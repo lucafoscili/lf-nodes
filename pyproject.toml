@@ -1,0 +1,15 @@
+[project]
+name = "lf-nodes"
+description = "LF Nodes new release - Work in progress"
+version = "0.0.1"
+license = {file = "LICENSE"}
+dependencies = []
+
+[project.urls]
+Repository = "https://github.com/lucafoscili/lf-nodes"
+#  Used by Comfy Registry https://comfyregistry.org
+
+[tool.comfy]
+PublisherId = "lucafoscili"
+DisplayName = "lf-nodes"
+Icon = ""
