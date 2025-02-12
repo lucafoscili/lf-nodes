@@ -1,7 +1,7 @@
 .lf-card {
   width: 100%;
   height: 100%;
-  background: var(--kul-background-color);
+  background: rgb(var(--lf-color-bg));
   max-height: 100%;
   max-width: 100%;
   overflow: auto;
@@ -20,7 +20,7 @@
 .lf-cardswithchip {
   width: 100%;
   height: 100%;
-  background: var(--kul-background-color);
+  background: rgb(var(--lf-color-bg));
   max-height: 100%;
   max-width: 100%;
   overflow: auto;
@@ -40,7 +40,7 @@
 .lf-carousel {
   width: 100%;
   height: 100%;
-  background: var(--kul-background-color);
+  background: rgb(var(--lf-color-bg));
   max-height: 100%;
   max-width: 100%;
   overflow: auto;
@@ -53,7 +53,7 @@
 .lf-chat {
   width: 100%;
   height: 100%;
-  background: var(--kul-background-color);
+  background: rgb(var(--lf-color-bg));
   max-height: 100%;
   max-width: 100%;
   overflow: auto;
@@ -66,7 +66,7 @@
 .lf-chip {
   width: 100%;
   height: 100%;
-  background: var(--kul-background-color);
+  background: rgb(var(--lf-color-bg));
   max-height: 100%;
   max-width: 100%;
   overflow: auto;
@@ -79,7 +79,7 @@
 .lf-code {
   width: 100%;
   height: 100%;
-  background: var(--kul-background-color);
+  background: rgb(var(--lf-color-bg));
   max-height: 100%;
   max-width: 100%;
   overflow: auto;
@@ -92,7 +92,7 @@
 .lf-compare {
   width: 100%;
   height: 100%;
-  background: var(--kul-background-color);
+  background: rgb(var(--lf-color-bg));
   max-height: 100%;
   max-width: 100%;
   overflow: hidden;
@@ -105,7 +105,7 @@
 .lf-controlpanel {
   width: 100%;
   height: 100%;
-  background: var(--kul-background-color);
+  background: rgb(var(--lf-color-bg));
   max-height: 100%;
   max-width: 100%;
   overflow: auto;
@@ -126,7 +126,7 @@
 .lf-countbarchart {
   width: 100%;
   height: 100%;
-  background: var(--kul-background-color);
+  background: rgb(var(--lf-color-bg));
   overflow: auto;
   position: relative;
 }
@@ -138,7 +138,7 @@
 .lf-history {
   width: 100%;
   height: 100%;
-  background: var(--kul-background-color);
+  background: rgb(var(--lf-color-bg));
   max-height: 100%;
   max-width: 100%;
   overflow: auto;
@@ -154,7 +154,7 @@
   --lf-slider-label-white-space: pre;
   width: 100%;
   height: 100%;
-  background: var(--kul-background-color);
+  background: rgb(var(--lf-color-bg));
   overflow: auto;
   position: relative;
 }
@@ -212,7 +212,7 @@
 .lf-masonry {
   width: 100%;
   height: 100%;
-  background: var(--kul-background-color);
+  background: rgb(var(--lf-color-bg));
   max-height: 100%;
   max-width: 100%;
   overflow: auto;
@@ -225,7 +225,7 @@
 .lf-messenger {
   width: 100%;
   height: 100%;
-  background: var(--kul-background-color);
+  background: rgb(var(--lf-color-bg));
   max-height: 100%;
   max-width: 100%;
   overflow: auto;
@@ -255,7 +255,7 @@
 .lf-progressbar {
   width: 100%;
   height: 100%;
-  background: var(--kul-background-color);
+  background: rgb(var(--lf-color-bg));
   overflow: hidden;
   display: flex;
   justify-content: center;
@@ -264,7 +264,7 @@
 .lf-tabbarchart {
   width: 100%;
   height: 100%;
-  background: var(--kul-background-color);
+  background: rgb(var(--lf-color-bg));
   overflow: auto;
   position: relative;
 }
@@ -287,7 +287,7 @@
 .lf-textarea {
   width: 100%;
   height: 100%;
-  background: var(--kul-background-color);
+  background: rgb(var(--lf-color-bg));
   max-height: 100%;
   max-width: 100%;
   overflow: auto;
@@ -316,7 +316,7 @@
 .lf-tree {
   width: 100%;
   height: 100%;
-  background: var(--kul-background-color);
+  background: rgb(var(--lf-color-bg));
   max-height: 100%;
   max-width: 100%;
   overflow: auto;
@@ -329,7 +329,7 @@
 .lf-upload {
   width: 100%;
   height: 100%;
-  background: var(--kul-background-color);
+  background: rgb(var(--lf-color-bg));
   max-height: 100%;
   max-width: 100%;
   overflow: auto;

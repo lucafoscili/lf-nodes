@@ -11,5 +11,5 @@ Repository = "https://github.com/lucafoscili/lf-nodes"
 
 [tool.comfy]
 PublisherId = "lucafoscili"
-DisplayName = "lf-nodes"
+DisplayName = "LF Nodes"
 Icon = ""

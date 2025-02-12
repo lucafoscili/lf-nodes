@@ -55,6 +55,7 @@ export class LFManager {
     const assetsUrl = window.location.href + 'extensions/lf-nodes/assets';
     this.#MANAGERS.lfFramework = getLfFramework();
     this.#MANAGERS.lfFramework.assets.set(assetsUrl);
+    this.#MANAGERS.lfFramework.theme.set('dark');
     this.log(
       'LfFramework ready!',
       { lfFramework: this.#MANAGERS.lfFramework },

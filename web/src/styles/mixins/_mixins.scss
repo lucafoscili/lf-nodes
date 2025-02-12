@@ -1,6 +1,6 @@
 @mixin lf-root($overflow: auto, $max: true) {
   @include lf-el-stretch;
-  background: var(--kul-background-color);
+  background: rgb(var(--lf-color-bg));
 
   @if $max == true {
     max-height: 100%;
