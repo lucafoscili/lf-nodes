@@ -1,0 +1,11 @@
+@use '../mixins/mixins' as mixins;
+
+.lf-masonry {
+  & {
+    @include mixins.lf-root();
+  }
+
+  &__widget {
+    @include mixins.lf-el-stretch;
+  }
+}

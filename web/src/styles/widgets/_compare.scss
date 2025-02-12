@@ -1,0 +1,11 @@
+@use '../mixins/mixins' as mixins;
+
+.lf-compare {
+  & {
+    @include mixins.lf-root($overflow: hidden);
+  }
+
+  &__widget {
+    @include mixins.lf-el-stretch;
+  }
+}

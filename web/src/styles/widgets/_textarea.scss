@@ -1,0 +1,31 @@
+@use '../mixins/mixins' as mixins;
+
+.lf-textarea {
+  & {
+    @include mixins.lf-root();
+  }
+
+  &__widget {
+    & {
+      @include mixins.lf-el-stretch;
+      background: rgb(var(--lf-color-bg));
+      border: 0;
+      color: rgb(var(--lf-color-on-bg));
+      display: block;
+      font-family: var(--lf-font-family-monospace);
+      font-size: var(--lf-font-size);
+      outline: none;
+      padding: 8px;
+      resize: none;
+      transition: box-shadow 175ms ease;
+    }
+
+    &:focus:not(.lf-textarea__widget--error) {
+      box-shadow: inset 0px 0px 4px 1px rgba(var(--lf-color-primary), 0.775);
+    }
+
+    &--error {
+      box-shadow: inset 0px 0px 4px 1px rgba(var(--lf-color-danger), 0.775);
+    }
+  }
+}

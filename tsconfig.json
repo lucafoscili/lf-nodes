@@ -1,0 +1,38 @@
+{
+  "compilerOptions": {
+    "allowJs": false,
+    "alwaysStrict": true,
+    "baseUrl": ".",
+    "forceConsistentCasingInFileNames": true,
+    "esModuleInterop": true,
+    "declaration": false,
+    "incremental": true,
+    "isolatedModules": true,
+    "lib": ["dom", "esnext"],
+    "module": "ES2020",
+    "moduleResolution": "node",
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": true,
+    "outDir": "web/temp",
+    "paths": {
+      "*": ["node_modules/*"],
+      "@/*": ["./src/*"],
+      "/scripts/*": ["../../web/scripts/*"],
+      "/lib/*": ["../../web/lib/*"],
+      "/extensions/*": ["../../web/extensions/*"],
+      "/types/*": ["../../web/types/*"]
+    },
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "strict": false,
+    "strictFunctionTypes": true,
+    "target": "ES2020",
+    "types": ["node", "@lf-widgets/core"]
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
+  "exclude": ["node_modules", "web/deploy"]
+}

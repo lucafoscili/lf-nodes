@@ -1,0 +1,11 @@
+@use '../mixins/mixins' as mixins;
+
+.lf-tree {
+  & {
+    @include mixins.lf-root();
+  }
+
+  &__widget {
+    @include mixins.lf-el-stretch;
+  }
+}

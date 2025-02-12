@@ -1,0 +1,16 @@
+@mixin lf-root($overflow: auto, $max: true) {
+  @include lf-el-stretch;
+  background: var(--kul-background-color);
+
+  @if $max == true {
+    max-height: 100%;
+    max-width: 100%;
+  }
+
+  overflow: $overflow;
+}
+
+@mixin lf-el-stretch {
+  width: 100%;
+  height: 100%;
+}

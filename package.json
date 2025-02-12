@@ -1,0 +1,31 @@
+{
+  "name": "lf-nodes",
+  "description": "LF Nodes - Custom nodes with a touch of extra UX ✨ Client-side LLM chat, mid-workflow image editing, history for primitives, JSON manipulation, analytics nodes, CivitAI metadata fetching and saving... and more!",
+  "author": {
+    "name": "Luca Foscili",
+    "url": "https://www.lucafoscili.com"
+  },
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "clean": "node ./web/src/scripts/clean.js",
+    "build:scss": "node ./web/src/scripts/compile-scss.js",
+    "build:ts": "tsc",
+    "build:lfw": "node ./web/src/scripts/copy-widgets.js",
+    "build:vite": "vite build",
+    "build": "yarn clean && yarn build:scss && yarn build:ts && yarn build:lfw && yarn build:vite"
+  },
+  "devDependencies": {
+    "@lf-widgets/assets": "^0.3.1-rc.2",
+    "@lf-widgets/core": "^0.3.1-rc.2",
+    "@lf-widgets/foundations": "^0.3.1-rc.2",
+    "@lf-widgets/framework": "^0.3.1-rc.2",
+    "@types/node": "^22",
+    "fs-extra": "^11",
+    "rollup-plugin-visualizer": "^5",
+    "sass": "^1",
+    "typescript": "^5",
+    "vite": "^6"
+  },
+  "packageManager": "yarn@4.6.0"
+}
