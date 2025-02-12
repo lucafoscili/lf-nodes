@@ -1,0 +1,1 @@
+import{bt as r}from"./theme.constants-7kSb6kn5.js";import{a as o,j as a}from"./lf-core-C8T4tqs2.js";r.then(e=>{e.register("lf-core",{getAssetPath:a,setAssetPath:o})});const i=async e=>{const t=await r;return e.debugInfo=t.debug.info.create(),t.theme.register(void 0),t};export{i as o};

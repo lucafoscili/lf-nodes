@@ -1,0 +1,7 @@
+numpy
+openai
+opencv-python
+piexif
+Pillow
+requests
+torch
