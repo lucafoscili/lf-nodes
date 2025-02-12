@@ -66,7 +66,8 @@ class LF_Boolean:
             create_history_node(str(boolean), nodes)
 
         if randomize:
-            boolean = bool(randomize_from_history(nodes, seed))
+            result = randomize_from_history(nodes, seed)
+            boolean = True if result.lower() == "true" else False
             
         PromptServer.instance.send_sync(f"{EVENT_PREFIX}boolean", {
             "node": kwargs.get("node_id"),
