@@ -45,7 +45,3 @@ node_modules/
 
 # Kethup Lite
 web/temp
-
-# Messenger - custom characters
-web/deploy/assets/media/custom_characters/*
-!web/deploy/assets/media/custom_characters/.gitkeep

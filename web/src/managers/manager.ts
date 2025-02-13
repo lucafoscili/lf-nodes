@@ -1,30 +1,30 @@
 import { LfArticleNode, LfDataDataset, LfFrameworkInterface } from '@lf-widgets/foundations';
 import { getLfFramework } from '@lf-widgets/framework';
-import { ANALYTICS_API } from '../api/analytics.js';
-import { BACKUP_API } from '../api/backup.js';
-import { COMFY_API } from '../api/comfy.js';
-import { GITHUB_API } from '../api/github.js';
-import { IMAGE_API } from '../api/image.js';
-import { JSON_API } from '../api/json.js';
-import { METADATA_API } from '../api/metadata.js';
+import { ANALYTICS_API } from '../api/analytics';
+import { BACKUP_API } from '../api/backup';
+import { COMFY_API } from '../api/comfy';
+import { GITHUB_API } from '../api/github';
+import { IMAGE_API } from '../api/image';
+import { JSON_API } from '../api/json';
+import { METADATA_API } from '../api/metadata';
 import {
   getLogStyle,
   NODE_WIDGET_MAP,
   onConnectionsChange,
   onDrawBackground,
   onNodeCreated,
-} from '../helpers/manager.js';
-import { APIRoutes } from '../types/api/api.js';
-import { EventName } from '../types/events/events.js';
+} from '../helpers/manager';
+import { APIRoutes } from '../types/api/api';
+import { EventName } from '../types/events/events';
 import {
   CustomWidgetGetter,
   Extension,
   ExtensionCallback,
   LogSeverity,
-} from '../types/manager/manager.js';
-import { CustomWidgetName, NodeName } from '../types/widgets/widgets.js';
-import { LFTooltip } from './tooltip.js';
-import { LFWidgets } from './widgets.js';
+} from '../types/manager/manager';
+import { CustomWidgetName, NodeName } from '../types/widgets/widgets';
+import { LFTooltip } from './tooltip';
+import { LFWidgets } from './widgets';
 
 export class LFManager {
   #APIS: APIRoutes = {
@@ -55,6 +55,7 @@ export class LFManager {
     const assetsUrl = window.location.href + 'extensions/lf-nodes/assets';
     this.#MANAGERS.lfFramework = getLfFramework();
     this.#MANAGERS.lfFramework.assets.set(assetsUrl);
+    this.#MANAGERS.lfFramework.theme.set('dark');
     this.log(
       'LfFramework ready!',
       { lfFramework: this.#MANAGERS.lfFramework },

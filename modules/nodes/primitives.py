@@ -66,7 +66,8 @@ class LF_Boolean:
             create_history_node(str(boolean), nodes)
 
         if randomize:
-            boolean = bool(randomize_from_history(nodes, seed))
+            result = randomize_from_history(nodes, seed)
+            boolean = True if result.lower() == "true" else False
             
         PromptServer.instance.send_sync(f"{EVENT_PREFIX}boolean", {
             "node": kwargs.get("node_id"),
@@ -573,8 +574,8 @@ class LF_Something2Number:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, False, False, False, True, True)
-    RETURN_NAMES = ("float", "int", "float_sum", "int_sum", "float_list", "int_list")
-    RETURN_TYPES = ("FLOAT", "INT", "FLOAT", "INT", "FLOAT", "INT")
+    RETURN_NAMES = ("float_sum", "int_sum", "float_list", "int_list")
+    RETURN_TYPES = ("FLOAT", "INT", "FLOAT", "INT")
 
     def on_exec(self, **kwargs: dict):
         def extract_numbers(data):
@@ -644,7 +645,7 @@ class LF_Something2Number:
             "value": log,
         })
 
-        return (float_values, integer_values, float_sum, integer_sum, float_values, integer_values)
+        return (float_sum, integer_sum, float_values, integer_values)
 # endregion
 
 # region LF_Something2String
