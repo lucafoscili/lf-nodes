@@ -3,7 +3,7 @@ export const DOWNLOAD_PLACEHOLDERS: Partial<HTMLLfCardElement> = {
     nodes: [
       {
         cells: {
-          lfImage: { shape: 'image', value: 'cloud_download' },
+          lfImage: { shape: 'image', value: 'download' },
           lfText: { shape: 'text', value: 'Fetching metadata from CivitAI...' },
         },
         id: '0',

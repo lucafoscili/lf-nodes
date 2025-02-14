@@ -9,6 +9,7 @@ import {
 import { getLfManager, getLfThemes } from '../utils/common';
 
 //#region Styles
+const BUTTON_STYLE = ':host { margin: auto; padding: 1em 0; width: max-content; }';
 const STYLES = {
   customization: () => {
     return {
@@ -26,25 +27,25 @@ const STYLES = {
   debugLogs: () => {
     return {
       display: 'grid',
-      gridGap: '12px',
-      gridTemplateRows: 'repeat(2, minmax(250px, 600px))',
+      gridGap: '0.75em',
+      gridTemplateRows: '320px 480px',
     };
   },
   logsArea: () => {
     return {
-      backgroundColor: 'rgba(var(--lf-text-color-rgb), 0.075)',
-      borderRadius: '8px',
+      backgroundColor: 'rgba(var(--lf-color-on-bg), 0.075)',
+      borderRadius: '0.5em',
       display: 'block',
       height: '100%',
-      marginBottom: '16px',
+      marginBottom: '1em',
       overflow: 'auto',
     };
   },
   separator: () => {
     return {
-      border: '1px solid var(--lf-border-color)',
+      border: '1px solid rgb(var(--lf-color-border))',
       display: 'block',
-      margin: '12px auto 24px',
+      margin: '0.75em auto 1.25em',
       opacity: '0.25',
       width: '50%',
     };
@@ -55,6 +56,9 @@ const STYLES = {
 export const SECTIONS: ControlPanelFixture = {
   //#region Analytics
   [ControlPanelIds.Analytics]: (): LfArticleNode => {
+    const { theme } = getLfManager().getManagers().lfFramework;
+    const { '--lf-icon-clear': clearIcon } = theme.get.current().variables;
+
     return {
       icon: ControlPanelIcons.Analytics,
       id: ControlPanelSection.Section,
@@ -102,10 +106,11 @@ export const SECTIONS: ControlPanelFixture = {
               value: '',
               cells: {
                 lfButton: {
-                  lfIcon: 'delete',
+                  lfIcon: clearIcon,
                   lfLabel: ControlPanelLabels.DeleteUsage,
-                  lfStyle: ':host { margin: auto; padding:16px 0 }',
+                  lfStyle: BUTTON_STYLE,
                   lfStyling: 'outlined',
+                  lfUiState: 'danger',
                   shape: 'button',
                   value: '',
                 },
@@ -120,6 +125,9 @@ export const SECTIONS: ControlPanelFixture = {
 
   //#region Backup
   [ControlPanelIds.Backup]: (): LfArticleNode => {
+    const { theme } = getLfManager().getManagers().lfFramework;
+    const { '--lf-icon-download': downloadIcon } = theme.get.current().variables;
+
     return {
       icon: ControlPanelIcons.Backup,
       id: ControlPanelSection.Section,
@@ -146,7 +154,7 @@ export const SECTIONS: ControlPanelFixture = {
                 lfToggle: {
                   lfLabel: ControlPanelLabels.AutoBackup,
                   lfLeadingLabel: true,
-                  lfStyle: ':host { text-align: center; padding: 16px 0; }',
+                  lfStyle: ':host { text-align: center; padding: 1em 0; }',
                   shape: 'toggle',
                   value: !!getLfManager().isBackupEnabled(),
                 } as any,
@@ -178,9 +186,9 @@ export const SECTIONS: ControlPanelFixture = {
               value: '',
               cells: {
                 lfButton: {
-                  lfIcon: 'backup',
+                  lfIcon: downloadIcon,
                   lfLabel: ControlPanelLabels.Backup,
-                  lfStyle: ':host { margin: auto; padding:16px 0 }',
+                  lfStyle: BUTTON_STYLE,
                   lfStyling: 'raised',
                   shape: 'button',
                   value: '',
@@ -196,6 +204,9 @@ export const SECTIONS: ControlPanelFixture = {
 
   //#region Debug
   [ControlPanelIds.Debug]: (logsData: LfArticleNode[]): LfArticleNode => {
+    const { theme } = getLfManager().getManagers().lfFramework;
+    const { '--lf-icon-clear': clearIcon } = theme.get.current().variables;
+
     return {
       icon: ControlPanelIcons.Debug,
       id: ControlPanelSection.Section,
@@ -217,7 +228,7 @@ export const SECTIONS: ControlPanelFixture = {
                 lfToggle: {
                   lfLabel: ControlPanelLabels.Debug,
                   lfLeadingLabel: true,
-                  lfStyle: ':host { text-align: center; padding: 16px 0; }',
+                  lfStyle: ':host { text-align: center; padding: 1em 0; }',
                   shape: 'toggle',
                   value: !!getLfManager().isDebug(),
                 },
@@ -231,7 +242,7 @@ export const SECTIONS: ControlPanelFixture = {
           children: [
             {
               id: ControlPanelSection.Content,
-              value: 'Every time the node manager receives a messages, it will be printed below.',
+              value: 'Every time the node manager receives a message it will be printed below.',
             },
             {
               id: ControlPanelSection.Content,
@@ -249,19 +260,19 @@ export const SECTIONS: ControlPanelFixture = {
             },
             {
               id: ControlPanelSection.Content,
-              value:
-                'Further below another widget will display additional Ketchup Lite components information.',
+              value: 'Further below another card will display additional LF Widgets information.',
             },
             {
               id: ControlPanelSection.Content,
               value: '',
               cells: {
                 lfButton: {
-                  htmlProps: { className: 'lf-danger lf-full-width' },
                   shape: 'button',
-                  lfIcon: 'refresh',
+                  lfIcon: clearIcon,
                   lfLabel: ControlPanelLabels.ClearLogs,
-                  lfStyle: ':host { padding-top: 16px; }',
+                  lfStretchX: true,
+                  lfStyle: BUTTON_STYLE,
+                  lfUiState: 'danger',
                   value: '',
                 },
               },
@@ -322,6 +333,9 @@ export const SECTIONS: ControlPanelFixture = {
   [ControlPanelIds.GitHub]: (): LfArticleNode => {
     const lfManager = getLfManager();
     const releaseData = lfManager.getLatestRelease();
+    const { theme } = lfManager.getManagers().lfFramework;
+    const { brandGithub } = theme.get.icons();
+
     return {
       icon: ControlPanelIcons.GitHub,
       id: ControlPanelSection.Section,
@@ -352,10 +366,10 @@ export const SECTIONS: ControlPanelFixture = {
                     backgroundSize: 'cover',
                     borderRadius: '50%',
                     display: 'inline-block',
-                    height: '32px',
+                    height: '2em',
                     marginRight: '0.5em',
                     verticalAlign: 'middle',
-                    width: '32px',
+                    width: '2em',
                   },
                 },
                 {
@@ -363,7 +377,7 @@ export const SECTIONS: ControlPanelFixture = {
                   value: `Author: ${releaseData?.author?.login || 'Unknown'}`,
                   cssStyle: {
                     fontSize: '0.9em',
-                    color: 'var(--lf-secondary-color)',
+                    color: 'rgb(var(--lf-color-secondary))',
                     verticalAlign: 'middle',
                   },
                 },
@@ -377,7 +391,7 @@ export const SECTIONS: ControlPanelFixture = {
             },
             {
               cssStyle: {
-                color: 'var(--lf-secondary-color)',
+                color: 'rgb(var(--lf-color-secondary))',
                 display: 'block',
                 fontSize: '0.9em',
                 fontStyle: 'italic',
@@ -421,9 +435,9 @@ export const SECTIONS: ControlPanelFixture = {
                   value: '',
                   cells: {
                     lfButton: {
-                      lfIcon: 'github',
+                      lfIcon: brandGithub,
                       lfLabel: ControlPanelLabels.OpenIssue,
-                      lfStyle: ':host { margin: auto; padding:16px 0 }',
+                      lfStyle: BUTTON_STYLE,
                       lfStyling: 'raised',
                       shape: 'button',
                       value: '',
@@ -441,6 +455,9 @@ export const SECTIONS: ControlPanelFixture = {
 
   //#region Metadata
   [ControlPanelIds.Metadata]: (): LfArticleNode => {
+    const { theme } = getLfManager().getManagers().lfFramework;
+    const { '--lf-icon-delete': deleteIcon } = theme.get.current().variables;
+
     return {
       icon: ControlPanelIcons.Metadata,
       id: ControlPanelSection.Section,
@@ -474,10 +491,11 @@ export const SECTIONS: ControlPanelFixture = {
               value: '',
               cells: {
                 lfButton: {
-                  lfIcon: 'delete',
+                  lfIcon: deleteIcon,
                   lfLabel: ControlPanelLabels.DeleteMetadata,
-                  lfStyle: ':host { margin: auto; padding:16px 0 }',
+                  lfStyle: BUTTON_STYLE,
                   lfStyling: 'outlined',
+                  lfUiState: 'danger',
                   shape: 'button',
                   value: '',
                 },
@@ -513,7 +531,7 @@ export const SECTIONS: ControlPanelFixture = {
               cells: {
                 lfButton: {
                   lfDataset: getLfThemes(),
-                  lfStyle: ':host { margin: auto; padding: 16px 0 }',
+                  lfStyle: BUTTON_STYLE,
                   shape: 'button',
                   value: '',
                 },

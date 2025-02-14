@@ -60,7 +60,7 @@ export const cardFactory: CardFactory = {
         content.classList.add(CardCSS.ContentHasButton);
 
         const button = document.createElement(TagName.LfButton);
-        button.lfIcon = 'cloud_download';
+        button.lfIcon = 'download';
         button.lfLabel = 'Refresh';
         button.lfStretchX = true;
         button.title = 'Attempts to manually ownload fresh metadata from CivitAI';

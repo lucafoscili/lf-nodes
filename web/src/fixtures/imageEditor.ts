@@ -558,7 +558,7 @@ export const TREE_DATA: LfDataDataset = {
         {
           description: 'Brush configuration.',
           cells: {
-            kulCode: {
+            lfCode: {
               shape: 'code',
               value: JSON.stringify(SETTINGS.brush),
             },
@@ -579,7 +579,7 @@ export const TREE_DATA: LfDataDataset = {
         {
           description: 'Adjusts the brightness.',
           cells: {
-            kulCode: {
+            lfCode: {
               shape: 'code',
               value: JSON.stringify(SETTINGS.brightness),
             },
@@ -593,7 +593,7 @@ export const TREE_DATA: LfDataDataset = {
         {
           description: 'Simulates the Lightroom clarity effect.',
           cells: {
-            kulCode: {
+            lfCode: {
               shape: 'code',
               value: JSON.stringify(SETTINGS.clarity),
             },
@@ -607,7 +607,7 @@ export const TREE_DATA: LfDataDataset = {
         {
           description: 'Adjusts the contrast.',
           cells: {
-            kulCode: {
+            lfCode: {
               shape: 'code',
               value: JSON.stringify(SETTINGS.contrast),
             },
@@ -621,7 +621,7 @@ export const TREE_DATA: LfDataDataset = {
         {
           description: 'Reduces the saturation.',
           cells: {
-            kulCode: {
+            lfCode: {
               shape: 'code',
               value: JSON.stringify(SETTINGS.desaturate),
             },
@@ -641,7 +641,7 @@ export const TREE_DATA: LfDataDataset = {
         //#region Blend
         {
           cells: {
-            kulCode: {
+            lfCode: {
               shape: 'code',
               value: JSON.stringify(SETTINGS.blend),
             },
@@ -656,7 +656,7 @@ export const TREE_DATA: LfDataDataset = {
         {
           description: 'Applies a film grain effect.',
           cells: {
-            kulCode: {
+            lfCode: {
               shape: 'code',
               value: JSON.stringify(SETTINGS.filmGrain),
             },
@@ -670,7 +670,7 @@ export const TREE_DATA: LfDataDataset = {
         {
           description: 'Blurs the image.',
           cells: {
-            kulCode: {
+            lfCode: {
               shape: 'code',
               value: JSON.stringify(SETTINGS.gaussianBlur),
             },
@@ -684,7 +684,7 @@ export const TREE_DATA: LfDataDataset = {
         {
           description: 'Draws a line.',
           cells: {
-            kulCode: {
+            lfCode: {
               shape: 'code',
               value: JSON.stringify(SETTINGS.line),
             },
@@ -697,7 +697,7 @@ export const TREE_DATA: LfDataDataset = {
         //#region Sepia
         {
           cells: {
-            kulCode: {
+            lfCode: {
               shape: 'code',
               value: JSON.stringify(SETTINGS.sepia),
             },
@@ -711,7 +711,7 @@ export const TREE_DATA: LfDataDataset = {
         //#region Vignette
         {
           cells: {
-            kulCode: {
+            lfCode: {
               shape: 'code',
               value: JSON.stringify(SETTINGS.vignette),
             },

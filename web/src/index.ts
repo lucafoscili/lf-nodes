@@ -1,18 +1,17 @@
-import * as Foundations from '@lf-widgets/foundations';
-import * as Framework from '@lf-widgets/framework';
-import * as Core from '@lf-widgets/core/dist/loader';
+import { getLfFramework } from '@lf-widgets/framework';
+import './@lf-widgets/core/dist/lf-core/lf-core.esm.js';
 
 import { getLfManager, initLfManager } from './utils/common';
 
-const isDev = process.env.NODE_ENV === 'development';
+const isDev = true;
 
 if (isDev) {
-  console.log('LF modules loaded!', Core, Foundations, Framework);
+  console.log('LF modules loaded!');
 }
 
-Framework.getLfFramework();
+getLfFramework();
 if (isDev) {
-  console.log('LF Framework initialized!', Framework);
+  console.log('LF Framework initialized!');
 }
 
 initLfManager();
@@ -20,9 +19,4 @@ const lfManager = getLfManager();
 lfManager.initialize();
 if (isDev) {
   console.log('LF Manager initialized!', lfManager);
-}
-
-Core.defineCustomElements(window);
-if (isDev) {
-  console.log('LF Core custom elements defined!', Core);
 }

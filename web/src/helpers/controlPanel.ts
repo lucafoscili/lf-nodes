@@ -195,7 +195,17 @@ export const createContent = () => {
       }
 
       const { icon, value } = node;
-      nodes.push({ icon, id, value });
+      nodes.push({
+        cells: {
+          lfSlot: {
+            shape: 'slot',
+            value: id,
+          },
+        },
+        icon,
+        id,
+        value,
+      });
       accordion.appendChild(article);
     }
   }
