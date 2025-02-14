@@ -45,12 +45,12 @@ export interface ControlPanelFixture {
   [ControlPanelIds.Theme]: () => LfArticleNode;
 }
 export enum ControlPanelIcons {
-  Analytics = 'pie_chart',
-  Backup = 'save',
+  Analytics = 'chart-histogram',
+  Backup = 'download',
   Debug = 'bug',
-  GitHub = 'github',
-  Metadata = 'information-variant',
-  Theme = 'style',
+  GitHub = 'brand-github',
+  Metadata = 'info-hexagon',
+  Theme = 'color-swatch',
 }
 export enum ControlPanelIds {
   Analytics = 'analytics',

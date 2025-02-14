@@ -14,5 +14,6 @@
     @include mixins.lf-el-stretch;
     display: grid;
     grid-template: var(--card-grid);
+    overflow: auto;
   }
 }

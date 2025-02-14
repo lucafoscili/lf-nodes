@@ -32,7 +32,24 @@ export const countBarChartFactory: CountBarChartFactory = {
           const json = u.parsedJson as CountBarChartDeserializedValue;
           datasets.chart = json.chart || {};
           datasets.chip = json.chip || {};
-          card.refresh();
+          card.lfDataset = {
+            nodes: [
+              {
+                id: 'countBarChart',
+                cells: {
+                  lfButton: { shape: 'button', value: '' },
+                  lfChart: {
+                    lfAxis: ['Axis_0'],
+                    lfDataset: datasets.chart,
+                    lfSeries: ['Series_0'],
+                    shape: 'chart',
+                    value: '',
+                  },
+                  lfChip: { lfDataset: datasets.chip, shape: 'chip', value: '' },
+                },
+              },
+            ],
+          };
         };
 
         normalizeValue(value, callback, CustomWidgetName.countBarChart);

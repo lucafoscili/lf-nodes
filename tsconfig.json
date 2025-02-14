@@ -10,7 +10,7 @@
     "isolatedModules": true,
     "lib": ["dom", "esnext"],
     "module": "ES2020",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "noFallthroughCasesInSwitch": true,
     "noImplicitOverride": true,
     "noImplicitReturns": true,
