@@ -194,7 +194,7 @@ class LF_IsLandscape:
             widths_list.append(width)
             result = width >= height
             is_landscape_list.append(result)
-            nodes.append({"icon": "check" if result else "clear",
+            nodes.append({"icon": "check" if result else "x",
                           "id": counter, 
                           "value": f"Image {counter}: {str(result)}"})
 

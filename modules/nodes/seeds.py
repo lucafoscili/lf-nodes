@@ -80,7 +80,7 @@ class LF_UrandomSeedGenerator:
             "optional": {
                 "fixed_seeds": (Input.JSON, {
                     "default": {}, 
-                    "tooltip": "A Ketchup Lite-compatible dataset containing 20 previously generated seeds."
+                    "tooltip": "LF Widgets-compatible dataset containing 20 previously generated seeds."
                 }),
                 "ui_widget": (Input.LF_TREE, {
                     "default": {}

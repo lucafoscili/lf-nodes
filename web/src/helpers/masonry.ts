@@ -4,7 +4,11 @@ import { MasonryState } from '../types/widgets/masonry';
 export const EV_HANDLERS = {
   //#region Masonry handler
   masonry: (state: MasonryState, e: CustomEvent<LfMasonryEventPayload>) => {
-    const { eventType, originalEvent, selectedShape } = e.detail;
+    const { comp, eventType, originalEvent, selectedShape } = e.detail;
+
+    if (!comp.lfSelectable) {
+      return;
+    }
 
     switch (eventType) {
       case 'lf-event':

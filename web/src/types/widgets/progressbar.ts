@@ -32,8 +32,8 @@ export interface ProgressbarState extends BaseWidgetState {
 
 //#region Dataset
 export enum ProgressbarIcons {
-  Landscape = 'landscape',
-  Portrait = 'portrait',
+  Landscape = 'viewport-wide',
+  Portrait = 'viewport-tall',
 }
 export enum ProgressbarLabels {
   Fallback = 'N/A',

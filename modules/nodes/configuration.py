@@ -279,7 +279,7 @@ class LF_LoadLoraTags:
             lora = comfy.utils.load_torch_file(lora_path, safe_load=True)
             return lora
         def add_chip(value: str):
-            return { "icon": "clear", 
+            return { "icon": "x", 
                      "description": "Failed to load this LoRA.", 
                      "id": value, 
                      "value": value } 

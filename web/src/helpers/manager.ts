@@ -205,7 +205,8 @@ const chipCb = (node: NodeType) => {
   }
   const chipW = getCustomWidget(node, CustomWidgetName.chip);
   const datasetW = nodeInput?.widgets?.[linkInput.origin_slot];
-  if (!chipW || !datasetW) {
+  if (!chipW.options?.getState || !datasetW.options?.getValue) {
+    lfManager.log('Missing options', { chipW, datasetW }, LogSeverity.Warning);
     return;
   }
 
@@ -290,9 +291,7 @@ const setCanvasSizeCb = async (imageviewer: HTMLLfImageviewerElement) => {
     try {
       const { canvas } = (await imageviewer.getComponents()).details;
       canvas.resizeCanvas();
-    } catch (error) {
-      getLfManager().log("Could't update canvas dimensions.", { error }, LogSeverity.Info);
-    }
+    } catch (error) {}
   });
 };
 //#endregion

@@ -523,7 +523,7 @@ export const SECTIONS: ControlPanelFixture = {
             {
               id: ControlPanelSection.Content,
               value:
-                "Through the button below it's possible to set a random theme for the Ketchup Lite components, or select one from the dropdown menu.",
+                "Through the button below it's possible to set a random theme for the LF Widgets components, or select one from the dropdown menu.",
             },
             {
               id: ControlPanelSection.Content,
@@ -531,6 +531,7 @@ export const SECTIONS: ControlPanelFixture = {
               cells: {
                 lfButton: {
                   lfDataset: getLfThemes(),
+                  lfLabel: ControlPanelLabels.Theme,
                   lfStyle: BUTTON_STYLE,
                   shape: 'button',
                   value: '',

@@ -33,9 +33,10 @@
 }
 .lf-cardswithchip__cards {
   grid-template-columns: repeat(var(--card-grid), 1fr);
+  overflow: auto;
 }
 .lf-cardswithchip__grid {
-  grid-template-rows: minmax(0, auto) 1fr;
+  grid-template-rows: auto 1fr;
 }
 
 .lf-carousel {
@@ -99,6 +100,7 @@
   overflow: hidden;
 }
 .lf-compare__widget {
+  --lf-image-object-fit: contain;
   width: 100%;
   height: 100%;
 }
@@ -186,7 +188,7 @@
 .lf-imageeditor__grid--is-inactive:after {
   width: 100%;
   height: 100%;
-  background-color: rgba(var(--lf-color-on-bg), 0.875);
+  background-color: rgba(var(--lf-color-bg), 0.875);
   content: "";
   cursor: not-allowed;
   left: 0;

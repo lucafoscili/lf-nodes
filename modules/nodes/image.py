@@ -591,7 +591,7 @@ class LF_ResizeImageByEdge:
         resize_method: str = normalize_list_to_value(kwargs.get("resize_method"))
 
         nodes: list[dict] = []
-        root: dict = { "children": nodes, "icon":"help", "id": "", "value": "" }
+        root: dict = { "children": nodes, "icon":"info-hexagon", "id": "", "value": "" }
         dataset: dict = { "nodes": [root] }
 
         original_heights: list[int] = []
@@ -688,7 +688,7 @@ class LF_ResizeImageToDimension:
         pad_color: str = normalize_list_to_value(kwargs.get("pad_color"))
 
         nodes: list[dict] = []
-        root: dict = { "children": nodes, "icon":"help", "id": "", "value": "" }
+        root: dict = { "children": nodes, "icon":"info-hexagon", "id": "", "value": "" }
         dataset: dict = { "nodes": [root] }
 
         original_heights: list[int] = []
@@ -776,7 +776,7 @@ class LF_ResizeImageToSquare:
         crop_position: str = normalize_list_to_value(kwargs.get("crop_position"))
 
         nodes: list[dict] = []
-        root: dict = { "children": nodes, "icon":"help", "id": "", "value": "" }
+        root: dict = { "children": nodes, "icon":"info-hexagon", "id": "", "value": "" }
         dataset: dict = { "nodes": [root] }
 
         original_heights: list[int] = []

@@ -6,6 +6,8 @@
   }
 
   &__widget {
+    --lf-image-object-fit: contain;
+
     @include mixins.lf-el-stretch;
   }
 }

@@ -13,9 +13,10 @@
 
   &__cards {
     grid-template-columns: repeat(var(--card-grid), 1fr);
+    overflow: auto;
   }
 
   &__grid {
-    grid-template-rows: minmax(0, auto) 1fr;
+    grid-template-rows: auto 1fr;
   }
 }

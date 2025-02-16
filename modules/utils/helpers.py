@@ -640,7 +640,7 @@ def get_random_parameter(length: int = 8) -> str:
     Returns:
         str: A random alphanumeric string prefixed with '?'.
     """
-    return '?' + ''.join(random.choices(string.ascii_letters + string.digits, k=length))
+    return "nonce=" + ''.join(random.choices(string.ascii_letters + string.digits, k=length))
 # endregion
 
 # region get_resource_url

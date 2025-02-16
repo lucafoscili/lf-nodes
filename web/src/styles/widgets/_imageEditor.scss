@@ -33,7 +33,7 @@
 
       &:after {
         @include mixins.lf-el-stretch;
-        background-color: rgba(var(--lf-color-on-bg), 0.875);
+        background-color: rgba(var(--lf-color-bg), 0.875);
         content: '';
         cursor: not-allowed;
         left: 0;

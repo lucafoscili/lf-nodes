@@ -22,6 +22,9 @@ export const chatFactory: ChatFactory = {
 
         const callback: ChatNormalizeCallback = (v) => {
           state.history = v || '';
+          if (v && state.chat.lfValue) {
+            state.chat.lfValue = JSON.parse(v);
+          }
           state.chat.setHistory(v);
         };
 

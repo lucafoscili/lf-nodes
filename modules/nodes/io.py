@@ -664,7 +664,7 @@ class LF_SaveJSON:
         nodes: list[dict] = []
         root: dict = { "children": nodes, "icon":"check", "id": "root", "value": "JSON saved successfully!" }
         dataset: dict = { "nodes": [root] }
-        nodes.append({ "description": output_file, "icon": "json", "id": output_file, "value": output_file })
+        nodes.append({ "description": output_file, "icon": "code", "id": output_file, "value": output_file })
  
         PromptServer.instance.send_sync(f"{EVENT_PREFIX}savejson", {
             "node": kwargs.get("node_id"),
@@ -728,7 +728,7 @@ class LF_SaveMarkdown:
         nodes: list[dict] = []
         root: dict = { "children": nodes, "icon":"check", "id": "root", "value": "Markdown saved successfully!" }
         dataset: dict = { "nodes": [root] }
-        nodes.append({ "description": output_file, "icon": "document", "id": output_file, "value": output_file })
+        nodes.append({ "description": output_file, "icon": "article", "id": output_file, "value": output_file })
 
         PromptServer.instance.send_sync(f"{EVENT_PREFIX}savemarkdown", {
             "node": kwargs.get("node_id"),

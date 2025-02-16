@@ -69,9 +69,9 @@ export interface ImageEditorActionButtons {
   resume?: HTMLLfButtonElement;
 }
 export enum ImageEditorIcons {
-  Interrupt = 'stop',
+  Interrupt = 'x',
   Reset = 'refresh',
-  Resume = 'play',
+  Resume = 'check',
 }
 //#endregion
 

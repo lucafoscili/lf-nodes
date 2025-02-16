@@ -1,7 +1,7 @@
 import os
 import importlib.util
 
-VERSION = "0.2.0"
+VERSION = "0.3.0"
 
 NODE_CLASS_MAPPINGS = {}
 NODE_DISPLAY_NAME_MAPPINGS = {}

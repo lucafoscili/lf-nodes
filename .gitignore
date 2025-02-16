@@ -43,5 +43,7 @@ node_modules/
 # TS
 *.tsbuildinfo
 
-# Kethup Lite
+# Deployment
 web/temp
+web/deploy/assets/messenger/**/*.*
+!web/deploy/assets/messenger/**/*.gitkeep

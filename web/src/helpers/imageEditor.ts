@@ -444,8 +444,8 @@ export const setGridStatus = (
 
     case ImageEditorStatus.Pending:
       requestAnimationFrame(() => {
-        actionButtons.interrupt.lfUiState = 'primary';
-        actionButtons.resume.lfUiState = 'primary';
+        actionButtons.interrupt.lfUiState = 'danger';
+        actionButtons.resume.lfUiState = 'success';
       });
       grid.classList.remove(ImageEditorCSS.GridIsInactive);
       break;

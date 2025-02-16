@@ -229,13 +229,13 @@ export class LFWidgets {
 
       const icon =
         action === 'focus tab'
-          ? 'visibility'
+          ? 'photo-search'
           : action === 'interrupt'
-          ? 'not_interested'
+          ? 'x'
           : action === 'interrupt and queue'
           ? 'refresh'
           : action === 'queue prompt'
-          ? 'queue'
+          ? 'stack-push'
           : '';
 
       const options: NotificationOptions = {

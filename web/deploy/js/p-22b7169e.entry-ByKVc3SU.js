@@ -1,5 +1,5 @@
-import { o, V as V$1, a_ as LF_TABBAR_BLOCKS, C as CY_ATTRIBUTES, a as LF_ATTRIBUTES, a$ as LF_TABBAR_PARTS, c as LF_STYLE_ID, d as LF_WRAPPER_ID, U as U$1, b0 as LF_TABBAR_PROPS, m as mt, A, T as T$1 } from "./index-DlhbnacL.js";
-import { o as o$1 } from "./p-c236cf18-D2j4DmvD.js";
+import { o, V as V$1, F as LF_TABBAR_BLOCKS, C as CY_ATTRIBUTES, a as LF_ATTRIBUTES, G as LF_TABBAR_PARTS, c as LF_STYLE_ID, d as LF_WRAPPER_ID, U as U$1, H as LF_TABBAR_PROPS, m as mt, A, T as T$1 } from "./index-pUN9aiPp.js";
+import { o as o$1 } from "./p-c236cf18-BTDQvuvD.js";
 const p = (t, r) => {
   if (t) {
     const a = t.scrollLeft;
@@ -79,7 +79,7 @@ const E = class {
   }
   componentDidLoad() {
     const { debug: t, drag: r } = M(this, u, "f");
-    r.register.dragToScroll(M(this, x, "f")), this.onLfEvent(new CustomEvent("ready"), "ready"), t.info.update(this, "did-load");
+    M(this, x, "f") && r.register.dragToScroll(M(this, x, "f")), this.onLfEvent(new CustomEvent("ready"), "ready"), t.info.update(this, "did-load");
   }
   componentWillRender() {
     const { debug: t } = M(this, u, "f");

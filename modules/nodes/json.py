@@ -275,7 +275,7 @@ class LF_KeywordToggleFromJSON:
         return {
             "required": {
                 "json_input": (Input.JSON, {
-                    "tooltip": "Ketchup Lite compatible JSON dataset."
+                    "tooltip": "LF Widgets compatible JSON dataset."
                 }),
                 "separator": (Input.STRING, {
                     "default": ", ", "tooltip": "Separator for keywords in the output prompt."
@@ -305,7 +305,7 @@ class LF_KeywordToggleFromJSON:
         filtered_json = {
             "nodes": [
                 node for node in json_input["nodes"]
-                if node["id"] in selected_keywords
+                if node["id"] in selected_keywords or node["value"] in selected_keywords
             ]
         }
 

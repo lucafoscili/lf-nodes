@@ -65,14 +65,17 @@ export const masonryFactory: MasonryFactory = {
     const masonry = document.createElement(TagName.LfMasonry);
 
     masonry.classList.add(MasonryCSS.Widget);
-    masonry.addEventListener(
-      LfEventName.LfMasonry,
-      EV_HANDLERS.masonry.bind(EV_HANDLERS.masonry, STATE.get(wrapper)),
+    masonry.addEventListener(LfEventName.LfMasonry, (e) =>
+      EV_HANDLERS.masonry(STATE.get(wrapper), e),
     );
+    masonry.lfColumns = 3;
 
     switch (node.comfyClass) {
       case NodeName.loadImages:
         masonry.lfSelectable = true;
+        break;
+      default:
+        masonry.lfActions = true;
         break;
     }
 

@@ -1,15 +1,15 @@
-import { o, V as V$1, u as LF_MASONRY_DEFAULT_COLUMNS, v as LF_MASONRY_BLOCKS, C as CY_ATTRIBUTES, a as LF_ATTRIBUTES, w as LF_MASONRY_PARTS, c as LF_STYLE_ID, x as LF_MASONRY_CSS_VARS, d as LF_WRAPPER_ID, U as U$1, k as kt, y as LF_MASONRY_PROPS, m as mt, A as A$1, T as T$1, z as LF_MASONRY_IDS } from "./index-DlhbnacL.js";
-import { o as o$1 } from "./p-c236cf18-D2j4DmvD.js";
-import { f } from "./p-d7fe17a6-DuVerhDt.js";
+import { o, V as V$1, ac as LF_MASONRY_DEFAULT_COLUMNS, ad as LF_MASONRY_BLOCKS, C as CY_ATTRIBUTES, a as LF_ATTRIBUTES, ae as LF_MASONRY_PARTS, c as LF_STYLE_ID, af as LF_MASONRY_CSS_VARS, d as LF_WRAPPER_ID, U as U$1, k as kt, ag as LF_MASONRY_PROPS, m as mt, A as A$1, T as T$1, ah as LF_MASONRY_IDS } from "./index-pUN9aiPp.js";
+import { o as o$1 } from "./p-c236cf18-BTDQvuvD.js";
+import { f } from "./p-d7fe17a6-Cr0dgAg0.js";
 const v = (t) => Number(t.rootElement.style.getPropertyValue(LF_MASONRY_CSS_VARS.columns)), w = (t, e) => Number(t.rootElement.style.setProperty(LF_MASONRY_CSS_VARS.columns, String(e))), k = (e) => /* @__PURE__ */ ((e2) => ({ addColumn: () => {
   const { controller: s, elements: i, handlers: a } = e2(), { refs: n } = i, { button: r } = a, { blocks: l, cyAttributes: f2, lfAttributes: h, manager: c, parts: d } = s.get, { assignRef: m, theme: u } = c, { bemClass: p, get: g } = u, { "--lf-icon-plus": y } = g.current().variables;
-  return U$1("lf-button", { class: p(l.grid._, l.grid.addColumn), "data-cy": f2.button, "data-lf": h.fadeIn, id: LF_MASONRY_IDS.addColumn, key: LF_MASONRY_IDS.addColumn, lfIcon: y, lfStyling: "floating", lfUiSize: "small", "onLf-button-event": r, part: d.addColumn, ref: m(n, "addColumn"), title: "Click to add a column to the masonry." });
+  return U$1("lf-button", { class: p(l.grid._, l.grid.addColumn), "data-cy": f2.button, "data-lf": h.fadeIn, id: LF_MASONRY_IDS.addColumn, key: LF_MASONRY_IDS.addColumn, lfIcon: y, lfStyling: "floating", lfUiSize: "xxsmall", "onLf-button-event": r, part: d.addColumn, ref: m(n, "addColumn"), title: "Click to add a column to the masonry." });
 }, removeColumn: () => {
   const { controller: s, elements: i, handlers: a } = e2(), { refs: n } = i, { button: r } = a, { blocks: l, cyAttributes: f2, lfAttributes: h, manager: c, parts: d } = s.get, { assignRef: m, theme: u } = c, { bemClass: p, get: g } = u, { "--lf-icon-minus": y } = g.current().variables;
-  return U$1("lf-button", { class: p(l.grid._, l.grid.removeColumn), "data-cy": f2.button, "data-lf": h.fadeIn, id: LF_MASONRY_IDS.removeColumn, key: LF_MASONRY_IDS.removeColumn, lfIcon: y, lfStyling: "floating", lfUiSize: "small", "onLf-button-event": r, part: d.removeColumn, ref: m(n, "removeColumn"), title: "Click to remove a column from the masonry." });
+  return U$1("lf-button", { class: p(l.grid._, l.grid.removeColumn), "data-cy": f2.button, "data-lf": h.fadeIn, id: LF_MASONRY_IDS.removeColumn, key: LF_MASONRY_IDS.removeColumn, lfIcon: y, lfStyling: "floating", lfUiSize: "xxsmall", "onLf-button-event": r, part: d.removeColumn, ref: m(n, "removeColumn"), title: "Click to remove a column from the masonry." });
 }, changeView: () => {
   const { controller: s, elements: i, handlers: a } = e2(), { refs: n } = i, { blocks: r, cyAttributes: l, isMasonry: f2, isVertical: h, manager: c, parts: d } = s.get, { button: m } = a, { assignRef: u, theme: p } = c, { bemClass: g, get: y } = p, { layoutBoardSplit: b, viewportTall: v2, viewportWide: w2 } = y.icons();
-  return U$1("lf-button", { class: g(r.grid._, r.grid.changeViewe), "data-cy": l.button, id: LF_MASONRY_IDS.masonry, key: LF_MASONRY_IDS.masonry, lfIcon: f2() ? v2 : h() ? w2 : b, lfStyling: "floating", "onLf-button-event": m, part: d.changeView, ref: u(n, "changeView"), title: f2() ? "Click to view the images arranged vertically." : h() ? "Click to view the images arranged horizontally." : "Click to view the images arranged in a masonry." });
+  return U$1("lf-button", { class: g(r.grid._, r.grid.changeViewe), "data-cy": l.button, id: LF_MASONRY_IDS.masonry, key: LF_MASONRY_IDS.masonry, lfIcon: f2() ? v2 : h() ? w2 : b, lfStyling: "floating", lfUiSize: "xsmall", "onLf-button-event": m, part: d.changeView, ref: u(n, "changeView"), title: f2() ? "Click to view the images arranged vertically." : h() ? "Click to view the images arranged horizontally." : "Click to view the images arranged in a masonry." });
 } }))(e), z = (t) => /* @__PURE__ */ ((t2) => ({ button: (e) => {
   const { eventType: s, id: i } = e.detail;
   if ("click" === s) switch (i) {
@@ -32,7 +32,7 @@ const v = (t) => Number(t.rootElement.style.getPropertyValue(LF_MASONRY_CSS_VARS
       })(t2());
   }
 } }))(t);
-var x, C, S, M, W, _, A, T, E, I, j, L, V, P, D, R, N, O, U, B, F, H, $, q, G = function(t, e, s, i) {
+var x, C, S, M, W, _, A, T, E, I, j, L, V, P, D, R, U, N, O, B, F, H, $, q, G = function(t, e, s, i) {
   if ("a" === s && !i) throw new TypeError("Private accessor was defined without a getter");
   if ("function" == typeof e ? t !== e || !i : !e.has(t)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return "m" === s ? i : "a" === s ? i.call(t) : i ? i.value : e.get(t);
@@ -48,9 +48,9 @@ const K = class {
     }), P.set(this, () => {
       var _a;
       return !!((_a = this.shapes) == null ? void 0 : _a[this.lfShape]);
-    }), D.set(this, () => "main" === this.lfView), R.set(this, () => "vertical" === this.lfView), N.set(this, (t, e) => () => {
+    }), D.set(this, () => "main" === this.lfView), R.set(this, () => "vertical" === this.lfView), U.set(this, (t, e) => () => {
       clearTimeout(G(this, j, "f")), J(this, j, setTimeout(t, e));
-    }), O.set(this, (t) => t.every((t2, e, s) => 0 === e || s[e - 1] < t2)), B.set(this, () => {
+    }), N.set(this, (t) => t.every((t2, e, s) => 0 === e || s[e - 1] < t2)), B.set(this, () => {
       const { lfShape: e, selectedShape: s, shapes: i } = this, a2 = i[this.lfShape].map(() => ({ htmlProps: { dataset: { lf: G(this, W, "f").fadeIn, selected: "" } } }));
       void 0 !== s.index && (a2[s.index] = { htmlProps: { dataset: { lf: G(this, W, "f").fadeIn, selected: "true" } } });
       const n = Array.from({ length: G(this, I, "f") }, () => [], []);
@@ -59,7 +59,7 @@ const K = class {
         n[s2 % G(this, I, "f")].push(U$1(f, { cell: Object.assign(o2, r), index: s2, shape: e, eventDispatcher: async (t) => this.onLfEvent(t, "lf-event"), framework: G(this, C, "f") }));
       }
       return n;
-    }), F.set(this, G(this, N, "f").call(this, () => {
+    }), F.set(this, G(this, U, "f").call(this, () => {
       this.viewportWidth = window.innerWidth;
     }, 200)), H.set(this, () => {
       const { bemClass: e } = G(this, C, "f").theme, { grid: s } = G(this, S, "f"), { addColumn: i, changeView: a2, removeColumn: n } = G(this, L, "f").elements.jsx;
@@ -89,7 +89,7 @@ const K = class {
   validateColumns() {
     if (!G(this, C, "f")) return;
     const { debug: t } = G(this, C, "f");
-    Array.isArray(this.lfColumns) && !G(this, O, "f").call(this, this.lfColumns) && (t.logs.new(this, "Invalid breakpoints in lfColumns: must be sorted in ascending order.", "warning"), this.lfColumns = [...LF_MASONRY_DEFAULT_COLUMNS]);
+    Array.isArray(this.lfColumns) && !G(this, N, "f").call(this, this.lfColumns) && (t.logs.new(this, "Invalid breakpoints in lfColumns: must be sorted in ascending order.", "warning"), this.lfColumns = [...LF_MASONRY_DEFAULT_COLUMNS]);
   }
   async updateShapes() {
     if (!G(this, C, "f")) return;
@@ -139,7 +139,7 @@ const K = class {
   }
   componentWillRender() {
     const { info: t } = G(this, C, "f").debug;
-    J(this, I, G(this, D, "f").call(this) ? G(this, x, "m", U).call(this) : 1), t.update(this, "will-render");
+    J(this, I, G(this, D, "f").call(this) ? G(this, x, "m", O).call(this) : 1), t.update(this, "will-render");
   }
   componentDidRender() {
     const { info: t } = G(this, C, "f").debug;
@@ -160,7 +160,7 @@ const K = class {
     return { lfColumns: ["validateColumns"], lfDataset: ["updateShapes"], lfShape: ["updateShapes"] };
   }
 };
-C = /* @__PURE__ */ new WeakMap(), S = /* @__PURE__ */ new WeakMap(), M = /* @__PURE__ */ new WeakMap(), W = /* @__PURE__ */ new WeakMap(), _ = /* @__PURE__ */ new WeakMap(), A = /* @__PURE__ */ new WeakMap(), T = /* @__PURE__ */ new WeakMap(), E = /* @__PURE__ */ new WeakMap(), I = /* @__PURE__ */ new WeakMap(), j = /* @__PURE__ */ new WeakMap(), L = /* @__PURE__ */ new WeakMap(), V = /* @__PURE__ */ new WeakMap(), P = /* @__PURE__ */ new WeakMap(), D = /* @__PURE__ */ new WeakMap(), R = /* @__PURE__ */ new WeakMap(), N = /* @__PURE__ */ new WeakMap(), O = /* @__PURE__ */ new WeakMap(), B = /* @__PURE__ */ new WeakMap(), F = /* @__PURE__ */ new WeakMap(), H = /* @__PURE__ */ new WeakMap(), $ = /* @__PURE__ */ new WeakMap(), q = /* @__PURE__ */ new WeakMap(), x = /* @__PURE__ */ new WeakSet(), U = function() {
+C = /* @__PURE__ */ new WeakMap(), S = /* @__PURE__ */ new WeakMap(), M = /* @__PURE__ */ new WeakMap(), W = /* @__PURE__ */ new WeakMap(), _ = /* @__PURE__ */ new WeakMap(), A = /* @__PURE__ */ new WeakMap(), T = /* @__PURE__ */ new WeakMap(), E = /* @__PURE__ */ new WeakMap(), I = /* @__PURE__ */ new WeakMap(), j = /* @__PURE__ */ new WeakMap(), L = /* @__PURE__ */ new WeakMap(), V = /* @__PURE__ */ new WeakMap(), P = /* @__PURE__ */ new WeakMap(), D = /* @__PURE__ */ new WeakMap(), R = /* @__PURE__ */ new WeakMap(), U = /* @__PURE__ */ new WeakMap(), N = /* @__PURE__ */ new WeakMap(), B = /* @__PURE__ */ new WeakMap(), F = /* @__PURE__ */ new WeakMap(), H = /* @__PURE__ */ new WeakMap(), $ = /* @__PURE__ */ new WeakMap(), q = /* @__PURE__ */ new WeakMap(), x = /* @__PURE__ */ new WeakSet(), O = function() {
   var _a, _b;
   const { lfColumns: t, viewportWidth: e, shapes: s, lfShape: i } = this;
   if ("number" == typeof t) return Math.min(t, ((_a = s[i]) == null ? void 0 : _a.length) || 0);
