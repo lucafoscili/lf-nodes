@@ -1,4 +1,4 @@
-import { LfButtonEventPayload, LfPortalAnchor } from '@lf-widgets/foundations/dist';
+import { LfButtonEventPayload, LfPortalAnchor } from '@lf-widgets/foundations';
 import { LfEventName } from '../types/events/events';
 import {
   LogSeverity,
@@ -41,6 +41,7 @@ export class LFTooltip {
     button.lfLabel = 'Update cover';
     button.lfStretchX = true;
 
+    content.dataset.lf = 'portal';
     content.appendChild(upload);
     content.appendChild(button);
 
@@ -105,14 +106,17 @@ export class LFTooltip {
     this.#TOOLTIP_ELEMENT = document.createElement('div');
     this.#TOOLTIP_ELEMENT.classList.add(this.#CSS_CLASSES.wrapper);
 
+    let layoutElement: HTMLDivElement;
+
     switch (this.#LAYOUT) {
       case 'upload':
-        this.#TOOLTIP_ELEMENT.appendChild(this.#uploadLayout());
+        layoutElement = this.#uploadLayout();
+        this.#TOOLTIP_ELEMENT.appendChild(layoutElement);
         break;
     }
 
-    lfFramework.portal.open(this.#TOOLTIP_ELEMENT, parent, anchor, 0, 'auto');
-    lfFramework.addClickCallback({ cb: () => this.destroy(), element: this.#TOOLTIP_ELEMENT });
+    lfFramework.portal.open(layoutElement, this.#TOOLTIP_ELEMENT, anchor, 0, 'auto');
+    lfFramework.addClickCallback({ cb: () => this.destroy(), element: layoutElement });
 
     requestAnimationFrame(() => parent.appendChild(this.#TOOLTIP_ELEMENT));
   }

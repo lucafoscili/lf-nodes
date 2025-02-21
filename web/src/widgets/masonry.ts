@@ -68,14 +68,12 @@ export const masonryFactory: MasonryFactory = {
     masonry.addEventListener(LfEventName.LfMasonry, (e) =>
       EV_HANDLERS.masonry(STATE.get(wrapper), e),
     );
+    masonry.lfActions = true;
     masonry.lfColumns = 3;
 
     switch (node.comfyClass) {
       case NodeName.loadImages:
         masonry.lfSelectable = true;
-        break;
-      default:
-        masonry.lfActions = true;
         break;
     }
 

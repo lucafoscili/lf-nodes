@@ -5092,7 +5092,7 @@ var Y = false, Z = false, tt = (t2, e2, n2) => {
                         const n3 = t7.S.replace(/-/g, "_"), o6 = t7.T;
                         if (!o6) return;
                         const l6 = i.get(o6);
-                        return l6 ? l6[n3] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-04d3b7d4.entry.js": () => import("./p-04d3b7d4.entry-DFz6UMBk.js"), "./p-054cd759.entry.js": () => import("./p-054cd759.entry-GhPGxsKr.js"), "./p-1265f5b0.entry.js": () => import("./p-1265f5b0.entry-BfumiFi-.js"), "./p-15415e9d.entry.js": () => import("./p-15415e9d.entry-DS7-JZ4A.js"), "./p-22b7169e.entry.js": () => import("./p-22b7169e.entry-ByKVc3SU.js"), "./p-35177d24.entry.js": () => import("./p-35177d24.entry-Df8oJDDk.js"), "./p-42df2d51.entry.js": () => import("./p-42df2d51.entry-HmfiASL4.js"), "./p-46391c90.entry.js": () => import("./p-46391c90.entry-B-DOOYOT.js"), "./p-593c3e82.entry.js": () => import("./p-593c3e82.entry-CpG6Jq5d.js"), "./p-66bf4aa1.entry.js": () => import("./p-66bf4aa1.entry-D12aeDrG.js"), "./p-69e770bf.entry.js": () => import("./p-69e770bf.entry-CEzNEAfZ.js"), "./p-6b65927d.entry.js": () => import("./p-6b65927d.entry-DMd-m9bq.js"), "./p-8189adcf.entry.js": () => import("./p-8189adcf.entry-Cl6LJdRA.js"), "./p-a4cbf5db.entry.js": () => import("./p-a4cbf5db.entry-FwjXbRlv.js"), "./p-b1658aeb.entry.js": () => import("./p-b1658aeb.entry-X12_jIDf.js"), "./p-c62fc177.entry.js": () => import("./p-c62fc177.entry-QKTOfM7-.js"), "./p-fbe10c11.entry.js": () => import("./p-fbe10c11.entry-D426LsHB.js") }), `./${o6}.entry.js`, 2).then((t8) => (i.set(o6, t8), t8[n3]), (t8) => {
+                        return l6 ? l6[n3] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-04d3b7d4.entry.js": () => import("./p-04d3b7d4.entry-D_h7XaHv.js"), "./p-054cd759.entry.js": () => import("./p-054cd759.entry-Bc1Q7O_W.js"), "./p-1265f5b0.entry.js": () => import("./p-1265f5b0.entry-DV8-vlnM.js"), "./p-15415e9d.entry.js": () => import("./p-15415e9d.entry-DWPltuKj.js"), "./p-16a05291.entry.js": () => import("./p-16a05291.entry-uppa8N41.js"), "./p-22b7169e.entry.js": () => import("./p-22b7169e.entry-BPmUVBMC.js"), "./p-35177d24.entry.js": () => import("./p-35177d24.entry-DO2nUYy0.js"), "./p-42df2d51.entry.js": () => import("./p-42df2d51.entry-CskisnSz.js"), "./p-46391c90.entry.js": () => import("./p-46391c90.entry-Bq48AdIv.js"), "./p-593c3e82.entry.js": () => import("./p-593c3e82.entry-srmuXjPE.js"), "./p-66bf4aa1.entry.js": () => import("./p-66bf4aa1.entry-BMNIwYkn.js"), "./p-69e770bf.entry.js": () => import("./p-69e770bf.entry-BNppCkd6.js"), "./p-6b65927d.entry.js": () => import("./p-6b65927d.entry-wGEKYRP8.js"), "./p-8189adcf.entry.js": () => import("./p-8189adcf.entry-D1hQxA5R.js"), "./p-a4cbf5db.entry.js": () => import("./p-a4cbf5db.entry-CwqOEsHP.js"), "./p-b1658aeb.entry.js": () => import("./p-b1658aeb.entry-DaPw9pTk.js"), "./p-c62fc177.entry.js": () => import("./p-c62fc177.entry-DeRQ0im9.js") }), `./${o6}.entry.js`, 2).then((t8) => (i.set(o6, t8), t8[n3]), (t8) => {
                           s(t8, e4.$hostElement$);
                         });
                         /*!__STENCIL_STATIC_IMPORT_SWITCH__*/
@@ -5172,7 +5172,7 @@ const o = () => {
 (() => {
   const l2 = import.meta.url, f2 = {};
   return "" !== l2 && (f2.resourcesUrl = new URL(".", l2).href), h(f2);
-})().then(async (e2) => (await o(), jt(JSON.parse('[["p-42df2d51",[[1,"lf-imageviewer",{"lfDataset":[1040],"lfLoadCallback":[1040],"lfStyle":[1025,"lf-style"],"lfValue":[1040],"debugInfo":[32],"currentShape":[32],"history":[32],"historyIndex":[32],"isSpinnerActive":[32],"addSnapshot":[64],"clearHistory":[64],"clearSelection":[64],"getComponents":[64],"getCurrentSnapshot":[64],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"reset":[64],"setSpinnerStatus":[64],"unmount":[64]}]]],["p-69e770bf",[[1,"lf-compare",{"lfDataset":[1040],"lfShape":[1025,"lf-shape"],"lfStyle":[1025,"lf-style"],"lfView":[1025,"lf-view"],"debugInfo":[32],"isLeftPanelOpened":[32],"isRightPanelOpened":[32],"leftShape":[32],"rightShape":[32],"shapes":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["updateShapes"],"lfShape":["updateShapes"]}]]],["p-593c3e82",[[1,"lf-accordion",{"lfDataset":[1040],"lfRipple":[1028,"lf-ripple"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"expandedNodes":[32],"selectedNodes":[32],"getDebugInfo":[64],"getProps":[64],"getSelectedNodes":[64],"refresh":[64],"toggleNode":[64],"unmount":[64]}]]],["p-1265f5b0",[[1,"lf-article",{"lfDataset":[1040],"lfEmpty":[1025,"lf-empty"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-04d3b7d4",[[1,"lf-carousel",{"lfDataset":[1040],"lfAutoPlay":[4,"lf-auto-play"],"lfInterval":[2,"lf-interval"],"lfLightbox":[1540,"lf-lightbox"],"lfNavigation":[1028,"lf-navigation"],"lfShape":[1537,"lf-shape"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"currentIndex":[32],"shapes":[32],"getDebugInfo":[64],"getProps":[64],"goToSlide":[64],"nextSlide":[64],"prevSlide":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["updateShapes"],"lfShape":["updateShapes"]}]]],["p-15415e9d",[[1,"lf-messenger",{"lfAutosave":[1028,"lf-autosave"],"lfDataset":[1040],"lfStyle":[1025,"lf-style"],"lfValue":[16],"debugInfo":[32],"chat":[32],"connectionStatus":[32],"covers":[32],"currentCharacter":[32],"formStatusMap":[32],"history":[32],"hoveredCustomizationOption":[32],"saveInProgress":[32],"ui":[32],"deleteOption":[64],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"reset":[64],"save":[64],"unmount":[64]}]]],["p-35177d24",[[1,"lf-drawer",{"lfDisplay":[1537,"lf-display"],"lfPosition":[1537,"lf-position"],"lfResponsive":[1026,"lf-responsive"],"lfStyle":[1025,"lf-style"],"lfValue":[1540,"lf-value"],"debugInfo":[32],"close":[64],"getDebugInfo":[64],"getProps":[64],"isOpened":[64],"open":[64],"refresh":[64],"toggle":[64],"unmount":[64]},[[0,"keydown","listenKeydown"]],{"lfDisplay":["onLfDisplayChange"],"lfResponsive":["onLfResponsiveChange"]}]]],["p-054cd759",[[1,"lf-header",{"lfStyle":[1025,"lf-style"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-8189adcf",[[1,"lf-placeholder",{"lfIcon":[1,"lf-icon"],"lfProps":[16],"lfStyle":[1025,"lf-style"],"lfThreshold":[2,"lf-threshold"],"lfTrigger":[1,"lf-trigger"],"lfValue":[1,"lf-value"],"debugInfo":[32],"isInViewport":[32],"getComponent":[64],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-c62fc177",[[1,"lf-slider",{"lfLabel":[1025,"lf-label"],"lfLeadingLabel":[1028,"lf-leading-label"],"lfMax":[2,"lf-max"],"lfMin":[2,"lf-min"],"lfStep":[2,"lf-step"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1026,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}]]],["p-66bf4aa1",[[1,"lf-splash",{"lfLabel":[1025,"lf-label"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"state":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-46391c90",[[1,"lf-toast",{"lfCloseIcon":[1025,"lf-close-icon"],"lfCloseCallback":[16],"lfIcon":[1025,"lf-icon"],"lfTimer":[2,"lf-timer"],"lfMessage":[1025,"lf-message"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-a4cbf5db",[[1,"lf-list",{"lfDataset":[1040],"lfEmpty":[1025,"lf-empty"],"lfEnableDeletions":[1028,"lf-enable-deletions"],"lfNavigation":[1028,"lf-navigation"],"lfRipple":[1028,"lf-ripple"],"lfSelectable":[1028,"lf-selectable"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[2,"lf-value"],"debugInfo":[32],"focused":[32],"selected":[32],"focusNext":[64],"focusPrevious":[64],"getDebugInfo":[64],"getProps":[64],"getSelected":[64],"refresh":[64],"selectNode":[64],"unmount":[64]},[[0,"keydown","listenKeydown"]]],[1,"lf-spinner",{"lfActive":[1540,"lf-active"],"lfBarVariant":[1540,"lf-bar-variant"],"lfDimensions":[1025,"lf-dimensions"],"lfFader":[1028,"lf-fader"],"lfFaderTimeout":[1026,"lf-fader-timeout"],"lfFullScreen":[1540,"lf-full-screen"],"lfLayout":[1026,"lf-layout"],"lfStyle":[1025,"lf-style"],"lfTimeout":[1026,"lf-timeout"],"bigWait":[32],"debugInfo":[32],"progress":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfBarVariant":["lfBarVariantChanged"],"lfTimeout":["lfTimeoutChanged"]}]]],["p-fbe10c11",[[1,"lf-card",{"lfDataset":[1040],"lfLayout":[1025,"lf-layout"],"lfSizeX":[1025,"lf-size-x"],"lfSizeY":[1025,"lf-size-y"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"debugInfo":[32],"shapes":[32],"getDebugInfo":[64],"getProps":[64],"getShapes":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["updateShapes"]}],[1,"lf-badge",{"lfImageProps":[1040],"lfLabel":[1025,"lf-label"],"lfPosition":[1025,"lf-position"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}],[1,"lf-canvas",{"lfBrush":[1025,"lf-brush"],"lfColor":[1025,"lf-color"],"lfCursor":[1025,"lf-cursor"],"lfImageProps":[1040],"lfOpacity":[1026,"lf-opacity"],"lfPreview":[1028,"lf-preview"],"lfStrokeTolerance":[1026,"lf-stroke-tolerance"],"lfSize":[1026,"lf-size"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"isPainting":[32],"points":[32],"clearCanvas":[64],"getCanvas":[64],"getDebugInfo":[64],"getImage":[64],"getProps":[64],"refresh":[64],"resizeCanvas":[64],"setCanvasHeight":[64],"setCanvasWidth":[64],"unmount":[64]}],[1,"lf-photoframe",{"lfOverlay":[1040],"lfPlaceholder":[16],"lfStyle":[1025,"lf-style"],"lfThreshold":[2,"lf-threshold"],"lfValue":[16],"debugInfo":[32],"imageOrientation":[32],"isInViewport":[32],"isReady":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}],[1,"lf-chart",{"lfAxis":[1025,"lf-axis"],"lfColors":[1040],"lfDataset":[1040],"lfLegend":[1025,"lf-legend"],"lfSeries":[1040],"lfSizeX":[1025,"lf-size-x"],"lfSizeY":[1025,"lf-size-y"],"lfStyle":[1025,"lf-style"],"lfTypes":[1040],"lfXAxis":[1040],"lfYAxis":[1040],"debugInfo":[32],"themeValues":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"resize":[64],"unmount":[64]}],[1,"lf-toggle",{"lfLabel":[1025,"lf-label"],"lfLeadingLabel":[1028,"lf-leading-label"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[4,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}],[1,"lf-upload",{"lfLabel":[1025,"lf-label"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfValue":[16],"debugInfo":[32],"selectedFiles":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"unmount":[64]}],[1,"lf-chat",{"lfContextWindow":[1026,"lf-context-window"],"lfEmpty":[1025,"lf-empty"],"lfEndpointUrl":[1025,"lf-endpoint-url"],"lfLayout":[1025,"lf-layout"],"lfMaxTokens":[1026,"lf-max-tokens"],"lfPollingInterval":[1026,"lf-polling-interval"],"lfSeed":[1026,"lf-seed"],"lfStyle":[1025,"lf-style"],"lfSystem":[1025,"lf-system"],"lfTemperature":[1026,"lf-temperature"],"lfTypewriterProps":[1040],"lfUiSize":[1537,"lf-ui-size"],"lfValue":[1040],"debugInfo":[32],"history":[32],"currentPrompt":[32],"currentTokens":[32],"status":[32],"view":[32],"getDebugInfo":[64],"getHistory":[64],"getLastMessage":[64],"getProps":[64],"refresh":[64],"setHistory":[64],"unmount":[64]},[[0,"keydown","listenKeydown"]],{"lfPollingInterval":["updatePollingInterval"],"lfSystem":["updateTokensCount"]}],[1,"lf-chip",{"lfDataset":[1040],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfStyling":[1025,"lf-styling"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[16],"debugInfo":[32],"expandedNodes":[32],"hiddenNodes":[32],"selectedNodes":[32],"getDebugInfo":[64],"getProps":[64],"getSelectedNodes":[64],"refresh":[64],"setSelectedNodes":[64],"unmount":[64]}],[1,"lf-code",{"lfFormat":[1028,"lf-format"],"lfLanguage":[1025,"lf-language"],"lfPreserveSpaces":[1028,"lf-preserve-spaces"],"lfShowCopy":[1028,"lf-show-copy"],"lfShowHeader":[1028,"lf-show-header"],"lfStickyHeader":[1028,"lf-sticky-header"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfLanguage":["loadLanguage"]}],[1,"lf-progressbar",{"lfAnimated":[1540,"lf-animated"],"lfCenteredLabel":[1540,"lf-centered-label"],"lfIcon":[1537,"lf-icon"],"lfIsRadial":[1540,"lf-is-radial"],"lfLabel":[1025,"lf-label"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1026,"lf-value"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}],[1,"lf-typewriter",{"lfCursor":[1025,"lf-cursor"],"lfDeleteSpeed":[1026,"lf-delete-speed"],"lfLoop":[1028,"lf-loop"],"lfPause":[1026,"lf-pause"],"lfSpeed":[1026,"lf-speed"],"lfStyle":[1025,"lf-style"],"lfTag":[1025,"lf-tag"],"lfUiSize":[1537,"lf-ui-size"],"lfUpdatable":[1028,"lf-updatable"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"displayedText":[32],"isDeleting":[32],"currentTextIndex":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfValue":["handleLfValueChange"]}],[1,"lf-image",{"lfHtmlAttributes":[1040],"lfShowSpinner":[1028,"lf-show-spinner"],"lfSizeX":[1025,"lf-size-x"],"lfSizeY":[1025,"lf-size-y"],"lfStyle":[1025,"lf-style"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"error":[32],"isLoaded":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfValue":["resetState"]}],[1,"lf-textfield",{"lfHelper":[1040],"lfHtmlAttributes":[1040],"lfIcon":[1025,"lf-icon"],"lfLabel":[1025,"lf-label"],"lfStretchX":[1540,"lf-stretch-x"],"lfStretchY":[1540,"lf-stretch-y"],"lfStyle":[1025,"lf-style"],"lfStyling":[1025,"lf-styling"],"lfTrailingIcon":[1540,"lf-trailing-icon"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1,"lf-value"],"debugInfo":[32],"status":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setBlur":[64],"setFocus":[64],"setValue":[64],"unmount":[64]}],[1,"lf-button",{"lfDataset":[1040],"lfIcon":[1025,"lf-icon"],"lfIconOff":[1025,"lf-icon-off"],"lfLabel":[1025,"lf-label"],"lfRipple":[1028,"lf-ripple"],"lfShowSpinner":[1540,"lf-show-spinner"],"lfStretchX":[1540,"lf-stretch-x"],"lfStretchY":[1540,"lf-stretch-y"],"lfStyle":[1025,"lf-style"],"lfStyling":[1025,"lf-styling"],"lfToggable":[1028,"lf-toggable"],"lfTrailingIcon":[1028,"lf-trailing-icon"],"lfType":[1025,"lf-type"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[4,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setMessage":[64],"setValue":[64],"unmount":[64]}]]],["p-6b65927d",[[1,"lf-masonry",{"lfActions":[1028,"lf-actions"],"lfColumns":[1026,"lf-columns"],"lfDataset":[1040],"lfSelectable":[1540,"lf-selectable"],"lfShape":[1025,"lf-shape"],"lfStyle":[1025,"lf-style"],"lfView":[1025,"lf-view"],"debugInfo":[32],"selectedShape":[32],"shapes":[32],"viewportWidth":[32],"getDebugInfo":[64],"getProps":[64],"getSelectedShape":[64],"redecorateShapes":[64],"refresh":[64],"setSelectedShape":[64],"unmount":[64]},null,{"lfColumns":["validateColumns"],"lfDataset":["updateShapes"],"lfShape":["updateShapes"]}]]],["p-22b7169e",[[1,"lf-tabbar",{"lfDataset":[16],"lfNavigation":[4,"lf-navigation"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[8,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}]]],["p-b1658aeb",[[1,"lf-tree",{"lfAccordionLayout":[1540,"lf-accordion-layout"],"lfDataset":[1040],"lfFilter":[1028,"lf-filter"],"lfEmpty":[1025,"lf-empty"],"lfInitialExpansionDepth":[1026,"lf-initial-expansion-depth"],"lfRipple":[1028,"lf-ripple"],"lfSelectable":[1540,"lf-selectable"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"debugInfo":[32],"expandedNodes":[32],"hiddenNodes":[32],"selectedNode":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]]]'), e2)));
+})().then(async (e2) => (await o(), jt(JSON.parse('[["p-42df2d51",[[1,"lf-imageviewer",{"lfDataset":[1040],"lfLoadCallback":[1040],"lfStyle":[1025,"lf-style"],"lfValue":[1040],"debugInfo":[32],"currentShape":[32],"history":[32],"historyIndex":[32],"isSpinnerActive":[32],"addSnapshot":[64],"clearHistory":[64],"clearSelection":[64],"getComponents":[64],"getCurrentSnapshot":[64],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"reset":[64],"setSpinnerStatus":[64],"unmount":[64]}]]],["p-69e770bf",[[1,"lf-compare",{"lfDataset":[1040],"lfShape":[1025,"lf-shape"],"lfStyle":[1025,"lf-style"],"lfView":[1025,"lf-view"],"debugInfo":[32],"isLeftPanelOpened":[32],"isRightPanelOpened":[32],"leftShape":[32],"rightShape":[32],"shapes":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["updateShapes"],"lfShape":["updateShapes"]}]]],["p-593c3e82",[[1,"lf-accordion",{"lfDataset":[1040],"lfRipple":[1028,"lf-ripple"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"expandedNodes":[32],"selectedNodes":[32],"getDebugInfo":[64],"getProps":[64],"getSelectedNodes":[64],"refresh":[64],"toggleNode":[64],"unmount":[64]}]]],["p-1265f5b0",[[1,"lf-article",{"lfDataset":[1040],"lfEmpty":[1025,"lf-empty"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-04d3b7d4",[[1,"lf-carousel",{"lfDataset":[1040],"lfAutoPlay":[4,"lf-auto-play"],"lfInterval":[2,"lf-interval"],"lfLightbox":[1540,"lf-lightbox"],"lfNavigation":[1028,"lf-navigation"],"lfShape":[1537,"lf-shape"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"currentIndex":[32],"shapes":[32],"getDebugInfo":[64],"getProps":[64],"goToSlide":[64],"nextSlide":[64],"prevSlide":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["updateShapes"],"lfShape":["updateShapes"]}]]],["p-15415e9d",[[1,"lf-messenger",{"lfAutosave":[1028,"lf-autosave"],"lfDataset":[1040],"lfStyle":[1025,"lf-style"],"lfValue":[16],"debugInfo":[32],"chat":[32],"connectionStatus":[32],"covers":[32],"currentCharacter":[32],"formStatusMap":[32],"history":[32],"hoveredCustomizationOption":[32],"saveInProgress":[32],"ui":[32],"deleteOption":[64],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"reset":[64],"save":[64],"unmount":[64]}]]],["p-35177d24",[[1,"lf-drawer",{"lfDisplay":[1537,"lf-display"],"lfPosition":[1537,"lf-position"],"lfResponsive":[1026,"lf-responsive"],"lfStyle":[1025,"lf-style"],"lfValue":[1540,"lf-value"],"debugInfo":[32],"close":[64],"getDebugInfo":[64],"getProps":[64],"isOpened":[64],"open":[64],"refresh":[64],"toggle":[64],"unmount":[64]},[[0,"keydown","listenKeydown"]],{"lfDisplay":["onLfDisplayChange"],"lfResponsive":["onLfResponsiveChange"]}]]],["p-054cd759",[[1,"lf-header",{"lfStyle":[1025,"lf-style"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-8189adcf",[[1,"lf-placeholder",{"lfIcon":[1,"lf-icon"],"lfProps":[16],"lfStyle":[1025,"lf-style"],"lfThreshold":[2,"lf-threshold"],"lfTrigger":[1,"lf-trigger"],"lfValue":[1,"lf-value"],"debugInfo":[32],"isInViewport":[32],"getComponent":[64],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-c62fc177",[[1,"lf-slider",{"lfLabel":[1025,"lf-label"],"lfLeadingLabel":[1028,"lf-leading-label"],"lfMax":[2,"lf-max"],"lfMin":[2,"lf-min"],"lfStep":[2,"lf-step"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1026,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}]]],["p-66bf4aa1",[[1,"lf-splash",{"lfLabel":[1025,"lf-label"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"state":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-46391c90",[[1,"lf-toast",{"lfCloseIcon":[1025,"lf-close-icon"],"lfCloseCallback":[16],"lfIcon":[1025,"lf-icon"],"lfTimer":[2,"lf-timer"],"lfMessage":[1025,"lf-message"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-a4cbf5db",[[1,"lf-list",{"lfDataset":[1040],"lfEmpty":[1025,"lf-empty"],"lfEnableDeletions":[1028,"lf-enable-deletions"],"lfNavigation":[1028,"lf-navigation"],"lfRipple":[1028,"lf-ripple"],"lfSelectable":[1028,"lf-selectable"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[2,"lf-value"],"debugInfo":[32],"focused":[32],"selected":[32],"focusNext":[64],"focusPrevious":[64],"getDebugInfo":[64],"getProps":[64],"getSelected":[64],"refresh":[64],"selectNode":[64],"unmount":[64]},[[0,"keydown","listenKeydown"]]],[1,"lf-spinner",{"lfActive":[1540,"lf-active"],"lfBarVariant":[1540,"lf-bar-variant"],"lfDimensions":[1025,"lf-dimensions"],"lfFader":[1028,"lf-fader"],"lfFaderTimeout":[1026,"lf-fader-timeout"],"lfFullScreen":[1540,"lf-full-screen"],"lfLayout":[1026,"lf-layout"],"lfStyle":[1025,"lf-style"],"lfTimeout":[1026,"lf-timeout"],"bigWait":[32],"debugInfo":[32],"progress":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfBarVariant":["lfBarVariantChanged"],"lfTimeout":["lfTimeoutChanged"]}]]],["p-16a05291",[[1,"lf-card",{"lfDataset":[1040],"lfLayout":[1025,"lf-layout"],"lfSizeX":[1025,"lf-size-x"],"lfSizeY":[1025,"lf-size-y"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"debugInfo":[32],"shapes":[32],"getDebugInfo":[64],"getProps":[64],"getShapes":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["updateShapes"]}],[1,"lf-badge",{"lfImageProps":[1040],"lfLabel":[1025,"lf-label"],"lfPosition":[1025,"lf-position"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}],[1,"lf-canvas",{"lfBrush":[1025,"lf-brush"],"lfColor":[1025,"lf-color"],"lfCursor":[1025,"lf-cursor"],"lfImageProps":[1040],"lfOpacity":[1026,"lf-opacity"],"lfPreview":[1028,"lf-preview"],"lfStrokeTolerance":[1026,"lf-stroke-tolerance"],"lfSize":[1026,"lf-size"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"isPainting":[32],"points":[32],"clearCanvas":[64],"getCanvas":[64],"getDebugInfo":[64],"getImage":[64],"getProps":[64],"refresh":[64],"resizeCanvas":[64],"setCanvasHeight":[64],"setCanvasWidth":[64],"unmount":[64]}],[1,"lf-photoframe",{"lfOverlay":[1040],"lfPlaceholder":[16],"lfStyle":[1025,"lf-style"],"lfThreshold":[2,"lf-threshold"],"lfValue":[16],"debugInfo":[32],"imageOrientation":[32],"isInViewport":[32],"isReady":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}],[1,"lf-chart",{"lfAxis":[1025,"lf-axis"],"lfColors":[1040],"lfDataset":[1040],"lfLegend":[1025,"lf-legend"],"lfSeries":[1040],"lfSizeX":[1025,"lf-size-x"],"lfSizeY":[1025,"lf-size-y"],"lfStyle":[1025,"lf-style"],"lfTypes":[1040],"lfXAxis":[1040],"lfYAxis":[1040],"debugInfo":[32],"themeValues":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"resize":[64],"unmount":[64]}],[1,"lf-toggle",{"lfLabel":[1025,"lf-label"],"lfLeadingLabel":[1028,"lf-leading-label"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[4,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}],[1,"lf-upload",{"lfLabel":[1025,"lf-label"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfValue":[16],"debugInfo":[32],"selectedFiles":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"unmount":[64]}],[1,"lf-chat",{"lfContextWindow":[1026,"lf-context-window"],"lfEmpty":[1025,"lf-empty"],"lfEndpointUrl":[1025,"lf-endpoint-url"],"lfLayout":[1025,"lf-layout"],"lfMaxTokens":[1026,"lf-max-tokens"],"lfPollingInterval":[1026,"lf-polling-interval"],"lfSeed":[1026,"lf-seed"],"lfStyle":[1025,"lf-style"],"lfSystem":[1025,"lf-system"],"lfTemperature":[1026,"lf-temperature"],"lfTypewriterProps":[1040],"lfUiSize":[1537,"lf-ui-size"],"lfValue":[1040],"debugInfo":[32],"history":[32],"currentPrompt":[32],"currentTokens":[32],"status":[32],"view":[32],"getDebugInfo":[64],"getHistory":[64],"getLastMessage":[64],"getProps":[64],"refresh":[64],"setHistory":[64],"unmount":[64]},[[0,"keydown","listenKeydown"]],{"lfPollingInterval":["updatePollingInterval"],"lfSystem":["updateTokensCount"]}],[1,"lf-chip",{"lfDataset":[1040],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfStyling":[1025,"lf-styling"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[16],"debugInfo":[32],"expandedNodes":[32],"hiddenNodes":[32],"selectedNodes":[32],"getDebugInfo":[64],"getProps":[64],"getSelectedNodes":[64],"refresh":[64],"setSelectedNodes":[64],"unmount":[64]}],[1,"lf-code",{"lfFormat":[1028,"lf-format"],"lfLanguage":[1025,"lf-language"],"lfPreserveSpaces":[1028,"lf-preserve-spaces"],"lfShowCopy":[1028,"lf-show-copy"],"lfShowHeader":[1028,"lf-show-header"],"lfStickyHeader":[1028,"lf-sticky-header"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfLanguage":["loadLanguage"]}],[1,"lf-progressbar",{"lfAnimated":[1540,"lf-animated"],"lfCenteredLabel":[1540,"lf-centered-label"],"lfIcon":[1537,"lf-icon"],"lfIsRadial":[1540,"lf-is-radial"],"lfLabel":[1025,"lf-label"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1026,"lf-value"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}],[1,"lf-typewriter",{"lfCursor":[1025,"lf-cursor"],"lfDeleteSpeed":[1026,"lf-delete-speed"],"lfLoop":[1028,"lf-loop"],"lfPause":[1026,"lf-pause"],"lfSpeed":[1026,"lf-speed"],"lfStyle":[1025,"lf-style"],"lfTag":[1025,"lf-tag"],"lfUiSize":[1537,"lf-ui-size"],"lfUpdatable":[1028,"lf-updatable"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"displayedText":[32],"isDeleting":[32],"currentTextIndex":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfValue":["handleLfValueChange"]}],[1,"lf-image",{"lfHtmlAttributes":[1040],"lfShowSpinner":[1028,"lf-show-spinner"],"lfSizeX":[1025,"lf-size-x"],"lfSizeY":[1025,"lf-size-y"],"lfStyle":[1025,"lf-style"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"error":[32],"isLoaded":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfValue":["resetState"]}],[1,"lf-textfield",{"lfHelper":[1040],"lfHtmlAttributes":[1040],"lfIcon":[1025,"lf-icon"],"lfLabel":[1025,"lf-label"],"lfStretchX":[1540,"lf-stretch-x"],"lfStretchY":[1540,"lf-stretch-y"],"lfStyle":[1025,"lf-style"],"lfStyling":[1025,"lf-styling"],"lfTrailingIcon":[1540,"lf-trailing-icon"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1,"lf-value"],"debugInfo":[32],"status":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setBlur":[64],"setFocus":[64],"setValue":[64],"unmount":[64]}],[1,"lf-button",{"lfDataset":[1040],"lfIcon":[1025,"lf-icon"],"lfIconOff":[1025,"lf-icon-off"],"lfLabel":[1025,"lf-label"],"lfRipple":[1028,"lf-ripple"],"lfShowSpinner":[1540,"lf-show-spinner"],"lfStretchX":[1540,"lf-stretch-x"],"lfStretchY":[1540,"lf-stretch-y"],"lfStyle":[1025,"lf-style"],"lfStyling":[1025,"lf-styling"],"lfToggable":[1028,"lf-toggable"],"lfTrailingIcon":[1028,"lf-trailing-icon"],"lfType":[1025,"lf-type"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[4,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setMessage":[64],"setValue":[64],"unmount":[64]}]]],["p-6b65927d",[[1,"lf-masonry",{"lfActions":[1028,"lf-actions"],"lfColumns":[1026,"lf-columns"],"lfDataset":[1040],"lfSelectable":[1540,"lf-selectable"],"lfShape":[1025,"lf-shape"],"lfStyle":[1025,"lf-style"],"lfView":[1025,"lf-view"],"debugInfo":[32],"selectedShape":[32],"shapes":[32],"viewportWidth":[32],"getDebugInfo":[64],"getProps":[64],"getSelectedShape":[64],"redecorateShapes":[64],"refresh":[64],"setSelectedShape":[64],"unmount":[64]},null,{"lfColumns":["validateColumns"],"lfDataset":["updateShapes"],"lfShape":["updateShapes"]}]]],["p-22b7169e",[[1,"lf-tabbar",{"lfDataset":[16],"lfNavigation":[4,"lf-navigation"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[8,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}]]],["p-b1658aeb",[[1,"lf-tree",{"lfAccordionLayout":[1540,"lf-accordion-layout"],"lfDataset":[1040],"lfFilter":[1028,"lf-filter"],"lfEmpty":[1025,"lf-empty"],"lfInitialExpansionDepth":[1026,"lf-initial-expansion-depth"],"lfRipple":[1028,"lf-ripple"],"lfSelectable":[1540,"lf-selectable"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"debugInfo":[32],"expandedNodes":[32],"hiddenNodes":[32],"selectedNode":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]]]'), e2)));
 var APIEndpoints;
 (function(APIEndpoints2) {
   APIEndpoints2["ClearAnalytics"] = "/lf-nodes/clear-analytics";
@@ -6224,13 +6224,15 @@ class LFTooltip {
     __classPrivateFieldSet$1(this, _LFTooltip_LAYOUT, layout ?? "upload", "f");
     __classPrivateFieldSet$1(this, _LFTooltip_TOOLTIP_ELEMENT, document.createElement("div"), "f");
     __classPrivateFieldGet$2(this, _LFTooltip_TOOLTIP_ELEMENT, "f").classList.add(__classPrivateFieldGet$2(this, _LFTooltip_CSS_CLASSES, "f").wrapper);
+    let layoutElement;
     switch (__classPrivateFieldGet$2(this, _LFTooltip_LAYOUT, "f")) {
       case "upload":
-        __classPrivateFieldGet$2(this, _LFTooltip_TOOLTIP_ELEMENT, "f").appendChild(__classPrivateFieldGet$2(this, _LFTooltip_instances, "m", _LFTooltip_uploadLayout).call(this));
+        layoutElement = __classPrivateFieldGet$2(this, _LFTooltip_instances, "m", _LFTooltip_uploadLayout).call(this);
+        __classPrivateFieldGet$2(this, _LFTooltip_TOOLTIP_ELEMENT, "f").appendChild(layoutElement);
         break;
     }
-    lfFramework2.portal.open(__classPrivateFieldGet$2(this, _LFTooltip_TOOLTIP_ELEMENT, "f"), parent, anchor, 0, "auto");
-    lfFramework2.addClickCallback({ cb: () => this.destroy(), element: __classPrivateFieldGet$2(this, _LFTooltip_TOOLTIP_ELEMENT, "f") });
+    lfFramework2.portal.open(layoutElement, __classPrivateFieldGet$2(this, _LFTooltip_TOOLTIP_ELEMENT, "f"), anchor, 0, "auto");
+    lfFramework2.addClickCallback({ cb: () => this.destroy(), element: layoutElement });
     requestAnimationFrame(() => parent.appendChild(__classPrivateFieldGet$2(this, _LFTooltip_TOOLTIP_ELEMENT, "f")));
   }
   //#endregion
@@ -6253,6 +6255,7 @@ _LFTooltip_CB = /* @__PURE__ */ new WeakMap(), _LFTooltip_CSS_CLASSES = /* @__PU
   button.lfIcon = "upload";
   button.lfLabel = "Update cover";
   button.lfStretchX = true;
+  content.dataset.lf = "portal";
   content.appendChild(upload);
   content.appendChild(button);
   button.addEventListener(LfEventName.LfButton, __classPrivateFieldGet$2(this, _LFTooltip_buttonEventHandler, "f").bind(__classPrivateFieldGet$2(this, _LFTooltip_buttonEventHandler, "f"), upload));
@@ -9289,13 +9292,11 @@ const masonryFactory = {
     const masonry = document.createElement(TagName.LfMasonry);
     masonry.classList.add(MasonryCSS.Widget);
     masonry.addEventListener(LfEventName.LfMasonry, (e2) => EV_HANDLERS$4.masonry(STATE$6.get(wrapper), e2));
+    masonry.lfActions = true;
     masonry.lfColumns = 3;
     switch (node.comfyClass) {
       case NodeName.loadImages:
         masonry.lfSelectable = true;
-        break;
-      default:
-        masonry.lfActions = true;
         break;
     }
     content.classList.add(MasonryCSS.Content);
@@ -10465,125 +10466,125 @@ lfManager.initialize();
   console.log("LF Manager initialized!", lfManager);
 }
 export {
-  LF_TOAST_PROPS as $,
+  LF_CHART_PARTS as $,
   A,
   LOCATION_COVER as B,
   CY_ATTRIBUTES as C,
   AVATAR_COVER as D,
   CHILD_ROOT_MAP as E,
-  LF_TABBAR_BLOCKS as F,
-  LF_TABBAR_PARTS as G,
-  LF_TABBAR_PROPS as H,
+  LF_BADGE_BLOCKS as F,
+  LF_BADGE_PARTS as G,
+  LF_BADGE_PROPS as H,
   IMAGE_TYPE_IDS as I,
-  LF_DRAWER_BLOCKS as J,
-  LF_DRAWER_PARTS as K,
+  LF_BUTTON_BLOCKS as J,
+  LF_BUTTON_PARTS as K,
   LF_CAROUSEL_BLOCKS as L,
-  LF_DRAWER_PROPS as M,
-  LF_DRAWER_SLOT as N,
+  LF_BUTTON_PROPS as M,
+  LF_CANVAS_BLOCKS as N,
   OPTION_TYPE_IDS as O,
-  LF_EFFECTS_FOCUSABLES as P,
-  LF_IMAGEVIEWER_BLOCKS as Q,
-  LF_IMAGEVIEWER_PARTS as R,
+  LF_CANVAS_PARTS as P,
+  LF_CANVAS_PROPS as Q,
+  LF_CARD_BLOCKS as R,
   STYLE_COVER as S,
   T$1 as T,
   U$1 as U,
   V$1 as V,
-  LF_IMAGEVIEWER_PROPS as W,
-  IDS as X,
-  LF_TOAST_BLOCKS as Y,
-  LF_TOAST_PARTS as Z,
-  LF_TOAST_CSS_VARIABLES as _,
+  LF_CARD_PARTS as W,
+  LF_CARD_CSS_VARS as X,
+  LF_CARD_DEFAULTS as Y,
+  LF_CARD_PROPS as Z,
+  LF_CHART_BLOCKS as _,
   LF_ATTRIBUTES as a,
-  LF_IMAGE_CSS_VARS as a$,
-  LF_ACCORDION_BLOCKS as a0,
-  LF_ACCORDION_PARTS as a1,
-  LF_ACCORDION_PROPS as a2,
-  LF_SPLASH_BLOCKS as a3,
-  LF_SPLASH_PARTS as a4,
-  LF_SPLASH_PROPS as a5,
-  LF_COMPARE_BLOCKS as a6,
-  LF_COMPARE_PARTS as a7,
-  LF_COMPARE_CSS_VARS as a8,
-  LF_COMPARE_DEFAULTS as a9,
-  LF_BUTTON_BLOCKS as aA,
-  LF_BUTTON_PARTS as aB,
-  LF_BUTTON_PROPS as aC,
-  LF_CANVAS_BLOCKS as aD,
-  LF_CANVAS_PARTS as aE,
-  LF_CANVAS_PROPS as aF,
-  LF_CARD_BLOCKS as aG,
-  LF_CARD_PARTS as aH,
-  LF_CARD_CSS_VARS as aI,
-  LF_CARD_DEFAULTS as aJ,
-  LF_CARD_PROPS as aK,
-  LF_CHART_BLOCKS as aL,
-  LF_CHART_PARTS as aM,
-  LF_CHART_CSS_VARS as aN,
-  LF_THEME_COLORS_DATA_PREFIX as aO,
-  LF_CHART_PROPS as aP,
-  LF_CHAT_BLOCKS as aQ,
-  LF_CHAT_PARTS as aR,
-  LF_CHAT_PROPS as aS,
-  LF_CHIP_BLOCKS as aT,
-  LF_CHIP_PARTS as aU,
-  LF_CHIP_PROPS as aV,
-  LF_CODE_BLOCKS as aW,
-  LF_CODE_PARTS as aX,
-  LF_CODE_PROPS as aY,
-  LF_IMAGE_BLOCKS as aZ,
-  LF_IMAGE_PARTS as a_,
-  LF_COMPARE_PROPS as aa,
-  LF_COMPARE_IDS as ab,
-  LF_MASONRY_DEFAULT_COLUMNS as ac,
-  LF_MASONRY_BLOCKS as ad,
-  LF_MASONRY_PARTS as ae,
-  LF_MASONRY_CSS_VARS as af,
-  LF_MASONRY_PROPS as ag,
-  LF_MASONRY_IDS as ah,
-  LF_PLACEHOLDER_BLOCKS as ai,
-  LF_PLACEHOLDER_PARTS as aj,
-  LF_PLACEHOLDER_PROPS as ak,
-  LF_LIST_BLOCKS as al,
-  LF_LIST_PARTS as am,
-  LF_LIST_PROPS as an,
-  LF_SPINNER_PROPS as ao,
-  LF_TREE_BLOCKS as ap,
-  LF_TREE_PARTS as aq,
-  LF_TREE_PROPS as ar,
-  LF_TREE_CSS_VARIABLES as as,
-  LF_SLIDER_BLOCKS as at,
-  LF_SLIDER_PARTS as au,
-  LF_SLIDER_CSS_VARIABLES as av,
-  LF_SLIDER_PROPS as aw,
-  LF_BADGE_BLOCKS as ax,
-  LF_BADGE_PARTS as ay,
-  LF_BADGE_PROPS as az,
+  LF_COMPARE_PARTS as a$,
+  LF_CHART_CSS_VARS as a0,
+  LF_THEME_COLORS_DATA_PREFIX as a1,
+  LF_CHART_PROPS as a2,
+  LF_CHAT_BLOCKS as a3,
+  LF_CHAT_PARTS as a4,
+  LF_CHAT_PROPS as a5,
+  LF_CHIP_BLOCKS as a6,
+  LF_CHIP_PARTS as a7,
+  LF_CHIP_PROPS as a8,
+  LF_CODE_BLOCKS as a9,
+  LF_CHIP_CSS_VARS as aA,
+  LF_CARD_IDS as aB,
+  LF_CHAT_IDS as aC,
+  LF_THEME_ICONS as aD,
+  LF_TABBAR_BLOCKS as aE,
+  LF_TABBAR_PARTS as aF,
+  LF_TABBAR_PROPS as aG,
+  LF_DRAWER_BLOCKS as aH,
+  LF_DRAWER_PARTS as aI,
+  LF_DRAWER_PROPS as aJ,
+  LF_DRAWER_SLOT as aK,
+  LF_EFFECTS_FOCUSABLES as aL,
+  LF_IMAGEVIEWER_BLOCKS as aM,
+  LF_IMAGEVIEWER_PARTS as aN,
+  LF_IMAGEVIEWER_PROPS as aO,
+  IDS as aP,
+  LF_TOAST_BLOCKS as aQ,
+  LF_TOAST_PARTS as aR,
+  LF_TOAST_CSS_VARIABLES as aS,
+  LF_TOAST_PROPS as aT,
+  LF_ACCORDION_BLOCKS as aU,
+  LF_ACCORDION_PARTS as aV,
+  LF_ACCORDION_PROPS as aW,
+  LF_SPLASH_BLOCKS as aX,
+  LF_SPLASH_PARTS as aY,
+  LF_SPLASH_PROPS as aZ,
+  LF_COMPARE_BLOCKS as a_,
+  LF_CODE_PARTS as aa,
+  LF_CODE_PROPS as ab,
+  LF_IMAGE_BLOCKS as ac,
+  LF_IMAGE_PARTS as ad,
+  LF_IMAGE_CSS_VARS as ae,
+  LF_IMAGE_PROPS as af,
+  CSS_VAR_PREFIX as ag,
+  LF_PHOTOFRAME_BLOCKS as ah,
+  LF_PHOTOFRAME_PARTS as ai,
+  LF_PHOTOFRAME_PROPS as aj,
+  LF_PROGRESSBAR_BLOCKS as ak,
+  LF_PROGRESSBAR_PARTS as al,
+  LF_PROGRESSBAR_CSS_VARIABLES as am,
+  LF_PROGRESSBAR_PROPS as an,
+  LF_TEXTFIELD_BLOCKS as ao,
+  LF_TEXTFIELD_PARTS as ap,
+  LF_TEXTFIELD_PROPS as aq,
+  LF_TOGGLE_BLOCKS as ar,
+  LF_TOGGLE_PARTS as as,
+  LF_TOGGLE_PROPS as at,
+  LF_TYPEWRITER_BLOCKS as au,
+  LF_TYPEWRITER_PARTS as av,
+  LF_TYPEWRITER_PROPS as aw,
+  LF_UPLOAD_BLOCKS as ax,
+  LF_UPLOAD_PARTS as ay,
+  LF_UPLOAD_PROPS as az,
   LF_CAROUSEL_PARTS as b,
-  LF_IMAGE_PROPS as b0,
-  CSS_VAR_PREFIX as b1,
-  LF_PHOTOFRAME_BLOCKS as b2,
-  LF_PHOTOFRAME_PARTS as b3,
-  LF_PHOTOFRAME_PROPS as b4,
-  LF_PROGRESSBAR_BLOCKS as b5,
-  LF_PROGRESSBAR_PARTS as b6,
-  LF_PROGRESSBAR_CSS_VARIABLES as b7,
-  LF_PROGRESSBAR_PROPS as b8,
-  LF_TEXTFIELD_BLOCKS as b9,
-  LF_TEXTFIELD_PARTS as ba,
-  LF_TEXTFIELD_PROPS as bb,
-  LF_TOGGLE_BLOCKS as bc,
-  LF_TOGGLE_PARTS as bd,
-  LF_TOGGLE_PROPS as be,
-  LF_TYPEWRITER_BLOCKS as bf,
-  LF_TYPEWRITER_PARTS as bg,
-  LF_TYPEWRITER_PROPS as bh,
-  LF_UPLOAD_BLOCKS as bi,
-  LF_UPLOAD_PARTS as bj,
-  LF_UPLOAD_PROPS as bk,
-  LF_CHIP_CSS_VARS as bl,
-  LF_CARD_IDS as bm,
-  LF_CHAT_IDS as bn,
-  LF_THEME_ICONS as bo,
+  LF_COMPARE_CSS_VARS as b0,
+  LF_COMPARE_DEFAULTS as b1,
+  LF_COMPARE_PROPS as b2,
+  LF_COMPARE_IDS as b3,
+  LF_MASONRY_DEFAULT_COLUMNS as b4,
+  LF_MASONRY_BLOCKS as b5,
+  LF_MASONRY_PARTS as b6,
+  LF_MASONRY_CSS_VARS as b7,
+  LF_MASONRY_PROPS as b8,
+  LF_MASONRY_IDS as b9,
+  LF_PLACEHOLDER_BLOCKS as ba,
+  LF_PLACEHOLDER_PARTS as bb,
+  LF_PLACEHOLDER_PROPS as bc,
+  LF_LIST_BLOCKS as bd,
+  LF_LIST_PARTS as be,
+  LF_LIST_PROPS as bf,
+  LF_SPINNER_PROPS as bg,
+  LF_TREE_BLOCKS as bh,
+  LF_TREE_PARTS as bi,
+  LF_TREE_PROPS as bj,
+  LF_TREE_CSS_VARIABLES as bk,
+  LF_SLIDER_BLOCKS as bl,
+  LF_SLIDER_PARTS as bm,
+  LF_SLIDER_CSS_VARIABLES as bn,
+  LF_SLIDER_PROPS as bo,
   onFrameworkReady as bp,
   k as bq,
   j as br,

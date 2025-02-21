@@ -1,6 +1,10 @@
 // Core Mixins
 @use './mixins/mixins' as mixins;
 
+// Manager
+
+@use './manager/tooltip.scss' as tooltip;
+
 // Widgets
 @use './widgets/card' as card;
 @use './widgets/cardsWithChip.scss' as cardsWithChip;

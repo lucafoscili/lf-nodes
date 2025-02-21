@@ -1,17 +1,15 @@
 @use '../mixins/mixins' as mixins;
 
 .lf-tooltip {
-  & {
+  &__content {
     border: 1px solid rgb(var(--lf-color-border));
+    display: grid;
+    grid-template-rows: minmax(120px, 180px) auto;
     height: max-content;
     max-width: 320px;
     min-height: 172px;
     min-width: 256px;
     width: max-content;
-  }
-
-  &__content {
-    display: grid;
-    grid-template-rows: minmax(120px, 180px) auto;
+    z-index: var(--lf-ui-zindex-portal);
   }
 }
