@@ -83,16 +83,17 @@ class LF_BlurImages:
             
             blurred_tensor = pil_to_tensor(blurred_image)
             blurred_images.append(blurred_tensor)
-                
+
+            filename_prefix = f"{base_name}_Blur"
             output_file, subfolder, filename = resolve_filepath(
-                    filename_prefix=f"{base_name}_Blur",
+                    filename_prefix=filename_prefix,
                     add_counter=False,
                     image=blurred_tensor,
             )
             blurred_image.save(output_file, format="PNG")
             url = get_resource_url(subfolder, filename, "temp")
 
-            blurred_file_names.append(filename)
+            blurred_file_names.append(filename_prefix)
             nodes.append(create_masonry_node(filename, url, index))
 
         image_batch, image_list = normalize_output_image(blurred_images)
@@ -447,7 +448,7 @@ class LF_MultipleImageResizeForWeb:
                 }),
             },
             "optional": {
-                "ui_widget": (Input.LF_MASONRY, {
+                "ui_widget": (Input.LF_TREE, {
                     "default": {}
                 })
             },
