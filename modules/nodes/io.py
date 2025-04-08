@@ -566,7 +566,7 @@ class LF_SaveImageForCivitAI:
         for index, img in enumerate(image):
             pil_img = tensor_to_pil(img)
 
-            use_filename_list = isinstance(filename_prefix, list) and len(filename_prefix) == len(image)
+            use_filename_list = isinstance(filename_prefix, list) and len(filename_prefix) > 1 and len(filename_prefix) == len(image) 
             if use_filename_list:
                 prefix = filename_prefix[index]
             else:
