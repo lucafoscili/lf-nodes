@@ -1,6 +1,7 @@
 import { APIEndpoints, BaseAPIPayload, JSONAPIs } from '../types/api/api';
 import { LogSeverity } from '../types/manager/manager';
 import { getLfManager } from '../utils/common';
+/// @ts-ignore
 import { api } from '/scripts/api.js';
 
 export const JSON_API: JSONAPIs = {
