@@ -83,16 +83,17 @@ class LF_BlurImages:
             
             blurred_tensor = pil_to_tensor(blurred_image)
             blurred_images.append(blurred_tensor)
-                
+
+            filename_prefix = f"{base_name}_Blur"
             output_file, subfolder, filename = resolve_filepath(
-                    filename_prefix=f"{base_name}_Blur",
+                    filename_prefix=filename_prefix,
                     add_counter=False,
                     image=blurred_tensor,
             )
             blurred_image.save(output_file, format="PNG")
             url = get_resource_url(subfolder, filename, "temp")
 
-            blurred_file_names.append(filename)
+            blurred_file_names.append(filename_prefix)
             nodes.append(create_masonry_node(filename, url, index))
 
         image_batch, image_list = normalize_output_image(blurred_images)
@@ -447,7 +448,7 @@ class LF_MultipleImageResizeForWeb:
                 }),
             },
             "optional": {
-                "ui_widget": (Input.LF_MASONRY, {
+                "ui_widget": (Input.LF_TREE, {
                     "default": {}
                 })
             },
@@ -499,8 +500,8 @@ class LF_MultipleImageResizeForWeb:
             img_byte_arr = img_byte_arr.getvalue()
 
             output_images.append(pil_to_tensor(img)) 
-            output_file_names.append(f"{base_name}.{image_format}")
-            output_file_names_with_dir.append(f"HD/{base_name}.{image_format}")
+            output_file_names.append(f"{base_name}")
+            output_file_names_with_dir.append(f"HD/{base_name}")
 
             children:list[dict] = []
             rootNode: dict = {
@@ -524,8 +525,8 @@ class LF_MultipleImageResizeForWeb:
                 img_byte_arr = img_byte_arr.getvalue()
 
                 output_images.append(pil_to_tensor(resized_image))
-                output_file_names.append(f"{r}w_{base_name}.webp")
-                output_file_names_with_dir.append(f"{r}w/{r}w_{base_name}.webp")
+                output_file_names.append(f"{r}w_{base_name}")
+                output_file_names_with_dir.append(f"{r}w/{r}w_{base_name}")
 
                 childNode = {
                     "id": f"{r}w_{base_name}",

@@ -129,7 +129,7 @@ declare interface ComfyUI {
   };
   utils: {
     clone: Function;
-    applyTextReplacements: (api: ComfyUI, value: string) => string;
+    applyTextReplacements: (api: ComfyApp, value: string) => string;
     addStylesheet: Function;
     downloadBlob: Function;
     prop: Function;

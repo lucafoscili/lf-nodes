@@ -74,7 +74,7 @@ export const NODE_WIDGET_MAP: NodeWidgetMap = {
   LF_LUTGeneration: [CustomWidgetName.tabBarChart],
   LF_MarkdownDocGenerator: [CustomWidgetName.code],
   LF_MathOperation: [CustomWidgetName.code],
-  LF_MultipleImageResizeForWeb: [CustomWidgetName.masonry],
+  LF_MultipleImageResizeForWeb: [CustomWidgetName.tree],
   LF_Notify: [],
   LF_ParsePromptWithLoraTags: [CustomWidgetName.code],
   LF_RandomBoolean: [CustomWidgetName.progressbar],
@@ -183,7 +183,7 @@ export const onNodeCreated = async (nodeType: NodeType) => {
         case ComfyWidgetName.text:
           w.serializeValue = () => {
             const comfy = getApiRoutes().comfy.comfyUi();
-            return comfy.utils.applyTextReplacements(comfy, w.value);
+            return comfy.utils.applyTextReplacements(comfy.app.app, w.value);
           };
           break;
       }

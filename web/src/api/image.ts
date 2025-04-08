@@ -6,6 +6,7 @@ import {
 } from '../types/api/api';
 import { LogSeverity } from '../types/manager/manager';
 import { getLfManager } from '../utils/common';
+/// @ts-ignore
 import { api } from '/scripts/api.js';
 
 export const IMAGE_API: ImageAPIs = {
