@@ -500,8 +500,8 @@ class LF_MultipleImageResizeForWeb:
             img_byte_arr = img_byte_arr.getvalue()
 
             output_images.append(pil_to_tensor(img)) 
-            output_file_names.append(f"{base_name}.{image_format}")
-            output_file_names_with_dir.append(f"HD/{base_name}.{image_format}")
+            output_file_names.append(f"{base_name}")
+            output_file_names_with_dir.append(f"HD/{base_name}")
 
             children:list[dict] = []
             rootNode: dict = {
@@ -525,8 +525,8 @@ class LF_MultipleImageResizeForWeb:
                 img_byte_arr = img_byte_arr.getvalue()
 
                 output_images.append(pil_to_tensor(resized_image))
-                output_file_names.append(f"{r}w_{base_name}.webp")
-                output_file_names_with_dir.append(f"{r}w/{r}w_{base_name}.webp")
+                output_file_names.append(f"{r}w_{base_name}")
+                output_file_names_with_dir.append(f"{r}w/{r}w_{base_name}")
 
                 childNode = {
                     "id": f"{r}w_{base_name}",
