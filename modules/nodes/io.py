@@ -566,7 +566,8 @@ class LF_SaveImageForCivitAI:
         for index, img in enumerate(image):
             pil_img = tensor_to_pil(img)
 
-            if len(filename_prefix) == len(image):
+            use_filename_list = isinstance(filename_prefix, list) and len(filename_prefix) == len(image)
+            if use_filename_list:
                 prefix = filename_prefix[index]
             else:
                 prefix = filename_prefix[0]
@@ -576,7 +577,8 @@ class LF_SaveImageForCivitAI:
                 base_output_path=get_comfy_dir("output"),
                 add_timestamp=add_timestamp,
                 extension=extension,
-                image=img
+                image=img,
+                add_counter=not use_filename_list
             )
             url = get_resource_url(subfolder, filename, "output")
         
