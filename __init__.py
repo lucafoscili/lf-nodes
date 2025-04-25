@@ -1,19 +1,22 @@
+import sys
 import os
 import importlib.util
 
-VERSION = "0.4.1"
+VERSION = "0.4.2"
 
 NODE_CLASS_MAPPINGS = {}
 NODE_DISPLAY_NAME_MAPPINGS = {}
 
 MODULES_DIR = os.path.join(os.path.dirname(__file__), "modules")
 
+sys.modules["lf_nodes"] = sys.modules[__name__]
+
 for dirpath, _, filenames in os.walk(MODULES_DIR):
     for filename in filenames:
         if filename.endswith(".py") and filename != "__init__.py":
             relative_path = os.path.relpath(os.path.join(dirpath, filename), MODULES_DIR)
             module_name = os.path.splitext(relative_path.replace(os.path.sep, "."))[0]
-            full_module_name = f"lf-nodes.modules.{module_name}"
+            full_module_name = f"lf_nodes.modules.{module_name}"
 
             try:
                 spec = importlib.util.spec_from_file_location(full_module_name, os.path.join(dirpath, filename))
