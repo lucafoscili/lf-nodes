@@ -250,13 +250,13 @@ def create_colored_tensor(input_tensor: torch.Tensor, hex_color: str = None) -> 
 # endregion
 
 # region create_compare_node
-def create_compare_node(source: str, target: str, index: int):
+def create_compare_node(before: str, after: str, index: int):
     """
-    Create a comparison node dictionary using source, target images, and index.
+    Create a comparison node dictionary using the provided before and after image paths.
 
     Args:
-        source (str): Source image value.
-        target (str): Target image value.
+        before (str): Path to the first image (before comparison). 
+        after (str): Path to the second image (after comparison).
         index (int): Index value for the node.
 
     Returns:
@@ -264,8 +264,8 @@ def create_compare_node(source: str, target: str, index: int):
     """
     node = {
         "cells": {
-            "lfImage": {"shape": "image", "lfValue": f"{source}", "value": ''},
-            "lfImage_after": {"shape": "image", "lfValue": f"{target}", "value": ''}
+            "lfImage": {"shape": "image", "lfValue": f"{before}", "value": ''},
+            "lfImage_after": {"shape": "image", "lfValue": f"{after}", "value": ''}
         },
         "id": f"image_{index+1}",
         "value": f"Comparison {index+1}"
