@@ -15,6 +15,10 @@ class LF_CheckpointSelector:
     def INPUT_TYPES(self):
         return {
             "required": {
+                "checkpoint": (["None"] + self.initial_list, {
+                    "default": "None", 
+                    "tooltip": "Checkpoint used to generate the image."
+                }),
                 "get_civitai_info": (Input.BOOLEAN, {
                     "default": True, 
                     "tooltip": "Attempts to retrieve more info about the model from CivitAI."
@@ -35,10 +39,6 @@ class LF_CheckpointSelector:
                 }),
             },
             "optional": {
-                "checkpoint": (["None"] + self.initial_list, {
-                    "default": "None", 
-                    "tooltip": "Checkpoint used to generate the image."
-                }),
                 "ui_widget": (Input.LF_CARD, {
                     "default": {}
                 }),
@@ -110,6 +110,10 @@ class LF_EmbeddingSelector:
     def INPUT_TYPES(self):
         return {
             "required": {
+                "embedding": (["None"] + self.initial_list, {
+                    "default": "None", 
+                    "tooltip": "Embedding to use."
+                }),
                 "get_civitai_info": (Input.BOOLEAN, {
                     "default": True, 
                     "tooltip": "Attempts to retrieve more info about the model from CivitAI."
@@ -136,10 +140,6 @@ class LF_EmbeddingSelector:
                 }),
             },
             "optional": {
-                "embedding": (["None"] + self.initial_list, {
-                    "default": "None", 
-                    "tooltip": "Embedding to use."
-                }),
                 "embedding_stack": (Input.STRING, {
                     "default": "", 
                     "defaultInput": True, 
@@ -235,6 +235,10 @@ class LF_LoraAndEmbeddingSelector:
     def INPUT_TYPES(self):
         return {
             "required": {
+                "lora": (["None"] + self.initial_lora_list, {
+                    "default": "None", 
+                    "tooltip": "Lora model to use, it will also select the embedding with the same name."
+                }),
                 "get_civitai_info": (Input.BOOLEAN, {
                     "default": True, 
                     "tooltip": "Attempts to retrieve more info about the models from CivitAI."
@@ -261,10 +265,6 @@ class LF_LoraAndEmbeddingSelector:
                 }),
             },
             "optional": {
-                "lora": (["None"] + self.initial_lora_list, {
-                    "default": "None", 
-                    "tooltip": "Lora model to use, it will also select the embedding with the same name."
-                }),
                 "lora_stack": (Input.STRING, {
                     "default": "", 
                     "defaultInput": True, 
@@ -388,6 +388,10 @@ class LF_LoraSelector:
     def INPUT_TYPES(self):
         return {
             "required": {
+                "lora": (["None"] + self.initial_list, {
+                    "default": "None", 
+                    "tooltip": "Lora model to use."
+                }),
                 "get_civitai_info": (Input.BOOLEAN, {
                     "default": True, 
                     "tooltip": "Attempts to retrieve more info about the model from CivitAI."
@@ -414,10 +418,6 @@ class LF_LoraSelector:
                 }),
             },
             "optional": {
-                "lora": (["None"] + self.initial_list, {
-                    "default": "None", 
-                    "tooltip": "Lora model to use."
-                }),
                 "lora_stack": (Input.STRING, {
                     "default": "", 
                     "defaultInput": True, 
@@ -510,6 +510,10 @@ class LF_SamplerSelector:
     def INPUT_TYPES(self):
         return {
             "required": {
+                "sampler": (["None"] + SAMPLERS, {
+                    "default": "None", 
+                    "tooltip": "Sampler used to generate the image."
+                }),
                 "enable_history": (Input.BOOLEAN, {
                     "default": True, 
                     "tooltip": "Enables history, saving the execution value and date of the widget."
@@ -532,10 +536,6 @@ class LF_SamplerSelector:
             "optional": {
                 "ui_widget": (Input.LF_HISTORY, {
                     "default": {}
-                }),
-                "sampler": (["None"] + SAMPLERS, {
-                    "default": "None", 
-                    "tooltip": "Sampler used to generate the image."
                 }),
             },
             "hidden": {
@@ -588,6 +588,10 @@ class LF_SchedulerSelector:
     def INPUT_TYPES(self):
         return {
             "required": {
+                "scheduler": (["None"] + SCHEDULERS, {
+                    "default": "None", 
+                    "tooltip": "Scheduler used to generate the image."
+                }),
                 "enable_history": (Input.BOOLEAN, {
                     "default": True, 
                     "tooltip": "Enables history, saving the execution value and date of the widget."
@@ -610,10 +614,6 @@ class LF_SchedulerSelector:
             "optional": {
                 "ui_widget": (Input.LF_HISTORY, {
                     "default": {}
-                }),
-                "scheduler": (["None"] + SCHEDULERS, {
-                    "default": "None", 
-                    "tooltip": "Scheduler used to generate the image."
                 }),
             },
             "hidden": {"node_id": "UNIQUE_ID"}
@@ -666,6 +666,10 @@ class LF_UpscaleModelSelector:
     def INPUT_TYPES(self):
         return {
             "required": {
+                "upscale_model": (["None"] + self.initial_list, {
+                    "default": "None", 
+                    "tooltip": "Upscale model used to upscale the image."
+                }),
                 "enable_history": (Input.BOOLEAN, {
                     "default": True, 
                     "tooltip": "Enables history, saving the execution value and date of the widget."
@@ -688,10 +692,6 @@ class LF_UpscaleModelSelector:
             "optional": {
                 "ui_widget": (Input.LF_HISTORY, {
                     "default": {}
-                }),
-                "upscale_model": (["None"] + self.initial_list, {
-                    "default": "None", 
-                    "tooltip": "Upscale model used to upscale the image."
                 }),
             },
             "hidden": {"node_id": "UNIQUE_ID"}
@@ -744,6 +744,10 @@ class LF_VAESelector:
     def INPUT_TYPES(self):
         return {
             "required": {
+                "vae": (["None"] + self.initial_list, {
+                    "default": "None", 
+                    "tooltip": "VAE used to generate the image."
+                }),
                 "enable_history": (Input.BOOLEAN, {
                     "default": True, 
                     "tooltip": "Enables history, saving the execution value and date of the widget."
@@ -766,10 +770,6 @@ class LF_VAESelector:
             "optional":{
                 "ui_widget": (Input.LF_HISTORY, {
                     "default": {}
-                }),
-                "vae": (["None"] + self.initial_list, {
-                    "default": "None", 
-                    "tooltip": "VAE used to generate the image."
                 }),
             },
             "hidden": {"node_id": "UNIQUE_ID"}
