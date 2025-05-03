@@ -1276,6 +1276,7 @@ def resize_and_crop_image(image_tensor: torch.Tensor, resize_method: str, target
 
     if resize_mode == "crop":
         output_image = functional.center_crop(resized_image, (target_height, target_width))
+        output_image = output_image.clamp(0.0, 1.0)
     else:
         pad_color = hex_to_tuple(pad_color)
         channels = [functional.pad(resized_image[:, i, :, :], (
