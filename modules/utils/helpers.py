@@ -1330,7 +1330,7 @@ def resize_image(image_tensor: torch.Tensor, resize_method: str, longest_side: b
     
     resized_image = resized_image.permute(0, 2, 3, 1)
 
-    return resized_image
+    return resized_image.clamp(0.0, 1.0)
 # endregion
 
 # region resize_to_square
@@ -1367,7 +1367,7 @@ def resize_to_square(image_tensor: torch.Tensor, square_size: int, resample_meth
     else:
         cropped_img = resized_img
 
-    return cropped_img
+    return cropped_img.clamp(0.0, 1.0)
 # endregion
 
 # region resolve_filepath
