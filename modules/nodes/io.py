@@ -329,7 +329,7 @@ class LF_LoadMetadata:
     def on_exec(self, **kwargs: dict):
         file_names: str = normalize_list_to_value(kwargs.get("file_names"))
 
-        input_dir = get_comfy_dir("base")
+        input_dir = get_comfy_dir("input")
         metadata_list: list[str] = []
         metadata = ""
 
