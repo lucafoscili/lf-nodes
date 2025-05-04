@@ -1,7 +1,7 @@
 [project]
 name = "lf-nodes"
 description = "Custom nodes with a touch of extra UX ✨ Client-side LLM chat, mid-workflow image editing, history for primitives, JSON manipulation, analytics nodes, CivitAI metadata fetching and saving... and more!"
-version = "0.4.3"
+version = "0.4.4"
 license = {file = "LICENSE"}
 dependencies = ["numpy", "openai", "opencv-python", "piexif", "Pillow", "requests", "torch"]
 
@@ -12,4 +12,4 @@ Repository = "https://github.com/lucafoscili/lf-nodes"
 [tool.comfy]
 PublisherId = "lucafoscili"
 DisplayName = "LF Nodes"
-Icon = ""
+Icon = "https://github.com/lucafoscili/lucafoscili/blob/996cb0c00612e3278798c32eea80f1332277132e/lf-nodes/logo/LFN.png"
