@@ -250,13 +250,13 @@ def create_colored_tensor(input_tensor: torch.Tensor, hex_color: str = None) -> 
 # endregion
 
 # region create_compare_node
-def create_compare_node(source: str, target: str, index: int):
+def create_compare_node(before: str, after: str, index: int):
     """
-    Create a comparison node dictionary using source, target images, and index.
+    Create a comparison node dictionary using the provided before and after image paths.
 
     Args:
-        source (str): Source image value.
-        target (str): Target image value.
+        before (str): Path to the first image (before comparison). 
+        after (str): Path to the second image (after comparison).
         index (int): Index value for the node.
 
     Returns:
@@ -264,8 +264,8 @@ def create_compare_node(source: str, target: str, index: int):
     """
     node = {
         "cells": {
-            "lfImage": {"shape": "image", "lfValue": f"{source}", "value": ''},
-            "lfImage_after": {"shape": "image", "lfValue": f"{target}", "value": ''}
+            "lfImage": {"shape": "image", "lfValue": f"{before}", "value": ''},
+            "lfImage_after": {"shape": "image", "lfValue": f"{after}", "value": ''}
         },
         "id": f"image_{index+1}",
         "value": f"Comparison {index+1}"
@@ -1276,6 +1276,7 @@ def resize_and_crop_image(image_tensor: torch.Tensor, resize_method: str, target
 
     if resize_mode == "crop":
         output_image = functional.center_crop(resized_image, (target_height, target_width))
+        output_image = output_image.clamp(0.0, 1.0)
     else:
         pad_color = hex_to_tuple(pad_color)
         channels = [functional.pad(resized_image[:, i, :, :], (
@@ -1329,7 +1330,7 @@ def resize_image(image_tensor: torch.Tensor, resize_method: str, longest_side: b
     
     resized_image = resized_image.permute(0, 2, 3, 1)
 
-    return resized_image
+    return resized_image.clamp(0.0, 1.0)
 # endregion
 
 # region resize_to_square
@@ -1366,7 +1367,7 @@ def resize_to_square(image_tensor: torch.Tensor, square_size: int, resample_meth
     else:
         cropped_img = resized_img
 
-    return cropped_img
+    return cropped_img.clamp(0.0, 1.0)
 # endregion
 
 # region resolve_filepath

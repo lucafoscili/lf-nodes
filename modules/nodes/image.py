@@ -112,13 +112,13 @@ class LF_CompareImages:
     def INPUT_TYPES(self):
         return {
             "required": {
-                "image": (Input.IMAGE, {
-                    "tooltip": "First input image tensor or a list of image tensors."
+                "image_after": (Input.IMAGE, {
+                    "tooltip": "Image to be compared (AFTER)."
                 }),
             },
             "optional": {
-                "image_opt": (Input.IMAGE, {
-                    "tooltip": "Second input image tensor or a list of image tensors (optional)."
+                "image_before": (Input.IMAGE, {
+                    "tooltip": "Reference image (BEFORE). If not provided, the AFTER image is reused."
                 }),
                 "ui_widget": (Input.LF_COMPARE, {
                     "default": {}
@@ -138,50 +138,48 @@ class LF_CompareImages:
     RETURN_TYPES = ("IMAGE", "IMAGE", "IMAGE", "JSON")
 
     def on_exec(self, **kwargs: dict):
-        image_list_1: list[torch.Tensor] = normalize_input_image(kwargs.get("image"))
-        image_list_2: list[torch.Tensor] = normalize_input_image(kwargs.get("image_opt", image_list_1))
-        
-        nodes: list[dict] = []
-        dataset: dict = { "nodes": nodes }
+        has_before : bool = "image_before" in kwargs and kwargs["image_before"] is not None
 
-        if len(image_list_1) != len(image_list_2):
+        image_list_a : list[torch.Tensor] = normalize_input_image(kwargs["image_after"])
+        image_list_b : list[torch.Tensor] = normalize_input_image(kwargs["image_before"]) if has_before else image_list_a
+
+        if len(image_list_a) != len(image_list_b):
             raise ValueError("Image lists must have the same length if both inputs are provided.")
-        
-        for index, img in enumerate(image_list_1):
-            pil_image = tensor_to_pil(img)
 
-            output_file_s, subfolder_s, filename_s = resolve_filepath(
-                    filename_prefix="compare_s",
-                    image=img,
+        nodes: list[dict] = []
+        dataset: dict = {"nodes": nodes}
+
+        for idx, img_a in enumerate(image_list_a):
+
+            pil_a = tensor_to_pil(img_a)
+            file_a, sub_a, name_a = resolve_filepath(
+                filename_prefix="compare_after", image=img_a
             )
-            pil_image.save(output_file_s, format="PNG")
-            filename_s = get_resource_url(subfolder_s, filename_s, "temp")
+            pil_a.save(file_a, format="PNG")
+            url_a = get_resource_url(sub_a, name_a, "temp")
 
-            if not_none(kwargs.get("image_opt")):
-                pil_image = tensor_to_pil(image_list_2[index])
-
-                output_file_t, subfolder_t, filename_t = resolve_filepath(
-                    filename_prefix="compare_t",
-                    image=image_list_2[index],
+            if has_before:
+                img_b = image_list_b[idx]
+                pil_b = tensor_to_pil(img_b)
+                file_b, sub_b, name_b = resolve_filepath(
+                    filename_prefix="compare_before", image=img_b
                 )
-                pil_image.save(output_file_t, format="PNG")
-                filename_t = get_resource_url(subfolder_t, filename_t, "temp")
+                pil_b.save(file_b, format="PNG")
+                url_b = get_resource_url(sub_b, name_b, "temp")
             else:
-                filename_t = get_resource_url(subfolder_s, filename_s, "temp")
+                url_b = url_a
 
-            nodes.append(create_compare_node(filename_s, filename_t, index))
+            nodes.append(create_compare_node(url_b, url_a, idx))
 
-        image_batch, image_list = normalize_output_image(image_list_1)
+        image_batch, image_list = normalize_output_image(image_list_a)
+        combined = image_list_a + (image_list_b if has_before else [])
+        _, all_images = normalize_output_image(combined)
 
-        combined_images = image_list_1 + (image_list_2 if kwargs.get("image_opt") is not None else [])
-        _, all_images_list = normalize_output_image(combined_images)
+        PromptServer.instance.send_sync(
+            f"{EVENT_PREFIX}compareimages", {"node": kwargs.get("node_id"), "dataset": dataset}
+        )
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}compareimages", {
-            "node": kwargs.get("node_id"),
-            "dataset": dataset,
-        })
-
-        return (image_batch[0], image_list, all_images_list, dataset)
+        return (image_batch[0], image_list, all_images, dataset)
 # endregion
 
 # region LF_ImagesEditingBreakpoint
