@@ -2,9 +2,13 @@ import base64
 import json
 import os
 import requests
+import aiohttp
+import imghdr
 
 from aiohttp import web
 from folder_paths import get_full_path
+from PIL import Image
+from io import BytesIO
 
 from ..utils.constants import API_ROUTE_PREFIX, BASE64_PNG_PREFIX
 from ..utils.helpers import get_comfy_list
@@ -77,11 +81,30 @@ async def save_model_info(request):
 
         if image_url:
             try:
-                image_data = requests.get(image_url).content
-                image_base64 =  base64.b64encode(image_data).decode('utf-8')
-                metadata_json["nodes"][0]["cells"]["lfImage"]["value"] = f"{BASE64_PNG_PREFIX}{image_base64}"
+                async with aiohttp.ClientSession() as session:
+                    async with session.head(image_url, timeout=5) as head:
+                        ctype = head.headers.get("Content-Type", "").lower()
+
+                if not ctype.startswith("image/"):
+                    metadata_json["nodes"][0]["cells"]["lfImage"]["value"] = None
+                else:
+                    async with aiohttp.ClientSession() as session:
+                        async with session.get(image_url, timeout=10) as resp:
+                            resp.raise_for_status()
+                            data = await resp.read()
+
+                    if imghdr.what(None, data) is None:
+                        metadata_json["nodes"][0]["cells"]["lfImage"]["value"] = None
+                    else:
+                        img = Image.open(BytesIO(data)).convert("RGB")
+                        img.thumbnail((1024, 1024), Image.LANCZOS)
+
+                        buf = BytesIO()
+                        img.save(buf, format="JPEG", quality=85)
+                        b64 = base64.b64encode(buf.getvalue()).decode("utf-8")
+                        metadata_json["nodes"][0]["cells"]["lfImage"]["value"] = f"{BASE64_PNG_PREFIX}{b64}"
             except Exception as e:
-                return web.Response(status=500, text=f"Error fetching image: {str(e)}")
+                return web.Response(status=500, text=f"Error fetching or processing media: {e}")
 
         with open(info_file_path, "w") as info_file:
             json.dump(metadata_json, info_file, indent=4)
