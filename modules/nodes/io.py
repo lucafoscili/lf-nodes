@@ -156,9 +156,9 @@ class LF_LoadImages:
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
-    OUTPUT_IS_LIST = (False, True, True, True, False, False, False, False)
-    RETURN_NAMES = ("image", "image_list", "name", "creation_date", "nr", "selected_image", "selected_index", "selected_name")
-    RETURN_TYPES = ("IMAGE", "IMAGE", "STRING", "STRING", "INT", "IMAGE", "INT", "STRING")
+    OUTPUT_IS_LIST = (False, True, True, True, False, False, False, False, False)
+    RETURN_NAMES = ("image", "image_list", "name", "creation_date", "nr", "selected_image", "selected_index", "selected_name", "metadata")
+    RETURN_TYPES = ("IMAGE", "IMAGE", "STRING", "STRING", "INT", "IMAGE", "INT", "STRING", "JSON")
 
     def on_exec(self, **kwargs: dict):
         dir: str = normalize_list_to_value(kwargs.get("dir"))
@@ -171,6 +171,7 @@ class LF_LoadImages:
         index = 0
         file_names: list[str] = []
         images: list[torch.Tensor] = []
+        metadata_list: list[str] = []
         output_creation_dates: list[str] = []
         selected_image = None
 
@@ -202,8 +203,18 @@ class LF_LoadImages:
                         file_creation_time = os.path.getctime(image_path)
                         creation_date = datetime.fromtimestamp(file_creation_time).strftime('%Y-%m-%d')
                         output_creation_dates.append(creation_date)
-                        pil_img = Image.open(io.BytesIO(img_file.read())).convert("RGB")
-                        img_tensor = pil_to_tensor(pil_img)
+
+                        pil_image = Image.open(img_file)
+                        if pil_image.format == "JPEG":
+                            metadata = extract_jpeg_metadata(pil_image, f)
+                        elif pil_image.format == "PNG":
+                            metadata = extract_png_metadata(pil_image)
+                        else:
+                            metadata = {"error": f"Unsupported image format for {f}"}
+                        metadata_list.append({"file": f, "metadata": metadata})                        
+
+                        rgb_img = pil_image.convert("RGB")
+                        img_tensor = pil_to_tensor(rgb_img)
   
                         output_file, subfolder, filename = resolve_filepath(
                             filename_prefix=f,
@@ -214,7 +225,7 @@ class LF_LoadImages:
                         )
                         url = get_resource_url(subfolder, filename, "input")
                         e = e.lower().replace('jpg', 'jpeg')
-                        pil_img.save(output_file, format=e.upper())
+                        rgb_img.save(output_file, format=e.upper())
 
                         images.append(img_tensor)
                         
@@ -247,7 +258,7 @@ class LF_LoadImages:
             "dataset": dataset,
         })
 
-        return (image_batch[0], image_list, file_names, output_creation_dates, index, selected_image, selected_index, selected_name)
+        return (image_batch[0], image_list, file_names, output_creation_dates, index, selected_image, selected_index, selected_name, metadata_list)
 # endregion
 
 # region LF_LoadLocalJSON
