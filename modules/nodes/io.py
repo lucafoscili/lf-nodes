@@ -171,7 +171,7 @@ class LF_LoadImages:
         index = 0
         file_names: list[str] = []
         images: list[torch.Tensor] = []
-        metadata_list: list[str] = []
+        metadata_list: list[dict] = []
         output_creation_dates: list[str] = []
         selected_image = None
 
