@@ -5092,7 +5092,7 @@ var Y = false, Z = false, tt = (t2, e2, n2) => {
                         const n3 = t7.S.replace(/-/g, "_"), o6 = t7.T;
                         if (!o6) return;
                         const l6 = i.get(o6);
-                        return l6 ? l6[n3] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-04d3b7d4.entry.js": () => import("./p-04d3b7d4.entry-CmkwODn7.js"), "./p-054cd759.entry.js": () => import("./p-054cd759.entry-TynDr0Yi.js"), "./p-1265f5b0.entry.js": () => import("./p-1265f5b0.entry-DHAsbX5t.js"), "./p-15415e9d.entry.js": () => import("./p-15415e9d.entry-KxC3TrXC.js"), "./p-16a05291.entry.js": () => import("./p-16a05291.entry-fmgz-5fQ.js"), "./p-22b7169e.entry.js": () => import("./p-22b7169e.entry-CwKDzA-b.js"), "./p-35177d24.entry.js": () => import("./p-35177d24.entry-CdVedNvb.js"), "./p-42df2d51.entry.js": () => import("./p-42df2d51.entry-BCPgk9gc.js"), "./p-46391c90.entry.js": () => import("./p-46391c90.entry-BxsAhgww.js"), "./p-593c3e82.entry.js": () => import("./p-593c3e82.entry-OlZ71GBg.js"), "./p-66bf4aa1.entry.js": () => import("./p-66bf4aa1.entry-uiTEkMhI.js"), "./p-69e770bf.entry.js": () => import("./p-69e770bf.entry-CFvI5kdu.js"), "./p-6b65927d.entry.js": () => import("./p-6b65927d.entry-ChD9Nd9v.js"), "./p-8189adcf.entry.js": () => import("./p-8189adcf.entry-BvEoVwku.js"), "./p-a4cbf5db.entry.js": () => import("./p-a4cbf5db.entry-CJop6MHf.js"), "./p-b1658aeb.entry.js": () => import("./p-b1658aeb.entry-DAXcemta.js"), "./p-c62fc177.entry.js": () => import("./p-c62fc177.entry-CNyVsKb0.js") }), `./${o6}.entry.js`, 2).then((t8) => (i.set(o6, t8), t8[n3]), (t8) => {
+                        return l6 ? l6[n3] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-04d3b7d4.entry.js": () => import("./p-04d3b7d4.entry-Cfw-16dO.js"), "./p-054cd759.entry.js": () => import("./p-054cd759.entry-BlPKqdnz.js"), "./p-1265f5b0.entry.js": () => import("./p-1265f5b0.entry-DWW5epvq.js"), "./p-15415e9d.entry.js": () => import("./p-15415e9d.entry-CZuQzaK4.js"), "./p-16a05291.entry.js": () => import("./p-16a05291.entry-oeWwnVKN.js"), "./p-22b7169e.entry.js": () => import("./p-22b7169e.entry-B4upsgN0.js"), "./p-35177d24.entry.js": () => import("./p-35177d24.entry-BEvCrwYu.js"), "./p-42df2d51.entry.js": () => import("./p-42df2d51.entry-B0PGpOEO.js"), "./p-46391c90.entry.js": () => import("./p-46391c90.entry-DddAYYeA.js"), "./p-593c3e82.entry.js": () => import("./p-593c3e82.entry--rOPNi6Z.js"), "./p-66bf4aa1.entry.js": () => import("./p-66bf4aa1.entry-DrDsyTh4.js"), "./p-69e770bf.entry.js": () => import("./p-69e770bf.entry-BhNCuudB.js"), "./p-6b65927d.entry.js": () => import("./p-6b65927d.entry-8g4LaKqr.js"), "./p-8189adcf.entry.js": () => import("./p-8189adcf.entry-CdNBOfcF.js"), "./p-a4cbf5db.entry.js": () => import("./p-a4cbf5db.entry-UrvYxu71.js"), "./p-b1658aeb.entry.js": () => import("./p-b1658aeb.entry-Bxxuzzk6.js"), "./p-c62fc177.entry.js": () => import("./p-c62fc177.entry-BgZekxd5.js") }), `./${o6}.entry.js`, 2).then((t8) => (i.set(o6, t8), t8[n3]), (t8) => {
                           s(t8, e4.$hostElement$);
                         });
                         /*!__STENCIL_STATIC_IMPORT_SWITCH__*/
@@ -5836,6 +5836,7 @@ var NodeName;
   NodeName2["something2Number"] = "LF_Something2Number";
   NodeName2["something2String"] = "LF_Something2String";
   NodeName2["sortJsonKeys"] = "LF_SortJSONKeys";
+  NodeName2["sortTags"] = "LF_SortTags";
   NodeName2["string"] = "LF_String";
   NodeName2["stringReplace"] = "LF_StringReplace";
   NodeName2["stringTemplate"] = "LF_StringTemplate";
@@ -5956,6 +5957,7 @@ const NODE_WIDGET_MAP = {
   LF_Something2Number: [CustomWidgetName.code],
   LF_Something2String: [CustomWidgetName.code],
   LF_SortJSONKeys: [CustomWidgetName.code],
+  LF_SortTags: [CustomWidgetName.code],
   LF_String: [CustomWidgetName.history],
   LF_StringReplace: [CustomWidgetName.code],
   LF_StringTemplate: [CustomWidgetName.code],
