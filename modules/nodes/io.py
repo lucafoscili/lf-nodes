@@ -756,6 +756,68 @@ class LF_SaveMarkdown:
         return (markdown_text,)
 # endregion
 
+# region LF_SaveText
+class LF_SaveText:
+    @classmethod
+    def INPUT_TYPES(self):
+        return {
+            "required": {
+                "text": (Input.STRING, {
+                    "tooltip": "Plain text data to save (.txt)."
+                }),
+                "filename_prefix": (Input.STRING, {
+                    "default": '', 
+                    "tooltip": "Path and filename for saving the text. Use slashes to set directories."
+                }),
+                "add_timestamp": (Input.BOOLEAN, {
+                    "default": True, 
+                    "tooltip": "Add timestamp to the filename as a suffix."
+                }),
+            },
+            "optional": {
+                "ui_widget": (Input.LF_TREE, {
+                    "default": {}
+                }),
+            },
+            "hidden": { 
+                "node_id": "UNIQUE_ID",
+            } 
+        }
+    
+    CATEGORY = CATEGORY
+    FUNCTION = FUNCTION
+    OUTPUT_NODE = True
+    RETURN_NAMES = ("text",)
+    RETURN_TYPES = ("STRING",)
+
+    def on_exec(self, **kwargs: dict):
+        text: dict = normalize_list_to_value(kwargs.get("text"))
+        filename_prefix: str = normalize_list_to_value(kwargs.get("filename_prefix"))
+        add_timestamp: bool = normalize_list_to_value(kwargs.get("add_timestamp"))
+
+        output_file, _, _ = resolve_filepath(
+            filename_prefix=filename_prefix,
+            base_output_path=get_comfy_dir("output"),
+            add_timestamp=add_timestamp,
+            extension="txt"
+        )
+ 
+        with open(output_file, 'w', encoding='utf-8') as txt_file:
+            txt_file.write(text)
+ 
+        nodes: list[dict] = []
+        root: dict = { "children": nodes, "icon":"check", "id": "root", "value": "TXT saved successfully!" }
+        dataset: dict = { "nodes": [root] }
+        nodes.append({ "description": output_file, "icon": "code", "id": output_file, "value": output_file })
+ 
+        PromptServer.instance.send_sync(f"{EVENT_PREFIX}savetext", {
+            "node": kwargs.get("node_id"),
+            "dataset": dataset,
+        })
+ 
+        return (text,)
+# endregion
+
 NODE_CLASS_MAPPINGS = {
     "LF_LoadAndEditImages": LF_LoadAndEditImages,
     "LF_LoadFileOnce": LF_LoadFileOnce,
@@ -765,7 +827,8 @@ NODE_CLASS_MAPPINGS = {
     "LF_RegionExtractor": LF_RegionExtractor,
     "LF_SaveJSON": LF_SaveJSON,
     "LF_SaveMarkdown": LF_SaveMarkdown,
-    "LF_SaveImageForCivitAI": LF_SaveImageForCivitAI
+    "LF_SaveImageForCivitAI": LF_SaveImageForCivitAI,
+    "LF_SaveText": LF_SaveText,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
@@ -777,5 +840,6 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "LF_RegionExtractor": "Extract region from sources",
     "LF_SaveJSON": "Save JSON",
     "LF_SaveMarkdown": "Save Markdown",
-    "LF_SaveImageForCivitAI": "Save image with CivitAI-compatible metadata"
+    "LF_SaveImageForCivitAI": "Save image with CivitAI-compatible metadata",
+    "LF_SaveText": "Save text",
 }

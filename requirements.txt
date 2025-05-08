@@ -5,3 +5,5 @@ piexif
 Pillow
 requests
 torch
+torchvision
+transformers
