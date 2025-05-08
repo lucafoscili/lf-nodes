@@ -559,6 +559,95 @@ class LF_ResolutionSwitcher:
         })
 
         return (width, height, is_landscape)
+    
+# endregion
+class LF_SortTags:
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "caption": (Input.STRING,
+                    {
+                        "tooltip": "The caption(s) whose tags need re-ordering. One per line or comma-separated."
+                    },
+                ),
+                "desired_order": (Input.STRING,
+                    {
+                        "default": "masterpiece, best quality",
+                        "tooltip": "Comma-separated list indicating the desired leading order."
+                    },
+                ),
+            },
+            "optional": {
+                "ui_widget": (Input.LF_CODE, {
+                    "default": ""
+                }),
+            },
+            "hidden": {
+                "node_id": "UNIQUE_ID"
+            }
+        }
+
+    CATEGORY = CATEGORY
+    FUNCTION = FUNCTION
+    RETURN_NAMES = ("string", "string_list")
+    RETURN_TYPES = ("STRING", "STRING")
+
+    def on_exec(self, **kwargs):
+
+        def normalise_caption(caption: str) -> list[str]:
+            """
+            Normalises a comma-separated caption string into a list of trimmed caption elements.
+
+            Parameters:
+                caption (str): A string that may contain multiple captions separated by commas.
+
+            Returns:
+                list[str]: A list containing each non-empty caption string stripped of leading and trailing whitespace.
+            """
+            if not caption:
+                return []
+            return [t.strip() for t in caption.split(',') if t.strip()]
+
+
+        def serialise_caption(tags: list[str]) -> str:
+            """
+            Serialises a list of tags into a comma-separated string.
+
+            Parameters:
+                tags (list[str]): A list of tags to be serialised.
+
+            Returns:
+                str: A comma-separated string of tags.
+            """
+            return ', '.join(tags)
+    
+        caption: str = normalize_list_to_value(kwargs.get("caption", ""))
+        desired_order: str = normalize_list_to_value(kwargs.get("desired_order", ""))
+        node_id = kwargs.get("node_id")
+
+        order_tokens = normalise_caption(desired_order)
+        out_lines: list[str] = []
+        logs: list[str] = []
+
+        for line in caption.splitlines():
+            tokens = normalise_caption(line)
+            leading = [tok for tok in order_tokens if tok in tokens]
+            trailing = [tok for tok in tokens if tok not in order_tokens]
+            sorted_tokens = leading + trailing
+            out_str = serialise_caption(sorted_tokens)
+            out_lines.append(out_str)
+
+            logs.append(
+                f"### Original\n`{line}`\n### Sorted\n`{out_str}`\n\n"
+            )
+
+        PromptServer.instance.send_sync(f"{EVENT_PREFIX}sorttags", {
+            "node": node_id, "value": "\n".join(logs)},
+        )
+
+        result = "\n".join(out_lines)
+        return (result, [result])
 # endregion
 
 # region LF_StringReplace
@@ -1038,6 +1127,7 @@ NODE_CLASS_MAPPINGS = {
     "LF_ParsePromptWithLoraTags": LF_ParsePromptWithLoraTags,
     "LF_RegexReplace": LF_RegexReplace,
     "LF_ResolutionSwitcher": LF_ResolutionSwitcher,
+    "LF_SortTags": LF_SortTags,
     "LF_StringReplace": LF_StringReplace,
     "LF_StringTemplate": LF_StringTemplate,
     "LF_SwitchFloat": LF_SwitchFloat,
@@ -1054,6 +1144,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "LF_ParsePromptWithLoraTags": "Parse Prompt with LoRA tags",
     "LF_RegexReplace": "Regex replace",
     "LF_ResolutionSwitcher": "Resolution switcher",
+    "LF_SortTags": "Sort tags",
     "LF_StringReplace": "String replace",
     "LF_StringTemplate": "String template",
     "LF_SwitchFloat": "Switch Float",
