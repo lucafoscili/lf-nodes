@@ -480,6 +480,57 @@ def filter_list(filter, list):
     return [model for model in list if fnmatch.fnmatch(model.replace('\\', '/'), normalized_filter)]
 # endregion
 
+# region get_clip_tokens
+def get_clip_tokens(clip, text: str) -> tuple[int, list[str]]:
+    """
+    Counts the number of CLIP tokens in a given text string and decodes the token list.
+    Parameters:
+        clip: Either a CLIP model instance with a tokenizer attribute or a tokenizer instance.
+        text (str): The text string to be tokenized.
+    Returns:
+        tuple: A tuple containing the number of tokens and the decoded token list.                
+    """
+    if hasattr(clip, "tokenizer"):
+        tokenizer = clip.tokenizer
+        if hasattr(tokenizer, "clip_l"):
+           tokenizer = tokenizer.clip_l
+        elif hasattr(tokenizer, "clip_g"):
+           tokenizer = tokenizer.clip_g
+    else:
+        tokenizer = clip
+
+    # If the tokenizer itself has a .tokenizer (like SDTokenizer), use it
+    if hasattr(tokenizer, "tokenizer"):
+        tokenizer = tokenizer.tokenizer
+
+    # HuggingFace style
+    if callable(tokenizer):
+        encoded = tokenizer(text, return_tensors="pt")
+        token_ids = encoded.input_ids[0]
+        if hasattr(tokenizer, "tokenize"):
+            tokens = tokenizer.tokenize(text)
+        else:
+            tokens = tokenizer.convert_ids_to_tokens(token_ids)
+        decoded_tokens = tokenizer.decode(token_ids).split()
+    # Fallbacks for other styles
+    elif hasattr(tokenizer, "encode"):
+        token_ids = torch.tensor(tokenizer.encode(text), dtype=torch.long)
+        tokens = tokenizer.convert_ids_to_tokens(token_ids)
+        decoded_tokens = tokens
+    elif hasattr(tokenizer, "tokenize_to_ids"):
+        token_ids = torch.tensor(tokenizer.tokenize_to_ids(text), dtype=torch.long)
+        tokens = tokenizer.convert_ids_to_tokens(token_ids)
+        decoded_tokens = tokens
+    elif hasattr(tokenizer, "text_to_ids"):
+        token_ids = torch.tensor(tokenizer.text_to_ids(text), dtype=torch.long)
+        tokens = tokenizer.convert_ids_to_tokens(token_ids)
+        decoded_tokens = tokens
+    else:
+        raise AttributeError("Tokenizer does not support any known tokenization method.")
+
+    return (len(tokens), decoded_tokens)
+# endregion
+
 # region get_embedding_hashes
 def get_embedding_hashes(embeddings: str, analytics_dataset: dict):
     """
