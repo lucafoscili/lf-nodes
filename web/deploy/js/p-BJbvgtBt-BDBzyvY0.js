@@ -1,6 +1,6 @@
-import { bp as onFrameworkReady, bq as k, br as j } from "./index-B1x5QnbI.js";
+import { bp as onFrameworkReady, bq as S, br as g } from "./index-CLXmI-OO.js";
 onFrameworkReady.then((t) => {
-  t.register("lf-core", { getAssetPath: j, setAssetPath: k });
+  t.register("lf-core", { getAssetPath: g, setAssetPath: S });
 });
 const o = async (s) => {
   const a = await onFrameworkReady;
