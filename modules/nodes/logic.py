@@ -649,13 +649,13 @@ class LF_SortTags:
             over = token_count > clip_limit
             warn = "⚠️ **TRUNCATES**" if over else "✅ within limit"
             token_lines = [f"{i+1:02d}: {tok}" for i, tok in enumerate(token_list)]
-            token_list = "\n".join(token_lines)
+            token_lines = "\n".join(token_lines)
             return (
                 f"### Original\n`{original}`\n\n"
                 f"### Sorted\n`{sorted_caption}`\n\n"
                 f"**CLIP tokens:** {token_count} / {clip_limit} {warn}\n\n---\n"
                 f"<details><summary>Show tokens</summary>\n\n"
-                f"{token_list}\n\n</details>"
+                f"{token_lines}\n\n</details>"
             )
         
         caption: str = normalize_list_to_value(kwargs.get("caption", ""))
@@ -665,7 +665,6 @@ class LF_SortTags:
         node_id = kwargs.get("node_id")
 
         order_tokens = normalise_caption(desired_order)
-        token_counts: list[int] = []
         out_lines: list[str] = []
         logs: list[str] = []
 

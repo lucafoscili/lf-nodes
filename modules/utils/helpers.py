@@ -507,28 +507,21 @@ def get_clip_tokens(clip, text: str) -> tuple[int, list[str]]:
     if callable(tokenizer):
         encoded = tokenizer(text, return_tensors="pt")
         token_ids = encoded.input_ids[0]
-        if hasattr(tokenizer, "tokenize"):
-            tokens = tokenizer.tokenize(text)
-        else:
-            tokens = tokenizer.convert_ids_to_tokens(token_ids)
-        decoded_tokens = tokenizer.decode(token_ids).split()
+        tokens = tokenizer.convert_ids_to_tokens(token_ids)            
     # Fallbacks for other styles
     elif hasattr(tokenizer, "encode"):
         token_ids = torch.tensor(tokenizer.encode(text), dtype=torch.long)
         tokens = tokenizer.convert_ids_to_tokens(token_ids)
-        decoded_tokens = tokens
     elif hasattr(tokenizer, "tokenize_to_ids"):
         token_ids = torch.tensor(tokenizer.tokenize_to_ids(text), dtype=torch.long)
         tokens = tokenizer.convert_ids_to_tokens(token_ids)
-        decoded_tokens = tokens
     elif hasattr(tokenizer, "text_to_ids"):
         token_ids = torch.tensor(tokenizer.text_to_ids(text), dtype=torch.long)
         tokens = tokenizer.convert_ids_to_tokens(token_ids)
-        decoded_tokens = tokens
     else:
         raise AttributeError("Tokenizer does not support any known tokenization method.")
 
-    return (len(tokens), decoded_tokens)
+    return (len(tokens), [token.replace("</w>", " ") for token in tokens])
 # endregion
 
 # region get_embedding_hashes
