@@ -521,7 +521,7 @@ def get_clip_tokens(clip, text: str) -> tuple[int, list[str]]:
     else:
         raise AttributeError("Tokenizer does not support any known tokenization method.")
 
-    return (len(tokens), tokens.replace("</w>", " "))
+    return (len(tokens), [token.replace("</w>", " ") for token in tokens])
 # endregion
 
 # region get_embedding_hashes
