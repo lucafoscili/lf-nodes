@@ -17,18 +17,25 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Count Nodes
+      - name: Count Nodes by “# region” markers
+        id: count
         run: |
-          COUNT=$(find modules/nodes -type f -name "*.py" | wc -l)
+          set -e
+          # count every "# region" in your .py node files
+          COUNT=$(grep -R '^# *region' modules/nodes --include='*.py' | wc -l)
+          # expose for later steps
+          echo "nodes=$COUNT" >> $GITHUB_OUTPUT
+          # write out the JSON
           echo "{ \"nodes\": $COUNT }" > count.json
 
       - name: Create Pull Request with Node Count Update
         uses: peter-evans/create-pull-request@v5
         with:
-          commit-message: '🤖 Auto-update node count: $COUNT nodes'
-          title: '🔢 Update node count to $COUNT'
-          body: 'This PR automatically updates the node count in count.json.'
-          branch: 'update-node-count/${{ github.run_id }}'
-          labels: 'automation, node count'
+          commit-message: '🤖 Auto-update node count: ${{ steps.count.outputs.nodes }} nodes'
+          title: '🔢 Update node count to ${{ steps.count.outputs.nodes }}'
+          body: |
+            This PR automatically updates the node count (by “# region” markers) in count.json.
+          branch: 'update-node-count/${{ github.run_id }}-${{ github.sha[:7] }}'
+          # Labels are intentionally omitted to avoid potential permission issues.
           author: 'github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>'
           add-paths: 'count.json'
