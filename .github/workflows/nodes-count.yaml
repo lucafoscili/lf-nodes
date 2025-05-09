@@ -34,7 +34,7 @@ jobs:
           title: '🔢 Update node count to ${{ steps.count.outputs.nodes }}'
           body: |
             This PR automatically updates the node count (by “# region” markers) in count.json.
-          branch: 'update-node-count/${{ github.run_id }}-${{ github.sha }}'
+          branch: 'update-node-count/${{ github.run_id }}-${{ github.sha[:7] }}'
           # Labels are intentionally omitted to avoid potential permission issues.
           author: 'github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>'
           add-paths: 'count.json'
