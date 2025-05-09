@@ -20,6 +20,7 @@ jobs:
       - name: Count Nodes by “# region” markers
         id: count
         run: |
+          set -e
           # count every "# region" in your .py node files
           COUNT=$(grep -R '^# *region' modules/nodes --include='*.py' | wc -l)
           # expose for later steps
