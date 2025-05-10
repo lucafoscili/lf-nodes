@@ -792,6 +792,10 @@ class LF_SaveText:
                     "default": True, 
                     "tooltip": "Add timestamp to the filename as a suffix."
                 }),
+                "add_counter": (Input.BOOLEAN, {
+                    "default": True, 
+                    "tooltip": "Add a counter to the filename to avoid overwriting."
+                }),
             },
             "optional": {
                 "ui_widget": (Input.LF_TREE, {
@@ -813,12 +817,14 @@ class LF_SaveText:
         text: dict = normalize_list_to_value(kwargs.get("text"))
         filename_prefix: str = normalize_list_to_value(kwargs.get("filename_prefix"))
         add_timestamp: bool = normalize_list_to_value(kwargs.get("add_timestamp"))
+        add_counter: bool = normalize_list_to_value(kwargs.get("add_counter"))
 
         output_file, _, _ = resolve_filepath(
             filename_prefix=filename_prefix,
             base_output_path=get_comfy_dir("output"),
             add_timestamp=add_timestamp,
-            extension="txt"
+            extension="txt",
+            add_counter=add_counter
         )
  
         with open(output_file, 'w', encoding='utf-8') as txt_file:
