@@ -108,6 +108,7 @@ export const NODE_WIDGET_MAP: NodeWidgetMap = {
   LF_SwitchInteger: [CustomWidgetName.progressbar],
   LF_SwitchJSON: [CustomWidgetName.progressbar],
   LF_SwitchString: [CustomWidgetName.progressbar],
+  LF_TiltShift: [CustomWidgetName.compare],
   LF_UpdateUsageStatistics: [CustomWidgetName.code],
   LF_UpscaleModelSelector: [CustomWidgetName.history],
   LF_UsageStatistics: [CustomWidgetName.tabBarChart],
