@@ -35,6 +35,27 @@ def blend_effect(image: torch.Tensor, overlay_image: torch.Tensor, alpha_mask: f
     return blend_overlay(image, overlay_image, alpha_tensor)
 # endregion
 
+# region bloom_effect
+def bloom_effect(image: torch.Tensor, threshold: float, radius: int,
+                 intensity: float, tint: str = "FFFFFF") -> torch.Tensor:
+    validate_image(image, expected_shape=(3,))
+
+    np_img = tensor_to_numpy(image, True) / 255.0
+
+    luminance = np.max(np_img, axis=-1, keepdims=True)
+    mask = (luminance > threshold).astype(np.float32)
+
+    colour = np_img if tint.upper() == "FFFFFF" else \
+             np.tile(np.array(hex_to_tuple(tint)) / 255.0, (*mask.shape[:2], 1))
+    highlights = mask * colour
+
+    k = radius | 1
+    blurred = cv2.GaussianBlur(highlights, (k, k), k * 0.4)
+
+    out = np.clip(np_img + blurred * intensity, 0, 1) * 255
+    return numpy_to_tensor(out.astype(np.uint8))
+# endregion
+
 # region brightness_effect
 def brightness_effect(image: torch.Tensor, brightness_strength: float, gamma: float, midpoint: float, localized_brightness: bool) -> torch.Tensor:
     """
