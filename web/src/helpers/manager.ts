@@ -99,6 +99,7 @@ export const NODE_WIDGET_MAP: NodeWidgetMap = {
   LF_Something2String: [CustomWidgetName.code],
   LF_SortJSONKeys: [CustomWidgetName.code],
   LF_SortTags: [CustomWidgetName.code],
+  LF_SplitTone: [CustomWidgetName.compare],
   LF_String: [CustomWidgetName.history],
   LF_StringReplace: [CustomWidgetName.code],
   LF_StringTemplate: [CustomWidgetName.code],

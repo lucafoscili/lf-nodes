@@ -362,6 +362,60 @@ def sepia_effect(image: torch.Tensor, intensity = 1.0):
     return numpy_to_tensor(sepia_image.astype(np.uint8))
 # endregion
 
+# region split_tone_effect
+def split_tone_effect(image: torch.Tensor, shadows_tint: str, highlights_tint: str, balance: float, softness: float, intensity: float) -> torch.Tensor:
+    """
+    Applies a split-tone effect to a batch of images.
+
+    Args:
+        image (torch.Tensor): Input tensor of shape [B, H, W, C] with C=3 and values in [0, 255].
+        shadows_tint (str): Hex color for shadows (e.g. "#FF0000").
+        highlights_tint (str): Hex color for highlights.
+        balance (float): Pivot luminance (0.0-1.0).
+        softness (float): Width of transition band around balance.
+        intensity (float): Strength of the tint (0.0-1.0).
+
+    Returns:
+        torch.Tensor: Tensor of same shape and dtype uint8 with effect applied.
+    """
+    def _hex_to_tensor(hex_color: str) -> torch.Tensor:
+        rgb = hex_to_tuple(hex_color)
+        tensor = torch.tensor(rgb, device=img.device, dtype=torch.float32)
+        return tensor.view(1, 1, 1, 3) / 255.0
+    
+    validate_image(image, expected_shape=(3,))
+
+    orig_dtype = image.dtype
+    if torch.is_floating_point(image):
+        img = image.clamp(0.0, 1.0)
+    else:
+        img = image.float() / 255.0
+
+    # Convert tints to [1,1,1,3]
+    def _hex_to_tensor(hex_color: str) -> torch.Tensor:
+        rgb = hex_to_tuple(hex_color)
+        t = torch.tensor(rgb, device=img.device, dtype=torch.float32) / 255.0
+        return t.view(1,1,1,3)
+
+    st = _hex_to_tensor(shadows_tint)
+    ht = _hex_to_tensor(highlights_tint)
+
+    # Luminance and mask
+    lum = img.max(dim=-1, keepdim=True)[0]
+    mask = ((lum - balance) / softness).clamp(0.0, 1.0)
+
+    # Blend
+    shadows = img * (1 - mask) + st * mask
+    highlights = img * (1 - mask) + ht * mask
+    blended = (shadows + highlights - img).clamp(0.0, 1.0)
+    out = (img + blended * intensity).clamp(0.0, 1.0)
+
+    # Restore dtype
+    if orig_dtype == torch.uint8:
+        return (out * 255.0).round().clamp(0, 255).to(torch.uint8)
+    return out
+# endregion
+
 # region tilt_shift_effect
 def tilt_shift_effect(img: torch.Tensor, focus_position: float, focus_size: float, blur_radius: int, feather: str = "smooth", orient: str = "horizontal") -> torch.Tensor:
     """
@@ -382,27 +436,24 @@ def tilt_shift_effect(img: torch.Tensor, focus_position: float, focus_size: floa
     validate_image(img, expected_shape=(3,))
     h, w = img.shape[-2:]
 
-    # 1. build distance map
     yy, xx = np.meshgrid(np.linspace(0, 1, h), np.linspace(0, 1, w), indexing="ij")
     if orient == "horizontal":
         dist = np.abs(yy - focus_position)
     elif orient == "vertical":
         dist = np.abs(xx - focus_position)
-    else:                                # circular
+    else:
         dist = np.sqrt((yy - focus_position) ** 2 + (xx - 0.5) ** 2)
 
     half = focus_size / 2.0
     mask = np.clip((half - dist) / half, 0, 1)
 
-    # 2. feather curve
-    if feather == "smooth":              # smoothstep
+    if feather == "smooth":
         mask = mask * mask * (3 - 2 * mask)
     elif feather == "expo":
         mask = mask ** 2
 
-    mask = np.expand_dims(mask, 0)       # (1, H, W) for broadcast
+    mask = np.expand_dims(mask, 0)
 
-    # 3. blur branch
     k = blur_radius | 1
     np_img = tensor_to_numpy(img, True)
     blurred = cv2.GaussianBlur(np_img, (k, k), k * 0.35)

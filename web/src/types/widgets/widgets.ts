@@ -128,6 +128,7 @@ export enum NodeName {
   something2String = 'LF_Something2String',
   sortJsonKeys = 'LF_SortJSONKeys',
   sortTags = 'LF_SortTags',
+  splitTone = 'LF_SplitTone',
   string = 'LF_String',
   stringReplace = 'LF_StringReplace',
   stringTemplate = 'LF_StringTemplate',
