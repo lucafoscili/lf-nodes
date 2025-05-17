@@ -5101,7 +5101,7 @@ var K = false, Q = (e2, t2, n2) => {
                         const n6 = e7.S.replace(/-/g, "_"), o6 = e7.T;
                         if (!o6) return;
                         const s3 = i.get(o6);
-                        return s3 ? s3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-0337b52e.entry.js": () => import("./p-0337b52e.entry-CFvyuMoV.js"), "./p-11178b37.entry.js": () => import("./p-11178b37.entry-C8yp8D8h.js"), "./p-2487f307.entry.js": () => import("./p-2487f307.entry-gByYtrsX.js"), "./p-273c8ea4.entry.js": () => import("./p-273c8ea4.entry-5zTcwKfO.js"), "./p-3364817f.entry.js": () => import("./p-3364817f.entry-Dce2viI2.js"), "./p-3a9e5f46.entry.js": () => import("./p-3a9e5f46.entry-MBUygfno.js"), "./p-4f321f6b.entry.js": () => import("./p-4f321f6b.entry-ClJknsNC.js"), "./p-585ccba5.entry.js": () => import("./p-585ccba5.entry-B9Drm7dn.js"), "./p-5c44cc7e.entry.js": () => import("./p-5c44cc7e.entry-Cjic-QyZ.js"), "./p-6c11bba7.entry.js": () => import("./p-6c11bba7.entry-CvjZX0C2.js"), "./p-7bb2c820.entry.js": () => import("./p-7bb2c820.entry-BRdZtiiB.js"), "./p-9f41b6b0.entry.js": () => import("./p-9f41b6b0.entry-BLxf7iKq.js"), "./p-ae4ab342.entry.js": () => import("./p-ae4ab342.entry-C_Utq5eM.js"), "./p-ce0e9b9e.entry.js": () => import("./p-ce0e9b9e.entry-r7WDpOwV.js"), "./p-d5e89be3.entry.js": () => import("./p-d5e89be3.entry-Bw4s7S0j.js"), "./p-eaba894b.entry.js": () => import("./p-eaba894b.entry-BirtaqtH.js"), "./p-eb0c30d6.entry.js": () => import("./p-eb0c30d6.entry-CoS7WERZ.js") }), `./${o6}.entry.js`, 2).then((e8) => (i.set(o6, e8), e8[n6]), (e8) => {
+                        return s3 ? s3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-0337b52e.entry.js": () => import("./p-0337b52e.entry-Cb70kDBs.js"), "./p-11178b37.entry.js": () => import("./p-11178b37.entry-BZszDB16.js"), "./p-2487f307.entry.js": () => import("./p-2487f307.entry-D2j2CyID.js"), "./p-273c8ea4.entry.js": () => import("./p-273c8ea4.entry-CzZMd4T3.js"), "./p-3364817f.entry.js": () => import("./p-3364817f.entry-BdXQVfBK.js"), "./p-3a9e5f46.entry.js": () => import("./p-3a9e5f46.entry-BcbWWuj5.js"), "./p-4f321f6b.entry.js": () => import("./p-4f321f6b.entry-QZEM8zaq.js"), "./p-585ccba5.entry.js": () => import("./p-585ccba5.entry-CeRoVVVP.js"), "./p-5c44cc7e.entry.js": () => import("./p-5c44cc7e.entry-Do4ikmjz.js"), "./p-6c11bba7.entry.js": () => import("./p-6c11bba7.entry-MEqcY8Ra.js"), "./p-7bb2c820.entry.js": () => import("./p-7bb2c820.entry-BXPZV4cz.js"), "./p-9f41b6b0.entry.js": () => import("./p-9f41b6b0.entry-BoYVIkan.js"), "./p-ae4ab342.entry.js": () => import("./p-ae4ab342.entry-aSvD5_6w.js"), "./p-ce0e9b9e.entry.js": () => import("./p-ce0e9b9e.entry-CxXiCMG0.js"), "./p-d5e89be3.entry.js": () => import("./p-d5e89be3.entry-C-GUPSaC.js"), "./p-eaba894b.entry.js": () => import("./p-eaba894b.entry-Byz8XTlJ.js"), "./p-eb0c30d6.entry.js": () => import("./p-eb0c30d6.entry-d6nKlafP.js") }), `./${o6}.entry.js`, 2).then((e8) => (i.set(o6, e8), e8[n6]), (e8) => {
                           l(e8, t3.$hostElement$);
                         });
                         /*!__STENCIL_STATIC_IMPORT_SWITCH__*/
@@ -5773,6 +5773,7 @@ var CustomWidgetName;
 var NodeName;
 (function(NodeName2) {
   NodeName2["blend"] = "LF_Blend";
+  NodeName2["bloom"] = "LF_Bloom";
   NodeName2["blurImages"] = "LF_BlurImages";
   NodeName2["boolean"] = "LF_Boolean";
   NodeName2["brightness"] = "LF_Brightness";
@@ -5847,6 +5848,7 @@ var NodeName;
   NodeName2["something2String"] = "LF_Something2String";
   NodeName2["sortJsonKeys"] = "LF_SortJSONKeys";
   NodeName2["sortTags"] = "LF_SortTags";
+  NodeName2["splitTone"] = "LF_SplitTone";
   NodeName2["string"] = "LF_String";
   NodeName2["stringReplace"] = "LF_StringReplace";
   NodeName2["stringTemplate"] = "LF_StringTemplate";
@@ -5856,6 +5858,7 @@ var NodeName;
   NodeName2["switchInteger"] = "LF_SwitchInteger";
   NodeName2["switchJson"] = "LF_SwitchJSON";
   NodeName2["switchString"] = "LF_SwitchString";
+  NodeName2["tiltShift"] = "LF_TiltShift";
   NodeName2["updateUsageStatistics"] = "LF_UpdateUsageStatistics";
   NodeName2["upscaleModelSelector"] = "LF_UpscaleModelSelector";
   NodeName2["urandomSeedGenerator"] = "LF_UrandomSeedGenerator";
@@ -5895,6 +5898,7 @@ var TagName;
 })(TagName || (TagName = {}));
 const NODE_WIDGET_MAP = {
   LF_Blend: [CustomWidgetName.compare],
+  LF_Bloom: [CustomWidgetName.compare],
   LF_BlurImages: [CustomWidgetName.masonry],
   LF_Boolean: [CustomWidgetName.history],
   LF_Brightness: [CustomWidgetName.compare],
@@ -5969,6 +5973,7 @@ const NODE_WIDGET_MAP = {
   LF_Something2String: [CustomWidgetName.code],
   LF_SortJSONKeys: [CustomWidgetName.code],
   LF_SortTags: [CustomWidgetName.code],
+  LF_SplitTone: [CustomWidgetName.compare],
   LF_String: [CustomWidgetName.history],
   LF_StringReplace: [CustomWidgetName.code],
   LF_StringTemplate: [CustomWidgetName.code],
@@ -5978,6 +5983,7 @@ const NODE_WIDGET_MAP = {
   LF_SwitchInteger: [CustomWidgetName.progressbar],
   LF_SwitchJSON: [CustomWidgetName.progressbar],
   LF_SwitchString: [CustomWidgetName.progressbar],
+  LF_TiltShift: [CustomWidgetName.compare],
   LF_UpdateUsageStatistics: [CustomWidgetName.code],
   LF_UpscaleModelSelector: [CustomWidgetName.history],
   LF_UsageStatistics: [CustomWidgetName.tabBarChart],
