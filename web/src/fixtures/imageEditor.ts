@@ -1,6 +1,7 @@
 import { LfDataDataset } from '@lf-widgets/foundations';
 import {
   ImageEditorBlendIds,
+  ImageEditorBloomIds,
   ImageEditorBrightnessIds,
   ImageEditorBrushIds,
   ImageEditorClarityIds,
@@ -48,6 +49,68 @@ export const SETTINGS: ImageEditorFilters = {
           id: ImageEditorTextfieldIds.Color,
           isMandatory: true,
           title: 'Sets the solid color that will be blended onto the image.',
+          type: 'color',
+        },
+      ],
+    },
+  },
+  //#endregion
+
+  //#region Bloom
+  bloom: {
+    controlIds: ImageEditorBloomIds,
+    settings: {
+      intensity: 0.6,
+      radius: 15,
+      threshold: 0.8,
+      tint: '#FFFFFF',
+    },
+    configs: {
+      [ImageEditorControls.Slider]: [
+        {
+          ariaLabel: 'Bloom Intensity',
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 0.6,
+          id: ImageEditorSliderIds.Intensity,
+          isMandatory: true,
+          max: '2',
+          min: '0',
+          step: '0.05',
+          title:
+            'How strong the bloom reads after compositing. 1.0 = add the blurred highlights at full strength.',
+        },
+        {
+          ariaLabel: 'Bloom Radius',
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 15,
+          id: ImageEditorSliderIds.Radius,
+          isMandatory: true,
+          max: '127',
+          min: '3',
+          step: '2',
+          title:
+            'Blur radius in pixels (odd numbers only). Bigger radius → softer, more cinematic glow.',
+        },
+        {
+          ariaLabel: 'Threshold',
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 0.8,
+          id: ImageEditorSliderIds.Threshold,
+          isMandatory: true,
+          max: '1',
+          min: '0',
+          step: '0.01',
+          title:
+            'Bright-pass cutoff. 0 = everything glows, 1 = nothing glows. For dim scenes start around 0.15-0.35.',
+        },
+      ],
+      [ImageEditorControls.Textfield]: [
+        {
+          ariaLabel: 'Tint Color',
+          controlType: ImageEditorControls.Textfield,
+          defaultValue: '#FFFFFF',
+          id: ImageEditorTextfieldIds.Color,
+          title: 'Hex color for the glow (e.g., FFCCAA). Pure white FFFFFF keeps original hue.',
           type: 'color',
         },
       ],
@@ -551,7 +614,7 @@ export const TREE_DATA: LfDataDataset = {
     {
       description: 'Tool configuration.',
       id: 'settings',
-      icon: 'wrench',
+      icon: 'brush',
       value: 'Settings',
       children: [
         //#region Brush
@@ -649,6 +712,20 @@ export const TREE_DATA: LfDataDataset = {
           description: 'Blends a color layer onto the image.',
           id: 'blend',
           value: 'Blend',
+        },
+        //#endregion
+
+        //#region Bloom
+        {
+          description: 'Applies a bloom effect.',
+          cells: {
+            lfCode: {
+              shape: 'code',
+              value: JSON.stringify(SETTINGS.bloom),
+            },
+          },
+          id: 'bloom',
+          value: 'Bloom',
         },
         //#endregion
 

@@ -9,7 +9,7 @@ from PIL import Image
 from server import PromptServer
 
 from ..utils.constants import API_ROUTE_PREFIX
-from ..utils.filters import blend_effect, brightness_effect, clarity_effect, contrast_effect, desaturate_effect, film_grain_effect, gaussian_blur_effect, line_effect, sepia_effect, vignette_effect
+from ..utils.filters import blend_effect, bloom_effect, brightness_effect, clarity_effect, contrast_effect, desaturate_effect, film_grain_effect, gaussian_blur_effect, line_effect, sepia_effect, vignette_effect
 from ..utils.helpers import base64_to_tensor, convert_to_boolean, convert_to_float, convert_to_int, create_colored_tensor, create_masonry_node, get_comfy_dir, get_resource_url, pil_to_tensor, resolve_filepath, resolve_url, tensor_to_pil
 
 # region get-image
@@ -69,6 +69,8 @@ async def process_image(request):
 
         if filter_type == "blend":
             processed_tensor = apply_blend_effect(img_tensor, settings)
+        elif filter_type == "bloom":
+            processed_tensor = apply_bloom_effect(img_tensor, settings)           
         elif filter_type == "brightness":
             processed_tensor = apply_brightness_effect(img_tensor, settings)
         elif filter_type == "brush":
@@ -113,6 +115,14 @@ def apply_blend_effect(img_tensor: torch.Tensor, settings: dict):
     overlay_image = create_colored_tensor(img_tensor, color)
 
     return blend_effect(img_tensor, overlay_image, opacity)
+
+def apply_bloom_effect(img_tensor: torch.Tensor, settings: dict):
+    intensity = convert_to_float(settings.get("intensity", 0))
+    radius = convert_to_int(settings.get("radius", 0))
+    threshold = convert_to_float(settings.get("threshold", 0))
+    tint = settings.get("tint", "FFFFFF")
+
+    return bloom_effect(img_tensor, threshold, radius, intensity, tint)
 
 def apply_brightness_effect(img_tensor: torch.Tensor, settings: dict):
     brightness_strength = convert_to_float(settings.get("strength", 0))

@@ -59,6 +59,7 @@ def bloom_effect(image: torch.Tensor, threshold: float, radius: int, intensity: 
     luminance = np.max(np_img, axis=-1, keepdims=True)
     mask = (luminance > threshold).astype(np.float32)
 
+    tint = tint.lstrip("#").upper()
     colour = np_img if tint.upper() == "FFFFFF" else \
              np.tile(np.array(hex_to_tuple(tint)) / 255.0, (*mask.shape[:2], 1))
     highlights = mask * colour

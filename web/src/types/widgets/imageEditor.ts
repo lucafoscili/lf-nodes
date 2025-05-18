@@ -101,6 +101,7 @@ export enum ImageEditorSliderIds {
   RedChannel = 'r_channel',
   SharpenAmount = 'sharpen_amount',
   Size = 'size',
+  Threshold = 'threshold',
 }
 export enum ImageEditorTextfieldIds {
   Color = 'color',
@@ -178,6 +179,7 @@ export type ImageEditorSettingsFor = Partial<{
 //#region Filters
 export interface ImageEditorFilterSettingsMap {
   blend: ImageEditorBlendSettings;
+  bloom: ImageEditorBloomSettings;
   brightness: ImageEditorBrightnessSettings;
   brush: ImageEditorBrushSettings;
   clarity: ImageEditorClaritySettings;
@@ -192,6 +194,12 @@ export interface ImageEditorFilterSettingsMap {
 export interface ImageEditorBlendSettings extends ImageEditorFilterSettings {
   color: string;
   opacity: number;
+}
+export interface ImageEditorBloomSettings extends ImageEditorFilterSettings {
+  threshold: number;
+  radius: number;
+  intensity: number;
+  tint: string;
 }
 export interface ImageEditorBrightnessSettings extends ImageEditorFilterSettings {
   strength: number;
@@ -248,6 +256,12 @@ export interface ImageEditorVignetteSettings extends ImageEditorFilterSettings {
 }
 export enum ImageEditorBlendIds {
   Opacity = 'opacity',
+}
+export enum ImageEditorBloomIds {
+  Threshold = 'threshold',
+  Radius = 'radius',
+  Intensity = 'intensity',
+  Tint = 'tint',
 }
 export enum ImageEditorBrightnessIds {
   Strength = 'strength',
@@ -317,6 +331,14 @@ export interface ImageEditorFilterDefinition<
 export type ImageEditorBlendFilter = ImageEditorFilterDefinition<
   typeof ImageEditorBlendIds,
   ImageEditorBlendSettings,
+  {
+    [ImageEditorControls.Slider]: ImageEditorSliderConfig[];
+    [ImageEditorControls.Textfield]: ImageEditorTextfieldConfig[];
+  }
+>;
+export type ImageEditorBloomFilter = ImageEditorFilterDefinition<
+  typeof ImageEditorBloomIds,
+  ImageEditorBloomSettings,
   {
     [ImageEditorControls.Slider]: ImageEditorSliderConfig[];
     [ImageEditorControls.Textfield]: ImageEditorTextfieldConfig[];
@@ -404,6 +426,7 @@ export type ImageEditorVignetteFilter = ImageEditorFilterDefinition<
 >;
 export type ImageEditorFilters = {
   blend: ImageEditorBlendFilter;
+  bloom: ImageEditorBloomFilter;
   brightness: ImageEditorBrightnessFilter;
   brush: ImageEditorBrushFilter;
   clarity: ImageEditorClarityFilter;
@@ -416,6 +439,8 @@ export type ImageEditorFilters = {
   vignette: ImageEditorVignetteFilter;
 };
 export type ImageEditorFilter =
+  | ImageEditorBlendFilter
+  | ImageEditorBloomFilter
   | ImageEditorBrightnessFilter
   | ImageEditorBrushFilter
   | ImageEditorClarityFilter
