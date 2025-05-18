@@ -938,15 +938,24 @@ class LF_TiltShift:
                     "tooltip": "Image to miniature-ify."
                 }),
                 "focus_position": (Input.FLOAT, {
-                    "default": 0.5, "min": 0.0, "max": 1.0, "step": 0.01,
+                    "default": 0.5, 
+                    "min": 0.0, 
+                    "max": 1.0, 
+                    "step": 0.01,
                     "tooltip": "Vertical centre of sharp band (0 = top, 1 = bottom)."
                 }),
                 "focus_size": (Input.FLOAT, {
-                    "default": 0.25, "min": 0.05, "max": 0.9, "step": 0.01,
+                    "default": 0.25, 
+                    "min": 0.05, 
+                    "max": 0.9, 
+                    "step": 0.01,
                     "tooltip": "Height of sharp zone as fraction of image."
                 }),
                 "blur_radius": (Input.INTEGER, {
-                    "default": 25, "min": 3, "max": 151, "step": 2,
+                    "default": 25, 
+                    "min": 3, 
+                    "max": 151, 
+                    "step": 2,
                     "tooltip": "Gaussian radius for out-of-focus areas."
                 }),
                 "feather_shape": (["linear", "smooth", "expo"], {

@@ -91,7 +91,8 @@ export enum ImageEditorSliderIds {
   BlueChannel = 'b_channel',
   BlurKernelSize = 'blur_kernel_size',
   BlurSigma = 'blur_sigma',
-  Strength = 'strength',
+  FocusPosition = 'focus_position',
+  FocusSize = 'focus_size',
   Gamma = 'gamma',
   GreenChannel = 'g_channel',
   Intensity = 'intensity',
@@ -101,6 +102,7 @@ export enum ImageEditorSliderIds {
   RedChannel = 'r_channel',
   SharpenAmount = 'sharpen_amount',
   Size = 'size',
+  Strength = 'strength',
   Threshold = 'threshold',
 }
 export enum ImageEditorTextfieldIds {
@@ -112,6 +114,7 @@ export enum ImageEditorToggleIds {
   Shape = 'shape',
   Smooth = 'smoooth',
   SoftBlend = 'soft_blend',
+  Vertical = 'vertical',
 }
 export type ImageEditorControlIds =
   | ImageEditorCanvasIds
@@ -189,6 +192,7 @@ export interface ImageEditorFilterSettingsMap {
   gaussianBlur: ImageEditorGaussianBlurSettings;
   line: ImageEditorLineSettings;
   sepia: ImageEditorSepiaSettings;
+  tiltShift: ImageEditorTiltShiftSettings;
   vignette: ImageEditorVignetteSettings;
 }
 export interface ImageEditorBlendSettings extends ImageEditorFilterSettings {
@@ -249,6 +253,13 @@ export interface ImageEditorLineSettings extends ImageEditorFilterSettings {
 export interface ImageEditorSepiaSettings extends ImageEditorFilterSettings {
   intensity: number;
 }
+export interface ImageEditorTiltShiftSettings extends ImageEditorFilterSettings {
+  focus_position: number;
+  focus_size: number;
+  radius: number;
+  smooth: boolean;
+  vertical: boolean;
+}
 export interface ImageEditorVignetteSettings extends ImageEditorFilterSettings {
   intensity: number;
   radius: number;
@@ -307,6 +318,13 @@ export enum ImageEditorLineIds {
   Points = 'points',
   Size = 'size',
   Smooth = 'smooth',
+}
+export enum ImageEditorTiltShiftIds {
+  FocusPosition = 'focus_position',
+  FocusSize = 'focus_size',
+  Radius = 'radius',
+  Smooth = 'smooth',
+  Vertical = 'vertical',
 }
 export enum ImageEditorSepiaIds {
   Intensity = 'intensity',
@@ -415,6 +433,14 @@ export type ImageEditorSepiaFilter = ImageEditorFilterDefinition<
     [ImageEditorControls.Slider]: ImageEditorSliderConfig[];
   }
 >;
+export type ImageEditorTiltShiftFilter = ImageEditorFilterDefinition<
+  typeof ImageEditorTiltShiftIds,
+  ImageEditorTiltShiftSettings,
+  {
+    [ImageEditorControls.Slider]: ImageEditorSliderConfig[];
+    [ImageEditorControls.Toggle]: ImageEditorToggleConfig[];
+  }
+>;
 export type ImageEditorVignetteFilter = ImageEditorFilterDefinition<
   typeof ImageEditorVignetteIds,
   ImageEditorVignetteSettings,
@@ -436,6 +462,7 @@ export type ImageEditorFilters = {
   gaussianBlur: ImageEditorGaussianBlurFilter;
   line: ImageEditorLineFilter;
   sepia: ImageEditorSepiaFilter;
+  tiltShift: ImageEditorTiltShiftFilter;
   vignette: ImageEditorVignetteFilter;
 };
 export type ImageEditorFilter =
@@ -450,5 +477,6 @@ export type ImageEditorFilter =
   | ImageEditorGaussianBlurFilter
   | ImageEditorLineFilter
   | ImageEditorSepiaFilter
+  | ImageEditorTiltShiftFilter
   | ImageEditorVignetteFilter;
 //#endregion

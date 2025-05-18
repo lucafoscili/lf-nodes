@@ -15,6 +15,7 @@ import {
   ImageEditorSepiaIds,
   ImageEditorSliderIds,
   ImageEditorTextfieldIds,
+  ImageEditorTiltShiftIds,
   ImageEditorToggleIds,
   ImageEditorVignetteIds,
 } from '../types/widgets/imageEditor';
@@ -549,6 +550,79 @@ export const SETTINGS: ImageEditorFilters = {
   },
   //#endregion
 
+  //#region Tilt-shift
+  tiltShift: {
+    controlIds: ImageEditorTiltShiftIds,
+    settings: {
+      focus_position: 0.5,
+      focus_size: 0.25,
+      radius: 25,
+      smooth: false,
+      vertical: false,
+    },
+    configs: {
+      [ImageEditorControls.Slider]: [
+        {
+          ariaLabel: 'Focus Position',
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 0.5,
+          id: ImageEditorSliderIds.FocusPosition,
+          isMandatory: true,
+          max: '1',
+          min: '0',
+          step: '0.01',
+          title: 'Vertical center of the sharp band (0 = top, 1 = bottom).',
+        },
+        {
+          ariaLabel: 'Focus Size',
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 0.25,
+          id: ImageEditorSliderIds.FocusSize,
+          isMandatory: true,
+          max: '0.9',
+          min: '0.05',
+          step: '0.01',
+          title: 'Height of the sharp zone as a fraction of the image.',
+        },
+        {
+          ariaLabel: 'Blur Radius',
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 25,
+          id: ImageEditorSliderIds.Radius,
+          isMandatory: true,
+          max: '151',
+          min: '3',
+          step: '2',
+          title:
+            'Gaussian radius for out-of-focus areas. Higher values mean more blur and less detail.',
+        },
+      ],
+      [ImageEditorControls.Toggle]: [
+        {
+          ariaLabel: 'Smooth Fall-off Curve',
+          controlType: ImageEditorControls.Toggle,
+          defaultValue: false,
+          id: ImageEditorToggleIds.Smooth,
+          off: 'linear',
+          on: 'smooth',
+          title:
+            'Fall-off curve of blur vs distance. Linear means a constant fall-off, smooth means a gradual transition.',
+        },
+        {
+          ariaLabel: 'Vertical Orientation',
+          controlType: ImageEditorControls.Toggle,
+          defaultValue: false,
+          id: ImageEditorToggleIds.Vertical,
+          off: 'horizontal',
+          on: 'vertical',
+          title:
+            'Direction of the focus band. Horizontal means the focus band is horizontal, vertical means it is vertical.',
+        },
+      ],
+    },
+  },
+  //#endregion
+
   //#region Vignette
   vignette: {
     controlIds: ImageEditorVignetteIds,
@@ -782,6 +856,20 @@ export const TREE_DATA: LfDataDataset = {
           description: 'Applies a sepia effect to the image.',
           id: 'sepia',
           value: 'Sepia',
+        },
+        //#endregion
+
+        //#region Tilt-shift
+        {
+          cells: {
+            lfCode: {
+              shape: 'code',
+              value: JSON.stringify(SETTINGS.tiltShift),
+            },
+          },
+          description: 'Applies a tilt-shift effect to the image.',
+          id: 'tilt_shift',
+          value: 'Tilt-shift',
         },
         //#endregion
 
