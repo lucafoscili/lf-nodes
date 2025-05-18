@@ -958,7 +958,7 @@ class LF_TiltShift:
                     "step": 2,
                     "tooltip": "Gaussian radius for out-of-focus areas."
                 }),
-                "feather_shape": (["linear", "smooth", "expo"], {
+                "feather": (["linear", "smooth", "expo"], {
                     "default": "smooth",
                     "tooltip": "Fall-off curve of blur vs distance."
                 }),
@@ -984,7 +984,7 @@ class LF_TiltShift:
         focus_position: float = normalize_list_to_value(kwargs.get("focus_position"))
         focus_size: float = normalize_list_to_value(kwargs.get("focus_size"))
         blur_radius: int = normalize_list_to_value(kwargs.get("blur_radius"))
-        feather_shape: str = normalize_list_to_value(kwargs.get("feather_shape", "smooth"))
+        feather: str = normalize_list_to_value(kwargs.get("feather", "smooth"))
         orientation: str = normalize_list_to_value(kwargs.get("orientation", "horizontal"))
 
         nodes: list[dict] = []
@@ -997,7 +997,7 @@ class LF_TiltShift:
                 'focus_position': focus_position,
                 'focus_size': focus_size,
                 'blur_radius': blur_radius,
-                'feather': feather_shape,
+                'feather': feather,
                 'orient': orientation
             },
             filename_prefix="tiltshift",

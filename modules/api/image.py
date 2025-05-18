@@ -207,10 +207,10 @@ def apply_tilt_shift_effect(img_tensor: torch.Tensor, settings: dict):
     focus_position = convert_to_float(settings.get("focus_position", 0.5))
     focus_size = convert_to_float(settings.get("focus_size", 0.25))
     blur_radius = convert_to_int(settings.get("radius", 25))
-    feather_shape: str = settings.get("feather_shape", "smooth")
+    feather: str = settings.get("feather", "smooth")
     orientation: str = settings.get("orientation", "horizontal")
 
-    return tilt_shift_effect(img_tensor, focus_position, focus_size, blur_radius, feather_shape, orientation)
+    return tilt_shift_effect(img_tensor, focus_position, focus_size, blur_radius, feather, orientation)
 
 def apply_vignette_effect(img_tensor: torch.Tensor, settings: dict):
     intensity = convert_to_float(settings.get("intensity", 0))
