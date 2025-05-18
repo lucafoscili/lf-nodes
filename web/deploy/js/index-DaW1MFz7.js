@@ -8692,7 +8692,7 @@ const SETTINGS = {
           ariaLabel: "Shadows",
           controlType: ImageEditorControls.Textfield,
           defaultValue: "#0066FF",
-          id: ImageEditorTextfieldIds.highlights,
+          id: ImageEditorTextfieldIds.shadows,
           title: "Hex colour applied to shadows (e.g. 0066FF).",
           type: "color"
         }
