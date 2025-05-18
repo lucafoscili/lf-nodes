@@ -1,4 +1,4 @@
-import { N, C as CY_ATTRIBUTES } from "./index-DUzNjWJu.js";
+import { N, C as CY_ATTRIBUTES } from "./index-DaW1MFz7.js";
 const f = ({ framework: e, shape: f2, index: a, cell: n, eventDispatcher: o, defaultCb: c, refCallback: L }) => {
   const { data: s, sanitizeProps: l } = e, { stringify: d } = s.cell, i = (e2) => {
     c && c(e2), o(e2);
