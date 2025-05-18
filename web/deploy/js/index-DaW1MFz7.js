@@ -5101,7 +5101,7 @@ var K = false, Q = (e2, t2, n2) => {
                         const n6 = e7.S.replace(/-/g, "_"), o6 = e7.T;
                         if (!o6) return;
                         const s3 = i.get(o6);
-                        return s3 ? s3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-0337b52e.entry.js": () => import("./p-0337b52e.entry-CFvyuMoV.js"), "./p-11178b37.entry.js": () => import("./p-11178b37.entry-C8yp8D8h.js"), "./p-2487f307.entry.js": () => import("./p-2487f307.entry-gByYtrsX.js"), "./p-273c8ea4.entry.js": () => import("./p-273c8ea4.entry-5zTcwKfO.js"), "./p-3364817f.entry.js": () => import("./p-3364817f.entry-Dce2viI2.js"), "./p-3a9e5f46.entry.js": () => import("./p-3a9e5f46.entry-MBUygfno.js"), "./p-4f321f6b.entry.js": () => import("./p-4f321f6b.entry-ClJknsNC.js"), "./p-585ccba5.entry.js": () => import("./p-585ccba5.entry-B9Drm7dn.js"), "./p-5c44cc7e.entry.js": () => import("./p-5c44cc7e.entry-Cjic-QyZ.js"), "./p-6c11bba7.entry.js": () => import("./p-6c11bba7.entry-CvjZX0C2.js"), "./p-7bb2c820.entry.js": () => import("./p-7bb2c820.entry-BRdZtiiB.js"), "./p-9f41b6b0.entry.js": () => import("./p-9f41b6b0.entry-BLxf7iKq.js"), "./p-ae4ab342.entry.js": () => import("./p-ae4ab342.entry-C_Utq5eM.js"), "./p-ce0e9b9e.entry.js": () => import("./p-ce0e9b9e.entry-r7WDpOwV.js"), "./p-d5e89be3.entry.js": () => import("./p-d5e89be3.entry-Bw4s7S0j.js"), "./p-eaba894b.entry.js": () => import("./p-eaba894b.entry-BirtaqtH.js"), "./p-eb0c30d6.entry.js": () => import("./p-eb0c30d6.entry-CoS7WERZ.js") }), `./${o6}.entry.js`, 2).then((e8) => (i.set(o6, e8), e8[n6]), (e8) => {
+                        return s3 ? s3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-0337b52e.entry.js": () => import("./p-0337b52e.entry-9YuFt8ja.js"), "./p-11178b37.entry.js": () => import("./p-11178b37.entry-D0txBLQk.js"), "./p-2487f307.entry.js": () => import("./p-2487f307.entry-DsoFe3Vn.js"), "./p-273c8ea4.entry.js": () => import("./p-273c8ea4.entry-2E9ehgwa.js"), "./p-3364817f.entry.js": () => import("./p-3364817f.entry-DiDpqk3B.js"), "./p-3a9e5f46.entry.js": () => import("./p-3a9e5f46.entry-DWSI4in9.js"), "./p-4f321f6b.entry.js": () => import("./p-4f321f6b.entry-BPvZqT5H.js"), "./p-585ccba5.entry.js": () => import("./p-585ccba5.entry-DrVqbMAg.js"), "./p-5c44cc7e.entry.js": () => import("./p-5c44cc7e.entry-C7T7BicJ.js"), "./p-6c11bba7.entry.js": () => import("./p-6c11bba7.entry-C15ZaJLF.js"), "./p-7bb2c820.entry.js": () => import("./p-7bb2c820.entry-r-_MqkoR.js"), "./p-9f41b6b0.entry.js": () => import("./p-9f41b6b0.entry-NPXRHndj.js"), "./p-ae4ab342.entry.js": () => import("./p-ae4ab342.entry-CS_GFMxP.js"), "./p-ce0e9b9e.entry.js": () => import("./p-ce0e9b9e.entry-B6IQObfC.js"), "./p-d5e89be3.entry.js": () => import("./p-d5e89be3.entry-CowIrsOQ.js"), "./p-eaba894b.entry.js": () => import("./p-eaba894b.entry-BL4oSsnp.js"), "./p-eb0c30d6.entry.js": () => import("./p-eb0c30d6.entry-Wgcld8o5.js") }), `./${o6}.entry.js`, 2).then((e8) => (i.set(o6, e8), e8[n6]), (e8) => {
                           l(e8, t3.$hostElement$);
                         });
                         /*!__STENCIL_STATIC_IMPORT_SWITCH__*/
@@ -5773,6 +5773,7 @@ var CustomWidgetName;
 var NodeName;
 (function(NodeName2) {
   NodeName2["blend"] = "LF_Blend";
+  NodeName2["bloom"] = "LF_Bloom";
   NodeName2["blurImages"] = "LF_BlurImages";
   NodeName2["boolean"] = "LF_Boolean";
   NodeName2["brightness"] = "LF_Brightness";
@@ -5847,6 +5848,7 @@ var NodeName;
   NodeName2["something2String"] = "LF_Something2String";
   NodeName2["sortJsonKeys"] = "LF_SortJSONKeys";
   NodeName2["sortTags"] = "LF_SortTags";
+  NodeName2["splitTone"] = "LF_SplitTone";
   NodeName2["string"] = "LF_String";
   NodeName2["stringReplace"] = "LF_StringReplace";
   NodeName2["stringTemplate"] = "LF_StringTemplate";
@@ -5856,6 +5858,7 @@ var NodeName;
   NodeName2["switchInteger"] = "LF_SwitchInteger";
   NodeName2["switchJson"] = "LF_SwitchJSON";
   NodeName2["switchString"] = "LF_SwitchString";
+  NodeName2["tiltShift"] = "LF_TiltShift";
   NodeName2["updateUsageStatistics"] = "LF_UpdateUsageStatistics";
   NodeName2["upscaleModelSelector"] = "LF_UpscaleModelSelector";
   NodeName2["urandomSeedGenerator"] = "LF_UrandomSeedGenerator";
@@ -5895,6 +5898,7 @@ var TagName;
 })(TagName || (TagName = {}));
 const NODE_WIDGET_MAP = {
   LF_Blend: [CustomWidgetName.compare],
+  LF_Bloom: [CustomWidgetName.compare],
   LF_BlurImages: [CustomWidgetName.masonry],
   LF_Boolean: [CustomWidgetName.history],
   LF_Brightness: [CustomWidgetName.compare],
@@ -5969,6 +5973,7 @@ const NODE_WIDGET_MAP = {
   LF_Something2String: [CustomWidgetName.code],
   LF_SortJSONKeys: [CustomWidgetName.code],
   LF_SortTags: [CustomWidgetName.code],
+  LF_SplitTone: [CustomWidgetName.compare],
   LF_String: [CustomWidgetName.history],
   LF_StringReplace: [CustomWidgetName.code],
   LF_StringTemplate: [CustomWidgetName.code],
@@ -5978,6 +5983,7 @@ const NODE_WIDGET_MAP = {
   LF_SwitchInteger: [CustomWidgetName.progressbar],
   LF_SwitchJSON: [CustomWidgetName.progressbar],
   LF_SwitchString: [CustomWidgetName.progressbar],
+  LF_TiltShift: [CustomWidgetName.compare],
   LF_UpdateUsageStatistics: [CustomWidgetName.code],
   LF_UpscaleModelSelector: [CustomWidgetName.history],
   LF_UsageStatistics: [CustomWidgetName.tabBarChart],
@@ -7994,10 +8000,12 @@ var ImageEditorCanvasIds;
 })(ImageEditorCanvasIds || (ImageEditorCanvasIds = {}));
 var ImageEditorSliderIds;
 (function(ImageEditorSliderIds2) {
+  ImageEditorSliderIds2["Balance"] = "balance";
   ImageEditorSliderIds2["BlueChannel"] = "b_channel";
   ImageEditorSliderIds2["BlurKernelSize"] = "blur_kernel_size";
   ImageEditorSliderIds2["BlurSigma"] = "blur_sigma";
-  ImageEditorSliderIds2["Strength"] = "strength";
+  ImageEditorSliderIds2["FocusPosition"] = "focus_position";
+  ImageEditorSliderIds2["FocusSize"] = "focus_size";
   ImageEditorSliderIds2["Gamma"] = "gamma";
   ImageEditorSliderIds2["GreenChannel"] = "g_channel";
   ImageEditorSliderIds2["Intensity"] = "intensity";
@@ -8007,10 +8015,15 @@ var ImageEditorSliderIds;
   ImageEditorSliderIds2["RedChannel"] = "r_channel";
   ImageEditorSliderIds2["SharpenAmount"] = "sharpen_amount";
   ImageEditorSliderIds2["Size"] = "size";
+  ImageEditorSliderIds2["Softness"] = "softness";
+  ImageEditorSliderIds2["Strength"] = "strength";
+  ImageEditorSliderIds2["Threshold"] = "threshold";
 })(ImageEditorSliderIds || (ImageEditorSliderIds = {}));
 var ImageEditorTextfieldIds;
 (function(ImageEditorTextfieldIds2) {
   ImageEditorTextfieldIds2["Color"] = "color";
+  ImageEditorTextfieldIds2["highlights"] = "highlights";
+  ImageEditorTextfieldIds2["Shadows"] = "shadows";
   ImageEditorTextfieldIds2["Tint"] = "tint";
 })(ImageEditorTextfieldIds || (ImageEditorTextfieldIds = {}));
 var ImageEditorToggleIds;
@@ -8019,11 +8032,19 @@ var ImageEditorToggleIds;
   ImageEditorToggleIds2["Shape"] = "shape";
   ImageEditorToggleIds2["Smooth"] = "smoooth";
   ImageEditorToggleIds2["SoftBlend"] = "soft_blend";
+  ImageEditorToggleIds2["Vertical"] = "vertical";
 })(ImageEditorToggleIds || (ImageEditorToggleIds = {}));
 var ImageEditorBlendIds;
 (function(ImageEditorBlendIds2) {
   ImageEditorBlendIds2["Opacity"] = "opacity";
 })(ImageEditorBlendIds || (ImageEditorBlendIds = {}));
+var ImageEditorBloomIds;
+(function(ImageEditorBloomIds2) {
+  ImageEditorBloomIds2["Threshold"] = "threshold";
+  ImageEditorBloomIds2["Radius"] = "radius";
+  ImageEditorBloomIds2["Intensity"] = "intensity";
+  ImageEditorBloomIds2["Tint"] = "tint";
+})(ImageEditorBloomIds || (ImageEditorBloomIds = {}));
 var ImageEditorBrightnessIds;
 (function(ImageEditorBrightnessIds2) {
   ImageEditorBrightnessIds2["Strength"] = "strength";
@@ -8081,6 +8102,22 @@ var ImageEditorSepiaIds;
 (function(ImageEditorSepiaIds2) {
   ImageEditorSepiaIds2["Intensity"] = "intensity";
 })(ImageEditorSepiaIds || (ImageEditorSepiaIds = {}));
+var ImageEditorSplitToneIds;
+(function(ImageEditorSplitToneIds2) {
+  ImageEditorSplitToneIds2["Balance"] = "balance";
+  ImageEditorSplitToneIds2["Highlights"] = "highlights";
+  ImageEditorSplitToneIds2["Intensity"] = "intensity";
+  ImageEditorSplitToneIds2["Shadows"] = "shadows";
+  ImageEditorSplitToneIds2["Softness"] = "softness";
+})(ImageEditorSplitToneIds || (ImageEditorSplitToneIds = {}));
+var ImageEditorTiltShiftIds;
+(function(ImageEditorTiltShiftIds2) {
+  ImageEditorTiltShiftIds2["FocusPosition"] = "focus_position";
+  ImageEditorTiltShiftIds2["FocusSize"] = "focus_size";
+  ImageEditorTiltShiftIds2["Radius"] = "radius";
+  ImageEditorTiltShiftIds2["Smooth"] = "smooth";
+  ImageEditorTiltShiftIds2["Vertical"] = "vertical";
+})(ImageEditorTiltShiftIds || (ImageEditorTiltShiftIds = {}));
 var ImageEditorVignetteIds;
 (function(ImageEditorVignetteIds2) {
   ImageEditorVignetteIds2["Color"] = "color";
@@ -8118,6 +8155,64 @@ const SETTINGS = {
           id: ImageEditorTextfieldIds.Color,
           isMandatory: true,
           title: "Sets the solid color that will be blended onto the image.",
+          type: "color"
+        }
+      ]
+    }
+  },
+  //#endregion
+  //#region Bloom
+  bloom: {
+    controlIds: ImageEditorBloomIds,
+    settings: {
+      intensity: 0.6,
+      radius: 15,
+      threshold: 0.8,
+      tint: "#FFFFFF"
+    },
+    configs: {
+      [ImageEditorControls.Slider]: [
+        {
+          ariaLabel: "Bloom Intensity",
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 0.6,
+          id: ImageEditorSliderIds.Intensity,
+          isMandatory: true,
+          max: "2",
+          min: "0",
+          step: "0.05",
+          title: "How strong the bloom reads after compositing. 1.0 = add the blurred highlights at full strength."
+        },
+        {
+          ariaLabel: "Bloom Radius",
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 15,
+          id: ImageEditorSliderIds.Radius,
+          isMandatory: true,
+          max: "127",
+          min: "3",
+          step: "2",
+          title: "Blur radius in pixels (odd numbers only). Bigger radius → softer, more cinematic glow."
+        },
+        {
+          ariaLabel: "Threshold",
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 0.8,
+          id: ImageEditorSliderIds.Threshold,
+          isMandatory: true,
+          max: "1",
+          min: "0",
+          step: "0.01",
+          title: "Bright-pass cutoff. 0 = everything glows, 1 = nothing glows. For dim scenes start around 0.15-0.35."
+        }
+      ],
+      [ImageEditorControls.Textfield]: [
+        {
+          ariaLabel: "Tint Color",
+          controlType: ImageEditorControls.Textfield,
+          defaultValue: "#FFFFFF",
+          id: ImageEditorTextfieldIds.Color,
+          title: "Hex color for the glow (e.g., FFCCAA). Pure white FFFFFF keeps original hue.",
           type: "color"
         }
       ]
@@ -8538,6 +8633,142 @@ const SETTINGS = {
     }
   },
   //#endregion
+  //#region Split tone
+  splitTone: {
+    controlIds: ImageEditorSplitToneIds,
+    settings: {
+      balance: 0.5,
+      highlights: "#FFAA55",
+      intensity: 0.6,
+      shadows: "#0066FF",
+      softness: 0.25
+    },
+    configs: {
+      [ImageEditorControls.Slider]: [
+        {
+          ariaLabel: "Intensity",
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 0.6,
+          id: ImageEditorSliderIds.Intensity,
+          isMandatory: true,
+          max: "2",
+          min: "0",
+          step: "0.05",
+          title: "Strength of the tint applied."
+        },
+        {
+          ariaLabel: "Balance",
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 0.5,
+          id: ImageEditorSliderIds.Balance,
+          isMandatory: true,
+          max: "1",
+          min: "0",
+          step: "0.01",
+          title: "Luminance pivot. 0 = lift even deep blacks; 1 = tint only the brightest pixels."
+        },
+        {
+          ariaLabel: "Softness",
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 0.25,
+          id: ImageEditorSliderIds.Softness,
+          isMandatory: true,
+          max: "0.5",
+          min: "0.01",
+          step: "0.01",
+          title: "Width of the transition band around the balance value."
+        }
+      ],
+      [ImageEditorControls.Textfield]: [
+        {
+          ariaLabel: "Highlights",
+          controlType: ImageEditorControls.Textfield,
+          defaultValue: "#FFAA55",
+          id: ImageEditorTextfieldIds.highlights,
+          title: "Hex colour applied to highlights (e.g. FFAA55).",
+          type: "color"
+        },
+        {
+          ariaLabel: "Shadows",
+          controlType: ImageEditorControls.Textfield,
+          defaultValue: "#0066FF",
+          id: ImageEditorTextfieldIds.shadows,
+          title: "Hex colour applied to shadows (e.g. 0066FF).",
+          type: "color"
+        }
+      ]
+    }
+  },
+  //#endregion
+  //#region Tilt-shift
+  tiltShift: {
+    controlIds: ImageEditorTiltShiftIds,
+    settings: {
+      focus_position: 0.5,
+      focus_size: 0.25,
+      radius: 25,
+      smooth: false,
+      vertical: false
+    },
+    configs: {
+      [ImageEditorControls.Slider]: [
+        {
+          ariaLabel: "Focus Position",
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 0.5,
+          id: ImageEditorSliderIds.FocusPosition,
+          isMandatory: true,
+          max: "1",
+          min: "0",
+          step: "0.01",
+          title: "Vertical center of the sharp band (0 = top, 1 = bottom)."
+        },
+        {
+          ariaLabel: "Focus Size",
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 0.25,
+          id: ImageEditorSliderIds.FocusSize,
+          isMandatory: true,
+          max: "0.9",
+          min: "0.05",
+          step: "0.01",
+          title: "Height of the sharp zone as a fraction of the image."
+        },
+        {
+          ariaLabel: "Blur Radius",
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 25,
+          id: ImageEditorSliderIds.Radius,
+          isMandatory: true,
+          max: "151",
+          min: "3",
+          step: "2",
+          title: "Gaussian radius for out-of-focus areas. Higher values mean more blur and less detail."
+        }
+      ],
+      [ImageEditorControls.Toggle]: [
+        {
+          ariaLabel: "Smooth Fall-off Curve",
+          controlType: ImageEditorControls.Toggle,
+          defaultValue: false,
+          id: ImageEditorToggleIds.Smooth,
+          off: "linear",
+          on: "smooth",
+          title: "Fall-off curve of blur vs distance. Linear means a constant fall-off, smooth means a gradual transition."
+        },
+        {
+          ariaLabel: "Vertical Orientation",
+          controlType: ImageEditorControls.Toggle,
+          defaultValue: false,
+          id: ImageEditorToggleIds.Vertical,
+          off: "horizontal",
+          on: "vertical",
+          title: "Direction of the focus band. Horizontal means the focus band is horizontal, vertical means it is vertical."
+        }
+      ]
+    }
+  },
+  //#endregion
   //#region Vignette
   vignette: {
     controlIds: ImageEditorVignetteIds,
@@ -8576,7 +8807,7 @@ const SETTINGS = {
         {
           ariaLabel: "Color",
           controlType: ImageEditorControls.Textfield,
-          defaultValue: "000000",
+          defaultValue: "#000000",
           id: ImageEditorTextfieldIds.Color,
           title: "Sets the color of the vignette.",
           type: "color"
@@ -8602,7 +8833,7 @@ const TREE_DATA = {
     {
       description: "Tool configuration.",
       id: "settings",
-      icon: "wrench",
+      icon: "brush",
       value: "Settings",
       children: [
         //#region Brush
@@ -8699,6 +8930,19 @@ const TREE_DATA = {
           value: "Blend"
         },
         //#endregion
+        //#region Bloom
+        {
+          description: "Applies a bloom effect.",
+          cells: {
+            lfCode: {
+              shape: "code",
+              value: JSON.stringify(SETTINGS.bloom)
+            }
+          },
+          id: "bloom",
+          value: "Bloom"
+        },
+        //#endregion
         //#region Film grain
         {
           description: "Applies a film grain effect.",
@@ -8749,6 +8993,32 @@ const TREE_DATA = {
           description: "Applies a sepia effect to the image.",
           id: "sepia",
           value: "Sepia"
+        },
+        //#endregion
+        //#region Split tone
+        {
+          cells: {
+            lfCode: {
+              shape: "code",
+              value: JSON.stringify(SETTINGS.splitTone)
+            }
+          },
+          description: "Applies a split tone effect to the image.",
+          id: "split_tone",
+          value: "Split tone"
+        },
+        //#endregion
+        //#region Tilt-shift
+        {
+          cells: {
+            lfCode: {
+              shape: "code",
+              value: JSON.stringify(SETTINGS.tiltShift)
+            }
+          },
+          description: "Applies a tilt-shift effect to the image.",
+          id: "tilt_shift",
+          value: "Tilt-shift"
         },
         //#endregion
         //#region Vignette

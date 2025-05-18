@@ -88,10 +88,12 @@ export enum ImageEditorCanvasIds {
   Points = 'points',
 }
 export enum ImageEditorSliderIds {
+  Balance = 'balance',
   BlueChannel = 'b_channel',
   BlurKernelSize = 'blur_kernel_size',
   BlurSigma = 'blur_sigma',
-  Strength = 'strength',
+  FocusPosition = 'focus_position',
+  FocusSize = 'focus_size',
   Gamma = 'gamma',
   GreenChannel = 'g_channel',
   Intensity = 'intensity',
@@ -101,9 +103,14 @@ export enum ImageEditorSliderIds {
   RedChannel = 'r_channel',
   SharpenAmount = 'sharpen_amount',
   Size = 'size',
+  Softness = 'softness',
+  Strength = 'strength',
+  Threshold = 'threshold',
 }
 export enum ImageEditorTextfieldIds {
   Color = 'color',
+  highlights = 'highlights',
+  Shadows = 'shadows',
   Tint = 'tint',
 }
 export enum ImageEditorToggleIds {
@@ -111,6 +118,7 @@ export enum ImageEditorToggleIds {
   Shape = 'shape',
   Smooth = 'smoooth',
   SoftBlend = 'soft_blend',
+  Vertical = 'vertical',
 }
 export type ImageEditorControlIds =
   | ImageEditorCanvasIds
@@ -178,6 +186,7 @@ export type ImageEditorSettingsFor = Partial<{
 //#region Filters
 export interface ImageEditorFilterSettingsMap {
   blend: ImageEditorBlendSettings;
+  bloom: ImageEditorBloomSettings;
   brightness: ImageEditorBrightnessSettings;
   brush: ImageEditorBrushSettings;
   clarity: ImageEditorClaritySettings;
@@ -187,11 +196,19 @@ export interface ImageEditorFilterSettingsMap {
   gaussianBlur: ImageEditorGaussianBlurSettings;
   line: ImageEditorLineSettings;
   sepia: ImageEditorSepiaSettings;
+  splitTone: ImageEditorSplitToneSettings;
+  tiltShift: ImageEditorTiltShiftSettings;
   vignette: ImageEditorVignetteSettings;
 }
 export interface ImageEditorBlendSettings extends ImageEditorFilterSettings {
   color: string;
   opacity: number;
+}
+export interface ImageEditorBloomSettings extends ImageEditorFilterSettings {
+  threshold: number;
+  radius: number;
+  intensity: number;
+  tint: string;
 }
 export interface ImageEditorBrightnessSettings extends ImageEditorFilterSettings {
   strength: number;
@@ -241,6 +258,20 @@ export interface ImageEditorLineSettings extends ImageEditorFilterSettings {
 export interface ImageEditorSepiaSettings extends ImageEditorFilterSettings {
   intensity: number;
 }
+export interface ImageEditorSplitToneSettings extends ImageEditorFilterSettings {
+  balance: number;
+  highlights: string;
+  intensity: number;
+  shadows: string;
+  softness: number;
+}
+export interface ImageEditorTiltShiftSettings extends ImageEditorFilterSettings {
+  focus_position: number;
+  focus_size: number;
+  radius: number;
+  smooth: boolean;
+  vertical: boolean;
+}
 export interface ImageEditorVignetteSettings extends ImageEditorFilterSettings {
   intensity: number;
   radius: number;
@@ -248,6 +279,12 @@ export interface ImageEditorVignetteSettings extends ImageEditorFilterSettings {
 }
 export enum ImageEditorBlendIds {
   Opacity = 'opacity',
+}
+export enum ImageEditorBloomIds {
+  Threshold = 'threshold',
+  Radius = 'radius',
+  Intensity = 'intensity',
+  Tint = 'tint',
 }
 export enum ImageEditorBrightnessIds {
   Strength = 'strength',
@@ -297,6 +334,20 @@ export enum ImageEditorLineIds {
 export enum ImageEditorSepiaIds {
   Intensity = 'intensity',
 }
+export enum ImageEditorSplitToneIds {
+  Balance = 'balance',
+  Highlights = 'highlights',
+  Intensity = 'intensity',
+  Shadows = 'shadows',
+  Softness = 'softness',
+}
+export enum ImageEditorTiltShiftIds {
+  FocusPosition = 'focus_position',
+  FocusSize = 'focus_size',
+  Radius = 'radius',
+  Smooth = 'smooth',
+  Vertical = 'vertical',
+}
 export enum ImageEditorVignetteIds {
   Color = 'color',
   Intensity = 'intensity',
@@ -317,6 +368,14 @@ export interface ImageEditorFilterDefinition<
 export type ImageEditorBlendFilter = ImageEditorFilterDefinition<
   typeof ImageEditorBlendIds,
   ImageEditorBlendSettings,
+  {
+    [ImageEditorControls.Slider]: ImageEditorSliderConfig[];
+    [ImageEditorControls.Textfield]: ImageEditorTextfieldConfig[];
+  }
+>;
+export type ImageEditorBloomFilter = ImageEditorFilterDefinition<
+  typeof ImageEditorBloomIds,
+  ImageEditorBloomSettings,
   {
     [ImageEditorControls.Slider]: ImageEditorSliderConfig[];
     [ImageEditorControls.Textfield]: ImageEditorTextfieldConfig[];
@@ -393,6 +452,22 @@ export type ImageEditorSepiaFilter = ImageEditorFilterDefinition<
     [ImageEditorControls.Slider]: ImageEditorSliderConfig[];
   }
 >;
+export type ImageEditorSplitToneFilter = ImageEditorFilterDefinition<
+  typeof ImageEditorSplitToneIds,
+  ImageEditorSplitToneSettings,
+  {
+    [ImageEditorControls.Slider]: ImageEditorSliderConfig[];
+    [ImageEditorControls.Textfield]: ImageEditorTextfieldConfig[];
+  }
+>;
+export type ImageEditorTiltShiftFilter = ImageEditorFilterDefinition<
+  typeof ImageEditorTiltShiftIds,
+  ImageEditorTiltShiftSettings,
+  {
+    [ImageEditorControls.Slider]: ImageEditorSliderConfig[];
+    [ImageEditorControls.Toggle]: ImageEditorToggleConfig[];
+  }
+>;
 export type ImageEditorVignetteFilter = ImageEditorFilterDefinition<
   typeof ImageEditorVignetteIds,
   ImageEditorVignetteSettings,
@@ -404,6 +479,7 @@ export type ImageEditorVignetteFilter = ImageEditorFilterDefinition<
 >;
 export type ImageEditorFilters = {
   blend: ImageEditorBlendFilter;
+  bloom: ImageEditorBloomFilter;
   brightness: ImageEditorBrightnessFilter;
   brush: ImageEditorBrushFilter;
   clarity: ImageEditorClarityFilter;
@@ -413,9 +489,13 @@ export type ImageEditorFilters = {
   gaussianBlur: ImageEditorGaussianBlurFilter;
   line: ImageEditorLineFilter;
   sepia: ImageEditorSepiaFilter;
+  splitTone: ImageEditorSplitToneFilter;
+  tiltShift: ImageEditorTiltShiftFilter;
   vignette: ImageEditorVignetteFilter;
 };
 export type ImageEditorFilter =
+  | ImageEditorBlendFilter
+  | ImageEditorBloomFilter
   | ImageEditorBrightnessFilter
   | ImageEditorBrushFilter
   | ImageEditorClarityFilter
@@ -425,5 +505,7 @@ export type ImageEditorFilter =
   | ImageEditorGaussianBlurFilter
   | ImageEditorLineFilter
   | ImageEditorSepiaFilter
+  | ImageEditorSplitToneFilter
+  | ImageEditorTiltShiftFilter
   | ImageEditorVignetteFilter;
 //#endregion

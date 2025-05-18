@@ -3,7 +3,7 @@ import torch
 from server import PromptServer
 
 from ..utils.constants import CATEGORY_PREFIX, EVENT_PREFIX, FUNCTION, Input
-from ..utils.filters import blend_effect, brightness_effect, clarity_effect, contrast_effect, desaturate_effect, film_grain_effect, gaussian_blur_effect, line_effect, sepia_effect, vignette_effect
+from ..utils.filters import blend_effect, bloom_effect, brightness_effect, clarity_effect, contrast_effect, desaturate_effect, film_grain_effect, gaussian_blur_effect, line_effect, sepia_effect, split_tone_effect, tilt_shift_effect, vignette_effect
 from ..utils.helpers import normalize_input_image, normalize_list_to_value, normalize_output_image, process_and_save_image
 
 CATEGORY = f"{CATEGORY_PREFIX}/Filters"
@@ -66,6 +66,111 @@ class LF_Blend:
         batch_list, image_list = normalize_output_image(processed_images)
 
         PromptServer.instance.send_sync(f"{EVENT_PREFIX}blend", {
+            "node": kwargs.get("node_id"),
+            "dataset": dataset,
+        })
+
+        return (batch_list[0], image_list)
+# endregion
+
+# region LF_Bloom
+class LF_Bloom:
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "image": (Input.IMAGE, {
+                    "tooltip": (
+                        "Source frame to receive the glow.\n"
+                        "Tip ▸ Works best if the image is already at final resolution; "
+                        "up-res after blooming can soften the effect."
+                    )
+                }),
+                "threshold": (Input.FLOAT, {
+                    "default": 0.80,
+                    "min": 0.00,
+                    "max": 1.00,
+                    "step": 0.01,
+                    "tooltip": (
+                        "Bright-pass cutoff.\n"
+                        "‣ 0 = everything glows • 1 = nothing glows\n"
+                        "‣ For dim scenes start around **0.15-0.35**; for high-key images **0.65-0.85**.\n"
+                        "Accepts 0-1 *or* 0-255 (e.g. 200 ≈ 0.78)."
+                    )
+                }),
+                "radius": (Input.INTEGER, {
+                    "default": 15,
+                    "min": 3,
+                    "max": 127,
+                    "step": 2,
+                    "tooltip": (
+                        "Blur radius in **pixels** (odd numbers only).\n"
+                        "Bigger radius → softer, more cinematic glow.\n"
+                        "A value ~1-2 % of image width is a good starting point."
+                    )
+                }),
+                "intensity": (Input.FLOAT, {
+                    "default": 0.60,
+                    "min": 0.00,
+                    "max": 2.00,
+                    "step": 0.05,
+                    "tooltip": (
+                        "How strong the bloom reads after compositing.\n"
+                        "1.0 = add the blurred highlights at full strength.\n"
+                        "< 1.0 softens; > 1.0 exaggerates (can wash out mid-tones)."
+                    )
+                }),
+            },
+            "optional": {
+                "tint": (Input.STRING, {
+                    "default": "FFFFFF",
+                    "tooltip": (
+                        "Hex colour for the glow (e.g. FFCCAA).\n"
+                        "Pure white **FFFFFF** keeps original hue."
+                    )
+                }),
+                "ui_widget": (Input.LF_COMPARE, {
+                    "default": {}
+                }),
+            },
+            "hidden": {
+                "node_id": "UNIQUE_ID"
+            }
+        }
+
+
+    CATEGORY = CATEGORY
+    FUNCTION = FUNCTION
+    OUTPUT_IS_LIST = (False, True)
+    RETURN_NAMES = ("image", "image_list")
+    RETURN_TYPES = ("IMAGE", "IMAGE")
+
+    def on_exec(self, **kwargs: dict):
+        image: list[torch.Tensor] = normalize_input_image(kwargs.get("image"))
+        threshold: float = normalize_list_to_value(kwargs.get("threshold"))
+        radius: int = normalize_list_to_value(kwargs.get("radius"))
+        intensity: float = normalize_list_to_value(kwargs.get("intensity"))
+        tint: str = normalize_list_to_value(kwargs.get("tint", "FFFFFF"))
+
+        nodes: list[dict] = []
+        dataset: dict = {"nodes": nodes}
+
+        processed_images = process_and_save_image(
+            images=image,
+            filter_function=bloom_effect,
+            filter_args={
+                'threshold': threshold,
+                'radius': radius,
+                'intensity': intensity,
+                'tint': tint
+            },
+            filename_prefix="bloom",
+            nodes=nodes,
+        )
+
+        batch_list, image_list = normalize_output_image(processed_images)
+
+        PromptServer.instance.send_sync(f"{EVENT_PREFIX}bloom", {
             "node": kwargs.get("node_id"),
             "dataset": dataset,
         })
@@ -734,6 +839,179 @@ class LF_Sepia:
         return (batch_list[0], image_list)
 # endregion
 
+# region LF_Split tone
+class LF_SplitTone:
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "image": (Input.IMAGE, {
+                    "tooltip": "Base image to colour-grade."
+                }),
+                "shadows_tint": (Input.STRING, {
+                    "default": "0066FF",
+                    "tooltip": "Hex colour applied to shadows (e.g. 0066FF)."
+                }),
+                "highlights_tint": (Input.STRING, {
+                    "default": "FFAA55",
+                    "tooltip": "Hex colour applied to highlights (e.g. FFAA55)."
+                }),
+                "balance": (Input.FLOAT, {
+                    "default": 0.50, 
+                    "min": 0.0, 
+                    "max": 1.0, 
+                    "step": 0.01,
+                    "tooltip": "Luminance pivot. 0 = lift even deep blacks; 1 = tint only the brightest pixels."
+                    
+                }),
+                "softness": (Input.FLOAT, {
+                    "default": 0.25, 
+                    "min": 0.01, 
+                    "max": 0.5, 
+                    "step": 0.01,
+                    "tooltip": "Width of the transition band around the balance value."
+                }),
+                "intensity": (Input.FLOAT, {
+                    "default": 0.60, 
+                    "min": 0.0, 
+                    "max": 2.0, 
+                    "step": 0.05,
+                    "tooltip": "Strength of the tint applied."
+                }),
+            },
+            "optional": {
+                "ui_widget": ("LF_COMPARE", {"default": {}}),
+            },
+            "hidden": {
+                "node_id": "UNIQUE_ID"
+            }
+        }
+
+    RETURN_TYPES = ("IMAGE", "IMAGE")
+    RETURN_NAMES = ("image", "image_list")
+    FUNCTION = FUNCTION
+    CATEGORY = CATEGORY
+    OUTPUT_IS_LIST = (False, True)
+
+    def on_exec(self, **kwargs: dict):
+        image: list[torch.Tensor] = normalize_input_image(kwargs.get("image"))
+        shadows_tint: str = normalize_list_to_value(kwargs.get("shadows_tint", "0066FF"))
+        highlights_tint: str = normalize_list_to_value(kwargs.get("highlights_tint", "FFAA55"))
+        balance: float = normalize_list_to_value(kwargs.get("balance", 0.5))
+        softness: float = normalize_list_to_value(kwargs.get("softness", 0.25))
+        intensity: float = normalize_list_to_value(kwargs.get("intensity", 0.6))
+
+        nodes: list[dict] = []
+        dataset: dict = {"nodes": nodes}
+
+        processed_images = process_and_save_image(
+            images=image,
+            filter_function=split_tone_effect,
+            filter_args={
+                'shadows_tint': shadows_tint,
+                'highlights_tint': highlights_tint,
+                'balance': balance,
+                'softness': softness,
+                'intensity': intensity
+            },
+            filename_prefix="splittone",
+            nodes=nodes,
+        )
+
+        batch_list, image_list = normalize_output_image(processed_images)
+
+        PromptServer.instance.send_sync(f"{EVENT_PREFIX}splittone", {
+            "node": kwargs.get("node_id"),
+            "dataset": dataset,
+        })
+
+        return (batch_list[0], image_list)
+# endregion
+
+# region LF_TiltShift
+class LF_TiltShift:
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "image": (Input.IMAGE, {
+                    "tooltip": "Image to miniature-ify."
+                }),
+                "focus_position": (Input.FLOAT, {
+                    "default": 0.5, 
+                    "min": 0.0, 
+                    "max": 1.0, 
+                    "step": 0.01,
+                    "tooltip": "Vertical centre of sharp band (0 = top, 1 = bottom)."
+                }),
+                "focus_size": (Input.FLOAT, {
+                    "default": 0.25, 
+                    "min": 0.05, 
+                    "max": 0.9, 
+                    "step": 0.01,
+                    "tooltip": "Height of sharp zone as fraction of image."
+                }),
+                "blur_radius": (Input.INTEGER, {
+                    "default": 25, 
+                    "min": 3, 
+                    "max": 151, 
+                    "step": 2,
+                    "tooltip": "Gaussian radius for out-of-focus areas."
+                }),
+                "feather": (["linear", "smooth", "expo"], {
+                    "default": "smooth",
+                    "tooltip": "Fall-off curve of blur vs distance."
+                }),
+            },
+            "optional": {
+                "orientation": (["horizontal", "vertical", "circular"], {
+                    "default": "horizontal",
+                    "tooltip": "Direction of the focus band."
+                }),
+                "ui_widget": (Input.LF_COMPARE, {"default": {}})
+            },
+            "hidden": {"node_id": "UNIQUE_ID"}
+        }
+
+    CATEGORY = CATEGORY
+    FUNCTION = FUNCTION
+    OUTPUT_IS_LIST = (False, True)
+    RETURN_NAMES = ("image", "image_list")
+    RETURN_TYPES = ("IMAGE", "IMAGE")
+
+    def on_exec(self, **kwargs: dict):
+        image: list[torch.Tensor] = normalize_input_image(kwargs.get("image"))
+        focus_position: float = normalize_list_to_value(kwargs.get("focus_position"))
+        focus_size: float = normalize_list_to_value(kwargs.get("focus_size"))
+        blur_radius: int = normalize_list_to_value(kwargs.get("blur_radius"))
+        feather: str = normalize_list_to_value(kwargs.get("feather", "smooth"))
+        orientation: str = normalize_list_to_value(kwargs.get("orientation", "horizontal"))
+
+        nodes: list[dict] = []
+        dataset: dict = {"nodes": nodes}
+
+        processed_images = process_and_save_image(
+            images=image,
+            filter_function=tilt_shift_effect,
+            filter_args={
+                'focus_position': focus_position,
+                'focus_size': focus_size,
+                'blur_radius': blur_radius,
+                'feather': feather,
+                'orient': orientation
+            },
+            filename_prefix="tiltshift",
+            nodes=nodes,
+        )
+
+        batch_list, image_list = normalize_output_image(processed_images)
+
+        PromptServer.instance.send_sync(f"{EVENT_PREFIX}tiltshift", {
+            "node": kwargs.get("node_id"),
+            "dataset": dataset,
+        })
+
+        return (batch_list[0], image_list)
 # region LF_Vignette
 class LF_Vignette:
     @classmethod
@@ -817,6 +1095,7 @@ class LF_Vignette:
 
 NODE_CLASS_MAPPINGS = {
     "LF_Blend": LF_Blend,
+    "LF_Bloom": LF_Bloom,
     "LF_Brightness": LF_Brightness,
     "LF_Clarity": LF_Clarity,
     "LF_Contrast": LF_Contrast,
@@ -825,10 +1104,13 @@ NODE_CLASS_MAPPINGS = {
     "LF_GaussianBlur": LF_GaussianBlur,
     "LF_Line": LF_Line,
     "LF_Sepia": LF_Sepia,
+    "LF_SplitTone": LF_SplitTone,
+    "LF_TiltShift": LF_TiltShift,
     "LF_Vignette": LF_Vignette
 }
 NODE_DISPLAY_NAME_MAPPINGS = {
     "LF_Blend": "Blend",
+    "LF_Bloom": "Bloom",
     "LF_Brightness": "Brightness",
     "LF_Clarity": "Clarity",
     "LF_Contrast": "Contrast",
@@ -837,5 +1119,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "LF_GaussianBlur": "Gaussian Blur",
     "LF_Line": "Line",
     "LF_Sepia": "Sepia",
+    "LF_SplitTone": "Split Tone",
+    "LF_TiltShift": "Tilt Shift",
     "LF_Vignette": "Vignette"
 }

@@ -35,6 +35,42 @@ def blend_effect(image: torch.Tensor, overlay_image: torch.Tensor, alpha_mask: f
     return blend_overlay(image, overlay_image, alpha_tensor)
 # endregion
 
+# region bloom_effect
+def bloom_effect(image: torch.Tensor, threshold: float, radius: int, intensity: float, tint: str = "FFFFFF") -> torch.Tensor:
+    """
+    Applies a bloom effect to an input image tensor.
+    The bloom effect enhances bright areas of the image by blurring and blending highlights, 
+    optionally tinting them with a specified color.
+
+    Args:
+        image (torch.Tensor): Input image tensor of shape (3, H, W) or (H, W, 3), with pixel values in [0, 255].
+        threshold (float): Luminance threshold above which pixels are considered highlights (range: 0.0–1.0).
+        radius (int): Radius of the Gaussian blur applied to highlights (should be a positive integer).
+        intensity (float): Strength of the bloom effect (higher values produce a stronger effect).
+        tint (str, optional): Hex color code (e.g., "FFFFFF" for white) used to tint the bloom highlights. Defaults to "FFFFFF".
+
+    Returns:
+        torch.Tensor: Image tensor with the bloom effect applied, in the same format as the input.
+    """
+    validate_image(image, expected_shape=(3,))
+
+    np_img = tensor_to_numpy(image, True) / 255.0
+
+    luminance = np.max(np_img, axis=-1, keepdims=True)
+    mask = (luminance > threshold).astype(np.float32)
+
+    tint = tint.lstrip("#").upper()
+    colour = np_img if tint.upper() == "FFFFFF" else \
+             np.tile(np.array(hex_to_tuple(tint)) / 255.0, (*mask.shape[:2], 1))
+    highlights = mask * colour
+
+    k = radius | 1
+    blurred = cv2.GaussianBlur(highlights, (k, k), k * 0.4)
+
+    out = np.clip(np_img + blurred * intensity, 0, 1) * 255
+    return numpy_to_tensor(out.astype(np.uint8))
+# endregion
+
 # region brightness_effect
 def brightness_effect(image: torch.Tensor, brightness_strength: float, gamma: float, midpoint: float, localized_brightness: bool) -> torch.Tensor:
     """
@@ -167,20 +203,6 @@ def desaturate_effect(image: torch.Tensor, global_level: float, channel_levels: 
 # endregion
 
 # region film_grain_effect
-def film_grain_effect(image: torch.Tensor, intensity: float = 0.5, size: float = 1.0, tint: str = "FFFFFF", soft_blend = False) -> torch.Tensor:
-    """
-    Adds a refined film grain effect to the given image with tint and soft blend options.
-
-    Args:
-        image: The input image. [1, H, W, C]
-        intensity: A float between 0 and 1 controlling the grain's opacity.
-        size: A float controlling the granularity of the grain (higher = coarser).
-        tint: Hexadecimal color (default is FFFFFF for no tint).
-        soft_blend: If True, uses a soft blending mode for the grain.
-
-    Returns:
-        The image with film grain applied. [1, H, W, C]
-    """
 def film_grain_effect(image: torch.Tensor, intensity: float = 0.5, size: float = 1.0, tint: str = "FFFFFF", soft_blend = False) -> torch.Tensor:
     """
     Adds a refined film grain effect to the given image with tint and soft blend options.
@@ -339,6 +361,98 @@ def sepia_effect(image: torch.Tensor, intensity = 1.0):
     sepia_image = np.clip(sepia_image, 0, 255)
 
     return numpy_to_tensor(sepia_image.astype(np.uint8))
+# endregion
+
+# region split_tone_effect
+def split_tone_effect(image: torch.Tensor, shadows_tint: str, highlights_tint: str, balance: float, softness: float, intensity: float) -> torch.Tensor:
+    """
+    Applies a split-tone effect to a batch of images.
+
+    Args:
+        image (torch.Tensor): Input tensor of shape [B, H, W, C] with C=3 and values in [0, 255].
+        shadows_tint (str): Hex color for shadows (e.g. "#FF0000").
+        highlights_tint (str): Hex color for highlights.
+        balance (float): Pivot luminance (0.0-1.0).
+        softness (float): Width of transition band around balance.
+        intensity (float): Strength of the tint (0.0-1.0).
+
+    Returns:
+        torch.Tensor: Tensor of same shape and dtype uint8 with effect applied.
+    """
+    def _hex_to_tensor(hex_color: str) -> torch.Tensor:
+        rgb = hex_to_tuple(hex_color)
+        t = torch.tensor(rgb, device=img.device, dtype=torch.float32) / 255.0
+        return t.view(1,1,1,3)
+    
+    validate_image(image, expected_shape=(3,))
+
+    orig_dtype = image.dtype
+    if torch.is_floating_point(image):
+        img = image.clamp(0.0, 1.0)
+    else:
+        img = image.float() / 255.0
+
+
+    st = _hex_to_tensor(shadows_tint)
+    ht = _hex_to_tensor(highlights_tint)
+
+    lum = img.max(dim=-1, keepdim=True)[0]
+    mask = ((lum - balance) / softness).clamp(0.0, 1.0)
+
+    shadows = img * (1 - mask) + st * mask
+    highlights = img * (1 - mask) + ht * mask
+    blended = (shadows + highlights - img).clamp(0.0, 1.0)
+    out = (img + blended * intensity).clamp(0.0, 1.0)
+
+    if orig_dtype == torch.uint8:
+        return (out * 255.0).round().clamp(0, 255).to(torch.uint8)
+    return out
+# endregion
+
+# region tilt_shift_effect
+def tilt_shift_effect(img: torch.Tensor, focus_position: float, focus_size: float, blur_radius: int, feather: str = "smooth", orient: str = "horizontal") -> torch.Tensor:
+    """
+    Applies a tilt-shift effect to an input image tensor, simulating a shallow depth-of-field by blending a focused region with a blurred background.
+
+    Args:
+        img (torch.Tensor): Input image tensor of shape (3, H, W) with values in [0, 255].
+        focus_position (float): Position of the focus region, normalized between 0 (top/left) and 1 (bottom/right).
+        focus_size (float): Size of the focus region as a fraction of the image dimension (0 to 1).
+        blur_radius (int): Radius of the Gaussian blur applied to out-of-focus areas.
+        feather (str, optional): Feathering curve for the transition between focused and blurred regions.
+            Options are "smooth" (default, smoothstep curve) or "expo" (exponential curve).
+        orient (str, optional): Orientation of the focus region. Options are "horizontal" (default), "vertical", or "circular".
+
+    Returns:
+        torch.Tensor: Image tensor with the tilt-shift effect applied, of shape (3, H, W) and dtype uint8.
+    """    
+    validate_image(img, expected_shape=(3,))
+    h, w = img.shape[-2:]
+
+    yy, xx = np.meshgrid(np.linspace(0, 1, h), np.linspace(0, 1, w), indexing="ij")
+    if orient == "horizontal":
+        dist = np.abs(yy - focus_position)
+    elif orient == "vertical":
+        dist = np.abs(xx - focus_position)
+    else:
+        dist = np.sqrt((yy - focus_position) ** 2 + (xx - 0.5) ** 2)
+
+    half = focus_size / 2.0
+    mask = np.clip((half - dist) / half, 0, 1)
+
+    if feather == "smooth":
+        mask = mask * mask * (3 - 2 * mask)
+    elif feather == "expo":
+        mask = mask ** 2
+
+    mask = np.expand_dims(mask, 0)
+
+    k = blur_radius | 1
+    np_img = tensor_to_numpy(img, True)
+    blurred = cv2.GaussianBlur(np_img, (k, k), k * 0.35)
+
+    out = np_img * mask + blurred * (1 - mask)
+    return numpy_to_tensor(out.astype(np.uint8))
 # endregion
 
 # region vignette_effect

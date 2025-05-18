@@ -24,6 +24,7 @@ import {
 //#region Node-Widget map
 export const NODE_WIDGET_MAP: NodeWidgetMap = {
   LF_Blend: [CustomWidgetName.compare],
+  LF_Bloom: [CustomWidgetName.compare],
   LF_BlurImages: [CustomWidgetName.masonry],
   LF_Boolean: [CustomWidgetName.history],
   LF_Brightness: [CustomWidgetName.compare],
@@ -98,6 +99,7 @@ export const NODE_WIDGET_MAP: NodeWidgetMap = {
   LF_Something2String: [CustomWidgetName.code],
   LF_SortJSONKeys: [CustomWidgetName.code],
   LF_SortTags: [CustomWidgetName.code],
+  LF_SplitTone: [CustomWidgetName.compare],
   LF_String: [CustomWidgetName.history],
   LF_StringReplace: [CustomWidgetName.code],
   LF_StringTemplate: [CustomWidgetName.code],
@@ -107,6 +109,7 @@ export const NODE_WIDGET_MAP: NodeWidgetMap = {
   LF_SwitchInteger: [CustomWidgetName.progressbar],
   LF_SwitchJSON: [CustomWidgetName.progressbar],
   LF_SwitchString: [CustomWidgetName.progressbar],
+  LF_TiltShift: [CustomWidgetName.compare],
   LF_UpdateUsageStatistics: [CustomWidgetName.code],
   LF_UpscaleModelSelector: [CustomWidgetName.history],
   LF_UsageStatistics: [CustomWidgetName.tabBarChart],

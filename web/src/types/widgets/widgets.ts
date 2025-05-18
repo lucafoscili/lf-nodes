@@ -53,6 +53,7 @@ export enum CustomWidgetName {
 }
 export enum NodeName {
   blend = 'LF_Blend',
+  bloom = 'LF_Bloom',
   blurImages = 'LF_BlurImages',
   boolean = 'LF_Boolean',
   brightness = 'LF_Brightness',
@@ -127,6 +128,7 @@ export enum NodeName {
   something2String = 'LF_Something2String',
   sortJsonKeys = 'LF_SortJSONKeys',
   sortTags = 'LF_SortTags',
+  splitTone = 'LF_SplitTone',
   string = 'LF_String',
   stringReplace = 'LF_StringReplace',
   stringTemplate = 'LF_StringTemplate',
@@ -136,6 +138,7 @@ export enum NodeName {
   switchInteger = 'LF_SwitchInteger',
   switchJson = 'LF_SwitchJSON',
   switchString = 'LF_SwitchString',
+  tiltShift = 'LF_TiltShift',
   updateUsageStatistics = 'LF_UpdateUsageStatistics',
   upscaleModelSelector = 'LF_UpscaleModelSelector',
   urandomSeedGenerator = 'LF_UrandomSeedGenerator',
