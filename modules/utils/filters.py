@@ -381,8 +381,8 @@ def split_tone_effect(image: torch.Tensor, shadows_tint: str, highlights_tint: s
     """
     def _hex_to_tensor(hex_color: str) -> torch.Tensor:
         rgb = hex_to_tuple(hex_color)
-        tensor = torch.tensor(rgb, device=img.device, dtype=torch.float32)
-        return tensor.view(1, 1, 1, 3) / 255.0
+        t = torch.tensor(rgb, device=img.device, dtype=torch.float32) / 255.0
+        return t.view(1,1,1,3)
     
     validate_image(image, expected_shape=(3,))
 
@@ -392,26 +392,18 @@ def split_tone_effect(image: torch.Tensor, shadows_tint: str, highlights_tint: s
     else:
         img = image.float() / 255.0
 
-    # Convert tints to [1,1,1,3]
-    def _hex_to_tensor(hex_color: str) -> torch.Tensor:
-        rgb = hex_to_tuple(hex_color)
-        t = torch.tensor(rgb, device=img.device, dtype=torch.float32) / 255.0
-        return t.view(1,1,1,3)
 
     st = _hex_to_tensor(shadows_tint)
     ht = _hex_to_tensor(highlights_tint)
 
-    # Luminance and mask
     lum = img.max(dim=-1, keepdim=True)[0]
     mask = ((lum - balance) / softness).clamp(0.0, 1.0)
 
-    # Blend
     shadows = img * (1 - mask) + st * mask
     highlights = img * (1 - mask) + ht * mask
     blended = (shadows + highlights - img).clamp(0.0, 1.0)
     out = (img + blended * intensity).clamp(0.0, 1.0)
 
-    # Restore dtype
     if orig_dtype == torch.uint8:
         return (out * 255.0).round().clamp(0, 255).to(torch.uint8)
     return out
