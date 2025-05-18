@@ -88,6 +88,7 @@ export enum ImageEditorCanvasIds {
   Points = 'points',
 }
 export enum ImageEditorSliderIds {
+  Balance = 'balance',
   BlueChannel = 'b_channel',
   BlurKernelSize = 'blur_kernel_size',
   BlurSigma = 'blur_sigma',
@@ -102,11 +103,14 @@ export enum ImageEditorSliderIds {
   RedChannel = 'r_channel',
   SharpenAmount = 'sharpen_amount',
   Size = 'size',
+  Softness = 'softness',
   Strength = 'strength',
   Threshold = 'threshold',
 }
 export enum ImageEditorTextfieldIds {
   Color = 'color',
+  highlights = 'highlights',
+  Shadows = 'shadows',
   Tint = 'tint',
 }
 export enum ImageEditorToggleIds {
@@ -192,6 +196,7 @@ export interface ImageEditorFilterSettingsMap {
   gaussianBlur: ImageEditorGaussianBlurSettings;
   line: ImageEditorLineSettings;
   sepia: ImageEditorSepiaSettings;
+  splitTone: ImageEditorSplitToneSettings;
   tiltShift: ImageEditorTiltShiftSettings;
   vignette: ImageEditorVignetteSettings;
 }
@@ -252,6 +257,13 @@ export interface ImageEditorLineSettings extends ImageEditorFilterSettings {
 }
 export interface ImageEditorSepiaSettings extends ImageEditorFilterSettings {
   intensity: number;
+}
+export interface ImageEditorSplitToneSettings extends ImageEditorFilterSettings {
+  balance: number;
+  highlights: string;
+  intensity: number;
+  shadows: string;
+  softness: number;
 }
 export interface ImageEditorTiltShiftSettings extends ImageEditorFilterSettings {
   focus_position: number;
@@ -319,15 +331,22 @@ export enum ImageEditorLineIds {
   Size = 'size',
   Smooth = 'smooth',
 }
+export enum ImageEditorSepiaIds {
+  Intensity = 'intensity',
+}
+export enum ImageEditorSplitToneIds {
+  Balance = 'balance',
+  Highlights = 'highlights',
+  Intensity = 'intensity',
+  Shadows = 'shadows',
+  Softness = 'softness',
+}
 export enum ImageEditorTiltShiftIds {
   FocusPosition = 'focus_position',
   FocusSize = 'focus_size',
   Radius = 'radius',
   Smooth = 'smooth',
   Vertical = 'vertical',
-}
-export enum ImageEditorSepiaIds {
-  Intensity = 'intensity',
 }
 export enum ImageEditorVignetteIds {
   Color = 'color',
@@ -433,6 +452,14 @@ export type ImageEditorSepiaFilter = ImageEditorFilterDefinition<
     [ImageEditorControls.Slider]: ImageEditorSliderConfig[];
   }
 >;
+export type ImageEditorSplitToneFilter = ImageEditorFilterDefinition<
+  typeof ImageEditorSplitToneIds,
+  ImageEditorSplitToneSettings,
+  {
+    [ImageEditorControls.Slider]: ImageEditorSliderConfig[];
+    [ImageEditorControls.Textfield]: ImageEditorTextfieldConfig[];
+  }
+>;
 export type ImageEditorTiltShiftFilter = ImageEditorFilterDefinition<
   typeof ImageEditorTiltShiftIds,
   ImageEditorTiltShiftSettings,
@@ -462,6 +489,7 @@ export type ImageEditorFilters = {
   gaussianBlur: ImageEditorGaussianBlurFilter;
   line: ImageEditorLineFilter;
   sepia: ImageEditorSepiaFilter;
+  splitTone: ImageEditorSplitToneFilter;
   tiltShift: ImageEditorTiltShiftFilter;
   vignette: ImageEditorVignetteFilter;
 };
@@ -477,6 +505,7 @@ export type ImageEditorFilter =
   | ImageEditorGaussianBlurFilter
   | ImageEditorLineFilter
   | ImageEditorSepiaFilter
+  | ImageEditorSplitToneFilter
   | ImageEditorTiltShiftFilter
   | ImageEditorVignetteFilter;
 //#endregion

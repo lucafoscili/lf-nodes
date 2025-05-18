@@ -14,6 +14,7 @@ import {
   ImageEditorLineIds,
   ImageEditorSepiaIds,
   ImageEditorSliderIds,
+  ImageEditorSplitToneIds,
   ImageEditorTextfieldIds,
   ImageEditorTiltShiftIds,
   ImageEditorToggleIds,
@@ -550,6 +551,74 @@ export const SETTINGS: ImageEditorFilters = {
   },
   //#endregion
 
+  //#region Split tone
+  splitTone: {
+    controlIds: ImageEditorSplitToneIds,
+    settings: {
+      balance: 0.5,
+      highlights: '#FFAA55',
+      intensity: 0.6,
+      shadows: '#0066FF',
+      softness: 0.25,
+    },
+    configs: {
+      [ImageEditorControls.Slider]: [
+        {
+          ariaLabel: 'Intensity',
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 0.6,
+          id: ImageEditorSliderIds.Intensity,
+          isMandatory: true,
+          max: '2',
+          min: '0',
+          step: '0.05',
+          title: 'Strength of the tint applied.',
+        },
+        {
+          ariaLabel: 'Balance',
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 0.5,
+          id: ImageEditorSliderIds.Balance,
+          isMandatory: true,
+          max: '1',
+          min: '0',
+          step: '0.01',
+          title: 'Luminance pivot. 0 = lift even deep blacks; 1 = tint only the brightest pixels.',
+        },
+        {
+          ariaLabel: 'Softness',
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 0.25,
+          id: ImageEditorSliderIds.Softness,
+          isMandatory: true,
+          max: '0.5',
+          min: '0.01',
+          step: '0.01',
+          title: 'Width of the transition band around the balance value.',
+        },
+      ],
+      [ImageEditorControls.Textfield]: [
+        {
+          ariaLabel: 'Highlights',
+          controlType: ImageEditorControls.Textfield,
+          defaultValue: '#FFAA55',
+          id: ImageEditorTextfieldIds.highlights,
+          title: 'Hex colour applied to highlights (e.g. FFAA55).',
+          type: 'color',
+        },
+        {
+          ariaLabel: 'Shadows',
+          controlType: ImageEditorControls.Textfield,
+          defaultValue: '#0066FF',
+          id: ImageEditorTextfieldIds.highlights,
+          title: 'Hex colour applied to shadows (e.g. 0066FF).',
+          type: 'color',
+        },
+      ],
+    },
+  },
+  //#endregion
+
   //#region Tilt-shift
   tiltShift: {
     controlIds: ImageEditorTiltShiftIds,
@@ -661,7 +730,7 @@ export const SETTINGS: ImageEditorFilters = {
         {
           ariaLabel: 'Color',
           controlType: ImageEditorControls.Textfield,
-          defaultValue: '000000',
+          defaultValue: '#000000',
           id: ImageEditorTextfieldIds.Color,
           title: 'Sets the color of the vignette.',
           type: 'color',
@@ -856,6 +925,20 @@ export const TREE_DATA: LfDataDataset = {
           description: 'Applies a sepia effect to the image.',
           id: 'sepia',
           value: 'Sepia',
+        },
+        //#endregion
+
+        //#region Split tone
+        {
+          cells: {
+            lfCode: {
+              shape: 'code',
+              value: JSON.stringify(SETTINGS.splitTone),
+            },
+          },
+          description: 'Applies a split tone effect to the image.',
+          id: 'split_tone',
+          value: 'Split tone',
         },
         //#endregion
 

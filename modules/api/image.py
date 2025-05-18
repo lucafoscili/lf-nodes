@@ -9,7 +9,7 @@ from PIL import Image
 from server import PromptServer
 
 from ..utils.constants import API_ROUTE_PREFIX
-from ..utils.filters import blend_effect, bloom_effect, brightness_effect, clarity_effect, contrast_effect, desaturate_effect, film_grain_effect, gaussian_blur_effect, line_effect, sepia_effect, tilt_shift_effect, vignette_effect
+from ..utils.filters import blend_effect, bloom_effect, brightness_effect, clarity_effect, contrast_effect, desaturate_effect, film_grain_effect, gaussian_blur_effect, line_effect, sepia_effect, split_tone_effect, tilt_shift_effect, vignette_effect
 from ..utils.helpers import base64_to_tensor, convert_to_boolean, convert_to_float, convert_to_int, create_colored_tensor, create_masonry_node, get_comfy_dir, get_resource_url, pil_to_tensor, resolve_filepath, resolve_url, tensor_to_pil
 
 # region get-image
@@ -89,6 +89,8 @@ async def process_image(request):
             processed_tensor = apply_line_effect(img_tensor, settings)
         elif filter_type == "sepia":
             processed_tensor = apply_sepia_effect(img_tensor, settings)
+        elif filter_type == "split_tone":
+            processed_tensor = apply_split_tone_effect(img_tensor, settings)
         elif filter_type == "tilt_shift":
             processed_tensor = apply_tilt_shift_effect(img_tensor, settings)
         elif filter_type == "vignette":
@@ -191,6 +193,15 @@ def apply_sepia_effect(img_tensor: torch.Tensor, settings: dict):
     intensity = convert_to_float(settings.get("intensity", 0))
 
     return sepia_effect(img_tensor, intensity)
+
+def apply_split_tone_effect(img_tensor: torch.Tensor, settings: dict):
+    highlights: str = settings.get("highlights", "FFAA55")
+    shadows: str = settings.get("shadows", "0066FF")
+    balance = convert_to_float(settings.get("balance", 0))
+    softness = convert_to_float(settings.get("softness", 0))
+    intensity = convert_to_float(settings.get("intensity", 0))
+
+    return split_tone_effect(img_tensor, shadows, highlights, balance, softness, intensity)
 
 def apply_tilt_shift_effect(img_tensor: torch.Tensor, settings: dict):
     focus_position = convert_to_float(settings.get("focus_position", 0.5))
