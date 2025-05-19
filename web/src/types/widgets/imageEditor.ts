@@ -255,6 +255,9 @@ export interface ImageEditorLineSettings extends ImageEditorFilterSettings {
   size: number;
   smooth: boolean;
 }
+export interface ImageEditorSaturationSettings extends ImageEditorFilterSettings {
+  intensity: number;
+}
 export interface ImageEditorSepiaSettings extends ImageEditorFilterSettings {
   intensity: number;
 }
@@ -330,6 +333,9 @@ export enum ImageEditorLineIds {
   Points = 'points',
   Size = 'size',
   Smooth = 'smooth',
+}
+export enum ImageEditorSaturationIds {
+  Intensity = 'intensity',
 }
 export enum ImageEditorSepiaIds {
   Intensity = 'intensity',
@@ -445,6 +451,13 @@ export type ImageEditorLineFilter = ImageEditorFilterDefinition<
     [ImageEditorControls.Toggle]: ImageEditorToggleConfig[];
   }
 >;
+export type ImageEditorSaturationFilter = ImageEditorFilterDefinition<
+  typeof ImageEditorSaturationIds,
+  ImageEditorSaturationSettings,
+  {
+    [ImageEditorControls.Slider]: ImageEditorSliderConfig[];
+  }
+>;
 export type ImageEditorSepiaFilter = ImageEditorFilterDefinition<
   typeof ImageEditorSepiaIds,
   ImageEditorSepiaSettings,
@@ -488,6 +501,7 @@ export type ImageEditorFilters = {
   filmGrain: ImageEditorFilmGrainFilter;
   gaussianBlur: ImageEditorGaussianBlurFilter;
   line: ImageEditorLineFilter;
+  saturation: ImageEditorSaturationFilter;
   sepia: ImageEditorSepiaFilter;
   splitTone: ImageEditorSplitToneFilter;
   tiltShift: ImageEditorTiltShiftFilter;
@@ -504,6 +518,7 @@ export type ImageEditorFilter =
   | ImageEditorFilmGrainFilter
   | ImageEditorGaussianBlurFilter
   | ImageEditorLineFilter
+  | ImageEditorSaturationFilter
   | ImageEditorSepiaFilter
   | ImageEditorSplitToneFilter
   | ImageEditorTiltShiftFilter

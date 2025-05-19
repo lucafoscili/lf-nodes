@@ -115,6 +115,7 @@ export enum NodeName {
   resizeImageToSquare = 'LF_ResizeImageToSquare',
   resolutionSwitcher = 'LF_ResolutionSwitcher',
   samplerSelector = 'LF_SamplerSelector',
+  saturation = 'LF_Saturation',
   saveImageForCivitai = 'LF_SaveImageForCivitAI',
   saveJson = 'LF_SaveJSON',
   saveMarkdown = 'LF_SaveMarkdown',

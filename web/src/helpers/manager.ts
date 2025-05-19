@@ -86,6 +86,7 @@ export const NODE_WIDGET_MAP: NodeWidgetMap = {
   LF_ResizeImageToSquare: [CustomWidgetName.tree],
   LF_ResolutionSwitcher: [CustomWidgetName.progressbar],
   LF_SamplerSelector: [CustomWidgetName.history],
+  LF_Saturation: [CustomWidgetName.compare],
   LF_SaveImageForCivitAI: [CustomWidgetName.masonry],
   LF_SaveJSON: [CustomWidgetName.tree],
   LF_SaveMarkdown: [CustomWidgetName.tree],

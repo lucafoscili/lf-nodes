@@ -3,7 +3,7 @@ import torch
 from server import PromptServer
 
 from ..utils.constants import CATEGORY_PREFIX, EVENT_PREFIX, FUNCTION, Input
-from ..utils.filters import blend_effect, bloom_effect, brightness_effect, clarity_effect, contrast_effect, desaturate_effect, film_grain_effect, gaussian_blur_effect, line_effect, sepia_effect, split_tone_effect, tilt_shift_effect, vignette_effect
+from ..utils.filters import blend_effect, bloom_effect, brightness_effect, clarity_effect, contrast_effect, desaturate_effect, film_grain_effect, gaussian_blur_effect, line_effect, saturation_effect, sepia_effect, split_tone_effect, tilt_shift_effect, vignette_effect
 from ..utils.helpers import normalize_input_image, normalize_list_to_value, normalize_output_image, process_and_save_image
 
 CATEGORY = f"{CATEGORY_PREFIX}/Filters"
@@ -779,6 +779,66 @@ class LF_Line:
         return (batch_list[0], image_list)
 # endregion
 
+# region LF_Saturation
+class LF_Saturation:
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "image": (Input.IMAGE, {
+                    "tooltip": "Input image tensor or a list of image tensors."
+                }),
+                "intensity": (Input.FLOAT, {
+                    "default": 1.2, 
+                    "min": 0.0, 
+                    "max": 5.0, 
+                    "step": 0.1, 
+                    "tooltip": "1.0 = no change, <1 = desat, >1 = saturation boost."
+                }),
+            },
+            "optional": {
+                "ui_widget": (Input.LF_COMPARE, {
+                    "default": {}
+                })
+            },
+            "hidden": {
+                "node_id": "UNIQUE_ID"
+            }
+        }
+
+    CATEGORY = CATEGORY
+    FUNCTION = FUNCTION
+    OUTPUT_IS_LIST = (False, True)
+    RETURN_NAMES = ("image", "image_list")
+    RETURN_TYPES = ("IMAGE", "IMAGE")
+
+    def on_exec(self, **kwargs):
+        image: list[torch.Tensor] = normalize_input_image(kwargs.get("image"))
+        intensity: float = normalize_list_to_value(kwargs["intensity"])
+
+        nodes: list[dict] = []
+        dataset: dict = {"nodes": nodes}
+
+        processed = process_and_save_image(
+            images=image,
+            filter_function=saturation_effect,
+            filter_args={
+                "intensity": intensity
+            },
+            filename_prefix="saturation",
+            nodes=nodes,
+        )
+
+        batch_list, image_list = normalize_output_image(processed)
+
+        PromptServer.instance.send_sync(f"{EVENT_PREFIX}saturation", {
+            "node": kwargs.get("node_id"), 
+            "dataset": dataset
+        })
+
+        return (batch_list[0], image_list)
+# endregion    
+
 # region LF_Sepia
 class LF_Sepia:
     @classmethod
@@ -1103,6 +1163,7 @@ NODE_CLASS_MAPPINGS = {
     "LF_FilmGrain": LF_FilmGrain,
     "LF_GaussianBlur": LF_GaussianBlur,
     "LF_Line": LF_Line,
+    "LF_Saturation": LF_Saturation,
     "LF_Sepia": LF_Sepia,
     "LF_SplitTone": LF_SplitTone,
     "LF_TiltShift": LF_TiltShift,
@@ -1118,6 +1179,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "LF_FilmGrain": "Film grain",
     "LF_GaussianBlur": "Gaussian Blur",
     "LF_Line": "Line",
+    "LF_Saturation": "Saturation",
     "LF_Sepia": "Sepia",
     "LF_SplitTone": "Split Tone",
     "LF_TiltShift": "Tilt Shift",

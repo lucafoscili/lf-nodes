@@ -12,6 +12,7 @@ import {
   ImageEditorFilters,
   ImageEditorGaussianBlurIds,
   ImageEditorLineIds,
+  ImageEditorSaturationIds,
   ImageEditorSepiaIds,
   ImageEditorSliderIds,
   ImageEditorSplitToneIds,
@@ -551,6 +552,31 @@ export const SETTINGS: ImageEditorFilters = {
   },
   //#endregion
 
+  //#region Saturation
+  saturation: {
+    controlIds: ImageEditorSaturationIds,
+    settings: {
+      intensity: 1,
+    },
+    configs: {
+      [ImageEditorControls.Slider]: [
+        {
+          ariaLabel: 'Saturation Intensity',
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 1,
+          id: ImageEditorSliderIds.Intensity,
+          isMandatory: true,
+          max: '5',
+          min: '0',
+          step: '0.1',
+          title:
+            'Controls the intensity of the saturation adjustment. 1.0 is no change, below 1 reduces saturation, above 1 increases saturation.',
+        },
+      ],
+    },
+  },
+  //#endregion
+
   //#region Split tone
   splitTone: {
     controlIds: ImageEditorSplitToneIds,
@@ -834,6 +860,20 @@ export const TREE_DATA: LfDataDataset = {
           },
           id: 'desaturate',
           value: 'Desaturate',
+        },
+        //#endregion
+
+        //#region Saturation
+        {
+          cells: {
+            lfCode: {
+              shape: 'code',
+              value: JSON.stringify(SETTINGS.saturation),
+            },
+          },
+          description: 'Adjusts the saturation.',
+          id: 'saturation',
+          value: 'Saturation',
         },
         //#endregion
       ],

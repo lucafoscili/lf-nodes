@@ -9,7 +9,7 @@ from PIL import Image
 from server import PromptServer
 
 from ..utils.constants import API_ROUTE_PREFIX
-from ..utils.filters import blend_effect, bloom_effect, brightness_effect, clarity_effect, contrast_effect, desaturate_effect, film_grain_effect, gaussian_blur_effect, line_effect, sepia_effect, split_tone_effect, tilt_shift_effect, vignette_effect
+from ..utils.filters import blend_effect, bloom_effect, brightness_effect, clarity_effect, contrast_effect, desaturate_effect, film_grain_effect, gaussian_blur_effect, line_effect, saturation_effect, sepia_effect, split_tone_effect, tilt_shift_effect, vignette_effect
 from ..utils.helpers import base64_to_tensor, convert_to_boolean, convert_to_float, convert_to_int, create_colored_tensor, create_masonry_node, get_comfy_dir, get_resource_url, pil_to_tensor, resolve_filepath, resolve_url, tensor_to_pil
 
 # region get-image
@@ -87,6 +87,8 @@ async def process_image(request):
             processed_tensor = apply_gaussian_blur_effect(img_tensor, settings)
         elif filter_type == "line":
             processed_tensor = apply_line_effect(img_tensor, settings)
+        elif filter_type == "saturation":
+            processed_tensor = apply_saturation_effect(img_tensor, settings)
         elif filter_type == "sepia":
             processed_tensor = apply_sepia_effect(img_tensor, settings)
         elif filter_type == "split_tone":
@@ -188,6 +190,11 @@ def apply_line_effect(img_tensor: torch.Tensor, settings: dict):
     smooth = convert_to_boolean(settings.get("smoooth", False))
 
     return line_effect(img_tensor, points, size, color, opacity, smooth)
+
+def apply_saturation_effect(img_tensor: torch.Tensor, settings: dict):
+    intensity = convert_to_float(settings.get("intensity", 1))
+
+    return saturation_effect(img_tensor, intensity)
 
 def apply_sepia_effect(img_tensor: torch.Tensor, settings: dict):
     intensity = convert_to_float(settings.get("intensity", 0))
