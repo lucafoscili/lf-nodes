@@ -114,7 +114,9 @@ export enum ImageEditorTextfieldIds {
   Tint = 'tint',
 }
 export enum ImageEditorToggleIds {
+  ClipSoft = 'clip_soft',
   Localized = 'localized',
+  ProtectSkin = 'protect_skin',
   Shape = 'shape',
   Smooth = 'smoooth',
   SoftBlend = 'soft_blend',
@@ -198,6 +200,7 @@ export interface ImageEditorFilterSettingsMap {
   sepia: ImageEditorSepiaSettings;
   splitTone: ImageEditorSplitToneSettings;
   tiltShift: ImageEditorTiltShiftSettings;
+  vibrance: ImageEditorVibranceSettings;
   vignette: ImageEditorVignetteSettings;
 }
 export interface ImageEditorBlendSettings extends ImageEditorFilterSettings {
@@ -274,6 +277,11 @@ export interface ImageEditorTiltShiftSettings extends ImageEditorFilterSettings 
   radius: number;
   smooth: boolean;
   vertical: boolean;
+}
+export interface ImageEditorVibranceSettings extends ImageEditorFilterSettings {
+  intensity: number;
+  clip_soft: boolean;
+  protect_skin: boolean;
 }
 export interface ImageEditorVignetteSettings extends ImageEditorFilterSettings {
   intensity: number;
@@ -353,6 +361,11 @@ export enum ImageEditorTiltShiftIds {
   Radius = 'radius',
   Smooth = 'smooth',
   Vertical = 'vertical',
+}
+export enum ImageEditorVibranceIds {
+  Intensity = 'intensity',
+  ClipSoft = 'clip_soft',
+  ProtectSkin = 'protect_skin',
 }
 export enum ImageEditorVignetteIds {
   Color = 'color',
@@ -481,6 +494,14 @@ export type ImageEditorTiltShiftFilter = ImageEditorFilterDefinition<
     [ImageEditorControls.Toggle]: ImageEditorToggleConfig[];
   }
 >;
+export type ImageEditorVibranceFilter = ImageEditorFilterDefinition<
+  typeof ImageEditorVibranceIds,
+  ImageEditorVibranceSettings,
+  {
+    [ImageEditorControls.Slider]: ImageEditorSliderConfig[];
+    [ImageEditorControls.Toggle]: ImageEditorToggleConfig[];
+  }
+>;
 export type ImageEditorVignetteFilter = ImageEditorFilterDefinition<
   typeof ImageEditorVignetteIds,
   ImageEditorVignetteSettings,
@@ -505,6 +526,7 @@ export type ImageEditorFilters = {
   sepia: ImageEditorSepiaFilter;
   splitTone: ImageEditorSplitToneFilter;
   tiltShift: ImageEditorTiltShiftFilter;
+  vibrance: ImageEditorVibranceFilter;
   vignette: ImageEditorVignetteFilter;
 };
 export type ImageEditorFilter =
@@ -522,5 +544,6 @@ export type ImageEditorFilter =
   | ImageEditorSepiaFilter
   | ImageEditorSplitToneFilter
   | ImageEditorTiltShiftFilter
+  | ImageEditorVibranceFilter
   | ImageEditorVignetteFilter;
 //#endregion

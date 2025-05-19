@@ -146,6 +146,7 @@ export enum NodeName {
   usageStatistics = 'LF_UsageStatistics',
   vaeSelector = 'LF_VAESelector',
   viewImages = 'LF_ViewImages',
+  vibrance = 'LF_Vibrance',
   vignette = 'LF_Vignette',
   wallOfText = 'LF_WallOfText',
   writeJson = 'LF_WriteJSON',

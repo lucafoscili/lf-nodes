@@ -9,7 +9,7 @@ from PIL import Image
 from server import PromptServer
 
 from ..utils.constants import API_ROUTE_PREFIX
-from ..utils.filters import blend_effect, bloom_effect, brightness_effect, clarity_effect, contrast_effect, desaturate_effect, film_grain_effect, gaussian_blur_effect, line_effect, saturation_effect, sepia_effect, split_tone_effect, tilt_shift_effect, vignette_effect
+from ..utils.filters import blend_effect, bloom_effect, brightness_effect, clarity_effect, contrast_effect, desaturate_effect, film_grain_effect, gaussian_blur_effect, line_effect, saturation_effect, sepia_effect, split_tone_effect, tilt_shift_effect, vibrance_effect, vignette_effect
 from ..utils.helpers import base64_to_tensor, convert_to_boolean, convert_to_float, convert_to_int, create_colored_tensor, create_masonry_node, get_comfy_dir, get_resource_url, pil_to_tensor, resolve_filepath, resolve_url, tensor_to_pil
 
 # region get-image
@@ -95,6 +95,8 @@ async def process_image(request):
             processed_tensor = apply_split_tone_effect(img_tensor, settings)
         elif filter_type == "tilt_shift":
             processed_tensor = apply_tilt_shift_effect(img_tensor, settings)
+        elif filter_type == "vibrance":
+            processed_tensor = apply_vibrance_effect(img_tensor, settings)
         elif filter_type == "vignette":
             processed_tensor = apply_vignette_effect(img_tensor, settings)
         else:
@@ -218,6 +220,13 @@ def apply_tilt_shift_effect(img_tensor: torch.Tensor, settings: dict):
     orientation: str = settings.get("orientation", "horizontal")
 
     return tilt_shift_effect(img_tensor, focus_position, focus_size, blur_radius, feather, orientation)
+
+def apply_vibrance_effect(img_tensor: torch.Tensor, settings: dict):
+    intensity: float= convert_to_float(settings.get("intensity", 0))
+    protect_skin: bool = convert_to_boolean(settings.get("protect_skin", False))
+    clip_soft: bool = convert_to_boolean(settings.get("clip_soft", False))
+
+    return vibrance_effect(img_tensor, intensity, protect_skin, clip_soft)
 
 def apply_vignette_effect(img_tensor: torch.Tensor, settings: dict):
     intensity = convert_to_float(settings.get("intensity", 0))

@@ -19,6 +19,7 @@ import {
   ImageEditorTextfieldIds,
   ImageEditorTiltShiftIds,
   ImageEditorToggleIds,
+  ImageEditorVibranceIds,
   ImageEditorVignetteIds,
 } from '../types/widgets/imageEditor';
 
@@ -718,6 +719,53 @@ export const SETTINGS: ImageEditorFilters = {
   },
   //#endregion
 
+  //#region Vibrance
+  vibrance: {
+    controlIds: ImageEditorVibranceIds,
+    settings: {
+      intensity: 0,
+      protect_skin: true,
+      clip_soft: true,
+    },
+    configs: {
+      [ImageEditorControls.Slider]: [
+        {
+          ariaLabel: 'Vibrance Intensity',
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 0,
+          id: ImageEditorSliderIds.Intensity,
+          isMandatory: true,
+          max: '2',
+          min: '-1',
+          step: '0.05',
+          title:
+            'Controls the intensity of the vibrance adjustment. Negative values reduce vibrance, positive values increase it.',
+        },
+      ],
+      [ImageEditorControls.Toggle]: [
+        {
+          ariaLabel: 'Protect Skin Tones',
+          controlType: ImageEditorControls.Toggle,
+          defaultValue: true,
+          id: ImageEditorToggleIds.ProtectSkin,
+          off: 'false',
+          on: 'true',
+          title: 'If true, skin tones are less affected by the vibrance adjustment.',
+        },
+        {
+          ariaLabel: 'Clip Softly',
+          controlType: ImageEditorControls.Toggle,
+          defaultValue: true,
+          id: ImageEditorToggleIds.ClipSoft,
+          off: 'false',
+          on: 'true',
+          title: 'If true, saturation is rolled off near maximum to avoid clipping.',
+        },
+      ],
+    },
+  },
+  //#endregion
+
   //#region Vignette
   vignette: {
     controlIds: ImageEditorVignetteIds,
@@ -993,6 +1041,20 @@ export const TREE_DATA: LfDataDataset = {
           description: 'Applies a tilt-shift effect to the image.',
           id: 'tilt_shift',
           value: 'Tilt-shift',
+        },
+        //#endregion
+
+        //#region Vibrance
+        {
+          cells: {
+            lfCode: {
+              shape: 'code',
+              value: JSON.stringify(SETTINGS.vibrance),
+            },
+          },
+          description: 'Applies a vibrance effect to the image.',
+          id: 'vibrance',
+          value: 'Vibrance',
         },
         //#endregion
 
