@@ -12,12 +12,14 @@ import {
   ImageEditorFilters,
   ImageEditorGaussianBlurIds,
   ImageEditorLineIds,
+  ImageEditorSaturationIds,
   ImageEditorSepiaIds,
   ImageEditorSliderIds,
   ImageEditorSplitToneIds,
   ImageEditorTextfieldIds,
   ImageEditorTiltShiftIds,
   ImageEditorToggleIds,
+  ImageEditorVibranceIds,
   ImageEditorVignetteIds,
 } from '../types/widgets/imageEditor';
 
@@ -551,6 +553,31 @@ export const SETTINGS: ImageEditorFilters = {
   },
   //#endregion
 
+  //#region Saturation
+  saturation: {
+    controlIds: ImageEditorSaturationIds,
+    settings: {
+      intensity: 1,
+    },
+    configs: {
+      [ImageEditorControls.Slider]: [
+        {
+          ariaLabel: 'Saturation Intensity',
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 1,
+          id: ImageEditorSliderIds.Intensity,
+          isMandatory: true,
+          max: '5',
+          min: '0',
+          step: '0.1',
+          title:
+            'Controls the intensity of the saturation adjustment. 1.0 is no change, below 1 reduces saturation, above 1 increases saturation.',
+        },
+      ],
+    },
+  },
+  //#endregion
+
   //#region Split tone
   splitTone: {
     controlIds: ImageEditorSplitToneIds,
@@ -686,6 +713,53 @@ export const SETTINGS: ImageEditorFilters = {
           on: 'vertical',
           title:
             'Direction of the focus band. Horizontal means the focus band is horizontal, vertical means it is vertical.',
+        },
+      ],
+    },
+  },
+  //#endregion
+
+  //#region Vibrance
+  vibrance: {
+    controlIds: ImageEditorVibranceIds,
+    settings: {
+      intensity: 0,
+      protect_skin: true,
+      clip_soft: true,
+    },
+    configs: {
+      [ImageEditorControls.Slider]: [
+        {
+          ariaLabel: 'Vibrance Intensity',
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 0,
+          id: ImageEditorSliderIds.Intensity,
+          isMandatory: true,
+          max: '2',
+          min: '-1',
+          step: '0.05',
+          title:
+            'Controls the intensity of the vibrance adjustment. Negative values reduce vibrance, positive values increase it.',
+        },
+      ],
+      [ImageEditorControls.Toggle]: [
+        {
+          ariaLabel: 'Protect Skin Tones',
+          controlType: ImageEditorControls.Toggle,
+          defaultValue: true,
+          id: ImageEditorToggleIds.ProtectSkin,
+          off: 'false',
+          on: 'true',
+          title: 'If true, skin tones are less affected by the vibrance adjustment.',
+        },
+        {
+          ariaLabel: 'Clip Softly',
+          controlType: ImageEditorControls.Toggle,
+          defaultValue: true,
+          id: ImageEditorToggleIds.ClipSoft,
+          off: 'false',
+          on: 'true',
+          title: 'If true, saturation is rolled off near maximum to avoid clipping.',
         },
       ],
     },
@@ -836,6 +910,20 @@ export const TREE_DATA: LfDataDataset = {
           value: 'Desaturate',
         },
         //#endregion
+
+        //#region Saturation
+        {
+          cells: {
+            lfCode: {
+              shape: 'code',
+              value: JSON.stringify(SETTINGS.saturation),
+            },
+          },
+          description: 'Adjusts the saturation.',
+          id: 'saturation',
+          value: 'Saturation',
+        },
+        //#endregion
       ],
     },
     {
@@ -953,6 +1041,20 @@ export const TREE_DATA: LfDataDataset = {
           description: 'Applies a tilt-shift effect to the image.',
           id: 'tilt_shift',
           value: 'Tilt-shift',
+        },
+        //#endregion
+
+        //#region Vibrance
+        {
+          cells: {
+            lfCode: {
+              shape: 'code',
+              value: JSON.stringify(SETTINGS.vibrance),
+            },
+          },
+          description: 'Applies a vibrance effect to the image.',
+          id: 'vibrance',
+          value: 'Vibrance',
         },
         //#endregion
 

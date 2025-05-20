@@ -5101,7 +5101,7 @@ var K = false, Q = (e2, t2, n2) => {
                         const n6 = e7.S.replace(/-/g, "_"), o6 = e7.T;
                         if (!o6) return;
                         const s3 = i.get(o6);
-                        return s3 ? s3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-0337b52e.entry.js": () => import("./p-0337b52e.entry-9YuFt8ja.js"), "./p-11178b37.entry.js": () => import("./p-11178b37.entry-D0txBLQk.js"), "./p-2487f307.entry.js": () => import("./p-2487f307.entry-DsoFe3Vn.js"), "./p-273c8ea4.entry.js": () => import("./p-273c8ea4.entry-2E9ehgwa.js"), "./p-3364817f.entry.js": () => import("./p-3364817f.entry-DiDpqk3B.js"), "./p-3a9e5f46.entry.js": () => import("./p-3a9e5f46.entry-DWSI4in9.js"), "./p-4f321f6b.entry.js": () => import("./p-4f321f6b.entry-BPvZqT5H.js"), "./p-585ccba5.entry.js": () => import("./p-585ccba5.entry-DrVqbMAg.js"), "./p-5c44cc7e.entry.js": () => import("./p-5c44cc7e.entry-C7T7BicJ.js"), "./p-6c11bba7.entry.js": () => import("./p-6c11bba7.entry-C15ZaJLF.js"), "./p-7bb2c820.entry.js": () => import("./p-7bb2c820.entry-r-_MqkoR.js"), "./p-9f41b6b0.entry.js": () => import("./p-9f41b6b0.entry-NPXRHndj.js"), "./p-ae4ab342.entry.js": () => import("./p-ae4ab342.entry-CS_GFMxP.js"), "./p-ce0e9b9e.entry.js": () => import("./p-ce0e9b9e.entry-B6IQObfC.js"), "./p-d5e89be3.entry.js": () => import("./p-d5e89be3.entry-CowIrsOQ.js"), "./p-eaba894b.entry.js": () => import("./p-eaba894b.entry-BL4oSsnp.js"), "./p-eb0c30d6.entry.js": () => import("./p-eb0c30d6.entry-Wgcld8o5.js") }), `./${o6}.entry.js`, 2).then((e8) => (i.set(o6, e8), e8[n6]), (e8) => {
+                        return s3 ? s3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-0337b52e.entry.js": () => import("./p-0337b52e.entry-D2E-7jq8.js"), "./p-11178b37.entry.js": () => import("./p-11178b37.entry-_Rg6PE6k.js"), "./p-2487f307.entry.js": () => import("./p-2487f307.entry-Bosero12.js"), "./p-273c8ea4.entry.js": () => import("./p-273c8ea4.entry-D2wddEBC.js"), "./p-3364817f.entry.js": () => import("./p-3364817f.entry-Dqev6oO7.js"), "./p-3a9e5f46.entry.js": () => import("./p-3a9e5f46.entry-ncnlL_Hs.js"), "./p-4f321f6b.entry.js": () => import("./p-4f321f6b.entry-SnCuOMQj.js"), "./p-585ccba5.entry.js": () => import("./p-585ccba5.entry-Dc0Gb08h.js"), "./p-5c44cc7e.entry.js": () => import("./p-5c44cc7e.entry-B2F4qnxK.js"), "./p-6c11bba7.entry.js": () => import("./p-6c11bba7.entry-DCiLEyXL.js"), "./p-7bb2c820.entry.js": () => import("./p-7bb2c820.entry-5C3EvRGB.js"), "./p-9f41b6b0.entry.js": () => import("./p-9f41b6b0.entry-BymLqzPB.js"), "./p-ae4ab342.entry.js": () => import("./p-ae4ab342.entry-6dZZ91JR.js"), "./p-ce0e9b9e.entry.js": () => import("./p-ce0e9b9e.entry-CP4KD8t7.js"), "./p-d5e89be3.entry.js": () => import("./p-d5e89be3.entry-6lA7_PYa.js"), "./p-eaba894b.entry.js": () => import("./p-eaba894b.entry-DbSbHREx.js"), "./p-eb0c30d6.entry.js": () => import("./p-eb0c30d6.entry-Eg5-WQ-j.js") }), `./${o6}.entry.js`, 2).then((e8) => (i.set(o6, e8), e8[n6]), (e8) => {
                           l(e8, t3.$hostElement$);
                         });
                         /*!__STENCIL_STATIC_IMPORT_SWITCH__*/
@@ -5773,6 +5773,7 @@ var CustomWidgetName;
 var NodeName;
 (function(NodeName2) {
   NodeName2["blend"] = "LF_Blend";
+  NodeName2["blobToImage"] = "LF_BlobToImage";
   NodeName2["bloom"] = "LF_Bloom";
   NodeName2["blurImages"] = "LF_BlurImages";
   NodeName2["boolean"] = "LF_Boolean";
@@ -5835,6 +5836,7 @@ var NodeName;
   NodeName2["resizeImageToSquare"] = "LF_ResizeImageToSquare";
   NodeName2["resolutionSwitcher"] = "LF_ResolutionSwitcher";
   NodeName2["samplerSelector"] = "LF_SamplerSelector";
+  NodeName2["saturation"] = "LF_Saturation";
   NodeName2["saveImageForCivitai"] = "LF_SaveImageForCivitAI";
   NodeName2["saveJson"] = "LF_SaveJSON";
   NodeName2["saveMarkdown"] = "LF_SaveMarkdown";
@@ -5865,6 +5867,7 @@ var NodeName;
   NodeName2["usageStatistics"] = "LF_UsageStatistics";
   NodeName2["vaeSelector"] = "LF_VAESelector";
   NodeName2["viewImages"] = "LF_ViewImages";
+  NodeName2["vibrance"] = "LF_Vibrance";
   NodeName2["vignette"] = "LF_Vignette";
   NodeName2["wallOfText"] = "LF_WallOfText";
   NodeName2["writeJson"] = "LF_WriteJSON";
@@ -5898,6 +5901,7 @@ var TagName;
 })(TagName || (TagName = {}));
 const NODE_WIDGET_MAP = {
   LF_Blend: [CustomWidgetName.compare],
+  LF_BlobToImage: [CustomWidgetName.code],
   LF_Bloom: [CustomWidgetName.compare],
   LF_BlurImages: [CustomWidgetName.masonry],
   LF_Boolean: [CustomWidgetName.history],
@@ -5960,6 +5964,7 @@ const NODE_WIDGET_MAP = {
   LF_ResizeImageToSquare: [CustomWidgetName.tree],
   LF_ResolutionSwitcher: [CustomWidgetName.progressbar],
   LF_SamplerSelector: [CustomWidgetName.history],
+  LF_Saturation: [CustomWidgetName.compare],
   LF_SaveImageForCivitAI: [CustomWidgetName.masonry],
   LF_SaveJSON: [CustomWidgetName.tree],
   LF_SaveMarkdown: [CustomWidgetName.tree],
@@ -5989,6 +5994,7 @@ const NODE_WIDGET_MAP = {
   LF_UsageStatistics: [CustomWidgetName.tabBarChart],
   LF_UrandomSeedGenerator: [CustomWidgetName.tree],
   LF_VAESelector: [CustomWidgetName.history],
+  LF_Vibrance: [CustomWidgetName.compare],
   LF_ViewImages: [CustomWidgetName.masonry],
   LF_Vignette: [CustomWidgetName.compare],
   LF_WallOfText: [CustomWidgetName.code],
@@ -8028,7 +8034,9 @@ var ImageEditorTextfieldIds;
 })(ImageEditorTextfieldIds || (ImageEditorTextfieldIds = {}));
 var ImageEditorToggleIds;
 (function(ImageEditorToggleIds2) {
+  ImageEditorToggleIds2["ClipSoft"] = "clip_soft";
   ImageEditorToggleIds2["Localized"] = "localized";
+  ImageEditorToggleIds2["ProtectSkin"] = "protect_skin";
   ImageEditorToggleIds2["Shape"] = "shape";
   ImageEditorToggleIds2["Smooth"] = "smoooth";
   ImageEditorToggleIds2["SoftBlend"] = "soft_blend";
@@ -8098,6 +8106,10 @@ var ImageEditorLineIds;
   ImageEditorLineIds2["Size"] = "size";
   ImageEditorLineIds2["Smooth"] = "smooth";
 })(ImageEditorLineIds || (ImageEditorLineIds = {}));
+var ImageEditorSaturationIds;
+(function(ImageEditorSaturationIds2) {
+  ImageEditorSaturationIds2["Intensity"] = "intensity";
+})(ImageEditorSaturationIds || (ImageEditorSaturationIds = {}));
 var ImageEditorSepiaIds;
 (function(ImageEditorSepiaIds2) {
   ImageEditorSepiaIds2["Intensity"] = "intensity";
@@ -8118,6 +8130,12 @@ var ImageEditorTiltShiftIds;
   ImageEditorTiltShiftIds2["Smooth"] = "smooth";
   ImageEditorTiltShiftIds2["Vertical"] = "vertical";
 })(ImageEditorTiltShiftIds || (ImageEditorTiltShiftIds = {}));
+var ImageEditorVibranceIds;
+(function(ImageEditorVibranceIds2) {
+  ImageEditorVibranceIds2["Intensity"] = "intensity";
+  ImageEditorVibranceIds2["ClipSoft"] = "clip_soft";
+  ImageEditorVibranceIds2["ProtectSkin"] = "protect_skin";
+})(ImageEditorVibranceIds || (ImageEditorVibranceIds = {}));
 var ImageEditorVignetteIds;
 (function(ImageEditorVignetteIds2) {
   ImageEditorVignetteIds2["Color"] = "color";
@@ -8633,6 +8651,29 @@ const SETTINGS = {
     }
   },
   //#endregion
+  //#region Saturation
+  saturation: {
+    controlIds: ImageEditorSaturationIds,
+    settings: {
+      intensity: 1
+    },
+    configs: {
+      [ImageEditorControls.Slider]: [
+        {
+          ariaLabel: "Saturation Intensity",
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 1,
+          id: ImageEditorSliderIds.Intensity,
+          isMandatory: true,
+          max: "5",
+          min: "0",
+          step: "0.1",
+          title: "Controls the intensity of the saturation adjustment. 1.0 is no change, below 1 reduces saturation, above 1 increases saturation."
+        }
+      ]
+    }
+  },
+  //#endregion
   //#region Split tone
   splitTone: {
     controlIds: ImageEditorSplitToneIds,
@@ -8692,7 +8733,7 @@ const SETTINGS = {
           ariaLabel: "Shadows",
           controlType: ImageEditorControls.Textfield,
           defaultValue: "#0066FF",
-          id: ImageEditorTextfieldIds.shadows,
+          id: ImageEditorTextfieldIds.highlights,
           title: "Hex colour applied to shadows (e.g. 0066FF).",
           type: "color"
         }
@@ -8764,6 +8805,51 @@ const SETTINGS = {
           off: "horizontal",
           on: "vertical",
           title: "Direction of the focus band. Horizontal means the focus band is horizontal, vertical means it is vertical."
+        }
+      ]
+    }
+  },
+  //#endregion
+  //#region Vibrance
+  vibrance: {
+    controlIds: ImageEditorVibranceIds,
+    settings: {
+      intensity: 0,
+      protect_skin: true,
+      clip_soft: true
+    },
+    configs: {
+      [ImageEditorControls.Slider]: [
+        {
+          ariaLabel: "Vibrance Intensity",
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 0,
+          id: ImageEditorSliderIds.Intensity,
+          isMandatory: true,
+          max: "2",
+          min: "-1",
+          step: "0.05",
+          title: "Controls the intensity of the vibrance adjustment. Negative values reduce vibrance, positive values increase it."
+        }
+      ],
+      [ImageEditorControls.Toggle]: [
+        {
+          ariaLabel: "Protect Skin Tones",
+          controlType: ImageEditorControls.Toggle,
+          defaultValue: true,
+          id: ImageEditorToggleIds.ProtectSkin,
+          off: "false",
+          on: "true",
+          title: "If true, skin tones are less affected by the vibrance adjustment."
+        },
+        {
+          ariaLabel: "Clip Softly",
+          controlType: ImageEditorControls.Toggle,
+          defaultValue: true,
+          id: ImageEditorToggleIds.ClipSoft,
+          off: "false",
+          on: "true",
+          title: "If true, saturation is rolled off near maximum to avoid clipping."
         }
       ]
     }
@@ -8907,6 +8993,19 @@ const TREE_DATA = {
           },
           id: "desaturate",
           value: "Desaturate"
+        },
+        //#endregion
+        //#region Saturation
+        {
+          cells: {
+            lfCode: {
+              shape: "code",
+              value: JSON.stringify(SETTINGS.saturation)
+            }
+          },
+          description: "Adjusts the saturation.",
+          id: "saturation",
+          value: "Saturation"
         }
         //#endregion
       ]
@@ -9019,6 +9118,19 @@ const TREE_DATA = {
           description: "Applies a tilt-shift effect to the image.",
           id: "tilt_shift",
           value: "Tilt-shift"
+        },
+        //#endregion
+        //#region Vibrance
+        {
+          cells: {
+            lfCode: {
+              shape: "code",
+              value: JSON.stringify(SETTINGS.vibrance)
+            }
+          },
+          description: "Applies a vibrance effect to the image.",
+          id: "vibrance",
+          value: "Vibrance"
         },
         //#endregion
         //#region Vignette

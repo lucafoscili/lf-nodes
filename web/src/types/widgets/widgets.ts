@@ -53,6 +53,7 @@ export enum CustomWidgetName {
 }
 export enum NodeName {
   blend = 'LF_Blend',
+  blobToImage = 'LF_BlobToImage',
   bloom = 'LF_Bloom',
   blurImages = 'LF_BlurImages',
   boolean = 'LF_Boolean',
@@ -115,6 +116,7 @@ export enum NodeName {
   resizeImageToSquare = 'LF_ResizeImageToSquare',
   resolutionSwitcher = 'LF_ResolutionSwitcher',
   samplerSelector = 'LF_SamplerSelector',
+  saturation = 'LF_Saturation',
   saveImageForCivitai = 'LF_SaveImageForCivitAI',
   saveJson = 'LF_SaveJSON',
   saveMarkdown = 'LF_SaveMarkdown',
@@ -145,6 +147,7 @@ export enum NodeName {
   usageStatistics = 'LF_UsageStatistics',
   vaeSelector = 'LF_VAESelector',
   viewImages = 'LF_ViewImages',
+  vibrance = 'LF_Vibrance',
   vignette = 'LF_Vignette',
   wallOfText = 'LF_WallOfText',
   writeJson = 'LF_WriteJSON',

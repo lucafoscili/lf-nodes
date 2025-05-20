@@ -24,6 +24,7 @@ import {
 //#region Node-Widget map
 export const NODE_WIDGET_MAP: NodeWidgetMap = {
   LF_Blend: [CustomWidgetName.compare],
+  LF_BlobToImage: [CustomWidgetName.code],
   LF_Bloom: [CustomWidgetName.compare],
   LF_BlurImages: [CustomWidgetName.masonry],
   LF_Boolean: [CustomWidgetName.history],
@@ -86,6 +87,7 @@ export const NODE_WIDGET_MAP: NodeWidgetMap = {
   LF_ResizeImageToSquare: [CustomWidgetName.tree],
   LF_ResolutionSwitcher: [CustomWidgetName.progressbar],
   LF_SamplerSelector: [CustomWidgetName.history],
+  LF_Saturation: [CustomWidgetName.compare],
   LF_SaveImageForCivitAI: [CustomWidgetName.masonry],
   LF_SaveJSON: [CustomWidgetName.tree],
   LF_SaveMarkdown: [CustomWidgetName.tree],
@@ -115,6 +117,7 @@ export const NODE_WIDGET_MAP: NodeWidgetMap = {
   LF_UsageStatistics: [CustomWidgetName.tabBarChart],
   LF_UrandomSeedGenerator: [CustomWidgetName.tree],
   LF_VAESelector: [CustomWidgetName.history],
+  LF_Vibrance: [CustomWidgetName.compare],
   LF_ViewImages: [CustomWidgetName.masonry],
   LF_Vignette: [CustomWidgetName.compare],
   LF_WallOfText: [CustomWidgetName.code],

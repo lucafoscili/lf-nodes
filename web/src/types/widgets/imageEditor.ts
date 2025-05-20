@@ -114,7 +114,9 @@ export enum ImageEditorTextfieldIds {
   Tint = 'tint',
 }
 export enum ImageEditorToggleIds {
+  ClipSoft = 'clip_soft',
   Localized = 'localized',
+  ProtectSkin = 'protect_skin',
   Shape = 'shape',
   Smooth = 'smoooth',
   SoftBlend = 'soft_blend',
@@ -198,6 +200,7 @@ export interface ImageEditorFilterSettingsMap {
   sepia: ImageEditorSepiaSettings;
   splitTone: ImageEditorSplitToneSettings;
   tiltShift: ImageEditorTiltShiftSettings;
+  vibrance: ImageEditorVibranceSettings;
   vignette: ImageEditorVignetteSettings;
 }
 export interface ImageEditorBlendSettings extends ImageEditorFilterSettings {
@@ -255,6 +258,9 @@ export interface ImageEditorLineSettings extends ImageEditorFilterSettings {
   size: number;
   smooth: boolean;
 }
+export interface ImageEditorSaturationSettings extends ImageEditorFilterSettings {
+  intensity: number;
+}
 export interface ImageEditorSepiaSettings extends ImageEditorFilterSettings {
   intensity: number;
 }
@@ -271,6 +277,11 @@ export interface ImageEditorTiltShiftSettings extends ImageEditorFilterSettings 
   radius: number;
   smooth: boolean;
   vertical: boolean;
+}
+export interface ImageEditorVibranceSettings extends ImageEditorFilterSettings {
+  intensity: number;
+  clip_soft: boolean;
+  protect_skin: boolean;
 }
 export interface ImageEditorVignetteSettings extends ImageEditorFilterSettings {
   intensity: number;
@@ -331,6 +342,9 @@ export enum ImageEditorLineIds {
   Size = 'size',
   Smooth = 'smooth',
 }
+export enum ImageEditorSaturationIds {
+  Intensity = 'intensity',
+}
 export enum ImageEditorSepiaIds {
   Intensity = 'intensity',
 }
@@ -347,6 +361,11 @@ export enum ImageEditorTiltShiftIds {
   Radius = 'radius',
   Smooth = 'smooth',
   Vertical = 'vertical',
+}
+export enum ImageEditorVibranceIds {
+  Intensity = 'intensity',
+  ClipSoft = 'clip_soft',
+  ProtectSkin = 'protect_skin',
 }
 export enum ImageEditorVignetteIds {
   Color = 'color',
@@ -445,6 +464,13 @@ export type ImageEditorLineFilter = ImageEditorFilterDefinition<
     [ImageEditorControls.Toggle]: ImageEditorToggleConfig[];
   }
 >;
+export type ImageEditorSaturationFilter = ImageEditorFilterDefinition<
+  typeof ImageEditorSaturationIds,
+  ImageEditorSaturationSettings,
+  {
+    [ImageEditorControls.Slider]: ImageEditorSliderConfig[];
+  }
+>;
 export type ImageEditorSepiaFilter = ImageEditorFilterDefinition<
   typeof ImageEditorSepiaIds,
   ImageEditorSepiaSettings,
@@ -463,6 +489,14 @@ export type ImageEditorSplitToneFilter = ImageEditorFilterDefinition<
 export type ImageEditorTiltShiftFilter = ImageEditorFilterDefinition<
   typeof ImageEditorTiltShiftIds,
   ImageEditorTiltShiftSettings,
+  {
+    [ImageEditorControls.Slider]: ImageEditorSliderConfig[];
+    [ImageEditorControls.Toggle]: ImageEditorToggleConfig[];
+  }
+>;
+export type ImageEditorVibranceFilter = ImageEditorFilterDefinition<
+  typeof ImageEditorVibranceIds,
+  ImageEditorVibranceSettings,
   {
     [ImageEditorControls.Slider]: ImageEditorSliderConfig[];
     [ImageEditorControls.Toggle]: ImageEditorToggleConfig[];
@@ -488,9 +522,11 @@ export type ImageEditorFilters = {
   filmGrain: ImageEditorFilmGrainFilter;
   gaussianBlur: ImageEditorGaussianBlurFilter;
   line: ImageEditorLineFilter;
+  saturation: ImageEditorSaturationFilter;
   sepia: ImageEditorSepiaFilter;
   splitTone: ImageEditorSplitToneFilter;
   tiltShift: ImageEditorTiltShiftFilter;
+  vibrance: ImageEditorVibranceFilter;
   vignette: ImageEditorVignetteFilter;
 };
 export type ImageEditorFilter =
@@ -504,8 +540,10 @@ export type ImageEditorFilter =
   | ImageEditorFilmGrainFilter
   | ImageEditorGaussianBlurFilter
   | ImageEditorLineFilter
+  | ImageEditorSaturationFilter
   | ImageEditorSepiaFilter
   | ImageEditorSplitToneFilter
   | ImageEditorTiltShiftFilter
+  | ImageEditorVibranceFilter
   | ImageEditorVignetteFilter;
 //#endregion
