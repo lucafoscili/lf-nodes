@@ -53,6 +53,7 @@ export enum CustomWidgetName {
 }
 export enum NodeName {
   blend = 'LF_Blend',
+  blobToImage = 'LF_BlobToImage',
   bloom = 'LF_Bloom',
   blurImages = 'LF_BlurImages',
   boolean = 'LF_Boolean',

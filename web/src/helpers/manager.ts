@@ -24,6 +24,7 @@ import {
 //#region Node-Widget map
 export const NODE_WIDGET_MAP: NodeWidgetMap = {
   LF_Blend: [CustomWidgetName.compare],
+  LF_BlobToImage: [CustomWidgetName.code],
   LF_Bloom: [CustomWidgetName.compare],
   LF_BlurImages: [CustomWidgetName.masonry],
   LF_Boolean: [CustomWidgetName.history],
