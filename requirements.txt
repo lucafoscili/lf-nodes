@@ -4,6 +4,7 @@ opencv-python
 piexif
 Pillow
 requests
+svgwrite
 torch
 torchvision
 transformers

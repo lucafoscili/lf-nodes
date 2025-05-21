@@ -88,6 +88,7 @@ export enum NodeName {
   imageHistogram = 'LF_ImageHistogram',
   imagesEditingBreakpoint = 'LF_ImagesEditingBreakpoint',
   imagesSlideshow = 'LF_ImagesSlideshow',
+  imageToSvg = 'LF_ImageToSVG',
   integer = 'LF_Integer',
   isLandscape = 'LF_IsLandscape',
   keywordCounter = 'LF_KeywordCounter',
