@@ -78,6 +78,7 @@ export enum NodeName {
   filmGrain = 'LF_FilmGrain',
   float = 'LF_Float',
   embeddingSelector = 'LF_EmbeddingSelector',
+  emptyImage = 'LF_EmptyImage',
   extractString = 'LF_ExtractString',
   extractPromptFromLoraTag = 'LF_ExtractPromptFromLoraTag',
   gaussianBlur = 'LF_GaussianBlur',

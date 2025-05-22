@@ -12,7 +12,7 @@ from server import PromptServer
 from urllib.parse import urlparse, parse_qs
 
 from ..utils.constants import BLUE_CHANNEL_ID, CATEGORY_PREFIX, EVENT_PREFIX, FUNCTION, GREEN_CHANNEL_ID, Input, RED_CHANNEL_ID, RESAMPLERS
-from ..utils.helpers import create_compare_node, create_masonry_node, create_resize_node, encode_text_for_sdclip, get_comfy_dir, get_otsu_threshold, get_resource_url, get_text_encoder_from_clip, get_tokenizer_from_clip, normalize_input_image, normalize_input_list, normalize_json_input, normalize_list_item, normalize_list_to_value, normalize_output_image, not_none, numpy_to_tensor, pil_to_tensor, numpy_to_svg, resize_and_crop_image, resize_image, resize_to_square, resolve_filepath, tensor_to_numpy, tensor_to_pil
+from ..utils.helpers import create_compare_node, create_masonry_node, create_resize_node, encode_text_for_sdclip, get_comfy_dir, get_otsu_threshold, get_resource_url, get_text_encoder_from_clip, get_tokenizer_from_clip, hex_to_tuple, normalize_input_image, normalize_input_list, normalize_json_input, normalize_list_item, normalize_list_to_value, normalize_output_image, not_none, numpy_to_tensor, pil_to_tensor, numpy_to_svg, resize_and_crop_image, resize_image, resize_to_square, resolve_filepath, tensor_to_numpy, tensor_to_pil
 
 CATEGORY = f"{CATEGORY_PREFIX}/Image"
 
@@ -311,6 +311,90 @@ class LF_CompareImages:
 
         return (image_batch[0], image_list, all_images, dataset)
 # endregion
+
+# region LF_EmptyImage
+class LF_EmptyImage:
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "width": (Input.INTEGER, {
+                    "default": 1024, 
+                    "min": 64, 
+                    "max": 8192, 
+                    "step": 64,
+                    "tooltip": "Width of the empty image."
+                }),
+                "height": (Input.INTEGER, {
+                    "default": 512, 
+                    "min": 1, 
+                    "max": 4096, 
+                    "step": 1,
+                    "tooltip": "Height of the empty image."
+                }),
+                "color": (Input.STRING, {
+                    "default": "000000",
+                    "tooltip": "Color of the empty image. Format: RRGGBB (hexadecimal)."
+                }),
+            },
+            "optional": {
+                "ui_widget": (Input.LF_MASONRY, {
+                    "default": {}
+                })
+            },
+            "hidden": {
+                "node_id": "UNIQUE_ID"
+            }
+        }
+
+    CATEGORY = CATEGORY
+    FUNCTION = FUNCTION
+    INPUT_IS_LIST = (True, True, True)
+    OUTPUT_IS_LIST = (False, True)
+    RETURN_NAMES = ("image",)
+    RETURN_TYPES = ("IMAGE",)
+
+    def on_exec(self, **kwargs: dict):
+        width: list[int] = normalize_input_list(kwargs.get("width"))
+        height: list[int] = normalize_input_list(kwargs.get("height"))
+        color: list[int] = normalize_input_list(kwargs.get("color"))
+        
+        nodes: list[dict] = []
+        dataset: dict = { "nodes": nodes }
+
+
+        if len(width) != len(height) or len(width) != len(color):
+            raise ValueError("Width, height, and color lists must have the same length.")
+        
+        empty_images = []
+
+        for w, h, c in zip(width, height, color):
+            if not isinstance(c, str) or len(c) != 6 or not all(c[i:i+2].isalnum() for i in range(0, 6, 2)):
+                raise ValueError("Color must be a hexadecimal string in the format RRGGBB.")
+            
+            rgb = hex_to_tuple(c)
+            pil_image = Image.new("RGB", (w, h), rgb)
+            empty_image_tensor = pil_to_tensor(pil_image)
+
+            output_file, subfolder, filename = resolve_filepath(
+                    filename_prefix="emptyimage",
+                    image=empty_image_tensor,
+            )
+            pil_image.save(output_file, format="PNG")
+            url = get_resource_url(subfolder, filename, "temp")
+
+            nodes.append(create_masonry_node(filename, url, len(empty_images)))
+
+            empty_images.append(empty_image_tensor)
+        
+        image_batch, image_list = normalize_output_image(empty_images)
+
+        PromptServer.instance.send_sync(f"{EVENT_PREFIX}emptyimage", {
+            "node": kwargs.get("node_id"),
+            "dataset": dataset,
+        })
+
+        return (image_batch[0], image_list)
 
 # region LF_ImagesEditingBreakpoint
 class LF_ImagesEditingBreakpoint:
@@ -1255,6 +1339,7 @@ NODE_CLASS_MAPPINGS = {
     "LF_BlobToImage": LF_BlobToImage,
     "LF_BlurImages": LF_BlurImages,
     "LF_CompareImages": LF_CompareImages,
+    "LF_EmptyImage": LF_EmptyImage,
     "LF_ImagesEditingBreakpoint": LF_ImagesEditingBreakpoint,
     "LF_ImagesSlideshow": LF_ImagesSlideshow,
     "LF_ImageToSVG": LF_ImageToSVG,
@@ -1270,6 +1355,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "LF_BlobToImage": "Blob to Image",
     "LF_BlurImages": "Blur images",
     "LF_CompareImages": "Compare images",
+    "LF_EmptyImage": "Empty image",
     "LF_ImagesEditingBreakpoint": "Images editing breakpoint",
     "LF_ImagesSlideshow": "Images slideshow",
     "LF_ImageToSVG": "Image to SVG",

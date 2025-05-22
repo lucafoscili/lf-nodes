@@ -46,6 +46,7 @@ export const NODE_WIDGET_MAP: NodeWidgetMap = {
   LF_DisplayPrimitiveAsJSON: [CustomWidgetName.code],
   LF_DisplayString: [CustomWidgetName.code],
   LF_EmbeddingSelector: [CustomWidgetName.card],
+  LF_EmptyImage: [CustomWidgetName.masonry],
   LF_ExtractString: [CustomWidgetName.code],
   LF_ExtractPromptFromLoraTag: [CustomWidgetName.code],
   LF_FilmGrain: [CustomWidgetName.compare],
