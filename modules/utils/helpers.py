@@ -3,6 +3,7 @@ import cv2
 import fnmatch
 import folder_paths
 import hashlib
+import inspect
 import io
 import json
 import numpy as np
@@ -369,6 +370,49 @@ def create_resize_node(height_s: int, width_s: int, height_t: int, width_t: int,
     return node
 # endregion
 
+# region encode_text_for_sdclip
+def encode_text_for_sdclip(text_encoder, tokenizer, prompt, device):
+    """
+    Encodes a text prompt using a given text encoder and tokenizer for use with SDClip models.
+    This function tokenizes the input prompt and passes it through the provided text encoder,
+    handling different encoder signatures (e.g., custom SDClipModel or HuggingFace CLIPTextModel).
+    It returns the encoded text features suitable for downstream tasks.
+
+    Args:
+        text_encoder: The text encoder model to use for encoding the prompt.
+        tokenizer: The tokenizer compatible with the text encoder.
+        prompt (str): The text prompt to encode.
+        device: The device (e.g., 'cpu' or 'cuda') to perform computation on.
+        
+    Returns:
+        tuple: A tuple containing the encoded text features, input IDs, and attention mask.
+    """
+    toks = tokenizer(
+        prompt,
+        return_tensors="pt",
+        padding="max_length",
+        truncation=True,
+        max_length=tokenizer.model_max_length,
+    )
+    id_list = toks.input_ids.tolist()
+
+    sig = inspect.signature(text_encoder.forward)
+    params = [p for p in sig.parameters if p != "self"]
+
+    if params == ["tokens"]:
+        args, kwargs = [id_list], {}
+    else:
+        args, kwargs = toks.input_ids.to(device), {}
+
+    with torch.no_grad():
+        out = text_encoder(*args, **kwargs)
+
+    toks = { k: v.to(device) for k,v in toks.items() }
+    sd_embeds = out[0]
+
+    return sd_embeds, toks["input_ids"], toks["attention_mask"]
+# endregion
+
 # region extract_jpeg_metadata
 def extract_jpeg_metadata(pil_image, file_name):
     """
@@ -492,18 +536,7 @@ def get_clip_tokens(clip, text: str) -> tuple[int, list[str]]:
     Returns:
         tuple: A tuple containing the number of tokens and the decoded token list.                
     """
-    if hasattr(clip, "tokenizer"):
-        tokenizer = clip.tokenizer
-        if hasattr(tokenizer, "clip_l"):
-           tokenizer = tokenizer.clip_l
-        elif hasattr(tokenizer, "clip_g"):
-           tokenizer = tokenizer.clip_g
-    else:
-        tokenizer = clip
-
-    # If the tokenizer itself has a .tokenizer (like SDTokenizer), use it
-    if hasattr(tokenizer, "tokenizer"):
-        tokenizer = tokenizer.tokenizer
+    tokenizer = get_tokenizer_from_clip(clip)
 
     # HuggingFace style
     if callable(tokenizer):
@@ -524,42 +557,6 @@ def get_clip_tokens(clip, text: str) -> tuple[int, list[str]]:
         raise AttributeError("Tokenizer does not support any known tokenization method.")
 
     return (len(tokens), [token.replace("</w>", " ") for token in tokens])
-# endregion
-
-# region get_embedding_hashes
-def get_embedding_hashes(embeddings: str, analytics_dataset: dict):
-    """
-    Retrieve SHA256 hashes for the given embeddings.
-
-    Args:
-        embeddings (str): A comma-separated string of embedding names.
-        analytics_dataset (dict): A dataset to which nodes can be appended.
-
-    Returns:
-        List[str]: A list containing the name and hash of each embedding.
-    """
-    children = []
-    emb_hashes = []
-    emb_entries = [emb.strip() for emb in embeddings.split(',')]
-    analytics_dataset["nodes"].append({ "children": children, "id": "embeddings"})
-
-    for emb_entry in emb_entries:
-        match = re.match(r'(?:embedding:)?(.*)', emb_entry)
-        if match:
-            emb_name = match.group(1).strip()
-            if emb_name:
-                if not emb_name.endswith('.pt') and not emb_name.endswith('.safetensors'):
-                    emb_name_with_ext = f"{emb_name}.safetensors"
-                else:
-                    emb_name_with_ext = emb_name
-                    emb_file_path = folder_paths.get_full_path("embeddings", emb_name_with_ext)
-                try:
-                    emb_hash = get_sha256(emb_file_path)
-                    emb_hashes.append(f"{emb_name_with_ext}: {emb_hash}")
-                    children.append({ "id": emb_name, "value": emb_name })
-                except Exception as e:
-                    emb_hashes.append(f"{emb_name}: Unknown")
-    return emb_hashes
 # endregion
 
 # region get_comfy_dir
@@ -640,6 +637,42 @@ def get_comfy_list(folder: str):
     return get_filename_list(folder)
 # endregion
 
+# region get_embedding_hashes
+def get_embedding_hashes(embeddings: str, analytics_dataset: dict):
+    """
+    Retrieve SHA256 hashes for the given embeddings.
+
+    Args:
+        embeddings (str): A comma-separated string of embedding names.
+        analytics_dataset (dict): A dataset to which nodes can be appended.
+
+    Returns:
+        List[str]: A list containing the name and hash of each embedding.
+    """
+    children = []
+    emb_hashes = []
+    emb_entries = [emb.strip() for emb in embeddings.split(',')]
+    analytics_dataset["nodes"].append({ "children": children, "id": "embeddings"})
+
+    for emb_entry in emb_entries:
+        match = re.match(r'(?:embedding:)?(.*)', emb_entry)
+        if match:
+            emb_name = match.group(1).strip()
+            if emb_name:
+                if not emb_name.endswith('.pt') and not emb_name.endswith('.safetensors'):
+                    emb_name_with_ext = f"{emb_name}.safetensors"
+                else:
+                    emb_name_with_ext = emb_name
+                    emb_file_path = folder_paths.get_full_path("embeddings", emb_name_with_ext)
+                try:
+                    emb_hash = get_sha256(emb_file_path)
+                    emb_hashes.append(f"{emb_name_with_ext}: {emb_hash}")
+                    children.append({ "id": emb_name, "value": emb_name })
+                except Exception as e:
+                    emb_hashes.append(f"{emb_name}: Unknown")
+    return emb_hashes
+# endregion
+
 # region get_lora_hashes
 def get_lora_hashes(lora_tags: str, analytics_dataset: dict):
     """
@@ -673,6 +706,52 @@ def get_lora_hashes(lora_tags: str, analytics_dataset: dict):
             except Exception:
                 lora_hashes.append(f"{lora_name}: Unknown")
     return lora_hashes
+# endregion
+
+# region get_otsu_threshold
+def get_otsu_threshold(image: np.ndarray, nbins: int = 256) -> float:
+    """
+    Compute Otsu's threshold for a grayscale image.
+    Otsu's method determines an optimal global threshold value from the image histogram
+    by maximizing the between-class variance. The function assumes the input image is
+    normalized to the range [0.0, 1.0].
+
+    Args:
+        image (np.ndarray): Input grayscale image as a NumPy array with values in [0.0, 1.0].
+        nbins (int, optional): Number of bins to use for the histogram. Default is 256.
+        
+    Returns:
+        float: The computed threshold value in the range [0.0, 1.0].
+    """
+    hist, bins = np.histogram(image.ravel(), bins=nbins, range=(0.0,1.0))
+    bin_centers = (bins[:-1] + bins[1:]) * 0.5
+
+    total = image.size
+    sum_total = (hist * bin_centers).sum()
+
+    sum_b = 0.0
+    w_b   = 0.0
+    max_var = 0.0
+    thresh = 0.0
+
+    for i in range(nbins):
+        w_b += hist[i]
+        if w_b == 0:
+            continue
+        w_f = total - w_b
+        if w_f == 0:
+            break
+
+        sum_b += hist[i] * bin_centers[i]
+        m_b = sum_b / w_b
+        m_f = (sum_total - sum_b) / w_f
+
+        var_between = w_b * w_f * (m_b - m_f) ** 2
+        if var_between > max_var:
+            max_var = var_between
+            thresh = bin_centers[i]
+
+    return thresh
 # endregion
 
 # region get_random_parameter
@@ -742,6 +821,78 @@ def get_sha256(file_path: str):
         hash_file.write(sha256_value.hexdigest())
 
     return sha256_value.hexdigest()
+# endregion
+
+# region get_text_encoder_from_clip
+def get_text_encoder_from_clip(clip) -> torch.nn.Module:
+    """
+    Retrieve the text encoder from a CLIP model.
+
+    Args:
+        clip: A CLIP model instance.
+
+    Returns:
+        torch.nn.Module: The text encoder module from the CLIP model.
+
+    Raises:
+        AttributeError: If the CLIP model does not have a text encoder.
+    """
+    # 1) SDXLClipModel in ComfyUI
+    if hasattr(clip, "cond_stage_model"):
+        cs = clip.cond_stage_model
+        if hasattr(cs, "clip_l"):
+            return cs.clip_l
+        if hasattr(cs, "clip_g"):
+            return cs.clip_g
+
+    # 2) HuggingFace Transformers CLIPModel
+    if hasattr(clip, "text_model"):
+        return clip.text_model
+    if hasattr(clip, "text_encoder"):
+        return clip.text_encoder
+
+    # 3) Diffusers pipelines
+    if hasattr(clip, "pipeline") and hasattr(clip.pipeline, "text_encoder"):
+        return clip.pipeline.text_encoder
+
+    raise AttributeError(f"Could not find a CLIP text encoder in {clip!r}")
+# endregion
+
+# region get_tokenizer_from_clip
+def get_tokenizer_from_clip(clip):
+    """
+    Retrieve the tokenizer from a CLIP model.
+
+    Args:
+        clip: A CLIP model instance.
+
+    Returns:
+        tokenizer: The tokenizer associated with the CLIP model.
+
+    Raises:
+        AttributeError: If the CLIP model does not have a tokenizer.
+    """
+    # 1) SDXLClipModel in ComfyUI: clip.tokenizer has clip_l and clip_g
+    if hasattr(clip, "tokenizer") and hasattr(clip.tokenizer, "clip_l") and hasattr(clip.tokenizer, "clip_g"):
+        # prefer the 'clip_l' tokenizer for encoding
+        tok = clip.tokenizer.clip_l
+        if hasattr(tok, "tokenizer"):
+            tok = tok.tokenizer
+        return tok
+
+    # 2) HuggingFace Transformers style
+    if hasattr(clip, "tokenizer"):
+        tok = clip.tokenizer
+        # Some HF pipelines wrap the real tokenizer under .tokenizer
+        if hasattr(tok, "tokenizer"):
+            tok = tok.tokenizer
+        return tok
+
+    # 3) Diffusers pipelines
+    if hasattr(clip, "pipeline") and hasattr(clip.pipeline, "tokenizer"):
+        return clip.pipeline.tokenizer
+
+    raise AttributeError(f"Could not find a CLIP tokenizer in {clip!r}")
 # endregion
 
 # region handle_response

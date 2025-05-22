@@ -1,8 +1,11 @@
+import os
 import re
 import torch
 
-from folder_paths import get_full_path
+from folder_paths import get_folder_paths, get_full_path
+from huggingface_hub import snapshot_download
 from pathlib import Path
+from transformers import CLIPSegProcessor, CLIPSegForImageSegmentation
 
 import comfy.sd
 import comfy.utils
@@ -218,6 +221,98 @@ class LF_ControlPanel:
 
     def on_exec(self, **kwargs: dict):
         return ()
+# endregion
+
+# region LF_LoadCLIPSeg
+class LF_LoadCLIPSeg:
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "model_id": (Input.STRING, {
+                    "default": "CIDAS/clipseg-rd64-refined",
+                    "tooltip": "HuggingFace CLIPSeg model ID"
+                }),
+            },
+            "optional": {
+                "ui_widget": (Input.LF_CODE, {
+                    "default": {}
+                })
+            },
+            "hidden": {"node_id":"UNIQUE_ID"}
+        }
+    
+    CATEGORY = CATEGORY
+    FUNCTION = FUNCTION
+    RETURN_TYPES = ("*", "*")
+    RETURN_NAMES = ("processor", "model")
+
+    def on_exec(self, **kwargs: dict):
+        node_id   = kwargs.get("node_id")
+        model_id  = normalize_list_to_value(kwargs["model_id"])
+        base_dir  = get_folder_paths("text_encoders")[0]
+
+        safe_name = model_id.replace("/", "--")
+        model_dir = os.path.join(base_dir, safe_name)
+        exists = os.path.isdir(model_dir) and os.listdir(model_dir)
+
+        log_lines: list[str] = []
+        
+        if exists:
+            log_lines.append(f"- ✅ Model already present at `{model_dir}`")
+            processor = CLIPSegProcessor.from_pretrained(model_dir)
+            model     = CLIPSegForImageSegmentation.from_pretrained(model_dir).eval()
+        else:
+            log_lines.append(f"- ⏳ Downloading **{model_id}** to `{model_dir}`…")
+            
+        log_md = f"""## CLIPSeg Loader
+
+### Model ID
+- `{model_id}`
+
+### Status
+{chr(10).join(log_lines)}
+"""
+        PromptServer.instance.send_sync(
+            f"{EVENT_PREFIX}loadclipseg",
+            {"node": node_id, "value": log_md}
+        )
+
+        if exists:
+            return (processor, model)
+        
+        try:
+            local_path = snapshot_download(
+                repo_id=model_id,
+                local_dir=model_dir,
+                local_dir_use_symlinks=False
+            )
+            log_lines.append(f"- ✅ Download complete: `{local_path}`")
+        except Exception as e:
+            log_lines.append(f"- ❌ Download failed: {e}")
+
+        try:
+            processor = CLIPSegProcessor.from_pretrained(model_dir)
+            model     = CLIPSegForImageSegmentation.from_pretrained(model_dir).eval()
+            log_lines.append(f"- ✅ Loaded processor & model from `{model_dir}`")
+        except Exception as e:
+            raise RuntimeError(f"Failed to load CLIPSeg from `{model_dir}`: {e}")
+
+        # 4. Emit final log
+        final_md = f"""## CLIPSeg Loader
+
+### Model ID
+- `{model_id}`
+
+### Details
+{chr(10).join(log_lines)}
+"""
+        PromptServer.instance.send_sync(f"{EVENT_PREFIX}loadclipseg", {
+            "node": node_id, 
+            "value": final_md
+        })
+
+        return (processor, model)
 # endregion
 
 # region LF_LoadLoraTags
@@ -439,6 +534,7 @@ class LF_Notify:
 NODE_CLASS_MAPPINGS = {
     "LF_CivitAIMetadataSetup": LF_CivitAIMetadataSetup,
     "LF_ControlPanel": LF_ControlPanel,
+    "LF_LoadCLIPSeg": LF_LoadCLIPSeg,
     "LF_LoadLoraTags": LF_LoadLoraTags,
     "LF_Notify": LF_Notify,
 }
@@ -446,6 +542,7 @@ NODE_CLASS_MAPPINGS = {
 NODE_DISPLAY_NAME_MAPPINGS = {
     "LF_CivitAIMetadataSetup": "CivitAI metadata setup",
     "LF_ControlPanel": "Control panel",
+    "LF_LoadCLIPSeg": "Load CLIPSeg",
     "LF_LoadLoraTags": "Load LoRA tags",
     "LF_Notify": "Notify",
 }
