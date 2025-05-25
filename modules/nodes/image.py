@@ -508,7 +508,7 @@ class LF_EmptyImage:
         empty_images = []
 
         for w, h, c in zip(width, height, color):
-            if not isinstance(c, str) or len(c) != 6 or not all(c[i:i+2].isalnum() for i in range(0, 6, 2)):
+            if not isinstance(c, str) or not re.fullmatch(r"[0-9A-Fa-f]{6}", c):
                 raise ValueError("Color must be a hexadecimal string in the format RRGGBB.")
             
             rgb = hex_to_tuple(c)
