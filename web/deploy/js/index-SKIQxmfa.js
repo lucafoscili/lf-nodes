@@ -5101,7 +5101,7 @@ var K = false, Q = (e2, t2, n2) => {
                         const n6 = e7.S.replace(/-/g, "_"), o6 = e7.T;
                         if (!o6) return;
                         const s3 = i.get(o6);
-                        return s3 ? s3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-0337b52e.entry.js": () => import("./p-0337b52e.entry-lmwNBYJ0.js"), "./p-11178b37.entry.js": () => import("./p-11178b37.entry-C0f26O9Q.js"), "./p-2487f307.entry.js": () => import("./p-2487f307.entry-CfeM4OmM.js"), "./p-273c8ea4.entry.js": () => import("./p-273c8ea4.entry-CEFmDR0F.js"), "./p-3364817f.entry.js": () => import("./p-3364817f.entry-C37ImnAG.js"), "./p-3a9e5f46.entry.js": () => import("./p-3a9e5f46.entry-CwIbAfpl.js"), "./p-4f321f6b.entry.js": () => import("./p-4f321f6b.entry-CxcaAtIF.js"), "./p-585ccba5.entry.js": () => import("./p-585ccba5.entry-DAFKUU29.js"), "./p-5c44cc7e.entry.js": () => import("./p-5c44cc7e.entry-BCMOVEoJ.js"), "./p-6c11bba7.entry.js": () => import("./p-6c11bba7.entry-CN9rKeCV.js"), "./p-7bb2c820.entry.js": () => import("./p-7bb2c820.entry-BhMSrf31.js"), "./p-9f41b6b0.entry.js": () => import("./p-9f41b6b0.entry-CsZW1IxA.js"), "./p-ae4ab342.entry.js": () => import("./p-ae4ab342.entry-BVJSUvar.js"), "./p-ce0e9b9e.entry.js": () => import("./p-ce0e9b9e.entry-CgM7AW1n.js"), "./p-d5e89be3.entry.js": () => import("./p-d5e89be3.entry-ChlzYWdG.js"), "./p-eaba894b.entry.js": () => import("./p-eaba894b.entry-Cg8Ua-l9.js"), "./p-eb0c30d6.entry.js": () => import("./p-eb0c30d6.entry-Bp0Zp1tD.js") }), `./${o6}.entry.js`, 2).then((e8) => (i.set(o6, e8), e8[n6]), (e8) => {
+                        return s3 ? s3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-0337b52e.entry.js": () => import("./p-0337b52e.entry-CC0mUBLL.js"), "./p-11178b37.entry.js": () => import("./p-11178b37.entry-TzxLYmvp.js"), "./p-2487f307.entry.js": () => import("./p-2487f307.entry-k0VMehrv.js"), "./p-273c8ea4.entry.js": () => import("./p-273c8ea4.entry-7BbG5qKc.js"), "./p-3364817f.entry.js": () => import("./p-3364817f.entry-B5HPIgJl.js"), "./p-3a9e5f46.entry.js": () => import("./p-3a9e5f46.entry-DVW62Vqj.js"), "./p-4f321f6b.entry.js": () => import("./p-4f321f6b.entry-aaqoVG2j.js"), "./p-585ccba5.entry.js": () => import("./p-585ccba5.entry-CyzyBXlG.js"), "./p-5c44cc7e.entry.js": () => import("./p-5c44cc7e.entry-BCKJEiw-.js"), "./p-6c11bba7.entry.js": () => import("./p-6c11bba7.entry-B_8BKQBj.js"), "./p-7bb2c820.entry.js": () => import("./p-7bb2c820.entry-C-j4Tm8j.js"), "./p-9f41b6b0.entry.js": () => import("./p-9f41b6b0.entry-D-Z6qaNX.js"), "./p-ae4ab342.entry.js": () => import("./p-ae4ab342.entry-Tm0kQZix.js"), "./p-ce0e9b9e.entry.js": () => import("./p-ce0e9b9e.entry-jU0J395t.js"), "./p-d5e89be3.entry.js": () => import("./p-d5e89be3.entry-Dr5PLv2E.js"), "./p-eaba894b.entry.js": () => import("./p-eaba894b.entry-BNetNpgv.js"), "./p-eb0c30d6.entry.js": () => import("./p-eb0c30d6.entry-CnPDRoOm.js") }), `./${o6}.entry.js`, 2).then((e8) => (i.set(o6, e8), e8[n6]), (e8) => {
                           l(e8, t3.$hostElement$);
                         });
                         /*!__STENCIL_STATIC_IMPORT_SWITCH__*/
@@ -5779,6 +5779,7 @@ var NodeName;
   NodeName2["boolean"] = "LF_Boolean";
   NodeName2["brightness"] = "LF_Brightness";
   NodeName2["brush"] = "LF_Brush";
+  NodeName2["captionImageWD14"] = "LF_CaptionImageWD14";
   NodeName2["characterImpersonator"] = "LF_CharacterImpersonator";
   NodeName2["checkpointSelector"] = "LF_CheckpointSelector";
   NodeName2["civitaiMetadataSetup"] = "LF_CivitAIMetadataSetup";
@@ -5787,6 +5788,7 @@ var NodeName;
   NodeName2["compareImages"] = "LF_CompareImages";
   NodeName2["contrast"] = "LF_Contrast";
   NodeName2["controlPanel"] = "LF_ControlPanel";
+  NodeName2["createMask"] = "LF_CreateMask";
   NodeName2["desaturation"] = "LF_Desaturation";
   NodeName2["displayBoolean"] = "LF_DisplayBoolean";
   NodeName2["displayFloat"] = "LF_DisplayFloat";
@@ -5798,6 +5800,7 @@ var NodeName;
   NodeName2["filmGrain"] = "LF_FilmGrain";
   NodeName2["float"] = "LF_Float";
   NodeName2["embeddingSelector"] = "LF_EmbeddingSelector";
+  NodeName2["emptyImage"] = "LF_EmptyImage";
   NodeName2["extractString"] = "LF_ExtractString";
   NodeName2["extractPromptFromLoraTag"] = "LF_ExtractPromptFromLoraTag";
   NodeName2["gaussianBlur"] = "LF_GaussianBlur";
@@ -5817,7 +5820,8 @@ var NodeName;
   NodeName2["llmChat"] = "LF_LLMChat";
   NodeName2["llmMessenger"] = "LF_LLMMessenger";
   NodeName2["loadAndEditImages"] = "LF_LoadAndEditImages";
-  NodeName2["loadClipSeg"] = "LF_LoadCLIPSeg";
+  NodeName2["loadClipSegModel"] = "LF_LoadCLIPSegModel";
+  NodeName2["loadWd14Model"] = "LF_LoadWD14Model";
   NodeName2["loadFileOnce"] = "LF_LoadFileOnce";
   NodeName2["loadImages"] = "LF_LoadImages";
   NodeName2["loadLoraTags"] = "LF_LoadLoraTags";
@@ -5830,7 +5834,6 @@ var NodeName;
   NodeName2["multipleImageResizeForWeb"] = "LF_MultipleImageResizeForWeb";
   NodeName2["notify"] = "LF_Notify";
   NodeName2["parsePromptWithLoraTags"] = "LF_ParsePromptWithLoraTags";
-  NodeName2["promptToMask"] = "LF_PromptToMask";
   NodeName2["randomBoolean"] = "LF_RandomBoolean";
   NodeName2["regexReplace"] = "LF_RegexReplace";
   NodeName2["regionExtractor"] = "LF_RegionExtractor";
@@ -5910,6 +5913,7 @@ const NODE_WIDGET_MAP = {
   LF_Boolean: [CustomWidgetName.history],
   LF_Brightness: [CustomWidgetName.compare],
   LF_Brush: [CustomWidgetName.compare],
+  LF_CaptionImageWD14: [CustomWidgetName.countBarChart],
   LF_CharacterImpersonator: [CustomWidgetName.code],
   LF_CheckpointSelector: [CustomWidgetName.card],
   LF_CivitAIMetadataSetup: [CustomWidgetName.code],
@@ -5918,6 +5922,7 @@ const NODE_WIDGET_MAP = {
   LF_CompareImages: [CustomWidgetName.compare],
   LF_Contrast: [CustomWidgetName.compare],
   LF_ControlPanel: [CustomWidgetName.controlPanel],
+  LF_CreateMask: [CustomWidgetName.compare],
   LF_Desaturation: [CustomWidgetName.compare],
   LF_DisplayBoolean: [CustomWidgetName.code],
   LF_DisplayFloat: [CustomWidgetName.code],
@@ -5926,6 +5931,7 @@ const NODE_WIDGET_MAP = {
   LF_DisplayPrimitiveAsJSON: [CustomWidgetName.code],
   LF_DisplayString: [CustomWidgetName.code],
   LF_EmbeddingSelector: [CustomWidgetName.card],
+  LF_EmptyImage: [CustomWidgetName.masonry],
   LF_ExtractString: [CustomWidgetName.code],
   LF_ExtractPromptFromLoraTag: [CustomWidgetName.code],
   LF_FilmGrain: [CustomWidgetName.compare],
@@ -5947,8 +5953,9 @@ const NODE_WIDGET_MAP = {
   LF_LLMChat: [CustomWidgetName.chat],
   LF_LLMMessenger: [CustomWidgetName.messenger],
   LF_LoadAndEditImages: [CustomWidgetName.imageEditor],
-  LF_LoadCLIPSeg: [CustomWidgetName.code],
   LF_LoadFileOnce: [CustomWidgetName.history],
+  LF_LoadCLIPSegModel: [CustomWidgetName.code],
+  LF_LoadWD14Model: [CustomWidgetName.code],
   LF_LoadImages: [CustomWidgetName.masonry],
   LF_LoadLoraTags: [CustomWidgetName.cardsWithChip],
   LF_LoadMetadata: [CustomWidgetName.code, CustomWidgetName.upload],
@@ -5961,7 +5968,6 @@ const NODE_WIDGET_MAP = {
   LF_MultipleImageResizeForWeb: [CustomWidgetName.tree],
   LF_Notify: [],
   LF_ParsePromptWithLoraTags: [CustomWidgetName.code],
-  LF_PromptToMask: [CustomWidgetName.compare],
   LF_RandomBoolean: [CustomWidgetName.progressbar],
   LF_RegexReplace: [CustomWidgetName.code],
   LF_RegionExtractor: [CustomWidgetName.code],
