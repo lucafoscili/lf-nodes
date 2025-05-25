@@ -5,13 +5,14 @@ import os
 import re
 import time
 import torch
+import torch.nn.functional as F
 
 from PIL import Image, ImageFilter
 from server import PromptServer
 from urllib.parse import urlparse, parse_qs
 
 from ..utils.constants import BLUE_CHANNEL_ID, CATEGORY_PREFIX, EVENT_PREFIX, FUNCTION, GREEN_CHANNEL_ID, Input, RED_CHANNEL_ID, RESAMPLERS
-from ..utils.helpers import create_compare_node, create_masonry_node, create_resize_node, get_comfy_dir, get_resource_url, normalize_input_image, normalize_input_list, normalize_json_input, normalize_list_item, normalize_list_to_value, normalize_output_image, not_none, numpy_to_tensor, pil_to_tensor, resize_and_crop_image, resize_image, resize_to_square, resolve_filepath, tensor_to_numpy, tensor_to_pil
+from ..utils.helpers import create_compare_node, create_masonry_node, create_resize_node, encode_text_for_sdclip, get_comfy_dir, get_otsu_threshold, get_resource_url, get_text_encoder_from_clip, get_tokenizer_from_clip, hex_to_tuple, normalize_input_image, normalize_input_list, normalize_json_input, normalize_list_item, normalize_list_to_value, normalize_output_image, not_none, numpy_to_tensor, pil_to_tensor, numpy_to_svg, resize_and_crop_image, resize_image, resize_to_square, resolve_filepath, tensor_to_numpy, tensor_to_pil
 
 CATEGORY = f"{CATEGORY_PREFIX}/Image"
 
@@ -40,8 +41,6 @@ class LF_BlobToImage:
     RETURN_NAMES = ("image", "image_list")
     RETURN_TYPES = ("IMAGE", "IMAGE")
     OUTPUT_IS_LIST = (False, True)
-
-
     EMBEDDED_FORMATS = [
         {"name": "PNG",  "header": b"\x89PNG\r\n\x1a\n", "footer": b"\xAE\x42\x60\x82"},
         {"name": "JPEG","header": b"\xff\xd8\xff",      "footer": b"\xff\xd9"},
@@ -311,6 +310,231 @@ class LF_CompareImages:
         return (image_batch[0], image_list, all_images, dataset)
 # endregion
 
+# region LF_CreateMask
+class LF_CreateMask:
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "processor": ("*", {
+                    "tooltip": "CLIPSegProcessor from LF_LoadHFModel (segmentation model).",
+                }),
+                "model":     ("*", {
+                    "tooltip": "CLIPSegForImageSegmentation from LF_LoadHFModel (segmentation model).",
+                }),
+                "image": (Input.IMAGE, {
+                    "tooltip": "Image tensor to segment."
+                }),
+                "prompt": (Input.STRING, {
+                    "tooltip": "Text prompt for mask."
+                }),
+                "threshold_mode": (["fixed", "relative", "otsu"], {
+                    "default": "otsu",
+                    "tooltip": (
+                        "Thresholding mode: 'fixed' uses the exact threshold value; "
+                        "'relative' scales threshold by max probability; 'otsu' auto-computes."
+                    )
+                })
+            },
+            "optional": {
+                "clip": (Input.CLIP, {
+                    "tooltip": 
+                    f"Optional Stable-Diffusion CLIP model:\n "
+                    f"⚠️ Embeddings from this CLIP will not perfectly match the segmentation head—"
+                    f"expect degraded mask accuracy unless you fine-tune or insert an adapter."
+                }),
+                "threshold": (Input.FLOAT, {
+                    "default": 0.5, 
+                    "min": 0.0, 
+                    "max": 1.0,
+                    "step": 0.01,
+                    "tooltip": "Binarization threshold on mask probabilities (0→1). Lower to include more pixels."
+                }),
+                "relative_scale": (Input.FLOAT, {
+                    "default": 0.5,
+                    "min": 0.0,
+                    "max": 1.0,
+                    "step": 0.01,
+                    "tooltip": "Fraction of peak probability to use when in 'relative' mode."
+                }),
+                "ui_widget": (Input.LF_COMPARE, {
+                    "default":{}
+                })
+            },
+            "hidden": {"node_id":"UNIQUE_ID"}
+        }
+
+    RETURN_TYPES   = ("IMAGE","IMAGE")
+    RETURN_NAMES   = ("mask","mask_list")
+    CATEGORY       = CATEGORY
+    FUNCTION       = FUNCTION
+    OUTPUT_IS_LIST = (False, True)
+
+    def on_exec(self, **kwargs):
+        images = normalize_input_image(kwargs["image"])
+        proc = normalize_list_to_value(kwargs["processor"])
+        seg_model = normalize_list_to_value(kwargs["model"])
+        prompt = normalize_list_to_value(kwargs["prompt"])
+        clip = normalize_list_to_value(kwargs.get("clip", None))
+        mode = normalize_list_to_value(kwargs.get("threshold_mode", "otsu"))
+        fixed_thresh = normalize_list_to_value(kwargs.get("threshold", 0.5))
+        rel_scale = normalize_list_to_value(kwargs.get("relative_scale", 0.5))
+
+        seg_model.eval()
+        device = next(seg_model.parameters()).device
+
+        masks, nodes = [], []
+        dataset = { "nodes": nodes }
+
+        for idx, img_tensor in enumerate(images):
+            pil_img = tensor_to_pil(img_tensor)
+
+            if clip is not None:
+                text_encoder = get_text_encoder_from_clip(clip)
+                tokenizer   = get_tokenizer_from_clip(clip)
+                _, token_ids, attn_mask = encode_text_for_sdclip(
+                    text_encoder, tokenizer, prompt, device
+                )
+
+                img_inputs   = proc(images=pil_img, return_tensors="pt")
+                pixel_values = img_inputs.pixel_values.to(device)
+
+                with torch.no_grad():
+                    outputs = seg_model(
+                        pixel_values=pixel_values,
+                        input_ids=token_ids,
+                        attention_mask=attn_mask
+                    )
+            else:
+                inputs = proc(text=prompt, images=pil_img, return_tensors="pt")
+                inputs = {k:v.to(device) for k,v in inputs.items()}
+                with torch.no_grad():
+                    outputs = seg_model(**inputs)
+
+            probs = torch.sigmoid(outputs.logits)
+            mask_prob = probs[0,0] if probs.ndim==4 else probs[0]
+
+            if mode == "relative":
+                thresh = mask_prob.max().item() * rel_scale
+            elif mode == "otsu":
+                prob_map = mask_prob.cpu().numpy() 
+                thresh = get_otsu_threshold(prob_map)
+            else:
+                thresh = fixed_thresh
+
+            mask_np = (mask_prob.cpu().numpy() >= thresh).astype("uint8")*255
+            mask_pil = Image.fromarray(mask_np)
+            
+            m_t = pil_to_tensor(mask_pil.convert("RGB"))[0:1,...]
+            m_t = m_t.to(device)    
+            m_t = m_t.permute(0, 3, 1, 2) # [1,1,H,W]
+            H, W = img_tensor.shape[1], img_tensor.shape[2]
+            up = F.interpolate(m_t, size=(H,W), mode="bicubic", align_corners=False)
+            up = up.permute(0,2,3,1) # [1,H,W,1]
+            masks.append(up)
+
+            orig_f, so, no = resolve_filepath("mask_orig", image=img_tensor)
+            tensor_to_pil(img_tensor).save(orig_f, "PNG")
+            mo, sm, nm = resolve_filepath("mask_bin", image=up)
+            tensor_to_pil(up).save(mo, "PNG")
+            nodes.append(create_compare_node(get_resource_url(so,no,"temp"),
+                                               get_resource_url(sm,nm,"temp"),
+                                               idx))
+
+        PromptServer.instance.send_sync(f"{EVENT_PREFIX}prompttomask", {
+            "node": kwargs.get("node_id"),
+            "dataset": dataset
+        })
+
+        image_batch, image_list = normalize_output_image(masks)
+
+        return (image_batch[0], image_list)
+# endregion
+
+# region LF_EmptyImage
+class LF_EmptyImage:
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "width": (Input.INTEGER, {
+                    "default": 1024, 
+                    "min": 64, 
+                    "max": 8192, 
+                    "step": 64,
+                    "tooltip": "Width of the empty image."
+                }),
+                "height": (Input.INTEGER, {
+                    "default": 512, 
+                    "min": 1, 
+                    "max": 4096, 
+                    "step": 1,
+                    "tooltip": "Height of the empty image."
+                }),
+                "color": (Input.STRING, {
+                    "default": "000000",
+                    "tooltip": "Color of the empty image. Format: RRGGBB (hexadecimal)."
+                }),
+            },
+            "optional": {
+                "ui_widget": (Input.LF_MASONRY, {
+                    "default": {}
+                })
+            },
+            "hidden": {
+                "node_id": "UNIQUE_ID"
+            }
+        }
+
+    CATEGORY = CATEGORY
+    FUNCTION = FUNCTION
+    INPUT_IS_LIST = (True, True, True)
+    OUTPUT_IS_LIST = (False, True)
+    RETURN_NAMES = ("image",)
+    RETURN_TYPES = ("IMAGE",)
+
+    def on_exec(self, **kwargs: dict):
+        width: list[int] = normalize_input_list(kwargs.get("width"))
+        height: list[int] = normalize_input_list(kwargs.get("height"))
+        color: list[int] = normalize_input_list(kwargs.get("color"))
+        
+        nodes: list[dict] = []
+        dataset: dict = { "nodes": nodes }
+
+
+        if len(width) != len(height) or len(width) != len(color):
+            raise ValueError("Width, height, and color lists must have the same length.")
+        
+        empty_images = []
+
+        for w, h, c in zip(width, height, color):
+            if not isinstance(c, str) or not re.fullmatch(r"[0-9A-Fa-f]{6}", c):
+                raise ValueError("Color must be a hexadecimal string in the format RRGGBB.")
+            
+            rgb = hex_to_tuple(c)
+            pil_image = Image.new("RGB", (w, h), rgb)
+            empty_image_tensor = pil_to_tensor(pil_image)
+
+            output_file, subfolder, filename = resolve_filepath(
+                    filename_prefix="emptyimage",
+                    image=empty_image_tensor,
+            )
+            pil_image.save(output_file, format="PNG")
+            url = get_resource_url(subfolder, filename, "temp")
+
+            nodes.append(create_masonry_node(filename, url, len(empty_images)))
+
+            empty_images.append(empty_image_tensor)
+        
+        image_batch, image_list = normalize_output_image(empty_images)
+
+        PromptServer.instance.send_sync(f"{EVENT_PREFIX}emptyimage", {
+            "node": kwargs.get("node_id"),
+            "dataset": dataset,
+        })
+
+        return (image_batch[0], image_list)
+
 # region LF_ImagesEditingBreakpoint
 class LF_ImagesEditingBreakpoint:
     @classmethod
@@ -457,6 +681,115 @@ class LF_ImagesSlideshow:
         })
         
         return (batch_list[0], image_list)
+# endregion
+
+# region LF_ImageToSVG
+class LF_ImageToSVG:
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "image": (Input.IMAGE, {
+                    "tooltip": "Input image tensor to vectorize"
+                }),
+                "threshold": (Input.FLOAT, {
+                    "default": 0.5, 
+                    "min": 0.0, 
+                    "max": 1.0, 
+                    "step": 0.01,
+                    "tooltip": "Binarization threshold for monochrome mode"
+                }),
+                "num_colors": (Input.INTEGER, {
+                    "default": 2,
+                    "min": 1,
+                    "max": 16,
+                    "step": 1,
+                    "tooltip": "Number of colors for quantization (1 = binary)"
+                }),
+                "simplify_tol": (Input.FLOAT, {
+                    "default": 2.0, 
+                    "min": 0.0, 
+                    "max": 10.0, 
+                    "step": 0.1,
+                    "tooltip": "Contour simplification tolerance (Douglas-Peucker)"
+                }),
+                "vector_mode": (["fill", "stroke", "both"], {
+                    "default": "fill",
+                    "tooltip": "Render mode: fill, stroke, or both."
+                }),
+                "stroke_width": (Input.FLOAT, {
+                    "default": 1.0,
+                    "min": 0.0,
+                    "max": 10.0,
+                    "step": 0.1,
+                    "tooltip": "Outline width"
+                }),
+            },
+            "optional": {
+                "ui_widget": (Input.LF_COMPARE, {
+                    "default": {}
+                })
+            },
+            "hidden": {
+                "node_id": "UNIQUE_ID"
+            }
+        }
+
+    RETURN_TYPES = ("STRING", "STRING", "IMAGE", "IMAGE", "STRING", "STRING")
+    RETURN_NAMES = ("svg", "svg_list", "image", "image_list", "palette", "palette_list")
+    CATEGORY = CATEGORY
+    FUNCTION = FUNCTION
+    OUTPUT_IS_LIST = (False, True, False, True, False, True)
+
+    def on_exec(self, **kwargs: dict):
+        image: list[torch.Tensor] = normalize_input_image(kwargs.get("image"))
+        threshold: float = normalize_list_to_value(kwargs.get("threshold"))
+        num_colors: int = normalize_list_to_value(kwargs.get("num_colors"))
+        simplify_tol: float = normalize_list_to_value(kwargs.get("simplify_tol"))
+        vector_mode: str = normalize_list_to_value(kwargs.get("vector_mode"))
+        stroke_width: float = normalize_list_to_value(kwargs.get("stroke_width"))
+
+        nodes: list[dict] = []
+        dataset: dict = { "nodes": nodes }
+
+        previews: list[torch.Tensor] = []
+        svgs: list[str] = []
+        palettes: list[dict] = []
+
+        for index, img in enumerate(image):
+            arr = tensor_to_numpy(img)
+            svg_str, proc, palette = numpy_to_svg(arr, num_colors, threshold, simplify_tol, vector_mode, stroke_width)
+            preview = numpy_to_tensor(proc)
+
+            pil_image_original = tensor_to_pil(img)
+            output_file_s, subfolder_s, filename_s = resolve_filepath(
+                filename_prefix="svg_s",
+                image=img,
+            )
+            pil_image_original.save(output_file_s, format="PNG")
+            filename_s = get_resource_url(subfolder_s, filename_s, "temp")
+
+            pil_image_blended = tensor_to_pil(preview)
+            output_file_t, subfolder_t, filename_t = resolve_filepath(
+                filename_prefix="svg_t",
+                image=preview,
+            )
+            pil_image_blended.save(output_file_t, format="PNG")
+            filename_t = get_resource_url(subfolder_t, filename_t, "temp")
+
+            previews.append(preview)
+            svgs.append(svg_str)
+            palettes.append(palette)
+            nodes.append(create_compare_node(filename_s, filename_t, index))
+
+        PromptServer.instance.send_sync(f"{EVENT_PREFIX}imagetosvg", {
+            "node": kwargs.get("node_id"),
+            "dataset": dataset
+        })
+
+        image_batch, image_list = normalize_output_image(previews)
+
+        return (svgs[0], svgs, image_batch[0], image_list, palettes[0], palettes)
 # endregion
 
 # region LF_LUTApplication
@@ -1004,8 +1337,11 @@ NODE_CLASS_MAPPINGS = {
     "LF_BlobToImage": LF_BlobToImage,
     "LF_BlurImages": LF_BlurImages,
     "LF_CompareImages": LF_CompareImages,
+    "LF_CreateMask": LF_CreateMask,
+    "LF_EmptyImage": LF_EmptyImage,
     "LF_ImagesEditingBreakpoint": LF_ImagesEditingBreakpoint,
     "LF_ImagesSlideshow": LF_ImagesSlideshow,
+    "LF_ImageToSVG": LF_ImageToSVG,
     "LF_LUTApplication": LF_LUTApplication,
     "LF_MultipleImageResizeForWeb": LF_MultipleImageResizeForWeb,
     "LF_ResizeImageToDimension": LF_ResizeImageToDimension,
@@ -1017,8 +1353,11 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "LF_BlobToImage": "Blob to Image",
     "LF_BlurImages": "Blur images",
     "LF_CompareImages": "Compare images",
+    "LF_CreateMask": "Create Mask",
+    "LF_EmptyImage": "Empty image",
     "LF_ImagesEditingBreakpoint": "Images editing breakpoint",
     "LF_ImagesSlideshow": "Images slideshow",
+    "LF_ImageToSVG": "Image to SVG",
     "LF_LUTApplication": "LUT Application (filter)",
     "LF_MultipleImageResizeForWeb": "Multiple image resize for Web",
     "LF_ResizeImageToDimension": "Resize image to dimension",

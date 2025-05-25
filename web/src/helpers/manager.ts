@@ -30,6 +30,7 @@ export const NODE_WIDGET_MAP: NodeWidgetMap = {
   LF_Boolean: [CustomWidgetName.history],
   LF_Brightness: [CustomWidgetName.compare],
   LF_Brush: [CustomWidgetName.compare],
+  LF_CaptionImageWD14: [CustomWidgetName.countBarChart],
   LF_CharacterImpersonator: [CustomWidgetName.code],
   LF_CheckpointSelector: [CustomWidgetName.card],
   LF_CivitAIMetadataSetup: [CustomWidgetName.code],
@@ -38,6 +39,7 @@ export const NODE_WIDGET_MAP: NodeWidgetMap = {
   LF_CompareImages: [CustomWidgetName.compare],
   LF_Contrast: [CustomWidgetName.compare],
   LF_ControlPanel: [CustomWidgetName.controlPanel],
+  LF_CreateMask: [CustomWidgetName.compare],
   LF_Desaturation: [CustomWidgetName.compare],
   LF_DisplayBoolean: [CustomWidgetName.code],
   LF_DisplayFloat: [CustomWidgetName.code],
@@ -46,6 +48,7 @@ export const NODE_WIDGET_MAP: NodeWidgetMap = {
   LF_DisplayPrimitiveAsJSON: [CustomWidgetName.code],
   LF_DisplayString: [CustomWidgetName.code],
   LF_EmbeddingSelector: [CustomWidgetName.card],
+  LF_EmptyImage: [CustomWidgetName.masonry],
   LF_ExtractString: [CustomWidgetName.code],
   LF_ExtractPromptFromLoraTag: [CustomWidgetName.code],
   LF_FilmGrain: [CustomWidgetName.compare],
@@ -58,6 +61,7 @@ export const NODE_WIDGET_MAP: NodeWidgetMap = {
   LF_ImageListFromJSON: [CustomWidgetName.masonry],
   LF_ImagesEditingBreakpoint: [CustomWidgetName.imageEditor],
   LF_ImagesSlideshow: [CustomWidgetName.carousel],
+  LF_ImageToSVG: [CustomWidgetName.compare],
   LF_Integer: [CustomWidgetName.history],
   LF_IsLandscape: [CustomWidgetName.tree],
   LF_KeywordCounter: [CustomWidgetName.countBarChart],
@@ -67,6 +71,8 @@ export const NODE_WIDGET_MAP: NodeWidgetMap = {
   LF_LLMMessenger: [CustomWidgetName.messenger],
   LF_LoadAndEditImages: [CustomWidgetName.imageEditor],
   LF_LoadFileOnce: [CustomWidgetName.history],
+  LF_LoadCLIPSegModel: [CustomWidgetName.code],
+  LF_LoadWD14Model: [CustomWidgetName.code],
   LF_LoadImages: [CustomWidgetName.masonry],
   LF_LoadLoraTags: [CustomWidgetName.cardsWithChip],
   LF_LoadMetadata: [CustomWidgetName.code, CustomWidgetName.upload],
@@ -293,7 +299,7 @@ const messengerCb = (node: NodeType) => {
 };
 //#endregion
 
-//#region logStyle
+//#region setCanvasSizeCb
 const setCanvasSizeCb = async (imageviewer: HTMLLfImageviewerElement) => {
   requestAnimationFrame(async () => {
     try {
@@ -304,7 +310,7 @@ const setCanvasSizeCb = async (imageviewer: HTMLLfImageviewerElement) => {
 };
 //#endregion
 
-//#region logStyle
+//#region getLogStyle
 export const getLogStyle = () => {
   return {
     fontFamily: 'var(--lf-font-family-monospace)',

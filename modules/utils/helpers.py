@@ -1,23 +1,29 @@
 import base64
+import cv2
 import fnmatch
 import folder_paths
 import hashlib
+import inspect
 import io
 import json
 import numpy as np
 import os
+import pandas as pd
 import piexif
 import random
 import re
 import string
+import svgwrite
 import torch
 import urllib
 
 from datetime import datetime
 from folder_paths import get_filename_list, get_input_directory, get_output_directory, get_save_image_path, get_temp_directory, get_user_directory
+from huggingface_hub import hf_hub_download
 from PIL import Image
 from PIL.ExifTags import TAGS
 from torchvision.transforms import InterpolationMode, functional
+from transformers import AutoConfig
 from urllib.parse import urlparse, parse_qs
 
 from ..utils.constants import BACKUP_FOLDER, BASE64_PNG_PREFIX, USER_FOLDER
@@ -61,6 +67,64 @@ def base64_to_tensor(base64_str: str, preserve_alpha = False) -> torch.Tensor:
     img_tensor = img_tensor.unsqueeze(0)
 
     return img_tensor
+# endregion
+
+# region build_id2label
+def build_id2label(model):
+    """
+    Attempts to build an `id2label` mapping for a given model using several strategies:
+    1. Tries to retrieve `id2label` from the model's native Hugging Face config (`model.config.id2label`).
+    2. If not found or contains only default labels (e.g., "LABEL_0"), attempts to locate a repository ID
+       (from `model.pretrained_cfg` or `model.config`) and download a `selected_tags.csv` file from the Hugging Face Hub,
+       using the "name" column to construct the mapping.
+    3. If still unsuccessful, tries to load the config using `AutoConfig.from_pretrained` with the repository ID.
+    4. Raises a `RuntimeError` if no valid `id2label` mapping can be found.
+
+    Args:
+        model: The model object to extract or build the `id2label` mapping from.
+
+    Returns:
+        dict: A mapping from integer class IDs to string labels.
+
+    Raises:
+        RuntimeError: If no valid `id2label` mapping can be found using any of the strategies.
+    """
+    try:
+        cfg = getattr(model, "config", None)
+        id2lab = getattr(cfg, "id2label", None)
+    except Exception:
+        id2lab = None
+
+    if not id2lab or all(str(v).startswith("LABEL_") for v in id2lab.values()):
+        repo = None
+        for src in ("hf_hub_id",):
+            pcfg = getattr(model, "pretrained_cfg", {}) or {}
+            repo = pcfg.get(src) or getattr(getattr(model, "config", {}), src, None)
+            if repo:
+                break
+
+        if repo:
+            try:
+                csv_file = hf_hub_download(repo_id=repo, filename="selected_tags.csv")
+                names = pd.read_csv(csv_file, usecols=["name"])["name"].tolist()
+                id2lab = {i: name for i, name in enumerate(names)}
+            except Exception as e:
+                id2lab = None
+
+    if not id2lab:
+        try:
+            cfg2 = AutoConfig.from_pretrained(repo)
+            id2lab = cfg2.id2label
+        except Exception:
+            id2lab = None
+
+    if not id2lab:
+        raise RuntimeError(
+            f"No valid id2label mapping found on {model.__class__.__name__} "
+            f"(tried .config.id2label, CSV fallback, AutoConfig.from_pretrained)."
+        )
+
+    return id2lab
 # endregion
 
 # region cleanse_lora_tag
@@ -367,6 +431,49 @@ def create_resize_node(height_s: int, width_s: int, height_t: int, width_t: int,
     return node
 # endregion
 
+# region encode_text_for_sdclip
+def encode_text_for_sdclip(text_encoder, tokenizer, prompt, device):
+    """
+    Encodes a text prompt using a given text encoder and tokenizer for use with SDClip models.
+    This function tokenizes the input prompt and passes it through the provided text encoder,
+    handling different encoder signatures (e.g., custom SDClipModel or HuggingFace CLIPTextModel).
+    It returns the encoded text features suitable for downstream tasks.
+
+    Args:
+        text_encoder: The text encoder model to use for encoding the prompt.
+        tokenizer: The tokenizer compatible with the text encoder.
+        prompt (str): The text prompt to encode.
+        device: The device (e.g., 'cpu' or 'cuda') to perform computation on.
+        
+    Returns:
+        tuple: A tuple containing the encoded text features, input IDs, and attention mask.
+    """
+    toks = tokenizer(
+        prompt,
+        return_tensors="pt",
+        padding="max_length",
+        truncation=True,
+        max_length=tokenizer.model_max_length,
+    )
+    id_list = toks.input_ids.tolist()
+
+    sig = inspect.signature(text_encoder.forward)
+    params = [p for p in sig.parameters if p != "self"]
+
+    if params == ["tokens"]:
+        args, kwargs = [id_list], {}
+    else:
+        args, kwargs = toks.input_ids.to(device), {}
+
+    with torch.no_grad():
+        out = text_encoder(*args, **kwargs)
+
+    toks = { k: v.to(device) for k,v in toks.items() }
+    sd_embeds = out[0]
+
+    return sd_embeds, toks["input_ids"], toks["attention_mask"]
+# endregion
+
 # region extract_jpeg_metadata
 def extract_jpeg_metadata(pil_image, file_name):
     """
@@ -490,18 +597,7 @@ def get_clip_tokens(clip, text: str) -> tuple[int, list[str]]:
     Returns:
         tuple: A tuple containing the number of tokens and the decoded token list.                
     """
-    if hasattr(clip, "tokenizer"):
-        tokenizer = clip.tokenizer
-        if hasattr(tokenizer, "clip_l"):
-           tokenizer = tokenizer.clip_l
-        elif hasattr(tokenizer, "clip_g"):
-           tokenizer = tokenizer.clip_g
-    else:
-        tokenizer = clip
-
-    # If the tokenizer itself has a .tokenizer (like SDTokenizer), use it
-    if hasattr(tokenizer, "tokenizer"):
-        tokenizer = tokenizer.tokenizer
+    tokenizer = get_tokenizer_from_clip(clip)
 
     # HuggingFace style
     if callable(tokenizer):
@@ -522,42 +618,6 @@ def get_clip_tokens(clip, text: str) -> tuple[int, list[str]]:
         raise AttributeError("Tokenizer does not support any known tokenization method.")
 
     return (len(tokens), [token.replace("</w>", " ") for token in tokens])
-# endregion
-
-# region get_embedding_hashes
-def get_embedding_hashes(embeddings: str, analytics_dataset: dict):
-    """
-    Retrieve SHA256 hashes for the given embeddings.
-
-    Args:
-        embeddings (str): A comma-separated string of embedding names.
-        analytics_dataset (dict): A dataset to which nodes can be appended.
-
-    Returns:
-        List[str]: A list containing the name and hash of each embedding.
-    """
-    children = []
-    emb_hashes = []
-    emb_entries = [emb.strip() for emb in embeddings.split(',')]
-    analytics_dataset["nodes"].append({ "children": children, "id": "embeddings"})
-
-    for emb_entry in emb_entries:
-        match = re.match(r'(?:embedding:)?(.*)', emb_entry)
-        if match:
-            emb_name = match.group(1).strip()
-            if emb_name:
-                if not emb_name.endswith('.pt') and not emb_name.endswith('.safetensors'):
-                    emb_name_with_ext = f"{emb_name}.safetensors"
-                else:
-                    emb_name_with_ext = emb_name
-                    emb_file_path = folder_paths.get_full_path("embeddings", emb_name_with_ext)
-                try:
-                    emb_hash = get_sha256(emb_file_path)
-                    emb_hashes.append(f"{emb_name_with_ext}: {emb_hash}")
-                    children.append({ "id": emb_name, "value": emb_name })
-                except Exception as e:
-                    emb_hashes.append(f"{emb_name}: Unknown")
-    return emb_hashes
 # endregion
 
 # region get_comfy_dir
@@ -638,6 +698,42 @@ def get_comfy_list(folder: str):
     return get_filename_list(folder)
 # endregion
 
+# region get_embedding_hashes
+def get_embedding_hashes(embeddings: str, analytics_dataset: dict):
+    """
+    Retrieve SHA256 hashes for the given embeddings.
+
+    Args:
+        embeddings (str): A comma-separated string of embedding names.
+        analytics_dataset (dict): A dataset to which nodes can be appended.
+
+    Returns:
+        List[str]: A list containing the name and hash of each embedding.
+    """
+    children = []
+    emb_hashes = []
+    emb_entries = [emb.strip() for emb in embeddings.split(',')]
+    analytics_dataset["nodes"].append({ "children": children, "id": "embeddings"})
+
+    for emb_entry in emb_entries:
+        match = re.match(r'(?:embedding:)?(.*)', emb_entry)
+        if match:
+            emb_name = match.group(1).strip()
+            if emb_name:
+                if not emb_name.endswith('.pt') and not emb_name.endswith('.safetensors'):
+                    emb_name_with_ext = f"{emb_name}.safetensors"
+                else:
+                    emb_name_with_ext = emb_name
+                    emb_file_path = folder_paths.get_full_path("embeddings", emb_name_with_ext)
+                try:
+                    emb_hash = get_sha256(emb_file_path)
+                    emb_hashes.append(f"{emb_name_with_ext}: {emb_hash}")
+                    children.append({ "id": emb_name, "value": emb_name })
+                except Exception as e:
+                    emb_hashes.append(f"{emb_name}: Unknown")
+    return emb_hashes
+# endregion
+
 # region get_lora_hashes
 def get_lora_hashes(lora_tags: str, analytics_dataset: dict):
     """
@@ -671,6 +767,52 @@ def get_lora_hashes(lora_tags: str, analytics_dataset: dict):
             except Exception:
                 lora_hashes.append(f"{lora_name}: Unknown")
     return lora_hashes
+# endregion
+
+# region get_otsu_threshold
+def get_otsu_threshold(image: np.ndarray, nbins: int = 256) -> float:
+    """
+    Compute Otsu's threshold for a grayscale image.
+    Otsu's method determines an optimal global threshold value from the image histogram
+    by maximizing the between-class variance. The function assumes the input image is
+    normalized to the range [0.0, 1.0].
+
+    Args:
+        image (np.ndarray): Input grayscale image as a NumPy array with values in [0.0, 1.0].
+        nbins (int, optional): Number of bins to use for the histogram. Default is 256.
+        
+    Returns:
+        float: The computed threshold value in the range [0.0, 1.0].
+    """
+    hist, bins = np.histogram(image.ravel(), bins=nbins, range=(0.0,1.0))
+    bin_centers = (bins[:-1] + bins[1:]) * 0.5
+
+    total = image.size
+    sum_total = (hist * bin_centers).sum()
+
+    sum_b = 0.0
+    w_b   = 0.0
+    max_var = 0.0
+    thresh = 0.0
+
+    for i in range(nbins):
+        w_b += hist[i]
+        if w_b == 0:
+            continue
+        w_f = total - w_b
+        if w_f == 0:
+            break
+
+        sum_b += hist[i] * bin_centers[i]
+        m_b = sum_b / w_b
+        m_f = (sum_total - sum_b) / w_f
+
+        var_between = w_b * w_f * (m_b - m_f) ** 2
+        if var_between > max_var:
+            max_var = var_between
+            thresh = bin_centers[i]
+
+    return thresh
 # endregion
 
 # region get_random_parameter
@@ -740,6 +882,78 @@ def get_sha256(file_path: str):
         hash_file.write(sha256_value.hexdigest())
 
     return sha256_value.hexdigest()
+# endregion
+
+# region get_text_encoder_from_clip
+def get_text_encoder_from_clip(clip) -> torch.nn.Module:
+    """
+    Retrieve the text encoder from a CLIP model.
+
+    Args:
+        clip: A CLIP model instance.
+
+    Returns:
+        torch.nn.Module: The text encoder module from the CLIP model.
+
+    Raises:
+        AttributeError: If the CLIP model does not have a text encoder.
+    """
+    # 1) SDXLClipModel in ComfyUI
+    if hasattr(clip, "cond_stage_model"):
+        cs = clip.cond_stage_model
+        if hasattr(cs, "clip_l"):
+            return cs.clip_l
+        if hasattr(cs, "clip_g"):
+            return cs.clip_g
+
+    # 2) HuggingFace Transformers CLIPModel
+    if hasattr(clip, "text_model"):
+        return clip.text_model
+    if hasattr(clip, "text_encoder"):
+        return clip.text_encoder
+
+    # 3) Diffusers pipelines
+    if hasattr(clip, "pipeline") and hasattr(clip.pipeline, "text_encoder"):
+        return clip.pipeline.text_encoder
+
+    raise AttributeError(f"Could not find a CLIP text encoder in {clip!r}")
+# endregion
+
+# region get_tokenizer_from_clip
+def get_tokenizer_from_clip(clip):
+    """
+    Retrieve the tokenizer from a CLIP model.
+
+    Args:
+        clip: A CLIP model instance.
+
+    Returns:
+        tokenizer: The tokenizer associated with the CLIP model.
+
+    Raises:
+        AttributeError: If the CLIP model does not have a tokenizer.
+    """
+    # 1) SDXLClipModel in ComfyUI: clip.tokenizer has clip_l and clip_g
+    if hasattr(clip, "tokenizer") and hasattr(clip.tokenizer, "clip_l") and hasattr(clip.tokenizer, "clip_g"):
+        # prefer the 'clip_l' tokenizer for encoding
+        tok = clip.tokenizer.clip_l
+        if hasattr(tok, "tokenizer"):
+            tok = tok.tokenizer
+        return tok
+
+    # 2) HuggingFace Transformers style
+    if hasattr(clip, "tokenizer"):
+        tok = clip.tokenizer
+        # Some HF pipelines wrap the real tokenizer under .tokenizer
+        if hasattr(tok, "tokenizer"):
+            tok = tok.tokenizer
+        return tok
+
+    # 3) Diffusers pipelines
+    if hasattr(clip, "pipeline") and hasattr(clip.pipeline, "tokenizer"):
+        return clip.pipeline.tokenizer
+
+    raise AttributeError(f"Could not find a CLIP tokenizer in {clip!r}")
 # endregion
 
 # region handle_response
@@ -1149,6 +1363,81 @@ def prepare_model_dataset (model_name, model_hash, model_base64, model_path):
             }
 
     return dataset
+# endregion
+
+# region numpy_to_svg
+def numpy_to_svg(arr: np.ndarray, num_colors: int, threshold: float, simplify_tol: float, mode: str, stroke_width: float) -> tuple[str, np.ndarray, list[str]]:
+    """
+    Converts a NumPy image array into an SVG string representation by extracting and simplifying contours.
+
+    Args:
+        arr (np.ndarray): An RGB image represented as a NumPy array with shape (height, width, 3).
+        num_colors (int): The number of colors to reduce the image to. If greater than 1, k-means clustering is applied
+                          for color quantization.
+        threshold (float): A threshold value (between 0 and 1) used to generate a binary mask when num_colors is 1.
+        simplify_tol (float): The tolerance parameter for polygonal curve approximation used to simplify contours.
+        mode (str): The mode of vectorization. Currently "fill", "stroke", and "both" are supported.
+        stroke_width (float): The width of the stroke for the SVG polygons.
+
+    Returns:
+        tuple:
+            - str: An SVG string generated from the simplified contours of the processed image.
+            - np.ndarray: The processed image array after applying color quantization or thresholding.
+            - list[str]: A list of color hex codes representing the palette used in the SVG.
+            
+    Notes:
+        This function processes the provided image as follows:
+          1. If num_colors > 1:
+               - Reshapes the image array and performs k-means clustering to reduce the number of colors.
+               - Reconstructs the image using the quantized colors.
+          2. Otherwise, converts the image to grayscale, applies a threshold to create a binary mask, and converts it back to RGB.
+          3. Converts the processed RGB image to grayscale.
+          4. Extracts external contours from the grayscale image.
+          5. Simplifies each contour using the specified simplify_tol.
+          6. Creates an SVG drawing with polygons corresponding to the simplified contours using the svgwrite library.
+    """
+    h, w = arr.shape[:2]
+    img = arr.copy()
+
+    palette = []
+    if num_colors > 1:
+        pixels = img.reshape(-1,3).astype(np.float32)
+        crit = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
+        _, labels, centers = cv2.kmeans(pixels, num_colors, None, crit, 10, cv2.KMEANS_RANDOM_CENTERS)
+        centers = centers.astype(np.uint8)
+        proc = centers[labels.flatten()].reshape((h, w, 3))
+        palette = [f"#{c[0]:02x}{c[1]:02x}{c[2]:02x}" for c in centers]
+    else:
+        gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+        _, mask = cv2.threshold(gray, int(threshold*255), 255, cv2.THRESH_BINARY)
+        proc = cv2.cvtColor(mask, cv2.COLOR_GRAY2RGB)
+
+    grayp = cv2.cvtColor(proc, cv2.COLOR_RGB2GRAY)
+    contours, _ = cv2.findContours(grayp, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    polys = [cv2.approxPolyDP(c, simplify_tol, True) for c in contours]
+
+    if mode == "fill":
+        fill_css, stroke_css = "currentColor", "none"
+    elif mode == "stroke":
+        fill_css, stroke_css = "none", "currentColor"
+    else:  # both
+        fill_css, stroke_css = "currentColor", "currentColor"
+
+    dwg = svgwrite.Drawing(
+        size=("100%","100%"),
+        viewBox=f"0 0 {w} {h}",
+        preserveAspectRatio="xMidYMid meet"
+    )
+    for poly in polys:
+        pts = [(int(pt[0][0]), int(pt[0][1])) for pt in poly]
+        dwg.add(dwg.polygon(
+            pts,
+            fill=fill_css,
+            stroke=stroke_css,
+            stroke_width=stroke_width
+        ))
+
+    return dwg.tostring(), proc, palette
 # endregion
 
 # region process_and_save_image

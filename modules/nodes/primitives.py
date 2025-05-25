@@ -240,7 +240,6 @@ class LF_DisplayPrimitiveAsJSON:
                 "string": (Input.STRING, {
                     "default": "", 
                     "forceInput": True, 
-                    "multiline": True, 
                     "tooltip": "String value."
                 }),
                 "boolean": (Input.BOOLEAN, {
@@ -755,7 +754,6 @@ class LF_String:
             "required": {
                 "string": (Input.STRING, {
                     "default": "", 
-                    "multiline": True, 
                     "tooltip": "String value."
                 }),
                 "enable_history": (Input.BOOLEAN, {
@@ -825,11 +823,9 @@ class LF_WallOfText:
                     "tooltip": "Character(s) separating each string apart."}),
                 "text_1": (Input.STRING, {
                     "default": "", 
-                    "multiline": True, 
                     "tooltip": "The first required string."}),
                 "text_2": (Input.STRING, {
                     "default": "", 
-                    "multiline": True, 
                     "tooltip": "The second required string."}),
             },
             "optional": {

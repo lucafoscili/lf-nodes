@@ -54,6 +54,8 @@ That's a tough one—the nodes span quite a few categories. Here's a quick break
     - [Using ComfyUI Manager](#using-comfyui-manager)
     - [Manual](#manual)
   - [Workflow samples](#workflow-samples)
+    - [Caption dataset (WD14)](#caption-dataset-wd14)
+    - [Resize image for training](#resize-image-for-training)
     - [Compare images](#compare-images)
     - [e2e](#e2e)
     - [Flux + LLM Character manager](#flux--llm-character-manager)
@@ -81,6 +83,14 @@ That's a tough one—the nodes span quite a few categories. Here's a quick break
 - Copy and paste this command `git clone https://github.com/lucafoscili/lf-nodes.git`.
 
 ## Workflow samples
+
+### [Caption dataset (WD14)](https://github.com/lucafoscili/lucafoscili/blob/dd5c3f0fd525ff4cf5b99a940562faa4b7d0135e/lf-nodes/workflows/Caption%20dataset%20(WD14).json)
+
+![Caption dataset (WD14)](https://github.com/lucafoscili/lucafoscili/blob/dd5c3f0fd525ff4cf5b99a940562faa4b7d0135e/lf-nodes/screenshots/Caption%20dataset%20(WD14).png)
+
+### [Resize image for training](https://github.com/lucafoscili/lucafoscili/blob/743c982169cb6a8981b14a13dd65b1016fc84028/lf-nodes/workflows/Resize%20image%20for%20training.json)
+
+![Resize image for training](https://github.com/lucafoscili/lucafoscili/blob/743c982169cb6a8981b14a13dd65b1016fc84028/lf-nodes/screenshots/Resize%20image%20for%20training.png)
 
 ### [Compare images](https://github.com/lucafoscili/lucafoscili/blob/3c8e1c3b4d802115a0cd03c29eb71db0ba698a89/lf-nodes/workflows/Compare%20images.json)
 

@@ -1,9 +1,13 @@
 numpy
 openai
 opencv-python
+pandas
 piexif
 Pillow
 requests
+svgwrite
+timm
 torch
 torchvision
+tqdm
 transformers
