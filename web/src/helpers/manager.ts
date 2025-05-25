@@ -30,6 +30,7 @@ export const NODE_WIDGET_MAP: NodeWidgetMap = {
   LF_Boolean: [CustomWidgetName.history],
   LF_Brightness: [CustomWidgetName.compare],
   LF_Brush: [CustomWidgetName.compare],
+  LF_CaptionImageWD14: [CustomWidgetName.countBarChart],
   LF_CharacterImpersonator: [CustomWidgetName.code],
   LF_CheckpointSelector: [CustomWidgetName.card],
   LF_CivitAIMetadataSetup: [CustomWidgetName.code],
@@ -38,6 +39,7 @@ export const NODE_WIDGET_MAP: NodeWidgetMap = {
   LF_CompareImages: [CustomWidgetName.compare],
   LF_Contrast: [CustomWidgetName.compare],
   LF_ControlPanel: [CustomWidgetName.controlPanel],
+  LF_CreateMask: [CustomWidgetName.compare],
   LF_Desaturation: [CustomWidgetName.compare],
   LF_DisplayBoolean: [CustomWidgetName.code],
   LF_DisplayFloat: [CustomWidgetName.code],
@@ -68,8 +70,9 @@ export const NODE_WIDGET_MAP: NodeWidgetMap = {
   LF_LLMChat: [CustomWidgetName.chat],
   LF_LLMMessenger: [CustomWidgetName.messenger],
   LF_LoadAndEditImages: [CustomWidgetName.imageEditor],
-  LF_LoadCLIPSeg: [CustomWidgetName.code],
   LF_LoadFileOnce: [CustomWidgetName.history],
+  LF_LoadCLIPSegModel: [CustomWidgetName.code],
+  LF_LoadWD14Model: [CustomWidgetName.code],
   LF_LoadImages: [CustomWidgetName.masonry],
   LF_LoadLoraTags: [CustomWidgetName.cardsWithChip],
   LF_LoadMetadata: [CustomWidgetName.code, CustomWidgetName.upload],
@@ -82,7 +85,6 @@ export const NODE_WIDGET_MAP: NodeWidgetMap = {
   LF_MultipleImageResizeForWeb: [CustomWidgetName.tree],
   LF_Notify: [],
   LF_ParsePromptWithLoraTags: [CustomWidgetName.code],
-  LF_PromptToMask: [CustomWidgetName.compare],
   LF_RandomBoolean: [CustomWidgetName.progressbar],
   LF_RegexReplace: [CustomWidgetName.code],
   LF_RegionExtractor: [CustomWidgetName.code],
@@ -297,7 +299,7 @@ const messengerCb = (node: NodeType) => {
 };
 //#endregion
 
-//#region logStyle
+//#region setCanvasSizeCb
 const setCanvasSizeCb = async (imageviewer: HTMLLfImageviewerElement) => {
   requestAnimationFrame(async () => {
     try {
@@ -308,7 +310,7 @@ const setCanvasSizeCb = async (imageviewer: HTMLLfImageviewerElement) => {
 };
 //#endregion
 
-//#region logStyle
+//#region getLogStyle
 export const getLogStyle = () => {
   return {
     fontFamily: 'var(--lf-font-family-monospace)',
