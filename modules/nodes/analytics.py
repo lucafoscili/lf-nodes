@@ -145,6 +145,7 @@ class LF_CaptionImageWD14:
             tags, _ = zip(*pairs) if len(pairs) > 0 else ([], [])
             for tag in tags:
                 conf = pairs[tags.index(tag)][1]
+                conf = round(conf, 3)
                 chart_node = {
                     "cells": {
                         "Axis_0": {"value": tag},
@@ -184,6 +185,7 @@ class LF_CaptionImageWD14:
                     tag_counts[tag] = tag_counts.get(tag, 0) + 1
             
             chart_nodes = []
+            chip_nodes = []
             for tag, count in tag_counts.items():
                 chart_node = {
                     "cells": {
@@ -193,6 +195,13 @@ class LF_CaptionImageWD14:
                     "id": tag
                 }
                 chart_nodes.append(chart_node)
+
+                chip_node = {
+                    "id": tag,
+                    "title": "Count: {}".format(count),
+                    "value": tag,
+                }
+                chip_nodes.append(chip_node)
             
             chart_dataset["columns"].append({
                 "id": "Series_0",
@@ -200,6 +209,8 @@ class LF_CaptionImageWD14:
                 "title": "Count"
             })
             chart_dataset["nodes"] = chart_nodes
+            chip_dataset["nodes"] = chip_nodes
+            
         else:
             chart_dataset["columns"].append({
                 "id": "Series_0",
