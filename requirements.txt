@@ -6,8 +6,8 @@ piexif
 Pillow
 requests
 svgwrite
-tdqm
 timm
 torch
 torchvision
+tqdm
 transformers
