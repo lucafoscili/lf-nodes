@@ -142,7 +142,7 @@ class LF_EmbeddingSelector:
             "optional": {
                 "embedding_stack": (Input.STRING, {
                     "default": "", 
-                    "defaultInput": True, 
+                    "forceInput": True, 
                     "tooltip": "Optional string usable to concatenate subsequent selector nodes."
                 }),
                 "ui_widget": (Input.LF_CARD, {
@@ -267,12 +267,12 @@ class LF_LoraAndEmbeddingSelector:
             "optional": {
                 "lora_stack": (Input.STRING, {
                     "default": "", 
-                    "defaultInput": True, 
+                    "forceInput": True, 
                     "tooltip": "Optional string usable to concatenate subsequent Lora selector nodes."
                 }),
                 "embedding_stack": (Input.STRING, {
                     "default": "", 
-                    "defaultInput": True, 
+                    "forceInput": True, 
                     "tooltip": "Optional string usable to concatenate subsequent embedding selector nodes."
                 }),
                 "ui_widget": (Input.LF_CARD, {
@@ -420,7 +420,7 @@ class LF_LoraSelector:
             "optional": {
                 "lora_stack": (Input.STRING, {
                     "default": "", 
-                    "defaultInput": True, 
+                    "forceInput": True, 
                     "tooltip": "Optional string usable to concatenate subsequent selector nodes."
                 }),
                 "ui_widget": (Input.LF_CARD, {

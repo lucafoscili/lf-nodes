@@ -555,7 +555,7 @@ class LF_SaveImageForCivitAI:
             },
             "optional": {
                 "civitai_metadata": (Input.STRING, {
-                    "defaultInput": True, 
+                    "forceInput": True, 
                     "tooltip": "String containing CivitAI compatible metadata (created by the node LF_CivitAIMetadataSetup)."
                 }),
                 "ui_widget": (Input.LF_MASONRY, {
