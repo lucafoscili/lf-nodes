@@ -444,7 +444,7 @@ def tilt_shift_effect(img: torch.Tensor, focus_position: float, focus_size: floa
     Applies a tilt-shift effect to an input image tensor, simulating a shallow depth-of-field by blending a focused region with a blurred background.
 
     Args:
-        img (torch.Tensor): Input image tensor of shape (3, H, W) with values in [0, 255].
+        img (torch.Tensor): Input image tensor of shape [B, H, W, C] with values in [0, 255].
         focus_position (float): Position of the focus region, normalized between 0 (top/left) and 1 (bottom/right).
         focus_size (float): Size of the focus region as a fraction of the image dimension (0 to 1).
         blur_radius (int): Radius of the Gaussian blur applied to out-of-focus areas.
@@ -453,10 +453,10 @@ def tilt_shift_effect(img: torch.Tensor, focus_position: float, focus_size: floa
         orient (str, optional): Orientation of the focus region. Options are "horizontal" (default), "vertical", or "circular".
 
     Returns:
-        torch.Tensor: Image tensor with the tilt-shift effect applied, of shape (3, H, W) and dtype uint8.
+        torch.Tensor: Image tensor with the tilt-shift effect applied, of shape [B, H, W, C] and dtype uint8.
     """    
     validate_image(img, expected_shape=(3,))
-    h, w = img.shape[-2:]
+    _, h, w, _ = img.shape
 
     yy, xx = np.meshgrid(np.linspace(0, 1, h), np.linspace(0, 1, w), indexing="ij")
     if orient == "horizontal":
@@ -480,7 +480,12 @@ def tilt_shift_effect(img: torch.Tensor, focus_position: float, focus_size: floa
     np_img = tensor_to_numpy(img, True)
     blurred = cv2.GaussianBlur(np_img, (k, k), k * 0.35)
 
-    out = np_img * mask + blurred * (1 - mask)
+    mask_expanded = np.transpose(mask, (1, 2, 0)) if mask.shape[0] == 1 else mask
+    if mask_expanded.shape[-1] != np_img.shape[-1]:
+        mask_expanded = np.repeat(mask_expanded, np_img.shape[-1], axis=-1)
+
+    out = np_img * mask_expanded + blurred * (1 - mask_expanded)
+    
     return numpy_to_tensor(out.astype(np.uint8))
 # endregion
 
