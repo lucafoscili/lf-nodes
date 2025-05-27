@@ -831,42 +831,42 @@ class LF_WallOfText:
             "optional": {
                 "text_3": (Input.STRING, {
                     "default": "", 
-                    "defaultInput": True, 
+                    "forceInput": True, 
                     "tooltip": "The third optional string."
                 }),
                 "text_4": (Input.STRING, {
                     "default": "", 
-                    "defaultInput": True, 
+                    "forceInput": True, 
                     "tooltip": "The fourth optional string."
                 }),
                 "text_5": (Input.STRING, {
                     "default": "", 
-                    "defaultInput": True, 
+                    "forceInput": True, 
                     "tooltip": "The fifth optional string."
                 }),
                 "text_6": (Input.STRING, {
                     "default": "", 
-                    "defaultInput": True, 
+                    "forceInput": True, 
                     "tooltip": "The sixth optional string."
                 }),
                 "text_7": (Input.STRING, {
                     "default": "", 
-                    "defaultInput": True, 
+                    "forceInput": True, 
                     "tooltip": "The seventh optional string."
                 }),
                 "text_8": (Input.STRING, {
                     "default": "", 
-                    "defaultInput": True, 
+                    "forceInput": True, 
                     "tooltip": "The eighth optional string."
                 }),
                 "text_9": (Input.STRING, {
                     "default": "", 
-                    "defaultInput": True, 
+                    "forceInput": True, 
                     "tooltip": "The ninth optional string."
                 }),
                 "text_10": (Input.STRING, {
                     "default": "", 
-                    "defaultInput": True, 
+                    "forceInput": True, 
                     "tooltip": "The tenth optional string."
                 }),
                 "shuffle_inputs": (Input.BOOLEAN, {

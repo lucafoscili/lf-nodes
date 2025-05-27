@@ -593,7 +593,7 @@ class LF_UpdateUsageStatistics:
                     "tooltip": "The files are saved in the user directory of ComfyUI under LF_Nodes. This field can be used to add additional folders."
                 }),
                 "dataset": (Input.JSON, {
-                    "defaultInput": True, 
+                    "forceInput": True, 
                     "tooltip": "Dataset including the resources (produced by CivitAIMetadataSetup)."
                 }),
             },
