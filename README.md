@@ -87,7 +87,7 @@ That's a tough one—the nodes span quite a few categories. Here's a quick break
 
 ### [Image 2 Image (ControlNet + Editing breakpoint + WD14Tagger)](https://github.com/lucafoscili/lucafoscili/blob/c581de007c088e84a7cb78c64431b7263622ff0f/lf-nodes/workflows/Image%202%20Image%20(with%20ControlNet%2C%20editing%20breakpoint%20and%20WD14%20tagger).json)
 
-![Caption dataset (WD14)](https://github.com/lucafoscili/lucafoscili/blob/c581de007c088e84a7cb78c64431b7263622ff0f/lf-nodes/screenshots/Image%202%20Image%20(with%20ControlNet%2C%20editing%20breakpoint%20and%20WD14%20tagger).png)
+![Image 2 Image (ControlNet + Editing breakpoint + WD14Tagger)](https://github.com/lucafoscili/lucafoscili/blob/c581de007c088e84a7cb78c64431b7263622ff0f/lf-nodes/screenshots/Image%202%20Image%20(with%20ControlNet%2C%20editing%20breakpoint%20and%20WD14%20tagger).png)
 
 ### [Caption dataset (WD14)](https://github.com/lucafoscili/lucafoscili/blob/dd5c3f0fd525ff4cf5b99a940562faa4b7d0135e/lf-nodes/workflows/Caption%20dataset%20(WD14).json)
 
