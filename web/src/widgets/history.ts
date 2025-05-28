@@ -16,7 +16,7 @@ export const historyFactory: HistoryFactory = {
   //#region Options
   options: (wrapper) => {
     return {
-      hideOnZoom: true,
+      hideOnZoom: false,
       getState: () => STATE.get(wrapper),
       getValue() {
         const { list } = STATE.get(wrapper);

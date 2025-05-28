@@ -95,6 +95,11 @@ class LF_CaptionImageWD14:
         chip_dataset: dict = {
             "nodes": chip_nodes
         }
+        raw_blacklist = [
+            b.strip().lower().replace("_", " ")
+            for b in blacklist.split(",")
+            if b.strip()
+        ]        
 
         id2lab = build_id2label(model)
 
@@ -127,20 +132,23 @@ class LF_CaptionImageWD14:
 
             probs = logits.sigmoid().cpu().numpy()[0]
 
-            pairs = [
-                (id2lab[i], float(probs[i]))
-                for i in range(len(probs))
-                if probs[i] >= thr
+            candidates = []
+            for i, p in enumerate(probs):
+                if p < thr:
+                    continue
+                tag = id2lab[i]
+                if remove_underscore:
+                    tag = tag.replace("_", " ")
+                candidates.append((tag, float(p)))
+
+            filtered = [
+                (tag, conf)
+                for tag, conf in candidates
+                if tag.lower() not in raw_blacklist
             ]
-            pairs.sort(key=lambda x: x[1], reverse=True)
-            pairs = pairs[:k if not blacklist else k + len(blacklist.split(","))]
 
-            if remove_underscore:
-                pairs = [(tag.replace("_", " "), conf) for tag, conf in pairs]
-
-            if blacklist:
-                filtered_pairs = [pair for pair in pairs if pair[0] not in blacklist.lower().split(",")]
-                pairs = filtered_pairs if blacklist else pairs
+            filtered.sort(key=lambda x: x[1], reverse=True)
+            pairs = filtered[:k]
 
             tags, _ = zip(*pairs) if len(pairs) > 0 else ([], [])
             for tag in tags:
