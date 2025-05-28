@@ -5,7 +5,7 @@
     "name": "Luca Foscili",
     "url": "https://www.lucafoscili.com"
   },
-  "version": "0.10.1",
+  "version": "0.10.2",
   "type": "module",
   "scripts": {
     "clean": "node ./web/src/scripts/clean.js",
