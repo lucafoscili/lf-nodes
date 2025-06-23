@@ -192,7 +192,7 @@ class LF_LoadImages:
     RETURN_TYPES = ("IMAGE", "IMAGE", "STRING", "STRING", "INT", "IMAGE", "INT", "STRING", "JSON")
 
     def on_exec(self, **kwargs: dict):
-        def select(image_list, names, metadata_list, sel_idx_ui, sel_name_ui):
+        def select(image_list, names, sel_idx_ui, sel_name_ui):
             """
             Determine selected image, index, and name based on UI inputs.
             """
@@ -248,7 +248,7 @@ class LF_LoadImages:
             img0, image_list, names, dates, count, _, _, _, metadata_list = cached_output
 
             sel_img, sel_idx, sel_name = select(
-                image_list, names, metadata_list, selected_index, selected_name
+                image_list, names, selected_index, selected_name
             )
 
             new_output = (
@@ -332,7 +332,7 @@ class LF_LoadImages:
         image_batch, image_list = normalize_output_image(images)
 
         sel_img, sel_idx, sel_name = select(
-            image_list, file_names, metadata_list, selected_index, selected_name
+            image_list, file_names, selected_index, selected_name
         )
 
         output_tuple = (image_batch[0], image_list, file_names, output_creation_dates, index, 
