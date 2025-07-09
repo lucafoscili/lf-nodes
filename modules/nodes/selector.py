@@ -182,7 +182,7 @@ class LF_DiffusionModelSelector:
         else:
             dataset = prepare_model_dataset(model_name, model_hash, model_base64, model_path)
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}checkpointselector", {
+        PromptServer.instance.send_sync(f"{EVENT_PREFIX}diffusionmodelselector", {
             "node": kwargs.get("node_id"),
             "datasets": [dataset],
             "hashes": [model_hash],
