@@ -1839,9 +1839,9 @@ def tensor_to_numpy(image: torch.Tensor, threeD: bool = False, dtype: type = np.
         raise ValueError(f"Unexpected tensor shape for conversion: {image.shape}")
 
     try:
-        # Normalize the image and scale according to the target dtype
         if dtype == np.uint8:
-            numpy_array = (image.cpu().numpy() * 255).astype(dtype)
+            clamped_image = torch.clamp(image, 0.0, 1.0)
+            numpy_array = (clamped_image.cpu().numpy() * 255).astype(dtype)        
         elif dtype == np.float32 or dtype == np.float64:
             numpy_array = image.cpu().numpy().astype(dtype)
         else:
