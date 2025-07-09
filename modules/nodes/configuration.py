@@ -97,12 +97,16 @@ class LF_CivitAIMetadataSetup:
     def INPUT_TYPES(self):
         return {
             "required": {
-                "checkpoint": (get_comfy_list("checkpoints"), {
-                    "default": "None", 
-                    "tooltip": "Checkpoint used to generate the image."
-                }),
             },
             "optional": {
+                "checkpoint": (get_comfy_list("checkpoints"), {
+                    "default": "None", 
+                    "tooltip": "Checkpoint used to generate the image (in alternative to the diffusion model)."
+                }),
+                "unet": (get_comfy_list("unet"), {
+                    "default": "None", 
+                    "tooltip": "Diffusion model used to generate the image (in alternative to the checkpoint)."
+                }),
                 "vae": (get_comfy_list("vae"), {
                     "tooltip": "VAE used to generate the image."
                 }),
@@ -190,11 +194,11 @@ class LF_CivitAIMetadataSetup:
     
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
-    RETURN_NAMES = ("metadata_string", "checkpoint", "vae", 
+    RETURN_NAMES = ("metadata_string", "checkpoint", "unet", "vae", 
                     "sampler", "scheduler", "embeddings", "lora_tags",
                     "full_pos_prompt", "neg_prompt", "steps", "denoising", "clip_skip", "cfg", "seed", 
                     "width", "height", "hires_upscaler", "hires_upscale", "analytics_dataset")
-    RETURN_TYPES = ("STRING", get_comfy_list("checkpoints"), get_comfy_list("vae"),
+    RETURN_TYPES = ("STRING", get_comfy_list("checkpoints"), get_comfy_list("unet"), get_comfy_list("vae"),
                     SAMPLERS, SCHEDULERS, "STRING", "STRING",
                     "STRING", "STRING", "INT", "FLOAT", "INT", "FLOAT", "INT",
                     "INT", "INT", get_comfy_list("upscale_models"), "FLOAT", "JSON")
@@ -223,20 +227,30 @@ class LF_CivitAIMetadataSetup:
         scheduler: str = normalize_list_to_value(kwargs.get("scheduler"))
         seed: int = normalize_list_to_value(kwargs.get("seed"))
         steps: int = normalize_list_to_value(kwargs.get("steps"))
+        unet: str = normalize_list_to_value(kwargs.get("unet"))
         vae: str = normalize_list_to_value(kwargs.get("vae"))
         width: int = normalize_list_to_value(kwargs.get("width"))
 
         analytics_dataset: dict = {"nodes": []}
 
-        # Adding nodes to analytics dataset
-        add_metadata_node("checkpoints", checkpoint)
+        # Hashes for Model, VAE, LoRAs, and Embeddings
+        if not checkpoint or checkpoint == "None":
+            if unet and unet != "None":
+                checkpoint = unet
+                model_hash = get_sha256(get_full_path("unet", unet))
+            else:
+                checkpoint = "Unknown"
+                model_hash = "Unknown"
+        else:
+            model_hash = get_sha256(get_full_path("checkpoints", checkpoint)) if checkpoint else "Unknown"
+            
+        if checkpoint and checkpoint != "Unknown":
+            add_metadata_node("checkpoints", checkpoint)
         add_metadata_node("samplers", sampler)
         add_metadata_node("schedulers", scheduler)
         add_metadata_node("upscale_models", hires_upscaler)
         add_metadata_node("vaes", vae)
 
-        # Hashes for Model, VAE, LoRAs, and Embeddings
-        model_hash = get_sha256(get_full_path("checkpoints", checkpoint)) if checkpoint else "Unknown"
         vae_hash = get_sha256(get_full_path("vae", vae)) if vae else "Unknown"
         emb_hashes_str = ", ".join(get_embedding_hashes(embeddings, analytics_dataset)) if embeddings else ""
         lora_hashes_str = ", ".join(get_lora_hashes(lora_tags, analytics_dataset)) if lora_tags else ""
@@ -267,10 +281,14 @@ class LF_CivitAIMetadataSetup:
         output_prompt = f"{emb_str}{positive_prompt}" if positive_prompt else ""
         
         return (
-            clean_metadata_string, checkpoint, vae, sampler, scheduler, embeddings, lora_tags,
+            clean_metadata_string, checkpoint, unet, vae, sampler, scheduler, embeddings, lora_tags,
             output_prompt, negative_prompt, steps, denoising, clip_skip, cfg, seed,
             width, height, hires_upscaler, hires_upscale, analytics_dataset
         )
+    
+    @classmethod
+    def VALIDATE_INPUTS(self, **kwargs):
+         return True
 # endregion
 
 # region LF_ControlPanel
