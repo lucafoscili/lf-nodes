@@ -41,6 +41,7 @@ export const NODE_WIDGET_MAP: NodeWidgetMap = {
   LF_ControlPanel: [CustomWidgetName.controlPanel],
   LF_CreateMask: [CustomWidgetName.compare],
   LF_Desaturation: [CustomWidgetName.compare],
+  LF_DiffusionModelSelector: [CustomWidgetName.card],
   LF_DisplayBoolean: [CustomWidgetName.code],
   LF_DisplayFloat: [CustomWidgetName.code],
   LF_DisplayInteger: [CustomWidgetName.code],
