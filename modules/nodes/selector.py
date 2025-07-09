@@ -102,6 +102,101 @@ class LF_CheckpointSelector:
          return True
 # endregion
 
+# region LF_DiffusionModelSelector
+class LF_DiffusionModelSelector:
+    initial_list = get_comfy_list("unet")
+
+    @classmethod
+    def INPUT_TYPES(self):
+        return {
+            "required": {
+                "diffusion_model": (["None"] + self.initial_list, {
+                    "default": "None", 
+                    "tooltip": "Diffusion model used to generate the image ('unet' folder)."
+                }),
+                "get_civitai_info": (Input.BOOLEAN, {
+                    "default": True, 
+                    "tooltip": "Attempts to retrieve more info about the model from CivitAI."
+                }),
+                "randomize": (Input.BOOLEAN, {
+                    "default": False, 
+                    "tooltip": "Selects a checkpoint randomly from your checkpoints directory."
+                }),
+                "filter": (Input.STRING, {
+                    "default": "", 
+                    "tooltip": "When randomization is active, this field can be used to filter checkpoint file names. Supports wildcards (*)"
+                }),
+                "seed": (Input.INTEGER, {
+                    "default": 42, 
+                    "min": 0, 
+                    "max": INT_MAX, 
+                    "tooltip": "Seed value for when randomization is active."
+                }),
+            },
+            "optional": {
+                "ui_widget": (Input.LF_CARD, {
+                    "default": {}
+                }),
+            },
+            "hidden": {
+                "node_id": "UNIQUE_ID"
+            }
+        }
+
+    CATEGORY = CATEGORY
+    FUNCTION = FUNCTION
+    RETURN_NAMES = ("combo", "string", "path", "image")
+    RETURN_TYPES = (initial_list, "STRING", "STRING", "IMAGE")
+
+    def on_exec(self, **kwargs: dict):
+        diffusion_model: str = normalize_list_to_value(kwargs.get("diffusion_model"))
+        get_civitai_info: bool = normalize_list_to_value(kwargs.get("get_civitai_info"))
+        randomize: bool = normalize_list_to_value(kwargs.get("randomize"))
+        seed: int = normalize_list_to_value(kwargs.get("seed"))
+        filter: str = normalize_list_to_value(kwargs.get("filter"))
+
+        if is_none(diffusion_model):
+            diffusion_model = None 
+        
+        models = get_comfy_list("unet")
+
+        if randomize:
+            if filter:
+                models = filter_list(filter, models)
+                if not models:
+                    raise ValueError(f"Not found a model with the specified filter: {filter}")
+            random.seed(seed)
+            diffusion_model = random.choice(models)
+
+        checkpoint_data = process_model("diffusion_model", diffusion_model, "unet")
+        model_name = checkpoint_data["model_name"]
+        model_hash = checkpoint_data["model_hash"]
+        model_path = checkpoint_data["model_path"]
+        model_base64 = checkpoint_data["model_base64"]
+        model_cover = checkpoint_data["model_cover"]
+        saved_info = checkpoint_data["saved_info"]
+
+        if saved_info:
+            dataset = saved_info
+            get_civitai_info = False
+        else:
+            dataset = prepare_model_dataset(model_name, model_hash, model_base64, model_path)
+
+        PromptServer.instance.send_sync(f"{EVENT_PREFIX}checkpointselector", {
+            "node": kwargs.get("node_id"),
+            "datasets": [dataset],
+            "hashes": [model_hash],
+            "apiFlags": [get_civitai_info],
+            "paths": [model_path],
+        })
+
+        return (diffusion_model, model_name, model_path, model_cover)
+    
+    @classmethod
+    def VALIDATE_INPUTS(self, **kwargs):
+         return True
+# endregion
+
 # region LF_EmbeddingSelector
 class LF_EmbeddingSelector:
     initial_list = get_comfy_list("embeddings")
@@ -816,6 +911,7 @@ class LF_VAESelector:
 
 NODE_CLASS_MAPPINGS = {
     "LF_CheckpointSelector": LF_CheckpointSelector,
+    "LF_DiffusionModelSelector": LF_DiffusionModelSelector,
     "LF_EmbeddingSelector": LF_EmbeddingSelector,
     "LF_LoraAndEmbeddingSelector": LF_LoraAndEmbeddingSelector,
     "LF_LoraSelector": LF_LoraSelector,
@@ -827,6 +923,7 @@ NODE_CLASS_MAPPINGS = {
 
 NODE_DISPLAY_NAME_MAPPINGS = {
     "LF_CheckpointSelector": "Checkpoint selector",
+    "LF_DiffusionModelSelector": "Diffusion model selector",
     "LF_EmbeddingSelector": "Embedding selector",
     "LF_LoraAndEmbeddingSelector": "LoRA and embedding selector",
     "LF_LoraSelector": "LoRA selector",

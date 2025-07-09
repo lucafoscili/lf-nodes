@@ -70,6 +70,7 @@ export enum NodeName {
   controlPanel = 'LF_ControlPanel',
   createMask = 'LF_CreateMask',
   desaturation = 'LF_Desaturation',
+  diffusionModelSelector = 'LF_DiffusionModelSelector',
   displayBoolean = 'LF_DisplayBoolean',
   displayFloat = 'LF_DisplayFloat',
   displayInteger = 'LF_DisplayInteger',
