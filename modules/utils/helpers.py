@@ -868,20 +868,40 @@ def get_sha256(file_path: str):
     """
     hash_file_path = f"{os.path.splitext(file_path)[0]}.sha256"
 
+    # Check if hash file exists and is valid
     if os.path.exists(hash_file_path):
-        with open(hash_file_path, "r") as hash_file:
-            return hash_file.read().strip()
+        try:
+            with open(hash_file_path, "r") as hash_file:
+                cached_hash = hash_file.read().strip()
+                if cached_hash and len(cached_hash) == 64:  # Valid SHA-256 length
+                    return cached_hash
+        except (IOError, OSError):
+            pass  # If reading fails, recalculate hash
 
+    # Calculate hash with larger buffer for better performance
     sha256_value = hashlib.sha256()
+    buffer_size = 8 * 1024 * 1024  # 8MB buffer for even better performance on large files
 
-    with open(file_path, "rb") as file:
-        for byte_block in iter(lambda: file.read(4096), b""):
-            sha256_value.update(byte_block)
-
-    with open(hash_file_path, "w") as hash_file:
-        hash_file.write(sha256_value.hexdigest())
-
-    return sha256_value.hexdigest()
+    try:
+        with open(file_path, "rb") as file:
+            while True:
+                chunk = file.read(buffer_size)
+                if not chunk:
+                    break
+                sha256_value.update(chunk)
+        
+        hex_hash = sha256_value.hexdigest()
+        
+        # Save hash to cache file
+        try:
+            with open(hash_file_path, "w") as hash_file:
+                hash_file.write(hex_hash)
+        except (IOError, OSError):
+            pass  # If writing fails, just return the hash without caching
+        
+        return hex_hash
+    except (IOError, OSError) as e:
+        raise RuntimeError(f"Error calculating hash for {file_path}: {e}")
 # endregion
 
 # region get_text_encoder_from_clip
