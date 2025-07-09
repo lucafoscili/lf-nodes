@@ -1,9 +1,14 @@
+import comfy.sd
+import comfy.utils
+import folder_paths
 import random
+import torch
 
 from server import PromptServer
 
 from ..utils.constants import CATEGORY_PREFIX, EVENT_PREFIX, FUNCTION, Input, INT_MAX, SAMPLERS, SCHEDULERS
 from ..utils.helpers import create_history_node, filter_list, get_comfy_list, is_none, normalize_json_input, normalize_list_to_value, prepare_model_dataset, process_model
+
 
 CATEGORY = f"{CATEGORY_PREFIX}/Selectors"
 
@@ -50,8 +55,8 @@ class LF_CheckpointSelector:
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
-    RETURN_NAMES = ("combo", "string", "path", "image")
-    RETURN_TYPES = (initial_list, "STRING", "STRING", "IMAGE")
+    RETURN_NAMES = ("combo", "string", "path", "image", "model", "clip", "vae")
+    RETURN_TYPES = (initial_list, "STRING", "STRING", "IMAGE", "MODEL", "CLIP", "VAE")
 
     def on_exec(self, **kwargs: dict):
         checkpoint: str = normalize_list_to_value(kwargs.get("checkpoint"))
@@ -72,6 +77,15 @@ class LF_CheckpointSelector:
                     raise ValueError(f"Not found a model with the specified filter: {filter}")
             random.seed(seed)
             checkpoint = random.choice(checkpoints)
+
+        model = None
+        clip = None
+        vae = None
+        
+        if checkpoint:
+            ckpt_path = folder_paths.get_full_path_or_raise("checkpoints", checkpoint)
+            out = comfy.sd.load_checkpoint_guess_config(ckpt_path, output_vae=True, output_clip=True, embedding_directory=folder_paths.get_folder_paths("embeddings"))
+            model, clip, vae = out[:3]
 
         checkpoint_data = process_model("checkpoint", checkpoint, "checkpoints")
         model_name = checkpoint_data["model_name"]
@@ -95,7 +109,7 @@ class LF_CheckpointSelector:
             "paths": [model_path],
         })
 
-        return (checkpoint, model_name, model_path, model_cover)
+        return (checkpoint, model_name, model_path, model_cover, model, clip, vae)
     
     @classmethod
     def VALIDATE_INPUTS(self, **kwargs):
@@ -132,6 +146,10 @@ class LF_DiffusionModelSelector:
                     "max": INT_MAX, 
                     "tooltip": "Seed value for when randomization is active."
                 }),
+                "weight_dtype": (["default", "fp8_e4m3fn", "fp8_e4m3fn_fast", "fp8_e5m2"], {
+                    "default": "default",
+                    "tooltip": "Weight data type for the diffusion model. 'default' will use the default data type for the model, while the others will force a specific data type."
+                }),
             },
             "optional": {
                 "ui_widget": (Input.LF_CARD, {
@@ -145,8 +163,8 @@ class LF_DiffusionModelSelector:
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
-    RETURN_NAMES = ("combo", "string", "path", "image")
-    RETURN_TYPES = (initial_list, "STRING", "STRING", "IMAGE")
+    RETURN_NAMES = ("combo", "string", "path", "image", "model")
+    RETURN_TYPES = (initial_list, "STRING", "STRING", "IMAGE", "MODEL")
 
     def on_exec(self, **kwargs: dict):
         diffusion_model: str = normalize_list_to_value(kwargs.get("diffusion_model"))
@@ -154,6 +172,7 @@ class LF_DiffusionModelSelector:
         randomize: bool = normalize_list_to_value(kwargs.get("randomize"))
         seed: int = normalize_list_to_value(kwargs.get("seed"))
         filter: str = normalize_list_to_value(kwargs.get("filter"))
+        weight_dtype: str = normalize_list_to_value(kwargs.get("weight_dtype", "default"))
 
         if is_none(diffusion_model):
             diffusion_model = None 
@@ -167,6 +186,30 @@ class LF_DiffusionModelSelector:
                     raise ValueError(f"Not found a model with the specified filter: {filter}")
             random.seed(seed)
             diffusion_model = random.choice(models)
+
+        model_obj = None
+        if diffusion_model:
+            
+            model_options = {}
+            if weight_dtype == "fp8_e4m3fn":
+                model_options["dtype"] = torch.float8_e4m3fn
+            elif weight_dtype == "fp8_e4m3fn_fast":
+                model_options["dtype"] = torch.float8_e4m3fn
+                model_options["fp8_optimizations"] = True
+            elif weight_dtype == "fp8_e5m2":
+                model_options["dtype"] = torch.float8_e5m2
+
+            try:
+                unet_path = folder_paths.get_full_path_or_raise("diffusion_models", diffusion_model)
+                model_obj = comfy.sd.load_diffusion_model(unet_path, model_options=model_options)
+            except:
+                # Fallback to unet path if diffusion_models fails
+                try:
+                    unet_path = folder_paths.get_full_path_or_raise("unet", diffusion_model)
+                    model_obj = comfy.sd.load_diffusion_model(unet_path, model_options=model_options)
+                except Exception as e:
+                    print(f"Failed to load diffusion model {diffusion_model}: {e}")
+                    model_obj = None
 
         checkpoint_data = process_model("diffusion_model", diffusion_model, "unet")
         model_name = checkpoint_data["model_name"]
@@ -190,7 +233,7 @@ class LF_DiffusionModelSelector:
             "paths": [model_path],
         })
 
-        return (diffusion_model, model_name, model_path, model_cover)
+        return (diffusion_model, model_name, model_path, model_cover, model_obj)
     
     @classmethod
     def VALIDATE_INPUTS(self, **kwargs):
@@ -872,8 +915,8 @@ class LF_VAESelector:
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
-    RETURN_NAMES = ("combo", "string")
-    RETURN_TYPES = (initial_list, "STRING")
+    RETURN_NAMES = ("combo", "string", "vae")
+    RETURN_TYPES = (initial_list, "STRING", "VAE")
         
     def on_exec(self, **kwargs: dict):
         vae: str = normalize_list_to_value(kwargs.get("vae"))
@@ -898,6 +941,17 @@ class LF_VAESelector:
             random.seed(seed)
             vae = random.choice(vaes)
         
+        vae_model = None
+        if vae and vae != "None":
+            if vae in ["taesd", "taesdxl", "taesd3", "taef1"]:
+                # Load TAESD VAE
+                sd = self.load_taesd(vae)
+            else:
+                vae_path = folder_paths.get_full_path_or_raise("vae", vae)
+                sd = comfy.utils.load_torch_file(vae_path)
+            vae_model = comfy.sd.VAE(sd=sd)
+            vae_model.throw_exception_if_invalid()
+        
         if enable_history:
             create_history_node(vae, nodes)
 
@@ -906,7 +960,37 @@ class LF_VAESelector:
             "dataset": dataset,
         })
 
-        return (vae, vae)
+        return (vae, vae, vae_model)
+
+    @staticmethod
+    def load_taesd(name):
+        sd = {}
+        approx_vaes = folder_paths.get_filename_list("vae_approx")
+
+        encoder = next(filter(lambda a: a.startswith("{}_encoder.".format(name)), approx_vaes))
+        decoder = next(filter(lambda a: a.startswith("{}_decoder.".format(name)), approx_vaes))
+
+        enc = comfy.utils.load_torch_file(folder_paths.get_full_path_or_raise("vae_approx", encoder))
+        for k in enc:
+            sd["taesd_encoder.{}".format(k)] = enc[k]
+
+        dec = comfy.utils.load_torch_file(folder_paths.get_full_path_or_raise("vae_approx", decoder))
+        for k in dec:
+            sd["taesd_decoder.{}".format(k)] = dec[k]
+
+        if name == "taesd":
+            sd["vae_scale"] = torch.tensor(0.18215)
+            sd["vae_shift"] = torch.tensor(0.0)
+        elif name == "taesdxl":
+            sd["vae_scale"] = torch.tensor(0.13025)
+            sd["vae_shift"] = torch.tensor(0.0)
+        elif name == "taesd3":
+            sd["vae_scale"] = torch.tensor(1.5305)
+            sd["vae_shift"] = torch.tensor(0.0609)
+        elif name == "taef1":
+            sd["vae_scale"] = torch.tensor(0.3611)
+            sd["vae_shift"] = torch.tensor(0.1159)
+        return sd
 # endregion
 
 NODE_CLASS_MAPPINGS = {
