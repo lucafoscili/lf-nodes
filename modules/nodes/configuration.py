@@ -99,13 +99,17 @@ class LF_CivitAIMetadataSetup:
             "required": {
             },
             "optional": {
+                "model_type": (["none", "checkpoint", "unet"], {
+                    "default": "none", 
+                    "tooltip": "Type of model to use for metadata generation."
+                }),
                 "checkpoint": (get_comfy_list("checkpoints"), {
                     "default": "None", 
-                    "tooltip": "Checkpoint used to generate the image (in alternative to the diffusion model)."
+                    "tooltip": "Checkpoint used to generate the image (only used when model_type is 'checkpoint')."
                 }),
                 "unet": (get_comfy_list("unet"), {
                     "default": "None", 
-                    "tooltip": "Diffusion model used to generate the image (in alternative to the checkpoint)."
+                    "tooltip": "Diffusion model used to generate the image (only used when model_type is 'unet')."
                 }),
                 "vae": (get_comfy_list("vae"), {
                     "tooltip": "VAE used to generate the image."
@@ -221,6 +225,7 @@ class LF_CivitAIMetadataSetup:
         hires_upscale: float = normalize_list_to_value(kwargs.get("hires_upscale"))
         hires_upscaler: str = normalize_list_to_value(kwargs.get("hires_upscaler"))
         lora_tags: str = normalize_list_to_value(kwargs.get("lora_tags"))
+        model_type: str = normalize_list_to_value(kwargs.get("model_type"))
         negative_prompt: str = normalize_list_to_value(kwargs.get("negative_prompt"))
         positive_prompt: str = normalize_list_to_value(kwargs.get("positive_prompt"))
         sampler: str = normalize_list_to_value(kwargs.get("sampler"))
@@ -233,19 +238,18 @@ class LF_CivitAIMetadataSetup:
 
         analytics_dataset: dict = {"nodes": []}
 
-        # Hashes for Model, VAE, LoRAs, and Embeddings
-        if not checkpoint or checkpoint == "None":
-            if unet and unet != "None":
-                checkpoint = unet
-                model_hash = get_sha256(get_full_path("unet", unet))
-            else:
-                checkpoint = "Unknown"
-                model_hash = "Unknown"
-        else:
-            model_hash = get_sha256(get_full_path("checkpoints", checkpoint)) if checkpoint else "Unknown"
-            
-        if checkpoint and checkpoint != "Unknown":
+        model_name = "Unknown"
+        model_hash = "Unknown"
+        
+        if model_type == "checkpoint" and checkpoint and checkpoint != "None":
+            model_name = checkpoint
+            model_hash = get_sha256(get_full_path("checkpoints", checkpoint))
             add_metadata_node("checkpoints", checkpoint)
+        elif model_type == "unet" and unet and unet != "None":
+            model_name = unet
+            model_hash = get_sha256(get_full_path("unet", unet))
+            add_metadata_node("unet", unet)
+
         add_metadata_node("samplers", sampler)
         add_metadata_node("schedulers", scheduler)
         add_metadata_node("upscale_models", hires_upscaler)
@@ -266,7 +270,7 @@ class LF_CivitAIMetadataSetup:
             f"Seed: {seed or ''}, Size: {width or ''}x{height or ''}, "
             f"Denoising strength: {denoising or ''}, Clip skip: {abs(clip_skip) or ''}, "
             f"VAE hash: {vae_hash}, "
-            f"Model hash: {model_hash}, Model: {checkpoint}, "
+            f"Model hash: {model_hash}, Model: {model_name}, "
             f"Hires upscale: {hires_upscale or ''}, Hires upscaler: {hires_upscaler or 'Latent'}, "
             f"Lora hashes: \"{lora_hashes_str}\", TI hashes: \"{emb_hashes_str}\", Version: ComfyUI.LF Nodes"
         )
@@ -280,8 +284,11 @@ class LF_CivitAIMetadataSetup:
 
         output_prompt = f"{emb_str}{positive_prompt}" if positive_prompt else ""
         
+        selected_checkpoint = checkpoint if model_type == "checkpoint" else "None"
+        selected_unet = unet if model_type == "unet" else "None"
+        
         return (
-            clean_metadata_string, checkpoint, unet, vae, sampler, scheduler, embeddings, lora_tags,
+            clean_metadata_string, selected_checkpoint, selected_unet, vae, sampler, scheduler, embeddings, lora_tags,
             output_prompt, negative_prompt, steps, denoising, clip_skip, cfg, seed,
             width, height, hires_upscaler, hires_upscale, analytics_dataset
         )
