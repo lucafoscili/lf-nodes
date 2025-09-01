@@ -19,6 +19,7 @@ import {
   UnescapeJSONPayload,
   WidgetOptions,
 } from '../types/widgets/widgets';
+import { BaseEventPayload } from '../types/events/events';
 
 declare global {
   interface Window {
@@ -150,6 +151,12 @@ export const getInput = (node: NodeType, type: ComfyWidgetName | CustomWidgetNam
 };
 export const getOutput = (node: NodeType, type: ComfyWidgetName | CustomWidgetName): SlotInfo => {
   return node?.outputs?.find((w) => w.type.toLowerCase() === type.toLowerCase()) as SlotInfo;
+};
+export const resolveNodeId = (p: BaseEventPayload | undefined | null): string | null => {
+  if (!p) {
+    return null;
+  }
+  return p.node ?? p.id ?? p.node_id ?? null;
 };
 //#endregion
 
