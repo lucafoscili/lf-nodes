@@ -5,7 +5,12 @@ import { CustomWidgetName, NodeName } from '../widgets/widgets';
 export type GenericPayload = WidgetPayloadFor<CustomWidgetName>;
 export type GenericEvent = CustomEvent<GenericPayload>;
 export interface BaseEventPayload {
-  id: string;
+  /** canonical simple-event key currently emitted by backend */
+  node?: string;
+  /** legacy alias widgets originally relied on */
+  id?: string;
+  /** key used in richer meta/progress/error objects */
+  node_id?: string;
 }
 export type EventCallback<T extends EventPayload<CustomWidgetName>> = (e: CustomEvent<T>) => void;
 type ToKebabCase<S extends string> = S extends `${infer First}${infer Rest}`

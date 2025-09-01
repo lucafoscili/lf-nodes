@@ -5,7 +5,7 @@ import { LogSeverity } from '../types/manager/manager';
 import { Card } from '../types/widgets/card';
 import { CardsWithChip, CardsWithChipDeserializedValue } from '../types/widgets/cardsWithChip';
 import { CustomWidgetName, NodeName, WidgetFactory } from '../types/widgets/widgets';
-import { getApiRoutes, getCustomWidget, getLfManager } from '../utils/common';
+import { getApiRoutes, getCustomWidget, getLfManager, resolveNodeId } from '../utils/common';
 import { cardFactory } from '../widgets/card';
 import { cardsWithChipFactory } from '../widgets/cardsWithChip';
 import { carouselFactory } from '../widgets/carousel';
@@ -101,7 +101,16 @@ export class LFWidgets {
     const lfManager = getLfManager();
 
     const payload = event.detail;
-    const node = lfManager.getApiRoutes().comfy.getNodeById(payload.id);
+    const id = resolveNodeId(payload);
+    if (!id) {
+      lfManager.log(
+        `Event '${name}' missing node identifier; present keys: ${Object.keys(payload).join(', ')}`,
+        { payload, name },
+        LogSeverity.Warning,
+      );
+      return;
+    }
+    const node = lfManager.getApiRoutes().comfy.getNodeById(id);
 
     if (node) {
       lfManager.log(
@@ -214,7 +223,7 @@ export class LFWidgets {
       lfManager.getApiRoutes().comfy.redraw();
     } else {
       lfManager.log(
-        `Event '${name}' was fired but its related node (#${payload.id}) wasn't found in the graph! Skipping handling the event.`,
+        `Event '${name}' was fired but its related node (#${id}) wasn't found in the graph! Skipping handling the event.`,
         { payload, name },
         LogSeverity.Warning,
       );
