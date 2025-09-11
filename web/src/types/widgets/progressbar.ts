@@ -31,11 +31,9 @@ export interface ProgressbarState extends BaseWidgetState {
 //#endregion
 
 //#region Dataset
-export enum ProgressbarIcons {
-  Landscape = 'viewport-wide',
-  Portrait = 'viewport-tall',
-}
 export enum ProgressbarLabels {
+  ArrowRight = '→',
+  ArrowUp = '↑',
   Fallback = 'N/A',
   False = 'false',
   True = 'true',

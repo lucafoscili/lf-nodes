@@ -2,7 +2,6 @@ import {
   ProgressbarCSS,
   ProgressbarDeserializedValue,
   ProgressbarFactory,
-  ProgressbarIcons,
   ProgressbarLabels,
   ProgressbarNormalizeCallback,
   ProgressbarState,
@@ -38,23 +37,26 @@ export const progressbarFactory: ProgressbarFactory = {
           switch (node.comfyClass) {
             case NodeName.resolutionSwitcher:
               if (isTrue) {
-                progressbar.lfIcon = ProgressbarIcons.Landscape;
+                progressbar.lfLabel = ProgressbarLabels.ArrowRight;
+                progressbar.lfUiState = 'primary';
               } else if (isFalse) {
-                progressbar.lfIcon = ProgressbarIcons.Portrait;
+                progressbar.lfLabel = ProgressbarLabels.ArrowUp;
+                progressbar.lfUiState = 'secondary';
               } else {
                 progressbar.lfLabel = ProgressbarLabels.Fallback;
+                progressbar.lfUiState = 'disabled';
               }
               break;
             default:
               if (isTrue) {
-                progressbar.lfUiState = 'success';
                 progressbar.lfLabel = ProgressbarLabels.True;
+                progressbar.lfUiState = 'success';
               } else if (isFalse) {
-                progressbar.lfUiState = 'danger';
                 progressbar.lfLabel = ProgressbarLabels.False;
+                progressbar.lfUiState = 'danger';
               } else {
-                progressbar.lfUiState = 'primary';
                 progressbar.lfLabel = ProgressbarLabels.Fallback;
+                progressbar.lfUiState = 'disabled';
               }
               break;
           }

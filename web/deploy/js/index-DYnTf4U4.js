@@ -5423,7 +5423,7 @@ var tt = false, et = (t2, e2, n2) => {
                         const n6 = t7.i.replace(/-/g, "_"), o6 = t7.T;
                         if (!o6) return;
                         const i3 = r.get(o6);
-                        return i3 ? i3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-4ba08932.entry.js": () => import("./p-4ba08932.entry-BlHKASlD.js"), "./p-60af2d7f.entry.js": () => import("./p-60af2d7f.entry-CY8_HFR1.js"), "./p-7652d72d.entry.js": () => import("./p-7652d72d.entry-C3uy4F-N.js"), "./p-79cc15c2.entry.js": () => import("./p-79cc15c2.entry-DLk43kGi.js"), "./p-846257eb.entry.js": () => import("./p-846257eb.entry-BbjEOmsA.js"), "./p-84927cea.entry.js": () => import("./p-84927cea.entry-DCQ2Wv1v.js"), "./p-87e2e37a.entry.js": () => import("./p-87e2e37a.entry-Bw0uJF8A.js"), "./p-928c4970.entry.js": () => import("./p-928c4970.entry-DOPqGgKw.js"), "./p-93ed735a.entry.js": () => import("./p-93ed735a.entry-DwMuE2hb.js"), "./p-a147e6c9.entry.js": () => import("./p-a147e6c9.entry-QIVlhi3s.js"), "./p-a14c6d82.entry.js": () => import("./p-a14c6d82.entry-DgfUdNCp.js"), "./p-a7fc1135.entry.js": () => import("./p-a7fc1135.entry-BZq-HMCE.js"), "./p-bd214b33.entry.js": () => import("./p-bd214b33.entry-BjfVb2-2.js"), "./p-bf8a47d4.entry.js": () => import("./p-bf8a47d4.entry-BeRCaOga.js"), "./p-ccea11a0.entry.js": () => import("./p-ccea11a0.entry-PpJoXOvM.js"), "./p-e2689624.entry.js": () => import("./p-e2689624.entry-ClmqcohU.js") }), `./${o6}.entry.js`, 2).then(((t8) => (r.set(o6, t8), t8[n6])), ((t8) => {
+                        return i3 ? i3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-4ba08932.entry.js": () => import("./p-4ba08932.entry-CWgOnZvm.js"), "./p-60af2d7f.entry.js": () => import("./p-60af2d7f.entry-Dm-0LijP.js"), "./p-7652d72d.entry.js": () => import("./p-7652d72d.entry-5QDQnGcY.js"), "./p-79cc15c2.entry.js": () => import("./p-79cc15c2.entry-DgE4PCeM.js"), "./p-846257eb.entry.js": () => import("./p-846257eb.entry-CsOb9oVO.js"), "./p-84927cea.entry.js": () => import("./p-84927cea.entry-BBLepssp.js"), "./p-87e2e37a.entry.js": () => import("./p-87e2e37a.entry-EFErLY37.js"), "./p-928c4970.entry.js": () => import("./p-928c4970.entry-qYO1nb83.js"), "./p-93ed735a.entry.js": () => import("./p-93ed735a.entry-CKviar4Q.js"), "./p-a147e6c9.entry.js": () => import("./p-a147e6c9.entry-L-CS2-px.js"), "./p-a14c6d82.entry.js": () => import("./p-a14c6d82.entry-CzCEzJo_.js"), "./p-a7fc1135.entry.js": () => import("./p-a7fc1135.entry-Bq6UvMs2.js"), "./p-bd214b33.entry.js": () => import("./p-bd214b33.entry-Dfy6e4We.js"), "./p-bf8a47d4.entry.js": () => import("./p-bf8a47d4.entry-Ce1fU5mA.js"), "./p-ccea11a0.entry.js": () => import("./p-ccea11a0.entry-tkixgSBM.js"), "./p-e2689624.entry.js": () => import("./p-e2689624.entry-BbbuTe16.js") }), `./${o6}.entry.js`, 2).then(((t8) => (r.set(o6, t8), t8[n6])), ((t8) => {
                           l(t8, e3.$hostElement$);
                         }));
                         /*!__STENCIL_STATIC_IMPORT_SWITCH__*/
@@ -8206,6 +8206,7 @@ const EV_HANDLERS$6 = {
       const numberW = getWidget(comfyNode, ComfyWidgetName.number);
       const seedW = getWidget(comfyNode, ComfyWidgetName.seed);
       const stringW = getWidget(comfyNode, ComfyWidgetName.string);
+      const textW = getWidget(comfyNode, ComfyWidgetName.text);
       const toggleW = getWidget(comfyNode, ComfyWidgetName.toggle);
       switch (comfyNode.comfyClass) {
         case NodeName.boolean:
@@ -8243,6 +8244,8 @@ const EV_HANDLERS$6 = {
             stringW.options.setValue(node.value);
           } else if (customtextW) {
             customtextW.options.setValue(node.value);
+          } else if (textW) {
+            textW.value = node.value;
           }
           break;
       }
@@ -10125,13 +10128,10 @@ var ProgressbarCSS;
 (function(ProgressbarCSS2) {
   ProgressbarCSS2["Content"] = "lf-progressbar";
 })(ProgressbarCSS || (ProgressbarCSS = {}));
-var ProgressbarIcons;
-(function(ProgressbarIcons2) {
-  ProgressbarIcons2["Landscape"] = "viewport-wide";
-  ProgressbarIcons2["Portrait"] = "viewport-tall";
-})(ProgressbarIcons || (ProgressbarIcons = {}));
 var ProgressbarLabels;
 (function(ProgressbarLabels2) {
+  ProgressbarLabels2["ArrowRight"] = "→";
+  ProgressbarLabels2["ArrowUp"] = "↑";
   ProgressbarLabels2["Fallback"] = "N/A";
   ProgressbarLabels2["False"] = "false";
   ProgressbarLabels2["True"] = "true";
@@ -10159,23 +10159,26 @@ const progressbarFactory = {
           switch (node.comfyClass) {
             case NodeName.resolutionSwitcher:
               if (isTrue) {
-                progressbar.lfIcon = ProgressbarIcons.Landscape;
+                progressbar.lfLabel = ProgressbarLabels.ArrowRight;
+                progressbar.lfUiState = "primary";
               } else if (isFalse) {
-                progressbar.lfIcon = ProgressbarIcons.Portrait;
+                progressbar.lfLabel = ProgressbarLabels.ArrowUp;
+                progressbar.lfUiState = "secondary";
               } else {
                 progressbar.lfLabel = ProgressbarLabels.Fallback;
+                progressbar.lfUiState = "disabled";
               }
               break;
             default:
               if (isTrue) {
-                progressbar.lfUiState = "success";
                 progressbar.lfLabel = ProgressbarLabels.True;
+                progressbar.lfUiState = "success";
               } else if (isFalse) {
-                progressbar.lfUiState = "danger";
                 progressbar.lfLabel = ProgressbarLabels.False;
+                progressbar.lfUiState = "danger";
               } else {
-                progressbar.lfUiState = "primary";
                 progressbar.lfLabel = ProgressbarLabels.Fallback;
+                progressbar.lfUiState = "disabled";
               }
               break;
           }
@@ -10784,7 +10787,7 @@ class LFWidgets {
         const icon = action === "focus tab" ? "photo-search" : action === "interrupt" ? "x" : action === "interrupt and queue" ? "refresh" : action === "queue prompt" ? "stack-push" : "";
         const options = {
           body: message,
-          icon: icon ? window.location.href + `extensions/comfyui-lf/assets/svg/${icon}.svg` : void 0,
+          icon: icon ? window.location.href + `extensions/lf-nodes/assets/svg/${icon}.svg` : void 0,
           requireInteraction: action === "none" ? false : true,
           silent,
           tag
