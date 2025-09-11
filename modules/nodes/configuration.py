@@ -509,7 +509,6 @@ class LF_LoadLoraTags:
                 }),
                 "tags": (Input.STRING, {
                     "default": '', 
-                    "multiline": True, 
                     "tooltip": "Text containing LoRA tags, e.g., <lora:example:1.0>"
                 }),
             },
@@ -588,7 +587,7 @@ class LF_LoadLoraTags:
 
             lora_name, m_weight, c_weight = get_lora_weights(tag_content)
             if not lora_name:
-                nodes.append(add_chip(lora_name))
+                nodes.append(add_chip(tag_content[1]))
                 lora_status[tag_content[1]] = False
                 continue
 
