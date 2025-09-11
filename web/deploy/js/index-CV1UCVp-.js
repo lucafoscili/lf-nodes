@@ -5423,7 +5423,7 @@ var tt = false, et = (t2, e2, n2) => {
                         const n6 = t7.i.replace(/-/g, "_"), o6 = t7.T;
                         if (!o6) return;
                         const i3 = r.get(o6);
-                        return i3 ? i3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-4ba08932.entry.js": () => import("./p-4ba08932.entry-C6fCEW9Q.js"), "./p-60af2d7f.entry.js": () => import("./p-60af2d7f.entry-DMTIIHew.js"), "./p-7652d72d.entry.js": () => import("./p-7652d72d.entry-XyILgPNU.js"), "./p-79cc15c2.entry.js": () => import("./p-79cc15c2.entry-BKYS43r4.js"), "./p-846257eb.entry.js": () => import("./p-846257eb.entry-DdXqaOtc.js"), "./p-84927cea.entry.js": () => import("./p-84927cea.entry-COZ0FoZC.js"), "./p-87e2e37a.entry.js": () => import("./p-87e2e37a.entry-C6X7ZTc4.js"), "./p-928c4970.entry.js": () => import("./p-928c4970.entry-zCVDuDT8.js"), "./p-93ed735a.entry.js": () => import("./p-93ed735a.entry-CndcT1yA.js"), "./p-a147e6c9.entry.js": () => import("./p-a147e6c9.entry-CiPcqgrS.js"), "./p-a14c6d82.entry.js": () => import("./p-a14c6d82.entry-CrGWcQAD.js"), "./p-a7fc1135.entry.js": () => import("./p-a7fc1135.entry-BAghNEHK.js"), "./p-bd214b33.entry.js": () => import("./p-bd214b33.entry-2Wz-hle6.js"), "./p-bf8a47d4.entry.js": () => import("./p-bf8a47d4.entry-Ce4mZwO3.js"), "./p-ccea11a0.entry.js": () => import("./p-ccea11a0.entry-DU-yldXx.js"), "./p-e2689624.entry.js": () => import("./p-e2689624.entry-R051NhjZ.js") }), `./${o6}.entry.js`, 2).then(((t8) => (r.set(o6, t8), t8[n6])), ((t8) => {
+                        return i3 ? i3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-4ba08932.entry.js": () => import("./p-4ba08932.entry-zMWQ-YOc.js"), "./p-60af2d7f.entry.js": () => import("./p-60af2d7f.entry-BcOOShCh.js"), "./p-7652d72d.entry.js": () => import("./p-7652d72d.entry-CKuO_lGk.js"), "./p-79cc15c2.entry.js": () => import("./p-79cc15c2.entry-D3pQ3DzK.js"), "./p-846257eb.entry.js": () => import("./p-846257eb.entry-By330zMa.js"), "./p-84927cea.entry.js": () => import("./p-84927cea.entry-Buo8k4SC.js"), "./p-87e2e37a.entry.js": () => import("./p-87e2e37a.entry-DkdzvRhd.js"), "./p-928c4970.entry.js": () => import("./p-928c4970.entry-C-TQK63V.js"), "./p-93ed735a.entry.js": () => import("./p-93ed735a.entry-BB8A7owV.js"), "./p-a147e6c9.entry.js": () => import("./p-a147e6c9.entry-CmG47Q70.js"), "./p-a14c6d82.entry.js": () => import("./p-a14c6d82.entry-CZT5jV8b.js"), "./p-a7fc1135.entry.js": () => import("./p-a7fc1135.entry-RuZ9fnZz.js"), "./p-bd214b33.entry.js": () => import("./p-bd214b33.entry-ChBXuQX9.js"), "./p-bf8a47d4.entry.js": () => import("./p-bf8a47d4.entry-BXw4nfUp.js"), "./p-ccea11a0.entry.js": () => import("./p-ccea11a0.entry-C-PDBT0k.js"), "./p-e2689624.entry.js": () => import("./p-e2689624.entry-C78fmpt2.js") }), `./${o6}.entry.js`, 2).then(((t8) => (r.set(o6, t8), t8[n6])), ((t8) => {
                           l(t8, e3.$hostElement$);
                         }));
                         /*!__STENCIL_STATIC_IMPORT_SWITCH__*/
@@ -10128,13 +10128,10 @@ var ProgressbarCSS;
 (function(ProgressbarCSS2) {
   ProgressbarCSS2["Content"] = "lf-progressbar";
 })(ProgressbarCSS || (ProgressbarCSS = {}));
-var ProgressbarIcons;
-(function(ProgressbarIcons2) {
-  ProgressbarIcons2["Landscape"] = "viewport-wide";
-  ProgressbarIcons2["Portrait"] = "viewport-tall";
-})(ProgressbarIcons || (ProgressbarIcons = {}));
 var ProgressbarLabels;
 (function(ProgressbarLabels2) {
+  ProgressbarLabels2["ArrowRight"] = "→";
+  ProgressbarLabels2["ArrowUp"] = "↑";
   ProgressbarLabels2["Fallback"] = "N/A";
   ProgressbarLabels2["False"] = "false";
   ProgressbarLabels2["True"] = "true";
@@ -10162,23 +10159,26 @@ const progressbarFactory = {
           switch (node.comfyClass) {
             case NodeName.resolutionSwitcher:
               if (isTrue) {
-                progressbar.lfIcon = ProgressbarIcons.Landscape;
+                progressbar.lfLabel = ProgressbarLabels.ArrowRight;
+                progressbar.lfUiState = "primary";
               } else if (isFalse) {
-                progressbar.lfIcon = ProgressbarIcons.Portrait;
+                progressbar.lfLabel = ProgressbarLabels.ArrowUp;
+                progressbar.lfUiState = "secondary";
               } else {
                 progressbar.lfLabel = ProgressbarLabels.Fallback;
+                progressbar.lfUiState = "disabled";
               }
               break;
             default:
               if (isTrue) {
-                progressbar.lfUiState = "success";
                 progressbar.lfLabel = ProgressbarLabels.True;
+                progressbar.lfUiState = "success";
               } else if (isFalse) {
-                progressbar.lfUiState = "danger";
                 progressbar.lfLabel = ProgressbarLabels.False;
+                progressbar.lfUiState = "danger";
               } else {
-                progressbar.lfUiState = "primary";
                 progressbar.lfLabel = ProgressbarLabels.Fallback;
+                progressbar.lfUiState = "disabled";
               }
               break;
           }
