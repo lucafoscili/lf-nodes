@@ -250,7 +250,7 @@ export class LFWidgets {
       const options: NotificationOptions = {
         body: message,
         icon: icon
-          ? window.location.href + `extensions/comfyui-lf/assets/svg/${icon}.svg`
+          ? window.location.href + `extensions/lf-nodes/assets/svg/${icon}.svg`
           : undefined,
         requireInteraction: action === 'none' ? false : true,
         silent,
