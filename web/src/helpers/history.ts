@@ -21,6 +21,7 @@ export const EV_HANDLERS = {
       const numberW = getWidget(comfyNode, ComfyWidgetName.number);
       const seedW = getWidget(comfyNode, ComfyWidgetName.seed);
       const stringW = getWidget(comfyNode, ComfyWidgetName.string);
+      const textW = getWidget(comfyNode, ComfyWidgetName.text);
       const toggleW = getWidget(comfyNode, ComfyWidgetName.toggle);
 
       switch (comfyNode.comfyClass as NodeName) {
@@ -59,6 +60,8 @@ export const EV_HANDLERS = {
             stringW.options.setValue(node.value);
           } else if (customtextW) {
             customtextW.options.setValue(node.value);
+          } else if (textW) {
+            textW.value = node.value;
           }
           break;
       }
