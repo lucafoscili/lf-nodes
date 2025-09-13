@@ -335,10 +335,13 @@ class LF_MathOperation:
                         raise ValueError("Attribute access restricted to math.*")
 
             try:
+                allowed_names = {"a", "b", "c", "d"}
+                cleaned_vars = {k: (v if v is not None else float('NaN')) for k, v in variables.items() if k in allowed_names}
+
                 parsed = ast.parse(expr, mode='eval')
                 Validator().visit(parsed)
-                # Build evaluation environment
-                env = {k: v for k, v in variables.items()}
+                # Build evaluation environment (math injected separately, no __builtins__)
+                env = {k: v for k, v in cleaned_vars.items()}
                 env['math'] = math  # retain math namespace for attribute access
                 return eval(compile(parsed, '<lf_math>', 'eval'), {'__builtins__': {}}, env)
             except Exception:
@@ -396,7 +399,7 @@ class LF_MathOperation:
         int_result: int
         if isinstance(result, (int, float)):
             try:
-                if result is None or (isinstance(result, float) and (math.isnan(result) or math.isinf(result))):
+                if isinstance(result, float) and (math.isnan(result) or math.isinf(result)):
                     int_result = 0
                 else:
                     int_result = int(result)
