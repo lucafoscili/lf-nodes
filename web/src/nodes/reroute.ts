@@ -223,7 +223,7 @@ export const lfReroute = {
           }
           if (key === 'horizontal' || key === 'showIcon' || key === 'showType') {
             if (typeof incoming === 'boolean') {
-              (this.properties as any)[key] = incoming;
+              this.properties[key] = incoming;
             }
             continue;
           }
@@ -232,7 +232,7 @@ export const lfReroute = {
         if (this.__labelWidget && this.widgets) {
           const idx = this.widgets.indexOf(this.__labelWidget);
           if (idx >= 0 && 'value' in this.__labelWidget) {
-            (this.__labelWidget as any).value = this.properties.label;
+            this.__labelWidget.value = this.properties.label;
           }
         }
 
