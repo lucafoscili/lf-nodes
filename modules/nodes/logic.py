@@ -340,10 +340,66 @@ class LF_MathOperation:
 
                 parsed = ast.parse(expr, mode='eval')
                 Validator().visit(parsed)
-                # Build evaluation environment (math injected separately, no __builtins__)
-                env = {k: v for k, v in cleaned_vars.items()}
-                env['math'] = math  # retain math namespace for attribute access
-                return eval(compile(parsed, '<lf_math>', 'eval'), {'__builtins__': {}}, env)
+
+                def evaluate(node):
+                    if isinstance(node, ast.Expression):
+                        return evaluate(node.body)
+                    if isinstance(node, ast.Constant):
+                        return float(node.value)
+                    if isinstance(node, ast.Name):
+                        if node.id == 'math':
+                            return math
+                        return cleaned_vars.get(node.id, float('NaN'))
+                    if isinstance(node, ast.UnaryOp):
+                        val = evaluate(node.operand)
+                        if isinstance(node.op, ast.UAdd):
+                            return +val
+                        if isinstance(node.op, ast.USub):
+                            return -val
+                        raise ValueError('Unsupported unary op')
+                    if isinstance(node, ast.BinOp):
+                        left = evaluate(node.left)
+                        right = evaluate(node.right)
+                        op = node.op
+                        try:
+                            if isinstance(op, ast.Add):
+                                return left + right
+                            if isinstance(op, ast.Sub):
+                                return left - right
+                            if isinstance(op, ast.Mult):
+                                return left * right
+                            if isinstance(op, ast.Div):
+                                return left / right
+                            if isinstance(op, ast.FloorDiv):
+                                return left // right
+                            if isinstance(op, ast.Mod):
+                                return left % right
+                            if isinstance(op, ast.Pow):
+                                return left ** right
+                        except Exception:
+                            return float('NaN')
+                        raise ValueError('Unsupported binary op')
+                    if isinstance(node, ast.Call):
+                        # math.<func>(...)
+                        func_attr = node.func
+                        if not (isinstance(func_attr, ast.Attribute) and isinstance(func_attr.value, ast.Name) and func_attr.value.id == 'math'):
+                            raise ValueError('Only math.<func>() allowed')
+                        func = getattr(math, func_attr.attr, None)
+                        if func is None or func_attr.attr not in allowed_math_funcs:
+                            raise ValueError(f'math.{func_attr.attr} not allowed')
+                        if node.keywords:
+                            raise ValueError('Keyword arguments not allowed')
+                        args = [evaluate(a) for a in node.args]
+                        try:
+                            return float(func(*args))
+                        except Exception:
+                            return float('NaN')
+                    if isinstance(node, ast.Attribute):
+                        # Only reachable as part of Call validation; treat standalone attr as invalid
+                        raise ValueError('Bare attribute access not allowed')
+                    raise ValueError(f'Unexpected node: {type(node).__name__}')
+
+                return evaluate(parsed)
             except Exception:
                 return float('NaN')
 
