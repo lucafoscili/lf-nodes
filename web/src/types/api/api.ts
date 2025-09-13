@@ -35,6 +35,7 @@ export interface ComfyAPIs {
   queuePrompt: () => Promise<void>;
   redraw: () => void;
   redrawFull: () => void;
+  scheduleRedraw: (immediate?: boolean) => void;
   register: (extension: Extension) => void;
   upload: (body: FormData) => Promise<Response>;
 }

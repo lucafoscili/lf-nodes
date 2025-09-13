@@ -10,6 +10,10 @@ declare module '/scripts/api.js' {
   };
 }
 
+declare interface GraphAppLike {
+  graph: LiteGraphGraph;
+}
+
 declare interface GitHubRelease {
   target_commitish: string;
   url: string;
@@ -196,7 +200,7 @@ interface LGraphNodeBase {
     value: any,
     callback: (v: any) => void,
     options?: Record<string, any>,
-  ): { value: any; serializeValue?: () => string } | undefined;
+  ): { value: any; serializeValue: () => string } | undefined;
   addProperty?(name: string, defaultValue: any, type?: string): void;
   computeSize?(): [number, number];
   onConnectionsChange?: (...args: any[]) => void;
@@ -344,6 +348,8 @@ interface NodeType {
   onDropFile?: (file: File) => void;
   onConnectInput?: (inputIndex: number, link: LinkInfo) => boolean;
   onConnectionsChange?: (connection: ConnectionInfo) => void;
+  // Added: lifecycle invoked after graph finished configuring (custom extension point)
+  onAfterGraphConfigured?: () => void;
   addInput?: (name: string, type: string) => void;
   addOutput?: (name: string, type: string) => void;
   getInputData?: (slotIndex: number) => any;
@@ -398,6 +404,7 @@ interface SlotInfo {
   slot_index?: number;
 }
 interface GraphSlot {
+  label?: string;
   name?: string;
   type?: string;
   link?: number | null;

@@ -21,6 +21,26 @@ export enum LogSeverity {
 }
 //#endregion
 
+//#region Nodes
+export interface VirtualNodeExtension extends Extension {
+  name: string;
+  registerCustomNodes?: (appInstance: GraphAppLike) => void;
+}
+
+export interface RegisteredVirtualNode {
+  extension: VirtualNodeExtension;
+  registered: boolean;
+  error?: unknown;
+}
+
+export interface LFNodesInterface {
+  add: (ext: VirtualNodeExtension) => void;
+  addMany: (ext: VirtualNodeExtension[]) => void;
+  list: () => RegisteredVirtualNode[];
+  registerAll: () => void;
+}
+//#endregion
+
 //#region Tooltip
 export type TooltipUploadCallback = (b64image: string) => void;
 export type TooltipCallbacks = TooltipUploadCallback;

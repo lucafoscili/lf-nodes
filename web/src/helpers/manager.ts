@@ -132,6 +132,28 @@ export const NODE_WIDGET_MAP: NodeWidgetMap = {
 };
 //#endregion
 
+//#region onAfterGraphConfigured
+/**
+ * Accepts any class (not strictly requiring NodeType) to minimize casting at call sites.
+ */
+export const onAfterGraphConfigured = async <T extends abstract new (...args: any) => any>(
+  ctor: T,
+  cb: (instance: InstanceType<T>) => void,
+) => {
+  const proto = ctor.prototype;
+  const original: (() => void) | undefined = proto.onAfterGraphConfigured;
+  proto.onAfterGraphConfigured = function () {
+    const r = original?.apply(this, arguments as any);
+    try {
+      cb(this as InstanceType<T>);
+    } catch (err) {
+      getLfManager()?.log?.('onAfterGraphConfigured hook error', { err }, LogSeverity.Warning);
+    }
+    return r as any;
+  };
+};
+//#endregion
+
 //#region onConnectionsChange
 export const onConnectionsChange = async (nodeType: NodeType) => {
   const onConnectionsChange = nodeType.prototype.onConnectionsChange;

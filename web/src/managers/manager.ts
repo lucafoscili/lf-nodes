@@ -14,7 +14,7 @@ import {
   onDrawBackground,
   onNodeCreated,
 } from '../helpers/manager';
-import { lfLabeledRerouteExtension } from '../nodes/reroute';
+import { LFNodes } from './nodes';
 import { APIRoutes } from '../types/api/api';
 import { EventName } from '../types/events/events';
 import {
@@ -50,6 +50,7 @@ export class LFManager {
     lfFramework?: LfFrameworkInterface;
     tooltip?: LFTooltip;
     widgets?: LFWidgets;
+    nodes?: LFNodes;
   } = {};
 
   constructor() {
@@ -72,6 +73,7 @@ export class LFManager {
 
     this.#MANAGERS.tooltip = new LFTooltip();
     this.#MANAGERS.widgets = new LFWidgets();
+    this.#MANAGERS.nodes = new LFNodes();
   }
 
   //#region Initialize
@@ -135,13 +137,7 @@ export class LFManager {
       }
     }
 
-    // Register frontend-only virtual nodes/extensions (not backed by backend NodeName enums)
-    try {
-      this.#APIS.comfy.register(lfLabeledRerouteExtension);
-      this.log('Registered LF Labeled Reroute virtual node', {}, LogSeverity.Success);
-    } catch (e) {
-      this.log('Failed to register LF Labeled Reroute node', { error: e }, LogSeverity.Error);
-    }
+    this.#MANAGERS.nodes.registerAll();
 
     this.#INITIALIZED = true;
   }
