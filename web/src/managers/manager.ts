@@ -14,6 +14,7 @@ import {
   onDrawBackground,
   onNodeCreated,
 } from '../helpers/manager';
+import { LFNodes } from './nodes';
 import { APIRoutes } from '../types/api/api';
 import { EventName } from '../types/events/events';
 import {
@@ -49,6 +50,7 @@ export class LFManager {
     lfFramework?: LfFrameworkInterface;
     tooltip?: LFTooltip;
     widgets?: LFWidgets;
+    nodes?: LFNodes;
   } = {};
 
   constructor() {
@@ -71,6 +73,7 @@ export class LFManager {
 
     this.#MANAGERS.tooltip = new LFTooltip();
     this.#MANAGERS.widgets = new LFWidgets();
+    this.#MANAGERS.nodes = new LFNodes();
   }
 
   //#region Initialize
@@ -134,6 +137,8 @@ export class LFManager {
       }
     }
 
+    this.#MANAGERS.nodes.registerAll();
+
     this.#INITIALIZED = true;
   }
   //#endregion
@@ -156,6 +161,9 @@ export class LFManager {
   }
   getManagers() {
     return this.#MANAGERS;
+  }
+  getPrefixedNode(nodeName: string) {
+    return `✨ LF Nodes/${nodeName}`;
   }
   isBackupEnabled() {
     return this.#AUTOMATIC_BACKUP;

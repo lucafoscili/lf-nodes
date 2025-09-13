@@ -52,6 +52,32 @@ export const COMFY_API: ComfyAPIs = {
   redraw: () => {
     app.graph.setDirtyCanvas(true, false);
   },
+  redrawFull: () => {
+    app.graph.setDirtyCanvas(true, true);
+  },
+  scheduleRedraw: (() => {
+    let scheduled = false;
+
+    return (immediate = false) => {
+      if (immediate) {
+        scheduled = false;
+        try {
+          app.graph.setDirtyCanvas(true, true);
+        } catch {}
+        return;
+      }
+      if (scheduled) {
+        return;
+      }
+      scheduled = true;
+      requestAnimationFrame(() => {
+        scheduled = false;
+        try {
+          app.graph.setDirtyCanvas(true, true);
+        } catch {}
+      });
+    };
+  })(),
   register: (extension) => {
     app.registerExtension(extension);
   },

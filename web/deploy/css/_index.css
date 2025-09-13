@@ -261,6 +261,7 @@
   font-family: var(--lf-font-family-primary);
   font-size: var(--lf-font-size);
   left: 0;
+  overflow: hidden;
   position: absolute;
   text-align: center;
   top: 0;

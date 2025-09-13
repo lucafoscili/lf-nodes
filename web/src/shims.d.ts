@@ -10,6 +10,10 @@ declare module '/scripts/api.js' {
   };
 }
 
+declare interface GraphAppLike {
+  graph: LiteGraphGraph;
+}
+
 declare interface GitHubRelease {
   target_commitish: string;
   url: string;
@@ -171,7 +175,43 @@ declare interface NotificationOptions {
 declare namespace LiteGraph {
   export const getNodeType: (node: string) => NodeType;
   export const NODE_TITLE_HEIGHT: number;
+  export const NORMAL_TITLE: number;
+  export const INPUT: number;
+  export const NODE_TEXT_SIZE: number;
+  export const CANVAS_GRID_SIZE: number;
+  export function registerNodeType(path: string, nodeClass: any): void;
 }
+interface LGraphCanvasGlobal {
+  link_type_colors?: Record<string, string>;
+}
+declare const LGraphCanvas: LGraphCanvasGlobal;
+
+// Raw LiteGraph base class (subset we consume)
+interface LGraphNodeBase {
+  title?: string;
+  pos?: [number, number];
+  outputs?: GraphSlot[];
+  inputs?: GraphSlot[];
+  addInput?(name: string, type: string): void;
+  addOutput?(name: string, type: string): void;
+  addWidget?(
+    type: string,
+    name: string,
+    value: any,
+    callback: (v: any) => void,
+    options?: Record<string, any>,
+  ): { value: any; serializeValue: () => string } | undefined;
+  addProperty?(name: string, defaultValue: any, type?: string): void;
+  computeSize?(): [number, number];
+  onConnectionsChange?: (...args: any[]) => void;
+  widgets?: any[];
+  flags?: Record<string, any>;
+  disconnectInput?(slot: number): void;
+}
+declare const LGraphNode: {
+  prototype: LGraphNodeBase & { snapToGrid?: (size?: number) => void };
+  new (): LGraphNodeBase;
+};
 interface CivitAIModelData {
   air: string;
   baseModel: string;
@@ -308,6 +348,8 @@ interface NodeType {
   onDropFile?: (file: File) => void;
   onConnectInput?: (inputIndex: number, link: LinkInfo) => boolean;
   onConnectionsChange?: (connection: ConnectionInfo) => void;
+  // Added: lifecycle invoked after graph finished configuring (custom extension point)
+  onAfterGraphConfigured?: () => void;
   addInput?: (name: string, type: string) => void;
   addOutput?: (name: string, type: string) => void;
   getInputData?: (slotIndex: number) => any;
@@ -341,6 +383,16 @@ interface LinkInfo {
   _data?: any;
   _pos?: { [key: number]: number };
 }
+// Lightweight shapes used internally by lf-nodes virtual helpers
+interface GraphLink {
+  id: number;
+  origin_id: number;
+  origin_slot: number;
+  target_id: number;
+  target_slot: number;
+  type?: string;
+  color?: string;
+}
 interface SlotInfo {
   name?: string;
   type?: string;
@@ -350,6 +402,20 @@ interface SlotInfo {
   colorOn?: string; // Color to render when it is connected
   colorOff?: string; // Color to render when it is not connected
   slot_index?: number;
+}
+interface GraphSlot {
+  label?: string;
+  name?: string;
+  type?: string;
+  link?: number | null;
+  links?: number[];
+  pos?: [number, number];
+}
+
+interface LiteGraphGraph {
+  links: Record<number, GraphLink>;
+  getNodeById(id: number): any;
+  setDirtyCanvas(fg: boolean, bg: boolean): void;
 }
 interface Widget<W extends CustomWidgetName | ComfyWidgetName> {
   element?: DOMWidget;

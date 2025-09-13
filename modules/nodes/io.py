@@ -357,7 +357,6 @@ class LF_LoadLocalJSON:
             "required": {
                 "url": (Input.STRING, {
                     "default": "", 
-                    "multiline": True, 
                     "tooltip": "The local URL where the JSON file is stored (i.e.: file://C:/myjson.json)."
                 }),
             },
