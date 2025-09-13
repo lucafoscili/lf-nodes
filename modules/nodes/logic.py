@@ -7,7 +7,20 @@ import torch
 from server import PromptServer
 
 from ..utils.constants import ANY, CATEGORY_PREFIX, EVENT_PREFIX, FUNCTION, Input, INT_MAX, LORA_TAG_REGEX
-from ..utils.helpers import count_words_in_comma_separated_string, cleanse_lora_tag, get_clip_tokens, normalize_input_list, convert_to_boolean, convert_to_float, convert_to_int, convert_to_json, normalize_input_image, normalize_input_list, normalize_json_input, normalize_list_to_value, not_none
+from ..utils.helpers import (
+    count_words_in_comma_separated_string,
+    cleanse_lora_tag,
+    get_clip_tokens,
+    normalize_input_list,
+    convert_to_boolean,
+    convert_to_float,
+    convert_to_int,
+    convert_to_json,
+    normalize_input_image,
+    normalize_json_input,
+    normalize_list_to_value,
+    not_none,
+)
 
 CATEGORY = f"{CATEGORY_PREFIX}/Logic"
 
@@ -252,6 +265,7 @@ class LF_MathOperation:
             - numeric literals
             - variables: a, b, c, d (may be None)
             - math.<function> calls (whitelisted from Python's math module)
+            - math.<constant> numeric constants (pi, e, tau, inf, nan, etc.)
             - arithmetic operators: +, -, *, /, //, %, **
             - unary + and -
             - parentheses
@@ -274,6 +288,12 @@ class LF_MathOperation:
                 name: getattr(math, name)
                 for name in dir(math)
                 if not name.startswith('_') and callable(getattr(math, name))
+            }
+            # Allow numeric constants (ints/floats only) from math
+            allowed_math_constants = {
+                name: getattr(math, name)
+                for name in dir(math)
+                if not name.startswith('_') and isinstance(getattr(math, name), (int, float))
             }
 
             class Validator(ast.NodeVisitor):
@@ -330,9 +350,18 @@ class LF_MathOperation:
                         raise ValueError(f"Node type {type(node).__name__} not allowed")
 
                 def visit_Attribute(self, node):
-                    # Allow math.<attr> (validated in Call)
+                    # Allow math.<func> (validated in visit_Call) and math.<constant>
                     if not (isinstance(node.value, ast.Name) and node.value.id == 'math'):
                         raise ValueError("Attribute access restricted to math.*")
+                    # If attribute is a constant, ensure it's in allowed set
+                    if node.attr in allowed_math_constants:
+                        return  # constant access is fine
+                    # If attribute is a function, it'll be validated in visit_Call context. Standalone function reference disallowed.
+                    if node.attr in allowed_math_funcs:
+                        # We don't allow using a bare function object as a value.
+                        raise ValueError("Bare math function reference not allowed; call it e.g. math.sin(x)")
+                    # Anything else is invalid
+                    raise ValueError(f"math.{node.attr} not allowed")
 
             try:
                 allowed_names = {"a", "b", "c", "d"}
@@ -349,7 +378,9 @@ class LF_MathOperation:
                     if isinstance(node, ast.Name):
                         if node.id == 'math':
                             return math
-                        return cleaned_vars.get(node.id, float('NaN'))
+                        if node.id in cleaned_vars:
+                            return cleaned_vars[node.id]
+                        raise ValueError(f"Undefined variable: {node.id}")
                     if isinstance(node, ast.UnaryOp):
                         val = evaluate(node.operand)
                         if isinstance(node.op, ast.UAdd):
@@ -363,44 +394,36 @@ class LF_MathOperation:
                         op = node.op
                         try:
                             if isinstance(op, ast.Add):
-                                return left + right
-                            if isinstance(op, ast.Sub):
-                                return left - right
-                            if isinstance(op, ast.Mult):
-                                return left * right
-                            if isinstance(op, ast.Div):
-                                return left / right
-                            if isinstance(op, ast.FloorDiv):
-                                return left // right
-                            if isinstance(op, ast.Mod):
-                                return left % right
-                            if isinstance(op, ast.Pow):
-                                return left ** right
-                        except Exception:
-                            return float('NaN')
-                        raise ValueError('Unsupported binary op')
-                    if isinstance(node, ast.Call):
-                        # math.<func>(...)
-                        func_attr = node.func
-                        if not (isinstance(func_attr, ast.Attribute) and isinstance(func_attr.value, ast.Name) and func_attr.value.id == 'math'):
-                            raise ValueError('Only math.<func>() allowed')
-                        func = getattr(math, func_attr.attr, None)
-                        if func is None or func_attr.attr not in allowed_math_funcs:
-                            raise ValueError(f'math.{func_attr.attr} not allowed')
-                        if node.keywords:
-                            raise ValueError('Keyword arguments not allowed')
-                        args = [evaluate(a) for a in node.args]
-                        try:
-                            return float(func(*args))
-                        except Exception:
+                                result_val = left + right
+                            elif isinstance(op, ast.Sub):
+                                result_val = left - right
+                            elif isinstance(op, ast.Mult):
+                                result_val = left * right
+                            elif isinstance(op, ast.Div):
+                                result_val = left / right
+                            elif isinstance(op, ast.FloorDiv):
+                                result_val = left // right
+                            elif isinstance(op, ast.Mod):
+                                result_val = left % right
+                            elif isinstance(op, ast.Pow):
+                                result_val = left ** right
+                            else:
+                                raise ValueError('Unsupported binary op')
+                            if isinstance(result_val, complex):
+                                return float('NaN')
+                            return result_val
+                        except (ZeroDivisionError, OverflowError, ValueError, TypeError):
                             return float('NaN')
                     if isinstance(node, ast.Attribute):
-                        # Only reachable as part of Call validation; treat standalone attr as invalid
+                        # Only numeric constants allowed here (validated earlier)
+                        if isinstance(node.value, ast.Name) and node.value.id == 'math' and node.attr in allowed_math_constants:
+                            return float(allowed_math_constants[node.attr])
                         raise ValueError('Bare attribute access not allowed')
                     raise ValueError(f'Unexpected node: {type(node).__name__}')
 
                 return evaluate(parsed)
             except Exception:
+                # Any validation or evaluation error results in NaN
                 return float('NaN')
 
         def normalize_and_sum_with_log(variable):
@@ -430,7 +453,13 @@ class LF_MathOperation:
         c_sum, c_log = normalize_and_sum_with_log(c) if not_none(c) else (None, na_placeholder)
         d_sum, d_log = normalize_and_sum_with_log(d) if not_none(d) else (None, na_placeholder)
 
-        str_operation = operation.replace("a", str(a_sum)).replace("b", str(b_sum)).replace("c", str(c_sum)).replace("d", str(d_sum))
+        # Build a human-readable substituted operation without corrupting identifiers like 'math'
+        def _subst(expr: str, var: str, value):
+            pattern = rf'\b{var}\b'
+            return re.sub(pattern, str(value), expr)
+        str_operation = operation
+        for _v in ("a", "b", "c", "d"):
+            str_operation = _subst(str_operation, _v, locals().get(f"{_v}_sum"))
 
         result = safe_eval(operation, {"a": a_sum, "b": b_sum, "c": c_sum, "d": d_sum})
 
