@@ -4017,7 +4017,7 @@ var __classPrivateFieldSet$3 = function(receiver, state, value, kind, f2) {
   if (typeof state === "function" ? receiver !== state || !f2 : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
   return kind === "a" ? f2.call(receiver, value) : f2 ? f2.value = value : state.set(receiver, value), value;
 };
-var __classPrivateFieldGet$3 = function(receiver, state, kind, f2) {
+var __classPrivateFieldGet$3$1 = function(receiver, state, kind, f2) {
   if (kind === "a" && !f2) throw new TypeError("Private accessor was defined without a getter");
   if (typeof state === "function" ? receiver !== state || !f2 : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return kind === "m" ? f2 : kind === "a" ? f2.call(receiver) : f2 ? f2.value : state.get(receiver);
@@ -4107,7 +4107,7 @@ class LfLLM {
           signal: opts == null ? void 0 : opts.signal
         });
       } catch (e2) {
-        if (__classPrivateFieldGet$3(this, _LfLLM_IS_ABORT_ERROR, "f").call(this, e2)) {
+        if (__classPrivateFieldGet$3$1(this, _LfLLM_IS_ABORT_ERROR, "f").call(this, e2)) {
           return;
         }
         throw e2;
@@ -4129,7 +4129,7 @@ class LfLLM {
         try {
           result = await reader.read();
         } catch (e2) {
-          if (__classPrivateFieldGet$3(this, _LfLLM_IS_ABORT_ERROR, "f").call(this, e2)) {
+          if (__classPrivateFieldGet$3$1(this, _LfLLM_IS_ABORT_ERROR, "f").call(this, e2)) {
             return;
           }
           throw e2;
@@ -4174,7 +4174,7 @@ class LfLLM {
       yield { done: true };
     };
     this.speechToText = async (textarea, button) => {
-      const { debug } = __classPrivateFieldGet$3(this, _LfLLM_LF_MANAGER, "f");
+      const { debug } = __classPrivateFieldGet$3$1(this, _LfLLM_LF_MANAGER, "f");
       const speechConstructor = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (!speechConstructor) {
         alert("Speech recognition is not supported in this browser.");
@@ -4233,7 +4233,7 @@ class LfLLM {
         } catch (e2) {
           lastError = e2;
           attempt++;
-          if (__classPrivateFieldGet$3(this, _LfLLM_IS_ABORT_ERROR, "f").call(this, e2)) {
+          if (__classPrivateFieldGet$3$1(this, _LfLLM_IS_ABORT_ERROR, "f").call(this, e2)) {
             break;
           }
           const name = e2 == null ? void 0 : e2.name;
@@ -5423,7 +5423,7 @@ var tt = false, et = (t2, e2, n2) => {
                         const n6 = t7.i.replace(/-/g, "_"), o6 = t7.T;
                         if (!o6) return;
                         const i3 = r.get(o6);
-                        return i3 ? i3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-4ba08932.entry.js": () => import("./p-4ba08932.entry-CWgOnZvm.js"), "./p-60af2d7f.entry.js": () => import("./p-60af2d7f.entry-Dm-0LijP.js"), "./p-7652d72d.entry.js": () => import("./p-7652d72d.entry-5QDQnGcY.js"), "./p-79cc15c2.entry.js": () => import("./p-79cc15c2.entry-DgE4PCeM.js"), "./p-846257eb.entry.js": () => import("./p-846257eb.entry-CsOb9oVO.js"), "./p-84927cea.entry.js": () => import("./p-84927cea.entry-BBLepssp.js"), "./p-87e2e37a.entry.js": () => import("./p-87e2e37a.entry-EFErLY37.js"), "./p-928c4970.entry.js": () => import("./p-928c4970.entry-qYO1nb83.js"), "./p-93ed735a.entry.js": () => import("./p-93ed735a.entry-CKviar4Q.js"), "./p-a147e6c9.entry.js": () => import("./p-a147e6c9.entry-L-CS2-px.js"), "./p-a14c6d82.entry.js": () => import("./p-a14c6d82.entry-CzCEzJo_.js"), "./p-a7fc1135.entry.js": () => import("./p-a7fc1135.entry-Bq6UvMs2.js"), "./p-bd214b33.entry.js": () => import("./p-bd214b33.entry-Dfy6e4We.js"), "./p-bf8a47d4.entry.js": () => import("./p-bf8a47d4.entry-Ce1fU5mA.js"), "./p-ccea11a0.entry.js": () => import("./p-ccea11a0.entry-tkixgSBM.js"), "./p-e2689624.entry.js": () => import("./p-e2689624.entry-BbbuTe16.js") }), `./${o6}.entry.js`, 2).then(((t8) => (r.set(o6, t8), t8[n6])), ((t8) => {
+                        return i3 ? i3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-4ba08932.entry.js": () => import("./p-4ba08932.entry-DK_MlTGd.js"), "./p-60af2d7f.entry.js": () => import("./p-60af2d7f.entry-Bok7G4J3.js"), "./p-7652d72d.entry.js": () => import("./p-7652d72d.entry-BUA6w-JV.js"), "./p-79cc15c2.entry.js": () => import("./p-79cc15c2.entry-BQna-OLj.js"), "./p-846257eb.entry.js": () => import("./p-846257eb.entry-B1FpRqTq.js"), "./p-84927cea.entry.js": () => import("./p-84927cea.entry-BfFna-T7.js"), "./p-87e2e37a.entry.js": () => import("./p-87e2e37a.entry-D0n33ieA.js"), "./p-928c4970.entry.js": () => import("./p-928c4970.entry-oM_41_Ie.js"), "./p-93ed735a.entry.js": () => import("./p-93ed735a.entry-vzh63Ns4.js"), "./p-a147e6c9.entry.js": () => import("./p-a147e6c9.entry-CCrBazFo.js"), "./p-a14c6d82.entry.js": () => import("./p-a14c6d82.entry-B91pe35z.js"), "./p-a7fc1135.entry.js": () => import("./p-a7fc1135.entry-Be4tLWix.js"), "./p-bd214b33.entry.js": () => import("./p-bd214b33.entry-DjZ5rGdB.js"), "./p-bf8a47d4.entry.js": () => import("./p-bf8a47d4.entry-CAaHWBDc.js"), "./p-ccea11a0.entry.js": () => import("./p-ccea11a0.entry-BpxzDV45.js"), "./p-e2689624.entry.js": () => import("./p-e2689624.entry-B03Rw8tZ.js") }), `./${o6}.entry.js`, 2).then(((t8) => (r.set(o6, t8), t8[n6])), ((t8) => {
                           l(t8, e3.$hostElement$);
                         }));
                         /*!__STENCIL_STATIC_IMPORT_SWITCH__*/
@@ -5696,6 +5696,33 @@ const COMFY_API = {
   redraw: () => {
     app.graph.setDirtyCanvas(true, false);
   },
+  redrawFull: () => {
+    app.graph.setDirtyCanvas(true, true);
+  },
+  scheduleRedraw: /* @__PURE__ */ (() => {
+    let scheduled = false;
+    return (immediate = false) => {
+      if (immediate) {
+        scheduled = false;
+        try {
+          app.graph.setDirtyCanvas(true, true);
+        } catch {
+        }
+        return;
+      }
+      if (scheduled) {
+        return;
+      }
+      scheduled = true;
+      requestAnimationFrame(() => {
+        scheduled = false;
+        try {
+          app.graph.setDirtyCanvas(true, true);
+        } catch {
+        }
+      });
+    };
+  })(),
   register: (extension) => {
     app.registerExtension(extension);
   },
@@ -6339,6 +6366,20 @@ const NODE_WIDGET_MAP = {
   LF_WallOfText: [CustomWidgetName.code],
   LF_WriteJSON: [CustomWidgetName.textarea]
 };
+const onAfterGraphConfigured = async (ctor, cb) => {
+  const proto = ctor.prototype;
+  const original = proto.onAfterGraphConfigured;
+  proto.onAfterGraphConfigured = function() {
+    var _a, _b;
+    const r2 = original == null ? void 0 : original.apply(this, arguments);
+    try {
+      cb(this);
+    } catch (err2) {
+      (_b = (_a = getLfManager()) == null ? void 0 : _a.log) == null ? void 0 : _b.call(_a, "onAfterGraphConfigured hook error", { err: err2 }, LogSeverity.Warning);
+    }
+    return r2;
+  };
+};
 const onConnectionsChange = async (nodeType) => {
   const onConnectionsChange2 = nodeType.prototype.onConnectionsChange;
   nodeType.prototype.onConnectionsChange = function() {
@@ -6496,6 +6537,414 @@ const getLogStyle = () => {
     textOverflow: "ellipsis"
   };
 };
+const CATEGORY = "✨ LF Nodes";
+const DESCRIPTION = "Virtual reroute node that propagates upstream type and optional label.";
+const DISPLAY_NAME = "Reroute";
+const EXTENSION_NAME = `lf.virtual.${DISPLAY_NAME}`;
+const NODE_PATH = "✨ LF Nodes/Reroute";
+const SERIALIZED_KEYS = ["label", "showIcon", "showType", "mode", "horizontal"];
+const lfReroute = {
+  name: EXTENSION_NAME,
+  registerCustomNodes(appInstance) {
+    var _a, _b;
+    class LFReroute extends LGraphNode {
+      constructor() {
+        var _a2, _b2, _c, _d, _e, _f;
+        super();
+        this.isVirtualNode = true;
+        this.properties = {
+          horizontal: false,
+          label: "",
+          mode: "label+type",
+          showType: true,
+          showIcon: true
+        };
+        this.title = this.properties.label || "Label";
+        (_a2 = this.addProperty) == null ? void 0 : _a2.call(this, "label", this.properties.label, "string");
+        (_b2 = this.addProperty) == null ? void 0 : _b2.call(this, "mode", this.properties.mode, "string");
+        (_c = this.addProperty) == null ? void 0 : _c.call(this, "showType", this.properties.showType, "boolean");
+        (_d = this.addProperty) == null ? void 0 : _d.call(this, "showIcon", this.properties.showIcon, "boolean");
+        (_e = this.addProperty) == null ? void 0 : _e.call(this, "horizontal", this.properties.horizontal, "boolean");
+        this.addInput("", "*");
+        this.addOutput(this.makeOutputName("*"), "*");
+        this.__labelWidget = (_f = this.addWidget) == null ? void 0 : _f.call(this, "text", "Label", this.properties.label, (v2) => {
+          this.properties.label = v2;
+          this.refreshLabel();
+        }, { multiline: false });
+        if (this.__labelWidget) {
+          this.__labelWidget.serializeValue = () => this.properties.label;
+        }
+        this.onConnectionsChange = () => {
+          var _a3, _b3;
+          try {
+            reroutePropagationLogic.call(this, appInstance);
+          } catch (error) {
+            (_b3 = (_a3 = getLfManager()) == null ? void 0 : _a3.log) == null ? void 0 : _b3.call(_a3, "[LFReroute] onConnectionsChange error", { error }, LogSeverity.Warning);
+          }
+        };
+      }
+      snapToGrid(size) {
+        const proto = LGraphNode.prototype;
+        if (proto == null ? void 0 : proto.snapToGrid) {
+          return proto.snapToGrid.call(this, size);
+        }
+        const grid = size || LiteGraph.CANVAS_GRID_SIZE || 10;
+        if (this.pos) {
+          this.pos[0] = grid * Math.round(this.pos[0] / grid);
+          this.pos[1] = grid * Math.round(this.pos[1] / grid);
+        }
+      }
+      getExtraMenuOptions(_ignored, options) {
+        options.unshift({
+          content: "Cycle Label/Type Mode",
+          callback: () => {
+            const order = ["label+type", "label", "type"];
+            const i2 = order.indexOf(this.properties.mode);
+            this.properties.mode = order[(i2 + 1) % order.length];
+            this.refreshLabel();
+          }
+        }, {
+          content: (this.properties.showType ? "Hide" : "Show") + " Type Part",
+          callback: () => {
+            this.properties.showType = !this.properties.showType;
+            this.refreshLabel();
+          }
+        }, {
+          content: (this.properties.showIcon ? "Hide" : "Show") + " Icon",
+          callback: () => {
+            this.properties.showIcon = !this.properties.showIcon;
+            COMFY_API.scheduleRedraw();
+          }
+        }, {
+          content: "Edit Label",
+          callback: () => {
+            const v2 = prompt("Set label", this.properties.label || "");
+            if (v2 !== null) {
+              this.properties.label = v2;
+              this.refreshLabel();
+            }
+          }
+        }, {
+          content: "Set " + (this.properties.horizontal ? "Horizontal" : "Vertical"),
+          callback: () => {
+            this.properties.horizontal = !this.properties.horizontal;
+            this.applyOrientation();
+          }
+        });
+      }
+      makeOutputName(displayType, labelOverride) {
+        const label = (labelOverride !== void 0 ? labelOverride : this.properties.label || "").trim();
+        const typePart = this.properties.showType ? displayType : "";
+        switch (this.properties.mode) {
+          case "label":
+            return label || (this.properties.showType ? displayType : "");
+          case "type":
+            return typePart;
+          case "label+type":
+          default:
+            if (label && typePart)
+              return `${label}:${typePart}`;
+            return label || typePart;
+        }
+      }
+      refreshLabel() {
+        var _a2;
+        if (!((_a2 = this.outputs) == null ? void 0 : _a2.length))
+          return;
+        const effectiveLabel = (this.properties.label || "").trim() || this.__autoLabel || "";
+        const displayType = this.__outputType || this.outputs[0].type || "*";
+        this.outputs[0].name = this.makeOutputName(displayType, effectiveLabel);
+        this.title = effectiveLabel || "Label";
+        this.size = this.computeSize();
+        this.applyOrientation();
+        COMFY_API.scheduleRedraw();
+        const w2 = this.__labelWidget;
+        if (w2 && "value" in w2 && w2.value !== this.properties.label) {
+          w2.value = this.properties.label;
+        }
+      }
+      onSerialize(raw) {
+        const o2 = raw;
+        if (o2 == null ? void 0 : o2.properties) {
+          const target = o2.properties;
+          for (const key of SERIALIZED_KEYS) {
+            target[key] = this.properties[key];
+          }
+        }
+        if (Array.isArray(o2 == null ? void 0 : o2.widgets_values) && this.__labelWidget && this.widgets) {
+          const idx = this.widgets.indexOf(this.__labelWidget);
+          if (idx >= 0) {
+            o2.widgets_values[idx] = this.properties.label;
+          }
+        }
+      }
+      onConfigure(raw) {
+        const o2 = raw;
+        const props = (o2 == null ? void 0 : o2.properties) || {};
+        for (const key of SERIALIZED_KEYS) {
+          const incoming = props[key];
+          if (incoming === void 0)
+            continue;
+          if (key === "mode") {
+            if (typeof incoming === "string" && ["label", "type", "label+type"].includes(incoming)) {
+              this.properties.mode = incoming;
+            }
+            continue;
+          }
+          if (key === "label") {
+            if (typeof incoming === "string") {
+              this.properties.label = incoming;
+            } else if (Array.isArray(o2 == null ? void 0 : o2.widgets_values) && this.__labelWidget && this.widgets) {
+              const idx = this.widgets.indexOf(this.__labelWidget);
+              const wv = o2.widgets_values[idx];
+              if (idx >= 0 && typeof wv === "string") {
+                this.properties.label = wv;
+              }
+            }
+            continue;
+          }
+          if (key === "horizontal" || key === "showIcon" || key === "showType") {
+            if (typeof incoming === "boolean") {
+              this.properties[key] = incoming;
+            }
+            continue;
+          }
+        }
+        if (this.__labelWidget && this.widgets) {
+          const idx = this.widgets.indexOf(this.__labelWidget);
+          if (idx >= 0 && "value" in this.__labelWidget) {
+            this.__labelWidget.value = this.properties.label;
+          }
+        }
+        this.refreshLabel();
+      }
+      applyOrientation() {
+        var _a2, _b2, _c, _d;
+        if (this.properties.horizontal) {
+          if ((_a2 = this.inputs) == null ? void 0 : _a2[0]) {
+            this.inputs[0].pos = [this.size[0] / 2, 0];
+          }
+          if ((_b2 = this.outputs) == null ? void 0 : _b2[0]) {
+            this.outputs[0].pos = [this.size[0] / 2, this.size[1]];
+          }
+        } else {
+          if ((_c = this.inputs) == null ? void 0 : _c[0]) {
+            delete this.inputs[0].pos;
+          }
+          if ((_d = this.outputs) == null ? void 0 : _d[0]) {
+            delete this.outputs[0].pos;
+          }
+        }
+        COMFY_API.scheduleRedraw();
+      }
+      computeSize() {
+        var _a2, _b2, _c;
+        const base = this.title || "";
+        const slotName = ((_b2 = (_a2 = this.outputs) == null ? void 0 : _a2[0]) == null ? void 0 : _b2.name) || "";
+        const longest = base.length > slotName.length ? base : slotName;
+        const textSize = LiteGraph.NODE_TEXT_SIZE || 14;
+        const w2 = Math.max(120, textSize * longest.length * 0.6 + 50);
+        const collapsed = (_c = this.flags) == null ? void 0 : _c.collapsed;
+        const h2 = collapsed ? 28 : 50;
+        return [w2, h2];
+      }
+      onDrawForeground(ctx) {
+        var _a2, _b2;
+        try {
+          if (!this.properties.showIcon || !ctx) {
+            return;
+          }
+          const headerH = LiteGraph && LiteGraph.NODE_TITLE_HEIGHT || 24;
+          const radius = 6;
+          const cx = 10 + radius;
+          const cy = -headerH / 2;
+          ctx.save();
+          ctx.fillStyle = "#3a3a3a";
+          ctx.beginPath();
+          ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = "#d4d4d4";
+          ctx.beginPath();
+          ctx.arc(cx, cy, radius * 0.4, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        } catch (err2) {
+          (_b2 = (_a2 = getLfManager()) == null ? void 0 : _a2.log) == null ? void 0 : _b2.call(_a2, "[LFReroute] onDrawForeground error", { err: err2 }, LogSeverity.Info);
+        }
+      }
+    }
+    function reroutePropagationLogic(appInstance2) {
+      var _a2, _b2, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m;
+      const isLabeled = (n2) => {
+        var _a3;
+        return ((_a3 = n2 == null ? void 0 : n2.constructor) == null ? void 0 : _a3.type) === NODE_PATH;
+      };
+      let inputType = null;
+      let upstream = this;
+      let originNode = null;
+      while (((_b2 = (_a2 = upstream == null ? void 0 : upstream.inputs) == null ? void 0 : _a2[0]) == null ? void 0 : _b2.link) != null) {
+        const linkId = upstream.inputs[0].link;
+        const link = appInstance2.graph.links[linkId];
+        if (!link)
+          break;
+        const origin = appInstance2.graph.getNodeById(link.origin_id);
+        if (!origin)
+          break;
+        if (isLabeled(origin)) {
+          if (origin === this) {
+            (_c = upstream.disconnectInput) == null ? void 0 : _c.call(upstream, link.target_slot);
+            break;
+          }
+          upstream = origin;
+          continue;
+        }
+        inputType = ((_e = (_d = origin.outputs) == null ? void 0 : _d[link.origin_slot]) == null ? void 0 : _e.type) || null;
+        originNode = origin;
+        break;
+      }
+      let downstreamType = null;
+      const firstLinks = ((_g = (_f = this.outputs) == null ? void 0 : _f[0]) == null ? void 0 : _g.links) || [];
+      for (const l2 of firstLinks) {
+        const link = appInstance2.graph.links[l2];
+        if (!link) {
+          continue;
+        }
+        const target = appInstance2.graph.getNodeById(link.target_id);
+        if (!target || isLabeled(target)) {
+          continue;
+        }
+        downstreamType = ((_i = (_h = target.inputs) == null ? void 0 : _h[link.target_slot]) == null ? void 0 : _i.type) || null;
+        if (downstreamType) {
+          break;
+        }
+      }
+      const finalType = inputType || downstreamType || "*";
+      if (!(this.properties.label || "").trim()) {
+        if (originNode) {
+          const candidateTitle = (originNode.title || "").trim();
+          const candidateSlotName = (() => {
+            var _a3, _b3, _c2, _d2;
+            if (!originNode.outputs)
+              return "";
+            const slotIdx = (() => {
+              var _a4, _b4;
+              if (((_b4 = (_a4 = upstream == null ? void 0 : upstream.inputs) == null ? void 0 : _a4[0]) == null ? void 0 : _b4.link) != null) {
+                const linkId = upstream.inputs[0].link;
+                const link = appInstance2.graph.links[linkId];
+                if (link)
+                  return link.origin_slot ?? 0;
+              }
+              return 0;
+            })();
+            return (((_b3 = (_a3 = originNode.outputs) == null ? void 0 : _a3[slotIdx]) == null ? void 0 : _b3.label) || ((_d2 = (_c2 = originNode.outputs) == null ? void 0 : _c2[slotIdx]) == null ? void 0 : _d2.name) || "").trim();
+          })();
+          const effectiveSlotName = candidateSlotName && candidateSlotName !== "*" ? candidateSlotName : "";
+          const chosen = effectiveSlotName || candidateTitle;
+          if (chosen) {
+            this.__autoLabel = chosen;
+          }
+        } else {
+          this.__autoLabel = void 0;
+        }
+      } else {
+        this.__autoLabel = void 0;
+      }
+      this.__outputType = finalType;
+      if ((_j = this.outputs) == null ? void 0 : _j[0]) {
+        this.outputs[0].type = inputType || "*";
+        this.outputs[0].name = this.makeOutputName(finalType);
+      }
+      this.size = this.computeSize();
+      this.applyOrientation();
+      this.refreshLabel();
+      const color = (_k = LGraphCanvas.link_type_colors) == null ? void 0 : _k[finalType];
+      if (color && ((_m = (_l = this.outputs) == null ? void 0 : _l[0]) == null ? void 0 : _m.links)) {
+        for (const l2 of this.outputs[0].links) {
+          const link = appInstance2.graph.links[l2];
+          if (link)
+            link.color = color;
+        }
+      }
+      COMFY_API.scheduleRedraw();
+    }
+    LiteGraph.registerNodeType(NODE_PATH, Object.assign(LFReroute, {
+      title_mode: LiteGraph.NORMAL_TITLE,
+      title: "Reroute",
+      collapsable: true,
+      category: "LF Nodes",
+      description: "Label + type aware reroute (frontend virtual)"
+    }));
+    onAfterGraphConfigured(LFReroute, (node) => {
+      requestAnimationFrame(() => {
+        var _a2, _b2, _c;
+        try {
+          (_a2 = node.onConnectionsChange) == null ? void 0 : _a2.call(node);
+        } catch (err2) {
+          (_c = (_b2 = getLfManager()) == null ? void 0 : _b2.log) == null ? void 0 : _c.call(_b2, "LFReroute onAfterGraphConfigured error", { err: err2 }, LogSeverity.Warning);
+        }
+      });
+    });
+    (_b = (_a = getLfManager()) == null ? void 0 : _a.log) == null ? void 0 : _b.call(_a, `Virtual node registered (UI compliant): ${NODE_PATH}`, {}, LogSeverity.Success);
+  },
+  beforeRegisterVueAppNodeDefs(defs) {
+    const def = defs.find((d2) => d2.name === NODE_PATH);
+    if (def) {
+      def.display_name = DISPLAY_NAME;
+      def.category = CATEGORY;
+      def.description = DESCRIPTION;
+      if (def.python_module === "custom_nodes.frontend_only") {
+        def.python_module = "lf_nodes.virtual";
+      }
+    }
+  }
+};
+var __classPrivateFieldGet$3 = function(receiver, state, kind, f2) {
+  if (kind === "a" && !f2) throw new TypeError("Private accessor was defined without a getter");
+  if (typeof state === "function" ? receiver !== state || !f2 : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+  return kind === "m" ? f2 : kind === "a" ? f2.call(receiver) : f2 ? f2.value : state.get(receiver);
+};
+var _LFNodes_REGISTRY;
+class LFNodes {
+  constructor() {
+    _LFNodes_REGISTRY.set(this, /* @__PURE__ */ new Map());
+    this.add = (extension) => {
+      var _a, _b;
+      const lfManager2 = getLfManager();
+      if (!(extension == null ? void 0 : extension.name)) {
+        (_a = lfManager2 == null ? void 0 : lfManager2.log) == null ? void 0 : _a.call(lfManager2, `Attempted to add virtual node with invalid name`, { extension }, LogSeverity.Warning);
+        return;
+      }
+      if (__classPrivateFieldGet$3(this, _LFNodes_REGISTRY, "f").has(extension.name)) {
+        (_b = lfManager2 == null ? void 0 : lfManager2.log) == null ? void 0 : _b.call(lfManager2, `Duplicate virtual node ignored: '${extension.name}'`, {}, LogSeverity.Warning);
+        return;
+      }
+      __classPrivateFieldGet$3(this, _LFNodes_REGISTRY, "f").set(extension.name, { extension, registered: false });
+    };
+    this.addMany = (extensions) => {
+      extensions.forEach((e2) => this.add(e2));
+    };
+    this.list = () => Array.from(__classPrivateFieldGet$3(this, _LFNodes_REGISTRY, "f").values());
+    this.registerAll = () => {
+      const lfManager2 = getLfManager();
+      __classPrivateFieldGet$3(this, _LFNodes_REGISTRY, "f").forEach((entry, key) => {
+        var _a, _b;
+        if (entry.registered) {
+          return;
+        }
+        try {
+          COMFY_API.register(entry.extension);
+          entry.registered = true;
+          (_a = lfManager2 == null ? void 0 : lfManager2.log) == null ? void 0 : _a.call(lfManager2, `Registered virtual node '${key}'`, {}, LogSeverity.Success);
+        } catch (error) {
+          entry.error = error;
+          (_b = lfManager2 == null ? void 0 : lfManager2.log) == null ? void 0 : _b.call(lfManager2, `Failed to register virtual node '${key}'`, { error }, LogSeverity.Error);
+        }
+      });
+    };
+    this.add(lfReroute);
+  }
+}
+_LFNodes_REGISTRY = /* @__PURE__ */ new WeakMap();
 var LfEventName;
 (function(LfEventName2) {
   LfEventName2["LfAccordion"] = "lf-accordion-event";
@@ -10050,7 +10499,7 @@ const masonryFactory = {
 };
 const PLACEHOLDER_MESSAGE = `The setup of this node must be done client-side. Use either <strong>LF_WriteJSON</strong> or <strong>LF_DisplayJSON</strong>
 to connect as input a valid JSON dataset. Check the repository's workflows to see a 
-<a target="_blank" href="https://github.com/lucafoscili/comfyui-lf/blob/fd52deb44d199e222833fbc159628aceeac48ab9/workflows/LLMMessenger.png">working example here.</a>.`;
+<a target="_blank" href="https://github.com/lucafoscili/lucafoscili/blob/7cd0e072cb790ff2e921d6db0b16027d1dea0545/lf-nodes/workflows/Flux%20%2B%20LLM%20Character%20manager.json">working example here.</a>.`;
 const EV_HANDLERS$3 = {
   //#region Messenger handler
   messenger: (state, e2) => {
@@ -10884,6 +11333,7 @@ class LFManager {
     document.head.appendChild(link);
     __classPrivateFieldGet(this, _LFManager_MANAGERS, "f").tooltip = new LFTooltip();
     __classPrivateFieldGet(this, _LFManager_MANAGERS, "f").widgets = new LFWidgets();
+    __classPrivateFieldGet(this, _LFManager_MANAGERS, "f").nodes = new LFNodes();
   }
   //#region Initialize
   initialize() {
@@ -10926,6 +11376,7 @@ class LFManager {
         });
       }
     }
+    __classPrivateFieldGet(this, _LFManager_MANAGERS, "f").nodes.registerAll();
     __classPrivateFieldSet(this, _LFManager_INITIALIZED, true, "f");
   }
   //#endregion
@@ -10947,6 +11398,9 @@ class LFManager {
   }
   getManagers() {
     return __classPrivateFieldGet(this, _LFManager_MANAGERS, "f");
+  }
+  getPrefixedNode(nodeName) {
+    return `✨ LF Nodes/${nodeName}`;
   }
   isBackupEnabled() {
     return __classPrivateFieldGet(this, _LFManager_AUTOMATIC_BACKUP, "f");
