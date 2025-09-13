@@ -416,7 +416,7 @@ export const lfReroute = {
           node.onConnectionsChange?.();
         } catch (err) {
           getLfManager()?.log?.(
-            '[LFReroute] onAfterGraphConfigured error',
+            '[LFReroute] onAfterGraphConfigured',
             { err },
             LogSeverity.Warning,
           );
