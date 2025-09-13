@@ -1,3 +1,4 @@
+import ast
 import math
 import random
 import re
@@ -246,6 +247,106 @@ class LF_MathOperation:
     RETURN_TYPES = ("INT", "FLOAT")
 
     def on_exec(self, **kwargs: dict):
+        def safe_eval(expr: str, variables: dict):
+            """Safely evaluate a math expression consisting of:
+            - numeric literals
+            - variables: a, b, c, d (may be None)
+            - math.<function> calls (whitelisted from Python's math module)
+            - arithmetic operators: +, -, *, /, //, %, **
+            - unary + and -
+            - parentheses
+
+            Any other construct raises a ValueError. If evaluation fails, float('NaN') is returned.
+            This mitigates S307 (unsafe eval) while preserving existing UX.
+            """
+            # Examples (documentation only):
+            #   OK: "a * b / c + d"
+            #   OK: "math.sin(a) + math.sqrt(b)"
+            #   OK: "-(a ** 2) + math.fabs(b)"
+            #   Rejected: "__import__('os').system('rm -rf /')"
+            #   Rejected: "(lambda x: x)(1)" (lambda)
+            #   Rejected: "[a,b]" (list literals not allowed)
+            #   Rejected: "open('file')" (non-math call)
+            allowed_bin_ops = (ast.Add, ast.Sub, ast.Mult, ast.Div, ast.FloorDiv, ast.Mod, ast.Pow)
+            allowed_unary_ops = (ast.UAdd, ast.USub)
+
+            allowed_math_funcs = {
+                name: getattr(math, name)
+                for name in dir(math)
+                if not name.startswith('_') and callable(getattr(math, name))
+            }
+
+            class Validator(ast.NodeVisitor):
+                def visit_Module(self, node):  # pragma: no cover - defensive
+                    raise ValueError("Only expressions are allowed")
+
+                def visit_Expression(self, node):
+                    self.visit(node.body)
+
+                def visit_BinOp(self, node):
+                    if not isinstance(node.op, allowed_bin_ops):
+                        raise ValueError("Operator not allowed")
+                    self.visit(node.left)
+                    self.visit(node.right)
+
+                def visit_UnaryOp(self, node):
+                    if not isinstance(node.op, allowed_unary_ops):
+                        raise ValueError("Unary operator not allowed")
+                    self.visit(node.operand)
+
+                def visit_Name(self, node):
+                    if node.id not in {"a", "b", "c", "d", "math"}:
+                        raise ValueError(f"Variable '{node.id}' not allowed")
+
+                def visit_Constant(self, node):  # numbers / simple constants
+                    if not isinstance(node.value, (int, float)):  # disallow other constant types
+                        raise ValueError("Only int/float literals allowed")
+
+                def visit_Call(self, node):
+                    # Allow math.<func>(...)
+                    if not isinstance(node.func, ast.Attribute) or not isinstance(node.func.value, ast.Name):
+                        raise ValueError("Only math.<func>() calls allowed")
+                    if node.func.value.id != 'math':
+                        raise ValueError("Only math module calls allowed")
+                    if node.func.attr not in allowed_math_funcs:
+                        raise ValueError(f"math.{node.func.attr} not allowed")
+                    for arg in node.args:
+                        self.visit(arg)
+                    if node.keywords:
+                        raise ValueError("Keyword args not allowed")
+
+                # Disallow ALL other nodes explicitly
+                def generic_visit(self, node):
+                    allowed = (
+                        ast.Expression,
+                        ast.BinOp,
+                        ast.UnaryOp,
+                        ast.Name,
+                        ast.Constant,
+                        ast.Call,
+                        ast.Load,
+                        ast.Attribute,
+                    )
+                    if isinstance(node, allowed):
+                        super().generic_visit(node)
+                    else:
+                        raise ValueError(f"Node type {type(node).__name__} not allowed")
+
+                def visit_Attribute(self, node):
+                    # Allow math.<attr> (validated in Call)
+                    if not (isinstance(node.value, ast.Name) and node.value.id == 'math'):
+                        raise ValueError("Attribute access restricted to math.*")
+
+            try:
+                parsed = ast.parse(expr, mode='eval')
+                Validator().visit(parsed)
+                # Build evaluation environment
+                env = {k: v for k, v in variables.items()}
+                env['math'] = math  # retain math namespace for attribute access
+                return eval(compile(parsed, '<lf_math>', 'eval'), {'__builtins__': {}}, env)
+            except Exception:
+                return float('NaN')
+
         def normalize_and_sum_with_log(variable):
             normalized = normalize_input_list(variable)
 
@@ -275,10 +376,7 @@ class LF_MathOperation:
 
         str_operation = operation.replace("a", str(a_sum)).replace("b", str(b_sum)).replace("c", str(c_sum)).replace("d", str(d_sum))
 
-        try:
-            result = eval(operation, {"a": a_sum, "b": b_sum, "c": c_sum, "d": d_sum, "math": math})
-        except Exception:
-            result = float("NaN")
+        result = safe_eval(operation, {"a": a_sum, "b": b_sum, "c": c_sum, "d": d_sum})
 
         log = f"""## Result:
   **{str(result)}**
