@@ -204,8 +204,7 @@ export const lfReroute = {
               typeof incoming === 'string' &&
               ['label', 'type', 'label+type'].includes(incoming)
             ) {
-              // @ts-expect-error validated mode assignment
-              this.properties.mode = incoming;
+              this.properties.mode = incoming as 'label' | 'type' | 'label+type';
             }
             continue;
           }
