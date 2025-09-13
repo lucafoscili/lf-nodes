@@ -1,33 +1,14 @@
-/* Frontend-only Labeled Reroute Node for LF Nodes
- * Inspired by native ComfyUI reroute implementation.
- * Provides: user label + dynamic type propagation + display modes.
- * This file purposefully avoids importing internal ComfyUI modules and instead
- * relies on runtime globals (LiteGraph, LGraphCanvas, app, helper fns) to stay
- * resilient to upstream path/layout changes.
- */
+import { COMFY_API } from '../api/comfy';
+import { getLfManager } from '../utils/common';
 
-// Declare globals to satisfy TypeScript (these are provided by ComfyUI at runtime)
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-declare const LiteGraph: any;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-declare const LGraphCanvas: any;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-declare const app: any; // provided by ComfyUI core frontend
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-declare const LGraphNode: any; // base LiteGraph node class
+declare const app: { graph: LiteGraphGraph };
 
-// Helper access wrappers (gracefully degrade if missing)
-const widgetHelpers = (() => {
-  const g: any = window as any;
-  return {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    mergeIfValid: g.mergeIfValid || ((..._args: any[]) => null),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    getWidgetConfig: g.getWidgetConfig || ((..._args: any[]) => null),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    setWidgetConfig: g.setWidgetConfig || ((..._args: any[]) => {}),
-  };
-})();
+// Resolve redraw via directly imported COMFY_API (guaranteed initialized by manager before usage)
+const getRedrawFn = () =>
+  COMFY_API.redrawFull ||
+  COMFY_API.redraw ||
+  // fallback to the underlying graph dirty call if API not yet wired (e.g. in isolated tests)
+  ((...args: any[]) => app.graph.setDirtyCanvas.apply(app.graph, args));
 
 interface LFLabeledRerouteNode /* extends LGraphNode (untyped global) */ {
   __outputType?: string;
@@ -39,22 +20,10 @@ interface LFLabeledRerouteNode /* extends LGraphNode (untyped global) */ {
     showIcon?: boolean;
     [k: string]: any;
   };
-  inputs?: Array<{
-    name?: string;
-    type?: string;
-    link?: number | null;
-    links?: number[];
-    pos?: [number, number];
-    [k: string]: any;
-  }>;
-  outputs?: Array<{
-    name?: string;
-    type?: string;
-    links?: number[];
-    [k: string]: any;
-  }>;
+  inputs?: GraphSlot[];
+  outputs?: GraphSlot[];
   size: [number, number];
-  graph?: any;
+  graph?: LiteGraphGraph;
   makeOutputName: (displayType: string) => string;
   refreshLabel: () => void;
   applyOrientation: () => void;
@@ -62,7 +31,6 @@ interface LFLabeledRerouteNode /* extends LGraphNode (untyped global) */ {
 }
 
 const EXTENSION_NAME = 'LF.LabeledReroute';
-const NODE_TYPE = 'LF/LabeledReroute'; // Category prefix shown in UI
 
 // Exported extension consumed by LFManager instead of self-registering here.
 // This avoids relying on global app during module evaluation and keeps a single
@@ -71,7 +39,7 @@ const NODE_TYPE = 'LF/LabeledReroute'; // Category prefix shown in UI
 export const lfLabeledRerouteExtension: any = {
   name: EXTENSION_NAME,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  registerCustomNodes(appInstance: any) {
+  registerCustomNodes(appInstance: { graph: LiteGraphGraph }) {
     class LFLabeledReroute extends LGraphNode implements LFLabeledRerouteNode {
       static category: string | undefined = 'utils';
       static defaultVisibility = false;
@@ -136,7 +104,7 @@ export const lfLabeledRerouteExtension: any = {
         if (typeof (LGraphNode as any).prototype.snapToGrid === 'function') {
           return (LGraphNode as any).prototype.snapToGrid.call(this, size);
         }
-        const grid = size || LiteGraph.CANVAS_GRID_SIZE || 10;
+        const grid = size || (LiteGraph as any).CANVAS_GRID_SIZE || 10;
         if (this.pos) {
           this.pos[0] = grid * Math.round(this.pos[0] / grid);
           this.pos[1] = grid * Math.round(this.pos[1] / grid);
@@ -167,7 +135,7 @@ export const lfLabeledRerouteExtension: any = {
             content: (this.properties.showIcon ? 'Hide' : 'Show') + ' Icon',
             callback: () => {
               this.properties.showIcon = !this.properties.showIcon;
-              appInstance.graph.setDirtyCanvas(true, true);
+              getRedrawFn()(true, true);
             },
           },
           {
@@ -214,7 +182,7 @@ export const lfLabeledRerouteExtension: any = {
         this.title = this.properties.label || 'Label';
         this.size = this.computeSize();
         this.applyOrientation();
-        appInstance.graph.setDirtyCanvas(true, true);
+        getRedrawFn()(true, true);
         const w = (this as any)._lf_labelWidget;
         if (w && w.value !== this.properties.label) w.value = this.properties.label;
       }
@@ -258,15 +226,16 @@ export const lfLabeledRerouteExtension: any = {
         } else if (this.inputs?.[0]) {
           delete this.inputs[0].pos;
         }
-        appInstance.graph.setDirtyCanvas(true, true);
+        getRedrawFn()(true, true);
       }
 
-      computeSize(): [number, number] {
+      override computeSize(): [number, number] {
         // Base width considers longest between title and output label but keeps a minimum
         const base = this.title || '';
         const slotName = this.outputs?.[0]?.name || '';
         const longest = base.length > slotName.length ? base : slotName;
-        const w = Math.max(120, LiteGraph.NODE_TEXT_SIZE * longest.length * 0.6 + 50);
+        const textSize = (LiteGraph as any).NODE_TEXT_SIZE || 14;
+        const w = Math.max(120, textSize * longest.length * 0.6 + 50);
         // Height: header (approx 24) + body (widget row ~ 24) minimal; if collapsed rely on framework to shrink
         const collapsed = (this as any).flags?.collapsed;
         const h = collapsed ? 28 : 50;
@@ -310,7 +279,7 @@ export const lfLabeledRerouteExtension: any = {
 
     // Reroute propagation logic (adapted from native ComfyUI reroute)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    function reroutePropagationLogic(this: any, appInstance: any) {
+    function reroutePropagationLogic(this: any, appInstance: { graph: LiteGraphGraph }) {
       // Only operate on our custom labeled reroute chain. We don't mutate native reroutes.
       const isLabeled = (n: any) => (n?.constructor as any)?.type === 'LabeledReroute';
 
@@ -343,7 +312,7 @@ export const lfLabeledRerouteExtension: any = {
       let downstreamType: string | null = null;
       const firstLinks = this.outputs?.[0]?.links || [];
       for (const l of firstLinks) {
-        const link = appInstance.graph.links[l];
+        const link: GraphLink | undefined = appInstance.graph.links[l];
         if (!link) continue;
         const target = appInstance.graph.getNodeById(link.target_id);
         if (!target) continue;
@@ -393,18 +362,18 @@ export const lfLabeledRerouteExtension: any = {
       }
 
       // Link coloring (only immediate outgoing links)
-      const color = (LGraphCanvas as any).link_type_colors?.[finalType];
+      const color = LGraphCanvas.link_type_colors?.[finalType];
       if (color && this.outputs?.[0]?.links) {
         for (const l of this.outputs[0].links) {
-          const link = appInstance.graph.links[l];
+          const link: GraphLink | undefined = appInstance.graph.links[l];
           if (link) link.color = color;
         }
       }
-      appInstance.graph.setDirtyCanvas(true, true);
+      getRedrawFn()(true, true);
     }
 
     LiteGraph.registerNodeType(
-      NODE_TYPE,
+      getLfManager().getPrefixedNode('Reroute'),
       Object.assign(LFLabeledReroute, {
         title_mode: LiteGraph.NORMAL_TITLE,
         title: 'Label',

@@ -34,6 +34,7 @@ export interface ComfyAPIs {
   interrupt: () => void;
   queuePrompt: () => Promise<void>;
   redraw: () => void;
+  redrawFull: () => void;
   register: (extension: Extension) => void;
   upload: (body: FormData) => Promise<Response>;
 }

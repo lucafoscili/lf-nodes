@@ -14,6 +14,7 @@ import {
   onDrawBackground,
   onNodeCreated,
 } from '../helpers/manager';
+import { lfLabeledRerouteExtension } from '../nodes/reroute';
 import { APIRoutes } from '../types/api/api';
 import { EventName } from '../types/events/events';
 import {
@@ -25,7 +26,6 @@ import {
 import { CustomWidgetName, NodeName } from '../types/widgets/widgets';
 import { LFTooltip } from './tooltip';
 import { LFWidgets } from './widgets';
-import { lfLabeledRerouteExtension } from '../nodes/lfLabeledReroute';
 
 export class LFManager {
   #APIS: APIRoutes = {
@@ -165,6 +165,9 @@ export class LFManager {
   }
   getManagers() {
     return this.#MANAGERS;
+  }
+  getPrefixedNode(nodeName: string) {
+    return `✨ LF Nodes/${nodeName}`;
   }
   isBackupEnabled() {
     return this.#AUTOMATIC_BACKUP;
