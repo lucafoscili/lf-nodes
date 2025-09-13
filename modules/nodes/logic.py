@@ -277,9 +277,6 @@ class LF_MathOperation:
             }
 
             class Validator(ast.NodeVisitor):
-                def visit_Module(self, node):  # pragma: no cover - defensive
-                    raise ValueError("Only expressions are allowed")
-
                 def visit_Expression(self, node):
                     self.visit(node.body)
 
@@ -396,7 +393,19 @@ class LF_MathOperation:
             "value": log,
         })
         
-        return (int(result), result)
+        int_result: int
+        if isinstance(result, (int, float)):
+            try:
+                if result is None or (isinstance(result, float) and (math.isnan(result) or math.isinf(result))):
+                    int_result = 0
+                else:
+                    int_result = int(result)
+            except Exception:
+                int_result = 0
+        else:
+            int_result = 0
+
+        return (int_result, result)
     
     @classmethod
     def VALIDATE_INPUTS(self, **kwargs):
