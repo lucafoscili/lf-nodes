@@ -25,6 +25,7 @@ import {
 import { CustomWidgetName, NodeName } from '../types/widgets/widgets';
 import { LFTooltip } from './tooltip';
 import { LFWidgets } from './widgets';
+import { lfLabeledRerouteExtension } from '../nodes/lfLabeledReroute';
 
 export class LFManager {
   #APIS: APIRoutes = {
@@ -132,6 +133,14 @@ export class LFManager {
           this.#MANAGERS.widgets.onEvent(name, e, widgets as CustomWidgetName[]);
         });
       }
+    }
+
+    // Register frontend-only virtual nodes/extensions (not backed by backend NodeName enums)
+    try {
+      this.#APIS.comfy.register(lfLabeledRerouteExtension);
+      this.log('Registered LF Labeled Reroute virtual node', {}, LogSeverity.Success);
+    } catch (e) {
+      this.log('Failed to register LF Labeled Reroute node', { error: e }, LogSeverity.Error);
     }
 
     this.#INITIALIZED = true;
