@@ -5423,7 +5423,7 @@ var tt = false, et = (t2, e2, n2) => {
                         const n6 = t7.i.replace(/-/g, "_"), o6 = t7.T;
                         if (!o6) return;
                         const i3 = r.get(o6);
-                        return i3 ? i3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-4ba08932.entry.js": () => import("./p-4ba08932.entry-DK_MlTGd.js"), "./p-60af2d7f.entry.js": () => import("./p-60af2d7f.entry-Bok7G4J3.js"), "./p-7652d72d.entry.js": () => import("./p-7652d72d.entry-BUA6w-JV.js"), "./p-79cc15c2.entry.js": () => import("./p-79cc15c2.entry-BQna-OLj.js"), "./p-846257eb.entry.js": () => import("./p-846257eb.entry-B1FpRqTq.js"), "./p-84927cea.entry.js": () => import("./p-84927cea.entry-BfFna-T7.js"), "./p-87e2e37a.entry.js": () => import("./p-87e2e37a.entry-D0n33ieA.js"), "./p-928c4970.entry.js": () => import("./p-928c4970.entry-oM_41_Ie.js"), "./p-93ed735a.entry.js": () => import("./p-93ed735a.entry-vzh63Ns4.js"), "./p-a147e6c9.entry.js": () => import("./p-a147e6c9.entry-CCrBazFo.js"), "./p-a14c6d82.entry.js": () => import("./p-a14c6d82.entry-B91pe35z.js"), "./p-a7fc1135.entry.js": () => import("./p-a7fc1135.entry-Be4tLWix.js"), "./p-bd214b33.entry.js": () => import("./p-bd214b33.entry-DjZ5rGdB.js"), "./p-bf8a47d4.entry.js": () => import("./p-bf8a47d4.entry-CAaHWBDc.js"), "./p-ccea11a0.entry.js": () => import("./p-ccea11a0.entry-BpxzDV45.js"), "./p-e2689624.entry.js": () => import("./p-e2689624.entry-B03Rw8tZ.js") }), `./${o6}.entry.js`, 2).then(((t8) => (r.set(o6, t8), t8[n6])), ((t8) => {
+                        return i3 ? i3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-4ba08932.entry.js": () => import("./p-4ba08932.entry-D7Pwggh5.js"), "./p-60af2d7f.entry.js": () => import("./p-60af2d7f.entry-bRyKqxR1.js"), "./p-7652d72d.entry.js": () => import("./p-7652d72d.entry-C3frCqsS.js"), "./p-79cc15c2.entry.js": () => import("./p-79cc15c2.entry-BjALdzx0.js"), "./p-846257eb.entry.js": () => import("./p-846257eb.entry-B94f5-yU.js"), "./p-84927cea.entry.js": () => import("./p-84927cea.entry-Da453TX9.js"), "./p-87e2e37a.entry.js": () => import("./p-87e2e37a.entry-DfOn2B2a.js"), "./p-928c4970.entry.js": () => import("./p-928c4970.entry-Bx_6M9Vr.js"), "./p-93ed735a.entry.js": () => import("./p-93ed735a.entry-D5jJlG2U.js"), "./p-a147e6c9.entry.js": () => import("./p-a147e6c9.entry-DuihVIRV.js"), "./p-a14c6d82.entry.js": () => import("./p-a14c6d82.entry-DqfCxxv2.js"), "./p-a7fc1135.entry.js": () => import("./p-a7fc1135.entry-D6GVvvK9.js"), "./p-bd214b33.entry.js": () => import("./p-bd214b33.entry-BjVCorc0.js"), "./p-bf8a47d4.entry.js": () => import("./p-bf8a47d4.entry-D4kc_aG8.js"), "./p-ccea11a0.entry.js": () => import("./p-ccea11a0.entry-cBpNq70G.js"), "./p-e2689624.entry.js": () => import("./p-e2689624.entry-BjKNqo54.js") }), `./${o6}.entry.js`, 2).then(((t8) => (r.set(o6, t8), t8[n6])), ((t8) => {
                           l(t8, e3.$hostElement$);
                         }));
                         /*!__STENCIL_STATIC_IMPORT_SWITCH__*/
@@ -6774,7 +6774,7 @@ const lfReroute = {
       }
     }
     function reroutePropagationLogic(appInstance2) {
-      var _a2, _b2, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m;
+      var _a2, _b2, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p;
       const isLabeled = (n2) => {
         var _a3;
         return ((_a3 = n2 == null ? void 0 : n2.constructor) == null ? void 0 : _a3.type) === NODE_PATH;
@@ -6850,19 +6850,32 @@ const lfReroute = {
         this.__autoLabel = void 0;
       }
       this.__outputType = finalType;
-      if ((_j = this.outputs) == null ? void 0 : _j[0]) {
-        this.outputs[0].type = inputType || "*";
+      if ((_j = this.inputs) == null ? void 0 : _j[0]) {
+        this.inputs[0].type = finalType;
+      }
+      if ((_k = this.outputs) == null ? void 0 : _k[0]) {
+        this.outputs[0].type = finalType;
         this.outputs[0].name = this.makeOutputName(finalType);
       }
       this.size = this.computeSize();
       this.applyOrientation();
       this.refreshLabel();
-      const color = (_k = LGraphCanvas.link_type_colors) == null ? void 0 : _k[finalType];
-      if (color && ((_m = (_l = this.outputs) == null ? void 0 : _l[0]) == null ? void 0 : _m.links)) {
-        for (const l2 of this.outputs[0].links) {
-          const link = appInstance2.graph.links[l2];
-          if (link)
-            link.color = color;
+      const color = (_l = LGraphCanvas.link_type_colors) == null ? void 0 : _l[finalType];
+      if (color) {
+        if ((_n = (_m = this.outputs) == null ? void 0 : _m[0]) == null ? void 0 : _n.links) {
+          for (const l2 of this.outputs[0].links) {
+            const link = appInstance2.graph.links[l2];
+            if (link) {
+              link.color = color;
+            }
+          }
+        }
+        const inLinkId = (_p = (_o = this.inputs) == null ? void 0 : _o[0]) == null ? void 0 : _p.link;
+        if (inLinkId != null) {
+          const inLink = appInstance2.graph.links[inLinkId];
+          if (inLink) {
+            inLink.color = color;
+          }
         }
       }
       COMFY_API.scheduleRedraw();
@@ -6880,7 +6893,7 @@ const lfReroute = {
         try {
           (_a2 = node.onConnectionsChange) == null ? void 0 : _a2.call(node);
         } catch (err2) {
-          (_c = (_b2 = getLfManager()) == null ? void 0 : _b2.log) == null ? void 0 : _c.call(_b2, "LFReroute onAfterGraphConfigured error", { err: err2 }, LogSeverity.Warning);
+          (_c = (_b2 = getLfManager()) == null ? void 0 : _b2.log) == null ? void 0 : _c.call(_b2, "[LFReroute] onAfterGraphConfigured", { err: err2 }, LogSeverity.Warning);
         }
       });
     });
