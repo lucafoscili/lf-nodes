@@ -374,26 +374,38 @@ export const lfReroute = {
           this.__autoLabel = undefined; // no origin -> clear auto label
         }
       } else {
-        // User provided a label -> freeze auto label until cleared
         this.__autoLabel = undefined;
       }
 
       this.__outputType = finalType;
+      if (this.inputs?.[0]) {
+        this.inputs[0].type = finalType;
+      }
       if (this.outputs?.[0]) {
-        this.outputs[0].type = inputType || '*';
+        this.outputs[0].type = finalType;
         this.outputs[0].name = this.makeOutputName(finalType);
       }
 
       this.size = this.computeSize();
       this.applyOrientation();
-      // Update title using refreshLabel to respect auto label logic
       this.refreshLabel();
 
       const color = LGraphCanvas.link_type_colors?.[finalType];
-      if (color && this.outputs?.[0]?.links) {
-        for (const l of this.outputs[0].links) {
-          const link: GraphLink = appInstance.graph.links[l];
-          if (link) link.color = color;
+      if (color) {
+        if (this.outputs?.[0]?.links) {
+          for (const l of this.outputs[0].links) {
+            const link: GraphLink = appInstance.graph.links[l];
+            if (link) {
+              link.color = color;
+            }
+          }
+        }
+        const inLinkId = this.inputs?.[0]?.link;
+        if (inLinkId != null) {
+          const inLink = appInstance.graph.links[inLinkId];
+          if (inLink) {
+            inLink.color = color;
+          }
         }
       }
       COMFY_API.scheduleRedraw();
@@ -415,11 +427,7 @@ export const lfReroute = {
         try {
           node.onConnectionsChange?.();
         } catch (err) {
-          getLfManager()?.log?.(
-            '[LFReroute] onAfterGraphConfigured',
-            { err },
-            LogSeverity.Warning,
-          );
+          getLfManager()?.log?.('[LFReroute] onAfterGraphConfigured', { err }, LogSeverity.Warning);
         }
       });
     });
