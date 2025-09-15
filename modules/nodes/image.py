@@ -11,7 +11,7 @@ from PIL import Image, ImageFilter
 from server import PromptServer
 from urllib.parse import urlparse, parse_qs
 
-from ..utils.constants import BLUE_CHANNEL_ID, CATEGORY_PREFIX, EVENT_PREFIX, FUNCTION, GREEN_CHANNEL_ID, Input, RED_CHANNEL_ID, RESAMPLERS
+from ..utils.constants import BLUE_CHANNEL_ID, CATEGORY_PREFIX, EVENT_PREFIX, FUNCTION, GREEN_CHANNEL_ID, Input, INT_MAX, RED_CHANNEL_ID, RESAMPLERS
 from ..utils.helpers import create_compare_node, create_masonry_node, create_resize_node, encode_text_for_sdclip, get_comfy_dir, get_otsu_threshold, get_resource_url, get_text_encoder_from_clip, get_tokenizer_from_clip, hex_to_tuple, normalize_input_image, normalize_input_list, normalize_json_input, normalize_list_item, normalize_list_to_value, normalize_output_image, not_none, numpy_to_tensor, pil_to_tensor, numpy_to_svg, resize_and_crop_image, resize_image, resize_to_square, resolve_filepath, tensor_to_numpy, tensor_to_pil
 
 CATEGORY = f"{CATEGORY_PREFIX}/Image"
@@ -1021,6 +1021,7 @@ class LF_ResizeImageByEdge:
                 }),
                 "new_size": (Input.INTEGER, {
                     "default": 1024, 
+                    "max": INT_MAX,
                     "tooltip": "The size of the longest edge of the output image."
                 }),
                 "resize_method": (RESAMPLERS, {
@@ -1104,10 +1105,12 @@ class LF_ResizeImageToDimension:
                 }),
                 "height": (Input.INTEGER, {
                     "default": 1216, 
+                    "max": INT_MAX,
                     "tooltip": "The target height for the output image."
                 }),
                 "width": (Input.INTEGER, {
                     "default": 832, 
+                    "max": INT_MAX,
                     "tooltip": "The target width for the output image."
                 }),
                 "resize_method": (RESAMPLERS, {
