@@ -38,7 +38,7 @@ class LF_Something2Number:
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
-    OUTPUT_IS_LIST = (False, False, False, False, True, True)
+    OUTPUT_IS_LIST = (False, False, True, True)
     RETURN_NAMES = ("float_sum", "int_sum", "float_list", "int_list")
     RETURN_TYPES = ("FLOAT", "INT", "FLOAT", "INT")
 
