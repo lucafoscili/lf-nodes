@@ -5,8 +5,8 @@ import torch
 from server import PromptServer
 
 from . import CATEGORY
-from ...utils.constants import BASE64_PNG_PREFIX, EVENT_PREFIX, FUNCTION, HEADERS, INT_MAX, get_character_impersonator_system, get_doc_generator_system, get_image_classifier_system
-from ...utils.helpers import handle_response, normalize_input_image, normalize_json_input, normalize_list_to_value, tensor_to_base64
+from ...utils.constants import BASE64_PNG_PREFIX, EVENT_PREFIX, FUNCTION, HEADERS, INT_MAX, get_character_impersonator_system
+from ...utils.helpers import handle_response, normalize_input_image, normalize_list_to_value, tensor_to_base64
 
 # region LF_CharacterImpersonator
 class LF_CharacterImpersonator:
