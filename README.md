@@ -64,6 +64,7 @@ That's a tough one—the nodes span quite a few categories. Here's a quick break
     - [LLM Chat](#llm-chat)
     - [LoRA tester](#lora-tester)
     - [Markdown documentation](#markdown-documentation)
+    - [Multiple prompt from JSON](#multiple-prompt-from-json)
     - [Resize for web + blurred placeholder](#resize-for-web--blurred-placeholder)
   - [Notes](#notes)
   - [Contributing](#contributing)
@@ -124,6 +125,10 @@ That's a tough one—the nodes span quite a few categories. Here's a quick break
 ### [Markdown documentation](https://github.com/lucafoscili/lucafoscili/blob/a42765fc6ef9a394deeb695e4c31eaf3c5ec6139/lf-nodes/workflows/Markdown%20documentation.json)
 
 ![Markdown documentation](https://github.com/lucafoscili/lucafoscili/blob/a42765fc6ef9a394deeb695e4c31eaf3c5ec6139/lf-nodes/screenshots/Markdown%20documentation.png)
+
+### [Multiple prompt from JSON](https://github.com/lucafoscili/lucafoscili/blob/b919d07e84881210b41e8ceba6126f0b01e50f38/lf-nodes/workflows/Multiple%20prompt%20from%20JSON.json)
+
+![Multiple prompt from JSON](https://github.com/lucafoscili/lucafoscili/blob/b919d07e84881210b41e8ceba6126f0b01e50f38/lf-nodes/screenshots/Multiple%20prompt%20from%20JSON.png)
 
 ### [Resize for web + blurred placeholder](https://github.com/lucafoscili/lucafoscili/blob/a42765fc6ef9a394deeb695e4c31eaf3c5ec6139/lf-nodes/workflows/Multiple%20image%20resize%20for%20web%20%2B%20blurred%20placeholder.json)
 
