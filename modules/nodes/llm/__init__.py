@@ -1,3 +1,3 @@
 from ...utils.constants import CATEGORY_PREFIX
 
-CATEGORY = f"{CATEGORY_PREFIX}/JSON"
+CATEGORY = f"{CATEGORY_PREFIX}/LLM"
