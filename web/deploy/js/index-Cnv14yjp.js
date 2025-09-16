@@ -5423,7 +5423,7 @@ var tt = false, et = (t2, e2, n2) => {
                         const n6 = t7.i.replace(/-/g, "_"), o6 = t7.T;
                         if (!o6) return;
                         const i3 = r.get(o6);
-                        return i3 ? i3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-4ba08932.entry.js": () => import("./p-4ba08932.entry-D7Pwggh5.js"), "./p-60af2d7f.entry.js": () => import("./p-60af2d7f.entry-bRyKqxR1.js"), "./p-7652d72d.entry.js": () => import("./p-7652d72d.entry-C3frCqsS.js"), "./p-79cc15c2.entry.js": () => import("./p-79cc15c2.entry-BjALdzx0.js"), "./p-846257eb.entry.js": () => import("./p-846257eb.entry-B94f5-yU.js"), "./p-84927cea.entry.js": () => import("./p-84927cea.entry-Da453TX9.js"), "./p-87e2e37a.entry.js": () => import("./p-87e2e37a.entry-DfOn2B2a.js"), "./p-928c4970.entry.js": () => import("./p-928c4970.entry-Bx_6M9Vr.js"), "./p-93ed735a.entry.js": () => import("./p-93ed735a.entry-D5jJlG2U.js"), "./p-a147e6c9.entry.js": () => import("./p-a147e6c9.entry-DuihVIRV.js"), "./p-a14c6d82.entry.js": () => import("./p-a14c6d82.entry-DqfCxxv2.js"), "./p-a7fc1135.entry.js": () => import("./p-a7fc1135.entry-D6GVvvK9.js"), "./p-bd214b33.entry.js": () => import("./p-bd214b33.entry-BjVCorc0.js"), "./p-bf8a47d4.entry.js": () => import("./p-bf8a47d4.entry-D4kc_aG8.js"), "./p-ccea11a0.entry.js": () => import("./p-ccea11a0.entry-cBpNq70G.js"), "./p-e2689624.entry.js": () => import("./p-e2689624.entry-BjKNqo54.js") }), `./${o6}.entry.js`, 2).then(((t8) => (r.set(o6, t8), t8[n6])), ((t8) => {
+                        return i3 ? i3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-4ba08932.entry.js": () => import("./p-4ba08932.entry-Cj9x0NU7.js"), "./p-60af2d7f.entry.js": () => import("./p-60af2d7f.entry-Dsb0jDSR.js"), "./p-7652d72d.entry.js": () => import("./p-7652d72d.entry-QWMlshDC.js"), "./p-79cc15c2.entry.js": () => import("./p-79cc15c2.entry-DkEP1m3w.js"), "./p-846257eb.entry.js": () => import("./p-846257eb.entry-dzorz2ib.js"), "./p-84927cea.entry.js": () => import("./p-84927cea.entry-DeohlGK-.js"), "./p-87e2e37a.entry.js": () => import("./p-87e2e37a.entry-BLbj-tpH.js"), "./p-928c4970.entry.js": () => import("./p-928c4970.entry-w4QSaJkB.js"), "./p-93ed735a.entry.js": () => import("./p-93ed735a.entry-CC40k0uc.js"), "./p-a147e6c9.entry.js": () => import("./p-a147e6c9.entry-CaEU_vG-.js"), "./p-a14c6d82.entry.js": () => import("./p-a14c6d82.entry-hkMinTa5.js"), "./p-a7fc1135.entry.js": () => import("./p-a7fc1135.entry-BR9zuQRl.js"), "./p-bd214b33.entry.js": () => import("./p-bd214b33.entry-Q2oAMzgb.js"), "./p-bf8a47d4.entry.js": () => import("./p-bf8a47d4.entry-BEqhFGsf.js"), "./p-ccea11a0.entry.js": () => import("./p-ccea11a0.entry-Bn377zqE.js"), "./p-e2689624.entry.js": () => import("./p-e2689624.entry-CZsBPhOe.js") }), `./${o6}.entry.js`, 2).then(((t8) => (r.set(o6, t8), t8[n6])), ((t8) => {
                           l(t8, e3.$hostElement$);
                         }));
                         /*!__STENCIL_STATIC_IMPORT_SWITCH__*/
@@ -6167,6 +6167,7 @@ var NodeName;
   NodeName2["imageToSvg"] = "LF_ImageToSVG";
   NodeName2["integer"] = "LF_Integer";
   NodeName2["isLandscape"] = "LF_IsLandscape";
+  NodeName2["jsonPromptCombinator"] = "LF_JSONPromptCombinator";
   NodeName2["keywordCounter"] = "LF_KeywordCounter";
   NodeName2["keywordToggleFromJson"] = "LF_KeywordToggleFromJSON";
   NodeName2["line"] = "LF_Line";
@@ -6301,6 +6302,7 @@ const NODE_WIDGET_MAP = {
   LF_ImageToSVG: [CustomWidgetName.compare],
   LF_Integer: [CustomWidgetName.history],
   LF_IsLandscape: [CustomWidgetName.tree],
+  LF_JSONPromptCombinator: [CustomWidgetName.code],
   LF_KeywordCounter: [CustomWidgetName.countBarChart],
   LF_KeywordToggleFromJSON: [CustomWidgetName.chip],
   LF_Line: [CustomWidgetName.compare],
