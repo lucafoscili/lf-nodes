@@ -65,6 +65,7 @@ export const NODE_WIDGET_MAP: NodeWidgetMap = {
   LF_ImageToSVG: [CustomWidgetName.compare],
   LF_Integer: [CustomWidgetName.history],
   LF_IsLandscape: [CustomWidgetName.tree],
+  LF_JSONPromptCombinator: [CustomWidgetName.code],
   LF_KeywordCounter: [CustomWidgetName.countBarChart],
   LF_KeywordToggleFromJSON: [CustomWidgetName.chip],
   LF_Line: [CustomWidgetName.compare],

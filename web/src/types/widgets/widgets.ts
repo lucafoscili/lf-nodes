@@ -95,6 +95,7 @@ export enum NodeName {
   imageToSvg = 'LF_ImageToSVG',
   integer = 'LF_Integer',
   isLandscape = 'LF_IsLandscape',
+  jsonPromptCombinator = 'LF_JSONPromptCombinator',
   keywordCounter = 'LF_KeywordCounter',
   keywordToggleFromJson = 'LF_KeywordToggleFromJSON',
   line = 'LF_Line',
