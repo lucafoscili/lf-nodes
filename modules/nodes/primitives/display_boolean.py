@@ -1,13 +1,8 @@
-import json
-import random
-
-from itertools import combinations
-
 from server import PromptServer
 
 from . import CATEGORY
-from ...utils.constants import CATEGORY_PREFIX, EVENT_PREFIX, FUNCTION, Input, INT_MAX
-from ...utils.helpers import create_history_node, normalize_input_list, normalize_json_input, normalize_list_to_value, randomize_from_history
+from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
+from ...utils.helpers import normalize_input_list
 
 # region LF_DisplayBoolean
 class LF_DisplayBoolean:
