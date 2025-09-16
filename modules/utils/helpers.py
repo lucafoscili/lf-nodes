@@ -1539,8 +1539,8 @@ def process_model(model_type, model_name, folder):
 
     if saved_info:
         try:
-            lf_image_value = saved_info['nodes'][0]['cells']['lfImage']['value']
-            if lf_image_value.startswith(BASE64_PNG_PREFIX):
+            lf_image_value: str = saved_info['nodes'][0]['cells']['lfImage']['value']
+            if lf_image_value and lf_image_value.startswith(BASE64_PNG_PREFIX):
                 try:
                     model_base64 = lf_image_value.replace(BASE64_PNG_PREFIX, "")
                     model_cover = base64_to_tensor(model_base64)
