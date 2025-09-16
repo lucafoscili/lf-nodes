@@ -230,7 +230,7 @@ class LF_JSONPromptCombinator:
         return ("\n".join(combinations), combinations, count, flat_json)
 # endregion
 
-# Mappings
+# region Mappings
 NODE_CLASS_MAPPINGS = {
     "LF_JSONPromptCombinator": LF_JSONPromptCombinator,
 }
