@@ -1,3 +1,4 @@
+insightface
 numpy
 openai
 opencv-python

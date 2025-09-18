@@ -52,6 +52,8 @@ export enum CustomWidgetName {
   upload = 'LF_UPLOAD',
 }
 export enum NodeName {
+  applyIPAdapter = 'LF_ApplyIPAdapter',
+  applyFaceIDIPAdapter = 'LF_ApplyFaceIDIPAdapter',
   blend = 'LF_Blend',
   blobToImage = 'LF_BlobToImage',
   bloom = 'LF_Bloom',
@@ -82,8 +84,9 @@ export enum NodeName {
   float = 'LF_Float',
   embeddingSelector = 'LF_EmbeddingSelector',
   emptyImage = 'LF_EmptyImage',
-  extractString = 'LF_ExtractString',
+  extractFaceEmbedding = 'LF_ExtractFaceEmbedding',
   extractPromptFromLoraTag = 'LF_ExtractPromptFromLoraTag',
+  extractString = 'LF_ExtractString',
   gaussianBlur = 'LF_GaussianBlur',
   getValueFromJson = 'LF_GetValueFromJSON',
   getRandomKeyFromJson = 'LF_GetRandomKeyFromJSON',
@@ -106,6 +109,7 @@ export enum NodeName {
   loadWd14Model = 'LF_LoadWD14Model',
   loadFileOnce = 'LF_LoadFileOnce',
   loadImages = 'LF_LoadImages',
+  loadIPAdapterModel = 'LF_LoadIPAdapterModel',
   loadLoraTags = 'LF_LoadLoraTags',
   loadMetadata = 'LF_LoadMetadata',
   loraAndEmbeddingSelector = 'LF_LoraAndEmbeddingSelector',

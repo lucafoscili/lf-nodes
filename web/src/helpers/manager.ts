@@ -23,6 +23,8 @@ import {
 
 //#region Node-Widget map
 export const NODE_WIDGET_MAP: NodeWidgetMap = {
+  LF_ApplyFaceIDIPAdapter: [CustomWidgetName.code],
+  LF_ApplyIPAdapter: [CustomWidgetName.code],
   LF_Blend: [CustomWidgetName.compare],
   LF_BlobToImage: [CustomWidgetName.code],
   LF_Bloom: [CustomWidgetName.compare],
@@ -50,8 +52,9 @@ export const NODE_WIDGET_MAP: NodeWidgetMap = {
   LF_DisplayString: [CustomWidgetName.code],
   LF_EmbeddingSelector: [CustomWidgetName.card],
   LF_EmptyImage: [CustomWidgetName.masonry],
-  LF_ExtractString: [CustomWidgetName.code],
+  LF_ExtractFaceEmbedding: [CustomWidgetName.code],
   LF_ExtractPromptFromLoraTag: [CustomWidgetName.code],
+  LF_ExtractString: [CustomWidgetName.code],
   LF_FilmGrain: [CustomWidgetName.compare],
   LF_Float: [CustomWidgetName.history],
   LF_GaussianBlur: [CustomWidgetName.compare],
@@ -74,6 +77,7 @@ export const NODE_WIDGET_MAP: NodeWidgetMap = {
   LF_LoadAndEditImages: [CustomWidgetName.imageEditor],
   LF_LoadFileOnce: [CustomWidgetName.history],
   LF_LoadCLIPSegModel: [CustomWidgetName.code],
+  LF_LoadIPAdapterModel: [CustomWidgetName.code],
   LF_LoadWD14Model: [CustomWidgetName.code],
   LF_LoadImages: [CustomWidgetName.masonry],
   LF_LoadLoraTags: [CustomWidgetName.cardsWithChip],

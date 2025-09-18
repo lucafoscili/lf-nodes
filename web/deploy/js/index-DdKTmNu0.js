@@ -5423,7 +5423,7 @@ var tt = false, et = (t2, e2, n2) => {
                         const n6 = t7.i.replace(/-/g, "_"), o6 = t7.T;
                         if (!o6) return;
                         const i3 = r.get(o6);
-                        return i3 ? i3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-4ba08932.entry.js": () => import("./p-4ba08932.entry-Cj9x0NU7.js"), "./p-60af2d7f.entry.js": () => import("./p-60af2d7f.entry-Dsb0jDSR.js"), "./p-7652d72d.entry.js": () => import("./p-7652d72d.entry-QWMlshDC.js"), "./p-79cc15c2.entry.js": () => import("./p-79cc15c2.entry-DkEP1m3w.js"), "./p-846257eb.entry.js": () => import("./p-846257eb.entry-dzorz2ib.js"), "./p-84927cea.entry.js": () => import("./p-84927cea.entry-DeohlGK-.js"), "./p-87e2e37a.entry.js": () => import("./p-87e2e37a.entry-BLbj-tpH.js"), "./p-928c4970.entry.js": () => import("./p-928c4970.entry-w4QSaJkB.js"), "./p-93ed735a.entry.js": () => import("./p-93ed735a.entry-CC40k0uc.js"), "./p-a147e6c9.entry.js": () => import("./p-a147e6c9.entry-CaEU_vG-.js"), "./p-a14c6d82.entry.js": () => import("./p-a14c6d82.entry-hkMinTa5.js"), "./p-a7fc1135.entry.js": () => import("./p-a7fc1135.entry-BR9zuQRl.js"), "./p-bd214b33.entry.js": () => import("./p-bd214b33.entry-Q2oAMzgb.js"), "./p-bf8a47d4.entry.js": () => import("./p-bf8a47d4.entry-BEqhFGsf.js"), "./p-ccea11a0.entry.js": () => import("./p-ccea11a0.entry-Bn377zqE.js"), "./p-e2689624.entry.js": () => import("./p-e2689624.entry-CZsBPhOe.js") }), `./${o6}.entry.js`, 2).then(((t8) => (r.set(o6, t8), t8[n6])), ((t8) => {
+                        return i3 ? i3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-4ba08932.entry.js": () => import("./p-4ba08932.entry-CypdWtU4.js"), "./p-60af2d7f.entry.js": () => import("./p-60af2d7f.entry-NalenjXP.js"), "./p-7652d72d.entry.js": () => import("./p-7652d72d.entry-DDF56Mkh.js"), "./p-79cc15c2.entry.js": () => import("./p-79cc15c2.entry-BljrBhiC.js"), "./p-846257eb.entry.js": () => import("./p-846257eb.entry-CXTwOTjS.js"), "./p-84927cea.entry.js": () => import("./p-84927cea.entry-I00XG1m8.js"), "./p-87e2e37a.entry.js": () => import("./p-87e2e37a.entry-9yyxOlkS.js"), "./p-928c4970.entry.js": () => import("./p-928c4970.entry-BEqy_g2w.js"), "./p-93ed735a.entry.js": () => import("./p-93ed735a.entry-Byo9LZiw.js"), "./p-a147e6c9.entry.js": () => import("./p-a147e6c9.entry-DGP9472p.js"), "./p-a14c6d82.entry.js": () => import("./p-a14c6d82.entry-oQQ9N-Hf.js"), "./p-a7fc1135.entry.js": () => import("./p-a7fc1135.entry-Jaq1EyIb.js"), "./p-bd214b33.entry.js": () => import("./p-bd214b33.entry-Dx0p2hNd.js"), "./p-bf8a47d4.entry.js": () => import("./p-bf8a47d4.entry-BYIBddAT.js"), "./p-ccea11a0.entry.js": () => import("./p-ccea11a0.entry-CaP36ka2.js"), "./p-e2689624.entry.js": () => import("./p-e2689624.entry-B5izLxC_.js") }), `./${o6}.entry.js`, 2).then(((t8) => (r.set(o6, t8), t8[n6])), ((t8) => {
                           l(t8, e3.$hostElement$);
                         }));
                         /*!__STENCIL_STATIC_IMPORT_SWITCH__*/
@@ -6124,6 +6124,8 @@ var CustomWidgetName;
 })(CustomWidgetName || (CustomWidgetName = {}));
 var NodeName;
 (function(NodeName2) {
+  NodeName2["applyIPAdapter"] = "LF_ApplyIPAdapter";
+  NodeName2["applyFaceIDIPAdapter"] = "LF_ApplyFaceIDIPAdapter";
   NodeName2["blend"] = "LF_Blend";
   NodeName2["blobToImage"] = "LF_BlobToImage";
   NodeName2["bloom"] = "LF_Bloom";
@@ -6154,8 +6156,9 @@ var NodeName;
   NodeName2["float"] = "LF_Float";
   NodeName2["embeddingSelector"] = "LF_EmbeddingSelector";
   NodeName2["emptyImage"] = "LF_EmptyImage";
-  NodeName2["extractString"] = "LF_ExtractString";
+  NodeName2["extractFaceEmbedding"] = "LF_ExtractFaceEmbedding";
   NodeName2["extractPromptFromLoraTag"] = "LF_ExtractPromptFromLoraTag";
+  NodeName2["extractString"] = "LF_ExtractString";
   NodeName2["gaussianBlur"] = "LF_GaussianBlur";
   NodeName2["getValueFromJson"] = "LF_GetValueFromJSON";
   NodeName2["getRandomKeyFromJson"] = "LF_GetRandomKeyFromJSON";
@@ -6178,6 +6181,7 @@ var NodeName;
   NodeName2["loadWd14Model"] = "LF_LoadWD14Model";
   NodeName2["loadFileOnce"] = "LF_LoadFileOnce";
   NodeName2["loadImages"] = "LF_LoadImages";
+  NodeName2["loadIPAdapterModel"] = "LF_LoadIPAdapterModel";
   NodeName2["loadLoraTags"] = "LF_LoadLoraTags";
   NodeName2["loadMetadata"] = "LF_LoadMetadata";
   NodeName2["loraAndEmbeddingSelector"] = "LF_LoraAndEmbeddingSelector";
@@ -6260,6 +6264,8 @@ var TagName;
   TagName2["Textarea"] = "textarea";
 })(TagName || (TagName = {}));
 const NODE_WIDGET_MAP = {
+  LF_ApplyFaceIDIPAdapter: [CustomWidgetName.code],
+  LF_ApplyIPAdapter: [CustomWidgetName.code],
   LF_Blend: [CustomWidgetName.compare],
   LF_BlobToImage: [CustomWidgetName.code],
   LF_Bloom: [CustomWidgetName.compare],
@@ -6287,8 +6293,9 @@ const NODE_WIDGET_MAP = {
   LF_DisplayString: [CustomWidgetName.code],
   LF_EmbeddingSelector: [CustomWidgetName.card],
   LF_EmptyImage: [CustomWidgetName.masonry],
-  LF_ExtractString: [CustomWidgetName.code],
+  LF_ExtractFaceEmbedding: [CustomWidgetName.code],
   LF_ExtractPromptFromLoraTag: [CustomWidgetName.code],
+  LF_ExtractString: [CustomWidgetName.code],
   LF_FilmGrain: [CustomWidgetName.compare],
   LF_Float: [CustomWidgetName.history],
   LF_GaussianBlur: [CustomWidgetName.compare],
@@ -6311,6 +6318,7 @@ const NODE_WIDGET_MAP = {
   LF_LoadAndEditImages: [CustomWidgetName.imageEditor],
   LF_LoadFileOnce: [CustomWidgetName.history],
   LF_LoadCLIPSegModel: [CustomWidgetName.code],
+  LF_LoadIPAdapterModel: [CustomWidgetName.code],
   LF_LoadWD14Model: [CustomWidgetName.code],
   LF_LoadImages: [CustomWidgetName.masonry],
   LF_LoadLoraTags: [CustomWidgetName.cardsWithChip],
