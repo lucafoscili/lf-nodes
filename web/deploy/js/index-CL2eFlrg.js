@@ -5423,7 +5423,7 @@ var tt = false, et = (t2, e2, n2) => {
                         const n6 = t7.i.replace(/-/g, "_"), o6 = t7.T;
                         if (!o6) return;
                         const i3 = r.get(o6);
-                        return i3 ? i3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-4ba08932.entry.js": () => import("./p-4ba08932.entry-CypdWtU4.js"), "./p-60af2d7f.entry.js": () => import("./p-60af2d7f.entry-NalenjXP.js"), "./p-7652d72d.entry.js": () => import("./p-7652d72d.entry-DDF56Mkh.js"), "./p-79cc15c2.entry.js": () => import("./p-79cc15c2.entry-BljrBhiC.js"), "./p-846257eb.entry.js": () => import("./p-846257eb.entry-CXTwOTjS.js"), "./p-84927cea.entry.js": () => import("./p-84927cea.entry-I00XG1m8.js"), "./p-87e2e37a.entry.js": () => import("./p-87e2e37a.entry-9yyxOlkS.js"), "./p-928c4970.entry.js": () => import("./p-928c4970.entry-BEqy_g2w.js"), "./p-93ed735a.entry.js": () => import("./p-93ed735a.entry-Byo9LZiw.js"), "./p-a147e6c9.entry.js": () => import("./p-a147e6c9.entry-DGP9472p.js"), "./p-a14c6d82.entry.js": () => import("./p-a14c6d82.entry-oQQ9N-Hf.js"), "./p-a7fc1135.entry.js": () => import("./p-a7fc1135.entry-Jaq1EyIb.js"), "./p-bd214b33.entry.js": () => import("./p-bd214b33.entry-Dx0p2hNd.js"), "./p-bf8a47d4.entry.js": () => import("./p-bf8a47d4.entry-BYIBddAT.js"), "./p-ccea11a0.entry.js": () => import("./p-ccea11a0.entry-CaP36ka2.js"), "./p-e2689624.entry.js": () => import("./p-e2689624.entry-B5izLxC_.js") }), `./${o6}.entry.js`, 2).then(((t8) => (r.set(o6, t8), t8[n6])), ((t8) => {
+                        return i3 ? i3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-4ba08932.entry.js": () => import("./p-4ba08932.entry-BOaJyT_0.js"), "./p-60af2d7f.entry.js": () => import("./p-60af2d7f.entry-MS0WogDY.js"), "./p-7652d72d.entry.js": () => import("./p-7652d72d.entry-Bw3O4Krm.js"), "./p-79cc15c2.entry.js": () => import("./p-79cc15c2.entry-C6guUgmR.js"), "./p-846257eb.entry.js": () => import("./p-846257eb.entry-Bnge-ylm.js"), "./p-84927cea.entry.js": () => import("./p-84927cea.entry-59G123Ny.js"), "./p-87e2e37a.entry.js": () => import("./p-87e2e37a.entry-DSWUDB97.js"), "./p-928c4970.entry.js": () => import("./p-928c4970.entry-BgxptXJG.js"), "./p-93ed735a.entry.js": () => import("./p-93ed735a.entry-CzuXOWNf.js"), "./p-a147e6c9.entry.js": () => import("./p-a147e6c9.entry-Ds8fHmi_.js"), "./p-a14c6d82.entry.js": () => import("./p-a14c6d82.entry-CVB_2FMH.js"), "./p-a7fc1135.entry.js": () => import("./p-a7fc1135.entry-DDgMp1gY.js"), "./p-bd214b33.entry.js": () => import("./p-bd214b33.entry-DIKsici-.js"), "./p-bf8a47d4.entry.js": () => import("./p-bf8a47d4.entry-D93-UG8D.js"), "./p-ccea11a0.entry.js": () => import("./p-ccea11a0.entry-BTUvafs-.js"), "./p-e2689624.entry.js": () => import("./p-e2689624.entry-gR4kVdiN.js") }), `./${o6}.entry.js`, 2).then(((t8) => (r.set(o6, t8), t8[n6])), ((t8) => {
                           l(t8, e3.$hostElement$);
                         }));
                         /*!__STENCIL_STATIC_IMPORT_SWITCH__*/
@@ -6124,8 +6124,6 @@ var CustomWidgetName;
 })(CustomWidgetName || (CustomWidgetName = {}));
 var NodeName;
 (function(NodeName2) {
-  NodeName2["applyIPAdapter"] = "LF_ApplyIPAdapter";
-  NodeName2["applyFaceIDIPAdapter"] = "LF_ApplyFaceIDIPAdapter";
   NodeName2["blend"] = "LF_Blend";
   NodeName2["blobToImage"] = "LF_BlobToImage";
   NodeName2["bloom"] = "LF_Bloom";
@@ -6143,6 +6141,7 @@ var NodeName;
   NodeName2["contrast"] = "LF_Contrast";
   NodeName2["controlPanel"] = "LF_ControlPanel";
   NodeName2["createMask"] = "LF_CreateMask";
+  NodeName2["detectRegions"] = "LF_DetectRegions";
   NodeName2["desaturation"] = "LF_Desaturation";
   NodeName2["diffusionModelSelector"] = "LF_DiffusionModelSelector";
   NodeName2["displayBoolean"] = "LF_DisplayBoolean";
@@ -6181,7 +6180,6 @@ var NodeName;
   NodeName2["loadWd14Model"] = "LF_LoadWD14Model";
   NodeName2["loadFileOnce"] = "LF_LoadFileOnce";
   NodeName2["loadImages"] = "LF_LoadImages";
-  NodeName2["loadIPAdapterModel"] = "LF_LoadIPAdapterModel";
   NodeName2["loadLoraTags"] = "LF_LoadLoraTags";
   NodeName2["loadMetadata"] = "LF_LoadMetadata";
   NodeName2["loraAndEmbeddingSelector"] = "LF_LoraAndEmbeddingSelector";
@@ -6195,6 +6193,7 @@ var NodeName;
   NodeName2["randomBoolean"] = "LF_RandomBoolean";
   NodeName2["regexReplace"] = "LF_RegexReplace";
   NodeName2["regionExtractor"] = "LF_RegionExtractor";
+  NodeName2["regionMask"] = "LF_RegionMask";
   NodeName2["resizeImageByEdge"] = "LF_ResizeImageByEdge";
   NodeName2["resizeImageToDimension"] = "LF_ResizeImageToDimension";
   NodeName2["resizeImageToSquare"] = "LF_ResizeImageToSquare";
@@ -6230,6 +6229,7 @@ var NodeName;
   NodeName2["urandomSeedGenerator"] = "LF_UrandomSeedGenerator";
   NodeName2["usageStatistics"] = "LF_UsageStatistics";
   NodeName2["vaeSelector"] = "LF_VAESelector";
+  NodeName2["onnxSelector"] = "LF_ONNXSelector";
   NodeName2["viewImages"] = "LF_ViewImages";
   NodeName2["vibrance"] = "LF_Vibrance";
   NodeName2["vignette"] = "LF_Vignette";
@@ -6264,8 +6264,6 @@ var TagName;
   TagName2["Textarea"] = "textarea";
 })(TagName || (TagName = {}));
 const NODE_WIDGET_MAP = {
-  LF_ApplyFaceIDIPAdapter: [CustomWidgetName.code],
-  LF_ApplyIPAdapter: [CustomWidgetName.code],
   LF_Blend: [CustomWidgetName.compare],
   LF_BlobToImage: [CustomWidgetName.code],
   LF_Bloom: [CustomWidgetName.compare],
@@ -6283,6 +6281,7 @@ const NODE_WIDGET_MAP = {
   LF_Contrast: [CustomWidgetName.compare],
   LF_ControlPanel: [CustomWidgetName.controlPanel],
   LF_CreateMask: [CustomWidgetName.compare],
+  LF_DetectRegions: [CustomWidgetName.compare],
   LF_Desaturation: [CustomWidgetName.compare],
   LF_DiffusionModelSelector: [CustomWidgetName.card],
   LF_DisplayBoolean: [CustomWidgetName.code],
@@ -6318,7 +6317,6 @@ const NODE_WIDGET_MAP = {
   LF_LoadAndEditImages: [CustomWidgetName.imageEditor],
   LF_LoadFileOnce: [CustomWidgetName.history],
   LF_LoadCLIPSegModel: [CustomWidgetName.code],
-  LF_LoadIPAdapterModel: [CustomWidgetName.code],
   LF_LoadWD14Model: [CustomWidgetName.code],
   LF_LoadImages: [CustomWidgetName.masonry],
   LF_LoadLoraTags: [CustomWidgetName.cardsWithChip],
@@ -6335,6 +6333,7 @@ const NODE_WIDGET_MAP = {
   LF_RandomBoolean: [CustomWidgetName.progressbar],
   LF_RegexReplace: [CustomWidgetName.code],
   LF_RegionExtractor: [CustomWidgetName.code],
+  LF_RegionMask: [CustomWidgetName.compare],
   LF_ResizeImageByEdge: [CustomWidgetName.tree],
   LF_ResizeImageToDimension: [CustomWidgetName.tree],
   LF_ResizeImageToSquare: [CustomWidgetName.tree],
@@ -6370,6 +6369,7 @@ const NODE_WIDGET_MAP = {
   LF_UsageStatistics: [CustomWidgetName.tabBarChart],
   LF_UrandomSeedGenerator: [CustomWidgetName.tree],
   LF_VAESelector: [CustomWidgetName.history],
+  LF_ONNXSelector: [CustomWidgetName.history],
   LF_Vibrance: [CustomWidgetName.compare],
   LF_ViewImages: [CustomWidgetName.masonry],
   LF_Vignette: [CustomWidgetName.compare],
