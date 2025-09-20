@@ -52,8 +52,6 @@ export enum CustomWidgetName {
   upload = 'LF_UPLOAD',
 }
 export enum NodeName {
-  applyIPAdapter = 'LF_ApplyIPAdapter',
-  applyFaceIDIPAdapter = 'LF_ApplyFaceIDIPAdapter',
   blend = 'LF_Blend',
   blobToImage = 'LF_BlobToImage',
   bloom = 'LF_Bloom',
@@ -71,6 +69,7 @@ export enum NodeName {
   contrast = 'LF_Contrast',
   controlPanel = 'LF_ControlPanel',
   createMask = 'LF_CreateMask',
+  detectRegions = 'LF_DetectRegions',
   desaturation = 'LF_Desaturation',
   diffusionModelSelector = 'LF_DiffusionModelSelector',
   displayBoolean = 'LF_DisplayBoolean',
@@ -109,7 +108,6 @@ export enum NodeName {
   loadWd14Model = 'LF_LoadWD14Model',
   loadFileOnce = 'LF_LoadFileOnce',
   loadImages = 'LF_LoadImages',
-  loadIPAdapterModel = 'LF_LoadIPAdapterModel',
   loadLoraTags = 'LF_LoadLoraTags',
   loadMetadata = 'LF_LoadMetadata',
   loraAndEmbeddingSelector = 'LF_LoraAndEmbeddingSelector',
@@ -123,6 +121,7 @@ export enum NodeName {
   randomBoolean = 'LF_RandomBoolean',
   regexReplace = 'LF_RegexReplace',
   regionExtractor = 'LF_RegionExtractor',
+  regionMask = 'LF_RegionMask',
   resizeImageByEdge = 'LF_ResizeImageByEdge',
   resizeImageToDimension = 'LF_ResizeImageToDimension',
   resizeImageToSquare = 'LF_ResizeImageToSquare',
@@ -158,6 +157,7 @@ export enum NodeName {
   urandomSeedGenerator = 'LF_UrandomSeedGenerator',
   usageStatistics = 'LF_UsageStatistics',
   vaeSelector = 'LF_VAESelector',
+  onnxSelector = 'LF_ONNXSelector',
   viewImages = 'LF_ViewImages',
   vibrance = 'LF_Vibrance',
   vignette = 'LF_Vignette',
@@ -298,3 +298,4 @@ export type WidgetSetter = {
   [W in CustomWidgetName]: CustomWidgetCallback;
 };
 //#endregion
+

@@ -23,8 +23,6 @@ import {
 
 //#region Node-Widget map
 export const NODE_WIDGET_MAP: NodeWidgetMap = {
-  LF_ApplyFaceIDIPAdapter: [CustomWidgetName.code],
-  LF_ApplyIPAdapter: [CustomWidgetName.code],
   LF_Blend: [CustomWidgetName.compare],
   LF_BlobToImage: [CustomWidgetName.code],
   LF_Bloom: [CustomWidgetName.compare],
@@ -42,6 +40,7 @@ export const NODE_WIDGET_MAP: NodeWidgetMap = {
   LF_Contrast: [CustomWidgetName.compare],
   LF_ControlPanel: [CustomWidgetName.controlPanel],
   LF_CreateMask: [CustomWidgetName.compare],
+  LF_DetectRegions: [CustomWidgetName.compare],
   LF_Desaturation: [CustomWidgetName.compare],
   LF_DiffusionModelSelector: [CustomWidgetName.card],
   LF_DisplayBoolean: [CustomWidgetName.code],
@@ -77,7 +76,6 @@ export const NODE_WIDGET_MAP: NodeWidgetMap = {
   LF_LoadAndEditImages: [CustomWidgetName.imageEditor],
   LF_LoadFileOnce: [CustomWidgetName.history],
   LF_LoadCLIPSegModel: [CustomWidgetName.code],
-  LF_LoadIPAdapterModel: [CustomWidgetName.code],
   LF_LoadWD14Model: [CustomWidgetName.code],
   LF_LoadImages: [CustomWidgetName.masonry],
   LF_LoadLoraTags: [CustomWidgetName.cardsWithChip],
@@ -94,6 +92,7 @@ export const NODE_WIDGET_MAP: NodeWidgetMap = {
   LF_RandomBoolean: [CustomWidgetName.progressbar],
   LF_RegexReplace: [CustomWidgetName.code],
   LF_RegionExtractor: [CustomWidgetName.code],
+  LF_RegionMask: [CustomWidgetName.compare],
   LF_ResizeImageByEdge: [CustomWidgetName.tree],
   LF_ResizeImageToDimension: [CustomWidgetName.tree],
   LF_ResizeImageToSquare: [CustomWidgetName.tree],
@@ -129,6 +128,7 @@ export const NODE_WIDGET_MAP: NodeWidgetMap = {
   LF_UsageStatistics: [CustomWidgetName.tabBarChart],
   LF_UrandomSeedGenerator: [CustomWidgetName.tree],
   LF_VAESelector: [CustomWidgetName.history],
+  LF_ONNXSelector: [CustomWidgetName.history],
   LF_Vibrance: [CustomWidgetName.compare],
   LF_ViewImages: [CustomWidgetName.masonry],
   LF_Vignette: [CustomWidgetName.compare],
@@ -350,3 +350,4 @@ export const getLogStyle = () => {
   };
 };
 //#endregion
+

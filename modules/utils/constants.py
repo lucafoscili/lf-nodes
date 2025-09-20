@@ -8,13 +8,9 @@ class AnyType(str):
 class Input:
     BOOLEAN = "BOOLEAN"
     CLIP = "CLIP"
-    CLIP_VISION = "CLIP_VISION"
-    FACE_EMBED = "FACE_EMBED"
-    FACE_META = "FACE_META"
     FLOAT = "FLOAT"
     IMAGE = "IMAGE"
     INTEGER = "INT"
-    IPADAPTER = "IPADAPTER"
     LF_CARD = "LF_CARD"
     LF_CARDS_WITH_CHIP = "LF_CARDS_WITH_CHIP"
     LF_CAROUSEL = "LF_CAROUSEL"
@@ -34,6 +30,7 @@ class Input:
     LF_TREE = "LF_TREE"
     LF_UPLOAD = "LF_UPLOAD"
     JSON = "JSON"
+    REGION_META = "REGION_META"
     MODEL = "MODEL"
     STRING = "STRING"
 
