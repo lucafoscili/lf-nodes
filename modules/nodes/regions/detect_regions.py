@@ -1,14 +1,21 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 from pathlib import Path
-from typing import List
+from typing import Any, Dict, List, Optional
 
 from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
 from ...utils.detection import detect_regions, load_yolo_session
-from ...utils.detection_helpers import append_compare_entry, build_overlay, parse_class_filter, select_region
+from ...utils.detection_helpers import (
+    append_compare_entry,
+    build_overlay,
+    load_label_map,
+    parse_class_filter,
+    parse_class_labels,
+    select_region,
+)
 from ...utils.helpers import normalize_input_image, normalize_json_input, normalize_list_to_value
 
 
@@ -50,7 +57,11 @@ class LF_DetectRegions:
                 }),
                 "class_filter": (Input.STRING, {
                     "default": "",
-                    "tooltip": "Optional comma-separated list of COCO class names or IDs to keep.",
+                    "tooltip": "Optional comma-separated list of class names or IDs to keep.",
+                }),
+                "class_labels": (Input.STRING, {
+                    "default": "",
+                    "tooltip": "Optional class label override (comma, newline or JSON).",
                 }),
                 "preferred_label": (Input.STRING, {
                     "default": "",
@@ -77,7 +88,7 @@ class LF_DetectRegions:
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
-    INPUT_IS_LIST = (True, False, False, False, False, False, False, False, False, False, False)
+    INPUT_IS_LIST = (True, False, False, False, False, False, False, False, False, False, False, False)
     OUTPUT_IS_LIST = (False, True)
     RETURN_NAMES = ("region_meta", "region_meta_list")
     RETURN_TYPES = ("REGION_META", "REGION_META")
@@ -93,7 +104,9 @@ class LF_DetectRegions:
 
         model_path = Path(str(model_path_raw)).expanduser()
         if not model_path.is_file():
-            raise FileNotFoundError(f"YOLO detector model not found at '{model_path}'. Place the ONNX file under ComfyUI/models/onnx.")
+            raise FileNotFoundError(
+                f"YOLO detector model not found at '{model_path}'. Place the ONNX file under ComfyUI/models/onnx."
+            )
         model_label = model_label_raw or model_path.name
 
         confidence_threshold = float(normalize_list_to_value(kwargs.get("confidence_threshold", 0.25)))
@@ -103,6 +116,12 @@ class LF_DetectRegions:
 
         raw_filter = normalize_list_to_value(kwargs.get("class_filter", "")) or ""
         class_whitelist = parse_class_filter(str(raw_filter))
+
+        label_input_raw = normalize_list_to_value(kwargs.get("class_labels", "")) or ""
+        manual_label_override = parse_class_labels(label_input_raw)
+        sidecar_labels = load_label_map(model_path) if not manual_label_override else None
+        label_override = manual_label_override or sidecar_labels
+        label_override_source = "manual" if manual_label_override else ("sidecar" if sidecar_labels else None)
 
         preferred_label_raw = normalize_list_to_value(kwargs.get("preferred_label", "")) or ""
         preferred_label_clean = preferred_label_raw.strip()
@@ -123,16 +142,19 @@ class LF_DetectRegions:
         providers = session.get_providers()
 
         region_meta_list: List[dict] = []
+        last_runtime: Optional[Dict[str, Any]] = None
 
         for index, image in enumerate(images):
-            detections = detect_regions(
+            detections, runtime_info = detect_regions(
                 image,
                 session=session,
                 confidence_threshold=confidence_threshold,
                 iou_threshold=iou_threshold,
                 max_detections=max_regions,
                 class_whitelist=class_whitelist,
+                class_labels=label_override,
             )
+            last_runtime = runtime_info
 
             enriched: List[dict] = []
             for order, detection in enumerate(detections):
@@ -155,6 +177,40 @@ class LF_DetectRegions:
             overlay = build_overlay(image, enriched)
             append_compare_entry(image, overlay, nodes, index)
 
+            input_shape_info = runtime_info.get("input_shape") if runtime_info else None
+            input_size_value = None
+            if isinstance(input_shape_info, dict):
+                height = input_shape_info.get("height")
+                width = input_shape_info.get("width")
+                if isinstance(height, int) and isinstance(width, int) and height == width:
+                    input_size_value = height
+
+            detector_info = {
+                "model_label": model_label,
+                "model_path": str(model_path),
+                "model_name": model_path.name,
+                "providers": providers,
+                "input_shape": input_shape_info,
+                "input_size": input_size_value,
+                "class_labels": runtime_info.get("class_labels") if runtime_info else None,
+                "class_labels_source": runtime_info.get("label_source") if runtime_info else None,
+                "mask_coefficient_count": runtime_info.get("mask_coefficient_count") if runtime_info else None,
+                "mask_prototype_shape": runtime_info.get("mask_prototype_shape") if runtime_info else None,
+                "label_override_source": label_override_source,
+            }
+
+            settings = {
+                "confidence_threshold": confidence_threshold,
+                "iou_threshold": iou_threshold,
+                "max_regions": max_regions,
+                "class_filter": class_whitelist,
+                "class_filter_raw": raw_filter or None,
+                "class_labels_override": manual_label_override,
+                "preferred_label": preferred_label_clean,
+                "selection_strategy": selection_strategy,
+                "select_index": select_index,
+            }
+
             meta = {
                 "image_index": index,
                 "image_height": int(image.shape[1]),
@@ -162,22 +218,8 @@ class LF_DetectRegions:
                 "regions": enriched,
                 "selected_region": selected_copy,
                 "selected_index": selected_copy.get("index") if selected_copy else None,
-                "detector": {
-                    "model_label": model_label,
-                    "model_path": str(model_path),
-                    "model_name": model_path.name,
-                    "providers": providers,
-                    "input_size": 640,
-                },
-                "settings": {
-                    "confidence_threshold": confidence_threshold,
-                    "iou_threshold": iou_threshold,
-                    "max_regions": max_regions,
-                    "class_filter": class_whitelist,
-                    "preferred_label": preferred_label_clean,
-                    "selection_strategy": selection_strategy,
-                    "select_index": select_index,
-                },
+                "detector": detector_info,
+                "settings": settings,
                 "count": len(enriched),
             }
             region_meta_list.append(meta)
@@ -187,30 +229,52 @@ class LF_DetectRegions:
             {"node": node_id, "dataset": dataset},
         )
 
-        region_meta = region_meta_list[0] if region_meta_list else {
-            "image_index": 0,
-            "image_height": None,
-            "image_width": None,
-            "regions": [],
-            "selected_region": None,
-            "detector": {
+        if region_meta_list:
+            region_meta = region_meta_list[0]
+        else:
+            runtime_info = last_runtime or {}
+            input_shape_info = runtime_info.get("input_shape") if runtime_info else None
+            input_size_value = None
+            if isinstance(input_shape_info, dict):
+                height = input_shape_info.get("height")
+                width = input_shape_info.get("width")
+                if isinstance(height, int) and isinstance(width, int) and height == width:
+                    input_size_value = height
+            detector_info = {
                 "model_label": model_label,
                 "model_path": str(model_path),
                 "model_name": model_path.name,
                 "providers": providers,
-                "input_size": 640,
-            },
-            "settings": {
+                "input_shape": input_shape_info,
+                "input_size": input_size_value,
+                "class_labels": runtime_info.get("class_labels"),
+                "class_labels_source": runtime_info.get("label_source"),
+                "mask_coefficient_count": runtime_info.get("mask_coefficient_count"),
+                "mask_prototype_shape": runtime_info.get("mask_prototype_shape"),
+                "label_override_source": label_override_source,
+            }
+            settings = {
                 "confidence_threshold": confidence_threshold,
                 "iou_threshold": iou_threshold,
                 "max_regions": max_regions,
                 "class_filter": class_whitelist,
+                "class_filter_raw": raw_filter or None,
+                "class_labels_override": manual_label_override,
                 "preferred_label": preferred_label_clean,
                 "selection_strategy": selection_strategy,
                 "select_index": select_index,
-            },
-            "count": 0,
-        }
+            }
+            region_meta = {
+                "image_index": 0,
+                "image_height": None,
+                "image_width": None,
+                "regions": [],
+                "selected_region": None,
+                "selected_index": None,
+                "detector": detector_info,
+                "settings": settings,
+                "count": 0,
+            }
 
         return (region_meta, region_meta_list)
 
@@ -222,4 +286,3 @@ NODE_CLASS_MAPPINGS = {
 NODE_DISPLAY_NAME_MAPPINGS = {
     "LF_DetectRegions": "Detect Regions (YOLO)",
 }
-

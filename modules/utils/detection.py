@@ -1,7 +1,10 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
+
+import ast
+import json
 
 import cv2
 import numpy as np
@@ -104,6 +107,9 @@ _NAME_TO_INDEX = {name: idx for idx, name in enumerate(COCO_CLASS_NAMES)}
 
 _SESSION_CACHE: Dict[Tuple[str, Tuple[str, ...]], Any] = {}
 
+DEFAULT_INPUT_SIZE = 640
+_SEGMENTATION_EXTRA_COUNTS = {32, 64, 96, 128, 160, 192, 256}
+
 
 def _ensure_ort() -> None:
     if ort is None:
@@ -143,7 +149,7 @@ def load_yolo_session(
     path = Path(model_path)
     if not path.exists():
         raise FileNotFoundError(
-            f"YOLO detector model not found at '{path}'. Place the ONNX file inside ComfyUI/models/ultralytics/bbox or segm."
+            f"YOLO detector model not found at '{path}'. Place the ONNX file inside ComfyUI/models/onnx."
         )
 
     provider_list = _select_providers(providers)
@@ -266,8 +272,139 @@ def _nms(
     return keep
 
 
-def _resolve_class_whitelist(class_whitelist: Optional[Iterable[int | str]]) -> Optional[set[int]]:
+def _coerce_int(value: Any) -> Optional[int]:
+    if isinstance(value, (int, np.integer)):
+        return int(value)
+    if isinstance(value, (float, np.floating)) and float(value).is_integer():
+        return int(value)
+    if isinstance(value, str):
+        text = value.strip()
+        if text.isdigit():
+            return int(text)
+    return None
+
+
+def _resolve_input_shape(
+    session: "ort.InferenceSession",
+    requested: Optional[int | Tuple[int, int] | Sequence[int]],
+) -> Tuple[int, int]:
+    if isinstance(requested, (list, tuple)):
+        if len(requested) == 1:
+            value = int(round(float(requested[0])))
+            value = max(1, value)
+            return value, value
+        height = int(round(float(requested[0])))
+        width = int(round(float(requested[1])))
+        return max(1, height), max(1, width)
+    if isinstance(requested, (int, float)):
+        value = int(round(float(requested)))
+        value = max(1, value)
+        return value, value
+
+    height = width = None
+    try:
+        input_meta = session.get_inputs()[0]
+        shape = getattr(input_meta, "shape", None)
+    except Exception:  # pragma: no cover - runtime guard
+        shape = None
+    if shape and len(shape) >= 4:
+        height = _coerce_int(shape[2])
+        width = _coerce_int(shape[3])
+    if height is None or width is None:
+        return DEFAULT_INPUT_SIZE, DEFAULT_INPUT_SIZE
+    return max(1, height), max(1, width)
+
+
+def _sanitize_labels(labels: Optional[Sequence[str]]) -> Tuple[str, ...]:
+    sanitized: List[str] = []
+    if labels:
+        for label in labels:
+            text = str(label).strip()
+            if text:
+                sanitized.append(text)
+    return tuple(sanitized)
+
+
+def _labels_from_session_metadata(session: "ort.InferenceSession") -> Optional[Tuple[str, ...]]:
+    try:
+        meta = session.get_modelmeta()
+    except Exception:  # pragma: no cover - runtime guard
+        return None
+    mapping = getattr(meta, "custom_metadata_map", None) or {}
+    for key in ("names", "labels", "classes"):
+        raw = mapping.get(key)
+        if not raw:
+            continue
+        parsed: Any = None
+        if isinstance(raw, str):
+            try:
+                parsed = json.loads(raw)
+            except (json.JSONDecodeError, TypeError):
+                try:
+                    parsed = ast.literal_eval(raw)
+                except (ValueError, SyntaxError):
+                    parsed = None
+        if isinstance(parsed, dict):
+            items = []
+            for idx, name in parsed.items():
+                try:
+                    idx_int = int(idx)
+                except (TypeError, ValueError):
+                    continue
+                label = str(name).strip()
+                if label:
+                    items.append((idx_int, label))
+            if items:
+                items.sort(key=lambda item: item[0])
+                return tuple(label for _, label in items)
+        if isinstance(parsed, list):
+            labels = [str(item).strip() for item in parsed if str(item).strip()]
+            if labels:
+                return tuple(labels)
+        if isinstance(raw, str):
+            tokens = [segment.strip() for segment in raw.split(",") if segment.strip()]
+            if tokens:
+                return tuple(tokens)
+    return None
+
+
+def _resolve_prediction_labels(
+    extra_columns: int,
+    override_labels: Tuple[str, ...],
+    metadata_labels: Tuple[str, ...],
+) -> Tuple[Tuple[str, ...], str]:
+    if override_labels:
+        return override_labels, "override"
+    if metadata_labels:
+        return metadata_labels, "onnx_metadata"
+    if extra_columns == len(COCO_CLASS_NAMES):
+        return COCO_CLASS_NAMES, "coco_default"
+    if extra_columns > len(COCO_CLASS_NAMES):
+        diff = extra_columns - len(COCO_CLASS_NAMES)
+        if diff in _SEGMENTATION_EXTRA_COUNTS:
+            return COCO_CLASS_NAMES, "coco_default"
+    if extra_columns <= 0:
+        return ("region",), "generated"
+    return tuple(f"class_{idx}" for idx in range(extra_columns)), "generated"
+
+
+def _build_label_lookup(names: Sequence[str]) -> Dict[str, int]:
+    lookup: Dict[str, int] = {}
+    for idx, name in enumerate(names):
+        key = str(name).strip().lower()
+        if key and key not in lookup:
+            lookup[key] = idx
+    return lookup
+
+
+def _resolve_class_whitelist(
+    class_whitelist: Optional[Iterable[int | str]],
+    name_lookup: Dict[str, int],
+    num_classes: int,
+) -> Optional[set[int]]:
     if not class_whitelist:
+        return None
+    if num_classes <= 0:
         return None
     indices: set[int] = set()
     for item in class_whitelist:
@@ -278,16 +415,19 @@ def _resolve_class_whitelist(class_whitelist: Optional[Iterable[int | str]]) -> 
             if normalized.isdigit():
                 idx = int(normalized)
             else:
-                match = _NAME_TO_INDEX.get(normalized)
-                if match is None:
-                    raise ValueError(f"Unknown class name '{item}' for COCO model.")
-                idx = match
+                idx = name_lookup.get(normalized)
+                if idx is None:
+                    idx = _NAME_TO_INDEX.get(normalized)
+                if idx is None:
+                    raise ValueError(
+                        f"Unknown class name '{item}'. Provide matching class labels or use numeric ids."
+                    )
         else:
             idx = int(item)
-        if idx < 0 or idx >= len(COCO_CLASS_NAMES):
-            raise ValueError(f"Class index {idx} out of bounds for COCO model.")
+        if idx < 0 or idx >= num_classes:
+            raise ValueError(f"Class index {idx} out of bounds for model with {num_classes} classes.")
         indices.add(idx)
-    return indices
+    return indices or None
 
 
 def detect_regions(
@@ -296,30 +436,39 @@ def detect_regions(
     session: Optional["ort.InferenceSession"] = None,
     model_path: Optional[Path | str] = None,
     providers: Optional[Sequence[str]] = None,
-    input_size: int = 640,
+    input_size: Optional[int | Tuple[int, int]] = None,
     confidence_threshold: float = 0.25,
     iou_threshold: float = 0.45,
     max_detections: int = 20,
     class_whitelist: Optional[Iterable[int | str]] = None,
-) -> List[Dict[str, Any]]:
+    class_labels: Optional[Sequence[str]] = None,
+) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
     """Run YOLO object detection on a single Comfy image tensor."""
     if image.ndim != 4 or image.shape[0] != 1:
         raise ValueError("Expected image tensor with shape [1, H, W, C].")
 
     session = session or load_yolo_session(model_path=model_path, providers=providers)
-    whitelist = _resolve_class_whitelist(class_whitelist)
+
+    override_labels = _sanitize_labels(class_labels)
+    metadata_labels: Tuple[str, ...] = ()
+    if not override_labels:
+        metadata_labels = _sanitize_labels(_labels_from_session_metadata(session))
+
+    input_shape = _resolve_input_shape(session, input_size)
 
     np_image = tensor_to_numpy(image, threeD=True, dtype=np.float32)
     orig_h, orig_w = np_image.shape[:2]
-    processed, ratio, pad = _letterbox(np_image, (input_size, input_size))
+    processed, ratio, pad = _letterbox(np_image, input_shape)
 
     input_tensor = processed.transpose(2, 0, 1)
     input_tensor = np.expand_dims(input_tensor, axis=0).astype(np.float32)
     input_tensor = np.ascontiguousarray(input_tensor)
 
     input_name = session.get_inputs()[0].name
-    output_name = session.get_outputs()[0].name
-    predictions = session.run([output_name], {input_name: input_tensor})[0]
+    output_names = [output.name for output in session.get_outputs()]
+    raw_outputs = session.run(output_names, {input_name: input_tensor})
+    predictions = raw_outputs[0]
+    mask_proto = raw_outputs[1] if len(raw_outputs) > 1 else None
 
     if predictions.ndim != 3:
         raise RuntimeError(f"Unexpected YOLO output shape: {predictions.shape}")
@@ -331,43 +480,93 @@ def detect_regions(
     if predictions.shape[1] < 4:
         raise RuntimeError(f"YOLO output has too few coordinates: {predictions.shape}")
 
+    num_columns = predictions.shape[1]
     boxes_xywh = predictions[:, :4]
     objectness = None
     class_scores = None
     confidences = None
     class_probabilities = None
     class_ids = None
+    mask_coefficients = None
+    label_source = "generated"
+    active_labels: Tuple[str, ...]
 
-    if predictions.shape[1] == 4:
+    if num_columns == 4:
         objectness = np.ones(len(predictions), dtype=np.float32)
         confidences = objectness.copy()
         class_probabilities = objectness.copy()
         class_ids = np.zeros(len(predictions), dtype=int)
-    elif predictions.shape[1] == 5:
+        active_labels, label_source = _resolve_prediction_labels(1, override_labels, metadata_labels)
+        if not active_labels:
+            active_labels = ("region",)
+    elif num_columns == 5:
         objectness = predictions[:, 4]
         confidences = objectness.copy()
         class_probabilities = objectness.copy()
         class_ids = np.zeros(len(predictions), dtype=int)
+        active_labels, label_source = _resolve_prediction_labels(1, override_labels, metadata_labels)
+        if not active_labels:
+            active_labels = ("region",)
     else:
         objectness = predictions[:, 4]
-        class_scores = predictions[:, 5:]
-        scores = class_scores * objectness[:, None]
-        class_ids = scores.argmax(axis=1)
-        confidences = scores[np.arange(scores.shape[0]), class_ids]
-        class_probabilities = class_scores[np.arange(class_scores.shape[0]), class_ids]
+        extra_columns = num_columns - 5
+        active_labels, label_source = _resolve_prediction_labels(extra_columns, override_labels, metadata_labels)
+        if not active_labels:
+            if extra_columns > 0:
+                active_labels = tuple(f"class_{idx}" for idx in range(extra_columns))
+            else:
+                active_labels = ("region",)
+        class_columns = min(len(active_labels), extra_columns) if extra_columns > 0 else len(active_labels)
+        if class_columns == 0 and extra_columns > 0:
+            class_columns = extra_columns
+            active_labels = tuple(f"class_{idx}" for idx in range(class_columns))
+        if class_columns > 0 and len(active_labels) > class_columns:
+            active_labels = active_labels[:class_columns]
+        class_scores = predictions[:, 5 : 5 + class_columns] if class_columns > 0 else None
+        mask_columns = max(0, extra_columns - class_columns)
+        if mask_columns > 0:
+            mask_coefficients = predictions[:, 5 + class_columns : 5 + class_columns + mask_columns]
+        if class_scores is not None and class_scores.size > 0:
+            scores = class_scores * objectness[:, None]
+            class_ids = scores.argmax(axis=1)
+            confidences = scores[np.arange(scores.shape[0]), class_ids]
+            class_probabilities = class_scores[np.arange(class_scores.shape[0]), class_ids]
+        else:
+            confidences = objectness.copy()
+            class_probabilities = objectness.copy()
+            class_ids = np.zeros(len(predictions), dtype=int)
+    if predictions.shape[1] in (4, 5):
+        active_labels = _sanitize_labels(active_labels) or ("region",)
+
+    if confidences is None or class_ids is None or class_probabilities is None:
+        raise RuntimeError("Failed to compute detection confidences.")
+
+    name_lookup = _build_label_lookup(active_labels)
+    effective_class_count = max(1, len(active_labels))
+    whitelist_indices = _resolve_class_whitelist(class_whitelist, name_lookup, effective_class_count)
 
     keep_mask = confidences >= confidence_threshold
-    if whitelist is not None:
-        keep_mask &= np.isin(class_ids, list(whitelist))
+    if whitelist_indices is not None:
+        keep_mask &= np.isin(class_ids, list(whitelist_indices))
 
     boxes_xywh = boxes_xywh[keep_mask]
     confidences = confidences[keep_mask]
     class_ids = class_ids[keep_mask]
     objectness = objectness[keep_mask] if objectness is not None else None
     class_probabilities = class_probabilities[keep_mask] if class_probabilities is not None else None
+    mask_coefficients = mask_coefficients[keep_mask] if mask_coefficients is not None else None
+
+    context: Dict[str, Any] = {
+        "class_labels": list(active_labels),
+        "label_source": label_source,
+        "input_shape": {"height": int(input_shape[0]), "width": int(input_shape[1])},
+        "mask_coefficient_count": int(mask_coefficients.shape[1]) if mask_coefficients is not None else 0,
+    }
+    if mask_proto is not None:
+        context["mask_prototype_shape"] = [int(dim) for dim in mask_proto.shape]
 
     if boxes_xywh.size == 0:
-        return []
+        return [], context
 
     boxes_xyxy = _xywh_to_xyxy(boxes_xywh)
     boxes_xyxy = _scale_boxes(boxes_xyxy, ratio, pad, (orig_h, orig_w))
@@ -383,7 +582,12 @@ def detect_regions(
         height = max(0.0, float(y2 - y1))
         area = width * height
         cls = int(class_ids[idx])
-        label = COCO_CLASS_NAMES[cls] if 0 <= cls < len(COCO_CLASS_NAMES) else f"class_{cls}"
+        if 0 <= cls < len(active_labels):
+            label = active_labels[cls]
+        elif 0 <= cls < len(COCO_CLASS_NAMES):
+            label = COCO_CLASS_NAMES[cls]
+        else:
+            label = f"class_{cls}"
         result = {
             "id": f"region_{order}",
             "index": order,
@@ -404,7 +608,8 @@ def detect_regions(
             "class_id": cls,
             "label": label,
         }
+        if mask_coefficients is not None and mask_coefficients.shape[1] > 0:
+            result["mask_coefficients"] = mask_coefficients[idx].astype(float).tolist()
         results.append(result)
 
-    return results
-
+    return results, context

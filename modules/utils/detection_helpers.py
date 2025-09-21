@@ -1,9 +1,11 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 from pathlib import Path
 from typing import Dict, Iterable, List, Optional
 
 import cv2
+import json
+import re
 import torch
 
 import folder_paths
@@ -41,6 +43,119 @@ def discover_ultralytics_models() -> Dict[str, Path]:
 def parse_class_filter(raw_value: str) -> Optional[List[str]]:
     tokens = [segment.strip() for segment in str(raw_value).replace(";", ",").split(",") if segment.strip()]
     return tokens or None
+
+
+def parse_class_labels(raw_value: str) -> Optional[List[str]]:
+    """Parse optional class labels supplied via UI input."""
+    if raw_value is None:
+        return None
+    text = str(raw_value).strip()
+    if not text:
+        return None
+    if text[0] in "[{":
+        try:
+            parsed = json.loads(text)
+        except json.JSONDecodeError:
+            parsed = None
+        else:
+            if isinstance(parsed, dict):
+                items = []
+                for key, value in parsed.items():
+                    try:
+                        idx = int(key)
+                    except (TypeError, ValueError):
+                        continue
+                    name = str(value).strip()
+                    if name:
+                        items.append((idx, name))
+                if items:
+                    items.sort(key=lambda item: item[0])
+                    return [name for _, name in items]
+            if isinstance(parsed, list):
+                labels = [str(item).strip() for item in parsed if str(item).strip()]
+                if labels:
+                    return labels
+    segments = re.split(r"[,;\n]+", text)
+    labels = [segment.strip() for segment in segments if segment.strip()]
+    return labels or None
+
+
+def load_label_map(model_path: Path) -> Optional[List[str]]:
+    """Discover label map overrides located next to the ONNX model."""
+    if not model_path:
+        return None
+
+    path = Path(model_path)
+    suffixes = (".json", ".yaml", ".yml", ".labels", ".names", ".txt")
+    candidates = []
+    for suffix in suffixes:
+        candidates.append(path.with_suffix(suffix))
+        candidates.append(path.parent / f"{path.stem}{suffix}")
+        if suffix in (".labels", ".txt"):
+            candidates.append(path.parent / f"{path.stem}.labels.txt")
+
+    seen: set[Path] = set()
+    for candidate in candidates:
+        candidate = candidate.resolve()
+        if candidate in seen:
+            continue
+        seen.add(candidate)
+        try:
+            if not candidate.is_file():
+                continue
+        except OSError:
+            continue
+        try:
+            content = candidate.read_text(encoding="utf-8").strip()
+        except (OSError, UnicodeError):
+            continue
+        if not content:
+            continue
+
+        suffix = candidate.suffix.lower()
+        if suffix == ".json":
+            try:
+                parsed = json.loads(content)
+            except json.JSONDecodeError:
+                parsed = None
+            else:
+                if isinstance(parsed, dict):
+                    items = []
+                    for key, value in parsed.items():
+                        try:
+                            idx = int(key)
+                        except (TypeError, ValueError):
+                            continue
+                        label = str(value).strip()
+                        if label:
+                            items.append((idx, label))
+                    if items:
+                        items.sort(key=lambda item: item[0])
+                        return [label for _, label in items]
+                if isinstance(parsed, list):
+                    labels = [str(item).strip() for item in parsed if str(item).strip()]
+                    if labels:
+                        return labels
+            continue
+
+        lines = [line.strip() for line in content.splitlines() if line.strip() and not line.strip().startswith("#")]
+        if not lines:
+            continue
+
+        labels: List[str] = []
+        for line in lines:
+            if ":" in line:
+                possible_idx, possible_name = line.split(":", 1)
+                if possible_idx.strip().isdigit():
+                    name = possible_name.strip()
+                    if name:
+                        labels.append(name)
+                        continue
+            labels.append(line)
+        if labels:
+            return labels
+
+    return None
 
 
 def select_region(
