@@ -26,6 +26,7 @@ import {
   ImageEditorFilter,
   ImageEditorFilterType,
   ImageEditorIcons,
+  ImageEditorRequestSettings,
   ImageEditorSliderConfig,
   ImageEditorSliderIds,
   ImageEditorState,
@@ -95,13 +96,10 @@ export const EV_HANDLERS = {
       case 'stroke':
         const originalFilter = filter;
         const originalFilterType = filterType;
-
-        let b64_canvas = '';
-
-        if (filterType === 'brush' || !filter?.hasCanvasAction) {
+        const canvas = await comp.getCanvas();
+        const b64_canvas = canvasToBase64(canvas);
+        if (filterType !== 'brush' && !filter?.hasCanvasAction) {
           state.filterType = 'brush';
-          const canvas = await comp.getCanvas();
-          b64_canvas = canvasToBase64(canvas);
         }
 
         const temporaryFilter: ImageEditorBrushFilter = {
@@ -120,6 +118,14 @@ export const EV_HANDLERS = {
         try {
           await updateCb(state, true);
         } finally {
+          if (originalFilter?.hasCanvasAction) {
+            const existingSettings =
+              originalFilter.settings ?? ({} as typeof originalFilter.settings);
+            originalFilter.settings = {
+              ...existingSettings,
+              b64_canvas,
+            };
+          }
           state.filter = originalFilter;
           state.filterType = originalFilterType;
           await comp.clearCanvas();
@@ -234,23 +240,34 @@ export const apiCall = async (state: ImageEditorState, addSnapshot: boolean) => 
   const lfManager = getLfManager();
 
   const snapshotValue = (await imageviewer.getCurrentSnapshot()).value;
+  const baseSettings = filter.settings as ImageEditorRequestSettings<typeof filterType>;
+  const payload: ImageEditorRequestSettings<typeof filterType> = {
+    ...baseSettings,
+  };
+
+  const contextId = (
+    imageviewer.lfDataset as ImageEditorRequestSettings<typeof filterType> | undefined
+  )?.context_id;
+
+  if (contextId) {
+    payload.context_id = contextId;
+  }
+
   requestAnimationFrame(() => imageviewer.setSpinnerStatus(true));
+
   try {
-    const response = await getApiRoutes().image.process(snapshotValue, filterType, filter.settings);
-    if (response.status === 'success') {
-      if (addSnapshot) {
-        imageviewer.addSnapshot(response.data);
-      } else {
-        const { canvas } = (await imageviewer.getComponents()).details;
-        const image = await canvas.getImage();
-        requestAnimationFrame(() => (image.lfValue = response.data));
-      }
+    const response = await getApiRoutes().image.process(snapshotValue, filterType, payload);
+    if (addSnapshot) {
+      imageviewer.addSnapshot(response.data);
     } else {
-      lfManager.log('Error processing image!', { response }, LogSeverity.Error);
+      const { canvas } = (await imageviewer.getComponents()).details;
+      const image = await canvas.getImage();
+      requestAnimationFrame(() => (image.lfValue = response.data));
     }
   } catch (error) {
     lfManager.log('Error processing image!', { error }, LogSeverity.Error);
   }
+
   requestAnimationFrame(() => imageviewer.setSpinnerStatus(false));
 };
 //#endregion

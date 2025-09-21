@@ -11,6 +11,7 @@ import {
   ImageEditorFilmGrainIds,
   ImageEditorFilters,
   ImageEditorGaussianBlurIds,
+  ImageEditorInpaintIds,
   ImageEditorLineIds,
   ImageEditorSaturationIds,
   ImageEditorSepiaIds,
@@ -472,6 +473,66 @@ export const SETTINGS: ImageEditorFilters = {
   },
   //#endregion
 
+  //#region Inpaint
+  inpaint: {
+    controlIds: ImageEditorInpaintIds,
+    hasCanvasAction: true,
+    settings: {
+      b64_canvas: '',
+      denoise_percentage: 40,
+      steps: 16,
+      positive_prompt: '',
+      negative_prompt: '',
+    },
+    configs: {
+      [ImageEditorControls.Slider]: [
+        {
+          ariaLabel: 'Denoise percentage',
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 40,
+          id: ImageEditorSliderIds.DenoisePercentage,
+          isMandatory: true,
+          max: '100',
+          min: '0',
+          step: '1',
+          title: 'Noise applied during inpaint. 0 keeps original pixels, 100 fully regenerates.',
+        },
+        {
+          ariaLabel: 'Steps',
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 16,
+          id: ImageEditorSliderIds.Steps,
+          isMandatory: true,
+          max: '30',
+          min: '1',
+          step: '1',
+          title: 'Diffusion steps used for the inpaint sampler.',
+        },
+      ],
+      [ImageEditorControls.Textfield]: [
+        {
+          ariaLabel: 'Positive prompt',
+          controlType: ImageEditorControls.Textfield,
+          defaultValue: '',
+          id: ImageEditorTextfieldIds.PositivePrompt,
+          isMandatory: false,
+          title: 'Prompt applied to masked pixels.',
+          type: 'text',
+        },
+        {
+          ariaLabel: 'Negative prompt',
+          controlType: ImageEditorControls.Textfield,
+          defaultValue: '',
+          id: ImageEditorTextfieldIds.NegativePrompt,
+          isMandatory: false,
+          title: 'Negative prompt applied to masked pixels.',
+          type: 'text',
+        },
+      ],
+    },
+  },
+  //#endregion
+
   //#region Line
   line: {
     controlIds: ImageEditorLineIds,
@@ -629,7 +690,7 @@ export const SETTINGS: ImageEditorFilters = {
           ariaLabel: 'Highlights',
           controlType: ImageEditorControls.Textfield,
           defaultValue: '#FFAA55',
-          id: ImageEditorTextfieldIds.highlights,
+          id: ImageEditorTextfieldIds.Highlights,
           title: 'Hex colour applied to highlights (e.g. FFAA55).',
           type: 'color',
         },
@@ -637,7 +698,7 @@ export const SETTINGS: ImageEditorFilters = {
           ariaLabel: 'Shadows',
           controlType: ImageEditorControls.Textfield,
           defaultValue: '#0066FF',
-          id: ImageEditorTextfieldIds.highlights,
+          id: ImageEditorTextfieldIds.Shadows,
           title: 'Hex colour applied to shadows (e.g. 0066FF).',
           type: 'color',
         },
@@ -828,6 +889,27 @@ export const SETTINGS: ImageEditorFilters = {
 
 export const TREE_DATA: LfDataDataset = {
   nodes: [
+    {
+      description: 'Diffusion-based retouching tools.',
+      id: 'diffusion_tools',
+      value: 'Diffusion Tools',
+      icon: 'wand',
+      children: [
+        //#region Inpaint
+        {
+          description: 'Inpaint masked areas using the connected diffusion model.',
+          cells: {
+            lfCode: {
+              shape: 'code',
+              value: JSON.stringify(SETTINGS.inpaint),
+            },
+          },
+          id: 'inpaint',
+          value: 'Inpaint',
+        },
+        //#endregion
+      ],
+    },
     {
       description: 'Tool configuration.',
       id: 'settings',

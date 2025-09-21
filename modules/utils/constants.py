@@ -32,6 +32,7 @@ class Input:
     JSON = "JSON"
     REGION_META = "REGION_META"
     MODEL = "MODEL"
+    VAE = "VAE"
     STRING = "STRING"
 
 ANY = AnyType("*")

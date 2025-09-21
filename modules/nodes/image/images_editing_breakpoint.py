@@ -9,7 +9,8 @@ from urllib.parse import urlparse, parse_qs
 
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
-from ...utils.helpers import create_masonry_node, get_comfy_dir, get_resource_url, normalize_input_image, normalize_output_image, pil_to_tensor, resolve_filepath, tensor_to_pil
+from ...utils.helpers import create_masonry_node, get_comfy_dir, get_resource_url, normalize_input_image, normalize_list_to_value, normalize_output_image, pil_to_tensor, resolve_filepath, tensor_to_pil
+from ...utils.image_editing import clear_editing_context, register_editing_context
 
 # region LF_ImagesEditingBreakpoint
 class LF_ImagesEditingBreakpoint:
@@ -24,7 +25,16 @@ class LF_ImagesEditingBreakpoint:
             "optional": {
                 "ui_widget": (Input.LF_IMAGE_EDITOR, {
                     "default": {}
-                })
+                }),
+                "model": (Input.MODEL, {
+                    "tooltip": "Optional diffusion model reused by inpaint edits."
+                }),
+                "clip": (Input.CLIP, {
+                    "tooltip": "Optional CLIP encoder reused by inpaint edits."
+                }),
+                "vae": (Input.VAE, {
+                    "tooltip": "Optional VAE reused by inpaint edits."
+                }),
             },
             "hidden": {
                 "node_id": "UNIQUE_ID"
@@ -51,6 +61,10 @@ class LF_ImagesEditingBreakpoint:
 
             return dataset
 
+        model_value = normalize_list_to_value(kwargs.get("model"))
+        clip_value = normalize_list_to_value(kwargs.get("clip"))
+        vae_value = normalize_list_to_value(kwargs.get("vae"))
+
         image: list[torch.Tensor] = normalize_input_image(kwargs.get("image"))
 
         columns: list[dict] = []
@@ -68,19 +82,26 @@ class LF_ImagesEditingBreakpoint:
             nodes.append(create_masonry_node(filename, url, index))
 
         temp_json_file: str = os.path.join(get_comfy_dir("temp"), f"{kwargs.get('node_id')}_edit_dataset.json")
+        dataset["context_id"] = temp_json_file
 
         columns.append({"id": "path", "title": temp_json_file})
         columns.append({"id": "status", "title": "pending"})
         
+        register_editing_context(temp_json_file, model=model_value, clip=clip_value, vae=vae_value)
         with open(temp_json_file, 'w', encoding='utf-8') as json_file:
             json.dump(dataset, json_file, ensure_ascii=False, indent=4)
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}imageseditingbreakpoint", {
-            "node": kwargs.get("node_id"),
-            "value": temp_json_file,
-        })
-
-        dataset = wait_for_editing_completion(temp_json_file)
+        try:
+            PromptServer.instance.send_sync(
+                f"{EVENT_PREFIX}imageseditingbreakpoint",
+                {
+                    "node": kwargs.get("node_id"),
+                    "value": temp_json_file,
+                },
+            )
+            dataset = wait_for_editing_completion(temp_json_file)
+        finally:
+            clear_editing_context(temp_json_file)
 
         edited_images = []
         for node in dataset["nodes"]:

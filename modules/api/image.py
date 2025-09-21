@@ -1,18 +1,23 @@
-import os
 import json
 import os
+import random
 import torch
+import torch.nn.functional as F
 
 from aiohttp import web
 from PIL import Image
 
+import nodes
+
 from server import PromptServer
 
-from ..utils.constants import API_ROUTE_PREFIX
+from ..utils.constants import API_ROUTE_PREFIX, SAMPLERS
 from ..utils.filters import blend_effect, bloom_effect, brightness_effect, clarity_effect, contrast_effect, desaturate_effect, film_grain_effect, gaussian_blur_effect, line_effect, saturation_effect, sepia_effect, split_tone_effect, tilt_shift_effect, vibrance_effect, vignette_effect
 from ..utils.helpers import base64_to_tensor, convert_to_boolean, convert_to_float, convert_to_int, create_colored_tensor, create_masonry_node, get_comfy_dir, get_resource_url, pil_to_tensor, resolve_filepath, resolve_url, tensor_to_pil
+from ..utils.image_editing import get_editing_context
 
 # region get-image
+
 @PromptServer.instance.routes.post(f"{API_ROUTE_PREFIX}/get-image")
 async def get_images_in_directory(request):
     try:
@@ -53,7 +58,8 @@ async def process_image(request):
 
         api_url: str = r.get("url")
         filter_type: str = r.get("type")
-        settings: dict = json.loads(r.get("settings"))
+        settings_raw = r.get("settings") or "{}"
+        settings: dict = json.loads(settings_raw)
 
         filename, file_type, subfolder = resolve_url(api_url)
 
@@ -99,6 +105,8 @@ async def process_image(request):
             processed_tensor = apply_vibrance_effect(img_tensor, settings)
         elif filter_type == "vignette":
             processed_tensor = apply_vignette_effect(img_tensor, settings)
+        elif filter_type == "inpaint":
+            processed_tensor = apply_inpaint_effect(img_tensor, settings)
         else:
             return web.Response(status=400, text=f"Unsupported filter type: {filter_type}")
 
@@ -235,6 +243,128 @@ def apply_vignette_effect(img_tensor: torch.Tensor, settings: dict):
     color: str = settings.get("color", "000000")
 
     return vignette_effect(img_tensor, intensity, radius, shape, color)
+
+def apply_inpaint_effect(img_tensor: torch.Tensor, settings: dict) -> torch.Tensor:
+    context_id = settings.get("context_id") or settings.get("dataset_path")
+    if not context_id:
+        raise ValueError("Inpaint filter requires a context_id referencing the editing session.")
+
+    context = get_editing_context(context_id)
+    if not context:
+        raise ValueError(f"No active editing session for '{context_id}'.")
+
+    model = context.get("model")
+    clip = context.get("clip")
+    vae = context.get("vae") or getattr(model, "vae", None)
+    if model is None or clip is None or vae is None:
+        raise ValueError(
+            "Inpaint filter requires model, clip, and vae inputs. Connect them to LF_ImagesEditingBreakpoint."
+        )
+
+    mask_b64 = settings.get("b64_canvas") or settings.get("mask_canvas") or settings.get("mask")
+    if not mask_b64:
+        raise ValueError("Missing brush mask for inpaint filter.")
+
+    canvas = base64_to_tensor(mask_b64, True)
+    if canvas.ndim != 4:
+        raise ValueError("Unexpected brush payload for inpaint filter.")
+
+    if canvas.shape[1] != img_tensor.shape[1] or canvas.shape[2] != img_tensor.shape[2]:
+        canvas = F.interpolate(
+            canvas.permute(0, 3, 1, 2),
+            size=(img_tensor.shape[1], img_tensor.shape[2]),
+            mode="bilinear",
+            align_corners=False,
+        ).permute(0, 2, 3, 1)
+
+    alpha = canvas[..., 3] if canvas.shape[-1] >= 4 else canvas.mean(dim=-1)
+    mask = (alpha > 0.01).float()
+    if float(mask.max().item()) <= 0.0:
+        raise ValueError("Inpaint mask strokes are empty.")
+    mask = mask.clamp(0.0, 1.0)
+
+    device = getattr(getattr(vae, "first_stage_model", None), "device", None)
+    if isinstance(device, str):
+        device = torch.device(device)
+    if device is None:
+        raw_device = getattr(vae, "device", None)
+        if isinstance(raw_device, str):
+            device = torch.device(raw_device)
+        else:
+            device = raw_device
+    if device is None:
+        device = img_tensor.device
+
+    image = img_tensor.to(device=device, dtype=torch.float32)
+    mask_tensor = mask.to(device=device, dtype=torch.float32)
+    if mask_tensor.ndim == 4:
+        mask_tensor = mask_tensor[..., 0]
+    if mask_tensor.shape[1] != image.shape[1] or mask_tensor.shape[2] != image.shape[2]:
+        mask_tensor = F.interpolate(
+            mask_tensor.unsqueeze(1),
+            size=(image.shape[1], image.shape[2]),
+            mode="bilinear",
+            align_corners=False,
+        ).squeeze(1)
+    mask_tensor = mask_tensor.clamp(0.0, 1.0)
+
+    steps = max(1, int(round(convert_to_int(settings.get("steps", 20)))))
+    denoise_value = convert_to_float(settings.get("denoise", settings.get("denoise_percentage", 100.0)))
+    if denoise_value > 1.0:
+        denoise_value = denoise_value / 100.0
+    denoise_value = max(0.0, min(1.0, denoise_value))
+    cfg = convert_to_float(settings.get("cfg", 7.0))
+
+    sampler_name = str(settings.get("sampler", "dpmpp_2m"))
+    if sampler_name not in SAMPLERS:
+        sampler_name = "dpmpp_2m"
+    scheduler_name = str(settings.get("scheduler", "karras"))
+    if scheduler_name not in SAMPLERS:
+        scheduler_name = "normal"
+
+    seed = convert_to_int(settings.get("seed", random.randint(0, 2**32 - 1))) & 0xFFFFFFFFFFFFFFFF
+    positive_prompt = str(settings.get("positive_prompt", ""))
+    negative_prompt = str(settings.get("negative_prompt", ""))
+
+    with torch.inference_mode():
+        clip_encoder = nodes.CLIPTextEncode()
+        positive = clip_encoder.encode(clip, positive_prompt)[0]
+        negative = clip_encoder.encode(clip, negative_prompt)[0]
+
+        conditioning_node = nodes.InpaintModelConditioning()
+        pos_cond, neg_cond, latent = conditioning_node.encode(
+            positive,
+            negative,
+            image,
+            vae,
+            mask_tensor,
+            True,
+        )
+
+        sampler = nodes.KSampler()
+        latent_result = sampler.sample(
+            model,
+            seed,
+            steps,
+            cfg,
+            sampler_name,
+            scheduler_name,
+            pos_cond,
+            neg_cond,
+            latent,
+            denoise_value,
+        )[0]
+
+        decoded = nodes.VAEDecode().decode(vae, latent_result)[0].to(device=device, dtype=torch.float32)
+
+    if decoded.shape != image.shape:
+        decoded = decoded.reshape_as(image)
+
+    mask_3c = mask_tensor.unsqueeze(-1)
+    result = decoded * mask_3c + image * (1.0 - mask_3c)
+
+    return result.detach().clamp(0.0, 1.0).to(torch.float32).cpu().contiguous()
+
 
 def load_image_tensor(image_path: str) -> torch.Tensor:
     try:
