@@ -5423,7 +5423,7 @@ var tt = false, et = (t2, e2, n2) => {
                         const n6 = t7.i.replace(/-/g, "_"), o6 = t7.T;
                         if (!o6) return;
                         const i3 = r.get(o6);
-                        return i3 ? i3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-4ba08932.entry.js": () => import("./p-4ba08932.entry-BOaJyT_0.js"), "./p-60af2d7f.entry.js": () => import("./p-60af2d7f.entry-MS0WogDY.js"), "./p-7652d72d.entry.js": () => import("./p-7652d72d.entry-Bw3O4Krm.js"), "./p-79cc15c2.entry.js": () => import("./p-79cc15c2.entry-C6guUgmR.js"), "./p-846257eb.entry.js": () => import("./p-846257eb.entry-Bnge-ylm.js"), "./p-84927cea.entry.js": () => import("./p-84927cea.entry-59G123Ny.js"), "./p-87e2e37a.entry.js": () => import("./p-87e2e37a.entry-DSWUDB97.js"), "./p-928c4970.entry.js": () => import("./p-928c4970.entry-BgxptXJG.js"), "./p-93ed735a.entry.js": () => import("./p-93ed735a.entry-CzuXOWNf.js"), "./p-a147e6c9.entry.js": () => import("./p-a147e6c9.entry-Ds8fHmi_.js"), "./p-a14c6d82.entry.js": () => import("./p-a14c6d82.entry-CVB_2FMH.js"), "./p-a7fc1135.entry.js": () => import("./p-a7fc1135.entry-DDgMp1gY.js"), "./p-bd214b33.entry.js": () => import("./p-bd214b33.entry-DIKsici-.js"), "./p-bf8a47d4.entry.js": () => import("./p-bf8a47d4.entry-D93-UG8D.js"), "./p-ccea11a0.entry.js": () => import("./p-ccea11a0.entry-BTUvafs-.js"), "./p-e2689624.entry.js": () => import("./p-e2689624.entry-gR4kVdiN.js") }), `./${o6}.entry.js`, 2).then(((t8) => (r.set(o6, t8), t8[n6])), ((t8) => {
+                        return i3 ? i3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-4ba08932.entry.js": () => import("./p-4ba08932.entry-BZAgVK-X.js"), "./p-60af2d7f.entry.js": () => import("./p-60af2d7f.entry-DE1ZXcek.js"), "./p-7652d72d.entry.js": () => import("./p-7652d72d.entry-CuiDFUOA.js"), "./p-79cc15c2.entry.js": () => import("./p-79cc15c2.entry-yyVI51Ks.js"), "./p-846257eb.entry.js": () => import("./p-846257eb.entry-C1WGoW3_.js"), "./p-84927cea.entry.js": () => import("./p-84927cea.entry-BS5qPRPc.js"), "./p-87e2e37a.entry.js": () => import("./p-87e2e37a.entry-COAeqUfL.js"), "./p-928c4970.entry.js": () => import("./p-928c4970.entry-DYKMtCZQ.js"), "./p-93ed735a.entry.js": () => import("./p-93ed735a.entry-DgCYL7Ud.js"), "./p-a147e6c9.entry.js": () => import("./p-a147e6c9.entry-D0gZJnSR.js"), "./p-a14c6d82.entry.js": () => import("./p-a14c6d82.entry-BTy5N4RM.js"), "./p-a7fc1135.entry.js": () => import("./p-a7fc1135.entry-BtbUutMa.js"), "./p-bd214b33.entry.js": () => import("./p-bd214b33.entry-hnUGCADE.js"), "./p-bf8a47d4.entry.js": () => import("./p-bf8a47d4.entry-CQu99YNE.js"), "./p-ccea11a0.entry.js": () => import("./p-ccea11a0.entry-CG4zL46q.js"), "./p-e2689624.entry.js": () => import("./p-e2689624.entry-DDUkHcsn.js") }), `./${o6}.entry.js`, 2).then(((t8) => (r.set(o6, t8), t8[n6])), ((t8) => {
                           l(t8, e3.$hostElement$);
                         }));
                         /*!__STENCIL_STATIC_IMPORT_SWITCH__*/
@@ -5818,6 +5818,7 @@ const IMAGE_API = {
     const lfManager2 = getLfManager();
     const payload = {
       data: "",
+      mask: void 0,
       message: "",
       status: LogSeverity.Info
     };
@@ -5836,6 +5837,7 @@ const IMAGE_API = {
           const p2 = await response.json();
           if (p2.status === "success") {
             payload.data = p2.data;
+            payload.mask = p2.mask;
             payload.message = "Image processed successfully.";
             payload.status = LogSeverity.Success;
             lfManager2.log(payload.message, { payload }, payload.status);
@@ -8824,6 +8826,7 @@ var ImageEditorSliderIds;
   ImageEditorSliderIds2["BlueChannel"] = "b_channel";
   ImageEditorSliderIds2["BlurKernelSize"] = "blur_kernel_size";
   ImageEditorSliderIds2["BlurSigma"] = "blur_sigma";
+  ImageEditorSliderIds2["DenoisePercentage"] = "denoise_percentage";
   ImageEditorSliderIds2["FocusPosition"] = "focus_position";
   ImageEditorSliderIds2["FocusSize"] = "focus_size";
   ImageEditorSliderIds2["Gamma"] = "gamma";
@@ -8836,13 +8839,16 @@ var ImageEditorSliderIds;
   ImageEditorSliderIds2["SharpenAmount"] = "sharpen_amount";
   ImageEditorSliderIds2["Size"] = "size";
   ImageEditorSliderIds2["Softness"] = "softness";
+  ImageEditorSliderIds2["Steps"] = "steps";
   ImageEditorSliderIds2["Strength"] = "strength";
   ImageEditorSliderIds2["Threshold"] = "threshold";
 })(ImageEditorSliderIds || (ImageEditorSliderIds = {}));
 var ImageEditorTextfieldIds;
 (function(ImageEditorTextfieldIds2) {
   ImageEditorTextfieldIds2["Color"] = "color";
-  ImageEditorTextfieldIds2["highlights"] = "highlights";
+  ImageEditorTextfieldIds2["Highlights"] = "highlights";
+  ImageEditorTextfieldIds2["NegativePrompt"] = "negative_prompt";
+  ImageEditorTextfieldIds2["PositivePrompt"] = "positive_prompt";
   ImageEditorTextfieldIds2["Shadows"] = "shadows";
   ImageEditorTextfieldIds2["Tint"] = "tint";
 })(ImageEditorTextfieldIds || (ImageEditorTextfieldIds = {}));
@@ -8957,6 +8963,14 @@ var ImageEditorVignetteIds;
   ImageEditorVignetteIds2["Radius"] = "radius";
   ImageEditorVignetteIds2["Shape"] = "shape";
 })(ImageEditorVignetteIds || (ImageEditorVignetteIds = {}));
+var ImageEditorInpaintIds;
+(function(ImageEditorInpaintIds2) {
+  ImageEditorInpaintIds2["B64Canvas"] = "b64_canvas";
+  ImageEditorInpaintIds2["DenoisePercentage"] = "denoise_percentage";
+  ImageEditorInpaintIds2["NegativePrompt"] = "negative_prompt";
+  ImageEditorInpaintIds2["PositivePrompt"] = "positive_prompt";
+  ImageEditorInpaintIds2["Steps"] = "steps";
+})(ImageEditorInpaintIds || (ImageEditorInpaintIds = {}));
 const SETTINGS = {
   //#region Blend
   blend: {
@@ -9386,6 +9400,66 @@ const SETTINGS = {
     }
   },
   //#endregion
+  //#region Inpaint
+  inpaint: {
+    controlIds: ImageEditorInpaintIds,
+    hasCanvasAction: true,
+    requiresManualApply: true,
+    settings: {
+      b64_canvas: "",
+      denoise_percentage: 40,
+      steps: 16,
+      positive_prompt: "",
+      negative_prompt: ""
+    },
+    configs: {
+      [ImageEditorControls.Slider]: [
+        {
+          ariaLabel: "Denoise percentage",
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 40,
+          id: ImageEditorSliderIds.DenoisePercentage,
+          isMandatory: true,
+          max: "100",
+          min: "0",
+          step: "1",
+          title: "Noise applied during inpaint. 0 keeps original pixels, 100 fully regenerates."
+        },
+        {
+          ariaLabel: "Steps",
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 16,
+          id: ImageEditorSliderIds.Steps,
+          isMandatory: true,
+          max: "30",
+          min: "1",
+          step: "1",
+          title: "Diffusion steps used for the inpaint sampler."
+        }
+      ],
+      [ImageEditorControls.Textfield]: [
+        {
+          ariaLabel: "Positive prompt",
+          controlType: ImageEditorControls.Textfield,
+          defaultValue: "",
+          id: ImageEditorTextfieldIds.PositivePrompt,
+          isMandatory: false,
+          title: "Prompt applied to masked pixels.",
+          type: "text"
+        },
+        {
+          ariaLabel: "Negative prompt",
+          controlType: ImageEditorControls.Textfield,
+          defaultValue: "",
+          id: ImageEditorTextfieldIds.NegativePrompt,
+          isMandatory: false,
+          title: "Negative prompt applied to masked pixels.",
+          type: "text"
+        }
+      ]
+    }
+  },
+  //#endregion
   //#region Line
   line: {
     controlIds: ImageEditorLineIds,
@@ -9539,7 +9613,7 @@ const SETTINGS = {
           ariaLabel: "Highlights",
           controlType: ImageEditorControls.Textfield,
           defaultValue: "#FFAA55",
-          id: ImageEditorTextfieldIds.highlights,
+          id: ImageEditorTextfieldIds.Highlights,
           title: "Hex colour applied to highlights (e.g. FFAA55).",
           type: "color"
         },
@@ -9547,7 +9621,7 @@ const SETTINGS = {
           ariaLabel: "Shadows",
           controlType: ImageEditorControls.Textfield,
           defaultValue: "#0066FF",
-          id: ImageEditorTextfieldIds.highlights,
+          id: ImageEditorTextfieldIds.Shadows,
           title: "Hex colour applied to shadows (e.g. 0066FF).",
           type: "color"
         }
@@ -9747,6 +9821,27 @@ const TREE_DATA = {
           },
           id: "brush",
           value: "Brush"
+        }
+        //#endregion
+      ]
+    },
+    {
+      description: "Diffusion-based retouching tools.",
+      id: "diffusion_tools",
+      value: "Diffusion Tools",
+      icon: "wand",
+      children: [
+        //#region Inpaint
+        {
+          description: "Inpaint masked areas using the connected diffusion model.",
+          cells: {
+            lfCode: {
+              shape: "code",
+              value: JSON.stringify(SETTINGS.inpaint)
+            }
+          },
+          id: "inpaint",
+          value: "Inpaint"
         }
         //#endregion
       ]
@@ -10003,26 +10098,37 @@ const EV_HANDLERS$5 = {
       case "stroke":
         const originalFilter = filter;
         const originalFilterType = filterType;
-        let b64_canvas = "";
-        if (filterType === "brush" || !(filter == null ? void 0 : filter.hasCanvasAction)) {
+        const canvas = await comp.getCanvas();
+        const b64_canvas = canvasToBase64(canvas);
+        if (filterType !== "brush" && !(filter == null ? void 0 : filter.hasCanvasAction)) {
           state.filterType = "brush";
-          const canvas = await comp.getCanvas();
-          b64_canvas = canvasToBase64(canvas);
         }
+        const brushDefaults = {
+          ...SETTINGS.brush.settings,
+          ...state.lastBrushSettings
+        };
         const temporaryFilter = {
           ...JSON.parse(JSON.stringify(SETTINGS.brush)),
           settings: {
+            ...brushDefaults,
             b64_canvas,
-            color: comp.lfColor,
-            opacity: comp.lfOpacity,
+            color: comp.lfColor ?? brushDefaults.color,
+            opacity: comp.lfOpacity ?? brushDefaults.opacity,
             points,
-            size: comp.lfSize
+            size: comp.lfSize ?? brushDefaults.size
           }
         };
         state.filter = temporaryFilter;
         try {
-          await updateCb(state, true);
+          await updateCb(state, true, true);
         } finally {
+          if (originalFilter == null ? void 0 : originalFilter.hasCanvasAction) {
+            const existingSettings = originalFilter.settings ?? {};
+            originalFilter.settings = {
+              ...existingSettings,
+              b64_canvas
+            };
+          }
           state.filter = originalFilter;
           state.filterType = originalFilterType;
           await comp.clearCanvas();
@@ -10117,23 +10223,31 @@ const EV_HANDLERS$5 = {
   //#endregion
 };
 const apiCall$1 = async (state, addSnapshot) => {
+  var _a;
   const { elements, filter, filterType } = state;
   const { imageviewer } = elements;
   const lfManager2 = getLfManager();
   const snapshotValue = (await imageviewer.getCurrentSnapshot()).value;
+  const baseSettings = filter.settings;
+  const payload = {
+    ...baseSettings
+  };
+  const contextId = (_a = imageviewer.lfDataset) == null ? void 0 : _a.context_id;
+  if (contextId) {
+    payload.context_id = contextId;
+  }
   requestAnimationFrame(() => imageviewer.setSpinnerStatus(true));
   try {
-    const response = await getApiRoutes().image.process(snapshotValue, filterType, filter.settings);
-    if (response.status === "success") {
-      if (addSnapshot) {
-        imageviewer.addSnapshot(response.data);
-      } else {
-        const { canvas } = (await imageviewer.getComponents()).details;
-        const image = await canvas.getImage();
-        requestAnimationFrame(() => image.lfValue = response.data);
-      }
+    const response = await getApiRoutes().image.process(snapshotValue, filterType, payload);
+    if (response.mask) {
+      lfManager2.log("Saved inpaint mask preview to temp", { mask: response.mask }, LogSeverity.Info);
+    }
+    if (addSnapshot) {
+      await imageviewer.addSnapshot(response.data);
     } else {
-      lfManager2.log("Error processing image!", { response }, LogSeverity.Error);
+      const { canvas } = (await imageviewer.getComponents()).details;
+      const image = await canvas.getImage();
+      requestAnimationFrame(() => image.lfValue = response.data);
     }
   } catch (error) {
     lfManager2.log("Error processing image!", { error }, LogSeverity.Error);
@@ -10212,11 +10326,47 @@ const prepSettings = (state, node) => {
     }
   });
   const resetButton = document.createElement(TagName.LfButton);
-  resetButton.classList.add("lf-full-width");
   resetButton.lfIcon = ImageEditorIcons.Reset;
   resetButton.lfLabel = "Reset";
+  resetButton.lfStretchX = true;
   resetButton.addEventListener("click", () => resetSettings(settings));
   settings.appendChild(resetButton);
+  if (state.filterType === "brush") {
+    const brushSettings = state.filter.settings ?? {};
+    state.lastBrushSettings = {
+      ...state.lastBrushSettings,
+      ...JSON.parse(JSON.stringify(brushSettings))
+    };
+  }
+  if (filter == null ? void 0 : filter.hasCanvasAction) {
+    requestAnimationFrame(async () => {
+      const canvas = (await state.elements.imageviewer.getComponents()).details.canvas;
+      const brushSource = {
+        ...SETTINGS.brush.settings,
+        ...state.lastBrushSettings,
+        ...state.filter.settings ?? {}
+      };
+      if (brushSource.color) {
+        canvas.lfColor = brushSource.color;
+      }
+      if (typeof brushSource.opacity === "number") {
+        canvas.lfOpacity = brushSource.opacity;
+      }
+      if (typeof brushSource.size === "number") {
+        canvas.lfSize = brushSource.size;
+      }
+    });
+  }
+  if (filter == null ? void 0 : filter.requiresManualApply) {
+    const applyButton = document.createElement(TagName.LfButton);
+    applyButton.lfIcon = ImageEditorIcons.Resume;
+    applyButton.lfLabel = "Apply";
+    applyButton.lfStretchX = true;
+    applyButton.addEventListener("click", () => {
+      void updateCb(state, true, true);
+    });
+    settings.appendChild(applyButton);
+  }
 };
 const createSlider = (state, data) => {
   const comp = document.createElement(TagName.LfSlider);
@@ -10299,7 +10449,7 @@ const setGridStatus = (status, grid, actionButtons) => {
       break;
   }
 };
-const updateCb = async (state, addSnapshot = false) => {
+const updateCb = async (state, addSnapshot = false, force = false) => {
   await refreshValues(state, addSnapshot);
   const { elements, filter } = state;
   const { imageviewer } = elements;
@@ -10308,14 +10458,30 @@ const updateCb = async (state, addSnapshot = false) => {
   const isCanvasAction = settings.points || settings.b64_canvas;
   const isStroke = !filter || filter.hasCanvasAction;
   if (validValues && isStroke) {
-    const { color, size, opacity } = settings;
     const canvas = (await imageviewer.getComponents()).details.canvas;
-    canvas.lfColor = color;
-    canvas.lfOpacity = opacity;
-    canvas.lfSize = size;
+    const brushDefaults = {
+      ...SETTINGS.brush.settings,
+      ...state.lastBrushSettings
+    };
+    const candidateSettings = settings ?? {};
+    const brushSettings = {
+      color: candidateSettings.color ?? brushDefaults.color,
+      opacity: candidateSettings.opacity ?? brushDefaults.opacity,
+      size: candidateSettings.size ?? brushDefaults.size
+    };
+    canvas.lfColor = brushSettings.color;
+    canvas.lfOpacity = brushSettings.opacity;
+    canvas.lfSize = brushSettings.size;
+    state.lastBrushSettings = {
+      ...state.lastBrushSettings,
+      color: brushSettings.color,
+      opacity: brushSettings.opacity,
+      size: brushSettings.size
+    };
   }
   const shouldUpdate = !!(validValues && (!isStroke || isStroke && isCanvasAction));
-  if (shouldUpdate) {
+  const requiresManualApply = !!(filter == null ? void 0 : filter.requiresManualApply);
+  if (shouldUpdate && (force || !requiresManualApply)) {
     apiCall$1(state, addSnapshot);
   }
 };
@@ -10410,6 +10576,7 @@ const imageEditorFactory = {
       elements: { actionButtons, controls: {}, grid, imageviewer, settings },
       filter: null,
       filterType: null,
+      lastBrushSettings: JSON.parse(JSON.stringify(SETTINGS.brush.settings)),
       node,
       update: {
         preview: () => updateCb(STATE$7.get(wrapper)),
