@@ -7,13 +7,10 @@ import torch.nn.functional as F
 from aiohttp import web
 from PIL import Image
 
-import nodes
-import comfy.sample
-
 from server import PromptServer
 
 from ..utils.constants import API_ROUTE_PREFIX, SAMPLERS
-from ..utils.filters import blend_effect, bloom_effect, brightness_effect, clarity_effect, contrast_effect, desaturate_effect, film_grain_effect, gaussian_blur_effect, line_effect, saturation_effect, sepia_effect, split_tone_effect, tilt_shift_effect, vibrance_effect, vignette_effect
+from ..utils.filters import blend_effect, bloom_effect, brightness_effect, clarity_effect, contrast_effect, desaturate_effect, film_grain_effect, gaussian_blur_effect, line_effect, perform_inpaint, saturation_effect, sepia_effect, split_tone_effect, tilt_shift_effect, vibrance_effect, vignette_effect
 from ..utils.helpers import base64_to_tensor, convert_to_boolean, convert_to_float, convert_to_int, create_colored_tensor, create_masonry_node, get_comfy_dir, get_resource_url, pil_to_tensor, resolve_filepath, resolve_url, tensor_to_pil
 from ..utils.image_editing import get_editing_context
 
@@ -246,52 +243,6 @@ def apply_vibrance_effect(img_tensor: torch.Tensor, settings: dict):
     return vibrance_effect(img_tensor, intensity, protect_skin, clip_soft)
 
 
-def sample_without_preview(
-    model,
-    positive,
-    negative,
-    latent,
-    seed,
-    steps,
-    cfg,
-    sampler_name,
-    scheduler_name,
-    denoise_value,
-):
-    latent_image = latent["samples"]
-    latent_image = comfy.sample.fix_empty_latent_channels(model, latent_image)
-
-    batch_inds = latent.get("batch_index")
-    noise = comfy.sample.prepare_noise(latent_image, seed, batch_inds)
-
-    noise_mask = latent.get("noise_mask")
-
-    samples = comfy.sample.sample(
-        model,
-        noise,
-        steps,
-        cfg,
-        sampler_name,
-        scheduler_name,
-        positive,
-        negative,
-        latent_image,
-        denoise=denoise_value,
-        disable_noise=False,
-        start_step=None,
-        last_step=None,
-        force_full_denoise=False,
-        noise_mask=noise_mask,
-        callback=None,
-        disable_pbar=True,
-        seed=seed,
-    )
-
-    out_latent = latent.copy()
-    out_latent["samples"] = samples
-
-    return out_latent
-
 def apply_vignette_effect(img_tensor: torch.Tensor, settings: dict):
     intensity = convert_to_float(settings.get("intensity", 0))
     radius = convert_to_float(settings.get("radius", 0))
@@ -396,44 +347,27 @@ def apply_inpaint_effect(img_tensor: torch.Tensor, settings: dict) -> tuple[torc
     positive_prompt = str(settings.get("positive_prompt", ""))
     negative_prompt = str(settings.get("negative_prompt", ""))
 
-    with torch.inference_mode():
-        clip_encoder = nodes.CLIPTextEncode()
-        positive = clip_encoder.encode(clip, positive_prompt)[0]
-        negative = clip_encoder.encode(clip, negative_prompt)[0]
-
-        conditioning_node = nodes.InpaintModelConditioning()
-        pos_cond, neg_cond, latent = conditioning_node.encode(
-            positive,
-            negative,
-            image,
-            vae,
-            mask_tensor,
-            True,
-        )
-        latent_result = sample_without_preview(
-        model,
-        pos_cond,
-        neg_cond,
-        latent,
-        seed,
-        steps,
-        cfg,
-        sampler_name,
-        scheduler_name,
-        denoise_value,
+    processed = perform_inpaint(
+        model=model,
+        clip=clip,
+        vae=vae,
+        image=image,
+        mask=mask_tensor,
+        positive_prompt=positive_prompt,
+        negative_prompt=negative_prompt,
+        sampler_name=sampler_name,
+        scheduler_name=scheduler_name,
+        steps=steps,
+        denoise=denoise_value,
+        cfg=cfg,
+        seed=seed,
+        disable_preview=True,
     )
 
-        decoded = nodes.VAEDecode().decode(vae, latent_result)[0].to(device=device, dtype=torch.float32)
-
-    if decoded.shape != image.shape:
-        decoded = decoded.reshape_as(image)
-
-    mask_3c = mask_tensor.unsqueeze(-1)
-    result = decoded * mask_3c + image * (1.0 - mask_3c)
-
-    processed = result.detach().clamp(0.0, 1.0).to(torch.float32).cpu().contiguous()
+    processed = processed.detach().clamp(0.0, 1.0).to(torch.float32).cpu().contiguous()
 
     return processed, {"mask": mask_url}
+
 
 
 def load_image_tensor(image_path: str) -> torch.Tensor:
