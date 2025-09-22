@@ -4,7 +4,9 @@ from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
-from ...utils.helpers import build_id2label, normalize_input_image, normalize_list_to_value, tensor_to_pil
+from ...utils.helpers.conversion import tensor_to_pil
+from ...utils.helpers.logic import normalize_input_image, normalize_list_to_value
+from ...utils.helpers.tagging import build_id2label
 
 #region LF_CaptionImageWD14
 class LF_CaptionImageWD14:

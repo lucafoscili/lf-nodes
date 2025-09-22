@@ -2,7 +2,7 @@ import json
 
 from . import CATEGORY
 from ...utils.constants import FUNCTION
-from ...utils.helpers import normalize_json_input
+from ...utils.helpers.logic import normalize_json_input
 
 # region LF_LLMMessenger
 class LF_LLMMessenger:

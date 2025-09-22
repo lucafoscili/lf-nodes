@@ -7,8 +7,9 @@ from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
-from ...utils.detection_helpers import discover_ultralytics_models
-from ...utils.helpers import create_history_node, normalize_json_input, normalize_list_to_value
+from ...utils.helpers.detection import discover_ultralytics_models
+from ...utils.helpers.logic import normalize_json_input, normalize_list_to_value
+from ...utils.helpers.ui import create_history_node
 
 
 class LF_ONNXSelector:

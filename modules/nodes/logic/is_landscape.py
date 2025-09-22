@@ -4,7 +4,7 @@ from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
-from ...utils.helpers import normalize_input_image
+from ...utils.helpers.logic import normalize_input_image
 
 # region LF_IsLandscape
 class LF_IsLandscape:

@@ -4,17 +4,14 @@ from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import FUNCTION, Input, EVENT_PREFIX
-from ...utils.helpers import (
-    normalize_input_image,
-    normalize_list_to_value,
-    normalize_output_image,
-    tensor_to_pil,
-    resolve_filepath,
-    get_resource_url,
-    create_compare_node,
-)
+from ...utils.helpers.api import get_resource_url
+from ...utils.helpers.comfy import resolve_filepath
+from ...utils.helpers.conversion import tensor_to_pil
+from ...utils.helpers.logic import normalize_input_image, normalize_list_to_value, normalize_output_image
+from ...utils.helpers.ui import create_compare_node
 from ...utils.regions import build_region_mask
 
+# region LF_RegionMask
 class LF_RegionMask:
     @classmethod
     def INPUT_TYPES(cls):
@@ -34,9 +31,8 @@ class LF_RegionMask:
                     "max": 256,
                     "tooltip": "Index of the region to use; -1 selects the region flagged as selected."
                 }),
-                "shape": (Input.STRING, {
+                "shape": (["rectangle", "ellipse"], {
                     "default": "rectangle",
-                    "choices": ["rectangle", "ellipse"],
                     "tooltip": "Mask shape to carve inside the bounding box."
                 }),
                 "padding": (Input.FLOAT, {
@@ -165,8 +161,9 @@ class LF_RegionMask:
             mask_list = [primary_mask]
 
         return (primary_mask, mask_list, target_region)
+# endregion
 
-
+# region Mappings
 NODE_CLASS_MAPPINGS = {
     "LF_RegionMask": LF_RegionMask,
 }
@@ -174,6 +171,4 @@ NODE_CLASS_MAPPINGS = {
 NODE_DISPLAY_NAME_MAPPINGS = {
     "LF_RegionMask": "Region Mask",
 }
-
-
-
+# endregion

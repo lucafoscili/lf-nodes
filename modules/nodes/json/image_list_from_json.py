@@ -4,7 +4,11 @@ from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
-from ...utils.helpers import create_masonry_node, get_resource_url, normalize_output_image, numpy_to_tensor, normalize_list_to_value, normalize_json_input, resolve_filepath, tensor_to_pil
+from ...utils.helpers.api import get_resource_url
+from ...utils.helpers.comfy import resolve_filepath
+from ...utils.helpers.conversion import numpy_to_tensor, tensor_to_pil
+from ...utils.helpers.logic import normalize_output_image, normalize_list_to_value, normalize_json_input
+from ...utils.helpers.ui import create_masonry_node
 
 # region LF_ImageListFromJSON
 class LF_ImageListFromJSON:

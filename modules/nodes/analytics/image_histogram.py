@@ -5,7 +5,7 @@ from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import BLUE_CHANNEL_ID, EVENT_PREFIX, FUNCTION, GREEN_CHANNEL_ID, Input, INTENSITY_ID, RED_CHANNEL_ID, SUM_ID
-from ...utils.helpers import normalize_input_image, normalize_output_image
+from ...utils.helpers.logic import normalize_input_image, normalize_output_image
 
 # region LF_ImageHistogram
 class LF_ImageHistogram:

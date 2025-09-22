@@ -6,7 +6,7 @@ from aiohttp import web
 from server import PromptServer
 
 from ..utils.constants import API_ROUTE_PREFIX, BACKUP_FOLDER
-from ..utils.helpers import get_comfy_dir
+from ..utils.helpers.comfy import get_comfy_dir
 
 # region clear-analytics
 @PromptServer.instance.routes.post(f"{API_ROUTE_PREFIX}/clear-analytics")

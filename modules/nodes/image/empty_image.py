@@ -5,7 +5,11 @@ from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
-from ...utils.helpers import create_masonry_node, get_resource_url, hex_to_tuple, normalize_input_list, normalize_output_image, pil_to_tensor, resolve_filepath
+from ...utils.helpers.api import get_resource_url
+from ...utils.helpers.comfy import resolve_filepath
+from ...utils.helpers.conversion import hex_to_tuple, pil_to_tensor
+from ...utils.helpers.logic import normalize_input_list, normalize_output_image
+from ...utils.helpers.ui import create_masonry_node
 
 # region LF_EmptyImage
 class LF_EmptyImage:

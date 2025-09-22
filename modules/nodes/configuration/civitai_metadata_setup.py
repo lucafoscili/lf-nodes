@@ -3,8 +3,9 @@ from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, INT_MAX, SAMPLERS, SCHEDULERS
-from ...utils.helpers import get_comfy_list, get_embedding_hashes, get_lora_hashes, get_sha256, normalize_list_to_value
-
+from ...utils.helpers.api import get_embedding_hashes, get_sha256, get_lora_hashes
+from ...utils.helpers.comfy import get_comfy_list
+from ...utils.helpers.logic import normalize_list_to_value
 
 # region LF_CivitAIMetadataSetup
 class LF_CivitAIMetadataSetup:

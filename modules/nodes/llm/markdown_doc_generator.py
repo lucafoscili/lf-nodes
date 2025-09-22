@@ -5,7 +5,8 @@ from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, HEADERS, INT_MAX, get_doc_generator_system
-from ...utils.helpers import handle_response, normalize_list_to_value
+from ...utils.helpers.api import handle_response
+from ...utils.helpers.logic import normalize_list_to_value
 
 # region LF_MarkdownDocGenerator
 class LF_MarkdownDocGenerator:

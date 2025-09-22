@@ -4,7 +4,8 @@ from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, LORA_TAG_REGEX
-from ...utils.helpers import cleanse_lora_tag, normalize_list_to_value
+from ...utils.helpers.logic import normalize_list_to_value
+from ...utils.helpers.prompt import cleanse_lora_tag
 
 # region LF_ParsePromptWithLoraTags
 class LF_ParsePromptWithLoraTags:

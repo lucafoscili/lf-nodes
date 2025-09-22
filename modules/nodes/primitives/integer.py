@@ -2,7 +2,8 @@ from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, INT_MAX
-from ...utils.helpers import create_history_node, normalize_json_input, normalize_list_to_value, randomize_from_history
+from ...utils.helpers.logic import normalize_json_input, normalize_list_to_value, randomize_from_history
+from ...utils.helpers.ui import create_history_node
 
 # region LF_Integer
 class LF_Integer:

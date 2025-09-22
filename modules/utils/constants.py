@@ -1,4 +1,7 @@
+import folder_paths
+
 from comfy.samplers import KSampler
+from pathlib import Path
 
 class AnyType(str):
     def __ne__(self, _: object) -> bool:
@@ -55,6 +58,7 @@ FUNCTION = "on_exec"
 
 BACKUP_FOLDER = "Backups"
 USER_FOLDER = "LF_Nodes"
+ONNX_ROOT = Path(folder_paths.models_dir) / "onnx"
 
 RESAMPLERS = ["bicubic", "bilinear", "linear", "nearest", "nearest exact"]
 SAMPLERS = KSampler.SAMPLERS

@@ -138,39 +138,6 @@ def _select_providers(custom: Optional[Sequence[str]] = None) -> List[str]:
     selected = [provider for provider in preferred if provider in available]
     return selected or available
 
-
-def load_yolo_session(
-    *,
-    model_path: Path | str,
-    providers: Optional[Sequence[str]] = None,
-) -> "ort.InferenceSession":
-    """Load (and cache) the YOLO ONNX session used for region detection."""
-    _ensure_ort()
-    path = Path(model_path)
-    if not path.exists():
-        raise FileNotFoundError(
-            f"YOLO detector model not found at '{path}'. Place the ONNX file inside ComfyUI/models/onnx."
-        )
-
-    provider_list = _select_providers(providers)
-    cache_key = (str(path.resolve()), tuple(provider_list))
-    session = _SESSION_CACHE.get(cache_key)
-    if session is None:
-        session_options = ort.SessionOptions()
-        session_options.enable_mem_pattern = False
-        session_options.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
-        try:
-            session = ort.InferenceSession(
-                str(path),
-                sess_options=session_options,
-                providers=list(provider_list),
-            )
-        except Exception as exc:  # pragma: no cover - defensive
-            raise RuntimeError(f"Failed to initialise ONNX session: {exc}") from exc
-        _SESSION_CACHE[cache_key] = session
-    return session
-
-
 def _letterbox(
     image: np.ndarray,
     new_shape: Tuple[int, int],
@@ -429,7 +396,58 @@ def _resolve_class_whitelist(
         indices.add(idx)
     return indices or None
 
+# region load_yolo_session
+def load_yolo_session(
+    *,
+    model_path: Path | str,
+    providers: Optional[Sequence[str]] = None,
+) -> "ort.InferenceSession":
+    """
+    Loads and caches a YOLO ONNX inference session for region detection.
 
+    Args:
+        model_path (Path | str): Path to the YOLO ONNX model file.
+        providers (Optional[Sequence[str]], optional): List of ONNX Runtime execution providers to use. If None, defaults are selected.
+
+    Returns:
+        ort.InferenceSession: The loaded and cached ONNX inference session.
+
+    Raises:
+        FileNotFoundError: If the specified model file does not exist.
+        RuntimeError: If the ONNX session fails to initialize.
+
+    Notes:
+        - The ONNX session is cached based on the model path and provider list.
+        - The ONNX Runtime must be available in the environment.
+        - The ONNX model file should be placed inside 'ComfyUI/models/onnx'.
+    """
+    _ensure_ort()
+    path = Path(model_path)
+    if not path.exists():
+        raise FileNotFoundError(
+            f"YOLO detector model not found at '{path}'. Place the ONNX file inside ComfyUI/models/onnx."
+        )
+
+    provider_list = _select_providers(providers)
+    cache_key = (str(path.resolve()), tuple(provider_list))
+    session = _SESSION_CACHE.get(cache_key)
+    if session is None:
+        session_options = ort.SessionOptions()
+        session_options.enable_mem_pattern = False
+        session_options.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
+        try:
+            session = ort.InferenceSession(
+                str(path),
+                sess_options=session_options,
+                providers=list(provider_list),
+            )
+        except Exception as exc:  # pragma: no cover - defensive
+            raise RuntimeError(f"Failed to initialise ONNX session: {exc}") from exc
+        _SESSION_CACHE[cache_key] = session
+    return session
+# endregion
+
+# region detect_regions
 def detect_regions(
     image: torch.Tensor,
     *,
@@ -443,7 +461,35 @@ def detect_regions(
     class_whitelist: Optional[Iterable[int | str]] = None,
     class_labels: Optional[Sequence[str]] = None,
 ) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
-    """Run YOLO object detection on a single Comfy image tensor."""
+    """
+    Detects regions (bounding boxes) in an input image tensor using a YOLO-based ONNX model.
+
+    Args:
+        image (torch.Tensor): Input image tensor of shape [1, H, W, C].
+        session (Optional[ort.InferenceSession], optional): Preloaded ONNX inference session. If None, a session is loaded from `model_path`.
+        model_path (Optional[Path | str], optional): Path to the ONNX model file. Used if `session` is not provided.
+        providers (Optional[Sequence[str]], optional): List of ONNX runtime providers to use for inference.
+        input_size (Optional[int | Tuple[int, int]], optional): Model input size (height, width). If None, inferred from model.
+        confidence_threshold (float, optional): Minimum confidence score to keep a detection. Defaults to 0.25.
+        iou_threshold (float, optional): IoU threshold for non-maximum suppression (NMS). Defaults to 0.45.
+        max_detections (int, optional): Maximum number of detections to return after NMS. Defaults to 20.
+        class_whitelist (Optional[Iterable[int | str]], optional): List of class indices or names to keep. If None, all classes are kept.
+        class_labels (Optional[Sequence[str]], optional): Optional override for class labels.
+
+    Returns:
+        Tuple[List[Dict[str, Any]], Dict[str, Any]]:
+            - List of detection results, each as a dictionary containing bounding box coordinates, confidence scores, class information, and optional mask coefficients.
+            - Context dictionary with metadata about the detection process (class labels, label source, input shape, mask prototype shape, etc.).
+
+    Raises:
+        ValueError: If the input image tensor does not have shape [1, H, W, C].
+        RuntimeError: If the model output shape is unexpected or detection confidences cannot be computed.
+
+    Notes:
+        - Supports YOLO models with various output formats (with/without class scores and mask coefficients).
+        - Applies non-maximum suppression (NMS) to filter overlapping detections.
+        - Optionally restricts detections to a whitelist of classes.
+    """
     if image.ndim != 4 or image.shape[0] != 1:
         raise ValueError("Expected image tensor with shape [1, H, W, C].")
 
@@ -613,3 +659,4 @@ def detect_regions(
         results.append(result)
 
     return results, context
+# endregion

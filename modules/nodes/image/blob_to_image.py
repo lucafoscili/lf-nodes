@@ -6,7 +6,8 @@ from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
-from ...utils.helpers import normalize_list_to_value, normalize_output_image, pil_to_tensor
+from ...utils.helpers.conversion import pil_to_tensor
+from ...utils.helpers.logic import normalize_list_to_value, normalize_output_image
 
 # region LF_BlobToImage
 class LF_BlobToImage:

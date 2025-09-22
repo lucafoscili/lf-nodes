@@ -4,7 +4,7 @@ from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
-from ...utils.helpers import normalize_list_to_value
+from ...utils.helpers.logic import normalize_list_to_value
 
 # region LF_RegexReplace
 class LF_RegexReplace:

@@ -5,7 +5,8 @@ from server import PromptServer
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
 from ...utils.filters import brightness_effect
-from ...utils.helpers import normalize_input_image, normalize_list_to_value, normalize_output_image, process_and_save_image
+from ...utils.helpers.logic import normalize_input_image, normalize_list_to_value, normalize_output_image
+from ...utils.helpers.torch import process_and_save_image
 
 # region LF_Brightness
 class LF_Brightness:

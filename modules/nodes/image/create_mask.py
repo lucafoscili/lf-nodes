@@ -6,7 +6,12 @@ from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
-from ...utils.helpers import create_compare_node, encode_text_for_sdclip, get_otsu_threshold, get_resource_url, get_text_encoder_from_clip, get_tokenizer_from_clip, normalize_input_image, normalize_list_to_value, normalize_output_image, pil_to_tensor, resolve_filepath, tensor_to_pil
+from ...utils.helpers.api import get_resource_url
+from ...utils.helpers.comfy import get_tokenizer_from_clip, resolve_filepath
+from ...utils.helpers.conversion import pil_to_tensor, tensor_to_pil
+from ...utils.helpers.logic import get_otsu_threshold, normalize_input_image, normalize_list_to_value, normalize_output_image
+from ...utils.helpers.torch import encode_text_for_sdclip, get_text_encoder_from_clip
+from ...utils.helpers.ui import create_compare_node
 
 # region LF_CreateMask
 class LF_CreateMask:
