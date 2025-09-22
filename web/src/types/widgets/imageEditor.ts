@@ -45,6 +45,7 @@ export interface ImageEditorState extends BaseWidgetState {
   };
   filter: ImageEditorFilter;
   filterType: ImageEditorFilterType;
+  lastBrushSettings: ImageEditorBrushSettings;
   update: {
     preview: () => Promise<void>;
     snapshot: () => Promise<void>;
@@ -76,7 +77,7 @@ export enum ImageEditorIcons {
 //#endregion
 
 //#region Controls
-export type ImageEditorUpdateCallback = (addSnapshot?: boolean) => Promise<void>;
+export type ImageEditorUpdateCallback = (addSnapshot?: boolean, force?: boolean) => Promise<void>;
 export enum ImageEditorControls {
   Canvas = 'canvas',
   Slider = 'slider',
@@ -401,6 +402,7 @@ export interface ImageEditorFilterDefinition<
   controlIds: ImageEditorControlIdsEnum;
   configs: ImageEditorConfigs;
   hasCanvasAction?: boolean;
+  requiresManualApply?: boolean;
   settings: ImageEditorSettings;
 }
 export type ImageEditorBlendFilter = ImageEditorFilterDefinition<

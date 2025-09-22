@@ -102,21 +102,25 @@ export const EV_HANDLERS = {
           state.filterType = 'brush';
         }
 
+        const brushDefaults = {
+          ...SETTINGS.brush.settings,
+          ...state.lastBrushSettings,
+        };
         const temporaryFilter: ImageEditorBrushFilter = {
           ...JSON.parse(JSON.stringify(SETTINGS.brush)),
           settings: {
+            ...brushDefaults,
             b64_canvas,
-            color: comp.lfColor,
-            opacity: comp.lfOpacity,
+            color: comp.lfColor ?? brushDefaults.color,
+            opacity: comp.lfOpacity ?? brushDefaults.opacity,
             points,
-            size: comp.lfSize,
+            size: comp.lfSize ?? brushDefaults.size,
           },
         };
-
         state.filter = temporaryFilter;
 
         try {
-          await updateCb(state, true);
+          await updateCb(state, true, true);
         } finally {
           if (originalFilter?.hasCanvasAction) {
             const existingSettings =
@@ -258,7 +262,11 @@ export const apiCall = async (state: ImageEditorState, addSnapshot: boolean) => 
   try {
     const response = await getApiRoutes().image.process(snapshotValue, filterType, payload);
     if (response.mask) {
-      lfManager.log('Saved inpaint mask preview to temp', { mask: response.mask }, LogSeverity.Info);
+      lfManager.log(
+        'Saved inpaint mask preview to temp',
+        { mask: response.mask },
+        LogSeverity.Info,
+      );
     }
     if (addSnapshot) {
       await imageviewer.addSnapshot(response.data);
@@ -363,11 +371,51 @@ export const prepSettings = (state: ImageEditorState, node: LfDataNode) => {
   });
 
   const resetButton = document.createElement(TagName.LfButton);
-  resetButton.classList.add('lf-full-width');
   resetButton.lfIcon = ImageEditorIcons.Reset;
   resetButton.lfLabel = 'Reset';
+  resetButton.lfStretchX = true;
   resetButton.addEventListener('click', () => resetSettings(settings));
   settings.appendChild(resetButton);
+
+  if (state.filterType === 'brush') {
+    const brushSettings = (state.filter.settings ?? {}) as ImageEditorBrushSettings;
+    state.lastBrushSettings = {
+      ...state.lastBrushSettings,
+      ...JSON.parse(JSON.stringify(brushSettings)),
+    };
+  }
+
+  if (filter?.hasCanvasAction) {
+    requestAnimationFrame(async () => {
+      const canvas = (await state.elements.imageviewer.getComponents()).details.canvas;
+      const brushSource = {
+        ...SETTINGS.brush.settings,
+        ...state.lastBrushSettings,
+        ...((state.filter.settings ?? {}) as Partial<ImageEditorBrushSettings>),
+      };
+
+      if (brushSource.color) {
+        canvas.lfColor = brushSource.color;
+      }
+      if (typeof brushSource.opacity === 'number') {
+        canvas.lfOpacity = brushSource.opacity;
+      }
+      if (typeof brushSource.size === 'number') {
+        canvas.lfSize = brushSource.size;
+      }
+    });
+  }
+
+  if (filter?.requiresManualApply) {
+    const applyButton = document.createElement(TagName.LfButton);
+    applyButton.lfIcon = ImageEditorIcons.Resume;
+    applyButton.lfLabel = 'Apply';
+    applyButton.lfStretchX = true;
+    applyButton.addEventListener('click', () => {
+      void updateCb(state, true, true);
+    });
+    settings.appendChild(applyButton);
+  }
 };
 //#endregion
 
@@ -471,7 +519,7 @@ export const setGridStatus = (
       break;
   }
 };
-export const updateCb = async (state: ImageEditorState, addSnapshot = false) => {
+export const updateCb = async (state: ImageEditorState, addSnapshot = false, force = false) => {
   await refreshValues(state, addSnapshot);
 
   const { elements, filter } = state;
@@ -484,16 +532,35 @@ export const updateCb = async (state: ImageEditorState, addSnapshot = false) => 
   const isStroke = !filter || filter.hasCanvasAction;
 
   if (validValues && isStroke) {
-    const { color, size, opacity } = settings as ImageEditorBrushSettings;
-
     const canvas = (await imageviewer.getComponents()).details.canvas;
-    canvas.lfColor = color;
-    canvas.lfOpacity = opacity;
-    canvas.lfSize = size;
+    const brushDefaults = {
+      ...SETTINGS.brush.settings,
+      ...state.lastBrushSettings,
+    };
+    const candidateSettings = (settings ?? {}) as Partial<ImageEditorBrushSettings>;
+    const brushSettings: ImageEditorBrushSettings = {
+      ...brushDefaults,
+      color: candidateSettings.color ?? brushDefaults.color,
+      opacity: candidateSettings.opacity ?? brushDefaults.opacity,
+      size: candidateSettings.size ?? brushDefaults.size,
+    };
+
+    canvas.lfColor = brushSettings.color;
+    canvas.lfOpacity = brushSettings.opacity;
+    canvas.lfSize = brushSettings.size;
+
+    state.lastBrushSettings = {
+      ...state.lastBrushSettings,
+      color: brushSettings.color,
+      opacity: brushSettings.opacity,
+      size: brushSettings.size,
+    };
   }
 
   const shouldUpdate = !!(validValues && (!isStroke || (isStroke && isCanvasAction)));
-  if (shouldUpdate) {
+  const requiresManualApply = !!filter?.requiresManualApply;
+
+  if (shouldUpdate && (force || !requiresManualApply)) {
     apiCall(state, addSnapshot);
   }
 };

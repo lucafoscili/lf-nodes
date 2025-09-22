@@ -477,6 +477,7 @@ export const SETTINGS: ImageEditorFilters = {
   inpaint: {
     controlIds: ImageEditorInpaintIds,
     hasCanvasAction: true,
+    requiresManualApply: true,
     settings: {
       b64_canvas: '',
       denoise_percentage: 40,
@@ -890,27 +891,6 @@ export const SETTINGS: ImageEditorFilters = {
 export const TREE_DATA: LfDataDataset = {
   nodes: [
     {
-      description: 'Diffusion-based retouching tools.',
-      id: 'diffusion_tools',
-      value: 'Diffusion Tools',
-      icon: 'wand',
-      children: [
-        //#region Inpaint
-        {
-          description: 'Inpaint masked areas using the connected diffusion model.',
-          cells: {
-            lfCode: {
-              shape: 'code',
-              value: JSON.stringify(SETTINGS.inpaint),
-            },
-          },
-          id: 'inpaint',
-          value: 'Inpaint',
-        },
-        //#endregion
-      ],
-    },
-    {
       description: 'Tool configuration.',
       id: 'settings',
       icon: 'brush',
@@ -927,6 +907,27 @@ export const TREE_DATA: LfDataDataset = {
           },
           id: 'brush',
           value: 'Brush',
+        },
+        //#endregion
+      ],
+    },
+    {
+      description: 'Diffusion-based retouching tools.',
+      id: 'diffusion_tools',
+      value: 'Diffusion Tools',
+      icon: 'wand',
+      children: [
+        //#region Inpaint
+        {
+          description: 'Inpaint masked areas using the connected diffusion model.',
+          cells: {
+            lfCode: {
+              shape: 'code',
+              value: JSON.stringify(SETTINGS.inpaint),
+            },
+          },
+          id: 'inpaint',
+          value: 'Inpaint',
         },
         //#endregion
       ],

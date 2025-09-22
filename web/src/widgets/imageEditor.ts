@@ -1,4 +1,4 @@
-import { TREE_DATA } from '../fixtures/imageEditor';
+import { SETTINGS, TREE_DATA } from '../fixtures/imageEditor';
 import { EV_HANDLERS, getStatusColumn, setGridStatus, updateCb } from '../helpers/imageEditor';
 import { LfEventName } from '../types/events/events';
 import { LogSeverity } from '../types/manager/manager';
@@ -137,6 +137,7 @@ export const imageEditorFactory: ImageEditorFactory = {
       elements: { actionButtons, controls: {}, grid, imageviewer, settings },
       filter: null,
       filterType: null,
+      lastBrushSettings: JSON.parse(JSON.stringify(SETTINGS.brush.settings)),
       node,
       update: {
         preview: () => updateCb(STATE.get(wrapper)),
