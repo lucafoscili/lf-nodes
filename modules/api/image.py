@@ -51,6 +51,7 @@ async def get_images_in_directory(request):
 # endregion
 
 # region process-image
+
 @PromptServer.instance.routes.post(f"{API_ROUTE_PREFIX}/process-image")
 async def process_image(request):
     try:
@@ -73,10 +74,12 @@ async def process_image(request):
         
         img_tensor = load_image_tensor(images_dir)
 
+        extra_payload: dict[str, str] = {}
+
         if filter_type == "blend":
             processed_tensor = apply_blend_effect(img_tensor, settings)
         elif filter_type == "bloom":
-            processed_tensor = apply_bloom_effect(img_tensor, settings)           
+            processed_tensor = apply_bloom_effect(img_tensor, settings)
         elif filter_type == "brightness":
             processed_tensor = apply_brightness_effect(img_tensor, settings)
         elif filter_type == "brush":
@@ -106,7 +109,7 @@ async def process_image(request):
         elif filter_type == "vignette":
             processed_tensor = apply_vignette_effect(img_tensor, settings)
         elif filter_type == "inpaint":
-            processed_tensor = apply_inpaint_effect(img_tensor, settings)
+            processed_tensor, extra_payload = apply_inpaint_effect(img_tensor, settings)
         else:
             return web.Response(status=400, text=f"Unsupported filter type: {filter_type}")
 
@@ -114,14 +117,19 @@ async def process_image(request):
         output_file, subfolder, filename = resolve_filepath(filename_prefix=filter_type, image=img_tensor)
         pil_image.save(output_file, format="PNG")
 
-        return web.json_response({
+        payload = {
             "status": "success",
-            "data": get_resource_url(subfolder, filename, "temp")
-        }, status=200)
+            "data": get_resource_url(subfolder, filename, "temp"),
+        }
+        if extra_payload:
+            payload.update(extra_payload)
+
+        return web.json_response(payload, status=200)
 
     except Exception as e:
         return web.Response(status=500, text=f"Error: {str(e)}")
 # endregion
+
 
 # region helpers
 def apply_blend_effect(img_tensor: torch.Tensor, settings: dict):
@@ -244,7 +252,8 @@ def apply_vignette_effect(img_tensor: torch.Tensor, settings: dict):
 
     return vignette_effect(img_tensor, intensity, radius, shape, color)
 
-def apply_inpaint_effect(img_tensor: torch.Tensor, settings: dict) -> torch.Tensor:
+
+def apply_inpaint_effect(img_tensor: torch.Tensor, settings: dict) -> tuple[torch.Tensor, dict[str, str]]:
     context_id = settings.get("context_id") or settings.get("dataset_path")
     if not context_id:
         raise ValueError("Inpaint filter requires a context_id referencing the editing session.")
@@ -273,7 +282,7 @@ def apply_inpaint_effect(img_tensor: torch.Tensor, settings: dict) -> torch.Tens
         canvas = F.interpolate(
             canvas.permute(0, 3, 1, 2),
             size=(img_tensor.shape[1], img_tensor.shape[2]),
-            mode="bilinear",
+            mode="bicubic",
             align_corners=False,
         ).permute(0, 2, 3, 1)
 
@@ -299,14 +308,29 @@ def apply_inpaint_effect(img_tensor: torch.Tensor, settings: dict) -> torch.Tens
     mask_tensor = mask.to(device=device, dtype=torch.float32)
     if mask_tensor.ndim == 4:
         mask_tensor = mask_tensor[..., 0]
-    if mask_tensor.shape[1] != image.shape[1] or mask_tensor.shape[2] != image.shape[2]:
+
+    image_height = image.shape[1]
+    image_width = image.shape[2]
+
+    if mask_tensor.shape[-2] != image_height or mask_tensor.shape[-1] != image_width:
         mask_tensor = F.interpolate(
             mask_tensor.unsqueeze(1),
-            size=(image.shape[1], image.shape[2]),
-            mode="bilinear",
+            size=(image_height, image_width),
+            mode="bicubic",
             align_corners=False,
         ).squeeze(1)
+
     mask_tensor = mask_tensor.clamp(0.0, 1.0)
+    mask_tensor = (mask_tensor > 0.5).float()
+
+    mask_preview_tensor = mask_tensor.detach().cpu().unsqueeze(-1).repeat(1, 1, 1, 3)
+    mask_image = tensor_to_pil(mask_preview_tensor)
+    mask_output_file, mask_subfolder, mask_filename = resolve_filepath(
+        filename_prefix="inpaint_mask",
+        image=mask_preview_tensor,
+    )
+    mask_image.save(mask_output_file, format="PNG")
+    mask_url = get_resource_url(mask_subfolder, mask_filename, "temp")
 
     steps = max(1, int(round(convert_to_int(settings.get("steps", 20)))))
     denoise_value = convert_to_float(settings.get("denoise", settings.get("denoise_percentage", 100.0)))
@@ -363,7 +387,9 @@ def apply_inpaint_effect(img_tensor: torch.Tensor, settings: dict) -> torch.Tens
     mask_3c = mask_tensor.unsqueeze(-1)
     result = decoded * mask_3c + image * (1.0 - mask_3c)
 
-    return result.detach().clamp(0.0, 1.0).to(torch.float32).cpu().contiguous()
+    processed = result.detach().clamp(0.0, 1.0).to(torch.float32).cpu().contiguous()
+
+    return processed, {"mask": mask_url}
 
 
 def load_image_tensor(image_path: str) -> torch.Tensor:

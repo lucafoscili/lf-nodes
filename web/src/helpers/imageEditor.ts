@@ -257,8 +257,11 @@ export const apiCall = async (state: ImageEditorState, addSnapshot: boolean) => 
 
   try {
     const response = await getApiRoutes().image.process(snapshotValue, filterType, payload);
+    if (response.mask) {
+      lfManager.log('Saved inpaint mask preview to temp', { mask: response.mask }, LogSeverity.Info);
+    }
     if (addSnapshot) {
-      imageviewer.addSnapshot(response.data);
+      await imageviewer.addSnapshot(response.data);
     } else {
       const { canvas } = (await imageviewer.getComponents()).details;
       const image = await canvas.getImage();

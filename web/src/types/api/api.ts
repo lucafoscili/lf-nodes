@@ -94,6 +94,7 @@ export interface GetMetadataAPIPayload extends BaseAPIPayload {
 }
 export interface ProcessImageAPIPayload extends BaseAPIPayload {
   data: string;
+  mask?: string;
 }
 //#endregion
 
