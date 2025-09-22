@@ -1,33 +1,28 @@
 import json
 import os
-import random
 import torch
-import torch.nn.functional as F
 
 from aiohttp import web
 from PIL import Image
 
 from server import PromptServer
 
-from ..utils.constants import API_ROUTE_PREFIX, SAMPLERS
-from ..utils.filters import blend_effect, bloom_effect, brightness_effect, clarity_effect, contrast_effect, desaturate_effect, film_grain_effect, gaussian_blur_effect, line_effect, perform_inpaint, saturation_effect, sepia_effect, split_tone_effect, tilt_shift_effect, vibrance_effect, vignette_effect
+from ..utils.constants import API_ROUTE_PREFIX
+from ..utils.filters.processors import UnknownFilterError, process_filter
 from ..utils.helpers.api import get_resource_url, resolve_url
 from ..utils.helpers.comfy import get_comfy_dir, resolve_filepath
-from ..utils.helpers.conversion import base64_to_tensor, convert_to_boolean, convert_to_float, convert_to_int, pil_to_tensor, tensor_to_pil
-from ..utils.helpers.editing import get_editing_context
-from ..utils.helpers.torch import create_colored_tensor
+from ..utils.helpers.conversion import pil_to_tensor, tensor_to_pil
 from ..utils.helpers.ui import create_masonry_node
 
 # region get-image
-
 @PromptServer.instance.routes.post(f"{API_ROUTE_PREFIX}/get-image")
 async def get_images_in_directory(request):
     try:
         r: dict = await request.post()
-        
+
         directory: str = r.get("directory")
 
-        if (directory):
+        if directory:
             images_dir = os.path.join(get_comfy_dir("input"), directory)
         else:
             images_dir = get_comfy_dir("input")
@@ -39,21 +34,23 @@ async def get_images_in_directory(request):
 
         for index, filename in enumerate(os.listdir(images_dir)):
             file_path = os.path.join(images_dir, filename)
-            if os.path.isfile(file_path) and filename.lower().endswith(('.png', '.jpg', '.jpeg', '.gif')):
+            if os.path.isfile(file_path) and filename.lower().endswith((".png", ".jpg", ".jpeg", ".gif")):
                 url = get_resource_url(directory, filename, "input")
                 nodes.append(create_masonry_node(filename, url, index))
 
-        return web.json_response({
-            "status": "success",
-            "data": dataset
-        }, status=200)
+        return web.json_response(
+            {
+                "status": "success",
+                "data": dataset,
+            },
+            status=200,
+        )
 
     except Exception as e:
         return web.Response(status=500, text=f"Error: {str(e)}")
 # endregion
 
 # region process-image
-
 @PromptServer.instance.routes.post(f"{API_ROUTE_PREFIX}/process-image")
 async def process_image(request):
     try:
@@ -73,50 +70,19 @@ async def process_image(request):
 
         if not os.path.exists(images_dir):
             return web.Response(status=404, text="Image not found.")
-        
+
         img_tensor = load_image_tensor(images_dir)
 
-        extra_payload: dict[str, str] = {}
-
-        if filter_type == "blend":
-            processed_tensor = apply_blend_effect(img_tensor, settings)
-        elif filter_type == "bloom":
-            processed_tensor = apply_bloom_effect(img_tensor, settings)
-        elif filter_type == "brightness":
-            processed_tensor = apply_brightness_effect(img_tensor, settings)
-        elif filter_type == "brush":
-            processed_tensor = apply_brush_effect(img_tensor, settings)
-        elif filter_type == "clarity":
-            processed_tensor = apply_clarity_effect(img_tensor, settings)
-        elif filter_type == "contrast":
-            processed_tensor = apply_contrast_effect(img_tensor, settings)
-        elif filter_type == "desaturate":
-            processed_tensor = apply_desaturate_effect(img_tensor, settings)
-        elif filter_type == "film_grain":
-            processed_tensor = apply_film_grain_effect(img_tensor, settings)
-        elif filter_type == "gaussian_blur":
-            processed_tensor = apply_gaussian_blur_effect(img_tensor, settings)
-        elif filter_type == "line":
-            processed_tensor = apply_line_effect(img_tensor, settings)
-        elif filter_type == "saturation":
-            processed_tensor = apply_saturation_effect(img_tensor, settings)
-        elif filter_type == "sepia":
-            processed_tensor = apply_sepia_effect(img_tensor, settings)
-        elif filter_type == "split_tone":
-            processed_tensor = apply_split_tone_effect(img_tensor, settings)
-        elif filter_type == "tilt_shift":
-            processed_tensor = apply_tilt_shift_effect(img_tensor, settings)
-        elif filter_type == "vibrance":
-            processed_tensor = apply_vibrance_effect(img_tensor, settings)
-        elif filter_type == "vignette":
-            processed_tensor = apply_vignette_effect(img_tensor, settings)
-        elif filter_type == "inpaint":
-            processed_tensor, extra_payload = apply_inpaint_effect(img_tensor, settings)
-        else:
-            return web.Response(status=400, text=f"Unsupported filter type: {filter_type}")
+        try:
+            processed_tensor, extra_payload = process_filter(filter_type, img_tensor, settings)
+        except UnknownFilterError as exc:
+            return web.Response(status=400, text=str(exc))
 
         pil_image = tensor_to_pil(processed_tensor)
-        output_file, subfolder, filename = resolve_filepath(filename_prefix=filter_type, image=img_tensor)
+        output_file, subfolder, filename = resolve_filepath(
+            filename_prefix=filter_type,
+            image=img_tensor,
+        )
         pil_image.save(output_file, format="PNG")
 
         payload = {
@@ -132,248 +98,7 @@ async def process_image(request):
         return web.Response(status=500, text=f"Error: {str(e)}")
 # endregion
 
-
 # region helpers
-def apply_blend_effect(img_tensor: torch.Tensor, settings: dict):
-    opacity = convert_to_float(settings.get("opacity", 1.0))
-    color: str = settings.get("color", "FF0000")
-
-    overlay_image = create_colored_tensor(img_tensor, color)
-
-    return blend_effect(img_tensor, overlay_image, opacity)
-
-def apply_bloom_effect(img_tensor: torch.Tensor, settings: dict):
-    intensity = convert_to_float(settings.get("intensity", 0))
-    radius = convert_to_int(settings.get("radius", 0))
-    threshold = convert_to_float(settings.get("threshold", 0))
-    tint = settings.get("tint", "FFFFFF")
-
-    return bloom_effect(img_tensor, threshold, radius, intensity, tint)
-
-def apply_brightness_effect(img_tensor: torch.Tensor, settings: dict):
-    brightness_strength = convert_to_float(settings.get("strength", 0))
-    gamma = convert_to_float(settings.get("gamma", 0))
-    midpoint = convert_to_float(settings.get("midpoint", 0))
-    localized_brightness = convert_to_boolean(settings.get("localized", False))
-
-    return brightness_effect(img_tensor, brightness_strength, gamma, midpoint, localized_brightness)
-
-def apply_brush_effect(img_tensor: torch.Tensor, settings: dict):
-    b64_canvas: str = settings.get("b64_canvas", "")
-    canvas = base64_to_tensor(b64_canvas, True)
-
-    return blend_effect(img_tensor, canvas, 1.0)
-
-def apply_clarity_effect(img_tensor: torch.Tensor, settings: dict):
-    clarity_strength = convert_to_float(settings.get("clarity_strength", 0))
-    sharpen_amount = convert_to_float(settings.get("sharpen_amount", 0))
-    blur_kernel_size = convert_to_int(settings.get("blur_kernel_size", 1))
-
-    return clarity_effect(img_tensor, clarity_strength, sharpen_amount, blur_kernel_size)
-
-def apply_contrast_effect(img_tensor: torch.Tensor, settings: dict):
-    contrast_strength = convert_to_float(settings.get("strength", 0))
-    midpoint = convert_to_float(settings.get("midpoint", 0))
-    localized_contrast = convert_to_boolean(settings.get("localized", False))
-
-    return contrast_effect(img_tensor, contrast_strength, midpoint, localized_contrast)
-
-def apply_desaturate_effect(img_tensor: torch.Tensor, settings: dict):
-    desaturation_strength = convert_to_float(settings.get("strength", 0))
-    r = convert_to_float(settings.get("r_channel", 1))
-    g = convert_to_float(settings.get("g_channel", 1))
-    b = convert_to_float(settings.get("b_channel", 1))
-
-    return desaturate_effect(img_tensor, desaturation_strength, [r, g, b])
-
-def apply_film_grain_effect(img_tensor: torch.Tensor, settings: dict):
-    intensity: float = convert_to_float(settings.get("intensity", 0))
-    size: float = convert_to_float(settings.get("size", 1))
-    tint: str = settings.get("tint", "FFFFFF")
-    soft_blend: bool = convert_to_boolean(settings.get("soft_blend", False))
-
-    return film_grain_effect(img_tensor, intensity, size, tint, soft_blend)
-
-def apply_gaussian_blur_effect(img_tensor: torch.Tensor, settings: dict):
-    blur_sigma = convert_to_float(settings.get("blur_sigma", 0))
-    blur_kernel_size = convert_to_int(settings.get("blur_kernel_size", 1))
-
-    return gaussian_blur_effect(img_tensor, blur_kernel_size, blur_sigma)
-
-def apply_line_effect(img_tensor: torch.Tensor, settings: dict):
-    points: list = settings.get("points", [])
-    points: list[tuple] = [(point["x"], point["y"]) for point in points]
-    
-    size = convert_to_int(settings.get("size", 0))
-    color: str = settings.get("color", "FF0000")
-    opacity = convert_to_float(settings.get("opacity", 1))
-    smooth = convert_to_boolean(settings.get("smoooth", False))
-
-    return line_effect(img_tensor, points, size, color, opacity, smooth)
-
-def apply_saturation_effect(img_tensor: torch.Tensor, settings: dict):
-    intensity = convert_to_float(settings.get("intensity", 1))
-
-    return saturation_effect(img_tensor, intensity)
-
-def apply_sepia_effect(img_tensor: torch.Tensor, settings: dict):
-    intensity = convert_to_float(settings.get("intensity", 0))
-
-    return sepia_effect(img_tensor, intensity)
-
-def apply_split_tone_effect(img_tensor: torch.Tensor, settings: dict):
-    highlights: str = settings.get("highlights", "FFAA55")
-    shadows: str = settings.get("shadows", "0066FF")
-    balance = convert_to_float(settings.get("balance", 0))
-    softness = convert_to_float(settings.get("softness", 0))
-    intensity = convert_to_float(settings.get("intensity", 0))
-
-    return split_tone_effect(img_tensor, shadows, highlights, balance, softness, intensity)
-
-def apply_tilt_shift_effect(img_tensor: torch.Tensor, settings: dict):
-    focus_position = convert_to_float(settings.get("focus_position", 0.5))
-    focus_size = convert_to_float(settings.get("focus_size", 0.25))
-    blur_radius = convert_to_int(settings.get("radius", 25))
-    feather: str = settings.get("feather", "smooth")
-    orientation: str = settings.get("orientation", "horizontal")
-
-    return tilt_shift_effect(img_tensor, focus_position, focus_size, blur_radius, feather, orientation)
-
-def apply_vibrance_effect(img_tensor: torch.Tensor, settings: dict):
-    intensity: float= convert_to_float(settings.get("intensity", 0))
-    protect_skin: bool = convert_to_boolean(settings.get("protect_skin", False))
-    clip_soft: bool = convert_to_boolean(settings.get("clip_soft", False))
-
-    return vibrance_effect(img_tensor, intensity, protect_skin, clip_soft)
-
-
-def apply_vignette_effect(img_tensor: torch.Tensor, settings: dict):
-    intensity = convert_to_float(settings.get("intensity", 0))
-    radius = convert_to_float(settings.get("radius", 0))
-    shape: str = settings.get("shape", "elliptical")
-    color: str = settings.get("color", "000000")
-
-    return vignette_effect(img_tensor, intensity, radius, shape, color)
-
-
-def apply_inpaint_effect(img_tensor: torch.Tensor, settings: dict) -> tuple[torch.Tensor, dict[str, str]]:
-    context_id = settings.get("context_id") or settings.get("dataset_path")
-    if not context_id:
-        raise ValueError("Inpaint filter requires a context_id referencing the editing session.")
-
-    context = get_editing_context(context_id)
-    if not context:
-        raise ValueError(f"No active editing session for '{context_id}'.")
-
-    model = context.get("model")
-    clip = context.get("clip")
-    vae = context.get("vae") or getattr(model, "vae", None)
-    if model is None or clip is None or vae is None:
-        raise ValueError(
-            "Inpaint filter requires model, clip, and vae inputs. Connect them to LF_ImagesEditingBreakpoint."
-        )
-
-    mask_b64 = settings.get("b64_canvas") or settings.get("mask_canvas") or settings.get("mask")
-    if not mask_b64:
-        raise ValueError("Missing brush mask for inpaint filter.")
-
-    canvas = base64_to_tensor(mask_b64, True)
-    if canvas.ndim != 4:
-        raise ValueError("Unexpected brush payload for inpaint filter.")
-
-    if canvas.shape[1] != img_tensor.shape[1] or canvas.shape[2] != img_tensor.shape[2]:
-        canvas = F.interpolate(
-            canvas.permute(0, 3, 1, 2),
-            size=(img_tensor.shape[1], img_tensor.shape[2]),
-            mode="nearest"
-        ).permute(0, 2, 3, 1)
-
-    alpha = canvas[..., 3] if canvas.shape[-1] >= 4 else canvas.mean(dim=-1)
-    mask = (alpha > 0.01).float()
-    if float(mask.max().item()) <= 0.0:
-        raise ValueError("Inpaint mask strokes are empty.")
-    mask = mask.clamp(0.0, 1.0)
-
-    device = getattr(getattr(vae, "first_stage_model", None), "device", None)
-    if isinstance(device, str):
-        device = torch.device(device)
-    if device is None:
-        raw_device = getattr(vae, "device", None)
-        if isinstance(raw_device, str):
-            device = torch.device(raw_device)
-        else:
-            device = raw_device
-    if device is None:
-        device = img_tensor.device
-
-    image = img_tensor.to(device=device, dtype=torch.float32)
-    mask_tensor = mask.to(device=device, dtype=torch.float32)
-    if mask_tensor.ndim == 4:
-        mask_tensor = mask_tensor[..., 0]
-
-    image_height = image.shape[1]
-    image_width = image.shape[2]
-
-    if mask_tensor.shape[-2] != image_height or mask_tensor.shape[-1] != image_width:
-        mask_tensor = F.interpolate(
-            mask_tensor.unsqueeze(1),
-            size=(image_height, image_width),
-            mode="nearest"
-        ).squeeze(1)
-
-    mask_tensor = mask_tensor.clamp(0.0, 1.0)
-    mask_tensor = (mask_tensor > 0.5).float()
-
-    mask_preview_tensor = mask_tensor.detach().cpu().unsqueeze(-1).repeat(1, 1, 1, 3)
-    mask_image = tensor_to_pil(mask_preview_tensor)
-    mask_output_file, mask_subfolder, mask_filename = resolve_filepath(
-        filename_prefix="inpaint_mask",
-        image=mask_preview_tensor,
-    )
-    mask_image.save(mask_output_file, format="PNG")
-    mask_url = get_resource_url(mask_subfolder, mask_filename, "temp")
-
-    steps = max(1, int(round(convert_to_int(settings.get("steps", 20)))))
-    denoise_value = convert_to_float(settings.get("denoise", settings.get("denoise_percentage", 100.0)))
-    if denoise_value > 1.0:
-        denoise_value = denoise_value / 100.0
-    denoise_value = max(0.0, min(1.0, denoise_value))
-    cfg = convert_to_float(settings.get("cfg", 7.0))
-
-    sampler_name = str(settings.get("sampler", "dpmpp_2m"))
-    if sampler_name not in SAMPLERS:
-        sampler_name = "dpmpp_2m"
-    scheduler_name = str(settings.get("scheduler", "karras"))
-    if scheduler_name not in SAMPLERS:
-        scheduler_name = "normal"
-
-    seed = convert_to_int(settings.get("seed", random.randint(0, 2**32 - 1))) & 0xFFFFFFFFFFFFFFFF
-    positive_prompt = str(settings.get("positive_prompt", ""))
-    negative_prompt = str(settings.get("negative_prompt", ""))
-
-    processed = perform_inpaint(
-        model=model,
-        clip=clip,
-        vae=vae,
-        image=image,
-        mask=mask_tensor,
-        positive_prompt=positive_prompt,
-        negative_prompt=negative_prompt,
-        sampler_name=sampler_name,
-        scheduler_name=scheduler_name,
-        steps=steps,
-        denoise=denoise_value,
-        cfg=cfg,
-        seed=seed,
-        disable_preview=True,
-    )
-
-    processed = processed.detach().clamp(0.0, 1.0).to(torch.float32).cpu().contiguous()
-
-    return processed, {"mask": mask_url}
-
-
-
 def load_image_tensor(image_path: str) -> torch.Tensor:
     try:
         pil_image = Image.open(image_path).convert("RGB")

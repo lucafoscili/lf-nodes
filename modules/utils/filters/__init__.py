@@ -8,6 +8,7 @@ from .film_grain import *
 from .gaussian_blur import *
 from .inpaint import *
 from .line import *
+from .processors import *
 from .saturation import *
 from .sepia import *
 from .split_tone import *
