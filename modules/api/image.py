@@ -282,8 +282,7 @@ def apply_inpaint_effect(img_tensor: torch.Tensor, settings: dict) -> tuple[torc
         canvas = F.interpolate(
             canvas.permute(0, 3, 1, 2),
             size=(img_tensor.shape[1], img_tensor.shape[2]),
-            mode="bicubic",
-            align_corners=False,
+            mode="nearest"
         ).permute(0, 2, 3, 1)
 
     alpha = canvas[..., 3] if canvas.shape[-1] >= 4 else canvas.mean(dim=-1)
@@ -316,8 +315,7 @@ def apply_inpaint_effect(img_tensor: torch.Tensor, settings: dict) -> tuple[torc
         mask_tensor = F.interpolate(
             mask_tensor.unsqueeze(1),
             size=(image_height, image_width),
-            mode="bicubic",
-            align_corners=False,
+            mode="nearest"
         ).squeeze(1)
 
     mask_tensor = mask_tensor.clamp(0.0, 1.0)
