@@ -8,6 +8,7 @@ from aiohttp import web
 from PIL import Image
 
 import nodes
+import comfy.sample
 
 from server import PromptServer
 
@@ -244,6 +245,53 @@ def apply_vibrance_effect(img_tensor: torch.Tensor, settings: dict):
 
     return vibrance_effect(img_tensor, intensity, protect_skin, clip_soft)
 
+
+def sample_without_preview(
+    model,
+    positive,
+    negative,
+    latent,
+    seed,
+    steps,
+    cfg,
+    sampler_name,
+    scheduler_name,
+    denoise_value,
+):
+    latent_image = latent["samples"]
+    latent_image = comfy.sample.fix_empty_latent_channels(model, latent_image)
+
+    batch_inds = latent.get("batch_index")
+    noise = comfy.sample.prepare_noise(latent_image, seed, batch_inds)
+
+    noise_mask = latent.get("noise_mask")
+
+    samples = comfy.sample.sample(
+        model,
+        noise,
+        steps,
+        cfg,
+        sampler_name,
+        scheduler_name,
+        positive,
+        negative,
+        latent_image,
+        denoise=denoise_value,
+        disable_noise=False,
+        start_step=None,
+        last_step=None,
+        force_full_denoise=False,
+        noise_mask=noise_mask,
+        callback=None,
+        disable_pbar=True,
+        seed=seed,
+    )
+
+    out_latent = latent.copy()
+    out_latent["samples"] = samples
+
+    return out_latent
+
 def apply_vignette_effect(img_tensor: torch.Tensor, settings: dict):
     intensity = convert_to_float(settings.get("intensity", 0))
     radius = convert_to_float(settings.get("radius", 0))
@@ -362,20 +410,18 @@ def apply_inpaint_effect(img_tensor: torch.Tensor, settings: dict) -> tuple[torc
             mask_tensor,
             True,
         )
-
-        sampler = nodes.KSampler()
-        latent_result = sampler.sample(
-            model,
-            seed,
-            steps,
-            cfg,
-            sampler_name,
-            scheduler_name,
-            pos_cond,
-            neg_cond,
-            latent,
-            denoise_value,
-        )[0]
+        latent_result = sample_without_preview(
+        model,
+        pos_cond,
+        neg_cond,
+        latent,
+        seed,
+        steps,
+        cfg,
+        sampler_name,
+        scheduler_name,
+        denoise_value,
+    )
 
         decoded = nodes.VAEDecode().decode(vae, latent_result)[0].to(device=device, dtype=torch.float32)
 
