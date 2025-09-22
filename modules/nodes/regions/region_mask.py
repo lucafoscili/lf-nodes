@@ -7,9 +7,9 @@ from ...utils.constants import FUNCTION, Input, EVENT_PREFIX
 from ...utils.helpers.api import get_resource_url
 from ...utils.helpers.comfy import resolve_filepath
 from ...utils.helpers.conversion import tensor_to_pil
+from ...utils.helpers.detection import build_region_mask
 from ...utils.helpers.logic import normalize_input_image, normalize_list_to_value, normalize_output_image
 from ...utils.helpers.ui import create_compare_node
-from ...utils.regions import build_region_mask
 
 # region LF_RegionMask
 class LF_RegionMask:

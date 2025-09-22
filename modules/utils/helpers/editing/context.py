@@ -4,6 +4,7 @@ from typing import Any, Dict, Optional
 
 _EDITING_CONTEXTS: Dict[str, Dict[str, Any]] = {}
 
+
 def register_editing_context(identifier: str, *, model: Any = None, clip: Any = None, vae: Any = None) -> None:
     """
     Registers an editing context with the given identifier and associated models.
@@ -19,12 +20,13 @@ def register_editing_context(identifier: str, *, model: Any = None, clip: Any = 
     """
     if not identifier:
         return
-    
+
     _EDITING_CONTEXTS[identifier] = {
         "model": model,
         "clip": clip,
         "vae": vae,
     }
+
 
 def get_editing_context(identifier: str) -> Optional[Dict[str, Any]]:
     """
@@ -38,7 +40,7 @@ def get_editing_context(identifier: str) -> Optional[Dict[str, Any]]:
     """
     if not identifier:
         return None
-    
+
     return _EDITING_CONTEXTS.get(identifier)
 
 
@@ -58,5 +60,5 @@ def clear_editing_context(identifier: str) -> None:
     """
     if not identifier:
         return
-    
+
     _EDITING_CONTEXTS.pop(identifier, None)

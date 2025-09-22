@@ -1,9 +1,10 @@
-﻿import math
+import math
 import torch
 
 from typing import Any, Dict, Tuple
 
-from ..utils.filters import apply_gaussian_blur
+from ...filters import apply_gaussian_blur
+
 
 def _gaussian_blur_2d(tensor: torch.Tensor, kernel_size: Tuple[int, int], sigma: float) -> torch.Tensor:
     if sigma <= 0:
@@ -33,6 +34,7 @@ def _ensure_bbox(region: Dict[str, Any], image_height: int, image_width: int) ->
         max(0.0, min(x2, image_width - 1.0)),
         max(0.0, min(y2, image_height - 1.0)),
     )
+
 
 # region build_region_mask
 def build_region_mask(
@@ -109,6 +111,6 @@ def build_region_mask(
     if invert:
         mask = 1.0 - mask
     mask = mask.clamp(0.0, 1.0)
-    
+
     return mask.unsqueeze(0).unsqueeze(-1)
 # endregion

@@ -14,9 +14,9 @@ from ..utils.filters import blend_effect, bloom_effect, brightness_effect, clari
 from ..utils.helpers.api import get_resource_url, resolve_url
 from ..utils.helpers.comfy import get_comfy_dir, resolve_filepath
 from ..utils.helpers.conversion import base64_to_tensor, convert_to_boolean, convert_to_float, convert_to_int, pil_to_tensor, tensor_to_pil
+from ..utils.helpers.editing import get_editing_context
 from ..utils.helpers.torch import create_colored_tensor
 from ..utils.helpers.ui import create_masonry_node
-from ..utils.image_editing import get_editing_context
 
 # region get-image
 

@@ -12,9 +12,9 @@ from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
 from ...utils.helpers.api import get_resource_url
 from ...utils.helpers.comfy import get_comfy_dir, resolve_filepath
 from ...utils.helpers.conversion import pil_to_tensor, tensor_to_pil
+from ...utils.helpers.editing import clear_editing_context, register_editing_context
 from ...utils.helpers.logic import normalize_input_image, normalize_list_to_value, normalize_output_image
 from ...utils.helpers.ui import create_masonry_node
-from ...utils.image_editing import clear_editing_context, register_editing_context
 
 # region LF_ImagesEditingBreakpoint
 class LF_ImagesEditingBreakpoint:

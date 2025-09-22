@@ -7,8 +7,7 @@ from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
-from ...utils.detection import detect_regions, load_yolo_session
-from ...utils.helpers.detection import append_compare_entry, build_overlay, load_label_map, parse_class_filter, parse_class_labels, select_region
+from ...utils.helpers.detection import append_compare_entry, build_overlay, detect_regions, load_label_map, load_yolo_session, parse_class_filter, parse_class_labels, select_region
 from ...utils.helpers.logic import normalize_input_image, normalize_json_input, normalize_list_to_value
 
 # region LF_DetectRegions

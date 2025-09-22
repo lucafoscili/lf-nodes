@@ -18,7 +18,8 @@ except ImportError as exc:  # pragma: no cover - handled at runtime
 else:
     _ORT_IMPORT_ERROR = None
 
-from .helpers import tensor_to_numpy
+from ..conversion import tensor_to_numpy
+
 
 COCO_CLASS_NAMES: Tuple[str, ...] = (
     "person",
@@ -138,6 +139,7 @@ def _select_providers(custom: Optional[Sequence[str]] = None) -> List[str]:
     selected = [provider for provider in preferred if provider in available]
     return selected or available
 
+
 def _letterbox(
     image: np.ndarray,
     new_shape: Tuple[int, int],
@@ -252,7 +254,7 @@ def _coerce_int(value: Any) -> Optional[int]:
 
 
 def _resolve_input_shape(
-    session: "ort.InferenceSession",
+    session: Any,
     requested: Optional[int | Tuple[int, int] | Sequence[int]],
 ) -> Tuple[int, int]:
     if isinstance(requested, (list, tuple)):
@@ -292,7 +294,7 @@ def _sanitize_labels(labels: Optional[Sequence[str]]) -> Tuple[str, ...]:
     return tuple(sanitized)
 
 
-def _labels_from_session_metadata(session: "ort.InferenceSession") -> Optional[Tuple[str, ...]]:
+def _labels_from_session_metadata(session: Any) -> Optional[Tuple[str, ...]]:
     try:
         meta = session.get_modelmeta()
     except Exception:  # pragma: no cover - runtime guard
@@ -396,12 +398,13 @@ def _resolve_class_whitelist(
         indices.add(idx)
     return indices or None
 
+
 # region load_yolo_session
 def load_yolo_session(
     *,
     model_path: Path | str,
     providers: Optional[Sequence[str]] = None,
-) -> "ort.InferenceSession":
+) -> Any:
     """
     Loads and caches a YOLO ONNX inference session for region detection.
 
@@ -447,11 +450,12 @@ def load_yolo_session(
     return session
 # endregion
 
+
 # region detect_regions
 def detect_regions(
     image: torch.Tensor,
     *,
-    session: Optional["ort.InferenceSession"] = None,
+    session: Optional[Any] = None,
     model_path: Optional[Path | str] = None,
     providers: Optional[Sequence[str]] = None,
     input_size: Optional[int | Tuple[int, int]] = None,
