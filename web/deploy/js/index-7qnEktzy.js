@@ -5423,7 +5423,7 @@ var tt = false, et = (t2, e2, n2) => {
                         const n6 = t7.i.replace(/-/g, "_"), o6 = t7.T;
                         if (!o6) return;
                         const i3 = r.get(o6);
-                        return i3 ? i3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-4ba08932.entry.js": () => import("./p-4ba08932.entry-BYm4W8Fc.js"), "./p-60af2d7f.entry.js": () => import("./p-60af2d7f.entry-BuPkV1dv.js"), "./p-7652d72d.entry.js": () => import("./p-7652d72d.entry-BiR5K0BJ.js"), "./p-79cc15c2.entry.js": () => import("./p-79cc15c2.entry-D31bYGVI.js"), "./p-846257eb.entry.js": () => import("./p-846257eb.entry-B898k_Ek.js"), "./p-84927cea.entry.js": () => import("./p-84927cea.entry-Chb7GeSX.js"), "./p-87e2e37a.entry.js": () => import("./p-87e2e37a.entry-BXYy9Gr6.js"), "./p-928c4970.entry.js": () => import("./p-928c4970.entry-DE1lkQ7I.js"), "./p-93ed735a.entry.js": () => import("./p-93ed735a.entry-BQGZzLlR.js"), "./p-a147e6c9.entry.js": () => import("./p-a147e6c9.entry-DQSslSmt.js"), "./p-a14c6d82.entry.js": () => import("./p-a14c6d82.entry-BmtvipoJ.js"), "./p-a7fc1135.entry.js": () => import("./p-a7fc1135.entry-Cm0mO8iL.js"), "./p-bd214b33.entry.js": () => import("./p-bd214b33.entry-BSqWCj3J.js"), "./p-bf8a47d4.entry.js": () => import("./p-bf8a47d4.entry-CR9lQbNG.js"), "./p-ccea11a0.entry.js": () => import("./p-ccea11a0.entry-d2dWVW_Q.js"), "./p-e2689624.entry.js": () => import("./p-e2689624.entry-r5DniQS_.js") }), `./${o6}.entry.js`, 2).then(((t8) => (r.set(o6, t8), t8[n6])), ((t8) => {
+                        return i3 ? i3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-4ba08932.entry.js": () => import("./p-4ba08932.entry-ur7gmD_i.js"), "./p-60af2d7f.entry.js": () => import("./p-60af2d7f.entry-CXr5F8Gp.js"), "./p-7652d72d.entry.js": () => import("./p-7652d72d.entry-DV6l_9Lg.js"), "./p-79cc15c2.entry.js": () => import("./p-79cc15c2.entry-DGQlsl5p.js"), "./p-846257eb.entry.js": () => import("./p-846257eb.entry-CZAovbNR.js"), "./p-84927cea.entry.js": () => import("./p-84927cea.entry-8QPetBba.js"), "./p-87e2e37a.entry.js": () => import("./p-87e2e37a.entry-D-JXgK-9.js"), "./p-928c4970.entry.js": () => import("./p-928c4970.entry-08AbMFAX.js"), "./p-93ed735a.entry.js": () => import("./p-93ed735a.entry-ByfrtO2u.js"), "./p-a147e6c9.entry.js": () => import("./p-a147e6c9.entry-xYbNO7oS.js"), "./p-a14c6d82.entry.js": () => import("./p-a14c6d82.entry-BygqSGNo.js"), "./p-a7fc1135.entry.js": () => import("./p-a7fc1135.entry-B3AYFk1-.js"), "./p-bd214b33.entry.js": () => import("./p-bd214b33.entry-Cbkro8X7.js"), "./p-bf8a47d4.entry.js": () => import("./p-bf8a47d4.entry-BBTfKLBn.js"), "./p-ccea11a0.entry.js": () => import("./p-ccea11a0.entry-Yd73vV9M.js"), "./p-e2689624.entry.js": () => import("./p-e2689624.entry-CxgSwR-T.js") }), `./${o6}.entry.js`, 2).then(((t8) => (r.set(o6, t8), t8[n6])), ((t8) => {
                           l(t8, e3.$hostElement$);
                         }));
                         /*!__STENCIL_STATIC_IMPORT_SWITCH__*/
@@ -8829,6 +8829,7 @@ var ImageEditorSliderIds;
   ImageEditorSliderIds2["BlurSigma"] = "blur_sigma";
   ImageEditorSliderIds2["DenoisePercentage"] = "denoise_percentage";
   ImageEditorSliderIds2["Cfg"] = "cfg";
+  ImageEditorSliderIds2["Dilate"] = "dilate";
   ImageEditorSliderIds2["FocusPosition"] = "focus_position";
   ImageEditorSliderIds2["FocusSize"] = "focus_size";
   ImageEditorSliderIds2["Gamma"] = "gamma";
@@ -8836,6 +8837,9 @@ var ImageEditorSliderIds;
   ImageEditorSliderIds2["Intensity"] = "intensity";
   ImageEditorSliderIds2["Midpoint"] = "midpoint";
   ImageEditorSliderIds2["Opacity"] = "opacity";
+  ImageEditorSliderIds2["RoiAlign"] = "roi_align";
+  ImageEditorSliderIds2["RoiMinSize"] = "roi_min_size";
+  ImageEditorSliderIds2["RoiPadding"] = "roi_padding";
   ImageEditorSliderIds2["Radius"] = "radius";
   ImageEditorSliderIds2["RedChannel"] = "r_channel";
   ImageEditorSliderIds2["SharpenAmount"] = "sharpen_amount";
@@ -8844,6 +8848,8 @@ var ImageEditorSliderIds;
   ImageEditorSliderIds2["Steps"] = "steps";
   ImageEditorSliderIds2["Strength"] = "strength";
   ImageEditorSliderIds2["Threshold"] = "threshold";
+  ImageEditorSliderIds2["UpsampleTarget"] = "upsample_target";
+  ImageEditorSliderIds2["Feather"] = "feather";
 })(ImageEditorSliderIds || (ImageEditorSliderIds = {}));
 var ImageEditorTextfieldIds;
 (function(ImageEditorTextfieldIds2) {
@@ -8865,6 +8871,8 @@ var ImageEditorToggleIds;
   ImageEditorToggleIds2["SoftBlend"] = "soft_blend";
   ImageEditorToggleIds2["Vertical"] = "vertical";
   ImageEditorToggleIds2["UseConditioning"] = "use_conditioning";
+  ImageEditorToggleIds2["RoiAuto"] = "roi_auto";
+  ImageEditorToggleIds2["RoiAlignAuto"] = "roi_align_auto";
 })(ImageEditorToggleIds || (ImageEditorToggleIds = {}));
 var ImageEditorBlendIds;
 (function(ImageEditorBlendIds2) {
@@ -8977,6 +8985,14 @@ var ImageEditorInpaintIds;
   ImageEditorInpaintIds2["Seed"] = "seed";
   ImageEditorInpaintIds2["Steps"] = "steps";
   ImageEditorInpaintIds2["UseConditioning"] = "use_conditioning";
+  ImageEditorInpaintIds2["RoiAuto"] = "roi_auto";
+  ImageEditorInpaintIds2["RoiPadding"] = "roi_padding";
+  ImageEditorInpaintIds2["RoiAlign"] = "roi_align";
+  ImageEditorInpaintIds2["RoiAlignAuto"] = "roi_align_auto";
+  ImageEditorInpaintIds2["RoiMinSize"] = "roi_min_size";
+  ImageEditorInpaintIds2["Dilate"] = "dilate";
+  ImageEditorInpaintIds2["Feather"] = "feather";
+  ImageEditorInpaintIds2["UpsampleTarget"] = "upsample_target";
 })(ImageEditorInpaintIds || (ImageEditorInpaintIds = {}));
 const SETTINGS = {
   //#region Blend
@@ -9420,7 +9436,16 @@ const SETTINGS = {
       positive_prompt: "",
       negative_prompt: "",
       seed: 42,
-      use_conditioning: false
+      use_conditioning: false,
+      // Advanced defaults mirror backend fallbacks
+      roi_auto: true,
+      roi_padding: 32,
+      roi_align: 8,
+      roi_align_auto: false,
+      roi_min_size: 64,
+      dilate: 0,
+      feather: 0,
+      upsample_target: 0
     },
     configs: {
       [ImageEditorControls.Slider]: [
@@ -9456,6 +9481,73 @@ const SETTINGS = {
           min: "1",
           step: "1",
           title: "Diffusion steps used for the inpaint sampler."
+        },
+        // ROI and Quality controls
+        {
+          ariaLabel: "ROI padding (px)",
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 32,
+          id: ImageEditorSliderIds.RoiPadding,
+          isMandatory: false,
+          max: "256",
+          min: "0",
+          step: "1",
+          title: "Pixels of padding around the mask bounding box when cropping the ROI."
+        },
+        {
+          ariaLabel: "ROI align multiple",
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 8,
+          id: ImageEditorSliderIds.RoiAlign,
+          isMandatory: false,
+          max: "64",
+          min: "1",
+          step: "1",
+          title: "Align ROI size/position to this multiple. Keeps latent-friendly dims. Disable auto-align to use."
+        },
+        {
+          ariaLabel: "ROI minimum size (px)",
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 64,
+          id: ImageEditorSliderIds.RoiMinSize,
+          isMandatory: false,
+          max: "1024",
+          min: "1",
+          step: "1",
+          title: "Enforce a minimum width/height for the cropped ROI."
+        },
+        {
+          ariaLabel: "Dilate mask (px)",
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 0,
+          id: ImageEditorSliderIds.Dilate,
+          isMandatory: false,
+          max: "64",
+          min: "0",
+          step: "1",
+          title: "Expand mask edges before inpaint to avoid seams."
+        },
+        {
+          ariaLabel: "Feather mask (px)",
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 0,
+          id: ImageEditorSliderIds.Feather,
+          isMandatory: false,
+          max: "64",
+          min: "0",
+          step: "1",
+          title: "Soften mask edges to blend the inpainted region."
+        },
+        {
+          ariaLabel: "Upsample target (px)",
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 0,
+          id: ImageEditorSliderIds.UpsampleTarget,
+          isMandatory: false,
+          max: "2048",
+          min: "0",
+          step: "16",
+          title: "Detailer path: upscale ROI longer side to this size before inpaint (0 disables)."
         }
       ],
       [ImageEditorControls.Textfield]: [
@@ -9497,6 +9589,26 @@ const SETTINGS = {
           off: "false",
           on: "true",
           title: "If enabled, prepend the connected conditioning inputs to the prompts before sampling."
+        },
+        {
+          ariaLabel: "Auto ROI crop",
+          controlType: ImageEditorControls.Toggle,
+          defaultValue: true,
+          id: ImageEditorToggleIds.RoiAuto,
+          isMandatory: false,
+          off: "false",
+          on: "true",
+          title: "Automatically crop to mask bounding box to speed up inpainting."
+        },
+        {
+          ariaLabel: "Auto-align ROI",
+          controlType: ImageEditorControls.Toggle,
+          defaultValue: false,
+          id: ImageEditorToggleIds.RoiAlignAuto,
+          isMandatory: false,
+          off: "false",
+          on: "true",
+          title: "Infer alignment multiple from VAE/model. Disable to set a manual multiple (see slider)."
         }
       ]
     }
