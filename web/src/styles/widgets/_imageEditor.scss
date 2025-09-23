@@ -48,7 +48,6 @@
       @include mixins.lf-el-stretch;
       align-items: center;
       display: grid;
-      grid-area: settings;
       grid-template-rows: 1fr auto;
     }
 
