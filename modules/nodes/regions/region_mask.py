@@ -73,7 +73,7 @@ class LF_RegionMask:
     INPUT_IS_LIST = (True, True, False)
     OUTPUT_IS_LIST = (False, True, False)
     RETURN_TYPES = ("MASK", "MASK", "REGION_META")
-    RETURN_NAMES = ("mask", "maske_list", "region")
+    RETURN_NAMES = ("mask", "mask_list", "region")
 
     def on_exec(self, **kwargs):
         node_id = kwargs.get("node_id")
