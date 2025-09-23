@@ -2,7 +2,7 @@ from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, INT_MAX
-from ...utils.helpers import normalize_input_list
+from ...utils.helpers.logic import normalize_input_list
 
 # region LF_DisplayPrimitiveAsJSON
 class LF_DisplayPrimitiveAsJSON:

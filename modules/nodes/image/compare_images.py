@@ -4,7 +4,11 @@ from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
-from ...utils.helpers import create_compare_node, get_resource_url, normalize_input_image, normalize_output_image, resolve_filepath, tensor_to_pil
+from ...utils.helpers.api import get_resource_url
+from ...utils.helpers.comfy import resolve_filepath
+from ...utils.helpers.conversion import tensor_to_pil
+from ...utils.helpers.logic import normalize_input_image, normalize_output_image
+from ...utils.helpers.ui import create_compare_node
 
 # region LF_CompareImages
 class LF_CompareImages:

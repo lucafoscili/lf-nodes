@@ -8,7 +8,9 @@ from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, INT_MAX
-from ...utils.helpers import create_history_node, filter_list, get_comfy_list, normalize_json_input, normalize_list_to_value
+from ...utils.helpers.comfy import get_comfy_list
+from ...utils.helpers.logic import filter_list, normalize_json_input, normalize_list_to_value
+from ...utils.helpers.ui import create_history_node
 
 # region LF_VAESelector
 class LF_VAESelector:

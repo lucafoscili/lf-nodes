@@ -26,6 +26,8 @@ import {
   ImageEditorFilter,
   ImageEditorFilterType,
   ImageEditorIcons,
+  ImageEditorRequestSettings,
+  ImageEditorDataset,
   ImageEditorSliderConfig,
   ImageEditorSliderIds,
   ImageEditorState,
@@ -95,31 +97,40 @@ export const EV_HANDLERS = {
       case 'stroke':
         const originalFilter = filter;
         const originalFilterType = filterType;
-
-        let b64_canvas = '';
-
-        if (filterType === 'brush' || !filter?.hasCanvasAction) {
+        const canvas = await comp.getCanvas();
+        const b64_canvas = canvasToBase64(canvas);
+        if (filterType !== 'brush' && !filter?.hasCanvasAction) {
           state.filterType = 'brush';
-          const canvas = await comp.getCanvas();
-          b64_canvas = canvasToBase64(canvas);
         }
 
+        const brushDefaults = {
+          ...SETTINGS.brush.settings,
+          ...state.lastBrushSettings,
+        };
         const temporaryFilter: ImageEditorBrushFilter = {
           ...JSON.parse(JSON.stringify(SETTINGS.brush)),
           settings: {
+            ...brushDefaults,
             b64_canvas,
-            color: comp.lfColor,
-            opacity: comp.lfOpacity,
+            color: comp.lfColor ?? brushDefaults.color,
+            opacity: comp.lfOpacity ?? brushDefaults.opacity,
             points,
-            size: comp.lfSize,
+            size: comp.lfSize ?? brushDefaults.size,
           },
         };
-
         state.filter = temporaryFilter;
 
         try {
-          await updateCb(state, true);
+          await updateCb(state, true, true);
         } finally {
+          if (originalFilter?.hasCanvasAction) {
+            const existingSettings =
+              originalFilter.settings ?? ({} as typeof originalFilter.settings);
+            originalFilter.settings = {
+              ...existingSettings,
+              b64_canvas,
+            };
+          }
           state.filter = originalFilter;
           state.filterType = originalFilterType;
           await comp.clearCanvas();
@@ -234,23 +245,40 @@ export const apiCall = async (state: ImageEditorState, addSnapshot: boolean) => 
   const lfManager = getLfManager();
 
   const snapshotValue = (await imageviewer.getCurrentSnapshot()).value;
+  const baseSettings = filter.settings as ImageEditorRequestSettings<typeof filterType>;
+  const payload: ImageEditorRequestSettings<typeof filterType> = {
+    ...baseSettings,
+  };
+
+  const contextDataset = imageviewer.lfDataset as ImageEditorDataset | undefined;
+  const contextId = contextDataset?.context_id;
+
+  if (contextId) {
+    payload.context_id = contextId;
+  }
+
   requestAnimationFrame(() => imageviewer.setSpinnerStatus(true));
+
   try {
-    const response = await getApiRoutes().image.process(snapshotValue, filterType, filter.settings);
-    if (response.status === 'success') {
-      if (addSnapshot) {
-        imageviewer.addSnapshot(response.data);
-      } else {
-        const { canvas } = (await imageviewer.getComponents()).details;
-        const image = await canvas.getImage();
-        requestAnimationFrame(() => (image.lfValue = response.data));
-      }
+    const response = await getApiRoutes().image.process(snapshotValue, filterType, payload);
+    if (response.mask) {
+      lfManager.log(
+        'Saved inpaint mask preview to temp',
+        { mask: response.mask },
+        LogSeverity.Info,
+      );
+    }
+    if (addSnapshot) {
+      await imageviewer.addSnapshot(response.data);
     } else {
-      lfManager.log('Error processing image!', { response }, LogSeverity.Error);
+      const { canvas } = (await imageviewer.getComponents()).details;
+      const image = await canvas.getImage();
+      requestAnimationFrame(() => (image.lfValue = response.data));
     }
   } catch (error) {
     lfManager.log('Error processing image!', { error }, LogSeverity.Error);
   }
+
   requestAnimationFrame(() => imageviewer.setSpinnerStatus(false));
 };
 //#endregion
@@ -262,6 +290,10 @@ export const refreshValues = async (state: ImageEditorState, addSnapshot = false
 
   const lfManager = getLfManager();
 
+  state.settingsStore = state.settingsStore ?? {};
+  const storeForFilter = (state.settingsStore[state.filterType] =
+    state.settingsStore[state.filterType] ?? {});
+
   for (const key in controls) {
     if (Object.prototype.hasOwnProperty.call(controls, key)) {
       const id = key as ImageEditorControlIds;
@@ -271,19 +303,24 @@ export const refreshValues = async (state: ImageEditorState, addSnapshot = false
         case 'LF-SLIDER': {
           const slider = control as HTMLLfSliderElement;
           const sliderValue = await slider.getValue();
-          filter.settings[id] = addSnapshot ? sliderValue.real : sliderValue.display;
+          const value = addSnapshot ? sliderValue.real : sliderValue.display;
+          filter.settings[id] = value;
+          storeForFilter[id] = value;
           break;
         }
         case 'LF-TEXTFIELD': {
           const textfield = control as HTMLLfTextfieldElement;
           const textfieldValue = await textfield.getValue();
           filter.settings[id] = textfieldValue;
+          storeForFilter[id] = textfieldValue;
           break;
         }
         case 'LF-TOGGLE': {
           const toggle = control as HTMLLfToggleElement;
           const toggleValue = await toggle.getValue();
-          filter.settings[id] = toggleValue === 'on' ? toggle.dataset.on : toggle.dataset.off;
+          const value = toggleValue === 'on' ? toggle.dataset.on : toggle.dataset.off;
+          filter.settings[id] = value;
+          storeForFilter[id] = value;
           break;
         }
         default:
@@ -299,11 +336,82 @@ export const refreshValues = async (state: ImageEditorState, addSnapshot = false
 };
 //#endregion
 
+//#region applyFilterDefaults
+const applyFilterDefaults = (
+  state: ImageEditorState,
+  defaults: Partial<Record<ImageEditorControlIds, unknown>>,
+) => {
+  const { filter } = state;
+  if (!filter) {
+    return;
+  }
+
+  const mutableSettings = filter.settings;
+
+  (Object.keys(filter.configs) as ImageEditorControls[]).forEach((controlType) => {
+    const configs = filter.configs[controlType];
+    configs?.forEach((config) => {
+      const defaultValue = defaults[config.id as ImageEditorControlIds];
+      if (typeof defaultValue === 'undefined') {
+        return;
+      }
+
+      switch (controlType) {
+        case ImageEditorControls.Slider: {
+          const numericValue =
+            typeof defaultValue === 'number' ? defaultValue : Number(defaultValue);
+          (config as ImageEditorSliderConfig).defaultValue = numericValue;
+          mutableSettings[config.id] = numericValue;
+          break;
+        }
+        case ImageEditorControls.Textfield: {
+          const stringValue =
+            defaultValue === null || typeof defaultValue === 'undefined'
+              ? ''
+              : String(defaultValue);
+          (config as ImageEditorTextfieldConfig).defaultValue = stringValue;
+          mutableSettings[config.id] = stringValue;
+          break;
+        }
+        case ImageEditorControls.Toggle: {
+          const toggleConfig = config as ImageEditorToggleConfig;
+          const boolValue =
+            defaultValue === true ||
+            (typeof defaultValue === 'string' && defaultValue.toLowerCase() === 'true');
+          toggleConfig.defaultValue = boolValue;
+          mutableSettings[config.id] = boolValue ? toggleConfig.on : toggleConfig.off;
+          break;
+        }
+      }
+    });
+  });
+};
+//#endregion
+
 //#region prepSettings
 export const prepSettings = (state: ImageEditorState, node: LfDataNode) => {
   state.elements.controls = {};
   state.filter = unescapeJson(node.cells.lfCode.value).parsedJson as ImageEditorFilter;
-  state.filterType = node.id as ImageEditorFilterType;
+  const idRaw = (node.id as string) || 'brush';
+  const alias = idRaw === 'inpaint_detail' || idRaw === 'inpaint_adv' ? 'inpaint' : idRaw;
+  state.filterType = alias as ImageEditorFilterType;
+
+  const dataset = state.elements.imageviewer.lfDataset as ImageEditorDataset | undefined;
+  const defaults = dataset?.defaults?.[state.filterType] as
+    | Partial<Record<ImageEditorControlIds, unknown>>
+    | undefined;
+  if (defaults) {
+    applyFilterDefaults(state, defaults);
+  }
+
+  state.settingsStore = state.settingsStore ?? {};
+  const stored = state.settingsStore[state.filterType] ?? {};
+  const mutableSettings = state.filter.settings;
+  (Object.keys(stored) as ImageEditorControlIds[]).forEach((id) => {
+    const v = stored[id];
+    if (typeof v === 'undefined') return;
+    mutableSettings[id] = v as never;
+  });
 
   const { elements, filter } = state;
   const { settings } = elements;
@@ -322,16 +430,32 @@ export const prepSettings = (state: ImageEditorState, node: LfDataNode) => {
         switch (controlName) {
           case ImageEditorControls.Slider:
             const slider = createSlider(state, control as ImageEditorSliderConfig);
+            const storedValueSlider = stored[control.id as ImageEditorControlIds];
+            if (typeof storedValueSlider !== 'undefined') {
+              slider.lfValue = Number(storedValueSlider);
+            }
             controlsContainer.appendChild(slider);
             state.elements.controls[control.id as ImageEditorSliderIds] = slider;
             break;
           case ImageEditorControls.Textfield:
             const textfield = createTextfield(state, control as ImageEditorTextfieldConfig);
+            const storedValueText = stored[control.id as ImageEditorControlIds];
+            if (typeof storedValueText !== 'undefined') {
+              textfield.lfValue = String(storedValueText);
+            }
             controlsContainer.appendChild(textfield);
             state.elements.controls[control.id as ImageEditorTextfieldIds] = textfield;
             break;
           case ImageEditorControls.Toggle:
             const toggle = createToggle(state, control as ImageEditorToggleConfig);
+            const storedValueToggle = stored[control.id as ImageEditorControlIds];
+            if (typeof storedValueToggle !== 'undefined') {
+              const bool =
+                storedValueToggle === true ||
+                (typeof storedValueToggle === 'string' &&
+                  storedValueToggle.toLowerCase() === 'true');
+              toggle.lfValue = bool;
+            }
             controlsContainer.appendChild(toggle);
             state.elements.controls[control.id as ImageEditorToggleIds] = toggle;
             break;
@@ -342,12 +466,56 @@ export const prepSettings = (state: ImageEditorState, node: LfDataNode) => {
     }
   });
 
+  const buttonsWrapper = document.createElement(TagName.Div);
+  buttonsWrapper.classList.add(ImageEditorCSS.SettingsButtons);
+  settings.appendChild(buttonsWrapper);
+
   const resetButton = document.createElement(TagName.LfButton);
-  resetButton.classList.add('lf-full-width');
   resetButton.lfIcon = ImageEditorIcons.Reset;
   resetButton.lfLabel = 'Reset';
+  resetButton.lfStretchX = true;
   resetButton.addEventListener('click', () => resetSettings(settings));
-  settings.appendChild(resetButton);
+  buttonsWrapper.appendChild(resetButton);
+
+  if (state.filterType === 'brush') {
+    const brushSettings = (state.filter.settings ?? {}) as ImageEditorBrushSettings;
+    state.lastBrushSettings = {
+      ...state.lastBrushSettings,
+      ...JSON.parse(JSON.stringify(brushSettings)),
+    };
+  }
+
+  if (filter?.hasCanvasAction) {
+    requestAnimationFrame(async () => {
+      const canvas = (await state.elements.imageviewer.getComponents()).details.canvas;
+      const brushSource = {
+        ...SETTINGS.brush.settings,
+        ...state.lastBrushSettings,
+        ...((state.filter.settings ?? {}) as Partial<ImageEditorBrushSettings>),
+      };
+
+      if (brushSource.color) {
+        canvas.lfColor = brushSource.color;
+      }
+      if (typeof brushSource.opacity === 'number') {
+        canvas.lfOpacity = brushSource.opacity;
+      }
+      if (typeof brushSource.size === 'number') {
+        canvas.lfSize = brushSource.size;
+      }
+    });
+  }
+
+  if (filter?.requiresManualApply) {
+    const applyButton = document.createElement(TagName.LfButton);
+    applyButton.lfIcon = ImageEditorIcons.Resume;
+    applyButton.lfLabel = 'Apply';
+    applyButton.lfStretchX = true;
+    applyButton.addEventListener('click', () => {
+      void updateCb(state, true, true);
+    });
+    buttonsWrapper.appendChild(applyButton);
+  }
 };
 //#endregion
 
@@ -390,7 +558,7 @@ export const createToggle = (state: ImageEditorState, data: ImageEditorToggleCon
   comp.dataset.off = data.off;
   comp.dataset.on = data.on;
   comp.lfLabel = parseLabel(data);
-  comp.lfValue = false;
+  comp.lfValue = data.defaultValue ?? false;
   comp.title = data.title;
   comp.addEventListener(LfEventName.LfToggle, (e) => EV_HANDLERS.toggle(state, e));
 
@@ -451,7 +619,7 @@ export const setGridStatus = (
       break;
   }
 };
-export const updateCb = async (state: ImageEditorState, addSnapshot = false) => {
+export const updateCb = async (state: ImageEditorState, addSnapshot = false, force = false) => {
   await refreshValues(state, addSnapshot);
 
   const { elements, filter } = state;
@@ -464,16 +632,35 @@ export const updateCb = async (state: ImageEditorState, addSnapshot = false) => 
   const isStroke = !filter || filter.hasCanvasAction;
 
   if (validValues && isStroke) {
-    const { color, size, opacity } = settings as ImageEditorBrushSettings;
-
     const canvas = (await imageviewer.getComponents()).details.canvas;
-    canvas.lfColor = color;
-    canvas.lfOpacity = opacity;
-    canvas.lfSize = size;
+    const brushDefaults = {
+      ...SETTINGS.brush.settings,
+      ...state.lastBrushSettings,
+    };
+    const candidateSettings = (settings ?? {}) as Partial<ImageEditorBrushSettings>;
+    const brushSettings: ImageEditorBrushSettings = {
+      ...brushDefaults,
+      color: candidateSettings.color ?? brushDefaults.color,
+      opacity: candidateSettings.opacity ?? brushDefaults.opacity,
+      size: candidateSettings.size ?? brushDefaults.size,
+    };
+
+    canvas.lfColor = brushSettings.color;
+    canvas.lfOpacity = brushSettings.opacity;
+    canvas.lfSize = brushSettings.size;
+
+    state.lastBrushSettings = {
+      ...state.lastBrushSettings,
+      color: brushSettings.color,
+      opacity: brushSettings.opacity,
+      size: brushSettings.size,
+    };
   }
 
   const shouldUpdate = !!(validValues && (!isStroke || (isStroke && isCanvasAction)));
-  if (shouldUpdate) {
+  const requiresManualApply = !!filter?.requiresManualApply;
+
+  if (shouldUpdate && (force || !requiresManualApply)) {
     apiCall(state, addSnapshot);
   }
 };

@@ -1,6 +1,7 @@
-numpy
+﻿numpy
 openai
 opencv-python
+onnxruntime
 pandas
 piexif
 Pillow

@@ -4,7 +4,9 @@ from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, INT_MAX, RESAMPLERS
-from ...utils.helpers import create_resize_node, normalize_input_image, normalize_input_list, normalize_list_item, normalize_list_to_value, normalize_output_image, resize_and_crop_image
+from ...utils.helpers.logic import normalize_input_image, normalize_input_list, normalize_list_item, normalize_list_to_value, normalize_output_image
+from ...utils.helpers.torch import resize_and_crop_image
+from ...utils.helpers.ui import create_resize_node
 
 # region LF_ResizeImageToDimension
 class LF_ResizeImageToDimension:

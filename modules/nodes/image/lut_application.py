@@ -5,7 +5,11 @@ from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import BLUE_CHANNEL_ID, EVENT_PREFIX, FUNCTION, GREEN_CHANNEL_ID, Input, RED_CHANNEL_ID
-from ...utils.helpers import create_compare_node, get_resource_url, normalize_input_image, normalize_json_input, normalize_list_to_value, normalize_output_image, numpy_to_tensor, resolve_filepath, tensor_to_numpy, tensor_to_pil
+from ...utils.helpers.api import get_resource_url
+from ...utils.helpers.comfy import resolve_filepath
+from ...utils.helpers.conversion import numpy_to_tensor, tensor_to_numpy, tensor_to_pil
+from ...utils.helpers.logic import normalize_input_image, normalize_json_input, normalize_list_to_value, normalize_output_image
+from ...utils.helpers.ui import create_compare_node
 
 # region LF_LUTApplication
 class LF_LUTApplication:

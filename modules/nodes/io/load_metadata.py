@@ -5,7 +5,9 @@ from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
-from ...utils.helpers import extract_jpeg_metadata, extract_png_metadata, get_comfy_dir, normalize_list_to_value
+from ...utils.helpers.comfy import get_comfy_dir
+from ...utils.helpers.logic import normalize_list_to_value
+from ...utils.helpers.metadata import extract_jpeg_metadata, extract_png_metadata
 
 # region LF_LoadMetadata
 class LF_LoadMetadata:

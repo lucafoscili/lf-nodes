@@ -2,7 +2,7 @@ from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import ANY, EVENT_PREFIX, FUNCTION, Input
-from ...utils.helpers import normalize_input_list, normalize_list_item, normalize_list_to_value, normalize_json_input
+from ...utils.helpers.logic import normalize_input_list, normalize_list_item, normalize_list_to_value, normalize_json_input
 
 # region LF_SetValueInJSON
 class LF_SetValueInJSON:

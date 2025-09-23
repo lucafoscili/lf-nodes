@@ -69,6 +69,7 @@ export enum NodeName {
   contrast = 'LF_Contrast',
   controlPanel = 'LF_ControlPanel',
   createMask = 'LF_CreateMask',
+  detectRegions = 'LF_DetectRegions',
   desaturation = 'LF_Desaturation',
   diffusionModelSelector = 'LF_DiffusionModelSelector',
   displayBoolean = 'LF_DisplayBoolean',
@@ -82,8 +83,9 @@ export enum NodeName {
   float = 'LF_Float',
   embeddingSelector = 'LF_EmbeddingSelector',
   emptyImage = 'LF_EmptyImage',
-  extractString = 'LF_ExtractString',
+  extractFaceEmbedding = 'LF_ExtractFaceEmbedding',
   extractPromptFromLoraTag = 'LF_ExtractPromptFromLoraTag',
+  extractString = 'LF_ExtractString',
   gaussianBlur = 'LF_GaussianBlur',
   getValueFromJson = 'LF_GetValueFromJSON',
   getRandomKeyFromJson = 'LF_GetRandomKeyFromJSON',
@@ -119,6 +121,7 @@ export enum NodeName {
   randomBoolean = 'LF_RandomBoolean',
   regexReplace = 'LF_RegexReplace',
   regionExtractor = 'LF_RegionExtractor',
+  regionMask = 'LF_RegionMask',
   resizeImageByEdge = 'LF_ResizeImageByEdge',
   resizeImageToDimension = 'LF_ResizeImageToDimension',
   resizeImageToSquare = 'LF_ResizeImageToSquare',
@@ -154,6 +157,7 @@ export enum NodeName {
   urandomSeedGenerator = 'LF_UrandomSeedGenerator',
   usageStatistics = 'LF_UsageStatistics',
   vaeSelector = 'LF_VAESelector',
+  onnxSelector = 'LF_ONNXSelector',
   viewImages = 'LF_ViewImages',
   vibrance = 'LF_Vibrance',
   vignette = 'LF_Vignette',
@@ -294,3 +298,4 @@ export type WidgetSetter = {
   [W in CustomWidgetName]: CustomWidgetCallback;
 };
 //#endregion
+

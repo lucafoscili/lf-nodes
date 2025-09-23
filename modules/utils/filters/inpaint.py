@@ -1,0 +1,544 @@
+from typing import Dict, Tuple
+
+import random
+import torch
+import torch.nn.functional as F
+
+import comfy.sample
+import nodes
+
+from ..constants import SAMPLERS, SCHEDULERS
+from ..helpers.api import get_resource_url
+from ..helpers.comfy import resolve_filepath
+from ..helpers.conversion import base64_to_tensor, convert_to_boolean, convert_to_float, convert_to_int, tensor_to_pil
+from ..helpers.editing import get_editing_context
+
+FilterResult = Tuple[torch.Tensor, Dict[str, str]]
+
+
+def sample_without_preview(
+    model,
+    positive,
+    negative,
+    latent,
+    seed,
+    steps,
+    cfg,
+    sampler_name,
+    scheduler_name,
+    denoise_value,
+):
+    """
+    Generates a new latent sample using the provided model and parameters, without generating a preview image.
+
+    Args:
+        model: The diffusion model used for sampling.
+        positive: Conditioning information for positive prompts.
+        negative: Conditioning information for negative prompts.
+        latent (dict): Dictionary containing latent image data and optional batch index and noise mask.
+        seed (int): Random seed for noise generation.
+        steps (int): Number of sampling steps to perform.
+        cfg (float): Classifier-free guidance scale.
+        sampler_name (str): Name of the sampler to use.
+        scheduler_name (str): Name of the scheduler to use.
+        denoise_value (float): Denoising strength for the sampling process.
+        
+    Returns:
+        dict: A copy of the input latent dictionary with the "samples" key updated to the newly generated latent samples.
+    """    
+    latent_image = latent["samples"]
+    latent_image = comfy.sample.fix_empty_latent_channels(model, latent_image)
+
+    batch_inds = latent.get("batch_index")
+    noise = comfy.sample.prepare_noise(latent_image, seed, batch_inds)
+
+    noise_mask = latent.get("noise_mask")
+
+    samples = comfy.sample.sample(
+        model,
+        noise,
+        steps,
+        cfg,
+        sampler_name,
+        scheduler_name,
+        positive,
+        negative,
+        latent_image,
+        denoise=denoise_value,
+        disable_noise=False,
+        start_step=None,
+        last_step=None,
+        force_full_denoise=False,
+        noise_mask=noise_mask,
+        callback=None,
+        disable_pbar=True,
+        seed=seed,
+    )
+
+    out_latent = latent.copy()
+    out_latent["samples"] = samples
+
+    return out_latent
+
+
+def perform_inpaint(
+    *,
+    model,
+    clip,
+    vae,
+    image: torch.Tensor,
+    mask: torch.Tensor,
+    positive_prompt: str,
+    negative_prompt: str,
+    sampler_name: str,
+    scheduler_name: str,
+    steps: int,
+    denoise: float,
+    cfg: float,
+    seed: int,
+    disable_preview: bool = True,
+    positive_conditioning=None,
+    negative_conditioning=None,
+    use_conditioning: bool = False,
+) -> torch.Tensor:
+    """
+    Run an inpaint diffusion pass and blend the result with the original image.
+
+    When `use_conditioning` is True, any provided conditioning stacks are prepended to the freshly
+    encoded prompts before sampling.
+
+    Args:
+        model: The diffusion model to use for inpainting.
+        clip: The CLIP model for text encoding.
+        vae: The VAE model for encoding/decoding images.
+        image (torch.Tensor): The input image tensor to be inpainted.
+        mask (torch.Tensor): The mask tensor indicating regions to inpaint (1=inpaint, 0=keep original).
+        positive_prompt (str): The positive text prompt guiding the inpainting.
+        negative_prompt (str): The negative text prompt for guidance.
+        sampler_name (str): The name of the sampler to use.
+        scheduler_name (str): The name of the scheduler to use.
+        steps (int): Number of diffusion steps.
+        denoise (float): Denoising strength (typically between 0 and 1).
+        cfg (float): Classifier-free guidance scale.
+        seed (int): Random seed for reproducibility.
+        disable_preview (bool, optional): If True, disables preview sampling for efficiency. Defaults to True.
+
+    Returns:
+        torch.Tensor: The inpainted image tensor, blended with the original image according to the mask.
+    """
+    with torch.inference_mode():
+        clip_encoder = nodes.CLIPTextEncode()
+        positive = clip_encoder.encode(clip, positive_prompt)[0]
+        negative = clip_encoder.encode(clip, negative_prompt)[0]
+
+        if use_conditioning:
+            combine_node = nodes.ConditioningCombine()
+            if positive_conditioning is not None:
+                positive = combine_node.combine(positive_conditioning, positive)[0]
+            if negative_conditioning is not None:
+                negative = combine_node.combine(negative_conditioning, negative)[0]
+
+        conditioning_node = nodes.InpaintModelConditioning()
+        pos_cond, neg_cond, latent = conditioning_node.encode(
+            positive,
+            negative,
+            image,
+            vae,
+            mask,
+            True,
+        )
+
+        if disable_preview:
+            latent_result = sample_without_preview(
+                model=model,
+                positive=pos_cond,
+                negative=neg_cond,
+                latent=latent,
+                seed=seed,
+                steps=steps,
+                cfg=cfg,
+                sampler_name=sampler_name,
+                scheduler_name=scheduler_name,
+                denoise_value=denoise,
+            )
+        else:
+            sampler = nodes.KSampler()
+            latent_result = sampler.sample(
+                model,
+                seed,
+                steps,
+                cfg,
+                sampler_name,
+                scheduler_name,
+                pos_cond,
+                neg_cond,
+                latent,
+                denoise,
+            )[0]
+
+        decoded = nodes.VAEDecode().decode(vae, latent_result)[0].to(
+            device=image.device,
+            dtype=torch.float32,
+        )
+
+    if decoded.shape != image.shape:
+        decoded = decoded.reshape_as(image)
+
+    mask_to_blend = mask
+    if mask_to_blend.dim() == 4:
+        mask_to_blend = mask_to_blend[..., 0]
+    if mask_to_blend.dim() == 3:
+        mask_to_blend = mask_to_blend.unsqueeze(-1)
+    if mask_to_blend.shape[-1] != decoded.shape[-1]:
+        mask_to_blend = mask_to_blend.expand(-1, -1, -1, decoded.shape[-1])
+
+    return decoded * mask_to_blend + image * (1.0 - mask_to_blend)
+
+
+def apply_inpaint_filter(image: torch.Tensor, settings: dict) -> FilterResult:
+    """
+    Applies an inpainting filter to the given image using the provided settings and editing context.
+
+    Args:
+        image (torch.Tensor): The input image tensor to be inpainted. Expected shape: (batch, channels, height, width).
+        settings (dict): Dictionary containing filter settings and context information. Must include:
+            - "context_id" or "dataset_path": Identifier for the editing session.
+            - "model", "clip", "vae": Model components required for inpainting.
+            - "b64_canvas", "mask_canvas", or "mask": Base64-encoded mask for inpainting.
+            - "steps" (optional): Number of inpainting steps (default: 20).
+            - "denoise" or "denoise_percentage" (optional): Denoising strength (default: 100.0).
+            - "cfg" (optional): Classifier-free guidance scale (default: 7.0).
+            - "sampler" (optional): Sampler name (default: "dpmpp_2m").
+            - "scheduler" (optional): Scheduler name (default: "karras").
+            - "seed" (optional): Random seed for generation.
+            - "positive_prompt" (optional): Positive prompt for inpainting.
+            - "negative_prompt" (optional): Negative prompt for inpainting.
+            - ROI optimization (optional):
+              - "roi_auto": Enable automatic ROI cropping around the mask (default: true)
+              - "roi_padding": Pixels of padding around the mask bbox (default: 32)
+              - "roi_align": Align ROI size/position to multiple (latent-friendly, default: 8)
+              - "roi_align_auto": If true, try to infer alignment from VAE/model downscale factor (fallback 8)
+              - "roi_min_size": Minimum ROI width/height (default: 64)
+            - Mask edges (optional):
+              - "dilate": Integer pixels to dilate mask before feathering (default: 0)
+              - "feather": Integer feather radius in pixels (default: 0)
+            - Upsample detail (optional):
+              - "upsample" or "upsample_target": Target size for the longer side of the ROI; if > current, upsample ROI before inpaint and downscale after (disabled by default)
+
+    Returns:
+        FilterResult: A tuple containing:
+            - processed (torch.Tensor): The inpainted image tensor.
+            - info (dict): Dictionary with additional information, including the mask URL and ROI/upsample info.
+            
+    Raises:
+        ValueError: If required context, model components, or mask are missing, or if the mask is empty.
+    """
+    context_id = settings.get("context_id") or settings.get("dataset_path")
+    if not context_id:
+        raise ValueError("Inpaint filter requires a context_id referencing the editing session.")
+
+    context = get_editing_context(context_id)
+    if not context:
+        raise ValueError(f"No active editing session for '{context_id}'.")
+
+    model = context.get("model")
+    clip = context.get("clip")
+    vae = context.get("vae") or getattr(model, "vae", None)
+    if model is None or clip is None or vae is None:
+        raise ValueError(
+            "Inpaint filter requires model, clip, and vae inputs. Connect them to LF_ImagesEditingBreakpoint."
+        )
+
+    sampler_default = context.get("sampler")
+    scheduler_default = context.get("scheduler")
+    cfg_default = context.get("cfg")
+    seed_default = -1
+    context_positive_prompt = str(context.get("positive_prompt") or "")
+    context_negative_prompt = str(context.get("negative_prompt") or "")
+    context_positive_conditioning = context.get("positive_conditioning")
+    context_negative_conditioning = context.get("negative_conditioning")
+
+    mask_b64 = settings.get("b64_canvas") or settings.get("mask_canvas") or settings.get("mask")
+    if not mask_b64:
+        raise ValueError("Missing brush mask for inpaint filter.")
+
+    canvas = base64_to_tensor(mask_b64, True)
+    if canvas.ndim != 4:
+        raise ValueError("Unexpected brush payload for inpaint filter.")
+
+    if canvas.shape[1] != image.shape[1] or canvas.shape[2] != image.shape[2]:
+        canvas = F.interpolate(
+            canvas.permute(0, 3, 1, 2),
+            size=(image.shape[1], image.shape[2]),
+            mode="nearest",
+        ).permute(0, 2, 3, 1)
+
+    alpha = canvas[..., 3] if canvas.shape[-1] >= 4 else canvas.mean(dim=-1)
+    mask = (alpha > 0.01).float()
+    if float(mask.max().item()) <= 0.0:
+        raise ValueError("Inpaint mask strokes are empty.")
+    mask = mask.clamp(0.0, 1.0)
+
+    device = getattr(getattr(vae, "first_stage_model", None), "device", None)
+    if isinstance(device, str):
+        device = torch.device(device)
+    if device is None:
+        raw_device = getattr(vae, "device", None)
+        if isinstance(raw_device, str):
+            device = torch.device(raw_device)
+        else:
+            device = raw_device
+    if device is None:
+        device = image.device
+
+    base_image = image.to(device=device, dtype=torch.float32)
+    mask_tensor = mask.to(device=device, dtype=torch.float32)
+    if mask_tensor.ndim == 4:
+        mask_tensor = mask_tensor[..., 0]
+
+    image_height = base_image.shape[1]
+    image_width = base_image.shape[2]
+
+    if mask_tensor.shape[-2] != image_height or mask_tensor.shape[-1] != image_width:
+        mask_tensor = F.interpolate(
+            mask_tensor.unsqueeze(1),
+            size=(image_height, image_width),
+            mode="nearest",
+        ).squeeze(1)
+
+    mask_tensor = mask_tensor.clamp(0.0, 1.0)
+    mask_tensor = (mask_tensor > 0.5).float()
+
+    mask_preview_tensor = mask_tensor.detach().cpu().unsqueeze(-1).repeat(1, 1, 1, 3)
+    mask_image = tensor_to_pil(mask_preview_tensor)
+    mask_output_file, mask_subfolder, mask_filename = resolve_filepath(
+        filename_prefix="inpaint_mask",
+        image=mask_preview_tensor,
+    )
+    mask_image.save(mask_output_file, format="PNG")
+    mask_url = get_resource_url(mask_subfolder, mask_filename, "temp")
+
+    steps = max(1, int(round(convert_to_int(settings.get("steps", 20)))))
+    denoise_value = convert_to_float(settings.get("denoise", settings.get("denoise_percentage", 100.0)))
+    if denoise_value > 1.0:
+        denoise_value = denoise_value / 100.0
+    denoise_value = max(0.0, min(1.0, denoise_value))
+
+    cfg_candidate = convert_to_float(settings.get("cfg"))
+    if cfg_candidate is None:
+        cfg_candidate = convert_to_float(cfg_default)
+    if cfg_candidate is None:
+        cfg_candidate = 7.0
+    cfg = cfg_candidate
+
+    sampler_candidate = settings.get("sampler") or sampler_default or "dpmpp_2m"
+    sampler_name = str(sampler_candidate)
+    if sampler_name not in SAMPLERS:
+        sampler_name = "dpmpp_2m"
+
+    scheduler_candidate = settings.get("scheduler") or scheduler_default or "karras"
+    scheduler_name = str(scheduler_candidate)
+    if scheduler_name not in SCHEDULERS:
+        scheduler_name = "normal"
+
+    seed_candidate = convert_to_int(settings.get("seed") or -1)
+    if seed_candidate is None or seed_candidate < 0:
+        seed_candidate = convert_to_int(seed_default)
+    if seed_candidate is None or seed_candidate < 0:
+        seed_candidate = random.randint(0, 2**32 - 1)
+    seed = seed_candidate & 0xFFFFFFFFFFFFFFFF
+
+    positive_prompt = str(settings.get("positive_prompt") or context_positive_prompt)
+    negative_prompt = str(settings.get("negative_prompt") or context_negative_prompt)
+
+    use_conditioning_raw = settings.get("use_conditioning", "false")
+    use_conditioning = convert_to_boolean(use_conditioning_raw)
+    if use_conditioning is None:
+        use_conditioning = False
+
+    roi_auto_raw = settings.get("roi_auto", "true")
+    roi_auto = convert_to_boolean(roi_auto_raw)
+    if roi_auto is None:
+        roi_auto = True
+    roi_padding = max(0, int(convert_to_int(settings.get("roi_padding", 32)) or 32))
+    roi_align = max(1, int(convert_to_int(settings.get("roi_align", 8)) or 8))
+    roi_align_auto = convert_to_boolean(settings.get("roi_align_auto", "false")) or False
+    roi_min_size = max(1, int(convert_to_int(settings.get("roi_min_size", 64)) or 64))
+
+    # Try to auto-detect VAE downscale factor if requested
+    align_multiple = roi_align
+    if roi_align_auto:
+        candidates = [
+            getattr(vae, "downscale_factor", None),
+            getattr(vae, "downsample_factor", None),
+            getattr(getattr(vae, "first_stage_model", None), "downscale_factor", None),
+            getattr(getattr(vae, "first_stage_model", None), "downsample_factor", None),
+        ]
+        for c in candidates:
+            if isinstance(c, int) and c > 0:
+                align_multiple = c
+                break
+
+    # Default to processing full image
+    work_image = base_image
+    work_mask = mask_tensor
+    paste_roi = (0, 0, image_height, image_width)
+
+    if roi_auto:
+        mask_any = (mask_tensor > 0.5).any(dim=0)  # [H, W]
+        rows = mask_any.any(dim=1)
+        cols = mask_any.any(dim=0)
+        if bool(rows.any()) and bool(cols.any()):
+            ys = torch.where(rows)[0]
+            xs = torch.where(cols)[0]
+            y0 = int(ys.min().item())
+            y1 = int(ys.max().item()) + 1
+            x0 = int(xs.min().item())
+            x1 = int(xs.max().item()) + 1
+
+            # Padding
+            y0 = max(0, y0 - roi_padding)
+            x0 = max(0, x0 - roi_padding)
+            y1 = min(image_height, y1 + roi_padding)
+            x1 = min(image_width, x1 + roi_padding)
+
+            # Align to multiples
+            def align_down(v, a):
+                return (v // a) * a
+
+            def align_up(v, a):
+                return ((v + a - 1) // a) * a
+
+            y0 = align_down(y0, align_multiple)
+            x0 = align_down(x0, align_multiple)
+            y1 = align_up(y1, align_multiple)
+            x1 = align_up(x1, align_multiple)
+
+            y0 = max(0, min(y0, image_height))
+            x0 = max(0, min(x0, image_width))
+            y1 = max(0, min(y1, image_height))
+            x1 = max(0, min(x1, image_width))
+
+            # Enforce minimum size
+            h = y1 - y0
+            w = x1 - x0
+            if h < roi_min_size:
+                delta = roi_min_size - h
+                y0 = max(0, y0 - delta // 2)
+                y1 = min(image_height, y0 + roi_min_size)
+            if w < roi_min_size:
+                delta = roi_min_size - w
+                x0 = max(0, x0 - delta // 2)
+                x1 = min(image_width, x0 + roi_min_size)
+
+            paste_roi = (y0, x0, y1, x1)
+            work_image = base_image[:, y0:y1, x0:x1, :]
+            work_mask = mask_tensor[:, y0:y1, x0:x1]
+        # else: keep full image fallback
+
+    # Mask edge shaping
+    dilate_px = max(0, int(convert_to_int(settings.get("dilate", 0)) or 0))
+    feather_px = max(0, int(convert_to_int(settings.get("feather", 0)) or 0))
+    work_mask_soft = work_mask
+    if dilate_px > 0:
+        k = dilate_px * 2 + 1
+        wm = work_mask_soft.unsqueeze(1)
+        wm = F.max_pool2d(wm, kernel_size=k, stride=1, padding=dilate_px)
+        work_mask_soft = wm.squeeze(1)
+    if feather_px > 0:
+        k = feather_px * 2 + 1
+        wm = work_mask_soft.unsqueeze(1)
+        wm = F.avg_pool2d(wm, kernel_size=k, stride=1, padding=feather_px)
+        work_mask_soft = wm.squeeze(1)
+    work_mask_soft = work_mask_soft.clamp(0.0, 1.0)
+
+    # Upsample ROI for extra detail (like a detailer)
+    raw_upsample = settings.get("upsample")
+    if raw_upsample is None or raw_upsample == "":
+        raw_upsample = settings.get("upsample_target")
+    upsample_target = convert_to_int(raw_upsample) if raw_upsample is not None else None
+    upsample_applied = False
+    upsample_info = None
+    if upsample_target is not None and upsample_target > 0:
+        orig_h, orig_w = int(work_image.shape[1]), int(work_image.shape[2])
+        longest = max(orig_h, orig_w)
+        if longest < upsample_target:
+            scale = float(upsample_target) / float(longest)
+            new_h = max(1, int(round(orig_h * scale)))
+            new_w = max(1, int(round(orig_w * scale)))
+            # align to alignment multiple to keep latent-friendly dims
+            def align_up(v, a):
+                return ((v + a - 1) // a) * a
+            new_h = align_up(new_h, align_multiple)
+            new_w = align_up(new_w, align_multiple)
+
+            # Resize image NHWC -> NCHW -> NHWC
+            wi = work_image.permute(0, 3, 1, 2)
+            wi = F.interpolate(wi, size=(new_h, new_w), mode="bicubic", align_corners=False)
+            work_image = wi.permute(0, 2, 3, 1).contiguous()
+
+            # Resize mask [B, H, W]
+            wm = work_mask_soft.unsqueeze(1)
+            wm = F.interpolate(wm, size=(new_h, new_w), mode="nearest")
+            work_mask_soft = wm.squeeze(1).contiguous()
+
+            upsample_applied = True
+            upsample_info = (orig_h, orig_w, new_h, new_w)
+
+    processed_region = perform_inpaint(
+        model=model,
+        clip=clip,
+        vae=vae,
+        image=work_image,
+        mask=work_mask_soft,
+        positive_prompt=positive_prompt,
+        negative_prompt=negative_prompt,
+        sampler_name=sampler_name,
+        scheduler_name=scheduler_name,
+        steps=steps,
+        denoise=denoise_value,
+        cfg=cfg,
+        seed=seed,
+        disable_preview=True,
+        positive_conditioning=context_positive_conditioning if use_conditioning else None,
+        negative_conditioning=context_negative_conditioning if use_conditioning else None,
+        use_conditioning=use_conditioning,
+    )
+
+    # Downscale back if upsample was applied
+    if upsample_applied and upsample_info is not None:
+        orig_h, orig_w, _, _ = upsample_info
+        pr = processed_region.permute(0, 3, 1, 2)
+        pr = F.interpolate(pr, size=(orig_h, orig_w), mode="bicubic", align_corners=False)
+        processed_region = pr.permute(0, 2, 3, 1).contiguous()
+
+    # Paste back into full-size image if cropped
+    if paste_roi != (0, 0, image_height, image_width):
+        y0, x0, y1, x1 = paste_roi
+        result_full = base_image.clone()
+        result_full[:, y0:y1, x0:x1, :] = processed_region
+        processed = result_full
+    else:
+        processed = processed_region
+
+    processed = processed.detach().clamp(0.0, 1.0).to(torch.float32).cpu().contiguous()
+
+    info: Dict[str, str] = {"mask": mask_url}
+    if paste_roi != (0, 0, image_height, image_width):
+        y0, x0, y1, x1 = paste_roi
+        info["roi"] = f"y0={y0},x0={x0},y1={y1},x1={x1}"
+    if upsample_applied and upsample_info is not None:
+        oh, ow, nh, nw = upsample_info
+        info["upsample"] = f"{ow}x{oh} -> {nw}x{nh}"
+    if dilate_px or feather_px:
+        info["edges"] = f"dilate={dilate_px},feather={feather_px}"
+
+    return processed, info
+
+
+__all__ = [
+    "FilterResult",
+    "apply_inpaint_filter",
+    "perform_inpaint",
+    "sample_without_preview",
+]

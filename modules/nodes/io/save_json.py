@@ -4,7 +4,8 @@ from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
-from ...utils.helpers import get_comfy_dir, normalize_json_input, normalize_list_to_value, resolve_filepath
+from ...utils.helpers.comfy import get_comfy_dir, resolve_filepath
+from ...utils.helpers.logic import normalize_json_input, normalize_list_to_value
 
 # region LF_SaveJSON
 class LF_SaveJSON:

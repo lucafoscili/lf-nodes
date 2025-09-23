@@ -8,8 +8,13 @@ from server import PromptServer
 from urllib.parse import urlparse, parse_qs
 
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
-from ...utils.helpers import create_masonry_node, get_comfy_dir, get_resource_url, normalize_input_image, normalize_output_image, pil_to_tensor, resolve_filepath, tensor_to_pil
+from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, INT_MAX, SAMPLERS, SCHEDULERS
+from ...utils.helpers.api import get_resource_url
+from ...utils.helpers.comfy import get_comfy_dir, resolve_filepath
+from ...utils.helpers.conversion import pil_to_tensor, tensor_to_pil
+from ...utils.helpers.editing import clear_editing_context, register_editing_context
+from ...utils.helpers.logic import normalize_conditioning, normalize_input_image, normalize_list_to_value, normalize_output_image
+from ...utils.helpers.ui import create_masonry_node
 
 # region LF_ImagesEditingBreakpoint
 class LF_ImagesEditingBreakpoint:
@@ -22,9 +27,47 @@ class LF_ImagesEditingBreakpoint:
                 }),
             },
             "optional": {
+                "model": (Input.MODEL, {
+                    "tooltip": "Optional diffusion model reused by inpaint edits."
+                }),
+                "clip": (Input.CLIP, {
+                    "tooltip": "Optional CLIP encoder reused by inpaint edits."
+                }),
+                "vae": (Input.VAE, {
+                    "tooltip": "Optional VAE reused by inpaint edits."
+                }),
+                "sampler": (SAMPLERS, {
+                    "tooltip": "Optional sampler reused by inpaint edits.",
+                    "default": "dpmpp_2m"
+                }),
+                "scheduler": (SCHEDULERS, {
+                    "tooltip": "Optional scheduler reused by inpaint edits.",
+                    "default": "normal"
+                }),
+                "cfg": (Input.FLOAT, {
+                    "default": 7.0,
+                    "min": 0.0,
+                    "max": 30.0,
+                    "step": 0.1,
+                    "tooltip": "CFG scale used as the starting value for inpaint edits."
+                }),
+                "positive_prompt": (Input.STRING, {
+                    "default": "",
+                    "tooltip": "Optional positive prompt used to pre-fill the inpaint editor."
+                }),
+                "negative_prompt": (Input.STRING, {
+                    "default": "",
+                    "tooltip": "Optional negative prompt used to pre-fill the inpaint editor."
+                }),
+                "positive_conditioning": (Input.CONDITIONING, {
+                    "tooltip": "Optional positive conditioning to reuse during inpaint edits."
+                }),
+                "negative_conditioning": (Input.CONDITIONING, {
+                    "tooltip": "Optional negative conditioning to reuse during inpaint edits."
+                }),
                 "ui_widget": (Input.LF_IMAGE_EDITOR, {
                     "default": {}
-                })
+                }),
             },
             "hidden": {
                 "node_id": "UNIQUE_ID"
@@ -51,6 +94,33 @@ class LF_ImagesEditingBreakpoint:
 
             return dataset
 
+        model_value = normalize_list_to_value(kwargs.get("model"))
+        clip_value = normalize_list_to_value(kwargs.get("clip"))
+        vae_value = normalize_list_to_value(kwargs.get("vae"))
+        sampler_value = normalize_list_to_value(kwargs.get("sampler"))
+        scheduler_value = normalize_list_to_value(kwargs.get("scheduler"))
+
+        cfg_raw = normalize_list_to_value(kwargs.get("cfg"))
+        try:
+            cfg_value = float(cfg_raw) if cfg_raw is not None else None
+        except (TypeError, ValueError):
+            cfg_value = None
+
+        seed_raw = normalize_list_to_value(kwargs.get("seed"))
+        try:
+            seed_value = int(seed_raw) if seed_raw not in (None, "") else None
+        except (TypeError, ValueError):
+            seed_value = None
+
+        positive_prompt_raw = normalize_list_to_value(kwargs.get("positive_prompt"))
+        positive_prompt_value = str(positive_prompt_raw) if positive_prompt_raw not in (None, "") else ""
+
+        negative_prompt_raw = normalize_list_to_value(kwargs.get("negative_prompt"))
+        negative_prompt_value = str(negative_prompt_raw) if negative_prompt_raw not in (None, "") else ""
+
+        positive_conditioning_value = normalize_conditioning(kwargs.get("positive_conditioning"))
+        negative_conditioning_value = normalize_conditioning(kwargs.get("negative_conditioning"))
+
         image: list[torch.Tensor] = normalize_input_image(kwargs.get("image"))
 
         columns: list[dict] = []
@@ -68,19 +138,52 @@ class LF_ImagesEditingBreakpoint:
             nodes.append(create_masonry_node(filename, url, index))
 
         temp_json_file: str = os.path.join(get_comfy_dir("temp"), f"{kwargs.get('node_id')}_edit_dataset.json")
+        dataset["context_id"] = temp_json_file
 
         columns.append({"id": "path", "title": temp_json_file})
         columns.append({"id": "status", "title": "pending"})
-        
+
+        inpaint_defaults: dict[str, object] = {}
+        if cfg_value is not None:
+            inpaint_defaults["cfg"] = cfg_value
+        if seed_value is not None and seed_value >= 0:
+            inpaint_defaults["seed"] = seed_value
+        if positive_prompt_value:
+            inpaint_defaults["positive_prompt"] = positive_prompt_value
+        if negative_prompt_value:
+            inpaint_defaults["negative_prompt"] = negative_prompt_value
+
+        if inpaint_defaults:
+            dataset.setdefault("defaults", {})["inpaint"] = inpaint_defaults
+
+        register_editing_context(
+            temp_json_file,
+            model=model_value,
+            clip=clip_value,
+            vae=vae_value,
+            sampler=sampler_value,
+            scheduler=scheduler_value,
+            cfg=cfg_value,
+            seed=seed_value,
+            positive_prompt=positive_prompt_value or None,
+            negative_prompt=negative_prompt_value or None,
+            positive_conditioning=positive_conditioning_value,
+            negative_conditioning=negative_conditioning_value,
+        )
         with open(temp_json_file, 'w', encoding='utf-8') as json_file:
             json.dump(dataset, json_file, ensure_ascii=False, indent=4)
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}imageseditingbreakpoint", {
-            "node": kwargs.get("node_id"),
-            "value": temp_json_file,
-        })
-
-        dataset = wait_for_editing_completion(temp_json_file)
+        try:
+            PromptServer.instance.send_sync(
+                f"{EVENT_PREFIX}imageseditingbreakpoint",
+                {
+                    "node": kwargs.get("node_id"),
+                    "value": temp_json_file,
+                },
+            )
+            dataset = wait_for_editing_completion(temp_json_file)
+        finally:
+            clear_editing_context(temp_json_file)
 
         edited_images = []
         for node in dataset["nodes"]:

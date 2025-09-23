@@ -9,7 +9,10 @@ import comfy.utils
 
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
-from ...utils.helpers import get_comfy_list, normalize_list_to_value,  prepare_model_dataset, process_model
+from ...utils.helpers.api import process_model
+from ...utils.helpers.comfy import get_comfy_list
+from ...utils.helpers.logic import normalize_list_to_value
+from ...utils.helpers.ui import  prepare_model_dataset
 
 # region LF_LoadLoraTags
 class LF_LoadLoraTags:

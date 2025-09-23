@@ -40,6 +40,7 @@ export const NODE_WIDGET_MAP: NodeWidgetMap = {
   LF_Contrast: [CustomWidgetName.compare],
   LF_ControlPanel: [CustomWidgetName.controlPanel],
   LF_CreateMask: [CustomWidgetName.compare],
+  LF_DetectRegions: [CustomWidgetName.compare],
   LF_Desaturation: [CustomWidgetName.compare],
   LF_DiffusionModelSelector: [CustomWidgetName.card],
   LF_DisplayBoolean: [CustomWidgetName.code],
@@ -50,8 +51,9 @@ export const NODE_WIDGET_MAP: NodeWidgetMap = {
   LF_DisplayString: [CustomWidgetName.code],
   LF_EmbeddingSelector: [CustomWidgetName.card],
   LF_EmptyImage: [CustomWidgetName.masonry],
-  LF_ExtractString: [CustomWidgetName.code],
+  LF_ExtractFaceEmbedding: [CustomWidgetName.code],
   LF_ExtractPromptFromLoraTag: [CustomWidgetName.code],
+  LF_ExtractString: [CustomWidgetName.code],
   LF_FilmGrain: [CustomWidgetName.compare],
   LF_Float: [CustomWidgetName.history],
   LF_GaussianBlur: [CustomWidgetName.compare],
@@ -90,6 +92,7 @@ export const NODE_WIDGET_MAP: NodeWidgetMap = {
   LF_RandomBoolean: [CustomWidgetName.progressbar],
   LF_RegexReplace: [CustomWidgetName.code],
   LF_RegionExtractor: [CustomWidgetName.code],
+  LF_RegionMask: [CustomWidgetName.compare],
   LF_ResizeImageByEdge: [CustomWidgetName.tree],
   LF_ResizeImageToDimension: [CustomWidgetName.tree],
   LF_ResizeImageToSquare: [CustomWidgetName.tree],
@@ -125,6 +128,7 @@ export const NODE_WIDGET_MAP: NodeWidgetMap = {
   LF_UsageStatistics: [CustomWidgetName.tabBarChart],
   LF_UrandomSeedGenerator: [CustomWidgetName.tree],
   LF_VAESelector: [CustomWidgetName.history],
+  LF_ONNXSelector: [CustomWidgetName.history],
   LF_Vibrance: [CustomWidgetName.compare],
   LF_ViewImages: [CustomWidgetName.masonry],
   LF_Vignette: [CustomWidgetName.compare],
@@ -346,3 +350,4 @@ export const getLogStyle = () => {
   };
 };
 //#endregion
+

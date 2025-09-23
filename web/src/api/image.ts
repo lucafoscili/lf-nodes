@@ -63,6 +63,7 @@ export const IMAGE_API: ImageAPIs = {
 
     const payload: ProcessImageAPIPayload = {
       data: '',
+      mask: undefined,
       message: '',
       status: LogSeverity.Info,
     };
@@ -85,6 +86,7 @@ export const IMAGE_API: ImageAPIs = {
           const p: ProcessImageAPIPayload = await response.json();
           if (p.status === 'success') {
             payload.data = p.data;
+            payload.mask = p.mask;
             payload.message = 'Image processed successfully.';
             payload.status = LogSeverity.Success;
             lfManager.log(payload.message, { payload }, payload.status);

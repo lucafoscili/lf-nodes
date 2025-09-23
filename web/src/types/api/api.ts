@@ -1,7 +1,7 @@
 import { LfDataDataset } from '@lf-widgets/foundations';
 import { EventName, GenericEvent } from '../events/events';
 import { Extension, LogSeverity } from '../manager/manager';
-import { ImageEditorFilterSettingsMap, ImageEditorFilterType } from '../widgets/imageEditor';
+import { ImageEditorFilterType, ImageEditorRequestSettings } from '../widgets/imageEditor';
 
 //#region API
 export interface APIRoutes {
@@ -47,7 +47,7 @@ export interface ImageAPIs {
   process: <T extends ImageEditorFilterType>(
     url: string,
     type: T,
-    settings: ImageEditorFilterSettingsMap[T],
+    settings: ImageEditorRequestSettings<T>,
   ) => Promise<ProcessImageAPIPayload>;
 }
 export interface JSONAPIs {
@@ -94,6 +94,7 @@ export interface GetMetadataAPIPayload extends BaseAPIPayload {
 }
 export interface ProcessImageAPIPayload extends BaseAPIPayload {
   data: string;
+  mask?: string;
 }
 //#endregion
 

@@ -17,6 +17,7 @@ export enum ImageEditorCSS {
   GridIsInactive = `${BASE_CSS_CLASS}__grid--is-inactive`,
   Settings = `${BASE_CSS_CLASS}__settings`,
   SettingsControls = `${BASE_CSS_CLASS}__settings__controls`,
+  SettingsButtons = `${BASE_CSS_CLASS}__settings__buttons`,
 }
 //#endregion
 
@@ -45,6 +46,10 @@ export interface ImageEditorState extends BaseWidgetState {
   };
   filter: ImageEditorFilter;
   filterType: ImageEditorFilterType;
+  lastBrushSettings: ImageEditorBrushSettings;
+  settingsStore?: Partial<
+    Record<ImageEditorFilterType, Partial<Record<ImageEditorControlIds, ImageEditorControlValue>>>
+  >;
   update: {
     preview: () => Promise<void>;
     snapshot: () => Promise<void>;
@@ -76,7 +81,7 @@ export enum ImageEditorIcons {
 //#endregion
 
 //#region Controls
-export type ImageEditorUpdateCallback = (addSnapshot?: boolean) => Promise<void>;
+export type ImageEditorUpdateCallback = (addSnapshot?: boolean, force?: boolean) => Promise<void>;
 export enum ImageEditorControls {
   Canvas = 'canvas',
   Slider = 'slider',
@@ -92,6 +97,9 @@ export enum ImageEditorSliderIds {
   BlueChannel = 'b_channel',
   BlurKernelSize = 'blur_kernel_size',
   BlurSigma = 'blur_sigma',
+  DenoisePercentage = 'denoise_percentage',
+  Cfg = 'cfg',
+  Dilate = 'dilate',
   FocusPosition = 'focus_position',
   FocusSize = 'focus_size',
   Gamma = 'gamma',
@@ -99,17 +107,26 @@ export enum ImageEditorSliderIds {
   Intensity = 'intensity',
   Midpoint = 'midpoint',
   Opacity = 'opacity',
+  RoiAlign = 'roi_align',
+  RoiMinSize = 'roi_min_size',
+  RoiPadding = 'roi_padding',
   Radius = 'radius',
   RedChannel = 'r_channel',
   SharpenAmount = 'sharpen_amount',
   Size = 'size',
   Softness = 'softness',
+  Steps = 'steps',
   Strength = 'strength',
   Threshold = 'threshold',
+  UpsampleTarget = 'upsample_target',
+  Feather = 'feather',
 }
 export enum ImageEditorTextfieldIds {
   Color = 'color',
-  highlights = 'highlights',
+  Highlights = 'highlights',
+  NegativePrompt = 'negative_prompt',
+  PositivePrompt = 'positive_prompt',
+  Seed = 'seed',
   Shadows = 'shadows',
   Tint = 'tint',
 }
@@ -121,6 +138,9 @@ export enum ImageEditorToggleIds {
   Smooth = 'smoooth',
   SoftBlend = 'soft_blend',
   Vertical = 'vertical',
+  UseConditioning = 'use_conditioning',
+  RoiAuto = 'roi_auto',
+  RoiAlignAuto = 'roi_align_auto',
 }
 export type ImageEditorControlIds =
   | ImageEditorCanvasIds
@@ -196,6 +216,7 @@ export interface ImageEditorFilterSettingsMap {
   desaturate: ImageEditorDesaturateSettings;
   filmGrain: ImageEditorFilmGrainSettings;
   gaussianBlur: ImageEditorGaussianBlurSettings;
+  inpaint: ImageEditorInpaintSettings;
   line: ImageEditorLineSettings;
   sepia: ImageEditorSepiaSettings;
   splitTone: ImageEditorSplitToneSettings;
@@ -288,6 +309,24 @@ export interface ImageEditorVignetteSettings extends ImageEditorFilterSettings {
   radius: number;
   shape: boolean;
 }
+export interface ImageEditorInpaintSettings extends ImageEditorFilterSettings {
+  b64_canvas: string;
+  cfg: number;
+  denoise_percentage: number;
+  negative_prompt: string;
+  positive_prompt: string;
+  steps: number;
+  upsample_target: number;
+  use_conditioning: boolean;
+  seed?: number;
+  roi_auto?: boolean;
+  roi_padding?: number;
+  roi_align?: number;
+  roi_align_auto?: boolean;
+  roi_min_size?: number;
+  dilate?: number;
+  feather?: number;
+}
 export enum ImageEditorBlendIds {
   Opacity = 'opacity',
 }
@@ -373,7 +412,32 @@ export enum ImageEditorVignetteIds {
   Radius = 'radius',
   Shape = 'shape',
 }
+export enum ImageEditorInpaintIds {
+  B64Canvas = 'b64_canvas',
+  Cfg = 'cfg',
+  DenoisePercentage = 'denoise_percentage',
+  NegativePrompt = 'negative_prompt',
+  PositivePrompt = 'positive_prompt',
+  Seed = 'seed',
+  Steps = 'steps',
+  UseConditioning = 'use_conditioning',
+  RoiAuto = 'roi_auto',
+  RoiPadding = 'roi_padding',
+  RoiAlign = 'roi_align',
+  RoiAlignAuto = 'roi_align_auto',
+  RoiMinSize = 'roi_min_size',
+  Dilate = 'dilate',
+  Feather = 'feather',
+  UpsampleTarget = 'upsample_target',
+}
 export type ImageEditorFilterType = keyof ImageEditorFilterSettingsMap;
+export type ImageEditorDatasetDefaults = Partial<
+  Record<ImageEditorFilterType, Partial<ImageEditorFilterSettingsMap[ImageEditorFilterType]>>
+>;
+export type ImageEditorDataset = ImageEditorDeserializedValue & {
+  context_id?: string;
+  defaults?: ImageEditorDatasetDefaults;
+};
 export interface ImageEditorFilterDefinition<
   ImageEditorControlIdsEnum extends { [key: string]: string },
   ImageEditorSettings extends ImageEditorFilterSettings,
@@ -382,6 +446,7 @@ export interface ImageEditorFilterDefinition<
   controlIds: ImageEditorControlIdsEnum;
   configs: ImageEditorConfigs;
   hasCanvasAction?: boolean;
+  requiresManualApply?: boolean;
   settings: ImageEditorSettings;
 }
 export type ImageEditorBlendFilter = ImageEditorFilterDefinition<
@@ -511,6 +576,15 @@ export type ImageEditorVignetteFilter = ImageEditorFilterDefinition<
     [ImageEditorControls.Toggle]: ImageEditorToggleConfig[];
   }
 >;
+export type ImageEditorInpaintFilter = ImageEditorFilterDefinition<
+  typeof ImageEditorInpaintIds,
+  ImageEditorInpaintSettings,
+  {
+    [ImageEditorControls.Slider]: ImageEditorSliderConfig[];
+    [ImageEditorControls.Textfield]: ImageEditorTextfieldConfig[];
+    [ImageEditorControls.Toggle]: ImageEditorToggleConfig[];
+  }
+>;
 export type ImageEditorFilters = {
   blend: ImageEditorBlendFilter;
   bloom: ImageEditorBloomFilter;
@@ -521,6 +595,7 @@ export type ImageEditorFilters = {
   desaturate: ImageEditorDesaturateFilter;
   filmGrain: ImageEditorFilmGrainFilter;
   gaussianBlur: ImageEditorGaussianBlurFilter;
+  inpaint: ImageEditorInpaintFilter;
   line: ImageEditorLineFilter;
   saturation: ImageEditorSaturationFilter;
   sepia: ImageEditorSepiaFilter;
@@ -539,6 +614,7 @@ export type ImageEditorFilter =
   | ImageEditorDesaturateFilter
   | ImageEditorFilmGrainFilter
   | ImageEditorGaussianBlurFilter
+  | ImageEditorInpaintFilter
   | ImageEditorLineFilter
   | ImageEditorSaturationFilter
   | ImageEditorSepiaFilter
@@ -546,4 +622,7 @@ export type ImageEditorFilter =
   | ImageEditorTiltShiftFilter
   | ImageEditorVibranceFilter
   | ImageEditorVignetteFilter;
+
+export type ImageEditorRequestSettings<T extends ImageEditorFilterType> =
+  ImageEditorFilterSettingsMap[T] & { context_id?: string };
 //#endregion

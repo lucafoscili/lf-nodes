@@ -1,7 +1,6 @@
 import base64
 import json
 import os
-import requests
 import aiohttp
 import imghdr
 
@@ -11,7 +10,7 @@ from PIL import Image
 from io import BytesIO
 
 from ..utils.constants import API_ROUTE_PREFIX, BASE64_PNG_PREFIX
-from ..utils.helpers import get_comfy_list
+from ..utils.helpers.comfy import get_comfy_list
 
 from server import PromptServer
 

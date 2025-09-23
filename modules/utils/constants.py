@@ -1,4 +1,7 @@
+import folder_paths
+
 from comfy.samplers import KSampler
+from pathlib import Path
 
 class AnyType(str):
     def __ne__(self, _: object) -> bool:
@@ -8,6 +11,7 @@ class AnyType(str):
 class Input:
     BOOLEAN = "BOOLEAN"
     CLIP = "CLIP"
+    CONDITIONING = "CONDITIONING"
     FLOAT = "FLOAT"
     IMAGE = "IMAGE"
     INTEGER = "INT"
@@ -30,7 +34,9 @@ class Input:
     LF_TREE = "LF_TREE"
     LF_UPLOAD = "LF_UPLOAD"
     JSON = "JSON"
+    REGION_META = "REGION_META"
     MODEL = "MODEL"
+    VAE = "VAE"
     STRING = "STRING"
 
 ANY = AnyType("*")
@@ -53,6 +59,7 @@ FUNCTION = "on_exec"
 
 BACKUP_FOLDER = "Backups"
 USER_FOLDER = "LF_Nodes"
+ONNX_ROOT = Path(folder_paths.models_dir) / "onnx"
 
 RESAMPLERS = ["bicubic", "bilinear", "linear", "nearest", "nearest exact"]
 SAMPLERS = KSampler.SAMPLERS

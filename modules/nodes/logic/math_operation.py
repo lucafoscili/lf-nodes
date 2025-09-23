@@ -6,7 +6,7 @@ from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import ANY, EVENT_PREFIX, FUNCTION, Input
-from ...utils.helpers import normalize_input_list, normalize_list_to_value, not_none
+from ...utils.helpers.logic import normalize_input_list, normalize_list_to_value, not_none
 
 # region LF_MathOperation
 class LF_MathOperation:

@@ -8,7 +8,7 @@ from folder_paths import get_full_path
 from server import PromptServer
 
 from ..utils.constants import API_ROUTE_PREFIX, BACKUP_FOLDER
-from ..utils.helpers import get_comfy_dir, get_comfy_list
+from ..utils.helpers.comfy import get_comfy_dir, get_comfy_list
 
 # region new-backup
 @PromptServer.instance.routes.post(f"{API_ROUTE_PREFIX}/new-backup")

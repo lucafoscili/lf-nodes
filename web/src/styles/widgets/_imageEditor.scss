@@ -48,7 +48,6 @@
       @include mixins.lf-el-stretch;
       align-items: center;
       display: grid;
-      grid-area: settings;
       grid-template-rows: 1fr auto;
     }
 
@@ -56,8 +55,16 @@
       @include mixins.lf-el-stretch;
       align-items: center;
       display: grid;
+      grid-gap: 16px;
       overflow: auto;
       padding: 12px 24px;
+    }
+
+    &__buttons {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      padding: 8px 16px;
     }
   }
 

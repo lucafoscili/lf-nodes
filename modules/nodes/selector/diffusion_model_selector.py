@@ -7,7 +7,10 @@ from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, INT_MAX
-from ...utils.helpers import filter_list, get_comfy_list, is_none, normalize_list_to_value, prepare_model_dataset, process_model
+from ...utils.helpers.api import process_model
+from ...utils.helpers.comfy import get_comfy_list
+from ...utils.helpers.logic import filter_list, is_none, normalize_list_to_value
+from ...utils.helpers.ui import prepare_model_dataset
 
 # region LF_DiffusionModelSelector
 class LF_DiffusionModelSelector:

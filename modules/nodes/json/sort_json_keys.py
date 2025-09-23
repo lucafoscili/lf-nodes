@@ -2,7 +2,7 @@ from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
-from ...utils.helpers import normalize_list_to_value, normalize_json_input
+from ...utils.helpers.logic import normalize_list_to_value, normalize_json_input
 
 # region LF_SortJSONKeys
 class LF_SortJSONKeys:

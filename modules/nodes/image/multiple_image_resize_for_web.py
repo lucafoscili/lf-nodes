@@ -6,7 +6,8 @@ from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
-from ...utils.helpers import normalize_input_image, normalize_input_list, normalize_output_image, pil_to_tensor, tensor_to_pil
+from ...utils.helpers.conversion import pil_to_tensor, tensor_to_pil
+from ...utils.helpers.logic import normalize_input_image, normalize_input_list, normalize_output_image
 
 # region LF_MultipleImageResizeForWeb
 class LF_MultipleImageResizeForWeb:

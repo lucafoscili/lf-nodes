@@ -6,7 +6,9 @@ from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import BASE64_PNG_PREFIX, EVENT_PREFIX, FUNCTION, HEADERS, INT_MAX, get_image_classifier_system
-from ...utils.helpers import handle_response, normalize_input_image, normalize_list_to_value, tensor_to_base64
+from ...utils.helpers.api import handle_response
+from ...utils.helpers.conversion import tensor_to_base64
+from ...utils.helpers.logic import normalize_input_image, normalize_list_to_value
 
 # region LF_ImageClassifier
 class LF_ImageClassifier:

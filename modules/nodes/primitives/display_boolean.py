@@ -2,7 +2,7 @@ from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
-from ...utils.helpers import normalize_input_list
+from ...utils.helpers.logic import normalize_input_list
 
 # region LF_DisplayBoolean
 class LF_DisplayBoolean:
