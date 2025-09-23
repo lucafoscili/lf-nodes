@@ -252,7 +252,7 @@ def apply_inpaint_filter(image: torch.Tensor, settings: dict) -> FilterResult:
     sampler_default = context.get("sampler")
     scheduler_default = context.get("scheduler")
     cfg_default = context.get("cfg")
-    seed_default = context.get("seed")
+    seed_default = -1
     context_positive_prompt = str(context.get("positive_prompt") or "")
     context_negative_prompt = str(context.get("negative_prompt") or "")
     context_positive_conditioning = context.get("positive_conditioning")
@@ -309,7 +309,6 @@ def apply_inpaint_filter(image: torch.Tensor, settings: dict) -> FilterResult:
     mask_tensor = mask_tensor.clamp(0.0, 1.0)
     mask_tensor = (mask_tensor > 0.5).float()
 
-    # Save mask preview (full-size) for UI
     mask_preview_tensor = mask_tensor.detach().cpu().unsqueeze(-1).repeat(1, 1, 1, 3)
     mask_image = tensor_to_pil(mask_preview_tensor)
     mask_output_file, mask_subfolder, mask_filename = resolve_filepath(
@@ -342,7 +341,7 @@ def apply_inpaint_filter(image: torch.Tensor, settings: dict) -> FilterResult:
     if scheduler_name not in SCHEDULERS:
         scheduler_name = "normal"
 
-    seed_candidate = convert_to_int(settings.get("seed"))
+    seed_candidate = convert_to_int(settings.get("seed") or -1)
     if seed_candidate is None or seed_candidate < 0:
         seed_candidate = convert_to_int(seed_default)
     if seed_candidate is None or seed_candidate < 0:
@@ -357,7 +356,6 @@ def apply_inpaint_filter(image: torch.Tensor, settings: dict) -> FilterResult:
     if use_conditioning is None:
         use_conditioning = False
 
-    # ROI optimization controls
     roi_auto_raw = settings.get("roi_auto", "true")
     roi_auto = convert_to_boolean(roi_auto_raw)
     if roi_auto is None:
@@ -387,7 +385,6 @@ def apply_inpaint_filter(image: torch.Tensor, settings: dict) -> FilterResult:
     paste_roi = (0, 0, image_height, image_width)
 
     if roi_auto:
-        # Compute union bbox of mask over batch
         mask_any = (mask_tensor > 0.5).any(dim=0)  # [H, W]
         rows = mask_any.any(dim=1)
         cols = mask_any.any(dim=0)

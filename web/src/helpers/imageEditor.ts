@@ -290,6 +290,10 @@ export const refreshValues = async (state: ImageEditorState, addSnapshot = false
 
   const lfManager = getLfManager();
 
+  state.settingsStore = state.settingsStore ?? {};
+  const storeForFilter = (state.settingsStore[state.filterType] =
+    state.settingsStore[state.filterType] ?? {});
+
   for (const key in controls) {
     if (Object.prototype.hasOwnProperty.call(controls, key)) {
       const id = key as ImageEditorControlIds;
@@ -299,19 +303,24 @@ export const refreshValues = async (state: ImageEditorState, addSnapshot = false
         case 'LF-SLIDER': {
           const slider = control as HTMLLfSliderElement;
           const sliderValue = await slider.getValue();
-          filter.settings[id] = addSnapshot ? sliderValue.real : sliderValue.display;
+          const value = addSnapshot ? sliderValue.real : sliderValue.display;
+          filter.settings[id] = value;
+          storeForFilter[id] = value;
           break;
         }
         case 'LF-TEXTFIELD': {
           const textfield = control as HTMLLfTextfieldElement;
           const textfieldValue = await textfield.getValue();
           filter.settings[id] = textfieldValue;
+          storeForFilter[id] = textfieldValue;
           break;
         }
         case 'LF-TOGGLE': {
           const toggle = control as HTMLLfToggleElement;
           const toggleValue = await toggle.getValue();
-          filter.settings[id] = toggleValue === 'on' ? toggle.dataset.on : toggle.dataset.off;
+          const value = toggleValue === 'on' ? toggle.dataset.on : toggle.dataset.off;
+          filter.settings[id] = value;
+          storeForFilter[id] = value;
           break;
         }
         default:
@@ -383,7 +392,9 @@ const applyFilterDefaults = (
 export const prepSettings = (state: ImageEditorState, node: LfDataNode) => {
   state.elements.controls = {};
   state.filter = unescapeJson(node.cells.lfCode.value).parsedJson as ImageEditorFilter;
-  state.filterType = node.id as ImageEditorFilterType;
+  const idRaw = (node.id as string) || 'brush';
+  const alias = idRaw === 'inpaint_detail' || idRaw === 'inpaint_adv' ? 'inpaint' : idRaw;
+  state.filterType = alias as ImageEditorFilterType;
 
   const dataset = state.elements.imageviewer.lfDataset as ImageEditorDataset | undefined;
   const defaults = dataset?.defaults?.[state.filterType] as
@@ -392,6 +403,15 @@ export const prepSettings = (state: ImageEditorState, node: LfDataNode) => {
   if (defaults) {
     applyFilterDefaults(state, defaults);
   }
+
+  state.settingsStore = state.settingsStore ?? {};
+  const stored = state.settingsStore[state.filterType] ?? {};
+  const mutableSettings = state.filter.settings;
+  (Object.keys(stored) as ImageEditorControlIds[]).forEach((id) => {
+    const v = stored[id];
+    if (typeof v === 'undefined') return;
+    mutableSettings[id] = v as never;
+  });
 
   const { elements, filter } = state;
   const { settings } = elements;
@@ -410,16 +430,32 @@ export const prepSettings = (state: ImageEditorState, node: LfDataNode) => {
         switch (controlName) {
           case ImageEditorControls.Slider:
             const slider = createSlider(state, control as ImageEditorSliderConfig);
+            const storedValueSlider = stored[control.id as ImageEditorControlIds];
+            if (typeof storedValueSlider !== 'undefined') {
+              slider.lfValue = Number(storedValueSlider);
+            }
             controlsContainer.appendChild(slider);
             state.elements.controls[control.id as ImageEditorSliderIds] = slider;
             break;
           case ImageEditorControls.Textfield:
             const textfield = createTextfield(state, control as ImageEditorTextfieldConfig);
+            const storedValueText = stored[control.id as ImageEditorControlIds];
+            if (typeof storedValueText !== 'undefined') {
+              textfield.lfValue = String(storedValueText);
+            }
             controlsContainer.appendChild(textfield);
             state.elements.controls[control.id as ImageEditorTextfieldIds] = textfield;
             break;
           case ImageEditorControls.Toggle:
             const toggle = createToggle(state, control as ImageEditorToggleConfig);
+            const storedValueToggle = stored[control.id as ImageEditorControlIds];
+            if (typeof storedValueToggle !== 'undefined') {
+              const bool =
+                storedValueToggle === true ||
+                (typeof storedValueToggle === 'string' &&
+                  storedValueToggle.toLowerCase() === 'true');
+              toggle.lfValue = bool;
+            }
             controlsContainer.appendChild(toggle);
             state.elements.controls[control.id as ImageEditorToggleIds] = toggle;
             break;

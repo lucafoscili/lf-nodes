@@ -51,12 +51,6 @@ class LF_ImagesEditingBreakpoint:
                     "step": 0.1,
                     "tooltip": "CFG scale used as the starting value for inpaint edits."
                 }),
-                "seed": (Input.INTEGER, {
-                    "default": -1,
-                    "min": -1,
-                    "max": INT_MAX,
-                    "tooltip": "Seed used as the starting value for inpaint edits. Set to -1 for random."
-                }),
                 "positive_prompt": (Input.STRING, {
                     "default": "",
                     "tooltip": "Optional positive prompt used to pre-fill the inpaint editor."

@@ -47,6 +47,9 @@ export interface ImageEditorState extends BaseWidgetState {
   filter: ImageEditorFilter;
   filterType: ImageEditorFilterType;
   lastBrushSettings: ImageEditorBrushSettings;
+  settingsStore?: Partial<
+    Record<ImageEditorFilterType, Partial<Record<ImageEditorControlIds, ImageEditorControlValue>>>
+  >;
   update: {
     preview: () => Promise<void>;
     snapshot: () => Promise<void>;
@@ -312,9 +315,10 @@ export interface ImageEditorInpaintSettings extends ImageEditorFilterSettings {
   denoise_percentage: number;
   negative_prompt: string;
   positive_prompt: string;
-  seed: number;
   steps: number;
+  upsample_target: number;
   use_conditioning: boolean;
+  seed?: number;
   roi_auto?: boolean;
   roi_padding?: number;
   roi_align?: number;
@@ -322,7 +326,6 @@ export interface ImageEditorInpaintSettings extends ImageEditorFilterSettings {
   roi_min_size?: number;
   dilate?: number;
   feather?: number;
-  upsample_target?: number;
 }
 export enum ImageEditorBlendIds {
   Opacity = 'opacity',
