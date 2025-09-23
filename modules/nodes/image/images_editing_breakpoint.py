@@ -13,7 +13,7 @@ from ...utils.helpers.api import get_resource_url
 from ...utils.helpers.comfy import get_comfy_dir, resolve_filepath
 from ...utils.helpers.conversion import pil_to_tensor, tensor_to_pil
 from ...utils.helpers.editing import clear_editing_context, register_editing_context
-from ...utils.helpers.logic import normalize_input_image, normalize_list_to_value, normalize_output_image
+from ...utils.helpers.logic import normalize_conditioning, normalize_input_image, normalize_list_to_value, normalize_output_image
 from ...utils.helpers.ui import create_masonry_node
 
 # region LF_ImagesEditingBreakpoint
@@ -87,24 +87,6 @@ class LF_ImagesEditingBreakpoint:
     RETURN_TYPES = ("IMAGE", "IMAGE", "IMAGE", "IMAGE")
 
     def on_exec(self, **kwargs):
-        def normalize_conditioning(cond):
-            """Ensure CONDITIONING is a list of [tensor, dict] pairs or None.
-
-            - If cond is already a list of pairs, return it.
-            - If cond is a single pair [tensor, dict], wrap it in a list.
-            - Otherwise, return None.
-            """
-            if cond is None:
-                return None
-            # Already a list of pairs?
-            if isinstance(cond, list) and len(cond) > 0 and isinstance(cond[0], (list, tuple)) and len(cond[0]) >= 2 and isinstance(cond[0][1], dict):
-                return cond
-            # Single pair?
-            if isinstance(cond, (list, tuple)) and len(cond) == 2 and isinstance(cond[1], dict):
-                # ensure list type
-                return [list(cond) if not isinstance(cond, list) else cond]
-            return None
-        
         def wait_for_editing_completion(json_file_path):
             while True:
                 with open(json_file_path, 'r', encoding='utf-8') as json_file:
