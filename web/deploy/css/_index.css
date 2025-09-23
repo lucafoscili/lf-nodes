@@ -223,6 +223,12 @@
   overflow: auto;
   padding: 12px 24px;
 }
+.lf-imageeditor__settings__buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  padding: 8px 16px;
+}
 .lf-imageeditor__widget {
   width: 100%;
   height: 100%;

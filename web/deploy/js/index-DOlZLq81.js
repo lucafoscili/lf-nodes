@@ -5423,7 +5423,7 @@ var tt = false, et = (t2, e2, n2) => {
                         const n6 = t7.i.replace(/-/g, "_"), o6 = t7.T;
                         if (!o6) return;
                         const i3 = r.get(o6);
-                        return i3 ? i3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-4ba08932.entry.js": () => import("./p-4ba08932.entry-BZAgVK-X.js"), "./p-60af2d7f.entry.js": () => import("./p-60af2d7f.entry-DE1ZXcek.js"), "./p-7652d72d.entry.js": () => import("./p-7652d72d.entry-CuiDFUOA.js"), "./p-79cc15c2.entry.js": () => import("./p-79cc15c2.entry-yyVI51Ks.js"), "./p-846257eb.entry.js": () => import("./p-846257eb.entry-C1WGoW3_.js"), "./p-84927cea.entry.js": () => import("./p-84927cea.entry-BS5qPRPc.js"), "./p-87e2e37a.entry.js": () => import("./p-87e2e37a.entry-COAeqUfL.js"), "./p-928c4970.entry.js": () => import("./p-928c4970.entry-DYKMtCZQ.js"), "./p-93ed735a.entry.js": () => import("./p-93ed735a.entry-DgCYL7Ud.js"), "./p-a147e6c9.entry.js": () => import("./p-a147e6c9.entry-D0gZJnSR.js"), "./p-a14c6d82.entry.js": () => import("./p-a14c6d82.entry-BTy5N4RM.js"), "./p-a7fc1135.entry.js": () => import("./p-a7fc1135.entry-BtbUutMa.js"), "./p-bd214b33.entry.js": () => import("./p-bd214b33.entry-hnUGCADE.js"), "./p-bf8a47d4.entry.js": () => import("./p-bf8a47d4.entry-CQu99YNE.js"), "./p-ccea11a0.entry.js": () => import("./p-ccea11a0.entry-CG4zL46q.js"), "./p-e2689624.entry.js": () => import("./p-e2689624.entry-DDUkHcsn.js") }), `./${o6}.entry.js`, 2).then(((t8) => (r.set(o6, t8), t8[n6])), ((t8) => {
+                        return i3 ? i3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-4ba08932.entry.js": () => import("./p-4ba08932.entry-BYm4W8Fc.js"), "./p-60af2d7f.entry.js": () => import("./p-60af2d7f.entry-BuPkV1dv.js"), "./p-7652d72d.entry.js": () => import("./p-7652d72d.entry-BiR5K0BJ.js"), "./p-79cc15c2.entry.js": () => import("./p-79cc15c2.entry-D31bYGVI.js"), "./p-846257eb.entry.js": () => import("./p-846257eb.entry-B898k_Ek.js"), "./p-84927cea.entry.js": () => import("./p-84927cea.entry-Chb7GeSX.js"), "./p-87e2e37a.entry.js": () => import("./p-87e2e37a.entry-BXYy9Gr6.js"), "./p-928c4970.entry.js": () => import("./p-928c4970.entry-DE1lkQ7I.js"), "./p-93ed735a.entry.js": () => import("./p-93ed735a.entry-BQGZzLlR.js"), "./p-a147e6c9.entry.js": () => import("./p-a147e6c9.entry-DQSslSmt.js"), "./p-a14c6d82.entry.js": () => import("./p-a14c6d82.entry-BmtvipoJ.js"), "./p-a7fc1135.entry.js": () => import("./p-a7fc1135.entry-Cm0mO8iL.js"), "./p-bd214b33.entry.js": () => import("./p-bd214b33.entry-BSqWCj3J.js"), "./p-bf8a47d4.entry.js": () => import("./p-bf8a47d4.entry-CR9lQbNG.js"), "./p-ccea11a0.entry.js": () => import("./p-ccea11a0.entry-d2dWVW_Q.js"), "./p-e2689624.entry.js": () => import("./p-e2689624.entry-r5DniQS_.js") }), `./${o6}.entry.js`, 2).then(((t8) => (r.set(o6, t8), t8[n6])), ((t8) => {
                           l(t8, e3.$hostElement$);
                         }));
                         /*!__STENCIL_STATIC_IMPORT_SWITCH__*/
@@ -8791,6 +8791,7 @@ var ImageEditorCSS;
   ImageEditorCSS2["GridIsInactive"] = "lf-imageeditor__grid--is-inactive";
   ImageEditorCSS2["Settings"] = "lf-imageeditor__settings";
   ImageEditorCSS2["SettingsControls"] = "lf-imageeditor__settings__controls";
+  ImageEditorCSS2["SettingsButtons"] = "lf-imageeditor__settings__buttons";
 })(ImageEditorCSS || (ImageEditorCSS = {}));
 var ImageEditorStatus;
 (function(ImageEditorStatus2) {
@@ -8827,6 +8828,7 @@ var ImageEditorSliderIds;
   ImageEditorSliderIds2["BlurKernelSize"] = "blur_kernel_size";
   ImageEditorSliderIds2["BlurSigma"] = "blur_sigma";
   ImageEditorSliderIds2["DenoisePercentage"] = "denoise_percentage";
+  ImageEditorSliderIds2["Cfg"] = "cfg";
   ImageEditorSliderIds2["FocusPosition"] = "focus_position";
   ImageEditorSliderIds2["FocusSize"] = "focus_size";
   ImageEditorSliderIds2["Gamma"] = "gamma";
@@ -8849,6 +8851,7 @@ var ImageEditorTextfieldIds;
   ImageEditorTextfieldIds2["Highlights"] = "highlights";
   ImageEditorTextfieldIds2["NegativePrompt"] = "negative_prompt";
   ImageEditorTextfieldIds2["PositivePrompt"] = "positive_prompt";
+  ImageEditorTextfieldIds2["Seed"] = "seed";
   ImageEditorTextfieldIds2["Shadows"] = "shadows";
   ImageEditorTextfieldIds2["Tint"] = "tint";
 })(ImageEditorTextfieldIds || (ImageEditorTextfieldIds = {}));
@@ -8861,6 +8864,7 @@ var ImageEditorToggleIds;
   ImageEditorToggleIds2["Smooth"] = "smoooth";
   ImageEditorToggleIds2["SoftBlend"] = "soft_blend";
   ImageEditorToggleIds2["Vertical"] = "vertical";
+  ImageEditorToggleIds2["UseConditioning"] = "use_conditioning";
 })(ImageEditorToggleIds || (ImageEditorToggleIds = {}));
 var ImageEditorBlendIds;
 (function(ImageEditorBlendIds2) {
@@ -8966,10 +8970,13 @@ var ImageEditorVignetteIds;
 var ImageEditorInpaintIds;
 (function(ImageEditorInpaintIds2) {
   ImageEditorInpaintIds2["B64Canvas"] = "b64_canvas";
+  ImageEditorInpaintIds2["Cfg"] = "cfg";
   ImageEditorInpaintIds2["DenoisePercentage"] = "denoise_percentage";
   ImageEditorInpaintIds2["NegativePrompt"] = "negative_prompt";
   ImageEditorInpaintIds2["PositivePrompt"] = "positive_prompt";
+  ImageEditorInpaintIds2["Seed"] = "seed";
   ImageEditorInpaintIds2["Steps"] = "steps";
+  ImageEditorInpaintIds2["UseConditioning"] = "use_conditioning";
 })(ImageEditorInpaintIds || (ImageEditorInpaintIds = {}));
 const SETTINGS = {
   //#region Blend
@@ -9407,10 +9414,13 @@ const SETTINGS = {
     requiresManualApply: true,
     settings: {
       b64_canvas: "",
+      cfg: 7,
       denoise_percentage: 40,
       steps: 16,
       positive_prompt: "",
-      negative_prompt: ""
+      negative_prompt: "",
+      seed: 42,
+      use_conditioning: false
     },
     configs: {
       [ImageEditorControls.Slider]: [
@@ -9424,6 +9434,17 @@ const SETTINGS = {
           min: "0",
           step: "1",
           title: "Noise applied during inpaint. 0 keeps original pixels, 100 fully regenerates."
+        },
+        {
+          ariaLabel: "CFG scale",
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 7,
+          id: ImageEditorSliderIds.Cfg,
+          isMandatory: true,
+          max: "30",
+          min: "1",
+          step: "0.5",
+          title: "Classifier-free guidance applied during the inpaint pass."
         },
         {
           ariaLabel: "Steps",
@@ -9455,6 +9476,27 @@ const SETTINGS = {
           isMandatory: false,
           title: "Negative prompt applied to masked pixels.",
           type: "text"
+        },
+        {
+          ariaLabel: "Seed",
+          controlType: ImageEditorControls.Textfield,
+          defaultValue: "",
+          id: ImageEditorTextfieldIds.Seed,
+          isMandatory: false,
+          title: "Optional seed override. Leave blank for a random seed.",
+          type: "number"
+        }
+      ],
+      [ImageEditorControls.Toggle]: [
+        {
+          ariaLabel: "Use conditioning prompts",
+          controlType: ImageEditorControls.Toggle,
+          defaultValue: false,
+          id: ImageEditorToggleIds.UseConditioning,
+          isMandatory: false,
+          off: "false",
+          on: "true",
+          title: "If enabled, prepend the connected conditioning inputs to the prompts before sampling."
         }
       ]
     }
@@ -10223,7 +10265,6 @@ const EV_HANDLERS$5 = {
   //#endregion
 };
 const apiCall$1 = async (state, addSnapshot) => {
-  var _a;
   const { elements, filter, filterType } = state;
   const { imageviewer } = elements;
   const lfManager2 = getLfManager();
@@ -10232,7 +10273,8 @@ const apiCall$1 = async (state, addSnapshot) => {
   const payload = {
     ...baseSettings
   };
-  const contextId = (_a = imageviewer.lfDataset) == null ? void 0 : _a.context_id;
+  const contextDataset = imageviewer.lfDataset;
+  const contextId = contextDataset == null ? void 0 : contextDataset.context_id;
   if (contextId) {
     payload.context_id = contextId;
   }
@@ -10288,10 +10330,53 @@ const refreshValues = async (state, addSnapshot = false) => {
     }
   }
 };
+const applyFilterDefaults = (state, defaults) => {
+  const { filter } = state;
+  if (!filter) {
+    return;
+  }
+  const mutableSettings = filter.settings;
+  Object.keys(filter.configs).forEach((controlType) => {
+    const configs = filter.configs[controlType];
+    configs == null ? void 0 : configs.forEach((config) => {
+      const defaultValue = defaults[config.id];
+      if (typeof defaultValue === "undefined") {
+        return;
+      }
+      switch (controlType) {
+        case ImageEditorControls.Slider: {
+          const numericValue = typeof defaultValue === "number" ? defaultValue : Number(defaultValue);
+          config.defaultValue = numericValue;
+          mutableSettings[config.id] = numericValue;
+          break;
+        }
+        case ImageEditorControls.Textfield: {
+          const stringValue = defaultValue === null || typeof defaultValue === "undefined" ? "" : String(defaultValue);
+          config.defaultValue = stringValue;
+          mutableSettings[config.id] = stringValue;
+          break;
+        }
+        case ImageEditorControls.Toggle: {
+          const toggleConfig = config;
+          const boolValue = defaultValue === true || typeof defaultValue === "string" && defaultValue.toLowerCase() === "true";
+          toggleConfig.defaultValue = boolValue;
+          mutableSettings[config.id] = boolValue ? toggleConfig.on : toggleConfig.off;
+          break;
+        }
+      }
+    });
+  });
+};
 const prepSettings = (state, node) => {
+  var _a;
   state.elements.controls = {};
   state.filter = unescapeJson(node.cells.lfCode.value).parsedJson;
   state.filterType = node.id;
+  const dataset = state.elements.imageviewer.lfDataset;
+  const defaults = (_a = dataset == null ? void 0 : dataset.defaults) == null ? void 0 : _a[state.filterType];
+  if (defaults) {
+    applyFilterDefaults(state, defaults);
+  }
   const { elements, filter } = state;
   const { settings } = elements;
   settings.innerHTML = "";
@@ -10325,12 +10410,15 @@ const prepSettings = (state, node) => {
       });
     }
   });
+  const buttonsWrapper = document.createElement(TagName.Div);
+  buttonsWrapper.classList.add(ImageEditorCSS.SettingsButtons);
+  settings.appendChild(buttonsWrapper);
   const resetButton = document.createElement(TagName.LfButton);
   resetButton.lfIcon = ImageEditorIcons.Reset;
   resetButton.lfLabel = "Reset";
   resetButton.lfStretchX = true;
   resetButton.addEventListener("click", () => resetSettings(settings));
-  settings.appendChild(resetButton);
+  buttonsWrapper.appendChild(resetButton);
   if (state.filterType === "brush") {
     const brushSettings = state.filter.settings ?? {};
     state.lastBrushSettings = {
@@ -10365,7 +10453,7 @@ const prepSettings = (state, node) => {
     applyButton.addEventListener("click", () => {
       void updateCb(state, true, true);
     });
-    settings.appendChild(applyButton);
+    buttonsWrapper.appendChild(applyButton);
   }
 };
 const createSlider = (state, data) => {
@@ -10395,7 +10483,7 @@ const createToggle = (state, data) => {
   comp.dataset.off = data.off;
   comp.dataset.on = data.on;
   comp.lfLabel = parseLabel(data);
-  comp.lfValue = false;
+  comp.lfValue = data.defaultValue ?? false;
   comp.title = data.title;
   comp.addEventListener(LfEventName.LfToggle, (e2) => EV_HANDLERS$5.toggle(state, e2));
   return comp;
