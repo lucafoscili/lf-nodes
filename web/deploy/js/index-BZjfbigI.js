@@ -5423,7 +5423,7 @@ var tt = false, et = (t2, e2, n2) => {
                         const n6 = t7.i.replace(/-/g, "_"), o6 = t7.T;
                         if (!o6) return;
                         const i3 = r.get(o6);
-                        return i3 ? i3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-4ba08932.entry.js": () => import("./p-4ba08932.entry-ur7gmD_i.js"), "./p-60af2d7f.entry.js": () => import("./p-60af2d7f.entry-CXr5F8Gp.js"), "./p-7652d72d.entry.js": () => import("./p-7652d72d.entry-DV6l_9Lg.js"), "./p-79cc15c2.entry.js": () => import("./p-79cc15c2.entry-DGQlsl5p.js"), "./p-846257eb.entry.js": () => import("./p-846257eb.entry-CZAovbNR.js"), "./p-84927cea.entry.js": () => import("./p-84927cea.entry-8QPetBba.js"), "./p-87e2e37a.entry.js": () => import("./p-87e2e37a.entry-D-JXgK-9.js"), "./p-928c4970.entry.js": () => import("./p-928c4970.entry-08AbMFAX.js"), "./p-93ed735a.entry.js": () => import("./p-93ed735a.entry-ByfrtO2u.js"), "./p-a147e6c9.entry.js": () => import("./p-a147e6c9.entry-xYbNO7oS.js"), "./p-a14c6d82.entry.js": () => import("./p-a14c6d82.entry-BygqSGNo.js"), "./p-a7fc1135.entry.js": () => import("./p-a7fc1135.entry-B3AYFk1-.js"), "./p-bd214b33.entry.js": () => import("./p-bd214b33.entry-Cbkro8X7.js"), "./p-bf8a47d4.entry.js": () => import("./p-bf8a47d4.entry-BBTfKLBn.js"), "./p-ccea11a0.entry.js": () => import("./p-ccea11a0.entry-Yd73vV9M.js"), "./p-e2689624.entry.js": () => import("./p-e2689624.entry-CxgSwR-T.js") }), `./${o6}.entry.js`, 2).then(((t8) => (r.set(o6, t8), t8[n6])), ((t8) => {
+                        return i3 ? i3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-4ba08932.entry.js": () => import("./p-4ba08932.entry-BmqL3wXg.js"), "./p-60af2d7f.entry.js": () => import("./p-60af2d7f.entry-Dme4aeAV.js"), "./p-7652d72d.entry.js": () => import("./p-7652d72d.entry-DY3akkb-.js"), "./p-79cc15c2.entry.js": () => import("./p-79cc15c2.entry-BRdSRPZP.js"), "./p-846257eb.entry.js": () => import("./p-846257eb.entry-C1c2lW8K.js"), "./p-84927cea.entry.js": () => import("./p-84927cea.entry-X5FMlA91.js"), "./p-87e2e37a.entry.js": () => import("./p-87e2e37a.entry-rnphxrqm.js"), "./p-928c4970.entry.js": () => import("./p-928c4970.entry-D2FXz3jo.js"), "./p-93ed735a.entry.js": () => import("./p-93ed735a.entry-CTEPywbs.js"), "./p-a147e6c9.entry.js": () => import("./p-a147e6c9.entry-ih5cMk9k.js"), "./p-a14c6d82.entry.js": () => import("./p-a14c6d82.entry-CFueRGwn.js"), "./p-a7fc1135.entry.js": () => import("./p-a7fc1135.entry-BEpMjBn_.js"), "./p-bd214b33.entry.js": () => import("./p-bd214b33.entry-D6C7gMEp.js"), "./p-bf8a47d4.entry.js": () => import("./p-bf8a47d4.entry-fTyH226h.js"), "./p-ccea11a0.entry.js": () => import("./p-ccea11a0.entry-D8m7g4Zh.js"), "./p-e2689624.entry.js": () => import("./p-e2689624.entry-Dva9KSWA.js") }), `./${o6}.entry.js`, 2).then(((t8) => (r.set(o6, t8), t8[n6])), ((t8) => {
                           l(t8, e3.$hostElement$);
                         }));
                         /*!__STENCIL_STATIC_IMPORT_SWITCH__*/
@@ -9423,7 +9423,7 @@ const SETTINGS = {
     }
   },
   //#endregion
-  //#region Inpaint
+  //#region Inpaint (basic)
   inpaint: {
     controlIds: ImageEditorInpaintIds,
     hasCanvasAction: true,
@@ -9435,19 +9435,42 @@ const SETTINGS = {
       steps: 16,
       positive_prompt: "",
       negative_prompt: "",
-      seed: 42,
-      use_conditioning: false,
-      // Advanced defaults mirror backend fallbacks
-      roi_auto: true,
-      roi_padding: 32,
-      roi_align: 8,
-      roi_align_auto: false,
-      roi_min_size: 64,
-      dilate: 0,
-      feather: 0,
-      upsample_target: 0
+      upsample_target: 0,
+      use_conditioning: false
     },
     configs: {
+      [ImageEditorControls.Textfield]: [
+        {
+          ariaLabel: "Positive prompt",
+          controlType: ImageEditorControls.Textfield,
+          defaultValue: "",
+          id: ImageEditorTextfieldIds.PositivePrompt,
+          isMandatory: false,
+          title: "Prompt applied to masked pixels.",
+          type: "text"
+        },
+        {
+          ariaLabel: "Negative prompt",
+          controlType: ImageEditorControls.Textfield,
+          defaultValue: "",
+          id: ImageEditorTextfieldIds.NegativePrompt,
+          isMandatory: false,
+          title: "Negative prompt applied to masked pixels.",
+          type: "text"
+        }
+      ],
+      [ImageEditorControls.Toggle]: [
+        {
+          ariaLabel: "Use conditioning prompts",
+          controlType: ImageEditorControls.Toggle,
+          defaultValue: false,
+          id: ImageEditorToggleIds.UseConditioning,
+          isMandatory: false,
+          off: "false",
+          on: "true",
+          title: "If enabled, prepend the connected conditioning inputs to the prompts before sampling."
+        }
+      ],
       [ImageEditorControls.Slider]: [
         {
           ariaLabel: "Denoise percentage",
@@ -9482,62 +9505,6 @@ const SETTINGS = {
           step: "1",
           title: "Diffusion steps used for the inpaint sampler."
         },
-        // ROI and Quality controls
-        {
-          ariaLabel: "ROI padding (px)",
-          controlType: ImageEditorControls.Slider,
-          defaultValue: 32,
-          id: ImageEditorSliderIds.RoiPadding,
-          isMandatory: false,
-          max: "256",
-          min: "0",
-          step: "1",
-          title: "Pixels of padding around the mask bounding box when cropping the ROI."
-        },
-        {
-          ariaLabel: "ROI align multiple",
-          controlType: ImageEditorControls.Slider,
-          defaultValue: 8,
-          id: ImageEditorSliderIds.RoiAlign,
-          isMandatory: false,
-          max: "64",
-          min: "1",
-          step: "1",
-          title: "Align ROI size/position to this multiple. Keeps latent-friendly dims. Disable auto-align to use."
-        },
-        {
-          ariaLabel: "ROI minimum size (px)",
-          controlType: ImageEditorControls.Slider,
-          defaultValue: 64,
-          id: ImageEditorSliderIds.RoiMinSize,
-          isMandatory: false,
-          max: "1024",
-          min: "1",
-          step: "1",
-          title: "Enforce a minimum width/height for the cropped ROI."
-        },
-        {
-          ariaLabel: "Dilate mask (px)",
-          controlType: ImageEditorControls.Slider,
-          defaultValue: 0,
-          id: ImageEditorSliderIds.Dilate,
-          isMandatory: false,
-          max: "64",
-          min: "0",
-          step: "1",
-          title: "Expand mask edges before inpaint to avoid seams."
-        },
-        {
-          ariaLabel: "Feather mask (px)",
-          controlType: ImageEditorControls.Slider,
-          defaultValue: 0,
-          id: ImageEditorSliderIds.Feather,
-          isMandatory: false,
-          max: "64",
-          min: "0",
-          step: "1",
-          title: "Soften mask edges to blend the inpainted region."
-        },
         {
           ariaLabel: "Upsample target (px)",
           controlType: ImageEditorControls.Slider,
@@ -9548,67 +9515,6 @@ const SETTINGS = {
           min: "0",
           step: "16",
           title: "Detailer path: upscale ROI longer side to this size before inpaint (0 disables)."
-        }
-      ],
-      [ImageEditorControls.Textfield]: [
-        {
-          ariaLabel: "Positive prompt",
-          controlType: ImageEditorControls.Textfield,
-          defaultValue: "",
-          id: ImageEditorTextfieldIds.PositivePrompt,
-          isMandatory: false,
-          title: "Prompt applied to masked pixels.",
-          type: "text"
-        },
-        {
-          ariaLabel: "Negative prompt",
-          controlType: ImageEditorControls.Textfield,
-          defaultValue: "",
-          id: ImageEditorTextfieldIds.NegativePrompt,
-          isMandatory: false,
-          title: "Negative prompt applied to masked pixels.",
-          type: "text"
-        },
-        {
-          ariaLabel: "Seed",
-          controlType: ImageEditorControls.Textfield,
-          defaultValue: "",
-          id: ImageEditorTextfieldIds.Seed,
-          isMandatory: false,
-          title: "Optional seed override. Leave blank for a random seed.",
-          type: "number"
-        }
-      ],
-      [ImageEditorControls.Toggle]: [
-        {
-          ariaLabel: "Use conditioning prompts",
-          controlType: ImageEditorControls.Toggle,
-          defaultValue: false,
-          id: ImageEditorToggleIds.UseConditioning,
-          isMandatory: false,
-          off: "false",
-          on: "true",
-          title: "If enabled, prepend the connected conditioning inputs to the prompts before sampling."
-        },
-        {
-          ariaLabel: "Auto ROI crop",
-          controlType: ImageEditorControls.Toggle,
-          defaultValue: true,
-          id: ImageEditorToggleIds.RoiAuto,
-          isMandatory: false,
-          off: "false",
-          on: "true",
-          title: "Automatically crop to mask bounding box to speed up inpainting."
-        },
-        {
-          ariaLabel: "Auto-align ROI",
-          controlType: ImageEditorControls.Toggle,
-          defaultValue: false,
-          id: ImageEditorToggleIds.RoiAlignAuto,
-          isMandatory: false,
-          off: "false",
-          on: "true",
-          title: "Infer alignment multiple from VAE/model. Disable to set a manual multiple (see slider)."
         }
       ]
     }
@@ -9956,6 +9862,186 @@ const SETTINGS = {
   }
   //#endregion
 };
+const INPAINT_ADV = {
+  controlIds: ImageEditorInpaintIds,
+  hasCanvasAction: true,
+  requiresManualApply: true,
+  settings: {
+    ...SETTINGS.inpaint.settings,
+    roi_auto: true,
+    roi_padding: 32,
+    roi_align: 8,
+    roi_align_auto: false,
+    roi_min_size: 64,
+    dilate: 0,
+    feather: 0,
+    seed: 42
+  },
+  configs: {
+    [ImageEditorControls.Textfield]: [
+      {
+        ariaLabel: "Positive prompt",
+        controlType: ImageEditorControls.Textfield,
+        defaultValue: "",
+        id: ImageEditorTextfieldIds.PositivePrompt,
+        isMandatory: false,
+        title: "Prompt applied to masked pixels.",
+        type: "text"
+      },
+      {
+        ariaLabel: "Negative prompt",
+        controlType: ImageEditorControls.Textfield,
+        defaultValue: "",
+        id: ImageEditorTextfieldIds.NegativePrompt,
+        isMandatory: false,
+        title: "Negative prompt applied to masked pixels.",
+        type: "text"
+      },
+      {
+        ariaLabel: "Seed",
+        controlType: ImageEditorControls.Textfield,
+        defaultValue: "",
+        id: ImageEditorTextfieldIds.Seed,
+        isMandatory: false,
+        title: "Optional seed override. Leave blank for a random seed.",
+        type: "number"
+      }
+    ],
+    [ImageEditorControls.Slider]: [
+      {
+        ariaLabel: "Denoise percentage",
+        controlType: ImageEditorControls.Slider,
+        defaultValue: 40,
+        id: ImageEditorSliderIds.DenoisePercentage,
+        isMandatory: true,
+        max: "100",
+        min: "0",
+        step: "1",
+        title: "Noise applied during inpaint. 0 keeps original pixels, 100 fully regenerates."
+      },
+      {
+        ariaLabel: "CFG scale",
+        controlType: ImageEditorControls.Slider,
+        defaultValue: 7,
+        id: ImageEditorSliderIds.Cfg,
+        isMandatory: true,
+        max: "30",
+        min: "1",
+        step: "0.5",
+        title: "Classifier-free guidance applied during the inpaint pass."
+      },
+      {
+        ariaLabel: "Steps",
+        controlType: ImageEditorControls.Slider,
+        defaultValue: 16,
+        id: ImageEditorSliderIds.Steps,
+        isMandatory: true,
+        max: "30",
+        min: "1",
+        step: "1",
+        title: "Diffusion steps used for the inpaint sampler."
+      },
+      {
+        ariaLabel: "Upsample target (px)",
+        controlType: ImageEditorControls.Slider,
+        defaultValue: 0,
+        id: ImageEditorSliderIds.UpsampleTarget,
+        isMandatory: false,
+        max: "2048",
+        min: "0",
+        step: "16",
+        title: "Detailer path: upscale ROI longer side to this size before inpaint (0 disables)."
+      },
+      {
+        ariaLabel: "ROI padding (px)",
+        controlType: ImageEditorControls.Slider,
+        defaultValue: 32,
+        id: ImageEditorSliderIds.RoiPadding,
+        isMandatory: false,
+        max: "256",
+        min: "0",
+        step: "1",
+        title: "Pixels of padding around the mask bounding box when cropping the ROI."
+      },
+      {
+        ariaLabel: "ROI align multiple",
+        controlType: ImageEditorControls.Slider,
+        defaultValue: 8,
+        id: ImageEditorSliderIds.RoiAlign,
+        isMandatory: false,
+        max: "64",
+        min: "1",
+        step: "1",
+        title: "Align ROI size/position to this multiple. Keeps latent-friendly dims. Disable auto-align to use."
+      },
+      {
+        ariaLabel: "ROI minimum size (px)",
+        controlType: ImageEditorControls.Slider,
+        defaultValue: 64,
+        id: ImageEditorSliderIds.RoiMinSize,
+        isMandatory: false,
+        max: "1024",
+        min: "1",
+        step: "1",
+        title: "Enforce a minimum width/height for the cropped ROI."
+      },
+      {
+        ariaLabel: "Dilate mask (px)",
+        controlType: ImageEditorControls.Slider,
+        defaultValue: 0,
+        id: ImageEditorSliderIds.Dilate,
+        isMandatory: false,
+        max: "64",
+        min: "0",
+        step: "1",
+        title: "Expand mask edges before inpaint to avoid seams."
+      },
+      {
+        ariaLabel: "Feather mask (px)",
+        controlType: ImageEditorControls.Slider,
+        defaultValue: 0,
+        id: ImageEditorSliderIds.Feather,
+        isMandatory: false,
+        max: "64",
+        min: "0",
+        step: "1",
+        title: "Soften mask edges to blend the inpainted region."
+      }
+    ],
+    [ImageEditorControls.Toggle]: [
+      {
+        ariaLabel: "Use conditioning prompts",
+        controlType: ImageEditorControls.Toggle,
+        defaultValue: false,
+        id: ImageEditorToggleIds.UseConditioning,
+        isMandatory: false,
+        off: "false",
+        on: "true",
+        title: "If enabled, prepend the connected conditioning inputs to the prompts before sampling."
+      },
+      {
+        ariaLabel: "Auto ROI crop",
+        controlType: ImageEditorControls.Toggle,
+        defaultValue: true,
+        id: ImageEditorToggleIds.RoiAuto,
+        isMandatory: false,
+        off: "false",
+        on: "true",
+        title: "Automatically crop to mask bounding box to speed up inpainting."
+      },
+      {
+        ariaLabel: "Auto-align ROI",
+        controlType: ImageEditorControls.Toggle,
+        defaultValue: false,
+        id: ImageEditorToggleIds.RoiAlignAuto,
+        isMandatory: false,
+        off: "false",
+        on: "true",
+        title: "Infer alignment multiple from VAE/model. Disable to set a manual multiple (see slider)."
+      }
+    ]
+  }
+};
 const TREE_DATA = {
   nodes: [
     {
@@ -9996,6 +10082,17 @@ const TREE_DATA = {
           },
           id: "inpaint",
           value: "Inpaint"
+        },
+        {
+          description: "Inpaint with advanced ROI controls.",
+          cells: {
+            lfCode: {
+              shape: "code",
+              value: JSON.stringify(INPAINT_ADV)
+            }
+          },
+          id: "inpaint_adv",
+          value: "Inpaint (adv.)"
         }
         //#endregion
       ]
@@ -10412,6 +10509,8 @@ const refreshValues = async (state, addSnapshot = false) => {
   const { elements, filter } = state;
   const { controls } = elements;
   const lfManager2 = getLfManager();
+  state.settingsStore = state.settingsStore ?? {};
+  const storeForFilter = state.settingsStore[state.filterType] = state.settingsStore[state.filterType] ?? {};
   for (const key in controls) {
     if (Object.prototype.hasOwnProperty.call(controls, key)) {
       const id = key;
@@ -10420,19 +10519,24 @@ const refreshValues = async (state, addSnapshot = false) => {
         case "LF-SLIDER": {
           const slider = control;
           const sliderValue = await slider.getValue();
-          filter.settings[id] = addSnapshot ? sliderValue.real : sliderValue.display;
+          const value = addSnapshot ? sliderValue.real : sliderValue.display;
+          filter.settings[id] = value;
+          storeForFilter[id] = value;
           break;
         }
         case "LF-TEXTFIELD": {
           const textfield = control;
           const textfieldValue = await textfield.getValue();
           filter.settings[id] = textfieldValue;
+          storeForFilter[id] = textfieldValue;
           break;
         }
         case "LF-TOGGLE": {
           const toggle = control;
           const toggleValue = await toggle.getValue();
-          filter.settings[id] = toggleValue === "on" ? toggle.dataset.on : toggle.dataset.off;
+          const value = toggleValue === "on" ? toggle.dataset.on : toggle.dataset.off;
+          filter.settings[id] = value;
+          storeForFilter[id] = value;
           break;
         }
         default:
@@ -10483,12 +10587,23 @@ const prepSettings = (state, node) => {
   var _a;
   state.elements.controls = {};
   state.filter = unescapeJson(node.cells.lfCode.value).parsedJson;
-  state.filterType = node.id;
+  const idRaw = node.id || "brush";
+  const alias = idRaw === "inpaint_detail" || idRaw === "inpaint_adv" ? "inpaint" : idRaw;
+  state.filterType = alias;
   const dataset = state.elements.imageviewer.lfDataset;
   const defaults = (_a = dataset == null ? void 0 : dataset.defaults) == null ? void 0 : _a[state.filterType];
   if (defaults) {
     applyFilterDefaults(state, defaults);
   }
+  state.settingsStore = state.settingsStore ?? {};
+  const stored = state.settingsStore[state.filterType] ?? {};
+  const mutableSettings = state.filter.settings;
+  Object.keys(stored).forEach((id) => {
+    const v2 = stored[id];
+    if (typeof v2 === "undefined")
+      return;
+    mutableSettings[id] = v2;
+  });
   const { elements, filter } = state;
   const { settings } = elements;
   settings.innerHTML = "";
@@ -10503,16 +10618,29 @@ const prepSettings = (state, node) => {
         switch (controlName) {
           case ImageEditorControls.Slider:
             const slider = createSlider(state, control);
+            const storedValueSlider = stored[control.id];
+            if (typeof storedValueSlider !== "undefined") {
+              slider.lfValue = Number(storedValueSlider);
+            }
             controlsContainer.appendChild(slider);
             state.elements.controls[control.id] = slider;
             break;
           case ImageEditorControls.Textfield:
             const textfield = createTextfield(state, control);
+            const storedValueText = stored[control.id];
+            if (typeof storedValueText !== "undefined") {
+              textfield.lfValue = String(storedValueText);
+            }
             controlsContainer.appendChild(textfield);
             state.elements.controls[control.id] = textfield;
             break;
           case ImageEditorControls.Toggle:
             const toggle = createToggle(state, control);
+            const storedValueToggle = stored[control.id];
+            if (typeof storedValueToggle !== "undefined") {
+              const bool = storedValueToggle === true || typeof storedValueToggle === "string" && storedValueToggle.toLowerCase() === "true";
+              toggle.lfValue = bool;
+            }
             controlsContainer.appendChild(toggle);
             state.elements.controls[control.id] = toggle;
             break;
