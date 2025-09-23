@@ -11,6 +11,7 @@ class AnyType(str):
 class Input:
     BOOLEAN = "BOOLEAN"
     CLIP = "CLIP"
+    CONDITIONING = "CONDITIONING"
     FLOAT = "FLOAT"
     IMAGE = "IMAGE"
     INTEGER = "INT"

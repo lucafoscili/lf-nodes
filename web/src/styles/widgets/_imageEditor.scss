@@ -59,6 +59,13 @@
       overflow: auto;
       padding: 12px 24px;
     }
+
+    &__buttons {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      padding: 8px 16px;
+    }
   }
 
   &__widget {

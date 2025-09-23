@@ -8,7 +8,7 @@ from server import PromptServer
 from urllib.parse import urlparse, parse_qs
 
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
+from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, INT_MAX, SAMPLERS, SCHEDULERS
 from ...utils.helpers.api import get_resource_url
 from ...utils.helpers.comfy import get_comfy_dir, resolve_filepath
 from ...utils.helpers.conversion import pil_to_tensor, tensor_to_pil
@@ -27,9 +27,6 @@ class LF_ImagesEditingBreakpoint:
                 }),
             },
             "optional": {
-                "ui_widget": (Input.LF_IMAGE_EDITOR, {
-                    "default": {}
-                }),
                 "model": (Input.MODEL, {
                     "tooltip": "Optional diffusion model reused by inpaint edits."
                 }),
@@ -38,6 +35,44 @@ class LF_ImagesEditingBreakpoint:
                 }),
                 "vae": (Input.VAE, {
                     "tooltip": "Optional VAE reused by inpaint edits."
+                }),
+                "sampler": (SAMPLERS, {
+                    "tooltip": "Optional sampler reused by inpaint edits.",
+                    "default": "dpmpp_2m"
+                }),
+                "scheduler": (SCHEDULERS, {
+                    "tooltip": "Optional scheduler reused by inpaint edits.",
+                    "default": "normal"
+                }),
+                "cfg": (Input.FLOAT, {
+                    "default": 7.0,
+                    "min": 0.0,
+                    "max": 30.0,
+                    "step": 0.1,
+                    "tooltip": "CFG scale used as the starting value for inpaint edits."
+                }),
+                "seed": (Input.INTEGER, {
+                    "default": -1,
+                    "min": -1,
+                    "max": INT_MAX,
+                    "tooltip": "Seed used as the starting value for inpaint edits. Set to -1 for random."
+                }),
+                "positive_prompt": (Input.STRING, {
+                    "default": "",
+                    "tooltip": "Optional positive prompt used to pre-fill the inpaint editor."
+                }),
+                "negative_prompt": (Input.STRING, {
+                    "default": "",
+                    "tooltip": "Optional negative prompt used to pre-fill the inpaint editor."
+                }),
+                "positive_conditioning": (Input.CONDITIONING, {
+                    "tooltip": "Optional positive conditioning to reuse during inpaint edits."
+                }),
+                "negative_conditioning": (Input.CONDITIONING, {
+                    "tooltip": "Optional negative conditioning to reuse during inpaint edits."
+                }),
+                "ui_widget": (Input.LF_IMAGE_EDITOR, {
+                    "default": {}
                 }),
             },
             "hidden": {
@@ -52,6 +87,24 @@ class LF_ImagesEditingBreakpoint:
     RETURN_TYPES = ("IMAGE", "IMAGE", "IMAGE", "IMAGE")
 
     def on_exec(self, **kwargs):
+        def normalize_conditioning(cond):
+            """Ensure CONDITIONING is a list of [tensor, dict] pairs or None.
+
+            - If cond is already a list of pairs, return it.
+            - If cond is a single pair [tensor, dict], wrap it in a list.
+            - Otherwise, return None.
+            """
+            if cond is None:
+                return None
+            # Already a list of pairs?
+            if isinstance(cond, list) and len(cond) > 0 and isinstance(cond[0], (list, tuple)) and len(cond[0]) >= 2 and isinstance(cond[0][1], dict):
+                return cond
+            # Single pair?
+            if isinstance(cond, (list, tuple)) and len(cond) == 2 and isinstance(cond[1], dict):
+                # ensure list type
+                return [list(cond) if not isinstance(cond, list) else cond]
+            return None
+        
         def wait_for_editing_completion(json_file_path):
             while True:
                 with open(json_file_path, 'r', encoding='utf-8') as json_file:
@@ -68,6 +121,29 @@ class LF_ImagesEditingBreakpoint:
         model_value = normalize_list_to_value(kwargs.get("model"))
         clip_value = normalize_list_to_value(kwargs.get("clip"))
         vae_value = normalize_list_to_value(kwargs.get("vae"))
+        sampler_value = normalize_list_to_value(kwargs.get("sampler"))
+        scheduler_value = normalize_list_to_value(kwargs.get("scheduler"))
+
+        cfg_raw = normalize_list_to_value(kwargs.get("cfg"))
+        try:
+            cfg_value = float(cfg_raw) if cfg_raw is not None else None
+        except (TypeError, ValueError):
+            cfg_value = None
+
+        seed_raw = normalize_list_to_value(kwargs.get("seed"))
+        try:
+            seed_value = int(seed_raw) if seed_raw not in (None, "") else None
+        except (TypeError, ValueError):
+            seed_value = None
+
+        positive_prompt_raw = normalize_list_to_value(kwargs.get("positive_prompt"))
+        positive_prompt_value = str(positive_prompt_raw) if positive_prompt_raw not in (None, "") else ""
+
+        negative_prompt_raw = normalize_list_to_value(kwargs.get("negative_prompt"))
+        negative_prompt_value = str(negative_prompt_raw) if negative_prompt_raw not in (None, "") else ""
+
+        positive_conditioning_value = normalize_conditioning(kwargs.get("positive_conditioning"))
+        negative_conditioning_value = normalize_conditioning(kwargs.get("negative_conditioning"))
 
         image: list[torch.Tensor] = normalize_input_image(kwargs.get("image"))
 
@@ -90,8 +166,34 @@ class LF_ImagesEditingBreakpoint:
 
         columns.append({"id": "path", "title": temp_json_file})
         columns.append({"id": "status", "title": "pending"})
-        
-        register_editing_context(temp_json_file, model=model_value, clip=clip_value, vae=vae_value)
+
+        inpaint_defaults: dict[str, object] = {}
+        if cfg_value is not None:
+            inpaint_defaults["cfg"] = cfg_value
+        if seed_value is not None and seed_value >= 0:
+            inpaint_defaults["seed"] = seed_value
+        if positive_prompt_value:
+            inpaint_defaults["positive_prompt"] = positive_prompt_value
+        if negative_prompt_value:
+            inpaint_defaults["negative_prompt"] = negative_prompt_value
+
+        if inpaint_defaults:
+            dataset.setdefault("defaults", {})["inpaint"] = inpaint_defaults
+
+        register_editing_context(
+            temp_json_file,
+            model=model_value,
+            clip=clip_value,
+            vae=vae_value,
+            sampler=sampler_value,
+            scheduler=scheduler_value,
+            cfg=cfg_value,
+            seed=seed_value,
+            positive_prompt=positive_prompt_value or None,
+            negative_prompt=negative_prompt_value or None,
+            positive_conditioning=positive_conditioning_value,
+            negative_conditioning=negative_conditioning_value,
+        )
         with open(temp_json_file, 'w', encoding='utf-8') as json_file:
             json.dump(dataset, json_file, ensure_ascii=False, indent=4)
 

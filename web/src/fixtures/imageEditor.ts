@@ -480,10 +480,13 @@ export const SETTINGS: ImageEditorFilters = {
     requiresManualApply: true,
     settings: {
       b64_canvas: '',
+      cfg: 7,
       denoise_percentage: 40,
       steps: 16,
       positive_prompt: '',
       negative_prompt: '',
+      seed: 42,
+      use_conditioning: false,
     },
     configs: {
       [ImageEditorControls.Slider]: [
@@ -497,6 +500,17 @@ export const SETTINGS: ImageEditorFilters = {
           min: '0',
           step: '1',
           title: 'Noise applied during inpaint. 0 keeps original pixels, 100 fully regenerates.',
+        },
+        {
+          ariaLabel: 'CFG scale',
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 7,
+          id: ImageEditorSliderIds.Cfg,
+          isMandatory: true,
+          max: '30',
+          min: '1',
+          step: '0.5',
+          title: 'Classifier-free guidance applied during the inpaint pass.',
         },
         {
           ariaLabel: 'Steps',
@@ -528,6 +542,28 @@ export const SETTINGS: ImageEditorFilters = {
           isMandatory: false,
           title: 'Negative prompt applied to masked pixels.',
           type: 'text',
+        },
+        {
+          ariaLabel: 'Seed',
+          controlType: ImageEditorControls.Textfield,
+          defaultValue: '',
+          id: ImageEditorTextfieldIds.Seed,
+          isMandatory: false,
+          title: 'Optional seed override. Leave blank for a random seed.',
+          type: 'number',
+        },
+      ],
+      [ImageEditorControls.Toggle]: [
+        {
+          ariaLabel: 'Use conditioning prompts',
+          controlType: ImageEditorControls.Toggle,
+          defaultValue: false,
+          id: ImageEditorToggleIds.UseConditioning,
+          isMandatory: false,
+          off: 'false',
+          on: 'true',
+          title:
+            'If enabled, prepend the connected conditioning inputs to the prompts before sampling.',
         },
       ],
     },

@@ -7,10 +7,10 @@ import torch.nn.functional as F
 import comfy.sample
 import nodes
 
-from ..constants import SAMPLERS
+from ..constants import SAMPLERS, SCHEDULERS
 from ..helpers.api import get_resource_url
 from ..helpers.comfy import resolve_filepath
-from ..helpers.conversion import base64_to_tensor, convert_to_float, convert_to_int, tensor_to_pil
+from ..helpers.conversion import base64_to_tensor, convert_to_boolean, convert_to_float, convert_to_int, tensor_to_pil
 from ..helpers.editing import get_editing_context
 
 FilterResult = Tuple[torch.Tensor, Dict[str, str]]
@@ -97,9 +97,15 @@ def perform_inpaint(
     cfg: float,
     seed: int,
     disable_preview: bool = True,
+    positive_conditioning=None,
+    negative_conditioning=None,
+    use_conditioning: bool = False,
 ) -> torch.Tensor:
     """
     Run an inpaint diffusion pass and blend the result with the original image.
+
+    When `use_conditioning` is True, any provided conditioning stacks are prepended to the freshly
+    encoded prompts before sampling.
 
     Args:
         model: The diffusion model to use for inpainting.
@@ -124,6 +130,13 @@ def perform_inpaint(
         clip_encoder = nodes.CLIPTextEncode()
         positive = clip_encoder.encode(clip, positive_prompt)[0]
         negative = clip_encoder.encode(clip, negative_prompt)[0]
+
+        if use_conditioning:
+            combine_node = nodes.ConditioningCombine()
+            if positive_conditioning is not None:
+                positive = combine_node.combine(positive_conditioning, positive)[0]
+            if negative_conditioning is not None:
+                negative = combine_node.combine(negative_conditioning, negative)[0]
 
         conditioning_node = nodes.InpaintModelConditioning()
         pos_cond, neg_cond, latent = conditioning_node.encode(
@@ -225,6 +238,15 @@ def apply_inpaint_filter(image: torch.Tensor, settings: dict) -> FilterResult:
             "Inpaint filter requires model, clip, and vae inputs. Connect them to LF_ImagesEditingBreakpoint."
         )
 
+    sampler_default = context.get("sampler")
+    scheduler_default = context.get("scheduler")
+    cfg_default = context.get("cfg")
+    seed_default = context.get("seed")
+    context_positive_prompt = str(context.get("positive_prompt") or "")
+    context_negative_prompt = str(context.get("negative_prompt") or "")
+    context_positive_conditioning = context.get("positive_conditioning")
+    context_negative_conditioning = context.get("negative_conditioning")
+
     mask_b64 = settings.get("b64_canvas") or settings.get("mask_canvas") or settings.get("mask")
     if not mask_b64:
         raise ValueError("Missing brush mask for inpaint filter.")
@@ -290,18 +312,38 @@ def apply_inpaint_filter(image: torch.Tensor, settings: dict) -> FilterResult:
     if denoise_value > 1.0:
         denoise_value = denoise_value / 100.0
     denoise_value = max(0.0, min(1.0, denoise_value))
-    cfg = convert_to_float(settings.get("cfg", 7.0))
 
-    sampler_name = str(settings.get("sampler", "dpmpp_2m"))
+    cfg_candidate = convert_to_float(settings.get("cfg"))
+    if cfg_candidate is None:
+        cfg_candidate = convert_to_float(cfg_default)
+    if cfg_candidate is None:
+        cfg_candidate = 7.0
+    cfg = cfg_candidate
+
+    sampler_candidate = settings.get("sampler") or sampler_default or "dpmpp_2m"
+    sampler_name = str(sampler_candidate)
     if sampler_name not in SAMPLERS:
         sampler_name = "dpmpp_2m"
-    scheduler_name = str(settings.get("scheduler", "karras"))
-    if scheduler_name not in SAMPLERS:
+
+    scheduler_candidate = settings.get("scheduler") or scheduler_default or "karras"
+    scheduler_name = str(scheduler_candidate)
+    if scheduler_name not in SCHEDULERS:
         scheduler_name = "normal"
 
-    seed = convert_to_int(settings.get("seed", random.randint(0, 2**32 - 1))) & 0xFFFFFFFFFFFFFFFF
-    positive_prompt = str(settings.get("positive_prompt", ""))
-    negative_prompt = str(settings.get("negative_prompt", ""))
+    seed_candidate = convert_to_int(settings.get("seed"))
+    if seed_candidate is None or seed_candidate < 0:
+        seed_candidate = convert_to_int(seed_default)
+    if seed_candidate is None or seed_candidate < 0:
+        seed_candidate = random.randint(0, 2**32 - 1)
+    seed = seed_candidate & 0xFFFFFFFFFFFFFFFF
+
+    positive_prompt = str(settings.get("positive_prompt") or context_positive_prompt)
+    negative_prompt = str(settings.get("negative_prompt") or context_negative_prompt)
+
+    use_conditioning_raw = settings.get("use_conditioning", "false")
+    use_conditioning = convert_to_boolean(use_conditioning_raw)
+    if use_conditioning is None:
+        use_conditioning = False
 
     processed = perform_inpaint(
         model=model,
@@ -318,6 +360,9 @@ def apply_inpaint_filter(image: torch.Tensor, settings: dict) -> FilterResult:
         cfg=cfg,
         seed=seed,
         disable_preview=True,
+        positive_conditioning=context_positive_conditioning if use_conditioning else None,
+        negative_conditioning=context_negative_conditioning if use_conditioning else None,
+        use_conditioning=use_conditioning,
     )
 
     processed = processed.detach().clamp(0.0, 1.0).to(torch.float32).cpu().contiguous()

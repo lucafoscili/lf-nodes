@@ -5,15 +5,13 @@ from typing import Any, Dict, Optional
 _EDITING_CONTEXTS: Dict[str, Dict[str, Any]] = {}
 
 
-def register_editing_context(identifier: str, *, model: Any = None, clip: Any = None, vae: Any = None) -> None:
+def register_editing_context(identifier: str, **context: Any) -> None:
     """
-    Registers an editing context with the given identifier and associated models.
+    Registers an editing context with the given identifier and any related values.
 
     Args:
         identifier (str): A unique string to identify the editing context.
-        model (Any, optional): The model object to associate with the context. Defaults to None.
-        clip (Any, optional): The CLIP model object to associate with the context. Defaults to None.
-        vae (Any, optional): The VAE model object to associate with the context. Defaults to None.
+        **context (Any): Arbitrary key/value pairs to associate with the context (e.g. model, sampler, prompts).
 
     Returns:
         None
@@ -21,11 +19,7 @@ def register_editing_context(identifier: str, *, model: Any = None, clip: Any = 
     if not identifier:
         return
 
-    _EDITING_CONTEXTS[identifier] = {
-        "model": model,
-        "clip": clip,
-        "vae": vae,
-    }
+    _EDITING_CONTEXTS[identifier] = context
 
 
 def get_editing_context(identifier: str) -> Optional[Dict[str, Any]]:

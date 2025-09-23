@@ -11,10 +11,16 @@ def convert_to_boolean(text):
                       False if it is 'false', 'no', or an empty string.
                       Returns None if the input does not match any of those options.
     """
-    text_lower = text.strip().lower()
+    if isinstance(text, bool):
+        return text
+    if text is None:
+        return False
+
+    text_lower = str(text).strip().lower()
     if text_lower in ['true', 'yes']:
         return True
     elif text_lower in ['false', 'no', '']:
         return False
+    
     return None
 # endregion

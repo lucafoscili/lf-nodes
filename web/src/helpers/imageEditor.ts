@@ -27,6 +27,7 @@ import {
   ImageEditorFilterType,
   ImageEditorIcons,
   ImageEditorRequestSettings,
+  ImageEditorDataset,
   ImageEditorSliderConfig,
   ImageEditorSliderIds,
   ImageEditorState,
@@ -249,9 +250,8 @@ export const apiCall = async (state: ImageEditorState, addSnapshot: boolean) => 
     ...baseSettings,
   };
 
-  const contextId = (
-    imageviewer.lfDataset as ImageEditorRequestSettings<typeof filterType> | undefined
-  )?.context_id;
+  const contextDataset = imageviewer.lfDataset as ImageEditorDataset | undefined;
+  const contextId = contextDataset?.context_id;
 
   if (contextId) {
     payload.context_id = contextId;
@@ -327,11 +327,71 @@ export const refreshValues = async (state: ImageEditorState, addSnapshot = false
 };
 //#endregion
 
+//#region applyFilterDefaults
+const applyFilterDefaults = (
+  state: ImageEditorState,
+  defaults: Partial<Record<ImageEditorControlIds, unknown>>,
+) => {
+  const { filter } = state;
+  if (!filter) {
+    return;
+  }
+
+  const mutableSettings = filter.settings;
+
+  (Object.keys(filter.configs) as ImageEditorControls[]).forEach((controlType) => {
+    const configs = filter.configs[controlType];
+    configs?.forEach((config) => {
+      const defaultValue = defaults[config.id as ImageEditorControlIds];
+      if (typeof defaultValue === 'undefined') {
+        return;
+      }
+
+      switch (controlType) {
+        case ImageEditorControls.Slider: {
+          const numericValue =
+            typeof defaultValue === 'number' ? defaultValue : Number(defaultValue);
+          (config as ImageEditorSliderConfig).defaultValue = numericValue;
+          mutableSettings[config.id] = numericValue;
+          break;
+        }
+        case ImageEditorControls.Textfield: {
+          const stringValue =
+            defaultValue === null || typeof defaultValue === 'undefined'
+              ? ''
+              : String(defaultValue);
+          (config as ImageEditorTextfieldConfig).defaultValue = stringValue;
+          mutableSettings[config.id] = stringValue;
+          break;
+        }
+        case ImageEditorControls.Toggle: {
+          const toggleConfig = config as ImageEditorToggleConfig;
+          const boolValue =
+            defaultValue === true ||
+            (typeof defaultValue === 'string' && defaultValue.toLowerCase() === 'true');
+          toggleConfig.defaultValue = boolValue;
+          mutableSettings[config.id] = boolValue ? toggleConfig.on : toggleConfig.off;
+          break;
+        }
+      }
+    });
+  });
+};
+//#endregion
+
 //#region prepSettings
 export const prepSettings = (state: ImageEditorState, node: LfDataNode) => {
   state.elements.controls = {};
   state.filter = unescapeJson(node.cells.lfCode.value).parsedJson as ImageEditorFilter;
   state.filterType = node.id as ImageEditorFilterType;
+
+  const dataset = state.elements.imageviewer.lfDataset as ImageEditorDataset | undefined;
+  const defaults = dataset?.defaults?.[state.filterType] as
+    | Partial<Record<ImageEditorControlIds, unknown>>
+    | undefined;
+  if (defaults) {
+    applyFilterDefaults(state, defaults);
+  }
 
   const { elements, filter } = state;
   const { settings } = elements;
@@ -370,12 +430,16 @@ export const prepSettings = (state: ImageEditorState, node: LfDataNode) => {
     }
   });
 
+  const buttonsWrapper = document.createElement(TagName.Div);
+  buttonsWrapper.classList.add(ImageEditorCSS.SettingsButtons);
+  settings.appendChild(buttonsWrapper);
+
   const resetButton = document.createElement(TagName.LfButton);
   resetButton.lfIcon = ImageEditorIcons.Reset;
   resetButton.lfLabel = 'Reset';
   resetButton.lfStretchX = true;
   resetButton.addEventListener('click', () => resetSettings(settings));
-  settings.appendChild(resetButton);
+  buttonsWrapper.appendChild(resetButton);
 
   if (state.filterType === 'brush') {
     const brushSettings = (state.filter.settings ?? {}) as ImageEditorBrushSettings;
@@ -414,7 +478,7 @@ export const prepSettings = (state: ImageEditorState, node: LfDataNode) => {
     applyButton.addEventListener('click', () => {
       void updateCb(state, true, true);
     });
-    settings.appendChild(applyButton);
+    buttonsWrapper.appendChild(applyButton);
   }
 };
 //#endregion
@@ -458,7 +522,7 @@ export const createToggle = (state: ImageEditorState, data: ImageEditorToggleCon
   comp.dataset.off = data.off;
   comp.dataset.on = data.on;
   comp.lfLabel = parseLabel(data);
-  comp.lfValue = false;
+  comp.lfValue = data.defaultValue ?? false;
   comp.title = data.title;
   comp.addEventListener(LfEventName.LfToggle, (e) => EV_HANDLERS.toggle(state, e));
 

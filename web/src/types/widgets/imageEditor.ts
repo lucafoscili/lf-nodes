@@ -17,6 +17,7 @@ export enum ImageEditorCSS {
   GridIsInactive = `${BASE_CSS_CLASS}__grid--is-inactive`,
   Settings = `${BASE_CSS_CLASS}__settings`,
   SettingsControls = `${BASE_CSS_CLASS}__settings__controls`,
+  SettingsButtons = `${BASE_CSS_CLASS}__settings__buttons`,
 }
 //#endregion
 
@@ -94,6 +95,7 @@ export enum ImageEditorSliderIds {
   BlurKernelSize = 'blur_kernel_size',
   BlurSigma = 'blur_sigma',
   DenoisePercentage = 'denoise_percentage',
+  Cfg = 'cfg',
   FocusPosition = 'focus_position',
   FocusSize = 'focus_size',
   Gamma = 'gamma',
@@ -115,6 +117,7 @@ export enum ImageEditorTextfieldIds {
   Highlights = 'highlights',
   NegativePrompt = 'negative_prompt',
   PositivePrompt = 'positive_prompt',
+  Seed = 'seed',
   Shadows = 'shadows',
   Tint = 'tint',
 }
@@ -126,6 +129,7 @@ export enum ImageEditorToggleIds {
   Smooth = 'smoooth',
   SoftBlend = 'soft_blend',
   Vertical = 'vertical',
+  UseConditioning = 'use_conditioning',
 }
 export type ImageEditorControlIds =
   | ImageEditorCanvasIds
@@ -296,10 +300,13 @@ export interface ImageEditorVignetteSettings extends ImageEditorFilterSettings {
 }
 export interface ImageEditorInpaintSettings extends ImageEditorFilterSettings {
   b64_canvas: string;
+  cfg: number;
   denoise_percentage: number;
   negative_prompt: string;
   positive_prompt: string;
+  seed: number;
   steps: number;
+  use_conditioning: boolean;
 }
 export enum ImageEditorBlendIds {
   Opacity = 'opacity',
@@ -388,12 +395,22 @@ export enum ImageEditorVignetteIds {
 }
 export enum ImageEditorInpaintIds {
   B64Canvas = 'b64_canvas',
+  Cfg = 'cfg',
   DenoisePercentage = 'denoise_percentage',
   NegativePrompt = 'negative_prompt',
   PositivePrompt = 'positive_prompt',
+  Seed = 'seed',
   Steps = 'steps',
+  UseConditioning = 'use_conditioning',
 }
 export type ImageEditorFilterType = keyof ImageEditorFilterSettingsMap;
+export type ImageEditorDatasetDefaults = Partial<
+  Record<ImageEditorFilterType, Partial<ImageEditorFilterSettingsMap[ImageEditorFilterType]>>
+>;
+export type ImageEditorDataset = ImageEditorDeserializedValue & {
+  context_id?: string;
+  defaults?: ImageEditorDatasetDefaults;
+};
 export interface ImageEditorFilterDefinition<
   ImageEditorControlIdsEnum extends { [key: string]: string },
   ImageEditorSettings extends ImageEditorFilterSettings,
@@ -538,6 +555,7 @@ export type ImageEditorInpaintFilter = ImageEditorFilterDefinition<
   {
     [ImageEditorControls.Slider]: ImageEditorSliderConfig[];
     [ImageEditorControls.Textfield]: ImageEditorTextfieldConfig[];
+    [ImageEditorControls.Toggle]: ImageEditorToggleConfig[];
   }
 >;
 export type ImageEditorFilters = {
