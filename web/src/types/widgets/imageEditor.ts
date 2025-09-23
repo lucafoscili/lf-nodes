@@ -96,6 +96,7 @@ export enum ImageEditorSliderIds {
   BlurSigma = 'blur_sigma',
   DenoisePercentage = 'denoise_percentage',
   Cfg = 'cfg',
+  Dilate = 'dilate',
   FocusPosition = 'focus_position',
   FocusSize = 'focus_size',
   Gamma = 'gamma',
@@ -103,6 +104,9 @@ export enum ImageEditorSliderIds {
   Intensity = 'intensity',
   Midpoint = 'midpoint',
   Opacity = 'opacity',
+  RoiAlign = 'roi_align',
+  RoiMinSize = 'roi_min_size',
+  RoiPadding = 'roi_padding',
   Radius = 'radius',
   RedChannel = 'r_channel',
   SharpenAmount = 'sharpen_amount',
@@ -111,6 +115,8 @@ export enum ImageEditorSliderIds {
   Steps = 'steps',
   Strength = 'strength',
   Threshold = 'threshold',
+  UpsampleTarget = 'upsample_target',
+  Feather = 'feather',
 }
 export enum ImageEditorTextfieldIds {
   Color = 'color',
@@ -130,6 +136,8 @@ export enum ImageEditorToggleIds {
   SoftBlend = 'soft_blend',
   Vertical = 'vertical',
   UseConditioning = 'use_conditioning',
+  RoiAuto = 'roi_auto',
+  RoiAlignAuto = 'roi_align_auto',
 }
 export type ImageEditorControlIds =
   | ImageEditorCanvasIds
@@ -307,6 +315,14 @@ export interface ImageEditorInpaintSettings extends ImageEditorFilterSettings {
   seed: number;
   steps: number;
   use_conditioning: boolean;
+  roi_auto?: boolean;
+  roi_padding?: number;
+  roi_align?: number;
+  roi_align_auto?: boolean;
+  roi_min_size?: number;
+  dilate?: number;
+  feather?: number;
+  upsample_target?: number;
 }
 export enum ImageEditorBlendIds {
   Opacity = 'opacity',
@@ -402,6 +418,14 @@ export enum ImageEditorInpaintIds {
   Seed = 'seed',
   Steps = 'steps',
   UseConditioning = 'use_conditioning',
+  RoiAuto = 'roi_auto',
+  RoiPadding = 'roi_padding',
+  RoiAlign = 'roi_align',
+  RoiAlignAuto = 'roi_align_auto',
+  RoiMinSize = 'roi_min_size',
+  Dilate = 'dilate',
+  Feather = 'feather',
+  UpsampleTarget = 'upsample_target',
 }
 export type ImageEditorFilterType = keyof ImageEditorFilterSettingsMap;
 export type ImageEditorDatasetDefaults = Partial<
