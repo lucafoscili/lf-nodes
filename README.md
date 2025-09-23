@@ -67,6 +67,7 @@ That's a tough one—the nodes span quite a few categories. Here's a quick break
     - [Multiple prompt from JSON](#multiple-prompt-from-json)
     - [Resize for web + blurred placeholder](#resize-for-web--blurred-placeholder)
   - [Notes](#notes)
+  - [Documentation](#documentation)
   - [Contributing](#contributing)
   - [License](#license)
 
@@ -162,3 +163,10 @@ This command will compile all the frontend sources and generate/refresh the actu
 ## License
 
 MIT License
+
+## Documentation
+
+For an overview of how this nodes suite is structured and how it integrates with the UI, see:
+
+- docs/ARCHITECTURE.md
+- docs/NODE_TEMPLATE.md
