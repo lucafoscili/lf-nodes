@@ -44,7 +44,10 @@ class LF_LoadCLIPSegModel:
 
         safe_name = model_id.replace("/", "--")
         model_dir = os.path.join(base_dir, safe_name)
-        exists = os.path.isdir(model_dir) and os.listdir(model_dir)
+        required_any = {"config.json", "preprocessor_config.json"}
+        exists = os.path.isdir(model_dir) and any(
+            name in required_any for name in os.listdir(model_dir)
+        )
 
         log_lines = []
         if exists:
@@ -58,11 +61,26 @@ class LF_LoadCLIPSegModel:
         })
 
         try:
-            processor = CLIPSegProcessor.from_pretrained(model_dir)
-            model = CLIPSegForImageSegmentation.from_pretrained(model_dir).eval()
-            log_lines.append(f"- ✅ Loaded processor & model from {model_dir}")
+            if exists:
+                processor = CLIPSegProcessor.from_pretrained(model_dir)
+                model = CLIPSegForImageSegmentation.from_pretrained(model_dir).eval()
+                log_lines.append(f"- ✅ Loaded processor & model from local folder: {model_dir}")
+            else:
+                os.makedirs(model_dir, exist_ok=True)
+                processor = CLIPSegProcessor.from_pretrained(model_id, cache_dir=base_dir)
+                model = CLIPSegForImageSegmentation.from_pretrained(model_id, cache_dir=base_dir).eval()
+                processor.save_pretrained(model_dir)
+                model.save_pretrained(model_dir)
+                log_lines.append(f"- ✅ Downloaded from Hub ({model_id}) and saved to: {model_dir}")
         except Exception as e:
-            raise RuntimeError(f"- ❌ Failed to load CLIPSeg from {model_dir}: {e}")
+            try:
+                processor = CLIPSegProcessor.from_pretrained(model_id)
+                model = CLIPSegForImageSegmentation.from_pretrained(model_id).eval()
+                log_lines.append(f"- ⚠️ Fallback: Loaded from Hub without saving (cache-managed) for {model_id}")
+            except Exception as e2:
+                raise RuntimeError(
+                    f"- ❌ Failed to load CLIPSeg model. Local: '{model_dir}' error: {e}; Hub '{model_id}' error: {e2}"
+                )
         
         PromptServer.instance.send_sync(f"{EVENT_PREFIX}loadclipsegmodel", {
             "node": node_id, 
