@@ -67,9 +67,9 @@ That's a tough one—the nodes span quite a few categories. Here's a quick break
     - [Multiple prompt from JSON](#multiple-prompt-from-json)
     - [Resize for web + blurred placeholder](#resize-for-web--blurred-placeholder)
   - [Notes](#notes)
-  - [Documentation](#documentation)
   - [Contributing](#contributing)
   - [License](#license)
+  - [Documentation](#documentation)
 
 ## Installation
 
@@ -87,19 +87,19 @@ That's a tough one—the nodes span quite a few categories. Here's a quick break
 
 ## Workflow samples
 
-### [Image 2 Image (ControlNet + Editing breakpoint + WD14Tagger)](https://github.com/lucafoscili/lucafoscili/blob/c581de007c088e84a7cb78c64431b7263622ff0f/lf-nodes/workflows/Image%202%20Image%20(with%20ControlNet%2C%20editing%20breakpoint%20and%20WD14%20tagger).json)
+### [Image 2 Image (ControlNet + Editing breakpoint + WD14Tagger)](https://github.com/lucafoscili/lf-nodes/blob/929fdb5a982c2c2192932f27782bf2a41a92e428/example_workflows/Image%202%20Image%20(with%20ControlNet%2C%20editing%20breakpoint%20and%20WD14%20tagger).json)
 
 ![Image 2 Image (ControlNet + Editing breakpoint + WD14Tagger)](https://github.com/lucafoscili/lucafoscili/blob/c581de007c088e84a7cb78c64431b7263622ff0f/lf-nodes/screenshots/Image%202%20Image%20(with%20ControlNet%2C%20editing%20breakpoint%20and%20WD14%20tagger).png)
 
-### [Caption dataset (WD14)](https://github.com/lucafoscili/lucafoscili/blob/dd5c3f0fd525ff4cf5b99a940562faa4b7d0135e/lf-nodes/workflows/Caption%20dataset%20(WD14).json)
+### [Caption dataset (WD14)](https://github.com/lucafoscili/lf-nodes/blob/929fdb5a982c2c2192932f27782bf2a41a92e428/example_workflows/Caption%20dataset%20(WD14).json)
 
 ![Caption dataset (WD14)](https://github.com/lucafoscili/lucafoscili/blob/dd5c3f0fd525ff4cf5b99a940562faa4b7d0135e/lf-nodes/screenshots/Caption%20dataset%20(WD14).png)
 
-### [Resize image for training](https://github.com/lucafoscili/lucafoscili/blob/743c982169cb6a8981b14a13dd65b1016fc84028/lf-nodes/workflows/Resize%20image%20for%20training.json)
+### [Resize image for training](https://github.com/lucafoscili/lf-nodes/blob/929fdb5a982c2c2192932f27782bf2a41a92e428/example_workflows/Resize%20image%20for%20training.json)
 
 ![Resize image for training](https://github.com/lucafoscili/lucafoscili/blob/743c982169cb6a8981b14a13dd65b1016fc84028/lf-nodes/screenshots/Resize%20image%20for%20training.png)
 
-### [Compare images](https://github.com/lucafoscili/lucafoscili/blob/3c8e1c3b4d802115a0cd03c29eb71db0ba698a89/lf-nodes/workflows/Compare%20images.json)
+### [Compare images](https://github.com/lucafoscili/lf-nodes/blob/929fdb5a982c2c2192932f27782bf2a41a92e428/example_workflows/Compare%20images.json)
 
 ![Compare images](https://github.com/lucafoscili/lucafoscili/blob/3c8e1c3b4d802115a0cd03c29eb71db0ba698a89/lf-nodes/screenshots/Compare%20images.png)
 
@@ -107,7 +107,7 @@ That's a tough one—the nodes span quite a few categories. Here's a quick break
 
 ![e2e](https://github.com/lucafoscili/lucafoscili/blob/a42765fc6ef9a394deeb695e4c31eaf3c5ec6139/lf-nodes/screenshots/E2E.png)
 
-### [Flux + LLM Character manager](https://github.com/lucafoscili/lucafoscili/blob/a42765fc6ef9a394deeb695e4c31eaf3c5ec6139/lf-nodes/workflows/Flux%20%2B%20LLM%20Character%20manager.json)
+### [Flux + LLM Character manager](https://github.com/lucafoscili/lf-nodes/blob/929fdb5a982c2c2192932f27782bf2a41a92e428/example_workflows/Flux%20%2B%20LLM%20Character%20manager.json)
 
 ![Flux + LLM Character manager](https://github.com/lucafoscili/lucafoscili/blob/a42765fc6ef9a394deeb695e4c31eaf3c5ec6139/lf-nodes/screenshots/Flux%20%2B%20LLM%20Character%20manager.png)
 
@@ -115,23 +115,23 @@ That's a tough one—the nodes span quite a few categories. Here's a quick break
 
 ![I2I (Refine)](https://github.com/lucafoscili/lucafoscili/blob/a42765fc6ef9a394deeb695e4c31eaf3c5ec6139/lf-nodes/screenshots/Image%202%20Image%20(Refine).png)
 
-### [LLM Chat](https://github.com/lucafoscili/lucafoscili/blob/main/lf-nodes/workflows/LLM%20Chat.json)
+### [LLM Chat](https://github.com/lucafoscili/lf-nodes/blob/929fdb5a982c2c2192932f27782bf2a41a92e428/example_workflows/LLM%20Chat.json)
 
 ![LLM Chat](https://github.com/lucafoscili/lucafoscili/blob/a42765fc6ef9a394deeb695e4c31eaf3c5ec6139/lf-nodes/screenshots/LLM%20Chat.png)
 
-### [LoRA tester](https://github.com/lucafoscili/lucafoscili/blob/a42765fc6ef9a394deeb695e4c31eaf3c5ec6139/lf-nodes/workflows/Lora%20tester.json)
+### [LoRA tester](https://github.com/lucafoscili/lf-nodes/blob/929fdb5a982c2c2192932f27782bf2a41a92e428/example_workflows/LoRa%20tester.json)
 
 ![LoRA tester](https://github.com/lucafoscili/lucafoscili/blob/a42765fc6ef9a394deeb695e4c31eaf3c5ec6139/lf-nodes/screenshots/Lora%20tester.png)
 
-### [Markdown documentation](https://github.com/lucafoscili/lucafoscili/blob/a42765fc6ef9a394deeb695e4c31eaf3c5ec6139/lf-nodes/workflows/Markdown%20documentation.json)
+### [Markdown documentation](https://github.com/lucafoscili/lf-nodes/blob/929fdb5a982c2c2192932f27782bf2a41a92e428/example_workflows/Markdown%20documentation.json)
 
 ![Markdown documentation](https://github.com/lucafoscili/lucafoscili/blob/a42765fc6ef9a394deeb695e4c31eaf3c5ec6139/lf-nodes/screenshots/Markdown%20documentation.png)
 
-### [Multiple prompt from JSON](https://github.com/lucafoscili/lucafoscili/blob/b919d07e84881210b41e8ceba6126f0b01e50f38/lf-nodes/workflows/Multiple%20prompt%20from%20JSON.json)
+### [Multiple prompt from JSON](https://github.com/lucafoscili/lf-nodes/blob/929fdb5a982c2c2192932f27782bf2a41a92e428/example_workflows/Multiple%20prompt%20from%20JSON.json)
 
 ![Multiple prompt from JSON](https://github.com/lucafoscili/lucafoscili/blob/b919d07e84881210b41e8ceba6126f0b01e50f38/lf-nodes/screenshots/Multiple%20prompt%20from%20JSON.png)
 
-### [Resize for web + blurred placeholder](https://github.com/lucafoscili/lucafoscili/blob/a42765fc6ef9a394deeb695e4c31eaf3c5ec6139/lf-nodes/workflows/Multiple%20image%20resize%20for%20web%20%2B%20blurred%20placeholder.json)
+### [Resize for web + blurred placeholder](https://github.com/lucafoscili/lf-nodes/blob/929fdb5a982c2c2192932f27782bf2a41a92e428/example_workflows/Multiple%20image%20resize%20for%20web%20%2B%20blurred%20placeholder.json)
 
 ![Resize for web + blurred placeholder](https://github.com/lucafoscili/lucafoscili/blob/a42765fc6ef9a394deeb695e4c31eaf3c5ec6139/lf-nodes/screenshots/Multiple%20image%20resize%20for%20web%20%2B%20blurred%20placeholder.png)
 
