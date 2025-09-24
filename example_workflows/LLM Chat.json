@@ -1,0 +1,387 @@
+{
+  "last_node_id": 20,
+  "last_link_id": 11,
+  "nodes": [
+    {
+      "id": 11,
+      "type": "LF_DisplayJSON",
+      "pos": [
+        645,
+        1070
+      ],
+      "size": [
+        450,
+        1405
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "json_input",
+          "type": "JSON",
+          "link": 4
+        }
+      ],
+      "outputs": [
+        {
+          "name": "json",
+          "type": "JSON",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LF_DisplayJSON"
+      },
+      "widgets_values": [
+        "[\n  {\n    \"role\": \"user\",\n    \"content\": \"Can you send me a javascript snippet?\"\n  },\n  {\n    \"role\": \"assistant\",\n    \"content\": \"I'd be happy to help you with a JavaScript snippet.\\n\\nBefore I send it over, could you please provide some more information on what you're trying to achieve? For example:\\n\\n1. What is the purpose of the script (e.g., form validation, animation, data manipulation)?\\n2. Are there any specific libraries or frameworks you're working with (e.g., React, jQuery, vanilla JavaScript)?\\n3. Do you have any specific requirements or constraints (e.g., browser compatibility, performance considerations)?\\n\\nWith this information, I can provide you with a tailored JavaScript snippet that meets your needs.\\n\\nIn the meantime, if you have any general requirements or ideas, I can suggest a basic snippet to get you started. Just let me know!\"\n  },\n  {\n    \"role\": \"user\",\n    \"content\": \"Oh just a random one.\\nI'm testing a feature :)\"\n  },\n  {\n    \"role\": \"assistant\",\n    \"content\": \"Well, in that case, I've got a simple JavaScript snippet that does a fun task - generating a random color!\\n\\nHere it is:\\n```javascript\\nfunction getRandomColor() {\\n  return `#${Math.floor(Math.random() * 16777215).toString(16)}`;\\n}\\n\\n// Example usage:\\nconst randomColor = getRandomColor();\\ndocument.body.style.backgroundColor = randomColor;\\n```\\nThis snippet uses the `Math.random()` function to generate a random 24-bit RGB color value, converts it to a hexadecimal string using `toString(16)`, and assigns it to a variable `randomColor`. You can then use this variable to set the background color of an HTML element, like the `body` tag, as shown in the example.\\n\\nFeel free to modify or expand upon this snippet to suit your testing needs!\\n\\n(P.S. If you want a more advanced color generator, I can definitely provide that too!)\"\n  }\n]"
+      ],
+      "color": "#ffffff",
+      "bgcolor": "#ffffff",
+      "shape": 1
+    },
+    {
+      "id": 16,
+      "type": "LF_DisplayString",
+      "pos": [
+        65,
+        1145
+      ],
+      "size": [
+        560,
+        215
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "string",
+          "type": "STRING",
+          "link": 8,
+          "widget": {
+            "name": "string"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "string",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LF_DisplayString",
+        "ttNbgOverride": {
+          "color": "#222",
+          "bgcolor": "#000",
+          "groupcolor": "#444"
+        }
+      },
+      "widgets_values": [
+        "",
+        "Well, in that case, I've got a simple JavaScript snippet that does a fun task - generating a random color!\n\nHere it is:\n```javascript\nfunction getRandomColor() {\n  return `#${Math.floor(Math.random() * 16777215).toString(16)}`;\n}\n\n// Example usage:\nconst randomColor = getRandomColor();\ndocument.body.style.backgroundColor = randomColor;\n```\nThis snippet uses the `Math.random()` function to generate a random 24-bit RGB color value, converts it to a hexadecimal string using `toString(16)`, and assigns it to a variable `randomColor`. You can then use this variable to set the background color of an HTML element, like the `body` tag, as shown in the example.\n\nFeel free to modify or expand upon this snippet to suit your testing needs!\n\n(P.S. If you want a more advanced color generator, I can definitely provide that too!)"
+      ],
+      "color": "#ffffff",
+      "bgcolor": "#ffffff"
+    },
+    {
+      "id": 17,
+      "type": "LF_DisplayString",
+      "pos": [
+        65,
+        1415
+      ],
+      "size": [
+        555,
+        205
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "string",
+          "type": "STRING",
+          "link": 9,
+          "widget": {
+            "name": "string"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "string",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LF_DisplayString",
+        "ttNbgOverride": {
+          "color": "#222",
+          "bgcolor": "#000",
+          "groupcolor": "#444"
+        }
+      },
+      "widgets_values": [
+        "",
+        "Oh just a random one.\nI'm testing a feature :)"
+      ],
+      "color": "#ffffff",
+      "bgcolor": "#ffffff"
+    },
+    {
+      "id": 18,
+      "type": "LF_DisplayString",
+      "pos": [
+        65,
+        1680
+      ],
+      "size": [
+        555,
+        215
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "string",
+          "type": "STRING",
+          "link": 10,
+          "widget": {
+            "name": "string"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "string",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LF_DisplayString",
+        "ttNbgOverride": {
+          "color": "#222",
+          "bgcolor": "#000",
+          "groupcolor": "#444"
+        }
+      },
+      "widgets_values": [
+        "",
+        "Well, in that case, I've got a simple JavaScript snippet that does a fun task - generating a random color!\n\nHere it is:\n```javascript\nfunction getRandomColor() {\n  return `#${Math.floor(Math.random() * 16777215).toString(16)}`;\n}\n\n// Example usage:\nconst randomColor = getRandomColor();\ndocument.body.style.backgroundColor = randomColor;\n```\nThis snippet uses the `Math.random()` function to generate a random 24-bit RGB color value, converts it to a hexadecimal string using `toString(16)`, and assigns it to a variable `randomColor`. You can then use this variable to set the background color of an HTML element, like the `body` tag, as shown in the example.\n\nFeel free to modify or expand upon this snippet to suit your testing needs!\n\n(P.S. If you want a more advanced color generator, I can definitely provide that too!)"
+      ],
+      "color": "#ffffff",
+      "bgcolor": "#ffffff"
+    },
+    {
+      "id": 20,
+      "type": "LF_DisplayString",
+      "pos": [
+        65,
+        1955
+      ],
+      "size": [
+        555,
+        520
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "string",
+          "type": "STRING",
+          "link": 11,
+          "widget": {
+            "name": "string"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "string",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LF_DisplayString",
+        "ttNbgOverride": {
+          "color": "#222",
+          "bgcolor": "#000",
+          "groupcolor": "#444"
+        }
+      },
+      "widgets_values": [
+        "",
+        "Well, in that case, I've got a simple JavaScript snippet that does a fun task - generating a random color!\n\nHere it is:\n```javascript\nfunction getRandomColor() {\n  return `#${Math.floor(Math.random() * 16777215).toString(16)}`;\n}\n\n// Example usage:\nconst randomColor = getRandomColor();\ndocument.body.style.backgroundColor = randomColor;\n```\nThis snippet uses the `Math.random()` function to generate a random 24-bit RGB color value, converts it to a hexadecimal string using `toString(16)`, and assigns it to a variable `randomColor`. You can then use this variable to set the background color of an HTML element, like the `body` tag, as shown in the example.\n\nFeel free to modify or expand upon this snippet to suit your testing needs!\n\n(P.S. If you want a more advanced color generator, I can definitely provide that too!)"
+      ],
+      "color": "#ffffff",
+      "bgcolor": "#ffffff"
+    },
+    {
+      "id": 15,
+      "type": "LF_ControlPanel",
+      "pos": [
+        1110,
+        1070
+      ],
+      "size": [
+        830,
+        1405
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "LF_ControlPanel"
+      },
+      "widgets_values": [
+        {
+          "backup": true,
+          "debug": true,
+          "themes": "urban"
+        }
+      ],
+      "color": "#ffffff",
+      "bgcolor": "#ffffff",
+      "shape": 1
+    },
+    {
+      "id": 10,
+      "type": "LF_LLMChat",
+      "pos": [
+        -810,
+        1070
+      ],
+      "size": [
+        855,
+        1405
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "chat_history_json",
+          "type": "JSON",
+          "links": [
+            4
+          ],
+          "shape": 3
+        },
+        {
+          "name": "last_message",
+          "type": "STRING",
+          "links": [
+            8
+          ],
+          "slot_index": 1,
+          "shape": 3
+        },
+        {
+          "name": "last_user_message",
+          "type": "STRING",
+          "links": [
+            9
+          ],
+          "slot_index": 2,
+          "shape": 3
+        },
+        {
+          "name": "last_llm_message",
+          "type": "STRING",
+          "links": [
+            10
+          ],
+          "slot_index": 3,
+          "shape": 3
+        },
+        {
+          "name": "all_messages",
+          "type": "STRING",
+          "links": [
+            11
+          ],
+          "slot_index": 4,
+          "shape": 6
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LF_LLMChat"
+      },
+      "widgets_values": [
+        "[{\"role\":\"user\",\"content\":\"Can you send me a javascript snippet?\"},{\"role\":\"assistant\",\"content\":\"I'd be happy to help you with a JavaScript snippet.\\n\\nBefore I send it over, could you please provide some more information on what you're trying to achieve? For example:\\n\\n1. What is the purpose of the script (e.g., form validation, animation, data manipulation)?\\n2. Are there any specific libraries or frameworks you're working with (e.g., React, jQuery, vanilla JavaScript)?\\n3. Do you have any specific requirements or constraints (e.g., browser compatibility, performance considerations)?\\n\\nWith this information, I can provide you with a tailored JavaScript snippet that meets your needs.\\n\\nIn the meantime, if you have any general requirements or ideas, I can suggest a basic snippet to get you started. Just let me know!\"},{\"role\":\"user\",\"content\":\"Oh just a random one.\\nI'm testing a feature :)\"},{\"role\":\"assistant\",\"content\":\"Well, in that case, I've got a simple JavaScript snippet that does a fun task - generating a random color!\\n\\nHere it is:\\n```javascript\\nfunction getRandomColor() {\\n  return `#${Math.floor(Math.random() * 16777215).toString(16)}`;\\n}\\n\\n// Example usage:\\nconst randomColor = getRandomColor();\\ndocument.body.style.backgroundColor = randomColor;\\n```\\nThis snippet uses the `Math.random()` function to generate a random 24-bit RGB color value, converts it to a hexadecimal string using `toString(16)`, and assigns it to a variable `randomColor`. You can then use this variable to set the background color of an HTML element, like the `body` tag, as shown in the example.\\n\\nFeel free to modify or expand upon this snippet to suit your testing needs!\\n\\n(P.S. If you want a more advanced color generator, I can definitely provide that too!)\"}]"
+      ],
+      "color": "#ffffff",
+      "bgcolor": "#ffffff",
+      "shape": 1
+    }
+  ],
+  "links": [
+    [
+      4,
+      10,
+      0,
+      11,
+      0,
+      "JSON"
+    ],
+    [
+      8,
+      10,
+      1,
+      16,
+      0,
+      "STRING"
+    ],
+    [
+      9,
+      10,
+      2,
+      17,
+      0,
+      "STRING"
+    ],
+    [
+      10,
+      10,
+      3,
+      18,
+      0,
+      "STRING"
+    ],
+    [
+      11,
+      10,
+      4,
+      20,
+      0,
+      "STRING"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.6830134553650712,
+      "offset": [
+        1050.1074954100409,
+        -924.7758845464642
+      ]
+    },
+    "node_versions": {
+      "lf-nodes": "efccb1d68317c58ee78cc65ff54c56bea3dc27d5"
+    },
+    "ue_links": []
+  },
+  "version": 0.4
+}
