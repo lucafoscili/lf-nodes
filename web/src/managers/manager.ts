@@ -7,7 +7,7 @@ import { GITHUB_API } from '../api/github';
 import { IMAGE_API } from '../api/image';
 import { JSON_API } from '../api/json';
 import { METADATA_API } from '../api/metadata';
-import { MODELS_API, beforeFree } from '../api/models';
+import { MODELS_API } from '../api/models';
 import {
   getLogStyle,
   NODE_WIDGET_MAP,
@@ -15,7 +15,7 @@ import {
   onDrawBackground,
   onNodeCreated,
 } from '../helpers/manager';
-import { LFNodes } from './nodes';
+import { installLFBeforeFreeHooks } from '../hooks/free';
 import { APIRoutes } from '../types/api/api';
 import { EventName } from '../types/events/events';
 import {
@@ -25,6 +25,7 @@ import {
   LogSeverity,
 } from '../types/manager/manager';
 import { CustomWidgetName, NodeName } from '../types/widgets/widgets';
+import { LFNodes } from './nodes';
 import { LFTooltip } from './tooltip';
 import { LFWidgets } from './widgets';
 /// @ts-ignore
@@ -82,115 +83,9 @@ export class LFManager {
 
   //#region Initialize
   initialize() {
-    // Hijack native free action once to clear LF caches before core frees
-    const installFreeMemoryHook = () => {
-      try {
-        if (!api) return false;
-        if ((api as any)._lf_patched_freeMemory === true) return true;
-
-        const wrap = (fn: any) =>
-          async function (this: any, options: any) {
-            await beforeFree(options);
-            return fn.apply(this ?? api, [options]);
-          };
-
-        const current = (api as any).freeMemory;
-        if (typeof current === 'function') {
-          (api as any)._lf_original_freeMemory = current;
-          (api as any).freeMemory = wrap(current);
-          (api as any)._lf_patched_freeMemory = true;
-          return true;
-        }
-
-        // If not yet defined, intercept future assignment
-        const desc = Object.getOwnPropertyDescriptor(api, 'freeMemory');
-        if (!desc || desc.configurable) {
-          let original: any;
-          Object.defineProperty(api, 'freeMemory', {
-            configurable: true,
-            enumerable: true,
-            get() {
-              return original;
-            },
-            set(fn: any) {
-              if ((api as any)._lf_patched_freeMemory === true) {
-                original = fn;
-                return;
-              }
-              if (typeof fn === 'function') {
-                (api as any)._lf_original_freeMemory = fn;
-                original = wrap(fn);
-                (api as any)._lf_patched_freeMemory = true;
-              } else {
-                original = fn;
-              }
-            },
-          });
-        }
-        return false;
-      } catch (e) {
-        this.log(
-          'LF: Failed to patch freeMemory; proceeding without LF cache clear hook',
-          { e },
-          LogSeverity.Warning,
-        );
-        return false;
-      }
-    };
-
-    // Try now and then poll briefly to catch late initialization
-    let patched = installFreeMemoryHook();
-    if (!patched) {
-      let attempts = 0;
-      const iv = setInterval(() => {
-        attempts += 1;
-        if (
-          installFreeMemoryHook() ||
-          (api as any)._lf_patched_freeMemory === true ||
-          attempts > 20
-        ) {
-          clearInterval(iv);
-        }
-      }, 250);
-    }
-
-    // Fallback: buttons may call api.fetchApi('/free' or '/api/free') directly; intercept narrowly
-    try {
-      if (api && (api as any)._lf_patched_fetchApi_free !== true) {
-        const originalFetchApi = (api as any).fetchApi;
-        if (typeof originalFetchApi === 'function') {
-          (api as any)._lf_patched_fetchApi_free = true;
-          (api as any).fetchApi = async function (path: any, init?: RequestInit) {
-            try {
-              const url = typeof path === 'string' ? path : String(path ?? '');
-              const isFree = url.endsWith('/free') || url.endsWith('/api/free');
-              const isOur = url.includes('/lf-nodes/free');
-              const method = (init?.method ?? 'GET').toUpperCase();
-              if (
-                isFree &&
-                !isOur &&
-                method === 'POST' &&
-                (api as any)._lf_in_beforeFree !== true
-              ) {
-                (api as any)._lf_in_beforeFree = true;
-                try {
-                  await beforeFree(init);
-                } finally {
-                  (api as any)._lf_in_beforeFree = false;
-                }
-              }
-            } catch {}
-            return originalFetchApi.apply(this ?? api, [path, init]);
-          };
-        }
-      }
-    } catch (e) {
-      this.log(
-        'LF: Failed to patch api.fetchApi; proceeding without LF cache clear fallback',
-        { e },
-        LogSeverity.Warning,
-      );
-    }
+    installLFBeforeFreeHooks(api, {
+      logger: (m, a, s) => this.log(m, a, s),
+    });
 
     this.#APIS.github.getLatestRelease().then((r) => (this.#LATEST_RELEASE = r?.data || null));
 

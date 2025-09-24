@@ -13,34 +13,29 @@ export const MODELS_API: ModelsAPIs = {
         return true;
       }
       lfManager.log(
-        'LF free endpoint returned non-200',
+        '"free" endpoint returned non-200',
         { status: response.status },
         LogSeverity.Warning,
       );
       return false;
     } catch (error) {
-      lfManager.log('LF free endpoint failed', { error }, LogSeverity.Warning);
+      lfManager.log('"free" endpoint failed', { error }, LogSeverity.Warning);
       return false;
     }
   },
 };
 
-// Execute this before calling ComfyUI's native free API. Adds visible logs and clears LF caches.
 export const beforeFree = async (options?: any) => {
   const lfManager = getLfManager();
-  console.info('[LF Nodes] Unload triggered — clearing LF caches first…', options);
-  lfManager.log('LF: Unload triggered — clearing LF caches first…', { options }, LogSeverity.Info);
+  lfManager.log('Unload triggered — clearing LF caches first…', { options }, LogSeverity.Info);
   try {
     const ok = await MODELS_API.free();
     if (ok) {
-      console.info('[LF Nodes] Caches cleared ✔️');
-      lfManager.log('LF: Caches cleared ✔️', {}, LogSeverity.Success);
+      lfManager.log('Caches cleared ✔️', {}, LogSeverity.Success);
     } else {
-      console.warn('[LF Nodes] Cache clear call returned non-200');
-      lfManager.log('LF: Cache clear call returned non-200', {}, LogSeverity.Warning);
+      lfManager.log('Cache clear call returned non-200', {}, LogSeverity.Warning);
     }
   } catch (error) {
-    console.warn('[LF Nodes] Error while clearing caches', error);
-    lfManager.log('LF: Error while clearing caches', { error }, LogSeverity.Warning);
+    lfManager.log('Error while clearing caches', { error }, LogSeverity.Warning);
   }
 };
