@@ -242,6 +242,9 @@ def get_usage_filename(resource: str):
         return "upscale_models_usage.json"
     if resource == "vaes":
         return "vaes_usage.json"
+    if resource == "diffusion_models" or resource == "unet":
+        return "diffusion_models_usage.json"
+    return "misc_usage.json"
     
 def get_usage_title(filename: str, type: str = None):
     """
@@ -268,4 +271,7 @@ def get_usage_title(filename: str, type: str = None):
         return "\n## Upscale models:\n" if type == "markdown" else "Upscale model name"
     if filename == "vaes_usage.json":
         return "\n## VAEs:\n" if type == "markdown" else "VAE name"
+    if filename == "diffusion_models_usage.json":
+        return "\n## Diffusion models:\n" if type == "markdown" else "Diffusion model name"
+    return "\n## Miscellaneous:\n" if type == "markdown" else "Resource name"
 # endregion
