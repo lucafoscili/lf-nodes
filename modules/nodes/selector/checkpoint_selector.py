@@ -8,12 +8,13 @@ from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, INT_MAX
 from ...utils.helpers.api import process_model
 from ...utils.helpers.comfy import get_comfy_list
-from ...utils.helpers.logic import filter_list, is_none, normalize_list_to_value
+from ...utils.helpers.logic import build_is_changed_tuple, filter_list, is_none, LazyCache, normalize_list_to_value
 from ...utils.helpers.ui import prepare_model_dataset
 
 # region LF_CheckpointSelector
 class LF_CheckpointSelector:
     initial_list = get_comfy_list("checkpoints")
+    _CACHE = LazyCache()
 
     @classmethod
     def INPUT_TYPES(self):
@@ -83,7 +84,16 @@ class LF_CheckpointSelector:
         
         if checkpoint:
             ckpt_path = folder_paths.get_full_path_or_raise("checkpoints", checkpoint)
-            out = comfy.sd.load_checkpoint_guess_config(ckpt_path, output_vae=True, output_clip=True, embedding_directory=folder_paths.get_folder_paths("embeddings"))
+            key = ("ckpt", ckpt_path)
+            out = self._CACHE.get_or_set(
+                key,
+                lambda: comfy.sd.load_checkpoint_guess_config(
+                    ckpt_path,
+                    output_vae=True,
+                    output_clip=True,
+                    embedding_directory=folder_paths.get_folder_paths("embeddings"),
+                ),
+            )
             model, clip, vae = out[:3]
 
         checkpoint_data = process_model("checkpoint", checkpoint, "checkpoints")
@@ -113,6 +123,23 @@ class LF_CheckpointSelector:
     @classmethod
     def VALIDATE_INPUTS(self, **kwargs):
          return True
+
+    @classmethod
+    def IS_CHANGED(
+        cls,
+        checkpoint,
+        get_civitai_info,
+        randomize,
+        filter,
+        seed
+    ):
+        return build_is_changed_tuple(
+            normalize_list_to_value(randomize),
+            normalize_list_to_value(seed),
+            normalize_list_to_value(filter),
+            normalize_list_to_value(checkpoint),
+            normalize_list_to_value(get_civitai_info),
+        )
 # endregion
 
 # region Mappings

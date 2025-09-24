@@ -9,8 +9,10 @@ from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, INT_MAX
 from ...utils.helpers.api import process_model
 from ...utils.helpers.comfy import get_comfy_list
-from ...utils.helpers.logic import filter_list, is_none, normalize_list_to_value
+from ...utils.helpers.logic import build_is_changed_tuple, filter_list, is_none, LazyCache, make_model_cache_key, normalize_list_to_value
 from ...utils.helpers.ui import prepare_model_dataset
+
+_DIFFUSION_MODEL_CACHE = LazyCache()
 
 # region LF_DiffusionModelSelector
 class LF_DiffusionModelSelector:
@@ -97,12 +99,25 @@ class LF_DiffusionModelSelector:
 
             try:
                 unet_path = folder_paths.get_full_path_or_raise("diffusion_models", diffusion_model)
-                model_obj = comfy.sd.load_diffusion_model(unet_path, model_options=model_options)
+                key = make_model_cache_key(
+                    unet_path,
+                    dtype=model_options.get("dtype"),
+                    fp8_opt=model_options.get("fp8_optimizations", False),
+                )
+                model_obj = _DIFFUSION_MODEL_CACHE.get_or_set(
+                    key, lambda: comfy.sd.load_diffusion_model(unet_path, model_options=model_options)
+                )
             except:
-                # Fallback to unet path if diffusion_models fails
                 try:
                     unet_path = folder_paths.get_full_path_or_raise("unet", diffusion_model)
-                    model_obj = comfy.sd.load_diffusion_model(unet_path, model_options=model_options)
+                    key = make_model_cache_key(
+                        unet_path,
+                        dtype=model_options.get("dtype"),
+                        fp8_opt=model_options.get("fp8_optimizations", False),
+                    )
+                    model_obj = _DIFFUSION_MODEL_CACHE.get_or_set(
+                        key, lambda: comfy.sd.load_diffusion_model(unet_path, model_options=model_options)
+                    )
                 except Exception as e:
                     print(f"Failed to load diffusion model {diffusion_model}: {e}")
                     model_obj = None
@@ -134,6 +149,25 @@ class LF_DiffusionModelSelector:
     @classmethod
     def VALIDATE_INPUTS(self, **kwargs):
          return True
+
+    @classmethod
+    def IS_CHANGED(
+        cls,
+        diffusion_model,
+        get_civitai_info,
+        randomize,
+        filter,
+        seed,
+        weight_dtype
+    ):
+        return build_is_changed_tuple(
+            normalize_list_to_value(randomize),
+            normalize_list_to_value(seed),
+            normalize_list_to_value(filter),
+            normalize_list_to_value(diffusion_model),
+            normalize_list_to_value(weight_dtype),
+            normalize_list_to_value(get_civitai_info),
+        )
 # endregion
 
 # region Mappings
