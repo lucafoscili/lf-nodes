@@ -8,6 +8,7 @@ export interface APIRoutes {
   analytics: AnalyticsAPIs;
   backup: BackupAPIs;
   comfy: ComfyAPIs;
+  models: ModelsAPIs;
   github: GitHubAPIs;
   image: ImageAPIs;
   json: JSONAPIs;
@@ -41,6 +42,9 @@ export interface ComfyAPIs {
 }
 export interface GitHubAPIs {
   getLatestRelease: () => Promise<GetGitHubLatestReleaseAPIPayload>;
+}
+export interface ModelsAPIs {
+  free: () => Promise<boolean>;
 }
 export interface ImageAPIs {
   get: (dir: string) => Promise<GetImageAPIPayload>;
@@ -102,6 +106,7 @@ export interface ProcessImageAPIPayload extends BaseAPIPayload {
 export enum APIEndpoints {
   ClearAnalytics = `/lf-nodes/clear-analytics`,
   ClearMetadata = `/lf-nodes/clear-metadata`,
+  LFFree = `/lf-nodes/free`,
   GetAnalytics = `/lf-nodes/get-analytics`,
   GetImage = `/lf-nodes/get-image`,
   GetJson = `/lf-nodes/get-json`,

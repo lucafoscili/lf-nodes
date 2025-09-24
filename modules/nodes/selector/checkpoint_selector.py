@@ -8,13 +8,14 @@ from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, INT_MAX
 from ...utils.helpers.api import process_model
 from ...utils.helpers.comfy import get_comfy_list
-from ...utils.helpers.logic import build_is_changed_tuple, filter_list, is_none, LazyCache, normalize_list_to_value
+from ...utils.helpers.logic import build_is_changed_tuple, filter_list, is_none, LazyCache, normalize_list_to_value, register_cache
 from ...utils.helpers.ui import prepare_model_dataset
 
 # region LF_CheckpointSelector
 class LF_CheckpointSelector:
     initial_list = get_comfy_list("checkpoints")
     _CACHE = LazyCache()
+    register_cache(_CACHE)
 
     @classmethod
     def INPUT_TYPES(self):
@@ -131,7 +132,8 @@ class LF_CheckpointSelector:
         get_civitai_info,
         randomize,
         filter,
-        seed
+        seed,
+        ui_widget
     ):
         return build_is_changed_tuple(
             normalize_list_to_value(randomize),

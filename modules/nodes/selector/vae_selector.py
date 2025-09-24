@@ -9,13 +9,14 @@ from server import PromptServer
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, INT_MAX
 from ...utils.helpers.comfy import get_comfy_list
-from ...utils.helpers.logic import build_is_changed_tuple, filter_list, LazyCache, normalize_json_input, normalize_list_to_value
+from ...utils.helpers.logic import build_is_changed_tuple, filter_list, LazyCache, normalize_json_input, normalize_list_to_value, register_cache
 from ...utils.helpers.ui import create_history_node
 
 # region LF_VAESelector
 class LF_VAESelector:
     initial_list = get_comfy_list("vae")
     _CACHE = LazyCache()
+    register_cache(_CACHE)
         
     @classmethod
     def INPUT_TYPES(self):
@@ -114,6 +115,7 @@ class LF_VAESelector:
         randomize,
         filter,
         seed,
+        ui_widget
     ):
         return build_is_changed_tuple(
             normalize_list_to_value(randomize),

@@ -1,4 +1,4 @@
-from typing import Any, Callable, Dict, Optional, Tuple
+from typing import Any, Callable, Dict, Optional, Tuple, List
 
 class LazyCache:
     """
@@ -40,6 +40,20 @@ class LazyCache:
 
     def clear(self) -> None:
         self._cache.clear()
+
+# Registry of caches so they can be cleared centrally (e.g., via a custom API)
+_CACHE_REGISTRY: List[LazyCache] = []
+
+def register_cache(cache: LazyCache) -> None:
+    if cache not in _CACHE_REGISTRY:
+        _CACHE_REGISTRY.append(cache)
+
+def clear_registered_caches() -> None:
+    for cache in list(_CACHE_REGISTRY):
+        try:
+            cache.clear()
+        except Exception:
+            pass
 
 def dtype_to_name(dtype: Any) -> str:
     """
