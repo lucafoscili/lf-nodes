@@ -5423,7 +5423,7 @@ var tt = false, et = (t2, e2, n2) => {
                         const n6 = t7.i.replace(/-/g, "_"), o6 = t7.T;
                         if (!o6) return;
                         const i3 = r.get(o6);
-                        return i3 ? i3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-4ba08932.entry.js": () => import("./p-4ba08932.entry-BZyGG3nv.js"), "./p-60af2d7f.entry.js": () => import("./p-60af2d7f.entry-CgSVLDJ3.js"), "./p-746a8577.entry.js": () => import("./p-746a8577.entry-Df4Iohj1.js"), "./p-7652d72d.entry.js": () => import("./p-7652d72d.entry-UBYUPU2V.js"), "./p-79cc15c2.entry.js": () => import("./p-79cc15c2.entry-oAowwmB1.js"), "./p-846257eb.entry.js": () => import("./p-846257eb.entry-BrVtTWOk.js"), "./p-84927cea.entry.js": () => import("./p-84927cea.entry-J8nqOfM7.js"), "./p-928c4970.entry.js": () => import("./p-928c4970.entry-NovXa7o4.js"), "./p-a147e6c9.entry.js": () => import("./p-a147e6c9.entry-d8TX_jjd.js"), "./p-a14c6d82.entry.js": () => import("./p-a14c6d82.entry-C_5R7g_C.js"), "./p-a7fc1135.entry.js": () => import("./p-a7fc1135.entry-B5XFN_kL.js"), "./p-bd214b33.entry.js": () => import("./p-bd214b33.entry-DHDHUI0N.js"), "./p-bf8a47d4.entry.js": () => import("./p-bf8a47d4.entry-BRULuNVU.js"), "./p-ccea11a0.entry.js": () => import("./p-ccea11a0.entry-CR3L8CX3.js"), "./p-dbe042fd.entry.js": () => import("./p-dbe042fd.entry-g4MEg6Ed.js"), "./p-e2689624.entry.js": () => import("./p-e2689624.entry-93-FqHV8.js") }), `./${o6}.entry.js`, 2).then(((t8) => (r.set(o6, t8), t8[n6])), ((t8) => {
+                        return i3 ? i3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-4ba08932.entry.js": () => import("./p-4ba08932.entry-BGwOlGZm.js"), "./p-60af2d7f.entry.js": () => import("./p-60af2d7f.entry-BDvPhEDp.js"), "./p-746a8577.entry.js": () => import("./p-746a8577.entry-Df_66ps7.js"), "./p-7652d72d.entry.js": () => import("./p-7652d72d.entry-DmqvCqGb.js"), "./p-79cc15c2.entry.js": () => import("./p-79cc15c2.entry-CNJDbdnT.js"), "./p-846257eb.entry.js": () => import("./p-846257eb.entry-YAZBwbSb.js"), "./p-84927cea.entry.js": () => import("./p-84927cea.entry-DyXrQ24W.js"), "./p-928c4970.entry.js": () => import("./p-928c4970.entry-Ddw51d21.js"), "./p-a147e6c9.entry.js": () => import("./p-a147e6c9.entry-DedwQy5v.js"), "./p-a14c6d82.entry.js": () => import("./p-a14c6d82.entry-LAlngeOZ.js"), "./p-a7fc1135.entry.js": () => import("./p-a7fc1135.entry-CUtg_rkf.js"), "./p-bd214b33.entry.js": () => import("./p-bd214b33.entry-BXWtuQ2p.js"), "./p-bf8a47d4.entry.js": () => import("./p-bf8a47d4.entry-w2rapgvj.js"), "./p-ccea11a0.entry.js": () => import("./p-ccea11a0.entry-pUEXoBUH.js"), "./p-dbe042fd.entry.js": () => import("./p-dbe042fd.entry-DvTz0eN3.js"), "./p-e2689624.entry.js": () => import("./p-e2689624.entry-BpvroNFE.js") }), `./${o6}.entry.js`, 2).then(((t8) => (r.set(o6, t8), t8[n6])), ((t8) => {
                           l(t8, e3.$hostElement$);
                         }));
                         /*!__STENCIL_STATIC_IMPORT_SWITCH__*/
@@ -5511,6 +5511,7 @@ var APIEndpoints;
 (function(APIEndpoints2) {
   APIEndpoints2["ClearAnalytics"] = "/lf-nodes/clear-analytics";
   APIEndpoints2["ClearMetadata"] = "/lf-nodes/clear-metadata";
+  APIEndpoints2["LFFree"] = "/lf-nodes/free";
   APIEndpoints2["GetAnalytics"] = "/lf-nodes/get-analytics";
   APIEndpoints2["GetImage"] = "/lf-nodes/get-image";
   APIEndpoints2["GetJson"] = "/lf-nodes/get-json";
@@ -6082,6 +6083,36 @@ const METADATA_API = {
   }
   //#endregion
 };
+const MODELS_API = {
+  free: async () => {
+    const lfManager2 = getLfManager();
+    try {
+      const response = await api.fetchApi(APIEndpoints.LFFree, { method: "POST" });
+      if (response.status === 200) {
+        return true;
+      }
+      lfManager2.log('"free" endpoint returned non-200', { status: response.status }, LogSeverity.Warning);
+      return false;
+    } catch (error) {
+      lfManager2.log('"free" endpoint failed', { error }, LogSeverity.Warning);
+      return false;
+    }
+  }
+};
+const beforeFree = async (options) => {
+  const lfManager2 = getLfManager();
+  lfManager2.log("Unload triggered — clearing LF caches first…", { options }, LogSeverity.Info);
+  try {
+    const ok2 = await MODELS_API.free();
+    if (ok2) {
+      lfManager2.log("Caches cleared ✔️", {}, LogSeverity.Success);
+    } else {
+      lfManager2.log("Cache clear call returned non-200", {}, LogSeverity.Warning);
+    }
+  } catch (error) {
+    lfManager2.log("Error while clearing caches", { error }, LogSeverity.Warning);
+  }
+};
 var MessengerCSS;
 (function(MessengerCSS2) {
   MessengerCSS2["Content"] = "lf-messenger";
@@ -6549,6 +6580,107 @@ const getLogStyle = () => {
     textOverflow: "ellipsis"
   };
 };
+function installLFBeforeFreeHooks(api2, opts = {}) {
+  const attempts = opts.attempts ?? 20;
+  const intervalMs = opts.intervalMs ?? 250;
+  const logger = opts.logger ?? (() => {
+  });
+  if (!isFreeHookAPI(api2)) {
+    logger('"api" object not available; cannot install free hooks yet', {}, LogSeverity.Warning);
+    return { freeMemoryHook: false, fetchFallbackHook: false };
+  }
+  const wrap = opts.freeWrapper ?? ((fn) => async function(options) {
+    await beforeFree(options);
+    return fn.apply(this ?? api2, [options]);
+  });
+  const installFreeMemory = () => {
+    try {
+      if (api2[LFFreeFlags.PatchedFree] === true)
+        return true;
+      const current = api2.freeMemory;
+      if (typeof current === "function") {
+        api2[LFFreeFlags.OriginalFreeRef] = current;
+        api2.freeMemory = wrap(current);
+        api2[LFFreeFlags.PatchedFree] = true;
+        return true;
+      }
+      const desc = Object.getOwnPropertyDescriptor(api2, "freeMemory");
+      if (!desc || desc.configurable) {
+        let original;
+        Object.defineProperty(api2, "freeMemory", {
+          configurable: true,
+          enumerable: true,
+          get() {
+            return original;
+          },
+          set(fn) {
+            if (api2[LFFreeFlags.PatchedFree] === true) {
+              original = fn;
+              return;
+            }
+            if (typeof fn === "function") {
+              api2[LFFreeFlags.OriginalFreeRef] = fn;
+              original = wrap(fn);
+              api2[LFFreeFlags.PatchedFree] = true;
+            } else {
+              original = fn;
+            }
+          }
+        });
+      }
+      return false;
+    } catch (e2) {
+      logger("Failed to patch freeMemory; proceeding without LF cache clear hook", { e: e2 }, LogSeverity.Warning);
+      return false;
+    }
+  };
+  let freePatched = installFreeMemory();
+  if (!freePatched) {
+    let count = 0;
+    const iv = setInterval(() => {
+      count += 1;
+      if (installFreeMemory() || api2[LFFreeFlags.PatchedFree] === true || count > attempts) {
+        clearInterval(iv);
+      }
+    }, intervalMs);
+  }
+  const installFetchFallback = () => {
+    try {
+      if (api2[LFFreeFlags.PatchedFetch] === true) {
+        return true;
+      }
+      const originalFetchApi = api2.fetchApi;
+      if (typeof originalFetchApi !== "function") {
+        return false;
+      }
+      api2[LFFreeFlags.PatchedFetch] = true;
+      api2.fetchApi = async function(path, init) {
+        try {
+          const url = typeof path === "string" ? path : String(path ?? "");
+          const isFree = url.endsWith("/free") || url.endsWith("/api/free");
+          const isOur = url.includes("/lf-nodes/free");
+          const method = ((init == null ? void 0 : init.method) ?? "GET").toUpperCase();
+          if (isFree && !isOur && method === "POST" && api2[LFFreeFlags.InBeforeFree] !== true) {
+            api2[LFFreeFlags.InBeforeFree] = true;
+            try {
+              await beforeFree(init);
+            } finally {
+              api2[LFFreeFlags.InBeforeFree] = false;
+            }
+          }
+        } catch {
+        }
+        return originalFetchApi.apply(this ?? api2, [path, init]);
+      };
+      return true;
+    } catch (e2) {
+      logger("Failed to patch api.fetchApi; proceeding without LF cache clear fallback", { e: e2 }, LogSeverity.Warning);
+      return false;
+    }
+  };
+  const fetchPatched = installFetchFallback();
+  return { freeMemoryHook: freePatched, fetchFallbackHook: fetchPatched };
+}
 const CATEGORY = "✨ LF Nodes";
 const DESCRIPTION = "Virtual reroute node that propagates upstream type and optional label.";
 const DISPLAY_NAME = "Reroute";
@@ -11823,6 +11955,7 @@ class LFManager {
       analytics: ANALYTICS_API,
       backup: BACKUP_API,
       comfy: COMFY_API,
+      models: MODELS_API,
       github: GITHUB_API,
       image: IMAGE_API,
       json: JSON_API,
@@ -11855,6 +11988,9 @@ class LFManager {
   }
   //#region Initialize
   initialize() {
+    installLFBeforeFreeHooks(api, {
+      logger: (m2, a2, s2) => this.log(m2, a2, s2)
+    });
     __classPrivateFieldGet(this, _LFManager_APIS, "f").github.getLatestRelease().then((r2) => __classPrivateFieldSet(this, _LFManager_LATEST_RELEASE, (r2 == null ? void 0 : r2.data) || null, "f"));
     if (__classPrivateFieldGet(this, _LFManager_INITIALIZED, "f")) {
       this.log("Attempt to initialize LFManager when already ready!", { LFManager: this }, LogSeverity.Warning);
@@ -11991,6 +12127,13 @@ class LFManager {
   }
 }
 _LFManager_APIS = /* @__PURE__ */ new WeakMap(), _LFManager_AUTOMATIC_BACKUP = /* @__PURE__ */ new WeakMap(), _LFManager_CACHED_DATASETS = /* @__PURE__ */ new WeakMap(), _LFManager_DEBUG = /* @__PURE__ */ new WeakMap(), _LFManager_DEBUG_ARTICLE = /* @__PURE__ */ new WeakMap(), _LFManager_DEBUG_DATASET = /* @__PURE__ */ new WeakMap(), _LFManager_INITIALIZED = /* @__PURE__ */ new WeakMap(), _LFManager_LATEST_RELEASE = /* @__PURE__ */ new WeakMap(), _LFManager_MANAGERS = /* @__PURE__ */ new WeakMap();
+var LFFreeFlags;
+(function(LFFreeFlags2) {
+  LFFreeFlags2["PatchedFree"] = "_lf_patched_freeMemory";
+  LFFreeFlags2["OriginalFreeRef"] = "_lf_original_freeMemory";
+  LFFreeFlags2["PatchedFetch"] = "_lf_patched_fetchApi_free";
+  LFFreeFlags2["InBeforeFree"] = "_lf_in_beforeFree";
+})(LFFreeFlags || (LFFreeFlags = {}));
 const LF_MANAGER_SYMBOL_ID = "__LfManager__";
 const LF_MANAGER_SYMBOL = Symbol.for(LF_MANAGER_SYMBOL_ID);
 const DEFAULT_WIDGET_NAME = "ui_widget";
@@ -12078,6 +12221,12 @@ const initLfManager = () => {
     window[LF_MANAGER_SYMBOL] = new LFManager();
   }
 };
+function isFreeHookAPI(obj) {
+  if (!obj || typeof obj !== "object")
+    return false;
+  const o2 = obj;
+  return typeof o2["freeMemory"] === "function" || typeof o2["fetchApi"] === "function" || LFFreeFlags.PatchedFree in o2 || LFFreeFlags.PatchedFetch in o2;
+}
 const getInput = (node, type) => {
   var _a;
   return (_a = node == null ? void 0 : node.inputs) == null ? void 0 : _a.find((w2) => w2.type.toLowerCase() === type.toLowerCase());
