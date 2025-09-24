@@ -5423,7 +5423,7 @@ var tt = false, et = (t2, e2, n2) => {
                         const n6 = t7.i.replace(/-/g, "_"), o6 = t7.T;
                         if (!o6) return;
                         const i3 = r.get(o6);
-                        return i3 ? i3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-4ba08932.entry.js": () => import("./p-4ba08932.entry-BGwOlGZm.js"), "./p-60af2d7f.entry.js": () => import("./p-60af2d7f.entry-BDvPhEDp.js"), "./p-746a8577.entry.js": () => import("./p-746a8577.entry-Df_66ps7.js"), "./p-7652d72d.entry.js": () => import("./p-7652d72d.entry-DmqvCqGb.js"), "./p-79cc15c2.entry.js": () => import("./p-79cc15c2.entry-CNJDbdnT.js"), "./p-846257eb.entry.js": () => import("./p-846257eb.entry-YAZBwbSb.js"), "./p-84927cea.entry.js": () => import("./p-84927cea.entry-DyXrQ24W.js"), "./p-928c4970.entry.js": () => import("./p-928c4970.entry-Ddw51d21.js"), "./p-a147e6c9.entry.js": () => import("./p-a147e6c9.entry-DedwQy5v.js"), "./p-a14c6d82.entry.js": () => import("./p-a14c6d82.entry-LAlngeOZ.js"), "./p-a7fc1135.entry.js": () => import("./p-a7fc1135.entry-CUtg_rkf.js"), "./p-bd214b33.entry.js": () => import("./p-bd214b33.entry-BXWtuQ2p.js"), "./p-bf8a47d4.entry.js": () => import("./p-bf8a47d4.entry-w2rapgvj.js"), "./p-ccea11a0.entry.js": () => import("./p-ccea11a0.entry-pUEXoBUH.js"), "./p-dbe042fd.entry.js": () => import("./p-dbe042fd.entry-DvTz0eN3.js"), "./p-e2689624.entry.js": () => import("./p-e2689624.entry-BpvroNFE.js") }), `./${o6}.entry.js`, 2).then(((t8) => (r.set(o6, t8), t8[n6])), ((t8) => {
+                        return i3 ? i3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-4ba08932.entry.js": () => import("./p-4ba08932.entry-CC6i_Hus.js"), "./p-60af2d7f.entry.js": () => import("./p-60af2d7f.entry-CltYqGAv.js"), "./p-746a8577.entry.js": () => import("./p-746a8577.entry-C0KAmIMl.js"), "./p-7652d72d.entry.js": () => import("./p-7652d72d.entry-D6Uk7Iyj.js"), "./p-79cc15c2.entry.js": () => import("./p-79cc15c2.entry-C_T2AgF5.js"), "./p-846257eb.entry.js": () => import("./p-846257eb.entry-qhVm8DIh.js"), "./p-84927cea.entry.js": () => import("./p-84927cea.entry-C9PF-C0X.js"), "./p-928c4970.entry.js": () => import("./p-928c4970.entry-BIR3wwze.js"), "./p-a147e6c9.entry.js": () => import("./p-a147e6c9.entry-CE8SyjR7.js"), "./p-a14c6d82.entry.js": () => import("./p-a14c6d82.entry-B0OV76or.js"), "./p-a7fc1135.entry.js": () => import("./p-a7fc1135.entry-CqCvTSJR.js"), "./p-bd214b33.entry.js": () => import("./p-bd214b33.entry-h7m9lp5q.js"), "./p-bf8a47d4.entry.js": () => import("./p-bf8a47d4.entry-B_2hsoyA.js"), "./p-ccea11a0.entry.js": () => import("./p-ccea11a0.entry-D7TMaSJw.js"), "./p-dbe042fd.entry.js": () => import("./p-dbe042fd.entry-sPHr5b4L.js"), "./p-e2689624.entry.js": () => import("./p-e2689624.entry-Dmg8JNWS.js") }), `./${o6}.entry.js`, 2).then(((t8) => (r.set(o6, t8), t8[n6])), ((t8) => {
                           l(t8, e3.$hostElement$);
                         }));
                         /*!__STENCIL_STATIC_IMPORT_SWITCH__*/
@@ -6687,6 +6687,22 @@ const DISPLAY_NAME = "Reroute";
 const EXTENSION_NAME = `lf.virtual.${DISPLAY_NAME}`;
 const NODE_PATH = "✨ LF Nodes/Reroute";
 const SERIALIZED_KEYS = ["label", "showIcon", "showType", "mode", "horizontal"];
+function deriveInnerColor(base) {
+  const hex = base.trim();
+  const expand = (h2) => h2.length === 4 ? `#${h2[1]}${h2[1]}${h2[2]}${h2[2]}${h2[3]}${h2[3]}` : h2;
+  if (!/^#([0-9a-fA-F]{3}){1,2}$/.test(hex)) {
+    return "#ececec";
+  }
+  const full = expand(hex).substring(1);
+  const r2 = parseInt(full.substring(0, 2), 16);
+  const g2 = parseInt(full.substring(2, 4), 16);
+  const b2 = parseInt(full.substring(4, 6), 16);
+  const lighten = (c2) => Math.min(255, Math.round(c2 + (255 - c2) * 0.55));
+  const rL = lighten(r2);
+  const gL = lighten(g2);
+  const bL = lighten(b2);
+  return `#${rL.toString(16).padStart(2, "0")}${gL.toString(16).padStart(2, "0")}${bL.toString(16).padStart(2, "0")}`;
+}
 const lfReroute = {
   name: EXTENSION_NAME,
   registerCustomNodes(appInstance) {
@@ -6893,7 +6909,7 @@ const lfReroute = {
         return [w2, h2];
       }
       onDrawForeground(ctx) {
-        var _a2, _b2;
+        var _a2, _b2, _c, _d;
         try {
           if (!this.properties.showIcon || !ctx) {
             return;
@@ -6903,17 +6919,27 @@ const lfReroute = {
           const cx = 10 + radius;
           const cy = -headerH / 2;
           ctx.save();
-          ctx.fillStyle = "#3a3a3a";
+          const displayType = this.__outputType || ((_b2 = (_a2 = this.outputs) == null ? void 0 : _a2[0]) == null ? void 0 : _b2.type);
+          let baseColor;
+          if (displayType && (LGraphCanvas == null ? void 0 : LGraphCanvas.link_type_colors)) {
+            const c2 = LGraphCanvas.link_type_colors[displayType];
+            if (typeof c2 === "string") {
+              baseColor = c2;
+            }
+          }
+          const outer = baseColor || "#3a3a3a";
+          const inner = deriveInnerColor(baseColor || "#3a3a3a");
+          ctx.fillStyle = outer;
           ctx.beginPath();
           ctx.arc(cx, cy, radius, 0, Math.PI * 2);
           ctx.fill();
-          ctx.fillStyle = "#d4d4d4";
+          ctx.fillStyle = inner;
           ctx.beginPath();
           ctx.arc(cx, cy, radius * 0.4, 0, Math.PI * 2);
           ctx.fill();
           ctx.restore();
         } catch (err2) {
-          (_b2 = (_a2 = getLfManager()) == null ? void 0 : _a2.log) == null ? void 0 : _b2.call(_a2, "[LFReroute] onDrawForeground error", { err: err2 }, LogSeverity.Info);
+          (_d = (_c = getLfManager()) == null ? void 0 : _c.log) == null ? void 0 : _d.call(_c, "[LFReroute] onDrawForeground error", { err: err2 }, LogSeverity.Info);
         }
       }
     }
