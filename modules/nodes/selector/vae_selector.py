@@ -9,12 +9,14 @@ from server import PromptServer
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, INT_MAX
 from ...utils.helpers.comfy import get_comfy_list
-from ...utils.helpers.logic import filter_list, normalize_json_input, normalize_list_to_value
+from ...utils.helpers.logic import build_is_changed_tuple, filter_list, LazyCache, normalize_json_input, normalize_list_to_value, register_cache
 from ...utils.helpers.ui import create_history_node
 
 # region LF_VAESelector
 class LF_VAESelector:
     initial_list = get_comfy_list("vae")
+    _CACHE = LazyCache()
+    register_cache(_CACHE)
         
     @classmethod
     def INPUT_TYPES(self):
@@ -82,13 +84,18 @@ class LF_VAESelector:
         vae_model = None
         if vae and vae != "None":
             if vae in ["taesd", "taesdxl", "taesd3", "taef1"]:
-                # Load TAESD VAE
-                sd = self.load_taesd(vae)
+                def _make_taesd_vae():
+                    m = comfy.sd.VAE(sd=self.load_taesd(vae))
+                    m.throw_exception_if_invalid()
+                    return m
+                vae_model = self._CACHE.get_or_set(("taesd-obj", vae), _make_taesd_vae)
             else:
                 vae_path = folder_paths.get_full_path_or_raise("vae", vae)
-                sd = comfy.utils.load_torch_file(vae_path)
-            vae_model = comfy.sd.VAE(sd=sd)
-            vae_model.throw_exception_if_invalid()
+                def _make_vae():
+                    m = comfy.sd.VAE(sd=comfy.utils.load_torch_file(vae_path))
+                    m.throw_exception_if_invalid()
+                    return m
+                vae_model = self._CACHE.get_or_set(("vae-obj", vae_path), _make_vae)
         
         if enable_history:
             create_history_node(vae, nodes)
@@ -99,6 +106,24 @@ class LF_VAESelector:
         })
 
         return (vae, vae, vae_model)
+
+    @classmethod
+    def IS_CHANGED(
+        cls,
+        vae,
+        enable_history,
+        randomize,
+        filter,
+        seed,
+        ui_widget
+    ):
+        return build_is_changed_tuple(
+            normalize_list_to_value(randomize),
+            normalize_list_to_value(seed),
+            normalize_list_to_value(filter),
+            normalize_list_to_value(vae),
+            normalize_list_to_value(enable_history),
+        )
 
     @staticmethod
     def load_taesd(name):

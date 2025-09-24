@@ -10,5 +10,6 @@ from .normalize_list_to_value import *
 from .normalize_output_image import *
 from .not_none import *
 from .randomize_from_history import *
+from .selector_utils import *
 
 __all__ = [name for name in dir() if not name.startswith("_")]

@@ -8,6 +8,8 @@ import {
   LfTreeInterface,
 } from '@lf-widgets/foundations';
 import { LFManager } from '../managers/manager';
+import { BaseEventPayload } from '../types/events/events';
+import { FreeHookAPI } from '../types/hooks/free';
 import { LogSeverity } from '../types/manager/manager';
 import {
   ComfyWidgetMap,
@@ -19,7 +21,6 @@ import {
   UnescapeJSONPayload,
   WidgetOptions,
 } from '../types/widgets/widgets';
-import { BaseEventPayload } from '../types/events/events';
 
 declare global {
   interface Window {
@@ -27,7 +28,13 @@ declare global {
   }
 }
 
-//#region Constants
+// #region Constants
+export enum LFFreeFlags {
+  PatchedFree = '_lf_patched_freeMemory',
+  OriginalFreeRef = '_lf_original_freeMemory',
+  PatchedFetch = '_lf_patched_fetchApi_free',
+  InBeforeFree = '_lf_in_beforeFree',
+}
 const LF_MANAGER_SYMBOL_ID = '__LfManager__';
 const LF_MANAGER_SYMBOL: unique symbol = Symbol.for(LF_MANAGER_SYMBOL_ID);
 const DEFAULT_WIDGET_NAME = 'ui_widget';
@@ -140,6 +147,16 @@ export const initLfManager = () => {
     window[LF_MANAGER_SYMBOL] = new LFManager();
   }
 };
+export function isFreeHookAPI(obj: unknown): obj is FreeHookAPI {
+  if (!obj || typeof obj !== 'object') return false;
+  const o = obj as Record<string, unknown>;
+  return (
+    typeof o['freeMemory'] === 'function' ||
+    typeof o['fetchApi'] === 'function' ||
+    LFFreeFlags.PatchedFree in o ||
+    LFFreeFlags.PatchedFetch in o
+  );
+}
 export const log = () => {
   return window[LF_MANAGER_SYMBOL].log;
 };

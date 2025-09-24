@@ -14,6 +14,33 @@ const NODE_PATH = '✨ LF Nodes/Reroute';
 const SERIALIZED_KEYS = ['label', 'showIcon', 'showType', 'mode', 'horizontal'] as const;
 //#endregion
 
+//#region Helpers
+function deriveInnerColor(base: string): string {
+  // Accept basic hex formats (#rgb, #rrggbb); fall back to neutral if parsing fails
+  const hex = base.trim();
+  const expand = (h: string) =>
+    h.length === 4 ? `#${h[1]}${h[1]}${h[2]}${h[2]}${h[3]}${h[3]}` : h;
+  if (!/^#([0-9a-fA-F]{3}){1,2}$/.test(hex)) {
+    return '#ececec';
+  }
+
+  const full = expand(hex).substring(1);
+  const r = parseInt(full.substring(0, 2), 16);
+  const g = parseInt(full.substring(2, 4), 16);
+  const b = parseInt(full.substring(4, 6), 16);
+  // Simple lighten: blend with white
+  const lighten = (c: number) => Math.min(255, Math.round(c + (255 - c) * 0.55));
+  const rL = lighten(r);
+  const gL = lighten(g);
+  const bL = lighten(b);
+
+  return `#${rL.toString(16).padStart(2, '0')}${gL.toString(16).padStart(2, '0')}${bL
+    .toString(16)
+    .padStart(2, '0')}`;
+}
+//#endregion
+
+//#region Reroute
 export const lfReroute = {
   name: EXTENSION_NAME,
   registerCustomNodes(appInstance: GraphAppLike) {
@@ -280,11 +307,23 @@ export const lfReroute = {
           const cx = 10 + radius; // horizontal padding
           const cy = -headerH / 2; // center within header (negative coordinate)
           ctx.save();
-          ctx.fillStyle = '#3a3a3a';
+
+          const displayType = this.__outputType || this.outputs?.[0]?.type;
+          let baseColor: string | undefined;
+          if (displayType && LGraphCanvas?.link_type_colors) {
+            const c = LGraphCanvas.link_type_colors[displayType];
+            if (typeof c === 'string') {
+              baseColor = c;
+            }
+          }
+
+          const outer = baseColor || '#3a3a3a';
+          const inner = deriveInnerColor(baseColor || '#3a3a3a');
+          ctx.fillStyle = outer;
           ctx.beginPath();
           ctx.arc(cx, cy, radius, 0, Math.PI * 2);
           ctx.fill();
-          ctx.fillStyle = '#d4d4d4';
+          ctx.fillStyle = inner;
           ctx.beginPath();
           ctx.arc(cx, cy, radius * 0.4, 0, Math.PI * 2);
           ctx.fill();
@@ -451,3 +490,4 @@ export const lfReroute = {
     }
   },
 };
+//#endregion

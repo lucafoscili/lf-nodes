@@ -7,6 +7,7 @@ import { GITHUB_API } from '../api/github';
 import { IMAGE_API } from '../api/image';
 import { JSON_API } from '../api/json';
 import { METADATA_API } from '../api/metadata';
+import { MODELS_API } from '../api/models';
 import {
   getLogStyle,
   NODE_WIDGET_MAP,
@@ -14,7 +15,7 @@ import {
   onDrawBackground,
   onNodeCreated,
 } from '../helpers/manager';
-import { LFNodes } from './nodes';
+import { installLFBeforeFreeHooks } from '../hooks/free';
 import { APIRoutes } from '../types/api/api';
 import { EventName } from '../types/events/events';
 import {
@@ -24,14 +25,18 @@ import {
   LogSeverity,
 } from '../types/manager/manager';
 import { CustomWidgetName, NodeName } from '../types/widgets/widgets';
+import { LFNodes } from './nodes';
 import { LFTooltip } from './tooltip';
 import { LFWidgets } from './widgets';
+/// @ts-ignore
+import { api } from '/scripts/api.js';
 
 export class LFManager {
   #APIS: APIRoutes = {
     analytics: ANALYTICS_API,
     backup: BACKUP_API,
     comfy: COMFY_API,
+    models: MODELS_API,
     github: GITHUB_API,
     image: IMAGE_API,
     json: JSON_API,
@@ -78,6 +83,10 @@ export class LFManager {
 
   //#region Initialize
   initialize() {
+    installLFBeforeFreeHooks(api, {
+      logger: (m, a, s) => this.log(m, a, s),
+    });
+
     this.#APIS.github.getLatestRelease().then((r) => (this.#LATEST_RELEASE = r?.data || null));
 
     if (this.#INITIALIZED) {
