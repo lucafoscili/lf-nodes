@@ -133,7 +133,8 @@ class LF_CheckpointSelector:
         randomize,
         filter,
         seed,
-        ui_widget
+        ui_widget,
+        node_id
     ):
         return build_is_changed_tuple(
             normalize_list_to_value(randomize),

@@ -160,7 +160,8 @@ class LF_DiffusionModelSelector:
         filter,
         seed,
         weight_dtype,
-        ui_widget
+        ui_widget,
+        node_id
     ):
         return build_is_changed_tuple(
             normalize_list_to_value(randomize),
