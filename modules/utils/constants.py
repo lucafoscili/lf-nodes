@@ -15,6 +15,7 @@ class Input:
     FLOAT = "FLOAT"
     IMAGE = "IMAGE"
     INTEGER = "INT"
+    LATENT = "LATENT"
     LF_CARD = "LF_CARD"
     LF_CARDS_WITH_CHIP = "LF_CARDS_WITH_CHIP"
     LF_CAROUSEL = "LF_CAROUSEL"
