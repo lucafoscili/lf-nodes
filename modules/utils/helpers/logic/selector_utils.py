@@ -1,4 +1,4 @@
-from typing import Any, Callable, Dict, Optional, Tuple, List
+from typing import Any, Callable, Dict, Optional, Tuple, List, Protocol
 
 class LazyCache:
     """
@@ -41,10 +41,14 @@ class LazyCache:
     def clear(self) -> None:
         self._cache.clear()
 
-# Registry of caches so they can be cleared centrally (e.g., via a custom API)
-_CACHE_REGISTRY: List[Any] = []
+class CacheLike(Protocol):
+    def clear(self) -> None:
+        ...
 
-def register_cache(cache: Any) -> None:
+# Registry of caches so they can be cleared centrally (e.g., via a custom API)
+_CACHE_REGISTRY: List[CacheLike] = []
+
+def register_cache(cache: CacheLike) -> None:
     if cache not in _CACHE_REGISTRY:
         _CACHE_REGISTRY.append(cache)
 
