@@ -15,7 +15,6 @@ from ..helpers.editing import get_editing_context
 
 FilterResult = Tuple[torch.Tensor, Dict[str, str]]
 
-
 def sample_without_preview(
     model,
     positive,
@@ -79,7 +78,6 @@ def sample_without_preview(
     out_latent["samples"] = samples
 
     return out_latent
-
 
 def perform_inpaint(
     *,
@@ -193,7 +191,6 @@ def perform_inpaint(
         mask_to_blend = mask_to_blend.expand(-1, -1, -1, decoded.shape[-1])
 
     return decoded * mask_to_blend + image * (1.0 - mask_to_blend)
-
 
 def _prepare_inpaint_region(
     base_image: torch.Tensor,
@@ -341,7 +338,6 @@ def _prepare_inpaint_region(
 
     return work_image, work_mask_soft, paste_roi, meta
 
-
 def _finalize_inpaint_output(
     processed_region: torch.Tensor,
     base_image: torch.Tensor,
@@ -386,6 +382,29 @@ def _finalize_inpaint_output(
 
     return processed, info
 
+def _normalize_steps(raw_value):
+    value = convert_to_int(raw_value) if raw_value is not None else None
+    if value is None:
+        value = 20
+    return max(1, int(round(value)))
+
+def _normalize_denoise(raw_value):
+    value = convert_to_float(raw_value) if raw_value is not None else None
+    if value is None:
+        value = 1.0
+    return max(0.0, min(1.0, float(value)))
+
+def _normalize_cfg(raw_value):
+    value = convert_to_float(raw_value) if raw_value is not None else None
+    if value is None:
+        value = 7.0
+    return float(value)
+
+def _normalize_seed(raw_value):
+    value = convert_to_int(raw_value) if raw_value is not None else None
+    if value is None:
+        value = -1
+    return int(value)
 
 def apply_inpaint_filter(image: torch.Tensor, settings: dict) -> FilterResult:
     """
@@ -587,16 +606,6 @@ def apply_inpaint_filter(image: torch.Tensor, settings: dict) -> FilterResult:
 
     return processed, info_with_mask
 
-
-__all__ = [
-    "FilterResult",
-    "apply_inpaint_filter",
-    "apply_inpaint_filter_tensor",
-    "perform_inpaint",
-    "sample_without_preview",
-]
-
-
 def apply_inpaint_filter_tensor(
     image: torch.Tensor,
     mask: torch.Tensor,
@@ -655,10 +664,10 @@ def apply_inpaint_filter_tensor(
         negative_prompt=str(settings.get("negative_prompt") or ""),
         sampler_name=str(settings.get("sampler") or "dpmpp_2m"),
         scheduler_name=str(settings.get("scheduler") or "karras"),
-        steps=max(1, int(round(convert_to_int(settings.get("steps", 20)) or 20))),
-        denoise=max(0.0, min(1.0, float(convert_to_float(settings.get("denoise", 1.0)) or 1.0))),
-        cfg=float(convert_to_float(settings.get("cfg", 7.0)) or 7.0),
-        seed=int(convert_to_int(settings.get("seed", -1)) or -1),
+        steps=_normalize_steps(settings.get("steps")),
+        denoise=_normalize_denoise(settings.get("denoise")),
+        cfg=_normalize_cfg(settings.get("cfg")),
+        seed=_normalize_seed(settings.get("seed")),
         disable_preview=True,
         positive_conditioning=settings.get("positive_conditioning") if convert_to_boolean(settings.get("use_conditioning", False)) else None,
         negative_conditioning=settings.get("negative_conditioning") if convert_to_boolean(settings.get("use_conditioning", False)) else None,
