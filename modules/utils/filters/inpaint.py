@@ -617,7 +617,7 @@ def apply_inpaint_filter_tensor(
 
     base_image = image.to(device=device, dtype=torch.float32)
     m = mask
-    if isinstance(m, list):
+    if isinstance(m, (list, tuple)):
         m = m[0]
     if m.dim() == 4:
         if m.shape[-1] > 1:

@@ -87,8 +87,8 @@ class LF_Inpaint:
         }
 
         masks_list = None
-        if isinstance(mask, list):
-            masks_list = mask
+        if isinstance(mask, (list, tuple)):
+            masks_list = list(mask)
         elif torch.is_tensor(mask):
             try:
                 if mask.dim() >= 3 and mask.shape[0] == len(images):
