@@ -1,3 +1,4 @@
+import logging
 from typing import Any, Callable, Dict, Optional, Tuple, List, Protocol
 
 class LazyCache:
@@ -158,7 +159,11 @@ class _SelectorListRefresher:
         Returns:
             List[str]: The updated list of values.
         """
-        values = list(self._loader() or [])
+        try:
+            values = list(self._loader() or [])
+        except Exception:
+            logging.getLogger(__name__).exception("Selector loader failed; falling back to empty list.")
+            values = []
 
         current = getattr(self._owner_cls, self._attr_name, None)
         if isinstance(current, list):
