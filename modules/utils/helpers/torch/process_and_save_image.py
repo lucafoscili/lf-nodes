@@ -13,6 +13,18 @@ def process_and_save_image(
     filename_prefix: str,
     nodes: list[dict],
 ):
+    """
+    Processes a list of images using a specified filter function, saves both the original and processed images to disk,
+    and appends comparison nodes to the provided nodes list.
+    Args:
+        images (list[torch.Tensor]): List of image tensors to process.
+        filter_function (callable): Function to apply to each image tensor for processing.
+        filter_args (dict): Dictionary of arguments to pass to the filter function.
+        filename_prefix (str): Prefix to use for saved image filenames.
+        nodes (list[dict]): List to which comparison nodes will be appended.
+    Returns:
+        list[torch.Tensor]: List of processed image tensors.
+    """
     processed_images = []
     
     for index, img in enumerate(images):

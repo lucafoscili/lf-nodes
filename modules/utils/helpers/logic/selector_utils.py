@@ -26,12 +26,43 @@ class LazyCache:
         self._cache: Dict[Any, Any] = {}
 
     def get(self, key: Any) -> Any:
+        """
+        Retrieve the value associated with the given key from the cache.
+
+        Args:
+            key (Any): The key to look up in the cache.
+
+        Returns:
+            Any: The value associated with the key if it exists, otherwise None.
+        """
         return self._cache.get(key)
 
     def set(self, key: Any, value: Any) -> None:
+        """
+        Sets the value for the specified key in the cache.
+
+        Args:
+            key (Any): The key to set in the cache.
+            value (Any): The value to associate with the key.
+
+        Returns:
+            None
+        """
         self._cache[key] = value
 
     def get_or_set(self, key: Any, factory: Callable[[], Any]) -> Any:
+        """
+        Retrieves the value associated with the given key from the cache.
+        If the key does not exist, creates a new value using the provided factory function,
+        stores it in the cache, and returns it.
+
+        Args:
+            key (Any): The key to look up in the cache.
+            factory (Callable[[], Any]): A function that returns a value to store if the key is not found.
+
+        Returns:
+            Any: The value associated with the key, either retrieved from the cache or newly created.
+        """
         value = self._cache.get(key)
         if value is None:
             value = factory()
@@ -39,9 +70,26 @@ class LazyCache:
         return value
 
     def clear(self) -> None:
+        """
+        Clears all items from the internal cache.
+
+        This method removes all entries from the `_cache` attribute,
+        effectively resetting the cache to an empty state.
+        """
         self._cache.clear()
 
 class CacheLike(Protocol):
+    """
+    Protocol representing a cache-like object.
+
+    Classes implementing this protocol should provide a `clear` method
+    that removes all items from the cache.
+
+    Methods
+    -------
+    clear() -> None
+        Removes all items from the cache.
+    """
     def clear(self) -> None:
         ...
 
@@ -49,6 +97,15 @@ class CacheLike(Protocol):
 _CACHE_REGISTRY: List[CacheLike] = []
 
 def register_cache(cache: CacheLike) -> None:
+    """
+    Registers a cache instance in the global cache registry if it is not already present.
+
+    Args:
+        cache (CacheLike): The cache instance to register.
+
+    Returns:
+        None
+    """
     if cache not in _CACHE_REGISTRY:
         _CACHE_REGISTRY.append(cache)
 
@@ -61,6 +118,25 @@ def clear_registered_caches() -> None:
 
 
 class _SelectorListRefresher:
+    """
+    Utility class to refresh and manage a list attribute within an owner class, 
+    typically used for dynamic selection lists in UI components.
+
+    Args:
+        owner_cls (Any): The class instance or type that owns the list attribute.
+        loader (Callable[[], List[str]]): A callable that returns the latest list of string values.
+        attr_name (str, optional): The name of the attribute in `owner_cls` to refresh. Defaults to "initial_list".
+        return_index (Optional[int], optional): The index in the `RETURN_TYPES` tuple to update with the refreshed list. 
+            If None, no update is performed. Defaults to 0.
+
+    Methods:
+        clear() -> List[str]:
+            Refreshes the target list attribute in `owner_cls` using the loader.
+            If the attribute exists and is a list, it is cleared and extended with new values.
+            Otherwise, the attribute is set to the new list.
+            Optionally updates the `RETURN_TYPES` tuple in `owner_cls` at `return_index` with the refreshed list.
+            Returns the refreshed list.
+    """
     def __init__(
         self,
         owner_cls: Any,
@@ -74,6 +150,14 @@ class _SelectorListRefresher:
         self._return_index = return_index
 
     def clear(self) -> List[str]:
+        """
+        Clears and resets the target attribute list of the owner class to the values loaded by the loader.
+        If the attribute is a list, it is cleared and extended with the loaded values; otherwise, it is set to the loaded values.
+        Optionally updates the owner class's RETURN_TYPES tuple at the specified return index with the new list.
+        
+        Returns:
+            List[str]: The updated list of values.
+        """
         values = list(self._loader() or [])
 
         current = getattr(self._owner_cls, self._attr_name, None)
@@ -105,6 +189,21 @@ def register_selector_list(
     attr_name: str = "initial_list",
     return_index: Optional[int] = 0,
 ):
+    """
+    Registers a selector list refresher for a given owner class.
+
+    This function creates a _SelectorListRefresher instance using the provided owner class, loader function,
+    attribute name, and return index. It clears the refresher, registers it in the cache, and returns the refresher instance.
+
+    Args:
+        owner_cls (Any): The class or object that owns the selector list.
+        loader (Callable[[], List[str]]): A callable that returns a list of strings to populate the selector.
+        attr_name (str, optional): The attribute name to store the initial list. Defaults to "initial_list".
+        return_index (Optional[int], optional): The index to return from the selector list. Defaults to 0.
+
+    Returns:
+        _SelectorListRefresher: The registered selector list refresher instance.
+    """
     refresher = _SelectorListRefresher(owner_cls, loader, attr_name, return_index)
     refresher.clear()
     register_cache(refresher)

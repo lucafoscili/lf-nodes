@@ -4,7 +4,6 @@ from typing import Any, Dict, Optional
 
 _EDITING_CONTEXTS: Dict[str, Dict[str, Any]] = {}
 
-
 def register_editing_context(identifier: str, **context: Any) -> None:
     """
     Registers an editing context with the given identifier and any related values.

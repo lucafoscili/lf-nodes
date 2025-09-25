@@ -3,7 +3,18 @@ from copy import deepcopy
 from typing import Any, Dict, Iterable, List
 
 def _flatten_latent_items(latent_input: Any) -> List[Dict[str, Any]]:
-    """Recursively collect latent dictionaries from possibly nested lists/tuples."""
+    """
+    Flattens a nested structure of latent inputs into a list of dictionaries.
+
+    Args:
+        latent_input (Any): The input to be flattened. Can be a dictionary, a list/tuple of dictionaries, or nested lists/tuples containing dictionaries.
+
+    Returns:
+        List[Dict[str, Any]]: A flat list of dictionaries extracted from the input.
+
+    Raises:
+        TypeError: If the input is not a dictionary, list, or tuple containing dictionaries.
+    """
     if latent_input is None:
         return []
     if isinstance(latent_input, dict):
@@ -18,6 +29,24 @@ def _flatten_latent_items(latent_input: Any) -> List[Dict[str, Any]]:
     )
 
 def _cat_tensor_sequence(values: Iterable[torch.Tensor]) -> torch.Tensor:
+    """
+    Concatenates a sequence of torch.Tensor objects along the first dimension.
+
+    Skips any None values in the input sequence. If a tensor is zero-dimensional,
+    it is unsqueezed to become one-dimensional before concatenation. Raises a
+    TypeError if any non-tensor value is encountered, and a ValueError if no
+    valid tensors are found to concatenate.
+
+    Args:
+        values (Iterable[torch.Tensor]): An iterable of torch.Tensor objects, possibly containing None.
+
+    Returns:
+        torch.Tensor: A single tensor resulting from concatenation along the first dimension.
+
+    Raises:
+        TypeError: If any non-tensor value is encountered in the input sequence.
+        ValueError: If no valid tensors are found to concatenate.
+    """
     tensors = []
     for value in values:
         if value is None:
@@ -33,6 +62,16 @@ def _cat_tensor_sequence(values: Iterable[torch.Tensor]) -> torch.Tensor:
     return torch.cat(tensors, dim=0)
 
 def _merge_optional_tensor_sequence(values: Iterable[Any]) -> Any:
+    """
+    Merges a sequence of optional tensor or integer values.
+    If any of the values are PyTorch tensors, concatenates them using `_cat_tensor_sequence`.
+    Otherwise, collects all integer values from the sequence, flattening any nested lists or tuples.
+    Ignores `None` values.
+    Args:
+        values (Iterable[Any]): An iterable containing tensors, integers, lists/tuples of integers, or None.
+    Returns:
+        Any: Concatenated tensor if any tensors are present; otherwise, a list of integers (flattened), or None if no values remain.
+    """
     tensors = [value for value in values if isinstance(value, torch.Tensor)]
     if tensors:
         return _cat_tensor_sequence(tensors)
@@ -49,11 +88,21 @@ def _merge_optional_tensor_sequence(values: Iterable[Any]) -> Any:
 
 def normalize_input_latent(latent_input: Any) -> Dict[str, Any]:
     """
-    Normalize latent inputs so downstream nodes always receive a single latent dictionary.
+    Normalizes and merges one or more latent input dictionaries into a single standardized latent dictionary.
+    This function flattens the input, validates the presence of required tensors, and merges multiple latent samples
+    into a single batch. It concatenates 'samples' tensors, optionally merges 'noise_mask' and 'batch_index' if present,
+    and preserves additional metadata from the first entry (falling back to subsequent entries if missing).
 
-    Accepts a single latent dict, a list/tuple of latent dicts, or nested combinations thereof.
-    The "samples" tensor (and other tensor-valued entries such as "noise_mask") are concatenated
-    along the batch dimension so the returned dictionary represents the whole batch.
+    Args:
+        latent_input (Any): A latent input or sequence of latent inputs, each expected to be a dictionary
+            containing at least a 'samples' tensor and optional 'noise_mask', 'batch_index', and other metadata.
+
+    Returns:
+        Dict[str, Any]: A normalized latent dictionary containing merged tensors and preserved metadata.
+        
+    Raises:
+        ValueError: If the input is empty.
+        KeyError: If any latent entry is missing the required 'samples' tensor.
     """
     flattened = _flatten_latent_items(latent_input)
     if not flattened:
