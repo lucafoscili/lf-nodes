@@ -1,4 +1,4 @@
-import { bq as onFrameworkReady, br as j, bs as S } from "./index-DRX_MP-1.js";
+import { bq as onFrameworkReady, br as j, bs as S } from "./index-DYPTRXfg.js";
 onFrameworkReady.then(((t) => {
   t.register("lf-core", { getAssetPath: S, setAssetPath: j });
 }));

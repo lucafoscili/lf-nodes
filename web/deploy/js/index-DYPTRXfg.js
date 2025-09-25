@@ -5423,7 +5423,7 @@ var tt = false, et = (t2, e2, n2) => {
                         const n6 = t7.i.replace(/-/g, "_"), o6 = t7.T;
                         if (!o6) return;
                         const i3 = r.get(o6);
-                        return i3 ? i3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-4ba08932.entry.js": () => import("./p-4ba08932.entry-BYdNp5vS.js"), "./p-60af2d7f.entry.js": () => import("./p-60af2d7f.entry-CaCKUwSr.js"), "./p-746a8577.entry.js": () => import("./p-746a8577.entry-C2ZQQnBa.js"), "./p-7652d72d.entry.js": () => import("./p-7652d72d.entry-j87UZQ2H.js"), "./p-79cc15c2.entry.js": () => import("./p-79cc15c2.entry-QOJFE3_i.js"), "./p-846257eb.entry.js": () => import("./p-846257eb.entry-3M00CAjm.js"), "./p-84927cea.entry.js": () => import("./p-84927cea.entry-CsfBV9YF.js"), "./p-928c4970.entry.js": () => import("./p-928c4970.entry-CgZ7cwON.js"), "./p-a147e6c9.entry.js": () => import("./p-a147e6c9.entry-YjrRGbiv.js"), "./p-a14c6d82.entry.js": () => import("./p-a14c6d82.entry-dPIaIsVd.js"), "./p-a7fc1135.entry.js": () => import("./p-a7fc1135.entry-BiENnOgl.js"), "./p-bd214b33.entry.js": () => import("./p-bd214b33.entry-CQCa9oYj.js"), "./p-bf8a47d4.entry.js": () => import("./p-bf8a47d4.entry-D6ZMFzxy.js"), "./p-ccea11a0.entry.js": () => import("./p-ccea11a0.entry-CvvcHg6h.js"), "./p-dbe042fd.entry.js": () => import("./p-dbe042fd.entry-mHK7DDZv.js"), "./p-e2689624.entry.js": () => import("./p-e2689624.entry-BjpBqa6m.js") }), `./${o6}.entry.js`, 2).then(((t8) => (r.set(o6, t8), t8[n6])), ((t8) => {
+                        return i3 ? i3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-4ba08932.entry.js": () => import("./p-4ba08932.entry-DeMCiRyE.js"), "./p-60af2d7f.entry.js": () => import("./p-60af2d7f.entry-C8p8aMQz.js"), "./p-746a8577.entry.js": () => import("./p-746a8577.entry-CHl0g3GK.js"), "./p-7652d72d.entry.js": () => import("./p-7652d72d.entry-dTmp8LE_.js"), "./p-79cc15c2.entry.js": () => import("./p-79cc15c2.entry-Dwj0bdbZ.js"), "./p-846257eb.entry.js": () => import("./p-846257eb.entry-D7h00g4B.js"), "./p-84927cea.entry.js": () => import("./p-84927cea.entry-CvPujpIa.js"), "./p-928c4970.entry.js": () => import("./p-928c4970.entry-B9sthko3.js"), "./p-a147e6c9.entry.js": () => import("./p-a147e6c9.entry-B6YZCVtB.js"), "./p-a14c6d82.entry.js": () => import("./p-a14c6d82.entry-CTWoQzbn.js"), "./p-a7fc1135.entry.js": () => import("./p-a7fc1135.entry-DNOgTojM.js"), "./p-bd214b33.entry.js": () => import("./p-bd214b33.entry-CjymUur4.js"), "./p-bf8a47d4.entry.js": () => import("./p-bf8a47d4.entry-jV8xiaCM.js"), "./p-ccea11a0.entry.js": () => import("./p-ccea11a0.entry-DxoxA2q9.js"), "./p-dbe042fd.entry.js": () => import("./p-dbe042fd.entry-Bs9funQ6.js"), "./p-e2689624.entry.js": () => import("./p-e2689624.entry-C0PgN0xD.js") }), `./${o6}.entry.js`, 2).then(((t8) => (r.set(o6, t8), t8[n6])), ((t8) => {
                           l(t8, e3.$hostElement$);
                         }));
                         /*!__STENCIL_STATIC_IMPORT_SWITCH__*/
@@ -6213,6 +6213,7 @@ var NodeName;
   NodeName2["imagesEditingBreakpoint"] = "LF_ImagesEditingBreakpoint";
   NodeName2["imagesSlideshow"] = "LF_ImagesSlideshow";
   NodeName2["imageToSvg"] = "LF_ImageToSVG";
+  NodeName2["inpaint"] = "LF_Inpaint";
   NodeName2["integer"] = "LF_Integer";
   NodeName2["isLandscape"] = "LF_IsLandscape";
   NodeName2["jsonPromptCombinator"] = "LF_JSONPromptCombinator";
@@ -6274,6 +6275,7 @@ var NodeName;
   NodeName2["upscaleModelSelector"] = "LF_UpscaleModelSelector";
   NodeName2["urandomSeedGenerator"] = "LF_UrandomSeedGenerator";
   NodeName2["usageStatistics"] = "LF_UsageStatistics";
+  NodeName2["vaeDecode"] = "LF_VAEDecode";
   NodeName2["vaeSelector"] = "LF_VAESelector";
   NodeName2["onnxSelector"] = "LF_ONNXSelector";
   NodeName2["viewImages"] = "LF_ViewImages";
@@ -6352,6 +6354,7 @@ const NODE_WIDGET_MAP = {
   LF_ImagesEditingBreakpoint: [CustomWidgetName.imageEditor],
   LF_ImagesSlideshow: [CustomWidgetName.carousel],
   LF_ImageToSVG: [CustomWidgetName.compare],
+  LF_Inpaint: [CustomWidgetName.compare],
   LF_Integer: [CustomWidgetName.history],
   LF_IsLandscape: [CustomWidgetName.tree],
   LF_JSONPromptCombinator: [CustomWidgetName.code],
@@ -6414,6 +6417,7 @@ const NODE_WIDGET_MAP = {
   LF_UpscaleModelSelector: [CustomWidgetName.history],
   LF_UsageStatistics: [CustomWidgetName.tabBarChart],
   LF_UrandomSeedGenerator: [CustomWidgetName.tree],
+  LF_VAEDecode: [CustomWidgetName.code],
   LF_VAESelector: [CustomWidgetName.history],
   LF_ONNXSelector: [CustomWidgetName.history],
   LF_Vibrance: [CustomWidgetName.compare],
