@@ -2,7 +2,7 @@ from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
-from ...utils.helpers.logic import normalize_output_image
+from ...utils.helpers.logic import normalize_input_latent, normalize_list_to_value, normalize_output_image
 
 # region LF_VAEDecode
 class LF_VAEDecode:
@@ -11,7 +11,7 @@ class LF_VAEDecode:
         return {
             "required": {
                 "samples": (Input.LATENT, {
-                    "tooltip": "The latent to be decoded."
+                    "tooltip": "The latent to be decoded.",
                 }),
                 "vae": (Input.VAE, {
                     "tooltip": "The VAE model used for decoding the latent."
@@ -27,21 +27,24 @@ class LF_VAEDecode:
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
+    INPUT_IS_LIST = (True, False)
+    OUTPUT_IS_LIST = (False, True)
     RETURN_TYPES = ("IMAGE", "IMAGE")
     RETURN_NAMES = ("image", "image_list")
-    OUTPUT_IS_LIST = (False, True)
 
     def on_exec(self, **kwargs: dict):
         node_id = kwargs.get("node_id")
-        vae = kwargs.get("vae")
-        samples = kwargs.get("samples")
+        vae = normalize_list_to_value(kwargs.get("vae"))
+        latent_input = kwargs.get("samples")
 
         if vae is None:
             raise RuntimeError("VAE is required for decoding.")
-        if samples is None or "samples" not in samples:
-            raise RuntimeError("Invalid latent input: missing 'samples'.")
 
-        latent_tensor = samples["samples"]
+        latent_dict = normalize_input_latent(latent_input)
+        latent_tensor = latent_dict.get("samples")
+
+        if latent_tensor is None:
+            raise RuntimeError("Invalid latent input: missing 'samples'.")
         total = int(latent_tensor.shape[0]) if hasattr(latent_tensor, "dim") and latent_tensor.dim() >= 1 else 1
 
         PromptServer.instance.send_sync(f"{EVENT_PREFIX}vaedecode", {
@@ -68,8 +71,8 @@ class LF_VAEDecode:
             temporal = None
 
         log_lines = [
-            "## VAE Decode",
-            f"- Input latent keys: `{list(samples.keys())}`",
+            "## VAE Decode\n\n",
+            f"- Input latent keys: `{list(latent_dict.keys())}`",
             f"- Output image shape: `{b}x{h}x{w}x{c}`",
             f"- Completed decoding `{total}` sample(s).",
         ]
