@@ -66,6 +66,7 @@ export const NODE_WIDGET_MAP: NodeWidgetMap = {
   LF_ImagesSlideshow: [CustomWidgetName.carousel],
   LF_ImageToSVG: [CustomWidgetName.compare],
   LF_Inpaint: [CustomWidgetName.compare],
+  LF_InpaintAdvanced: [CustomWidgetName.compare],
   LF_Integer: [CustomWidgetName.history],
   LF_IsLandscape: [CustomWidgetName.tree],
   LF_JSONPromptCombinator: [CustomWidgetName.code],

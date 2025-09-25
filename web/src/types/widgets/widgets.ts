@@ -96,6 +96,7 @@ export enum NodeName {
   imagesSlideshow = 'LF_ImagesSlideshow',
   imageToSvg = 'LF_ImageToSVG',
   inpaint = 'LF_Inpaint',
+  inpaintAdvanced = 'LF_InpaintAdvanced',
   integer = 'LF_Integer',
   isLandscape = 'LF_IsLandscape',
   jsonPromptCombinator = 'LF_JSONPromptCombinator',

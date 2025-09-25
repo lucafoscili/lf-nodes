@@ -35,6 +35,7 @@ class Input:
     LF_TREE = "LF_TREE"
     LF_UPLOAD = "LF_UPLOAD"
     JSON = "JSON"
+    MASK = "MASK"
     REGION_META = "REGION_META"
     MODEL = "MODEL"
     VAE = "VAE"
