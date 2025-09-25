@@ -35,7 +35,7 @@ export const ANALYTICS_API: AnalyticsAPIs = {
           const p: BaseAPIPayload = await response.json();
           if (p.status === 'success') {
             payload.message = p.message;
-            payload.status = LogSeverity.Error;
+            payload.status = LogSeverity.Success;
             lfManager.getCachedDatasets().usage = {};
           }
           break;
@@ -44,7 +44,12 @@ export const ANALYTICS_API: AnalyticsAPIs = {
           payload.status = LogSeverity.Info;
           break;
         default:
-          payload.message = `Unexpected response from the clear-analytics ${type} API: ${p.message}`;
+          {
+            const errorText = await response.text().catch(() => '');
+            payload.message = `Unexpected response from the clear-analytics ${type} API (${code}): ${
+              errorText || response.statusText
+            }`;
+          }
           payload.status = LogSeverity.Error;
           break;
       }
@@ -103,7 +108,12 @@ export const ANALYTICS_API: AnalyticsAPIs = {
           lfManager.log(`${type} analytics file not found.`, { payload }, payload.status);
           break;
         default:
-          payload.message = `Unexpected response from the get-analytics ${type} API: ${p.message}`;
+          {
+            const errorText = await response.text().catch(() => '');
+            payload.message = `Unexpected response from the get-analytics ${type} API (${code}): ${
+              errorText || response.statusText
+            }`;
+          }
           payload.status = LogSeverity.Error;
           break;
       }

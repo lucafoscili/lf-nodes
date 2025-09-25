@@ -22,7 +22,9 @@ export const IMAGE_API: ImageAPIs = {
 
     try {
       const body = new FormData();
-      body.append('directory', directory);
+      if (directory) {
+        body.append('directory', directory);
+      }
 
       const response = await api.fetchApi(APIEndpoints.GetImage, {
         body,
@@ -36,14 +38,18 @@ export const IMAGE_API: ImageAPIs = {
           const p: GetImageAPIPayload = await response.json();
           if (p.status === 'success') {
             payload.data = p.data;
-            payload.message = 'Analytics data fetched successfully.';
+            payload.message = 'Images fetched successfully.';
             payload.status = LogSeverity.Success;
             lfManager.log(payload.message, { payload }, payload.status);
-            lfManager.getCachedDatasets().usage = payload.data;
           }
           break;
         default:
-          payload.message = `Unexpected response from the get-image API: ${response.text}`;
+          {
+            const errorText = await response.text().catch(() => '');
+            payload.message = `Unexpected response from the get-image API (${code}): ${
+              errorText || response.statusText
+            }`;
+          }
           payload.status = LogSeverity.Error;
           break;
       }
@@ -93,7 +99,12 @@ export const IMAGE_API: ImageAPIs = {
           }
           break;
         default:
-          payload.message = `Unexpected response from the process-image API: ${response.text}`;
+          {
+            const errorText = await response.text().catch(() => '');
+            payload.message = `Unexpected response from the process-image API (${code}): ${
+              errorText || response.statusText
+            }`;
+          }
           payload.status = LogSeverity.Error;
           break;
       }
