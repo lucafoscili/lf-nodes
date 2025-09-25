@@ -5423,7 +5423,7 @@ var tt = false, et = (t2, e2, n2) => {
                         const n6 = t7.i.replace(/-/g, "_"), o6 = t7.T;
                         if (!o6) return;
                         const i3 = r.get(o6);
-                        return i3 ? i3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-4ba08932.entry.js": () => import("./p-4ba08932.entry-CC6i_Hus.js"), "./p-60af2d7f.entry.js": () => import("./p-60af2d7f.entry-CltYqGAv.js"), "./p-746a8577.entry.js": () => import("./p-746a8577.entry-C0KAmIMl.js"), "./p-7652d72d.entry.js": () => import("./p-7652d72d.entry-D6Uk7Iyj.js"), "./p-79cc15c2.entry.js": () => import("./p-79cc15c2.entry-C_T2AgF5.js"), "./p-846257eb.entry.js": () => import("./p-846257eb.entry-qhVm8DIh.js"), "./p-84927cea.entry.js": () => import("./p-84927cea.entry-C9PF-C0X.js"), "./p-928c4970.entry.js": () => import("./p-928c4970.entry-BIR3wwze.js"), "./p-a147e6c9.entry.js": () => import("./p-a147e6c9.entry-CE8SyjR7.js"), "./p-a14c6d82.entry.js": () => import("./p-a14c6d82.entry-B0OV76or.js"), "./p-a7fc1135.entry.js": () => import("./p-a7fc1135.entry-CqCvTSJR.js"), "./p-bd214b33.entry.js": () => import("./p-bd214b33.entry-h7m9lp5q.js"), "./p-bf8a47d4.entry.js": () => import("./p-bf8a47d4.entry-B_2hsoyA.js"), "./p-ccea11a0.entry.js": () => import("./p-ccea11a0.entry-D7TMaSJw.js"), "./p-dbe042fd.entry.js": () => import("./p-dbe042fd.entry-sPHr5b4L.js"), "./p-e2689624.entry.js": () => import("./p-e2689624.entry-Dmg8JNWS.js") }), `./${o6}.entry.js`, 2).then(((t8) => (r.set(o6, t8), t8[n6])), ((t8) => {
+                        return i3 ? i3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-4ba08932.entry.js": () => import("./p-4ba08932.entry-BYdNp5vS.js"), "./p-60af2d7f.entry.js": () => import("./p-60af2d7f.entry-CaCKUwSr.js"), "./p-746a8577.entry.js": () => import("./p-746a8577.entry-C2ZQQnBa.js"), "./p-7652d72d.entry.js": () => import("./p-7652d72d.entry-j87UZQ2H.js"), "./p-79cc15c2.entry.js": () => import("./p-79cc15c2.entry-QOJFE3_i.js"), "./p-846257eb.entry.js": () => import("./p-846257eb.entry-3M00CAjm.js"), "./p-84927cea.entry.js": () => import("./p-84927cea.entry-CsfBV9YF.js"), "./p-928c4970.entry.js": () => import("./p-928c4970.entry-CgZ7cwON.js"), "./p-a147e6c9.entry.js": () => import("./p-a147e6c9.entry-YjrRGbiv.js"), "./p-a14c6d82.entry.js": () => import("./p-a14c6d82.entry-dPIaIsVd.js"), "./p-a7fc1135.entry.js": () => import("./p-a7fc1135.entry-BiENnOgl.js"), "./p-bd214b33.entry.js": () => import("./p-bd214b33.entry-CQCa9oYj.js"), "./p-bf8a47d4.entry.js": () => import("./p-bf8a47d4.entry-D6ZMFzxy.js"), "./p-ccea11a0.entry.js": () => import("./p-ccea11a0.entry-CvvcHg6h.js"), "./p-dbe042fd.entry.js": () => import("./p-dbe042fd.entry-mHK7DDZv.js"), "./p-e2689624.entry.js": () => import("./p-e2689624.entry-BjpBqa6m.js") }), `./${o6}.entry.js`, 2).then(((t8) => (r.set(o6, t8), t8[n6])), ((t8) => {
                           l(t8, e3.$hostElement$);
                         }));
                         /*!__STENCIL_STATIC_IMPORT_SWITCH__*/
@@ -5550,7 +5550,7 @@ const ANALYTICS_API = {
           const p2 = await response.json();
           if (p2.status === "success") {
             payload.message = p2.message;
-            payload.status = LogSeverity.Error;
+            payload.status = LogSeverity.Success;
             lfManager2.getCachedDatasets().usage = {};
           }
           break;
@@ -5559,7 +5559,10 @@ const ANALYTICS_API = {
           payload.status = LogSeverity.Info;
           break;
         default:
-          payload.message = `Unexpected response from the clear-analytics ${type} API: ${p2.message}`;
+          {
+            const errorText = await response.text().catch(() => "");
+            payload.message = `Unexpected response from the clear-analytics ${type} API (${code}): ${errorText || response.statusText}`;
+          }
           payload.status = LogSeverity.Error;
           break;
       }
@@ -5610,7 +5613,10 @@ const ANALYTICS_API = {
           lfManager2.log(`${type} analytics file not found.`, { payload }, payload.status);
           break;
         default:
-          payload.message = `Unexpected response from the get-analytics ${type} API: ${p2.message}`;
+          {
+            const errorText = await response.text().catch(() => "");
+            payload.message = `Unexpected response from the get-analytics ${type} API (${code}): ${errorText || response.statusText}`;
+          }
           payload.status = LogSeverity.Error;
           break;
       }
@@ -5784,7 +5790,9 @@ const IMAGE_API = {
     };
     try {
       const body = new FormData();
-      body.append("directory", directory);
+      if (directory) {
+        body.append("directory", directory);
+      }
       const response = await api.fetchApi(APIEndpoints.GetImage, {
         body,
         method: "POST"
@@ -5795,14 +5803,16 @@ const IMAGE_API = {
           const p2 = await response.json();
           if (p2.status === "success") {
             payload.data = p2.data;
-            payload.message = "Analytics data fetched successfully.";
+            payload.message = "Images fetched successfully.";
             payload.status = LogSeverity.Success;
             lfManager2.log(payload.message, { payload }, payload.status);
-            lfManager2.getCachedDatasets().usage = payload.data;
           }
           break;
         default:
-          payload.message = `Unexpected response from the get-image API: ${response.text}`;
+          {
+            const errorText = await response.text().catch(() => "");
+            payload.message = `Unexpected response from the get-image API (${code}): ${errorText || response.statusText}`;
+          }
           payload.status = LogSeverity.Error;
           break;
       }
@@ -5845,7 +5855,10 @@ const IMAGE_API = {
           }
           break;
         default:
-          payload.message = `Unexpected response from the process-image API: ${response.text}`;
+          {
+            const errorText = await response.text().catch(() => "");
+            payload.message = `Unexpected response from the process-image API (${code}): ${errorText || response.statusText}`;
+          }
           payload.status = LogSeverity.Error;
           break;
       }
