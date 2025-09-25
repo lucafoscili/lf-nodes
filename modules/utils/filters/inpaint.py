@@ -100,26 +100,26 @@ def perform_inpaint(
     use_conditioning: bool = False,
 ) -> torch.Tensor:
     """
-    Run an inpaint diffusion pass and blend the result with the original image.
-
-    When `use_conditioning` is True, any provided conditioning stacks are prepended to the freshly
-    encoded prompts before sampling.
+    Performs inpainting on the given image using the specified model, mask, and prompts.
 
     Args:
-        model: The diffusion model to use for inpainting.
+        model: The diffusion model used for inpainting.
         clip: The CLIP model for text encoding.
-        vae: The VAE model for encoding/decoding images.
+        vae: The VAE model for encoding and decoding images.
         image (torch.Tensor): The input image tensor to be inpainted.
         mask (torch.Tensor): The mask tensor indicating regions to inpaint (1=inpaint, 0=keep original).
         positive_prompt (str): The positive text prompt guiding the inpainting.
-        negative_prompt (str): The negative text prompt for guidance.
-        sampler_name (str): The name of the sampler to use.
-        scheduler_name (str): The name of the scheduler to use.
-        steps (int): Number of diffusion steps.
-        denoise (float): Denoising strength (typically between 0 and 1).
+        negative_prompt (str): The negative text prompt for undesired features.
+        sampler_name (str): The name of the sampler to use for generation.
+        scheduler_name (str): The name of the scheduler to use for generation.
+        steps (int): Number of sampling steps.
+        denoise (float): Denoising strength for inpainting.
         cfg (float): Classifier-free guidance scale.
         seed (int): Random seed for reproducibility.
         disable_preview (bool, optional): If True, disables preview sampling for efficiency. Defaults to True.
+        positive_conditioning: Optional additional conditioning for the positive prompt.
+        negative_conditioning: Optional additional conditioning for the negative prompt.
+        use_conditioning (bool, optional): If True, combines additional conditioning with prompts. Defaults to False.
 
     Returns:
         torch.Tensor: The inpainted image tensor, blended with the original image according to the mask.
@@ -200,9 +200,36 @@ def _prepare_inpaint_region(
     settings: dict,
 ):
     """
-    Normalize ROI, mask edges, and optional upsample settings prior to running perform_inpaint.
+    Prepares the region of interest (ROI) and mask for inpainting by normalizing the ROI, processing mask edges, and optionally upsampling the region.
 
-    Returns (work_image, work_mask_soft, paste_roi, meta_dict).
+    Args:
+        base_image (torch.Tensor): The input image tensor of shape (B, H, W, C).
+        mask_tensor (torch.Tensor): The mask tensor of shape (B, H, W).
+        vae: VAE model instance, used for determining alignment factors.
+        settings (dict): Dictionary of settings controlling ROI, mask, and upsampling behavior.
+
+    Returns:
+        Tuple[
+            torch.Tensor,      # work_image: Cropped and optionally upsampled image tensor.
+            torch.Tensor,      # work_mask_soft: Processed mask tensor (dilated/feathered/upsampled).
+            Tuple[int, int, int, int],  # paste_roi: Coordinates (y0, x0, y1, x1) of the ROI in the original image.
+            dict               # meta: Metadata about the processing (dilate/feather px, upsample info, image shape).
+
+    Settings Keys:
+        roi_auto (bool): Whether to automatically detect and crop the ROI based on the mask.
+        roi_padding (int): Padding added around the detected ROI.
+        roi_align (int): Alignment multiple for ROI cropping.
+        roi_align_auto (bool): Whether to automatically determine alignment from VAE.
+        roi_min_size (int): Minimum size for the cropped ROI.
+        dilate (int): Number of pixels to dilate the mask.
+        feather (int): Number of pixels to feather (blur) the mask.
+        upsample (int or str): Target size for upsampling the longest side of the ROI.
+        upsample_target (int or str): Alternative key for upsampling target.
+
+    Notes:
+        - The function crops the image and mask to the smallest bounding box containing the mask, with optional padding and alignment.
+        - Mask edges can be dilated and feathered for smoother transitions.
+        - If upsampling is requested, the cropped region is resized so its longest side matches the target, maintaining alignment.
     """
     h = int(base_image.shape[1])
     w = int(base_image.shape[2])
@@ -346,7 +373,23 @@ def _finalize_inpaint_output(
     meta: dict,
 ):
     """
-    Downscale if needed, paste into the base image, clamp/output on CPU, and emit metadata.
+    Finalize the output of an inpainting operation by optionally downscaling, pasting the processed region into the base image, clamping values, and emitting metadata.
+
+    Args:
+        processed_region (torch.Tensor): The inpainted region tensor of shape (batch, height, width, channels).
+        base_image (torch.Tensor): The original image tensor of shape (batch, height, width, channels).
+        paste_roi (tuple[int, int, int, int]): The region of interest (y0, x0, y1, x1) where the processed region should be pasted.
+        meta (dict): Metadata containing optional keys:
+            - "upsample_applied" (bool): Whether upsampling was applied.
+            - "upsample_info" (tuple): Information about upsampling (orig_h, orig_w, new_h, new_w).
+            - "dilate_px" (int): Number of pixels for dilation.
+            - "feather_px" (int): Number of pixels for feathering.
+            - "image_shape" (tuple): Shape of the image (height, width).
+
+    Returns:
+        Tuple[torch.Tensor, Dict[str, str]]:
+            - The finalized image tensor on CPU, clamped to [0, 1].
+            - A dictionary with metadata about the operation (ROI, upsampling, edge processing).
     """
     upsample_applied = bool(meta.get("upsample_applied"))
     upsample_info = meta.get("upsample_info")
@@ -383,27 +426,67 @@ def _finalize_inpaint_output(
     return processed, info
 
 def _normalize_steps(raw_value):
+    """
+    Normalizes the input value to a valid number of steps for inpainting.
+
+    Parameters:
+        raw_value (Any): The raw input value representing the number of steps. Can be None or any type convertible to int.
+
+    Returns:
+        int: The normalized number of steps, rounded to the nearest integer, with a minimum value of 1. Defaults to 20 if input is None or invalid.
+    """
     value = convert_to_int(raw_value) if raw_value is not None else None
     if value is None:
         value = 20
+
     return max(1, int(round(value)))
 
 def _normalize_denoise(raw_value):
+    """
+    Normalizes the input value to a valid denoise strength for inpainting.
+
+    Parameters:
+        raw_value (Any): The raw input value representing the denoise strength. Can be None or any type convertible to float.
+
+    Returns:
+        float: The normalized denoise strength, clamped to [0, 1]. Defaults to 1.0 if input is None or invalid.
+    """
     value = convert_to_float(raw_value) if raw_value is not None else None
     if value is None:
         value = 1.0
+
     return max(0.0, min(1.0, float(value)))
 
 def _normalize_cfg(raw_value):
+    """
+    Normalizes the input value to a valid classifier-free guidance scale for inpainting.
+
+    Parameters:
+        raw_value (Any): The raw input value representing the CFG scale. Can be None or any type convertible to float.
+
+    Returns:
+        float: The normalized CFG scale, clamped to [0, 20]. Defaults to 7.0 if input is None or invalid.
+    """
     value = convert_to_float(raw_value) if raw_value is not None else None
     if value is None:
         value = 7.0
+
     return float(value)
 
 def _normalize_seed(raw_value):
+    """
+    Normalizes the input value to a valid random seed for inpainting.
+
+    Parameters:
+        raw_value (Any): The raw input value representing the random seed. Can be None or any type convertible to int.
+
+    Returns:
+        int: The normalized random seed, with a default value of -1 if input is None or invalid.
+    """
     value = convert_to_int(raw_value) if raw_value is not None else None
     if value is None:
         value = -1
+
     return int(value)
 
 def apply_inpaint_filter(image: torch.Tensor, settings: dict) -> FilterResult:
@@ -616,11 +699,21 @@ def apply_inpaint_filter_tensor(
     settings: dict,
 ) -> FilterResult:
     """
-    Like apply_inpaint_filter, but accepts tensors directly and explicit model/clip/vae.
+    Applies an inpainting filter to the given image tensor using the provided mask and model components.
+    
+    Args:
+        image (torch.Tensor): The input image tensor to be inpainted.
+        mask (torch.Tensor): The mask tensor indicating regions to inpaint.
+        model: The inpainting model to use for generating the inpainted region.
+        clip: The CLIP model used for conditioning.
+        vae: The VAE model used for encoding/decoding image data.
+        settings (dict): A dictionary of settings and parameters for inpainting, such as prompts, sampler, scheduler, steps, denoise, cfg, seed, and conditioning options.
 
-    Expects image as [1,H,W,C] and mask as [1,H,W] or [1,H,W,1] or [1,H,W,C].
-    The settings dict supports the same ROI/edge/upsample fields as apply_inpaint_filter.
-    Returns (processed, info).
+    Returns:
+        FilterResult: A tuple containing the processed image tensor and additional information about the inpainting operation.
+
+    Raises:
+        ValueError: If the mask tensor has an unsupported shape.
     """
     device = getattr(getattr(vae, "first_stage_model", None), "device", None) or image.device
 
