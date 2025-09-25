@@ -71,7 +71,11 @@ def normalize_input_latent(latent_input: Any) -> Dict[str, Any]:
 
     noise_masks = [item.get("noise_mask") for item in flattened if item.get("noise_mask") is not None]
     if noise_masks:
-        merged["noise_mask"] = _cat_tensor_sequence(noise_masks)
+        if len(noise_masks) == len(flattened):
+            merged["noise_mask"] = _cat_tensor_sequence(noise_masks)
+        else:
+            # Skip partial noise masks to avoid batch mismatches.
+            pass
 
     batch_indices = [item.get("batch_index") for item in flattened if item.get("batch_index") is not None]
     if batch_indices:
