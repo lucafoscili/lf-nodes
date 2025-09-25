@@ -10,6 +10,7 @@ import {
 import { LFManager } from '../managers/manager';
 import { BaseEventPayload } from '../types/events/events';
 import { FreeHookAPI } from '../types/hooks/free';
+import { RefreshHookApp } from '../types/hooks/refresh';
 import { LogSeverity } from '../types/manager/manager';
 import {
   ComfyWidgetMap,
@@ -34,6 +35,11 @@ export enum LFFreeFlags {
   OriginalFreeRef = '_lf_original_freeMemory',
   PatchedFetch = '_lf_patched_fetchApi_free',
   InBeforeFree = '_lf_in_beforeFree',
+}
+export enum LFRefreshFlags {
+  PatchedRefresh = '_lf_patched_refreshComboInNodes',
+  OriginalRefreshRef = '_lf_original_refreshComboInNodes',
+  InBeforeRefresh = '_lf_in_beforeRefreshComboInNodes',
 }
 const LF_MANAGER_SYMBOL_ID = '__LfManager__';
 const LF_MANAGER_SYMBOL: unique symbol = Symbol.for(LF_MANAGER_SYMBOL_ID);
@@ -155,6 +161,15 @@ export function isFreeHookAPI(obj: unknown): obj is FreeHookAPI {
     typeof o['fetchApi'] === 'function' ||
     LFFreeFlags.PatchedFree in o ||
     LFFreeFlags.PatchedFetch in o
+  );
+}
+export function isRefreshHookApp(obj: unknown): obj is RefreshHookApp {
+  if (!obj || typeof obj !== 'object') return false;
+  const o = obj as Record<string, unknown>;
+  return (
+    typeof o['refreshComboInNodes'] === 'function' ||
+    'refreshComboInNodes' in o ||
+    LFRefreshFlags.PatchedRefresh in o
   );
 }
 export const log = () => {

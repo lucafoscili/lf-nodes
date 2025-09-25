@@ -42,9 +42,9 @@ class LazyCache:
         self._cache.clear()
 
 # Registry of caches so they can be cleared centrally (e.g., via a custom API)
-_CACHE_REGISTRY: List[LazyCache] = []
+_CACHE_REGISTRY: List[Any] = []
 
-def register_cache(cache: LazyCache) -> None:
+def register_cache(cache: Any) -> None:
     if cache not in _CACHE_REGISTRY:
         _CACHE_REGISTRY.append(cache)
 
@@ -54,6 +54,57 @@ def clear_registered_caches() -> None:
             cache.clear()
         except Exception:
             pass
+
+
+class _SelectorListRefresher:
+    def __init__(
+        self,
+        owner_cls: Any,
+        loader: Callable[[], List[str]],
+        attr_name: str = "initial_list",
+        return_index: Optional[int] = 0,
+    ) -> None:
+        self._owner_cls = owner_cls
+        self._loader = loader
+        self._attr_name = attr_name
+        self._return_index = return_index
+
+    def clear(self) -> List[str]:
+        values = list(self._loader() or [])
+
+        current = getattr(self._owner_cls, self._attr_name, None)
+        if isinstance(current, list):
+            current.clear()
+            current.extend(values)
+            target_list = current
+        else:
+            target_list = values
+            setattr(self._owner_cls, self._attr_name, target_list)
+
+        if self._return_index is not None:
+            return_types = getattr(self._owner_cls, "RETURN_TYPES", None)
+            if isinstance(return_types, tuple):
+                rt_list = list(return_types)
+                if self._return_index < len(rt_list):
+                    rt_list[self._return_index] = target_list
+                else:
+                    rt_list.extend([None] * (self._return_index - len(rt_list) + 1))
+                    rt_list[self._return_index] = target_list
+                self._owner_cls.RETURN_TYPES = tuple(rt_list)
+
+        return target_list
+
+
+def register_selector_list(
+    owner_cls: Any,
+    loader: Callable[[], List[str]],
+    attr_name: str = "initial_list",
+    return_index: Optional[int] = 0,
+):
+    refresher = _SelectorListRefresher(owner_cls, loader, attr_name, return_index)
+    refresher.clear()
+    register_cache(refresher)
+    return refresher
 
 def dtype_to_name(dtype: Any) -> str:
     """

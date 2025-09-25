@@ -8,12 +8,20 @@ from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, INT_MAX
 from ...utils.helpers.api import process_model
 from ...utils.helpers.comfy import get_comfy_list
-from ...utils.helpers.logic import build_is_changed_tuple, filter_list, is_none, LazyCache, normalize_list_to_value, register_cache
+from ...utils.helpers.logic import (
+    build_is_changed_tuple,
+    filter_list,
+    is_none,
+    LazyCache,
+    normalize_list_to_value,
+    register_cache,
+    register_selector_list,
+)
 from ...utils.helpers.ui import prepare_model_dataset
 
 # region LF_CheckpointSelector
 class LF_CheckpointSelector:
-    initial_list = get_comfy_list("checkpoints")
+    initial_list: list[str] = []
     _CACHE = LazyCache()
     register_cache(_CACHE)
 
@@ -144,6 +152,12 @@ class LF_CheckpointSelector:
             normalize_list_to_value(get_civitai_info),
         )
 # endregion
+
+# Register refresh handler so options update when ComfyUI refreshes node definitions
+_CHECKPOINT_SELECTOR_LIST = register_selector_list(
+    LF_CheckpointSelector,
+    lambda: get_comfy_list("checkpoints"),
+)
 
 # region Mappings
 NODE_CLASS_MAPPINGS = {

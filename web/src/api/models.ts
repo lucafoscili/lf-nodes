@@ -23,6 +23,24 @@ export const MODELS_API: ModelsAPIs = {
       return false;
     }
   },
+  refresh: async () => {
+    const lfManager = getLfManager();
+    try {
+      const response = await api.fetchApi(APIEndpoints.LFRefreshNodeDefs, { method: 'POST' });
+      if (response.status === 200) {
+        return true;
+      }
+      lfManager.log(
+        '"refresh-node-defs" endpoint returned non-200',
+        { status: response.status },
+        LogSeverity.Warning,
+      );
+      return false;
+    } catch (error) {
+      lfManager.log('"refresh-node-defs" endpoint failed', { error }, LogSeverity.Warning);
+      return false;
+    }
+  },
 };
 
 export const beforeFree = async (options?: any) => {
@@ -37,5 +55,20 @@ export const beforeFree = async (options?: any) => {
     }
   } catch (error) {
     lfManager.log('Error while clearing caches', { error }, LogSeverity.Warning);
+  }
+};
+
+export const beforeRefreshNodeDefs = async (trigger?: unknown) => {
+  const lfManager = getLfManager();
+  lfManager.log('Refresh requested — clearing LF caches first…', { trigger }, LogSeverity.Info);
+  try {
+    const ok = await MODELS_API.refresh();
+    if (ok) {
+      lfManager.log('Refresh caches cleared ✔️', {}, LogSeverity.Success);
+    } else {
+      lfManager.log('Refresh cache clear call returned non-200', {}, LogSeverity.Warning);
+    }
+  } catch (error) {
+    lfManager.log('Error while clearing caches ahead of refresh', { error }, LogSeverity.Warning);
   }
 };

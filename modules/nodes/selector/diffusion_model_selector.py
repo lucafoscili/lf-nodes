@@ -9,7 +9,16 @@ from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, INT_MAX
 from ...utils.helpers.api import process_model
 from ...utils.helpers.comfy import get_comfy_list
-from ...utils.helpers.logic import build_is_changed_tuple, filter_list, is_none, LazyCache, make_model_cache_key, normalize_list_to_value, register_cache
+from ...utils.helpers.logic import (
+    build_is_changed_tuple,
+    filter_list,
+    is_none,
+    LazyCache,
+    make_model_cache_key,
+    normalize_list_to_value,
+    register_cache,
+    register_selector_list,
+)
 from ...utils.helpers.ui import prepare_model_dataset
 
 _DIFFUSION_MODEL_CACHE = LazyCache()
@@ -17,7 +26,7 @@ register_cache(_DIFFUSION_MODEL_CACHE)
 
 # region LF_DiffusionModelSelector
 class LF_DiffusionModelSelector:
-    initial_list = get_comfy_list("unet")
+    initial_list: list[str] = []
 
     @classmethod
     def INPUT_TYPES(self):
@@ -172,6 +181,11 @@ class LF_DiffusionModelSelector:
             normalize_list_to_value(get_civitai_info),
         )
 # endregion
+
+_DIFFUSION_MODEL_SELECTOR_LIST = register_selector_list(
+    LF_DiffusionModelSelector,
+    lambda: get_comfy_list("unet"),
+)
 
 # region Mappings
 NODE_CLASS_MAPPINGS = {
