@@ -34,7 +34,6 @@ export const JSON_API: JSONAPIs = {
             payload.message = 'JSON data fetched successfully.';
             payload.status = LogSeverity.Success;
             lfManager.log(payload.message, { payload }, payload.status);
-            lfManager.getCachedDatasets().usage = payload.data;
           }
           break;
         default:
