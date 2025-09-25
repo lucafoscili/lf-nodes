@@ -1,4 +1,5 @@
 import os
+import re
 import torch
 
 from datetime import datetime
@@ -14,6 +15,22 @@ from ...utils.helpers.logic import normalize_json_input, normalize_list_to_value
 from ...utils.helpers.metadata import extract_jpeg_metadata, extract_png_metadata
 from ...utils.helpers.torch import create_dummy_image_tensor
 from ...utils.helpers.ui import create_masonry_node
+
+SAFE_FILENAME_FALLBACK = "image"
+
+
+def _sanitize_filename_component(name: str) -> str:
+    sanitized = (name or "").strip()
+    sanitized = sanitized.replace("\\", "_").replace("/", "_")
+    sanitized = re.sub(r"\s+", " ", sanitized)
+    sanitized = sanitized.rstrip(". ")
+
+    while ".." in sanitized:
+        sanitized = sanitized.replace("..", ".")
+
+    sanitized = sanitized.strip()
+
+    return sanitized or SAFE_FILENAME_FALLBACK
 
 # region LF_LoadImages
 class LF_LoadImages:
@@ -150,13 +167,16 @@ class LF_LoadImages:
                 if file.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif')):
                     image_path = os.path.join(root, file)
                     with open(image_path, 'rb') as img_file:
-                        f, e = os.path.splitext(file)
-                        e = e.lstrip('.')
+                        original_stem, extension = os.path.splitext(file)
+                        extension = extension.lstrip('.')
+                        extension_lower = extension.lower()
+                        safe_stem = _sanitize_filename_component(original_stem)
+                        normalized_extension = extension_lower.replace('jpg', 'jpeg')
+                        display_extension = extension_lower or normalized_extension
+                        safe_filename = f"{safe_stem}.{display_extension}" if display_extension else safe_stem
+                        display_name = safe_stem if strip_ext else safe_filename
 
-                        if strip_ext:
-                            file_names.append(f)  
-                        else:
-                            file_names.append(file)
+                        file_names.append(display_name)
               
                         file_creation_time = os.path.getctime(image_path)
                         creation_date = datetime.fromtimestamp(file_creation_time).strftime('%Y-%m-%d')
@@ -164,34 +184,45 @@ class LF_LoadImages:
 
                         pil_image = Image.open(img_file)
                         if pil_image.format == "JPEG":
-                            metadata = extract_jpeg_metadata(pil_image, f)
+                            metadata = extract_jpeg_metadata(pil_image, original_stem)
                         elif pil_image.format == "PNG":
                             metadata = extract_png_metadata(pil_image)
                         else:
-                            metadata = {"error": f"Unsupported image format for {f}"}
-                        metadata_list.append({"file": f, "metadata": metadata})                        
+                            metadata = {"error": f"Unsupported image format for {original_stem}"}
 
                         rgb_img = pil_image.convert("RGB")
                         img_tensor = pil_to_tensor(rgb_img)
 
-                        if copy_into_input_dir:
-                           output_file, subfolder, filename = resolve_filepath(
-                               filename_prefix=f,
-                               base_output_path=get_comfy_dir("input"),
-                               extension=e,
-                               add_counter=False,
-                               image=img_tensor
-                           )
-                           url = get_resource_url(subfolder, filename, "input")
-                           e = e.lower().replace('jpg', 'jpeg')
-                           rgb_img.save(output_file, format=e.upper())
+                        force_preview_copy = ".." in file
+                        should_copy = copy_into_input_dir or force_preview_copy
+
+                        if should_copy:
+                            output_file, subfolder, resolved_filename = resolve_filepath(
+                                filename_prefix=safe_stem,
+                                base_output_path=get_comfy_dir("input"),
+                                extension=normalized_extension,
+                                add_counter=False,
+                                image=img_tensor
+                            )
+                            url = get_resource_url(subfolder, resolved_filename, "input")
+                            save_format = normalized_extension.upper() if normalized_extension else "PNG"
+                            rgb_img.save(output_file, format=save_format)
+                            preview_filename = resolved_filename
                         else:
-                           filename = f"{f}.{e}"
-                           url = get_resource_url(root, file, "input")
+                            preview_filename = safe_filename
+                            url = get_resource_url(root, file, "input")
 
                         images.append(img_tensor)
-                        
-                        nodes.append(create_masonry_node(filename, url, index))
+
+                        metadata_list.append({
+                            "file": original_stem,
+                            "original_filename": file,
+                            "sanitized_file": preview_filename,
+                            "copied_for_preview": should_copy,
+                            "metadata": metadata
+                        })
+
+                        nodes.append(create_masonry_node(preview_filename, url, index))
 
                         index += 1
                         if load_cap > 0 and index >= load_cap:
