@@ -5423,7 +5423,7 @@ var tt = false, et = (t2, e2, n2) => {
                         const n6 = t7.i.replace(/-/g, "_"), o6 = t7.T;
                         if (!o6) return;
                         const i3 = r.get(o6);
-                        return i3 ? i3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-4ba08932.entry.js": () => import("./p-4ba08932.entry-xfvvy2N4.js"), "./p-60af2d7f.entry.js": () => import("./p-60af2d7f.entry-D9eOv8_y.js"), "./p-746a8577.entry.js": () => import("./p-746a8577.entry-BDGGzDKn.js"), "./p-7652d72d.entry.js": () => import("./p-7652d72d.entry-C0q2AFNm.js"), "./p-79cc15c2.entry.js": () => import("./p-79cc15c2.entry-C82cNBlZ.js"), "./p-846257eb.entry.js": () => import("./p-846257eb.entry-BpR5P0Ne.js"), "./p-84927cea.entry.js": () => import("./p-84927cea.entry-C7VkQxzE.js"), "./p-928c4970.entry.js": () => import("./p-928c4970.entry-CSCHynsT.js"), "./p-a147e6c9.entry.js": () => import("./p-a147e6c9.entry-CP6438MK.js"), "./p-a14c6d82.entry.js": () => import("./p-a14c6d82.entry-BYM_xg-V.js"), "./p-a7fc1135.entry.js": () => import("./p-a7fc1135.entry-Dpx1yUON.js"), "./p-bd214b33.entry.js": () => import("./p-bd214b33.entry-DclXjbaR.js"), "./p-bf8a47d4.entry.js": () => import("./p-bf8a47d4.entry-C4Ru_dxj.js"), "./p-ccea11a0.entry.js": () => import("./p-ccea11a0.entry-43a1p2EU.js"), "./p-dbe042fd.entry.js": () => import("./p-dbe042fd.entry-BkX1PUbc.js"), "./p-e2689624.entry.js": () => import("./p-e2689624.entry-B2Tq6McS.js") }), `./${o6}.entry.js`, 2).then(((t8) => (r.set(o6, t8), t8[n6])), ((t8) => {
+                        return i3 ? i3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-4ba08932.entry.js": () => import("./p-4ba08932.entry-DrSYRjYO.js"), "./p-60af2d7f.entry.js": () => import("./p-60af2d7f.entry-DFOTPaSP.js"), "./p-746a8577.entry.js": () => import("./p-746a8577.entry-B5bTVKzL.js"), "./p-7652d72d.entry.js": () => import("./p-7652d72d.entry-BpNSebDk.js"), "./p-79cc15c2.entry.js": () => import("./p-79cc15c2.entry-CUM1reC_.js"), "./p-846257eb.entry.js": () => import("./p-846257eb.entry-BfXKaofO.js"), "./p-84927cea.entry.js": () => import("./p-84927cea.entry-2Pv9Mq35.js"), "./p-928c4970.entry.js": () => import("./p-928c4970.entry-DJBHCE7v.js"), "./p-a147e6c9.entry.js": () => import("./p-a147e6c9.entry-qNmexnMp.js"), "./p-a14c6d82.entry.js": () => import("./p-a14c6d82.entry-DUk_XQWm.js"), "./p-a7fc1135.entry.js": () => import("./p-a7fc1135.entry-BtbxvPj6.js"), "./p-bd214b33.entry.js": () => import("./p-bd214b33.entry-D0H1ZcyJ.js"), "./p-bf8a47d4.entry.js": () => import("./p-bf8a47d4.entry-CR4t5oag.js"), "./p-ccea11a0.entry.js": () => import("./p-ccea11a0.entry-BsmJ5wYJ.js"), "./p-dbe042fd.entry.js": () => import("./p-dbe042fd.entry-CgHPeUVW.js"), "./p-e2689624.entry.js": () => import("./p-e2689624.entry-B2xN43wq.js") }), `./${o6}.entry.js`, 2).then(((t8) => (r.set(o6, t8), t8[n6])), ((t8) => {
                           l(t8, e3.$hostElement$);
                         }));
                         /*!__STENCIL_STATIC_IMPORT_SWITCH__*/
@@ -6299,6 +6299,7 @@ var NodeName;
   NodeName2["switchInteger"] = "LF_SwitchInteger";
   NodeName2["switchJson"] = "LF_SwitchJSON";
   NodeName2["switchString"] = "LF_SwitchString";
+  NodeName2["tiledSuperRes"] = "LF_TiledSuperRes";
   NodeName2["tiltShift"] = "LF_TiltShift";
   NodeName2["updateUsageStatistics"] = "LF_UpdateUsageStatistics";
   NodeName2["upscaleModelSelector"] = "LF_UpscaleModelSelector";
@@ -6442,6 +6443,7 @@ const NODE_WIDGET_MAP = {
   LF_SwitchInteger: [CustomWidgetName.progressbar],
   LF_SwitchJSON: [CustomWidgetName.progressbar],
   LF_SwitchString: [CustomWidgetName.progressbar],
+  LF_TiledSuperRes: [CustomWidgetName.compare],
   LF_TiltShift: [CustomWidgetName.compare],
   LF_UpdateUsageStatistics: [CustomWidgetName.code],
   LF_UpscaleModelSelector: [CustomWidgetName.history],
@@ -7523,7 +7525,7 @@ const SETTINGS = {
         {
           ariaLabel: "Upsample target (px)",
           controlType: ImageEditorControls.Slider,
-          defaultValue: 0,
+          defaultValue: 1024,
           id: ImageEditorSliderIds.UpsampleTarget,
           isMandatory: false,
           max: "2048",
@@ -8400,6 +8402,76 @@ const handleInterruptForState = async (state) => {
   }
   await resetSettings(imageviewer);
 };
+const MANUAL_APPLY_PROCESSING_LABEL = "Applying…";
+const hasManualApplyPendingChanges = (state) => {
+  const manual = state.manualApply;
+  if (!manual)
+    return false;
+  return manual.latestChangeId > manual.latestAppliedChangeId;
+};
+const updateManualApplyButton = (state) => {
+  const manual = state.manualApply;
+  if (!manual) {
+    return;
+  }
+  manual.dirty = hasManualApplyPendingChanges(state);
+  if (manual.isProcessing) {
+    manual.button.lfUiState = "disabled";
+    manual.button.lfLabel = MANUAL_APPLY_PROCESSING_LABEL;
+    return;
+  }
+  manual.button.lfLabel = manual.defaultLabel;
+  if (manual.dirty) {
+    manual.button.lfUiState = "success";
+  } else {
+    manual.button.lfUiState = "disabled";
+  }
+};
+const initManualApplyState = (state, button) => {
+  state.manualApply = {
+    button,
+    defaultLabel: button.lfLabel ?? "Apply",
+    dirty: false,
+    isProcessing: false,
+    changeCounter: 0,
+    latestChangeId: 0,
+    latestAppliedChangeId: 0,
+    activeRequestChangeId: 0
+  };
+  updateManualApplyButton(state);
+};
+const registerManualApplyChange = (state) => {
+  var _a;
+  if (!((_a = state.filter) == null ? void 0 : _a.requiresManualApply) || !state.manualApply) {
+    return;
+  }
+  const manual = state.manualApply;
+  manual.latestChangeId = ++manual.changeCounter;
+  if (!manual.isProcessing) {
+    updateManualApplyButton(state);
+  }
+};
+const beginManualApplyRequest = (state) => {
+  if (!state.manualApply) {
+    return;
+  }
+  const manual = state.manualApply;
+  manual.isProcessing = true;
+  manual.activeRequestChangeId = manual.latestChangeId;
+  updateManualApplyButton(state);
+};
+const resolveManualApplyRequest = (state, wasSuccessful) => {
+  if (!state.manualApply) {
+    return;
+  }
+  const manual = state.manualApply;
+  if (wasSuccessful) {
+    manual.latestAppliedChangeId = Math.max(manual.latestAppliedChangeId, manual.activeRequestChangeId);
+  }
+  manual.activeRequestChangeId = 0;
+  manual.isProcessing = false;
+  updateManualApplyButton(state);
+};
 const EV_HANDLERS$a = {
   //#region Button handler
   button: async (state, e2) => {
@@ -8515,9 +8587,11 @@ const EV_HANDLERS$a = {
     const { preview, snapshot } = update;
     switch (eventType) {
       case "change":
+        registerManualApplyChange(state);
         snapshot();
         break;
       case "input":
+        registerManualApplyChange(state);
         const debouncedCallback = debounce(preview, 300);
         debouncedCallback();
         break;
@@ -8531,9 +8605,11 @@ const EV_HANDLERS$a = {
     const { preview, snapshot } = update;
     switch (eventType) {
       case "change":
+        registerManualApplyChange(state);
         snapshot();
         break;
       case "input":
+        registerManualApplyChange(state);
         const debouncedCallback = debounce(preview, 300);
         debouncedCallback();
         break;
@@ -8547,6 +8623,7 @@ const EV_HANDLERS$a = {
     const { snapshot } = update;
     switch (eventType) {
       case "change":
+        registerManualApplyChange(state);
         snapshot();
         break;
     }
@@ -8554,6 +8631,7 @@ const EV_HANDLERS$a = {
   //#endregion
 };
 const apiCall$2 = async (state, addSnapshot) => {
+  var _a, _b;
   const { elements, filter, filterType } = state;
   const { imageviewer } = elements;
   const lfManager2 = getLfManager();
@@ -8568,6 +8646,7 @@ const apiCall$2 = async (state, addSnapshot) => {
     payload.context_id = contextId;
   }
   requestAnimationFrame(() => imageviewer.setSpinnerStatus(true));
+  let isSuccess = false;
   try {
     const response = await getApiRoutes().image.process(snapshotValue, filterType, payload);
     if (response.mask) {
@@ -8580,10 +8659,15 @@ const apiCall$2 = async (state, addSnapshot) => {
       const image = await canvas.getImage();
       requestAnimationFrame(() => image.lfValue = response.data);
     }
+    isSuccess = true;
   } catch (error) {
     lfManager2.log("Error processing image!", { error }, LogSeverity.Error);
   }
   requestAnimationFrame(() => imageviewer.setSpinnerStatus(false));
+  if (((_a = state.filter) == null ? void 0 : _a.requiresManualApply) && ((_b = state.manualApply) == null ? void 0 : _b.isProcessing)) {
+    resolveManualApplyRequest(state, isSuccess);
+  }
+  return isSuccess;
 };
 const refreshValues = async (state, addSnapshot = false) => {
   const { elements, filter } = state;
@@ -8670,6 +8754,7 @@ const prepSettings = (state, node) => {
   const idRaw = node.id || "brush";
   const alias = idRaw === "inpaint_detail" || idRaw === "inpaint_adv" ? "inpaint" : idRaw;
   state.filterType = alias;
+  state.manualApply = void 0;
   const dataset = state.elements.imageviewer.lfDataset;
   const defaults = (_a = dataset == null ? void 0 : dataset.defaults) == null ? void 0 : _a[state.filterType];
   if (defaults) {
@@ -8737,7 +8822,12 @@ const prepSettings = (state, node) => {
   resetButton.lfIcon = ImageEditorIcons.Reset;
   resetButton.lfLabel = "Reset";
   resetButton.lfStretchX = true;
-  resetButton.addEventListener("click", () => resetSettings(settings));
+  resetButton.addEventListener("click", () => {
+    void (async () => {
+      await resetSettings(settings);
+      registerManualApplyChange(state);
+    })();
+  });
   buttonsWrapper.appendChild(resetButton);
   if (state.filterType === "brush") {
     const brushSettings = state.filter.settings ?? {};
@@ -8770,7 +8860,16 @@ const prepSettings = (state, node) => {
     applyButton.lfIcon = ImageEditorIcons.Resume;
     applyButton.lfLabel = "Apply";
     applyButton.lfStretchX = true;
+    initManualApplyState(state, applyButton);
     applyButton.addEventListener("click", () => {
+      if (!state.manualApply || state.manualApply.isProcessing) {
+        return;
+      }
+      const hasPending = hasManualApplyPendingChanges(state);
+      if (!hasPending) {
+        return;
+      }
+      beginManualApplyRequest(state);
       void updateCb(state, true, true);
     });
     buttonsWrapper.appendChild(applyButton);
@@ -8844,19 +8943,23 @@ function setGridStatus(status, grid, actionButtons) {
   switch (status) {
     case ImageEditorStatus.Completed:
       requestAnimationFrame(() => {
-        if (interrupt)
+        if (interrupt) {
           interrupt.lfUiState = "disabled";
-        if (resume)
+        }
+        if (resume) {
           resume.lfUiState = "disabled";
+        }
       });
       grid == null ? void 0 : grid.classList.add(ImageEditorCSS.GridIsInactive);
       break;
     case ImageEditorStatus.Pending:
       requestAnimationFrame(() => {
-        if (interrupt)
+        if (interrupt) {
           interrupt.lfUiState = "danger";
-        if (resume)
+        }
+        if (resume) {
           resume.lfUiState = "success";
+        }
       });
       grid == null ? void 0 : grid.classList.remove(ImageEditorCSS.GridIsInactive);
       break;
@@ -8894,9 +8997,11 @@ const updateCb = async (state, addSnapshot = false, force = false) => {
   }
   const shouldUpdate = !!(validValues && (!isStroke || isStroke && isCanvasAction));
   const requiresManualApply = !!(filter == null ? void 0 : filter.requiresManualApply);
+  let success = false;
   if (shouldUpdate && (force || !requiresManualApply)) {
-    apiCall$2(state, addSnapshot);
+    success = await apiCall$2(state, addSnapshot);
   }
+  return success;
 };
 const STATE$h = /* @__PURE__ */ new WeakMap();
 const IMAGE_EDITOR_INSTANCES = /* @__PURE__ */ new Set();
@@ -8993,8 +9098,10 @@ const imageEditorFactory = {
       lastBrushSettings: JSON.parse(JSON.stringify(SETTINGS.brush.settings)),
       node,
       update: {
-        preview: () => updateCb(STATE$h.get(wrapper)),
-        snapshot: () => updateCb(STATE$h.get(wrapper), true)
+        preview: () => updateCb(STATE$h.get(wrapper)).then(() => {
+        }),
+        snapshot: () => updateCb(STATE$h.get(wrapper), true).then(() => {
+        })
       },
       wrapper
     };
@@ -12489,18 +12596,18 @@ var LFFreeFlags;
   LFFreeFlags2["PatchedFetch"] = "_lf_patched_fetchApi_free";
   LFFreeFlags2["InBeforeFree"] = "_lf_in_beforeFree";
 })(LFFreeFlags || (LFFreeFlags = {}));
-var LFRefreshFlags;
-(function(LFRefreshFlags2) {
-  LFRefreshFlags2["PatchedRefresh"] = "_lf_patched_refreshComboInNodes";
-  LFRefreshFlags2["OriginalRefreshRef"] = "_lf_original_refreshComboInNodes";
-  LFRefreshFlags2["InBeforeRefresh"] = "_lf_in_beforeRefreshComboInNodes";
-})(LFRefreshFlags || (LFRefreshFlags = {}));
 var LFInterruptFlags;
 (function(LFInterruptFlags2) {
   LFInterruptFlags2["PatchedInterrupt"] = "_lf_patched_interrupt";
   LFInterruptFlags2["OriginalInterruptRef"] = "_lf_original_interrupt";
   LFInterruptFlags2["InBeforeInterrupt"] = "_lf_in_beforeInterrupt";
 })(LFInterruptFlags || (LFInterruptFlags = {}));
+var LFRefreshFlags;
+(function(LFRefreshFlags2) {
+  LFRefreshFlags2["PatchedRefresh"] = "_lf_patched_refreshComboInNodes";
+  LFRefreshFlags2["OriginalRefreshRef"] = "_lf_original_refreshComboInNodes";
+  LFRefreshFlags2["InBeforeRefresh"] = "_lf_in_beforeRefreshComboInNodes";
+})(LFRefreshFlags || (LFRefreshFlags = {}));
 const LF_MANAGER_SYMBOL_ID = "__LfManager__";
 const LF_MANAGER_SYMBOL = Symbol.for(LF_MANAGER_SYMBOL_ID);
 const DEFAULT_WIDGET_NAME = "ui_widget";

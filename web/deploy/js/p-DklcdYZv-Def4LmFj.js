@@ -1,4 +1,4 @@
-import { bq as onFrameworkReady, br as j, bs as S } from "./index-DGym7ebr.js";
+import { bq as onFrameworkReady, br as j, bs as S } from "./index-Cz_RXIGD.js";
 onFrameworkReady.then(((t) => {
   t.register("lf-core", { getAssetPath: S, setAssetPath: j });
 }));
