@@ -47,6 +47,16 @@ export interface ImageEditorState extends BaseWidgetState {
   filter: ImageEditorFilter;
   filterType: ImageEditorFilterType;
   lastBrushSettings: ImageEditorBrushSettings;
+  manualApply?: {
+    button: HTMLLfButtonElement;
+    defaultLabel: string;
+    dirty: boolean;
+    isProcessing: boolean;
+    changeCounter: number;
+    latestChangeId: number;
+    latestAppliedChangeId: number;
+    activeRequestChangeId: number;
+  };
   settingsStore?: Partial<
     Record<ImageEditorFilterType, Partial<Record<ImageEditorControlIds, ImageEditorControlValue>>>
   >;

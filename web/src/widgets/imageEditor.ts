@@ -141,8 +141,8 @@ export const imageEditorFactory: ImageEditorFactory = {
       lastBrushSettings: JSON.parse(JSON.stringify(SETTINGS.brush.settings)),
       node,
       update: {
-        preview: () => updateCb(STATE.get(wrapper)),
-        snapshot: () => updateCb(STATE.get(wrapper), true),
+        preview: () => updateCb(STATE.get(wrapper)).then(() => {}),
+        snapshot: () => updateCb(STATE.get(wrapper), true).then(() => {}),
       },
       wrapper,
     };
