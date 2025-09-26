@@ -5423,7 +5423,7 @@ var tt = false, et = (t2, e2, n2) => {
                         const n6 = t7.i.replace(/-/g, "_"), o6 = t7.T;
                         if (!o6) return;
                         const i3 = r.get(o6);
-                        return i3 ? i3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-4ba08932.entry.js": () => import("./p-4ba08932.entry-D0XmZ3oJ.js"), "./p-60af2d7f.entry.js": () => import("./p-60af2d7f.entry-BBdfc7Wj.js"), "./p-746a8577.entry.js": () => import("./p-746a8577.entry-5SA1Gsof.js"), "./p-7652d72d.entry.js": () => import("./p-7652d72d.entry-BfwEp_Qx.js"), "./p-79cc15c2.entry.js": () => import("./p-79cc15c2.entry-cU3plh41.js"), "./p-846257eb.entry.js": () => import("./p-846257eb.entry-D1-Mnj4n.js"), "./p-84927cea.entry.js": () => import("./p-84927cea.entry-BVNHZuU9.js"), "./p-928c4970.entry.js": () => import("./p-928c4970.entry-Cq61XVA8.js"), "./p-a147e6c9.entry.js": () => import("./p-a147e6c9.entry-CeCNz4SD.js"), "./p-a14c6d82.entry.js": () => import("./p-a14c6d82.entry-MsGFf-wU.js"), "./p-a7fc1135.entry.js": () => import("./p-a7fc1135.entry-hWf_L-tm.js"), "./p-bd214b33.entry.js": () => import("./p-bd214b33.entry-BMN6-0tD.js"), "./p-bf8a47d4.entry.js": () => import("./p-bf8a47d4.entry-DLabQ27R.js"), "./p-ccea11a0.entry.js": () => import("./p-ccea11a0.entry-DEyU4OuV.js"), "./p-dbe042fd.entry.js": () => import("./p-dbe042fd.entry-Dq3qnQmF.js"), "./p-e2689624.entry.js": () => import("./p-e2689624.entry-BRnIyGnW.js") }), `./${o6}.entry.js`, 2).then(((t8) => (r.set(o6, t8), t8[n6])), ((t8) => {
+                        return i3 ? i3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-4ba08932.entry.js": () => import("./p-4ba08932.entry-xfvvy2N4.js"), "./p-60af2d7f.entry.js": () => import("./p-60af2d7f.entry-D9eOv8_y.js"), "./p-746a8577.entry.js": () => import("./p-746a8577.entry-BDGGzDKn.js"), "./p-7652d72d.entry.js": () => import("./p-7652d72d.entry-C0q2AFNm.js"), "./p-79cc15c2.entry.js": () => import("./p-79cc15c2.entry-C82cNBlZ.js"), "./p-846257eb.entry.js": () => import("./p-846257eb.entry-BpR5P0Ne.js"), "./p-84927cea.entry.js": () => import("./p-84927cea.entry-C7VkQxzE.js"), "./p-928c4970.entry.js": () => import("./p-928c4970.entry-CSCHynsT.js"), "./p-a147e6c9.entry.js": () => import("./p-a147e6c9.entry-CP6438MK.js"), "./p-a14c6d82.entry.js": () => import("./p-a14c6d82.entry-BYM_xg-V.js"), "./p-a7fc1135.entry.js": () => import("./p-a7fc1135.entry-Dpx1yUON.js"), "./p-bd214b33.entry.js": () => import("./p-bd214b33.entry-DclXjbaR.js"), "./p-bf8a47d4.entry.js": () => import("./p-bf8a47d4.entry-C4Ru_dxj.js"), "./p-ccea11a0.entry.js": () => import("./p-ccea11a0.entry-43a1p2EU.js"), "./p-dbe042fd.entry.js": () => import("./p-dbe042fd.entry-BkX1PUbc.js"), "./p-e2689624.entry.js": () => import("./p-e2689624.entry-B2Tq6McS.js") }), `./${o6}.entry.js`, 2).then(((t8) => (r.set(o6, t8), t8[n6])), ((t8) => {
                           l(t8, e3.$hostElement$);
                         }));
                         /*!__STENCIL_STATIC_IMPORT_SWITCH__*/
@@ -6728,2343 +6728,6 @@ function installLFBeforeFreeHooks(api2, opts = {}) {
   const fetchPatched = installFetchFallback();
   return { freeMemoryHook: freePatched, fetchFallbackHook: fetchPatched };
 }
-function installLFRefreshNodeHook(appObj, opts = {}) {
-  const attempts = opts.attempts ?? 20;
-  const intervalMs = opts.intervalMs ?? 250;
-  const logger = opts.logger ?? (() => {
-  });
-  if (!isRefreshHookApp(appObj)) {
-    logger('"app" object not available; cannot install refresh hook yet', {}, LogSeverity.Warning);
-    return { refreshHook: false };
-  }
-  const scopedApp = appObj;
-  const wrap = opts.refreshWrapper;
-  const makePatched = (fn) => {
-    const factory = wrap ?? ((original) => async function patched2(...args) {
-      if (scopedApp[LFRefreshFlags.InBeforeRefresh] === true) {
-        return original.apply(this ?? scopedApp, args);
-      }
-      scopedApp[LFRefreshFlags.InBeforeRefresh] = true;
-      try {
-        await beforeRefreshNodeDefs(args == null ? void 0 : args[0]);
-      } catch (error) {
-        logger("LF refresh hook failed before calling original function", { error }, LogSeverity.Warning);
-      } finally {
-        scopedApp[LFRefreshFlags.InBeforeRefresh] = false;
-      }
-      return original.apply(this ?? scopedApp, args);
-    });
-    return factory(fn);
-  };
-  const installRefresh = () => {
-    try {
-      if (scopedApp[LFRefreshFlags.PatchedRefresh] === true) {
-        return true;
-      }
-      const current = scopedApp.refreshComboInNodes;
-      if (typeof current === "function") {
-        scopedApp[LFRefreshFlags.OriginalRefreshRef] = current;
-        scopedApp.refreshComboInNodes = makePatched(current);
-        scopedApp[LFRefreshFlags.PatchedRefresh] = true;
-        return true;
-      }
-      const descriptor = Object.getOwnPropertyDescriptor(scopedApp, "refreshComboInNodes");
-      if (!descriptor || descriptor.configurable) {
-        let original;
-        Object.defineProperty(scopedApp, "refreshComboInNodes", {
-          configurable: true,
-          enumerable: true,
-          get() {
-            return scopedApp[LFRefreshFlags.PatchedRefresh] ? original : scopedApp[LFRefreshFlags.OriginalRefreshRef] ?? original;
-          },
-          set(fn) {
-            if (typeof fn !== "function") {
-              original = fn;
-              return;
-            }
-            scopedApp[LFRefreshFlags.OriginalRefreshRef] = fn;
-            original = makePatched(fn);
-            scopedApp[LFRefreshFlags.PatchedRefresh] = true;
-          }
-        });
-      }
-      return false;
-    } catch (error) {
-      logger("Failed to patch refreshComboInNodes; proceeding without LF refresh hook", { error }, LogSeverity.Warning);
-      return false;
-    }
-  };
-  let patched = installRefresh();
-  if (!patched) {
-    let count = 0;
-    const timer2 = setInterval(() => {
-      count += 1;
-      patched = installRefresh();
-      if (patched || count > attempts) {
-        clearInterval(timer2);
-      }
-    }, intervalMs);
-  }
-  return { refreshHook: patched };
-}
-const CATEGORY = "✨ LF Nodes";
-const DESCRIPTION = "Virtual reroute node that propagates upstream type and optional label.";
-const DISPLAY_NAME = "Reroute";
-const EXTENSION_NAME = `lf.virtual.${DISPLAY_NAME}`;
-const NODE_PATH = "✨ LF Nodes/Reroute";
-const SERIALIZED_KEYS = ["label", "showIcon", "showType", "mode", "horizontal"];
-function deriveInnerColor(base) {
-  const hex = base.trim();
-  const expand = (h2) => h2.length === 4 ? `#${h2[1]}${h2[1]}${h2[2]}${h2[2]}${h2[3]}${h2[3]}` : h2;
-  if (!/^#([0-9a-fA-F]{3}){1,2}$/.test(hex)) {
-    return "#ececec";
-  }
-  const full = expand(hex).substring(1);
-  const r2 = parseInt(full.substring(0, 2), 16);
-  const g2 = parseInt(full.substring(2, 4), 16);
-  const b2 = parseInt(full.substring(4, 6), 16);
-  const lighten = (c2) => Math.min(255, Math.round(c2 + (255 - c2) * 0.55));
-  const rL = lighten(r2);
-  const gL = lighten(g2);
-  const bL = lighten(b2);
-  return `#${rL.toString(16).padStart(2, "0")}${gL.toString(16).padStart(2, "0")}${bL.toString(16).padStart(2, "0")}`;
-}
-const lfReroute = {
-  name: EXTENSION_NAME,
-  registerCustomNodes(appInstance) {
-    var _a, _b;
-    class LFReroute extends LGraphNode {
-      constructor() {
-        var _a2, _b2, _c, _d, _e, _f;
-        super();
-        this.isVirtualNode = true;
-        this.properties = {
-          horizontal: false,
-          label: "",
-          mode: "label+type",
-          showType: true,
-          showIcon: true
-        };
-        this.title = this.properties.label || "Label";
-        (_a2 = this.addProperty) == null ? void 0 : _a2.call(this, "label", this.properties.label, "string");
-        (_b2 = this.addProperty) == null ? void 0 : _b2.call(this, "mode", this.properties.mode, "string");
-        (_c = this.addProperty) == null ? void 0 : _c.call(this, "showType", this.properties.showType, "boolean");
-        (_d = this.addProperty) == null ? void 0 : _d.call(this, "showIcon", this.properties.showIcon, "boolean");
-        (_e = this.addProperty) == null ? void 0 : _e.call(this, "horizontal", this.properties.horizontal, "boolean");
-        this.addInput("", "*");
-        this.addOutput(this.makeOutputName("*"), "*");
-        this.__labelWidget = (_f = this.addWidget) == null ? void 0 : _f.call(this, "text", "Label", this.properties.label, (v2) => {
-          this.properties.label = v2;
-          this.refreshLabel();
-        }, { multiline: false });
-        if (this.__labelWidget) {
-          this.__labelWidget.serializeValue = () => this.properties.label;
-        }
-        this.onConnectionsChange = () => {
-          var _a3, _b3;
-          try {
-            reroutePropagationLogic.call(this, appInstance);
-          } catch (error) {
-            (_b3 = (_a3 = getLfManager()) == null ? void 0 : _a3.log) == null ? void 0 : _b3.call(_a3, "[LFReroute] onConnectionsChange error", { error }, LogSeverity.Warning);
-          }
-        };
-      }
-      snapToGrid(size) {
-        const proto = LGraphNode.prototype;
-        if (proto == null ? void 0 : proto.snapToGrid) {
-          return proto.snapToGrid.call(this, size);
-        }
-        const grid = size || LiteGraph.CANVAS_GRID_SIZE || 10;
-        if (this.pos) {
-          this.pos[0] = grid * Math.round(this.pos[0] / grid);
-          this.pos[1] = grid * Math.round(this.pos[1] / grid);
-        }
-      }
-      getExtraMenuOptions(_ignored, options) {
-        options.unshift({
-          content: "Cycle Label/Type Mode",
-          callback: () => {
-            const order = ["label+type", "label", "type"];
-            const i2 = order.indexOf(this.properties.mode);
-            this.properties.mode = order[(i2 + 1) % order.length];
-            this.refreshLabel();
-          }
-        }, {
-          content: (this.properties.showType ? "Hide" : "Show") + " Type Part",
-          callback: () => {
-            this.properties.showType = !this.properties.showType;
-            this.refreshLabel();
-          }
-        }, {
-          content: (this.properties.showIcon ? "Hide" : "Show") + " Icon",
-          callback: () => {
-            this.properties.showIcon = !this.properties.showIcon;
-            COMFY_API.scheduleRedraw();
-          }
-        }, {
-          content: "Edit Label",
-          callback: () => {
-            const v2 = prompt("Set label", this.properties.label || "");
-            if (v2 !== null) {
-              this.properties.label = v2;
-              this.refreshLabel();
-            }
-          }
-        }, {
-          content: "Set " + (this.properties.horizontal ? "Horizontal" : "Vertical"),
-          callback: () => {
-            this.properties.horizontal = !this.properties.horizontal;
-            this.applyOrientation();
-          }
-        });
-      }
-      makeOutputName(displayType, labelOverride) {
-        const label = (labelOverride !== void 0 ? labelOverride : this.properties.label || "").trim();
-        const typePart = this.properties.showType ? displayType : "";
-        switch (this.properties.mode) {
-          case "label":
-            return label || (this.properties.showType ? displayType : "");
-          case "type":
-            return typePart;
-          case "label+type":
-          default:
-            if (label && typePart)
-              return `${label}:${typePart}`;
-            return label || typePart;
-        }
-      }
-      refreshLabel() {
-        var _a2;
-        if (!((_a2 = this.outputs) == null ? void 0 : _a2.length))
-          return;
-        const effectiveLabel = (this.properties.label || "").trim() || this.__autoLabel || "";
-        const displayType = this.__outputType || this.outputs[0].type || "*";
-        this.outputs[0].name = this.makeOutputName(displayType, effectiveLabel);
-        this.title = effectiveLabel || "Label";
-        this.size = this.computeSize();
-        this.applyOrientation();
-        COMFY_API.scheduleRedraw();
-        const w2 = this.__labelWidget;
-        if (w2 && "value" in w2 && w2.value !== this.properties.label) {
-          w2.value = this.properties.label;
-        }
-      }
-      onSerialize(raw) {
-        const o2 = raw;
-        if (o2 == null ? void 0 : o2.properties) {
-          const target = o2.properties;
-          for (const key of SERIALIZED_KEYS) {
-            target[key] = this.properties[key];
-          }
-        }
-        if (Array.isArray(o2 == null ? void 0 : o2.widgets_values) && this.__labelWidget && this.widgets) {
-          const idx = this.widgets.indexOf(this.__labelWidget);
-          if (idx >= 0) {
-            o2.widgets_values[idx] = this.properties.label;
-          }
-        }
-      }
-      onConfigure(raw) {
-        const o2 = raw;
-        const props = (o2 == null ? void 0 : o2.properties) || {};
-        for (const key of SERIALIZED_KEYS) {
-          const incoming = props[key];
-          if (incoming === void 0)
-            continue;
-          if (key === "mode") {
-            if (typeof incoming === "string" && ["label", "type", "label+type"].includes(incoming)) {
-              this.properties.mode = incoming;
-            }
-            continue;
-          }
-          if (key === "label") {
-            if (typeof incoming === "string") {
-              this.properties.label = incoming;
-            } else if (Array.isArray(o2 == null ? void 0 : o2.widgets_values) && this.__labelWidget && this.widgets) {
-              const idx = this.widgets.indexOf(this.__labelWidget);
-              const wv = o2.widgets_values[idx];
-              if (idx >= 0 && typeof wv === "string") {
-                this.properties.label = wv;
-              }
-            }
-            continue;
-          }
-          if (key === "horizontal" || key === "showIcon" || key === "showType") {
-            if (typeof incoming === "boolean") {
-              this.properties[key] = incoming;
-            }
-            continue;
-          }
-        }
-        if (this.__labelWidget && this.widgets) {
-          const idx = this.widgets.indexOf(this.__labelWidget);
-          if (idx >= 0 && "value" in this.__labelWidget) {
-            this.__labelWidget.value = this.properties.label;
-          }
-        }
-        this.refreshLabel();
-      }
-      applyOrientation() {
-        var _a2, _b2, _c, _d;
-        if (this.properties.horizontal) {
-          if ((_a2 = this.inputs) == null ? void 0 : _a2[0]) {
-            this.inputs[0].pos = [this.size[0] / 2, 0];
-          }
-          if ((_b2 = this.outputs) == null ? void 0 : _b2[0]) {
-            this.outputs[0].pos = [this.size[0] / 2, this.size[1]];
-          }
-        } else {
-          if ((_c = this.inputs) == null ? void 0 : _c[0]) {
-            delete this.inputs[0].pos;
-          }
-          if ((_d = this.outputs) == null ? void 0 : _d[0]) {
-            delete this.outputs[0].pos;
-          }
-        }
-        COMFY_API.scheduleRedraw();
-      }
-      computeSize() {
-        var _a2, _b2, _c;
-        const base = this.title || "";
-        const slotName = ((_b2 = (_a2 = this.outputs) == null ? void 0 : _a2[0]) == null ? void 0 : _b2.name) || "";
-        const longest = base.length > slotName.length ? base : slotName;
-        const textSize = LiteGraph.NODE_TEXT_SIZE || 14;
-        const w2 = Math.max(120, textSize * longest.length * 0.6 + 50);
-        const collapsed = (_c = this.flags) == null ? void 0 : _c.collapsed;
-        const h2 = collapsed ? 28 : 50;
-        return [w2, h2];
-      }
-      onDrawForeground(ctx) {
-        var _a2, _b2, _c, _d;
-        try {
-          if (!this.properties.showIcon || !ctx) {
-            return;
-          }
-          const headerH = LiteGraph && LiteGraph.NODE_TITLE_HEIGHT || 24;
-          const radius = 6;
-          const cx = 10 + radius;
-          const cy = -headerH / 2;
-          ctx.save();
-          const displayType = this.__outputType || ((_b2 = (_a2 = this.outputs) == null ? void 0 : _a2[0]) == null ? void 0 : _b2.type);
-          let baseColor;
-          if (displayType && (LGraphCanvas == null ? void 0 : LGraphCanvas.link_type_colors)) {
-            const c2 = LGraphCanvas.link_type_colors[displayType];
-            if (typeof c2 === "string") {
-              baseColor = c2;
-            }
-          }
-          const outer = baseColor || "#3a3a3a";
-          const inner = deriveInnerColor(baseColor || "#3a3a3a");
-          ctx.fillStyle = outer;
-          ctx.beginPath();
-          ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.fillStyle = inner;
-          ctx.beginPath();
-          ctx.arc(cx, cy, radius * 0.4, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.restore();
-        } catch (err2) {
-          (_d = (_c = getLfManager()) == null ? void 0 : _c.log) == null ? void 0 : _d.call(_c, "[LFReroute] onDrawForeground error", { err: err2 }, LogSeverity.Info);
-        }
-      }
-    }
-    function reroutePropagationLogic(appInstance2) {
-      var _a2, _b2, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p;
-      const isLabeled = (n2) => {
-        var _a3;
-        return ((_a3 = n2 == null ? void 0 : n2.constructor) == null ? void 0 : _a3.type) === NODE_PATH;
-      };
-      let inputType = null;
-      let upstream = this;
-      let originNode = null;
-      while (((_b2 = (_a2 = upstream == null ? void 0 : upstream.inputs) == null ? void 0 : _a2[0]) == null ? void 0 : _b2.link) != null) {
-        const linkId = upstream.inputs[0].link;
-        const link = appInstance2.graph.links[linkId];
-        if (!link)
-          break;
-        const origin = appInstance2.graph.getNodeById(link.origin_id);
-        if (!origin)
-          break;
-        if (isLabeled(origin)) {
-          if (origin === this) {
-            (_c = upstream.disconnectInput) == null ? void 0 : _c.call(upstream, link.target_slot);
-            break;
-          }
-          upstream = origin;
-          continue;
-        }
-        inputType = ((_e = (_d = origin.outputs) == null ? void 0 : _d[link.origin_slot]) == null ? void 0 : _e.type) || null;
-        originNode = origin;
-        break;
-      }
-      let downstreamType = null;
-      const firstLinks = ((_g = (_f = this.outputs) == null ? void 0 : _f[0]) == null ? void 0 : _g.links) || [];
-      for (const l2 of firstLinks) {
-        const link = appInstance2.graph.links[l2];
-        if (!link) {
-          continue;
-        }
-        const target = appInstance2.graph.getNodeById(link.target_id);
-        if (!target || isLabeled(target)) {
-          continue;
-        }
-        downstreamType = ((_i = (_h = target.inputs) == null ? void 0 : _h[link.target_slot]) == null ? void 0 : _i.type) || null;
-        if (downstreamType) {
-          break;
-        }
-      }
-      const finalType = inputType || downstreamType || "*";
-      if (!(this.properties.label || "").trim()) {
-        if (originNode) {
-          const candidateTitle = (originNode.title || "").trim();
-          const candidateSlotName = (() => {
-            var _a3, _b3, _c2, _d2;
-            if (!originNode.outputs)
-              return "";
-            const slotIdx = (() => {
-              var _a4, _b4;
-              if (((_b4 = (_a4 = upstream == null ? void 0 : upstream.inputs) == null ? void 0 : _a4[0]) == null ? void 0 : _b4.link) != null) {
-                const linkId = upstream.inputs[0].link;
-                const link = appInstance2.graph.links[linkId];
-                if (link)
-                  return link.origin_slot ?? 0;
-              }
-              return 0;
-            })();
-            return (((_b3 = (_a3 = originNode.outputs) == null ? void 0 : _a3[slotIdx]) == null ? void 0 : _b3.label) || ((_d2 = (_c2 = originNode.outputs) == null ? void 0 : _c2[slotIdx]) == null ? void 0 : _d2.name) || "").trim();
-          })();
-          const effectiveSlotName = candidateSlotName && candidateSlotName !== "*" ? candidateSlotName : "";
-          const chosen = effectiveSlotName || candidateTitle;
-          if (chosen) {
-            this.__autoLabel = chosen;
-          }
-        } else {
-          this.__autoLabel = void 0;
-        }
-      } else {
-        this.__autoLabel = void 0;
-      }
-      this.__outputType = finalType;
-      if ((_j = this.inputs) == null ? void 0 : _j[0]) {
-        this.inputs[0].type = finalType;
-      }
-      if ((_k = this.outputs) == null ? void 0 : _k[0]) {
-        this.outputs[0].type = finalType;
-        this.outputs[0].name = this.makeOutputName(finalType);
-      }
-      this.size = this.computeSize();
-      this.applyOrientation();
-      this.refreshLabel();
-      const color = (_l = LGraphCanvas.link_type_colors) == null ? void 0 : _l[finalType];
-      if (color) {
-        if ((_n = (_m = this.outputs) == null ? void 0 : _m[0]) == null ? void 0 : _n.links) {
-          for (const l2 of this.outputs[0].links) {
-            const link = appInstance2.graph.links[l2];
-            if (link) {
-              link.color = color;
-            }
-          }
-        }
-        const inLinkId = (_p = (_o = this.inputs) == null ? void 0 : _o[0]) == null ? void 0 : _p.link;
-        if (inLinkId != null) {
-          const inLink = appInstance2.graph.links[inLinkId];
-          if (inLink) {
-            inLink.color = color;
-          }
-        }
-      }
-      COMFY_API.scheduleRedraw();
-    }
-    LiteGraph.registerNodeType(NODE_PATH, Object.assign(LFReroute, {
-      title_mode: LiteGraph.NORMAL_TITLE,
-      title: "Reroute",
-      collapsable: true,
-      category: "LF Nodes",
-      description: "Label + type aware reroute (frontend virtual)"
-    }));
-    onAfterGraphConfigured(LFReroute, (node) => {
-      requestAnimationFrame(() => {
-        var _a2, _b2, _c;
-        try {
-          (_a2 = node.onConnectionsChange) == null ? void 0 : _a2.call(node);
-        } catch (err2) {
-          (_c = (_b2 = getLfManager()) == null ? void 0 : _b2.log) == null ? void 0 : _c.call(_b2, "[LFReroute] onAfterGraphConfigured", { err: err2 }, LogSeverity.Warning);
-        }
-      });
-    });
-    (_b = (_a = getLfManager()) == null ? void 0 : _a.log) == null ? void 0 : _b.call(_a, `Virtual node registered (UI compliant): ${NODE_PATH}`, {}, LogSeverity.Success);
-  },
-  beforeRegisterVueAppNodeDefs(defs) {
-    const def = defs.find((d2) => d2.name === NODE_PATH);
-    if (def) {
-      def.display_name = DISPLAY_NAME;
-      def.category = CATEGORY;
-      def.description = DESCRIPTION;
-      if (def.python_module === "custom_nodes.frontend_only") {
-        def.python_module = "lf_nodes.virtual";
-      }
-    }
-  }
-};
-var __classPrivateFieldGet$3 = function(receiver, state, kind, f2) {
-  if (kind === "a" && !f2) throw new TypeError("Private accessor was defined without a getter");
-  if (typeof state === "function" ? receiver !== state || !f2 : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
-  return kind === "m" ? f2 : kind === "a" ? f2.call(receiver) : f2 ? f2.value : state.get(receiver);
-};
-var _LFNodes_REGISTRY;
-class LFNodes {
-  constructor() {
-    _LFNodes_REGISTRY.set(this, /* @__PURE__ */ new Map());
-    this.add = (extension) => {
-      var _a, _b;
-      const lfManager2 = getLfManager();
-      if (!(extension == null ? void 0 : extension.name)) {
-        (_a = lfManager2 == null ? void 0 : lfManager2.log) == null ? void 0 : _a.call(lfManager2, `Attempted to add virtual node with invalid name`, { extension }, LogSeverity.Warning);
-        return;
-      }
-      if (__classPrivateFieldGet$3(this, _LFNodes_REGISTRY, "f").has(extension.name)) {
-        (_b = lfManager2 == null ? void 0 : lfManager2.log) == null ? void 0 : _b.call(lfManager2, `Duplicate virtual node ignored: '${extension.name}'`, {}, LogSeverity.Warning);
-        return;
-      }
-      __classPrivateFieldGet$3(this, _LFNodes_REGISTRY, "f").set(extension.name, { extension, registered: false });
-    };
-    this.addMany = (extensions) => {
-      extensions.forEach((e2) => this.add(e2));
-    };
-    this.list = () => Array.from(__classPrivateFieldGet$3(this, _LFNodes_REGISTRY, "f").values());
-    this.registerAll = () => {
-      const lfManager2 = getLfManager();
-      __classPrivateFieldGet$3(this, _LFNodes_REGISTRY, "f").forEach((entry, key) => {
-        var _a, _b;
-        if (entry.registered) {
-          return;
-        }
-        try {
-          COMFY_API.register(entry.extension);
-          entry.registered = true;
-          (_a = lfManager2 == null ? void 0 : lfManager2.log) == null ? void 0 : _a.call(lfManager2, `Registered virtual node '${key}'`, {}, LogSeverity.Success);
-        } catch (error) {
-          entry.error = error;
-          (_b = lfManager2 == null ? void 0 : lfManager2.log) == null ? void 0 : _b.call(lfManager2, `Failed to register virtual node '${key}'`, { error }, LogSeverity.Error);
-        }
-      });
-    };
-    this.add(lfReroute);
-  }
-}
-_LFNodes_REGISTRY = /* @__PURE__ */ new WeakMap();
-var LfEventName;
-(function(LfEventName2) {
-  LfEventName2["LfAccordion"] = "lf-accordion-event";
-  LfEventName2["LfArticle"] = "lf-article-event";
-  LfEventName2["LfButton"] = "lf-button-event";
-  LfEventName2["LfCanvas"] = "lf-canvas-event";
-  LfEventName2["LfCard"] = "lf-card-event";
-  LfEventName2["LfCarousel"] = "lf-carousel-event";
-  LfEventName2["LfChat"] = "lf-chat-event";
-  LfEventName2["LfChart"] = "lf-chart-event";
-  LfEventName2["LfChip"] = "lf-chip-event";
-  LfEventName2["LfCode"] = "lf-code-event";
-  LfEventName2["LfCompare"] = "lf-compare-event";
-  LfEventName2["LfImageviewer"] = "lf-imageviewer-event";
-  LfEventName2["LfList"] = "lf-list-event";
-  LfEventName2["LfManager"] = "lf-manager-ready";
-  LfEventName2["LfMasonry"] = "lf-masonry-event";
-  LfEventName2["LfMessenger"] = "lf-messenger-event";
-  LfEventName2["LfProgressbar"] = "lf-progressbar-event";
-  LfEventName2["LfSlider"] = "lf-slider-event";
-  LfEventName2["LfSpinner"] = "lf-spinner-event";
-  LfEventName2["LfTabbar"] = "lf-tabbar-event";
-  LfEventName2["LfTextfield"] = "lf-textfield-event";
-  LfEventName2["LfToggle"] = "lf-toggle-event";
-  LfEventName2["LfTree"] = "lf-tree-event";
-  LfEventName2["LfUpload"] = "lf-upload-event";
-  LfEventName2["Textarea"] = "textarea-event";
-})(LfEventName || (LfEventName = {}));
-var __classPrivateFieldGet$2 = function(receiver, state, kind, f2) {
-  if (kind === "a" && !f2) throw new TypeError("Private accessor was defined without a getter");
-  if (typeof state === "function" ? receiver !== state || !f2 : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
-  return kind === "m" ? f2 : kind === "a" ? f2.call(receiver) : f2 ? f2.value : state.get(receiver);
-};
-var __classPrivateFieldSet$1 = function(receiver, state, value, kind, f2) {
-  if (kind === "m") throw new TypeError("Private method is not writable");
-  if (kind === "a" && !f2) throw new TypeError("Private accessor was defined without a setter");
-  if (typeof state === "function" ? receiver !== state || !f2 : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
-  return kind === "a" ? f2.call(receiver, value) : f2 ? f2.value = value : state.set(receiver, value), value;
-};
-var _LFTooltip_instances, _LFTooltip_CB, _LFTooltip_CSS_CLASSES, _LFTooltip_LAYOUT, _LFTooltip_TOOLTIP_ELEMENT, _LFTooltip_initialize, _LFTooltip_uploadLayout, _LFTooltip_buttonEventHandler;
-class LFTooltip {
-  constructor() {
-    _LFTooltip_instances.add(this);
-    _LFTooltip_CB.set(this, {});
-    _LFTooltip_CSS_CLASSES.set(this, {
-      wrapper: "lf-tooltip",
-      content: `lf-tooltip__content`
-    });
-    _LFTooltip_LAYOUT.set(this, void 0);
-    _LFTooltip_TOOLTIP_ELEMENT.set(this, void 0);
-    _LFTooltip_buttonEventHandler.set(this, async (upload, e2) => {
-      const { eventType } = e2.detail;
-      switch (eventType) {
-        case "click":
-          const lfManager2 = getLfManager();
-          switch (__classPrivateFieldGet$2(this, _LFTooltip_LAYOUT, "f")) {
-            case "upload":
-              const files = await upload.getValue();
-              const reader = new FileReader();
-              reader.onload = (e3) => {
-                var _a;
-                const result = (_a = e3.target) == null ? void 0 : _a.result;
-                let base64String = "";
-                if (typeof result === "string") {
-                  base64String = result.replace(/^data:.*,/, "");
-                } else if (result instanceof ArrayBuffer) {
-                  const arrayBufferView = new Uint8Array(result);
-                  base64String = btoa(String.fromCharCode.apply(null, arrayBufferView));
-                }
-                if (__classPrivateFieldGet$2(this, _LFTooltip_CB, "f")) {
-                  lfManager2.log("Invoking upload callback.", { base64String }, LogSeverity.Info);
-                  __classPrivateFieldGet$2(this, _LFTooltip_CB, "f")[__classPrivateFieldGet$2(this, _LFTooltip_LAYOUT, "f")](base64String);
-                }
-              };
-              reader.readAsDataURL(files[0]);
-              break;
-          }
-      }
-    });
-  }
-  //#endregion
-  //#region Create
-  create(anchor, layout, cb) {
-    const lfFramework2 = getLfManager().getManagers().lfFramework;
-    if (__classPrivateFieldGet$2(this, _LFTooltip_TOOLTIP_ELEMENT, "f")) {
-      __classPrivateFieldGet$2(this, _LFTooltip_instances, "m", _LFTooltip_initialize).call(this);
-    }
-    const parent = document.body;
-    __classPrivateFieldSet$1(this, _LFTooltip_CB, cb ? { [layout]: cb } : {}, "f");
-    __classPrivateFieldSet$1(this, _LFTooltip_LAYOUT, layout ?? "upload", "f");
-    __classPrivateFieldSet$1(this, _LFTooltip_TOOLTIP_ELEMENT, document.createElement("div"), "f");
-    __classPrivateFieldGet$2(this, _LFTooltip_TOOLTIP_ELEMENT, "f").classList.add(__classPrivateFieldGet$2(this, _LFTooltip_CSS_CLASSES, "f").wrapper);
-    let layoutElement;
-    switch (__classPrivateFieldGet$2(this, _LFTooltip_LAYOUT, "f")) {
-      case "upload":
-        layoutElement = __classPrivateFieldGet$2(this, _LFTooltip_instances, "m", _LFTooltip_uploadLayout).call(this);
-        __classPrivateFieldGet$2(this, _LFTooltip_TOOLTIP_ELEMENT, "f").appendChild(layoutElement);
-        break;
-    }
-    lfFramework2.portal.open(layoutElement, __classPrivateFieldGet$2(this, _LFTooltip_TOOLTIP_ELEMENT, "f"), anchor, 0, "auto");
-    lfFramework2.addClickCallback({ cb: () => this.destroy(), element: layoutElement });
-    requestAnimationFrame(() => parent.appendChild(__classPrivateFieldGet$2(this, _LFTooltip_TOOLTIP_ELEMENT, "f")));
-  }
-  //#endregion
-  //#region Destroy
-  destroy() {
-    __classPrivateFieldGet$2(this, _LFTooltip_instances, "m", _LFTooltip_initialize).call(this);
-  }
-}
-_LFTooltip_CB = /* @__PURE__ */ new WeakMap(), _LFTooltip_CSS_CLASSES = /* @__PURE__ */ new WeakMap(), _LFTooltip_LAYOUT = /* @__PURE__ */ new WeakMap(), _LFTooltip_TOOLTIP_ELEMENT = /* @__PURE__ */ new WeakMap(), _LFTooltip_buttonEventHandler = /* @__PURE__ */ new WeakMap(), _LFTooltip_instances = /* @__PURE__ */ new WeakSet(), _LFTooltip_initialize = function _LFTooltip_initialize2() {
-  var _a;
-  (_a = __classPrivateFieldGet$2(this, _LFTooltip_TOOLTIP_ELEMENT, "f")) == null ? void 0 : _a.remove();
-  __classPrivateFieldSet$1(this, _LFTooltip_TOOLTIP_ELEMENT, null, "f");
-  __classPrivateFieldSet$1(this, _LFTooltip_CB, {}, "f");
-  __classPrivateFieldSet$1(this, _LFTooltip_LAYOUT, null, "f");
-}, _LFTooltip_uploadLayout = function _LFTooltip_uploadLayout2() {
-  const content = document.createElement(TagName.Div);
-  const upload = document.createElement(TagName.LfUpload);
-  const button = document.createElement(TagName.LfButton);
-  content.classList.add(__classPrivateFieldGet$2(this, _LFTooltip_CSS_CLASSES, "f").content);
-  button.lfIcon = "upload";
-  button.lfLabel = "Update cover";
-  button.lfStretchX = true;
-  content.dataset.lf = "portal";
-  content.appendChild(upload);
-  content.appendChild(button);
-  button.addEventListener(LfEventName.LfButton, __classPrivateFieldGet$2(this, _LFTooltip_buttonEventHandler, "f").bind(__classPrivateFieldGet$2(this, _LFTooltip_buttonEventHandler, "f"), upload));
-  return content;
-};
-const DOWNLOAD_PLACEHOLDERS = {
-  lfDataset: {
-    nodes: [
-      {
-        cells: {
-          lfImage: { shape: "image", value: "download" },
-          lfText: { shape: "text", value: "Fetching metadata from CivitAI..." }
-        },
-        id: "0"
-      }
-    ]
-  }
-};
-const CARD_PROPS_TO_SERIALIZE = ["lfDataset"];
-const EV_HANDLERS$a = {
-  //#region Button handler
-  button: (state, e2) => {
-    const { comp, eventType } = e2.detail;
-    const { grid, node } = state;
-    switch (eventType) {
-      case "click":
-        const cards = Array.from(grid.querySelectorAll(TagName.LfCard));
-        if (cards == null ? void 0 : cards.length) {
-          const models = [];
-          const widget = getCustomWidget(node, CustomWidgetName.card);
-          cards.forEach((card) => {
-            var _a, _b, _c, _d;
-            const hashCell = (_d = (_c = (_b = (_a = card.lfDataset) == null ? void 0 : _a.nodes) == null ? void 0 : _b[0]) == null ? void 0 : _c.cells) == null ? void 0 : _d.lfCode;
-            if (hashCell) {
-              const { hash, path } = JSON.parse(JSON.stringify(hashCell.value));
-              const dataset = card.lfDataset;
-              comp.lfShowSpinner = true;
-              models.push({ apiFlag: true, dataset, hash, path });
-            }
-          });
-          if (models.length) {
-            const value = {
-              props: []
-            };
-            cardPlaceholders(widget, cards.length);
-            apiCall$2(models, true).then((r2) => {
-              for (let index = 0; index < r2.length; index++) {
-                const cardProps = r2[index];
-                if (cardProps.lfDataset) {
-                  value.props.push(cardProps);
-                } else {
-                  value.props.push({
-                    ...cardProps,
-                    lfDataset: models[index].dataset
-                  });
-                }
-              }
-              widget.options.setValue(JSON.stringify(value));
-              requestAnimationFrame(() => comp.lfShowSpinner = false);
-            });
-          }
-        }
-        break;
-    }
-  },
-  //#endregion
-  //#region Card handler
-  card: (e2) => {
-    var _a, _b;
-    const { comp, eventType, originalEvent } = e2.detail;
-    const node = (_b = (_a = comp.lfDataset) == null ? void 0 : _a.nodes) == null ? void 0 : _b[0];
-    switch (eventType) {
-      case "click":
-        if (node == null ? void 0 : node.value) {
-          window.open(String(node.value).valueOf(), "_blank");
-        }
-        break;
-      case "contextmenu":
-        const ogEv = originalEvent;
-        const lfManager2 = getLfManager();
-        ogEv.preventDefault();
-        ogEv.stopPropagation();
-        const tip = lfManager2.getManagers().tooltip;
-        const cb = async (b64image) => {
-          var _a2, _b2, _c, _d;
-          const node2 = (_b2 = (_a2 = comp.lfDataset) == null ? void 0 : _a2.nodes) == null ? void 0 : _b2[0];
-          if (node2) {
-            const code = (_c = node2 == null ? void 0 : node2.cells) == null ? void 0 : _c.lfCode;
-            if (code) {
-              try {
-                const path = JSON.parse(JSON.stringify(code.value)).path;
-                lfManager2.log(`Updating cover for model with path: ${path}`, { b64image }, LogSeverity.Info);
-                getApiRoutes().metadata.updateCover(path, b64image);
-                const image = (_d = node2 == null ? void 0 : node2.cells) == null ? void 0 : _d.lfImage;
-                if (image) {
-                  image.value = `data:image/png;charset=utf-8;base64,${b64image}`;
-                  comp.refresh();
-                  tip.destroy();
-                }
-              } catch (error) {
-                lfManager2.log("Failed to fetch the model's path from .info file", { b64image }, LogSeverity.Error);
-              }
-            }
-          }
-        };
-        tip.create({ x: ogEv.x, y: ogEv.y }, "upload", cb);
-        break;
-    }
-  }
-  //#endregion
-};
-const cardPlaceholders = (widget, count) => {
-  const dummyValue = {
-    props: []
-  };
-  for (let index = 0; index < count; index++) {
-    dummyValue.props.push(DOWNLOAD_PLACEHOLDERS);
-  }
-  widget.options.setValue(JSON.stringify(dummyValue));
-};
-const apiCall$2 = async (models, forcedSave = false) => {
-  const promises = models.map(async ({ dataset, hash, path, apiFlag }) => {
-    if (apiFlag) {
-      const payload = await getApiRoutes().metadata.get(hash);
-      return onResponse(dataset, path, forcedSave, payload);
-    } else {
-      return onResponse(dataset, path, forcedSave, null);
-    }
-  });
-  return Promise.all(promises);
-};
-const onResponse = async (dataset, path, forcedSave, payload) => {
-  var _a, _b, _c;
-  const r2 = payload == null ? void 0 : payload.data;
-  const id = r2 == null ? void 0 : r2.id;
-  const props = {
-    lfStyle: ".sub-2.description { white-space: pre-wrap; }"
-  };
-  switch (typeof id) {
-    case "number":
-      const code = (_c = (_b = (_a = dataset == null ? void 0 : dataset.nodes) == null ? void 0 : _a[0]) == null ? void 0 : _b.cells) == null ? void 0 : _c.lfCode;
-      const civitaiDataset = prepareValidDataset(r2, code);
-      props.lfDataset = civitaiDataset;
-      getApiRoutes().metadata.save(path, civitaiDataset, forcedSave);
-      break;
-    case "string":
-      const node = dataset.nodes[0];
-      node.description = "";
-      node.value = "";
-      node.cells.lfButton = {
-        lfIcon: "warning",
-        lfLabel: "Not found on CivitAI!",
-        lfStyling: "flat",
-        lfUiState: "disabled",
-        shape: "button",
-        value: ""
-      };
-      node.cells.text3 = {
-        value: "Whoops! It seems like something's off. Falling back to local data."
-      };
-      props.lfDataset = dataset;
-      break;
-  }
-  return props;
-};
-const prepCards = (container, propsArray) => {
-  var _a;
-  let count = 0;
-  const cards = container.querySelectorAll("lf-card");
-  cards.forEach((c2) => c2.remove());
-  for (let index = 0; propsArray && index < propsArray.length; index++) {
-    const card = container.appendChild(createCard());
-    count += 1;
-    const props = propsArray[index];
-    if (props.lfDataset) {
-      for (const key in props) {
-        if (Object.prototype.hasOwnProperty.call(props, key)) {
-          const prop = props[key];
-          if (key === "lfDataset") {
-            try {
-              if (typeof prop === "string") {
-                card.lfDataset = unescapeJson(prop).parsedJson;
-              } else {
-                card.lfDataset = prop;
-              }
-              const node = (_a = card.lfDataset.nodes) == null ? void 0 : _a[0];
-              if (node) {
-                card.dataset.link = node.description;
-                if (node.value) {
-                  card.title = String(node.value).valueOf();
-                }
-              }
-            } catch (error) {
-              getLfManager().log("Error when setting lfData prop on card!", { error }, LogSeverity.Error);
-            }
-          } else {
-            card[key] = prop;
-          }
-        }
-      }
-    }
-  }
-  return count;
-};
-const getCardProps = (container) => {
-  const propsArray = [];
-  const cards = container.querySelectorAll("lf-card");
-  for (let index = 0; index < cards.length; index++) {
-    const card = cards[index];
-    const props = CARD_PROPS_TO_SERIALIZE.reduce((acc, p2) => {
-      if (card[p2]) {
-        acc[p2] = card[p2];
-      }
-      return acc;
-    }, {});
-    propsArray.push(props);
-  }
-  return propsArray;
-};
-const createCard = () => {
-  const card = document.createElement(TagName.LfCard);
-  card.addEventListener(LfEventName.LfCard, EV_HANDLERS$a.card);
-  return card;
-};
-const prepareValidDataset = (r2, code) => {
-  var _a, _b, _c, _d, _e;
-  const dataset = {
-    nodes: [
-      {
-        cells: { lfCode: code ?? null, lfImage: null, text1: null, text2: null, text3: null },
-        id: r2.id.toString(),
-        description: "Click to open the model's page on CivitAI",
-        value: `https://civitai.com/models/${r2.modelId}`
-      }
-    ]
-  };
-  const cells = dataset.nodes[0].cells;
-  cells.lfImage = {
-    shape: "image",
-    value: r2.images[0].url
-  };
-  cells.text1 = { value: r2.model.name };
-  cells.text2 = { value: r2.name };
-  cells.text3 = {
-    value: `- Info:
-Type: ${((_a = r2.model) == null ? void 0 : _a.type) ? r2.model.type : "N/A"}
-Status: ${r2.status ? r2.status : "N/A"}
-Base model: ${r2.baseModel ? r2.baseModel : "N/A"}
-Description: ${r2.description ? r2.description : "N/A"}
-
-- Trained words:
-${((_b = r2.trainedWords) == null ? void 0 : _b.length) ? r2.trainedWords.join(", ") : "N/A"}
-
-- Stats:
-Updated at: ${r2.updatedAt ? r2.updatedAt : "N/A"}
-Downloads: ${((_c = r2.stats) == null ? void 0 : _c.downloadCount) ? r2.stats.downloadCount : "N/A"}
-Rating: ${((_d = r2.stats) == null ? void 0 : _d.rating) ? r2.stats.rating : "N/A"}
-Thumbs up: ${((_e = r2.stats) == null ? void 0 : _e.thumbsUpCount) ? r2.stats.thumbsUpCount : "N/A"}
-
-(data pulled from CivitAI at: ${(/* @__PURE__ */ new Date()).toLocaleDateString()})
-`
-  };
-  return dataset;
-};
-var CardCSS;
-(function(CardCSS2) {
-  CardCSS2["Content"] = "lf-card";
-  CardCSS2["ContentHasButton"] = "lf-card--has-button";
-  CardCSS2["Grid"] = "lf-card__grid";
-})(CardCSS || (CardCSS = {}));
-const STATE$h = /* @__PURE__ */ new WeakMap();
-const cardFactory = {
-  //#region Options
-  options: (wrapper) => {
-    return {
-      hideOnZoom: false,
-      getState: () => STATE$h.get(wrapper),
-      getValue() {
-        const { grid } = STATE$h.get(wrapper);
-        return {
-          props: getCardProps(grid) || []
-        };
-      },
-      setValue(value) {
-        const { grid } = STATE$h.get(wrapper);
-        const callback = (_2, u2) => {
-          const { props } = u2.parsedJson;
-          const len = (props == null ? void 0 : props.length) > 1 ? 2 : 1;
-          grid.style.setProperty("--card-grid", `repeat(1, 1fr) / repeat(${len}, 1fr)`);
-          prepCards(grid, props);
-        };
-        normalizeValue(value, callback, CustomWidgetName.card);
-      }
-    };
-  },
-  //#endregion
-  //#region Render
-  render: (node) => {
-    const wrapper = document.createElement(TagName.Div);
-    const content = document.createElement(TagName.Div);
-    const grid = document.createElement(TagName.Div);
-    grid.classList.add(CardCSS.Grid);
-    content.classList.add(CardCSS.Content);
-    content.appendChild(grid);
-    switch (node.comfyClass) {
-      case NodeName.checkpointSelector:
-      case NodeName.embeddingSelector:
-      case NodeName.loraAndEmbeddingSelector:
-      case NodeName.loraSelector:
-        content.classList.add(CardCSS.ContentHasButton);
-        const button = document.createElement(TagName.LfButton);
-        button.lfIcon = "download";
-        button.lfLabel = "Refresh";
-        button.lfStretchX = true;
-        button.title = "Attempts to manually ownload fresh metadata from CivitAI";
-        button.addEventListener(LfEventName.LfButton, (e2) => EV_HANDLERS$a.button(STATE$h.get(wrapper), e2));
-        content.appendChild(button);
-        break;
-    }
-    wrapper.appendChild(content);
-    const options = cardFactory.options(wrapper);
-    STATE$h.set(wrapper, { grid, node, wrapper });
-    return { widget: createDOMWidget(CustomWidgetName.card, wrapper, node, options) };
-  },
-  //#endregion
-  //#region State
-  state: STATE$h
-  //#endregion
-};
-var CardsWithChipCSS;
-(function(CardsWithChipCSS2) {
-  CardsWithChipCSS2["Content"] = "lf-cardswithchip";
-  CardsWithChipCSS2["Cards"] = "lf-cardswithchip__cards";
-  CardsWithChipCSS2["Chip"] = "lf-cardswithchip__chip";
-  CardsWithChipCSS2["Grid"] = "lf-cardswithchip__grid";
-})(CardsWithChipCSS || (CardsWithChipCSS = {}));
-const STATE$g = /* @__PURE__ */ new WeakMap();
-const cardsWithChipFactory = {
-  //#region Options
-  options: (wrapper) => {
-    return {
-      hideOnZoom: false,
-      getState: () => STATE$g.get(wrapper),
-      getValue() {
-        const { chip, grid } = STATE$g.get(wrapper);
-        return {
-          chip: (chip == null ? void 0 : chip.lfDataset) || {},
-          props: getCardProps(grid) || []
-        };
-      },
-      setValue(value) {
-        const { chip, grid } = STATE$g.get(wrapper);
-        const callback = (v2, u2) => {
-          const dataset = u2.parsedJson;
-          const cardsCount = prepCards(grid, dataset.props);
-          if (!cardsCount || !v2) {
-            return;
-          }
-          const columns = cardsCount > 1 ? 2 : 1;
-          grid.style.setProperty("--card-grid", String(columns).valueOf());
-          if (chip) {
-            chip.lfDataset = dataset.chip;
-          }
-        };
-        normalizeValue(value, callback, CustomWidgetName.cardsWithChip);
-      }
-    };
-  },
-  //#endregion
-  //#region Render
-  render: (node) => {
-    const wrapper = document.createElement(TagName.Div);
-    const content = document.createElement(TagName.Div);
-    const outerGrid = document.createElement(TagName.Div);
-    const grid = document.createElement(TagName.Div);
-    const chip = document.createElement(TagName.LfChip);
-    content.classList.add(CardsWithChipCSS.Content);
-    outerGrid.classList.add(CardsWithChipCSS.Grid);
-    grid.classList.add(CardsWithChipCSS.Cards);
-    chip.classList.add(CardsWithChipCSS.Chip);
-    outerGrid.appendChild(chip);
-    outerGrid.appendChild(grid);
-    content.appendChild(outerGrid);
-    wrapper.appendChild(content);
-    const options = cardsWithChipFactory.options(wrapper);
-    STATE$g.set(wrapper, { chip, grid, node, wrapper });
-    return { widget: createDOMWidget(CustomWidgetName.cardsWithChip, wrapper, node, options) };
-  },
-  //#endregion
-  //#region State
-  state: STATE$g
-  //#endregion
-};
-var CarouselCSS;
-(function(CarouselCSS2) {
-  CarouselCSS2["Content"] = "lf-carousel";
-  CarouselCSS2["Widget"] = "lf-carousel__widget";
-})(CarouselCSS || (CarouselCSS = {}));
-const STATE$f = /* @__PURE__ */ new WeakMap();
-const carouselFactory = {
-  //#region Options
-  options: (wrapper) => {
-    return {
-      hideOnZoom: true,
-      getState: () => STATE$f.get(wrapper),
-      getValue() {
-        const { carousel } = STATE$f.get(wrapper);
-        return (carousel == null ? void 0 : carousel.lfDataset) || {};
-      },
-      setValue(value) {
-        const { carousel } = STATE$f.get(wrapper);
-        const callback = (_2, u2) => {
-          const dataset = u2.parsedJson;
-          carousel.lfDataset = dataset || {};
-        };
-        normalizeValue(value, callback, CustomWidgetName.carousel);
-      }
-    };
-  },
-  //#endregion
-  //#region Render
-  render: (node) => {
-    const wrapper = document.createElement(TagName.Div);
-    const content = document.createElement(TagName.Div);
-    const carousel = document.createElement(TagName.LfCarousel);
-    carousel.lfAutoPlay = true;
-    content.classList.add(CarouselCSS.Content);
-    carousel.classList.add(CarouselCSS.Widget);
-    content.appendChild(carousel);
-    wrapper.appendChild(content);
-    const options = carouselFactory.options(wrapper);
-    STATE$f.set(wrapper, { carousel, node, wrapper });
-    return { widget: createDOMWidget(CustomWidgetName.carousel, wrapper, node, options) };
-  },
-  //#endregion
-  //#region State
-  state: STATE$f
-  //#endregion
-};
-const EV_HANDLERS$9 = {
-  //#region Chat handler
-  chat: (state, e2) => {
-    const { eventType, history, status } = e2.detail;
-    switch (eventType) {
-      case "polling":
-        const severity = status === "ready" ? LogSeverity.Info : status === "offline" ? LogSeverity.Error : LogSeverity.Warning;
-        getLfManager().log("Chat widget, polling status: " + status, { chat: e2.detail }, severity);
-        break;
-      case "update":
-        state.history = history;
-        break;
-    }
-  }
-  //#endregion
-};
-var ChatCSS;
-(function(ChatCSS2) {
-  ChatCSS2["Content"] = "lf-chat";
-  ChatCSS2["Widget"] = "lf-chat__widget";
-})(ChatCSS || (ChatCSS = {}));
-const STATE$e = /* @__PURE__ */ new WeakMap();
-const chatFactory = {
-  //#region Options
-  options: (wrapper) => {
-    return {
-      hideOnZoom: false,
-      getState: () => STATE$e.get(wrapper),
-      getValue() {
-        const { history } = STATE$e.get(wrapper);
-        return history || "";
-      },
-      setValue(value) {
-        const state = STATE$e.get(wrapper);
-        const callback = (v2) => {
-          state.history = v2 || "";
-          if (v2 && state.chat.lfValue) {
-            state.chat.lfValue = JSON.parse(v2);
-          }
-          state.chat.setHistory(v2);
-        };
-        normalizeValue(value, callback, CustomWidgetName.chat);
-      }
-    };
-  },
-  //#endregion
-  //#region Render
-  render: (node) => {
-    const wrapper = document.createElement(TagName.Div);
-    const content = document.createElement(TagName.Div);
-    const chat = document.createElement(TagName.LfChat);
-    content.classList.add(ChatCSS.Content);
-    chat.classList.add(ChatCSS.Widget);
-    chat.addEventListener(LfEventName.LfChat, (e2) => EV_HANDLERS$9.chat(STATE$e.get(wrapper), e2));
-    content.appendChild(chat);
-    wrapper.appendChild(content);
-    const options = chatFactory.options(wrapper);
-    STATE$e.set(wrapper, { chat, history: "", node, wrapper });
-    return { widget: createDOMWidget(CustomWidgetName.chat, wrapper, node, options) };
-  },
-  //#endregion
-  //#region State
-  state: STATE$e
-  //#endregion
-};
-const EV_HANDLERS$8 = {
-  //#region Chip handler
-  chip: async (state, e2) => {
-    const { comp, eventType } = e2.detail;
-    switch (eventType) {
-      case "click":
-        const selectedValues = [];
-        (await comp.getSelectedNodes()).forEach((node) => {
-          selectedValues.push(String(node.value).valueOf());
-        });
-        state.selected = selectedValues.join(", ");
-        break;
-    }
-  }
-};
-var ChipCSS;
-(function(ChipCSS2) {
-  ChipCSS2["Content"] = "lf-chip";
-  ChipCSS2["Widget"] = "lf-chip__widget";
-})(ChipCSS || (ChipCSS = {}));
-const STATE$d = /* @__PURE__ */ new WeakMap();
-const chipFactory = {
-  //#region Options
-  options: (wrapper) => {
-    return {
-      hideOnZoom: true,
-      getState: () => STATE$d.get(wrapper),
-      getValue() {
-        const { selected } = STATE$d.get(wrapper);
-        return selected || "";
-      },
-      setValue(value) {
-        const state = STATE$d.get(wrapper);
-        const callback = (v2) => {
-          const value2 = v2 ? v2.split(", ") : [];
-          state.selected = v2;
-          state.chip.setSelectedNodes(value2);
-        };
-        normalizeValue(value, callback, CustomWidgetName.chip);
-      }
-    };
-  },
-  //#endregion
-  //#region Render
-  render: (node) => {
-    const wrapper = document.createElement(TagName.Div);
-    const content = document.createElement(TagName.Div);
-    const chip = document.createElement(TagName.LfChip);
-    content.classList.add(ChipCSS.Content);
-    chip.classList.add(ChipCSS.Widget);
-    chip.addEventListener(LfEventName.LfChip, (e2) => EV_HANDLERS$8.chip(STATE$d.get(wrapper), e2));
-    switch (node.comfyClass) {
-      case NodeName.keywordToggleFromJson:
-        chip.lfStyling = "filter";
-        break;
-    }
-    content.appendChild(chip);
-    wrapper.appendChild(content);
-    const options = chipFactory.options(wrapper);
-    STATE$d.set(wrapper, { chip, node, selected: "", wrapper });
-    return { widget: createDOMWidget(CustomWidgetName.chip, wrapper, node, options) };
-  },
-  //#endregion
-  //#region State
-  state: STATE$d
-  //#endregion
-};
-var CodeCSS;
-(function(CodeCSS2) {
-  CodeCSS2["Content"] = "lf-code";
-  CodeCSS2["Widget"] = "lf-code__widget";
-})(CodeCSS || (CodeCSS = {}));
-const STATE$c = /* @__PURE__ */ new WeakMap();
-const codeFactory = {
-  //#region Options
-  options: (wrapper) => {
-    return {
-      hideOnZoom: false,
-      getState: () => STATE$c.get(wrapper),
-      getValue() {
-        const { code } = STATE$c.get(wrapper);
-        switch (code.lfLanguage) {
-          case "json":
-            return code.lfValue || "{}";
-          default:
-            return code.lfValue || "";
-        }
-      },
-      setValue(value) {
-        const { code } = STATE$c.get(wrapper);
-        const callback = (v2, u2) => {
-          switch (code.lfLanguage) {
-            case "json":
-              code.lfValue = u2.unescapedStr || "{}";
-              break;
-            default:
-              code.lfValue = typeof v2 === "string" ? v2 : "";
-              break;
-          }
-        };
-        normalizeValue(value, callback, CustomWidgetName.code);
-      }
-    };
-  },
-  //#endregion
-  //#region Render
-  render: (node) => {
-    const wrapper = document.createElement(TagName.Div);
-    const content = document.createElement(TagName.Div);
-    const code = document.createElement(TagName.LfCode);
-    content.classList.add(CodeCSS.Content);
-    code.classList.add(CodeCSS.Widget);
-    switch (node.comfyClass) {
-      case NodeName.displayJson:
-      case NodeName.displayPrimitiveAsJson:
-      case NodeName.shuffleJsonKeys:
-      case NodeName.sortJsonKeys:
-      case NodeName.stringToJson:
-        code.lfLanguage = "json";
-        code.lfValue = "{}";
-        break;
-      default:
-        code.lfLanguage = "markdown";
-        code.lfValue = "";
-        break;
-    }
-    content.appendChild(code);
-    wrapper.appendChild(content);
-    const options = codeFactory.options(wrapper);
-    STATE$c.set(wrapper, { code, node, wrapper });
-    return { widget: createDOMWidget(CustomWidgetName.code, wrapper, node, options) };
-  },
-  //#endregion
-  //#region State
-  state: STATE$c
-  //#endregion
-};
-var CompareCSS;
-(function(CompareCSS2) {
-  CompareCSS2["Content"] = "lf-compare";
-  CompareCSS2["Widget"] = "lf-compare__widget";
-})(CompareCSS || (CompareCSS = {}));
-const STATE$b = /* @__PURE__ */ new WeakMap();
-const compareFactory = {
-  //#region Options
-  options: (wrapper) => {
-    return {
-      hideOnZoom: false,
-      getState: () => STATE$b.get(wrapper),
-      getValue() {
-        const { compare } = STATE$b.get(wrapper);
-        return compare.lfDataset || {};
-      },
-      setValue(value) {
-        const { compare } = STATE$b.get(wrapper);
-        const callback = (_2, u2) => {
-          compare.lfDataset = u2.parsedJson || {};
-        };
-        normalizeValue(value, callback, CustomWidgetName.compare);
-      }
-    };
-  },
-  //#endregion
-  //#region Render
-  render: (node) => {
-    const wrapper = document.createElement(TagName.Div);
-    const content = document.createElement(TagName.Div);
-    const compare = document.createElement(TagName.LfCompare);
-    content.classList.add(CompareCSS.Content);
-    compare.classList.add(CompareCSS.Widget);
-    switch (node.comfyClass) {
-      default:
-        compare.lfShape = "image";
-        break;
-    }
-    content.appendChild(compare);
-    wrapper.appendChild(content);
-    const options = compareFactory.options(wrapper);
-    STATE$b.set(wrapper, { compare, node, wrapper });
-    return { widget: createDOMWidget(CustomWidgetName.compare, wrapper, node, options) };
-  },
-  //#endregion
-  //#region State
-  state: STATE$b
-  //#endregion
-};
-var ControlPanelCSS;
-(function(ControlPanelCSS2) {
-  ControlPanelCSS2["Content"] = "lf-controlpanel";
-  ControlPanelCSS2["Grid"] = "lf-controlpanel__grid";
-  ControlPanelCSS2["Spinner"] = "lf-controlpanel__spinner";
-})(ControlPanelCSS || (ControlPanelCSS = {}));
-var ControlPanelIcons;
-(function(ControlPanelIcons2) {
-  ControlPanelIcons2["Analytics"] = "chart-histogram";
-  ControlPanelIcons2["Backup"] = "download";
-  ControlPanelIcons2["Debug"] = "bug";
-  ControlPanelIcons2["GitHub"] = "brand-github";
-  ControlPanelIcons2["Metadata"] = "info-hexagon";
-  ControlPanelIcons2["Theme"] = "color-swatch";
-})(ControlPanelIcons || (ControlPanelIcons = {}));
-var ControlPanelIds;
-(function(ControlPanelIds2) {
-  ControlPanelIds2["Analytics"] = "analytics";
-  ControlPanelIds2["Backup"] = "backup";
-  ControlPanelIds2["Debug"] = "debug";
-  ControlPanelIds2["GitHub"] = "github";
-  ControlPanelIds2["Metadata"] = "metadata";
-  ControlPanelIds2["Theme"] = "theme";
-})(ControlPanelIds || (ControlPanelIds = {}));
-var ControlPanelLabels;
-(function(ControlPanelLabels2) {
-  ControlPanelLabels2["AutoBackup"] = "Automatic Backup";
-  ControlPanelLabels2["Backup"] = "Backup now";
-  ControlPanelLabels2["ClearLogs"] = "Clear logs";
-  ControlPanelLabels2["Debug"] = "Debug";
-  ControlPanelLabels2["DeleteUsage"] = "Delete usage analytics info";
-  ControlPanelLabels2["DeleteMetadata"] = "Delete models info";
-  ControlPanelLabels2["Done"] = "Done!";
-  ControlPanelLabels2["OpenIssue"] = "Open an issue";
-  ControlPanelLabels2["Theme"] = "Random theme";
-})(ControlPanelLabels || (ControlPanelLabels = {}));
-var ControlPanelSection;
-(function(ControlPanelSection2) {
-  ControlPanelSection2["Content"] = "content";
-  ControlPanelSection2["ContentSeparator"] = "content_spearator";
-  ControlPanelSection2["Paragraph"] = "paragraph";
-  ControlPanelSection2["Root"] = "root";
-  ControlPanelSection2["Section"] = "section";
-})(ControlPanelSection || (ControlPanelSection = {}));
-const BUTTON_STYLE = ":host { margin: auto; padding: 1em 0; width: max-content; }";
-const STYLES = {
-  customization: () => {
-    return {
-      margin: "0"
-    };
-  },
-  debugGrid: () => {
-    return {
-      display: "grid",
-      gridTemplateRows: "repeat(5, max-content) 1fr",
-      height: "100%",
-      margin: "0"
-    };
-  },
-  debugLogs: () => {
-    return {
-      display: "grid",
-      gridGap: "0.75em",
-      gridTemplateRows: "320px 480px"
-    };
-  },
-  logsArea: () => {
-    return {
-      backgroundColor: "rgba(var(--lf-color-on-bg), 0.075)",
-      borderRadius: "0.5em",
-      display: "block",
-      height: "100%",
-      marginBottom: "1em",
-      overflow: "auto"
-    };
-  },
-  separator: () => {
-    return {
-      border: "1px solid rgb(var(--lf-color-border))",
-      display: "block",
-      margin: "0.75em auto 1.25em",
-      opacity: "0.25",
-      width: "50%"
-    };
-  }
-};
-const SECTIONS = {
-  //#region Analytics
-  [ControlPanelIds.Analytics]: () => {
-    const { theme } = getLfManager().getManagers().lfFramework;
-    const { "--lf-icon-clear": clearIcon } = theme.get.current().variables;
-    return {
-      icon: ControlPanelIcons.Analytics,
-      id: ControlPanelSection.Section,
-      value: "Analytics",
-      children: [
-        {
-          id: ControlPanelSection.Paragraph,
-          value: "Usage",
-          children: [
-            {
-              id: ControlPanelSection.Content,
-              value: "Usage analytics can be enabled by saving datasets through the UpdateUsageStatistics node and displayed with the UsageStatistics node."
-            },
-            {
-              id: ControlPanelSection.Content,
-              tagName: "br",
-              value: ""
-            },
-            {
-              id: ControlPanelSection.Content,
-              value: "Once datasets are created (input folder of ComfyUI), the count for each resource used will increase everytime that particular resource is updated."
-            },
-            {
-              id: ControlPanelSection.Content,
-              tagName: "br",
-              value: ""
-            },
-            {
-              id: ControlPanelSection.Content,
-              value: "This button will clear all usage analytics data from your input folder."
-            },
-            {
-              id: ControlPanelSection.Content,
-              tagName: "br",
-              value: ""
-            },
-            {
-              id: ControlPanelSection.Content,
-              value: "This action is IRREVERSIBLE so use it with caution."
-            },
-            {
-              id: ControlPanelSection.Content,
-              value: "",
-              cells: {
-                lfButton: {
-                  lfIcon: clearIcon,
-                  lfLabel: ControlPanelLabels.DeleteUsage,
-                  lfStyle: BUTTON_STYLE,
-                  lfStyling: "outlined",
-                  lfUiState: "danger",
-                  shape: "button",
-                  value: ""
-                }
-              }
-            }
-          ]
-        }
-      ]
-    };
-  },
-  //#endregion
-  //#region Backup
-  [ControlPanelIds.Backup]: () => {
-    const { theme } = getLfManager().getManagers().lfFramework;
-    const { "--lf-icon-download": downloadIcon } = theme.get.current().variables;
-    return {
-      icon: ControlPanelIcons.Backup,
-      id: ControlPanelSection.Section,
-      value: "Backup",
-      children: [
-        {
-          id: ControlPanelSection.Paragraph,
-          value: "Toggle on/off",
-          children: [
-            {
-              id: ControlPanelSection.Content,
-              value: "Toggle this toggle to automatically back up the folder <path/to/your/comfyui/user/LF_Nodes> once a day (the first time you open this workflow)."
-            },
-            {
-              id: ControlPanelSection.Content,
-              tagName: "br",
-              value: ""
-            },
-            {
-              id: ControlPanelSection.Content,
-              value: "",
-              cells: {
-                lfToggle: {
-                  lfLabel: ControlPanelLabels.AutoBackup,
-                  lfLeadingLabel: true,
-                  lfStyle: ":host { text-align: center; padding: 1em 0; }",
-                  shape: "toggle",
-                  value: !!getLfManager().isBackupEnabled()
-                }
-              }
-            }
-          ]
-        },
-        {
-          cssStyle: STYLES.separator(),
-          id: ControlPanelSection.ContentSeparator,
-          value: ""
-        },
-        {
-          id: ControlPanelSection.Paragraph,
-          value: "Backup files",
-          children: [
-            {
-              id: ControlPanelSection.Content,
-              value: "This button will create a manual backup of the content in <path/to/your/comfyui/user/LF_Nodes>"
-            },
-            {
-              id: ControlPanelSection.Content,
-              value: "Be sure to include as much information as you can, without sufficient data it's difficult to troubleshoot problems."
-            },
-            {
-              id: ControlPanelSection.Content,
-              value: "",
-              cells: {
-                lfButton: {
-                  lfIcon: downloadIcon,
-                  lfLabel: ControlPanelLabels.Backup,
-                  lfStyle: BUTTON_STYLE,
-                  lfStyling: "raised",
-                  shape: "button",
-                  value: ""
-                }
-              }
-            }
-          ]
-        }
-      ]
-    };
-  },
-  //#endregion
-  //#region Debug
-  [ControlPanelIds.Debug]: (logsData) => {
-    const { theme } = getLfManager().getManagers().lfFramework;
-    const { "--lf-icon-clear": clearIcon } = theme.get.current().variables;
-    return {
-      icon: ControlPanelIcons.Debug,
-      id: ControlPanelSection.Section,
-      cssStyle: STYLES.debugGrid(),
-      value: "Debug",
-      children: [
-        {
-          id: ControlPanelSection.Paragraph,
-          value: "Toggle on/off",
-          children: [
-            {
-              id: ControlPanelSection.Content,
-              value: "Activating the debug will enable the display of verbose logging."
-            },
-            {
-              id: ControlPanelSection.Content,
-              value: "",
-              cells: {
-                lfToggle: {
-                  lfLabel: ControlPanelLabels.Debug,
-                  lfLeadingLabel: true,
-                  lfStyle: ":host { text-align: center; padding: 1em 0; }",
-                  shape: "toggle",
-                  value: !!getLfManager().isDebug()
-                }
-              }
-            }
-          ]
-        },
-        {
-          id: ControlPanelSection.Paragraph,
-          value: "Logs",
-          children: [
-            {
-              id: ControlPanelSection.Content,
-              value: "Every time the node manager receives a message it will be printed below."
-            },
-            {
-              id: ControlPanelSection.Content,
-              tagName: "br",
-              value: ""
-            },
-            {
-              id: ControlPanelSection.Content,
-              value: "In the browser console there should be more informations."
-            },
-            {
-              id: ControlPanelSection.Content,
-              tagName: "br",
-              value: ""
-            },
-            {
-              id: ControlPanelSection.Content,
-              value: "Further below another card will display additional LF Widgets information."
-            },
-            {
-              id: ControlPanelSection.Content,
-              value: "",
-              cells: {
-                lfButton: {
-                  shape: "button",
-                  lfIcon: clearIcon,
-                  lfLabel: ControlPanelLabels.ClearLogs,
-                  lfStretchX: true,
-                  lfStyle: BUTTON_STYLE,
-                  lfUiState: "danger",
-                  value: ""
-                }
-              }
-            }
-          ]
-        },
-        {
-          id: ControlPanelSection.Paragraph,
-          cssStyle: STYLES.debugLogs(),
-          value: "",
-          children: [
-            {
-              id: "content-wrapper",
-              cssStyle: STYLES.logsArea(),
-              value: "",
-              children: logsData
-            },
-            {
-              cells: {
-                lfCard: {
-                  lfDataset: {
-                    nodes: [
-                      {
-                        cells: {
-                          lfCode: { shape: "code", value: "" },
-                          lfButton: {
-                            shape: "button",
-                            value: ""
-                          },
-                          lfButton_2: {
-                            shape: "button",
-                            value: ""
-                          },
-                          lfToggle: {
-                            shape: "toggle",
-                            value: !!getLfManager().getManagers().lfFramework.debug.isEnabled()
-                          }
-                        },
-                        id: "debug"
-                      }
-                    ]
-                  },
-                  lfLayout: "debug",
-                  shape: "card",
-                  value: ""
-                }
-              },
-              id: "content-wrapper"
-            }
-          ]
-        }
-      ]
-    };
-  },
-  //#endregion
-  //#region GitHub
-  [ControlPanelIds.GitHub]: () => {
-    var _a, _b;
-    const lfManager2 = getLfManager();
-    const releaseData = lfManager2.getLatestRelease();
-    const { theme } = lfManager2.getManagers().lfFramework;
-    const { brandGithub } = theme.get.icons();
-    return {
-      icon: ControlPanelIcons.GitHub,
-      id: ControlPanelSection.Section,
-      value: "",
-      children: [
-        {
-          id: ControlPanelSection.Paragraph,
-          value: `Version: ${(releaseData == null ? void 0 : releaseData.tag_name) || "N/A"}`,
-          children: [
-            {
-              cells: {
-                lfCode: {
-                  lfLanguage: "markdown",
-                  shape: "code",
-                  value: (releaseData == null ? void 0 : releaseData.body) || "No changelog available"
-                }
-              },
-              id: "release-description"
-            },
-            {
-              id: "release-author",
-              children: [
-                {
-                  id: "author-avatar",
-                  value: "",
-                  cssStyle: {
-                    backgroundImage: `url(${((_a = releaseData == null ? void 0 : releaseData.author) == null ? void 0 : _a.avatar_url) || ""})`,
-                    backgroundSize: "cover",
-                    borderRadius: "50%",
-                    display: "inline-block",
-                    height: "2em",
-                    marginRight: "0.5em",
-                    verticalAlign: "middle",
-                    width: "2em"
-                  }
-                },
-                {
-                  id: "author-name",
-                  value: `Author: ${((_b = releaseData == null ? void 0 : releaseData.author) == null ? void 0 : _b.login) || "Unknown"}`,
-                  cssStyle: {
-                    fontSize: "0.9em",
-                    color: "rgb(var(--lf-color-secondary))",
-                    verticalAlign: "middle"
-                  }
-                }
-              ],
-              cssStyle: {
-                alignItems: "center",
-                display: "flex",
-                justifyContent: "center",
-                marginBottom: "1em"
-              }
-            },
-            {
-              cssStyle: {
-                color: "rgb(var(--lf-color-secondary))",
-                display: "block",
-                fontSize: "0.9em",
-                fontStyle: "italic",
-                marginBottom: "2em",
-                textAlign: "center",
-                width: "100%"
-              },
-              id: "release-date",
-              value: `Published on: ${(releaseData == null ? void 0 : releaseData.published_at) ? new Date(releaseData.published_at).toLocaleDateString() : "Unknown"}`
-            },
-            {
-              cssStyle: STYLES.separator(),
-              id: ControlPanelSection.ContentSeparator,
-              value: ""
-            },
-            {
-              id: ControlPanelSection.Paragraph,
-              value: "Bug report",
-              children: [
-                {
-                  id: ControlPanelSection.Content,
-                  value: "If you find bugs or odd behaviors feel free to open an issue on GitHub, just follow the link below!"
-                },
-                {
-                  id: ControlPanelSection.Content,
-                  tagName: "br",
-                  value: ""
-                },
-                {
-                  id: ControlPanelSection.Content,
-                  value: "Be sure to include as much information as you can, without sufficient data it's difficult to troubleshoot problems."
-                },
-                {
-                  id: ControlPanelSection.Content,
-                  value: "",
-                  cells: {
-                    lfButton: {
-                      lfIcon: brandGithub,
-                      lfLabel: ControlPanelLabels.OpenIssue,
-                      lfStyle: BUTTON_STYLE,
-                      lfStyling: "raised",
-                      shape: "button",
-                      value: ""
-                    }
-                  }
-                }
-              ]
-            }
-          ]
-        }
-      ]
-    };
-  },
-  //#endregion
-  //#region Metadata
-  [ControlPanelIds.Metadata]: () => {
-    const { theme } = getLfManager().getManagers().lfFramework;
-    const { "--lf-icon-delete": deleteIcon } = theme.get.current().variables;
-    return {
-      icon: ControlPanelIcons.Metadata,
-      id: ControlPanelSection.Section,
-      value: "Metadata",
-      children: [
-        {
-          id: ControlPanelSection.Paragraph,
-          value: "Purge metadata files",
-          children: [
-            {
-              id: ControlPanelSection.Content,
-              value: "Metadata pulled from CivitAI are stored in .info files saved in the same folders of the models to avoid unnecessary fetches from the API."
-            },
-            {
-              id: ControlPanelSection.Content,
-              value: "By pressing this button it's possible to delete every .info file created by fetching the metadata."
-            },
-            {
-              id: ControlPanelSection.Content,
-              tagName: "br",
-              value: ""
-            },
-            {
-              id: ControlPanelSection.Content,
-              value: "This action is IRREVERSIBLE so use it with caution."
-            },
-            {
-              id: ControlPanelSection.Content,
-              value: "",
-              cells: {
-                lfButton: {
-                  lfIcon: deleteIcon,
-                  lfLabel: ControlPanelLabels.DeleteMetadata,
-                  lfStyle: BUTTON_STYLE,
-                  lfStyling: "outlined",
-                  lfUiState: "danger",
-                  shape: "button",
-                  value: ""
-                }
-              }
-            }
-          ]
-        }
-      ]
-    };
-  },
-  //#endregion
-  //#region Theme
-  [ControlPanelIds.Theme]: () => {
-    return {
-      icon: ControlPanelIcons.Theme,
-      id: ControlPanelSection.Section,
-      value: "Customization",
-      cssStyle: STYLES.customization(),
-      children: [
-        {
-          id: ControlPanelSection.Paragraph,
-          value: "Theme selector",
-          children: [
-            {
-              id: ControlPanelSection.Content,
-              value: "Through the button below it's possible to set a random theme for the LF Widgets components, or select one from the dropdown menu."
-            },
-            {
-              id: ControlPanelSection.Content,
-              value: "",
-              cells: {
-                lfButton: {
-                  lfDataset: getLfThemes(),
-                  lfLabel: ControlPanelLabels.Theme,
-                  lfStyle: BUTTON_STYLE,
-                  shape: "button",
-                  value: ""
-                }
-              }
-            }
-          ]
-        }
-      ]
-    };
-  }
-  //#endregion
-};
-const INTRO_SECTION = ControlPanelIds.GitHub;
-let TIMEOUT;
-const EV_HANDLERS$7 = {
-  //#region Article handler
-  article: (e2) => {
-    const { eventType, originalEvent } = e2.detail;
-    switch (eventType) {
-      case "lf-event":
-        handleLfEvent(originalEvent);
-        break;
-    }
-  },
-  //#endregion
-  //#region Button handler
-  button: (e2) => {
-    const { comp, eventType, originalEvent } = e2.detail;
-    const element = comp.rootElement;
-    const createSpinner = () => {
-      const spinner = document.createElement("lf-spinner");
-      spinner.lfActive = true;
-      spinner.lfDimensions = "0.6em";
-      spinner.lfLayout = 2;
-      spinner.slot = "spinner";
-      return spinner;
-    };
-    const invokeAPI = (promise, label) => {
-      const onResponse2 = () => {
-        comp.lfIcon = "check";
-        comp.lfLabel = ControlPanelLabels.Done;
-        comp.lfShowSpinner = false;
-        comp.lfUiState = "disabled";
-      };
-      const restore = (label2) => {
-        comp.lfLabel = label2;
-        comp.lfIcon = "delete";
-        comp.lfUiState = "primary";
-        TIMEOUT = null;
-      };
-      requestAnimationFrame(() => comp.lfShowSpinner = true);
-      promise.then(() => {
-        requestAnimationFrame(onResponse2);
-        if (TIMEOUT) {
-          clearTimeout(TIMEOUT);
-        }
-        TIMEOUT = setTimeout(() => requestAnimationFrame(() => restore(label)), 1e3);
-      });
-    };
-    switch (eventType) {
-      case "click":
-        switch (comp.lfLabel) {
-          case ControlPanelLabels.Backup:
-            invokeAPI(getApiRoutes().backup.new("manual"), ControlPanelLabels.Backup);
-            break;
-          case ControlPanelLabels.ClearLogs:
-            const { article, dataset } = getLfManager().getDebugDataset();
-            if ((dataset == null ? void 0 : dataset.length) > 0) {
-              dataset.splice(0, dataset.length);
-              article.refresh();
-            }
-            break;
-          case ControlPanelLabels.DeleteMetadata:
-            invokeAPI(getApiRoutes().metadata.clear(), ControlPanelLabels.DeleteMetadata);
-            break;
-          case ControlPanelLabels.DeleteUsage:
-            invokeAPI(getApiRoutes().analytics.clear("usage"), ControlPanelLabels.DeleteUsage);
-            break;
-          case ControlPanelLabels.OpenIssue:
-            window.open("https://github.com/lucafoscili/comfyui-lf/issues/new", "_blank");
-            break;
-          case ControlPanelLabels.Theme:
-            getLfManager().getManagers().lfFramework.theme.randomize();
-            break;
-        }
-        break;
-      case "lf-event":
-        const ogEv = originalEvent;
-        EV_HANDLERS$7.list(ogEv);
-        break;
-      case "ready":
-        switch (comp.lfLabel) {
-          case ControlPanelLabels.Backup:
-            element.appendChild(createSpinner());
-            break;
-          case ControlPanelLabels.DeleteMetadata:
-          case ControlPanelLabels.DeleteUsage:
-            element.classList.add("lf-danger");
-            element.appendChild(createSpinner());
-            break;
-        }
-    }
-  },
-  //#endregion
-  //#region List handler
-  list: (e2) => {
-    const { comp, eventType, node } = e2.detail;
-    const { lfFramework: lfFramework2 } = getLfManager().getManagers();
-    const element = comp.rootElement;
-    const value = node.id;
-    switch (eventType) {
-      case "click":
-        lfFramework2.theme.set(value);
-        break;
-      case "ready":
-        element.title = "Change the LF Nodes suite theme";
-        lfFramework2.theme.set(value);
-        break;
-    }
-  },
-  //#endregion
-  //#region Toggle handler
-  toggle: (e2) => {
-    const { comp, eventType, value } = e2.detail;
-    const element = comp.rootElement;
-    switch (eventType) {
-      case "change":
-        getLfManager().toggleDebug(value === "on" ? true : false);
-        break;
-      case "ready":
-        element.title = "Activate verbose console logging";
-    }
-  }
-  //#endregion
-};
-const createContent = () => {
-  const grid = document.createElement(TagName.Div);
-  const accordion = document.createElement(TagName.LfAccordion);
-  const nodes = [];
-  accordion.lfDataset = { nodes };
-  for (const id in SECTIONS) {
-    if (id !== INTRO_SECTION && Object.prototype.hasOwnProperty.call(SECTIONS, id)) {
-      const section = SECTIONS[id];
-      let article;
-      let node;
-      switch (id) {
-        case ControlPanelIds.Debug:
-          const logsData = [];
-          node = section(logsData);
-          article = prepArticle(id, node);
-          getLfManager().setDebugDataset(article, logsData);
-          break;
-        default:
-          node = section(void 0);
-          article = prepArticle(id, node);
-          break;
-      }
-      const { icon, value } = node;
-      nodes.push({
-        cells: {
-          lfSlot: {
-            shape: "slot",
-            value: id
-          }
-        },
-        icon,
-        id,
-        value
-      });
-      accordion.appendChild(article);
-    }
-  }
-  const intro = prepArticle(INTRO_SECTION, SECTIONS[INTRO_SECTION]());
-  grid.classList.add(ControlPanelCSS.Grid);
-  grid.appendChild(intro);
-  grid.appendChild(accordion);
-  return grid;
-};
-const prepArticle = (key, node) => {
-  const article = document.createElement(TagName.LfArticle);
-  article.lfDataset = { nodes: [{ children: [node], id: ControlPanelSection.Root }] };
-  article.slot = key;
-  article.addEventListener(LfEventName.LfArticle, EV_HANDLERS$7.article);
-  return article;
-};
-const handleLfEvent = (e2) => {
-  const { comp } = e2.detail;
-  if (isButton(comp)) {
-    const ogEv = e2;
-    EV_HANDLERS$7.button(ogEv);
-  }
-  if (isToggle(comp)) {
-    const ogEv = e2;
-    EV_HANDLERS$7.toggle(ogEv);
-  }
-};
-const STATE$a = /* @__PURE__ */ new WeakMap();
-const controlPanelFactory = {
-  //#region Options
-  options: (wrapper) => {
-    return {
-      hideOnZoom: false,
-      getState: () => STATE$a.get(wrapper),
-      getValue() {
-        return {
-          backup: getLfManager().isBackupEnabled() || false,
-          debug: getLfManager().isDebug() || false,
-          themes: getLfManager().getManagers().lfFramework.theme.get.current().name || ""
-        };
-      },
-      setValue(value) {
-        const callback = (_2, u2) => {
-          const { backup, debug, themes } = u2.parsedJson;
-          if (backup === true || backup === false) {
-            getLfManager().toggleBackup(backup);
-          }
-          if (debug === true || debug === false) {
-            getLfManager().toggleDebug(debug);
-          }
-          if (themes) {
-            getLfManager().getManagers().lfFramework.theme.set(themes);
-          }
-          return value;
-        };
-        normalizeValue(value, callback, CustomWidgetName.controlPanel);
-      }
-    };
-  },
-  //#endregion
-  //#region Render
-  render: (node) => {
-    const contentCb = (domWidget, isReady) => {
-      const readyCb = (domWidget2) => {
-        setTimeout(() => {
-          getApiRoutes().backup.new();
-          contentCb(domWidget2, true);
-        }, 750);
-      };
-      const createSpinner = () => {
-        const spinner = document.createElement(TagName.LfSpinner);
-        spinner.classList.add(ControlPanelCSS.Spinner);
-        spinner.lfActive = true;
-        spinner.lfLayout = 11;
-        return spinner;
-      };
-      const content = document.createElement(TagName.Div);
-      if (isReady) {
-        content.appendChild(createContent());
-        domWidget.replaceChild(content, domWidget.firstChild);
-      } else {
-        const spinner = createSpinner();
-        spinner.addEventListener(LfEventName.LfSpinner, readyCb.bind(null, domWidget));
-        content.appendChild(spinner);
-        domWidget.appendChild(content);
-      }
-      content.classList.add(ControlPanelCSS.Content);
-    };
-    const wrapper = document.createElement(TagName.Div);
-    contentCb(wrapper, false);
-    const options = controlPanelFactory.options(wrapper);
-    STATE$a.set(wrapper, { node, wrapper });
-    return { widget: createDOMWidget(CustomWidgetName.controlPanel, wrapper, node, options) };
-  },
-  //#endregion
-  //#region State
-  state: STATE$a
-  //#endregion
-};
-var CountBarChartCSS;
-(function(CountBarChartCSS2) {
-  CountBarChartCSS2["Content"] = "lf-countbarchart";
-  CountBarChartCSS2["Widget"] = "lf-countbarchart__widget";
-})(CountBarChartCSS || (CountBarChartCSS = {}));
-const STATE$9 = /* @__PURE__ */ new WeakMap();
-const countBarChartFactory = {
-  //#region Options
-  options: (wrapper) => {
-    return {
-      hideOnZoom: true,
-      getState: () => STATE$9.get(wrapper),
-      getValue() {
-        const { datasets } = STATE$9.get(wrapper);
-        return {
-          chart: (datasets == null ? void 0 : datasets.chart) || {},
-          chip: (datasets == null ? void 0 : datasets.chip) || {}
-        };
-      },
-      setValue(value) {
-        const { card, datasets } = STATE$9.get(wrapper);
-        const callback = (_2, u2) => {
-          const json = u2.parsedJson;
-          datasets.chart = json.chart || {};
-          datasets.chip = json.chip || {};
-          card.lfDataset = {
-            nodes: [
-              {
-                id: "countBarChart",
-                cells: {
-                  lfButton: { shape: "button", value: "" },
-                  lfChart: {
-                    lfAxis: ["Axis_0"],
-                    lfDataset: datasets.chart,
-                    lfSeries: ["Series_0"],
-                    shape: "chart",
-                    value: ""
-                  },
-                  lfChip: { lfDataset: datasets.chip, shape: "chip", value: "" }
-                }
-              }
-            ]
-          };
-        };
-        normalizeValue(value, callback, CustomWidgetName.countBarChart);
-      }
-    };
-  },
-  //#endregion
-  //#region Render
-  render: (node) => {
-    const wrapper = document.createElement(TagName.Div);
-    const content = document.createElement(TagName.Div);
-    const card = document.createElement(TagName.LfCard);
-    const chart = {};
-    const chip = {};
-    card.classList.add(CountBarChartCSS.Widget);
-    card.lfLayout = "keywords";
-    content.classList.add(CountBarChartCSS.Content);
-    content.appendChild(card);
-    wrapper.appendChild(content);
-    const options = countBarChartFactory.options(wrapper);
-    STATE$9.set(wrapper, { card, datasets: { chart, chip }, node, wrapper });
-    return { widget: createDOMWidget(CustomWidgetName.countBarChart, wrapper, node, options) };
-  },
-  //#endregion
-  //#region State
-  state: STATE$9
-  //#endregion
-};
-const EV_HANDLERS$6 = {
-  //#region List handler
-  list: (state, e2) => {
-    const { eventType, node } = e2.detail;
-    const comfyNode = state.node;
-    const strValue = node ? String(node.value).valueOf() : "";
-    if (eventType === "click" && strValue) {
-      const boolW = getWidget(comfyNode, ComfyWidgetName.boolean);
-      const comboW = getWidget(comfyNode, ComfyWidgetName.combo);
-      const customtextW = getWidget(comfyNode, ComfyWidgetName.customtext);
-      const floatW = getWidget(comfyNode, ComfyWidgetName.float);
-      const intW = getWidget(comfyNode, ComfyWidgetName.integer);
-      const numberW = getWidget(comfyNode, ComfyWidgetName.number);
-      const seedW = getWidget(comfyNode, ComfyWidgetName.seed);
-      const stringW = getWidget(comfyNode, ComfyWidgetName.string);
-      const textW = getWidget(comfyNode, ComfyWidgetName.text);
-      const toggleW = getWidget(comfyNode, ComfyWidgetName.toggle);
-      switch (comfyNode.comfyClass) {
-        case NodeName.boolean:
-          if (boolW) {
-            boolW.value = String(node.value).toLowerCase() === "true" ? true : false;
-          } else if (toggleW) {
-            toggleW.value = String(node.value).toLowerCase() === "true" ? true : false;
-          }
-          break;
-        case NodeName.float:
-          if (numberW) {
-            numberW.value = Number(node.value).valueOf();
-          } else if (intW) {
-            floatW.value = Number(node.value).valueOf();
-          }
-          break;
-        case NodeName.integer:
-        case NodeName.sequentialSeedsGenerator:
-          if (numberW) {
-            numberW.value = Number(node.value).valueOf();
-          } else if (intW) {
-            intW.value = Number(node.value).valueOf();
-          } else if (seedW) {
-            seedW.value = Number(node.value).valueOf();
-          }
-          break;
-        case NodeName.samplerSelector:
-        case NodeName.schedulerSelector:
-        case NodeName.upscaleModelSelector:
-        case NodeName.vaeSelector:
-          comboW.value = node.value;
-          break;
-        case NodeName.string:
-          if (stringW) {
-            stringW.options.setValue(node.value);
-          } else if (customtextW) {
-            customtextW.options.setValue(node.value);
-          } else if (textW) {
-            textW.value = node.value;
-          }
-          break;
-      }
-    }
-  }
-  //#endregion
-};
-var HistoryCSS;
-(function(HistoryCSS2) {
-  HistoryCSS2["Content"] = "lf-history";
-  HistoryCSS2["Widget"] = "lf-history__widget";
-})(HistoryCSS || (HistoryCSS = {}));
-const STATE$8 = /* @__PURE__ */ new WeakMap();
-const historyFactory = {
-  //#region Options
-  options: (wrapper) => {
-    return {
-      hideOnZoom: false,
-      getState: () => STATE$8.get(wrapper),
-      getValue() {
-        const { list } = STATE$8.get(wrapper);
-        return (list == null ? void 0 : list.lfDataset) || {};
-      },
-      setValue(value) {
-        const { list } = STATE$8.get(wrapper);
-        const callback = (_2, u2) => {
-          list.lfDataset = u2.parsedJson || {};
-        };
-        normalizeValue(value, callback, CustomWidgetName.history);
-      }
-    };
-  },
-  //#endregion
-  //#region Render
-  render: (node) => {
-    const wrapper = document.createElement(TagName.Div);
-    const content = document.createElement(TagName.Div);
-    const list = document.createElement(TagName.LfList);
-    list.classList.add(HistoryCSS.Widget);
-    list.lfEmpty = "History is empty!";
-    list.lfEnableDeletions = true;
-    switch (node.comfyClass) {
-      case NodeName.loadFileOnce:
-        break;
-      default:
-        list.lfSelectable = true;
-        break;
-    }
-    list.addEventListener(LfEventName.LfList, (e2) => EV_HANDLERS$6.list(STATE$8.get(wrapper), e2));
-    content.classList.add(HistoryCSS.Content);
-    content.appendChild(list);
-    wrapper.appendChild(content);
-    const options = historyFactory.options(wrapper);
-    STATE$8.set(wrapper, { list, node, wrapper });
-    return { widget: createDOMWidget(CustomWidgetName.history, wrapper, node, options) };
-  },
-  //#endregion
-  //#region State
-  state: STATE$8
-  //#endregion
-};
 var ImageEditorCSS;
 (function(ImageEditorCSS2) {
   ImageEditorCSS2["Content"] = "lf-imageeditor";
@@ -9107,6 +6770,7 @@ var ImageEditorCanvasIds;
 })(ImageEditorCanvasIds || (ImageEditorCanvasIds = {}));
 var ImageEditorSliderIds;
 (function(ImageEditorSliderIds2) {
+  ImageEditorSliderIds2["Amount"] = "amount";
   ImageEditorSliderIds2["Balance"] = "balance";
   ImageEditorSliderIds2["BlueChannel"] = "b_channel";
   ImageEditorSliderIds2["BlurKernelSize"] = "blur_kernel_size";
@@ -9128,6 +6792,7 @@ var ImageEditorSliderIds;
   ImageEditorSliderIds2["RedChannel"] = "r_channel";
   ImageEditorSliderIds2["SharpenAmount"] = "sharpen_amount";
   ImageEditorSliderIds2["Size"] = "size";
+  ImageEditorSliderIds2["Sigma"] = "sigma";
   ImageEditorSliderIds2["Softness"] = "softness";
   ImageEditorSliderIds2["Steps"] = "steps";
   ImageEditorSliderIds2["Strength"] = "strength";
@@ -9246,6 +6911,13 @@ var ImageEditorTiltShiftIds;
   ImageEditorTiltShiftIds2["Smooth"] = "smooth";
   ImageEditorTiltShiftIds2["Vertical"] = "vertical";
 })(ImageEditorTiltShiftIds || (ImageEditorTiltShiftIds = {}));
+var ImageEditorUnsharpMaskIds;
+(function(ImageEditorUnsharpMaskIds2) {
+  ImageEditorUnsharpMaskIds2["Amount"] = "amount";
+  ImageEditorUnsharpMaskIds2["Radius"] = "radius";
+  ImageEditorUnsharpMaskIds2["Sigma"] = "sigma";
+  ImageEditorUnsharpMaskIds2["Threshold"] = "threshold";
+})(ImageEditorUnsharpMaskIds || (ImageEditorUnsharpMaskIds = {}));
 var ImageEditorVibranceIds;
 (function(ImageEditorVibranceIds2) {
   ImageEditorVibranceIds2["Intensity"] = "intensity";
@@ -9513,6 +7185,65 @@ const SETTINGS = {
           min: "1",
           step: "2",
           title: "Controls the size of the Gaussian blur kernel. Higher values mean more smoothing."
+        }
+      ]
+    }
+  },
+  //#endregion
+  //#region Unsharp mask
+  unsharpMask: {
+    controlIds: ImageEditorUnsharpMaskIds,
+    settings: {
+      amount: 0.5,
+      radius: 5,
+      sigma: 1,
+      threshold: 0
+    },
+    configs: {
+      [ImageEditorControls.Slider]: [
+        {
+          ariaLabel: "Sharpen Amount",
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 0.5,
+          id: ImageEditorSliderIds.Amount,
+          isMandatory: true,
+          max: "5",
+          min: "0",
+          step: "0.05",
+          title: "Overall strength applied to the high-frequency detail mask."
+        },
+        {
+          ariaLabel: "Radius",
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 5,
+          id: ImageEditorSliderIds.Radius,
+          isMandatory: true,
+          max: "31",
+          min: "1",
+          step: "2",
+          title: "Gaussian blur kernel size (odd numbers give the best results)."
+        },
+        {
+          ariaLabel: "Sigma",
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 1,
+          id: ImageEditorSliderIds.Sigma,
+          isMandatory: true,
+          max: "5",
+          min: "0.1",
+          step: "0.1",
+          title: "Gaussian blur sigma controlling feather softness around edges."
+        },
+        {
+          ariaLabel: "Threshold",
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 0,
+          id: ImageEditorSliderIds.Threshold,
+          isMandatory: true,
+          max: "1",
+          min: "0",
+          step: "0.01",
+          title: "Skip sharpening for pixels below this normalized contrast level."
         }
       ]
     }
@@ -10413,6 +8144,19 @@ const TREE_DATA = {
           value: "Clarity"
         },
         //#endregion
+        //#region Unsharp mask
+        {
+          description: "Sharpens edges using a classic unsharp mask pipeline.",
+          cells: {
+            lfCode: {
+              shape: "code",
+              value: JSON.stringify(SETTINGS.unsharpMask)
+            }
+          },
+          id: "unsharp_mask",
+          value: "Unsharp Mask"
+        },
+        //#endregion
         //#region Contrast
         {
           description: "Adjusts the contrast.",
@@ -10594,34 +8338,86 @@ const TREE_DATA = {
     }
   ]
 };
-const EV_HANDLERS$5 = {
+var LfEventName;
+(function(LfEventName2) {
+  LfEventName2["LfAccordion"] = "lf-accordion-event";
+  LfEventName2["LfArticle"] = "lf-article-event";
+  LfEventName2["LfButton"] = "lf-button-event";
+  LfEventName2["LfCanvas"] = "lf-canvas-event";
+  LfEventName2["LfCard"] = "lf-card-event";
+  LfEventName2["LfCarousel"] = "lf-carousel-event";
+  LfEventName2["LfChat"] = "lf-chat-event";
+  LfEventName2["LfChart"] = "lf-chart-event";
+  LfEventName2["LfChip"] = "lf-chip-event";
+  LfEventName2["LfCode"] = "lf-code-event";
+  LfEventName2["LfCompare"] = "lf-compare-event";
+  LfEventName2["LfImageviewer"] = "lf-imageviewer-event";
+  LfEventName2["LfList"] = "lf-list-event";
+  LfEventName2["LfManager"] = "lf-manager-ready";
+  LfEventName2["LfMasonry"] = "lf-masonry-event";
+  LfEventName2["LfMessenger"] = "lf-messenger-event";
+  LfEventName2["LfProgressbar"] = "lf-progressbar-event";
+  LfEventName2["LfSlider"] = "lf-slider-event";
+  LfEventName2["LfSpinner"] = "lf-spinner-event";
+  LfEventName2["LfTabbar"] = "lf-tabbar-event";
+  LfEventName2["LfTextfield"] = "lf-textfield-event";
+  LfEventName2["LfToggle"] = "lf-toggle-event";
+  LfEventName2["LfTree"] = "lf-tree-event";
+  LfEventName2["LfUpload"] = "lf-upload-event";
+  LfEventName2["Textarea"] = "textarea-event";
+})(LfEventName || (LfEventName = {}));
+const handleInterruptForState = async (state) => {
+  var _a, _b;
+  const lfManager2 = getLfManager();
+  const { actionButtons, grid, imageviewer } = state.elements;
+  const dataset = imageviewer.lfDataset;
+  const statusColumn = getStatusColumn(dataset);
+  const pathColumn = getPathColumn(dataset);
+  const parsedPath = pathColumn ? unescapeJson(pathColumn).parsedJson : void 0;
+  const path = typeof (parsedPath == null ? void 0 : parsedPath.title) === "string" ? parsedPath.title : null;
+  if ((statusColumn == null ? void 0 : statusColumn.title) === ImageEditorStatus.Pending) {
+    statusColumn.title = ImageEditorStatus.Completed;
+    if (dataset && path) {
+      try {
+        await getApiRoutes().json.update(path, dataset);
+      } catch (error) {
+        lfManager2.log("Failed to update JSON after workflow interrupt.", { error, path }, LogSeverity.Warning);
+      }
+    }
+    if ((actionButtons == null ? void 0 : actionButtons.interrupt) && (actionButtons == null ? void 0 : actionButtons.resume)) {
+      setGridStatus(ImageEditorStatus.Completed, grid, actionButtons);
+    } else {
+      grid == null ? void 0 : grid.classList.add(ImageEditorCSS.GridIsInactive);
+    }
+    try {
+      const components = await imageviewer.getComponents();
+      const navigation = components == null ? void 0 : components.navigation;
+      await imageviewer.reset();
+      await ((_b = (_a = navigation == null ? void 0 : navigation.masonry) == null ? void 0 : _a.setSelectedShape) == null ? void 0 : _b.call(_a, null));
+    } catch (error) {
+      lfManager2.log("Failed to reset image viewer after workflow interrupt.", { error }, LogSeverity.Warning);
+    }
+  }
+  await resetSettings(imageviewer);
+};
+const EV_HANDLERS$a = {
   //#region Button handler
   button: async (state, e2) => {
+    var _a;
     const { comp, eventType } = e2.detail;
-    const { elements } = state;
-    const { actionButtons, grid, imageviewer } = elements;
     if (eventType === "click") {
-      const update = async () => {
-        const dataset = imageviewer.lfDataset;
-        const pathColumn = getPathColumn(dataset);
-        const statusColumn = getStatusColumn(dataset);
-        if ((statusColumn == null ? void 0 : statusColumn.title) === ImageEditorStatus.Pending) {
-          statusColumn.title = ImageEditorStatus.Completed;
-          const path = unescapeJson(pathColumn).parsedJson.title;
-          await getApiRoutes().json.update(path, dataset);
-          setGridStatus(ImageEditorStatus.Completed, grid, actionButtons);
-          const { masonry } = (await imageviewer.getComponents()).navigation;
-          await imageviewer.reset();
-          await masonry.setSelectedShape(null);
-        }
-      };
+      const isPatched = ((_a = api) == null ? void 0 : _a[LFInterruptFlags.PatchedInterrupt]) === true;
       switch (comp.lfIcon) {
         case ImageEditorIcons.Interrupt:
           getApiRoutes().comfy.interrupt();
+          if (!isPatched) {
+            await handleInterruptForState(state);
+          }
+          break;
+        case ImageEditorIcons.Resume:
+          await handleInterruptForState(state);
           break;
       }
-      await update();
-      resetSettings(imageviewer);
     }
   },
   //#endregion
@@ -10691,7 +8487,7 @@ const EV_HANDLERS$5 = {
             break;
           case "stroke":
             const canvasEv = ogEv;
-            EV_HANDLERS$5.canvas(state, canvasEv);
+            EV_HANDLERS$a.canvas(state, canvasEv);
             break;
         }
         break;
@@ -10757,7 +8553,7 @@ const EV_HANDLERS$5 = {
   }
   //#endregion
 };
-const apiCall$1 = async (state, addSnapshot) => {
+const apiCall$2 = async (state, addSnapshot) => {
   const { elements, filter, filterType } = state;
   const { imageviewer } = elements;
   const lfManager2 = getLfManager();
@@ -10990,7 +8786,7 @@ const createSlider = (state, data) => {
   comp.lfStyle = ".form-field { width: 100%; }";
   comp.lfValue = Number(data.defaultValue);
   comp.title = data.title;
-  comp.addEventListener(LfEventName.LfSlider, (e2) => EV_HANDLERS$5.slider(state, e2));
+  comp.addEventListener(LfEventName.LfSlider, (e2) => EV_HANDLERS$a.slider(state, e2));
   return comp;
 };
 const createTextfield = (state, data) => {
@@ -10999,7 +8795,7 @@ const createTextfield = (state, data) => {
   comp.lfHtmlAttributes = { type: data.type };
   comp.lfValue = String(data.defaultValue).valueOf();
   comp.title = data.title;
-  comp.addEventListener(LfEventName.LfTextfield, (e2) => EV_HANDLERS$5.textfield(state, e2));
+  comp.addEventListener(LfEventName.LfTextfield, (e2) => EV_HANDLERS$a.textfield(state, e2));
   return comp;
 };
 const createToggle = (state, data) => {
@@ -11009,21 +8805,21 @@ const createToggle = (state, data) => {
   comp.lfLabel = parseLabel(data);
   comp.lfValue = data.defaultValue ?? false;
   comp.title = data.title;
-  comp.addEventListener(LfEventName.LfToggle, (e2) => EV_HANDLERS$5.toggle(state, e2));
+  comp.addEventListener(LfEventName.LfToggle, (e2) => EV_HANDLERS$a.toggle(state, e2));
   return comp;
 };
-const getPathColumn = (dataset) => {
+function getPathColumn(dataset) {
   var _a;
   return ((_a = dataset == null ? void 0 : dataset.columns) == null ? void 0 : _a.find((c2) => c2.id === ImageEditorColumnId.Path)) || null;
-};
-const getStatusColumn = (dataset) => {
+}
+function getStatusColumn(dataset) {
   var _a;
   return ((_a = dataset == null ? void 0 : dataset.columns) == null ? void 0 : _a.find((c2) => c2.id === ImageEditorColumnId.Status)) || null;
-};
-const parseLabel = (data) => {
+}
+function parseLabel(data) {
   return data.isMandatory ? `${data.ariaLabel}*` : data.ariaLabel;
-};
-const resetSettings = async (settings) => {
+}
+async function resetSettings(settings) {
   const controls = Array.from(settings.querySelectorAll("[data-id]"));
   for (const control of controls) {
     switch (control.tagName) {
@@ -11042,25 +8838,30 @@ const resetSettings = async (settings) => {
         break;
     }
   }
-};
-const setGridStatus = (status, grid, actionButtons) => {
+}
+function setGridStatus(status, grid, actionButtons) {
+  const { interrupt, resume } = actionButtons;
   switch (status) {
     case ImageEditorStatus.Completed:
       requestAnimationFrame(() => {
-        actionButtons.interrupt.lfUiState = "disabled";
-        actionButtons.resume.lfUiState = "disabled";
+        if (interrupt)
+          interrupt.lfUiState = "disabled";
+        if (resume)
+          resume.lfUiState = "disabled";
       });
-      grid.classList.add(ImageEditorCSS.GridIsInactive);
+      grid == null ? void 0 : grid.classList.add(ImageEditorCSS.GridIsInactive);
       break;
     case ImageEditorStatus.Pending:
       requestAnimationFrame(() => {
-        actionButtons.interrupt.lfUiState = "danger";
-        actionButtons.resume.lfUiState = "success";
+        if (interrupt)
+          interrupt.lfUiState = "danger";
+        if (resume)
+          resume.lfUiState = "success";
       });
-      grid.classList.remove(ImageEditorCSS.GridIsInactive);
+      grid == null ? void 0 : grid.classList.remove(ImageEditorCSS.GridIsInactive);
       break;
   }
-};
+}
 const updateCb = async (state, addSnapshot = false, force = false) => {
   await refreshValues(state, addSnapshot);
   const { elements, filter } = state;
@@ -11094,22 +8895,23 @@ const updateCb = async (state, addSnapshot = false, force = false) => {
   const shouldUpdate = !!(validValues && (!isStroke || isStroke && isCanvasAction));
   const requiresManualApply = !!(filter == null ? void 0 : filter.requiresManualApply);
   if (shouldUpdate && (force || !requiresManualApply)) {
-    apiCall$1(state, addSnapshot);
+    apiCall$2(state, addSnapshot);
   }
 };
-const STATE$7 = /* @__PURE__ */ new WeakMap();
+const STATE$h = /* @__PURE__ */ new WeakMap();
+const IMAGE_EDITOR_INSTANCES = /* @__PURE__ */ new Set();
 const imageEditorFactory = {
   //#region Options
   options: (wrapper) => {
     return {
       hideOnZoom: false,
-      getState: () => STATE$7.get(wrapper),
+      getState: () => STATE$h.get(wrapper),
       getValue: () => {
-        const { imageviewer } = STATE$7.get(wrapper).elements;
+        const { imageviewer } = STATE$h.get(wrapper).elements;
         return imageviewer.lfDataset || {};
       },
       setValue: (value) => {
-        const { actionButtons, grid, imageviewer } = STATE$7.get(wrapper).elements;
+        const { actionButtons, grid, imageviewer } = STATE$h.get(wrapper).elements;
         const callback = (_2, u2) => {
           var _a;
           const parsedValue = u2.parsedJson;
@@ -11147,7 +8949,7 @@ const imageEditorFactory = {
     imageviewer.classList.add(ImageEditorCSS.Widget);
     imageviewer.lfLoadCallback = async (_2, value) => await refresh(value);
     imageviewer.lfValue = TREE_DATA;
-    imageviewer.addEventListener(LfEventName.LfImageviewer, (e2) => EV_HANDLERS$5.imageviewer(STATE$7.get(wrapper), e2));
+    imageviewer.addEventListener(LfEventName.LfImageviewer, (e2) => EV_HANDLERS$a.imageviewer(STATE$h.get(wrapper), e2));
     imageviewer.appendChild(settings);
     const actionButtons = {};
     switch (node.comfyClass) {
@@ -11160,14 +8962,14 @@ const imageEditorFactory = {
         interrupt.lfStretchX = true;
         interrupt.lfUiState = "danger";
         interrupt.title = "Click to interrupt the workflow.";
-        interrupt.addEventListener(LfEventName.LfButton, (e2) => EV_HANDLERS$5.button(STATE$7.get(wrapper), e2));
+        interrupt.addEventListener(LfEventName.LfButton, (e2) => EV_HANDLERS$a.button(STATE$h.get(wrapper), e2));
         resume.lfIcon = ImageEditorIcons.Resume;
         resume.lfLabel = "Resume workflow";
         resume.lfStretchX = true;
         resume.lfStyling = "flat";
         resume.lfUiState = "success";
         resume.title = "Click to resume the workflow. Remember to save your snapshots after editing the images!";
-        resume.addEventListener(LfEventName.LfButton, (e2) => EV_HANDLERS$5.button(STATE$7.get(wrapper), e2));
+        resume.addEventListener(LfEventName.LfButton, (e2) => EV_HANDLERS$a.button(STATE$h.get(wrapper), e2));
         actions.classList.add(ImageEditorCSS.Actions);
         actions.appendChild(interrupt);
         actions.appendChild(resume);
@@ -11184,19 +8986,2414 @@ const imageEditorFactory = {
     content.appendChild(grid);
     wrapper.appendChild(content);
     const options = imageEditorFactory.options(wrapper);
-    STATE$7.set(wrapper, {
+    const state = {
       elements: { actionButtons, controls: {}, grid, imageviewer, settings },
       filter: null,
       filterType: null,
       lastBrushSettings: JSON.parse(JSON.stringify(SETTINGS.brush.settings)),
       node,
       update: {
-        preview: () => updateCb(STATE$7.get(wrapper)),
-        snapshot: () => updateCb(STATE$7.get(wrapper), true)
+        preview: () => updateCb(STATE$h.get(wrapper)),
+        snapshot: () => updateCb(STATE$h.get(wrapper), true)
       },
       wrapper
-    });
+    };
+    STATE$h.set(wrapper, state);
+    IMAGE_EDITOR_INSTANCES.add(state);
     return { widget: createDOMWidget(CustomWidgetName.imageEditor, wrapper, node, options) };
+  },
+  //#endregion
+  //#region State
+  state: STATE$h
+  //#endregion
+};
+function installLFInterruptHook(apiObj, opts = {}) {
+  const attempts = opts.attempts ?? 20;
+  const intervalMs = opts.intervalMs ?? 250;
+  const logger = opts.logger ?? (() => {
+  });
+  if (!isInterruptHookAPI(apiObj)) {
+    logger('"api" object not available; cannot install interrupt hook yet', {}, LogSeverity.Warning);
+    return { interruptHook: false };
+  }
+  const scopedApi = apiObj;
+  const wrap = opts.interruptWrapper;
+  const makePatched = (fn) => {
+    const factory = wrap ?? ((original) => async function patched2(...args) {
+      if (scopedApi[LFInterruptFlags.InBeforeInterrupt] === true) {
+        return original.apply(this ?? scopedApi, args);
+      }
+      scopedApi[LFInterruptFlags.InBeforeInterrupt] = true;
+      try {
+        const result = await original.apply(this ?? scopedApi, args);
+        for (const state of IMAGE_EDITOR_INSTANCES) {
+          try {
+            await handleInterruptForState(state);
+          } catch (error) {
+            logger("LF interrupt hook failed while applying image editor cleanup.", { error }, LogSeverity.Warning);
+          }
+        }
+        return result;
+      } finally {
+        scopedApi[LFInterruptFlags.InBeforeInterrupt] = false;
+      }
+    });
+    return factory(fn);
+  };
+  const installInterrupt = () => {
+    try {
+      if (scopedApi[LFInterruptFlags.PatchedInterrupt] === true) {
+        return true;
+      }
+      const current = scopedApi.interrupt;
+      if (typeof current === "function") {
+        scopedApi[LFInterruptFlags.OriginalInterruptRef] = current;
+        scopedApi.interrupt = makePatched(current);
+        scopedApi[LFInterruptFlags.PatchedInterrupt] = true;
+        return true;
+      }
+      const descriptor = Object.getOwnPropertyDescriptor(scopedApi, "interrupt");
+      if (!descriptor || descriptor.configurable) {
+        let original;
+        Object.defineProperty(scopedApi, "interrupt", {
+          configurable: true,
+          enumerable: true,
+          get() {
+            return scopedApi[LFInterruptFlags.PatchedInterrupt] ? original : scopedApi[LFInterruptFlags.OriginalInterruptRef] ?? original;
+          },
+          set(fn) {
+            if (typeof fn !== "function") {
+              original = fn;
+              return;
+            }
+            scopedApi[LFInterruptFlags.OriginalInterruptRef] = fn;
+            original = makePatched(fn);
+            scopedApi[LFInterruptFlags.PatchedInterrupt] = true;
+          }
+        });
+      }
+      return false;
+    } catch (error) {
+      logger("Failed to patch api.interrupt; proceeding without LF interrupt hook", { error }, LogSeverity.Warning);
+      return false;
+    }
+  };
+  let patched = installInterrupt();
+  if (!patched) {
+    let count = 0;
+    const timer2 = setInterval(() => {
+      count += 1;
+      patched = installInterrupt();
+      if (patched || count > attempts) {
+        clearInterval(timer2);
+      }
+    }, intervalMs);
+  }
+  return { interruptHook: patched };
+}
+function installLFRefreshNodeHook(appObj, opts = {}) {
+  const attempts = opts.attempts ?? 20;
+  const intervalMs = opts.intervalMs ?? 250;
+  const logger = opts.logger ?? (() => {
+  });
+  if (!isRefreshHookApp(appObj)) {
+    logger('"app" object not available; cannot install refresh hook yet', {}, LogSeverity.Warning);
+    return { refreshHook: false };
+  }
+  const scopedApp = appObj;
+  const wrap = opts.refreshWrapper;
+  const makePatched = (fn) => {
+    const factory = wrap ?? ((original) => async function patched2(...args) {
+      if (scopedApp[LFRefreshFlags.InBeforeRefresh] === true) {
+        return original.apply(this ?? scopedApp, args);
+      }
+      scopedApp[LFRefreshFlags.InBeforeRefresh] = true;
+      try {
+        await beforeRefreshNodeDefs(args == null ? void 0 : args[0]);
+      } catch (error) {
+        logger("LF refresh hook failed before calling original function", { error }, LogSeverity.Warning);
+      } finally {
+        scopedApp[LFRefreshFlags.InBeforeRefresh] = false;
+      }
+      return original.apply(this ?? scopedApp, args);
+    });
+    return factory(fn);
+  };
+  const installRefresh = () => {
+    try {
+      if (scopedApp[LFRefreshFlags.PatchedRefresh] === true) {
+        return true;
+      }
+      const current = scopedApp.refreshComboInNodes;
+      if (typeof current === "function") {
+        scopedApp[LFRefreshFlags.OriginalRefreshRef] = current;
+        scopedApp.refreshComboInNodes = makePatched(current);
+        scopedApp[LFRefreshFlags.PatchedRefresh] = true;
+        return true;
+      }
+      const descriptor = Object.getOwnPropertyDescriptor(scopedApp, "refreshComboInNodes");
+      if (!descriptor || descriptor.configurable) {
+        let original;
+        Object.defineProperty(scopedApp, "refreshComboInNodes", {
+          configurable: true,
+          enumerable: true,
+          get() {
+            return scopedApp[LFRefreshFlags.PatchedRefresh] ? original : scopedApp[LFRefreshFlags.OriginalRefreshRef] ?? original;
+          },
+          set(fn) {
+            if (typeof fn !== "function") {
+              original = fn;
+              return;
+            }
+            scopedApp[LFRefreshFlags.OriginalRefreshRef] = fn;
+            original = makePatched(fn);
+            scopedApp[LFRefreshFlags.PatchedRefresh] = true;
+          }
+        });
+      }
+      return false;
+    } catch (error) {
+      logger("Failed to patch refreshComboInNodes; proceeding without LF refresh hook", { error }, LogSeverity.Warning);
+      return false;
+    }
+  };
+  let patched = installRefresh();
+  if (!patched) {
+    let count = 0;
+    const timer2 = setInterval(() => {
+      count += 1;
+      patched = installRefresh();
+      if (patched || count > attempts) {
+        clearInterval(timer2);
+      }
+    }, intervalMs);
+  }
+  return { refreshHook: patched };
+}
+const CATEGORY = "✨ LF Nodes";
+const DESCRIPTION = "Virtual reroute node that propagates upstream type and optional label.";
+const DISPLAY_NAME = "Reroute";
+const EXTENSION_NAME = `lf.virtual.${DISPLAY_NAME}`;
+const NODE_PATH = "✨ LF Nodes/Reroute";
+const SERIALIZED_KEYS = ["label", "showIcon", "showType", "mode", "horizontal"];
+function deriveInnerColor(base) {
+  const hex = base.trim();
+  const expand = (h2) => h2.length === 4 ? `#${h2[1]}${h2[1]}${h2[2]}${h2[2]}${h2[3]}${h2[3]}` : h2;
+  if (!/^#([0-9a-fA-F]{3}){1,2}$/.test(hex)) {
+    return "#ececec";
+  }
+  const full = expand(hex).substring(1);
+  const r2 = parseInt(full.substring(0, 2), 16);
+  const g2 = parseInt(full.substring(2, 4), 16);
+  const b2 = parseInt(full.substring(4, 6), 16);
+  const lighten = (c2) => Math.min(255, Math.round(c2 + (255 - c2) * 0.55));
+  const rL = lighten(r2);
+  const gL = lighten(g2);
+  const bL = lighten(b2);
+  return `#${rL.toString(16).padStart(2, "0")}${gL.toString(16).padStart(2, "0")}${bL.toString(16).padStart(2, "0")}`;
+}
+const lfReroute = {
+  name: EXTENSION_NAME,
+  registerCustomNodes(appInstance) {
+    var _a, _b;
+    class LFReroute extends LGraphNode {
+      constructor() {
+        var _a2, _b2, _c, _d, _e, _f;
+        super();
+        this.isVirtualNode = true;
+        this.properties = {
+          horizontal: false,
+          label: "",
+          mode: "label+type",
+          showType: true,
+          showIcon: true
+        };
+        this.title = this.properties.label || "Label";
+        (_a2 = this.addProperty) == null ? void 0 : _a2.call(this, "label", this.properties.label, "string");
+        (_b2 = this.addProperty) == null ? void 0 : _b2.call(this, "mode", this.properties.mode, "string");
+        (_c = this.addProperty) == null ? void 0 : _c.call(this, "showType", this.properties.showType, "boolean");
+        (_d = this.addProperty) == null ? void 0 : _d.call(this, "showIcon", this.properties.showIcon, "boolean");
+        (_e = this.addProperty) == null ? void 0 : _e.call(this, "horizontal", this.properties.horizontal, "boolean");
+        this.addInput("", "*");
+        this.addOutput(this.makeOutputName("*"), "*");
+        this.__labelWidget = (_f = this.addWidget) == null ? void 0 : _f.call(this, "text", "Label", this.properties.label, (v2) => {
+          this.properties.label = v2;
+          this.refreshLabel();
+        }, { multiline: false });
+        if (this.__labelWidget) {
+          this.__labelWidget.serializeValue = () => this.properties.label;
+        }
+        this.onConnectionsChange = () => {
+          var _a3, _b3;
+          try {
+            reroutePropagationLogic.call(this, appInstance);
+          } catch (error) {
+            (_b3 = (_a3 = getLfManager()) == null ? void 0 : _a3.log) == null ? void 0 : _b3.call(_a3, "[LFReroute] onConnectionsChange error", { error }, LogSeverity.Warning);
+          }
+        };
+      }
+      snapToGrid(size) {
+        const proto = LGraphNode.prototype;
+        if (proto == null ? void 0 : proto.snapToGrid) {
+          return proto.snapToGrid.call(this, size);
+        }
+        const grid = size || LiteGraph.CANVAS_GRID_SIZE || 10;
+        if (this.pos) {
+          this.pos[0] = grid * Math.round(this.pos[0] / grid);
+          this.pos[1] = grid * Math.round(this.pos[1] / grid);
+        }
+      }
+      getExtraMenuOptions(_ignored, options) {
+        options.unshift({
+          content: "Cycle Label/Type Mode",
+          callback: () => {
+            const order = ["label+type", "label", "type"];
+            const i2 = order.indexOf(this.properties.mode);
+            this.properties.mode = order[(i2 + 1) % order.length];
+            this.refreshLabel();
+          }
+        }, {
+          content: (this.properties.showType ? "Hide" : "Show") + " Type Part",
+          callback: () => {
+            this.properties.showType = !this.properties.showType;
+            this.refreshLabel();
+          }
+        }, {
+          content: (this.properties.showIcon ? "Hide" : "Show") + " Icon",
+          callback: () => {
+            this.properties.showIcon = !this.properties.showIcon;
+            COMFY_API.scheduleRedraw();
+          }
+        }, {
+          content: "Edit Label",
+          callback: () => {
+            const v2 = prompt("Set label", this.properties.label || "");
+            if (v2 !== null) {
+              this.properties.label = v2;
+              this.refreshLabel();
+            }
+          }
+        }, {
+          content: "Set " + (this.properties.horizontal ? "Horizontal" : "Vertical"),
+          callback: () => {
+            this.properties.horizontal = !this.properties.horizontal;
+            this.applyOrientation();
+          }
+        });
+      }
+      makeOutputName(displayType, labelOverride) {
+        const label = (labelOverride !== void 0 ? labelOverride : this.properties.label || "").trim();
+        const typePart = this.properties.showType ? displayType : "";
+        switch (this.properties.mode) {
+          case "label":
+            return label || (this.properties.showType ? displayType : "");
+          case "type":
+            return typePart;
+          case "label+type":
+          default:
+            if (label && typePart)
+              return `${label}:${typePart}`;
+            return label || typePart;
+        }
+      }
+      refreshLabel() {
+        var _a2;
+        if (!((_a2 = this.outputs) == null ? void 0 : _a2.length))
+          return;
+        const effectiveLabel = (this.properties.label || "").trim() || this.__autoLabel || "";
+        const displayType = this.__outputType || this.outputs[0].type || "*";
+        this.outputs[0].name = this.makeOutputName(displayType, effectiveLabel);
+        this.title = effectiveLabel || "Label";
+        this.size = this.computeSize();
+        this.applyOrientation();
+        COMFY_API.scheduleRedraw();
+        const w2 = this.__labelWidget;
+        if (w2 && "value" in w2 && w2.value !== this.properties.label) {
+          w2.value = this.properties.label;
+        }
+      }
+      onSerialize(raw) {
+        const o2 = raw;
+        if (o2 == null ? void 0 : o2.properties) {
+          const target = o2.properties;
+          for (const key of SERIALIZED_KEYS) {
+            target[key] = this.properties[key];
+          }
+        }
+        if (Array.isArray(o2 == null ? void 0 : o2.widgets_values) && this.__labelWidget && this.widgets) {
+          const idx = this.widgets.indexOf(this.__labelWidget);
+          if (idx >= 0) {
+            o2.widgets_values[idx] = this.properties.label;
+          }
+        }
+      }
+      onConfigure(raw) {
+        const o2 = raw;
+        const props = (o2 == null ? void 0 : o2.properties) || {};
+        for (const key of SERIALIZED_KEYS) {
+          const incoming = props[key];
+          if (incoming === void 0)
+            continue;
+          if (key === "mode") {
+            if (typeof incoming === "string" && ["label", "type", "label+type"].includes(incoming)) {
+              this.properties.mode = incoming;
+            }
+            continue;
+          }
+          if (key === "label") {
+            if (typeof incoming === "string") {
+              this.properties.label = incoming;
+            } else if (Array.isArray(o2 == null ? void 0 : o2.widgets_values) && this.__labelWidget && this.widgets) {
+              const idx = this.widgets.indexOf(this.__labelWidget);
+              const wv = o2.widgets_values[idx];
+              if (idx >= 0 && typeof wv === "string") {
+                this.properties.label = wv;
+              }
+            }
+            continue;
+          }
+          if (key === "horizontal" || key === "showIcon" || key === "showType") {
+            if (typeof incoming === "boolean") {
+              this.properties[key] = incoming;
+            }
+            continue;
+          }
+        }
+        if (this.__labelWidget && this.widgets) {
+          const idx = this.widgets.indexOf(this.__labelWidget);
+          if (idx >= 0 && "value" in this.__labelWidget) {
+            this.__labelWidget.value = this.properties.label;
+          }
+        }
+        this.refreshLabel();
+      }
+      applyOrientation() {
+        var _a2, _b2, _c, _d;
+        if (this.properties.horizontal) {
+          if ((_a2 = this.inputs) == null ? void 0 : _a2[0]) {
+            this.inputs[0].pos = [this.size[0] / 2, 0];
+          }
+          if ((_b2 = this.outputs) == null ? void 0 : _b2[0]) {
+            this.outputs[0].pos = [this.size[0] / 2, this.size[1]];
+          }
+        } else {
+          if ((_c = this.inputs) == null ? void 0 : _c[0]) {
+            delete this.inputs[0].pos;
+          }
+          if ((_d = this.outputs) == null ? void 0 : _d[0]) {
+            delete this.outputs[0].pos;
+          }
+        }
+        COMFY_API.scheduleRedraw();
+      }
+      computeSize() {
+        var _a2, _b2, _c;
+        const base = this.title || "";
+        const slotName = ((_b2 = (_a2 = this.outputs) == null ? void 0 : _a2[0]) == null ? void 0 : _b2.name) || "";
+        const longest = base.length > slotName.length ? base : slotName;
+        const textSize = LiteGraph.NODE_TEXT_SIZE || 14;
+        const w2 = Math.max(120, textSize * longest.length * 0.6 + 50);
+        const collapsed = (_c = this.flags) == null ? void 0 : _c.collapsed;
+        const h2 = collapsed ? 28 : 50;
+        return [w2, h2];
+      }
+      onDrawForeground(ctx) {
+        var _a2, _b2, _c, _d;
+        try {
+          if (!this.properties.showIcon || !ctx) {
+            return;
+          }
+          const headerH = LiteGraph && LiteGraph.NODE_TITLE_HEIGHT || 24;
+          const radius = 6;
+          const cx = 10 + radius;
+          const cy = -headerH / 2;
+          ctx.save();
+          const displayType = this.__outputType || ((_b2 = (_a2 = this.outputs) == null ? void 0 : _a2[0]) == null ? void 0 : _b2.type);
+          let baseColor;
+          if (displayType && (LGraphCanvas == null ? void 0 : LGraphCanvas.link_type_colors)) {
+            const c2 = LGraphCanvas.link_type_colors[displayType];
+            if (typeof c2 === "string") {
+              baseColor = c2;
+            }
+          }
+          const outer = baseColor || "#3a3a3a";
+          const inner = deriveInnerColor(baseColor || "#3a3a3a");
+          ctx.fillStyle = outer;
+          ctx.beginPath();
+          ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = inner;
+          ctx.beginPath();
+          ctx.arc(cx, cy, radius * 0.4, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        } catch (err2) {
+          (_d = (_c = getLfManager()) == null ? void 0 : _c.log) == null ? void 0 : _d.call(_c, "[LFReroute] onDrawForeground error", { err: err2 }, LogSeverity.Info);
+        }
+      }
+    }
+    function reroutePropagationLogic(appInstance2) {
+      var _a2, _b2, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p;
+      const isLabeled = (n2) => {
+        var _a3;
+        return ((_a3 = n2 == null ? void 0 : n2.constructor) == null ? void 0 : _a3.type) === NODE_PATH;
+      };
+      let inputType = null;
+      let upstream = this;
+      let originNode = null;
+      while (((_b2 = (_a2 = upstream == null ? void 0 : upstream.inputs) == null ? void 0 : _a2[0]) == null ? void 0 : _b2.link) != null) {
+        const linkId = upstream.inputs[0].link;
+        const link = appInstance2.graph.links[linkId];
+        if (!link)
+          break;
+        const origin = appInstance2.graph.getNodeById(link.origin_id);
+        if (!origin)
+          break;
+        if (isLabeled(origin)) {
+          if (origin === this) {
+            (_c = upstream.disconnectInput) == null ? void 0 : _c.call(upstream, link.target_slot);
+            break;
+          }
+          upstream = origin;
+          continue;
+        }
+        inputType = ((_e = (_d = origin.outputs) == null ? void 0 : _d[link.origin_slot]) == null ? void 0 : _e.type) || null;
+        originNode = origin;
+        break;
+      }
+      let downstreamType = null;
+      const firstLinks = ((_g = (_f = this.outputs) == null ? void 0 : _f[0]) == null ? void 0 : _g.links) || [];
+      for (const l2 of firstLinks) {
+        const link = appInstance2.graph.links[l2];
+        if (!link) {
+          continue;
+        }
+        const target = appInstance2.graph.getNodeById(link.target_id);
+        if (!target || isLabeled(target)) {
+          continue;
+        }
+        downstreamType = ((_i = (_h = target.inputs) == null ? void 0 : _h[link.target_slot]) == null ? void 0 : _i.type) || null;
+        if (downstreamType) {
+          break;
+        }
+      }
+      const finalType = inputType || downstreamType || "*";
+      if (!(this.properties.label || "").trim()) {
+        if (originNode) {
+          const candidateTitle = (originNode.title || "").trim();
+          const candidateSlotName = (() => {
+            var _a3, _b3, _c2, _d2;
+            if (!originNode.outputs)
+              return "";
+            const slotIdx = (() => {
+              var _a4, _b4;
+              if (((_b4 = (_a4 = upstream == null ? void 0 : upstream.inputs) == null ? void 0 : _a4[0]) == null ? void 0 : _b4.link) != null) {
+                const linkId = upstream.inputs[0].link;
+                const link = appInstance2.graph.links[linkId];
+                if (link)
+                  return link.origin_slot ?? 0;
+              }
+              return 0;
+            })();
+            return (((_b3 = (_a3 = originNode.outputs) == null ? void 0 : _a3[slotIdx]) == null ? void 0 : _b3.label) || ((_d2 = (_c2 = originNode.outputs) == null ? void 0 : _c2[slotIdx]) == null ? void 0 : _d2.name) || "").trim();
+          })();
+          const effectiveSlotName = candidateSlotName && candidateSlotName !== "*" ? candidateSlotName : "";
+          const chosen = effectiveSlotName || candidateTitle;
+          if (chosen) {
+            this.__autoLabel = chosen;
+          }
+        } else {
+          this.__autoLabel = void 0;
+        }
+      } else {
+        this.__autoLabel = void 0;
+      }
+      this.__outputType = finalType;
+      if ((_j = this.inputs) == null ? void 0 : _j[0]) {
+        this.inputs[0].type = finalType;
+      }
+      if ((_k = this.outputs) == null ? void 0 : _k[0]) {
+        this.outputs[0].type = finalType;
+        this.outputs[0].name = this.makeOutputName(finalType);
+      }
+      this.size = this.computeSize();
+      this.applyOrientation();
+      this.refreshLabel();
+      const color = (_l = LGraphCanvas.link_type_colors) == null ? void 0 : _l[finalType];
+      if (color) {
+        if ((_n = (_m = this.outputs) == null ? void 0 : _m[0]) == null ? void 0 : _n.links) {
+          for (const l2 of this.outputs[0].links) {
+            const link = appInstance2.graph.links[l2];
+            if (link) {
+              link.color = color;
+            }
+          }
+        }
+        const inLinkId = (_p = (_o = this.inputs) == null ? void 0 : _o[0]) == null ? void 0 : _p.link;
+        if (inLinkId != null) {
+          const inLink = appInstance2.graph.links[inLinkId];
+          if (inLink) {
+            inLink.color = color;
+          }
+        }
+      }
+      COMFY_API.scheduleRedraw();
+    }
+    LiteGraph.registerNodeType(NODE_PATH, Object.assign(LFReroute, {
+      title_mode: LiteGraph.NORMAL_TITLE,
+      title: "Reroute",
+      collapsable: true,
+      category: "LF Nodes",
+      description: "Label + type aware reroute (frontend virtual)"
+    }));
+    onAfterGraphConfigured(LFReroute, (node) => {
+      requestAnimationFrame(() => {
+        var _a2, _b2, _c;
+        try {
+          (_a2 = node.onConnectionsChange) == null ? void 0 : _a2.call(node);
+        } catch (err2) {
+          (_c = (_b2 = getLfManager()) == null ? void 0 : _b2.log) == null ? void 0 : _c.call(_b2, "[LFReroute] onAfterGraphConfigured", { err: err2 }, LogSeverity.Warning);
+        }
+      });
+    });
+    (_b = (_a = getLfManager()) == null ? void 0 : _a.log) == null ? void 0 : _b.call(_a, `Virtual node registered (UI compliant): ${NODE_PATH}`, {}, LogSeverity.Success);
+  },
+  beforeRegisterVueAppNodeDefs(defs) {
+    const def = defs.find((d2) => d2.name === NODE_PATH);
+    if (def) {
+      def.display_name = DISPLAY_NAME;
+      def.category = CATEGORY;
+      def.description = DESCRIPTION;
+      if (def.python_module === "custom_nodes.frontend_only") {
+        def.python_module = "lf_nodes.virtual";
+      }
+    }
+  }
+};
+var __classPrivateFieldGet$3 = function(receiver, state, kind, f2) {
+  if (kind === "a" && !f2) throw new TypeError("Private accessor was defined without a getter");
+  if (typeof state === "function" ? receiver !== state || !f2 : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+  return kind === "m" ? f2 : kind === "a" ? f2.call(receiver) : f2 ? f2.value : state.get(receiver);
+};
+var _LFNodes_REGISTRY;
+class LFNodes {
+  constructor() {
+    _LFNodes_REGISTRY.set(this, /* @__PURE__ */ new Map());
+    this.add = (extension) => {
+      var _a, _b;
+      const lfManager2 = getLfManager();
+      if (!(extension == null ? void 0 : extension.name)) {
+        (_a = lfManager2 == null ? void 0 : lfManager2.log) == null ? void 0 : _a.call(lfManager2, `Attempted to add virtual node with invalid name`, { extension }, LogSeverity.Warning);
+        return;
+      }
+      if (__classPrivateFieldGet$3(this, _LFNodes_REGISTRY, "f").has(extension.name)) {
+        (_b = lfManager2 == null ? void 0 : lfManager2.log) == null ? void 0 : _b.call(lfManager2, `Duplicate virtual node ignored: '${extension.name}'`, {}, LogSeverity.Warning);
+        return;
+      }
+      __classPrivateFieldGet$3(this, _LFNodes_REGISTRY, "f").set(extension.name, { extension, registered: false });
+    };
+    this.addMany = (extensions) => {
+      extensions.forEach((e2) => this.add(e2));
+    };
+    this.list = () => Array.from(__classPrivateFieldGet$3(this, _LFNodes_REGISTRY, "f").values());
+    this.registerAll = () => {
+      const lfManager2 = getLfManager();
+      __classPrivateFieldGet$3(this, _LFNodes_REGISTRY, "f").forEach((entry, key) => {
+        var _a, _b;
+        if (entry.registered) {
+          return;
+        }
+        try {
+          COMFY_API.register(entry.extension);
+          entry.registered = true;
+          (_a = lfManager2 == null ? void 0 : lfManager2.log) == null ? void 0 : _a.call(lfManager2, `Registered virtual node '${key}'`, {}, LogSeverity.Success);
+        } catch (error) {
+          entry.error = error;
+          (_b = lfManager2 == null ? void 0 : lfManager2.log) == null ? void 0 : _b.call(lfManager2, `Failed to register virtual node '${key}'`, { error }, LogSeverity.Error);
+        }
+      });
+    };
+    this.add(lfReroute);
+  }
+}
+_LFNodes_REGISTRY = /* @__PURE__ */ new WeakMap();
+var __classPrivateFieldGet$2 = function(receiver, state, kind, f2) {
+  if (kind === "a" && !f2) throw new TypeError("Private accessor was defined without a getter");
+  if (typeof state === "function" ? receiver !== state || !f2 : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+  return kind === "m" ? f2 : kind === "a" ? f2.call(receiver) : f2 ? f2.value : state.get(receiver);
+};
+var __classPrivateFieldSet$1 = function(receiver, state, value, kind, f2) {
+  if (kind === "m") throw new TypeError("Private method is not writable");
+  if (kind === "a" && !f2) throw new TypeError("Private accessor was defined without a setter");
+  if (typeof state === "function" ? receiver !== state || !f2 : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
+  return kind === "a" ? f2.call(receiver, value) : f2 ? f2.value = value : state.set(receiver, value), value;
+};
+var _LFTooltip_instances, _LFTooltip_CB, _LFTooltip_CSS_CLASSES, _LFTooltip_LAYOUT, _LFTooltip_TOOLTIP_ELEMENT, _LFTooltip_initialize, _LFTooltip_uploadLayout, _LFTooltip_buttonEventHandler;
+class LFTooltip {
+  constructor() {
+    _LFTooltip_instances.add(this);
+    _LFTooltip_CB.set(this, {});
+    _LFTooltip_CSS_CLASSES.set(this, {
+      wrapper: "lf-tooltip",
+      content: `lf-tooltip__content`
+    });
+    _LFTooltip_LAYOUT.set(this, void 0);
+    _LFTooltip_TOOLTIP_ELEMENT.set(this, void 0);
+    _LFTooltip_buttonEventHandler.set(this, async (upload, e2) => {
+      const { eventType } = e2.detail;
+      switch (eventType) {
+        case "click":
+          const lfManager2 = getLfManager();
+          switch (__classPrivateFieldGet$2(this, _LFTooltip_LAYOUT, "f")) {
+            case "upload":
+              const files = await upload.getValue();
+              const reader = new FileReader();
+              reader.onload = (e3) => {
+                var _a;
+                const result = (_a = e3.target) == null ? void 0 : _a.result;
+                let base64String = "";
+                if (typeof result === "string") {
+                  base64String = result.replace(/^data:.*,/, "");
+                } else if (result instanceof ArrayBuffer) {
+                  const arrayBufferView = new Uint8Array(result);
+                  base64String = btoa(String.fromCharCode.apply(null, arrayBufferView));
+                }
+                if (__classPrivateFieldGet$2(this, _LFTooltip_CB, "f")) {
+                  lfManager2.log("Invoking upload callback.", { base64String }, LogSeverity.Info);
+                  __classPrivateFieldGet$2(this, _LFTooltip_CB, "f")[__classPrivateFieldGet$2(this, _LFTooltip_LAYOUT, "f")](base64String);
+                }
+              };
+              reader.readAsDataURL(files[0]);
+              break;
+          }
+      }
+    });
+  }
+  //#endregion
+  //#region Create
+  create(anchor, layout, cb) {
+    const lfFramework2 = getLfManager().getManagers().lfFramework;
+    if (__classPrivateFieldGet$2(this, _LFTooltip_TOOLTIP_ELEMENT, "f")) {
+      __classPrivateFieldGet$2(this, _LFTooltip_instances, "m", _LFTooltip_initialize).call(this);
+    }
+    const parent = document.body;
+    __classPrivateFieldSet$1(this, _LFTooltip_CB, cb ? { [layout]: cb } : {}, "f");
+    __classPrivateFieldSet$1(this, _LFTooltip_LAYOUT, layout ?? "upload", "f");
+    __classPrivateFieldSet$1(this, _LFTooltip_TOOLTIP_ELEMENT, document.createElement("div"), "f");
+    __classPrivateFieldGet$2(this, _LFTooltip_TOOLTIP_ELEMENT, "f").classList.add(__classPrivateFieldGet$2(this, _LFTooltip_CSS_CLASSES, "f").wrapper);
+    let layoutElement;
+    switch (__classPrivateFieldGet$2(this, _LFTooltip_LAYOUT, "f")) {
+      case "upload":
+        layoutElement = __classPrivateFieldGet$2(this, _LFTooltip_instances, "m", _LFTooltip_uploadLayout).call(this);
+        __classPrivateFieldGet$2(this, _LFTooltip_TOOLTIP_ELEMENT, "f").appendChild(layoutElement);
+        break;
+    }
+    lfFramework2.portal.open(layoutElement, __classPrivateFieldGet$2(this, _LFTooltip_TOOLTIP_ELEMENT, "f"), anchor, 0, "auto");
+    lfFramework2.addClickCallback({ cb: () => this.destroy(), element: layoutElement });
+    requestAnimationFrame(() => parent.appendChild(__classPrivateFieldGet$2(this, _LFTooltip_TOOLTIP_ELEMENT, "f")));
+  }
+  //#endregion
+  //#region Destroy
+  destroy() {
+    __classPrivateFieldGet$2(this, _LFTooltip_instances, "m", _LFTooltip_initialize).call(this);
+  }
+}
+_LFTooltip_CB = /* @__PURE__ */ new WeakMap(), _LFTooltip_CSS_CLASSES = /* @__PURE__ */ new WeakMap(), _LFTooltip_LAYOUT = /* @__PURE__ */ new WeakMap(), _LFTooltip_TOOLTIP_ELEMENT = /* @__PURE__ */ new WeakMap(), _LFTooltip_buttonEventHandler = /* @__PURE__ */ new WeakMap(), _LFTooltip_instances = /* @__PURE__ */ new WeakSet(), _LFTooltip_initialize = function _LFTooltip_initialize2() {
+  var _a;
+  (_a = __classPrivateFieldGet$2(this, _LFTooltip_TOOLTIP_ELEMENT, "f")) == null ? void 0 : _a.remove();
+  __classPrivateFieldSet$1(this, _LFTooltip_TOOLTIP_ELEMENT, null, "f");
+  __classPrivateFieldSet$1(this, _LFTooltip_CB, {}, "f");
+  __classPrivateFieldSet$1(this, _LFTooltip_LAYOUT, null, "f");
+}, _LFTooltip_uploadLayout = function _LFTooltip_uploadLayout2() {
+  const content = document.createElement(TagName.Div);
+  const upload = document.createElement(TagName.LfUpload);
+  const button = document.createElement(TagName.LfButton);
+  content.classList.add(__classPrivateFieldGet$2(this, _LFTooltip_CSS_CLASSES, "f").content);
+  button.lfIcon = "upload";
+  button.lfLabel = "Update cover";
+  button.lfStretchX = true;
+  content.dataset.lf = "portal";
+  content.appendChild(upload);
+  content.appendChild(button);
+  button.addEventListener(LfEventName.LfButton, __classPrivateFieldGet$2(this, _LFTooltip_buttonEventHandler, "f").bind(__classPrivateFieldGet$2(this, _LFTooltip_buttonEventHandler, "f"), upload));
+  return content;
+};
+const DOWNLOAD_PLACEHOLDERS = {
+  lfDataset: {
+    nodes: [
+      {
+        cells: {
+          lfImage: { shape: "image", value: "download" },
+          lfText: { shape: "text", value: "Fetching metadata from CivitAI..." }
+        },
+        id: "0"
+      }
+    ]
+  }
+};
+const CARD_PROPS_TO_SERIALIZE = ["lfDataset"];
+const EV_HANDLERS$9 = {
+  //#region Button handler
+  button: (state, e2) => {
+    const { comp, eventType } = e2.detail;
+    const { grid, node } = state;
+    switch (eventType) {
+      case "click":
+        const cards = Array.from(grid.querySelectorAll(TagName.LfCard));
+        if (cards == null ? void 0 : cards.length) {
+          const models = [];
+          const widget = getCustomWidget(node, CustomWidgetName.card);
+          cards.forEach((card) => {
+            var _a, _b, _c, _d;
+            const hashCell = (_d = (_c = (_b = (_a = card.lfDataset) == null ? void 0 : _a.nodes) == null ? void 0 : _b[0]) == null ? void 0 : _c.cells) == null ? void 0 : _d.lfCode;
+            if (hashCell) {
+              const { hash, path } = JSON.parse(JSON.stringify(hashCell.value));
+              const dataset = card.lfDataset;
+              comp.lfShowSpinner = true;
+              models.push({ apiFlag: true, dataset, hash, path });
+            }
+          });
+          if (models.length) {
+            const value = {
+              props: []
+            };
+            cardPlaceholders(widget, cards.length);
+            apiCall$1(models, true).then((r2) => {
+              for (let index = 0; index < r2.length; index++) {
+                const cardProps = r2[index];
+                if (cardProps.lfDataset) {
+                  value.props.push(cardProps);
+                } else {
+                  value.props.push({
+                    ...cardProps,
+                    lfDataset: models[index].dataset
+                  });
+                }
+              }
+              widget.options.setValue(JSON.stringify(value));
+              requestAnimationFrame(() => comp.lfShowSpinner = false);
+            });
+          }
+        }
+        break;
+    }
+  },
+  //#endregion
+  //#region Card handler
+  card: (e2) => {
+    var _a, _b;
+    const { comp, eventType, originalEvent } = e2.detail;
+    const node = (_b = (_a = comp.lfDataset) == null ? void 0 : _a.nodes) == null ? void 0 : _b[0];
+    switch (eventType) {
+      case "click":
+        if (node == null ? void 0 : node.value) {
+          window.open(String(node.value).valueOf(), "_blank");
+        }
+        break;
+      case "contextmenu":
+        const ogEv = originalEvent;
+        const lfManager2 = getLfManager();
+        ogEv.preventDefault();
+        ogEv.stopPropagation();
+        const tip = lfManager2.getManagers().tooltip;
+        const cb = async (b64image) => {
+          var _a2, _b2, _c, _d;
+          const node2 = (_b2 = (_a2 = comp.lfDataset) == null ? void 0 : _a2.nodes) == null ? void 0 : _b2[0];
+          if (node2) {
+            const code = (_c = node2 == null ? void 0 : node2.cells) == null ? void 0 : _c.lfCode;
+            if (code) {
+              try {
+                const path = JSON.parse(JSON.stringify(code.value)).path;
+                lfManager2.log(`Updating cover for model with path: ${path}`, { b64image }, LogSeverity.Info);
+                getApiRoutes().metadata.updateCover(path, b64image);
+                const image = (_d = node2 == null ? void 0 : node2.cells) == null ? void 0 : _d.lfImage;
+                if (image) {
+                  image.value = `data:image/png;charset=utf-8;base64,${b64image}`;
+                  comp.refresh();
+                  tip.destroy();
+                }
+              } catch (error) {
+                lfManager2.log("Failed to fetch the model's path from .info file", { b64image }, LogSeverity.Error);
+              }
+            }
+          }
+        };
+        tip.create({ x: ogEv.x, y: ogEv.y }, "upload", cb);
+        break;
+    }
+  }
+  //#endregion
+};
+const cardPlaceholders = (widget, count) => {
+  const dummyValue = {
+    props: []
+  };
+  for (let index = 0; index < count; index++) {
+    dummyValue.props.push(DOWNLOAD_PLACEHOLDERS);
+  }
+  widget.options.setValue(JSON.stringify(dummyValue));
+};
+const apiCall$1 = async (models, forcedSave = false) => {
+  const promises = models.map(async ({ dataset, hash, path, apiFlag }) => {
+    if (apiFlag) {
+      const payload = await getApiRoutes().metadata.get(hash);
+      return onResponse(dataset, path, forcedSave, payload);
+    } else {
+      return onResponse(dataset, path, forcedSave, null);
+    }
+  });
+  return Promise.all(promises);
+};
+const onResponse = async (dataset, path, forcedSave, payload) => {
+  var _a, _b, _c;
+  const r2 = payload == null ? void 0 : payload.data;
+  const id = r2 == null ? void 0 : r2.id;
+  const props = {
+    lfStyle: ".sub-2.description { white-space: pre-wrap; }"
+  };
+  switch (typeof id) {
+    case "number":
+      const code = (_c = (_b = (_a = dataset == null ? void 0 : dataset.nodes) == null ? void 0 : _a[0]) == null ? void 0 : _b.cells) == null ? void 0 : _c.lfCode;
+      const civitaiDataset = prepareValidDataset(r2, code);
+      props.lfDataset = civitaiDataset;
+      getApiRoutes().metadata.save(path, civitaiDataset, forcedSave);
+      break;
+    case "string":
+      const node = dataset.nodes[0];
+      node.description = "";
+      node.value = "";
+      node.cells.lfButton = {
+        lfIcon: "warning",
+        lfLabel: "Not found on CivitAI!",
+        lfStyling: "flat",
+        lfUiState: "disabled",
+        shape: "button",
+        value: ""
+      };
+      node.cells.text3 = {
+        value: "Whoops! It seems like something's off. Falling back to local data."
+      };
+      props.lfDataset = dataset;
+      break;
+  }
+  return props;
+};
+const prepCards = (container, propsArray) => {
+  var _a;
+  let count = 0;
+  const cards = container.querySelectorAll("lf-card");
+  cards.forEach((c2) => c2.remove());
+  for (let index = 0; propsArray && index < propsArray.length; index++) {
+    const card = container.appendChild(createCard());
+    count += 1;
+    const props = propsArray[index];
+    if (props.lfDataset) {
+      for (const key in props) {
+        if (Object.prototype.hasOwnProperty.call(props, key)) {
+          const prop = props[key];
+          if (key === "lfDataset") {
+            try {
+              if (typeof prop === "string") {
+                card.lfDataset = unescapeJson(prop).parsedJson;
+              } else {
+                card.lfDataset = prop;
+              }
+              const node = (_a = card.lfDataset.nodes) == null ? void 0 : _a[0];
+              if (node) {
+                card.dataset.link = node.description;
+                if (node.value) {
+                  card.title = String(node.value).valueOf();
+                }
+              }
+            } catch (error) {
+              getLfManager().log("Error when setting lfData prop on card!", { error }, LogSeverity.Error);
+            }
+          } else {
+            card[key] = prop;
+          }
+        }
+      }
+    }
+  }
+  return count;
+};
+const getCardProps = (container) => {
+  const propsArray = [];
+  const cards = container.querySelectorAll("lf-card");
+  for (let index = 0; index < cards.length; index++) {
+    const card = cards[index];
+    const props = CARD_PROPS_TO_SERIALIZE.reduce((acc, p2) => {
+      if (card[p2]) {
+        acc[p2] = card[p2];
+      }
+      return acc;
+    }, {});
+    propsArray.push(props);
+  }
+  return propsArray;
+};
+const createCard = () => {
+  const card = document.createElement(TagName.LfCard);
+  card.addEventListener(LfEventName.LfCard, EV_HANDLERS$9.card);
+  return card;
+};
+const prepareValidDataset = (r2, code) => {
+  var _a, _b, _c, _d, _e;
+  const dataset = {
+    nodes: [
+      {
+        cells: { lfCode: code ?? null, lfImage: null, text1: null, text2: null, text3: null },
+        id: r2.id.toString(),
+        description: "Click to open the model's page on CivitAI",
+        value: `https://civitai.com/models/${r2.modelId}`
+      }
+    ]
+  };
+  const cells = dataset.nodes[0].cells;
+  cells.lfImage = {
+    shape: "image",
+    value: r2.images[0].url
+  };
+  cells.text1 = { value: r2.model.name };
+  cells.text2 = { value: r2.name };
+  cells.text3 = {
+    value: `- Info:
+Type: ${((_a = r2.model) == null ? void 0 : _a.type) ? r2.model.type : "N/A"}
+Status: ${r2.status ? r2.status : "N/A"}
+Base model: ${r2.baseModel ? r2.baseModel : "N/A"}
+Description: ${r2.description ? r2.description : "N/A"}
+
+- Trained words:
+${((_b = r2.trainedWords) == null ? void 0 : _b.length) ? r2.trainedWords.join(", ") : "N/A"}
+
+- Stats:
+Updated at: ${r2.updatedAt ? r2.updatedAt : "N/A"}
+Downloads: ${((_c = r2.stats) == null ? void 0 : _c.downloadCount) ? r2.stats.downloadCount : "N/A"}
+Rating: ${((_d = r2.stats) == null ? void 0 : _d.rating) ? r2.stats.rating : "N/A"}
+Thumbs up: ${((_e = r2.stats) == null ? void 0 : _e.thumbsUpCount) ? r2.stats.thumbsUpCount : "N/A"}
+
+(data pulled from CivitAI at: ${(/* @__PURE__ */ new Date()).toLocaleDateString()})
+`
+  };
+  return dataset;
+};
+var CardCSS;
+(function(CardCSS2) {
+  CardCSS2["Content"] = "lf-card";
+  CardCSS2["ContentHasButton"] = "lf-card--has-button";
+  CardCSS2["Grid"] = "lf-card__grid";
+})(CardCSS || (CardCSS = {}));
+const STATE$g = /* @__PURE__ */ new WeakMap();
+const cardFactory = {
+  //#region Options
+  options: (wrapper) => {
+    return {
+      hideOnZoom: false,
+      getState: () => STATE$g.get(wrapper),
+      getValue() {
+        const { grid } = STATE$g.get(wrapper);
+        return {
+          props: getCardProps(grid) || []
+        };
+      },
+      setValue(value) {
+        const { grid } = STATE$g.get(wrapper);
+        const callback = (_2, u2) => {
+          const { props } = u2.parsedJson;
+          const len = (props == null ? void 0 : props.length) > 1 ? 2 : 1;
+          grid.style.setProperty("--card-grid", `repeat(1, 1fr) / repeat(${len}, 1fr)`);
+          prepCards(grid, props);
+        };
+        normalizeValue(value, callback, CustomWidgetName.card);
+      }
+    };
+  },
+  //#endregion
+  //#region Render
+  render: (node) => {
+    const wrapper = document.createElement(TagName.Div);
+    const content = document.createElement(TagName.Div);
+    const grid = document.createElement(TagName.Div);
+    grid.classList.add(CardCSS.Grid);
+    content.classList.add(CardCSS.Content);
+    content.appendChild(grid);
+    switch (node.comfyClass) {
+      case NodeName.checkpointSelector:
+      case NodeName.embeddingSelector:
+      case NodeName.loraAndEmbeddingSelector:
+      case NodeName.loraSelector:
+        content.classList.add(CardCSS.ContentHasButton);
+        const button = document.createElement(TagName.LfButton);
+        button.lfIcon = "download";
+        button.lfLabel = "Refresh";
+        button.lfStretchX = true;
+        button.title = "Attempts to manually ownload fresh metadata from CivitAI";
+        button.addEventListener(LfEventName.LfButton, (e2) => EV_HANDLERS$9.button(STATE$g.get(wrapper), e2));
+        content.appendChild(button);
+        break;
+    }
+    wrapper.appendChild(content);
+    const options = cardFactory.options(wrapper);
+    STATE$g.set(wrapper, { grid, node, wrapper });
+    return { widget: createDOMWidget(CustomWidgetName.card, wrapper, node, options) };
+  },
+  //#endregion
+  //#region State
+  state: STATE$g
+  //#endregion
+};
+var CardsWithChipCSS;
+(function(CardsWithChipCSS2) {
+  CardsWithChipCSS2["Content"] = "lf-cardswithchip";
+  CardsWithChipCSS2["Cards"] = "lf-cardswithchip__cards";
+  CardsWithChipCSS2["Chip"] = "lf-cardswithchip__chip";
+  CardsWithChipCSS2["Grid"] = "lf-cardswithchip__grid";
+})(CardsWithChipCSS || (CardsWithChipCSS = {}));
+const STATE$f = /* @__PURE__ */ new WeakMap();
+const cardsWithChipFactory = {
+  //#region Options
+  options: (wrapper) => {
+    return {
+      hideOnZoom: false,
+      getState: () => STATE$f.get(wrapper),
+      getValue() {
+        const { chip, grid } = STATE$f.get(wrapper);
+        return {
+          chip: (chip == null ? void 0 : chip.lfDataset) || {},
+          props: getCardProps(grid) || []
+        };
+      },
+      setValue(value) {
+        const { chip, grid } = STATE$f.get(wrapper);
+        const callback = (v2, u2) => {
+          const dataset = u2.parsedJson;
+          const cardsCount = prepCards(grid, dataset.props);
+          if (!cardsCount || !v2) {
+            return;
+          }
+          const columns = cardsCount > 1 ? 2 : 1;
+          grid.style.setProperty("--card-grid", String(columns).valueOf());
+          if (chip) {
+            chip.lfDataset = dataset.chip;
+          }
+        };
+        normalizeValue(value, callback, CustomWidgetName.cardsWithChip);
+      }
+    };
+  },
+  //#endregion
+  //#region Render
+  render: (node) => {
+    const wrapper = document.createElement(TagName.Div);
+    const content = document.createElement(TagName.Div);
+    const outerGrid = document.createElement(TagName.Div);
+    const grid = document.createElement(TagName.Div);
+    const chip = document.createElement(TagName.LfChip);
+    content.classList.add(CardsWithChipCSS.Content);
+    outerGrid.classList.add(CardsWithChipCSS.Grid);
+    grid.classList.add(CardsWithChipCSS.Cards);
+    chip.classList.add(CardsWithChipCSS.Chip);
+    outerGrid.appendChild(chip);
+    outerGrid.appendChild(grid);
+    content.appendChild(outerGrid);
+    wrapper.appendChild(content);
+    const options = cardsWithChipFactory.options(wrapper);
+    STATE$f.set(wrapper, { chip, grid, node, wrapper });
+    return { widget: createDOMWidget(CustomWidgetName.cardsWithChip, wrapper, node, options) };
+  },
+  //#endregion
+  //#region State
+  state: STATE$f
+  //#endregion
+};
+var CarouselCSS;
+(function(CarouselCSS2) {
+  CarouselCSS2["Content"] = "lf-carousel";
+  CarouselCSS2["Widget"] = "lf-carousel__widget";
+})(CarouselCSS || (CarouselCSS = {}));
+const STATE$e = /* @__PURE__ */ new WeakMap();
+const carouselFactory = {
+  //#region Options
+  options: (wrapper) => {
+    return {
+      hideOnZoom: true,
+      getState: () => STATE$e.get(wrapper),
+      getValue() {
+        const { carousel } = STATE$e.get(wrapper);
+        return (carousel == null ? void 0 : carousel.lfDataset) || {};
+      },
+      setValue(value) {
+        const { carousel } = STATE$e.get(wrapper);
+        const callback = (_2, u2) => {
+          const dataset = u2.parsedJson;
+          carousel.lfDataset = dataset || {};
+        };
+        normalizeValue(value, callback, CustomWidgetName.carousel);
+      }
+    };
+  },
+  //#endregion
+  //#region Render
+  render: (node) => {
+    const wrapper = document.createElement(TagName.Div);
+    const content = document.createElement(TagName.Div);
+    const carousel = document.createElement(TagName.LfCarousel);
+    carousel.lfAutoPlay = true;
+    content.classList.add(CarouselCSS.Content);
+    carousel.classList.add(CarouselCSS.Widget);
+    content.appendChild(carousel);
+    wrapper.appendChild(content);
+    const options = carouselFactory.options(wrapper);
+    STATE$e.set(wrapper, { carousel, node, wrapper });
+    return { widget: createDOMWidget(CustomWidgetName.carousel, wrapper, node, options) };
+  },
+  //#endregion
+  //#region State
+  state: STATE$e
+  //#endregion
+};
+const EV_HANDLERS$8 = {
+  //#region Chat handler
+  chat: (state, e2) => {
+    const { eventType, history, status } = e2.detail;
+    switch (eventType) {
+      case "polling":
+        const severity = status === "ready" ? LogSeverity.Info : status === "offline" ? LogSeverity.Error : LogSeverity.Warning;
+        getLfManager().log("Chat widget, polling status: " + status, { chat: e2.detail }, severity);
+        break;
+      case "update":
+        state.history = history;
+        break;
+    }
+  }
+  //#endregion
+};
+var ChatCSS;
+(function(ChatCSS2) {
+  ChatCSS2["Content"] = "lf-chat";
+  ChatCSS2["Widget"] = "lf-chat__widget";
+})(ChatCSS || (ChatCSS = {}));
+const STATE$d = /* @__PURE__ */ new WeakMap();
+const chatFactory = {
+  //#region Options
+  options: (wrapper) => {
+    return {
+      hideOnZoom: false,
+      getState: () => STATE$d.get(wrapper),
+      getValue() {
+        const { history } = STATE$d.get(wrapper);
+        return history || "";
+      },
+      setValue(value) {
+        const state = STATE$d.get(wrapper);
+        const callback = (v2) => {
+          state.history = v2 || "";
+          if (v2 && state.chat.lfValue) {
+            state.chat.lfValue = JSON.parse(v2);
+          }
+          state.chat.setHistory(v2);
+        };
+        normalizeValue(value, callback, CustomWidgetName.chat);
+      }
+    };
+  },
+  //#endregion
+  //#region Render
+  render: (node) => {
+    const wrapper = document.createElement(TagName.Div);
+    const content = document.createElement(TagName.Div);
+    const chat = document.createElement(TagName.LfChat);
+    content.classList.add(ChatCSS.Content);
+    chat.classList.add(ChatCSS.Widget);
+    chat.addEventListener(LfEventName.LfChat, (e2) => EV_HANDLERS$8.chat(STATE$d.get(wrapper), e2));
+    content.appendChild(chat);
+    wrapper.appendChild(content);
+    const options = chatFactory.options(wrapper);
+    STATE$d.set(wrapper, { chat, history: "", node, wrapper });
+    return { widget: createDOMWidget(CustomWidgetName.chat, wrapper, node, options) };
+  },
+  //#endregion
+  //#region State
+  state: STATE$d
+  //#endregion
+};
+const EV_HANDLERS$7 = {
+  //#region Chip handler
+  chip: async (state, e2) => {
+    const { comp, eventType } = e2.detail;
+    switch (eventType) {
+      case "click":
+        const selectedValues = [];
+        (await comp.getSelectedNodes()).forEach((node) => {
+          selectedValues.push(String(node.value).valueOf());
+        });
+        state.selected = selectedValues.join(", ");
+        break;
+    }
+  }
+};
+var ChipCSS;
+(function(ChipCSS2) {
+  ChipCSS2["Content"] = "lf-chip";
+  ChipCSS2["Widget"] = "lf-chip__widget";
+})(ChipCSS || (ChipCSS = {}));
+const STATE$c = /* @__PURE__ */ new WeakMap();
+const chipFactory = {
+  //#region Options
+  options: (wrapper) => {
+    return {
+      hideOnZoom: true,
+      getState: () => STATE$c.get(wrapper),
+      getValue() {
+        const { selected } = STATE$c.get(wrapper);
+        return selected || "";
+      },
+      setValue(value) {
+        const state = STATE$c.get(wrapper);
+        const callback = (v2) => {
+          const value2 = v2 ? v2.split(", ") : [];
+          state.selected = v2;
+          state.chip.setSelectedNodes(value2);
+        };
+        normalizeValue(value, callback, CustomWidgetName.chip);
+      }
+    };
+  },
+  //#endregion
+  //#region Render
+  render: (node) => {
+    const wrapper = document.createElement(TagName.Div);
+    const content = document.createElement(TagName.Div);
+    const chip = document.createElement(TagName.LfChip);
+    content.classList.add(ChipCSS.Content);
+    chip.classList.add(ChipCSS.Widget);
+    chip.addEventListener(LfEventName.LfChip, (e2) => EV_HANDLERS$7.chip(STATE$c.get(wrapper), e2));
+    switch (node.comfyClass) {
+      case NodeName.keywordToggleFromJson:
+        chip.lfStyling = "filter";
+        break;
+    }
+    content.appendChild(chip);
+    wrapper.appendChild(content);
+    const options = chipFactory.options(wrapper);
+    STATE$c.set(wrapper, { chip, node, selected: "", wrapper });
+    return { widget: createDOMWidget(CustomWidgetName.chip, wrapper, node, options) };
+  },
+  //#endregion
+  //#region State
+  state: STATE$c
+  //#endregion
+};
+var CodeCSS;
+(function(CodeCSS2) {
+  CodeCSS2["Content"] = "lf-code";
+  CodeCSS2["Widget"] = "lf-code__widget";
+})(CodeCSS || (CodeCSS = {}));
+const STATE$b = /* @__PURE__ */ new WeakMap();
+const codeFactory = {
+  //#region Options
+  options: (wrapper) => {
+    return {
+      hideOnZoom: false,
+      getState: () => STATE$b.get(wrapper),
+      getValue() {
+        const { code } = STATE$b.get(wrapper);
+        switch (code.lfLanguage) {
+          case "json":
+            return code.lfValue || "{}";
+          default:
+            return code.lfValue || "";
+        }
+      },
+      setValue(value) {
+        const { code } = STATE$b.get(wrapper);
+        const callback = (v2, u2) => {
+          switch (code.lfLanguage) {
+            case "json":
+              code.lfValue = u2.unescapedStr || "{}";
+              break;
+            default:
+              code.lfValue = typeof v2 === "string" ? v2 : "";
+              break;
+          }
+        };
+        normalizeValue(value, callback, CustomWidgetName.code);
+      }
+    };
+  },
+  //#endregion
+  //#region Render
+  render: (node) => {
+    const wrapper = document.createElement(TagName.Div);
+    const content = document.createElement(TagName.Div);
+    const code = document.createElement(TagName.LfCode);
+    content.classList.add(CodeCSS.Content);
+    code.classList.add(CodeCSS.Widget);
+    switch (node.comfyClass) {
+      case NodeName.displayJson:
+      case NodeName.displayPrimitiveAsJson:
+      case NodeName.shuffleJsonKeys:
+      case NodeName.sortJsonKeys:
+      case NodeName.stringToJson:
+        code.lfLanguage = "json";
+        code.lfValue = "{}";
+        break;
+      default:
+        code.lfLanguage = "markdown";
+        code.lfValue = "";
+        break;
+    }
+    content.appendChild(code);
+    wrapper.appendChild(content);
+    const options = codeFactory.options(wrapper);
+    STATE$b.set(wrapper, { code, node, wrapper });
+    return { widget: createDOMWidget(CustomWidgetName.code, wrapper, node, options) };
+  },
+  //#endregion
+  //#region State
+  state: STATE$b
+  //#endregion
+};
+var CompareCSS;
+(function(CompareCSS2) {
+  CompareCSS2["Content"] = "lf-compare";
+  CompareCSS2["Widget"] = "lf-compare__widget";
+})(CompareCSS || (CompareCSS = {}));
+const STATE$a = /* @__PURE__ */ new WeakMap();
+const compareFactory = {
+  //#region Options
+  options: (wrapper) => {
+    return {
+      hideOnZoom: false,
+      getState: () => STATE$a.get(wrapper),
+      getValue() {
+        const { compare } = STATE$a.get(wrapper);
+        return compare.lfDataset || {};
+      },
+      setValue(value) {
+        const { compare } = STATE$a.get(wrapper);
+        const callback = (_2, u2) => {
+          compare.lfDataset = u2.parsedJson || {};
+        };
+        normalizeValue(value, callback, CustomWidgetName.compare);
+      }
+    };
+  },
+  //#endregion
+  //#region Render
+  render: (node) => {
+    const wrapper = document.createElement(TagName.Div);
+    const content = document.createElement(TagName.Div);
+    const compare = document.createElement(TagName.LfCompare);
+    content.classList.add(CompareCSS.Content);
+    compare.classList.add(CompareCSS.Widget);
+    switch (node.comfyClass) {
+      default:
+        compare.lfShape = "image";
+        break;
+    }
+    content.appendChild(compare);
+    wrapper.appendChild(content);
+    const options = compareFactory.options(wrapper);
+    STATE$a.set(wrapper, { compare, node, wrapper });
+    return { widget: createDOMWidget(CustomWidgetName.compare, wrapper, node, options) };
+  },
+  //#endregion
+  //#region State
+  state: STATE$a
+  //#endregion
+};
+var ControlPanelCSS;
+(function(ControlPanelCSS2) {
+  ControlPanelCSS2["Content"] = "lf-controlpanel";
+  ControlPanelCSS2["Grid"] = "lf-controlpanel__grid";
+  ControlPanelCSS2["Spinner"] = "lf-controlpanel__spinner";
+})(ControlPanelCSS || (ControlPanelCSS = {}));
+var ControlPanelIcons;
+(function(ControlPanelIcons2) {
+  ControlPanelIcons2["Analytics"] = "chart-histogram";
+  ControlPanelIcons2["Backup"] = "download";
+  ControlPanelIcons2["Debug"] = "bug";
+  ControlPanelIcons2["GitHub"] = "brand-github";
+  ControlPanelIcons2["Metadata"] = "info-hexagon";
+  ControlPanelIcons2["Theme"] = "color-swatch";
+})(ControlPanelIcons || (ControlPanelIcons = {}));
+var ControlPanelIds;
+(function(ControlPanelIds2) {
+  ControlPanelIds2["Analytics"] = "analytics";
+  ControlPanelIds2["Backup"] = "backup";
+  ControlPanelIds2["Debug"] = "debug";
+  ControlPanelIds2["GitHub"] = "github";
+  ControlPanelIds2["Metadata"] = "metadata";
+  ControlPanelIds2["Theme"] = "theme";
+})(ControlPanelIds || (ControlPanelIds = {}));
+var ControlPanelLabels;
+(function(ControlPanelLabels2) {
+  ControlPanelLabels2["AutoBackup"] = "Automatic Backup";
+  ControlPanelLabels2["Backup"] = "Backup now";
+  ControlPanelLabels2["ClearLogs"] = "Clear logs";
+  ControlPanelLabels2["Debug"] = "Debug";
+  ControlPanelLabels2["DeleteUsage"] = "Delete usage analytics info";
+  ControlPanelLabels2["DeleteMetadata"] = "Delete models info";
+  ControlPanelLabels2["Done"] = "Done!";
+  ControlPanelLabels2["OpenIssue"] = "Open an issue";
+  ControlPanelLabels2["Theme"] = "Random theme";
+})(ControlPanelLabels || (ControlPanelLabels = {}));
+var ControlPanelSection;
+(function(ControlPanelSection2) {
+  ControlPanelSection2["Content"] = "content";
+  ControlPanelSection2["ContentSeparator"] = "content_spearator";
+  ControlPanelSection2["Paragraph"] = "paragraph";
+  ControlPanelSection2["Root"] = "root";
+  ControlPanelSection2["Section"] = "section";
+})(ControlPanelSection || (ControlPanelSection = {}));
+const BUTTON_STYLE = ":host { margin: auto; padding: 1em 0; width: max-content; }";
+const STYLES = {
+  customization: () => {
+    return {
+      margin: "0"
+    };
+  },
+  debugGrid: () => {
+    return {
+      display: "grid",
+      gridTemplateRows: "repeat(5, max-content) 1fr",
+      height: "100%",
+      margin: "0"
+    };
+  },
+  debugLogs: () => {
+    return {
+      display: "grid",
+      gridGap: "0.75em",
+      gridTemplateRows: "320px 480px"
+    };
+  },
+  logsArea: () => {
+    return {
+      backgroundColor: "rgba(var(--lf-color-on-bg), 0.075)",
+      borderRadius: "0.5em",
+      display: "block",
+      height: "100%",
+      marginBottom: "1em",
+      overflow: "auto"
+    };
+  },
+  separator: () => {
+    return {
+      border: "1px solid rgb(var(--lf-color-border))",
+      display: "block",
+      margin: "0.75em auto 1.25em",
+      opacity: "0.25",
+      width: "50%"
+    };
+  }
+};
+const SECTIONS = {
+  //#region Analytics
+  [ControlPanelIds.Analytics]: () => {
+    const { theme } = getLfManager().getManagers().lfFramework;
+    const { "--lf-icon-clear": clearIcon } = theme.get.current().variables;
+    return {
+      icon: ControlPanelIcons.Analytics,
+      id: ControlPanelSection.Section,
+      value: "Analytics",
+      children: [
+        {
+          id: ControlPanelSection.Paragraph,
+          value: "Usage",
+          children: [
+            {
+              id: ControlPanelSection.Content,
+              value: "Usage analytics can be enabled by saving datasets through the UpdateUsageStatistics node and displayed with the UsageStatistics node."
+            },
+            {
+              id: ControlPanelSection.Content,
+              tagName: "br",
+              value: ""
+            },
+            {
+              id: ControlPanelSection.Content,
+              value: "Once datasets are created (input folder of ComfyUI), the count for each resource used will increase everytime that particular resource is updated."
+            },
+            {
+              id: ControlPanelSection.Content,
+              tagName: "br",
+              value: ""
+            },
+            {
+              id: ControlPanelSection.Content,
+              value: "This button will clear all usage analytics data from your input folder."
+            },
+            {
+              id: ControlPanelSection.Content,
+              tagName: "br",
+              value: ""
+            },
+            {
+              id: ControlPanelSection.Content,
+              value: "This action is IRREVERSIBLE so use it with caution."
+            },
+            {
+              id: ControlPanelSection.Content,
+              value: "",
+              cells: {
+                lfButton: {
+                  lfIcon: clearIcon,
+                  lfLabel: ControlPanelLabels.DeleteUsage,
+                  lfStyle: BUTTON_STYLE,
+                  lfStyling: "outlined",
+                  lfUiState: "danger",
+                  shape: "button",
+                  value: ""
+                }
+              }
+            }
+          ]
+        }
+      ]
+    };
+  },
+  //#endregion
+  //#region Backup
+  [ControlPanelIds.Backup]: () => {
+    const { theme } = getLfManager().getManagers().lfFramework;
+    const { "--lf-icon-download": downloadIcon } = theme.get.current().variables;
+    return {
+      icon: ControlPanelIcons.Backup,
+      id: ControlPanelSection.Section,
+      value: "Backup",
+      children: [
+        {
+          id: ControlPanelSection.Paragraph,
+          value: "Toggle on/off",
+          children: [
+            {
+              id: ControlPanelSection.Content,
+              value: "Toggle this toggle to automatically back up the folder <path/to/your/comfyui/user/LF_Nodes> once a day (the first time you open this workflow)."
+            },
+            {
+              id: ControlPanelSection.Content,
+              tagName: "br",
+              value: ""
+            },
+            {
+              id: ControlPanelSection.Content,
+              value: "",
+              cells: {
+                lfToggle: {
+                  lfLabel: ControlPanelLabels.AutoBackup,
+                  lfLeadingLabel: true,
+                  lfStyle: ":host { text-align: center; padding: 1em 0; }",
+                  shape: "toggle",
+                  value: !!getLfManager().isBackupEnabled()
+                }
+              }
+            }
+          ]
+        },
+        {
+          cssStyle: STYLES.separator(),
+          id: ControlPanelSection.ContentSeparator,
+          value: ""
+        },
+        {
+          id: ControlPanelSection.Paragraph,
+          value: "Backup files",
+          children: [
+            {
+              id: ControlPanelSection.Content,
+              value: "This button will create a manual backup of the content in <path/to/your/comfyui/user/LF_Nodes>"
+            },
+            {
+              id: ControlPanelSection.Content,
+              value: "Be sure to include as much information as you can, without sufficient data it's difficult to troubleshoot problems."
+            },
+            {
+              id: ControlPanelSection.Content,
+              value: "",
+              cells: {
+                lfButton: {
+                  lfIcon: downloadIcon,
+                  lfLabel: ControlPanelLabels.Backup,
+                  lfStyle: BUTTON_STYLE,
+                  lfStyling: "raised",
+                  shape: "button",
+                  value: ""
+                }
+              }
+            }
+          ]
+        }
+      ]
+    };
+  },
+  //#endregion
+  //#region Debug
+  [ControlPanelIds.Debug]: (logsData) => {
+    const { theme } = getLfManager().getManagers().lfFramework;
+    const { "--lf-icon-clear": clearIcon } = theme.get.current().variables;
+    return {
+      icon: ControlPanelIcons.Debug,
+      id: ControlPanelSection.Section,
+      cssStyle: STYLES.debugGrid(),
+      value: "Debug",
+      children: [
+        {
+          id: ControlPanelSection.Paragraph,
+          value: "Toggle on/off",
+          children: [
+            {
+              id: ControlPanelSection.Content,
+              value: "Activating the debug will enable the display of verbose logging."
+            },
+            {
+              id: ControlPanelSection.Content,
+              value: "",
+              cells: {
+                lfToggle: {
+                  lfLabel: ControlPanelLabels.Debug,
+                  lfLeadingLabel: true,
+                  lfStyle: ":host { text-align: center; padding: 1em 0; }",
+                  shape: "toggle",
+                  value: !!getLfManager().isDebug()
+                }
+              }
+            }
+          ]
+        },
+        {
+          id: ControlPanelSection.Paragraph,
+          value: "Logs",
+          children: [
+            {
+              id: ControlPanelSection.Content,
+              value: "Every time the node manager receives a message it will be printed below."
+            },
+            {
+              id: ControlPanelSection.Content,
+              tagName: "br",
+              value: ""
+            },
+            {
+              id: ControlPanelSection.Content,
+              value: "In the browser console there should be more informations."
+            },
+            {
+              id: ControlPanelSection.Content,
+              tagName: "br",
+              value: ""
+            },
+            {
+              id: ControlPanelSection.Content,
+              value: "Further below another card will display additional LF Widgets information."
+            },
+            {
+              id: ControlPanelSection.Content,
+              value: "",
+              cells: {
+                lfButton: {
+                  shape: "button",
+                  lfIcon: clearIcon,
+                  lfLabel: ControlPanelLabels.ClearLogs,
+                  lfStretchX: true,
+                  lfStyle: BUTTON_STYLE,
+                  lfUiState: "danger",
+                  value: ""
+                }
+              }
+            }
+          ]
+        },
+        {
+          id: ControlPanelSection.Paragraph,
+          cssStyle: STYLES.debugLogs(),
+          value: "",
+          children: [
+            {
+              id: "content-wrapper",
+              cssStyle: STYLES.logsArea(),
+              value: "",
+              children: logsData
+            },
+            {
+              cells: {
+                lfCard: {
+                  lfDataset: {
+                    nodes: [
+                      {
+                        cells: {
+                          lfCode: { shape: "code", value: "" },
+                          lfButton: {
+                            shape: "button",
+                            value: ""
+                          },
+                          lfButton_2: {
+                            shape: "button",
+                            value: ""
+                          },
+                          lfToggle: {
+                            shape: "toggle",
+                            value: !!getLfManager().getManagers().lfFramework.debug.isEnabled()
+                          }
+                        },
+                        id: "debug"
+                      }
+                    ]
+                  },
+                  lfLayout: "debug",
+                  shape: "card",
+                  value: ""
+                }
+              },
+              id: "content-wrapper"
+            }
+          ]
+        }
+      ]
+    };
+  },
+  //#endregion
+  //#region GitHub
+  [ControlPanelIds.GitHub]: () => {
+    var _a, _b;
+    const lfManager2 = getLfManager();
+    const releaseData = lfManager2.getLatestRelease();
+    const { theme } = lfManager2.getManagers().lfFramework;
+    const { brandGithub } = theme.get.icons();
+    return {
+      icon: ControlPanelIcons.GitHub,
+      id: ControlPanelSection.Section,
+      value: "",
+      children: [
+        {
+          id: ControlPanelSection.Paragraph,
+          value: `Version: ${(releaseData == null ? void 0 : releaseData.tag_name) || "N/A"}`,
+          children: [
+            {
+              cells: {
+                lfCode: {
+                  lfLanguage: "markdown",
+                  shape: "code",
+                  value: (releaseData == null ? void 0 : releaseData.body) || "No changelog available"
+                }
+              },
+              id: "release-description"
+            },
+            {
+              id: "release-author",
+              children: [
+                {
+                  id: "author-avatar",
+                  value: "",
+                  cssStyle: {
+                    backgroundImage: `url(${((_a = releaseData == null ? void 0 : releaseData.author) == null ? void 0 : _a.avatar_url) || ""})`,
+                    backgroundSize: "cover",
+                    borderRadius: "50%",
+                    display: "inline-block",
+                    height: "2em",
+                    marginRight: "0.5em",
+                    verticalAlign: "middle",
+                    width: "2em"
+                  }
+                },
+                {
+                  id: "author-name",
+                  value: `Author: ${((_b = releaseData == null ? void 0 : releaseData.author) == null ? void 0 : _b.login) || "Unknown"}`,
+                  cssStyle: {
+                    fontSize: "0.9em",
+                    color: "rgb(var(--lf-color-secondary))",
+                    verticalAlign: "middle"
+                  }
+                }
+              ],
+              cssStyle: {
+                alignItems: "center",
+                display: "flex",
+                justifyContent: "center",
+                marginBottom: "1em"
+              }
+            },
+            {
+              cssStyle: {
+                color: "rgb(var(--lf-color-secondary))",
+                display: "block",
+                fontSize: "0.9em",
+                fontStyle: "italic",
+                marginBottom: "2em",
+                textAlign: "center",
+                width: "100%"
+              },
+              id: "release-date",
+              value: `Published on: ${(releaseData == null ? void 0 : releaseData.published_at) ? new Date(releaseData.published_at).toLocaleDateString() : "Unknown"}`
+            },
+            {
+              cssStyle: STYLES.separator(),
+              id: ControlPanelSection.ContentSeparator,
+              value: ""
+            },
+            {
+              id: ControlPanelSection.Paragraph,
+              value: "Bug report",
+              children: [
+                {
+                  id: ControlPanelSection.Content,
+                  value: "If you find bugs or odd behaviors feel free to open an issue on GitHub, just follow the link below!"
+                },
+                {
+                  id: ControlPanelSection.Content,
+                  tagName: "br",
+                  value: ""
+                },
+                {
+                  id: ControlPanelSection.Content,
+                  value: "Be sure to include as much information as you can, without sufficient data it's difficult to troubleshoot problems."
+                },
+                {
+                  id: ControlPanelSection.Content,
+                  value: "",
+                  cells: {
+                    lfButton: {
+                      lfIcon: brandGithub,
+                      lfLabel: ControlPanelLabels.OpenIssue,
+                      lfStyle: BUTTON_STYLE,
+                      lfStyling: "raised",
+                      shape: "button",
+                      value: ""
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    };
+  },
+  //#endregion
+  //#region Metadata
+  [ControlPanelIds.Metadata]: () => {
+    const { theme } = getLfManager().getManagers().lfFramework;
+    const { "--lf-icon-delete": deleteIcon } = theme.get.current().variables;
+    return {
+      icon: ControlPanelIcons.Metadata,
+      id: ControlPanelSection.Section,
+      value: "Metadata",
+      children: [
+        {
+          id: ControlPanelSection.Paragraph,
+          value: "Purge metadata files",
+          children: [
+            {
+              id: ControlPanelSection.Content,
+              value: "Metadata pulled from CivitAI are stored in .info files saved in the same folders of the models to avoid unnecessary fetches from the API."
+            },
+            {
+              id: ControlPanelSection.Content,
+              value: "By pressing this button it's possible to delete every .info file created by fetching the metadata."
+            },
+            {
+              id: ControlPanelSection.Content,
+              tagName: "br",
+              value: ""
+            },
+            {
+              id: ControlPanelSection.Content,
+              value: "This action is IRREVERSIBLE so use it with caution."
+            },
+            {
+              id: ControlPanelSection.Content,
+              value: "",
+              cells: {
+                lfButton: {
+                  lfIcon: deleteIcon,
+                  lfLabel: ControlPanelLabels.DeleteMetadata,
+                  lfStyle: BUTTON_STYLE,
+                  lfStyling: "outlined",
+                  lfUiState: "danger",
+                  shape: "button",
+                  value: ""
+                }
+              }
+            }
+          ]
+        }
+      ]
+    };
+  },
+  //#endregion
+  //#region Theme
+  [ControlPanelIds.Theme]: () => {
+    return {
+      icon: ControlPanelIcons.Theme,
+      id: ControlPanelSection.Section,
+      value: "Customization",
+      cssStyle: STYLES.customization(),
+      children: [
+        {
+          id: ControlPanelSection.Paragraph,
+          value: "Theme selector",
+          children: [
+            {
+              id: ControlPanelSection.Content,
+              value: "Through the button below it's possible to set a random theme for the LF Widgets components, or select one from the dropdown menu."
+            },
+            {
+              id: ControlPanelSection.Content,
+              value: "",
+              cells: {
+                lfButton: {
+                  lfDataset: getLfThemes(),
+                  lfLabel: ControlPanelLabels.Theme,
+                  lfStyle: BUTTON_STYLE,
+                  shape: "button",
+                  value: ""
+                }
+              }
+            }
+          ]
+        }
+      ]
+    };
+  }
+  //#endregion
+};
+const INTRO_SECTION = ControlPanelIds.GitHub;
+let TIMEOUT;
+const EV_HANDLERS$6 = {
+  //#region Article handler
+  article: (e2) => {
+    const { eventType, originalEvent } = e2.detail;
+    switch (eventType) {
+      case "lf-event":
+        handleLfEvent(originalEvent);
+        break;
+    }
+  },
+  //#endregion
+  //#region Button handler
+  button: (e2) => {
+    const { comp, eventType, originalEvent } = e2.detail;
+    const element = comp.rootElement;
+    const createSpinner = () => {
+      const spinner = document.createElement("lf-spinner");
+      spinner.lfActive = true;
+      spinner.lfDimensions = "0.6em";
+      spinner.lfLayout = 2;
+      spinner.slot = "spinner";
+      return spinner;
+    };
+    const invokeAPI = (promise, label) => {
+      const onResponse2 = () => {
+        comp.lfIcon = "check";
+        comp.lfLabel = ControlPanelLabels.Done;
+        comp.lfShowSpinner = false;
+        comp.lfUiState = "disabled";
+      };
+      const restore = (label2) => {
+        comp.lfLabel = label2;
+        comp.lfIcon = "delete";
+        comp.lfUiState = "primary";
+        TIMEOUT = null;
+      };
+      requestAnimationFrame(() => comp.lfShowSpinner = true);
+      promise.then(() => {
+        requestAnimationFrame(onResponse2);
+        if (TIMEOUT) {
+          clearTimeout(TIMEOUT);
+        }
+        TIMEOUT = setTimeout(() => requestAnimationFrame(() => restore(label)), 1e3);
+      });
+    };
+    switch (eventType) {
+      case "click":
+        switch (comp.lfLabel) {
+          case ControlPanelLabels.Backup:
+            invokeAPI(getApiRoutes().backup.new("manual"), ControlPanelLabels.Backup);
+            break;
+          case ControlPanelLabels.ClearLogs:
+            const { article, dataset } = getLfManager().getDebugDataset();
+            if ((dataset == null ? void 0 : dataset.length) > 0) {
+              dataset.splice(0, dataset.length);
+              article.refresh();
+            }
+            break;
+          case ControlPanelLabels.DeleteMetadata:
+            invokeAPI(getApiRoutes().metadata.clear(), ControlPanelLabels.DeleteMetadata);
+            break;
+          case ControlPanelLabels.DeleteUsage:
+            invokeAPI(getApiRoutes().analytics.clear("usage"), ControlPanelLabels.DeleteUsage);
+            break;
+          case ControlPanelLabels.OpenIssue:
+            window.open("https://github.com/lucafoscili/comfyui-lf/issues/new", "_blank");
+            break;
+          case ControlPanelLabels.Theme:
+            getLfManager().getManagers().lfFramework.theme.randomize();
+            break;
+        }
+        break;
+      case "lf-event":
+        const ogEv = originalEvent;
+        EV_HANDLERS$6.list(ogEv);
+        break;
+      case "ready":
+        switch (comp.lfLabel) {
+          case ControlPanelLabels.Backup:
+            element.appendChild(createSpinner());
+            break;
+          case ControlPanelLabels.DeleteMetadata:
+          case ControlPanelLabels.DeleteUsage:
+            element.classList.add("lf-danger");
+            element.appendChild(createSpinner());
+            break;
+        }
+    }
+  },
+  //#endregion
+  //#region List handler
+  list: (e2) => {
+    const { comp, eventType, node } = e2.detail;
+    const { lfFramework: lfFramework2 } = getLfManager().getManagers();
+    const element = comp.rootElement;
+    const value = node.id;
+    switch (eventType) {
+      case "click":
+        lfFramework2.theme.set(value);
+        break;
+      case "ready":
+        element.title = "Change the LF Nodes suite theme";
+        lfFramework2.theme.set(value);
+        break;
+    }
+  },
+  //#endregion
+  //#region Toggle handler
+  toggle: (e2) => {
+    const { comp, eventType, value } = e2.detail;
+    const element = comp.rootElement;
+    switch (eventType) {
+      case "change":
+        getLfManager().toggleDebug(value === "on" ? true : false);
+        break;
+      case "ready":
+        element.title = "Activate verbose console logging";
+    }
+  }
+  //#endregion
+};
+const createContent = () => {
+  const grid = document.createElement(TagName.Div);
+  const accordion = document.createElement(TagName.LfAccordion);
+  const nodes = [];
+  accordion.lfDataset = { nodes };
+  for (const id in SECTIONS) {
+    if (id !== INTRO_SECTION && Object.prototype.hasOwnProperty.call(SECTIONS, id)) {
+      const section = SECTIONS[id];
+      let article;
+      let node;
+      switch (id) {
+        case ControlPanelIds.Debug:
+          const logsData = [];
+          node = section(logsData);
+          article = prepArticle(id, node);
+          getLfManager().setDebugDataset(article, logsData);
+          break;
+        default:
+          node = section(void 0);
+          article = prepArticle(id, node);
+          break;
+      }
+      const { icon, value } = node;
+      nodes.push({
+        cells: {
+          lfSlot: {
+            shape: "slot",
+            value: id
+          }
+        },
+        icon,
+        id,
+        value
+      });
+      accordion.appendChild(article);
+    }
+  }
+  const intro = prepArticle(INTRO_SECTION, SECTIONS[INTRO_SECTION]());
+  grid.classList.add(ControlPanelCSS.Grid);
+  grid.appendChild(intro);
+  grid.appendChild(accordion);
+  return grid;
+};
+const prepArticle = (key, node) => {
+  const article = document.createElement(TagName.LfArticle);
+  article.lfDataset = { nodes: [{ children: [node], id: ControlPanelSection.Root }] };
+  article.slot = key;
+  article.addEventListener(LfEventName.LfArticle, EV_HANDLERS$6.article);
+  return article;
+};
+const handleLfEvent = (e2) => {
+  const { comp } = e2.detail;
+  if (isButton(comp)) {
+    const ogEv = e2;
+    EV_HANDLERS$6.button(ogEv);
+  }
+  if (isToggle(comp)) {
+    const ogEv = e2;
+    EV_HANDLERS$6.toggle(ogEv);
+  }
+};
+const STATE$9 = /* @__PURE__ */ new WeakMap();
+const controlPanelFactory = {
+  //#region Options
+  options: (wrapper) => {
+    return {
+      hideOnZoom: false,
+      getState: () => STATE$9.get(wrapper),
+      getValue() {
+        return {
+          backup: getLfManager().isBackupEnabled() || false,
+          debug: getLfManager().isDebug() || false,
+          themes: getLfManager().getManagers().lfFramework.theme.get.current().name || ""
+        };
+      },
+      setValue(value) {
+        const callback = (_2, u2) => {
+          const { backup, debug, themes } = u2.parsedJson;
+          if (backup === true || backup === false) {
+            getLfManager().toggleBackup(backup);
+          }
+          if (debug === true || debug === false) {
+            getLfManager().toggleDebug(debug);
+          }
+          if (themes) {
+            getLfManager().getManagers().lfFramework.theme.set(themes);
+          }
+          return value;
+        };
+        normalizeValue(value, callback, CustomWidgetName.controlPanel);
+      }
+    };
+  },
+  //#endregion
+  //#region Render
+  render: (node) => {
+    const contentCb = (domWidget, isReady) => {
+      const readyCb = (domWidget2) => {
+        setTimeout(() => {
+          getApiRoutes().backup.new();
+          contentCb(domWidget2, true);
+        }, 750);
+      };
+      const createSpinner = () => {
+        const spinner = document.createElement(TagName.LfSpinner);
+        spinner.classList.add(ControlPanelCSS.Spinner);
+        spinner.lfActive = true;
+        spinner.lfLayout = 11;
+        return spinner;
+      };
+      const content = document.createElement(TagName.Div);
+      if (isReady) {
+        content.appendChild(createContent());
+        domWidget.replaceChild(content, domWidget.firstChild);
+      } else {
+        const spinner = createSpinner();
+        spinner.addEventListener(LfEventName.LfSpinner, readyCb.bind(null, domWidget));
+        content.appendChild(spinner);
+        domWidget.appendChild(content);
+      }
+      content.classList.add(ControlPanelCSS.Content);
+    };
+    const wrapper = document.createElement(TagName.Div);
+    contentCb(wrapper, false);
+    const options = controlPanelFactory.options(wrapper);
+    STATE$9.set(wrapper, { node, wrapper });
+    return { widget: createDOMWidget(CustomWidgetName.controlPanel, wrapper, node, options) };
+  },
+  //#endregion
+  //#region State
+  state: STATE$9
+  //#endregion
+};
+var CountBarChartCSS;
+(function(CountBarChartCSS2) {
+  CountBarChartCSS2["Content"] = "lf-countbarchart";
+  CountBarChartCSS2["Widget"] = "lf-countbarchart__widget";
+})(CountBarChartCSS || (CountBarChartCSS = {}));
+const STATE$8 = /* @__PURE__ */ new WeakMap();
+const countBarChartFactory = {
+  //#region Options
+  options: (wrapper) => {
+    return {
+      hideOnZoom: true,
+      getState: () => STATE$8.get(wrapper),
+      getValue() {
+        const { datasets } = STATE$8.get(wrapper);
+        return {
+          chart: (datasets == null ? void 0 : datasets.chart) || {},
+          chip: (datasets == null ? void 0 : datasets.chip) || {}
+        };
+      },
+      setValue(value) {
+        const { card, datasets } = STATE$8.get(wrapper);
+        const callback = (_2, u2) => {
+          const json = u2.parsedJson;
+          datasets.chart = json.chart || {};
+          datasets.chip = json.chip || {};
+          card.lfDataset = {
+            nodes: [
+              {
+                id: "countBarChart",
+                cells: {
+                  lfButton: { shape: "button", value: "" },
+                  lfChart: {
+                    lfAxis: ["Axis_0"],
+                    lfDataset: datasets.chart,
+                    lfSeries: ["Series_0"],
+                    shape: "chart",
+                    value: ""
+                  },
+                  lfChip: { lfDataset: datasets.chip, shape: "chip", value: "" }
+                }
+              }
+            ]
+          };
+        };
+        normalizeValue(value, callback, CustomWidgetName.countBarChart);
+      }
+    };
+  },
+  //#endregion
+  //#region Render
+  render: (node) => {
+    const wrapper = document.createElement(TagName.Div);
+    const content = document.createElement(TagName.Div);
+    const card = document.createElement(TagName.LfCard);
+    const chart = {};
+    const chip = {};
+    card.classList.add(CountBarChartCSS.Widget);
+    card.lfLayout = "keywords";
+    content.classList.add(CountBarChartCSS.Content);
+    content.appendChild(card);
+    wrapper.appendChild(content);
+    const options = countBarChartFactory.options(wrapper);
+    STATE$8.set(wrapper, { card, datasets: { chart, chip }, node, wrapper });
+    return { widget: createDOMWidget(CustomWidgetName.countBarChart, wrapper, node, options) };
+  },
+  //#endregion
+  //#region State
+  state: STATE$8
+  //#endregion
+};
+const EV_HANDLERS$5 = {
+  //#region List handler
+  list: (state, e2) => {
+    const { eventType, node } = e2.detail;
+    const comfyNode = state.node;
+    const strValue = node ? String(node.value).valueOf() : "";
+    if (eventType === "click" && strValue) {
+      const boolW = getWidget(comfyNode, ComfyWidgetName.boolean);
+      const comboW = getWidget(comfyNode, ComfyWidgetName.combo);
+      const customtextW = getWidget(comfyNode, ComfyWidgetName.customtext);
+      const floatW = getWidget(comfyNode, ComfyWidgetName.float);
+      const intW = getWidget(comfyNode, ComfyWidgetName.integer);
+      const numberW = getWidget(comfyNode, ComfyWidgetName.number);
+      const seedW = getWidget(comfyNode, ComfyWidgetName.seed);
+      const stringW = getWidget(comfyNode, ComfyWidgetName.string);
+      const textW = getWidget(comfyNode, ComfyWidgetName.text);
+      const toggleW = getWidget(comfyNode, ComfyWidgetName.toggle);
+      switch (comfyNode.comfyClass) {
+        case NodeName.boolean:
+          if (boolW) {
+            boolW.value = String(node.value).toLowerCase() === "true" ? true : false;
+          } else if (toggleW) {
+            toggleW.value = String(node.value).toLowerCase() === "true" ? true : false;
+          }
+          break;
+        case NodeName.float:
+          if (numberW) {
+            numberW.value = Number(node.value).valueOf();
+          } else if (intW) {
+            floatW.value = Number(node.value).valueOf();
+          }
+          break;
+        case NodeName.integer:
+        case NodeName.sequentialSeedsGenerator:
+          if (numberW) {
+            numberW.value = Number(node.value).valueOf();
+          } else if (intW) {
+            intW.value = Number(node.value).valueOf();
+          } else if (seedW) {
+            seedW.value = Number(node.value).valueOf();
+          }
+          break;
+        case NodeName.samplerSelector:
+        case NodeName.schedulerSelector:
+        case NodeName.upscaleModelSelector:
+        case NodeName.vaeSelector:
+          comboW.value = node.value;
+          break;
+        case NodeName.string:
+          if (stringW) {
+            stringW.options.setValue(node.value);
+          } else if (customtextW) {
+            customtextW.options.setValue(node.value);
+          } else if (textW) {
+            textW.value = node.value;
+          }
+          break;
+      }
+    }
+  }
+  //#endregion
+};
+var HistoryCSS;
+(function(HistoryCSS2) {
+  HistoryCSS2["Content"] = "lf-history";
+  HistoryCSS2["Widget"] = "lf-history__widget";
+})(HistoryCSS || (HistoryCSS = {}));
+const STATE$7 = /* @__PURE__ */ new WeakMap();
+const historyFactory = {
+  //#region Options
+  options: (wrapper) => {
+    return {
+      hideOnZoom: false,
+      getState: () => STATE$7.get(wrapper),
+      getValue() {
+        const { list } = STATE$7.get(wrapper);
+        return (list == null ? void 0 : list.lfDataset) || {};
+      },
+      setValue(value) {
+        const { list } = STATE$7.get(wrapper);
+        const callback = (_2, u2) => {
+          list.lfDataset = u2.parsedJson || {};
+        };
+        normalizeValue(value, callback, CustomWidgetName.history);
+      }
+    };
+  },
+  //#endregion
+  //#region Render
+  render: (node) => {
+    const wrapper = document.createElement(TagName.Div);
+    const content = document.createElement(TagName.Div);
+    const list = document.createElement(TagName.LfList);
+    list.classList.add(HistoryCSS.Widget);
+    list.lfEmpty = "History is empty!";
+    list.lfEnableDeletions = true;
+    switch (node.comfyClass) {
+      case NodeName.loadFileOnce:
+        break;
+      default:
+        list.lfSelectable = true;
+        break;
+    }
+    list.addEventListener(LfEventName.LfList, (e2) => EV_HANDLERS$5.list(STATE$7.get(wrapper), e2));
+    content.classList.add(HistoryCSS.Content);
+    content.appendChild(list);
+    wrapper.appendChild(content);
+    const options = historyFactory.options(wrapper);
+    STATE$7.set(wrapper, { list, node, wrapper });
+    return { widget: createDOMWidget(CustomWidgetName.history, wrapper, node, options) };
   },
   //#endregion
   //#region State
@@ -11926,7 +12123,7 @@ class LFWidgets {
           const path = paths[index];
           models.push({ dataset, hash, path, apiFlag });
         }
-        apiCall$2(models).then((r2) => {
+        apiCall$1(models).then((r2) => {
           for (let index = 0; index < r2.length; index++) {
             const cardProps = r2[index];
             if (cardProps.lfDataset) {
@@ -12146,6 +12343,9 @@ class LFManager {
     installLFRefreshNodeHook(app, {
       logger: (m2, a2, s2) => this.log(m2, a2, s2)
     });
+    installLFInterruptHook(api, {
+      logger: (m2, a2, s2) => this.log(m2, a2, s2)
+    });
     __classPrivateFieldGet(this, _LFManager_APIS, "f").github.getLatestRelease().then((r2) => __classPrivateFieldSet(this, _LFManager_LATEST_RELEASE, (r2 == null ? void 0 : r2.data) || null, "f"));
     if (__classPrivateFieldGet(this, _LFManager_INITIALIZED, "f")) {
       this.log("Attempt to initialize LFManager when already ready!", { LFManager: this }, LogSeverity.Warning);
@@ -12295,6 +12495,12 @@ var LFRefreshFlags;
   LFRefreshFlags2["OriginalRefreshRef"] = "_lf_original_refreshComboInNodes";
   LFRefreshFlags2["InBeforeRefresh"] = "_lf_in_beforeRefreshComboInNodes";
 })(LFRefreshFlags || (LFRefreshFlags = {}));
+var LFInterruptFlags;
+(function(LFInterruptFlags2) {
+  LFInterruptFlags2["PatchedInterrupt"] = "_lf_patched_interrupt";
+  LFInterruptFlags2["OriginalInterruptRef"] = "_lf_original_interrupt";
+  LFInterruptFlags2["InBeforeInterrupt"] = "_lf_in_beforeInterrupt";
+})(LFInterruptFlags || (LFInterruptFlags = {}));
 const LF_MANAGER_SYMBOL_ID = "__LfManager__";
 const LF_MANAGER_SYMBOL = Symbol.for(LF_MANAGER_SYMBOL_ID);
 const DEFAULT_WIDGET_NAME = "ui_widget";
@@ -12393,6 +12599,12 @@ function isRefreshHookApp(obj) {
     return false;
   const o2 = obj;
   return typeof o2["refreshComboInNodes"] === "function" || "refreshComboInNodes" in o2 || LFRefreshFlags.PatchedRefresh in o2;
+}
+function isInterruptHookAPI(obj) {
+  if (!obj || typeof obj !== "object")
+    return false;
+  const o2 = obj;
+  return typeof o2["interrupt"] === "function" || "interrupt" in o2 || LFInterruptFlags.PatchedInterrupt in o2;
 }
 const getInput = (node, type) => {
   var _a;
