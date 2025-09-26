@@ -16,6 +16,7 @@ import { CustomWidgetName, NodeName, TagName } from '../types/widgets/widgets';
 import { createDOMWidget, getLfManager, normalizeValue } from '../utils/common';
 
 const STATE = new WeakMap<HTMLDivElement, ImageEditorState>();
+export const IMAGE_EDITOR_INSTANCES = new Set<ImageEditorState>();
 
 export const imageEditorFactory: ImageEditorFactory = {
   //#region Options
@@ -133,7 +134,7 @@ export const imageEditorFactory: ImageEditorFactory = {
 
     const options = imageEditorFactory.options(wrapper);
 
-    STATE.set(wrapper, {
+    const state: ImageEditorState = {
       elements: { actionButtons, controls: {}, grid, imageviewer, settings },
       filter: null,
       filterType: null,
@@ -144,7 +145,10 @@ export const imageEditorFactory: ImageEditorFactory = {
         snapshot: () => updateCb(STATE.get(wrapper), true),
       },
       wrapper,
-    });
+    };
+
+    STATE.set(wrapper, state);
+    IMAGE_EDITOR_INSTANCES.add(state);
 
     return { widget: createDOMWidget(CustomWidgetName.imageEditor, wrapper, node, options) };
   },

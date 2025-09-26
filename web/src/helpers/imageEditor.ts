@@ -23,11 +23,11 @@ import {
   ImageEditorControlIds,
   ImageEditorControls,
   ImageEditorCSS,
+  ImageEditorDataset,
   ImageEditorFilter,
   ImageEditorFilterType,
   ImageEditorIcons,
   ImageEditorRequestSettings,
-  ImageEditorDataset,
   ImageEditorSliderConfig,
   ImageEditorSliderIds,
   ImageEditorState,
@@ -45,44 +45,82 @@ import {
   getLfManager,
   isTree,
   isValidObject,
+  LFInterruptFlags,
   unescapeJson,
 } from '../utils/common';
+/// @ts-ignore
+import { api } from '/scripts/api.js';
+
+export const handleInterruptForState = async (state: ImageEditorState) => {
+  const lfManager = getLfManager();
+  const { actionButtons, grid, imageviewer } = state.elements;
+  const dataset = imageviewer.lfDataset as ImageEditorDataset | undefined;
+  const statusColumn = getStatusColumn(dataset);
+  const pathColumn = getPathColumn(dataset);
+  const parsedPath = pathColumn
+    ? (unescapeJson(pathColumn).parsedJson as LfDataColumn | undefined)
+    : undefined;
+  const path = typeof parsedPath?.title === 'string' ? parsedPath.title : null;
+
+  if (statusColumn?.title === ImageEditorStatus.Pending) {
+    statusColumn.title = ImageEditorStatus.Completed;
+
+    if (dataset && path) {
+      try {
+        await getApiRoutes().json.update(path, dataset);
+      } catch (error) {
+        lfManager.log(
+          'Failed to update JSON after workflow interrupt.',
+          { error, path },
+          LogSeverity.Warning,
+        );
+      }
+    }
+
+    if (actionButtons?.interrupt && actionButtons?.resume) {
+      setGridStatus(ImageEditorStatus.Completed, grid, actionButtons);
+    } else {
+      grid?.classList.add(ImageEditorCSS.GridIsInactive);
+    }
+
+    try {
+      const components = await imageviewer.getComponents();
+      const navigation = components?.navigation;
+      await imageviewer.reset();
+      await navigation?.masonry?.setSelectedShape?.(null);
+    } catch (error) {
+      lfManager.log(
+        'Failed to reset image viewer after workflow interrupt.',
+        { error },
+        LogSeverity.Warning,
+      );
+    }
+  }
+
+  await resetSettings(imageviewer);
+};
 
 export const EV_HANDLERS = {
   //#region Button handler
   button: async (state: ImageEditorState, e: CustomEvent<LfButtonEventPayload>) => {
     const { comp, eventType } = e.detail;
 
-    const { elements } = state;
-    const { actionButtons, grid, imageviewer } = elements;
-
     if (eventType === 'click') {
-      const update = async () => {
-        const dataset = imageviewer.lfDataset;
-        const pathColumn = getPathColumn(dataset);
-        const statusColumn = getStatusColumn(dataset);
-
-        if (statusColumn?.title === ImageEditorStatus.Pending) {
-          statusColumn.title = ImageEditorStatus.Completed;
-          const path = (unescapeJson(pathColumn).parsedJson as LfDataColumn).title;
-
-          await getApiRoutes().json.update(path, dataset);
-          setGridStatus(ImageEditorStatus.Completed, grid, actionButtons);
-
-          const { masonry } = (await imageviewer.getComponents()).navigation;
-          await imageviewer.reset();
-          await masonry.setSelectedShape(null);
-        }
-      };
+      const isPatched = api?.[LFInterruptFlags.PatchedInterrupt] === true;
 
       switch (comp.lfIcon) {
         case ImageEditorIcons.Interrupt:
           getApiRoutes().comfy.interrupt();
+          if (!isPatched) {
+            await handleInterruptForState(state);
+          }
+          break;
+        case ImageEditorIcons.Resume:
+          await handleInterruptForState(state);
+          break;
+        default:
           break;
       }
-
-      await update();
-      resetSettings(imageviewer);
     }
   },
   //#endregion
@@ -567,16 +605,16 @@ export const createToggle = (state: ImageEditorState, data: ImageEditorToggleCon
 //#endregion
 
 //#region Utils
-export const getPathColumn = (dataset: LfDataDataset): LfDataColumn | null => {
+export function getPathColumn(dataset: LfDataDataset): LfDataColumn | null {
   return dataset?.columns?.find((c) => c.id === ImageEditorColumnId.Path) || null;
-};
-export const getStatusColumn = (dataset: LfDataDataset): LfDataColumn | null => {
+}
+export function getStatusColumn(dataset: LfDataDataset): LfDataColumn | null {
   return dataset?.columns?.find((c) => c.id === ImageEditorColumnId.Status) || null;
-};
-export const parseLabel = (data: ImageEditorControlConfig) => {
+}
+export function parseLabel(data: ImageEditorControlConfig) {
   return data.isMandatory ? `${data.ariaLabel}*` : data.ariaLabel;
-};
-export const resetSettings = async (settings: HTMLElement) => {
+}
+export async function resetSettings(settings: HTMLElement) {
   const controls = Array.from(settings.querySelectorAll('[data-id]'));
   for (const control of controls) {
     switch (control.tagName) {
@@ -595,30 +633,39 @@ export const resetSettings = async (settings: HTMLElement) => {
         break;
     }
   }
-};
-export const setGridStatus = (
+}
+export function setGridStatus(
   status: ImageEditorStatus,
   grid: HTMLDivElement,
   actionButtons: ImageEditorActionButtons,
-) => {
+) {
+  const { interrupt, resume } = actionButtons;
   switch (status) {
     case ImageEditorStatus.Completed:
       requestAnimationFrame(() => {
-        actionButtons.interrupt.lfUiState = 'disabled';
-        actionButtons.resume.lfUiState = 'disabled';
+        if (interrupt) {
+          interrupt.lfUiState = 'disabled';
+        }
+        if (resume) {
+          resume.lfUiState = 'disabled';
+        }
       });
-      grid.classList.add(ImageEditorCSS.GridIsInactive);
+      grid?.classList.add(ImageEditorCSS.GridIsInactive);
       break;
 
     case ImageEditorStatus.Pending:
       requestAnimationFrame(() => {
-        actionButtons.interrupt.lfUiState = 'danger';
-        actionButtons.resume.lfUiState = 'success';
+        if (interrupt) {
+          interrupt.lfUiState = 'danger';
+        }
+        if (resume) {
+          resume.lfUiState = 'success';
+        }
       });
-      grid.classList.remove(ImageEditorCSS.GridIsInactive);
+      grid?.classList.remove(ImageEditorCSS.GridIsInactive);
       break;
   }
-};
+}
 export const updateCb = async (state: ImageEditorState, addSnapshot = false, force = false) => {
   await refreshValues(state, addSnapshot);
 

@@ -10,6 +10,7 @@ import {
 import { LFManager } from '../managers/manager';
 import { BaseEventPayload } from '../types/events/events';
 import { FreeHookAPI } from '../types/hooks/free';
+import { InterruptHookAPI } from '../types/hooks/interrupt';
 import { RefreshHookApp } from '../types/hooks/refresh';
 import { LogSeverity } from '../types/manager/manager';
 import {
@@ -35,6 +36,11 @@ export enum LFFreeFlags {
   OriginalFreeRef = '_lf_original_freeMemory',
   PatchedFetch = '_lf_patched_fetchApi_free',
   InBeforeFree = '_lf_in_beforeFree',
+}
+export enum LFInterruptFlags {
+  PatchedInterrupt = '_lf_patched_interrupt',
+  OriginalInterruptRef = '_lf_original_interrupt',
+  InBeforeInterrupt = '_lf_in_beforeInterrupt',
 }
 export enum LFRefreshFlags {
   PatchedRefresh = '_lf_patched_refreshComboInNodes',
@@ -170,6 +176,15 @@ export function isRefreshHookApp(obj: unknown): obj is RefreshHookApp {
     typeof o['refreshComboInNodes'] === 'function' ||
     'refreshComboInNodes' in o ||
     LFRefreshFlags.PatchedRefresh in o
+  );
+}
+export function isInterruptHookAPI(obj: unknown): obj is InterruptHookAPI {
+  if (!obj || typeof obj !== 'object') return false;
+  const o = obj as Record<string, unknown>;
+  return (
+    typeof o['interrupt'] === 'function' ||
+    'interrupt' in o ||
+    LFInterruptFlags.PatchedInterrupt in o
   );
 }
 export const log = () => {

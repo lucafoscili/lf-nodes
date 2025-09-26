@@ -16,6 +16,7 @@ import {
   onNodeCreated,
 } from '../helpers/manager';
 import { installLFBeforeFreeHooks } from '../hooks/free';
+import { installLFInterruptHook } from '../hooks/interrupt';
 import { installLFRefreshNodeHook } from '../hooks/refresh';
 import { APIRoutes } from '../types/api/api';
 import { EventName } from '../types/events/events';
@@ -90,6 +91,9 @@ export class LFManager {
       logger: (m, a, s) => this.log(m, a, s),
     });
     installLFRefreshNodeHook(app, {
+      logger: (m, a, s) => this.log(m, a, s),
+    });
+    installLFInterruptHook(api, {
       logger: (m, a, s) => this.log(m, a, s),
     });
 
