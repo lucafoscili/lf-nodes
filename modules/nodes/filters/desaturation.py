@@ -97,6 +97,7 @@ class LF_Desaturation:
 NODE_CLASS_MAPPINGS = {
     "LF_Desaturation": LF_Desaturation,
 }
+
 NODE_DISPLAY_NAME_MAPPINGS = {
     "LF_Desaturation": "Desaturation",
 }

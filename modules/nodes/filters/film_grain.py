@@ -93,6 +93,7 @@ class LF_FilmGrain:
 NODE_CLASS_MAPPINGS = {
     "LF_FilmGrain": LF_FilmGrain,
 }
+
 NODE_DISPLAY_NAME_MAPPINGS = {
     "LF_FilmGrain": "Film grain",
 }

@@ -81,6 +81,7 @@ class LF_GaussianBlur:
 NODE_CLASS_MAPPINGS = {
     "LF_GaussianBlur": LF_GaussianBlur,
 }
+
 NODE_DISPLAY_NAME_MAPPINGS = {
     "LF_GaussianBlur": "Gaussian Blur",
 }

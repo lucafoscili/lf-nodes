@@ -93,6 +93,7 @@ export enum ImageEditorCanvasIds {
   Points = 'points',
 }
 export enum ImageEditorSliderIds {
+  Amount = 'amount',
   Balance = 'balance',
   BlueChannel = 'b_channel',
   BlurKernelSize = 'blur_kernel_size',
@@ -114,6 +115,7 @@ export enum ImageEditorSliderIds {
   RedChannel = 'r_channel',
   SharpenAmount = 'sharpen_amount',
   Size = 'size',
+  Sigma = 'sigma',
   Softness = 'softness',
   Steps = 'steps',
   Strength = 'strength',
@@ -218,9 +220,11 @@ export interface ImageEditorFilterSettingsMap {
   gaussianBlur: ImageEditorGaussianBlurSettings;
   inpaint: ImageEditorInpaintSettings;
   line: ImageEditorLineSettings;
+  saturation: ImageEditorSaturationSettings;
   sepia: ImageEditorSepiaSettings;
   splitTone: ImageEditorSplitToneSettings;
   tiltShift: ImageEditorTiltShiftSettings;
+  unsharpMask: ImageEditorUnsharpMaskSettings;
   vibrance: ImageEditorVibranceSettings;
   vignette: ImageEditorVignetteSettings;
 }
@@ -298,6 +302,12 @@ export interface ImageEditorTiltShiftSettings extends ImageEditorFilterSettings 
   radius: number;
   smooth: boolean;
   vertical: boolean;
+}
+export interface ImageEditorUnsharpMaskSettings extends ImageEditorFilterSettings {
+  amount: number;
+  radius: number;
+  sigma: number;
+  threshold: number;
 }
 export interface ImageEditorVibranceSettings extends ImageEditorFilterSettings {
   intensity: number;
@@ -400,6 +410,12 @@ export enum ImageEditorTiltShiftIds {
   Radius = 'radius',
   Smooth = 'smooth',
   Vertical = 'vertical',
+}
+export enum ImageEditorUnsharpMaskIds {
+  Amount = 'amount',
+  Radius = 'radius',
+  Sigma = 'sigma',
+  Threshold = 'threshold',
 }
 export enum ImageEditorVibranceIds {
   Intensity = 'intensity',
@@ -559,6 +575,13 @@ export type ImageEditorTiltShiftFilter = ImageEditorFilterDefinition<
     [ImageEditorControls.Toggle]: ImageEditorToggleConfig[];
   }
 >;
+export type ImageEditorUnsharpMaskFilter = ImageEditorFilterDefinition<
+  typeof ImageEditorUnsharpMaskIds,
+  ImageEditorUnsharpMaskSettings,
+  {
+    [ImageEditorControls.Slider]: ImageEditorSliderConfig[];
+  }
+>;
 export type ImageEditorVibranceFilter = ImageEditorFilterDefinition<
   typeof ImageEditorVibranceIds,
   ImageEditorVibranceSettings,
@@ -601,6 +624,7 @@ export type ImageEditorFilters = {
   sepia: ImageEditorSepiaFilter;
   splitTone: ImageEditorSplitToneFilter;
   tiltShift: ImageEditorTiltShiftFilter;
+  unsharpMask: ImageEditorUnsharpMaskFilter;
   vibrance: ImageEditorVibranceFilter;
   vignette: ImageEditorVignetteFilter;
 };
@@ -620,6 +644,7 @@ export type ImageEditorFilter =
   | ImageEditorSepiaFilter
   | ImageEditorSplitToneFilter
   | ImageEditorTiltShiftFilter
+  | ImageEditorUnsharpMaskFilter
   | ImageEditorVibranceFilter
   | ImageEditorVignetteFilter;
 

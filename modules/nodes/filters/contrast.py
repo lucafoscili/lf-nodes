@@ -87,6 +87,7 @@ class LF_Contrast:
 NODE_CLASS_MAPPINGS = {
     "LF_Contrast": LF_Contrast,
 }
+
 NODE_DISPLAY_NAME_MAPPINGS = {
     "LF_Contrast": "Contrast",
 }

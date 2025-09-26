@@ -20,6 +20,7 @@ import {
   ImageEditorSplitToneIds,
   ImageEditorTextfieldIds,
   ImageEditorTiltShiftIds,
+  ImageEditorUnsharpMaskIds,
   ImageEditorToggleIds,
   ImageEditorVibranceIds,
   ImageEditorVignetteIds,
@@ -269,6 +270,66 @@ export const SETTINGS: ImageEditorFilters = {
           step: '2',
           title:
             'Controls the size of the Gaussian blur kernel. Higher values mean more smoothing.',
+        },
+      ],
+    },
+  },
+  //#endregion
+
+  //#region Unsharp mask
+  unsharpMask: {
+    controlIds: ImageEditorUnsharpMaskIds,
+    settings: {
+      amount: 0.5,
+      radius: 5,
+      sigma: 1.0,
+      threshold: 0,
+    },
+    configs: {
+      [ImageEditorControls.Slider]: [
+        {
+          ariaLabel: 'Sharpen Amount',
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 0.5,
+          id: ImageEditorSliderIds.Amount,
+          isMandatory: true,
+          max: '5',
+          min: '0',
+          step: '0.05',
+          title: 'Overall strength applied to the high-frequency detail mask.',
+        },
+        {
+          ariaLabel: 'Radius',
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 5,
+          id: ImageEditorSliderIds.Radius,
+          isMandatory: true,
+          max: '31',
+          min: '1',
+          step: '2',
+          title: 'Gaussian blur kernel size (odd numbers give the best results).',
+        },
+        {
+          ariaLabel: 'Sigma',
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 1,
+          id: ImageEditorSliderIds.Sigma,
+          isMandatory: true,
+          max: '5',
+          min: '0.1',
+          step: '0.1',
+          title: 'Gaussian blur sigma controlling feather softness around edges.',
+        },
+        {
+          ariaLabel: 'Threshold',
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 0,
+          id: ImageEditorSliderIds.Threshold,
+          isMandatory: true,
+          max: '1',
+          min: '0',
+          step: '0.01',
+          title: 'Skip sharpening for pixels below this normalized contrast level.',
         },
       ],
     },
@@ -1199,6 +1260,20 @@ export const TREE_DATA: LfDataDataset = {
           },
           id: 'clarity',
           value: 'Clarity',
+        },
+        //#endregion
+
+        //#region Unsharp mask
+        {
+          description: 'Sharpens edges using a classic unsharp mask pipeline.',
+          cells: {
+            lfCode: {
+              shape: 'code',
+              value: JSON.stringify(SETTINGS.unsharpMask),
+            },
+          },
+          id: 'unsharp_mask',
+          value: 'Unsharp Mask',
         },
         //#endregion
 

@@ -117,6 +117,7 @@ class LF_Bloom:
 NODE_CLASS_MAPPINGS = {
     "LF_Bloom": LF_Bloom,
 }
+
 NODE_DISPLAY_NAME_MAPPINGS = {
     "LF_Bloom": "Bloom",
 }

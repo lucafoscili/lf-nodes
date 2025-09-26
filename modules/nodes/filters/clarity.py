@@ -90,6 +90,7 @@ class LF_Clarity:
 NODE_CLASS_MAPPINGS = {
     "LF_Clarity": LF_Clarity,
 }
+
 NODE_DISPLAY_NAME_MAPPINGS = {
     "LF_Clarity": "Clarity",
 }

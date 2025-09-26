@@ -21,6 +21,7 @@ from .film_grain import film_grain_effect
 from .gaussian_blur import gaussian_blur_effect
 from .inpaint import apply_inpaint_filter
 from .line import line_effect
+from .unsharp_mask import unsharp_mask_effect
 from .saturation import saturation_effect
 from .sepia import sepia_effect
 from .split_tone import split_tone_effect
@@ -159,6 +160,14 @@ def apply_vignette_filter(image: torch.Tensor, settings: dict) -> FilterResult:
     return _as_result(vignette_effect(image, intensity, radius, shape, color))
 
 
+def apply_unsharp_mask_filter(image: torch.Tensor, settings: dict) -> FilterResult:
+    amount = convert_to_float(settings.get("amount", 0.0))
+    radius = convert_to_int(settings.get("radius", 1))
+    sigma = convert_to_float(settings.get("sigma", 1.0))
+    threshold = convert_to_float(settings.get("threshold", 0.0))
+    return _as_result(unsharp_mask_effect(image, amount, radius, sigma, threshold))
+
+
 FILTER_PROCESSORS: Dict[str, FilterProcessor] = {
     "blend": apply_blend_filter,
     "bloom": apply_bloom_filter,
@@ -175,6 +184,7 @@ FILTER_PROCESSORS: Dict[str, FilterProcessor] = {
     "sepia": apply_sepia_filter,
     "split_tone": apply_split_tone_filter,
     "tilt_shift": apply_tilt_shift_filter,
+    "unsharp_mask": apply_unsharp_mask_filter,
     "vibrance": apply_vibrance_filter,
     "vignette": apply_vignette_filter,
 }
@@ -208,6 +218,7 @@ __all__ = [
     "apply_sepia_filter",
     "apply_split_tone_filter",
     "apply_tilt_shift_filter",
+    "apply_unsharp_mask_filter",
     "apply_vibrance_filter",
     "apply_vignette_filter",
     "process_filter",

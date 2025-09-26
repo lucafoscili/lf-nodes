@@ -72,6 +72,7 @@ class LF_Sepia:
 NODE_CLASS_MAPPINGS = {
     "LF_Sepia": LF_Sepia,
 }
+
 NODE_DISPLAY_NAME_MAPPINGS = {
     "LF_Sepia": "Sepia",
 }

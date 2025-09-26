@@ -93,6 +93,7 @@ class LF_Vignette:
 NODE_CLASS_MAPPINGS = {
     "LF_Vignette": LF_Vignette
 }
+
 NODE_DISPLAY_NAME_MAPPINGS = {
     "LF_Vignette": "Vignette"
 }

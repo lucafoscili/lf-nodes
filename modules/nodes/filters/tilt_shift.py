@@ -98,6 +98,7 @@ class LF_TiltShift:
 NODE_CLASS_MAPPINGS = {
     "LF_TiltShift": LF_TiltShift,
 }
+
 NODE_DISPLAY_NAME_MAPPINGS = {
     "LF_TiltShift": "Tilt Shift",
 }

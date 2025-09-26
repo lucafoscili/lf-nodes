@@ -82,6 +82,7 @@ class LF_Vibrance:
 NODE_CLASS_MAPPINGS = {
     "LF_Vibrance": LF_Vibrance,
 }
+
 NODE_DISPLAY_NAME_MAPPINGS = {
     "LF_Vibrance": "Vibrance",
 }

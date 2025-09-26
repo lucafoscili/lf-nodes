@@ -77,6 +77,7 @@ class LF_Blend:
 NODE_CLASS_MAPPINGS = {
     "LF_Blend": LF_Blend,
 }
+
 NODE_DISPLAY_NAME_MAPPINGS = {
     "LF_Blend": "Blend",
 }

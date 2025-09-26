@@ -101,6 +101,7 @@ class LF_SplitTone:
 NODE_CLASS_MAPPINGS = {
     "LF_SplitTone": LF_SplitTone,
 }
+
 NODE_DISPLAY_NAME_MAPPINGS = {
     "LF_SplitTone": "Split Tone",
 }

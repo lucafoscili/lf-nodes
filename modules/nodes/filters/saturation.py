@@ -72,6 +72,7 @@ class LF_Saturation:
 NODE_CLASS_MAPPINGS = {
     "LF_Saturation": LF_Saturation,
 }
+
 NODE_DISPLAY_NAME_MAPPINGS = {
     "LF_Saturation": "Saturation",
 }

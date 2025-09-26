@@ -96,6 +96,7 @@ class LF_Brightness:
 NODE_CLASS_MAPPINGS = {
     "LF_Brightness": LF_Brightness,
 }
+
 NODE_DISPLAY_NAME_MAPPINGS = {
     "LF_Brightness": "Brightness",
 }
