@@ -621,7 +621,7 @@ export const SETTINGS: ImageEditorFilters = {
         {
           ariaLabel: 'Upsample target (px)',
           controlType: ImageEditorControls.Slider,
-          defaultValue: 0,
+          defaultValue: 1024,
           id: ImageEditorSliderIds.UpsampleTarget,
           isMandatory: false,
           max: '2048',
