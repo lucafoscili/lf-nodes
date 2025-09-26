@@ -7,5 +7,6 @@ from .process_and_save_image import *
 from .resize_and_crop_image import *
 from .resize_image import *
 from .resize_to_square import *
+from .tiling import *
 
 __all__ = [name for name in dir() if not name.startswith("_")]

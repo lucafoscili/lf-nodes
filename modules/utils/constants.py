@@ -36,10 +36,11 @@ class Input:
     LF_UPLOAD = "LF_UPLOAD"
     JSON = "JSON"
     MASK = "MASK"
-    REGION_META = "REGION_META"
     MODEL = "MODEL"
-    VAE = "VAE"
     STRING = "STRING"
+    REGION_META = "REGION_META"
+    UPSCALE_MODEL = "UPSCALE_MODEL"
+    VAE = "VAE"
 
 ANY = AnyType("*")
 INT_MAX = 0xffffffffffffffff

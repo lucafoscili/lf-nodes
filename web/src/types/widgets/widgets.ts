@@ -153,6 +153,7 @@ export enum NodeName {
   switchInteger = 'LF_SwitchInteger',
   switchJson = 'LF_SwitchJSON',
   switchString = 'LF_SwitchString',
+  tiledSuperRes = 'LF_TiledSuperRes',
   tiltShift = 'LF_TiltShift',
   updateUsageStatistics = 'LF_UpdateUsageStatistics',
   upscaleModelSelector = 'LF_UpscaleModelSelector',
