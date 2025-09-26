@@ -15,7 +15,6 @@ from ..helpers.editing import get_editing_context
 
 FilterResult = Tuple[torch.Tensor, Dict[str, str]]
 
-
 def sample_without_preview(
     model,
     positive,
@@ -80,7 +79,6 @@ def sample_without_preview(
 
     return out_latent
 
-
 def perform_inpaint(
     *,
     model,
@@ -102,26 +100,26 @@ def perform_inpaint(
     use_conditioning: bool = False,
 ) -> torch.Tensor:
     """
-    Run an inpaint diffusion pass and blend the result with the original image.
-
-    When `use_conditioning` is True, any provided conditioning stacks are prepended to the freshly
-    encoded prompts before sampling.
+    Performs inpainting on the given image using the specified model, mask, and prompts.
 
     Args:
-        model: The diffusion model to use for inpainting.
+        model: The diffusion model used for inpainting.
         clip: The CLIP model for text encoding.
-        vae: The VAE model for encoding/decoding images.
+        vae: The VAE model for encoding and decoding images.
         image (torch.Tensor): The input image tensor to be inpainted.
         mask (torch.Tensor): The mask tensor indicating regions to inpaint (1=inpaint, 0=keep original).
         positive_prompt (str): The positive text prompt guiding the inpainting.
-        negative_prompt (str): The negative text prompt for guidance.
-        sampler_name (str): The name of the sampler to use.
-        scheduler_name (str): The name of the scheduler to use.
-        steps (int): Number of diffusion steps.
-        denoise (float): Denoising strength (typically between 0 and 1).
+        negative_prompt (str): The negative text prompt for undesired features.
+        sampler_name (str): The name of the sampler to use for generation.
+        scheduler_name (str): The name of the scheduler to use for generation.
+        steps (int): Number of sampling steps.
+        denoise (float): Denoising strength for inpainting.
         cfg (float): Classifier-free guidance scale.
         seed (int): Random seed for reproducibility.
         disable_preview (bool, optional): If True, disables preview sampling for efficiency. Defaults to True.
+        positive_conditioning: Optional additional conditioning for the positive prompt.
+        negative_conditioning: Optional additional conditioning for the negative prompt.
+        use_conditioning (bool, optional): If True, combines additional conditioning with prompts. Defaults to False.
 
     Returns:
         torch.Tensor: The inpainted image tensor, blended with the original image according to the mask.
@@ -194,6 +192,302 @@ def perform_inpaint(
 
     return decoded * mask_to_blend + image * (1.0 - mask_to_blend)
 
+def _prepare_inpaint_region(
+    base_image: torch.Tensor,
+    mask_tensor: torch.Tensor,
+    *,
+    vae,
+    settings: dict,
+):
+    """
+    Prepares the region of interest (ROI) and mask for inpainting by normalizing the ROI, processing mask edges, and optionally upsampling the region.
+
+    Args:
+        base_image (torch.Tensor): The input image tensor of shape (B, H, W, C).
+        mask_tensor (torch.Tensor): The mask tensor of shape (B, H, W).
+        vae: VAE model instance, used for determining alignment factors.
+        settings (dict): Dictionary of settings controlling ROI, mask, and upsampling behavior.
+
+    Returns:
+        Tuple[
+            torch.Tensor,      # work_image: Cropped and optionally upsampled image tensor.
+            torch.Tensor,      # work_mask_soft: Processed mask tensor (dilated/feathered/upsampled).
+            Tuple[int, int, int, int],  # paste_roi: Coordinates (y0, x0, y1, x1) of the ROI in the original image.
+            dict               # meta: Metadata about the processing (dilate/feather px, upsample info, image shape).
+
+    Settings Keys:
+        roi_auto (bool): Whether to automatically detect and crop the ROI based on the mask.
+        roi_padding (int): Padding added around the detected ROI.
+        roi_align (int): Alignment multiple for ROI cropping.
+        roi_align_auto (bool): Whether to automatically determine alignment from VAE.
+        roi_min_size (int): Minimum size for the cropped ROI.
+        dilate (int): Number of pixels to dilate the mask.
+        feather (int): Number of pixels to feather (blur) the mask.
+        upsample (int or str): Target size for upsampling the longest side of the ROI.
+        upsample_target (int or str): Alternative key for upsampling target.
+
+    Notes:
+        - The function crops the image and mask to the smallest bounding box containing the mask, with optional padding and alignment.
+        - Mask edges can be dilated and feathered for smoother transitions.
+        - If upsampling is requested, the cropped region is resized so its longest side matches the target, maintaining alignment.
+    """
+    h = int(base_image.shape[1])
+    w = int(base_image.shape[2])
+
+    roi_auto = convert_to_boolean(settings.get("roi_auto", True))
+    if roi_auto is None:
+        roi_auto = True
+    roi_padding = max(0, int(convert_to_int(settings.get("roi_padding", 32)) or 32))
+    roi_align = max(1, int(convert_to_int(settings.get("roi_align", 8)) or 8))
+    roi_align_auto = convert_to_boolean(settings.get("roi_align_auto", False)) or False
+    roi_min_size = max(1, int(convert_to_int(settings.get("roi_min_size", 64)) or 64))
+
+    align_multiple = roi_align
+    if roi_align_auto:
+        candidates = [
+            getattr(vae, "downscale_factor", None),
+            getattr(vae, "downsample_factor", None),
+            getattr(getattr(vae, "first_stage_model", None), "downscale_factor", None),
+            getattr(getattr(vae, "first_stage_model", None), "downsample_factor", None),
+        ]
+        for candidate in candidates:
+            if isinstance(candidate, int) and candidate > 0:
+                align_multiple = candidate
+                break
+
+    work_image = base_image
+    work_mask = mask_tensor
+    paste_roi = (0, 0, h, w)
+
+    if roi_auto:
+        mask_any = (mask_tensor > 0.5).any(dim=0)
+        rows = mask_any.any(dim=1)
+        cols = mask_any.any(dim=0)
+        if bool(rows.any()) and bool(cols.any()):
+            ys = torch.where(rows)[0]
+            xs = torch.where(cols)[0]
+            y0 = int(ys.min().item())
+            y1 = int(ys.max().item()) + 1
+            x0 = int(xs.min().item())
+            x1 = int(xs.max().item()) + 1
+
+            y0 = max(0, y0 - roi_padding)
+            x0 = max(0, x0 - roi_padding)
+            y1 = min(h, y1 + roi_padding)
+            x1 = min(w, x1 + roi_padding)
+
+            def align_down(value: int, alignment: int) -> int:
+                return (value // alignment) * alignment
+
+            def align_up(value: int, alignment: int) -> int:
+                return ((value + alignment - 1) // alignment) * alignment
+
+            y0 = align_down(y0, align_multiple)
+            x0 = align_down(x0, align_multiple)
+            y1 = align_up(y1, align_multiple)
+            x1 = align_up(x1, align_multiple)
+
+            y0 = max(0, min(y0, h))
+            x0 = max(0, min(x0, w))
+            y1 = max(0, min(y1, h))
+            x1 = max(0, min(x1, w))
+
+            height = y1 - y0
+            width = x1 - x0
+            if height < roi_min_size:
+                delta = roi_min_size - height
+                y0 = max(0, y0 - delta // 2)
+                y1 = min(h, y0 + roi_min_size)
+            if width < roi_min_size:
+                delta = roi_min_size - width
+                x0 = max(0, x0 - delta // 2)
+                x1 = min(w, x0 + roi_min_size)
+
+            paste_roi = (y0, x0, y1, x1)
+            work_image = base_image[:, y0:y1, x0:x1, :]
+            work_mask = mask_tensor[:, y0:y1, x0:x1]
+
+    dilate_px = max(0, int(convert_to_int(settings.get("dilate", 0)) or 0))
+    feather_px = max(0, int(convert_to_int(settings.get("feather", 0)) or 0))
+
+    work_mask_soft = work_mask
+    if dilate_px > 0:
+        kernel = dilate_px * 2 + 1
+        wm = work_mask_soft.unsqueeze(1)
+        wm = F.max_pool2d(wm, kernel_size=kernel, stride=1, padding=dilate_px)
+        work_mask_soft = wm.squeeze(1)
+    if feather_px > 0:
+        kernel = feather_px * 2 + 1
+        wm = work_mask_soft.unsqueeze(1)
+        wm = F.avg_pool2d(wm, kernel_size=kernel, stride=1, padding=feather_px)
+        work_mask_soft = wm.squeeze(1)
+    work_mask_soft = work_mask_soft.clamp(0.0, 1.0)
+
+    raw_upsample = settings.get("upsample")
+    if raw_upsample is None or raw_upsample == "":
+        raw_upsample = settings.get("upsample_target")
+    upsample_target = convert_to_int(raw_upsample) if raw_upsample is not None else None
+
+    upsample_applied = False
+    upsample_info = None
+    if upsample_target is not None and upsample_target > 0:
+        orig_h, orig_w = int(work_image.shape[1]), int(work_image.shape[2])
+        longest = max(orig_h, orig_w)
+        if longest < upsample_target:
+            scale = float(upsample_target) / float(longest)
+            new_h = max(1, int(round(orig_h * scale)))
+            new_w = max(1, int(round(orig_w * scale)))
+
+            def align_up(value: int, alignment: int) -> int:
+                return ((value + alignment - 1) // alignment) * alignment
+
+            new_h = align_up(new_h, align_multiple)
+            new_w = align_up(new_w, align_multiple)
+
+            wi = work_image.permute(0, 3, 1, 2)
+            wi = F.interpolate(wi, size=(new_h, new_w), mode="bicubic", align_corners=False)
+            work_image = wi.permute(0, 2, 3, 1).contiguous()
+
+            wm = work_mask_soft.unsqueeze(1)
+            wm = F.interpolate(wm, size=(new_h, new_w), mode="nearest")
+            work_mask_soft = wm.squeeze(1).contiguous()
+
+            upsample_applied = True
+            upsample_info = (orig_h, orig_w, new_h, new_w)
+
+    meta = {
+        "dilate_px": dilate_px,
+        "feather_px": feather_px,
+        "upsample_applied": upsample_applied,
+        "upsample_info": upsample_info,
+        "image_shape": (h, w),
+    }
+
+    return work_image, work_mask_soft, paste_roi, meta
+
+def _finalize_inpaint_output(
+    processed_region: torch.Tensor,
+    base_image: torch.Tensor,
+    paste_roi: tuple[int, int, int, int],
+    *,
+    meta: dict,
+):
+    """
+    Finalize the output of an inpainting operation by optionally downscaling, pasting the processed region into the base image, clamping values, and emitting metadata.
+
+    Args:
+        processed_region (torch.Tensor): The inpainted region tensor of shape (batch, height, width, channels).
+        base_image (torch.Tensor): The original image tensor of shape (batch, height, width, channels).
+        paste_roi (tuple[int, int, int, int]): The region of interest (y0, x0, y1, x1) where the processed region should be pasted.
+        meta (dict): Metadata containing optional keys:
+            - "upsample_applied" (bool): Whether upsampling was applied.
+            - "upsample_info" (tuple): Information about upsampling (orig_h, orig_w, new_h, new_w).
+            - "dilate_px" (int): Number of pixels for dilation.
+            - "feather_px" (int): Number of pixels for feathering.
+            - "image_shape" (tuple): Shape of the image (height, width).
+
+    Returns:
+        Tuple[torch.Tensor, Dict[str, str]]:
+            - The finalized image tensor on CPU, clamped to [0, 1].
+            - A dictionary with metadata about the operation (ROI, upsampling, edge processing).
+    """
+    upsample_applied = bool(meta.get("upsample_applied"))
+    upsample_info = meta.get("upsample_info")
+    dilate_px = int(meta.get("dilate_px", 0))
+    feather_px = int(meta.get("feather_px", 0))
+
+    if upsample_applied and upsample_info is not None:
+        orig_h, orig_w, _, _ = upsample_info
+        pr = processed_region.permute(0, 3, 1, 2)
+        pr = F.interpolate(pr, size=(orig_h, orig_w), mode="bicubic", align_corners=False)
+        processed_region = pr.permute(0, 2, 3, 1).contiguous()
+
+    h, w = meta.get("image_shape", (int(base_image.shape[1]), int(base_image.shape[2])))
+    if paste_roi != (0, 0, h, w):
+        y0, x0, y1, x1 = paste_roi
+        result_full = base_image.clone()
+        result_full[:, y0:y1, x0:x1, :] = processed_region
+        processed = result_full
+    else:
+        processed = processed_region
+
+    processed = processed.detach().clamp(0.0, 1.0).to(torch.float32).cpu().contiguous()
+
+    info: Dict[str, str] = {}
+    if paste_roi != (0, 0, h, w):
+        y0, x0, y1, x1 = paste_roi
+        info["roi"] = f"y0={y0},x0={x0},y1={y1},x1={x1}"
+    if upsample_applied and upsample_info is not None:
+        oh, ow, nh, nw = upsample_info
+        info["upsample"] = f"{ow}x{oh} -> {nw}x{nh}"
+    if dilate_px or feather_px:
+        info["edges"] = f"dilate={dilate_px},feather={feather_px}"
+
+    return processed, info
+
+def _normalize_steps(raw_value):
+    """
+    Normalizes the input value to a valid number of steps for inpainting.
+
+    Parameters:
+        raw_value (Any): The raw input value representing the number of steps. Can be None or any type convertible to int.
+
+    Returns:
+        int: The normalized number of steps, rounded to the nearest integer, with a minimum value of 1. Defaults to 20 if input is None or invalid.
+    """
+    value = convert_to_int(raw_value) if raw_value is not None else None
+    if value is None:
+        value = 20
+
+    return max(1, int(round(value)))
+
+def _normalize_denoise(raw_value):
+    """
+    Normalizes the input value to a valid denoise strength for inpainting.
+
+    Parameters:
+        raw_value (Any): The raw input value representing the denoise strength. Can be None or any type convertible to float.
+
+    Returns:
+        float: The normalized denoise strength, clamped to [0, 1]. Defaults to 1.0 if input is None or invalid.
+    """
+    value = convert_to_float(raw_value) if raw_value is not None else None
+    if value is None:
+        value = 1.0
+
+    return max(0.0, min(1.0, float(value)))
+
+def _normalize_cfg(raw_value):
+    """
+    Normalizes the input value to a valid classifier-free guidance scale for inpainting.
+
+    Parameters:
+        raw_value (Any): The raw input value representing the CFG scale. Can be None or any type convertible to float.
+
+    Returns:
+        float: The normalized CFG scale, clamped to [0, 20]. Defaults to 7.0 if input is None or invalid.
+    """
+    value = convert_to_float(raw_value) if raw_value is not None else None
+    if value is None:
+        value = 7.0
+
+    return float(value)
+
+def _normalize_seed(raw_value):
+    """
+    Normalizes the input value to a valid random seed for inpainting.
+
+    Parameters:
+        raw_value (Any): The raw input value representing the random seed. Can be None or any type convertible to int.
+
+    Returns:
+        int: The normalized random seed, with a default value of -1 if input is None or invalid.
+    """
+    value = convert_to_int(raw_value) if raw_value is not None else None
+    if value is None:
+        value = -1
+
+    return int(value)
 
 def apply_inpaint_filter(image: torch.Tensor, settings: dict) -> FilterResult:
     """
@@ -356,134 +650,12 @@ def apply_inpaint_filter(image: torch.Tensor, settings: dict) -> FilterResult:
     if use_conditioning is None:
         use_conditioning = False
 
-    roi_auto_raw = settings.get("roi_auto", "true")
-    roi_auto = convert_to_boolean(roi_auto_raw)
-    if roi_auto is None:
-        roi_auto = True
-    roi_padding = max(0, int(convert_to_int(settings.get("roi_padding", 32)) or 32))
-    roi_align = max(1, int(convert_to_int(settings.get("roi_align", 8)) or 8))
-    roi_align_auto = convert_to_boolean(settings.get("roi_align_auto", "false")) or False
-    roi_min_size = max(1, int(convert_to_int(settings.get("roi_min_size", 64)) or 64))
-
-    # Try to auto-detect VAE downscale factor if requested
-    align_multiple = roi_align
-    if roi_align_auto:
-        candidates = [
-            getattr(vae, "downscale_factor", None),
-            getattr(vae, "downsample_factor", None),
-            getattr(getattr(vae, "first_stage_model", None), "downscale_factor", None),
-            getattr(getattr(vae, "first_stage_model", None), "downsample_factor", None),
-        ]
-        for c in candidates:
-            if isinstance(c, int) and c > 0:
-                align_multiple = c
-                break
-
-    # Default to processing full image
-    work_image = base_image
-    work_mask = mask_tensor
-    paste_roi = (0, 0, image_height, image_width)
-
-    if roi_auto:
-        mask_any = (mask_tensor > 0.5).any(dim=0)  # [H, W]
-        rows = mask_any.any(dim=1)
-        cols = mask_any.any(dim=0)
-        if bool(rows.any()) and bool(cols.any()):
-            ys = torch.where(rows)[0]
-            xs = torch.where(cols)[0]
-            y0 = int(ys.min().item())
-            y1 = int(ys.max().item()) + 1
-            x0 = int(xs.min().item())
-            x1 = int(xs.max().item()) + 1
-
-            # Padding
-            y0 = max(0, y0 - roi_padding)
-            x0 = max(0, x0 - roi_padding)
-            y1 = min(image_height, y1 + roi_padding)
-            x1 = min(image_width, x1 + roi_padding)
-
-            # Align to multiples
-            def align_down(v, a):
-                return (v // a) * a
-
-            def align_up(v, a):
-                return ((v + a - 1) // a) * a
-
-            y0 = align_down(y0, align_multiple)
-            x0 = align_down(x0, align_multiple)
-            y1 = align_up(y1, align_multiple)
-            x1 = align_up(x1, align_multiple)
-
-            y0 = max(0, min(y0, image_height))
-            x0 = max(0, min(x0, image_width))
-            y1 = max(0, min(y1, image_height))
-            x1 = max(0, min(x1, image_width))
-
-            # Enforce minimum size
-            h = y1 - y0
-            w = x1 - x0
-            if h < roi_min_size:
-                delta = roi_min_size - h
-                y0 = max(0, y0 - delta // 2)
-                y1 = min(image_height, y0 + roi_min_size)
-            if w < roi_min_size:
-                delta = roi_min_size - w
-                x0 = max(0, x0 - delta // 2)
-                x1 = min(image_width, x0 + roi_min_size)
-
-            paste_roi = (y0, x0, y1, x1)
-            work_image = base_image[:, y0:y1, x0:x1, :]
-            work_mask = mask_tensor[:, y0:y1, x0:x1]
-        # else: keep full image fallback
-
-    # Mask edge shaping
-    dilate_px = max(0, int(convert_to_int(settings.get("dilate", 0)) or 0))
-    feather_px = max(0, int(convert_to_int(settings.get("feather", 0)) or 0))
-    work_mask_soft = work_mask
-    if dilate_px > 0:
-        k = dilate_px * 2 + 1
-        wm = work_mask_soft.unsqueeze(1)
-        wm = F.max_pool2d(wm, kernel_size=k, stride=1, padding=dilate_px)
-        work_mask_soft = wm.squeeze(1)
-    if feather_px > 0:
-        k = feather_px * 2 + 1
-        wm = work_mask_soft.unsqueeze(1)
-        wm = F.avg_pool2d(wm, kernel_size=k, stride=1, padding=feather_px)
-        work_mask_soft = wm.squeeze(1)
-    work_mask_soft = work_mask_soft.clamp(0.0, 1.0)
-
-    # Upsample ROI for extra detail (like a detailer)
-    raw_upsample = settings.get("upsample")
-    if raw_upsample is None or raw_upsample == "":
-        raw_upsample = settings.get("upsample_target")
-    upsample_target = convert_to_int(raw_upsample) if raw_upsample is not None else None
-    upsample_applied = False
-    upsample_info = None
-    if upsample_target is not None and upsample_target > 0:
-        orig_h, orig_w = int(work_image.shape[1]), int(work_image.shape[2])
-        longest = max(orig_h, orig_w)
-        if longest < upsample_target:
-            scale = float(upsample_target) / float(longest)
-            new_h = max(1, int(round(orig_h * scale)))
-            new_w = max(1, int(round(orig_w * scale)))
-            # align to alignment multiple to keep latent-friendly dims
-            def align_up(v, a):
-                return ((v + a - 1) // a) * a
-            new_h = align_up(new_h, align_multiple)
-            new_w = align_up(new_w, align_multiple)
-
-            # Resize image NHWC -> NCHW -> NHWC
-            wi = work_image.permute(0, 3, 1, 2)
-            wi = F.interpolate(wi, size=(new_h, new_w), mode="bicubic", align_corners=False)
-            work_image = wi.permute(0, 2, 3, 1).contiguous()
-
-            # Resize mask [B, H, W]
-            wm = work_mask_soft.unsqueeze(1)
-            wm = F.interpolate(wm, size=(new_h, new_w), mode="nearest")
-            work_mask_soft = wm.squeeze(1).contiguous()
-
-            upsample_applied = True
-            upsample_info = (orig_h, orig_w, new_h, new_w)
+    work_image, work_mask_soft, paste_roi, region_meta = _prepare_inpaint_region(
+        base_image=base_image,
+        mask_tensor=mask_tensor,
+        vae=vae,
+        settings=settings,
+    )
 
     processed_region = perform_inpaint(
         model=model,
@@ -505,40 +677,101 @@ def apply_inpaint_filter(image: torch.Tensor, settings: dict) -> FilterResult:
         use_conditioning=use_conditioning,
     )
 
-    # Downscale back if upsample was applied
-    if upsample_applied and upsample_info is not None:
-        orig_h, orig_w, _, _ = upsample_info
-        pr = processed_region.permute(0, 3, 1, 2)
-        pr = F.interpolate(pr, size=(orig_h, orig_w), mode="bicubic", align_corners=False)
-        processed_region = pr.permute(0, 2, 3, 1).contiguous()
+    processed, info = _finalize_inpaint_output(
+        processed_region=processed_region,
+        base_image=base_image,
+        paste_roi=paste_roi,
+        meta=region_meta,
+    )
 
-    # Paste back into full-size image if cropped
-    if paste_roi != (0, 0, image_height, image_width):
-        y0, x0, y1, x1 = paste_roi
-        result_full = base_image.clone()
-        result_full[:, y0:y1, x0:x1, :] = processed_region
-        processed = result_full
+    info_with_mask = {"mask": mask_url}
+    info_with_mask.update(info)
+
+    return processed, info_with_mask
+
+def apply_inpaint_filter_tensor(
+    image: torch.Tensor,
+    mask: torch.Tensor,
+    *,
+    model,
+    clip,
+    vae,
+    settings: dict,
+) -> FilterResult:
+    """
+    Applies an inpainting filter to the given image tensor using the provided mask and model components.
+    
+    Args:
+        image (torch.Tensor): The input image tensor to be inpainted.
+        mask (torch.Tensor): The mask tensor indicating regions to inpaint.
+        model: The inpainting model to use for generating the inpainted region.
+        clip: The CLIP model used for conditioning.
+        vae: The VAE model used for encoding/decoding image data.
+        settings (dict): A dictionary of settings and parameters for inpainting, such as prompts, sampler, scheduler, steps, denoise, cfg, seed, and conditioning options.
+
+    Returns:
+        FilterResult: A tuple containing the processed image tensor and additional information about the inpainting operation.
+
+    Raises:
+        ValueError: If the mask tensor has an unsupported shape.
+    """
+    device = getattr(getattr(vae, "first_stage_model", None), "device", None) or image.device
+
+    base_image = image.to(device=device, dtype=torch.float32)
+    m = mask
+    if isinstance(m, (list, tuple)):
+        m = m[0]
+    if m.dim() == 4:
+        if m.shape[-1] > 1:
+            m = m.mean(dim=-1)
+        else:
+            m = m[..., 0]
+    elif m.dim() == 3:
+        pass
+    elif m.dim() == 2:
+        m = m.unsqueeze(0)
     else:
-        processed = processed_region
+        raise ValueError("Unsupported MASK tensor shape.")
 
-    processed = processed.detach().clamp(0.0, 1.0).to(torch.float32).cpu().contiguous()
+    h, w = int(base_image.shape[1]), int(base_image.shape[2])
+    m = m.to(device=base_image.device, dtype=torch.float32)
+    if m.shape[-2] != h or m.shape[-1] != w:
+        m = F.interpolate(m.unsqueeze(1), size=(h, w), mode="nearest").squeeze(1)
+    m = m.clamp(0.0, 1.0)
+    m = (m > 0.5).float()
 
-    info: Dict[str, str] = {"mask": mask_url}
-    if paste_roi != (0, 0, image_height, image_width):
-        y0, x0, y1, x1 = paste_roi
-        info["roi"] = f"y0={y0},x0={x0},y1={y1},x1={x1}"
-    if upsample_applied and upsample_info is not None:
-        oh, ow, nh, nw = upsample_info
-        info["upsample"] = f"{ow}x{oh} -> {nw}x{nh}"
-    if dilate_px or feather_px:
-        info["edges"] = f"dilate={dilate_px},feather={feather_px}"
+    work_image, work_mask_soft, paste_roi, region_meta = _prepare_inpaint_region(
+        base_image=base_image,
+        mask_tensor=m,
+        vae=vae,
+        settings=settings,
+    )
+
+    processed_region = perform_inpaint(
+        model=model,
+        clip=clip,
+        vae=vae,
+        image=work_image,
+        mask=work_mask_soft,
+        positive_prompt=str(settings.get("positive_prompt") or ""),
+        negative_prompt=str(settings.get("negative_prompt") or ""),
+        sampler_name=str(settings.get("sampler") or "dpmpp_2m"),
+        scheduler_name=str(settings.get("scheduler") or "karras"),
+        steps=_normalize_steps(settings.get("steps")),
+        denoise=_normalize_denoise(settings.get("denoise")),
+        cfg=_normalize_cfg(settings.get("cfg")),
+        seed=_normalize_seed(settings.get("seed")),
+        disable_preview=True,
+        positive_conditioning=settings.get("positive_conditioning") if convert_to_boolean(settings.get("use_conditioning", False)) else None,
+        negative_conditioning=settings.get("negative_conditioning") if convert_to_boolean(settings.get("use_conditioning", False)) else None,
+        use_conditioning=convert_to_boolean(settings.get("use_conditioning", False)) or False,
+    )
+
+    processed, info = _finalize_inpaint_output(
+        processed_region=processed_region,
+        base_image=base_image,
+        paste_roi=paste_roi,
+        meta=region_meta,
+    )
 
     return processed, info
-
-
-__all__ = [
-    "FilterResult",
-    "apply_inpaint_filter",
-    "perform_inpaint",
-    "sample_without_preview",
-]

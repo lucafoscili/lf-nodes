@@ -113,6 +113,13 @@ _SEGMENTATION_EXTRA_COUNTS = {32, 64, 96, 128, 160, 192, 256}
 
 
 def _ensure_ort() -> None:
+    """
+    Ensures that the 'onnxruntime' (ORT) library is available for use.
+
+    Raises:
+        ImportError: If 'onnxruntime' is not installed, raises an ImportError with instructions
+        on how to install it.
+    """
     if ort is None:
         message = (
             "onnxruntime is required to run the LF region detector. "
@@ -122,6 +129,19 @@ def _ensure_ort() -> None:
 
 
 def _select_providers(custom: Optional[Sequence[str]] = None) -> List[str]:
+    """
+    Selects and returns a list of available ONNX Runtime execution providers.
+
+    If a custom list of providers is specified, returns the intersection of the custom list and the available providers.
+    If no custom list is provided or none of the custom providers are available, returns a prioritized list of preferred providers that are available.
+    If none of the preferred providers are available, returns all available providers.
+
+    Args:
+        custom (Optional[Sequence[str]]): An optional sequence of provider names to select from.
+
+    Returns:
+        List[str]: A list of selected provider names that are available.
+    """
     _ensure_ort()
     available = list(ort.get_available_providers())
     if custom:
@@ -145,6 +165,23 @@ def _letterbox(
     new_shape: Tuple[int, int],
     color: Tuple[float, float, float] = (0.0, 0.0, 0.0),
 ) -> Tuple[np.ndarray, Tuple[float, float], Tuple[float, float]]:
+    """
+    Resizes and pads an image to fit a specified shape while maintaining aspect ratio.
+
+    Args:
+        image (np.ndarray): Input image as a NumPy array.
+        new_shape (Tuple[int, int]): Desired output shape as (height, width).
+        color (Tuple[float, float, float], optional): Padding color as a tuple of three floats (B, G, R). Defaults to (0.0, 0.0, 0.0).
+
+    Returns:
+        Tuple[np.ndarray, Tuple[float, float], Tuple[float, float]]:
+            - The letterboxed image as a NumPy array.
+            - The resize ratio as a tuple (ratio_x, ratio_y).
+            - The padding applied as a tuple (pad_x, pad_y).
+
+    Raises:
+        ValueError: If the input image has non-positive dimensions.
+    """
     h, w = image.shape[:2]
     new_h, new_w = new_shape
     if h == 0 or w == 0:
@@ -175,8 +212,16 @@ def _letterbox(
     bordered = bordered[:new_h, :new_w]
     return bordered, ratio, (dw, dh)
 
-
 def _xywh_to_xyxy(boxes: np.ndarray) -> np.ndarray:
+    """
+    Convert bounding boxes from (center_x, center_y, width, height) format to (x_min, y_min, x_max, y_max) format.
+
+    Args:
+        boxes (np.ndarray): An array of shape (N, 4) where each row represents a bounding box in (center_x, center_y, width, height) format.
+
+    Returns:
+        np.ndarray: An array of shape (N, 4) where each row represents a bounding box in (x_min, y_min, x_max, y_max) format.
+    """
     converted = boxes.copy()
     converted[:, 0] = boxes[:, 0] - boxes[:, 2] / 2.0
     converted[:, 1] = boxes[:, 1] - boxes[:, 3] / 2.0
@@ -184,13 +229,24 @@ def _xywh_to_xyxy(boxes: np.ndarray) -> np.ndarray:
     converted[:, 3] = boxes[:, 1] + boxes[:, 3] / 2.0
     return converted
 
-
 def _scale_boxes(
     boxes: np.ndarray,
     ratio: Tuple[float, float],
     pad: Tuple[float, float],
     original_shape: Tuple[int, int],
 ) -> np.ndarray:
+    """
+    Scales bounding box coordinates from a resized and padded image back to the original image size.
+
+    Args:
+        boxes (np.ndarray): Array of bounding boxes in the format [x1, y1, x2, y2].
+        ratio (Tuple[float, float]): Scaling ratios (gain_w, gain_h) used during resizing.
+        pad (Tuple[float, float]): Padding values (pad_w, pad_h) added during resizing.
+        original_shape (Tuple[int, int]): Shape of the original image as (height, width).
+
+    Returns:
+        np.ndarray: Array of bounding boxes scaled to the original image size.
+    """
     scaled = boxes.copy()
     gain_w, gain_h = ratio
     pad_w, pad_h = pad
@@ -202,8 +258,17 @@ def _scale_boxes(
     scaled[:, [1, 3]] = np.clip(scaled[:, [1, 3]], 0.0, float(original_shape[0]))
     return scaled
 
-
 def _compute_iou(box: np.ndarray, boxes: np.ndarray) -> np.ndarray:
+    """
+    Computes the Intersection over Union (IoU) between a single bounding box and an array of bounding boxes.
+
+    Args:
+        box (np.ndarray): A 1D array of shape (4,) representing a bounding box in the format [x1, y1, x2, y2].
+        boxes (np.ndarray): A 2D array of shape (N, 4) representing N bounding boxes in the format [x1, y1, x2, y2].
+
+    Returns:
+        np.ndarray: A 1D array of shape (N,) containing the IoU values between `box` and each box in `boxes`.
+    """
     inter_x1 = np.maximum(box[0], boxes[:, 0])
     inter_y1 = np.maximum(box[1], boxes[:, 1])
     inter_x2 = np.minimum(box[2], boxes[:, 2])
@@ -219,13 +284,24 @@ def _compute_iou(box: np.ndarray, boxes: np.ndarray) -> np.ndarray:
     np.divide(inter_area, union, out=iou, where=union > 0)
     return iou
 
-
 def _nms(
     boxes: np.ndarray,
     scores: np.ndarray,
     iou_threshold: float,
     max_detections: int,
 ) -> List[int]:
+    """
+    Performs Non-Maximum Suppression (NMS) on bounding boxes based on their scores and Intersection over Union (IoU).
+
+    Args:
+        boxes (np.ndarray): Array of bounding boxes with shape (N, 4), where N is the number of boxes.
+        scores (np.ndarray): Array of confidence scores for each bounding box with shape (N,).
+        iou_threshold (float): IoU threshold for suppressing overlapping boxes.
+        max_detections (int): Maximum number of boxes to keep after suppression.
+
+    Returns:
+        List[int]: Indices of the selected bounding boxes after NMS.
+    """
     if boxes.size == 0:
         return []
     idxs = scores.argsort()[::-1]
@@ -242,6 +318,19 @@ def _nms(
 
 
 def _coerce_int(value: Any) -> Optional[int]:
+    """
+    Attempts to convert the input value to an integer.
+
+    Parameters:
+        value (Any): The value to be coerced to an integer. Can be of type int, float, or str.
+
+    Returns:
+        Optional[int]: The integer representation of the value if conversion is possible; otherwise, None.
+
+    Notes:
+        - Floats are only converted if they represent an integer value (e.g., 3.0).
+        - Strings are only converted if they contain only digits (e.g., "42").
+    """
     if isinstance(value, (int, np.integer)):
         return int(value)
     if isinstance(value, (float, np.floating)) and float(value).is_integer():
@@ -257,6 +346,24 @@ def _resolve_input_shape(
     session: Any,
     requested: Optional[int | Tuple[int, int] | Sequence[int]],
 ) -> Tuple[int, int]:
+    """
+    Determines the input shape (height, width) for a model session.
+
+    Args:
+        session (Any): The model session object, expected to have a `get_inputs()` method
+            that returns input metadata with a `shape` attribute.
+        requested (Optional[int | Tuple[int, int] | Sequence[int]]): The desired input shape.
+            Can be an integer, a tuple/list of one or two integers, or None.
+
+    Returns:
+        Tuple[int, int]: The resolved input shape as (height, width).
+
+    Notes:
+        - If `requested` is a single integer or float, returns (value, value).
+        - If `requested` is a tuple/list of two values, returns (height, width).
+        - If `requested` is None, attempts to infer shape from the session's input metadata.
+        - If shape cannot be determined, returns default input size.
+    """
     if isinstance(requested, (list, tuple)):
         if len(requested) == 1:
             value = int(round(float(requested[0])))
@@ -283,8 +390,16 @@ def _resolve_input_shape(
         return DEFAULT_INPUT_SIZE, DEFAULT_INPUT_SIZE
     return max(1, height), max(1, width)
 
-
 def _sanitize_labels(labels: Optional[Sequence[str]]) -> Tuple[str, ...]:
+    """
+    Sanitizes a sequence of label strings by stripping whitespace and removing empty labels.
+
+    Args:
+        labels (Optional[Sequence[str]]): A sequence of label strings to sanitize.
+
+    Returns:
+        Tuple[str, ...]: A tuple containing sanitized, non-empty label strings.
+    """
     sanitized: List[str] = []
     if labels:
         for label in labels:
@@ -293,8 +408,22 @@ def _sanitize_labels(labels: Optional[Sequence[str]]) -> Tuple[str, ...]:
                 sanitized.append(text)
     return tuple(sanitized)
 
-
 def _labels_from_session_metadata(session: Any) -> Optional[Tuple[str, ...]]:
+    """
+    Extracts label names from the metadata of a given session object.
+
+    Attempts to retrieve model metadata from the session and parse label information
+    from possible keys: "names", "labels", or "classes" in the metadata's custom map.
+    Handles various formats including JSON strings, Python literals, dictionaries, lists,
+    and comma-separated strings.
+
+    Args:
+        session (Any): The session object providing model metadata via `get_modelmeta()`.
+
+    Returns:
+        Optional[Tuple[str, ...]]: A tuple of label names if found and parsed successfully,
+        otherwise None.
+    """
     try:
         meta = session.get_modelmeta()
     except Exception:  # pragma: no cover - runtime guard
@@ -336,12 +465,32 @@ def _labels_from_session_metadata(session: Any) -> Optional[Tuple[str, ...]]:
                 return tuple(tokens)
     return None
 
-
 def _resolve_prediction_labels(
     extra_columns: int,
     override_labels: Tuple[str, ...],
     metadata_labels: Tuple[str, ...],
 ) -> Tuple[Tuple[str, ...], str]:
+    """
+    Resolves the prediction labels for YOLO detection outputs based on provided parameters.
+
+    Parameters:
+        extra_columns (int): The number of extra columns in the prediction output, typically corresponding to the number of classes.
+        override_labels (Tuple[str, ...]): Labels to override any other label sources if provided.
+        metadata_labels (Tuple[str, ...]): Labels extracted from ONNX model metadata, used if override_labels are not provided.
+
+    Returns:
+        Tuple[Tuple[str, ...], str]: A tuple containing:
+            - The resolved labels as a tuple of strings.
+            - A string indicating the source of the labels ("override", "onnx_metadata", "coco_default", or "generated").
+
+    Label resolution order:
+        1. If override_labels are provided, they take precedence.
+        2. If metadata_labels are provided, they are used next.
+        3. If extra_columns matches the number of COCO class names, COCO labels are used.
+        4. If extra_columns exceeds COCO class names and matches known segmentation extra counts, COCO labels are used.
+        5. If extra_columns is less than or equal to zero, a single "region" label is generated.
+        6. Otherwise, generic class labels ("class_0", "class_1", ...) are generated.
+    """
     if override_labels:
         return override_labels, "override"
     if metadata_labels:
@@ -354,23 +503,51 @@ def _resolve_prediction_labels(
             return COCO_CLASS_NAMES, "coco_default"
     if extra_columns <= 0:
         return ("region",), "generated"
+    
     return tuple(f"class_{idx}" for idx in range(extra_columns)), "generated"
 
-
 def _build_label_lookup(names: Sequence[str]) -> Dict[str, int]:
+    """
+    Builds a lookup dictionary mapping normalized label names to their indices.
+
+    This function takes a sequence of label names, normalizes each name by stripping
+    whitespace and converting to lowercase, and creates a dictionary where each
+    normalized name is mapped to its index in the input sequence. Duplicate or empty
+    names are ignored.
+
+    Args:
+        names (Sequence[str]): A sequence of label names.
+
+    Returns:
+        Dict[str, int]: A dictionary mapping normalized label names to their indices.
+    """
     lookup: Dict[str, int] = {}
     for idx, name in enumerate(names):
         key = str(name).strip().lower()
         if key and key not in lookup:
             lookup[key] = idx
-    return lookup
 
+    return lookup
 
 def _resolve_class_whitelist(
     class_whitelist: Optional[Iterable[int | str]],
     name_lookup: Dict[str, int],
     num_classes: int,
 ) -> Optional[set[int]]:
+    """
+    Resolves a whitelist of class indices or names into a set of valid class indices.
+
+    Args:
+        class_whitelist (Optional[Iterable[int | str]]): An iterable containing class indices (int) or class names (str) to whitelist. If None or empty, returns None.
+        name_lookup (Dict[str, int]): A mapping from normalized class names to their corresponding indices.
+        num_classes (int): The total number of classes in the model. Used for bounds checking.
+
+    Returns:
+        Optional[set[int]]: A set of valid class indices if any are resolved, otherwise None.
+
+    Raises:
+        ValueError: If a class name is unknown or a class index is out of bounds.
+    """
     if not class_whitelist:
         return None
     if num_classes <= 0:
@@ -396,8 +573,8 @@ def _resolve_class_whitelist(
         if idx < 0 or idx >= num_classes:
             raise ValueError(f"Class index {idx} out of bounds for model with {num_classes} classes.")
         indices.add(idx)
-    return indices or None
 
+    return indices or None
 
 # region load_yolo_session
 def load_yolo_session(

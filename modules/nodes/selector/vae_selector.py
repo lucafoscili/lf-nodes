@@ -9,12 +9,20 @@ from server import PromptServer
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, INT_MAX
 from ...utils.helpers.comfy import get_comfy_list
-from ...utils.helpers.logic import build_is_changed_tuple, filter_list, LazyCache, normalize_json_input, normalize_list_to_value, register_cache
+from ...utils.helpers.logic import (
+    build_is_changed_tuple,
+    filter_list,
+    LazyCache,
+    normalize_json_input,
+    normalize_list_to_value,
+    register_cache,
+    register_selector_list,
+)
 from ...utils.helpers.ui import create_history_node
 
 # region LF_VAESelector
 class LF_VAESelector:
-    initial_list = get_comfy_list("vae")
+    initial_list: list[str] = []
     _CACHE = LazyCache()
     register_cache(_CACHE)
         
@@ -115,7 +123,8 @@ class LF_VAESelector:
         randomize,
         filter,
         seed,
-        ui_widget
+        ui_widget,
+        node_id
     ):
         return build_is_changed_tuple(
             normalize_list_to_value(randomize),
@@ -155,6 +164,11 @@ class LF_VAESelector:
             sd["vae_shift"] = torch.tensor(0.1159)
         return sd
 # endregion
+
+_VAE_SELECTOR_LIST = register_selector_list(
+    LF_VAESelector,
+    lambda: get_comfy_list("vae"),
+)
 
 # region Mappings
 NODE_CLASS_MAPPINGS = {

@@ -65,6 +65,8 @@ export const NODE_WIDGET_MAP: NodeWidgetMap = {
   LF_ImagesEditingBreakpoint: [CustomWidgetName.imageEditor],
   LF_ImagesSlideshow: [CustomWidgetName.carousel],
   LF_ImageToSVG: [CustomWidgetName.compare],
+  LF_Inpaint: [CustomWidgetName.compare],
+  LF_InpaintAdvanced: [CustomWidgetName.compare],
   LF_Integer: [CustomWidgetName.history],
   LF_IsLandscape: [CustomWidgetName.tree],
   LF_JSONPromptCombinator: [CustomWidgetName.code],
@@ -127,6 +129,7 @@ export const NODE_WIDGET_MAP: NodeWidgetMap = {
   LF_UpscaleModelSelector: [CustomWidgetName.history],
   LF_UsageStatistics: [CustomWidgetName.tabBarChart],
   LF_UrandomSeedGenerator: [CustomWidgetName.tree],
+  LF_VAEDecode: [CustomWidgetName.code],
   LF_VAESelector: [CustomWidgetName.history],
   LF_ONNXSelector: [CustomWidgetName.history],
   LF_Vibrance: [CustomWidgetName.compare],
@@ -350,4 +353,3 @@ export const getLogStyle = () => {
   };
 };
 //#endregion
-

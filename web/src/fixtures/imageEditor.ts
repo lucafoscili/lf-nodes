@@ -474,7 +474,7 @@ export const SETTINGS: ImageEditorFilters = {
   },
   //#endregion
 
-  //#region Inpaint (basic)
+  //#region Inpaint
   inpaint: {
     controlIds: ImageEditorInpaintIds,
     hasCanvasAction: true,
@@ -486,7 +486,7 @@ export const SETTINGS: ImageEditorFilters = {
       steps: 16,
       positive_prompt: '',
       negative_prompt: '',
-      upsample_target: 0,
+      upsample_target: 1024,
       use_conditioning: false,
     },
     configs: {
@@ -927,7 +927,7 @@ export const SETTINGS: ImageEditorFilters = {
   //#endregion
 };
 
-// Advanced inpaint variant: adds ROI/dilate/feather; excludes upsample slider
+// region Inpaint (advanced)
 export const INPAINT_ADV: ImageEditorInpaintFilter = {
   controlIds: ImageEditorInpaintIds,
   hasCanvasAction: true,
@@ -1111,6 +1111,7 @@ export const INPAINT_ADV: ImageEditorInpaintFilter = {
     ],
   },
 };
+//#endregion
 
 export const TREE_DATA: LfDataDataset = {
   nodes: [

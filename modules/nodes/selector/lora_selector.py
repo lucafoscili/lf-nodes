@@ -6,12 +6,17 @@ from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, INT_MAX
 from ...utils.helpers.api import process_model
 from ...utils.helpers.comfy import get_comfy_list
-from ...utils.helpers.logic import filter_list, is_none, normalize_list_to_value
+from ...utils.helpers.logic import (
+    filter_list,
+    is_none,
+    normalize_list_to_value,
+    register_selector_list,
+)
 from ...utils.helpers.ui import prepare_model_dataset
 
 # region LF_LoraSelector
 class LF_LoraSelector:
-    initial_list = get_comfy_list("loras")
+    initial_list: list[str] = []
         
     @classmethod
     def INPUT_TYPES(self):
@@ -132,6 +137,11 @@ class LF_LoraSelector:
     def VALIDATE_INPUTS(self, **kwargs):
          return True
 # endregion
+
+_LORA_SELECTOR_LIST = register_selector_list(
+    LF_LoraSelector,
+    lambda: get_comfy_list("loras"),
+)
 
 # region Mappings
 NODE_CLASS_MAPPINGS = {

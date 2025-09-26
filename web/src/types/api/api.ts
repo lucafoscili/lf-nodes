@@ -45,6 +45,7 @@ export interface GitHubAPIs {
 }
 export interface ModelsAPIs {
   free: () => Promise<boolean>;
+  refresh: () => Promise<boolean>;
 }
 export interface ImageAPIs {
   get: (dir: string) => Promise<GetImageAPIPayload>;
@@ -107,6 +108,7 @@ export enum APIEndpoints {
   ClearAnalytics = `/lf-nodes/clear-analytics`,
   ClearMetadata = `/lf-nodes/clear-metadata`,
   LFFree = `/lf-nodes/free`,
+  LFRefreshNodeDefs = `/lf-nodes/refresh-node-defs`,
   GetAnalytics = `/lf-nodes/get-analytics`,
   GetImage = `/lf-nodes/get-image`,
   GetJson = `/lf-nodes/get-json`,

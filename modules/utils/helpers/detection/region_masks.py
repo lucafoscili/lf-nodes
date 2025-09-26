@@ -7,16 +7,42 @@ from ...filters import apply_gaussian_blur
 
 
 def _gaussian_blur_2d(tensor: torch.Tensor, kernel_size: Tuple[int, int], sigma: float) -> torch.Tensor:
+    """
+    Applies a 2D Gaussian blur to the input tensor.
+
+    Args:
+        tensor (torch.Tensor): Input tensor of shape (1, 1, H, W) or (1, H, W).
+        kernel_size (Tuple[int, int]): Size of the Gaussian kernel (height, width).
+        sigma (float): Standard deviation of the Gaussian kernel. If sigma <= 0, no blur is applied.
+
+    Returns:
+        torch.Tensor: The blurred tensor with the same shape and device as the input.
+    """
     if sigma <= 0:
         return tensor
     _, kw = kernel_size
     array = tensor.squeeze(0).squeeze(0).detach().cpu().numpy().astype("float32")
     blurred = apply_gaussian_blur(array, max(1, kw), sigma)
     result = torch.from_numpy(blurred).to(tensor.device, tensor.dtype)
+
     return result.unsqueeze(0).unsqueeze(0)
 
 
 def _ensure_bbox(region: Dict[str, Any], image_height: int, image_width: int) -> Tuple[float, float, float, float]:
+    """
+    Ensures that the region's bounding box is valid and clamped within image dimensions.
+
+    Args:
+        region (Dict[str, Any]): A dictionary containing region metadata, expected to have either "bbox_float" or "bbox" keys with a list of four values [x1, y1, x2, y2].
+        image_height (int): The height of the image.
+        image_width (int): The width of the image.
+
+    Returns:
+        Tuple[float, float, float, float]: The clamped bounding box coordinates (x1, y1, x2, y2) as floats.
+
+    Raises:
+        ValueError: If the region metadata does not contain valid bounding box information.
+    """
     bbox = region.get("bbox_float") or region.get("bbox")
     if bbox is None or len(bbox) != 4:
         raise ValueError("Region metadata missing bbox information")
@@ -28,13 +54,13 @@ def _ensure_bbox(region: Dict[str, Any], image_height: int, image_width: int) ->
         x1, x2 = x2, x1
     if y1 > y2:
         y1, y2 = y2, y1
+
     return (
         max(0.0, min(x1, image_width - 1.0)),
         max(0.0, min(y1, image_height - 1.0)),
         max(0.0, min(x2, image_width - 1.0)),
         max(0.0, min(y2, image_height - 1.0)),
     )
-
 
 # region build_region_mask
 def build_region_mask(
@@ -47,7 +73,24 @@ def build_region_mask(
     shape: str = "rectangle",
     invert: bool = False,
 ) -> torch.Tensor:
-    """Create a float mask [1, H, W, 1] for the provided region metadata."""
+    """
+    Builds a region mask for a given image tensor and region specification.
+
+    Args:
+        image (torch.Tensor): Input image tensor of shape [B, H, W, C].
+        region (Dict[str, Any]): Dictionary specifying the region (bounding box) in the image.
+        padding (float, optional): Fractional padding to apply to the region size (relative to width/height). Default is 0.0.
+        padding_px (float, optional): Absolute padding in pixels to apply to the region size. Default is 0.0.
+        feather (float, optional): Amount of feathering (Gaussian blur) to apply to the mask edges. Default is 0.0.
+        shape (str, optional): Shape of the region mask, either "rectangle" or "ellipse". Default is "rectangle".
+        invert (bool, optional): If True, inverts the mask (region becomes background). Default is False.
+
+    Returns:
+        torch.Tensor: Region mask tensor of shape [1, H, W, 1] with values in [0.0, 1.0].
+
+    Raises:
+        ValueError: If the input image tensor does not have shape [B, H, W, C].
+    """
     if image.dim() != 4:
         raise ValueError("image tensor must be [B,H,W,C]")
     device = image.device

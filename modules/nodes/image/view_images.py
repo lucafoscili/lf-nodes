@@ -32,6 +32,7 @@ class LF_ViewImages:
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
+    INPUT_IS_LIST = (True, False)
     OUTPUT_IS_LIST = (False, True)
     OUTPUT_NODE = True
     RETURN_NAMES = ("image", "image_list")
@@ -69,6 +70,7 @@ class LF_ViewImages:
 NODE_CLASS_MAPPINGS = {
     "LF_ViewImages": LF_ViewImages,
 }
+
 NODE_DISPLAY_NAME_MAPPINGS = {
     "LF_ViewImages": "View images",
 }

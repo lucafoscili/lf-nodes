@@ -5423,7 +5423,7 @@ var tt = false, et = (t2, e2, n2) => {
                         const n6 = t7.i.replace(/-/g, "_"), o6 = t7.T;
                         if (!o6) return;
                         const i3 = r.get(o6);
-                        return i3 ? i3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-4ba08932.entry.js": () => import("./p-4ba08932.entry-CC6i_Hus.js"), "./p-60af2d7f.entry.js": () => import("./p-60af2d7f.entry-CltYqGAv.js"), "./p-746a8577.entry.js": () => import("./p-746a8577.entry-C0KAmIMl.js"), "./p-7652d72d.entry.js": () => import("./p-7652d72d.entry-D6Uk7Iyj.js"), "./p-79cc15c2.entry.js": () => import("./p-79cc15c2.entry-C_T2AgF5.js"), "./p-846257eb.entry.js": () => import("./p-846257eb.entry-qhVm8DIh.js"), "./p-84927cea.entry.js": () => import("./p-84927cea.entry-C9PF-C0X.js"), "./p-928c4970.entry.js": () => import("./p-928c4970.entry-BIR3wwze.js"), "./p-a147e6c9.entry.js": () => import("./p-a147e6c9.entry-CE8SyjR7.js"), "./p-a14c6d82.entry.js": () => import("./p-a14c6d82.entry-B0OV76or.js"), "./p-a7fc1135.entry.js": () => import("./p-a7fc1135.entry-CqCvTSJR.js"), "./p-bd214b33.entry.js": () => import("./p-bd214b33.entry-h7m9lp5q.js"), "./p-bf8a47d4.entry.js": () => import("./p-bf8a47d4.entry-B_2hsoyA.js"), "./p-ccea11a0.entry.js": () => import("./p-ccea11a0.entry-D7TMaSJw.js"), "./p-dbe042fd.entry.js": () => import("./p-dbe042fd.entry-sPHr5b4L.js"), "./p-e2689624.entry.js": () => import("./p-e2689624.entry-Dmg8JNWS.js") }), `./${o6}.entry.js`, 2).then(((t8) => (r.set(o6, t8), t8[n6])), ((t8) => {
+                        return i3 ? i3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-4ba08932.entry.js": () => import("./p-4ba08932.entry-D0XmZ3oJ.js"), "./p-60af2d7f.entry.js": () => import("./p-60af2d7f.entry-BBdfc7Wj.js"), "./p-746a8577.entry.js": () => import("./p-746a8577.entry-5SA1Gsof.js"), "./p-7652d72d.entry.js": () => import("./p-7652d72d.entry-BfwEp_Qx.js"), "./p-79cc15c2.entry.js": () => import("./p-79cc15c2.entry-cU3plh41.js"), "./p-846257eb.entry.js": () => import("./p-846257eb.entry-D1-Mnj4n.js"), "./p-84927cea.entry.js": () => import("./p-84927cea.entry-BVNHZuU9.js"), "./p-928c4970.entry.js": () => import("./p-928c4970.entry-Cq61XVA8.js"), "./p-a147e6c9.entry.js": () => import("./p-a147e6c9.entry-CeCNz4SD.js"), "./p-a14c6d82.entry.js": () => import("./p-a14c6d82.entry-MsGFf-wU.js"), "./p-a7fc1135.entry.js": () => import("./p-a7fc1135.entry-hWf_L-tm.js"), "./p-bd214b33.entry.js": () => import("./p-bd214b33.entry-BMN6-0tD.js"), "./p-bf8a47d4.entry.js": () => import("./p-bf8a47d4.entry-DLabQ27R.js"), "./p-ccea11a0.entry.js": () => import("./p-ccea11a0.entry-DEyU4OuV.js"), "./p-dbe042fd.entry.js": () => import("./p-dbe042fd.entry-Dq3qnQmF.js"), "./p-e2689624.entry.js": () => import("./p-e2689624.entry-BRnIyGnW.js") }), `./${o6}.entry.js`, 2).then(((t8) => (r.set(o6, t8), t8[n6])), ((t8) => {
                           l(t8, e3.$hostElement$);
                         }));
                         /*!__STENCIL_STATIC_IMPORT_SWITCH__*/
@@ -5512,6 +5512,7 @@ var APIEndpoints;
   APIEndpoints2["ClearAnalytics"] = "/lf-nodes/clear-analytics";
   APIEndpoints2["ClearMetadata"] = "/lf-nodes/clear-metadata";
   APIEndpoints2["LFFree"] = "/lf-nodes/free";
+  APIEndpoints2["LFRefreshNodeDefs"] = "/lf-nodes/refresh-node-defs";
   APIEndpoints2["GetAnalytics"] = "/lf-nodes/get-analytics";
   APIEndpoints2["GetImage"] = "/lf-nodes/get-image";
   APIEndpoints2["GetJson"] = "/lf-nodes/get-json";
@@ -5550,7 +5551,7 @@ const ANALYTICS_API = {
           const p2 = await response.json();
           if (p2.status === "success") {
             payload.message = p2.message;
-            payload.status = LogSeverity.Error;
+            payload.status = LogSeverity.Success;
             lfManager2.getCachedDatasets().usage = {};
           }
           break;
@@ -5559,7 +5560,10 @@ const ANALYTICS_API = {
           payload.status = LogSeverity.Info;
           break;
         default:
-          payload.message = `Unexpected response from the clear-analytics ${type} API: ${p2.message}`;
+          {
+            const errorText = await response.text().catch(() => "");
+            payload.message = `Unexpected response from the clear-analytics ${type} API (${code}): ${errorText || response.statusText}`;
+          }
           payload.status = LogSeverity.Error;
           break;
       }
@@ -5610,7 +5614,10 @@ const ANALYTICS_API = {
           lfManager2.log(`${type} analytics file not found.`, { payload }, payload.status);
           break;
         default:
-          payload.message = `Unexpected response from the get-analytics ${type} API: ${p2.message}`;
+          {
+            const errorText = await response.text().catch(() => "");
+            payload.message = `Unexpected response from the get-analytics ${type} API (${code}): ${errorText || response.statusText}`;
+          }
           payload.status = LogSeverity.Error;
           break;
       }
@@ -5784,7 +5791,9 @@ const IMAGE_API = {
     };
     try {
       const body = new FormData();
-      body.append("directory", directory);
+      if (directory) {
+        body.append("directory", directory);
+      }
       const response = await api.fetchApi(APIEndpoints.GetImage, {
         body,
         method: "POST"
@@ -5795,14 +5804,16 @@ const IMAGE_API = {
           const p2 = await response.json();
           if (p2.status === "success") {
             payload.data = p2.data;
-            payload.message = "Analytics data fetched successfully.";
+            payload.message = "Images fetched successfully.";
             payload.status = LogSeverity.Success;
             lfManager2.log(payload.message, { payload }, payload.status);
-            lfManager2.getCachedDatasets().usage = payload.data;
           }
           break;
         default:
-          payload.message = `Unexpected response from the get-image API: ${response.text}`;
+          {
+            const errorText = await response.text().catch(() => "");
+            payload.message = `Unexpected response from the get-image API (${code}): ${errorText || response.statusText}`;
+          }
           payload.status = LogSeverity.Error;
           break;
       }
@@ -5845,7 +5856,10 @@ const IMAGE_API = {
           }
           break;
         default:
-          payload.message = `Unexpected response from the process-image API: ${response.text}`;
+          {
+            const errorText = await response.text().catch(() => "");
+            payload.message = `Unexpected response from the process-image API (${code}): ${errorText || response.statusText}`;
+          }
           payload.status = LogSeverity.Error;
           break;
       }
@@ -5883,7 +5897,6 @@ const JSON_API = {
             payload.message = "JSON data fetched successfully.";
             payload.status = LogSeverity.Success;
             lfManager2.log(payload.message, { payload }, payload.status);
-            lfManager2.getCachedDatasets().usage = payload.data;
           }
           break;
         default:
@@ -6097,6 +6110,20 @@ const MODELS_API = {
       lfManager2.log('"free" endpoint failed', { error }, LogSeverity.Warning);
       return false;
     }
+  },
+  refresh: async () => {
+    const lfManager2 = getLfManager();
+    try {
+      const response = await api.fetchApi(APIEndpoints.LFRefreshNodeDefs, { method: "POST" });
+      if (response.status === 200) {
+        return true;
+      }
+      lfManager2.log('"refresh-node-defs" endpoint returned non-200', { status: response.status }, LogSeverity.Warning);
+      return false;
+    } catch (error) {
+      lfManager2.log('"refresh-node-defs" endpoint failed', { error }, LogSeverity.Warning);
+      return false;
+    }
   }
 };
 const beforeFree = async (options) => {
@@ -6111,6 +6138,20 @@ const beforeFree = async (options) => {
     }
   } catch (error) {
     lfManager2.log("Error while clearing caches", { error }, LogSeverity.Warning);
+  }
+};
+const beforeRefreshNodeDefs = async (trigger) => {
+  const lfManager2 = getLfManager();
+  lfManager2.log("Refresh requested — clearing LF caches first…", { trigger }, LogSeverity.Info);
+  try {
+    const ok2 = await MODELS_API.refresh();
+    if (ok2) {
+      lfManager2.log("Refresh caches cleared ✔️", {}, LogSeverity.Success);
+    } else {
+      lfManager2.log("Refresh cache clear call returned non-200", {}, LogSeverity.Warning);
+    }
+  } catch (error) {
+    lfManager2.log("Error while clearing caches ahead of refresh", { error }, LogSeverity.Warning);
   }
 };
 var MessengerCSS;
@@ -6200,6 +6241,8 @@ var NodeName;
   NodeName2["imagesEditingBreakpoint"] = "LF_ImagesEditingBreakpoint";
   NodeName2["imagesSlideshow"] = "LF_ImagesSlideshow";
   NodeName2["imageToSvg"] = "LF_ImageToSVG";
+  NodeName2["inpaint"] = "LF_Inpaint";
+  NodeName2["inpaintAdvanced"] = "LF_InpaintAdvanced";
   NodeName2["integer"] = "LF_Integer";
   NodeName2["isLandscape"] = "LF_IsLandscape";
   NodeName2["jsonPromptCombinator"] = "LF_JSONPromptCombinator";
@@ -6261,6 +6304,7 @@ var NodeName;
   NodeName2["upscaleModelSelector"] = "LF_UpscaleModelSelector";
   NodeName2["urandomSeedGenerator"] = "LF_UrandomSeedGenerator";
   NodeName2["usageStatistics"] = "LF_UsageStatistics";
+  NodeName2["vaeDecode"] = "LF_VAEDecode";
   NodeName2["vaeSelector"] = "LF_VAESelector";
   NodeName2["onnxSelector"] = "LF_ONNXSelector";
   NodeName2["viewImages"] = "LF_ViewImages";
@@ -6339,6 +6383,8 @@ const NODE_WIDGET_MAP = {
   LF_ImagesEditingBreakpoint: [CustomWidgetName.imageEditor],
   LF_ImagesSlideshow: [CustomWidgetName.carousel],
   LF_ImageToSVG: [CustomWidgetName.compare],
+  LF_Inpaint: [CustomWidgetName.compare],
+  LF_InpaintAdvanced: [CustomWidgetName.compare],
   LF_Integer: [CustomWidgetName.history],
   LF_IsLandscape: [CustomWidgetName.tree],
   LF_JSONPromptCombinator: [CustomWidgetName.code],
@@ -6401,6 +6447,7 @@ const NODE_WIDGET_MAP = {
   LF_UpscaleModelSelector: [CustomWidgetName.history],
   LF_UsageStatistics: [CustomWidgetName.tabBarChart],
   LF_UrandomSeedGenerator: [CustomWidgetName.tree],
+  LF_VAEDecode: [CustomWidgetName.code],
   LF_VAESelector: [CustomWidgetName.history],
   LF_ONNXSelector: [CustomWidgetName.history],
   LF_Vibrance: [CustomWidgetName.compare],
@@ -6680,6 +6727,85 @@ function installLFBeforeFreeHooks(api2, opts = {}) {
   };
   const fetchPatched = installFetchFallback();
   return { freeMemoryHook: freePatched, fetchFallbackHook: fetchPatched };
+}
+function installLFRefreshNodeHook(appObj, opts = {}) {
+  const attempts = opts.attempts ?? 20;
+  const intervalMs = opts.intervalMs ?? 250;
+  const logger = opts.logger ?? (() => {
+  });
+  if (!isRefreshHookApp(appObj)) {
+    logger('"app" object not available; cannot install refresh hook yet', {}, LogSeverity.Warning);
+    return { refreshHook: false };
+  }
+  const scopedApp = appObj;
+  const wrap = opts.refreshWrapper;
+  const makePatched = (fn) => {
+    const factory = wrap ?? ((original) => async function patched2(...args) {
+      if (scopedApp[LFRefreshFlags.InBeforeRefresh] === true) {
+        return original.apply(this ?? scopedApp, args);
+      }
+      scopedApp[LFRefreshFlags.InBeforeRefresh] = true;
+      try {
+        await beforeRefreshNodeDefs(args == null ? void 0 : args[0]);
+      } catch (error) {
+        logger("LF refresh hook failed before calling original function", { error }, LogSeverity.Warning);
+      } finally {
+        scopedApp[LFRefreshFlags.InBeforeRefresh] = false;
+      }
+      return original.apply(this ?? scopedApp, args);
+    });
+    return factory(fn);
+  };
+  const installRefresh = () => {
+    try {
+      if (scopedApp[LFRefreshFlags.PatchedRefresh] === true) {
+        return true;
+      }
+      const current = scopedApp.refreshComboInNodes;
+      if (typeof current === "function") {
+        scopedApp[LFRefreshFlags.OriginalRefreshRef] = current;
+        scopedApp.refreshComboInNodes = makePatched(current);
+        scopedApp[LFRefreshFlags.PatchedRefresh] = true;
+        return true;
+      }
+      const descriptor = Object.getOwnPropertyDescriptor(scopedApp, "refreshComboInNodes");
+      if (!descriptor || descriptor.configurable) {
+        let original;
+        Object.defineProperty(scopedApp, "refreshComboInNodes", {
+          configurable: true,
+          enumerable: true,
+          get() {
+            return scopedApp[LFRefreshFlags.PatchedRefresh] ? original : scopedApp[LFRefreshFlags.OriginalRefreshRef] ?? original;
+          },
+          set(fn) {
+            if (typeof fn !== "function") {
+              original = fn;
+              return;
+            }
+            scopedApp[LFRefreshFlags.OriginalRefreshRef] = fn;
+            original = makePatched(fn);
+            scopedApp[LFRefreshFlags.PatchedRefresh] = true;
+          }
+        });
+      }
+      return false;
+    } catch (error) {
+      logger("Failed to patch refreshComboInNodes; proceeding without LF refresh hook", { error }, LogSeverity.Warning);
+      return false;
+    }
+  };
+  let patched = installRefresh();
+  if (!patched) {
+    let count = 0;
+    const timer2 = setInterval(() => {
+      count += 1;
+      patched = installRefresh();
+      if (patched || count > attempts) {
+        clearInterval(timer2);
+      }
+    }, intervalMs);
+  }
+  return { refreshHook: patched };
 }
 const CATEGORY = "✨ LF Nodes";
 const DESCRIPTION = "Virtual reroute node that propagates upstream type and optional label.";
@@ -9581,7 +9707,7 @@ const SETTINGS = {
     }
   },
   //#endregion
-  //#region Inpaint (basic)
+  //#region Inpaint
   inpaint: {
     controlIds: ImageEditorInpaintIds,
     hasCanvasAction: true,
@@ -9593,7 +9719,7 @@ const SETTINGS = {
       steps: 16,
       positive_prompt: "",
       negative_prompt: "",
-      upsample_target: 0,
+      upsample_target: 1024,
       use_conditioning: false
     },
     configs: {
@@ -12017,6 +12143,9 @@ class LFManager {
     installLFBeforeFreeHooks(api, {
       logger: (m2, a2, s2) => this.log(m2, a2, s2)
     });
+    installLFRefreshNodeHook(app, {
+      logger: (m2, a2, s2) => this.log(m2, a2, s2)
+    });
     __classPrivateFieldGet(this, _LFManager_APIS, "f").github.getLatestRelease().then((r2) => __classPrivateFieldSet(this, _LFManager_LATEST_RELEASE, (r2 == null ? void 0 : r2.data) || null, "f"));
     if (__classPrivateFieldGet(this, _LFManager_INITIALIZED, "f")) {
       this.log("Attempt to initialize LFManager when already ready!", { LFManager: this }, LogSeverity.Warning);
@@ -12160,6 +12289,12 @@ var LFFreeFlags;
   LFFreeFlags2["PatchedFetch"] = "_lf_patched_fetchApi_free";
   LFFreeFlags2["InBeforeFree"] = "_lf_in_beforeFree";
 })(LFFreeFlags || (LFFreeFlags = {}));
+var LFRefreshFlags;
+(function(LFRefreshFlags2) {
+  LFRefreshFlags2["PatchedRefresh"] = "_lf_patched_refreshComboInNodes";
+  LFRefreshFlags2["OriginalRefreshRef"] = "_lf_original_refreshComboInNodes";
+  LFRefreshFlags2["InBeforeRefresh"] = "_lf_in_beforeRefreshComboInNodes";
+})(LFRefreshFlags || (LFRefreshFlags = {}));
 const LF_MANAGER_SYMBOL_ID = "__LfManager__";
 const LF_MANAGER_SYMBOL = Symbol.for(LF_MANAGER_SYMBOL_ID);
 const DEFAULT_WIDGET_NAME = "ui_widget";
@@ -12252,6 +12387,12 @@ function isFreeHookAPI(obj) {
     return false;
   const o2 = obj;
   return typeof o2["freeMemory"] === "function" || typeof o2["fetchApi"] === "function" || LFFreeFlags.PatchedFree in o2 || LFFreeFlags.PatchedFetch in o2;
+}
+function isRefreshHookApp(obj) {
+  if (!obj || typeof obj !== "object")
+    return false;
+  const o2 = obj;
+  return typeof o2["refreshComboInNodes"] === "function" || "refreshComboInNodes" in o2 || LFRefreshFlags.PatchedRefresh in o2;
 }
 const getInput = (node, type) => {
   var _a;

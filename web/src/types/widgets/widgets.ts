@@ -95,6 +95,8 @@ export enum NodeName {
   imagesEditingBreakpoint = 'LF_ImagesEditingBreakpoint',
   imagesSlideshow = 'LF_ImagesSlideshow',
   imageToSvg = 'LF_ImageToSVG',
+  inpaint = 'LF_Inpaint',
+  inpaintAdvanced = 'LF_InpaintAdvanced',
   integer = 'LF_Integer',
   isLandscape = 'LF_IsLandscape',
   jsonPromptCombinator = 'LF_JSONPromptCombinator',
@@ -156,6 +158,7 @@ export enum NodeName {
   upscaleModelSelector = 'LF_UpscaleModelSelector',
   urandomSeedGenerator = 'LF_UrandomSeedGenerator',
   usageStatistics = 'LF_UsageStatistics',
+  vaeDecode = 'LF_VAEDecode',
   vaeSelector = 'LF_VAESelector',
   onnxSelector = 'LF_ONNXSelector',
   viewImages = 'LF_ViewImages',
@@ -298,4 +301,3 @@ export type WidgetSetter = {
   [W in CustomWidgetName]: CustomWidgetCallback;
 };
 //#endregion
-

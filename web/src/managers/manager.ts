@@ -16,6 +16,7 @@ import {
   onNodeCreated,
 } from '../helpers/manager';
 import { installLFBeforeFreeHooks } from '../hooks/free';
+import { installLFRefreshNodeHook } from '../hooks/refresh';
 import { APIRoutes } from '../types/api/api';
 import { EventName } from '../types/events/events';
 import {
@@ -30,6 +31,8 @@ import { LFTooltip } from './tooltip';
 import { LFWidgets } from './widgets';
 /// @ts-ignore
 import { api } from '/scripts/api.js';
+/// @ts-ignore
+import { app } from '/scripts/app.js';
 
 export class LFManager {
   #APIS: APIRoutes = {
@@ -84,6 +87,9 @@ export class LFManager {
   //#region Initialize
   initialize() {
     installLFBeforeFreeHooks(api, {
+      logger: (m, a, s) => this.log(m, a, s),
+    });
+    installLFRefreshNodeHook(app, {
       logger: (m, a, s) => this.log(m, a, s),
     });
 

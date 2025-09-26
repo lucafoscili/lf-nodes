@@ -44,6 +44,7 @@ export const EV_HANDLERS = {
   },
   //#endregion
 };
+
 //#region apiCall
 export const apiCall = async (state: TabBarChartState) => {
   const { directory, elements, selected, type } = state;
