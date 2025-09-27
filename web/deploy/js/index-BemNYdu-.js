@@ -5423,7 +5423,7 @@ var tt = false, et = (t2, e2, n2) => {
                         const n6 = t7.i.replace(/-/g, "_"), o6 = t7.T;
                         if (!o6) return;
                         const i3 = r.get(o6);
-                        return i3 ? i3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-4ba08932.entry.js": () => import("./p-4ba08932.entry-DrSYRjYO.js"), "./p-60af2d7f.entry.js": () => import("./p-60af2d7f.entry-DFOTPaSP.js"), "./p-746a8577.entry.js": () => import("./p-746a8577.entry-B5bTVKzL.js"), "./p-7652d72d.entry.js": () => import("./p-7652d72d.entry-BpNSebDk.js"), "./p-79cc15c2.entry.js": () => import("./p-79cc15c2.entry-CUM1reC_.js"), "./p-846257eb.entry.js": () => import("./p-846257eb.entry-BfXKaofO.js"), "./p-84927cea.entry.js": () => import("./p-84927cea.entry-2Pv9Mq35.js"), "./p-928c4970.entry.js": () => import("./p-928c4970.entry-DJBHCE7v.js"), "./p-a147e6c9.entry.js": () => import("./p-a147e6c9.entry-qNmexnMp.js"), "./p-a14c6d82.entry.js": () => import("./p-a14c6d82.entry-DUk_XQWm.js"), "./p-a7fc1135.entry.js": () => import("./p-a7fc1135.entry-BtbxvPj6.js"), "./p-bd214b33.entry.js": () => import("./p-bd214b33.entry-D0H1ZcyJ.js"), "./p-bf8a47d4.entry.js": () => import("./p-bf8a47d4.entry-CR4t5oag.js"), "./p-ccea11a0.entry.js": () => import("./p-ccea11a0.entry-BsmJ5wYJ.js"), "./p-dbe042fd.entry.js": () => import("./p-dbe042fd.entry-CgHPeUVW.js"), "./p-e2689624.entry.js": () => import("./p-e2689624.entry-B2xN43wq.js") }), `./${o6}.entry.js`, 2).then(((t8) => (r.set(o6, t8), t8[n6])), ((t8) => {
+                        return i3 ? i3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-4ba08932.entry.js": () => import("./p-4ba08932.entry-D65m0YMy.js"), "./p-60af2d7f.entry.js": () => import("./p-60af2d7f.entry-CrAah05S.js"), "./p-746a8577.entry.js": () => import("./p-746a8577.entry-CelmWp2D.js"), "./p-7652d72d.entry.js": () => import("./p-7652d72d.entry-D1k0BKWy.js"), "./p-79cc15c2.entry.js": () => import("./p-79cc15c2.entry-DjrN64rd.js"), "./p-846257eb.entry.js": () => import("./p-846257eb.entry-cOdolMlN.js"), "./p-84927cea.entry.js": () => import("./p-84927cea.entry-xBmmQIAL.js"), "./p-928c4970.entry.js": () => import("./p-928c4970.entry-CfwJhiRS.js"), "./p-a147e6c9.entry.js": () => import("./p-a147e6c9.entry-CpRDud96.js"), "./p-a14c6d82.entry.js": () => import("./p-a14c6d82.entry-BIY6YnIg.js"), "./p-a7fc1135.entry.js": () => import("./p-a7fc1135.entry-CZbInSRk.js"), "./p-bd214b33.entry.js": () => import("./p-bd214b33.entry-93_HvAFh.js"), "./p-bf8a47d4.entry.js": () => import("./p-bf8a47d4.entry-B0u_oUB1.js"), "./p-ccea11a0.entry.js": () => import("./p-ccea11a0.entry-D8BtAQdq.js"), "./p-dbe042fd.entry.js": () => import("./p-dbe042fd.entry-DEAII7NR.js"), "./p-e2689624.entry.js": () => import("./p-e2689624.entry-Cmuw88iN.js") }), `./${o6}.entry.js`, 2).then(((t8) => (r.set(o6, t8), t8[n6])), ((t8) => {
                           l(t8, e3.$hostElement$);
                         }));
                         /*!__STENCIL_STATIC_IMPORT_SWITCH__*/
@@ -8631,7 +8631,7 @@ const EV_HANDLERS$a = {
   //#endregion
 };
 const apiCall$2 = async (state, addSnapshot) => {
-  var _a, _b;
+  var _a;
   const { elements, filter, filterType } = state;
   const { imageviewer } = elements;
   const lfManager2 = getLfManager();
@@ -8664,7 +8664,7 @@ const apiCall$2 = async (state, addSnapshot) => {
     lfManager2.log("Error processing image!", { error }, LogSeverity.Error);
   }
   requestAnimationFrame(() => imageviewer.setSpinnerStatus(false));
-  if (((_a = state.filter) == null ? void 0 : _a.requiresManualApply) && ((_b = state.manualApply) == null ? void 0 : _b.isProcessing)) {
+  if ((_a = state.manualApply) == null ? void 0 : _a.isProcessing) {
     resolveManualApplyRequest(state, isSuccess);
   }
   return isSuccess;
