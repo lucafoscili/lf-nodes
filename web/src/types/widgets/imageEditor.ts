@@ -1,4 +1,11 @@
-import { LfDataDataset } from '@lf-widgets/foundations';
+import {
+  LfDataDataset,
+  LfDataNode,
+  LfSliderEventPayload,
+  LfTextfieldEventPayload,
+  LfToggleEventPayload,
+} from '@lf-widgets/foundations';
+import type { createEventHandlers } from '../../helpers/imageEditor/events';
 import {
   BaseWidgetState,
   CustomWidgetName,
@@ -65,6 +72,23 @@ export interface ImageEditorState extends BaseWidgetState {
     snapshot: () => Promise<void>;
   };
 }
+
+export interface PrepSettingsDeps {
+  onSlider: (state: ImageEditorState, e: CustomEvent<LfSliderEventPayload>) => void | Promise<void>;
+  onTextfield: (
+    state: ImageEditorState,
+    e: CustomEvent<LfTextfieldEventPayload>,
+  ) => void | Promise<void>;
+  onToggle: (state: ImageEditorState, e: CustomEvent<LfToggleEventPayload>) => void | Promise<void>;
+}
+
+export type PrepSettingsFn = (state: ImageEditorState, node: LfDataNode) => void;
+export interface EventHandlerDeps {
+  handleInterruptForState: (state: ImageEditorState) => Promise<void>;
+  prepSettings: PrepSettingsFn;
+}
+
+export type EventHandlers = ReturnType<typeof createEventHandlers>;
 //#endregion
 
 //#region Dataset
