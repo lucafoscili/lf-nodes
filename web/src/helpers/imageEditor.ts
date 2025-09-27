@@ -417,7 +417,7 @@ export const apiCall = async (state: ImageEditorState, addSnapshot: boolean) => 
 
   requestAnimationFrame(() => imageviewer.setSpinnerStatus(false));
 
-  if (state.filter?.requiresManualApply && state.manualApply?.isProcessing) {
+  if (state.manualApply?.isProcessing) {
     resolveManualApplyRequest(state, isSuccess);
   }
 
