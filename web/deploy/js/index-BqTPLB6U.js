@@ -5423,7 +5423,7 @@ var tt = false, et = (t2, e2, n2) => {
                         const n6 = t7.i.replace(/-/g, "_"), o6 = t7.T;
                         if (!o6) return;
                         const i3 = r.get(o6);
-                        return i3 ? i3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-4ba08932.entry.js": () => import("./p-4ba08932.entry-D65m0YMy.js"), "./p-60af2d7f.entry.js": () => import("./p-60af2d7f.entry-CrAah05S.js"), "./p-746a8577.entry.js": () => import("./p-746a8577.entry-CelmWp2D.js"), "./p-7652d72d.entry.js": () => import("./p-7652d72d.entry-D1k0BKWy.js"), "./p-79cc15c2.entry.js": () => import("./p-79cc15c2.entry-DjrN64rd.js"), "./p-846257eb.entry.js": () => import("./p-846257eb.entry-cOdolMlN.js"), "./p-84927cea.entry.js": () => import("./p-84927cea.entry-xBmmQIAL.js"), "./p-928c4970.entry.js": () => import("./p-928c4970.entry-CfwJhiRS.js"), "./p-a147e6c9.entry.js": () => import("./p-a147e6c9.entry-CpRDud96.js"), "./p-a14c6d82.entry.js": () => import("./p-a14c6d82.entry-BIY6YnIg.js"), "./p-a7fc1135.entry.js": () => import("./p-a7fc1135.entry-CZbInSRk.js"), "./p-bd214b33.entry.js": () => import("./p-bd214b33.entry-93_HvAFh.js"), "./p-bf8a47d4.entry.js": () => import("./p-bf8a47d4.entry-B0u_oUB1.js"), "./p-ccea11a0.entry.js": () => import("./p-ccea11a0.entry-D8BtAQdq.js"), "./p-dbe042fd.entry.js": () => import("./p-dbe042fd.entry-DEAII7NR.js"), "./p-e2689624.entry.js": () => import("./p-e2689624.entry-Cmuw88iN.js") }), `./${o6}.entry.js`, 2).then(((t8) => (r.set(o6, t8), t8[n6])), ((t8) => {
+                        return i3 ? i3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-4ba08932.entry.js": () => import("./p-4ba08932.entry-BYEhj4mU.js"), "./p-60af2d7f.entry.js": () => import("./p-60af2d7f.entry-BpOt1_94.js"), "./p-746a8577.entry.js": () => import("./p-746a8577.entry-BD9wsKp7.js"), "./p-7652d72d.entry.js": () => import("./p-7652d72d.entry-Bw3P--CW.js"), "./p-79cc15c2.entry.js": () => import("./p-79cc15c2.entry-Bedx_kaj.js"), "./p-846257eb.entry.js": () => import("./p-846257eb.entry-COIE6phJ.js"), "./p-84927cea.entry.js": () => import("./p-84927cea.entry-CHw8dlDF.js"), "./p-928c4970.entry.js": () => import("./p-928c4970.entry-D8v2HeUt.js"), "./p-a147e6c9.entry.js": () => import("./p-a147e6c9.entry-BZlHVI5W.js"), "./p-a14c6d82.entry.js": () => import("./p-a14c6d82.entry-CA2aB5Ma.js"), "./p-a7fc1135.entry.js": () => import("./p-a7fc1135.entry-D3qq25Bw.js"), "./p-bd214b33.entry.js": () => import("./p-bd214b33.entry-BA7uAh2N.js"), "./p-bf8a47d4.entry.js": () => import("./p-bf8a47d4.entry-BrnqFfRB.js"), "./p-ccea11a0.entry.js": () => import("./p-ccea11a0.entry-BSB-koxr.js"), "./p-dbe042fd.entry.js": () => import("./p-dbe042fd.entry-BVqBHvLI.js"), "./p-e2689624.entry.js": () => import("./p-e2689624.entry-CpmtuxpM.js") }), `./${o6}.entry.js`, 2).then(((t8) => (r.set(o6, t8), t8[n6])), ((t8) => {
                           l(t8, e3.$hostElement$);
                         }));
                         /*!__STENCIL_STATIC_IMPORT_SWITCH__*/
@@ -6299,6 +6299,7 @@ var NodeName;
   NodeName2["switchInteger"] = "LF_SwitchInteger";
   NodeName2["switchJson"] = "LF_SwitchJSON";
   NodeName2["switchString"] = "LF_SwitchString";
+  NodeName2["tiledDiffusionRefiner"] = "LF_TiledDiffusionRefiner";
   NodeName2["tiledSuperRes"] = "LF_TiledSuperRes";
   NodeName2["tiltShift"] = "LF_TiltShift";
   NodeName2["updateUsageStatistics"] = "LF_UpdateUsageStatistics";
@@ -6443,6 +6444,7 @@ const NODE_WIDGET_MAP = {
   LF_SwitchInteger: [CustomWidgetName.progressbar],
   LF_SwitchJSON: [CustomWidgetName.progressbar],
   LF_SwitchString: [CustomWidgetName.progressbar],
+  LF_TiledDiffusionRefiner: [CustomWidgetName.compare],
   LF_TiledSuperRes: [CustomWidgetName.compare],
   LF_TiltShift: [CustomWidgetName.compare],
   LF_UpdateUsageStatistics: [CustomWidgetName.code],
@@ -6730,6 +6732,116 @@ function installLFBeforeFreeHooks(api2, opts = {}) {
   const fetchPatched = installFetchFallback();
   return { freeMemoryHook: freePatched, fetchFallbackHook: fetchPatched };
 }
+const MANUAL_APPLY_PROCESSING_LABEL = "Applying…";
+const hasManualApplyPendingChanges = (state) => {
+  const manual = state.manualApply;
+  if (!manual) {
+    return false;
+  }
+  return manual.latestChangeId > manual.latestAppliedChangeId;
+};
+const updateManualApplyButton = (state) => {
+  const manual = state.manualApply;
+  if (!manual) {
+    return;
+  }
+  manual.dirty = hasManualApplyPendingChanges(state);
+  if (manual.isProcessing) {
+    manual.button.lfUiState = "disabled";
+    manual.button.lfLabel = MANUAL_APPLY_PROCESSING_LABEL;
+    return;
+  }
+  manual.button.lfLabel = manual.defaultLabel;
+  if (manual.dirty) {
+    manual.button.lfUiState = "success";
+  } else {
+    manual.button.lfUiState = "disabled";
+  }
+};
+const initManualApplyState = (state, button) => {
+  state.manualApply = {
+    button,
+    defaultLabel: button.lfLabel ?? "Apply",
+    dirty: false,
+    isProcessing: false,
+    changeCounter: 0,
+    latestChangeId: 0,
+    latestAppliedChangeId: 0,
+    activeRequestChangeId: 0
+  };
+  updateManualApplyButton(state);
+};
+const registerManualApplyChange = (state) => {
+  var _a;
+  if (!((_a = state.filter) == null ? void 0 : _a.requiresManualApply) || !state.manualApply) {
+    return;
+  }
+  const manual = state.manualApply;
+  manual.latestChangeId = ++manual.changeCounter;
+  if (!manual.isProcessing) {
+    updateManualApplyButton(state);
+  }
+};
+const beginManualApplyRequest = (state) => {
+  if (!state.manualApply) {
+    return;
+  }
+  const manual = state.manualApply;
+  manual.isProcessing = true;
+  manual.activeRequestChangeId = manual.latestChangeId;
+  updateManualApplyButton(state);
+};
+const resolveManualApplyRequest = (state, wasSuccessful) => {
+  if (!state.manualApply) {
+    return;
+  }
+  const manual = state.manualApply;
+  if (wasSuccessful) {
+    manual.latestAppliedChangeId = Math.max(manual.latestAppliedChangeId, manual.activeRequestChangeId);
+  }
+  manual.activeRequestChangeId = 0;
+  manual.isProcessing = false;
+  updateManualApplyButton(state);
+};
+const apiCall$2 = async (state, addSnapshot) => {
+  var _a;
+  const { elements, filter, filterType } = state;
+  const { imageviewer } = elements;
+  const lfManager2 = getLfManager();
+  const snapshotValue = (await imageviewer.getCurrentSnapshot()).value;
+  const baseSettings = filter.settings;
+  const payload = {
+    ...baseSettings
+  };
+  const contextDataset = imageviewer.lfDataset;
+  const contextId = contextDataset == null ? void 0 : contextDataset.context_id;
+  if (contextId) {
+    payload.context_id = contextId;
+  }
+  requestAnimationFrame(() => imageviewer.setSpinnerStatus(true));
+  let isSuccess = false;
+  try {
+    const response = await getApiRoutes().image.process(snapshotValue, filterType, payload);
+    if (response.mask) {
+      lfManager2.log("Saved inpaint mask preview to temp", { mask: response.mask }, LogSeverity.Info);
+    }
+    if (addSnapshot) {
+      await imageviewer.addSnapshot(response.data);
+    } else {
+      const { canvas } = (await imageviewer.getComponents()).details;
+      const image = await canvas.getImage();
+      requestAnimationFrame(() => image.lfValue = response.data);
+    }
+    isSuccess = true;
+  } catch (error) {
+    lfManager2.log("Error processing image!", { error }, LogSeverity.Error);
+  }
+  requestAnimationFrame(() => imageviewer.setSpinnerStatus(false));
+  if ((_a = state.manualApply) == null ? void 0 : _a.isProcessing) {
+    resolveManualApplyRequest(state, isSuccess);
+  }
+  return isSuccess;
+};
 var ImageEditorCSS;
 (function(ImageEditorCSS2) {
   ImageEditorCSS2["Content"] = "lf-imageeditor";
@@ -6952,7 +7064,295 @@ var ImageEditorInpaintIds;
   ImageEditorInpaintIds2["Feather"] = "feather";
   ImageEditorInpaintIds2["UpsampleTarget"] = "upsample_target";
 })(ImageEditorInpaintIds || (ImageEditorInpaintIds = {}));
-const SETTINGS = {
+const BASIC_ADJUSTMENT_SETTINGS = {
+  //#region Brightness
+  brightness: {
+    controlIds: ImageEditorBrightnessIds,
+    settings: {
+      strength: 0,
+      gamma: 0,
+      localized: false,
+      midpoint: 0.5
+    },
+    configs: {
+      [ImageEditorControls.Slider]: [
+        {
+          ariaLabel: "Brightness Strength",
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 0,
+          id: ImageEditorSliderIds.Strength,
+          isMandatory: true,
+          max: "1",
+          min: "-1",
+          step: "0.05",
+          title: "Adjust the brightness of the image. Negative values darken, positive values brighten."
+        },
+        {
+          ariaLabel: "Gamma",
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 1,
+          id: ImageEditorSliderIds.Gamma,
+          max: "3",
+          min: "0.1",
+          step: "0.1",
+          title: "Adjust the gamma correction. Values < 1 brighten shadows, > 1 darken highlights."
+        },
+        {
+          ariaLabel: "Midpoint",
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 0.5,
+          id: ImageEditorSliderIds.Midpoint,
+          max: "1",
+          min: "0",
+          step: "0.05",
+          title: "Defines the tonal midpoint for brightness scaling."
+        }
+      ],
+      [ImageEditorControls.Toggle]: [
+        {
+          ariaLabel: "Localized Brightness",
+          controlType: ImageEditorControls.Toggle,
+          defaultValue: false,
+          id: ImageEditorToggleIds.Localized,
+          off: "false",
+          on: "true",
+          title: "Enhance brightness locally in darker regions."
+        }
+      ]
+    }
+  },
+  //#endregion
+  //#region Clarity
+  clarity: {
+    controlIds: ImageEditorClarityIds,
+    settings: {
+      strength: 0,
+      sharpen_amount: 0,
+      blur_kernel_size: 1
+    },
+    configs: {
+      [ImageEditorControls.Slider]: [
+        {
+          ariaLabel: "Clarity Strength",
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 0,
+          id: ImageEditorSliderIds.Strength,
+          isMandatory: true,
+          max: "5",
+          min: "0",
+          step: "0.1",
+          title: "Controls the amount of contrast enhancement in midtones."
+        },
+        {
+          ariaLabel: "Sharpen Amount",
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 0,
+          id: ImageEditorSliderIds.SharpenAmount,
+          max: "5",
+          min: "0",
+          step: "0.1",
+          title: "Controls how much sharpening is applied to the image."
+        },
+        {
+          ariaLabel: "Blur Kernel Size",
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 7,
+          id: ImageEditorSliderIds.BlurKernelSize,
+          max: "15",
+          min: "1",
+          step: "2",
+          title: "Controls the size of the Gaussian blur kernel. Higher values mean more smoothing."
+        }
+      ]
+    }
+  },
+  //#endregion
+  //#region Contrast
+  contrast: {
+    controlIds: ImageEditorContrastIds,
+    settings: {
+      strength: 0,
+      localized: false,
+      midpoint: 0
+    },
+    configs: {
+      [ImageEditorControls.Slider]: [
+        {
+          ariaLabel: "Contrast Strength",
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 0,
+          id: ImageEditorSliderIds.Strength,
+          isMandatory: true,
+          max: "1",
+          min: "-1",
+          step: "0.05",
+          title: "Controls the intensity of the contrast adjustment. 1.0 is no change, below 1 reduces contrast, above 1 increases contrast."
+        },
+        {
+          ariaLabel: "Midpoint",
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 0.5,
+          id: ImageEditorSliderIds.Midpoint,
+          max: "1",
+          min: "0",
+          step: "0.05",
+          title: "Defines the tonal midpoint for contrast scaling."
+        }
+      ],
+      [ImageEditorControls.Toggle]: [
+        {
+          ariaLabel: "Localized Contrast",
+          controlType: ImageEditorControls.Toggle,
+          defaultValue: false,
+          id: ImageEditorToggleIds.Localized,
+          off: "false",
+          on: "true",
+          title: "Apply contrast enhancement locally to edges and textures."
+        }
+      ]
+    }
+  },
+  //#endregion
+  //#region Desaturate
+  desaturate: {
+    controlIds: ImageEditorDesaturateIds,
+    settings: {
+      r_channel: 1,
+      g_channel: 1,
+      b_channel: 1,
+      strength: 0
+    },
+    configs: {
+      slider: [
+        {
+          ariaLabel: "Desaturation strength",
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 0,
+          id: ImageEditorSliderIds.Strength,
+          isMandatory: true,
+          max: "1",
+          min: "0",
+          step: "0.05",
+          title: "Controls the intensity of the desaturation. 0 is no effect, 1 is fully desaturated."
+        },
+        {
+          ariaLabel: "Red channel level",
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 1,
+          id: ImageEditorSliderIds.RedChannel,
+          max: "1",
+          min: "0",
+          step: "0.05",
+          title: "Controls the intensity of the red channel desaturation relative to the total strength of the filter."
+        },
+        {
+          ariaLabel: "Green channel level",
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 1,
+          id: ImageEditorSliderIds.GreenChannel,
+          max: "1",
+          min: "0",
+          step: "0.05",
+          title: "Controls the intensity of the green channel desaturation relative to the total strength of the filter."
+        },
+        {
+          ariaLabel: "Blue channel level",
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 1,
+          id: ImageEditorSliderIds.BlueChannel,
+          max: "1",
+          min: "0",
+          step: "0.05",
+          title: "Controls the intensity of the blue channel desaturation relative to the total strength of the filter."
+        }
+      ]
+    }
+  },
+  //#endregion
+  //#region Saturation
+  saturation: {
+    controlIds: ImageEditorSaturationIds,
+    settings: {
+      intensity: 1
+    },
+    configs: {
+      [ImageEditorControls.Slider]: [
+        {
+          ariaLabel: "Saturation Intensity",
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 1,
+          id: ImageEditorSliderIds.Intensity,
+          isMandatory: true,
+          max: "5",
+          min: "0",
+          step: "0.1",
+          title: "Controls the intensity of the saturation adjustment. 1.0 is no change, below 1 reduces saturation, above 1 increases saturation."
+        }
+      ]
+    }
+  },
+  //#endregion
+  //#region Unsharp Mask
+  unsharpMask: {
+    controlIds: ImageEditorUnsharpMaskIds,
+    settings: {
+      amount: 0.5,
+      radius: 5,
+      sigma: 1,
+      threshold: 0
+    },
+    configs: {
+      [ImageEditorControls.Slider]: [
+        {
+          ariaLabel: "Sharpen Amount",
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 0.5,
+          id: ImageEditorSliderIds.Amount,
+          isMandatory: true,
+          max: "5",
+          min: "0",
+          step: "0.05",
+          title: "Overall strength applied to the high-frequency detail mask."
+        },
+        {
+          ariaLabel: "Radius",
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 5,
+          id: ImageEditorSliderIds.Radius,
+          isMandatory: true,
+          max: "31",
+          min: "1",
+          step: "2",
+          title: "Gaussian blur kernel size (odd numbers give the best results)."
+        },
+        {
+          ariaLabel: "Sigma",
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 1,
+          id: ImageEditorSliderIds.Sigma,
+          isMandatory: true,
+          max: "5",
+          min: "0.1",
+          step: "0.1",
+          title: "Gaussian blur sigma controlling feather softness around edges."
+        },
+        {
+          ariaLabel: "Threshold",
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 0,
+          id: ImageEditorSliderIds.Threshold,
+          isMandatory: true,
+          max: "1",
+          min: "0",
+          step: "0.01",
+          title: "Skip sharpening for pixels below this normalized contrast level."
+        }
+      ]
+    }
+    //#endregion
+  }
+};
+const CREATIVE_EFFECT_SETTINGS = {
   //#region Blend
   blend: {
     controlIds: ImageEditorBlendIds,
@@ -7046,314 +7446,7 @@ const SETTINGS = {
     }
   },
   //#endregion
-  //#region Brightness
-  brightness: {
-    controlIds: ImageEditorBrightnessIds,
-    settings: {
-      strength: 0,
-      gamma: 0,
-      localized: false,
-      midpoint: 0.5
-    },
-    configs: {
-      [ImageEditorControls.Slider]: [
-        {
-          ariaLabel: "Brightness Strength",
-          controlType: ImageEditorControls.Slider,
-          defaultValue: 0,
-          id: ImageEditorSliderIds.Strength,
-          isMandatory: true,
-          max: "1",
-          min: "-1",
-          step: "0.05",
-          title: "Adjust the brightness of the image. Negative values darken, positive values brighten."
-        },
-        {
-          ariaLabel: "Gamma",
-          controlType: ImageEditorControls.Slider,
-          defaultValue: 1,
-          id: ImageEditorSliderIds.Gamma,
-          max: "3",
-          min: "0.1",
-          step: "0.1",
-          title: "Adjust the gamma correction. Values < 1 brighten shadows, > 1 darken highlights."
-        },
-        {
-          ariaLabel: "Midpoint",
-          controlType: ImageEditorControls.Slider,
-          defaultValue: 0.5,
-          id: ImageEditorSliderIds.Midpoint,
-          max: "1",
-          min: "0",
-          step: "0.05",
-          title: "Defines the tonal midpoint for brightness scaling."
-        }
-      ],
-      [ImageEditorControls.Toggle]: [
-        {
-          ariaLabel: "Localized Brightness",
-          controlType: ImageEditorControls.Toggle,
-          defaultValue: false,
-          id: ImageEditorToggleIds.Localized,
-          off: "false",
-          on: "true",
-          title: "Enhance brightness locally in darker regions."
-        }
-      ]
-    }
-  },
-  //#endregion
-  //#region Brush
-  brush: {
-    controlIds: ImageEditorBrushIds,
-    hasCanvasAction: true,
-    settings: { b64_canvas: "", color: "#FF0000", opacity: 1, size: 10 },
-    configs: {
-      [ImageEditorControls.Slider]: [
-        {
-          ariaLabel: "Size",
-          controlType: ImageEditorControls.Slider,
-          defaultValue: 10,
-          id: ImageEditorSliderIds.Size,
-          isMandatory: true,
-          max: "500",
-          min: "1",
-          step: "1",
-          title: "Sets the size of the brush."
-        },
-        {
-          ariaLabel: "Opacity",
-          controlType: ImageEditorControls.Slider,
-          defaultValue: 1,
-          id: ImageEditorSliderIds.Opacity,
-          isMandatory: true,
-          max: "1",
-          min: "0.05",
-          step: "0.05",
-          title: "Sets the opacity of the brush."
-        }
-      ],
-      [ImageEditorControls.Textfield]: [
-        {
-          ariaLabel: "Color",
-          controlType: ImageEditorControls.Textfield,
-          defaultValue: "#FF0000",
-          id: ImageEditorTextfieldIds.Color,
-          isMandatory: true,
-          title: "Sets the color of the brush stroke.",
-          type: "color"
-        }
-      ]
-    }
-  },
-  //#endregion
-  //#region Clarity
-  clarity: {
-    controlIds: ImageEditorClarityIds,
-    settings: {
-      strength: 0,
-      sharpen_amount: 0,
-      blur_kernel_size: 1
-    },
-    configs: {
-      [ImageEditorControls.Slider]: [
-        {
-          ariaLabel: "Clarity Strength",
-          controlType: ImageEditorControls.Slider,
-          defaultValue: 0,
-          id: ImageEditorSliderIds.Strength,
-          isMandatory: true,
-          max: "5",
-          min: "0",
-          step: "0.1",
-          title: "Controls the amount of contrast enhancement in midtones."
-        },
-        {
-          ariaLabel: "Sharpen Amount",
-          controlType: ImageEditorControls.Slider,
-          defaultValue: 0,
-          id: ImageEditorSliderIds.SharpenAmount,
-          max: "5",
-          min: "0",
-          step: "0.1",
-          title: "Controls how much sharpening is applied to the image."
-        },
-        {
-          ariaLabel: "Blur Kernel Size",
-          controlType: ImageEditorControls.Slider,
-          defaultValue: 7,
-          id: ImageEditorSliderIds.BlurKernelSize,
-          max: "15",
-          min: "1",
-          step: "2",
-          title: "Controls the size of the Gaussian blur kernel. Higher values mean more smoothing."
-        }
-      ]
-    }
-  },
-  //#endregion
-  //#region Unsharp mask
-  unsharpMask: {
-    controlIds: ImageEditorUnsharpMaskIds,
-    settings: {
-      amount: 0.5,
-      radius: 5,
-      sigma: 1,
-      threshold: 0
-    },
-    configs: {
-      [ImageEditorControls.Slider]: [
-        {
-          ariaLabel: "Sharpen Amount",
-          controlType: ImageEditorControls.Slider,
-          defaultValue: 0.5,
-          id: ImageEditorSliderIds.Amount,
-          isMandatory: true,
-          max: "5",
-          min: "0",
-          step: "0.05",
-          title: "Overall strength applied to the high-frequency detail mask."
-        },
-        {
-          ariaLabel: "Radius",
-          controlType: ImageEditorControls.Slider,
-          defaultValue: 5,
-          id: ImageEditorSliderIds.Radius,
-          isMandatory: true,
-          max: "31",
-          min: "1",
-          step: "2",
-          title: "Gaussian blur kernel size (odd numbers give the best results)."
-        },
-        {
-          ariaLabel: "Sigma",
-          controlType: ImageEditorControls.Slider,
-          defaultValue: 1,
-          id: ImageEditorSliderIds.Sigma,
-          isMandatory: true,
-          max: "5",
-          min: "0.1",
-          step: "0.1",
-          title: "Gaussian blur sigma controlling feather softness around edges."
-        },
-        {
-          ariaLabel: "Threshold",
-          controlType: ImageEditorControls.Slider,
-          defaultValue: 0,
-          id: ImageEditorSliderIds.Threshold,
-          isMandatory: true,
-          max: "1",
-          min: "0",
-          step: "0.01",
-          title: "Skip sharpening for pixels below this normalized contrast level."
-        }
-      ]
-    }
-  },
-  //#endregion
-  //#region Contrast
-  contrast: {
-    controlIds: ImageEditorContrastIds,
-    settings: {
-      strength: 0,
-      localized: false,
-      midpoint: 0
-    },
-    configs: {
-      [ImageEditorControls.Slider]: [
-        {
-          ariaLabel: "Contrast Strength",
-          controlType: ImageEditorControls.Slider,
-          defaultValue: 0,
-          id: ImageEditorSliderIds.Strength,
-          isMandatory: true,
-          max: "1",
-          min: "-1",
-          step: "0.05",
-          title: "Controls the intensity of the contrast adjustment. 1.0 is no change, below 1 reduces contrast, above 1 increases contrast."
-        },
-        {
-          ariaLabel: "Midpoint",
-          controlType: ImageEditorControls.Slider,
-          defaultValue: 0.5,
-          id: ImageEditorSliderIds.Midpoint,
-          max: "1",
-          min: "0",
-          step: "0.05",
-          title: "Defines the tonal midpoint for contrast scaling."
-        }
-      ],
-      [ImageEditorControls.Toggle]: [
-        {
-          ariaLabel: "Localized Contrast",
-          controlType: ImageEditorControls.Toggle,
-          defaultValue: false,
-          id: ImageEditorToggleIds.Localized,
-          off: "false",
-          on: "true",
-          title: "Apply contrast enhancement locally to edges and textures."
-        }
-      ]
-    }
-  },
-  //#endregion
-  //#region Desaturate
-  desaturate: {
-    controlIds: ImageEditorDesaturateIds,
-    settings: {
-      r_channel: 1,
-      g_channel: 1,
-      b_channel: 1,
-      strength: 0
-    },
-    configs: {
-      slider: [
-        {
-          ariaLabel: "Desaturation strength",
-          controlType: ImageEditorControls.Slider,
-          defaultValue: 0,
-          id: ImageEditorSliderIds.Strength,
-          isMandatory: true,
-          max: "1",
-          min: "0",
-          step: "0.05",
-          title: "Controls the total intensity of the desaturation. 0 is no effect, 1 is fully desaturated."
-        },
-        {
-          ariaLabel: "Red channel level",
-          controlType: ImageEditorControls.Slider,
-          defaultValue: 1,
-          id: ImageEditorSliderIds.RedChannel,
-          max: "1",
-          min: "0",
-          step: "0.05",
-          title: "Controls the intensity of the red channel desaturation relative to the total strength of the filter."
-        },
-        {
-          ariaLabel: "Green channel level",
-          controlType: ImageEditorControls.Slider,
-          defaultValue: 1,
-          id: ImageEditorSliderIds.GreenChannel,
-          max: "1",
-          min: "0",
-          step: "0.05",
-          title: "Controls the intensity of the green channel desaturation relative to the total strength of the filter."
-        },
-        {
-          ariaLabel: "Blue channel level",
-          controlType: ImageEditorControls.Slider,
-          defaultValue: 1,
-          id: ImageEditorSliderIds.BlueChannel,
-          max: "1",
-          min: "0",
-          step: "0.05",
-          title: "Controls the intensity of the blue channel desaturation relative to the total strength of the filter."
-        }
-      ]
-    }
-  },
-  //#endregion
-  //#region Film grain
+  //#region Film Grain
   filmGrain: {
     controlIds: ImageEditorFilmGrainIds,
     settings: { intensity: 0, size: 1, soft_blend: false, tint: "#FFFFFF" },
@@ -7407,7 +7500,7 @@ const SETTINGS = {
     }
   },
   //#endregion
-  //#region Gaussian blur
+  //#region Gaussian Blur
   gaussianBlur: {
     controlIds: ImageEditorGaussianBlurIds,
     settings: {
@@ -7440,159 +7533,6 @@ const SETTINGS = {
     }
   },
   //#endregion
-  //#region Inpaint
-  inpaint: {
-    controlIds: ImageEditorInpaintIds,
-    hasCanvasAction: true,
-    requiresManualApply: true,
-    settings: {
-      b64_canvas: "",
-      cfg: 7,
-      denoise_percentage: 40,
-      steps: 16,
-      positive_prompt: "",
-      negative_prompt: "",
-      upsample_target: 1024,
-      use_conditioning: false
-    },
-    configs: {
-      [ImageEditorControls.Textfield]: [
-        {
-          ariaLabel: "Positive prompt",
-          controlType: ImageEditorControls.Textfield,
-          defaultValue: "",
-          id: ImageEditorTextfieldIds.PositivePrompt,
-          isMandatory: false,
-          title: "Prompt applied to masked pixels.",
-          type: "text"
-        },
-        {
-          ariaLabel: "Negative prompt",
-          controlType: ImageEditorControls.Textfield,
-          defaultValue: "",
-          id: ImageEditorTextfieldIds.NegativePrompt,
-          isMandatory: false,
-          title: "Negative prompt applied to masked pixels.",
-          type: "text"
-        }
-      ],
-      [ImageEditorControls.Toggle]: [
-        {
-          ariaLabel: "Use conditioning prompts",
-          controlType: ImageEditorControls.Toggle,
-          defaultValue: false,
-          id: ImageEditorToggleIds.UseConditioning,
-          isMandatory: false,
-          off: "false",
-          on: "true",
-          title: "If enabled, prepend the connected conditioning inputs to the prompts before sampling."
-        }
-      ],
-      [ImageEditorControls.Slider]: [
-        {
-          ariaLabel: "Denoise percentage",
-          controlType: ImageEditorControls.Slider,
-          defaultValue: 40,
-          id: ImageEditorSliderIds.DenoisePercentage,
-          isMandatory: true,
-          max: "100",
-          min: "0",
-          step: "1",
-          title: "Noise applied during inpaint. 0 keeps original pixels, 100 fully regenerates."
-        },
-        {
-          ariaLabel: "CFG scale",
-          controlType: ImageEditorControls.Slider,
-          defaultValue: 7,
-          id: ImageEditorSliderIds.Cfg,
-          isMandatory: true,
-          max: "30",
-          min: "1",
-          step: "0.5",
-          title: "Classifier-free guidance applied during the inpaint pass."
-        },
-        {
-          ariaLabel: "Steps",
-          controlType: ImageEditorControls.Slider,
-          defaultValue: 16,
-          id: ImageEditorSliderIds.Steps,
-          isMandatory: true,
-          max: "30",
-          min: "1",
-          step: "1",
-          title: "Diffusion steps used for the inpaint sampler."
-        },
-        {
-          ariaLabel: "Upsample target (px)",
-          controlType: ImageEditorControls.Slider,
-          defaultValue: 1024,
-          id: ImageEditorSliderIds.UpsampleTarget,
-          isMandatory: false,
-          max: "2048",
-          min: "0",
-          step: "16",
-          title: "Detailer path: upscale ROI longer side to this size before inpaint (0 disables)."
-        }
-      ]
-    }
-  },
-  //#endregion
-  //#region Line
-  line: {
-    controlIds: ImageEditorLineIds,
-    hasCanvasAction: true,
-    settings: { color: "#FF0000", opacity: 1, points: [], size: 10, smooth: false },
-    configs: {
-      [ImageEditorControls.Canvas]: [],
-      [ImageEditorControls.Slider]: [
-        {
-          ariaLabel: "Size",
-          controlType: ImageEditorControls.Slider,
-          defaultValue: 10,
-          id: ImageEditorSliderIds.Size,
-          isMandatory: true,
-          max: "500",
-          min: "1",
-          step: "1",
-          title: "Sets the size of the brush."
-        },
-        {
-          ariaLabel: "Opacity",
-          controlType: ImageEditorControls.Slider,
-          defaultValue: 1,
-          id: ImageEditorSliderIds.Opacity,
-          isMandatory: true,
-          max: "1",
-          min: "0.05",
-          step: "0.05",
-          title: "Sets the opacity of the brush."
-        }
-      ],
-      [ImageEditorControls.Textfield]: [
-        {
-          ariaLabel: "Color",
-          controlType: ImageEditorControls.Textfield,
-          defaultValue: "#FF0000",
-          id: ImageEditorTextfieldIds.Color,
-          isMandatory: true,
-          title: "Sets the color of the brush stroke.",
-          type: "color"
-        }
-      ],
-      [ImageEditorControls.Toggle]: [
-        {
-          ariaLabel: "Smooth",
-          controlType: ImageEditorControls.Toggle,
-          defaultValue: false,
-          id: ImageEditorToggleIds.Smooth,
-          title: "Draws a smooth line.",
-          off: "false",
-          on: "true"
-        }
-      ]
-    }
-  },
-  //#endregion
   //#region Sepia
   sepia: {
     controlIds: ImageEditorSepiaIds,
@@ -7616,30 +7556,7 @@ const SETTINGS = {
     }
   },
   //#endregion
-  //#region Saturation
-  saturation: {
-    controlIds: ImageEditorSaturationIds,
-    settings: {
-      intensity: 1
-    },
-    configs: {
-      [ImageEditorControls.Slider]: [
-        {
-          ariaLabel: "Saturation Intensity",
-          controlType: ImageEditorControls.Slider,
-          defaultValue: 1,
-          id: ImageEditorSliderIds.Intensity,
-          isMandatory: true,
-          max: "5",
-          min: "0",
-          step: "0.1",
-          title: "Controls the intensity of the saturation adjustment. 1.0 is no change, below 1 reduces saturation, above 1 increases saturation."
-        }
-      ]
-    }
-  },
-  //#endregion
-  //#region Split tone
+  //#region Split Tone
   splitTone: {
     controlIds: ImageEditorSplitToneIds,
     settings: {
@@ -7706,7 +7623,7 @@ const SETTINGS = {
     }
   },
   //#endregion
-  //#region Tilt-shift
+  //#region Tilt Shift
   tiltShift: {
     controlIds: ImageEditorTiltShiftIds,
     settings: {
@@ -7879,12 +7796,112 @@ const SETTINGS = {
   }
   //#endregion
 };
+const DIFFUSION_SETTINGS = {
+  //#region Inpaint
+  inpaint: {
+    controlIds: ImageEditorInpaintIds,
+    hasCanvasAction: true,
+    requiresManualApply: true,
+    settings: {
+      b64_canvas: "",
+      cfg: 7,
+      denoise_percentage: 40,
+      steps: 16,
+      positive_prompt: "",
+      negative_prompt: "",
+      upsample_target: 1024,
+      use_conditioning: false
+    },
+    configs: {
+      [ImageEditorControls.Textfield]: [
+        {
+          ariaLabel: "Positive prompt",
+          controlType: ImageEditorControls.Textfield,
+          defaultValue: "",
+          id: ImageEditorTextfieldIds.PositivePrompt,
+          isMandatory: false,
+          title: "Prompt applied to masked pixels.",
+          type: "text"
+        },
+        {
+          ariaLabel: "Negative prompt",
+          controlType: ImageEditorControls.Textfield,
+          defaultValue: "",
+          id: ImageEditorTextfieldIds.NegativePrompt,
+          isMandatory: false,
+          title: "Negative prompt applied to masked pixels.",
+          type: "text"
+        }
+      ],
+      [ImageEditorControls.Toggle]: [
+        {
+          ariaLabel: "Use conditioning prompts",
+          controlType: ImageEditorControls.Toggle,
+          defaultValue: false,
+          id: ImageEditorToggleIds.UseConditioning,
+          isMandatory: false,
+          off: "false",
+          on: "true",
+          title: "If enabled, prepend the connected conditioning inputs to the prompts before sampling."
+        }
+      ],
+      [ImageEditorControls.Slider]: [
+        {
+          ariaLabel: "Denoise percentage",
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 40,
+          id: ImageEditorSliderIds.DenoisePercentage,
+          isMandatory: true,
+          max: "100",
+          min: "0",
+          step: "1",
+          title: "Noise applied during inpaint. 0 keeps original pixels, 100 fully regenerates."
+        },
+        {
+          ariaLabel: "CFG scale",
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 7,
+          id: ImageEditorSliderIds.Cfg,
+          isMandatory: true,
+          max: "30",
+          min: "1",
+          step: "0.5",
+          title: "Classifier-free guidance applied during the inpaint pass."
+        },
+        {
+          ariaLabel: "Steps",
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 16,
+          id: ImageEditorSliderIds.Steps,
+          isMandatory: true,
+          max: "30",
+          min: "1",
+          step: "1",
+          title: "Diffusion steps used for the inpaint sampler."
+        },
+        {
+          ariaLabel: "Upsample target (px)",
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 1024,
+          id: ImageEditorSliderIds.UpsampleTarget,
+          isMandatory: false,
+          max: "2048",
+          min: "0",
+          step: "16",
+          title: "Detailer path: upscale ROI longer side to this size before inpaint (0 disables)."
+        }
+      ]
+    }
+  }
+  //#endregion
+};
 const INPAINT_ADV = {
+  //#region Inpaint (adv.)
   controlIds: ImageEditorInpaintIds,
   hasCanvasAction: true,
   requiresManualApply: true,
   settings: {
-    ...SETTINGS.inpaint.settings,
+    ...DIFFUSION_SETTINGS.inpaint.settings,
     roi_auto: true,
     roi_padding: 32,
     roi_align: 8,
@@ -8058,16 +8075,125 @@ const INPAINT_ADV = {
       }
     ]
   }
+  //#endregion
+};
+const DRAWING_SETTINGS = {
+  //#region Brush
+  brush: {
+    controlIds: ImageEditorBrushIds,
+    hasCanvasAction: true,
+    settings: { b64_canvas: "", color: "#FF0000", opacity: 1, size: 10 },
+    configs: {
+      [ImageEditorControls.Slider]: [
+        {
+          ariaLabel: "Size",
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 10,
+          id: ImageEditorSliderIds.Size,
+          isMandatory: true,
+          max: "500",
+          min: "1",
+          step: "1",
+          title: "Sets the size of the brush."
+        },
+        {
+          ariaLabel: "Opacity",
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 1,
+          id: ImageEditorSliderIds.Opacity,
+          isMandatory: true,
+          max: "1",
+          min: "0.05",
+          step: "0.05",
+          title: "Sets the opacity of the brush."
+        }
+      ],
+      [ImageEditorControls.Textfield]: [
+        {
+          ariaLabel: "Color",
+          controlType: ImageEditorControls.Textfield,
+          defaultValue: "#FF0000",
+          id: ImageEditorTextfieldIds.Color,
+          isMandatory: true,
+          title: "Sets the color of the brush stroke.",
+          type: "color"
+        }
+      ]
+    }
+  },
+  //#endregion
+  //#region Line
+  line: {
+    controlIds: ImageEditorLineIds,
+    hasCanvasAction: true,
+    settings: { color: "#FF0000", opacity: 1, points: [], size: 10, smooth: false },
+    configs: {
+      [ImageEditorControls.Canvas]: [],
+      [ImageEditorControls.Slider]: [
+        {
+          ariaLabel: "Size",
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 10,
+          id: ImageEditorSliderIds.Size,
+          isMandatory: true,
+          max: "500",
+          min: "1",
+          step: "1",
+          title: "Sets the size of the brush."
+        },
+        {
+          ariaLabel: "Opacity",
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 1,
+          id: ImageEditorSliderIds.Opacity,
+          isMandatory: true,
+          max: "1",
+          min: "0.05",
+          step: "0.05",
+          title: "Sets the opacity of the brush."
+        }
+      ],
+      [ImageEditorControls.Textfield]: [
+        {
+          ariaLabel: "Color",
+          controlType: ImageEditorControls.Textfield,
+          defaultValue: "#FF0000",
+          id: ImageEditorTextfieldIds.Color,
+          isMandatory: true,
+          title: "Sets the color of the brush stroke.",
+          type: "color"
+        }
+      ],
+      [ImageEditorControls.Toggle]: [
+        {
+          ariaLabel: "Smooth",
+          controlType: ImageEditorControls.Toggle,
+          defaultValue: false,
+          id: ImageEditorToggleIds.Smooth,
+          title: "Draws a smooth line.",
+          off: "false",
+          on: "true"
+        }
+      ]
+    }
+  }
+  //#endregion
+};
+const SETTINGS = {
+  ...BASIC_ADJUSTMENT_SETTINGS,
+  ...CREATIVE_EFFECT_SETTINGS,
+  ...DRAWING_SETTINGS,
+  ...DIFFUSION_SETTINGS
 };
 const TREE_DATA = {
   nodes: [
+    //#region Settings
     {
       description: "Tool configuration.",
       id: "settings",
       icon: "brush",
       value: "Settings",
       children: [
-        //#region Brush
         {
           description: "Brush configuration.",
           cells: {
@@ -8079,16 +8205,16 @@ const TREE_DATA = {
           id: "brush",
           value: "Brush"
         }
-        //#endregion
       ]
     },
+    //#endregion
+    //#region Diffusion Tools
     {
       description: "Diffusion-based retouching tools.",
       id: "diffusion_tools",
       value: "Diffusion Tools",
       icon: "wand",
       children: [
-        //#region Inpaint
         {
           description: "Inpaint masked areas using the connected diffusion model.",
           cells: {
@@ -8111,16 +8237,16 @@ const TREE_DATA = {
           id: "inpaint_adv",
           value: "Inpaint (adv.)"
         }
-        //#endregion
       ]
     },
+    //#endregion
+    //#region Basic Adjustments
     {
       description: "Basic adjustments such as sharpening and color tuning.",
       id: "basic_adjustments",
       value: "Basic Adjustments",
       icon: "settings",
       children: [
-        //#region Brightness
         {
           description: "Adjusts the brightness.",
           cells: {
@@ -8132,8 +8258,6 @@ const TREE_DATA = {
           id: "brightness",
           value: "Brightness"
         },
-        //#endregion
-        //#region Clarity
         {
           description: "Simulates the Lightroom clarity effect.",
           cells: {
@@ -8145,8 +8269,6 @@ const TREE_DATA = {
           id: "clarity",
           value: "Clarity"
         },
-        //#endregion
-        //#region Unsharp mask
         {
           description: "Sharpens edges using a classic unsharp mask pipeline.",
           cells: {
@@ -8158,8 +8280,6 @@ const TREE_DATA = {
           id: "unsharp_mask",
           value: "Unsharp Mask"
         },
-        //#endregion
-        //#region Contrast
         {
           description: "Adjusts the contrast.",
           cells: {
@@ -8171,8 +8291,6 @@ const TREE_DATA = {
           id: "contrast",
           value: "Contrast"
         },
-        //#endregion
-        //#region Desaturate
         {
           description: "Reduces the saturation.",
           cells: {
@@ -8184,29 +8302,27 @@ const TREE_DATA = {
           id: "desaturate",
           value: "Desaturate"
         },
-        //#endregion
-        //#region Saturation
         {
+          description: "Adjusts the saturation.",
           cells: {
             lfCode: {
               shape: "code",
               value: JSON.stringify(SETTINGS.saturation)
             }
           },
-          description: "Adjusts the saturation.",
           id: "saturation",
           value: "Saturation"
         }
-        //#endregion
       ]
     },
+    //#endregion
+    //#region Creative Effects
     {
       description: "Artistic filters, such as vignette effect and gaussian blur.",
       id: "creative_effects",
       icon: "palette",
       value: "Creative Effects",
       children: [
-        //#region Blend
         {
           cells: {
             lfCode: {
@@ -8218,8 +8334,6 @@ const TREE_DATA = {
           id: "blend",
           value: "Blend"
         },
-        //#endregion
-        //#region Bloom
         {
           description: "Applies a bloom effect.",
           cells: {
@@ -8231,8 +8345,6 @@ const TREE_DATA = {
           id: "bloom",
           value: "Bloom"
         },
-        //#endregion
-        //#region Film grain
         {
           description: "Applies a film grain effect.",
           cells: {
@@ -8244,8 +8356,6 @@ const TREE_DATA = {
           id: "film_grain",
           value: "Film grain"
         },
-        //#endregion
-        //#region Gaussian blur
         {
           description: "Blurs the image.",
           cells: {
@@ -8257,8 +8367,6 @@ const TREE_DATA = {
           id: "gaussian_blur",
           value: "Gaussian blur"
         },
-        //#endregion
-        //#region Line
         {
           description: "Draws a line.",
           cells: {
@@ -8270,8 +8378,6 @@ const TREE_DATA = {
           id: "line",
           value: "Line"
         },
-        //#endregion
-        //#region Sepia
         {
           cells: {
             lfCode: {
@@ -8283,8 +8389,6 @@ const TREE_DATA = {
           id: "sepia",
           value: "Sepia"
         },
-        //#endregion
-        //#region Split tone
         {
           cells: {
             lfCode: {
@@ -8296,8 +8400,6 @@ const TREE_DATA = {
           id: "split_tone",
           value: "Split tone"
         },
-        //#endregion
-        //#region Tilt-shift
         {
           cells: {
             lfCode: {
@@ -8309,8 +8411,6 @@ const TREE_DATA = {
           id: "tilt_shift",
           value: "Tilt-shift"
         },
-        //#endregion
-        //#region Vibrance
         {
           cells: {
             lfCode: {
@@ -8322,8 +8422,6 @@ const TREE_DATA = {
           id: "vibrance",
           value: "Vibrance"
         },
-        //#endregion
-        //#region Vignette
         {
           cells: {
             lfCode: {
@@ -8335,339 +8433,10 @@ const TREE_DATA = {
           id: "vignette",
           value: "Vignette"
         }
-        //#endregion
       ]
     }
+    //#endregion
   ]
-};
-var LfEventName;
-(function(LfEventName2) {
-  LfEventName2["LfAccordion"] = "lf-accordion-event";
-  LfEventName2["LfArticle"] = "lf-article-event";
-  LfEventName2["LfButton"] = "lf-button-event";
-  LfEventName2["LfCanvas"] = "lf-canvas-event";
-  LfEventName2["LfCard"] = "lf-card-event";
-  LfEventName2["LfCarousel"] = "lf-carousel-event";
-  LfEventName2["LfChat"] = "lf-chat-event";
-  LfEventName2["LfChart"] = "lf-chart-event";
-  LfEventName2["LfChip"] = "lf-chip-event";
-  LfEventName2["LfCode"] = "lf-code-event";
-  LfEventName2["LfCompare"] = "lf-compare-event";
-  LfEventName2["LfImageviewer"] = "lf-imageviewer-event";
-  LfEventName2["LfList"] = "lf-list-event";
-  LfEventName2["LfManager"] = "lf-manager-ready";
-  LfEventName2["LfMasonry"] = "lf-masonry-event";
-  LfEventName2["LfMessenger"] = "lf-messenger-event";
-  LfEventName2["LfProgressbar"] = "lf-progressbar-event";
-  LfEventName2["LfSlider"] = "lf-slider-event";
-  LfEventName2["LfSpinner"] = "lf-spinner-event";
-  LfEventName2["LfTabbar"] = "lf-tabbar-event";
-  LfEventName2["LfTextfield"] = "lf-textfield-event";
-  LfEventName2["LfToggle"] = "lf-toggle-event";
-  LfEventName2["LfTree"] = "lf-tree-event";
-  LfEventName2["LfUpload"] = "lf-upload-event";
-  LfEventName2["Textarea"] = "textarea-event";
-})(LfEventName || (LfEventName = {}));
-const handleInterruptForState = async (state) => {
-  var _a, _b;
-  const lfManager2 = getLfManager();
-  const { actionButtons, grid, imageviewer } = state.elements;
-  const dataset = imageviewer.lfDataset;
-  const statusColumn = getStatusColumn(dataset);
-  const pathColumn = getPathColumn(dataset);
-  const parsedPath = pathColumn ? unescapeJson(pathColumn).parsedJson : void 0;
-  const path = typeof (parsedPath == null ? void 0 : parsedPath.title) === "string" ? parsedPath.title : null;
-  if ((statusColumn == null ? void 0 : statusColumn.title) === ImageEditorStatus.Pending) {
-    statusColumn.title = ImageEditorStatus.Completed;
-    if (dataset && path) {
-      try {
-        await getApiRoutes().json.update(path, dataset);
-      } catch (error) {
-        lfManager2.log("Failed to update JSON after workflow interrupt.", { error, path }, LogSeverity.Warning);
-      }
-    }
-    if ((actionButtons == null ? void 0 : actionButtons.interrupt) && (actionButtons == null ? void 0 : actionButtons.resume)) {
-      setGridStatus(ImageEditorStatus.Completed, grid, actionButtons);
-    } else {
-      grid == null ? void 0 : grid.classList.add(ImageEditorCSS.GridIsInactive);
-    }
-    try {
-      const components = await imageviewer.getComponents();
-      const navigation = components == null ? void 0 : components.navigation;
-      await imageviewer.reset();
-      await ((_b = (_a = navigation == null ? void 0 : navigation.masonry) == null ? void 0 : _a.setSelectedShape) == null ? void 0 : _b.call(_a, null));
-    } catch (error) {
-      lfManager2.log("Failed to reset image viewer after workflow interrupt.", { error }, LogSeverity.Warning);
-    }
-  }
-  await resetSettings(imageviewer);
-};
-const MANUAL_APPLY_PROCESSING_LABEL = "Applying…";
-const hasManualApplyPendingChanges = (state) => {
-  const manual = state.manualApply;
-  if (!manual)
-    return false;
-  return manual.latestChangeId > manual.latestAppliedChangeId;
-};
-const updateManualApplyButton = (state) => {
-  const manual = state.manualApply;
-  if (!manual) {
-    return;
-  }
-  manual.dirty = hasManualApplyPendingChanges(state);
-  if (manual.isProcessing) {
-    manual.button.lfUiState = "disabled";
-    manual.button.lfLabel = MANUAL_APPLY_PROCESSING_LABEL;
-    return;
-  }
-  manual.button.lfLabel = manual.defaultLabel;
-  if (manual.dirty) {
-    manual.button.lfUiState = "success";
-  } else {
-    manual.button.lfUiState = "disabled";
-  }
-};
-const initManualApplyState = (state, button) => {
-  state.manualApply = {
-    button,
-    defaultLabel: button.lfLabel ?? "Apply",
-    dirty: false,
-    isProcessing: false,
-    changeCounter: 0,
-    latestChangeId: 0,
-    latestAppliedChangeId: 0,
-    activeRequestChangeId: 0
-  };
-  updateManualApplyButton(state);
-};
-const registerManualApplyChange = (state) => {
-  var _a;
-  if (!((_a = state.filter) == null ? void 0 : _a.requiresManualApply) || !state.manualApply) {
-    return;
-  }
-  const manual = state.manualApply;
-  manual.latestChangeId = ++manual.changeCounter;
-  if (!manual.isProcessing) {
-    updateManualApplyButton(state);
-  }
-};
-const beginManualApplyRequest = (state) => {
-  if (!state.manualApply) {
-    return;
-  }
-  const manual = state.manualApply;
-  manual.isProcessing = true;
-  manual.activeRequestChangeId = manual.latestChangeId;
-  updateManualApplyButton(state);
-};
-const resolveManualApplyRequest = (state, wasSuccessful) => {
-  if (!state.manualApply) {
-    return;
-  }
-  const manual = state.manualApply;
-  if (wasSuccessful) {
-    manual.latestAppliedChangeId = Math.max(manual.latestAppliedChangeId, manual.activeRequestChangeId);
-  }
-  manual.activeRequestChangeId = 0;
-  manual.isProcessing = false;
-  updateManualApplyButton(state);
-};
-const EV_HANDLERS$a = {
-  //#region Button handler
-  button: async (state, e2) => {
-    var _a;
-    const { comp, eventType } = e2.detail;
-    if (eventType === "click") {
-      const isPatched = ((_a = api) == null ? void 0 : _a[LFInterruptFlags.PatchedInterrupt]) === true;
-      switch (comp.lfIcon) {
-        case ImageEditorIcons.Interrupt:
-          getApiRoutes().comfy.interrupt();
-          if (!isPatched) {
-            await handleInterruptForState(state);
-          }
-          break;
-        case ImageEditorIcons.Resume:
-          await handleInterruptForState(state);
-          break;
-      }
-    }
-  },
-  //#endregion
-  //#region Canvas handler
-  canvas: async (state, e2) => {
-    const { comp, eventType, points } = e2.detail;
-    const { filter, filterType } = state;
-    switch (eventType) {
-      case "stroke":
-        const originalFilter = filter;
-        const originalFilterType = filterType;
-        const canvas = await comp.getCanvas();
-        const b64_canvas = canvasToBase64(canvas);
-        if (filterType !== "brush" && !(filter == null ? void 0 : filter.hasCanvasAction)) {
-          state.filterType = "brush";
-        }
-        const brushDefaults = {
-          ...SETTINGS.brush.settings,
-          ...state.lastBrushSettings
-        };
-        const temporaryFilter = {
-          ...JSON.parse(JSON.stringify(SETTINGS.brush)),
-          settings: {
-            ...brushDefaults,
-            b64_canvas,
-            color: comp.lfColor ?? brushDefaults.color,
-            opacity: comp.lfOpacity ?? brushDefaults.opacity,
-            points,
-            size: comp.lfSize ?? brushDefaults.size
-          }
-        };
-        state.filter = temporaryFilter;
-        try {
-          await updateCb(state, true, true);
-        } finally {
-          if (originalFilter == null ? void 0 : originalFilter.hasCanvasAction) {
-            const existingSettings = originalFilter.settings ?? {};
-            originalFilter.settings = {
-              ...existingSettings,
-              b64_canvas
-            };
-          }
-          state.filter = originalFilter;
-          state.filterType = originalFilterType;
-          await comp.clearCanvas();
-        }
-        break;
-    }
-  },
-  //#endregion
-  //#region Imageviewer handler
-  imageviewer: async (state, e2) => {
-    var _a;
-    const { comp, eventType, originalEvent } = e2.detail;
-    const { node } = state;
-    switch (eventType) {
-      case "lf-event":
-        const ogEv = originalEvent;
-        switch (ogEv.detail.eventType) {
-          case "click":
-            if (isTree(ogEv.detail.comp)) {
-              const { node: node2 } = ogEv.detail;
-              if ((_a = node2.cells) == null ? void 0 : _a.lfCode) {
-                prepSettings(state, node2);
-              }
-            }
-            break;
-          case "stroke":
-            const canvasEv = ogEv;
-            EV_HANDLERS$a.canvas(state, canvasEv);
-            break;
-        }
-        break;
-      case "ready":
-        const { details, navigation } = await comp.getComponents();
-        switch (node.comfyClass) {
-          case NodeName.imagesEditingBreakpoint:
-            navigation.load.lfLabel = "";
-            navigation.load.lfUiState = "disabled";
-            navigation.textfield.lfLabel = "Previews are visible in your ComfyUI/temp folder";
-            navigation.textfield.lfUiState = "disabled";
-            break;
-          default:
-            navigation.textfield.lfLabel = "Directory (relative to ComfyUI/input)";
-            break;
-        }
-        break;
-    }
-  },
-  //#endregion
-  //#region Slider handler
-  slider: async (state, e2) => {
-    const { eventType } = e2.detail;
-    const { update } = state;
-    const { preview, snapshot } = update;
-    switch (eventType) {
-      case "change":
-        registerManualApplyChange(state);
-        snapshot();
-        break;
-      case "input":
-        registerManualApplyChange(state);
-        const debouncedCallback = debounce(preview, 300);
-        debouncedCallback();
-        break;
-    }
-  },
-  //#endregion
-  //#region Textfield handler
-  textfield: async (state, e2) => {
-    const { eventType } = e2.detail;
-    const { update } = state;
-    const { preview, snapshot } = update;
-    switch (eventType) {
-      case "change":
-        registerManualApplyChange(state);
-        snapshot();
-        break;
-      case "input":
-        registerManualApplyChange(state);
-        const debouncedCallback = debounce(preview, 300);
-        debouncedCallback();
-        break;
-    }
-  },
-  //#endregion
-  //#region Toggle
-  toggle: async (state, e2) => {
-    const { eventType } = e2.detail;
-    const { update } = state;
-    const { snapshot } = update;
-    switch (eventType) {
-      case "change":
-        registerManualApplyChange(state);
-        snapshot();
-        break;
-    }
-  }
-  //#endregion
-};
-const apiCall$2 = async (state, addSnapshot) => {
-  var _a;
-  const { elements, filter, filterType } = state;
-  const { imageviewer } = elements;
-  const lfManager2 = getLfManager();
-  const snapshotValue = (await imageviewer.getCurrentSnapshot()).value;
-  const baseSettings = filter.settings;
-  const payload = {
-    ...baseSettings
-  };
-  const contextDataset = imageviewer.lfDataset;
-  const contextId = contextDataset == null ? void 0 : contextDataset.context_id;
-  if (contextId) {
-    payload.context_id = contextId;
-  }
-  requestAnimationFrame(() => imageviewer.setSpinnerStatus(true));
-  let isSuccess = false;
-  try {
-    const response = await getApiRoutes().image.process(snapshotValue, filterType, payload);
-    if (response.mask) {
-      lfManager2.log("Saved inpaint mask preview to temp", { mask: response.mask }, LogSeverity.Info);
-    }
-    if (addSnapshot) {
-      await imageviewer.addSnapshot(response.data);
-    } else {
-      const { canvas } = (await imageviewer.getComponents()).details;
-      const image = await canvas.getImage();
-      requestAnimationFrame(() => image.lfValue = response.data);
-    }
-    isSuccess = true;
-  } catch (error) {
-    lfManager2.log("Error processing image!", { error }, LogSeverity.Error);
-  }
-  requestAnimationFrame(() => imageviewer.setSpinnerStatus(false));
-  if ((_a = state.manualApply) == null ? void 0 : _a.isProcessing) {
-    resolveManualApplyRequest(state, isSuccess);
-  }
-  return isSuccess;
 };
 const refreshValues = async (state, addSnapshot = false) => {
   const { elements, filter } = state;
@@ -8710,261 +8479,6 @@ const refreshValues = async (state, addSnapshot = false) => {
     }
   }
 };
-const applyFilterDefaults = (state, defaults) => {
-  const { filter } = state;
-  if (!filter) {
-    return;
-  }
-  const mutableSettings = filter.settings;
-  Object.keys(filter.configs).forEach((controlType) => {
-    const configs = filter.configs[controlType];
-    configs == null ? void 0 : configs.forEach((config) => {
-      const defaultValue = defaults[config.id];
-      if (typeof defaultValue === "undefined") {
-        return;
-      }
-      switch (controlType) {
-        case ImageEditorControls.Slider: {
-          const numericValue = typeof defaultValue === "number" ? defaultValue : Number(defaultValue);
-          config.defaultValue = numericValue;
-          mutableSettings[config.id] = numericValue;
-          break;
-        }
-        case ImageEditorControls.Textfield: {
-          const stringValue = defaultValue === null || typeof defaultValue === "undefined" ? "" : String(defaultValue);
-          config.defaultValue = stringValue;
-          mutableSettings[config.id] = stringValue;
-          break;
-        }
-        case ImageEditorControls.Toggle: {
-          const toggleConfig = config;
-          const boolValue = defaultValue === true || typeof defaultValue === "string" && defaultValue.toLowerCase() === "true";
-          toggleConfig.defaultValue = boolValue;
-          mutableSettings[config.id] = boolValue ? toggleConfig.on : toggleConfig.off;
-          break;
-        }
-      }
-    });
-  });
-};
-const prepSettings = (state, node) => {
-  var _a;
-  state.elements.controls = {};
-  state.filter = unescapeJson(node.cells.lfCode.value).parsedJson;
-  const idRaw = node.id || "brush";
-  const alias = idRaw === "inpaint_detail" || idRaw === "inpaint_adv" ? "inpaint" : idRaw;
-  state.filterType = alias;
-  state.manualApply = void 0;
-  const dataset = state.elements.imageviewer.lfDataset;
-  const defaults = (_a = dataset == null ? void 0 : dataset.defaults) == null ? void 0 : _a[state.filterType];
-  if (defaults) {
-    applyFilterDefaults(state, defaults);
-  }
-  state.settingsStore = state.settingsStore ?? {};
-  const stored = state.settingsStore[state.filterType] ?? {};
-  const mutableSettings = state.filter.settings;
-  Object.keys(stored).forEach((id) => {
-    const v2 = stored[id];
-    if (typeof v2 === "undefined")
-      return;
-    mutableSettings[id] = v2;
-  });
-  const { elements, filter } = state;
-  const { settings } = elements;
-  settings.innerHTML = "";
-  const controlsContainer = document.createElement(TagName.Div);
-  controlsContainer.classList.add(ImageEditorCSS.SettingsControls);
-  settings.appendChild(controlsContainer);
-  const controlNames = Object.keys(filter.configs);
-  controlNames.forEach((controlName) => {
-    const controls = filter.configs[controlName];
-    if (controls) {
-      controls.forEach((control) => {
-        switch (controlName) {
-          case ImageEditorControls.Slider:
-            const slider = createSlider(state, control);
-            const storedValueSlider = stored[control.id];
-            if (typeof storedValueSlider !== "undefined") {
-              slider.lfValue = Number(storedValueSlider);
-            }
-            controlsContainer.appendChild(slider);
-            state.elements.controls[control.id] = slider;
-            break;
-          case ImageEditorControls.Textfield:
-            const textfield = createTextfield(state, control);
-            const storedValueText = stored[control.id];
-            if (typeof storedValueText !== "undefined") {
-              textfield.lfValue = String(storedValueText);
-            }
-            controlsContainer.appendChild(textfield);
-            state.elements.controls[control.id] = textfield;
-            break;
-          case ImageEditorControls.Toggle:
-            const toggle = createToggle(state, control);
-            const storedValueToggle = stored[control.id];
-            if (typeof storedValueToggle !== "undefined") {
-              const bool = storedValueToggle === true || typeof storedValueToggle === "string" && storedValueToggle.toLowerCase() === "true";
-              toggle.lfValue = bool;
-            }
-            controlsContainer.appendChild(toggle);
-            state.elements.controls[control.id] = toggle;
-            break;
-          default:
-            throw new Error(`Unknown control type: ${controlName}`);
-        }
-      });
-    }
-  });
-  const buttonsWrapper = document.createElement(TagName.Div);
-  buttonsWrapper.classList.add(ImageEditorCSS.SettingsButtons);
-  settings.appendChild(buttonsWrapper);
-  const resetButton = document.createElement(TagName.LfButton);
-  resetButton.lfIcon = ImageEditorIcons.Reset;
-  resetButton.lfLabel = "Reset";
-  resetButton.lfStretchX = true;
-  resetButton.addEventListener("click", () => {
-    void (async () => {
-      await resetSettings(settings);
-      registerManualApplyChange(state);
-    })();
-  });
-  buttonsWrapper.appendChild(resetButton);
-  if (state.filterType === "brush") {
-    const brushSettings = state.filter.settings ?? {};
-    state.lastBrushSettings = {
-      ...state.lastBrushSettings,
-      ...JSON.parse(JSON.stringify(brushSettings))
-    };
-  }
-  if (filter == null ? void 0 : filter.hasCanvasAction) {
-    requestAnimationFrame(async () => {
-      const canvas = (await state.elements.imageviewer.getComponents()).details.canvas;
-      const brushSource = {
-        ...SETTINGS.brush.settings,
-        ...state.lastBrushSettings,
-        ...state.filter.settings ?? {}
-      };
-      if (brushSource.color) {
-        canvas.lfColor = brushSource.color;
-      }
-      if (typeof brushSource.opacity === "number") {
-        canvas.lfOpacity = brushSource.opacity;
-      }
-      if (typeof brushSource.size === "number") {
-        canvas.lfSize = brushSource.size;
-      }
-    });
-  }
-  if (filter == null ? void 0 : filter.requiresManualApply) {
-    const applyButton = document.createElement(TagName.LfButton);
-    applyButton.lfIcon = ImageEditorIcons.Resume;
-    applyButton.lfLabel = "Apply";
-    applyButton.lfStretchX = true;
-    initManualApplyState(state, applyButton);
-    applyButton.addEventListener("click", () => {
-      if (!state.manualApply || state.manualApply.isProcessing) {
-        return;
-      }
-      const hasPending = hasManualApplyPendingChanges(state);
-      if (!hasPending) {
-        return;
-      }
-      beginManualApplyRequest(state);
-      void updateCb(state, true, true);
-    });
-    buttonsWrapper.appendChild(applyButton);
-  }
-};
-const createSlider = (state, data) => {
-  const comp = document.createElement(TagName.LfSlider);
-  comp.lfLabel = parseLabel(data);
-  comp.lfLeadingLabel = true;
-  comp.lfMax = Number(data.max);
-  comp.lfMin = Number(data.min);
-  comp.lfStep = Number(data.step);
-  comp.lfStyle = ".form-field { width: 100%; }";
-  comp.lfValue = Number(data.defaultValue);
-  comp.title = data.title;
-  comp.addEventListener(LfEventName.LfSlider, (e2) => EV_HANDLERS$a.slider(state, e2));
-  return comp;
-};
-const createTextfield = (state, data) => {
-  const comp = document.createElement(TagName.LfTextfield);
-  comp.lfLabel = parseLabel(data);
-  comp.lfHtmlAttributes = { type: data.type };
-  comp.lfValue = String(data.defaultValue).valueOf();
-  comp.title = data.title;
-  comp.addEventListener(LfEventName.LfTextfield, (e2) => EV_HANDLERS$a.textfield(state, e2));
-  return comp;
-};
-const createToggle = (state, data) => {
-  const comp = document.createElement(TagName.LfToggle);
-  comp.dataset.off = data.off;
-  comp.dataset.on = data.on;
-  comp.lfLabel = parseLabel(data);
-  comp.lfValue = data.defaultValue ?? false;
-  comp.title = data.title;
-  comp.addEventListener(LfEventName.LfToggle, (e2) => EV_HANDLERS$a.toggle(state, e2));
-  return comp;
-};
-function getPathColumn(dataset) {
-  var _a;
-  return ((_a = dataset == null ? void 0 : dataset.columns) == null ? void 0 : _a.find((c2) => c2.id === ImageEditorColumnId.Path)) || null;
-}
-function getStatusColumn(dataset) {
-  var _a;
-  return ((_a = dataset == null ? void 0 : dataset.columns) == null ? void 0 : _a.find((c2) => c2.id === ImageEditorColumnId.Status)) || null;
-}
-function parseLabel(data) {
-  return data.isMandatory ? `${data.ariaLabel}*` : data.ariaLabel;
-}
-async function resetSettings(settings) {
-  const controls = Array.from(settings.querySelectorAll("[data-id]"));
-  for (const control of controls) {
-    switch (control.tagName) {
-      case "LF-SLIDER":
-        const slider = control;
-        await slider.setValue(slider.lfValue);
-        await slider.refresh();
-        break;
-      case "LF-TEXTFIELD":
-        const textfield = control;
-        await textfield.setValue(textfield.lfValue);
-        break;
-      case "LF-TOGGLE":
-        const toggle = control;
-        toggle.setValue(toggle.lfValue ? "on" : "off");
-        break;
-    }
-  }
-}
-function setGridStatus(status, grid, actionButtons) {
-  const { interrupt, resume } = actionButtons;
-  switch (status) {
-    case ImageEditorStatus.Completed:
-      requestAnimationFrame(() => {
-        if (interrupt) {
-          interrupt.lfUiState = "disabled";
-        }
-        if (resume) {
-          resume.lfUiState = "disabled";
-        }
-      });
-      grid == null ? void 0 : grid.classList.add(ImageEditorCSS.GridIsInactive);
-      break;
-    case ImageEditorStatus.Pending:
-      requestAnimationFrame(() => {
-        if (interrupt) {
-          interrupt.lfUiState = "danger";
-        }
-        if (resume) {
-          resume.lfUiState = "success";
-        }
-      });
-      grid == null ? void 0 : grid.classList.remove(ImageEditorCSS.GridIsInactive);
-      break;
-  }
-}
 const updateCb = async (state, addSnapshot = false, force = false) => {
   await refreshValues(state, addSnapshot);
   const { elements, filter } = state;
@@ -9003,6 +8517,517 @@ const updateCb = async (state, addSnapshot = false, force = false) => {
   }
   return success;
 };
+const createEventHandlers = ({ handleInterruptForState: handleInterruptForState2, prepSettings: prepSettings2 }) => {
+  const handlers = {
+    //#region Button
+    button: async (state, e2) => {
+      var _a;
+      const { comp, eventType } = e2.detail;
+      if (eventType === "click") {
+        const isPatched = ((_a = api) == null ? void 0 : _a[LFInterruptFlags.PatchedInterrupt]) === true;
+        switch (comp.lfIcon) {
+          case ImageEditorIcons.Interrupt:
+            getApiRoutes().comfy.interrupt();
+            if (!isPatched) {
+              await handleInterruptForState2(state);
+            }
+            break;
+          case ImageEditorIcons.Resume:
+            await handleInterruptForState2(state);
+            break;
+        }
+      }
+    },
+    //#endregion
+    //#region Canvas
+    canvas: async (state, e2) => {
+      const { comp, eventType, points } = e2.detail;
+      const { filter, filterType } = state;
+      switch (eventType) {
+        case "stroke":
+          const originalFilter = filter;
+          const originalFilterType = filterType;
+          const canvas = await comp.getCanvas();
+          const b64Canvas = canvasToBase64(canvas);
+          if (filterType !== "brush" && !(filter == null ? void 0 : filter.hasCanvasAction)) {
+            state.filterType = "brush";
+          }
+          const brushDefaults = {
+            ...SETTINGS.brush.settings,
+            ...state.lastBrushSettings
+          };
+          const temporaryFilter = {
+            ...JSON.parse(JSON.stringify(SETTINGS.brush)),
+            settings: {
+              ...brushDefaults,
+              b64_canvas: b64Canvas,
+              color: comp.lfColor ?? brushDefaults.color,
+              opacity: comp.lfOpacity ?? brushDefaults.opacity,
+              points,
+              size: comp.lfSize ?? brushDefaults.size
+            }
+          };
+          state.filter = temporaryFilter;
+          try {
+            await updateCb(state, true, true);
+          } finally {
+            if (originalFilter == null ? void 0 : originalFilter.hasCanvasAction) {
+              const existingSettings = originalFilter.settings ?? {};
+              originalFilter.settings = {
+                ...existingSettings,
+                b64_canvas: b64Canvas
+              };
+            }
+            state.filter = originalFilter;
+            state.filterType = originalFilterType;
+            await comp.clearCanvas();
+          }
+          break;
+      }
+    },
+    //#endregion
+    //#region Imageviewer
+    imageviewer: async (state, e2) => {
+      var _a;
+      const { comp, eventType, originalEvent } = e2.detail;
+      const { node } = state;
+      switch (eventType) {
+        case "lf-event": {
+          const ogEv = originalEvent;
+          switch (ogEv.detail.eventType) {
+            case "click":
+              if (isTree(ogEv.detail.comp)) {
+                const { node: node2 } = ogEv.detail;
+                if ((_a = node2.cells) == null ? void 0 : _a.lfCode) {
+                  prepSettings2(state, node2);
+                }
+              }
+              break;
+            case "stroke": {
+              const canvasEv = ogEv;
+              await handlers.canvas(state, canvasEv);
+              break;
+            }
+          }
+          break;
+        }
+        case "ready": {
+          const { navigation } = await comp.getComponents();
+          switch (node.comfyClass) {
+            case NodeName.imagesEditingBreakpoint:
+              navigation.load.lfLabel = "";
+              navigation.load.lfUiState = "disabled";
+              navigation.textfield.lfLabel = "Previews are visible in your ComfyUI/temp folder";
+              navigation.textfield.lfUiState = "disabled";
+              break;
+            default:
+              navigation.textfield.lfLabel = "Directory (relative to ComfyUI/input)";
+              break;
+          }
+          break;
+        }
+      }
+    },
+    //#endregion
+    //#region Slider
+    slider: async (state, e2) => {
+      const { eventType } = e2.detail;
+      const { update } = state;
+      const { preview, snapshot } = update;
+      switch (eventType) {
+        case "change":
+          registerManualApplyChange(state);
+          snapshot();
+          break;
+        case "input":
+          registerManualApplyChange(state);
+          const debouncedSlider = debounce(preview, 300);
+          debouncedSlider();
+          break;
+      }
+    },
+    //#endregion
+    //#region Textfield
+    textfield: async (state, e2) => {
+      const { eventType } = e2.detail;
+      const { update } = state;
+      const { preview, snapshot } = update;
+      switch (eventType) {
+        case "change":
+          registerManualApplyChange(state);
+          snapshot();
+          break;
+        case "input":
+          registerManualApplyChange(state);
+          const debouncedTextfield = debounce(preview, 300);
+          debouncedTextfield();
+          break;
+      }
+    },
+    //#endregion
+    //#region Toggle
+    toggle: async (state, e2) => {
+      const { eventType } = e2.detail;
+      const { update } = state;
+      const { snapshot } = update;
+      switch (eventType) {
+        case "change":
+          registerManualApplyChange(state);
+          snapshot();
+          break;
+      }
+    }
+    //#endregion
+  };
+  return handlers;
+};
+function getPathColumn(dataset) {
+  var _a;
+  return ((_a = dataset == null ? void 0 : dataset.columns) == null ? void 0 : _a.find((c2) => c2.id === ImageEditorColumnId.Path)) || null;
+}
+function getStatusColumn(dataset) {
+  var _a;
+  return ((_a = dataset == null ? void 0 : dataset.columns) == null ? void 0 : _a.find((c2) => c2.id === ImageEditorColumnId.Status)) || null;
+}
+function parseLabel(data) {
+  return data.isMandatory ? `${data.ariaLabel}*` : data.ariaLabel;
+}
+var LfEventName;
+(function(LfEventName2) {
+  LfEventName2["LfAccordion"] = "lf-accordion-event";
+  LfEventName2["LfArticle"] = "lf-article-event";
+  LfEventName2["LfButton"] = "lf-button-event";
+  LfEventName2["LfCanvas"] = "lf-canvas-event";
+  LfEventName2["LfCard"] = "lf-card-event";
+  LfEventName2["LfCarousel"] = "lf-carousel-event";
+  LfEventName2["LfChat"] = "lf-chat-event";
+  LfEventName2["LfChart"] = "lf-chart-event";
+  LfEventName2["LfChip"] = "lf-chip-event";
+  LfEventName2["LfCode"] = "lf-code-event";
+  LfEventName2["LfCompare"] = "lf-compare-event";
+  LfEventName2["LfImageviewer"] = "lf-imageviewer-event";
+  LfEventName2["LfList"] = "lf-list-event";
+  LfEventName2["LfManager"] = "lf-manager-ready";
+  LfEventName2["LfMasonry"] = "lf-masonry-event";
+  LfEventName2["LfMessenger"] = "lf-messenger-event";
+  LfEventName2["LfProgressbar"] = "lf-progressbar-event";
+  LfEventName2["LfSlider"] = "lf-slider-event";
+  LfEventName2["LfSpinner"] = "lf-spinner-event";
+  LfEventName2["LfTabbar"] = "lf-tabbar-event";
+  LfEventName2["LfTextfield"] = "lf-textfield-event";
+  LfEventName2["LfToggle"] = "lf-toggle-event";
+  LfEventName2["LfTree"] = "lf-tree-event";
+  LfEventName2["LfUpload"] = "lf-upload-event";
+  LfEventName2["Textarea"] = "textarea-event";
+})(LfEventName || (LfEventName = {}));
+const createPrepSettings = (deps) => {
+  const { onSlider, onTextfield, onToggle } = deps;
+  return (state, node) => {
+    var _a;
+    state.elements.controls = {};
+    state.filter = unescapeJson(node.cells.lfCode.value).parsedJson;
+    const idRaw = node.id || "brush";
+    const alias = idRaw === "inpaint_detail" || idRaw === "inpaint_adv" ? "inpaint" : idRaw;
+    state.filterType = alias;
+    state.manualApply = void 0;
+    const dataset = state.elements.imageviewer.lfDataset;
+    const defaults = (_a = dataset == null ? void 0 : dataset.defaults) == null ? void 0 : _a[state.filterType];
+    if (defaults) {
+      applyFilterDefaults(state, defaults);
+    }
+    state.settingsStore = state.settingsStore ?? {};
+    const stored = state.settingsStore[state.filterType] ?? {};
+    const mutableSettings = state.filter.settings;
+    Object.keys(stored).forEach((id) => {
+      const storedValue = stored[id];
+      if (typeof storedValue === "undefined") {
+        return;
+      }
+      mutableSettings[id] = storedValue;
+    });
+    const { elements, filter } = state;
+    const { settings } = elements;
+    settings.innerHTML = "";
+    const controlsContainer = document.createElement(TagName.Div);
+    controlsContainer.classList.add(ImageEditorCSS.SettingsControls);
+    settings.appendChild(controlsContainer);
+    const controlGroups = Object.keys(filter.configs);
+    controlGroups.forEach((controlType) => {
+      const configs = filter.configs[controlType];
+      if (!configs) {
+        return;
+      }
+      configs.forEach((config) => {
+        switch (controlType) {
+          case ImageEditorControls.Slider: {
+            const sliderConfig = config;
+            const slider = document.createElement(TagName.LfSlider);
+            slider.lfLabel = parseLabel(sliderConfig);
+            slider.lfLeadingLabel = true;
+            slider.lfMax = Number(sliderConfig.max);
+            slider.lfMin = Number(sliderConfig.min);
+            slider.lfStep = Number(sliderConfig.step);
+            slider.lfStyle = ".form-field { width: 100%; }";
+            slider.lfValue = Number(sliderConfig.defaultValue);
+            slider.title = sliderConfig.title;
+            slider.dataset.id = sliderConfig.id;
+            slider.addEventListener(LfEventName.LfSlider, (event) => onSlider(state, event));
+            const storedValue = stored[sliderConfig.id];
+            if (typeof storedValue !== "undefined") {
+              slider.lfValue = Number(storedValue);
+            }
+            controlsContainer.appendChild(slider);
+            state.elements.controls[sliderConfig.id] = slider;
+            break;
+          }
+          case ImageEditorControls.Textfield: {
+            const textfieldConfig = config;
+            const textfield = document.createElement(TagName.LfTextfield);
+            textfield.lfLabel = parseLabel(textfieldConfig);
+            textfield.lfHtmlAttributes = { type: textfieldConfig.type };
+            textfield.lfValue = String(textfieldConfig.defaultValue).valueOf();
+            textfield.title = textfieldConfig.title;
+            textfield.dataset.id = textfieldConfig.id;
+            textfield.addEventListener(LfEventName.LfTextfield, (event) => onTextfield(state, event));
+            const storedValue = stored[textfieldConfig.id];
+            if (typeof storedValue !== "undefined") {
+              textfield.lfValue = String(storedValue);
+            }
+            controlsContainer.appendChild(textfield);
+            state.elements.controls[textfieldConfig.id] = textfield;
+            break;
+          }
+          case ImageEditorControls.Toggle: {
+            const toggleConfig = config;
+            const toggle = document.createElement(TagName.LfToggle);
+            toggle.dataset.off = toggleConfig.off;
+            toggle.dataset.on = toggleConfig.on;
+            toggle.lfLabel = parseLabel(toggleConfig);
+            toggle.lfValue = toggleConfig.defaultValue ?? false;
+            toggle.title = toggleConfig.title;
+            toggle.dataset.id = toggleConfig.id;
+            toggle.addEventListener(LfEventName.LfToggle, (event) => onToggle(state, event));
+            const storedValue = stored[toggleConfig.id];
+            if (typeof storedValue !== "undefined") {
+              const boolValue = storedValue === true || typeof storedValue === "string" && storedValue.toLowerCase() === "true";
+              toggle.lfValue = boolValue;
+            }
+            controlsContainer.appendChild(toggle);
+            state.elements.controls[toggleConfig.id] = toggle;
+            break;
+          }
+          default:
+            throw new Error(`Unknown control type: ${controlType}`);
+        }
+      });
+    });
+    const buttonsWrapper = document.createElement(TagName.Div);
+    buttonsWrapper.classList.add(ImageEditorCSS.SettingsButtons);
+    settings.appendChild(buttonsWrapper);
+    const resetButton = document.createElement(TagName.LfButton);
+    resetButton.lfIcon = ImageEditorIcons.Reset;
+    resetButton.lfLabel = "Reset";
+    resetButton.lfStretchX = true;
+    resetButton.addEventListener("click", () => {
+      void (async () => {
+        await resetSettings(settings);
+        registerManualApplyChange(state);
+      })();
+    });
+    buttonsWrapper.appendChild(resetButton);
+    if (state.filterType === "brush") {
+      const brushSettings = state.filter.settings ?? {};
+      state.lastBrushSettings = {
+        ...state.lastBrushSettings,
+        ...JSON.parse(JSON.stringify(brushSettings))
+      };
+    }
+    if (filter == null ? void 0 : filter.hasCanvasAction) {
+      requestAnimationFrame(async () => {
+        const canvas = (await state.elements.imageviewer.getComponents()).details.canvas;
+        const brushSource = {
+          ...SETTINGS.brush.settings,
+          ...state.lastBrushSettings,
+          ...state.filter.settings ?? {}
+        };
+        if (brushSource.color) {
+          canvas.lfColor = brushSource.color;
+        }
+        if (typeof brushSource.opacity === "number") {
+          canvas.lfOpacity = brushSource.opacity;
+        }
+        if (typeof brushSource.size === "number") {
+          canvas.lfSize = brushSource.size;
+        }
+      });
+    }
+    if (filter == null ? void 0 : filter.requiresManualApply) {
+      const applyButton = document.createElement(TagName.LfButton);
+      applyButton.lfIcon = ImageEditorIcons.Resume;
+      applyButton.lfLabel = "Apply";
+      applyButton.lfStretchX = true;
+      initManualApplyState(state, applyButton);
+      applyButton.addEventListener("click", () => {
+        if (!state.manualApply || state.manualApply.isProcessing) {
+          return;
+        }
+        const hasPending = hasManualApplyPendingChanges(state);
+        if (!hasPending) {
+          return;
+        }
+        beginManualApplyRequest(state);
+        void updateCb(state, true, true);
+      });
+      buttonsWrapper.appendChild(applyButton);
+    }
+  };
+};
+async function resetSettings(settings) {
+  const controls = Array.from(settings.querySelectorAll("[data-id]"));
+  for (const control of controls) {
+    switch (control.tagName) {
+      case "LF-SLIDER": {
+        const slider = control;
+        await slider.setValue(slider.lfValue);
+        await slider.refresh();
+        break;
+      }
+      case "LF-TEXTFIELD": {
+        const textfield = control;
+        await textfield.setValue(textfield.lfValue);
+        break;
+      }
+      case "LF-TOGGLE": {
+        const toggle = control;
+        toggle.setValue(toggle.lfValue ? "on" : "off");
+        break;
+      }
+    }
+  }
+}
+const applyFilterDefaults = (state, defaults) => {
+  const { filter } = state;
+  if (!filter) {
+    return;
+  }
+  const mutableSettings = filter.settings;
+  Object.keys(filter.configs).forEach((controlType) => {
+    const configs = filter.configs[controlType];
+    configs == null ? void 0 : configs.forEach((config) => {
+      const defaultValue = defaults[config.id];
+      if (typeof defaultValue === "undefined") {
+        return;
+      }
+      switch (controlType) {
+        case ImageEditorControls.Slider: {
+          const sliderConfig = config;
+          const numericValue = typeof defaultValue === "number" ? defaultValue : Number(defaultValue);
+          sliderConfig.defaultValue = numericValue;
+          mutableSettings[sliderConfig.id] = numericValue;
+          break;
+        }
+        case ImageEditorControls.Textfield: {
+          const textfieldConfig = config;
+          const stringValue = defaultValue === null || typeof defaultValue === "undefined" ? "" : String(defaultValue);
+          textfieldConfig.defaultValue = stringValue;
+          mutableSettings[textfieldConfig.id] = stringValue;
+          break;
+        }
+        case ImageEditorControls.Toggle: {
+          const toggleConfig = config;
+          const boolValue = defaultValue === true || typeof defaultValue === "string" && defaultValue.toLowerCase() === "true";
+          toggleConfig.defaultValue = boolValue;
+          mutableSettings[toggleConfig.id] = boolValue ? toggleConfig.on : toggleConfig.off;
+          break;
+        }
+      }
+    });
+  });
+};
+function setGridStatus(status, grid, actionButtons) {
+  const { interrupt, resume } = actionButtons;
+  switch (status) {
+    case ImageEditorStatus.Completed:
+      requestAnimationFrame(() => {
+        if (interrupt) {
+          interrupt.lfUiState = "disabled";
+        }
+        if (resume) {
+          resume.lfUiState = "disabled";
+        }
+      });
+      grid == null ? void 0 : grid.classList.add(ImageEditorCSS.GridIsInactive);
+      break;
+    case ImageEditorStatus.Pending:
+      requestAnimationFrame(() => {
+        if (interrupt) {
+          interrupt.lfUiState = "danger";
+        }
+        if (resume) {
+          resume.lfUiState = "success";
+        }
+      });
+      grid == null ? void 0 : grid.classList.remove(ImageEditorCSS.GridIsInactive);
+      break;
+  }
+}
+const handleInterruptForState = async (state) => {
+  var _a, _b;
+  const lfManager2 = getLfManager();
+  const { actionButtons, grid, imageviewer } = state.elements;
+  const dataset = imageviewer.lfDataset;
+  const statusColumn = getStatusColumn(dataset);
+  const pathColumn = getPathColumn(dataset);
+  const parsedPath = pathColumn ? unescapeJson(pathColumn).parsedJson : void 0;
+  const path = typeof (parsedPath == null ? void 0 : parsedPath.title) === "string" ? parsedPath.title : null;
+  if ((statusColumn == null ? void 0 : statusColumn.title) === ImageEditorStatus.Pending) {
+    statusColumn.title = ImageEditorStatus.Completed;
+    if (dataset && path) {
+      try {
+        await getApiRoutes().json.update(path, dataset);
+      } catch (error) {
+        lfManager2.log("Failed to update JSON after workflow interrupt.", { error, path }, LogSeverity.Warning);
+      }
+    }
+    if ((actionButtons == null ? void 0 : actionButtons.interrupt) && (actionButtons == null ? void 0 : actionButtons.resume)) {
+      setGridStatus(ImageEditorStatus.Completed, grid, actionButtons);
+    } else {
+      grid == null ? void 0 : grid.classList.add(ImageEditorCSS.GridIsInactive);
+    }
+    try {
+      const components = await imageviewer.getComponents();
+      const navigation = components == null ? void 0 : components.navigation;
+      await imageviewer.reset();
+      await ((_b = (_a = navigation == null ? void 0 : navigation.masonry) == null ? void 0 : _a.setSelectedShape) == null ? void 0 : _b.call(_a, null));
+    } catch (error) {
+      lfManager2.log("Failed to reset image viewer after workflow interrupt.", { error }, LogSeverity.Warning);
+    }
+  }
+  await resetSettings(imageviewer);
+};
+const handlerRefs = {
+  slider: async () => {
+    throw new Error("Image editor slider handler not initialized.");
+  },
+  textfield: async () => {
+    throw new Error("Image editor textfield handler not initialized.");
+  },
+  toggle: async () => {
+    throw new Error("Image editor toggle handler not initialized.");
+  }
+};
+const prepSettings = createPrepSettings({
+  onSlider: (state, event) => handlerRefs.slider(state, event),
+  onTextfield: (state, event) => handlerRefs.textfield(state, event),
+  onToggle: (state, event) => handlerRefs.toggle(state, event)
+});
+const EV_HANDLERS$a = createEventHandlers({
+  handleInterruptForState,
+  prepSettings
+});
+handlerRefs.slider = EV_HANDLERS$a.slider;
+handlerRefs.textfield = EV_HANDLERS$a.textfield;
+handlerRefs.toggle = EV_HANDLERS$a.toggle;
 const STATE$h = /* @__PURE__ */ new WeakMap();
 const IMAGE_EDITOR_INSTANCES = /* @__PURE__ */ new Set();
 const imageEditorFactory = {
