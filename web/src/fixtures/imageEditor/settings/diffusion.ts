@@ -22,7 +22,7 @@ export const DIFFUSION_SETTINGS: Pick<ImageEditorFilters, 'inpaint'> = {
       positive_prompt: '',
       negative_prompt: '',
       upsample_target: 1024,
-      use_conditioning: false,
+      use_conditioning: true,
     },
     configs: {
       [ImageEditorControls.Textfield]: [
@@ -49,7 +49,7 @@ export const DIFFUSION_SETTINGS: Pick<ImageEditorFilters, 'inpaint'> = {
         {
           ariaLabel: 'Use conditioning prompts',
           controlType: ImageEditorControls.Toggle,
-          defaultValue: false,
+          defaultValue: true,
           id: ImageEditorToggleIds.UseConditioning,
           isMandatory: false,
           off: 'false',

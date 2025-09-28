@@ -13,13 +13,13 @@ export const DRAWING_SETTINGS: Pick<ImageEditorFilters, 'brush' | 'line'> = {
   brush: {
     controlIds: ImageEditorBrushIds,
     hasCanvasAction: true,
-    settings: { b64_canvas: '', color: '#FF0000', opacity: 1, size: 10 },
+    settings: { b64_canvas: '', color: '#FF0000', opacity: 1, size: 50 },
     configs: {
       [ImageEditorControls.Slider]: [
         {
           ariaLabel: 'Size',
           controlType: ImageEditorControls.Slider,
-          defaultValue: 10,
+          defaultValue: 50,
           id: ImageEditorSliderIds.Size,
           isMandatory: true,
           max: '500',
