@@ -40,6 +40,13 @@ class LF_Clarity:
                 }),
             },
             "optional": {
+                "clarity_amount": (Input.FLOAT, {
+                    "default": 0.0,
+                    "min": -1.0,
+                    "max": 1.0,
+                    "step": 0.05,
+                    "tooltip": "Lightroom-style clarity slider. Negative values soften, positive values enhance local contrast. Overrides advanced parameters when set.",
+                }),
                 "ui_widget": (Input.LF_COMPARE, {
                     "default": {}
                 })
@@ -60,6 +67,20 @@ class LF_Clarity:
         clarity_strength: float = normalize_list_to_value(kwargs.get("clarity_strength"))
         sharpen_amount: float = normalize_list_to_value(kwargs.get("sharpen_amount"))
         blur_kernel_size: int = normalize_list_to_value(kwargs.get("blur_kernel_size"))
+
+        simple_amount = kwargs.get("clarity_amount")
+        clarity_amount = normalize_list_to_value(simple_amount) if simple_amount is not None else None
+
+        if clarity_amount is not None:
+            amount = float(max(-1.0, min(1.0, clarity_amount)))
+
+            clarity_strength = -amount * 4.0
+            sharpen_amount = max(0.0, amount) * 0.75
+
+            kernel_base = 5 + int(abs(amount) * 6)
+            if kernel_base % 2 == 0:
+                kernel_base += 1
+            blur_kernel_size = max(3, kernel_base)
 
         nodes: list[dict] = []
         dataset: dict = {"nodes": nodes}

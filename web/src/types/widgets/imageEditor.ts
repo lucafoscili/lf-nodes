@@ -132,6 +132,7 @@ export enum ImageEditorSliderIds {
   BlueChannel = 'b_channel',
   BlurKernelSize = 'blur_kernel_size',
   BlurSigma = 'blur_sigma',
+  ClarityAmount = 'clarity_amount',
   DenoisePercentage = 'denoise_percentage',
   Cfg = 'cfg',
   Dilate = 'dilate',
@@ -291,9 +292,7 @@ export interface ImageEditorBrushSettings extends ImageEditorFilterSettings {
   size: number;
 }
 export interface ImageEditorClaritySettings extends ImageEditorFilterSettings {
-  strength: number;
-  sharpen_amount: number;
-  blur_kernel_size: number;
+  clarity_amount: number;
 }
 export interface ImageEditorContrastSettings extends ImageEditorFilterSettings {
   strength: number;
@@ -403,9 +402,7 @@ export enum ImageEditorBrushIds {
   Size = 'size',
 }
 export enum ImageEditorClarityIds {
-  BlurKernelSize = 'blur_kernel_size',
-  Strength = 'strength',
-  SharpenAmount = 'sharpen_amount',
+  Amount = 'clarity_amount',
 }
 export enum ImageEditorContrastIds {
   Strength = 'strength',

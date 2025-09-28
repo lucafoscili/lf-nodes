@@ -224,7 +224,7 @@ def merge_channels(channels: tuple, color_space: str = 'RGB') -> np.ndarray:
         return cv2.merge(channels)
     elif color_space == 'LAB':
         merged_lab = cv2.merge(channels)
-        return cv2.cvtColor(merged_lab, cv2.COLOR_LAB2BGR)
+        return cv2.cvtColor(merged_lab, cv2.COLOR_LAB2RGB)
     else:
         raise ValueError(f"Unsupported color space: {color_space}")
 # endregion
@@ -244,7 +244,7 @@ def split_channels(image: np.ndarray, color_space: str = 'RGB') -> tuple:
     if color_space == 'RGB':
         return cv2.split(image)
     elif color_space == 'LAB':
-        lab_image = cv2.cvtColor(image, cv2.COLOR_BGR2LAB)
+        lab_image = cv2.cvtColor(image, cv2.COLOR_RGB2LAB)
         return cv2.split(lab_image)
     else:
         raise ValueError(f"Unsupported color space: {color_space}")

@@ -59,7 +59,7 @@ def _as_result(image: torch.Tensor) -> FilterResult:
 def apply_background_remover_filter(image: torch.Tensor, settings: dict) -> FilterResult:
     """
     Applies a background remover filter to the given image tensor using specified settings.
-    
+
     Args:
         image (torch.Tensor): The input image tensor to process.
         settings (dict): A dictionary of settings for the background remover filter. Supported keys:
@@ -186,16 +186,37 @@ def apply_clarity_filter(image: torch.Tensor, settings: dict) -> FilterResult:
     Args:
         image (torch.Tensor): The input image tensor to be processed.
         settings (dict): A dictionary containing filter parameters:
-            - "clarity_strength" (float, optional): Strength of the clarity effect. Defaults to 0.0.
-            - "sharpen_amount" (float, optional): Amount of sharpening to apply. Defaults to 0.0.
-            - "blur_kernel_size" (int, optional): Size of the blur kernel. Defaults to 1.
+                        - "clarity_amount" (float, optional): Lightroom-style clarity slider in the range [-1, 1].
+                            When provided, overrides the advanced parameters below.
+                        - "clarity_strength" (float, optional): Strength of the clarity effect. Defaults to 0.0.
+                        - "sharpen_amount" (float, optional): Amount of sharpening to apply. Defaults to 0.0.
+                        - "blur_kernel_size" (int, optional): Size of the blur kernel. Defaults to 1.
 
     Returns:
         FilterResult: The result of applying the clarity filter to the image.
     """
-    clarity_strength = convert_to_float(settings.get("clarity_strength", 0.0))
+    clarity_amount_raw = settings.get("clarity_amount")
+    clarity_amount = (
+        convert_to_float(clarity_amount_raw) if clarity_amount_raw is not None else None
+    )
+
+    clarity_strength = convert_to_float(
+        settings.get("clarity_strength", settings.get("strength", 0.0))
+    )
     sharpen_amount = convert_to_float(settings.get("sharpen_amount", 0.0))
-    blur_kernel_size = convert_to_int(settings.get("blur_kernel_size", 1))
+    blur_kernel_size = convert_to_int(settings.get("blur_kernel_size", 7))
+
+    if clarity_amount is not None:
+        amount = float(max(-1.0, min(1.0, clarity_amount)))
+
+        clarity_strength = -amount * 4.0
+        sharpen_amount = max(0.0, amount) * 0.75
+
+        kernel_base = 5 + int(abs(amount) * 6)
+        if kernel_base % 2 == 0:
+            kernel_base += 1
+        blur_kernel_size = max(3, kernel_base)
+
     return _as_result(clarity_effect(image, clarity_strength, sharpen_amount, blur_kernel_size))
 # endregion
 
