@@ -5423,7 +5423,7 @@ var tt = false, et = (t2, e2, n2) => {
                         const n6 = t7.i.replace(/-/g, "_"), o6 = t7.T;
                         if (!o6) return;
                         const i3 = r.get(o6);
-                        return i3 ? i3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-4ba08932.entry.js": () => import("./p-4ba08932.entry-BSTOS13A.js"), "./p-60af2d7f.entry.js": () => import("./p-60af2d7f.entry-CRu9p30B.js"), "./p-746a8577.entry.js": () => import("./p-746a8577.entry-BdUHhkuW.js"), "./p-7652d72d.entry.js": () => import("./p-7652d72d.entry-NUBm3yt5.js"), "./p-79cc15c2.entry.js": () => import("./p-79cc15c2.entry-DZjAT_kC.js"), "./p-846257eb.entry.js": () => import("./p-846257eb.entry-CKymFubc.js"), "./p-84927cea.entry.js": () => import("./p-84927cea.entry-CHI4oqNr.js"), "./p-928c4970.entry.js": () => import("./p-928c4970.entry-C3iMj7oC.js"), "./p-a147e6c9.entry.js": () => import("./p-a147e6c9.entry-CDh9toS0.js"), "./p-a14c6d82.entry.js": () => import("./p-a14c6d82.entry-Bow-yUZc.js"), "./p-a7fc1135.entry.js": () => import("./p-a7fc1135.entry-Cs_CAYJW.js"), "./p-bd214b33.entry.js": () => import("./p-bd214b33.entry-D9KKDESZ.js"), "./p-bf8a47d4.entry.js": () => import("./p-bf8a47d4.entry-C3WIrsS7.js"), "./p-ccea11a0.entry.js": () => import("./p-ccea11a0.entry-Hhy-ZV8I.js"), "./p-dbe042fd.entry.js": () => import("./p-dbe042fd.entry-DsTTlUMX.js"), "./p-e2689624.entry.js": () => import("./p-e2689624.entry-885TZE3t.js") }), `./${o6}.entry.js`, 2).then(((t8) => (r.set(o6, t8), t8[n6])), ((t8) => {
+                        return i3 ? i3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-4ba08932.entry.js": () => import("./p-4ba08932.entry-jL9unx-e.js"), "./p-60af2d7f.entry.js": () => import("./p-60af2d7f.entry-D0LFV_32.js"), "./p-746a8577.entry.js": () => import("./p-746a8577.entry-CX58FrGx.js"), "./p-7652d72d.entry.js": () => import("./p-7652d72d.entry-BdoxLzKD.js"), "./p-79cc15c2.entry.js": () => import("./p-79cc15c2.entry-ChOh5JDm.js"), "./p-846257eb.entry.js": () => import("./p-846257eb.entry-CLq221_N.js"), "./p-84927cea.entry.js": () => import("./p-84927cea.entry-D2-mW8bs.js"), "./p-928c4970.entry.js": () => import("./p-928c4970.entry-ClIQDFA_.js"), "./p-a147e6c9.entry.js": () => import("./p-a147e6c9.entry-DD1tOm_X.js"), "./p-a14c6d82.entry.js": () => import("./p-a14c6d82.entry-Q87YrEQt.js"), "./p-a7fc1135.entry.js": () => import("./p-a7fc1135.entry-D6f4pV3b.js"), "./p-bd214b33.entry.js": () => import("./p-bd214b33.entry-CGOAK6mz.js"), "./p-bf8a47d4.entry.js": () => import("./p-bf8a47d4.entry-rqwwOX7k.js"), "./p-ccea11a0.entry.js": () => import("./p-ccea11a0.entry-CqPvDF9r.js"), "./p-dbe042fd.entry.js": () => import("./p-dbe042fd.entry-XegYy1gj.js"), "./p-e2689624.entry.js": () => import("./p-e2689624.entry-BucCXUqP.js") }), `./${o6}.entry.js`, 2).then(((t8) => (r.set(o6, t8), t8[n6])), ((t8) => {
                           l(t8, e3.$hostElement$);
                         }));
                         /*!__STENCIL_STATIC_IMPORT_SWITCH__*/
@@ -6895,6 +6895,7 @@ var ImageEditorSliderIds;
   ImageEditorSliderIds2["BlueChannel"] = "b_channel";
   ImageEditorSliderIds2["BlurKernelSize"] = "blur_kernel_size";
   ImageEditorSliderIds2["BlurSigma"] = "blur_sigma";
+  ImageEditorSliderIds2["ClarityAmount"] = "clarity_amount";
   ImageEditorSliderIds2["DenoisePercentage"] = "denoise_percentage";
   ImageEditorSliderIds2["Cfg"] = "cfg";
   ImageEditorSliderIds2["Dilate"] = "dilate";
@@ -6976,9 +6977,7 @@ var ImageEditorBrushIds;
 })(ImageEditorBrushIds || (ImageEditorBrushIds = {}));
 var ImageEditorClarityIds;
 (function(ImageEditorClarityIds2) {
-  ImageEditorClarityIds2["BlurKernelSize"] = "blur_kernel_size";
-  ImageEditorClarityIds2["Strength"] = "strength";
-  ImageEditorClarityIds2["SharpenAmount"] = "sharpen_amount";
+  ImageEditorClarityIds2["Amount"] = "clarity_amount";
 })(ImageEditorClarityIds || (ImageEditorClarityIds = {}));
 var ImageEditorContrastIds;
 (function(ImageEditorContrastIds2) {
@@ -7171,42 +7170,20 @@ const BASIC_ADJUSTMENT_SETTINGS = {
   clarity: {
     controlIds: ImageEditorClarityIds,
     settings: {
-      strength: 0,
-      sharpen_amount: 0,
-      blur_kernel_size: 1
+      clarity_amount: 0
     },
     configs: {
       [ImageEditorControls.Slider]: [
         {
-          ariaLabel: "Clarity Strength",
+          ariaLabel: "Clarity Amount",
           controlType: ImageEditorControls.Slider,
           defaultValue: 0,
-          id: ImageEditorSliderIds.Strength,
+          id: ImageEditorSliderIds.ClarityAmount,
           isMandatory: true,
-          max: "5",
-          min: "0",
-          step: "0.1",
-          title: "Controls the amount of contrast enhancement in midtones."
-        },
-        {
-          ariaLabel: "Sharpen Amount",
-          controlType: ImageEditorControls.Slider,
-          defaultValue: 0,
-          id: ImageEditorSliderIds.SharpenAmount,
-          max: "5",
-          min: "0",
-          step: "0.1",
-          title: "Controls how much sharpening is applied to the image."
-        },
-        {
-          ariaLabel: "Blur Kernel Size",
-          controlType: ImageEditorControls.Slider,
-          defaultValue: 7,
-          id: ImageEditorSliderIds.BlurKernelSize,
-          max: "15",
-          min: "1",
-          step: "2",
-          title: "Controls the size of the Gaussian blur kernel. Higher values mean more smoothing."
+          max: "1",
+          min: "-1",
+          step: "0.05",
+          title: "Lightroom-style clarity. Negative values soften details, positive values boost local contrast."
         }
       ]
     }
