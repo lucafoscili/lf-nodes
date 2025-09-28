@@ -1,6 +1,5 @@
-import re
 import time
-from typing import List, Optional
+from typing import List
 
 from PIL import Image, ImageDraw, ImageFont
 
@@ -22,7 +21,7 @@ from ...utils.helpers.torch import TilePlan, make_blend_mask, plan_input_tiles
 from ...utils.helpers.api import get_resource_url
 from ...utils.helpers.comfy import resolve_filepath
 from ...utils.helpers.conversion import tensor_to_pil
-from ...utils.helpers.ui import create_compare_node
+from ...utils.helpers.ui import ComparePreviewStream
 
 # region LF_TiledSuperRes
 class LF_TiledSuperRes:
@@ -165,43 +164,70 @@ class LF_TiledSuperRes:
             )
             weights = torch.zeros_like(canvas)
 
-            preview_destination = self._prepare_preview_destination(node_id, index, image)
-            compare_node: Optional[dict] = None
+            preview_stream = ComparePreviewStream(
+                node_id=node_id,
+                index=index,
+                input_image=image,
+                dataset=dataset,
+                compare_nodes=compare_nodes,
+                event=f"{EVENT_PREFIX}tiledsuperres",
+                input_target_size=(h, w),
+                filename_prefix="tiled_super_res",
+            )
 
-            for spec in plan.tiles:
+            for tile_idx, spec in enumerate(plan.tiles):
                 patch = image[:, spec.y0:spec.y1, spec.x0:spec.x1, :]
                 patch_chw = patch.permute(0, 3, 1, 2).to(device)
+                self._log_tensor_stats(f"tile_input[{index}:{tile_idx}]", patch_chw)
+
                 with torch.autocast(device.type, enabled=device.type == "cuda"):
                     upscaled = upscale_model(patch_chw)
+                self._log_tensor_stats(f"tile_raw[{index}:{tile_idx}]", upscaled)
+
+                if torch.isnan(upscaled).any() or torch.isinf(upscaled).any():
+                    print(f"[TiledSuperRes] tile[{index}:{tile_idx}] NaNs detected, retrying in float32")
+                    patch_fp32 = patch_chw.to(dtype=torch.float32)
+                    with torch.autocast(device.type, enabled=False):
+                        upscaled_retry = upscale_model(patch_fp32)
+                    self._log_tensor_stats(f"tile_retry[{index}:{tile_idx}]", upscaled_retry)
+
+                    if torch.isnan(upscaled_retry).any() or torch.isinf(upscaled_retry).any():
+                        print(f"[TiledSuperRes] tile[{index}:{tile_idx}] still invalid after retry; falling back to input tile")
+                        upscaled = patch_fp32
+                    else:
+                        upscaled = upscaled_retry
+
+                upscaled = torch.nan_to_num(upscaled, nan=0.0, posinf=1.0, neginf=0.0)
+                if torch.is_floating_point(upscaled):
+                    min_val = float(upscaled.amin().item())
+                    max_val = float(upscaled.amax().item())
+
+                    is_bipolar = min_val < -0.01 and max_val <= 1.05
+                    is_near_zero = max_val <= 0.01
+
+                    if is_bipolar:
+                        upscaled = (upscaled + 1.0) * 0.5
+                    elif is_near_zero and min_val < 0.0:
+                        upscaled = torch.sigmoid(upscaled)
+
                 upscaled = upscaled.clamp(0.0, 1.0)
+                self._log_tensor_stats(f"tile_clamped[{index}:{tile_idx}]", upscaled)
                 tile = upscaled.permute(0, 2, 3, 1).detach().to(device=device, dtype=canvas.dtype)
 
                 self._accumulate_tile(canvas, weights, tile, spec, scale)
 
                 preview_tensor = self._compose_from_accumulator(canvas, weights)
-                preview_url = self._save_preview_image(
+                self._log_tensor_stats(f"preview_accum[{index}:{tile_idx}]", preview_tensor)
+                preview_url = preview_stream.save_preview(
                     preview_tensor,
-                    preview_destination,
                     target_size=(target_h, target_w),
                 )
-
-                if compare_node is None:
-                    compare_node = create_compare_node(preview_url, preview_url, index)
-                    compare_nodes.append(compare_node)
-                else:
-                    cells = compare_node["cells"]
-                    cells["lfImage"]["lfValue"] = preview_url
-                    cells["lfImage_after"]["lfValue"] = preview_url
-
-                PromptServer.instance.send_sync(
-                    f"{EVENT_PREFIX}tiledsuperres",
-                    {
-                        "node": node_id,
-                        "dataset": dataset,
-                    },
-                )
+                preview_stream.update_compare(preview_url)
+                preview_stream.emit()
 
             blended = self._compose_from_accumulator(canvas, weights)
+            blended = torch.nan_to_num(blended, nan=0.0, posinf=1.0, neginf=0.0)
+            self._log_tensor_stats(f"blended[{index}]", blended)
 
             if blended.shape[1] != target_h or blended.shape[2] != target_w:
                 blended = F.interpolate(
@@ -240,11 +266,11 @@ class LF_TiledSuperRes:
 
             blended = blended.clamp(0.0, 1.0)
             blended_cpu = blended.to(image.dtype).cpu()
+            self._log_tensor_stats(f"blended_cpu[{index}]", blended_cpu)
             upscaled_images.append(blended_cpu)
 
-            final_preview_url = self._save_preview_image(
+            preview_stream.save_preview(
                 blended_cpu,
-                preview_destination,
                 target_size=(target_h, target_w),
             )
 
@@ -255,31 +281,8 @@ class LF_TiledSuperRes:
                 base_height=h,
             )
 
-            if compare_node is None:
-                compare_node = create_compare_node(
-                    final_preview_url,
-                    clean_url,
-                    index,
-                    debug=debug_url,
-                )
-                compare_nodes.append(compare_node)
-            else:
-                cells = compare_node["cells"]
-                cells["lfImage"]["lfValue"] = final_preview_url
-                cells["lfImage_after"]["lfValue"] = clean_url
-                cells["lfImage_debug"] = {
-                    "shape": "image",
-                    "lfValue": debug_url,
-                    "value": "",
-                }
-
-            PromptServer.instance.send_sync(
-                f"{EVENT_PREFIX}tiledsuperres",
-                {
-                    "node": node_id,
-                    "dataset": dataset,
-                },
-            )
+            preview_stream.update_compare(clean_url, debug_url=debug_url)
+            preview_stream.emit()
 
             elapsed = time.perf_counter() - start
             stats_rows.append({
@@ -307,36 +310,6 @@ class LF_TiledSuperRes:
 
         return batch_list[0], image_list, {"runs": stats_rows}
 
-    def _prepare_preview_destination(
-        self,
-        node_id: Optional[str],
-        index: int,
-        image: torch.Tensor,
-    ) -> dict:
-        """
-        Prepares the destination information for saving a preview image.
-
-        Args:
-            node_id (Optional[str]): Identifier for the node. If None, defaults to "node".
-            index (int): Index of the image in the sequence.
-            image (torch.Tensor): The image tensor to be saved.
-
-        Returns:
-            dict: A dictionary containing the output file path ('file'), subfolder ('subfolder'), and filename ('filename') for the preview image.
-        """
-        safe_node = re.sub(r"[^0-9A-Za-z_-]", "_", str(node_id) if node_id else "node")
-        prefix = f"tiled_super_res_preview_{safe_node}_{index + 1}"
-        output_file, subfolder, filename = resolve_filepath(
-            filename_prefix=prefix,
-            image=image,
-            add_counter=False,
-        )
-        return {
-            "file": output_file,
-            "subfolder": subfolder,
-            "filename": filename,
-        }
-
     @staticmethod
     def _compose_from_accumulator(canvas: torch.Tensor, weights: torch.Tensor) -> torch.Tensor:
         """
@@ -353,7 +326,8 @@ class LF_TiledSuperRes:
             torch.Tensor: The composed image tensor after normalization by weights.
         """
         weights_clamped = torch.clamp(weights, min=1e-6)
-        return canvas / weights_clamped
+        composed = canvas / weights_clamped
+        return torch.nan_to_num(composed, nan=0.0, posinf=1.0, neginf=0.0)
 
     @staticmethod
     def _accumulate_tile(
@@ -416,65 +390,32 @@ class LF_TiledSuperRes:
         canvas[..., y0:y1, x0:x1, :] += tile * mask
         weights[..., y0:y1, x0:x1, :] += mask
 
-    def _save_preview_image(
-        self,
-        tensor: torch.Tensor,
-        destination: dict,
-        *,
-        target_size: tuple[int, int],
-    ) -> str:
-        """
-        Saves a preview image from a given tensor to a specified destination.
+    @staticmethod
+    def _log_tensor_stats(label: str, tensor: torch.Tensor) -> None:
+        try:
+            with torch.no_grad():
+                data = tensor.detach()
+                shape = tuple(data.shape)
+                if data.numel() == 0:
+                    print(f"[TiledSuperRes] {label}: empty tensor")
+                    return
 
-        Args:
-            tensor (torch.Tensor): The input image tensor. Expected shape is (C, H, W) or (B, C, H, W).
-            destination (dict): Dictionary containing file saving information. Must include keys "file", "subfolder", and "filename".
-            target_size (tuple[int, int]): Desired output image size as (height, width). If both are greater than 0, the image is resized.
+                if not torch.is_floating_point(data):
+                    data = data.to(torch.float32)
 
-        Returns:
-            str: URL to the saved preview image resource.
+                stats_tensor = data.to(torch.float32)
+                min_val = float(stats_tensor.min().item())
+                max_val = float(stats_tensor.max().item())
+                mean_val = float(stats_tensor.mean().item())
+                has_nan = bool(torch.isnan(stats_tensor).any().item())
+                has_inf = bool(torch.isinf(stats_tensor).any().item())
 
-        Notes:
-            - The image is clamped to [0.0, 1.0] and converted to CPU.
-            - If the longest edge exceeds 512 pixels, the image is downscaled to fit within 512 pixels.
-            - The image is saved in PNG format.
-        """
-        if tensor.dim() == 3:
-            tensor = tensor.unsqueeze(0)
-
-        preview = tensor.detach().to(torch.float32)
-
-        target_h, target_w = target_size
-        if target_h > 0 and target_w > 0:
-            if preview.shape[1] != target_h or preview.shape[2] != target_w:
-                preview = F.interpolate(
-                    preview.permute(0, 3, 1, 2),
-                    size=(target_h, target_w),
-                    mode="bicubic",
-                    align_corners=False,
-                    antialias=True,
-                ).permute(0, 2, 3, 1)
-
-        preview = preview.clamp(0.0, 1.0).to("cpu")
-
-        _, height, width, _ = preview.shape
-        long_edge = max(height, width)
-        if long_edge > 512:
-            scale_factor = 512 / long_edge
-            new_h = max(1, int(round(height * scale_factor)))
-            new_w = max(1, int(round(width * scale_factor)))
-            preview = F.interpolate(
-                preview.permute(0, 3, 1, 2),
-                size=(new_h, new_w),
-                mode="bicubic",
-                align_corners=False,
-                antialias=True,
-            ).permute(0, 2, 3, 1)
-
-        preview_pil = tensor_to_pil(preview)
-        preview_pil.save(destination["file"], format="PNG")
-
-        return get_resource_url(destination["subfolder"], destination["filename"], "temp")
+                print(
+                    f"[TiledSuperRes] {label}: shape={shape} min={min_val:.6f} "
+                    f"max={max_val:.6f} mean={mean_val:.6f} nan={has_nan} inf={has_inf}"
+                )
+        except Exception as exc:
+            print(f"[TiledSuperRes] {label}: failed to compute stats -> {exc}")
 
     def _save_compare_images(
         self,
@@ -496,6 +437,7 @@ class LF_TiledSuperRes:
         Returns:
             tuple[str, str]: A tuple containing the URLs for the clean image and the debug image.
         """
+        image = torch.nan_to_num(image, nan=0.0, posinf=1.0, neginf=0.0)
         clean_pil = tensor_to_pil(image)
         debug_image = self._render_tile_overlay(
             clean_pil.copy(),
