@@ -5423,7 +5423,7 @@ var tt = false, et = (t2, e2, n2) => {
                         const n6 = t7.i.replace(/-/g, "_"), o6 = t7.T;
                         if (!o6) return;
                         const i3 = r.get(o6);
-                        return i3 ? i3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-4ba08932.entry.js": () => import("./p-4ba08932.entry-BYEhj4mU.js"), "./p-60af2d7f.entry.js": () => import("./p-60af2d7f.entry-BpOt1_94.js"), "./p-746a8577.entry.js": () => import("./p-746a8577.entry-BD9wsKp7.js"), "./p-7652d72d.entry.js": () => import("./p-7652d72d.entry-Bw3P--CW.js"), "./p-79cc15c2.entry.js": () => import("./p-79cc15c2.entry-Bedx_kaj.js"), "./p-846257eb.entry.js": () => import("./p-846257eb.entry-COIE6phJ.js"), "./p-84927cea.entry.js": () => import("./p-84927cea.entry-CHw8dlDF.js"), "./p-928c4970.entry.js": () => import("./p-928c4970.entry-D8v2HeUt.js"), "./p-a147e6c9.entry.js": () => import("./p-a147e6c9.entry-BZlHVI5W.js"), "./p-a14c6d82.entry.js": () => import("./p-a14c6d82.entry-CA2aB5Ma.js"), "./p-a7fc1135.entry.js": () => import("./p-a7fc1135.entry-D3qq25Bw.js"), "./p-bd214b33.entry.js": () => import("./p-bd214b33.entry-BA7uAh2N.js"), "./p-bf8a47d4.entry.js": () => import("./p-bf8a47d4.entry-BrnqFfRB.js"), "./p-ccea11a0.entry.js": () => import("./p-ccea11a0.entry-BSB-koxr.js"), "./p-dbe042fd.entry.js": () => import("./p-dbe042fd.entry-BVqBHvLI.js"), "./p-e2689624.entry.js": () => import("./p-e2689624.entry-CpmtuxpM.js") }), `./${o6}.entry.js`, 2).then(((t8) => (r.set(o6, t8), t8[n6])), ((t8) => {
+                        return i3 ? i3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-4ba08932.entry.js": () => import("./p-4ba08932.entry-1c3bxi0K.js"), "./p-60af2d7f.entry.js": () => import("./p-60af2d7f.entry-CQdb16cS.js"), "./p-746a8577.entry.js": () => import("./p-746a8577.entry-BvmtA66q.js"), "./p-7652d72d.entry.js": () => import("./p-7652d72d.entry-BtTLMenv.js"), "./p-79cc15c2.entry.js": () => import("./p-79cc15c2.entry-CCkwTy80.js"), "./p-846257eb.entry.js": () => import("./p-846257eb.entry-DPVvfiS6.js"), "./p-84927cea.entry.js": () => import("./p-84927cea.entry-BtSgAkQ8.js"), "./p-928c4970.entry.js": () => import("./p-928c4970.entry-DzT08IWx.js"), "./p-a147e6c9.entry.js": () => import("./p-a147e6c9.entry-4DAb1m3u.js"), "./p-a14c6d82.entry.js": () => import("./p-a14c6d82.entry-DhRvXFE6.js"), "./p-a7fc1135.entry.js": () => import("./p-a7fc1135.entry-03RfMfVZ.js"), "./p-bd214b33.entry.js": () => import("./p-bd214b33.entry-BG4Uybyv.js"), "./p-bf8a47d4.entry.js": () => import("./p-bf8a47d4.entry-C7RQeaH2.js"), "./p-ccea11a0.entry.js": () => import("./p-ccea11a0.entry-BFzFSrbt.js"), "./p-dbe042fd.entry.js": () => import("./p-dbe042fd.entry-DI9N1hwY.js"), "./p-e2689624.entry.js": () => import("./p-e2689624.entry-UVXuv5lZ.js") }), `./${o6}.entry.js`, 2).then(((t8) => (r.set(o6, t8), t8[n6])), ((t8) => {
                           l(t8, e3.$hostElement$);
                         }));
                         /*!__STENCIL_STATIC_IMPORT_SWITCH__*/
@@ -6299,7 +6299,6 @@ var NodeName;
   NodeName2["switchInteger"] = "LF_SwitchInteger";
   NodeName2["switchJson"] = "LF_SwitchJSON";
   NodeName2["switchString"] = "LF_SwitchString";
-  NodeName2["tiledDiffusionRefiner"] = "LF_TiledDiffusionRefiner";
   NodeName2["tiledSuperRes"] = "LF_TiledSuperRes";
   NodeName2["tiltShift"] = "LF_TiltShift";
   NodeName2["updateUsageStatistics"] = "LF_UpdateUsageStatistics";
@@ -6444,7 +6443,6 @@ const NODE_WIDGET_MAP = {
   LF_SwitchInteger: [CustomWidgetName.progressbar],
   LF_SwitchJSON: [CustomWidgetName.progressbar],
   LF_SwitchString: [CustomWidgetName.progressbar],
-  LF_TiledDiffusionRefiner: [CustomWidgetName.compare],
   LF_TiledSuperRes: [CustomWidgetName.compare],
   LF_TiltShift: [CustomWidgetName.compare],
   LF_UpdateUsageStatistics: [CustomWidgetName.code],
@@ -6825,6 +6823,12 @@ const apiCall$2 = async (state, addSnapshot) => {
     if (response.mask) {
       lfManager2.log("Saved inpaint mask preview to temp", { mask: response.mask }, LogSeverity.Info);
     }
+    if (response.cutout) {
+      lfManager2.log("Saved cutout preview to temp", { cutout: response.cutout }, LogSeverity.Info);
+    }
+    if (response.stats) {
+      lfManager2.log("Filter statistics", { stats: response.stats }, LogSeverity.Info);
+    }
     if (addSnapshot) {
       await imageviewer.addSnapshot(response.data);
     } else {
@@ -6932,11 +6936,17 @@ var ImageEditorToggleIds;
   ImageEditorToggleIds2["Shape"] = "shape";
   ImageEditorToggleIds2["Smooth"] = "smoooth";
   ImageEditorToggleIds2["SoftBlend"] = "soft_blend";
+  ImageEditorToggleIds2["TransparentBackground"] = "transparent_background";
   ImageEditorToggleIds2["Vertical"] = "vertical";
   ImageEditorToggleIds2["UseConditioning"] = "use_conditioning";
   ImageEditorToggleIds2["RoiAuto"] = "roi_auto";
   ImageEditorToggleIds2["RoiAlignAuto"] = "roi_align_auto";
 })(ImageEditorToggleIds || (ImageEditorToggleIds = {}));
+var ImageEditorBackgroundRemoverIds;
+(function(ImageEditorBackgroundRemoverIds2) {
+  ImageEditorBackgroundRemoverIds2["Color"] = "color";
+  ImageEditorBackgroundRemoverIds2["TransparentBackground"] = "transparent_background";
+})(ImageEditorBackgroundRemoverIds || (ImageEditorBackgroundRemoverIds = {}));
 var ImageEditorBlendIds;
 (function(ImageEditorBlendIds2) {
   ImageEditorBlendIds2["Opacity"] = "opacity";
@@ -7350,6 +7360,39 @@ const BASIC_ADJUSTMENT_SETTINGS = {
       ]
     }
     //#endregion
+  }
+};
+const BACKGROUND_SETTINGS = {
+  backgroundRemover: {
+    controlIds: ImageEditorBackgroundRemoverIds,
+    settings: {
+      color: "#000000",
+      transparent_background: true
+    },
+    configs: {
+      [ImageEditorControls.Textfield]: [
+        {
+          ariaLabel: "Background color",
+          controlType: ImageEditorControls.Textfield,
+          defaultValue: "#000000",
+          id: ImageEditorTextfieldIds.Color,
+          isMandatory: true,
+          title: "Used to fill the removed background when transparency is disabled.",
+          type: "color"
+        }
+      ],
+      [ImageEditorControls.Toggle]: [
+        {
+          ariaLabel: "Transparent background",
+          controlType: ImageEditorControls.Toggle,
+          defaultValue: true,
+          id: ImageEditorToggleIds.TransparentBackground,
+          off: "false",
+          on: "true",
+          title: "Keep an alpha channel instead of filling the background with the selected color."
+        }
+      ]
+    }
   }
 };
 const CREATIVE_EFFECT_SETTINGS = {
@@ -8181,6 +8224,7 @@ const DRAWING_SETTINGS = {
 };
 const SETTINGS = {
   ...BASIC_ADJUSTMENT_SETTINGS,
+  ...BACKGROUND_SETTINGS,
   ...CREATIVE_EFFECT_SETTINGS,
   ...DRAWING_SETTINGS,
   ...DIFFUSION_SETTINGS
@@ -8312,6 +8356,27 @@ const TREE_DATA = {
           },
           id: "saturation",
           value: "Saturation"
+        }
+      ]
+    },
+    //#endregion
+    //#region Cutouts
+    {
+      description: "Background removal and matting tools.",
+      id: "cutouts",
+      value: "Cutouts",
+      icon: "wand",
+      children: [
+        {
+          description: "Remove the background using rembg with optional solid fill.",
+          cells: {
+            lfCode: {
+              shape: "code",
+              value: JSON.stringify(SETTINGS.backgroundRemover)
+            }
+          },
+          id: "background_remover",
+          value: "Background remover"
         }
       ]
     },
