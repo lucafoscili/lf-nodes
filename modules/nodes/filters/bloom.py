@@ -73,7 +73,6 @@ class LF_Bloom:
             }
         }
 
-
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, True)

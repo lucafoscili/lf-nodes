@@ -8,12 +8,14 @@ from server import PromptServer
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
 from ...utils.filters import apply_background_remover_filter
+from ...utils.helpers.api import get_resource_url
+from ...utils.helpers.comfy import resolve_filepath
+from ...utils.helpers.conversion import tensor_to_pil
 from ...utils.helpers.logic import (
     normalize_input_image,
     normalize_list_to_value,
     normalize_output_image,
 )
-from ...utils.helpers.torch import process_and_save_image
 from ...utils.helpers.ui import create_compare_node
 
 # region LF_BackgroundRemover
@@ -69,10 +71,10 @@ class LF_BackgroundRemover:
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
-    RETURN_TYPES = ("IMAGE", "IMAGE", "MASK", "JSON")
-    RETURN_NAMES = ("image", "cutout", "mask", "stats")
+    RETURN_TYPES = ("IMAGE", "IMAGE", "IMAGE", "MASK", "JSON")
+    RETURN_NAMES = ("image", "image_list", "cutout_list", "mask", "stats")
     INPUT_IS_LIST = (True, False, False, False, False)
-    OUTPUT_IS_LIST = (False, True, False, False)
+    OUTPUT_IS_LIST = (False, True, True, False, False)
 
     def on_exec(self, **kwargs: dict):
         node_id = kwargs.get("node_id")
@@ -95,37 +97,45 @@ class LF_BackgroundRemover:
 
         nodes: List[dict] = []
         dataset: Dict[str, Any] = {"nodes": nodes}
-        payloads: List[Dict[str, Any]] = []
 
-        def run_filter(image: torch.Tensor, *, settings=settings) -> torch.Tensor:
-            result_image, payload = apply_background_remover_filter(image, settings)
-            payloads.append(payload)
-            return result_image
-
-        processed_images = process_and_save_image(
-            images=images,
-            filter_function=run_filter,
-            filter_args={},
-            filename_prefix="background_remover",
-            nodes=nodes,
-        )
-
+        composite_images: List[torch.Tensor] = []
         cutout_images: List[torch.Tensor] = []
         mask_images: List[torch.Tensor] = []
         stats_rows: List[dict] = []
 
-        for index, payload in enumerate(payloads):
+        for index, image in enumerate(images):
+            composite, payload = apply_background_remover_filter(image, settings)
+
             cutout_tensor = payload.get("cutout_tensor")
             mask_tensor = payload.get("mask_tensor")
             if cutout_tensor is None or mask_tensor is None:
                 raise RuntimeError("Background remover filter response missing required tensors.")
 
+            composite_images.append(composite)
             cutout_images.append(cutout_tensor)
             mask_images.append(mask_tensor)
 
             stats = dict(payload.get("stats", {})) if payload.get("stats") else {}
             stats["index"] = index
             stats_rows.append(stats)
+
+            source_pil = tensor_to_pil(image)
+            source_path, source_subfolder, source_filename = resolve_filepath(
+                filename_prefix="background_src",
+                image=image,
+            )
+            source_pil.save(source_path, format="PNG")
+            source_url = get_resource_url(source_subfolder, source_filename, "temp")
+
+            composite_pil = tensor_to_pil(composite)
+            composite_path, composite_subfolder, composite_filename = resolve_filepath(
+                filename_prefix="background_result",
+                image=composite,
+            )
+            composite_pil.save(composite_path, format="PNG")
+            composite_url = get_resource_url(composite_subfolder, composite_filename, "temp")
+
+            nodes.append(create_compare_node(source_url, composite_url, len(nodes)))
 
             cutout_url = payload.get("cutout")
             mask_url = payload.get("mask")
@@ -137,7 +147,7 @@ class LF_BackgroundRemover:
             {"node": node_id, "dataset": dataset},
         )
 
-        composite_batches, composite_list = normalize_output_image(processed_images)
+        composite_batches, composite_list = normalize_output_image(composite_images)
         _, cutout_list = normalize_output_image(cutout_images)
 
         mask_for_grouping = [mask.unsqueeze(-1) for mask in mask_images]
@@ -146,10 +156,11 @@ class LF_BackgroundRemover:
 
         stats_output = {"runs": stats_rows}
 
-        primary_image = composite_batches[0] if composite_batches else processed_images[0]
+        primary_image = composite_batches[0] if composite_batches else composite_images[0]
 
         return (
             primary_image,
+            composite_list,
             cutout_list,
             mask_output,
             stats_output,
