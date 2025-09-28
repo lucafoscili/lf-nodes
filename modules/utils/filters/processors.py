@@ -10,7 +10,7 @@ from ..helpers.conversion import (
     convert_to_float,
     convert_to_int,
 )
-from .background_remover import apply_background_remover_filter
+from .background_remover import background_remover_effect
 from .blend import blend_effect
 from .bloom import bloom_effect
 from .brightness import brightness_effect
@@ -53,6 +53,43 @@ def _as_result(image: torch.Tensor) -> FilterResult:
         FilterResult: A tuple containing the image tensor and an empty dictionary.
     """
     return image, {}
+
+
+# region Background Remover
+def apply_background_remover_filter(image: torch.Tensor, settings: dict) -> FilterResult:
+    """
+    Applies a background remover filter to the given image tensor using specified settings.
+    
+    Args:
+        image (torch.Tensor): The input image tensor to process.
+        settings (dict): A dictionary of settings for the background remover filter. Supported keys:
+            - "transparent_background" (bool or str, optional): Whether to make the background transparent. Defaults to True.
+            - "color" (str, optional): Hex code for the background color if not transparent. Defaults to "#000000".
+            - "model" (str, optional): The model name to use for background removal. Defaults to "u2net".
+
+    Returns:
+        Tuple[FilterResult, dict]: A tuple containing the processed image result and a payload dictionary with additional information.
+    """
+
+    transparent_raw = settings.get("transparent_background", True)
+    transparent = convert_to_boolean(transparent_raw)
+    if transparent is None:
+        transparent = True
+
+    color = str(settings.get("color") or "#000000")
+    model_name = str(settings.get("model") or "u2net")
+
+    composite, extra_payload = background_remover_effect(
+        image,
+        transparent_background=transparent,
+        background_color=color,
+        model_name=model_name,
+    )
+
+    image_result, payload = _as_result(composite)
+    payload.update(extra_payload)
+    return image_result, payload
+# endregion
 
 # region Blend
 def apply_blend_filter(image: torch.Tensor, settings: dict) -> FilterResult:

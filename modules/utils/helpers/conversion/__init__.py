@@ -6,6 +6,7 @@ from .convert_to_json import *
 from .hex_to_tuple import *
 from .numpy_to_svg import *
 from .numpy_to_tensor import *
+from .normalize_hex_color import *
 from .pil_to_tensor import *
 from .tensor_to_base64 import *
 from .tensor_to_bytes import *

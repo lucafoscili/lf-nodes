@@ -13,6 +13,7 @@ _SESSION_CACHE: dict[str, Any] = {}
 _SESSION_LOCK = threading.Lock()
 _MODEL_DIR = Path(ONNX_ROOT) / "rembg"
 
+# region Helpers
 def _ensure_model_dir() -> Path:
     """
     Ensures that the model directory exists and sets the 'U2NET_HOME' environment variable.
@@ -27,8 +28,9 @@ def _ensure_model_dir() -> Path:
     _MODEL_DIR.mkdir(parents=True, exist_ok=True)
     os.environ.setdefault("U2NET_HOME", str(_MODEL_DIR))
     return _MODEL_DIR
+# endregion
 
-
+# region Public API
 def get_rembg_session(model_name: str = "u2net") -> Any:
     """
     Returns a cached rembg session for the specified model name.
@@ -55,3 +57,4 @@ def get_rembg_session(model_name: str = "u2net") -> Any:
         session = new_session(model_name)
         _SESSION_CACHE[model_name] = session
         return session
+# endregion

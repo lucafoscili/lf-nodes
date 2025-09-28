@@ -12,15 +12,12 @@ from rembg import remove
 from ...utils.helpers.api import get_resource_url
 from ...utils.helpers.comfy import resolve_filepath
 from ...utils.helpers.conversion import (
-    convert_to_boolean,
     hex_to_tuple,
+    normalize_hex_color,
     numpy_to_tensor,
     tensor_to_pil,
 )
-from ...utils.helpers.detection import get_rembg_session
-
-FilterPayload = Dict[str, Any]
-FilterResult = Tuple[torch.Tensor, FilterPayload]
+from ...utils.helpers.detection.rembg import get_rembg_session
 
 @dataclass
 class BackgroundRemovalResult:
@@ -38,25 +35,7 @@ class BackgroundRemovalResult:
     mask: torch.Tensor
     stats: Dict[str, Any]
 
-def normalize_hex_color(color: str | None) -> str:
-    """
-    Normalizes a hex color string to the standard 7-character format (#RRGGBB).
-
-    Args:
-        color (str | None): The input color string, which may be in shorthand (#RGB), missing the hash, or None.
-
-    Returns:
-        str: The normalized hex color string in uppercase (#RRGGBB). Returns "#000000" if the input is invalid.
-    """
-    color = (color or "#000000").strip()
-    if not color.startswith("#"):
-        color = f"#{color}"
-    if len(color) == 4:  # #RGB
-        color = "#" + "".join(ch * 2 for ch in color[1:])
-    if len(color) != 7:
-        return "#000000"
-    return color.upper()
-
+# region Helpers
 def _ensure_rgba_image(value: Image.Image | bytes) -> Image.Image:
     """
     Ensures that the input image is in RGBA mode.
@@ -117,7 +96,9 @@ def _compute_stats(alpha: np.ndarray, width: int, height: int) -> Dict[str, Any]
         stats["bounding_box"] = bbox
 
     return stats
+# endregion
 
+# region Apply Background Removal
 def apply_background_removal(
     image: torch.Tensor,
     *,
@@ -142,6 +123,7 @@ def apply_background_removal(
             - mask (torch.Tensor): The alpha mask tensor indicating foreground regions.
             - stats (dict): Statistics and metadata about the background removal process.
     """
+    normalized_color = normalize_hex_color(background_color)
     pil_image = tensor_to_pil(image)
     session = get_rembg_session(model_name)
 
@@ -154,7 +136,7 @@ def apply_background_removal(
     if transparent_background:
         composite_image = cutout_image
     else:
-        rgb = hex_to_tuple(background_color)
+        rgb = hex_to_tuple(normalized_color)
         background = Image.new("RGBA", cutout_image.size, rgb + (255,))
         composite_image = Image.alpha_composite(background, cutout_image).convert("RGB")
 
@@ -165,7 +147,7 @@ def apply_background_removal(
         {
             "model": model_name,
             "transparent_background": transparent_background,
-            "background_color": background_color,
+            "background_color": normalized_color,
         }
     )
 
@@ -175,38 +157,22 @@ def apply_background_removal(
         mask=mask_tensor,
         stats=stats,
     )
+# endregion
 
-def apply_background_remover_filter(image: torch.Tensor, settings: dict) -> FilterResult:
-    """
-    Applies a background removal filter to the given image tensor using specified settings.
-
-    Args:
-        image (torch.Tensor): The input image tensor to process.
-        settings (dict): Dictionary containing filter settings. Supported keys:
-            - "transparent_background" (bool or str, optional): Whether to make the background transparent. Defaults to True.
-            - "color" (str, optional): Hex color code for the background if not transparent. Defaults to "#000000".
-            - "model" (str, optional): Name of the background removal model to use. Defaults to "u2net".
-
-    Returns:
-        Tuple[torch.Tensor, dict]: 
-            - The composite image tensor with background removed or replaced.
-            - A payload dictionary containing:
-                - "mask": URL to the saved mask image.
-                - "cutout": URL to the saved cutout image.
-                - "stats": Statistics from the background removal process.
-    """
-    transparent_raw = settings.get("transparent_background", True)
-    transparent = convert_to_boolean(transparent_raw)
-    if transparent is None:
-        transparent = True
-
-    color = normalize_hex_color(settings.get("color") or "#000000")
-    model_name = str(settings.get("model") or "u2net")
+# region Background Remover Effect
+def background_remover_effect(
+    image: torch.Tensor,
+    *,
+    transparent_background: bool,
+    background_color: str,
+    model_name: str,
+) -> Tuple[torch.Tensor, Dict[str, Any]]:
+    """Apply background removal and prepare auxiliary artifacts for UI consumption."""
 
     result = apply_background_removal(
         image,
-        transparent_background=transparent,
-        background_color=color,
+        transparent_background=transparent_background,
+        background_color=background_color,
         model_name=model_name,
     )
 
@@ -225,10 +191,19 @@ def apply_background_remover_filter(image: torch.Tensor, settings: dict) -> Filt
     mask_image.save(mask_path, format="PNG")
     mask_url = get_resource_url(mask_subfolder, mask_filename, "temp")
 
-    payload: FilterPayload = {
+    payload: Dict[str, Any] = {
         "mask": mask_url,
         "cutout": cutout_url,
         "stats": result.stats,
+        "mask_tensor": result.mask,
+        "cutout_tensor": result.cutout,
     }
 
     return result.composite, payload
+# endregion
+
+__all__ = [
+    "BackgroundRemovalResult",
+    "apply_background_removal",
+    "background_remover_effect",
+]
