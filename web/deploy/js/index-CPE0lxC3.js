@@ -5423,7 +5423,7 @@ var tt = false, et = (t2, e2, n2) => {
                         const n6 = t7.i.replace(/-/g, "_"), o6 = t7.T;
                         if (!o6) return;
                         const i3 = r.get(o6);
-                        return i3 ? i3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-4ba08932.entry.js": () => import("./p-4ba08932.entry-jL9unx-e.js"), "./p-60af2d7f.entry.js": () => import("./p-60af2d7f.entry-D0LFV_32.js"), "./p-746a8577.entry.js": () => import("./p-746a8577.entry-CX58FrGx.js"), "./p-7652d72d.entry.js": () => import("./p-7652d72d.entry-BdoxLzKD.js"), "./p-79cc15c2.entry.js": () => import("./p-79cc15c2.entry-ChOh5JDm.js"), "./p-846257eb.entry.js": () => import("./p-846257eb.entry-CLq221_N.js"), "./p-84927cea.entry.js": () => import("./p-84927cea.entry-D2-mW8bs.js"), "./p-928c4970.entry.js": () => import("./p-928c4970.entry-ClIQDFA_.js"), "./p-a147e6c9.entry.js": () => import("./p-a147e6c9.entry-DD1tOm_X.js"), "./p-a14c6d82.entry.js": () => import("./p-a14c6d82.entry-Q87YrEQt.js"), "./p-a7fc1135.entry.js": () => import("./p-a7fc1135.entry-D6f4pV3b.js"), "./p-bd214b33.entry.js": () => import("./p-bd214b33.entry-CGOAK6mz.js"), "./p-bf8a47d4.entry.js": () => import("./p-bf8a47d4.entry-rqwwOX7k.js"), "./p-ccea11a0.entry.js": () => import("./p-ccea11a0.entry-CqPvDF9r.js"), "./p-dbe042fd.entry.js": () => import("./p-dbe042fd.entry-XegYy1gj.js"), "./p-e2689624.entry.js": () => import("./p-e2689624.entry-BucCXUqP.js") }), `./${o6}.entry.js`, 2).then(((t8) => (r.set(o6, t8), t8[n6])), ((t8) => {
+                        return i3 ? i3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-4ba08932.entry.js": () => import("./p-4ba08932.entry-CAo6VqOx.js"), "./p-60af2d7f.entry.js": () => import("./p-60af2d7f.entry-BPcOKYik.js"), "./p-746a8577.entry.js": () => import("./p-746a8577.entry-weNWRy1D.js"), "./p-7652d72d.entry.js": () => import("./p-7652d72d.entry-Az8bqsRZ.js"), "./p-79cc15c2.entry.js": () => import("./p-79cc15c2.entry-CAmJPcTT.js"), "./p-846257eb.entry.js": () => import("./p-846257eb.entry-CPG8xUDC.js"), "./p-84927cea.entry.js": () => import("./p-84927cea.entry-D-4TCVBx.js"), "./p-928c4970.entry.js": () => import("./p-928c4970.entry-C-pIWaoo.js"), "./p-a147e6c9.entry.js": () => import("./p-a147e6c9.entry-TAWFoRpE.js"), "./p-a14c6d82.entry.js": () => import("./p-a14c6d82.entry-j3kUOmIk.js"), "./p-a7fc1135.entry.js": () => import("./p-a7fc1135.entry-BjRYEvQV.js"), "./p-bd214b33.entry.js": () => import("./p-bd214b33.entry-LeP-_kYW.js"), "./p-bf8a47d4.entry.js": () => import("./p-bf8a47d4.entry-CcZA4DYk.js"), "./p-ccea11a0.entry.js": () => import("./p-ccea11a0.entry-U7atws2L.js"), "./p-dbe042fd.entry.js": () => import("./p-dbe042fd.entry-B3NlHXOP.js"), "./p-e2689624.entry.js": () => import("./p-e2689624.entry-CcNGy5J8.js") }), `./${o6}.entry.js`, 2).then(((t8) => (r.set(o6, t8), t8[n6])), ((t8) => {
                           l(t8, e3.$hostElement$);
                         }));
                         /*!__STENCIL_STATIC_IMPORT_SWITCH__*/
@@ -7832,7 +7832,7 @@ const DIFFUSION_SETTINGS = {
       positive_prompt: "",
       negative_prompt: "",
       upsample_target: 1024,
-      use_conditioning: false
+      use_conditioning: true
     },
     configs: {
       [ImageEditorControls.Textfield]: [
@@ -7859,7 +7859,7 @@ const DIFFUSION_SETTINGS = {
         {
           ariaLabel: "Use conditioning prompts",
           controlType: ImageEditorControls.Toggle,
-          defaultValue: false,
+          defaultValue: true,
           id: ImageEditorToggleIds.UseConditioning,
           isMandatory: false,
           off: "false",
@@ -8104,13 +8104,13 @@ const DRAWING_SETTINGS = {
   brush: {
     controlIds: ImageEditorBrushIds,
     hasCanvasAction: true,
-    settings: { b64_canvas: "", color: "#FF0000", opacity: 1, size: 10 },
+    settings: { b64_canvas: "", color: "#FF0000", opacity: 1, size: 50 },
     configs: {
       [ImageEditorControls.Slider]: [
         {
           ariaLabel: "Size",
           controlType: ImageEditorControls.Slider,
-          defaultValue: 10,
+          defaultValue: 50,
           id: ImageEditorSliderIds.Size,
           isMandatory: true,
           max: "500",
