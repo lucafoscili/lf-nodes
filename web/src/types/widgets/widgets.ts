@@ -52,6 +52,7 @@ export enum CustomWidgetName {
   upload = 'LF_UPLOAD',
 }
 export enum NodeName {
+  backgroundRemover = 'LF_BackgroundRemover',
   blend = 'LF_Blend',
   blobToImage = 'LF_BlobToImage',
   bloom = 'LF_Bloom',

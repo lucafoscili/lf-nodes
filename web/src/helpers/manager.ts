@@ -23,6 +23,7 @@ import {
 
 //#region Node-Widget map
 export const NODE_WIDGET_MAP: NodeWidgetMap = {
+  LF_BackgroundRemover: [CustomWidgetName.compare],
   LF_Blend: [CustomWidgetName.compare],
   LF_BlobToImage: [CustomWidgetName.code],
   LF_Bloom: [CustomWidgetName.compare],
