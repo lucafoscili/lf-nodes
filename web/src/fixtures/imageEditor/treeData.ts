@@ -57,6 +57,27 @@ export const TREE_DATA: LfDataDataset = {
       ],
     },
     //#endregion
+    //#region Cutouts
+    {
+      description: 'Background removal and matting tools.',
+      id: 'cutouts',
+      value: 'Cutouts',
+      icon: 'replace',
+      children: [
+        {
+          description: 'Remove the background using rembg with optional solid fill.',
+          cells: {
+            lfCode: {
+              shape: 'code',
+              value: JSON.stringify(SETTINGS.backgroundRemover),
+            },
+          },
+          id: 'background_remover',
+          value: 'Background remover',
+        },
+      ],
+    },
+    //#endregion
     //#region Basic Adjustments
     {
       description: 'Basic adjustments such as sharpening and color tuning.',

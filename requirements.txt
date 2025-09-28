@@ -5,6 +5,7 @@ onnxruntime
 pandas
 piexif
 Pillow
+rembg
 requests
 svgwrite
 timm

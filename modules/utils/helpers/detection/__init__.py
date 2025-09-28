@@ -5,6 +5,7 @@ from .load_label_map import *
 from .parse_class_filter import *
 from .parse_class_labels import *
 from .region_masks import *
+from .rembg import *
 from .select_region import *
 from .yolo import *
 

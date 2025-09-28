@@ -40,6 +40,12 @@ export const apiCall = async (state: ImageEditorState, addSnapshot: boolean) => 
         LogSeverity.Info,
       );
     }
+    if (response.cutout) {
+      lfManager.log('Saved cutout preview to temp', { cutout: response.cutout }, LogSeverity.Info);
+    }
+    if (response.stats) {
+      lfManager.log('Filter statistics', { stats: response.stats }, LogSeverity.Info);
+    }
     if (addSnapshot) {
       await imageviewer.addSnapshot(response.data);
     } else {

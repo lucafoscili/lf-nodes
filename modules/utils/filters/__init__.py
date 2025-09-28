@@ -1,3 +1,4 @@
+from .background_remover import *
 from .blend import *
 from .bloom import *
 from .brightness import *

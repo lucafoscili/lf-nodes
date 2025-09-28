@@ -3,6 +3,7 @@ from .comfy import *
 from .conversion import *
 from .detection import *
 from .logic import *
+from .rembg import *
 from .metadata import *
 from .prompt import *
 from .tagging import *

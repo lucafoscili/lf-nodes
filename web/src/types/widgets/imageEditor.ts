@@ -173,6 +173,7 @@ export enum ImageEditorToggleIds {
   Shape = 'shape',
   Smooth = 'smoooth',
   SoftBlend = 'soft_blend',
+  TransparentBackground = 'transparent_background',
   Vertical = 'vertical',
   UseConditioning = 'use_conditioning',
   RoiAuto = 'roi_auto',
@@ -247,6 +248,7 @@ export interface ImageEditorFilterSettingsMap {
   bloom: ImageEditorBloomSettings;
   brightness: ImageEditorBrightnessSettings;
   brush: ImageEditorBrushSettings;
+  backgroundRemover: ImageEditorBackgroundRemoverSettings;
   clarity: ImageEditorClaritySettings;
   contrast: ImageEditorContrastSettings;
   desaturate: ImageEditorDesaturateSettings;
@@ -261,6 +263,10 @@ export interface ImageEditorFilterSettingsMap {
   unsharpMask: ImageEditorUnsharpMaskSettings;
   vibrance: ImageEditorVibranceSettings;
   vignette: ImageEditorVignetteSettings;
+}
+export interface ImageEditorBackgroundRemoverSettings extends ImageEditorFilterSettings {
+  color: string;
+  transparent_background: boolean;
 }
 export interface ImageEditorBlendSettings extends ImageEditorFilterSettings {
   color: string;
@@ -370,6 +376,10 @@ export interface ImageEditorInpaintSettings extends ImageEditorFilterSettings {
   roi_min_size?: number;
   dilate?: number;
   feather?: number;
+}
+export enum ImageEditorBackgroundRemoverIds {
+  Color = 'color',
+  TransparentBackground = 'transparent_background',
 }
 export enum ImageEditorBlendIds {
   Opacity = 'opacity',
@@ -499,6 +509,14 @@ export interface ImageEditorFilterDefinition<
   requiresManualApply?: boolean;
   settings: ImageEditorSettings;
 }
+export type ImageEditorBackgroundRemoverFilter = ImageEditorFilterDefinition<
+  typeof ImageEditorBackgroundRemoverIds,
+  ImageEditorBackgroundRemoverSettings,
+  {
+    [ImageEditorControls.Textfield]: ImageEditorTextfieldConfig[];
+    [ImageEditorControls.Toggle]: ImageEditorToggleConfig[];
+  }
+>;
 export type ImageEditorBlendFilter = ImageEditorFilterDefinition<
   typeof ImageEditorBlendIds,
   ImageEditorBlendSettings,
@@ -643,6 +661,7 @@ export type ImageEditorInpaintFilter = ImageEditorFilterDefinition<
   }
 >;
 export type ImageEditorFilters = {
+  backgroundRemover: ImageEditorBackgroundRemoverFilter;
   blend: ImageEditorBlendFilter;
   bloom: ImageEditorBloomFilter;
   brightness: ImageEditorBrightnessFilter;
@@ -663,6 +682,7 @@ export type ImageEditorFilters = {
   vignette: ImageEditorVignetteFilter;
 };
 export type ImageEditorFilter =
+  | ImageEditorBackgroundRemoverFilter
   | ImageEditorBlendFilter
   | ImageEditorBloomFilter
   | ImageEditorBrightnessFilter
@@ -681,7 +701,6 @@ export type ImageEditorFilter =
   | ImageEditorUnsharpMaskFilter
   | ImageEditorVibranceFilter
   | ImageEditorVignetteFilter;
-
 export type ImageEditorRequestSettings<T extends ImageEditorFilterType> =
   ImageEditorFilterSettingsMap[T] & { context_id?: string };
 //#endregion
