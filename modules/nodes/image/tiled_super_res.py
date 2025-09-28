@@ -1,5 +1,6 @@
+import re
 import time
-from typing import List
+from typing import List, Optional
 
 from PIL import Image, ImageDraw, ImageFont
 
@@ -17,7 +18,7 @@ from ...utils.helpers.logic import (
     normalize_list_to_value,
     normalize_output_image,
 )
-from ...utils.helpers.torch import TilePlan, blend_upscaled_tiles, plan_input_tiles
+from ...utils.helpers.torch import TilePlan, make_blend_mask, plan_input_tiles
 from ...utils.helpers.api import get_resource_url
 from ...utils.helpers.comfy import resolve_filepath
 from ...utils.helpers.conversion import tensor_to_pil
@@ -137,42 +138,79 @@ class LF_TiledSuperRes:
         upscaled_images: List[torch.Tensor] = []
         stats_rows: List[dict] = []
         compare_nodes: List[dict] = []
+        node_id = kwargs.get("node_id")
+        dataset = {"nodes": compare_nodes}
 
         for index, image in enumerate(images):
             start = time.perf_counter()
             h, w = image.shape[1], image.shape[2]
             plan = plan_input_tiles(w, h, tile_count)
 
-            tiles_out: List[torch.Tensor] = []
+            if target_long_edge > 0 and max(h, w) > 0:
+                target_scale_image = target_long_edge / max(h, w)
+                effective_scale_image = max(scale, target_scale_image)
+            else:
+                effective_scale_image = scale
+
+            target_h = max(1, int(round(h * effective_scale_image)))
+            target_w = max(1, int(round(w * effective_scale_image)))
+            upscaled_h = max(1, int(round(h * scale)))
+            upscaled_w = max(1, int(round(w * scale)))
+
+            accumulator_dtype = torch.float32
+            canvas = torch.zeros(
+                (1, upscaled_h, upscaled_w, channels),
+                device=device,
+                dtype=accumulator_dtype,
+            )
+            weights = torch.zeros_like(canvas)
+
+            preview_destination = self._prepare_preview_destination(node_id, index, image)
+            compare_node: Optional[dict] = None
+
             for spec in plan.tiles:
                 patch = image[:, spec.y0:spec.y1, spec.x0:spec.x1, :]
                 patch_chw = patch.permute(0, 3, 1, 2).to(device)
                 with torch.autocast(device.type, enabled=device.type == "cuda"):
                     upscaled = upscale_model(patch_chw)
                 upscaled = upscaled.clamp(0.0, 1.0)
-                tiles_out.append(upscaled.permute(0, 2, 3, 1).detach())
+                tile = upscaled.permute(0, 2, 3, 1).detach().to(device=device, dtype=canvas.dtype)
 
-            blended = blend_upscaled_tiles(
-                tiles_out,
-                plan.tiles,
-                scale=scale,
-                device=device,
-                channels=image.shape[-1],
-            )
+                self._accumulate_tile(canvas, weights, tile, spec, scale)
 
-            if target_long_edge > 0:
-                final_long_edge = max(h, w) * scale
-                if abs(final_long_edge - target_long_edge) > 1:
-                    target_scale = target_long_edge / max(h, w)
-                    target_h = int(round(h * target_scale))
-                    target_w = int(round(w * target_scale))
-                    blended = F.interpolate(
-                        blended.permute(0, 3, 1, 2),
-                        size=(target_h, target_w),
-                        mode="bicubic",
-                        align_corners=False,
-                        antialias=True,
-                    ).permute(0, 2, 3, 1)
+                preview_tensor = self._compose_from_accumulator(canvas, weights)
+                preview_url = self._save_preview_image(
+                    preview_tensor,
+                    preview_destination,
+                    target_size=(target_h, target_w),
+                )
+
+                if compare_node is None:
+                    compare_node = create_compare_node(preview_url, preview_url, index)
+                    compare_nodes.append(compare_node)
+                else:
+                    cells = compare_node["cells"]
+                    cells["lfImage"]["lfValue"] = preview_url
+                    cells["lfImage_after"]["lfValue"] = preview_url
+
+                PromptServer.instance.send_sync(
+                    f"{EVENT_PREFIX}tiledsuperres",
+                    {
+                        "node": node_id,
+                        "dataset": dataset,
+                    },
+                )
+
+            blended = self._compose_from_accumulator(canvas, weights)
+
+            if blended.shape[1] != target_h or blended.shape[2] != target_w:
+                blended = F.interpolate(
+                    blended.permute(0, 3, 1, 2),
+                    size=(target_h, target_w),
+                    mode="bicubic",
+                    align_corners=False,
+                    antialias=True,
+                ).permute(0, 2, 3, 1)
 
             if sharpen_amount > 0:
                 sharpened_samples: List[torch.Tensor] = []
@@ -200,22 +238,54 @@ class LF_TiledSuperRes:
                         dtype=original_dtype,
                     )
 
-            blended = blended.clamp(0.0, 1.0).to(image.dtype).cpu()
-            upscaled_images.append(blended)
+            blended = blended.clamp(0.0, 1.0)
+            blended_cpu = blended.to(image.dtype).cpu()
+            upscaled_images.append(blended_cpu)
+
+            final_preview_url = self._save_preview_image(
+                blended_cpu,
+                preview_destination,
+                target_size=(target_h, target_w),
+            )
 
             clean_url, debug_url = self._save_compare_images(
-                blended,
+                blended_cpu,
                 plan,
                 base_width=w,
                 base_height=h,
             )
-            compare_nodes.append(create_compare_node(clean_url, debug_url, index))
+
+            if compare_node is None:
+                compare_node = create_compare_node(
+                    final_preview_url,
+                    clean_url,
+                    index,
+                    debug=debug_url,
+                )
+                compare_nodes.append(compare_node)
+            else:
+                cells = compare_node["cells"]
+                cells["lfImage"]["lfValue"] = final_preview_url
+                cells["lfImage_after"]["lfValue"] = clean_url
+                cells["lfImage_debug"] = {
+                    "shape": "image",
+                    "lfValue": debug_url,
+                    "value": "",
+                }
+
+            PromptServer.instance.send_sync(
+                f"{EVENT_PREFIX}tiledsuperres",
+                {
+                    "node": node_id,
+                    "dataset": dataset,
+                },
+            )
 
             elapsed = time.perf_counter() - start
             stats_rows.append({
                 "index": index,
                 "input_size": [int(h), int(w)],
-                "output_size": [int(blended.shape[1]), int(blended.shape[2])],
+                "output_size": [int(blended_cpu.shape[1]), int(blended_cpu.shape[2])],
                 "tiles": len(plan.tiles),
                 "grid": [plan.cols, plan.rows],
                 "model_scale": scale,
@@ -227,19 +297,184 @@ class LF_TiledSuperRes:
 
         batch_list, image_list = normalize_output_image(upscaled_images)
 
-        dataset = {
-            "nodes": compare_nodes,
-        }
-
         PromptServer.instance.send_sync(
             f"{EVENT_PREFIX}tiledsuperres",
             {
-                "node": kwargs.get("node_id"),
+                "node": node_id,
                 "dataset": dataset,
             },
         )
 
         return batch_list[0], image_list, {"runs": stats_rows}
+
+    def _prepare_preview_destination(
+        self,
+        node_id: Optional[str],
+        index: int,
+        image: torch.Tensor,
+    ) -> dict:
+        """
+        Prepares the destination information for saving a preview image.
+
+        Args:
+            node_id (Optional[str]): Identifier for the node. If None, defaults to "node".
+            index (int): Index of the image in the sequence.
+            image (torch.Tensor): The image tensor to be saved.
+
+        Returns:
+            dict: A dictionary containing the output file path ('file'), subfolder ('subfolder'), and filename ('filename') for the preview image.
+        """
+        safe_node = re.sub(r"[^0-9A-Za-z_-]", "_", str(node_id) if node_id else "node")
+        prefix = f"tiled_super_res_preview_{safe_node}_{index + 1}"
+        output_file, subfolder, filename = resolve_filepath(
+            filename_prefix=prefix,
+            image=image,
+            add_counter=False,
+        )
+        return {
+            "file": output_file,
+            "subfolder": subfolder,
+            "filename": filename,
+        }
+
+    @staticmethod
+    def _compose_from_accumulator(canvas: torch.Tensor, weights: torch.Tensor) -> torch.Tensor:
+        """
+        Combines the accumulated image data in `canvas` with the corresponding `weights` tensor.
+
+        This function clamps the `weights` tensor to a minimum value to avoid division by zero,
+        then divides the `canvas` tensor by the clamped weights to produce the final composed image.
+
+        Args:
+            canvas (torch.Tensor): The tensor containing accumulated image data.
+            weights (torch.Tensor): The tensor containing accumulation weights for each pixel.
+
+        Returns:
+            torch.Tensor: The composed image tensor after normalization by weights.
+        """
+        weights_clamped = torch.clamp(weights, min=1e-6)
+        return canvas / weights_clamped
+
+    @staticmethod
+    def _accumulate_tile(
+        canvas: torch.Tensor,
+        weights: torch.Tensor,
+        tile: torch.Tensor,
+        spec,
+        scale: float,
+    ) -> None:
+        """
+        Accumulates a processed image tile onto a canvas and updates the corresponding weights for blending.
+        This function resizes the input tile to match the expected dimensions based on the provided scale and tile specification.
+        It then creates a blend mask to handle overlapping regions and blends the tile into the canvas at the correct position.
+        The weights tensor is updated to reflect the contribution of the tile for later normalization.
+
+        Args:
+            canvas (torch.Tensor): The tensor representing the output image canvas to accumulate tiles onto.
+            weights (torch.Tensor): The tensor tracking blending weights for each pixel in the canvas.
+            tile (torch.Tensor): The image tile tensor to be accumulated.
+            spec: An object containing tile position and overlap specifications (x0, x1, y0, y1, left_overlap, right_overlap, top_overlap, bottom_overlap).
+            scale (float): The scaling factor to apply to the tile and its position.
+
+        Returns:
+            None
+        """
+        expected_w = max(1, int(round((spec.x1 - spec.x0) * scale)))
+        expected_h = max(1, int(round((spec.y1 - spec.y0) * scale)))
+
+        if tile.shape[1] != expected_h or tile.shape[2] != expected_w:
+            tile = F.interpolate(
+                tile.permute(0, 3, 1, 2),
+                size=(expected_h, expected_w),
+                mode="bicubic",
+                align_corners=False,
+                antialias=True,
+            ).permute(0, 2, 3, 1)
+
+        tile = tile.to(dtype=canvas.dtype)
+
+        left = int(round(spec.left_overlap * scale))
+        right = int(round(spec.right_overlap * scale))
+        top = int(round(spec.top_overlap * scale))
+        bottom = int(round(spec.bottom_overlap * scale))
+
+        mask = make_blend_mask(
+            expected_h,
+            expected_w,
+            left,
+            right,
+            top,
+            bottom,
+            device=canvas.device,
+        ).to(dtype=canvas.dtype)
+
+        x0 = int(round(spec.x0 * scale))
+        y0 = int(round(spec.y0 * scale))
+        x1 = x0 + expected_w
+        y1 = y0 + expected_h
+
+        canvas[..., y0:y1, x0:x1, :] += tile * mask
+        weights[..., y0:y1, x0:x1, :] += mask
+
+    def _save_preview_image(
+        self,
+        tensor: torch.Tensor,
+        destination: dict,
+        *,
+        target_size: tuple[int, int],
+    ) -> str:
+        """
+        Saves a preview image from a given tensor to a specified destination.
+
+        Args:
+            tensor (torch.Tensor): The input image tensor. Expected shape is (C, H, W) or (B, C, H, W).
+            destination (dict): Dictionary containing file saving information. Must include keys "file", "subfolder", and "filename".
+            target_size (tuple[int, int]): Desired output image size as (height, width). If both are greater than 0, the image is resized.
+
+        Returns:
+            str: URL to the saved preview image resource.
+
+        Notes:
+            - The image is clamped to [0.0, 1.0] and converted to CPU.
+            - If the longest edge exceeds 512 pixels, the image is downscaled to fit within 512 pixels.
+            - The image is saved in PNG format.
+        """
+        if tensor.dim() == 3:
+            tensor = tensor.unsqueeze(0)
+
+        preview = tensor.detach().to(torch.float32)
+
+        target_h, target_w = target_size
+        if target_h > 0 and target_w > 0:
+            if preview.shape[1] != target_h or preview.shape[2] != target_w:
+                preview = F.interpolate(
+                    preview.permute(0, 3, 1, 2),
+                    size=(target_h, target_w),
+                    mode="bicubic",
+                    align_corners=False,
+                    antialias=True,
+                ).permute(0, 2, 3, 1)
+
+        preview = preview.clamp(0.0, 1.0).to("cpu")
+
+        _, height, width, _ = preview.shape
+        long_edge = max(height, width)
+        if long_edge > 512:
+            scale_factor = 512 / long_edge
+            new_h = max(1, int(round(height * scale_factor)))
+            new_w = max(1, int(round(width * scale_factor)))
+            preview = F.interpolate(
+                preview.permute(0, 3, 1, 2),
+                size=(new_h, new_w),
+                mode="bicubic",
+                align_corners=False,
+                antialias=True,
+            ).permute(0, 2, 3, 1)
+
+        preview_pil = tensor_to_pil(preview)
+        preview_pil.save(destination["file"], format="PNG")
+
+        return get_resource_url(destination["subfolder"], destination["filename"], "temp")
 
     def _save_compare_images(
         self,
@@ -249,6 +484,18 @@ class LF_TiledSuperRes:
         base_width: int,
         base_height: int,
     ) -> tuple[str, str]:
+        """
+        Saves two versions of an image (clean and debug with tile overlay) to disk and returns their URLs.
+
+        Args:
+            image (torch.Tensor): The image tensor to be saved.
+            plan (TilePlan): The tiling plan used for rendering the debug overlay.
+            base_width (int): The base width of the image.
+            base_height (int): The base height of the image.
+
+        Returns:
+            tuple[str, str]: A tuple containing the URLs for the clean image and the debug image.
+        """
         clean_pil = tensor_to_pil(image)
         debug_image = self._render_tile_overlay(
             clean_pil.copy(),
@@ -281,6 +528,23 @@ class LF_TiledSuperRes:
         base_width: int,
         base_height: int,
     ) -> Image.Image:
+        """
+        Renders an overlay on the given base image to visualize tile boundaries and indices.
+
+        Args:
+            base_image (Image.Image): The base image to draw overlays on.
+            plan (TilePlan): The tile plan containing tile specifications.
+            base_width (int): The original width of the base image before scaling.
+            base_height (int): The original height of the base image before scaling.
+
+        Returns:
+            Image.Image: The resulting image with tile overlays rendered.
+            
+        Notes:
+            - Draws rectangles for each tile's outer and inner boundaries.
+            - Labels each tile with its index if there are multiple tiles.
+            - Uses semi-transparent fills and outlines for visualization.
+        """
         rgba_base = base_image.convert("RGBA")
         overlay = Image.new("RGBA", rgba_base.size, (0, 0, 0, 0))
         draw = ImageDraw.Draw(overlay)

@@ -1,5 +1,15 @@
 # region create_compare_node
-def create_compare_node(before: str, after: str, index: int):
+from typing import Optional
+
+
+def create_compare_node(
+    before: str,
+    after: str,
+    index: int,
+    *,
+    debug: Optional[str] = None,
+    title: Optional[str] = None,
+):
     """
     Create a comparison node dictionary using the provided before and after image paths.
 
@@ -19,5 +29,15 @@ def create_compare_node(before: str, after: str, index: int):
         "id": f"image_{index+1}",
         "value": f"Comparison {index+1}"
     }
+    if title:
+        node["value"] = title
+
+    if debug:
+        node["cells"]["lfImage_debug"] = {
+            "shape": "image",
+            "lfValue": f"{debug}",
+            "value": ""
+        }
+
     return node
 # endregion
