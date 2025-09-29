@@ -5423,7 +5423,7 @@ var tt = false, et = (t2, e2, n2) => {
                         const n6 = t7.i.replace(/-/g, "_"), o6 = t7.T;
                         if (!o6) return;
                         const i3 = r.get(o6);
-                        return i3 ? i3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-4ba08932.entry.js": () => import("./p-4ba08932.entry-C7AA7swE.js"), "./p-60af2d7f.entry.js": () => import("./p-60af2d7f.entry-BrXahBVo.js"), "./p-746a8577.entry.js": () => import("./p-746a8577.entry-CVXZc52y.js"), "./p-7652d72d.entry.js": () => import("./p-7652d72d.entry-COsZOH3k.js"), "./p-79cc15c2.entry.js": () => import("./p-79cc15c2.entry-CbaFMuHi.js"), "./p-846257eb.entry.js": () => import("./p-846257eb.entry-ZDhBmaoo.js"), "./p-84927cea.entry.js": () => import("./p-84927cea.entry-BuszujXF.js"), "./p-928c4970.entry.js": () => import("./p-928c4970.entry-CLH4yVjE.js"), "./p-a147e6c9.entry.js": () => import("./p-a147e6c9.entry-6FeiPQrh.js"), "./p-a14c6d82.entry.js": () => import("./p-a14c6d82.entry-BW2DnH7u.js"), "./p-a7fc1135.entry.js": () => import("./p-a7fc1135.entry-BhjbIPSJ.js"), "./p-bd214b33.entry.js": () => import("./p-bd214b33.entry-90Rz6v5B.js"), "./p-bf8a47d4.entry.js": () => import("./p-bf8a47d4.entry-eitZ3vwv.js"), "./p-ccea11a0.entry.js": () => import("./p-ccea11a0.entry-Bd8Kucd3.js"), "./p-dbe042fd.entry.js": () => import("./p-dbe042fd.entry-CwzeLSge.js"), "./p-e2689624.entry.js": () => import("./p-e2689624.entry-CtwBz7Ql.js") }), `./${o6}.entry.js`, 2).then(((t8) => (r.set(o6, t8), t8[n6])), ((t8) => {
+                        return i3 ? i3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-4ba08932.entry.js": () => import("./p-4ba08932.entry-DUi_8NlJ.js"), "./p-60af2d7f.entry.js": () => import("./p-60af2d7f.entry-BosFBnRo.js"), "./p-746a8577.entry.js": () => import("./p-746a8577.entry-CcVBBnxx.js"), "./p-7652d72d.entry.js": () => import("./p-7652d72d.entry-D2fEpIS9.js"), "./p-79cc15c2.entry.js": () => import("./p-79cc15c2.entry-BvLp6XCO.js"), "./p-846257eb.entry.js": () => import("./p-846257eb.entry-C7gUwmBw.js"), "./p-84927cea.entry.js": () => import("./p-84927cea.entry-DzSNh4OD.js"), "./p-928c4970.entry.js": () => import("./p-928c4970.entry-BX1JCnzQ.js"), "./p-a147e6c9.entry.js": () => import("./p-a147e6c9.entry-DpkAWPZt.js"), "./p-a14c6d82.entry.js": () => import("./p-a14c6d82.entry-Dsl13v2B.js"), "./p-a7fc1135.entry.js": () => import("./p-a7fc1135.entry-_DXkvaXm.js"), "./p-bd214b33.entry.js": () => import("./p-bd214b33.entry-CrPnRMap.js"), "./p-bf8a47d4.entry.js": () => import("./p-bf8a47d4.entry-MD7Ip_zF.js"), "./p-ccea11a0.entry.js": () => import("./p-ccea11a0.entry-C_p95ghi.js"), "./p-dbe042fd.entry.js": () => import("./p-dbe042fd.entry-Cqxu3Si9.js"), "./p-e2689624.entry.js": () => import("./p-e2689624.entry-BnUmPpvX.js") }), `./${o6}.entry.js`, 2).then(((t8) => (r.set(o6, t8), t8[n6])), ((t8) => {
                           l(t8, e3.$hostElement$);
                         }));
                         /*!__STENCIL_STATIC_IMPORT_SWITCH__*/
@@ -8482,6 +8482,45 @@ const TREE_DATA = {
     //#endregion
   ]
 };
+var LfEventName;
+(function(LfEventName2) {
+  LfEventName2["LfAccordion"] = "lf-accordion-event";
+  LfEventName2["LfArticle"] = "lf-article-event";
+  LfEventName2["LfButton"] = "lf-button-event";
+  LfEventName2["LfCanvas"] = "lf-canvas-event";
+  LfEventName2["LfCard"] = "lf-card-event";
+  LfEventName2["LfCarousel"] = "lf-carousel-event";
+  LfEventName2["LfChat"] = "lf-chat-event";
+  LfEventName2["LfChart"] = "lf-chart-event";
+  LfEventName2["LfChip"] = "lf-chip-event";
+  LfEventName2["LfCode"] = "lf-code-event";
+  LfEventName2["LfCompare"] = "lf-compare-event";
+  LfEventName2["LfImageviewer"] = "lf-imageviewer-event";
+  LfEventName2["LfList"] = "lf-list-event";
+  LfEventName2["LfManager"] = "lf-manager-ready";
+  LfEventName2["LfMasonry"] = "lf-masonry-event";
+  LfEventName2["LfMessenger"] = "lf-messenger-event";
+  LfEventName2["LfProgressbar"] = "lf-progressbar-event";
+  LfEventName2["LfSlider"] = "lf-slider-event";
+  LfEventName2["LfSpinner"] = "lf-spinner-event";
+  LfEventName2["LfTabbar"] = "lf-tabbar-event";
+  LfEventName2["LfTextfield"] = "lf-textfield-event";
+  LfEventName2["LfToggle"] = "lf-toggle-event";
+  LfEventName2["LfTree"] = "lf-tree-event";
+  LfEventName2["LfUpload"] = "lf-upload-event";
+  LfEventName2["Textarea"] = "textarea-event";
+})(LfEventName || (LfEventName = {}));
+function getPathColumn(dataset) {
+  var _a;
+  return ((_a = dataset == null ? void 0 : dataset.columns) == null ? void 0 : _a.find((c2) => c2.id === ImageEditorColumnId.Path)) || null;
+}
+function getStatusColumn(dataset) {
+  var _a;
+  return ((_a = dataset == null ? void 0 : dataset.columns) == null ? void 0 : _a.find((c2) => c2.id === ImageEditorColumnId.Status)) || null;
+}
+function parseLabel(data) {
+  return data.isMandatory ? `${data.ariaLabel}*` : data.ariaLabel;
+}
 const refreshValues = async (state, addSnapshot = false) => {
   const { elements, filter } = state;
   const { controls } = elements;
@@ -8561,219 +8600,6 @@ const updateCb = async (state, addSnapshot = false, force = false) => {
   }
   return success;
 };
-const createEventHandlers = ({ handleInterruptForState: handleInterruptForState2, prepSettings: prepSettings2 }) => {
-  const handlers = {
-    //#region Button
-    button: async (state, e2) => {
-      var _a;
-      const { comp, eventType } = e2.detail;
-      if (eventType === "click") {
-        const isPatched = ((_a = api) == null ? void 0 : _a[LFInterruptFlags.PatchedInterrupt]) === true;
-        switch (comp.lfIcon) {
-          case ImageEditorIcons.Interrupt:
-            getApiRoutes().comfy.interrupt();
-            if (!isPatched) {
-              await handleInterruptForState2(state);
-            }
-            break;
-          case ImageEditorIcons.Resume:
-            await handleInterruptForState2(state);
-            break;
-        }
-      }
-    },
-    //#endregion
-    //#region Canvas
-    canvas: async (state, e2) => {
-      const { comp, eventType, points } = e2.detail;
-      const { filter, filterType } = state;
-      switch (eventType) {
-        case "stroke":
-          const originalFilter = filter;
-          const originalFilterType = filterType;
-          const canvas = await comp.getCanvas();
-          const b64Canvas = canvasToBase64(canvas);
-          if (filterType !== "brush" && !(filter == null ? void 0 : filter.hasCanvasAction)) {
-            state.filterType = "brush";
-          }
-          const brushDefaults = {
-            ...SETTINGS.brush.settings,
-            ...state.lastBrushSettings
-          };
-          const temporaryFilter = {
-            ...JSON.parse(JSON.stringify(SETTINGS.brush)),
-            settings: {
-              ...brushDefaults,
-              b64_canvas: b64Canvas,
-              color: comp.lfColor ?? brushDefaults.color,
-              opacity: comp.lfOpacity ?? brushDefaults.opacity,
-              points,
-              size: comp.lfSize ?? brushDefaults.size
-            }
-          };
-          state.filter = temporaryFilter;
-          try {
-            await updateCb(state, true, true);
-          } finally {
-            if (originalFilter == null ? void 0 : originalFilter.hasCanvasAction) {
-              const existingSettings = originalFilter.settings ?? {};
-              originalFilter.settings = {
-                ...existingSettings,
-                b64_canvas: b64Canvas
-              };
-            }
-            state.filter = originalFilter;
-            state.filterType = originalFilterType;
-            await comp.clearCanvas();
-          }
-          break;
-      }
-    },
-    //#endregion
-    //#region Imageviewer
-    imageviewer: async (state, e2) => {
-      var _a;
-      const { comp, eventType, originalEvent } = e2.detail;
-      const { node } = state;
-      switch (eventType) {
-        case "lf-event": {
-          const ogEv = originalEvent;
-          switch (ogEv.detail.eventType) {
-            case "click":
-              if (isTree(ogEv.detail.comp)) {
-                const { node: node2 } = ogEv.detail;
-                if ((_a = node2.cells) == null ? void 0 : _a.lfCode) {
-                  prepSettings2(state, node2);
-                }
-              }
-              break;
-            case "ready":
-              const c2 = ogEv.detail.comp;
-              const isCanvas = c2.rootElement.tagName.toLowerCase() === "lf-canvas";
-              if (isCanvas) {
-                const { color, opacity, size } = SETTINGS.brush.settings;
-                c2.lfColor = color;
-                c2.lfOpacity = opacity;
-                c2.lfSize = size;
-              }
-              break;
-            case "stroke": {
-              const canvasEv = ogEv;
-              await handlers.canvas(state, canvasEv);
-              break;
-            }
-          }
-          break;
-        }
-        case "ready": {
-          const { navigation } = await comp.getComponents();
-          switch (node.comfyClass) {
-            case NodeName.imagesEditingBreakpoint:
-              navigation.load.lfLabel = "";
-              navigation.load.lfUiState = "disabled";
-              navigation.textfield.lfLabel = "Previews are visible in your ComfyUI/temp folder";
-              navigation.textfield.lfUiState = "disabled";
-              break;
-            default:
-              navigation.textfield.lfLabel = "Directory (relative to ComfyUI/input)";
-              break;
-          }
-          break;
-        }
-      }
-    },
-    //#endregion
-    //#region Slider
-    slider: async (state, e2) => {
-      const { eventType } = e2.detail;
-      const { update } = state;
-      const { preview, snapshot } = update;
-      switch (eventType) {
-        case "change":
-          registerManualApplyChange(state);
-          snapshot();
-          break;
-        case "input":
-          registerManualApplyChange(state);
-          const debouncedSlider = debounce(preview, 300);
-          debouncedSlider();
-          break;
-      }
-    },
-    //#endregion
-    //#region Textfield
-    textfield: async (state, e2) => {
-      const { eventType } = e2.detail;
-      const { update } = state;
-      const { preview, snapshot } = update;
-      switch (eventType) {
-        case "change":
-          registerManualApplyChange(state);
-          snapshot();
-          break;
-        case "input":
-          registerManualApplyChange(state);
-          const debouncedTextfield = debounce(preview, 300);
-          debouncedTextfield();
-          break;
-      }
-    },
-    //#endregion
-    //#region Toggle
-    toggle: async (state, e2) => {
-      const { eventType } = e2.detail;
-      const { update } = state;
-      const { snapshot } = update;
-      switch (eventType) {
-        case "change":
-          registerManualApplyChange(state);
-          snapshot();
-          break;
-      }
-    }
-    //#endregion
-  };
-  return handlers;
-};
-function getPathColumn(dataset) {
-  var _a;
-  return ((_a = dataset == null ? void 0 : dataset.columns) == null ? void 0 : _a.find((c2) => c2.id === ImageEditorColumnId.Path)) || null;
-}
-function getStatusColumn(dataset) {
-  var _a;
-  return ((_a = dataset == null ? void 0 : dataset.columns) == null ? void 0 : _a.find((c2) => c2.id === ImageEditorColumnId.Status)) || null;
-}
-function parseLabel(data) {
-  return data.isMandatory ? `${data.ariaLabel}*` : data.ariaLabel;
-}
-var LfEventName;
-(function(LfEventName2) {
-  LfEventName2["LfAccordion"] = "lf-accordion-event";
-  LfEventName2["LfArticle"] = "lf-article-event";
-  LfEventName2["LfButton"] = "lf-button-event";
-  LfEventName2["LfCanvas"] = "lf-canvas-event";
-  LfEventName2["LfCard"] = "lf-card-event";
-  LfEventName2["LfCarousel"] = "lf-carousel-event";
-  LfEventName2["LfChat"] = "lf-chat-event";
-  LfEventName2["LfChart"] = "lf-chart-event";
-  LfEventName2["LfChip"] = "lf-chip-event";
-  LfEventName2["LfCode"] = "lf-code-event";
-  LfEventName2["LfCompare"] = "lf-compare-event";
-  LfEventName2["LfImageviewer"] = "lf-imageviewer-event";
-  LfEventName2["LfList"] = "lf-list-event";
-  LfEventName2["LfManager"] = "lf-manager-ready";
-  LfEventName2["LfMasonry"] = "lf-masonry-event";
-  LfEventName2["LfMessenger"] = "lf-messenger-event";
-  LfEventName2["LfProgressbar"] = "lf-progressbar-event";
-  LfEventName2["LfSlider"] = "lf-slider-event";
-  LfEventName2["LfSpinner"] = "lf-spinner-event";
-  LfEventName2["LfTabbar"] = "lf-tabbar-event";
-  LfEventName2["LfTextfield"] = "lf-textfield-event";
-  LfEventName2["LfToggle"] = "lf-toggle-event";
-  LfEventName2["LfTree"] = "lf-tree-event";
-  LfEventName2["LfUpload"] = "lf-upload-event";
-  LfEventName2["Textarea"] = "textarea-event";
-})(LfEventName || (LfEventName = {}));
 const createPrepSettings = (deps) => {
   const { onSlider, onTextfield, onToggle } = deps;
   return (state, node) => {
@@ -8959,6 +8785,14 @@ async function resetSettings(settings) {
     }
   }
 }
+const setBrush = async (canvas, lastBrushSettings) => {
+  if (canvas) {
+    const { color, opacity, size } = lastBrushSettings;
+    canvas.lfColor = color;
+    canvas.lfOpacity = opacity;
+    canvas.lfSize = size;
+  }
+};
 const applyFilterDefaults = (state, defaults) => {
   const { filter } = state;
   if (!filter) {
@@ -8997,6 +8831,177 @@ const applyFilterDefaults = (state, defaults) => {
       }
     });
   });
+};
+const createEventHandlers = ({ handleInterruptForState: handleInterruptForState2, prepSettings: prepSettings2 }) => {
+  const handlers = {
+    //#region Button
+    button: async (state, e2) => {
+      var _a;
+      const { comp, eventType } = e2.detail;
+      if (eventType === "click") {
+        const isPatched = ((_a = api) == null ? void 0 : _a[LFInterruptFlags.PatchedInterrupt]) === true;
+        switch (comp.lfIcon) {
+          case ImageEditorIcons.Interrupt:
+            getApiRoutes().comfy.interrupt();
+            if (!isPatched) {
+              await handleInterruptForState2(state);
+            }
+            break;
+          case ImageEditorIcons.Resume:
+            await handleInterruptForState2(state);
+            break;
+        }
+      }
+    },
+    //#endregion
+    //#region Canvas
+    canvas: async (state, e2) => {
+      const { comp, eventType, points } = e2.detail;
+      const { filter, filterType } = state;
+      switch (eventType) {
+        case "stroke":
+          const originalFilter = filter;
+          const originalFilterType = filterType;
+          const canvas = await comp.getCanvas();
+          const b64Canvas = canvasToBase64(canvas);
+          if (filterType !== "brush" && !(filter == null ? void 0 : filter.hasCanvasAction)) {
+            state.filterType = "brush";
+          }
+          const brushDefaults = {
+            ...SETTINGS.brush.settings,
+            ...state.lastBrushSettings
+          };
+          const temporaryFilter = {
+            ...JSON.parse(JSON.stringify(SETTINGS.brush)),
+            settings: {
+              ...brushDefaults,
+              b64_canvas: b64Canvas,
+              color: comp.lfColor ?? brushDefaults.color,
+              opacity: comp.lfOpacity ?? brushDefaults.opacity,
+              points,
+              size: comp.lfSize ?? brushDefaults.size
+            }
+          };
+          state.filter = temporaryFilter;
+          try {
+            await updateCb(state, true, true);
+          } finally {
+            if (originalFilter == null ? void 0 : originalFilter.hasCanvasAction) {
+              const existingSettings = originalFilter.settings ?? {};
+              originalFilter.settings = {
+                ...existingSettings,
+                b64_canvas: b64Canvas
+              };
+            }
+            state.filter = originalFilter;
+            state.filterType = originalFilterType;
+            await comp.clearCanvas();
+          }
+          break;
+      }
+    },
+    //#endregion
+    //#region Imageviewer
+    imageviewer: async (state, e2) => {
+      var _a;
+      const { comp, eventType, originalEvent } = e2.detail;
+      const { node } = state;
+      switch (eventType) {
+        case "lf-event": {
+          const ogEv = originalEvent;
+          switch (ogEv.detail.eventType) {
+            case "click":
+              if (isTree(ogEv.detail.comp)) {
+                const { node: node2 } = ogEv.detail;
+                if ((_a = node2.cells) == null ? void 0 : _a.lfCode) {
+                  prepSettings2(state, node2);
+                }
+              }
+              break;
+            case "ready":
+              const c2 = ogEv.detail.comp;
+              const isCanvas = c2.rootElement.tagName.toLowerCase() === "lf-canvas";
+              if (isCanvas) {
+                setBrush(c2, SETTINGS.brush.settings);
+              }
+              break;
+            case "stroke": {
+              const canvasEv = ogEv;
+              await handlers.canvas(state, canvasEv);
+              break;
+            }
+          }
+          break;
+        }
+        case "ready": {
+          const { navigation } = await comp.getComponents();
+          switch (node.comfyClass) {
+            case NodeName.imagesEditingBreakpoint:
+              navigation.load.lfLabel = "";
+              navigation.load.lfUiState = "disabled";
+              navigation.textfield.lfLabel = "Previews are visible in your ComfyUI/temp folder";
+              navigation.textfield.lfUiState = "disabled";
+              break;
+            default:
+              navigation.textfield.lfLabel = "Directory (relative to ComfyUI/input)";
+              break;
+          }
+          break;
+        }
+      }
+    },
+    //#endregion
+    //#region Slider
+    slider: async (state, e2) => {
+      const { eventType } = e2.detail;
+      const { update } = state;
+      const { preview, snapshot } = update;
+      switch (eventType) {
+        case "change":
+          registerManualApplyChange(state);
+          snapshot();
+          break;
+        case "input":
+          registerManualApplyChange(state);
+          const debouncedSlider = debounce(preview, 300);
+          debouncedSlider();
+          break;
+      }
+    },
+    //#endregion
+    //#region Textfield
+    textfield: async (state, e2) => {
+      const { eventType } = e2.detail;
+      const { update } = state;
+      const { preview, snapshot } = update;
+      switch (eventType) {
+        case "change":
+          registerManualApplyChange(state);
+          snapshot();
+          break;
+        case "input":
+          registerManualApplyChange(state);
+          const debouncedTextfield = debounce(preview, 300);
+          debouncedTextfield();
+          break;
+      }
+    },
+    //#endregion
+    //#region Toggle
+    toggle: async (state, e2) => {
+      const { eventType } = e2.detail;
+      const { update } = state;
+      const { snapshot } = update;
+      switch (eventType) {
+        case "change":
+          registerManualApplyChange(state);
+          snapshot();
+          break;
+      }
+    }
+    //#endregion
+  };
+  return handlers;
 };
 function setGridStatus(status, grid, actionButtons) {
   const { interrupt, resume } = actionButtons;
@@ -9104,6 +9109,12 @@ const imageEditorFactory = {
             setGridStatus(ImageEditorStatus.Pending, grid, actionButtons);
           }
           imageviewer.lfDataset = parsedValue || {};
+          imageviewer.getComponents().then(({ details }) => {
+            const { canvas } = details;
+            if (canvas) {
+              setBrush(canvas, STATE$h.get(wrapper).lastBrushSettings);
+            }
+          });
         };
         normalizeValue(value, callback, CustomWidgetName.imageEditor);
       }
