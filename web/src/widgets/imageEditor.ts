@@ -1,5 +1,6 @@
 import { SETTINGS, TREE_DATA } from '../fixtures/imageEditor';
 import { EV_HANDLERS, getStatusColumn, setGridStatus, updateCb } from '../helpers/imageEditor';
+import { setBrush } from '../helpers/imageEditor/settings';
 import { LfEventName } from '../types/events/events';
 import { LogSeverity } from '../types/manager/manager';
 import {
@@ -40,6 +41,12 @@ export const imageEditorFactory: ImageEditorFactory = {
           }
 
           imageviewer.lfDataset = parsedValue || {};
+          imageviewer.getComponents().then(({ details }) => {
+            const { canvas } = details;
+            if (canvas) {
+              setBrush(canvas, STATE.get(wrapper).lastBrushSettings);
+            }
+          });
         };
 
         normalizeValue(value, callback, CustomWidgetName.imageEditor);

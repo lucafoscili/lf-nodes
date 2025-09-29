@@ -1,5 +1,6 @@
 import {
   LfButtonEventPayload,
+  LfCanvasElement,
   LfCanvasEventPayload,
   LfCanvasInterface,
   LfEvent,
@@ -25,6 +26,7 @@ import {
   LFInterruptFlags,
 } from '../../utils/common';
 import { registerManualApplyChange } from './manualApply';
+import { setBrush } from './settings';
 import { updateCb } from './update';
 /// @ts-ignore
 import { api } from '/scripts/api.js';
@@ -128,13 +130,10 @@ export const createEventHandlers = ({
               break;
 
             case 'ready':
-              const c = ogEv.detail.comp as LfCanvasInterface;
+              const c = ogEv.detail.comp as LfCanvasElement & LfCanvasInterface;
               const isCanvas = c.rootElement.tagName.toLowerCase() === 'lf-canvas';
               if (isCanvas) {
-                const { color, opacity, size } = SETTINGS.brush.settings;
-                c.lfColor = color;
-                c.lfOpacity = opacity;
-                c.lfSize = size;
+                setBrush(c, SETTINGS.brush.settings);
               }
               break;
 

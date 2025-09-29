@@ -1,3 +1,4 @@
+import { LfCanvasElement } from '@lf-widgets/foundations/dist';
 import { SETTINGS } from '../../fixtures/imageEditor';
 import { LfEventName } from '../../types/events/events';
 import {
@@ -250,6 +251,20 @@ export async function resetSettings(settings: HTMLElement) {
     }
   }
 }
+//#endregion
+
+//#region setBrush
+export const setBrush = async (
+  canvas: LfCanvasElement,
+  lastBrushSettings: ImageEditorBrushSettings,
+) => {
+  if (canvas) {
+    const { color, opacity, size } = lastBrushSettings;
+    canvas.lfColor = color;
+    canvas.lfOpacity = opacity;
+    canvas.lfSize = size;
+  }
+};
 //#endregion
 
 //#region applyFilterDefaults
