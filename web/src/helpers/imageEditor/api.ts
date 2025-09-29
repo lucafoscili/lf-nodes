@@ -14,7 +14,13 @@ export const apiCall = async (state: ImageEditorState, addSnapshot: boolean) => 
 
   const lfManager = getLfManager();
 
-  const snapshotValue = (await imageviewer.getCurrentSnapshot()).value;
+  const snapshot = await imageviewer.getCurrentSnapshot();
+  if (!snapshot) {
+    lfManager.log('No snapshot available for processing!', {}, LogSeverity.Warning);
+    return false;
+  }
+
+  const snapshotValue = snapshot.value;
   const baseSettings = filter.settings as ImageEditorRequestSettings<typeof filterType>;
   const payload: ImageEditorRequestSettings<typeof filterType> = {
     ...baseSettings,
