@@ -1,6 +1,7 @@
 import {
   LfButtonEventPayload,
   LfCanvasEventPayload,
+  LfCanvasInterface,
   LfEvent,
   LfImageviewerEventPayload,
   LfSliderEventPayload,
@@ -125,6 +126,18 @@ export const createEventHandlers = ({
                 }
               }
               break;
+
+            case 'ready':
+              const c = ogEv.detail.comp as LfCanvasInterface;
+              const isCanvas = c.rootElement.tagName.toLowerCase() === 'lf-canvas';
+              if (isCanvas) {
+                const { color, opacity, size } = SETTINGS.brush.settings;
+                c.lfColor = color;
+                c.lfOpacity = opacity;
+                c.lfSize = size;
+              }
+              break;
+
             case 'stroke': {
               const canvasEv = ogEv as CustomEvent<LfCanvasEventPayload>;
               await handlers.canvas(state, canvasEv);
@@ -136,6 +149,7 @@ export const createEventHandlers = ({
 
         case 'ready': {
           const { navigation } = await comp.getComponents();
+
           switch (node.comfyClass) {
             case NodeName.imagesEditingBreakpoint:
               navigation.load.lfLabel = '';
