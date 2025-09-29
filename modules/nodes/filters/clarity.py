@@ -67,11 +67,9 @@ class LF_Clarity:
         clarity_strength: float = normalize_list_to_value(kwargs.get("clarity_strength"))
         sharpen_amount: float = normalize_list_to_value(kwargs.get("sharpen_amount"))
         blur_kernel_size: int = normalize_list_to_value(kwargs.get("blur_kernel_size"))
+        clarity_amount: float = normalize_list_to_value(kwargs.get("clarity_amount"))
 
-        simple_amount = kwargs.get("clarity_amount")
-        clarity_amount = normalize_list_to_value(simple_amount) if simple_amount is not None else None
-
-        if clarity_amount is not None:
+        if clarity_amount != 0.0:
             amount = float(max(-1.0, min(1.0, clarity_amount)))
 
             clarity_strength = -amount * 4.0
