@@ -5423,7 +5423,7 @@ var tt = false, et = (t2, e2, n2) => {
                         const n6 = t7.i.replace(/-/g, "_"), o6 = t7.T;
                         if (!o6) return;
                         const i3 = r.get(o6);
-                        return i3 ? i3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-4ba08932.entry.js": () => import("./p-4ba08932.entry-CAo6VqOx.js"), "./p-60af2d7f.entry.js": () => import("./p-60af2d7f.entry-BPcOKYik.js"), "./p-746a8577.entry.js": () => import("./p-746a8577.entry-weNWRy1D.js"), "./p-7652d72d.entry.js": () => import("./p-7652d72d.entry-Az8bqsRZ.js"), "./p-79cc15c2.entry.js": () => import("./p-79cc15c2.entry-CAmJPcTT.js"), "./p-846257eb.entry.js": () => import("./p-846257eb.entry-CPG8xUDC.js"), "./p-84927cea.entry.js": () => import("./p-84927cea.entry-D-4TCVBx.js"), "./p-928c4970.entry.js": () => import("./p-928c4970.entry-C-pIWaoo.js"), "./p-a147e6c9.entry.js": () => import("./p-a147e6c9.entry-TAWFoRpE.js"), "./p-a14c6d82.entry.js": () => import("./p-a14c6d82.entry-j3kUOmIk.js"), "./p-a7fc1135.entry.js": () => import("./p-a7fc1135.entry-BjRYEvQV.js"), "./p-bd214b33.entry.js": () => import("./p-bd214b33.entry-LeP-_kYW.js"), "./p-bf8a47d4.entry.js": () => import("./p-bf8a47d4.entry-CcZA4DYk.js"), "./p-ccea11a0.entry.js": () => import("./p-ccea11a0.entry-U7atws2L.js"), "./p-dbe042fd.entry.js": () => import("./p-dbe042fd.entry-B3NlHXOP.js"), "./p-e2689624.entry.js": () => import("./p-e2689624.entry-CcNGy5J8.js") }), `./${o6}.entry.js`, 2).then(((t8) => (r.set(o6, t8), t8[n6])), ((t8) => {
+                        return i3 ? i3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-4ba08932.entry.js": () => import("./p-4ba08932.entry-C7AA7swE.js"), "./p-60af2d7f.entry.js": () => import("./p-60af2d7f.entry-BrXahBVo.js"), "./p-746a8577.entry.js": () => import("./p-746a8577.entry-CVXZc52y.js"), "./p-7652d72d.entry.js": () => import("./p-7652d72d.entry-COsZOH3k.js"), "./p-79cc15c2.entry.js": () => import("./p-79cc15c2.entry-CbaFMuHi.js"), "./p-846257eb.entry.js": () => import("./p-846257eb.entry-ZDhBmaoo.js"), "./p-84927cea.entry.js": () => import("./p-84927cea.entry-BuszujXF.js"), "./p-928c4970.entry.js": () => import("./p-928c4970.entry-CLH4yVjE.js"), "./p-a147e6c9.entry.js": () => import("./p-a147e6c9.entry-6FeiPQrh.js"), "./p-a14c6d82.entry.js": () => import("./p-a14c6d82.entry-BW2DnH7u.js"), "./p-a7fc1135.entry.js": () => import("./p-a7fc1135.entry-BhjbIPSJ.js"), "./p-bd214b33.entry.js": () => import("./p-bd214b33.entry-90Rz6v5B.js"), "./p-bf8a47d4.entry.js": () => import("./p-bf8a47d4.entry-eitZ3vwv.js"), "./p-ccea11a0.entry.js": () => import("./p-ccea11a0.entry-Bd8Kucd3.js"), "./p-dbe042fd.entry.js": () => import("./p-dbe042fd.entry-CwzeLSge.js"), "./p-e2689624.entry.js": () => import("./p-e2689624.entry-CtwBz7Ql.js") }), `./${o6}.entry.js`, 2).then(((t8) => (r.set(o6, t8), t8[n6])), ((t8) => {
                           l(t8, e3.$hostElement$);
                         }));
                         /*!__STENCIL_STATIC_IMPORT_SWITCH__*/
@@ -8645,6 +8645,16 @@ const createEventHandlers = ({ handleInterruptForState: handleInterruptForState2
                 if ((_a = node2.cells) == null ? void 0 : _a.lfCode) {
                   prepSettings2(state, node2);
                 }
+              }
+              break;
+            case "ready":
+              const c2 = ogEv.detail.comp;
+              const isCanvas = c2.rootElement.tagName.toLowerCase() === "lf-canvas";
+              if (isCanvas) {
+                const { color, opacity, size } = SETTINGS.brush.settings;
+                c2.lfColor = color;
+                c2.lfOpacity = opacity;
+                c2.lfSize = size;
               }
               break;
             case "stroke": {

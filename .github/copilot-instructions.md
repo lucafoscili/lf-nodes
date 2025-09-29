@@ -37,6 +37,6 @@
 
 ## Key references
 
-- `docs/ARCHITECTURE.md` for the end-to-end overview; `docs/NODE_TEMPLATE.md` for implementation conventions.
+- `docs/ARCHITECTURE.md` for the end-to-end overview; `docs/NODE_TEMPLATE.md` for implementation conventions; `docs/IMAGE_EDITOR.md` for the image editor widget.
 - `modules/utils/helpers/logic/normalize_conditioning.py` guards CONDITIONING payloads; never treat them like scalars.
 - `web/src/utils/common.ts` centralizes ComfyUI hook flags and widget utilities; reuse its helpers (`createDOMWidget`, `refreshChart`, JSON tooling) instead of reinventing them.
