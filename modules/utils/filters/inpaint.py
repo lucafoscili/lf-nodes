@@ -1,5 +1,6 @@
 from typing import Dict, Tuple
 
+import os
 import random
 import torch
 import torch.nn.functional as F
@@ -9,12 +10,13 @@ import nodes
 
 from ..constants import SAMPLERS, SCHEDULERS
 from ..helpers.api import get_resource_url
-from ..helpers.comfy import resolve_filepath
+from ..helpers.comfy import get_comfy_dir, resolve_filepath
 from ..helpers.conversion import base64_to_tensor, convert_to_boolean, convert_to_float, convert_to_int, tensor_to_pil
 from ..helpers.editing import get_editing_context
 
 FilterResult = Tuple[torch.Tensor, Dict[str, str]]
 
+# region Sample Without Preview
 def sample_without_preview(
     model,
     positive,
@@ -78,7 +80,9 @@ def sample_without_preview(
     out_latent["samples"] = samples
 
     return out_latent
+# endregion
 
+# region Perform Inpaint
 def perform_inpaint(
     *,
     model,
@@ -191,7 +195,9 @@ def perform_inpaint(
         mask_to_blend = mask_to_blend.expand(-1, -1, -1, decoded.shape[-1])
 
     return decoded * mask_to_blend + image * (1.0 - mask_to_blend)
+# endregion
 
+# region Helpers for Inpaint Node
 def _prepare_inpaint_region(
     base_image: torch.Tensor,
     mask_tensor: torch.Tensor,
@@ -488,7 +494,9 @@ def _normalize_seed(raw_value):
         value = -1
 
     return int(value)
+# endregion
 
+# region Apply Inpaint Filter
 def apply_inpaint_filter(image: torch.Tensor, settings: dict) -> FilterResult:
     """
     Applies an inpainting filter to the given image using the provided settings and editing context.
@@ -605,12 +613,26 @@ def apply_inpaint_filter(image: torch.Tensor, settings: dict) -> FilterResult:
 
     mask_preview_tensor = mask_tensor.detach().cpu().unsqueeze(-1).repeat(1, 1, 1, 3)
     mask_image = tensor_to_pil(mask_preview_tensor)
+
+    mask_save_type = str(settings.get("resource_type") or settings.get("output_type") or "temp")
+    mask_base_output = get_comfy_dir(mask_save_type)
+
+    mask_subfolder_raw = settings.get("subfolder")
+    if isinstance(mask_subfolder_raw, str) and mask_subfolder_raw.strip():
+        mask_normalized_subfolder = os.path.normpath(mask_subfolder_raw.strip()).strip("\\/")
+        if mask_normalized_subfolder.startswith(".."):
+            raise ValueError("Invalid subfolder path.")
+    else:
+        mask_normalized_subfolder = ""
+
+    mask_prefix = os.path.join(mask_normalized_subfolder, "inpaint_mask") if mask_normalized_subfolder else "inpaint_mask"
     mask_output_file, mask_subfolder, mask_filename = resolve_filepath(
-        filename_prefix="inpaint_mask",
+        filename_prefix=mask_prefix,
+        base_output_path=mask_base_output,
         image=mask_preview_tensor,
     )
     mask_image.save(mask_output_file, format="PNG")
-    mask_url = get_resource_url(mask_subfolder, mask_filename, "temp")
+    mask_url = get_resource_url((mask_subfolder or "").replace("\\", "/"), mask_filename, mask_save_type)
 
     steps = max(1, int(round(convert_to_int(settings.get("steps", 20)))))
     denoise_value = convert_to_float(settings.get("denoise", settings.get("denoise_percentage", 100.0)))
@@ -688,7 +710,9 @@ def apply_inpaint_filter(image: torch.Tensor, settings: dict) -> FilterResult:
     info_with_mask.update(info)
 
     return processed, info_with_mask
+# endregion
 
+# region Apply Inpaint Filter (Tensor Mask)
 def apply_inpaint_filter_tensor(
     image: torch.Tensor,
     mask: torch.Tensor,
@@ -775,3 +799,4 @@ def apply_inpaint_filter_tensor(
     )
 
     return processed, info
+# endregion
