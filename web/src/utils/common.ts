@@ -81,6 +81,14 @@ export const isToggle = (comp: LfComponent): comp is LfToggleInterface => {
 export const areJSONEqual = (a: unknown, b: unknown) => {
   return JSON.stringify(a) === JSON.stringify(b);
 };
+export const isJSONLikeString = (value: unknown): value is string => {
+  return (
+    typeof value === 'string' &&
+    ((value.trim().startsWith('{') && value.trim().endsWith('}')) ||
+      (value.trim().startsWith('[') && value.trim().endsWith(']'))) &&
+    value.indexOf('"') !== -1
+  );
+};
 export const isValidJSON = (value: unknown) => {
   try {
     JSON.stringify(value);
@@ -103,8 +111,8 @@ export const unescapeJson = (input: any): UnescapeJSONPayload => {
     return newStr;
   };
 
-  const deepParse = (data: any) => {
-    if (typeof data === 'string') {
+  const deepParse = (data: unknown) => {
+    if (isJSONLikeString(data)) {
       try {
         const innerJson = JSON.parse(data);
         if (typeof innerJson === 'object' && innerJson !== null) {
@@ -122,9 +130,9 @@ export const unescapeJson = (input: any): UnescapeJSONPayload => {
   };
 
   try {
-    parsedJson = JSON.parse(input);
+    parsedJson = isJSONLikeString(input) ? JSON.parse(input) : input;
     validJson = true;
-    parsedJson = deepParse(parsedJson);
+    parsedJson = deepParse(parsedJson) as Record<string, unknown>;
     unescapedStr = JSON.stringify(parsedJson, null, 2);
   } catch (error) {
     if (typeof input === 'object' && input !== null) {
