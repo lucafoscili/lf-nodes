@@ -22,26 +22,35 @@ class LF_JSONPromptCombinator:
                     "tooltip": "Separator between merged parts."
                 }),
                 "include_keys": (Input.BOOLEAN, {
-                    "default": False, "tooltip": "Include path keys before each leaf."
+                    "default": False,
+                    "tooltip": "Include path keys before each leaf."
                 }),
                 "full_path_keys": (Input.BOOLEAN, {
-                    "default": False, "tooltip": "If true and include_keys, use full path; else only last key."
+                    "default": False,
+                    "tooltip": "If true and include_keys, use full path; else only last key."
                 }),
                 "generate_root_prompts": (Input.BOOLEAN, {
-                    "default": False, "tooltip": "Include standalone root-level direct string leaves."
+                    "default": False,
+                    "tooltip": "Include standalone root-level direct string leaves."
                 }),
                 "dedupe": (Input.BOOLEAN, {
-                    "default": True, "tooltip": "Remove duplicate final prompts."
+                    "default": True,
+                    "tooltip": "Remove duplicate final prompts."
                 }),
                 "max_combinations": (Input.INTEGER, {
-                    "default": 5000, "min": 1, "max": 200000, "tooltip": "Safety cap."
+                    "default": 5000,
+                    "min": 1,
+                    "max": 200000,
+                    "tooltip": "Safety cap."
                 }),
                 "shuffle": (Input.BOOLEAN, {
                     "default": False,
                     "tooltip": "Randomize order (after generation, before limiting)."
                 }),
                 "limit": (Input.INTEGER, {
-                    "default": 0, "min": 0, "tooltip": "If > 0, limit number of prompts after processing."
+                    "default": 0,
+                    "min": 0,
+                    "tooltip": "If > 0, limit number of prompts after processing."
                 }),
                 "ui_widget": (Input.LF_CODE, {
                     "default": ""

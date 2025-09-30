@@ -12,9 +12,10 @@ class LF_KeywordToggleFromJSON:
                     "tooltip": "LF Widgets compatible JSON dataset."
                 }),
                 "separator": (Input.STRING, {
-                    "default": ", ", "tooltip": "Separator for keywords in the output prompt."
+                    "default": ", ",
+                    "tooltip": "Separator for keywords in the output prompt."
                 }),
-                "ui_widget": ("LF_CHIP", {
+                "ui_widget": (Input.LF_CHIP, {
                     "default": ""
                 })
             },
