@@ -1,3 +1,5 @@
+import json
+
 from itertools import combinations
 
 from server import PromptServer
@@ -58,7 +60,11 @@ class LF_Something2String:
             if isinstance(input_item, list):
                 return [str(sub_item) for item in input_item for sub_item in flatten_input(item)]
             elif isinstance(input_item, (dict, bool, float, int)):
-                flattened_value = str(input_item)
+                try:
+                    flattened_value = json.dumps(input_item, ensure_ascii=False)
+                except Exception:
+                    flattened_value = str(input_item)
+
                 breakdown.append(f"**{type(input_item).__name__}** detected => {flattened_value}")
                 return [flattened_value]
             elif input_item is not None:
