@@ -1,11 +1,11 @@
-import { n, I as I$1, q as LF_COMPARE_BLOCKS, C as CY_ATTRIBUTES, a as LF_ATTRIBUTES, r as LF_COMPARE_PARTS, c as LF_STYLE_ID, s as LF_COMPARE_CSS_VARS, d as LF_WRAPPER_ID, t as LF_COMPARE_DEFAULTS, u as LF_COMPARE_PROPS, m as mt, W as W$1, f as L$1, G, k as kt, v as LF_COMPARE_IDS } from "./index-DyIJGFvp.js";
-import { o } from "./p-DklcdYZv-BrxmsKHs.js";
-import { f } from "./p-HvQH5Jh2-DgZlLIDb.js";
+import { n, I as I$1, bk as LF_COMPARE_BLOCKS, C as CY_ATTRIBUTES, a as LF_ATTRIBUTES, bl as LF_COMPARE_PARTS, c as LF_STYLE_ID, bm as LF_COMPARE_CSS_VARS, d as LF_WRAPPER_ID, bn as LF_COMPARE_DEFAULTS, bo as LF_COMPARE_PROPS, m as mt, W as W$1, f as L$1, G, k as kt, bp as LF_COMPARE_IDS } from "./index-BXreadi9.js";
+import { o } from "./p-DklcdYZv-DiItl7sc.js";
+import { f } from "./p-HvQH5Jh2-B5iF4tLG.js";
 const w = (e, t, r) => {
   const i = { nodes: [] };
   for (let a = 0; a < r.length; a++) {
-    const s = r[a], o2 = String(a).valueOf();
-    i.nodes.push({ icon: e === s && t, id: o2, value: `#${o2}` });
+    const s = r[a], o2 = String(a).valueOf(), l = "string" == typeof s.value && s.value.trim().length > 0;
+    i.nodes.push({ icon: e === s && t, id: o2, value: l ? s.value : `#${o2}` });
   }
   return i;
 }, k = (e) => ({ ...e, defaults: LF_COMPARE_DEFAULTS() }), y = (t) => /* @__PURE__ */ ((t2) => ({ changeView: () => {

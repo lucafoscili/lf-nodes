@@ -1,6 +1,6 @@
-import { n, I, ap as LF_BADGE_BLOCKS, a as LF_ATTRIBUTES, aq as LF_BADGE_PARTS, c as LF_STYLE_ID, d as LF_WRAPPER_ID, ar as LF_BADGE_PROPS, m as mt, W as W$1, f as L, G, as as LF_BUTTON_BLOCKS, at as LF_BUTTON_PARTS, C as CY_ATTRIBUTES, au as LF_BUTTON_PROPS, av as LF_CANVAS_BLOCKS, aw as LF_CANVAS_PARTS, ax as LF_CANVAS_PROPS, ay as LF_CARD_BLOCKS, az as LF_CARD_PARTS, aA as LF_CARD_CSS_VARS, aB as LF_CARD_DEFAULTS, aC as LF_CARD_PROPS, aD as LF_CHART_BLOCKS, aE as LF_CHART_PARTS, aF as LF_CHART_CSS_VARS, aG as LF_THEME_COLORS_DATA_PREFIX, aH as LF_CHART_PROPS, aI as LF_CHAT_BLOCKS, aJ as LF_CHAT_PARTS, k as kt$1, aK as LF_CHAT_PROPS, aL as LF_CHIP_BLOCKS, aM as LF_CHIP_PARTS, aN as LF_CHIP_PROPS, aO as LF_CODE_BLOCKS, aP as LF_CODE_PARTS, aQ as LF_CODE_PROPS, aR as LF_IMAGE_BLOCKS, aS as LF_IMAGE_PARTS, aT as LF_IMAGE_CSS_VARS, aU as LF_IMAGE_PROPS, aV as CSS_VAR_PREFIX, aW as LF_LIST_BLOCKS, aX as LF_LIST_PARTS, aY as LF_LIST_PROPS, aZ as LF_PHOTOFRAME_BLOCKS, a_ as LF_PHOTOFRAME_PARTS, a$ as LF_PHOTOFRAME_PROPS, b0 as LF_PROGRESSBAR_BLOCKS, b1 as LF_PROGRESSBAR_PARTS, b2 as LF_PROGRESSBAR_CSS_VARIABLES, b3 as LF_PROGRESSBAR_PROPS, b4 as LF_SPINNER_PROPS, b5 as LF_TEXTFIELD_BLOCKS, b6 as LF_TEXTFIELD_PARTS, b7 as LF_TEXTFIELD_PROPS, b8 as LF_TOGGLE_BLOCKS, b9 as LF_TOGGLE_PARTS, ba as LF_TOGGLE_PROPS, bb as LF_TYPEWRITER_BLOCKS, bc as LF_TYPEWRITER_PARTS, bd as LF_TYPEWRITER_PROPS, be as LF_UPLOAD_BLOCKS, bf as LF_UPLOAD_PARTS, bg as LF_UPLOAD_PROPS, bh as LF_BADGE_CSS_VARS, bi as LF_CHIP_CSS_VARS, bj as LF_CARD_IDS, bk as LF_CHAT_IDS, bl as LF_THEME_ICONS } from "./index-DyIJGFvp.js";
-import { o } from "./p-DklcdYZv-BrxmsKHs.js";
-import { f } from "./p-HvQH5Jh2-DgZlLIDb.js";
+import { n, I, an as LF_BADGE_BLOCKS, a as LF_ATTRIBUTES, ao as LF_BADGE_PARTS, c as LF_STYLE_ID, d as LF_WRAPPER_ID, ap as LF_BADGE_PROPS, m as mt, W as W$1, f as L, G, aq as LF_BUTTON_BLOCKS, ar as LF_BUTTON_PARTS, C as CY_ATTRIBUTES, as as LF_BUTTON_PROPS, at as LF_CANVAS_BLOCKS, au as LF_CANVAS_PARTS, av as LF_CANVAS_PROPS, aw as LF_CARD_BLOCKS, ax as LF_CARD_PARTS, ay as LF_CARD_CSS_VARS, az as LF_CARD_DEFAULTS, aA as LF_CARD_PROPS, aB as LF_CHART_BLOCKS, aC as LF_CHART_PARTS, aD as LF_CHART_CSS_VARS, aE as LF_THEME_COLORS_DATA_PREFIX, aF as LF_CHART_PROPS, aG as LF_CHAT_BLOCKS, aH as LF_CHAT_PARTS, k as kt$1, aI as LF_CHAT_PROPS, aJ as LF_CHIP_BLOCKS, aK as LF_CHIP_PARTS, aL as LF_CHIP_PROPS, aM as LF_CODE_BLOCKS, aN as LF_CODE_PARTS, aO as LF_CODE_PROPS, aP as LF_IMAGE_BLOCKS, aQ as LF_IMAGE_PARTS, aR as LF_IMAGE_CSS_VARS, aS as LF_IMAGE_PROPS, aT as CSS_VAR_PREFIX, aU as LF_LIST_BLOCKS, aV as LF_LIST_PARTS, aW as LF_LIST_PROPS, aX as LF_PHOTOFRAME_BLOCKS, aY as LF_PHOTOFRAME_PARTS, aZ as LF_PHOTOFRAME_PROPS, a_ as LF_PROGRESSBAR_BLOCKS, a$ as LF_PROGRESSBAR_PARTS, b0 as LF_PROGRESSBAR_CSS_VARIABLES, b1 as LF_PROGRESSBAR_PROPS, b2 as LF_SPINNER_PROPS, b3 as LF_TEXTFIELD_BLOCKS, b4 as LF_TEXTFIELD_PARTS, b5 as LF_TEXTFIELD_PROPS, b6 as LF_TOGGLE_BLOCKS, b7 as LF_TOGGLE_PARTS, b8 as LF_TOGGLE_PROPS, b9 as LF_TYPEWRITER_BLOCKS, ba as LF_TYPEWRITER_PARTS, bb as LF_TYPEWRITER_PROPS, bc as LF_UPLOAD_BLOCKS, bd as LF_UPLOAD_PARTS, be as LF_UPLOAD_PROPS, bf as LF_BADGE_CSS_VARS, bg as LF_CHIP_CSS_VARS, bh as LF_CARD_IDS, bi as LF_CHAT_IDS, bj as LF_THEME_ICONS } from "./index-BXreadi9.js";
+import { o } from "./p-DklcdYZv-DiItl7sc.js";
+import { f } from "./p-HvQH5Jh2-B5iF4tLG.js";
 var wt, xt, kt, Mt, zt, St, At = function(t4, n2, i, r) {
   if ("function" == typeof n2 ? t4 !== n2 || true : !n2.has(t4)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return n2.get(t4);
@@ -292,8 +292,11 @@ const tn = { get: (t4, n2) => {
   const { controller: n2, elements: i, handlers: e } = t5(), { refs: a } = i, { blocks: o2, cyAttributes: s, manager: l, parts: u } = n2.get, { assignRef: f2, theme: c } = l, { bemClass: h } = c, { onPointerDown: v, onPointerMove: d, onPointerOut: p, onPointerUp: m } = e.board;
   return W$1("canvas", { class: h(o2.canvas._, o2.canvas.board), "data-cy": s.canvas, onPointerDown: v, onPointerMove: d, onPointerOut: p, onPointerUp: m, part: u.board, ref: f2(a, "board") });
 }, image: () => {
-  const { controller: n2, elements: i } = t5(), { refs: e } = i, { blocks: a, compInstance: o2, cyAttributes: s, manager: l, parts: u } = n2.get, { assignRef: f2, sanitizeProps: c, theme: h } = l, { bemClass: v } = h;
-  return W$1("lf-image", { ...c(o2.lfImageProps, "LfImage"), class: v(a.canvas._, a.canvas.image), "data-cy": s.image, part: u.image, ref: f2(e, "image") });
+  const { controller: n2, elements: i, handlers: e } = t5(), { blocks: a, compInstance: o2, cyAttributes: s, manager: l, parts: u } = n2.get, { refs: f2 } = i, { onLoad: c } = e.image, { assignRef: h, sanitizeProps: v, theme: d } = l, { bemClass: p } = d;
+  return W$1("lf-image", { ...v(o2.lfImageProps, "LfImage"), class: p(a.canvas._, a.canvas.image), "data-cy": s.image, "onLf-image-event": (t6) => {
+    const { eventType: n3 } = t6.detail;
+    "load" === n3 && c(t6);
+  }, part: u.image, ref: h(f2, "image") });
 }, preview: () => {
   const { controller: n2, elements: i } = t5(), { blocks: e, cyAttributes: a, manager: o2, parts: s } = n2.get, { assignRef: l, theme: u } = o2, { refs: f2 } = i, { bemClass: c } = u;
   return W$1("canvas", { class: c(e.canvas._, e.canvas.preview), "data-cy": a.canvas, part: s.preview, ref: l(f2, "preview") });
@@ -333,6 +336,29 @@ const tn = { get: (t4, n2) => {
 }, onPointerUp: (n2) => {
   const { handlers: i } = t5(), { endCapture: r } = i.board;
   r(n2);
+} }, image: { onLoad: async (n2) => {
+  const i = t5(), { controller: r } = i, { get: e, set: a } = r, { compInstance: o2 } = e, s = await n2.detail.comp.getImage();
+  if (s) if (s instanceof HTMLImageElement) {
+    const { naturalWidth: t6, naturalHeight: n3 } = s;
+    a.orientation(t6 >= n3 ? "landscape" : "portrait");
+  } else if (s instanceof SVGElement) {
+    const t6 = s;
+    let n3 = 0, i2 = 0;
+    try {
+      const r2 = t6.getBBox ? t6.getBBox() : null;
+      r2 && r2.width && r2.height && (n3 = r2.width, i2 = r2.height);
+    } catch {
+    }
+    if (0 === n3 || 0 === i2) {
+      const t7 = s.getAttribute("width"), r2 = s.getAttribute("height");
+      n3 = n3 || parseFloat(t7 ?? "0"), i2 = i2 || parseFloat(r2 ?? "0");
+    }
+    n3 > 0 && i2 > 0 && a.orientation(n3 >= i2 ? "landscape" : "portrait");
+  } else {
+    const t6 = s.naturalWidth ?? s.width ?? 0, n3 = s.naturalHeight ?? s.height ?? 0;
+    t6 > 0 && n3 > 0 && a.orientation(t6 >= n3 ? "landscape" : "portrait");
+  }
+  o2.onLfEvent(n2, "lf-event");
 } } }))(t4), on = (t4) => ({ ctx: nn(t4), coordinates: tn, draw: rn(t4) });
 var sn, ln, un, fn, cn, hn, vn, dn, pn, mn, bn, gn, yn, wn = function(t4, n2, i, r) {
   if ("a" === i && !r) throw new TypeError("Private accessor was defined without a getter");
@@ -344,28 +370,28 @@ var sn, ln, un, fn, cn, hn, vn, dn, pn, mn, bn, gn, yn, wn = function(t4, n2, i,
 };
 const kn = class {
   constructor(i) {
-    n(this, i), this.lfEvent = I(this, "lf-canvas-event"), sn.add(this), this.isPainting = false, this.points = [], this.lfBrush = "round", this.lfColor = "#ff0000", this.lfCursor = "preview", this.lfImageProps = null, this.lfOpacity = 1, this.lfPreview = true, this.lfStrokeTolerance = null, this.lfSize = 10, this.lfStyle = "", ln.set(this, void 0), un.set(this, LF_CANVAS_BLOCKS), fn.set(this, CY_ATTRIBUTES), cn.set(this, LF_CANVAS_PARTS), hn.set(this, LF_STYLE_ID), vn.set(this, LF_WRAPPER_ID), dn.set(this, void 0), pn.set(this, void 0), mn.set(this, void 0), bn.set(this, void 0), gn.set(this, (() => {
+    n(this, i), this.lfEvent = I(this, "lf-canvas-event"), sn.add(this), this.isPainting = false, this.points = [], this.orientation = null, this.lfBrush = "round", this.lfColor = "#ff0000", this.lfCursor = "preview", this.lfImageProps = null, this.lfOpacity = 1, this.lfPreview = true, this.lfStrokeTolerance = null, this.lfSize = 10, this.lfStyle = "", ln.set(this, void 0), un.set(this, LF_CANVAS_BLOCKS), fn.set(this, CY_ATTRIBUTES), cn.set(this, LF_CANVAS_PARTS), hn.set(this, LF_STYLE_ID), vn.set(this, LF_WRAPPER_ID), dn.set(this, void 0), pn.set(this, void 0), mn.set(this, void 0), bn.set(this, void 0), gn.set(this, (() => {
       var t4;
-      xn(this, bn, { controller: { get: { blocks: wn(this, un, "f"), compInstance: this, cyAttributes: wn(this, fn, "f"), isCursorPreview: () => wn(this, sn, "m", yn).call(this), isPainting: () => this.isPainting, manager: wn(this, ln, "f"), parts: wn(this, cn, "f"), points: () => this.points }, set: { isPainting: (t5) => this.isPainting = t5, points: (t5) => this.points = t5 } }, elements: { jsx: en(t4 = () => wn(this, bn, "f")), refs: { board: null, image: null, preview: null } }, handlers: an(t4), toolkit: on(t4) });
+      xn(this, dn, { controller: { get: { blocks: wn(this, un, "f"), compInstance: this, cyAttributes: wn(this, fn, "f"), isCursorPreview: () => wn(this, sn, "m", yn).call(this), isPainting: () => this.isPainting, manager: wn(this, ln, "f"), orientation: () => this.orientation, parts: wn(this, cn, "f"), points: () => this.points }, set: { isPainting: (t5) => this.isPainting = t5, orientation: (t5) => this.orientation = t5, points: (t5) => this.points = t5 } }, elements: { jsx: en(t4 = () => wn(this, dn, "f")), refs: { board: null, image: null, preview: null } }, handlers: an(t4), toolkit: on(t4) });
     }));
   }
   onLfEvent(t4, n2) {
-    const { coordinates: i } = wn(this, bn, "f").toolkit, { lfStrokeTolerance: r, points: e, rootElement: a } = this;
+    const { coordinates: i } = wn(this, dn, "f").toolkit, { lfStrokeTolerance: r, points: e, rootElement: a } = this;
     this.lfEvent.emit({ comp: this, id: a.id, originalEvent: t4, eventType: n2, points: null !== r && (e == null ? void 0 : e.length) ? i.simplify(e, r) : e });
   }
   async clearCanvas(t4 = "board") {
-    const { clear: n2 } = wn(this, bn, "f").toolkit.ctx;
+    const { clear: n2 } = wn(this, dn, "f").toolkit.ctx;
     n2(t4);
   }
   async getCanvas(t4 = "board") {
-    const { board: n2, preview: i } = wn(this, bn, "f").elements.refs;
+    const { board: n2, preview: i } = wn(this, dn, "f").elements.refs;
     return "board" === t4 ? n2 : i;
   }
   async getDebugInfo() {
     return this.debugInfo;
   }
   async getImage() {
-    const { image: t4 } = wn(this, bn, "f").elements.refs;
+    const { image: t4 } = wn(this, dn, "f").elements.refs;
     return t4;
   }
   async getProps() {
@@ -376,22 +402,22 @@ const kn = class {
     mt(this);
   }
   async resizeCanvas() {
-    const { board: t4, preview: n2 } = wn(this, bn, "f").elements.refs, { height: i, width: r } = wn(this, dn, "f").getBoundingClientRect();
+    const { board: t4, preview: n2 } = wn(this, dn, "f").elements.refs, { height: i, width: r } = wn(this, pn, "f").getBoundingClientRect();
     t4.height = i, t4.width = r, wn(this, sn, "m", yn).call(this) && (n2.height = i, n2.width = r);
   }
   async setCanvasHeight(t4) {
-    const { board: n2, preview: i } = wn(this, bn, "f").elements.refs;
+    const { board: n2, preview: i } = wn(this, dn, "f").elements.refs;
     if (void 0 !== t4) n2.height = t4, wn(this, sn, "m", yn).call(this) && (i.height = t4);
     else {
-      const { height: t5 } = wn(this, dn, "f").getBoundingClientRect();
+      const { height: t5 } = wn(this, pn, "f").getBoundingClientRect();
       n2.height = t5, wn(this, sn, "m", yn).call(this) && (i.height = t5);
     }
   }
   async setCanvasWidth(t4) {
-    const { board: n2, preview: i } = wn(this, bn, "f").elements.refs;
+    const { board: n2, preview: i } = wn(this, dn, "f").elements.refs;
     if (void 0 !== t4) n2.width = t4, wn(this, sn, "m", yn).call(this) && (i.width = t4);
     else {
-      const { width: t5 } = wn(this, dn, "f").getBoundingClientRect();
+      const { width: t5 } = wn(this, pn, "f").getBoundingClientRect();
       n2.width = t5, wn(this, sn, "m", yn).call(this) && (i.width = t5);
     }
   }
@@ -408,11 +434,11 @@ const kn = class {
   }
   componentDidLoad() {
     const { info: t4 } = wn(this, ln, "f").debug;
-    this.resizeCanvas(), xn(this, pn, new ResizeObserver((() => {
-      clearTimeout(wn(this, mn, "f")), xn(this, mn, setTimeout((() => {
+    this.resizeCanvas(), xn(this, mn, new ResizeObserver((() => {
+      clearTimeout(wn(this, bn, "f")), xn(this, bn, setTimeout((() => {
         this.resizeCanvas();
       }), 100), "f");
-    }))), wn(this, pn, "f").observe(wn(this, dn, "f")), this.onLfEvent(new CustomEvent("ready"), "ready"), t4.update(this, "did-load");
+    }))), wn(this, mn, "f").observe(wn(this, pn, "f")), this.onLfEvent(new CustomEvent("ready"), "ready"), t4.update(this, "did-load");
   }
   componentWillRender() {
     const { info: t4 } = wn(this, ln, "f").debug;
@@ -423,14 +449,14 @@ const kn = class {
     t4.update(this, "did-render");
   }
   render() {
-    const { bemClass: t4, setLfStyle: n2 } = wn(this, ln, "f").theme, { board: i, image: a, preview: o2 } = wn(this, bn, "f").elements.jsx, { lfStyle: s } = this, l = wn(this, sn, "m", yn).call(this) || this.lfPreview, { canvas: u } = wn(this, un, "f");
-    return W$1(L, { key: "7a1548c8debe16cea3bb91f086fa8be1c239ed81" }, s && W$1("style", { key: "d8a7e6975b38f6e8f7d9e03faf58e44082339a4f", id: wn(this, hn, "f") }, n2(this)), W$1("div", { key: "38744a83dbefac53c71e945260986b381395c415", id: wn(this, vn, "f") }, W$1("div", { key: "d51298c0212cc5462c88b941b5b76db8807b432f", class: t4(u._, null, { hidden: wn(this, sn, "m", yn).call(this) }), part: wn(this, cn, "f").canvas, ref: (t5) => {
-      t5 && xn(this, dn, t5);
+    const { bemClass: t4, setLfStyle: n2 } = wn(this, ln, "f").theme, { board: i, image: a, preview: o2 } = wn(this, dn, "f").elements.jsx, { lfStyle: s } = this, l = wn(this, sn, "m", yn).call(this) || this.lfPreview, { canvas: u } = wn(this, un, "f");
+    return W$1(L, { key: "36c641cad6c44580b8f37a30aff702115895dacd", "data-orientation": this.orientation }, s && W$1("style", { key: "c25cf9bd2a931ac07faf822eff5985098f5078a1", id: wn(this, hn, "f") }, n2(this)), W$1("div", { key: "eda9ea5f1a7121f185ff73a04e744ac3cd56e641", id: wn(this, vn, "f") }, W$1("div", { key: "8f92cb2a125e6eb492de374f7ec8b88270385f9d", class: t4(u._, null, { hidden: wn(this, sn, "m", yn).call(this) }), part: wn(this, cn, "f").canvas, ref: (t5) => {
+      t5 && xn(this, pn, t5);
     } }, a(), i(), l && o2())));
   }
   disconnectedCallback() {
     var _a2;
-    (_a2 = wn(this, ln, "f")) == null ? void 0 : _a2.theme.unregister(this), wn(this, pn, "f") && wn(this, pn, "f").disconnect();
+    (_a2 = wn(this, ln, "f")) == null ? void 0 : _a2.theme.unregister(this), wn(this, mn, "f") && wn(this, mn, "f").disconnect();
   }
   get rootElement() {
     return G(this);
@@ -438,7 +464,7 @@ const kn = class {
 };
 ln = /* @__PURE__ */ new WeakMap(), un = /* @__PURE__ */ new WeakMap(), fn = /* @__PURE__ */ new WeakMap(), cn = /* @__PURE__ */ new WeakMap(), hn = /* @__PURE__ */ new WeakMap(), vn = /* @__PURE__ */ new WeakMap(), dn = /* @__PURE__ */ new WeakMap(), pn = /* @__PURE__ */ new WeakMap(), mn = /* @__PURE__ */ new WeakMap(), bn = /* @__PURE__ */ new WeakMap(), gn = /* @__PURE__ */ new WeakMap(), sn = /* @__PURE__ */ new WeakSet(), yn = function() {
   return "preview" === this.lfCursor;
-}, kn.style = "::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=danger]{--lf-canvas-color-primary:var(\n    --lf-canvas-color-danger,\n    var(--lf-color-danger)\n  );--lf-canvas-color-on-primary:var(\n    --lf-canvas-color-danger,\n    var(--lf-color-on-danger)\n  )}[data-lf=disabled]{opacity:var(--lf-canvas-ui-opacity-disabled, var(--lf-ui-opacity-disabled));pointer-events:none}[data-lf=info]{--lf-canvas-color-primary:var(\n    --lf-canvas-color-info,\n    var(--lf-color-info)\n  );--lf-canvas-color-on-primary:var(\n    --lf-canvas-color-info,\n    var(--lf-color-on-info)\n  )}[data-lf=secondary]{--lf-canvas-color-primary:var(\n    --lf-canvas-color-secondary,\n    var(--lf-color-secondary)\n  );--lf-canvas-color-on-primary:var(\n    --lf-canvas-color-secondary,\n    var(--lf-color-on-secondary)\n  )}[data-lf=success]{--lf-canvas-color-primary:var(\n    --lf-canvas-color-success,\n    var(--lf-color-success)\n  );--lf-canvas-color-on-primary:var(\n    --lf-canvas-color-success,\n    var(--lf-color-on-success)\n  )}[data-lf=warning]{--lf-canvas-color-primary:var(\n    --lf-canvas-color-warning,\n    var(--lf-color-warning)\n  );--lf-canvas-color-on-primary:var(\n    --lf-canvas-color-warning,\n    var(--lf-color-on-warning)\n  )}:host{display:block;font-family:var(--lf-canvas-font-family, var(--lf-font-family-primary));font-size:var(--lf-canvas-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-canvas-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-canvas-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-canvas-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-canvas-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-canvas-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-canvas-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-canvas-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{width:100%;height:100%;position:relative}.canvas{width:100%;height:100%;margin:var(--lf-canvas-margin, auto);max-height:var(--lf-canvas-max-height, max-content);max-width:var(--lf-canvas-max-width, max-content);position:var(--lf-canvas-position, relative);touch-action:none}.canvas--hidden{cursor:none}.canvas__image{--lf-image-object-fit:var(--lf-canvas-object-fit, contain);pointer-events:none;user-select:none}.canvas__board,.canvas__preview{width:100%;height:100%;left:0;position:absolute;top:0}.canvas__preview{pointer-events:none}";
+}, kn.style = "::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=danger]{--lf-canvas-color-primary:var(\n    --lf-canvas-color-danger,\n    var(--lf-color-danger)\n  );--lf-canvas-color-on-primary:var(\n    --lf-canvas-color-danger,\n    var(--lf-color-on-danger)\n  )}[data-lf=disabled]{opacity:var(--lf-canvas-ui-opacity-disabled, var(--lf-ui-opacity-disabled));pointer-events:none}[data-lf=info]{--lf-canvas-color-primary:var(\n    --lf-canvas-color-info,\n    var(--lf-color-info)\n  );--lf-canvas-color-on-primary:var(\n    --lf-canvas-color-info,\n    var(--lf-color-on-info)\n  )}[data-lf=secondary]{--lf-canvas-color-primary:var(\n    --lf-canvas-color-secondary,\n    var(--lf-color-secondary)\n  );--lf-canvas-color-on-primary:var(\n    --lf-canvas-color-secondary,\n    var(--lf-color-on-secondary)\n  )}[data-lf=success]{--lf-canvas-color-primary:var(\n    --lf-canvas-color-success,\n    var(--lf-color-success)\n  );--lf-canvas-color-on-primary:var(\n    --lf-canvas-color-success,\n    var(--lf-color-on-success)\n  )}[data-lf=warning]{--lf-canvas-color-primary:var(\n    --lf-canvas-color-warning,\n    var(--lf-color-warning)\n  );--lf-canvas-color-on-primary:var(\n    --lf-canvas-color-warning,\n    var(--lf-color-on-warning)\n  )}:host{display:block;font-family:var(--lf-canvas-font-family, var(--lf-font-family-primary));font-size:var(--lf-canvas-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-canvas-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-canvas-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-canvas-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-canvas-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-canvas-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-canvas-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-canvas-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{width:100%;height:100%;display:flex;justify-self:center;position:relative}:host([data-orientation=landscape]){height:max-content}:host([data-orientation=portrait]){width:max-content}.canvas{width:100%;height:100%;margin:var(--lf-canvas-margin, auto);max-height:var(--lf-canvas-max-height, max-content);max-width:var(--lf-canvas-max-width, max-content);position:var(--lf-canvas-position, relative);touch-action:none}.canvas--hidden{cursor:none}.canvas__image{--lf-image-object-fit:var(--lf-canvas-object-fit, contain);pointer-events:none;user-select:none}.canvas__board,.canvas__preview{width:100%;height:100%;left:0;position:absolute;top:0}.canvas__preview{pointer-events:none}";
 const Mn = (t4) => ({ button: (n2) => {
   const { eventType: i, id: r, originalEvent: e } = n2.detail, { controller: a, handlers: o2 } = t4(), { manager: s } = a.get, { layouts: l } = o2, { debug: u, theme: f2 } = s;
   switch (i) {
@@ -29349,29 +29375,32 @@ AY = /* @__PURE__ */ new WeakMap(), CY = /* @__PURE__ */ new WeakMap(), _Y = /* 
     }
   }, part: jY(this, NY, "f").copy }));
 }, YY.style = "::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=danger]{--lf-code-color-primary:var(\n    --lf-code-color-danger,\n    var(--lf-color-danger)\n  );--lf-code-color-on-primary:var(\n    --lf-code-color-danger,\n    var(--lf-color-on-danger)\n  )}[data-lf=disabled]{opacity:var(--lf-code-ui-opacity-disabled, var(--lf-ui-opacity-disabled));pointer-events:none}[data-lf=info]{--lf-code-color-primary:var(\n    --lf-code-color-info,\n    var(--lf-color-info)\n  );--lf-code-color-on-primary:var(\n    --lf-code-color-info,\n    var(--lf-color-on-info)\n  )}[data-lf=secondary]{--lf-code-color-primary:var(\n    --lf-code-color-secondary,\n    var(--lf-color-secondary)\n  );--lf-code-color-on-primary:var(\n    --lf-code-color-secondary,\n    var(--lf-color-on-secondary)\n  )}[data-lf=success]{--lf-code-color-primary:var(\n    --lf-code-color-success,\n    var(--lf-color-success)\n  );--lf-code-color-on-primary:var(\n    --lf-code-color-success,\n    var(--lf-color-on-success)\n  )}[data-lf=warning]{--lf-code-color-primary:var(\n    --lf-code-color-warning,\n    var(--lf-color-warning)\n  );--lf-code-color-on-primary:var(\n    --lf-code-color-warning,\n    var(--lf-color-on-warning)\n  )}[data-lf=fade-in]{display:block;animation:lf-fade-in-block 0.25s ease-out forwards}@keyframes lf-fade-in-block{from{visibility:hidden;opacity:0}to{visibility:visible;opacity:1}}:host{display:block;font-family:var(--lf-code-font-family, var(--lf-font-family-primary));font-size:var(--lf-code-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-code-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-code-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-code-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-code-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-code-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-code-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-code-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{width:100%;height:100%}#lf-component,.container{position:relative}.container{width:100%;height:100%}.code{display:grid;grid-template-rows:1fr;height:var(--lf-code-height, 100%)}.code--has-header{grid-template-rows:auto 1fr}.code__header{border:0;border-style:solid;border-radius:var(--lf-code-border-radius, var(--lf-ui-border-radius));border-bottom-left-radius:0;border-bottom-right-radius:0;background-color:rgba(var(--lf-code-color-surface, var(--lf-color-surface)), 0.775);color:rgb(var(--lf-code-color-on-surface, var(--lf-color-on-surface)));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);align-items:center;border-left-color:rgb(var(--lf-code-color-primary, rgb(var(--lf-color-primary))));border-left-style:outset;border-left-width:0.25em;border-right:var(--lf-code-border-right, 1px solid rgb(var(--lf-color-border)));border-top:var(--lf-comp-border-top, 1px solid rgb(var(--lf-color-border)));box-sizing:border-box;display:flex;height:var(--lf-code-header-height, 2.25em);justify-content:var(--lf-code-header-justify, space-between);padding:var(--lf-code-header-padding, 0.25em 0.75em)}.code__header--sticky{position:var(--lf-code-header-position, sticky);top:0;z-index:1}.code__title{font-size:0.875em;font-weight:400;line-height:1.25em;letter-spacing:0.2em;padding:0.5em;text-transform:uppercase}.body,pre,:not(pre)>code{border:0;border-style:solid;border-color:rgba(var(--lf-code-border-color, var(--lf-color-border)), 1);border-width:1px;border-radius:var(--lf-code-border-radius, var(--lf-ui-border-radius));border-top-left-radius:0;border-top-right-radius:0;box-sizing:border-box;overflow:auto;background-color:rgba(var(--lf-code-color-surface, var(--lf-color-surface)), 0.375);color:rgb(var(--lf-code-color-on-surface, var(--lf-color-on-surface)));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.body{font-size:1em;font-weight:400;line-height:1.6em;letter-spacing:0em;margin-bottom:1em;box-sizing:border-box;margin-bottom:0;padding:1em;white-space:pre-line}.code-snippet{display:initial}:not(pre)>code,pre{font-family:var(--lf-font-family-monospace, monospace);font-size:0.875em;font-weight:400;hyphens:none;line-height:1.5em;letter-spacing:0.01em;tab-size:4;text-align:left;white-space:pre;word-break:normal;word-spacing:normal;word-wrap:normal}code ::-moz-selection,code::-moz-selection,pre ::-moz-selection,pre::-moz-selection,code ::selection,code::selection,pre ::selection,pre::selection{background-color:rgba(var(--lf-code-color-primary, var(--lf-color-primary)), 1);color:rgb(var(--lf-code-color-on-primary, var(--lf-color-on-primary)));text-shadow:none}pre{box-sizing:border-box;margin:0;min-height:calc(100% - 2.25em);overflow:auto;padding:1.75em 1em;white-space:pre-wrap}:not(pre)>code{padding:0.1em;white-space:normal}.token.cdata,.token.comment,.token.doctype,.token.prolog{color:rgb(var(--lf-code-color-on-bg, var(--lf-color-on-bg)))}.token.punctuation{color:rgb(var(--lf-code-color-on-bg, var(--lf-color-on-bg)))}.token.bold,.token.important{font-weight:700}.token.italic{font-style:italic}.token.entity{cursor:help}.token.boolean,.token.constant,.token.deleted,.token.number,.token.property,.token.symbol,.token.tag{color:rgb(var(--lf-color-data-1))}.token.attr-name,.token.builtin,.token.char,.token.inserted,.token.selector,.token.string{color:rgb(var(--lf-color-data-2))}.token.atrule,.token.attr-value,.token.keyword{color:rgb(var(--lf--color-data-3))}.token.class-name,.token.function{color:rgb(var(--lf-color-data-4))}.token.important,.token.regex,.token.variable{color:rgb(var(--lf-color-data-5))}";
-var XY, ZY, UY, GY, qY, JY, KY, QY, tX, nX, iX, rX, eX, aX, oX, sX, lX, uX = function(t4, n2, i, r) {
+var XY, ZY, UY, GY, qY, JY, KY, QY, tX, nX, iX, rX, eX, aX, oX, sX, lX, uX, fX = function(t4, n2, i, r) {
   if ("a" === i && !r) throw new TypeError("Private accessor was defined without a getter");
   if ("function" == typeof n2 ? t4 !== n2 || !r : !n2.has(t4)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return "m" === i ? r : "a" === i ? r.call(t4) : r ? r.value : n2.get(t4);
-}, fX = function(t4, n2, i, r, e) {
+}, cX = function(t4, n2, i, r, e) {
   if ("function" == typeof n2 ? t4 !== n2 || true : !n2.has(t4)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
   return n2.set(t4, i), i;
 };
-const cX = class {
+const hX = class {
   constructor(i) {
-    n(this, i), this.lfEvent = I(this, "lf-image-event"), XY.add(this), this.error = false, this.isLoaded = false, this.lfHtmlAttributes = {}, this.lfMode = "sprite", this.lfShowSpinner = false, this.lfSizeX = "100%", this.lfSizeY = "100%", this.lfStyle = "", this.lfUiState = "primary", this.lfValue = "", ZY.set(this, void 0), UY.set(this, LF_IMAGE_BLOCKS), GY.set(this, CY_ATTRIBUTES), qY.set(this, LF_ATTRIBUTES), JY.set(this, LF_IMAGE_PARTS), KY.set(this, LF_STYLE_ID), QY.set(this, LF_IMAGE_CSS_VARS), tX.set(this, LF_WRAPPER_ID), nX.set(this, void 0), iX.set(this, void 0), lX.set(this, ((t4) => {
-      const { assets: n2 } = uX(this, ZY, "f"), { mask: i2 } = n2.get(`./assets/svg/${t4}.svg`).style;
-      fX(this, nX, i2);
+    n(this, i), this.lfEvent = I(this, "lf-image-event"), XY.add(this), this.error = false, this.isLoaded = false, this.lfHtmlAttributes = {}, this.lfMode = "sprite", this.lfShowSpinner = false, this.lfSizeX = "100%", this.lfSizeY = "100%", this.lfStyle = "", this.lfUiState = "primary", this.lfValue = "", ZY.set(this, void 0), UY.set(this, LF_IMAGE_BLOCKS), GY.set(this, CY_ATTRIBUTES), qY.set(this, LF_ATTRIBUTES), JY.set(this, LF_IMAGE_PARTS), KY.set(this, LF_STYLE_ID), QY.set(this, LF_IMAGE_CSS_VARS), tX.set(this, LF_WRAPPER_ID), nX.set(this, null), iX.set(this, void 0), rX.set(this, void 0), uX.set(this, ((t4) => {
+      const { assets: n2 } = fX(this, ZY, "f"), { mask: i2 } = n2.get(`./assets/svg/${t4}.svg`).style;
+      cX(this, iX, i2);
     }));
   }
   onLfEvent(t4, n2) {
     this.lfEvent.emit({ comp: this, id: this.rootElement.id, originalEvent: t4, eventType: n2 });
   }
   async resetState() {
-    uX(this, ZY, "f") && (this.error = false, this.isLoaded = false, this.resolvedSpriteName = void 0, fX(this, iX, void 0));
+    fX(this, ZY, "f") && (this.error = false, this.isLoaded = false, this.resolvedSpriteName = void 0, cX(this, rX, void 0));
   }
   async getDebugInfo() {
     return this.debugInfo;
+  }
+  async getImage() {
+    return fX(this, nX, "f");
   }
   async getProps() {
     const t4 = LF_IMAGE_PROPS.map(((t5) => [t5, this[t5]]));
@@ -29386,60 +29415,60 @@ const cX = class {
     }), t4);
   }
   connectedCallback() {
-    uX(this, ZY, "f") && uX(this, ZY, "f").theme.register(this);
+    fX(this, ZY, "f") && fX(this, ZY, "f").theme.register(this);
   }
   async componentWillLoad() {
-    fX(this, ZY, await o(this));
-    const { logs: t4 } = uX(this, ZY, "f").debug;
-    if (!uX(this, XY, "m", aX).call(this) && this.lfValue) if ("mask" === this.lfMode) try {
-      await uX(this, XY, "m", oX).call(this, this.lfValue), this.isLoaded = true;
+    cX(this, ZY, await o(this));
+    const { logs: t4 } = fX(this, ZY, "f").debug;
+    if (!fX(this, XY, "m", oX).call(this) && this.lfValue) if ("mask" === this.lfMode) try {
+      await fX(this, XY, "m", sX).call(this, this.lfValue), this.isLoaded = true;
     } catch (n2) {
       t4.new(this, "Failed to preload icon", "warning"), this.error = true;
     }
     else {
-      const { theme: t5 } = uX(this, ZY, "f");
+      const { theme: t5 } = fX(this, ZY, "f");
       this.isLoaded = true, t5.get.sprite.ids();
     }
   }
   componentDidLoad() {
-    const { info: t4 } = uX(this, ZY, "f").debug;
+    const { info: t4 } = fX(this, ZY, "f").debug;
     this.onLfEvent(new CustomEvent("ready"), "ready"), t4.update(this, "did-load");
   }
   componentWillRender() {
-    const { info: t4 } = uX(this, ZY, "f").debug;
+    const { info: t4 } = fX(this, ZY, "f").debug;
     t4.update(this, "will-render");
   }
   componentDidRender() {
-    const { info: t4 } = uX(this, ZY, "f").debug;
+    const { info: t4 } = fX(this, ZY, "f").debug;
     t4.update(this, "did-render");
   }
   render() {
-    const { debug: t4, theme: n2 } = uX(this, ZY, "f"), { bemClass: i, get: a } = n2, { variables: o2 } = a.current(), { image: s } = uX(this, UY, "f"), { error: l, isLoaded: u, lfSizeX: f2, lfSizeY: c, lfStyle: h, lfValue: v } = this;
+    const { debug: t4, theme: n2 } = fX(this, ZY, "f"), { bemClass: i, get: a } = n2, { variables: o2 } = a.current(), { image: s } = fX(this, UY, "f"), { error: l, isLoaded: u, lfSizeX: f2, lfSizeY: c, lfStyle: h, lfValue: v } = this;
     if (!v) return void t4.logs.new(this, "Empty image.");
-    fX(this, nX, "");
-    const d = uX(this, XY, "m", aX).call(this), p = !d && "sprite" === this.lfMode;
+    cX(this, iX, "");
+    const d = fX(this, XY, "m", oX).call(this), p = !d && "sprite" === this.lfMode;
     if ("mask" === this.lfMode) {
       if (l) {
         const { "--lf-icon-broken-image": t5 } = o2;
-        uX(this, lX, "f").call(this, t5);
+        fX(this, uX, "f").call(this, t5);
       } else if (!d) {
         const t5 = v.indexOf(CSS_VAR_PREFIX) > -1 ? o2[v] : v;
-        uX(this, lX, "f").call(this, t5);
+        fX(this, uX, "f").call(this, t5);
       }
     }
-    return W$1(L, null, W$1("style", { id: uX(this, KY, "f") }, `
+    return W$1(L, null, W$1("style", { id: fX(this, KY, "f") }, `
           :host {
-            ${uX(this, QY, "f").mask}: ${"mask" === this.lfMode && uX(this, nX, "f") ? uX(this, nX, "f") : "none"};
-            ${uX(this, QY, "f").height}: ${c || "100%"};
-            ${uX(this, QY, "f").width}: ${f2 || "100%"};
+            ${fX(this, QY, "f").mask}: ${"mask" === this.lfMode && fX(this, iX, "f") ? fX(this, iX, "f") : "none"};
+            ${fX(this, QY, "f").height}: ${c || "100%"};
+            ${fX(this, QY, "f").width}: ${f2 || "100%"};
           }
-          ${h && n2.setLfStyle(this) || ""}`), W$1("div", { id: uX(this, tX, "f") }, W$1("div", { class: i(s._, null), "data-lf": uX(this, qY, "f").fadeIn, onClick: (t5) => {
+          ${h && n2.setLfStyle(this) || ""}`), W$1("div", { id: fX(this, tX, "f") }, W$1("div", { class: i(s._, null), "data-lf": fX(this, qY, "f").fadeIn, onClick: (t5) => {
       this.onLfEvent(t5, "click");
-    }, part: uX(this, JY, "f").image }, (() => l ? "mask" === this.lfMode ? uX(this, XY, "m", rX).call(this) : uX(this, XY, "m", sX).call(this) : d ? uX(this, XY, "m", eX).call(this) : p && u ? uX(this, XY, "m", sX).call(this, v) : "mask" === this.lfMode && u ? uX(this, XY, "m", rX).call(this) : null)())));
+    }, part: fX(this, JY, "f").image }, (() => l ? "mask" === this.lfMode ? fX(this, XY, "m", eX).call(this) : fX(this, XY, "m", lX).call(this) : d ? fX(this, XY, "m", aX).call(this) : p && u ? fX(this, XY, "m", lX).call(this, v) : "mask" === this.lfMode && u ? fX(this, XY, "m", eX).call(this) : null)())));
   }
   disconnectedCallback() {
     var _a2;
-    (_a2 = uX(this, ZY, "f")) == null ? void 0 : _a2.theme.unregister(this);
+    (_a2 = fX(this, ZY, "f")) == null ? void 0 : _a2.theme.unregister(this);
   }
   get rootElement() {
     return G(this);
@@ -29448,52 +29477,56 @@ const cX = class {
     return { lfValue: ["resetState"] };
   }
 };
-ZY = /* @__PURE__ */ new WeakMap(), UY = /* @__PURE__ */ new WeakMap(), GY = /* @__PURE__ */ new WeakMap(), qY = /* @__PURE__ */ new WeakMap(), JY = /* @__PURE__ */ new WeakMap(), KY = /* @__PURE__ */ new WeakMap(), QY = /* @__PURE__ */ new WeakMap(), tX = /* @__PURE__ */ new WeakMap(), nX = /* @__PURE__ */ new WeakMap(), iX = /* @__PURE__ */ new WeakMap(), lX = /* @__PURE__ */ new WeakMap(), XY = /* @__PURE__ */ new WeakSet(), rX = function() {
-  const { sanitizeProps: t4, theme: n2 } = uX(this, ZY, "f"), { bemClass: i } = n2, { image: e } = uX(this, UY, "f");
-  return W$1("div", { ...t4(this.lfHtmlAttributes), class: i(e._, e.icon), "data-cy": uX(this, GY, "f").maskedSvg, "data-lf": this.lfUiState, part: uX(this, JY, "f").icon });
-}, eX = function() {
-  const { sanitizeProps: t4, theme: n2 } = uX(this, ZY, "f"), { bemClass: i } = n2, { image: e } = uX(this, UY, "f");
-  return W$1("img", { ...t4(this.lfHtmlAttributes), class: i(e._, e.img), "data-cy": uX(this, GY, "f").image, onError: (t5) => {
+ZY = /* @__PURE__ */ new WeakMap(), UY = /* @__PURE__ */ new WeakMap(), GY = /* @__PURE__ */ new WeakMap(), qY = /* @__PURE__ */ new WeakMap(), JY = /* @__PURE__ */ new WeakMap(), KY = /* @__PURE__ */ new WeakMap(), QY = /* @__PURE__ */ new WeakMap(), tX = /* @__PURE__ */ new WeakMap(), nX = /* @__PURE__ */ new WeakMap(), iX = /* @__PURE__ */ new WeakMap(), rX = /* @__PURE__ */ new WeakMap(), uX = /* @__PURE__ */ new WeakMap(), XY = /* @__PURE__ */ new WeakSet(), eX = function() {
+  const { sanitizeProps: t4, theme: n2 } = fX(this, ZY, "f"), { bemClass: i } = n2, { image: e } = fX(this, UY, "f");
+  return W$1("div", { ...t4(this.lfHtmlAttributes), class: i(e._, e.icon), "data-cy": fX(this, GY, "f").maskedSvg, "data-lf": this.lfUiState, part: fX(this, JY, "f").icon });
+}, aX = function() {
+  const { sanitizeProps: t4, theme: n2 } = fX(this, ZY, "f"), { bemClass: i } = n2, { image: e } = fX(this, UY, "f");
+  return W$1("img", { ...t4(this.lfHtmlAttributes), class: i(e._, e.img), "data-cy": fX(this, GY, "f").image, onError: (t5) => {
     this.error = true, this.isLoaded = false, this.onLfEvent(t5, "error");
   }, onLoad: (t5) => {
     this.error = false, this.isLoaded = true, this.onLfEvent(t5, "load");
-  }, part: uX(this, JY, "f").img, src: this.lfValue });
-}, aX = function() {
+  }, part: fX(this, JY, "f").img, ref: (t5) => {
+    t5 && cX(this, nX, t5);
+  }, src: this.lfValue });
+}, oX = function() {
   const { lfValue: t4 } = this;
   return !(!t4 || "string" != typeof t4) && /^(?:(?:https?:\/\/|\/|\.{1,2}\/|[a-zA-Z]:\\|\\\\|blob:).+|data:image\/[a-zA-Z0-9+.-]+(?:;charset=[^;,]+)?(?:;base64)?,.*)$/.test(t4);
-}, oX = async function(t4) {
-  const { assets: n2, theme: i } = uX(this, ZY, "f"), { variables: r } = i.get.current(), { "--lf-icon-broken-image": e } = r, a = t4.indexOf(CSS_VAR_PREFIX) > -1, o2 = n2.get(`./assets/svg/${this.error ? e : a ? r[t4] : t4}.svg`), s = new Image(), l = new URL(o2.path, window.location.origin).href, u = new Promise(((t5, n3) => {
+}, sX = async function(t4) {
+  const { assets: n2, theme: i } = fX(this, ZY, "f"), { variables: r } = i.get.current(), { "--lf-icon-broken-image": e } = r, a = t4.indexOf(CSS_VAR_PREFIX) > -1, o2 = n2.get(`./assets/svg/${this.error ? e : a ? r[t4] : t4}.svg`), s = new Image(), l = new URL(o2.path, window.location.origin).href, u = new Promise(((t5, n3) => {
     s.onload = () => t5(), s.onerror = (t6) => n3(t6);
   }));
   s.src = l, await u;
-}, sX = function(t4) {
-  const { theme: n2, sanitizeProps: i } = uX(this, ZY, "f"), { bemClass: e } = n2, { image: a } = uX(this, UY, "f"), { variables: o2 } = n2.get.current(), s = t4 ? t4.indexOf(CSS_VAR_PREFIX) > -1 ? o2[t4] : t4 : o2["--lf-icon-broken-image"];
-  uX(this, iX, "f") !== s && (this.resolvedSpriteName = void 0, fX(this, iX, s), n2.get.sprite.hasIcon(s).then(((t5) => {
-    uX(this, iX, "f") === s && (this.resolvedSpriteName = t5 ? s : o2["--lf-icon-broken-image"]);
+}, lX = function(t4) {
+  const { theme: n2, sanitizeProps: i } = fX(this, ZY, "f"), { bemClass: e } = n2, { image: a } = fX(this, UY, "f"), { variables: o2 } = n2.get.current(), s = t4 ? t4.indexOf(CSS_VAR_PREFIX) > -1 ? o2[t4] : t4 : o2["--lf-icon-broken-image"];
+  fX(this, rX, "f") !== s && (this.resolvedSpriteName = void 0, cX(this, rX, s), n2.get.sprite.hasIcon(s).then(((t5) => {
+    fX(this, rX, "f") === s && (this.resolvedSpriteName = t5 ? s : o2["--lf-icon-broken-image"]);
   })));
   const l = this.resolvedSpriteName ?? s, u = `${n2.get.sprite.path()}#${l}`;
-  return W$1("svg", { ...i(this.lfHtmlAttributes), part: uX(this, JY, "f").icon, class: e(a._, a.icon), "data-cy": uX(this, GY, "f").maskedSvg, "data-lf": this.lfUiState, "aria-hidden": "true", viewBox: "0 0 24 24" }, W$1("use", { href: u }));
-}, cX.style = "::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=danger]{--lf-image-color-primary:var(\n    --lf-image-color-danger,\n    var(--lf-color-danger)\n  );--lf-image-color-on-primary:var(\n    --lf-image-color-danger,\n    var(--lf-color-on-danger)\n  )}[data-lf=disabled]{opacity:var(--lf-image-ui-opacity-disabled, var(--lf-ui-opacity-disabled));pointer-events:none}[data-lf=info]{--lf-image-color-primary:var(\n    --lf-image-color-info,\n    var(--lf-color-info)\n  );--lf-image-color-on-primary:var(\n    --lf-image-color-info,\n    var(--lf-color-on-info)\n  )}[data-lf=secondary]{--lf-image-color-primary:var(\n    --lf-image-color-secondary,\n    var(--lf-color-secondary)\n  );--lf-image-color-on-primary:var(\n    --lf-image-color-secondary,\n    var(--lf-color-on-secondary)\n  )}[data-lf=success]{--lf-image-color-primary:var(\n    --lf-image-color-success,\n    var(--lf-color-success)\n  );--lf-image-color-on-primary:var(\n    --lf-image-color-success,\n    var(--lf-color-on-success)\n  )}[data-lf=warning]{--lf-image-color-primary:var(\n    --lf-image-color-warning,\n    var(--lf-color-warning)\n  );--lf-image-color-on-primary:var(\n    --lf-image-color-warning,\n    var(--lf-color-on-warning)\n  )}[data-lf=fade-in]{display:block;animation:lf-fade-in-block 0.25s ease-out forwards}@keyframes lf-fade-in-block{from{visibility:hidden;opacity:0}to{visibility:visible;opacity:1}}:host{display:block;font-family:var(--lf-image-font-family, var(--lf-font-family-primary));font-size:var(--lf-image-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-image-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-image-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-image-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-image-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-image-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-image-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-image-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host,#lf-component,.image{height:var(--lf_image_height, 0);position:relative;width:var(--lf_image_width, 0)}.image__icon,.image__img{display:block;height:var(--lf_image_height, 0);margin:var(--lf-image-margin, auto);width:var(--lf_image_width, 0)}.image__icon{transition:all 150ms cubic-bezier(0.42, 0, 0.58, 1);aspect-ratio:var(--lf-comp-aspect-ratio, 1);mask:var(--lf_image_mask);-webkit-mask:var(--lf_image_mask)}.image__img{object-fit:var(--lf-image-object-fit, cover)}:host([lf-mode=mask]) .image__icon{background-color:rgba(var(--lf-image-color-primary, var(--lf-color-primary)), 0.775);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}:host([lf-mode=sprite]) .image__icon{color:rgb(var(--lf-image-color-primary, var(--lf-color-primary)));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}";
-var hX, vX, dX, pX, mX, bX, gX, yX, wX, xX, kX, MX, zX, SX, AX, CX, _X = function(t4, n2, i, r) {
+  return W$1("svg", { ...i(this.lfHtmlAttributes), "aria-hidden": "true", class: e(a._, a.icon), "data-cy": fX(this, GY, "f").maskedSvg, "data-lf": this.lfUiState, part: fX(this, JY, "f").icon, ref: (t5) => {
+    t5 && cX(this, nX, t5);
+  }, viewBox: "0 0 24 24" }, W$1("use", { href: u }));
+}, hX.style = "::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=danger]{--lf-image-color-primary:var(\n    --lf-image-color-danger,\n    var(--lf-color-danger)\n  );--lf-image-color-on-primary:var(\n    --lf-image-color-danger,\n    var(--lf-color-on-danger)\n  )}[data-lf=disabled]{opacity:var(--lf-image-ui-opacity-disabled, var(--lf-ui-opacity-disabled));pointer-events:none}[data-lf=info]{--lf-image-color-primary:var(\n    --lf-image-color-info,\n    var(--lf-color-info)\n  );--lf-image-color-on-primary:var(\n    --lf-image-color-info,\n    var(--lf-color-on-info)\n  )}[data-lf=secondary]{--lf-image-color-primary:var(\n    --lf-image-color-secondary,\n    var(--lf-color-secondary)\n  );--lf-image-color-on-primary:var(\n    --lf-image-color-secondary,\n    var(--lf-color-on-secondary)\n  )}[data-lf=success]{--lf-image-color-primary:var(\n    --lf-image-color-success,\n    var(--lf-color-success)\n  );--lf-image-color-on-primary:var(\n    --lf-image-color-success,\n    var(--lf-color-on-success)\n  )}[data-lf=warning]{--lf-image-color-primary:var(\n    --lf-image-color-warning,\n    var(--lf-color-warning)\n  );--lf-image-color-on-primary:var(\n    --lf-image-color-warning,\n    var(--lf-color-on-warning)\n  )}[data-lf=fade-in]{display:block;animation:lf-fade-in-block 0.25s ease-out forwards}@keyframes lf-fade-in-block{from{visibility:hidden;opacity:0}to{visibility:visible;opacity:1}}:host{display:block;font-family:var(--lf-image-font-family, var(--lf-font-family-primary));font-size:var(--lf-image-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-image-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-image-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-image-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-image-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-image-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-image-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-image-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host,#lf-component,.image{height:var(--lf_image_height, 0);position:relative;width:var(--lf_image_width, 0)}.image__icon,.image__img{display:block;height:var(--lf_image_height, 0);margin:var(--lf-image-margin, auto);width:var(--lf_image_width, 0)}.image__icon{transition:all 150ms cubic-bezier(0.42, 0, 0.58, 1);aspect-ratio:var(--lf-comp-aspect-ratio, 1);mask:var(--lf_image_mask);-webkit-mask:var(--lf_image_mask)}.image__img{object-fit:var(--lf-image-object-fit, cover)}:host([lf-mode=mask]) .image__icon{background-color:rgba(var(--lf-image-color-primary, var(--lf-color-primary)), 0.775);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}:host([lf-mode=sprite]) .image__icon{color:rgb(var(--lf-image-color-primary, var(--lf-color-primary)));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}";
+var vX, dX, pX, mX, bX, gX, yX, wX, xX, kX, MX, zX, SX, AX, CX, _X, TX = function(t4, n2, i, r) {
   if ("a" === i && !r) throw new TypeError("Private accessor was defined without a getter");
   if ("function" == typeof n2 ? t4 !== n2 || !r : !n2.has(t4)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return "m" === i ? r : "a" === i ? r.call(t4) : r ? r.value : n2.get(t4);
-}, TX = function(t4, n2, i, r, e) {
+}, NX = function(t4, n2, i, r, e) {
   if ("function" == typeof n2 ? t4 !== n2 || true : !n2.has(t4)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
   return n2.set(t4, i), i;
 };
-const NX = class {
+const IX = class {
   constructor(i) {
-    n(this, i), this.lfEvent = I(this, "lf-list-event"), hX.add(this), this.lfDataset = null, this.lfEmpty = "Empty data.", this.lfEnableDeletions = false, this.lfNavigation = true, this.lfRipple = true, this.lfSelectable = true, this.lfStyle = "", this.lfUiSize = "medium", this.lfUiState = "primary", this.lfValue = null, vX.set(this, void 0), dX.set(this, LF_LIST_BLOCKS), pX.set(this, CY_ATTRIBUTES), mX.set(this, LF_ATTRIBUTES), bX.set(this, LF_LIST_PARTS), gX.set(this, []), yX.set(this, LF_STYLE_ID), wX.set(this, LF_WRAPPER_ID), xX.set(this, []);
+    n(this, i), this.lfEvent = I(this, "lf-list-event"), vX.add(this), this.lfDataset = null, this.lfEmpty = "Empty data.", this.lfEnableDeletions = false, this.lfNavigation = true, this.lfRipple = true, this.lfSelectable = true, this.lfStyle = "", this.lfUiSize = "medium", this.lfUiState = "primary", this.lfValue = null, dX.set(this, void 0), pX.set(this, LF_LIST_BLOCKS), mX.set(this, CY_ATTRIBUTES), bX.set(this, LF_ATTRIBUTES), gX.set(this, LF_LIST_PARTS), yX.set(this, []), wX.set(this, LF_STYLE_ID), xX.set(this, LF_WRAPPER_ID), kX.set(this, []);
   }
   onLfEvent(t4, n2, i, r = 0) {
-    const { effects: e } = _X(this, vX, "f");
+    const { effects: e } = TX(this, dX, "f");
     switch (n2) {
       case "blur":
         this.focused = null;
         break;
       case "click":
-        this.focused = r, _X(this, hX, "m", kX).call(this, r);
+        this.focused = r, TX(this, vX, "m", MX).call(this, r);
         break;
       case "delete":
         r > -1 && (this.lfDataset.nodes.splice(r, 1), this.refresh());
@@ -29502,7 +29535,7 @@ const NX = class {
         this.focused = r;
         break;
       case "pointerdown":
-        this.lfRipple && e.ripple(t4, _X(this, gX, "f")[r]);
+        this.lfRipple && e.ripple(t4, TX(this, yX, "f")[r]);
     }
     this.lfEvent.emit({ comp: this, eventType: n2, id: this.rootElement.id, originalEvent: t4, node: i });
   }
@@ -29516,16 +29549,16 @@ const NX = class {
         t4.preventDefault(), t4.stopPropagation(), this.focusPrevious();
         break;
       case "Enter":
-        t4.preventDefault(), t4.stopPropagation(), _X(this, hX, "m", kX).call(this, n2);
+        t4.preventDefault(), t4.stopPropagation(), TX(this, vX, "m", MX).call(this, n2);
     }
   }
   async focusNext() {
     const { focused: t4, selected: n2 } = this;
-    isNaN(t4) || null == t4 ? this.focused = n2 : this.focused++, this.focused > _X(this, xX, "f").length - 1 && (this.focused = 0), _X(this, xX, "f")[this.focused].focus();
+    isNaN(t4) || null == t4 ? this.focused = n2 : this.focused++, this.focused > TX(this, kX, "f").length - 1 && (this.focused = 0), TX(this, kX, "f")[this.focused].focus();
   }
   async focusPrevious() {
     const { focused: t4, selected: n2 } = this;
-    isNaN(t4) || null == t4 ? this.focused = n2 : this.focused--, this.focused < 0 && (this.focused = _X(this, xX, "f").length - 1), _X(this, xX, "f")[this.focused].focus();
+    isNaN(t4) || null == t4 ? this.focused = n2 : this.focused--, this.focused < 0 && (this.focused = TX(this, kX, "f").length - 1), TX(this, kX, "f")[this.focused].focus();
   }
   async getDebugInfo() {
     return this.debugInfo;
@@ -29541,7 +29574,7 @@ const NX = class {
     mt(this);
   }
   async selectNode(t4) {
-    void 0 === t4 && (t4 = this.focused), _X(this, hX, "m", kX).call(this, t4);
+    void 0 === t4 && (t4 = this.focused), TX(this, vX, "m", MX).call(this, t4);
   }
   async unmount(t4 = 0) {
     setTimeout((() => {
@@ -29549,83 +29582,83 @@ const NX = class {
     }), t4);
   }
   connectedCallback() {
-    _X(this, vX, "f") && _X(this, vX, "f").theme.register(this);
+    TX(this, dX, "f") && TX(this, dX, "f").theme.register(this);
   }
   async componentWillLoad() {
-    TX(this, vX, await o(this)), this.lfValue && "number" == typeof this.lfValue && (this.selected = this.lfValue);
+    NX(this, dX, await o(this)), this.lfValue && "number" == typeof this.lfValue && (this.selected = this.lfValue);
   }
   componentDidLoad() {
-    const { debug: t4 } = _X(this, vX, "f");
+    const { debug: t4 } = TX(this, dX, "f");
     this.onLfEvent(new CustomEvent("ready"), "ready"), t4.info.update(this, "did-load");
   }
   componentWillRender() {
-    const { info: t4 } = _X(this, vX, "f").debug;
+    const { info: t4 } = TX(this, dX, "f").debug;
     t4.update(this, "will-render");
   }
   componentDidRender() {
-    const { info: t4 } = _X(this, vX, "f").debug;
+    const { info: t4 } = TX(this, dX, "f").debug;
     t4.update(this, "did-render");
   }
   render() {
     var _a2;
-    const { bemClass: t4, setLfStyle: n2 } = _X(this, vX, "f").theme, { emptyData: i, list: a } = _X(this, dX, "f"), { lfDataset: o2, lfEmpty: s, lfSelectable: l, lfStyle: u } = this, f2 = !((_a2 = o2 == null ? void 0 : o2.nodes) == null ? void 0 : _a2.length);
-    return TX(this, xX, []), W$1(L, { key: "920d6630b6043b025f9a6c066db56b9ff190a668" }, u && W$1("style", { key: "a00dee232d2154959fe11670b4c981aaf731e6ac", id: _X(this, yX, "f") }, n2(this)), W$1("div", { key: "90126f0615ae2b49569977bd0d045df3edfccd78", id: _X(this, wX, "f") }, f2 ? W$1("div", { class: t4(i._), part: _X(this, bX, "f").emptyData }, W$1("div", { class: t4(i._, i.text) }, s)) : W$1("ul", { "aria-multiselectable": "false", class: t4(a._, null, { empty: f2, selectable: l }), part: _X(this, bX, "f").list, role: "listbox" }, o2.nodes.map(((t5, n3) => _X(this, hX, "m", SX).call(this, t5, n3))))));
+    const { bemClass: t4, setLfStyle: n2 } = TX(this, dX, "f").theme, { emptyData: i, list: a } = TX(this, pX, "f"), { lfDataset: o2, lfEmpty: s, lfSelectable: l, lfStyle: u } = this, f2 = !((_a2 = o2 == null ? void 0 : o2.nodes) == null ? void 0 : _a2.length);
+    return NX(this, kX, []), W$1(L, { key: "920d6630b6043b025f9a6c066db56b9ff190a668" }, u && W$1("style", { key: "a00dee232d2154959fe11670b4c981aaf731e6ac", id: TX(this, wX, "f") }, n2(this)), W$1("div", { key: "90126f0615ae2b49569977bd0d045df3edfccd78", id: TX(this, xX, "f") }, f2 ? W$1("div", { class: t4(i._), part: TX(this, gX, "f").emptyData }, W$1("div", { class: t4(i._, i.text) }, s)) : W$1("ul", { "aria-multiselectable": "false", class: t4(a._, null, { empty: f2, selectable: l }), part: TX(this, gX, "f").list, role: "listbox" }, o2.nodes.map(((t5, n3) => TX(this, vX, "m", AX).call(this, t5, n3))))));
   }
   disconnectedCallback() {
     var _a2;
-    (_a2 = _X(this, vX, "f")) == null ? void 0 : _a2.theme.unregister(this);
+    (_a2 = TX(this, dX, "f")) == null ? void 0 : _a2.theme.unregister(this);
   }
   get rootElement() {
     return G(this);
   }
 };
-vX = /* @__PURE__ */ new WeakMap(), dX = /* @__PURE__ */ new WeakMap(), pX = /* @__PURE__ */ new WeakMap(), mX = /* @__PURE__ */ new WeakMap(), bX = /* @__PURE__ */ new WeakMap(), gX = /* @__PURE__ */ new WeakMap(), yX = /* @__PURE__ */ new WeakMap(), wX = /* @__PURE__ */ new WeakMap(), xX = /* @__PURE__ */ new WeakMap(), hX = /* @__PURE__ */ new WeakSet(), kX = function(t4) {
+dX = /* @__PURE__ */ new WeakMap(), pX = /* @__PURE__ */ new WeakMap(), mX = /* @__PURE__ */ new WeakMap(), bX = /* @__PURE__ */ new WeakMap(), gX = /* @__PURE__ */ new WeakMap(), yX = /* @__PURE__ */ new WeakMap(), wX = /* @__PURE__ */ new WeakMap(), xX = /* @__PURE__ */ new WeakMap(), kX = /* @__PURE__ */ new WeakMap(), vX = /* @__PURE__ */ new WeakSet(), MX = function(t4) {
   this.lfSelectable && null != t4 && !isNaN(t4) && (this.selected = t4);
-}, MX = function(t4) {
-  const { bemClass: n2 } = _X(this, vX, "f").theme;
-  return W$1("div", { class: n2(_X(this, dX, "f").delete._), "data-cy": _X(this, pX, "f").button, "data-lf": _X(this, mX, "f").icon, onClick: (n3) => {
+}, zX = function(t4) {
+  const { bemClass: n2 } = TX(this, dX, "f").theme;
+  return W$1("div", { class: n2(TX(this, pX, "f").delete._), "data-cy": TX(this, mX, "f").button, "data-lf": TX(this, bX, "f").icon, onClick: (n3) => {
     var _a2, _b2;
     const i = (_b2 = (_a2 = this.lfDataset) == null ? void 0 : _a2.nodes) == null ? void 0 : _b2.indexOf(t4);
     this.onLfEvent(n3, "delete", t4, i);
-  }, part: _X(this, bX, "f").delete }, W$1("div", { class: n2(_X(this, dX, "f").delete._, _X(this, dX, "f").delete.icon), key: t4.id + "_delete" }));
-}, zX = function(t4) {
-  const { get: n2 } = _X(this, vX, "f").assets, { bemClass: i } = _X(this, vX, "f").theme, { style: e } = n2(`./assets/svg/${t4.icon}.svg`);
-  return W$1("div", { class: i(_X(this, dX, "f").node._, _X(this, dX, "f").node.icon), "data-cy": _X(this, pX, "f").maskedSvg, style: e });
-}, SX = function(t4, n2) {
-  const { stringify: i } = _X(this, vX, "f").data.cell, { bemClass: e } = _X(this, vX, "f").theme, { list: a } = _X(this, dX, "f"), { focused: o2, lfDataset: s, lfRipple: l, selected: u } = this, f2 = o2 === s.nodes.findIndex(((n3) => n3.id === t4.id)), c = u === s.nodes.findIndex(((n3) => n3.id === t4.id));
-  return W$1("li", { class: e(a._, a.item, { focused: f2, "has-description": !!t4.description, selected: c }), "data-lf": _X(this, mX, "f")[this.lfUiState], key: t4.id }, this.lfEnableDeletions ? _X(this, hX, "m", MX).call(this, t4) : null, W$1("div", { "aria-checked": c, "aria-selected": c, class: e(_X(this, dX, "f").node._), "data-cy": _X(this, pX, "f").node, "data-index": n2.toString(), onBlur: (i2) => this.onLfEvent(i2, "blur", t4, n2), onClick: (i2) => this.onLfEvent(i2, "click", t4, n2), onFocus: (i2) => this.onLfEvent(i2, "focus", t4, n2), onPointerDown: (i2) => this.onLfEvent(i2, "pointerdown", t4, n2), part: _X(this, bX, "f").node, ref: (t5) => {
-    t5 && _X(this, xX, "f").push(t5);
-  }, role: "option", tabindex: c ? "0" : "-1", title: i(t4.value) || i(t4.description) }, W$1("div", { "data-cy": _X(this, pX, "f").rippleSurface, "data-lf": _X(this, mX, "f").rippleSurface, ref: (t5) => {
-    l && t5 && _X(this, gX, "f").push(t5);
-  } }), t4.icon && _X(this, hX, "m", zX).call(this, t4), W$1("span", { class: e(_X(this, dX, "f").node._, _X(this, dX, "f").node.text) }, _X(this, hX, "m", CX).call(this, t4), _X(this, hX, "m", AX).call(this, t4))));
-}, AX = function(t4) {
-  const { bemClass: n2 } = _X(this, vX, "f").theme;
-  return t4.description && W$1("div", { class: n2(_X(this, dX, "f").node._, _X(this, dX, "f").node.subtitle) }, t4.description);
+  }, part: TX(this, gX, "f").delete }, W$1("div", { class: n2(TX(this, pX, "f").delete._, TX(this, pX, "f").delete.icon), key: t4.id + "_delete" }));
+}, SX = function(t4) {
+  const { get: n2 } = TX(this, dX, "f").assets, { bemClass: i } = TX(this, dX, "f").theme, { style: e } = n2(`./assets/svg/${t4.icon}.svg`);
+  return W$1("div", { class: i(TX(this, pX, "f").node._, TX(this, pX, "f").node.icon), "data-cy": TX(this, mX, "f").maskedSvg, style: e });
+}, AX = function(t4, n2) {
+  const { stringify: i } = TX(this, dX, "f").data.cell, { bemClass: e } = TX(this, dX, "f").theme, { list: a } = TX(this, pX, "f"), { focused: o2, lfDataset: s, lfRipple: l, selected: u } = this, f2 = o2 === s.nodes.findIndex(((n3) => n3.id === t4.id)), c = u === s.nodes.findIndex(((n3) => n3.id === t4.id));
+  return W$1("li", { class: e(a._, a.item, { focused: f2, "has-description": !!t4.description, selected: c }), "data-lf": TX(this, bX, "f")[this.lfUiState], key: t4.id }, this.lfEnableDeletions ? TX(this, vX, "m", zX).call(this, t4) : null, W$1("div", { "aria-checked": c, "aria-selected": c, class: e(TX(this, pX, "f").node._), "data-cy": TX(this, mX, "f").node, "data-index": n2.toString(), onBlur: (i2) => this.onLfEvent(i2, "blur", t4, n2), onClick: (i2) => this.onLfEvent(i2, "click", t4, n2), onFocus: (i2) => this.onLfEvent(i2, "focus", t4, n2), onPointerDown: (i2) => this.onLfEvent(i2, "pointerdown", t4, n2), part: TX(this, gX, "f").node, ref: (t5) => {
+    t5 && TX(this, kX, "f").push(t5);
+  }, role: "option", tabindex: c ? "0" : "-1", title: i(t4.value) || i(t4.description) }, W$1("div", { "data-cy": TX(this, mX, "f").rippleSurface, "data-lf": TX(this, bX, "f").rippleSurface, ref: (t5) => {
+    l && t5 && TX(this, yX, "f").push(t5);
+  } }), t4.icon && TX(this, vX, "m", SX).call(this, t4), W$1("span", { class: e(TX(this, pX, "f").node._, TX(this, pX, "f").node.text) }, TX(this, vX, "m", _X).call(this, t4), TX(this, vX, "m", CX).call(this, t4))));
 }, CX = function(t4) {
-  const { bemClass: n2 } = _X(this, vX, "f").theme;
-  return String(t4.value).valueOf() && W$1("div", { class: n2(_X(this, dX, "f").node._, _X(this, dX, "f").node.title) }, String(t4.value).valueOf());
-}, NX.style = '::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=ripple]{animation-duration:var(--lf-ui-duration-ripple, 675ms);animation-fill-mode:forwards;animation-name:lf-ripple;animation-timing-function:var(--lf-ui-timing-ripple, ease-out);background:var(--lf-ui-ripple-background, var(--lf-color-primary));border-radius:var(--lf-ui-radius-ripple, 50%);height:var(--lf-ui-ripple-height, 100%);left:var(--lf-ui-ripple-x, 50%);opacity:var(--lf-ui-opacity-ripple, 0.5);pointer-events:none;position:absolute;top:var(--lf-ui-ripple-y, 50%);transform:scale(0);width:var(--lf-ui-ripple-width, 100%)}@keyframes lf-ripple{from{transform:scale(0)}to{opacity:0;transform:scale(4)}}[data-lf=ripple-surface]{cursor:pointer;height:100%;left:0;overflow:hidden;position:absolute;top:0;width:100%}[data-lf=danger]{--lf-list-color-primary:var(\n    --lf-list-color-danger,\n    var(--lf-color-danger)\n  );--lf-list-color-on-primary:var(\n    --lf-list-color-danger,\n    var(--lf-color-on-danger)\n  )}[data-lf=disabled]{opacity:var(--lf-list-ui-opacity-disabled, var(--lf-ui-opacity-disabled));pointer-events:none}[data-lf=info]{--lf-list-color-primary:var(\n    --lf-list-color-info,\n    var(--lf-color-info)\n  );--lf-list-color-on-primary:var(\n    --lf-list-color-info,\n    var(--lf-color-on-info)\n  )}[data-lf=secondary]{--lf-list-color-primary:var(\n    --lf-list-color-secondary,\n    var(--lf-color-secondary)\n  );--lf-list-color-on-primary:var(\n    --lf-list-color-secondary,\n    var(--lf-color-on-secondary)\n  )}[data-lf=success]{--lf-list-color-primary:var(\n    --lf-list-color-success,\n    var(--lf-color-success)\n  );--lf-list-color-on-primary:var(\n    --lf-list-color-success,\n    var(--lf-color-on-success)\n  )}[data-lf=warning]{--lf-list-color-primary:var(\n    --lf-list-color-warning,\n    var(--lf-color-warning)\n  );--lf-list-color-on-primary:var(\n    --lf-list-color-warning,\n    var(--lf-color-on-warning)\n  )}:host{display:block;font-family:var(--lf-list-font-family, var(--lf-font-family-primary));font-size:var(--lf-list-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-list-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-list-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-list-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-list-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-list-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-list-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-list-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{width:100%;height:100%;outline:none}.list{border:0;border-style:solid;border-color:rgba(var(--lf-list-border-color, var(--lf-color-border)), 1);border-width:1px;border-radius:var(--lf-list-border-radius, var(--lf-ui-border-radius));background-color:rgba(var(--lf-list-color-bg, var(--lf-color-bg)), 0.275);color:rgb(var(--lf-list-color-on-bg, var(--lf-color-on-bg)));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);width:100%;height:100%;box-sizing:border-box;list-style-type:none;margin:0;overflow:auto;padding:0.5em 0}.list--empty{padding:0}.list--selectable .list__item{cursor:pointer;user-select:none}.list:not(.list.list--selectable) .list__item{cursor:default;pointer-events:none}.list__item{transition:all 150ms cubic-bezier(0.42, 0, 0.58, 1);display:flex;height:var(--lf-list-item-height, 2.5em);width:100%}.list__item:hover{background-color:rgba(var(--lf-list-color-on-bg, var(--lf-color-on-bg)), 0.125);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.list__item:hover .delete{width:1.5em}.list__item--has-description{height:var(--lf-list-item-with-description-height, 3.6em)}.list__item--focused{background-color:rgba(var(--lf-list-color-primary, var(--lf-color-primary)), 0.225);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.list__item--selected{background-color:rgba(var(--lf-list-color-primary, var(--lf-color-primary)), 0.325);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.list__item--selected:hover{background-color:rgba(var(--lf-list-color-primary, var(--lf-color-primary)), 0.475);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.delete{background-color:rgba(var(--lf-list-color-danger, var(--lf-color-danger)), 0.575);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:all 150ms cubic-bezier(0.42, 0, 0.58, 1);align-content:center;box-sizing:border-box;opacity:0.75;overflow:hidden;width:0}.delete:hover{opacity:1}.delete__icon{-webkit-mask:var(--lf-icon-clear);mask:var(--lf-icon-clear);-webkit-mask-position:center;-webkit-mask-repeat:no-repeat;-webkit-mask-size:contain;mask-position:center;mask-repeat:no-repeat;mask-size:contain;background-color:rgba(var(--lf-list-color-on-danger, var(--lf-color-on-danger)), 1);height:1.5em;width:1.5em;overflow:hidden;margin:0}.node{transition:all 150ms cubic-bezier(0.42, 0, 0.58, 1);align-items:center;box-sizing:border-box;display:flex;justify-content:flex-start;padding:var(--lf-list-item-padding, 0 0.75em);position:relative;outline:none;overflow:hidden;width:100%}.node__title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:1em;font-weight:400;line-height:1.6em;letter-spacing:0em;margin-bottom:0.5em;margin-left:1.5em;display:block;margin-bottom:-1.5em;margin-left:0;margin-top:0}.node__title:before{content:"";display:inline-block;height:1.5em;vertical-align:0;width:0}.node__title:after{content:"";display:inline-block;width:0;height:2em;vertical-align:-2em}.node__subtitle{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:0.875em;font-weight:500;line-height:1.375em;letter-spacing:0.01em;display:block;margin-top:0;opacity:0.75;padding-bottom:0.5em}.node__icon{background-color:rgba(var(--lf-list-color-on-bg, var(--lf-color-on-bg)), 1);height:1.5em;width:1.5em;overflow:hidden;margin:0 0.75em 0 0}.node__text{overflow:hidden;width:100%}.empty-data{border:0;border-style:solid;border-color:rgba(var(--lf-list-border-color, var(--lf-color-border)), 1);border-width:1px;border-radius:var(--lf-list-border-radius, var(--lf-ui-border-radius));background-color:rgba(var(--lf-list-color-bg, var(--lf-color-bg)), 0.275);color:rgb(var(--lf-list-color-on-bg, var(--lf-color-on-bg)));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);width:100%;height:100%;font-size:1em;font-weight:400;line-height:1.6em;letter-spacing:0em;margin-bottom:1em;align-items:center;box-sizing:border-box;display:flex;justify-content:center}';
-var IX, LX, FX, DX, EX, WX, OX, RX, PX, BX, $X, VX, jX, HX, YX = function(t4, n2, i, r) {
+  const { bemClass: n2 } = TX(this, dX, "f").theme;
+  return t4.description && W$1("div", { class: n2(TX(this, pX, "f").node._, TX(this, pX, "f").node.subtitle) }, t4.description);
+}, _X = function(t4) {
+  const { bemClass: n2 } = TX(this, dX, "f").theme;
+  return String(t4.value).valueOf() && W$1("div", { class: n2(TX(this, pX, "f").node._, TX(this, pX, "f").node.title) }, String(t4.value).valueOf());
+}, IX.style = '::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=ripple]{animation-duration:var(--lf-ui-duration-ripple, 675ms);animation-fill-mode:forwards;animation-name:lf-ripple;animation-timing-function:var(--lf-ui-timing-ripple, ease-out);background:var(--lf-ui-ripple-background, var(--lf-color-primary));border-radius:var(--lf-ui-radius-ripple, 50%);height:var(--lf-ui-ripple-height, 100%);left:var(--lf-ui-ripple-x, 50%);opacity:var(--lf-ui-opacity-ripple, 0.5);pointer-events:none;position:absolute;top:var(--lf-ui-ripple-y, 50%);transform:scale(0);width:var(--lf-ui-ripple-width, 100%)}@keyframes lf-ripple{from{transform:scale(0)}to{opacity:0;transform:scale(4)}}[data-lf=ripple-surface]{cursor:pointer;height:100%;left:0;overflow:hidden;position:absolute;top:0;width:100%}[data-lf=danger]{--lf-list-color-primary:var(\n    --lf-list-color-danger,\n    var(--lf-color-danger)\n  );--lf-list-color-on-primary:var(\n    --lf-list-color-danger,\n    var(--lf-color-on-danger)\n  )}[data-lf=disabled]{opacity:var(--lf-list-ui-opacity-disabled, var(--lf-ui-opacity-disabled));pointer-events:none}[data-lf=info]{--lf-list-color-primary:var(\n    --lf-list-color-info,\n    var(--lf-color-info)\n  );--lf-list-color-on-primary:var(\n    --lf-list-color-info,\n    var(--lf-color-on-info)\n  )}[data-lf=secondary]{--lf-list-color-primary:var(\n    --lf-list-color-secondary,\n    var(--lf-color-secondary)\n  );--lf-list-color-on-primary:var(\n    --lf-list-color-secondary,\n    var(--lf-color-on-secondary)\n  )}[data-lf=success]{--lf-list-color-primary:var(\n    --lf-list-color-success,\n    var(--lf-color-success)\n  );--lf-list-color-on-primary:var(\n    --lf-list-color-success,\n    var(--lf-color-on-success)\n  )}[data-lf=warning]{--lf-list-color-primary:var(\n    --lf-list-color-warning,\n    var(--lf-color-warning)\n  );--lf-list-color-on-primary:var(\n    --lf-list-color-warning,\n    var(--lf-color-on-warning)\n  )}:host{display:block;font-family:var(--lf-list-font-family, var(--lf-font-family-primary));font-size:var(--lf-list-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-list-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-list-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-list-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-list-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-list-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-list-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-list-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{width:100%;height:100%;outline:none}.list{border:0;border-style:solid;border-color:rgba(var(--lf-list-border-color, var(--lf-color-border)), 1);border-width:1px;border-radius:var(--lf-list-border-radius, var(--lf-ui-border-radius));background-color:rgba(var(--lf-list-color-bg, var(--lf-color-bg)), 0.275);color:rgb(var(--lf-list-color-on-bg, var(--lf-color-on-bg)));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);width:100%;height:100%;box-sizing:border-box;list-style-type:none;margin:0;overflow:auto;padding:0.5em 0}.list--empty{padding:0}.list--selectable .list__item{cursor:pointer;user-select:none}.list:not(.list.list--selectable) .list__item{cursor:default;pointer-events:none}.list__item{transition:all 150ms cubic-bezier(0.42, 0, 0.58, 1);display:flex;height:var(--lf-list-item-height, 2.5em);width:100%}.list__item:hover{background-color:rgba(var(--lf-list-color-on-bg, var(--lf-color-on-bg)), 0.125);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.list__item:hover .delete{width:1.5em}.list__item--has-description{height:var(--lf-list-item-with-description-height, 3.6em)}.list__item--focused{background-color:rgba(var(--lf-list-color-primary, var(--lf-color-primary)), 0.225);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.list__item--selected{background-color:rgba(var(--lf-list-color-primary, var(--lf-color-primary)), 0.325);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.list__item--selected:hover{background-color:rgba(var(--lf-list-color-primary, var(--lf-color-primary)), 0.475);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.delete{background-color:rgba(var(--lf-list-color-danger, var(--lf-color-danger)), 0.575);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:all 150ms cubic-bezier(0.42, 0, 0.58, 1);align-content:center;box-sizing:border-box;opacity:0.75;overflow:hidden;width:0}.delete:hover{opacity:1}.delete__icon{-webkit-mask:var(--lf-icon-clear);mask:var(--lf-icon-clear);-webkit-mask-position:center;-webkit-mask-repeat:no-repeat;-webkit-mask-size:contain;mask-position:center;mask-repeat:no-repeat;mask-size:contain;background-color:rgba(var(--lf-list-color-on-danger, var(--lf-color-on-danger)), 1);height:1.5em;width:1.5em;overflow:hidden;margin:0}.node{transition:all 150ms cubic-bezier(0.42, 0, 0.58, 1);align-items:center;box-sizing:border-box;display:flex;justify-content:flex-start;padding:var(--lf-list-item-padding, 0 0.75em);position:relative;outline:none;overflow:hidden;width:100%}.node__title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:1em;font-weight:400;line-height:1.6em;letter-spacing:0em;margin-bottom:0.5em;margin-left:1.5em;display:block;margin-bottom:-1.5em;margin-left:0;margin-top:0}.node__title:before{content:"";display:inline-block;height:1.5em;vertical-align:0;width:0}.node__title:after{content:"";display:inline-block;width:0;height:2em;vertical-align:-2em}.node__subtitle{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:0.875em;font-weight:500;line-height:1.375em;letter-spacing:0.01em;display:block;margin-top:0;opacity:0.75;padding-bottom:0.5em}.node__icon{background-color:rgba(var(--lf-list-color-on-bg, var(--lf-color-on-bg)), 1);height:1.5em;width:1.5em;overflow:hidden;margin:0 0.75em 0 0}.node__text{overflow:hidden;width:100%}.empty-data{border:0;border-style:solid;border-color:rgba(var(--lf-list-border-color, var(--lf-color-border)), 1);border-width:1px;border-radius:var(--lf-list-border-radius, var(--lf-ui-border-radius));background-color:rgba(var(--lf-list-color-bg, var(--lf-color-bg)), 0.275);color:rgb(var(--lf-list-color-on-bg, var(--lf-color-on-bg)));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);width:100%;height:100%;font-size:1em;font-weight:400;line-height:1.6em;letter-spacing:0em;margin-bottom:1em;align-items:center;box-sizing:border-box;display:flex;justify-content:center}';
+var LX, FX, DX, EX, WX, OX, RX, PX, BX, $X, VX, jX, HX, YX, XX = function(t4, n2, i, r) {
   if ("a" === i && !r) throw new TypeError("Private accessor was defined without a getter");
   if ("function" == typeof n2 ? t4 !== n2 || !r : !n2.has(t4)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return "m" === i ? r : "a" === i ? r.call(t4) : r ? r.value : n2.get(t4);
-}, XX = function(t4, n2, i, r, e) {
+}, ZX = function(t4, n2, i, r, e) {
   if ("function" == typeof n2 ? t4 !== n2 || true : !n2.has(t4)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
   return n2.set(t4, i), i;
 };
-const ZX = class {
+const UX = class {
   constructor(i) {
-    n(this, i), this.lfEvent = I(this, "lf-photoframe-event"), IX.add(this), this.imageOrientation = "", this.isInViewport = false, this.isReady = false, this.lfOverlay = null, this.lfPlaceholder = null, this.lfStyle = "", this.lfThreshold = 0.25, this.lfValue = null, LX.set(this, void 0), FX.set(this, LF_PHOTOFRAME_BLOCKS), DX.set(this, CY_ATTRIBUTES), EX.set(this, LF_PHOTOFRAME_PARTS), WX.set(this, LF_STYLE_ID), OX.set(this, LF_WRAPPER_ID), RX.set(this, void 0), PX.set(this, void 0), $X.set(this, (() => {
+    n(this, i), this.lfEvent = I(this, "lf-photoframe-event"), LX.add(this), this.imageOrientation = "", this.isInViewport = false, this.isReady = false, this.lfOverlay = null, this.lfPlaceholder = null, this.lfStyle = "", this.lfThreshold = 0.25, this.lfValue = null, FX.set(this, void 0), DX.set(this, LF_PHOTOFRAME_BLOCKS), EX.set(this, CY_ATTRIBUTES), WX.set(this, LF_PHOTOFRAME_PARTS), OX.set(this, LF_STYLE_ID), RX.set(this, LF_WRAPPER_ID), PX.set(this, void 0), BX.set(this, void 0), VX.set(this, (() => {
       const { lfOverlay: t4 } = this;
       if (!t4 || "object" != typeof t4) return null;
-      const { bemClass: n2 } = YX(this, LX, "f").theme, { overlay: i2 } = YX(this, FX, "f"), { description: e, hideOnClick: a, icon: o2, title: s } = t4;
+      const { bemClass: n2 } = XX(this, FX, "f").theme, { overlay: i2 } = XX(this, DX, "f"), { description: e, hideOnClick: a, icon: o2, title: s } = t4;
       return W$1("div", { class: n2(i2._, null, { "has-actions": a }), onClick: a ? (t5) => {
         this.onLfEvent(t5, "overlay"), this.lfOverlay = null;
-      } : void 0, part: YX(this, EX, "f").overlay }, W$1("div", { class: n2(i2._, i2.content) }, o2 && W$1("lf-image", { class: n2(i2._, i2.icon), lfSizeX: "3em", lfSizeY: "3em", lfValue: o2, part: YX(this, EX, "f").icon }), s && W$1("div", { class: n2(i2._, i2.title), part: YX(this, EX, "f").title }, s), e && W$1("div", { class: n2(i2._, i2.description), part: YX(this, EX, "f").description }, e)));
+      } : void 0, part: XX(this, WX, "f").overlay }, W$1("div", { class: n2(i2._, i2.content) }, o2 && W$1("lf-image", { class: n2(i2._, i2.icon), lfSizeX: "3em", lfSizeY: "3em", lfValue: o2, part: XX(this, WX, "f").icon }), s && W$1("div", { class: n2(i2._, i2.title), part: XX(this, WX, "f").title }, s), e && W$1("div", { class: n2(i2._, i2.description), part: XX(this, WX, "f").description }, e)));
     }));
   }
   onLfEvent(t4, n2, i = false) {
-    "load" === n2 && (i ? this.imageOrientation = YX(this, IX, "m", BX).call(this, YX(this, PX, "f")) ? "horizontal" : "vertical" : this.isReady = true), this.lfEvent.emit({ comp: this, id: this.rootElement.id, originalEvent: t4, eventType: n2, isPlaceholder: i });
+    "load" === n2 && (i ? this.imageOrientation = XX(this, LX, "m", $X).call(this, XX(this, BX, "f")) ? "horizontal" : "vertical" : this.isReady = true), this.lfEvent.emit({ comp: this, id: this.rootElement.id, originalEvent: t4, eventType: n2, isPlaceholder: i });
   }
   async getDebugInfo() {
     return this.debugInfo;
@@ -29643,54 +29676,54 @@ const ZX = class {
     }), t4);
   }
   connectedCallback() {
-    YX(this, LX, "f") && (YX(this, LX, "f").theme.register(this), YX(this, IX, "m", VX).call(this));
+    XX(this, FX, "f") && (XX(this, FX, "f").theme.register(this), XX(this, LX, "m", jX).call(this));
   }
   async componentWillLoad() {
-    XX(this, LX, await o(this));
+    ZX(this, FX, await o(this));
   }
   componentDidLoad() {
     var _a2;
-    const { info: t4 } = YX(this, LX, "f").debug;
-    YX(this, IX, "m", VX).call(this), (_a2 = YX(this, RX, "f")) == null ? void 0 : _a2.observe(this.rootElement), this.onLfEvent(new CustomEvent("ready"), "ready"), t4.update(this, "did-load");
+    const { info: t4 } = XX(this, FX, "f").debug;
+    XX(this, LX, "m", jX).call(this), (_a2 = XX(this, PX, "f")) == null ? void 0 : _a2.observe(this.rootElement), this.onLfEvent(new CustomEvent("ready"), "ready"), t4.update(this, "did-load");
   }
   componentWillRender() {
-    const { info: t4 } = YX(this, LX, "f").debug;
+    const { info: t4 } = XX(this, FX, "f").debug;
     t4.update(this, "will-render");
   }
   componentDidRender() {
-    const { info: t4 } = YX(this, LX, "f").debug;
+    const { info: t4 } = XX(this, FX, "f").debug;
     t4.update(this, "did-render");
   }
   render() {
-    const { sanitizeProps: t4, theme: n2 } = YX(this, LX, "f"), { bemClass: i, setLfStyle: a } = n2, { photoframe: o2 } = YX(this, FX, "f"), { isInViewport: s, isReady: l, lfPlaceholder: u, lfStyle: f2, lfValue: c } = this, h = Boolean(s && l);
-    return W$1(L, { key: "bd51874e64388e55d293b6baf88b8e402b3a6fed" }, f2 && W$1("style", { key: "6f3d86a9ca8d0402563929a1d3556bf88576013b", id: YX(this, WX, "f") }, a(this)), W$1("div", { key: "b2f4e1ce92baacc009153b2dc0668b420a8cf5bf", class: i(o2._, null, { [this.imageOrientation]: this.imageOrientation && true }), id: YX(this, OX, "f") }, YX(this, $X, "f").call(this), W$1("img", { key: "9bbdb38a9bce72bb40956193f6f602bce5764872", class: i(o2._, o2.placeholder, { loaded: Boolean(this.imageOrientation), hidden: h }), "data-cy": YX(this, DX, "f").image, onLoad: (t5) => {
-      YX(this, IX, "m", HX).call(this, t5, true);
-    }, part: YX(this, EX, "f").placeholder, ref: (t5) => {
-      t5 && XX(this, PX, t5);
-    }, ...t4(u) }), s && W$1("img", { key: "b8332f4a831038fd2b4b47b64a92c4a2c2a1740c", class: i(o2._, o2.image, { active: h }), "data-cy": YX(this, DX, "f").image, onLoad: (t5) => {
-      YX(this, IX, "m", HX).call(this, t5, false);
-    }, part: YX(this, EX, "f").image, ...t4(c) })));
+    const { sanitizeProps: t4, theme: n2 } = XX(this, FX, "f"), { bemClass: i, setLfStyle: a } = n2, { photoframe: o2 } = XX(this, DX, "f"), { isInViewport: s, isReady: l, lfPlaceholder: u, lfStyle: f2, lfValue: c } = this, h = Boolean(s && l);
+    return W$1(L, { key: "bd51874e64388e55d293b6baf88b8e402b3a6fed" }, f2 && W$1("style", { key: "6f3d86a9ca8d0402563929a1d3556bf88576013b", id: XX(this, OX, "f") }, a(this)), W$1("div", { key: "b2f4e1ce92baacc009153b2dc0668b420a8cf5bf", class: i(o2._, null, { [this.imageOrientation]: this.imageOrientation && true }), id: XX(this, RX, "f") }, XX(this, VX, "f").call(this), W$1("img", { key: "9bbdb38a9bce72bb40956193f6f602bce5764872", class: i(o2._, o2.placeholder, { loaded: Boolean(this.imageOrientation), hidden: h }), "data-cy": XX(this, EX, "f").image, onLoad: (t5) => {
+      XX(this, LX, "m", YX).call(this, t5, true);
+    }, part: XX(this, WX, "f").placeholder, ref: (t5) => {
+      t5 && ZX(this, BX, t5);
+    }, ...t4(u) }), s && W$1("img", { key: "b8332f4a831038fd2b4b47b64a92c4a2c2a1740c", class: i(o2._, o2.image, { active: h }), "data-cy": XX(this, EX, "f").image, onLoad: (t5) => {
+      XX(this, LX, "m", YX).call(this, t5, false);
+    }, part: XX(this, WX, "f").image, ...t4(c) })));
   }
   disconnectedCallback() {
     var _a2, _b2;
-    (_a2 = YX(this, LX, "f")) == null ? void 0 : _a2.theme.unregister(this), (_b2 = YX(this, RX, "f")) == null ? void 0 : _b2.unobserve(this.rootElement);
+    (_a2 = XX(this, FX, "f")) == null ? void 0 : _a2.theme.unregister(this), (_b2 = XX(this, PX, "f")) == null ? void 0 : _b2.unobserve(this.rootElement);
   }
   get rootElement() {
     return G(this);
   }
 };
-LX = /* @__PURE__ */ new WeakMap(), FX = /* @__PURE__ */ new WeakMap(), DX = /* @__PURE__ */ new WeakMap(), EX = /* @__PURE__ */ new WeakMap(), WX = /* @__PURE__ */ new WeakMap(), OX = /* @__PURE__ */ new WeakMap(), RX = /* @__PURE__ */ new WeakMap(), PX = /* @__PURE__ */ new WeakMap(), $X = /* @__PURE__ */ new WeakMap(), IX = /* @__PURE__ */ new WeakSet(), BX = function(t4) {
+FX = /* @__PURE__ */ new WeakMap(), DX = /* @__PURE__ */ new WeakMap(), EX = /* @__PURE__ */ new WeakMap(), WX = /* @__PURE__ */ new WeakMap(), OX = /* @__PURE__ */ new WeakMap(), RX = /* @__PURE__ */ new WeakMap(), PX = /* @__PURE__ */ new WeakMap(), BX = /* @__PURE__ */ new WeakMap(), VX = /* @__PURE__ */ new WeakMap(), LX = /* @__PURE__ */ new WeakSet(), $X = function(t4) {
   return Boolean(t4.naturalWidth > t4.naturalHeight);
-}, VX = function() {
-  XX(this, RX, new IntersectionObserver(((t4) => {
+}, jX = function() {
+  ZX(this, PX, new IntersectionObserver(((t4) => {
     t4.forEach(((t5) => {
       const n2 = this.rootElement.hasAttribute("lf-hydrated");
       t5.isIntersecting && n2 && this.rootElement.isConnected && requestAnimationFrame((() => {
-        this.isInViewport = true, YX(this, RX, "f").unobserve(this.rootElement);
+        this.isInViewport = true, XX(this, PX, "f").unobserve(this.rootElement);
       }));
     }));
   }), { threshold: this.lfThreshold }));
-}, jX = function(t4) {
+}, HX = function(t4) {
   return new Promise(((n2) => {
     let i = null;
     const r = () => {
@@ -29702,19 +29735,19 @@ LX = /* @__PURE__ */ new WeakMap(), FX = /* @__PURE__ */ new WeakMap(), DX = /* 
     };
     r();
   }));
-}, HX = function(t4, n2, i = 100) {
-  YX(this, IX, "m", jX).call(this, i).then((() => {
+}, YX = function(t4, n2, i = 100) {
+  XX(this, LX, "m", HX).call(this, i).then((() => {
     this.onLfEvent(t4, "load", n2);
   }));
-}, ZX.style = "::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}:host{display:block;font-family:var(--lf-photoframe-font-family, var(--lf-font-family-primary));font-size:var(--lf-photoframe-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-photoframe-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-photoframe-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-photoframe-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-photoframe-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-photoframe-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-photoframe-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-photoframe-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{width:100%;height:100%;box-sizing:border-box;position:relative}#lf-component{position:relative}img{width:100%;height:100%}.photoframe--landscape img{width:100%}.photoframe--portrait img{height:100%}.photoframe__image{display:none;left:0;object-fit:var(--lf-comp-image-fit, cover);position:absolute;top:0;z-index:0}.photoframe__image--active{display:block;position:relative}.photoframe__placeholder{display:none;object-fit:var(--lf-comp-placeholder-fit, cover);transition:opacity var(--lf-comp-fade-out-time, 1750ms) ease-out;will-change:opacity;z-index:1}.photoframe__placeholder--hidden{opacity:0;position:absolute}.photoframe__placeholder--loaded{display:block}.overlay{background-color:rgba(var(--lf-photoframe-color-bg, var(--lf-color-bg)), 1);width:100%;height:100%;display:flex;justify-content:center;left:0;position:absolute;top:0;z-index:var(--lf-comp-overlay-zindex, 2)}.overlay--has-actions{cursor:pointer}.overlay--has-actions:hover .overlay__content{transform:scale(1.5)}.overlay__content,.overlay__description,.overlay__title{color:rgb(var(--lf-photoframe-color-on-bg, var(--lf-color-on-bg)));text-align:center}.overlay__content{font-size:0.875em;font-weight:500;line-height:1.375em;letter-spacing:0.01em;transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);display:grid;grid-gap:0.75em;margin:auto;overflow:hidden}.overlay__description{font-size:0.875em;font-weight:400;line-height:1.25em;letter-spacing:0.2em}.overlay__title{font-size:1.25em;font-weight:500;line-height:1.4em;letter-spacing:0em}.overlay__icon{margin:auto}";
-var UX, GX, qX, JX, KX, QX, tZ, nZ, iZ, rZ, eZ, aZ, oZ, sZ = function(t4, n2, i, r) {
+}, UX.style = "::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}:host{display:block;font-family:var(--lf-photoframe-font-family, var(--lf-font-family-primary));font-size:var(--lf-photoframe-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-photoframe-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-photoframe-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-photoframe-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-photoframe-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-photoframe-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-photoframe-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-photoframe-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{width:100%;height:100%;box-sizing:border-box;position:relative}#lf-component{position:relative}img{width:100%;height:100%}.photoframe--landscape img{width:100%}.photoframe--portrait img{height:100%}.photoframe__image{display:none;left:0;object-fit:var(--lf-comp-image-fit, cover);position:absolute;top:0;z-index:0}.photoframe__image--active{display:block;position:relative}.photoframe__placeholder{display:none;object-fit:var(--lf-comp-placeholder-fit, cover);transition:opacity var(--lf-comp-fade-out-time, 1750ms) ease-out;will-change:opacity;z-index:1}.photoframe__placeholder--hidden{opacity:0;position:absolute}.photoframe__placeholder--loaded{display:block}.overlay{background-color:rgba(var(--lf-photoframe-color-bg, var(--lf-color-bg)), 1);width:100%;height:100%;display:flex;justify-content:center;left:0;position:absolute;top:0;z-index:var(--lf-comp-overlay-zindex, 2)}.overlay--has-actions{cursor:pointer}.overlay--has-actions:hover .overlay__content{transform:scale(1.5)}.overlay__content,.overlay__description,.overlay__title{color:rgb(var(--lf-photoframe-color-on-bg, var(--lf-color-on-bg)));text-align:center}.overlay__content{font-size:0.875em;font-weight:500;line-height:1.375em;letter-spacing:0.01em;transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);display:grid;grid-gap:0.75em;margin:auto;overflow:hidden}.overlay__description{font-size:0.875em;font-weight:400;line-height:1.25em;letter-spacing:0.2em}.overlay__title{font-size:1.25em;font-weight:500;line-height:1.4em;letter-spacing:0em}.overlay__icon{margin:auto}";
+var GX, qX, JX, KX, QX, tZ, nZ, iZ, rZ, eZ, aZ, oZ, sZ, lZ = function(t4, n2, i, r) {
   if ("a" === i && !r) throw new TypeError("Private accessor was defined without a getter");
   if ("function" == typeof n2 ? t4 !== n2 || !r : !n2.has(t4)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return "m" === i ? r : "a" === i ? r.call(t4) : r ? r.value : n2.get(t4);
 };
-const lZ = class {
+const uZ = class {
   constructor(i) {
-    n(this, i), this.lfEvent = I(this, "lf-progressbar-event"), UX.add(this), this.lfAnimated = false, this.lfCenteredLabel = false, this.lfIcon = "", this.lfIsRadial = false, this.lfLabel = "", this.lfStyle = "", this.lfUiSize = "medium", this.lfUiState = "primary", this.lfValue = 0, GX.set(this, void 0), qX.set(this, LF_PROGRESSBAR_BLOCKS), JX.set(this, CY_ATTRIBUTES), KX.set(this, LF_ATTRIBUTES), QX.set(this, LF_PROGRESSBAR_PARTS), tZ.set(this, LF_STYLE_ID), nZ.set(this, LF_PROGRESSBAR_CSS_VARIABLES), iZ.set(this, LF_WRAPPER_ID);
+    n(this, i), this.lfEvent = I(this, "lf-progressbar-event"), GX.add(this), this.lfAnimated = false, this.lfCenteredLabel = false, this.lfIcon = "", this.lfIsRadial = false, this.lfLabel = "", this.lfStyle = "", this.lfUiSize = "medium", this.lfUiState = "primary", this.lfValue = 0, qX.set(this, void 0), JX.set(this, LF_PROGRESSBAR_BLOCKS), KX.set(this, CY_ATTRIBUTES), QX.set(this, LF_ATTRIBUTES), tZ.set(this, LF_PROGRESSBAR_PARTS), nZ.set(this, LF_STYLE_ID), iZ.set(this, LF_PROGRESSBAR_CSS_VARIABLES), rZ.set(this, LF_WRAPPER_ID);
   }
   onLfEvent(t4, n2) {
     this.lfEvent.emit({ comp: this, eventType: n2, id: this.rootElement.id, originalEvent: t4 });
@@ -29735,77 +29768,77 @@ const lZ = class {
     }), t4);
   }
   connectedCallback() {
-    sZ(this, GX, "f") && sZ(this, GX, "f").theme.register(this);
+    lZ(this, qX, "f") && lZ(this, qX, "f").theme.register(this);
   }
   async componentWillLoad() {
     !(function(t4, n2, i, r, e) {
       if ("function" == typeof n2 ? t4 !== n2 || true : !n2.has(t4)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
       n2.set(t4, i);
-    })(this, GX, await o(this));
+    })(this, qX, await o(this));
   }
   componentDidLoad() {
-    const { info: t4 } = sZ(this, GX, "f").debug;
+    const { info: t4 } = lZ(this, qX, "f").debug;
     this.onLfEvent(new CustomEvent("ready"), "ready"), t4.update(this, "did-load");
   }
   componentWillRender() {
-    const { info: t4 } = sZ(this, GX, "f").debug;
+    const { info: t4 } = lZ(this, qX, "f").debug;
     t4.update(this, "will-render");
   }
   componentDidRender() {
-    const { info: t4 } = sZ(this, GX, "f").debug;
+    const { info: t4 } = lZ(this, qX, "f").debug;
     t4.update(this, "did-render");
   }
   render() {
-    const { theme: t4 } = sZ(this, GX, "f"), { lfIsRadial: n2, lfStyle: i, lfValue: a } = this;
-    return W$1(L, { key: "28b77bffaf6a33de9850a2f8f0e73b3a7bdef854" }, W$1("style", { key: "9cbd1828fbfcf98c306b4374a98dc0fb656c53cc", id: sZ(this, tZ, "f") }, `
+    const { theme: t4 } = lZ(this, qX, "f"), { lfIsRadial: n2, lfStyle: i, lfValue: a } = this;
+    return W$1(L, { key: "28b77bffaf6a33de9850a2f8f0e73b3a7bdef854" }, W$1("style", { key: "9cbd1828fbfcf98c306b4374a98dc0fb656c53cc", id: lZ(this, nZ, "f") }, `
                 :host {
-                  ${sZ(this, nZ, "f").transform}: rotate(${3.6 * a}deg);
-                  ${sZ(this, nZ, "f").width}: ${a}%;
+                  ${lZ(this, iZ, "f").transform}: rotate(${3.6 * a}deg);
+                  ${lZ(this, iZ, "f").width}: ${a}%;
                 }
-                ${i && t4.setLfStyle(this) || ""}`), W$1("div", { key: "f50be474e86b93ea5354f56653a05b2ee1e3f5a6", id: sZ(this, iZ, "f") }, n2 ? sZ(this, UX, "m", oZ).call(this) : sZ(this, UX, "m", aZ).call(this)));
+                ${i && t4.setLfStyle(this) || ""}`), W$1("div", { key: "f50be474e86b93ea5354f56653a05b2ee1e3f5a6", id: lZ(this, rZ, "f") }, n2 ? lZ(this, GX, "m", sZ).call(this) : lZ(this, GX, "m", oZ).call(this)));
   }
   disconnectedCallback() {
     var _a2;
-    (_a2 = sZ(this, GX, "f")) == null ? void 0 : _a2.theme.unregister(this);
+    (_a2 = lZ(this, qX, "f")) == null ? void 0 : _a2.theme.unregister(this);
   }
   get rootElement() {
     return G(this);
   }
 };
-GX = /* @__PURE__ */ new WeakMap(), qX = /* @__PURE__ */ new WeakMap(), JX = /* @__PURE__ */ new WeakMap(), KX = /* @__PURE__ */ new WeakMap(), QX = /* @__PURE__ */ new WeakMap(), tZ = /* @__PURE__ */ new WeakMap(), nZ = /* @__PURE__ */ new WeakMap(), iZ = /* @__PURE__ */ new WeakMap(), UX = /* @__PURE__ */ new WeakSet(), rZ = function() {
-  const { get: t4 } = sZ(this, GX, "f").assets, { bemClass: n2 } = sZ(this, GX, "f").theme, { progressbar: i } = sZ(this, qX, "f"), { lfIcon: e } = this, { style: a } = t4(`./assets/svg/${e}.svg`);
-  return W$1("div", { class: n2(i._, i.icon), "data-cy": sZ(this, JX, "f").maskedSvg, part: sZ(this, QX, "f").icon, style: a });
-}, eZ = function() {
-  const { bemClass: t4 } = sZ(this, GX, "f").theme, { progressbar: n2 } = sZ(this, qX, "f"), { lfIcon: i, lfLabel: e, lfValue: a } = this, o2 = e ? [W$1("div", { class: t4(n2._, n2.text), part: sZ(this, QX, "f").text }, e)] : [W$1("div", { class: t4(n2._, n2.text), part: sZ(this, QX, "f").text }, a), W$1("div", { class: t4(n2._, n2.mu), part: sZ(this, QX, "f").mu }, "%")];
-  return W$1("div", { class: t4(n2._, n2.label) }, i && sZ(this, UX, "m", rZ).call(this), o2);
+qX = /* @__PURE__ */ new WeakMap(), JX = /* @__PURE__ */ new WeakMap(), KX = /* @__PURE__ */ new WeakMap(), QX = /* @__PURE__ */ new WeakMap(), tZ = /* @__PURE__ */ new WeakMap(), nZ = /* @__PURE__ */ new WeakMap(), iZ = /* @__PURE__ */ new WeakMap(), rZ = /* @__PURE__ */ new WeakMap(), GX = /* @__PURE__ */ new WeakSet(), eZ = function() {
+  const { get: t4 } = lZ(this, qX, "f").assets, { bemClass: n2 } = lZ(this, qX, "f").theme, { progressbar: i } = lZ(this, JX, "f"), { lfIcon: e } = this, { style: a } = t4(`./assets/svg/${e}.svg`);
+  return W$1("div", { class: n2(i._, i.icon), "data-cy": lZ(this, KX, "f").maskedSvg, part: lZ(this, tZ, "f").icon, style: a });
 }, aZ = function() {
-  const { bemClass: t4 } = sZ(this, GX, "f").theme, { progressbar: n2 } = sZ(this, qX, "f");
-  return W$1("div", { class: t4(n2._), "data-lf": sZ(this, KX, "f")[this.lfUiState], part: sZ(this, QX, "f").progressbar }, W$1("div", { class: t4(n2._, n2.percentage), part: sZ(this, QX, "f").percentage }, !this.lfCenteredLabel && sZ(this, UX, "m", eZ).call(this)), this.lfCenteredLabel && sZ(this, UX, "m", eZ).call(this));
+  const { bemClass: t4 } = lZ(this, qX, "f").theme, { progressbar: n2 } = lZ(this, JX, "f"), { lfIcon: i, lfLabel: e, lfValue: a } = this, o2 = e ? [W$1("div", { class: t4(n2._, n2.text), part: lZ(this, tZ, "f").text }, e)] : [W$1("div", { class: t4(n2._, n2.text), part: lZ(this, tZ, "f").text }, a), W$1("div", { class: t4(n2._, n2.mu), part: lZ(this, tZ, "f").mu }, "%")];
+  return W$1("div", { class: t4(n2._, n2.label) }, i && lZ(this, GX, "m", eZ).call(this), o2);
 }, oZ = function() {
-  const { bemClass: t4 } = sZ(this, GX, "f").theme, { pie: n2, progressbar: i } = sZ(this, qX, "f");
-  return W$1("div", { class: t4(i._), "data-lf": sZ(this, KX, "f")[this.lfUiState], part: sZ(this, QX, "f").progressbar }, sZ(this, UX, "m", eZ).call(this), W$1("div", { class: t4(n2._, null, { empty: this.lfValue <= 50, full: this.lfValue > 50, "has-value": Boolean(this.lfValue) }) }, W$1("div", { class: t4(n2._, n2.halfCircle, { left: true }) }), W$1("div", { class: t4(n2._, n2.halfCircle, { right: true }) })), W$1("div", { class: t4(n2._, n2.track), part: sZ(this, QX, "f").track }));
-}, lZ.style = "::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=danger]{--lf-progressbar-color-primary:var(\n    --lf-progressbar-color-danger,\n    var(--lf-color-danger)\n  );--lf-progressbar-color-on-primary:var(\n    --lf-progressbar-color-danger,\n    var(--lf-color-on-danger)\n  )}[data-lf=disabled]{opacity:var(--lf-progressbar-ui-opacity-disabled, var(--lf-ui-opacity-disabled));pointer-events:none}[data-lf=info]{--lf-progressbar-color-primary:var(\n    --lf-progressbar-color-info,\n    var(--lf-color-info)\n  );--lf-progressbar-color-on-primary:var(\n    --lf-progressbar-color-info,\n    var(--lf-color-on-info)\n  )}[data-lf=secondary]{--lf-progressbar-color-primary:var(\n    --lf-progressbar-color-secondary,\n    var(--lf-color-secondary)\n  );--lf-progressbar-color-on-primary:var(\n    --lf-progressbar-color-secondary,\n    var(--lf-color-on-secondary)\n  )}[data-lf=success]{--lf-progressbar-color-primary:var(\n    --lf-progressbar-color-success,\n    var(--lf-color-success)\n  );--lf-progressbar-color-on-primary:var(\n    --lf-progressbar-color-success,\n    var(--lf-color-on-success)\n  )}[data-lf=warning]{--lf-progressbar-color-primary:var(\n    --lf-progressbar-color-warning,\n    var(--lf-color-warning)\n  );--lf-progressbar-color-on-primary:var(\n    --lf-progressbar-color-warning,\n    var(--lf-color-on-warning)\n  )}:host{display:block;font-family:var(--lf-progressbar-font-family, var(--lf-font-family-primary));font-size:var(--lf-progressbar-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-progressbar-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-progressbar-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-progressbar-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-progressbar-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-progressbar-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-progressbar-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-progressbar-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{width:100%;height:100%}#lf-component{background-color:rgba(var(--lf-progressbar-color-surface, var(--lf-color-surface)), 0.225);color:rgb(var(--lf-progressbar-color-on-surface, var(--lf-color-on-surface)));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.progressbar{border:0;border-style:solid;border-color:rgba(var(--lf-progressbar-border-color, var(--lf-color-border)), 1);border-width:1px;border-radius:var(--lf-progressbar-border-radius, var(--lf-ui-border-radius));box-sizing:border-box;height:var(--lf-progressbar-height, 100%);overflow:hidden;width:var(--lf-progressbar-width, 100%)}.progressbar__icon{background-color:rgba(var(--lf-progressbar-color-on-primary, var(--lf-color-on-primary)), 1);height:1.5em;width:1.5em;overflow:hidden;margin:0 0.75em}.progressbar__label{color:rgb(var(--lf-progressbar-color-on-primary, var(--lf-color-on-primary)));width:100%;height:100%;font-size:0.775em;letter-spacing:0.0892857143em;line-height:inherit;text-transform:uppercase;align-items:center;display:flex;justify-content:center;left:0;min-width:max-content;position:absolute;top:0}.progressbar__mu{font-size:0.875em;font-weight:500;line-height:1.375em;letter-spacing:0.01em;font-size:0.5em}.progressbar__percentage{border:0;border-style:solid;border-radius:var(--lf-progressbar-border-radius, var(--lf-ui-border-radius));background-color:rgba(var(--lf-progressbar-color-primary, var(--lf-color-primary)), 0.775);color:rgb(var(--lf-progressbar-color-on-primary, var(--lf-color-on-primary)));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:all 250ms cubic-bezier(0.34, 1.56, 0.64, 1);box-sizing:border-box;height:var(--lf-progressbar-height, 100%);padding:var(--lf-progressbar-padding, 1em 0);position:relative;text-align:center;width:var(--lf_progressbar_percentage_width)}:host([lf-centered-label]) .progressbar{position:relative}:host([lf-centered-label]) .progressbar__percentage{position:static}:host([lf-is-radial]){box-sizing:border-box;margin:auto}:host([lf-is-radial]) #lf-component{display:flex;font-size:10em;margin:auto;padding:0.1em 0}:host([lf-is-radial]) .progressbar{background:none;border:none;height:1em;margin:auto;overflow:visible;position:relative;width:1em}:host([lf-is-radial]) .progressbar:nth-child(3n+1){clear:both}:host([lf-is-radial]) .progressbar__icon{background-color:rgba(var(--lf-progressbar-color-on-bg, var(--lf-color-on-bg)), 1);height:0.75em;width:0.75em;overflow:hidden;margin:0 0.15em}:host([lf-is-radial]) .progressbar__label{color:rgb(var(--lf-progressbar-color-on-bg, var(--lf-color-on-bg)));cursor:default;display:flex;font-size:0.15em}:host([lf-is-radial]) .progressbar__um{color:rgb(var(--lf-progressbar-color-on-bg, var(--lf-color-on-bg)));font-size:0.5em;padding-bottom:0.75em}:host([lf-is-radial]) *,:host([lf-is-radial]) *:before,:host([lf-is-radial]) *:after{box-sizing:border-box}:host([lf-animated]) .progressbar__percentage{animation:running-stripes 2s linear infinite;background-image:linear-gradient(-45deg, rgba(var(--lf-color-surface), 0.125) 25%, transparent 25%, transparent 50%, rgba(var(--lf-color-surface), 0.125) 50%, rgba(var(--lf-color-surface), 0.125) 75%, transparent 75%, transparent);background-size:3em 3em}.pie{clip:rect(0, 1em, 1em, 0.5em);height:1em;left:0;position:absolute;top:0;width:1em}.pie--empty__half-circle--right{display:none}.pie--full{clip:rect(auto, auto, auto, auto)}.pie--full .pie__half-circle--right{transform:rotate(180deg)}.pie--has-value .pie__half-circle{border-color:rgb(var(--lf-progressbar-color-primary, rgb(var(--lf-color-primary))))}.pie--has-value .pie__half-circle--left{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);transform:var(--lf_progressbar_transform)}.pie__half-circle{height:1em;width:1em;border:0.1em solid rgba(var(--lf-color-surface), 0.375);border-radius:50%;clip:rect(0, 0.5em, 1em, 0);left:0;position:absolute;top:0}.pie__track{height:1em;width:1em;border:0.1em solid rgba(var(--lf-color-surface), 0.375);border-radius:50%}@keyframes running-stripes{0%{background-position:0 0}100%{background-position:3em 3em}}";
-const uZ = { 1: { className: "spinner-bar-v1", elements: () => [] }, 2: { className: "spinner-bar-v2", elements: () => [] }, 3: { className: "spinner-bar-v3", elements: (t4) => [W$1("div", { class: "progress-bar", style: { width: `${t4}%` } })] } }, fZ = { 7: { className: "spinner-v7", elements: () => Array(6).fill(0).map((() => W$1("div", { class: "sk-spinner-v7-dot" }))) }, 9: { className: "spinner-v9", elements: () => [W$1("div", { class: "sk-spinner-v9-bounce1" }), W$1("div", { class: "sk-spinner-v9-bounce2" })] }, 10: { className: "spinner-v10", elements: () => [W$1("div", { class: "sk-spinner-v10-cube1" }), W$1("div", { class: "sk-spinner-v10-cube2" })] }, 12: { className: "spinner-v12", elements: () => [W$1("div", { class: "sk-spinner-v12-dot1" }), W$1("div", { class: "sk-spinner-v12-dot2" })] }, 13: { className: "spinner-v13", elements: () => Array(9).fill(0).map(((t4, n2) => W$1("div", { class: `sk-spinner-v13-cube sk-spinner-v13-cube${n2 + 1}` }))) }, 14: { className: "spinner-v14", elements: () => Array(12).fill(0).map(((t4, n2) => W$1("div", { class: `sk-spinner-v14-circle${n2 + 1} sk-spinner-v14-circle` }))) } };
-var cZ, hZ, vZ, dZ, pZ, mZ, bZ, gZ, yZ = function(t4, n2, i, r) {
+  const { bemClass: t4 } = lZ(this, qX, "f").theme, { progressbar: n2 } = lZ(this, JX, "f");
+  return W$1("div", { class: t4(n2._), "data-lf": lZ(this, QX, "f")[this.lfUiState], part: lZ(this, tZ, "f").progressbar }, W$1("div", { class: t4(n2._, n2.percentage), part: lZ(this, tZ, "f").percentage }, !this.lfCenteredLabel && lZ(this, GX, "m", aZ).call(this)), this.lfCenteredLabel && lZ(this, GX, "m", aZ).call(this));
+}, sZ = function() {
+  const { bemClass: t4 } = lZ(this, qX, "f").theme, { pie: n2, progressbar: i } = lZ(this, JX, "f");
+  return W$1("div", { class: t4(i._), "data-lf": lZ(this, QX, "f")[this.lfUiState], part: lZ(this, tZ, "f").progressbar }, lZ(this, GX, "m", aZ).call(this), W$1("div", { class: t4(n2._, null, { empty: this.lfValue <= 50, full: this.lfValue > 50, "has-value": Boolean(this.lfValue) }) }, W$1("div", { class: t4(n2._, n2.halfCircle, { left: true }) }), W$1("div", { class: t4(n2._, n2.halfCircle, { right: true }) })), W$1("div", { class: t4(n2._, n2.track), part: lZ(this, tZ, "f").track }));
+}, uZ.style = "::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=danger]{--lf-progressbar-color-primary:var(\n    --lf-progressbar-color-danger,\n    var(--lf-color-danger)\n  );--lf-progressbar-color-on-primary:var(\n    --lf-progressbar-color-danger,\n    var(--lf-color-on-danger)\n  )}[data-lf=disabled]{opacity:var(--lf-progressbar-ui-opacity-disabled, var(--lf-ui-opacity-disabled));pointer-events:none}[data-lf=info]{--lf-progressbar-color-primary:var(\n    --lf-progressbar-color-info,\n    var(--lf-color-info)\n  );--lf-progressbar-color-on-primary:var(\n    --lf-progressbar-color-info,\n    var(--lf-color-on-info)\n  )}[data-lf=secondary]{--lf-progressbar-color-primary:var(\n    --lf-progressbar-color-secondary,\n    var(--lf-color-secondary)\n  );--lf-progressbar-color-on-primary:var(\n    --lf-progressbar-color-secondary,\n    var(--lf-color-on-secondary)\n  )}[data-lf=success]{--lf-progressbar-color-primary:var(\n    --lf-progressbar-color-success,\n    var(--lf-color-success)\n  );--lf-progressbar-color-on-primary:var(\n    --lf-progressbar-color-success,\n    var(--lf-color-on-success)\n  )}[data-lf=warning]{--lf-progressbar-color-primary:var(\n    --lf-progressbar-color-warning,\n    var(--lf-color-warning)\n  );--lf-progressbar-color-on-primary:var(\n    --lf-progressbar-color-warning,\n    var(--lf-color-on-warning)\n  )}:host{display:block;font-family:var(--lf-progressbar-font-family, var(--lf-font-family-primary));font-size:var(--lf-progressbar-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-progressbar-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-progressbar-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-progressbar-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-progressbar-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-progressbar-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-progressbar-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-progressbar-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{width:100%;height:100%}#lf-component{background-color:rgba(var(--lf-progressbar-color-surface, var(--lf-color-surface)), 0.225);color:rgb(var(--lf-progressbar-color-on-surface, var(--lf-color-on-surface)));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.progressbar{border:0;border-style:solid;border-color:rgba(var(--lf-progressbar-border-color, var(--lf-color-border)), 1);border-width:1px;border-radius:var(--lf-progressbar-border-radius, var(--lf-ui-border-radius));box-sizing:border-box;height:var(--lf-progressbar-height, 100%);overflow:hidden;width:var(--lf-progressbar-width, 100%)}.progressbar__icon{background-color:rgba(var(--lf-progressbar-color-on-primary, var(--lf-color-on-primary)), 1);height:1.5em;width:1.5em;overflow:hidden;margin:0 0.75em}.progressbar__label{color:rgb(var(--lf-progressbar-color-on-primary, var(--lf-color-on-primary)));width:100%;height:100%;font-size:0.775em;letter-spacing:0.0892857143em;line-height:inherit;text-transform:uppercase;align-items:center;display:flex;justify-content:center;left:0;min-width:max-content;position:absolute;top:0}.progressbar__mu{font-size:0.875em;font-weight:500;line-height:1.375em;letter-spacing:0.01em;font-size:0.5em}.progressbar__percentage{border:0;border-style:solid;border-radius:var(--lf-progressbar-border-radius, var(--lf-ui-border-radius));background-color:rgba(var(--lf-progressbar-color-primary, var(--lf-color-primary)), 0.775);color:rgb(var(--lf-progressbar-color-on-primary, var(--lf-color-on-primary)));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:all 250ms cubic-bezier(0.34, 1.56, 0.64, 1);box-sizing:border-box;height:var(--lf-progressbar-height, 100%);padding:var(--lf-progressbar-padding, 1em 0);position:relative;text-align:center;width:var(--lf_progressbar_percentage_width)}:host([lf-centered-label]) .progressbar{position:relative}:host([lf-centered-label]) .progressbar__percentage{position:static}:host([lf-is-radial]){box-sizing:border-box;margin:auto}:host([lf-is-radial]) #lf-component{display:flex;font-size:10em;margin:auto;padding:0.1em 0}:host([lf-is-radial]) .progressbar{background:none;border:none;height:1em;margin:auto;overflow:visible;position:relative;width:1em}:host([lf-is-radial]) .progressbar:nth-child(3n+1){clear:both}:host([lf-is-radial]) .progressbar__icon{background-color:rgba(var(--lf-progressbar-color-on-bg, var(--lf-color-on-bg)), 1);height:0.75em;width:0.75em;overflow:hidden;margin:0 0.15em}:host([lf-is-radial]) .progressbar__label{color:rgb(var(--lf-progressbar-color-on-bg, var(--lf-color-on-bg)));cursor:default;display:flex;font-size:0.15em}:host([lf-is-radial]) .progressbar__um{color:rgb(var(--lf-progressbar-color-on-bg, var(--lf-color-on-bg)));font-size:0.5em;padding-bottom:0.75em}:host([lf-is-radial]) *,:host([lf-is-radial]) *:before,:host([lf-is-radial]) *:after{box-sizing:border-box}:host([lf-animated]) .progressbar__percentage{animation:running-stripes 2s linear infinite;background-image:linear-gradient(-45deg, rgba(var(--lf-color-surface), 0.125) 25%, transparent 25%, transparent 50%, rgba(var(--lf-color-surface), 0.125) 50%, rgba(var(--lf-color-surface), 0.125) 75%, transparent 75%, transparent);background-size:3em 3em}.pie{clip:rect(0, 1em, 1em, 0.5em);height:1em;left:0;position:absolute;top:0;width:1em}.pie--empty__half-circle--right{display:none}.pie--full{clip:rect(auto, auto, auto, auto)}.pie--full .pie__half-circle--right{transform:rotate(180deg)}.pie--has-value .pie__half-circle{border-color:rgb(var(--lf-progressbar-color-primary, rgb(var(--lf-color-primary))))}.pie--has-value .pie__half-circle--left{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);transform:var(--lf_progressbar_transform)}.pie__half-circle{height:1em;width:1em;border:0.1em solid rgba(var(--lf-color-surface), 0.375);border-radius:50%;clip:rect(0, 0.5em, 1em, 0);left:0;position:absolute;top:0}.pie__track{height:1em;width:1em;border:0.1em solid rgba(var(--lf-color-surface), 0.375);border-radius:50%}@keyframes running-stripes{0%{background-position:0 0}100%{background-position:3em 3em}}";
+const fZ = { 1: { className: "spinner-bar-v1", elements: () => [] }, 2: { className: "spinner-bar-v2", elements: () => [] }, 3: { className: "spinner-bar-v3", elements: (t4) => [W$1("div", { class: "progress-bar", style: { width: `${t4}%` } })] } }, cZ = { 7: { className: "spinner-v7", elements: () => Array(6).fill(0).map((() => W$1("div", { class: "sk-spinner-v7-dot" }))) }, 9: { className: "spinner-v9", elements: () => [W$1("div", { class: "sk-spinner-v9-bounce1" }), W$1("div", { class: "sk-spinner-v9-bounce2" })] }, 10: { className: "spinner-v10", elements: () => [W$1("div", { class: "sk-spinner-v10-cube1" }), W$1("div", { class: "sk-spinner-v10-cube2" })] }, 12: { className: "spinner-v12", elements: () => [W$1("div", { class: "sk-spinner-v12-dot1" }), W$1("div", { class: "sk-spinner-v12-dot2" })] }, 13: { className: "spinner-v13", elements: () => Array(9).fill(0).map(((t4, n2) => W$1("div", { class: `sk-spinner-v13-cube sk-spinner-v13-cube${n2 + 1}` }))) }, 14: { className: "spinner-v14", elements: () => Array(12).fill(0).map(((t4, n2) => W$1("div", { class: `sk-spinner-v14-circle${n2 + 1} sk-spinner-v14-circle` }))) } };
+var hZ, vZ, dZ, pZ, mZ, bZ, gZ, yZ, wZ = function(t4, n2, i, r) {
   if ("a" === i && !r) throw new TypeError("Private accessor was defined without a getter");
   if ("function" == typeof n2 ? t4 !== n2 || !r : !n2.has(t4)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return "m" === i ? r : "a" === i ? r.call(t4) : r ? r.value : n2.get(t4);
-}, wZ = function(t4, n2, i, r, e) {
+}, xZ = function(t4, n2, i, r, e) {
   if ("function" == typeof n2 ? t4 !== n2 || true : !n2.has(t4)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
   return n2.set(t4, i), i;
 };
-const xZ = class {
+const kZ = class {
   constructor(i) {
-    n(this, i), this.lfEvent = I(this, "lf-spinner-event"), cZ.add(this), this.bigWait = false, this.progress = 0, this.lfActive = false, this.lfBarVariant = false, this.lfDimensions = "", this.lfFader = false, this.lfFaderTimeout = 3500, this.lfFullScreen = false, this.lfLayout = 1, this.lfStyle = "", this.lfTimeout = 0, hZ.set(this, void 0), vZ.set(this, LF_STYLE_ID), dZ.set(this, LF_WRAPPER_ID), pZ.set(this, void 0), mZ.set(this, void 0);
+    n(this, i), this.lfEvent = I(this, "lf-spinner-event"), hZ.add(this), this.bigWait = false, this.progress = 0, this.lfActive = false, this.lfBarVariant = false, this.lfDimensions = "", this.lfFader = false, this.lfFaderTimeout = 3500, this.lfFullScreen = false, this.lfLayout = 1, this.lfStyle = "", this.lfTimeout = 0, vZ.set(this, void 0), dZ.set(this, LF_STYLE_ID), pZ.set(this, LF_WRAPPER_ID), mZ.set(this, void 0), bZ.set(this, void 0);
   }
   onFaderChange() {
-    yZ(this, cZ, "m", gZ).call(this);
+    wZ(this, hZ, "m", yZ).call(this);
   }
   lfBarVariantChanged(t4) {
-    yZ(this, hZ, "f") && (t4 && this.lfTimeout ? yZ(this, cZ, "m", bZ).call(this) : (this.progress = 0, cancelAnimationFrame(yZ(this, pZ, "f"))));
+    wZ(this, vZ, "f") && (t4 && this.lfTimeout ? wZ(this, hZ, "m", gZ).call(this) : (this.progress = 0, cancelAnimationFrame(wZ(this, mZ, "f"))));
   }
   lfTimeoutChanged(t4, n2) {
-    yZ(this, hZ, "f") && t4 !== n2 && this.lfBarVariant && yZ(this, cZ, "m", bZ).call(this);
+    wZ(this, vZ, "f") && t4 !== n2 && this.lfBarVariant && wZ(this, hZ, "m", gZ).call(this);
   }
   onLfEvent(t4, n2) {
     this.lfEvent.emit({ comp: this, id: this.rootElement.id, originalEvent: t4, eventType: n2 });
@@ -29826,30 +29859,30 @@ const xZ = class {
     }), t4);
   }
   connectedCallback() {
-    yZ(this, hZ, "f") && yZ(this, hZ, "f").theme.register(this);
+    wZ(this, vZ, "f") && wZ(this, vZ, "f").theme.register(this);
   }
   async componentWillLoad() {
-    wZ(this, hZ, await o(this));
+    xZ(this, vZ, await o(this));
   }
   componentDidLoad() {
-    const { info: t4 } = yZ(this, hZ, "f").debug, { lfBarVariant: n2, lfTimeout: i } = this;
-    this.onLfEvent(new CustomEvent("ready"), "ready"), t4.update(this, "did-load"), n2 && i && yZ(this, cZ, "m", bZ).call(this);
+    const { info: t4 } = wZ(this, vZ, "f").debug, { lfBarVariant: n2, lfTimeout: i } = this;
+    this.onLfEvent(new CustomEvent("ready"), "ready"), t4.update(this, "did-load"), n2 && i && wZ(this, hZ, "m", gZ).call(this);
   }
   componentWillRender() {
-    const { info: t4 } = yZ(this, hZ, "f").debug;
+    const { info: t4 } = wZ(this, vZ, "f").debug;
     t4.update(this, "will-render");
   }
   componentDidRender() {
-    const { info: t4 } = yZ(this, hZ, "f").debug;
+    const { info: t4 } = wZ(this, vZ, "f").debug;
     t4.update(this, "did-render");
   }
   render() {
-    const { setLfStyle: t4 } = yZ(this, hZ, "f").theme, { bigWait: n2, lfBarVariant: i, lfDimensions: a, lfFullScreen: o2, lfLayout: s, lfStyle: l, progress: u } = this, f2 = { height: o2 ? void 0 : "100%", width: o2 ? void 0 : "100%", fontSize: a || (i ? "0.25em" : ".875em") }, c = i ? uZ[s] : fZ[s], h = i ? "loading-wrapper-master-bar" : "loading-wrapper-master-spinner", v = { "spinner-version": !i, "loading-wrapper-big-wait": n2 }, d = (c == null ? void 0 : c.className) || `spinner-${i ? "bar-v" : "v"}${s}`, p = (c == null ? void 0 : c.elements(u)) || [];
-    return W$1(L, { key: "3cb8aa55dec4b4f7515a75849230fddc9b21a6a1", style: f2 }, l && W$1("style", { key: "4ff095e9df43b734a0f75c0a685aa9926c313215", id: yZ(this, vZ, "f") }, t4(this)), W$1("div", { key: "4c1996399657b6287dfce2d473eb11a3d46aeb70", id: yZ(this, dZ, "f"), style: f2 }, W$1("div", { key: "ce955d64e9e355a8a33356079a164a37ce3d4134", id: "loading-wrapper-master", class: { ...v }, style: f2 }, W$1("div", { key: "69b3088b9f4ffb51fedb19c3074db91f4b12b902", id: h, style: f2 }, W$1("div", { key: "b295bb48ad8142df459508d675e61f9403236bd7", class: d }, p)))));
+    const { setLfStyle: t4 } = wZ(this, vZ, "f").theme, { bigWait: n2, lfBarVariant: i, lfDimensions: a, lfFullScreen: o2, lfLayout: s, lfStyle: l, progress: u } = this, f2 = { height: o2 ? void 0 : "100%", width: o2 ? void 0 : "100%", fontSize: a || (i ? "0.25em" : ".875em") }, c = i ? fZ[s] : cZ[s], h = i ? "loading-wrapper-master-bar" : "loading-wrapper-master-spinner", v = { "spinner-version": !i, "loading-wrapper-big-wait": n2 }, d = (c == null ? void 0 : c.className) || `spinner-${i ? "bar-v" : "v"}${s}`, p = (c == null ? void 0 : c.elements(u)) || [];
+    return W$1(L, { key: "3cb8aa55dec4b4f7515a75849230fddc9b21a6a1", style: f2 }, l && W$1("style", { key: "4ff095e9df43b734a0f75c0a685aa9926c313215", id: wZ(this, dZ, "f") }, t4(this)), W$1("div", { key: "4c1996399657b6287dfce2d473eb11a3d46aeb70", id: wZ(this, pZ, "f"), style: f2 }, W$1("div", { key: "ce955d64e9e355a8a33356079a164a37ce3d4134", id: "loading-wrapper-master", class: { ...v }, style: f2 }, W$1("div", { key: "69b3088b9f4ffb51fedb19c3074db91f4b12b902", id: h, style: f2 }, W$1("div", { key: "b295bb48ad8142df459508d675e61f9403236bd7", class: d }, p)))));
   }
   disconnectedCallback() {
     var _a2;
-    (_a2 = yZ(this, hZ, "f")) == null ? void 0 : _a2.theme.unregister(this), cancelAnimationFrame(yZ(this, pZ, "f")), yZ(this, mZ, "f") && clearTimeout(yZ(this, mZ, "f"));
+    (_a2 = wZ(this, vZ, "f")) == null ? void 0 : _a2.theme.unregister(this), cancelAnimationFrame(wZ(this, mZ, "f")), wZ(this, bZ, "f") && clearTimeout(wZ(this, bZ, "f"));
   }
   get rootElement() {
     return G(this);
@@ -29858,85 +29891,85 @@ const xZ = class {
     return { lfActive: ["onFaderChange"], lfFader: ["onFaderChange"], lfFaderTimeout: ["onFaderChange"], lfBarVariant: ["lfBarVariantChanged"], lfTimeout: ["lfTimeoutChanged"] };
   }
 };
-hZ = /* @__PURE__ */ new WeakMap(), vZ = /* @__PURE__ */ new WeakMap(), dZ = /* @__PURE__ */ new WeakMap(), pZ = /* @__PURE__ */ new WeakMap(), mZ = /* @__PURE__ */ new WeakMap(), cZ = /* @__PURE__ */ new WeakSet(), bZ = function() {
+vZ = /* @__PURE__ */ new WeakMap(), dZ = /* @__PURE__ */ new WeakMap(), pZ = /* @__PURE__ */ new WeakMap(), mZ = /* @__PURE__ */ new WeakMap(), bZ = /* @__PURE__ */ new WeakMap(), hZ = /* @__PURE__ */ new WeakSet(), gZ = function() {
   this.progress = 0;
   const t4 = Date.now(), n2 = this.lfTimeout, i = () => {
     const r = Date.now() - t4;
-    this.progress = Math.min(r / n2 * 100, 100), this.progress < 100 ? wZ(this, pZ, requestAnimationFrame(i)) : cancelAnimationFrame(yZ(this, pZ, "f"));
+    this.progress = Math.min(r / n2 * 100, 100), this.progress < 100 ? xZ(this, mZ, requestAnimationFrame(i)) : cancelAnimationFrame(wZ(this, mZ, "f"));
   };
-  wZ(this, pZ, requestAnimationFrame(i));
-}, gZ = function() {
-  yZ(this, mZ, "f") && (clearTimeout(yZ(this, mZ, "f")), wZ(this, mZ, void 0)), this.bigWait = false, this.lfFader && this.lfActive && wZ(this, mZ, window.setTimeout((() => {
+  xZ(this, mZ, requestAnimationFrame(i));
+}, yZ = function() {
+  wZ(this, bZ, "f") && (clearTimeout(wZ(this, bZ, "f")), xZ(this, bZ, void 0)), this.bigWait = false, this.lfFader && this.lfActive && xZ(this, bZ, window.setTimeout((() => {
     this.bigWait = true;
   }), this.lfFaderTimeout));
-}, xZ.style = '.spinner-bar-v1{position:absolute;overflow:hidden;transform:translateZ(0);width:100%;height:1em}.spinner-bar-v1:before{content:"";position:absolute;width:25%;height:1em;animation:sk-spinner-bar-v1 5s linear infinite;transform:translateZ(0)}.spinner-bar-v2{position:absolute;overflow:hidden;transform:translateZ(0);box-shadow:-1px 0px 2px 2px rgb(var(--lf-color-on-spinner));height:calc(1em - 2px);width:100%;animation:sk-spinner-bar-v2 5s forwards;animation-timing-function:cubic-bezier(0.19, 0.78, 0.19, 0.78)}.spinner-bar-v3{background-color:rgb(var(--lf-color-spinner));height:calc(1.5em - 2px);position:absolute;overflow:hidden;width:100%}.spinner-bar-v3 .progress-bar{animation:sk-spinner-bar-v3 1s infinite ease-in-out;background-color:rgb(var(--lf-color-on-spinner));height:100%;transition:width 0.1s linear}@keyframes sk-spinner-bar-v1{from{left:-25%;background:linear-gradient(to left, rgb(var(--lf-color-on-spinner)) 0, transparent 100%)}50%{left:100%}to{left:-25%;background:linear-gradient(to right, rgb(var(--lf-color-on-spinner)) 0, transparent 100%)}}@keyframes sk-spinner-bar-v2{from{left:-100%}to{left:-1%}}@keyframes sk-spinner-bar-v3{0%{opacity:1}50%{opacity:0.6}100%{opacity:1}}.spinner-v1{width:7em;height:7em;border-radius:50%;border-top:1em solid rgb(var(--lf-color-spinner));border-right:1em solid rgb(var(--lf-color-spinner));border-bottom:1em solid rgb(var(--lf-color-spinner));border-left:1em solid rgb(var(--lf-color-on-spinner));transform:translateZ(0);animation:sk-spinner-v1 1.1s infinite linear}.spinner-v2,.spinner-v2:before,.spinner-v2:after{border-radius:50%;width:2em;height:2em;animation-fill-mode:both;animation:sk-spinner-v2 1.4s infinite ease-in-out;transform:translateZ(0)}.spinner-v2{backface-visibility:hidden;color:rgb(var(--lf-color-on-spinner));font-size:1em;transform:translateY(-2.5em);animation-delay:-0.16s}.spinner-v2:before,.spinner-v2:after{content:"";position:absolute;top:0}.spinner-v2:before{left:-4em;animation-delay:-0.32s}.spinner-v2:after{left:4em}.spinner-v3{color:rgb(var(--lf-color-on-spinner));font-size:6em;width:1em;height:1em;border-radius:50%;transform:translateZ(0);animation:sk-spinner-v3 1.7s infinite ease, sk-spinner-v3-1 1.7s infinite ease}.spinner-v4{color:rgb(var(--lf-color-on-spinner));width:1em;height:1em;border-radius:50%;transform:translateZ(0);animation:sk-spinner-v4 1.3s infinite linear}.spinner-v5{width:9em;height:9em;margin-top:-0.8em;border-radius:50%;background:linear-gradient(to right, rgb(var(--lf-color-on-spinner)) 10%, rgba(255, 255, 255, 0) 42%);transform:translateZ(0);animation:sk-spinner-v5 1.4s infinite linear}.spinner-v5::before{content:"";width:50%;height:50%;background:rgb(var(--lf-color-on-spinner));border-radius:100% 0 0 0;position:absolute;top:0;left:0}.spinner-v5::after{content:"";width:75%;height:75%;background:rgb(var(--lf-color-spinner));border-radius:50%;position:absolute;margin:auto;top:0;right:0;bottom:0;left:0}.spinner-v6,.spinner-v6:before,.spinner-v6:after{background:rgb(var(--lf-color-on-spinner));animation:sk-spinner-v6 1s infinite ease-in-out;width:1em;height:4em}.spinner-v6{color:rgb(var(--lf-color-on-spinner));margin-top:2em;transform:translateZ(0);animation-delay:-0.16s}.spinner-v6:before,.spinner-v6:after{content:"";position:absolute;top:0}.spinner-v6:before{left:-1.5em;animation-delay:-0.32s}.spinner-v6:after{left:1.5em}.spinner-v7{width:6em;height:6em;position:relative;animation:sk-spinner-v7 2.5s infinite linear both}.sk-spinner-v7-dot{width:100%;height:100%;position:absolute;left:0;top:0;animation:sk-spinner-v7-dot 2s infinite ease-in-out both}.sk-spinner-v7-dot:before{content:"";display:block;width:25%;height:25%;background-color:rgb(var(--lf-color-on-spinner));border-radius:100%;animation:sk-spinner-v7-dot-before 2s infinite ease-in-out both}.sk-spinner-v7-dot:nth-child(1){animation-delay:-1.1s}.sk-spinner-v7-dot:nth-child(1):before{animation-delay:-1.1s}.sk-spinner-v7-dot:nth-child(2){animation-delay:-1s}.sk-spinner-v7-dot:nth-child(2):before{animation-delay:-1s}.sk-spinner-v7-dot:nth-child(3){animation-delay:-0.9s}.sk-spinner-v7-dot:nth-child(3):before{animation-delay:-0.9s}.sk-spinner-v7-dot:nth-child(4){animation-delay:-0.8s}.sk-spinner-v7-dot:nth-child(4):before{animation-delay:-0.8s}.sk-spinner-v7-dot:nth-child(5){animation-delay:-0.7s}.sk-spinner-v7-dot:nth-child(5):before{animation-delay:-0.7s}.sk-spinner-v7-dot:nth-child(6){animation-delay:-0.6s}.sk-spinner-v7-dot:nth-child(6):before{animation-delay:-0.6s}.spinner-v8{width:8em;height:8em;background-color:rgb(var(--lf-color-on-spinner));animation:sk-spinner-v8 1.2s infinite ease-in-out;transform:perspective(120px) rotateX(0deg) rotateY(0deg)}.spinner-v9{width:8em;height:8em;position:relative}.sk-spinner-v9-bounce1,.sk-spinner-v9-bounce2{width:100%;height:100%;background-color:rgb(var(--lf-color-on-spinner));border-radius:50%;opacity:0.6;position:absolute;top:0;left:0;animation:sk-spinner-v9 2s infinite ease-in-out}.sk-spinner-v9-bounce2{animation-delay:-1s}.spinner-v10{width:8em;height:8em;position:relative}.sk-spinner-v10-cube1,.sk-spinner-v10-cube2{backface-visibility:hidden;background-color:rgb(var(--lf-color-on-spinner));width:2em;height:2em;position:absolute;top:0;left:0;animation:sk-spinner-v10 1.8s infinite ease-in-out}.sk-spinner-v10-cube2{animation-delay:-0.9s}.spinner-v11{width:8em;height:8em;background-color:rgb(var(--lf-color-on-spinner));border-radius:100%;animation:sk-spinner-v11 1s infinite ease-in-out}.spinner-v12{width:8em;height:8em;position:relative;text-align:center;animation:sk-spinner-v12 2s infinite linear}.sk-spinner-v12-dot1,.sk-spinner-v12-dot2{width:60%;height:60%;display:inline-block;position:absolute;background-color:rgb(var(--lf-color-on-spinner));border-radius:100%;animation:sk-spinner-v12-1 2s infinite ease-in-out}.sk-spinner-v12-dot2{bottom:0 !important;animation-delay:-1s}.spinner-v13{width:7em;height:7em}.spinner-v13 .sk-spinner-v13-cube{backface-visibility:hidden;background-color:rgb(var(--lf-color-on-spinner));float:left;width:33%;height:33%;position:relative !important;animation:sk-spinner-v13 1.3s infinite ease-in-out;outline:1px solid transparent}.spinner-v13 .sk-spinner-v13-cube.sk-spinner-v13-cube1{animation-delay:0.2s}.spinner-v13 .sk-spinner-v13-cube.sk-spinner-v13-cube2{animation-delay:0.3s}.spinner-v13 .sk-spinner-v13-cube.sk-spinner-v13-cube3{animation-delay:0.4s}.spinner-v13 .sk-spinner-v13-cube.sk-spinner-v13-cube4{animation-delay:0.1s}.spinner-v13 .sk-spinner-v13-cube.sk-spinner-v13-cube5{animation-delay:0.2s}.spinner-v13 .sk-spinner-v13-cube.sk-spinner-v13-cube6{animation-delay:0.3s}.spinner-v13 .sk-spinner-v13-cube.sk-spinner-v13-cube7{animation-delay:0s}.spinner-v13 .sk-spinner-v13-cube.sk-spinner-v13-cube8{animation-delay:0.1s}.spinner-v13 .sk-spinner-v13-cube.sk-spinner-v13-cube9{animation-delay:0.2s}.spinner-v14{width:8em;height:8em;position:relative}.spinner-v14 .sk-spinner-v14-circle{width:100%;height:100%;position:absolute;left:0;top:0}.spinner-v14 .sk-spinner-v14-circle:before{content:"";display:block;margin:0 auto;width:15%;height:15%;background-color:rgb(var(--lf-color-on-spinner));border-radius:100%;animation:sk-spinner-v14-circleFadeDelay 1.2s infinite ease-in-out both}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle2{transform:rotate(30deg)}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle2:before{animation-delay:-1.1s}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle3{transform:rotate(60deg)}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle3:before{animation-delay:-1s}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle4{transform:rotate(90deg)}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle4:before{animation-delay:-0.9s}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle5{transform:rotate(120deg)}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle5:before{animation-delay:-0.8s}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle6{transform:rotate(150deg)}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle6:before{animation-delay:-0.7s}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle7{transform:rotate(180deg)}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle7:before{animation-delay:-0.6s}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle8{transform:rotate(210deg)}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle8:before{animation-delay:-0.5s}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle9{transform:rotate(240deg)}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle9:before{animation-delay:-0.4s}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle10{transform:rotate(270deg)}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle10:before{animation-delay:-0.3s}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle11{transform:rotate(300deg)}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle11:before{animation-delay:-0.2s}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle12{transform:rotate(330deg)}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle12:before{animation-delay:-0.1s}@keyframes sk-spinner-v1{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}@keyframes sk-spinner-v2{0%,80%,100%{box-shadow:0 2.5em 0 -1.3em}40%{box-shadow:0 2.5em 0 0}}@keyframes sk-spinner-v3{0%{box-shadow:0 -0.83em 0 -0.4em, 0 -0.83em 0 -0.42em, 0 -0.83em 0 -0.44em, 0 -0.83em 0 -0.46em, 0 -0.83em 0 -0.477em}5%,95%{box-shadow:0 -0.83em 0 -0.4em, 0 -0.83em 0 -0.42em, 0 -0.83em 0 -0.44em, 0 -0.83em 0 -0.46em, 0 -0.83em 0 -0.477em}10%,59%{box-shadow:0 -0.83em 0 -0.4em, -0.087em -0.825em 0 -0.42em, -0.173em -0.812em 0 -0.44em, -0.256em -0.789em 0 -0.46em, -0.297em -0.775em 0 -0.477em}20%{box-shadow:0 -0.83em 0 -0.4em, -0.338em -0.758em 0 -0.42em, -0.555em -0.617em 0 -0.44em, -0.671em -0.488em 0 -0.46em, -0.749em -0.34em 0 -0.477em}38%{box-shadow:0 -0.83em 0 -0.4em, -0.377em -0.74em 0 -0.42em, -0.645em -0.522em 0 -0.44em, -0.775em -0.297em 0 -0.46em, -0.82em -0.09em 0 -0.477em}100%{box-shadow:0 -0.83em 0 -0.4em, 0 -0.83em 0 -0.42em, 0 -0.83em 0 -0.44em, 0 -0.83em 0 -0.46em, 0 -0.83em 0 -0.477em}}@keyframes sk-spinner-v3-1{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}@keyframes sk-spinner-v4{0%,100%{box-shadow:0 -3em 0 0.2em, 2em -2em 0 0em, 3em 0 0 -1em, 2em 2em 0 -1em, 0 3em 0 -1em, -2em 2em 0 -1em, -3em 0 0 -1em, -2em -2em 0 0}12.5%{box-shadow:0 -3em 0 0, 2em -2em 0 0.2em, 3em 0 0 0, 2em 2em 0 -1em, 0 3em 0 -1em, -2em 2em 0 -1em, -3em 0 0 -1em, -2em -2em 0 -1em}25%{box-shadow:0 -3em 0 -0.5em, 2em -2em 0 0, 3em 0 0 0.2em, 2em 2em 0 0, 0 3em 0 -1em, -2em 2em 0 -1em, -3em 0 0 -1em, -2em -2em 0 -1em}37.5%{box-shadow:0 -3em 0 -1em, 2em -2em 0 -1em, 3em 0em 0 0, 2em 2em 0 0.2em, 0 3em 0 0em, -2em 2em 0 -1em, -3em 0em 0 -1em, -2em -2em 0 -1em}50%{box-shadow:0 -3em 0 -1em, 2em -2em 0 -1em, 3em 0 0 -1em, 2em 2em 0 0em, 0 3em 0 0.2em, -2em 2em 0 0, -3em 0em 0 -1em, -2em -2em 0 -1em}62.5%{box-shadow:0 -3em 0 -1em, 2em -2em 0 -1em, 3em 0 0 -1em, 2em 2em 0 -1em, 0 3em 0 0, -2em 2em 0 0.2em, -3em 0 0 0, -2em -2em 0 -1em}75%{box-shadow:0em -3em 0 -1em, 2em -2em 0 -1em, 3em 0em 0 -1em, 2em 2em 0 -1em, 0 3em 0 -1em, -2em 2em 0 0, -3em 0em 0 0.2em, -2em -2em 0 0}87.5%{box-shadow:0em -3em 0 0, 2em -2em 0 -1em, 3em 0 0 -1em, 2em 2em 0 -1em, 0 3em 0 -1em, -2em 2em 0 0, -3em 0em 0 0, -2em -2em 0 0.2em}}@keyframes sk-spinner-v5{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}@keyframes sk-spinner-v6{0%,80%,100%{box-shadow:0 0;height:4em}40%{box-shadow:0 -2em;height:5em}}@keyframes sk-spinner-v7{100%{transform:rotate(360deg)}}@keyframes sk-spinner-v7-dot{80%,100%{transform:rotate(360deg)}}@keyframes sk-spinner-v7-dot-before{0%,100%{transform:scale(1)}50%{transform:scale(0.4)}}@keyframes sk-spinner-v8{0%{transform:perspective(120px) rotateX(0deg) rotateY(0deg)}50%{transform:perspective(120px) rotateX(-180.1deg) rotateY(0deg)}100%{transform:perspective(120px) rotateX(-180deg) rotateY(-179.9deg)}}@keyframes sk-spinner-v9{0%,100%{transform:scale(0)}50%{transform:scale(1)}}@keyframes sk-spinner-v10{25%{transform:translateX(5em) rotate(-90deg) scale(0.5)}50%{transform:translateX(5em) translateY(5em) rotate(-179deg)}50.1%{transform:translateX(5em) translateY(5em) rotate(-180deg)}75%{transform:translateX(0) translateY(5em) rotate(-270deg) scale(0.5)}100%{transform:rotate(-360deg)}}@keyframes sk-spinner-v11{0%{transform:scale(0)}100%{transform:scale(1);opacity:0}}@keyframes sk-spinner-v12{100%{transform:rotate(360deg)}}@keyframes sk-spinner-v12-1{0%,100%{transform:scale(0)}50%{transform:scale(1)}}@keyframes sk-spinner-v13{0%,70%,100%{transform:scale3D(1, 1, 1)}35%{transform:scale3D(0, 0, 1)}}@keyframes sk-spinner-v14-circleFadeDelay{0%,39%,100%{opacity:0}40%{opacity:1}}::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=ripple]{animation-duration:var(--lf-ui-duration-ripple, 675ms);animation-fill-mode:forwards;animation-name:lf-ripple;animation-timing-function:var(--lf-ui-timing-ripple, ease-out);background:var(--lf-ui-ripple-background, var(--lf-color-primary));border-radius:var(--lf-ui-radius-ripple, 50%);height:var(--lf-ui-ripple-height, 100%);left:var(--lf-ui-ripple-x, 50%);opacity:var(--lf-ui-opacity-ripple, 0.5);pointer-events:none;position:absolute;top:var(--lf-ui-ripple-y, 50%);transform:scale(0);width:var(--lf-ui-ripple-width, 100%)}@keyframes lf-ripple{from{transform:scale(0)}to{opacity:0;transform:scale(4)}}[data-lf=ripple-surface]{cursor:pointer;height:100%;left:0;overflow:hidden;position:absolute;top:0;width:100%}[data-lf=danger]{--lf-spinner-color-primary:var(\n    --lf-spinner-color-danger,\n    var(--lf-color-danger)\n  );--lf-spinner-color-on-primary:var(\n    --lf-spinner-color-danger,\n    var(--lf-color-on-danger)\n  )}[data-lf=disabled]{opacity:var(--lf-spinner-ui-opacity-disabled, var(--lf-ui-opacity-disabled));pointer-events:none}[data-lf=info]{--lf-spinner-color-primary:var(\n    --lf-spinner-color-info,\n    var(--lf-color-info)\n  );--lf-spinner-color-on-primary:var(\n    --lf-spinner-color-info,\n    var(--lf-color-on-info)\n  )}[data-lf=secondary]{--lf-spinner-color-primary:var(\n    --lf-spinner-color-secondary,\n    var(--lf-color-secondary)\n  );--lf-spinner-color-on-primary:var(\n    --lf-spinner-color-secondary,\n    var(--lf-color-on-secondary)\n  )}[data-lf=success]{--lf-spinner-color-primary:var(\n    --lf-spinner-color-success,\n    var(--lf-color-success)\n  );--lf-spinner-color-on-primary:var(\n    --lf-spinner-color-success,\n    var(--lf-color-on-success)\n  )}[data-lf=warning]{--lf-spinner-color-primary:var(\n    --lf-spinner-color-warning,\n    var(--lf-color-warning)\n  );--lf-spinner-color-on-primary:var(\n    --lf-spinner-color-warning,\n    var(--lf-color-on-warning)\n  )}:host{display:block;font-family:var(--lf-spinner-font-family, var(--lf-font-family-primary));font-size:var(--lf-spinner-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-spinner-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-spinner-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-spinner-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-spinner-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-spinner-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-spinner-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-spinner-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{width:100%;height:100%}#loading-wrapper-master{transition:all 200ms cubic-bezier(0.4, 0, 0.6, 1);background:transparent;opacity:0;overflow:hidden;transform:translateZ(0)}#loading-wrapper-master.spinner-version>#loading-wrapper-master-spinner{width:100%;height:100%;position:relative}#loading-wrapper-master.spinner-version>#loading-wrapper-master-spinner div{position:absolute;top:0;right:0;bottom:0;left:0;margin:auto}:host([lf-active]) #loading-wrapper-master{opacity:1}:host([lf-active]) #loading-wrapper-master.spinner-version>#loading-wrapper-master-spinner{opacity:1;overflow:hidden}:host([lf-active]) #loading-wrapper-master[lf-bar-variant]>#loading-wrapper-master-bar{opacity:1}:host([lf-active]) #loading-wrapper-master[lf-bar-variant]>#loading-wrapper-master-bar div.spinner-bar-v2{animation:sk-spinner-bar-v2 20s;background-color:rgb(var(--lf-color-on-spinner));left:-1%}:host([lf-active]) #loading-wrapper-master.loading-wrapper-big-wait{background:rgba(var(--lf-comp-color-bg, var(--lf-color-bg)), 0.25)}:host([lf-active]) #loading-wrapper-master.loading-wrapper-big-wait>#loading-wrapper-master-spinner{font-size:10px}:host([lf-full-screen]) #loading-wrapper-master{position:fixed;top:0;left:0;right:0;bottom:0;pointer-events:none;width:100%;z-index:9999}:host([lf-full-screen]) #loading-wrapper-master div,:host([lf-full-screen]) #loading-wrapper-master.spinner-version #loading-wrapper-master-spinner{position:fixed;transition:opacity 1.25s ease-in, background-color 1s ease-in, top 0.5s ease-in}:host([lf-active][lf-fader]) #loading-wrapper-master{pointer-events:all;cursor:not-allowed}';
-var kZ, MZ, zZ, SZ, AZ, CZ, _Z, TZ, NZ, IZ, LZ, FZ, DZ, EZ, WZ, OZ, RZ, PZ, BZ, $Z, VZ, jZ, HZ, YZ = function(t4, n2, i, r) {
+}, kZ.style = '.spinner-bar-v1{position:absolute;overflow:hidden;transform:translateZ(0);width:100%;height:1em}.spinner-bar-v1:before{content:"";position:absolute;width:25%;height:1em;animation:sk-spinner-bar-v1 5s linear infinite;transform:translateZ(0)}.spinner-bar-v2{position:absolute;overflow:hidden;transform:translateZ(0);box-shadow:-1px 0px 2px 2px rgb(var(--lf-color-on-spinner));height:calc(1em - 2px);width:100%;animation:sk-spinner-bar-v2 5s forwards;animation-timing-function:cubic-bezier(0.19, 0.78, 0.19, 0.78)}.spinner-bar-v3{background-color:rgb(var(--lf-color-spinner));height:calc(1.5em - 2px);position:absolute;overflow:hidden;width:100%}.spinner-bar-v3 .progress-bar{animation:sk-spinner-bar-v3 1s infinite ease-in-out;background-color:rgb(var(--lf-color-on-spinner));height:100%;transition:width 0.1s linear}@keyframes sk-spinner-bar-v1{from{left:-25%;background:linear-gradient(to left, rgb(var(--lf-color-on-spinner)) 0, transparent 100%)}50%{left:100%}to{left:-25%;background:linear-gradient(to right, rgb(var(--lf-color-on-spinner)) 0, transparent 100%)}}@keyframes sk-spinner-bar-v2{from{left:-100%}to{left:-1%}}@keyframes sk-spinner-bar-v3{0%{opacity:1}50%{opacity:0.6}100%{opacity:1}}.spinner-v1{width:7em;height:7em;border-radius:50%;border-top:1em solid rgb(var(--lf-color-spinner));border-right:1em solid rgb(var(--lf-color-spinner));border-bottom:1em solid rgb(var(--lf-color-spinner));border-left:1em solid rgb(var(--lf-color-on-spinner));transform:translateZ(0);animation:sk-spinner-v1 1.1s infinite linear}.spinner-v2,.spinner-v2:before,.spinner-v2:after{border-radius:50%;width:2em;height:2em;animation-fill-mode:both;animation:sk-spinner-v2 1.4s infinite ease-in-out;transform:translateZ(0)}.spinner-v2{backface-visibility:hidden;color:rgb(var(--lf-color-on-spinner));font-size:1em;transform:translateY(-2.5em);animation-delay:-0.16s}.spinner-v2:before,.spinner-v2:after{content:"";position:absolute;top:0}.spinner-v2:before{left:-4em;animation-delay:-0.32s}.spinner-v2:after{left:4em}.spinner-v3{color:rgb(var(--lf-color-on-spinner));font-size:6em;width:1em;height:1em;border-radius:50%;transform:translateZ(0);animation:sk-spinner-v3 1.7s infinite ease, sk-spinner-v3-1 1.7s infinite ease}.spinner-v4{color:rgb(var(--lf-color-on-spinner));width:1em;height:1em;border-radius:50%;transform:translateZ(0);animation:sk-spinner-v4 1.3s infinite linear}.spinner-v5{width:9em;height:9em;margin-top:-0.8em;border-radius:50%;background:linear-gradient(to right, rgb(var(--lf-color-on-spinner)) 10%, rgba(255, 255, 255, 0) 42%);transform:translateZ(0);animation:sk-spinner-v5 1.4s infinite linear}.spinner-v5::before{content:"";width:50%;height:50%;background:rgb(var(--lf-color-on-spinner));border-radius:100% 0 0 0;position:absolute;top:0;left:0}.spinner-v5::after{content:"";width:75%;height:75%;background:rgb(var(--lf-color-spinner));border-radius:50%;position:absolute;margin:auto;top:0;right:0;bottom:0;left:0}.spinner-v6,.spinner-v6:before,.spinner-v6:after{background:rgb(var(--lf-color-on-spinner));animation:sk-spinner-v6 1s infinite ease-in-out;width:1em;height:4em}.spinner-v6{color:rgb(var(--lf-color-on-spinner));margin-top:2em;transform:translateZ(0);animation-delay:-0.16s}.spinner-v6:before,.spinner-v6:after{content:"";position:absolute;top:0}.spinner-v6:before{left:-1.5em;animation-delay:-0.32s}.spinner-v6:after{left:1.5em}.spinner-v7{width:6em;height:6em;position:relative;animation:sk-spinner-v7 2.5s infinite linear both}.sk-spinner-v7-dot{width:100%;height:100%;position:absolute;left:0;top:0;animation:sk-spinner-v7-dot 2s infinite ease-in-out both}.sk-spinner-v7-dot:before{content:"";display:block;width:25%;height:25%;background-color:rgb(var(--lf-color-on-spinner));border-radius:100%;animation:sk-spinner-v7-dot-before 2s infinite ease-in-out both}.sk-spinner-v7-dot:nth-child(1){animation-delay:-1.1s}.sk-spinner-v7-dot:nth-child(1):before{animation-delay:-1.1s}.sk-spinner-v7-dot:nth-child(2){animation-delay:-1s}.sk-spinner-v7-dot:nth-child(2):before{animation-delay:-1s}.sk-spinner-v7-dot:nth-child(3){animation-delay:-0.9s}.sk-spinner-v7-dot:nth-child(3):before{animation-delay:-0.9s}.sk-spinner-v7-dot:nth-child(4){animation-delay:-0.8s}.sk-spinner-v7-dot:nth-child(4):before{animation-delay:-0.8s}.sk-spinner-v7-dot:nth-child(5){animation-delay:-0.7s}.sk-spinner-v7-dot:nth-child(5):before{animation-delay:-0.7s}.sk-spinner-v7-dot:nth-child(6){animation-delay:-0.6s}.sk-spinner-v7-dot:nth-child(6):before{animation-delay:-0.6s}.spinner-v8{width:8em;height:8em;background-color:rgb(var(--lf-color-on-spinner));animation:sk-spinner-v8 1.2s infinite ease-in-out;transform:perspective(120px) rotateX(0deg) rotateY(0deg)}.spinner-v9{width:8em;height:8em;position:relative}.sk-spinner-v9-bounce1,.sk-spinner-v9-bounce2{width:100%;height:100%;background-color:rgb(var(--lf-color-on-spinner));border-radius:50%;opacity:0.6;position:absolute;top:0;left:0;animation:sk-spinner-v9 2s infinite ease-in-out}.sk-spinner-v9-bounce2{animation-delay:-1s}.spinner-v10{width:8em;height:8em;position:relative}.sk-spinner-v10-cube1,.sk-spinner-v10-cube2{backface-visibility:hidden;background-color:rgb(var(--lf-color-on-spinner));width:2em;height:2em;position:absolute;top:0;left:0;animation:sk-spinner-v10 1.8s infinite ease-in-out}.sk-spinner-v10-cube2{animation-delay:-0.9s}.spinner-v11{width:8em;height:8em;background-color:rgb(var(--lf-color-on-spinner));border-radius:100%;animation:sk-spinner-v11 1s infinite ease-in-out}.spinner-v12{width:8em;height:8em;position:relative;text-align:center;animation:sk-spinner-v12 2s infinite linear}.sk-spinner-v12-dot1,.sk-spinner-v12-dot2{width:60%;height:60%;display:inline-block;position:absolute;background-color:rgb(var(--lf-color-on-spinner));border-radius:100%;animation:sk-spinner-v12-1 2s infinite ease-in-out}.sk-spinner-v12-dot2{bottom:0 !important;animation-delay:-1s}.spinner-v13{width:7em;height:7em}.spinner-v13 .sk-spinner-v13-cube{backface-visibility:hidden;background-color:rgb(var(--lf-color-on-spinner));float:left;width:33%;height:33%;position:relative !important;animation:sk-spinner-v13 1.3s infinite ease-in-out;outline:1px solid transparent}.spinner-v13 .sk-spinner-v13-cube.sk-spinner-v13-cube1{animation-delay:0.2s}.spinner-v13 .sk-spinner-v13-cube.sk-spinner-v13-cube2{animation-delay:0.3s}.spinner-v13 .sk-spinner-v13-cube.sk-spinner-v13-cube3{animation-delay:0.4s}.spinner-v13 .sk-spinner-v13-cube.sk-spinner-v13-cube4{animation-delay:0.1s}.spinner-v13 .sk-spinner-v13-cube.sk-spinner-v13-cube5{animation-delay:0.2s}.spinner-v13 .sk-spinner-v13-cube.sk-spinner-v13-cube6{animation-delay:0.3s}.spinner-v13 .sk-spinner-v13-cube.sk-spinner-v13-cube7{animation-delay:0s}.spinner-v13 .sk-spinner-v13-cube.sk-spinner-v13-cube8{animation-delay:0.1s}.spinner-v13 .sk-spinner-v13-cube.sk-spinner-v13-cube9{animation-delay:0.2s}.spinner-v14{width:8em;height:8em;position:relative}.spinner-v14 .sk-spinner-v14-circle{width:100%;height:100%;position:absolute;left:0;top:0}.spinner-v14 .sk-spinner-v14-circle:before{content:"";display:block;margin:0 auto;width:15%;height:15%;background-color:rgb(var(--lf-color-on-spinner));border-radius:100%;animation:sk-spinner-v14-circleFadeDelay 1.2s infinite ease-in-out both}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle2{transform:rotate(30deg)}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle2:before{animation-delay:-1.1s}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle3{transform:rotate(60deg)}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle3:before{animation-delay:-1s}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle4{transform:rotate(90deg)}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle4:before{animation-delay:-0.9s}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle5{transform:rotate(120deg)}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle5:before{animation-delay:-0.8s}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle6{transform:rotate(150deg)}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle6:before{animation-delay:-0.7s}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle7{transform:rotate(180deg)}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle7:before{animation-delay:-0.6s}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle8{transform:rotate(210deg)}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle8:before{animation-delay:-0.5s}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle9{transform:rotate(240deg)}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle9:before{animation-delay:-0.4s}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle10{transform:rotate(270deg)}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle10:before{animation-delay:-0.3s}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle11{transform:rotate(300deg)}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle11:before{animation-delay:-0.2s}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle12{transform:rotate(330deg)}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle12:before{animation-delay:-0.1s}@keyframes sk-spinner-v1{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}@keyframes sk-spinner-v2{0%,80%,100%{box-shadow:0 2.5em 0 -1.3em}40%{box-shadow:0 2.5em 0 0}}@keyframes sk-spinner-v3{0%{box-shadow:0 -0.83em 0 -0.4em, 0 -0.83em 0 -0.42em, 0 -0.83em 0 -0.44em, 0 -0.83em 0 -0.46em, 0 -0.83em 0 -0.477em}5%,95%{box-shadow:0 -0.83em 0 -0.4em, 0 -0.83em 0 -0.42em, 0 -0.83em 0 -0.44em, 0 -0.83em 0 -0.46em, 0 -0.83em 0 -0.477em}10%,59%{box-shadow:0 -0.83em 0 -0.4em, -0.087em -0.825em 0 -0.42em, -0.173em -0.812em 0 -0.44em, -0.256em -0.789em 0 -0.46em, -0.297em -0.775em 0 -0.477em}20%{box-shadow:0 -0.83em 0 -0.4em, -0.338em -0.758em 0 -0.42em, -0.555em -0.617em 0 -0.44em, -0.671em -0.488em 0 -0.46em, -0.749em -0.34em 0 -0.477em}38%{box-shadow:0 -0.83em 0 -0.4em, -0.377em -0.74em 0 -0.42em, -0.645em -0.522em 0 -0.44em, -0.775em -0.297em 0 -0.46em, -0.82em -0.09em 0 -0.477em}100%{box-shadow:0 -0.83em 0 -0.4em, 0 -0.83em 0 -0.42em, 0 -0.83em 0 -0.44em, 0 -0.83em 0 -0.46em, 0 -0.83em 0 -0.477em}}@keyframes sk-spinner-v3-1{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}@keyframes sk-spinner-v4{0%,100%{box-shadow:0 -3em 0 0.2em, 2em -2em 0 0em, 3em 0 0 -1em, 2em 2em 0 -1em, 0 3em 0 -1em, -2em 2em 0 -1em, -3em 0 0 -1em, -2em -2em 0 0}12.5%{box-shadow:0 -3em 0 0, 2em -2em 0 0.2em, 3em 0 0 0, 2em 2em 0 -1em, 0 3em 0 -1em, -2em 2em 0 -1em, -3em 0 0 -1em, -2em -2em 0 -1em}25%{box-shadow:0 -3em 0 -0.5em, 2em -2em 0 0, 3em 0 0 0.2em, 2em 2em 0 0, 0 3em 0 -1em, -2em 2em 0 -1em, -3em 0 0 -1em, -2em -2em 0 -1em}37.5%{box-shadow:0 -3em 0 -1em, 2em -2em 0 -1em, 3em 0em 0 0, 2em 2em 0 0.2em, 0 3em 0 0em, -2em 2em 0 -1em, -3em 0em 0 -1em, -2em -2em 0 -1em}50%{box-shadow:0 -3em 0 -1em, 2em -2em 0 -1em, 3em 0 0 -1em, 2em 2em 0 0em, 0 3em 0 0.2em, -2em 2em 0 0, -3em 0em 0 -1em, -2em -2em 0 -1em}62.5%{box-shadow:0 -3em 0 -1em, 2em -2em 0 -1em, 3em 0 0 -1em, 2em 2em 0 -1em, 0 3em 0 0, -2em 2em 0 0.2em, -3em 0 0 0, -2em -2em 0 -1em}75%{box-shadow:0em -3em 0 -1em, 2em -2em 0 -1em, 3em 0em 0 -1em, 2em 2em 0 -1em, 0 3em 0 -1em, -2em 2em 0 0, -3em 0em 0 0.2em, -2em -2em 0 0}87.5%{box-shadow:0em -3em 0 0, 2em -2em 0 -1em, 3em 0 0 -1em, 2em 2em 0 -1em, 0 3em 0 -1em, -2em 2em 0 0, -3em 0em 0 0, -2em -2em 0 0.2em}}@keyframes sk-spinner-v5{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}@keyframes sk-spinner-v6{0%,80%,100%{box-shadow:0 0;height:4em}40%{box-shadow:0 -2em;height:5em}}@keyframes sk-spinner-v7{100%{transform:rotate(360deg)}}@keyframes sk-spinner-v7-dot{80%,100%{transform:rotate(360deg)}}@keyframes sk-spinner-v7-dot-before{0%,100%{transform:scale(1)}50%{transform:scale(0.4)}}@keyframes sk-spinner-v8{0%{transform:perspective(120px) rotateX(0deg) rotateY(0deg)}50%{transform:perspective(120px) rotateX(-180.1deg) rotateY(0deg)}100%{transform:perspective(120px) rotateX(-180deg) rotateY(-179.9deg)}}@keyframes sk-spinner-v9{0%,100%{transform:scale(0)}50%{transform:scale(1)}}@keyframes sk-spinner-v10{25%{transform:translateX(5em) rotate(-90deg) scale(0.5)}50%{transform:translateX(5em) translateY(5em) rotate(-179deg)}50.1%{transform:translateX(5em) translateY(5em) rotate(-180deg)}75%{transform:translateX(0) translateY(5em) rotate(-270deg) scale(0.5)}100%{transform:rotate(-360deg)}}@keyframes sk-spinner-v11{0%{transform:scale(0)}100%{transform:scale(1);opacity:0}}@keyframes sk-spinner-v12{100%{transform:rotate(360deg)}}@keyframes sk-spinner-v12-1{0%,100%{transform:scale(0)}50%{transform:scale(1)}}@keyframes sk-spinner-v13{0%,70%,100%{transform:scale3D(1, 1, 1)}35%{transform:scale3D(0, 0, 1)}}@keyframes sk-spinner-v14-circleFadeDelay{0%,39%,100%{opacity:0}40%{opacity:1}}::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=ripple]{animation-duration:var(--lf-ui-duration-ripple, 675ms);animation-fill-mode:forwards;animation-name:lf-ripple;animation-timing-function:var(--lf-ui-timing-ripple, ease-out);background:var(--lf-ui-ripple-background, var(--lf-color-primary));border-radius:var(--lf-ui-radius-ripple, 50%);height:var(--lf-ui-ripple-height, 100%);left:var(--lf-ui-ripple-x, 50%);opacity:var(--lf-ui-opacity-ripple, 0.5);pointer-events:none;position:absolute;top:var(--lf-ui-ripple-y, 50%);transform:scale(0);width:var(--lf-ui-ripple-width, 100%)}@keyframes lf-ripple{from{transform:scale(0)}to{opacity:0;transform:scale(4)}}[data-lf=ripple-surface]{cursor:pointer;height:100%;left:0;overflow:hidden;position:absolute;top:0;width:100%}[data-lf=danger]{--lf-spinner-color-primary:var(\n    --lf-spinner-color-danger,\n    var(--lf-color-danger)\n  );--lf-spinner-color-on-primary:var(\n    --lf-spinner-color-danger,\n    var(--lf-color-on-danger)\n  )}[data-lf=disabled]{opacity:var(--lf-spinner-ui-opacity-disabled, var(--lf-ui-opacity-disabled));pointer-events:none}[data-lf=info]{--lf-spinner-color-primary:var(\n    --lf-spinner-color-info,\n    var(--lf-color-info)\n  );--lf-spinner-color-on-primary:var(\n    --lf-spinner-color-info,\n    var(--lf-color-on-info)\n  )}[data-lf=secondary]{--lf-spinner-color-primary:var(\n    --lf-spinner-color-secondary,\n    var(--lf-color-secondary)\n  );--lf-spinner-color-on-primary:var(\n    --lf-spinner-color-secondary,\n    var(--lf-color-on-secondary)\n  )}[data-lf=success]{--lf-spinner-color-primary:var(\n    --lf-spinner-color-success,\n    var(--lf-color-success)\n  );--lf-spinner-color-on-primary:var(\n    --lf-spinner-color-success,\n    var(--lf-color-on-success)\n  )}[data-lf=warning]{--lf-spinner-color-primary:var(\n    --lf-spinner-color-warning,\n    var(--lf-color-warning)\n  );--lf-spinner-color-on-primary:var(\n    --lf-spinner-color-warning,\n    var(--lf-color-on-warning)\n  )}:host{display:block;font-family:var(--lf-spinner-font-family, var(--lf-font-family-primary));font-size:var(--lf-spinner-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-spinner-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-spinner-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-spinner-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-spinner-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-spinner-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-spinner-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-spinner-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{width:100%;height:100%}#loading-wrapper-master{transition:all 200ms cubic-bezier(0.4, 0, 0.6, 1);background:transparent;opacity:0;overflow:hidden;transform:translateZ(0)}#loading-wrapper-master.spinner-version>#loading-wrapper-master-spinner{width:100%;height:100%;position:relative}#loading-wrapper-master.spinner-version>#loading-wrapper-master-spinner div{position:absolute;top:0;right:0;bottom:0;left:0;margin:auto}:host([lf-active]) #loading-wrapper-master{opacity:1}:host([lf-active]) #loading-wrapper-master.spinner-version>#loading-wrapper-master-spinner{opacity:1;overflow:hidden}:host([lf-active]) #loading-wrapper-master[lf-bar-variant]>#loading-wrapper-master-bar{opacity:1}:host([lf-active]) #loading-wrapper-master[lf-bar-variant]>#loading-wrapper-master-bar div.spinner-bar-v2{animation:sk-spinner-bar-v2 20s;background-color:rgb(var(--lf-color-on-spinner));left:-1%}:host([lf-active]) #loading-wrapper-master.loading-wrapper-big-wait{background:rgba(var(--lf-comp-color-bg, var(--lf-color-bg)), 0.25)}:host([lf-active]) #loading-wrapper-master.loading-wrapper-big-wait>#loading-wrapper-master-spinner{font-size:10px}:host([lf-full-screen]) #loading-wrapper-master{position:fixed;top:0;left:0;right:0;bottom:0;pointer-events:none;width:100%;z-index:9999}:host([lf-full-screen]) #loading-wrapper-master div,:host([lf-full-screen]) #loading-wrapper-master.spinner-version #loading-wrapper-master-spinner{position:fixed;transition:opacity 1.25s ease-in, background-color 1s ease-in, top 0.5s ease-in}:host([lf-active][lf-fader]) #loading-wrapper-master{pointer-events:all;cursor:not-allowed}';
+var MZ, zZ, SZ, AZ, CZ, _Z, TZ, NZ, IZ, LZ, FZ, DZ, EZ, WZ, OZ, RZ, PZ, BZ, $Z, VZ, jZ, HZ, YZ, XZ = function(t4, n2, i, r) {
   if ("function" == typeof n2 ? t4 !== n2 || !r : !n2.has(t4)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return "m" === i ? r : "a" === i ? r.call(t4) : r ? r.value : n2.get(t4);
-}, XZ = function(t4, n2, i, r, e) {
+}, ZZ = function(t4, n2, i, r, e) {
   if ("function" == typeof n2 ? t4 !== n2 || true : !n2.has(t4)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
   return n2.set(t4, i), i;
 };
-const ZZ = class {
+const UZ = class {
   constructor(i) {
-    n(this, i), this.lfEvent = I(this, "lf-textfield-event"), this.status = /* @__PURE__ */ new Set(), this.value = "", this.lfHelper = null, this.lfIcon = "", this.lfLabel = "", this.lfStretchX = false, this.lfStretchY = false, this.lfStyle = "", this.lfStyling = "raised", this.lfTrailingIcon = false, this.lfUiSize = "medium", this.lfUiState = "primary", this.lfValue = "", kZ.set(this, void 0), MZ.set(this, LF_TEXTFIELD_BLOCKS), zZ.set(this, CY_ATTRIBUTES), SZ.set(this, LF_ATTRIBUTES), AZ.set(this, LF_TEXTFIELD_PARTS), CZ.set(this, LF_STYLE_ID), _Z.set(this, LF_WRAPPER_ID), TZ.set(this, void 0), NZ.set(this, void 0), IZ.set(this, void 0), LZ.set(this, void 0), FZ.set(this, (() => "disabled" === this.lfUiState)), DZ.set(this, (() => "outlined" === this.lfStyling || "textarea" === this.lfStyling)), EZ.set(this, (() => "textarea" === this.lfStyling)), WZ.set(this, ((t4, n2 = new CustomEvent("change")) => {
-      YZ(this, FZ, "f").call(this) || (this.value = t4, this.onLfEvent(n2, "change"));
-    })), OZ.set(this, (() => {
-      if (!YZ(this, LZ, "f")) return null;
-      const { bemClass: t4 } = YZ(this, kZ, "f").theme, { textfield: n2 } = YZ(this, MZ, "f");
-      return W$1("div", { class: t4(n2._, n2.counter), part: YZ(this, AZ, "f").counter }, "'0 / ' + ", YZ(this, LZ, "f").toString());
+    n(this, i), this.lfEvent = I(this, "lf-textfield-event"), this.status = /* @__PURE__ */ new Set(), this.value = "", this.lfHelper = null, this.lfIcon = "", this.lfLabel = "", this.lfStretchX = false, this.lfStretchY = false, this.lfStyle = "", this.lfStyling = "raised", this.lfTrailingIcon = false, this.lfUiSize = "medium", this.lfUiState = "primary", this.lfValue = "", MZ.set(this, void 0), zZ.set(this, LF_TEXTFIELD_BLOCKS), SZ.set(this, CY_ATTRIBUTES), AZ.set(this, LF_ATTRIBUTES), CZ.set(this, LF_TEXTFIELD_PARTS), _Z.set(this, LF_STYLE_ID), TZ.set(this, LF_WRAPPER_ID), NZ.set(this, void 0), IZ.set(this, void 0), LZ.set(this, void 0), FZ.set(this, void 0), DZ.set(this, (() => "disabled" === this.lfUiState)), EZ.set(this, (() => "outlined" === this.lfStyling || "textarea" === this.lfStyling)), WZ.set(this, (() => "textarea" === this.lfStyling)), OZ.set(this, ((t4, n2 = new CustomEvent("change")) => {
+      XZ(this, DZ, "f").call(this) || (this.value = t4, this.onLfEvent(n2, "change"));
     })), RZ.set(this, (() => {
+      if (!XZ(this, FZ, "f")) return null;
+      const { bemClass: t4 } = XZ(this, MZ, "f").theme, { textfield: n2 } = XZ(this, zZ, "f");
+      return W$1("div", { class: t4(n2._, n2.counter), part: XZ(this, CZ, "f").counter }, "'0 / ' + ", XZ(this, FZ, "f").toString());
+    })), PZ.set(this, (() => {
       var _a2;
       if (!((_a2 = this.lfHelper) == null ? void 0 : _a2.value)) return null;
-      const { bemClass: t4 } = YZ(this, kZ, "f").theme, { textfield: n2 } = YZ(this, MZ, "f"), i2 = this.lfHelper.showWhenFocused && this.status.has("focused") || !this.lfHelper.showWhenFocused;
-      return W$1("div", { class: t4(n2._, n2.helperLine) }, W$1("div", { class: t4(n2._, n2.helperText, { active: i2 }) }, this.lfHelper.value), !YZ(this, EZ, "f").call(this) && YZ(this, OZ, "f").call(this));
-    })), PZ.set(this, (() => {
-      if (!this.lfIcon) return null;
-      const { get: t4 } = YZ(this, kZ, "f").assets, { bemClass: n2 } = YZ(this, kZ, "f").theme, { textfield: i2 } = YZ(this, MZ, "f"), { style: e } = t4(`./assets/svg/${this.lfIcon}.svg`);
-      return W$1("div", { class: n2(i2._, i2.icon, { trailing: this.lfTrailingIcon }), "data-cy": YZ(this, zZ, "f").maskedSvg, onClick: (t5) => {
-        this.onLfEvent(t5, "click", true);
-      }, part: YZ(this, AZ, "f").icon, ref: (t5) => {
-        t5 && XZ(this, NZ, t5);
-      }, style: e, tabIndex: 0 });
+      const { bemClass: t4 } = XZ(this, MZ, "f").theme, { textfield: n2 } = XZ(this, zZ, "f"), i2 = this.lfHelper.showWhenFocused && this.status.has("focused") || !this.lfHelper.showWhenFocused;
+      return W$1("div", { class: t4(n2._, n2.helperLine) }, W$1("div", { class: t4(n2._, n2.helperText, { active: i2 }) }, this.lfHelper.value), !XZ(this, WZ, "f").call(this) && XZ(this, RZ, "f").call(this));
     })), BZ.set(this, (() => {
-      const { sanitizeProps: t4, theme: n2 } = YZ(this, kZ, "f"), { bemClass: i2 } = n2, { textfield: e } = YZ(this, MZ, "f");
-      return W$1("input", { ...t4(this.lfHtmlAttributes), class: i2(e._, e.input), "data-cy": YZ(this, zZ, "f").input, disabled: YZ(this, FZ, "f").call(this), onBlur: (t5) => {
-        this.onLfEvent(t5, "blur");
-      }, onChange: (t5) => {
-        YZ(this, WZ, "f").call(this, t5.currentTarget.value);
-      }, onClick: (t5) => {
-        this.onLfEvent(t5, "click");
-      }, onFocus: (t5) => {
-        this.onLfEvent(t5, "focus");
-      }, onInput: (t5) => {
-        this.onLfEvent(t5, "input");
-      }, part: YZ(this, AZ, "f").input, placeholder: YZ(this, DZ, "f").call(this) && this.lfLabel || "", ref: (t5) => {
-        t5 && XZ(this, IZ, t5);
-      }, value: this.value });
+      if (!this.lfIcon) return null;
+      const { get: t4 } = XZ(this, MZ, "f").assets, { bemClass: n2 } = XZ(this, MZ, "f").theme, { textfield: i2 } = XZ(this, zZ, "f"), { style: e } = t4(`./assets/svg/${this.lfIcon}.svg`);
+      return W$1("div", { class: n2(i2._, i2.icon, { trailing: this.lfTrailingIcon }), "data-cy": XZ(this, SZ, "f").maskedSvg, onClick: (t5) => {
+        this.onLfEvent(t5, "click", true);
+      }, part: XZ(this, CZ, "f").icon, ref: (t5) => {
+        t5 && ZZ(this, IZ, t5);
+      }, style: e, tabIndex: 0 });
     })), $Z.set(this, (() => {
-      if (YZ(this, DZ, "f").call(this) || !this.lfLabel) return null;
-      const { bemClass: t4 } = YZ(this, kZ, "f").theme, { textfield: n2 } = YZ(this, MZ, "f");
-      return W$1("label", { class: t4(n2._, n2.label), htmlFor: "input", part: YZ(this, AZ, "f").label }, this.lfLabel);
-    })), VZ.set(this, (() => {
-      const { bemClass: t4 } = YZ(this, kZ, "f").theme, { textfield: n2 } = YZ(this, MZ, "f");
-      return !YZ(this, TZ, "f") && W$1("span", { class: t4(n2._, n2.rippleSurface), "data-cy": YZ(this, zZ, "f").rippleSurface, "data-lf": YZ(this, SZ, "f").rippleSurface });
-    })), jZ.set(this, (() => {
-      const { sanitizeProps: t4, theme: n2 } = YZ(this, kZ, "f"), { bemClass: i2 } = n2, { textfield: e } = YZ(this, MZ, "f");
-      return W$1("span", { class: i2(e._, e.resizer) }, W$1("textarea", { ...t4(this.lfHtmlAttributes), class: i2(e._, e.input), "data-cy": YZ(this, zZ, "f").input, id: "input", onBlur: (t5) => {
+      const { sanitizeProps: t4, theme: n2 } = XZ(this, MZ, "f"), { bemClass: i2 } = n2, { textfield: e } = XZ(this, zZ, "f");
+      return W$1("input", { ...t4(this.lfHtmlAttributes), class: i2(e._, e.input), "data-cy": XZ(this, SZ, "f").input, disabled: XZ(this, DZ, "f").call(this), onBlur: (t5) => {
         this.onLfEvent(t5, "blur");
       }, onChange: (t5) => {
-        YZ(this, WZ, "f").call(this, t5.currentTarget.value);
+        XZ(this, OZ, "f").call(this, t5.currentTarget.value);
       }, onClick: (t5) => {
         this.onLfEvent(t5, "click");
       }, onFocus: (t5) => {
         this.onLfEvent(t5, "focus");
       }, onInput: (t5) => {
         this.onLfEvent(t5, "input");
-      }, part: YZ(this, AZ, "f").input, placeholder: YZ(this, DZ, "f").call(this) && this.lfLabel || "", ref: (t5) => {
-        t5 && XZ(this, IZ, t5);
-      }, value: this.value }));
+      }, part: XZ(this, CZ, "f").input, placeholder: XZ(this, EZ, "f").call(this) && this.lfLabel || "", ref: (t5) => {
+        t5 && ZZ(this, LZ, t5);
+      }, value: this.value });
+    })), VZ.set(this, (() => {
+      if (XZ(this, EZ, "f").call(this) || !this.lfLabel) return null;
+      const { bemClass: t4 } = XZ(this, MZ, "f").theme, { textfield: n2 } = XZ(this, zZ, "f");
+      return W$1("label", { class: t4(n2._, n2.label), htmlFor: "input", part: XZ(this, CZ, "f").label }, this.lfLabel);
+    })), jZ.set(this, (() => {
+      const { bemClass: t4 } = XZ(this, MZ, "f").theme, { textfield: n2 } = XZ(this, zZ, "f");
+      return !XZ(this, NZ, "f") && W$1("span", { class: t4(n2._, n2.rippleSurface), "data-cy": XZ(this, SZ, "f").rippleSurface, "data-lf": XZ(this, AZ, "f").rippleSurface });
     })), HZ.set(this, (() => {
-      [{ condition: () => Boolean(this.value), status: "filled" }, { condition: () => YZ(this, FZ, "f").call(this), status: "disabled" }, { condition: () => Boolean(this.lfStretchX), status: "full-width" }, { condition: () => Boolean(this.lfIcon), status: "has-icon" }, { condition: () => Boolean(this.lfLabel), status: "has-label" }].forEach((({ condition: t4, status: n2 }) => {
+      const { sanitizeProps: t4, theme: n2 } = XZ(this, MZ, "f"), { bemClass: i2 } = n2, { textfield: e } = XZ(this, zZ, "f");
+      return W$1("span", { class: i2(e._, e.resizer) }, W$1("textarea", { ...t4(this.lfHtmlAttributes), class: i2(e._, e.input), "data-cy": XZ(this, SZ, "f").input, id: "input", onBlur: (t5) => {
+        this.onLfEvent(t5, "blur");
+      }, onChange: (t5) => {
+        XZ(this, OZ, "f").call(this, t5.currentTarget.value);
+      }, onClick: (t5) => {
+        this.onLfEvent(t5, "click");
+      }, onFocus: (t5) => {
+        this.onLfEvent(t5, "focus");
+      }, onInput: (t5) => {
+        this.onLfEvent(t5, "input");
+      }, part: XZ(this, CZ, "f").input, placeholder: XZ(this, EZ, "f").call(this) && this.lfLabel || "", ref: (t5) => {
+        t5 && ZZ(this, LZ, t5);
+      }, value: this.value }));
+    })), YZ.set(this, (() => {
+      [{ condition: () => Boolean(this.value), status: "filled" }, { condition: () => XZ(this, DZ, "f").call(this), status: "disabled" }, { condition: () => Boolean(this.lfStretchX), status: "full-width" }, { condition: () => Boolean(this.lfIcon), status: "has-icon" }, { condition: () => Boolean(this.lfLabel), status: "has-label" }].forEach((({ condition: t4, status: n2 }) => {
         t4() ? this.status.add(n2) : this.status.delete(n2);
       }));
     }));
@@ -29950,7 +29983,7 @@ const ZZ = class {
       case "focus":
         this.status.add("focused"), this.status = new Set(this.status);
     }
-    this.lfEvent.emit({ comp: this, eventType: n2, id: this.rootElement.id, originalEvent: t4, inputValue: e, target: YZ(this, i ? NZ : IZ, "f"), value: this.value });
+    this.lfEvent.emit({ comp: this, eventType: n2, id: this.rootElement.id, originalEvent: t4, inputValue: e, target: XZ(this, i ? IZ : LZ, "f"), value: this.value });
   }
   async getDebugInfo() {
     return this.debugInfo;
@@ -29966,13 +29999,13 @@ const ZZ = class {
     mt(this);
   }
   async setBlur() {
-    YZ(this, IZ, "f").blur();
+    XZ(this, LZ, "f").blur();
   }
   async setFocus() {
-    YZ(this, IZ, "f").focus();
+    XZ(this, LZ, "f").focus();
   }
   async setValue(t4) {
-    YZ(this, WZ, "f").call(this, t4);
+    XZ(this, OZ, "f").call(this, t4);
   }
   async unmount(t4 = 0) {
     setTimeout((() => {
@@ -29980,55 +30013,55 @@ const ZZ = class {
     }), t4);
   }
   connectedCallback() {
-    YZ(this, kZ, "f") && YZ(this, kZ, "f").theme.register(this);
+    XZ(this, MZ, "f") && XZ(this, MZ, "f").theme.register(this);
   }
   async componentWillLoad() {
-    XZ(this, kZ, await o(this)), this.lfValue && (this.status.add("filled"), this.value = this.lfValue);
+    ZZ(this, MZ, await o(this)), this.lfValue && (this.status.add("filled"), this.value = this.lfValue);
   }
   componentDidLoad() {
-    const { info: t4 } = YZ(this, kZ, "f").debug;
+    const { info: t4 } = XZ(this, MZ, "f").debug;
     this.onLfEvent(new CustomEvent("ready"), "ready"), t4.update(this, "did-load");
   }
   componentWillRender() {
     var _a2;
-    const { info: t4 } = YZ(this, kZ, "f").debug;
-    t4.update(this, "will-render"), XZ(this, TZ, YZ(this, DZ, "f").call(this)), XZ(this, LZ, (_a2 = this.lfHtmlAttributes) == null ? void 0 : _a2.maxLength), YZ(this, HZ, "f").call(this);
+    const { info: t4 } = XZ(this, MZ, "f").debug;
+    t4.update(this, "will-render"), ZZ(this, NZ, XZ(this, EZ, "f").call(this)), ZZ(this, FZ, (_a2 = this.lfHtmlAttributes) == null ? void 0 : _a2.maxLength), XZ(this, YZ, "f").call(this);
   }
   componentDidRender() {
-    const { info: t4 } = YZ(this, kZ, "f").debug;
+    const { info: t4 } = XZ(this, MZ, "f").debug;
     t4.update(this, "did-render");
   }
   render() {
-    const { bemClass: t4, setLfStyle: n2 } = YZ(this, kZ, "f").theme, { lfStyle: i, lfStyling: a, status: o2 } = this, s = "textarea" === a, l = { [a]: true };
+    const { bemClass: t4, setLfStyle: n2 } = XZ(this, MZ, "f").theme, { lfStyle: i, lfStyling: a, status: o2 } = this, s = "textarea" === a, l = { [a]: true };
     return o2.forEach(((t5) => {
       l[t5] = true;
-    })), W$1(L, { key: "79b1eb12db37354147e8623a8668d0f072d229a6" }, i && W$1("style", { key: "e0473611a661c8ba454382f32815482de2514f65", id: YZ(this, CZ, "f") }, n2(this)), W$1("div", { key: "54c56deb97b376f1f253944a3c9fc43469220bd9", id: YZ(this, _Z, "f") }, W$1("div", { key: "d3281c292e25c706f5e6a3aca74e3dd884da80d3", class: t4(YZ(this, MZ, "f").textfield._, null, l), "data-lf": YZ(this, SZ, "f")[this.lfUiState], part: YZ(this, AZ, "f").textfield }, s ? [YZ(this, OZ, "f").call(this), YZ(this, PZ, "f").call(this), YZ(this, jZ, "f").call(this)] : [YZ(this, PZ, "f").call(this), YZ(this, BZ, "f").call(this), YZ(this, $Z, "f").call(this), YZ(this, VZ, "f").call(this)]), YZ(this, RZ, "f").call(this)));
+    })), W$1(L, { key: "79b1eb12db37354147e8623a8668d0f072d229a6" }, i && W$1("style", { key: "e0473611a661c8ba454382f32815482de2514f65", id: XZ(this, _Z, "f") }, n2(this)), W$1("div", { key: "54c56deb97b376f1f253944a3c9fc43469220bd9", id: XZ(this, TZ, "f") }, W$1("div", { key: "d3281c292e25c706f5e6a3aca74e3dd884da80d3", class: t4(XZ(this, zZ, "f").textfield._, null, l), "data-lf": XZ(this, AZ, "f")[this.lfUiState], part: XZ(this, CZ, "f").textfield }, s ? [XZ(this, RZ, "f").call(this), XZ(this, BZ, "f").call(this), XZ(this, HZ, "f").call(this)] : [XZ(this, BZ, "f").call(this), XZ(this, $Z, "f").call(this), XZ(this, VZ, "f").call(this), XZ(this, jZ, "f").call(this)]), XZ(this, PZ, "f").call(this)));
   }
   disconnectedCallback() {
     var _a2;
-    (_a2 = YZ(this, kZ, "f")) == null ? void 0 : _a2.theme.unregister(this);
+    (_a2 = XZ(this, MZ, "f")) == null ? void 0 : _a2.theme.unregister(this);
   }
   get rootElement() {
     return G(this);
   }
 };
-kZ = /* @__PURE__ */ new WeakMap(), MZ = /* @__PURE__ */ new WeakMap(), zZ = /* @__PURE__ */ new WeakMap(), SZ = /* @__PURE__ */ new WeakMap(), AZ = /* @__PURE__ */ new WeakMap(), CZ = /* @__PURE__ */ new WeakMap(), _Z = /* @__PURE__ */ new WeakMap(), TZ = /* @__PURE__ */ new WeakMap(), NZ = /* @__PURE__ */ new WeakMap(), IZ = /* @__PURE__ */ new WeakMap(), LZ = /* @__PURE__ */ new WeakMap(), FZ = /* @__PURE__ */ new WeakMap(), DZ = /* @__PURE__ */ new WeakMap(), EZ = /* @__PURE__ */ new WeakMap(), WZ = /* @__PURE__ */ new WeakMap(), OZ = /* @__PURE__ */ new WeakMap(), RZ = /* @__PURE__ */ new WeakMap(), PZ = /* @__PURE__ */ new WeakMap(), BZ = /* @__PURE__ */ new WeakMap(), $Z = /* @__PURE__ */ new WeakMap(), VZ = /* @__PURE__ */ new WeakMap(), jZ = /* @__PURE__ */ new WeakMap(), HZ = /* @__PURE__ */ new WeakMap(), ZZ.style = '::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=danger]{--lf-textfield-color-primary:var(\n    --lf-textfield-color-danger,\n    var(--lf-color-danger)\n  );--lf-textfield-color-on-primary:var(\n    --lf-textfield-color-danger,\n    var(--lf-color-on-danger)\n  )}[data-lf=disabled]{opacity:var(--lf-textfield-ui-opacity-disabled, var(--lf-ui-opacity-disabled));pointer-events:none}[data-lf=info]{--lf-textfield-color-primary:var(\n    --lf-textfield-color-info,\n    var(--lf-color-info)\n  );--lf-textfield-color-on-primary:var(\n    --lf-textfield-color-info,\n    var(--lf-color-on-info)\n  )}[data-lf=secondary]{--lf-textfield-color-primary:var(\n    --lf-textfield-color-secondary,\n    var(--lf-color-secondary)\n  );--lf-textfield-color-on-primary:var(\n    --lf-textfield-color-secondary,\n    var(--lf-color-on-secondary)\n  )}[data-lf=success]{--lf-textfield-color-primary:var(\n    --lf-textfield-color-success,\n    var(--lf-color-success)\n  );--lf-textfield-color-on-primary:var(\n    --lf-textfield-color-success,\n    var(--lf-color-on-success)\n  )}[data-lf=warning]{--lf-textfield-color-primary:var(\n    --lf-textfield-color-warning,\n    var(--lf-color-warning)\n  );--lf-textfield-color-on-primary:var(\n    --lf-textfield-color-warning,\n    var(--lf-color-on-warning)\n  )}:host{display:block;font-family:var(--lf-textfield-font-family, var(--lf-font-family-primary));font-size:var(--lf-textfield-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-textfield-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-textfield-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-textfield-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-textfield-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-textfield-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-textfield-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-textfield-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{width:100%}:host([lf-stretch-y]),:host([lf-stretch-y]) #lf-component,:host([lf-stretch-y]) .textfield{height:100%}:host([lf-trailing-icon]) #lf-component .textfield{flex-direction:row-reverse}:host([lf-trailing-icon]) #lf-component .textfield__icon{padding-left:0.5em}:host([lf-trailing-icon]) #lf-component .textfield__label{left:1em}.textfield{border:0;border-style:solid;border-radius:var(--lf-textfield-border-radius, var(--lf-ui-border-radius));transition:all 300ms cubic-bezier(0.4, 0, 0.2, 1);align-items:baseline;box-sizing:border-box;display:inline-flex;height:var(--lf-textfield-height, 3.5em);padding:var(--lf-textfield-padding, 0 1em);position:relative;width:100%}.textfield--has-icon .textfield__label{left:1.25em}.textfield--filled .textfield__icon,.textfield--focused .textfield__icon{background-color:rgba(var(--lf-textfield-color-primary, var(--lf-color-primary)), 1)}.textfield--filled .textfield__label,.textfield--focused .textfield__label{color:rgb(var(--lf-textfield-color-primary, var(--lf-color-primary)))}.textfield--filled .textfield__ripple-surface:after,.textfield--focused .textfield__ripple-surface:after{width:100%}.textfield--flat.textfield--filled .textfield__label,.textfield--flat.textfield--focused .textfield__label,.textfield--raised.textfield--filled .textfield__label,.textfield--raised.textfield--focused .textfield__label{transform:translateY(-130%) scale(0.75)}.textfield--flat.textfield--has-icon .textfield__label,.textfield--raised.textfield--has-icon .textfield__label{left:3.5em}.textfield--flat .textfield__label,.textfield--raised .textfield__label{left:1.25em;right:initial}.textfield--raised{background-color:rgba(var(--lf-textfield-color-surface, var(--lf-color-surface)), 0.125);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.textfield--raised:hover{background-color:rgba(var(--lf-textfield-color-surface, var(--lf-color-surface)), 0.275);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.textfield--raised.textfield--focused{background-color:rgba(var(--lf-textfield-color-surface, var(--lf-color-surface)), 0.525);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.textfield--outlined,.textfield--textarea{border:0;border-style:solid;border-color:rgba(var(--lf-textfield-border-color, var(--lf-color-border)), 1);border-width:1px;padding-top:0}.textfield--outlined:hover,.textfield--textarea:hover{background-color:rgba(var(--lf-textfield-color-surface, var(--lf-color-surface)), 0.075);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-color:rgba(var(--lf-textfield-color-primary, var(--lf-color-primary)), 0.775)}.textfield--outlined.textfield--focused,.textfield--textarea.textfield--focused{border-color:rgb(var(--lf-textfield-color-primary, var(--lf-color-primary)));box-shadow:inset 0 0 0 0.15em rgb(var(--lf-textfield-color-primary, var(--lf-color-primary)))}.textfield--outlined.textfield--filled,.textfield--textarea.textfield--filled{background-color:rgba(var(--lf-textfield-color-surface, var(--lf-color-surface)), 0.175);backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px)}.textfield--textarea{align-items:center;flex-direction:column;height:auto;overflow:visible;padding:0;transition:none}.textfield--textarea .textfield__input{box-sizing:border-box;flex-grow:1;height:auto;overflow-x:hidden;overflow-y:auto;padding:1em;resize:none}.textfield--textarea .textfield__label{left:0.25em;position:relative;top:2.75em}.textfield__input,.textfield__label{box-sizing:border-box}.textfield__icon{background-color:rgba(var(--lf-textfield-color-on-bg, var(--lf-color-on-bg)), 1);height:1.5em;width:1.5em;overflow:hidden;transition:all 250ms cubic-bezier(0.34, 1.56, 0.64, 1);align-self:center;cursor:pointer;outline:none;padding-right:0.75em}.textfield__icon:hover{opacity:0.75}.textfield__icon:focus{box-shadow:0 0 0 0.15em rgb(var(--lf-textfield-color-primary, var(--lf-color-primary)))}.textfield__input{color:rgb(var(--lf-textfield-color-on-bg, var(--lf-color-on-bg)));font-family:var(--lf-textfield-font-family, var(--lf-font-family-primary));width:100%;height:100%;font-size:1em;font-weight:400;line-height:1.5em;letter-spacing:0em;transition:all 300ms cubic-bezier(0.4, 0, 0.2, 1);appearance:none;-webkit-appearance:none;background:none;border:none;border-radius:0;box-sizing:border-box;caret-color:rgba(var(--lf-textfield-color-primary, var(--lf-color-primary)), 0.75);-webkit-font-smoothing:antialiased;margin:0;min-width:0;outline:none;padding:0;text-decoration:inherit;text-transform:inherit}.textfield__input:placeholder{color:rgb(var(--lf-textfield-color-on-bg, var(--lf-color-on-bg)))}.textfield__label{color:rgb(var(--lf-textfield-color-on-bg, var(--lf-color-on-bg)));overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:0.875em;font-weight:500;line-height:1.5em;letter-spacing:0.01em;transition:all 250ms cubic-bezier(0.34, 1.56, 0.64, 1);cursor:text;left:0.25em;overflow:hidden;pointer-events:none;position:absolute;right:initial;text-align:left;top:50%;transform:translateY(-50%);transform-origin:left top}.textfield__ripple-surface{max-width:100%;overflow:hidden}.textfield__ripple-surface:before,.textfield__ripple-surface:after{border-radius:2px;bottom:0;content:"";height:2px;left:0;position:absolute}.textfield__ripple-surface:before{background-color:rgba(var(--lf-textfield-color-on-bg, var(--lf-color-on-bg)), 0.225);width:100%}.textfield__ripple-surface:after{background-color:rgba(var(--lf-textfield-color-primary, var(--lf-color-primary)), 0.775);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:width 300ms cubic-bezier(0.4, 0, 0.2, 1);width:0}.textfield__resizer{align-self:stretch;display:inline-flex;flex-direction:column;flex-grow:1;max-height:100%;max-width:100%;min-height:var(--lf-textfield-height, 3em);min-width:fit-content;min-width:-moz-available;min-width:-webkit-fill-available;overflow:hidden;resize:both;transform:translateX(-1px) translateY(-1px)}.textfield__helper-text{color:rgb(var(--lf-textfield-color-primary, var(--lf-color-primary)));font-size:0.875em;font-weight:500;line-height:1.375em;letter-spacing:0.01em;transition:all 200ms cubic-bezier(0.4, 0, 0.6, 1);line-height:normal;margin:0;opacity:0;text-decoration:inherit;text-transform:inherit;will-change:opacity}.textfield__helper-text--active{opacity:1;transition:none;will-change:initial}.textfield__helper-line{border-top:1px solid rgba(var(--lf-color-border), 0.775);box-sizing:border-box;display:flex;justify-content:space-between;padding-right:1em;padding-left:1em}';
-var UZ, GZ, qZ, JZ, KZ, QZ, tU, nU, iU, rU, eU, aU, oU = function(t4, n2, i, r) {
+MZ = /* @__PURE__ */ new WeakMap(), zZ = /* @__PURE__ */ new WeakMap(), SZ = /* @__PURE__ */ new WeakMap(), AZ = /* @__PURE__ */ new WeakMap(), CZ = /* @__PURE__ */ new WeakMap(), _Z = /* @__PURE__ */ new WeakMap(), TZ = /* @__PURE__ */ new WeakMap(), NZ = /* @__PURE__ */ new WeakMap(), IZ = /* @__PURE__ */ new WeakMap(), LZ = /* @__PURE__ */ new WeakMap(), FZ = /* @__PURE__ */ new WeakMap(), DZ = /* @__PURE__ */ new WeakMap(), EZ = /* @__PURE__ */ new WeakMap(), WZ = /* @__PURE__ */ new WeakMap(), OZ = /* @__PURE__ */ new WeakMap(), RZ = /* @__PURE__ */ new WeakMap(), PZ = /* @__PURE__ */ new WeakMap(), BZ = /* @__PURE__ */ new WeakMap(), $Z = /* @__PURE__ */ new WeakMap(), VZ = /* @__PURE__ */ new WeakMap(), jZ = /* @__PURE__ */ new WeakMap(), HZ = /* @__PURE__ */ new WeakMap(), YZ = /* @__PURE__ */ new WeakMap(), UZ.style = '::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=danger]{--lf-textfield-color-primary:var(\n    --lf-textfield-color-danger,\n    var(--lf-color-danger)\n  );--lf-textfield-color-on-primary:var(\n    --lf-textfield-color-danger,\n    var(--lf-color-on-danger)\n  )}[data-lf=disabled]{opacity:var(--lf-textfield-ui-opacity-disabled, var(--lf-ui-opacity-disabled));pointer-events:none}[data-lf=info]{--lf-textfield-color-primary:var(\n    --lf-textfield-color-info,\n    var(--lf-color-info)\n  );--lf-textfield-color-on-primary:var(\n    --lf-textfield-color-info,\n    var(--lf-color-on-info)\n  )}[data-lf=secondary]{--lf-textfield-color-primary:var(\n    --lf-textfield-color-secondary,\n    var(--lf-color-secondary)\n  );--lf-textfield-color-on-primary:var(\n    --lf-textfield-color-secondary,\n    var(--lf-color-on-secondary)\n  )}[data-lf=success]{--lf-textfield-color-primary:var(\n    --lf-textfield-color-success,\n    var(--lf-color-success)\n  );--lf-textfield-color-on-primary:var(\n    --lf-textfield-color-success,\n    var(--lf-color-on-success)\n  )}[data-lf=warning]{--lf-textfield-color-primary:var(\n    --lf-textfield-color-warning,\n    var(--lf-color-warning)\n  );--lf-textfield-color-on-primary:var(\n    --lf-textfield-color-warning,\n    var(--lf-color-on-warning)\n  )}:host{display:block;font-family:var(--lf-textfield-font-family, var(--lf-font-family-primary));font-size:var(--lf-textfield-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-textfield-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-textfield-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-textfield-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-textfield-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-textfield-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-textfield-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-textfield-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{width:100%}:host([lf-stretch-y]),:host([lf-stretch-y]) #lf-component,:host([lf-stretch-y]) .textfield{height:100%}:host([lf-trailing-icon]) #lf-component .textfield{flex-direction:row-reverse}:host([lf-trailing-icon]) #lf-component .textfield__icon{padding-left:0.5em}:host([lf-trailing-icon]) #lf-component .textfield__label{left:1em}.textfield{border:0;border-style:solid;border-radius:var(--lf-textfield-border-radius, var(--lf-ui-border-radius));transition:all 300ms cubic-bezier(0.4, 0, 0.2, 1);align-items:baseline;box-sizing:border-box;display:inline-flex;height:var(--lf-textfield-height, 3.5em);padding:var(--lf-textfield-padding, 0 1em);position:relative;width:100%}.textfield--has-icon .textfield__label{left:1.25em}.textfield--filled .textfield__icon,.textfield--focused .textfield__icon{background-color:rgba(var(--lf-textfield-color-primary, var(--lf-color-primary)), 1)}.textfield--filled .textfield__label,.textfield--focused .textfield__label{color:rgb(var(--lf-textfield-color-primary, var(--lf-color-primary)))}.textfield--filled .textfield__ripple-surface:after,.textfield--focused .textfield__ripple-surface:after{width:100%}.textfield--flat.textfield--filled .textfield__label,.textfield--flat.textfield--focused .textfield__label,.textfield--raised.textfield--filled .textfield__label,.textfield--raised.textfield--focused .textfield__label{transform:translateY(-130%) scale(0.75)}.textfield--flat.textfield--has-icon .textfield__label,.textfield--raised.textfield--has-icon .textfield__label{left:3.5em}.textfield--flat .textfield__label,.textfield--raised .textfield__label{left:1.25em;right:initial}.textfield--raised{background-color:rgba(var(--lf-textfield-color-surface, var(--lf-color-surface)), 0.125);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.textfield--raised:hover{background-color:rgba(var(--lf-textfield-color-surface, var(--lf-color-surface)), 0.275);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.textfield--raised.textfield--focused{background-color:rgba(var(--lf-textfield-color-surface, var(--lf-color-surface)), 0.525);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.textfield--outlined,.textfield--textarea{border:0;border-style:solid;border-color:rgba(var(--lf-textfield-border-color, var(--lf-color-border)), 1);border-width:1px;padding-top:0}.textfield--outlined:hover,.textfield--textarea:hover{background-color:rgba(var(--lf-textfield-color-surface, var(--lf-color-surface)), 0.075);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-color:rgba(var(--lf-textfield-color-primary, var(--lf-color-primary)), 0.775)}.textfield--outlined.textfield--focused,.textfield--textarea.textfield--focused{border-color:rgb(var(--lf-textfield-color-primary, var(--lf-color-primary)));box-shadow:inset 0 0 0 0.15em rgb(var(--lf-textfield-color-primary, var(--lf-color-primary)))}.textfield--outlined.textfield--filled,.textfield--textarea.textfield--filled{background-color:rgba(var(--lf-textfield-color-surface, var(--lf-color-surface)), 0.175);backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px)}.textfield--textarea{align-items:center;flex-direction:column;height:auto;overflow:visible;padding:0;transition:none}.textfield--textarea .textfield__input{box-sizing:border-box;flex-grow:1;height:auto;overflow-x:hidden;overflow-y:auto;padding:1em;resize:none}.textfield--textarea .textfield__label{left:0.25em;position:relative;top:2.75em}.textfield__input,.textfield__label{box-sizing:border-box}.textfield__icon{background-color:rgba(var(--lf-textfield-color-on-bg, var(--lf-color-on-bg)), 1);height:1.5em;width:1.5em;overflow:hidden;transition:all 250ms cubic-bezier(0.34, 1.56, 0.64, 1);align-self:center;cursor:pointer;outline:none;padding-right:0.75em}.textfield__icon:hover{opacity:0.75}.textfield__icon:focus{box-shadow:0 0 0 0.15em rgb(var(--lf-textfield-color-primary, var(--lf-color-primary)))}.textfield__input{color:rgb(var(--lf-textfield-color-on-bg, var(--lf-color-on-bg)));font-family:var(--lf-textfield-font-family, var(--lf-font-family-primary));width:100%;height:100%;font-size:1em;font-weight:400;line-height:1.5em;letter-spacing:0em;transition:all 300ms cubic-bezier(0.4, 0, 0.2, 1);appearance:none;-webkit-appearance:none;background:none;border:none;border-radius:0;box-sizing:border-box;caret-color:rgba(var(--lf-textfield-color-primary, var(--lf-color-primary)), 0.75);-webkit-font-smoothing:antialiased;margin:0;min-width:0;outline:none;padding:0;text-decoration:inherit;text-transform:inherit}.textfield__input:placeholder{color:rgb(var(--lf-textfield-color-on-bg, var(--lf-color-on-bg)))}.textfield__label{color:rgb(var(--lf-textfield-color-on-bg, var(--lf-color-on-bg)));overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:0.875em;font-weight:500;line-height:1.5em;letter-spacing:0.01em;transition:all 250ms cubic-bezier(0.34, 1.56, 0.64, 1);cursor:text;left:0.25em;overflow:hidden;pointer-events:none;position:absolute;right:initial;text-align:left;top:50%;transform:translateY(-50%);transform-origin:left top}.textfield__ripple-surface{max-width:100%;overflow:hidden}.textfield__ripple-surface:before,.textfield__ripple-surface:after{border-radius:2px;bottom:0;content:"";height:2px;left:0;position:absolute}.textfield__ripple-surface:before{background-color:rgba(var(--lf-textfield-color-on-bg, var(--lf-color-on-bg)), 0.225);width:100%}.textfield__ripple-surface:after{background-color:rgba(var(--lf-textfield-color-primary, var(--lf-color-primary)), 0.775);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:width 300ms cubic-bezier(0.4, 0, 0.2, 1);width:0}.textfield__resizer{align-self:stretch;display:inline-flex;flex-direction:column;flex-grow:1;max-height:100%;max-width:100%;min-height:var(--lf-textfield-height, 3em);min-width:fit-content;min-width:-moz-available;min-width:-webkit-fill-available;overflow:hidden;resize:both;transform:translateX(-1px) translateY(-1px)}.textfield__helper-text{color:rgb(var(--lf-textfield-color-primary, var(--lf-color-primary)));font-size:0.875em;font-weight:500;line-height:1.375em;letter-spacing:0.01em;transition:all 200ms cubic-bezier(0.4, 0, 0.6, 1);line-height:normal;margin:0;opacity:0;text-decoration:inherit;text-transform:inherit;will-change:opacity}.textfield__helper-text--active{opacity:1;transition:none;will-change:initial}.textfield__helper-line{border-top:1px solid rgba(var(--lf-color-border), 0.775);box-sizing:border-box;display:flex;justify-content:space-between;padding-right:1em;padding-left:1em}';
+var GZ, qZ, JZ, KZ, QZ, tU, nU, iU, rU, eU, aU, oU, sU = function(t4, n2, i, r) {
   if ("function" == typeof n2 ? t4 !== n2 || !r : !n2.has(t4)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return "m" === i ? r : "a" === i ? r.call(t4) : r ? r.value : n2.get(t4);
-}, sU = function(t4, n2, i, r, e) {
+}, lU = function(t4, n2, i, r, e) {
   if ("function" == typeof n2 ? t4 !== n2 || true : !n2.has(t4)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
   return n2.set(t4, i), i;
 };
-const lU = class {
+const uU = class {
   constructor(i) {
-    n(this, i), this.lfEvent = I(this, "lf-toggle-event"), this.value = "off", this.lfAriaLabel = "", this.lfLabel = "", this.lfLeadingLabel = false, this.lfRipple = true, this.lfStyle = "", this.lfUiSize = "medium", this.lfUiState = "primary", this.lfValue = false, UZ.set(this, void 0), GZ.set(this, LF_TOGGLE_BLOCKS), qZ.set(this, CY_ATTRIBUTES), JZ.set(this, LF_ATTRIBUTES), KZ.set(this, LF_TOGGLE_PARTS), QZ.set(this, LF_STYLE_ID), tU.set(this, LF_WRAPPER_ID), nU.set(this, void 0), iU.set(this, (() => "disabled" === this.lfUiState)), rU.set(this, (() => "on" === this.value)), eU.set(this, ((t4) => "off" === t4 || "on" === t4)), aU.set(this, ((t4, n2 = new CustomEvent("change")) => {
-      "boolean" == typeof t4 && (t4 = t4 ? "on" : "off"), !oU(this, iU, "f").call(this) && oU(this, eU, "f").call(this, t4) && (this.value = t4, this.onLfEvent(n2, "change"));
+    n(this, i), this.lfEvent = I(this, "lf-toggle-event"), this.value = "off", this.lfAriaLabel = "", this.lfLabel = "", this.lfLeadingLabel = false, this.lfRipple = true, this.lfStyle = "", this.lfUiSize = "medium", this.lfUiState = "primary", this.lfValue = false, GZ.set(this, void 0), qZ.set(this, LF_TOGGLE_BLOCKS), JZ.set(this, CY_ATTRIBUTES), KZ.set(this, LF_ATTRIBUTES), QZ.set(this, LF_TOGGLE_PARTS), tU.set(this, LF_STYLE_ID), nU.set(this, LF_WRAPPER_ID), iU.set(this, void 0), rU.set(this, (() => "disabled" === this.lfUiState)), eU.set(this, (() => "on" === this.value)), aU.set(this, ((t4) => "off" === t4 || "on" === t4)), oU.set(this, ((t4, n2 = new CustomEvent("change")) => {
+      "boolean" == typeof t4 && (t4 = t4 ? "on" : "off"), !sU(this, rU, "f").call(this) && sU(this, aU, "f").call(this, t4) && (this.value = t4, this.onLfEvent(n2, "change"));
     }));
   }
   onLfEvent(t4, n2) {
-    const { effects: i } = oU(this, UZ, "f"), { lfRipple: r, value: e } = this;
-    "pointerdown" === n2 && r && i.ripple(t4, oU(this, nU, "f")), this.lfEvent.emit({ comp: this, eventType: n2, id: this.rootElement.id, originalEvent: t4, value: e, valueAsBoolean: "on" === e });
+    const { effects: i } = sU(this, GZ, "f"), { lfRipple: r, value: e } = this;
+    "pointerdown" === n2 && r && i.ripple(t4, sU(this, iU, "f")), this.lfEvent.emit({ comp: this, eventType: n2, id: this.rootElement.id, originalEvent: t4, value: e, valueAsBoolean: "on" === e });
   }
   async getDebugInfo() {
     return this.debugInfo;
@@ -30044,7 +30077,7 @@ const lU = class {
     mt(this);
   }
   async setValue(t4) {
-    oU(this, aU, "f").call(this, t4);
+    sU(this, oU, "f").call(this, t4);
   }
   async unmount(t4 = 0) {
     setTimeout((() => {
@@ -30052,65 +30085,65 @@ const lU = class {
     }), t4);
   }
   connectedCallback() {
-    oU(this, UZ, "f") && oU(this, UZ, "f").theme.register(this);
+    sU(this, GZ, "f") && sU(this, GZ, "f").theme.register(this);
   }
   async componentWillLoad() {
-    sU(this, UZ, await o(this)), this.lfValue && (this.value = "on");
+    lU(this, GZ, await o(this)), this.lfValue && (this.value = "on");
   }
   componentDidLoad() {
-    const { debug: t4 } = oU(this, UZ, "f");
+    const { debug: t4 } = sU(this, GZ, "f");
     this.onLfEvent(new CustomEvent("ready"), "ready"), t4.info.update(this, "did-load");
   }
   componentWillRender() {
-    const { info: t4 } = oU(this, UZ, "f").debug;
+    const { info: t4 } = sU(this, GZ, "f").debug;
     t4.update(this, "will-render");
   }
   componentDidRender() {
-    const { info: t4 } = oU(this, UZ, "f").debug;
+    const { info: t4 } = sU(this, GZ, "f").debug;
     t4.update(this, "did-render");
   }
   render() {
-    const { bemClass: t4, setLfStyle: n2 } = oU(this, UZ, "f").theme, { formField: i, toggle: a } = oU(this, GZ, "f"), { lfAriaLabel: o2, lfLabel: s, lfLeadingLabel: l, lfRipple: u, lfStyle: f2, value: c } = this, h = (o2 || s || this.rootElement.id || "toggle").trim();
-    return W$1(L, { key: "c2c3993d6774b72883b1ab90c3bef545e0c0bde1" }, f2 && W$1("style", { key: "e8f6acb3b96a9a7cc5207a79caa402dd105e92b6", id: oU(this, QZ, "f") }, n2(this)), W$1("div", { key: "a71a4da29faa1ea252ff029d9178e8d96f1a26f7", id: oU(this, tU, "f") }, W$1("div", { key: "be6fc0ca5ff050719184d2c9f9ec7e1ace1f3695", class: t4(i._, null, { leading: l }) }, W$1("div", { key: "111780a1f96cd3c473a972c53a78d2cb3de0fc12", class: t4(a._, null, { active: oU(this, rU, "f").call(this) }), "data-lf": oU(this, JZ, "f")[this.lfUiState], part: oU(this, KZ, "f").toggle }, W$1("div", { key: "f04115e45fa4c213b5d03939a99b5a974dff0565", class: t4(a._, a.track), part: oU(this, KZ, "f").track }), W$1("div", { key: "f0b97b3397b02d993e64ba05dc992fbf5f294bd0", class: t4(a._, a.thumbUnderlay) }, W$1("div", { key: "48f28483fd5b5d2f0bd9279dd20f91b661a428c5", class: t4(a._, a.thumb) }, W$1("div", { key: "d8d28b5800aaab9c50222f4352d89fc412b74af9", "data-cy": oU(this, qZ, "f").rippleSurface, "data-lf": oU(this, JZ, "f").rippleSurface, ref: (t5) => {
-      t5 && u && sU(this, nU, t5);
-    } })), W$1("input", { key: "272e2ea5f2e01dfd779e0647e3c8623ad2be6726", class: t4(a._, a.nativeControl), checked: oU(this, rU, "f").call(this), "data-cy": oU(this, qZ, "f").input, disabled: oU(this, iU, "f").call(this), "aria-label": h, onBlur: (t5) => {
+    const { bemClass: t4, setLfStyle: n2 } = sU(this, GZ, "f").theme, { formField: i, toggle: a } = sU(this, qZ, "f"), { lfAriaLabel: o2, lfLabel: s, lfLeadingLabel: l, lfRipple: u, lfStyle: f2, value: c } = this, h = (o2 || s || this.rootElement.id || "toggle").trim();
+    return W$1(L, { key: "c2c3993d6774b72883b1ab90c3bef545e0c0bde1" }, f2 && W$1("style", { key: "e8f6acb3b96a9a7cc5207a79caa402dd105e92b6", id: sU(this, tU, "f") }, n2(this)), W$1("div", { key: "a71a4da29faa1ea252ff029d9178e8d96f1a26f7", id: sU(this, nU, "f") }, W$1("div", { key: "be6fc0ca5ff050719184d2c9f9ec7e1ace1f3695", class: t4(i._, null, { leading: l }) }, W$1("div", { key: "111780a1f96cd3c473a972c53a78d2cb3de0fc12", class: t4(a._, null, { active: sU(this, eU, "f").call(this) }), "data-lf": sU(this, KZ, "f")[this.lfUiState], part: sU(this, QZ, "f").toggle }, W$1("div", { key: "f04115e45fa4c213b5d03939a99b5a974dff0565", class: t4(a._, a.track), part: sU(this, QZ, "f").track }), W$1("div", { key: "f0b97b3397b02d993e64ba05dc992fbf5f294bd0", class: t4(a._, a.thumbUnderlay) }, W$1("div", { key: "48f28483fd5b5d2f0bd9279dd20f91b661a428c5", class: t4(a._, a.thumb) }, W$1("div", { key: "d8d28b5800aaab9c50222f4352d89fc412b74af9", "data-cy": sU(this, JZ, "f").rippleSurface, "data-lf": sU(this, KZ, "f").rippleSurface, ref: (t5) => {
+      t5 && u && lU(this, iU, t5);
+    } })), W$1("input", { key: "272e2ea5f2e01dfd779e0647e3c8623ad2be6726", class: t4(a._, a.nativeControl), checked: sU(this, eU, "f").call(this), "data-cy": sU(this, JZ, "f").input, disabled: sU(this, rU, "f").call(this), "aria-label": h, onBlur: (t5) => {
       this.onLfEvent(t5, "blur");
     }, onChange: (t5) => {
-      oU(this, aU, "f").call(this, oU(this, rU, "f").call(this) ? "off" : "on", t5);
+      sU(this, oU, "f").call(this, sU(this, eU, "f").call(this) ? "off" : "on", t5);
     }, onFocus: (t5) => {
       this.onLfEvent(t5, "focus");
     }, onPointerDown: (t5) => {
       this.onLfEvent(t5, "pointerdown");
-    }, part: oU(this, KZ, "f").nativeControl, role: "toggle", type: "checkbox", value: c ? "on" : "off" }))), W$1("label", { key: "307d3b588a431ef1f097c96a3d2c3438a7dbaabf", class: t4(i._, i.label), onClick: (t5) => {
+    }, part: sU(this, QZ, "f").nativeControl, role: "toggle", type: "checkbox", value: c ? "on" : "off" }))), W$1("label", { key: "307d3b588a431ef1f097c96a3d2c3438a7dbaabf", class: t4(i._, i.label), onClick: (t5) => {
       this.onLfEvent(t5, "change");
-    }, part: oU(this, KZ, "f").label }, s))));
+    }, part: sU(this, QZ, "f").label }, s))));
   }
   disconnectedCallback() {
     var _a2;
-    (_a2 = oU(this, UZ, "f")) == null ? void 0 : _a2.theme.unregister(this);
+    (_a2 = sU(this, GZ, "f")) == null ? void 0 : _a2.theme.unregister(this);
   }
   get rootElement() {
     return G(this);
   }
 };
-UZ = /* @__PURE__ */ new WeakMap(), GZ = /* @__PURE__ */ new WeakMap(), qZ = /* @__PURE__ */ new WeakMap(), JZ = /* @__PURE__ */ new WeakMap(), KZ = /* @__PURE__ */ new WeakMap(), QZ = /* @__PURE__ */ new WeakMap(), tU = /* @__PURE__ */ new WeakMap(), nU = /* @__PURE__ */ new WeakMap(), iU = /* @__PURE__ */ new WeakMap(), rU = /* @__PURE__ */ new WeakMap(), eU = /* @__PURE__ */ new WeakMap(), aU = /* @__PURE__ */ new WeakMap(), lU.style = '::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=ripple]{animation-duration:var(--lf-ui-duration-ripple, 675ms);animation-fill-mode:forwards;animation-name:lf-ripple;animation-timing-function:var(--lf-ui-timing-ripple, ease-out);background:var(--lf-ui-ripple-background, var(--lf-color-primary));border-radius:var(--lf-ui-radius-ripple, 50%);height:var(--lf-ui-ripple-height, 100%);left:var(--lf-ui-ripple-x, 50%);opacity:var(--lf-ui-opacity-ripple, 0.5);pointer-events:none;position:absolute;top:var(--lf-ui-ripple-y, 50%);transform:scale(0);width:var(--lf-ui-ripple-width, 100%)}@keyframes lf-ripple{from{transform:scale(0)}to{opacity:0;transform:scale(4)}}[data-lf=ripple-surface]{cursor:pointer;height:100%;left:0;overflow:hidden;position:absolute;top:0;width:100%}[data-lf=danger]{--lf-toggle-color-primary:var(\n    --lf-toggle-color-danger,\n    var(--lf-color-danger)\n  );--lf-toggle-color-on-primary:var(\n    --lf-toggle-color-danger,\n    var(--lf-color-on-danger)\n  )}[data-lf=disabled]{opacity:var(--lf-toggle-ui-opacity-disabled, var(--lf-ui-opacity-disabled));pointer-events:none}[data-lf=info]{--lf-toggle-color-primary:var(\n    --lf-toggle-color-info,\n    var(--lf-color-info)\n  );--lf-toggle-color-on-primary:var(\n    --lf-toggle-color-info,\n    var(--lf-color-on-info)\n  )}[data-lf=secondary]{--lf-toggle-color-primary:var(\n    --lf-toggle-color-secondary,\n    var(--lf-color-secondary)\n  );--lf-toggle-color-on-primary:var(\n    --lf-toggle-color-secondary,\n    var(--lf-color-on-secondary)\n  )}[data-lf=success]{--lf-toggle-color-primary:var(\n    --lf-toggle-color-success,\n    var(--lf-color-success)\n  );--lf-toggle-color-on-primary:var(\n    --lf-toggle-color-success,\n    var(--lf-color-on-success)\n  )}[data-lf=warning]{--lf-toggle-color-primary:var(\n    --lf-toggle-color-warning,\n    var(--lf-color-warning)\n  );--lf-toggle-color-on-primary:var(\n    --lf-toggle-color-warning,\n    var(--lf-color-on-warning)\n  )}:host{display:block;font-family:var(--lf-toggle-font-family, var(--lf-font-family-primary));font-size:var(--lf-toggle-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-toggle-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-toggle-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-toggle-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-toggle-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-toggle-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-toggle-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-toggle-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{width:100%;height:100%}.form-field{color:rgb(var(--lf-toggle-color-on-bg, var(--lf-color-on-bg)));width:100%;height:100%;font-size:0.875em;font-weight:500;line-height:1.5em;letter-spacing:0.01em;align-items:center;box-sizing:border-box;display:inline-flex;justify-content:center;padding:var(--lf-toggle-form-padding, 0.5em);vertical-align:middle}.form-field__label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:var(--lf-toggle-label-min-width, max-content);padding-left:var(--lf-toggle-label-padding-left, 1em)}.form-field--leading .form-field__label{margin-right:0;order:-1;padding-left:0;padding-right:var(--lf-toggle-label-padding-right, 1em)}.toggle{align-items:center;display:inline-flex;margin:var(--lf-toggle-margin, 1em 0.5em);min-width:var(--lf-toggle-min-width, 4em);outline:none;position:relative;user-select:none}.toggle:hover:before{background-color:rgba(var(--lf-toggle-color-on-surface, var(--lf-color-on-surface)), 0.125);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);transition:all 200ms cubic-bezier(0.4, 0, 0.6, 1);border-radius:50%;content:"";height:2.5em;left:calc(50% - 0.5em);padding:0.5em;position:absolute;top:50%;transform:translate(-50%, -50%);width:2.5em}.toggle--active .toggle__track{background-color:rgba(var(--lf-toggle-color-primary, var(--lf-color-primary)), 0.675);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.toggle--active .toggle__thumb{transform:translateX(100%) translateY(-50%);background-color:rgba(var(--lf-toggle-color-primary, var(--lf-color-primary)), 0.775);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.toggle__track{border:0;border-style:solid;border-radius:var(--lf-toggle-border-radius, var(--lf-ui-border-radius));background-color:rgba(var(--lf-toggle-color-on-surface, var(--lf-color-on-surface)), 0.275);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:all 300ms cubic-bezier(0.5, 1.7, 0.2, 1);border-radius:var(--lf-ui-border-radius, 1em);box-sizing:border-box;height:var(--lf-toggle-track-height, 0.5em);position:relative;width:var(--lf-toggle-track-width, 3em)}.toggle__thumb{background-color:rgba(var(--lf-toggle-color-on-surface, var(--lf-color-on-surface)), 0.375);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);transition:all 300ms cubic-bezier(0.5, 1.7, 0.2, 1);border-radius:50%;cursor:pointer;height:var(--lf-toggle-thumb-size, 1.5em);left:0;overflow:hidden;position:absolute;top:50%;transform:translateY(-50%);width:var(--lf-toggle-thumb-size, 1.5em)}.toggle__thumb:hover{background-color:rgba(var(--lf-toggle-color-surface, var(--lf-color-surface)), 0.8);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.toggle__native-control{cursor:pointer;height:var(--lf-toggle-input-height, 3em);left:-0.5em;opacity:0;position:absolute;top:-1.25em;width:4em;z-index:1}';
-var uU, fU, cU, hU, vU, dU, pU, mU, bU, gU, yU, wU, xU, kU, MU = function(t4, n2, i, r) {
+GZ = /* @__PURE__ */ new WeakMap(), qZ = /* @__PURE__ */ new WeakMap(), JZ = /* @__PURE__ */ new WeakMap(), KZ = /* @__PURE__ */ new WeakMap(), QZ = /* @__PURE__ */ new WeakMap(), tU = /* @__PURE__ */ new WeakMap(), nU = /* @__PURE__ */ new WeakMap(), iU = /* @__PURE__ */ new WeakMap(), rU = /* @__PURE__ */ new WeakMap(), eU = /* @__PURE__ */ new WeakMap(), aU = /* @__PURE__ */ new WeakMap(), oU = /* @__PURE__ */ new WeakMap(), uU.style = '::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=ripple]{animation-duration:var(--lf-ui-duration-ripple, 675ms);animation-fill-mode:forwards;animation-name:lf-ripple;animation-timing-function:var(--lf-ui-timing-ripple, ease-out);background:var(--lf-ui-ripple-background, var(--lf-color-primary));border-radius:var(--lf-ui-radius-ripple, 50%);height:var(--lf-ui-ripple-height, 100%);left:var(--lf-ui-ripple-x, 50%);opacity:var(--lf-ui-opacity-ripple, 0.5);pointer-events:none;position:absolute;top:var(--lf-ui-ripple-y, 50%);transform:scale(0);width:var(--lf-ui-ripple-width, 100%)}@keyframes lf-ripple{from{transform:scale(0)}to{opacity:0;transform:scale(4)}}[data-lf=ripple-surface]{cursor:pointer;height:100%;left:0;overflow:hidden;position:absolute;top:0;width:100%}[data-lf=danger]{--lf-toggle-color-primary:var(\n    --lf-toggle-color-danger,\n    var(--lf-color-danger)\n  );--lf-toggle-color-on-primary:var(\n    --lf-toggle-color-danger,\n    var(--lf-color-on-danger)\n  )}[data-lf=disabled]{opacity:var(--lf-toggle-ui-opacity-disabled, var(--lf-ui-opacity-disabled));pointer-events:none}[data-lf=info]{--lf-toggle-color-primary:var(\n    --lf-toggle-color-info,\n    var(--lf-color-info)\n  );--lf-toggle-color-on-primary:var(\n    --lf-toggle-color-info,\n    var(--lf-color-on-info)\n  )}[data-lf=secondary]{--lf-toggle-color-primary:var(\n    --lf-toggle-color-secondary,\n    var(--lf-color-secondary)\n  );--lf-toggle-color-on-primary:var(\n    --lf-toggle-color-secondary,\n    var(--lf-color-on-secondary)\n  )}[data-lf=success]{--lf-toggle-color-primary:var(\n    --lf-toggle-color-success,\n    var(--lf-color-success)\n  );--lf-toggle-color-on-primary:var(\n    --lf-toggle-color-success,\n    var(--lf-color-on-success)\n  )}[data-lf=warning]{--lf-toggle-color-primary:var(\n    --lf-toggle-color-warning,\n    var(--lf-color-warning)\n  );--lf-toggle-color-on-primary:var(\n    --lf-toggle-color-warning,\n    var(--lf-color-on-warning)\n  )}:host{display:block;font-family:var(--lf-toggle-font-family, var(--lf-font-family-primary));font-size:var(--lf-toggle-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-toggle-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-toggle-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-toggle-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-toggle-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-toggle-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-toggle-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-toggle-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{width:100%;height:100%}.form-field{color:rgb(var(--lf-toggle-color-on-bg, var(--lf-color-on-bg)));width:100%;height:100%;font-size:0.875em;font-weight:500;line-height:1.5em;letter-spacing:0.01em;align-items:center;box-sizing:border-box;display:inline-flex;justify-content:center;padding:var(--lf-toggle-form-padding, 0.5em);vertical-align:middle}.form-field__label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:var(--lf-toggle-label-min-width, max-content);padding-left:var(--lf-toggle-label-padding-left, 1em)}.form-field--leading .form-field__label{margin-right:0;order:-1;padding-left:0;padding-right:var(--lf-toggle-label-padding-right, 1em)}.toggle{align-items:center;display:inline-flex;margin:var(--lf-toggle-margin, 1em 0.5em);min-width:var(--lf-toggle-min-width, 4em);outline:none;position:relative;user-select:none}.toggle:hover:before{background-color:rgba(var(--lf-toggle-color-on-surface, var(--lf-color-on-surface)), 0.125);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);transition:all 200ms cubic-bezier(0.4, 0, 0.6, 1);border-radius:50%;content:"";height:2.5em;left:calc(50% - 0.5em);padding:0.5em;position:absolute;top:50%;transform:translate(-50%, -50%);width:2.5em}.toggle--active .toggle__track{background-color:rgba(var(--lf-toggle-color-primary, var(--lf-color-primary)), 0.675);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.toggle--active .toggle__thumb{transform:translateX(100%) translateY(-50%);background-color:rgba(var(--lf-toggle-color-primary, var(--lf-color-primary)), 0.775);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.toggle__track{border:0;border-style:solid;border-radius:var(--lf-toggle-border-radius, var(--lf-ui-border-radius));background-color:rgba(var(--lf-toggle-color-on-surface, var(--lf-color-on-surface)), 0.275);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:all 300ms cubic-bezier(0.5, 1.7, 0.2, 1);border-radius:var(--lf-ui-border-radius, 1em);box-sizing:border-box;height:var(--lf-toggle-track-height, 0.5em);position:relative;width:var(--lf-toggle-track-width, 3em)}.toggle__thumb{background-color:rgba(var(--lf-toggle-color-on-surface, var(--lf-color-on-surface)), 0.375);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);transition:all 300ms cubic-bezier(0.5, 1.7, 0.2, 1);border-radius:50%;cursor:pointer;height:var(--lf-toggle-thumb-size, 1.5em);left:0;overflow:hidden;position:absolute;top:50%;transform:translateY(-50%);width:var(--lf-toggle-thumb-size, 1.5em)}.toggle__thumb:hover{background-color:rgba(var(--lf-toggle-color-surface, var(--lf-color-surface)), 0.8);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.toggle__native-control{cursor:pointer;height:var(--lf-toggle-input-height, 3em);left:-0.5em;opacity:0;position:absolute;top:-1.25em;width:4em;z-index:1}';
+var fU, cU, hU, vU, dU, pU, mU, bU, gU, yU, wU, xU, kU, MU, zU = function(t4, n2, i, r) {
   if ("a" === i && !r) throw new TypeError("Private accessor was defined without a getter");
   if ("function" == typeof n2 ? t4 !== n2 || !r : !n2.has(t4)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return "m" === i ? r : "a" === i ? r.call(t4) : r ? r.value : n2.get(t4);
-}, zU = function(t4, n2, i, r, e) {
+}, SU = function(t4, n2, i, r, e) {
   if ("function" == typeof n2 ? t4 !== n2 || true : !n2.has(t4)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
   return n2.set(t4, i), i;
 };
-const SU = class {
+const AU = class {
   constructor(i) {
-    n(this, i), this.lfEvent = I(this, "lf-typewriter-event"), uU.add(this), this.displayedText = "", this.isDeleting = false, this.currentTextIndex = 0, this.lfCursor = "auto", this.lfDeleteSpeed = 50, this.lfLoop = false, this.lfPause = 500, this.lfSpeed = 50, this.lfStyle = "", this.lfTag = "p", this.lfUiSize = "medium", this.lfUpdatable = true, this.lfValue = "", fU.set(this, void 0), cU.set(this, LF_TYPEWRITER_BLOCKS), hU.set(this, LF_TYPEWRITER_PARTS), vU.set(this, LF_STYLE_ID), dU.set(this, LF_WRAPPER_ID), pU.set(this, void 0), mU.set(this, []);
+    n(this, i), this.lfEvent = I(this, "lf-typewriter-event"), fU.add(this), this.displayedText = "", this.isDeleting = false, this.currentTextIndex = 0, this.lfCursor = "auto", this.lfDeleteSpeed = 50, this.lfLoop = false, this.lfPause = 500, this.lfSpeed = 50, this.lfStyle = "", this.lfTag = "p", this.lfUiSize = "medium", this.lfUpdatable = true, this.lfValue = "", cU.set(this, void 0), hU.set(this, LF_TYPEWRITER_BLOCKS), vU.set(this, LF_TYPEWRITER_PARTS), dU.set(this, LF_STYLE_ID), pU.set(this, LF_WRAPPER_ID), mU.set(this, void 0), bU.set(this, []);
   }
   onLfEvent(t4, n2) {
     this.lfEvent.emit({ comp: this, id: this.rootElement.id, originalEvent: t4, eventType: n2 });
   }
   handleLfValueChange() {
-    MU(this, fU, "f") && this.lfUpdatable && (MU(this, uU, "m", bU).call(this), MU(this, uU, "m", yU).call(this));
+    zU(this, cU, "f") && this.lfUpdatable && (zU(this, fU, "m", gU).call(this), zU(this, fU, "m", wU).call(this));
   }
   async getDebugInfo() {
     return this.debugInfo;
@@ -30128,30 +30161,30 @@ const SU = class {
     }), t4);
   }
   connectedCallback() {
-    MU(this, fU, "f") && MU(this, fU, "f").theme.register(this);
+    zU(this, cU, "f") && zU(this, cU, "f").theme.register(this);
   }
   async componentWillLoad() {
-    zU(this, fU, await o(this)), MU(this, uU, "m", bU).call(this);
+    SU(this, cU, await o(this)), zU(this, fU, "m", gU).call(this);
   }
   componentDidLoad() {
-    const { info: t4 } = MU(this, fU, "f").debug;
-    this.onLfEvent(new CustomEvent("ready"), "ready"), requestAnimationFrame((async () => MU(this, uU, "m", gU).call(this))), t4.update(this, "did-load");
+    const { info: t4 } = zU(this, cU, "f").debug;
+    this.onLfEvent(new CustomEvent("ready"), "ready"), requestAnimationFrame((async () => zU(this, fU, "m", yU).call(this))), t4.update(this, "did-load");
   }
   componentWillRender() {
-    const { info: t4 } = MU(this, fU, "f").debug;
+    const { info: t4 } = zU(this, cU, "f").debug;
     t4.update(this, "will-render");
   }
   componentDidRender() {
-    const { info: t4 } = MU(this, fU, "f").debug;
+    const { info: t4 } = zU(this, cU, "f").debug;
     t4.update(this, "did-render");
   }
   render() {
-    const { theme: t4 } = MU(this, fU, "f"), { lfStyle: n2 } = this;
-    return W$1(L, { key: "740b94d1d18a93390519ab1b53603e9dc41313b2" }, n2 && W$1("style", { key: "100aa1b3a02e91b65480b58e39311ceb77c4d004", id: MU(this, vU, "f") }, t4.setLfStyle(this)), W$1("div", { key: "dc2df62cf20d91fd1a8857077f005efb260f0a6f", id: MU(this, dU, "f") }, MU(this, uU, "m", kU).call(this)));
+    const { theme: t4 } = zU(this, cU, "f"), { lfStyle: n2 } = this;
+    return W$1(L, { key: "740b94d1d18a93390519ab1b53603e9dc41313b2" }, n2 && W$1("style", { key: "100aa1b3a02e91b65480b58e39311ceb77c4d004", id: zU(this, dU, "f") }, t4.setLfStyle(this)), W$1("div", { key: "dc2df62cf20d91fd1a8857077f005efb260f0a6f", id: zU(this, pU, "f") }, zU(this, fU, "m", MU).call(this)));
   }
   disconnectedCallback() {
     var _a2;
-    (_a2 = MU(this, fU, "f")) == null ? void 0 : _a2.theme.unregister(this), clearTimeout(MU(this, pU, "f"));
+    (_a2 = zU(this, cU, "f")) == null ? void 0 : _a2.theme.unregister(this), clearTimeout(zU(this, mU, "f"));
   }
   get rootElement() {
     return G(this);
@@ -30160,51 +30193,51 @@ const SU = class {
     return { lfValue: ["handleLfValueChange"] };
   }
 };
-fU = /* @__PURE__ */ new WeakMap(), cU = /* @__PURE__ */ new WeakMap(), hU = /* @__PURE__ */ new WeakMap(), vU = /* @__PURE__ */ new WeakMap(), dU = /* @__PURE__ */ new WeakMap(), pU = /* @__PURE__ */ new WeakMap(), mU = /* @__PURE__ */ new WeakMap(), uU = /* @__PURE__ */ new WeakSet(), bU = function() {
+cU = /* @__PURE__ */ new WeakMap(), hU = /* @__PURE__ */ new WeakMap(), vU = /* @__PURE__ */ new WeakMap(), dU = /* @__PURE__ */ new WeakMap(), pU = /* @__PURE__ */ new WeakMap(), mU = /* @__PURE__ */ new WeakMap(), bU = /* @__PURE__ */ new WeakMap(), fU = /* @__PURE__ */ new WeakSet(), gU = function() {
   const { lfValue: t4 } = this;
-  zU(this, mU, Array.isArray(t4) ? t4 : [t4]);
-}, gU = function t2() {
-  const n2 = MU(this, mU, "f")[this.currentTextIndex] || "";
-  this.displayedText = n2.substring(0, this.isDeleting ? this.displayedText.length - 1 : this.displayedText.length + 1), this.isDeleting || this.displayedText !== n2 ? this.isDeleting && "" === this.displayedText ? (this.isDeleting = false, this.currentTextIndex = (this.currentTextIndex + 1) % MU(this, mU, "f").length) : zU(this, pU, setTimeout((() => MU(this, uU, "m", t2).call(this)), this.isDeleting ? this.lfDeleteSpeed : this.lfSpeed)) : zU(this, pU, setTimeout((() => {
+  SU(this, bU, Array.isArray(t4) ? t4 : [t4]);
+}, yU = function t2() {
+  const n2 = zU(this, bU, "f")[this.currentTextIndex] || "";
+  this.displayedText = n2.substring(0, this.isDeleting ? this.displayedText.length - 1 : this.displayedText.length + 1), this.isDeleting || this.displayedText !== n2 ? this.isDeleting && "" === this.displayedText ? (this.isDeleting = false, this.currentTextIndex = (this.currentTextIndex + 1) % zU(this, bU, "f").length) : SU(this, mU, setTimeout((() => zU(this, fU, "m", t2).call(this)), this.isDeleting ? this.lfDeleteSpeed : this.lfSpeed)) : SU(this, mU, setTimeout((() => {
     this.lfLoop && (this.isDeleting = true);
   }), this.lfPause));
-}, yU = function() {
-  clearTimeout(MU(this, pU, "f")), this.displayedText ? (this.isDeleting = true, MU(this, uU, "m", wU).call(this, (() => {
-    MU(this, uU, "m", xU).call(this);
-  }))) : MU(this, uU, "m", xU).call(this);
-}, wU = function t3(n2) {
-  this.displayedText.length > 0 ? (this.displayedText = this.displayedText.slice(0, -1), zU(this, pU, setTimeout((() => {
-    MU(this, uU, "m", t3).call(this, n2);
+}, wU = function() {
+  clearTimeout(zU(this, mU, "f")), this.displayedText ? (this.isDeleting = true, zU(this, fU, "m", xU).call(this, (() => {
+    zU(this, fU, "m", kU).call(this);
+  }))) : zU(this, fU, "m", kU).call(this);
+}, xU = function t3(n2) {
+  this.displayedText.length > 0 ? (this.displayedText = this.displayedText.slice(0, -1), SU(this, mU, setTimeout((() => {
+    zU(this, fU, "m", t3).call(this, n2);
   }), this.lfDeleteSpeed))) : n2();
-}, xU = function() {
-  this.isDeleting = false, this.currentTextIndex = 0, MU(this, uU, "m", gU).call(this);
 }, kU = function() {
-  const { bemClass: t4 } = MU(this, fU, "f").theme, { typewriter: n2 } = MU(this, cU, "f"), { currentTextIndex: i, displayedText: e, isDeleting: a, lfCursor: o2, lfTag: s } = this, l = "enabled" === o2 || "auto" === o2 && !a && e !== MU(this, mU, "f")[i], u = s || "div";
-  return W$1("div", { class: t4(n2._), part: MU(this, hU, "f").typewriter }, W$1(u, { class: t4(n2._, n2.text), part: MU(this, hU, "f").text }, W$1("span", null, e || " "), l && W$1("span", { class: t4(n2._, n2.cursor), part: MU(this, hU, "f").cursor })));
-}, SU.style = "::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}:host{display:block;font-family:var(--lf-typewriter-font-family, var(--lf-font-family-primary));font-size:var(--lf-typewriter-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-typewriter-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-typewriter-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-typewriter-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-typewriter-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-typewriter-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-typewriter-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-typewriter-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{width:100%;height:100%}.typewriter{background-color:rgba(var(--lf-typewriter-color-bg, var(--lf-color-bg)), 0.125);color:rgb(var(--lf-typewriter-color-on-bg, var(--lf-color-on-bg)));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);width:100%;height:100%;box-sizing:border-box;padding:var(--lf-typewriter-padding, 1em)}.typewriter__text{width:100%;height:100%;display:inline-block;margin:var(--lf-typewriter-margin, 0)}.typewriter__cursor{background-color:rgba(var(--lf-typewriter-color-on-bg, var(--lf-color-on-bg)), 0.575);color:rgb(var(--lf-typewriter-color-bg, var(--lf-color-bg)));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);animation:blink var(--lf-typewriter-cursor-height, 800ms) infinite;display:inline-block;height:var(--lf-typewriter-cursor-height, 1.25em);margin-left:var(--lf-typewriter-cursor-margin-left, 0.15em);vertical-align:var(--lf-typewriter-cursor-vertical-align, top);width:var(--lf-typewriter-cursor-width, 0.125em)}@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}";
-var AU, CU, _U, TU, NU, IU, LU, FU, DU, EU, WU, OU, RU, PU, BU = function(t4, n2, i, r) {
+  this.isDeleting = false, this.currentTextIndex = 0, zU(this, fU, "m", yU).call(this);
+}, MU = function() {
+  const { bemClass: t4 } = zU(this, cU, "f").theme, { typewriter: n2 } = zU(this, hU, "f"), { currentTextIndex: i, displayedText: e, isDeleting: a, lfCursor: o2, lfTag: s } = this, l = "enabled" === o2 || "auto" === o2 && !a && e !== zU(this, bU, "f")[i], u = s || "div";
+  return W$1("div", { class: t4(n2._), part: zU(this, vU, "f").typewriter }, W$1(u, { class: t4(n2._, n2.text), part: zU(this, vU, "f").text }, W$1("span", null, e || " "), l && W$1("span", { class: t4(n2._, n2.cursor), part: zU(this, vU, "f").cursor })));
+}, AU.style = "::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}:host{display:block;font-family:var(--lf-typewriter-font-family, var(--lf-font-family-primary));font-size:var(--lf-typewriter-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-typewriter-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-typewriter-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-typewriter-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-typewriter-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-typewriter-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-typewriter-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-typewriter-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{width:100%;height:100%}.typewriter{background-color:rgba(var(--lf-typewriter-color-bg, var(--lf-color-bg)), 0.125);color:rgb(var(--lf-typewriter-color-on-bg, var(--lf-color-on-bg)));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);width:100%;height:100%;box-sizing:border-box;padding:var(--lf-typewriter-padding, 1em)}.typewriter__text{width:100%;height:100%;display:inline-block;margin:var(--lf-typewriter-margin, 0)}.typewriter__cursor{background-color:rgba(var(--lf-typewriter-color-on-bg, var(--lf-color-on-bg)), 0.575);color:rgb(var(--lf-typewriter-color-bg, var(--lf-color-bg)));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);animation:blink var(--lf-typewriter-cursor-height, 800ms) infinite;display:inline-block;height:var(--lf-typewriter-cursor-height, 1.25em);margin-left:var(--lf-typewriter-cursor-margin-left, 0.15em);vertical-align:var(--lf-typewriter-cursor-vertical-align, top);width:var(--lf-typewriter-cursor-width, 0.125em)}@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}";
+var CU, _U, TU, NU, IU, LU, FU, DU, EU, WU, OU, RU, PU, BU, $U = function(t4, n2, i, r) {
   if ("a" === i && !r) throw new TypeError("Private accessor was defined without a getter");
   if ("function" == typeof n2 ? t4 !== n2 || !r : !n2.has(t4)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return "m" === i ? r : "a" === i ? r.call(t4) : r ? r.value : n2.get(t4);
-}, $U = function(t4, n2, i, r, e) {
+}, VU = function(t4, n2, i, r, e) {
   if ("function" == typeof n2 ? t4 !== n2 || true : !n2.has(t4)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
   return n2.set(t4, i), i;
 };
-const VU = class {
+const jU = class {
   constructor(i) {
-    n(this, i), this.lfEvent = I(this, "lf-upload-event"), AU.add(this), this.selectedFiles = [], this.lfLabel = "Upload files...", this.lfRipple = true, this.lfStyle = "", this.lfValue = null, CU.set(this, void 0), _U.set(this, LF_UPLOAD_BLOCKS), TU.set(this, CY_ATTRIBUTES), NU.set(this, LF_ATTRIBUTES), IU.set(this, LF_UPLOAD_PARTS), LU.set(this, LF_STYLE_ID), FU.set(this, LF_WRAPPER_ID), DU.set(this, void 0), EU.set(this, void 0), PU.set(this, ((t4, n2 = false) => {
-      const { assets: i2, theme: e } = BU(this, CU, "f"), { get: a } = i2, { bemClass: o2 } = e, { file: s, movie: l, music: u, pdf: f2, photo: c, zip: h } = BU(this, CU, "f").theme.get.icons(), { "--lf-icon-clear": v } = BU(this, CU, "f").theme.get.current().variables, { fileInfo: d } = BU(this, _U, "f"), p = t4.type.includes("image") || t4.type.includes("jpg") || t4.type.includes("png") || t4.type.includes("jpeg") || t4.type.includes("gif"), m = t4.type.includes("audio") || t4.type.includes("mp3") || t4.type.includes("wav") || t4.type.includes("ogg"), b = t4.type.includes("video") || t4.type.includes("mp4") || t4.type.includes("avi") || t4.type.includes("mov"), g = t4.type.includes("7z") || t4.type.includes("zip") || t4.type.includes("application/zip") || t4.type.includes("application/x-zip-compressed"), y = t4.type.includes("pdf"), w = n2 ? v : p ? c : m ? u : b ? l : y ? f2 : g ? h : s, { style: x } = a(`./assets/svg/${w}.svg`);
-      return W$1("div", { class: o2(d._, d.icon, { "has-actions": n2 }), "data-cy": BU(this, TU, "f").maskedSvg, onClick: n2 ? (n3) => this.onLfEvent(n3, "delete", t4) : null, part: BU(this, IU, "f").icon, style: x, tabIndex: n2 && 0, title: n2 ? "Remove file" : t4.type });
+    n(this, i), this.lfEvent = I(this, "lf-upload-event"), CU.add(this), this.selectedFiles = [], this.lfLabel = "Upload files...", this.lfRipple = true, this.lfStyle = "", this.lfValue = null, _U.set(this, void 0), TU.set(this, LF_UPLOAD_BLOCKS), NU.set(this, CY_ATTRIBUTES), IU.set(this, LF_ATTRIBUTES), LU.set(this, LF_UPLOAD_PARTS), FU.set(this, LF_STYLE_ID), DU.set(this, LF_WRAPPER_ID), EU.set(this, void 0), WU.set(this, void 0), BU.set(this, ((t4, n2 = false) => {
+      const { assets: i2, theme: e } = $U(this, _U, "f"), { get: a } = i2, { bemClass: o2 } = e, { file: s, movie: l, music: u, pdf: f2, photo: c, zip: h } = $U(this, _U, "f").theme.get.icons(), { "--lf-icon-clear": v } = $U(this, _U, "f").theme.get.current().variables, { fileInfo: d } = $U(this, TU, "f"), p = t4.type.includes("image") || t4.type.includes("jpg") || t4.type.includes("png") || t4.type.includes("jpeg") || t4.type.includes("gif"), m = t4.type.includes("audio") || t4.type.includes("mp3") || t4.type.includes("wav") || t4.type.includes("ogg"), b = t4.type.includes("video") || t4.type.includes("mp4") || t4.type.includes("avi") || t4.type.includes("mov"), g = t4.type.includes("7z") || t4.type.includes("zip") || t4.type.includes("application/zip") || t4.type.includes("application/x-zip-compressed"), y = t4.type.includes("pdf"), w = n2 ? v : p ? c : m ? u : b ? l : y ? f2 : g ? h : s, { style: x } = a(`./assets/svg/${w}.svg`);
+      return W$1("div", { class: o2(d._, d.icon, { "has-actions": n2 }), "data-cy": $U(this, NU, "f").maskedSvg, onClick: n2 ? (n3) => this.onLfEvent(n3, "delete", t4) : null, part: $U(this, LU, "f").icon, style: x, tabIndex: n2 && 0, title: n2 ? "Remove file" : t4.type });
     }));
   }
   onLfEvent(t4, n2, i) {
-    const { effects: r } = BU(this, CU, "f");
+    const { effects: r } = $U(this, _U, "f");
     switch (n2) {
       case "delete":
         this.selectedFiles = this.selectedFiles.filter(((t5) => t5 !== i));
         break;
       case "pointerdown":
-        this.lfRipple && r.ripple(t4, BU(this, DU, "f"));
+        this.lfRipple && r.ripple(t4, $U(this, EU, "f"));
     }
     this.lfEvent.emit({ comp: this, eventType: n2, id: this.rootElement.id, originalEvent: t4, selectedFiles: this.selectedFiles });
   }
@@ -30227,51 +30260,51 @@ const VU = class {
     }), t4);
   }
   connectedCallback() {
-    BU(this, CU, "f") && BU(this, CU, "f").theme.register(this);
+    $U(this, _U, "f") && $U(this, _U, "f").theme.register(this);
   }
   async componentWillLoad() {
-    $U(this, CU, await o(this)), Array.isArray(this.lfValue) && (this.selectedFiles = this.lfValue);
+    VU(this, _U, await o(this)), Array.isArray(this.lfValue) && (this.selectedFiles = this.lfValue);
   }
   componentDidLoad() {
-    const { debug: t4 } = BU(this, CU, "f");
+    const { debug: t4 } = $U(this, _U, "f");
     this.onLfEvent(new CustomEvent("ready"), "ready"), t4.info.update(this, "did-load");
   }
   componentWillRender() {
-    const { info: t4 } = BU(this, CU, "f").debug;
+    const { info: t4 } = $U(this, _U, "f").debug;
     t4.update(this, "will-render");
   }
   componentDidRender() {
-    const { info: t4 } = BU(this, CU, "f").debug;
+    const { info: t4 } = $U(this, _U, "f").debug;
     t4.update(this, "did-render");
   }
   render() {
-    const { bemClass: t4, setLfStyle: n2 } = BU(this, CU, "f").theme, { fileInfo: i, fileUpload: a, upload: o2 } = BU(this, _U, "f"), { lfLabel: s, lfRipple: l, lfStyle: u, selectedFiles: f2 } = this, c = !!(f2 == null ? void 0 : f2.length);
-    return W$1(L, { key: "59096e8d963ddaa95a53b9f81a8e1b2c18812b1d" }, u && W$1("style", { key: "f16562dabc49a04b16eb32f0c328a05282b2b6bc", id: BU(this, LU, "f") }, n2(this)), W$1("div", { key: "f268f0acff6060681db805b03fb2dafc93e8b6f9", id: BU(this, FU, "f") }, W$1("div", { key: "d5eb5fca819a20148c7f0158b87f592a0853205b", class: t4(o2._, null, { "has-description": Boolean(f2 == null ? void 0 : f2.length) }) }, W$1("div", { key: "28702eae33c33e894cca034d75b39eba318744c0", class: t4(a._), onPointerDown: (t5) => this.onLfEvent(t5, "pointerdown") }, W$1("input", { key: "631ebea107c9c1966665675fbd2086ea064a1702", class: t4(a._, a.input), "data-cy": BU(this, TU, "f").input, id: "upload-input", multiple: true, onChange: () => BU(this, AU, "m", OU).call(this), ref: (t5) => {
-      t5 && $U(this, EU, t5);
-    }, type: "file" }), W$1("label", { key: "508fc08fad48071d148fede1fcfee1b5860c8fdc", class: t4(a._, a.label), "data-cy": BU(this, TU, "f").rippleSurface, "data-lf": BU(this, NU, "f").rippleSurface, htmlFor: "upload-input", ref: (t5) => {
-      l && $U(this, DU, t5);
-    } }, W$1("div", { key: "daa7de4f81403d2df35913dc8d01177025c4ce32", class: t4(a._, a.text) }, s))), W$1("div", { key: "5af65ef72b1a6260b4d2567908c2b31e895885c5", class: t4(i._) }, c && BU(this, AU, "m", RU).call(this)))));
+    const { bemClass: t4, setLfStyle: n2 } = $U(this, _U, "f").theme, { fileInfo: i, fileUpload: a, upload: o2 } = $U(this, TU, "f"), { lfLabel: s, lfRipple: l, lfStyle: u, selectedFiles: f2 } = this, c = !!(f2 == null ? void 0 : f2.length);
+    return W$1(L, { key: "59096e8d963ddaa95a53b9f81a8e1b2c18812b1d" }, u && W$1("style", { key: "f16562dabc49a04b16eb32f0c328a05282b2b6bc", id: $U(this, FU, "f") }, n2(this)), W$1("div", { key: "f268f0acff6060681db805b03fb2dafc93e8b6f9", id: $U(this, DU, "f") }, W$1("div", { key: "d5eb5fca819a20148c7f0158b87f592a0853205b", class: t4(o2._, null, { "has-description": Boolean(f2 == null ? void 0 : f2.length) }) }, W$1("div", { key: "28702eae33c33e894cca034d75b39eba318744c0", class: t4(a._), onPointerDown: (t5) => this.onLfEvent(t5, "pointerdown") }, W$1("input", { key: "631ebea107c9c1966665675fbd2086ea064a1702", class: t4(a._, a.input), "data-cy": $U(this, NU, "f").input, id: "upload-input", multiple: true, onChange: () => $U(this, CU, "m", RU).call(this), ref: (t5) => {
+      t5 && VU(this, WU, t5);
+    }, type: "file" }), W$1("label", { key: "508fc08fad48071d148fede1fcfee1b5860c8fdc", class: t4(a._, a.label), "data-cy": $U(this, NU, "f").rippleSurface, "data-lf": $U(this, IU, "f").rippleSurface, htmlFor: "upload-input", ref: (t5) => {
+      l && VU(this, EU, t5);
+    } }, W$1("div", { key: "daa7de4f81403d2df35913dc8d01177025c4ce32", class: t4(a._, a.text) }, s))), W$1("div", { key: "5af65ef72b1a6260b4d2567908c2b31e895885c5", class: t4(i._) }, c && $U(this, CU, "m", PU).call(this)))));
   }
   disconnectedCallback() {
     var _a2;
-    (_a2 = BU(this, CU, "f")) == null ? void 0 : _a2.theme.unregister(this);
+    (_a2 = $U(this, _U, "f")) == null ? void 0 : _a2.theme.unregister(this);
   }
   get rootElement() {
     return G(this);
   }
 };
-CU = /* @__PURE__ */ new WeakMap(), _U = /* @__PURE__ */ new WeakMap(), TU = /* @__PURE__ */ new WeakMap(), NU = /* @__PURE__ */ new WeakMap(), IU = /* @__PURE__ */ new WeakMap(), LU = /* @__PURE__ */ new WeakMap(), FU = /* @__PURE__ */ new WeakMap(), DU = /* @__PURE__ */ new WeakMap(), EU = /* @__PURE__ */ new WeakMap(), PU = /* @__PURE__ */ new WeakMap(), AU = /* @__PURE__ */ new WeakSet(), WU = function(t4) {
+_U = /* @__PURE__ */ new WeakMap(), TU = /* @__PURE__ */ new WeakMap(), NU = /* @__PURE__ */ new WeakMap(), IU = /* @__PURE__ */ new WeakMap(), LU = /* @__PURE__ */ new WeakMap(), FU = /* @__PURE__ */ new WeakMap(), DU = /* @__PURE__ */ new WeakMap(), EU = /* @__PURE__ */ new WeakMap(), WU = /* @__PURE__ */ new WeakMap(), BU = /* @__PURE__ */ new WeakMap(), CU = /* @__PURE__ */ new WeakSet(), OU = function(t4) {
   const n2 = ["Bytes", "KB", "MB", "GB", "TB"];
   let i = 0;
   if (t4 > 1e4) t4 /= 1024, t4 /= 1024, i = 2;
   else for (; t4 >= 1024 && i < n2.length - 1; ) t4 /= 1024, i++;
   return `${t4.toFixed(2)} ${n2[i]}`;
-}, OU = function() {
-  this.selectedFiles = BU(this, EU, "f").files ? Array.from(BU(this, EU, "f").files) : [], this.onLfEvent(new CustomEvent("upload"), "upload");
 }, RU = function() {
-  const { bemClass: t4 } = BU(this, CU, "f").theme, { fileInfo: n2 } = BU(this, _U, "f");
-  return this.selectedFiles.map(((i, e) => W$1("div", { class: t4(n2._, n2.item), "data-lf": BU(this, NU, "f").fadeIn, key: e }, BU(this, PU, "f").call(this, i), W$1("span", { class: t4(n2._, n2.name), title: i.name }, i.name), W$1("span", { class: t4(n2._, n2.size), title: i.size.toString() }, BU(this, AU, "m", WU).call(this, i.size)), BU(this, PU, "f").call(this, i, true))));
-}, VU.style = "::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=ripple]{animation-duration:var(--lf-ui-duration-ripple, 675ms);animation-fill-mode:forwards;animation-name:lf-ripple;animation-timing-function:var(--lf-ui-timing-ripple, ease-out);background:var(--lf-ui-ripple-background, var(--lf-color-primary));border-radius:var(--lf-ui-radius-ripple, 50%);height:var(--lf-ui-ripple-height, 100%);left:var(--lf-ui-ripple-x, 50%);opacity:var(--lf-ui-opacity-ripple, 0.5);pointer-events:none;position:absolute;top:var(--lf-ui-ripple-y, 50%);transform:scale(0);width:var(--lf-ui-ripple-width, 100%)}@keyframes lf-ripple{from{transform:scale(0)}to{opacity:0;transform:scale(4)}}[data-lf=ripple-surface]{cursor:pointer;height:100%;left:0;overflow:hidden;position:absolute;top:0;width:100%}[data-lf=fade-in]{display:block;animation:lf-fade-in-block 0.25s ease-out forwards}@keyframes lf-fade-in-block{from{visibility:hidden;opacity:0}to{visibility:visible;opacity:1}}:host{display:block;font-family:var(--lf-upload-font-family, var(--lf-font-family-primary));font-size:var(--lf-upload-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-upload-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-upload-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-upload-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-upload-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-upload-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-upload-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-upload-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{width:100%;height:100%}.upload{border:0;border-style:solid;border-color:rgba(var(--lf-upload-border-color, var(--lf-color-border)), 1);border-width:1px;border-radius:var(--lf-upload-border-radius, var(--lf-ui-border-radius));background-color:rgba(var(--lf-upload-color-surface, var(--lf-color-surface)), 0.175);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);width:100%;height:100%;box-sizing:border-box;display:grid;grid-template-rows:1fr;min-height:var(--lf-upload-min-height, 8em);padding:var(--lf-upload-padding, 1em)}.upload--has-description{grid-gap:var(--lf-upload-grid-gap, 1.25em);grid-template-rows:var(--lf-upload-button-height, 2.75em) var(--lf-upload-info-height, minmax(auto, 25vh))}.upload--has-description .file-info{padding:var(--lf-upload-item-padding, 0.75em)}.file-upload{border:0;border-style:solid;border-color:rgba(var(--lf-upload-border-color, var(--lf-color-border)), 1);border-width:1px;border-radius:var(--lf-upload-border-radius, var(--lf-ui-border-radius));background-color:rgba(var(--lf-upload-color-surface, var(--lf-color-surface)), 0.175);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:all 300ms cubic-bezier(0.4, 0, 0.2, 1);display:flex}.file-upload__input{display:none}.file-upload__label{width:100%;height:100%;font-size:0.775em;letter-spacing:0.0892857143em;line-height:inherit;text-transform:uppercase;align-content:center;cursor:pointer;display:block;margin:auto;text-align:center}.file-upload:hover{box-shadow:0 5px 5px -3px rgba(var(--lf-color-on-bg), 0.25), 0 8px 10px 1px rgba(var(--lf-color-on-bg), 0.18), 0 3px 14px 2px rgba(var(--lf-color-on-bg), 0.15)}.file-info{transition:all 300ms cubic-bezier(0.4, 0, 0.2, 1);max-height:25dvh;overflow:auto}.file-info__icon{background-color:rgba(var(--lf-upload-color-on-bg, var(--lf-color-on-bg)), 1);height:1.5em;width:1.5em;overflow:hidden}.file-info__icon--has-actions{transition:all 300ms cubic-bezier(0.4, 0, 0.2, 1);cursor:pointer}.file-info__icon--has-actions:hover{opacity:0.75}.file-info__item{align-items:center;display:flex;justify-content:center}.file-info__name,.file-info__size{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:0.875em;font-weight:400;line-height:1.25em;letter-spacing:0.2em;flex-grow:1}.file-info__name{padding:0 0.5em;width:100%}.file-info__size{min-width:max-content;padding:0 0.5em}";
+  this.selectedFiles = $U(this, WU, "f").files ? Array.from($U(this, WU, "f").files) : [], this.onLfEvent(new CustomEvent("upload"), "upload");
+}, PU = function() {
+  const { bemClass: t4 } = $U(this, _U, "f").theme, { fileInfo: n2 } = $U(this, TU, "f");
+  return this.selectedFiles.map(((i, e) => W$1("div", { class: t4(n2._, n2.item), "data-lf": $U(this, IU, "f").fadeIn, key: e }, $U(this, BU, "f").call(this, i), W$1("span", { class: t4(n2._, n2.name), title: i.name }, i.name), W$1("span", { class: t4(n2._, n2.size), title: i.size.toString() }, $U(this, CU, "m", OU).call(this, i.size)), $U(this, BU, "f").call(this, i, true))));
+}, jU.style = "::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=ripple]{animation-duration:var(--lf-ui-duration-ripple, 675ms);animation-fill-mode:forwards;animation-name:lf-ripple;animation-timing-function:var(--lf-ui-timing-ripple, ease-out);background:var(--lf-ui-ripple-background, var(--lf-color-primary));border-radius:var(--lf-ui-radius-ripple, 50%);height:var(--lf-ui-ripple-height, 100%);left:var(--lf-ui-ripple-x, 50%);opacity:var(--lf-ui-opacity-ripple, 0.5);pointer-events:none;position:absolute;top:var(--lf-ui-ripple-y, 50%);transform:scale(0);width:var(--lf-ui-ripple-width, 100%)}@keyframes lf-ripple{from{transform:scale(0)}to{opacity:0;transform:scale(4)}}[data-lf=ripple-surface]{cursor:pointer;height:100%;left:0;overflow:hidden;position:absolute;top:0;width:100%}[data-lf=fade-in]{display:block;animation:lf-fade-in-block 0.25s ease-out forwards}@keyframes lf-fade-in-block{from{visibility:hidden;opacity:0}to{visibility:visible;opacity:1}}:host{display:block;font-family:var(--lf-upload-font-family, var(--lf-font-family-primary));font-size:var(--lf-upload-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-upload-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-upload-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-upload-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-upload-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-upload-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-upload-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-upload-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{width:100%;height:100%}.upload{border:0;border-style:solid;border-color:rgba(var(--lf-upload-border-color, var(--lf-color-border)), 1);border-width:1px;border-radius:var(--lf-upload-border-radius, var(--lf-ui-border-radius));background-color:rgba(var(--lf-upload-color-surface, var(--lf-color-surface)), 0.175);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);width:100%;height:100%;box-sizing:border-box;display:grid;grid-template-rows:1fr;min-height:var(--lf-upload-min-height, 8em);padding:var(--lf-upload-padding, 1em)}.upload--has-description{grid-gap:var(--lf-upload-grid-gap, 1.25em);grid-template-rows:var(--lf-upload-button-height, 2.75em) var(--lf-upload-info-height, minmax(auto, 25vh))}.upload--has-description .file-info{padding:var(--lf-upload-item-padding, 0.75em)}.file-upload{border:0;border-style:solid;border-color:rgba(var(--lf-upload-border-color, var(--lf-color-border)), 1);border-width:1px;border-radius:var(--lf-upload-border-radius, var(--lf-ui-border-radius));background-color:rgba(var(--lf-upload-color-surface, var(--lf-color-surface)), 0.175);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:all 300ms cubic-bezier(0.4, 0, 0.2, 1);display:flex}.file-upload__input{display:none}.file-upload__label{width:100%;height:100%;font-size:0.775em;letter-spacing:0.0892857143em;line-height:inherit;text-transform:uppercase;align-content:center;cursor:pointer;display:block;margin:auto;text-align:center}.file-upload:hover{box-shadow:0 5px 5px -3px rgba(var(--lf-color-on-bg), 0.25), 0 8px 10px 1px rgba(var(--lf-color-on-bg), 0.18), 0 3px 14px 2px rgba(var(--lf-color-on-bg), 0.15)}.file-info{transition:all 300ms cubic-bezier(0.4, 0, 0.2, 1);max-height:25dvh;overflow:auto}.file-info__icon{background-color:rgba(var(--lf-upload-color-on-bg, var(--lf-color-on-bg)), 1);height:1.5em;width:1.5em;overflow:hidden}.file-info__icon--has-actions{transition:all 300ms cubic-bezier(0.4, 0, 0.2, 1);cursor:pointer}.file-info__icon--has-actions:hover{opacity:0.75}.file-info__item{align-items:center;display:flex;justify-content:center}.file-info__name,.file-info__size{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:0.875em;font-weight:400;line-height:1.25em;letter-spacing:0.2em;flex-grow:1}.file-info__name{padding:0 0.5em;width:100%}.file-info__size{min-width:max-content;padding:0 0.5em}";
 export {
   Ct as lf_badge,
   Qt as lf_button,
@@ -30281,13 +30314,13 @@ export {
   ZH as lf_chat,
   xY as lf_chip,
   YY as lf_code,
-  cX as lf_image,
-  NX as lf_list,
-  ZX as lf_photoframe,
-  lZ as lf_progressbar,
-  xZ as lf_spinner,
-  ZZ as lf_textfield,
-  lU as lf_toggle,
-  SU as lf_typewriter,
-  VU as lf_upload
+  hX as lf_image,
+  IX as lf_list,
+  UX as lf_photoframe,
+  uZ as lf_progressbar,
+  kZ as lf_spinner,
+  UZ as lf_textfield,
+  uU as lf_toggle,
+  AU as lf_typewriter,
+  jU as lf_upload
 };
