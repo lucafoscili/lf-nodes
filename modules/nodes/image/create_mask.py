@@ -10,11 +10,15 @@ from ...utils.helpers.api import get_resource_url
 from ...utils.helpers.comfy import get_tokenizer_from_clip, resolve_filepath
 from ...utils.helpers.conversion import pil_to_tensor, tensor_to_pil
 from ...utils.helpers.logic import get_otsu_threshold, normalize_input_image, normalize_list_to_value, normalize_output_image
+from ...utils.helpers.temp_cache import TempFileCache
 from ...utils.helpers.torch import encode_text_for_sdclip, get_text_encoder_from_clip
 from ...utils.helpers.ui import create_compare_node
 
 # region LF_CreateMask
 class LF_CreateMask:
+    def __init__(self):
+        self._temp_cache = TempFileCache()
+
     @classmethod
     def INPUT_TYPES(cls):
         return {
@@ -136,9 +140,13 @@ class LF_CreateMask:
             up = up.permute(0,2,3,1) # [1,H,W,1]
             masks.append(up)
 
-            orig_f, so, no = resolve_filepath("mask_orig", image=img_tensor)
+            orig_f, so, no = resolve_filepath("mask_orig",
+                                              image=img_tensor,
+                                              temp_cache=self._temp_cache)
             tensor_to_pil(img_tensor).save(orig_f, "PNG")
-            mo, sm, nm = resolve_filepath("mask_bin", image=up)
+            mo, sm, nm = resolve_filepath("mask_bin",
+                                          image=up,
+                                          temp_cache=self._temp_cache)
             tensor_to_pil(up).save(mo, "PNG")
             nodes.append(create_compare_node(get_resource_url(so,no,"temp"),
                                                get_resource_url(sm,nm,"temp"),
@@ -158,6 +166,7 @@ class LF_CreateMask:
 NODE_CLASS_MAPPINGS = {
     "LF_CreateMask": LF_CreateMask,
 }
+
 NODE_DISPLAY_NAME_MAPPINGS = {
     "LF_CreateMask": "Create Mask",
 }

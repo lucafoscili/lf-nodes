@@ -21,10 +21,14 @@ from ...utils.helpers.torch import TilePlan, make_blend_mask, plan_input_tiles
 from ...utils.helpers.api import get_resource_url
 from ...utils.helpers.comfy import resolve_filepath
 from ...utils.helpers.conversion import tensor_to_pil
+from ...utils.helpers.temp_cache import TempFileCache
 from ...utils.helpers.ui import ComparePreviewStream
 
 # region LF_TiledSuperRes
 class LF_TiledSuperRes:
+    def __init__(self):
+        self._temp_cache = TempFileCache()
+
     @classmethod
     def INPUT_TYPES(cls):
         return {
@@ -449,6 +453,7 @@ class LF_TiledSuperRes:
         output_file_clean, subfolder_clean, filename_clean = resolve_filepath(
             filename_prefix="tiled_super_res",
             image=image,
+            temp_cache=self._temp_cache
         )
         clean_pil.save(output_file_clean, format="PNG")
         clean_url = get_resource_url(subfolder_clean, filename_clean, "temp")
@@ -456,6 +461,7 @@ class LF_TiledSuperRes:
         output_file_debug, subfolder_debug, filename_debug = resolve_filepath(
             filename_prefix="tiled_super_res_debug",
             image=image,
+            temp_cache=self._temp_cache
         )
         debug_image.save(output_file_debug, format="PNG")
         debug_url = get_resource_url(subfolder_debug, filename_debug, "temp")

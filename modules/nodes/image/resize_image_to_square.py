@@ -99,6 +99,7 @@ class LF_ResizeImageToSquare:
 NODE_CLASS_MAPPINGS = {
     "LF_ResizeImageToSquare": LF_ResizeImageToSquare,
 }
+
 NODE_DISPLAY_NAME_MAPPINGS = {
     "LF_ResizeImageToSquare": "Resize image to square",
 }

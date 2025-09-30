@@ -8,10 +8,14 @@ from ...utils.helpers.api import get_resource_url
 from ...utils.helpers.comfy import resolve_filepath
 from ...utils.helpers.conversion import numpy_to_tensor, numpy_to_svg, tensor_to_numpy, tensor_to_pil
 from ...utils.helpers.logic import normalize_input_image, normalize_list_to_value, normalize_output_image
+from ...utils.helpers.temp_cache import TempFileCache
 from ...utils.helpers.ui import create_compare_node
 
 # region LF_ImageToSVG
 class LF_ImageToSVG:
+    def __init__(self):
+        self._temp_cache = TempFileCache()
+
     @classmethod
     def INPUT_TYPES(cls):
         return {
@@ -92,6 +96,7 @@ class LF_ImageToSVG:
             output_file_s, subfolder_s, filename_s = resolve_filepath(
                 filename_prefix="svg_s",
                 image=img,
+                temp_cache=self._temp_cache
             )
             pil_image_original.save(output_file_s, format="PNG")
             filename_s = get_resource_url(subfolder_s, filename_s, "temp")
@@ -100,6 +105,7 @@ class LF_ImageToSVG:
             output_file_t, subfolder_t, filename_t = resolve_filepath(
                 filename_prefix="svg_t",
                 image=preview,
+                temp_cache=self._temp_cache
             )
             pil_image_blended.save(output_file_t, format="PNG")
             filename_t = get_resource_url(subfolder_t, filename_t, "temp")
@@ -123,6 +129,7 @@ class LF_ImageToSVG:
 NODE_CLASS_MAPPINGS = {
     "LF_ImageToSVG": LF_ImageToSVG,
 }
+
 NODE_DISPLAY_NAME_MAPPINGS = {
     "LF_ImageToSVG": "Image to SVG",
 }

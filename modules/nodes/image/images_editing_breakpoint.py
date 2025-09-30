@@ -14,10 +14,14 @@ from ...utils.helpers.comfy import get_comfy_dir, resolve_filepath
 from ...utils.helpers.conversion import pil_to_tensor, tensor_to_pil
 from ...utils.helpers.editing import clear_editing_context, register_editing_context
 from ...utils.helpers.logic import normalize_conditioning, normalize_input_image, normalize_list_to_value, normalize_output_image
+from ...utils.helpers.temp_cache import TempFileCache
 from ...utils.helpers.ui import create_masonry_node
 
 # region LF_ImagesEditingBreakpoint
 class LF_ImagesEditingBreakpoint:
+    def __init__(self):
+        self._temp_cache = TempFileCache()
+
     @classmethod
     def INPUT_TYPES(cls):
         return {
@@ -131,7 +135,8 @@ class LF_ImagesEditingBreakpoint:
             pil_image = tensor_to_pil(img)
             output_file, subfolder, filename = resolve_filepath(
                 filename_prefix="edit_breakpoint", 
-                image=img
+                image=img,
+                temp_cache=self._temp_cache
             )
             pil_image.save(output_file, format="PNG")
             url = get_resource_url(subfolder, filename, "temp")
@@ -211,6 +216,7 @@ class LF_ImagesEditingBreakpoint:
 NODE_CLASS_MAPPINGS = {
     "LF_ImagesEditingBreakpoint": LF_ImagesEditingBreakpoint,
 }
+
 NODE_DISPLAY_NAME_MAPPINGS = {
     "LF_ImagesEditingBreakpoint": "Images editing breakpoint",
 }

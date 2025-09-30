@@ -139,6 +139,7 @@ class LF_BlobToImage:
 NODE_CLASS_MAPPINGS = {
     "LF_BlobToImage": LF_BlobToImage,
 }
+
 NODE_DISPLAY_NAME_MAPPINGS = {
     "LF_BlobToImage": "Blob to Image",
 }

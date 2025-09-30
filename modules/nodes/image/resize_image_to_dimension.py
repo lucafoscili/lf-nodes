@@ -112,6 +112,7 @@ class LF_ResizeImageToDimension:
 NODE_CLASS_MAPPINGS = {
     "LF_ResizeImageToDimension": LF_ResizeImageToDimension,
 }
+
 NODE_DISPLAY_NAME_MAPPINGS = {
     "LF_ResizeImageToDimension": "Resize image to dimension",
 }

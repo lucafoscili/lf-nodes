@@ -127,6 +127,7 @@ class LF_MultipleImageResizeForWeb:
 NODE_CLASS_MAPPINGS = {
     "LF_MultipleImageResizeForWeb": LF_MultipleImageResizeForWeb,
 }
+
 NODE_DISPLAY_NAME_MAPPINGS = {
     "LF_MultipleImageResizeForWeb": "Multiple image resize for Web",
 }

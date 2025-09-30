@@ -100,6 +100,7 @@ class LF_ResizeImageByEdge:
 NODE_CLASS_MAPPINGS = {
     "LF_ResizeImageByEdge": LF_ResizeImageByEdge,
 }
+
 NODE_DISPLAY_NAME_MAPPINGS = {
     "LF_ResizeImageByEdge": "Resize image by edge",
 }

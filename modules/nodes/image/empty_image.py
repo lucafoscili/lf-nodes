@@ -9,10 +9,14 @@ from ...utils.helpers.api import get_resource_url
 from ...utils.helpers.comfy import resolve_filepath
 from ...utils.helpers.conversion import hex_to_tuple, pil_to_tensor
 from ...utils.helpers.logic import normalize_input_list, normalize_output_image
+from ...utils.helpers.temp_cache import TempFileCache
 from ...utils.helpers.ui import create_masonry_node
 
 # region LF_EmptyImage
 class LF_EmptyImage:
+    def __init__(self):
+        self._temp_cache = TempFileCache()
+
     @classmethod
     def INPUT_TYPES(cls):
         return {
@@ -61,7 +65,6 @@ class LF_EmptyImage:
         nodes: list[dict] = []
         dataset: dict = { "nodes": nodes }
 
-
         if len(width) != len(height) or len(width) != len(color):
             raise ValueError("Width, height, and color lists must have the same length.")
         
@@ -78,6 +81,7 @@ class LF_EmptyImage:
             output_file, subfolder, filename = resolve_filepath(
                     filename_prefix="emptyimage",
                     image=empty_image_tensor,
+                    temp_cache=self._temp_cache
             )
             pil_image.save(output_file, format="PNG")
             url = get_resource_url(subfolder, filename, "temp")
@@ -100,6 +104,7 @@ class LF_EmptyImage:
 NODE_CLASS_MAPPINGS = {
     "LF_EmptyImage": LF_EmptyImage,
 }
+
 NODE_DISPLAY_NAME_MAPPINGS = {
     "LF_EmptyImage": "Empty image",
 }

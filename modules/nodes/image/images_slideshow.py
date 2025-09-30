@@ -8,10 +8,14 @@ from ...utils.helpers.api import get_resource_url
 from ...utils.helpers.comfy import resolve_filepath
 from ...utils.helpers.conversion import tensor_to_pil
 from ...utils.helpers.logic import normalize_input_image, normalize_output_image
+from ...utils.helpers.temp_cache import TempFileCache
 from ...utils.helpers.ui import create_masonry_node
 
 # region LF_ImagesSlideshow
 class LF_ImagesSlideshow:
+    def __init__(self):
+        self._temp_cache = TempFileCache()
+
     @classmethod
     def INPUT_TYPES(self):
         return {
@@ -49,6 +53,7 @@ class LF_ImagesSlideshow:
             output_file, subfolder, filename = resolve_filepath(
                     filename_prefix="slide",
                     image=img,
+                    temp_cache=self._temp_cache
             )
             pil_image.save(output_file, format="PNG")
             url = get_resource_url(subfolder, filename, "temp")
