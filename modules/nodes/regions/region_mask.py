@@ -9,10 +9,14 @@ from ...utils.helpers.comfy import resolve_filepath
 from ...utils.helpers.conversion import tensor_to_pil
 from ...utils.helpers.detection import build_region_mask
 from ...utils.helpers.logic import normalize_input_image, normalize_list_to_value, normalize_output_image
+from ...utils.helpers.temp_cache import TempFileCache
 from ...utils.helpers.ui import create_compare_node
 
 # region LF_RegionMask
 class LF_RegionMask:
+    def __init__(self):
+        self._temp_cache = TempFileCache()
+        
     @classmethod
     def INPUT_TYPES(cls):
         return {
@@ -123,11 +127,11 @@ class LF_RegionMask:
             )
             masks_4d.append(mask_4d)
 
-            orig_path, orig_sub, orig_name = resolve_filepath("region_source", image=image_tensor)
+            orig_path, orig_sub, orig_name = resolve_filepath("region_source", image=image_tensor, temp_cache=self._temp_cache)
             tensor_to_pil(image_tensor).save(orig_path, "PNG")
 
             mask_rgb = mask_4d.repeat(1, 1, 1, 3)
-            mask_path, mask_sub, mask_name = resolve_filepath("region_mask", image=mask_rgb)
+            mask_path, mask_sub, mask_name = resolve_filepath("region_mask", image=mask_rgb, temp_cache=self._temp_cache)
             tensor_to_pil(mask_rgb).save(mask_path, "PNG")
 
             url_a = get_resource_url(orig_sub, orig_name, "temp")

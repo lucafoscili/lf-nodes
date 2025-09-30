@@ -9,9 +9,13 @@ from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
 from ...utils.helpers.detection import append_compare_entry, build_overlay, detect_regions, load_label_map, load_yolo_session, parse_class_filter, parse_class_labels, select_region
 from ...utils.helpers.logic import normalize_input_image, normalize_json_input, normalize_list_to_value
+from ...utils.helpers.temp_cache import TempFileCache
 
 # region LF_DetectRegions
 class LF_DetectRegions:
+    def __init__(self):
+        self._temp_cache = TempFileCache()
+
     @classmethod
     def INPUT_TYPES(cls):
         return {
@@ -167,7 +171,7 @@ class LF_DetectRegions:
                 selected_copy["is_selected"] = True
 
             overlay = build_overlay(image, enriched)
-            append_compare_entry(image, overlay, nodes, index)
+            append_compare_entry(image, overlay, nodes, index, temp_cache=self._temp_cache)
 
             input_shape_info = runtime_info.get("input_shape") if runtime_info else None
             input_size_value = None
