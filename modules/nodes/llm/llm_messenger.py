@@ -1,7 +1,7 @@
 import json
 
 from . import CATEGORY
-from ...utils.constants import FUNCTION
+from ...utils.constants import FUNCTION, Input
 from ...utils.helpers.logic import normalize_json_input
 
 # region LF_LLMMessenger
@@ -10,16 +10,16 @@ class LF_LLMMessenger:
     def INPUT_TYPES(self):
         return {
             "required": {
-                "ui_widget": ("LF_MESSENGER", {
+                "ui_widget": (Input.LF_MESSENGER, {
                     "default": ""
                 }),
             },
             "optional": {
-                "dataset": ("JSON", {
+                "dataset": (Input.JSON, {
                     "default": "",
                     "tooltip": "The dataset JSON containing characters to talk to."
                 }),
-                "config": ("JSON", {
+                "config": (Input.JSON, {
                     "default": "",
                     "tooltip": "Set of parameters that initializes the interface."
                 }),

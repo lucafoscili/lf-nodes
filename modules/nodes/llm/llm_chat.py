@@ -1,5 +1,5 @@
 from . import CATEGORY
-from ...utils.constants import FUNCTION
+from ...utils.constants import FUNCTION, Input
 from ...utils.helpers.logic import normalize_json_input
 
 # region LF_LLMChat
@@ -8,7 +8,7 @@ class LF_LLMChat:
     def INPUT_TYPES(self):
         return {
             "required": {
-                "ui_widget": ("LF_CHAT", {
+                "ui_widget": (Input.LF_CODE, {
                     "default": ""
                 }),
             },

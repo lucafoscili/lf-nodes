@@ -5,7 +5,7 @@ import torch
 from server import PromptServer
 
 from . import CATEGORY
-from ...utils.constants import BASE64_PNG_PREFIX, EVENT_PREFIX, FUNCTION, HEADERS, INT_MAX, get_image_classifier_system
+from ...utils.constants import BASE64_PNG_PREFIX, EVENT_PREFIX, FUNCTION, HEADERS, Input, INT_MAX, get_image_classifier_system
 from ...utils.helpers.api import handle_response
 from ...utils.helpers.conversion import tensor_to_base64
 from ...utils.helpers.logic import normalize_input_image, normalize_list_to_value
@@ -16,11 +16,11 @@ class LF_ImageClassifier:
     def INPUT_TYPES(self):
         return {
             "required": {
-                "image" : ("IMAGE", {
+                "image" : (Input.IMAGE, {
                     "default": None, 
                     "tooltip": "The image that the LLM will try to classify."
                 }),
-                "temperature" : ("FLOAT", {
+                "temperature" : (Input.FLOAT, {
                     "max": 1.901, 
                     "min": 0.1, 
                     "step": 0.1, 
@@ -28,36 +28,36 @@ class LF_ImageClassifier:
                     "default": 0.7, 
                     "tooltip": "Controls the randomness of the generated text. Higher values make the output more random."
                 }),
-                "max_tokens" : ("INT", {
+                "max_tokens" : (Input.INTEGER, {
                     "max": 8000, 
                     "min": 20, 
                     "step": 10, 
                     "default": 500, 
                     "tooltip": "Limits the length of the generated text. Adjusting this value can help control the verbosity of the output."
                 }),
-                "prompt": ("STRING", {
+                "prompt": (Input.STRING, {
                     "multiline": True, 
                     "default": "", 
                     "tooltip": "The initial input or question that guides the generation process. Can be a single line or multiple lines of text."
                 }),
-                "seed": ("INT", {
+                "seed": (Input.INTEGER, {
                     "default": 42, 
                     "min": 0, 
                     "max": INT_MAX, 
                     "tooltip": "Determines the starting point for generating random numbers. Setting a specific seed ensures reproducibility of results."
                 }),
-                "url": ("STRING", {
+                "url": (Input.STRING, {
                     "default": "http://localhost:5001/v1/chat/completions", 
                     "tooltip": "URL of the local endpoint where the request is sent."
                 }),
             },
             "optional": {
-                "character_bio": ("STRING", {
+                "character_bio": (Input.STRING, {
                     "multiline": True, 
                     "default": "", 
                     "tooltip": "Biographical details of the character to be impersonated. Helps in shaping the tone and content of the generated text."
                 }),
-                "ui_widget" : ("LF_CODE", {
+                "ui_widget" : (Input.LF_CODE, {
                     "default": ""
                 })
             },
