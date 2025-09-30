@@ -43,6 +43,8 @@ class LF_ViewImages:
     RETURN_TYPES = ("IMAGE", "IMAGE")
 
     def on_exec(self, **kwargs: dict):
+        self._temp_cache.cleanup()
+        
         image: list[torch.Tensor] = normalize_input_image(kwargs.get("image"))
 
         nodes: list[dict] = []

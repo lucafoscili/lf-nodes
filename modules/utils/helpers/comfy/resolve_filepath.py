@@ -104,7 +104,7 @@ def resolve_filepath(
 
     output_file = os.path.join(output_folder, filename)
     if temp_cache:
-        temp_cache.add(output_file)
+        temp_cache.register(output_file)
 
     os.makedirs(output_folder, exist_ok=True)
 

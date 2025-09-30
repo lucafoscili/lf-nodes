@@ -78,6 +78,8 @@ class LF_CreateMask:
     OUTPUT_IS_LIST = (False, True)
 
     def on_exec(self, **kwargs):
+        self._temp_cache.cleanup()
+        
         images = normalize_input_image(kwargs["image"])
         proc = normalize_list_to_value(kwargs["processor"])
         seg_model = normalize_list_to_value(kwargs["model"])

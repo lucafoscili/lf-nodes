@@ -58,6 +58,8 @@ class LF_EmptyImage:
     RETURN_TYPES = ("IMAGE",)
 
     def on_exec(self, **kwargs: dict):
+        self._temp_cache.cleanup()
+        
         width: list[int] = normalize_input_list(kwargs.get("width"))
         height: list[int] = normalize_input_list(kwargs.get("height"))
         color: list[int] = normalize_input_list(kwargs.get("color"))

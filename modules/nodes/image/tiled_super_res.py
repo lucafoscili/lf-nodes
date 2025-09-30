@@ -72,6 +72,8 @@ class LF_TiledSuperRes:
     RETURN_NAMES = ("image", "image_list", "stats")
 
     def on_exec(self, **kwargs: dict):
+        self._temp_cache.cleanup()
+        
         images = normalize_input_image(kwargs.get("image"))
         upscale_model = normalize_list_to_value(kwargs.get("upscale_model"))
         target_long_edge = int(normalize_list_to_value(kwargs.get("target_long_edge")))

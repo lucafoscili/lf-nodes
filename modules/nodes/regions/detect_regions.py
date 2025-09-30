@@ -90,6 +90,8 @@ class LF_DetectRegions:
     RETURN_TYPES = ("REGION_META", "REGION_META")
 
     def on_exec(self, **kwargs):
+        self._temp_cache.cleanup()
+        
         node_id = kwargs.get("node_id")
         images = normalize_input_image(kwargs["image"])
 

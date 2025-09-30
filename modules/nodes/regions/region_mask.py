@@ -80,6 +80,8 @@ class LF_RegionMask:
     RETURN_NAMES = ("mask", "mask_list", "region")
 
     def on_exec(self, **kwargs):
+        self._temp_cache.cleanup()
+        
         node_id = kwargs.get("node_id")
         images = normalize_input_image(kwargs["image"])
         image_tensor = images[0]

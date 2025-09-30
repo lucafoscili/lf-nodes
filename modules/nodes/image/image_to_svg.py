@@ -73,6 +73,8 @@ class LF_ImageToSVG:
     OUTPUT_IS_LIST = (False, True, False, True, False, True)
 
     def on_exec(self, **kwargs: dict):
+        self._temp_cache.cleanup()
+        
         image: list[torch.Tensor] = normalize_input_image(kwargs.get("image"))
         threshold: float = normalize_list_to_value(kwargs.get("threshold"))
         num_colors: int = normalize_list_to_value(kwargs.get("num_colors"))

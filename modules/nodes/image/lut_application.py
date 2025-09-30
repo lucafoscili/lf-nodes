@@ -50,6 +50,8 @@ class LF_LUTApplication:
     RETURN_TYPES = ("IMAGE", "IMAGE")
 
     def on_exec(self, **kwargs: dict):
+        self._temp_cache.cleanup()
+        
         image: list[torch.Tensor] = normalize_input_image(kwargs.get("image", []))
         strength: float = normalize_list_to_value(kwargs.get("strength"))
         lut_dataset: dict = normalize_json_input(kwargs.get("lut_dataset", {}))

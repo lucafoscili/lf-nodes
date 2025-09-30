@@ -46,6 +46,8 @@ class LF_CompareImages:
     RETURN_TYPES = ("IMAGE", "IMAGE", "IMAGE", "JSON")
 
     def on_exec(self, **kwargs: dict):
+        self._temp_cache.cleanup()
+        
         has_before : bool = "image_before" in kwargs and kwargs["image_before"] is not None
 
         image_list_a : list[torch.Tensor] = normalize_input_image(kwargs["image_after"])

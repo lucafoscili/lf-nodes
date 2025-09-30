@@ -85,6 +85,8 @@ class LF_ImagesEditingBreakpoint:
     RETURN_TYPES = ("IMAGE", "IMAGE", "IMAGE", "IMAGE")
 
     def on_exec(self, **kwargs):
+        self._temp_cache.cleanup()
+        
         def wait_for_editing_completion(json_file_path):
             while True:
                 with open(json_file_path, 'r', encoding='utf-8') as json_file:

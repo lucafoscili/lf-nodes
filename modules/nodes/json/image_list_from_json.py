@@ -57,6 +57,8 @@ class LF_ImageListFromJSON:
     RETURN_TYPES = ("IMAGE", "IMAGE", "STRING", "INT", "INT", "INT")
 
     def on_exec(self, **kwargs: dict):
+        self._temp_cache.cleanup()
+        
         json_input: dict = normalize_json_input(kwargs.get("json_input"))
         add_noise: bool = normalize_list_to_value(kwargs.get("add_noise"))
         width: int = normalize_list_to_value(kwargs.get("width"))
