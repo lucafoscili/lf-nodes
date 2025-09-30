@@ -16,10 +16,10 @@
     "build": "yarn clean && yarn build:scss && yarn build:ts && yarn build:lfw && yarn build:vite"
   },
   "devDependencies": {
-    "@lf-widgets/assets": "^0.4.1",
-    "@lf-widgets/core": "^0.4.1",
-    "@lf-widgets/foundations": "^0.4.1",
-    "@lf-widgets/framework": "^0.4.1",
+    "@lf-widgets/assets": "^0.5.0",
+    "@lf-widgets/core": "^0.5.0",
+    "@lf-widgets/foundations": "^0.5.0",
+    "@lf-widgets/framework": "^0.5.0",
     "@types/node": "^22",
     "fs-extra": "^11",
     "rollup-plugin-visualizer": "^5",
