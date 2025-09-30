@@ -82,12 +82,30 @@ export const areJSONEqual = (a: unknown, b: unknown) => {
   return JSON.stringify(a) === JSON.stringify(b);
 };
 export const isJSONLikeString = (value: unknown): value is string => {
-  return (
-    typeof value === 'string' &&
-    ((value.trim().startsWith('{') && value.trim().endsWith('}')) ||
-      (value.trim().startsWith('[') && value.trim().endsWith(']'))) &&
-    value.indexOf('"') !== -1
-  );
+  if (typeof value !== 'string') return false;
+  const trimmed = value.trim();
+  if (
+    !(
+      (trimmed.startsWith('{') && trimmed.endsWith('}')) ||
+      (trimmed.startsWith('[') && trimmed.endsWith(']'))
+    )
+  ) {
+    return false;
+  }
+
+  if (trimmed.startsWith('{')) {
+    if (trimmed === '{}') return true;
+    if (/".*"\s*:\s*.+/.test(trimmed)) return true;
+    return false;
+  }
+
+  if (trimmed.indexOf('"') !== -1) return true;
+
+  const simpleArrayScalar =
+    /^\[\s*(?:-?\d+(\.\d+)?|true|false|null)(\s*,\s*(?:-?\d+(\.\d+)?|true|false|null))*\s*\]$/i;
+  if (trimmed.startsWith('[') && simpleArrayScalar.test(trimmed)) return true;
+
+  return false;
 };
 export const isValidJSON = (value: unknown) => {
   try {
