@@ -1,4 +1,4 @@
-import torch
+﻿import torch
 
 from server import PromptServer
 
@@ -6,10 +6,14 @@ from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
 from ...utils.filters import clarity_effect
 from ...utils.helpers.logic import normalize_input_image, normalize_list_to_value, normalize_output_image
+from ...utils.helpers.temp_cache import TempFileCache
 from ...utils.helpers.torch import process_and_save_image
 
 # region LF_Clarity
 class LF_Clarity:
+    def __init__(self):
+        self._temp_cache = TempFileCache()
+
     @classmethod
     def INPUT_TYPES(self):
         return {
@@ -18,24 +22,24 @@ class LF_Clarity:
                     "tooltip": "Input image tensor or a list of image tensors."
                 }),
                 "clarity_strength": (Input.FLOAT, {
-                    "default": 0.5, 
-                    "min": 0.0, 
-                    "max": 5.0, 
-                    "step": 0.1, 
+                    "default": 0.5,
+                    "min": 0.0,
+                    "max": 5.0,
+                    "step": 0.1,
                     "tooltip": "Controls the amount of contrast enhancement in midtones."
                 }),
                 "sharpen_amount": (Input.FLOAT, {
-                    "default": 1.0, 
-                    "min": 0.0, 
-                    "max": 5.0, 
-                    "step": 0.1, 
+                    "default": 1.0,
+                    "min": 0.0,
+                    "max": 5.0,
+                    "step": 0.1,
                     "tooltip": "Controls how much sharpening is applied to the image."
                 }),
                 "blur_kernel_size": (Input.INTEGER, {
-                    "default": 7, 
-                    "min": 1, 
-                    "max": 15, 
-                    "step": 2, 
+                    "default": 7,
+                    "min": 1,
+                    "max": 15,
+                    "step": 2,
                     "tooltip": "Controls the size of the Gaussian blur kernel. Higher values mean more smoothing."
                 }),
             },
@@ -63,6 +67,8 @@ class LF_Clarity:
     RETURN_TYPES = ("IMAGE", "IMAGE")
 
     def on_exec(self, **kwargs: dict):
+        self._temp_cache.cleanup()
+
         image: list[torch.Tensor] = normalize_input_image(kwargs.get("image"))
         clarity_strength: float = normalize_list_to_value(kwargs.get("clarity_strength"))
         sharpen_amount: float = normalize_list_to_value(kwargs.get("sharpen_amount"))
@@ -93,6 +99,7 @@ class LF_Clarity:
             },
             filename_prefix="clarity",
             nodes=nodes,
+            temp_cache=self._temp_cache,
         )
 
         batch_list, image_list = normalize_output_image(processed_images)

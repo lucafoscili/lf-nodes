@@ -6,10 +6,14 @@ from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, SAMPLERS, SCHEDULERS
 from ...utils.filters.inpaint import apply_inpaint_filter_tensor
 from ...utils.helpers.logic import normalize_input_image, normalize_list_to_value, normalize_masks_for_images, normalize_output_image
+from ...utils.helpers.temp_cache import TempFileCache
 from ...utils.helpers.torch import process_and_save_image
 
 # region LF_Inpaint
 class LF_Inpaint:
+    def __init__(self):
+        self._temp_cache = TempFileCache()
+        
     @classmethod
     def INPUT_TYPES(cls):
         return {
@@ -97,6 +101,8 @@ class LF_Inpaint:
     OUTPUT_IS_LIST = (False, True)
 
     def on_exec(self, **kwargs: dict):
+        self._temp_cache.cleanup()
+
         node_id = kwargs.get("node_id")
         images = normalize_input_image(kwargs.get("image"))
         model = kwargs.get("model")
@@ -159,6 +165,7 @@ class LF_Inpaint:
             filter_args={},
             filename_prefix="inpaint",
             nodes=nodes,
+            temp_cache=self._temp_cache,
         )
 
         PromptServer.instance.send_sync(

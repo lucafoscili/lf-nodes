@@ -1,9 +1,10 @@
-import torch
+﻿import torch
 
 from ..api import get_resource_url
 from ..comfy import resolve_filepath
 from ..conversion import tensor_to_pil
 from ..ui import create_compare_node
+from ..temp_cache import TempFileCache
 
 # region process_and_save_image
 def process_and_save_image(
@@ -12,6 +13,7 @@ def process_and_save_image(
     filter_args: dict,
     filename_prefix: str,
     nodes: list[dict],
+    temp_cache: TempFileCache,
 ):
     """
     Processes a list of images using a specified filter function, saves both the original and processed images to disk,
@@ -22,6 +24,7 @@ def process_and_save_image(
         filter_args (dict): Dictionary of arguments to pass to the filter function.
         filename_prefix (str): Prefix to use for saved image filenames.
         nodes (list[dict]): List to which comparison nodes will be appended.
+        temp_cache (TempFileCache): Temporary file cache to manage saved files.
     Returns:
         list[torch.Tensor]: List of processed image tensors.
     """
@@ -34,6 +37,9 @@ def process_and_save_image(
             image=img,
         )
         pil_image.save(output_file_s, format="PNG")
+
+        temp_cache.register(output_file_s)
+
         filename_s = get_resource_url(subfolder_s, filename_s, "temp")
 
         processed = filter_function(img, **filter_args)
@@ -44,6 +50,9 @@ def process_and_save_image(
             image=processed,
         )
         pil_image.save(output_file_t, format="PNG")
+
+        temp_cache.register(output_file_t)
+
         filename_t = get_resource_url(subfolder_t, filename_t, "temp")
 
         nodes.append(create_compare_node(filename_s, filename_t, index))

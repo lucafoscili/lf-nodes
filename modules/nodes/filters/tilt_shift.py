@@ -6,10 +6,14 @@ from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
 from ...utils.filters import tilt_shift_effect
 from ...utils.helpers.logic import normalize_input_image, normalize_list_to_value, normalize_output_image
+from ...utils.helpers.temp_cache import TempFileCache
 from ...utils.helpers.torch import process_and_save_image
 
 # region LF_TiltShift
 class LF_TiltShift:
+    def __init__(self):
+        self._temp_cache = TempFileCache()
+        
     @classmethod
     def INPUT_TYPES(cls):
         return {
@@ -60,6 +64,8 @@ class LF_TiltShift:
     RETURN_TYPES = ("IMAGE", "IMAGE")
 
     def on_exec(self, **kwargs: dict):
+        self._temp_cache.cleanup()
+
         image: list[torch.Tensor] = normalize_input_image(kwargs.get("image"))
         focus_position: float = normalize_list_to_value(kwargs.get("focus_position"))
         focus_size: float = normalize_list_to_value(kwargs.get("focus_size"))
@@ -82,6 +88,7 @@ class LF_TiltShift:
             },
             filename_prefix="tiltshift",
             nodes=nodes,
+            temp_cache=self._temp_cache,
         )
 
         batch_list, image_list = normalize_output_image(processed_images)

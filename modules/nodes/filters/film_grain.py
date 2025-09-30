@@ -6,10 +6,14 @@ from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
 from ...utils.filters import film_grain_effect
 from ...utils.helpers.logic import normalize_input_image, normalize_list_to_value, normalize_output_image
+from ...utils.helpers.temp_cache import TempFileCache
 from ...utils.helpers.torch import process_and_save_image
 
 # region LF_FilmGrain
 class LF_FilmGrain:
+    def __init__(self):
+        self._temp_cache = TempFileCache()
+        
     @classmethod
     def INPUT_TYPES(self):
         return {
@@ -57,6 +61,8 @@ class LF_FilmGrain:
     RETURN_TYPES = ("IMAGE", "IMAGE")
 
     def on_exec(self, **kwargs: dict):
+        self._temp_cache.cleanup()
+
         image: list[torch.Tensor] = normalize_input_image(kwargs.get("image"))
         intensity: float = normalize_list_to_value(kwargs.get("intensity"))
         size: float = normalize_list_to_value(kwargs.get("size"))
@@ -77,6 +83,7 @@ class LF_FilmGrain:
             },
             filename_prefix="film_grain",
             nodes=nodes,
+            temp_cache=self._temp_cache,
         )
 
         batch_list, image_list = normalize_output_image(processed_images)

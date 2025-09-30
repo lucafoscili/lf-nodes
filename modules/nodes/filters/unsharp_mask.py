@@ -10,10 +10,14 @@ from ...utils.helpers.logic import (
     normalize_list_to_value,
     normalize_output_image,
 )
+from ...utils.helpers.temp_cache import TempFileCache
 from ...utils.helpers.torch import process_and_save_image
 
 # region LF_UnsharpMask
 class LF_UnsharpMask:
+    def __init__(self):
+        self._temp_cache = TempFileCache()
+        
     @classmethod
     def INPUT_TYPES(cls):
         return {
@@ -80,6 +84,8 @@ class LF_UnsharpMask:
     RETURN_TYPES = ("IMAGE", "IMAGE")
 
     def on_exec(self, **kwargs: dict):
+        self._temp_cache.cleanup()
+
         images: list[torch.Tensor] = normalize_input_image(kwargs.get("image"))
         amount: float = normalize_list_to_value(kwargs.get("amount"))
         radius: int = normalize_list_to_value(kwargs.get("radius"))
@@ -100,6 +106,7 @@ class LF_UnsharpMask:
             },
             filename_prefix="unsharp_mask",
             nodes=nodes,
+            temp_cache=self._temp_cache,
         )
 
         batch_list, image_list = normalize_output_image(processed_images)

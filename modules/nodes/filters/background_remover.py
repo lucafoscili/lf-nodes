@@ -16,10 +16,14 @@ from ...utils.helpers.logic import (
     normalize_list_to_value,
     normalize_output_image,
 )
+from ...utils.helpers.temp_cache import TempFileCache
 from ...utils.helpers.ui import create_compare_node
 
 # region LF_BackgroundRemover
 class LF_BackgroundRemover:
+    def __init__(self):
+        self._temp_cache = TempFileCache()
+
     @classmethod
     def INPUT_TYPES(cls):
         models = [
@@ -77,6 +81,8 @@ class LF_BackgroundRemover:
     OUTPUT_IS_LIST = (False, True, True, False, False)
 
     def on_exec(self, **kwargs: dict):
+        self._temp_cache.cleanup()
+
         node_id = kwargs.get("node_id")
         images = normalize_input_image(kwargs.get("image"))
         if not images:
