@@ -1,7 +1,6 @@
 # region create_compare_node
 from typing import Optional
 
-
 def create_compare_node(
     before: str,
     after: str,
@@ -29,6 +28,7 @@ def create_compare_node(
         "id": f"image_{index+1}",
         "value": f"Comparison {index+1}"
     }
+    
     if title:
         node["value"] = title
 
