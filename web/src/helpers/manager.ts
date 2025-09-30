@@ -333,11 +333,11 @@ const messengerCb = (node: NodeType) => {
 //#endregion
 
 //#region setCanvasSizeCb
-const setCanvasSizeCb = async (imageviewer: HTMLLfImageviewerElement) => {
+const setCanvasSizeCb = (imageviewer: HTMLLfImageviewerElement) => {
   requestAnimationFrame(async () => {
     try {
       const { canvas } = (await imageviewer.getComponents()).details;
-      canvas.resizeCanvas();
+      canvas?.resizeCanvas();
     } catch (error) {}
   });
 };
