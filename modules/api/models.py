@@ -5,6 +5,7 @@ from server import PromptServer
 from ..utils.constants import API_ROUTE_PREFIX
 from ..utils.helpers.logic import clear_registered_caches
 
+# region free
 @PromptServer.instance.routes.post(f"{API_ROUTE_PREFIX}/free")
 async def lf_nodes_free(request: web.Request):
     """
@@ -18,3 +19,4 @@ async def lf_nodes_free(request: web.Request):
         return web.json_response({"status": "success", "cleared": True})
     except Exception as e:
         return web.Response(status=500, text=f"Error: {e}")
+# endregion

@@ -5,7 +5,7 @@ from server import PromptServer
 from ..utils.constants import API_ROUTE_PREFIX
 from ..utils.helpers.logic import clear_registered_caches
 
-
+# region refresh-node-defs
 @PromptServer.instance.routes.post(f"{API_ROUTE_PREFIX}/refresh-node-defs")
 async def lf_nodes_refresh_node_defs(request: web.Request):
     """
@@ -17,3 +17,4 @@ async def lf_nodes_refresh_node_defs(request: web.Request):
         return web.json_response({"status": "success", "cleared": True})
     except Exception as exc:  # pragma: no cover - logged to UI instead
         return web.Response(status=500, text=f"Error: {exc}")
+# endregion
