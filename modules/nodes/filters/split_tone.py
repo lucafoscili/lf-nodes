@@ -60,11 +60,11 @@ class LF_SplitTone:
             }
         }
 
-    RETURN_TYPES = ("IMAGE", "IMAGE")
-    RETURN_NAMES = ("image", "image_list")
-    FUNCTION = FUNCTION
     CATEGORY = CATEGORY
+    FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, True)
+    RETURN_NAMES = ("image", "image_list")
+    RETURN_TYPES = ("IMAGE", "IMAGE")
 
     def on_exec(self, **kwargs: dict):
         self._temp_cache.cleanup()

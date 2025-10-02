@@ -8,7 +8,7 @@ class LF_LLMChat:
     def INPUT_TYPES(self):
         return {
             "required": {
-                "ui_widget": (Input.LF_CODE, {
+                "ui_widget": (Input.LF_CHAT, {
                     "default": ""
                 }),
             },

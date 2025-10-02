@@ -96,9 +96,9 @@ class LF_Inpaint:
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
-    RETURN_TYPES = ("IMAGE", "IMAGE")
-    RETURN_NAMES = ("image", "image_list")
     OUTPUT_IS_LIST = (False, True)
+    RETURN_NAMES = ("image", "image_list")
+    RETURN_TYPES = ("IMAGE", "IMAGE")
 
     def on_exec(self, **kwargs: dict):
         self._temp_cache.cleanup()
