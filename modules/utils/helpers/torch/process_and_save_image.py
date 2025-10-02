@@ -35,11 +35,9 @@ def process_and_save_image(
         output_file_s, subfolder_s, filename_s = resolve_filepath(
             filename_prefix=f"{filename_prefix}_s",
             image=img,
+            temp_cache=temp_cache
         )
         pil_image.save(output_file_s, format="PNG")
-
-        temp_cache.register(output_file_s)
-
         filename_s = get_resource_url(subfolder_s, filename_s, "temp")
 
         processed = filter_function(img, **filter_args)
@@ -48,11 +46,9 @@ def process_and_save_image(
         output_file_t, subfolder_t, filename_t = resolve_filepath(
             filename_prefix=f"{filename_prefix}_t",
             image=processed,
+            temp_cache=temp_cache
         )
         pil_image.save(output_file_t, format="PNG")
-
-        temp_cache.register(output_file_t)
-
         filename_t = get_resource_url(subfolder_t, filename_t, "temp")
 
         nodes.append(create_compare_node(filename_s, filename_t, index))
