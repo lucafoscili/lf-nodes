@@ -181,24 +181,19 @@ class LF_TiledSuperRes:
                 filename_prefix="tiled_super_res",
             )
 
-            for tile_idx, spec in enumerate(plan.tiles):
+            for _, spec in enumerate(plan.tiles):
                 patch = image[:, spec.y0:spec.y1, spec.x0:spec.x1, :]
                 patch_chw = patch.permute(0, 3, 1, 2).to(device)
-                self._log_tensor_stats(f"tile_input[{index}:{tile_idx}]", patch_chw)
 
                 with torch.autocast(device.type, enabled=device.type == "cuda"):
                     upscaled = upscale_model(patch_chw)
-                self._log_tensor_stats(f"tile_raw[{index}:{tile_idx}]", upscaled)
 
                 if torch.isnan(upscaled).any() or torch.isinf(upscaled).any():
-                    print(f"[TiledSuperRes] tile[{index}:{tile_idx}] NaNs detected, retrying in float32")
                     patch_fp32 = patch_chw.to(dtype=torch.float32)
                     with torch.autocast(device.type, enabled=False):
                         upscaled_retry = upscale_model(patch_fp32)
-                    self._log_tensor_stats(f"tile_retry[{index}:{tile_idx}]", upscaled_retry)
 
                     if torch.isnan(upscaled_retry).any() or torch.isinf(upscaled_retry).any():
-                        print(f"[TiledSuperRes] tile[{index}:{tile_idx}] still invalid after retry; falling back to input tile")
                         upscaled = patch_fp32
                     else:
                         upscaled = upscaled_retry
@@ -217,13 +212,11 @@ class LF_TiledSuperRes:
                         upscaled = torch.sigmoid(upscaled)
 
                 upscaled = upscaled.clamp(0.0, 1.0)
-                self._log_tensor_stats(f"tile_clamped[{index}:{tile_idx}]", upscaled)
                 tile = upscaled.permute(0, 2, 3, 1).detach().to(device=device, dtype=canvas.dtype)
 
                 self._accumulate_tile(canvas, weights, tile, spec, scale)
 
                 preview_tensor = self._compose_from_accumulator(canvas, weights)
-                self._log_tensor_stats(f"preview_accum[{index}:{tile_idx}]", preview_tensor)
                 preview_url = preview_stream.save_preview(
                     preview_tensor,
                     target_size=(target_h, target_w),
@@ -233,7 +226,6 @@ class LF_TiledSuperRes:
 
             blended = self._compose_from_accumulator(canvas, weights)
             blended = torch.nan_to_num(blended, nan=0.0, posinf=1.0, neginf=0.0)
-            self._log_tensor_stats(f"blended[{index}]", blended)
 
             if blended.shape[1] != target_h or blended.shape[2] != target_w:
                 blended = F.interpolate(
@@ -272,7 +264,6 @@ class LF_TiledSuperRes:
 
             blended = blended.clamp(0.0, 1.0)
             blended_cpu = blended.to(image.dtype).cpu()
-            self._log_tensor_stats(f"blended_cpu[{index}]", blended_cpu)
             upscaled_images.append(blended_cpu)
 
             preview_stream.save_preview(
@@ -395,33 +386,6 @@ class LF_TiledSuperRes:
 
         canvas[..., y0:y1, x0:x1, :] += tile * mask
         weights[..., y0:y1, x0:x1, :] += mask
-
-    @staticmethod
-    def _log_tensor_stats(label: str, tensor: torch.Tensor) -> None:
-        try:
-            with torch.no_grad():
-                data = tensor.detach()
-                shape = tuple(data.shape)
-                if data.numel() == 0:
-                    print(f"[TiledSuperRes] {label}: empty tensor")
-                    return
-
-                if not torch.is_floating_point(data):
-                    data = data.to(torch.float32)
-
-                stats_tensor = data.to(torch.float32)
-                min_val = float(stats_tensor.min().item())
-                max_val = float(stats_tensor.max().item())
-                mean_val = float(stats_tensor.mean().item())
-                has_nan = bool(torch.isnan(stats_tensor).any().item())
-                has_inf = bool(torch.isinf(stats_tensor).any().item())
-
-                print(
-                    f"[TiledSuperRes] {label}: shape={shape} min={min_val:.6f} "
-                    f"max={max_val:.6f} mean={mean_val:.6f} nan={has_nan} inf={has_inf}"
-                )
-        except Exception as exc:
-            print(f"[TiledSuperRes] {label}: failed to compute stats -> {exc}")
 
     def _save_compare_images(
         self,
