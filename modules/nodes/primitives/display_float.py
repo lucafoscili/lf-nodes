@@ -30,7 +30,7 @@ class LF_DisplayFloat:
     FUNCTION = FUNCTION
     OUTPUT_NODE = True
     RETURN_NAMES = ("float",)
-    RETURN_TYPES = ("FLOAT",)
+    RETURN_TYPES = (Input.FLOAT,)
 
     def on_exec(self, **kwargs: dict):
         display_float: float = normalize_input_list(kwargs.get("float"))

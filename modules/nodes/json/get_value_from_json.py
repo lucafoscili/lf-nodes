@@ -35,7 +35,7 @@ class LF_GetValueFromJSON:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     RETURN_NAMES = ("json", "string", "number", "int", "float", "boolean")
-    RETURN_TYPES = ("JSON", "STRING", "NUMBER", "INT", "FLOAT", "BOOLEAN")
+    RETURN_TYPES = (Input.JSON, Input.STRING, Input.NUMBER, Input.INTEGER, Input.FLOAT, Input.BOOLEAN)
 
     def on_exec(self, **kwargs: dict):
         key: str = normalize_list_to_value(kwargs.get("key"))

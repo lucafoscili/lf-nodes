@@ -52,6 +52,7 @@ export enum CustomWidgetName {
   upload = 'LF_UPLOAD',
 }
 export enum NodeName {
+  backgroundRemover = 'LF_BackgroundRemover',
   blend = 'LF_Blend',
   blobToImage = 'LF_BlobToImage',
   bloom = 'LF_Bloom',
@@ -153,6 +154,7 @@ export enum NodeName {
   switchInteger = 'LF_SwitchInteger',
   switchJson = 'LF_SwitchJSON',
   switchString = 'LF_SwitchString',
+  tiledSuperRes = 'LF_TiledSuperRes',
   tiltShift = 'LF_TiltShift',
   updateUsageStatistics = 'LF_UpdateUsageStatistics',
   upscaleModelSelector = 'LF_UpscaleModelSelector',

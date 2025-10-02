@@ -78,16 +78,65 @@ async def process_image(request):
         except UnknownFilterError as exc:
             return web.Response(status=400, text=str(exc))
 
+        save_type: str = str(settings.get("resource_type") or settings.get("output_type") or "temp")
+        base_output_path = get_comfy_dir(save_type)
+
+        custom_subfolder_raw = settings.get("subfolder")
+        if isinstance(custom_subfolder_raw, str) and custom_subfolder_raw.strip():
+            normalized_subfolder = os.path.normpath(custom_subfolder_raw.strip()).strip("\\/")
+            if normalized_subfolder.startswith(".."):
+                return web.Response(status=400, text="Invalid subfolder path.")
+        else:
+            normalized_subfolder = ""
+
+        filename_prefix_override = settings.get("filename_prefix")
+        if isinstance(filename_prefix_override, str) and filename_prefix_override.strip():
+            filename_prefix_value = filename_prefix_override.strip()
+        else:
+            filename_prefix_value = filter_type
+
+        custom_filename_raw = settings.get("filename")
+        if isinstance(custom_filename_raw, str) and custom_filename_raw.strip():
+            filename_value = custom_filename_raw.strip()
+            _, ext = os.path.splitext(filename_value)
+            if not ext:
+                filename_value = f"{filename_value}.png"
+                ext = ".png"
+
+            output_folder = os.path.join(base_output_path, normalized_subfolder) if normalized_subfolder else base_output_path
+            os.makedirs(output_folder, exist_ok=True)
+            output_file = os.path.join(output_folder, filename_value)
+            final_subfolder = normalized_subfolder.replace("\\", "/") if normalized_subfolder else ""
+        else:
+            prefixed_name = os.path.join(normalized_subfolder, filename_prefix_value) if normalized_subfolder else filename_prefix_value
+            output_file, final_subfolder_raw, filename_value = resolve_filepath(
+                filename_prefix=prefixed_name,
+                base_output_path=base_output_path,
+                image=img_tensor,
+            )
+            final_subfolder = (final_subfolder_raw or "").replace("\\", "/")
+            _, ext = os.path.splitext(filename_value)
+
         pil_image = tensor_to_pil(processed_tensor)
-        output_file, subfolder, filename = resolve_filepath(
-            filename_prefix=filter_type,
-            image=img_tensor,
-        )
-        pil_image.save(output_file, format="PNG")
+
+        ext_lower = ext.lower()
+        format_map = {
+            ".png": "PNG",
+            ".jpg": "JPEG",
+            ".jpeg": "JPEG",
+            ".webp": "WEBP",
+            ".bmp": "BMP",
+            ".gif": "GIF",
+        }
+        save_format = format_map.get(ext_lower, "PNG")
+        pil_image.save(output_file, format=save_format)
 
         payload = {
             "status": "success",
-            "data": get_resource_url(subfolder, filename, "temp"),
+            "data": get_resource_url(final_subfolder, filename_value, save_type),
+            "type": save_type,
+            "subfolder": final_subfolder,
+            "filename": filename_value,
         }
         if extra_payload:
             payload.update(extra_payload)

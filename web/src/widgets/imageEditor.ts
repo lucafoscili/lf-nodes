@@ -1,5 +1,6 @@
 import { SETTINGS, TREE_DATA } from '../fixtures/imageEditor';
 import { EV_HANDLERS, getStatusColumn, setGridStatus, updateCb } from '../helpers/imageEditor';
+import { setBrush } from '../helpers/imageEditor/settings';
 import { LfEventName } from '../types/events/events';
 import { LogSeverity } from '../types/manager/manager';
 import {
@@ -16,6 +17,7 @@ import { CustomWidgetName, NodeName, TagName } from '../types/widgets/widgets';
 import { createDOMWidget, getLfManager, normalizeValue } from '../utils/common';
 
 const STATE = new WeakMap<HTMLDivElement, ImageEditorState>();
+export const IMAGE_EDITOR_INSTANCES = new Set<ImageEditorState>();
 
 export const imageEditorFactory: ImageEditorFactory = {
   //#region Options
@@ -39,6 +41,12 @@ export const imageEditorFactory: ImageEditorFactory = {
           }
 
           imageviewer.lfDataset = parsedValue || {};
+          imageviewer.getComponents().then(({ details }) => {
+            const { canvas } = details;
+            if (canvas) {
+              setBrush(canvas, STATE.get(wrapper).lastBrushSettings);
+            }
+          });
         };
 
         normalizeValue(value, callback, CustomWidgetName.imageEditor);
@@ -133,18 +141,21 @@ export const imageEditorFactory: ImageEditorFactory = {
 
     const options = imageEditorFactory.options(wrapper);
 
-    STATE.set(wrapper, {
+    const state: ImageEditorState = {
       elements: { actionButtons, controls: {}, grid, imageviewer, settings },
       filter: null,
       filterType: null,
       lastBrushSettings: JSON.parse(JSON.stringify(SETTINGS.brush.settings)),
       node,
       update: {
-        preview: () => updateCb(STATE.get(wrapper)),
-        snapshot: () => updateCb(STATE.get(wrapper), true),
+        preview: () => updateCb(STATE.get(wrapper)).then(() => {}),
+        snapshot: () => updateCb(STATE.get(wrapper), true).then(() => {}),
       },
       wrapper,
-    });
+    };
+
+    STATE.set(wrapper, state);
+    IMAGE_EDITOR_INSTANCES.add(state);
 
     return { widget: createDOMWidget(CustomWidgetName.imageEditor, wrapper, node, options) };
   },

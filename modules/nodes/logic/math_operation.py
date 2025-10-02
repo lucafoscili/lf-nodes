@@ -44,7 +44,7 @@ class LF_MathOperation:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     RETURN_NAMES = ("int_result", "float_result")
-    RETURN_TYPES = ("INT", "FLOAT")
+    RETURN_TYPES = (Input.INTEGER, Input.FLOAT)
 
     def on_exec(self, **kwargs: dict):
         def safe_eval(expr: str, variables: dict):

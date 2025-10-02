@@ -23,6 +23,7 @@ import {
 
 //#region Node-Widget map
 export const NODE_WIDGET_MAP: NodeWidgetMap = {
+  LF_BackgroundRemover: [CustomWidgetName.compare],
   LF_Blend: [CustomWidgetName.compare],
   LF_BlobToImage: [CustomWidgetName.code],
   LF_Bloom: [CustomWidgetName.compare],
@@ -124,6 +125,7 @@ export const NODE_WIDGET_MAP: NodeWidgetMap = {
   LF_SwitchInteger: [CustomWidgetName.progressbar],
   LF_SwitchJSON: [CustomWidgetName.progressbar],
   LF_SwitchString: [CustomWidgetName.progressbar],
+  LF_TiledSuperRes: [CustomWidgetName.compare],
   LF_TiltShift: [CustomWidgetName.compare],
   LF_UpdateUsageStatistics: [CustomWidgetName.code],
   LF_UpscaleModelSelector: [CustomWidgetName.history],
@@ -331,11 +333,11 @@ const messengerCb = (node: NodeType) => {
 //#endregion
 
 //#region setCanvasSizeCb
-const setCanvasSizeCb = async (imageviewer: HTMLLfImageviewerElement) => {
+const setCanvasSizeCb = (imageviewer: HTMLLfImageviewerElement) => {
   requestAnimationFrame(async () => {
     try {
       const { canvas } = (await imageviewer.getComponents()).details;
-      canvas.resizeCanvas();
+      canvas?.resizeCanvas();
     } catch (error) {}
   });
 };

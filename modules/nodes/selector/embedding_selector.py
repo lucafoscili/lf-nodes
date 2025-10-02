@@ -64,7 +64,7 @@ class LF_EmbeddingSelector:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     RETURN_NAMES = ("combo", "prompt", "string", "path", "image")
-    RETURN_TYPES = (initial_list, "STRING", "STRING", "STRING", "IMAGE")
+    RETURN_TYPES = (initial_list, Input.STRING, Input.STRING, Input.STRING, Input.IMAGE)
 
     def on_exec(self, **kwargs: dict):
         embedding: str = normalize_list_to_value(kwargs.get("embedding"))

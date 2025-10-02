@@ -65,7 +65,7 @@ class LF_CheckpointSelector:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     RETURN_NAMES = ("combo", "string", "path", "image", "model", "clip", "vae")
-    RETURN_TYPES = (initial_list, "STRING", "STRING", "IMAGE", "MODEL", "CLIP", "VAE")
+    RETURN_TYPES = (initial_list, Input.STRING, Input.STRING, Input.IMAGE, Input.MODEL, Input.CLIP, Input.VAE)
 
     def on_exec(self, **kwargs: dict):
         checkpoint: str = normalize_list_to_value(kwargs.get("checkpoint"))

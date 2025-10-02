@@ -34,7 +34,7 @@ class LF_SequentialSeedsGenerator:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     RETURN_NAMES = ("seed",) * 20
-    RETURN_TYPES = ("INT",) * 20
+    RETURN_TYPES = (Input.INTEGER,) * 20
 
     def on_exec(self, **kwargs: dict):
         seed: int = normalize_list_to_value(kwargs.get("seed"))

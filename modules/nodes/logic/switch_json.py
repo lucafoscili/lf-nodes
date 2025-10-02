@@ -37,7 +37,7 @@ class LF_SwitchJSON:
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, True)
     RETURN_NAMES = ("json", "json_list")
-    RETURN_TYPES = ("JSON", "JSON")
+    RETURN_TYPES = (Input.JSON, Input.JSON)
 
     def check_lazy_status(self, **kwargs: dict):
         switch_value = kwargs["boolean"]

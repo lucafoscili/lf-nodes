@@ -1,37 +1,49 @@
 import torch
 
 # region normalize_input_image
-def normalize_input_image(image: list[torch.Tensor] | torch.Tensor):
-    """
-    Converts an input tensor or list of image tensors into a standardized list of individual image tensors.
-    
-    This function ensures that:
-    
-    - A 4D tensor (batch of images) is converted into a list of tensors, each with shape [1, H, W, C].
-    - A 3D tensor (single image) is converted into a list with one element, maintaining a batch dimension as [1, H, W, C].
-    - A list with only one element is handled as a single batch or image, as applicable.
-    - A list of images is returned as-is, with each element assumed to be an individual image tensor.
-    
+def normalize_input_image(image):
+    """Convert arbitrary image containers into a flat list of `[1, H, W, C]` tensors.
+
+    Accepts tensors, lists, or tuples (including arbitrarily nested combinations) and
+    returns a list where every element keeps an explicit batch dimension of size 1.
+
     Parameters:
-    image (torch.Tensor or list): Input image(s) as a tensor (3D/4D) or a list.
-    
+        image: torch.Tensor | list | tuple | None
+
     Returns:
-    list: A list of individual image tensors, each with a batch dimension.
-    
+        list[torch.Tensor]: list of tensors with shape `[1, H, W, C]`.
+
     Raises:
-    ValueError: If the input tensor is neither 3D nor 4D.
+        ValueError: if tensors do not have 3 or 4 dimensions.
+        TypeError: if unsupported types are encountered.
     """
-    if isinstance(image, torch.Tensor):
-        if len(image.shape) == 4:
-            return [img.unsqueeze(0) for img in image]
-        elif len(image.shape) == 3:
-            return [image.unsqueeze(0)]
+
+    if image is None:
+        return []
+
+    flat_images: list[torch.Tensor] = []
+
+    def _collect(item):
+        if item is None:
+            return
+        if isinstance(item, torch.Tensor):
+            if item.dim() == 4:
+                if item.shape[0] == 1:
+                    flat_images.append(item)
+                else:
+                    for single in item:
+                        flat_images.append(single.unsqueeze(0))
+            elif item.dim() == 3:
+                flat_images.append(item.unsqueeze(0))
+            else:
+                raise ValueError(f"Input tensor must be 3D or 4D. Got shape {tuple(item.shape)}")
+        elif isinstance(item, (list, tuple)):
+            for sub_item in item:
+                _collect(sub_item)
         else:
-            raise ValueError("Input tensor must be either 3D or 4D.")
-    elif isinstance(image, list):
-        if len(image) == 1 and isinstance(image[0], torch.Tensor):
-            return normalize_input_image(image[0])
-        return image
-    else:
-        raise TypeError("Input must be a torch.Tensor or list.")
+            raise TypeError(f"Unsupported image container type: {type(item)}")
+
+    _collect(image)
+
+    return flat_images
 # endregion

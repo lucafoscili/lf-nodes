@@ -40,7 +40,7 @@ class LF_Something2Number:
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, False, True, True)
     RETURN_NAMES = ("float_sum", "int_sum", "float_list", "int_list")
-    RETURN_TYPES = ("FLOAT", "INT", "FLOAT", "INT")
+    RETURN_TYPES = (Input.FLOAT, Input.INTEGER, Input.FLOAT, Input.INTEGER)
 
     def on_exec(self, **kwargs: dict):
         def extract_numbers(data):

@@ -1,3 +1,4 @@
+from .background_remover import *
 from .blend import *
 from .bloom import *
 from .brightness import *
@@ -13,5 +14,6 @@ from .saturation import *
 from .sepia import *
 from .split_tone import *
 from .tilt_shift import *
+from .unsharp_mask import *
 from .vibrance import *
 from .vignette import *

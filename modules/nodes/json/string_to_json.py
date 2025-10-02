@@ -31,7 +31,7 @@ class LF_StringToJSON:
     INPUT_IS_LIST = (True,)
     OUTPUT_NODE = True
     RETURN_NAMES = ("json",)
-    RETURN_TYPES = ("JSON",)
+    RETURN_TYPES = (Input.JSON,)
 
     def on_exec(self, **kwargs: dict):
         json_data: dict = normalize_json_input(kwargs.get("string"))

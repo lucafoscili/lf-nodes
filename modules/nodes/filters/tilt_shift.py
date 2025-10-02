@@ -3,13 +3,17 @@ import torch
 from server import PromptServer
 
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
+from ...utils.constants import BLUR_FEATHER_COMBO, EVENT_PREFIX, FUNCTION, Input, TILT_SHIFT_ORIENTATION_COMBO
 from ...utils.filters import tilt_shift_effect
 from ...utils.helpers.logic import normalize_input_image, normalize_list_to_value, normalize_output_image
+from ...utils.helpers.temp_cache import TempFileCache
 from ...utils.helpers.torch import process_and_save_image
 
 # region LF_TiltShift
 class LF_TiltShift:
+    def __init__(self):
+        self._temp_cache = TempFileCache()
+        
     @classmethod
     def INPUT_TYPES(cls):
         return {
@@ -38,17 +42,19 @@ class LF_TiltShift:
                     "step": 2,
                     "tooltip": "Gaussian radius for out-of-focus areas."
                 }),
-                "feather": (["linear", "smooth", "expo"], {
+                "feather": (BLUR_FEATHER_COMBO, {
                     "default": "smooth",
                     "tooltip": "Fall-off curve of blur vs distance."
                 }),
             },
             "optional": {
-                "orientation": (["horizontal", "vertical", "circular"], {
+                "orientation": (TILT_SHIFT_ORIENTATION_COMBO, {
                     "default": "horizontal",
                     "tooltip": "Direction of the focus band."
                 }),
-                "ui_widget": (Input.LF_COMPARE, {"default": {}})
+                "ui_widget": (Input.LF_COMPARE, {
+                    "default": {}
+                })
             },
             "hidden": {"node_id": "UNIQUE_ID"}
         }
@@ -57,9 +63,11 @@ class LF_TiltShift:
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, True)
     RETURN_NAMES = ("image", "image_list")
-    RETURN_TYPES = ("IMAGE", "IMAGE")
+    RETURN_TYPES = (Input.IMAGE, Input.IMAGE)
 
     def on_exec(self, **kwargs: dict):
+        self._temp_cache.cleanup()
+
         image: list[torch.Tensor] = normalize_input_image(kwargs.get("image"))
         focus_position: float = normalize_list_to_value(kwargs.get("focus_position"))
         focus_size: float = normalize_list_to_value(kwargs.get("focus_size"))
@@ -82,6 +90,7 @@ class LF_TiltShift:
             },
             filename_prefix="tiltshift",
             nodes=nodes,
+            temp_cache=self._temp_cache,
         )
 
         batch_list, image_list = normalize_output_image(processed_images)
@@ -98,6 +107,7 @@ class LF_TiltShift:
 NODE_CLASS_MAPPINGS = {
     "LF_TiltShift": LF_TiltShift,
 }
+
 NODE_DISPLAY_NAME_MAPPINGS = {
     "LF_TiltShift": "Tilt Shift",
 }

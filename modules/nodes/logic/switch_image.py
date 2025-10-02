@@ -39,7 +39,7 @@ class LF_SwitchImage:
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, True)
     RETURN_NAMES = ("image", "image_list")
-    RETURN_TYPES = ("IMAGE", "IMAGE")
+    RETURN_TYPES = (Input.IMAGE, Input.IMAGE)
 
     def check_lazy_status(self, **kwargs: dict):
         switch_value = kwargs["boolean"]

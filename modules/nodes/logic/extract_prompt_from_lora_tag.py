@@ -35,7 +35,7 @@ class LF_ExtractPromptFromLoraTag:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     RETURN_NAMES = ("keywords", "keywords_count", "keywords_list", "keywords_count_list")
-    RETURN_TYPES = ("STRING", "INT", "STRING", "INT")
+    RETURN_TYPES = (Input.STRING, Input.INTEGER, Input.STRING, Input.INTEGER)
 
     def on_exec(self, **kwargs: dict):
         tag_list: list[str] = normalize_input_list(kwargs.get("tag"))

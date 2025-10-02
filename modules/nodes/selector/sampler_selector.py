@@ -49,7 +49,7 @@ class LF_SamplerSelector:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     RETURN_NAMES = ("combo", "string")
-    RETURN_TYPES = (SAMPLERS, "STRING")
+    RETURN_TYPES = (SAMPLERS, Input.STRING)
 
     def on_exec(self, **kwargs: dict):
         sampler: str = normalize_list_to_value(kwargs.get("sampler"))

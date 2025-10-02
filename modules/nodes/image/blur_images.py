@@ -9,10 +9,14 @@ from ...utils.helpers.api import get_resource_url
 from ...utils.helpers.comfy import resolve_filepath
 from ...utils.helpers.conversion import pil_to_tensor, tensor_to_pil
 from ...utils.helpers.logic import normalize_input_image, normalize_input_list, normalize_list_to_value, normalize_output_image
+from ...utils.helpers.temp_cache import TempFileCache
 from ...utils.helpers.ui import create_masonry_node
 
 # region LF_BlurImages
 class LF_BlurImages:
+    def __init__(self):
+        self._temp_cache = TempFileCache()
+
     @classmethod
     def INPUT_TYPES(self):
         return {
@@ -47,9 +51,11 @@ class LF_BlurImages:
     INPUT_IS_LIST = (True, False, False, True)
     OUTPUT_IS_LIST = (False, True, True, False)
     RETURN_NAMES = ("image", "image_list", "file_name", "count")
-    RETURN_TYPES = ("IMAGE", "IMAGE", "STRING", "INT")
+    RETURN_TYPES = (Input.IMAGE, Input.IMAGE, Input.STRING, Input.INTEGER)
 
     def on_exec(self, **kwargs: dict):
+        self._temp_cache.cleanup()
+
         image: list[torch.Tensor] = normalize_input_image(kwargs.get("image"))
         blur_percentage: float = normalize_list_to_value(kwargs.get("blur_percentage"))
         file_name: list[str] = normalize_input_list(kwargs.get("file_name"))
@@ -86,7 +92,9 @@ class LF_BlurImages:
                     filename_prefix=filename_prefix,
                     add_counter=False,
                     image=blurred_tensor,
+                    temp_cache=self._temp_cache
             )
+
             blurred_image.save(output_file, format="PNG")
             url = get_resource_url(subfolder, filename, "temp")
 
@@ -107,6 +115,7 @@ class LF_BlurImages:
 NODE_CLASS_MAPPINGS = {
     "LF_BlurImages": LF_BlurImages,
 }
+
 NODE_DISPLAY_NAME_MAPPINGS = {
     "LF_BlurImages": "Blur images",
 }

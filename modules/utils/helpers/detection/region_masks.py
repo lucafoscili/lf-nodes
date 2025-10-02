@@ -3,9 +3,9 @@ import torch
 
 from typing import Any, Dict, Tuple
 
-from ...filters import apply_gaussian_blur
+from ...filters._common import apply_gaussian_blur
 
-
+# region Helpers
 def _gaussian_blur_2d(tensor: torch.Tensor, kernel_size: Tuple[int, int], sigma: float) -> torch.Tensor:
     """
     Applies a 2D Gaussian blur to the input tensor.
@@ -26,7 +26,6 @@ def _gaussian_blur_2d(tensor: torch.Tensor, kernel_size: Tuple[int, int], sigma:
     result = torch.from_numpy(blurred).to(tensor.device, tensor.dtype)
 
     return result.unsqueeze(0).unsqueeze(0)
-
 
 def _ensure_bbox(region: Dict[str, Any], image_height: int, image_width: int) -> Tuple[float, float, float, float]:
     """
@@ -61,6 +60,7 @@ def _ensure_bbox(region: Dict[str, Any], image_height: int, image_width: int) ->
         max(0.0, min(x2, image_width - 1.0)),
         max(0.0, min(y2, image_height - 1.0)),
     )
+# endregion
 
 # region build_region_mask
 def build_region_mask(

@@ -3,7 +3,7 @@ import torch
 from server import PromptServer
 
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, INT_MAX, RESAMPLERS
+from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, INT_MAX, RESAMPLERS, RESIZE_MODE_COMBO
 from ...utils.helpers.logic import normalize_input_image, normalize_input_list, normalize_list_item, normalize_list_to_value, normalize_output_image
 from ...utils.helpers.torch import resize_and_crop_image
 from ...utils.helpers.ui import create_resize_node
@@ -31,7 +31,7 @@ class LF_ResizeImageToDimension:
                     "default": "bicubic", 
                     "tooltip": "Method to resize the image."
                 }),
-                "resize_mode": (["crop", "pad"], {
+                "resize_mode": (RESIZE_MODE_COMBO, {
                     "default": "crop", 
                     "tooltip": "Choose whether to crop or pad when resizing."
                 }),
@@ -55,7 +55,7 @@ class LF_ResizeImageToDimension:
     INPUT_IS_LIST = (True, True, True, False, False, False, False)
     OUTPUT_IS_LIST = (False, True, False)
     RETURN_NAMES = ("image", "image_list", "count")
-    RETURN_TYPES = ("IMAGE", "IMAGE", "INT")
+    RETURN_TYPES = (Input.IMAGE, Input.IMAGE, Input.INTEGER)
 
     def on_exec(self, **kwargs: dict):
         image: list[torch.Tensor] = normalize_input_image(kwargs.get("image"))
@@ -112,6 +112,7 @@ class LF_ResizeImageToDimension:
 NODE_CLASS_MAPPINGS = {
     "LF_ResizeImageToDimension": LF_ResizeImageToDimension,
 }
+
 NODE_DISPLAY_NAME_MAPPINGS = {
     "LF_ResizeImageToDimension": "Resize image to dimension",
 }

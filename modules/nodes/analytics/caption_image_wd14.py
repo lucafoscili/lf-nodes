@@ -14,10 +14,10 @@ class LF_CaptionImageWD14:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "processor": ("*", {
+                "processor": (Input.CLIP_PROCESSOR, {
                     "tooltip": "Processor returned by LF_LoadWD14Model.",
                 }),
-                "model": ("*", {
+                "model": (Input.CLIP_MODEL, {
                     "tooltip": "Model returned by LF_LoadWD14Model.",
                 }),
                 "image": (Input.IMAGE, {
@@ -66,7 +66,7 @@ class LF_CaptionImageWD14:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     RETURN_NAMES = ("string", "string_list", "json", "json_list", "chart_dataset", "chip_dataset")
-    RETURN_TYPES = ("STRING", "STRING", "JSON", "JSON", "JSON", "JSON")
+    RETURN_TYPES = (Input.STRING, Input.STRING, Input.JSON, Input.JSON, Input.JSON, Input.JSON)
     OUTPUT_IS_LIST = (False, True, False, True, False, False)
 
     def on_exec(self, **kwargs: dict):

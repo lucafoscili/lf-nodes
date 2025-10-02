@@ -43,7 +43,7 @@ class LF_Boolean:
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, True)
     RETURN_NAMES = ("boolean", "boolean_list")
-    RETURN_TYPES = ("BOOLEAN", "BOOLEAN")
+    RETURN_TYPES = (Input.BOOLEAN, Input.BOOLEAN)
 
     def on_exec(self, **kwargs: dict):
         boolean: bool = normalize_list_to_value(kwargs.get("boolean"))

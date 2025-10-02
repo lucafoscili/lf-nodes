@@ -69,7 +69,7 @@ class LF_LoraSelector:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     RETURN_NAMES = ("lora", "lora_tag", "lora_name", "model_path", "model_cover")
-    RETURN_TYPES = (initial_list, "STRING", "STRING", "STRING", "IMAGE")
+    RETURN_TYPES = (initial_list, Input.STRING, Input.STRING, Input.STRING, Input.IMAGE)
 
     def on_exec(self, **kwargs: dict):
         lora: str = normalize_list_to_value(kwargs.get("lora"))

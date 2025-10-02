@@ -29,7 +29,7 @@ class LF_LUTGeneration:
     OUTPUT_IS_LIST = (False,)
     OUTPUT_NODE = True
     RETURN_NAMES = ("lut_dataset",)
-    RETURN_TYPES = ("JSON",)
+    RETURN_TYPES = (Input.JSON,)
 
     def on_exec(self, **kwargs: dict):
         color_analysis: dict = normalize_json_input(kwargs.get("color_analysis_dataset"))

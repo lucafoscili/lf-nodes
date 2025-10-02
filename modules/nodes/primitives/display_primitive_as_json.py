@@ -46,7 +46,7 @@ class LF_DisplayPrimitiveAsJSON:
     FUNCTION = FUNCTION
     OUTPUT_NODE = True
     RETURN_NAMES = ("json",)
-    RETURN_TYPES = ("JSON",)
+    RETURN_TYPES = (Input.JSON,)
 
     def on_exec(self, **kwargs: dict):
         integer_list: int = normalize_input_list(kwargs.get("integer"))

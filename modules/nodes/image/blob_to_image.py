@@ -15,7 +15,7 @@ class LF_BlobToImage:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "file_blob": ("*", {
+                "file_blob": (Input.FILE_BLOB, {
                     "tooltip": "Raw byte blob, e.g. from LF_LoadFileOnce"
                 })
             },
@@ -30,10 +30,6 @@ class LF_BlobToImage:
         }
 
     CATEGORY = CATEGORY
-    FUNCTION = FUNCTION
-    RETURN_NAMES = ("image", "image_list")
-    RETURN_TYPES = ("IMAGE", "IMAGE")
-    OUTPUT_IS_LIST = (False, True)
     EMBEDDED_FORMATS = [
         {"name": "PNG",  "header": b"\x89PNG\r\n\x1a\n", "footer": b"\xAE\x42\x60\x82"},
         {"name": "JPEG","header": b"\xff\xd8\xff",      "footer": b"\xff\xd9"},
@@ -45,6 +41,10 @@ class LF_BlobToImage:
         {"name": "HEIF", "header": b"ftypheic",         "length_offset": -4, "length_size": 4, "length_endian": "big"},
         {"name": "HEVC", "header": b"ftyphevc",         "length_offset": -4, "length_size": 4, "length_endian": "big"},
     ]
+    FUNCTION = FUNCTION
+    OUTPUT_IS_LIST = (False, True)
+    RETURN_NAMES = ("image", "image_list")
+    RETURN_TYPES = (Input.IMAGE, Input.IMAGE)
 
     def on_exec(self, **kwargs: dict):
         blob = normalize_list_to_value(kwargs.get("file_blob"))
@@ -139,6 +139,7 @@ class LF_BlobToImage:
 NODE_CLASS_MAPPINGS = {
     "LF_BlobToImage": LF_BlobToImage,
 }
+
 NODE_DISPLAY_NAME_MAPPINGS = {
     "LF_BlobToImage": "Blob to Image",
 }

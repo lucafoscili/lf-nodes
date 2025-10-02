@@ -8,10 +8,14 @@ from ...utils.helpers.api import get_resource_url
 from ...utils.helpers.comfy import resolve_filepath
 from ...utils.helpers.conversion import tensor_to_pil
 from ...utils.helpers.logic import normalize_input_image, normalize_output_image
+from ...utils.helpers.temp_cache import TempFileCache
 from ...utils.helpers.ui import create_compare_node
 
 # region LF_CompareImages
 class LF_CompareImages:
+    def __init__(self):
+        self._temp_cache = TempFileCache()
+
     @classmethod
     def INPUT_TYPES(self):
         return {
@@ -39,9 +43,11 @@ class LF_CompareImages:
     OUTPUT_IS_LIST = (False, True, True, False)
     OUTPUT_NODE = True
     RETURN_NAMES = ("image", "image_list", "all_images", "dataset")
-    RETURN_TYPES = ("IMAGE", "IMAGE", "IMAGE", "JSON")
+    RETURN_TYPES = (Input.IMAGE, Input.IMAGE, Input.IMAGE, Input.JSON)
 
     def on_exec(self, **kwargs: dict):
+        self._temp_cache.cleanup()
+        
         has_before : bool = "image_before" in kwargs and kwargs["image_before"] is not None
 
         image_list_a : list[torch.Tensor] = normalize_input_image(kwargs["image_after"])
@@ -57,7 +63,9 @@ class LF_CompareImages:
 
             pil_a = tensor_to_pil(img_a)
             file_a, sub_a, name_a = resolve_filepath(
-                filename_prefix="compare_after", image=img_a
+                filename_prefix="compare_after",
+                image=img_a,
+                temp_cache=self._temp_cache
             )
             pil_a.save(file_a, format="PNG")
             url_a = get_resource_url(sub_a, name_a, "temp")
@@ -66,7 +74,9 @@ class LF_CompareImages:
                 img_b = image_list_b[idx]
                 pil_b = tensor_to_pil(img_b)
                 file_b, sub_b, name_b = resolve_filepath(
-                    filename_prefix="compare_before", image=img_b
+                    filename_prefix="compare_before",
+                    image=img_b,
+                    temp_cache=self._temp_cache
                 )
                 pil_b.save(file_b, format="PNG")
                 url_b = get_resource_url(sub_b, name_b, "temp")
@@ -90,6 +100,7 @@ class LF_CompareImages:
 NODE_CLASS_MAPPINGS = {
     "LF_CompareImages": LF_CompareImages,
 }
+
 NODE_DISPLAY_NAME_MAPPINGS = {
     "LF_CompareImages": "Compare images",
 }

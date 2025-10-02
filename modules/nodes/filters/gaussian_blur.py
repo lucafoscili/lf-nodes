@@ -6,10 +6,14 @@ from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
 from ...utils.filters import gaussian_blur_effect
 from ...utils.helpers.logic import normalize_input_image, normalize_list_to_value, normalize_output_image
+from ...utils.helpers.temp_cache import TempFileCache
 from ...utils.helpers.torch import process_and_save_image
 
 # region LF_GaussianBlur
 class LF_GaussianBlur:
+    def __init__(self):
+        self._temp_cache = TempFileCache()
+        
     @classmethod
     def INPUT_TYPES(self):
         return {
@@ -46,9 +50,11 @@ class LF_GaussianBlur:
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, True)
     RETURN_NAMES = ("image", "image_list")
-    RETURN_TYPES = ("IMAGE", "IMAGE")
+    RETURN_TYPES = (Input.IMAGE, Input.IMAGE)
 
     def on_exec(self, **kwargs: dict):
+        self._temp_cache.cleanup()
+
         image: list[torch.Tensor] = normalize_input_image(kwargs.get("image"))
         blur_kernel_size: int = normalize_list_to_value(kwargs.get("blur_kernel_size"))
         blur_sigma: float = normalize_list_to_value(kwargs.get("blur_sigma"))
@@ -65,6 +71,7 @@ class LF_GaussianBlur:
             },
             filename_prefix="gaussianblur",
             nodes=nodes,
+            temp_cache=self._temp_cache,
         )
 
         batch_list, image_list = normalize_output_image(processed_images)
@@ -81,6 +88,7 @@ class LF_GaussianBlur:
 NODE_CLASS_MAPPINGS = {
     "LF_GaussianBlur": LF_GaussianBlur,
 }
+
 NODE_DISPLAY_NAME_MAPPINGS = {
     "LF_GaussianBlur": "Gaussian Blur",
 }

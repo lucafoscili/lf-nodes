@@ -12,9 +12,10 @@ class LF_KeywordToggleFromJSON:
                     "tooltip": "LF Widgets compatible JSON dataset."
                 }),
                 "separator": (Input.STRING, {
-                    "default": ", ", "tooltip": "Separator for keywords in the output prompt."
+                    "default": ", ",
+                    "tooltip": "Separator for keywords in the output prompt."
                 }),
-                "ui_widget": ("LF_CHIP", {
+                "ui_widget": (Input.LF_CHIP, {
                     "default": ""
                 })
             },
@@ -27,7 +28,7 @@ class LF_KeywordToggleFromJSON:
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, False, True)
     RETURN_NAMES = ("json", "keywords", "keywords_list")
-    RETURN_TYPES = ("JSON", "STRING", "STRING")
+    RETURN_TYPES = (Input.JSON, Input.STRING, Input.STRING)
 
     def on_exec(self, **kwargs: dict):
         json_input: dict = normalize_json_input(kwargs.get("json_input"))

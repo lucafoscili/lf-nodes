@@ -8,10 +8,14 @@ from ...utils.helpers.api import get_resource_url
 from ...utils.helpers.comfy import resolve_filepath
 from ...utils.helpers.conversion import numpy_to_tensor, tensor_to_pil
 from ...utils.helpers.logic import normalize_output_image, normalize_list_to_value, normalize_json_input
+from ...utils.helpers.temp_cache import TempFileCache
 from ...utils.helpers.ui import create_masonry_node
 
 # region LF_ImageListFromJSON
 class LF_ImageListFromJSON:
+    def __init__(self):
+        self._temp_cache = TempFileCache()
+
     @classmethod
     def INPUT_TYPES(self):
         return {
@@ -50,9 +54,11 @@ class LF_ImageListFromJSON:
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, True, True, False, False, False)
     RETURN_NAMES = ("image", "image_list", "keys", "nr", "width", "height")
-    RETURN_TYPES = ("IMAGE", "IMAGE", "STRING", "INT", "INT", "INT")
+    RETURN_TYPES = (Input.IMAGE, Input.IMAGE, Input.STRING, Input.INTEGER, Input.INTEGER, Input.INTEGER)
 
     def on_exec(self, **kwargs: dict):
+        self._temp_cache.cleanup()
+        
         json_input: dict = normalize_json_input(kwargs.get("json_input"))
         add_noise: bool = normalize_list_to_value(kwargs.get("add_noise"))
         width: int = normalize_list_to_value(kwargs.get("width"))
@@ -79,7 +85,8 @@ class LF_ImageListFromJSON:
 
             output_file, subfolder, filename = resolve_filepath(
                 filename_prefix="jsonimage_",
-                image=img
+                image=img,
+                temp_cache=self._temp_cache
             )
             url = get_resource_url(subfolder, filename, "temp")
             pil_img.save(output_file, format="PNG")

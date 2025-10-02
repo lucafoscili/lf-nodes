@@ -33,8 +33,8 @@ class LF_LoadCLIPSegModel:
     
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
-    RETURN_TYPES = ("*", "*")
     RETURN_NAMES = ("processor", "model")
+    RETURN_TYPES = (Input.CLIP_PROCESSOR, Input.CLIP_MODEL)
 
     def on_exec(self, **kwargs: dict):
         node_id = kwargs.get("node_id")

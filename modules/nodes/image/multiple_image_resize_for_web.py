@@ -39,7 +39,7 @@ class LF_MultipleImageResizeForWeb:
     INPUT_IS_LIST = (True, True)
     OUTPUT_IS_LIST = (False, True, False, True, True, False)
     RETURN_NAMES = ("image", "image_list", "name", "name_list", "names_with_dir", "dataset")
-    RETURN_TYPES = ("IMAGE", "IMAGE", "STRING", "STRING", "STRING", "JSON")
+    RETURN_TYPES = (Input.IMAGE, Input.IMAGE, Input.STRING, Input.STRING, Input.STRING, Input.JSON)
 
     def on_exec(self, **kwargs: dict):
         image: list[torch.Tensor] = normalize_input_image(kwargs.get("image"))
@@ -127,6 +127,7 @@ class LF_MultipleImageResizeForWeb:
 NODE_CLASS_MAPPINGS = {
     "LF_MultipleImageResizeForWeb": LF_MultipleImageResizeForWeb,
 }
+
 NODE_DISPLAY_NAME_MAPPINGS = {
     "LF_MultipleImageResizeForWeb": "Multiple image resize for Web",
 }

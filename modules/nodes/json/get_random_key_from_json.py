@@ -35,7 +35,7 @@ class LF_GetRandomKeyFromJSON:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     RETURN_NAMES = ("string",)
-    RETURN_TYPES = ("STRING",)
+    RETURN_TYPES = (Input.STRING,)
 
     def on_exec(self, **kwargs: dict):
         seed: int = normalize_list_to_value(kwargs.get("seed"))

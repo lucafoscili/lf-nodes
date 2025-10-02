@@ -43,7 +43,7 @@ class LF_ParsePromptWithLoraTags:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     RETURN_NAMES = ("prompt", "loras")
-    RETURN_TYPES = ("STRING", "STRING")
+    RETURN_TYPES = (Input.STRING, Input.STRING)
 
     def on_exec(self, **kwargs: dict):
         text: str = normalize_list_to_value(kwargs.get("text"))

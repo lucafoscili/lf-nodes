@@ -39,7 +39,7 @@ class LF_SwitchFloat:
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, True)
     RETURN_NAMES = ("float", "float_list")
-    RETURN_TYPES = ("FLOAT", "FLOAT")
+    RETURN_TYPES = (Input.FLOAT, Input.FLOAT)
 
     def check_lazy_status(self, **kwargs: dict):
         switch_value = kwargs["boolean"]

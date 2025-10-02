@@ -11,7 +11,10 @@ class AnyType(str):
 class Input:
     BOOLEAN = "BOOLEAN"
     CLIP = "CLIP"
+    CLIP_MODEL = "CLIP_MODEL"
+    CLIP_PROCESSOR = "CLIP_PROCESSOR"
     CONDITIONING = "CONDITIONING"
+    FILE_BLOB = "FILE_BLOB"
     FLOAT = "FLOAT"
     IMAGE = "IMAGE"
     INTEGER = "INT"
@@ -36,10 +39,14 @@ class Input:
     LF_UPLOAD = "LF_UPLOAD"
     JSON = "JSON"
     MASK = "MASK"
-    REGION_META = "REGION_META"
     MODEL = "MODEL"
-    VAE = "VAE"
+    NUMBER = "NUMBER"
+    ONNX_DETECTOR = "ONNX_DETECTOR"
+    ONNX_PATH = "ONNX_PATH"
     STRING = "STRING"
+    REGION_META = "REGION_META"
+    UPSCALE_MODEL = "UPSCALE_MODEL"
+    VAE = "VAE"
 
 ANY = AnyType("*")
 INT_MAX = 0xffffffffffffffff
@@ -51,7 +58,19 @@ INTENSITY_ID = "intensity"
 RED_CHANNEL_ID = "red"
 SUM_ID = "sum"
 
+BLUR_FEATHER_COMBO = ["linear", "smooth", "expo"]
+CROP_POSITION_COMBO = ["top", "bottom", "left", "right", "center"]
+IMAGE_EXTENSION_COMBO = ["png", "jpeg", "webp"]
+MASK_SHAPE_COMBO = ["rectangle", "ellipse"]
+MASK_THRESHOLD_COMBO = ["fixed", "relative", "otsu"]
 NOTIFY_COMBO = ["None", "Focus tab", "Interrupt", "Interrupt and queue", "Queue prompt"]
+RESIZE_MODE_COMBO = ["crop", "pad"]
+SELECTION_STRATEGY_COMBO = ["confidence", "area"]
+SVG_COMBO = ["fill", "stroke", "both"]
+TILT_SHIFT_ORIENTATION_COMBO = ["horizontal", "vertical", "circular"]
+UNET_DIFFUSION_COMBO = ["none", "checkpoint", "unet"]
+VIGNETTE_SHAPE_COMBO = ["elliptical", "circular"]
+WEIGHT_DTYPE_COMBO = ["default", "fp8_e4m3fn", "fp8_e4m3fn_fast", "fp8_e5m2"]
 
 API_ROUTE_PREFIX = "/lf-nodes"
 BASE64_PNG_PREFIX = "data:image/png;charset=utf-8;base64,"

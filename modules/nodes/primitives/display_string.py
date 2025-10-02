@@ -30,7 +30,7 @@ class LF_DisplayString:
     FUNCTION = FUNCTION
     OUTPUT_NODE = True
     RETURN_NAMES = ("string",)
-    RETURN_TYPES = ("STRING",)
+    RETURN_TYPES = (Input.STRING,)
 
     def on_exec(self, **kwargs: dict):
         display_string:str = normalize_input_list(kwargs.get("string"))

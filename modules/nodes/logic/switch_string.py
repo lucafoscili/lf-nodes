@@ -39,7 +39,7 @@ class LF_SwitchString:
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, True)
     RETURN_NAMES = ("string", "string_list")
-    RETURN_TYPES = ("STRING", "STRING")
+    RETURN_TYPES = (Input.STRING, Input.STRING)
 
     def check_lazy_status(self, **kwargs: dict):
         switch_value = kwargs["boolean"]

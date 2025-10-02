@@ -85,7 +85,7 @@ class LF_LoadImages:
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, True, True, True, False, False, False, False, False)
     RETURN_NAMES = ("image", "image_list", "name", "creation_date", "nr", "selected_image", "selected_index", "selected_name", "metadata")
-    RETURN_TYPES = ("IMAGE", "IMAGE", "STRING", "STRING", "INT", "IMAGE", "INT", "STRING", "JSON")
+    RETURN_TYPES = (Input.IMAGE, Input.IMAGE, Input.STRING, Input.STRING, Input.INTEGER, Input.IMAGE, Input.INTEGER, Input.STRING, Input.JSON)
 
     def on_exec(self, **kwargs: dict):
         def select(image_list, names, sel_idx_ui, sel_name_ui):

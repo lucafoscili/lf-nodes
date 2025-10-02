@@ -26,17 +26,20 @@ class LF_ResolutionSwitcher:
                     "tooltip": "Width when the image is portrait-oriented."
                 }),
                 "portrait_height": (Input.INTEGER, {
-                    "default": 1216, "min": 1, 
+                    "default": 1216,
+                    "min": 1, 
                     "step": 1, 
                     "tooltip": "Height when the image is portrait-oriented."
                 }),
                 "landscape_width": (Input.INTEGER, {
-                    "default": 1216, "min": 1, 
+                    "default": 1216,
+                    "min": 1, 
                     "step": 1, 
                     "tooltip": "Width when the image is landscape-oriented."
                 }),
                 "landscape_height": (Input.INTEGER, {
-                    "default": 832, "min": 1, 
+                    "default": 832,
+                    "min": 1, 
                     "step": 1, 
                     "tooltip": "Height when the image is landscape-oriented."
                 }),
@@ -52,7 +55,7 @@ class LF_ResolutionSwitcher:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     RETURN_NAMES = ("width", "height", "is_landscape")
-    RETURN_TYPES = ("INT", "INT", "BOOLEAN")
+    RETURN_TYPES = (Input.INTEGER, Input.INTEGER, Input.BOOLEAN)
 
     def on_exec(self, **kwargs: dict):
         chance_landscape: float = normalize_list_to_value(kwargs.get("chance_landscape"))

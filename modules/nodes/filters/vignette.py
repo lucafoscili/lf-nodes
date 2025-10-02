@@ -3,13 +3,17 @@ import torch
 from server import PromptServer
 
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
+from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, VIGNETTE_SHAPE_COMBO
 from ...utils.filters import vignette_effect
 from ...utils.helpers.logic import normalize_input_image, normalize_list_to_value, normalize_output_image
+from ...utils.helpers.temp_cache import TempFileCache
 from ...utils.helpers.torch import process_and_save_image
         
 # region LF_Vignette
 class LF_Vignette:
+    def __init__(self):
+        self._temp_cache = TempFileCache()
+        
     @classmethod
     def INPUT_TYPES(self):
         return {
@@ -31,7 +35,7 @@ class LF_Vignette:
                     "step": 0.05,
                     "tooltip": "Controls the size of the vignette effect. Lower values mean a smaller vignette."
                 }),
-                "shape": (["elliptical", "circular"], {
+                "shape": (VIGNETTE_SHAPE_COMBO, {
                     "default": "elliptical",
                     "tooltip": "Selects the shape of the vignette effect."
                 }),
@@ -54,9 +58,11 @@ class LF_Vignette:
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, True)
     RETURN_NAMES = ("image", "image_list")
-    RETURN_TYPES = ("IMAGE", "IMAGE")
+    RETURN_TYPES = (Input.IMAGE, Input.IMAGE)
 
     def on_exec(self, **kwargs: dict):
+        self._temp_cache.cleanup()
+
         image: list[torch.Tensor] = normalize_input_image(kwargs.get("image"))
         intensity: float = normalize_list_to_value(kwargs.get("intensity"))
         radius: float = normalize_list_to_value(kwargs.get("radius"))
@@ -77,6 +83,7 @@ class LF_Vignette:
             },
             filename_prefix="vignette",
             nodes=nodes,
+            temp_cache=self._temp_cache,
         )
 
         batch_list, image_list = normalize_output_image(processed_images)
@@ -93,6 +100,7 @@ class LF_Vignette:
 NODE_CLASS_MAPPINGS = {
     "LF_Vignette": LF_Vignette
 }
+
 NODE_DISPLAY_NAME_MAPPINGS = {
     "LF_Vignette": "Vignette"
 }

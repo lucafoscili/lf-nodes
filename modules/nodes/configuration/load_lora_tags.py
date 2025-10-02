@@ -48,7 +48,7 @@ class LF_LoadLoraTags:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     RETURN_NAMES = ("model", "clip")
-    RETURN_TYPES = ("MODEL", "CLIP")
+    RETURN_TYPES = (Input.MODEL, Input.CLIP)
 
     def on_exec(self, **kwargs: dict):
         def get_lora_weights(tag_content: str):

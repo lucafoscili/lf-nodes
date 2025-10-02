@@ -8,10 +8,14 @@ from ...utils.helpers.api import get_resource_url
 from ...utils.helpers.comfy import resolve_filepath
 from ...utils.helpers.conversion import tensor_to_pil
 from ...utils.helpers.logic import normalize_input_image, normalize_output_image
+from ...utils.helpers.temp_cache import TempFileCache
 from ...utils.helpers.ui import create_masonry_node
 
 # region LF_ViewImages
 class LF_ViewImages:
+    def __init__(self):
+        self._temp_cache = TempFileCache()
+
     @classmethod
     def INPUT_TYPES(self):
         return {
@@ -36,9 +40,11 @@ class LF_ViewImages:
     OUTPUT_IS_LIST = (False, True)
     OUTPUT_NODE = True
     RETURN_NAMES = ("image", "image_list")
-    RETURN_TYPES = ("IMAGE", "IMAGE")
+    RETURN_TYPES = (Input.IMAGE, Input.IMAGE)
 
     def on_exec(self, **kwargs: dict):
+        self._temp_cache.cleanup()
+        
         image: list[torch.Tensor] = normalize_input_image(kwargs.get("image"))
 
         nodes: list[dict] = []
@@ -50,6 +56,7 @@ class LF_ViewImages:
             output_file, subfolder, filename = resolve_filepath(
                     filename_prefix="view",
                     image=img,
+                    temp_cache=self._temp_cache
             )
             pil_image.save(output_file, format="PNG")
             url = get_resource_url(subfolder, filename, "temp")

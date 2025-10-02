@@ -31,7 +31,8 @@ class LF_IsLandscape:
     OUTPUT_IS_LIST = (False, False, False, True, True, True)
     RETURN_NAMES = ("is_landscape", "height", "width", 
                     "is_landscape_list", "heights_list", "widths_list")
-    RETURN_TYPES = ("BOOLEAN", "INT", "INT", "BOOLEAN", "INT", "INT")
+    RETURN_TYPES = (Input.BOOLEAN, Input.INTEGER, Input.INTEGER,
+                    Input.BOOLEAN, Input.INTEGER, Input.INTEGER)
 
     def on_exec(self, **kwargs: dict):
         image: list[torch.Tensor] = normalize_input_image(kwargs.get("image"))

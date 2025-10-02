@@ -14,24 +14,18 @@ class LF_SortTags:
                 "clip": (Input.CLIP, {
                     "tooltip": "CLIP model to use for tokenization."
                 }),
-                "caption": (Input.STRING,
-                    {
-                        "tooltip": "The caption(s) whose tags need re-ordering. One per line or comma-separated."
-                    },
-                ),
-                "desired_order": (Input.STRING,
-                    {
-                        "default": "masterpiece, best quality",
-                        "tooltip": "Comma-separated list indicating the desired leading order."
-                    },
-                ),
-                "clip_limit": (Input.INTEGER,
-                    {
-                        "default": 75,
-                        "step": 1,
-                        "tooltip": "Maximum number of CLIP tokens allowed. Exceeding this will display a warning in the output widget."
-                    },
-                ),
+                "caption": (Input.STRING, {
+                    "tooltip": "The caption(s) whose tags need re-ordering. One per line or comma-separated."
+                }),
+                "desired_order": (Input.STRING, {
+                    "default": "masterpiece, best quality",
+                    "tooltip": "Comma-separated list indicating the desired leading order."
+                }),
+                "clip_limit": (Input.INTEGER, {
+                    "default": 75,
+                    "step": 1,
+                    "tooltip": "Maximum number of CLIP tokens allowed. Exceeding this will display a warning in the output widget."
+                }),
             },
             "optional": {
                 "ui_widget": (Input.LF_CODE, {
@@ -47,7 +41,7 @@ class LF_SortTags:
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, True)
     RETURN_NAMES = ("string", "string_list")
-    RETURN_TYPES = ("STRING", "STRING")
+    RETURN_TYPES = (Input.STRING, Input.STRING)
 
     def on_exec(self, **kwargs):
         def normalise_caption(caption: str) -> list[str]:

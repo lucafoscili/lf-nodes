@@ -4,7 +4,7 @@ import requests
 from server import PromptServer
 
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, HEADERS, INT_MAX, get_doc_generator_system
+from ...utils.constants import EVENT_PREFIX, FUNCTION, HEADERS, Input, INT_MAX, get_doc_generator_system
 from ...utils.helpers.api import handle_response
 from ...utils.helpers.logic import normalize_list_to_value
 
@@ -14,12 +14,12 @@ class LF_MarkdownDocGenerator:
     def INPUT_TYPES(self):
         return {
             "required": {
-                "prompt": ("STRING", {
+                "prompt": (Input.STRING, {
                     "default": "", 
                     "multiline": True, 
                     "tooltip": "The source file to document."
                 }),
-                "temperature": ("FLOAT", {
+                "temperature": (Input.FLOAT, {
                     "max": 1.901, 
                     "min": 0.1, 
                     "step": 0.1, 
@@ -27,31 +27,31 @@ class LF_MarkdownDocGenerator:
                     "default": 0.5, 
                     "tooltip": "Controls the randomness of the generated text. Higher values make the output more random."
                 }),
-                "max_tokens": ("INT", {
+                "max_tokens": (Input.INTEGER, {
                     "max": 8000, 
                     "min": 20, 
                     "step": 10, 
                     "default": 2000, 
                     "tooltip": "Limits the length of the generated text. Adjusting this value can help control the verbosity of the output."
                 }),
-                "seed": ("INT", {
+                "seed": (Input.INTEGER, {
                     "default": 42, 
                     "min": 0, 
                     "max": INT_MAX, 
                     "tooltip": "Determines the starting point for generating random numbers. Setting a specific seed ensures reproducibility of results."
                 }),
-                "url": ("STRING", {
+                "url": (Input.STRING, {
                     "default": "http://localhost:5001/v1/chat/completions", 
                     "tooltip": "URL of the local endpoint for the LLM."
                 }),
             },
             "optional": { 
-                "extra_context": ("STRING", {
+                "extra_context": (Input.STRING, {
                     "default": "", 
                     "multiline": True, 
                     "tooltip": "Additional context to guide the LLM (out of scope constants and helpers definitions)."
                 }),
-                "ui_widget" : ("LF_CODE", {
+                "ui_widget" : (Input.LF_CODE, {
                     "default": ""
                 })
             },
@@ -64,7 +64,7 @@ class LF_MarkdownDocGenerator:
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, False, False, True)
     RETURN_NAMES = ("request_json", "response_json", "markdown", "markdown_list")
-    RETURN_TYPES = ("JSON", "JSON", "STRING", "STRING")
+    RETURN_TYPES = (Input.JSON, Input.JSON, Input.STRING, Input.STRING)
 
     def on_exec(self, **kwargs: dict):
         temperature: float = normalize_list_to_value(kwargs.get("temperature"))

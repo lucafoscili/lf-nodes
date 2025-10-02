@@ -6,6 +6,7 @@ import torch
 from ..api import get_resource_url
 from ..comfy import resolve_filepath
 from ..conversion import tensor_to_pil
+from ..temp_cache import TempFileCache
 from ..ui import create_compare_node
 
 # region append_compare_entry
@@ -14,6 +15,7 @@ def append_compare_entry(
     overlay: torch.Tensor,
     nodes: List[dict],
     index: int,
+    temp_cache: TempFileCache
 ) -> None:
     """
     Saves the original and overlay image tensors as PNG files, generates resource URLs for each,
@@ -24,14 +26,15 @@ def append_compare_entry(
         overlay (torch.Tensor): The overlay image tensor to be saved and compared.
         nodes (List[dict]): The list of comparison nodes to which a new entry will be appended.
         index (int): The index used for the comparison node.
+        temp_cache (TempFileCache): Temporary file cache for managing file storage.
 
     Returns:
         None
     """    
-    orig_path, orig_sub, orig_name = resolve_filepath("detect_regions_orig", image=original)
+    orig_path, orig_sub, orig_name = resolve_filepath("detect_regions_orig", image=original, temp_cache=temp_cache)
     tensor_to_pil(original).save(orig_path, "PNG")
 
-    overlay_path, overlay_sub, overlay_name = resolve_filepath("detect_regions_overlay", image=overlay)
+    overlay_path, overlay_sub, overlay_name = resolve_filepath("detect_regions_overlay", image=overlay, temp_cache=temp_cache)
     tensor_to_pil(overlay).save(overlay_path, "PNG")
 
     url_before = get_resource_url(orig_sub, orig_name, "temp")

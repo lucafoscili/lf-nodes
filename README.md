@@ -168,5 +168,6 @@ MIT License
 
 For an overview of how this nodes suite is structured and how it integrates with the UI, see:
 
-- docs/ARCHITECTURE.md
-- docs/NODE_TEMPLATE.md
+- [Architecture](docs/ARCHITECTURE.md)  
+- [Image Editor](docs/IMAGE_EDITOR.md)
+- [Node Template](docs/NODE_TEMPLATE.md)

@@ -3,13 +3,17 @@ import torch
 from server import PromptServer
 
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, SAMPLERS, SCHEDULERS
+from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, INT_MAX, SAMPLERS, SCHEDULERS
 from ...utils.filters.inpaint import apply_inpaint_filter_tensor
-from ...utils.helpers.logic import normalize_input_image, normalize_list_to_value, normalize_masks_for_images,  normalize_output_image
+from ...utils.helpers.logic import normalize_input_image, normalize_list_to_value, normalize_masks_for_images, normalize_output_image
+from ...utils.helpers.temp_cache import TempFileCache
 from ...utils.helpers.torch import process_and_save_image
 
 # region LF_InpaintAdvanced
 class LF_InpaintAdvanced:
+    def __init__(self):
+        self._temp_cache = TempFileCache()
+        
     @classmethod
     def INPUT_TYPES(cls):
         return {
@@ -60,7 +64,7 @@ class LF_InpaintAdvanced:
                 "seed": (Input.INTEGER, {
                     "default": -1,
                     "min": -1,
-                    "max": 0xFFFFFFFFFFFFFFFF,
+                    "max": INT_MAX,
                     "tooltip": "Seed for the random number generator. Use -1 for a random seed."
                 }),
             },
@@ -136,11 +140,13 @@ class LF_InpaintAdvanced:
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
-    RETURN_TYPES = ("IMAGE", "IMAGE")
-    RETURN_NAMES = ("image", "image_list")
     OUTPUT_IS_LIST = (False, True)
+    RETURN_NAMES = ("image", "image_list")
+    RETURN_TYPES = (Input.IMAGE, Input.IMAGE)
 
     def on_exec(self, **kwargs: dict):
+        self._temp_cache.cleanup()
+
         node_id = kwargs.get("node_id")
         images = normalize_input_image(kwargs.get("image"))
         model = kwargs.get("model")
@@ -210,6 +216,7 @@ class LF_InpaintAdvanced:
             filter_args={},
             filename_prefix="inpaint",
             nodes=nodes,
+            temp_cache=self._temp_cache,
         )
 
         PromptServer.instance.send_sync(

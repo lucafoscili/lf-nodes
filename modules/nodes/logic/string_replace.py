@@ -37,7 +37,7 @@ class LF_StringReplace:
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, True)
     RETURN_NAMES = ("string", "string_list")
-    RETURN_TYPES = ("STRING", "STRING")
+    RETURN_TYPES = (Input.STRING, Input.STRING)
 
     def on_exec(self, **kwargs: dict):
         input_text: str = normalize_list_to_value(kwargs.get("input_text"))

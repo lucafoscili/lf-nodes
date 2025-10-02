@@ -1,4 +1,11 @@
-import { LfDataDataset } from '@lf-widgets/foundations';
+import {
+  LfDataDataset,
+  LfDataNode,
+  LfSliderEventPayload,
+  LfTextfieldEventPayload,
+  LfToggleEventPayload,
+} from '@lf-widgets/foundations';
+import type { createEventHandlers } from '../../helpers/imageEditor/events';
 import {
   BaseWidgetState,
   CustomWidgetName,
@@ -47,6 +54,16 @@ export interface ImageEditorState extends BaseWidgetState {
   filter: ImageEditorFilter;
   filterType: ImageEditorFilterType;
   lastBrushSettings: ImageEditorBrushSettings;
+  manualApply?: {
+    button: HTMLLfButtonElement;
+    defaultLabel: string;
+    dirty: boolean;
+    isProcessing: boolean;
+    changeCounter: number;
+    latestChangeId: number;
+    latestAppliedChangeId: number;
+    activeRequestChangeId: number;
+  };
   settingsStore?: Partial<
     Record<ImageEditorFilterType, Partial<Record<ImageEditorControlIds, ImageEditorControlValue>>>
   >;
@@ -55,6 +72,23 @@ export interface ImageEditorState extends BaseWidgetState {
     snapshot: () => Promise<void>;
   };
 }
+
+export interface PrepSettingsDeps {
+  onSlider: (state: ImageEditorState, e: CustomEvent<LfSliderEventPayload>) => void | Promise<void>;
+  onTextfield: (
+    state: ImageEditorState,
+    e: CustomEvent<LfTextfieldEventPayload>,
+  ) => void | Promise<void>;
+  onToggle: (state: ImageEditorState, e: CustomEvent<LfToggleEventPayload>) => void | Promise<void>;
+}
+
+export type PrepSettingsFn = (state: ImageEditorState, node: LfDataNode) => void;
+export interface EventHandlerDeps {
+  handleInterruptForState: (state: ImageEditorState) => Promise<void>;
+  prepSettings: PrepSettingsFn;
+}
+
+export type EventHandlers = ReturnType<typeof createEventHandlers>;
 //#endregion
 
 //#region Dataset
@@ -93,10 +127,12 @@ export enum ImageEditorCanvasIds {
   Points = 'points',
 }
 export enum ImageEditorSliderIds {
+  Amount = 'amount',
   Balance = 'balance',
   BlueChannel = 'b_channel',
   BlurKernelSize = 'blur_kernel_size',
   BlurSigma = 'blur_sigma',
+  ClarityAmount = 'clarity_amount',
   DenoisePercentage = 'denoise_percentage',
   Cfg = 'cfg',
   Dilate = 'dilate',
@@ -114,6 +150,7 @@ export enum ImageEditorSliderIds {
   RedChannel = 'r_channel',
   SharpenAmount = 'sharpen_amount',
   Size = 'size',
+  Sigma = 'sigma',
   Softness = 'softness',
   Steps = 'steps',
   Strength = 'strength',
@@ -137,6 +174,7 @@ export enum ImageEditorToggleIds {
   Shape = 'shape',
   Smooth = 'smoooth',
   SoftBlend = 'soft_blend',
+  TransparentBackground = 'transparent_background',
   Vertical = 'vertical',
   UseConditioning = 'use_conditioning',
   RoiAuto = 'roi_auto',
@@ -211,6 +249,7 @@ export interface ImageEditorFilterSettingsMap {
   bloom: ImageEditorBloomSettings;
   brightness: ImageEditorBrightnessSettings;
   brush: ImageEditorBrushSettings;
+  backgroundRemover: ImageEditorBackgroundRemoverSettings;
   clarity: ImageEditorClaritySettings;
   contrast: ImageEditorContrastSettings;
   desaturate: ImageEditorDesaturateSettings;
@@ -218,11 +257,17 @@ export interface ImageEditorFilterSettingsMap {
   gaussianBlur: ImageEditorGaussianBlurSettings;
   inpaint: ImageEditorInpaintSettings;
   line: ImageEditorLineSettings;
+  saturation: ImageEditorSaturationSettings;
   sepia: ImageEditorSepiaSettings;
   splitTone: ImageEditorSplitToneSettings;
   tiltShift: ImageEditorTiltShiftSettings;
+  unsharpMask: ImageEditorUnsharpMaskSettings;
   vibrance: ImageEditorVibranceSettings;
   vignette: ImageEditorVignetteSettings;
+}
+export interface ImageEditorBackgroundRemoverSettings extends ImageEditorFilterSettings {
+  color: string;
+  transparent_background: boolean;
 }
 export interface ImageEditorBlendSettings extends ImageEditorFilterSettings {
   color: string;
@@ -247,9 +292,7 @@ export interface ImageEditorBrushSettings extends ImageEditorFilterSettings {
   size: number;
 }
 export interface ImageEditorClaritySettings extends ImageEditorFilterSettings {
-  strength: number;
-  sharpen_amount: number;
-  blur_kernel_size: number;
+  clarity_amount: number;
 }
 export interface ImageEditorContrastSettings extends ImageEditorFilterSettings {
   strength: number;
@@ -299,6 +342,12 @@ export interface ImageEditorTiltShiftSettings extends ImageEditorFilterSettings 
   smooth: boolean;
   vertical: boolean;
 }
+export interface ImageEditorUnsharpMaskSettings extends ImageEditorFilterSettings {
+  amount: number;
+  radius: number;
+  sigma: number;
+  threshold: number;
+}
 export interface ImageEditorVibranceSettings extends ImageEditorFilterSettings {
   intensity: number;
   clip_soft: boolean;
@@ -327,6 +376,10 @@ export interface ImageEditorInpaintSettings extends ImageEditorFilterSettings {
   dilate?: number;
   feather?: number;
 }
+export enum ImageEditorBackgroundRemoverIds {
+  Color = 'color',
+  TransparentBackground = 'transparent_background',
+}
 export enum ImageEditorBlendIds {
   Opacity = 'opacity',
 }
@@ -349,9 +402,7 @@ export enum ImageEditorBrushIds {
   Size = 'size',
 }
 export enum ImageEditorClarityIds {
-  BlurKernelSize = 'blur_kernel_size',
-  Strength = 'strength',
-  SharpenAmount = 'sharpen_amount',
+  Amount = 'clarity_amount',
 }
 export enum ImageEditorContrastIds {
   Strength = 'strength',
@@ -401,6 +452,12 @@ export enum ImageEditorTiltShiftIds {
   Smooth = 'smooth',
   Vertical = 'vertical',
 }
+export enum ImageEditorUnsharpMaskIds {
+  Amount = 'amount',
+  Radius = 'radius',
+  Sigma = 'sigma',
+  Threshold = 'threshold',
+}
 export enum ImageEditorVibranceIds {
   Intensity = 'intensity',
   ClipSoft = 'clip_soft',
@@ -449,6 +506,14 @@ export interface ImageEditorFilterDefinition<
   requiresManualApply?: boolean;
   settings: ImageEditorSettings;
 }
+export type ImageEditorBackgroundRemoverFilter = ImageEditorFilterDefinition<
+  typeof ImageEditorBackgroundRemoverIds,
+  ImageEditorBackgroundRemoverSettings,
+  {
+    [ImageEditorControls.Textfield]: ImageEditorTextfieldConfig[];
+    [ImageEditorControls.Toggle]: ImageEditorToggleConfig[];
+  }
+>;
 export type ImageEditorBlendFilter = ImageEditorFilterDefinition<
   typeof ImageEditorBlendIds,
   ImageEditorBlendSettings,
@@ -559,6 +624,13 @@ export type ImageEditorTiltShiftFilter = ImageEditorFilterDefinition<
     [ImageEditorControls.Toggle]: ImageEditorToggleConfig[];
   }
 >;
+export type ImageEditorUnsharpMaskFilter = ImageEditorFilterDefinition<
+  typeof ImageEditorUnsharpMaskIds,
+  ImageEditorUnsharpMaskSettings,
+  {
+    [ImageEditorControls.Slider]: ImageEditorSliderConfig[];
+  }
+>;
 export type ImageEditorVibranceFilter = ImageEditorFilterDefinition<
   typeof ImageEditorVibranceIds,
   ImageEditorVibranceSettings,
@@ -586,6 +658,7 @@ export type ImageEditorInpaintFilter = ImageEditorFilterDefinition<
   }
 >;
 export type ImageEditorFilters = {
+  backgroundRemover: ImageEditorBackgroundRemoverFilter;
   blend: ImageEditorBlendFilter;
   bloom: ImageEditorBloomFilter;
   brightness: ImageEditorBrightnessFilter;
@@ -601,10 +674,12 @@ export type ImageEditorFilters = {
   sepia: ImageEditorSepiaFilter;
   splitTone: ImageEditorSplitToneFilter;
   tiltShift: ImageEditorTiltShiftFilter;
+  unsharpMask: ImageEditorUnsharpMaskFilter;
   vibrance: ImageEditorVibranceFilter;
   vignette: ImageEditorVignetteFilter;
 };
 export type ImageEditorFilter =
+  | ImageEditorBackgroundRemoverFilter
   | ImageEditorBlendFilter
   | ImageEditorBloomFilter
   | ImageEditorBrightnessFilter
@@ -620,9 +695,9 @@ export type ImageEditorFilter =
   | ImageEditorSepiaFilter
   | ImageEditorSplitToneFilter
   | ImageEditorTiltShiftFilter
+  | ImageEditorUnsharpMaskFilter
   | ImageEditorVibranceFilter
   | ImageEditorVignetteFilter;
-
 export type ImageEditorRequestSettings<T extends ImageEditorFilterType> =
   ImageEditorFilterSettingsMap[T] & { context_id?: string };
 //#endregion

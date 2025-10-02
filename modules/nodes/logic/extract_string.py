@@ -38,7 +38,7 @@ class LF_ExtractString:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     RETURN_NAMES = ("result_as_json", "extracted_text", "result_as_int", "result_as_float", "result_as_boolean")
-    RETURN_TYPES = ("JSON", "STRING", "INT", "FLOAT", "BOOLEAN")
+    RETURN_TYPES = (Input.JSON, Input.STRING, Input.INTEGER, Input.FLOAT, Input.BOOLEAN)
 
     def on_exec(self, **kwargs: dict):
         def extract_nested(text, start_delim, end_delim):

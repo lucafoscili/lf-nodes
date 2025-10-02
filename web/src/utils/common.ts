@@ -10,6 +10,7 @@ import {
 import { LFManager } from '../managers/manager';
 import { BaseEventPayload } from '../types/events/events';
 import { FreeHookAPI } from '../types/hooks/free';
+import { InterruptHookAPI } from '../types/hooks/interrupt';
 import { RefreshHookApp } from '../types/hooks/refresh';
 import { LogSeverity } from '../types/manager/manager';
 import {
@@ -35,6 +36,11 @@ export enum LFFreeFlags {
   OriginalFreeRef = '_lf_original_freeMemory',
   PatchedFetch = '_lf_patched_fetchApi_free',
   InBeforeFree = '_lf_in_beforeFree',
+}
+export enum LFInterruptFlags {
+  PatchedInterrupt = '_lf_patched_interrupt',
+  OriginalInterruptRef = '_lf_original_interrupt',
+  InBeforeInterrupt = '_lf_in_beforeInterrupt',
 }
 export enum LFRefreshFlags {
   PatchedRefresh = '_lf_patched_refreshComboInNodes',
@@ -75,6 +81,32 @@ export const isToggle = (comp: LfComponent): comp is LfToggleInterface => {
 export const areJSONEqual = (a: unknown, b: unknown) => {
   return JSON.stringify(a) === JSON.stringify(b);
 };
+export const isJSONLikeString = (value: unknown): value is string => {
+  if (typeof value !== 'string') return false;
+  const trimmed = value.trim();
+  if (
+    !(
+      (trimmed.startsWith('{') && trimmed.endsWith('}')) ||
+      (trimmed.startsWith('[') && trimmed.endsWith(']'))
+    )
+  ) {
+    return false;
+  }
+
+  if (trimmed.startsWith('{')) {
+    if (trimmed === '{}') return true;
+    if (/".*"\s*:\s*.+/.test(trimmed)) return true;
+    return false;
+  }
+
+  if (trimmed.indexOf('"') !== -1) return true;
+
+  const simpleArrayScalar =
+    /^\[\s*(?:-?\d+(\.\d+)?|true|false|null)(\s*,\s*(?:-?\d+(\.\d+)?|true|false|null))*\s*\]$/i;
+  if (trimmed.startsWith('[') && simpleArrayScalar.test(trimmed)) return true;
+
+  return false;
+};
 export const isValidJSON = (value: unknown) => {
   try {
     JSON.stringify(value);
@@ -97,8 +129,8 @@ export const unescapeJson = (input: any): UnescapeJSONPayload => {
     return newStr;
   };
 
-  const deepParse = (data: any) => {
-    if (typeof data === 'string') {
+  const deepParse = (data: unknown) => {
+    if (isJSONLikeString(data)) {
       try {
         const innerJson = JSON.parse(data);
         if (typeof innerJson === 'object' && innerJson !== null) {
@@ -116,9 +148,9 @@ export const unescapeJson = (input: any): UnescapeJSONPayload => {
   };
 
   try {
-    parsedJson = JSON.parse(input);
+    parsedJson = isJSONLikeString(input) ? JSON.parse(input) : input;
     validJson = true;
-    parsedJson = deepParse(parsedJson);
+    parsedJson = deepParse(parsedJson) as Record<string, unknown>;
     unescapedStr = JSON.stringify(parsedJson, null, 2);
   } catch (error) {
     if (typeof input === 'object' && input !== null) {
@@ -170,6 +202,15 @@ export function isRefreshHookApp(obj: unknown): obj is RefreshHookApp {
     typeof o['refreshComboInNodes'] === 'function' ||
     'refreshComboInNodes' in o ||
     LFRefreshFlags.PatchedRefresh in o
+  );
+}
+export function isInterruptHookAPI(obj: unknown): obj is InterruptHookAPI {
+  if (!obj || typeof obj !== 'object') return false;
+  const o = obj as Record<string, unknown>;
+  return (
+    typeof o['interrupt'] === 'function' ||
+    'interrupt' in o ||
+    LFInterruptFlags.PatchedInterrupt in o
   );
 }
 export const log = () => {

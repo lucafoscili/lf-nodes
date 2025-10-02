@@ -41,7 +41,7 @@ class LF_SaveText:
     FUNCTION = FUNCTION
     OUTPUT_NODE = True
     RETURN_NAMES = ("text",)
-    RETURN_TYPES = ("STRING",)
+    RETURN_TYPES = (Input.STRING,)
 
     def on_exec(self, **kwargs: dict):
         text: dict = normalize_list_to_value(kwargs.get("text"))

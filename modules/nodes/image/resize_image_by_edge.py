@@ -46,7 +46,7 @@ class LF_ResizeImageByEdge:
     INPUT_IS_LIST = (True, False, True, False, False)
     OUTPUT_IS_LIST = (False, True, False)
     RETURN_NAMES = ("image", "image_list", "count")
-    RETURN_TYPES = ("IMAGE", "IMAGE", "INT")
+    RETURN_TYPES = (Input.IMAGE, Input.IMAGE, Input.INTEGER)
 
     def on_exec(self, **kwargs: dict):
         image: list[torch.Tensor] = normalize_input_image(kwargs.get("image"))
@@ -100,6 +100,7 @@ class LF_ResizeImageByEdge:
 NODE_CLASS_MAPPINGS = {
     "LF_ResizeImageByEdge": LF_ResizeImageByEdge,
 }
+
 NODE_DISPLAY_NAME_MAPPINGS = {
     "LF_ResizeImageByEdge": "Resize image by edge",
 }

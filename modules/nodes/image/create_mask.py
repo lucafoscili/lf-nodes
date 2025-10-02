@@ -1,28 +1,37 @@
 import torch
 import torch.nn.functional as F
 
-from PIL import Image
 from server import PromptServer
 
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
+from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, MASK_THRESHOLD_COMBO
 from ...utils.helpers.api import get_resource_url
 from ...utils.helpers.comfy import get_tokenizer_from_clip, resolve_filepath
-from ...utils.helpers.conversion import pil_to_tensor, tensor_to_pil
-from ...utils.helpers.logic import get_otsu_threshold, normalize_input_image, normalize_list_to_value, normalize_output_image
+from ...utils.helpers.conversion import tensor_to_pil
+from ...utils.helpers.logic import (
+    get_otsu_threshold,
+    normalize_input_image,
+    normalize_list_to_value,
+    normalize_output_image,
+    normalize_output_mask,
+)
+from ...utils.helpers.temp_cache import TempFileCache
 from ...utils.helpers.torch import encode_text_for_sdclip, get_text_encoder_from_clip
 from ...utils.helpers.ui import create_compare_node
 
 # region LF_CreateMask
 class LF_CreateMask:
+    def __init__(self):
+        self._temp_cache = TempFileCache()
+
     @classmethod
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "processor": ("*", {
+                "processor": (Input.CLIP_PROCESSOR, {
                     "tooltip": "CLIPSegProcessor from LF_LoadHFModel (segmentation model).",
                 }),
-                "model":     ("*", {
+                "model":     (Input.CLIP_MODEL, {
                     "tooltip": "CLIPSegForImageSegmentation from LF_LoadHFModel (segmentation model).",
                 }),
                 "image": (Input.IMAGE, {
@@ -31,7 +40,7 @@ class LF_CreateMask:
                 "prompt": (Input.STRING, {
                     "tooltip": "Text prompt for mask."
                 }),
-                "threshold_mode": (["fixed", "relative", "otsu"], {
+                "threshold_mode": (MASK_THRESHOLD_COMBO, {
                     "default": "otsu",
                     "tooltip": (
                         "Thresholding mode: 'fixed' uses the exact threshold value; "
@@ -67,13 +76,15 @@ class LF_CreateMask:
             "hidden": {"node_id":"UNIQUE_ID"}
         }
 
-    RETURN_TYPES   = ("IMAGE","IMAGE")
-    RETURN_NAMES   = ("mask","mask_list")
     CATEGORY       = CATEGORY
     FUNCTION       = FUNCTION
-    OUTPUT_IS_LIST = (False, True)
+    OUTPUT_IS_LIST = (False, True, False, True)
+    RETURN_NAMES   = ("mask", "mask_list", "image", "image_list")
+    RETURN_TYPES   = (Input.MASK, Input.MASK, Input.IMAGE, Input.IMAGE)
 
     def on_exec(self, **kwargs):
+        self._temp_cache.cleanup()
+        
         images = normalize_input_image(kwargs["image"])
         proc = normalize_list_to_value(kwargs["processor"])
         seg_model = normalize_list_to_value(kwargs["model"])
@@ -86,7 +97,7 @@ class LF_CreateMask:
         seg_model.eval()
         device = next(seg_model.parameters()).device
 
-        masks, nodes = [], []
+        mask_images, mask_tensors, nodes = [], [], []
         dataset = { "nodes": nodes }
 
         for idx, img_tensor in enumerate(images):
@@ -125,39 +136,43 @@ class LF_CreateMask:
             else:
                 thresh = fixed_thresh
 
-            mask_np = (mask_prob.cpu().numpy() >= thresh).astype("uint8")*255
-            mask_pil = Image.fromarray(mask_np)
-            
-            m_t = pil_to_tensor(mask_pil.convert("RGB"))[0:1,...]
-            m_t = m_t.to(device)    
-            m_t = m_t.permute(0, 3, 1, 2) # [1,1,H,W]
+            binary = (mask_prob >= thresh).float().unsqueeze(0).unsqueeze(0)
+            binary = binary.to(device)
             H, W = img_tensor.shape[1], img_tensor.shape[2]
-            up = F.interpolate(m_t, size=(H,W), mode="bicubic", align_corners=False)
-            up = up.permute(0,2,3,1) # [1,H,W,1]
-            masks.append(up)
+            up = F.interpolate(binary, size=(H, W), mode="nearest")
+            mask_image = up.permute(0, 2, 3, 1)
+            mask_rgb = mask_image.repeat(1, 1, 1, 3)
+            mask_images.append(mask_rgb)
+            mask_tensors.append(up[:, 0])
 
-            orig_f, so, no = resolve_filepath("mask_orig", image=img_tensor)
+            orig_f, so, no = resolve_filepath("mask_orig",
+                                              image=img_tensor,
+                                              temp_cache=self._temp_cache)
             tensor_to_pil(img_tensor).save(orig_f, "PNG")
-            mo, sm, nm = resolve_filepath("mask_bin", image=up)
-            tensor_to_pil(up).save(mo, "PNG")
+            mo, sm, nm = resolve_filepath("mask_bin",
+                                          image=mask_rgb,
+                                          temp_cache=self._temp_cache)
+            tensor_to_pil(mask_rgb).save(mo, "PNG")
             nodes.append(create_compare_node(get_resource_url(so,no,"temp"),
                                                get_resource_url(sm,nm,"temp"),
                                                idx))
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}prompttomask", {
+        PromptServer.instance.send_sync(f"{EVENT_PREFIX}createmask", {
             "node": kwargs.get("node_id"),
             "dataset": dataset
         })
 
-        image_batch, image_list = normalize_output_image(masks)
+        image_batch, image_list = normalize_output_image(mask_images)
+        mask_batch, mask_list = normalize_output_mask(mask_tensors)
 
-        return (image_batch[0], image_list)
+        return (mask_batch[0], mask_list, image_batch[0], image_list)
 # endregion
 
 # region Mappings
 NODE_CLASS_MAPPINGS = {
     "LF_CreateMask": LF_CreateMask,
 }
+
 NODE_DISPLAY_NAME_MAPPINGS = {
     "LF_CreateMask": "Create Mask",
 }

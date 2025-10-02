@@ -64,7 +64,7 @@ class LF_VAESelector:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     RETURN_NAMES = ("combo", "string", "vae")
-    RETURN_TYPES = (initial_list, "STRING", "VAE")
+    RETURN_TYPES = (initial_list, Input.STRING, Input.VAE)
         
     def on_exec(self, **kwargs: dict):
         vae: str = normalize_list_to_value(kwargs.get("vae"))
