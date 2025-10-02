@@ -30,7 +30,8 @@ class LF_LoadLocalJSON:
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
-    RETURN_TYPES = ("JSON",)
+    RETURN_NAMES = ("json",)
+    RETURN_TYPES = (Input.JSON,)
 
     def on_exec(self, **kwargs: dict):
         url: str = normalize_list_to_value(kwargs.get("url"))

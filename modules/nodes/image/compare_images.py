@@ -43,7 +43,7 @@ class LF_CompareImages:
     OUTPUT_IS_LIST = (False, True, True, False)
     OUTPUT_NODE = True
     RETURN_NAMES = ("image", "image_list", "all_images", "dataset")
-    RETURN_TYPES = ("IMAGE", "IMAGE", "IMAGE", "JSON")
+    RETURN_TYPES = (Input.IMAGE, Input.IMAGE, Input.IMAGE, Input.JSON)
 
     def on_exec(self, **kwargs: dict):
         self._temp_cache.cleanup()

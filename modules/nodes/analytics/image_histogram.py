@@ -32,7 +32,7 @@ class LF_ImageHistogram:
     OUTPUT_IS_LIST = (False, True, False)
     OUTPUT_NODE = True
     RETURN_NAMES = ("image", "image_list", "dataset")
-    RETURN_TYPES = ("IMAGE", "IMAGE", "JSON")
+    RETURN_TYPES = (Input.IMAGE, Input.IMAGE, Input.JSON)
 
     def on_exec(self, **kwargs: dict):
         image: list[torch.Tensor] = normalize_input_image(kwargs.get("image", []))

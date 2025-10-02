@@ -39,7 +39,7 @@ class LF_UrandomSeedGenerator:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     RETURN_NAMES = tuple(["fixed_seeds_dataset"] + ["seed"] * 20)
-    RETURN_TYPES = tuple(["JSON"] + ["INT"] * 20)
+    RETURN_TYPES = tuple([Input.JSON] + [Input.INTEGER] * 20)
 
     def on_exec(self, **kwargs: dict):
         json_input: dict = normalize_json_input(kwargs.get("fixed_seeds", {}))

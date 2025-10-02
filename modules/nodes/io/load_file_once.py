@@ -48,7 +48,7 @@ class LF_LoadFileOnce:
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, False, False, True, True, True)
     RETURN_NAMES = ("file_blob", "file_content", "name", "file_blob_list", "file_content_list", "name_list")
-    RETURN_TYPES = ("*", "STRING", "STRING", "*", "STRING", "STRING")
+    RETURN_TYPES = (Input.FILE_BLOB, Input.STRING, Input.STRING, Input.FILE_BLOB, Input.STRING, Input.STRING)
 
     def on_exec(self, **kwargs: dict):
         dir: str = normalize_list_to_value(kwargs.get("dir"))

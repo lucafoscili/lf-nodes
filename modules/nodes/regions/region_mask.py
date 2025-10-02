@@ -3,7 +3,7 @@ import torch
 from server import PromptServer
 
 from . import CATEGORY
-from ...utils.constants import FUNCTION, Input, EVENT_PREFIX
+from ...utils.constants import FUNCTION, Input, EVENT_PREFIX, MASK_SHAPE_COMBO
 from ...utils.helpers.api import get_resource_url
 from ...utils.helpers.comfy import resolve_filepath
 from ...utils.helpers.conversion import tensor_to_pil
@@ -35,7 +35,7 @@ class LF_RegionMask:
                     "max": 256,
                     "tooltip": "Index of the region to use; -1 selects the region flagged as selected."
                 }),
-                "shape": (["rectangle", "ellipse"], {
+                "shape": (MASK_SHAPE_COMBO, {
                     "default": "rectangle",
                     "tooltip": "Mask shape to carve inside the bounding box."
                 }),
@@ -76,8 +76,8 @@ class LF_RegionMask:
     FUNCTION = FUNCTION
     INPUT_IS_LIST = (True, True, False)
     OUTPUT_IS_LIST = (False, True, False)
-    RETURN_TYPES = ("MASK", "MASK", "REGION_META")
     RETURN_NAMES = ("mask", "mask_list", "region")
+    RETURN_TYPES = (Input.MASK, Input.MASK, Input.REGION_META)
 
     def on_exec(self, **kwargs):
         self._temp_cache.cleanup()

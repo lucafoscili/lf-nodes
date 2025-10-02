@@ -19,7 +19,6 @@ class LF_UpdateUsageStatistics:
                     "tooltip": "The files are saved in the user directory of ComfyUI under LF_Nodes. This field can be used to add additional folders."
                 }),
                 "dataset": (Input.JSON, {
-                    "forceInput": True, 
                     "tooltip": "Dataset including the resources (produced by CivitAIMetadataSetup)."
                 }),
             },
@@ -37,7 +36,7 @@ class LF_UpdateUsageStatistics:
     FUNCTION = FUNCTION
     OUTPUT_NODE = True
     RETURN_NAMES = ("dir", "dataset")
-    RETURN_TYPES = ("STRING", "JSON")
+    RETURN_TYPES = (Input.STRING, Input.JSON)
 
     def on_exec(self, **kwargs: dict):
         def update_usage_json(resource_file: str, resource_name: str, resource_value: str):

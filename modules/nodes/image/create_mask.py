@@ -4,7 +4,7 @@ import torch.nn.functional as F
 from server import PromptServer
 
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
+from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, MASK_THRESHOLD_COMBO
 from ...utils.helpers.api import get_resource_url
 from ...utils.helpers.comfy import get_tokenizer_from_clip, resolve_filepath
 from ...utils.helpers.conversion import tensor_to_pil
@@ -28,10 +28,10 @@ class LF_CreateMask:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "processor": ("*", {
+                "processor": (Input.CLIP_PROCESSOR, {
                     "tooltip": "CLIPSegProcessor from LF_LoadHFModel (segmentation model).",
                 }),
-                "model":     ("*", {
+                "model":     (Input.CLIP_MODEL, {
                     "tooltip": "CLIPSegForImageSegmentation from LF_LoadHFModel (segmentation model).",
                 }),
                 "image": (Input.IMAGE, {
@@ -40,7 +40,7 @@ class LF_CreateMask:
                 "prompt": (Input.STRING, {
                     "tooltip": "Text prompt for mask."
                 }),
-                "threshold_mode": (["fixed", "relative", "otsu"], {
+                "threshold_mode": (MASK_THRESHOLD_COMBO, {
                     "default": "otsu",
                     "tooltip": (
                         "Thresholding mode: 'fixed' uses the exact threshold value; "
@@ -76,11 +76,11 @@ class LF_CreateMask:
             "hidden": {"node_id":"UNIQUE_ID"}
         }
 
-    RETURN_TYPES   = ("MASK", "MASK", "IMAGE", "IMAGE")
-    RETURN_NAMES   = ("mask", "mask_list", "image", "image_list")
     CATEGORY       = CATEGORY
     FUNCTION       = FUNCTION
     OUTPUT_IS_LIST = (False, True, False, True)
+    RETURN_NAMES   = ("mask", "mask_list", "image", "image_list")
+    RETURN_TYPES   = (Input.MASK, Input.MASK, Input.IMAGE, Input.IMAGE)
 
     def on_exec(self, **kwargs):
         self._temp_cache.cleanup()

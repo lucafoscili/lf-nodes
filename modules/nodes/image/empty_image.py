@@ -55,7 +55,7 @@ class LF_EmptyImage:
     INPUT_IS_LIST = (True, True, True)
     OUTPUT_IS_LIST = (False, True)
     RETURN_NAMES = ("image",)
-    RETURN_TYPES = ("IMAGE",)
+    RETURN_TYPES = (Input.IMAGE,)
 
     def on_exec(self, **kwargs: dict):
         self._temp_cache.cleanup()

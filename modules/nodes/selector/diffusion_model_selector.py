@@ -6,7 +6,7 @@ import torch
 from server import PromptServer
 
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, INT_MAX
+from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, INT_MAX, WEIGHT_DTYPE_COMBO
 from ...utils.helpers.api import process_model
 from ...utils.helpers.comfy import get_comfy_list
 from ...utils.helpers.logic import (
@@ -54,7 +54,7 @@ class LF_DiffusionModelSelector:
                     "max": INT_MAX, 
                     "tooltip": "Seed value for when randomization is active."
                 }),
-                "weight_dtype": (["default", "fp8_e4m3fn", "fp8_e4m3fn_fast", "fp8_e5m2"], {
+                "weight_dtype": (WEIGHT_DTYPE_COMBO, {
                     "default": "default",
                     "tooltip": "Weight data type for the diffusion model. 'default' will use the default data type for the model, while the others will force a specific data type."
                 }),
@@ -72,7 +72,7 @@ class LF_DiffusionModelSelector:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     RETURN_NAMES = ("combo", "string", "path", "image", "model")
-    RETURN_TYPES = (initial_list, "STRING", "STRING", "IMAGE", "MODEL")
+    RETURN_TYPES = (initial_list, Input.STRING, Input.STRING, Input.IMAGE, Input.MODEL)
 
     def on_exec(self, **kwargs: dict):
         diffusion_model: str = normalize_list_to_value(kwargs.get("diffusion_model"))

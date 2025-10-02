@@ -47,7 +47,7 @@ class LF_SchedulerSelector:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     RETURN_NAMES = ("combo", "string")
-    RETURN_TYPES = (SCHEDULERS, "STRING")
+    RETURN_TYPES = (SCHEDULERS, Input.STRING)
 
     def on_exec(self, **kwargs: dict):
         scheduler: str = normalize_list_to_value(kwargs.get("scheduler"))

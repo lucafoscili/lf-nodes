@@ -31,10 +31,10 @@ class LF_LoadMetadata:
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
-    OUTPUT_NODE = True
     OUTPUT_IS_LIST = (False, True)
+    OUTPUT_NODE = True
     RETURN_NAMES = ("metadata", "metadata_list")
-    RETURN_TYPES = ("JSON",)
+    RETURN_TYPES = (Input.JSON, Input.JSON)
 
     def on_exec(self, **kwargs: dict):
         file_names: str = normalize_list_to_value(kwargs.get("file_names"))

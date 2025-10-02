@@ -44,7 +44,7 @@ class LF_RegionExtractor:
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, True)
     RETURN_NAMES = ("regions", "regions_list")
-    RETURN_TYPES = ("JSON", "JSON")
+    RETURN_TYPES = (Input.JSON, Input.JSON)
 
     def on_exec(self, **kwargs: dict):
         def find_missing_references(code):

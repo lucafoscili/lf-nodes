@@ -33,8 +33,12 @@ class LF_TiledSuperRes:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "image": (Input.IMAGE, {"tooltip": "Image or image list to upscale."}),
-                "upscale_model": (Input.UPSCALE_MODEL, {"tooltip": "Preloaded spandrel upscaling model."}),
+                "image": (Input.IMAGE, {
+                    "tooltip": "Image or image list to upscale."
+                }),
+                "upscale_model": (Input.UPSCALE_MODEL, {
+                    "tooltip": "Preloaded spandrel upscaling model."
+                }),
                 "target_long_edge": (Input.INTEGER, {
                     "default": 2048,
                     "max": 16384,
@@ -57,7 +61,9 @@ class LF_TiledSuperRes:
                 }),
             },
             "optional": {
-                "ui_widget": (Input.LF_COMPARE, {"default": {}}),
+                "ui_widget": (Input.LF_COMPARE, {
+                    "default": {}
+                }),
             },
             "hidden": {
                 "node_id": "UNIQUE_ID",
@@ -68,8 +74,8 @@ class LF_TiledSuperRes:
     FUNCTION = FUNCTION
     INPUT_IS_LIST = (True, False, False, False, False)
     OUTPUT_IS_LIST = (False, True, False)
-    RETURN_TYPES = ("IMAGE", "IMAGE", "JSON")
     RETURN_NAMES = ("image", "image_list", "stats")
+    RETURN_TYPES = (Input.IMAGE, Input.IMAGE, Input.JSON)
 
     def on_exec(self, **kwargs: dict):
         self._temp_cache.cleanup()

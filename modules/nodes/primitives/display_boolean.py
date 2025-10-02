@@ -30,7 +30,7 @@ class LF_DisplayBoolean:
     FUNCTION = FUNCTION
     OUTPUT_NODE = True
     RETURN_NAMES = ("boolean",)
-    RETURN_TYPES = ("BOOLEAN",)
+    RETURN_TYPES = (Input.BOOLEAN,)
 
     def on_exec(self, **kwargs: dict):
         display_boolean: bool = normalize_input_list(kwargs.get("boolean"))

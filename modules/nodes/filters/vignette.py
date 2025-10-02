@@ -3,7 +3,7 @@ import torch
 from server import PromptServer
 
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
+from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, VIGNETTE_SHAPE_COMBO
 from ...utils.filters import vignette_effect
 from ...utils.helpers.logic import normalize_input_image, normalize_list_to_value, normalize_output_image
 from ...utils.helpers.temp_cache import TempFileCache
@@ -35,7 +35,7 @@ class LF_Vignette:
                     "step": 0.05,
                     "tooltip": "Controls the size of the vignette effect. Lower values mean a smaller vignette."
                 }),
-                "shape": (["elliptical", "circular"], {
+                "shape": (VIGNETTE_SHAPE_COMBO, {
                     "default": "elliptical",
                     "tooltip": "Selects the shape of the vignette effect."
                 }),
@@ -58,7 +58,7 @@ class LF_Vignette:
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, True)
     RETURN_NAMES = ("image", "image_list")
-    RETURN_TYPES = ("IMAGE", "IMAGE")
+    RETURN_TYPES = (Input.IMAGE, Input.IMAGE)
 
     def on_exec(self, **kwargs: dict):
         self._temp_cache.cleanup()

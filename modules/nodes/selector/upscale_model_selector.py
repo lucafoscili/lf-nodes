@@ -50,7 +50,7 @@ class LF_UpscaleModelSelector:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     RETURN_NAMES = ("combo", "string")
-    RETURN_TYPES = (initial_list, "STRING")
+    RETURN_TYPES = (initial_list, Input.STRING)
         
     def on_exec(self, **kwargs: dict):
         upscale_model: str = normalize_list_to_value(kwargs.get("upscale_model"))

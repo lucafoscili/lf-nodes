@@ -36,7 +36,9 @@ class LF_ONNXSelector:
                 }),
             },
             "optional": {
-                "ui_widget": (Input.LF_HISTORY, {"default": {}}),
+                "ui_widget": (Input.LF_HISTORY, {
+                    "default": {}
+                }),
             },
             "hidden": {"node_id": "UNIQUE_ID"},
         }
@@ -45,7 +47,7 @@ class LF_ONNXSelector:
     FUNCTION = FUNCTION
     INPUT_IS_LIST = (False, False, False)
     RETURN_NAMES = ("detector", "model_path")
-    RETURN_TYPES = ("STRING", "STRING")
+    RETURN_TYPES = (Input.ONNX_DETECTOR, Input.ONNX_PATH)
 
     def on_exec(self, **kwargs: dict):
         detector_label: str = normalize_list_to_value(kwargs.get("detector"))

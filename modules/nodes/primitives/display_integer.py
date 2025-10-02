@@ -30,7 +30,7 @@ class LF_DisplayInteger:
     FUNCTION = FUNCTION
     OUTPUT_NODE = True
     RETURN_NAMES = ("integer",)
-    RETURN_TYPES = ("INT",)
+    RETURN_TYPES = (Input.INTEGER,)
 
     def on_exec(self, **kwargs: dict):
         display_integer: int = normalize_input_list(kwargs.get("integer"))

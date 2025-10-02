@@ -69,7 +69,7 @@ class LF_CharacterImpersonator:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     RETURN_NAMES = ("request_json", "response_json", "answer")
-    RETURN_TYPES = ("JSON", "JSON", "STRING")
+    RETURN_TYPES = (Input.JSON, Input.JSON, Input.STRING)
 
     def on_exec(self, **kwargs: dict):
         temperature: float = normalize_list_to_value(kwargs.get("temperature"))

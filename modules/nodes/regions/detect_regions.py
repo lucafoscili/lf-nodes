@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Optional
 from server import PromptServer
 
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
+from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, SELECTION_STRATEGY_COMBO
 from ...utils.helpers.detection import append_compare_entry, build_overlay, detect_regions, load_label_map, load_yolo_session, parse_class_filter, parse_class_labels, select_region
 from ...utils.helpers.logic import normalize_input_image, normalize_json_input, normalize_list_to_value
 from ...utils.helpers.temp_cache import TempFileCache
@@ -20,14 +20,16 @@ class LF_DetectRegions:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "image": (Input.IMAGE, {"tooltip": "Image tensor or batch to analyse."}),
-                "model_path": (Input.STRING, {
+                "image": (Input.IMAGE, {
+                    "tooltip": "Image tensor or batch to analyse."
+                }),
+                "model_path": (Input.ONNX_PATH, {
                     "default": "",
                     "tooltip": "Absolute path to a YOLO ONNX model (use LF_ONNXSelector; files live under ComfyUI/models/onnx).",
                 }),
             },
             "optional": {
-                "model_label": (Input.STRING, {
+                "model_label": (Input.ONNX_DETECTOR, {
                     "default": "",
                     "tooltip": "Optional label reported in metadata; defaults to the filename.",
                 }),
@@ -63,7 +65,7 @@ class LF_DetectRegions:
                     "default": "",
                     "tooltip": "First region whose label matches this string will be selected.",
                 }),
-                "selection_strategy": (["confidence", "area"], {
+                "selection_strategy": (SELECTION_STRATEGY_COMBO, {
                     "default": "confidence",
                     "tooltip": "Fallback strategy when auto-selecting a region.",
                 }),
@@ -87,7 +89,7 @@ class LF_DetectRegions:
     INPUT_IS_LIST = (True, False, False, False, False, False, False, False, False, False, False, False)
     OUTPUT_IS_LIST = (False, True)
     RETURN_NAMES = ("region_meta", "region_meta_list")
-    RETURN_TYPES = ("REGION_META", "REGION_META")
+    RETURN_TYPES = (Input.REGION_META, Input.REGION_META)
 
     def on_exec(self, **kwargs):
         self._temp_cache.cleanup()

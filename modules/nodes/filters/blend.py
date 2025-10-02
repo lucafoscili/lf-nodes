@@ -46,7 +46,7 @@ class LF_Blend:
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, True)
     RETURN_NAMES = ("image", "image_list")
-    RETURN_TYPES = ("IMAGE", "IMAGE")
+    RETURN_TYPES = (Input.IMAGE, Input.IMAGE)
 
     def on_exec(self, **kwargs: dict):
         self._temp_cache.cleanup()

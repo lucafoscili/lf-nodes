@@ -123,8 +123,8 @@ class LF_LoadWD14Model:
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
-    RETURN_TYPES = ("*", "*")
     RETURN_NAMES = ("processor", "model")
+    RETURN_TYPES = (Input.CLIP_PROCESSOR, Input.CLIP_MODEL)
 
     def on_exec(self, **kwargs):
         node_id: str  = kwargs.get("node_id")

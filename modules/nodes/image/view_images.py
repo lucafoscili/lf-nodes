@@ -40,7 +40,7 @@ class LF_ViewImages:
     OUTPUT_IS_LIST = (False, True)
     OUTPUT_NODE = True
     RETURN_NAMES = ("image", "image_list")
-    RETURN_TYPES = ("IMAGE", "IMAGE")
+    RETURN_TYPES = (Input.IMAGE, Input.IMAGE)
 
     def on_exec(self, **kwargs: dict):
         self._temp_cache.cleanup()

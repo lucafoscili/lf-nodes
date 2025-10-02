@@ -3,9 +3,9 @@ import torch
 from server import PromptServer
 
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, SAMPLERS, SCHEDULERS
+from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, INT_MAX, SAMPLERS, SCHEDULERS
 from ...utils.filters.inpaint import apply_inpaint_filter_tensor
-from ...utils.helpers.logic import normalize_input_image, normalize_list_to_value, normalize_masks_for_images,  normalize_output_image
+from ...utils.helpers.logic import normalize_input_image, normalize_list_to_value, normalize_masks_for_images, normalize_output_image
 from ...utils.helpers.temp_cache import TempFileCache
 from ...utils.helpers.torch import process_and_save_image
 
@@ -64,7 +64,7 @@ class LF_InpaintAdvanced:
                 "seed": (Input.INTEGER, {
                     "default": -1,
                     "min": -1,
-                    "max": 0xFFFFFFFFFFFFFFFF,
+                    "max": INT_MAX,
                     "tooltip": "Seed for the random number generator. Use -1 for a random seed."
                 }),
             },
@@ -142,7 +142,7 @@ class LF_InpaintAdvanced:
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, True)
     RETURN_NAMES = ("image", "image_list")
-    RETURN_TYPES = ("IMAGE", "IMAGE")
+    RETURN_TYPES = (Input.IMAGE, Input.IMAGE)
 
     def on_exec(self, **kwargs: dict):
         self._temp_cache.cleanup()

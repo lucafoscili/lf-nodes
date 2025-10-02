@@ -63,9 +63,9 @@ class LF_JSONPromptCombinator:
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
-    RETURN_NAMES = ("string", "string_list", "count", "json")
-    RETURN_TYPES = ("STRING", "STRING", "INT", "JSON")
     OUTPUT_IS_LIST = (False, True, False, False)
+    RETURN_NAMES = ("string", "string_list", "count", "json")
+    RETURN_TYPES = (Input.STRING, Input.STRING, Input.INTEGER, Input.JSON)
 
     def on_exec(self, **kwargs: Any) -> Tuple[str, List[str], int, Dict[str, str]]:
         json_input: Dict[str, Any] = normalize_json_input(kwargs.get("json_input", {}))

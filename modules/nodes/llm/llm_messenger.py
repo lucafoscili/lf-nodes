@@ -34,8 +34,8 @@ class LF_LLMMessenger:
         "character_name", "outfit_name", "location_name", "style_name", "timeframe_name"
     )
     RETURN_TYPES = (
-        "JSON", "STRING", "STRING", "STRING", "STRING", "STRING", 
-        "STRING", "STRING", "STRING", "STRING", "STRING"
+        Input.JSON, Input.STRING, Input.STRING, Input.STRING, Input.STRING, Input.STRING, 
+        Input.STRING, Input.STRING, Input.STRING, Input.STRING, Input.STRING
     )
 
     def on_exec(self, **kwargs: dict):

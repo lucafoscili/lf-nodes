@@ -7,7 +7,7 @@ from PIL.PngImagePlugin import PngInfo
 from server import PromptServer
 
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
+from ...utils.constants import EVENT_PREFIX, FUNCTION, IMAGE_EXTENSION_COMBO, Input
 from ...utils.helpers.api import get_resource_url
 from ...utils.helpers.comfy import get_comfy_dir, resolve_filepath
 from ...utils.helpers.conversion import tensor_to_pil
@@ -35,7 +35,7 @@ class LF_SaveImageForCivitAI:
                     "default": True, 
                     "tooltip": "Whether to embed inside the images the current workflow or not."
                 }),
-                "extension": (['png', 'jpeg', 'webp'], {
+                "extension": (IMAGE_EXTENSION_COMBO, {
                     "default": "png", 
                     "tooltip": "Supported file formats."
                 }),
@@ -68,7 +68,7 @@ class LF_SaveImageForCivitAI:
     OUTPUT_IS_LIST = (True, False)
     OUTPUT_NODE = True
     RETURN_NAMES = ("file_names", "civitai_metadata")
-    RETURN_TYPES = ("STRING", "STRING")
+    RETURN_TYPES = (Input.STRING, Input.STRING)
 
     def on_exec(self, **kwargs: dict):
         image: list[torch.Tensor] = normalize_input_image(kwargs.get("image"))

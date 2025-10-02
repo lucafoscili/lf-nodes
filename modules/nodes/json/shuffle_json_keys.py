@@ -40,7 +40,7 @@ class LF_ShuffleJSONKeys:
     FUNCTION = FUNCTION
     OUTPUT_NODE = True
     RETURN_NAMES = ("json",)
-    RETURN_TYPES = ("JSON",)
+    RETURN_TYPES = (Input.JSON,)
 
     def on_exec(self, **kwargs: dict):
         json_input: dict = normalize_json_input(kwargs.get("json_input"))

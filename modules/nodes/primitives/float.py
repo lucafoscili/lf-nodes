@@ -44,7 +44,7 @@ class LF_Float:
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, True)
     RETURN_NAMES = ("float", "float_list")
-    RETURN_TYPES = ("FLOAT", "FLOAT")
+    RETURN_TYPES = (Input.FLOAT, Input.FLOAT)
 
     def on_exec(self, **kwargs: dict):
         float_input: float = normalize_list_to_value(kwargs.get("float"))

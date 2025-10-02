@@ -34,7 +34,7 @@ class LF_SetValueInJSON:
     FUNCTION = FUNCTION
     INPUT_IS_LIST = (False, False, True)
     RETURN_NAMES = ("json", "json_list")
-    RETURN_TYPES = ("JSON", "JSON")
+    RETURN_TYPES = (Input.JSON, Input.JSON)
 
     def on_exec(self, **kwargs: dict):
         json_input: dict = normalize_json_input(kwargs.get("json_input"))

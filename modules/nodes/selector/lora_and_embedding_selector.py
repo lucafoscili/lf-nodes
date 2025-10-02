@@ -71,8 +71,8 @@ class LF_LoraAndEmbeddingSelector:
     FUNCTION = FUNCTION
     RETURN_NAMES = ("lora_combo", "emb_combo", "lora_tag", "emb_prompt", "lora_string", "emb_string",
                     "lora_path", "emb_path", "lora_image", "emb_image")
-    RETURN_TYPES = (initial_lora_list, initial_emb_list, "STRING", "STRING", "STRING", "STRING",
-                    "STRING", "STRING", "IMAGE", "IMAGE",)
+    RETURN_TYPES = (initial_lora_list, initial_emb_list, Input.STRING, Input.STRING, Input.STRING, Input.STRING,
+                    Input.STRING, Input.STRING, Input.IMAGE, Input.IMAGE)
 
     def on_exec(self, **kwargs: dict):
         lora: str = normalize_list_to_value(kwargs.get("lora"))

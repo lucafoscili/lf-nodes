@@ -52,7 +52,7 @@ class LF_Something2String:
             combinations_list.append(combo_name)
 
     OUTPUT_IS_LIST = tuple([False] * len(combinations_list))
-    RETURN_TYPES = tuple(["STRING"] * len(combinations_list))
+    RETURN_TYPES = tuple([Input.STRING] * len(combinations_list))
     RETURN_NAMES = tuple(combinations_list)
 
     def on_exec(self, **kwargs: dict):

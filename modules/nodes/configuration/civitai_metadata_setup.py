@@ -2,7 +2,7 @@ from folder_paths import get_full_path
 from server import PromptServer
 
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, INT_MAX, SAMPLERS, SCHEDULERS
+from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, INT_MAX, SAMPLERS, SCHEDULERS, UNET_DIFFUSION_COMBO
 from ...utils.helpers.api import get_embedding_hashes, get_sha256, get_lora_hashes
 from ...utils.helpers.comfy import get_comfy_list
 from ...utils.helpers.logic import normalize_list_to_value
@@ -15,7 +15,7 @@ class LF_CivitAIMetadataSetup:
             "required": {
             },
             "optional": {
-                "model_type": (["none", "checkpoint", "unet"], {
+                "model_type": (UNET_DIFFUSION_COMBO, {
                     "default": "none", 
                     "tooltip": "Type of model to use for metadata generation."
                 }),
@@ -118,10 +118,10 @@ class LF_CivitAIMetadataSetup:
                     "sampler", "scheduler", "embeddings", "lora_tags",
                     "full_pos_prompt", "neg_prompt", "steps", "denoising", "clip_skip", "cfg", "seed", 
                     "width", "height", "hires_upscaler", "hires_upscale", "analytics_dataset")
-    RETURN_TYPES = ("STRING", get_comfy_list("checkpoints"), get_comfy_list("unet"), get_comfy_list("vae"),
-                    SAMPLERS, SCHEDULERS, "STRING", "STRING",
-                    "STRING", "STRING", "INT", "FLOAT", "INT", "FLOAT", "INT",
-                    "INT", "INT", get_comfy_list("upscale_models"), "FLOAT", "JSON")
+    RETURN_TYPES = (Input.STRING, get_comfy_list("checkpoints"), get_comfy_list("unet"), get_comfy_list("vae"),
+                    SAMPLERS, SCHEDULERS, Input.STRING, Input.STRING,
+                    Input.STRING, Input.STRING, Input.INTEGER, Input.FLOAT, Input.INTEGER, Input.FLOAT, Input.INTEGER,
+                    Input.INTEGER, Input.INTEGER, get_comfy_list("upscale_models"), Input.FLOAT, Input.JSON)
 
     def on_exec(self, **kwargs:dict):
         def add_metadata_node(category, item):

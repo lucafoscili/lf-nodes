@@ -75,10 +75,10 @@ class LF_BackgroundRemover:
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
-    RETURN_TYPES = ("IMAGE", "IMAGE", "IMAGE", "MASK", "JSON")
-    RETURN_NAMES = ("image", "image_list", "cutout_list", "mask", "stats")
     INPUT_IS_LIST = (True, False, False, False, False)
     OUTPUT_IS_LIST = (False, True, True, False, False)
+    RETURN_NAMES = ("image", "image_list", "cutout_list", "mask", "stats")
+    RETURN_TYPES = (Input.IMAGE, Input.IMAGE, Input.IMAGE, Input.MASK, Input.JSON)
 
     def on_exec(self, **kwargs: dict):
         self._temp_cache.cleanup()

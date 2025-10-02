@@ -85,7 +85,7 @@ class LF_WallOfText:
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, True)
     RETURN_NAMES = ("string", "string_list")
-    RETURN_TYPES = ("STRING", "STRING")
+    RETURN_TYPES = (Input.STRING, Input.STRING)
 
     def on_exec(self, **kwargs: dict):
         texts: list[str] = [normalize_list_to_value(kwargs.get(f"text_{i}", "")) for i in range(1, 11)]

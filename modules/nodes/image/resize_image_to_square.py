@@ -3,7 +3,7 @@ import torch
 from server import PromptServer
 
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, RESAMPLERS
+from ...utils.constants import CROP_POSITION_COMBO, EVENT_PREFIX, FUNCTION, Input, RESAMPLERS
 from ...utils.helpers.logic import normalize_input_image, normalize_input_list, normalize_list_item, normalize_list_to_value, normalize_output_image
 from ...utils.helpers.torch import resize_to_square
 from ...utils.helpers.ui import create_resize_node
@@ -25,7 +25,7 @@ class LF_ResizeImageToSquare:
                     "default": "bicubic", 
                     "tooltip": "Resampling method for resizing."
                 }),
-                "crop_position": (["top", "bottom", "left", "right", "center"], {
+                "crop_position": (CROP_POSITION_COMBO, {
                     "default": "center", 
                     "tooltip": "Where to crop the image."
                 })
@@ -45,7 +45,7 @@ class LF_ResizeImageToSquare:
     INPUT_IS_LIST = (True, True, False, False, False)
     OUTPUT_IS_LIST = (False, True, False)
     RETURN_NAMES = ("image", "image_list", "count")
-    RETURN_TYPES = ("IMAGE", "IMAGE", "INT")
+    RETURN_TYPES = (Input.IMAGE, Input.IMAGE, Input.INTEGER)
 
     def on_exec(self, **kwargs: dict):
         image: list[torch.Tensor] = normalize_input_image(kwargs.get("image"))

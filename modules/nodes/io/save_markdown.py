@@ -39,7 +39,7 @@ class LF_SaveMarkdown:
     FUNCTION = FUNCTION
     OUTPUT_NODE = True
     RETURN_NAMES = ("string",)
-    RETURN_TYPES = ("STRING",)
+    RETURN_TYPES = (Input.STRING,)
 
     def on_exec(self, **kwargs: dict):
         markdown_text: str = normalize_list_to_value(kwargs.get("markdown_text"))

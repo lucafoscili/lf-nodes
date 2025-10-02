@@ -64,7 +64,7 @@ class LF_MarkdownDocGenerator:
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, False, False, True)
     RETURN_NAMES = ("request_json", "response_json", "markdown", "markdown_list")
-    RETURN_TYPES = ("JSON", "JSON", "STRING", "STRING")
+    RETURN_TYPES = (Input.JSON, Input.JSON, Input.STRING, Input.STRING)
 
     def on_exec(self, **kwargs: dict):
         temperature: float = normalize_list_to_value(kwargs.get("temperature"))

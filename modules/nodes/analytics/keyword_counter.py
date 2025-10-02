@@ -33,7 +33,7 @@ class LF_KeywordCounter:
     FUNCTION = FUNCTION
     OUTPUT_NODE = True
     RETURN_NAMES = ("chart_dataset", "chip_dataset")
-    RETURN_TYPES = ("JSON", "JSON")
+    RETURN_TYPES = (Input.JSON, Input.JSON)
 
     def on_exec(self, **kwargs: dict):
         prompt: str = normalize_list_to_value(kwargs.get("prompt"))

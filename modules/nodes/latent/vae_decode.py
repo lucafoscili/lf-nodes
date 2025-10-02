@@ -29,8 +29,8 @@ class LF_VAEDecode:
     FUNCTION = FUNCTION
     INPUT_IS_LIST = (True, False)
     OUTPUT_IS_LIST = (False, True)
-    RETURN_TYPES = ("IMAGE", "IMAGE")
     RETURN_NAMES = ("image", "image_list")
+    RETURN_TYPES = (Input.IMAGE, Input.IMAGE)
 
     def on_exec(self, **kwargs: dict):
         node_id = kwargs.get("node_id")

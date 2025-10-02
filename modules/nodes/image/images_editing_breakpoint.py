@@ -8,7 +8,7 @@ from server import PromptServer
 from urllib.parse import urlparse, parse_qs
 
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, INT_MAX, SAMPLERS, SCHEDULERS
+from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, SAMPLERS, SCHEDULERS
 from ...utils.helpers.api import get_resource_url
 from ...utils.helpers.comfy import get_comfy_dir, resolve_filepath
 from ...utils.helpers.conversion import pil_to_tensor, tensor_to_pil
@@ -82,7 +82,7 @@ class LF_ImagesEditingBreakpoint:
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, True, False, True)
     RETURN_NAMES = ("image", "image_list", "orig_image", "orig_image_list")
-    RETURN_TYPES = ("IMAGE", "IMAGE", "IMAGE", "IMAGE")
+    RETURN_TYPES = (Input.IMAGE, Input.IMAGE, Input.IMAGE, Input.IMAGE)
 
     def on_exec(self, **kwargs):
         self._temp_cache.cleanup()

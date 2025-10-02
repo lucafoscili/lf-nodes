@@ -44,7 +44,7 @@ class LF_Integer:
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, True)
     RETURN_NAMES = ("int", "int_list")
-    RETURN_TYPES = ("INT", "INT")
+    RETURN_TYPES = (Input.INTEGER, Input.INTEGER)
 
     def on_exec(self, **kwargs: dict):
         integer_input: int = normalize_list_to_value(kwargs.get("integer"))

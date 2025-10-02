@@ -54,7 +54,7 @@ class LF_ImageListFromJSON:
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, True, True, False, False, False)
     RETURN_NAMES = ("image", "image_list", "keys", "nr", "width", "height")
-    RETURN_TYPES = ("IMAGE", "IMAGE", "STRING", "INT", "INT", "INT")
+    RETURN_TYPES = (Input.IMAGE, Input.IMAGE, Input.STRING, Input.INTEGER, Input.INTEGER, Input.INTEGER)
 
     def on_exec(self, **kwargs: dict):
         self._temp_cache.cleanup()

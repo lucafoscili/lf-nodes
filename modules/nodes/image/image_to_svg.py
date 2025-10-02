@@ -3,7 +3,7 @@ import torch
 from server import PromptServer
 
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
+from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, SVG_COMBO
 from ...utils.helpers.api import get_resource_url
 from ...utils.helpers.comfy import resolve_filepath
 from ...utils.helpers.conversion import numpy_to_tensor, numpy_to_svg, tensor_to_numpy, tensor_to_pil
@@ -44,7 +44,7 @@ class LF_ImageToSVG:
                     "step": 0.1,
                     "tooltip": "Contour simplification tolerance (Douglas-Peucker)"
                 }),
-                "vector_mode": (["fill", "stroke", "both"], {
+                "vector_mode": (SVG_COMBO, {
                     "default": "fill",
                     "tooltip": "Render mode: fill, stroke, or both."
                 }),
@@ -66,11 +66,11 @@ class LF_ImageToSVG:
             }
         }
 
-    RETURN_TYPES = ("STRING", "STRING", "IMAGE", "IMAGE", "STRING", "STRING")
-    RETURN_NAMES = ("svg", "svg_list", "image", "image_list", "palette", "palette_list")
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, True, False, True, False, True)
+    RETURN_NAMES = ("svg", "svg_list", "image", "image_list", "palette", "palette_list")
+    RETURN_TYPES = (Input.STRING, Input.STRING, Input.IMAGE, Input.IMAGE, Input.STRING, Input.STRING)
 
     def on_exec(self, **kwargs: dict):
         self._temp_cache.cleanup()

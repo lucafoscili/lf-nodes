@@ -1,7 +1,7 @@
 from server import PromptServer
 
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION
+from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
 from ...utils.helpers.logic import normalize_json_input
 
 # region LF_WriteJSON
@@ -10,7 +10,7 @@ class LF_WriteJSON:
     def INPUT_TYPES(self):
         return {
             "required": {
-                "ui_widget": ("LF_TEXTAREA", {
+                "ui_widget": (Input.LF_TEXTAREA, {
                     "default": "{}", 
                     "tooltip": "Write your JSON content here."
                 }),
@@ -21,7 +21,8 @@ class LF_WriteJSON:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     OUTPUT_NODE = True
-    RETURN_TYPES = ("JSON",)
+    RETURN_NAMES = ("json",)
+    RETURN_TYPES = (Input.JSON,)
 
     def on_exec(self, **kwargs: dict):
         ui_widget: dict = normalize_json_input(kwargs.get("ui_widget", {}))

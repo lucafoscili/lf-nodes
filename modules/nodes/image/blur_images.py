@@ -51,7 +51,7 @@ class LF_BlurImages:
     INPUT_IS_LIST = (True, False, False, True)
     OUTPUT_IS_LIST = (False, True, True, False)
     RETURN_NAMES = ("image", "image_list", "file_name", "count")
-    RETURN_TYPES = ("IMAGE", "IMAGE", "STRING", "INT")
+    RETURN_TYPES = (Input.IMAGE, Input.IMAGE, Input.STRING, Input.INTEGER)
 
     def on_exec(self, **kwargs: dict):
         self._temp_cache.cleanup()
