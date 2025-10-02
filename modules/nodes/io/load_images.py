@@ -284,40 +284,53 @@ class LF_LoadImages:
                 if load_cap > 0 and index >= load_cap:
                     break
 
+        placeholder_tensor = None
         if not images:
-            placeholder_image = selected_image if isinstance(selected_image, torch.Tensor) else create_dummy_image_tensor()
-            images.append(placeholder_image)
-            if not file_names:
-                file_names.append("empty")
-            if not output_creation_dates:
-                output_creation_dates.append("")
-            metadata_list.append(
-                {
-                    "file": file_names[-1],
-                    "original_filename": None,
-                    "sanitized_file": file_names[-1],
-                    "copied_for_preview": False,
-                    "metadata": {"info": "Generated placeholder image."},
-                }
-            )
-            selected_image = placeholder_image
+            placeholder_tensor = selected_image if isinstance(selected_image, torch.Tensor) else create_dummy_image_tensor()
+            if dummy_output:
+                images.append(placeholder_tensor)
+                if not file_names:
+                    file_names.append("empty")
+                if not output_creation_dates:
+                    output_creation_dates.append("")
+                metadata_list.append(
+                    {
+                        "file": file_names[-1],
+                        "original_filename": None,
+                        "sanitized_file": file_names[-1],
+                        "copied_for_preview": False,
+                        "metadata": {"info": "Generated placeholder image."},
+                    }
+                )
+                selected_image = placeholder_tensor
 
         if selected_image is None and images:
             selected_image = images[0]
 
         image_batch, image_list = normalize_output_image(images) if images else ([], [])
 
-        if image_batch:
-            primary_image = image_batch[0]
-        else:
-            primary_image = selected_image if isinstance(selected_image, torch.Tensor) else create_dummy_image_tensor()
-            image_batch = [primary_image]
-            if not image_list:
-                image_list = [primary_image]
-
         sel_img, sel_idx, sel_name = select(
             image_list, file_names, selected_index, selected_name
         )
+
+        if image_batch:
+            primary_image = image_batch[0]
+        elif sel_img is not None and isinstance(sel_img, torch.Tensor):
+            primary_image = sel_img
+        elif isinstance(selected_image, torch.Tensor):
+            primary_image = selected_image
+        elif isinstance(placeholder_tensor, torch.Tensor):
+            primary_image = placeholder_tensor
+        else:
+            primary_image = create_dummy_image_tensor()
+
+        if sel_img is None or not isinstance(sel_img, torch.Tensor):
+            if isinstance(selected_image, torch.Tensor):
+                sel_img = selected_image
+            elif isinstance(placeholder_tensor, torch.Tensor):
+                sel_img = placeholder_tensor
+            else:
+                sel_img = primary_image
 
         output_tuple = (
             primary_image,

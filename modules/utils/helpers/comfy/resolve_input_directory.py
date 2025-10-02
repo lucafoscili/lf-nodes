@@ -1,7 +1,7 @@
 import hashlib
 import os
 import shutil
-from typing import NamedTuple, Tuple, Union
+from typing import NamedTuple, Union
 
 from ...constants import EXTERNAL_PREVIEW_SUBDIR
 from ..logic import SAFE_EXT_FALLBACK, SAFE_FILENAME_FALLBACK, sanitize_filename
@@ -77,22 +77,23 @@ def resolve_input_directory_path(
         configured base directory; False otherwise. When resolution fails or the
         result is inside the base (including the base itself), this is False.
 
-    Behavior summary:
-    - If directory is None or only whitespace: returns (abs_base_dir, "", False).
-    - If directory is an existing filesystem directory (absolute or relative):
-        - If the directory is located inside the base directory, returns its absolute
-          path and a relative path under the base, with separators normalized to "/".
-        - If the directory exists but is outside the base, returns its absolute path,
-          an empty relative string, and is_outside_base == True.
-    - If directory is a non-existing absolute path: resolution fails -> (None, "", False).
-    - If directory is a relative path, it is interpreted as a sequence of components
+        Behavior summary:
+        - If directory is None or only whitespace: returns ``ResolvedDirectory(abs_base_dir, "", False)``.
+        - If directory is an existing filesystem directory (absolute or relative):
+                - If the directory is located inside the base directory, returns a
+                    ``ResolvedDirectory`` with the absolute path and relative path populated.
+                - If the directory exists but is outside the base, ``is_external`` is ``True``
+                    and ``relative_path`` is empty.
+        - If directory is a non-existing absolute path: resolution fails and the result is
+            ``ResolvedDirectory(None, "", False)``.
+        - If directory is a relative path, it is interpreted as a sequence of components
       under the base directory. Each component is matched against actual directory
       entries in the filesystem:
         - Exact name matches win.
         - Otherwise a sanitized comparison (e.g., case/Unicode normalization depending
           on _sanitize_path_component) is used to find a matching directory entry.
         - If any component cannot be matched or any filesystem access fails (OSError),
-          resolution fails -> (None, "", False).
+        resolution fails and the helper returns ``ResolvedDirectory(None, "", False)``.
     - The returned relative path uses forward slashes and uses "" for the base
       directory itself (not ".").
 
@@ -101,14 +102,14 @@ def resolve_input_directory_path(
     - Directory names are normalized for matching using _sanitize_path_component;
       this allows tolerant matching (for example, case-insensitive or accent-insensitive
       matches depending on that sanitizer).
-    - The function never raises on normal failure modes (missing entries, permission
-      errors); instead it returns (None, "", False) for failure cases.
+        - The function never raises on normal failure modes (missing entries, permission
+            errors); instead it returns ``ResolvedDirectory(None, "", False)`` for failure cases.
 
     Examples:
-    - directory = None -> (abs_base_dir, "", False)
-    - directory = "subdir/inner" -> (abs_base_dir/subdir/inner, "subdir/inner", False) if matched
-    - directory = "C:/Other/Folder" (exists outside base) -> ("C:/Other/Folder", "", True)
-    - directory = "/non/existent/dir" -> (None, "", False)
+        - directory = None -> ``ResolvedDirectory(abs_base_dir, "", False)``
+        - directory = "subdir/inner" -> ``ResolvedDirectory(abs_base_dir/subdir/inner, "subdir/inner", False)`` if matched
+        - directory = "C:/Other/Folder" (exists outside base) -> ``ResolvedDirectory("C:/Other/Folder", "", True)``
+        - directory = "/non/existent/dir" -> ``ResolvedDirectory(None, "", False)``
     """
     base_dir = get_comfy_dir(base_type)
     base_abs = os.path.abspath(base_dir)
@@ -183,7 +184,7 @@ def resolve_input_directory_path(
     return ResolvedDirectory(current_dir, rel_path, False)
 
 
-def ensure_external_preview(source_dir: str, filename: str, *, base_type: str = "input") -> Tuple[str, str]:
+def ensure_external_preview(source_dir: str, filename: str, *, base_type: str = "input") -> tuple[str, str]:
     source_path = os.path.join(source_dir, filename)
     base_input = get_comfy_dir(base_type)
 
