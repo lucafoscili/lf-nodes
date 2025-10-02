@@ -10,6 +10,7 @@ from .normalize_list_item import *
 from .normalize_list_to_value import *
 from .normalize_masks_for_images import *
 from .normalize_output_image import *
+from .normalize_output_mask import *
 from .not_none import *
 from .randomize_from_history import *
 from .selector_utils import *
