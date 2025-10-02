@@ -1,5 +1,4 @@
 import os
-import re
 import torch
 
 from datetime import datetime
@@ -7,30 +6,25 @@ from PIL import Image
 from server import PromptServer
 
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
+from ...utils.constants import EVENT_PREFIX, FUNCTION, IMAGE_FILE_EXTENSIONS, Input
 from ...utils.helpers.api import get_resource_url
-from ...utils.helpers.comfy import get_comfy_dir, resolve_filepath
+from ...utils.helpers.comfy import (
+    ensure_external_preview,
+    get_comfy_dir,
+    resolve_filepath,
+    resolve_input_directory_path,
+)
 from ...utils.helpers.conversion import pil_to_tensor
-from ...utils.helpers.logic import normalize_json_input, normalize_list_to_value, normalize_output_image
+from ...utils.helpers.logic import (
+    SAFE_FILENAME_FALLBACK,
+    normalize_json_input,
+    normalize_list_to_value,
+    normalize_output_image,
+    sanitize_filename,
+)
 from ...utils.helpers.metadata import extract_jpeg_metadata, extract_png_metadata
 from ...utils.helpers.torch import create_dummy_image_tensor
 from ...utils.helpers.ui import create_masonry_node
-
-SAFE_FILENAME_FALLBACK = "image"
-
-
-def _sanitize_filename_component(name: str) -> str:
-    sanitized = (name or "").strip()
-    sanitized = sanitized.replace("\\", "_").replace("/", "_")
-    sanitized = re.sub(r"\s+", " ", sanitized)
-    sanitized = sanitized.rstrip(". ")
-
-    while ".." in sanitized:
-        sanitized = sanitized.replace("..", ".")
-
-    sanitized = sanitized.strip()
-
-    return sanitized or SAFE_FILENAME_FALLBACK
 
 # region LF_LoadImages
 class LF_LoadImages:
@@ -120,6 +114,11 @@ class LF_LoadImages:
         copy_into_input_dir: bool = normalize_list_to_value(kwargs.get("copy_into_input_dir"))
         ui_widget: dict = normalize_json_input(kwargs.get("ui_widget", {}))
 
+        base_input_dir = get_comfy_dir("input")
+        resolved_dir, resolved_directory, is_external_dir = resolve_input_directory_path(dir)
+        if resolved_dir is not None and not os.path.isdir(resolved_dir):
+            resolved_dir = None
+
         index = 0
         file_names: list[str] = []
         images: list[torch.Tensor] = []
@@ -137,7 +136,21 @@ class LF_LoadImages:
             selected_index = None
             selected_name = None
 
-        cache_key = os.path.normpath(dir)
+        cache_key_base = resolved_dir or (dir or "")
+        try:
+            normalized_cache_key = os.path.normpath(cache_key_base)
+        except Exception:
+            normalized_cache_key = cache_key_base
+        cache_key = "|".join(
+            [
+                normalized_cache_key,
+                str(subdir),
+                str(strip_ext),
+                str(load_cap),
+                str(copy_into_input_dir),
+                str(is_external_dir),
+            ]
+        )
 
         if cache_images and cache_key in self._cached_images:
             cached_output, cached_dataset = self._cached_images[cache_key]
@@ -160,67 +173,107 @@ class LF_LoadImages:
             )
             return new_output
 
-        for root, dirs, files in os.walk(dir):
-            if not subdir:
-                dirs[:] = []
-            for file in files:
-                if file.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif')):
+        if resolved_dir:
+            for root, dirs, files in os.walk(resolved_dir):
+                if not subdir:
+                    dirs[:] = []
+
+                relative_to_dir = os.path.relpath(root, resolved_dir)
+                relative_to_dir = "" if relative_to_dir == "." else relative_to_dir.replace("\\", "/")
+                combined_subfolder = "/".join(
+                    [part for part in [resolved_directory, relative_to_dir] if part]
+                )
+
+                for file in files:
+                    if not file.lower().endswith(IMAGE_FILE_EXTENSIONS):
+                        continue
+
                     image_path = os.path.join(root, file)
-                    with open(image_path, 'rb') as img_file:
+                    if not os.path.isfile(image_path):
+                        continue
+
+                    with open(image_path, "rb") as img_file:
                         original_stem, extension = os.path.splitext(file)
-                        extension = extension.lstrip('.')
-                        extension_lower = extension.lower()
-                        safe_stem = _sanitize_filename_component(original_stem)
-                        normalized_extension = extension_lower.replace('jpg', 'jpeg')
+                        extension_lower = extension.lstrip(".").lower()
+
+                        sanitized_full = sanitize_filename(
+                            file,
+                            default_ext=extension_lower or "png",
+                        )
+                        safe_stem, safe_ext = os.path.splitext(sanitized_full)
+                        safe_stem = safe_stem or SAFE_FILENAME_FALLBACK
+                        safe_ext = safe_ext.lstrip(".") or (extension_lower or "png")
+
+                        normalized_extension = safe_ext.replace("jpg", "jpeg")
                         display_extension = extension_lower or normalized_extension
                         safe_filename = f"{safe_stem}.{display_extension}" if display_extension else safe_stem
                         display_name = safe_stem if strip_ext else safe_filename
 
                         file_names.append(display_name)
-              
-                        file_creation_time = os.path.getctime(image_path)
-                        creation_date = datetime.fromtimestamp(file_creation_time).strftime('%Y-%m-%d')
+
+                        try:
+                            file_creation_time = os.path.getctime(image_path)
+                            creation_date = datetime.fromtimestamp(file_creation_time).strftime("%Y-%m-%d")
+                        except OSError:
+                            creation_date = ""
                         output_creation_dates.append(creation_date)
 
                         pil_image = Image.open(img_file)
-                        if pil_image.format == "JPEG":
-                            metadata = extract_jpeg_metadata(pil_image, original_stem)
-                        elif pil_image.format == "PNG":
-                            metadata = extract_png_metadata(pil_image)
-                        else:
-                            metadata = {"error": f"Unsupported image format for {original_stem}"}
+                        try:
+                            if pil_image.format == "JPEG":
+                                metadata = extract_jpeg_metadata(pil_image, original_stem)
+                            elif pil_image.format == "PNG":
+                                metadata = extract_png_metadata(pil_image)
+                            else:
+                                metadata = {"error": f"Unsupported image format for {original_stem}"}
 
-                        rgb_img = pil_image.convert("RGB")
+                            rgb_img = pil_image.convert("RGB")
+                        finally:
+                            pil_image.close()
+
                         img_tensor = pil_to_tensor(rgb_img)
 
                         force_preview_copy = ".." in file
                         should_copy = copy_into_input_dir or force_preview_copy
+                        copied_for_preview = False
 
-                        if should_copy:
+                        if is_external_dir:
+                            try:
+                                preview_subfolder, preview_filename = ensure_external_preview(root, file)
+                                copied_for_preview = True
+                            except FileNotFoundError:
+                                continue
+                            url = get_resource_url(preview_subfolder, preview_filename, "input")
+                        elif should_copy:
+                            filename_prefix = f"{combined_subfolder}/{safe_stem}" if combined_subfolder else safe_stem
                             output_file, subfolder, resolved_filename = resolve_filepath(
-                                filename_prefix=safe_stem,
-                                base_output_path=get_comfy_dir("input"),
+                                filename_prefix=filename_prefix,
+                                base_output_path=base_input_dir,
                                 extension=normalized_extension,
                                 add_counter=False,
-                                image=img_tensor
+                                image=img_tensor,
                             )
                             url = get_resource_url(subfolder, resolved_filename, "input")
                             save_format = normalized_extension.upper() if normalized_extension else "PNG"
                             rgb_img.save(output_file, format=save_format)
                             preview_filename = resolved_filename
+                            copied_for_preview = True
                         else:
                             preview_filename = safe_filename
-                            url = get_resource_url(root, file, "input")
+                            target_subfolder = combined_subfolder
+                            url = get_resource_url(target_subfolder, file, "input")
 
                         images.append(img_tensor)
 
-                        metadata_list.append({
-                            "file": original_stem,
-                            "original_filename": file,
-                            "sanitized_file": preview_filename,
-                            "copied_for_preview": should_copy,
-                            "metadata": metadata
-                        })
+                        metadata_list.append(
+                            {
+                                "file": original_stem,
+                                "original_filename": file,
+                                "sanitized_file": preview_filename,
+                                "copied_for_preview": copied_for_preview,
+                                "metadata": metadata,
+                            }
+                        )
 
                         nodes.append(create_masonry_node(preview_filename, url, index))
 
@@ -228,25 +281,55 @@ class LF_LoadImages:
                         if load_cap > 0 and index >= load_cap:
                             break
 
-            if load_cap > 0 and index >= load_cap:
-                break
+                if load_cap > 0 and index >= load_cap:
+                    break
 
-        if dummy_output and not images:
-            file_names.append("empty")
-            selected_image = create_dummy_image_tensor()
-            images.append(selected_image)         
+        if not images:
+            placeholder_image = selected_image if isinstance(selected_image, torch.Tensor) else create_dummy_image_tensor()
+            images.append(placeholder_image)
+            if not file_names:
+                file_names.append("empty")
+            if not output_creation_dates:
+                output_creation_dates.append("")
+            metadata_list.append(
+                {
+                    "file": file_names[-1],
+                    "original_filename": None,
+                    "sanitized_file": file_names[-1],
+                    "copied_for_preview": False,
+                    "metadata": {"info": "Generated placeholder image."},
+                }
+            )
+            selected_image = placeholder_image
 
-        if dummy_output and images and selected_image is None:
-            selected_image = create_dummy_image_tensor()
+        if selected_image is None and images:
+            selected_image = images[0]
 
-        image_batch, image_list = normalize_output_image(images)
+        image_batch, image_list = normalize_output_image(images) if images else ([], [])
+
+        if image_batch:
+            primary_image = image_batch[0]
+        else:
+            primary_image = selected_image if isinstance(selected_image, torch.Tensor) else create_dummy_image_tensor()
+            image_batch = [primary_image]
+            if not image_list:
+                image_list = [primary_image]
 
         sel_img, sel_idx, sel_name = select(
             image_list, file_names, selected_index, selected_name
         )
 
-        output_tuple = (image_batch[0], image_list, file_names, output_creation_dates, index, 
-                        sel_img, sel_idx, sel_name, metadata_list)
+        output_tuple = (
+            primary_image,
+            image_list,
+            file_names,
+            output_creation_dates,
+            index,
+            sel_img,
+            sel_idx,
+            sel_name,
+            metadata_list,
+        )
 
         if cache_images:
             self._cached_images[cache_key] = (output_tuple, dataset)
