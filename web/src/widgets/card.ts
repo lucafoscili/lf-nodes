@@ -54,6 +54,7 @@ export const cardFactory: CardFactory = {
 
     switch (node.comfyClass as NodeName) {
       case NodeName.checkpointSelector:
+      case NodeName.diffusionModelSelector:
       case NodeName.embeddingSelector:
       case NodeName.loraAndEmbeddingSelector:
       case NodeName.loraSelector:
