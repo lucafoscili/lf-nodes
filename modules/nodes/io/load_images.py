@@ -57,12 +57,11 @@ class LF_LoadImages:
                 }),
                 "cache_images": (Input.BOOLEAN, {
                     "default": True, 
-                    "tooltip": "Whether to refresh the image list each time the node is executed or to use cached images from the previous run."
+                    "tooltip": "When enabled the node reuses the last scan for the same settings, skipping disk traversal until parameters change."
                 }),
                 "copy_into_input_dir": (Input.BOOLEAN, {
-                    "default": True, 
-                    "tooltip": "Whether to copy the loaded images into the input directory of ComfyUI. The loading is faster when this is set to False, "
-                               "but this is mandatory for the preview to be displayed in the node's UI widget."
+                    "default": False, 
+                    "tooltip": "Create sanitized copies inside ComfyUI's input folder for reuse/export. Previews now work without this, but keep it on if you want dedicated duplicates."
                 })
             },
             "optional": {
