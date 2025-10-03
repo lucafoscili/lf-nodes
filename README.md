@@ -23,49 +23,38 @@
 
 A suite of custom nodes for [ComfyUI](https://github.com/comfyanonymous/ComfyUI) aimed at enhancing user experience with more interactive and visually engaging widgets.
 
-Whether you're after quality-of-life improvements or specific functionalities, LF Nodes has you covered. The nodes are designed to be user-friendly and intuitive, making them accessible to users of all skill levels.
-
 Most UI elements used by the frontend belong to the [LF Widgets webcomponents library](https://github.com/lucafoscili/lf-widgets), a modern collection of modular and customizable webcomponents built on Stencil.js specifically to integrate with LF Nodes.
-  
-![Histograms and compares](https://github.com/lucafoscili/lucafoscili/blob/97bfd28ca4ea3c0ecf6a6990fbbd467ab394c2cc/lf-nodes/screenshots/Screenshot%202025-02-18%20094817.png "Histograms and compares")
 
-## What kind of nodes does it offer?
+![Simple inpaint](https://github.com/lucafoscili/lucafoscili/blob/e988f5c1df6299e96f2bf6b164c3b99e6df841f7/lf-nodes/screenshots/Screenshot%202025-10-03%20224716.jpg "Simple inpaint")
 
-That's a tough one—the nodes span quite a few categories. Here's a quick breakdown:
+The nodes span quite a few categories:
 
 - **Analytics nodes**: Visualize and track data, like checkpoint/LoRA usage or image histograms.
 - **Configuration nodes**: Manage CivitAI metadata, and control the suite via the Control Panel.
+- **Filter nodes**: Apply various filters to images, including blur, sharpen, and edge detection.
 - **Image manipulation nodes**: Tools to manipulate images, such as filter and resize nodes.
 - **IO Operations nodes**: Load and save files to/from the file system.
 - **JSON nodes**: Tools to manipulate and display JSON data.
+- **Latent manipulation nodes**: Latent decoding and encoding tools.
 - **LLM nodes**: Interface with locally running LLMs, like the Messenger node, which also manages characters.
 - **Logic nodes**: Control flow using simple switches.
 - **Primitive nodes**: Work with primitive data types, offering features like history.
+- **Region nodes**: Image region selection and editing tools.
 - **Seed generation nodes**: Generate seeds for complex workflows.
 - **Selector nodes**: Resource selection widgets with metadata display for models.
+
+To see some example workflow you can check the [example_workflows folder](example_workflows).
 
 ## Table of Contents
 
 - [LF Nodes](#lf-nodes)
   - [Overview](#overview)
-  - [What kind of nodes does it offer?](#what-kind-of-nodes-does-it-offer)
   - [Table of Contents](#table-of-contents)
   - [Installation](#installation)
-    - [Using ComfyUI Manager](#using-comfyui-manager)
+    - [ComfyUI Manager](#comfyui-manager)
     - [Manual](#manual)
-  - [Workflow samples](#workflow-samples)
-    - [Image 2 Image (ControlNet + Editing breakpoint + WD14Tagger)](#image-2-image-controlnet--editing-breakpoint--wd14tagger)
-    - [Caption dataset (WD14)](#caption-dataset-wd14)
-    - [Resize image for training](#resize-image-for-training)
-    - [Compare images](#compare-images)
-    - [e2e](#e2e)
-    - [Flux + LLM Character manager](#flux--llm-character-manager)
-    - [I2I (Refine)](#i2i-refine)
-    - [LLM Chat](#llm-chat)
-    - [LoRA tester](#lora-tester)
-    - [Markdown documentation](#markdown-documentation)
-    - [Multiple prompt from JSON](#multiple-prompt-from-json)
-    - [Resize for web + blurred placeholder](#resize-for-web--blurred-placeholder)
+      - [Method 1: Download ZIP](#method-1-download-zip)
+      - [Method 2: Git Clone](#method-2-git-clone)
   - [Notes](#notes)
   - [Contributing](#contributing)
   - [License](#license)
@@ -73,7 +62,7 @@ That's a tough one—the nodes span quite a few categories. Here's a quick break
 
 ## Installation
 
-### Using ComfyUI Manager
+### ComfyUI Manager
 
 - Open ComfyUI Manager.
 - Search LF Nodes.
@@ -81,59 +70,18 @@ That's a tough one—the nodes span quite a few categories. Here's a quick break
 
 ### Manual
 
+#### Method 1: Download ZIP
+
+- Go to the [releases page](https://github.com/lucafoscili/lf-nodes/releases).
+- Download the latest release ZIP file.
+- Extract the contents of the ZIP file into the `ComfyUI/custom_nodes` folder.
+- Restart ComfyUI.
+
+#### Method 2: Git Clone
+
 - Go to the `ComfyUI/custom_nodes` folder.
 - Open a terminal.
 - Copy and paste this command `git clone https://github.com/lucafoscili/lf-nodes.git`.
-
-## Workflow samples
-
-### [Image 2 Image (ControlNet + Editing breakpoint + WD14Tagger)](https://github.com/lucafoscili/lf-nodes/blob/929fdb5a982c2c2192932f27782bf2a41a92e428/example_workflows/Image%202%20Image%20(with%20ControlNet%2C%20editing%20breakpoint%20and%20WD14%20tagger).json)
-
-![Image 2 Image (ControlNet + Editing breakpoint + WD14Tagger)](https://github.com/lucafoscili/lucafoscili/blob/c581de007c088e84a7cb78c64431b7263622ff0f/lf-nodes/screenshots/Image%202%20Image%20(with%20ControlNet%2C%20editing%20breakpoint%20and%20WD14%20tagger).png)
-
-### [Caption dataset (WD14)](https://github.com/lucafoscili/lf-nodes/blob/929fdb5a982c2c2192932f27782bf2a41a92e428/example_workflows/Caption%20dataset%20(WD14).json)
-
-![Caption dataset (WD14)](https://github.com/lucafoscili/lucafoscili/blob/dd5c3f0fd525ff4cf5b99a940562faa4b7d0135e/lf-nodes/screenshots/Caption%20dataset%20(WD14).png)
-
-### [Resize image for training](https://github.com/lucafoscili/lf-nodes/blob/929fdb5a982c2c2192932f27782bf2a41a92e428/example_workflows/Resize%20image%20for%20training.json)
-
-![Resize image for training](https://github.com/lucafoscili/lucafoscili/blob/743c982169cb6a8981b14a13dd65b1016fc84028/lf-nodes/screenshots/Resize%20image%20for%20training.png)
-
-### [Compare images](https://github.com/lucafoscili/lf-nodes/blob/929fdb5a982c2c2192932f27782bf2a41a92e428/example_workflows/Compare%20images.json)
-
-![Compare images](https://github.com/lucafoscili/lucafoscili/blob/3c8e1c3b4d802115a0cd03c29eb71db0ba698a89/lf-nodes/screenshots/Compare%20images.png)
-
-### [e2e](https://github.com/lucafoscili/lucafoscili/blob/a42765fc6ef9a394deeb695e4c31eaf3c5ec6139/lf-nodes/workflows/E2E.json)
-
-![e2e](https://github.com/lucafoscili/lucafoscili/blob/a42765fc6ef9a394deeb695e4c31eaf3c5ec6139/lf-nodes/screenshots/E2E.png)
-
-### [Flux + LLM Character manager](https://github.com/lucafoscili/lf-nodes/blob/929fdb5a982c2c2192932f27782bf2a41a92e428/example_workflows/Flux%20%2B%20LLM%20Character%20manager.json)
-
-![Flux + LLM Character manager](https://github.com/lucafoscili/lucafoscili/blob/a42765fc6ef9a394deeb695e4c31eaf3c5ec6139/lf-nodes/screenshots/Flux%20%2B%20LLM%20Character%20manager.png)
-
-### [I2I (Refine)](https://github.com/lucafoscili/lucafoscili/blob/a42765fc6ef9a394deeb695e4c31eaf3c5ec6139/lf-nodes/workflows/Image%202%20Image%20(Refine).json)
-
-![I2I (Refine)](https://github.com/lucafoscili/lucafoscili/blob/a42765fc6ef9a394deeb695e4c31eaf3c5ec6139/lf-nodes/screenshots/Image%202%20Image%20(Refine).png)
-
-### [LLM Chat](https://github.com/lucafoscili/lf-nodes/blob/929fdb5a982c2c2192932f27782bf2a41a92e428/example_workflows/LLM%20Chat.json)
-
-![LLM Chat](https://github.com/lucafoscili/lucafoscili/blob/a42765fc6ef9a394deeb695e4c31eaf3c5ec6139/lf-nodes/screenshots/LLM%20Chat.png)
-
-### [LoRA tester](https://github.com/lucafoscili/lf-nodes/blob/929fdb5a982c2c2192932f27782bf2a41a92e428/example_workflows/LoRa%20tester.json)
-
-![LoRA tester](https://github.com/lucafoscili/lucafoscili/blob/a42765fc6ef9a394deeb695e4c31eaf3c5ec6139/lf-nodes/screenshots/Lora%20tester.png)
-
-### [Markdown documentation](https://github.com/lucafoscili/lf-nodes/blob/929fdb5a982c2c2192932f27782bf2a41a92e428/example_workflows/Markdown%20documentation.json)
-
-![Markdown documentation](https://github.com/lucafoscili/lucafoscili/blob/a42765fc6ef9a394deeb695e4c31eaf3c5ec6139/lf-nodes/screenshots/Markdown%20documentation.png)
-
-### [Multiple prompt from JSON](https://github.com/lucafoscili/lf-nodes/blob/929fdb5a982c2c2192932f27782bf2a41a92e428/example_workflows/Multiple%20prompt%20from%20JSON.json)
-
-![Multiple prompt from JSON](https://github.com/lucafoscili/lucafoscili/blob/b919d07e84881210b41e8ceba6126f0b01e50f38/lf-nodes/screenshots/Multiple%20prompt%20from%20JSON.png)
-
-### [Resize for web + blurred placeholder](https://github.com/lucafoscili/lf-nodes/blob/929fdb5a982c2c2192932f27782bf2a41a92e428/example_workflows/Multiple%20image%20resize%20for%20web%20%2B%20blurred%20placeholder.json)
-
-![Resize for web + blurred placeholder](https://github.com/lucafoscili/lucafoscili/blob/a42765fc6ef9a394deeb695e4c31eaf3c5ec6139/lf-nodes/screenshots/Multiple%20image%20resize%20for%20web%20%2B%20blurred%20placeholder.png)
 
 ## Notes
 
@@ -168,6 +116,8 @@ MIT License
 
 For an overview of how this nodes suite is structured and how it integrates with the UI, see:
 
-- [Architecture](docs/ARCHITECTURE.md)  
+- [Architecture](docs/ARCHITECTURE.md)
 - [Image Editor](docs/IMAGE_EDITOR.md)
 - [Node Template](docs/NODE_TEMPLATE.md)
+
+![Simple pipeline](https://github.com/lucafoscili/lucafoscili/blob/e988f5c1df6299e96f2bf6b164c3b99e6df841f7/lf-nodes/screenshots/Screenshot%202025-02-18%20094817.png "Simple pipeline")

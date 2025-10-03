@@ -174,12 +174,7 @@ export const SECTIONS: ControlPanelFixture = {
             {
               id: ControlPanelSection.Content,
               value:
-                'This button will create a manual backup of the content in <path/to/your/comfyui/user/LF_Nodes>',
-            },
-            {
-              id: ControlPanelSection.Content,
-              value:
-                "Be sure to include as much information as you can, without sufficient data it's difficult to troubleshoot problems.",
+                'This button will create a manual backup of the content in <path/to/your/comfyui/user/LF_Nodes>.',
             },
             {
               id: ControlPanelSection.Content,
@@ -472,6 +467,7 @@ export const SECTIONS: ControlPanelFixture = {
               value:
                 'Metadata pulled from CivitAI are stored in .info files saved in the same folders of the models to avoid unnecessary fetches from the API.',
             },
+            { id: ControlPanelSection.Content, tagName: 'div', value: '' },
             {
               id: ControlPanelSection.Content,
               value:

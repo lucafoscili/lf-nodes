@@ -16,88 +16,84 @@ class LF_CivitAIMetadataSetup:
             },
             "optional": {
                 "model_type": (UNET_DIFFUSION_COMBO, {
-                    "default": "none", 
+                    "default": "none",
                     "tooltip": "Type of model to use for metadata generation."
                 }),
                 "checkpoint": (get_comfy_list("checkpoints"), {
-                    "default": "None", 
+                    "default": "None",
                     "tooltip": "Checkpoint used to generate the image (only used when model_type is 'checkpoint')."
                 }),
                 "unet": (get_comfy_list("unet"), {
-                    "default": "None", 
+                    "default": "None",
                     "tooltip": "Diffusion model used to generate the image (only used when model_type is 'unet')."
                 }),
                 "vae": (get_comfy_list("vae"), {
                     "tooltip": "VAE used to generate the image."
                 }),
                 "sampler": (SAMPLERS, {
-                    "default": "None", 
+                    "default": "None",
                     "tooltip": "Sampler used to generate the image."
                 }),
                 "scheduler": (SCHEDULERS, {
-                    "default": "None", 
+                    "default": "None",
                     "tooltip": "Scheduler used to generate the image."
                 }),
                 "embeddings": (Input.STRING, {
-                    "default": '', 
-                    "multiline": True, 
+                    "default": '',
                     "tooltip": "Embeddings used to generate the image."
                 }),
                 "lora_tags": (Input.STRING, {
-                    "default": '', 
-                    "multiline": True, 
+                    "default": '',
                     "tooltip": "Tags of the LoRAs used to generate the image."
                 }),
                 "positive_prompt": (Input.STRING, {
-                    "default": '', 
-                    "multiline": True, 
+                    "default": '',
                     "tooltip": "Prompt to generate the image."
                 }),
                 "negative_prompt": (Input.STRING, {
-                    "default": '', 
-                    "multiline": True, 
+                    "default": '',
                     "tooltip": "Negative prompt used to generate the image."
                 }),
                 "steps": (Input.INTEGER, {
-                    "default": 30, 
-                    "min": 1, 
-                    "max": 10000, 
+                    "default": 30,
+                    "min": 1,
+                    "max": 10000,
                     "tooltip": "Steps used to generate the image."
                 }),
                 "denoising": (Input.FLOAT, {
-                    "default": 1.0, 
-                    "min": 0.0, 
-                    "max": 1.0, 
+                    "default": 1.0,
+                    "min": 0.0,
+                    "max": 1.0,
                     "tooltip": "Denoising strength used to generate the image."
                 }),
                 "clip_skip": (Input.INTEGER, {
-                    "default": -1, 
-                    "min": -24, 
-                    "max": -1, 
+                    "default": -1,
+                    "min": -24,
+                    "max": -1,
                     "tooltip": "CLIP skip used to generate the image."
                 }),
                 "cfg": (Input.FLOAT, {
-                    "default": 7.0, 
-                    "min": 0.0, 
-                    "max": 30.0, 
+                    "default": 7.0,
+                    "min": 0.0,
+                    "max": 30.0,
                     "tooltip": "CFG used to generate the image."
                 }),
                 "seed": (Input.INTEGER, {
-                    "default": 0, 
-                    "min": 0, 
-                    "max": INT_MAX, 
+                    "default": 0,
+                    "min": 0,
+                    "max": INT_MAX,
                     "tooltip": "Seed used to generate the image."
                 }),
                 "width": (Input.INTEGER, {
-                    "default": 1024, 
+                    "default": 1024,
                     "tooltip": "Width of the image."
                 }),
                 "height": (Input.INTEGER, {
-                    "default": 1024, 
+                    "default": 1024,
                     "tooltip": "Height of the image."
                 }),
                 "hires_upscale": (Input.FLOAT, {
-                    "default": 1.5, 
+                    "default": 1.5,
                     "tooltip": "Upscale factor for Hires-fix."
                 }),
                 "hires_upscaler": (get_comfy_list("upscale_models"), {
@@ -107,16 +103,16 @@ class LF_CivitAIMetadataSetup:
                     "default": ""
                 }),
             },
-            "hidden": { 
+            "hidden": {
                 "node_id": "UNIQUE_ID"
             }
         }
-    
+
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
-    RETURN_NAMES = ("metadata_string", "checkpoint", "unet", "vae", 
+    RETURN_NAMES = ("metadata_string", "checkpoint", "unet", "vae",
                     "sampler", "scheduler", "embeddings", "lora_tags",
-                    "full_pos_prompt", "neg_prompt", "steps", "denoising", "clip_skip", "cfg", "seed", 
+                    "full_pos_prompt", "neg_prompt", "steps", "denoising", "clip_skip", "cfg", "seed",
                     "width", "height", "hires_upscaler", "hires_upscale", "analytics_dataset")
     RETURN_TYPES = (Input.STRING, get_comfy_list("checkpoints"), get_comfy_list("unet"), get_comfy_list("vae"),
                     SAMPLERS, SCHEDULERS, Input.STRING, Input.STRING,
@@ -156,7 +152,7 @@ class LF_CivitAIMetadataSetup:
 
         model_name = "Unknown"
         model_hash = "Unknown"
-        
+
         if model_type == "checkpoint" and checkpoint and checkpoint != "None":
             model_name = checkpoint
             model_hash = get_sha256(get_full_path("checkpoints", checkpoint))
@@ -192,23 +188,23 @@ class LF_CivitAIMetadataSetup:
         )
 
         clean_metadata_string = metadata_string.replace(".safetensors", "").replace("embedding:", "")
-        
+
         PromptServer.instance.send_sync(f"{EVENT_PREFIX}civitaimetadatasetup", {
             "node": kwargs.get("node_id"),
             "value": clean_metadata_string,
         })
 
         output_prompt = f"{emb_str}{positive_prompt}" if positive_prompt else ""
-        
+
         selected_checkpoint = checkpoint if model_type == "checkpoint" else "None"
         selected_unet = unet if model_type == "unet" else "None"
-        
+
         return (
             clean_metadata_string, selected_checkpoint, selected_unet, vae, sampler, scheduler, embeddings, lora_tags,
             output_prompt, negative_prompt, steps, denoising, clip_skip, cfg, seed,
             width, height, hires_upscaler, hires_upscale, analytics_dataset
         )
-    
+
     @classmethod
     def VALIDATE_INPUTS(self, **kwargs):
          return True

@@ -11,11 +11,10 @@ class LF_KeywordCounter:
         return {
             "required": {
                 "prompt": (Input.STRING, {
-                    "multiline": True, 
                     "tooltip": "Prompt containing keywords to count."
                 }),
                 "separator": (Input.STRING, {
-                    "default": ", ", 
+                    "default": ", ",
                     "tooltip": "Character(s) used to separate keywords in the prompt."
                 }),
             },
@@ -24,7 +23,7 @@ class LF_KeywordCounter:
                     "default": {}
                 })
             },
-            "hidden": { 
+            "hidden": {
                 "node_id": "UNIQUE_ID"
             }
         }
