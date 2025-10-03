@@ -5607,7 +5607,7 @@ var libExports = /* @__PURE__ */ requireLib();
 function _class(obj) {
   return Object.prototype.toString.call(obj);
 }
-function isString(obj) {
+function isString$1(obj) {
   return _class(obj) === "[object String]";
 }
 const _hasOwnProperty = Object.prototype.hasOwnProperty;
@@ -5818,7 +5818,7 @@ var utils = /* @__PURE__ */ Object.freeze({
   isMdAsciiPunct,
   isPunctChar,
   isSpace,
-  isString,
+  isString: isString$1,
   isValidEntityCode,
   isWhiteSpace,
   lib,
@@ -9889,7 +9889,7 @@ function MarkdownIt(presetName, options) {
     return new MarkdownIt(presetName, options);
   }
   if (!options) {
-    if (!isString(presetName)) {
+    if (!isString$1(presetName)) {
       options = presetName || {};
       presetName = "default";
     }
@@ -9916,7 +9916,7 @@ MarkdownIt.prototype.set = function(options) {
 };
 MarkdownIt.prototype.configure = function(presets) {
   const self2 = this;
-  if (isString(presets)) {
+  if (isString$1(presets)) {
     const presetName = presets;
     presets = config[presetName];
     if (!presets) {
@@ -13498,7 +13498,7 @@ var X = false, Z = (t2, e2, n2) => {
                         const n6 = t7.i.replace(/-/g, "_"), o6 = t7.T;
                         if (!o6) return;
                         const r3 = i.get(o6);
-                        return r3 ? r3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-00fecc42.entry.js": () => import("./p-00fecc42.entry-BBOIbZPF.js"), "./p-0df37de3.entry.js": () => import("./p-0df37de3.entry-DRwU7awe.js"), "./p-28dd0bff.entry.js": () => import("./p-28dd0bff.entry-C19ZtHFM.js"), "./p-2e9faeab.entry.js": () => import("./p-2e9faeab.entry-CwDfbYeg.js"), "./p-36aa4a7f.entry.js": () => import("./p-36aa4a7f.entry-CX5_snz5.js"), "./p-37b3e400.entry.js": () => import("./p-37b3e400.entry-DeV-tRcY.js"), "./p-426ea672.entry.js": () => import("./p-426ea672.entry-ivmXmG5A.js"), "./p-43bf5312.entry.js": () => import("./p-43bf5312.entry-uoDNJHmV.js"), "./p-924ca284.entry.js": () => import("./p-924ca284.entry-lCids-Mu.js"), "./p-a0ed5f95.entry.js": () => import("./p-a0ed5f95.entry-BV4l4iYZ.js"), "./p-a6642965.entry.js": () => import("./p-a6642965.entry-BPchWDev.js"), "./p-bb63963d.entry.js": () => import("./p-bb63963d.entry-BVeSUtb3.js"), "./p-e2900881.entry.js": () => import("./p-e2900881.entry-DUFzqNVz.js"), "./p-e6148250.entry.js": () => import("./p-e6148250.entry-BH-qdiCz.js"), "./p-f19de954.entry.js": () => import("./p-f19de954.entry-CVMy4yaA.js"), "./p-febf6aa2.entry.js": () => import("./p-febf6aa2.entry-_MqSR__p.js") }), `./${o6}.entry.js`, 2).then(((t8) => (i.set(o6, t8), t8[n6])), ((t8) => {
+                        return r3 ? r3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-00fecc42.entry.js": () => import("./p-00fecc42.entry-B-7vYRZa.js"), "./p-0df37de3.entry.js": () => import("./p-0df37de3.entry-BTft8SI1.js"), "./p-28dd0bff.entry.js": () => import("./p-28dd0bff.entry-D8NWq3xv.js"), "./p-2e9faeab.entry.js": () => import("./p-2e9faeab.entry-BApK3OxJ.js"), "./p-36aa4a7f.entry.js": () => import("./p-36aa4a7f.entry-B2xOOrsQ.js"), "./p-37b3e400.entry.js": () => import("./p-37b3e400.entry-BZP86bnj.js"), "./p-426ea672.entry.js": () => import("./p-426ea672.entry-DOZZ0ryn.js"), "./p-43bf5312.entry.js": () => import("./p-43bf5312.entry-BFgKdn-M.js"), "./p-924ca284.entry.js": () => import("./p-924ca284.entry-CoGfNplL.js"), "./p-a0ed5f95.entry.js": () => import("./p-a0ed5f95.entry-CcocnQR7.js"), "./p-a6642965.entry.js": () => import("./p-a6642965.entry-D_1-5eqs.js"), "./p-bb63963d.entry.js": () => import("./p-bb63963d.entry-QxcvxRuU.js"), "./p-e2900881.entry.js": () => import("./p-e2900881.entry-CPBlYG2-.js"), "./p-e6148250.entry.js": () => import("./p-e6148250.entry-CoHJKb80.js"), "./p-f19de954.entry.js": () => import("./p-f19de954.entry-34L8huoR.js"), "./p-febf6aa2.entry.js": () => import("./p-febf6aa2.entry-BQCYuas2.js") }), `./${o6}.entry.js`, 2).then(((t8) => (i.set(o6, t8), t8[n6])), ((t8) => {
                           l(t8, e3.$hostElement$);
                         }));
                         /*!__STENCIL_STATIC_IMPORT_SWITCH__*/
@@ -14807,6 +14807,7 @@ function installLFBeforeFreeHooks(api2, opts = {}) {
   const fetchPatched = installFetchFallback();
   return { freeMemoryHook: freePatched, fetchFallbackHook: fetchPatched };
 }
+const isString = (value) => typeof value === "string";
 const asString = (value) => typeof value === "string" ? value : void 0;
 const getImageNode = (nodes, index) => {
   if (!Array.isArray(nodes) || index < 0 || index >= nodes.length) {
@@ -14945,6 +14946,36 @@ const ensureDatasetContext = (dataset, state) => {
   if (state == null ? void 0 : state.contextId) {
     dataset.context_id = state.contextId;
     return state.contextId;
+  }
+  return void 0;
+};
+const getNavigationDirectory = (dataset) => {
+  var _a;
+  return (_a = dataset == null ? void 0 : dataset.navigation) == null ? void 0 : _a.directory;
+};
+const mergeNavigationDirectory = (dataset, directory) => {
+  var _a;
+  const current = ((_a = dataset.navigation) == null ? void 0 : _a.directory) ?? {};
+  const next = {
+    ...current,
+    ...directory
+  };
+  dataset.navigation = dataset.navigation ?? {};
+  dataset.navigation.directory = next;
+  return next;
+};
+const deriveDirectoryValue = (directory) => {
+  if (!directory) {
+    return void 0;
+  }
+  if (isString(directory.raw)) {
+    return directory.raw;
+  }
+  if (isString(directory.relative)) {
+    return directory.relative;
+  }
+  if (isString(directory.resolved)) {
+    return directory.resolved;
   }
   return void 0;
 };
@@ -17382,6 +17413,32 @@ handlerRefs.textfield = EV_HANDLERS$a.textfield;
 handlerRefs.toggle = EV_HANDLERS$a.toggle;
 const STATE$h = /* @__PURE__ */ new WeakMap();
 const IMAGE_EDITOR_INSTANCES = /* @__PURE__ */ new Set();
+const normalizeDirectoryRequest = (value) => typeof value === "string" ? value : "";
+const syncNavigationDirectoryControl = async (state, directoryValue) => {
+  var _a;
+  const { imageviewer } = state.elements;
+  if (!(imageviewer == null ? void 0 : imageviewer.getComponents)) {
+    return;
+  }
+  const targetValue = normalizeDirectoryRequest(directoryValue);
+  try {
+    const components = await imageviewer.getComponents();
+    const textfield = (_a = components == null ? void 0 : components.navigation) == null ? void 0 : _a.textfield;
+    if (!textfield || typeof textfield.setValue !== "function") {
+      return;
+    }
+    const currentValue = typeof textfield.getValue === "function" ? await textfield.getValue() : void 0;
+    if ((currentValue ?? "") === targetValue) {
+      return;
+    }
+    state.isSyncingDirectory = true;
+    await textfield.setValue(targetValue);
+  } catch (error2) {
+    getLfManager().log("Failed to synchronize directory input.", { error: error2 }, LogSeverity.Warning);
+  } finally {
+    state.isSyncingDirectory = false;
+  }
+};
 const imageEditorFactory = {
   //#region Options
   options: (wrapper) => {
@@ -17396,7 +17453,7 @@ const imageEditorFactory = {
         const state = STATE$h.get(wrapper);
         const { actionButtons, grid, imageviewer } = state.elements;
         const callback = (_2, u2) => {
-          var _a;
+          var _a, _b;
           const parsedValue = u2.parsedJson;
           const isPending = ((_a = getStatusColumn(parsedValue)) == null ? void 0 : _a.title) === ImageEditorStatus.Pending;
           if (isPending) {
@@ -17404,13 +17461,27 @@ const imageEditorFactory = {
           }
           const dataset = parsedValue || {};
           ensureDatasetContext(dataset, state);
+          const navigationDirectory = getNavigationDirectory(dataset);
+          if (navigationDirectory) {
+            state.directory = { ...navigationDirectory };
+          }
+          const derivedDirectoryValue = deriveDirectoryValue(navigationDirectory);
+          if (derivedDirectoryValue !== void 0) {
+            state.directoryValue = derivedDirectoryValue;
+          }
           imageviewer.lfDataset = dataset;
           imageviewer.getComponents().then(({ details }) => {
             const { canvas } = details;
             if (canvas) {
               setBrush(canvas, STATE$h.get(wrapper).lastBrushSettings);
             }
-          });
+          }).catch((error2) => getLfManager().log("Failed to prepare image editor canvas.", { error: error2 }, LogSeverity.Warning));
+          void syncNavigationDirectoryControl(state, state.directoryValue);
+          const shouldAutoLoad = !state.hasAutoDirectoryLoad && (!Array.isArray(dataset == null ? void 0 : dataset.nodes) || dataset.nodes.length === 0);
+          if (shouldAutoLoad) {
+            state.hasAutoDirectoryLoad = true;
+            (_b = state.refreshDirectory) == null ? void 0 : _b.call(state, normalizeDirectoryRequest(state.directoryValue));
+          }
         };
         normalizeValue(value, callback, CustomWidgetName.imageEditor);
       }
@@ -17426,22 +17497,46 @@ const imageEditorFactory = {
     const imageviewer = document.createElement(TagName.LfImageviewer);
     const refresh = async (directory) => {
       const state2 = STATE$h.get(wrapper);
-      getLfManager().getApiRoutes().image.get(directory).then((r2) => {
-        if (r2.status === "success") {
-          if ((r2 == null ? void 0 : r2.data) && Object.entries(r2.data).length > 0) {
-            const dataset = r2.data;
-            ensureDatasetContext(dataset, state2);
-            imageviewer.lfDataset = dataset;
-          } else {
-            getLfManager().log("Images not found.", { r: r2 }, LogSeverity.Info);
-          }
+      const normalizedDirectory = normalizeDirectoryRequest(directory);
+      state2.hasAutoDirectoryLoad = true;
+      state2.lastRequestedDirectory = normalizedDirectory;
+      try {
+        const response = await getLfManager().getApiRoutes().image.get(normalizedDirectory);
+        if (response.status !== "success") {
+          getLfManager().log("Images not found.", { response }, LogSeverity.Info);
+          return;
         }
-      });
+        const dataset = (response == null ? void 0 : response.data) ?? { nodes: [] };
+        const mergedDirectory = mergeNavigationDirectory(dataset, { raw: normalizedDirectory });
+        state2.directory = { ...mergedDirectory };
+        const derivedDirectoryValue = deriveDirectoryValue(mergedDirectory);
+        state2.directoryValue = derivedDirectoryValue ?? normalizedDirectory;
+        state2.lastRequestedDirectory = state2.directoryValue;
+        ensureDatasetContext(dataset, state2);
+        imageviewer.lfDataset = dataset;
+        await syncNavigationDirectoryControl(state2, state2.directoryValue);
+      } catch (error2) {
+        getLfManager().log("Failed to refresh image directory.", { error: error2, directory: normalizedDirectory }, LogSeverity.Warning);
+      }
     };
     settings.classList.add(ImageEditorCSS.Settings);
     settings.slot = "settings";
     imageviewer.classList.add(ImageEditorCSS.Widget);
-    imageviewer.lfLoadCallback = async (_2, value) => await refresh(value);
+    imageviewer.lfLoadCallback = async (_2, value) => {
+      const state2 = STATE$h.get(wrapper);
+      if (!state2 || state2.isSyncingDirectory) {
+        return;
+      }
+      let directoryValue = normalizeDirectoryRequest(value);
+      if (!directoryValue) {
+        const fallbackDirectory = state2.directoryValue ?? deriveDirectoryValue(state2.directory) ?? void 0;
+        directoryValue = normalizeDirectoryRequest(fallbackDirectory);
+      }
+      if (state2.lastRequestedDirectory === directoryValue && state2.directoryValue === directoryValue) {
+        return;
+      }
+      await refresh(directoryValue);
+    };
     imageviewer.lfValue = TREE_DATA;
     imageviewer.addEventListener(LfEventName.LfImageviewer, (e2) => EV_HANDLERS$a.imageviewer(STATE$h.get(wrapper), e2));
     imageviewer.appendChild(settings);
@@ -17483,10 +17578,16 @@ const imageEditorFactory = {
     const state = {
       elements: { actionButtons, controls: {}, grid, imageviewer, settings },
       contextId: void 0,
+      directory: void 0,
+      directoryValue: void 0,
       filter: null,
       filterType: null,
       lastBrushSettings: JSON.parse(JSON.stringify(SETTINGS.brush.settings)),
+      hasAutoDirectoryLoad: false,
+      isSyncingDirectory: false,
+      lastRequestedDirectory: void 0,
       node,
+      refreshDirectory: refresh,
       update: {
         preview: () => updateCb(STATE$h.get(wrapper)).then(() => {
         }),
@@ -17497,6 +17598,20 @@ const imageEditorFactory = {
     };
     STATE$h.set(wrapper, state);
     IMAGE_EDITOR_INSTANCES.add(state);
+    void Promise.resolve().then(() => {
+      var _a, _b;
+      const currentState = STATE$h.get(wrapper);
+      if (!currentState || currentState.hasAutoDirectoryLoad) {
+        return;
+      }
+      const currentDataset = (_a = currentState.elements.imageviewer) == null ? void 0 : _a.lfDataset;
+      const hasNodes = Array.isArray(currentDataset == null ? void 0 : currentDataset.nodes) && currentDataset.nodes.length > 0;
+      const hasDirectoryValue = Boolean(currentState.directoryValue);
+      if (hasNodes || hasDirectoryValue) {
+        return;
+      }
+      (_b = currentState.refreshDirectory) == null ? void 0 : _b.call(currentState, "");
+    });
     return { widget: createDOMWidget(CustomWidgetName.imageEditor, wrapper, node, options) };
   },
   //#endregion
