@@ -13498,7 +13498,7 @@ var X = false, Z = (t2, e2, n2) => {
                         const n6 = t7.i.replace(/-/g, "_"), o6 = t7.T;
                         if (!o6) return;
                         const r3 = i.get(o6);
-                        return r3 ? r3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-00fecc42.entry.js": () => import("./p-00fecc42.entry-CqjbejPb.js"), "./p-0df37de3.entry.js": () => import("./p-0df37de3.entry-jzUiwG4C.js"), "./p-28dd0bff.entry.js": () => import("./p-28dd0bff.entry-vSLj6hUk.js"), "./p-2e9faeab.entry.js": () => import("./p-2e9faeab.entry-CAQ0QU6p.js"), "./p-36aa4a7f.entry.js": () => import("./p-36aa4a7f.entry-C40H1Ale.js"), "./p-37b3e400.entry.js": () => import("./p-37b3e400.entry-DvX5YGGr.js"), "./p-426ea672.entry.js": () => import("./p-426ea672.entry-DO3WhKtd.js"), "./p-43bf5312.entry.js": () => import("./p-43bf5312.entry-DCsht14f.js"), "./p-924ca284.entry.js": () => import("./p-924ca284.entry-BP07psdk.js"), "./p-a0ed5f95.entry.js": () => import("./p-a0ed5f95.entry-Sl8tRQAI.js"), "./p-a6642965.entry.js": () => import("./p-a6642965.entry-DweJf7r6.js"), "./p-bb63963d.entry.js": () => import("./p-bb63963d.entry-C_dFisfW.js"), "./p-e2900881.entry.js": () => import("./p-e2900881.entry-CvZhGbNH.js"), "./p-e6148250.entry.js": () => import("./p-e6148250.entry-DFptmf-Z.js"), "./p-f19de954.entry.js": () => import("./p-f19de954.entry-DLZ9Zujh.js"), "./p-febf6aa2.entry.js": () => import("./p-febf6aa2.entry-Cm3F5QQW.js") }), `./${o6}.entry.js`, 2).then(((t8) => (i.set(o6, t8), t8[n6])), ((t8) => {
+                        return r3 ? r3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-00fecc42.entry.js": () => import("./p-00fecc42.entry-BBOIbZPF.js"), "./p-0df37de3.entry.js": () => import("./p-0df37de3.entry-DRwU7awe.js"), "./p-28dd0bff.entry.js": () => import("./p-28dd0bff.entry-C19ZtHFM.js"), "./p-2e9faeab.entry.js": () => import("./p-2e9faeab.entry-CwDfbYeg.js"), "./p-36aa4a7f.entry.js": () => import("./p-36aa4a7f.entry-CX5_snz5.js"), "./p-37b3e400.entry.js": () => import("./p-37b3e400.entry-DeV-tRcY.js"), "./p-426ea672.entry.js": () => import("./p-426ea672.entry-ivmXmG5A.js"), "./p-43bf5312.entry.js": () => import("./p-43bf5312.entry-uoDNJHmV.js"), "./p-924ca284.entry.js": () => import("./p-924ca284.entry-lCids-Mu.js"), "./p-a0ed5f95.entry.js": () => import("./p-a0ed5f95.entry-BV4l4iYZ.js"), "./p-a6642965.entry.js": () => import("./p-a6642965.entry-BPchWDev.js"), "./p-bb63963d.entry.js": () => import("./p-bb63963d.entry-BVeSUtb3.js"), "./p-e2900881.entry.js": () => import("./p-e2900881.entry-DUFzqNVz.js"), "./p-e6148250.entry.js": () => import("./p-e6148250.entry-BH-qdiCz.js"), "./p-f19de954.entry.js": () => import("./p-f19de954.entry-CVMy4yaA.js"), "./p-febf6aa2.entry.js": () => import("./p-febf6aa2.entry-_MqSR__p.js") }), `./${o6}.entry.js`, 2).then(((t8) => (i.set(o6, t8), t8[n6])), ((t8) => {
                           l(t8, e3.$hostElement$);
                         }));
                         /*!__STENCIL_STATIC_IMPORT_SWITCH__*/
@@ -14807,6 +14807,147 @@ function installLFBeforeFreeHooks(api2, opts = {}) {
   const fetchPatched = installFetchFallback();
   return { freeMemoryHook: freePatched, fetchFallbackHook: fetchPatched };
 }
+const asString = (value) => typeof value === "string" ? value : void 0;
+const getImageNode = (nodes, index) => {
+  if (!Array.isArray(nodes) || index < 0 || index >= nodes.length) {
+    return void 0;
+  }
+  const candidate = nodes[index];
+  return candidate && typeof candidate === "object" ? candidate : void 0;
+};
+const getImageCell = (node) => {
+  if (!node || typeof node !== "object") {
+    return void 0;
+  }
+  const cells = node.cells ?? {};
+  const imageCell = (cells == null ? void 0 : cells.lfImage) ?? {};
+  return imageCell;
+};
+const applySelectionColumn = (dataset, selection) => {
+  const nextColumns = Array.isArray(dataset == null ? void 0 : dataset.columns) ? [...dataset.columns] : [];
+  const selectedColumnIndex = nextColumns.findIndex((column) => (column == null ? void 0 : column.id) === "selected");
+  const selectionColumn = selectedColumnIndex >= 0 ? nextColumns[selectedColumnIndex] : { id: "selected" };
+  const coercedSelectionColumn = {
+    ...selectionColumn,
+    title: selection
+  };
+  if (selectedColumnIndex >= 0) {
+    nextColumns[selectedColumnIndex] = coercedSelectionColumn;
+  } else {
+    nextColumns.push(coercedSelectionColumn);
+  }
+  return {
+    ...dataset,
+    columns: nextColumns,
+    selection
+  };
+};
+const deriveSelectionName = (selectedShape) => {
+  if (!selectedShape) {
+    return void 0;
+  }
+  const shape = selectedShape.shape;
+  const htmlProps = (shape == null ? void 0 : shape.htmlProps) ?? {};
+  const htmlTitle = asString(htmlProps["title"]);
+  const htmlId = asString(htmlProps["id"]);
+  const shapeValue = asString(shape == null ? void 0 : shape.value);
+  const lfValue = asString(shape == null ? void 0 : shape.lfValue);
+  return htmlTitle ?? htmlId ?? shapeValue ?? lfValue ?? void 0;
+};
+const resolveSelectionIndex = (selectedShape, nodes) => {
+  var _a;
+  if (typeof (selectedShape == null ? void 0 : selectedShape.index) === "number") {
+    return selectedShape.index;
+  }
+  if (!Array.isArray(nodes)) {
+    return void 0;
+  }
+  const shape = selectedShape == null ? void 0 : selectedShape.shape;
+  const shapeId = asString((_a = shape == null ? void 0 : shape.htmlProps) == null ? void 0 : _a["id"]);
+  const shapeValue = asString(shape == null ? void 0 : shape.value) ?? asString(shape == null ? void 0 : shape.lfValue);
+  const resolvedIndex = nodes.findIndex((node) => {
+    var _a2;
+    const imageCell = getImageCell(node);
+    if (!imageCell) {
+      return false;
+    }
+    const cellId = asString((_a2 = imageCell.htmlProps) == null ? void 0 : _a2["id"]);
+    const cellValue = asString(imageCell.value) ?? asString(imageCell.lfValue);
+    if (shapeId && cellId === shapeId) {
+      return true;
+    }
+    if (shapeValue && cellValue === shapeValue) {
+      return true;
+    }
+    return false;
+  });
+  return resolvedIndex >= 0 ? resolvedIndex : void 0;
+};
+const buildSelectionPayload = ({ dataset, index, nodes, selectedShape, fallbackContextId }) => {
+  var _a;
+  const resolvedContextId = dataset.context_id ?? ((_a = dataset.selection) == null ? void 0 : _a.context_id) ?? fallbackContextId;
+  const selection = {
+    index,
+    context_id: resolvedContextId
+  };
+  const derivedName = deriveSelectionName(selectedShape);
+  if (derivedName) {
+    selection.name = derivedName;
+  }
+  const selectedNode = getImageNode(nodes, index);
+  if (selectedNode) {
+    const nodeId = asString(selectedNode.id);
+    if (nodeId) {
+      selection.node_id = nodeId;
+    }
+    const imageCell = getImageCell(selectedNode);
+    const imageValue = asString(imageCell == null ? void 0 : imageCell.value) ?? asString(imageCell == null ? void 0 : imageCell.lfValue);
+    if (imageValue) {
+      selection.url = imageValue;
+    }
+  }
+  return { selection, contextId: resolvedContextId };
+};
+const hasSelectionChanged = (previousSelection, nextSelection) => {
+  return JSON.stringify(previousSelection ?? null) !== JSON.stringify(nextSelection ?? null);
+};
+const hasContextChanged = (previousContextId, nextContextId) => {
+  return previousContextId !== nextContextId;
+};
+const ensureDatasetContext = (dataset, state) => {
+  if (!dataset) {
+    return state == null ? void 0 : state.contextId;
+  }
+  const setStateContext = (contextId) => {
+    if (contextId && state) {
+      state.contextId = contextId;
+    }
+  };
+  if (dataset.context_id) {
+    setStateContext(dataset.context_id);
+  } else if (state == null ? void 0 : state.contextId) {
+    dataset.context_id = state.contextId;
+  }
+  const selection = dataset.selection;
+  const resolvedContext = (selection == null ? void 0 : selection.context_id) ?? dataset.context_id ?? (state == null ? void 0 : state.contextId);
+  if (selection && resolvedContext) {
+    selection.context_id = selection.context_id ?? resolvedContext;
+    if (!dataset.context_id) {
+      dataset.context_id = resolvedContext;
+    }
+    setStateContext(resolvedContext);
+    return resolvedContext;
+  }
+  if (dataset.context_id) {
+    setStateContext(dataset.context_id);
+    return dataset.context_id;
+  }
+  if (state == null ? void 0 : state.contextId) {
+    dataset.context_id = state.contextId;
+    return state.contextId;
+  }
+  return void 0;
+};
 const MANUAL_APPLY_PROCESSING_LABEL = "Applying…";
 const hasManualApplyPendingChanges = (state) => {
   const manual = state.manualApply;
@@ -14879,7 +15020,7 @@ const resolveManualApplyRequest = (state, wasSuccessful) => {
   updateManualApplyButton(state);
 };
 const apiCall$2 = async (state, addSnapshot) => {
-  var _a, _b, _c;
+  var _a, _b;
   const { elements, filter, filterType } = state;
   const { imageviewer } = elements;
   const lfManager2 = getLfManager();
@@ -14894,17 +15035,14 @@ const apiCall$2 = async (state, addSnapshot) => {
     ...baseSettings
   };
   const contextDataset = imageviewer.lfDataset;
-  const datasetContextId = contextDataset == null ? void 0 : contextDataset.context_id;
-  const selectionContextId = (_a = contextDataset == null ? void 0 : contextDataset.selection) == null ? void 0 : _a.context_id;
-  const contextId = datasetContextId ?? selectionContextId ?? state.contextId;
+  const contextId = ensureDatasetContext(contextDataset, state);
   if (!contextId) {
     lfManager2.log("Missing editing context. Run the workflow to register an editing session before using inpaint.", { dataset: contextDataset }, LogSeverity.Warning);
-    if ((_b = state.manualApply) == null ? void 0 : _b.isProcessing) {
+    if ((_a = state.manualApply) == null ? void 0 : _a.isProcessing) {
       resolveManualApplyRequest(state, false);
     }
     return false;
   }
-  state.contextId = contextId;
   payload.context_id = contextId;
   requestAnimationFrame(() => imageviewer.setSpinnerStatus(true));
   let isSuccess = false;
@@ -14931,7 +15069,7 @@ const apiCall$2 = async (state, addSnapshot) => {
     lfManager2.log("Error processing image!", { error: error2 }, LogSeverity.Error);
   }
   requestAnimationFrame(() => imageviewer.setSpinnerStatus(false));
-  if ((_c = state.manualApply) == null ? void 0 : _c.isProcessing) {
+  if ((_b = state.manualApply) == null ? void 0 : _b.isProcessing) {
     resolveManualApplyRequest(state, isSuccess);
   }
   return isSuccess;
@@ -16924,41 +17062,12 @@ const applyFilterDefaults = (state, defaults) => {
   });
 };
 const createEventHandlers = ({ handleInterruptForState: handleInterruptForState2, prepSettings: prepSettings2 }) => {
-  const updateDatasetSelection = (dataset, selection) => {
-    const nextColumns = Array.isArray(dataset == null ? void 0 : dataset.columns) ? [...dataset.columns] : [];
-    const selectedColumnIndex = nextColumns.findIndex((column) => (column == null ? void 0 : column.id) === "selected");
-    const selectionColumn = selectedColumnIndex >= 0 ? nextColumns[selectedColumnIndex] : { id: "selected" };
-    const coercedSelectionColumn = {
-      ...selectionColumn,
-      title: selection
-    };
-    if (selectedColumnIndex >= 0) {
-      nextColumns[selectedColumnIndex] = coercedSelectionColumn;
-    } else {
-      nextColumns.push(coercedSelectionColumn);
-    }
-    return {
-      ...dataset,
-      columns: nextColumns,
-      selection
-    };
-  };
-  const resolveSelectionName = (selectedShape) => {
-    if (!selectedShape) {
-      return void 0;
-    }
-    const shape = selectedShape.shape;
-    const htmlProps = (shape == null ? void 0 : shape.htmlProps) ?? {};
-    const htmlTitle = htmlProps && typeof htmlProps["title"] === "string" ? htmlProps["title"] : void 0;
-    const htmlId = htmlProps && typeof htmlProps["id"] === "string" ? htmlProps["id"] : void 0;
-    const shapeValue = shape && typeof shape.value === "string" ? shape.value : void 0;
-    const lfValue = typeof (shape == null ? void 0 : shape.lfValue) === "string" ? shape.lfValue : void 0;
-    return htmlTitle ?? htmlId ?? shapeValue ?? lfValue ?? void 0;
-  };
   const syncSelectionWithDataset = async (state, masonryEvent) => {
-    var _a, _b;
     const { elements } = state;
     const dataset = elements.imageviewer.lfDataset || {};
+    const effectiveContextId = ensureDatasetContext(dataset, state);
+    const previousSelection = dataset.selection;
+    const previousContextId = dataset.context_id ?? effectiveContextId;
     const { comp, selectedShape: rawSelectedShape } = masonryEvent.detail;
     const masonryComp = comp;
     let selectedShape = rawSelectedShape;
@@ -16970,58 +17079,29 @@ const createEventHandlers = ({ handleInterruptForState: handleInterruptForState2
       }
     }
     const nodes = Array.isArray(dataset == null ? void 0 : dataset.nodes) ? dataset.nodes : [];
-    let selectionIndex = typeof (selectedShape == null ? void 0 : selectedShape.index) === "number" ? selectedShape.index : void 0;
-    if (typeof selectionIndex !== "number") {
-      const shape = selectedShape == null ? void 0 : selectedShape.shape;
-      const shapeId = (shape == null ? void 0 : shape.htmlProps) && typeof shape.htmlProps["id"] === "string" ? shape.htmlProps["id"] : void 0;
-      const shapeValue = typeof (shape == null ? void 0 : shape.value) === "string" ? shape.value : typeof (shape == null ? void 0 : shape.lfValue) === "string" ? shape.lfValue : void 0;
-      const resolvedIndex = nodes.findIndex((node) => {
-        var _a2;
-        const cell = ((_a2 = node == null ? void 0 : node.cells) == null ? void 0 : _a2.lfImage) ?? {};
-        const htmlProps = (cell == null ? void 0 : cell.htmlProps) ?? {};
-        const cellId = typeof htmlProps["id"] === "string" ? htmlProps["id"] : void 0;
-        const cellValue = typeof (cell == null ? void 0 : cell.value) === "string" ? cell.value : typeof (cell == null ? void 0 : cell.lfValue) === "string" ? cell.lfValue : void 0;
-        if (shapeId && cellId === shapeId) {
-          return true;
-        }
-        if (shapeValue && cellValue === shapeValue) {
-          return true;
-        }
-        return false;
-      });
-      selectionIndex = resolvedIndex >= 0 ? resolvedIndex : void 0;
-    }
+    const selectionIndex = resolveSelectionIndex(selectedShape, nodes);
     if (typeof selectionIndex !== "number") {
       getLfManager().log("Unable to resolve selected masonry index.", { selectedShape }, LogSeverity.Warning);
       return;
     }
-    const previousSelection = dataset.selection;
-    const resolvedContextId = dataset.context_id ?? ((_a = dataset.selection) == null ? void 0 : _a.context_id) ?? state.contextId;
-    const baseSelection = {
+    const { selection, contextId } = buildSelectionPayload({
+      dataset,
       index: selectionIndex,
-      context_id: resolvedContextId
-    };
-    const derivedName = resolveSelectionName(selectedShape);
-    if (derivedName) {
-      baseSelection.name = derivedName;
-    }
+      nodes,
+      selectedShape,
+      fallbackContextId: previousContextId ?? state.contextId
+    });
+    const resolvedContextId = selection.context_id ?? contextId ?? previousContextId ?? state.contextId;
     if (resolvedContextId) {
       state.contextId = resolvedContextId;
+      if (!selection.context_id) {
+        selection.context_id = resolvedContextId;
+      }
     }
-    const selectedNode = nodes == null ? void 0 : nodes[selectionIndex];
-    const imageCell = ((_b = selectedNode == null ? void 0 : selectedNode.cells) == null ? void 0 : _b.lfImage) ?? {};
-    const imageValue = typeof (imageCell == null ? void 0 : imageCell.value) === "string" ? imageCell.value : typeof (imageCell == null ? void 0 : imageCell.lfValue) === "string" ? imageCell.lfValue : void 0;
-    if (selectedNode == null ? void 0 : selectedNode.id) {
-      baseSelection.node_id = selectedNode.id;
-    }
-    if (imageValue) {
-      baseSelection.url = imageValue;
-    }
-    const nextDataset = updateDatasetSelection({
+    const nextDataset = applySelectionColumn({
       ...dataset,
-      context_id: dataset.context_id ?? resolvedContextId,
-      selection: dataset.selection ?? void 0
-    }, baseSelection);
+      context_id: dataset.context_id ?? resolvedContextId
+    }, selection);
     if (resolvedContextId && nextDataset.selection) {
       nextDataset.selection.context_id = resolvedContextId;
     }
@@ -17029,9 +17109,7 @@ const createEventHandlers = ({ handleInterruptForState: handleInterruptForState2
     if (!resolvedContextId) {
       return;
     }
-    const selectionChanged = JSON.stringify(previousSelection ?? null) !== JSON.stringify(nextDataset.selection ?? null);
-    const contextChanged = dataset.context_id !== nextDataset.context_id;
-    if (!selectionChanged && !contextChanged) {
+    if (!hasSelectionChanged(previousSelection, nextDataset.selection) && !hasContextChanged(previousContextId, nextDataset.context_id)) {
       return;
     }
     getApiRoutes().json.update(resolvedContextId, nextDataset).catch((error2) => getLfManager().log("Failed to persist image selection.", { error: error2, contextId: resolvedContextId }, LogSeverity.Warning));
@@ -17106,7 +17184,7 @@ const createEventHandlers = ({ handleInterruptForState: handleInterruptForState2
     //#endregion
     //#region Imageviewer
     imageviewer: async (state, e2) => {
-      var _a;
+      var _a, _b;
       const { comp, eventType, originalEvent } = e2.detail;
       const { node } = state;
       switch (eventType) {
@@ -17123,7 +17201,8 @@ const createEventHandlers = ({ handleInterruptForState: handleInterruptForState2
               break;
             case "lf-event":
               const masonryEvent = ogEv;
-              if (isMasonry(ogEv.detail.comp)) {
+              const masonrySource = isMasonry(ogEv.detail.comp) || typeof ((_b = masonryEvent == null ? void 0 : masonryEvent.detail) == null ? void 0 : _b.selectedShape) !== "undefined";
+              if (masonrySource) {
                 const { selectedShape } = masonryEvent.detail;
                 if (!selectedShape) {
                   getLfManager().log("Masonry selection cleared.", { selectedShape }, LogSeverity.Info);
@@ -17324,20 +17403,7 @@ const imageEditorFactory = {
             setGridStatus(ImageEditorStatus.Pending, grid, actionButtons);
           }
           const dataset = parsedValue || {};
-          const datasetContext = dataset == null ? void 0 : dataset.context_id;
-          if (datasetContext) {
-            state.contextId = datasetContext;
-          } else if (state.contextId) {
-            dataset.context_id = state.contextId;
-          }
-          const selection = dataset == null ? void 0 : dataset.selection;
-          if (selection) {
-            const resolvedContext = selection.context_id ?? dataset.context_id ?? state.contextId;
-            if (resolvedContext) {
-              selection.context_id = resolvedContext;
-              state.contextId = resolvedContext;
-            }
-          }
+          ensureDatasetContext(dataset, state);
           imageviewer.lfDataset = dataset;
           imageviewer.getComponents().then(({ details }) => {
             const { canvas } = details;
@@ -17361,20 +17427,10 @@ const imageEditorFactory = {
     const refresh = async (directory) => {
       const state2 = STATE$h.get(wrapper);
       getLfManager().getApiRoutes().image.get(directory).then((r2) => {
-        var _a;
         if (r2.status === "success") {
           if ((r2 == null ? void 0 : r2.data) && Object.entries(r2.data).length > 0) {
             const dataset = r2.data;
-            const resolvedContext = (dataset == null ? void 0 : dataset.context_id) ?? (state2 == null ? void 0 : state2.contextId) ?? ((_a = dataset == null ? void 0 : dataset.selection) == null ? void 0 : _a.context_id);
-            if (resolvedContext) {
-              dataset.context_id = resolvedContext;
-              if (dataset.selection) {
-                dataset.selection.context_id = dataset.selection.context_id ?? resolvedContext;
-              }
-              if (state2) {
-                state2.contextId = resolvedContext;
-              }
-            }
+            ensureDatasetContext(dataset, state2);
             imageviewer.lfDataset = dataset;
           } else {
             getLfManager().log("Images not found.", { r: r2 }, LogSeverity.Info);
