@@ -13498,7 +13498,7 @@ var X = false, Z = (t2, e2, n2) => {
                         const n6 = t7.i.replace(/-/g, "_"), o6 = t7.T;
                         if (!o6) return;
                         const r3 = i.get(o6);
-                        return r3 ? r3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-00fecc42.entry.js": () => import("./p-00fecc42.entry-B-7vYRZa.js"), "./p-0df37de3.entry.js": () => import("./p-0df37de3.entry-BTft8SI1.js"), "./p-28dd0bff.entry.js": () => import("./p-28dd0bff.entry-D8NWq3xv.js"), "./p-2e9faeab.entry.js": () => import("./p-2e9faeab.entry-BApK3OxJ.js"), "./p-36aa4a7f.entry.js": () => import("./p-36aa4a7f.entry-B2xOOrsQ.js"), "./p-37b3e400.entry.js": () => import("./p-37b3e400.entry-BZP86bnj.js"), "./p-426ea672.entry.js": () => import("./p-426ea672.entry-DOZZ0ryn.js"), "./p-43bf5312.entry.js": () => import("./p-43bf5312.entry-BFgKdn-M.js"), "./p-924ca284.entry.js": () => import("./p-924ca284.entry-CoGfNplL.js"), "./p-a0ed5f95.entry.js": () => import("./p-a0ed5f95.entry-CcocnQR7.js"), "./p-a6642965.entry.js": () => import("./p-a6642965.entry-D_1-5eqs.js"), "./p-bb63963d.entry.js": () => import("./p-bb63963d.entry-QxcvxRuU.js"), "./p-e2900881.entry.js": () => import("./p-e2900881.entry-CPBlYG2-.js"), "./p-e6148250.entry.js": () => import("./p-e6148250.entry-CoHJKb80.js"), "./p-f19de954.entry.js": () => import("./p-f19de954.entry-34L8huoR.js"), "./p-febf6aa2.entry.js": () => import("./p-febf6aa2.entry-BQCYuas2.js") }), `./${o6}.entry.js`, 2).then(((t8) => (i.set(o6, t8), t8[n6])), ((t8) => {
+                        return r3 ? r3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-00fecc42.entry.js": () => import("./p-00fecc42.entry-BDcYSgCC.js"), "./p-0df37de3.entry.js": () => import("./p-0df37de3.entry-BpZ-ma2p.js"), "./p-28dd0bff.entry.js": () => import("./p-28dd0bff.entry-DoOz7cWD.js"), "./p-2e9faeab.entry.js": () => import("./p-2e9faeab.entry-B6_dB9K9.js"), "./p-36aa4a7f.entry.js": () => import("./p-36aa4a7f.entry-BOtOlJcg.js"), "./p-37b3e400.entry.js": () => import("./p-37b3e400.entry-DvSZUq3G.js"), "./p-426ea672.entry.js": () => import("./p-426ea672.entry-CdBjinq5.js"), "./p-43bf5312.entry.js": () => import("./p-43bf5312.entry-DFB2Np4D.js"), "./p-924ca284.entry.js": () => import("./p-924ca284.entry-mUSmQY3V.js"), "./p-a0ed5f95.entry.js": () => import("./p-a0ed5f95.entry-BFqqm0fZ.js"), "./p-a6642965.entry.js": () => import("./p-a6642965.entry-DvZuZbv9.js"), "./p-bb63963d.entry.js": () => import("./p-bb63963d.entry-Xfw1qaKc.js"), "./p-e2900881.entry.js": () => import("./p-e2900881.entry-DHCEbNTw.js"), "./p-e6148250.entry.js": () => import("./p-e6148250.entry-XA7FDa0k.js"), "./p-f19de954.entry.js": () => import("./p-f19de954.entry-DqSkou5Q.js"), "./p-febf6aa2.entry.js": () => import("./p-febf6aa2.entry-CHBFceBV.js") }), `./${o6}.entry.js`, 2).then(((t8) => (i.set(o6, t8), t8[n6])), ((t8) => {
                           l(t8, e3.$hostElement$);
                         }));
                         /*!__STENCIL_STATIC_IMPORT_SWITCH__*/
@@ -17215,7 +17215,7 @@ const createEventHandlers = ({ handleInterruptForState: handleInterruptForState2
     //#endregion
     //#region Imageviewer
     imageviewer: async (state, e2) => {
-      var _a, _b;
+      var _a;
       const { comp, eventType, originalEvent } = e2.detail;
       const { node } = state;
       switch (eventType) {
@@ -17232,14 +17232,26 @@ const createEventHandlers = ({ handleInterruptForState: handleInterruptForState2
               break;
             case "lf-event":
               const masonryEvent = ogEv;
-              const masonrySource = isMasonry(ogEv.detail.comp) || typeof ((_b = masonryEvent == null ? void 0 : masonryEvent.detail) == null ? void 0 : _b.selectedShape) !== "undefined";
-              if (masonrySource) {
+              const isMasonryEvent = isMasonry(ogEv.detail.comp);
+              if (isMasonryEvent) {
                 const { selectedShape } = masonryEvent.detail;
-                if (!selectedShape) {
-                  getLfManager().log("Masonry selection cleared.", { selectedShape }, LogSeverity.Info);
-                  return;
+                switch (masonryEvent.detail.eventType) {
+                  case "lf-event":
+                    const subOgEv = masonryEvent.detail.originalEvent;
+                    const isImageEvent = isImage(subOgEv.detail.comp);
+                    if (isImageEvent) {
+                      switch (subOgEv.detail.eventType) {
+                        case "click":
+                          if (!selectedShape) {
+                            getLfManager().log("Masonry selection cleared.", { selectedShape }, LogSeverity.Info);
+                            return;
+                          }
+                          await syncSelectionWithDataset(state, masonryEvent);
+                          break;
+                      }
+                    }
                 }
-                await syncSelectionWithDataset(state, masonryEvent);
+                break;
               }
               break;
             case "ready":
@@ -21120,6 +21132,9 @@ const DEFAULT_WIDGET_NAME = "ui_widget";
 let timer;
 const isButton = (comp) => {
   return comp.rootElement.tagName.toLowerCase() === "lf-button";
+};
+const isImage = (comp) => {
+  return comp.rootElement.tagName.toLowerCase() === "lf-image";
 };
 const isMasonry = (comp) => {
   return comp.rootElement.tagName.toLowerCase() === "lf-masonry";
