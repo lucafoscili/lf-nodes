@@ -27,8 +27,6 @@ Most UI elements used by the frontend belong to the [LF Widgets webcomponents li
 
 ![Simple inpaint](https://github.com/lucafoscili/lucafoscili/blob/e988f5c1df6299e96f2bf6b164c3b99e6df841f7/lf-nodes/screenshots/Screenshot%202025-10-03%20224716.jpg "Simple inpaint")
 
-## What kind of nodes does it offer?
-
 The nodes span quite a few categories:
 
 - **Analytics nodes**: Visualize and track data, like checkpoint/LoRA usage or image histograms.
@@ -51,7 +49,6 @@ To see some example workflow you can check the [example_workflows folder](exampl
 
 - [LF Nodes](#lf-nodes)
   - [Overview](#overview)
-  - [What kind of nodes does it offer?](#what-kind-of-nodes-does-it-offer)
   - [Table of Contents](#table-of-contents)
   - [Installation](#installation)
     - [ComfyUI Manager](#comfyui-manager)
@@ -122,3 +119,5 @@ For an overview of how this nodes suite is structured and how it integrates with
 - [Architecture](docs/ARCHITECTURE.md)
 - [Image Editor](docs/IMAGE_EDITOR.md)
 - [Node Template](docs/NODE_TEMPLATE.md)
+
+![Simple pipeline](https://github.com/lucafoscili/lucafoscili/blob/e988f5c1df6299e96f2bf6b164c3b99e6df841f7/lf-nodes/screenshots/Screenshot%202025-02-18%20094817.png "Simple pipeline")
