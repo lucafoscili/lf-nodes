@@ -117,7 +117,7 @@ class EditingSession:
         from PIL import Image
 
         with Image.open(path) as img:
-            return img.convert("RGB")
+            return img.convert("RGB").copy()
 
     def _resolve_image_path(self, url: str) -> str:
         from urllib.parse import parse_qs, urlparse
