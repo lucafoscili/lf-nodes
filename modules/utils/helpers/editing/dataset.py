@@ -213,31 +213,31 @@ def resolve_image_selection(
             - The index of the selected image (or None if not found).
             - The resolved name of the selected image (or the provided selection_name if not found).
     """
-    def _valid_index(index: Optional[int]) -> bool:
-        return isinstance(index, int) and 0 <= index < len(image_list)
+    def _valid_index(index: Optional[int], items: Sequence[Any]) -> bool:
+        return isinstance(index, int) and 0 <= index < len(items)
 
     def _resolve_by_index(index: int) -> Tuple[Any, int, Optional[str]]:
         resolved_name = names[index] if index < len(names) else selection_name
         return image_list[index], index, resolved_name
 
-    if _valid_index(selection_index):
+    if _valid_index(selection_index, image_list):
         return _resolve_by_index(selection_index)  # type: ignore[arg-type]
 
     if selection_node_id and node_ids:
         if selection_node_id in node_ids:
             idx = node_ids.index(selection_node_id)
-            if _valid_index(idx):
+            if _valid_index(idx, image_list):
                 return _resolve_by_index(idx)
 
     if selection_url and urls:
         if selection_url in urls:
             idx = urls.index(selection_url)
-            if _valid_index(idx):
+            if _valid_index(idx, image_list):
                 return _resolve_by_index(idx)
 
     if selection_name and selection_name in names:
         idx = names.index(selection_name)
-        if _valid_index(idx):
+        if _valid_index(idx, image_list):
             return _resolve_by_index(idx)
 
     if fallback_to_first and len(image_list) > 0:
