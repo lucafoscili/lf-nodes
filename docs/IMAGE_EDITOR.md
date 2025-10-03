@@ -11,6 +11,7 @@ This guide explains how the interactive image editor (the inpainting workflow su
 - **`/lf-nodes/process-image`** loads the requested asset, dispatches it through `process_filter`, and saves results with deterministic names provided by the UI.
 - Inpainting is implemented by **`apply_inpaint_filter`**, which reuses the stored context (model, clip, vae, prompts, conditioning) to run denoising and mask blending.
 - Mask previews and filtered outputs are stored with helper utilities (`resolve_filepath`, `get_resource_url`) so the UI can refresh non-linear history snapshots.
+- Loader nodes now share dataset normalization and selection helpers (`ensure_dataset_context`, `extract_dataset_entries`, `resolve_image_selection`) so gallery metadata and UI selections behave identically whether assets originate from disk or the live editor.
 
 ---
 
@@ -20,6 +21,7 @@ This guide explains how the interactive image editor (the inpainting workflow su
 | --- | --- | --- |
 | Custom node | `modules/nodes/image/images_editing_breakpoint.py` | Starts an editing session, writes dataset JSON, emits prompt-server events, returns edited images to the graph. |
 | Context registry | `modules/utils/helpers/editing/context.py` | In-memory store for per-session state (model, sampler, prompts, conditioning). |
+| Dataset helpers | `modules/utils/helpers/editing/dataset.py` | Normalizes dataset context, synthesizes fallback gallery rows, and resolves selected images for both loader nodes. |
 | HTTP API | `modules/api/image.py` | `get-image` lists existing assets, `process-image` runs filters + persists outputs/masks. |
 | Filter dispatcher | `modules/utils/filters/processors.py` | Maps `type` strings to concrete filter implementations (`apply_inpaint_filter`, etc.). |
 | Inpaint core | `modules/utils/filters/inpaint.py` | Crops & upsamples masked regions, runs sampling without preview, blends decoded pixels, saves mask previews. |
@@ -42,6 +44,7 @@ This guide explains how the interactive image editor (the inpainting workflow su
    5. Emits a prompt-server event (`lf-imageseditingbreakpoint`) so the frontend opens the editor.
    6. Blocks until the dataset’s `status` column flips to `completed` (the UI mutation).
    7. Reads final `nodes` entries, resolves image paths with `get_comfy_dir(type)` + `subfolder`, converts to tensors, and returns them to the ComfyUI graph.
+   8. Emits the same output shape as the disk loader: single image, full batch, names, creation dates, count, and resolved selection metadata alongside a deep-cloned dataset JSON (now guaranteed to include `context_id` and selection details via the shared helpers).
 
 2. **UI lifecycle (high-level)**
    1. Widget loads the dataset file and renders the image gallery.
@@ -141,6 +144,17 @@ The frontend augments this structure by:
 - Optionally adding per-node metadata (e.g., brush settings, timestamps) for UI purposes.
 
 Backend consumers should rely on `context_id` to reopen the editing context and on `nodes[*].cells.lfImage.lfValue` for deterministic asset loading.
+
+### Shared dataset + selection helpers (2025 parity pass)
+
+Recent refactors extracted common behaviour into `modules/utils/helpers/editing/dataset.py` so both loader nodes (`LF_LoadImages`, `LF_LoadAndEditImages`) emit identical gallery metadata and respect the same selection rules:
+
+- `ensure_dataset_context(dataset, context_id=None)` guarantees every dataset carries a stable `context_id`, backfilling it when the UI omitted one.
+- `extract_dataset_entries(dataset, fallback_count, context_id)` now normalizes names/urls/node IDs and synthesizes fallback rows when the dataset has not yet been populated by the UI (useful when the editor returns tensors before the widget writes back).
+- `resolve_image_selection(images, names, …)` mirrors the UI’s selection semantics, resolving by explicit index, node ID, URL, or name, and finally falling back to the first image. Both loader nodes now call this helper so cached results, fresh scans, and live-edit batches resolve selections deterministically.
+- The helpers attach `context_id` to metadata rows, enabling downstream tooling to trace assets back to the editing session without re-reading the dataset file.
+
+With these utilities in place, `LF_LoadAndEditImages` returns the same socket layout as `LF_LoadImages` (`image`, `image_list`, `name`, `creation_date`, `nr`, plus the selection trio and `metadata` + `dataset` JSON). Downstream workflows can therefore switch between disk-sourced galleries and live editing sessions without branching logic.
 
 ---
 

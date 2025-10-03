@@ -1,14 +1,19 @@
 import copy
+import torch
 
 from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, SAMPLERS, SCHEDULERS
-from ...utils.helpers.editing import EditingSession
+from ...utils.helpers.editing import (
+    EditingSession,
+    ensure_dataset_context,
+    extract_dataset_entries,
+    resolve_image_selection,
+)
 from ...utils.helpers.logic import normalize_conditioning, normalize_json_input, normalize_list_to_value
 from ...utils.helpers.temp_cache import TempFileCache
 from ...utils.helpers.torch import create_dummy_image_tensor
-
 
 # region LF_LoadAndEditImages
 class LF_LoadAndEditImages:
@@ -69,9 +74,31 @@ class LF_LoadAndEditImages:
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
-    OUTPUT_IS_LIST = (False, True, False, False)
-    RETURN_NAMES = ("image", "image_list", "selection", "dataset")
-    RETURN_TYPES = (Input.IMAGE, Input.IMAGE, Input.JSON, Input.JSON)
+    OUTPUT_IS_LIST = (False, True, True, True, False, False, False, False, False, False)
+    RETURN_NAMES = (
+        "image",
+        "image_list",
+        "name",
+        "creation_date",
+        "nr",
+        "selected_image",
+        "selected_index",
+        "selected_name",
+        "metadata",
+        "dataset",
+    )
+    RETURN_TYPES = (
+        Input.IMAGE,
+        Input.IMAGE,
+        Input.STRING,
+        Input.STRING,
+        Input.INTEGER,
+        Input.IMAGE,
+        Input.INTEGER,
+        Input.STRING,
+        Input.JSON,
+        Input.JSON,
+    )
 
     def on_exec(self, **kwargs: dict):
         node_id = kwargs.get("node_id")
@@ -146,15 +173,91 @@ class LF_LoadAndEditImages:
         )
 
         results = session.collect_results(dataset)
+        image_batch = list(results.batch_list or [])
         image_list = list(results.image_list or [])
-        selected_image, selection = self._resolve_selection(results, dataset, image_list)
 
-        dataset_output = dict(dataset)
-        dataset_output.setdefault("selection", selection)
+        context_id = ensure_dataset_context(dataset)
 
-        return (selected_image, image_list, selection, dataset_output)
+        names, urls, node_ids, metadata_entries = extract_dataset_entries(
+            dataset,
+            fallback_count=len(image_list),
+            context_id=context_id,
+        )
 
-    # region internal helpers
+        creation_dates = ["" for _ in names]
+        image_count = len(names) if names else len(image_list)
+
+        raw_selection = results.selected_entry or dataset.get("selection") or {}
+        selection = dict(raw_selection) if isinstance(raw_selection, dict) else {}
+
+        sel_idx_raw = selection.get("index") if isinstance(selection.get("index"), int) else None
+        sel_name_raw = selection.get("name") if isinstance(selection.get("name"), str) else None
+        sel_node_id_raw = selection.get("node_id") if isinstance(selection.get("node_id"), str) else None
+        sel_url_raw = selection.get("url") if isinstance(selection.get("url"), str) else None
+
+        selected_image_tensor, selected_index, selected_name = resolve_image_selection(
+            image_list,
+            names,
+            selection_index=sel_idx_raw,
+            selection_name=sel_name_raw,
+            selection_node_id=sel_node_id_raw,
+            selection_url=sel_url_raw,
+            node_ids=node_ids,
+            urls=urls,
+        )
+
+        if selected_index is not None:
+            selection["index"] = selected_index
+
+        if selected_name:
+            selection["name"] = selected_name
+
+        if selected_index is not None and 0 <= selected_index < len(node_ids):
+            node_id_value = node_ids[selected_index]
+            if node_id_value:
+                selection.setdefault("node_id", node_id_value)
+            if selected_index < len(urls):
+                url_value = urls[selected_index]
+                if url_value:
+                    selection.setdefault("url", url_value)
+
+        if context_id:
+            selection["context_id"] = context_id
+
+        dataset["selection"] = selection
+
+        metadata_list = []
+        for entry in metadata_entries:
+            metadata_list.append({k: v for k, v in entry.items() if v is not None})
+
+        if image_batch:
+            primary_image = image_batch[0]
+        elif isinstance(selected_image_tensor, torch.Tensor):
+            primary_image = selected_image_tensor
+        elif image_list:
+            primary_image = image_list[0]
+        else:
+            primary_image = create_dummy_image_tensor()
+
+        if not isinstance(selected_image_tensor, torch.Tensor):
+            selected_image_tensor = primary_image if isinstance(primary_image, torch.Tensor) else create_dummy_image_tensor()
+
+        ensure_dataset_context(dataset, context_id)
+        dataset_output = copy.deepcopy(dataset)
+
+        return (
+            primary_image,
+            image_list,
+            names,
+            creation_dates,
+            image_count,
+            selected_image_tensor,
+            selected_index,
+            selected_name,
+            metadata_list,
+            dataset_output,
+        )
+
     def _prepare_dataset(self, session: EditingSession, ui_dataset: dict) -> dict:
         if isinstance(ui_dataset, dict) and ui_dataset:
             dataset = copy.deepcopy(ui_dataset)
@@ -191,30 +294,9 @@ class LF_LoadAndEditImages:
         if not isinstance(nodes, list):
             dataset["nodes"] = []
 
+        ensure_dataset_context(dataset)
+
         return dataset
-
-    def _resolve_selection(self, results, dataset, image_list):
-        selection = results.selected_entry or dataset.get("selection", {}) or {}
-
-        context_id = dataset.get("context_id")
-        if context_id:
-            if isinstance(selection, dict):
-                selection = {**selection, "context_id": context_id}
-            else:
-                selection = {"context_id": context_id}
-
-        index = selection.get("index") if isinstance(selection, dict) else None
-        if isinstance(index, int) and 0 <= index < len(image_list):
-            selected_image = image_list[index]
-        elif results.batch_list:
-            selected_image = results.batch_list[0]
-        elif image_list:
-            selected_image = image_list[0]
-        else:
-            selected_image = create_dummy_image_tensor()
-
-        return selected_image, selection
-    # endregion
 # endregion
 
 # region Mappings

@@ -22,6 +22,7 @@ from ...utils.helpers.logic import (
     normalize_output_image,
     sanitize_filename,
 )
+from ...utils.helpers.editing import resolve_image_selection
 from ...utils.helpers.metadata import extract_jpeg_metadata, extract_png_metadata
 from ...utils.helpers.torch import create_dummy_image_tensor
 from ...utils.helpers.ui import create_masonry_node
@@ -36,31 +37,31 @@ class LF_LoadImages:
         return {
             "required": {
                 "dir": (Input.STRING, {
-                    "default":"", 
+                    "default":"",
                     "tooltip": "Path to the directory containing the images to load."
                 }),
                 "subdir": (Input.BOOLEAN, {
-                    "default": False, 
+                    "default": False,
                     "tooltip": "Indicates whether to also load images from subdirectories."
                 }),
                 "strip_ext": (Input.BOOLEAN, {
-                    "default": True, 
+                    "default": True,
                     "tooltip": "Whether to remove file extensions from filenames."
                 }),
                 "load_cap": (Input.INTEGER, {
-                    "default": 0, 
+                    "default": 0,
                     "tooltip": "Maximum number of images to load before stopping. Set 0 for an unlimited amount."
                 }),
                 "dummy_output": (Input.BOOLEAN, {
-                    "default": False, 
+                    "default": False,
                     "tooltip": "Flag indicating whether to output a dummy image tensor and string when the list is empty."
                 }),
                 "cache_images": (Input.BOOLEAN, {
-                    "default": True, 
+                    "default": True,
                     "tooltip": "When enabled the node reuses the last scan for the same settings, skipping disk traversal until parameters change."
                 }),
                 "copy_into_input_dir": (Input.BOOLEAN, {
-                    "default": False, 
+                    "default": False,
                     "tooltip": "Create sanitized copies inside ComfyUI's input folder for reuse/export. Previews now work without this, but keep it on if you want dedicated duplicates."
                 })
             },
@@ -69,9 +70,9 @@ class LF_LoadImages:
                     "default": {}
                 }),
             },
-            "hidden": { 
+            "hidden": {
                 "node_id": "UNIQUE_ID",
-            } 
+            }
         }
 
     CATEGORY = CATEGORY
@@ -81,29 +82,6 @@ class LF_LoadImages:
     RETURN_TYPES = (Input.IMAGE, Input.IMAGE, Input.STRING, Input.STRING, Input.INTEGER, Input.IMAGE, Input.INTEGER, Input.STRING, Input.JSON)
 
     def on_exec(self, **kwargs: dict):
-        def select(image_list, names, sel_idx_ui, sel_name_ui):
-            """
-            Determine selected image, index, and name based on UI inputs.
-            """
-            sel_idx = sel_idx_ui
-            sel_name = sel_name_ui
-            sel_img = None
-            # If UI index is valid
-            if sel_idx is not None and 0 <= sel_idx < len(image_list):
-                sel_img = image_list[sel_idx]
-                sel_name = names[sel_idx]
-            # Else if UI name matches
-            elif sel_name_ui in names:
-                sel_idx = names.index(sel_name_ui)
-                sel_img = image_list[sel_idx]
-                sel_name = names[sel_idx]
-            # Default to first image
-            else:
-                sel_idx = 0 if image_list else None
-                sel_name = names[0] if names else None
-                sel_img = image_list[0] if image_list else None
-            return sel_img, sel_idx, sel_name
-    
         dir: str = normalize_list_to_value(kwargs.get("dir"))
         subdir: bool = normalize_list_to_value(kwargs.get("subdir"))
         strip_ext: bool = normalize_list_to_value(kwargs.get("strip_ext"))
@@ -155,8 +133,14 @@ class LF_LoadImages:
             cached_output, cached_dataset = self._cached_images[cache_key]
             img0, image_list, names, dates, count, _, _, _, metadata_list = cached_output
 
-            sel_img, sel_idx, sel_name = select(
-                image_list, names, selected_index, selected_name
+            sel_idx_input = selected_index if isinstance(selected_index, int) else None
+            sel_name_input = selected_name if isinstance(selected_name, str) else None
+
+            sel_img, sel_idx, sel_name = resolve_image_selection(
+                image_list,
+                names,
+                selection_index=sel_idx_input,
+                selection_name=sel_name_input,
             )
 
             new_output = (
@@ -308,8 +292,14 @@ class LF_LoadImages:
 
         image_batch, image_list = normalize_output_image(images) if images else ([], [])
 
-        sel_img, sel_idx, sel_name = select(
-            image_list, file_names, selected_index, selected_name
+        sel_idx_input = selected_index if isinstance(selected_index, int) else None
+        sel_name_input = selected_name if isinstance(selected_name, str) else None
+
+        sel_img, sel_idx, sel_name = resolve_image_selection(
+            image_list,
+            file_names,
+            selection_index=sel_idx_input,
+            selection_name=sel_name_input,
         )
 
         if image_batch:
@@ -347,7 +337,7 @@ class LF_LoadImages:
             self._cached_images[cache_key] = (output_tuple, dataset)
 
         PromptServer.instance.send_sync(f"{EVENT_PREFIX}loadimages", {
-            "node": kwargs.get("node_id"), 
+            "node": kwargs.get("node_id"),
             "dataset": dataset,
         })
 
