@@ -5,6 +5,7 @@ import {
   ImageEditorState,
 } from '../../types/widgets/imageEditor';
 import { getApiRoutes, getLfManager } from '../../utils/common';
+import { ensureDatasetContext } from './dataset';
 import { resolveManualApplyRequest } from './manualApply';
 
 //#region API Call
@@ -27,9 +28,7 @@ export const apiCall = async (state: ImageEditorState, addSnapshot: boolean) => 
   };
 
   const contextDataset = imageviewer.lfDataset as ImageEditorDataset | undefined;
-  const datasetContextId = contextDataset?.context_id;
-  const selectionContextId = contextDataset?.selection?.context_id;
-  const contextId = datasetContextId ?? selectionContextId ?? state.contextId;
+  const contextId = ensureDatasetContext(contextDataset, state);
 
   if (!contextId) {
     lfManager.log(
@@ -43,7 +42,6 @@ export const apiCall = async (state: ImageEditorState, addSnapshot: boolean) => 
     return false;
   }
 
-  state.contextId = contextId;
   payload.context_id = contextId;
 
   requestAnimationFrame(() => imageviewer.setSpinnerStatus(true));

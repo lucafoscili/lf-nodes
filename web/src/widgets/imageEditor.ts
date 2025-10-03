@@ -1,5 +1,6 @@
 import { SETTINGS, TREE_DATA } from '../fixtures/imageEditor';
 import { EV_HANDLERS, getStatusColumn, setGridStatus, updateCb } from '../helpers/imageEditor';
+import { ensureDatasetContext } from '../helpers/imageEditor/dataset';
 import { setBrush } from '../helpers/imageEditor/settings';
 import { LfEventName } from '../types/events/events';
 import { LogSeverity } from '../types/manager/manager';
@@ -43,21 +44,7 @@ export const imageEditorFactory: ImageEditorFactory = {
           }
 
           const dataset = (parsedValue || {}) as ImageEditorDataset;
-          const datasetContext = dataset?.context_id;
-          if (datasetContext) {
-            state.contextId = datasetContext;
-          } else if (state.contextId) {
-            dataset.context_id = state.contextId;
-          }
-
-          const selection = dataset?.selection;
-          if (selection) {
-            const resolvedContext = selection.context_id ?? dataset.context_id ?? state.contextId;
-            if (resolvedContext) {
-              selection.context_id = resolvedContext;
-              state.contextId = resolvedContext;
-            }
-          }
+          ensureDatasetContext(dataset, state);
 
           imageviewer.lfDataset = dataset;
           imageviewer.getComponents().then(({ details }) => {
@@ -91,17 +78,7 @@ export const imageEditorFactory: ImageEditorFactory = {
           if (r.status === 'success') {
             if (r?.data && Object.entries(r.data).length > 0) {
               const dataset = r.data as ImageEditorDataset;
-              const resolvedContext =
-                dataset?.context_id ?? state?.contextId ?? dataset?.selection?.context_id;
-              if (resolvedContext) {
-                dataset.context_id = resolvedContext;
-                if (dataset.selection) {
-                  dataset.selection.context_id = dataset.selection.context_id ?? resolvedContext;
-                }
-                if (state) {
-                  state.contextId = resolvedContext;
-                }
-              }
+              ensureDatasetContext(dataset, state);
 
               imageviewer.lfDataset = dataset;
             } else {
