@@ -13498,7 +13498,7 @@ var X = false, Z = (t2, e2, n2) => {
                         const n6 = t7.i.replace(/-/g, "_"), o6 = t7.T;
                         if (!o6) return;
                         const r3 = i.get(o6);
-                        return r3 ? r3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-00fecc42.entry.js": () => import("./p-00fecc42.entry-BDcYSgCC.js"), "./p-0df37de3.entry.js": () => import("./p-0df37de3.entry-BpZ-ma2p.js"), "./p-28dd0bff.entry.js": () => import("./p-28dd0bff.entry-DoOz7cWD.js"), "./p-2e9faeab.entry.js": () => import("./p-2e9faeab.entry-B6_dB9K9.js"), "./p-36aa4a7f.entry.js": () => import("./p-36aa4a7f.entry-BOtOlJcg.js"), "./p-37b3e400.entry.js": () => import("./p-37b3e400.entry-DvSZUq3G.js"), "./p-426ea672.entry.js": () => import("./p-426ea672.entry-CdBjinq5.js"), "./p-43bf5312.entry.js": () => import("./p-43bf5312.entry-DFB2Np4D.js"), "./p-924ca284.entry.js": () => import("./p-924ca284.entry-mUSmQY3V.js"), "./p-a0ed5f95.entry.js": () => import("./p-a0ed5f95.entry-BFqqm0fZ.js"), "./p-a6642965.entry.js": () => import("./p-a6642965.entry-DvZuZbv9.js"), "./p-bb63963d.entry.js": () => import("./p-bb63963d.entry-Xfw1qaKc.js"), "./p-e2900881.entry.js": () => import("./p-e2900881.entry-DHCEbNTw.js"), "./p-e6148250.entry.js": () => import("./p-e6148250.entry-XA7FDa0k.js"), "./p-f19de954.entry.js": () => import("./p-f19de954.entry-DqSkou5Q.js"), "./p-febf6aa2.entry.js": () => import("./p-febf6aa2.entry-CHBFceBV.js") }), `./${o6}.entry.js`, 2).then(((t8) => (i.set(o6, t8), t8[n6])), ((t8) => {
+                        return r3 ? r3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-00fecc42.entry.js": () => import("./p-00fecc42.entry-DCvuTkPI.js"), "./p-0df37de3.entry.js": () => import("./p-0df37de3.entry-D2YeBn3D.js"), "./p-28dd0bff.entry.js": () => import("./p-28dd0bff.entry-XOEjTilx.js"), "./p-2e9faeab.entry.js": () => import("./p-2e9faeab.entry-DNZDx-TC.js"), "./p-36aa4a7f.entry.js": () => import("./p-36aa4a7f.entry-hs96MiLq.js"), "./p-37b3e400.entry.js": () => import("./p-37b3e400.entry-BXwvkfrj.js"), "./p-426ea672.entry.js": () => import("./p-426ea672.entry-Dka98bbx.js"), "./p-43bf5312.entry.js": () => import("./p-43bf5312.entry-DK4hojeU.js"), "./p-924ca284.entry.js": () => import("./p-924ca284.entry-BgEv2iSH.js"), "./p-a0ed5f95.entry.js": () => import("./p-a0ed5f95.entry-BSXzzBBO.js"), "./p-a6642965.entry.js": () => import("./p-a6642965.entry-29BpkLUV.js"), "./p-bb63963d.entry.js": () => import("./p-bb63963d.entry-CkWEw6q-.js"), "./p-e2900881.entry.js": () => import("./p-e2900881.entry-CaUs3NJ6.js"), "./p-e6148250.entry.js": () => import("./p-e6148250.entry-BDzVq8iu.js"), "./p-f19de954.entry.js": () => import("./p-f19de954.entry-bonyXs88.js"), "./p-febf6aa2.entry.js": () => import("./p-febf6aa2.entry-vXZey28O.js") }), `./${o6}.entry.js`, 2).then(((t8) => (i.set(o6, t8), t8[n6])), ((t8) => {
                           l(t8, e3.$hostElement$);
                         }));
                         /*!__STENCIL_STATIC_IMPORT_SWITCH__*/
@@ -19228,11 +19228,7 @@ const SECTIONS = {
           children: [
             {
               id: ControlPanelSection.Content,
-              value: "This button will create a manual backup of the content in <path/to/your/comfyui/user/LF_Nodes>"
-            },
-            {
-              id: ControlPanelSection.Content,
-              value: "Be sure to include as much information as you can, without sufficient data it's difficult to troubleshoot problems."
+              value: "This button will create a manual backup of the content in <path/to/your/comfyui/user/LF_Nodes>."
             },
             {
               id: ControlPanelSection.Content,
@@ -19513,6 +19509,7 @@ const SECTIONS = {
               id: ControlPanelSection.Content,
               value: "Metadata pulled from CivitAI are stored in .info files saved in the same folders of the models to avoid unnecessary fetches from the API."
             },
+            { id: ControlPanelSection.Content, tagName: "div", value: "" },
             {
               id: ControlPanelSection.Content,
               value: "By pressing this button it's possible to delete every .info file created by fetching the metadata."
