@@ -6,6 +6,7 @@ import { LogSeverity } from '../types/manager/manager';
 import {
   ImageEditorActionButtons,
   ImageEditorCSS,
+  ImageEditorDataset,
   ImageEditorDeserializedValue,
   ImageEditorFactory,
   ImageEditorIcons,
@@ -31,7 +32,8 @@ export const imageEditorFactory: ImageEditorFactory = {
         return imageviewer.lfDataset || {};
       },
       setValue: (value) => {
-        const { actionButtons, grid, imageviewer } = STATE.get(wrapper).elements;
+        const state = STATE.get(wrapper);
+        const { actionButtons, grid, imageviewer } = state.elements;
 
         const callback: ImageEditorNormalizeCallback = (_, u) => {
           const parsedValue = u.parsedJson as ImageEditorDeserializedValue;
@@ -40,7 +42,24 @@ export const imageEditorFactory: ImageEditorFactory = {
             setGridStatus(ImageEditorStatus.Pending, grid, actionButtons);
           }
 
-          imageviewer.lfDataset = parsedValue || {};
+          const dataset = (parsedValue || {}) as ImageEditorDataset;
+          const datasetContext = dataset?.context_id;
+          if (datasetContext) {
+            state.contextId = datasetContext;
+          } else if (state.contextId) {
+            dataset.context_id = state.contextId;
+          }
+
+          const selection = dataset?.selection;
+          if (selection) {
+            const resolvedContext = selection.context_id ?? dataset.context_id ?? state.contextId;
+            if (resolvedContext) {
+              selection.context_id = resolvedContext;
+              state.contextId = resolvedContext;
+            }
+          }
+
+          imageviewer.lfDataset = dataset;
           imageviewer.getComponents().then(({ details }) => {
             const { canvas } = details;
             if (canvas) {
@@ -64,13 +83,27 @@ export const imageEditorFactory: ImageEditorFactory = {
     const imageviewer = document.createElement(TagName.LfImageviewer);
 
     const refresh = async (directory: string) => {
+      const state = STATE.get(wrapper);
       getLfManager()
         .getApiRoutes()
         .image.get(directory)
         .then((r) => {
           if (r.status === 'success') {
             if (r?.data && Object.entries(r.data).length > 0) {
-              imageviewer.lfDataset = r.data;
+              const dataset = r.data as ImageEditorDataset;
+              const resolvedContext =
+                dataset?.context_id ?? state?.contextId ?? dataset?.selection?.context_id;
+              if (resolvedContext) {
+                dataset.context_id = resolvedContext;
+                if (dataset.selection) {
+                  dataset.selection.context_id = dataset.selection.context_id ?? resolvedContext;
+                }
+                if (state) {
+                  state.contextId = resolvedContext;
+                }
+              }
+
+              imageviewer.lfDataset = dataset;
             } else {
               getLfManager().log('Images not found.', { r }, LogSeverity.Info);
             }
@@ -143,6 +176,7 @@ export const imageEditorFactory: ImageEditorFactory = {
 
     const state: ImageEditorState = {
       elements: { actionButtons, controls: {}, grid, imageviewer, settings },
+      contextId: undefined,
       filter: null,
       filterType: null,
       lastBrushSettings: JSON.parse(JSON.stringify(SETTINGS.brush.settings)),

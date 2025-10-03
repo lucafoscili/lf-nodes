@@ -4,6 +4,7 @@ import {
   LfChartInterface,
   LfComponent,
   LfListInterface,
+  LfMasonryInterface,
   LfToggleInterface,
   LfTreeInterface,
 } from '@lf-widgets/foundations';
@@ -68,6 +69,9 @@ export const isChart = (comp: LfComponent): comp is LfChartInterface => {
 };
 export const isList = (comp: LfComponent): comp is LfListInterface => {
   return comp.rootElement.tagName.toLowerCase() === 'lf-list';
+};
+export const isMasonry = (comp: LfComponent): comp is LfMasonryInterface => {
+  return comp.rootElement.tagName.toLowerCase() === 'lf-masonry';
 };
 export const isTree = (comp: LfComponent): comp is LfTreeInterface => {
   return comp.rootElement.tagName.toLowerCase() === 'lf-tree';

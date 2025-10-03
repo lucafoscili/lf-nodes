@@ -27,11 +27,24 @@ export const apiCall = async (state: ImageEditorState, addSnapshot: boolean) => 
   };
 
   const contextDataset = imageviewer.lfDataset as ImageEditorDataset | undefined;
-  const contextId = contextDataset?.context_id;
+  const datasetContextId = contextDataset?.context_id;
+  const selectionContextId = contextDataset?.selection?.context_id;
+  const contextId = datasetContextId ?? selectionContextId ?? state.contextId;
 
-  if (contextId) {
-    payload.context_id = contextId;
+  if (!contextId) {
+    lfManager.log(
+      'Missing editing context. Run the workflow to register an editing session before using inpaint.',
+      { dataset: contextDataset },
+      LogSeverity.Warning,
+    );
+    if (state.manualApply?.isProcessing) {
+      resolveManualApplyRequest(state, false);
+    }
+    return false;
   }
+
+  state.contextId = contextId;
+  payload.context_id = contextId;
 
   requestAnimationFrame(() => imageviewer.setSpinnerStatus(true));
 
