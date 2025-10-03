@@ -185,6 +185,23 @@ def resolve_input_directory_path(
 
 
 def ensure_external_preview(source_dir: str, filename: str, *, base_type: str = "input") -> tuple[str, str]:
+    """
+    Copy a file from an external directory into a deterministic ComfyUI preview folder.
+
+    The preview folder lives under the configured input or output directory and is keyed by a hash
+    of the source directory to avoid collisions.
+
+    Args:
+        source_dir: Absolute or relative path to the external directory that contains the file.
+        filename: Name of the file to copy into the preview directory.
+        base_type: ComfyUI base directory type to use ("input" or "output"). Defaults to "input".
+
+    Returns:
+        tuple[str, str]: Relative preview subfolder (with forward slashes) and the sanitized filename.
+
+    Raises:
+        FileNotFoundError: If the requested file cannot be found or accessed.
+    """
     source_path = os.path.join(source_dir, filename)
     base_input = get_comfy_dir(base_type)
 
