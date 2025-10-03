@@ -115,13 +115,6 @@ export enum ImageEditorColumnId {
   Status = 'status',
 }
 
-export interface ImageEditorDatasetNavigationDirectory {
-  raw?: string;
-  relative?: string;
-  resolved?: string;
-  is_external?: boolean;
-}
-
 export interface ImageEditorDatasetNavigation {
   directory?: ImageEditorDatasetNavigationDirectory;
 }

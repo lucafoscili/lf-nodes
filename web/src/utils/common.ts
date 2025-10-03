@@ -3,6 +3,7 @@ import {
   LfCanvasInterface,
   LfChartInterface,
   LfComponent,
+  LfImageInterface,
   LfListInterface,
   LfMasonryInterface,
   LfToggleInterface,
@@ -66,6 +67,9 @@ export const isCanvas = (comp: LfComponent): comp is LfCanvasInterface => {
 };
 export const isChart = (comp: LfComponent): comp is LfChartInterface => {
   return comp.rootElement.tagName.toLowerCase() === 'lf-chart';
+};
+export const isImage = (comp: LfComponent): comp is LfImageInterface => {
+  return comp.rootElement.tagName.toLowerCase() === 'lf-image';
 };
 export const isList = (comp: LfComponent): comp is LfListInterface => {
   return comp.rootElement.tagName.toLowerCase() === 'lf-list';

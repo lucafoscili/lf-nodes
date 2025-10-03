@@ -4,6 +4,7 @@ import {
   LfCanvasEventPayload,
   LfCanvasInterface,
   LfEvent,
+  LfImageEventPayload,
   LfImageviewerEventPayload,
   LfMasonryEventPayload,
   LfMasonryInterface,
@@ -27,6 +28,7 @@ import {
   debounce,
   getApiRoutes,
   getLfManager,
+  isImage,
   isMasonry,
   isTree,
   LFInterruptFlags,
@@ -223,6 +225,7 @@ export const createEventHandlers = ({
 
       switch (eventType) {
         case 'lf-event': {
+          // Events bubbled up by imageviewer's children
           const ogEv = originalEvent as LfEvent;
           switch (ogEv.detail.eventType) {
             case 'click':
@@ -234,23 +237,37 @@ export const createEventHandlers = ({
               }
               break;
 
-            case 'lf-event':
+            case 'lf-event': // Events bubbled up further
+              // Check if it's a masonry event
               const masonryEvent = ogEv as CustomEvent<LfMasonryEventPayload>;
-              const masonrySource =
-                isMasonry(ogEv.detail.comp) ||
-                typeof masonryEvent?.detail?.selectedShape !== 'undefined';
+              const isMasonryEvent = isMasonry(ogEv.detail.comp);
 
-              if (masonrySource) {
+              if (isMasonryEvent) {
                 const { selectedShape } = masonryEvent.detail;
-                if (!selectedShape) {
-                  getLfManager().log(
-                    'Masonry selection cleared.',
-                    { selectedShape },
-                    LogSeverity.Info,
-                  );
-                  return;
+
+                switch (masonryEvent.detail.eventType) {
+                  case 'lf-event': // Events bubbled up by masonry children
+                    // Check if it's an image event
+                    const subOgEv = masonryEvent.detail
+                      .originalEvent as CustomEvent<LfImageEventPayload>;
+                    const isImageEvent = isImage(subOgEv.detail.comp);
+                    if (isImageEvent) {
+                      switch (subOgEv.detail.eventType) {
+                        case 'click':
+                          if (!selectedShape) {
+                            getLfManager().log(
+                              'Masonry selection cleared.',
+                              { selectedShape },
+                              LogSeverity.Info,
+                            );
+                            return;
+                          }
+                          await syncSelectionWithDataset(state, masonryEvent);
+                          break;
+                      }
+                    }
                 }
-                await syncSelectionWithDataset(state, masonryEvent);
+                break;
               }
               break;
 
