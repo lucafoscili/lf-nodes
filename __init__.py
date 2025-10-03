@@ -2,7 +2,7 @@ import sys
 import os
 import importlib.util
 
-VERSION = "1.2.0"
+VERSION = "1.3.0"
 
 NODE_CLASS_MAPPINGS = {}
 NODE_DISPLAY_NAME_MAPPINGS = {}
@@ -23,7 +23,7 @@ for dirpath, _, filenames in os.walk(MODULES_DIR):
                 if spec and spec.loader:
                     module = importlib.util.module_from_spec(spec)
                     spec.loader.exec_module(module)
-                    
+
                     NODE_CLASS_MAPPINGS.update(getattr(module, "NODE_CLASS_MAPPINGS", {}))
                     NODE_DISPLAY_NAME_MAPPINGS.update(getattr(module, "NODE_DISPLAY_NAME_MAPPINGS", {}))
             except Exception as e:
