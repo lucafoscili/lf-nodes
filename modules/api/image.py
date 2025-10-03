@@ -34,6 +34,17 @@ async def get_images_in_directory(request):
         nodes: list[dict] = []
         dataset: dict = {"nodes": nodes}
 
+        navigation_directory: dict[str, object] = {}
+        if isinstance(raw_directory, str):
+            navigation_directory["raw"] = raw_directory
+        if images_dir:
+            navigation_directory["resolved"] = images_dir
+        if resolved_directory is not None:
+            navigation_directory["relative"] = resolved_directory
+        navigation_directory["is_external"] = is_external
+
+        dataset["navigation"] = {"directory": navigation_directory}
+
         for index, filename in enumerate(os.listdir(images_dir)):
             file_path = os.path.join(images_dir, filename)
             if os.path.isfile(file_path) and filename.lower().endswith(IMAGE_FILE_EXTENSIONS):

@@ -106,6 +106,17 @@ class LF_LoadImages:
         nodes: list[dict] = []
         dataset: dict = { "nodes": nodes }
 
+        raw_directory_value = dir if isinstance(dir, str) else ""
+        navigation_directory: dict[str, object] = {
+            "raw": raw_directory_value,
+            "relative": (resolved_directory or "") if resolved_directory is not None else "",
+            "is_external": is_external_dir,
+        }
+        if resolved_dir:
+            navigation_directory["resolved"] = resolved_dir
+
+        dataset["navigation"] = {"directory": navigation_directory}
+
         if ui_widget:
             selected_index = ui_widget.get("index", None)
             selected_name = ui_widget.get("name", None)

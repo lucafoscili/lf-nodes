@@ -1,9 +1,12 @@
 import { LfDataColumn, LfMasonryEventPayload } from '@lf-widgets/foundations';
 import {
   ImageEditorDataset,
+  ImageEditorDatasetNavigationDirectory,
   ImageEditorDatasetSelection,
   ImageEditorState,
 } from '../../types/widgets/imageEditor';
+
+const isString = (value: unknown): value is string => typeof value === 'string';
 
 const asString = (value: unknown): string | undefined =>
   typeof value === 'string' ? value : undefined;
@@ -233,6 +236,50 @@ export const ensureDatasetContext = (
   if (state?.contextId) {
     dataset.context_id = state.contextId;
     return state.contextId;
+  }
+
+  return undefined;
+};
+
+export const getNavigationDirectory = (
+  dataset: ImageEditorDataset | undefined,
+): ImageEditorDatasetNavigationDirectory | undefined => {
+  return dataset?.navigation?.directory;
+};
+
+export const mergeNavigationDirectory = (
+  dataset: ImageEditorDataset,
+  directory: Partial<ImageEditorDatasetNavigationDirectory>,
+): ImageEditorDatasetNavigationDirectory => {
+  const current = dataset.navigation?.directory ?? {};
+  const next = {
+    ...current,
+    ...directory,
+  } satisfies ImageEditorDatasetNavigationDirectory;
+
+  dataset.navigation = dataset.navigation ?? {};
+  dataset.navigation.directory = next;
+
+  return next;
+};
+
+export const deriveDirectoryValue = (
+  directory: ImageEditorDatasetNavigationDirectory | undefined,
+): string | undefined => {
+  if (!directory) {
+    return undefined;
+  }
+
+  if (isString(directory.raw)) {
+    return directory.raw;
+  }
+
+  if (isString(directory.relative)) {
+    return directory.relative;
+  }
+
+  if (isString(directory.resolved)) {
+    return directory.resolved;
   }
 
   return undefined;

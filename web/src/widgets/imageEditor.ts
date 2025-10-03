@@ -1,6 +1,11 @@
 import { SETTINGS, TREE_DATA } from '../fixtures/imageEditor';
 import { EV_HANDLERS, getStatusColumn, setGridStatus, updateCb } from '../helpers/imageEditor';
-import { ensureDatasetContext } from '../helpers/imageEditor/dataset';
+import {
+  deriveDirectoryValue,
+  ensureDatasetContext,
+  getNavigationDirectory,
+  mergeNavigationDirectory,
+} from '../helpers/imageEditor/dataset';
 import { setBrush } from '../helpers/imageEditor/settings';
 import { LfEventName } from '../types/events/events';
 import { LogSeverity } from '../types/manager/manager';
@@ -20,6 +25,43 @@ import { createDOMWidget, getLfManager, normalizeValue } from '../utils/common';
 
 const STATE = new WeakMap<HTMLDivElement, ImageEditorState>();
 export const IMAGE_EDITOR_INSTANCES = new Set<ImageEditorState>();
+
+const normalizeDirectoryRequest = (value: unknown): string =>
+  typeof value === 'string' ? value : '';
+
+const syncNavigationDirectoryControl = async (
+  state: ImageEditorState,
+  directoryValue: string | undefined,
+): Promise<void> => {
+  const { imageviewer } = state.elements;
+  if (!imageviewer?.getComponents) {
+    return;
+  }
+
+  const targetValue = normalizeDirectoryRequest(directoryValue);
+
+  try {
+    const components = await imageviewer.getComponents();
+    const textfield = components?.navigation?.textfield;
+    if (!textfield || typeof textfield.setValue !== 'function') {
+      return;
+    }
+
+    const currentValue =
+      typeof textfield.getValue === 'function' ? await textfield.getValue() : undefined;
+
+    if ((currentValue ?? '') === targetValue) {
+      return;
+    }
+
+    state.isSyncingDirectory = true;
+    await textfield.setValue(targetValue);
+  } catch (error) {
+    getLfManager().log('Failed to synchronize directory input.', { error }, LogSeverity.Warning);
+  } finally {
+    state.isSyncingDirectory = false;
+  }
+};
 
 export const imageEditorFactory: ImageEditorFactory = {
   //#region Options
@@ -46,13 +88,43 @@ export const imageEditorFactory: ImageEditorFactory = {
           const dataset = (parsedValue || {}) as ImageEditorDataset;
           ensureDatasetContext(dataset, state);
 
+          const navigationDirectory = getNavigationDirectory(dataset);
+          if (navigationDirectory) {
+            state.directory = { ...navigationDirectory };
+          }
+
+          const derivedDirectoryValue = deriveDirectoryValue(navigationDirectory);
+          if (derivedDirectoryValue !== undefined) {
+            state.directoryValue = derivedDirectoryValue;
+          }
+
           imageviewer.lfDataset = dataset;
-          imageviewer.getComponents().then(({ details }) => {
-            const { canvas } = details;
-            if (canvas) {
-              setBrush(canvas, STATE.get(wrapper).lastBrushSettings);
-            }
-          });
+          imageviewer
+            .getComponents()
+            .then(({ details }) => {
+              const { canvas } = details;
+              if (canvas) {
+                setBrush(canvas, STATE.get(wrapper).lastBrushSettings);
+              }
+            })
+            .catch((error) =>
+              getLfManager().log(
+                'Failed to prepare image editor canvas.',
+                { error },
+                LogSeverity.Warning,
+              ),
+            );
+
+          void syncNavigationDirectoryControl(state, state.directoryValue);
+
+          const shouldAutoLoad =
+            !state.hasAutoDirectoryLoad &&
+            (!Array.isArray(dataset?.nodes) || dataset.nodes.length === 0);
+
+          if (shouldAutoLoad) {
+            state.hasAutoDirectoryLoad = true;
+            state.refreshDirectory?.(normalizeDirectoryRequest(state.directoryValue));
+          }
         };
 
         normalizeValue(value, callback, CustomWidgetName.imageEditor);
@@ -71,28 +143,65 @@ export const imageEditorFactory: ImageEditorFactory = {
 
     const refresh = async (directory: string) => {
       const state = STATE.get(wrapper);
-      getLfManager()
-        .getApiRoutes()
-        .image.get(directory)
-        .then((r) => {
-          if (r.status === 'success') {
-            if (r?.data && Object.entries(r.data).length > 0) {
-              const dataset = r.data as ImageEditorDataset;
-              ensureDatasetContext(dataset, state);
+      const normalizedDirectory = normalizeDirectoryRequest(directory);
 
-              imageviewer.lfDataset = dataset;
-            } else {
-              getLfManager().log('Images not found.', { r }, LogSeverity.Info);
-            }
-          }
-        });
+      state.hasAutoDirectoryLoad = true;
+      state.lastRequestedDirectory = normalizedDirectory;
+
+      try {
+        const response = await getLfManager().getApiRoutes().image.get(normalizedDirectory);
+        if (response.status !== 'success') {
+          getLfManager().log('Images not found.', { response }, LogSeverity.Info);
+          return;
+        }
+
+        const dataset = (response?.data ?? { nodes: [] }) as ImageEditorDataset;
+        const mergedDirectory = mergeNavigationDirectory(dataset, { raw: normalizedDirectory });
+
+        state.directory = { ...mergedDirectory };
+        const derivedDirectoryValue = deriveDirectoryValue(mergedDirectory);
+        state.directoryValue = derivedDirectoryValue ?? normalizedDirectory;
+        state.lastRequestedDirectory = state.directoryValue;
+
+        ensureDatasetContext(dataset, state);
+
+        imageviewer.lfDataset = dataset;
+        await syncNavigationDirectoryControl(state, state.directoryValue);
+      } catch (error) {
+        getLfManager().log(
+          'Failed to refresh image directory.',
+          { error, directory: normalizedDirectory },
+          LogSeverity.Warning,
+        );
+      }
     };
 
     settings.classList.add(ImageEditorCSS.Settings);
     settings.slot = 'settings';
 
     imageviewer.classList.add(ImageEditorCSS.Widget);
-    imageviewer.lfLoadCallback = async (_, value) => await refresh(value);
+    imageviewer.lfLoadCallback = async (_, value) => {
+      const state = STATE.get(wrapper);
+      if (!state || state.isSyncingDirectory) {
+        return;
+      }
+
+      let directoryValue = normalizeDirectoryRequest(value);
+      if (!directoryValue) {
+        const fallbackDirectory =
+          state.directoryValue ?? deriveDirectoryValue(state.directory) ?? undefined;
+        directoryValue = normalizeDirectoryRequest(fallbackDirectory);
+      }
+
+      if (
+        state.lastRequestedDirectory === directoryValue &&
+        state.directoryValue === directoryValue
+      ) {
+        return;
+      }
+
+      await refresh(directoryValue);
+    };
     imageviewer.lfValue = TREE_DATA;
     imageviewer.addEventListener(LfEventName.LfImageviewer, (e) =>
       EV_HANDLERS.imageviewer(STATE.get(wrapper), e),
@@ -154,10 +263,16 @@ export const imageEditorFactory: ImageEditorFactory = {
     const state: ImageEditorState = {
       elements: { actionButtons, controls: {}, grid, imageviewer, settings },
       contextId: undefined,
+      directory: undefined,
+      directoryValue: undefined,
       filter: null,
       filterType: null,
       lastBrushSettings: JSON.parse(JSON.stringify(SETTINGS.brush.settings)),
+      hasAutoDirectoryLoad: false,
+      isSyncingDirectory: false,
+      lastRequestedDirectory: undefined,
       node,
+      refreshDirectory: refresh,
       update: {
         preview: () => updateCb(STATE.get(wrapper)).then(() => {}),
         snapshot: () => updateCb(STATE.get(wrapper), true).then(() => {}),
@@ -167,6 +282,25 @@ export const imageEditorFactory: ImageEditorFactory = {
 
     STATE.set(wrapper, state);
     IMAGE_EDITOR_INSTANCES.add(state);
+
+    void Promise.resolve().then(() => {
+      const currentState = STATE.get(wrapper);
+      if (!currentState || currentState.hasAutoDirectoryLoad) {
+        return;
+      }
+
+      const currentDataset = currentState.elements.imageviewer?.lfDataset as
+        | ImageEditorDataset
+        | undefined;
+      const hasNodes = Array.isArray(currentDataset?.nodes) && currentDataset.nodes.length > 0;
+      const hasDirectoryValue = Boolean(currentState.directoryValue);
+
+      if (hasNodes || hasDirectoryValue) {
+        return;
+      }
+
+      currentState.refreshDirectory?.('');
+    });
 
     return { widget: createDOMWidget(CustomWidgetName.imageEditor, wrapper, node, options) };
   },
