@@ -212,8 +212,7 @@ class LF_LoadImages:
                             creation_date = ""
                         output_creation_dates.append(creation_date)
 
-                        pil_image = Image.open(img_file)
-                        try:
+                        with Image.open(img_file) as pil_image:
                             if pil_image.format == "JPEG":
                                 metadata = extract_jpeg_metadata(pil_image, original_stem)
                             elif pil_image.format == "PNG":
@@ -222,8 +221,6 @@ class LF_LoadImages:
                                 metadata = {"error": f"Unsupported image format for {original_stem}"}
 
                             rgb_img = pil_image.convert("RGB")
-                        finally:
-                            pil_image.close()
 
                         img_tensor = pil_to_tensor(rgb_img)
 
