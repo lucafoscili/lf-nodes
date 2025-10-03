@@ -15,6 +15,7 @@ from ...utils.helpers.logic import (
     normalize_input_image,
     normalize_list_to_value,
     normalize_output_image,
+    normalize_output_mask,
 )
 from ...utils.helpers.temp_cache import TempFileCache
 from ...utils.helpers.ui import create_compare_node
@@ -76,9 +77,9 @@ class LF_BackgroundRemover:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     INPUT_IS_LIST = (True, False, False, False, False)
-    OUTPUT_IS_LIST = (False, True, True, False, False)
-    RETURN_NAMES = ("image", "image_list", "cutout_list", "mask", "stats")
-    RETURN_TYPES = (Input.IMAGE, Input.IMAGE, Input.IMAGE, Input.MASK, Input.JSON)
+    OUTPUT_IS_LIST = (False, True, True, False, True, False)
+    RETURN_NAMES = ("image", "image_list", "cutout_list", "mask", "mask_list", "stats")
+    RETURN_TYPES = (Input.IMAGE, Input.IMAGE, Input.IMAGE, Input.MASK, Input.MASK, Input.JSON)
 
     def on_exec(self, **kwargs: dict):
         self._temp_cache.cleanup()
@@ -156,9 +157,8 @@ class LF_BackgroundRemover:
         composite_batches, composite_list = normalize_output_image(composite_images)
         _, cutout_list = normalize_output_image(cutout_images)
 
-        mask_for_grouping = [mask.unsqueeze(-1) for mask in mask_images]
-        mask_batches, _ = normalize_output_image(mask_for_grouping)
-        mask_output = mask_batches[0].squeeze(-1) if mask_batches else mask_images[0]
+        mask_batches, mask_list = normalize_output_mask(mask_images)
+        mask_output = mask_batches[0] if mask_batches else mask_list[0]
 
         stats_output = {"runs": stats_rows}
 
@@ -169,6 +169,7 @@ class LF_BackgroundRemover:
             composite_list,
             cutout_list,
             mask_output,
+            mask_list,
             stats_output,
         )
 # endregion

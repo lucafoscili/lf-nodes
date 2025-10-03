@@ -4,16 +4,21 @@ import {
   LfCanvasEventPayload,
   LfCanvasInterface,
   LfEvent,
+  LfImageEventPayload,
   LfImageviewerEventPayload,
+  LfMasonryEventPayload,
+  LfMasonryInterface,
   LfSliderEventPayload,
   LfTextfieldEventPayload,
   LfToggleEventPayload,
   LfTreeEventPayload,
 } from '@lf-widgets/foundations';
 import { SETTINGS } from '../../fixtures/imageEditor';
+import { LogSeverity } from '../../types/manager/manager';
 import {
   EventHandlerDeps,
   ImageEditorBrushFilter,
+  ImageEditorDataset,
   ImageEditorIcons,
   ImageEditorState,
 } from '../../types/widgets/imageEditor';
@@ -22,9 +27,20 @@ import {
   canvasToBase64,
   debounce,
   getApiRoutes,
+  getLfManager,
+  isImage,
+  isMasonry,
   isTree,
   LFInterruptFlags,
 } from '../../utils/common';
+import {
+  applySelectionColumn,
+  buildSelectionPayload,
+  ensureDatasetContext,
+  hasContextChanged,
+  hasSelectionChanged,
+  resolveSelectionIndex,
+} from './dataset';
 import { registerManualApplyChange } from './manualApply';
 import { setBrush } from './settings';
 import { updateCb } from './update';
@@ -35,6 +51,97 @@ export const createEventHandlers = ({
   handleInterruptForState,
   prepSettings,
 }: EventHandlerDeps) => {
+  const syncSelectionWithDataset = async (
+    state: ImageEditorState,
+    masonryEvent: CustomEvent<LfMasonryEventPayload>,
+  ) => {
+    const { elements } = state;
+    const dataset = (elements.imageviewer.lfDataset || {}) as ImageEditorDataset;
+    const effectiveContextId = ensureDatasetContext(dataset, state);
+    const previousSelection = dataset.selection;
+    const previousContextId = dataset.context_id ?? effectiveContextId;
+
+    const { comp, selectedShape: rawSelectedShape } = masonryEvent.detail;
+    const masonryComp = comp as LfMasonryInterface | undefined;
+
+    let selectedShape = rawSelectedShape;
+
+    if (
+      (!selectedShape || typeof selectedShape.index !== 'number') &&
+      masonryComp?.getSelectedShape
+    ) {
+      try {
+        selectedShape = await masonryComp.getSelectedShape();
+      } catch (error) {
+        getLfManager().log('Failed to resolve masonry selection.', { error }, LogSeverity.Warning);
+      }
+    }
+
+    const nodes = Array.isArray(dataset?.nodes) ? dataset.nodes : [];
+    const selectionIndex = resolveSelectionIndex(selectedShape, nodes);
+
+    if (typeof selectionIndex !== 'number') {
+      getLfManager().log(
+        'Unable to resolve selected masonry index.',
+        { selectedShape },
+        LogSeverity.Warning,
+      );
+      return;
+    }
+
+    const { selection, contextId } = buildSelectionPayload({
+      dataset,
+      index: selectionIndex,
+      nodes,
+      selectedShape,
+      fallbackContextId: previousContextId ?? state.contextId,
+    });
+
+    const resolvedContextId =
+      selection.context_id ?? contextId ?? previousContextId ?? state.contextId;
+    if (resolvedContextId) {
+      state.contextId = resolvedContextId;
+      if (!selection.context_id) {
+        selection.context_id = resolvedContextId;
+      }
+    }
+
+    const nextDataset = applySelectionColumn(
+      {
+        ...dataset,
+        context_id: dataset.context_id ?? resolvedContextId,
+      },
+      selection,
+    );
+
+    if (resolvedContextId && nextDataset.selection) {
+      nextDataset.selection.context_id = resolvedContextId;
+    }
+
+    elements.imageviewer.lfDataset = nextDataset;
+
+    if (!resolvedContextId) {
+      return;
+    }
+
+    if (
+      !hasSelectionChanged(previousSelection, nextDataset.selection) &&
+      !hasContextChanged(previousContextId, nextDataset.context_id)
+    ) {
+      return;
+    }
+
+    getApiRoutes()
+      .json.update(resolvedContextId, nextDataset)
+      .catch((error) =>
+        getLfManager().log(
+          'Failed to persist image selection.',
+          { error, contextId: resolvedContextId },
+          LogSeverity.Warning,
+        ),
+      );
+  };
+
   const handlers = {
     //#region Button
     button: async (state: ImageEditorState, e: CustomEvent<LfButtonEventPayload>) => {
@@ -118,6 +225,7 @@ export const createEventHandlers = ({
 
       switch (eventType) {
         case 'lf-event': {
+          // Events bubbled up by imageviewer's children
           const ogEv = originalEvent as LfEvent;
           switch (ogEv.detail.eventType) {
             case 'click':
@@ -126,6 +234,40 @@ export const createEventHandlers = ({
                 if (node.cells?.lfCode) {
                   prepSettings(state, node);
                 }
+              }
+              break;
+
+            case 'lf-event': // Events bubbled up further
+              // Check if it's a masonry event
+              const masonryEvent = ogEv as CustomEvent<LfMasonryEventPayload>;
+              const isMasonryEvent = isMasonry(ogEv.detail.comp);
+
+              if (isMasonryEvent) {
+                const { selectedShape } = masonryEvent.detail;
+
+                switch (masonryEvent.detail.eventType) {
+                  case 'lf-event': // Events bubbled up by masonry children
+                    // Check if it's an image event
+                    const subOgEv = masonryEvent.detail
+                      .originalEvent as CustomEvent<LfImageEventPayload>;
+                    const isImageEvent = isImage(subOgEv.detail.comp);
+                    if (isImageEvent) {
+                      switch (subOgEv.detail.eventType) {
+                        case 'click':
+                          if (!selectedShape) {
+                            getLfManager().log(
+                              'Masonry selection cleared.',
+                              { selectedShape },
+                              LogSeverity.Info,
+                            );
+                            return;
+                          }
+                          await syncSelectionWithDataset(state, masonryEvent);
+                          break;
+                      }
+                    }
+                }
+                break;
               }
               break;
 

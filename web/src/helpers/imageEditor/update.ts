@@ -67,14 +67,19 @@ export const updateCb = async (state: ImageEditorState, addSnapshot = false, for
 
   const { elements, filter } = state;
   const { imageviewer } = elements;
-  const { settings } = filter;
 
+  // If no filter selected yet, bail out
+  if (!filter) {
+    return false;
+  }
+
+  const { settings } = filter;
   const validValues = isValidObject(settings);
 
   const isCanvasAction = settings.points || settings.b64_canvas;
-  const isStroke = !filter || filter.hasCanvasAction;
+  const hasCanvasAction = filter.hasCanvasAction;
 
-  if (validValues && isStroke) {
+  if (validValues && hasCanvasAction) {
     const canvas = (await imageviewer.getComponents()).details.canvas;
     const brushDefaults = {
       ...SETTINGS.brush.settings,
@@ -100,7 +105,11 @@ export const updateCb = async (state: ImageEditorState, addSnapshot = false, for
     };
   }
 
-  const shouldUpdate = !!(validValues && (!isStroke || (isStroke && isCanvasAction)));
+  // Only call API if:
+  // 1. Settings are valid
+  // 2. For canvas-based filters: must have actual canvas data (points or b64_canvas)
+  // 3. For regular filters: just need valid settings
+  const shouldUpdate = validValues && (!hasCanvasAction || isCanvasAction);
   const requiresManualApply = !!filter?.requiresManualApply;
 
   let success = false;

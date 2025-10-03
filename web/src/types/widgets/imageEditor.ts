@@ -37,6 +37,13 @@ export type ImageEditorNormalizeCallback = NormalizeValueCallback<
 //#endregion
 
 //#region Value
+export interface ImageEditorDatasetNavigationDirectory {
+  raw?: string;
+  relative?: string;
+  resolved?: string;
+  is_external?: boolean;
+}
+
 export type ImageEditorDeserializedValue = LfDataDataset;
 //#endregion
 
@@ -51,9 +58,15 @@ export interface ImageEditorState extends BaseWidgetState {
     imageviewer: HTMLLfImageviewerElement;
     settings: HTMLDivElement;
   };
+  contextId?: string;
   filter: ImageEditorFilter;
   filterType: ImageEditorFilterType;
   lastBrushSettings: ImageEditorBrushSettings;
+  directory?: ImageEditorDatasetNavigationDirectory;
+  directoryValue?: string;
+  hasAutoDirectoryLoad?: boolean;
+  isSyncingDirectory?: boolean;
+  lastRequestedDirectory?: string;
   manualApply?: {
     button: HTMLLfButtonElement;
     defaultLabel: string;
@@ -71,6 +84,7 @@ export interface ImageEditorState extends BaseWidgetState {
     preview: () => Promise<void>;
     snapshot: () => Promise<void>;
   };
+  refreshDirectory?: (directory: string) => Promise<void>;
 }
 
 export interface PrepSettingsDeps {
@@ -99,6 +113,10 @@ export enum ImageEditorStatus {
 export enum ImageEditorColumnId {
   Path = 'path',
   Status = 'status',
+}
+
+export interface ImageEditorDatasetNavigation {
+  directory?: ImageEditorDatasetNavigationDirectory;
 }
 //#endregion
 
@@ -491,9 +509,18 @@ export type ImageEditorFilterType = keyof ImageEditorFilterSettingsMap;
 export type ImageEditorDatasetDefaults = Partial<
   Record<ImageEditorFilterType, Partial<ImageEditorFilterSettingsMap[ImageEditorFilterType]>>
 >;
+export interface ImageEditorDatasetSelection {
+  context_id?: string;
+  index?: number;
+  name?: string;
+  node_id?: string;
+  url?: string;
+}
 export type ImageEditorDataset = ImageEditorDeserializedValue & {
   context_id?: string;
   defaults?: ImageEditorDatasetDefaults;
+  selection?: ImageEditorDatasetSelection;
+  navigation?: ImageEditorDatasetNavigation;
 };
 export interface ImageEditorFilterDefinition<
   ImageEditorControlIdsEnum extends { [key: string]: string },

@@ -5,6 +5,7 @@ import {
   ImageEditorState,
 } from '../../types/widgets/imageEditor';
 import { getApiRoutes, getLfManager } from '../../utils/common';
+import { ensureDatasetContext } from './dataset';
 import { resolveManualApplyRequest } from './manualApply';
 
 //#region API Call
@@ -27,11 +28,21 @@ export const apiCall = async (state: ImageEditorState, addSnapshot: boolean) => 
   };
 
   const contextDataset = imageviewer.lfDataset as ImageEditorDataset | undefined;
-  const contextId = contextDataset?.context_id;
+  const contextId = ensureDatasetContext(contextDataset, state);
 
-  if (contextId) {
-    payload.context_id = contextId;
+  if (!contextId) {
+    lfManager.log(
+      'Missing editing context. Run the workflow to register an editing session before using inpaint.',
+      { dataset: contextDataset },
+      LogSeverity.Warning,
+    );
+    if (state.manualApply?.isProcessing) {
+      resolveManualApplyRequest(state, false);
+    }
+    return false;
   }
+
+  payload.context_id = contextId;
 
   requestAnimationFrame(() => imageviewer.setSpinnerStatus(true));
 

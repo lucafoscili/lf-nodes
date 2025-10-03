@@ -61,6 +61,7 @@ SUM_ID = "sum"
 BLUR_FEATHER_COMBO = ["linear", "smooth", "expo"]
 CROP_POSITION_COMBO = ["top", "bottom", "left", "right", "center"]
 IMAGE_EXTENSION_COMBO = ["png", "jpeg", "webp"]
+IMAGE_FILE_EXTENSIONS = (".png", ".jpg", ".jpeg", ".bmp", ".gif")
 MASK_SHAPE_COMBO = ["rectangle", "ellipse"]
 MASK_THRESHOLD_COMBO = ["fixed", "relative", "otsu"]
 NOTIFY_COMBO = ["None", "Focus tab", "Interrupt", "Interrupt and queue", "Queue prompt"]
@@ -79,8 +80,9 @@ EVENT_PREFIX = "lf-"
 FUNCTION = "on_exec"
 
 BACKUP_FOLDER = "Backups"
-USER_FOLDER = "LF_Nodes"
+EXTERNAL_PREVIEW_SUBDIR = "_lf_external_previews"
 ONNX_ROOT = Path(folder_paths.models_dir) / "onnx"
+USER_FOLDER = "LF_Nodes"
 
 RESAMPLERS = ["bicubic", "bilinear", "linear", "nearest", "nearest exact"]
 SAMPLERS = KSampler.SAMPLERS

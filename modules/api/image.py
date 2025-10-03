@@ -7,11 +7,17 @@ from PIL import Image
 
 from server import PromptServer
 
-from ..utils.constants import API_ROUTE_PREFIX
+from ..utils.constants import API_ROUTE_PREFIX, IMAGE_FILE_EXTENSIONS
 from ..utils.filters.processors import UnknownFilterError, process_filter
 from ..utils.helpers.api import get_resource_url, resolve_url
-from ..utils.helpers.comfy import get_comfy_dir, resolve_filepath
+from ..utils.helpers.comfy import (
+    ensure_external_preview,
+    get_comfy_dir,
+    resolve_filepath,
+    resolve_input_directory_path,
+)
 from ..utils.helpers.conversion import pil_to_tensor, tensor_to_pil
+from ..utils.helpers.logic import sanitize_filename
 from ..utils.helpers.ui import create_masonry_node
 
 # region get-image
@@ -20,22 +26,36 @@ async def get_images_in_directory(request):
     try:
         r: dict = await request.post()
 
-        directory: str = r.get("directory")
-
-        if directory:
-            images_dir = os.path.join(get_comfy_dir("input"), directory)
-        else:
-            images_dir = get_comfy_dir("input")
-        if not os.path.exists(images_dir):
+        raw_directory: str = r.get("directory")
+        images_dir, resolved_directory, is_external = resolve_input_directory_path(raw_directory)
+        if images_dir is None or not os.path.exists(images_dir):
             return web.Response(status=404, text="Directory not found.")
 
         nodes: list[dict] = []
         dataset: dict = {"nodes": nodes}
 
+        navigation_directory: dict[str, object] = {}
+        if isinstance(raw_directory, str):
+            navigation_directory["raw"] = raw_directory
+        if images_dir:
+            navigation_directory["resolved"] = images_dir
+        if resolved_directory is not None:
+            navigation_directory["relative"] = resolved_directory
+        navigation_directory["is_external"] = is_external
+
+        dataset["navigation"] = {"directory": navigation_directory}
+
         for index, filename in enumerate(os.listdir(images_dir)):
             file_path = os.path.join(images_dir, filename)
-            if os.path.isfile(file_path) and filename.lower().endswith((".png", ".jpg", ".jpeg", ".gif")):
-                url = get_resource_url(directory, filename, "input")
+            if os.path.isfile(file_path) and filename.lower().endswith(IMAGE_FILE_EXTENSIONS):
+                if is_external:
+                    try:
+                        preview_subfolder, preview_name = ensure_external_preview(images_dir, filename)
+                    except FileNotFoundError:
+                        continue
+                    url = get_resource_url(preview_subfolder, preview_name, "input")
+                else:
+                    url = get_resource_url(resolved_directory or "", filename, "input")
                 nodes.append(create_masonry_node(filename, url, index))
 
         return web.json_response(
@@ -97,15 +117,22 @@ async def process_image(request):
 
         custom_filename_raw = settings.get("filename")
         if isinstance(custom_filename_raw, str) and custom_filename_raw.strip():
-            filename_value = custom_filename_raw.strip()
+            sanitized_name = sanitize_filename(custom_filename_raw)
+            if sanitized_name is None:
+                return web.Response(status=400, text="Invalid filename provided.")
+
+            filename_value = sanitized_name
             _, ext = os.path.splitext(filename_value)
-            if not ext:
-                filename_value = f"{filename_value}.png"
-                ext = ".png"
 
             output_folder = os.path.join(base_output_path, normalized_subfolder) if normalized_subfolder else base_output_path
             os.makedirs(output_folder, exist_ok=True)
+
             output_file = os.path.join(output_folder, filename_value)
+            output_folder_abs = os.path.abspath(output_folder)
+            output_file_abs = os.path.abspath(output_file)
+            if os.path.commonpath([output_folder_abs, output_file_abs]) != output_folder_abs:
+                return web.Response(status=400, text="Filename resolves outside of the target directory.")
+
             final_subfolder = normalized_subfolder.replace("\\", "/") if normalized_subfolder else ""
         else:
             prefixed_name = os.path.join(normalized_subfolder, filename_prefix_value) if normalized_subfolder else filename_prefix_value
