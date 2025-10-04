@@ -1,7 +1,9 @@
 import {
   APIEndpoints,
+  GetFilesystemAPIPayload,
   GetImageAPIPayload,
   ImageAPIs,
+  ImageExplorerRequestOptions,
   ProcessImageAPIPayload,
 } from '../types/api/api';
 import { LogSeverity } from '../types/manager/manager';
@@ -114,6 +116,67 @@ export const IMAGE_API: ImageAPIs = {
     }
 
     lfManager.log(payload.message, { payload }, payload.status);
+    return payload;
+  },
+  //#endregion
+
+  //#region explore
+  explore: async (directory, options = {}) => {
+    const lfManager = getLfManager();
+
+    const payload: GetFilesystemAPIPayload = {
+      data: {},
+      message: '',
+      status: LogSeverity.Info,
+    };
+
+    try {
+      const body = new FormData();
+      if (directory) {
+        body.append('directory', directory);
+      }
+
+      const { scope, nodePath }: ImageExplorerRequestOptions = options;
+      if (scope) {
+        body.append('scope', scope);
+      }
+      if (nodePath) {
+        body.append('node', nodePath);
+      }
+
+      const response = await api.fetchApi(APIEndpoints.ExploreFilesystem, {
+        body,
+        method: 'POST',
+      });
+
+      const code = response.status;
+
+      switch (code) {
+        case 200:
+          const p: GetFilesystemAPIPayload = await response.json();
+          if (p.status === 'success') {
+            payload.data = p.data ?? {};
+            payload.message = 'Filesystem data fetched successfully.';
+            payload.status = LogSeverity.Success;
+            lfManager.log(payload.message, { payload }, payload.status);
+          }
+          break;
+        default:
+          {
+            const errorText = await response.text().catch(() => '');
+            payload.message = `Unexpected response from the explore-filesystem API (${code}): ${
+              errorText || response.statusText
+            }`;
+          }
+          payload.status = LogSeverity.Error;
+          break;
+      }
+    } catch (error) {
+      payload.message = error as string;
+      payload.status = LogSeverity.Error;
+    }
+
+    lfManager.log(payload.message, { payload, options }, payload.status);
     return payload;
   },
   //#endregion

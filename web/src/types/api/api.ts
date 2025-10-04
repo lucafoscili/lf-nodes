@@ -54,6 +54,10 @@ export interface ImageAPIs {
     type: T,
     settings: ImageEditorRequestSettings<T>,
   ) => Promise<ProcessImageAPIPayload>;
+  explore: (
+    directory: string,
+    options?: ImageExplorerRequestOptions,
+  ) => Promise<GetFilesystemAPIPayload>;
 }
 export interface JSONAPIs {
   get: (path: string) => Promise<GetJSONAPIPayload>;
@@ -91,6 +95,12 @@ export interface GetGitHubLatestReleaseAPIPayload extends BaseAPIPayload {
 export interface GetImageAPIPayload extends BaseAPIPayload {
   data: LfDataDataset;
 }
+export interface GetFilesystemAPIPayload extends BaseAPIPayload {
+  data: {
+    dataset?: LfDataDataset;
+    tree?: (LfDataDataset & { parent_id?: string }) | null;
+  };
+}
 export interface GetJSONAPIPayload extends BaseAPIPayload {
   data: LfDataDataset;
 }
@@ -103,6 +113,12 @@ export interface ProcessImageAPIPayload extends BaseAPIPayload {
   cutout?: string;
   stats?: Record<string, unknown>;
 }
+
+export type ImageExplorerScope = 'all' | 'dataset' | 'tree' | 'roots';
+export interface ImageExplorerRequestOptions {
+  scope?: ImageExplorerScope;
+  nodePath?: string;
+}
 //#endregion
 
 //#region Routes
@@ -113,6 +129,7 @@ export enum APIEndpoints {
   LFRefreshNodeDefs = `/lf-nodes/refresh-node-defs`,
   GetAnalytics = `/lf-nodes/get-analytics`,
   GetImage = `/lf-nodes/get-image`,
+  ExploreFilesystem = `/lf-nodes/explore-filesystem`,
   GetJson = `/lf-nodes/get-json`,
   GetMetadata = `/lf-nodes/get-metadata`,
   NewBackup = `/lf-nodes/new-backup`,
