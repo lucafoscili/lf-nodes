@@ -1,6 +1,6 @@
-import { n, V, L as LF_ACCORDION_BLOCKS, C as CY_ATTRIBUTES, a as LF_ATTRIBUTES, b as LF_ACCORDION_PARTS, c as LF_STYLE_ID, d as LF_WRAPPER_ID, D as D$1, e as LF_ACCORDION_PROPS, p as pt, W as W$1, z as z$1 } from "./index-CAhA1yg9.js";
-import { a } from "./p-Dl9cVpAY-bPm7KoFq.js";
-import { f } from "./p-Cn5YKT90-DMhcviCw.js";
+import { n, V, a_ as LF_ACCORDION_BLOCKS, C as CY_ATTRIBUTES, b as LF_ATTRIBUTES, a$ as LF_ACCORDION_PARTS, d as LF_STYLE_ID, f as LF_WRAPPER_ID, D as D$1, b0 as LF_ACCORDION_PROPS, p as pt, W as W$1, z as z$1 } from "./index-BFq_6STv.js";
+import { a } from "./p-Dl9cVpAY-9zAXgbCa.js";
+import { f } from "./p-Cn5YKT90-BudbUsl0.js";
 var v, m, u, g, y, w, k, x, z, _, E, W, C, M, j, T = function(r, o, i, a2) {
   if ("a" === i && !a2) throw new TypeError("Private accessor was defined without a getter");
   if ("function" == typeof o ? r !== o || !a2 : !o.has(r)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
@@ -64,7 +64,7 @@ const S = class {
     const { bemClass: r, setLfStyle: o } = T(this, m, "f").theme, { lfStyle: a2 } = this;
     D(this, z, {});
     const { accordion: t } = T(this, u, "f");
-    return D$1(W$1, { key: "cf05618985fae22815dc9feb7bcb3bcfeb67daf5" }, a2 && D$1("style", { key: "2248a586b39ae7758361616bcf82494baf6f43b1", id: T(this, k, "f") }, o(this)), D$1("div", { key: "02dacfdfddd9e16e776e0ab666b273e04390c263", id: T(this, x, "f") }, D$1("div", { key: "b98095b71dcadbfab5de9cdedba3bbd06470d924", class: r(t._), part: T(this, w, "f").accordion }, T(this, v, "m", M).call(this))));
+    return D$1(W$1, { key: "5f4c9b6f470ab5ea79bfff765fa5f38682d6486c" }, a2 && D$1("style", { key: "7f1568492b7e455dc3befe91dbf3fb906ca4e7dc", id: T(this, k, "f") }, o(this)), D$1("div", { key: "472fec764de2d261f595703bfa3c512b8c0d806c", id: T(this, x, "f") }, D$1("div", { key: "8df169ac03db398ba5526c26d69520dbf502a577", class: r(t._), part: T(this, w, "f").accordion }, T(this, v, "m", M).call(this))));
   }
   disconnectedCallback() {
     var _a;

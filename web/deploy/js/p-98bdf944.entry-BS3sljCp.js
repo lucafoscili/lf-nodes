@@ -1,6 +1,6 @@
-import { n, V, w as LF_ARTICLE_BLOCKS, C as CY_ATTRIBUTES, x as LF_ARTICLE_PARTS, c as LF_STYLE_ID, d as LF_WRAPPER_ID, y as LF_ARTICLE_PROPS, p as pt, D as D$1, W as W$1, z as z$1, l as jt } from "./index-CAhA1yg9.js";
-import { a } from "./p-Dl9cVpAY-bPm7KoFq.js";
-import { f } from "./p-Cn5YKT90-DMhcviCw.js";
+import { n, V, b1 as LF_ARTICLE_BLOCKS, C as CY_ATTRIBUTES, b2 as LF_ARTICLE_PARTS, d as LF_STYLE_ID, f as LF_WRAPPER_ID, b3 as LF_ARTICLE_PROPS, p as pt, D as D$1, W as W$1, z as z$1, j as jt } from "./index-BFq_6STv.js";
+import { a } from "./p-Dl9cVpAY-9zAXgbCa.js";
+import { f } from "./p-Cn5YKT90-BudbUsl0.js";
 var g, u, p, b, y, z, w, k, x, C, E, W, j, S, T = function(t, e, i, a2) {
   if ("a" === i && !a2) throw new TypeError("Private accessor was defined without a getter");
   if ("function" == typeof e ? t !== e || !a2 : !e.has(t)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
@@ -52,7 +52,7 @@ const D = class {
   render() {
     var _a;
     const { theme: t } = T(this, u, "f"), { bemClass: e, setLfStyle: i } = t, { lfDataset: l, lfEmpty: o, lfStyle: n2 } = this, { emptyData: s } = T(this, p, "f");
-    return D$1(W$1, { key: "facc45a56c7f608d4ea63431396e1a044bf952cc" }, n2 && D$1("style", { key: "32ff6a90169431aa5dba003da5e168715cbeb1f5", id: T(this, z, "f") }, i(this)), D$1("div", { key: "c5549c09dd1786060182280c0586fee4d7c45985", id: T(this, w, "f") }, ((_a = l == null ? void 0 : l.nodes) == null ? void 0 : _a.length) ? T(this, g, "m", x).call(this) : D$1("div", { class: e(s._), part: T(this, y, "f").emptyData }, D$1("div", { class: e(s._, s.text) }, o))));
+    return D$1(W$1, { key: "b7be88b13ad4291a9ad50c6fbd9f136d66971db9" }, n2 && D$1("style", { key: "df9919c81532bd67d6f3ad8de0f750887f505aad", id: T(this, z, "f") }, i(this)), D$1("div", { key: "57c860113ec400c2f62b528f3683f82752c90d2e", id: T(this, w, "f") }, ((_a = l == null ? void 0 : l.nodes) == null ? void 0 : _a.length) ? T(this, g, "m", x).call(this) : D$1("div", { class: e(s._), part: T(this, y, "f").emptyData }, D$1("div", { class: e(s._, s.text) }, o))));
   }
   disconnectedCallback() {
     var _a;

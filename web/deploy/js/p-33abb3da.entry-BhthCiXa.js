@@ -1,57 +1,57 @@
-import { n, V, f as LF_SPLASH_BLOCKS, g as LF_SPLASH_PARTS, c as LF_STYLE_ID, d as LF_WRAPPER_ID, h as LF_SPLASH_PROPS, p as pt, D as D$1, W as W$1, z } from "./index-CAhA1yg9.js";
-import { a } from "./p-Dl9cVpAY-bPm7KoFq.js";
-var d, p, v, m, b, u = function(e, t, s, a2) {
-  if ("function" == typeof t ? e !== t || true : !t.has(e)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
-  return t.get(e);
+import { n, V, w as LF_SPLASH_BLOCKS, x as LF_SPLASH_PARTS, d as LF_STYLE_ID, f as LF_WRAPPER_ID, y as LF_SPLASH_PROPS, p as pt, D as D$1, W as W$1, z } from "./index-BFq_6STv.js";
+import { a } from "./p-Dl9cVpAY-9zAXgbCa.js";
+var d, p, v, m, b, u = function(t, s, e, a2) {
+  if ("function" == typeof s ? t !== s || true : !s.has(t)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+  return s.get(t);
 };
 const g = class {
-  constructor(s) {
-    n(this, s), this.lfEvent = V(this, "lf-splash-event"), this.state = "initializing", this.lfLabel = "Loading...", this.lfStyle = "", d.set(this, void 0), p.set(this, LF_SPLASH_BLOCKS), v.set(this, LF_SPLASH_PARTS), m.set(this, LF_STYLE_ID), b.set(this, LF_WRAPPER_ID);
+  constructor(e) {
+    n(this, e), this.lfEvent = V(this, "lf-splash-event"), this.state = "initializing", this.lfLabel = "Loading...", this.lfStyle = "", d.set(this, void 0), p.set(this, LF_SPLASH_BLOCKS), v.set(this, LF_SPLASH_PARTS), m.set(this, LF_STYLE_ID), b.set(this, LF_WRAPPER_ID);
   }
-  onLfEvent(e, t) {
-    this.lfEvent.emit({ comp: this, eventType: t, id: this.rootElement.id, originalEvent: e });
+  onLfEvent(t, s) {
+    this.lfEvent.emit({ comp: this, eventType: s, id: this.rootElement.id, originalEvent: t });
   }
   async getDebugInfo() {
     return this.debugInfo;
   }
   async getProps() {
-    const e = LF_SPLASH_PROPS.map(((e2) => [e2, this[e2]]));
-    return Object.fromEntries(e);
+    const t = LF_SPLASH_PROPS.map(((t2) => [t2, this[t2]]));
+    return Object.fromEntries(t);
   }
   async refresh() {
     pt(this);
   }
-  async unmount(e = 575) {
+  async unmount(t = 575) {
     setTimeout((() => {
       this.state = "unmounting", setTimeout((() => {
         this.onLfEvent(new CustomEvent("unmount"), "unmount"), this.rootElement.remove();
       }), 300);
-    }), e);
+    }), t);
   }
   connectedCallback() {
     u(this, d) && u(this, d).theme.register(this);
   }
   async componentWillLoad() {
-    !(function(e, t, s, a2, i) {
-      if ("function" == typeof t ? e !== t || true : !t.has(e)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
-      t.set(e, s);
+    !(function(t, s, e, a2, i) {
+      if ("function" == typeof s ? t !== s || true : !s.has(t)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
+      s.set(t, e);
     })(this, d, await a(this));
   }
   componentDidLoad() {
-    const { info: e } = u(this, d).debug;
-    this.onLfEvent(new CustomEvent("ready"), "ready"), e.update(this, "did-load");
+    const { info: t } = u(this, d).debug;
+    this.onLfEvent(new CustomEvent("ready"), "ready"), t.update(this, "did-load");
   }
   componentWillRender() {
-    const { info: e } = u(this, d).debug;
-    e.update(this, "will-render");
+    const { info: t } = u(this, d).debug;
+    t.update(this, "will-render");
   }
   componentDidRender() {
-    const { info: e } = u(this, d).debug;
-    e.update(this, "did-render");
+    const { info: t } = u(this, d).debug;
+    t.update(this, "did-render");
   }
   render() {
-    const { bemClass: e, setLfStyle: t } = u(this, d).theme, { lfLabel: s, lfStyle: l, state: o } = this, r = "unmounting" === o, { splash: f } = u(this, p);
-    return D$1(W$1, { key: "b2f8e4fa5ca16c1ec0835688eaf8c8db79e004de" }, l && D$1("style", { key: "01e56d34ff2df739886396381e1d9c3ee75c44c7", id: u(this, m) }, t(this)), D$1("div", { key: "a63455f43781ab1dd0a7de874516107aeda037e4", id: u(this, b) }, D$1("div", { key: "28b288678d2c163dab061b917c84ea4b8dd8f1c1", class: e(f._, null, { active: r }), part: u(this, v).splash }, D$1("div", { key: "6939e6eff13d37bbfbf3f7c59f496c70699cd9c8", class: e(f._, f.content), part: u(this, v).content }, D$1("div", { key: "ad9c8d8d3d00c153bf1d6bbee56fae140c5c462e", class: e(f._, f.widget), part: u(this, v).widget }, D$1("slot", { key: "3b97f4a962a2a10527a568a2b935b79b43be6ca8" })), D$1("div", { key: "1e98521df8a0244361a51d011aba684d3b1fbfe1", class: e(f._, f.label), part: u(this, v).label }, r ? "Ready!" : s)))));
+    const { bemClass: t, setLfStyle: s } = u(this, d).theme, { lfLabel: e, lfStyle: l, state: o } = this, r = "unmounting" === o, { splash: f } = u(this, p);
+    return D$1(W$1, { key: "1f05bd939b021ddfa85a39c4e12f7985f1707030" }, l && D$1("style", { key: "027913f95b6817f5926188ae16ac7774936e7b6b", id: u(this, m) }, s(this)), D$1("div", { key: "0f16cdd9bb4397aff286bb90fece2034d85c7f83", id: u(this, b) }, D$1("div", { key: "75863d9a46178491dd15404929bb24db7168ef5f", class: t(f._, null, { active: r }), part: u(this, v).splash }, D$1("div", { key: "cba0cc1e7103a7c1a516f033d9a4fd5abfb2683a", class: t(f._, f.content), part: u(this, v).content }, D$1("div", { key: "44c08f651fbd3c38334f05c4701ad21cfb25decb", class: t(f._, f.widget), part: u(this, v).widget }, D$1("slot", { key: "a6763485801abb4c955dba3c7dee0eaa3e898fdf" })), D$1("div", { key: "ac99a9d2a6cd942fea72f085f40f845692f7e698", class: t(f._, f.label), part: u(this, v).label }, r ? "Ready!" : e)))));
   }
   disconnectedCallback() {
     var _a;

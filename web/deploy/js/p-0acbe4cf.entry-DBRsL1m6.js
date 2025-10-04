@@ -1,6 +1,6 @@
-import { n, V as V$1, aL as LF_MASONRY_DEFAULT_COLUMNS, aM as LF_MASONRY_BLOCKS, C as CY_ATTRIBUTES, a as LF_ATTRIBUTES, aN as LF_MASONRY_PARTS, c as LF_STYLE_ID, aO as LF_MASONRY_CSS_VARS, d as LF_WRAPPER_ID, D as D$1, l as jt, aP as LF_MASONRY_PROPS, p as pt, W as W$1, z as z$1, aQ as LF_MASONRY_IDS } from "./index-CAhA1yg9.js";
-import { a } from "./p-Dl9cVpAY-bPm7KoFq.js";
-import { f } from "./p-Cn5YKT90-DMhcviCw.js";
+import { n, V as V$1, L as LF_MASONRY_DEFAULT_COLUMNS, a as LF_MASONRY_BLOCKS, C as CY_ATTRIBUTES, b as LF_ATTRIBUTES, c as LF_MASONRY_PARTS, d as LF_STYLE_ID, e as LF_MASONRY_CSS_VARS, f as LF_WRAPPER_ID, D as D$1, j as jt, g as LF_MASONRY_PROPS, p as pt, W as W$1, z as z$1, h as LF_MASONRY_IDS } from "./index-BFq_6STv.js";
+import { a } from "./p-Dl9cVpAY-9zAXgbCa.js";
+import { f } from "./p-Cn5YKT90-BudbUsl0.js";
 const v = (e) => /* @__PURE__ */ ((e2) => ({ addColumn: () => {
   const { controller: s, elements: i, handlers: a2 } = e2(), { refs: r } = i, { button: n2 } = a2, { blocks: l, cyAttributes: f2, lfAttributes: h, manager: c, parts: d } = s.get, { assignRef: m, theme: u } = c, { bemClass: p, get: g } = u, { "--lf-icon-plus": y } = g.current().variables;
   return D$1("lf-button", { class: p(l.grid._, l.grid.addColumn), "data-cy": f2.button, "data-lf": h.fadeIn, id: LF_MASONRY_IDS.addColumn, key: LF_MASONRY_IDS.addColumn, lfIcon: y, lfStyling: "floating", lfUiSize: "xxsmall", "onLf-button-event": n2, part: d.addColumn, ref: m(r, "addColumn"), title: "Click to add a column to the masonry." });
@@ -147,7 +147,7 @@ const q = class {
   }
   render() {
     const { bemClass: e, setLfStyle: s } = K(this, z, "f").theme, { masonry: i } = K(this, x, "f"), { lfStyle: a2 } = this, n2 = { [K(this, _, "f").columns]: String(K(this, T, "f")) };
-    return D$1(W$1, { key: "badbb6aa631769c02b287aeb7244293e15f1b81f", style: n2 }, a2 && D$1("style", { key: "f7d6a9aee293e23aff45c85c5c48927de3416edb", id: K(this, W, "f") }, s(this)), D$1("div", { key: "3d0ec51656b8fb1726406a24ed184207609ea2f1", id: K(this, A, "f") }, D$1("div", { key: "d3f7292aaee793b705fba479363c8668bc57c79a", class: e(i._) }, K(this, F, "f").call(this))));
+    return D$1(W$1, { key: "1af9b229e674dfdd638fbc9d01caec0ec9d8fa1a", style: n2 }, a2 && D$1("style", { key: "a883d9656b91a6ee61dbd0e988eeca24c66fc2c8", id: K(this, W, "f") }, s(this)), D$1("div", { key: "40e45a9bb4abdaab4e77e07c05dce658c11be953", id: K(this, A, "f") }, D$1("div", { key: "bd7c35c72c72a420af44d361cb04d6a4a5daebdc", class: e(i._) }, K(this, F, "f").call(this))));
   }
   disconnectedCallback() {
     var _a;

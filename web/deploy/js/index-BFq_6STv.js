@@ -502,8 +502,14 @@ const LF_IMAGEVIEWER_BLOCKS = {
   mainGrid: { _: "main-grid" },
   navigationGrid: {
     _: "navigation-grid",
+    content: "content",
     button: "button",
     masonry: "masonry",
+    tree: "tree",
+    treeContent: "tree-content",
+    treeHeader: "tree-header",
+    treeShell: "tree-shell",
+    treeToggle: "tree-toggle",
     textfield: "textfield"
   }
 };
@@ -521,6 +527,8 @@ const IDS = {
   navigation: {
     load: "navigation-load",
     masonry: "navigation-masonry",
+    tree: "navigation-tree",
+    treeToggle: "navigation-tree-toggle",
     textfield: "navigation-textfield"
   }
 };
@@ -532,7 +540,9 @@ const LF_IMAGEVIEWER_PARTS = {
 const LF_IMAGEVIEWER_PROPS = [
   "lfDataset",
   "lfLoadCallback",
+  "lfNavigationTree",
   "lfStyle",
+  "lfTreeProps",
   "lfValue"
 ];
 const LF_LIST_BLOCKS = {
@@ -2646,6 +2656,108 @@ class LfColor {
   }
 }
 _LfColor_LF_MANAGER = /* @__PURE__ */ new WeakMap(), _LfColor_handleEdgeCases = /* @__PURE__ */ new WeakMap();
+const deepClone = (value) => {
+  if (value === void 0 || value === null) {
+    return value;
+  }
+  return JSON.parse(JSON.stringify(value));
+};
+const ensurePlaceholderRecursively = (node, options) => {
+  const { create, isPlaceholder = () => false, shouldDecorate = (candidate) => candidate.hasChildren === true } = options;
+  const currentChildren = Array.isArray(node.children) ? node.children : [];
+  const hasRealChildren = currentChildren.some((child) => !isPlaceholder(child));
+  const hasPlaceholder = currentChildren.some((child) => isPlaceholder(child));
+  if (shouldDecorate(node) && !hasRealChildren && !hasPlaceholder) {
+    const placeholderNode = deepClone(create({ parent: node }));
+    node.children = [...currentChildren, placeholderNode];
+  } else if (!Array.isArray(node.children)) {
+    node.children = currentChildren;
+  }
+  if (Array.isArray(node.children)) {
+    node.children = node.children.map((child) => {
+      ensurePlaceholderRecursively(child, options);
+      return child;
+    });
+  }
+  return node;
+};
+const stripPlaceholderChildren = (children, isPlaceholder) => {
+  if (!Array.isArray(children)) {
+    return [];
+  }
+  if (!isPlaceholder) {
+    return [...children];
+  }
+  return children.filter((child) => !isPlaceholder(child));
+};
+const cloneChildren = (children) => {
+  if (!Array.isArray(children)) {
+    return [];
+  }
+  return children.map((child) => deepClone(child));
+};
+const nodeDecoratePlaceholders = (dataset, options) => {
+  if (!dataset) {
+    return dataset;
+  }
+  if (typeof (options == null ? void 0 : options.create) !== "function") {
+    return dataset;
+  }
+  const clonedDataset = deepClone(dataset);
+  const nodes = Array.isArray(clonedDataset.nodes) ? clonedDataset.nodes : [];
+  clonedDataset.nodes = nodes.map((node) => {
+    const clonedNode = deepClone(node);
+    ensurePlaceholderRecursively(clonedNode, options);
+    return clonedNode;
+  });
+  return clonedDataset;
+};
+const nodeFind = (dataset, predicate) => {
+  if (!dataset || !Array.isArray(dataset.nodes) || !predicate) {
+    return void 0;
+  }
+  const queue = [...dataset.nodes];
+  while (queue.length > 0) {
+    const current = queue.shift();
+    if (!current) {
+      continue;
+    }
+    if (predicate(current)) {
+      return current;
+    }
+    if (Array.isArray(current.children) && current.children.length) {
+      queue.unshift(...current.children);
+    }
+  }
+  return void 0;
+};
+const nodeMergeChildren = (dataset, options) => {
+  var _a;
+  if (!dataset) {
+    return dataset;
+  }
+  const { parentId, children, columns, placeholder } = options ?? {};
+  if (!parentId) {
+    return dataset;
+  }
+  const clonedDataset = deepClone(dataset);
+  if (Array.isArray(columns) && columns.length) {
+    clonedDataset.columns = columns.map((column) => deepClone(column));
+  }
+  const parentNode = nodeFind(clonedDataset, (node) => node.id === parentId);
+  if (!parentNode) {
+    return clonedDataset;
+  }
+  if (placeholder == null ? void 0 : placeholder.removeExisting) {
+    const isPlaceholder = (_a = placeholder == null ? void 0 : placeholder.config) == null ? void 0 : _a.isPlaceholder;
+    parentNode.children = stripPlaceholderChildren(parentNode.children, isPlaceholder);
+  }
+  parentNode.children = cloneChildren(children);
+  if ((placeholder == null ? void 0 : placeholder.reapply) && (placeholder == null ? void 0 : placeholder.config)) {
+    ensurePlaceholderRecursively(parentNode, placeholder.config);
+  }
+  return clonedDataset;
+};
 const findNodeByCell = (dataset, targetCell) => {
   function recursive(nodes) {
     for (const node of nodes) {
@@ -2861,6 +2973,26 @@ const nodeTraverseVisible = (nodes, options) => {
     walk(n2, 0);
   return out;
 };
+const removeNodeByCell = (dataset, targetCell) => {
+  function recursive(nodes, nodeToRemove) {
+    const index = nodes.indexOf(nodeToRemove);
+    if (index !== -1) {
+      nodes.splice(index, 1);
+      return true;
+    }
+    for (const node of nodes) {
+      if (node.children && recursive(node.children, nodeToRemove)) {
+        return true;
+      }
+    }
+    return false;
+  }
+  const targetNode = findNodeByCell(dataset, targetCell);
+  if (!targetNode) {
+    return null;
+  }
+  return recursive(dataset.nodes, targetNode) ? targetNode : null;
+};
 const cellExists = (node) => {
   return !!(node && node.cells && Object.keys(node.cells).length);
 };
@@ -3039,10 +3171,13 @@ class LfData {
       getDrilldownInfo: (nodes) => nodeGetDrilldownInfo(nodes),
       getParent: (nodes, child) => nodeGetParent(nodes, child),
       pop: (nodes, node2remove) => nodePop(nodes, node2remove),
-      removeNodeByCell: (dataset, cell) => findNodeByCell(dataset, cell),
+      removeNodeByCell: (dataset, cell) => removeNodeByCell(dataset, cell),
       setProperties: (nodes, properties, recursively, exclude) => nodeSetProperties(nodes, properties, recursively, exclude),
       toStream: (nodes) => nodeToStream(nodes),
-      traverseVisible: (nodes, predicates) => nodeTraverseVisible(nodes, predicates)
+      traverseVisible: (nodes, predicates) => nodeTraverseVisible(nodes, predicates),
+      decoratePlaceholders: (dataset, options) => nodeDecoratePlaceholders(dataset, options),
+      find: (dataset, predicate) => nodeFind(dataset, predicate),
+      mergeChildren: (dataset, options) => nodeMergeChildren(dataset, options)
     };
   }
 }
@@ -10126,7 +10261,7 @@ function requirePrism() {
            * @returns {T}
            * @template T
            */
-          clone: function deepClone(o2, visited) {
+          clone: function deepClone2(o2, visited) {
             visited = visited || {};
             var clone;
             var id;
@@ -10141,7 +10276,7 @@ function requirePrism() {
                 visited[id] = clone;
                 for (var key in o2) {
                   if (o2.hasOwnProperty(key)) {
-                    clone[key] = deepClone(o2[key], visited);
+                    clone[key] = deepClone2(o2[key], visited);
                   }
                 }
                 return (
@@ -10158,7 +10293,7 @@ function requirePrism() {
                 /** @type {Array} */
                 /** @type {any} */
                 o2.forEach(function(v2, i2) {
-                  clone[i2] = deepClone(v2, visited);
+                  clone[i2] = deepClone2(v2, visited);
                 });
                 return (
                   /** @type {any} */
@@ -13498,7 +13633,7 @@ var X = false, Z = (t2, e2, n2) => {
                         const n6 = t7.i.replace(/-/g, "_"), o6 = t7.T;
                         if (!o6) return;
                         const r3 = i.get(o6);
-                        return r3 ? r3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-00fecc42.entry.js": () => import("./p-00fecc42.entry-DCvuTkPI.js"), "./p-0df37de3.entry.js": () => import("./p-0df37de3.entry-D2YeBn3D.js"), "./p-28dd0bff.entry.js": () => import("./p-28dd0bff.entry-XOEjTilx.js"), "./p-2e9faeab.entry.js": () => import("./p-2e9faeab.entry-DNZDx-TC.js"), "./p-36aa4a7f.entry.js": () => import("./p-36aa4a7f.entry-hs96MiLq.js"), "./p-37b3e400.entry.js": () => import("./p-37b3e400.entry-BXwvkfrj.js"), "./p-426ea672.entry.js": () => import("./p-426ea672.entry-Dka98bbx.js"), "./p-43bf5312.entry.js": () => import("./p-43bf5312.entry-DK4hojeU.js"), "./p-924ca284.entry.js": () => import("./p-924ca284.entry-BgEv2iSH.js"), "./p-a0ed5f95.entry.js": () => import("./p-a0ed5f95.entry-BSXzzBBO.js"), "./p-a6642965.entry.js": () => import("./p-a6642965.entry-29BpkLUV.js"), "./p-bb63963d.entry.js": () => import("./p-bb63963d.entry-CkWEw6q-.js"), "./p-e2900881.entry.js": () => import("./p-e2900881.entry-CaUs3NJ6.js"), "./p-e6148250.entry.js": () => import("./p-e6148250.entry-BDzVq8iu.js"), "./p-f19de954.entry.js": () => import("./p-f19de954.entry-bonyXs88.js"), "./p-febf6aa2.entry.js": () => import("./p-febf6aa2.entry-vXZey28O.js") }), `./${o6}.entry.js`, 2).then(((t8) => (i.set(o6, t8), t8[n6])), ((t8) => {
+                        return r3 ? r3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-0acbe4cf.entry.js": () => import("./p-0acbe4cf.entry-DBRsL1m6.js"), "./p-28dd0bff.entry.js": () => import("./p-28dd0bff.entry-CQNxHDzX.js"), "./p-33abb3da.entry.js": () => import("./p-33abb3da.entry-BhthCiXa.js"), "./p-39cc0e0f.entry.js": () => import("./p-39cc0e0f.entry-CVcdJTCR.js"), "./p-3dde8514.entry.js": () => import("./p-3dde8514.entry-CG5tV8dh.js"), "./p-45c52a25.entry.js": () => import("./p-45c52a25.entry-DPg9E7eL.js"), "./p-4d8a687e.entry.js": () => import("./p-4d8a687e.entry-DGFWP29k.js"), "./p-7225e5d8.entry.js": () => import("./p-7225e5d8.entry-DyPVbdkf.js"), "./p-82a405e5.entry.js": () => import("./p-82a405e5.entry-DanERC9G.js"), "./p-88c4c8e0.entry.js": () => import("./p-88c4c8e0.entry-DXNfCb1b.js"), "./p-98bdf944.entry.js": () => import("./p-98bdf944.entry-BS3sljCp.js"), "./p-9a28c130.entry.js": () => import("./p-9a28c130.entry-T4Z-F7aY.js"), "./p-da4e8664.entry.js": () => import("./p-da4e8664.entry-DotkeHwg.js"), "./p-e2900881.entry.js": () => import("./p-e2900881.entry-Bw8nYpm8.js"), "./p-f9c5f8f8.entry.js": () => import("./p-f9c5f8f8.entry-Bq1fPjOu.js"), "./p-f9e0dfd9.entry.js": () => import("./p-f9e0dfd9.entry-FSRCWv2s.js") }), `./${o6}.entry.js`, 2).then(((t8) => (i.set(o6, t8), t8[n6])), ((t8) => {
                           l(t8, e3.$hostElement$);
                         }));
                         /*!__STENCIL_STATIC_IMPORT_SWITCH__*/
@@ -13581,7 +13716,7 @@ const o = () => {
 (() => {
   const l2 = import.meta.url, f$1 = {};
   return "" !== l2 && (f$1.resourcesUrl = new URL(".", l2).href), f(f$1);
-})().then((async (e2) => (await o(), St(JSON.parse('[["p-bb63963d",[[257,"lf-imageviewer",{"lfDataset":[1040,"lf-dataset"],"lfLoadCallback":[1040,"lf-load-callback"],"lfStyle":[1025,"lf-style"],"lfValue":[1040,"lf-value"],"debugInfo":[32],"currentShape":[32],"history":[32],"historyIndex":[32],"isSpinnerActive":[32],"addSnapshot":[64],"clearHistory":[64],"clearSelection":[64],"getComponents":[64],"getCurrentSnapshot":[64],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"reset":[64],"setSpinnerStatus":[64],"unmount":[64]}]]],["p-febf6aa2",[[257,"lf-compare",{"lfDataset":[1040,"lf-dataset"],"lfShape":[1025,"lf-shape"],"lfStyle":[1025,"lf-style"],"lfView":[1025,"lf-view"],"debugInfo":[32],"isLeftPanelOpened":[32],"isRightPanelOpened":[32],"leftShape":[32],"rightShape":[32],"shapes":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["updateShapes"],"lfShape":["updateShapes"]}]]],["p-00fecc42",[[257,"lf-accordion",{"lfDataset":[1040,"lf-dataset"],"lfRipple":[1028,"lf-ripple"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"expandedNodes":[32],"selectedNodes":[32],"getDebugInfo":[64],"getProps":[64],"getSelectedNodes":[64],"refresh":[64],"toggleNode":[64],"unmount":[64]}]]],["p-2e9faeab",[[257,"lf-article",{"lfDataset":[1040,"lf-dataset"],"lfEmpty":[1025,"lf-empty"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-a0ed5f95",[[257,"lf-carousel",{"lfDataset":[1040,"lf-dataset"],"lfAutoPlay":[4,"lf-auto-play"],"lfInterval":[2,"lf-interval"],"lfLightbox":[1540,"lf-lightbox"],"lfNavigation":[1028,"lf-navigation"],"lfShape":[1537,"lf-shape"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"currentIndex":[32],"shapes":[32],"getDebugInfo":[64],"getProps":[64],"goToSlide":[64],"nextSlide":[64],"prevSlide":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["updateShapes"],"lfShape":["updateShapes"]}]]],["p-28dd0bff",[[257,"lf-messenger",{"lfAutosave":[1028,"lf-autosave"],"lfDataset":[1040,"lf-dataset"],"lfStyle":[1025,"lf-style"],"lfValue":[16,"lf-value"],"debugInfo":[32],"chat":[32],"connectionStatus":[32],"covers":[32],"currentCharacter":[32],"formStatusMap":[32],"history":[32],"hoveredCustomizationOption":[32],"saveInProgress":[32],"ui":[32],"deleteOption":[64],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"reset":[64],"save":[64],"unmount":[64]}]]],["p-f19de954",[[257,"lf-drawer",{"lfDisplay":[1537,"lf-display"],"lfPosition":[1537,"lf-position"],"lfResponsive":[1026,"lf-responsive"],"lfStyle":[1025,"lf-style"],"lfValue":[1540,"lf-value"],"debugInfo":[32],"close":[64],"getDebugInfo":[64],"getProps":[64],"isOpened":[64],"open":[64],"refresh":[64],"toggle":[64],"unmount":[64]},[[0,"keydown","listenKeydown"]],{"lfDisplay":["onLfDisplayChange"],"lfResponsive":["onLfResponsiveChange"]}]]],["p-a6642965",[[257,"lf-header",{"lfStyle":[1025,"lf-style"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-e6148250",[[257,"lf-placeholder",{"lfIcon":[1,"lf-icon"],"lfProps":[16,"lf-props"],"lfStyle":[1025,"lf-style"],"lfThreshold":[2,"lf-threshold"],"lfTrigger":[1,"lf-trigger"],"lfValue":[1,"lf-value"],"debugInfo":[32],"isInViewport":[32],"getComponent":[64],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-36aa4a7f",[[257,"lf-slider",{"lfLabel":[1025,"lf-label"],"lfLeadingLabel":[1028,"lf-leading-label"],"lfMax":[2,"lf-max"],"lfMin":[2,"lf-min"],"lfStep":[2,"lf-step"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1026,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}]]],["p-0df37de3",[[257,"lf-splash",{"lfLabel":[1025,"lf-label"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"state":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-924ca284",[[257,"lf-toast",{"lfCloseIcon":[1025,"lf-close-icon"],"lfCloseCallback":[16,"lf-close-callback"],"lfIcon":[1025,"lf-icon"],"lfTimer":[2,"lf-timer"],"lfMessage":[1025,"lf-message"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-37b3e400",[[257,"lf-card",{"lfDataset":[1040,"lf-dataset"],"lfLayout":[1025,"lf-layout"],"lfSizeX":[1025,"lf-size-x"],"lfSizeY":[1025,"lf-size-y"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"debugInfo":[32],"shapes":[32],"getDebugInfo":[64],"getProps":[64],"getShapes":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["updateShapes"]}],[257,"lf-badge",{"lfImageProps":[1040,"lf-image-props"],"lfLabel":[1025,"lf-label"],"lfPosition":[1537,"lf-position"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}],[257,"lf-canvas",{"lfBrush":[1025,"lf-brush"],"lfColor":[1025,"lf-color"],"lfCursor":[1025,"lf-cursor"],"lfImageProps":[1040,"lf-image-props"],"lfOpacity":[1026,"lf-opacity"],"lfPreview":[1028,"lf-preview"],"lfStrokeTolerance":[1026,"lf-stroke-tolerance"],"lfSize":[1026,"lf-size"],"lfStyle":[1025,"lf-style"],"boxing":[32],"debugInfo":[32],"isPainting":[32],"orientation":[32],"points":[32],"clearCanvas":[64],"getCanvas":[64],"getDebugInfo":[64],"getImage":[64],"getProps":[64],"refresh":[64],"resizeCanvas":[64],"setCanvasHeight":[64],"setCanvasWidth":[64],"unmount":[64]}],[257,"lf-photoframe",{"lfOverlay":[1040,"lf-overlay"],"lfPlaceholder":[16,"lf-placeholder"],"lfStyle":[1025,"lf-style"],"lfThreshold":[2,"lf-threshold"],"lfValue":[16,"lf-value"],"debugInfo":[32],"imageOrientation":[32],"isInViewport":[32],"isReady":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}],[257,"lf-chart",{"lfAxis":[1025,"lf-axis"],"lfColors":[1040,"lf-colors"],"lfDataset":[1040,"lf-dataset"],"lfLegend":[1025,"lf-legend"],"lfSeries":[1040,"lf-series"],"lfSizeX":[1025,"lf-size-x"],"lfSizeY":[1025,"lf-size-y"],"lfStyle":[1025,"lf-style"],"lfTypes":[1040,"lf-types"],"lfXAxis":[1040,"lf-x-axis"],"lfYAxis":[1040,"lf-y-axis"],"debugInfo":[32],"themeValues":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"resize":[64],"unmount":[64]}],[257,"lf-toggle",{"lfAriaLabel":[1025,"lf-aria-label"],"lfLabel":[1025,"lf-label"],"lfLeadingLabel":[1028,"lf-leading-label"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[4,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}],[257,"lf-upload",{"lfLabel":[1025,"lf-label"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfValue":[16,"lf-value"],"debugInfo":[32],"selectedFiles":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"unmount":[64]}],[257,"lf-chat",{"lfContextWindow":[1026,"lf-context-window"],"lfEmpty":[1025,"lf-empty"],"lfEndpointUrl":[1025,"lf-endpoint-url"],"lfLayout":[1025,"lf-layout"],"lfMaxTokens":[1026,"lf-max-tokens"],"lfPollingInterval":[1026,"lf-polling-interval"],"lfSeed":[1026,"lf-seed"],"lfStyle":[1025,"lf-style"],"lfSystem":[1025,"lf-system"],"lfTemperature":[1026,"lf-temperature"],"lfTypewriterProps":[1028,"lf-typewriter-props"],"lfUiSize":[1537,"lf-ui-size"],"lfValue":[1040,"lf-value"],"currentAbortStreaming":[32],"currentPrompt":[32],"currentTokens":[32],"debugInfo":[32],"history":[32],"status":[32],"view":[32],"abortStreaming":[64],"getDebugInfo":[64],"getHistory":[64],"getLastMessage":[64],"getProps":[64],"refresh":[64],"scrollToBottom":[64],"setHistory":[64],"unmount":[64]},[[0,"keydown","listenKeydown"]],{"lfPollingInterval":["updatePollingInterval"],"lfSystem":["updateTokensCount"]}],[257,"lf-chip",{"lfAriaLabel":[1025,"lf-aria-label"],"lfDataset":[1040,"lf-dataset"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfStyling":[1025,"lf-styling"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[16,"lf-value"],"debugInfo":[32],"expandedNodes":[32],"hiddenNodes":[32],"selectedNodes":[32],"getDebugInfo":[64],"getProps":[64],"getSelectedNodes":[64],"refresh":[64],"setSelectedNodes":[64],"unmount":[64]}],[257,"lf-code",{"lfFadeIn":[1028,"lf-fade-in"],"lfFormat":[1028,"lf-format"],"lfLanguage":[1025,"lf-language"],"lfPreserveSpaces":[1028,"lf-preserve-spaces"],"lfShowCopy":[1028,"lf-show-copy"],"lfShowHeader":[1028,"lf-show-header"],"lfStickyHeader":[1028,"lf-sticky-header"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfLanguage":["loadLanguage"]}],[257,"lf-progressbar",{"lfAnimated":[1540,"lf-animated"],"lfCenteredLabel":[1540,"lf-centered-label"],"lfIcon":[1537,"lf-icon"],"lfIsRadial":[1540,"lf-is-radial"],"lfLabel":[1025,"lf-label"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1026,"lf-value"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}],[257,"lf-textfield",{"lfHelper":[1040,"lf-helper"],"lfHtmlAttributes":[1040,"lf-html-attributes"],"lfIcon":[1025,"lf-icon"],"lfLabel":[1025,"lf-label"],"lfStretchX":[1540,"lf-stretch-x"],"lfStretchY":[1540,"lf-stretch-y"],"lfStyle":[1025,"lf-style"],"lfStyling":[1025,"lf-styling"],"lfTrailingIcon":[1540,"lf-trailing-icon"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1,"lf-value"],"debugInfo":[32],"status":[32],"value":[32],"getDebugInfo":[64],"getElement":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setBlur":[64],"setFocus":[64],"setValue":[64],"unmount":[64]}],[257,"lf-typewriter",{"lfCursor":[1025,"lf-cursor"],"lfDeleteSpeed":[1026,"lf-delete-speed"],"lfLoop":[1028,"lf-loop"],"lfPause":[1026,"lf-pause"],"lfSpeed":[1026,"lf-speed"],"lfStyle":[1025,"lf-style"],"lfTag":[1025,"lf-tag"],"lfUiSize":[1537,"lf-ui-size"],"lfUpdatable":[1028,"lf-updatable"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"displayedText":[32],"isDeleting":[32],"currentTextIndex":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfValue":["handleLfValueChange"]}],[257,"lf-image",{"lfHtmlAttributes":[1040,"lf-html-attributes"],"lfMode":[1537,"lf-mode"],"lfShowSpinner":[1028,"lf-show-spinner"],"lfSizeX":[1025,"lf-size-x"],"lfSizeY":[1025,"lf-size-y"],"lfStyle":[1025,"lf-style"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"error":[32],"isLoaded":[32],"resolvedSpriteName":[32],"getDebugInfo":[64],"getImage":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfValue":["resetState"]}],[257,"lf-button",{"lfAriaLabel":[1025,"lf-aria-label"],"lfDataset":[1040,"lf-dataset"],"lfIcon":[1025,"lf-icon"],"lfIconOff":[1025,"lf-icon-off"],"lfLabel":[1025,"lf-label"],"lfRipple":[1028,"lf-ripple"],"lfShowSpinner":[1540,"lf-show-spinner"],"lfStretchX":[1540,"lf-stretch-x"],"lfStretchY":[1540,"lf-stretch-y"],"lfStyle":[1025,"lf-style"],"lfStyling":[1025,"lf-styling"],"lfToggable":[1028,"lf-toggable"],"lfTrailingIcon":[1028,"lf-trailing-icon"],"lfType":[1025,"lf-type"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[4,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setMessage":[64],"setValue":[64],"unmount":[64]}],[257,"lf-list",{"lfDataset":[1040,"lf-dataset"],"lfEmpty":[1025,"lf-empty"],"lfEnableDeletions":[1028,"lf-enable-deletions"],"lfNavigation":[1028,"lf-navigation"],"lfRipple":[1028,"lf-ripple"],"lfSelectable":[1028,"lf-selectable"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[2,"lf-value"],"debugInfo":[32],"focused":[32],"selected":[32],"focusNext":[64],"focusPrevious":[64],"getDebugInfo":[64],"getProps":[64],"getSelected":[64],"refresh":[64],"selectNode":[64],"unmount":[64]},[[0,"keydown","listenKeydown"]]],[257,"lf-spinner",{"lfActive":[1540,"lf-active"],"lfBarVariant":[1540,"lf-bar-variant"],"lfDimensions":[1025,"lf-dimensions"],"lfFader":[1540,"lf-fader"],"lfFaderTimeout":[1026,"lf-fader-timeout"],"lfFullScreen":[1540,"lf-full-screen"],"lfLayout":[1026,"lf-layout"],"lfStyle":[1025,"lf-style"],"lfTimeout":[1026,"lf-timeout"],"bigWait":[32],"debugInfo":[32],"progress":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfActive":["onFaderChange"],"lfFader":["onFaderChange"],"lfFaderTimeout":["onFaderChange"],"lfBarVariant":["lfBarVariantChanged"],"lfTimeout":["lfTimeoutChanged"]}]]],["p-426ea672",[[257,"lf-masonry",{"lfActions":[1028,"lf-actions"],"lfColumns":[1026,"lf-columns"],"lfDataset":[1040,"lf-dataset"],"lfSelectable":[1540,"lf-selectable"],"lfShape":[1025,"lf-shape"],"lfStyle":[1025,"lf-style"],"lfView":[1025,"lf-view"],"debugInfo":[32],"selectedShape":[32],"shapes":[32],"viewportWidth":[32],"getDebugInfo":[64],"getProps":[64],"getSelectedShape":[64],"redecorateShapes":[64],"refresh":[64],"setSelectedShape":[64],"unmount":[64]},null,{"lfColumns":["validateColumns"],"lfDataset":["updateShapes"],"lfShape":["updateShapes"]}]]],["p-e2900881",[[257,"lf-tabbar",{"lfAriaLabel":[1025,"lf-aria-label"],"lfDataset":[16,"lf-dataset"],"lfNavigation":[4,"lf-navigation"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[8,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}]]],["p-43bf5312",[[257,"lf-tree",{"lfAccordionLayout":[1540,"lf-accordion-layout"],"lfDataset":[1040,"lf-dataset"],"lfEmpty":[1025,"lf-empty"],"lfFilter":[1028,"lf-filter"],"lfGrid":[1540,"lf-grid"],"lfInitialExpansionDepth":[1026,"lf-initial-expansion-depth"],"lfRipple":[1028,"lf-ripple"],"lfSelectable":[1540,"lf-selectable"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"debugInfo":[32],"expandedNodes":[32],"hiddenNodes":[32],"selectedNode":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["handleDatasetChange"],"lfInitialExpansionDepth":["handleInitialDepthChange"]}]]]]'), e2))));
+})().then((async (e2) => (await o(), St(JSON.parse('[["p-da4e8664",[[257,"lf-imageviewer",{"lfDataset":[1040,"lf-dataset"],"lfLoadCallback":[1040,"lf-load-callback"],"lfNavigationTree":[1028,"lf-navigation-tree"],"lfStyle":[1025,"lf-style"],"lfTreeProps":[1040,"lf-tree-props"],"lfValue":[1040,"lf-value"],"debugInfo":[32],"currentShape":[32],"history":[32],"historyIndex":[32],"isSpinnerActive":[32],"isNavigationTreeOpen":[32],"addSnapshot":[64],"clearHistory":[64],"clearSelection":[64],"getComponents":[64],"getCurrentSnapshot":[64],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"reset":[64],"setSpinnerStatus":[64],"unmount":[64]},null,{"lfNavigationTree":["onLfNavigationTreeChange"]}]]],["p-9a28c130",[[257,"lf-compare",{"lfDataset":[1040,"lf-dataset"],"lfShape":[1025,"lf-shape"],"lfStyle":[1025,"lf-style"],"lfView":[1025,"lf-view"],"debugInfo":[32],"isLeftPanelOpened":[32],"isRightPanelOpened":[32],"leftShape":[32],"rightShape":[32],"shapes":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["updateShapes"],"lfShape":["updateShapes"]}]]],["p-88c4c8e0",[[257,"lf-accordion",{"lfDataset":[1040,"lf-dataset"],"lfRipple":[1028,"lf-ripple"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"expandedNodes":[32],"selectedNodes":[32],"getDebugInfo":[64],"getProps":[64],"getSelectedNodes":[64],"refresh":[64],"toggleNode":[64],"unmount":[64]}]]],["p-98bdf944",[[257,"lf-article",{"lfDataset":[1040,"lf-dataset"],"lfEmpty":[1025,"lf-empty"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-4d8a687e",[[257,"lf-carousel",{"lfDataset":[1040,"lf-dataset"],"lfAutoPlay":[4,"lf-auto-play"],"lfInterval":[2,"lf-interval"],"lfLightbox":[1540,"lf-lightbox"],"lfNavigation":[1028,"lf-navigation"],"lfShape":[1537,"lf-shape"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"currentIndex":[32],"shapes":[32],"getDebugInfo":[64],"getProps":[64],"goToSlide":[64],"nextSlide":[64],"prevSlide":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["updateShapes"],"lfShape":["updateShapes"]}]]],["p-28dd0bff",[[257,"lf-messenger",{"lfAutosave":[1028,"lf-autosave"],"lfDataset":[1040,"lf-dataset"],"lfStyle":[1025,"lf-style"],"lfValue":[16,"lf-value"],"debugInfo":[32],"chat":[32],"connectionStatus":[32],"covers":[32],"currentCharacter":[32],"formStatusMap":[32],"history":[32],"hoveredCustomizationOption":[32],"saveInProgress":[32],"ui":[32],"deleteOption":[64],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"reset":[64],"save":[64],"unmount":[64]}]]],["p-f9c5f8f8",[[257,"lf-drawer",{"lfDisplay":[1537,"lf-display"],"lfPosition":[1537,"lf-position"],"lfResponsive":[1026,"lf-responsive"],"lfStyle":[1025,"lf-style"],"lfValue":[1540,"lf-value"],"debugInfo":[32],"close":[64],"getDebugInfo":[64],"getProps":[64],"isOpened":[64],"open":[64],"refresh":[64],"toggle":[64],"unmount":[64]},[[0,"keydown","listenKeydown"]],{"lfDisplay":["onLfDisplayChange"],"lfResponsive":["onLfResponsiveChange"]}]]],["p-3dde8514",[[257,"lf-header",{"lfStyle":[1025,"lf-style"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-45c52a25",[[257,"lf-placeholder",{"lfIcon":[1,"lf-icon"],"lfProps":[16,"lf-props"],"lfStyle":[1025,"lf-style"],"lfThreshold":[2,"lf-threshold"],"lfTrigger":[1,"lf-trigger"],"lfValue":[1,"lf-value"],"debugInfo":[32],"isInViewport":[32],"getComponent":[64],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-f9e0dfd9",[[257,"lf-slider",{"lfLabel":[1025,"lf-label"],"lfLeadingLabel":[1028,"lf-leading-label"],"lfMax":[2,"lf-max"],"lfMin":[2,"lf-min"],"lfStep":[2,"lf-step"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1026,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}]]],["p-33abb3da",[[257,"lf-splash",{"lfLabel":[1025,"lf-label"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"state":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-82a405e5",[[257,"lf-toast",{"lfCloseIcon":[1025,"lf-close-icon"],"lfCloseCallback":[16,"lf-close-callback"],"lfIcon":[1025,"lf-icon"],"lfTimer":[2,"lf-timer"],"lfMessage":[1025,"lf-message"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-39cc0e0f",[[257,"lf-card",{"lfDataset":[1040,"lf-dataset"],"lfLayout":[1025,"lf-layout"],"lfSizeX":[1025,"lf-size-x"],"lfSizeY":[1025,"lf-size-y"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"debugInfo":[32],"shapes":[32],"getDebugInfo":[64],"getProps":[64],"getShapes":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["updateShapes"]}],[257,"lf-badge",{"lfImageProps":[1040,"lf-image-props"],"lfLabel":[1025,"lf-label"],"lfPosition":[1537,"lf-position"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}],[257,"lf-canvas",{"lfBrush":[1025,"lf-brush"],"lfColor":[1025,"lf-color"],"lfCursor":[1025,"lf-cursor"],"lfImageProps":[1040,"lf-image-props"],"lfOpacity":[1026,"lf-opacity"],"lfPreview":[1028,"lf-preview"],"lfStrokeTolerance":[1026,"lf-stroke-tolerance"],"lfSize":[1026,"lf-size"],"lfStyle":[1025,"lf-style"],"boxing":[32],"debugInfo":[32],"isPainting":[32],"orientation":[32],"points":[32],"clearCanvas":[64],"getCanvas":[64],"getDebugInfo":[64],"getImage":[64],"getProps":[64],"refresh":[64],"resizeCanvas":[64],"setCanvasHeight":[64],"setCanvasWidth":[64],"unmount":[64]}],[257,"lf-photoframe",{"lfOverlay":[1040,"lf-overlay"],"lfPlaceholder":[16,"lf-placeholder"],"lfStyle":[1025,"lf-style"],"lfThreshold":[2,"lf-threshold"],"lfValue":[16,"lf-value"],"debugInfo":[32],"imageOrientation":[32],"isInViewport":[32],"isReady":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}],[257,"lf-chart",{"lfAxis":[1025,"lf-axis"],"lfColors":[1040,"lf-colors"],"lfDataset":[1040,"lf-dataset"],"lfLegend":[1025,"lf-legend"],"lfSeries":[1040,"lf-series"],"lfSizeX":[1025,"lf-size-x"],"lfSizeY":[1025,"lf-size-y"],"lfStyle":[1025,"lf-style"],"lfTypes":[1040,"lf-types"],"lfXAxis":[1040,"lf-x-axis"],"lfYAxis":[1040,"lf-y-axis"],"debugInfo":[32],"themeValues":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"resize":[64],"unmount":[64]}],[257,"lf-toggle",{"lfAriaLabel":[1025,"lf-aria-label"],"lfLabel":[1025,"lf-label"],"lfLeadingLabel":[1028,"lf-leading-label"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[4,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}],[257,"lf-upload",{"lfLabel":[1025,"lf-label"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfValue":[16,"lf-value"],"debugInfo":[32],"selectedFiles":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"unmount":[64]}],[257,"lf-chat",{"lfContextWindow":[1026,"lf-context-window"],"lfEmpty":[1025,"lf-empty"],"lfEndpointUrl":[1025,"lf-endpoint-url"],"lfLayout":[1025,"lf-layout"],"lfMaxTokens":[1026,"lf-max-tokens"],"lfPollingInterval":[1026,"lf-polling-interval"],"lfSeed":[1026,"lf-seed"],"lfStyle":[1025,"lf-style"],"lfSystem":[1025,"lf-system"],"lfTemperature":[1026,"lf-temperature"],"lfTypewriterProps":[1028,"lf-typewriter-props"],"lfUiSize":[1537,"lf-ui-size"],"lfValue":[1040,"lf-value"],"currentAbortStreaming":[32],"currentPrompt":[32],"currentTokens":[32],"debugInfo":[32],"history":[32],"status":[32],"view":[32],"abortStreaming":[64],"getDebugInfo":[64],"getHistory":[64],"getLastMessage":[64],"getProps":[64],"refresh":[64],"scrollToBottom":[64],"setHistory":[64],"unmount":[64]},[[0,"keydown","listenKeydown"]],{"lfPollingInterval":["updatePollingInterval"],"lfSystem":["updateTokensCount"]}],[257,"lf-chip",{"lfAriaLabel":[1025,"lf-aria-label"],"lfDataset":[1040,"lf-dataset"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfStyling":[1025,"lf-styling"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[16,"lf-value"],"debugInfo":[32],"expandedNodes":[32],"hiddenNodes":[32],"selectedNodes":[32],"getDebugInfo":[64],"getProps":[64],"getSelectedNodes":[64],"refresh":[64],"setSelectedNodes":[64],"unmount":[64]}],[257,"lf-code",{"lfFadeIn":[1028,"lf-fade-in"],"lfFormat":[1028,"lf-format"],"lfLanguage":[1025,"lf-language"],"lfPreserveSpaces":[1028,"lf-preserve-spaces"],"lfShowCopy":[1028,"lf-show-copy"],"lfShowHeader":[1028,"lf-show-header"],"lfStickyHeader":[1028,"lf-sticky-header"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfLanguage":["loadLanguage"]}],[257,"lf-progressbar",{"lfAnimated":[1540,"lf-animated"],"lfCenteredLabel":[1540,"lf-centered-label"],"lfIcon":[1537,"lf-icon"],"lfIsRadial":[1540,"lf-is-radial"],"lfLabel":[1025,"lf-label"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1026,"lf-value"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}],[257,"lf-textfield",{"lfHelper":[1040,"lf-helper"],"lfHtmlAttributes":[1040,"lf-html-attributes"],"lfIcon":[1025,"lf-icon"],"lfLabel":[1025,"lf-label"],"lfStretchX":[1540,"lf-stretch-x"],"lfStretchY":[1540,"lf-stretch-y"],"lfStyle":[1025,"lf-style"],"lfStyling":[1025,"lf-styling"],"lfTrailingIcon":[1540,"lf-trailing-icon"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1,"lf-value"],"debugInfo":[32],"status":[32],"value":[32],"getDebugInfo":[64],"getElement":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setBlur":[64],"setFocus":[64],"setValue":[64],"unmount":[64]}],[257,"lf-typewriter",{"lfCursor":[1025,"lf-cursor"],"lfDeleteSpeed":[1026,"lf-delete-speed"],"lfLoop":[1028,"lf-loop"],"lfPause":[1026,"lf-pause"],"lfSpeed":[1026,"lf-speed"],"lfStyle":[1025,"lf-style"],"lfTag":[1025,"lf-tag"],"lfUiSize":[1537,"lf-ui-size"],"lfUpdatable":[1028,"lf-updatable"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"displayedText":[32],"isDeleting":[32],"currentTextIndex":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfValue":["handleLfValueChange"]}],[257,"lf-image",{"lfHtmlAttributes":[1040,"lf-html-attributes"],"lfMode":[1537,"lf-mode"],"lfShowSpinner":[1028,"lf-show-spinner"],"lfSizeX":[1025,"lf-size-x"],"lfSizeY":[1025,"lf-size-y"],"lfStyle":[1025,"lf-style"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"error":[32],"isLoaded":[32],"resolvedSpriteName":[32],"getDebugInfo":[64],"getImage":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfValue":["resetState"]}],[257,"lf-button",{"lfAriaLabel":[1025,"lf-aria-label"],"lfDataset":[1040,"lf-dataset"],"lfIcon":[1025,"lf-icon"],"lfIconOff":[1025,"lf-icon-off"],"lfLabel":[1025,"lf-label"],"lfRipple":[1028,"lf-ripple"],"lfShowSpinner":[1540,"lf-show-spinner"],"lfStretchX":[1540,"lf-stretch-x"],"lfStretchY":[1540,"lf-stretch-y"],"lfStyle":[1025,"lf-style"],"lfStyling":[1025,"lf-styling"],"lfToggable":[1028,"lf-toggable"],"lfTrailingIcon":[1028,"lf-trailing-icon"],"lfType":[1025,"lf-type"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[4,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setMessage":[64],"setValue":[64],"unmount":[64]}],[257,"lf-list",{"lfDataset":[1040,"lf-dataset"],"lfEmpty":[1025,"lf-empty"],"lfEnableDeletions":[1028,"lf-enable-deletions"],"lfNavigation":[1028,"lf-navigation"],"lfRipple":[1028,"lf-ripple"],"lfSelectable":[1028,"lf-selectable"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[2,"lf-value"],"debugInfo":[32],"focused":[32],"selected":[32],"focusNext":[64],"focusPrevious":[64],"getDebugInfo":[64],"getProps":[64],"getSelected":[64],"refresh":[64],"selectNode":[64],"unmount":[64]},[[0,"keydown","listenKeydown"]]],[257,"lf-spinner",{"lfActive":[1540,"lf-active"],"lfBarVariant":[1540,"lf-bar-variant"],"lfDimensions":[1025,"lf-dimensions"],"lfFader":[1540,"lf-fader"],"lfFaderTimeout":[1026,"lf-fader-timeout"],"lfFullScreen":[1540,"lf-full-screen"],"lfLayout":[1026,"lf-layout"],"lfStyle":[1025,"lf-style"],"lfTimeout":[1026,"lf-timeout"],"bigWait":[32],"debugInfo":[32],"progress":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfActive":["onFaderChange"],"lfFader":["onFaderChange"],"lfFaderTimeout":["onFaderChange"],"lfBarVariant":["lfBarVariantChanged"],"lfTimeout":["lfTimeoutChanged"]}]]],["p-0acbe4cf",[[257,"lf-masonry",{"lfActions":[1028,"lf-actions"],"lfColumns":[1026,"lf-columns"],"lfDataset":[1040,"lf-dataset"],"lfSelectable":[1540,"lf-selectable"],"lfShape":[1025,"lf-shape"],"lfStyle":[1025,"lf-style"],"lfView":[1025,"lf-view"],"debugInfo":[32],"selectedShape":[32],"shapes":[32],"viewportWidth":[32],"getDebugInfo":[64],"getProps":[64],"getSelectedShape":[64],"redecorateShapes":[64],"refresh":[64],"setSelectedShape":[64],"unmount":[64]},null,{"lfColumns":["validateColumns"],"lfDataset":["updateShapes"],"lfShape":["updateShapes"]}]]],["p-e2900881",[[257,"lf-tabbar",{"lfAriaLabel":[1025,"lf-aria-label"],"lfDataset":[16,"lf-dataset"],"lfNavigation":[4,"lf-navigation"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[8,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}]]],["p-7225e5d8",[[257,"lf-tree",{"lfAccordionLayout":[1540,"lf-accordion-layout"],"lfDataset":[1040,"lf-dataset"],"lfEmpty":[1025,"lf-empty"],"lfFilter":[1028,"lf-filter"],"lfGrid":[1540,"lf-grid"],"lfInitialExpansionDepth":[1026,"lf-initial-expansion-depth"],"lfRipple":[1028,"lf-ripple"],"lfSelectable":[1540,"lf-selectable"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"debugInfo":[32],"expandedNodes":[32],"hiddenNodes":[32],"selectedNode":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["handleDatasetChange"],"lfInitialExpansionDepth":["handleInitialDepthChange"]}]]]]'), e2))));
 var APIEndpoints;
 (function(APIEndpoints2) {
   APIEndpoints2["ClearAnalytics"] = "/lf-nodes/clear-analytics";
@@ -13590,6 +13725,7 @@ var APIEndpoints;
   APIEndpoints2["LFRefreshNodeDefs"] = "/lf-nodes/refresh-node-defs";
   APIEndpoints2["GetAnalytics"] = "/lf-nodes/get-analytics";
   APIEndpoints2["GetImage"] = "/lf-nodes/get-image";
+  APIEndpoints2["ExploreFilesystem"] = "/lf-nodes/explore-filesystem";
   APIEndpoints2["GetJson"] = "/lf-nodes/get-json";
   APIEndpoints2["GetMetadata"] = "/lf-nodes/get-metadata";
   APIEndpoints2["NewBackup"] = "/lf-nodes/new-backup";
@@ -13943,6 +14079,57 @@ const IMAGE_API = {
       payload.status = LogSeverity.Error;
     }
     lfManager2.log(payload.message, { payload }, payload.status);
+    return payload;
+  },
+  //#endregion
+  //#region explore
+  explore: async (directory, options = {}) => {
+    const lfManager2 = getLfManager();
+    const payload = {
+      data: {},
+      message: "",
+      status: LogSeverity.Info
+    };
+    try {
+      const body = new FormData();
+      if (directory) {
+        body.append("directory", directory);
+      }
+      const { scope, nodePath } = options;
+      if (scope) {
+        body.append("scope", scope);
+      }
+      if (nodePath) {
+        body.append("node", nodePath);
+      }
+      const response = await api.fetchApi(APIEndpoints.ExploreFilesystem, {
+        body,
+        method: "POST"
+      });
+      const code2 = response.status;
+      switch (code2) {
+        case 200:
+          const p2 = await response.json();
+          if (p2.status === "success") {
+            payload.data = p2.data ?? {};
+            payload.message = "Filesystem data fetched successfully.";
+            payload.status = LogSeverity.Success;
+            lfManager2.log(payload.message, { payload }, payload.status);
+          }
+          break;
+        default:
+          {
+            const errorText = await response.text().catch(() => "");
+            payload.message = `Unexpected response from the explore-filesystem API (${code2}): ${errorText || response.statusText}`;
+          }
+          payload.status = LogSeverity.Error;
+          break;
+      }
+    } catch (error2) {
+      payload.message = error2;
+      payload.status = LogSeverity.Error;
+    }
+    lfManager2.log(payload.message, { payload, options }, payload.status);
     return payload;
   }
   //#endregion
@@ -17092,6 +17279,147 @@ const applyFilterDefaults = (state, defaults) => {
     });
   });
 };
+const NAVIGATION_TREE_PLACEHOLDER_SUFFIX = "__lf_placeholder";
+const getLfData = () => {
+  var _a, _b, _c;
+  const lfData = (_c = (_b = (_a = getLfManager()) == null ? void 0 : _a.getManagers()) == null ? void 0 : _b.lfFramework) == null ? void 0 : _c.data;
+  if (!lfData) {
+    throw new Error("LF Framework data module is unavailable.");
+  }
+  return lfData;
+};
+const createPlaceholderNode = (parent) => {
+  const parentMetadata = extractNavigationTreeMetadata(parent);
+  const parentId = (parentMetadata == null ? void 0 : parentMetadata.id) ?? String(parent.id ?? "");
+  const placeholderId = `${parentId}${NAVIGATION_TREE_PLACEHOLDER_SUFFIX}`;
+  const metadata = {
+    id: placeholderId,
+    name: "Loading…",
+    hasChildren: false,
+    parentId,
+    paths: (parentMetadata == null ? void 0 : parentMetadata.paths) ?? {},
+    isPlaceholder: true,
+    imageCount: void 0,
+    isRoot: false
+  };
+  return {
+    id: placeholderId,
+    value: "Loading…",
+    cells: {
+      name: {
+        shape: "text",
+        value: "Loading…"
+      },
+      items: {
+        shape: "text",
+        value: ""
+      },
+      type: {
+        shape: "text",
+        value: ""
+      },
+      lfCode: {
+        shape: "code",
+        value: JSON.stringify({ ...metadata, isPlaceholder: true })
+      }
+    },
+    children: []
+  };
+};
+const isPlaceholderNode = (node) => {
+  if (!node) {
+    return false;
+  }
+  if (typeof node.id === "string" && node.id.endsWith(NAVIGATION_TREE_PLACEHOLDER_SUFFIX)) {
+    return true;
+  }
+  const metadata = extractNavigationTreeMetadata(node);
+  if (!metadata) {
+    return false;
+  }
+  if (metadata.isPlaceholder) {
+    return true;
+  }
+  if (metadata.name !== "Loading…") {
+    return false;
+  }
+  const pathValues = Object.values(metadata.paths ?? {}).filter(Boolean);
+  return pathValues.length === 0;
+};
+const NAVIGATION_TREE_PLACEHOLDER_CONFIG = {
+  create: ({ parent }) => createPlaceholderNode(parent),
+  isPlaceholder: (node) => isPlaceholderNode(node),
+  shouldDecorate: (node) => {
+    const metadata = extractNavigationTreeMetadata(node);
+    if (metadata == null ? void 0 : metadata.isPlaceholder) {
+      return false;
+    }
+    if (metadata && metadata.hasChildren !== void 0) {
+      return metadata.hasChildren;
+    }
+    return node.hasChildren === true;
+  }
+};
+const extractNavigationTreeMetadata = (node) => {
+  var _a, _b;
+  if (!node) {
+    return void 0;
+  }
+  const rawValue = (_b = (_a = node.cells) == null ? void 0 : _a.lfCode) == null ? void 0 : _b.value;
+  if (typeof rawValue !== "string") {
+    return void 0;
+  }
+  try {
+    const parsed = JSON.parse(rawValue);
+    if (!parsed || typeof parsed !== "object") {
+      return void 0;
+    }
+    return {
+      id: parsed.id ?? String(node.id ?? ""),
+      name: parsed.name ?? String(node.value ?? ""),
+      hasChildren: Boolean(parsed.hasChildren),
+      imageCount: parsed.imageCount,
+      parentId: parsed.parentId ?? null,
+      isRoot: Boolean(parsed.isRoot),
+      paths: parsed.paths ?? {},
+      isPlaceholder: Boolean(parsed.isPlaceholder)
+    };
+  } catch (error2) {
+    return void 0;
+  }
+};
+const prepareNavigationTreeDataset = (dataset) => {
+  if (!dataset) {
+    return dataset;
+  }
+  return getLfData().node.decoratePlaceholders(dataset, NAVIGATION_TREE_PLACEHOLDER_CONFIG);
+};
+const mergeNavigationTreeChildren = (dataset, branch) => {
+  if (!dataset || !branch) {
+    return dataset;
+  }
+  const parentId = branch.parent_id;
+  if (!parentId) {
+    return dataset;
+  }
+  const merged = getLfData().node.mergeChildren(dataset, {
+    parentId,
+    children: Array.isArray(branch.nodes) ? branch.nodes : void 0,
+    columns: branch.columns,
+    placeholder: {
+      removeExisting: true,
+      reapply: true,
+      config: NAVIGATION_TREE_PLACEHOLDER_CONFIG
+    }
+  });
+  return merged;
+};
+const findNodeInNavigationTree = (dataset, predicate) => {
+  if (!dataset || !Array.isArray(dataset.nodes) || typeof predicate !== "function") {
+    return void 0;
+  }
+  return getLfData().node.find(dataset, predicate);
+};
 const createEventHandlers = ({ handleInterruptForState: handleInterruptForState2, prepSettings: prepSettings2 }) => {
   const syncSelectionWithDataset = async (state, masonryEvent) => {
     const { elements } = state;
@@ -17215,7 +17543,7 @@ const createEventHandlers = ({ handleInterruptForState: handleInterruptForState2
     //#endregion
     //#region Imageviewer
     imageviewer: async (state, e2) => {
-      var _a;
+      var _a, _b, _c, _d, _e, _f, _g;
       const { comp, eventType, originalEvent } = e2.detail;
       const { node } = state;
       switch (eventType) {
@@ -17224,8 +17552,20 @@ const createEventHandlers = ({ handleInterruptForState: handleInterruptForState2
           switch (ogEv.detail.eventType) {
             case "click":
               if (isTree(ogEv.detail.comp)) {
-                const { node: node2 } = ogEv.detail;
-                if ((_a = node2.cells) == null ? void 0 : _a.lfCode) {
+                const treeEvent = ogEv.detail;
+                const { node: node2 } = treeEvent;
+                const isExpansion = Boolean(treeEvent.expansion);
+                const metadata = extractNavigationTreeMetadata(node2);
+                const hasNavigationPaths = Boolean(metadata && !metadata.isPlaceholder && (metadata.isRoot || Object.values(metadata.paths ?? {}).some((value) => Boolean(value))));
+                if (hasNavigationPaths) {
+                  if (isExpansion) {
+                    await ((_c = (_b = (_a = state.navigationTree) == null ? void 0 : _a.handlers) == null ? void 0 : _b.expand) == null ? void 0 : _c.call(_b, node2));
+                    return;
+                  }
+                  await ((_f = (_e = (_d = state.navigationTree) == null ? void 0 : _d.handlers) == null ? void 0 : _e.select) == null ? void 0 : _f.call(_e, node2));
+                  return;
+                }
+                if ((_g = node2 == null ? void 0 : node2.cells) == null ? void 0 : _g.lfCode) {
                   prepSettings2(state, node2);
                 }
               }
@@ -17425,6 +17765,14 @@ handlerRefs.textfield = EV_HANDLERS$a.textfield;
 handlerRefs.toggle = EV_HANDLERS$a.toggle;
 const STATE$h = /* @__PURE__ */ new WeakMap();
 const IMAGE_EDITOR_INSTANCES = /* @__PURE__ */ new Set();
+const NAVIGATION_TREE_PROPS_BASE = {
+  lfAccordionLayout: true,
+  lfFilter: true,
+  lfInitialExpansionDepth: 0,
+  lfGrid: true,
+  lfSelectable: false
+};
+const shouldEnableNavigationTree = (node) => (node == null ? void 0 : node.comfyClass) === NodeName.loadAndEditImages;
 const normalizeDirectoryRequest = (value) => typeof value === "string" ? value : "";
 const syncNavigationDirectoryControl = async (state, directoryValue) => {
   var _a;
@@ -17507,18 +17855,269 @@ const imageEditorFactory = {
     const grid = document.createElement(TagName.Div);
     const settings = document.createElement(TagName.Div);
     const imageviewer = document.createElement(TagName.LfImageviewer);
+    const navigationTreeEnabled = shouldEnableNavigationTree(node);
+    const navigationTreeState = navigationTreeEnabled ? {
+      dataset: void 0,
+      prepared: void 0,
+      loadedNodes: /* @__PURE__ */ new Set(),
+      pendingNodes: /* @__PURE__ */ new Set(),
+      expandedNodes: /* @__PURE__ */ new Set(),
+      handlers: void 0,
+      rootsLoaded: false,
+      selectedNodeId: void 0
+    } : void 0;
+    if (navigationTreeEnabled) {
+      imageviewer.lfNavigationTree = {
+        defaultOpen: true,
+        enabled: true,
+        minWidth: 240,
+        width: 320,
+        position: "start"
+      };
+      imageviewer.lfTreeProps = {
+        ...NAVIGATION_TREE_PROPS_BASE,
+        lfDataset: { columns: [], nodes: [] }
+      };
+    }
+    const updateNavigationTreeDataset = (treeDataset, { reset } = {}) => {
+      var _a, _b, _c, _d;
+      if (!navigationTreeState) {
+        return;
+      }
+      if (reset) {
+        navigationTreeState.loadedNodes.clear();
+        navigationTreeState.pendingNodes.clear();
+        navigationTreeState.rootsLoaded = false;
+        navigationTreeState.expandedNodes.clear();
+        navigationTreeState.selectedNodeId = void 0;
+      }
+      if (!treeDataset) {
+        const fallbackColumns = ((_a = navigationTreeState.prepared) == null ? void 0 : _a.columns) ?? ((_b = navigationTreeState.dataset) == null ? void 0 : _b.columns) ?? ((_d = (_c = imageviewer.lfTreeProps) == null ? void 0 : _c.lfDataset) == null ? void 0 : _d.columns) ?? [];
+        navigationTreeState.dataset = void 0;
+        navigationTreeState.prepared = void 0;
+        const previousProps2 = imageviewer.lfTreeProps ?? {};
+        imageviewer.lfTreeProps = {
+          ...NAVIGATION_TREE_PROPS_BASE,
+          ...previousProps2,
+          lfDataset: {
+            columns: fallbackColumns,
+            nodes: []
+          }
+        };
+        return;
+      }
+      const shouldMerge = Boolean(navigationTreeState.dataset) && !reset;
+      const mergedDataset = shouldMerge && navigationTreeState.dataset ? mergeNavigationTreeChildren(navigationTreeState.dataset, treeDataset) ?? navigationTreeState.dataset : treeDataset;
+      navigationTreeState.dataset = mergedDataset ?? void 0;
+      const parentId = treeDataset.parent_id;
+      if (parentId) {
+        navigationTreeState.loadedNodes.add(parentId);
+        navigationTreeState.pendingNodes.delete(parentId);
+      }
+      if (treeDataset.parent_id === "root") {
+        navigationTreeState.rootsLoaded = true;
+        navigationTreeState.loadedNodes.add("root");
+        navigationTreeState.pendingNodes.delete("root");
+      }
+      const prepared = mergedDataset ? prepareNavigationTreeDataset(mergedDataset) : void 0;
+      navigationTreeState.prepared = prepared ?? void 0;
+      const datasetForTree = prepared ?? (mergedDataset ? {
+        ...mergedDataset,
+        nodes: Array.isArray(mergedDataset.nodes) ? mergedDataset.nodes : []
+      } : {
+        columns: treeDataset.columns ?? [],
+        nodes: [],
+        parent_id: treeDataset.parent_id
+      });
+      const previousProps = imageviewer.lfTreeProps ?? {};
+      imageviewer.lfTreeProps = {
+        ...NAVIGATION_TREE_PROPS_BASE,
+        ...previousProps,
+        lfDataset: datasetForTree
+      };
+      void applyNavigationTreePersistence();
+    };
+    const applyNavigationTreePersistence = async () => {
+      var _a, _b;
+      if (!navigationTreeState || !navigationTreeState.expandedNodes || !(imageviewer == null ? void 0 : imageviewer.getComponents)) {
+        return;
+      }
+      const shouldPersistSelection = Boolean(navigationTreeState.selectedNodeId);
+      const shouldPersistExpansion = navigationTreeState.expandedNodes.size > 0;
+      if (!shouldPersistSelection && !shouldPersistExpansion) {
+        return;
+      }
+      try {
+        const components = await imageviewer.getComponents();
+        const tree = (_a = components == null ? void 0 : components.navigation) == null ? void 0 : _a.tree;
+        if (!tree) {
+          return;
+        }
+        const dataset = ((_b = imageviewer.lfTreeProps) == null ? void 0 : _b.lfDataset) ?? navigationTreeState.prepared ?? navigationTreeState.dataset;
+        if (!dataset) {
+          return;
+        }
+        const treeWithState = tree;
+        if (shouldPersistExpansion) {
+          const desiredNodes = /* @__PURE__ */ new Set();
+          navigationTreeState.expandedNodes.forEach((nodeId) => {
+            const match = findNodeInNavigationTree(dataset, (node2) => node2.id === nodeId);
+            if (match) {
+              desiredNodes.add(match);
+            }
+          });
+          if (desiredNodes.size > 0) {
+            const nextExpanded = new Set(desiredNodes);
+            treeWithState.expandedNodes = nextExpanded;
+          }
+        }
+        if (shouldPersistSelection && navigationTreeState.selectedNodeId) {
+          const selectedNode = findNodeInNavigationTree(dataset, (node2) => node2.id === navigationTreeState.selectedNodeId);
+          if (selectedNode) {
+            treeWithState.selectedNode = selectedNode;
+          }
+        }
+        if (typeof treeWithState.refresh === "function") {
+          await treeWithState.refresh();
+        }
+      } catch (error2) {
+        getLfManager().log("Failed to persist navigation tree state.", { error: error2 }, LogSeverity.Warning);
+      }
+    };
+    const loadNavigationTreeRoots = async () => {
+      var _a;
+      if (!navigationTreeState || navigationTreeState.rootsLoaded) {
+        return;
+      }
+      navigationTreeState.pendingNodes.add("root");
+      try {
+        const response = await IMAGE_API.explore("", { scope: "roots" });
+        if (response.status !== LogSeverity.Success) {
+          return;
+        }
+        const roots = (_a = response.data) == null ? void 0 : _a.tree;
+        if (!roots) {
+          return;
+        }
+        updateNavigationTreeDataset(roots, { reset: true });
+      } catch (error2) {
+        getLfManager().log("Failed to load navigation tree roots.", { error: error2 }, LogSeverity.Warning);
+      } finally {
+        navigationTreeState.pendingNodes.delete("root");
+      }
+    };
+    const handleNavigationTreeExpansion = async (nodeToExpand) => {
+      var _a, _b, _c, _d, _e, _f;
+      if (!navigationTreeEnabled || !navigationTreeState || !nodeToExpand) {
+        return;
+      }
+      const metadata = extractNavigationTreeMetadata(nodeToExpand);
+      if (!metadata || metadata.isPlaceholder || !metadata.hasChildren) {
+        return;
+      }
+      const nodeId = metadata.id;
+      if (!nodeId) {
+        return;
+      }
+      const wasExpanded = navigationTreeState.expandedNodes.has(nodeId);
+      if (wasExpanded) {
+        navigationTreeState.expandedNodes.delete(nodeId);
+      } else {
+        navigationTreeState.expandedNodes.add(nodeId);
+      }
+      if (wasExpanded) {
+        void applyNavigationTreePersistence();
+        return;
+      }
+      if (navigationTreeState.pendingNodes.has(nodeId)) {
+        return;
+      }
+      if (navigationTreeState.loadedNodes.has(nodeId)) {
+        void applyNavigationTreePersistence();
+        return;
+      }
+      const expansionDirectory = normalizeDirectoryRequest(((_a = metadata.paths) == null ? void 0 : _a.resolved) ?? ((_b = metadata.paths) == null ? void 0 : _b.raw) ?? ((_c = metadata.paths) == null ? void 0 : _c.relative) ?? "");
+      const nodePath = ((_d = metadata.paths) == null ? void 0 : _d.resolved) ?? ((_e = metadata.paths) == null ? void 0 : _e.raw) ?? expansionDirectory;
+      if (!expansionDirectory || !nodePath) {
+        return;
+      }
+      navigationTreeState.pendingNodes.add(nodeId);
+      try {
+        const response = await IMAGE_API.explore(expansionDirectory, {
+          scope: "tree",
+          nodePath
+        });
+        if (response.status !== LogSeverity.Success) {
+          return;
+        }
+        const branch = (_f = response.data) == null ? void 0 : _f.tree;
+        if (!branch) {
+          navigationTreeState.loadedNodes.add(nodeId);
+          return;
+        }
+        updateNavigationTreeDataset(branch, { reset: false });
+      } catch (error2) {
+        getLfManager().log("Failed to expand navigation tree node.", { error: error2, nodeId, path: nodePath }, LogSeverity.Warning);
+      } finally {
+        navigationTreeState.pendingNodes.delete(nodeId);
+      }
+    };
+    const handleNavigationTreeSelection = async (nodeToSelect) => {
+      var _a, _b, _c, _d;
+      if (!navigationTreeEnabled || !navigationTreeState || !nodeToSelect) {
+        return;
+      }
+      const metadata = extractNavigationTreeMetadata(nodeToSelect);
+      if (!metadata || metadata.isPlaceholder) {
+        return;
+      }
+      const currentState = STATE$h.get(wrapper);
+      if (!currentState) {
+        return;
+      }
+      navigationTreeState.selectedNodeId = metadata.id ?? void 0;
+      void applyNavigationTreePersistence();
+      const targetDirectory = normalizeDirectoryRequest(((_a = metadata.paths) == null ? void 0 : _a.resolved) ?? ((_b = metadata.paths) == null ? void 0 : _b.raw) ?? ((_c = metadata.paths) == null ? void 0 : _c.relative) ?? metadata.name ?? "");
+      const currentDirectory = normalizeDirectoryRequest(currentState.directoryValue ?? deriveDirectoryValue(currentState.directory) ?? currentState.lastRequestedDirectory ?? "");
+      if (targetDirectory === currentDirectory && !metadata.isRoot) {
+        return;
+      }
+      await ((_d = currentState.refreshDirectory) == null ? void 0 : _d.call(currentState, targetDirectory));
+      void applyNavigationTreePersistence();
+    };
     const refresh = async (directory) => {
+      var _a;
       const state2 = STATE$h.get(wrapper);
       const normalizedDirectory = normalizeDirectoryRequest(directory);
+      if (!state2) {
+        return;
+      }
       state2.hasAutoDirectoryLoad = true;
       state2.lastRequestedDirectory = normalizedDirectory;
       try {
-        const response = await getLfManager().getApiRoutes().image.get(normalizedDirectory);
-        if (response.status !== "success") {
+        if (navigationTreeEnabled) {
+          const response2 = await IMAGE_API.explore(normalizedDirectory, { scope: "dataset" });
+          if (response2.status !== LogSeverity.Success) {
+            getLfManager().log("Images not found.", { response: response2 }, LogSeverity.Info);
+            return;
+          }
+          const dataset2 = ((_a = response2.data) == null ? void 0 : _a.dataset) ?? { nodes: [] };
+          const mergedDirectory2 = mergeNavigationDirectory(dataset2, { raw: normalizedDirectory });
+          state2.directory = { ...mergedDirectory2 };
+          const derivedDirectoryValue2 = deriveDirectoryValue(mergedDirectory2);
+          state2.directoryValue = derivedDirectoryValue2 ?? normalizedDirectory;
+          state2.lastRequestedDirectory = state2.directoryValue;
+          ensureDatasetContext(dataset2, state2);
+          imageviewer.lfDataset = dataset2;
+          await syncNavigationDirectoryControl(state2, state2.directoryValue);
+          return;
+        }
+        const response = await IMAGE_API.get(normalizedDirectory);
+        if (response.status !== LogSeverity.Success) {
           getLfManager().log("Images not found.", { response }, LogSeverity.Info);
           return;
         }
-        const dataset = (response == null ? void 0 : response.data) ?? { nodes: [] };
+        const dataset = response.data ?? { nodes: [] };
         const mergedDirectory = mergeNavigationDirectory(dataset, { raw: normalizedDirectory });
         state2.directory = { ...mergedDirectory };
         const derivedDirectoryValue = deriveDirectoryValue(mergedDirectory);
@@ -17599,6 +18198,7 @@ const imageEditorFactory = {
       isSyncingDirectory: false,
       lastRequestedDirectory: void 0,
       node,
+      navigationTree: navigationTreeState,
       refreshDirectory: refresh,
       update: {
         preview: () => updateCb(STATE$h.get(wrapper)).then(() => {
@@ -17608,12 +18208,24 @@ const imageEditorFactory = {
       },
       wrapper
     };
+    if (navigationTreeState) {
+      navigationTreeState.handlers = {
+        expand: handleNavigationTreeExpansion,
+        select: handleNavigationTreeSelection
+      };
+    }
     STATE$h.set(wrapper, state);
     IMAGE_EDITOR_INSTANCES.add(state);
-    void Promise.resolve().then(() => {
+    void Promise.resolve().then(async () => {
       var _a, _b;
       const currentState = STATE$h.get(wrapper);
-      if (!currentState || currentState.hasAutoDirectoryLoad) {
+      if (!currentState) {
+        return;
+      }
+      if (navigationTreeEnabled) {
+        await loadNavigationTreeRoots();
+      }
+      if (currentState.hasAutoDirectoryLoad) {
         return;
       }
       const currentDataset = (_a = currentState.elements.imageviewer) == null ? void 0 : _a.lfDataset;
@@ -21363,137 +21975,137 @@ lfManager.initialize();
   console.log("LF Manager initialized!", lfManager);
 }
 export {
-  LF_CARD_PROPS as $,
+  LF_THEME_COLORS_DATA_PREFIX as $,
   AVATAR_COVER as A,
-  LF_SLIDER_BLOCKS as B,
+  LF_BADGE_BLOCKS as B,
   CY_ATTRIBUTES as C,
   D$1 as D,
-  LF_SLIDER_PARTS as E,
-  LF_SLIDER_CSS_VARIABLES as F,
-  LF_SLIDER_PROPS as G,
-  LF_BADGE_BLOCKS as H,
+  LF_BADGE_PARTS as E,
+  LF_BADGE_PROPS as F,
+  LF_BUTTON_BLOCKS as G,
+  LF_BUTTON_PARTS as H,
   IMAGE_TYPE_IDS as I,
-  LF_BADGE_PARTS as J,
-  LF_BADGE_PROPS as K,
-  LF_ACCORDION_BLOCKS as L,
-  LF_BUTTON_BLOCKS as M,
-  LF_BUTTON_PARTS as N,
+  LF_BUTTON_PROPS as J,
+  LF_CANVAS_BLOCKS as K,
+  LF_MASONRY_DEFAULT_COLUMNS as L,
+  LF_CANVAS_PARTS as M,
+  LF_CANVAS_PROPS as N,
   OPTION_TYPE_IDS as O,
-  LF_BUTTON_PROPS as P,
-  LF_CANVAS_BLOCKS as Q,
-  LF_CANVAS_PARTS as R,
+  LF_CARD_BLOCKS as P,
+  LF_CARD_PARTS as Q,
+  LF_CARD_CSS_VARS as R,
   STYLE_COVER as S,
   TIMEFRAME_COVER as T,
-  LF_CANVAS_PROPS as U,
+  LF_CARD_DEFAULTS as U,
   V,
   W$1 as W,
-  LF_CARD_BLOCKS as X,
-  LF_CARD_PARTS as Y,
-  LF_CARD_CSS_VARS as Z,
-  LF_CARD_DEFAULTS as _,
-  LF_ATTRIBUTES as a,
-  LF_CAROUSEL_PROPS as a$,
-  LF_CHART_BLOCKS as a0,
-  LF_CHART_PARTS as a1,
-  LF_CHART_CSS_VARS as a2,
-  LF_THEME_COLORS_DATA_PREFIX as a3,
-  LF_CHART_PROPS as a4,
-  LF_CHAT_BLOCKS as a5,
-  LF_CHAT_PARTS as a6,
-  LF_CHAT_PROPS as a7,
-  LF_CHIP_BLOCKS as a8,
-  LF_CHIP_PARTS as a9,
-  LF_TYPEWRITER_BLOCKS as aA,
-  LF_TYPEWRITER_PARTS as aB,
-  LF_TYPEWRITER_PROPS as aC,
-  LF_UPLOAD_BLOCKS as aD,
-  LF_UPLOAD_PARTS as aE,
-  LF_UPLOAD_PROPS as aF,
-  LF_BADGE_CSS_VARS as aG,
-  LF_CHIP_CSS_VARS as aH,
-  LF_CARD_IDS as aI,
-  LF_CHAT_IDS as aJ,
-  LF_THEME_ICONS as aK,
-  LF_MASONRY_DEFAULT_COLUMNS as aL,
-  LF_MASONRY_BLOCKS as aM,
-  LF_MASONRY_PARTS as aN,
-  LF_MASONRY_CSS_VARS as aO,
-  LF_MASONRY_PROPS as aP,
-  LF_MASONRY_IDS as aQ,
-  LF_TREE_BLOCKS as aR,
-  LF_TREE_PARTS as aS,
-  LF_TREE_PROPS as aT,
-  LF_TREE_CSS_VARIABLES as aU,
-  LF_TOAST_BLOCKS as aV,
-  LF_TOAST_PARTS as aW,
-  LF_TOAST_CSS_VARIABLES as aX,
-  LF_TOAST_PROPS as aY,
-  LF_CAROUSEL_BLOCKS as aZ,
-  LF_CAROUSEL_PARTS as a_,
-  LF_CHIP_PROPS as aa,
-  LF_CODE_BLOCKS as ab,
-  LF_CODE_PARTS as ac,
-  LF_CODE_PROPS as ad,
-  LF_IMAGE_BLOCKS as ae,
-  LF_IMAGE_PARTS as af,
-  LF_IMAGE_CSS_VARS as ag,
-  LF_IMAGE_PROPS as ah,
-  CSS_VAR_PREFIX as ai,
-  LF_LIST_BLOCKS as aj,
-  LF_LIST_PARTS as ak,
-  LF_LIST_PROPS as al,
-  LF_PHOTOFRAME_BLOCKS as am,
-  LF_PHOTOFRAME_PARTS as an,
-  LF_PHOTOFRAME_PROPS as ao,
-  LF_PROGRESSBAR_BLOCKS as ap,
-  LF_PROGRESSBAR_PARTS as aq,
-  LF_PROGRESSBAR_CSS_VARIABLES as ar,
-  LF_PROGRESSBAR_PROPS as as,
-  LF_SPINNER_PROPS as at,
-  LF_TEXTFIELD_BLOCKS as au,
-  LF_TEXTFIELD_PARTS as av,
-  LF_TEXTFIELD_PROPS as aw,
-  LF_TOGGLE_BLOCKS as ax,
-  LF_TOGGLE_PARTS as ay,
-  LF_TOGGLE_PROPS as az,
-  LF_ACCORDION_PARTS as b,
-  LF_CAROUSEL_IDS as b0,
-  LF_HEADER_BLOCKS as b1,
-  LF_HEADER_PARTS as b2,
-  LF_HEADER_PROPS as b3,
-  LF_HEADER_SLOT as b4,
-  LF_IMAGEVIEWER_BLOCKS as b5,
-  LF_IMAGEVIEWER_PARTS as b6,
-  LF_IMAGEVIEWER_PROPS as b7,
-  IDS as b8,
-  LF_TABBAR_BLOCKS as b9,
-  LF_TABBAR_PARTS as ba,
-  LF_TABBAR_PROPS as bb,
-  LF_PLACEHOLDER_BLOCKS as bc,
-  LF_PLACEHOLDER_PARTS as bd,
-  LF_PLACEHOLDER_PROPS as be,
-  LF_DRAWER_BLOCKS as bf,
-  LF_DRAWER_PARTS as bg,
-  LF_DRAWER_PROPS as bh,
-  LF_DRAWER_SLOT as bi,
-  LF_EFFECTS_FOCUSABLES as bj,
-  LF_COMPARE_BLOCKS as bk,
-  LF_COMPARE_PARTS as bl,
-  LF_COMPARE_CSS_VARS as bm,
-  LF_COMPARE_DEFAULTS as bn,
-  LF_COMPARE_PROPS as bo,
-  LF_COMPARE_IDS as bp,
+  LF_CARD_PROPS as X,
+  LF_CHART_BLOCKS as Y,
+  LF_CHART_PARTS as Z,
+  LF_CHART_CSS_VARS as _,
+  LF_MASONRY_BLOCKS as a,
+  LF_ACCORDION_PARTS as a$,
+  LF_CHART_PROPS as a0,
+  LF_CHAT_BLOCKS as a1,
+  LF_CHAT_PARTS as a2,
+  LF_CHAT_PROPS as a3,
+  LF_CHIP_BLOCKS as a4,
+  LF_CHIP_PARTS as a5,
+  LF_CHIP_PROPS as a6,
+  LF_CODE_BLOCKS as a7,
+  LF_CODE_PARTS as a8,
+  LF_CODE_PROPS as a9,
+  LF_UPLOAD_PARTS as aA,
+  LF_UPLOAD_PROPS as aB,
+  LF_BADGE_CSS_VARS as aC,
+  LF_CHIP_CSS_VARS as aD,
+  LF_CARD_IDS as aE,
+  LF_CHAT_IDS as aF,
+  LF_THEME_ICONS as aG,
+  LF_HEADER_BLOCKS as aH,
+  LF_HEADER_PARTS as aI,
+  LF_HEADER_PROPS as aJ,
+  LF_HEADER_SLOT as aK,
+  LF_PLACEHOLDER_BLOCKS as aL,
+  LF_PLACEHOLDER_PARTS as aM,
+  LF_PLACEHOLDER_PROPS as aN,
+  LF_CAROUSEL_BLOCKS as aO,
+  LF_CAROUSEL_PARTS as aP,
+  LF_CAROUSEL_PROPS as aQ,
+  LF_CAROUSEL_IDS as aR,
+  LF_TREE_BLOCKS as aS,
+  LF_TREE_PARTS as aT,
+  LF_TREE_PROPS as aU,
+  LF_TREE_CSS_VARIABLES as aV,
+  LF_TOAST_BLOCKS as aW,
+  LF_TOAST_PARTS as aX,
+  LF_TOAST_CSS_VARIABLES as aY,
+  LF_TOAST_PROPS as aZ,
+  LF_ACCORDION_BLOCKS as a_,
+  LF_IMAGE_BLOCKS as aa,
+  LF_IMAGE_PARTS as ab,
+  LF_IMAGE_CSS_VARS as ac,
+  LF_IMAGE_PROPS as ad,
+  CSS_VAR_PREFIX as ae,
+  LF_LIST_BLOCKS as af,
+  LF_LIST_PARTS as ag,
+  LF_LIST_PROPS as ah,
+  LF_PHOTOFRAME_BLOCKS as ai,
+  LF_PHOTOFRAME_PARTS as aj,
+  LF_PHOTOFRAME_PROPS as ak,
+  LF_PROGRESSBAR_BLOCKS as al,
+  LF_PROGRESSBAR_PARTS as am,
+  LF_PROGRESSBAR_CSS_VARIABLES as an,
+  LF_PROGRESSBAR_PROPS as ao,
+  LF_SPINNER_PROPS as ap,
+  LF_TEXTFIELD_BLOCKS as aq,
+  LF_TEXTFIELD_PARTS as ar,
+  LF_TEXTFIELD_PROPS as as,
+  LF_TOGGLE_BLOCKS as at,
+  LF_TOGGLE_PARTS as au,
+  LF_TOGGLE_PROPS as av,
+  LF_TYPEWRITER_BLOCKS as aw,
+  LF_TYPEWRITER_PARTS as ax,
+  LF_TYPEWRITER_PROPS as ay,
+  LF_UPLOAD_BLOCKS as az,
+  LF_ATTRIBUTES as b,
+  LF_ACCORDION_PROPS as b0,
+  LF_ARTICLE_BLOCKS as b1,
+  LF_ARTICLE_PARTS as b2,
+  LF_ARTICLE_PROPS as b3,
+  LF_COMPARE_BLOCKS as b4,
+  LF_COMPARE_PARTS as b5,
+  LF_COMPARE_CSS_VARS as b6,
+  LF_COMPARE_DEFAULTS as b7,
+  LF_COMPARE_PROPS as b8,
+  LF_COMPARE_IDS as b9,
+  LF_IMAGEVIEWER_BLOCKS as ba,
+  LF_IMAGEVIEWER_PARTS as bb,
+  LF_IMAGEVIEWER_PROPS as bc,
+  IDS as bd,
+  LF_TABBAR_BLOCKS as be,
+  LF_TABBAR_PARTS as bf,
+  LF_TABBAR_PROPS as bg,
+  LF_DRAWER_BLOCKS as bh,
+  LF_DRAWER_PARTS as bi,
+  LF_DRAWER_PROPS as bj,
+  LF_DRAWER_SLOT as bk,
+  LF_EFFECTS_FOCUSABLES as bl,
+  LF_SLIDER_BLOCKS as bm,
+  LF_SLIDER_PARTS as bn,
+  LF_SLIDER_CSS_VARIABLES as bo,
+  LF_SLIDER_PROPS as bp,
   onFrameworkReady as bq,
-  LF_STYLE_ID as c,
-  LF_WRAPPER_ID as d,
-  LF_ACCORDION_PROPS as e,
-  LF_SPLASH_BLOCKS as f,
-  LF_SPLASH_PARTS as g,
-  LF_SPLASH_PROPS as h,
+  LF_MASONRY_PARTS as c,
+  LF_STYLE_ID as d,
+  LF_MASONRY_CSS_VARS as e,
+  LF_WRAPPER_ID as f,
+  LF_MASONRY_PROPS as g,
+  LF_MASONRY_IDS as h,
   LF_MESSENGER_CLEAN_UI as i,
-  LF_MESSENGER_BLOCKS as j,
-  LF_MESSENGER_PARTS as k,
-  jt as l,
+  jt as j,
+  LF_MESSENGER_BLOCKS as k,
+  LF_MESSENGER_PARTS as l,
   LF_MESSENGER_PROPS as m,
   n,
   LF_MESSENGER_IDS as o,
@@ -21504,8 +22116,8 @@ export {
   OUTFIT_COVER as t,
   LOCATION_COVER as u,
   CHILD_ROOT_MAP as v,
-  LF_ARTICLE_BLOCKS as w,
-  LF_ARTICLE_PARTS as x,
-  LF_ARTICLE_PROPS as y,
+  LF_SPLASH_BLOCKS as w,
+  LF_SPLASH_PARTS as x,
+  LF_SPLASH_PROPS as y,
   z
 };

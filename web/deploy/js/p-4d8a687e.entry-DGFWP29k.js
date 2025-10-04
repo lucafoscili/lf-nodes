@@ -1,6 +1,6 @@
-import { n, V, aZ as LF_CAROUSEL_BLOCKS, C as CY_ATTRIBUTES, a as LF_ATTRIBUTES, a_ as LF_CAROUSEL_PARTS, c as LF_STYLE_ID, d as LF_WRAPPER_ID, a$ as LF_CAROUSEL_PROPS, p as pt, D as D$1, W as W$1, z as z$1, l as jt, b0 as LF_CAROUSEL_IDS } from "./index-CAhA1yg9.js";
-import { a } from "./p-Dl9cVpAY-bPm7KoFq.js";
-import { f } from "./p-Cn5YKT90-DMhcviCw.js";
+import { n, V, aO as LF_CAROUSEL_BLOCKS, C as CY_ATTRIBUTES, b as LF_ATTRIBUTES, aP as LF_CAROUSEL_PARTS, d as LF_STYLE_ID, f as LF_WRAPPER_ID, aQ as LF_CAROUSEL_PROPS, p as pt, D as D$1, W as W$1, z as z$1, j as jt, aR as LF_CAROUSEL_IDS } from "./index-BFq_6STv.js";
+import { a } from "./p-Dl9cVpAY-9zAXgbCa.js";
+import { f } from "./p-Cn5YKT90-BudbUsl0.js";
 const m = { start: (t) => {
   const { controller: e } = t, { get: s, set: i } = e, { compInstance: r } = s, { lfAutoPlay: a2, lfInterval: o } = r;
   a2 && o > 0 && i.interval(setInterval((() => {
@@ -122,7 +122,7 @@ const B = class {
   }
   render() {
     const { bemClass: e, setLfStyle: s } = H(this, z, "f").theme, { lfStyle: i } = this, { carousel: a2 } = H(this, x, "f");
-    return D$1(W$1, { key: "80540b7fb5566ef47c904a27811e0f15de3b4f3e" }, i && D$1("style", { key: "07913ca7e055a83fde61905b79e923092bdb3f9e", id: H(this, W, "f") }, s(this)), D$1("div", { key: "901aef70c78f967fe0e8925f21146e3ff7453a69", id: H(this, C, "f") }, D$1("div", { key: "2ab6f3383322d90fcd4b4fb0cfe68999d24f3c87", class: e(a2._), part: H(this, E, "f").carousel, ref: (t) => {
+    return D$1(W$1, { key: "ee720e27dd3c3214eca7b0c2935648f35b25911f" }, i && D$1("style", { key: "1435cdd04f5426f55a5dd9d5f870364a2d94ec24", id: H(this, W, "f") }, s(this)), D$1("div", { key: "2c21aa5cd310aa1b50394b363839528b21334361", id: H(this, C, "f") }, D$1("div", { key: "0991911dce9ce540c9b2a9e4dab28017f4ba6ba7", class: e(a2._), part: H(this, E, "f").carousel, ref: (t) => {
       t && Y(this, M, t);
     }, role: "region" }, H(this, k, "m", D).call(this))));
   }
