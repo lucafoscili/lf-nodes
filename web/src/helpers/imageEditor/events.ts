@@ -44,6 +44,7 @@ import {
 import { registerManualApplyChange } from './manualApply';
 import { setBrush } from './settings';
 import { updateCb } from './update';
+import { extractNavigationTreeMetadata } from './tree';
 /// @ts-ignore
 import { api } from '/scripts/api.js';
 
@@ -230,8 +231,29 @@ export const createEventHandlers = ({
           switch (ogEv.detail.eventType) {
             case 'click':
               if (isTree(ogEv.detail.comp)) {
-                const { node } = ogEv.detail as LfTreeEventPayload;
-                if (node.cells?.lfCode) {
+                const treeEvent = ogEv.detail as LfTreeEventPayload & { expansion?: boolean };
+                const { node } = treeEvent;
+                const isExpansion = Boolean(treeEvent.expansion);
+                const metadata = extractNavigationTreeMetadata(node);
+
+                const hasNavigationPaths = Boolean(
+                  metadata &&
+                    !metadata.isPlaceholder &&
+                    (metadata.isRoot ||
+                      Object.values(metadata.paths ?? {}).some((value) => Boolean(value))),
+                );
+
+                if (hasNavigationPaths) {
+                  if (isExpansion) {
+                    await state.navigationTree?.handlers?.expand?.(node);
+                    return;
+                  }
+
+                  await state.navigationTree?.handlers?.select?.(node);
+                  return;
+                }
+
+                if (node?.cells?.lfCode) {
                   prepSettings(state, node);
                 }
               }

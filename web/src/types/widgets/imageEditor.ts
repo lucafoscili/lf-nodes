@@ -67,6 +67,7 @@ export interface ImageEditorState extends BaseWidgetState {
   hasAutoDirectoryLoad?: boolean;
   isSyncingDirectory?: boolean;
   lastRequestedDirectory?: string;
+  navigationTree?: ImageEditorNavigationTreeState;
   manualApply?: {
     button: HTMLLfButtonElement;
     defaultLabel: string;
@@ -85,6 +86,36 @@ export interface ImageEditorState extends BaseWidgetState {
     snapshot: () => Promise<void>;
   };
   refreshDirectory?: (directory: string) => Promise<void>;
+}
+
+export interface ImageEditorNavigationTreeMetadataPaths {
+  raw?: string;
+  relative?: string;
+  resolved?: string;
+}
+export interface ImageEditorNavigationTreeMetadata {
+  id: string;
+  name: string;
+  hasChildren: boolean;
+  imageCount?: number;
+  parentId?: string | null;
+  isRoot?: boolean;
+  paths: ImageEditorNavigationTreeMetadataPaths;
+  isPlaceholder?: boolean;
+}
+export interface ImageEditorNavigationTreeHandlers {
+  expand: (node: LfDataNode | undefined) => Promise<void> | void;
+  select: (node: LfDataNode | undefined) => Promise<void> | void;
+}
+export interface ImageEditorNavigationTreeState {
+  dataset?: LfDataDataset & { parent_id?: string };
+  prepared?: LfDataDataset & { parent_id?: string };
+  loadedNodes: Set<string>;
+  pendingNodes: Set<string>;
+  expandedNodes: Set<string>;
+  selectedNodeId?: string;
+  handlers?: ImageEditorNavigationTreeHandlers;
+  rootsLoaded?: boolean;
 }
 
 export interface PrepSettingsDeps {
