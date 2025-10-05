@@ -9,6 +9,7 @@ interface NavigationTreeState {
   dataset: LfDataDataset | null;
   loadedNodes: Set<string>;
   pendingNodes: Set<string>;
+  selectedNodeId: string | null;
 }
 
 interface NavigationMetadata {
@@ -57,17 +58,32 @@ export const createNavigationTreeManager = (
     dataset: null,
     loadedNodes: new Set(),
     pendingNodes: new Set(),
+    selectedNodeId: null,
   };
 
-  const updateTreeDataset = (dataset: LfDataDataset | null) => {
+  const updateTreeDataset = async (dataset: LfDataDataset | null) => {
     state.dataset = dataset;
+
+    // Get current expansion state before updating dataset
+    let expandedIds: string[] = [];
+    try {
+      const { navigation } = await imageviewer.getComponents();
+      if (navigation?.tree?.getExpandedNodeIds) {
+        expandedIds = await navigation.tree.getExpandedNodeIds();
+      }
+    } catch {
+      // Tree not ready yet, that's okay
+    }
+
+    // Update dataset with expansion preserved via lfExpandedNodeIds prop
     imageviewer.lfTreeProps = {
       ...imageviewer.lfTreeProps,
       lfDataset: dataset ?? { columns: dataset?.columns ?? [], nodes: [] },
+      lfExpandedNodeIds: expandedIds.length > 0 ? expandedIds : undefined,
     };
   };
 
-  const mergeChildren = (
+  const mergeChildren = async (
     parentId: string,
     children: LfDataNode[],
     columns?: LfDataDataset['columns'],
@@ -83,7 +99,7 @@ export const createNavigationTreeManager = (
       columns: columns as any,
     }) as LfDataDataset;
 
-    updateTreeDataset(merged);
+    await updateTreeDataset(merged);
     state.loadedNodes.add(parentId);
     state.pendingNodes.delete(parentId);
   };
@@ -95,7 +111,7 @@ export const createNavigationTreeManager = (
     try {
       const response = await IMAGE_API.explore('', { scope: 'roots' });
       if (response.status === LogSeverity.Success && response.data?.tree) {
-        updateTreeDataset(response.data.tree);
+        await updateTreeDataset(response.data.tree);
         state.loadedNodes.add('root');
       }
     } catch (error) {
@@ -121,13 +137,25 @@ export const createNavigationTreeManager = (
       if (response.status === LogSeverity.Success && response.data?.tree) {
         const branch = response.data.tree;
         if (Array.isArray(branch.nodes)) {
-          mergeChildren(nodeId, branch.nodes, branch.columns);
+          await mergeChildren(nodeId, branch.nodes, branch.columns);
         }
       }
     } catch (error) {
       getLfManager().log('Failed to expand node.', { error, nodeId, path }, LogSeverity.Warning);
     } finally {
       state.pendingNodes.delete(nodeId);
+    }
+  };
+
+  const syncSelection = async (nodeId: string) => {
+    try {
+      const { navigation } = await imageviewer.getComponents();
+      if (navigation?.tree) {
+        await navigation.tree.setSelectedNodes(nodeId);
+        state.selectedNodeId = nodeId;
+      }
+    } catch (error) {
+      getLfManager().log('Failed to sync tree selection.', { error, nodeId }, LogSeverity.Warning);
     }
   };
 
@@ -140,8 +168,13 @@ export const createNavigationTreeManager = (
       editorState.directoryValue ?? deriveDirectoryValue(editorState.directory) ?? '',
     );
 
+    // Update tree selection to highlight current directory
+    await syncSelection(metadata.id);
+
+    // Skip refresh if we're already at this directory (unless it's a root)
     if (targetPath === currentPath && !metadata.isRoot) return;
 
+    // Load images from this directory into the grid
     await editorState.refreshDirectory?.(targetPath);
   };
 
@@ -165,10 +198,35 @@ export const createNavigationTreeManager = (
     return new Set(expandedIds);
   };
 
+  const syncSelectionByPath = async (directoryPath: string) => {
+    if (!state.dataset) return;
+
+    const lfData = getLfData();
+    if (!lfData) return;
+
+    const normalizedPath = normalizeDirectoryRequest(directoryPath);
+
+    // Find node matching this path
+    const matchingNode = lfData.node.find(state.dataset, (node) => {
+      const metadata = extractMetadata(node);
+      if (!metadata) return false;
+      const nodePath = normalizeDirectoryRequest(getDirectoryPath(metadata));
+      return nodePath === normalizedPath;
+    });
+
+    if (matchingNode) {
+      const metadata = extractMetadata(matchingNode);
+      if (metadata) {
+        await syncSelection(metadata.id);
+      }
+    }
+  };
+
   return {
     loadRoots,
     expandNode,
     selectNode,
+    syncSelectionByPath,
     persistExpansion,
     getState: () => ({ ...state }),
   };

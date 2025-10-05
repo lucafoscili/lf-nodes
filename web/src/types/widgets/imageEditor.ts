@@ -69,6 +69,9 @@ export interface ImageEditorState extends BaseWidgetState {
   isSyncingDirectory?: boolean;
   lastRequestedDirectory?: string;
   navigationTree?: ImageEditorNavigationTreeState;
+  navigationManager?: ReturnType<
+    typeof import('../../helpers/imageEditor/navigationTree').createNavigationTreeManager
+  >;
   manualApply?: {
     button: HTMLLfButtonElement;
     defaultLabel: string;

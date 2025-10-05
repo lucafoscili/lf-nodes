@@ -40,7 +40,7 @@ const NAVIGATION_TREE_PROPS_BASE: Partial<LfTreeInterface> = {
   lfFilter: true,
   lfInitialExpansionDepth: 0,
   lfGrid: true,
-  lfSelectable: false,
+  lfSelectable: true,
 } as const;
 
 export const imageEditorFactory: ImageEditorFactory = {
@@ -171,6 +171,12 @@ export const imageEditorFactory: ImageEditorFactory = {
           imageviewer.lfDataset = dataset;
 
           await syncNavigationDirectoryControl(state, state.directoryValue);
+
+          // Sync tree selection to highlight the current directory
+          if (state.navigationManager && state.directoryValue) {
+            await state.navigationManager.syncSelectionByPath(state.directoryValue);
+          }
+
           return;
         }
 
@@ -192,6 +198,11 @@ export const imageEditorFactory: ImageEditorFactory = {
 
         imageviewer.lfDataset = dataset;
         await syncNavigationDirectoryControl(state, state.directoryValue);
+
+        // Sync tree selection to highlight the current directory
+        if (state.navigationManager && state.directoryValue) {
+          await state.navigationManager.syncSelectionByPath(state.directoryValue);
+        }
       } catch (error) {
         getLfManager().log(
           'Failed to refresh image directory.',
@@ -311,6 +322,7 @@ export const imageEditorFactory: ImageEditorFactory = {
     // Initialize navigation tree manager after state is set
     if (navigationTreeEnabled) {
       navigationManager = createNavigationTreeManager(imageviewer, state);
+      state.navigationManager = navigationManager;
 
       // Handle tree events
       imageviewer.addEventListener('lf-tree-event', async (e) => {
@@ -321,22 +333,11 @@ export const imageEditorFactory: ImageEditorFactory = {
         if (!node) return;
 
         if (expansion) {
+          // User clicked expand icon - load subdirectories
           await navigationManager.expandNode(node);
         } else {
+          // User clicked node itself - select and load images
           await navigationManager.selectNode(node);
-        }
-
-        // Persist expansion state
-        try {
-          const { navigation } = await imageviewer.getComponents();
-          if (navigation?.tree) {
-            expandedNodes = await navigationManager.persistExpansion(
-              navigation.tree,
-              Array.from(expandedNodes),
-            );
-          }
-        } catch (error) {
-          // Tree component access may fail during teardown
         }
       });
     }
