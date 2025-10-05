@@ -1,4 +1,4 @@
-import { LfDataDataset, LfDataNode, LfTreeInterface } from '@lf-widgets/foundations';
+import { LfTreeEventPayload, LfTreeInterface } from '@lf-widgets/foundations';
 import { IMAGE_API } from '../api/image';
 import { SETTINGS, TREE_DATA } from '../fixtures/imageEditor';
 import { EV_HANDLERS, getStatusColumn, setGridStatus, updateCb } from '../helpers/imageEditor';
@@ -9,11 +9,8 @@ import {
   mergeNavigationDirectory,
 } from '../helpers/imageEditor/dataset';
 import { syncNavigationDirectoryControl } from '../helpers/imageEditor/navigation';
+import { createNavigationTreeManager } from '../helpers/imageEditor/navigationTree';
 import { setBrush } from '../helpers/imageEditor/settings';
-import {
-  mergeNavigationTreeChildren,
-  prepareNavigationTreeDataset,
-} from '../helpers/imageEditor/tree';
 import { LfEventName } from '../types/events/events';
 import { LogSeverity } from '../types/manager/manager';
 import {
@@ -23,7 +20,6 @@ import {
   ImageEditorDeserializedValue,
   ImageEditorFactory,
   ImageEditorIcons,
-  ImageEditorNavigationTreeState,
   ImageEditorNormalizeCallback,
   ImageEditorState,
   ImageEditorStatus,
@@ -46,9 +42,6 @@ const NAVIGATION_TREE_PROPS_BASE: Partial<LfTreeInterface> = {
   lfGrid: true,
   lfSelectable: false,
 } as const;
-
-const shouldEnableNavigationTree = (node: { comfyClass?: string }) =>
-  node?.comfyClass === NodeName.loadAndEditImages;
 
 export const imageEditorFactory: ImageEditorFactory = {
   //#region Options
@@ -128,19 +121,9 @@ export const imageEditorFactory: ImageEditorFactory = {
     const settings = document.createElement(TagName.Div);
     const imageviewer = document.createElement(TagName.LfImageviewer);
 
-    const navigationTreeEnabled = shouldEnableNavigationTree(node);
-    const navigationTreeState: ImageEditorNavigationTreeState | undefined = navigationTreeEnabled
-      ? {
-          dataset: undefined as (LfDataDataset & { parent_id?: string }) | undefined,
-          prepared: undefined as (LfDataDataset & { parent_id?: string }) | undefined,
-          loadedNodes: new Set<string>(),
-          pendingNodes: new Set<string>(),
-          expandedNodes: new Set<string>(),
-          handlers: undefined,
-          rootsLoaded: false,
-          selectedNodeId: undefined,
-        }
-      : undefined;
+    const navigationTreeEnabled = node.comfyClass === NodeName.loadAndEditImages;
+    let navigationManager: ReturnType<typeof createNavigationTreeManager> | null = null;
+    let expandedNodes = new Set<string>();
 
     if (navigationTreeEnabled) {
       imageviewer.lfNavigationTree = {
@@ -155,211 +138,6 @@ export const imageEditorFactory: ImageEditorFactory = {
         lfDataset: { columns: [], nodes: [] },
       };
     }
-
-    const updateNavigationTreeDataset = (
-      treeDataset: (LfDataDataset & { parent_id?: string }) | null | undefined,
-      { reset }: { reset?: boolean } = {},
-    ) => {
-      if (!navigationTreeState) {
-        return;
-      }
-
-      if (reset) {
-        navigationTreeState.loadedNodes.clear();
-        navigationTreeState.pendingNodes.clear();
-        navigationTreeState.rootsLoaded = false;
-        navigationTreeState.expandedNodes.clear();
-        navigationTreeState.selectedNodeId = undefined;
-      }
-
-      if (!treeDataset) {
-        const fallbackColumns =
-          navigationTreeState.prepared?.columns ??
-          navigationTreeState.dataset?.columns ??
-          (imageviewer.lfTreeProps?.lfDataset as LfDataDataset | undefined)?.columns ??
-          [];
-
-        navigationTreeState.dataset = undefined;
-        navigationTreeState.prepared = undefined;
-
-        const previousProps = imageviewer.lfTreeProps ?? {};
-        imageviewer.lfTreeProps = {
-          ...NAVIGATION_TREE_PROPS_BASE,
-          ...previousProps,
-          lfDataset: {
-            columns: fallbackColumns,
-            nodes: [],
-          },
-        };
-        return;
-      }
-
-      const shouldMerge = Boolean(navigationTreeState.dataset) && !reset;
-      const mergedDataset =
-        shouldMerge && navigationTreeState.dataset
-          ? mergeNavigationTreeChildren(navigationTreeState.dataset, treeDataset) ??
-            navigationTreeState.dataset
-          : treeDataset;
-
-      navigationTreeState.dataset = mergedDataset ?? undefined;
-
-      const parentId = treeDataset.parent_id;
-      if (parentId) {
-        navigationTreeState.loadedNodes.add(parentId);
-        navigationTreeState.pendingNodes.delete(parentId);
-      }
-
-      if (treeDataset.parent_id === 'root') {
-        navigationTreeState.rootsLoaded = true;
-        navigationTreeState.loadedNodes.add('root');
-        navigationTreeState.pendingNodes.delete('root');
-      }
-
-      const prepared = mergedDataset ? prepareNavigationTreeDataset(mergedDataset) : undefined;
-      navigationTreeState.prepared = prepared ?? undefined;
-
-      const datasetForTree =
-        prepared ??
-        (mergedDataset
-          ? {
-              ...mergedDataset,
-              nodes: Array.isArray(mergedDataset.nodes) ? mergedDataset.nodes : [],
-            }
-          : {
-              columns: treeDataset.columns ?? [],
-              nodes: [],
-              parent_id: treeDataset.parent_id,
-            });
-
-      const previousProps = imageviewer.lfTreeProps ?? {};
-      imageviewer.lfTreeProps = {
-        ...NAVIGATION_TREE_PROPS_BASE,
-        ...previousProps,
-        lfDataset: datasetForTree,
-      };
-
-      void applyNavigationTreePersistence();
-    };
-
-    const applyNavigationTreePersistence = async (): Promise<void> => {
-      if (
-        !navigationTreeState ||
-        !navigationTreeState.expandedNodes ||
-        !imageviewer?.getComponents
-      ) {
-        return;
-      }
-
-      const shouldPersistSelection = Boolean(navigationTreeState.selectedNodeId);
-      const shouldPersistExpansion = navigationTreeState.expandedNodes.size > 0;
-
-      if (!shouldPersistSelection && !shouldPersistExpansion) {
-        return;
-      }
-
-      try {
-        const { navigation } = await imageviewer.getComponents();
-        const { tree } = navigation;
-
-        if (shouldPersistExpansion && typeof tree.setExpandedNodes === 'function') {
-          const targetIds = Array.from(navigationTreeState.expandedNodes);
-          await tree.setExpandedNodes(targetIds);
-
-          if (typeof tree.getExpandedNodeIds === 'function') {
-            const normalizedIds = await tree.getExpandedNodeIds();
-            navigationTreeState.expandedNodes.clear();
-            normalizedIds.forEach((id) => navigationTreeState.expandedNodes.add(id));
-          }
-        }
-
-        if (
-          shouldPersistSelection &&
-          navigationTreeState.selectedNodeId &&
-          typeof tree.setSelectedNodes === 'function'
-        ) {
-          await tree.setSelectedNodes(navigationTreeState.selectedNodeId);
-
-          if (typeof tree.getSelectedNodeIds === 'function') {
-            const normalizedSelectedIds = await tree.getSelectedNodeIds();
-            navigationTreeState.selectedNodeId = normalizedSelectedIds[0];
-          }
-        }
-
-        if (typeof tree.refresh === 'function') {
-          await tree.refresh();
-        }
-      } catch (error) {
-        getLfManager().log(
-          'Failed to persist navigation tree state.',
-          { error },
-          LogSeverity.Warning,
-        );
-      }
-    };
-
-    const loadNavigationTreeRoots = async () => {
-      if (!navigationTreeState || navigationTreeState.rootsLoaded) {
-        return;
-      }
-
-      navigationTreeState.pendingNodes.add('root');
-
-      try {
-        const response = await IMAGE_API.explore('', { scope: 'roots' });
-        if (response.status !== LogSeverity.Success) {
-          return;
-        }
-
-        const roots = response.data?.tree;
-        if (!roots) {
-          return;
-        }
-
-        updateNavigationTreeDataset(roots, { reset: true });
-      } catch (error) {
-        getLfManager().log('Failed to load navigation tree roots.', { error }, LogSeverity.Warning);
-      } finally {
-        navigationTreeState.pendingNodes.delete('root');
-      }
-    };
-
-    const handleNavigationTreeExpansion = async (nodeToExpand?: LfDataNode) => {
-      if (!navigationTreeEnabled || !navigationTreeState || !nodeToExpand) {
-        return;
-      }
-
-      await (async () => {
-        const handlers = EV_HANDLERS.navigation;
-        if (handlers?.expand) {
-          await handlers.expand({
-            node: nodeToExpand,
-            treeState: navigationTreeState,
-            persist: applyNavigationTreePersistence,
-            updateDataset: updateNavigationTreeDataset,
-          });
-        }
-      })();
-    };
-
-    const handleNavigationTreeSelection = async (nodeToSelect?: LfDataNode) => {
-      if (!navigationTreeEnabled || !navigationTreeState || !nodeToSelect) {
-        return;
-      }
-
-      const editorState = STATE.get(wrapper);
-
-      await (async () => {
-        const handlers = EV_HANDLERS.navigation;
-        if (handlers?.select && editorState) {
-          await handlers.select({
-            node: nodeToSelect,
-            treeState: navigationTreeState,
-            persist: applyNavigationTreePersistence,
-            editorState,
-          });
-        }
-      })();
-    };
 
     const refresh = async (directory: string) => {
       const state = STATE.get(wrapper);
@@ -457,6 +235,26 @@ export const imageEditorFactory: ImageEditorFactory = {
 
     const actionButtons: ImageEditorActionButtons = {};
 
+    const state: ImageEditorState = {
+      contextId: undefined,
+      elements: { actionButtons, controls: {}, grid, imageviewer, settings },
+      directory: undefined,
+      directoryValue: undefined,
+      filter: null,
+      filterType: null,
+      hasAutoDirectoryLoad: false,
+      isSyncingDirectory: false,
+      lastBrushSettings: JSON.parse(JSON.stringify(SETTINGS.brush.settings)),
+      lastRequestedDirectory: undefined,
+      node,
+      refreshDirectory: refresh,
+      update: {
+        preview: () => updateCb(STATE.get(wrapper)).then(() => {}),
+        snapshot: () => updateCb(STATE.get(wrapper), true).then(() => {}),
+      },
+      wrapper,
+    };
+
     switch (node.comfyClass) {
       case NodeName.imagesEditingBreakpoint:
         const actions = document.createElement(TagName.Div);
@@ -507,36 +305,41 @@ export const imageEditorFactory: ImageEditorFactory = {
 
     const options = imageEditorFactory.options(wrapper);
 
-    const state: ImageEditorState = {
-      contextId: undefined,
-      elements: { actionButtons, controls: {}, grid, imageviewer, settings },
-      directory: undefined,
-      directoryValue: undefined,
-      filter: null,
-      filterType: null,
-      hasAutoDirectoryLoad: false,
-      isSyncingDirectory: false,
-      lastBrushSettings: JSON.parse(JSON.stringify(SETTINGS.brush.settings)),
-      lastRequestedDirectory: undefined,
-      navigationTree: navigationTreeState,
-      node,
-      refreshDirectory: refresh,
-      update: {
-        preview: () => updateCb(STATE.get(wrapper)).then(() => {}),
-        snapshot: () => updateCb(STATE.get(wrapper), true).then(() => {}),
-      },
-      wrapper,
-    };
-
-    if (navigationTreeState) {
-      navigationTreeState.handlers = {
-        expand: handleNavigationTreeExpansion,
-        select: handleNavigationTreeSelection,
-      };
-    }
-
     STATE.set(wrapper, state);
     IMAGE_EDITOR_INSTANCES.add(state);
+
+    // Initialize navigation tree manager after state is set
+    if (navigationTreeEnabled) {
+      navigationManager = createNavigationTreeManager(imageviewer, state);
+
+      // Handle tree events
+      imageviewer.addEventListener('lf-tree-event', async (e) => {
+        if (!navigationManager) return;
+
+        const treeEvent = e as CustomEvent<LfTreeEventPayload>;
+        const { node, expansion } = treeEvent.detail;
+        if (!node) return;
+
+        if (expansion) {
+          await navigationManager.expandNode(node);
+        } else {
+          await navigationManager.selectNode(node);
+        }
+
+        // Persist expansion state
+        try {
+          const { navigation } = await imageviewer.getComponents();
+          if (navigation?.tree) {
+            expandedNodes = await navigationManager.persistExpansion(
+              navigation.tree,
+              Array.from(expandedNodes),
+            );
+          }
+        } catch (error) {
+          // Tree component access may fail during teardown
+        }
+      });
+    }
 
     void Promise.resolve().then(async () => {
       const currentState = STATE.get(wrapper);
@@ -544,8 +347,8 @@ export const imageEditorFactory: ImageEditorFactory = {
         return;
       }
 
-      if (navigationTreeEnabled) {
-        await loadNavigationTreeRoots();
+      if (navigationTreeEnabled && navigationManager) {
+        await navigationManager.loadRoots();
       }
 
       if (currentState.hasAutoDirectoryLoad) {

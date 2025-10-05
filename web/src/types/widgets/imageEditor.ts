@@ -102,15 +102,13 @@ export interface ImageEditorNavigationTreeMetadata {
   parentId?: string | null;
   isRoot?: boolean;
   paths: ImageEditorNavigationTreeMetadataPaths;
-  isPlaceholder?: boolean;
 }
 export interface ImageEditorNavigationTreeHandlers {
   expand: (node: LfDataNode | undefined) => Promise<void> | void;
   select: (node: LfDataNode | undefined) => Promise<void> | void;
 }
 export interface ImageEditorNavigationTreeState {
-  dataset?: LfDataDataset & { parent_id?: string };
-  prepared?: LfDataDataset & { parent_id?: string };
+  dataset?: ImageEditorDataset;
   loadedNodes: Set<string>;
   pendingNodes: Set<string>;
   expandedNodes: Set<string>;
