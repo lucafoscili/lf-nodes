@@ -248,6 +248,8 @@ export const isValidNumber = (n: number) => {
 //#endregion
 
 //#region String
+export const asString = (value: unknown): string | undefined =>
+  typeof value === 'string' ? value : undefined;
 export const capitalize = (input: string) => {
   return input
     .toLowerCase()
@@ -255,6 +257,9 @@ export const capitalize = (input: string) => {
     .map((word) => word.charAt(0).toUpperCase() + word.substring(1))
     .join(' ');
 };
+export const isString = (value: unknown): value is string => typeof value === 'string';
+export const normalizeDirectoryRequest = (value: unknown): string =>
+  typeof value === 'string' ? value : '';
 export const splitByLastSpaceBeforeAnyBracket = (input: string) => {
   const match = input.match(/\s+(.+)\[.*?\]/);
 

@@ -3,6 +3,8 @@ import {
   LfCanvasElement,
   LfCanvasEventPayload,
   LfCanvasInterface,
+  LfDataDataset,
+  LfDataNode,
   LfEvent,
   LfImageEventPayload,
   LfImageviewerEventPayload,
@@ -13,6 +15,7 @@ import {
   LfToggleEventPayload,
   LfTreeEventPayload,
 } from '@lf-widgets/foundations';
+import { IMAGE_API } from '../../api/image';
 import { SETTINGS } from '../../fixtures/imageEditor';
 import { LogSeverity } from '../../types/manager/manager';
 import {
@@ -20,6 +23,7 @@ import {
   ImageEditorBrushFilter,
   ImageEditorDataset,
   ImageEditorIcons,
+  ImageEditorNavigationTreeState,
   ImageEditorState,
 } from '../../types/widgets/imageEditor';
 import { NodeName } from '../../types/widgets/widgets';
@@ -32,10 +36,12 @@ import {
   isMasonry,
   isTree,
   LFInterruptFlags,
+  normalizeDirectoryRequest,
 } from '../../utils/common';
 import {
   applySelectionColumn,
   buildSelectionPayload,
+  deriveDirectoryValue,
   ensureDatasetContext,
   hasContextChanged,
   hasSelectionChanged,
@@ -43,8 +49,8 @@ import {
 } from './dataset';
 import { registerManualApplyChange } from './manualApply';
 import { setBrush } from './settings';
+import { extractNavigationTreeMetadata, findNodeInNavigationTree } from './tree';
 import { updateCb } from './update';
-import { extractNavigationTreeMetadata } from './tree';
 /// @ts-ignore
 import { api } from '/scripts/api.js';
 
@@ -143,6 +149,164 @@ export const createEventHandlers = ({
       );
   };
 
+  const navigationHandlers = {
+    expand: async ({
+      node,
+      treeState,
+      persist,
+      updateDataset,
+    }: {
+      node: LfDataNode;
+      treeState: ImageEditorNavigationTreeState | undefined;
+      persist: () => Promise<void> | void;
+      updateDataset: (
+        dataset: (LfDataDataset & { parent_id?: string }) | null | undefined,
+        options?: { reset?: boolean },
+      ) => void;
+    }) => {
+      if (!treeState || !node) {
+        return;
+      }
+
+      const metadata = extractNavigationTreeMetadata(node);
+      if (!metadata || metadata.isPlaceholder || !metadata.hasChildren) {
+        return;
+      }
+
+      const nodeId = metadata.id;
+      if (!nodeId) {
+        return;
+      }
+
+      const wasExpanded = treeState.expandedNodes.has(nodeId);
+      if (wasExpanded) {
+        treeState.expandedNodes.delete(nodeId);
+      } else {
+        treeState.expandedNodes.add(nodeId);
+      }
+
+      if (wasExpanded) {
+        await persist();
+        return;
+      }
+
+      if (treeState.pendingNodes.has(nodeId)) {
+        return;
+      }
+
+      if (treeState.loadedNodes.has(nodeId)) {
+        await persist();
+        return;
+      }
+
+      const expansionDirectory = normalizeDirectoryRequest(
+        metadata.paths?.resolved ?? metadata.paths?.raw ?? metadata.paths?.relative ?? '',
+      );
+      const nodePath = metadata.paths?.resolved ?? metadata.paths?.raw ?? expansionDirectory;
+
+      if (!expansionDirectory || !nodePath) {
+        return;
+      }
+
+      treeState.pendingNodes.add(nodeId);
+
+      try {
+        const response = await IMAGE_API.explore(expansionDirectory, {
+          scope: 'tree',
+          nodePath,
+        });
+
+        if (response.status !== LogSeverity.Success) {
+          return;
+        }
+
+        const branch = response.data?.tree;
+        if (!branch) {
+          treeState.loadedNodes.add(nodeId);
+          return;
+        }
+
+        updateDataset(branch, { reset: false });
+      } catch (error) {
+        getLfManager().log(
+          'Failed to expand navigation tree node.',
+          { error, nodeId, path: nodePath },
+          LogSeverity.Warning,
+        );
+      } finally {
+        treeState.pendingNodes.delete(nodeId);
+      }
+    },
+    select: async ({
+      node,
+      treeState,
+      persist,
+      editorState,
+    }: {
+      node: LfDataNode;
+      treeState: ImageEditorNavigationTreeState | undefined;
+      persist: () => Promise<void> | void;
+      editorState: ImageEditorState | undefined;
+    }) => {
+      if (!treeState || !node) {
+        return;
+      }
+
+      const metadata = extractNavigationTreeMetadata(node);
+      if (!metadata) {
+        return;
+      }
+
+      let targetMetadata = metadata;
+
+      if (metadata.isPlaceholder) {
+        const datasetToSearch = treeState.dataset ?? treeState.prepared ?? undefined;
+        const parentId = metadata.parentId;
+        if (parentId && datasetToSearch) {
+          const parentNode = findNodeInNavigationTree(
+            datasetToSearch,
+            (candidate) => extractNavigationTreeMetadata(candidate)?.id === parentId,
+          );
+          if (parentNode) {
+            const parentMetadata = extractNavigationTreeMetadata(parentNode);
+            if (parentMetadata) {
+              targetMetadata = parentMetadata;
+            }
+          }
+        }
+      }
+
+      if (!editorState) {
+        return;
+      }
+
+      treeState.selectedNodeId = targetMetadata.id ?? metadata.id ?? undefined;
+      await persist();
+
+      const targetDirectory = normalizeDirectoryRequest(
+        targetMetadata.paths?.resolved ??
+          targetMetadata.paths?.raw ??
+          targetMetadata.paths?.relative ??
+          targetMetadata.name ??
+          '',
+      );
+
+      const currentDirectory = normalizeDirectoryRequest(
+        editorState.directoryValue ??
+          deriveDirectoryValue(editorState.directory) ??
+          editorState.lastRequestedDirectory ??
+          '',
+      );
+
+      if (targetDirectory === currentDirectory && !targetMetadata.isRoot) {
+        return;
+      }
+
+      await editorState.refreshDirectory?.(targetDirectory);
+      await persist();
+    },
+  } as const;
+
   const handlers = {
     //#region Button
     button: async (state: ImageEditorState, e: CustomEvent<LfButtonEventPayload>) => {
@@ -230,31 +394,38 @@ export const createEventHandlers = ({
           const ogEv = originalEvent as LfEvent;
           switch (ogEv.detail.eventType) {
             case 'click':
+              // Check if it's a tree event
               if (isTree(ogEv.detail.comp)) {
-                const treeEvent = ogEv.detail as LfTreeEventPayload & { expansion?: boolean };
-                const { node } = treeEvent;
-                const isExpansion = Boolean(treeEvent.expansion);
-                const metadata = extractNavigationTreeMetadata(node);
+                const treeEvent = ogEv as CustomEvent<LfTreeEventPayload>;
+                const { id, node } = treeEvent.detail;
 
-                const hasNavigationPaths = Boolean(
-                  metadata &&
-                    !metadata.isPlaceholder &&
-                    (metadata.isRoot ||
-                      Object.values(metadata.paths ?? {}).some((value) => Boolean(value))),
-                );
+                switch (id) {
+                  case 'details-tree':
+                    if (node?.cells?.lfCode) {
+                      prepSettings(state, node);
+                    }
+                    break;
+                  case 'navigation-tree':
+                    const isExpansion = Boolean(treeEvent.detail.expansion);
+                    const metadata = extractNavigationTreeMetadata(node);
 
-                if (hasNavigationPaths) {
-                  if (isExpansion) {
-                    await state.navigationTree?.handlers?.expand?.(node);
-                    return;
-                  }
+                    const hasNavigationPaths = Boolean(
+                      metadata &&
+                        !metadata.isPlaceholder &&
+                        (metadata.isRoot ||
+                          Object.values(metadata.paths ?? {}).some((value) => Boolean(value))),
+                    );
 
-                  await state.navigationTree?.handlers?.select?.(node);
-                  return;
-                }
+                    if (hasNavigationPaths) {
+                      if (isExpansion) {
+                        await state.navigationTree?.handlers?.expand?.(node);
+                        return;
+                      }
 
-                if (node?.cells?.lfCode) {
-                  prepSettings(state, node);
+                      await state.navigationTree?.handlers?.select?.(node);
+                      return;
+                    }
+                    break;
                 }
               }
               break;
@@ -383,5 +554,5 @@ export const createEventHandlers = ({
     //#endregion
   } satisfies Record<string, unknown>;
 
-  return handlers;
+  return Object.assign(handlers, { navigation: navigationHandlers });
 };

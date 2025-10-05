@@ -1,6 +1,7 @@
 import {
   LfDataDataset,
   LfDataNode,
+  LfMasonryEventPayload,
   LfSliderEventPayload,
   LfTextfieldEventPayload,
   LfToggleEventPayload,
@@ -145,9 +146,15 @@ export enum ImageEditorColumnId {
   Path = 'path',
   Status = 'status',
 }
-
 export interface ImageEditorDatasetNavigation {
   directory?: ImageEditorDatasetNavigationDirectory;
+}
+export interface ImageEditorBuildSelectionPayloadParams {
+  dataset: ImageEditorDataset;
+  index: number;
+  nodes: ImageEditorDataset['nodes'];
+  selectedShape?: LfMasonryEventPayload['selectedShape'];
+  fallbackContextId?: string;
 }
 //#endregion
 
