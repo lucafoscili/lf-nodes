@@ -1132,9 +1132,11 @@ const LF_TREE_PARTS = {
 const LF_TREE_PROPS = [
   "lfAccordionLayout",
   "lfDataset",
+  "lfExpandedNodeIds",
   "lfEmpty",
   "lfFilter",
   "lfInitialExpansionDepth",
+  "lfSelectedNodeIds",
   "lfRipple",
   "lfSelectable",
   "lfStyle",
@@ -2696,6 +2698,61 @@ const cloneChildren = (children) => {
   }
   return children.map((child) => deepClone(child));
 };
+const buildNodeLookup = (dataset) => {
+  var _a;
+  const lookup = /* @__PURE__ */ new Map();
+  if (!((_a = dataset == null ? void 0 : dataset.nodes) == null ? void 0 : _a.length)) {
+    return lookup;
+  }
+  const queue = [...dataset.nodes];
+  while (queue.length > 0) {
+    const current = queue.shift();
+    if (!current) {
+      continue;
+    }
+    if (current.id != null) {
+      lookup.set(String(current.id), current);
+    }
+    if (Array.isArray(current.children) && current.children.length) {
+      queue.unshift(...current.children);
+    }
+  }
+  return lookup;
+};
+const normaliseTargetInput = (target) => {
+  if (target == null) {
+    return [];
+  }
+  return Array.isArray(target) ? target : [target];
+};
+const extractCellMetadata = (node, cellId, schema) => {
+  if (!node || typeof node !== "object" || !node.cells) {
+    return (schema == null ? void 0 : schema.nullable) ? null : void 0;
+  }
+  const cell = node.cells[cellId];
+  if (!cell || typeof cell !== "object") {
+    return (schema == null ? void 0 : schema.nullable) ? null : void 0;
+  }
+  const rawValue = cell.value;
+  if (rawValue === void 0 || rawValue === null) {
+    return (schema == null ? void 0 : schema.nullable) ? null : void 0;
+  }
+  if (!schema) {
+    return rawValue;
+  }
+  if (schema.validate && !schema.validate(rawValue)) {
+    return schema.nullable ? null : void 0;
+  }
+  const validated = rawValue;
+  if (schema.transform) {
+    try {
+      return schema.transform(validated);
+    } catch {
+      return schema.nullable ? null : void 0;
+    }
+  }
+  return validated;
+};
 const nodeDecoratePlaceholders = (dataset, options) => {
   if (!dataset) {
     return dataset;
@@ -2757,6 +2814,105 @@ const nodeMergeChildren = (dataset, options) => {
     ensurePlaceholderRecursively(parentNode, placeholder.config);
   }
   return clonedDataset;
+};
+const nodeResolveTargets = (dataset, target) => {
+  const lookup = buildNodeLookup(dataset);
+  const inputs = normaliseTargetInput(target);
+  if (!inputs.length) {
+    return { ids: [], nodes: [] };
+  }
+  const ids = [];
+  const seenIds = /* @__PURE__ */ new Set();
+  const nodesById = /* @__PURE__ */ new Map();
+  for (const entry of inputs) {
+    if (entry == null) {
+      continue;
+    }
+    let id = null;
+    let resolvedNode;
+    if (typeof entry === "string") {
+      if (!entry) {
+        continue;
+      }
+      id = entry;
+      resolvedNode = lookup.get(entry);
+    } else {
+      const candidateId = entry.id;
+      if (candidateId == null) {
+        continue;
+      }
+      id = String(candidateId);
+      resolvedNode = lookup.get(id) ?? entry;
+    }
+    if (!id) {
+      continue;
+    }
+    if (!nodesById.has(id) && resolvedNode) {
+      nodesById.set(id, resolvedNode);
+    } else if (!nodesById.has(id)) {
+      const datasetNode = lookup.get(id);
+      if (datasetNode) {
+        nodesById.set(id, datasetNode);
+      }
+    } else if (lookup.has(id)) {
+      nodesById.set(id, lookup.get(id));
+    }
+    if (!seenIds.has(id)) {
+      seenIds.add(id);
+      ids.push(id);
+    }
+  }
+  const nodes = [];
+  for (const id of ids) {
+    const resolved = nodesById.get(id) ?? lookup.get(id);
+    if (resolved) {
+      nodes.push(resolved);
+    }
+  }
+  return { ids, nodes };
+};
+const nodeSanitizeIds = (dataset, candidates, options = {}) => {
+  var _a;
+  const empty = { ids: [], nodes: [] };
+  if (!((_a = dataset == null ? void 0 : dataset.nodes) == null ? void 0 : _a.length) || !candidates) {
+    return empty;
+  }
+  const lookup = buildNodeLookup(dataset);
+  const { predicate, limit } = options;
+  const ids = [];
+  const nodes = [];
+  const seen = /* @__PURE__ */ new Set();
+  for (const entry of candidates) {
+    if (entry == null) {
+      continue;
+    }
+    let id = null;
+    let resolvedNode;
+    if (typeof entry === "string" || typeof entry === "number") {
+      id = String(entry);
+      resolvedNode = lookup.get(id);
+    } else {
+      const candidateId = entry.id;
+      if (candidateId == null) {
+        continue;
+      }
+      id = String(candidateId);
+      resolvedNode = lookup.get(id);
+    }
+    if (!id || seen.has(id) || !resolvedNode) {
+      continue;
+    }
+    if (predicate && !predicate(resolvedNode)) {
+      continue;
+    }
+    ids.push(id);
+    nodes.push(resolvedNode);
+    seen.add(id);
+    if (limit && ids.length >= limit) {
+      break;
+    }
+  }
+  return { ids, nodes };
 };
 const findNodeByCell = (dataset, targetCell) => {
   function recursive(nodes) {
@@ -3177,7 +3333,10 @@ class LfData {
       traverseVisible: (nodes, predicates) => nodeTraverseVisible(nodes, predicates),
       decoratePlaceholders: (dataset, options) => nodeDecoratePlaceholders(dataset, options),
       find: (dataset, predicate) => nodeFind(dataset, predicate),
-      mergeChildren: (dataset, options) => nodeMergeChildren(dataset, options)
+      mergeChildren: (dataset, options) => nodeMergeChildren(dataset, options),
+      resolveTargets: (dataset, target) => nodeResolveTargets(dataset, target),
+      sanitizeIds: (dataset, candidates, options) => nodeSanitizeIds(dataset, candidates, options),
+      extractCellMetadata: (node, cellId, schema) => extractCellMetadata(node, cellId, schema)
     };
   }
 }
@@ -12322,6 +12481,7 @@ class LfFramework {
     return __classPrivateFieldGet$9(this, _LfFramework_syntax, "f");
   }
   sanitizeProps(props, compName) {
+    var _a;
     const ALLOWED_ATTRS = new Set(LF_FRAMEWORK_ALLOWED_ATTRS);
     const ALLOWED_PREFIXES = new Set(LF_FRAMEWORK_ALLOWED_PREFIXES);
     const PROPS = getComponentProps();
@@ -12361,9 +12521,23 @@ class LfFramework {
     }
     if (compName) {
       return sanitized;
-    } else {
-      return sanitized;
     }
+    if (typeof process !== "undefined" && ((_a = process == null ? void 0 : process.env) == null ? void 0 : _a.NODE_ENV) !== "production") {
+      const droppedKeys = [];
+      for (const key in props) {
+        if (!Object.prototype.hasOwnProperty.call(props, key))
+          continue;
+        if (key in sanitized)
+          continue;
+        if (!key.startsWith("lf"))
+          continue;
+        droppedKeys.push(key);
+      }
+      if (droppedKeys.length) {
+        console.warn(`[lf-framework] sanitizeProps called without component name. Dropped lf-prefixed attributes: ${droppedKeys.join(", ")}. Pass the target component name as the second argument to keep them.`);
+      }
+    }
+    return sanitized;
   }
 }
 _LfFramework_LISTENERS_SETUP = /* @__PURE__ */ new WeakMap(), _LfFramework_MODULES = /* @__PURE__ */ new WeakMap(), _LfFramework_SHAPES = /* @__PURE__ */ new WeakMap(), _LfFramework_data = /* @__PURE__ */ new WeakMap(), _LfFramework_drag = /* @__PURE__ */ new WeakMap(), _LfFramework_llm = /* @__PURE__ */ new WeakMap(), _LfFramework_portal = /* @__PURE__ */ new WeakMap(), _LfFramework_syntax = /* @__PURE__ */ new WeakMap(), _LfFramework_setupListeners = /* @__PURE__ */ new WeakMap();
@@ -13633,7 +13807,7 @@ var X = false, Z = (t2, e2, n2) => {
                         const n6 = t7.i.replace(/-/g, "_"), o6 = t7.T;
                         if (!o6) return;
                         const r3 = i.get(o6);
-                        return r3 ? r3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-0acbe4cf.entry.js": () => import("./p-0acbe4cf.entry-DBRsL1m6.js"), "./p-28dd0bff.entry.js": () => import("./p-28dd0bff.entry-CQNxHDzX.js"), "./p-33abb3da.entry.js": () => import("./p-33abb3da.entry-BhthCiXa.js"), "./p-39cc0e0f.entry.js": () => import("./p-39cc0e0f.entry-CVcdJTCR.js"), "./p-3dde8514.entry.js": () => import("./p-3dde8514.entry-CG5tV8dh.js"), "./p-45c52a25.entry.js": () => import("./p-45c52a25.entry-DPg9E7eL.js"), "./p-4d8a687e.entry.js": () => import("./p-4d8a687e.entry-DGFWP29k.js"), "./p-7225e5d8.entry.js": () => import("./p-7225e5d8.entry-DyPVbdkf.js"), "./p-82a405e5.entry.js": () => import("./p-82a405e5.entry-DanERC9G.js"), "./p-88c4c8e0.entry.js": () => import("./p-88c4c8e0.entry-DXNfCb1b.js"), "./p-98bdf944.entry.js": () => import("./p-98bdf944.entry-BS3sljCp.js"), "./p-9a28c130.entry.js": () => import("./p-9a28c130.entry-T4Z-F7aY.js"), "./p-da4e8664.entry.js": () => import("./p-da4e8664.entry-DotkeHwg.js"), "./p-e2900881.entry.js": () => import("./p-e2900881.entry-Bw8nYpm8.js"), "./p-f9c5f8f8.entry.js": () => import("./p-f9c5f8f8.entry-Bq1fPjOu.js"), "./p-f9e0dfd9.entry.js": () => import("./p-f9e0dfd9.entry-FSRCWv2s.js") }), `./${o6}.entry.js`, 2).then(((t8) => (i.set(o6, t8), t8[n6])), ((t8) => {
+                        return r3 ? r3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-0acbe4cf.entry.js": () => import("./p-0acbe4cf.entry-3TwA8iCz.js"), "./p-28dd0bff.entry.js": () => import("./p-28dd0bff.entry-CZNNGvjp.js"), "./p-33abb3da.entry.js": () => import("./p-33abb3da.entry-BaLftPj8.js"), "./p-39cc0e0f.entry.js": () => import("./p-39cc0e0f.entry-HD4wIjni.js"), "./p-3dde8514.entry.js": () => import("./p-3dde8514.entry-Bnly5Ddg.js"), "./p-45c52a25.entry.js": () => import("./p-45c52a25.entry-BOFg9Ogl.js"), "./p-49b56c14.entry.js": () => import("./p-49b56c14.entry-jPHg1Xey.js"), "./p-4d8a687e.entry.js": () => import("./p-4d8a687e.entry-C3zuyrHW.js"), "./p-82a405e5.entry.js": () => import("./p-82a405e5.entry-D1c3nf_N.js"), "./p-88c4c8e0.entry.js": () => import("./p-88c4c8e0.entry-DpCHOxVN.js"), "./p-96c6ecbb.entry.js": () => import("./p-96c6ecbb.entry-Ci4hv4lW.js"), "./p-98bdf944.entry.js": () => import("./p-98bdf944.entry-B5n--JR8.js"), "./p-9a28c130.entry.js": () => import("./p-9a28c130.entry-CSiuYwLt.js"), "./p-e2900881.entry.js": () => import("./p-e2900881.entry-C7thpJv6.js"), "./p-f9c5f8f8.entry.js": () => import("./p-f9c5f8f8.entry-Dcar8qU_.js"), "./p-f9e0dfd9.entry.js": () => import("./p-f9e0dfd9.entry-CboLb4GK.js") }), `./${o6}.entry.js`, 2).then(((t8) => (i.set(o6, t8), t8[n6])), ((t8) => {
                           l(t8, e3.$hostElement$);
                         }));
                         /*!__STENCIL_STATIC_IMPORT_SWITCH__*/
@@ -13716,7 +13890,7 @@ const o = () => {
 (() => {
   const l2 = import.meta.url, f$1 = {};
   return "" !== l2 && (f$1.resourcesUrl = new URL(".", l2).href), f(f$1);
-})().then((async (e2) => (await o(), St(JSON.parse('[["p-da4e8664",[[257,"lf-imageviewer",{"lfDataset":[1040,"lf-dataset"],"lfLoadCallback":[1040,"lf-load-callback"],"lfNavigationTree":[1028,"lf-navigation-tree"],"lfStyle":[1025,"lf-style"],"lfTreeProps":[1040,"lf-tree-props"],"lfValue":[1040,"lf-value"],"debugInfo":[32],"currentShape":[32],"history":[32],"historyIndex":[32],"isSpinnerActive":[32],"isNavigationTreeOpen":[32],"addSnapshot":[64],"clearHistory":[64],"clearSelection":[64],"getComponents":[64],"getCurrentSnapshot":[64],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"reset":[64],"setSpinnerStatus":[64],"unmount":[64]},null,{"lfNavigationTree":["onLfNavigationTreeChange"]}]]],["p-9a28c130",[[257,"lf-compare",{"lfDataset":[1040,"lf-dataset"],"lfShape":[1025,"lf-shape"],"lfStyle":[1025,"lf-style"],"lfView":[1025,"lf-view"],"debugInfo":[32],"isLeftPanelOpened":[32],"isRightPanelOpened":[32],"leftShape":[32],"rightShape":[32],"shapes":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["updateShapes"],"lfShape":["updateShapes"]}]]],["p-88c4c8e0",[[257,"lf-accordion",{"lfDataset":[1040,"lf-dataset"],"lfRipple":[1028,"lf-ripple"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"expandedNodes":[32],"selectedNodes":[32],"getDebugInfo":[64],"getProps":[64],"getSelectedNodes":[64],"refresh":[64],"toggleNode":[64],"unmount":[64]}]]],["p-98bdf944",[[257,"lf-article",{"lfDataset":[1040,"lf-dataset"],"lfEmpty":[1025,"lf-empty"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-4d8a687e",[[257,"lf-carousel",{"lfDataset":[1040,"lf-dataset"],"lfAutoPlay":[4,"lf-auto-play"],"lfInterval":[2,"lf-interval"],"lfLightbox":[1540,"lf-lightbox"],"lfNavigation":[1028,"lf-navigation"],"lfShape":[1537,"lf-shape"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"currentIndex":[32],"shapes":[32],"getDebugInfo":[64],"getProps":[64],"goToSlide":[64],"nextSlide":[64],"prevSlide":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["updateShapes"],"lfShape":["updateShapes"]}]]],["p-28dd0bff",[[257,"lf-messenger",{"lfAutosave":[1028,"lf-autosave"],"lfDataset":[1040,"lf-dataset"],"lfStyle":[1025,"lf-style"],"lfValue":[16,"lf-value"],"debugInfo":[32],"chat":[32],"connectionStatus":[32],"covers":[32],"currentCharacter":[32],"formStatusMap":[32],"history":[32],"hoveredCustomizationOption":[32],"saveInProgress":[32],"ui":[32],"deleteOption":[64],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"reset":[64],"save":[64],"unmount":[64]}]]],["p-f9c5f8f8",[[257,"lf-drawer",{"lfDisplay":[1537,"lf-display"],"lfPosition":[1537,"lf-position"],"lfResponsive":[1026,"lf-responsive"],"lfStyle":[1025,"lf-style"],"lfValue":[1540,"lf-value"],"debugInfo":[32],"close":[64],"getDebugInfo":[64],"getProps":[64],"isOpened":[64],"open":[64],"refresh":[64],"toggle":[64],"unmount":[64]},[[0,"keydown","listenKeydown"]],{"lfDisplay":["onLfDisplayChange"],"lfResponsive":["onLfResponsiveChange"]}]]],["p-3dde8514",[[257,"lf-header",{"lfStyle":[1025,"lf-style"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-45c52a25",[[257,"lf-placeholder",{"lfIcon":[1,"lf-icon"],"lfProps":[16,"lf-props"],"lfStyle":[1025,"lf-style"],"lfThreshold":[2,"lf-threshold"],"lfTrigger":[1,"lf-trigger"],"lfValue":[1,"lf-value"],"debugInfo":[32],"isInViewport":[32],"getComponent":[64],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-f9e0dfd9",[[257,"lf-slider",{"lfLabel":[1025,"lf-label"],"lfLeadingLabel":[1028,"lf-leading-label"],"lfMax":[2,"lf-max"],"lfMin":[2,"lf-min"],"lfStep":[2,"lf-step"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1026,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}]]],["p-33abb3da",[[257,"lf-splash",{"lfLabel":[1025,"lf-label"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"state":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-82a405e5",[[257,"lf-toast",{"lfCloseIcon":[1025,"lf-close-icon"],"lfCloseCallback":[16,"lf-close-callback"],"lfIcon":[1025,"lf-icon"],"lfTimer":[2,"lf-timer"],"lfMessage":[1025,"lf-message"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-39cc0e0f",[[257,"lf-card",{"lfDataset":[1040,"lf-dataset"],"lfLayout":[1025,"lf-layout"],"lfSizeX":[1025,"lf-size-x"],"lfSizeY":[1025,"lf-size-y"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"debugInfo":[32],"shapes":[32],"getDebugInfo":[64],"getProps":[64],"getShapes":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["updateShapes"]}],[257,"lf-badge",{"lfImageProps":[1040,"lf-image-props"],"lfLabel":[1025,"lf-label"],"lfPosition":[1537,"lf-position"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}],[257,"lf-canvas",{"lfBrush":[1025,"lf-brush"],"lfColor":[1025,"lf-color"],"lfCursor":[1025,"lf-cursor"],"lfImageProps":[1040,"lf-image-props"],"lfOpacity":[1026,"lf-opacity"],"lfPreview":[1028,"lf-preview"],"lfStrokeTolerance":[1026,"lf-stroke-tolerance"],"lfSize":[1026,"lf-size"],"lfStyle":[1025,"lf-style"],"boxing":[32],"debugInfo":[32],"isPainting":[32],"orientation":[32],"points":[32],"clearCanvas":[64],"getCanvas":[64],"getDebugInfo":[64],"getImage":[64],"getProps":[64],"refresh":[64],"resizeCanvas":[64],"setCanvasHeight":[64],"setCanvasWidth":[64],"unmount":[64]}],[257,"lf-photoframe",{"lfOverlay":[1040,"lf-overlay"],"lfPlaceholder":[16,"lf-placeholder"],"lfStyle":[1025,"lf-style"],"lfThreshold":[2,"lf-threshold"],"lfValue":[16,"lf-value"],"debugInfo":[32],"imageOrientation":[32],"isInViewport":[32],"isReady":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}],[257,"lf-chart",{"lfAxis":[1025,"lf-axis"],"lfColors":[1040,"lf-colors"],"lfDataset":[1040,"lf-dataset"],"lfLegend":[1025,"lf-legend"],"lfSeries":[1040,"lf-series"],"lfSizeX":[1025,"lf-size-x"],"lfSizeY":[1025,"lf-size-y"],"lfStyle":[1025,"lf-style"],"lfTypes":[1040,"lf-types"],"lfXAxis":[1040,"lf-x-axis"],"lfYAxis":[1040,"lf-y-axis"],"debugInfo":[32],"themeValues":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"resize":[64],"unmount":[64]}],[257,"lf-toggle",{"lfAriaLabel":[1025,"lf-aria-label"],"lfLabel":[1025,"lf-label"],"lfLeadingLabel":[1028,"lf-leading-label"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[4,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}],[257,"lf-upload",{"lfLabel":[1025,"lf-label"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfValue":[16,"lf-value"],"debugInfo":[32],"selectedFiles":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"unmount":[64]}],[257,"lf-chat",{"lfContextWindow":[1026,"lf-context-window"],"lfEmpty":[1025,"lf-empty"],"lfEndpointUrl":[1025,"lf-endpoint-url"],"lfLayout":[1025,"lf-layout"],"lfMaxTokens":[1026,"lf-max-tokens"],"lfPollingInterval":[1026,"lf-polling-interval"],"lfSeed":[1026,"lf-seed"],"lfStyle":[1025,"lf-style"],"lfSystem":[1025,"lf-system"],"lfTemperature":[1026,"lf-temperature"],"lfTypewriterProps":[1028,"lf-typewriter-props"],"lfUiSize":[1537,"lf-ui-size"],"lfValue":[1040,"lf-value"],"currentAbortStreaming":[32],"currentPrompt":[32],"currentTokens":[32],"debugInfo":[32],"history":[32],"status":[32],"view":[32],"abortStreaming":[64],"getDebugInfo":[64],"getHistory":[64],"getLastMessage":[64],"getProps":[64],"refresh":[64],"scrollToBottom":[64],"setHistory":[64],"unmount":[64]},[[0,"keydown","listenKeydown"]],{"lfPollingInterval":["updatePollingInterval"],"lfSystem":["updateTokensCount"]}],[257,"lf-chip",{"lfAriaLabel":[1025,"lf-aria-label"],"lfDataset":[1040,"lf-dataset"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfStyling":[1025,"lf-styling"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[16,"lf-value"],"debugInfo":[32],"expandedNodes":[32],"hiddenNodes":[32],"selectedNodes":[32],"getDebugInfo":[64],"getProps":[64],"getSelectedNodes":[64],"refresh":[64],"setSelectedNodes":[64],"unmount":[64]}],[257,"lf-code",{"lfFadeIn":[1028,"lf-fade-in"],"lfFormat":[1028,"lf-format"],"lfLanguage":[1025,"lf-language"],"lfPreserveSpaces":[1028,"lf-preserve-spaces"],"lfShowCopy":[1028,"lf-show-copy"],"lfShowHeader":[1028,"lf-show-header"],"lfStickyHeader":[1028,"lf-sticky-header"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfLanguage":["loadLanguage"]}],[257,"lf-progressbar",{"lfAnimated":[1540,"lf-animated"],"lfCenteredLabel":[1540,"lf-centered-label"],"lfIcon":[1537,"lf-icon"],"lfIsRadial":[1540,"lf-is-radial"],"lfLabel":[1025,"lf-label"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1026,"lf-value"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}],[257,"lf-textfield",{"lfHelper":[1040,"lf-helper"],"lfHtmlAttributes":[1040,"lf-html-attributes"],"lfIcon":[1025,"lf-icon"],"lfLabel":[1025,"lf-label"],"lfStretchX":[1540,"lf-stretch-x"],"lfStretchY":[1540,"lf-stretch-y"],"lfStyle":[1025,"lf-style"],"lfStyling":[1025,"lf-styling"],"lfTrailingIcon":[1540,"lf-trailing-icon"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1,"lf-value"],"debugInfo":[32],"status":[32],"value":[32],"getDebugInfo":[64],"getElement":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setBlur":[64],"setFocus":[64],"setValue":[64],"unmount":[64]}],[257,"lf-typewriter",{"lfCursor":[1025,"lf-cursor"],"lfDeleteSpeed":[1026,"lf-delete-speed"],"lfLoop":[1028,"lf-loop"],"lfPause":[1026,"lf-pause"],"lfSpeed":[1026,"lf-speed"],"lfStyle":[1025,"lf-style"],"lfTag":[1025,"lf-tag"],"lfUiSize":[1537,"lf-ui-size"],"lfUpdatable":[1028,"lf-updatable"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"displayedText":[32],"isDeleting":[32],"currentTextIndex":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfValue":["handleLfValueChange"]}],[257,"lf-image",{"lfHtmlAttributes":[1040,"lf-html-attributes"],"lfMode":[1537,"lf-mode"],"lfShowSpinner":[1028,"lf-show-spinner"],"lfSizeX":[1025,"lf-size-x"],"lfSizeY":[1025,"lf-size-y"],"lfStyle":[1025,"lf-style"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"error":[32],"isLoaded":[32],"resolvedSpriteName":[32],"getDebugInfo":[64],"getImage":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfValue":["resetState"]}],[257,"lf-button",{"lfAriaLabel":[1025,"lf-aria-label"],"lfDataset":[1040,"lf-dataset"],"lfIcon":[1025,"lf-icon"],"lfIconOff":[1025,"lf-icon-off"],"lfLabel":[1025,"lf-label"],"lfRipple":[1028,"lf-ripple"],"lfShowSpinner":[1540,"lf-show-spinner"],"lfStretchX":[1540,"lf-stretch-x"],"lfStretchY":[1540,"lf-stretch-y"],"lfStyle":[1025,"lf-style"],"lfStyling":[1025,"lf-styling"],"lfToggable":[1028,"lf-toggable"],"lfTrailingIcon":[1028,"lf-trailing-icon"],"lfType":[1025,"lf-type"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[4,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setMessage":[64],"setValue":[64],"unmount":[64]}],[257,"lf-list",{"lfDataset":[1040,"lf-dataset"],"lfEmpty":[1025,"lf-empty"],"lfEnableDeletions":[1028,"lf-enable-deletions"],"lfNavigation":[1028,"lf-navigation"],"lfRipple":[1028,"lf-ripple"],"lfSelectable":[1028,"lf-selectable"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[2,"lf-value"],"debugInfo":[32],"focused":[32],"selected":[32],"focusNext":[64],"focusPrevious":[64],"getDebugInfo":[64],"getProps":[64],"getSelected":[64],"refresh":[64],"selectNode":[64],"unmount":[64]},[[0,"keydown","listenKeydown"]]],[257,"lf-spinner",{"lfActive":[1540,"lf-active"],"lfBarVariant":[1540,"lf-bar-variant"],"lfDimensions":[1025,"lf-dimensions"],"lfFader":[1540,"lf-fader"],"lfFaderTimeout":[1026,"lf-fader-timeout"],"lfFullScreen":[1540,"lf-full-screen"],"lfLayout":[1026,"lf-layout"],"lfStyle":[1025,"lf-style"],"lfTimeout":[1026,"lf-timeout"],"bigWait":[32],"debugInfo":[32],"progress":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfActive":["onFaderChange"],"lfFader":["onFaderChange"],"lfFaderTimeout":["onFaderChange"],"lfBarVariant":["lfBarVariantChanged"],"lfTimeout":["lfTimeoutChanged"]}]]],["p-0acbe4cf",[[257,"lf-masonry",{"lfActions":[1028,"lf-actions"],"lfColumns":[1026,"lf-columns"],"lfDataset":[1040,"lf-dataset"],"lfSelectable":[1540,"lf-selectable"],"lfShape":[1025,"lf-shape"],"lfStyle":[1025,"lf-style"],"lfView":[1025,"lf-view"],"debugInfo":[32],"selectedShape":[32],"shapes":[32],"viewportWidth":[32],"getDebugInfo":[64],"getProps":[64],"getSelectedShape":[64],"redecorateShapes":[64],"refresh":[64],"setSelectedShape":[64],"unmount":[64]},null,{"lfColumns":["validateColumns"],"lfDataset":["updateShapes"],"lfShape":["updateShapes"]}]]],["p-e2900881",[[257,"lf-tabbar",{"lfAriaLabel":[1025,"lf-aria-label"],"lfDataset":[16,"lf-dataset"],"lfNavigation":[4,"lf-navigation"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[8,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}]]],["p-7225e5d8",[[257,"lf-tree",{"lfAccordionLayout":[1540,"lf-accordion-layout"],"lfDataset":[1040,"lf-dataset"],"lfEmpty":[1025,"lf-empty"],"lfFilter":[1028,"lf-filter"],"lfGrid":[1540,"lf-grid"],"lfInitialExpansionDepth":[1026,"lf-initial-expansion-depth"],"lfRipple":[1028,"lf-ripple"],"lfSelectable":[1540,"lf-selectable"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"debugInfo":[32],"expandedNodes":[32],"hiddenNodes":[32],"selectedNode":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["handleDatasetChange"],"lfInitialExpansionDepth":["handleInitialDepthChange"]}]]]]'), e2))));
+})().then((async (e2) => (await o(), St(JSON.parse('[["p-49b56c14",[[257,"lf-imageviewer",{"lfDataset":[1040,"lf-dataset"],"lfLoadCallback":[1040,"lf-load-callback"],"lfNavigationTree":[1028,"lf-navigation-tree"],"lfStyle":[1025,"lf-style"],"lfTreeProps":[1040,"lf-tree-props"],"lfValue":[1040,"lf-value"],"debugInfo":[32],"currentShape":[32],"history":[32],"historyIndex":[32],"isSpinnerActive":[32],"isNavigationTreeOpen":[32],"addSnapshot":[64],"clearHistory":[64],"clearSelection":[64],"getComponents":[64],"getCurrentSnapshot":[64],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"reset":[64],"setSpinnerStatus":[64],"unmount":[64]},null,{"lfNavigationTree":["onLfNavigationTreeChange"]}]]],["p-9a28c130",[[257,"lf-compare",{"lfDataset":[1040,"lf-dataset"],"lfShape":[1025,"lf-shape"],"lfStyle":[1025,"lf-style"],"lfView":[1025,"lf-view"],"debugInfo":[32],"isLeftPanelOpened":[32],"isRightPanelOpened":[32],"leftShape":[32],"rightShape":[32],"shapes":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["updateShapes"],"lfShape":["updateShapes"]}]]],["p-88c4c8e0",[[257,"lf-accordion",{"lfDataset":[1040,"lf-dataset"],"lfRipple":[1028,"lf-ripple"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"expandedNodes":[32],"selectedNodes":[32],"getDebugInfo":[64],"getProps":[64],"getSelectedNodes":[64],"refresh":[64],"toggleNode":[64],"unmount":[64]}]]],["p-98bdf944",[[257,"lf-article",{"lfDataset":[1040,"lf-dataset"],"lfEmpty":[1025,"lf-empty"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-4d8a687e",[[257,"lf-carousel",{"lfDataset":[1040,"lf-dataset"],"lfAutoPlay":[4,"lf-auto-play"],"lfInterval":[2,"lf-interval"],"lfLightbox":[1540,"lf-lightbox"],"lfNavigation":[1028,"lf-navigation"],"lfShape":[1537,"lf-shape"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"currentIndex":[32],"shapes":[32],"getDebugInfo":[64],"getProps":[64],"goToSlide":[64],"nextSlide":[64],"prevSlide":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["updateShapes"],"lfShape":["updateShapes"]}]]],["p-28dd0bff",[[257,"lf-messenger",{"lfAutosave":[1028,"lf-autosave"],"lfDataset":[1040,"lf-dataset"],"lfStyle":[1025,"lf-style"],"lfValue":[16,"lf-value"],"debugInfo":[32],"chat":[32],"connectionStatus":[32],"covers":[32],"currentCharacter":[32],"formStatusMap":[32],"history":[32],"hoveredCustomizationOption":[32],"saveInProgress":[32],"ui":[32],"deleteOption":[64],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"reset":[64],"save":[64],"unmount":[64]}]]],["p-f9c5f8f8",[[257,"lf-drawer",{"lfDisplay":[1537,"lf-display"],"lfPosition":[1537,"lf-position"],"lfResponsive":[1026,"lf-responsive"],"lfStyle":[1025,"lf-style"],"lfValue":[1540,"lf-value"],"debugInfo":[32],"close":[64],"getDebugInfo":[64],"getProps":[64],"isOpened":[64],"open":[64],"refresh":[64],"toggle":[64],"unmount":[64]},[[0,"keydown","listenKeydown"]],{"lfDisplay":["onLfDisplayChange"],"lfResponsive":["onLfResponsiveChange"]}]]],["p-3dde8514",[[257,"lf-header",{"lfStyle":[1025,"lf-style"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-45c52a25",[[257,"lf-placeholder",{"lfIcon":[1,"lf-icon"],"lfProps":[16,"lf-props"],"lfStyle":[1025,"lf-style"],"lfThreshold":[2,"lf-threshold"],"lfTrigger":[1,"lf-trigger"],"lfValue":[1,"lf-value"],"debugInfo":[32],"isInViewport":[32],"getComponent":[64],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-f9e0dfd9",[[257,"lf-slider",{"lfLabel":[1025,"lf-label"],"lfLeadingLabel":[1028,"lf-leading-label"],"lfMax":[2,"lf-max"],"lfMin":[2,"lf-min"],"lfStep":[2,"lf-step"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1026,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}]]],["p-33abb3da",[[257,"lf-splash",{"lfLabel":[1025,"lf-label"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"state":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-82a405e5",[[257,"lf-toast",{"lfCloseIcon":[1025,"lf-close-icon"],"lfCloseCallback":[16,"lf-close-callback"],"lfIcon":[1025,"lf-icon"],"lfTimer":[2,"lf-timer"],"lfMessage":[1025,"lf-message"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-39cc0e0f",[[257,"lf-card",{"lfDataset":[1040,"lf-dataset"],"lfLayout":[1025,"lf-layout"],"lfSizeX":[1025,"lf-size-x"],"lfSizeY":[1025,"lf-size-y"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"debugInfo":[32],"shapes":[32],"getDebugInfo":[64],"getProps":[64],"getShapes":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["updateShapes"]}],[257,"lf-badge",{"lfImageProps":[1040,"lf-image-props"],"lfLabel":[1025,"lf-label"],"lfPosition":[1537,"lf-position"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}],[257,"lf-canvas",{"lfBrush":[1025,"lf-brush"],"lfColor":[1025,"lf-color"],"lfCursor":[1025,"lf-cursor"],"lfImageProps":[1040,"lf-image-props"],"lfOpacity":[1026,"lf-opacity"],"lfPreview":[1028,"lf-preview"],"lfStrokeTolerance":[1026,"lf-stroke-tolerance"],"lfSize":[1026,"lf-size"],"lfStyle":[1025,"lf-style"],"boxing":[32],"debugInfo":[32],"isPainting":[32],"orientation":[32],"points":[32],"clearCanvas":[64],"getCanvas":[64],"getDebugInfo":[64],"getImage":[64],"getProps":[64],"refresh":[64],"resizeCanvas":[64],"setCanvasHeight":[64],"setCanvasWidth":[64],"unmount":[64]}],[257,"lf-photoframe",{"lfOverlay":[1040,"lf-overlay"],"lfPlaceholder":[16,"lf-placeholder"],"lfStyle":[1025,"lf-style"],"lfThreshold":[2,"lf-threshold"],"lfValue":[16,"lf-value"],"debugInfo":[32],"imageOrientation":[32],"isInViewport":[32],"isReady":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}],[257,"lf-chart",{"lfAxis":[1025,"lf-axis"],"lfColors":[1040,"lf-colors"],"lfDataset":[1040,"lf-dataset"],"lfLegend":[1025,"lf-legend"],"lfSeries":[1040,"lf-series"],"lfSizeX":[1025,"lf-size-x"],"lfSizeY":[1025,"lf-size-y"],"lfStyle":[1025,"lf-style"],"lfTypes":[1040,"lf-types"],"lfXAxis":[1040,"lf-x-axis"],"lfYAxis":[1040,"lf-y-axis"],"debugInfo":[32],"themeValues":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"resize":[64],"unmount":[64]}],[257,"lf-toggle",{"lfAriaLabel":[1025,"lf-aria-label"],"lfLabel":[1025,"lf-label"],"lfLeadingLabel":[1028,"lf-leading-label"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[4,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}],[257,"lf-upload",{"lfLabel":[1025,"lf-label"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfValue":[16,"lf-value"],"debugInfo":[32],"selectedFiles":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"unmount":[64]}],[257,"lf-chat",{"lfContextWindow":[1026,"lf-context-window"],"lfEmpty":[1025,"lf-empty"],"lfEndpointUrl":[1025,"lf-endpoint-url"],"lfLayout":[1025,"lf-layout"],"lfMaxTokens":[1026,"lf-max-tokens"],"lfPollingInterval":[1026,"lf-polling-interval"],"lfSeed":[1026,"lf-seed"],"lfStyle":[1025,"lf-style"],"lfSystem":[1025,"lf-system"],"lfTemperature":[1026,"lf-temperature"],"lfTypewriterProps":[1028,"lf-typewriter-props"],"lfUiSize":[1537,"lf-ui-size"],"lfValue":[1040,"lf-value"],"currentAbortStreaming":[32],"currentPrompt":[32],"currentTokens":[32],"debugInfo":[32],"history":[32],"status":[32],"view":[32],"abortStreaming":[64],"getDebugInfo":[64],"getHistory":[64],"getLastMessage":[64],"getProps":[64],"refresh":[64],"scrollToBottom":[64],"setHistory":[64],"unmount":[64]},[[0,"keydown","listenKeydown"]],{"lfPollingInterval":["updatePollingInterval"],"lfSystem":["updateTokensCount"]}],[257,"lf-chip",{"lfAriaLabel":[1025,"lf-aria-label"],"lfDataset":[1040,"lf-dataset"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfStyling":[1025,"lf-styling"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[16,"lf-value"],"debugInfo":[32],"expandedNodes":[32],"hiddenNodes":[32],"selectedNodes":[32],"getDebugInfo":[64],"getProps":[64],"getSelectedNodes":[64],"refresh":[64],"setSelectedNodes":[64],"unmount":[64]}],[257,"lf-code",{"lfFadeIn":[1028,"lf-fade-in"],"lfFormat":[1028,"lf-format"],"lfLanguage":[1025,"lf-language"],"lfPreserveSpaces":[1028,"lf-preserve-spaces"],"lfShowCopy":[1028,"lf-show-copy"],"lfShowHeader":[1028,"lf-show-header"],"lfStickyHeader":[1028,"lf-sticky-header"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfLanguage":["loadLanguage"]}],[257,"lf-progressbar",{"lfAnimated":[1540,"lf-animated"],"lfCenteredLabel":[1540,"lf-centered-label"],"lfIcon":[1537,"lf-icon"],"lfIsRadial":[1540,"lf-is-radial"],"lfLabel":[1025,"lf-label"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1026,"lf-value"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}],[257,"lf-textfield",{"lfHelper":[1040,"lf-helper"],"lfHtmlAttributes":[1040,"lf-html-attributes"],"lfIcon":[1025,"lf-icon"],"lfLabel":[1025,"lf-label"],"lfStretchX":[1540,"lf-stretch-x"],"lfStretchY":[1540,"lf-stretch-y"],"lfStyle":[1025,"lf-style"],"lfStyling":[1025,"lf-styling"],"lfTrailingIcon":[1540,"lf-trailing-icon"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1,"lf-value"],"debugInfo":[32],"status":[32],"value":[32],"getDebugInfo":[64],"getElement":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setBlur":[64],"setFocus":[64],"setValue":[64],"unmount":[64]}],[257,"lf-typewriter",{"lfCursor":[1025,"lf-cursor"],"lfDeleteSpeed":[1026,"lf-delete-speed"],"lfLoop":[1028,"lf-loop"],"lfPause":[1026,"lf-pause"],"lfSpeed":[1026,"lf-speed"],"lfStyle":[1025,"lf-style"],"lfTag":[1025,"lf-tag"],"lfUiSize":[1537,"lf-ui-size"],"lfUpdatable":[1028,"lf-updatable"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"displayedText":[32],"isDeleting":[32],"currentTextIndex":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfValue":["handleLfValueChange"]}],[257,"lf-image",{"lfHtmlAttributes":[1040,"lf-html-attributes"],"lfMode":[1537,"lf-mode"],"lfShowSpinner":[1028,"lf-show-spinner"],"lfSizeX":[1025,"lf-size-x"],"lfSizeY":[1025,"lf-size-y"],"lfStyle":[1025,"lf-style"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"error":[32],"isLoaded":[32],"resolvedSpriteName":[32],"getDebugInfo":[64],"getImage":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfValue":["resetState"]}],[257,"lf-button",{"lfAriaLabel":[1025,"lf-aria-label"],"lfDataset":[1040,"lf-dataset"],"lfIcon":[1025,"lf-icon"],"lfIconOff":[1025,"lf-icon-off"],"lfLabel":[1025,"lf-label"],"lfRipple":[1028,"lf-ripple"],"lfShowSpinner":[1540,"lf-show-spinner"],"lfStretchX":[1540,"lf-stretch-x"],"lfStretchY":[1540,"lf-stretch-y"],"lfStyle":[1025,"lf-style"],"lfStyling":[1025,"lf-styling"],"lfToggable":[1028,"lf-toggable"],"lfTrailingIcon":[1028,"lf-trailing-icon"],"lfType":[1025,"lf-type"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[4,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setMessage":[64],"setValue":[64],"unmount":[64]}],[257,"lf-list",{"lfDataset":[1040,"lf-dataset"],"lfEmpty":[1025,"lf-empty"],"lfEnableDeletions":[1028,"lf-enable-deletions"],"lfNavigation":[1028,"lf-navigation"],"lfRipple":[1028,"lf-ripple"],"lfSelectable":[1028,"lf-selectable"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[2,"lf-value"],"debugInfo":[32],"focused":[32],"selected":[32],"focusNext":[64],"focusPrevious":[64],"getDebugInfo":[64],"getProps":[64],"getSelected":[64],"refresh":[64],"selectNode":[64],"unmount":[64]},[[0,"keydown","listenKeydown"]]],[257,"lf-spinner",{"lfActive":[1540,"lf-active"],"lfBarVariant":[1540,"lf-bar-variant"],"lfDimensions":[1025,"lf-dimensions"],"lfFader":[1540,"lf-fader"],"lfFaderTimeout":[1026,"lf-fader-timeout"],"lfFullScreen":[1540,"lf-full-screen"],"lfLayout":[1026,"lf-layout"],"lfStyle":[1025,"lf-style"],"lfTimeout":[1026,"lf-timeout"],"bigWait":[32],"debugInfo":[32],"progress":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfActive":["onFaderChange"],"lfFader":["onFaderChange"],"lfFaderTimeout":["onFaderChange"],"lfBarVariant":["lfBarVariantChanged"],"lfTimeout":["lfTimeoutChanged"]}]]],["p-0acbe4cf",[[257,"lf-masonry",{"lfActions":[1028,"lf-actions"],"lfColumns":[1026,"lf-columns"],"lfDataset":[1040,"lf-dataset"],"lfSelectable":[1540,"lf-selectable"],"lfShape":[1025,"lf-shape"],"lfStyle":[1025,"lf-style"],"lfView":[1025,"lf-view"],"debugInfo":[32],"selectedShape":[32],"shapes":[32],"viewportWidth":[32],"getDebugInfo":[64],"getProps":[64],"getSelectedShape":[64],"redecorateShapes":[64],"refresh":[64],"setSelectedShape":[64],"unmount":[64]},null,{"lfColumns":["validateColumns"],"lfDataset":["updateShapes"],"lfShape":["updateShapes"]}]]],["p-e2900881",[[257,"lf-tabbar",{"lfAriaLabel":[1025,"lf-aria-label"],"lfDataset":[16,"lf-dataset"],"lfNavigation":[4,"lf-navigation"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[8,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}]]],["p-96c6ecbb",[[257,"lf-tree",{"lfAccordionLayout":[1540,"lf-accordion-layout"],"lfDataset":[1040,"lf-dataset"],"lfEmpty":[1025,"lf-empty"],"lfExpandedNodeIds":[1040,"lf-expanded-node-ids"],"lfFilter":[1028,"lf-filter"],"lfGrid":[1540,"lf-grid"],"lfInitialExpansionDepth":[1026,"lf-initial-expansion-depth"],"lfSelectedNodeIds":[1040,"lf-selected-node-ids"],"lfRipple":[1028,"lf-ripple"],"lfSelectable":[1540,"lf-selectable"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"debugInfo":[32],"expandedNodes":[32],"hiddenNodes":[32],"selectedNode":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"getExpandedNodeIds":[64],"getSelectedNodeIds":[64],"setExpandedNodes":[64],"setSelectedNodes":[64],"selectByPredicate":[64],"unmount":[64]},null,{"lfDataset":["handleDatasetChange"],"lfExpandedNodeIds":["handleExpandedPropChange"],"lfSelectedNodeIds":["handleSelectedPropChange"],"lfInitialExpansionDepth":["handleInitialDepthChange"],"lfSelectable":["handleSelectableChange"],"lfFilter":["handleFilterToggle"]}]]]]'), e2))));
 var APIEndpoints;
 (function(APIEndpoints2) {
   APIEndpoints2["ClearAnalytics"] = "/lf-nodes/clear-analytics";
@@ -14994,41 +15168,61 @@ function installLFBeforeFreeHooks(api2, opts = {}) {
   const fetchPatched = installFetchFallback();
   return { freeMemoryHook: freePatched, fetchFallbackHook: fetchPatched };
 }
-const isString = (value) => typeof value === "string";
-const asString = (value) => typeof value === "string" ? value : void 0;
-const getImageNode = (nodes, index) => {
-  if (!Array.isArray(nodes) || index < 0 || index >= nodes.length) {
-    return void 0;
-  }
-  const candidate = nodes[index];
-  return candidate && typeof candidate === "object" ? candidate : void 0;
-};
-const getImageCell = (node) => {
-  if (!node || typeof node !== "object") {
-    return void 0;
-  }
-  const cells = node.cells ?? {};
-  const imageCell = (cells == null ? void 0 : cells.lfImage) ?? {};
-  return imageCell;
-};
 const applySelectionColumn = (dataset, selection) => {
-  const nextColumns = Array.isArray(dataset == null ? void 0 : dataset.columns) ? [...dataset.columns] : [];
-  const selectedColumnIndex = nextColumns.findIndex((column) => (column == null ? void 0 : column.id) === "selected");
-  const selectionColumn = selectedColumnIndex >= 0 ? nextColumns[selectedColumnIndex] : { id: "selected" };
-  const coercedSelectionColumn = {
-    ...selectionColumn,
+  var _a, _b, _c;
+  const lfData = (_c = (_b = (_a = getLfManager()) == null ? void 0 : _a.getManagers()) == null ? void 0 : _b.lfFramework) == null ? void 0 : _c.data;
+  const existingColumns = Array.isArray(dataset == null ? void 0 : dataset.columns) ? dataset.columns : [];
+  const [existingSelectionColumn] = lfData ? lfData.column.find(existingColumns, { id: "selected" }) : [];
+  const updatedSelectionColumn = {
+    ...existingSelectionColumn ?? { id: "selected" },
     title: selection
   };
-  if (selectedColumnIndex >= 0) {
-    nextColumns[selectedColumnIndex] = coercedSelectionColumn;
-  } else {
-    nextColumns.push(coercedSelectionColumn);
-  }
+  const nextColumns = existingSelectionColumn ? existingColumns.map((col) => col.id === "selected" ? updatedSelectionColumn : col) : [...existingColumns, updatedSelectionColumn];
   return {
     ...dataset,
     columns: nextColumns,
     selection
   };
+};
+const buildSelectionPayload = ({ dataset, index, nodes, selectedShape, fallbackContextId }) => {
+  var _a, _b;
+  const resolvedContextId = dataset.context_id ?? ((_a = dataset.selection) == null ? void 0 : _a.context_id) ?? fallbackContextId;
+  const selection = {
+    index,
+    context_id: resolvedContextId
+  };
+  const derivedName = deriveSelectionName(selectedShape);
+  if (derivedName) {
+    selection.name = derivedName;
+  }
+  const selectedNode = Array.isArray(nodes) && index >= 0 && index < nodes.length && nodes[index] ? nodes[index] : void 0;
+  if (selectedNode && typeof selectedNode === "object") {
+    const nodeId = asString(selectedNode.id);
+    if (nodeId) {
+      selection.node_id = nodeId;
+    }
+    const imageCell = (_b = selectedNode.cells) == null ? void 0 : _b.lfImage;
+    const imageValue = asString(imageCell == null ? void 0 : imageCell.value) ?? asString(imageCell == null ? void 0 : imageCell.lfValue);
+    if (imageValue) {
+      selection.url = imageValue;
+    }
+  }
+  return { selection, contextId: resolvedContextId };
+};
+const deriveDirectoryValue = (directory) => {
+  if (!directory) {
+    return void 0;
+  }
+  if (isString(directory.raw)) {
+    return directory.raw;
+  }
+  if (isString(directory.relative)) {
+    return directory.relative;
+  }
+  if (isString(directory.resolved)) {
+    return directory.resolved;
+  }
+  return void 0;
 };
 const deriveSelectionName = (selectedShape) => {
   if (!selectedShape) {
@@ -15041,66 +15235,6 @@ const deriveSelectionName = (selectedShape) => {
   const shapeValue = asString(shape == null ? void 0 : shape.value);
   const lfValue = asString(shape == null ? void 0 : shape.lfValue);
   return htmlTitle ?? htmlId ?? shapeValue ?? lfValue ?? void 0;
-};
-const resolveSelectionIndex = (selectedShape, nodes) => {
-  var _a;
-  if (typeof (selectedShape == null ? void 0 : selectedShape.index) === "number") {
-    return selectedShape.index;
-  }
-  if (!Array.isArray(nodes)) {
-    return void 0;
-  }
-  const shape = selectedShape == null ? void 0 : selectedShape.shape;
-  const shapeId = asString((_a = shape == null ? void 0 : shape.htmlProps) == null ? void 0 : _a["id"]);
-  const shapeValue = asString(shape == null ? void 0 : shape.value) ?? asString(shape == null ? void 0 : shape.lfValue);
-  const resolvedIndex = nodes.findIndex((node) => {
-    var _a2;
-    const imageCell = getImageCell(node);
-    if (!imageCell) {
-      return false;
-    }
-    const cellId = asString((_a2 = imageCell.htmlProps) == null ? void 0 : _a2["id"]);
-    const cellValue = asString(imageCell.value) ?? asString(imageCell.lfValue);
-    if (shapeId && cellId === shapeId) {
-      return true;
-    }
-    if (shapeValue && cellValue === shapeValue) {
-      return true;
-    }
-    return false;
-  });
-  return resolvedIndex >= 0 ? resolvedIndex : void 0;
-};
-const buildSelectionPayload = ({ dataset, index, nodes, selectedShape, fallbackContextId }) => {
-  var _a;
-  const resolvedContextId = dataset.context_id ?? ((_a = dataset.selection) == null ? void 0 : _a.context_id) ?? fallbackContextId;
-  const selection = {
-    index,
-    context_id: resolvedContextId
-  };
-  const derivedName = deriveSelectionName(selectedShape);
-  if (derivedName) {
-    selection.name = derivedName;
-  }
-  const selectedNode = getImageNode(nodes, index);
-  if (selectedNode) {
-    const nodeId = asString(selectedNode.id);
-    if (nodeId) {
-      selection.node_id = nodeId;
-    }
-    const imageCell = getImageCell(selectedNode);
-    const imageValue = asString(imageCell == null ? void 0 : imageCell.value) ?? asString(imageCell == null ? void 0 : imageCell.lfValue);
-    if (imageValue) {
-      selection.url = imageValue;
-    }
-  }
-  return { selection, contextId: resolvedContextId };
-};
-const hasSelectionChanged = (previousSelection, nextSelection) => {
-  return JSON.stringify(previousSelection ?? null) !== JSON.stringify(nextSelection ?? null);
-};
-const hasContextChanged = (previousContextId, nextContextId) => {
-  return previousContextId !== nextContextId;
 };
 const ensureDatasetContext = (dataset, state) => {
   if (!dataset) {
@@ -15140,6 +15274,12 @@ const getNavigationDirectory = (dataset) => {
   var _a;
   return (_a = dataset == null ? void 0 : dataset.navigation) == null ? void 0 : _a.directory;
 };
+const hasContextChanged = (previousContextId, nextContextId) => {
+  return previousContextId !== nextContextId;
+};
+const hasSelectionChanged = (previousSelection, nextSelection) => {
+  return JSON.stringify(previousSelection ?? null) !== JSON.stringify(nextSelection ?? null);
+};
 const mergeNavigationDirectory = (dataset, directory) => {
   var _a;
   const current = ((_a = dataset.navigation) == null ? void 0 : _a.directory) ?? {};
@@ -15151,20 +15291,37 @@ const mergeNavigationDirectory = (dataset, directory) => {
   dataset.navigation.directory = next;
   return next;
 };
-const deriveDirectoryValue = (directory) => {
-  if (!directory) {
+const resolveSelectionIndex = (selectedShape, nodes) => {
+  var _a;
+  if (typeof (selectedShape == null ? void 0 : selectedShape.index) === "number") {
+    return selectedShape.index;
+  }
+  if (!Array.isArray(nodes)) {
     return void 0;
   }
-  if (isString(directory.raw)) {
-    return directory.raw;
-  }
-  if (isString(directory.relative)) {
-    return directory.relative;
-  }
-  if (isString(directory.resolved)) {
-    return directory.resolved;
-  }
-  return void 0;
+  const shape = selectedShape == null ? void 0 : selectedShape.shape;
+  const shapeId = asString((_a = shape == null ? void 0 : shape.htmlProps) == null ? void 0 : _a["id"]);
+  const shapeValue = asString(shape == null ? void 0 : shape.value) ?? asString(shape == null ? void 0 : shape.lfValue);
+  const resolvedIndex = nodes.findIndex((node) => {
+    var _a2, _b;
+    if (!node || typeof node !== "object") {
+      return false;
+    }
+    const imageCell = (_a2 = node.cells) == null ? void 0 : _a2.lfImage;
+    if (!imageCell) {
+      return false;
+    }
+    const cellId = asString((_b = imageCell.htmlProps) == null ? void 0 : _b["id"]);
+    const cellValue = asString(imageCell.value) ?? asString(imageCell.lfValue);
+    if (shapeId && cellId === shapeId) {
+      return true;
+    }
+    if (shapeValue && cellValue === shapeValue) {
+      return true;
+    }
+    return false;
+  });
+  return resolvedIndex >= 0 ? resolvedIndex : void 0;
 };
 const MANUAL_APPLY_PROCESSING_LABEL = "Applying…";
 const hasManualApplyPendingChanges = (state) => {
@@ -15254,7 +15411,7 @@ const apiCall$2 = async (state, addSnapshot) => {
   };
   const contextDataset = imageviewer.lfDataset;
   const contextId = ensureDatasetContext(contextDataset, state);
-  if (!contextId) {
+  if (!contextId && filterType === "inpaint") {
     lfManager2.log("Missing editing context. Run the workflow to register an editing session before using inpaint.", { dataset: contextDataset }, LogSeverity.Warning);
     if ((_a = state.manualApply) == null ? void 0 : _a.isProcessing) {
       resolveManualApplyRequest(state, false);
@@ -17074,6 +17231,9 @@ const createPrepSettings = (deps) => {
     });
     const { elements, filter } = state;
     const { settings } = elements;
+    if (!(filter == null ? void 0 : filter.configs)) {
+      return;
+    }
     settings.innerHTML = "";
     const controlsContainer = document.createElement(TagName.Div);
     controlsContainer.classList.add(ImageEditorCSS.SettingsControls);
@@ -17279,147 +17439,6 @@ const applyFilterDefaults = (state, defaults) => {
     });
   });
 };
-const NAVIGATION_TREE_PLACEHOLDER_SUFFIX = "__lf_placeholder";
-const getLfData = () => {
-  var _a, _b, _c;
-  const lfData = (_c = (_b = (_a = getLfManager()) == null ? void 0 : _a.getManagers()) == null ? void 0 : _b.lfFramework) == null ? void 0 : _c.data;
-  if (!lfData) {
-    throw new Error("LF Framework data module is unavailable.");
-  }
-  return lfData;
-};
-const createPlaceholderNode = (parent) => {
-  const parentMetadata = extractNavigationTreeMetadata(parent);
-  const parentId = (parentMetadata == null ? void 0 : parentMetadata.id) ?? String(parent.id ?? "");
-  const placeholderId = `${parentId}${NAVIGATION_TREE_PLACEHOLDER_SUFFIX}`;
-  const metadata = {
-    id: placeholderId,
-    name: "Loading…",
-    hasChildren: false,
-    parentId,
-    paths: (parentMetadata == null ? void 0 : parentMetadata.paths) ?? {},
-    isPlaceholder: true,
-    imageCount: void 0,
-    isRoot: false
-  };
-  return {
-    id: placeholderId,
-    value: "Loading…",
-    cells: {
-      name: {
-        shape: "text",
-        value: "Loading…"
-      },
-      items: {
-        shape: "text",
-        value: ""
-      },
-      type: {
-        shape: "text",
-        value: ""
-      },
-      lfCode: {
-        shape: "code",
-        value: JSON.stringify({ ...metadata, isPlaceholder: true })
-      }
-    },
-    children: []
-  };
-};
-const isPlaceholderNode = (node) => {
-  if (!node) {
-    return false;
-  }
-  if (typeof node.id === "string" && node.id.endsWith(NAVIGATION_TREE_PLACEHOLDER_SUFFIX)) {
-    return true;
-  }
-  const metadata = extractNavigationTreeMetadata(node);
-  if (!metadata) {
-    return false;
-  }
-  if (metadata.isPlaceholder) {
-    return true;
-  }
-  if (metadata.name !== "Loading…") {
-    return false;
-  }
-  const pathValues = Object.values(metadata.paths ?? {}).filter(Boolean);
-  return pathValues.length === 0;
-};
-const NAVIGATION_TREE_PLACEHOLDER_CONFIG = {
-  create: ({ parent }) => createPlaceholderNode(parent),
-  isPlaceholder: (node) => isPlaceholderNode(node),
-  shouldDecorate: (node) => {
-    const metadata = extractNavigationTreeMetadata(node);
-    if (metadata == null ? void 0 : metadata.isPlaceholder) {
-      return false;
-    }
-    if (metadata && metadata.hasChildren !== void 0) {
-      return metadata.hasChildren;
-    }
-    return node.hasChildren === true;
-  }
-};
-const extractNavigationTreeMetadata = (node) => {
-  var _a, _b;
-  if (!node) {
-    return void 0;
-  }
-  const rawValue = (_b = (_a = node.cells) == null ? void 0 : _a.lfCode) == null ? void 0 : _b.value;
-  if (typeof rawValue !== "string") {
-    return void 0;
-  }
-  try {
-    const parsed = JSON.parse(rawValue);
-    if (!parsed || typeof parsed !== "object") {
-      return void 0;
-    }
-    return {
-      id: parsed.id ?? String(node.id ?? ""),
-      name: parsed.name ?? String(node.value ?? ""),
-      hasChildren: Boolean(parsed.hasChildren),
-      imageCount: parsed.imageCount,
-      parentId: parsed.parentId ?? null,
-      isRoot: Boolean(parsed.isRoot),
-      paths: parsed.paths ?? {},
-      isPlaceholder: Boolean(parsed.isPlaceholder)
-    };
-  } catch (error2) {
-    return void 0;
-  }
-};
-const prepareNavigationTreeDataset = (dataset) => {
-  if (!dataset) {
-    return dataset;
-  }
-  return getLfData().node.decoratePlaceholders(dataset, NAVIGATION_TREE_PLACEHOLDER_CONFIG);
-};
-const mergeNavigationTreeChildren = (dataset, branch) => {
-  if (!dataset || !branch) {
-    return dataset;
-  }
-  const parentId = branch.parent_id;
-  if (!parentId) {
-    return dataset;
-  }
-  const merged = getLfData().node.mergeChildren(dataset, {
-    parentId,
-    children: Array.isArray(branch.nodes) ? branch.nodes : void 0,
-    columns: branch.columns,
-    placeholder: {
-      removeExisting: true,
-      reapply: true,
-      config: NAVIGATION_TREE_PLACEHOLDER_CONFIG
-    }
-  });
-  return merged;
-};
-const findNodeInNavigationTree = (dataset, predicate) => {
-  if (!dataset || !Array.isArray(dataset.nodes) || typeof predicate !== "function") {
-    return void 0;
-  }
-  return getLfData().node.find(dataset, predicate);
-};
 const createEventHandlers = ({ handleInterruptForState: handleInterruptForState2, prepSettings: prepSettings2 }) => {
   const syncSelectionWithDataset = async (state, masonryEvent) => {
     const { elements } = state;
@@ -17543,33 +17562,36 @@ const createEventHandlers = ({ handleInterruptForState: handleInterruptForState2
     //#endregion
     //#region Imageviewer
     imageviewer: async (state, e2) => {
-      var _a, _b, _c, _d, _e, _f, _g;
+      var _a;
       const { comp, eventType, originalEvent } = e2.detail;
       const { node } = state;
       switch (eventType) {
         case "lf-event": {
           const ogEv = originalEvent;
-          switch (ogEv.detail.eventType) {
-            case "click":
-              if (isTree(ogEv.detail.comp)) {
-                const treeEvent = ogEv.detail;
-                const { node: node2 } = treeEvent;
-                const isExpansion = Boolean(treeEvent.expansion);
-                const metadata = extractNavigationTreeMetadata(node2);
-                const hasNavigationPaths = Boolean(metadata && !metadata.isPlaceholder && (metadata.isRoot || Object.values(metadata.paths ?? {}).some((value) => Boolean(value))));
-                if (hasNavigationPaths) {
-                  if (isExpansion) {
-                    await ((_c = (_b = (_a = state.navigationTree) == null ? void 0 : _a.handlers) == null ? void 0 : _b.expand) == null ? void 0 : _c.call(_b, node2));
-                    return;
+          if (isTree(ogEv.detail.comp)) {
+            const treeEvent = ogEv;
+            const { id, node: treeNode, eventType: eventType2 } = treeEvent.detail;
+            switch (id) {
+              case "details-tree":
+                if (((_a = treeNode == null ? void 0 : treeNode.cells) == null ? void 0 : _a.lfCode) && eventType2 === "click") {
+                  prepSettings2(state, treeNode);
+                }
+                break;
+              case "navigation-tree":
+                if (!treeNode || !state.navigationManager) {
+                  break;
+                }
+                if (eventType2 === "click") {
+                  const hasChildren = treeNode.children && treeNode.children.length > 0;
+                  if (!hasChildren) {
+                    await state.navigationManager.expandNode(treeNode);
                   }
-                  await ((_f = (_e = (_d = state.navigationTree) == null ? void 0 : _d.handlers) == null ? void 0 : _e.select) == null ? void 0 : _f.call(_e, node2));
-                  return;
+                  await state.navigationManager.selectNode(treeNode);
                 }
-                if ((_g = node2 == null ? void 0 : node2.cells) == null ? void 0 : _g.lfCode) {
-                  prepSettings2(state, node2);
-                }
-              }
-              break;
+                break;
+            }
+          }
+          switch (ogEv.detail.eventType) {
             case "lf-event":
               const masonryEvent = ogEv;
               const isMasonryEvent = isMasonry(ogEv.detail.comp);
@@ -17763,41 +17785,194 @@ const EV_HANDLERS$a = createEventHandlers({
 handlerRefs.slider = EV_HANDLERS$a.slider;
 handlerRefs.textfield = EV_HANDLERS$a.textfield;
 handlerRefs.toggle = EV_HANDLERS$a.toggle;
-const STATE$h = /* @__PURE__ */ new WeakMap();
-const IMAGE_EDITOR_INSTANCES = /* @__PURE__ */ new Set();
-const NAVIGATION_TREE_PROPS_BASE = {
-  lfAccordionLayout: true,
-  lfFilter: true,
-  lfInitialExpansionDepth: 0,
-  lfGrid: true,
-  lfSelectable: false
-};
-const shouldEnableNavigationTree = (node) => (node == null ? void 0 : node.comfyClass) === NodeName.loadAndEditImages;
-const normalizeDirectoryRequest = (value) => typeof value === "string" ? value : "";
 const syncNavigationDirectoryControl = async (state, directoryValue) => {
-  var _a;
   const { imageviewer } = state.elements;
-  if (!(imageviewer == null ? void 0 : imageviewer.getComponents)) {
+  const { navigation } = await imageviewer.getComponents();
+  const { textfield } = navigation;
+  const current = await textfield.getValue();
+  const target = normalizeDirectoryRequest(directoryValue);
+  if ((current ?? "") === target) {
     return;
   }
-  const targetValue = normalizeDirectoryRequest(directoryValue);
   try {
-    const components = await imageviewer.getComponents();
-    const textfield = (_a = components == null ? void 0 : components.navigation) == null ? void 0 : _a.textfield;
-    if (!textfield || typeof textfield.setValue !== "function") {
-      return;
-    }
-    const currentValue = typeof textfield.getValue === "function" ? await textfield.getValue() : void 0;
-    if ((currentValue ?? "") === targetValue) {
-      return;
-    }
     state.isSyncingDirectory = true;
-    await textfield.setValue(targetValue);
+    await textfield.setValue(target);
   } catch (error2) {
     getLfManager().log("Failed to synchronize directory input.", { error: error2 }, LogSeverity.Warning);
   } finally {
     state.isSyncingDirectory = false;
   }
+};
+const getLfData = () => {
+  var _a, _b, _c;
+  return (_c = (_b = (_a = getLfManager()) == null ? void 0 : _a.getManagers()) == null ? void 0 : _b.lfFramework) == null ? void 0 : _c.data;
+};
+const extractMetadata = (node) => {
+  const lfData = getLfData();
+  if (!lfData)
+    return null;
+  const metadata = lfData.node.extractCellMetadata(node, "lfCode", {
+    validate: (val) => {
+      if (typeof val === "string") {
+        try {
+          val = JSON.parse(val);
+        } catch {
+          return false;
+        }
+      }
+      if (typeof val !== "object" || val === null)
+        return false;
+      return "id" in val || "name" in val || "paths" in val;
+    },
+    transform: (val) => {
+      let parsed = val;
+      if (typeof val === "string") {
+        try {
+          parsed = JSON.parse(val);
+        } catch {
+          parsed = val;
+        }
+      }
+      return {
+        id: parsed.id ?? String(node.id ?? ""),
+        name: parsed.name ?? String(node.value ?? ""),
+        hasChildren: Boolean(parsed.hasChildren),
+        paths: parsed.paths ?? {},
+        isRoot: parsed.isRoot
+      };
+    }
+  });
+  return metadata ?? null;
+};
+const getDirectoryPath = (metadata) => {
+  return metadata.paths.resolved ?? metadata.paths.raw ?? metadata.paths.relative ?? metadata.name ?? "";
+};
+const createNavigationTreeManager = (imageviewer, editorState) => {
+  const state = {
+    dataset: null,
+    loadedNodes: /* @__PURE__ */ new Set(),
+    pendingNodes: /* @__PURE__ */ new Set()
+  };
+  const updateTreeDataset = async (dataset) => {
+    state.dataset = dataset;
+    imageviewer.lfTreeProps = {
+      ...imageviewer.lfTreeProps,
+      lfDataset: dataset ?? { columns: (dataset == null ? void 0 : dataset.columns) ?? [], nodes: [] }
+    };
+  };
+  const mergeChildren = async (parentId, children, columns) => {
+    if (!state.dataset)
+      return;
+    const lfData = getLfData();
+    if (!lfData)
+      return;
+    const merged = lfData.node.mergeChildren(state.dataset, {
+      parentId,
+      children,
+      columns
+    });
+    await updateTreeDataset(merged);
+    state.loadedNodes.add(parentId);
+    state.pendingNodes.delete(parentId);
+  };
+  const loadRoots = async () => {
+    var _a;
+    if (state.loadedNodes.has("root"))
+      return;
+    state.pendingNodes.add("root");
+    try {
+      const response = await IMAGE_API.explore("", { scope: "roots" });
+      if (response.status === LogSeverity.Success && ((_a = response.data) == null ? void 0 : _a.tree)) {
+        await updateTreeDataset(response.data.tree);
+        state.loadedNodes.add("root");
+      }
+    } catch (error2) {
+      getLfManager().log("Failed to load navigation roots.", { error: error2 }, LogSeverity.Warning);
+    } finally {
+      state.pendingNodes.delete("root");
+    }
+  };
+  const expandNode = async (node) => {
+    var _a;
+    const metadata = extractMetadata(node);
+    if (!(metadata == null ? void 0 : metadata.hasChildren))
+      return;
+    const nodeId = metadata.id;
+    if (state.loadedNodes.has(nodeId) || state.pendingNodes.has(nodeId))
+      return;
+    const path = normalizeDirectoryRequest(getDirectoryPath(metadata));
+    if (!path)
+      return;
+    state.pendingNodes.add(nodeId);
+    try {
+      const response = await IMAGE_API.explore(path, { scope: "tree", nodePath: path });
+      if (response.status === LogSeverity.Success && ((_a = response.data) == null ? void 0 : _a.tree)) {
+        const branch = response.data.tree;
+        if (Array.isArray(branch.nodes)) {
+          await mergeChildren(nodeId, branch.nodes, branch.columns);
+        }
+      }
+    } catch (error2) {
+      getLfManager().log("Failed to expand node.", { error: error2, nodeId, path }, LogSeverity.Warning);
+    } finally {
+      state.pendingNodes.delete(nodeId);
+    }
+  };
+  const syncSelection = async (nodeId) => {
+    try {
+      const { navigation } = await imageviewer.getComponents();
+      if (navigation == null ? void 0 : navigation.tree) {
+        await navigation.tree.setSelectedNodes(nodeId);
+      }
+    } catch (error2) {
+      getLfManager().log("Failed to sync tree selection.", { error: error2, nodeId }, LogSeverity.Warning);
+    }
+  };
+  const selectNode = async (node) => {
+    var _a;
+    const metadata = extractMetadata(node);
+    if (!metadata)
+      return;
+    const targetPath = normalizeDirectoryRequest(getDirectoryPath(metadata));
+    const currentPath = normalizeDirectoryRequest(editorState.directoryValue ?? deriveDirectoryValue(editorState.directory) ?? "");
+    await syncSelection(metadata.id);
+    if (targetPath === currentPath && !metadata.isRoot)
+      return;
+    await ((_a = editorState.refreshDirectory) == null ? void 0 : _a.call(editorState, targetPath));
+  };
+  const syncSelectionByPath = async (directoryPath) => {
+    const normalizedPath = normalizeDirectoryRequest(directoryPath);
+    try {
+      const { navigation } = await imageviewer.getComponents();
+      if (!(navigation == null ? void 0 : navigation.tree))
+        return;
+      await navigation.tree.selectByPredicate((node) => {
+        const metadata = extractMetadata(node);
+        if (!metadata)
+          return false;
+        const nodePath = normalizeDirectoryRequest(getDirectoryPath(metadata));
+        return nodePath === normalizedPath;
+      });
+    } catch (error2) {
+      getLfManager().log("Failed to sync selection by path.", { error: error2, path: directoryPath }, LogSeverity.Warning);
+    }
+  };
+  return {
+    loadRoots,
+    expandNode,
+    selectNode,
+    syncSelectionByPath,
+    getState: () => ({ ...state })
+  };
+};
+const IMAGE_EDITOR_INSTANCES = /* @__PURE__ */ new Set();
+const STATE$h = /* @__PURE__ */ new WeakMap();
+const NAVIGATION_TREE_PROPS_BASE = {
+  lfAccordionLayout: true,
+  lfFilter: true,
+  lfInitialExpansionDepth: 0,
+  lfGrid: true,
+  lfSelectable: true
 };
 const imageEditorFactory = {
   //#region Options
@@ -17855,17 +18030,8 @@ const imageEditorFactory = {
     const grid = document.createElement(TagName.Div);
     const settings = document.createElement(TagName.Div);
     const imageviewer = document.createElement(TagName.LfImageviewer);
-    const navigationTreeEnabled = shouldEnableNavigationTree(node);
-    const navigationTreeState = navigationTreeEnabled ? {
-      dataset: void 0,
-      prepared: void 0,
-      loadedNodes: /* @__PURE__ */ new Set(),
-      pendingNodes: /* @__PURE__ */ new Set(),
-      expandedNodes: /* @__PURE__ */ new Set(),
-      handlers: void 0,
-      rootsLoaded: false,
-      selectedNodeId: void 0
-    } : void 0;
+    const navigationTreeEnabled = node.comfyClass === NodeName.loadAndEditImages;
+    let navigationManager = null;
     if (navigationTreeEnabled) {
       imageviewer.lfNavigationTree = {
         defaultOpen: true,
@@ -17879,212 +18045,6 @@ const imageEditorFactory = {
         lfDataset: { columns: [], nodes: [] }
       };
     }
-    const updateNavigationTreeDataset = (treeDataset, { reset } = {}) => {
-      var _a, _b, _c, _d;
-      if (!navigationTreeState) {
-        return;
-      }
-      if (reset) {
-        navigationTreeState.loadedNodes.clear();
-        navigationTreeState.pendingNodes.clear();
-        navigationTreeState.rootsLoaded = false;
-        navigationTreeState.expandedNodes.clear();
-        navigationTreeState.selectedNodeId = void 0;
-      }
-      if (!treeDataset) {
-        const fallbackColumns = ((_a = navigationTreeState.prepared) == null ? void 0 : _a.columns) ?? ((_b = navigationTreeState.dataset) == null ? void 0 : _b.columns) ?? ((_d = (_c = imageviewer.lfTreeProps) == null ? void 0 : _c.lfDataset) == null ? void 0 : _d.columns) ?? [];
-        navigationTreeState.dataset = void 0;
-        navigationTreeState.prepared = void 0;
-        const previousProps2 = imageviewer.lfTreeProps ?? {};
-        imageviewer.lfTreeProps = {
-          ...NAVIGATION_TREE_PROPS_BASE,
-          ...previousProps2,
-          lfDataset: {
-            columns: fallbackColumns,
-            nodes: []
-          }
-        };
-        return;
-      }
-      const shouldMerge = Boolean(navigationTreeState.dataset) && !reset;
-      const mergedDataset = shouldMerge && navigationTreeState.dataset ? mergeNavigationTreeChildren(navigationTreeState.dataset, treeDataset) ?? navigationTreeState.dataset : treeDataset;
-      navigationTreeState.dataset = mergedDataset ?? void 0;
-      const parentId = treeDataset.parent_id;
-      if (parentId) {
-        navigationTreeState.loadedNodes.add(parentId);
-        navigationTreeState.pendingNodes.delete(parentId);
-      }
-      if (treeDataset.parent_id === "root") {
-        navigationTreeState.rootsLoaded = true;
-        navigationTreeState.loadedNodes.add("root");
-        navigationTreeState.pendingNodes.delete("root");
-      }
-      const prepared = mergedDataset ? prepareNavigationTreeDataset(mergedDataset) : void 0;
-      navigationTreeState.prepared = prepared ?? void 0;
-      const datasetForTree = prepared ?? (mergedDataset ? {
-        ...mergedDataset,
-        nodes: Array.isArray(mergedDataset.nodes) ? mergedDataset.nodes : []
-      } : {
-        columns: treeDataset.columns ?? [],
-        nodes: [],
-        parent_id: treeDataset.parent_id
-      });
-      const previousProps = imageviewer.lfTreeProps ?? {};
-      imageviewer.lfTreeProps = {
-        ...NAVIGATION_TREE_PROPS_BASE,
-        ...previousProps,
-        lfDataset: datasetForTree
-      };
-      void applyNavigationTreePersistence();
-    };
-    const applyNavigationTreePersistence = async () => {
-      var _a, _b;
-      if (!navigationTreeState || !navigationTreeState.expandedNodes || !(imageviewer == null ? void 0 : imageviewer.getComponents)) {
-        return;
-      }
-      const shouldPersistSelection = Boolean(navigationTreeState.selectedNodeId);
-      const shouldPersistExpansion = navigationTreeState.expandedNodes.size > 0;
-      if (!shouldPersistSelection && !shouldPersistExpansion) {
-        return;
-      }
-      try {
-        const components = await imageviewer.getComponents();
-        const tree = (_a = components == null ? void 0 : components.navigation) == null ? void 0 : _a.tree;
-        if (!tree) {
-          return;
-        }
-        const dataset = ((_b = imageviewer.lfTreeProps) == null ? void 0 : _b.lfDataset) ?? navigationTreeState.prepared ?? navigationTreeState.dataset;
-        if (!dataset) {
-          return;
-        }
-        const treeWithState = tree;
-        if (shouldPersistExpansion) {
-          const desiredNodes = /* @__PURE__ */ new Set();
-          navigationTreeState.expandedNodes.forEach((nodeId) => {
-            const match = findNodeInNavigationTree(dataset, (node2) => node2.id === nodeId);
-            if (match) {
-              desiredNodes.add(match);
-            }
-          });
-          if (desiredNodes.size > 0) {
-            const nextExpanded = new Set(desiredNodes);
-            treeWithState.expandedNodes = nextExpanded;
-          }
-        }
-        if (shouldPersistSelection && navigationTreeState.selectedNodeId) {
-          const selectedNode = findNodeInNavigationTree(dataset, (node2) => node2.id === navigationTreeState.selectedNodeId);
-          if (selectedNode) {
-            treeWithState.selectedNode = selectedNode;
-          }
-        }
-        if (typeof treeWithState.refresh === "function") {
-          await treeWithState.refresh();
-        }
-      } catch (error2) {
-        getLfManager().log("Failed to persist navigation tree state.", { error: error2 }, LogSeverity.Warning);
-      }
-    };
-    const loadNavigationTreeRoots = async () => {
-      var _a;
-      if (!navigationTreeState || navigationTreeState.rootsLoaded) {
-        return;
-      }
-      navigationTreeState.pendingNodes.add("root");
-      try {
-        const response = await IMAGE_API.explore("", { scope: "roots" });
-        if (response.status !== LogSeverity.Success) {
-          return;
-        }
-        const roots = (_a = response.data) == null ? void 0 : _a.tree;
-        if (!roots) {
-          return;
-        }
-        updateNavigationTreeDataset(roots, { reset: true });
-      } catch (error2) {
-        getLfManager().log("Failed to load navigation tree roots.", { error: error2 }, LogSeverity.Warning);
-      } finally {
-        navigationTreeState.pendingNodes.delete("root");
-      }
-    };
-    const handleNavigationTreeExpansion = async (nodeToExpand) => {
-      var _a, _b, _c, _d, _e, _f;
-      if (!navigationTreeEnabled || !navigationTreeState || !nodeToExpand) {
-        return;
-      }
-      const metadata = extractNavigationTreeMetadata(nodeToExpand);
-      if (!metadata || metadata.isPlaceholder || !metadata.hasChildren) {
-        return;
-      }
-      const nodeId = metadata.id;
-      if (!nodeId) {
-        return;
-      }
-      const wasExpanded = navigationTreeState.expandedNodes.has(nodeId);
-      if (wasExpanded) {
-        navigationTreeState.expandedNodes.delete(nodeId);
-      } else {
-        navigationTreeState.expandedNodes.add(nodeId);
-      }
-      if (wasExpanded) {
-        void applyNavigationTreePersistence();
-        return;
-      }
-      if (navigationTreeState.pendingNodes.has(nodeId)) {
-        return;
-      }
-      if (navigationTreeState.loadedNodes.has(nodeId)) {
-        void applyNavigationTreePersistence();
-        return;
-      }
-      const expansionDirectory = normalizeDirectoryRequest(((_a = metadata.paths) == null ? void 0 : _a.resolved) ?? ((_b = metadata.paths) == null ? void 0 : _b.raw) ?? ((_c = metadata.paths) == null ? void 0 : _c.relative) ?? "");
-      const nodePath = ((_d = metadata.paths) == null ? void 0 : _d.resolved) ?? ((_e = metadata.paths) == null ? void 0 : _e.raw) ?? expansionDirectory;
-      if (!expansionDirectory || !nodePath) {
-        return;
-      }
-      navigationTreeState.pendingNodes.add(nodeId);
-      try {
-        const response = await IMAGE_API.explore(expansionDirectory, {
-          scope: "tree",
-          nodePath
-        });
-        if (response.status !== LogSeverity.Success) {
-          return;
-        }
-        const branch = (_f = response.data) == null ? void 0 : _f.tree;
-        if (!branch) {
-          navigationTreeState.loadedNodes.add(nodeId);
-          return;
-        }
-        updateNavigationTreeDataset(branch, { reset: false });
-      } catch (error2) {
-        getLfManager().log("Failed to expand navigation tree node.", { error: error2, nodeId, path: nodePath }, LogSeverity.Warning);
-      } finally {
-        navigationTreeState.pendingNodes.delete(nodeId);
-      }
-    };
-    const handleNavigationTreeSelection = async (nodeToSelect) => {
-      var _a, _b, _c, _d;
-      if (!navigationTreeEnabled || !navigationTreeState || !nodeToSelect) {
-        return;
-      }
-      const metadata = extractNavigationTreeMetadata(nodeToSelect);
-      if (!metadata || metadata.isPlaceholder) {
-        return;
-      }
-      const currentState = STATE$h.get(wrapper);
-      if (!currentState) {
-        return;
-      }
-      navigationTreeState.selectedNodeId = metadata.id ?? void 0;
-      void applyNavigationTreePersistence();
-      const targetDirectory = normalizeDirectoryRequest(((_a = metadata.paths) == null ? void 0 : _a.resolved) ?? ((_b = metadata.paths) == null ? void 0 : _b.raw) ?? ((_c = metadata.paths) == null ? void 0 : _c.relative) ?? metadata.name ?? "");
-      const currentDirectory = normalizeDirectoryRequest(currentState.directoryValue ?? deriveDirectoryValue(currentState.directory) ?? currentState.lastRequestedDirectory ?? "");
-      if (targetDirectory === currentDirectory && !metadata.isRoot) {
-        return;
-      }
-      await ((_d = currentState.refreshDirectory) == null ? void 0 : _d.call(currentState, targetDirectory));
-      void applyNavigationTreePersistence();
-    };
     const refresh = async (directory) => {
       var _a;
       const state2 = STATE$h.get(wrapper);
@@ -18110,6 +18070,9 @@ const imageEditorFactory = {
           ensureDatasetContext(dataset2, state2);
           imageviewer.lfDataset = dataset2;
           await syncNavigationDirectoryControl(state2, state2.directoryValue);
+          if (state2.navigationManager && state2.directoryValue) {
+            await state2.navigationManager.syncSelectionByPath(state2.directoryValue);
+          }
           return;
         }
         const response = await IMAGE_API.get(normalizedDirectory);
@@ -18126,6 +18089,9 @@ const imageEditorFactory = {
         ensureDatasetContext(dataset, state2);
         imageviewer.lfDataset = dataset;
         await syncNavigationDirectoryControl(state2, state2.directoryValue);
+        if (state2.navigationManager && state2.directoryValue) {
+          await state2.navigationManager.syncSelectionByPath(state2.directoryValue);
+        }
       } catch (error2) {
         getLfManager().log("Failed to refresh image directory.", { error: error2, directory: normalizedDirectory }, LogSeverity.Warning);
       }
@@ -18138,12 +18104,9 @@ const imageEditorFactory = {
       if (!state2 || state2.isSyncingDirectory) {
         return;
       }
-      let directoryValue = normalizeDirectoryRequest(value);
-      if (!directoryValue) {
-        const fallbackDirectory = state2.directoryValue ?? deriveDirectoryValue(state2.directory) ?? void 0;
-        directoryValue = normalizeDirectoryRequest(fallbackDirectory);
-      }
+      const directoryValue = normalizeDirectoryRequest(value);
       if (state2.lastRequestedDirectory === directoryValue && state2.directoryValue === directoryValue) {
+        getLfManager().log("lfLoadCallback: directory unchanged, skipping", {}, LogSeverity.Info);
         return;
       }
       await refresh(directoryValue);
@@ -18152,6 +18115,27 @@ const imageEditorFactory = {
     imageviewer.addEventListener(LfEventName.LfImageviewer, (e2) => EV_HANDLERS$a.imageviewer(STATE$h.get(wrapper), e2));
     imageviewer.appendChild(settings);
     const actionButtons = {};
+    const state = {
+      contextId: void 0,
+      elements: { actionButtons, controls: {}, grid, imageviewer, settings },
+      directory: void 0,
+      directoryValue: void 0,
+      filter: null,
+      filterType: null,
+      hasAutoDirectoryLoad: false,
+      isSyncingDirectory: false,
+      lastBrushSettings: JSON.parse(JSON.stringify(SETTINGS.brush.settings)),
+      lastRequestedDirectory: void 0,
+      node,
+      refreshDirectory: refresh,
+      update: {
+        preview: () => updateCb(STATE$h.get(wrapper)).then(() => {
+        }),
+        snapshot: () => updateCb(STATE$h.get(wrapper), true).then(() => {
+        })
+      },
+      wrapper
+    };
     switch (node.comfyClass) {
       case NodeName.imagesEditingBreakpoint:
         const actions = document.createElement(TagName.Div);
@@ -18186,44 +18170,20 @@ const imageEditorFactory = {
     content.appendChild(grid);
     wrapper.appendChild(content);
     const options = imageEditorFactory.options(wrapper);
-    const state = {
-      elements: { actionButtons, controls: {}, grid, imageviewer, settings },
-      contextId: void 0,
-      directory: void 0,
-      directoryValue: void 0,
-      filter: null,
-      filterType: null,
-      lastBrushSettings: JSON.parse(JSON.stringify(SETTINGS.brush.settings)),
-      hasAutoDirectoryLoad: false,
-      isSyncingDirectory: false,
-      lastRequestedDirectory: void 0,
-      node,
-      navigationTree: navigationTreeState,
-      refreshDirectory: refresh,
-      update: {
-        preview: () => updateCb(STATE$h.get(wrapper)).then(() => {
-        }),
-        snapshot: () => updateCb(STATE$h.get(wrapper), true).then(() => {
-        })
-      },
-      wrapper
-    };
-    if (navigationTreeState) {
-      navigationTreeState.handlers = {
-        expand: handleNavigationTreeExpansion,
-        select: handleNavigationTreeSelection
-      };
-    }
     STATE$h.set(wrapper, state);
     IMAGE_EDITOR_INSTANCES.add(state);
+    if (navigationTreeEnabled) {
+      navigationManager = createNavigationTreeManager(imageviewer, state);
+      state.navigationManager = navigationManager;
+    }
     void Promise.resolve().then(async () => {
       var _a, _b;
       const currentState = STATE$h.get(wrapper);
       if (!currentState) {
         return;
       }
-      if (navigationTreeEnabled) {
-        await loadNavigationTreeRoots();
+      if (navigationTreeEnabled && navigationManager) {
+        await navigationManager.loadRoots();
       }
       if (currentState.hasAutoDirectoryLoad) {
         return;
@@ -21880,6 +21840,9 @@ const resolveNodeId = (p2) => {
 const isValidNumber = (n2) => {
   return !isNaN(n2) && typeof n2 === "number";
 };
+const asString = (value) => typeof value === "string" ? value : void 0;
+const isString = (value) => typeof value === "string";
+const normalizeDirectoryRequest = (value) => typeof value === "string" ? value : "";
 const canvasToBase64 = (canvas) => {
   return canvas.toDataURL("image/png");
 };
@@ -22029,14 +21992,14 @@ export {
   LF_PLACEHOLDER_BLOCKS as aL,
   LF_PLACEHOLDER_PARTS as aM,
   LF_PLACEHOLDER_PROPS as aN,
-  LF_CAROUSEL_BLOCKS as aO,
-  LF_CAROUSEL_PARTS as aP,
-  LF_CAROUSEL_PROPS as aQ,
-  LF_CAROUSEL_IDS as aR,
-  LF_TREE_BLOCKS as aS,
-  LF_TREE_PARTS as aT,
-  LF_TREE_PROPS as aU,
-  LF_TREE_CSS_VARIABLES as aV,
+  LF_IMAGEVIEWER_BLOCKS as aO,
+  LF_IMAGEVIEWER_PARTS as aP,
+  LF_IMAGEVIEWER_PROPS as aQ,
+  IDS as aR,
+  LF_CAROUSEL_BLOCKS as aS,
+  LF_CAROUSEL_PARTS as aT,
+  LF_CAROUSEL_PROPS as aU,
+  LF_CAROUSEL_IDS as aV,
   LF_TOAST_BLOCKS as aW,
   LF_TOAST_PARTS as aX,
   LF_TOAST_CSS_VARIABLES as aY,
@@ -22070,19 +22033,19 @@ export {
   LF_UPLOAD_BLOCKS as az,
   LF_ATTRIBUTES as b,
   LF_ACCORDION_PROPS as b0,
-  LF_ARTICLE_BLOCKS as b1,
-  LF_ARTICLE_PARTS as b2,
-  LF_ARTICLE_PROPS as b3,
-  LF_COMPARE_BLOCKS as b4,
-  LF_COMPARE_PARTS as b5,
-  LF_COMPARE_CSS_VARS as b6,
-  LF_COMPARE_DEFAULTS as b7,
-  LF_COMPARE_PROPS as b8,
-  LF_COMPARE_IDS as b9,
-  LF_IMAGEVIEWER_BLOCKS as ba,
-  LF_IMAGEVIEWER_PARTS as bb,
-  LF_IMAGEVIEWER_PROPS as bc,
-  IDS as bd,
+  LF_TREE_BLOCKS as b1,
+  LF_TREE_PARTS as b2,
+  LF_TREE_PROPS as b3,
+  LF_TREE_CSS_VARIABLES as b4,
+  LF_ARTICLE_BLOCKS as b5,
+  LF_ARTICLE_PARTS as b6,
+  LF_ARTICLE_PROPS as b7,
+  LF_COMPARE_BLOCKS as b8,
+  LF_COMPARE_PARTS as b9,
+  LF_COMPARE_CSS_VARS as ba,
+  LF_COMPARE_DEFAULTS as bb,
+  LF_COMPARE_PROPS as bc,
+  LF_COMPARE_IDS as bd,
   LF_TABBAR_BLOCKS as be,
   LF_TABBAR_PARTS as bf,
   LF_TABBAR_PROPS as bg,
