@@ -67,8 +67,6 @@ async def get_images_in_directory(request):
     except Exception as e:
         return web.Response(status=500, text=f"Error: {str(e)}")
 
-
-
 # region explore-filesystem
 @PromptServer.instance.routes.post(f"{API_ROUTE_PREFIX}/explore-filesystem")
 async def explore_filesystem(request):

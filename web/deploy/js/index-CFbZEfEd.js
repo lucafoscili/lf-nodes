@@ -502,14 +502,10 @@ const LF_IMAGEVIEWER_BLOCKS = {
   mainGrid: { _: "main-grid" },
   navigationGrid: {
     _: "navigation-grid",
-    content: "content",
     button: "button",
     masonry: "masonry",
+    navToggle: "nav-toggle",
     tree: "tree",
-    treeContent: "tree-content",
-    treeHeader: "tree-header",
-    treeShell: "tree-shell",
-    treeToggle: "tree-toggle",
     textfield: "textfield"
   }
 };
@@ -527,8 +523,8 @@ const IDS = {
   navigation: {
     load: "navigation-load",
     masonry: "navigation-masonry",
+    navToggle: "navigation-nav-toggle",
     tree: "navigation-tree",
-    treeToggle: "navigation-tree-toggle",
     textfield: "navigation-textfield"
   }
 };
@@ -540,9 +536,8 @@ const LF_IMAGEVIEWER_PARTS = {
 const LF_IMAGEVIEWER_PROPS = [
   "lfDataset",
   "lfLoadCallback",
-  "lfNavigationTree",
+  "lfNavigation",
   "lfStyle",
-  "lfTreeProps",
   "lfValue"
 ];
 const LF_LIST_BLOCKS = {
@@ -13652,7 +13647,7 @@ var X = false, Z = (t2, e2, n2) => {
                         const n6 = t7.i.replace(/-/g, "_"), o6 = t7.T;
                         if (!o6) return;
                         const r3 = i.get(o6);
-                        return r3 ? r3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-0acbe4cf.entry.js": () => import("./p-0acbe4cf.entry-UPLf3K1Z.js"), "./p-28dd0bff.entry.js": () => import("./p-28dd0bff.entry-B7fzGLcF.js"), "./p-33abb3da.entry.js": () => import("./p-33abb3da.entry-BHxEcDdz.js"), "./p-39cc0e0f.entry.js": () => import("./p-39cc0e0f.entry-ylhdXLEf.js"), "./p-3dde8514.entry.js": () => import("./p-3dde8514.entry-CqmxisAa.js"), "./p-45c52a25.entry.js": () => import("./p-45c52a25.entry-VaB99Khp.js"), "./p-4d8a687e.entry.js": () => import("./p-4d8a687e.entry-BXsI5zA6.js"), "./p-5fe335e2.entry.js": () => import("./p-5fe335e2.entry-AKF3AJ0b.js"), "./p-82a405e5.entry.js": () => import("./p-82a405e5.entry-yE2h0bZ9.js"), "./p-88c4c8e0.entry.js": () => import("./p-88c4c8e0.entry-Cac-2gor.js"), "./p-98bdf944.entry.js": () => import("./p-98bdf944.entry-jQGNEeEF.js"), "./p-9a28c130.entry.js": () => import("./p-9a28c130.entry-DE8oEMhG.js"), "./p-e2900881.entry.js": () => import("./p-e2900881.entry--E8_fCiZ.js"), "./p-e4efda97.entry.js": () => import("./p-e4efda97.entry-7JFiGBJg.js"), "./p-f9c5f8f8.entry.js": () => import("./p-f9c5f8f8.entry-NZL0Q8YN.js"), "./p-f9e0dfd9.entry.js": () => import("./p-f9e0dfd9.entry-huVhkk-s.js") }), `./${o6}.entry.js`, 2).then(((t8) => (i.set(o6, t8), t8[n6])), ((t8) => {
+                        return r3 ? r3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-28dd0bff.entry.js": () => import("./p-28dd0bff.entry-Dkcl5kFf.js"), "./p-33abb3da.entry.js": () => import("./p-33abb3da.entry-C-MKKgKi.js"), "./p-3dde8514.entry.js": () => import("./p-3dde8514.entry-DxmGHO_J.js"), "./p-4105f262.entry.js": () => import("./p-4105f262.entry-CKviyYdt.js"), "./p-45c52a25.entry.js": () => import("./p-45c52a25.entry-CfiVJiOl.js"), "./p-6f70ee7a.entry.js": () => import("./p-6f70ee7a.entry-CMs0CvQa.js"), "./p-82a405e5.entry.js": () => import("./p-82a405e5.entry-cNQN2I98.js"), "./p-88c4c8e0.entry.js": () => import("./p-88c4c8e0.entry-BhCesAoG.js"), "./p-8e2979f0.entry.js": () => import("./p-8e2979f0.entry-DMFvSSJs.js"), "./p-98bdf944.entry.js": () => import("./p-98bdf944.entry-Bj0yMvVJ.js"), "./p-9a28c130.entry.js": () => import("./p-9a28c130.entry-DZd-Zo6j.js"), "./p-ab217eb3.entry.js": () => import("./p-ab217eb3.entry-BGvALF4-.js"), "./p-cb639669.entry.js": () => import("./p-cb639669.entry-c7p93E4a.js"), "./p-e2900881.entry.js": () => import("./p-e2900881.entry-D3yQsqdZ.js"), "./p-f9c5f8f8.entry.js": () => import("./p-f9c5f8f8.entry-Be0Krn7o.js"), "./p-f9e0dfd9.entry.js": () => import("./p-f9e0dfd9.entry-Dkl3wsnu.js") }), `./${o6}.entry.js`, 2).then(((t8) => (i.set(o6, t8), t8[n6])), ((t8) => {
                           l(t8, e3.$hostElement$);
                         }));
                         /*!__STENCIL_STATIC_IMPORT_SWITCH__*/
@@ -13735,7 +13730,7 @@ const o = () => {
 (() => {
   const l2 = import.meta.url, f$1 = {};
   return "" !== l2 && (f$1.resourcesUrl = new URL(".", l2).href), f(f$1);
-})().then((async (e2) => (await o(), St(JSON.parse('[["p-5fe335e2",[[257,"lf-imageviewer",{"lfDataset":[1040,"lf-dataset"],"lfLoadCallback":[1040,"lf-load-callback"],"lfNavigationTree":[1028,"lf-navigation-tree"],"lfStyle":[1025,"lf-style"],"lfTreeProps":[1040,"lf-tree-props"],"lfValue":[1040,"lf-value"],"debugInfo":[32],"currentShape":[32],"history":[32],"historyIndex":[32],"isSpinnerActive":[32],"isNavigationTreeOpen":[32],"addSnapshot":[64],"clearHistory":[64],"clearSelection":[64],"getComponents":[64],"getCurrentSnapshot":[64],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"reset":[64],"setSpinnerStatus":[64],"unmount":[64]},null,{"lfNavigationTree":["onLfNavigationTreeChange"]}]]],["p-9a28c130",[[257,"lf-compare",{"lfDataset":[1040,"lf-dataset"],"lfShape":[1025,"lf-shape"],"lfStyle":[1025,"lf-style"],"lfView":[1025,"lf-view"],"debugInfo":[32],"isLeftPanelOpened":[32],"isRightPanelOpened":[32],"leftShape":[32],"rightShape":[32],"shapes":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["updateShapes"],"lfShape":["updateShapes"]}]]],["p-88c4c8e0",[[257,"lf-accordion",{"lfDataset":[1040,"lf-dataset"],"lfRipple":[1028,"lf-ripple"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"expandedNodes":[32],"selectedNodes":[32],"getDebugInfo":[64],"getProps":[64],"getSelectedNodes":[64],"refresh":[64],"toggleNode":[64],"unmount":[64]}]]],["p-98bdf944",[[257,"lf-article",{"lfDataset":[1040,"lf-dataset"],"lfEmpty":[1025,"lf-empty"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-4d8a687e",[[257,"lf-carousel",{"lfDataset":[1040,"lf-dataset"],"lfAutoPlay":[4,"lf-auto-play"],"lfInterval":[2,"lf-interval"],"lfLightbox":[1540,"lf-lightbox"],"lfNavigation":[1028,"lf-navigation"],"lfShape":[1537,"lf-shape"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"currentIndex":[32],"shapes":[32],"getDebugInfo":[64],"getProps":[64],"goToSlide":[64],"nextSlide":[64],"prevSlide":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["updateShapes"],"lfShape":["updateShapes"]}]]],["p-28dd0bff",[[257,"lf-messenger",{"lfAutosave":[1028,"lf-autosave"],"lfDataset":[1040,"lf-dataset"],"lfStyle":[1025,"lf-style"],"lfValue":[16,"lf-value"],"debugInfo":[32],"chat":[32],"connectionStatus":[32],"covers":[32],"currentCharacter":[32],"formStatusMap":[32],"history":[32],"hoveredCustomizationOption":[32],"saveInProgress":[32],"ui":[32],"deleteOption":[64],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"reset":[64],"save":[64],"unmount":[64]}]]],["p-f9c5f8f8",[[257,"lf-drawer",{"lfDisplay":[1537,"lf-display"],"lfPosition":[1537,"lf-position"],"lfResponsive":[1026,"lf-responsive"],"lfStyle":[1025,"lf-style"],"lfValue":[1540,"lf-value"],"debugInfo":[32],"close":[64],"getDebugInfo":[64],"getProps":[64],"isOpened":[64],"open":[64],"refresh":[64],"toggle":[64],"unmount":[64]},[[0,"keydown","listenKeydown"]],{"lfDisplay":["onLfDisplayChange"],"lfResponsive":["onLfResponsiveChange"]}]]],["p-3dde8514",[[257,"lf-header",{"lfStyle":[1025,"lf-style"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-45c52a25",[[257,"lf-placeholder",{"lfIcon":[1,"lf-icon"],"lfProps":[16,"lf-props"],"lfStyle":[1025,"lf-style"],"lfThreshold":[2,"lf-threshold"],"lfTrigger":[1,"lf-trigger"],"lfValue":[1,"lf-value"],"debugInfo":[32],"isInViewport":[32],"getComponent":[64],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-f9e0dfd9",[[257,"lf-slider",{"lfLabel":[1025,"lf-label"],"lfLeadingLabel":[1028,"lf-leading-label"],"lfMax":[2,"lf-max"],"lfMin":[2,"lf-min"],"lfStep":[2,"lf-step"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1026,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}]]],["p-33abb3da",[[257,"lf-splash",{"lfLabel":[1025,"lf-label"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"state":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-82a405e5",[[257,"lf-toast",{"lfCloseIcon":[1025,"lf-close-icon"],"lfCloseCallback":[16,"lf-close-callback"],"lfIcon":[1025,"lf-icon"],"lfTimer":[2,"lf-timer"],"lfMessage":[1025,"lf-message"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-39cc0e0f",[[257,"lf-card",{"lfDataset":[1040,"lf-dataset"],"lfLayout":[1025,"lf-layout"],"lfSizeX":[1025,"lf-size-x"],"lfSizeY":[1025,"lf-size-y"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"debugInfo":[32],"shapes":[32],"getDebugInfo":[64],"getProps":[64],"getShapes":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["updateShapes"]}],[257,"lf-badge",{"lfImageProps":[1040,"lf-image-props"],"lfLabel":[1025,"lf-label"],"lfPosition":[1537,"lf-position"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}],[257,"lf-canvas",{"lfBrush":[1025,"lf-brush"],"lfColor":[1025,"lf-color"],"lfCursor":[1025,"lf-cursor"],"lfImageProps":[1040,"lf-image-props"],"lfOpacity":[1026,"lf-opacity"],"lfPreview":[1028,"lf-preview"],"lfStrokeTolerance":[1026,"lf-stroke-tolerance"],"lfSize":[1026,"lf-size"],"lfStyle":[1025,"lf-style"],"boxing":[32],"debugInfo":[32],"isPainting":[32],"orientation":[32],"points":[32],"clearCanvas":[64],"getCanvas":[64],"getDebugInfo":[64],"getImage":[64],"getProps":[64],"refresh":[64],"resizeCanvas":[64],"setCanvasHeight":[64],"setCanvasWidth":[64],"unmount":[64]}],[257,"lf-photoframe",{"lfOverlay":[1040,"lf-overlay"],"lfPlaceholder":[16,"lf-placeholder"],"lfStyle":[1025,"lf-style"],"lfThreshold":[2,"lf-threshold"],"lfValue":[16,"lf-value"],"debugInfo":[32],"imageOrientation":[32],"isInViewport":[32],"isReady":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}],[257,"lf-chart",{"lfAxis":[1025,"lf-axis"],"lfColors":[1040,"lf-colors"],"lfDataset":[1040,"lf-dataset"],"lfLegend":[1025,"lf-legend"],"lfSeries":[1040,"lf-series"],"lfSizeX":[1025,"lf-size-x"],"lfSizeY":[1025,"lf-size-y"],"lfStyle":[1025,"lf-style"],"lfTypes":[1040,"lf-types"],"lfXAxis":[1040,"lf-x-axis"],"lfYAxis":[1040,"lf-y-axis"],"debugInfo":[32],"themeValues":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"resize":[64],"unmount":[64]}],[257,"lf-toggle",{"lfAriaLabel":[1025,"lf-aria-label"],"lfLabel":[1025,"lf-label"],"lfLeadingLabel":[1028,"lf-leading-label"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[4,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}],[257,"lf-upload",{"lfLabel":[1025,"lf-label"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfValue":[16,"lf-value"],"debugInfo":[32],"selectedFiles":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"unmount":[64]}],[257,"lf-chat",{"lfContextWindow":[1026,"lf-context-window"],"lfEmpty":[1025,"lf-empty"],"lfEndpointUrl":[1025,"lf-endpoint-url"],"lfLayout":[1025,"lf-layout"],"lfMaxTokens":[1026,"lf-max-tokens"],"lfPollingInterval":[1026,"lf-polling-interval"],"lfSeed":[1026,"lf-seed"],"lfStyle":[1025,"lf-style"],"lfSystem":[1025,"lf-system"],"lfTemperature":[1026,"lf-temperature"],"lfTypewriterProps":[1028,"lf-typewriter-props"],"lfUiSize":[1537,"lf-ui-size"],"lfValue":[1040,"lf-value"],"currentAbortStreaming":[32],"currentPrompt":[32],"currentTokens":[32],"debugInfo":[32],"history":[32],"status":[32],"view":[32],"abortStreaming":[64],"getDebugInfo":[64],"getHistory":[64],"getLastMessage":[64],"getProps":[64],"refresh":[64],"scrollToBottom":[64],"setHistory":[64],"unmount":[64]},[[0,"keydown","listenKeydown"]],{"lfPollingInterval":["updatePollingInterval"],"lfSystem":["updateTokensCount"]}],[257,"lf-chip",{"lfAriaLabel":[1025,"lf-aria-label"],"lfDataset":[1040,"lf-dataset"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfStyling":[1025,"lf-styling"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[16,"lf-value"],"debugInfo":[32],"expandedNodes":[32],"hiddenNodes":[32],"selectedNodes":[32],"getDebugInfo":[64],"getProps":[64],"getSelectedNodes":[64],"refresh":[64],"setSelectedNodes":[64],"unmount":[64]}],[257,"lf-code",{"lfFadeIn":[1028,"lf-fade-in"],"lfFormat":[1028,"lf-format"],"lfLanguage":[1025,"lf-language"],"lfPreserveSpaces":[1028,"lf-preserve-spaces"],"lfShowCopy":[1028,"lf-show-copy"],"lfShowHeader":[1028,"lf-show-header"],"lfStickyHeader":[1028,"lf-sticky-header"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfLanguage":["loadLanguage"]}],[257,"lf-progressbar",{"lfAnimated":[1540,"lf-animated"],"lfCenteredLabel":[1540,"lf-centered-label"],"lfIcon":[1537,"lf-icon"],"lfIsRadial":[1540,"lf-is-radial"],"lfLabel":[1025,"lf-label"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1026,"lf-value"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}],[257,"lf-textfield",{"lfHelper":[1040,"lf-helper"],"lfHtmlAttributes":[1040,"lf-html-attributes"],"lfIcon":[1025,"lf-icon"],"lfLabel":[1025,"lf-label"],"lfStretchX":[1540,"lf-stretch-x"],"lfStretchY":[1540,"lf-stretch-y"],"lfStyle":[1025,"lf-style"],"lfStyling":[1025,"lf-styling"],"lfTrailingIcon":[1540,"lf-trailing-icon"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1,"lf-value"],"debugInfo":[32],"status":[32],"value":[32],"getDebugInfo":[64],"getElement":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setBlur":[64],"setFocus":[64],"setValue":[64],"unmount":[64]}],[257,"lf-typewriter",{"lfCursor":[1025,"lf-cursor"],"lfDeleteSpeed":[1026,"lf-delete-speed"],"lfLoop":[1028,"lf-loop"],"lfPause":[1026,"lf-pause"],"lfSpeed":[1026,"lf-speed"],"lfStyle":[1025,"lf-style"],"lfTag":[1025,"lf-tag"],"lfUiSize":[1537,"lf-ui-size"],"lfUpdatable":[1028,"lf-updatable"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"displayedText":[32],"isDeleting":[32],"currentTextIndex":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfValue":["handleLfValueChange"]}],[257,"lf-image",{"lfHtmlAttributes":[1040,"lf-html-attributes"],"lfMode":[1537,"lf-mode"],"lfShowSpinner":[1028,"lf-show-spinner"],"lfSizeX":[1025,"lf-size-x"],"lfSizeY":[1025,"lf-size-y"],"lfStyle":[1025,"lf-style"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"error":[32],"isLoaded":[32],"resolvedSpriteName":[32],"getDebugInfo":[64],"getImage":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfValue":["resetState"]}],[257,"lf-button",{"lfAriaLabel":[1025,"lf-aria-label"],"lfDataset":[1040,"lf-dataset"],"lfIcon":[1025,"lf-icon"],"lfIconOff":[1025,"lf-icon-off"],"lfLabel":[1025,"lf-label"],"lfRipple":[1028,"lf-ripple"],"lfShowSpinner":[1540,"lf-show-spinner"],"lfStretchX":[1540,"lf-stretch-x"],"lfStretchY":[1540,"lf-stretch-y"],"lfStyle":[1025,"lf-style"],"lfStyling":[1025,"lf-styling"],"lfToggable":[1028,"lf-toggable"],"lfTrailingIcon":[1028,"lf-trailing-icon"],"lfType":[1025,"lf-type"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[4,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setMessage":[64],"setValue":[64],"unmount":[64]}],[257,"lf-list",{"lfDataset":[1040,"lf-dataset"],"lfEmpty":[1025,"lf-empty"],"lfEnableDeletions":[1028,"lf-enable-deletions"],"lfNavigation":[1028,"lf-navigation"],"lfRipple":[1028,"lf-ripple"],"lfSelectable":[1028,"lf-selectable"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[2,"lf-value"],"debugInfo":[32],"focused":[32],"selected":[32],"focusNext":[64],"focusPrevious":[64],"getDebugInfo":[64],"getProps":[64],"getSelected":[64],"refresh":[64],"selectNode":[64],"unmount":[64]},[[0,"keydown","listenKeydown"]]],[257,"lf-spinner",{"lfActive":[1540,"lf-active"],"lfBarVariant":[1540,"lf-bar-variant"],"lfDimensions":[1025,"lf-dimensions"],"lfFader":[1540,"lf-fader"],"lfFaderTimeout":[1026,"lf-fader-timeout"],"lfFullScreen":[1540,"lf-full-screen"],"lfLayout":[1026,"lf-layout"],"lfStyle":[1025,"lf-style"],"lfTimeout":[1026,"lf-timeout"],"bigWait":[32],"debugInfo":[32],"progress":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfActive":["onFaderChange"],"lfFader":["onFaderChange"],"lfFaderTimeout":["onFaderChange"],"lfBarVariant":["lfBarVariantChanged"],"lfTimeout":["lfTimeoutChanged"]}]]],["p-0acbe4cf",[[257,"lf-masonry",{"lfActions":[1028,"lf-actions"],"lfColumns":[1026,"lf-columns"],"lfDataset":[1040,"lf-dataset"],"lfSelectable":[1540,"lf-selectable"],"lfShape":[1025,"lf-shape"],"lfStyle":[1025,"lf-style"],"lfView":[1025,"lf-view"],"debugInfo":[32],"selectedShape":[32],"shapes":[32],"viewportWidth":[32],"getDebugInfo":[64],"getProps":[64],"getSelectedShape":[64],"redecorateShapes":[64],"refresh":[64],"setSelectedShape":[64],"unmount":[64]},null,{"lfColumns":["validateColumns"],"lfDataset":["updateShapes"],"lfShape":["updateShapes"]}]]],["p-e2900881",[[257,"lf-tabbar",{"lfAriaLabel":[1025,"lf-aria-label"],"lfDataset":[16,"lf-dataset"],"lfNavigation":[4,"lf-navigation"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[8,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}]]],["p-e4efda97",[[257,"lf-tree",{"lfAccordionLayout":[1540,"lf-accordion-layout"],"lfDataset":[1040,"lf-dataset"],"lfEmpty":[1025,"lf-empty"],"lfExpandedNodeIds":[1040,"lf-expanded-node-ids"],"lfFilter":[1028,"lf-filter"],"lfGrid":[1540,"lf-grid"],"lfInitialExpansionDepth":[1026,"lf-initial-expansion-depth"],"lfSelectedNodeIds":[1040,"lf-selected-node-ids"],"lfRipple":[1028,"lf-ripple"],"lfSelectable":[1540,"lf-selectable"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"debugInfo":[32],"expandedNodes":[32],"hiddenNodes":[32],"selectedNode":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"getExpandedNodeIds":[64],"getSelectedNodeIds":[64],"setExpandedNodes":[64],"setSelectedNodes":[64],"selectByPredicate":[64],"unmount":[64]},null,{"lfDataset":["handleDatasetChange"],"lfExpandedNodeIds":["handleExpandedPropChange"],"lfSelectedNodeIds":["handleSelectedPropChange"],"lfInitialExpansionDepth":["handleInitialDepthChange"],"lfSelectable":["handleSelectableChange"],"lfFilter":["handleFilterToggle"]}]]]]'), e2))));
+})().then((async (e2) => (await o(), St(JSON.parse('[["p-ab217eb3",[[257,"lf-imageviewer",{"lfDataset":[1040,"lf-dataset"],"lfLoadCallback":[1040,"lf-load-callback"],"lfNavigation":[1040,"lf-navigation"],"lfStyle":[1025,"lf-style"],"lfValue":[1040,"lf-value"],"debugInfo":[32],"currentShape":[32],"history":[32],"historyIndex":[32],"isNavigationTreeOpen":[32],"isSpinnerActive":[32],"addSnapshot":[64],"clearHistory":[64],"clearSelection":[64],"getComponents":[64],"getCurrentSnapshot":[64],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"reset":[64],"setSpinnerStatus":[64],"unmount":[64]}]]],["p-9a28c130",[[257,"lf-compare",{"lfDataset":[1040,"lf-dataset"],"lfShape":[1025,"lf-shape"],"lfStyle":[1025,"lf-style"],"lfView":[1025,"lf-view"],"debugInfo":[32],"isLeftPanelOpened":[32],"isRightPanelOpened":[32],"leftShape":[32],"rightShape":[32],"shapes":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["updateShapes"],"lfShape":["updateShapes"]}]]],["p-88c4c8e0",[[257,"lf-accordion",{"lfDataset":[1040,"lf-dataset"],"lfRipple":[1028,"lf-ripple"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"expandedNodes":[32],"selectedNodes":[32],"getDebugInfo":[64],"getProps":[64],"getSelectedNodes":[64],"refresh":[64],"toggleNode":[64],"unmount":[64]}]]],["p-98bdf944",[[257,"lf-article",{"lfDataset":[1040,"lf-dataset"],"lfEmpty":[1025,"lf-empty"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-4105f262",[[257,"lf-carousel",{"lfDataset":[1040,"lf-dataset"],"lfAutoPlay":[4,"lf-auto-play"],"lfInterval":[2,"lf-interval"],"lfLightbox":[1540,"lf-lightbox"],"lfNavigation":[1028,"lf-navigation"],"lfShape":[1537,"lf-shape"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"currentIndex":[32],"shapes":[32],"getDebugInfo":[64],"getProps":[64],"goToSlide":[64],"nextSlide":[64],"prevSlide":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["updateShapes"],"lfShape":["updateShapes"]}]]],["p-28dd0bff",[[257,"lf-messenger",{"lfAutosave":[1028,"lf-autosave"],"lfDataset":[1040,"lf-dataset"],"lfStyle":[1025,"lf-style"],"lfValue":[16,"lf-value"],"debugInfo":[32],"chat":[32],"connectionStatus":[32],"covers":[32],"currentCharacter":[32],"formStatusMap":[32],"history":[32],"hoveredCustomizationOption":[32],"saveInProgress":[32],"ui":[32],"deleteOption":[64],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"reset":[64],"save":[64],"unmount":[64]}]]],["p-f9c5f8f8",[[257,"lf-drawer",{"lfDisplay":[1537,"lf-display"],"lfPosition":[1537,"lf-position"],"lfResponsive":[1026,"lf-responsive"],"lfStyle":[1025,"lf-style"],"lfValue":[1540,"lf-value"],"debugInfo":[32],"close":[64],"getDebugInfo":[64],"getProps":[64],"isOpened":[64],"open":[64],"refresh":[64],"toggle":[64],"unmount":[64]},[[0,"keydown","listenKeydown"]],{"lfDisplay":["onLfDisplayChange"],"lfResponsive":["onLfResponsiveChange"]}]]],["p-3dde8514",[[257,"lf-header",{"lfStyle":[1025,"lf-style"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-45c52a25",[[257,"lf-placeholder",{"lfIcon":[1,"lf-icon"],"lfProps":[16,"lf-props"],"lfStyle":[1025,"lf-style"],"lfThreshold":[2,"lf-threshold"],"lfTrigger":[1,"lf-trigger"],"lfValue":[1,"lf-value"],"debugInfo":[32],"isInViewport":[32],"getComponent":[64],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-f9e0dfd9",[[257,"lf-slider",{"lfLabel":[1025,"lf-label"],"lfLeadingLabel":[1028,"lf-leading-label"],"lfMax":[2,"lf-max"],"lfMin":[2,"lf-min"],"lfStep":[2,"lf-step"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1026,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}]]],["p-33abb3da",[[257,"lf-splash",{"lfLabel":[1025,"lf-label"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"state":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-82a405e5",[[257,"lf-toast",{"lfCloseIcon":[1025,"lf-close-icon"],"lfCloseCallback":[16,"lf-close-callback"],"lfIcon":[1025,"lf-icon"],"lfTimer":[2,"lf-timer"],"lfMessage":[1025,"lf-message"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-8e2979f0",[[257,"lf-card",{"lfDataset":[1040,"lf-dataset"],"lfLayout":[1025,"lf-layout"],"lfSizeX":[1025,"lf-size-x"],"lfSizeY":[1025,"lf-size-y"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"debugInfo":[32],"shapes":[32],"getDebugInfo":[64],"getProps":[64],"getShapes":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["updateShapes"]}],[257,"lf-badge",{"lfImageProps":[1040,"lf-image-props"],"lfLabel":[1025,"lf-label"],"lfPosition":[1537,"lf-position"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}],[257,"lf-canvas",{"lfBrush":[1025,"lf-brush"],"lfColor":[1025,"lf-color"],"lfCursor":[1025,"lf-cursor"],"lfImageProps":[1040,"lf-image-props"],"lfOpacity":[1026,"lf-opacity"],"lfPreview":[1028,"lf-preview"],"lfStrokeTolerance":[1026,"lf-stroke-tolerance"],"lfSize":[1026,"lf-size"],"lfStyle":[1025,"lf-style"],"boxing":[32],"debugInfo":[32],"isPainting":[32],"orientation":[32],"points":[32],"clearCanvas":[64],"getCanvas":[64],"getDebugInfo":[64],"getImage":[64],"getProps":[64],"refresh":[64],"resizeCanvas":[64],"setCanvasHeight":[64],"setCanvasWidth":[64],"unmount":[64]}],[257,"lf-photoframe",{"lfOverlay":[1040,"lf-overlay"],"lfPlaceholder":[16,"lf-placeholder"],"lfStyle":[1025,"lf-style"],"lfThreshold":[2,"lf-threshold"],"lfValue":[16,"lf-value"],"debugInfo":[32],"imageOrientation":[32],"isInViewport":[32],"isReady":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}],[257,"lf-chart",{"lfAxis":[1025,"lf-axis"],"lfColors":[1040,"lf-colors"],"lfDataset":[1040,"lf-dataset"],"lfLegend":[1025,"lf-legend"],"lfSeries":[1040,"lf-series"],"lfSizeX":[1025,"lf-size-x"],"lfSizeY":[1025,"lf-size-y"],"lfStyle":[1025,"lf-style"],"lfTypes":[1040,"lf-types"],"lfXAxis":[1040,"lf-x-axis"],"lfYAxis":[1040,"lf-y-axis"],"debugInfo":[32],"themeValues":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"resize":[64],"unmount":[64]}],[257,"lf-toggle",{"lfAriaLabel":[1025,"lf-aria-label"],"lfLabel":[1025,"lf-label"],"lfLeadingLabel":[1028,"lf-leading-label"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[4,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}],[257,"lf-upload",{"lfLabel":[1025,"lf-label"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfValue":[16,"lf-value"],"debugInfo":[32],"selectedFiles":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"unmount":[64]}],[257,"lf-chat",{"lfContextWindow":[1026,"lf-context-window"],"lfEmpty":[1025,"lf-empty"],"lfEndpointUrl":[1025,"lf-endpoint-url"],"lfLayout":[1025,"lf-layout"],"lfMaxTokens":[1026,"lf-max-tokens"],"lfPollingInterval":[1026,"lf-polling-interval"],"lfSeed":[1026,"lf-seed"],"lfStyle":[1025,"lf-style"],"lfSystem":[1025,"lf-system"],"lfTemperature":[1026,"lf-temperature"],"lfTypewriterProps":[1028,"lf-typewriter-props"],"lfUiSize":[1537,"lf-ui-size"],"lfValue":[1040,"lf-value"],"currentAbortStreaming":[32],"currentPrompt":[32],"currentTokens":[32],"debugInfo":[32],"history":[32],"status":[32],"view":[32],"abortStreaming":[64],"getDebugInfo":[64],"getHistory":[64],"getLastMessage":[64],"getProps":[64],"refresh":[64],"scrollToBottom":[64],"setHistory":[64],"unmount":[64]},[[0,"keydown","listenKeydown"]],{"lfPollingInterval":["updatePollingInterval"],"lfSystem":["updateTokensCount"]}],[257,"lf-chip",{"lfAriaLabel":[1025,"lf-aria-label"],"lfDataset":[1040,"lf-dataset"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfStyling":[1025,"lf-styling"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[16,"lf-value"],"debugInfo":[32],"expandedNodes":[32],"hiddenNodes":[32],"selectedNodes":[32],"getDebugInfo":[64],"getProps":[64],"getSelectedNodes":[64],"refresh":[64],"setSelectedNodes":[64],"unmount":[64]}],[257,"lf-code",{"lfFadeIn":[1028,"lf-fade-in"],"lfFormat":[1028,"lf-format"],"lfLanguage":[1025,"lf-language"],"lfPreserveSpaces":[1028,"lf-preserve-spaces"],"lfShowCopy":[1028,"lf-show-copy"],"lfShowHeader":[1028,"lf-show-header"],"lfStickyHeader":[1028,"lf-sticky-header"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfLanguage":["loadLanguage"]}],[257,"lf-progressbar",{"lfAnimated":[1540,"lf-animated"],"lfCenteredLabel":[1540,"lf-centered-label"],"lfIcon":[1537,"lf-icon"],"lfIsRadial":[1540,"lf-is-radial"],"lfLabel":[1025,"lf-label"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1026,"lf-value"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}],[257,"lf-textfield",{"lfHelper":[1040,"lf-helper"],"lfHtmlAttributes":[1040,"lf-html-attributes"],"lfIcon":[1025,"lf-icon"],"lfLabel":[1025,"lf-label"],"lfStretchX":[1540,"lf-stretch-x"],"lfStretchY":[1540,"lf-stretch-y"],"lfStyle":[1025,"lf-style"],"lfStyling":[1025,"lf-styling"],"lfTrailingIcon":[1540,"lf-trailing-icon"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1,"lf-value"],"debugInfo":[32],"status":[32],"value":[32],"getDebugInfo":[64],"getElement":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setBlur":[64],"setFocus":[64],"setValue":[64],"unmount":[64]}],[257,"lf-typewriter",{"lfCursor":[1025,"lf-cursor"],"lfDeleteSpeed":[1026,"lf-delete-speed"],"lfLoop":[1028,"lf-loop"],"lfPause":[1026,"lf-pause"],"lfSpeed":[1026,"lf-speed"],"lfStyle":[1025,"lf-style"],"lfTag":[1025,"lf-tag"],"lfUiSize":[1537,"lf-ui-size"],"lfUpdatable":[1028,"lf-updatable"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"displayedText":[32],"isDeleting":[32],"currentTextIndex":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfValue":["handleLfValueChange"]}],[257,"lf-image",{"lfHtmlAttributes":[1040,"lf-html-attributes"],"lfMode":[1537,"lf-mode"],"lfShowSpinner":[1028,"lf-show-spinner"],"lfSizeX":[1025,"lf-size-x"],"lfSizeY":[1025,"lf-size-y"],"lfStyle":[1025,"lf-style"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"error":[32],"isLoaded":[32],"resolvedSpriteName":[32],"getDebugInfo":[64],"getImage":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfValue":["resetState"]}],[257,"lf-button",{"lfAriaLabel":[1025,"lf-aria-label"],"lfDataset":[1040,"lf-dataset"],"lfIcon":[1025,"lf-icon"],"lfIconOff":[1025,"lf-icon-off"],"lfLabel":[1025,"lf-label"],"lfRipple":[1028,"lf-ripple"],"lfShowSpinner":[1540,"lf-show-spinner"],"lfStretchX":[1540,"lf-stretch-x"],"lfStretchY":[1540,"lf-stretch-y"],"lfStyle":[1025,"lf-style"],"lfStyling":[1025,"lf-styling"],"lfToggable":[1028,"lf-toggable"],"lfTrailingIcon":[1028,"lf-trailing-icon"],"lfType":[1025,"lf-type"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[4,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setMessage":[64],"setValue":[64],"unmount":[64]}],[257,"lf-list",{"lfDataset":[1040,"lf-dataset"],"lfEmpty":[1025,"lf-empty"],"lfEnableDeletions":[1028,"lf-enable-deletions"],"lfNavigation":[1028,"lf-navigation"],"lfRipple":[1028,"lf-ripple"],"lfSelectable":[1028,"lf-selectable"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[2,"lf-value"],"debugInfo":[32],"focused":[32],"selected":[32],"focusNext":[64],"focusPrevious":[64],"getDebugInfo":[64],"getProps":[64],"getSelected":[64],"refresh":[64],"selectNode":[64],"unmount":[64]},[[0,"keydown","listenKeydown"]]],[257,"lf-spinner",{"lfActive":[1540,"lf-active"],"lfBarVariant":[1540,"lf-bar-variant"],"lfDimensions":[1025,"lf-dimensions"],"lfFader":[1540,"lf-fader"],"lfFaderTimeout":[1026,"lf-fader-timeout"],"lfFullScreen":[1540,"lf-full-screen"],"lfLayout":[1026,"lf-layout"],"lfStyle":[1025,"lf-style"],"lfTimeout":[1026,"lf-timeout"],"bigWait":[32],"debugInfo":[32],"progress":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfActive":["onFaderChange"],"lfFader":["onFaderChange"],"lfFaderTimeout":["onFaderChange"],"lfBarVariant":["lfBarVariantChanged"],"lfTimeout":["lfTimeoutChanged"]}]]],["p-6f70ee7a",[[257,"lf-masonry",{"lfActions":[1028,"lf-actions"],"lfColumns":[1026,"lf-columns"],"lfDataset":[1040,"lf-dataset"],"lfSelectable":[1540,"lf-selectable"],"lfShape":[1025,"lf-shape"],"lfStyle":[1025,"lf-style"],"lfView":[1025,"lf-view"],"debugInfo":[32],"selectedShape":[32],"shapes":[32],"viewportWidth":[32],"getDebugInfo":[64],"getProps":[64],"getSelectedShape":[64],"redecorateShapes":[64],"refresh":[64],"setSelectedShape":[64],"unmount":[64]},null,{"lfColumns":["validateColumns"],"lfDataset":["updateShapes"],"lfShape":["updateShapes"]}]]],["p-e2900881",[[257,"lf-tabbar",{"lfAriaLabel":[1025,"lf-aria-label"],"lfDataset":[16,"lf-dataset"],"lfNavigation":[4,"lf-navigation"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[8,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}]]],["p-cb639669",[[257,"lf-tree",{"lfAccordionLayout":[1540,"lf-accordion-layout"],"lfDataset":[1040,"lf-dataset"],"lfEmpty":[1025,"lf-empty"],"lfExpandedNodeIds":[1040,"lf-expanded-node-ids"],"lfFilter":[1028,"lf-filter"],"lfGrid":[1540,"lf-grid"],"lfInitialExpansionDepth":[1026,"lf-initial-expansion-depth"],"lfSelectedNodeIds":[1040,"lf-selected-node-ids"],"lfRipple":[1028,"lf-ripple"],"lfSelectable":[1540,"lf-selectable"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"debugInfo":[32],"expandedNodes":[32],"hiddenNodes":[32],"selectedNode":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"getExpandedNodeIds":[64],"getSelectedNodeIds":[64],"setExpandedNodes":[64],"setSelectedNodes":[64],"selectByPredicate":[64],"unmount":[64]},null,{"lfDataset":["handleDatasetChange"],"lfExpandedNodeIds":["handleExpandedPropChange"],"lfSelectedNodeIds":["handleSelectedPropChange"],"lfInitialExpansionDepth":["handleInitialDepthChange"],"lfSelectable":["handleSelectableChange"],"lfFilter":["handleFilterToggle"]}]]]]'), e2))));
 var APIEndpoints;
 (function(APIEndpoints2) {
   APIEndpoints2["ClearAnalytics"] = "/lf-nodes/clear-analytics";
@@ -17423,16 +17418,14 @@ const createEventHandlers = ({ handleInterruptForState: handleInterruptForState2
                 }
                 break;
               case "navigation-tree":
-                if (!treeNode || !state.navigationManager) {
+                if (!state.navigationManager || !treeNode || eventType2 !== "click") {
                   break;
                 }
-                if (eventType2 === "click") {
-                  const hasChildren = treeNode.children && treeNode.children.length > 0;
-                  if (!hasChildren) {
-                    await state.navigationManager.expandNode(treeNode);
-                  }
-                  await state.navigationManager.selectNode(treeNode);
+                const needsLazyLoad = !treeNode.children || treeNode.children.length === 0;
+                if (needsLazyLoad) {
+                  await state.navigationManager.expandNode(treeNode);
                 }
+                await state.navigationManager.handleTreeClick(treeNode);
                 break;
             }
           }
@@ -17648,14 +17641,8 @@ const syncNavigationDirectoryControl = async (state, directoryValue) => {
     state.isSyncingDirectory = false;
   }
 };
-const getLfData = () => {
-  var _a, _b, _c;
-  return (_c = (_b = (_a = getLfManager()) == null ? void 0 : _a.getManagers()) == null ? void 0 : _b.lfFramework) == null ? void 0 : _c.data;
-};
 const extractMetadata = (node) => {
   const lfData = getLfData();
-  if (!lfData)
-    return null;
   const metadata = lfData.node.extractCellMetadata(node, "lfCode", {
     validate: (val) => {
       if (typeof val === "string") {
@@ -17665,8 +17652,9 @@ const extractMetadata = (node) => {
           return false;
         }
       }
-      if (typeof val !== "object" || val === null)
+      if (typeof val !== "object" || val === null) {
         return false;
+      }
       return "id" in val || "name" in val || "paths" in val;
     },
     transform: (val) => {
@@ -17689,130 +17677,81 @@ const extractMetadata = (node) => {
   });
   return metadata ?? null;
 };
-const getDirectoryPath = (metadata) => {
-  return metadata.paths.resolved ?? metadata.paths.raw ?? metadata.paths.relative ?? metadata.name ?? "";
-};
 const createNavigationTreeManager = (imageviewer, editorState) => {
-  const state = {
-    dataset: null,
-    loadedNodes: /* @__PURE__ */ new Set(),
-    pendingNodes: /* @__PURE__ */ new Set()
-  };
-  const updateTreeDataset = async (dataset) => {
-    state.dataset = dataset;
-    imageviewer.lfTreeProps = {
-      ...imageviewer.lfTreeProps,
-      lfDataset: dataset ?? { columns: (dataset == null ? void 0 : dataset.columns) ?? [], nodes: [] }
-    };
-  };
-  const mergeChildren = async (parentId, children, columns) => {
-    if (!state.dataset)
-      return;
-    const lfData = getLfData();
-    if (!lfData)
-      return;
-    const parentNode = lfData.node.find(state.dataset, (node) => node.id === parentId);
-    if (!parentNode)
-      return;
-    const merged = {
-      ...state.dataset,
-      columns: columns || state.dataset.columns,
-      nodes: [...state.dataset.nodes]
-      // Clone to trigger reactivity
-    };
-    parentNode.children = [...children];
-    await updateTreeDataset(merged);
-    state.loadedNodes.add(parentId);
-    state.pendingNodes.delete(parentId);
-  };
   const loadRoots = async () => {
-    var _a;
-    if (state.loadedNodes.has("root"))
-      return;
-    state.pendingNodes.add("root");
+    var _a, _b, _c;
     try {
       const response = await IMAGE_API.explore("", { scope: "roots" });
       if (response.status === LogSeverity.Success && ((_a = response.data) == null ? void 0 : _a.tree)) {
-        await updateTreeDataset(response.data.tree);
-        state.loadedNodes.add("root");
+        if ((_b = imageviewer.lfNavigation) == null ? void 0 : _b.treeProps) {
+          imageviewer.lfNavigation.treeProps.lfDataset = response.data.tree ?? {
+            columns: ((_c = response.data.tree) == null ? void 0 : _c.columns) ?? [],
+            nodes: []
+          };
+        }
       }
     } catch (error2) {
       getLfManager().log("Failed to load navigation roots.", { error: error2 }, LogSeverity.Warning);
-    } finally {
-      state.pendingNodes.delete("root");
     }
   };
   const expandNode = async (node) => {
-    var _a;
+    var _a, _b, _c;
     const metadata = extractMetadata(node);
-    if (!(metadata == null ? void 0 : metadata.hasChildren))
+    if (!(metadata == null ? void 0 : metadata.hasChildren)) {
       return;
+    }
     const nodeId = metadata.id;
-    if (state.loadedNodes.has(nodeId) || state.pendingNodes.has(nodeId))
+    const path = normalizeDirectoryRequest(metadata.paths.raw ?? metadata.paths.relative ?? metadata.paths.resolved ?? metadata.name ?? "");
+    if (!path) {
       return;
-    const path = normalizeDirectoryRequest(getDirectoryPath(metadata));
-    if (!path)
-      return;
-    state.pendingNodes.add(nodeId);
+    }
     try {
       const response = await IMAGE_API.explore(path, { scope: "tree", nodePath: path });
       if (response.status === LogSeverity.Success && ((_a = response.data) == null ? void 0 : _a.tree)) {
         const branch = response.data.tree;
-        if (Array.isArray(branch.nodes)) {
-          await mergeChildren(nodeId, branch.nodes, branch.columns);
+        if (!Array.isArray(branch.nodes)) {
+          return;
         }
+        const currentDataset = (_c = (_b = imageviewer.lfNavigation) == null ? void 0 : _b.treeProps) == null ? void 0 : _c.lfDataset;
+        if (!currentDataset) {
+          return;
+        }
+        const lfData = getLfData();
+        if (!lfData) {
+          return;
+        }
+        const parentNode = lfData.node.find(currentDataset, (n2) => n2.id === nodeId);
+        if (!parentNode) {
+          return;
+        }
+        parentNode.children = branch.nodes;
+        imageviewer.lfNavigation.treeProps.lfDataset = {
+          ...currentDataset,
+          columns: branch.columns ?? currentDataset.columns,
+          nodes: [...currentDataset.nodes]
+        };
       }
     } catch (error2) {
       getLfManager().log("Failed to expand node.", { error: error2, nodeId, path }, LogSeverity.Warning);
-    } finally {
-      state.pendingNodes.delete(nodeId);
     }
   };
-  const syncSelection = async (nodeId) => {
-    try {
-      const { navigation } = await imageviewer.getComponents();
-      if (navigation == null ? void 0 : navigation.tree) {
-        await navigation.tree.setSelectedNodes(nodeId);
-      }
-    } catch (error2) {
-      getLfManager().log("Failed to sync tree selection.", { error: error2, nodeId }, LogSeverity.Warning);
-    }
-  };
-  const selectNode = async (node) => {
+  const handleTreeClick = async (node) => {
     var _a;
     const metadata = extractMetadata(node);
-    if (!metadata)
+    if (!metadata) {
       return;
-    const targetPath = normalizeDirectoryRequest(getDirectoryPath(metadata));
-    const currentPath = normalizeDirectoryRequest(editorState.directoryValue ?? deriveDirectoryValue(editorState.directory) ?? "");
-    await syncSelection(metadata.id);
-    if (targetPath === currentPath && !metadata.isRoot)
-      return;
-    await ((_a = editorState.refreshDirectory) == null ? void 0 : _a.call(editorState, targetPath));
-  };
-  const syncSelectionByPath = async (directoryPath) => {
-    const normalizedPath = normalizeDirectoryRequest(directoryPath);
-    try {
-      const { navigation } = await imageviewer.getComponents();
-      if (!(navigation == null ? void 0 : navigation.tree))
-        return;
-      await navigation.tree.selectByPredicate((node) => {
-        const metadata = extractMetadata(node);
-        if (!metadata)
-          return false;
-        const nodePath = normalizeDirectoryRequest(getDirectoryPath(metadata));
-        return nodePath === normalizedPath;
-      });
-    } catch (error2) {
-      getLfManager().log("Failed to sync selection by path.", { error: error2, path: directoryPath }, LogSeverity.Warning);
     }
+    const targetPath = normalizeDirectoryRequest(metadata.paths.raw ?? metadata.paths.relative ?? metadata.paths.resolved ?? metadata.name ?? "");
+    const currentPath = normalizeDirectoryRequest(editorState.directoryValue ?? deriveDirectoryValue(editorState.directory) ?? "");
+    if (targetPath === currentPath && !metadata.isRoot) {
+      return;
+    }
+    await ((_a = editorState.refreshDirectory) == null ? void 0 : _a.call(editorState, targetPath));
   };
   return {
     loadRoots,
     expandNode,
-    selectNode,
-    syncSelectionByPath,
-    getState: () => ({ ...state })
+    handleTreeClick
   };
 };
 const IMAGE_EDITOR_INSTANCES = /* @__PURE__ */ new Set();
@@ -17883,20 +17822,15 @@ const imageEditorFactory = {
     const navigationTreeEnabled = node.comfyClass === NodeName.loadAndEditImages;
     let navigationManager = null;
     if (navigationTreeEnabled) {
-      imageviewer.lfNavigationTree = {
-        defaultOpen: true,
-        enabled: true,
-        minWidth: 240,
-        width: 320,
-        position: "start"
-      };
-      imageviewer.lfTreeProps = {
-        ...NAVIGATION_TREE_PROPS_BASE,
-        lfDataset: { columns: [], nodes: [] }
+      imageviewer.lfNavigation = {
+        isTreeOpen: true,
+        treeProps: {
+          ...NAVIGATION_TREE_PROPS_BASE,
+          lfDataset: { columns: [], nodes: [] }
+        }
       };
     }
     const refresh = async (directory) => {
-      var _a;
       const state2 = STATE$h.get(wrapper);
       const normalizedDirectory = normalizeDirectoryRequest(directory);
       if (!state2) {
@@ -17905,32 +17839,13 @@ const imageEditorFactory = {
       state2.hasAutoDirectoryLoad = true;
       state2.lastRequestedDirectory = normalizedDirectory;
       try {
-        if (navigationTreeEnabled) {
-          const response2 = await IMAGE_API.explore(normalizedDirectory, { scope: "dataset" });
-          if (response2.status !== LogSeverity.Success) {
-            getLfManager().log("Images not found.", { response: response2 }, LogSeverity.Info);
-            return;
-          }
-          const dataset2 = ((_a = response2.data) == null ? void 0 : _a.dataset) ?? { nodes: [] };
-          const mergedDirectory2 = mergeNavigationDirectory(dataset2, { raw: normalizedDirectory });
-          state2.directory = { ...mergedDirectory2 };
-          const derivedDirectoryValue2 = deriveDirectoryValue(mergedDirectory2);
-          state2.directoryValue = derivedDirectoryValue2 ?? normalizedDirectory;
-          state2.lastRequestedDirectory = state2.directoryValue;
-          ensureDatasetContext(dataset2, state2);
-          imageviewer.lfDataset = dataset2;
-          await syncNavigationDirectoryControl(state2, state2.directoryValue);
-          if (state2.navigationManager && state2.directoryValue) {
-            await state2.navigationManager.syncSelectionByPath(state2.directoryValue);
-          }
-          return;
-        }
-        const response = await IMAGE_API.get(normalizedDirectory);
+        const response = navigationTreeEnabled ? await IMAGE_API.explore(normalizedDirectory, { scope: "dataset" }) : await IMAGE_API.get(normalizedDirectory);
         if (response.status !== LogSeverity.Success) {
           getLfManager().log("Images not found.", { response }, LogSeverity.Info);
           return;
         }
-        const dataset = response.data ?? { nodes: [] };
+        const rawData = response.data;
+        const dataset = (navigationTreeEnabled ? rawData == null ? void 0 : rawData.dataset : rawData) ?? { nodes: [] };
         const mergedDirectory = mergeNavigationDirectory(dataset, { raw: normalizedDirectory });
         state2.directory = { ...mergedDirectory };
         const derivedDirectoryValue = deriveDirectoryValue(mergedDirectory);
@@ -17939,9 +17854,6 @@ const imageEditorFactory = {
         ensureDatasetContext(dataset, state2);
         imageviewer.lfDataset = dataset;
         await syncNavigationDirectoryControl(state2, state2.directoryValue);
-        if (state2.navigationManager && state2.directoryValue) {
-          await state2.navigationManager.syncSelectionByPath(state2.directoryValue);
-        }
       } catch (error2) {
         getLfManager().log("Failed to refresh image directory.", { error: error2, directory: normalizedDirectory }, LogSeverity.Warning);
       }
@@ -21648,6 +21560,10 @@ const unescapeJson = (input) => {
 const getApiRoutes = () => {
   return getLfManager().getApiRoutes();
 };
+const getLfData = () => {
+  var _a;
+  return (_a = getLfManager().getManagers().lfFramework) == null ? void 0 : _a.data;
+};
 const getLfManager = () => {
   return window[LF_MANAGER_SYMBOL];
 };
@@ -21788,117 +21704,117 @@ lfManager.initialize();
   console.log("LF Manager initialized!", lfManager);
 }
 export {
-  LF_THEME_COLORS_DATA_PREFIX as $,
+  LF_ACCORDION_PROPS as $,
   AVATAR_COVER as A,
-  LF_BADGE_BLOCKS as B,
+  LF_CAROUSEL_PROPS as B,
   CY_ATTRIBUTES as C,
   D$1 as D,
-  LF_BADGE_PARTS as E,
-  LF_BADGE_PROPS as F,
-  LF_BUTTON_BLOCKS as G,
-  LF_BUTTON_PARTS as H,
+  LF_CAROUSEL_IDS as E,
+  LF_PLACEHOLDER_BLOCKS as F,
+  LF_PLACEHOLDER_PARTS as G,
+  LF_PLACEHOLDER_PROPS as H,
   IMAGE_TYPE_IDS as I,
-  LF_BUTTON_PROPS as J,
-  LF_CANVAS_BLOCKS as K,
-  LF_MASONRY_DEFAULT_COLUMNS as L,
-  LF_CANVAS_PARTS as M,
-  LF_CANVAS_PROPS as N,
+  LF_MASONRY_DEFAULT_COLUMNS as J,
+  LF_MASONRY_BLOCKS as K,
+  LF_MESSENGER_CLEAN_UI as L,
+  LF_MASONRY_PARTS as M,
+  LF_MASONRY_CSS_VARS as N,
   OPTION_TYPE_IDS as O,
-  LF_CARD_BLOCKS as P,
-  LF_CARD_PARTS as Q,
-  LF_CARD_CSS_VARS as R,
+  LF_MASONRY_PROPS as P,
+  LF_MASONRY_IDS as Q,
+  LF_TOAST_BLOCKS as R,
   STYLE_COVER as S,
   TIMEFRAME_COVER as T,
-  LF_CARD_DEFAULTS as U,
+  LF_TOAST_PARTS as U,
   V,
   W$1 as W,
-  LF_CARD_PROPS as X,
-  LF_CHART_BLOCKS as Y,
-  LF_CHART_PARTS as Z,
-  LF_CHART_CSS_VARS as _,
-  LF_MASONRY_BLOCKS as a,
-  LF_ACCORDION_PARTS as a$,
-  LF_CHART_PROPS as a0,
-  LF_CHAT_BLOCKS as a1,
-  LF_CHAT_PARTS as a2,
-  LF_CHAT_PROPS as a3,
-  LF_CHIP_BLOCKS as a4,
-  LF_CHIP_PARTS as a5,
-  LF_CHIP_PROPS as a6,
-  LF_CODE_BLOCKS as a7,
-  LF_CODE_PARTS as a8,
-  LF_CODE_PROPS as a9,
-  LF_UPLOAD_PARTS as aA,
-  LF_UPLOAD_PROPS as aB,
-  LF_BADGE_CSS_VARS as aC,
-  LF_CHIP_CSS_VARS as aD,
-  LF_CARD_IDS as aE,
-  LF_CHAT_IDS as aF,
-  LF_THEME_ICONS as aG,
-  LF_HEADER_BLOCKS as aH,
-  LF_HEADER_PARTS as aI,
-  LF_HEADER_PROPS as aJ,
-  LF_HEADER_SLOT as aK,
-  LF_PLACEHOLDER_BLOCKS as aL,
-  LF_PLACEHOLDER_PARTS as aM,
-  LF_PLACEHOLDER_PROPS as aN,
-  LF_CAROUSEL_BLOCKS as aO,
-  LF_CAROUSEL_PARTS as aP,
-  LF_CAROUSEL_PROPS as aQ,
-  LF_CAROUSEL_IDS as aR,
-  LF_IMAGEVIEWER_BLOCKS as aS,
-  LF_IMAGEVIEWER_PARTS as aT,
-  LF_IMAGEVIEWER_PROPS as aU,
-  IDS as aV,
-  LF_TOAST_BLOCKS as aW,
-  LF_TOAST_PARTS as aX,
-  LF_TOAST_CSS_VARIABLES as aY,
-  LF_TOAST_PROPS as aZ,
-  LF_ACCORDION_BLOCKS as a_,
-  LF_IMAGE_BLOCKS as aa,
-  LF_IMAGE_PARTS as ab,
-  LF_IMAGE_CSS_VARS as ac,
-  LF_IMAGE_PROPS as ad,
-  CSS_VAR_PREFIX as ae,
-  LF_LIST_BLOCKS as af,
-  LF_LIST_PARTS as ag,
-  LF_LIST_PROPS as ah,
-  LF_PHOTOFRAME_BLOCKS as ai,
-  LF_PHOTOFRAME_PARTS as aj,
-  LF_PHOTOFRAME_PROPS as ak,
-  LF_PROGRESSBAR_BLOCKS as al,
-  LF_PROGRESSBAR_PARTS as am,
-  LF_PROGRESSBAR_CSS_VARIABLES as an,
-  LF_PROGRESSBAR_PROPS as ao,
-  LF_SPINNER_PROPS as ap,
-  LF_TEXTFIELD_BLOCKS as aq,
-  LF_TEXTFIELD_PARTS as ar,
-  LF_TEXTFIELD_PROPS as as,
-  LF_TOGGLE_BLOCKS as at,
-  LF_TOGGLE_PARTS as au,
-  LF_TOGGLE_PROPS as av,
-  LF_TYPEWRITER_BLOCKS as aw,
-  LF_TYPEWRITER_PARTS as ax,
-  LF_TYPEWRITER_PROPS as ay,
-  LF_UPLOAD_BLOCKS as az,
+  LF_TOAST_CSS_VARIABLES as X,
+  LF_TOAST_PROPS as Y,
+  LF_ACCORDION_BLOCKS as Z,
+  LF_ACCORDION_PARTS as _,
+  LF_MESSENGER_BLOCKS as a,
+  LF_ARTICLE_PROPS as a$,
+  LF_BADGE_BLOCKS as a0,
+  LF_BADGE_PARTS as a1,
+  LF_BADGE_PROPS as a2,
+  LF_BUTTON_BLOCKS as a3,
+  LF_BUTTON_PARTS as a4,
+  LF_BUTTON_PROPS as a5,
+  LF_CANVAS_BLOCKS as a6,
+  LF_CANVAS_PARTS as a7,
+  LF_CANVAS_PROPS as a8,
+  LF_CARD_BLOCKS as a9,
+  LF_PHOTOFRAME_BLOCKS as aA,
+  LF_PHOTOFRAME_PARTS as aB,
+  LF_PHOTOFRAME_PROPS as aC,
+  LF_PROGRESSBAR_BLOCKS as aD,
+  LF_PROGRESSBAR_PARTS as aE,
+  LF_PROGRESSBAR_CSS_VARIABLES as aF,
+  LF_PROGRESSBAR_PROPS as aG,
+  LF_SPINNER_PROPS as aH,
+  LF_TEXTFIELD_BLOCKS as aI,
+  LF_TEXTFIELD_PARTS as aJ,
+  LF_TEXTFIELD_PROPS as aK,
+  LF_TOGGLE_BLOCKS as aL,
+  LF_TOGGLE_PARTS as aM,
+  LF_TOGGLE_PROPS as aN,
+  LF_TYPEWRITER_BLOCKS as aO,
+  LF_TYPEWRITER_PARTS as aP,
+  LF_TYPEWRITER_PROPS as aQ,
+  LF_UPLOAD_BLOCKS as aR,
+  LF_UPLOAD_PARTS as aS,
+  LF_UPLOAD_PROPS as aT,
+  LF_BADGE_CSS_VARS as aU,
+  LF_CHIP_CSS_VARS as aV,
+  LF_CARD_IDS as aW,
+  LF_CHAT_IDS as aX,
+  LF_THEME_ICONS as aY,
+  LF_ARTICLE_BLOCKS as aZ,
+  LF_ARTICLE_PARTS as a_,
+  LF_CARD_PARTS as aa,
+  LF_CARD_CSS_VARS as ab,
+  LF_CARD_DEFAULTS as ac,
+  LF_CARD_PROPS as ad,
+  LF_CHART_BLOCKS as ae,
+  LF_CHART_PARTS as af,
+  LF_CHART_CSS_VARS as ag,
+  LF_THEME_COLORS_DATA_PREFIX as ah,
+  LF_CHART_PROPS as ai,
+  LF_CHAT_BLOCKS as aj,
+  LF_CHAT_PARTS as ak,
+  LF_CHAT_PROPS as al,
+  LF_CHIP_BLOCKS as am,
+  LF_CHIP_PARTS as an,
+  LF_CHIP_PROPS as ao,
+  LF_CODE_BLOCKS as ap,
+  LF_CODE_PARTS as aq,
+  LF_CODE_PROPS as ar,
+  LF_IMAGE_BLOCKS as as,
+  LF_IMAGE_PARTS as at,
+  LF_IMAGE_CSS_VARS as au,
+  LF_IMAGE_PROPS as av,
+  CSS_VAR_PREFIX as aw,
+  LF_LIST_BLOCKS as ax,
+  LF_LIST_PARTS as ay,
+  LF_LIST_PROPS as az,
   LF_ATTRIBUTES as b,
-  LF_ACCORDION_PROPS as b0,
-  LF_ARTICLE_BLOCKS as b1,
-  LF_ARTICLE_PARTS as b2,
-  LF_ARTICLE_PROPS as b3,
-  LF_COMPARE_BLOCKS as b4,
-  LF_COMPARE_PARTS as b5,
-  LF_COMPARE_CSS_VARS as b6,
-  LF_COMPARE_DEFAULTS as b7,
-  LF_COMPARE_PROPS as b8,
-  LF_COMPARE_IDS as b9,
-  LF_TABBAR_BLOCKS as ba,
-  LF_TABBAR_PARTS as bb,
-  LF_TABBAR_PROPS as bc,
-  LF_TREE_BLOCKS as bd,
-  LF_TREE_PARTS as be,
-  LF_TREE_PROPS as bf,
-  LF_TREE_CSS_VARIABLES as bg,
+  LF_COMPARE_BLOCKS as b0,
+  LF_COMPARE_PARTS as b1,
+  LF_COMPARE_CSS_VARS as b2,
+  LF_COMPARE_DEFAULTS as b3,
+  LF_COMPARE_PROPS as b4,
+  LF_COMPARE_IDS as b5,
+  LF_IMAGEVIEWER_BLOCKS as b6,
+  LF_IMAGEVIEWER_PARTS as b7,
+  LF_IMAGEVIEWER_PROPS as b8,
+  IDS as b9,
+  LF_TREE_BLOCKS as ba,
+  LF_TREE_PARTS as bb,
+  LF_TREE_PROPS as bc,
+  LF_TREE_CSS_VARIABLES as bd,
+  LF_TABBAR_BLOCKS as be,
+  LF_TABBAR_PARTS as bf,
+  LF_TABBAR_PROPS as bg,
   LF_DRAWER_BLOCKS as bh,
   LF_DRAWER_PARTS as bi,
   LF_DRAWER_PROPS as bj,
@@ -21909,28 +21825,28 @@ export {
   LF_SLIDER_CSS_VARIABLES as bo,
   LF_SLIDER_PROPS as bp,
   onFrameworkReady as bq,
-  LF_MASONRY_PARTS as c,
+  LF_MESSENGER_PARTS as c,
   LF_STYLE_ID as d,
-  LF_MASONRY_CSS_VARS as e,
-  LF_WRAPPER_ID as f,
-  LF_MASONRY_PROPS as g,
-  LF_MASONRY_IDS as h,
-  LF_MESSENGER_CLEAN_UI as i,
+  LF_WRAPPER_ID as e,
+  LF_MESSENGER_PROPS as f,
+  LF_MESSENGER_IDS as g,
+  LF_MESSENGER_FILTER as h,
+  LF_MESSENGER_NAV as i,
   jt as j,
-  LF_MESSENGER_BLOCKS as k,
-  LF_MESSENGER_PARTS as l,
-  LF_MESSENGER_PROPS as m,
+  LF_MESSENGER_MENU as k,
+  OUTFIT_COVER as l,
+  LOCATION_COVER as m,
   n,
-  LF_MESSENGER_IDS as o,
+  CHILD_ROOT_MAP as o,
   pt as p,
-  LF_MESSENGER_FILTER as q,
-  LF_MESSENGER_NAV as r,
-  LF_MESSENGER_MENU as s,
-  OUTFIT_COVER as t,
-  LOCATION_COVER as u,
-  CHILD_ROOT_MAP as v,
-  LF_SPLASH_BLOCKS as w,
-  LF_SPLASH_PARTS as x,
-  LF_SPLASH_PROPS as y,
+  LF_SPLASH_BLOCKS as q,
+  LF_SPLASH_PARTS as r,
+  LF_SPLASH_PROPS as s,
+  LF_HEADER_BLOCKS as t,
+  LF_HEADER_PARTS as u,
+  LF_HEADER_PROPS as v,
+  LF_HEADER_SLOT as w,
+  LF_CAROUSEL_BLOCKS as x,
+  LF_CAROUSEL_PARTS as y,
   z
 };

@@ -1,5 +1,5 @@
-import { n, V, ba as LF_TABBAR_BLOCKS, C as CY_ATTRIBUTES, b as LF_ATTRIBUTES, bb as LF_TABBAR_PARTS, d as LF_STYLE_ID, f as LF_WRAPPER_ID, D as D$1, bc as LF_TABBAR_PROPS, p as pt, W as W$1, z as z$1 } from "./index-EOkmblAM.js";
-import { a } from "./p-Dl9cVpAY-5guf9rt2.js";
+import { n, V, be as LF_TABBAR_BLOCKS, C as CY_ATTRIBUTES, b as LF_ATTRIBUTES, bf as LF_TABBAR_PARTS, d as LF_STYLE_ID, e as LF_WRAPPER_ID, D as D$1, bg as LF_TABBAR_PROPS, p as pt, W as W$1, z as z$1 } from "./index-CFbZEfEd.js";
+import { a } from "./p-Dl9cVpAY-teeJEAws.js";
 const p = (t, r) => {
   if (t) {
     const a2 = t.scrollLeft;
