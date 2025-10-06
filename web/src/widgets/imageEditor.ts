@@ -146,42 +146,20 @@ export const imageEditorFactory: ImageEditorFactory = {
       state.lastRequestedDirectory = normalizedDirectory;
 
       try {
-        if (navigationTreeEnabled) {
-          const response = await IMAGE_API.explore(normalizedDirectory, { scope: 'dataset' });
-          if (response.status !== LogSeverity.Success) {
-            getLfManager().log('Images not found.', { response }, LogSeverity.Info);
-            return;
-          }
+        const response = navigationTreeEnabled
+          ? await IMAGE_API.explore(normalizedDirectory, { scope: 'dataset' })
+          : await IMAGE_API.get(normalizedDirectory);
 
-          const dataset = (response.data?.dataset ?? { nodes: [] }) as ImageEditorDataset;
-          const mergedDirectory = mergeNavigationDirectory(dataset, { raw: normalizedDirectory });
-
-          state.directory = { ...mergedDirectory };
-          const derivedDirectoryValue = deriveDirectoryValue(mergedDirectory);
-          state.directoryValue = derivedDirectoryValue ?? normalizedDirectory;
-          state.lastRequestedDirectory = state.directoryValue;
-
-          ensureDatasetContext(dataset, state);
-
-          imageviewer.lfDataset = dataset;
-
-          await syncNavigationDirectoryControl(state, state.directoryValue);
-
-          // Sync tree selection to highlight the current directory
-          if (state.navigationManager && state.directoryValue) {
-            await state.navigationManager.syncSelectionByPath(state.directoryValue);
-          }
-
-          return;
-        }
-
-        const response = await IMAGE_API.get(normalizedDirectory);
         if (response.status !== LogSeverity.Success) {
           getLfManager().log('Images not found.', { response }, LogSeverity.Info);
           return;
         }
 
-        const dataset = (response.data ?? { nodes: [] }) as ImageEditorDataset;
+        const rawData: any = response.data;
+        const dataset =
+          (navigationTreeEnabled ? rawData?.dataset : rawData) ??
+          ({ nodes: [] } as ImageEditorDataset);
+
         const mergedDirectory = mergeNavigationDirectory(dataset, { raw: normalizedDirectory });
 
         state.directory = { ...mergedDirectory };
@@ -192,12 +170,8 @@ export const imageEditorFactory: ImageEditorFactory = {
         ensureDatasetContext(dataset, state);
 
         imageviewer.lfDataset = dataset;
-        await syncNavigationDirectoryControl(state, state.directoryValue);
 
-        // Sync tree selection to highlight the current directory
-        if (state.navigationManager && state.directoryValue) {
-          await state.navigationManager.syncSelectionByPath(state.directoryValue);
-        }
+        await syncNavigationDirectoryControl(state, state.directoryValue);
       } catch (error) {
         getLfManager().log(
           'Failed to refresh image directory.',
@@ -310,7 +284,6 @@ export const imageEditorFactory: ImageEditorFactory = {
     STATE.set(wrapper, state);
     IMAGE_EDITOR_INSTANCES.add(state);
 
-    // Initialize navigation tree manager after state is set
     if (navigationTreeEnabled) {
       navigationManager = createNavigationTreeManager(imageviewer, state);
       state.navigationManager = navigationManager;

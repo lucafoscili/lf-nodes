@@ -225,9 +225,11 @@ export const createEventHandlers = ({
 
       switch (eventType) {
         case 'lf-event': {
+          // Events bubbled up
           const ogEv = originalEvent as LfEvent;
 
           if (isTree(ogEv.detail.comp)) {
+            // Check if it's a tree event
             const treeEvent = ogEv as CustomEvent<LfTreeEventPayload>;
             const { id, node: treeNode, eventType } = treeEvent.detail;
 
@@ -239,19 +241,16 @@ export const createEventHandlers = ({
                 break;
 
               case 'navigation-tree':
-                if (!treeNode || !state.navigationManager) {
+                if (!state.navigationManager || !treeNode || eventType !== 'click') {
                   break;
                 }
 
-                if (eventType === 'click') {
-                  const hasChildren = treeNode.children && treeNode.children.length > 0;
-
-                  if (!hasChildren) {
-                    await state.navigationManager.expandNode(treeNode);
-                  }
-
-                  await state.navigationManager.selectNode(treeNode);
+                const needsLazyLoad = !treeNode.children || treeNode.children.length === 0;
+                if (needsLazyLoad) {
+                  await state.navigationManager.expandNode(treeNode);
                 }
+
+                await state.navigationManager.handleTreeClick(treeNode);
                 break;
             }
           }
