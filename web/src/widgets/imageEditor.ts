@@ -1,4 +1,4 @@
-import { LfTreeEventPayload, LfTreeInterface } from '@lf-widgets/foundations';
+import { LfTreeInterface } from '@lf-widgets/foundations';
 import { IMAGE_API } from '../api/image';
 import { SETTINGS, TREE_DATA } from '../fixtures/imageEditor';
 import { EV_HANDLERS, getStatusColumn, setGridStatus, updateCb } from '../helpers/imageEditor';
@@ -123,7 +123,6 @@ export const imageEditorFactory: ImageEditorFactory = {
 
     const navigationTreeEnabled = node.comfyClass === NodeName.loadAndEditImages;
     let navigationManager: ReturnType<typeof createNavigationTreeManager> | null = null;
-    let expandedNodes = new Set<string>();
 
     if (navigationTreeEnabled) {
       imageviewer.lfNavigationTree = {
@@ -222,17 +221,13 @@ export const imageEditorFactory: ImageEditorFactory = {
         return;
       }
 
-      let directoryValue = normalizeDirectoryRequest(value);
-      if (!directoryValue) {
-        const fallbackDirectory =
-          state.directoryValue ?? deriveDirectoryValue(state.directory) ?? undefined;
-        directoryValue = normalizeDirectoryRequest(fallbackDirectory);
-      }
+      const directoryValue = normalizeDirectoryRequest(value);
 
       if (
         state.lastRequestedDirectory === directoryValue &&
         state.directoryValue === directoryValue
       ) {
+        getLfManager().log('lfLoadCallback: directory unchanged, skipping', {}, LogSeverity.Info);
         return;
       }
 
@@ -323,23 +318,6 @@ export const imageEditorFactory: ImageEditorFactory = {
     if (navigationTreeEnabled) {
       navigationManager = createNavigationTreeManager(imageviewer, state);
       state.navigationManager = navigationManager;
-
-      // Handle tree events
-      imageviewer.addEventListener('lf-tree-event', async (e) => {
-        if (!navigationManager) return;
-
-        const treeEvent = e as CustomEvent<LfTreeEventPayload>;
-        const { node, expansion } = treeEvent.detail;
-        if (!node) return;
-
-        if (expansion) {
-          // User clicked expand icon - load subdirectories
-          await navigationManager.expandNode(node);
-        } else {
-          // User clicked node itself - select and load images
-          await navigationManager.selectNode(node);
-        }
-      });
     }
 
     void Promise.resolve().then(async () => {

@@ -3,8 +3,6 @@ import {
   LfCanvasElement,
   LfCanvasEventPayload,
   LfCanvasInterface,
-  LfDataDataset,
-  LfDataNode,
   LfEvent,
   LfImageEventPayload,
   LfImageviewerEventPayload,
@@ -15,7 +13,6 @@ import {
   LfToggleEventPayload,
   LfTreeEventPayload,
 } from '@lf-widgets/foundations';
-import { IMAGE_API } from '../../api/image';
 import { SETTINGS } from '../../fixtures/imageEditor';
 import { LogSeverity } from '../../types/manager/manager';
 import {
@@ -228,26 +225,38 @@ export const createEventHandlers = ({
 
       switch (eventType) {
         case 'lf-event': {
-          // Events bubbled up by imageviewer's children
           const ogEv = originalEvent as LfEvent;
-          switch (ogEv.detail.eventType) {
-            case 'click':
-              // Check if it's a tree event
-              if (isTree(ogEv.detail.comp)) {
-                const treeEvent = ogEv as CustomEvent<LfTreeEventPayload>;
-                const { id, node } = treeEvent.detail;
 
-                switch (id) {
-                  case 'details-tree':
-                    if (node?.cells?.lfCode) {
-                      prepSettings(state, node);
-                    }
-                    break;
-                  // navigation-tree events now handled directly in imageEditor.ts
+          if (isTree(ogEv.detail.comp)) {
+            const treeEvent = ogEv as CustomEvent<LfTreeEventPayload>;
+            const { id, node: treeNode, eventType } = treeEvent.detail;
+
+            switch (id) {
+              case 'details-tree':
+                if (treeNode?.cells?.lfCode && eventType === 'click') {
+                  prepSettings(state, treeNode);
                 }
-              }
-              break;
+                break;
 
+              case 'navigation-tree':
+                if (!treeNode || !state.navigationManager) {
+                  break;
+                }
+
+                if (eventType === 'click') {
+                  const hasChildren = treeNode.children && treeNode.children.length > 0;
+
+                  if (!hasChildren) {
+                    await state.navigationManager.expandNode(treeNode);
+                  }
+
+                  await state.navigationManager.selectNode(treeNode);
+                }
+                break;
+            }
+          }
+
+          switch (ogEv.detail.eventType) {
             case 'lf-event': // Events bubbled up further
               // Check if it's a masonry event
               const masonryEvent = ogEv as CustomEvent<LfMasonryEventPayload>;

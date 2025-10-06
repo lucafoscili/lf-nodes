@@ -1,4 +1,4 @@
-import { LfDataDataset, LfDataNode, LfTreeElement } from '@lf-widgets/foundations';
+import { LfDataDataset, LfDataNode } from '@lf-widgets/foundations';
 import { IMAGE_API } from '../../api/image';
 import { LogSeverity } from '../../types/manager/manager';
 import { ImageEditorState } from '../../types/widgets/imageEditor';
@@ -9,7 +9,6 @@ interface NavigationTreeState {
   dataset: LfDataDataset | null;
   loadedNodes: Set<string>;
   pendingNodes: Set<string>;
-  selectedNodeId: string | null;
 }
 
 interface NavigationMetadata {
@@ -27,21 +26,42 @@ interface NavigationMetadata {
 const getLfData = () => getLfManager()?.getManagers()?.lfFramework?.data;
 
 const extractMetadata = (node: LfDataNode): NavigationMetadata | null => {
-  try {
-    const raw = (node.cells?.lfCode as { value?: unknown })?.value;
-    if (typeof raw !== 'string') return null;
+  const lfData = getLfData();
+  if (!lfData) return null;
 
-    const parsed = JSON.parse(raw) as Partial<NavigationMetadata>;
-    return {
-      id: parsed.id ?? String(node.id ?? ''),
-      name: parsed.name ?? String(node.value ?? ''),
-      hasChildren: Boolean(parsed.hasChildren),
-      paths: parsed.paths ?? {},
-      isRoot: parsed.isRoot,
-    };
-  } catch {
-    return null;
-  }
+  const metadata = lfData.node.extractCellMetadata<NavigationMetadata>(node, 'lfCode', {
+    validate: (val): val is NavigationMetadata => {
+      if (typeof val === 'string') {
+        try {
+          val = JSON.parse(val);
+        } catch {
+          return false;
+        }
+      }
+      if (typeof val !== 'object' || val === null) return false;
+      return 'id' in val || 'name' in val || 'paths' in val;
+    },
+    transform: (val) => {
+      let parsed = val;
+      if (typeof val === 'string') {
+        try {
+          parsed = JSON.parse(val);
+        } catch {
+          parsed = val;
+        }
+      }
+
+      return {
+        id: parsed.id ?? String(node.id ?? ''),
+        name: parsed.name ?? String(node.value ?? ''),
+        hasChildren: Boolean(parsed.hasChildren),
+        paths: parsed.paths ?? {},
+        isRoot: parsed.isRoot,
+      };
+    },
+  });
+
+  return metadata ?? null;
 };
 
 const getDirectoryPath = (metadata: NavigationMetadata): string => {
@@ -58,28 +78,14 @@ export const createNavigationTreeManager = (
     dataset: null,
     loadedNodes: new Set(),
     pendingNodes: new Set(),
-    selectedNodeId: null,
   };
 
   const updateTreeDataset = async (dataset: LfDataDataset | null) => {
     state.dataset = dataset;
 
-    // Get current expansion state before updating dataset
-    let expandedIds: string[] = [];
-    try {
-      const { navigation } = await imageviewer.getComponents();
-      if (navigation?.tree?.getExpandedNodeIds) {
-        expandedIds = await navigation.tree.getExpandedNodeIds();
-      }
-    } catch {
-      // Tree not ready yet, that's okay
-    }
-
-    // Update dataset with expansion preserved via lfExpandedNodeIds prop
     imageviewer.lfTreeProps = {
       ...imageviewer.lfTreeProps,
       lfDataset: dataset ?? { columns: dataset?.columns ?? [], nodes: [] },
-      lfExpandedNodeIds: expandedIds.length > 0 ? expandedIds : undefined,
     };
   };
 
@@ -152,7 +158,6 @@ export const createNavigationTreeManager = (
       const { navigation } = await imageviewer.getComponents();
       if (navigation?.tree) {
         await navigation.tree.setSelectedNodes(nodeId);
-        state.selectedNodeId = nodeId;
       }
     } catch (error) {
       getLfManager().log('Failed to sync tree selection.', { error, nodeId }, LogSeverity.Warning);
@@ -168,57 +173,32 @@ export const createNavigationTreeManager = (
       editorState.directoryValue ?? deriveDirectoryValue(editorState.directory) ?? '',
     );
 
-    // Update tree selection to highlight current directory
     await syncSelection(metadata.id);
 
-    // Skip refresh if we're already at this directory (unless it's a root)
     if (targetPath === currentPath && !metadata.isRoot) return;
 
-    // Load images from this directory into the grid
     await editorState.refreshDirectory?.(targetPath);
   };
 
-  const persistExpansion = async (
-    tree: LfTreeElement,
-    expandedIds: string[],
-  ): Promise<Set<string>> => {
-    if (!tree.setExpandedNodes) {
-      return new Set(expandedIds);
-    }
-
-    try {
-      await tree.setExpandedNodes(expandedIds);
-      if (tree.getExpandedNodeIds) {
-        const normalized = await tree.getExpandedNodeIds();
-        return new Set(normalized);
-      }
-    } catch (error) {
-      getLfManager().log('Failed to persist tree expansion.', { error }, LogSeverity.Warning);
-    }
-    return new Set(expandedIds);
-  };
-
   const syncSelectionByPath = async (directoryPath: string) => {
-    if (!state.dataset) return;
-
-    const lfData = getLfData();
-    if (!lfData) return;
-
     const normalizedPath = normalizeDirectoryRequest(directoryPath);
 
-    // Find node matching this path
-    const matchingNode = lfData.node.find(state.dataset, (node) => {
-      const metadata = extractMetadata(node);
-      if (!metadata) return false;
-      const nodePath = normalizeDirectoryRequest(getDirectoryPath(metadata));
-      return nodePath === normalizedPath;
-    });
+    try {
+      const { navigation } = await imageviewer.getComponents();
+      if (!navigation?.tree) return;
 
-    if (matchingNode) {
-      const metadata = extractMetadata(matchingNode);
-      if (metadata) {
-        await syncSelection(metadata.id);
-      }
+      await navigation.tree.selectByPredicate((node) => {
+        const metadata = extractMetadata(node);
+        if (!metadata) return false;
+        const nodePath = normalizeDirectoryRequest(getDirectoryPath(metadata));
+        return nodePath === normalizedPath;
+      });
+    } catch (error) {
+      getLfManager().log(
+        'Failed to sync selection by path.',
+        { error, path: directoryPath },
+        LogSeverity.Warning,
+      );
     }
   };
 
@@ -227,7 +207,6 @@ export const createNavigationTreeManager = (
     expandNode,
     selectNode,
     syncSelectionByPath,
-    persistExpansion,
     getState: () => ({ ...state }),
   };
 };

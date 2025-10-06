@@ -6,21 +6,23 @@ import {
   ImageEditorDatasetSelection,
   ImageEditorState,
 } from '../../types/widgets/imageEditor';
-import { asString, isString } from '../../utils/common';
+import { asString, getLfManager, isString } from '../../utils/common';
 
 //#region applySelectionColumn
 /**
- * Updates (or creates) the column with id 'selected' in the provided dataset and returns a new dataset object.
+ * Applies a selection value to an image editor dataset by ensuring a 'selected' column exists and is updated.
  *
  * The function:
- * - Ensures there is a column with id === 'selected' in dataset.columns (creates one if absent).
- * - Sets that column's title to the provided selection value (coerced to string).
- * - Produces a new columns array and returns a shallow-copied dataset with the updated columns and selection field.
+ * 1. Checks for an existing column with id 'selected' in dataset.columns.
+ * 2. If found, updates its title to the string representation of the provided selection value.
+ * 3. If not found, appends a new column with id 'selected' and title set to the selection value.
+ * 4. Updates dataset.selection to the provided selection value.
  *
  * Important notes:
- * - The original dataset and its columns array are not mutated; a new dataset object and a new columns array are returned.
- * - If a 'selected' column already exists, its other properties are preserved and only its title is replaced.
- * - If dataset.columns is null/undefined or not an array, an empty columns array is created and the new 'selected' column is appended.
+ * - The function mutates the input dataset object by modifying its columns array and selection property.
+ * - The selection value is coerced to a string for storage in the column title.
+ * - If dataset.columns is undefined or not an array, it initializes it as an empty array before proceeding.
+ * - The function returns a new dataset object reflecting these updates.
  *
  * @param dataset - The image editor dataset to update. May have an optional `columns` array.
  * @param selection - The selection value to set; this will be coerced to a string and stored in the selected column's title and in the returned dataset.selection.
@@ -30,22 +32,21 @@ export const applySelectionColumn = (
   dataset: ImageEditorDataset,
   selection: ImageEditorDatasetSelection,
 ): ImageEditorDataset => {
-  const nextColumns: LfDataColumn[] = Array.isArray(dataset?.columns) ? [...dataset.columns] : [];
-  const selectedColumnIndex = nextColumns.findIndex((column) => column?.id === 'selected');
-  const selectionColumn = (
-    selectedColumnIndex >= 0 ? nextColumns[selectedColumnIndex] : { id: 'selected' }
-  ) as LfDataColumn;
+  const lfData = getLfManager()?.getManagers()?.lfFramework?.data;
+  const existingColumns = Array.isArray(dataset?.columns) ? dataset.columns : [];
 
-  const coercedSelectionColumn = {
-    ...selectionColumn,
+  const [existingSelectionColumn] = lfData
+    ? lfData.column.find(existingColumns, { id: 'selected' })
+    : [];
+
+  const updatedSelectionColumn = {
+    ...(existingSelectionColumn ?? { id: 'selected' }),
     title: selection as unknown as string,
   } as unknown as LfDataColumn;
 
-  if (selectedColumnIndex >= 0) {
-    nextColumns[selectedColumnIndex] = coercedSelectionColumn;
-  } else {
-    nextColumns.push(coercedSelectionColumn);
-  }
+  const nextColumns = existingSelectionColumn
+    ? existingColumns.map((col) => (col.id === 'selected' ? updatedSelectionColumn : col))
+    : [...existingColumns, updatedSelectionColumn];
 
   return {
     ...dataset,
@@ -115,14 +116,18 @@ export const buildSelectionPayload = ({
     selection.name = derivedName;
   }
 
-  const selectedNode = getImageNode(nodes, index);
-  if (selectedNode) {
+  const selectedNode =
+    Array.isArray(nodes) && index >= 0 && index < nodes.length && nodes[index]
+      ? nodes[index]
+      : undefined;
+
+  if (selectedNode && typeof selectedNode === 'object') {
     const nodeId = asString((selectedNode as { id?: unknown }).id);
     if (nodeId) {
       selection.node_id = nodeId;
     }
 
-    const imageCell = getImageCell(selectedNode);
+    const imageCell = selectedNode.cells?.lfImage;
     const imageValue = asString(imageCell?.value) ?? asString(imageCell?.lfValue);
     if (imageValue) {
       selection.url = imageValue;
@@ -444,7 +449,11 @@ export const resolveSelectionIndex = (
   const shapeValue = asString(shape?.value) ?? asString(shape?.lfValue);
 
   const resolvedIndex = nodes.findIndex((node) => {
-    const imageCell = getImageCell(node);
+    if (!node || typeof node !== 'object') {
+      return false;
+    }
+
+    const imageCell = node.cells?.lfImage;
     if (!imageCell) {
       return false;
     }
@@ -464,68 +473,5 @@ export const resolveSelectionIndex = (
   });
 
   return resolvedIndex >= 0 ? resolvedIndex : undefined;
-};
-//#endregion
-
-//#region Helpers
-/**
- * Retrieves the node at the specified index from an ImageEditorDataset nodes array if it exists and is an object.
- *
- * @param nodes - The nodes array from an ImageEditorDataset (may be undefined or non-array).
- * @param index - Zero-based index of the desired node.
- * @returns The node object at the given index when `nodes` is an array, the index is in range, and the element is an object; otherwise `undefined`.
- *
- * @remarks
- * - Defensive: returns `undefined` when `nodes` is not an array or index is out of bounds.
- * - Ensures the returned value is an object (filters out primitives and `null`).
- *
- * @example
- * const node = getImageNode(dataset.nodes, 2);
- * if (node) {
- *   // use node
- * }
- */
-const getImageNode = (nodes: ImageEditorDataset['nodes'], index: number) => {
-  if (!Array.isArray(nodes) || index < 0 || index >= nodes.length) {
-    return undefined;
-  }
-
-  const candidate = nodes[index];
-  return candidate && typeof candidate === 'object' ? candidate : undefined;
-};
-/**
- * Retrieves the "lfImage" cell object from a node-like object.
- *
- * This function performs a safe extraction:
- * - If the provided `node` is null, undefined, or not an object, the function returns `undefined`.
- * - If `node` is an object but does not contain a `cells` property or the `cells.lfImage`
- *   entry is missing, the function returns an empty object typed as the expected image cell shape.
- *
- * The returned object (when not `undefined`) may contain these optional properties:
- * - `htmlProps?: Record<string, unknown>` — HTML-related props for rendering the image.
- * - `value?: unknown` — a stored value associated with the cell.
- * - `lfValue?: unknown` — a library/framework-specific value for the cell.
- *
- * Note: The function makes no assumptions about the internal types of those properties beyond
- * `unknown`; callers should perform appropriate type-narrowing before using them. The input
- * object is not mutated.
- *
- * @param node - Any value expected to be a node-like object that may contain a `cells` map.
- * @returns The `lfImage` cell object (possibly empty) when `node` is an object, or `undefined`
- *          when `node` is null/undefined or not an object.
- */
-const getImageCell = (node: unknown) => {
-  if (!node || typeof node !== 'object') {
-    return undefined;
-  }
-
-  const cells = (node as { cells?: Record<string, unknown> }).cells ?? {};
-  const imageCell = (cells?.lfImage ?? {}) as {
-    htmlProps?: Record<string, unknown>;
-    value?: unknown;
-    lfValue?: unknown;
-  };
-
-  return imageCell;
 };
 //#endregion
