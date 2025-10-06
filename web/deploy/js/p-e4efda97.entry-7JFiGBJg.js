@@ -1,7 +1,7 @@
-import { n, V as V$1, b1 as LF_TREE_BLOCKS, b2 as LF_TREE_PARTS, C as CY_ATTRIBUTES, b as LF_ATTRIBUTES, d as LF_STYLE_ID, f as LF_WRAPPER_ID, b3 as LF_TREE_PROPS, p as pt, D as D$1, W as W$1, z as z$1, b4 as LF_TREE_CSS_VARIABLES } from "./index-BCfB3I5o.js";
-import { a } from "./p-Dl9cVpAY-BVBOtcmu.js";
-import { f } from "./p-Cn5YKT90-DluM1Jlc.js";
-const g = ({ depth: t, expanded: r = false, manager: i, node: o, onClickExpand: n2, type: d }) => {
+import { n, V as V$1, bd as LF_TREE_BLOCKS, be as LF_TREE_PARTS, C as CY_ATTRIBUTES, b as LF_ATTRIBUTES, d as LF_STYLE_ID, f as LF_WRAPPER_ID, bf as LF_TREE_PROPS, p as pt, D as D$1, W as W$1, z as z$1, bg as LF_TREE_CSS_VARIABLES } from "./index-EOkmblAM.js";
+import { a } from "./p-Dl9cVpAY-5guf9rt2.js";
+import { f } from "./p-Cn5YKT90-CysuV9Gk.js";
+const m = ({ depth: t, expanded: r = false, manager: i, node: o, onClickExpand: n2, type: d }) => {
   const { get: c } = i.assets, { bemClass: f2 } = i.theme;
   switch (d) {
     case "dropdown":
@@ -18,8 +18,8 @@ const g = ({ depth: t, expanded: r = false, manager: i, node: o, onClickExpand: 
   }
 }, b = (t) => {
   var _a, _b;
-  const { manager: r } = t, { bemClass: i } = r.theme, { accordionLayout: o, depth: n2, elements: s, events: c, expanded: f2, node: p, selected: h } = t || {}, u = D$1(g, p.icon ? { manager: r, node: p, type: "icon" } : { manager: r, type: "placeholder" });
-  return o ? D$1("div", { class: i(LF_TREE_BLOCKS.node._, null, { expanded: f2, selected: h }), "data-cy": CY_ATTRIBUTES.node, "data-depth": n2.toString(), key: p.id, onClick: c.onClickExpand, onPointerDown: c.onPointerDown, part: LF_TREE_PARTS.node, title: p.description }, D$1("div", { class: i(LF_TREE_BLOCKS.node._, LF_TREE_BLOCKS.node.content) }, s.ripple, u, s.value, D$1(g, ((_a = p.children) == null ? void 0 : _a.length) ? { expanded: f2, manager: r, node: p, type: "dropdown" } : { manager: r, type: "placeholder" }))) : D$1("div", { class: i(LF_TREE_BLOCKS.node._, null, { expanded: f2, selected: h }), "data-cy": CY_ATTRIBUTES.node, "data-depth": n2.toString(), key: p.id, onClick: c.onClick, onPointerDown: c.onPointerDown, title: p.description }, D$1("div", { class: "node__content" }, s.ripple, D$1(g, { depth: n2, manager: r, type: "padding" }), D$1(g, ((_b = p.children) == null ? void 0 : _b.length) ? { expanded: f2, manager: r, node: p, onClickExpand: c.onClickExpand, type: "expand" } : { manager: r, type: "placeholder" }), u, s.value));
+  const { manager: r } = t, { bemClass: i } = r.theme, { accordionLayout: o, depth: n2, elements: s, events: c, expanded: f2, node: h, selected: p } = t || {}, u = D$1(m, h.icon ? { manager: r, node: h, type: "icon" } : { manager: r, type: "placeholder" });
+  return o ? D$1("div", { class: i(LF_TREE_BLOCKS.node._, null, { expanded: f2, selected: p }), "data-cy": CY_ATTRIBUTES.node, "data-depth": n2.toString(), key: h.id, onClick: c.onClickExpand, onPointerDown: c.onPointerDown, part: LF_TREE_PARTS.node, title: h.description }, D$1("div", { class: i(LF_TREE_BLOCKS.node._, LF_TREE_BLOCKS.node.content) }, s.ripple, u, s.value, D$1(m, ((_a = h.children) == null ? void 0 : _a.length) ? { expanded: f2, manager: r, node: h, type: "dropdown" } : { manager: r, type: "placeholder" }))) : D$1("div", { class: i(LF_TREE_BLOCKS.node._, null, { expanded: f2, selected: p }), "data-cy": CY_ATTRIBUTES.node, "data-depth": n2.toString(), key: h.id, onClick: c.onClick, onPointerDown: c.onPointerDown, title: h.description }, D$1("div", { class: "node__content" }, s.ripple, D$1(m, { depth: n2, manager: r, type: "padding" }), D$1(m, ((_b = h.children) == null ? void 0 : _b.length) ? { expanded: f2, manager: r, node: h, onClickExpand: c.onClickExpand, type: "expand" } : { manager: r, type: "placeholder" }), u, s.value));
 }, v = (t) => ({ filter: () => {
   const { controller: r, handlers: i } = t(), { compInstance: o, manager: n2 } = r.get, { theme: a2 } = n2, { bemClass: s, get: l } = a2, d = r.get.blocks.tree;
   return o.lfFilter ? D$1("lf-textfield", { class: s(d._, d.filter), lfStretchX: true, lfIcon: l.current().variables["--lf-icon-search"], lfLabel: "Search...", lfStyling: "flat", "onLf-textfield-event": (e) => i.filter.input(e), ref: (e) => t().elements.refs.filterField = e }) : null;
@@ -29,31 +29,31 @@ const g = ({ depth: t, expanded: r = false, manager: i, node: o, onClickExpand: 
   const { bemClass: l } = a2.theme, d = o.header;
   return D$1("div", { class: l(d._), part: s.header }, D$1("div", { class: l(d._, d.row) }, i.map(((t2, r2) => D$1("div", { class: l(d._, d.cell), part: 0 === r2 ? s.headerRow : void 0, "data-column": t2.id, "data-index": r2.toString(), key: t2.id }, t2.title)))));
 }, nodes: () => {
-  const r = t(), { controller: i, elements: o, handlers: n2 } = r, { get: a2 } = i, { blocks: s, manager: l, parts: d } = a2, { bemClass: c } = l.theme, { tree: f$1 } = s, p = l.data.cell.stringify, h = a2.filterValue() || "", u = a2.columns(), g2 = a2.isGrid(), v2 = a2.dataset(), w2 = a2.manager.data.node.traverseVisible(v2 == null ? void 0 : v2.nodes, { isExpanded: a2.isExpanded, isHidden: a2.isHidden, isSelected: a2.isSelected, forceExpand: !!h }), k2 = w2.length > 0, y2 = w2.map((({ node: t2, depth: r2, expanded: i2, selected: f$12 }) => {
-    const h2 = s.node, v3 = ((t3) => {
-      if (!g2 || !u.length) return null;
+  const r = t(), { controller: i, elements: o, handlers: n2 } = r, { get: a2 } = i, { blocks: s, manager: l, parts: d } = a2, { bemClass: c } = l.theme, { tree: f$1 } = s, h = l.data.cell.stringify, p = a2.filterValue() || "", u = a2.columns(), m2 = a2.isGrid(), v2 = a2.dataset(), w2 = a2.manager.data.node.traverseVisible(v2 == null ? void 0 : v2.nodes, { isExpanded: a2.isExpanded, isHidden: a2.isHidden, isSelected: a2.isSelected, forceExpand: !!p }), k2 = w2.length > 0, y2 = w2.map((({ node: t2, depth: r2, expanded: i2, selected: f$12 }) => {
+    const p2 = s.node, v3 = ((t3) => {
+      if (!m2 || !u.length) return null;
       const r3 = s.node;
       return D$1("div", { class: c(r3._, r3.grid), part: d.node + "-grid" }, u.map(((r4, i3) => ((t4, r5, i4) => {
         var _a;
         const o2 = s.node, n3 = (_a = t4.cells) == null ? void 0 : _a[r5.id];
         if (!n3) {
           const n4 = c(o2._, o2.gridCell);
-          return D$1("div", { class: i4 ? n4 + " value" : n4, "data-column": r5.id }, i4 ? p(t4.value) : "");
+          return D$1("div", { class: i4 ? n4 + " value" : n4, "data-column": r5.id }, i4 ? h(t4.value) : "");
         }
-        const d2 = n3.shape || "text", f$13 = "text" === d2 || "number" === d2 || "slot" === d2, h3 = l.data.cell.shapes.get(n3);
-        Object.prototype.hasOwnProperty.call(h3, "lfValue") || (h3.lfValue = n3.value);
-        const u2 = h3.lfValue ?? n3.value;
-        return D$1("div", { class: c(o2._, o2.gridCell), "data-column": r5.id }, f$13 ? p(u2) : D$1(f, { framework: l, shape: d2, index: 0, cell: h3, eventDispatcher: async (e) => a2.compInstance.onLfEvent(e, "lf-event", { node: t4 }) }));
+        const d2 = n3.shape || "text", f$13 = "text" === d2 || "number" === d2 || "slot" === d2, p3 = l.data.cell.shapes.get(n3);
+        Object.prototype.hasOwnProperty.call(p3, "lfValue") || (p3.lfValue = n3.value);
+        const u2 = p3.lfValue ?? n3.value;
+        return D$1("div", { class: c(o2._, o2.gridCell), "data-column": r5.id }, f$13 ? h(u2) : D$1(f, { framework: l, shape: d2, index: 0, cell: p3, eventDispatcher: async (e) => a2.compInstance.onLfEvent(e, "lf-event", { node: t4 }) }));
       })(t3, r4, 0 === i3))));
-    })(t2), w3 = a2.compInstance.lfGrid && v3 ? D$1("div", { class: c(h2._, h2.value, { grid: true }) }, v3) : D$1("div", { class: c(h2._, h2.value) }, p(t2.value));
+    })(t2), w3 = a2.compInstance.lfGrid && v3 ? D$1("div", { class: c(p2._, p2.value, { grid: true }) }, v3) : D$1("div", { class: c(p2._, p2.value) }, h(t2.value));
     return D$1(b, { accordionLayout: a2.compInstance.lfAccordionLayout && 0 === r2, depth: r2, elements: { ripple: D$1("div", { "data-cy": a2.cyAttributes.rippleSurface, "data-lf": a2.lfAttributes.rippleSurface, ref: (e) => {
       e && a2.compInstance.lfRipple && (o.refs.rippleSurfaces[t2.id] = e);
     } }), value: w3 }, events: { onClick: (e) => n2.node.click(e, t2), onClickExpand: (e) => n2.node.expand(e, t2), onPointerDown: (e) => n2.node.pointerDown(e, t2) }, expanded: i2, manager: l, node: t2, selected: f$12 });
   }));
   if (k2) return D$1("div", { class: c(f$1._, f$1.nodesWrapper) }, y2);
-  if (h) {
+  if (p) {
     const { noMatches: t2 } = s;
-    return D$1("div", { class: c(t2._) }, D$1("div", { class: c(t2._, t2.icon) }), D$1("div", { class: c(t2._, t2.text) }, 'No matches found for "', D$1("strong", { class: c(t2._, t2.filter) }, h), '".'));
+    return D$1("div", { class: c(t2._) }, D$1("div", { class: c(t2._, t2.icon) }), D$1("div", { class: c(t2._, t2.text) }, 'No matches found for "', D$1("strong", { class: c(t2._, t2.filter) }, p), '".'));
   }
   return D$1("div", { class: c(f$1._, f$1.nodesWrapper) });
 }, empty: () => {
@@ -116,8 +116,41 @@ const x = (e) => {
     e2 && t.push(e2);
   }
   return t;
-}, P = (e, t) => e.length === t.length && e.every(((e2, r) => e2 === t[r]));
-var C, E, D, I, N, A, W, M, T, j, L, F, H, V = function(e, t, r, i) {
+}, P = (e, t) => {
+  let r, i = false;
+  const o = (e2) => {
+    var r2, o2;
+    (r2 = x(t.getProp())).length === (o2 = e2).length && r2.every(((e3, t2) => e3 === o2[t2])) || (i = true, t.setProp([...e2]), i = false);
+  };
+  return { syncProp: o, applyIdsWithSanitization: (e2, i2, o2) => {
+    const n2 = x(e2), a2 = t.getManager();
+    if (!a2) return r = [...n2], o2(n2, i2), n2;
+    const { ids: s } = a2.data.node.sanitizeIds(t.getDataset(), n2);
+    return r = void 0, o2(s, i2), s;
+  }, handlePropChange: (e2, t2) => {
+    if (i) return;
+    const r2 = t2(x(e2), { emit: false, updateProp: false });
+    o(r2);
+  }, initialisePersistentState: (e2, t2, i2) => {
+    const o2 = x(e2);
+    return o2.length ? (t2(o2, { emit: false, updateProp: true }), void (r = void 0)) : r && r.length ? (t2(r, { emit: false, updateProp: true }), void (r = void 0)) : void (i2 && i2());
+  }, reconcileAfterDatasetChange: (e2, r2, i2) => {
+    const n2 = x(t.getProp());
+    if (n2.length) {
+      const e3 = r2(n2, { emit: false, updateProp: false });
+      o(e3);
+    } else {
+      if (e2 && e2.length) {
+        const t2 = r2(e2, { emit: false, updateProp: false });
+        if (o(t2), t2.length) return;
+      }
+      i2 && i2();
+    }
+  }, getPendingIds: () => r, clearPendingIds: () => {
+    r = void 0;
+  } };
+};
+var C, E, D, I, A, N, M, W, T, j, L, F, H, V = function(e, t, r, i) {
   if ("a" === r && !i) throw new TypeError("Private accessor was defined without a getter");
   if ("function" == typeof t ? e !== t || !i : !t.has(e)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return "m" === r ? i : "a" === r ? i.call(e) : i ? i.value : t.get(e);
@@ -127,7 +160,7 @@ var C, E, D, I, N, A, W, M, T, j, L, F, H, V = function(e, t, r, i) {
 };
 const B = class {
   constructor(e) {
-    n(this, e), this.lfEvent = V$1(this, "lf-tree-event"), C.add(this), this.expandedNodes = /* @__PURE__ */ new Set(), this.hiddenNodes = /* @__PURE__ */ new Set(), this.selectedNode = null, this.lfAccordionLayout = true, this.lfDataset = null, this.lfEmpty = "Empty data.", this.lfFilter = true, this.lfGrid = false, this.lfRipple = true, this.lfSelectable = true, this.lfStyle = "", this.lfUiSize = "medium", E.set(this, void 0), D.set(this, LF_TREE_BLOCKS), I.set(this, LF_TREE_PARTS), N.set(this, CY_ATTRIBUTES), A.set(this, LF_ATTRIBUTES), W.set(this, LF_STYLE_ID), M.set(this, LF_WRAPPER_ID), this._filterValue = "", T.set(this, void 0), j.set(this, void 0), L.set(this, void 0);
+    n(this, e), this.lfEvent = V$1(this, "lf-tree-event"), C.add(this), this.expandedNodes = /* @__PURE__ */ new Set(), this.hiddenNodes = /* @__PURE__ */ new Set(), this.selectedNode = null, this.lfAccordionLayout = true, this.lfDataset = null, this.lfEmpty = "Empty data.", this.lfFilter = true, this.lfGrid = false, this.lfRipple = true, this.lfSelectable = true, this.lfStyle = "", this.lfUiSize = "medium", E.set(this, void 0), D.set(this, LF_TREE_BLOCKS), I.set(this, LF_TREE_PARTS), A.set(this, CY_ATTRIBUTES), N.set(this, LF_ATTRIBUTES), M.set(this, LF_STYLE_ID), W.set(this, LF_WRAPPER_ID), this._filterValue = "", T.set(this, void 0), j.set(this, void 0), L.set(this, void 0);
   }
   handleDatasetChange() {
     if (!V(this, E, "f") || !V(this, j, "f") || !V(this, L, "f")) return;
@@ -203,13 +236,13 @@ const B = class {
     $(this, E, await a(this)), $(this, T, { controller: { get: { blocks: V(this, D, "f"), columns: () => {
       var _a;
       return ((_a = this.lfDataset) == null ? void 0 : _a.columns) || [];
-    }, compInstance: this, cyAttributes: V(this, N, "f"), dataset: () => this.lfDataset, filterValue: () => this._filterValue, isExpanded: (e2) => {
+    }, compInstance: this, cyAttributes: V(this, A, "f"), dataset: () => this.lfDataset, filterValue: () => this._filterValue, isExpanded: (e2) => {
       const t = z(e2);
       return !!t && this.expandedNodes.has(t);
     }, isGrid: () => {
       var _a, _b;
       return !(!this.lfGrid || !((_b = (_a = this.lfDataset) == null ? void 0 : _a.columns) == null ? void 0 : _b.length));
-    }, isHidden: (e2) => this.hiddenNodes.has(e2), isSelected: (e2) => this.selectedNode === e2, lfAttributes: V(this, A, "f"), manager: V(this, E, "f"), parts: V(this, I, "f"), state: { expansion: { ids: () => {
+    }, isHidden: (e2) => this.hiddenNodes.has(e2), isSelected: (e2) => this.selectedNode === e2, lfAttributes: V(this, N, "f"), manager: V(this, E, "f"), parts: V(this, I, "f"), state: { expansion: { ids: () => {
       var _a;
       return ((_a = V(this, j, "f")) == null ? void 0 : _a.getIds()) ?? Array.from(this.expandedNodes);
     }, nodes: () => this.expandedNodes }, selection: { ids: () => {
@@ -249,99 +282,71 @@ const B = class {
     }, setProp: (e2) => {
       this.lfSelectedNodeIds = e2;
     } } } } }, elements: { jsx: v(e = () => V(this, T, "f")), refs: { rippleSurfaces: {}, filterField: null } }, handlers: w(e) }), $(this, j, ((e2) => {
-      const { controller: t } = e2();
-      let r, i = false;
-      const o = () => {
+      const { controller: t } = e2(), r = P(0, { getProp: () => t.get.expandedProp(), setProp: (e3) => t.set.state.expansion.setProp(e3), getDataset: () => t.get.dataset(), getManager: () => t.get.manager }), i = () => {
         const e3 = t.get.state.expansion.nodes();
         return Array.from(e3 ?? /* @__PURE__ */ new Set());
-      }, n2 = (e3) => {
-        const r2 = x(t.get.expandedProp());
-        P(r2, e3) || (i = true, t.set.state.expansion.setProp([...e3]), i = false);
-      }, a2 = (e3, r2 = {}) => {
-        t.set.state.expansion.setNodes(e3), false !== r2.updateProp && n2(e3);
-      }, s = (e3, i2 = {}) => {
-        const o2 = x(e3), s2 = t.get.manager;
-        if (!s2) return r = [...o2], t.set.state.expansion.setNodes(o2), false !== i2.updateProp && n2(o2), o2;
-        const { ids: l2 } = s2.data.node.sanitizeIds(t.get.dataset(), o2);
-        return r = void 0, a2(l2, i2), l2;
-      }, l = (e3) => {
-        const r2 = t.get.initialExpansionDepth(), i2 = t.get.dataset(), o2 = (i2 == null ? void 0 : i2.nodes) ?? [], n3 = e3 ? new Set(e3) : /* @__PURE__ */ new Set(), s2 = /* @__PURE__ */ new Set(), l2 = (e4, t2) => {
+      }, o = (e3, i2 = {}) => {
+        t.set.state.expansion.setNodes(e3), false !== i2.updateProp && r.syncProp(e3);
+      }, n2 = (e3, t2 = {}) => r.applyIdsWithSanitization(e3, t2, ((e4, t3) => {
+        o(e4, t3);
+      })), a2 = (e3) => {
+        const r2 = t.get.initialExpansionDepth(), i2 = t.get.dataset(), n3 = (i2 == null ? void 0 : i2.nodes) ?? [], a3 = e3 ? new Set(e3) : /* @__PURE__ */ new Set(), s = /* @__PURE__ */ new Set(), l = (e4, t2) => {
           for (const i3 of e4) {
             const e5 = z(i3);
-            e5 && (null == r2 || t2 < r2 || n3.has(e5)) && s2.add(e5), Array.isArray(i3.children) && i3.children.length > 0 && l2(i3.children, t2 + 1);
+            e5 && (null == r2 || t2 < r2 || a3.has(e5)) && s.add(e5), Array.isArray(i3.children) && i3.children.length > 0 && l(i3.children, t2 + 1);
           }
         };
-        l2(o2, 0), a2(Array.from(s2), {});
+        l(n3, 0), o(Array.from(s), {});
       };
-      return { applyIds: s, handlePropChange: (e3) => {
-        if (i) return;
-        const t2 = x(e3), r2 = s(t2, { updateProp: false });
-        n2(r2);
-      }, applyInitialExpansion: l, reconcileAfterDatasetChange: (e3) => {
-        const r2 = x(t.get.expandedProp());
-        if (r2.length) {
-          const e4 = s(r2, { updateProp: false });
-          return void n2(e4);
-        }
-        const i2 = e3 ? Array.from(e3) : [];
-        if (i2.length) {
-          const e4 = s(i2, { updateProp: false });
-          if (n2(e4), e4.length) return;
-        }
-        l(e3);
+      return { applyIds: n2, handlePropChange: (e3) => {
+        r.handlePropChange(e3, n2);
+      }, applyInitialExpansion: a2, reconcileAfterDatasetChange: (e3) => {
+        const t2 = e3 ? Array.from(e3) : null;
+        r.reconcileAfterDatasetChange(t2, n2, (() => {
+          a2(e3);
+        }));
       }, handleInitialDepthChange(e3) {
-        l(e3);
+        a2(e3);
       }, toggle: (e3) => {
         const t2 = z(e3);
         if (!t2) return;
-        const r2 = new Set(o());
-        r2.has(t2) ? r2.delete(t2) : r2.add(t2), s(Array.from(r2), { updateProp: true });
-      }, getIds: () => o(), initialisePersistentState: (e3) => {
-        const t2 = x(e3);
-        return t2.length ? (s(t2, { updateProp: true }), void (r = void 0)) : r && r.length ? (s(r, { updateProp: true }), void (r = void 0)) : void l(new Set(o()));
+        const r2 = new Set(i());
+        r2.has(t2) ? r2.delete(t2) : r2.add(t2), n2(Array.from(r2), { emit: true, updateProp: true, node: e3 });
+      }, getIds: () => i(), initialisePersistentState: (e3) => {
+        r.initialisePersistentState(e3, n2, (() => {
+          a2(new Set(i()));
+        }));
       } };
     })((() => V(this, T, "f")))), $(this, L, ((e2) => {
-      const { controller: t } = e2();
-      let r, i = false, o = [];
-      const n2 = (e3) => {
-        const r2 = x(t.get.selectedProp());
-        P(r2, e3) || (i = true, t.set.state.selection.setProp([...e3]), i = false);
-      }, a2 = (e3 = {}) => (r = void 0, o = [], t.set.state.selection.setNode(null), false !== e3.updateProp && n2([]), o), s = (e3, i2 = {}) => {
-        const s2 = x(e3), l = t.get.manager;
-        if (!l) return r = [...s2], o = t.get.allowsMultiSelect() ? [...s2] : s2.slice(0, 1), t.set.state.selection.setNode(null), false !== i2.updateProp && n2(o), o;
-        if (!t.get.selectable()) return a2(i2);
-        const d = l.data.node.sanitizeIds(t.get.dataset(), s2, { predicate: (e4) => t.get.canSelectNode(e4), limit: t.get.allowsMultiSelect() ? void 0 : 1 });
-        return r = void 0, ((e4, r2, i3 = {}) => {
+      const { controller: t } = e2(), r = P(0, { getProp: () => t.get.selectedProp(), setProp: (e3) => t.set.state.selection.setProp(e3), getDataset: () => t.get.dataset(), getManager: () => t.get.manager });
+      let i = [];
+      const o = (e3 = {}) => (r.clearPendingIds(), i = [], t.set.state.selection.setNode(null), false !== e3.updateProp && r.syncProp([]), i), n2 = (e3, n3 = {}) => {
+        const a2 = x(e3), s = t.get.manager;
+        if (!s) return i = t.get.allowsMultiSelect() ? [...a2] : a2.slice(0, 1), t.set.state.selection.setNode(null), false !== n3.updateProp && r.syncProp(i), i;
+        if (!t.get.selectable()) return o(n3);
+        const l = s.data.node.sanitizeIds(t.get.dataset(), a2, { predicate: (e4) => t.get.canSelectNode(e4), limit: t.get.allowsMultiSelect() ? void 0 : 1 });
+        return ((e4, o2, n4 = {}) => {
           const a3 = t.get.allowsMultiSelect() ? e4 : e4.slice(0, 1);
-          return o = [...a3], t.set.state.selection.setNode(o.length ? r2[0] ?? null : null), false !== i3.updateProp && n2(o), o;
-        })(d.ids, d.nodes, i2);
+          return i = [...a3], t.set.state.selection.setNode(i.length ? o2[0] ?? null : null), false !== n4.updateProp && r.syncProp(i), i;
+        })(l.ids, l.nodes, n3);
       };
-      return { applyIds: s, applyTargets: (e3, t2 = {}) => {
-        if (null == e3) return s([], t2);
+      return { applyIds: n2, applyTargets: (e3, t2 = {}) => {
+        if (null == e3) return n2([], t2);
         const r2 = _(e3), i2 = S(r2);
-        return s(i2, t2);
+        return n2(i2, t2);
       }, handlePropChange: (e3) => {
-        if (i) return;
-        const t2 = x(e3), r2 = s(t2, { updateProp: false });
-        n2(r2);
+        r.handlePropChange(e3, n2);
       }, reconcileAfterDatasetChange: (e3) => {
-        const r2 = x(t.get.selectedProp());
-        if (r2.length) {
-          const e4 = s(r2, { updateProp: false });
-          n2(e4);
-        } else {
-          if (e3) {
-            const t2 = s([e3], { updateProp: false });
-            if (n2(t2), t2.length) return;
-          }
-          a2({ updateProp: true });
-        }
+        r.reconcileAfterDatasetChange(e3 ? [e3] : null, n2, (() => {
+          o({ updateProp: true });
+        }));
       }, initialisePersistentState: (e3) => {
-        const t2 = x(e3);
-        return t2.length ? (s(t2, { updateProp: true }), void (r = void 0)) : r && r.length ? (s(r, { updateProp: true }), void (r = void 0)) : void a2({ updateProp: true });
+        r.initialisePersistentState(e3, n2, (() => {
+          o({ updateProp: true });
+        }));
       }, handleSelectableChange: (e3) => {
-        e3 || a2({ updateProp: true });
-      }, getIds: () => [...o], clearSelection: a2 };
+        e3 || o({ updateProp: true });
+      }, getIds: () => [...i], clearSelection: o };
     })((() => V(this, T, "f")))), V(this, j, "f").initialisePersistentState(this.lfExpandedNodeIds), V(this, L, "f").initialisePersistentState(this.lfSelectedNodeIds), V(this, L, "f").handleSelectableChange(this.lfSelectable), this.handleDatasetChange();
   }
   componentDidLoad() {
@@ -359,7 +364,7 @@ const B = class {
   render() {
     var _a, _b;
     const { bemClass: t, setLfStyle: r } = V(this, E, "f").theme, { tree: i } = V(this, D, "f"), { lfDataset: n2, lfStyle: a2, lfGrid: s } = this, l = (_a = V(this, T, "f")) == null ? void 0 : _a.elements.jsx, d = !((_b = n2 == null ? void 0 : n2.nodes) == null ? void 0 : _b.length);
-    return D$1(W$1, { key: "dc3ce3c774d1fa63638c638971785af7510d5c04" }, a2 && D$1("style", { key: "34f57f1e36871a72aa17001677ead2216201a4e5", id: V(this, W, "f") }, r(this)), D$1("div", { key: "3bffd468ac69fb089b76ff5076724761a114b66d", id: V(this, M, "f") }, D$1("div", { key: "049e72aec4a815d03b32b3f0831d5a3a337247fa", class: t(i._) + (s ? " tree--grid" : ""), part: V(this, I, "f").tree }, l == null ? void 0 : l.filter(), l == null ? void 0 : l.header(), d ? l == null ? void 0 : l.empty() : l == null ? void 0 : l.nodes())));
+    return D$1(W$1, { key: "dc3ce3c774d1fa63638c638971785af7510d5c04" }, a2 && D$1("style", { key: "34f57f1e36871a72aa17001677ead2216201a4e5", id: V(this, M, "f") }, r(this)), D$1("div", { key: "3bffd468ac69fb089b76ff5076724761a114b66d", id: V(this, W, "f") }, D$1("div", { key: "049e72aec4a815d03b32b3f0831d5a3a337247fa", class: t(i._) + (s ? " tree--grid" : ""), part: V(this, I, "f").tree }, l == null ? void 0 : l.filter(), l == null ? void 0 : l.header(), d ? l == null ? void 0 : l.empty() : l == null ? void 0 : l.nodes())));
   }
   disconnectedCallback() {
     var _a;
@@ -372,7 +377,7 @@ const B = class {
     return { lfDataset: ["handleDatasetChange"], lfExpandedNodeIds: ["handleExpandedPropChange"], lfSelectedNodeIds: ["handleSelectedPropChange"], lfInitialExpansionDepth: ["handleInitialDepthChange"], lfSelectable: ["handleSelectableChange"], lfFilter: ["handleFilterToggle"] };
   }
 };
-E = /* @__PURE__ */ new WeakMap(), D = /* @__PURE__ */ new WeakMap(), I = /* @__PURE__ */ new WeakMap(), N = /* @__PURE__ */ new WeakMap(), A = /* @__PURE__ */ new WeakMap(), W = /* @__PURE__ */ new WeakMap(), M = /* @__PURE__ */ new WeakMap(), T = /* @__PURE__ */ new WeakMap(), j = /* @__PURE__ */ new WeakMap(), L = /* @__PURE__ */ new WeakMap(), C = /* @__PURE__ */ new WeakSet(), F = function() {
+E = /* @__PURE__ */ new WeakMap(), D = /* @__PURE__ */ new WeakMap(), I = /* @__PURE__ */ new WeakMap(), A = /* @__PURE__ */ new WeakMap(), N = /* @__PURE__ */ new WeakMap(), M = /* @__PURE__ */ new WeakMap(), W = /* @__PURE__ */ new WeakMap(), T = /* @__PURE__ */ new WeakMap(), j = /* @__PURE__ */ new WeakMap(), L = /* @__PURE__ */ new WeakMap(), C = /* @__PURE__ */ new WeakSet(), F = function() {
   return false;
 }, H = function(e) {
   return !!e && !!this.lfSelectable && true !== e.isDisabled;
