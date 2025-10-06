@@ -8,6 +8,7 @@ import { IMAGE_API } from '../api/image';
 import { JSON_API } from '../api/json';
 import { METADATA_API } from '../api/metadata';
 import { MODELS_API } from '../api/models';
+import { PREVIEW_API } from '../api/preview';
 import {
   getLogStyle,
   NODE_WIDGET_MAP,
@@ -45,8 +46,10 @@ export class LFManager {
     image: IMAGE_API,
     json: JSON_API,
     metadata: METADATA_API,
+    preview: PREVIEW_API,
   };
   #AUTOMATIC_BACKUP = true;
+  #BACKUP_RETENTION = 14;
   #CACHED_DATASETS: { usage: LfDataDataset } = {
     usage: null,
   };
@@ -184,6 +187,9 @@ export class LFManager {
   getPrefixedNode(nodeName: string) {
     return `✨ LF Nodes/${nodeName}`;
   }
+  getBackupRetention() {
+    return this.#BACKUP_RETENTION;
+  }
   isBackupEnabled() {
     return this.#AUTOMATIC_BACKUP;
   }
@@ -247,6 +253,13 @@ export class LFManager {
   //#endregion
 
   //#region Setters
+  setBackupRetention(value: number) {
+    if (typeof value === 'number' && value >= 0) {
+      this.#BACKUP_RETENTION = Math.floor(value);
+      this.log(`Backup retention set to: ${this.#BACKUP_RETENTION}`, { value }, LogSeverity.Info);
+    }
+    return this.#BACKUP_RETENTION;
+  }
   setDebugDataset(article: HTMLLfArticleElement, dataset: LfArticleNode[]) {
     this.#DEBUG_ARTICLE = article;
     this.#DEBUG_DATASET = dataset;

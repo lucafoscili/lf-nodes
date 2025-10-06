@@ -1,62 +1,37 @@
 import { LfDataColumn, LfMasonryEventPayload } from '@lf-widgets/foundations';
 import {
+  ImageEditorBuildSelectionPayloadParams,
   ImageEditorDataset,
   ImageEditorDatasetNavigationDirectory,
   ImageEditorDatasetSelection,
   ImageEditorState,
 } from '../../types/widgets/imageEditor';
+import { asString, getLfManager, isString } from '../../utils/common';
 
-const isString = (value: unknown): value is string => typeof value === 'string';
-
-const asString = (value: unknown): string | undefined =>
-  typeof value === 'string' ? value : undefined;
-
-const getImageNode = (nodes: ImageEditorDataset['nodes'], index: number) => {
-  if (!Array.isArray(nodes) || index < 0 || index >= nodes.length) {
-    return undefined;
-  }
-
-  const candidate = nodes[index];
-  return candidate && typeof candidate === 'object' ? candidate : undefined;
-};
-
-const getImageCell = (node: unknown) => {
-  if (!node || typeof node !== 'object') {
-    return undefined;
-  }
-
-  const cells = (node as { cells?: Record<string, unknown> }).cells ?? {};
-  const imageCell = (cells?.lfImage ?? {}) as {
-    htmlProps?: Record<string, unknown>;
-    value?: unknown;
-    lfValue?: unknown;
-  };
-
-  return imageCell;
-};
-
+//#region applySelectionColumn
+/**
+ * Updates dataset with a 'selected' column containing the selection value.
+ * Mutates dataset.columns and dataset.selection.
+ */
 export const applySelectionColumn = (
   dataset: ImageEditorDataset,
   selection: ImageEditorDatasetSelection,
 ): ImageEditorDataset => {
-  const nextColumns: LfDataColumn[] = Array.isArray(dataset?.columns) ? [...dataset.columns] : [];
+  const lfData = getLfManager()?.getManagers()?.lfFramework?.data;
+  const existingColumns = Array.isArray(dataset?.columns) ? dataset.columns : [];
 
-  const selectedColumnIndex = nextColumns.findIndex((column) => column?.id === 'selected');
+  const [existingSelectionColumn] = lfData
+    ? lfData.column.find(existingColumns, { id: 'selected' })
+    : [];
 
-  const selectionColumn = (
-    selectedColumnIndex >= 0 ? nextColumns[selectedColumnIndex] : { id: 'selected' }
-  ) as LfDataColumn;
-
-  const coercedSelectionColumn = {
-    ...selectionColumn,
+  const updatedSelectionColumn = {
+    ...(existingSelectionColumn ?? { id: 'selected' }),
     title: selection as unknown as string,
   } as unknown as LfDataColumn;
 
-  if (selectedColumnIndex >= 0) {
-    nextColumns[selectedColumnIndex] = coercedSelectionColumn;
-  } else {
-    nextColumns.push(coercedSelectionColumn);
-  }
+  const nextColumns = existingSelectionColumn
+    ? existingColumns.map((col) => (col.id === 'selected' ? updatedSelectionColumn : col))
+    : [...existingColumns, updatedSelectionColumn];
 
   return {
     ...dataset,
@@ -64,7 +39,88 @@ export const applySelectionColumn = (
     selection,
   };
 };
+//#endregion
 
+//#region buildSelectionPayload
+/**
+ * Builds a selection payload with index, context_id, and optional name/node_id/url
+ * derived from the dataset, selectedShape, and nodes.
+ */
+export const buildSelectionPayload = ({
+  dataset,
+  index,
+  nodes,
+  selectedShape,
+  fallbackContextId,
+}: ImageEditorBuildSelectionPayloadParams): {
+  selection: ImageEditorDatasetSelection;
+  contextId?: string;
+} => {
+  const resolvedContextId =
+    dataset.context_id ?? dataset.selection?.context_id ?? fallbackContextId;
+  const selection: ImageEditorDatasetSelection = {
+    index,
+    context_id: resolvedContextId,
+  };
+
+  const derivedName = deriveSelectionName(selectedShape);
+  if (derivedName) {
+    selection.name = derivedName;
+  }
+
+  const selectedNode =
+    Array.isArray(nodes) && index >= 0 && index < nodes.length && nodes[index]
+      ? nodes[index]
+      : undefined;
+
+  if (selectedNode && typeof selectedNode === 'object') {
+    const nodeId = asString((selectedNode as { id?: unknown }).id);
+    if (nodeId) {
+      selection.node_id = nodeId;
+    }
+
+    const imageCell = selectedNode.cells?.lfImage;
+    const imageValue = asString(imageCell?.value) ?? asString(imageCell?.lfValue);
+    if (imageValue) {
+      selection.url = imageValue;
+    }
+  }
+
+  return { selection, contextId: resolvedContextId };
+};
+//#endregion
+
+//#region deriveDirectoryValue
+/**
+ * Extracts directory path from directory object, checking raw → relative → resolved in order.
+ */
+export const deriveDirectoryValue = (
+  directory: ImageEditorDatasetNavigationDirectory | undefined,
+): string | undefined => {
+  if (!directory) {
+    return undefined;
+  }
+
+  if (isString(directory.raw)) {
+    return directory.raw;
+  }
+
+  if (isString(directory.relative)) {
+    return directory.relative;
+  }
+
+  if (isString(directory.resolved)) {
+    return directory.resolved;
+  }
+
+  return undefined;
+};
+//#endregion
+
+//#region deriveSelectionName
+/**
+ * Derives a human-readable name from selectedShape, checking title → id → value → lfValue in order.
+ */
 export const deriveSelectionName = (
   selectedShape: LfMasonryEventPayload['selectedShape'],
 ): string | undefined => {
@@ -87,115 +143,13 @@ export const deriveSelectionName = (
 
   return htmlTitle ?? htmlId ?? shapeValue ?? lfValue ?? undefined;
 };
+//#endregion
 
-export const resolveSelectionIndex = (
-  selectedShape: LfMasonryEventPayload['selectedShape'],
-  nodes: ImageEditorDataset['nodes'],
-): number | undefined => {
-  if (typeof selectedShape?.index === 'number') {
-    return selectedShape.index;
-  }
-
-  if (!Array.isArray(nodes)) {
-    return undefined;
-  }
-
-  const shape = selectedShape?.shape as
-    | ({
-        htmlProps?: Record<string, unknown>;
-        lfValue?: unknown;
-        value?: unknown;
-      } & Record<string, unknown>)
-    | undefined;
-
-  const shapeId = asString(shape?.htmlProps?.['id']);
-  const shapeValue = asString(shape?.value) ?? asString(shape?.lfValue);
-
-  const resolvedIndex = nodes.findIndex((node) => {
-    const imageCell = getImageCell(node);
-    if (!imageCell) {
-      return false;
-    }
-
-    const cellId = asString(imageCell.htmlProps?.['id']);
-    const cellValue = asString(imageCell.value) ?? asString(imageCell.lfValue);
-
-    if (shapeId && cellId === shapeId) {
-      return true;
-    }
-
-    if (shapeValue && cellValue === shapeValue) {
-      return true;
-    }
-
-    return false;
-  });
-
-  return resolvedIndex >= 0 ? resolvedIndex : undefined;
-};
-
-interface BuildSelectionPayloadParams {
-  dataset: ImageEditorDataset;
-  index: number;
-  nodes: ImageEditorDataset['nodes'];
-  selectedShape?: LfMasonryEventPayload['selectedShape'];
-  fallbackContextId?: string;
-}
-
-export const buildSelectionPayload = ({
-  dataset,
-  index,
-  nodes,
-  selectedShape,
-  fallbackContextId,
-}: BuildSelectionPayloadParams): {
-  selection: ImageEditorDatasetSelection;
-  contextId?: string;
-} => {
-  const resolvedContextId =
-    dataset.context_id ?? dataset.selection?.context_id ?? fallbackContextId;
-
-  const selection: ImageEditorDatasetSelection = {
-    index,
-    context_id: resolvedContextId,
-  };
-
-  const derivedName = deriveSelectionName(selectedShape);
-  if (derivedName) {
-    selection.name = derivedName;
-  }
-
-  const selectedNode = getImageNode(nodes, index);
-  if (selectedNode) {
-    const nodeId = asString((selectedNode as { id?: unknown }).id);
-    if (nodeId) {
-      selection.node_id = nodeId;
-    }
-
-    const imageCell = getImageCell(selectedNode);
-    const imageValue = asString(imageCell?.value) ?? asString(imageCell?.lfValue);
-    if (imageValue) {
-      selection.url = imageValue;
-    }
-  }
-
-  return { selection, contextId: resolvedContextId };
-};
-
-export const hasSelectionChanged = (
-  previousSelection: ImageEditorDatasetSelection | undefined,
-  nextSelection: ImageEditorDatasetSelection | undefined,
-) => {
-  return JSON.stringify(previousSelection ?? null) !== JSON.stringify(nextSelection ?? null);
-};
-
-export const hasContextChanged = (
-  previousContextId: string | undefined,
-  nextContextId: string | undefined,
-) => {
-  return previousContextId !== nextContextId;
-};
-
+//#region ensureDatasetContext
+/**
+ * Resolves and syncs context_id between dataset, selection, and state.
+ * Mutates all three to align with the resolved context.
+ */
 export const ensureDatasetContext = (
   dataset: ImageEditorDataset | undefined,
   state: ImageEditorState | undefined,
@@ -240,13 +194,49 @@ export const ensureDatasetContext = (
 
   return undefined;
 };
+//#endregion
 
+//#region getNavigationDirectory
+/**
+ * Returns dataset.navigation.directory or undefined.
+ */
 export const getNavigationDirectory = (
   dataset: ImageEditorDataset | undefined,
 ): ImageEditorDatasetNavigationDirectory | undefined => {
   return dataset?.navigation?.directory;
 };
+//#endregion
 
+//#region hasContextChanged
+/**
+ * Checks if context_id has changed between two states using strict inequality.
+ */
+export const hasContextChanged = (
+  previousContextId: string | undefined,
+  nextContextId: string | undefined,
+) => {
+  return previousContextId !== nextContextId;
+};
+//#endregion
+
+//#region hasSelectionChanged
+/**
+ * Checks if selection has changed using JSON serialization comparison.
+ * Note: Sensitive to property key order.
+ */
+export const hasSelectionChanged = (
+  previousSelection: ImageEditorDatasetSelection | undefined,
+  nextSelection: ImageEditorDatasetSelection | undefined,
+) => {
+  return JSON.stringify(previousSelection ?? null) !== JSON.stringify(nextSelection ?? null);
+};
+//#endregion
+
+//#region mergeNavigationDirectory
+/**
+ * Shallow-merges directory partial into dataset.navigation.directory.
+ * Mutates dataset.navigation.
+ */
 export const mergeNavigationDirectory = (
   dataset: ImageEditorDataset,
   directory: Partial<ImageEditorDatasetNavigationDirectory>,
@@ -262,25 +252,59 @@ export const mergeNavigationDirectory = (
 
   return next;
 };
+//#endregion
 
-export const deriveDirectoryValue = (
-  directory: ImageEditorDatasetNavigationDirectory | undefined,
-): string | undefined => {
-  if (!directory) {
+//#region resolveSelectionIndex
+/**
+ * Resolves the index of a selected shape by checking explicit index → HTML id → cell value.
+ */
+export const resolveSelectionIndex = (
+  selectedShape: LfMasonryEventPayload['selectedShape'],
+  nodes: ImageEditorDataset['nodes'],
+): number | undefined => {
+  if (typeof selectedShape?.index === 'number') {
+    return selectedShape.index;
+  }
+
+  if (!Array.isArray(nodes)) {
     return undefined;
   }
 
-  if (isString(directory.raw)) {
-    return directory.raw;
-  }
+  const shape = selectedShape?.shape as
+    | ({
+        htmlProps?: Record<string, unknown>;
+        lfValue?: unknown;
+        value?: unknown;
+      } & Record<string, unknown>)
+    | undefined;
 
-  if (isString(directory.relative)) {
-    return directory.relative;
-  }
+  const shapeId = asString(shape?.htmlProps?.['id']);
+  const shapeValue = asString(shape?.value) ?? asString(shape?.lfValue);
 
-  if (isString(directory.resolved)) {
-    return directory.resolved;
-  }
+  const resolvedIndex = nodes.findIndex((node) => {
+    if (!node || typeof node !== 'object') {
+      return false;
+    }
 
-  return undefined;
+    const imageCell = node.cells?.lfImage;
+    if (!imageCell) {
+      return false;
+    }
+
+    const cellId = asString(imageCell.htmlProps?.['id']);
+    const cellValue = asString(imageCell.value) ?? asString(imageCell.lfValue);
+
+    if (shapeId && cellId === shapeId) {
+      return true;
+    }
+
+    if (shapeValue && cellValue === shapeValue) {
+      return true;
+    }
+
+    return false;
+  });
+
+  return resolvedIndex >= 0 ? resolvedIndex : undefined;
 };
+//#endregion

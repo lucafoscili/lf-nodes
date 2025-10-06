@@ -1,5 +1,5 @@
-import { n, V, aV as LF_TOAST_BLOCKS, C as CY_ATTRIBUTES, a as LF_ATTRIBUTES, aW as LF_TOAST_PARTS, c as LF_STYLE_ID, aX as LF_TOAST_CSS_VARIABLES, d as LF_WRAPPER_ID, D as D$1, aY as LF_TOAST_PROPS, p as pt, W as W$1, z as z$1 } from "./index-CAhA1yg9.js";
-import { a } from "./p-Dl9cVpAY-bPm7KoFq.js";
+import { n, V, b0 as LF_TOAST_BLOCKS, C as CY_ATTRIBUTES, f as LF_ATTRIBUTES, b1 as LF_TOAST_PARTS, b as LF_STYLE_ID, b2 as LF_TOAST_CSS_VARIABLES, c as LF_WRAPPER_ID, D, b3 as LF_TOAST_PROPS, p as pt, W as W$1, z as z$1 } from "./index-C0xOFSd6.js";
+import { a } from "./p-Dl9cVpAY-BzaNfh1a.js";
 var p, b, u, g, y, w, k, z, x, _ = function(t, a2, o, s) {
   if ("function" == typeof a2 ? t !== a2 || true : !a2.has(t)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return a2.get(t);
@@ -10,7 +10,7 @@ const W = class {
       this.unmount();
     }, this.lfTimer = null, this.lfMessage = "", this.lfStyle = "", this.lfUiSize = "medium", this.lfUiState = "primary", p.set(this, void 0), b.set(this, LF_TOAST_BLOCKS), u.set(this, CY_ATTRIBUTES), g.set(this, LF_ATTRIBUTES), y.set(this, LF_TOAST_PARTS), w.set(this, LF_STYLE_ID), k.set(this, LF_TOAST_CSS_VARIABLES), z.set(this, LF_WRAPPER_ID), x.set(this, ((t = false) => {
       const { assets: a2, theme: s2 } = _(this, p), { get: r } = a2, { bemClass: e } = s2, { toast: i } = _(this, b), { style: l } = r(`./assets/svg/${t ? this.lfCloseIcon : this.lfIcon}.svg`);
-      return D$1("div", { class: e(i._, i.icon, { "has-actions": t }), "data-cy": _(this, u).maskedSvg, onPointerDown: t ? (t2) => this.lfCloseCallback(this, t2) : null, part: _(this, y).icon, style: l, tabIndex: t && 0 });
+      return D("div", { class: e(i._, i.icon, { "has-actions": t }), "data-cy": _(this, u).maskedSvg, onPointerDown: t ? (t2) => this.lfCloseCallback(this, t2) : null, part: _(this, y).icon, style: l, tabIndex: t && 0 });
     }));
   }
   onLfEvent(t, a2) {
@@ -59,11 +59,11 @@ const W = class {
   }
   render() {
     const { theme: t } = _(this, p), { bemClass: a2, setLfStyle: s } = t, { toast: e } = _(this, b), { lfCloseIcon: i, lfIcon: l, lfMessage: n2, lfStyle: f, lfTimer: c } = this;
-    return D$1(W$1, { key: "93f2712f80c3bc24cc6bf2b3d58a6a6b51b47092" }, D$1("style", { key: "42dbb4395076e39224a5ca44029b57220ab1434c", id: _(this, w) }, `
+    return D(W$1, { key: "93f2712f80c3bc24cc6bf2b3d58a6a6b51b47092" }, D("style", { key: "42dbb4395076e39224a5ca44029b57220ab1434c", id: _(this, w) }, `
           :host {
             ${c ? `--${_(this, k).timer}: ${c}ms;` : ""}
           }
-        ${f && s(this) || ""}`), D$1("div", { key: "7cd989a7ed9896bcce06b5c9d359cdb8ae893a8d", id: _(this, z), "data-lf": _(this, g).fadeIn }, D$1("div", { key: "4759c6bf70205f2620727ef38612badcf2fc83cd", class: a2(e._), "data-lf": _(this, g)[this.lfUiState] }, D$1("div", { key: "5346b0c13071dfbbc7ac19fbffa9e238b209b848", class: a2(e._, e.accent, { temporary: !!c }) }), D$1("div", { key: "fdbd1205e39bce799435db57899205758880d112", class: a2(e._, e.messageWrapper, { full: Boolean(l) && Boolean(i), "has-actions": Boolean(i), "has-icon": Boolean(l) }) }, l && _(this, x).call(this), n2 && D$1("div", { key: "2dfa82f8c32c1f6ba4b52acdf48723c7eef8aa95", class: a2(e._, e.message) }, n2), i && _(this, x).call(this, true)))));
+        ${f && s(this) || ""}`), D("div", { key: "7cd989a7ed9896bcce06b5c9d359cdb8ae893a8d", id: _(this, z), "data-lf": _(this, g).fadeIn }, D("div", { key: "4759c6bf70205f2620727ef38612badcf2fc83cd", class: a2(e._), "data-lf": _(this, g)[this.lfUiState] }, D("div", { key: "5346b0c13071dfbbc7ac19fbffa9e238b209b848", class: a2(e._, e.accent, { temporary: !!c }) }), D("div", { key: "fdbd1205e39bce799435db57899205758880d112", class: a2(e._, e.messageWrapper, { full: Boolean(l) && Boolean(i), "has-actions": Boolean(i), "has-icon": Boolean(l) }) }, l && _(this, x).call(this), n2 && D("div", { key: "2dfa82f8c32c1f6ba4b52acdf48723c7eef8aa95", class: a2(e._, e.message) }, n2), i && _(this, x).call(this, true)))));
   }
   disconnectedCallback() {
     var _a;

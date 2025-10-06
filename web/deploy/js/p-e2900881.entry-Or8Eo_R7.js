@@ -1,5 +1,5 @@
-import { n, V, b9 as LF_TABBAR_BLOCKS, C as CY_ATTRIBUTES, a as LF_ATTRIBUTES, ba as LF_TABBAR_PARTS, c as LF_STYLE_ID, d as LF_WRAPPER_ID, D as D$1, bb as LF_TABBAR_PROPS, p as pt, W as W$1, z as z$1 } from "./index-CAhA1yg9.js";
-import { a } from "./p-Dl9cVpAY-bPm7KoFq.js";
+import { n, V, bc as LF_TABBAR_BLOCKS, C as CY_ATTRIBUTES, f as LF_ATTRIBUTES, bd as LF_TABBAR_PARTS, b as LF_STYLE_ID, c as LF_WRAPPER_ID, D, be as LF_TABBAR_PROPS, p as pt, W as W$1, z as z$1 } from "./index-C0xOFSd6.js";
+import { a } from "./p-Dl9cVpAY-BzaNfh1a.js";
 const p = (t, r) => {
   if (t) {
     const a2 = t.scrollLeft;
@@ -17,16 +17,16 @@ const E = class {
   constructor(i) {
     n(this, i), this.lfEvent = V(this, "lf-tabbar-event"), this.value = null, this.lfAriaLabel = "", this.lfDataset = null, this.lfNavigation = false, this.lfRipple = true, this.lfStyle = "", this.lfUiSize = "medium", this.lfUiState = "primary", this.lfValue = null, u.set(this, void 0), v.set(this, LF_TABBAR_BLOCKS), m.set(this, CY_ATTRIBUTES), g.set(this, LF_ATTRIBUTES), y.set(this, LF_TABBAR_PARTS), w.set(this, LF_STYLE_ID), z.set(this, LF_WRAPPER_ID), k.set(this, void 0), x.set(this, void 0), _.set(this, ((t) => {
       const { get: r } = M(this, u, "f").assets, { bemClass: i2 } = M(this, u, "f").theme, { tab: o } = M(this, v, "f"), { style: e } = r(`./assets/svg/${t.icon}.svg`);
-      return D$1("div", { class: i2(o._, o.icon), "data-cy": M(this, m, "f").maskedSvg, style: e });
+      return D("div", { class: i2(o._, o.icon), "data-cy": M(this, m, "f").maskedSvg, style: e });
     })), W.set(this, ((t, r) => {
       const { theme: i2 } = M(this, u, "f"), { bemClass: o } = i2, { tab: e } = M(this, v, "f"), { lfRipple: l, value: n2 } = this, s = t === (n2 == null ? void 0 : n2.node);
-      return D$1("button", { "aria-selected": s, "aria-label": (this.lfAriaLabel && t.value ? `${this.lfAriaLabel} ${t.value}` : t.value || this.lfAriaLabel || t.icon || this.rootElement.id || "tab").toString().trim(), class: o(e._, null, { active: s }), "data-cy": M(this, m, "f").button, "data-lf": M(this, g, "f")[this.lfUiState], onClick: (a2) => {
+      return D("button", { "aria-selected": s, "aria-label": (this.lfAriaLabel && t.value ? `${this.lfAriaLabel} ${t.value}` : t.value || this.lfAriaLabel || t.icon || this.rootElement.id || "tab").toString().trim(), class: o(e._, null, { active: s }), "data-cy": M(this, m, "f").button, "data-lf": M(this, g, "f")[this.lfUiState], onClick: (a2) => {
         this.onLfEvent(a2, "click", r, t);
       }, onPointerDown: (a2) => {
         this.onLfEvent(a2, "pointerdown", r, t);
-      }, part: M(this, y, "f").tab, role: "tab", tabIndex: r, title: (t == null ? void 0 : t.description) || "" }, D$1("div", { "data-cy": M(this, m, "f").rippleSurface, "data-lf": M(this, g, "f").rippleSurface, ref: (t2) => {
+      }, part: M(this, y, "f").tab, role: "tab", tabIndex: r, title: (t == null ? void 0 : t.description) || "" }, D("div", { "data-cy": M(this, m, "f").rippleSurface, "data-lf": M(this, g, "f").rippleSurface, ref: (t2) => {
         t2 && l && M(this, k, "f").push(t2);
-      } }), D$1("span", { class: o(e._, e.content), "data-cy": M(this, m, "f").node }, t.icon && M(this, _, "f").call(this, t), t.value && D$1("span", { class: o(e._, e.label) }, t.value)), D$1("span", { class: o(e._, e.indicator, { active: s }) }, D$1("span", { class: o(e._, e.indicatorContent, { active: true }) })));
+      } }), D("span", { class: o(e._, e.content), "data-cy": M(this, m, "f").node }, t.icon && M(this, _, "f").call(this, t), t.value && D("span", { class: o(e._, e.label) }, t.value)), D("span", { class: o(e._, e.indicator, { active: s }) }, D("span", { class: o(e._, e.indicatorContent, { active: true }) })));
     }));
   }
   onLfEvent(t, r, a2 = 0, i) {
@@ -94,9 +94,9 @@ const E = class {
     if (!t.node.exists(c)) return;
     C(this, k, []);
     const d = c.nodes;
-    return D$1(W$1, null, b && D$1("style", { id: M(this, w, "f") }, l(this)), D$1("div", { id: M(this, z, "f") }, D$1("div", { class: i(f._), part: M(this, y, "f").tabbbar, role: "tablist" }, this.lfNavigation && D$1("lf-button", { lfIcon: s, lfStretchY: true, lfStyling: "flat", lfUiSize: this.lfUiSize, "onLf-button-event": () => p(M(this, x, "f"), "left") }), D$1("div", { class: i(f._, f.scroll), ref: (t2) => {
+    return D(W$1, null, b && D("style", { id: M(this, w, "f") }, l(this)), D("div", { id: M(this, z, "f") }, D("div", { class: i(f._), part: M(this, y, "f").tabbbar, role: "tablist" }, this.lfNavigation && D("lf-button", { lfIcon: s, lfStretchY: true, lfStyling: "flat", lfUiSize: this.lfUiSize, "onLf-button-event": () => p(M(this, x, "f"), "left") }), D("div", { class: i(f._, f.scroll), ref: (t2) => {
       t2 && C(this, x, t2);
-    } }, d.map(((t2, r2) => M(this, W, "f").call(this, t2, r2)))), this.lfNavigation && D$1("lf-button", { lfIcon: n2, lfStretchY: true, lfStyling: "flat", lfUiSize: this.lfUiSize, "onLf-button-event": () => p(M(this, x, "f"), "right") }))));
+    } }, d.map(((t2, r2) => M(this, W, "f").call(this, t2, r2)))), this.lfNavigation && D("lf-button", { lfIcon: n2, lfStretchY: true, lfStyling: "flat", lfUiSize: this.lfUiSize, "onLf-button-event": () => p(M(this, x, "f"), "right") }))));
   }
   disconnectedCallback() {
     var _a, _b, _c;

@@ -5,7 +5,7 @@
     "name": "Luca Foscili",
     "url": "https://www.lucafoscili.com"
   },
-  "version": "1.3.0",
+  "version": "1.4.0",
   "type": "module",
   "scripts": {
     "clean": "node ./web/src/scripts/clean.js",
@@ -16,10 +16,10 @@
     "build": "yarn clean && yarn build:scss && yarn build:ts && yarn build:lfw && yarn build:vite"
   },
   "devDependencies": {
-    "@lf-widgets/assets": "1.0.2",
-    "@lf-widgets/core": "1.0.2",
-    "@lf-widgets/foundations": "1.0.2",
-    "@lf-widgets/framework": "1.0.2",
+    "@lf-widgets/assets": "1.1.0",
+    "@lf-widgets/core": "1.1.0",
+    "@lf-widgets/foundations": "1.1.0",
+    "@lf-widgets/framework": "1.1.0",
     "@types/node": "^22",
     "fs-extra": "^11",
     "rollup-plugin-visualizer": "^5",

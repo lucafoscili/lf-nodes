@@ -21,16 +21,21 @@ export const controlPanelFactory: ControlPanelFactory = {
       getValue() {
         return {
           backup: getLfManager().isBackupEnabled() || false,
+          backupRetention: getLfManager().getBackupRetention() || 14,
           debug: getLfManager().isDebug() || false,
           themes: getLfManager().getManagers().lfFramework.theme.get.current().name || '',
         };
       },
       setValue(value) {
         const callback: ControlPanelNormalizeCallback = (_, u) => {
-          const { backup, debug, themes } = u.parsedJson as ControlPanelDeserializedValue;
+          const { backup, backupRetention, debug, themes } =
+            u.parsedJson as ControlPanelDeserializedValue;
 
           if (backup === true || backup === false) {
             getLfManager().toggleBackup(backup);
+          }
+          if (typeof backupRetention === 'number') {
+            getLfManager().setBackupRetention(backupRetention);
           }
           if (debug === true || debug === false) {
             getLfManager().toggleDebug(debug);
@@ -54,6 +59,7 @@ export const controlPanelFactory: ControlPanelFactory = {
         setTimeout(() => {
           getApiRoutes().backup.new();
           contentCb(domWidget, true);
+          getApiRoutes().backup.cleanOld();
         }, 750);
       };
 

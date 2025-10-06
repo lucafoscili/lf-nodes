@@ -6,6 +6,7 @@ import {
   LfImageInterface,
   LfListInterface,
   LfMasonryInterface,
+  LfTextfieldInterface,
   LfToggleInterface,
   LfTreeInterface,
 } from '@lf-widgets/foundations';
@@ -76,6 +77,9 @@ export const isList = (comp: LfComponent): comp is LfListInterface => {
 };
 export const isMasonry = (comp: LfComponent): comp is LfMasonryInterface => {
   return comp.rootElement.tagName.toLowerCase() === 'lf-masonry';
+};
+export const isTextfield = (comp: LfComponent): comp is LfTextfieldInterface => {
+  return comp.rootElement.tagName.toLowerCase() === 'lf-textfield';
 };
 export const isTree = (comp: LfComponent): comp is LfTreeInterface => {
   return comp.rootElement.tagName.toLowerCase() === 'lf-tree';
@@ -182,6 +186,9 @@ export const unescapeJson = (input: any): UnescapeJSONPayload => {
 export const getApiRoutes = () => {
   return getLfManager().getApiRoutes();
 };
+export const getLfData = () => {
+  return getLfManager().getManagers().lfFramework?.data;
+};
 export const getLfManager = () => {
   return window[LF_MANAGER_SYMBOL];
 };
@@ -248,6 +255,8 @@ export const isValidNumber = (n: number) => {
 //#endregion
 
 //#region String
+export const asString = (value: unknown): string | undefined =>
+  typeof value === 'string' ? value : undefined;
 export const capitalize = (input: string) => {
   return input
     .toLowerCase()
@@ -255,6 +264,9 @@ export const capitalize = (input: string) => {
     .map((word) => word.charAt(0).toUpperCase() + word.substring(1))
     .join(' ');
 };
+export const isString = (value: unknown): value is string => typeof value === 'string';
+export const normalizeDirectoryRequest = (value: unknown): string =>
+  typeof value === 'string' ? value : '';
 export const splitByLastSpaceBeforeAnyBracket = (input: string) => {
   const match = input.match(/\s+(.+)\[.*?\]/);
 

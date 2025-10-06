@@ -225,18 +225,37 @@ export const createEventHandlers = ({
 
       switch (eventType) {
         case 'lf-event': {
-          // Events bubbled up by imageviewer's children
+          // Events bubbled up
           const ogEv = originalEvent as LfEvent;
-          switch (ogEv.detail.eventType) {
-            case 'click':
-              if (isTree(ogEv.detail.comp)) {
-                const { node } = ogEv.detail as LfTreeEventPayload;
-                if (node.cells?.lfCode) {
-                  prepSettings(state, node);
-                }
-              }
-              break;
 
+          if (isTree(ogEv.detail.comp)) {
+            // Check if it's a tree event
+            const treeEvent = ogEv as CustomEvent<LfTreeEventPayload>;
+            const { id, node: treeNode, eventType } = treeEvent.detail;
+
+            switch (id) {
+              case 'details-tree':
+                if (treeNode?.cells?.lfCode && eventType === 'click') {
+                  prepSettings(state, treeNode);
+                }
+                break;
+
+              case 'navigation-tree':
+                if (!state.navigationManager || !treeNode || eventType !== 'click') {
+                  break;
+                }
+
+                const needsLazyLoad = !treeNode.children || treeNode.children.length === 0;
+                if (needsLazyLoad) {
+                  await state.navigationManager.expandNode(treeNode);
+                }
+
+                await state.navigationManager.handleTreeClick(treeNode);
+                break;
+            }
+          }
+
+          switch (ogEv.detail.eventType) {
             case 'lf-event': // Events bubbled up further
               // Check if it's a masonry event
               const masonryEvent = ogEv as CustomEvent<LfMasonryEventPayload>;

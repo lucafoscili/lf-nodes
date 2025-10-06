@@ -66,12 +66,15 @@ export const createPrepSettings = (deps: PrepSettingsDeps): PrepSettingsFn => {
     const { elements, filter } = state;
     const { settings } = elements;
 
+    if (!filter?.configs) {
+      return;
+    }
+
     settings.innerHTML = '';
 
     const controlsContainer = document.createElement(TagName.Div);
     controlsContainer.classList.add(ImageEditorCSS.SettingsControls);
     settings.appendChild(controlsContainer);
-
     const controlGroups = Object.keys(filter.configs) as ImageEditorControls[];
     controlGroups.forEach((controlType) => {
       const configs = filter.configs[controlType];

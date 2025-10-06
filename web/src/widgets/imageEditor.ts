@@ -1,3 +1,5 @@
+import { LfTreeInterface } from '@lf-widgets/foundations';
+import { IMAGE_API } from '../api/image';
 import { SETTINGS, TREE_DATA } from '../fixtures/imageEditor';
 import { EV_HANDLERS, getStatusColumn, setGridStatus, updateCb } from '../helpers/imageEditor';
 import {
@@ -6,6 +8,8 @@ import {
   getNavigationDirectory,
   mergeNavigationDirectory,
 } from '../helpers/imageEditor/dataset';
+import { syncNavigationDirectoryControl } from '../helpers/imageEditor/navigation';
+import { createNavigationTreeManager } from '../helpers/imageEditor/navigationTree';
 import { setBrush } from '../helpers/imageEditor/settings';
 import { LfEventName } from '../types/events/events';
 import { LogSeverity } from '../types/manager/manager';
@@ -21,47 +25,23 @@ import {
   ImageEditorStatus,
 } from '../types/widgets/imageEditor';
 import { CustomWidgetName, NodeName, TagName } from '../types/widgets/widgets';
-import { createDOMWidget, getLfManager, normalizeValue } from '../utils/common';
+import {
+  createDOMWidget,
+  getLfManager,
+  normalizeDirectoryRequest,
+  normalizeValue,
+} from '../utils/common';
 
-const STATE = new WeakMap<HTMLDivElement, ImageEditorState>();
 export const IMAGE_EDITOR_INSTANCES = new Set<ImageEditorState>();
+const STATE = new WeakMap<HTMLDivElement, ImageEditorState>();
 
-const normalizeDirectoryRequest = (value: unknown): string =>
-  typeof value === 'string' ? value : '';
-
-const syncNavigationDirectoryControl = async (
-  state: ImageEditorState,
-  directoryValue: string | undefined,
-): Promise<void> => {
-  const { imageviewer } = state.elements;
-  if (!imageviewer?.getComponents) {
-    return;
-  }
-
-  const targetValue = normalizeDirectoryRequest(directoryValue);
-
-  try {
-    const components = await imageviewer.getComponents();
-    const textfield = components?.navigation?.textfield;
-    if (!textfield || typeof textfield.setValue !== 'function') {
-      return;
-    }
-
-    const currentValue =
-      typeof textfield.getValue === 'function' ? await textfield.getValue() : undefined;
-
-    if ((currentValue ?? '') === targetValue) {
-      return;
-    }
-
-    state.isSyncingDirectory = true;
-    await textfield.setValue(targetValue);
-  } catch (error) {
-    getLfManager().log('Failed to synchronize directory input.', { error }, LogSeverity.Warning);
-  } finally {
-    state.isSyncingDirectory = false;
-  }
-};
+const NAVIGATION_TREE_PROPS_BASE: Partial<LfTreeInterface> = {
+  lfAccordionLayout: true,
+  lfFilter: true,
+  lfInitialExpansionDepth: 0,
+  lfGrid: true,
+  lfSelectable: true,
+} as const;
 
 export const imageEditorFactory: ImageEditorFactory = {
   //#region Options
@@ -141,21 +121,45 @@ export const imageEditorFactory: ImageEditorFactory = {
     const settings = document.createElement(TagName.Div);
     const imageviewer = document.createElement(TagName.LfImageviewer);
 
+    const navigationTreeEnabled = node.comfyClass === NodeName.loadAndEditImages;
+    let navigationManager: ReturnType<typeof createNavigationTreeManager> | null = null;
+
+    if (navigationTreeEnabled) {
+      imageviewer.lfNavigation = {
+        isTreeOpen: true,
+        treeProps: {
+          ...NAVIGATION_TREE_PROPS_BASE,
+          lfDataset: { columns: [], nodes: [] },
+        },
+      };
+    }
+
     const refresh = async (directory: string) => {
       const state = STATE.get(wrapper);
       const normalizedDirectory = normalizeDirectoryRequest(directory);
+
+      if (!state) {
+        return;
+      }
 
       state.hasAutoDirectoryLoad = true;
       state.lastRequestedDirectory = normalizedDirectory;
 
       try {
-        const response = await getLfManager().getApiRoutes().image.get(normalizedDirectory);
-        if (response.status !== 'success') {
+        const response = navigationTreeEnabled
+          ? await IMAGE_API.explore(normalizedDirectory, { scope: 'dataset' })
+          : await IMAGE_API.get(normalizedDirectory);
+
+        if (response.status !== LogSeverity.Success) {
           getLfManager().log('Images not found.', { response }, LogSeverity.Info);
           return;
         }
 
-        const dataset = (response?.data ?? { nodes: [] }) as ImageEditorDataset;
+        const rawData: any = response.data;
+        const dataset =
+          (navigationTreeEnabled ? rawData?.dataset : rawData) ??
+          ({ nodes: [] } as ImageEditorDataset);
+
         const mergedDirectory = mergeNavigationDirectory(dataset, { raw: normalizedDirectory });
 
         state.directory = { ...mergedDirectory };
@@ -166,6 +170,7 @@ export const imageEditorFactory: ImageEditorFactory = {
         ensureDatasetContext(dataset, state);
 
         imageviewer.lfDataset = dataset;
+
         await syncNavigationDirectoryControl(state, state.directoryValue);
       } catch (error) {
         getLfManager().log(
@@ -186,17 +191,13 @@ export const imageEditorFactory: ImageEditorFactory = {
         return;
       }
 
-      let directoryValue = normalizeDirectoryRequest(value);
-      if (!directoryValue) {
-        const fallbackDirectory =
-          state.directoryValue ?? deriveDirectoryValue(state.directory) ?? undefined;
-        directoryValue = normalizeDirectoryRequest(fallbackDirectory);
-      }
+      const directoryValue = normalizeDirectoryRequest(value);
 
       if (
         state.lastRequestedDirectory === directoryValue &&
         state.directoryValue === directoryValue
       ) {
+        getLfManager().log('lfLoadCallback: directory unchanged, skipping', {}, LogSeverity.Info);
         return;
       }
 
@@ -209,6 +210,26 @@ export const imageEditorFactory: ImageEditorFactory = {
     imageviewer.appendChild(settings);
 
     const actionButtons: ImageEditorActionButtons = {};
+
+    const state: ImageEditorState = {
+      contextId: undefined,
+      elements: { actionButtons, controls: {}, grid, imageviewer, settings },
+      directory: undefined,
+      directoryValue: undefined,
+      filter: null,
+      filterType: null,
+      hasAutoDirectoryLoad: false,
+      isSyncingDirectory: false,
+      lastBrushSettings: JSON.parse(JSON.stringify(SETTINGS.brush.settings)),
+      lastRequestedDirectory: undefined,
+      node,
+      refreshDirectory: refresh,
+      update: {
+        preview: () => updateCb(STATE.get(wrapper)).then(() => {}),
+        snapshot: () => updateCb(STATE.get(wrapper), true).then(() => {}),
+      },
+      wrapper,
+    };
 
     switch (node.comfyClass) {
       case NodeName.imagesEditingBreakpoint:
@@ -260,32 +281,25 @@ export const imageEditorFactory: ImageEditorFactory = {
 
     const options = imageEditorFactory.options(wrapper);
 
-    const state: ImageEditorState = {
-      elements: { actionButtons, controls: {}, grid, imageviewer, settings },
-      contextId: undefined,
-      directory: undefined,
-      directoryValue: undefined,
-      filter: null,
-      filterType: null,
-      lastBrushSettings: JSON.parse(JSON.stringify(SETTINGS.brush.settings)),
-      hasAutoDirectoryLoad: false,
-      isSyncingDirectory: false,
-      lastRequestedDirectory: undefined,
-      node,
-      refreshDirectory: refresh,
-      update: {
-        preview: () => updateCb(STATE.get(wrapper)).then(() => {}),
-        snapshot: () => updateCb(STATE.get(wrapper), true).then(() => {}),
-      },
-      wrapper,
-    };
-
     STATE.set(wrapper, state);
     IMAGE_EDITOR_INSTANCES.add(state);
 
-    void Promise.resolve().then(() => {
+    if (navigationTreeEnabled) {
+      navigationManager = createNavigationTreeManager(imageviewer, state);
+      state.navigationManager = navigationManager;
+    }
+
+    void Promise.resolve().then(async () => {
       const currentState = STATE.get(wrapper);
-      if (!currentState || currentState.hasAutoDirectoryLoad) {
+      if (!currentState) {
+        return;
+      }
+
+      if (navigationTreeEnabled && navigationManager) {
+        await navigationManager.loadRoots();
+      }
+
+      if (currentState.hasAutoDirectoryLoad) {
         return;
       }
 

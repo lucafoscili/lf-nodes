@@ -1,5 +1,5 @@
-import { n, V, f as LF_SPLASH_BLOCKS, g as LF_SPLASH_PARTS, c as LF_STYLE_ID, d as LF_WRAPPER_ID, h as LF_SPLASH_PROPS, p as pt, D as D$1, W as W$1, z } from "./index-CAhA1yg9.js";
-import { a } from "./p-Dl9cVpAY-bPm7KoFq.js";
+import { n, V, L as LF_SPLASH_BLOCKS, a as LF_SPLASH_PARTS, b as LF_STYLE_ID, c as LF_WRAPPER_ID, d as LF_SPLASH_PROPS, p as pt, D, W as W$1, z } from "./index-C0xOFSd6.js";
+import { a } from "./p-Dl9cVpAY-BzaNfh1a.js";
 var d, p, v, m, b, u = function(e, t, s, a2) {
   if ("function" == typeof t ? e !== t || true : !t.has(e)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return t.get(e);
@@ -51,7 +51,7 @@ const g = class {
   }
   render() {
     const { bemClass: e, setLfStyle: t } = u(this, d).theme, { lfLabel: s, lfStyle: l, state: o } = this, r = "unmounting" === o, { splash: f } = u(this, p);
-    return D$1(W$1, { key: "b2f8e4fa5ca16c1ec0835688eaf8c8db79e004de" }, l && D$1("style", { key: "01e56d34ff2df739886396381e1d9c3ee75c44c7", id: u(this, m) }, t(this)), D$1("div", { key: "a63455f43781ab1dd0a7de874516107aeda037e4", id: u(this, b) }, D$1("div", { key: "28b288678d2c163dab061b917c84ea4b8dd8f1c1", class: e(f._, null, { active: r }), part: u(this, v).splash }, D$1("div", { key: "6939e6eff13d37bbfbf3f7c59f496c70699cd9c8", class: e(f._, f.content), part: u(this, v).content }, D$1("div", { key: "ad9c8d8d3d00c153bf1d6bbee56fae140c5c462e", class: e(f._, f.widget), part: u(this, v).widget }, D$1("slot", { key: "3b97f4a962a2a10527a568a2b935b79b43be6ca8" })), D$1("div", { key: "1e98521df8a0244361a51d011aba684d3b1fbfe1", class: e(f._, f.label), part: u(this, v).label }, r ? "Ready!" : s)))));
+    return D(W$1, { key: "b2f8e4fa5ca16c1ec0835688eaf8c8db79e004de" }, l && D("style", { key: "01e56d34ff2df739886396381e1d9c3ee75c44c7", id: u(this, m) }, t(this)), D("div", { key: "a63455f43781ab1dd0a7de874516107aeda037e4", id: u(this, b) }, D("div", { key: "28b288678d2c163dab061b917c84ea4b8dd8f1c1", class: e(f._, null, { active: r }), part: u(this, v).splash }, D("div", { key: "6939e6eff13d37bbfbf3f7c59f496c70699cd9c8", class: e(f._, f.content), part: u(this, v).content }, D("div", { key: "ad9c8d8d3d00c153bf1d6bbee56fae140c5c462e", class: e(f._, f.widget), part: u(this, v).widget }, D("slot", { key: "3b97f4a962a2a10527a568a2b935b79b43be6ca8" })), D("div", { key: "1e98521df8a0244361a51d011aba684d3b1fbfe1", class: e(f._, f.label), part: u(this, v).label }, r ? "Ready!" : s)))));
   }
   disconnectedCallback() {
     var _a;

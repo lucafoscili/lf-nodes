@@ -1,5 +1,5 @@
-import { n, V, b1 as LF_HEADER_BLOCKS, b2 as LF_HEADER_PARTS, c as LF_STYLE_ID, d as LF_WRAPPER_ID, b3 as LF_HEADER_PROPS, p as pt, D as D$1, b4 as LF_HEADER_SLOT, W as W$1, z as z$1 } from "./index-CAhA1yg9.js";
-import { a } from "./p-Dl9cVpAY-bPm7KoFq.js";
+import { n, V, b4 as LF_HEADER_BLOCKS, b5 as LF_HEADER_PARTS, b as LF_STYLE_ID, c as LF_WRAPPER_ID, b6 as LF_HEADER_PROPS, p as pt, D, b7 as LF_HEADER_SLOT, W as W$1, z as z$1 } from "./index-C0xOFSd6.js";
+import { a } from "./p-Dl9cVpAY-BzaNfh1a.js";
 var b, u, p, v, m, z = function(e, r, a2, i) {
   if ("function" == typeof r ? e !== r || true : !r.has(e)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return r.get(e);
@@ -49,7 +49,7 @@ const w = class {
   }
   render() {
     const { bemClass: e, setLfStyle: r } = z(this, b).theme, { header: a2 } = z(this, u), { lfStyle: o } = this;
-    return D$1(W$1, { key: "d08eda643b8a9c7bc9d1bb117f09ab64660180f8" }, o && D$1("style", { key: "daa7eb123c72b285ce1c827f8adfdc0b0900f59c", id: z(this, v) }, r(this)), D$1("div", { key: "b7499d58b9725b78bc9a608d82b051d5e63cefc3", id: z(this, m) }, D$1("header", { key: "027236b510cbaf1326bcd6a1e948f428670fbb40", class: e(a2._), part: z(this, p).header }, D$1("section", { key: "11efdf4a877acc8d00e1e2aecb14fdce8963972f", class: e(a2._, a2.section), part: z(this, p).section }, D$1("slot", { key: "87c980b4af04a6144b0f3000796a249d8a72bc00", name: LF_HEADER_SLOT })))));
+    return D(W$1, { key: "d08eda643b8a9c7bc9d1bb117f09ab64660180f8" }, o && D("style", { key: "daa7eb123c72b285ce1c827f8adfdc0b0900f59c", id: z(this, v) }, r(this)), D("div", { key: "b7499d58b9725b78bc9a608d82b051d5e63cefc3", id: z(this, m) }, D("header", { key: "027236b510cbaf1326bcd6a1e948f428670fbb40", class: e(a2._), part: z(this, p).header }, D("section", { key: "11efdf4a877acc8d00e1e2aecb14fdce8963972f", class: e(a2._, a2.section), part: z(this, p).section }, D("slot", { key: "87c980b4af04a6144b0f3000796a249d8a72bc00", name: LF_HEADER_SLOT })))));
   }
   disconnectedCallback() {
     var _a;

@@ -1,6 +1,7 @@
 import {
   LfDataDataset,
   LfDataNode,
+  LfMasonryEventPayload,
   LfSliderEventPayload,
   LfTextfieldEventPayload,
   LfToggleEventPayload,
@@ -67,6 +68,7 @@ export interface ImageEditorState extends BaseWidgetState {
   hasAutoDirectoryLoad?: boolean;
   isSyncingDirectory?: boolean;
   lastRequestedDirectory?: string;
+  navigationManager?: NavigationManager;
   manualApply?: {
     button: HTMLLfButtonElement;
     defaultLabel: string;
@@ -86,7 +88,6 @@ export interface ImageEditorState extends BaseWidgetState {
   };
   refreshDirectory?: (directory: string) => Promise<void>;
 }
-
 export interface PrepSettingsDeps {
   onSlider: (state: ImageEditorState, e: CustomEvent<LfSliderEventPayload>) => void | Promise<void>;
   onTextfield: (
@@ -95,14 +96,28 @@ export interface PrepSettingsDeps {
   ) => void | Promise<void>;
   onToggle: (state: ImageEditorState, e: CustomEvent<LfToggleEventPayload>) => void | Promise<void>;
 }
-
 export type PrepSettingsFn = (state: ImageEditorState, node: LfDataNode) => void;
 export interface EventHandlerDeps {
   handleInterruptForState: (state: ImageEditorState) => Promise<void>;
   prepSettings: PrepSettingsFn;
 }
-
 export type EventHandlers = ReturnType<typeof createEventHandlers>;
+export interface NavigationManager {
+  loadRoots: () => Promise<void>;
+  expandNode: (node: LfDataNode) => Promise<void>;
+  handleTreeClick: (node: LfDataNode) => Promise<void>;
+}
+export interface NavigationMetadata {
+  id: string;
+  name: string;
+  hasChildren: boolean;
+  paths: {
+    raw?: string;
+    relative?: string;
+    resolved?: string;
+  };
+  isRoot?: boolean;
+}
 //#endregion
 
 //#region Dataset
@@ -114,9 +129,15 @@ export enum ImageEditorColumnId {
   Path = 'path',
   Status = 'status',
 }
-
 export interface ImageEditorDatasetNavigation {
   directory?: ImageEditorDatasetNavigationDirectory;
+}
+export interface ImageEditorBuildSelectionPayloadParams {
+  dataset: ImageEditorDataset;
+  index: number;
+  nodes: ImageEditorDataset['nodes'];
+  selectedShape?: LfMasonryEventPayload['selectedShape'];
+  fallbackContextId?: string;
 }
 //#endregion
 
