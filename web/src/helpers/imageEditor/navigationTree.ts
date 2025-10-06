@@ -81,13 +81,13 @@ export const createNavigationTreeManager = (
   };
 
   const updateTreeDataset = async (dataset: LfDataDataset | null) => {
-    const { navigation } = await imageviewer.getComponents();
-    const { tree } = navigation ?? {};
-
     state.dataset = dataset;
 
-    if (tree) {
-      tree.lfDataset = dataset ?? { columns: dataset?.columns ?? [], nodes: [] };
+    if (imageviewer.lfNavigation?.treeProps) {
+      imageviewer.lfNavigation.treeProps.lfDataset = dataset ?? {
+        columns: dataset?.columns ?? [],
+        nodes: [],
+      };
     }
   };
 
