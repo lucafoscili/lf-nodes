@@ -63,12 +63,9 @@ export const mergeNavigationTreeChildren = (
     return dataset;
   }
 
-  const merged = getLfData().node.mergeChildren(dataset, {
-    parentId,
-    children: (Array.isArray(branch.nodes) ? branch.nodes : undefined) as LfDataNode[] | undefined,
-    columns: branch.columns,
-  });
-  return merged as typeof dataset;
+  const parentNode = getLfData().node.find(dataset, (node) => node.id === parentId);
+  parentNode.children = [...((Array.isArray(branch.nodes) ? branch.nodes : undefined) ?? [])];
+  return dataset;
 };
 
 export const findNodeInNavigationTree = (

@@ -99,11 +99,16 @@ export const createNavigationTreeManager = (
     const lfData = getLfData();
     if (!lfData) return;
 
-    const merged = lfData.node.mergeChildren(state.dataset, {
-      parentId,
-      children,
-      columns: columns as any,
-    }) as LfDataDataset;
+    const parentNode = lfData.node.find(state.dataset, (node) => node.id === parentId);
+    if (!parentNode) return;
+
+    const merged: LfDataDataset = {
+      ...state.dataset,
+      columns: columns || state.dataset.columns,
+      nodes: [...state.dataset.nodes], // Clone to trigger reactivity
+    };
+
+    parentNode.children = [...children]; // Replace parent's children
 
     await updateTreeDataset(merged);
     state.loadedNodes.add(parentId);
