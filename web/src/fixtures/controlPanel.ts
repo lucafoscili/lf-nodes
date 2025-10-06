@@ -10,7 +10,6 @@ import { getLfManager, getLfThemes } from '../utils/common';
 
 //#region Styles
 const BUTTON_STYLE = ':host { margin: auto; padding: 1em 0; width: max-content; }';
-const PROGRESSBAR_STYLE = `.progressbar__label { text-shadow: 0 0 8px rgba(var(--lf-color-bg), 0.95), 0 1px 3px rgba(0, 0, 0, 0.8); font-weight: 600; }`;
 const STYLES = {
   customization: () => {
     return {
@@ -125,9 +124,30 @@ export const SECTIONS: ControlPanelFixture = {
   //#endregion
 
   //#region Backup
-  [ControlPanelIds.Backup]: (): LfArticleNode => {
+  [ControlPanelIds.Backup]: (stats?: {
+    totalSizeBytes: number;
+    fileCount: number;
+  }): LfArticleNode => {
     const { theme } = getLfManager().getManagers().lfFramework;
-    const { '--lf-icon-download': downloadIcon } = theme.get.current().variables;
+    const { '--lf-icon-download': downloadIcon, '--lf-icon-refresh': refreshIcon } =
+      theme.get.current().variables;
+    const { progress } = theme.get.icons();
+
+    const totalBytes = stats?.totalSizeBytes ?? 0;
+    const fileCount = stats?.fileCount ?? 0;
+
+    // Convert bytes to human-readable format
+    const formatBytes = (bytes: number): string => {
+      if (bytes === 0) return '0 B';
+      const k = 1024;
+      const sizes = ['B', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return `${(bytes / Math.pow(k, i)).toFixed(2)} ${sizes[i]}`;
+    };
+
+    // Calculate percentage (assuming 1GB max for visualization)
+    const maxBytes = 1024 * 1024 * 1024; // 1GB
+    const percentage = Math.min((totalBytes / maxBytes) * 100, 100);
 
     return {
       icon: ControlPanelIcons.Backup,
@@ -158,7 +178,103 @@ export const SECTIONS: ControlPanelFixture = {
                   lfStyle: ':host { text-align: center; padding: 1em 0; }',
                   shape: 'toggle',
                   value: !!getLfManager().isBackupEnabled(),
-                } as any,
+                },
+              },
+            },
+          ],
+        },
+        {
+          cssStyle: STYLES.separator(),
+          id: ControlPanelSection.ContentSeparator,
+          value: '',
+        },
+        {
+          id: ControlPanelSection.Paragraph,
+          value: 'Backup statistics',
+          children: [
+            {
+              id: ControlPanelSection.Content,
+              value:
+                'Backup files are stored in the user/LF_Nodes folder. Monitor your backup folder size to ensure you have enough disk space.',
+            },
+            {
+              id: ControlPanelSection.Content,
+              tagName: 'br',
+              value: '',
+            },
+            {
+              id: ControlPanelSection.Content,
+              value: '',
+              children: [
+                {
+                  id: 'backup-info',
+                  value: `Current backup: ${formatBytes(totalBytes)} (${fileCount} files)`,
+                  cssStyle: {
+                    display: 'block',
+                    marginBottom: '0.75em',
+                  },
+                },
+                {
+                  id: 'backup-progress',
+                  value: '',
+                  cells: {
+                    lfProgressbar: {
+                      lfIcon: progress,
+                      lfLabel: `${formatBytes(totalBytes)} (${percentage.toFixed(1)}%)`,
+                      shape: 'progressbar',
+                      value: percentage,
+                    },
+                  },
+                },
+              ],
+            },
+            {
+              id: ControlPanelSection.Content,
+              value: '',
+              cells: {
+                lfButton: {
+                  lfIcon: refreshIcon,
+                  lfLabel: ControlPanelLabels.RefreshBackupStats,
+                  lfStyle: BUTTON_STYLE,
+                  lfStyling: 'flat',
+                  shape: 'button',
+                  value: '',
+                },
+              },
+            },
+          ],
+        },
+        {
+          cssStyle: STYLES.separator(),
+          id: ControlPanelSection.ContentSeparator,
+          value: '',
+        },
+        {
+          id: ControlPanelSection.Paragraph,
+          value: 'Rolling backup retention',
+          children: [
+            {
+              id: ControlPanelSection.Content,
+              value:
+                'Set the maximum number of backups to keep. When this limit is exceeded, the oldest backups will be automatically deleted. Set to 0 to disable this feature.',
+            },
+            {
+              id: ControlPanelSection.Content,
+              tagName: 'br',
+              value: '',
+            },
+            {
+              id: ControlPanelSection.Content,
+              value: '',
+              cells: {
+                lfTextfield: {
+                  lfHtmlAttributes: { type: 'number' },
+                  lfLabel: ControlPanelLabels.BackupRetention,
+                  lfStyle: ':host { text-align: center; padding: 1em 0; }',
+                  lfValue: getLfManager().getBackupRetention().toString() || '14',
+                  shape: 'textfield',
+                  value: '',
+                },
               },
             },
           ],
@@ -387,11 +503,8 @@ export const SECTIONS: ControlPanelFixture = {
                   value: '',
                   cells: {
                     lfProgressbar: {
-                      lfCenteredLabel: true,
                       lfIcon: progress,
                       lfLabel: `${formatBytes(totalBytes)} (${percentage.toFixed(1)}%)`,
-                      lfStyle: PROGRESSBAR_STYLE,
-                      lfUiSize: 'large',
                       shape: 'progressbar',
                       value: percentage,
                     },
@@ -405,7 +518,7 @@ export const SECTIONS: ControlPanelFixture = {
               cells: {
                 lfButton: {
                   lfIcon: refreshIcon,
-                  lfLabel: ControlPanelLabels.RefreshStats,
+                  lfLabel: ControlPanelLabels.RefreshPreviewStats,
                   lfStyle: BUTTON_STYLE,
                   lfStyling: 'flat',
                   shape: 'button',

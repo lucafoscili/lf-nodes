@@ -6,6 +6,7 @@ import {
   LfImageInterface,
   LfListInterface,
   LfMasonryInterface,
+  LfTextfieldInterface,
   LfToggleInterface,
   LfTreeInterface,
 } from '@lf-widgets/foundations';
@@ -76,6 +77,9 @@ export const isList = (comp: LfComponent): comp is LfListInterface => {
 };
 export const isMasonry = (comp: LfComponent): comp is LfMasonryInterface => {
   return comp.rootElement.tagName.toLowerCase() === 'lf-masonry';
+};
+export const isTextfield = (comp: LfComponent): comp is LfTextfieldInterface => {
+  return comp.rootElement.tagName.toLowerCase() === 'lf-textfield';
 };
 export const isTree = (comp: LfComponent): comp is LfTreeInterface => {
   return comp.rootElement.tagName.toLowerCase() === 'lf-tree';

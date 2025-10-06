@@ -49,6 +49,7 @@ export class LFManager {
     preview: PREVIEW_API,
   };
   #AUTOMATIC_BACKUP = true;
+  #BACKUP_RETENTION = 14;
   #CACHED_DATASETS: { usage: LfDataDataset } = {
     usage: null,
   };
@@ -186,6 +187,9 @@ export class LFManager {
   getPrefixedNode(nodeName: string) {
     return `✨ LF Nodes/${nodeName}`;
   }
+  getBackupRetention() {
+    return this.#BACKUP_RETENTION;
+  }
   isBackupEnabled() {
     return this.#AUTOMATIC_BACKUP;
   }
@@ -249,6 +253,13 @@ export class LFManager {
   //#endregion
 
   //#region Setters
+  setBackupRetention(value: number) {
+    if (typeof value === 'number' && value >= 0) {
+      this.#BACKUP_RETENTION = Math.floor(value);
+      this.log(`Backup retention set to: ${this.#BACKUP_RETENTION}`, { value }, LogSeverity.Info);
+    }
+    return this.#BACKUP_RETENTION;
+  }
   setDebugDataset(article: HTMLLfArticleElement, dataset: LfArticleNode[]) {
     this.#DEBUG_ARTICLE = article;
     this.#DEBUG_DATASET = dataset;

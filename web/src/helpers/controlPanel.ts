@@ -1,10 +1,13 @@
 import {
+  LfArticleElement,
   LfArticleEventPayload,
   LfArticleNode,
   LfButtonEvent,
   LfButtonEventPayload,
   LfDataNode,
   LfListEventPayload,
+  LfTextfieldEvent,
+  LfTextfieldEventPayload,
   LfToggleEvent,
   LfToggleEventPayload,
 } from '@lf-widgets/foundations';
@@ -13,13 +16,12 @@ import { BaseAPIPayload } from '../types/api/api';
 import { LfEventName } from '../types/events/events';
 import {
   ControlPanelCSS,
-  ControlPanelFixture,
   ControlPanelIds,
   ControlPanelLabels,
   ControlPanelSection,
 } from '../types/widgets/controlPanel';
 import { TagName } from '../types/widgets/widgets';
-import { getApiRoutes, getLfManager, isButton, isToggle } from '../utils/common';
+import { getApiRoutes, getLfManager, isButton, isTextfield, isToggle } from '../utils/common';
 
 const INTRO_SECTION = ControlPanelIds.GitHub;
 
@@ -28,30 +30,21 @@ let TIMEOUT: NodeJS.Timeout;
 export const EV_HANDLERS = {
   //#region Article handler
   article: (e: CustomEvent<LfArticleEventPayload>) => {
-    const { eventType, originalEvent } = (e as CustomEvent<LfArticleEventPayload>).detail;
+    const { comp, eventType, originalEvent } = (e as CustomEvent<LfArticleEventPayload>).detail;
 
     switch (eventType) {
       case 'lf-event':
-        handleLfEvent(originalEvent);
+        handleLfEvent(originalEvent, comp.rootElement);
         break;
     }
   },
   //#endregion
 
   //#region Button handler
-  button: (e: CustomEvent<LfButtonEventPayload>) => {
+  button: (e: CustomEvent<LfButtonEventPayload>, slot: LfArticleElement) => {
     const { comp, eventType, originalEvent } = e.detail;
 
     const element = comp.rootElement;
-
-    const createSpinner = () => {
-      const spinner = document.createElement('lf-spinner');
-      spinner.lfActive = true;
-      spinner.lfDimensions = '0.6em';
-      spinner.lfLayout = 2;
-      spinner.slot = 'spinner';
-      return spinner;
-    };
 
     const invokeAPI = (promise: Promise<BaseAPIPayload>, label: ControlPanelLabels) => {
       const onResponse = () => {
@@ -62,7 +55,7 @@ export const EV_HANDLERS = {
       };
       const restore = (label: ControlPanelLabels) => {
         comp.lfLabel = label;
-        comp.lfIcon = 'delete';
+        comp.lfIcon = 'x';
         comp.lfUiState = 'primary';
         TIMEOUT = null;
       };
@@ -83,6 +76,7 @@ export const EV_HANDLERS = {
         switch (comp.lfLabel) {
           case ControlPanelLabels.Backup:
             invokeAPI(getApiRoutes().backup.new('manual'), ControlPanelLabels.Backup);
+            getApiRoutes().backup.cleanOld();
             break;
           case ControlPanelLabels.ClearLogs:
             const { article, dataset } = getLfManager().getDebugDataset();
@@ -103,28 +97,33 @@ export const EV_HANDLERS = {
           case ControlPanelLabels.OpenIssue:
             window.open('https://github.com/lucafoscili/comfyui-lf/issues/new', '_blank');
             break;
-          case ControlPanelLabels.RefreshStats:
-            // Refresh preview stats
+          case ControlPanelLabels.RefreshPreviewStats:
             getApiRoutes()
               .preview.getStats()
               .then((response) => {
                 if (response.status === 'success') {
-                  // Re-create the section with updated stats
-                  const accordion = element.closest('lf-accordion');
-                  if (accordion) {
-                    const article = accordion.querySelector(
-                      '[slot="external-previews"]',
-                    ) as HTMLLfArticleElement;
-                    if (article) {
-                      const updatedNode = SECTIONS[ControlPanelIds.ExternalPreviews]({
-                        totalSizeBytes: response.data.total_size_bytes,
-                        fileCount: response.data.file_count,
-                      });
-                      article.lfDataset = {
-                        nodes: [{ children: [updatedNode], id: ControlPanelSection.Root }],
-                      };
-                    }
-                  }
+                  const updatedNode = SECTIONS[ControlPanelIds.ExternalPreviews]({
+                    totalSizeBytes: response.data.total_size_bytes,
+                    fileCount: response.data.file_count,
+                  });
+                  slot.lfDataset = {
+                    nodes: [{ children: [updatedNode], id: ControlPanelSection.Root }],
+                  };
+                }
+              });
+            break;
+          case ControlPanelLabels.RefreshBackupStats:
+            getApiRoutes()
+              .backup.getStats()
+              .then((response) => {
+                if (response.status === 'success') {
+                  const updatedNode = SECTIONS[ControlPanelIds.Backup]({
+                    totalSizeBytes: response.data.total_size_bytes,
+                    fileCount: response.data.file_count,
+                  });
+                  slot.lfDataset = {
+                    nodes: [{ children: [updatedNode], id: ControlPanelSection.Root }],
+                  };
                 }
               });
             break;
@@ -140,18 +139,6 @@ export const EV_HANDLERS = {
         const ogEv = originalEvent as CustomEvent<LfListEventPayload>;
         EV_HANDLERS.list(ogEv);
         break;
-
-      case 'ready':
-        switch (comp.lfLabel) {
-          case ControlPanelLabels.Backup:
-            element.appendChild(createSpinner());
-            break;
-          case ControlPanelLabels.DeleteMetadata:
-          case ControlPanelLabels.DeleteUsage:
-            element.classList.add('lf-danger');
-            element.appendChild(createSpinner());
-            break;
-        }
     }
   },
   //#endregion
@@ -177,6 +164,22 @@ export const EV_HANDLERS = {
   //#endregion
 
   //#region Toggle handler
+  textfield: (e: CustomEvent<LfTextfieldEventPayload>) => {
+    const { comp, eventType, value } = e.detail;
+
+    const element = comp.rootElement;
+
+    switch (eventType as LfTextfieldEvent) {
+      case 'change':
+        const retentionValue = parseInt(value, 10);
+        if (!isNaN(retentionValue) && retentionValue >= 0) {
+          getLfManager().setBackupRetention(retentionValue);
+        }
+        break;
+      case 'ready':
+        element.title = 'Maximum number of backups to keep (0 = unlimited)';
+    }
+  },
   toggle: (e: CustomEvent<LfToggleEventPayload>) => {
     const { comp, eventType, value } = e.detail;
 
@@ -216,10 +219,8 @@ export const createContent = () => {
           break;
 
         case ControlPanelIds.ExternalPreviews:
-          // Initial load with no stats (will show 0)
-          node = SECTIONS[ControlPanelIds.ExternalPreviews](undefined);
+          node = SECTIONS[ControlPanelIds.ExternalPreviews]();
           article = prepArticle(id, node);
-          // Fetch stats asynchronously and update
           getApiRoutes()
             .preview.getStats()
             .then((response) => {
@@ -243,6 +244,19 @@ export const createContent = () => {
         case ControlPanelIds.Backup:
           node = SECTIONS[ControlPanelIds.Backup]();
           article = prepArticle(id, node);
+          getApiRoutes()
+            .backup.getStats()
+            .then((response) => {
+              if (response.status === 'success') {
+                const updatedNode = SECTIONS[ControlPanelIds.Backup]({
+                  totalSizeBytes: response.data.total_size_bytes,
+                  fileCount: response.data.file_count,
+                });
+                article.lfDataset = {
+                  nodes: [{ children: [updatedNode], id: ControlPanelSection.Root }],
+                };
+              }
+            });
           break;
 
         case ControlPanelIds.Metadata:
@@ -297,14 +311,21 @@ export const prepArticle = (key: string, node: LfArticleNode) => {
 //#endregion
 
 //#region handleLfEvent
-export const handleLfEvent = (e: Event) => {
+export const handleLfEvent = (e: Event, slot: LfArticleElement) => {
   const { comp } = (
-    e as CustomEvent<LfButtonEventPayload | LfListEventPayload | LfToggleEventPayload>
+    e as CustomEvent<
+      LfButtonEventPayload | LfListEventPayload | LfTextfieldEventPayload | LfToggleEventPayload
+    >
   ).detail;
 
   if (isButton(comp)) {
     const ogEv = e as CustomEvent<LfButtonEventPayload>;
-    EV_HANDLERS.button(ogEv);
+    EV_HANDLERS.button(ogEv, slot);
+  }
+
+  if (isTextfield(comp)) {
+    const ogEv = e as CustomEvent<LfTextfieldEventPayload>;
+    EV_HANDLERS.textfield(ogEv);
   }
 
   if (isToggle(comp)) {
