@@ -21,8 +21,18 @@ export interface AnalyticsAPIs {
   get: (dir: string, type: AnalyticsType) => Promise<GetAnalyticsAPIPayload>;
 }
 export type BackupType = 'automatic' | 'manual';
+export interface BackupInfo {
+  name: string;
+  type: string;
+  timestamp: string;
+  sizeBytes: number;
+  fileCount: number;
+  path: string;
+}
 export interface BackupAPIs {
   new: (backupType?: BackupType) => Promise<BaseAPIPayload>;
+  getStats: () => Promise<GetBackupStatsAPIPayload>;
+  cleanOld: (maxBackups?: number) => Promise<BaseAPIPayload>;
 }
 export type ComfyURLType = 'input' | 'output' | 'temp';
 export interface ComfyAPIs {
@@ -125,6 +135,13 @@ export interface GetPreviewStatsAPIPayload extends BaseAPIPayload {
     path: string;
   };
 }
+export interface GetBackupStatsAPIPayload extends BaseAPIPayload {
+  data: {
+    total_size_bytes: number;
+    file_count: number;
+    backups: BackupInfo[];
+  };
+}
 
 export type ImageExplorerScope = 'all' | 'dataset' | 'tree' | 'roots';
 export interface ImageExplorerRequestOptions {
@@ -146,7 +163,9 @@ export enum APIEndpoints {
   GetJson = `/lf-nodes/get-json`,
   GetMetadata = `/lf-nodes/get-metadata`,
   GetPreviewStats = `/lf-nodes/get-preview-stats`,
+  GetBackupStats = `/lf-nodes/get-backup-stats`,
   NewBackup = `/lf-nodes/new-backup`,
+  CleanOldBackups = `/lf-nodes/clean-old-backups`,
   ProcessImage = `/lf-nodes/process-image`,
   SaveMetadata = '/lf-nodes/save-metadata',
   UpdateJson = `/lf-nodes/update-json`,
