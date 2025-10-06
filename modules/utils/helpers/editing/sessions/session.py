@@ -16,7 +16,6 @@ from ..context import clear_editing_context, register_editing_context
 
 __all__ = ["EditingSession", "EditingSessionResult"]
 
-
 @dataclass
 class EditingSessionResult:
     dataset: Dict[str, Any]
