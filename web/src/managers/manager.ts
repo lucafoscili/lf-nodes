@@ -8,6 +8,7 @@ import { IMAGE_API } from '../api/image';
 import { JSON_API } from '../api/json';
 import { METADATA_API } from '../api/metadata';
 import { MODELS_API } from '../api/models';
+import { PREVIEW_API } from '../api/preview';
 import {
   getLogStyle,
   NODE_WIDGET_MAP,
@@ -45,6 +46,7 @@ export class LFManager {
     image: IMAGE_API,
     json: JSON_API,
     metadata: METADATA_API,
+    preview: PREVIEW_API,
   };
   #AUTOMATIC_BACKUP = true;
   #CACHED_DATASETS: { usage: LfDataDataset } = {

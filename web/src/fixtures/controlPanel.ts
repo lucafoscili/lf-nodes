@@ -10,6 +10,7 @@ import { getLfManager, getLfThemes } from '../utils/common';
 
 //#region Styles
 const BUTTON_STYLE = ':host { margin: auto; padding: 1em 0; width: max-content; }';
+const PROGRESSBAR_STYLE = `.progressbar__label { text-shadow: 0 0 8px rgba(var(--lf-color-bg), 0.95), 0 1px 3px rgba(0, 0, 0, 0.8); font-weight: 600; }`;
 const STYLES = {
   customization: () => {
     return {
@@ -324,6 +325,141 @@ export const SECTIONS: ControlPanelFixture = {
   },
   //#endregion
 
+  //#region ExternalPreviews
+  [ControlPanelIds.ExternalPreviews]: (stats?: {
+    totalSizeBytes: number;
+    fileCount: number;
+  }): LfArticleNode => {
+    const { theme } = getLfManager().getManagers().lfFramework;
+    const { '--lf-icon-delete': deleteIcon, '--lf-icon-refresh': refreshIcon } =
+      theme.get.current().variables;
+    const { progress } = theme.get.icons();
+
+    const totalBytes = stats?.totalSizeBytes ?? 0;
+    const fileCount = stats?.fileCount ?? 0;
+
+    // Convert bytes to human-readable format
+    const formatBytes = (bytes: number): string => {
+      if (bytes === 0) return '0 B';
+      const k = 1024;
+      const sizes = ['B', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return `${(bytes / Math.pow(k, i)).toFixed(2)} ${sizes[i]}`;
+    };
+
+    // Calculate percentage (assuming 1GB max for visualization)
+    const maxBytes = 1024 * 1024 * 1024; // 1GB
+    const percentage = Math.min((totalBytes / maxBytes) * 100, 100);
+
+    return {
+      icon: ControlPanelIcons.ExternalPreviews,
+      id: ControlPanelSection.Section,
+      value: 'External Previews',
+      children: [
+        {
+          id: ControlPanelSection.Paragraph,
+          value: 'Cache statistics',
+          children: [
+            {
+              id: ControlPanelSection.Content,
+              value:
+                'External image previews are cached in the _lf_external_previews folder under ComfyUI/input to speed up loading.',
+            },
+            {
+              id: ControlPanelSection.Content,
+              tagName: 'br',
+              value: '',
+            },
+            {
+              id: ControlPanelSection.Content,
+              value: '',
+              children: [
+                {
+                  id: 'cache-info',
+                  value: `Current cache: ${formatBytes(totalBytes)} (${fileCount} files)`,
+                  cssStyle: {
+                    display: 'block',
+                    marginBottom: '0.75em',
+                  },
+                },
+                {
+                  id: 'cache-progress',
+                  value: '',
+                  cells: {
+                    lfProgressbar: {
+                      lfCenteredLabel: true,
+                      lfIcon: progress,
+                      lfLabel: `${formatBytes(totalBytes)} (${percentage.toFixed(1)}%)`,
+                      lfStyle: PROGRESSBAR_STYLE,
+                      lfUiSize: 'large',
+                      shape: 'progressbar',
+                      value: percentage,
+                    },
+                  },
+                },
+              ],
+            },
+            {
+              id: ControlPanelSection.Content,
+              value: '',
+              cells: {
+                lfButton: {
+                  lfIcon: refreshIcon,
+                  lfLabel: ControlPanelLabels.RefreshStats,
+                  lfStyle: BUTTON_STYLE,
+                  lfStyling: 'flat',
+                  shape: 'button',
+                  value: '',
+                },
+              },
+            },
+          ],
+        },
+        {
+          cssStyle: STYLES.separator(),
+          id: ControlPanelSection.ContentSeparator,
+          value: '',
+        },
+        {
+          id: ControlPanelSection.Paragraph,
+          value: 'Clear cache',
+          children: [
+            {
+              id: ControlPanelSection.Content,
+              value:
+                'This button will permanently delete the entire preview cache folder and all its contents.',
+            },
+            {
+              id: ControlPanelSection.Content,
+              tagName: 'br',
+              value: '',
+            },
+            {
+              id: ControlPanelSection.Content,
+              value: 'This action is IRREVERSIBLE so use it with caution.',
+            },
+            {
+              id: ControlPanelSection.Content,
+              value: '',
+              cells: {
+                lfButton: {
+                  lfIcon: deleteIcon,
+                  lfLabel: ControlPanelLabels.ClearPreviews,
+                  lfStyle: BUTTON_STYLE,
+                  lfStyling: 'outlined',
+                  lfUiState: 'danger',
+                  shape: 'button',
+                  value: '',
+                },
+              },
+            },
+          ],
+        },
+      ],
+    };
+  },
+  //#endregion
+
   //#region GitHub
   [ControlPanelIds.GitHub]: (): LfArticleNode => {
     const lfManager = getLfManager();
@@ -381,7 +517,7 @@ export const SECTIONS: ControlPanelFixture = {
                 alignItems: 'center',
                 display: 'flex',
                 justifyContent: 'center',
-                marginBottom: '1em',
+                marginBottom: '.25em',
               },
             },
             {

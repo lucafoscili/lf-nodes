@@ -91,6 +91,9 @@ export const EV_HANDLERS = {
               article.refresh();
             }
             break;
+          case ControlPanelLabels.ClearPreviews:
+            invokeAPI(getApiRoutes().preview.clearCache(), ControlPanelLabels.ClearPreviews);
+            break;
           case ControlPanelLabels.DeleteMetadata:
             invokeAPI(getApiRoutes().metadata.clear(), ControlPanelLabels.DeleteMetadata);
             break;
@@ -99,6 +102,31 @@ export const EV_HANDLERS = {
             break;
           case ControlPanelLabels.OpenIssue:
             window.open('https://github.com/lucafoscili/comfyui-lf/issues/new', '_blank');
+            break;
+          case ControlPanelLabels.RefreshStats:
+            // Refresh preview stats
+            getApiRoutes()
+              .preview.getStats()
+              .then((response) => {
+                if (response.status === 'success') {
+                  // Re-create the section with updated stats
+                  const accordion = element.closest('lf-accordion');
+                  if (accordion) {
+                    const article = accordion.querySelector(
+                      '[slot="external-previews"]',
+                    ) as HTMLLfArticleElement;
+                    if (article) {
+                      const updatedNode = SECTIONS[ControlPanelIds.ExternalPreviews]({
+                        totalSizeBytes: response.data.total_size_bytes,
+                        fileCount: response.data.file_count,
+                      });
+                      article.lfDataset = {
+                        nodes: [{ children: [updatedNode], id: ControlPanelSection.Root }],
+                      };
+                    }
+                  }
+                }
+              });
             break;
           case ControlPanelLabels.Theme:
             getLfManager().getManagers().lfFramework.theme.randomize();
@@ -176,22 +204,59 @@ export const createContent = () => {
 
   for (const id in SECTIONS) {
     if (id !== INTRO_SECTION && Object.prototype.hasOwnProperty.call(SECTIONS, id)) {
-      const section = SECTIONS[id as keyof ControlPanelFixture];
       let article: HTMLLfArticleElement;
       let node: LfDataNode;
 
       switch (id) {
         case ControlPanelIds.Debug:
           const logsData: LfArticleNode[] = [];
-          node = section(logsData);
+          node = SECTIONS[ControlPanelIds.Debug](logsData);
           article = prepArticle(id, node);
           getLfManager().setDebugDataset(article, logsData);
           break;
 
-        default:
-          node = section(undefined);
+        case ControlPanelIds.ExternalPreviews:
+          // Initial load with no stats (will show 0)
+          node = SECTIONS[ControlPanelIds.ExternalPreviews](undefined);
+          article = prepArticle(id, node);
+          // Fetch stats asynchronously and update
+          getApiRoutes()
+            .preview.getStats()
+            .then((response) => {
+              if (response.status === 'success') {
+                const updatedNode = SECTIONS[ControlPanelIds.ExternalPreviews]({
+                  totalSizeBytes: response.data.total_size_bytes,
+                  fileCount: response.data.file_count,
+                });
+                article.lfDataset = {
+                  nodes: [{ children: [updatedNode], id: ControlPanelSection.Root }],
+                };
+              }
+            });
+          break;
+
+        case ControlPanelIds.Analytics:
+          node = SECTIONS[ControlPanelIds.Analytics]();
           article = prepArticle(id, node);
           break;
+
+        case ControlPanelIds.Backup:
+          node = SECTIONS[ControlPanelIds.Backup]();
+          article = prepArticle(id, node);
+          break;
+
+        case ControlPanelIds.Metadata:
+          node = SECTIONS[ControlPanelIds.Metadata]();
+          article = prepArticle(id, node);
+          break;
+
+        case ControlPanelIds.Theme:
+          node = SECTIONS[ControlPanelIds.Theme]();
+          article = prepArticle(id, node);
+          break;
+
+        default:
+          continue;
       }
 
       const { icon, value } = node;

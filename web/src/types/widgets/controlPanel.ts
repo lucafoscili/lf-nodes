@@ -40,6 +40,10 @@ export interface ControlPanelFixture {
   [ControlPanelIds.Analytics]: () => LfArticleNode;
   [ControlPanelIds.Backup]: () => LfArticleNode;
   [ControlPanelIds.Debug]: (logsData: LfArticleNode[]) => LfArticleNode;
+  [ControlPanelIds.ExternalPreviews]: (stats?: {
+    totalSizeBytes: number;
+    fileCount: number;
+  }) => LfArticleNode;
   [ControlPanelIds.GitHub]: () => LfArticleNode;
   [ControlPanelIds.Metadata]: () => LfArticleNode;
   [ControlPanelIds.Theme]: () => LfArticleNode;
@@ -48,6 +52,7 @@ export enum ControlPanelIcons {
   Analytics = 'chart-histogram',
   Backup = 'download',
   Debug = 'bug',
+  ExternalPreviews = 'photo-search',
   GitHub = 'brand-github',
   Metadata = 'info-hexagon',
   Theme = 'color-swatch',
@@ -56,6 +61,7 @@ export enum ControlPanelIds {
   Analytics = 'analytics',
   Backup = 'backup',
   Debug = 'debug',
+  ExternalPreviews = 'external-previews',
   GitHub = 'github',
   Metadata = 'metadata',
   Theme = 'theme',
@@ -64,11 +70,13 @@ export enum ControlPanelLabels {
   AutoBackup = 'Automatic Backup',
   Backup = 'Backup now',
   ClearLogs = 'Clear logs',
+  ClearPreviews = 'Clear preview cache',
   Debug = 'Debug',
   DeleteUsage = 'Delete usage analytics info',
   DeleteMetadata = 'Delete models info',
   Done = 'Done!',
   OpenIssue = 'Open an issue',
+  RefreshStats = 'Refresh stats',
   Theme = 'Random theme',
 }
 export enum ControlPanelSection {

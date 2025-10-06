@@ -13,6 +13,7 @@ export interface APIRoutes {
   image: ImageAPIs;
   json: JSONAPIs;
   metadata: MetadataAPIs;
+  preview: PreviewAPIs;
 }
 export type AnalyticsType = 'usage';
 export interface AnalyticsAPIs {
@@ -79,6 +80,10 @@ export interface MetadataAPIs {
   ) => Promise<BaseAPIPayload>;
   updateCover: (modelPath: string, b64image: string) => Promise<BaseAPIPayload>;
 }
+export interface PreviewAPIs {
+  clearCache: () => Promise<BaseAPIPayload>;
+  getStats: () => Promise<GetPreviewStatsAPIPayload>;
+}
 //#endregion
 
 //#region Payloads
@@ -113,6 +118,13 @@ export interface ProcessImageAPIPayload extends BaseAPIPayload {
   cutout?: string;
   stats?: Record<string, unknown>;
 }
+export interface GetPreviewStatsAPIPayload extends BaseAPIPayload {
+  data: {
+    total_size_bytes: number;
+    file_count: number;
+    path: string;
+  };
+}
 
 export type ImageExplorerScope = 'all' | 'dataset' | 'tree' | 'roots';
 export interface ImageExplorerRequestOptions {
@@ -125,6 +137,7 @@ export interface ImageExplorerRequestOptions {
 export enum APIEndpoints {
   ClearAnalytics = `/lf-nodes/clear-analytics`,
   ClearMetadata = `/lf-nodes/clear-metadata`,
+  ClearPreviewCache = `/lf-nodes/clear-preview-cache`,
   LFFree = `/lf-nodes/free`,
   LFRefreshNodeDefs = `/lf-nodes/refresh-node-defs`,
   GetAnalytics = `/lf-nodes/get-analytics`,
@@ -132,6 +145,7 @@ export enum APIEndpoints {
   ExploreFilesystem = `/lf-nodes/explore-filesystem`,
   GetJson = `/lf-nodes/get-json`,
   GetMetadata = `/lf-nodes/get-metadata`,
+  GetPreviewStats = `/lf-nodes/get-preview-stats`,
   NewBackup = `/lf-nodes/new-backup`,
   ProcessImage = `/lf-nodes/process-image`,
   SaveMetadata = '/lf-nodes/save-metadata',
