@@ -1,5 +1,5 @@
-import { n, V, b6 as LF_IMAGEVIEWER_BLOCKS, C as CY_ATTRIBUTES, b as LF_ATTRIBUTES, b7 as LF_IMAGEVIEWER_PARTS, d as LF_STYLE_ID, e as LF_WRAPPER_ID, b8 as LF_IMAGEVIEWER_PROPS, p as pt, D as D$1, W as W$1, z as z$1, b9 as IDS } from "./index-CFbZEfEd.js";
-import { a } from "./p-Dl9cVpAY-teeJEAws.js";
+import { n, V, m as LF_IMAGEVIEWER_BLOCKS, C as CY_ATTRIBUTES, f as LF_ATTRIBUTES, o as LF_IMAGEVIEWER_PARTS, b as LF_STYLE_ID, c as LF_WRAPPER_ID, q as LF_IMAGEVIEWER_PROPS, p as pt, D as D$1, W as W$1, z as z$1, I as IDS } from "./index-C0xOFSd6.js";
+import { a } from "./p-Dl9cVpAY-BzaNfh1a.js";
 const u = async (e, t = null) => {
   const { history: a2 } = e.controller.set;
   null === t ? (a2.pop(), b(e)) : a2.pop(t);
@@ -224,7 +224,7 @@ const F = class {
   }
   render() {
     const { bemClass: t, setLfStyle: a2 } = O(this, I, "f").theme, { lfStyle: s } = this;
-    return D$1(W$1, { key: "d0c56d7685ccb7317c404b8b63d43c66c23ee411" }, s && D$1("style", { key: "7f0af6a9b28641d3a88d23405a3c94cf85d77d0a", id: O(this, E, "f") }, a2(this)), D$1("div", { key: "4175450da97464d3bddb40391e59d25e076c5edb", id: O(this, W, "f") }, D$1("div", { key: "856e0e609d9e7c5a3068168a59fc8ba3cbbca117", class: t(O(this, T, "f").imageviewer._), part: O(this, D, "f").imageviewer }, O(this, _, "m", U).call(this))));
+    return D$1(W$1, { key: "fbd19d0e1e615d75bbc7158fc9f9733dee8f350e" }, s && D$1("style", { key: "d1bb9217fe9805fbe843e672e56a2cf7d606b6f5", id: O(this, E, "f") }, a2(this)), D$1("div", { key: "d40bd5f1c362aa925e808d0cc889d0ce021b5d3d", id: O(this, W, "f") }, D$1("div", { key: "18f1b3febb27f6919d4a62590f87e3515212dd6c", class: t(O(this, T, "f").imageviewer._), part: O(this, D, "f").imageviewer }, O(this, _, "m", U).call(this))));
   }
   disconnectedCallback() {
     var _a;

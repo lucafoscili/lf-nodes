@@ -1,5 +1,5 @@
-import { n, V, bm as LF_SLIDER_BLOCKS, C as CY_ATTRIBUTES, b as LF_ATTRIBUTES, bn as LF_SLIDER_PARTS, d as LF_STYLE_ID, bo as LF_SLIDER_CSS_VARIABLES, e as LF_WRAPPER_ID, bp as LF_SLIDER_PROPS, p as pt, D as D$1, W as W$1, z as z$1 } from "./index-CFbZEfEd.js";
-import { a } from "./p-Dl9cVpAY-teeJEAws.js";
+import { n, V, aL as LF_SLIDER_BLOCKS, C as CY_ATTRIBUTES, f as LF_ATTRIBUTES, aM as LF_SLIDER_PARTS, b as LF_STYLE_ID, aN as LF_SLIDER_CSS_VARIABLES, c as LF_WRAPPER_ID, aO as LF_SLIDER_PROPS, p as pt, D, W as W$1, z as z$1 } from "./index-C0xOFSd6.js";
+import { a } from "./p-Dl9cVpAY-BzaNfh1a.js";
 var m, u, v, g, y, w, k, z, x, _, M, W = function(r, e, i, l) {
   if ("function" == typeof e ? r !== e || true : !e.has(r)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return e.get(r);
@@ -68,11 +68,11 @@ const C = class {
   }
   render() {
     const { bemClass: r, setLfStyle: e } = W(this, m).theme, { formField: i, slider: t } = W(this, u), { lfLabel: o, lfLeadingLabel: s, lfMax: n2, lfMin: f, lfRipple: d, lfStep: c, lfStyle: h, value: p } = this;
-    return D$1(W$1, { key: "5dba41f512f251e431c19a9a4952b253394ef934" }, D$1("style", { key: "b91d40b09e10d58863049f55559be84a916cf3cb", id: W(this, w) }, `
+    return D(W$1, { key: "8f82ee6cd1dffdb81f07d1e83810bc4302fa7398" }, D("style", { key: "faf803d88ef839aa820e43a48d0b765039c4b0b8", id: W(this, w) }, `
             :host {
               ${W(this, k).value}: ${(p.display - f) / (n2 - f) * 100}%;
             }
-          ${h && e(this) || ""}`), D$1("div", { key: "77ac88046ebc6b6564b070919d60bc131e01479b", id: W(this, z) }, D$1("div", { key: "a8f46bb59ea2eec7d0ee45c15b890c2269a9e0f8", class: r(i._, null, { leading: s }), part: W(this, y).formField }, D$1("div", { key: "160a4c2086b3c43a37e1a9d65bb340825c47625a", class: r(t._, null, { "has-value": p.display > f, disabled: W(this, M).call(this) }), "data-lf": W(this, g)[this.lfUiState], part: W(this, y).slider }, D$1("input", { key: "d8a110aaa7bde80a598b97f5da47fdcd444c0096", type: "range", class: r(t._, t.nativeControl), "data-cy": W(this, v).input, disabled: W(this, M).call(this), max: n2, min: f, onBlur: (r2) => {
+          ${h && e(this) || ""}`), D("div", { key: "84a3d75382ba4674c87f07ed67ed8934abc812b0", id: W(this, z) }, D("div", { key: "4e52a29997143eb6355c643925b84d7cf8f6ef2d", class: r(i._, null, { leading: s }), part: W(this, y).formField }, D("div", { key: "84da6408a117b44f452e675e211e42ff49adda2f", class: r(t._, null, { "has-value": p.display > f, disabled: W(this, M).call(this) }), "data-lf": W(this, g)[this.lfUiState], part: W(this, y).slider }, D("input", { key: "853c7de168bda53dddc3985f8258ab1f8cd65fe0", type: "range", class: r(t._, t.nativeControl), "data-cy": W(this, v).input, disabled: W(this, M).call(this), max: n2, min: f, onBlur: (r2) => {
       this.onLfEvent(r2, "blur");
     }, onChange: (r2) => {
       this.onLfEvent(r2, "change");
@@ -84,9 +84,9 @@ const C = class {
       this.onLfEvent(r2, "pointerdown");
     }, part: W(this, y).nativeControl, ref: (r2) => {
       r2 && E(this, x, r2);
-    }, step: c, value: p.real }), D$1("div", { key: "da4c682ebbfde45203cf814c8e8ff74daca24410", class: r(t._, t.track) }, D$1("div", { key: "4c2079bdf5547c2b28379b2961c537d228370a74", class: r(t._, t.thumbUnderlay) }, D$1("div", { key: "50b3d686fa67cdc2c625bed1329361c5f14d87b1", class: r(t._, t.thumb), "data-cy": W(this, v).rippleSurface, "data-lf": W(this, g).rippleSurface, part: W(this, y).thumb, ref: (r2) => {
+    }, step: c, value: p.real }), D("div", { key: "54c390ac3f085b0183de9439e5b98a95d388025f", class: r(t._, t.track) }, D("div", { key: "9d40003e9a5282121c81a134f0f244c89fe5c587", class: r(t._, t.thumbUnderlay) }, D("div", { key: "3434a7859bb8aa2fc1c5974a7cbcce20d9b8899c", class: r(t._, t.thumb), "data-cy": W(this, v).rippleSurface, "data-lf": W(this, g).rippleSurface, part: W(this, y).thumb, ref: (r2) => {
       d && E(this, _, r2);
-    } }))), D$1("span", { key: "d23a91063ec317029ef8bae82622ac806d60756d", class: r(t._, t.value), part: W(this, y).value }, p.display)), D$1("label", { key: "b805cfce5d72360ff49c4c8cd8632a3dcc3b866a", class: r(i._, i.label), part: W(this, y).label }, o))));
+    } }))), D("span", { key: "b9bb3173b021053ed83ac20add992b32d0206aff", class: r(t._, t.value), part: W(this, y).value }, p.display)), D("label", { key: "bab064df0606e7d0c6fe874bb92784f6451b0357", class: r(i._, i.label), part: W(this, y).label }, o))));
   }
   disconnectedCallback() {
     var _a;
