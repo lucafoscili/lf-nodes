@@ -81,12 +81,14 @@ export const createNavigationTreeManager = (
   };
 
   const updateTreeDataset = async (dataset: LfDataDataset | null) => {
+    const { navigation } = await imageviewer.getComponents();
+    const { tree } = navigation ?? {};
+
     state.dataset = dataset;
 
-    imageviewer.lfTreeProps = {
-      ...imageviewer.lfTreeProps,
-      lfDataset: dataset ?? { columns: dataset?.columns ?? [], nodes: [] },
-    };
+    if (tree) {
+      tree.lfDataset = dataset ?? { columns: dataset?.columns ?? [], nodes: [] };
+    }
   };
 
   const mergeChildren = async (

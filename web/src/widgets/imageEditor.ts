@@ -125,16 +125,12 @@ export const imageEditorFactory: ImageEditorFactory = {
     let navigationManager: ReturnType<typeof createNavigationTreeManager> | null = null;
 
     if (navigationTreeEnabled) {
-      imageviewer.lfNavigationTree = {
-        defaultOpen: true,
-        enabled: true,
-        minWidth: 240,
-        width: 320,
-        position: 'start',
-      };
-      imageviewer.lfTreeProps = {
-        ...NAVIGATION_TREE_PROPS_BASE,
-        lfDataset: { columns: [], nodes: [] },
+      imageviewer.lfNavigation = {
+        isTreeOpen: true,
+        treeProps: {
+          ...NAVIGATION_TREE_PROPS_BASE,
+          lfDataset: { columns: [], nodes: [] },
+        },
       };
     }
 
