@@ -68,10 +68,7 @@ export interface ImageEditorState extends BaseWidgetState {
   hasAutoDirectoryLoad?: boolean;
   isSyncingDirectory?: boolean;
   lastRequestedDirectory?: string;
-  navigationTree?: ImageEditorNavigationTreeState;
-  navigationManager?: ReturnType<
-    typeof import('../../helpers/imageEditor/navigationTree').createNavigationTreeManager
-  >;
+  navigationManager?: NavigationManager;
   manualApply?: {
     button: HTMLLfButtonElement;
     defaultLabel: string;
@@ -91,35 +88,6 @@ export interface ImageEditorState extends BaseWidgetState {
   };
   refreshDirectory?: (directory: string) => Promise<void>;
 }
-
-export interface ImageEditorNavigationTreeMetadataPaths {
-  raw?: string;
-  relative?: string;
-  resolved?: string;
-}
-export interface ImageEditorNavigationTreeMetadata {
-  id: string;
-  name: string;
-  hasChildren: boolean;
-  imageCount?: number;
-  parentId?: string | null;
-  isRoot?: boolean;
-  paths: ImageEditorNavigationTreeMetadataPaths;
-}
-export interface ImageEditorNavigationTreeHandlers {
-  expand: (node: LfDataNode | undefined) => Promise<void> | void;
-  select: (node: LfDataNode | undefined) => Promise<void> | void;
-}
-export interface ImageEditorNavigationTreeState {
-  dataset?: ImageEditorDataset;
-  loadedNodes: Set<string>;
-  pendingNodes: Set<string>;
-  expandedNodes: Set<string>;
-  selectedNodeId?: string;
-  handlers?: ImageEditorNavigationTreeHandlers;
-  rootsLoaded?: boolean;
-}
-
 export interface PrepSettingsDeps {
   onSlider: (state: ImageEditorState, e: CustomEvent<LfSliderEventPayload>) => void | Promise<void>;
   onTextfield: (
@@ -128,14 +96,28 @@ export interface PrepSettingsDeps {
   ) => void | Promise<void>;
   onToggle: (state: ImageEditorState, e: CustomEvent<LfToggleEventPayload>) => void | Promise<void>;
 }
-
 export type PrepSettingsFn = (state: ImageEditorState, node: LfDataNode) => void;
 export interface EventHandlerDeps {
   handleInterruptForState: (state: ImageEditorState) => Promise<void>;
   prepSettings: PrepSettingsFn;
 }
-
 export type EventHandlers = ReturnType<typeof createEventHandlers>;
+export interface NavigationManager {
+  loadRoots: () => Promise<void>;
+  expandNode: (node: LfDataNode) => Promise<void>;
+  handleTreeClick: (node: LfDataNode) => Promise<void>;
+}
+export interface NavigationMetadata {
+  id: string;
+  name: string;
+  hasChildren: boolean;
+  paths: {
+    raw?: string;
+    relative?: string;
+    resolved?: string;
+  };
+  isRoot?: boolean;
+}
 //#endregion
 
 //#region Dataset
