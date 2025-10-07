@@ -1,4 +1,4 @@
-import { bq as onFrameworkReady } from "./index-C0xOFSd6.js";
+import { bq as onFrameworkReady } from "./index-CoMIlQ4I.js";
 const getGlobalScope = () => {
   if (typeof globalThis === "undefined") {
     return void 0;
