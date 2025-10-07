@@ -6,10 +6,11 @@ on:
       - main
       - master
     paths:
-      - "pyproject.toml"
+      - 'pyproject.toml'
 
 permissions:
   issues: write
+  contents: write
 
 jobs:
   publish-node:
@@ -19,8 +20,67 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+      - name: Get Previous Tag
+        id: previous_tag
+        run: |
+          PREVIOUS_TAG=$(git tag --sort=-version:refname | head -n 1 || echo "")
+          echo "previous_tag=$PREVIOUS_TAG" >> $GITHUB_OUTPUT
       - name: Publish Custom Node
         uses: Comfy-Org/publish-node-action@v1
         with:
           ## Add your own personal access token to your Github Repository secrets and reference it here.
           personal_access_token: ${{ secrets.REGISTRY_ACCESS_TOKEN }}
+      - name: Extract Version from pyproject.toml
+        id: extract_version
+        run: |
+          VERSION=$(python3 -c "import tomllib; data = tomllib.load(open('pyproject.toml')); print(data['project']['version'])")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+      - name: Check if Tag Exists
+        id: check_tag
+        run: |
+          TAG_NAME="v${{ steps.extract_version.outputs.version }}"
+          if git rev-parse --verify "$TAG_NAME" >/dev/null 2>&1; then
+            echo "tag_exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "tag_exists=false" >> $GITHUB_OUTPUT
+          fi
+      - name: Generate Release Notes from Commits
+        if: steps.check_tag.outputs.tag_exists == 'false'
+        id: generate_notes
+        run: |
+          PREV_TAG='${{ steps.previous_tag.outputs.previous_tag }}'
+          if [ -n "$PREV_TAG" ] && git rev-parse --verify "$PREV_TAG" >/dev/null 2>&1; then
+            COMMITS=$(git log --oneline --no-merges "$PREV_TAG"..HEAD)
+          else
+            COMMITS=$(git log --oneline --no-merges --max-count=50)
+          fi
+          echo "commits<<EOF" >> $GITHUB_OUTPUT
+          echo "$COMMITS" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+      - name: Create and Push Tag
+        if: steps.check_tag.outputs.tag_exists == 'false'
+        run: |
+          TAG_NAME="v${{ steps.extract_version.outputs.version }}"
+          git tag "$TAG_NAME"
+          git push origin "$TAG_NAME"
+      - name: Create GitHub Release
+        if: steps.check_tag.outputs.tag_exists == 'false'
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ steps.extract_version.outputs.version }}
+          name: v${{ steps.extract_version.outputs.version }}
+          body: |
+            Version: `${{ steps.extract_version.outputs.version }}`
+
+            ## Commits
+
+            ${{ steps.generate_notes.outputs.commits }}
+
+            ## Install
+
+            Install from the Comfy registry.
+          prerelease: false
+          generate_release_notes: false

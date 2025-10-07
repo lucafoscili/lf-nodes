@@ -245,12 +245,13 @@ export const createEventHandlers = ({
                   break;
                 }
 
+                await state.navigationManager.handleTreeClick(treeNode);
+
                 const needsLazyLoad = !treeNode.children || treeNode.children.length === 0;
                 if (needsLazyLoad) {
                   await state.navigationManager.expandNode(treeNode);
                 }
 
-                await state.navigationManager.handleTreeClick(treeNode);
                 break;
             }
           }

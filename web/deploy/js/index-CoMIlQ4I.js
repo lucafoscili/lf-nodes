@@ -13655,7 +13655,7 @@ var X = false, Z = (t2, e2, n2) => {
                         const n6 = t7.i.replace(/-/g, "_"), o6 = t7.T;
                         if (!o6) return;
                         const r3 = i.get(o6);
-                        return r3 ? r3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-0df37de3.entry.js": () => import("./p-0df37de3.entry-OeL33Yvm.js"), "./p-182c6c19.entry.js": () => import("./p-182c6c19.entry-CYBPQY9y.js"), "./p-1e33d558.entry.js": () => import("./p-1e33d558.entry-BbeTk04G.js"), "./p-28dd0bff.entry.js": () => import("./p-28dd0bff.entry-4KorZV92.js"), "./p-2ab0f248.entry.js": () => import("./p-2ab0f248.entry-CumCbkmF.js"), "./p-36aa4a7f.entry.js": () => import("./p-36aa4a7f.entry-pAzWhoHK.js"), "./p-55c6a817.entry.js": () => import("./p-55c6a817.entry-DRhXC_WL.js"), "./p-5d51f267.entry.js": () => import("./p-5d51f267.entry-BlzUOKDv.js"), "./p-62695161.entry.js": () => import("./p-62695161.entry-BT71c12d.js"), "./p-924ca284.entry.js": () => import("./p-924ca284.entry-fpRfOfLF.js"), "./p-a6642965.entry.js": () => import("./p-a6642965.entry-FEcBQpeT.js"), "./p-b1bf3d70.entry.js": () => import("./p-b1bf3d70.entry-Bey78zdZ.js"), "./p-e2900881.entry.js": () => import("./p-e2900881.entry-Or8Eo_R7.js"), "./p-e4e76694.entry.js": () => import("./p-e4e76694.entry-Ux0627WC.js"), "./p-e6148250.entry.js": () => import("./p-e6148250.entry-P-rW7dhv.js"), "./p-f19de954.entry.js": () => import("./p-f19de954.entry-Cx3gIHia.js") }), `./${o6}.entry.js`, 2).then(((t8) => (i.set(o6, t8), t8[n6])), ((t8) => {
+                        return r3 ? r3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-0df37de3.entry.js": () => import("./p-0df37de3.entry-Bg7T7uCL.js"), "./p-182c6c19.entry.js": () => import("./p-182c6c19.entry-Dt8Hy2Z7.js"), "./p-28dd0bff.entry.js": () => import("./p-28dd0bff.entry-CUAeqjC2.js"), "./p-2ab0f248.entry.js": () => import("./p-2ab0f248.entry-CX5fcTK7.js"), "./p-36aa4a7f.entry.js": () => import("./p-36aa4a7f.entry-CU2ubfMC.js"), "./p-55c6a817.entry.js": () => import("./p-55c6a817.entry-OrU16l3_.js"), "./p-5d51f267.entry.js": () => import("./p-5d51f267.entry-9enb6p4I.js"), "./p-62695161.entry.js": () => import("./p-62695161.entry-BpxfcDLU.js"), "./p-924ca284.entry.js": () => import("./p-924ca284.entry-DsfgoCYk.js"), "./p-988ad9c7.entry.js": () => import("./p-988ad9c7.entry-Bf-w4fB-.js"), "./p-a6642965.entry.js": () => import("./p-a6642965.entry-VzVgKsMX.js"), "./p-b1bf3d70.entry.js": () => import("./p-b1bf3d70.entry-RJXx4uNL.js"), "./p-e2900881.entry.js": () => import("./p-e2900881.entry-B92D0OXb.js"), "./p-e4e76694.entry.js": () => import("./p-e4e76694.entry-cC406SHw.js"), "./p-e6148250.entry.js": () => import("./p-e6148250.entry-L94AH3M9.js"), "./p-f19de954.entry.js": () => import("./p-f19de954.entry-sPNGYOrA.js") }), `./${o6}.entry.js`, 2).then(((t8) => (i.set(o6, t8), t8[n6])), ((t8) => {
                           l(t8, e3.$hostElement$);
                         }));
                         /*!__STENCIL_STATIC_IMPORT_SWITCH__*/
@@ -13738,7 +13738,7 @@ const o = () => {
 (() => {
   const l2 = import.meta.url, f$1 = {};
   return "" !== l2 && (f$1.resourcesUrl = new URL(".", l2).href), f(f$1);
-})().then((async (e2) => (await o(), St(JSON.parse('[["p-1e33d558",[[257,"lf-imageviewer",{"lfDataset":[1040,"lf-dataset"],"lfLoadCallback":[1040,"lf-load-callback"],"lfNavigation":[1040,"lf-navigation"],"lfStyle":[1025,"lf-style"],"lfValue":[1040,"lf-value"],"debugInfo":[32],"currentShape":[32],"history":[32],"historyIndex":[32],"isNavigationTreeOpen":[32],"isSpinnerActive":[32],"addSnapshot":[64],"clearHistory":[64],"clearSelection":[64],"getComponents":[64],"getCurrentSnapshot":[64],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"reset":[64],"setSpinnerStatus":[64],"unmount":[64]}]]],["p-182c6c19",[[257,"lf-compare",{"lfDataset":[1040,"lf-dataset"],"lfShape":[1025,"lf-shape"],"lfStyle":[1025,"lf-style"],"lfView":[1025,"lf-view"],"debugInfo":[32],"isLeftPanelOpened":[32],"isRightPanelOpened":[32],"leftShape":[32],"rightShape":[32],"shapes":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["updateShapes"],"lfShape":["updateShapes"]}]]],["p-e4e76694",[[257,"lf-accordion",{"lfDataset":[1040,"lf-dataset"],"lfRipple":[1028,"lf-ripple"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"expandedNodes":[32],"selectedNodes":[32],"getDebugInfo":[64],"getProps":[64],"getSelectedNodes":[64],"refresh":[64],"toggleNode":[64],"unmount":[64]}]]],["p-62695161",[[257,"lf-article",{"lfDataset":[1040,"lf-dataset"],"lfEmpty":[1025,"lf-empty"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-5d51f267",[[257,"lf-carousel",{"lfDataset":[1040,"lf-dataset"],"lfAutoPlay":[4,"lf-auto-play"],"lfInterval":[2,"lf-interval"],"lfLightbox":[1540,"lf-lightbox"],"lfNavigation":[1028,"lf-navigation"],"lfShape":[1537,"lf-shape"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"currentIndex":[32],"shapes":[32],"getDebugInfo":[64],"getProps":[64],"goToSlide":[64],"nextSlide":[64],"prevSlide":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["updateShapes"],"lfShape":["updateShapes"]}]]],["p-28dd0bff",[[257,"lf-messenger",{"lfAutosave":[1028,"lf-autosave"],"lfDataset":[1040,"lf-dataset"],"lfStyle":[1025,"lf-style"],"lfValue":[16,"lf-value"],"debugInfo":[32],"chat":[32],"connectionStatus":[32],"covers":[32],"currentCharacter":[32],"formStatusMap":[32],"history":[32],"hoveredCustomizationOption":[32],"saveInProgress":[32],"ui":[32],"deleteOption":[64],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"reset":[64],"save":[64],"unmount":[64]}]]],["p-f19de954",[[257,"lf-drawer",{"lfDisplay":[1537,"lf-display"],"lfPosition":[1537,"lf-position"],"lfResponsive":[1026,"lf-responsive"],"lfStyle":[1025,"lf-style"],"lfValue":[1540,"lf-value"],"debugInfo":[32],"close":[64],"getDebugInfo":[64],"getProps":[64],"isOpened":[64],"open":[64],"refresh":[64],"toggle":[64],"unmount":[64]},[[0,"keydown","listenKeydown"]],{"lfDisplay":["onLfDisplayChange"],"lfResponsive":["onLfResponsiveChange"]}]]],["p-a6642965",[[257,"lf-header",{"lfStyle":[1025,"lf-style"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-e6148250",[[257,"lf-placeholder",{"lfIcon":[1,"lf-icon"],"lfProps":[16,"lf-props"],"lfStyle":[1025,"lf-style"],"lfThreshold":[2,"lf-threshold"],"lfTrigger":[1,"lf-trigger"],"lfValue":[1,"lf-value"],"debugInfo":[32],"isInViewport":[32],"getComponent":[64],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-36aa4a7f",[[257,"lf-slider",{"lfLabel":[1025,"lf-label"],"lfLeadingLabel":[1028,"lf-leading-label"],"lfMax":[2,"lf-max"],"lfMin":[2,"lf-min"],"lfStep":[2,"lf-step"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1026,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}]]],["p-0df37de3",[[257,"lf-splash",{"lfLabel":[1025,"lf-label"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"state":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-924ca284",[[257,"lf-toast",{"lfCloseIcon":[1025,"lf-close-icon"],"lfCloseCallback":[16,"lf-close-callback"],"lfIcon":[1025,"lf-icon"],"lfTimer":[2,"lf-timer"],"lfMessage":[1025,"lf-message"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-2ab0f248",[[257,"lf-card",{"lfDataset":[1040,"lf-dataset"],"lfLayout":[1025,"lf-layout"],"lfSizeX":[1025,"lf-size-x"],"lfSizeY":[1025,"lf-size-y"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"debugInfo":[32],"shapes":[32],"getDebugInfo":[64],"getProps":[64],"getShapes":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["updateShapes"]}],[257,"lf-badge",{"lfImageProps":[1040,"lf-image-props"],"lfLabel":[1025,"lf-label"],"lfPosition":[1537,"lf-position"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}],[257,"lf-canvas",{"lfBrush":[1025,"lf-brush"],"lfColor":[1025,"lf-color"],"lfCursor":[1025,"lf-cursor"],"lfImageProps":[1040,"lf-image-props"],"lfOpacity":[1026,"lf-opacity"],"lfPreview":[1028,"lf-preview"],"lfStrokeTolerance":[1026,"lf-stroke-tolerance"],"lfSize":[1026,"lf-size"],"lfStyle":[1025,"lf-style"],"boxing":[32],"debugInfo":[32],"isPainting":[32],"orientation":[32],"points":[32],"clearCanvas":[64],"getCanvas":[64],"getDebugInfo":[64],"getImage":[64],"getProps":[64],"refresh":[64],"resizeCanvas":[64],"setCanvasHeight":[64],"setCanvasWidth":[64],"unmount":[64]}],[257,"lf-photoframe",{"lfOverlay":[1040,"lf-overlay"],"lfPlaceholder":[16,"lf-placeholder"],"lfStyle":[1025,"lf-style"],"lfThreshold":[2,"lf-threshold"],"lfValue":[16,"lf-value"],"debugInfo":[32],"imageOrientation":[32],"isInViewport":[32],"isReady":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}],[257,"lf-chart",{"lfAxis":[1025,"lf-axis"],"lfColors":[1040,"lf-colors"],"lfDataset":[1040,"lf-dataset"],"lfLegend":[1025,"lf-legend"],"lfSeries":[1040,"lf-series"],"lfSizeX":[1025,"lf-size-x"],"lfSizeY":[1025,"lf-size-y"],"lfStyle":[1025,"lf-style"],"lfTypes":[1040,"lf-types"],"lfXAxis":[1040,"lf-x-axis"],"lfYAxis":[1040,"lf-y-axis"],"debugInfo":[32],"themeValues":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"resize":[64],"unmount":[64]}],[257,"lf-toggle",{"lfAriaLabel":[1025,"lf-aria-label"],"lfLabel":[1025,"lf-label"],"lfLeadingLabel":[1028,"lf-leading-label"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[4,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}],[257,"lf-upload",{"lfLabel":[1025,"lf-label"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfValue":[16,"lf-value"],"debugInfo":[32],"selectedFiles":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"unmount":[64]}],[257,"lf-chat",{"lfContextWindow":[1026,"lf-context-window"],"lfEmpty":[1025,"lf-empty"],"lfEndpointUrl":[1025,"lf-endpoint-url"],"lfLayout":[1025,"lf-layout"],"lfMaxTokens":[1026,"lf-max-tokens"],"lfPollingInterval":[1026,"lf-polling-interval"],"lfSeed":[1026,"lf-seed"],"lfStyle":[1025,"lf-style"],"lfSystem":[1025,"lf-system"],"lfTemperature":[1026,"lf-temperature"],"lfTypewriterProps":[1028,"lf-typewriter-props"],"lfUiSize":[1537,"lf-ui-size"],"lfValue":[1040,"lf-value"],"currentAbortStreaming":[32],"currentPrompt":[32],"currentTokens":[32],"debugInfo":[32],"history":[32],"status":[32],"view":[32],"abortStreaming":[64],"getDebugInfo":[64],"getHistory":[64],"getLastMessage":[64],"getProps":[64],"refresh":[64],"scrollToBottom":[64],"setHistory":[64],"unmount":[64]},[[0,"keydown","listenKeydown"]],{"lfPollingInterval":["updatePollingInterval"],"lfSystem":["updateTokensCount"]}],[257,"lf-chip",{"lfAriaLabel":[1025,"lf-aria-label"],"lfDataset":[1040,"lf-dataset"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfStyling":[1025,"lf-styling"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[16,"lf-value"],"debugInfo":[32],"expandedNodes":[32],"hiddenNodes":[32],"selectedNodes":[32],"getDebugInfo":[64],"getProps":[64],"getSelectedNodes":[64],"refresh":[64],"setSelectedNodes":[64],"unmount":[64]}],[257,"lf-code",{"lfFadeIn":[1028,"lf-fade-in"],"lfFormat":[1028,"lf-format"],"lfLanguage":[1025,"lf-language"],"lfPreserveSpaces":[1028,"lf-preserve-spaces"],"lfShowCopy":[1028,"lf-show-copy"],"lfShowHeader":[1028,"lf-show-header"],"lfStickyHeader":[1028,"lf-sticky-header"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfLanguage":["loadLanguage"]}],[257,"lf-progressbar",{"lfAnimated":[1540,"lf-animated"],"lfCenteredLabel":[1540,"lf-centered-label"],"lfIcon":[1537,"lf-icon"],"lfIsRadial":[1540,"lf-is-radial"],"lfLabel":[1025,"lf-label"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1026,"lf-value"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}],[257,"lf-textfield",{"lfHelper":[1040,"lf-helper"],"lfHtmlAttributes":[1040,"lf-html-attributes"],"lfIcon":[1025,"lf-icon"],"lfLabel":[1025,"lf-label"],"lfStretchX":[1540,"lf-stretch-x"],"lfStretchY":[1540,"lf-stretch-y"],"lfStyle":[1025,"lf-style"],"lfStyling":[1025,"lf-styling"],"lfTrailingIcon":[1540,"lf-trailing-icon"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1,"lf-value"],"debugInfo":[32],"status":[32],"value":[32],"getDebugInfo":[64],"getElement":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setBlur":[64],"setFocus":[64],"setValue":[64],"unmount":[64]}],[257,"lf-typewriter",{"lfCursor":[1025,"lf-cursor"],"lfDeleteSpeed":[1026,"lf-delete-speed"],"lfLoop":[1028,"lf-loop"],"lfPause":[1026,"lf-pause"],"lfSpeed":[1026,"lf-speed"],"lfStyle":[1025,"lf-style"],"lfTag":[1025,"lf-tag"],"lfUiSize":[1537,"lf-ui-size"],"lfUpdatable":[1028,"lf-updatable"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"displayedText":[32],"isDeleting":[32],"currentTextIndex":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfValue":["handleLfValueChange"]}],[257,"lf-image",{"lfHtmlAttributes":[1040,"lf-html-attributes"],"lfMode":[1537,"lf-mode"],"lfShowSpinner":[1028,"lf-show-spinner"],"lfSizeX":[1025,"lf-size-x"],"lfSizeY":[1025,"lf-size-y"],"lfStyle":[1025,"lf-style"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"error":[32],"isLoaded":[32],"resolvedSpriteName":[32],"getDebugInfo":[64],"getImage":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfValue":["resetState"]}],[257,"lf-button",{"lfAriaLabel":[1025,"lf-aria-label"],"lfDataset":[1040,"lf-dataset"],"lfIcon":[1025,"lf-icon"],"lfIconOff":[1025,"lf-icon-off"],"lfLabel":[1025,"lf-label"],"lfRipple":[1028,"lf-ripple"],"lfShowSpinner":[1540,"lf-show-spinner"],"lfStretchX":[1540,"lf-stretch-x"],"lfStretchY":[1540,"lf-stretch-y"],"lfStyle":[1025,"lf-style"],"lfStyling":[1025,"lf-styling"],"lfToggable":[1028,"lf-toggable"],"lfTrailingIcon":[1028,"lf-trailing-icon"],"lfType":[1025,"lf-type"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[4,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setMessage":[64],"setValue":[64],"unmount":[64]}],[257,"lf-list",{"lfDataset":[1040,"lf-dataset"],"lfEmpty":[1025,"lf-empty"],"lfEnableDeletions":[1028,"lf-enable-deletions"],"lfNavigation":[1028,"lf-navigation"],"lfRipple":[1028,"lf-ripple"],"lfSelectable":[1028,"lf-selectable"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[2,"lf-value"],"debugInfo":[32],"focused":[32],"selected":[32],"focusNext":[64],"focusPrevious":[64],"getDebugInfo":[64],"getProps":[64],"getSelected":[64],"refresh":[64],"selectNode":[64],"unmount":[64]},[[0,"keydown","listenKeydown"]]],[257,"lf-spinner",{"lfActive":[1540,"lf-active"],"lfBarVariant":[1540,"lf-bar-variant"],"lfDimensions":[1025,"lf-dimensions"],"lfFader":[1540,"lf-fader"],"lfFaderTimeout":[1026,"lf-fader-timeout"],"lfFullScreen":[1540,"lf-full-screen"],"lfLayout":[1026,"lf-layout"],"lfStyle":[1025,"lf-style"],"lfTimeout":[1026,"lf-timeout"],"bigWait":[32],"debugInfo":[32],"progress":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfActive":["onFaderChange"],"lfFader":["onFaderChange"],"lfFaderTimeout":["onFaderChange"],"lfBarVariant":["lfBarVariantChanged"],"lfTimeout":["lfTimeoutChanged"]}]]],["p-55c6a817",[[257,"lf-masonry",{"lfActions":[1028,"lf-actions"],"lfColumns":[1026,"lf-columns"],"lfDataset":[1040,"lf-dataset"],"lfSelectable":[1540,"lf-selectable"],"lfShape":[1025,"lf-shape"],"lfStyle":[1025,"lf-style"],"lfView":[1025,"lf-view"],"debugInfo":[32],"selectedShape":[32],"shapes":[32],"viewportWidth":[32],"getDebugInfo":[64],"getProps":[64],"getSelectedShape":[64],"redecorateShapes":[64],"refresh":[64],"setSelectedShape":[64],"unmount":[64]},null,{"lfColumns":["validateColumns"],"lfDataset":["updateShapes"],"lfShape":["updateShapes"]}]]],["p-e2900881",[[257,"lf-tabbar",{"lfAriaLabel":[1025,"lf-aria-label"],"lfDataset":[16,"lf-dataset"],"lfNavigation":[4,"lf-navigation"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[8,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}]]],["p-b1bf3d70",[[257,"lf-tree",{"lfAccordionLayout":[1540,"lf-accordion-layout"],"lfDataset":[1040,"lf-dataset"],"lfEmpty":[1025,"lf-empty"],"lfExpandedNodeIds":[1040,"lf-expanded-node-ids"],"lfFilter":[1028,"lf-filter"],"lfGrid":[1540,"lf-grid"],"lfInitialExpansionDepth":[1026,"lf-initial-expansion-depth"],"lfSelectedNodeIds":[1040,"lf-selected-node-ids"],"lfRipple":[1028,"lf-ripple"],"lfSelectable":[1540,"lf-selectable"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"debugInfo":[32],"expandedNodes":[32],"hiddenNodes":[32],"selectedNode":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"getExpandedNodeIds":[64],"getSelectedNodeIds":[64],"setExpandedNodes":[64],"setSelectedNodes":[64],"selectByPredicate":[64],"unmount":[64]},null,{"lfDataset":["handleDatasetChange"],"lfExpandedNodeIds":["handleExpandedPropChange"],"lfSelectedNodeIds":["handleSelectedPropChange"],"lfInitialExpansionDepth":["handleInitialDepthChange"],"lfSelectable":["handleSelectableChange"],"lfFilter":["handleFilterToggle"]}]]]]'), e2))));
+})().then((async (e2) => (await o(), St(JSON.parse('[["p-988ad9c7",[[257,"lf-imageviewer",{"lfDataset":[1040,"lf-dataset"],"lfLoadCallback":[1040,"lf-load-callback"],"lfNavigation":[1040,"lf-navigation"],"lfStyle":[1025,"lf-style"],"lfValue":[1040,"lf-value"],"debugInfo":[32],"currentShape":[32],"history":[32],"historyIndex":[32],"isNavigationTreeOpen":[32],"isSpinnerActive":[32],"addSnapshot":[64],"clearHistory":[64],"clearSelection":[64],"getComponents":[64],"getCurrentSnapshot":[64],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"reset":[64],"setSpinnerStatus":[64],"unmount":[64]}]]],["p-182c6c19",[[257,"lf-compare",{"lfDataset":[1040,"lf-dataset"],"lfShape":[1025,"lf-shape"],"lfStyle":[1025,"lf-style"],"lfView":[1025,"lf-view"],"debugInfo":[32],"isLeftPanelOpened":[32],"isRightPanelOpened":[32],"leftShape":[32],"rightShape":[32],"shapes":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["updateShapes"],"lfShape":["updateShapes"]}]]],["p-e4e76694",[[257,"lf-accordion",{"lfDataset":[1040,"lf-dataset"],"lfRipple":[1028,"lf-ripple"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"expandedNodes":[32],"selectedNodes":[32],"getDebugInfo":[64],"getProps":[64],"getSelectedNodes":[64],"refresh":[64],"toggleNode":[64],"unmount":[64]}]]],["p-62695161",[[257,"lf-article",{"lfDataset":[1040,"lf-dataset"],"lfEmpty":[1025,"lf-empty"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-5d51f267",[[257,"lf-carousel",{"lfDataset":[1040,"lf-dataset"],"lfAutoPlay":[4,"lf-auto-play"],"lfInterval":[2,"lf-interval"],"lfLightbox":[1540,"lf-lightbox"],"lfNavigation":[1028,"lf-navigation"],"lfShape":[1537,"lf-shape"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"currentIndex":[32],"shapes":[32],"getDebugInfo":[64],"getProps":[64],"goToSlide":[64],"nextSlide":[64],"prevSlide":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["updateShapes"],"lfShape":["updateShapes"]}]]],["p-28dd0bff",[[257,"lf-messenger",{"lfAutosave":[1028,"lf-autosave"],"lfDataset":[1040,"lf-dataset"],"lfStyle":[1025,"lf-style"],"lfValue":[16,"lf-value"],"debugInfo":[32],"chat":[32],"connectionStatus":[32],"covers":[32],"currentCharacter":[32],"formStatusMap":[32],"history":[32],"hoveredCustomizationOption":[32],"saveInProgress":[32],"ui":[32],"deleteOption":[64],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"reset":[64],"save":[64],"unmount":[64]}]]],["p-f19de954",[[257,"lf-drawer",{"lfDisplay":[1537,"lf-display"],"lfPosition":[1537,"lf-position"],"lfResponsive":[1026,"lf-responsive"],"lfStyle":[1025,"lf-style"],"lfValue":[1540,"lf-value"],"debugInfo":[32],"close":[64],"getDebugInfo":[64],"getProps":[64],"isOpened":[64],"open":[64],"refresh":[64],"toggle":[64],"unmount":[64]},[[0,"keydown","listenKeydown"]],{"lfDisplay":["onLfDisplayChange"],"lfResponsive":["onLfResponsiveChange"]}]]],["p-a6642965",[[257,"lf-header",{"lfStyle":[1025,"lf-style"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-e6148250",[[257,"lf-placeholder",{"lfIcon":[1,"lf-icon"],"lfProps":[16,"lf-props"],"lfStyle":[1025,"lf-style"],"lfThreshold":[2,"lf-threshold"],"lfTrigger":[1,"lf-trigger"],"lfValue":[1,"lf-value"],"debugInfo":[32],"isInViewport":[32],"getComponent":[64],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-36aa4a7f",[[257,"lf-slider",{"lfLabel":[1025,"lf-label"],"lfLeadingLabel":[1028,"lf-leading-label"],"lfMax":[2,"lf-max"],"lfMin":[2,"lf-min"],"lfStep":[2,"lf-step"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1026,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}]]],["p-0df37de3",[[257,"lf-splash",{"lfLabel":[1025,"lf-label"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"state":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-924ca284",[[257,"lf-toast",{"lfCloseIcon":[1025,"lf-close-icon"],"lfCloseCallback":[16,"lf-close-callback"],"lfIcon":[1025,"lf-icon"],"lfTimer":[2,"lf-timer"],"lfMessage":[1025,"lf-message"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-2ab0f248",[[257,"lf-card",{"lfDataset":[1040,"lf-dataset"],"lfLayout":[1025,"lf-layout"],"lfSizeX":[1025,"lf-size-x"],"lfSizeY":[1025,"lf-size-y"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"debugInfo":[32],"shapes":[32],"getDebugInfo":[64],"getProps":[64],"getShapes":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["updateShapes"]}],[257,"lf-badge",{"lfImageProps":[1040,"lf-image-props"],"lfLabel":[1025,"lf-label"],"lfPosition":[1537,"lf-position"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}],[257,"lf-canvas",{"lfBrush":[1025,"lf-brush"],"lfColor":[1025,"lf-color"],"lfCursor":[1025,"lf-cursor"],"lfImageProps":[1040,"lf-image-props"],"lfOpacity":[1026,"lf-opacity"],"lfPreview":[1028,"lf-preview"],"lfStrokeTolerance":[1026,"lf-stroke-tolerance"],"lfSize":[1026,"lf-size"],"lfStyle":[1025,"lf-style"],"boxing":[32],"debugInfo":[32],"isPainting":[32],"orientation":[32],"points":[32],"clearCanvas":[64],"getCanvas":[64],"getDebugInfo":[64],"getImage":[64],"getProps":[64],"refresh":[64],"resizeCanvas":[64],"setCanvasHeight":[64],"setCanvasWidth":[64],"unmount":[64]}],[257,"lf-photoframe",{"lfOverlay":[1040,"lf-overlay"],"lfPlaceholder":[16,"lf-placeholder"],"lfStyle":[1025,"lf-style"],"lfThreshold":[2,"lf-threshold"],"lfValue":[16,"lf-value"],"debugInfo":[32],"imageOrientation":[32],"isInViewport":[32],"isReady":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}],[257,"lf-chart",{"lfAxis":[1025,"lf-axis"],"lfColors":[1040,"lf-colors"],"lfDataset":[1040,"lf-dataset"],"lfLegend":[1025,"lf-legend"],"lfSeries":[1040,"lf-series"],"lfSizeX":[1025,"lf-size-x"],"lfSizeY":[1025,"lf-size-y"],"lfStyle":[1025,"lf-style"],"lfTypes":[1040,"lf-types"],"lfXAxis":[1040,"lf-x-axis"],"lfYAxis":[1040,"lf-y-axis"],"debugInfo":[32],"themeValues":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"resize":[64],"unmount":[64]}],[257,"lf-toggle",{"lfAriaLabel":[1025,"lf-aria-label"],"lfLabel":[1025,"lf-label"],"lfLeadingLabel":[1028,"lf-leading-label"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[4,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}],[257,"lf-upload",{"lfLabel":[1025,"lf-label"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfValue":[16,"lf-value"],"debugInfo":[32],"selectedFiles":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"unmount":[64]}],[257,"lf-chat",{"lfContextWindow":[1026,"lf-context-window"],"lfEmpty":[1025,"lf-empty"],"lfEndpointUrl":[1025,"lf-endpoint-url"],"lfLayout":[1025,"lf-layout"],"lfMaxTokens":[1026,"lf-max-tokens"],"lfPollingInterval":[1026,"lf-polling-interval"],"lfSeed":[1026,"lf-seed"],"lfStyle":[1025,"lf-style"],"lfSystem":[1025,"lf-system"],"lfTemperature":[1026,"lf-temperature"],"lfTypewriterProps":[1028,"lf-typewriter-props"],"lfUiSize":[1537,"lf-ui-size"],"lfValue":[1040,"lf-value"],"currentAbortStreaming":[32],"currentPrompt":[32],"currentTokens":[32],"debugInfo":[32],"history":[32],"status":[32],"view":[32],"abortStreaming":[64],"getDebugInfo":[64],"getHistory":[64],"getLastMessage":[64],"getProps":[64],"refresh":[64],"scrollToBottom":[64],"setHistory":[64],"unmount":[64]},[[0,"keydown","listenKeydown"]],{"lfPollingInterval":["updatePollingInterval"],"lfSystem":["updateTokensCount"]}],[257,"lf-chip",{"lfAriaLabel":[1025,"lf-aria-label"],"lfDataset":[1040,"lf-dataset"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfStyling":[1025,"lf-styling"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[16,"lf-value"],"debugInfo":[32],"expandedNodes":[32],"hiddenNodes":[32],"selectedNodes":[32],"getDebugInfo":[64],"getProps":[64],"getSelectedNodes":[64],"refresh":[64],"setSelectedNodes":[64],"unmount":[64]}],[257,"lf-code",{"lfFadeIn":[1028,"lf-fade-in"],"lfFormat":[1028,"lf-format"],"lfLanguage":[1025,"lf-language"],"lfPreserveSpaces":[1028,"lf-preserve-spaces"],"lfShowCopy":[1028,"lf-show-copy"],"lfShowHeader":[1028,"lf-show-header"],"lfStickyHeader":[1028,"lf-sticky-header"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfLanguage":["loadLanguage"]}],[257,"lf-progressbar",{"lfAnimated":[1540,"lf-animated"],"lfCenteredLabel":[1540,"lf-centered-label"],"lfIcon":[1537,"lf-icon"],"lfIsRadial":[1540,"lf-is-radial"],"lfLabel":[1025,"lf-label"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1026,"lf-value"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}],[257,"lf-textfield",{"lfHelper":[1040,"lf-helper"],"lfHtmlAttributes":[1040,"lf-html-attributes"],"lfIcon":[1025,"lf-icon"],"lfLabel":[1025,"lf-label"],"lfStretchX":[1540,"lf-stretch-x"],"lfStretchY":[1540,"lf-stretch-y"],"lfStyle":[1025,"lf-style"],"lfStyling":[1025,"lf-styling"],"lfTrailingIcon":[1540,"lf-trailing-icon"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1,"lf-value"],"debugInfo":[32],"status":[32],"value":[32],"getDebugInfo":[64],"getElement":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setBlur":[64],"setFocus":[64],"setValue":[64],"unmount":[64]}],[257,"lf-typewriter",{"lfCursor":[1025,"lf-cursor"],"lfDeleteSpeed":[1026,"lf-delete-speed"],"lfLoop":[1028,"lf-loop"],"lfPause":[1026,"lf-pause"],"lfSpeed":[1026,"lf-speed"],"lfStyle":[1025,"lf-style"],"lfTag":[1025,"lf-tag"],"lfUiSize":[1537,"lf-ui-size"],"lfUpdatable":[1028,"lf-updatable"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"displayedText":[32],"isDeleting":[32],"currentTextIndex":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfValue":["handleLfValueChange"]}],[257,"lf-image",{"lfHtmlAttributes":[1040,"lf-html-attributes"],"lfMode":[1537,"lf-mode"],"lfShowSpinner":[1028,"lf-show-spinner"],"lfSizeX":[1025,"lf-size-x"],"lfSizeY":[1025,"lf-size-y"],"lfStyle":[1025,"lf-style"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"error":[32],"isLoaded":[32],"resolvedSpriteName":[32],"getDebugInfo":[64],"getImage":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfValue":["resetState"]}],[257,"lf-button",{"lfAriaLabel":[1025,"lf-aria-label"],"lfDataset":[1040,"lf-dataset"],"lfIcon":[1025,"lf-icon"],"lfIconOff":[1025,"lf-icon-off"],"lfLabel":[1025,"lf-label"],"lfRipple":[1028,"lf-ripple"],"lfShowSpinner":[1540,"lf-show-spinner"],"lfStretchX":[1540,"lf-stretch-x"],"lfStretchY":[1540,"lf-stretch-y"],"lfStyle":[1025,"lf-style"],"lfStyling":[1025,"lf-styling"],"lfToggable":[1028,"lf-toggable"],"lfTrailingIcon":[1028,"lf-trailing-icon"],"lfType":[1025,"lf-type"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[4,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setMessage":[64],"setValue":[64],"unmount":[64]}],[257,"lf-list",{"lfDataset":[1040,"lf-dataset"],"lfEmpty":[1025,"lf-empty"],"lfEnableDeletions":[1028,"lf-enable-deletions"],"lfNavigation":[1028,"lf-navigation"],"lfRipple":[1028,"lf-ripple"],"lfSelectable":[1028,"lf-selectable"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[2,"lf-value"],"debugInfo":[32],"focused":[32],"selected":[32],"focusNext":[64],"focusPrevious":[64],"getDebugInfo":[64],"getProps":[64],"getSelected":[64],"refresh":[64],"selectNode":[64],"unmount":[64]},[[0,"keydown","listenKeydown"]]],[257,"lf-spinner",{"lfActive":[1540,"lf-active"],"lfBarVariant":[1540,"lf-bar-variant"],"lfDimensions":[1025,"lf-dimensions"],"lfFader":[1540,"lf-fader"],"lfFaderTimeout":[1026,"lf-fader-timeout"],"lfFullScreen":[1540,"lf-full-screen"],"lfLayout":[1026,"lf-layout"],"lfStyle":[1025,"lf-style"],"lfTimeout":[1026,"lf-timeout"],"bigWait":[32],"debugInfo":[32],"progress":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfActive":["onFaderChange"],"lfFader":["onFaderChange"],"lfFaderTimeout":["onFaderChange"],"lfBarVariant":["lfBarVariantChanged"],"lfTimeout":["lfTimeoutChanged"]}]]],["p-55c6a817",[[257,"lf-masonry",{"lfActions":[1028,"lf-actions"],"lfColumns":[1026,"lf-columns"],"lfDataset":[1040,"lf-dataset"],"lfSelectable":[1540,"lf-selectable"],"lfShape":[1025,"lf-shape"],"lfStyle":[1025,"lf-style"],"lfView":[1025,"lf-view"],"debugInfo":[32],"selectedShape":[32],"shapes":[32],"viewportWidth":[32],"getDebugInfo":[64],"getProps":[64],"getSelectedShape":[64],"redecorateShapes":[64],"refresh":[64],"setSelectedShape":[64],"unmount":[64]},null,{"lfColumns":["validateColumns"],"lfDataset":["updateShapes"],"lfShape":["updateShapes"]}]]],["p-e2900881",[[257,"lf-tabbar",{"lfAriaLabel":[1025,"lf-aria-label"],"lfDataset":[16,"lf-dataset"],"lfNavigation":[4,"lf-navigation"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[8,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}]]],["p-b1bf3d70",[[257,"lf-tree",{"lfAccordionLayout":[1540,"lf-accordion-layout"],"lfDataset":[1040,"lf-dataset"],"lfEmpty":[1025,"lf-empty"],"lfExpandedNodeIds":[1040,"lf-expanded-node-ids"],"lfFilter":[1028,"lf-filter"],"lfGrid":[1540,"lf-grid"],"lfInitialExpansionDepth":[1026,"lf-initial-expansion-depth"],"lfSelectedNodeIds":[1040,"lf-selected-node-ids"],"lfRipple":[1028,"lf-ripple"],"lfSelectable":[1540,"lf-selectable"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"debugInfo":[32],"expandedNodes":[32],"hiddenNodes":[32],"selectedNode":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"getExpandedNodeIds":[64],"getSelectedNodeIds":[64],"setExpandedNodes":[64],"setSelectedNodes":[64],"selectByPredicate":[64],"unmount":[64]},null,{"lfDataset":["handleDatasetChange"],"lfExpandedNodeIds":["handleExpandedPropChange"],"lfSelectedNodeIds":["handleSelectedPropChange"],"lfInitialExpansionDepth":["handleInitialDepthChange"],"lfSelectable":["handleSelectableChange"],"lfFilter":["handleFilterToggle"]}]]]]'), e2))));
 var APIEndpoints;
 (function(APIEndpoints2) {
   APIEndpoints2["ClearAnalytics"] = "/lf-nodes/clear-analytics";
@@ -17595,11 +17595,11 @@ const createEventHandlers = ({ handleInterruptForState: handleInterruptForState2
                 if (!state.navigationManager || !treeNode || eventType2 !== "click") {
                   break;
                 }
+                await state.navigationManager.handleTreeClick(treeNode);
                 const needsLazyLoad = !treeNode.children || treeNode.children.length === 0;
                 if (needsLazyLoad) {
                   await state.navigationManager.expandNode(treeNode);
                 }
-                await state.navigationManager.handleTreeClick(treeNode);
                 break;
             }
           }
@@ -17852,17 +17852,24 @@ const extractMetadata = (node) => {
   return metadata ?? null;
 };
 const createNavigationTreeManager = (imageviewer, editorState) => {
+  const _getDirectoryPath = (metadata) => {
+    return metadata.paths.resolved ?? metadata.paths.raw ?? metadata.paths.relative ?? metadata.name ?? "";
+  };
   const loadRoots = async () => {
-    var _a, _b, _c;
+    var _a;
     try {
       const response = await IMAGE_API.explore("", { scope: "roots" });
       if (response.status === LogSeverity.Success && ((_a = response.data) == null ? void 0 : _a.tree)) {
-        if ((_b = imageviewer.lfNavigation) == null ? void 0 : _b.treeProps) {
-          imageviewer.lfNavigation.treeProps.lfDataset = response.data.tree ?? {
-            columns: ((_c = response.data.tree) == null ? void 0 : _c.columns) ?? [],
-            nodes: []
-          };
-        }
+        imageviewer.lfNavigation = {
+          isTreeOpen: false,
+          treeProps: {
+            lfAccordionLayout: true,
+            lfDataset: response.data.tree ?? { columns: [], nodes: [] },
+            lfFilter: true,
+            lfGrid: true,
+            lfSelectable: true
+          }
+        };
       }
     } catch (error2) {
       getLfManager().log("Failed to load navigation roots.", { error: error2 }, LogSeverity.Warning);
@@ -17875,13 +17882,14 @@ const createNavigationTreeManager = (imageviewer, editorState) => {
       return;
     }
     const nodeId = metadata.id;
-    const path = normalizeDirectoryRequest(metadata.paths.raw ?? metadata.paths.relative ?? metadata.paths.resolved ?? metadata.name ?? "");
+    const path = normalizeDirectoryRequest(_getDirectoryPath(metadata));
     if (!path) {
       return;
     }
     try {
       const response = await IMAGE_API.explore(path, { scope: "tree", nodePath: path });
       if (response.status === LogSeverity.Success && ((_a = response.data) == null ? void 0 : _a.tree)) {
+        const { navigation } = await imageviewer.getComponents();
         const branch = response.data.tree;
         if (!Array.isArray(branch.nodes)) {
           return;
@@ -17899,11 +17907,8 @@ const createNavigationTreeManager = (imageviewer, editorState) => {
           return;
         }
         parentNode.children = branch.nodes;
-        imageviewer.lfNavigation.treeProps.lfDataset = {
-          ...currentDataset,
-          columns: branch.columns ?? currentDataset.columns,
-          nodes: [...currentDataset.nodes]
-        };
+        const parentId = parentNode.id;
+        navigation.tree.lfExpandedNodeIds = Array.isArray(navigation.tree.lfExpandedNodeIds) && !navigation.tree.lfExpandedNodeIds.includes(parentId) ? [...navigation.tree.lfExpandedNodeIds, parentId] : [parentId];
       }
     } catch (error2) {
       getLfManager().log("Failed to expand node.", { error: error2, nodeId, path }, LogSeverity.Warning);
@@ -17915,7 +17920,7 @@ const createNavigationTreeManager = (imageviewer, editorState) => {
     if (!metadata) {
       return;
     }
-    const targetPath = normalizeDirectoryRequest(metadata.paths.raw ?? metadata.paths.relative ?? metadata.paths.resolved ?? metadata.name ?? "");
+    const targetPath = normalizeDirectoryRequest(_getDirectoryPath(metadata));
     const currentPath = normalizeDirectoryRequest(editorState.directoryValue ?? deriveDirectoryValue(editorState.directory) ?? "");
     if (targetPath === currentPath && !metadata.isRoot) {
       return;
@@ -17930,13 +17935,6 @@ const createNavigationTreeManager = (imageviewer, editorState) => {
 };
 const IMAGE_EDITOR_INSTANCES = /* @__PURE__ */ new Set();
 const STATE$h = /* @__PURE__ */ new WeakMap();
-const NAVIGATION_TREE_PROPS_BASE = {
-  lfAccordionLayout: true,
-  lfFilter: true,
-  lfInitialExpansionDepth: 0,
-  lfGrid: true,
-  lfSelectable: true
-};
 const imageEditorFactory = {
   //#region Options
   options: (wrapper) => {
@@ -17995,15 +17993,6 @@ const imageEditorFactory = {
     const imageviewer = document.createElement(TagName.LfImageviewer);
     const navigationTreeEnabled = node.comfyClass === NodeName.loadAndEditImages;
     let navigationManager = null;
-    if (navigationTreeEnabled) {
-      imageviewer.lfNavigation = {
-        isTreeOpen: true,
-        treeProps: {
-          ...NAVIGATION_TREE_PROPS_BASE,
-          lfDataset: { columns: [], nodes: [] }
-        }
-      };
-    }
     const refresh = async (directory) => {
       const state2 = STATE$h.get(wrapper);
       const normalizedDirectory = normalizeDirectoryRequest(directory);
@@ -22199,104 +22188,104 @@ lfManager.initialize();
   console.log("LF Manager initialized!", lfManager);
 }
 export {
-  LF_CARD_PROPS as $,
-  LF_MESSENGER_MENU as A,
-  OUTFIT_COVER as B,
+  LF_THEME_COLORS_DATA_PREFIX as $,
+  AVATAR_COVER as A,
+  LF_BADGE_BLOCKS as B,
   CY_ATTRIBUTES as C,
   D,
-  LOCATION_COVER as E,
-  AVATAR_COVER as F,
-  CHILD_ROOT_MAP as G,
-  LF_BADGE_BLOCKS as H,
-  IDS as I,
-  LF_BADGE_PARTS as J,
-  LF_BADGE_PROPS as K,
+  LF_BADGE_PARTS as E,
+  LF_BADGE_PROPS as F,
+  LF_BUTTON_BLOCKS as G,
+  LF_BUTTON_PARTS as H,
+  IMAGE_TYPE_IDS as I,
+  LF_BUTTON_PROPS as J,
+  LF_CANVAS_BLOCKS as K,
   LF_SPLASH_BLOCKS as L,
-  LF_BUTTON_BLOCKS as M,
-  LF_BUTTON_PARTS as N,
+  LF_CANVAS_PARTS as M,
+  LF_CANVAS_PROPS as N,
   OPTION_TYPE_IDS as O,
-  LF_BUTTON_PROPS as P,
-  LF_CANVAS_BLOCKS as Q,
-  LF_CANVAS_PARTS as R,
+  LF_CARD_BLOCKS as P,
+  LF_CARD_PARTS as Q,
+  LF_CARD_CSS_VARS as R,
   STYLE_COVER as S,
   TIMEFRAME_COVER as T,
-  LF_CANVAS_PROPS as U,
+  LF_CARD_DEFAULTS as U,
   V,
   W$1 as W,
-  LF_CARD_BLOCKS as X,
-  LF_CARD_PARTS as Y,
-  LF_CARD_CSS_VARS as Z,
-  LF_CARD_DEFAULTS as _,
+  LF_CARD_PROPS as X,
+  LF_CHART_BLOCKS as Y,
+  LF_CHART_PARTS as Z,
+  LF_CHART_CSS_VARS as _,
   LF_SPLASH_PARTS as a,
-  LF_ARTICLE_PROPS as a$,
-  LF_CHART_BLOCKS as a0,
-  LF_CHART_PARTS as a1,
-  LF_CHART_CSS_VARS as a2,
-  LF_THEME_COLORS_DATA_PREFIX as a3,
-  LF_CHART_PROPS as a4,
-  LF_CHAT_BLOCKS as a5,
-  LF_CHAT_PARTS as a6,
-  LF_CHAT_PROPS as a7,
-  LF_CHIP_BLOCKS as a8,
-  LF_CHIP_PARTS as a9,
-  LF_TYPEWRITER_BLOCKS as aA,
-  LF_TYPEWRITER_PARTS as aB,
-  LF_TYPEWRITER_PROPS as aC,
-  LF_UPLOAD_BLOCKS as aD,
-  LF_UPLOAD_PARTS as aE,
-  LF_UPLOAD_PROPS as aF,
-  LF_BADGE_CSS_VARS as aG,
-  LF_CHIP_CSS_VARS as aH,
-  LF_CARD_IDS as aI,
-  LF_CHAT_IDS as aJ,
-  LF_THEME_ICONS as aK,
-  LF_SLIDER_BLOCKS as aL,
-  LF_SLIDER_PARTS as aM,
-  LF_SLIDER_CSS_VARIABLES as aN,
-  LF_SLIDER_PROPS as aO,
-  LF_MASONRY_DEFAULT_COLUMNS as aP,
-  LF_MASONRY_BLOCKS as aQ,
-  LF_MASONRY_PARTS as aR,
-  LF_MASONRY_CSS_VARS as aS,
-  LF_MASONRY_PROPS as aT,
-  LF_MASONRY_IDS as aU,
-  LF_CAROUSEL_BLOCKS as aV,
-  LF_CAROUSEL_PARTS as aW,
-  LF_CAROUSEL_PROPS as aX,
-  LF_CAROUSEL_IDS as aY,
-  LF_ARTICLE_BLOCKS as aZ,
-  LF_ARTICLE_PARTS as a_,
-  LF_CHIP_PROPS as aa,
-  LF_CODE_BLOCKS as ab,
-  LF_CODE_PARTS as ac,
-  LF_CODE_PROPS as ad,
-  LF_IMAGE_BLOCKS as ae,
-  LF_IMAGE_PARTS as af,
-  LF_IMAGE_CSS_VARS as ag,
-  LF_IMAGE_PROPS as ah,
-  CSS_VAR_PREFIX as ai,
-  LF_LIST_BLOCKS as aj,
-  LF_LIST_PARTS as ak,
-  LF_LIST_PROPS as al,
-  LF_PHOTOFRAME_BLOCKS as am,
-  LF_PHOTOFRAME_PARTS as an,
-  LF_PHOTOFRAME_PROPS as ao,
-  LF_PROGRESSBAR_BLOCKS as ap,
-  LF_PROGRESSBAR_PARTS as aq,
-  LF_PROGRESSBAR_CSS_VARIABLES as ar,
-  LF_PROGRESSBAR_PROPS as as,
-  LF_SPINNER_PROPS as at,
-  LF_TEXTFIELD_BLOCKS as au,
-  LF_TEXTFIELD_PARTS as av,
-  LF_TEXTFIELD_PROPS as aw,
-  LF_TOGGLE_BLOCKS as ax,
-  LF_TOGGLE_PARTS as ay,
-  LF_TOGGLE_PROPS as az,
+  LF_TOAST_PROPS as a$,
+  LF_CHART_PROPS as a0,
+  LF_CHAT_BLOCKS as a1,
+  LF_CHAT_PARTS as a2,
+  LF_CHAT_PROPS as a3,
+  LF_CHIP_BLOCKS as a4,
+  LF_CHIP_PARTS as a5,
+  LF_CHIP_PROPS as a6,
+  LF_CODE_BLOCKS as a7,
+  LF_CODE_PARTS as a8,
+  LF_CODE_PROPS as a9,
+  LF_UPLOAD_PARTS as aA,
+  LF_UPLOAD_PROPS as aB,
+  LF_BADGE_CSS_VARS as aC,
+  LF_CHIP_CSS_VARS as aD,
+  LF_CARD_IDS as aE,
+  LF_CHAT_IDS as aF,
+  LF_THEME_ICONS as aG,
+  LF_SLIDER_BLOCKS as aH,
+  LF_SLIDER_PARTS as aI,
+  LF_SLIDER_CSS_VARIABLES as aJ,
+  LF_SLIDER_PROPS as aK,
+  LF_MASONRY_DEFAULT_COLUMNS as aL,
+  LF_MASONRY_BLOCKS as aM,
+  LF_MASONRY_PARTS as aN,
+  LF_MASONRY_CSS_VARS as aO,
+  LF_MASONRY_PROPS as aP,
+  LF_MASONRY_IDS as aQ,
+  LF_CAROUSEL_BLOCKS as aR,
+  LF_CAROUSEL_PARTS as aS,
+  LF_CAROUSEL_PROPS as aT,
+  LF_CAROUSEL_IDS as aU,
+  LF_ARTICLE_BLOCKS as aV,
+  LF_ARTICLE_PARTS as aW,
+  LF_ARTICLE_PROPS as aX,
+  LF_TOAST_BLOCKS as aY,
+  LF_TOAST_PARTS as aZ,
+  LF_TOAST_CSS_VARIABLES as a_,
+  LF_IMAGE_BLOCKS as aa,
+  LF_IMAGE_PARTS as ab,
+  LF_IMAGE_CSS_VARS as ac,
+  LF_IMAGE_PROPS as ad,
+  CSS_VAR_PREFIX as ae,
+  LF_LIST_BLOCKS as af,
+  LF_LIST_PARTS as ag,
+  LF_LIST_PROPS as ah,
+  LF_PHOTOFRAME_BLOCKS as ai,
+  LF_PHOTOFRAME_PARTS as aj,
+  LF_PHOTOFRAME_PROPS as ak,
+  LF_PROGRESSBAR_BLOCKS as al,
+  LF_PROGRESSBAR_PARTS as am,
+  LF_PROGRESSBAR_CSS_VARIABLES as an,
+  LF_PROGRESSBAR_PROPS as ao,
+  LF_SPINNER_PROPS as ap,
+  LF_TEXTFIELD_BLOCKS as aq,
+  LF_TEXTFIELD_PARTS as ar,
+  LF_TEXTFIELD_PROPS as as,
+  LF_TOGGLE_BLOCKS as at,
+  LF_TOGGLE_PARTS as au,
+  LF_TOGGLE_PROPS as av,
+  LF_TYPEWRITER_BLOCKS as aw,
+  LF_TYPEWRITER_PARTS as ax,
+  LF_TYPEWRITER_PROPS as ay,
+  LF_UPLOAD_BLOCKS as az,
   LF_STYLE_ID as b,
-  LF_TOAST_BLOCKS as b0,
-  LF_TOAST_PARTS as b1,
-  LF_TOAST_CSS_VARIABLES as b2,
-  LF_TOAST_PROPS as b3,
+  LF_IMAGEVIEWER_BLOCKS as b0,
+  LF_IMAGEVIEWER_PARTS as b1,
+  LF_IMAGEVIEWER_PROPS as b2,
+  IDS as b3,
   LF_HEADER_BLOCKS as b4,
   LF_HEADER_PARTS as b5,
   LF_HEADER_PROPS as b6,
@@ -22330,18 +22319,18 @@ export {
   LF_COMPARE_PROPS as j,
   jt as k,
   LF_COMPARE_IDS as l,
-  LF_IMAGEVIEWER_BLOCKS as m,
+  LF_MESSENGER_CLEAN_UI as m,
   n,
-  LF_IMAGEVIEWER_PARTS as o,
+  LF_MESSENGER_BLOCKS as o,
   pt as p,
-  LF_IMAGEVIEWER_PROPS as q,
-  IMAGE_TYPE_IDS as r,
-  LF_MESSENGER_CLEAN_UI as s,
-  LF_MESSENGER_BLOCKS as t,
-  LF_MESSENGER_PARTS as u,
-  LF_MESSENGER_PROPS as v,
-  LF_MESSENGER_IDS as w,
-  LF_MESSENGER_FILTER as x,
-  LF_MESSENGER_NAV as y,
+  LF_MESSENGER_PARTS as q,
+  LF_MESSENGER_PROPS as r,
+  LF_MESSENGER_IDS as s,
+  LF_MESSENGER_FILTER as t,
+  LF_MESSENGER_NAV as u,
+  LF_MESSENGER_MENU as v,
+  OUTFIT_COVER as w,
+  LOCATION_COVER as x,
+  CHILD_ROOT_MAP as y,
   z
 };
