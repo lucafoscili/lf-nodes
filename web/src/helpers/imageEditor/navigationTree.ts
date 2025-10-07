@@ -49,16 +49,30 @@ export const createNavigationTreeManager = (
   imageviewer: HTMLLfImageviewerElement,
   editorState: ImageEditorState,
 ) => {
+  const _getDirectoryPath = (metadata: NavigationMetadata): string => {
+    return (
+      metadata.paths.resolved ??
+      metadata.paths.raw ??
+      metadata.paths.relative ??
+      metadata.name ??
+      ''
+    );
+  };
+
   const loadRoots = async () => {
     try {
       const response = await IMAGE_API.explore('', { scope: 'roots' });
       if (response.status === LogSeverity.Success && response.data?.tree) {
-        if (imageviewer.lfNavigation?.treeProps) {
-          imageviewer.lfNavigation.treeProps.lfDataset = response.data.tree ?? {
-            columns: response.data.tree?.columns ?? [],
-            nodes: [],
-          };
-        }
+        imageviewer.lfNavigation = {
+          isTreeOpen: false,
+          treeProps: {
+            lfAccordionLayout: true,
+            lfDataset: response.data.tree ?? { columns: [], nodes: [] },
+            lfFilter: true,
+            lfGrid: true,
+            lfSelectable: true,
+          },
+        };
       }
     } catch (error) {
       getLfManager().log('Failed to load navigation roots.', { error }, LogSeverity.Warning);
@@ -72,13 +86,8 @@ export const createNavigationTreeManager = (
     }
 
     const nodeId = metadata.id;
-    const path = normalizeDirectoryRequest(
-      metadata.paths.raw ??
-        metadata.paths.relative ??
-        metadata.paths.resolved ??
-        metadata.name ??
-        '',
-    );
+
+    const path = normalizeDirectoryRequest(_getDirectoryPath(metadata));
     if (!path) {
       return;
     }
@@ -86,6 +95,7 @@ export const createNavigationTreeManager = (
     try {
       const response = await IMAGE_API.explore(path, { scope: 'tree', nodePath: path });
       if (response.status === LogSeverity.Success && response.data?.tree) {
+        const { navigation } = await imageviewer.getComponents();
         const branch = response.data.tree;
         if (!Array.isArray(branch.nodes)) {
           return;
@@ -107,11 +117,13 @@ export const createNavigationTreeManager = (
         }
 
         parentNode.children = branch.nodes;
-        imageviewer.lfNavigation.treeProps.lfDataset = {
-          ...currentDataset,
-          columns: branch.columns ?? currentDataset.columns,
-          nodes: [...currentDataset.nodes],
-        };
+        const parentId = parentNode.id;
+
+        navigation.tree.lfExpandedNodeIds =
+          Array.isArray(navigation.tree.lfExpandedNodeIds) &&
+          !navigation.tree.lfExpandedNodeIds.includes(parentId)
+            ? [...navigation.tree.lfExpandedNodeIds, parentId]
+            : [parentId];
       }
     } catch (error) {
       getLfManager().log('Failed to expand node.', { error, nodeId, path }, LogSeverity.Warning);
@@ -124,13 +136,7 @@ export const createNavigationTreeManager = (
       return;
     }
 
-    const targetPath = normalizeDirectoryRequest(
-      metadata.paths.raw ??
-        metadata.paths.relative ??
-        metadata.paths.resolved ??
-        metadata.name ??
-        '',
-    );
+    const targetPath = normalizeDirectoryRequest(_getDirectoryPath(metadata));
     const currentPath = normalizeDirectoryRequest(
       editorState.directoryValue ?? deriveDirectoryValue(editorState.directory) ?? '',
     );

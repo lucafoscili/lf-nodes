@@ -35,14 +35,6 @@ import {
 export const IMAGE_EDITOR_INSTANCES = new Set<ImageEditorState>();
 const STATE = new WeakMap<HTMLDivElement, ImageEditorState>();
 
-const NAVIGATION_TREE_PROPS_BASE: Partial<LfTreeInterface> = {
-  lfAccordionLayout: true,
-  lfFilter: true,
-  lfInitialExpansionDepth: 0,
-  lfGrid: true,
-  lfSelectable: true,
-} as const;
-
 export const imageEditorFactory: ImageEditorFactory = {
   //#region Options
   options: (wrapper) => {
@@ -123,16 +115,6 @@ export const imageEditorFactory: ImageEditorFactory = {
 
     const navigationTreeEnabled = node.comfyClass === NodeName.loadAndEditImages;
     let navigationManager: ReturnType<typeof createNavigationTreeManager> | null = null;
-
-    if (navigationTreeEnabled) {
-      imageviewer.lfNavigation = {
-        isTreeOpen: true,
-        treeProps: {
-          ...NAVIGATION_TREE_PROPS_BASE,
-          lfDataset: { columns: [], nodes: [] },
-        },
-      };
-    }
 
     const refresh = async (directory: string) => {
       const state = STATE.get(wrapper);
