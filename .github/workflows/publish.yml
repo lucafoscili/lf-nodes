@@ -33,10 +33,12 @@ jobs:
         with:
           ## Add your own personal access token to your Github Repository secrets and reference it here.
           personal_access_token: ${{ secrets.REGISTRY_ACCESS_TOKEN }}
+      - name: Install TOML Parser
+        run: pip install tomli
       - name: Extract Version from pyproject.toml
         id: extract_version
         run: |
-          VERSION=$(python3 -c "import tomllib; data = tomllib.load(open('pyproject.toml')); print(data['project']['version'])")
+          VERSION=$(python3 -c "import tomli; data = tomli.load(open('pyproject.toml', 'rb')); print(data['project']['version'])")
           echo "version=$VERSION" >> $GITHUB_OUTPUT
       - name: Check if Tag Exists
         id: check_tag
