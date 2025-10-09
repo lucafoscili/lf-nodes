@@ -164,6 +164,7 @@ export enum NodeName {
   vaeSelector = 'LF_VAESelector',
   onnxSelector = 'LF_ONNXSelector',
   viewImages = 'LF_ViewImages',
+  viewSVGs = 'LF_ViewSVGs',
   vibrance = 'LF_Vibrance',
   vignette = 'LF_Vignette',
   wallOfText = 'LF_WallOfText',

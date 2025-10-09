@@ -92,6 +92,7 @@ export interface CardPayload extends BaseEventPayload {
 export interface MasonryPayload extends SingleDatasetPayload {
   index: number;
   name: string;
+  slot_map?: { [slotName: string]: string };
 }
 // #endregion
 

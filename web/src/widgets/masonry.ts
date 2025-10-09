@@ -34,7 +34,8 @@ export const masonryFactory: MasonryFactory = {
         const callback: MasonryNormalizeCallback = (_, u) => {
           const { masonry, selected } = STATE.get(wrapper);
 
-          const { columns, dataset, index, name, view } = u.parsedJson as MasonryDeserializedValue;
+          const { columns, dataset, index, name, view, slot_map } =
+            u.parsedJson as MasonryDeserializedValue;
 
           if (columns) {
             masonry.lfColumns = columns;
@@ -49,6 +50,25 @@ export const masonryFactory: MasonryFactory = {
             selected.index = index;
             selected.name = name || '';
             masonry.setSelectedShape(index);
+          }
+
+          if (slot_map && typeof slot_map === 'object' && Object.keys(slot_map).length > 0) {
+            while (masonry.firstChild) {
+              masonry.removeChild(masonry.firstChild);
+            }
+
+            for (const key in slot_map) {
+              if (!Object.hasOwn(slot_map, key)) continue;
+
+              const element = slot_map[key];
+              const div = document.createElement('div');
+              div.innerHTML = element;
+              div.setAttribute('slot', key);
+              div.classList.add(MasonryCSS.Slot);
+              masonry.appendChild(div);
+            }
+
+            masonry.lfShape = 'slot';
           }
         };
 
