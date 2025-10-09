@@ -246,6 +246,9 @@
   max-width: 100%;
   overflow: auto;
 }
+.lf-masonry__slot {
+  color: rgba(var(--lf-color-primary, 1));
+}
 .lf-masonry__widget {
   width: 100%;
   height: 100%;
