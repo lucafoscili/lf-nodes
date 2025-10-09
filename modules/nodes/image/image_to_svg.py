@@ -24,9 +24,9 @@ class LF_ImageToSVG:
                     "tooltip": "Input image tensor to vectorize"
                 }),
                 "threshold": (Input.FLOAT, {
-                    "default": 0.5, 
-                    "min": 0.0, 
-                    "max": 1.0, 
+                    "default": 0.5,
+                    "min": 0.0,
+                    "max": 1.0,
                     "step": 0.01,
                     "tooltip": "Binarization threshold for monochrome mode"
                 }),
@@ -38,9 +38,9 @@ class LF_ImageToSVG:
                     "tooltip": "Number of colors for quantization (1 = binary)"
                 }),
                 "simplify_tol": (Input.FLOAT, {
-                    "default": 2.0, 
-                    "min": 0.0, 
-                    "max": 10.0, 
+                    "default": 2.0,
+                    "min": 0.0,
+                    "max": 10.0,
                     "step": 0.1,
                     "tooltip": "Contour simplification tolerance (Douglas-Peucker)"
                 }),
@@ -74,7 +74,7 @@ class LF_ImageToSVG:
 
     def on_exec(self, **kwargs: dict):
         self._temp_cache.cleanup()
-        
+
         image: list[torch.Tensor] = normalize_input_image(kwargs.get("image"))
         threshold: float = normalize_list_to_value(kwargs.get("threshold"))
         num_colors: int = normalize_list_to_value(kwargs.get("num_colors"))
