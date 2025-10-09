@@ -44,6 +44,7 @@ class Input:
     ONNX_DETECTOR = "ONNX_DETECTOR"
     ONNX_PATH = "ONNX_PATH"
     STRING = "STRING"
+    SVG = "SVG"
     REGION_META = "REGION_META"
     UPSCALE_MODEL = "UPSCALE_MODEL"
     VAE = "VAE"
@@ -125,10 +126,10 @@ HEADERS =  {
 def get_character_impersonator_system(character_bio: str):
     """
     Prepares the LLM to impersonate a specific character by embedding the character's biography directly into the system instructions.
-    
+
     Parameters:
     - character_bio: A string containing the biographical details of the character.
-    
+
     Returns:
     A formatted string that instructs the LLM to adopt the character's persona fully, ensuring it never breaks the fourth wall.
     """
@@ -268,7 +269,7 @@ def get_usage_filename(resource: str):
     if resource == "diffusion_models" or resource == "unet":
         return "diffusion_models_usage.json"
     return "misc_usage.json"
-    
+
 def get_usage_title(filename: str, type: str = None):
     """
     Generate a title based on the filename and type.

@@ -21,7 +21,7 @@ class LF_LoadLoraTags:
         return {
             "required": {
                 "get_civitai_info": (Input.BOOLEAN, {
-                    "default": True, 
+                    "default": True,
                     "tooltip": "Attempts to retrieve more info about the models from CivitAI."
                 }),
                 "model": (Input.MODEL, {
@@ -31,7 +31,7 @@ class LF_LoadLoraTags:
                     "tooltip": "The CLIP model to modify."
                 }),
                 "tags": (Input.STRING, {
-                    "default": '', 
+                    "default": '',
                     "tooltip": "Text containing LoRA tags, e.g., <lora:example:1.0>"
                 }),
             },
@@ -40,7 +40,7 @@ class LF_LoadLoraTags:
                     "default": ""
                 })
             },
-            "hidden": { 
+            "hidden": {
                 "node_id": "UNIQUE_ID"
             }
         }
@@ -66,17 +66,17 @@ class LF_LoadLoraTags:
                 if Path(lora_file).name.startswith(name) or lora_file.startswith(name):
                     lora_name = lora_file
                     break
-                
+
             return lora_name, m_weight, c_weight
         def load_lora_file(lora_path: str):
             lora = comfy.utils.load_torch_file(lora_path, safe_load=True)
             return lora
         def add_chip(value: str):
-            return { "icon": "x", 
-                     "description": "Failed to load this LoRA.", 
-                     "id": value, 
-                     "value": value } 
-        
+            return { "icon": "x",
+                     "description": "Failed to load this LoRA.",
+                     "id": value,
+                     "value": value }
+
         clip = normalize_list_to_value(kwargs.get("clip"))
         get_civitai_info: bool = normalize_list_to_value(kwargs.get("get_civitai_info"))
         model = normalize_list_to_value(kwargs.get("model"))
@@ -144,10 +144,10 @@ class LF_LoadLoraTags:
 
         if not len(nodes):
             nodes.append({ "icon": "check",
-                           "description": "Each LoRA has been loaded successfully!", 
-                           "id": "0", 
+                           "description": "Each LoRA has been loaded successfully!",
+                           "id": "0",
                            "value": "LoRA loaded successfully!" })
-            
+
 
         PromptServer.instance.send_sync(f"{EVENT_PREFIX}loadloratags", {
             "node": kwargs.get("node_id"),

@@ -102,7 +102,7 @@ class LF_RegionExtractor:
         nodes: list[dict] = ui_widget.get("nodes", [])
 
         for file_path in files:
-            with open(file_path, 'r') as f:
+            with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
                 code = f.read()
 
                 if enable_history and ui_widget.get(file_path):

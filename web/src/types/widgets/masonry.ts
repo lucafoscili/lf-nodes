@@ -10,6 +10,7 @@ import {
 const BASE_CSS_CLASS = 'lf-masonry';
 export enum MasonryCSS {
   Content = BASE_CSS_CLASS,
+  Slot = `${BASE_CSS_CLASS}__slot`,
   Widget = `${BASE_CSS_CLASS}__widget`,
 }
 //#endregion
@@ -27,6 +28,7 @@ export interface MasonryDeserializedValue {
   index?: number;
   name?: string;
   view?: LfMasonryView;
+  slot_map?: { [slotName: string]: string };
 }
 //#endregion
 

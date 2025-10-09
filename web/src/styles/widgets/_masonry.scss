@@ -5,6 +5,10 @@
     @include mixins.lf-root();
   }
 
+  &__slot {
+    color: rgba(var(--lf-color-primary, 1));
+  }
+
   &__widget {
     @include mixins.lf-el-stretch;
   }

@@ -4,7 +4,6 @@ import './@lf-widgets/core/dist/lf-core/lf-core.esm.js';
 import { getLfManager, initLfManager } from './utils/common';
 
 const isDev = true;
-
 if (isDev) {
   console.log('LF modules loaded!');
 }
@@ -14,9 +13,16 @@ if (isDev) {
   console.log('LF Framework initialized!');
 }
 
-initLfManager();
-const lfManager = getLfManager();
-lfManager.initialize();
-if (isDev) {
-  console.log('LF Manager initialized!', lfManager);
+const hasComfyApp = typeof window !== 'undefined' && typeof (window as any).LGraph !== 'undefined';
+if (hasComfyApp) {
+  initLfManager();
+  const lfManager = getLfManager();
+  lfManager.initialize();
+  if (isDev) {
+    console.log('LF Manager initialized!', lfManager);
+  }
+} else {
+  if (isDev) {
+    console.log('Skipping dashboard bootstrap (no Comfy app detected)');
+  }
 }

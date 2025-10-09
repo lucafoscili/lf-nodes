@@ -54,24 +54,46 @@ def normalize_json_input(input):
         return input
     
     elif isinstance(input, str):
+        stripped = input.strip()
+        if stripped == "":
+            return {}
         try:
-            return json.loads(input)
+            return json.loads(stripped)
         except json.JSONDecodeError:
-            return json.loads(convert_python_to_json(input))
+            try:
+                return json.loads(convert_python_to_json(stripped))
+            except json.JSONDecodeError:
+                return {}
     
     elif isinstance(input, list):
         if all(isinstance(i, dict) for i in input):
             return input
         elif len(input) == 1 and isinstance(input[0], str):
+            candidate = input[0].strip()
+            if candidate == "":
+                return {}
             try:
-                return json.loads(input[0])
+                return json.loads(candidate)
             except json.JSONDecodeError:
-                return json.loads(convert_python_to_json(input[0]))
+                return json.loads(convert_python_to_json(candidate))
         else:
-            return [
-                json.loads(convert_python_to_json(s)) if isinstance(s, str) else s 
-                for s in input
-            ]
+            normalized_list = []
+            for item in input:
+                if isinstance(item, str):
+                    candidate = item.strip()
+                    if candidate == "":
+                        normalized_list.append({})
+                        continue
+                    try:
+                        normalized_list.append(json.loads(candidate))
+                    except json.JSONDecodeError:
+                        try:
+                            normalized_list.append(json.loads(convert_python_to_json(candidate)))
+                        except json.JSONDecodeError:
+                            normalized_list.append({})
+                else:
+                    normalized_list.append(item)
+            return normalized_list
     
     else:
         raise TypeError(f"Unsupported input type: {type(input)}") 

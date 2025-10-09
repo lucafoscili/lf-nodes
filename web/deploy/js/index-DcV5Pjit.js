@@ -13655,7 +13655,7 @@ var X = false, Z = (t2, e2, n2) => {
                         const n6 = t7.i.replace(/-/g, "_"), o6 = t7.T;
                         if (!o6) return;
                         const r3 = i.get(o6);
-                        return r3 ? r3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-0df37de3.entry.js": () => import("./p-0df37de3.entry-Bg7T7uCL.js"), "./p-182c6c19.entry.js": () => import("./p-182c6c19.entry-Dt8Hy2Z7.js"), "./p-28dd0bff.entry.js": () => import("./p-28dd0bff.entry-CUAeqjC2.js"), "./p-2ab0f248.entry.js": () => import("./p-2ab0f248.entry-CX5fcTK7.js"), "./p-36aa4a7f.entry.js": () => import("./p-36aa4a7f.entry-CU2ubfMC.js"), "./p-55c6a817.entry.js": () => import("./p-55c6a817.entry-OrU16l3_.js"), "./p-5d51f267.entry.js": () => import("./p-5d51f267.entry-9enb6p4I.js"), "./p-62695161.entry.js": () => import("./p-62695161.entry-BpxfcDLU.js"), "./p-924ca284.entry.js": () => import("./p-924ca284.entry-DsfgoCYk.js"), "./p-988ad9c7.entry.js": () => import("./p-988ad9c7.entry-Bf-w4fB-.js"), "./p-a6642965.entry.js": () => import("./p-a6642965.entry-VzVgKsMX.js"), "./p-b1bf3d70.entry.js": () => import("./p-b1bf3d70.entry-RJXx4uNL.js"), "./p-e2900881.entry.js": () => import("./p-e2900881.entry-B92D0OXb.js"), "./p-e4e76694.entry.js": () => import("./p-e4e76694.entry-cC406SHw.js"), "./p-e6148250.entry.js": () => import("./p-e6148250.entry-L94AH3M9.js"), "./p-f19de954.entry.js": () => import("./p-f19de954.entry-sPNGYOrA.js") }), `./${o6}.entry.js`, 2).then(((t8) => (i.set(o6, t8), t8[n6])), ((t8) => {
+                        return r3 ? r3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-0df37de3.entry.js": () => import("./p-0df37de3.entry-fg5H_3dg.js"), "./p-182c6c19.entry.js": () => import("./p-182c6c19.entry-Df5DokuD.js"), "./p-28dd0bff.entry.js": () => import("./p-28dd0bff.entry-CGDPqIUI.js"), "./p-2ab0f248.entry.js": () => import("./p-2ab0f248.entry-Bzv2ZcSV.js"), "./p-36aa4a7f.entry.js": () => import("./p-36aa4a7f.entry-CLwjNzBU.js"), "./p-55c6a817.entry.js": () => import("./p-55c6a817.entry-ZgMGfuDn.js"), "./p-5d51f267.entry.js": () => import("./p-5d51f267.entry-4nzCDrwr.js"), "./p-62695161.entry.js": () => import("./p-62695161.entry-DrtAMEio.js"), "./p-924ca284.entry.js": () => import("./p-924ca284.entry-C8kIoRa7.js"), "./p-988ad9c7.entry.js": () => import("./p-988ad9c7.entry-CYs6Jj5p.js"), "./p-a6642965.entry.js": () => import("./p-a6642965.entry-Bw6JemkH.js"), "./p-b1bf3d70.entry.js": () => import("./p-b1bf3d70.entry-DNMai-4e.js"), "./p-e2900881.entry.js": () => import("./p-e2900881.entry-mgIYaK5t.js"), "./p-e4e76694.entry.js": () => import("./p-e4e76694.entry-C7VpC9Dn.js"), "./p-e6148250.entry.js": () => import("./p-e6148250.entry-DCOglS03.js"), "./p-f19de954.entry.js": () => import("./p-f19de954.entry-0DGUTsyz.js") }), `./${o6}.entry.js`, 2).then(((t8) => (i.set(o6, t8), t8[n6])), ((t8) => {
                           l(t8, e3.$hostElement$);
                         }));
                         /*!__STENCIL_STATIC_IMPORT_SWITCH__*/
@@ -13770,7 +13770,7 @@ var LogSeverity;
 const ANALYTICS_API = {
   //#region clear
   clear: async (type) => {
-    const lfManager2 = getLfManager();
+    const lfManager = getLfManager();
     const payload = {
       message: "",
       status: LogSeverity.Info
@@ -13789,7 +13789,7 @@ const ANALYTICS_API = {
           if (p2.status === "success") {
             payload.message = p2.message;
             payload.status = LogSeverity.Success;
-            lfManager2.getCachedDatasets().usage = {};
+            lfManager.getCachedDatasets().usage = {};
           }
           break;
         case 404:
@@ -13808,13 +13808,13 @@ const ANALYTICS_API = {
       payload.message = error2;
       payload.status = LogSeverity.Error;
     }
-    lfManager2.log(payload.message, { payload }, payload.status);
+    lfManager.log(payload.message, { payload }, payload.status);
     return payload;
   },
   //#endregion
   //#region get
   get: async (directory, type) => {
-    const lfManager2 = getLfManager();
+    const lfManager = getLfManager();
     const payload = {
       data: {},
       message: "",
@@ -13823,7 +13823,7 @@ const ANALYTICS_API = {
     if (!directory || !type) {
       payload.message = `Missing directory (received ${directory}) or  (received ${type}).`;
       payload.status = LogSeverity.Error;
-      lfManager2.log(payload.message, { payload }, LogSeverity.Error);
+      lfManager.log(payload.message, { payload }, LogSeverity.Error);
       return payload;
     }
     try {
@@ -13842,13 +13842,13 @@ const ANALYTICS_API = {
             payload.data = p2.data;
             payload.message = "Analytics data fetched successfully.";
             payload.status = LogSeverity.Success;
-            lfManager2.log(payload.message, { payload }, payload.status);
-            lfManager2.getCachedDatasets().usage = payload.data;
+            lfManager.log(payload.message, { payload }, payload.status);
+            lfManager.getCachedDatasets().usage = payload.data;
           }
           break;
         case 404:
           payload.status = LogSeverity.Info;
-          lfManager2.log(`${type} analytics file not found.`, { payload }, payload.status);
+          lfManager.log(`${type} analytics file not found.`, { payload }, payload.status);
           break;
         default:
           {
@@ -13862,7 +13862,7 @@ const ANALYTICS_API = {
       payload.message = error2;
       payload.status = LogSeverity.Error;
     }
-    lfManager2.log(payload.message, { payload }, payload.status);
+    lfManager.log(payload.message, { payload }, payload.status);
     return payload;
   }
   //#endregion
@@ -13870,7 +13870,7 @@ const ANALYTICS_API = {
 const BACKUP_API = {
   //#region new
   new: async (backupType = "automatic") => {
-    const lfManager2 = getLfManager();
+    const lfManager = getLfManager();
     const payload = {
       message: "",
       status: LogSeverity.Info
@@ -13897,13 +13897,13 @@ const BACKUP_API = {
       payload.message = error2;
       payload.status = LogSeverity.Error;
     }
-    lfManager2.log(payload.message, { payload }, payload.status);
+    lfManager.log(payload.message, { payload }, payload.status);
     return payload;
   },
   //#endregion
   //#region getStats
   getStats: async () => {
-    const lfManager2 = getLfManager();
+    const lfManager = getLfManager();
     const payload = {
       data: {
         total_size_bytes: 0,
@@ -13934,21 +13934,21 @@ const BACKUP_API = {
       payload.message = error2;
       payload.status = LogSeverity.Error;
     }
-    lfManager2.log(payload.message, { payload }, payload.status);
+    lfManager.log(payload.message, { payload }, payload.status);
     return payload;
   },
   //#endregion
   //#region cleanOld
   cleanOld: async (maxBackups) => {
-    const lfManager2 = getLfManager();
-    const _maxBackups = maxBackups || lfManager2.getBackupRetention();
+    const lfManager = getLfManager();
+    const _maxBackups = maxBackups || lfManager.getBackupRetention();
     const payload = {
       message: "",
       status: LogSeverity.Info
     };
     if (_maxBackups <= 0) {
       const message = "Backup retention is set to 0, skipping cleanup.";
-      lfManager2.log(payload.message, { payload }, payload.status);
+      lfManager.log(payload.message, { payload }, payload.status);
       payload.message = message;
       payload.status = LogSeverity.Info;
       return payload;
@@ -13975,7 +13975,7 @@ const BACKUP_API = {
       payload.message = error2;
       payload.status = LogSeverity.Error;
     }
-    lfManager2.log(payload.message, { payload }, payload.status);
+    lfManager.log(payload.message, { payload }, payload.status);
     return payload;
   }
   //#endregion
@@ -14059,7 +14059,7 @@ const COMFY_API = {
 const GITHUB_API = {
   //#region getLatestRelease
   getLatestRelease: async () => {
-    const lfManager2 = getLfManager();
+    const lfManager = getLfManager();
     const REPO = "lf-nodes";
     const USER = "lucafoscili";
     const payload = {
@@ -14090,7 +14090,7 @@ const GITHUB_API = {
       payload.message = `Error fetching release info: ${error2}`;
       payload.status = LogSeverity.Error;
     }
-    lfManager2.log(payload.message, { payload }, payload.status);
+    lfManager.log(payload.message, { payload }, payload.status);
     return payload;
   }
   //#endregion
@@ -14098,7 +14098,7 @@ const GITHUB_API = {
 const IMAGE_API = {
   //#region get
   get: async (directory) => {
-    const lfManager2 = getLfManager();
+    const lfManager = getLfManager();
     const payload = {
       data: {},
       message: "",
@@ -14121,7 +14121,7 @@ const IMAGE_API = {
             payload.data = p2.data;
             payload.message = "Images fetched successfully.";
             payload.status = LogSeverity.Success;
-            lfManager2.log(payload.message, { payload }, payload.status);
+            lfManager.log(payload.message, { payload }, payload.status);
           }
           break;
         default:
@@ -14136,13 +14136,13 @@ const IMAGE_API = {
       payload.message = error2;
       payload.status = LogSeverity.Error;
     }
-    lfManager2.log(payload.message, { payload }, payload.status);
+    lfManager.log(payload.message, { payload }, payload.status);
     return payload;
   },
   //#endregion
   //#region process
   process: async (url, type, settings) => {
-    const lfManager2 = getLfManager();
+    const lfManager = getLfManager();
     const payload = {
       data: "",
       mask: void 0,
@@ -14167,7 +14167,7 @@ const IMAGE_API = {
             payload.mask = p2.mask;
             payload.message = "Image processed successfully.";
             payload.status = LogSeverity.Success;
-            lfManager2.log(payload.message, { payload }, payload.status);
+            lfManager.log(payload.message, { payload }, payload.status);
           }
           break;
         default:
@@ -14182,13 +14182,13 @@ const IMAGE_API = {
       payload.message = error2;
       payload.status = LogSeverity.Error;
     }
-    lfManager2.log(payload.message, { payload }, payload.status);
+    lfManager.log(payload.message, { payload }, payload.status);
     return payload;
   },
   //#endregion
   //#region explore
   explore: async (directory, options = {}) => {
-    const lfManager2 = getLfManager();
+    const lfManager = getLfManager();
     const payload = {
       data: {},
       message: "",
@@ -14218,7 +14218,7 @@ const IMAGE_API = {
             payload.data = p2.data ?? {};
             payload.message = "Filesystem data fetched successfully.";
             payload.status = LogSeverity.Success;
-            lfManager2.log(payload.message, { payload }, payload.status);
+            lfManager.log(payload.message, { payload }, payload.status);
           }
           break;
         default:
@@ -14233,7 +14233,7 @@ const IMAGE_API = {
       payload.message = error2;
       payload.status = LogSeverity.Error;
     }
-    lfManager2.log(payload.message, { payload, options }, payload.status);
+    lfManager.log(payload.message, { payload, options }, payload.status);
     return payload;
   }
   //#endregion
@@ -14241,7 +14241,7 @@ const IMAGE_API = {
 const JSON_API = {
   //#region get
   get: async (filePath) => {
-    const lfManager2 = getLfManager();
+    const lfManager = getLfManager();
     const payload = {
       data: {},
       message: "",
@@ -14262,7 +14262,7 @@ const JSON_API = {
             payload.data = p2.data;
             payload.message = "JSON data fetched successfully.";
             payload.status = LogSeverity.Success;
-            lfManager2.log(payload.message, { payload }, payload.status);
+            lfManager.log(payload.message, { payload }, payload.status);
           }
           break;
         default:
@@ -14274,13 +14274,13 @@ const JSON_API = {
       payload.message = error2.toString();
       payload.status = LogSeverity.Error;
     }
-    lfManager2.log(payload.message, { payload }, payload.status);
+    lfManager.log(payload.message, { payload }, payload.status);
     return payload;
   },
   //#endregion
   //#region update
   update: async (filePath, dataset) => {
-    const lfManager2 = getLfManager();
+    const lfManager = getLfManager();
     const payload = {
       message: "",
       status: LogSeverity.Info
@@ -14311,7 +14311,7 @@ const JSON_API = {
       payload.message = error2;
       payload.status = LogSeverity.Error;
     }
-    lfManager2.log(payload.message, { payload }, payload.status);
+    lfManager.log(payload.message, { payload }, payload.status);
     return payload;
   }
   //#endregion
@@ -14319,7 +14319,7 @@ const JSON_API = {
 const METADATA_API = {
   //#region clear
   clear: async () => {
-    const lfManager2 = getLfManager();
+    const lfManager = getLfManager();
     const payload = {
       message: "",
       status: LogSeverity.Info
@@ -14346,13 +14346,13 @@ const METADATA_API = {
       payload.message = error2;
       payload.status = LogSeverity.Error;
     }
-    lfManager2.log(payload.message, { payload }, payload.status);
+    lfManager.log(payload.message, { payload }, payload.status);
     return payload;
   },
   //#endregion
   //#region get
   get: async (hash) => {
-    const lfManager2 = getLfManager();
+    const lfManager = getLfManager();
     const payload = {
       data: null,
       message: "",
@@ -14381,13 +14381,13 @@ const METADATA_API = {
       payload.message = error2;
       payload.status = LogSeverity.Error;
     }
-    lfManager2.log(payload.message, { payload }, payload.status);
+    lfManager.log(payload.message, { payload }, payload.status);
     return payload;
   },
   //#endregion
   //#region save
   save: async (modelPath, dataset, forcedSave = false) => {
-    const lfManager2 = getLfManager();
+    const lfManager = getLfManager();
     const payload = {
       data: null,
       message: "",
@@ -14420,13 +14420,13 @@ const METADATA_API = {
       payload.message = error2;
       payload.status = LogSeverity.Error;
     }
-    lfManager2.log(payload.message, { payload }, payload.status);
+    lfManager.log(payload.message, { payload }, payload.status);
     return payload;
   },
   //#endregion
   //#region updateCover
   updateCover: async (modelPath, b64image) => {
-    const lfManager2 = getLfManager();
+    const lfManager = getLfManager();
     const payload = {
       message: "",
       status: LogSeverity.Info
@@ -14457,73 +14457,73 @@ const METADATA_API = {
       payload.message = error2;
       payload.status = LogSeverity.Error;
     }
-    lfManager2.log(payload.message, { payload }, payload.status);
+    lfManager.log(payload.message, { payload }, payload.status);
     return payload;
   }
   //#endregion
 };
 const MODELS_API = {
   free: async () => {
-    const lfManager2 = getLfManager();
+    const lfManager = getLfManager();
     try {
       const response = await api.fetchApi(APIEndpoints.LFFree, { method: "POST" });
       if (response.status === 200) {
         return true;
       }
-      lfManager2.log('"free" endpoint returned non-200', { status: response.status }, LogSeverity.Warning);
+      lfManager.log('"free" endpoint returned non-200', { status: response.status }, LogSeverity.Warning);
       return false;
     } catch (error2) {
-      lfManager2.log('"free" endpoint failed', { error: error2 }, LogSeverity.Warning);
+      lfManager.log('"free" endpoint failed', { error: error2 }, LogSeverity.Warning);
       return false;
     }
   },
   refresh: async () => {
-    const lfManager2 = getLfManager();
+    const lfManager = getLfManager();
     try {
       const response = await api.fetchApi(APIEndpoints.LFRefreshNodeDefs, { method: "POST" });
       if (response.status === 200) {
         return true;
       }
-      lfManager2.log('"refresh-node-defs" endpoint returned non-200', { status: response.status }, LogSeverity.Warning);
+      lfManager.log('"refresh-node-defs" endpoint returned non-200', { status: response.status }, LogSeverity.Warning);
       return false;
     } catch (error2) {
-      lfManager2.log('"refresh-node-defs" endpoint failed', { error: error2 }, LogSeverity.Warning);
+      lfManager.log('"refresh-node-defs" endpoint failed', { error: error2 }, LogSeverity.Warning);
       return false;
     }
   }
 };
 const beforeFree = async (options) => {
-  const lfManager2 = getLfManager();
-  lfManager2.log("Unload triggered — clearing LF caches first…", { options }, LogSeverity.Info);
+  const lfManager = getLfManager();
+  lfManager.log("Unload triggered — clearing LF caches first…", { options }, LogSeverity.Info);
   try {
     const ok = await MODELS_API.free();
     if (ok) {
-      lfManager2.log("Caches cleared ✔️", {}, LogSeverity.Success);
+      lfManager.log("Caches cleared ✔️", {}, LogSeverity.Success);
     } else {
-      lfManager2.log("Cache clear call returned non-200", {}, LogSeverity.Warning);
+      lfManager.log("Cache clear call returned non-200", {}, LogSeverity.Warning);
     }
   } catch (error2) {
-    lfManager2.log("Error while clearing caches", { error: error2 }, LogSeverity.Warning);
+    lfManager.log("Error while clearing caches", { error: error2 }, LogSeverity.Warning);
   }
 };
 const beforeRefreshNodeDefs = async (trigger) => {
-  const lfManager2 = getLfManager();
-  lfManager2.log("Refresh requested — clearing LF caches first…", { trigger }, LogSeverity.Info);
+  const lfManager = getLfManager();
+  lfManager.log("Refresh requested — clearing LF caches first…", { trigger }, LogSeverity.Info);
   try {
     const ok = await MODELS_API.refresh();
     if (ok) {
-      lfManager2.log("Refresh caches cleared ✔️", {}, LogSeverity.Success);
+      lfManager.log("Refresh caches cleared ✔️", {}, LogSeverity.Success);
     } else {
-      lfManager2.log("Refresh cache clear call returned non-200", {}, LogSeverity.Warning);
+      lfManager.log("Refresh cache clear call returned non-200", {}, LogSeverity.Warning);
     }
   } catch (error2) {
-    lfManager2.log("Error while clearing caches ahead of refresh", { error: error2 }, LogSeverity.Warning);
+    lfManager.log("Error while clearing caches ahead of refresh", { error: error2 }, LogSeverity.Warning);
   }
 };
 const PREVIEW_API = {
   //#region clearCache
   clearCache: async () => {
-    const lfManager2 = getLfManager();
+    const lfManager = getLfManager();
     const payload = {
       message: "",
       status: LogSeverity.Info
@@ -14557,13 +14557,13 @@ const PREVIEW_API = {
       payload.message = String(error2);
       payload.status = LogSeverity.Error;
     }
-    lfManager2.log(payload.message, { payload }, payload.status);
+    lfManager.log(payload.message, { payload }, payload.status);
     return payload;
   },
   //#endregion
   //#region getStats
   getStats: async () => {
-    const lfManager2 = getLfManager();
+    const lfManager = getLfManager();
     const payload = {
       data: {
         total_size_bytes: 0,
@@ -14599,7 +14599,7 @@ const PREVIEW_API = {
       payload.message = String(error2);
       payload.status = LogSeverity.Error;
     }
-    lfManager2.log(payload.message, { payload }, payload.status);
+    lfManager.log(payload.message, { payload }, payload.status);
     return payload;
   }
   //#endregion
@@ -14760,6 +14760,7 @@ var NodeName;
   NodeName2["vaeSelector"] = "LF_VAESelector";
   NodeName2["onnxSelector"] = "LF_ONNXSelector";
   NodeName2["viewImages"] = "LF_ViewImages";
+  NodeName2["viewSVGs"] = "LF_ViewSVGs";
   NodeName2["vibrance"] = "LF_Vibrance";
   NodeName2["vignette"] = "LF_Vignette";
   NodeName2["wallOfText"] = "LF_WallOfText";
@@ -14906,6 +14907,7 @@ const NODE_WIDGET_MAP = {
   LF_ONNXSelector: [CustomWidgetName.history],
   LF_Vibrance: [CustomWidgetName.compare],
   LF_ViewImages: [CustomWidgetName.masonry],
+  LF_ViewSVGs: [CustomWidgetName.masonry],
   LF_Vignette: [CustomWidgetName.compare],
   LF_WallOfText: [CustomWidgetName.code],
   LF_WriteJSON: [CustomWidgetName.textarea]
@@ -14985,7 +14987,7 @@ const onNodeCreated = async (nodeType) => {
 };
 const chipCb = (node) => {
   var _a, _b, _c, _d, _e;
-  const lfManager2 = getLfManager();
+  const lfManager = getLfManager();
   const routes = getApiRoutes().comfy;
   const textarea = getInput(node, ComfyWidgetName.json);
   const linkInput = routes.getLinkById((_a = textarea == null ? void 0 : textarea.link) == null ? void 0 : _a.toString());
@@ -14996,7 +14998,7 @@ const chipCb = (node) => {
   const chipW = getCustomWidget(node, CustomWidgetName.chip);
   const datasetW = (_c = nodeInput == null ? void 0 : nodeInput.widgets) == null ? void 0 : _c[linkInput.origin_slot];
   if (!((_d = chipW.options) == null ? void 0 : _d.getState) || !((_e = datasetW.options) == null ? void 0 : _e.getValue)) {
-    lfManager2.log("Missing options", { chipW, datasetW }, LogSeverity.Warning);
+    lfManager.log("Missing options", { chipW, datasetW }, LogSeverity.Warning);
     return;
   }
   const dataset = datasetW.options.getValue();
@@ -15006,18 +15008,18 @@ const chipCb = (node) => {
     if (isValidJSON(newData) && isValidJSON(chip.lfDataset)) {
       if (!areJSONEqual(newData, chip.lfDataset)) {
         chip.lfDataset = newData;
-        lfManager2.log("Updated chip data", { dataset }, LogSeverity.Info);
+        lfManager.log("Updated chip data", { dataset }, LogSeverity.Info);
       }
     } else {
       if (isValidJSON(newData)) {
         chip.lfDataset = newData;
-        lfManager2.log("Set chip data", { dataset }, LogSeverity.Info);
+        lfManager.log("Set chip data", { dataset }, LogSeverity.Info);
       } else {
-        lfManager2.log("Invalid JSON data", { dataset, error: "Invalid JSON" }, LogSeverity.Warning);
+        lfManager.log("Invalid JSON data", { dataset, error: "Invalid JSON" }, LogSeverity.Warning);
       }
     }
   } catch (error2) {
-    lfManager2.log("Error processing chip data", { dataset, error: error2 }, LogSeverity.Error);
+    lfManager.log("Error processing chip data", { dataset, error: error2 }, LogSeverity.Error);
   }
 };
 const messengerCb = (node) => {
@@ -15412,10 +15414,10 @@ const apiCall$2 = async (state, addSnapshot) => {
   var _a, _b;
   const { elements, filter, filterType } = state;
   const { imageviewer } = elements;
-  const lfManager2 = getLfManager();
+  const lfManager = getLfManager();
   const snapshot = await imageviewer.getCurrentSnapshot();
   if (!snapshot) {
-    lfManager2.log("No snapshot available for processing!", {}, LogSeverity.Warning);
+    lfManager.log("No snapshot available for processing!", {}, LogSeverity.Warning);
     return false;
   }
   const snapshotValue = snapshot.value;
@@ -15426,7 +15428,7 @@ const apiCall$2 = async (state, addSnapshot) => {
   const contextDataset = imageviewer.lfDataset;
   const contextId = ensureDatasetContext(contextDataset, state);
   if (!contextId && filterType === "inpaint") {
-    lfManager2.log("Missing editing context. Run the workflow to register an editing session before using inpaint.", { dataset: contextDataset }, LogSeverity.Warning);
+    lfManager.log("Missing editing context. Run the workflow to register an editing session before using inpaint.", { dataset: contextDataset }, LogSeverity.Warning);
     if ((_a = state.manualApply) == null ? void 0 : _a.isProcessing) {
       resolveManualApplyRequest(state, false);
     }
@@ -15438,13 +15440,13 @@ const apiCall$2 = async (state, addSnapshot) => {
   try {
     const response = await getApiRoutes().image.process(snapshotValue, filterType, payload);
     if (response.mask) {
-      lfManager2.log("Saved inpaint mask preview to temp", { mask: response.mask }, LogSeverity.Info);
+      lfManager.log("Saved inpaint mask preview to temp", { mask: response.mask }, LogSeverity.Info);
     }
     if (response.cutout) {
-      lfManager2.log("Saved cutout preview to temp", { cutout: response.cutout }, LogSeverity.Info);
+      lfManager.log("Saved cutout preview to temp", { cutout: response.cutout }, LogSeverity.Info);
     }
     if (response.stats) {
-      lfManager2.log("Filter statistics", { stats: response.stats }, LogSeverity.Info);
+      lfManager.log("Filter statistics", { stats: response.stats }, LogSeverity.Info);
     }
     if (addSnapshot) {
       await imageviewer.addSnapshot(response.data);
@@ -15455,7 +15457,7 @@ const apiCall$2 = async (state, addSnapshot) => {
     }
     isSuccess = true;
   } catch (error2) {
-    lfManager2.log("Error processing image!", { error: error2 }, LogSeverity.Error);
+    lfManager.log("Error processing image!", { error: error2 }, LogSeverity.Error);
   }
   requestAnimationFrame(() => imageviewer.setSpinnerStatus(false));
   if ((_b = state.manualApply) == null ? void 0 : _b.isProcessing) {
@@ -17139,7 +17141,7 @@ function parseLabel(data) {
 const refreshValues = async (state, addSnapshot = false) => {
   const { elements, filter } = state;
   const { controls } = elements;
-  const lfManager2 = getLfManager();
+  const lfManager = getLfManager();
   state.settingsStore = state.settingsStore ?? {};
   const storeForFilter = state.settingsStore[state.filterType] = state.settingsStore[state.filterType] ?? {};
   for (const key in controls) {
@@ -17171,7 +17173,7 @@ const refreshValues = async (state, addSnapshot = false) => {
           break;
         }
         default:
-          lfManager2.log(`Unhandled control type: ${control.tagName}`, { control }, LogSeverity.Warning);
+          lfManager.log(`Unhandled control type: ${control.tagName}`, { control }, LogSeverity.Warning);
           continue;
       }
     }
@@ -17742,7 +17744,7 @@ function setGridStatus(status, grid, actionButtons) {
 }
 const handleInterruptForState = async (state) => {
   var _a, _b;
-  const lfManager2 = getLfManager();
+  const lfManager = getLfManager();
   const { actionButtons, grid, imageviewer } = state.elements;
   const dataset = imageviewer.lfDataset;
   const statusColumn = getStatusColumn(dataset);
@@ -17755,7 +17757,7 @@ const handleInterruptForState = async (state) => {
       try {
         await getApiRoutes().json.update(path, dataset);
       } catch (error2) {
-        lfManager2.log("Failed to update JSON after workflow interrupt.", { error: error2, path }, LogSeverity.Warning);
+        lfManager.log("Failed to update JSON after workflow interrupt.", { error: error2, path }, LogSeverity.Warning);
       }
     }
     if ((actionButtons == null ? void 0 : actionButtons.interrupt) && (actionButtons == null ? void 0 : actionButtons.resume)) {
@@ -17769,7 +17771,7 @@ const handleInterruptForState = async (state) => {
       await imageviewer.reset();
       await ((_b = (_a = navigation == null ? void 0 : navigation.masonry) == null ? void 0 : _a.setSelectedShape) == null ? void 0 : _b.call(_a, null));
     } catch (error2) {
-      lfManager2.log("Failed to reset image viewer after workflow interrupt.", { error: error2 }, LogSeverity.Warning);
+      lfManager.log("Failed to reset image viewer after workflow interrupt.", { error: error2 }, LogSeverity.Warning);
     }
   }
   await resetSettings(imageviewer);
@@ -18702,13 +18704,13 @@ class LFNodes {
     _LFNodes_REGISTRY.set(this, /* @__PURE__ */ new Map());
     this.add = (extension) => {
       var _a, _b;
-      const lfManager2 = getLfManager();
+      const lfManager = getLfManager();
       if (!(extension == null ? void 0 : extension.name)) {
-        (_a = lfManager2 == null ? void 0 : lfManager2.log) == null ? void 0 : _a.call(lfManager2, `Attempted to add virtual node with invalid name`, { extension }, LogSeverity.Warning);
+        (_a = lfManager == null ? void 0 : lfManager.log) == null ? void 0 : _a.call(lfManager, `Attempted to add virtual node with invalid name`, { extension }, LogSeverity.Warning);
         return;
       }
       if (__classPrivateFieldGet$3(this, _LFNodes_REGISTRY, "f").has(extension.name)) {
-        (_b = lfManager2 == null ? void 0 : lfManager2.log) == null ? void 0 : _b.call(lfManager2, `Duplicate virtual node ignored: '${extension.name}'`, {}, LogSeverity.Warning);
+        (_b = lfManager == null ? void 0 : lfManager.log) == null ? void 0 : _b.call(lfManager, `Duplicate virtual node ignored: '${extension.name}'`, {}, LogSeverity.Warning);
         return;
       }
       __classPrivateFieldGet$3(this, _LFNodes_REGISTRY, "f").set(extension.name, { extension, registered: false });
@@ -18718,7 +18720,7 @@ class LFNodes {
     };
     this.list = () => Array.from(__classPrivateFieldGet$3(this, _LFNodes_REGISTRY, "f").values());
     this.registerAll = () => {
-      const lfManager2 = getLfManager();
+      const lfManager = getLfManager();
       __classPrivateFieldGet$3(this, _LFNodes_REGISTRY, "f").forEach((entry, key) => {
         var _a, _b;
         if (entry.registered) {
@@ -18727,10 +18729,10 @@ class LFNodes {
         try {
           COMFY_API.register(entry.extension);
           entry.registered = true;
-          (_a = lfManager2 == null ? void 0 : lfManager2.log) == null ? void 0 : _a.call(lfManager2, `Registered virtual node '${key}'`, {}, LogSeverity.Success);
+          (_a = lfManager == null ? void 0 : lfManager.log) == null ? void 0 : _a.call(lfManager, `Registered virtual node '${key}'`, {}, LogSeverity.Success);
         } catch (error2) {
           entry.error = error2;
-          (_b = lfManager2 == null ? void 0 : lfManager2.log) == null ? void 0 : _b.call(lfManager2, `Failed to register virtual node '${key}'`, { error: error2 }, LogSeverity.Error);
+          (_b = lfManager == null ? void 0 : lfManager.log) == null ? void 0 : _b.call(lfManager, `Failed to register virtual node '${key}'`, { error: error2 }, LogSeverity.Error);
         }
       });
     };
@@ -18764,7 +18766,7 @@ class LFTooltip {
       const { eventType } = e2.detail;
       switch (eventType) {
         case "click":
-          const lfManager2 = getLfManager();
+          const lfManager = getLfManager();
           switch (__classPrivateFieldGet$2(this, _LFTooltip_LAYOUT, "f")) {
             case "upload":
               const files = await upload.getValue();
@@ -18780,7 +18782,7 @@ class LFTooltip {
                   base64String = btoa(String.fromCharCode.apply(null, arrayBufferView));
                 }
                 if (__classPrivateFieldGet$2(this, _LFTooltip_CB, "f")) {
-                  lfManager2.log("Invoking upload callback.", { base64String }, LogSeverity.Info);
+                  lfManager.log("Invoking upload callback.", { base64String }, LogSeverity.Info);
                   __classPrivateFieldGet$2(this, _LFTooltip_CB, "f")[__classPrivateFieldGet$2(this, _LFTooltip_LAYOUT, "f")](base64String);
                 }
               };
@@ -18913,10 +18915,10 @@ const EV_HANDLERS$9 = {
         break;
       case "contextmenu":
         const ogEv = originalEvent;
-        const lfManager2 = getLfManager();
+        const lfManager = getLfManager();
         ogEv.preventDefault();
         ogEv.stopPropagation();
-        const tip = lfManager2.getManagers().tooltip;
+        const tip = lfManager.getManagers().tooltip;
         const cb = async (b64image) => {
           var _a2, _b2, _c, _d;
           const node2 = (_b2 = (_a2 = comp.lfDataset) == null ? void 0 : _a2.nodes) == null ? void 0 : _b2[0];
@@ -18925,7 +18927,7 @@ const EV_HANDLERS$9 = {
             if (code2) {
               try {
                 const path = JSON.parse(JSON.stringify(code2.value)).path;
-                lfManager2.log(`Updating cover for model with path: ${path}`, { b64image }, LogSeverity.Info);
+                lfManager.log(`Updating cover for model with path: ${path}`, { b64image }, LogSeverity.Info);
                 getApiRoutes().metadata.updateCover(path, b64image);
                 const image2 = (_d = node2 == null ? void 0 : node2.cells) == null ? void 0 : _d.lfImage;
                 if (image2) {
@@ -18934,7 +18936,7 @@ const EV_HANDLERS$9 = {
                   tip.destroy();
                 }
               } catch (error2) {
-                lfManager2.log("Failed to fetch the model's path from .info file", { b64image }, LogSeverity.Error);
+                lfManager.log("Failed to fetch the model's path from .info file", { b64image }, LogSeverity.Error);
               }
             }
           }
@@ -20108,9 +20110,9 @@ const SECTIONS = {
   //#region GitHub
   [ControlPanelIds.GitHub]: () => {
     var _a, _b;
-    const lfManager2 = getLfManager();
-    const releaseData = lfManager2.getLatestRelease();
-    const { theme } = lfManager2.getManagers().lfFramework;
+    const lfManager = getLfManager();
+    const releaseData = lfManager.getLatestRelease();
+    const { theme } = lfManager.getManagers().lfFramework;
     const { brandGithub } = theme.get.icons();
     return {
       icon: ControlPanelIcons.GitHub,
@@ -20851,6 +20853,7 @@ const EV_HANDLERS$4 = {
 var MasonryCSS;
 (function(MasonryCSS2) {
   MasonryCSS2["Content"] = "lf-masonry";
+  MasonryCSS2["Slot"] = "lf-masonry__slot";
   MasonryCSS2["Widget"] = "lf-masonry__widget";
 })(MasonryCSS || (MasonryCSS = {}));
 const STATE$6 = /* @__PURE__ */ new WeakMap();
@@ -20874,7 +20877,7 @@ const masonryFactory = {
       setValue(value) {
         const callback = (_2, u2) => {
           const { masonry, selected } = STATE$6.get(wrapper);
-          const { columns, dataset, index, name, view } = u2.parsedJson;
+          const { columns, dataset, index, name, view, slot_map } = u2.parsedJson;
           if (columns) {
             masonry.lfColumns = columns;
           }
@@ -20888,6 +20891,22 @@ const masonryFactory = {
             selected.index = index;
             selected.name = name || "";
             masonry.setSelectedShape(index);
+          }
+          if (slot_map && typeof slot_map === "object" && Object.keys(slot_map).length > 0) {
+            while (masonry.firstChild) {
+              masonry.removeChild(masonry.firstChild);
+            }
+            for (const key in slot_map) {
+              if (!Object.hasOwn(slot_map, key))
+                continue;
+              const element = slot_map[key];
+              const div = document.createElement("div");
+              div.innerHTML = element;
+              div.setAttribute("slot", key);
+              div.classList.add(MasonryCSS.Slot);
+              masonry.appendChild(div);
+            }
+            masonry.lfShape = "slot";
           }
         };
         normalizeValue(value, callback, CustomWidgetName.masonry);
@@ -21566,16 +21585,16 @@ class LFWidgets {
       }
     };
     this.onEvent = (name, event, widgets) => {
-      const lfManager2 = getLfManager();
+      const lfManager = getLfManager();
       const payload = event.detail;
       const id = resolveNodeId(payload);
       if (!id) {
-        lfManager2.log(`Event '${name}' missing node identifier; present keys: ${Object.keys(payload).join(", ")}`, { payload, name }, LogSeverity.Warning);
+        lfManager.log(`Event '${name}' missing node identifier; present keys: ${Object.keys(payload).join(", ")}`, { payload, name }, LogSeverity.Warning);
         return;
       }
-      const node = lfManager2.getApiRoutes().comfy.getNodeById(id);
+      const node = lfManager.getApiRoutes().comfy.getNodeById(id);
       if (node) {
-        lfManager2.log(`${node.comfyClass} (#${node.id}): event '${name}' fired`, { payload, node }, LogSeverity.Info);
+        lfManager.log(`${node.comfyClass} (#${node.id}): event '${name}' fired`, { payload, node }, LogSeverity.Info);
         switch (name) {
           case NodeName.notify:
             if ("action" in payload) {
@@ -21592,19 +21611,19 @@ class LFWidgets {
                 case NodeName.imagesEditingBreakpoint:
                   if (widget && "value" in payload) {
                     const { value } = payload;
-                    lfManager2.log(`Initiating JSON data fetch for editing breakpoint from path: ${value}`, { widget, value });
+                    lfManager.log(`Initiating JSON data fetch for editing breakpoint from path: ${value}`, { widget, value });
                     getApiRoutes().json.get(value).then((r2) => {
                       if (r2.status === LogSeverity.Success) {
-                        lfManager2.log("JSON data fetched successfully for image editing breakpoint.", { data: r2.data }, LogSeverity.Success);
+                        lfManager.log("JSON data fetched successfully for image editing breakpoint.", { data: r2.data }, LogSeverity.Success);
                         widget.options.setValue(JSON.stringify(r2.data));
                       } else {
-                        lfManager2.log(`Failed to fetch JSON data: ${r2.message}`, { response: r2 }, LogSeverity.Error);
+                        lfManager.log(`Failed to fetch JSON data: ${r2.message}`, { response: r2 }, LogSeverity.Error);
                       }
                     }).catch((error2) => {
-                      lfManager2.log(`Error during JSON fetch for editing breakpoint: ${error2.toString()}`, { error: error2 }, LogSeverity.Error);
+                      lfManager.log(`Error during JSON fetch for editing breakpoint: ${error2.toString()}`, { error: error2 }, LogSeverity.Error);
                     });
                   } else {
-                    lfManager2.log(`Image editor widget handling failed: missing 'widget' or 'value' in payload.`, { widget, payload }, LogSeverity.Warning);
+                    lfManager.log(`Image editor widget handling failed: missing 'widget' or 'value' in payload.`, { widget, payload }, LogSeverity.Warning);
                   }
                   break;
                 default:
@@ -21649,9 +21668,9 @@ class LFWidgets {
               break;
           }
         }
-        lfManager2.getApiRoutes().comfy.redraw();
+        lfManager.getApiRoutes().comfy.redraw();
       } else {
-        lfManager2.log(`Event '${name}' was fired but its related node (#${id}) wasn't found in the graph! Skipping handling the event.`, { payload, name }, LogSeverity.Warning);
+        lfManager.log(`Event '${name}' was fired but its related node (#${id}) wasn't found in the graph! Skipping handling the event.`, { payload, name }, LogSeverity.Warning);
       }
     };
     _LFWidgets_notifications.set(this, {
@@ -21671,7 +21690,7 @@ class LFWidgets {
         if (Notification.permission === "granted") {
           const notification = new Notification(title, options);
           notification.addEventListener("click", () => {
-            const lfManager2 = getLfManager();
+            const lfManager = getLfManager();
             const routes = getApiRoutes().comfy;
             switch (action) {
               case "focus tab":
@@ -21683,24 +21702,24 @@ class LFWidgets {
               case "interrupt and queue":
                 routes.interrupt();
                 routes.queuePrompt();
-                lfManager2.log("New prompt queued from notification after interrupting.", {}, LogSeverity.Success);
+                lfManager.log("New prompt queued from notification after interrupting.", {}, LogSeverity.Success);
                 break;
               case "queue prompt":
                 routes.queuePrompt();
-                lfManager2.log("New prompt queued from notification.", {}, LogSeverity.Success);
+                lfManager.log("New prompt queued from notification.", {}, LogSeverity.Success);
                 break;
             }
           });
         }
       },
       show: (payload) => {
-        const lfManager2 = getLfManager();
+        const lfManager = getLfManager();
         if (Notification.permission !== "granted") {
           Notification.requestPermission().then((permission) => {
             if (permission === "granted") {
               __classPrivateFieldGet$1(this, _LFWidgets_notifications, "f").decorate(payload);
             } else {
-              lfManager2.log("Notification permission denied.", {}, LogSeverity.Warning);
+              lfManager.log("Notification permission denied.", {}, LogSeverity.Warning);
             }
           });
         } else {
@@ -22181,11 +22200,18 @@ getLfFramework();
 {
   console.log("LF Framework initialized!");
 }
-initLfManager();
-const lfManager = getLfManager();
-lfManager.initialize();
-{
-  console.log("LF Manager initialized!", lfManager);
+const hasComfyApp = typeof window !== "undefined" && typeof window.LGraph !== "undefined";
+if (hasComfyApp) {
+  initLfManager();
+  const lfManager = getLfManager();
+  lfManager.initialize();
+  {
+    console.log("LF Manager initialized!", lfManager);
+  }
+} else {
+  {
+    console.log("Skipping dashboard bootstrap (no Comfy app detected)");
+  }
 }
 export {
   LF_THEME_COLORS_DATA_PREFIX as $,
