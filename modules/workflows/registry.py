@@ -116,6 +116,11 @@ def _resolve_user_path(*relative_parts: str) -> Path:
     return user_dir.joinpath(*relative_parts).resolve()
 
 
+def _resolve_package_path(*relative_parts: str) -> Path:
+    package_root = Path(__file__).resolve().parents[2]
+    return package_root.joinpath(*relative_parts).resolve()
+
+
 def _configure_markdown_workflow(prompt: Dict[str, Any], inputs: Dict[str, Any]) -> None:
     source_path = inputs.get("source_path")
     if not source_path:
@@ -129,6 +134,12 @@ def _configure_markdown_workflow(prompt: Dict[str, Any], inputs: Dict[str, Any])
     for node in prompt.values():
         if node.get("class_type") == "LF_RegionExtractor":
             node.setdefault("inputs", {})["dir"] = resolved_str
+
+
+def _configure_lora_workflow(prompt: Dict[str, Any], _: Dict[str, Any]) -> None:
+    # Defaults baked into the workflow handle prompt execution.
+    # No dynamic inputs required for the first iteration.
+    return
 
 
 WORKFLOW_DEFINITIONS: Dict[str, WorkflowDefinition] = {}
@@ -153,6 +164,18 @@ WORKFLOW_DEFINITIONS["markdown-documentation"] = WorkflowDefinition(
         ),
     ],
     configure_prompt=_configure_markdown_workflow,
+)
+
+lora_workflow_path = _resolve_package_path("example_workflows", "LoRa tester.json")
+WORKFLOW_DEFINITIONS["lora-tester"] = WorkflowDefinition(
+    workflow_id="lora-tester",
+    label="LoRA Tester",
+    description=(
+        "Runs the LoRA tester workflow with the bundled defaults and returns the generated image metadata."
+    ),
+    workflow_path=lora_workflow_path,
+    fields=[],
+    configure_prompt=_configure_lora_workflow,
 )
 
 
