@@ -103,7 +103,7 @@ class LF_ViewSVGs:
             "slot_map": slot_map,
         })
 
-        return (svg_string, "\n\n".join(svg_blocks))
+        return (svg_string, svg_blocks)
 # endregion
 
 # region Mappings
