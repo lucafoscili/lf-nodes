@@ -55,9 +55,9 @@ jobs:
         run: |
           PREV_TAG='${{ steps.previous_tag.outputs.previous_tag }}'
           if [ -n "$PREV_TAG" ] && git rev-parse --verify "$PREV_TAG" >/dev/null 2>&1; then
-            COMMITS=$(git log --oneline --no-merges "$PREV_TAG"..HEAD)
+            COMMITS=$(git log --oneline --no-merges "$PREV_TAG"..main)
           else
-            COMMITS=$(git log --oneline --no-merges --max-count=50)
+            COMMITS=$(git log --oneline --no-merges main --max-count=50)
           fi
           echo "commits<<EOF" >> $GITHUB_OUTPUT
           echo "$COMMITS" >> $GITHUB_OUTPUT
