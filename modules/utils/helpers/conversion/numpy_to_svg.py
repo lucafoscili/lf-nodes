@@ -37,10 +37,23 @@ def numpy_to_svg(arr: np.ndarray, num_colors: int, threshold: float, simplify_to
 
     img = arr.copy()
 
+    # For reproducible outputs across runs, force OpenCV to use a
+    # single thread (reduces race-based nondeterminism) and seed its RNG
+    # before any randomized routines (kmeans, grabCut).
+    try:
+        cv2.setNumThreads(1)
+    except Exception:
+        pass
+
     palette = []
     if num_colors > 1:
         pixels = img.reshape(-1,3).astype(np.float32)
         crit = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
+        # Seed OpenCV RNG for deterministic k-means initialization
+        try:
+            cv2.setRNGSeed(0)
+        except Exception:
+            pass
         _, labels, centers = cv2.kmeans(pixels, num_colors, None, crit, 10, cv2.KMEANS_RANDOM_CENTERS)
         centers = centers.astype(np.uint8)
         proc = centers[labels.flatten()].reshape((h, w, 3))
@@ -56,15 +69,66 @@ def numpy_to_svg(arr: np.ndarray, num_colors: int, threshold: float, simplify_to
     # used the earlier 'mask'. Then invert the mask if it covers most of
     # the image (likely the background), which prevents the full-canvas
     # contour from being detected.
-    grayp = cv2.cvtColor(proc, cv2.COLOR_RGB2GRAY)
+    # Preprocess: apply a mild edge-preserving smoothing so quantization
+    # or thresholding keeps large regions while preserving strong edges
+    # (helps photographic inputs). Then compute a grayscale image for
+    # multiple mask strategies.
+    proc_sm = cv2.bilateralFilter(proc, d=9, sigmaColor=75, sigmaSpace=75)
+    grayp = cv2.cvtColor(proc_sm, cv2.COLOR_RGB2GRAY)
 
+    # Primary mask: any non-zero pixel after quantization is foreground.
     if num_colors > 1:
-        # any non-zero pixel is considered foreground
-        _, mask = cv2.threshold(grayp, 1, 255, cv2.THRESH_BINARY)
+        _, mask_color = cv2.threshold(grayp, 1, 255, cv2.THRESH_BINARY)
     else:
-        # for single-color mode we already computed a mask earlier; use it
-        # but make sure we're using the processed gray image
-        _, mask = cv2.threshold(grayp, int(threshold*255), 255, cv2.THRESH_BINARY)
+        # for single-color mode use the earlier threshold intent
+        _, mask_color = cv2.threshold(grayp, int(threshold*255), 255, cv2.THRESH_BINARY)
+
+    # Secondary mask: adaptive threshold works better on photos with
+    # non-uniform lighting. We'll combine it when it provides extra detail.
+    try:
+        mask_adapt = cv2.adaptiveThreshold(grayp, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+                                           cv2.THRESH_BINARY, 11, 2)
+    except Exception:
+        mask_adapt = mask_color.copy()
+
+    # Edge detection to carve out inner details (eyes, mouth) as holes.
+    edges = cv2.Canny(cv2.GaussianBlur(grayp, (5,5), 0), 50, 150)
+    edges_dil = cv2.dilate(edges, np.ones((3,3), np.uint8), iterations=1)
+
+    # Combine masks: prefer color/threshold mask but add adaptively
+    # detected regions; remove strong edges from the filled mask so
+    # interior details become contours/holes.
+    mask = cv2.bitwise_or(mask_color, mask_adapt)
+    mask = cv2.bitwise_and(mask, cv2.bitwise_not(edges_dil))
+
+    # Morphological clean: close small gaps and remove speckle
+    kernel = np.ones((3,3), np.uint8)
+    mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel, iterations=2)
+    mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel, iterations=1)
+
+    # If the mask is neither almost-empty nor almost-full, try a GrabCut
+    # refinement using the cleaned mask as an initial mask. This helps
+    # photographic inputs where thresholding/quantization misses subtle
+    # boundaries. Keep it conservative (only runs when 2%-98% foreground).
+    nonzero = cv2.countNonZero(mask)
+    frac = nonzero / float(w * h)
+    if 0.02 < frac < 0.98:
+        try:
+            # Prepare mask for grabCut: GC_BGD, GC_FGD, GC_PR_BGD, GC_PR_FGD
+            gc_mask = np.where(mask == 255, cv2.GC_PR_FGD, cv2.GC_PR_BGD).astype('uint8')
+            proc_bgr = cv2.cvtColor(proc, cv2.COLOR_RGB2BGR)
+            bgdModel = np.zeros((1, 65), np.float64)
+            fgdModel = np.zeros((1, 65), np.float64)
+            # Run grabCut (with our mask) for a few iterations
+            cv2.grabCut(proc_bgr, gc_mask, None, bgdModel, fgdModel, 5, cv2.GC_INIT_WITH_MASK)
+            # Convert grabCut output to binary mask
+            mask_gc = np.where((gc_mask == cv2.GC_FGD) | (gc_mask == cv2.GC_PR_FGD), 255, 0).astype('uint8')
+            # Use grabCut result if it changed significantly (avoid noise)
+            if abs(cv2.countNonZero(mask_gc) - nonzero) / (w * h) > 0.001:
+                mask = mask_gc
+        except Exception:
+            # If grabCut fails for any reason, continue with existing mask
+            pass
 
     # If the mask is mostly white (background), invert so objects are white
     nonzero = cv2.countNonZero(mask)
@@ -182,7 +246,8 @@ def numpy_to_svg(arr: np.ndarray, num_colors: int, threshold: float, simplify_to
         hier = np.array(hierarchy).reshape(-1, 4)
 
     # Find top-level contours among accepted indices (parent == -1 or parent not accepted)
-    accepted_idxs = set(idx_to_approx.keys())
+    # Use sorted iteration to ensure deterministic output ordering
+    accepted_idxs = sorted(idx_to_approx.keys())
     top_level = []
     for idx in accepted_idxs:
         parent = int(hier[idx, 3]) if idx < hier.shape[0] else -1
@@ -190,7 +255,7 @@ def numpy_to_svg(arr: np.ndarray, num_colors: int, threshold: float, simplify_to
             top_level.append(idx)
 
     # For each top-level contour, build a combined path with its child contours as subpaths
-    for tidx in top_level:
+    for tidx in sorted(top_level):
         d = ""
         # add the top-level contour
         d += contour_to_subpath(idx_to_approx[tidx])
