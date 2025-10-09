@@ -15,6 +15,95 @@ from ..utils.constants import API_ROUTE_PREFIX
 from ..workflows import get_workflow, list_workflows
 from ..workflows.registry import _json_safe as workflow_json_safe
 
+# region Submit prompt
+@PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/submit-prompt")
+async def lf_nodes_workflow_runner_page(_: web.Request) -> web.Response:
+    return web.Response(text=LFN_WORKFLOW_RUNNER_HTML, content_type="text/html")
+# endregion
+
+# region Workflow
+@PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/workflows")
+async def lf_nodes_list_workflows(_: web.Request) -> web.Response:
+    return web.json_response({"workflows": list_workflows()})
+# endregion
+
+# region Run
+@PromptServer.instance.routes.post(f"{API_ROUTE_PREFIX}/run")
+async def lf_nodes_run_workflow(request: web.Request) -> web.Response:
+    try:
+        payload = await request.json()
+    except Exception as exc:  # pragma: no cover - defensive, logged to UI
+        logging.warning("Failed to parse workflow request payload: %s", exc)
+        return web.json_response({"error": "invalid_json", "detail": str(exc)}, status=400)
+
+    workflow_id = payload.get("workflowId")
+    inputs = payload.get("inputs", {})
+    if not isinstance(inputs, dict):
+        return web.json_response(
+            {"error": "invalid_inputs", "detail": "inputs must be an object"},
+            status=400,
+        )
+
+    definition = get_workflow(workflow_id or "")
+    if definition is None:
+        return web.json_response(
+            {"error": "unknown_workflow", "detail": f"No workflow found for id '{workflow_id}'."},
+            status=404,
+        )
+
+    try:
+        prompt = definition.load_prompt()
+        definition.configure_prompt(prompt, inputs)
+    except FileNotFoundError as exc:
+        return web.json_response({"error": "missing_source", "detail": str(exc)}, status=400)
+    except ValueError as exc:
+        return web.json_response({"error": "invalid_input", "detail": str(exc)}, status=400)
+    except Exception as exc:  # pragma: no cover - unexpected issues are surfaced to the UI
+        logging.exception("Failed to prepare workflow '%s': %s", workflow_id, exc)
+        return web.json_response({"error": "configuration_failed", "detail": str(exc)}, status=500)
+
+    prompt_id = payload.get("promptId") or uuid.uuid4().hex
+    validation = await execution.validate_prompt(prompt_id, prompt, None)
+    if not validation[0]:
+        return web.json_response(
+            {
+                "error": "validation_failed",
+                "detail": validation[1],
+                "node_errors": _json_safe(validation[3]),
+            },
+            status=400,
+        )
+
+    server = PromptServer.instance
+    queue_number = server.number
+    server.number += 1
+
+    extra_data = {"lf_nodes": {"workflow_id": workflow_id}}
+    extra_data.update(payload.get("extraData", {}))
+
+    server.prompt_queue.put((queue_number, prompt_id, prompt, extra_data, validation[2]))
+
+    try:
+        history_entry = await _wait_for_completion(prompt_id)
+    except TimeoutError as exc:
+        return web.json_response({"error": "timeout", "detail": str(exc), "prompt_id": prompt_id}, status=504)
+
+    status = history_entry.get("status") or {}
+    status_str = status.get("status_str", "unknown")
+    http_status = 200 if status_str == "success" else 500
+
+    return web.json_response(
+        {
+            "prompt_id": prompt_id,
+            "status": status_str,
+            "history": _sanitize_history(history_entry),
+            "workflow_id": workflow_id,
+        },
+        status=http_status,
+    )
+# endregion
+
+# region HTML content
 LFN_WORKFLOW_RUNNER_HTML = dedent(
     """\
     <!doctype html>
@@ -236,21 +325,15 @@ LFN_WORKFLOW_RUNNER_HTML = dedent(
     </html>
     """
 )
+# endregion
 
-_LFW_PACKAGE_ROOTS = {
-    "core": Path(__file__).resolve().parents[5] / "lf-widgets" / "packages" / "core" / "dist",
-    "foundations": Path(__file__).resolve().parents[5] / "lf-widgets" / "packages" / "foundations" / "dist",
-    "framework": Path(__file__).resolve().parents[5] / "lf-widgets" / "packages" / "framework" / "dist",
-}
-
-
+# region Helpers
 def _json_safe(value: Any) -> Any:
     """
     Thin wrapper that reuses the workflow serializer while keeping the intent
     clear within this module.
     """
     return workflow_json_safe(value)
-
 
 async def _wait_for_completion(prompt_id: str, timeout_seconds: float = 180.0) -> Dict[str, Any]:
     """
@@ -276,142 +359,10 @@ async def _wait_for_completion(prompt_id: str, timeout_seconds: float = 180.0) -
 
         await asyncio.sleep(0.35)
 
-
 def _sanitize_history(entry: Dict[str, Any]) -> Dict[str, Any]:
     return {
         "status": _json_safe(entry.get("status")),
         "outputs": _json_safe(entry.get("outputs", {})),
         "prompt": _json_safe(entry.get("prompt")),
     }
-
-
-def _resolve_lfw_asset(relative_path: str) -> Path | None:
-    if not relative_path:
-        return None
-
-    normalized = relative_path.strip("/")
-    if not normalized:
-        return None
-
-    parts = Path(normalized).parts
-    package_key = parts[0] if parts and parts[0] in _LFW_PACKAGE_ROOTS else "core"
-    root = _LFW_PACKAGE_ROOTS.get(package_key)
-    if root is None or not root.exists():
-        logging.warning("LF Widgets package '%s' dist folder not found at %s", package_key, root)
-        return None
-
-    remaining_parts = parts[1:] if parts and parts[0] == package_key else parts
-    base_path = root.joinpath(*remaining_parts) if remaining_parts else root
-
-    candidate_strings = [str(base_path)]
-
-    if not base_path.suffix:
-        candidate_strings.append(f"{base_path}.js")
-        candidate_strings.append(str(base_path / "index.js"))
-        candidate_strings.append(f"{base_path}.mjs")
-
-    for candidate_str in candidate_strings:
-        candidate = Path(candidate_str).resolve()
-        try:
-            candidate.relative_to(root)
-        except ValueError:
-            continue
-
-        if candidate.is_file():
-            return candidate
-
-    return None
-
-
-@PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/workflows")
-async def lf_nodes_list_workflows(_: web.Request) -> web.Response:
-    return web.json_response({"workflows": list_workflows()})
-
-
-@PromptServer.instance.routes.post(f"{API_ROUTE_PREFIX}/run")
-async def lf_nodes_run_workflow(request: web.Request) -> web.Response:
-    try:
-        payload = await request.json()
-    except Exception as exc:  # pragma: no cover - defensive, logged to UI
-        logging.warning("Failed to parse workflow request payload: %s", exc)
-        return web.json_response({"error": "invalid_json", "detail": str(exc)}, status=400)
-
-    workflow_id = payload.get("workflowId")
-    inputs = payload.get("inputs", {})
-    if not isinstance(inputs, dict):
-        return web.json_response(
-            {"error": "invalid_inputs", "detail": "inputs must be an object"},
-            status=400,
-        )
-
-    definition = get_workflow(workflow_id or "")
-    if definition is None:
-        return web.json_response(
-            {"error": "unknown_workflow", "detail": f"No workflow found for id '{workflow_id}'."},
-            status=404,
-        )
-
-    try:
-        prompt = definition.load_prompt()
-        definition.configure_prompt(prompt, inputs)
-    except FileNotFoundError as exc:
-        return web.json_response({"error": "missing_source", "detail": str(exc)}, status=400)
-    except ValueError as exc:
-        return web.json_response({"error": "invalid_input", "detail": str(exc)}, status=400)
-    except Exception as exc:  # pragma: no cover - unexpected issues are surfaced to the UI
-        logging.exception("Failed to prepare workflow '%s': %s", workflow_id, exc)
-        return web.json_response({"error": "configuration_failed", "detail": str(exc)}, status=500)
-
-    prompt_id = payload.get("promptId") or uuid.uuid4().hex
-    validation = await execution.validate_prompt(prompt_id, prompt, None)
-    if not validation[0]:
-        return web.json_response(
-            {
-                "error": "validation_failed",
-                "detail": validation[1],
-                "node_errors": _json_safe(validation[3]),
-            },
-            status=400,
-        )
-
-    server = PromptServer.instance
-    queue_number = server.number
-    server.number += 1
-
-    extra_data = {"lf_nodes": {"workflow_id": workflow_id}}
-    extra_data.update(payload.get("extraData", {}))
-
-    server.prompt_queue.put((queue_number, prompt_id, prompt, extra_data, validation[2]))
-
-    try:
-        history_entry = await _wait_for_completion(prompt_id)
-    except TimeoutError as exc:
-        return web.json_response({"error": "timeout", "detail": str(exc), "prompt_id": prompt_id}, status=504)
-
-    status = history_entry.get("status") or {}
-    status_str = status.get("status_str", "unknown")
-    http_status = 200 if status_str == "success" else 500
-
-    return web.json_response(
-        {
-            "prompt_id": prompt_id,
-            "status": status_str,
-            "history": _sanitize_history(history_entry),
-            "workflow_id": workflow_id,
-        },
-        status=http_status,
-    )
-
-
-@PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/submit-prompt")
-async def lf_nodes_workflow_runner_page(_: web.Request) -> web.Response:
-    return web.Response(text=LFN_WORKFLOW_RUNNER_HTML, content_type="text/html")
-
-
-@PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/assets/lfw/{{asset_path:.*}}")
-async def lf_nodes_lfw_assets(request: web.Request) -> web.Response:
-    asset_path = request.match_info.get("asset_path", "")
-    asset = _resolve_lfw_asset(asset_path)
-    if asset is None:
-        return web.Response(status=404, text="Asset not found")
-    return web.FileResponse(asset)
+# endregion
