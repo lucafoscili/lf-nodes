@@ -14,6 +14,7 @@ export interface APIRoutes {
   json: JSONAPIs;
   metadata: MetadataAPIs;
   preview: PreviewAPIs;
+  system: SystemAPIs;
 }
 export type AnalyticsType = 'usage';
 export interface AnalyticsAPIs {
@@ -94,6 +95,12 @@ export interface PreviewAPIs {
   clearCache: () => Promise<BaseAPIPayload>;
   getStats: () => Promise<GetPreviewStatsAPIPayload>;
 }
+export interface SystemAPIs {
+  getGpuStats: () => Promise<GetGpuStatsAPIPayload>;
+  getDiskStats: () => Promise<GetDiskStatsAPIPayload>;
+  getCpuStats: () => Promise<GetCpuStatsAPIPayload>;
+  getRamStats: () => Promise<GetRamStatsAPIPayload>;
+}
 //#endregion
 
 //#region Payloads
@@ -142,6 +149,51 @@ export interface GetBackupStatsAPIPayload extends BaseAPIPayload {
     backups: BackupInfo[];
   };
 }
+export interface GPUInfo {
+  name: string;
+  index: number;
+  vram_used: number;
+  vram_total: number;
+  utilization: number;
+}
+export interface DiskInfo {
+  device: string;
+  mountpoint: string;
+  label: string;
+  used: number;
+  total: number;
+  percent: number;
+}
+export interface CpuCoreInfo {
+  index: number;
+  usage: number;
+}
+export interface CpuStats {
+  cores: CpuCoreInfo[];
+  average: number;
+  count: number;
+  physical_count: number;
+}
+export interface RamStats {
+  used: number;
+  total: number;
+  available: number;
+  percent: number;
+  swap_used: number;
+  swap_total: number;
+}
+export interface GetGpuStatsAPIPayload extends BaseAPIPayload {
+  data: GPUInfo[];
+}
+export interface GetDiskStatsAPIPayload extends BaseAPIPayload {
+  data: DiskInfo[];
+}
+export interface GetCpuStatsAPIPayload extends BaseAPIPayload {
+  data: CpuStats;
+}
+export interface GetRamStatsAPIPayload extends BaseAPIPayload {
+  data: RamStats;
+}
 
 export type ImageExplorerScope = 'all' | 'dataset' | 'tree' | 'roots';
 export interface ImageExplorerRequestOptions {
@@ -170,5 +222,9 @@ export enum APIEndpoints {
   SaveMetadata = '/lf-nodes/save-metadata',
   UpdateJson = `/lf-nodes/update-json`,
   UpdateMetadataCover = '/lf-nodes/update-metadata-cover',
+  GetGpuStats = '/lf-nodes/get-gpu-stats',
+  GetDiskStats = '/lf-nodes/get-disk-stats',
+  GetCpuStats = '/lf-nodes/get-cpu-stats',
+  GetRamStats = '/lf-nodes/get-ram-stats',
 }
 //#endregion
