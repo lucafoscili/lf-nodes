@@ -1,4 +1,5 @@
 import { LfArticleNode } from '@lf-widgets/foundations';
+import { CpuStats, DiskInfo, GPUInfo, RamStats } from '../api/api';
 import {
   BaseWidgetState,
   CustomWidgetName,
@@ -50,7 +51,17 @@ export interface ControlPanelFixture {
   }) => LfArticleNode;
   [ControlPanelIds.GitHub]: () => LfArticleNode;
   [ControlPanelIds.Metadata]: () => LfArticleNode;
+  [ControlPanelIds.SystemDashboard]: (stats?: ControlPanelSystemStats) => LfArticleNode;
   [ControlPanelIds.Theme]: () => LfArticleNode;
+}
+export interface ControlPanelSystemStats {
+  gpus?: GPUInfo[];
+  disks?: DiskInfo[];
+  cpu?: CpuStats;
+  ram?: RamStats;
+  timestamp?: number;
+  errors?: string[];
+  autoRefreshSeconds?: number;
 }
 export enum ControlPanelIcons {
   Analytics = 'chart-histogram',
@@ -59,6 +70,7 @@ export enum ControlPanelIcons {
   ExternalPreviews = 'photo-search',
   GitHub = 'brand-github',
   Metadata = 'info-hexagon',
+  SystemDashboard = 'percentage-60',
   Theme = 'color-swatch',
 }
 export enum ControlPanelIds {
@@ -68,6 +80,7 @@ export enum ControlPanelIds {
   ExternalPreviews = 'external-previews',
   GitHub = 'github',
   Metadata = 'metadata',
+  SystemDashboard = 'system-dashboard',
   Theme = 'theme',
 }
 export enum ControlPanelLabels {
@@ -83,6 +96,8 @@ export enum ControlPanelLabels {
   OpenIssue = 'Open an issue',
   RefreshBackupStats = 'Refresh backup stats',
   RefreshPreviewStats = 'Refresh preview stats',
+  SystemAutoRefresh = 'Auto refresh (seconds)',
+  RefreshSystemStats = 'Refresh system stats',
   Theme = 'Random theme',
 }
 export enum ControlPanelSection {

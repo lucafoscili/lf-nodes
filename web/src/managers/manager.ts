@@ -9,6 +9,7 @@ import { JSON_API } from '../api/json';
 import { METADATA_API } from '../api/metadata';
 import { MODELS_API } from '../api/models';
 import { PREVIEW_API } from '../api/preview';
+import { SYSTEM_API } from '../api/system';
 import {
   getLogStyle,
   NODE_WIDGET_MAP,
@@ -47,6 +48,7 @@ export class LFManager {
     json: JSON_API,
     metadata: METADATA_API,
     preview: PREVIEW_API,
+    system: SYSTEM_API,
   };
   #AUTOMATIC_BACKUP = true;
   #BACKUP_RETENTION = 14;

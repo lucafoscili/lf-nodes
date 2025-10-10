@@ -5,6 +5,7 @@ import {
   ControlPanelIds,
   ControlPanelLabels,
   ControlPanelSection,
+  ControlPanelSystemStats,
 } from '../types/widgets/controlPanel';
 import { getLfManager, getLfThemes } from '../utils/common';
 
@@ -747,6 +748,381 @@ export const SECTIONS: ControlPanelFixture = {
               },
             },
           ],
+        },
+      ],
+    };
+  },
+  //#endregion
+
+  //#region SystemDashboard
+  [ControlPanelIds.SystemDashboard]: (stats?: ControlPanelSystemStats): LfArticleNode => {
+    const { theme } = getLfManager().getManagers().lfFramework;
+    const { '--lf-icon-refresh': refreshIcon } = theme.get.current().variables;
+    const { progress } = theme.get.icons();
+
+    const clampPercent = (value: number = 0) => {
+      if (Number.isNaN(value)) {
+        return 0;
+      }
+
+      return Math.min(100, Math.max(0, value || 0));
+    };
+    const getUsageState = (percent: number) => {
+      const value = clampPercent(percent);
+
+      if (value >= 90) {
+        return 'danger';
+      }
+      if (value >= 70) {
+        return 'warning';
+      }
+      if (value == 0) {
+        return 'primary';
+      }
+      return 'success';
+    };
+    const percentLabel = (value: number) => `${clampPercent(value).toFixed(1)}%`;
+    const formatBytes = (bytes: number): string => {
+      if (!bytes) {
+        return '0 B';
+      }
+
+      const units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
+      let value = bytes;
+      let index = 0;
+      while (value >= 1024 && index < units.length - 1) {
+        value /= 1024;
+        index += 1;
+      }
+      const decimals = value >= 10 || index === 0 ? 1 : 2;
+
+      return `${value.toFixed(decimals)} ${units[index]}`;
+    };
+    const createProgressNode = (id: string, label: string, percent: number): LfArticleNode => ({
+      id,
+      value: '',
+      cells: {
+        lfProgressbar: {
+          lfIcon: progress,
+          lfLabel: label,
+          lfUiState: getUsageState(percent),
+          shape: 'progressbar',
+          value: clampPercent(percent) || 0,
+        },
+      },
+    });
+
+    const gpus = stats?.gpus ?? [];
+    const disks = stats?.disks ?? [];
+    const cpu = stats?.cpu;
+    const ram = stats?.ram;
+    const errors = stats?.errors ?? [];
+    const timestamp = stats?.timestamp ? new Date(stats.timestamp) : null;
+    const lastUpdated = timestamp ? timestamp.toLocaleString() : 'Waiting for data';
+
+    const gpuNodes: LfArticleNode[] = gpus.length
+      ? gpus.map((gpu) => {
+          const vramPercent = gpu.vram_total ? (gpu.vram_used / gpu.vram_total) * 100 : 0;
+          const utilPercent = gpu.utilization ?? 0;
+          return {
+            id: `gpu-${gpu.index}`,
+            value: '',
+            cssStyle: {
+              marginBottom: '1em',
+            },
+            children: [
+              {
+                id: `gpu-${gpu.index}-title`,
+                value: `${gpu.name} (GPU ${gpu.index})`,
+                tagName: 'strong',
+              },
+              createProgressNode(
+                `gpu-${gpu.index}-vram`,
+                `VRAM ${formatBytes(gpu.vram_used)} / ${formatBytes(
+                  gpu.vram_total,
+                )} (${percentLabel(vramPercent)})`,
+                vramPercent,
+              ),
+              createProgressNode(
+                `gpu-${gpu.index}-util`,
+                `Utilization ${percentLabel(utilPercent)}`,
+                utilPercent,
+              ),
+            ],
+          };
+        })
+      : [
+          {
+            id: 'gpu-none',
+            value: 'No GPUs detected.',
+            cssStyle: {
+              opacity: '0.7',
+            },
+          },
+        ];
+
+    const cpuNodes: LfArticleNode[] = cpu
+      ? [
+          createProgressNode(
+            'cpu-average',
+            `Average usage ${percentLabel(cpu.average)}`,
+            cpu.average,
+          ),
+          {
+            id: 'cpu-meta',
+            value: `Logical cores: ${cpu.count} • Physical cores: ${cpu.physical_count}`,
+            cssStyle: {
+              fontSize: '0.9em',
+              opacity: '0.8',
+            },
+          },
+          {
+            id: 'cpu-cores',
+            value: '',
+            cssStyle: {
+              display: 'grid',
+              gap: '0.75em',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+            },
+            children: cpu.cores.map((core) =>
+              createProgressNode(
+                `cpu-core-${core.index}`,
+                `Core ${core.index} ${percentLabel(core.usage)}`,
+                core.usage,
+              ),
+            ),
+          },
+        ]
+      : [
+          {
+            id: 'cpu-none',
+            value: 'CPU statistics unavailable.',
+            cssStyle: {
+              opacity: '0.7',
+            },
+          },
+        ];
+
+    const ramNodes: LfArticleNode[] = ram
+      ? [
+          createProgressNode(
+            'ram-usage',
+            `RAM ${formatBytes(ram.used)} / ${formatBytes(ram.total)} (${percentLabel(
+              ram.percent,
+            )})`,
+            ram.percent,
+          ),
+          {
+            id: 'ram-available',
+            value: `Available: ${formatBytes(ram.available)}`,
+            cssStyle: {
+              fontSize: '0.9em',
+              opacity: '0.8',
+            },
+          },
+          ...(ram.swap_total
+            ? [
+                createProgressNode(
+                  'swap-usage',
+                  `Swap ${formatBytes(ram.swap_used)} / ${formatBytes(
+                    ram.swap_total,
+                  )} (${percentLabel(
+                    ram.swap_total ? (ram.swap_used / ram.swap_total) * 100 : 0,
+                  )})`,
+                  ram.swap_total ? (ram.swap_used / ram.swap_total) * 100 : 0,
+                ),
+              ]
+            : []),
+        ]
+      : [
+          {
+            id: 'ram-none',
+            value: 'RAM statistics unavailable.',
+            cssStyle: {
+              opacity: '0.7',
+            },
+          },
+        ];
+
+    const diskNodes: LfArticleNode[] = disks.length
+      ? disks.map((disk, index) => {
+          const percent = disk.total ? (disk.used / disk.total) * 100 : disk.percent;
+
+          return {
+            id: `disk-${index}`,
+            value: '',
+            cssStyle: {
+              marginBottom: '1em',
+            },
+            children: [
+              {
+                cells: {
+                  lfChip: {
+                    lfAriaLabel: `Disk ${disk.device || disk.mountpoint} ${disk.label}`,
+                    lfDataset: {
+                      nodes: [
+                        { id: `disk-${index}-device`, value: `${disk.device || disk.mountpoint}` },
+                        { id: `disk-${index}-label`, value: `${disk.label}` },
+                      ],
+                    },
+                    lfStyle: ':host { width: max-content; }',
+                    lfUiSize: 'small',
+                    shape: 'chip',
+                    value: '',
+                  },
+                },
+                id: `disk-${index}-mount`,
+                value: ``,
+                cssStyle: {
+                  fontSize: '0.9em',
+                  opacity: '0.8',
+                  marginBottom: '0.25em',
+                },
+              },
+              createProgressNode(
+                `disk-${index}-usage`,
+                `${formatBytes(disk.used)} / ${formatBytes(disk.total)} (${percentLabel(percent)})`,
+                percent,
+              ),
+            ],
+          };
+        })
+      : [
+          {
+            id: 'disk-none',
+            value: 'No disks detected.',
+            cssStyle: {
+              opacity: '0.7',
+            },
+          },
+        ];
+
+    const errorNodes: LfArticleNode[] = errors.map((error, index) => ({
+      id: `system-error-${index}`,
+      value: error,
+      cssStyle: {
+        color: 'rgb(var(--lf-color-danger))',
+        fontSize: '0.85em',
+      },
+    }));
+
+    const overviewChildren: LfArticleNode[] = [
+      {
+        id: ControlPanelSection.Content,
+        value: 'Monitor real-time hardware usage for GPUs, CPU, memory, and storage.',
+      },
+      {
+        id: ControlPanelSection.Content,
+        value: `Last updated: ${lastUpdated}`,
+        cssStyle: {
+          fontSize: '0.85em',
+          opacity: '0.75',
+        },
+      },
+      {
+        id: ControlPanelSection.Content,
+        value:
+          stats?.autoRefreshSeconds && stats.autoRefreshSeconds > 0
+            ? `Auto refresh every ${stats.autoRefreshSeconds}s`
+            : 'Auto refresh disabled.',
+        cssStyle: {
+          fontSize: '0.85em',
+          opacity: '0.75',
+          marginTop: '0.3em',
+        },
+      },
+      {
+        id: ControlPanelSection.Content,
+        value: '',
+        cells: {
+          lfTextfield: {
+            lfHelper: { showWhenFocused: false, value: 'Set to 0 to disable auto refresh' },
+            lfHtmlAttributes: { type: 'number', min: '0', step: 'any' },
+            lfLabel: ControlPanelLabels.SystemAutoRefresh,
+            lfStyle: ':host { display: block; margin: 0.75em auto; max-width: 240px; }',
+            lfValue:
+              stats?.autoRefreshSeconds !== undefined && stats.autoRefreshSeconds > 0
+                ? String(stats.autoRefreshSeconds)
+                : '',
+            shape: 'textfield',
+            value: '',
+          },
+        },
+      },
+    ];
+
+    if (errorNodes.length) {
+      overviewChildren.push({
+        id: 'system-errors',
+        value: '',
+        children: errorNodes,
+      });
+    }
+
+    overviewChildren.push({
+      id: ControlPanelSection.Content,
+      value: '',
+      cells: {
+        lfButton: {
+          lfIcon: refreshIcon,
+          lfLabel: ControlPanelLabels.RefreshSystemStats,
+          lfStyle: BUTTON_STYLE,
+          lfStyling: 'flat',
+          shape: 'button',
+          value: '',
+        },
+      },
+    });
+
+    return {
+      icon: ControlPanelIcons.SystemDashboard,
+      id: ControlPanelSection.Section,
+      value: 'System monitor',
+      children: [
+        {
+          id: ControlPanelSection.Paragraph,
+          value: 'Overview',
+          children: overviewChildren,
+        },
+        {
+          cssStyle: STYLES.separator(),
+          id: ControlPanelSection.ContentSeparator,
+          value: '',
+        },
+        {
+          id: ControlPanelSection.Paragraph,
+          value: 'GPU usage',
+          children: gpuNodes,
+        },
+        {
+          cssStyle: STYLES.separator(),
+          id: ControlPanelSection.ContentSeparator,
+          value: '',
+        },
+        {
+          id: ControlPanelSection.Paragraph,
+          value: 'CPU usage',
+          children: cpuNodes,
+        },
+        {
+          cssStyle: STYLES.separator(),
+          id: ControlPanelSection.ContentSeparator,
+          value: '',
+        },
+        {
+          id: ControlPanelSection.Paragraph,
+          value: 'Memory',
+          children: ramNodes,
+        },
+        {
+          cssStyle: STYLES.separator(),
+          id: ControlPanelSection.ContentSeparator,
+          value: '',
+        },
+        {
+          id: ControlPanelSection.Paragraph,
+          value: 'Disk usage',
+          children: diskNodes,
         },
       ],
     };
