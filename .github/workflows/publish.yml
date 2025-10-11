@@ -54,10 +54,19 @@ jobs:
         id: generate_notes
         run: |
           PREV_TAG='${{ steps.previous_tag.outputs.previous_tag }}'
+          CURRENT_REF='${{ github.sha }}'
+          RANGE=''
           if [ -n "$PREV_TAG" ] && git rev-parse --verify "$PREV_TAG" >/dev/null 2>&1; then
-            COMMITS=$(git log --oneline --no-merges "$PREV_TAG"..main)
+            RANGE="$PREV_TAG..$CURRENT_REF"
           else
-            COMMITS=$(git log --oneline --no-merges main --max-count=50)
+            RANGE="$CURRENT_REF"
+          fi
+
+          COMMITS=$(git log --oneline --no-merges $RANGE --max-count=50)
+          if [ -z "$COMMITS" ]; then
+            COMMITS="(no new non-merge commits detected)"
+          else
+            COMMITS=$(echo "$COMMITS" | sed 's/^/- /')
           fi
           echo "commits<<EOF" >> $GITHUB_OUTPUT
           echo "$COMMITS" >> $GITHUB_OUTPUT
