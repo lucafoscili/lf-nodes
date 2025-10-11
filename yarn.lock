@@ -210,45 +210,45 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@lf-widgets/assets@npm:1.1.1":
-  version: 1.1.1
-  resolution: "@lf-widgets/assets@npm:1.1.1"
-  checksum: 10c0/d572a79a6e40a1174a12e1881fb99fd77822fe878217e4dfa1110089e19d9d98e44e97671c860da18035ab37b4dc19aed8eae3daa4e8ed21cdd5ee947db3b1e7
+"@lf-widgets/assets@npm:1.1.2":
+  version: 1.1.2
+  resolution: "@lf-widgets/assets@npm:1.1.2"
+  checksum: 10c0/5a2d37ced455c26f4954c1d936f7e2f7eaf6e55ce753a292931f42b92d628af55c64af73027684911aab22cb2db49731c2669a9e290d30e561e54c493a9f183b
   languageName: node
   linkType: hard
 
-"@lf-widgets/core@npm:1.1.1":
-  version: 1.1.1
-  resolution: "@lf-widgets/core@npm:1.1.1"
+"@lf-widgets/core@npm:1.1.2":
+  version: 1.1.2
+  resolution: "@lf-widgets/core@npm:1.1.2"
   dependencies:
-    "@lf-widgets/assets": "npm:1.1.1"
+    "@lf-widgets/assets": "npm:1.1.2"
     echarts: "npm:^5"
   peerDependencies:
-    "@lf-widgets/foundations": 1.1.1
-    "@lf-widgets/framework": 1.1.1
+    "@lf-widgets/foundations": 1.1.2
+    "@lf-widgets/framework": 1.1.2
   dependenciesMeta:
     "@lf-widgets/assets":
       optional: true
-  checksum: 10c0/ec38e4a81ee096a590175e9416d26330cb60987b4a3f6bff7d4fc3ab784c597fafe2378ea043b738c7fbedc5934e3475d4a91ebe24d8567fb5089c8e51014a77
+  checksum: 10c0/42c433d94f5affc1f1c69850773058e6e827c95a296bd384b50c2f95b14b61843dde70ddd465f385b403068e30aa44d4af92c7287337768c82320c726ddf37fa
   languageName: node
   linkType: hard
 
-"@lf-widgets/foundations@npm:1.1.1":
-  version: 1.1.1
-  resolution: "@lf-widgets/foundations@npm:1.1.1"
-  checksum: 10c0/db0f56751ee82f9ea2b4da3efe2e7d0e54d85c9e8c09407719afeb079a2814fe640181ecb22422256e19b79b6214c4dfda7aed50706e0cbfc0fa5c681efe1360
+"@lf-widgets/foundations@npm:1.1.2":
+  version: 1.1.2
+  resolution: "@lf-widgets/foundations@npm:1.1.2"
+  checksum: 10c0/cb26fcbb8abb65f0ec284176a5674ad05ca2dee3d9a975e8334fd8575edd9880e516147d08a5a45b79f2ec53f72effcff482086d3b3c50960a4b5ef4740a5f95
   languageName: node
   linkType: hard
 
-"@lf-widgets/framework@npm:1.1.1":
-  version: 1.1.1
-  resolution: "@lf-widgets/framework@npm:1.1.1"
+"@lf-widgets/framework@npm:1.1.2":
+  version: 1.1.2
+  resolution: "@lf-widgets/framework@npm:1.1.2"
   dependencies:
     markdown-it: "npm:^14"
     prismjs: "npm:^1"
   peerDependencies:
-    "@lf-widgets/foundations": 1.1.1
-  checksum: 10c0/dec346717496bd107301dd0f9febdb11d85a3140f770647c66a496517b08639340922168c31db9ce53bab69d355684e50ae420773e42b53470b9a1877b057af7
+    "@lf-widgets/foundations": 1.1.2
+  checksum: 10c0/6d79fbd5239fe8cc0477dc91fd153efa478a210dbbf80f61ff81895064b655aa8903dd5bfb8714c3bcb211f6c055ba6f22b44cca3e643bd745ae684f6133f589
   languageName: node
   linkType: hard
 
@@ -1186,10 +1186,10 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "lf-nodes@workspace:."
   dependencies:
-    "@lf-widgets/assets": "npm:1.1.1"
-    "@lf-widgets/core": "npm:1.1.1"
-    "@lf-widgets/foundations": "npm:1.1.1"
-    "@lf-widgets/framework": "npm:1.1.1"
+    "@lf-widgets/assets": "npm:1.1.2"
+    "@lf-widgets/core": "npm:1.1.2"
+    "@lf-widgets/foundations": "npm:1.1.2"
+    "@lf-widgets/framework": "npm:1.1.2"
     "@types/node": "npm:^22"
     fs-extra: "npm:^11"
     rollup-plugin-visualizer: "npm:^5"
