@@ -249,8 +249,20 @@ export const resolveNodeId = (p: BaseEventPayload | undefined | null): string | 
 //#endregion
 
 //#region Number
+export const clampPercent = (value: number | null | undefined) => {
+  if (typeof value !== 'number' || Number.isNaN(value) || !Number.isFinite(value)) {
+    return 0;
+  }
+  return Math.min(100, Math.max(0, value));
+};
 export const isValidNumber = (n: number) => {
   return !isNaN(n) && typeof n === 'number';
+};
+export const toNumber = (value: unknown) => {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return value;
+  }
+  return 0;
 };
 //#endregion
 
@@ -264,9 +276,22 @@ export const capitalize = (input: string) => {
     .map((word) => word.charAt(0).toUpperCase() + word.substring(1))
     .join(' ');
 };
+export const formatBytes = (bytes: number): string => {
+  if (!bytes) {
+    return '0 B';
+  }
+
+  const units = ['B', 'KB', 'MB', 'GB'];
+  const index = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
+  const value = bytes / Math.pow(1024, index);
+
+  return `${value.toFixed(2)} ${units[index]}`;
+};
 export const isString = (value: unknown): value is string => typeof value === 'string';
 export const normalizeDirectoryRequest = (value: unknown): string =>
   typeof value === 'string' ? value : '';
+export const percentLabel = (value: number | null | undefined) =>
+  `${clampPercent(value).toFixed(1)}%`;
 export const splitByLastSpaceBeforeAnyBracket = (input: string) => {
   const match = input.match(/\s+(.+)\[.*?\]/);
 

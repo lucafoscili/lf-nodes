@@ -9,6 +9,7 @@ import { JSON_API } from '../api/json';
 import { METADATA_API } from '../api/metadata';
 import { MODELS_API } from '../api/models';
 import { PREVIEW_API } from '../api/preview';
+import { SYSTEM_API } from '../api/system';
 import {
   getLogStyle,
   NODE_WIDGET_MAP,
@@ -47,6 +48,7 @@ export class LFManager {
     json: JSON_API,
     metadata: METADATA_API,
     preview: PREVIEW_API,
+    system: SYSTEM_API,
   };
   #AUTOMATIC_BACKUP = true;
   #BACKUP_RETENTION = 14;
@@ -64,6 +66,7 @@ export class LFManager {
     widgets?: LFWidgets;
     nodes?: LFNodes;
   } = {};
+  #SYSTEM_TIMEOUT = 0;
 
   constructor() {
     const assetsUrl = window.location.href + 'extensions/lf-nodes/assets';
@@ -190,6 +193,9 @@ export class LFManager {
   getBackupRetention() {
     return this.#BACKUP_RETENTION;
   }
+  getSystemTimeout() {
+    return this.#SYSTEM_TIMEOUT;
+  }
   isBackupEnabled() {
     return this.#AUTOMATIC_BACKUP;
   }
@@ -263,6 +269,13 @@ export class LFManager {
   setDebugDataset(article: HTMLLfArticleElement, dataset: LfArticleNode[]) {
     this.#DEBUG_ARTICLE = article;
     this.#DEBUG_DATASET = dataset;
+    this.log('Debug dataset set!', { article, dataset }, LogSeverity.Info);
+  }
+  setSystemTimeout(value: number = 0) {
+    if (typeof value === 'number' && value >= 0) {
+      this.#SYSTEM_TIMEOUT = Math.floor(value);
+      this.log(`System timeout set to: ${value}`, { value }, LogSeverity.Info);
+    }
   }
   toggleBackup(value?: boolean) {
     if (value === false || value === true) {
@@ -270,9 +283,13 @@ export class LFManager {
     } else {
       this.#AUTOMATIC_BACKUP = !this.#AUTOMATIC_BACKUP;
     }
-    this.log(`Automatic backup active: '${this.#DEBUG}'`, { value }, LogSeverity.Warning);
+    this.log(
+      `Automatic backup active: '${this.#AUTOMATIC_BACKUP}'`,
+      { value },
+      LogSeverity.Warning,
+    );
 
-    return this.#DEBUG;
+    return this.#AUTOMATIC_BACKUP;
   }
   toggleDebug(value?: boolean) {
     if (value === false || value === true) {

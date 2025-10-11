@@ -13,3 +13,6 @@ torch
 torchvision
 tqdm
 transformers
+psutil
+GPUtil
+pynvml

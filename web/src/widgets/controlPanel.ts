@@ -1,4 +1,5 @@
-import { createContent } from '../helpers/controlPanel';
+import { createContent } from '../helpers/controlPanel/content';
+import { setSystemAutoRefreshSeconds } from '../helpers/controlPanel/systemDashboard';
 import { LfEventName } from '../types/events/events';
 import {
   ControlPanelCSS,
@@ -23,12 +24,13 @@ export const controlPanelFactory: ControlPanelFactory = {
           backup: getLfManager().isBackupEnabled() || false,
           backupRetention: getLfManager().getBackupRetention() || 14,
           debug: getLfManager().isDebug() || false,
+          systemTimeout: getLfManager().getSystemTimeout() || 0,
           themes: getLfManager().getManagers().lfFramework.theme.get.current().name || '',
         };
       },
       setValue(value) {
         const callback: ControlPanelNormalizeCallback = (_, u) => {
-          const { backup, backupRetention, debug, themes } =
+          const { backup, backupRetention, debug, systemTimeout, themes } =
             u.parsedJson as ControlPanelDeserializedValue;
 
           if (backup === true || backup === false) {
@@ -39,6 +41,9 @@ export const controlPanelFactory: ControlPanelFactory = {
           }
           if (debug === true || debug === false) {
             getLfManager().toggleDebug(debug);
+          }
+          if (typeof systemTimeout === 'number') {
+            setSystemAutoRefreshSeconds(systemTimeout);
           }
           if (themes) {
             getLfManager().getManagers().lfFramework.theme.set(themes);

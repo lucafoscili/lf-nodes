@@ -13655,7 +13655,7 @@ var X = false, Z = (t2, e2, n2) => {
                         const n6 = t7.i.replace(/-/g, "_"), o6 = t7.T;
                         if (!o6) return;
                         const r3 = i.get(o6);
-                        return r3 ? r3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-0df37de3.entry.js": () => import("./p-0df37de3.entry-fg5H_3dg.js"), "./p-182c6c19.entry.js": () => import("./p-182c6c19.entry-Df5DokuD.js"), "./p-28dd0bff.entry.js": () => import("./p-28dd0bff.entry-CGDPqIUI.js"), "./p-2ab0f248.entry.js": () => import("./p-2ab0f248.entry-Bzv2ZcSV.js"), "./p-36aa4a7f.entry.js": () => import("./p-36aa4a7f.entry-CLwjNzBU.js"), "./p-55c6a817.entry.js": () => import("./p-55c6a817.entry-ZgMGfuDn.js"), "./p-5d51f267.entry.js": () => import("./p-5d51f267.entry-4nzCDrwr.js"), "./p-62695161.entry.js": () => import("./p-62695161.entry-DrtAMEio.js"), "./p-924ca284.entry.js": () => import("./p-924ca284.entry-C8kIoRa7.js"), "./p-988ad9c7.entry.js": () => import("./p-988ad9c7.entry-CYs6Jj5p.js"), "./p-a6642965.entry.js": () => import("./p-a6642965.entry-Bw6JemkH.js"), "./p-b1bf3d70.entry.js": () => import("./p-b1bf3d70.entry-DNMai-4e.js"), "./p-e2900881.entry.js": () => import("./p-e2900881.entry-mgIYaK5t.js"), "./p-e4e76694.entry.js": () => import("./p-e4e76694.entry-C7VpC9Dn.js"), "./p-e6148250.entry.js": () => import("./p-e6148250.entry-DCOglS03.js"), "./p-f19de954.entry.js": () => import("./p-f19de954.entry-0DGUTsyz.js") }), `./${o6}.entry.js`, 2).then(((t8) => (i.set(o6, t8), t8[n6])), ((t8) => {
+                        return r3 ? r3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-0df37de3.entry.js": () => import("./p-0df37de3.entry-DV2Iu4d3.js"), "./p-182c6c19.entry.js": () => import("./p-182c6c19.entry-j5QF_7IX.js"), "./p-28dd0bff.entry.js": () => import("./p-28dd0bff.entry-DsDwHtCc.js"), "./p-36aa4a7f.entry.js": () => import("./p-36aa4a7f.entry-BE0eZiyw.js"), "./p-55c6a817.entry.js": () => import("./p-55c6a817.entry-_NYxrDF4.js"), "./p-5d51f267.entry.js": () => import("./p-5d51f267.entry-CW2SvlgP.js"), "./p-62695161.entry.js": () => import("./p-62695161.entry-iRW0zdgp.js"), "./p-924ca284.entry.js": () => import("./p-924ca284.entry-CLqq1c01.js"), "./p-9738317a.entry.js": () => import("./p-9738317a.entry-DSDAUtuc.js"), "./p-988ad9c7.entry.js": () => import("./p-988ad9c7.entry-CVvqwwut.js"), "./p-a6642965.entry.js": () => import("./p-a6642965.entry-DT6bZpZ5.js"), "./p-b1bf3d70.entry.js": () => import("./p-b1bf3d70.entry--3zLE3Z1.js"), "./p-e2900881.entry.js": () => import("./p-e2900881.entry-Di-OVUcb.js"), "./p-e4e76694.entry.js": () => import("./p-e4e76694.entry-AkdbxURP.js"), "./p-e6148250.entry.js": () => import("./p-e6148250.entry-C3wJzbck.js"), "./p-f19de954.entry.js": () => import("./p-f19de954.entry-DTFhifx0.js") }), `./${o6}.entry.js`, 2).then(((t8) => (i.set(o6, t8), t8[n6])), ((t8) => {
                           l(t8, e3.$hostElement$);
                         }));
                         /*!__STENCIL_STATIC_IMPORT_SWITCH__*/
@@ -13738,7 +13738,7 @@ const o = () => {
 (() => {
   const l2 = import.meta.url, f$1 = {};
   return "" !== l2 && (f$1.resourcesUrl = new URL(".", l2).href), f(f$1);
-})().then((async (e2) => (await o(), St(JSON.parse('[["p-988ad9c7",[[257,"lf-imageviewer",{"lfDataset":[1040,"lf-dataset"],"lfLoadCallback":[1040,"lf-load-callback"],"lfNavigation":[1040,"lf-navigation"],"lfStyle":[1025,"lf-style"],"lfValue":[1040,"lf-value"],"debugInfo":[32],"currentShape":[32],"history":[32],"historyIndex":[32],"isNavigationTreeOpen":[32],"isSpinnerActive":[32],"addSnapshot":[64],"clearHistory":[64],"clearSelection":[64],"getComponents":[64],"getCurrentSnapshot":[64],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"reset":[64],"setSpinnerStatus":[64],"unmount":[64]}]]],["p-182c6c19",[[257,"lf-compare",{"lfDataset":[1040,"lf-dataset"],"lfShape":[1025,"lf-shape"],"lfStyle":[1025,"lf-style"],"lfView":[1025,"lf-view"],"debugInfo":[32],"isLeftPanelOpened":[32],"isRightPanelOpened":[32],"leftShape":[32],"rightShape":[32],"shapes":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["updateShapes"],"lfShape":["updateShapes"]}]]],["p-e4e76694",[[257,"lf-accordion",{"lfDataset":[1040,"lf-dataset"],"lfRipple":[1028,"lf-ripple"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"expandedNodes":[32],"selectedNodes":[32],"getDebugInfo":[64],"getProps":[64],"getSelectedNodes":[64],"refresh":[64],"toggleNode":[64],"unmount":[64]}]]],["p-62695161",[[257,"lf-article",{"lfDataset":[1040,"lf-dataset"],"lfEmpty":[1025,"lf-empty"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-5d51f267",[[257,"lf-carousel",{"lfDataset":[1040,"lf-dataset"],"lfAutoPlay":[4,"lf-auto-play"],"lfInterval":[2,"lf-interval"],"lfLightbox":[1540,"lf-lightbox"],"lfNavigation":[1028,"lf-navigation"],"lfShape":[1537,"lf-shape"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"currentIndex":[32],"shapes":[32],"getDebugInfo":[64],"getProps":[64],"goToSlide":[64],"nextSlide":[64],"prevSlide":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["updateShapes"],"lfShape":["updateShapes"]}]]],["p-28dd0bff",[[257,"lf-messenger",{"lfAutosave":[1028,"lf-autosave"],"lfDataset":[1040,"lf-dataset"],"lfStyle":[1025,"lf-style"],"lfValue":[16,"lf-value"],"debugInfo":[32],"chat":[32],"connectionStatus":[32],"covers":[32],"currentCharacter":[32],"formStatusMap":[32],"history":[32],"hoveredCustomizationOption":[32],"saveInProgress":[32],"ui":[32],"deleteOption":[64],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"reset":[64],"save":[64],"unmount":[64]}]]],["p-f19de954",[[257,"lf-drawer",{"lfDisplay":[1537,"lf-display"],"lfPosition":[1537,"lf-position"],"lfResponsive":[1026,"lf-responsive"],"lfStyle":[1025,"lf-style"],"lfValue":[1540,"lf-value"],"debugInfo":[32],"close":[64],"getDebugInfo":[64],"getProps":[64],"isOpened":[64],"open":[64],"refresh":[64],"toggle":[64],"unmount":[64]},[[0,"keydown","listenKeydown"]],{"lfDisplay":["onLfDisplayChange"],"lfResponsive":["onLfResponsiveChange"]}]]],["p-a6642965",[[257,"lf-header",{"lfStyle":[1025,"lf-style"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-e6148250",[[257,"lf-placeholder",{"lfIcon":[1,"lf-icon"],"lfProps":[16,"lf-props"],"lfStyle":[1025,"lf-style"],"lfThreshold":[2,"lf-threshold"],"lfTrigger":[1,"lf-trigger"],"lfValue":[1,"lf-value"],"debugInfo":[32],"isInViewport":[32],"getComponent":[64],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-36aa4a7f",[[257,"lf-slider",{"lfLabel":[1025,"lf-label"],"lfLeadingLabel":[1028,"lf-leading-label"],"lfMax":[2,"lf-max"],"lfMin":[2,"lf-min"],"lfStep":[2,"lf-step"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1026,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}]]],["p-0df37de3",[[257,"lf-splash",{"lfLabel":[1025,"lf-label"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"state":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-924ca284",[[257,"lf-toast",{"lfCloseIcon":[1025,"lf-close-icon"],"lfCloseCallback":[16,"lf-close-callback"],"lfIcon":[1025,"lf-icon"],"lfTimer":[2,"lf-timer"],"lfMessage":[1025,"lf-message"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-2ab0f248",[[257,"lf-card",{"lfDataset":[1040,"lf-dataset"],"lfLayout":[1025,"lf-layout"],"lfSizeX":[1025,"lf-size-x"],"lfSizeY":[1025,"lf-size-y"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"debugInfo":[32],"shapes":[32],"getDebugInfo":[64],"getProps":[64],"getShapes":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["updateShapes"]}],[257,"lf-badge",{"lfImageProps":[1040,"lf-image-props"],"lfLabel":[1025,"lf-label"],"lfPosition":[1537,"lf-position"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}],[257,"lf-canvas",{"lfBrush":[1025,"lf-brush"],"lfColor":[1025,"lf-color"],"lfCursor":[1025,"lf-cursor"],"lfImageProps":[1040,"lf-image-props"],"lfOpacity":[1026,"lf-opacity"],"lfPreview":[1028,"lf-preview"],"lfStrokeTolerance":[1026,"lf-stroke-tolerance"],"lfSize":[1026,"lf-size"],"lfStyle":[1025,"lf-style"],"boxing":[32],"debugInfo":[32],"isPainting":[32],"orientation":[32],"points":[32],"clearCanvas":[64],"getCanvas":[64],"getDebugInfo":[64],"getImage":[64],"getProps":[64],"refresh":[64],"resizeCanvas":[64],"setCanvasHeight":[64],"setCanvasWidth":[64],"unmount":[64]}],[257,"lf-photoframe",{"lfOverlay":[1040,"lf-overlay"],"lfPlaceholder":[16,"lf-placeholder"],"lfStyle":[1025,"lf-style"],"lfThreshold":[2,"lf-threshold"],"lfValue":[16,"lf-value"],"debugInfo":[32],"imageOrientation":[32],"isInViewport":[32],"isReady":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}],[257,"lf-chart",{"lfAxis":[1025,"lf-axis"],"lfColors":[1040,"lf-colors"],"lfDataset":[1040,"lf-dataset"],"lfLegend":[1025,"lf-legend"],"lfSeries":[1040,"lf-series"],"lfSizeX":[1025,"lf-size-x"],"lfSizeY":[1025,"lf-size-y"],"lfStyle":[1025,"lf-style"],"lfTypes":[1040,"lf-types"],"lfXAxis":[1040,"lf-x-axis"],"lfYAxis":[1040,"lf-y-axis"],"debugInfo":[32],"themeValues":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"resize":[64],"unmount":[64]}],[257,"lf-toggle",{"lfAriaLabel":[1025,"lf-aria-label"],"lfLabel":[1025,"lf-label"],"lfLeadingLabel":[1028,"lf-leading-label"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[4,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}],[257,"lf-upload",{"lfLabel":[1025,"lf-label"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfValue":[16,"lf-value"],"debugInfo":[32],"selectedFiles":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"unmount":[64]}],[257,"lf-chat",{"lfContextWindow":[1026,"lf-context-window"],"lfEmpty":[1025,"lf-empty"],"lfEndpointUrl":[1025,"lf-endpoint-url"],"lfLayout":[1025,"lf-layout"],"lfMaxTokens":[1026,"lf-max-tokens"],"lfPollingInterval":[1026,"lf-polling-interval"],"lfSeed":[1026,"lf-seed"],"lfStyle":[1025,"lf-style"],"lfSystem":[1025,"lf-system"],"lfTemperature":[1026,"lf-temperature"],"lfTypewriterProps":[1028,"lf-typewriter-props"],"lfUiSize":[1537,"lf-ui-size"],"lfValue":[1040,"lf-value"],"currentAbortStreaming":[32],"currentPrompt":[32],"currentTokens":[32],"debugInfo":[32],"history":[32],"status":[32],"view":[32],"abortStreaming":[64],"getDebugInfo":[64],"getHistory":[64],"getLastMessage":[64],"getProps":[64],"refresh":[64],"scrollToBottom":[64],"setHistory":[64],"unmount":[64]},[[0,"keydown","listenKeydown"]],{"lfPollingInterval":["updatePollingInterval"],"lfSystem":["updateTokensCount"]}],[257,"lf-chip",{"lfAriaLabel":[1025,"lf-aria-label"],"lfDataset":[1040,"lf-dataset"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfStyling":[1025,"lf-styling"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[16,"lf-value"],"debugInfo":[32],"expandedNodes":[32],"hiddenNodes":[32],"selectedNodes":[32],"getDebugInfo":[64],"getProps":[64],"getSelectedNodes":[64],"refresh":[64],"setSelectedNodes":[64],"unmount":[64]}],[257,"lf-code",{"lfFadeIn":[1028,"lf-fade-in"],"lfFormat":[1028,"lf-format"],"lfLanguage":[1025,"lf-language"],"lfPreserveSpaces":[1028,"lf-preserve-spaces"],"lfShowCopy":[1028,"lf-show-copy"],"lfShowHeader":[1028,"lf-show-header"],"lfStickyHeader":[1028,"lf-sticky-header"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfLanguage":["loadLanguage"]}],[257,"lf-progressbar",{"lfAnimated":[1540,"lf-animated"],"lfCenteredLabel":[1540,"lf-centered-label"],"lfIcon":[1537,"lf-icon"],"lfIsRadial":[1540,"lf-is-radial"],"lfLabel":[1025,"lf-label"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1026,"lf-value"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}],[257,"lf-textfield",{"lfHelper":[1040,"lf-helper"],"lfHtmlAttributes":[1040,"lf-html-attributes"],"lfIcon":[1025,"lf-icon"],"lfLabel":[1025,"lf-label"],"lfStretchX":[1540,"lf-stretch-x"],"lfStretchY":[1540,"lf-stretch-y"],"lfStyle":[1025,"lf-style"],"lfStyling":[1025,"lf-styling"],"lfTrailingIcon":[1540,"lf-trailing-icon"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1,"lf-value"],"debugInfo":[32],"status":[32],"value":[32],"getDebugInfo":[64],"getElement":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setBlur":[64],"setFocus":[64],"setValue":[64],"unmount":[64]}],[257,"lf-typewriter",{"lfCursor":[1025,"lf-cursor"],"lfDeleteSpeed":[1026,"lf-delete-speed"],"lfLoop":[1028,"lf-loop"],"lfPause":[1026,"lf-pause"],"lfSpeed":[1026,"lf-speed"],"lfStyle":[1025,"lf-style"],"lfTag":[1025,"lf-tag"],"lfUiSize":[1537,"lf-ui-size"],"lfUpdatable":[1028,"lf-updatable"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"displayedText":[32],"isDeleting":[32],"currentTextIndex":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfValue":["handleLfValueChange"]}],[257,"lf-image",{"lfHtmlAttributes":[1040,"lf-html-attributes"],"lfMode":[1537,"lf-mode"],"lfShowSpinner":[1028,"lf-show-spinner"],"lfSizeX":[1025,"lf-size-x"],"lfSizeY":[1025,"lf-size-y"],"lfStyle":[1025,"lf-style"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"error":[32],"isLoaded":[32],"resolvedSpriteName":[32],"getDebugInfo":[64],"getImage":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfValue":["resetState"]}],[257,"lf-button",{"lfAriaLabel":[1025,"lf-aria-label"],"lfDataset":[1040,"lf-dataset"],"lfIcon":[1025,"lf-icon"],"lfIconOff":[1025,"lf-icon-off"],"lfLabel":[1025,"lf-label"],"lfRipple":[1028,"lf-ripple"],"lfShowSpinner":[1540,"lf-show-spinner"],"lfStretchX":[1540,"lf-stretch-x"],"lfStretchY":[1540,"lf-stretch-y"],"lfStyle":[1025,"lf-style"],"lfStyling":[1025,"lf-styling"],"lfToggable":[1028,"lf-toggable"],"lfTrailingIcon":[1028,"lf-trailing-icon"],"lfType":[1025,"lf-type"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[4,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setMessage":[64],"setValue":[64],"unmount":[64]}],[257,"lf-list",{"lfDataset":[1040,"lf-dataset"],"lfEmpty":[1025,"lf-empty"],"lfEnableDeletions":[1028,"lf-enable-deletions"],"lfNavigation":[1028,"lf-navigation"],"lfRipple":[1028,"lf-ripple"],"lfSelectable":[1028,"lf-selectable"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[2,"lf-value"],"debugInfo":[32],"focused":[32],"selected":[32],"focusNext":[64],"focusPrevious":[64],"getDebugInfo":[64],"getProps":[64],"getSelected":[64],"refresh":[64],"selectNode":[64],"unmount":[64]},[[0,"keydown","listenKeydown"]]],[257,"lf-spinner",{"lfActive":[1540,"lf-active"],"lfBarVariant":[1540,"lf-bar-variant"],"lfDimensions":[1025,"lf-dimensions"],"lfFader":[1540,"lf-fader"],"lfFaderTimeout":[1026,"lf-fader-timeout"],"lfFullScreen":[1540,"lf-full-screen"],"lfLayout":[1026,"lf-layout"],"lfStyle":[1025,"lf-style"],"lfTimeout":[1026,"lf-timeout"],"bigWait":[32],"debugInfo":[32],"progress":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfActive":["onFaderChange"],"lfFader":["onFaderChange"],"lfFaderTimeout":["onFaderChange"],"lfBarVariant":["lfBarVariantChanged"],"lfTimeout":["lfTimeoutChanged"]}]]],["p-55c6a817",[[257,"lf-masonry",{"lfActions":[1028,"lf-actions"],"lfColumns":[1026,"lf-columns"],"lfDataset":[1040,"lf-dataset"],"lfSelectable":[1540,"lf-selectable"],"lfShape":[1025,"lf-shape"],"lfStyle":[1025,"lf-style"],"lfView":[1025,"lf-view"],"debugInfo":[32],"selectedShape":[32],"shapes":[32],"viewportWidth":[32],"getDebugInfo":[64],"getProps":[64],"getSelectedShape":[64],"redecorateShapes":[64],"refresh":[64],"setSelectedShape":[64],"unmount":[64]},null,{"lfColumns":["validateColumns"],"lfDataset":["updateShapes"],"lfShape":["updateShapes"]}]]],["p-e2900881",[[257,"lf-tabbar",{"lfAriaLabel":[1025,"lf-aria-label"],"lfDataset":[16,"lf-dataset"],"lfNavigation":[4,"lf-navigation"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[8,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}]]],["p-b1bf3d70",[[257,"lf-tree",{"lfAccordionLayout":[1540,"lf-accordion-layout"],"lfDataset":[1040,"lf-dataset"],"lfEmpty":[1025,"lf-empty"],"lfExpandedNodeIds":[1040,"lf-expanded-node-ids"],"lfFilter":[1028,"lf-filter"],"lfGrid":[1540,"lf-grid"],"lfInitialExpansionDepth":[1026,"lf-initial-expansion-depth"],"lfSelectedNodeIds":[1040,"lf-selected-node-ids"],"lfRipple":[1028,"lf-ripple"],"lfSelectable":[1540,"lf-selectable"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"debugInfo":[32],"expandedNodes":[32],"hiddenNodes":[32],"selectedNode":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"getExpandedNodeIds":[64],"getSelectedNodeIds":[64],"setExpandedNodes":[64],"setSelectedNodes":[64],"selectByPredicate":[64],"unmount":[64]},null,{"lfDataset":["handleDatasetChange"],"lfExpandedNodeIds":["handleExpandedPropChange"],"lfSelectedNodeIds":["handleSelectedPropChange"],"lfInitialExpansionDepth":["handleInitialDepthChange"],"lfSelectable":["handleSelectableChange"],"lfFilter":["handleFilterToggle"]}]]]]'), e2))));
+})().then((async (e2) => (await o(), St(JSON.parse('[["p-988ad9c7",[[257,"lf-imageviewer",{"lfDataset":[1040,"lf-dataset"],"lfLoadCallback":[1040,"lf-load-callback"],"lfNavigation":[1040,"lf-navigation"],"lfStyle":[1025,"lf-style"],"lfValue":[1040,"lf-value"],"debugInfo":[32],"currentShape":[32],"history":[32],"historyIndex":[32],"isNavigationTreeOpen":[32],"isSpinnerActive":[32],"addSnapshot":[64],"clearHistory":[64],"clearSelection":[64],"getComponents":[64],"getCurrentSnapshot":[64],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"reset":[64],"setSpinnerStatus":[64],"unmount":[64]}]]],["p-182c6c19",[[257,"lf-compare",{"lfDataset":[1040,"lf-dataset"],"lfShape":[1025,"lf-shape"],"lfStyle":[1025,"lf-style"],"lfView":[1025,"lf-view"],"debugInfo":[32],"isLeftPanelOpened":[32],"isRightPanelOpened":[32],"leftShape":[32],"rightShape":[32],"shapes":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["updateShapes"],"lfShape":["updateShapes"]}]]],["p-e4e76694",[[257,"lf-accordion",{"lfDataset":[1040,"lf-dataset"],"lfRipple":[1028,"lf-ripple"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"expandedNodes":[32],"selectedNodes":[32],"getDebugInfo":[64],"getProps":[64],"getSelectedNodes":[64],"refresh":[64],"toggleNode":[64],"unmount":[64]}]]],["p-62695161",[[257,"lf-article",{"lfDataset":[1040,"lf-dataset"],"lfEmpty":[1025,"lf-empty"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-5d51f267",[[257,"lf-carousel",{"lfDataset":[1040,"lf-dataset"],"lfAutoPlay":[4,"lf-auto-play"],"lfInterval":[2,"lf-interval"],"lfLightbox":[1540,"lf-lightbox"],"lfNavigation":[1028,"lf-navigation"],"lfShape":[1537,"lf-shape"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"currentIndex":[32],"shapes":[32],"getDebugInfo":[64],"getProps":[64],"goToSlide":[64],"nextSlide":[64],"prevSlide":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["updateShapes"],"lfShape":["updateShapes"]}]]],["p-28dd0bff",[[257,"lf-messenger",{"lfAutosave":[1028,"lf-autosave"],"lfDataset":[1040,"lf-dataset"],"lfStyle":[1025,"lf-style"],"lfValue":[16,"lf-value"],"debugInfo":[32],"chat":[32],"connectionStatus":[32],"covers":[32],"currentCharacter":[32],"formStatusMap":[32],"history":[32],"hoveredCustomizationOption":[32],"saveInProgress":[32],"ui":[32],"deleteOption":[64],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"reset":[64],"save":[64],"unmount":[64]}]]],["p-f19de954",[[257,"lf-drawer",{"lfDisplay":[1537,"lf-display"],"lfPosition":[1537,"lf-position"],"lfResponsive":[1026,"lf-responsive"],"lfStyle":[1025,"lf-style"],"lfValue":[1540,"lf-value"],"debugInfo":[32],"close":[64],"getDebugInfo":[64],"getProps":[64],"isOpened":[64],"open":[64],"refresh":[64],"toggle":[64],"unmount":[64]},[[0,"keydown","listenKeydown"]],{"lfDisplay":["onLfDisplayChange"],"lfResponsive":["onLfResponsiveChange"]}]]],["p-a6642965",[[257,"lf-header",{"lfStyle":[1025,"lf-style"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-e6148250",[[257,"lf-placeholder",{"lfIcon":[1,"lf-icon"],"lfProps":[16,"lf-props"],"lfStyle":[1025,"lf-style"],"lfThreshold":[2,"lf-threshold"],"lfTrigger":[1,"lf-trigger"],"lfValue":[1,"lf-value"],"debugInfo":[32],"isInViewport":[32],"getComponent":[64],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-36aa4a7f",[[257,"lf-slider",{"lfLabel":[1025,"lf-label"],"lfLeadingLabel":[1028,"lf-leading-label"],"lfMax":[2,"lf-max"],"lfMin":[2,"lf-min"],"lfStep":[2,"lf-step"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1026,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}]]],["p-0df37de3",[[257,"lf-splash",{"lfLabel":[1025,"lf-label"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"state":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-924ca284",[[257,"lf-toast",{"lfCloseIcon":[1025,"lf-close-icon"],"lfCloseCallback":[16,"lf-close-callback"],"lfIcon":[1025,"lf-icon"],"lfTimer":[2,"lf-timer"],"lfMessage":[1025,"lf-message"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-9738317a",[[257,"lf-card",{"lfDataset":[1040,"lf-dataset"],"lfLayout":[1025,"lf-layout"],"lfSizeX":[1025,"lf-size-x"],"lfSizeY":[1025,"lf-size-y"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"debugInfo":[32],"shapes":[32],"getDebugInfo":[64],"getProps":[64],"getShapes":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["updateShapes"]}],[257,"lf-badge",{"lfImageProps":[1040,"lf-image-props"],"lfLabel":[1025,"lf-label"],"lfPosition":[1537,"lf-position"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}],[257,"lf-canvas",{"lfBrush":[1025,"lf-brush"],"lfColor":[1025,"lf-color"],"lfCursor":[1025,"lf-cursor"],"lfImageProps":[1040,"lf-image-props"],"lfOpacity":[1026,"lf-opacity"],"lfPreview":[1028,"lf-preview"],"lfStrokeTolerance":[1026,"lf-stroke-tolerance"],"lfSize":[1026,"lf-size"],"lfStyle":[1025,"lf-style"],"boxing":[32],"debugInfo":[32],"isPainting":[32],"orientation":[32],"points":[32],"clearCanvas":[64],"getCanvas":[64],"getDebugInfo":[64],"getImage":[64],"getProps":[64],"refresh":[64],"resizeCanvas":[64],"setCanvasHeight":[64],"setCanvasWidth":[64],"unmount":[64]}],[257,"lf-photoframe",{"lfOverlay":[1040,"lf-overlay"],"lfPlaceholder":[16,"lf-placeholder"],"lfStyle":[1025,"lf-style"],"lfThreshold":[2,"lf-threshold"],"lfValue":[16,"lf-value"],"debugInfo":[32],"imageOrientation":[32],"isInViewport":[32],"isReady":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}],[257,"lf-chart",{"lfAxis":[1025,"lf-axis"],"lfColors":[1040,"lf-colors"],"lfDataset":[1040,"lf-dataset"],"lfLegend":[1025,"lf-legend"],"lfSeries":[1040,"lf-series"],"lfSizeX":[1025,"lf-size-x"],"lfSizeY":[1025,"lf-size-y"],"lfStyle":[1025,"lf-style"],"lfTypes":[1040,"lf-types"],"lfXAxis":[1040,"lf-x-axis"],"lfYAxis":[1040,"lf-y-axis"],"debugInfo":[32],"themeValues":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"resize":[64],"unmount":[64]}],[257,"lf-toggle",{"lfAriaLabel":[1025,"lf-aria-label"],"lfLabel":[1025,"lf-label"],"lfLeadingLabel":[1028,"lf-leading-label"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[4,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}],[257,"lf-upload",{"lfLabel":[1025,"lf-label"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfValue":[16,"lf-value"],"debugInfo":[32],"selectedFiles":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"unmount":[64]}],[257,"lf-chat",{"lfContextWindow":[1026,"lf-context-window"],"lfEmpty":[1025,"lf-empty"],"lfEndpointUrl":[1025,"lf-endpoint-url"],"lfLayout":[1025,"lf-layout"],"lfMaxTokens":[1026,"lf-max-tokens"],"lfPollingInterval":[1026,"lf-polling-interval"],"lfSeed":[1026,"lf-seed"],"lfStyle":[1025,"lf-style"],"lfSystem":[1025,"lf-system"],"lfTemperature":[1026,"lf-temperature"],"lfTypewriterProps":[1028,"lf-typewriter-props"],"lfUiSize":[1537,"lf-ui-size"],"lfValue":[1040,"lf-value"],"currentAbortStreaming":[32],"currentPrompt":[32],"currentTokens":[32],"debugInfo":[32],"history":[32],"status":[32],"view":[32],"abortStreaming":[64],"getDebugInfo":[64],"getHistory":[64],"getLastMessage":[64],"getProps":[64],"refresh":[64],"scrollToBottom":[64],"setHistory":[64],"unmount":[64]},[[0,"keydown","listenKeydown"]],{"lfPollingInterval":["updatePollingInterval"],"lfSystem":["updateTokensCount"]}],[257,"lf-chip",{"lfAriaLabel":[1025,"lf-aria-label"],"lfDataset":[1040,"lf-dataset"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfStyling":[1025,"lf-styling"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[16,"lf-value"],"debugInfo":[32],"expandedNodes":[32],"hiddenNodes":[32],"selectedNodes":[32],"getDebugInfo":[64],"getProps":[64],"getSelectedNodes":[64],"refresh":[64],"setSelectedNodes":[64],"unmount":[64]}],[257,"lf-code",{"lfFadeIn":[1028,"lf-fade-in"],"lfFormat":[1028,"lf-format"],"lfLanguage":[1025,"lf-language"],"lfPreserveSpaces":[1028,"lf-preserve-spaces"],"lfShowCopy":[1028,"lf-show-copy"],"lfShowHeader":[1028,"lf-show-header"],"lfStickyHeader":[1028,"lf-sticky-header"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfLanguage":["loadLanguage"]}],[257,"lf-progressbar",{"lfAnimated":[1540,"lf-animated"],"lfCenteredLabel":[1540,"lf-centered-label"],"lfIcon":[1537,"lf-icon"],"lfIsRadial":[1540,"lf-is-radial"],"lfLabel":[1025,"lf-label"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1026,"lf-value"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}],[257,"lf-textfield",{"lfHelper":[1040,"lf-helper"],"lfHtmlAttributes":[1040,"lf-html-attributes"],"lfIcon":[1025,"lf-icon"],"lfLabel":[1025,"lf-label"],"lfStretchX":[1540,"lf-stretch-x"],"lfStretchY":[1540,"lf-stretch-y"],"lfStyle":[1025,"lf-style"],"lfStyling":[1025,"lf-styling"],"lfTrailingIcon":[1540,"lf-trailing-icon"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1,"lf-value"],"debugInfo":[32],"status":[32],"value":[32],"getDebugInfo":[64],"getElement":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setBlur":[64],"setFocus":[64],"setValue":[64],"unmount":[64]}],[257,"lf-typewriter",{"lfCursor":[1025,"lf-cursor"],"lfDeleteSpeed":[1026,"lf-delete-speed"],"lfLoop":[1028,"lf-loop"],"lfPause":[1026,"lf-pause"],"lfSpeed":[1026,"lf-speed"],"lfStyle":[1025,"lf-style"],"lfTag":[1025,"lf-tag"],"lfUiSize":[1537,"lf-ui-size"],"lfUpdatable":[1028,"lf-updatable"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"displayedText":[32],"isDeleting":[32],"currentTextIndex":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfValue":["handleLfValueChange"]}],[257,"lf-image",{"lfHtmlAttributes":[1040,"lf-html-attributes"],"lfMode":[1537,"lf-mode"],"lfShowSpinner":[1028,"lf-show-spinner"],"lfSizeX":[1025,"lf-size-x"],"lfSizeY":[1025,"lf-size-y"],"lfStyle":[1025,"lf-style"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"error":[32],"isLoaded":[32],"resolvedSpriteName":[32],"getDebugInfo":[64],"getImage":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfValue":["resetState"]}],[257,"lf-button",{"lfAriaLabel":[1025,"lf-aria-label"],"lfDataset":[1040,"lf-dataset"],"lfIcon":[1025,"lf-icon"],"lfIconOff":[1025,"lf-icon-off"],"lfLabel":[1025,"lf-label"],"lfRipple":[1028,"lf-ripple"],"lfShowSpinner":[1540,"lf-show-spinner"],"lfStretchX":[1540,"lf-stretch-x"],"lfStretchY":[1540,"lf-stretch-y"],"lfStyle":[1025,"lf-style"],"lfStyling":[1025,"lf-styling"],"lfToggable":[1028,"lf-toggable"],"lfTrailingIcon":[1028,"lf-trailing-icon"],"lfType":[1025,"lf-type"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[4,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setMessage":[64],"setValue":[64],"unmount":[64]}],[257,"lf-list",{"lfDataset":[1040,"lf-dataset"],"lfEmpty":[1025,"lf-empty"],"lfEnableDeletions":[1028,"lf-enable-deletions"],"lfNavigation":[1028,"lf-navigation"],"lfRipple":[1028,"lf-ripple"],"lfSelectable":[1028,"lf-selectable"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[2,"lf-value"],"debugInfo":[32],"focused":[32],"selected":[32],"focusNext":[64],"focusPrevious":[64],"getDebugInfo":[64],"getProps":[64],"getSelected":[64],"refresh":[64],"selectNode":[64],"unmount":[64]},[[0,"keydown","listenKeydown"]]],[257,"lf-spinner",{"lfActive":[1540,"lf-active"],"lfBarVariant":[1540,"lf-bar-variant"],"lfDimensions":[1025,"lf-dimensions"],"lfFader":[1540,"lf-fader"],"lfFaderTimeout":[1026,"lf-fader-timeout"],"lfFullScreen":[1540,"lf-full-screen"],"lfLayout":[1026,"lf-layout"],"lfStyle":[1025,"lf-style"],"lfTimeout":[1026,"lf-timeout"],"bigWait":[32],"debugInfo":[32],"progress":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfActive":["onFaderChange"],"lfFader":["onFaderChange"],"lfFaderTimeout":["onFaderChange"],"lfBarVariant":["lfBarVariantChanged"],"lfTimeout":["lfTimeoutChanged"]}]]],["p-55c6a817",[[257,"lf-masonry",{"lfActions":[1028,"lf-actions"],"lfColumns":[1026,"lf-columns"],"lfDataset":[1040,"lf-dataset"],"lfSelectable":[1540,"lf-selectable"],"lfShape":[1025,"lf-shape"],"lfStyle":[1025,"lf-style"],"lfView":[1025,"lf-view"],"debugInfo":[32],"selectedShape":[32],"shapes":[32],"viewportWidth":[32],"getDebugInfo":[64],"getProps":[64],"getSelectedShape":[64],"redecorateShapes":[64],"refresh":[64],"setSelectedShape":[64],"unmount":[64]},null,{"lfColumns":["validateColumns"],"lfDataset":["updateShapes"],"lfShape":["updateShapes"]}]]],["p-e2900881",[[257,"lf-tabbar",{"lfAriaLabel":[1025,"lf-aria-label"],"lfDataset":[16,"lf-dataset"],"lfNavigation":[4,"lf-navigation"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[8,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}]]],["p-b1bf3d70",[[257,"lf-tree",{"lfAccordionLayout":[1540,"lf-accordion-layout"],"lfDataset":[1040,"lf-dataset"],"lfEmpty":[1025,"lf-empty"],"lfExpandedNodeIds":[1040,"lf-expanded-node-ids"],"lfFilter":[1028,"lf-filter"],"lfGrid":[1540,"lf-grid"],"lfInitialExpansionDepth":[1026,"lf-initial-expansion-depth"],"lfSelectedNodeIds":[1040,"lf-selected-node-ids"],"lfRipple":[1028,"lf-ripple"],"lfSelectable":[1540,"lf-selectable"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"debugInfo":[32],"expandedNodes":[32],"hiddenNodes":[32],"selectedNode":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"getExpandedNodeIds":[64],"getSelectedNodeIds":[64],"setExpandedNodes":[64],"setSelectedNodes":[64],"selectByPredicate":[64],"unmount":[64]},null,{"lfDataset":["handleDatasetChange"],"lfExpandedNodeIds":["handleExpandedPropChange"],"lfSelectedNodeIds":["handleSelectedPropChange"],"lfInitialExpansionDepth":["handleInitialDepthChange"],"lfSelectable":["handleSelectableChange"],"lfFilter":["handleFilterToggle"]}]]]]'), e2))));
 var APIEndpoints;
 (function(APIEndpoints2) {
   APIEndpoints2["ClearAnalytics"] = "/lf-nodes/clear-analytics";
@@ -13759,6 +13759,10 @@ var APIEndpoints;
   APIEndpoints2["SaveMetadata"] = "/lf-nodes/save-metadata";
   APIEndpoints2["UpdateJson"] = "/lf-nodes/update-json";
   APIEndpoints2["UpdateMetadataCover"] = "/lf-nodes/update-metadata-cover";
+  APIEndpoints2["GetGpuStats"] = "/lf-nodes/get-gpu-stats";
+  APIEndpoints2["GetDiskStats"] = "/lf-nodes/get-disk-stats";
+  APIEndpoints2["GetCpuStats"] = "/lf-nodes/get-cpu-stats";
+  APIEndpoints2["GetRamStats"] = "/lf-nodes/get-ram-stats";
 })(APIEndpoints || (APIEndpoints = {}));
 var LogSeverity;
 (function(LogSeverity2) {
@@ -14594,6 +14598,163 @@ const PREVIEW_API = {
           }
           payload.status = LogSeverity.Error;
           break;
+      }
+    } catch (error2) {
+      payload.message = String(error2);
+      payload.status = LogSeverity.Error;
+    }
+    lfManager.log(payload.message, { payload }, payload.status);
+    return payload;
+  }
+  //#endregion
+};
+const unexpectedMessage = (endpoint, code2, response, text2) => {
+  const body = text2 || response.statusText || "No message provided.";
+  return `Unexpected response from ${endpoint} (${code2}): ${body}`;
+};
+const normalizeMessage = (message, fallback = "Statistics retrieved successfully.") => {
+  return message && message.trim().length > 0 ? message : fallback;
+};
+const SYSTEM_API = {
+  //#region getGpuStats
+  getGpuStats: async () => {
+    const lfManager = getLfManager();
+    const payload = {
+      data: [],
+      message: "",
+      status: LogSeverity.Info
+    };
+    try {
+      const response = await api.fetchApi(APIEndpoints.GetGpuStats, { method: "GET" });
+      const code2 = response.status;
+      switch (code2) {
+        case 200: {
+          const p2 = await response.json();
+          payload.data = p2.data || [];
+          payload.message = normalizeMessage(p2.message, "GPU statistics retrieved successfully.");
+          payload.status = p2.status === "success" ? LogSeverity.Success : LogSeverity.Error;
+          break;
+        }
+        default: {
+          const text2 = await response.text().catch(() => "");
+          payload.message = unexpectedMessage("get-gpu-stats", code2, response, text2);
+          payload.status = LogSeverity.Error;
+          break;
+        }
+      }
+    } catch (error2) {
+      payload.message = String(error2);
+      payload.status = LogSeverity.Error;
+    }
+    lfManager.log(payload.message, { payload }, payload.status);
+    return payload;
+  },
+  //#endregion
+  //#region getDiskStats
+  getDiskStats: async () => {
+    const lfManager = getLfManager();
+    const payload = {
+      data: [],
+      message: "",
+      status: LogSeverity.Info
+    };
+    try {
+      const response = await api.fetchApi(APIEndpoints.GetDiskStats, { method: "GET" });
+      const code2 = response.status;
+      switch (code2) {
+        case 200: {
+          const p2 = await response.json();
+          payload.data = p2.data || [];
+          payload.message = normalizeMessage(p2.message, "Disk statistics retrieved successfully.");
+          payload.status = p2.status === "success" ? LogSeverity.Success : LogSeverity.Error;
+          break;
+        }
+        default: {
+          const text2 = await response.text().catch(() => "");
+          payload.message = unexpectedMessage("get-disk-stats", code2, response, text2);
+          payload.status = LogSeverity.Error;
+          break;
+        }
+      }
+    } catch (error2) {
+      payload.message = String(error2);
+      payload.status = LogSeverity.Error;
+    }
+    lfManager.log(payload.message, { payload }, payload.status);
+    return payload;
+  },
+  //#endregion
+  //#region getCpuStats
+  getCpuStats: async () => {
+    const lfManager = getLfManager();
+    const payload = {
+      data: {
+        average: 0,
+        cores: [],
+        count: 0,
+        physical_count: 0
+      },
+      message: "",
+      status: LogSeverity.Info
+    };
+    try {
+      const response = await api.fetchApi(APIEndpoints.GetCpuStats, { method: "GET" });
+      const code2 = response.status;
+      switch (code2) {
+        case 200: {
+          const p2 = await response.json();
+          payload.data = p2.data || payload.data;
+          payload.message = normalizeMessage(p2.message, "CPU statistics retrieved successfully.");
+          payload.status = p2.status === "success" ? LogSeverity.Success : LogSeverity.Error;
+          break;
+        }
+        default: {
+          const text2 = await response.text().catch(() => "");
+          payload.message = unexpectedMessage("get-cpu-stats", code2, response, text2);
+          payload.status = LogSeverity.Error;
+          break;
+        }
+      }
+    } catch (error2) {
+      payload.message = String(error2);
+      payload.status = LogSeverity.Error;
+    }
+    lfManager.log(payload.message, { payload }, payload.status);
+    return payload;
+  },
+  //#endregion
+  //#region getRamStats
+  getRamStats: async () => {
+    const lfManager = getLfManager();
+    const payload = {
+      data: {
+        available: 0,
+        percent: 0,
+        swap_total: 0,
+        swap_used: 0,
+        total: 0,
+        used: 0
+      },
+      message: "",
+      status: LogSeverity.Info
+    };
+    try {
+      const response = await api.fetchApi(APIEndpoints.GetRamStats, { method: "GET" });
+      const code2 = response.status;
+      switch (code2) {
+        case 200: {
+          const p2 = await response.json();
+          payload.data = p2.data || payload.data;
+          payload.message = normalizeMessage(p2.message, "RAM statistics retrieved successfully.");
+          payload.status = p2.status === "success" ? LogSeverity.Success : LogSeverity.Error;
+          break;
+        }
+        default: {
+          const text2 = await response.text().catch(() => "");
+          payload.message = unexpectedMessage("get-ram-stats", code2, response, text2);
+          payload.status = LogSeverity.Error;
+          break;
+        }
       }
     } catch (error2) {
       payload.message = String(error2);
@@ -17634,7 +17795,8 @@ const createEventHandlers = ({ handleInterruptForState: handleInterruptForState2
               const c2 = ogEv.detail.comp;
               const isCanvas = c2.rootElement.tagName.toLowerCase() === "lf-canvas";
               if (isCanvas) {
-                setBrush(c2, SETTINGS.brush.settings);
+                const brushSettings = (state == null ? void 0 : state.lastBrushSettings) ?? SETTINGS.brush.settings;
+                setBrush(c2, brushSettings);
               }
               break;
             case "stroke": {
@@ -19541,6 +19703,7 @@ var ControlPanelIcons;
   ControlPanelIcons2["ExternalPreviews"] = "photo-search";
   ControlPanelIcons2["GitHub"] = "brand-github";
   ControlPanelIcons2["Metadata"] = "info-hexagon";
+  ControlPanelIcons2["SystemDashboard"] = "percentage-60";
   ControlPanelIcons2["Theme"] = "color-swatch";
 })(ControlPanelIcons || (ControlPanelIcons = {}));
 var ControlPanelIds;
@@ -19551,6 +19714,7 @@ var ControlPanelIds;
   ControlPanelIds2["ExternalPreviews"] = "external-previews";
   ControlPanelIds2["GitHub"] = "github";
   ControlPanelIds2["Metadata"] = "metadata";
+  ControlPanelIds2["SystemDashboard"] = "system-dashboard";
   ControlPanelIds2["Theme"] = "theme";
 })(ControlPanelIds || (ControlPanelIds = {}));
 var ControlPanelLabels;
@@ -19567,6 +19731,8 @@ var ControlPanelLabels;
   ControlPanelLabels2["OpenIssue"] = "Open an issue";
   ControlPanelLabels2["RefreshBackupStats"] = "Refresh backup stats";
   ControlPanelLabels2["RefreshPreviewStats"] = "Refresh preview stats";
+  ControlPanelLabels2["SystemAutoRefresh"] = "Auto refresh (seconds)";
+  ControlPanelLabels2["RefreshSystemStats"] = "Refresh system stats";
   ControlPanelLabels2["Theme"] = "Random theme";
 })(ControlPanelLabels || (ControlPanelLabels = {}));
 var ControlPanelSection;
@@ -19579,843 +19745,1144 @@ var ControlPanelSection;
 })(ControlPanelSection || (ControlPanelSection = {}));
 const BUTTON_STYLE = ":host { margin: auto; padding: 1em 0; width: max-content; }";
 const STYLES = {
-  customization: () => {
+  customization: () => ({
+    margin: "0"
+  }),
+  debugGrid: () => ({
+    display: "grid",
+    gridTemplateRows: "repeat(5, max-content) 1fr",
+    height: "100%",
+    margin: "0"
+  }),
+  debugLogs: () => ({
+    display: "grid",
+    gridGap: "0.75em",
+    gridTemplateRows: "320px 480px"
+  }),
+  logsArea: () => ({
+    backgroundColor: "rgba(var(--lf-color-on-bg), 0.075)",
+    borderRadius: "0.5em",
+    display: "block",
+    height: "100%",
+    marginBottom: "1em",
+    overflow: "auto"
+  }),
+  separator: () => ({
+    border: "1px solid rgb(var(--lf-color-border))",
+    display: "block",
+    margin: "0.75em auto 1.25em",
+    opacity: "0.25",
+    width: "50%"
+  })
+};
+const buildAnalyticsSection = () => {
+  const { theme } = getLfManager().getManagers().lfFramework;
+  const { "--lf-icon-clear": clearIcon } = theme.get.current().variables;
+  return {
+    icon: ControlPanelIcons.Analytics,
+    id: ControlPanelSection.Section,
+    value: "Analytics",
+    children: [
+      {
+        id: ControlPanelSection.Paragraph,
+        value: "Usage",
+        children: [
+          {
+            id: ControlPanelSection.Content,
+            value: "Usage analytics can be enabled by saving datasets through the UpdateUsageStatistics node and displayed with the UsageStatistics node."
+          },
+          {
+            id: ControlPanelSection.Content,
+            tagName: "br",
+            value: ""
+          },
+          {
+            id: ControlPanelSection.Content,
+            value: "Once datasets are created (input folder of ComfyUI), the count for each resource used will increase everytime that particular resource is updated."
+          },
+          {
+            id: ControlPanelSection.Content,
+            tagName: "br",
+            value: ""
+          },
+          {
+            id: ControlPanelSection.Content,
+            value: "This button will clear all usage analytics data from your input folder."
+          },
+          {
+            id: ControlPanelSection.Content,
+            tagName: "br",
+            value: ""
+          },
+          {
+            id: ControlPanelSection.Content,
+            value: "This action is IRREVERSIBLE so use it with caution."
+          },
+          {
+            id: ControlPanelSection.Content,
+            value: "",
+            cells: {
+              lfButton: {
+                lfIcon: clearIcon,
+                lfLabel: ControlPanelLabels.DeleteUsage,
+                lfStyle: BUTTON_STYLE,
+                lfStyling: "outlined",
+                lfUiState: "danger",
+                shape: "button",
+                value: ""
+              }
+            }
+          }
+        ]
+      }
+    ]
+  };
+};
+const buildBackupSection = (stats) => {
+  const { theme } = getLfManager().getManagers().lfFramework;
+  const { "--lf-icon-download": downloadIcon, "--lf-icon-refresh": refreshIcon } = theme.get.current().variables;
+  const { progress } = theme.get.icons();
+  const totalBytes = (stats == null ? void 0 : stats.totalSizeBytes) ?? 0;
+  const fileCount = (stats == null ? void 0 : stats.fileCount) ?? 0;
+  const maxBytes = 1024 * 1024 * 1024;
+  const percentage = Math.min(totalBytes / maxBytes * 100, 100);
+  return {
+    icon: ControlPanelIcons.Backup,
+    id: ControlPanelSection.Section,
+    value: "Backup",
+    children: [
+      {
+        id: ControlPanelSection.Paragraph,
+        value: "Toggle on/off",
+        children: [
+          {
+            id: ControlPanelSection.Content,
+            value: "Toggle this toggle to automatically back up the folder <path/to/your/comfyui/user/LF_Nodes> once a day (the first time you open this workflow)."
+          },
+          { id: ControlPanelSection.Content, tagName: "br", value: "" },
+          {
+            id: ControlPanelSection.Content,
+            value: "",
+            cells: {
+              lfToggle: {
+                lfLabel: ControlPanelLabels.AutoBackup,
+                lfLeadingLabel: true,
+                lfStyle: ":host { text-align: center; padding: 1em 0; }",
+                shape: "toggle",
+                value: !!getLfManager().isBackupEnabled()
+              }
+            }
+          }
+        ]
+      },
+      {
+        cssStyle: STYLES.separator(),
+        id: ControlPanelSection.ContentSeparator,
+        value: ""
+      },
+      {
+        id: ControlPanelSection.Paragraph,
+        value: "Backup statistics",
+        children: [
+          {
+            id: ControlPanelSection.Content,
+            value: "Backup files are stored in the user/LF_Nodes folder. Monitor your backup folder size to ensure you have enough disk space."
+          },
+          { id: ControlPanelSection.Content, tagName: "br", value: "" },
+          {
+            id: ControlPanelSection.Content,
+            value: "",
+            children: [
+              {
+                id: "backup-info",
+                value: `Current backup: ${formatBytes(totalBytes)} (${fileCount} files)`,
+                cssStyle: { display: "block", marginBottom: "0.75em" }
+              },
+              {
+                id: "backup-progress",
+                value: "",
+                cells: {
+                  lfProgressbar: {
+                    lfIcon: progress,
+                    lfLabel: `${formatBytes(totalBytes)} (${percentage.toFixed(1)}%)`,
+                    shape: "progressbar",
+                    value: percentage
+                  }
+                }
+              }
+            ]
+          },
+          {
+            id: ControlPanelSection.Content,
+            value: "",
+            cells: {
+              lfButton: {
+                lfIcon: refreshIcon,
+                lfLabel: ControlPanelLabels.RefreshBackupStats,
+                lfStyle: BUTTON_STYLE,
+                lfStyling: "flat",
+                shape: "button",
+                value: ""
+              }
+            }
+          }
+        ]
+      },
+      {
+        cssStyle: STYLES.separator(),
+        id: ControlPanelSection.ContentSeparator,
+        value: ""
+      },
+      {
+        id: ControlPanelSection.Paragraph,
+        value: "Rolling backup retention",
+        children: [
+          {
+            id: ControlPanelSection.Content,
+            value: "Set the maximum number of backups to keep. When this limit is exceeded, the oldest backups will be automatically deleted. Set to 0 to disable this feature."
+          },
+          { id: ControlPanelSection.Content, tagName: "br", value: "" },
+          {
+            id: ControlPanelSection.Content,
+            value: "",
+            cells: {
+              lfTextfield: {
+                lfHtmlAttributes: { type: "number" },
+                lfLabel: ControlPanelLabels.BackupRetention,
+                lfStyle: ":host { text-align: center; padding: 1em 0; }",
+                lfValue: getLfManager().getBackupRetention().toString() || "14",
+                shape: "textfield",
+                value: ""
+              }
+            }
+          }
+        ]
+      },
+      {
+        cssStyle: STYLES.separator(),
+        id: ControlPanelSection.ContentSeparator,
+        value: ""
+      },
+      {
+        id: ControlPanelSection.Paragraph,
+        value: "Backup files",
+        children: [
+          {
+            id: ControlPanelSection.Content,
+            value: "This button will create a manual backup of the content in <path/to/your/comfyui/user/LF_Nodes>."
+          },
+          {
+            id: ControlPanelSection.Content,
+            value: "",
+            cells: {
+              lfButton: {
+                lfIcon: downloadIcon,
+                lfLabel: ControlPanelLabels.Backup,
+                lfStyle: BUTTON_STYLE,
+                lfStyling: "raised",
+                shape: "button",
+                value: ""
+              }
+            }
+          }
+        ]
+      }
+    ]
+  };
+};
+const buildDebugSection = (logsData) => {
+  const { theme } = getLfManager().getManagers().lfFramework;
+  const { "--lf-icon-clear": clearIcon } = theme.get.current().variables;
+  return {
+    icon: ControlPanelIcons.Debug,
+    id: ControlPanelSection.Section,
+    cssStyle: STYLES.debugGrid(),
+    value: "Debug",
+    children: [
+      {
+        id: ControlPanelSection.Paragraph,
+        value: "Toggle on/off",
+        children: [
+          {
+            id: ControlPanelSection.Content,
+            value: "Activating the debug will enable the display of verbose logging."
+          },
+          {
+            id: ControlPanelSection.Content,
+            value: "",
+            cells: {
+              lfToggle: {
+                lfLabel: ControlPanelLabels.Debug,
+                lfLeadingLabel: true,
+                lfStyle: ":host { text-align: center; padding: 1em 0; }",
+                shape: "toggle",
+                value: !!getLfManager().isDebug()
+              }
+            }
+          }
+        ]
+      },
+      {
+        id: ControlPanelSection.Paragraph,
+        value: "Logs",
+        children: [
+          {
+            id: ControlPanelSection.Content,
+            value: "Every time the node manager receives a message it will be printed below."
+          },
+          { id: ControlPanelSection.Content, tagName: "br", value: "" },
+          {
+            id: ControlPanelSection.Content,
+            value: "In the browser console there should be more informations."
+          },
+          { id: ControlPanelSection.Content, tagName: "br", value: "" },
+          {
+            id: ControlPanelSection.Content,
+            value: "Further below another card will display additional LF Widgets information."
+          },
+          {
+            id: ControlPanelSection.Content,
+            value: "",
+            cells: {
+              lfButton: {
+                shape: "button",
+                lfIcon: clearIcon,
+                lfLabel: ControlPanelLabels.ClearLogs,
+                lfStretchX: true,
+                lfStyle: BUTTON_STYLE,
+                lfUiState: "danger",
+                value: ""
+              }
+            }
+          }
+        ]
+      },
+      {
+        id: ControlPanelSection.Paragraph,
+        cssStyle: STYLES.debugLogs(),
+        value: "",
+        children: [
+          {
+            id: "content-wrapper",
+            cssStyle: STYLES.logsArea(),
+            value: "",
+            children: logsData
+          },
+          {
+            id: "content-wrapper",
+            value: "",
+            cells: {
+              lfCard: {
+                lfDataset: {
+                  nodes: [
+                    {
+                      cells: {
+                        lfCode: { shape: "code", value: "" },
+                        lfButton: { shape: "button", value: "" },
+                        lfButton_2: { shape: "button", value: "" },
+                        lfToggle: {
+                          shape: "toggle",
+                          value: !!getLfManager().getManagers().lfFramework.debug.isEnabled()
+                        }
+                      },
+                      id: "debug"
+                    }
+                  ]
+                },
+                lfLayout: "debug",
+                shape: "card",
+                value: ""
+              }
+            }
+          }
+        ]
+      }
+    ]
+  };
+};
+const buildExternalPreviewsSection = (stats) => {
+  const { theme } = getLfManager().getManagers().lfFramework;
+  const { "--lf-icon-delete": deleteIcon, "--lf-icon-refresh": refreshIcon } = theme.get.current().variables;
+  const { progress } = theme.get.icons();
+  const totalBytes = (stats == null ? void 0 : stats.totalSizeBytes) ?? 0;
+  const fileCount = (stats == null ? void 0 : stats.fileCount) ?? 0;
+  const maxBytes = 1024 * 1024 * 1024;
+  const percentage = Math.min(totalBytes / maxBytes * 100, 100);
+  return {
+    icon: ControlPanelIcons.ExternalPreviews,
+    id: ControlPanelSection.Section,
+    value: "External Previews",
+    children: [
+      {
+        id: ControlPanelSection.Paragraph,
+        value: "Cache statistics",
+        children: [
+          {
+            id: ControlPanelSection.Content,
+            value: "External image previews are cached in the _lf_external_previews folder under ComfyUI/input to speed up loading."
+          },
+          { id: ControlPanelSection.Content, tagName: "br", value: "" },
+          {
+            id: ControlPanelSection.Content,
+            value: "",
+            children: [
+              {
+                id: "cache-info",
+                value: `Current cache: ${formatBytes(totalBytes)} (${fileCount} files)`,
+                cssStyle: { display: "block", marginBottom: "0.75em" }
+              },
+              {
+                id: "cache-progress",
+                value: "",
+                cells: {
+                  lfProgressbar: {
+                    lfIcon: progress,
+                    lfLabel: `${formatBytes(totalBytes)} (${percentage.toFixed(1)}%)`,
+                    shape: "progressbar",
+                    value: percentage
+                  }
+                }
+              }
+            ]
+          },
+          {
+            id: ControlPanelSection.Content,
+            value: "",
+            cells: {
+              lfButton: {
+                lfIcon: refreshIcon,
+                lfLabel: ControlPanelLabels.RefreshPreviewStats,
+                lfStyle: BUTTON_STYLE,
+                lfStyling: "flat",
+                shape: "button",
+                value: ""
+              }
+            }
+          }
+        ]
+      },
+      {
+        cssStyle: STYLES.separator(),
+        id: ControlPanelSection.ContentSeparator,
+        value: ""
+      },
+      {
+        id: ControlPanelSection.Paragraph,
+        value: "Clear cache",
+        children: [
+          {
+            id: ControlPanelSection.Content,
+            value: "This button will permanently delete the entire preview cache folder and all its contents."
+          },
+          { id: ControlPanelSection.Content, tagName: "br", value: "" },
+          {
+            id: ControlPanelSection.Content,
+            value: "This action is IRREVERSIBLE so use it with caution."
+          },
+          {
+            id: ControlPanelSection.Content,
+            value: "",
+            cells: {
+              lfButton: {
+                lfIcon: deleteIcon,
+                lfLabel: ControlPanelLabels.ClearPreviews,
+                lfStyle: BUTTON_STYLE,
+                lfStyling: "outlined",
+                lfUiState: "danger",
+                shape: "button",
+                value: ""
+              }
+            }
+          }
+        ]
+      }
+    ]
+  };
+};
+const buildGitHubSection = () => {
+  var _a, _b;
+  const lfManager = getLfManager();
+  const releaseData = lfManager.getLatestRelease();
+  const { theme } = lfManager.getManagers().lfFramework;
+  const { brandGithub } = theme.get.icons();
+  return {
+    icon: ControlPanelIcons.GitHub,
+    id: ControlPanelSection.Section,
+    value: "",
+    children: [
+      {
+        id: ControlPanelSection.Paragraph,
+        value: `Version: ${(releaseData == null ? void 0 : releaseData.tag_name) || "N/A"}`,
+        children: [
+          {
+            cells: {
+              lfCode: {
+                lfLanguage: "markdown",
+                shape: "code",
+                value: (releaseData == null ? void 0 : releaseData.body) || "No changelog available"
+              }
+            },
+            id: "release-description"
+          },
+          {
+            id: "release-author",
+            children: [
+              {
+                id: "author-avatar",
+                value: "",
+                cssStyle: {
+                  backgroundImage: `url(${((_a = releaseData == null ? void 0 : releaseData.author) == null ? void 0 : _a.avatar_url) || ""})`,
+                  backgroundSize: "cover",
+                  borderRadius: "50%",
+                  display: "inline-block",
+                  height: "2em",
+                  marginRight: "0.5em",
+                  verticalAlign: "middle",
+                  width: "2em"
+                }
+              },
+              {
+                id: "author-name",
+                value: `Author: ${((_b = releaseData == null ? void 0 : releaseData.author) == null ? void 0 : _b.login) || "Unknown"}`,
+                cssStyle: {
+                  fontSize: "0.9em",
+                  color: "rgb(var(--lf-color-secondary))",
+                  verticalAlign: "middle"
+                }
+              }
+            ],
+            cssStyle: {
+              alignItems: "center",
+              display: "flex",
+              justifyContent: "center",
+              marginBottom: ".25em"
+            }
+          },
+          {
+            cssStyle: {
+              color: "rgb(var(--lf-color-secondary))",
+              display: "block",
+              fontSize: "0.9em",
+              fontStyle: "italic",
+              marginBottom: "2em",
+              textAlign: "center",
+              width: "100%"
+            },
+            id: "release-date",
+            value: `Published on: ${(releaseData == null ? void 0 : releaseData.published_at) ? new Date(releaseData.published_at).toLocaleDateString() : "Unknown"}`
+          },
+          {
+            cssStyle: STYLES.separator(),
+            id: ControlPanelSection.ContentSeparator,
+            value: ""
+          },
+          {
+            id: ControlPanelSection.Paragraph,
+            value: "Bug report",
+            children: [
+              {
+                id: ControlPanelSection.Content,
+                value: "If you find bugs or odd behaviors feel free to open an issue on GitHub, just follow the link below!"
+              },
+              { id: ControlPanelSection.Content, tagName: "br", value: "" },
+              {
+                id: ControlPanelSection.Content,
+                value: "Be sure to include as much information as you can, without sufficient data it's difficult to troubleshoot problems."
+              },
+              {
+                id: ControlPanelSection.Content,
+                value: "",
+                cells: {
+                  lfButton: {
+                    lfIcon: brandGithub,
+                    lfLabel: ControlPanelLabels.OpenIssue,
+                    lfStyle: BUTTON_STYLE,
+                    lfStyling: "raised",
+                    shape: "button",
+                    value: ""
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  };
+};
+const buildMetadataSection = () => {
+  const { theme } = getLfManager().getManagers().lfFramework;
+  const { "--lf-icon-delete": deleteIcon } = theme.get.current().variables;
+  return {
+    icon: ControlPanelIcons.Metadata,
+    id: ControlPanelSection.Section,
+    value: "Metadata",
+    children: [
+      {
+        id: ControlPanelSection.Paragraph,
+        value: "Purge metadata files",
+        children: [
+          {
+            id: ControlPanelSection.Content,
+            value: "Metadata pulled from CivitAI are stored in .info files saved in the same folders of the models to avoid unnecessary fetches from the API."
+          },
+          { id: ControlPanelSection.Content, tagName: "div", value: "" },
+          {
+            id: ControlPanelSection.Content,
+            value: "By pressing this button it's possible to delete every .info file created by fetching the metadata."
+          },
+          { id: ControlPanelSection.Content, tagName: "br", value: "" },
+          {
+            id: ControlPanelSection.Content,
+            value: "This action is IRREVERSIBLE so use it with caution."
+          },
+          {
+            id: ControlPanelSection.Content,
+            value: "",
+            cells: {
+              lfButton: {
+                lfIcon: deleteIcon,
+                lfLabel: ControlPanelLabels.DeleteMetadata,
+                lfStyle: BUTTON_STYLE,
+                lfStyling: "outlined",
+                lfUiState: "danger",
+                shape: "button",
+                value: ""
+              }
+            }
+          }
+        ]
+      }
+    ]
+  };
+};
+const buildSystemDashboardSection = (stats) => {
+  const { theme } = getLfManager().getManagers().lfFramework;
+  const { "--lf-icon-refresh": refreshIcon } = theme.get.current().variables;
+  const { progress } = theme.get.icons();
+  const refreshTimeout = getLfManager().getSystemTimeout() || 0;
+  const gpus = (stats == null ? void 0 : stats.gpus) ?? [];
+  const disks = (stats == null ? void 0 : stats.disks) ?? [];
+  const cpu = stats == null ? void 0 : stats.cpu;
+  const ram = stats == null ? void 0 : stats.ram;
+  const errors2 = (stats == null ? void 0 : stats.errors) ?? [];
+  const timestamp = (stats == null ? void 0 : stats.timestamp) ? new Date(stats.timestamp) : null;
+  const lastUpdated = timestamp ? timestamp.toLocaleString() : "Waiting for data";
+  const gpuNodes = gpus.length ? gpus.map((gpu) => {
+    const vramPercent = gpu.vram_total ? clampPercent(gpu.vram_used / gpu.vram_total * 100) : 0;
+    const utilPercent = clampPercent(gpu.utilization);
     return {
-      margin: "0"
+      id: `gpu-${gpu.index}`,
+      value: "",
+      cssStyle: { marginBottom: "1em" },
+      children: [
+        {
+          id: `gpu-${gpu.index}-title`,
+          value: `${gpu.name} (GPU ${gpu.index})`,
+          tagName: "strong"
+        },
+        buildProgressNode(progress, `gpu-${gpu.index}-vram`, `VRAM ${formatBytes(gpu.vram_used)} / ${formatBytes(gpu.vram_total)} (${percentLabel(vramPercent)})`, vramPercent),
+        buildProgressNode(progress, `gpu-${gpu.index}-util`, `Utilization ${percentLabel(utilPercent)}`, utilPercent)
+      ]
     };
-  },
-  debugGrid: () => {
+  }) : [
+    {
+      id: "gpu-none",
+      value: "No GPUs detected.",
+      cssStyle: { opacity: "0.7" }
+    }
+  ];
+  const cpuNodes = cpu ? [
+    buildProgressNode(progress, "cpu-average", `Average usage ${percentLabel(cpu.average)}`, clampPercent(cpu.average)),
+    {
+      id: "cpu-meta",
+      value: `Logical cores: ${cpu.count} • Physical cores: ${cpu.physical_count}`,
+      cssStyle: { fontSize: "0.9em", opacity: "0.8" }
+    },
+    {
+      id: "cpu-cores",
+      value: "",
+      cssStyle: {
+        display: "grid",
+        gap: "0.75em",
+        gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))"
+      },
+      children: cpu.cores.map((core) => buildProgressNode(progress, `cpu-core-${core.index}`, `Core ${core.index} ${percentLabel(core.usage)}`, clampPercent(core.usage)))
+    }
+  ] : [
+    {
+      id: "cpu-none",
+      value: "CPU statistics unavailable.",
+      cssStyle: { opacity: "0.7" }
+    }
+  ];
+  const ramNodes = ram ? [
+    buildProgressNode(progress, "ram-usage", `RAM ${formatBytes(ram.used)} / ${formatBytes(ram.total)} (${percentLabel(ram.percent)})`, clampPercent(ram.percent)),
+    {
+      id: "ram-available",
+      value: `Available: ${formatBytes(ram.available)}`,
+      cssStyle: { fontSize: "0.9em", opacity: "0.8" }
+    },
+    ...ram.swap_total ? [
+      buildProgressNode(progress, "swap-usage", `Swap ${formatBytes(ram.swap_used)} / ${formatBytes(ram.swap_total)} (${percentLabel(ram.swap_used / ram.swap_total * 100)})`, clampPercent(ram.swap_used / ram.swap_total * 100))
+    ] : []
+  ] : [
+    {
+      id: "ram-none",
+      value: "RAM statistics unavailable.",
+      cssStyle: { opacity: "0.7" }
+    }
+  ];
+  const diskNodes = disks.length ? disks.map((disk, index) => {
+    const used = toNumber(disk.used);
+    const total = toNumber(disk.total);
+    const percent = total ? clampPercent(used / total * 100) : clampPercent(disk.percent);
+    const descriptor = [disk.device || disk.mountpoint, disk.label].filter(Boolean).join(" ");
     return {
-      display: "grid",
-      gridTemplateRows: "repeat(5, max-content) 1fr",
-      height: "100%",
-      margin: "0"
+      id: `disk-${index}`,
+      value: "",
+      cssStyle: { marginBottom: "1em" },
+      children: [
+        {
+          id: `disk-${index}-title`,
+          value: descriptor || disk.mountpoint,
+          tagName: "strong"
+        },
+        {
+          id: `disk-${index}-mount`,
+          value: `Mount: ${disk.mountpoint}`,
+          cssStyle: { fontSize: "0.9em", opacity: "0.8", marginBottom: "0.25em" }
+        },
+        buildProgressNode(progress, `disk-${index}-usage`, `${formatBytes(disk.used)} / ${formatBytes(disk.total)} (${percentLabel(percent)})`, percent)
+      ]
     };
-  },
-  debugLogs: () => {
-    return {
-      display: "grid",
-      gridGap: "0.75em",
-      gridTemplateRows: "320px 480px"
-    };
-  },
-  logsArea: () => {
-    return {
-      backgroundColor: "rgba(var(--lf-color-on-bg), 0.075)",
-      borderRadius: "0.5em",
-      display: "block",
-      height: "100%",
-      marginBottom: "1em",
-      overflow: "auto"
-    };
-  },
-  separator: () => {
-    return {
-      border: "1px solid rgb(var(--lf-color-border))",
-      display: "block",
-      margin: "0.75em auto 1.25em",
-      opacity: "0.25",
-      width: "50%"
-    };
+  }) : [
+    {
+      id: "disk-none",
+      value: "No disks detected.",
+      cssStyle: { opacity: "0.7" }
+    }
+  ];
+  const overviewChildren = [
+    {
+      id: ControlPanelSection.Content,
+      value: "Monitor real-time hardware usage for GPUs, CPU, memory, and storage."
+    },
+    {
+      id: ControlPanelSection.Content,
+      value: `Last updated: ${lastUpdated}`,
+      cssStyle: { fontSize: "0.85em", opacity: "0.75" }
+    },
+    {
+      id: ControlPanelSection.Content,
+      value: refreshTimeout > 0 ? `Auto refresh every ${refreshTimeout}s` : "Auto refresh disabled.",
+      cssStyle: { fontSize: "0.85em", opacity: "0.75", marginTop: "0.3em" }
+    },
+    {
+      id: ControlPanelSection.Content,
+      value: "",
+      cells: {
+        lfTextfield: {
+          lfHelper: { showWhenFocused: false, value: "Set to 0 to disable auto refresh" },
+          lfHtmlAttributes: { type: "number", min: "0", step: "any" },
+          lfLabel: ControlPanelLabels.SystemAutoRefresh,
+          lfStyle: ":host { display: block; margin: 0.75em auto; max-width: 240px; }",
+          lfValue: refreshTimeout > 0 ? refreshTimeout.toString() : "",
+          shape: "textfield",
+          value: ""
+        }
+      }
+    }
+  ];
+  if (errors2.length) {
+    overviewChildren.push({
+      id: "system-errors",
+      value: "",
+      children: errors2.map((message, index) => ({
+        id: `system-error-${index}`,
+        value: message,
+        cssStyle: {
+          color: "rgb(var(--lf-color-danger))",
+          fontSize: "0.85em"
+        }
+      }))
+    });
   }
+  overviewChildren.push({
+    id: ControlPanelSection.Content,
+    value: "",
+    cells: {
+      lfButton: {
+        lfIcon: refreshIcon,
+        lfLabel: ControlPanelLabels.RefreshSystemStats,
+        lfStyle: BUTTON_STYLE,
+        lfStyling: "flat",
+        shape: "button",
+        value: ""
+      }
+    }
+  });
+  return {
+    icon: ControlPanelIcons.SystemDashboard,
+    id: ControlPanelSection.Section,
+    value: "System monitor",
+    children: [
+      {
+        id: ControlPanelSection.Paragraph,
+        value: "Overview",
+        children: overviewChildren
+      },
+      {
+        cssStyle: STYLES.separator(),
+        id: ControlPanelSection.ContentSeparator,
+        value: ""
+      },
+      {
+        id: ControlPanelSection.Paragraph,
+        value: "GPU usage",
+        children: gpuNodes
+      },
+      {
+        cssStyle: STYLES.separator(),
+        id: ControlPanelSection.ContentSeparator,
+        value: ""
+      },
+      {
+        id: ControlPanelSection.Paragraph,
+        value: "CPU usage",
+        children: cpuNodes
+      },
+      {
+        cssStyle: STYLES.separator(),
+        id: ControlPanelSection.ContentSeparator,
+        value: ""
+      },
+      {
+        id: ControlPanelSection.Paragraph,
+        value: "Memory",
+        children: ramNodes
+      },
+      {
+        cssStyle: STYLES.separator(),
+        id: ControlPanelSection.ContentSeparator,
+        value: ""
+      },
+      {
+        id: ControlPanelSection.Paragraph,
+        value: "Disk usage",
+        children: diskNodes
+      }
+    ]
+  };
+};
+const getUsageState = (percent) => {
+  const value = clampPercent(percent);
+  if (value >= 90)
+    return "danger";
+  if (value >= 70)
+    return "warning";
+  if (value === 0)
+    return "primary";
+  return "success";
+};
+const buildProgressNode = (icon, id, label, percent) => ({
+  id,
+  value: "",
+  cells: {
+    lfProgressbar: {
+      lfIcon: icon,
+      lfLabel: label,
+      lfUiState: getUsageState(percent),
+      shape: "progressbar",
+      value: clampPercent(percent)
+    }
+  }
+});
+const buildThemeSection = () => {
+  return {
+    icon: ControlPanelIcons.Theme,
+    id: ControlPanelSection.Section,
+    value: "Customization",
+    cssStyle: STYLES.customization(),
+    children: [
+      {
+        id: ControlPanelSection.Paragraph,
+        value: "Theme selector",
+        children: [
+          {
+            id: ControlPanelSection.Content,
+            value: "Through the button below it's possible to set a random theme for the LF Widgets components, or select one from the dropdown menu."
+          },
+          {
+            id: ControlPanelSection.Content,
+            value: "",
+            cells: {
+              lfButton: {
+                lfDataset: getLfThemes(),
+                lfLabel: ControlPanelLabels.Theme,
+                lfStyle: BUTTON_STYLE,
+                shape: "button",
+                value: ""
+              }
+            }
+          }
+        ]
+      }
+    ]
+  };
 };
 const SECTIONS = {
-  //#region Analytics
-  [ControlPanelIds.Analytics]: () => {
-    const { theme } = getLfManager().getManagers().lfFramework;
-    const { "--lf-icon-clear": clearIcon } = theme.get.current().variables;
-    return {
-      icon: ControlPanelIcons.Analytics,
-      id: ControlPanelSection.Section,
-      value: "Analytics",
-      children: [
-        {
-          id: ControlPanelSection.Paragraph,
-          value: "Usage",
-          children: [
-            {
-              id: ControlPanelSection.Content,
-              value: "Usage analytics can be enabled by saving datasets through the UpdateUsageStatistics node and displayed with the UsageStatistics node."
-            },
-            {
-              id: ControlPanelSection.Content,
-              tagName: "br",
-              value: ""
-            },
-            {
-              id: ControlPanelSection.Content,
-              value: "Once datasets are created (input folder of ComfyUI), the count for each resource used will increase everytime that particular resource is updated."
-            },
-            {
-              id: ControlPanelSection.Content,
-              tagName: "br",
-              value: ""
-            },
-            {
-              id: ControlPanelSection.Content,
-              value: "This button will clear all usage analytics data from your input folder."
-            },
-            {
-              id: ControlPanelSection.Content,
-              tagName: "br",
-              value: ""
-            },
-            {
-              id: ControlPanelSection.Content,
-              value: "This action is IRREVERSIBLE so use it with caution."
-            },
-            {
-              id: ControlPanelSection.Content,
-              value: "",
-              cells: {
-                lfButton: {
-                  lfIcon: clearIcon,
-                  lfLabel: ControlPanelLabels.DeleteUsage,
-                  lfStyle: BUTTON_STYLE,
-                  lfStyling: "outlined",
-                  lfUiState: "danger",
-                  shape: "button",
-                  value: ""
-                }
-              }
-            }
-          ]
-        }
-      ]
-    };
-  },
-  //#endregion
-  //#region Backup
-  [ControlPanelIds.Backup]: (stats) => {
-    const { theme } = getLfManager().getManagers().lfFramework;
-    const { "--lf-icon-download": downloadIcon, "--lf-icon-refresh": refreshIcon } = theme.get.current().variables;
-    const { progress } = theme.get.icons();
-    const totalBytes = (stats == null ? void 0 : stats.totalSizeBytes) ?? 0;
-    const fileCount = (stats == null ? void 0 : stats.fileCount) ?? 0;
-    const formatBytes = (bytes) => {
-      if (bytes === 0)
-        return "0 B";
-      const k2 = 1024;
-      const sizes = ["B", "KB", "MB", "GB"];
-      const i2 = Math.floor(Math.log(bytes) / Math.log(k2));
-      return `${(bytes / Math.pow(k2, i2)).toFixed(2)} ${sizes[i2]}`;
-    };
-    const maxBytes = 1024 * 1024 * 1024;
-    const percentage = Math.min(totalBytes / maxBytes * 100, 100);
-    return {
-      icon: ControlPanelIcons.Backup,
-      id: ControlPanelSection.Section,
-      value: "Backup",
-      children: [
-        {
-          id: ControlPanelSection.Paragraph,
-          value: "Toggle on/off",
-          children: [
-            {
-              id: ControlPanelSection.Content,
-              value: "Toggle this toggle to automatically back up the folder <path/to/your/comfyui/user/LF_Nodes> once a day (the first time you open this workflow)."
-            },
-            {
-              id: ControlPanelSection.Content,
-              tagName: "br",
-              value: ""
-            },
-            {
-              id: ControlPanelSection.Content,
-              value: "",
-              cells: {
-                lfToggle: {
-                  lfLabel: ControlPanelLabels.AutoBackup,
-                  lfLeadingLabel: true,
-                  lfStyle: ":host { text-align: center; padding: 1em 0; }",
-                  shape: "toggle",
-                  value: !!getLfManager().isBackupEnabled()
-                }
-              }
-            }
-          ]
-        },
-        {
-          cssStyle: STYLES.separator(),
-          id: ControlPanelSection.ContentSeparator,
-          value: ""
-        },
-        {
-          id: ControlPanelSection.Paragraph,
-          value: "Backup statistics",
-          children: [
-            {
-              id: ControlPanelSection.Content,
-              value: "Backup files are stored in the user/LF_Nodes folder. Monitor your backup folder size to ensure you have enough disk space."
-            },
-            {
-              id: ControlPanelSection.Content,
-              tagName: "br",
-              value: ""
-            },
-            {
-              id: ControlPanelSection.Content,
-              value: "",
-              children: [
-                {
-                  id: "backup-info",
-                  value: `Current backup: ${formatBytes(totalBytes)} (${fileCount} files)`,
-                  cssStyle: {
-                    display: "block",
-                    marginBottom: "0.75em"
-                  }
-                },
-                {
-                  id: "backup-progress",
-                  value: "",
-                  cells: {
-                    lfProgressbar: {
-                      lfIcon: progress,
-                      lfLabel: `${formatBytes(totalBytes)} (${percentage.toFixed(1)}%)`,
-                      shape: "progressbar",
-                      value: percentage
-                    }
-                  }
-                }
-              ]
-            },
-            {
-              id: ControlPanelSection.Content,
-              value: "",
-              cells: {
-                lfButton: {
-                  lfIcon: refreshIcon,
-                  lfLabel: ControlPanelLabels.RefreshBackupStats,
-                  lfStyle: BUTTON_STYLE,
-                  lfStyling: "flat",
-                  shape: "button",
-                  value: ""
-                }
-              }
-            }
-          ]
-        },
-        {
-          cssStyle: STYLES.separator(),
-          id: ControlPanelSection.ContentSeparator,
-          value: ""
-        },
-        {
-          id: ControlPanelSection.Paragraph,
-          value: "Rolling backup retention",
-          children: [
-            {
-              id: ControlPanelSection.Content,
-              value: "Set the maximum number of backups to keep. When this limit is exceeded, the oldest backups will be automatically deleted. Set to 0 to disable this feature."
-            },
-            {
-              id: ControlPanelSection.Content,
-              tagName: "br",
-              value: ""
-            },
-            {
-              id: ControlPanelSection.Content,
-              value: "",
-              cells: {
-                lfTextfield: {
-                  lfHtmlAttributes: { type: "number" },
-                  lfLabel: ControlPanelLabels.BackupRetention,
-                  lfStyle: ":host { text-align: center; padding: 1em 0; }",
-                  lfValue: getLfManager().getBackupRetention().toString() || "14",
-                  shape: "textfield",
-                  value: ""
-                }
-              }
-            }
-          ]
-        },
-        {
-          cssStyle: STYLES.separator(),
-          id: ControlPanelSection.ContentSeparator,
-          value: ""
-        },
-        {
-          id: ControlPanelSection.Paragraph,
-          value: "Backup files",
-          children: [
-            {
-              id: ControlPanelSection.Content,
-              value: "This button will create a manual backup of the content in <path/to/your/comfyui/user/LF_Nodes>."
-            },
-            {
-              id: ControlPanelSection.Content,
-              value: "",
-              cells: {
-                lfButton: {
-                  lfIcon: downloadIcon,
-                  lfLabel: ControlPanelLabels.Backup,
-                  lfStyle: BUTTON_STYLE,
-                  lfStyling: "raised",
-                  shape: "button",
-                  value: ""
-                }
-              }
-            }
-          ]
-        }
-      ]
-    };
-  },
-  //#endregion
-  //#region Debug
-  [ControlPanelIds.Debug]: (logsData) => {
-    const { theme } = getLfManager().getManagers().lfFramework;
-    const { "--lf-icon-clear": clearIcon } = theme.get.current().variables;
-    return {
-      icon: ControlPanelIcons.Debug,
-      id: ControlPanelSection.Section,
-      cssStyle: STYLES.debugGrid(),
-      value: "Debug",
-      children: [
-        {
-          id: ControlPanelSection.Paragraph,
-          value: "Toggle on/off",
-          children: [
-            {
-              id: ControlPanelSection.Content,
-              value: "Activating the debug will enable the display of verbose logging."
-            },
-            {
-              id: ControlPanelSection.Content,
-              value: "",
-              cells: {
-                lfToggle: {
-                  lfLabel: ControlPanelLabels.Debug,
-                  lfLeadingLabel: true,
-                  lfStyle: ":host { text-align: center; padding: 1em 0; }",
-                  shape: "toggle",
-                  value: !!getLfManager().isDebug()
-                }
-              }
-            }
-          ]
-        },
-        {
-          id: ControlPanelSection.Paragraph,
-          value: "Logs",
-          children: [
-            {
-              id: ControlPanelSection.Content,
-              value: "Every time the node manager receives a message it will be printed below."
-            },
-            {
-              id: ControlPanelSection.Content,
-              tagName: "br",
-              value: ""
-            },
-            {
-              id: ControlPanelSection.Content,
-              value: "In the browser console there should be more informations."
-            },
-            {
-              id: ControlPanelSection.Content,
-              tagName: "br",
-              value: ""
-            },
-            {
-              id: ControlPanelSection.Content,
-              value: "Further below another card will display additional LF Widgets information."
-            },
-            {
-              id: ControlPanelSection.Content,
-              value: "",
-              cells: {
-                lfButton: {
-                  shape: "button",
-                  lfIcon: clearIcon,
-                  lfLabel: ControlPanelLabels.ClearLogs,
-                  lfStretchX: true,
-                  lfStyle: BUTTON_STYLE,
-                  lfUiState: "danger",
-                  value: ""
-                }
-              }
-            }
-          ]
-        },
-        {
-          id: ControlPanelSection.Paragraph,
-          cssStyle: STYLES.debugLogs(),
-          value: "",
-          children: [
-            {
-              id: "content-wrapper",
-              cssStyle: STYLES.logsArea(),
-              value: "",
-              children: logsData
-            },
-            {
-              cells: {
-                lfCard: {
-                  lfDataset: {
-                    nodes: [
-                      {
-                        cells: {
-                          lfCode: { shape: "code", value: "" },
-                          lfButton: {
-                            shape: "button",
-                            value: ""
-                          },
-                          lfButton_2: {
-                            shape: "button",
-                            value: ""
-                          },
-                          lfToggle: {
-                            shape: "toggle",
-                            value: !!getLfManager().getManagers().lfFramework.debug.isEnabled()
-                          }
-                        },
-                        id: "debug"
-                      }
-                    ]
-                  },
-                  lfLayout: "debug",
-                  shape: "card",
-                  value: ""
-                }
-              },
-              id: "content-wrapper"
-            }
-          ]
-        }
-      ]
-    };
-  },
-  //#endregion
-  //#region ExternalPreviews
-  [ControlPanelIds.ExternalPreviews]: (stats) => {
-    const { theme } = getLfManager().getManagers().lfFramework;
-    const { "--lf-icon-delete": deleteIcon, "--lf-icon-refresh": refreshIcon } = theme.get.current().variables;
-    const { progress } = theme.get.icons();
-    const totalBytes = (stats == null ? void 0 : stats.totalSizeBytes) ?? 0;
-    const fileCount = (stats == null ? void 0 : stats.fileCount) ?? 0;
-    const formatBytes = (bytes) => {
-      if (bytes === 0)
-        return "0 B";
-      const k2 = 1024;
-      const sizes = ["B", "KB", "MB", "GB"];
-      const i2 = Math.floor(Math.log(bytes) / Math.log(k2));
-      return `${(bytes / Math.pow(k2, i2)).toFixed(2)} ${sizes[i2]}`;
-    };
-    const maxBytes = 1024 * 1024 * 1024;
-    const percentage = Math.min(totalBytes / maxBytes * 100, 100);
-    return {
-      icon: ControlPanelIcons.ExternalPreviews,
-      id: ControlPanelSection.Section,
-      value: "External Previews",
-      children: [
-        {
-          id: ControlPanelSection.Paragraph,
-          value: "Cache statistics",
-          children: [
-            {
-              id: ControlPanelSection.Content,
-              value: "External image previews are cached in the _lf_external_previews folder under ComfyUI/input to speed up loading."
-            },
-            {
-              id: ControlPanelSection.Content,
-              tagName: "br",
-              value: ""
-            },
-            {
-              id: ControlPanelSection.Content,
-              value: "",
-              children: [
-                {
-                  id: "cache-info",
-                  value: `Current cache: ${formatBytes(totalBytes)} (${fileCount} files)`,
-                  cssStyle: {
-                    display: "block",
-                    marginBottom: "0.75em"
-                  }
-                },
-                {
-                  id: "cache-progress",
-                  value: "",
-                  cells: {
-                    lfProgressbar: {
-                      lfIcon: progress,
-                      lfLabel: `${formatBytes(totalBytes)} (${percentage.toFixed(1)}%)`,
-                      shape: "progressbar",
-                      value: percentage
-                    }
-                  }
-                }
-              ]
-            },
-            {
-              id: ControlPanelSection.Content,
-              value: "",
-              cells: {
-                lfButton: {
-                  lfIcon: refreshIcon,
-                  lfLabel: ControlPanelLabels.RefreshPreviewStats,
-                  lfStyle: BUTTON_STYLE,
-                  lfStyling: "flat",
-                  shape: "button",
-                  value: ""
-                }
-              }
-            }
-          ]
-        },
-        {
-          cssStyle: STYLES.separator(),
-          id: ControlPanelSection.ContentSeparator,
-          value: ""
-        },
-        {
-          id: ControlPanelSection.Paragraph,
-          value: "Clear cache",
-          children: [
-            {
-              id: ControlPanelSection.Content,
-              value: "This button will permanently delete the entire preview cache folder and all its contents."
-            },
-            {
-              id: ControlPanelSection.Content,
-              tagName: "br",
-              value: ""
-            },
-            {
-              id: ControlPanelSection.Content,
-              value: "This action is IRREVERSIBLE so use it with caution."
-            },
-            {
-              id: ControlPanelSection.Content,
-              value: "",
-              cells: {
-                lfButton: {
-                  lfIcon: deleteIcon,
-                  lfLabel: ControlPanelLabels.ClearPreviews,
-                  lfStyle: BUTTON_STYLE,
-                  lfStyling: "outlined",
-                  lfUiState: "danger",
-                  shape: "button",
-                  value: ""
-                }
-              }
-            }
-          ]
-        }
-      ]
-    };
-  },
-  //#endregion
-  //#region GitHub
-  [ControlPanelIds.GitHub]: () => {
-    var _a, _b;
-    const lfManager = getLfManager();
-    const releaseData = lfManager.getLatestRelease();
-    const { theme } = lfManager.getManagers().lfFramework;
-    const { brandGithub } = theme.get.icons();
-    return {
-      icon: ControlPanelIcons.GitHub,
-      id: ControlPanelSection.Section,
-      value: "",
-      children: [
-        {
-          id: ControlPanelSection.Paragraph,
-          value: `Version: ${(releaseData == null ? void 0 : releaseData.tag_name) || "N/A"}`,
-          children: [
-            {
-              cells: {
-                lfCode: {
-                  lfLanguage: "markdown",
-                  shape: "code",
-                  value: (releaseData == null ? void 0 : releaseData.body) || "No changelog available"
-                }
-              },
-              id: "release-description"
-            },
-            {
-              id: "release-author",
-              children: [
-                {
-                  id: "author-avatar",
-                  value: "",
-                  cssStyle: {
-                    backgroundImage: `url(${((_a = releaseData == null ? void 0 : releaseData.author) == null ? void 0 : _a.avatar_url) || ""})`,
-                    backgroundSize: "cover",
-                    borderRadius: "50%",
-                    display: "inline-block",
-                    height: "2em",
-                    marginRight: "0.5em",
-                    verticalAlign: "middle",
-                    width: "2em"
-                  }
-                },
-                {
-                  id: "author-name",
-                  value: `Author: ${((_b = releaseData == null ? void 0 : releaseData.author) == null ? void 0 : _b.login) || "Unknown"}`,
-                  cssStyle: {
-                    fontSize: "0.9em",
-                    color: "rgb(var(--lf-color-secondary))",
-                    verticalAlign: "middle"
-                  }
-                }
-              ],
-              cssStyle: {
-                alignItems: "center",
-                display: "flex",
-                justifyContent: "center",
-                marginBottom: ".25em"
-              }
-            },
-            {
-              cssStyle: {
-                color: "rgb(var(--lf-color-secondary))",
-                display: "block",
-                fontSize: "0.9em",
-                fontStyle: "italic",
-                marginBottom: "2em",
-                textAlign: "center",
-                width: "100%"
-              },
-              id: "release-date",
-              value: `Published on: ${(releaseData == null ? void 0 : releaseData.published_at) ? new Date(releaseData.published_at).toLocaleDateString() : "Unknown"}`
-            },
-            {
-              cssStyle: STYLES.separator(),
-              id: ControlPanelSection.ContentSeparator,
-              value: ""
-            },
-            {
-              id: ControlPanelSection.Paragraph,
-              value: "Bug report",
-              children: [
-                {
-                  id: ControlPanelSection.Content,
-                  value: "If you find bugs or odd behaviors feel free to open an issue on GitHub, just follow the link below!"
-                },
-                {
-                  id: ControlPanelSection.Content,
-                  tagName: "br",
-                  value: ""
-                },
-                {
-                  id: ControlPanelSection.Content,
-                  value: "Be sure to include as much information as you can, without sufficient data it's difficult to troubleshoot problems."
-                },
-                {
-                  id: ControlPanelSection.Content,
-                  value: "",
-                  cells: {
-                    lfButton: {
-                      lfIcon: brandGithub,
-                      lfLabel: ControlPanelLabels.OpenIssue,
-                      lfStyle: BUTTON_STYLE,
-                      lfStyling: "raised",
-                      shape: "button",
-                      value: ""
-                    }
-                  }
-                }
-              ]
-            }
-          ]
-        }
-      ]
-    };
-  },
-  //#endregion
-  //#region Metadata
-  [ControlPanelIds.Metadata]: () => {
-    const { theme } = getLfManager().getManagers().lfFramework;
-    const { "--lf-icon-delete": deleteIcon } = theme.get.current().variables;
-    return {
-      icon: ControlPanelIcons.Metadata,
-      id: ControlPanelSection.Section,
-      value: "Metadata",
-      children: [
-        {
-          id: ControlPanelSection.Paragraph,
-          value: "Purge metadata files",
-          children: [
-            {
-              id: ControlPanelSection.Content,
-              value: "Metadata pulled from CivitAI are stored in .info files saved in the same folders of the models to avoid unnecessary fetches from the API."
-            },
-            { id: ControlPanelSection.Content, tagName: "div", value: "" },
-            {
-              id: ControlPanelSection.Content,
-              value: "By pressing this button it's possible to delete every .info file created by fetching the metadata."
-            },
-            {
-              id: ControlPanelSection.Content,
-              tagName: "br",
-              value: ""
-            },
-            {
-              id: ControlPanelSection.Content,
-              value: "This action is IRREVERSIBLE so use it with caution."
-            },
-            {
-              id: ControlPanelSection.Content,
-              value: "",
-              cells: {
-                lfButton: {
-                  lfIcon: deleteIcon,
-                  lfLabel: ControlPanelLabels.DeleteMetadata,
-                  lfStyle: BUTTON_STYLE,
-                  lfStyling: "outlined",
-                  lfUiState: "danger",
-                  shape: "button",
-                  value: ""
-                }
-              }
-            }
-          ]
-        }
-      ]
-    };
-  },
-  //#endregion
-  //#region Theme
-  [ControlPanelIds.Theme]: () => {
-    return {
-      icon: ControlPanelIcons.Theme,
-      id: ControlPanelSection.Section,
-      value: "Customization",
-      cssStyle: STYLES.customization(),
-      children: [
-        {
-          id: ControlPanelSection.Paragraph,
-          value: "Theme selector",
-          children: [
-            {
-              id: ControlPanelSection.Content,
-              value: "Through the button below it's possible to set a random theme for the LF Widgets components, or select one from the dropdown menu."
-            },
-            {
-              id: ControlPanelSection.Content,
-              value: "",
-              cells: {
-                lfButton: {
-                  lfDataset: getLfThemes(),
-                  lfLabel: ControlPanelLabels.Theme,
-                  lfStyle: BUTTON_STYLE,
-                  shape: "button",
-                  value: ""
-                }
-              }
-            }
-          ]
-        }
-      ]
-    };
-  }
-  //#endregion
+  [ControlPanelIds.Analytics]: buildAnalyticsSection,
+  [ControlPanelIds.Backup]: buildBackupSection,
+  [ControlPanelIds.Debug]: buildDebugSection,
+  [ControlPanelIds.ExternalPreviews]: buildExternalPreviewsSection,
+  [ControlPanelIds.GitHub]: buildGitHubSection,
+  [ControlPanelIds.Metadata]: buildMetadataSection,
+  [ControlPanelIds.SystemDashboard]: buildSystemDashboardSection,
+  [ControlPanelIds.Theme]: buildThemeSection
 };
+const setArticleDataset = (article, node) => {
+  article.lfDataset = {
+    nodes: [{ children: [node], id: ControlPanelSection.Root }]
+  };
+};
+let SYSTEM_REFRESH_TIMER = null;
+let SYSTEM_ARTICLE = null;
+let SYSTEM_LAST_STATS;
+const clearSystemAutoRefresh = () => {
+  if (SYSTEM_REFRESH_TIMER) {
+    clearTimeout(SYSTEM_REFRESH_TIMER);
+    SYSTEM_REFRESH_TIMER = null;
+  }
+};
+const getSystemAutoRefreshSeconds = () => {
+  var _a, _b;
+  try {
+    const stored = ((_b = (_a = getLfManager()) == null ? void 0 : _a.getSystemTimeout) == null ? void 0 : _b.call(_a)) ?? 0;
+    return typeof stored === "number" && stored > 0 ? Math.floor(stored) : 0;
+  } catch {
+    return 0;
+  }
+};
+const hasConnectedArticle = () => {
+  return SYSTEM_ARTICLE && SYSTEM_ARTICLE.isConnected && document.body.contains(SYSTEM_ARTICLE);
+};
+const scheduleSystemAutoRefresh = () => {
+  clearSystemAutoRefresh();
+  const seconds = getSystemAutoRefreshSeconds();
+  if (seconds <= 0 || !hasConnectedArticle()) {
+    return;
+  }
+  const delay = Math.max(seconds * 1e3, 1e3);
+  SYSTEM_REFRESH_TIMER = setTimeout(() => {
+    if (!hasConnectedArticle()) {
+      clearSystemAutoRefresh();
+      return;
+    }
+    refreshSystemDashboard(SYSTEM_ARTICLE, { reschedule: false }).finally(() => {
+      scheduleSystemAutoRefresh();
+    });
+  }, delay);
+};
+const setSystemAutoRefreshSeconds = (seconds, article) => {
+  const sanitized = typeof seconds === "number" && Number.isFinite(seconds) && seconds > 0 ? Math.floor(seconds) : 0;
+  getLfManager().setSystemTimeout(sanitized);
+  if (article) {
+    SYSTEM_ARTICLE = article;
+  }
+  if (sanitized > 0) {
+    scheduleSystemAutoRefresh();
+  } else {
+    clearSystemAutoRefresh();
+  }
+  const targetArticle = article ?? SYSTEM_ARTICLE;
+  if (targetArticle) {
+    applySystemStats(targetArticle, SYSTEM_LAST_STATS);
+  }
+  return sanitized;
+};
+const applySystemStats = (article, stats) => {
+  const nextStats = stats ? { ...stats } : SYSTEM_LAST_STATS ? { ...SYSTEM_LAST_STATS } : void 0;
+  SYSTEM_LAST_STATS = nextStats;
+  setArticleDataset(article, SECTIONS[ControlPanelIds.SystemDashboard](nextStats));
+  requestAnimationFrame(() => {
+    const textfield = article.querySelector(`lf-textfield[lf-label="${ControlPanelLabels.SystemAutoRefresh}"]`);
+    if (textfield) {
+      const timeout = getSystemAutoRefreshSeconds();
+      const value = timeout > 0 ? timeout.toString() : "";
+      if (textfield.lfValue !== value) {
+        textfield.lfValue = value;
+      }
+    }
+  });
+};
+const gatherSystemStats = async () => {
+  const routes = getApiRoutes().system;
+  const [gpu, cpu, ram, disks] = await Promise.all([
+    routes.getGpuStats(),
+    routes.getCpuStats(),
+    routes.getRamStats(),
+    routes.getDiskStats()
+  ]);
+  const stats = { timestamp: Date.now() };
+  const errors2 = [];
+  if (gpu.status === LogSeverity.Success) {
+    stats.gpus = gpu.data || [];
+  } else {
+    errors2.push(`GPU: ${gpu.message || "Statistics unavailable."}`);
+  }
+  if (cpu.status === LogSeverity.Success) {
+    stats.cpu = cpu.data;
+  } else {
+    errors2.push(`CPU: ${cpu.message || "Statistics unavailable."}`);
+  }
+  if (ram.status === LogSeverity.Success) {
+    stats.ram = ram.data;
+  } else {
+    errors2.push(`RAM: ${ram.message || "Statistics unavailable."}`);
+  }
+  if (disks.status === LogSeverity.Success) {
+    stats.disks = disks.data || [];
+  } else {
+    errors2.push(`Disks: ${disks.message || "Statistics unavailable."}`);
+  }
+  if (errors2.length) {
+    stats.errors = errors2;
+  }
+  return stats;
+};
+const refreshSystemDashboard = async (article, options = {}) => {
+  var _a;
+  const { reschedule = true } = options;
+  const payload = {
+    message: "",
+    status: LogSeverity.Info
+  };
+  SYSTEM_ARTICLE = article;
+  try {
+    const stats = await gatherSystemStats();
+    applySystemStats(article, stats);
+    if ((_a = stats.errors) == null ? void 0 : _a.length) {
+      payload.message = `System statistics updated with warnings: ${stats.errors.join(" | ")}`;
+      payload.status = LogSeverity.Warning;
+    } else {
+      payload.message = "System statistics updated.";
+      payload.status = LogSeverity.Success;
+    }
+  } catch (error2) {
+    payload.message = String(error2);
+    payload.status = LogSeverity.Error;
+  }
+  if (reschedule) {
+    scheduleSystemAutoRefresh();
+  }
+  return payload;
+};
+const getSystemLastStats = () => SYSTEM_LAST_STATS;
+let BUTTON_TIMEOUT;
 const INTRO_SECTION = ControlPanelIds.GitHub;
-let TIMEOUT;
+const withButtonSpinner = (comp, promise, label) => {
+  const onResponse2 = () => {
+    comp.lfIcon = "check";
+    comp.lfLabel = ControlPanelLabels.Done;
+    comp.lfShowSpinner = false;
+    comp.lfUiState = "disabled";
+  };
+  const restore = () => {
+    comp.lfLabel = label;
+    comp.lfIcon = "x";
+    comp.lfUiState = "primary";
+    BUTTON_TIMEOUT = null;
+  };
+  requestAnimationFrame(() => comp.lfShowSpinner = true);
+  promise.then(() => {
+    requestAnimationFrame(onResponse2);
+    if (BUTTON_TIMEOUT) {
+      clearTimeout(BUTTON_TIMEOUT);
+    }
+    BUTTON_TIMEOUT = setTimeout(() => requestAnimationFrame(restore), 1e3);
+  });
+};
+const updateArticleSection = (article, id, data) => {
+  const buildNode = SECTIONS[id];
+  if (!buildNode)
+    return;
+  setArticleDataset(article, buildNode(data));
+};
+const handleButtonClick = (comp, slot) => {
+  switch (comp.lfLabel) {
+    case ControlPanelLabels.Backup:
+      withButtonSpinner(comp, getApiRoutes().backup.new("manual"), ControlPanelLabels.Backup);
+      getApiRoutes().backup.cleanOld();
+      break;
+    case ControlPanelLabels.ClearLogs: {
+      const { article, dataset } = getLfManager().getDebugDataset();
+      if ((dataset == null ? void 0 : dataset.length) > 0) {
+        dataset.splice(0, dataset.length);
+        article.refresh();
+      }
+      break;
+    }
+    case ControlPanelLabels.ClearPreviews:
+      withButtonSpinner(comp, getApiRoutes().preview.clearCache(), ControlPanelLabels.ClearPreviews);
+      break;
+    case ControlPanelLabels.DeleteMetadata:
+      withButtonSpinner(comp, getApiRoutes().metadata.clear(), ControlPanelLabels.DeleteMetadata);
+      break;
+    case ControlPanelLabels.DeleteUsage:
+      withButtonSpinner(comp, getApiRoutes().analytics.clear("usage"), ControlPanelLabels.DeleteUsage);
+      break;
+    case ControlPanelLabels.OpenIssue:
+      window.open("https://github.com/lucafoscili/comfyui-lf/issues/new", "_blank");
+      break;
+    case ControlPanelLabels.RefreshPreviewStats:
+      getApiRoutes().preview.getStats().then((response) => {
+        if (response.status === "success") {
+          updateArticleSection(slot, ControlPanelIds.ExternalPreviews, {
+            totalSizeBytes: response.data.total_size_bytes,
+            fileCount: response.data.file_count
+          });
+        }
+      });
+      break;
+    case ControlPanelLabels.RefreshBackupStats:
+      getApiRoutes().backup.getStats().then((response) => {
+        if (response.status === "success") {
+          updateArticleSection(slot, ControlPanelIds.Backup, {
+            totalSizeBytes: response.data.total_size_bytes,
+            fileCount: response.data.file_count
+          });
+        }
+      });
+      break;
+    case ControlPanelLabels.RefreshSystemStats:
+      withButtonSpinner(comp, refreshSystemDashboard(slot), ControlPanelLabels.RefreshSystemStats);
+      break;
+    case ControlPanelLabels.Theme:
+      getLfManager().getManagers().lfFramework.theme.randomize();
+      break;
+  }
+};
 const EV_HANDLERS$6 = {
-  //#region Article handler
   article: (e2) => {
     const { comp, eventType, originalEvent } = e2.detail;
-    switch (eventType) {
-      case "lf-event":
-        handleLfEvent(originalEvent, comp.rootElement);
-        break;
+    if (eventType === "lf-event") {
+      handleLfEvent(originalEvent, comp.rootElement);
     }
   },
-  //#endregion
-  //#region Button handler
   button: (e2, slot) => {
     const { comp, eventType, originalEvent } = e2.detail;
-    comp.rootElement;
-    const invokeAPI = (promise, label) => {
-      const onResponse2 = () => {
-        comp.lfIcon = "check";
-        comp.lfLabel = ControlPanelLabels.Done;
-        comp.lfShowSpinner = false;
-        comp.lfUiState = "disabled";
-      };
-      const restore = (label2) => {
-        comp.lfLabel = label2;
-        comp.lfIcon = "x";
-        comp.lfUiState = "primary";
-        TIMEOUT = null;
-      };
-      requestAnimationFrame(() => comp.lfShowSpinner = true);
-      promise.then(() => {
-        requestAnimationFrame(onResponse2);
-        if (TIMEOUT) {
-          clearTimeout(TIMEOUT);
-        }
-        TIMEOUT = setTimeout(() => requestAnimationFrame(() => restore(label)), 1e3);
-      });
-    };
     switch (eventType) {
       case "click":
-        switch (comp.lfLabel) {
-          case ControlPanelLabels.Backup:
-            invokeAPI(getApiRoutes().backup.new("manual"), ControlPanelLabels.Backup);
-            getApiRoutes().backup.cleanOld();
-            break;
-          case ControlPanelLabels.ClearLogs:
-            const { article, dataset } = getLfManager().getDebugDataset();
-            if ((dataset == null ? void 0 : dataset.length) > 0) {
-              dataset.splice(0, dataset.length);
-              article.refresh();
-            }
-            break;
-          case ControlPanelLabels.ClearPreviews:
-            invokeAPI(getApiRoutes().preview.clearCache(), ControlPanelLabels.ClearPreviews);
-            break;
-          case ControlPanelLabels.DeleteMetadata:
-            invokeAPI(getApiRoutes().metadata.clear(), ControlPanelLabels.DeleteMetadata);
-            break;
-          case ControlPanelLabels.DeleteUsage:
-            invokeAPI(getApiRoutes().analytics.clear("usage"), ControlPanelLabels.DeleteUsage);
-            break;
-          case ControlPanelLabels.OpenIssue:
-            window.open("https://github.com/lucafoscili/comfyui-lf/issues/new", "_blank");
-            break;
-          case ControlPanelLabels.RefreshPreviewStats:
-            getApiRoutes().preview.getStats().then((response) => {
-              if (response.status === "success") {
-                const updatedNode = SECTIONS[ControlPanelIds.ExternalPreviews]({
-                  totalSizeBytes: response.data.total_size_bytes,
-                  fileCount: response.data.file_count
-                });
-                slot.lfDataset = {
-                  nodes: [{ children: [updatedNode], id: ControlPanelSection.Root }]
-                };
-              }
-            });
-            break;
-          case ControlPanelLabels.RefreshBackupStats:
-            getApiRoutes().backup.getStats().then((response) => {
-              if (response.status === "success") {
-                const updatedNode = SECTIONS[ControlPanelIds.Backup]({
-                  totalSizeBytes: response.data.total_size_bytes,
-                  fileCount: response.data.file_count
-                });
-                slot.lfDataset = {
-                  nodes: [{ children: [updatedNode], id: ControlPanelSection.Root }]
-                };
-              }
-            });
-            break;
-          case ControlPanelLabels.Theme:
-            getLfManager().getManagers().lfFramework.theme.randomize();
-            break;
-        }
+        handleButtonClick(comp, slot);
         break;
-      case "lf-event":
+      case "lf-event": {
         const ogEv = originalEvent;
         EV_HANDLERS$6.list(ogEv);
         break;
+      }
     }
   },
-  //#endregion
-  //#region List handler
   list: (e2) => {
     const { comp, eventType, node } = e2.detail;
     const { lfFramework: lfFramework2 } = getLfManager().getManagers();
@@ -20431,20 +20898,33 @@ const EV_HANDLERS$6 = {
         break;
     }
   },
-  //#endregion
-  //#region Toggle handler
   textfield: (e2) => {
     const { comp, eventType, value } = e2.detail;
     const element = comp.rootElement;
+    const article = element.closest("lf-article");
     switch (eventType) {
       case "change":
-        const retentionValue = parseInt(value, 10);
-        if (!isNaN(retentionValue) && retentionValue >= 0) {
-          getLfManager().setBackupRetention(retentionValue);
+        if (comp.lfLabel === ControlPanelLabels.SystemAutoRefresh) {
+          const trimmed = (value || "").trim();
+          const parsed = trimmed ? Number(trimmed) : 0;
+          const normalized = setSystemAutoRefreshSeconds(parsed, article);
+          comp.lfValue = normalized > 0 ? normalized.toString() : "";
+        } else if (comp.lfLabel === ControlPanelLabels.BackupRetention) {
+          const retentionValue = parseInt(value, 10);
+          if (!isNaN(retentionValue) && retentionValue >= 0) {
+            getLfManager().setBackupRetention(retentionValue);
+          }
         }
         break;
       case "ready":
-        element.title = "Maximum number of backups to keep (0 = unlimited)";
+        if (comp.lfLabel === ControlPanelLabels.SystemAutoRefresh) {
+          element.title = "Auto refresh interval in seconds (0 or empty disables auto refresh)";
+          const currentTimeout = getSystemAutoRefreshSeconds();
+          comp.lfValue = currentTimeout > 0 ? currentTimeout.toString() : comp.lfValue || "";
+        } else if (comp.lfLabel === ControlPanelLabels.BackupRetention) {
+          element.title = "Maximum number of backups to keep (0 = unlimited)";
+        }
+        break;
     }
   },
   toggle: (e2) => {
@@ -20456,98 +20936,9 @@ const EV_HANDLERS$6 = {
         break;
       case "ready":
         element.title = "Activate verbose console logging";
+        break;
     }
   }
-  //#endregion
-};
-const createContent = () => {
-  const grid = document.createElement(TagName.Div);
-  const accordion = document.createElement(TagName.LfAccordion);
-  const nodes = [];
-  accordion.lfDataset = { nodes };
-  for (const id in SECTIONS) {
-    if (id !== INTRO_SECTION && Object.prototype.hasOwnProperty.call(SECTIONS, id)) {
-      let article;
-      let node;
-      switch (id) {
-        case ControlPanelIds.Debug:
-          const logsData = [];
-          node = SECTIONS[ControlPanelIds.Debug](logsData);
-          article = prepArticle(id, node);
-          getLfManager().setDebugDataset(article, logsData);
-          break;
-        case ControlPanelIds.ExternalPreviews:
-          node = SECTIONS[ControlPanelIds.ExternalPreviews]();
-          article = prepArticle(id, node);
-          getApiRoutes().preview.getStats().then((response) => {
-            if (response.status === "success") {
-              const updatedNode = SECTIONS[ControlPanelIds.ExternalPreviews]({
-                totalSizeBytes: response.data.total_size_bytes,
-                fileCount: response.data.file_count
-              });
-              article.lfDataset = {
-                nodes: [{ children: [updatedNode], id: ControlPanelSection.Root }]
-              };
-            }
-          });
-          break;
-        case ControlPanelIds.Analytics:
-          node = SECTIONS[ControlPanelIds.Analytics]();
-          article = prepArticle(id, node);
-          break;
-        case ControlPanelIds.Backup:
-          node = SECTIONS[ControlPanelIds.Backup]();
-          article = prepArticle(id, node);
-          getApiRoutes().backup.getStats().then((response) => {
-            if (response.status === "success") {
-              const updatedNode = SECTIONS[ControlPanelIds.Backup]({
-                totalSizeBytes: response.data.total_size_bytes,
-                fileCount: response.data.file_count
-              });
-              article.lfDataset = {
-                nodes: [{ children: [updatedNode], id: ControlPanelSection.Root }]
-              };
-            }
-          });
-          break;
-        case ControlPanelIds.Metadata:
-          node = SECTIONS[ControlPanelIds.Metadata]();
-          article = prepArticle(id, node);
-          break;
-        case ControlPanelIds.Theme:
-          node = SECTIONS[ControlPanelIds.Theme]();
-          article = prepArticle(id, node);
-          break;
-        default:
-          continue;
-      }
-      const { icon, value } = node;
-      nodes.push({
-        cells: {
-          lfSlot: {
-            shape: "slot",
-            value: id
-          }
-        },
-        icon,
-        id,
-        value
-      });
-      accordion.appendChild(article);
-    }
-  }
-  const intro = prepArticle(INTRO_SECTION, SECTIONS[INTRO_SECTION]());
-  grid.classList.add(ControlPanelCSS.Grid);
-  grid.appendChild(intro);
-  grid.appendChild(accordion);
-  return grid;
-};
-const prepArticle = (key, node) => {
-  const article = document.createElement(TagName.LfArticle);
-  article.lfDataset = { nodes: [{ children: [node], id: ControlPanelSection.Root }] };
-  article.slot = key;
-  article.addEventListener(LfEventName.LfArticle, EV_HANDLERS$6.article);
-  return article;
 };
 const handleLfEvent = (e2, slot) => {
   const { comp } = e2.detail;
@@ -20564,6 +20955,125 @@ const handleLfEvent = (e2, slot) => {
     EV_HANDLERS$6.toggle(ogEv);
   }
 };
+const INTRO_SECTION_ID = INTRO_SECTION;
+const prepArticle = (key, node) => {
+  const article = document.createElement(TagName.LfArticle);
+  setArticleDataset(article, node);
+  article.slot = key;
+  article.addEventListener(LfEventName.LfArticle, EV_HANDLERS$6.article);
+  return article;
+};
+const buildSection = (id) => {
+  switch (id) {
+    //#region Analytics
+    case ControlPanelIds.Analytics: {
+      const node = SECTIONS[ControlPanelIds.Analytics]();
+      const article = prepArticle(id, node);
+      return { article, node };
+    }
+    //#endregion
+    //#region Backup
+    case ControlPanelIds.Backup: {
+      const node = SECTIONS[ControlPanelIds.Backup]();
+      const article = prepArticle(id, node);
+      getApiRoutes().backup.getStats().then((response) => {
+        if (response.status === "success") {
+          const updatedNode = SECTIONS[ControlPanelIds.Backup]({
+            totalSizeBytes: response.data.total_size_bytes,
+            fileCount: response.data.file_count
+          });
+          setArticleDataset(article, updatedNode);
+        }
+      });
+      return { article, node };
+    }
+    //#endregion
+    //#region Debug
+    case ControlPanelIds.Debug: {
+      const logsData = [];
+      const node = SECTIONS[ControlPanelIds.Debug](logsData);
+      const article = prepArticle(id, node);
+      getLfManager().setDebugDataset(article, logsData);
+      return { article, node };
+    }
+    //#endregion
+    //#region ExternalPreviews
+    case ControlPanelIds.ExternalPreviews: {
+      const node = SECTIONS[ControlPanelIds.ExternalPreviews]();
+      const article = prepArticle(id, node);
+      getApiRoutes().preview.getStats().then((response) => {
+        if (response.status === "success") {
+          const updatedNode = SECTIONS[ControlPanelIds.ExternalPreviews]({
+            totalSizeBytes: response.data.total_size_bytes,
+            fileCount: response.data.file_count
+          });
+          setArticleDataset(article, updatedNode);
+        }
+      });
+      return { article, node };
+    }
+    //#endregion
+    //#region Metadata
+    case ControlPanelIds.Metadata: {
+      const node = SECTIONS[ControlPanelIds.Metadata]();
+      const article = prepArticle(id, node);
+      return { article, node };
+    }
+    //#endregion
+    //#region System Dashboard
+    case ControlPanelIds.SystemDashboard: {
+      const initialStats = getSystemLastStats();
+      const node = SECTIONS[ControlPanelIds.SystemDashboard](initialStats);
+      const article = prepArticle(id, node);
+      applySystemStats(article, initialStats);
+      refreshSystemDashboard(article);
+      return { article, node };
+    }
+    //#endregion
+    //#region Theme
+    case ControlPanelIds.Theme: {
+      const node = SECTIONS[ControlPanelIds.Theme]();
+      const article = prepArticle(id, node);
+      return { article, node };
+    }
+    //#endregion
+    default:
+      return null;
+  }
+};
+const createContent = () => {
+  const grid = document.createElement(TagName.Div);
+  const accordion = document.createElement(TagName.LfAccordion);
+  const nodes = [];
+  accordion.lfDataset = { nodes };
+  for (const id in SECTIONS) {
+    if (id !== INTRO_SECTION_ID && Object.prototype.hasOwnProperty.call(SECTIONS, id)) {
+      const section = buildSection(id);
+      if (!section) {
+        continue;
+      }
+      const { article, node } = section;
+      const { icon, value } = node;
+      nodes.push({
+        cells: {
+          lfSlot: {
+            shape: "slot",
+            value: id
+          }
+        },
+        icon,
+        id,
+        value
+      });
+      accordion.appendChild(article);
+    }
+  }
+  const intro = prepArticle(INTRO_SECTION_ID, SECTIONS[INTRO_SECTION_ID]());
+  grid.classList.add(ControlPanelCSS.Grid);
+  grid.appendChild(intro);
+  grid.appendChild(accordion);
+  return grid;
+};
 const STATE$9 = /* @__PURE__ */ new WeakMap();
 const controlPanelFactory = {
   //#region Options
@@ -20576,12 +21086,13 @@ const controlPanelFactory = {
           backup: getLfManager().isBackupEnabled() || false,
           backupRetention: getLfManager().getBackupRetention() || 14,
           debug: getLfManager().isDebug() || false,
+          systemTimeout: getLfManager().getSystemTimeout() || 0,
           themes: getLfManager().getManagers().lfFramework.theme.get.current().name || ""
         };
       },
       setValue(value) {
         const callback = (_2, u2) => {
-          const { backup, backupRetention, debug, themes } = u2.parsedJson;
+          const { backup, backupRetention, debug, systemTimeout, themes } = u2.parsedJson;
           if (backup === true || backup === false) {
             getLfManager().toggleBackup(backup);
           }
@@ -20590,6 +21101,9 @@ const controlPanelFactory = {
           }
           if (debug === true || debug === false) {
             getLfManager().toggleDebug(debug);
+          }
+          if (typeof systemTimeout === "number") {
+            setSystemAutoRefreshSeconds(systemTimeout);
           }
           if (themes) {
             getLfManager().getManagers().lfFramework.theme.set(themes);
@@ -21741,7 +22255,7 @@ var __classPrivateFieldSet = function(receiver, state, value, kind, f2) {
   if (typeof state === "function" ? receiver !== state || !f2 : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
   return kind === "a" ? f2.call(receiver, value) : f2 ? f2.value = value : state.set(receiver, value), value;
 };
-var _LFManager_APIS, _LFManager_AUTOMATIC_BACKUP, _LFManager_BACKUP_RETENTION, _LFManager_CACHED_DATASETS, _LFManager_DEBUG, _LFManager_DEBUG_ARTICLE, _LFManager_DEBUG_DATASET, _LFManager_INITIALIZED, _LFManager_LATEST_RELEASE, _LFManager_MANAGERS;
+var _LFManager_APIS, _LFManager_AUTOMATIC_BACKUP, _LFManager_BACKUP_RETENTION, _LFManager_CACHED_DATASETS, _LFManager_DEBUG, _LFManager_DEBUG_ARTICLE, _LFManager_DEBUG_DATASET, _LFManager_INITIALIZED, _LFManager_LATEST_RELEASE, _LFManager_MANAGERS, _LFManager_SYSTEM_TIMEOUT;
 class LFManager {
   constructor() {
     _LFManager_APIS.set(this, {
@@ -21753,7 +22267,8 @@ class LFManager {
       image: IMAGE_API,
       json: JSON_API,
       metadata: METADATA_API,
-      preview: PREVIEW_API
+      preview: PREVIEW_API,
+      system: SYSTEM_API
     });
     _LFManager_AUTOMATIC_BACKUP.set(this, true);
     _LFManager_BACKUP_RETENTION.set(this, 14);
@@ -21766,6 +22281,7 @@ class LFManager {
     _LFManager_INITIALIZED.set(this, false);
     _LFManager_LATEST_RELEASE.set(this, void 0);
     _LFManager_MANAGERS.set(this, {});
+    _LFManager_SYSTEM_TIMEOUT.set(this, 0);
     const assetsUrl = window.location.href + "extensions/lf-nodes/assets";
     __classPrivateFieldGet(this, _LFManager_MANAGERS, "f").lfFramework = getLfFramework();
     __classPrivateFieldGet(this, _LFManager_MANAGERS, "f").lfFramework.assets.set(assetsUrl);
@@ -21860,6 +22376,9 @@ class LFManager {
   getBackupRetention() {
     return __classPrivateFieldGet(this, _LFManager_BACKUP_RETENTION, "f");
   }
+  getSystemTimeout() {
+    return __classPrivateFieldGet(this, _LFManager_SYSTEM_TIMEOUT, "f");
+  }
   isBackupEnabled() {
     return __classPrivateFieldGet(this, _LFManager_AUTOMATIC_BACKUP, "f");
   }
@@ -21917,6 +22436,13 @@ class LFManager {
   setDebugDataset(article, dataset) {
     __classPrivateFieldSet(this, _LFManager_DEBUG_ARTICLE, article, "f");
     __classPrivateFieldSet(this, _LFManager_DEBUG_DATASET, dataset, "f");
+    this.log("Debug dataset set!", { article, dataset }, LogSeverity.Info);
+  }
+  setSystemTimeout(value = 0) {
+    if (typeof value === "number" && value >= 0) {
+      __classPrivateFieldSet(this, _LFManager_SYSTEM_TIMEOUT, Math.floor(value), "f");
+      this.log(`System timeout set to: ${value}`, { value }, LogSeverity.Info);
+    }
   }
   toggleBackup(value) {
     if (value === false || value === true) {
@@ -21924,8 +22450,8 @@ class LFManager {
     } else {
       __classPrivateFieldSet(this, _LFManager_AUTOMATIC_BACKUP, !__classPrivateFieldGet(this, _LFManager_AUTOMATIC_BACKUP, "f"), "f");
     }
-    this.log(`Automatic backup active: '${__classPrivateFieldGet(this, _LFManager_DEBUG, "f")}'`, { value }, LogSeverity.Warning);
-    return __classPrivateFieldGet(this, _LFManager_DEBUG, "f");
+    this.log(`Automatic backup active: '${__classPrivateFieldGet(this, _LFManager_AUTOMATIC_BACKUP, "f")}'`, { value }, LogSeverity.Warning);
+    return __classPrivateFieldGet(this, _LFManager_AUTOMATIC_BACKUP, "f");
   }
   toggleDebug(value) {
     if (value === false || value === true) {
@@ -21937,7 +22463,7 @@ class LFManager {
     return __classPrivateFieldGet(this, _LFManager_DEBUG, "f");
   }
 }
-_LFManager_APIS = /* @__PURE__ */ new WeakMap(), _LFManager_AUTOMATIC_BACKUP = /* @__PURE__ */ new WeakMap(), _LFManager_BACKUP_RETENTION = /* @__PURE__ */ new WeakMap(), _LFManager_CACHED_DATASETS = /* @__PURE__ */ new WeakMap(), _LFManager_DEBUG = /* @__PURE__ */ new WeakMap(), _LFManager_DEBUG_ARTICLE = /* @__PURE__ */ new WeakMap(), _LFManager_DEBUG_DATASET = /* @__PURE__ */ new WeakMap(), _LFManager_INITIALIZED = /* @__PURE__ */ new WeakMap(), _LFManager_LATEST_RELEASE = /* @__PURE__ */ new WeakMap(), _LFManager_MANAGERS = /* @__PURE__ */ new WeakMap();
+_LFManager_APIS = /* @__PURE__ */ new WeakMap(), _LFManager_AUTOMATIC_BACKUP = /* @__PURE__ */ new WeakMap(), _LFManager_BACKUP_RETENTION = /* @__PURE__ */ new WeakMap(), _LFManager_CACHED_DATASETS = /* @__PURE__ */ new WeakMap(), _LFManager_DEBUG = /* @__PURE__ */ new WeakMap(), _LFManager_DEBUG_ARTICLE = /* @__PURE__ */ new WeakMap(), _LFManager_DEBUG_DATASET = /* @__PURE__ */ new WeakMap(), _LFManager_INITIALIZED = /* @__PURE__ */ new WeakMap(), _LFManager_LATEST_RELEASE = /* @__PURE__ */ new WeakMap(), _LFManager_MANAGERS = /* @__PURE__ */ new WeakMap(), _LFManager_SYSTEM_TIMEOUT = /* @__PURE__ */ new WeakMap();
 var LFFreeFlags;
 (function(LFFreeFlags2) {
   LFFreeFlags2["PatchedFree"] = "_lf_patched_freeMemory";
@@ -22106,12 +22632,34 @@ const resolveNodeId = (p2) => {
   }
   return p2.node ?? p2.id ?? p2.node_id ?? null;
 };
+const clampPercent = (value) => {
+  if (typeof value !== "number" || Number.isNaN(value) || !Number.isFinite(value)) {
+    return 0;
+  }
+  return Math.min(100, Math.max(0, value));
+};
 const isValidNumber = (n2) => {
   return !isNaN(n2) && typeof n2 === "number";
 };
+const toNumber = (value) => {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return value;
+  }
+  return 0;
+};
 const asString = (value) => typeof value === "string" ? value : void 0;
+const formatBytes = (bytes) => {
+  if (!bytes) {
+    return "0 B";
+  }
+  const units = ["B", "KB", "MB", "GB"];
+  const index = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
+  const value = bytes / Math.pow(1024, index);
+  return `${value.toFixed(2)} ${units[index]}`;
+};
 const isString = (value) => typeof value === "string";
 const normalizeDirectoryRequest = (value) => typeof value === "string" ? value : "";
+const percentLabel = (value) => `${clampPercent(value).toFixed(1)}%`;
 const canvasToBase64 = (canvas) => {
   return canvas.toDataURL("image/png");
 };
@@ -22214,99 +22762,99 @@ if (hasComfyApp) {
   }
 }
 export {
-  LF_THEME_COLORS_DATA_PREFIX as $,
+  LF_TOAST_BLOCKS as $,
   AVATAR_COVER as A,
-  LF_BADGE_BLOCKS as B,
+  LF_SLIDER_BLOCKS as B,
   CY_ATTRIBUTES as C,
   D,
-  LF_BADGE_PARTS as E,
-  LF_BADGE_PROPS as F,
-  LF_BUTTON_BLOCKS as G,
-  LF_BUTTON_PARTS as H,
+  LF_SLIDER_PARTS as E,
+  LF_SLIDER_CSS_VARIABLES as F,
+  LF_SLIDER_PROPS as G,
+  LF_MASONRY_DEFAULT_COLUMNS as H,
   IMAGE_TYPE_IDS as I,
-  LF_BUTTON_PROPS as J,
-  LF_CANVAS_BLOCKS as K,
+  LF_MASONRY_BLOCKS as J,
+  LF_MASONRY_PARTS as K,
   LF_SPLASH_BLOCKS as L,
-  LF_CANVAS_PARTS as M,
-  LF_CANVAS_PROPS as N,
+  LF_MASONRY_CSS_VARS as M,
+  LF_MASONRY_PROPS as N,
   OPTION_TYPE_IDS as O,
-  LF_CARD_BLOCKS as P,
-  LF_CARD_PARTS as Q,
-  LF_CARD_CSS_VARS as R,
+  LF_MASONRY_IDS as P,
+  LF_CAROUSEL_BLOCKS as Q,
+  LF_CAROUSEL_PARTS as R,
   STYLE_COVER as S,
   TIMEFRAME_COVER as T,
-  LF_CARD_DEFAULTS as U,
+  LF_CAROUSEL_PROPS as U,
   V,
   W$1 as W,
-  LF_CARD_PROPS as X,
-  LF_CHART_BLOCKS as Y,
-  LF_CHART_PARTS as Z,
-  LF_CHART_CSS_VARS as _,
+  LF_CAROUSEL_IDS as X,
+  LF_ARTICLE_BLOCKS as Y,
+  LF_ARTICLE_PARTS as Z,
+  LF_ARTICLE_PROPS as _,
   LF_SPLASH_PARTS as a,
-  LF_TOAST_PROPS as a$,
-  LF_CHART_PROPS as a0,
-  LF_CHAT_BLOCKS as a1,
-  LF_CHAT_PARTS as a2,
-  LF_CHAT_PROPS as a3,
-  LF_CHIP_BLOCKS as a4,
-  LF_CHIP_PARTS as a5,
-  LF_CHIP_PROPS as a6,
-  LF_CODE_BLOCKS as a7,
-  LF_CODE_PARTS as a8,
-  LF_CODE_PROPS as a9,
-  LF_UPLOAD_PARTS as aA,
-  LF_UPLOAD_PROPS as aB,
-  LF_BADGE_CSS_VARS as aC,
-  LF_CHIP_CSS_VARS as aD,
-  LF_CARD_IDS as aE,
-  LF_CHAT_IDS as aF,
-  LF_THEME_ICONS as aG,
-  LF_SLIDER_BLOCKS as aH,
-  LF_SLIDER_PARTS as aI,
-  LF_SLIDER_CSS_VARIABLES as aJ,
-  LF_SLIDER_PROPS as aK,
-  LF_MASONRY_DEFAULT_COLUMNS as aL,
-  LF_MASONRY_BLOCKS as aM,
-  LF_MASONRY_PARTS as aN,
-  LF_MASONRY_CSS_VARS as aO,
-  LF_MASONRY_PROPS as aP,
-  LF_MASONRY_IDS as aQ,
-  LF_CAROUSEL_BLOCKS as aR,
-  LF_CAROUSEL_PARTS as aS,
-  LF_CAROUSEL_PROPS as aT,
-  LF_CAROUSEL_IDS as aU,
-  LF_ARTICLE_BLOCKS as aV,
-  LF_ARTICLE_PARTS as aW,
-  LF_ARTICLE_PROPS as aX,
-  LF_TOAST_BLOCKS as aY,
-  LF_TOAST_PARTS as aZ,
-  LF_TOAST_CSS_VARIABLES as a_,
-  LF_IMAGE_BLOCKS as aa,
-  LF_IMAGE_PARTS as ab,
-  LF_IMAGE_CSS_VARS as ac,
-  LF_IMAGE_PROPS as ad,
-  CSS_VAR_PREFIX as ae,
-  LF_LIST_BLOCKS as af,
-  LF_LIST_PARTS as ag,
-  LF_LIST_PROPS as ah,
-  LF_PHOTOFRAME_BLOCKS as ai,
-  LF_PHOTOFRAME_PARTS as aj,
-  LF_PHOTOFRAME_PROPS as ak,
-  LF_PROGRESSBAR_BLOCKS as al,
-  LF_PROGRESSBAR_PARTS as am,
-  LF_PROGRESSBAR_CSS_VARIABLES as an,
-  LF_PROGRESSBAR_PROPS as ao,
-  LF_SPINNER_PROPS as ap,
-  LF_TEXTFIELD_BLOCKS as aq,
-  LF_TEXTFIELD_PARTS as ar,
-  LF_TEXTFIELD_PROPS as as,
-  LF_TOGGLE_BLOCKS as at,
-  LF_TOGGLE_PARTS as au,
-  LF_TOGGLE_PROPS as av,
-  LF_TYPEWRITER_BLOCKS as aw,
-  LF_TYPEWRITER_PARTS as ax,
-  LF_TYPEWRITER_PROPS as ay,
-  LF_UPLOAD_BLOCKS as az,
+  LF_THEME_ICONS as a$,
+  LF_TOAST_PARTS as a0,
+  LF_TOAST_CSS_VARIABLES as a1,
+  LF_TOAST_PROPS as a2,
+  LF_BADGE_BLOCKS as a3,
+  LF_BADGE_PARTS as a4,
+  LF_BADGE_PROPS as a5,
+  LF_BUTTON_BLOCKS as a6,
+  LF_BUTTON_PARTS as a7,
+  LF_BUTTON_PROPS as a8,
+  LF_CANVAS_BLOCKS as a9,
+  LF_LIST_BLOCKS as aA,
+  LF_LIST_PARTS as aB,
+  LF_LIST_PROPS as aC,
+  LF_PHOTOFRAME_BLOCKS as aD,
+  LF_PHOTOFRAME_PARTS as aE,
+  LF_PHOTOFRAME_PROPS as aF,
+  LF_PROGRESSBAR_BLOCKS as aG,
+  LF_PROGRESSBAR_PARTS as aH,
+  LF_PROGRESSBAR_CSS_VARIABLES as aI,
+  LF_PROGRESSBAR_PROPS as aJ,
+  LF_SPINNER_PROPS as aK,
+  LF_TEXTFIELD_BLOCKS as aL,
+  LF_TEXTFIELD_PARTS as aM,
+  LF_TEXTFIELD_PROPS as aN,
+  LF_TOGGLE_BLOCKS as aO,
+  LF_TOGGLE_PARTS as aP,
+  LF_TOGGLE_PROPS as aQ,
+  LF_TYPEWRITER_BLOCKS as aR,
+  LF_TYPEWRITER_PARTS as aS,
+  LF_TYPEWRITER_PROPS as aT,
+  LF_UPLOAD_BLOCKS as aU,
+  LF_UPLOAD_PARTS as aV,
+  LF_UPLOAD_PROPS as aW,
+  LF_BADGE_CSS_VARS as aX,
+  LF_CHIP_CSS_VARS as aY,
+  LF_CARD_IDS as aZ,
+  LF_CHAT_IDS as a_,
+  LF_CANVAS_PARTS as aa,
+  LF_CANVAS_PROPS as ab,
+  LF_CARD_BLOCKS as ac,
+  LF_CARD_PARTS as ad,
+  LF_CARD_CSS_VARS as ae,
+  LF_CARD_DEFAULTS as af,
+  LF_CARD_PROPS as ag,
+  LF_CHART_BLOCKS as ah,
+  LF_CHART_PARTS as ai,
+  LF_CHART_CSS_VARS as aj,
+  LF_THEME_COLORS_DATA_PREFIX as ak,
+  LF_CHART_PROPS as al,
+  LF_CHAT_BLOCKS as am,
+  LF_CHAT_PARTS as an,
+  LF_CHAT_PROPS as ao,
+  LF_CHIP_BLOCKS as ap,
+  LF_CHIP_PARTS as aq,
+  LF_CHIP_PROPS as ar,
+  LF_CODE_BLOCKS as as,
+  LF_CODE_PARTS as at,
+  LF_CODE_PROPS as au,
+  LF_IMAGE_BLOCKS as av,
+  LF_IMAGE_PARTS as aw,
+  LF_IMAGE_CSS_VARS as ax,
+  LF_IMAGE_PROPS as ay,
+  CSS_VAR_PREFIX as az,
   LF_STYLE_ID as b,
   LF_IMAGEVIEWER_BLOCKS as b0,
   LF_IMAGEVIEWER_PARTS as b1,

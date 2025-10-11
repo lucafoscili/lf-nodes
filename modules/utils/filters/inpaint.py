@@ -325,7 +325,13 @@ def _prepare_inpaint_region(
     if feather_px > 0:
         kernel = feather_px * 2 + 1
         wm = work_mask_soft.unsqueeze(1)
-        wm = F.avg_pool2d(wm, kernel_size=kernel, stride=1, padding=feather_px)
+        wm = F.avg_pool2d(
+            wm,
+            kernel_size=kernel,
+            stride=1,
+            padding=feather_px,
+            count_include_pad=False,
+        )
         work_mask_soft = wm.squeeze(1)
     work_mask_soft = work_mask_soft.clamp(0.0, 1.0)
 

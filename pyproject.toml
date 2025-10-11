@@ -1,9 +1,28 @@
 [project]
 name = "lf-nodes"
 description = "Custom nodes with a touch of extra UX ✨ Client-side LLM chat, mid-workflow image editing, history for primitives, JSON manipulation, analytics nodes, CivitAI metadata fetching and saving... and more!"
-version = "1.5.0"
+version = "1.6.0"
 license = {file = "LICENSE"}
-dependencies = ["numpy", "onnxruntime", "openai", "opencv-python", "pandas", "piexif", "Pillow", "rembg", "requests", "svgwrite", "timm", "torch", "torchvision", "tqdm", "transformers"]
+dependencies = [
+    "numpy",
+    "onnxruntime",
+    "openai",
+    "opencv-python",
+    "pandas",
+    "piexif",
+    "Pillow",
+    "rembg",
+    "requests",
+    "svgwrite",
+    "timm",
+    "torch",
+    "torchvision",
+    "tqdm",
+    "transformers",
+    "psutil",
+    "GPUtil",
+    "pynvml",
+]
 
 [project.urls]
 Repository = "https://github.com/lucafoscili/lf-nodes"
