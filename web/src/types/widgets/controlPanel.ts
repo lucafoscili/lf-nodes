@@ -29,6 +29,7 @@ export type ControlPanelDeserializedValue = {
   backup: boolean;
   backupRetention: number;
   debug: boolean;
+  systemTimeout?: number;
   themes: string;
 };
 //#endregion
@@ -40,28 +41,25 @@ export interface ControlPanelState extends BaseWidgetState {}
 //#region Dataset
 export interface ControlPanelFixture {
   [ControlPanelIds.Analytics]: () => LfArticleNode;
-  [ControlPanelIds.Backup]: (stats?: {
-    totalSizeBytes: number;
-    fileCount: number;
-  }) => LfArticleNode;
+  [ControlPanelIds.Backup]: (stats?: ControlPanelDiskStats) => LfArticleNode;
   [ControlPanelIds.Debug]: (logsData: LfArticleNode[]) => LfArticleNode;
-  [ControlPanelIds.ExternalPreviews]: (stats?: {
-    totalSizeBytes: number;
-    fileCount: number;
-  }) => LfArticleNode;
+  [ControlPanelIds.ExternalPreviews]: (stats?: ControlPanelDiskStats) => LfArticleNode;
   [ControlPanelIds.GitHub]: () => LfArticleNode;
   [ControlPanelIds.Metadata]: () => LfArticleNode;
   [ControlPanelIds.SystemDashboard]: (stats?: ControlPanelSystemStats) => LfArticleNode;
   [ControlPanelIds.Theme]: () => LfArticleNode;
 }
+export interface ControlPanelDiskStats {
+  totalSizeBytes: number;
+  fileCount: number;
+}
 export interface ControlPanelSystemStats {
-  gpus?: GPUInfo[];
-  disks?: DiskInfo[];
   cpu?: CpuStats;
+  disks?: DiskInfo[];
+  errors?: string[];
+  gpus?: GPUInfo[];
   ram?: RamStats;
   timestamp?: number;
-  errors?: string[];
-  autoRefreshSeconds?: number;
 }
 export enum ControlPanelIcons {
   Analytics = 'chart-histogram',
