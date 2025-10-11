@@ -13655,7 +13655,7 @@ var X = false, Z = (t2, e2, n2) => {
                         const n6 = t7.i.replace(/-/g, "_"), o6 = t7.T;
                         if (!o6) return;
                         const r3 = i.get(o6);
-                        return r3 ? r3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-0df37de3.entry.js": () => import("./p-0df37de3.entry-hSOvjrd5.js"), "./p-182c6c19.entry.js": () => import("./p-182c6c19.entry-CKrAnArC.js"), "./p-28dd0bff.entry.js": () => import("./p-28dd0bff.entry-BTYSJaWu.js"), "./p-36aa4a7f.entry.js": () => import("./p-36aa4a7f.entry-DsCcbEOE.js"), "./p-55c6a817.entry.js": () => import("./p-55c6a817.entry-Dof5rrDQ.js"), "./p-5d51f267.entry.js": () => import("./p-5d51f267.entry-DrC2LHm0.js"), "./p-62695161.entry.js": () => import("./p-62695161.entry-Ci6-Pxdw.js"), "./p-924ca284.entry.js": () => import("./p-924ca284.entry-mcKT-Yt0.js"), "./p-9738317a.entry.js": () => import("./p-9738317a.entry-Biwx3Vy6.js"), "./p-988ad9c7.entry.js": () => import("./p-988ad9c7.entry-BpooDYG2.js"), "./p-a6642965.entry.js": () => import("./p-a6642965.entry-SJUITRTL.js"), "./p-b1bf3d70.entry.js": () => import("./p-b1bf3d70.entry-CF8WvqYu.js"), "./p-e2900881.entry.js": () => import("./p-e2900881.entry-Da7qgTMA.js"), "./p-e4e76694.entry.js": () => import("./p-e4e76694.entry-CnZ5q5gF.js"), "./p-e6148250.entry.js": () => import("./p-e6148250.entry-Cxh6qDpa.js"), "./p-f19de954.entry.js": () => import("./p-f19de954.entry-CqkVoxEo.js") }), `./${o6}.entry.js`, 2).then(((t8) => (i.set(o6, t8), t8[n6])), ((t8) => {
+                        return r3 ? r3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-0df37de3.entry.js": () => import("./p-0df37de3.entry-DV2Iu4d3.js"), "./p-182c6c19.entry.js": () => import("./p-182c6c19.entry-j5QF_7IX.js"), "./p-28dd0bff.entry.js": () => import("./p-28dd0bff.entry-DsDwHtCc.js"), "./p-36aa4a7f.entry.js": () => import("./p-36aa4a7f.entry-BE0eZiyw.js"), "./p-55c6a817.entry.js": () => import("./p-55c6a817.entry-_NYxrDF4.js"), "./p-5d51f267.entry.js": () => import("./p-5d51f267.entry-CW2SvlgP.js"), "./p-62695161.entry.js": () => import("./p-62695161.entry-iRW0zdgp.js"), "./p-924ca284.entry.js": () => import("./p-924ca284.entry-CLqq1c01.js"), "./p-9738317a.entry.js": () => import("./p-9738317a.entry-DSDAUtuc.js"), "./p-988ad9c7.entry.js": () => import("./p-988ad9c7.entry-CVvqwwut.js"), "./p-a6642965.entry.js": () => import("./p-a6642965.entry-DT6bZpZ5.js"), "./p-b1bf3d70.entry.js": () => import("./p-b1bf3d70.entry--3zLE3Z1.js"), "./p-e2900881.entry.js": () => import("./p-e2900881.entry-Di-OVUcb.js"), "./p-e4e76694.entry.js": () => import("./p-e4e76694.entry-AkdbxURP.js"), "./p-e6148250.entry.js": () => import("./p-e6148250.entry-C3wJzbck.js"), "./p-f19de954.entry.js": () => import("./p-f19de954.entry-DTFhifx0.js") }), `./${o6}.entry.js`, 2).then(((t8) => (i.set(o6, t8), t8[n6])), ((t8) => {
                           l(t8, e3.$hostElement$);
                         }));
                         /*!__STENCIL_STATIC_IMPORT_SWITCH__*/
@@ -17795,7 +17795,8 @@ const createEventHandlers = ({ handleInterruptForState: handleInterruptForState2
               const c2 = ogEv.detail.comp;
               const isCanvas = c2.rootElement.tagName.toLowerCase() === "lf-canvas";
               if (isCanvas) {
-                setBrush(c2, SETTINGS.brush.settings);
+                const brushSettings = (state == null ? void 0 : state.lastBrushSettings) ?? SETTINGS.brush.settings;
+                setBrush(c2, brushSettings);
               }
               break;
             case "stroke": {
