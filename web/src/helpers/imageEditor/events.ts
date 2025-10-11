@@ -295,7 +295,8 @@ export const createEventHandlers = ({
               const c = ogEv.detail.comp as LfCanvasElement & LfCanvasInterface;
               const isCanvas = c.rootElement.tagName.toLowerCase() === 'lf-canvas';
               if (isCanvas) {
-                setBrush(c, SETTINGS.brush.settings);
+                const brushSettings = state?.lastBrushSettings ?? SETTINGS.brush.settings;
+                setBrush(c, brushSettings);
               }
               break;
 
