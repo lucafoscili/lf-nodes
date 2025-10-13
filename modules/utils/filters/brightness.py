@@ -22,9 +22,10 @@ def brightness_effect(image: torch.Tensor, brightness_strength: float, gamma: fl
     """
     validate_image(image, expected_shape=(3,))
 
-    image_np = tensor_to_numpy(image, True) / 255.0
+    image_np = tensor_to_numpy(image, True).astype(np.float32) / 255.0
 
     adjusted_image = midpoint + (image_np - midpoint) + brightness_strength
+    adjusted_image = np.clip(adjusted_image, 0.0, 1.0)
 
     adjusted_image = np.power(adjusted_image, gamma)
 
