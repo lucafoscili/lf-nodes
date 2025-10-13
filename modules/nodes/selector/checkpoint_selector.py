@@ -6,10 +6,11 @@ from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, INT_MAX
-from ...utils.helpers.api import process_model
+from ...utils.helpers.api import process_model_async
 from ...utils.helpers.comfy import get_comfy_list
 from ...utils.helpers.logic import (
     build_is_changed_tuple,
+    dataset_from_metadata,
     filter_list,
     is_none,
     LazyCache,
@@ -23,6 +24,7 @@ from ...utils.helpers.ui import prepare_model_dataset
 class LF_CheckpointSelector:
     initial_list: list[str] = []
     _CACHE = LazyCache()
+    _LAST_SELECTION: dict[str, str] = {}
     register_cache(_CACHE)
 
     @classmethod
@@ -30,25 +32,25 @@ class LF_CheckpointSelector:
         return {
             "required": {
                 "checkpoint": (["None"] + self.initial_list, {
-                    "default": "None", 
+                    "default": "None",
                     "tooltip": "Checkpoint used to generate the image."
                 }),
                 "get_civitai_info": (Input.BOOLEAN, {
-                    "default": True, 
+                    "default": True,
                     "tooltip": "Attempts to retrieve more info about the model from CivitAI."
                 }),
                 "randomize": (Input.BOOLEAN, {
-                    "default": False, 
+                    "default": False,
                     "tooltip": "Selects a checkpoint randomly from your checkpoints directory."
                 }),
                 "filter": (Input.STRING, {
-                    "default": "", 
+                    "default": "",
                     "tooltip": "When randomization is active, this field can be used to filter checkpoint file names. Supports wildcards (*)"
                 }),
                 "seed": (Input.INTEGER, {
-                    "default": 42, 
-                    "min": 0, 
-                    "max": INT_MAX, 
+                    "default": 42,
+                    "min": 0,
+                    "max": INT_MAX,
                     "tooltip": "Seed value for when randomization is active."
                 }),
             },
@@ -75,8 +77,8 @@ class LF_CheckpointSelector:
         filter: str = normalize_list_to_value(kwargs.get("filter"))
 
         if is_none(checkpoint):
-            checkpoint = None 
-        
+            checkpoint = None
+
         checkpoints = get_comfy_list("checkpoints")
 
         if randomize:
@@ -90,7 +92,7 @@ class LF_CheckpointSelector:
         model = None
         clip = None
         vae = None
-        
+
         if checkpoint:
             ckpt_path = folder_paths.get_full_path_or_raise("checkpoints", checkpoint)
             key = ("ckpt", ckpt_path)
@@ -105,30 +107,84 @@ class LF_CheckpointSelector:
             )
             model, clip, vae = out[:3]
 
-        checkpoint_data = process_model("checkpoint", checkpoint, "checkpoints")
-        model_name = checkpoint_data["model_name"]
-        model_hash = checkpoint_data["model_hash"]
-        model_path = checkpoint_data["model_path"]
-        model_base64 = checkpoint_data["model_base64"]
-        model_cover = checkpoint_data["model_cover"]
-        saved_info = checkpoint_data["saved_info"]
+        should_fetch_civitai = bool(get_civitai_info)
+        event_name = f"{EVENT_PREFIX}checkpointselector"
+        node_id = kwargs.get("node_id")
 
-        if saved_info:
-            dataset = saved_info
-            get_civitai_info = False
-        else:
-            dataset = prepare_model_dataset(model_name, model_hash, model_base64, model_path)
+        callback = None
+        if node_id and checkpoint:
+            def _metadata_callback(metadata_ready: dict) -> None:
+                model_path_ready = metadata_ready.get("model_path")
+                if not model_path_ready:
+                    return
+                if self._LAST_SELECTION.get(node_id) != model_path_ready:
+                    return
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}checkpointselector", {
-            "node": kwargs.get("node_id"),
-            "datasets": [dataset],
-            "hashes": [model_hash],
-            "apiFlags": [get_civitai_info],
-            "paths": [model_path],
-        })
+                dataset_ready, hash_ready = dataset_from_metadata(metadata_ready)
+                hash_event_ready = hash_ready if hash_ready and hash_ready != "Unknown" else ""
+                fetch_flag_ready = (
+                    should_fetch_civitai
+                    and not metadata_ready.get("saved_info")
+                    and bool(hash_event_ready)
+                )
 
-        return (checkpoint, model_name, model_path, model_cover, model, clip, vae)
-    
+                PromptServer.instance.send_sync(
+                    event_name,
+                    {
+                        "node": node_id,
+                        "datasets": [dataset_ready],
+                        "hashes": [hash_event_ready],
+                        "apiFlags": [fetch_flag_ready],
+                        "paths": [model_path_ready or ""],
+                    },
+                )
+
+            callback = _metadata_callback
+
+        metadata = process_model_async("checkpoint", checkpoint, "checkpoints", on_complete=callback)
+        model_path = metadata.get("model_path")
+
+        if node_id:
+            if model_path:
+                self._LAST_SELECTION[node_id] = model_path
+            else:
+                self._LAST_SELECTION.pop(node_id, None)
+
+        dataset, hash_value = dataset_from_metadata(metadata)
+        if metadata.get("saved_info"):
+            should_fetch_civitai = False
+
+        metadata_pending = bool(metadata.get("metadata_pending", False))
+        hash_event = hash_value if hash_value and hash_value != "Unknown" else ""
+        fetch_now = (
+            should_fetch_civitai
+            and not metadata.get("saved_info")
+            and not metadata_pending
+            and bool(hash_event)
+        )
+        path_event = model_path or ""
+
+        PromptServer.instance.send_sync(
+            event_name,
+            {
+                "node": node_id,
+                "datasets": [dataset],
+                "hashes": [hash_event],
+                "apiFlags": [fetch_now],
+                "paths": [path_event],
+            },
+        )
+
+        return (
+            checkpoint,
+            metadata.get("model_name") or checkpoint,
+            model_path,
+            metadata.get("model_cover"),
+            model,
+            clip,
+            vae,
+        )
+
     @classmethod
     def VALIDATE_INPUTS(self, **kwargs):
          return True

@@ -1,6 +1,9 @@
 import logging
-from typing import Any, Callable, Dict, Optional, Tuple, List, Protocol
+from typing import Any, Callable, Dict, Mapping, Optional, Tuple, List, Protocol
 
+from ..ui import prepare_model_dataset
+
+# region LazyCache
 class LazyCache:
     """
     A simple cache class that lazily stores and retrieves values associated with keys.
@@ -78,7 +81,9 @@ class LazyCache:
         effectively resetting the cache to an empty state.
         """
         self._cache.clear()
+# endregion
 
+# CacheLike Protocol
 class CacheLike(Protocol):
     """
     Protocol representing a cache-like object.
@@ -116,18 +121,19 @@ def clear_registered_caches() -> None:
             cache.clear()
         except Exception:
             pass
+# endregion
 
-
+# region SelectorListRefresher
 class _SelectorListRefresher:
     """
-    Utility class to refresh and manage a list attribute within an owner class, 
+    Utility class to refresh and manage a list attribute within an owner class,
     typically used for dynamic selection lists in UI components.
 
     Args:
         owner_cls (Any): The class instance or type that owns the list attribute.
         loader (Callable[[], List[str]]): A callable that returns the latest list of string values.
         attr_name (str, optional): The name of the attribute in `owner_cls` to refresh. Defaults to "initial_list".
-        return_index (Optional[int], optional): The index in the `RETURN_TYPES` tuple to update with the refreshed list. 
+        return_index (Optional[int], optional): The index in the `RETURN_TYPES` tuple to update with the refreshed list.
             If None, no update is performed. Defaults to 0.
 
     Methods:
@@ -155,7 +161,7 @@ class _SelectorListRefresher:
         Clears and resets the target attribute list of the owner class to the values loaded by the loader.
         If the attribute is a list, it is cleared and extended with the loaded values; otherwise, it is set to the loaded values.
         Optionally updates the owner class's RETURN_TYPES tuple at the specified return index with the new list.
-        
+
         Returns:
             List[str]: The updated list of values.
         """
@@ -186,8 +192,9 @@ class _SelectorListRefresher:
                 self._owner_cls.RETURN_TYPES = tuple(rt_list)
 
         return target_list
+# endregion
 
-
+# register_selector_list
 def register_selector_list(
     owner_cls: Any,
     loader: Callable[[], List[str]],
@@ -213,7 +220,9 @@ def register_selector_list(
     refresher.clear()
     register_cache(refresher)
     return refresher
+# endregion
 
+# dtype_to_name
 def dtype_to_name(dtype: Any) -> str:
     """
     Converts a data type object to its string name representation.
@@ -231,8 +240,9 @@ def dtype_to_name(dtype: Any) -> str:
         return getattr(dtype, "name", None) or (str(dtype) if dtype is not None else "default")
     except Exception:
         return "default" if dtype is None else str(dtype)
+# endregion
 
-
+# region make_model_cache_key
 def make_model_cache_key(path: str, dtype: Any = None, fp8_opt: bool = False, extra: Optional[Tuple[Any, ...]] = None) -> str:
     """
     Generates a stable, readable cache key for loaded models based on input parameters.
@@ -250,8 +260,9 @@ def make_model_cache_key(path: str, dtype: Any = None, fp8_opt: bool = False, ex
     extra_str = f"|extra={repr(extra)}" if extra is not None else ""
 
     return f"{path}|dtype={dtype_name}|fp8opt={fp8_opt}{extra_str}"
+# endregion
 
-
+# build_is_changed_tuple
 def build_is_changed_tuple(randomize: bool, seed: Any, filter_value: Any, *components: Any) -> Tuple[Any, ...]:
     """
     Builds a tuple representing the change state of components, optionally including a randomization key.
@@ -271,3 +282,27 @@ def build_is_changed_tuple(randomize: bool, seed: Any, filter_value: Any, *compo
     rand_key = (filter_value, seed) if randomize else None
 
     return (*components, rand_key)
+# endregion
+
+# region dataset_from_metadata
+def dataset_from_metadata(metadata: Mapping[str, Any]) -> Tuple[dict, str]:
+    """
+    Convert cached model metadata into a dataset payload consumable by the frontend.
+
+    Returns a tuple of (dataset, hash_string).
+    """
+    raw_hash = metadata.get("model_hash")
+    hash_str = str(raw_hash) if raw_hash else "Unknown"
+
+    saved_info = metadata.get("saved_info")
+    if saved_info:
+        return saved_info, hash_str
+
+    dataset = prepare_model_dataset(
+        metadata.get("model_name"),
+        hash_str,
+        metadata.get("model_base64"),
+        metadata.get("model_path"),
+    )
+    return dataset, hash_str
+# endregion

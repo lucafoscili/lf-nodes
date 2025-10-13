@@ -1,18 +1,19 @@
 import random
+from typing import Optional, Tuple
 
 from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, INT_MAX
-from ...utils.helpers.api import process_model
+from ...utils.helpers.api import process_model_async
 from ...utils.helpers.comfy import get_comfy_list
-from ...utils.helpers.logic import filter_list, is_none, normalize_list_to_value
-from ...utils.helpers.ui import prepare_model_dataset
+from ...utils.helpers.logic import dataset_from_metadata, filter_list, is_none, normalize_list_to_value
 
 # region LF_LoraAndEmbeddingSelector
 class LF_LoraAndEmbeddingSelector:
     initial_emb_list = get_comfy_list("embeddings")
     initial_lora_list = get_comfy_list("loras")
+    _LAST_SELECTION: dict[str, Tuple[Optional[str], Optional[str]]] = {}
         
     @classmethod
     def INPUT_TYPES(self):
@@ -83,6 +84,7 @@ class LF_LoraAndEmbeddingSelector:
         filter: str = normalize_list_to_value(kwargs.get("filter"))
         lora_stack: str = normalize_list_to_value(kwargs.get("lora_stack", ""))
         embedding_stack: str = normalize_list_to_value(kwargs.get("embedding_stack", ""))
+        node_id = kwargs.get("node_id")
 
         if is_none(lora):
             lora = None
@@ -92,9 +94,12 @@ class LF_LoraAndEmbeddingSelector:
         if passthrough:
 
             PromptServer.instance.send_sync(f"{EVENT_PREFIX}loraandembeddingselector", {
-                "node": kwargs.get("node_id"),
+                "node": node_id,
                 "apiFlags": [False],
             })
+
+            if node_id:
+                self._LAST_SELECTION.pop(node_id, None)
 
             return (None, None, lora_stack, embedding_stack, "", "", "", "", None, None)
         
@@ -113,34 +118,113 @@ class LF_LoraAndEmbeddingSelector:
         if embedding not in EMBEDDINGS:
             raise ValueError(f"Not found an embedding named {lora}")
 
-        lora_data = process_model("lora", lora, "loras")
-        l_name = lora_data["model_name"]
-        l_hash = lora_data["model_hash"]
-        l_path = lora_data["model_path"]
-        l_base64 = lora_data["model_base64"]
-        l_cover = lora_data["model_cover"]
-        l_saved_info = lora_data["saved_info"]
+        should_fetch_civitai = bool(get_civitai_info)
+        event_name = f"{EVENT_PREFIX}loraandembeddingselector"
 
-        embedding_data = process_model("embedding", embedding, "embeddings")
-        e_name = embedding_data["model_name"]
-        e_hash = embedding_data["model_hash"]
-        e_path = embedding_data["model_path"]
-        e_base64 = embedding_data["model_base64"]
-        e_cover = embedding_data["model_cover"]
-        e_saved_info = embedding_data["saved_info"]
+        combined_metadata = {"lora": None, "embedding": None}
+
+        def send_update() -> None:
+            l_metadata = combined_metadata["lora"]
+            e_metadata = combined_metadata["embedding"]
+            if l_metadata is None or e_metadata is None:
+                return
+
+            l_dataset, l_hash = dataset_from_metadata(l_metadata)
+            e_dataset, e_hash = dataset_from_metadata(e_metadata)
+
+            l_pending = bool(l_metadata.get("metadata_pending", False))
+            e_pending = bool(e_metadata.get("metadata_pending", False))
+
+            def _should_fetch(meta: dict, hash_value: str, pending: bool) -> bool:
+                if not should_fetch_civitai:
+                    return False
+                if meta.get("saved_info"):
+                    return False
+                if pending:
+                    return False
+                return bool(hash_value) and hash_value != "Unknown"
+
+            fetch_flags = [
+                _should_fetch(l_metadata, l_hash, l_pending),
+                _should_fetch(e_metadata, e_hash, e_pending),
+            ]
+
+            PromptServer.instance.send_sync(
+                event_name,
+                {
+                    "node": node_id,
+                    "datasets": [l_dataset, e_dataset],
+                    "hashes": [l_hash if l_hash else "", e_hash if e_hash else ""],
+                    "apiFlags": fetch_flags,
+                    "paths": [
+                        l_metadata.get("model_path") or "",
+                        e_metadata.get("model_path") or "",
+                    ],
+                },
+            )
+
+        def _metadata_callback(kind: str):
+            def _callback(metadata_ready: dict) -> None:
+                if node_id:
+                    current = self._LAST_SELECTION.get(node_id)
+                    ready_l_path = (
+                        metadata_ready.get("model_path")
+                        if kind == "lora"
+                        else (combined_metadata["lora"].get("model_path") if combined_metadata["lora"] else None)
+                    )
+                    ready_e_path = (
+                        metadata_ready.get("model_path")
+                        if kind == "embedding"
+                        else (combined_metadata["embedding"].get("model_path") if combined_metadata["embedding"] else None)
+                    )
+                    ready_tuple = (ready_l_path, ready_e_path)
+                    if current and current != ready_tuple:
+                        return
+
+                combined_metadata[kind] = metadata_ready
+
+                if node_id:
+                    l_path_sel = combined_metadata["lora"].get("model_path") if combined_metadata["lora"] else None
+                    e_path_sel = (
+                        combined_metadata["embedding"].get("model_path") if combined_metadata["embedding"] else None
+                    )
+                    if l_path_sel or e_path_sel:
+                        self._LAST_SELECTION[node_id] = (l_path_sel, e_path_sel)
+                    else:
+                        self._LAST_SELECTION.pop(node_id, None)
+
+                send_update()
+
+            return _callback
+
+        l_callback = _metadata_callback("lora") if node_id and lora else None
+        e_callback = _metadata_callback("embedding") if node_id and embedding else None
+
+        combined_metadata["lora"] = process_model_async("lora", lora, "loras", on_complete=l_callback)
+        combined_metadata["embedding"] = process_model_async(
+            "embedding", embedding, "embeddings", on_complete=e_callback
+        )
+
+        if node_id:
+            l_path_sel = combined_metadata["lora"].get("model_path") if combined_metadata["lora"] else None
+            e_path_sel = combined_metadata["embedding"].get("model_path") if combined_metadata["embedding"] else None
+            if l_path_sel or e_path_sel:
+                self._LAST_SELECTION[node_id] = (l_path_sel, e_path_sel)
+            else:
+                self._LAST_SELECTION.pop(node_id, None)
+
+        send_update()
+
+        l_metadata = combined_metadata["lora"]
+        e_metadata = combined_metadata["embedding"]
+
+        l_name = l_metadata.get("model_name") or lora
+        e_name = e_metadata.get("model_name") or embedding
+        l_path = l_metadata.get("model_path")
+        e_path = e_metadata.get("model_path")
 
         lora_tag = f"<lora:{l_name}:{weight}>"
         formatted_embedding = f"embedding:{e_name}" if weight == 1 else f"(embedding:{e_name}:{weight})"
-
-        if l_saved_info:
-            l_dataset = l_saved_info
-        else:
-            l_dataset = prepare_model_dataset(l_name, l_hash, l_base64, l_path)
-
-        if e_saved_info:
-            e_dataset = e_saved_info
-        else:
-            e_dataset = prepare_model_dataset(e_name, e_hash, e_base64, e_path)
 
         if lora_stack:
             lora_tag = f"{lora_tag}, {lora_stack}"
@@ -148,15 +232,18 @@ class LF_LoraAndEmbeddingSelector:
         if embedding_stack:
             formatted_embedding = f"{formatted_embedding}, {embedding_stack}"
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}loraandembeddingselector", {
-            "node": kwargs.get("node_id"),
-            "datasets": [l_dataset, e_dataset],
-            "hashes": [l_hash, e_hash],
-            "apiFlags": [False if l_saved_info else get_civitai_info, False if e_saved_info else get_civitai_info],
-            "paths": [l_path, e_path],
-        })
-
-        return (lora, embedding, lora_tag, formatted_embedding, l_name, e_name, l_path, e_path, l_cover, e_cover)
+        return (
+            lora,
+            embedding,
+            lora_tag,
+            formatted_embedding,
+            l_name,
+            e_name,
+            l_path,
+            e_path,
+            l_metadata.get("model_cover"),
+            e_metadata.get("model_cover"),
+        )
     
     @classmethod
     def VALIDATE_INPUTS(self, **kwargs):
