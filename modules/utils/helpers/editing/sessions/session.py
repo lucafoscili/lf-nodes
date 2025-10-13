@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 import time
+import uuid
 from dataclasses import dataclass, field
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
@@ -106,7 +107,11 @@ class EditingSession:
 
     # region internal helpers
     def _build_context_path(self) -> str:
-        return os.path.join(get_comfy_dir("temp"), f"{self.node_id}_edit_dataset.json")
+        unique_suffix = uuid.uuid4().hex
+        return os.path.join(
+            get_comfy_dir("temp"),
+            f"{self.node_id}_{unique_suffix}_edit_dataset.json",
+        )
 
     def _write_dataset(self, dataset: Dict[str, Any]) -> None:
         with open(dataset["context_id"], "w", encoding="utf-8") as json_file:

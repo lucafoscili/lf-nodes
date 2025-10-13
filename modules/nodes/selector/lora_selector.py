@@ -4,19 +4,20 @@ from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, INT_MAX
-from ...utils.helpers.api import process_model
+from ...utils.helpers.api import process_model_async
 from ...utils.helpers.comfy import get_comfy_list
 from ...utils.helpers.logic import (
+    dataset_from_metadata,
     filter_list,
     is_none,
     normalize_list_to_value,
     register_selector_list,
 )
-from ...utils.helpers.ui import prepare_model_dataset
 
 # region LF_LoraSelector
 class LF_LoraSelector:
     initial_list: list[str] = []
+    _LAST_SELECTION: dict[str, str] = {}
         
     @classmethod
     def INPUT_TYPES(self):
@@ -79,6 +80,7 @@ class LF_LoraSelector:
         seed: int = normalize_list_to_value(kwargs.get("seed"))
         filter: str = normalize_list_to_value(kwargs.get("filter"))
         lora_stack: str = normalize_list_to_value(kwargs.get("lora_stack", ""))
+        node_id = kwargs.get("node_id")
 
         if is_none(lora):
             lora = None
@@ -88,9 +90,12 @@ class LF_LoraSelector:
         if passthrough:
 
             PromptServer.instance.send_sync(f"{EVENT_PREFIX}loraselector", {
-                "node": kwargs.get("node_id"),
+                "node": node_id,
                 "apiFlags": [False],
             })
+
+            if node_id:
+                self._LAST_SELECTION.pop(node_id, None)
 
             return (None, lora_stack, "", "", None)
         
@@ -104,34 +109,79 @@ class LF_LoraSelector:
             random.seed(seed)
             lora = random.choice(loras)
 
-        lora_data = process_model("lora", lora, "loras")
-        model_name = lora_data["model_name"]
-        model_hash = lora_data["model_hash"]
-        model_path = lora_data["model_path"]
-        model_base64 = lora_data["model_base64"]
-        model_cover = lora_data["model_cover"]
-        saved_info = lora_data["saved_info"]
+        should_fetch_civitai = bool(get_civitai_info)
+        event_name = f"{EVENT_PREFIX}loraselector"
 
+        callback = None
+        if node_id and lora:
+            def _metadata_callback(metadata_ready: dict) -> None:
+                model_path_ready = metadata_ready.get("model_path")
+                if not model_path_ready:
+                    return
+                if self._LAST_SELECTION.get(node_id) != model_path_ready:
+                    return
+
+                dataset_ready, hash_ready = dataset_from_metadata(metadata_ready)
+                hash_event_ready = hash_ready if hash_ready and hash_ready != "Unknown" else ""
+                fetch_flag_ready = (
+                    should_fetch_civitai
+                    and not metadata_ready.get("saved_info")
+                    and bool(hash_event_ready)
+                )
+
+                PromptServer.instance.send_sync(
+                    event_name,
+                    {
+                        "node": node_id,
+                        "datasets": [dataset_ready],
+                        "hashes": [hash_event_ready],
+                        "apiFlags": [fetch_flag_ready],
+                        "paths": [model_path_ready or ""],
+                    },
+                )
+
+            callback = _metadata_callback
+
+        metadata = process_model_async("lora", lora, "loras", on_complete=callback)
+        model_path = metadata.get("model_path")
+
+        if node_id:
+            if model_path:
+                self._LAST_SELECTION[node_id] = model_path
+            else:
+                self._LAST_SELECTION.pop(node_id, None)
+
+        dataset, hash_value = dataset_from_metadata(metadata)
+        if metadata.get("saved_info"):
+            should_fetch_civitai = False
+
+        metadata_pending = bool(metadata.get("metadata_pending", False))
+        hash_event = hash_value if hash_value and hash_value != "Unknown" else ""
+        fetch_now = (
+            should_fetch_civitai
+            and not metadata.get("saved_info")
+            and not metadata_pending
+            and bool(hash_event)
+        )
+        path_event = model_path or ""
+
+        model_name = metadata.get("model_name") or lora
         lora_tag = f"<lora:{model_name}:{weight}>"
-
-        if saved_info:
-            dataset = saved_info
-            get_civitai_info = False
-        else:
-            dataset = prepare_model_dataset(model_name, model_hash, model_base64, model_path)
-
         if lora_stack:
             lora_tag = f"{lora_tag}, {lora_stack}"
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}loraselector", {
-            "node": kwargs.get("node_id"),
-            "datasets": [dataset],
-            "hashes": [model_hash],
-            "apiFlags": [get_civitai_info],
-            "paths": [model_path],
-        })
+        PromptServer.instance.send_sync(
+            event_name,
+            {
+                "node": node_id,
+                "datasets": [dataset],
+                "hashes": [hash_event],
+                "apiFlags": [fetch_now],
+                "paths": [path_event],
+            },
+        )
 
-        return (lora, lora_tag, model_name, model_path, model_cover)
+        return (lora, lora_tag, model_name, model_path, metadata.get("model_cover"))
     
     @classmethod
     def VALIDATE_INPUTS(self, **kwargs):

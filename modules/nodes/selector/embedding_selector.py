@@ -4,14 +4,14 @@ from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, INT_MAX
-from ...utils.helpers.api import process_model
+from ...utils.helpers.api import process_model_async
 from ...utils.helpers.comfy import get_comfy_list
-from ...utils.helpers.logic import filter_list, is_none, normalize_list_to_value
-from ...utils.helpers.ui import prepare_model_dataset
+from ...utils.helpers.logic import dataset_from_metadata, filter_list, is_none, normalize_list_to_value
 
 # region LF_EmbeddingSelector
 class LF_EmbeddingSelector:
     initial_list = get_comfy_list("embeddings")
+    _LAST_SELECTION: dict[str, str] = {}
 
     @classmethod
     def INPUT_TYPES(self):
@@ -74,6 +74,7 @@ class LF_EmbeddingSelector:
         seed: int = normalize_list_to_value(kwargs.get("seed"))
         filter: str = normalize_list_to_value(kwargs.get("filter"))
         embedding_stack: str = normalize_list_to_value(kwargs.get("embedding_stack", ""))
+        node_id = kwargs.get("node_id")
 
         if is_none(embedding):
             embedding = None
@@ -83,9 +84,12 @@ class LF_EmbeddingSelector:
         if passthrough:
 
             PromptServer.instance.send_sync(f"{EVENT_PREFIX}embeddingselector", {
-                "node": kwargs.get("node_id"),
+                "node": node_id,
                 "apiFlags": [False],
             })
+
+            if node_id:
+                self._LAST_SELECTION.pop(node_id, None)
 
             return (None, embedding_stack, "", "", None)
         
@@ -99,34 +103,81 @@ class LF_EmbeddingSelector:
             random.seed(seed)
             embedding = random.choice(embeddings)
 
-        embedding_data = process_model("embedding", embedding, "embeddings")
-        model_name = embedding_data["model_name"]
-        model_hash = embedding_data["model_hash"]
-        model_path = embedding_data["model_path"]
-        model_base64 = embedding_data["model_base64"]
-        model_cover = embedding_data["model_cover"]
-        saved_info = embedding_data["saved_info"]
+        should_fetch_civitai = bool(get_civitai_info)
+        event_name = f"{EVENT_PREFIX}embeddingselector"
 
-        formatted_embedding =  f"embedding:{model_name}" if weight == 1 else f"(embedding:{model_name}:{weight})"
+        callback = None
+        if node_id and embedding:
+            def _metadata_callback(metadata_ready: dict) -> None:
+                model_path_ready = metadata_ready.get("model_path")
+                if not model_path_ready:
+                    return
+                if self._LAST_SELECTION.get(node_id) != model_path_ready:
+                    return
 
-        if saved_info:
-            dataset = saved_info
-            get_civitai_info = False
-        else:
-            dataset = prepare_model_dataset(model_name, model_hash, model_base64, model_path)
+                dataset_ready, hash_ready = dataset_from_metadata(metadata_ready)
+                hash_event_ready = hash_ready if hash_ready and hash_ready != "Unknown" else ""
+                fetch_flag_ready = (
+                    should_fetch_civitai
+                    and not metadata_ready.get("saved_info")
+                    and bool(hash_event_ready)
+                )
 
+                PromptServer.instance.send_sync(
+                    event_name,
+                    {
+                        "node": node_id,
+                        "datasets": [dataset_ready],
+                        "hashes": [hash_event_ready],
+                        "apiFlags": [fetch_flag_ready],
+                        "paths": [model_path_ready or ""],
+                    },
+                )
+
+            callback = _metadata_callback
+
+        metadata = process_model_async("embedding", embedding, "embeddings", on_complete=callback)
+        model_path = metadata.get("model_path")
+
+        if node_id:
+            if model_path:
+                self._LAST_SELECTION[node_id] = model_path
+            else:
+                self._LAST_SELECTION.pop(node_id, None)
+
+        dataset, hash_value = dataset_from_metadata(metadata)
+        if metadata.get("saved_info"):
+            should_fetch_civitai = False
+
+        metadata_pending = bool(metadata.get("metadata_pending", False))
+        hash_event = hash_value if hash_value and hash_value != "Unknown" else ""
+        fetch_now = (
+            should_fetch_civitai
+            and not metadata.get("saved_info")
+            and not metadata_pending
+            and bool(hash_event)
+        )
+        path_event = model_path or ""
+
+        model_name = metadata.get("model_name") or embedding
+        formatted_embedding = (
+            f"embedding:{model_name}" if weight == 1 else f"(embedding:{model_name}:{weight})"
+        )
         if embedding_stack:
             formatted_embedding = f"{formatted_embedding}, {embedding_stack}"
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}embeddingselector", {
-            "node": kwargs.get("node_id"),
-            "datasets": [dataset],
-            "hashes": [model_hash],
-            "apiFlags": [get_civitai_info],
-            "paths": [model_path],
-        })
+        PromptServer.instance.send_sync(
+            event_name,
+            {
+                "node": node_id,
+                "datasets": [dataset],
+                "hashes": [hash_event],
+                "apiFlags": [fetch_now],
+                "paths": [path_event],
+            },
+        )
 
-        return (embedding, formatted_embedding, model_name, model_path, model_cover)
+        return (embedding, formatted_embedding, model_name, model_path, metadata.get("model_cover"))
     
     @classmethod
     def VALIDATE_INPUTS(self, **kwargs):

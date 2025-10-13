@@ -7,10 +7,11 @@ from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, INT_MAX, WEIGHT_DTYPE_COMBO
-from ...utils.helpers.api import process_model
+from ...utils.helpers.api import process_model_async
 from ...utils.helpers.comfy import get_comfy_list
 from ...utils.helpers.logic import (
     build_is_changed_tuple,
+    dataset_from_metadata,
     filter_list,
     is_none,
     LazyCache,
@@ -19,7 +20,6 @@ from ...utils.helpers.logic import (
     register_cache,
     register_selector_list,
 )
-from ...utils.helpers.ui import prepare_model_dataset
 
 _DIFFUSION_MODEL_CACHE = LazyCache()
 register_cache(_DIFFUSION_MODEL_CACHE)
@@ -27,6 +27,7 @@ register_cache(_DIFFUSION_MODEL_CACHE)
 # region LF_DiffusionModelSelector
 class LF_DiffusionModelSelector:
     initial_list: list[str] = []
+    _LAST_SELECTION: dict[str, str] = {}
 
     @classmethod
     def INPUT_TYPES(self):
@@ -81,10 +82,11 @@ class LF_DiffusionModelSelector:
         seed: int = normalize_list_to_value(kwargs.get("seed"))
         filter: str = normalize_list_to_value(kwargs.get("filter"))
         weight_dtype: str = normalize_list_to_value(kwargs.get("weight_dtype", "default"))
+        node_id = kwargs.get("node_id")
 
         if is_none(diffusion_model):
-            diffusion_model = None 
-        
+            diffusion_model = None
+
         models = get_comfy_list("unet")
 
         if randomize:
@@ -97,7 +99,6 @@ class LF_DiffusionModelSelector:
 
         model_obj = None
         if diffusion_model:
-            
             model_options = {}
             if weight_dtype == "fp8_e4m3fn":
                 model_options["dtype"] = torch.float8_e4m3fn
@@ -117,7 +118,7 @@ class LF_DiffusionModelSelector:
                 model_obj = _DIFFUSION_MODEL_CACHE.get_or_set(
                     key, lambda: comfy.sd.load_diffusion_model(unet_path, model_options=model_options)
                 )
-            except:
+            except Exception:
                 try:
                     unet_path = folder_paths.get_full_path_or_raise("unet", diffusion_model)
                     key = make_model_cache_key(
@@ -132,29 +133,68 @@ class LF_DiffusionModelSelector:
                     print(f"Failed to load diffusion model {diffusion_model}: {e}")
                     model_obj = None
 
-        checkpoint_data = process_model("diffusion_model", diffusion_model, "unet")
-        model_name = checkpoint_data["model_name"]
-        model_hash = checkpoint_data["model_hash"]
-        model_path = checkpoint_data["model_path"]
-        model_base64 = checkpoint_data["model_base64"]
-        model_cover = checkpoint_data["model_cover"]
-        saved_info = checkpoint_data["saved_info"]
+        should_fetch_civitai = bool(get_civitai_info)
+        event_name = f"{EVENT_PREFIX}diffusionmodelselector"
 
-        if saved_info:
-            dataset = saved_info
-            get_civitai_info = False
-        else:
-            dataset = prepare_model_dataset(model_name, model_hash, model_base64, model_path)
+        callback = None
+        if node_id and diffusion_model:
+            def _metadata_callback(metadata_ready: dict) -> None:
+                model_path_ready = metadata_ready.get("model_path")
+                if not model_path_ready:
+                    return
+                if self._LAST_SELECTION.get(node_id) != model_path_ready:
+                    return
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}diffusionmodelselector", {
-            "node": kwargs.get("node_id"),
-            "datasets": [dataset],
-            "hashes": [model_hash],
-            "apiFlags": [get_civitai_info],
-            "paths": [model_path],
-        })
+                dataset_ready, hash_ready = dataset_from_metadata(metadata_ready)
+                hash_event_ready = hash_ready if hash_ready and hash_ready != "Unknown" else ""
+                fetch_flag_ready = should_fetch_civitai and bool(hash_event_ready)
 
-        return (diffusion_model, model_name, model_path, model_cover, model_obj)
+                PromptServer.instance.send_sync(
+                    event_name,
+                    {
+                        "node": node_id,
+                        "datasets": [dataset_ready],
+                        "hashes": [hash_event_ready],
+                        "apiFlags": [fetch_flag_ready],
+                        "paths": [model_path_ready or ""],
+                    },
+                )
+
+            callback = _metadata_callback
+
+        metadata = process_model_async("diffusion_model", diffusion_model, "unet", on_complete=callback)
+        model_path = metadata.get("model_path")
+
+        if node_id:
+            if model_path:
+                self._LAST_SELECTION[node_id] = model_path
+            else:
+                self._LAST_SELECTION.pop(node_id, None)
+
+        dataset, hash_value = dataset_from_metadata(metadata)
+        metadata_pending = bool(metadata.get("metadata_pending", False))
+        hash_event = hash_value if hash_value and hash_value != "Unknown" else ""
+        fetch_now = should_fetch_civitai and not metadata_pending and bool(hash_event)
+        path_event = model_path or ""
+
+        PromptServer.instance.send_sync(
+            event_name,
+            {
+                "node": node_id,
+                "datasets": [dataset],
+                "hashes": [hash_event],
+                "apiFlags": [fetch_now],
+                "paths": [path_event],
+            },
+        )
+
+        return (
+            diffusion_model,
+            metadata.get("model_name") or diffusion_model,
+            model_path,
+            metadata.get("model_cover"),
+            model_obj,
+        )
     
     @classmethod
     def VALIDATE_INPUTS(self, **kwargs):
