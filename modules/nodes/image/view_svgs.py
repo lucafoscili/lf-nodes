@@ -6,6 +6,7 @@ from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
 from ...utils.helpers.temp_cache import TempFileCache
 from ...utils.helpers.logic.split_svgs import split_svgs
+from ...utils.helpers.logic import normalize_list_to_value
 
 # region LF_ViewSVGs
 class LF_ViewSVGs:
@@ -41,7 +42,15 @@ class LF_ViewSVGs:
     def on_exec(self, **kwargs: dict):
         self._temp_cache.cleanup()
 
-        svg_string: str = kwargs.get("svg_string", "") or ""
+        raw = normalize_list_to_value(kwargs.get("svg_string"))
+
+        if isinstance(raw, bytes):
+            try:
+                svg_string = raw.decode('utf-8')
+            except Exception:
+                svg_string = raw.decode('latin-1', errors='ignore')
+        else:
+            svg_string = str(raw or "")
 
         svg_blocks = split_svgs(svg_string)
 
