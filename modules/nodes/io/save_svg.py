@@ -15,15 +15,15 @@ class LF_SaveSVG:
                     "tooltip": "SVG data to save (.svg)."
                 }),
                 "filename_prefix": (Input.STRING, {
-                    "default": '', 
+                    "default": '',
                     "tooltip": "Path and filename for saving the SVG. Use slashes to set directories."
                 }),
                 "add_timestamp": (Input.BOOLEAN, {
-                    "default": True, 
+                    "default": True,
                     "tooltip": "Add timestamp to the filename as a suffix."
                 }),
                 "add_counter": (Input.BOOLEAN, {
-                    "default": True, 
+                    "default": True,
                     "tooltip": "Add a counter to the filename to avoid overwriting."
                 }),
             },
@@ -32,11 +32,11 @@ class LF_SaveSVG:
                     "default": {}
                 }),
             },
-            "hidden": { 
+            "hidden": {
                 "node_id": "UNIQUE_ID",
-            } 
+            }
         }
-    
+
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     OUTPUT_NODE = True
@@ -79,7 +79,7 @@ class LF_SaveSVG:
         dataset: dict = { "nodes": nodes }
 
         slot_names = [f"slot-{i}" for i in range(len(svg_blocks))]
-        slot_map = { name: svg for name, svg in zip(slot_names, svg_blocks) }
+        slot_map = { name: block for name, block in zip(slot_names, svg_blocks) }
 
         PromptServer.instance.send_sync(f"{EVENT_PREFIX}savesvg", {
             "node": kwargs.get("node_id"),
@@ -87,9 +87,6 @@ class LF_SaveSVG:
             "slot_map": slot_map,
         })
 
-        # Include a UI representation so execution caches.ui will record this
-        # node's output in history. The 'ui' key will be collected by the
-        # execution machinery and saved under history.outputs for the prompt.
         return {
             "ui": {"svg": (svg,)},
             "result": (svg,)

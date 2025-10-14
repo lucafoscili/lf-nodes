@@ -62,7 +62,7 @@ class LF_ViewSVGs:
         dataset: dict = { "nodes": nodes }
 
         slot_names = [f"slot-{i}" for i in range(len(svg_blocks))]
-        slot_map = { name: svg for name, svg in zip(slot_names, svg_blocks) }
+        slot_map = { name: block for name, block in zip(slot_names, svg_blocks) }
 
         PromptServer.instance.send_sync(f"{EVENT_PREFIX}viewsvgs", {
             "node": kwargs.get("node_id"),
