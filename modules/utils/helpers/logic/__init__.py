@@ -15,5 +15,6 @@ from .not_none import *
 from .randomize_from_history import *
 from .sanitize_filename import *
 from .selector_utils import *
+from .split_svgs import *
 
 __all__ = [name for name in dir() if not name.startswith("_")]

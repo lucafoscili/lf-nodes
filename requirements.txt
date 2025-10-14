@@ -1,10 +1,13 @@
-﻿numpy
+﻿GPUtil
+numpy
 openai
 opencv-python
 onnxruntime
 pandas
 piexif
 Pillow
+psutil
+pynvml
 rembg
 requests
 svgwrite
@@ -13,6 +16,4 @@ torch
 torchvision
 tqdm
 transformers
-psutil
-GPUtil
-pynvml
+vtracer

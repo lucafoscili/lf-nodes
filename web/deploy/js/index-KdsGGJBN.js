@@ -13655,7 +13655,7 @@ var X = false, Z = (t2, e2, n2) => {
                         const n6 = t7.i.replace(/-/g, "_"), o6 = t7.T;
                         if (!o6) return;
                         const r3 = i.get(o6);
-                        return r3 ? r3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-0df37de3.entry.js": () => import("./p-0df37de3.entry-DV2Iu4d3.js"), "./p-182c6c19.entry.js": () => import("./p-182c6c19.entry-j5QF_7IX.js"), "./p-28dd0bff.entry.js": () => import("./p-28dd0bff.entry-DsDwHtCc.js"), "./p-36aa4a7f.entry.js": () => import("./p-36aa4a7f.entry-BE0eZiyw.js"), "./p-55c6a817.entry.js": () => import("./p-55c6a817.entry-_NYxrDF4.js"), "./p-5d51f267.entry.js": () => import("./p-5d51f267.entry-CW2SvlgP.js"), "./p-62695161.entry.js": () => import("./p-62695161.entry-iRW0zdgp.js"), "./p-924ca284.entry.js": () => import("./p-924ca284.entry-CLqq1c01.js"), "./p-9738317a.entry.js": () => import("./p-9738317a.entry-DSDAUtuc.js"), "./p-988ad9c7.entry.js": () => import("./p-988ad9c7.entry-CVvqwwut.js"), "./p-a6642965.entry.js": () => import("./p-a6642965.entry-DT6bZpZ5.js"), "./p-b1bf3d70.entry.js": () => import("./p-b1bf3d70.entry--3zLE3Z1.js"), "./p-e2900881.entry.js": () => import("./p-e2900881.entry-Di-OVUcb.js"), "./p-e4e76694.entry.js": () => import("./p-e4e76694.entry-AkdbxURP.js"), "./p-e6148250.entry.js": () => import("./p-e6148250.entry-C3wJzbck.js"), "./p-f19de954.entry.js": () => import("./p-f19de954.entry-DTFhifx0.js") }), `./${o6}.entry.js`, 2).then(((t8) => (i.set(o6, t8), t8[n6])), ((t8) => {
+                        return r3 ? r3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-0df37de3.entry.js": () => import("./p-0df37de3.entry-BD2fiNex.js"), "./p-182c6c19.entry.js": () => import("./p-182c6c19.entry-C7SrtR4j.js"), "./p-28dd0bff.entry.js": () => import("./p-28dd0bff.entry-Ce_4o629.js"), "./p-36aa4a7f.entry.js": () => import("./p-36aa4a7f.entry-BY3qXhQ_.js"), "./p-55c6a817.entry.js": () => import("./p-55c6a817.entry-Bz-Hf5_c.js"), "./p-5d51f267.entry.js": () => import("./p-5d51f267.entry-CjZdSH02.js"), "./p-62695161.entry.js": () => import("./p-62695161.entry-B5R54dLT.js"), "./p-924ca284.entry.js": () => import("./p-924ca284.entry-hXKDFZ1d.js"), "./p-9738317a.entry.js": () => import("./p-9738317a.entry-8nhjLahJ.js"), "./p-988ad9c7.entry.js": () => import("./p-988ad9c7.entry-TV5Tx7Gj.js"), "./p-a6642965.entry.js": () => import("./p-a6642965.entry-DJxtmVgW.js"), "./p-b1bf3d70.entry.js": () => import("./p-b1bf3d70.entry-Csd3LnkJ.js"), "./p-e2900881.entry.js": () => import("./p-e2900881.entry-4hVh16tg.js"), "./p-e4e76694.entry.js": () => import("./p-e4e76694.entry-fsfNWn1o.js"), "./p-e6148250.entry.js": () => import("./p-e6148250.entry-C7qVDo8t.js"), "./p-f19de954.entry.js": () => import("./p-f19de954.entry-D6DIJFuZ.js") }), `./${o6}.entry.js`, 2).then(((t8) => (i.set(o6, t8), t8[n6])), ((t8) => {
                           l(t8, e3.$hostElement$);
                         }));
                         /*!__STENCIL_STATIC_IMPORT_SWITCH__*/
@@ -14891,6 +14891,7 @@ var NodeName;
   NodeName2["saveImageForCivitai"] = "LF_SaveImageForCivitAI";
   NodeName2["saveJson"] = "LF_SaveJSON";
   NodeName2["saveMarkdown"] = "LF_SaveMarkdown";
+  NodeName2["saveSvg"] = "LF_SaveSVG";
   NodeName2["saveText"] = "LF_SaveText";
   NodeName2["schedulerSelector"] = "LF_SchedulerSelector";
   NodeName2["sepia"] = "LF_Sepia";
@@ -15037,6 +15038,7 @@ const NODE_WIDGET_MAP = {
   LF_SaveImageForCivitAI: [CustomWidgetName.masonry],
   LF_SaveJSON: [CustomWidgetName.tree],
   LF_SaveMarkdown: [CustomWidgetName.tree],
+  LF_SaveSVG: [CustomWidgetName.masonry],
   LF_SaveText: [CustomWidgetName.tree],
   LF_SchedulerSelector: [CustomWidgetName.history],
   LF_Sepia: [CustomWidgetName.compare],

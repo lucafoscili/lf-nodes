@@ -134,6 +134,7 @@ export enum NodeName {
   saveImageForCivitai = 'LF_SaveImageForCivitAI',
   saveJson = 'LF_SaveJSON',
   saveMarkdown = 'LF_SaveMarkdown',
+  saveSvg = 'LF_SaveSVG',
   saveText = 'LF_SaveText',
   schedulerSelector = 'LF_SchedulerSelector',
   sepia = 'LF_Sepia',
