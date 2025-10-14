@@ -14,6 +14,8 @@ from server import PromptServer
 from ..utils.constants import API_ROUTE_PREFIX
 from ..workflows import get_workflow, list_workflows
 from ..workflows.registry import _json_safe as workflow_json_safe
+import os
+import folder_paths
 
 # region Submit prompt
 @PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/submit-prompt")
@@ -91,6 +93,27 @@ async def lf_nodes_run_workflow(request: web.Request) -> web.Response:
     status = history_entry.get("status") or {}
     status_str = status.get("status_str", "unknown")
     http_status = 200 if status_str == "success" else 500
+    # Choose a preferred output to surface in the UI.
+    # Prefer the first validated output (from validate_prompt) that produced outputs.
+    preferred_output = None
+    try:
+        outputs_in_history = set((history_entry.get('outputs') or {}).keys())
+        validated_outputs = validation[2] if isinstance(validation, (list, tuple)) and len(validation) > 2 else []
+        for o in validated_outputs:
+            if o in outputs_in_history:
+                preferred_output = o
+                break
+        # Fallback: pick an output node that contains an images array if present
+        if preferred_output is None:
+            for o, v in (history_entry.get('outputs') or {}).items():
+                try:
+                    if isinstance(v, dict) and v.get('images'):
+                        preferred_output = o
+                        break
+                except Exception:
+                    continue
+    except Exception:
+        preferred_output = None
 
     return web.json_response(
         {
@@ -98,9 +121,53 @@ async def lf_nodes_run_workflow(request: web.Request) -> web.Response:
             "status": status_str,
             "history": _sanitize_history(history_entry),
             "workflow_id": workflow_id,
+            "preferred_output": preferred_output,
         },
         status=http_status,
     )
+# endregion
+
+
+# region Upload handler
+@PromptServer.instance.routes.post(f"{API_ROUTE_PREFIX}/upload")
+async def lf_nodes_upload(request: web.Request) -> web.Response:
+  """Accept a multipart file upload and save to Comfy temp directory.
+
+  Returns JSON: { "path": <path_to_use_in_workflow> }
+  The returned path is the absolute file path which can be passed to nodes that
+  expect an image path. Files are written with their original filename into
+  the temp directory.
+  """
+  reader = await request.multipart()
+  field = await reader.next()
+  if field is None or field.name != 'file':
+    return web.json_response({'error': 'missing_file'}, status=400)
+
+  filename = field.filename or f"upload_{int(time.time())}"
+  # Ensure directory exists
+  temp_dir = folder_paths.get_temp_directory()
+  os.makedirs(temp_dir, exist_ok=True)
+  # Avoid clobbering: add a numeric suffix if file exists
+  dest_path = os.path.join(temp_dir, filename)
+  base, ext = os.path.splitext(dest_path)
+  counter = 1
+  while os.path.exists(dest_path):
+    dest_path = f"{base}_{counter}{ext}"
+    counter += 1
+
+  try:
+    with open(dest_path, 'wb') as f:
+      while True:
+        chunk = await field.read_chunk()
+        if not chunk:
+          break
+        f.write(chunk)
+  except Exception as exc:
+    logging.exception('Failed to save uploaded file: %s', exc)
+    return web.json_response({'error': 'save_failed', 'detail': str(exc)}, status=500)
+
+  # Return the absolute path which workflows expect for file inputs
+  return web.json_response({'path': dest_path})
 # endregion
 
 # region HTML content
@@ -149,7 +216,6 @@ LFN_WORKFLOW_RUNNER_HTML = dedent(
           padding: 1rem 1.2rem;
           margin-top: 1rem;
           white-space: pre-wrap;
-          max-height: 360px;
           overflow: auto;
           border: 1px solid #1d2230;
           font-size: 0.95rem;
@@ -205,12 +271,23 @@ LFN_WORKFLOW_RUNNER_HTML = dedent(
           label.textContent = field.label;
           wrapper.appendChild(label);
 
-          const input = document.createElement('input');
-          input.type = 'text';
-          input.value = field.default ?? '';
-          input.className = 'fallback-input';
-          if (field.placeholder) {
-            input.placeholder = field.placeholder;
+          // Special-case the common 'source_path' field: render a file input
+          // so users can upload an image directly. The uploaded file will be
+          // sent to the server and stored in Comfy's temp directory.
+          let input;
+          if (field.name === 'source_path') {
+            input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.className = 'fallback-input';
+          } else {
+            input = document.createElement('input');
+            input.type = 'text';
+            input.value = field.default ?? '';
+            input.className = 'fallback-input';
+            if (field.placeholder) {
+              input.placeholder = field.placeholder;
+            }
           }
           if (field.extra && field.extra.htmlAttributes) {
             Object.entries(field.extra.htmlAttributes).forEach(([key, value]) => {
@@ -233,6 +310,10 @@ LFN_WORKFLOW_RUNNER_HTML = dedent(
           return {
             element: wrapper,
             async getValue() {
+              // If this is a file input, return the File object (or null)
+              if (input.type === 'file') {
+                return input.files && input.files.length > 0 ? input.files[0] : null;
+              }
               return input.value;
             }
           };
@@ -287,8 +368,33 @@ LFN_WORKFLOW_RUNNER_HTML = dedent(
           resetResult();
 
           const inputs = {};
+          // Upload any selected files first and replace value with the
+          // saved path returned by the server.
           for (const [name, renderer] of fieldRenderers.entries()) {
-            inputs[name] = await renderer.getValue();
+            const val = await renderer.getValue();
+            // If val is a File object, upload it to the server
+            if (val instanceof File) {
+              setStatus('Uploading file…', 'info');
+              const form = new FormData();
+              form.append('file', val, val.name);
+              try {
+                const uploadResp = await fetch(`${API_BASE}/upload`, { method: 'POST', body: form });
+                if (!uploadResp.ok) {
+                  const err = await uploadResp.text();
+                  throw new Error(`Upload failed: ${err}`);
+                }
+                const uploadJson = await uploadResp.json();
+                // Server returns the absolute path to use as the workflow input
+                inputs[name] = uploadJson.path;
+              } catch (err) {
+                setStatus('File upload failed.', 'error');
+                resultElement.textContent = String(err);
+                runButton.disabled = false;
+                return;
+              }
+            } else {
+              inputs[name] = val;
+            }
           }
 
           try {
@@ -304,7 +410,136 @@ LFN_WORKFLOW_RUNNER_HTML = dedent(
               return;
             }
             setStatus(`Workflow completed with status: ${payload.status}`, 'info');
-            resultElement.textContent = stringify(payload.history.outputs);
+
+            // If outputs contain image info (or any outputs), render them and
+            // provide a small selector when multiple outputs exist. Default to
+            // the server-provided preferred_output when available.
+            const outputs = payload.history && payload.history.outputs ? payload.history.outputs : {};
+            const outputKeys = Object.keys(outputs || {});
+
+            // Determine which key to show by default
+            const preferred = payload.preferred_output;
+            let selectedKey = null;
+            if (preferred && outputs[preferred]) selectedKey = preferred;
+            else if (outputKeys.length > 0) selectedKey = outputKeys[0];
+
+            // Helper: render a single output key (images if present, otherwise JSON)
+            function renderOutputForKey(key) {
+              resultElement.innerHTML = '';
+              if (!key || !outputs[key]) {
+                resultElement.textContent = stringify(outputs);
+                return;
+              }
+              const val = outputs[key];
+              // If images[] exists, render the first image
+              try {
+                if (val && val.images && Array.isArray(val.images) && val.images.length > 0) {
+                  const imgInfo = val.images[0];
+                  const filename = imgInfo.filename || imgInfo.name;
+                  const type = imgInfo.type || 'temp';
+                  const subfolder = imgInfo.subfolder || '';
+                  if (filename) {
+                    const url = `/view?filename=${encodeURIComponent(filename)}&type=${encodeURIComponent(type)}&subfolder=${encodeURIComponent(subfolder)}`;
+                    const img = document.createElement('img');
+                    img.src = url;
+                    img.style.maxWidth = '100%';
+                    img.style.borderRadius = '8px';
+                    img.alt = filename;
+                    resultElement.appendChild(img);
+                    return;
+                  }
+                }
+                // If there's an SVG UI payload, render it inline and add download
+                if (val && val.svg) {
+                  const svgText = Array.isArray(val.svg) ? val.svg[0] : val.svg;
+                  try {
+                    // Create a container and inject the SVG string. We trust this SVG
+                    // because it was produced locally by the workflow, but to be safe
+                    // render inside a sandboxed <object> when possible.
+                    const wrapper = document.createElement('div');
+                    wrapper.style.borderRadius = '8px';
+                    wrapper.style.overflow = 'auto';
+                    wrapper.style.padding = '0.6rem';
+                    wrapper.style.background = '#061018';
+
+                    // Use an <object> with data: URI so the SVG is rendered as vector
+                    const blob = new Blob([svgText], { type: 'image/svg+xml' });
+                    const url = URL.createObjectURL(blob);
+                    const obj = document.createElement('object');
+                    obj.type = 'image/svg+xml';
+                    obj.data = url;
+                    obj.style.width = '100%';
+                    obj.style.border = 'none';
+                    wrapper.appendChild(obj);
+
+                    // Add download button
+                    const dl = document.createElement('a');
+                    dl.href = url;
+                    dl.download = (key + '.svg') || 'result.svg';
+                    dl.textContent = 'Download SVG';
+                    dl.style.display = 'inline-block';
+                    dl.style.marginTop = '0.6rem';
+                    dl.style.padding = '0.45rem 0.65rem';
+                    dl.style.background = '#1f2533';
+                    dl.style.border = '1px solid #39435a';
+                    dl.style.borderRadius = '8px';
+                    dl.style.color = 'white';
+                    wrapper.appendChild(dl);
+
+                    resultElement.appendChild(wrapper);
+                    return;
+                  } catch (e) {
+                    // Continue to textual fallback
+                  }
+                }
+              } catch (e) {
+                // fall through to textual representation
+              }
+
+              // Fallback: pretty-print the specific output node (or all outputs)
+              if (outputs[key]) {
+                resultElement.textContent = stringify(outputs[key]);
+              } else {
+                resultElement.textContent = stringify(outputs);
+              }
+            }
+
+            // If multiple outputs, create a small dropdown for choosing which
+            // node's output to display. Insert it above the result element.
+            let outputSelect = document.getElementById('output-select');
+            if (outputKeys.length > 1) {
+              if (!outputSelect) {
+                outputSelect = document.createElement('select');
+                outputSelect.id = 'output-select';
+                outputSelect.style.marginTop = '0.6rem';
+                outputSelect.style.padding = '0.4rem 0.6rem';
+                outputSelect.style.borderRadius = '8px';
+                outputSelect.style.background = '#111520';
+                outputSelect.style.border = '1px solid #3a4154';
+                outputSelect.style.color = 'inherit';
+                // Insert before resultElement
+                resultElement.parentNode.insertBefore(outputSelect, resultElement);
+              }
+              // Populate options
+              outputSelect.innerHTML = '';
+              for (const key of outputKeys) {
+                const opt = document.createElement('option');
+                opt.value = key;
+                opt.textContent = `${key}`;
+                if (key === preferred) opt.textContent += ' (preferred)';
+                outputSelect.appendChild(opt);
+              }
+              outputSelect.value = selectedKey;
+              outputSelect.onchange = (e) => {
+                renderOutputForKey(e.target.value);
+              };
+            } else {
+              // Remove select if present and not needed
+              if (outputSelect && outputSelect.parentNode) outputSelect.parentNode.removeChild(outputSelect);
+            }
+
+            // Finally render the selected output (or a fallback)
+            renderOutputForKey(selectedKey);
           } catch (error) {
             console.error(error);
             setStatus('Failed to execute workflow.', 'error');
@@ -313,6 +548,8 @@ LFN_WORKFLOW_RUNNER_HTML = dedent(
             runButton.disabled = false;
           }
         });
+
+        // Upload endpoint helper (server-side implemented below)
 
         loadWorkflows()
           .then(() => setStatus('Ready.', 'info'))

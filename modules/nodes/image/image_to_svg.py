@@ -1,3 +1,6 @@
+import json
+from dataclasses import replace
+
 import torch
 
 from server import PromptServer
@@ -6,10 +9,140 @@ from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, SVG_COMBO
 from ...utils.helpers.api import get_resource_url
 from ...utils.helpers.comfy import resolve_filepath
-from ...utils.helpers.conversion import numpy_to_tensor, numpy_to_svg, tensor_to_numpy, tensor_to_pil
+from ...utils.helpers.conversion import (
+    SVGTraceConfig,
+    numpy_to_tensor,
+    numpy_to_svg,
+    tensor_to_numpy,
+    tensor_to_pil,
+)
 from ...utils.helpers.logic import normalize_input_image, normalize_list_to_value, normalize_output_image
 from ...utils.helpers.temp_cache import TempFileCache
 from ...utils.helpers.ui import create_compare_node
+
+TRACE_PRESET_COMBO = ["max_quality", "high_quality", "balanced", "max_speed", "custom"]
+OPTIONAL_VECTOR_MODE_COMBO = ["preset", "fill", "stroke", "both"]
+SIZE_MODE_COMBO = ["preset", "responsive", "fixed"]
+PRESET_CONFIGS: dict[str, SVGTraceConfig] = {
+    "max_quality": SVGTraceConfig(
+        num_colors=8,
+        simplify_tol=0.01,
+        vector_mode="fill",
+        stroke_width=0.0,
+        upsample_scale=6,
+        mask_blur=1.0,
+        mask_offset=0,
+        mask_close_iters=2,
+        mask_open_iters=0,
+        smooth_passes=1,
+        min_area_ratio=0.00002,
+        pre_blur_sigma=0.15,
+        bilateral_d=5,
+        bilateral_sigma_color=20.0,
+        bilateral_sigma_space=20.0,
+        collinear_angle_tol=3.0,
+        engine="vtracer",
+        vtracer_mode="spline",
+        vtracer_hierarchical="stacked",
+        vtracer_filter_speckle=3,
+        vtracer_color_precision=6,
+        vtracer_layer_difference=10,
+        vtracer_corner_threshold=80,
+        vtracer_length_threshold=3.5,
+        vtracer_max_iterations=12,
+        vtracer_splice_threshold=50,
+        vtracer_path_precision=3,
+    ),
+    "high_quality": SVGTraceConfig(
+        num_colors=6,
+        simplify_tol=0.014,
+        vector_mode="fill",
+        stroke_width=0.0,
+        upsample_scale=5,
+        mask_blur=0.9,
+        mask_offset=0,
+        mask_close_iters=2,
+        mask_open_iters=0,
+        smooth_passes=1,
+        min_area_ratio=0.00002,
+        pre_blur_sigma=0.18,
+        bilateral_d=6,
+        bilateral_sigma_color=30.0,
+        bilateral_sigma_space=30.0,
+        collinear_angle_tol=4.0,
+        engine="vtracer",
+        vtracer_mode="spline",
+        vtracer_hierarchical="stacked",
+        vtracer_filter_speckle=4,
+        vtracer_color_precision=6,
+        vtracer_layer_difference=12,
+        vtracer_corner_threshold=85,
+        vtracer_length_threshold=4.0,
+        vtracer_max_iterations=12,
+        vtracer_splice_threshold=55,
+        vtracer_path_precision=3,
+    ),
+    "balanced": SVGTraceConfig(
+        num_colors=5,
+        simplify_tol=0.012,
+        vector_mode="fill",
+        stroke_width=0.0,
+        upsample_scale=3,
+        mask_blur=0.9,
+        mask_offset=0,
+        mask_close_iters=1,
+        mask_open_iters=0,
+        smooth_passes=1,
+        min_area_ratio=0.00002,
+        pre_blur_sigma=0.15,
+        bilateral_d=5,
+        bilateral_sigma_color=28.0,
+        bilateral_sigma_space=28.0,
+        collinear_angle_tol=4.0,
+        engine="vtracer",
+        vtracer_mode="spline",
+        vtracer_hierarchical="stacked",
+        vtracer_filter_speckle=5,
+        vtracer_color_precision=6,
+        vtracer_layer_difference=10,
+        vtracer_corner_threshold=85,
+        vtracer_length_threshold=4.0,
+        vtracer_max_iterations=10,
+        vtracer_splice_threshold=55,
+        vtracer_path_precision=3,
+    ),
+    "max_speed": SVGTraceConfig(
+        num_colors=4,
+        simplify_tol=0.02,
+        vector_mode="fill",
+        stroke_width=0.0,
+        upsample_scale=2,
+        mask_blur=0.6,
+        mask_offset=0,
+        mask_close_iters=1,
+        mask_open_iters=0,
+        smooth_passes=1,
+        min_area_ratio=0.00002,
+        pre_blur_sigma=0.1,
+        bilateral_d=0,
+        bilateral_sigma_color=0.0,
+        bilateral_sigma_space=0.0,
+        collinear_angle_tol=5.0,
+        engine="contour",
+        vtracer_mode="spline",
+        vtracer_hierarchical="stacked",
+        vtracer_filter_speckle=3,
+        vtracer_color_precision=6,
+        vtracer_layer_difference=8,
+        vtracer_corner_threshold=80,
+        vtracer_length_threshold=3.5,
+        vtracer_max_iterations=8,
+        vtracer_splice_threshold=45,
+        vtracer_path_precision=3,
+    ),
+    "custom": SVGTraceConfig(),
+}
+
 
 # region LF_ImageToSVG
 class LF_ImageToSVG:
@@ -23,40 +156,43 @@ class LF_ImageToSVG:
                 "image": (Input.IMAGE, {
                     "tooltip": "Input image tensor to vectorize"
                 }),
-                "threshold": (Input.FLOAT, {
-                    "default": 0.5,
-                    "min": 0.0,
-                    "max": 1.0,
-                    "step": 0.01,
-                    "tooltip": "Binarization threshold for monochrome mode"
-                }),
-                "num_colors": (Input.INTEGER, {
-                    "default": 2,
-                    "min": 1,
-                    "max": 16,
-                    "step": 1,
-                    "tooltip": "Number of colors for quantization (1 = binary)"
-                }),
-                "simplify_tol": (Input.FLOAT, {
-                    "default": 2.0,
-                    "min": 0.0,
-                    "max": 10.0,
-                    "step": 0.1,
-                    "tooltip": "Contour simplification tolerance (Douglas-Peucker)"
-                }),
-                "vector_mode": (SVG_COMBO, {
-                    "default": "fill",
-                    "tooltip": "Render mode: fill, stroke, or both."
-                }),
-                "stroke_width": (Input.FLOAT, {
-                    "default": 1.0,
-                    "min": 0.0,
-                    "max": 10.0,
-                    "step": 0.1,
-                    "tooltip": "Outline width"
+                "preset": (TRACE_PRESET_COMBO, {
+                    "default": "max_quality",
+                    "tooltip": "Choose a quality/speed profile. Max quality favours fidelity, max speed favours performance."
                 }),
             },
             "optional": {
+                "advanced_config": (Input.JSON, {
+                    "default": {},
+                    "tooltip": "Optional overrides for preset values (keys map to SVGTraceConfig fields)."
+                }),
+                "render_mode": (OPTIONAL_VECTOR_MODE_COMBO, {
+                    "default": "preset",
+                    "tooltip": "Override preset stroke/fill behaviour."
+                }),
+                "fill_color": (Input.STRING, {
+                    "default": "",
+                    "tooltip": "Override fill colour (hex or CSS). Leave blank to use preset colours."
+                }),
+                "stroke_color": (Input.STRING, {
+                    "default": "",
+                    "tooltip": "Override stroke colour (hex or CSS). Leave blank to use preset colours."
+                }),
+                "background_color": (Input.STRING, {
+                    "default": "",
+                    "tooltip": "Background colour for the SVG canvas. Leave blank for transparent."
+                }),
+                "stroke_width": (Input.FLOAT, {
+                    "default": 0.0,
+                    "min": 0.0,
+                    "max": 10.0,
+                    "step": 0.1,
+                    "tooltip": "Stroke width when stroke rendering is enabled. Leave at 0 to keep preset."
+                }),
+                "size_mode": (SIZE_MODE_COMBO, {
+                    "default": "preset",
+                    "tooltip": "Responsive outputs use width/height 100%%, fixed uses pixel dimensions."
+                }),
                 "ui_widget": (Input.LF_COMPARE, {
                     "default": {}
                 })
@@ -76,22 +212,63 @@ class LF_ImageToSVG:
         self._temp_cache.cleanup()
 
         image: list[torch.Tensor] = normalize_input_image(kwargs.get("image"))
-        threshold: float = normalize_list_to_value(kwargs.get("threshold"))
-        num_colors: int = normalize_list_to_value(kwargs.get("num_colors"))
-        simplify_tol: float = normalize_list_to_value(kwargs.get("simplify_tol"))
-        vector_mode: str = normalize_list_to_value(kwargs.get("vector_mode"))
-        stroke_width: float = normalize_list_to_value(kwargs.get("stroke_width"))
+        preset: str = (normalize_list_to_value(kwargs.get("preset")) or "max_quality").lower()
+        advanced_cfg = normalize_list_to_value(kwargs.get("advanced_config")) or {}
+
+        if isinstance(advanced_cfg, str):
+            try:
+                parsed = json.loads(advanced_cfg)
+                advanced_cfg = parsed if isinstance(parsed, dict) else {}
+            except json.JSONDecodeError:
+                advanced_cfg = {}
+        elif not isinstance(advanced_cfg, dict):
+            advanced_cfg = {}
+
+        base_config = PRESET_CONFIGS.get(preset, PRESET_CONFIGS["max_quality"])
+        config = replace(base_config)
+
+        for key, value in advanced_cfg.items():
+            if value is None or not hasattr(config, key):
+                continue
+            setattr(config, key, value)
+
+        render_mode = normalize_list_to_value(kwargs.get("render_mode"))
+        if isinstance(render_mode, str) and render_mode and render_mode.lower() != "preset":
+            config.vector_mode = render_mode.lower()
+
+        fill_color = normalize_list_to_value(kwargs.get("fill_color"))
+        if isinstance(fill_color, str):
+            fill_color = fill_color.strip()
+            config.fill_color_override = fill_color or config.fill_color_override
+
+        stroke_color = normalize_list_to_value(kwargs.get("stroke_color"))
+        if isinstance(stroke_color, str):
+            stroke_color = stroke_color.strip()
+            config.stroke_color_override = stroke_color or config.stroke_color_override
+
+        background_color = normalize_list_to_value(kwargs.get("background_color"))
+        if isinstance(background_color, str):
+            background_color = background_color.strip()
+            config.background_color = background_color or config.background_color
+
+        stroke_width_override = normalize_list_to_value(kwargs.get("stroke_width"))
+        if isinstance(stroke_width_override, (int, float)) and stroke_width_override > 0:
+            config.stroke_width = float(stroke_width_override)
+
+        size_mode = normalize_list_to_value(kwargs.get("size_mode"))
+        if isinstance(size_mode, str) and size_mode and size_mode.lower() != "preset":
+            config.size_mode = size_mode.lower()
 
         nodes: list[dict] = []
-        dataset: dict = { "nodes": nodes }
+        dataset: dict = {"nodes": nodes}
 
         previews: list[torch.Tensor] = []
         svgs: list[str] = []
-        palettes: list[dict] = []
+        palettes: list[list[str]] = []
 
         for index, img in enumerate(image):
             arr = tensor_to_numpy(img)
-            svg_str, proc, palette = numpy_to_svg(arr, num_colors, threshold, simplify_tol, vector_mode, stroke_width)
+            svg_str, proc, palette = numpy_to_svg(arr, config)
             preview = numpy_to_tensor(proc)
 
             pil_image_original = tensor_to_pil(img)
