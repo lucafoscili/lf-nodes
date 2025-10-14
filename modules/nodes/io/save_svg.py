@@ -52,7 +52,7 @@ class LF_SaveSVG:
         svg_blocks = split_svgs(svg)
 
         nodes: list[dict] = []
-        for index, _ in enumerate(svg_blocks):
+        for index, block in enumerate(svg_blocks):
             slot_name = f"slot-{index}"
             nodes.append({
                 "cells": {
@@ -73,8 +73,17 @@ class LF_SaveSVG:
                 add_counter=add_counter
             )
 
+            content = block
+            if isinstance(content, bytes):
+                try:
+                    content = content.decode('utf-8')
+                except Exception:
+                    content = content.decode('latin-1', errors='ignore')
+            else:
+                content = str(content)
+
             with open(output_file, 'w', encoding='utf-8') as svg_file:
-                svg_file.write(svg)
+                svg_file.write(content)
 
         dataset: dict = { "nodes": nodes }
 
