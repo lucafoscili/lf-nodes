@@ -4,6 +4,7 @@ description = "Custom nodes with a touch of extra UX ✨ Client-side LLM chat, m
 version = "1.6.1"
 license = {file = "LICENSE"}
 dependencies = [
+    "GPUtil",
     "numpy",
     "onnxruntime",
     "openai",
@@ -11,6 +12,8 @@ dependencies = [
     "pandas",
     "piexif",
     "Pillow",
+    "psutil",
+    "pynvml",
     "rembg",
     "requests",
     "svgwrite",
@@ -19,9 +22,7 @@ dependencies = [
     "torchvision",
     "tqdm",
     "transformers",
-    "psutil",
-    "GPUtil",
-    "pynvml",
+    "vtracer"
 ]
 
 [project.urls]
