@@ -216,7 +216,6 @@ LFN_WORKFLOW_RUNNER_HTML = dedent(
           padding: 1rem 1.2rem;
           margin-top: 1rem;
           white-space: pre-wrap;
-          max-height: 360px;
           overflow: auto;
           border: 1px solid #1d2230;
           font-size: 0.95rem;
@@ -470,7 +469,6 @@ LFN_WORKFLOW_RUNNER_HTML = dedent(
                     obj.type = 'image/svg+xml';
                     obj.data = url;
                     obj.style.width = '100%';
-                    obj.style.height = '480px';
                     obj.style.border = 'none';
                     wrapper.appendChild(obj);
 

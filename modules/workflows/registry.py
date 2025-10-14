@@ -237,6 +237,27 @@ def _configure_image_to_svg_workflow(prompt: Dict[str, Any], inputs: Dict[str, A
 # region Workflow Definitions
 WORKFLOW_DEFINITIONS: Dict[str, WorkflowDefinition] = {}
 
+image_to_svg_workflow_path = _resolve_user_path("default", "workflows", "API_ImageToSVG.json")
+WORKFLOW_DEFINITIONS["image-to-svg"] = WorkflowDefinition(
+    workflow_id="image-to-svg",
+    label="Image to SVG",
+    description=(
+        "Converts a raster image to SVG format using the configured image processing model."
+    ),
+    workflow_path=image_to_svg_workflow_path,
+    fields=[
+        WorkflowField(
+            name="source_path",
+            label="Source File or Directory",
+            component="lf-textfield",
+            description="Absolute path to the image file (or folder) to convert.",
+            placeholder="C:\\\\path\\\\to\\\\file.png",
+            extra={"htmlAttributes": {"autocomplete": "off"}},
+        ),
+    ],
+    configure_prompt=_configure_image_to_svg_workflow,
+)
+
 markdown_workflow_path = _resolve_user_path("default", "workflows", "Markdown documentation.json")
 WORKFLOW_DEFINITIONS["markdown-documentation"] = WorkflowDefinition(
     workflow_id="markdown-documentation",
@@ -269,27 +290,6 @@ WORKFLOW_DEFINITIONS["lora-tester"] = WorkflowDefinition(
     workflow_path=lora_workflow_path,
     fields=[],
     configure_prompt=_configure_lora_workflow,
-)
-
-markdown_workflow_path = _resolve_user_path("default", "workflows", "API_ImageToSVG.json")
-WORKFLOW_DEFINITIONS["image-to-svg"] = WorkflowDefinition(
-    workflow_id="image-to-svg",
-    label="Image to SVG",
-    description=(
-        "Converts a raster image to SVG format using the configured image processing model."
-    ),
-    workflow_path=markdown_workflow_path,
-    fields=[
-        WorkflowField(
-            name="source_path",
-            label="Source File or Directory",
-            component="lf-textfield",
-            description="Absolute path to the image file (or folder) to convert.",
-            placeholder="C:\\\\path\\\\to\\\\file.png",
-            extra={"htmlAttributes": {"autocomplete": "off"}},
-        ),
-    ],
-    configure_prompt=_configure_image_to_svg_workflow,
 )
             
 def list_workflows() -> List[Dict[str, Any]]:
