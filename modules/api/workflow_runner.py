@@ -12,6 +12,7 @@ import execution
 from server import PromptServer
 
 from ..utils.constants import API_ROUTE_PREFIX
+from ..utils.helpers.logic.sanitize_filename import sanitize_filename
 from ..workflows import get_workflow, list_workflows
 from ..workflows.registry import _json_safe as workflow_json_safe
 import os
@@ -143,7 +144,12 @@ async def lf_nodes_upload(request: web.Request) -> web.Response:
   if field is None or field.name != 'file':
     return web.json_response({'error': 'missing_file'}, status=400)
 
-  filename = field.filename or f"upload_{int(time.time())}"
+  raw_filename = field.filename or ""
+  sanitized = sanitize_filename(raw_filename)
+  if sanitized is None:
+    filename = f"upload_{int(time.time())}.png"
+  else:
+    filename = sanitized
   # Ensure directory exists
   temp_dir = folder_paths.get_temp_directory()
   os.makedirs(temp_dir, exist_ok=True)
