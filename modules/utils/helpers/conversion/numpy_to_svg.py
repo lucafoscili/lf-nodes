@@ -5,6 +5,7 @@ import cv2
 import numpy as np
 import svgwrite
 from PIL import Image
+import xml.etree.ElementTree as ET
 
 try:
     import vtracer
@@ -13,6 +14,12 @@ except Exception:  # pragma: no cover - optional dependency
     vtracer = None
     _VTRACER_AVAILABLE = False
 
+try:
+    from skimage import color as sk_color
+    _SKIMAGE_AVAILABLE = True
+except Exception:  # pragma: no cover - optional dependency
+    sk_color = None
+    _SKIMAGE_AVAILABLE = False
 
 @dataclass
 class SVGTraceConfig:
@@ -40,6 +47,11 @@ class SVGTraceConfig:
     bilateral_sigma_color: float = 60.0
     bilateral_sigma_space: float = 60.0
     collinear_angle_tol: float = 4.0
+    use_lab_colors: bool = False
+    fill_color_override: str | None = None
+    stroke_color_override: str | None = None
+    background_color: str | None = None
+    size_mode: str = "responsive"
 
     engine: str = "contour"
     vtracer_mode: str = "spline"
@@ -89,6 +101,100 @@ def _unique_palette_from_image(img: np.ndarray, max_colors: int = 32) -> list[st
     return [_rgb_to_hex(color) for color in unique]
 
 
+def _quantize_via_lab(img_uint8: np.ndarray, num_colors: int, attempts: int = 5) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """
+    Quantise an RGB image to num_colors using k-means in Lab space for improved
+    perceptual fidelity. Returns (preview_rgb, label_map, centers_rgb).
+    """
+    h, w = img_uint8.shape[:2]
+    rgb_norm = img_uint8.astype(np.float32) / 255.0
+    lab = sk_color.rgb2lab(rgb_norm)
+    lab_reshaped = lab.reshape(-1, 3).astype(np.float32)
+    criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 40, 1.0)
+    _, labels, centers_lab = cv2.kmeans(lab_reshaped, num_colors, None, criteria, attempts, cv2.KMEANS_PP_CENTERS)
+    centers_lab = centers_lab.astype(np.float32)
+    centers_rgb = sk_color.lab2rgb(centers_lab.reshape(1, -1, 3)).reshape(-1, 3)
+    centers_rgb = np.clip(centers_rgb * 255.0, 0, 255).astype(np.uint8)
+    preview = centers_rgb[labels.flatten()].reshape((h, w, 3))
+
+    flat_lab = lab_reshaped
+    for idx in range(num_colors):
+        mask = labels.flatten() == idx
+        if not np.any(mask):
+            continue
+        weighted_lab = flat_lab[mask]
+        centers_lab[idx] = weighted_lab.mean(axis=0)
+
+    centers_rgb = sk_color.lab2rgb(centers_lab.reshape(1, -1, 3)).reshape(-1, 3)
+    centers_rgb = np.clip(centers_rgb * 255.0, 0, 255).astype(np.uint8)
+    preview = centers_rgb[labels.flatten()].reshape((h, w, 3))
+    label_map = labels.reshape(h, w)
+    return preview, label_map, centers_rgb
+
+
+SVG_NS = "http://www.w3.org/2000/svg"
+ET.register_namespace("", SVG_NS)
+
+
+def _apply_svg_overrides(svg_str: str, cfg: SVGTraceConfig, width: int, height: int) -> str:
+    try:
+        root = ET.fromstring(svg_str)
+    except ET.ParseError:
+        return svg_str
+
+    root.set("viewBox", f"0 0 {width} {height}")
+    root.set("preserveAspectRatio", "xMidYMid meet")
+
+    if cfg.size_mode == "fixed":
+        root.set("width", str(width))
+        root.set("height", str(height))
+    else:
+        root.set("width", "100%")
+        root.set("height", "100%")
+
+    if cfg.background_color:
+        rect_attrs = {
+            "x": "0",
+            "y": "0",
+            "width": str(width),
+            "height": str(height),
+            "fill": cfg.background_color
+        }
+        background = ET.Element(f"{{{SVG_NS}}}rect", rect_attrs)
+        insert_index = 0
+        if len(root) > 0 and root[0].tag == f"{{{SVG_NS}}}defs":
+            insert_index = 1
+        root.insert(insert_index, background)
+
+    ns = {"svg": SVG_NS}
+    fill_mode = (cfg.vector_mode or "fill").lower()
+    allow_fill = fill_mode in {"fill", "both"}
+    allow_stroke = fill_mode in {"stroke", "both"}
+
+    for path in root.findall(".//svg:path", ns):
+        original_fill = path.get("fill")
+
+        if allow_fill:
+            if cfg.fill_color_override and original_fill != "none":
+                path.set("fill", cfg.fill_color_override)
+        else:
+            path.set("fill", "none")
+
+        if allow_stroke:
+            fallback_color = cfg.stroke_color_override or path.get("stroke")
+            if not fallback_color or fallback_color == "none":
+                fallback_color = cfg.fill_color_override or original_fill
+            if not fallback_color or fallback_color == "none":
+                fallback_color = "#000000"
+            path.set("stroke", cfg.stroke_color_override or fallback_color)
+            path.set("stroke-width", str(cfg.stroke_width))
+        else:
+            path.set("stroke", "none")
+            path.set("stroke-width", "0")
+
+    return ET.tostring(root, encoding="unicode")
+
+
 def _numpy_to_svg_vtracer(img_uint8: np.ndarray, cfg: SVGTraceConfig, num_colors: int) -> tuple[str, np.ndarray, list[str]]:
     pil_img = Image.fromarray(img_uint8)
     if num_colors > 0:
@@ -119,6 +225,7 @@ def _numpy_to_svg_vtracer(img_uint8: np.ndarray, cfg: SVGTraceConfig, num_colors
     )
 
     palette = _unique_palette_from_image(preview_img)
+    svg_str = _apply_svg_overrides(svg_str, cfg, size[0], size[1])
     return svg_str, preview_img, palette
 
 
@@ -437,6 +544,16 @@ def numpy_to_svg(arr: np.ndarray, config: Any = None) -> tuple[str, np.ndarray, 
     dwg.attribs["stroke-linejoin"] = "round"
     dwg.attribs["stroke-linecap"] = "round"
 
+    if cfg.size_mode == "fixed":
+        dwg.attribs["width"] = str(w)
+        dwg.attribs["height"] = str(h)
+    else:
+        dwg.attribs["width"] = "100%"
+        dwg.attribs["height"] = "100%"
+
+    if cfg.background_color:
+        dwg.add(dwg.rect(insert=(0, 0), size=(w, h), fill=cfg.background_color, stroke="none"))
+
     palette: list[str] = []
     mode = (cfg.vector_mode or "fill").lower()
     fill_enabled = mode in {"fill", "both"}
@@ -459,6 +576,13 @@ def numpy_to_svg(arr: np.ndarray, config: Any = None) -> tuple[str, np.ndarray, 
         palette.append(hex_color)
         fill_color = hex_color if fill_enabled else "none"
         stroke_color = hex_color if stroke_enabled else "none"
+
+        if fill_enabled and cfg.fill_color_override:
+            fill_color = cfg.fill_color_override
+        if stroke_enabled and cfg.stroke_color_override:
+            stroke_color = cfg.stroke_color_override
+        elif stroke_enabled and (not stroke_color or stroke_color == "none"):
+            stroke_color = fill_color if fill_color != "none" else "#000000"
 
         for path_d in paths:
             path = dwg.path(d=path_d, fill=fill_color, stroke=stroke_color)
