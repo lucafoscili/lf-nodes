@@ -13,6 +13,47 @@ from ..helpers.api import get_resource_url
 from ..helpers.comfy import get_comfy_dir, resolve_filepath
 from ..helpers.conversion import base64_to_tensor, convert_to_boolean, convert_to_float, convert_to_int, tensor_to_pil
 from ..helpers.editing import get_editing_context
+from .unsharp_mask import unsharp_mask_effect
+
+# region Debug Preview Save
+# Toggle debug preview saves. Hardwired to False for normal runs; set True when debugging.
+DEBUG_PREVIEW_SAVES = True
+
+def _save_tensor_preview(tensor: torch.Tensor, filename_prefix: str, save_type: str = "temp") -> str | None:
+    """Save a tensor preview (first image in batch) to the comfy dir and return a resource URL.
+
+    - tensor: expected shape (B,H,W,C) or (H,W,C) or (B,C,H,W); function will normalize.
+    - filename_prefix: passed to resolve_filepath (may include subfolder path).
+    - save_type: passed to get_comfy_dir (e.g., 'temp' or other resource types).
+
+    Returns the resource URL string on success or None on failure.
+    """
+    if not DEBUG_PREVIEW_SAVES:
+        return None
+
+    try:
+        dbg_tensor = tensor.detach().cpu()
+        if dbg_tensor.ndim == 3:
+            dbg_tensor = dbg_tensor.unsqueeze(0)
+        if dbg_tensor.ndim == 4:
+            # if channels-first (B,C,H,W) move to last
+            if dbg_tensor.shape[1] in (1, 3, 4) and dbg_tensor.shape[-1] not in (1, 3, 4):
+                dbg_tensor = dbg_tensor.permute(0, 2, 3, 1).contiguous()
+        dbg_tensor = dbg_tensor.clamp(0.0, 1.0)
+        dbg_to_save = dbg_tensor[0:1]
+        dbg_image = tensor_to_pil(dbg_to_save)
+
+        dbg_base = get_comfy_dir(save_type)
+        dbg_out_file, dbg_sub, dbg_name = resolve_filepath(
+            filename_prefix=filename_prefix,
+            base_output_path=dbg_base,
+            image=dbg_to_save,
+        )
+        dbg_image.save(dbg_out_file, format="PNG")
+        return get_resource_url((dbg_sub or "").replace("\\", "/"), dbg_name, save_type)
+    except Exception:
+        return None
+# endregion
 
 FilterResult = Tuple[torch.Tensor, Dict[str, str]]
 
@@ -43,10 +84,10 @@ def sample_without_preview(
         sampler_name (str): Name of the sampler to use.
         scheduler_name (str): Name of the scheduler to use.
         denoise_value (float): Denoising strength for the sampling process.
-        
+
     Returns:
         dict: A copy of the input latent dictionary with the "samples" key updated to the newly generated latent samples.
-    """    
+    """
     latent_image = latent["samples"]
     latent_image = comfy.sample.fix_empty_latent_channels(model, latent_image)
 
@@ -313,8 +354,8 @@ def _prepare_inpaint_region(
             work_image = base_image[:, y0:y1, x0:x1, :]
             work_mask = mask_tensor[:, y0:y1, x0:x1]
 
-    dilate_px = max(0, int(convert_to_int(settings.get("dilate", 0)) or 0))
-    feather_px = max(0, int(convert_to_int(settings.get("feather", 0)) or 0))
+    dilate_px = max(0, int(convert_to_int(settings.get("dilate", 4)) or 4))
+    feather_px = max(0, int(convert_to_int(settings.get("feather", 2)) or 2))
 
     work_mask_soft = work_mask
     if dilate_px > 0:
@@ -347,14 +388,31 @@ def _prepare_inpaint_region(
         longest = max(orig_h, orig_w)
         if longest < upsample_target:
             scale = float(upsample_target) / float(longest)
-            new_h = max(1, int(round(orig_h * scale)))
-            new_w = max(1, int(round(orig_w * scale)))
+            # Compute target sizes using the same scale, then align the longest side
+            # and compute the other side proportionally to preserve aspect ratio.
+            target_h = max(1, int(round(orig_h * scale)))
+            target_w = max(1, int(round(orig_w * scale)))
 
             def align_up(value: int, alignment: int) -> int:
                 return ((value + alignment - 1) // alignment) * alignment
 
-            new_h = align_up(new_h, align_multiple)
-            new_w = align_up(new_w, align_multiple)
+            def align_nearest(value: int, alignment: int) -> int:
+                # snap to nearest multiple of alignment (with minimum of alignment)
+                if alignment <= 1:
+                    return max(1, value)
+                half = alignment // 2
+                return max(alignment, ((value + half) // alignment) * alignment)
+
+            # Align the longest side up to meet alignment requirements
+            if orig_h >= orig_w:
+                new_h = align_up(target_h, align_multiple)
+                # compute width proportionally and snap to nearest alignment multiple
+                new_w = max(1, int(round(new_h * (orig_w / float(orig_h)))))
+                new_w = align_nearest(new_w, align_multiple)
+            else:
+                new_w = align_up(target_w, align_multiple)
+                new_h = max(1, int(round(new_w * (orig_h / float(orig_w)))))
+                new_h = align_nearest(new_h, align_multiple)
 
             wi = work_image.permute(0, 3, 1, 2)
             wi = F.interpolate(wi, size=(new_h, new_w), mode="bicubic", align_corners=False)
@@ -405,14 +463,50 @@ def _finalize_inpaint_output(
     """
     upsample_applied = bool(meta.get("upsample_applied"))
     upsample_info = meta.get("upsample_info")
-    dilate_px = int(meta.get("dilate_px", 0))
-    feather_px = int(meta.get("feather_px", 0))
+    dilate_px = int(meta.get("dilate_px", 4))
+    feather_px = int(meta.get("feather_px", 2))
+
+    # Debug helpers: save intermediate previews to temp so user can compare
+    debug_files: dict = {}
 
     if upsample_applied and upsample_info is not None:
         orig_h, orig_w, _, _ = upsample_info
+        # Save region before downscale (this is what the preview image was taken from)
+        url = _save_tensor_preview(processed_region, "inpaint_region_before_downscale", "temp")
+        if url:
+            debug_files["region_before_downscale"] = url
+
         pr = processed_region.permute(0, 3, 1, 2)
-        pr = F.interpolate(pr, size=(orig_h, orig_w), mode="bicubic", align_corners=False)
+        # Use bicubic with antialias to preserve high-frequency detail when downscaling.
+        # antialias=True produces results that match Pillow for downsampling and generally
+        # reduces destructive low-pass effects. Clamp afterwards to avoid bicubic overshoot.
+        pr = F.interpolate(pr, size=(orig_h, orig_w), mode="bicubic", align_corners=False, antialias=True)
         processed_region = pr.permute(0, 2, 3, 1).contiguous()
+        processed_region = processed_region.clamp(0.0, 1.0)
+
+        # Optionally apply a conservative unsharp mask to restore perceived sharpness
+        try:
+            us_amount = 0.3
+            us_radius = 3
+            us_sigma = 1.0
+            us_threshold = 0.0
+            sharpened = unsharp_mask_effect(processed_region, us_amount, us_radius, us_sigma, us_threshold)
+            # Normalize returned tensor to float [0,1] and move to the processed_region device
+            if not torch.is_floating_point(sharpened):
+                # assume uint8 [0,255]
+                sharpened = sharpened.to(dtype=torch.float32) / 255.0
+            else:
+                sharpened = sharpened.to(dtype=torch.float32)
+            sharpened = sharpened.clamp(0.0, 1.0).to(device=processed_region.device, dtype=processed_region.dtype)
+            processed_region = sharpened
+        except Exception:
+            # sharpening is best-effort and non-fatal
+            pass
+
+        # Save region after downscale
+        url = _save_tensor_preview(processed_region, "inpaint_region_after_downscale", "temp")
+        if url:
+            debug_files["region_after_downscale"] = url
 
     h, w = meta.get("image_shape", (int(base_image.shape[1]), int(base_image.shape[2])))
     if paste_roi != (0, 0, h, w):
@@ -420,12 +514,19 @@ def _finalize_inpaint_output(
         result_full = base_image.clone()
         result_full[:, y0:y1, x0:x1, :] = processed_region
         processed = result_full
+        # Save the stitched-full result prior to clamp/move to CPU for debugging
+        url = _save_tensor_preview(result_full, "inpaint_final_stitched", "temp")
+        if url:
+            debug_files["final_stitched"] = url
     else:
         processed = processed_region
 
     processed = processed.detach().clamp(0.0, 1.0).to(torch.float32).cpu().contiguous()
 
     info: Dict[str, str] = {}
+    # merge any debug file URLs collected earlier
+    if debug_files:
+        info.update(debug_files)
     if paste_roi != (0, 0, h, w):
         y0, x0, y1, x1 = paste_roi
         info["roi"] = f"y0={y0},x0={x0},y1={y1},x1={x1}"
@@ -528,8 +629,8 @@ def apply_inpaint_filter(image: torch.Tensor, settings: dict) -> FilterResult:
               - "roi_align_auto": If true, try to infer alignment from VAE/model downscale factor (fallback 8)
               - "roi_min_size": Minimum ROI width/height (default: 64)
             - Mask edges (optional):
-              - "dilate": Integer pixels to dilate mask before feathering (default: 0)
-              - "feather": Integer feather radius in pixels (default: 0)
+              - "dilate": Integer pixels to dilate mask before feathering (default: 4)
+              - "feather": Integer feather radius in pixels (default: 2)
             - Upsample detail (optional):
               - "upsample" or "upsample_target": Target size for the longer side of the ROI; if > current, upsample ROI before inpaint and downscale after (disabled by default)
 
@@ -537,7 +638,7 @@ def apply_inpaint_filter(image: torch.Tensor, settings: dict) -> FilterResult:
         FilterResult: A tuple containing:
             - processed (torch.Tensor): The inpainted image tensor.
             - info (dict): Dictionary with additional information, including the mask URL and ROI/upsample info.
-            
+
     Raises:
         ValueError: If required context, model components, or mask are missing, or if the mask is empty.
     """
@@ -704,6 +805,9 @@ def apply_inpaint_filter(image: torch.Tensor, settings: dict) -> FilterResult:
         negative_conditioning=context_negative_conditioning if use_conditioning else None,
         use_conditioning=use_conditioning,
     )
+    # Save the raw processed region (before final downscale/stitch) to temp so user
+    # can preview the area as generated. This mirrors how the mask preview is saved.
+    region_url = _save_tensor_preview(processed_region, "inpaint_region", str(settings.get("resource_type") or settings.get("output_type") or "temp"))
 
     processed, info = _finalize_inpaint_output(
         processed_region=processed_region,
@@ -714,6 +818,8 @@ def apply_inpaint_filter(image: torch.Tensor, settings: dict) -> FilterResult:
 
     info_with_mask = {"mask": mask_url}
     info_with_mask.update(info)
+    if region_url:
+        info_with_mask["region"] = region_url
 
     return processed, info_with_mask
 # endregion
@@ -730,7 +836,7 @@ def apply_inpaint_filter_tensor(
 ) -> FilterResult:
     """
     Applies an inpainting filter to the given image tensor using the provided mask and model components.
-    
+
     Args:
         image (torch.Tensor): The input image tensor to be inpainted.
         mask (torch.Tensor): The mask tensor indicating regions to inpaint.
@@ -796,6 +902,8 @@ def apply_inpaint_filter_tensor(
         negative_conditioning=settings.get("negative_conditioning") if convert_to_boolean(settings.get("use_conditioning", False)) else None,
         use_conditioning=convert_to_boolean(settings.get("use_conditioning", False)) or False,
     )
+
+    _ = _save_tensor_preview(processed_region, "inpaint_region", str(settings.get("resource_type") or settings.get("output_type") or "temp"))
 
     processed, info = _finalize_inpaint_output(
         processed_region=processed_region,
