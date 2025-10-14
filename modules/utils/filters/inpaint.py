@@ -354,8 +354,23 @@ def _prepare_inpaint_region(
             work_image = base_image[:, y0:y1, x0:x1, :]
             work_mask = mask_tensor[:, y0:y1, x0:x1]
 
-    dilate_px = max(0, int(convert_to_int(settings.get("dilate", 4)) or 4))
-    feather_px = max(0, int(convert_to_int(settings.get("feather", 2)) or 2))
+    # Preserve explicit 0 values from settings. Only fall back to defaults when
+    # the setting is missing or convert_to_int returns None.
+    raw_dilate = settings.get("dilate", None)
+    dilate_val = convert_to_int(raw_dilate) if raw_dilate is not None else None
+    if dilate_val is None:
+        dilate_px = 4
+    else:
+        dilate_px = int(dilate_val)
+    dilate_px = max(0, dilate_px)
+
+    raw_feather = settings.get("feather", None)
+    feather_val = convert_to_int(raw_feather) if raw_feather is not None else None
+    if feather_val is None:
+        feather_px = 2
+    else:
+        feather_px = int(feather_val)
+    feather_px = max(0, feather_px)
 
     work_mask_soft = work_mask
     if dilate_px > 0:
