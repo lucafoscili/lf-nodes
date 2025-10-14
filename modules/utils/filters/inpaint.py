@@ -284,10 +284,10 @@ def _prepare_inpaint_region(
     roi_auto = convert_to_boolean(settings.get("roi_auto", True))
     if roi_auto is None:
         roi_auto = True
-    roi_padding = _normalize_int_setting(settings.get("roi_padding", None), default=32, minimum=0)
-    roi_align = _normalize_int_setting(settings.get("roi_align", None), default=8, minimum=1)
+    roi_padding = _normalize_int_setting(settings.get("roi_padding", None), 32, min_value=0)
+    roi_align = _normalize_int_setting(settings.get("roi_align", None), 8, min_value=1)
     roi_align_auto = convert_to_boolean(settings.get("roi_align_auto", False)) or False
-    roi_min_size = _normalize_int_setting(settings.get("roi_min_size", None), default=64, minimum=1)
+    roi_min_size = _normalize_int_setting(settings.get("roi_min_size", None), 64, min_value=1)
 
     align_multiple = roi_align
     if roi_align_auto:
@@ -618,30 +618,24 @@ def _normalize_seed(raw_value):
     return int(value)
 
 
-def _normalize_int_setting(raw_value, default: int, minimum: int | None = None) -> int:
+def _normalize_int_setting(raw_value, default, min_value=None, max_value=None):
     """
-    Normalize an integer setting from raw input while preserving explicit zero values.
+    Normalize an integer-like setting value while preserving explicit zeros.
 
-    - raw_value: the raw value (may be None). If None, the default is used.
-    - default: integer default used when raw_value is None or conversion fails.
-    - minimum: optional minimum clamp (e.g., 1). If None, no minimum enforced except by max(0,...)
+    - raw_value: the raw value (may be None)
+    - default: the fallback integer when raw_value is None or conversion fails
+    - min_value, max_value: optional clamps applied after conversion
 
-    Returns an int with the provided default applied only when raw_value is None or invalid.
+    Returns an int.
     """
-    if raw_value is None:
+    val = convert_to_int(raw_value) if raw_value is not None else None
+    if val is None:
         val = default
-    else:
-        val = convert_to_int(raw_value)
-        if val is None:
-            val = default
-        else:
-            val = int(val)
-
-    if minimum is not None:
-        val = max(minimum, val)
-    else:
-        val = max(0, val)
-
+    val = int(val)
+    if min_value is not None:
+        val = max(min_value, val)
+    if max_value is not None:
+        val = min(max_value, val)
     return val
 # endregion
 
@@ -783,7 +777,7 @@ def apply_inpaint_filter(image: torch.Tensor, settings: dict) -> FilterResult:
     mask_image.save(mask_output_file, format="PNG")
     mask_url = get_resource_url((mask_subfolder or "").replace("\\", "/"), mask_filename, mask_save_type)
 
-    steps = max(1, int(round(_normalize_int_setting(settings.get("steps", None), default=20, minimum=1))))
+    steps = _normalize_steps(settings.get("steps"))
     denoise_value = convert_to_float(settings.get("denoise", settings.get("denoise_percentage", 100.0)))
     if denoise_value > 1.0:
         denoise_value = denoise_value / 100.0
@@ -806,14 +800,12 @@ def apply_inpaint_filter(image: torch.Tensor, settings: dict) -> FilterResult:
     if scheduler_name not in SCHEDULERS:
         scheduler_name = "normal"
 
-    # Normalize seed: allow explicit 0 and negative handling; fall back to context/default or random.
-    raw_seed = settings.get("seed", None)
-    seed_candidate = convert_to_int(raw_seed) if raw_seed is not None else None
+    seed_candidate = _normalize_seed(settings.get("seed"))
     if seed_candidate is None or seed_candidate < 0:
-        seed_candidate = convert_to_int(seed_default)
+        seed_candidate = _normalize_seed(seed_default)
     if seed_candidate is None or seed_candidate < 0:
         seed_candidate = random.randint(0, 2**32 - 1)
-    seed = seed_candidate & 0xFFFFFFFFFFFFFFFF
+    seed = int(seed_candidate) & 0xFFFFFFFFFFFFFFFF
 
     positive_prompt = str(settings.get("positive_prompt") or context_positive_prompt)
     negative_prompt = str(settings.get("negative_prompt") or context_negative_prompt)
