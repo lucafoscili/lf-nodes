@@ -105,6 +105,7 @@ export const NODE_WIDGET_MAP: NodeWidgetMap = {
   LF_SaveImageForCivitAI: [CustomWidgetName.masonry],
   LF_SaveJSON: [CustomWidgetName.tree],
   LF_SaveMarkdown: [CustomWidgetName.tree],
+  LF_SaveSVG: [CustomWidgetName.masonry],
   LF_SaveText: [CustomWidgetName.tree],
   LF_SchedulerSelector: [CustomWidgetName.history],
   LF_Sepia: [CustomWidgetName.compare],
