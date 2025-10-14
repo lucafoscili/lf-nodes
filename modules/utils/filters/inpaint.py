@@ -284,10 +284,10 @@ def _prepare_inpaint_region(
     roi_auto = convert_to_boolean(settings.get("roi_auto", True))
     if roi_auto is None:
         roi_auto = True
-    roi_padding = max(0, int(convert_to_int(settings.get("roi_padding", 32)) or 32))
-    roi_align = max(1, int(convert_to_int(settings.get("roi_align", 8)) or 8))
+    roi_padding = max(0, _get_int_setting(settings, "roi_padding", 32))
+    roi_align = max(1, _get_int_setting(settings, "roi_align", 8))
     roi_align_auto = convert_to_boolean(settings.get("roi_align_auto", False)) or False
-    roi_min_size = max(1, int(convert_to_int(settings.get("roi_min_size", 64)) or 64))
+    roi_min_size = max(1, _get_int_setting(settings, "roi_min_size", 64))
 
     align_multiple = roi_align
     if roi_align_auto:
@@ -616,6 +616,21 @@ def _normalize_seed(raw_value):
         value = -1
 
     return int(value)
+
+
+def _get_int_setting(settings: dict, key: str, default: int) -> int:
+    """
+    Helper to read an integer setting from the settings dict while preserving
+    an explicit 0. Falls back to `default` only when the key is missing or
+    conversion returns None.
+
+    Returns an int.
+    """
+    raw = settings.get(key, None)
+    val = convert_to_int(raw) if raw is not None else None
+    if val is None:
+        return int(default)
+    return int(val)
 # endregion
 
 # region Apply Inpaint Filter
@@ -756,7 +771,7 @@ def apply_inpaint_filter(image: torch.Tensor, settings: dict) -> FilterResult:
     mask_image.save(mask_output_file, format="PNG")
     mask_url = get_resource_url((mask_subfolder or "").replace("\\", "/"), mask_filename, mask_save_type)
 
-    steps = max(1, int(round(convert_to_int(settings.get("steps", 20)))))
+    steps = max(1, int(round(_get_int_setting(settings, "steps", 20))))
     denoise_value = convert_to_float(settings.get("denoise", settings.get("denoise_percentage", 100.0)))
     if denoise_value > 1.0:
         denoise_value = denoise_value / 100.0
@@ -779,12 +794,15 @@ def apply_inpaint_filter(image: torch.Tensor, settings: dict) -> FilterResult:
     if scheduler_name not in SCHEDULERS:
         scheduler_name = "normal"
 
-    seed_candidate = convert_to_int(settings.get("seed") or -1)
+    # Seed: preserve explicit 0 or negative values passed by user; fall back
+    # to context default or a random seed only when missing/None.
+    raw_seed = settings.get("seed", None)
+    seed_candidate = convert_to_int(raw_seed) if raw_seed is not None else None
     if seed_candidate is None or seed_candidate < 0:
-        seed_candidate = convert_to_int(seed_default)
+        seed_candidate = convert_to_int(seed_default) if seed_default is not None else None
     if seed_candidate is None or seed_candidate < 0:
         seed_candidate = random.randint(0, 2**32 - 1)
-    seed = seed_candidate & 0xFFFFFFFFFFFFFFFF
+    seed = int(seed_candidate) & 0xFFFFFFFFFFFFFFFF
 
     positive_prompt = str(settings.get("positive_prompt") or context_positive_prompt)
     negative_prompt = str(settings.get("negative_prompt") or context_negative_prompt)
