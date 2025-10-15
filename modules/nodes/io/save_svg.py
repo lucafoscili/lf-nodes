@@ -1,3 +1,5 @@
+import os
+
 from server import PromptServer
 
 from . import CATEGORY
@@ -52,6 +54,7 @@ class LF_SaveSVG:
         svg_blocks = split_svgs(svg)
 
         nodes: list[dict] = []
+        results = []
         for index, block in enumerate(svg_blocks):
             slot_name = f"slot-{index}"
             nodes.append({
@@ -65,7 +68,7 @@ class LF_SaveSVG:
                 "value": str(index)
             })
 
-            output_file, _, _ = resolve_filepath(
+            output_file, subfolder_raw, filename_value = resolve_filepath(
                 filename_prefix=filename_prefix,
                 base_output_path=get_comfy_dir("output"),
                 add_timestamp=add_timestamp,
@@ -85,6 +88,18 @@ class LF_SaveSVG:
             with open(output_file, 'w', encoding='utf-8') as svg_file:
                 svg_file.write(content)
 
+            subfolder = (subfolder_raw or "").replace('\\', '/')
+            if subfolder == ".":
+                subfolder = ""
+
+            filename_final = filename_value or os.path.basename(output_file)
+
+            results.append({
+                "filename": filename_final,
+                "subfolder": subfolder,
+                "type": "output",
+            })
+
         dataset: dict = { "nodes": nodes }
 
         slot_names = [f"slot-{i}" for i in range(len(svg_blocks))]
@@ -97,8 +112,12 @@ class LF_SaveSVG:
         })
 
         return {
-            "ui": {"svg": (svg,)},
-            "result": (svg,)
+            "ui": {
+                "lf_images": results,
+            },
+            "result": ({
+                "lf_images": results
+            },)
         }
 # endregion
 
