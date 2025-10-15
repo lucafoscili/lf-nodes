@@ -13,7 +13,8 @@
     "build:ts": "tsc",
     "build:lfw": "node ./web/src/scripts/copy-widgets.js",
     "build:vite": "vite build",
-    "build": "yarn clean && yarn build:scss && yarn build:ts && yarn build:lfw && yarn build:vite"
+    "build:submit": "node ./web/src/scripts/build-submit-prompt.js",
+    "build": "yarn clean && yarn build:scss && yarn build:ts && yarn build:lfw && yarn build:vite && yarn build:submit"
   },
   "devDependencies": {
     "@lf-widgets/assets": "1.1.2",
