@@ -513,7 +513,7 @@ def numpy_to_svg(arr: np.ndarray, config: Any = None) -> tuple[str, np.ndarray, 
     except Exception:
         pass
 
-    num_colors = max(1, min(int(cfg.num_colors), 64))
+    num_colors = max(1, min(int(cfg.num_colors), 256))
     simplify_tol = max(0.0, float(cfg.simplify_tol))
     min_area = max(1.0, float(cfg.min_area_ratio) * float(h * w))
 
