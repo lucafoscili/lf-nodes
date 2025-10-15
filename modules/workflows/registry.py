@@ -159,14 +159,13 @@ def _resolve_user_path(*relative_parts: str) -> Path:
     return user_dir.joinpath(*relative_parts).resolve()
 
 def _configure_image_to_svg_workflow(prompt: Dict[str, Any], inputs: Dict[str, Any]) -> None:
-    for node in prompt.values():
+    for (node_id, node) in prompt.items():
         if not isinstance(node, dict):
             continue
 
         inputs_map = node.setdefault("inputs", {})
-        class_type = node.get("class_type")
         
-        if class_type == "LoadImage":
+        if node_id == "16":  # Image Loader node
             source_path = inputs.get("source_path")
             if not source_path:
                 raise ValueError("Missing required input 'source_path'.")
@@ -178,11 +177,16 @@ def _configure_image_to_svg_workflow(prompt: Dict[str, Any], inputs: Dict[str, A
             resolved_str = str(resolved_path)
             inputs_map["image"] = resolved_str
         
-        if class_type == "LF_Integer":
+        if node_id == "40":  # Color number node (optional)
             input_value = int(inputs.get("number_of_colors", 0) or 0)
             if input_value is not None and input_value > 0:
                 inputs_map["integer"] = input_value
-            
+
+        if node_id == "47":  # Icon name node (optional)
+            icon_name = inputs.get("icon_name")
+            if icon_name:
+                inputs_map["string"] = str(icon_name)
+
 # endregion
 
 # region Workflow Definitions
@@ -206,12 +210,20 @@ WORKFLOW_DEFINITIONS["image-to-svg"] = WorkflowDefinition(
             extra={"htmlAttributes": {"autocomplete": "off"}},
         ),
         WorkflowField(
+            name="icon_name",
+            label="Icon Name",
+            component="lf-textfield",
+            description="Optional: The name of the icon to use.",
+            placeholder="icon",
+            extra={"htmlAttributes": {"autocomplete": "off", "type": "text"}},
+        ),
+        WorkflowField(
             name="number_of_colors",
             label="Number of Colors",
             component="lf-textfield",
-            description="The number of colors to reduce the image to.",
+            description="Optional: the number of colors to reduce the image to.",
             placeholder="2",
-            extra={"htmlAttributes": {"autocomplete": "off"}},
+            extra={"htmlAttributes": {"autocomplete": "off", "type": "number", "min": "1", "max": "256"}},
         ),
     ],
     configure_prompt=_configure_image_to_svg_workflow,
