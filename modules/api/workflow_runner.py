@@ -120,8 +120,6 @@ async def lf_nodes_run_workflow(request: web.Request) -> web.Response:
     status_str = status.get("status_str", "unknown")
     http_status = 200 if status_str == "success" else 500
     
-    # Choose a preferred output to surface in the UI.
-    # Prefer the first validated output (from validate_prompt) that produced outputs.
     preferred_output = None
     try:
         outputs_in_history = set((history_entry.get('outputs') or {}).keys())
@@ -130,11 +128,10 @@ async def lf_nodes_run_workflow(request: web.Request) -> web.Response:
             if o in outputs_in_history:
                 preferred_output = o
                 break
-        # Fallback: pick an output node that contains an images array if present
         if preferred_output is None:
             for o, v in (history_entry.get('outputs') or {}).items():
                 try:
-                    if isinstance(v, dict) and v.get('images'):
+                    if isinstance(v, dict) and (v.get('images') or v.get('lf_images')):
                         preferred_output = o
                         break
                 except Exception:
@@ -235,9 +232,34 @@ async def _wait_for_completion(prompt_id: str, timeout_seconds: float = 180.0) -
         await asyncio.sleep(0.35)
 
 def _sanitize_history(entry: Dict[str, Any]) -> Dict[str, Any]:
+    outputs = entry.get("outputs", {}) or {}
+    safe_outputs = {}
+    for node_id, node_out in outputs.items():
+        try:
+            if isinstance(node_out, dict):
+                node_copy = dict(node_out)
+                if 'lf_images' in node_copy and 'images' not in node_copy:
+                    node_copy['images'] = node_copy.pop('lf_images')
+                safe_outputs[node_id] = node_copy
+            elif isinstance(node_out, list):
+                new_list = []
+                for elem in node_out:
+                    if isinstance(elem, dict):
+                        elem_copy = dict(elem)
+                        if 'lf_images' in elem_copy and 'images' not in elem_copy:
+                            elem_copy['images'] = elem_copy.pop('lf_images')
+                        new_list.append(elem_copy)
+                    else:
+                        new_list.append(elem)
+                safe_outputs[node_id] = new_list
+            else:
+                safe_outputs[node_id] = node_out
+        except Exception:
+            safe_outputs[node_id] = node_out
+
     return {
         "status": _json_safe(entry.get("status")),
-        "outputs": _json_safe(entry.get("outputs", {})),
+        "outputs": _json_safe(safe_outputs),
         "prompt": _json_safe(entry.get("prompt")),
     }
 # endregion
