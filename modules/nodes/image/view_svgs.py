@@ -17,7 +17,7 @@ class LF_ViewSVGs:
     def INPUT_TYPES(self):
         return {
             "required": {
-                "svg_string": (Input.STRING, {
+                "svg": (Input.STRING, {
                     "tooltip": "A string containing one or more <svg>...</svg> blocks concatenated together."
                 }),
             },
