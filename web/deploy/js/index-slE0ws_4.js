@@ -13655,7 +13655,7 @@ var X = false, Z = (t2, e2, n2) => {
                         const n6 = t7.i.replace(/-/g, "_"), o6 = t7.T;
                         if (!o6) return;
                         const r3 = i.get(o6);
-                        return r3 ? r3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-0df37de3.entry.js": () => import("./p-0df37de3.entry-BD2fiNex.js"), "./p-182c6c19.entry.js": () => import("./p-182c6c19.entry-C7SrtR4j.js"), "./p-28dd0bff.entry.js": () => import("./p-28dd0bff.entry-Ce_4o629.js"), "./p-36aa4a7f.entry.js": () => import("./p-36aa4a7f.entry-BY3qXhQ_.js"), "./p-55c6a817.entry.js": () => import("./p-55c6a817.entry-Bz-Hf5_c.js"), "./p-5d51f267.entry.js": () => import("./p-5d51f267.entry-CjZdSH02.js"), "./p-62695161.entry.js": () => import("./p-62695161.entry-B5R54dLT.js"), "./p-924ca284.entry.js": () => import("./p-924ca284.entry-hXKDFZ1d.js"), "./p-9738317a.entry.js": () => import("./p-9738317a.entry-8nhjLahJ.js"), "./p-988ad9c7.entry.js": () => import("./p-988ad9c7.entry-TV5Tx7Gj.js"), "./p-a6642965.entry.js": () => import("./p-a6642965.entry-DJxtmVgW.js"), "./p-b1bf3d70.entry.js": () => import("./p-b1bf3d70.entry-Csd3LnkJ.js"), "./p-e2900881.entry.js": () => import("./p-e2900881.entry-4hVh16tg.js"), "./p-e4e76694.entry.js": () => import("./p-e4e76694.entry-fsfNWn1o.js"), "./p-e6148250.entry.js": () => import("./p-e6148250.entry-C7qVDo8t.js"), "./p-f19de954.entry.js": () => import("./p-f19de954.entry-D6DIJFuZ.js") }), `./${o6}.entry.js`, 2).then(((t8) => (i.set(o6, t8), t8[n6])), ((t8) => {
+                        return r3 ? r3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-0df37de3.entry.js": () => import("./p-0df37de3.entry-DlXr8hKm.js"), "./p-182c6c19.entry.js": () => import("./p-182c6c19.entry-iidR3Lyd.js"), "./p-28dd0bff.entry.js": () => import("./p-28dd0bff.entry-Bd9fmLD9.js"), "./p-36aa4a7f.entry.js": () => import("./p-36aa4a7f.entry-C4WbgGrj.js"), "./p-55c6a817.entry.js": () => import("./p-55c6a817.entry-J257fHxs.js"), "./p-5d51f267.entry.js": () => import("./p-5d51f267.entry-aoWKaCHD.js"), "./p-62695161.entry.js": () => import("./p-62695161.entry-BC33fPeF.js"), "./p-924ca284.entry.js": () => import("./p-924ca284.entry-Cic9ZA8r.js"), "./p-9738317a.entry.js": () => import("./p-9738317a.entry-CLG2Y3pm.js"), "./p-988ad9c7.entry.js": () => import("./p-988ad9c7.entry-CVlfnimW.js"), "./p-a6642965.entry.js": () => import("./p-a6642965.entry-CKuFECx2.js"), "./p-b1bf3d70.entry.js": () => import("./p-b1bf3d70.entry-C7Mgkia4.js"), "./p-e2900881.entry.js": () => import("./p-e2900881.entry-DbWs05AC.js"), "./p-e4e76694.entry.js": () => import("./p-e4e76694.entry-CfEHXRiw.js"), "./p-e6148250.entry.js": () => import("./p-e6148250.entry-qFJKdK0O.js"), "./p-f19de954.entry.js": () => import("./p-f19de954.entry-DBcKCQby.js") }), `./${o6}.entry.js`, 2).then(((t8) => (i.set(o6, t8), t8[n6])), ((t8) => {
                           l(t8, e3.$hostElement$);
                         }));
                         /*!__STENCIL_STATIC_IMPORT_SWITCH__*/
@@ -22760,7 +22760,7 @@ if (hasComfyApp) {
   }
 } else {
   {
-    console.log("Skipping dashboard bootstrap (no Comfy app detected)");
+    console.log("No Comfy app detected.");
   }
 }
 export {
