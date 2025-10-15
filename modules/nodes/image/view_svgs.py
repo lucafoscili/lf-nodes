@@ -36,13 +36,13 @@ class LF_ViewSVGs:
     INPUT_IS_LIST = (False, False)
     OUTPUT_IS_LIST = (False, True)
     OUTPUT_NODE = True
-    RETURN_NAMES = ("svg_string", "svg_list")
+    RETURN_NAMES = ("svg", "svg_list")
     RETURN_TYPES = (Input.STRING, Input.STRING)
 
     def on_exec(self, **kwargs: dict):
         self._temp_cache.cleanup()
 
-        raw = normalize_list_to_value(kwargs.get("svg_string"))
+        raw = normalize_list_to_value(kwargs.get("svg"))
 
         if isinstance(raw, bytes):
             try:

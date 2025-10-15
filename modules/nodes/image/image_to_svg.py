@@ -1,12 +1,19 @@
 import json
-from dataclasses import replace
-
 import torch
+
+from dataclasses import replace
 
 from server import PromptServer
 
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, SVG_COMBO
+from ...utils.constants import (
+    EVENT_PREFIX,
+    FUNCTION,
+    Input,
+    OPTIONAL_VECTOR_MODE_COMBO,
+    SIZE_MODE_COMBO,
+    TRACE_PRESET_COMBO
+)
 from ...utils.helpers.api import get_resource_url
 from ...utils.helpers.comfy import resolve_filepath
 from ...utils.helpers.conversion import (
@@ -20,9 +27,6 @@ from ...utils.helpers.logic import normalize_input_image, normalize_list_to_valu
 from ...utils.helpers.temp_cache import TempFileCache
 from ...utils.helpers.ui import create_compare_node
 
-TRACE_PRESET_COMBO = ["max_quality", "high_quality", "balanced", "max_speed", "custom"]
-OPTIONAL_VECTOR_MODE_COMBO = ["preset", "fill", "stroke", "both"]
-SIZE_MODE_COMBO = ["preset", "responsive", "fixed"]
 PRESET_CONFIGS: dict[str, SVGTraceConfig] = {
     "max_quality": SVGTraceConfig(
         num_colors=8,
@@ -193,6 +197,10 @@ class LF_ImageToSVG:
                     "default": "preset",
                     "tooltip": "Responsive outputs use width/height 100%%, fixed uses pixel dimensions."
                 }),
+                "viewbox": (Input.STRING, {
+                    "default": "",
+                    "tooltip": "Optional viewBox override in the format: 'minX minY width height' (e.g. '0 0 24 24'). Leave blank to keep the original image dimensions."
+                }),
                 "ui_widget": (Input.LF_COMPARE, {
                     "default": {}
                 })
@@ -258,6 +266,12 @@ class LF_ImageToSVG:
         size_mode = normalize_list_to_value(kwargs.get("size_mode"))
         if isinstance(size_mode, str) and size_mode and size_mode.lower() != "preset":
             config.size_mode = size_mode.lower()
+
+        viewbox_override = normalize_list_to_value(kwargs.get("viewbox"))
+        if isinstance(viewbox_override, str):
+            viewbox_override = viewbox_override.strip()
+            if viewbox_override:
+                config.viewbox_override = viewbox_override
 
         nodes: list[dict] = []
         dataset: dict = {"nodes": nodes}
