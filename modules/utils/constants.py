@@ -59,6 +59,17 @@ INTENSITY_ID = "intensity"
 RED_CHANNEL_ID = "red"
 SUM_ID = "sum"
 
+BLEND_MODE_COMBO = [
+    "normal",
+    "multiply",
+    "screen",
+    "overlay",
+    "soft_light",
+    "hard_light",
+    "difference",
+    "addition",
+    "subtract",
+]
 BLUR_FEATHER_COMBO = ["linear", "smooth", "expo"]
 CROP_POSITION_COMBO = ["top", "bottom", "left", "right", "center"]
 IMAGE_EXTENSION_COMBO = ["png", "jpeg", "webp"]

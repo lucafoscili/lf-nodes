@@ -109,8 +109,9 @@ def apply_blend_filter(image: torch.Tensor, settings: dict) -> FilterResult:
     """
     opacity = convert_to_float(settings.get("opacity", 1.0))
     color: str = settings.get("color", "FF0000")
+    mode: str = settings.get("mode") or settings.get("blend_mode") or "normal"
     overlay_image = create_colored_tensor(image, color)
-    return _as_result(blend_effect(image, overlay_image, opacity))
+    return _as_result(blend_effect(image, overlay_image, opacity, mode=mode))
 # endregion
 
 # region Bloom

@@ -4,6 +4,7 @@ from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
+from ...utils.constants import BLEND_MODE_COMBO
 from ...utils.filters import blend_effect
 from ...utils.helpers.logic import normalize_input_image, normalize_list_to_value, normalize_output_image
 from ...utils.helpers.temp_cache import TempFileCache
@@ -30,6 +31,10 @@ class LF_Blend:
                     "max": 1.0, 
                     "step": 0.01, 
                     "tooltip": "Opacity of the overlay. 0 means invisible, 1 means fully opaque."
+                }),
+                "blend_mode": (BLEND_MODE_COMBO, {
+                    "default": "normal",
+                    "tooltip": "Pixel blend mode to use when combining base and overlay images."
                 }),
             },
             "optional": {
@@ -64,6 +69,7 @@ class LF_Blend:
             filter_args={
                 'overlay_image': overlay_image[0],
                 'alpha_mask': opacity,
+                'mode': kwargs.get("blend_mode", "normal"),
             },
             filename_prefix="blend",
             nodes=nodes,
