@@ -25,7 +25,33 @@ async def lf_nodes_static_asset(request: web.Request) -> web.Response:
         if '..' in rel_path or rel_path.startswith('/') or rel_path.startswith('\\'):
             return web.Response(status=400, text='Invalid path')
 
-        asset_path = module_root / 'web' / 'deploy' / Path(rel_path)
+        if not rel_path.startswith('assets/'):
+            return web.Response(status=404, text='Not found')
+
+        candidates = [
+            module_root / 'web' / 'deploy' / Path(rel_path),
+            module_root / 'web' / 'deploy_workflow_app' / Path(rel_path),
+        ]
+
+        for asset_path in candidates:
+            if asset_path.exists() and asset_path.is_file():
+                return web.FileResponse(str(asset_path))
+    except Exception:
+        logging.exception('Error while attempting to serve static asset: %s', request.path)
+
+    return web.Response(status=404, text='Not found')
+# endregion
+
+# region Workflow static
+@PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/static-workflow/{'{path:.*}'}")
+async def lf_nodes_static_workflow(request: web.Request) -> web.Response:
+    try:
+        module_root = Path(__file__).resolve().parents[2]
+        rel_path = request.match_info.get('path', '')
+        if '..' in rel_path or rel_path.startswith('/') or rel_path.startswith('\\'):
+            return web.Response(status=400, text='Invalid path')
+
+        asset_path = module_root / 'web' / 'deploy_workflow_app' / Path(rel_path)
         if asset_path.exists() and asset_path.is_file():
             return web.FileResponse(str(asset_path))
     except Exception:
@@ -37,16 +63,19 @@ async def lf_nodes_static_asset(request: web.Request) -> web.Response:
 # region Submit prompt
 @PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/submit-prompt")
 async def lf_nodes_workflow_runner_page(_: web.Request) -> web.Response:
-  try:
-    module_root = Path(__file__).resolve().parents[2]
-    deploy_html = module_root / "web" / "deploy" / "submit-prompt.html"
-    if deploy_html.exists():
-      return web.FileResponse(str(deploy_html))
-    
-  except Exception:
-    pass
+    try:
+        module_root = Path(__file__).resolve().parents[2]
+        deploy_html = module_root / "web" / "deploy_workflow_app" / "submit-prompt.html"
+        if not deploy_html.exists():
+            deploy_html = module_root / "web" / "deploy" / "submit-prompt.html"
 
-  return web.Response(text=NOT_FND_HTML, content_type="text/html", status=404)
+        if deploy_html.exists():
+            return web.FileResponse(str(deploy_html))
+
+    except Exception:
+        pass
+
+    return web.Response(text=NOT_FND_HTML, content_type="text/html", status=404)
 # endregion
 
 # region Workflow

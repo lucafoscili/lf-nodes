@@ -1,16 +1,14 @@
-/* Styles for Workflow Runner. This mirrors the previous embedded CSS so
-   existing look-and-feel remains unchanged. Customize freely and import in
-   the TypeScript entry if you want CSS bundling. */
-
 :root {
   color-scheme: dark;
   font-family: 'Segoe UI', system-ui, sans-serif;
 }
+
 body {
   margin: 0;
   background: #0f1115;
   color: #e8ebf0;
 }
+
 main {
   max-width: 720px;
   margin: 3rem auto;
@@ -19,69 +17,85 @@ main {
   border-radius: 18px;
   box-shadow: 0 22px 60px rgba(7, 12, 22, 0.45);
 }
+
 h1 {
   margin: 0 0 1.5rem;
   font-size: 1.85rem;
   letter-spacing: 0.02em;
 }
-.field {
-  margin: 1.5rem 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
+
+.field-container {
+  & {
+    margin: 1.5rem 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .field {
+    & {
+      font-weight: 600;
+    }
+
+    &__description {
+      font-size: 0.9rem;
+      opacity: 0.75;
+      margin: 0;
+    }
+  }
 }
-.field label {
-  font-weight: 600;
-}
+
 select,
 button {
-  background: #161b24;
-  color: inherit;
-  border: 1px solid #252b38;
-  border-radius: 10px;
-  padding: 0.7rem 0.85rem;
-  font-size: 1rem;
-  transition: border 0.15s ease, transform 0.15s ease, background 0.15s ease;
+  & {
+    background: #161b24;
+    color: inherit;
+    border: 1px solid #252b38;
+    border-radius: 10px;
+    padding: 0.7rem 0.85rem;
+    font-size: 1rem;
+    transition: border 0.15s ease, transform 0.15s ease, background 0.15s ease;
+  }
+
+  &:focus-visible {
+    cursor: pointer;
+    font-weight: 600;
+    margin-top: 1rem;
+  }
 }
-select:focus-visible,
-button:focus-visible {
-  outline: 2px solid #3f7fff;
-  outline-offset: 3px;
-}
-button {
-  cursor: pointer;
-  font-weight: 600;
-  margin-top: 1rem;
-}
+
 button[disabled] {
   opacity: 0.55;
   cursor: not-allowed;
 }
+
 button:not([disabled]):hover {
   transform: translateY(-1px);
   background: #1f2533;
   border-color: #39435a;
 }
-.field__description {
-  font-size: 0.9rem;
-  opacity: 0.75;
-  margin: 0;
-}
+
 #status {
-  margin-top: 1.25rem;
-  min-height: 1.5rem;
-  font-size: 0.95rem;
-  transition: color 0.2s ease;
+  & {
+    margin-top: 1.25rem;
+    min-height: 1.5rem;
+    font-size: 0.95rem;
+    transition: color 0.2s ease;
+  }
+
+  &[data-tone='success'] {
+    color: #6fcf97;
+  }
+
+  &[data-tone='warn'] {
+    color: #ffd166;
+  }
+
+  &[data-tone='error'] {
+    color: #ff6f6f;
+  }
 }
-#status[data-tone='info'] {
-  color: #8ab4ff;
-}
-#status[data-tone='warn'] {
-  color: #ffd166;
-}
-#status[data-tone='error'] {
-  color: #ff6f6f;
-}
+
 #result {
   background: #0b0d12;
   border-radius: 14px;
@@ -92,6 +106,7 @@ button:not([disabled]):hover {
   border: 1px solid #1d2230;
   font-size: 0.95rem;
 }
+
 .fallback-input {
   padding: 0.6rem 0.75rem;
   border-radius: 8px;
