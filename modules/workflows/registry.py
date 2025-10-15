@@ -154,90 +154,41 @@ class WorkflowDefinition:
     def fields_as_dict(self) -> List[Dict[str, Any]]:
         return [field.to_dict() for field in self.fields]
 
-
 def _resolve_user_path(*relative_parts: str) -> Path:
     user_dir = Path(folder_paths.get_user_directory())
     return user_dir.joinpath(*relative_parts).resolve()
 
-
-def _resolve_package_path(*relative_parts: str) -> Path:
-    package_root = Path(__file__).resolve().parents[2]
-    return package_root.joinpath(*relative_parts).resolve()
-
-
-def _configure_markdown_workflow(prompt: Dict[str, Any], inputs: Dict[str, Any]) -> None:
-    source_path = inputs.get("source_path")
-    if not source_path:
-        raise ValueError("Missing required input 'source_path'.")
-
-    resolved_path = Path(source_path).expanduser()
-    if not resolved_path.exists():
-        raise FileNotFoundError(f"Input path does not exist: {resolved_path}")
-
-    resolved_str = str(resolved_path)
-    for node in prompt.values():
-        # Be defensive: some prompt entries may not be dicts when imported from
-        # external or API formats. Skip entries that aren't mappings.
-        if not isinstance(node, dict):
-            continue
-        if node.get("class_type") == "LF_RegionExtractor":
-            node.setdefault("inputs", {})["dir"] = resolved_str
-
-def _configure_lora_workflow(prompt: Dict[str, Any], _: Dict[str, Any]) -> None:
-    # Defaults baked into the workflow handle prompt execution.
-    # No dynamic inputs required for the first iteration.
-    return
-
 def _configure_image_to_svg_workflow(prompt: Dict[str, Any], inputs: Dict[str, Any]) -> None:
-    source_path = inputs.get("source_path")
-    if not source_path:
-        raise ValueError("Missing required input 'source_path'.")
-
-    resolved_path = Path(source_path).expanduser()
-    if not resolved_path.exists():
-        raise FileNotFoundError(f"Input path does not exist: {resolved_path}")
-
-    resolved_str = str(resolved_path)
     for node in prompt.values():
-        # Defensive check: ensure node is a dict before accessing its keys.
         if not isinstance(node, dict):
             continue
-        # If the node is a LoadImage node and doesn't already have a linked
-        # 'image' input, set it to the uploaded path. Also set 'image_path' on
-        # API_ImageToSVG nodes to support older workflow shapes.
+
         inputs_map = node.setdefault("inputs", {})
         class_type = node.get("class_type")
-        # If this node expects a plain 'image' input and it's not linked, overwrite
-        # only when its current value is a literal filename or missing.
+        
         if class_type == "LoadImage":
-            cur = inputs_map.get("image")
-            # Skip if it's already a link ([node_id, slot])
-            if not (isinstance(cur, list) and len(cur) == 2):
-                inputs_map["image"] = resolved_str
+            source_path = inputs.get("source_path")
+            if not source_path:
+                raise ValueError("Missing required input 'source_path'.")
 
-        if class_type == "API_ImageToSVG":
-            # older API-style node uses 'image_path'
-            cur = inputs_map.get("image_path")
-            if not (isinstance(cur, list) and len(cur) == 2):
-                inputs_map["image_path"] = resolved_str
+            resolved_path = Path(source_path).expanduser()
+            if not resolved_path.exists():
+                raise FileNotFoundError(f"Input path does not exist: {resolved_path}")
 
-        # Generic fallback: set any unlinked input named 'image' or 'image_path'
-        # to the resolved path — this helps if the workflow uses different node types.
-        for possible in ("image", "image_path"):
-            cur = inputs_map.get(possible)
-            if cur is None:
-                # only set when missing entirely
-                inputs_map[possible] = resolved_str
-            elif not (isinstance(cur, list) and len(cur) == 2):
-                # if it's a literal string (old saved filename), prefer the uploaded path
-                if isinstance(cur, str) and cur.strip() != "":
-                    inputs_map[possible] = resolved_str
+            resolved_str = str(resolved_path)
+            inputs_map["image"] = resolved_str
+        
+        if class_type == "LF_Integer":
+            input_value = int(inputs.get("number_of_colors", 0) or 0)
+            if input_value is not None and input_value > 0:
+                inputs_map["integer"] = input_value
+            
 # endregion
 
 # region Workflow Definitions
 WORKFLOW_DEFINITIONS: Dict[str, WorkflowDefinition] = {}
 
-image_to_svg_workflow_path = _resolve_user_path("default", "workflows", "API_ImageToSVG.json")
+image_to_svg_workflow_path = _resolve_user_path("default", "workflows", "ImageToSVG.json")
 WORKFLOW_DEFINITIONS["image-to-svg"] = WorkflowDefinition(
     workflow_id="image-to-svg",
     label="Image to SVG",
@@ -254,42 +205,16 @@ WORKFLOW_DEFINITIONS["image-to-svg"] = WorkflowDefinition(
             placeholder="C:\\\\path\\\\to\\\\file.png",
             extra={"htmlAttributes": {"autocomplete": "off"}},
         ),
-    ],
-    configure_prompt=_configure_image_to_svg_workflow,
-)
-
-markdown_workflow_path = _resolve_user_path("default", "workflows", "Markdown documentation.json")
-WORKFLOW_DEFINITIONS["markdown-documentation"] = WorkflowDefinition(
-    workflow_id="markdown-documentation",
-    label="Markdown Documentation",
-    description=(
-        "Extracts annotated regions from a Python file and generates Markdown documentation "
-        "using the configured LLM endpoint."
-    ),
-    workflow_path=markdown_workflow_path,
-    fields=[
         WorkflowField(
-            name="source_path",
-            label="Source File or Directory",
+            name="number_of_colors",
+            label="Number of Colors",
             component="lf-textfield",
-            description="Absolute path to the Python file (or folder) containing annotated regions.",
-            placeholder="C:\\\\path\\\\to\\\\file.py",
+            description="The number of colors to reduce the image to.",
+            placeholder="2",
             extra={"htmlAttributes": {"autocomplete": "off"}},
         ),
     ],
-    configure_prompt=_configure_markdown_workflow,
-)
-
-lora_workflow_path = _resolve_package_path("example_workflows", "LoRa tester.json")
-WORKFLOW_DEFINITIONS["lora-tester"] = WorkflowDefinition(
-    workflow_id="lora-tester",
-    label="LoRA Tester",
-    description=(
-        "Runs the LoRA tester workflow with the bundled defaults and returns the generated image metadata."
-    ),
-    workflow_path=lora_workflow_path,
-    fields=[],
-    configure_prompt=_configure_lora_workflow,
+    configure_prompt=_configure_image_to_svg_workflow,
 )
             
 def list_workflows() -> List[Dict[str, Any]]:

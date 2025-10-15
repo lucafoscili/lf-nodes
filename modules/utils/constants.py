@@ -312,4 +312,25 @@ def get_usage_title(filename: str, type: str = None):
     if filename == "diffusion_models_usage.json":
         return "\n## Diffusion models:\n" if type == "markdown" else "Diffusion model name"
     return "\n## Miscellaneous:\n" if type == "markdown" else "Resource name"
+
+NOT_FND_HTML = """
+  <!doctype html>
+  <html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Workflow Runner Not Found</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <style>body{font-family:Segoe UI,system-ui,Arial,sans-serif;background:#0b0d12;color:#e8ebf0;padding:2rem}main{max-width:720px;margin:2rem auto;background:#0f1115;padding:1.5rem;border-radius:12px;border:1px solid #1d2230}h1{margin-top:0}code{background:#0b0f14;padding:.15rem .35rem;border-radius:4px}</style>
+  </head>
+  <body>
+    <main>
+      <h1>LF Nodes — Workflow Runner</h1>
+      <p>The workflow runner UI is not built or not available in the extension's <code>web/deploy</code> directory.</p>
+      <p>To build the frontend, change into the extension directory and run the project build (this will produce <code>web/deploy/submit-prompt.html</code> and related JS):</p>
+      <pre style="background:#071018;padding:.6rem;border-radius:6px;color:#9fb6ff">cd custom_nodes/lf-nodes; yarn build</pre>
+      <p>After building, refresh this page. If you want to work on the frontend in dev mode, edit <code>web/src/workflow</code> and run the dev server described in the project's README.</p>
+    </main>
+  </body>
+  </html>
+  """
 # endregion
