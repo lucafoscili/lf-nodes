@@ -139,7 +139,16 @@ class LF_SaveImageForCivitAI:
             "dataset": dataset,
         })
 
-        return (file_names, civitai_metadata)
+        return {
+            "ui": {
+                "lf_civitai_metadata": (civitai_metadata, ),
+                "lf_file_names": (file_names, ),
+                "lf_masonry": ({
+                    "lfDataset": dataset,
+                },),
+            },
+            "result": (file_names, civitai_metadata)
+        }
 # endregion
 
 # region Mappings
