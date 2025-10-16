@@ -186,6 +186,12 @@ export const unescapeJson = (input: any): UnescapeJSONPayload => {
 export const getApiRoutes = () => {
   return getLfManager().getApiRoutes();
 };
+export const getComfyAPI = () => {
+  return comfyAPI['api'].api;
+};
+export const getComfyAPP = () => {
+  return comfyAPI['app'].app;
+};
 export const getLfData = () => {
   return getLfManager().getManagers().lfFramework?.data;
 };

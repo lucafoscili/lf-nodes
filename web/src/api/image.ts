@@ -7,9 +7,7 @@ import {
   ProcessImageAPIPayload,
 } from '../types/api/api';
 import { LogSeverity } from '../types/manager/manager';
-import { getLfManager } from '../utils/common';
-/// @ts-ignore
-import { api } from '/scripts/api.js';
+import { getComfyAPI, getLfManager } from '../utils/common';
 
 export const IMAGE_API: ImageAPIs = {
   //#region get
@@ -28,7 +26,7 @@ export const IMAGE_API: ImageAPIs = {
         body.append('directory', directory);
       }
 
-      const response = await api.fetchApi(APIEndpoints.GetImage, {
+      const response = await getComfyAPI().fetchApi(APIEndpoints.GetImage, {
         body,
         method: 'POST',
       });
@@ -82,7 +80,7 @@ export const IMAGE_API: ImageAPIs = {
       body.append('type', type);
       body.append('settings', JSON.stringify(settings));
 
-      const response = await api.fetchApi(APIEndpoints.ProcessImage, {
+      const response = await getComfyAPI().fetchApi(APIEndpoints.ProcessImage, {
         body,
         method: 'POST',
       });
@@ -144,7 +142,7 @@ export const IMAGE_API: ImageAPIs = {
         body.append('node', nodePath);
       }
 
-      const response = await api.fetchApi(APIEndpoints.ExploreFilesystem, {
+      const response = await getComfyAPI().fetchApi(APIEndpoints.ExploreFilesystem, {
         body,
         method: 'POST',
       });

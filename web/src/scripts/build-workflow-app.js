@@ -49,7 +49,7 @@ async function run() {
       try {
         await mkdir(cssOutDir, { recursive: true });
       } catch (_) {}
-      const scssPath = path.resolve('web/src/workflow/styles.scss');
+      const scssPath = path.resolve('web/src/workflow/styles/global.scss');
       const cssOutFile = path.join(cssOutDir, 'submit-prompt.css');
       // Use the modern Dart Sass JS API to avoid the legacy-js-api deprecation
       // warning. `sass.compile` returns an object with a `.css` property.

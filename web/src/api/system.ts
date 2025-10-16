@@ -10,9 +10,7 @@ import {
   SystemAPIs,
 } from '../types/api/api';
 import { LogSeverity } from '../types/manager/manager';
-import { getLfManager } from '../utils/common';
-/// @ts-ignore
-import { api } from '/scripts/api.js';
+import { getComfyAPI, getLfManager } from '../utils/common';
 
 const unexpectedMessage = (endpoint: string, code: number, response: Response, text?: string) => {
   const body = text || response.statusText || 'No message provided.';
@@ -34,7 +32,9 @@ export const SYSTEM_API: SystemAPIs = {
     };
 
     try {
-      const response: Response = await api.fetchApi(APIEndpoints.GetGpuStats, { method: 'GET' });
+      const response: Response = await getComfyAPI().fetchApi(APIEndpoints.GetGpuStats, {
+        method: 'GET',
+      });
       const code = response.status;
 
       switch (code) {
@@ -72,17 +72,16 @@ export const SYSTEM_API: SystemAPIs = {
     };
 
     try {
-      const response: Response = await api.fetchApi(APIEndpoints.GetDiskStats, { method: 'GET' });
+      const response: Response = await getComfyAPI().fetchApi(APIEndpoints.GetDiskStats, {
+        method: 'GET',
+      });
       const code = response.status;
 
       switch (code) {
         case 200: {
           const p: GetDiskStatsAPIPayload = await response.json();
           payload.data = p.data || [];
-          payload.message = normalizeMessage(
-            p.message,
-            'Disk statistics retrieved successfully.',
-          );
+          payload.message = normalizeMessage(p.message, 'Disk statistics retrieved successfully.');
           payload.status = p.status === 'success' ? LogSeverity.Success : LogSeverity.Error;
           break;
         }
@@ -118,17 +117,16 @@ export const SYSTEM_API: SystemAPIs = {
     };
 
     try {
-      const response: Response = await api.fetchApi(APIEndpoints.GetCpuStats, { method: 'GET' });
+      const response: Response = await getComfyAPI().fetchApi(APIEndpoints.GetCpuStats, {
+        method: 'GET',
+      });
       const code = response.status;
 
       switch (code) {
         case 200: {
           const p: GetCpuStatsAPIPayload = await response.json();
           payload.data = p.data || payload.data;
-          payload.message = normalizeMessage(
-            p.message,
-            'CPU statistics retrieved successfully.',
-          );
+          payload.message = normalizeMessage(p.message, 'CPU statistics retrieved successfully.');
           payload.status = p.status === 'success' ? LogSeverity.Success : LogSeverity.Error;
           break;
         }
@@ -166,17 +164,16 @@ export const SYSTEM_API: SystemAPIs = {
     };
 
     try {
-      const response: Response = await api.fetchApi(APIEndpoints.GetRamStats, { method: 'GET' });
+      const response: Response = await getComfyAPI().fetchApi(APIEndpoints.GetRamStats, {
+        method: 'GET',
+      });
       const code = response.status;
 
       switch (code) {
         case 200: {
           const p: GetRamStatsAPIPayload = await response.json();
           payload.data = p.data || payload.data;
-          payload.message = normalizeMessage(
-            p.message,
-            'RAM statistics retrieved successfully.',
-          );
+          payload.message = normalizeMessage(p.message, 'RAM statistics retrieved successfully.');
           payload.status = p.status === 'success' ? LogSeverity.Success : LogSeverity.Error;
           break;
         }
@@ -197,4 +194,3 @@ export const SYSTEM_API: SystemAPIs = {
   },
   //#endregion
 };
-

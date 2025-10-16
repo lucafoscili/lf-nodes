@@ -5,9 +5,7 @@ import {
   PreviewAPIs,
 } from '../types/api/api';
 import { LogSeverity } from '../types/manager/manager';
-import { getLfManager } from '../utils/common';
-/// @ts-ignore
-import { api } from '/scripts/api.js';
+import { getComfyAPI, getLfManager } from '../utils/common';
 
 export const PREVIEW_API: PreviewAPIs = {
   //#region clearCache
@@ -20,7 +18,7 @@ export const PREVIEW_API: PreviewAPIs = {
     };
 
     try {
-      const response: Response = await api.fetchApi(APIEndpoints.ClearPreviewCache, {
+      const response: Response = await getComfyAPI().fetchApi(APIEndpoints.ClearPreviewCache, {
         method: 'POST',
       });
 
@@ -73,7 +71,7 @@ export const PREVIEW_API: PreviewAPIs = {
     };
 
     try {
-      const response: Response = await api.fetchApi(APIEndpoints.GetPreviewStats, {
+      const response: Response = await getComfyAPI().fetchApi(APIEndpoints.GetPreviewStats, {
         method: 'POST',
       });
 

@@ -27,6 +27,7 @@ import {
   canvasToBase64,
   debounce,
   getApiRoutes,
+  getComfyAPI,
   getLfManager,
   isImage,
   isMasonry,
@@ -44,8 +45,6 @@ import {
 import { registerManualApplyChange } from './manualApply';
 import { setBrush } from './settings';
 import { updateCb } from './update';
-/// @ts-ignore
-import { api } from '/scripts/api.js';
 
 export const createEventHandlers = ({
   handleInterruptForState,
@@ -148,7 +147,7 @@ export const createEventHandlers = ({
       const { comp, eventType } = e.detail;
 
       if (eventType === 'click') {
-        const isPatched = api?.[LFInterruptFlags.PatchedInterrupt] === true;
+        const isPatched = getComfyAPI()[LFInterruptFlags.PatchedInterrupt] === true;
 
         switch (comp.lfIcon) {
           case ImageEditorIcons.Interrupt:
