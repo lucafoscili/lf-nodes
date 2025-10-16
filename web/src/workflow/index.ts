@@ -149,80 +149,66 @@ export class LfWorkflowApp {
             return;
           }
           const val = outputs[key];
-          try {
-            if (val && val.images && Array.isArray(val.images) && val.images.length > 0) {
-              const imgInfo = val.images[0];
-              const filename = imgInfo.filename || imgInfo.name;
-              const type = imgInfo.type || 'temp';
-              const subfolder = imgInfo.subfolder || '';
-              if (filename) {
-                const nonce = Date.now();
-                const url = `/view?filename=${encodeURIComponent(
-                  filename,
-                )}&type=${encodeURIComponent(type)}&subfolder=${encodeURIComponent(
-                  subfolder,
-                )}&nonce=${nonce}`;
-                const img = document.createElement('img');
-                img.src = url;
-                img.style.maxWidth = '100%';
-                img.style.borderRadius = '8px';
-                img.alt = filename;
-                img.title = filename;
-                sections.result.appendChild(img);
-                return;
-              }
+          const isSVG =
+            (typeof val === 'string' && val.trim().startsWith('<svg')) ||
+            (Array.isArray(val) &&
+              val.length > 0 &&
+              typeof val[0] === 'string' &&
+              val[0].trim().startsWith('<svg'));
+          const isImage = val && val.images && Array.isArray(val.images) && val.images.length > 0;
+
+          if (isImage) {
+            const val = outputs[key] as {
+              images: Array<{
+                filename?: string;
+                name?: string;
+                type?: string;
+                subfolder?: string;
+              }>;
+            };
+            const imgInfo = val.images[0];
+            const filename = imgInfo.filename || imgInfo.name;
+            const type = imgInfo.type || 'temp';
+            const subfolder = imgInfo.subfolder || '';
+            if (filename) {
+              const nonce = Date.now();
+              const url = `/view?filename=${encodeURIComponent(filename)}&type=${encodeURIComponent(
+                type,
+              )}&subfolder=${encodeURIComponent(subfolder)}&nonce=${nonce}`;
+              const img = document.createElement('img');
+              img.src = url;
+              img.style.maxWidth = '100%';
+              img.style.borderRadius = '8px';
+              img.alt = filename;
+              img.title = filename;
+              sections.result.appendChild(img);
+              return;
             }
-            if (val && val.svg) {
-              const svgText = Array.isArray(val.svg) ? val.svg[0] : val.svg;
-              try {
-                const wrapper = document.createElement('div');
-                wrapper.style.borderRadius = '8px';
-                wrapper.style.overflow = 'auto';
-                wrapper.style.padding = '0.6rem';
-                wrapper.style.background = '#061018';
-                const blob = new Blob([svgText], { type: 'image/svg+xml' });
-                const url = URL.createObjectURL(blob);
-                const obj = document.createElement('object');
-                obj.type = 'image/svg+xml';
-                obj.data = url;
-                obj.style.width = '100%';
-                obj.style.border = 'none';
-                wrapper.appendChild(obj);
-                const dl = document.createElement('a');
-                dl.href = url;
-                const providedName =
-                  (val && typeof val.filename === 'string' && val.filename) ||
-                  (val && typeof val.name === 'string' && val.name) ||
-                  (Array.isArray(val.svg) && val.svgFilename) ||
-                  null;
-                const imageFilename =
-                  (val &&
-                    val.images &&
-                    Array.isArray(val.images) &&
-                    val.images[0] &&
-                    (val.images[0].filename || val.images[0].name)) ||
-                  null;
-                let downloadName =
-                  providedName || imageFilename || (key ? `${key}.svg` : 'result.svg');
-                if (!downloadName.toLowerCase().endsWith('.svg')) downloadName += '.svg';
-                dl.download = downloadName;
-                dl.textContent = 'Download SVG';
-                dl.style.display = 'inline-block';
-                dl.style.marginTop = '0.6rem';
-                dl.style.padding = '0.45rem 0.65rem';
-                dl.style.background = '#1f2533';
-                dl.style.border = '1px solid #39435a';
-                dl.style.borderRadius = '8px';
-                dl.style.color = 'white';
-                wrapper.appendChild(dl);
-                sections.result.appendChild(wrapper);
-                return;
-              } catch (e) {
-                /* fallback to textual */
-              }
+          } else if (isSVG) {
+            const val = outputs[key] as { svg: string | string[] };
+            const svgText = Array.isArray(val.svg) ? val.svg[0] : val.svg;
+            try {
+              const wrapper = document.createElement('div');
+              wrapper.style.borderRadius = '8px';
+              wrapper.style.overflow = 'auto';
+              wrapper.style.padding = '0.6rem';
+              wrapper.style.background = '#061018';
+              const blob = new Blob([svgText], { type: 'image/svg+xml' });
+              const url = URL.createObjectURL(blob);
+              const obj = document.createElement('object');
+              obj.type = 'image/svg+xml';
+              obj.data = url;
+              obj.style.width = '100%';
+              obj.style.border = 'none';
+              wrapper.appendChild(obj);
+              const dl = document.createElement('a');
+              dl.href = url;
+              wrapper.appendChild(dl);
+              sections.result.appendChild(wrapper);
+              return;
+            } catch (e) {
+              /* fallback to textual */
             }
-          } catch (e) {
-            /* fallback */
           }
 
           if (outputs[key]) {

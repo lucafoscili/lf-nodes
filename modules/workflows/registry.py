@@ -187,6 +187,10 @@ def _configure_image_to_svg_workflow(prompt: Dict[str, Any], inputs: Dict[str, A
             if icon_name:
                 inputs_map["string"] = str(icon_name)
 
+        if node_id == "51":  # Desaturate checkbox (optional)
+            desaturate = inputs.get("desaturate")
+            inputs_map["boolean"] = bool(desaturate)
+
 # endregion
 
 # region Workflow Definitions
@@ -224,6 +228,13 @@ WORKFLOW_DEFINITIONS["image-to-svg"] = WorkflowDefinition(
             description="Optional: the number of colors to reduce the image to.",
             placeholder="2",
             extra={"htmlAttributes": {"autocomplete": "off", "type": "number", "min": "1", "max": "256"}},
+        ),
+        WorkflowField(
+            name="desaturate",
+            label="Desaturate",
+            component="lf-textfield",
+            description="Optional: sets whether to desaturate the image before converting.",
+            extra={"htmlAttributes": {"type": "checkbox"}},
         ),
     ],
     configure_prompt=_configure_image_to_svg_workflow,

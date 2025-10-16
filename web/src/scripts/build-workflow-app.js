@@ -3,7 +3,7 @@ import { readFile as fsReadFile, writeFile as fsWriteFile, mkdir } from 'fs/prom
 import * as sass from 'sass';
 import path from 'path';
 const outDir = path.resolve('web/deploy_workflow_app/js');
-const srcEntry = path.resolve('web/src/workflow/main.ts');
+const srcEntry = path.resolve('web/src/workflow/index.ts');
 const outFile = path.join(outDir, 'submit-prompt.js');
 const htmlSrc = path.resolve('web/src/workflow/index.html');
 const htmlOut = path.resolve('web/deploy_workflow_app/submit-prompt.html');
@@ -18,7 +18,7 @@ async function ensureDir(dir) {
 
 async function run() {
   console.log(logColor, '*-------------------------------------------*');
-  console.log(logColor, '*   B u i l d   S u b m i t - P r o m p t   *');
+  console.log(logColor, '*   B u i l d   W o r k f l o w   A p p     *');
   console.log(logColor, '*-------------------------------------------*');
   console.log(logColor, '*---*');
   await ensureDir(outDir);
