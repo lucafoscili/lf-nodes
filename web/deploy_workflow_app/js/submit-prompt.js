@@ -48335,7 +48335,7 @@ var finalize = (framework) => {
   document.dispatchEvent(ev2);
 };
 
-// web/src/workflow/main.ts
+// web/src/workflow/index.ts
 var _API_BASE, _ASSETS_BASE, _ASSETS_URL, _APP, _FIELD_RENDERERS, _MANAGERS, _STATE, _STRINGIFY, _LfWorkflowApp_instances, initializeElements_fn, _loadWorkflows;
 var LfWorkflowApp = class {
   constructor() {
@@ -48577,67 +48577,52 @@ initializeElements_fn = function() {
           return;
         }
         const val = outputs[key];
-        try {
-          if (val && val.images && Array.isArray(val.images) && val.images.length > 0) {
-            const imgInfo = val.images[0];
-            const filename = imgInfo.filename || imgInfo.name;
-            const type = imgInfo.type || "temp";
-            const subfolder = imgInfo.subfolder || "";
-            if (filename) {
-              const nonce = Date.now();
-              const url = `/view?filename=${encodeURIComponent(
-                filename
-              )}&type=${encodeURIComponent(type)}&subfolder=${encodeURIComponent(
-                subfolder
-              )}&nonce=${nonce}`;
-              const img = document.createElement("img");
-              img.src = url;
-              img.style.maxWidth = "100%";
-              img.style.borderRadius = "8px";
-              img.alt = filename;
-              img.title = filename;
-              sections2.result.appendChild(img);
-              return;
-            }
+        const isSVG = typeof val === "string" && val.trim().startsWith("<svg") || Array.isArray(val) && val.length > 0 && typeof val[0] === "string" && val[0].trim().startsWith("<svg");
+        const isImage = val && val.images && Array.isArray(val.images) && val.images.length > 0;
+        if (isImage) {
+          const val2 = outputs[key];
+          const imgInfo = val2.images[0];
+          const filename = imgInfo.filename || imgInfo.name;
+          const type = imgInfo.type || "temp";
+          const subfolder = imgInfo.subfolder || "";
+          if (filename) {
+            const nonce = Date.now();
+            const url = `/view?filename=${encodeURIComponent(filename)}&type=${encodeURIComponent(
+              type
+            )}&subfolder=${encodeURIComponent(subfolder)}&nonce=${nonce}`;
+            const img = document.createElement("img");
+            img.src = url;
+            img.style.maxWidth = "100%";
+            img.style.borderRadius = "8px";
+            img.alt = filename;
+            img.title = filename;
+            sections2.result.appendChild(img);
+            return;
           }
-          if (val && val.svg) {
-            const svgText = Array.isArray(val.svg) ? val.svg[0] : val.svg;
-            try {
-              const wrapper = document.createElement("div");
-              wrapper.style.borderRadius = "8px";
-              wrapper.style.overflow = "auto";
-              wrapper.style.padding = "0.6rem";
-              wrapper.style.background = "#061018";
-              const blob = new Blob([svgText], { type: "image/svg+xml" });
-              const url = URL.createObjectURL(blob);
-              const obj = document.createElement("object");
-              obj.type = "image/svg+xml";
-              obj.data = url;
-              obj.style.width = "100%";
-              obj.style.border = "none";
-              wrapper.appendChild(obj);
-              const dl2 = document.createElement("a");
-              dl2.href = url;
-              const providedName = val && typeof val.filename === "string" && val.filename || val && typeof val.name === "string" && val.name || Array.isArray(val.svg) && val.svgFilename || null;
-              const imageFilename = val && val.images && Array.isArray(val.images) && val.images[0] && (val.images[0].filename || val.images[0].name) || null;
-              let downloadName = providedName || imageFilename || (key ? `${key}.svg` : "result.svg");
-              if (!downloadName.toLowerCase().endsWith(".svg")) downloadName += ".svg";
-              dl2.download = downloadName;
-              dl2.textContent = "Download SVG";
-              dl2.style.display = "inline-block";
-              dl2.style.marginTop = "0.6rem";
-              dl2.style.padding = "0.45rem 0.65rem";
-              dl2.style.background = "#1f2533";
-              dl2.style.border = "1px solid #39435a";
-              dl2.style.borderRadius = "8px";
-              dl2.style.color = "white";
-              wrapper.appendChild(dl2);
-              sections2.result.appendChild(wrapper);
-              return;
-            } catch (e2) {
-            }
+        } else if (isSVG) {
+          const val2 = outputs[key];
+          const svgText = Array.isArray(val2.svg) ? val2.svg[0] : val2.svg;
+          try {
+            const wrapper = document.createElement("div");
+            wrapper.style.borderRadius = "8px";
+            wrapper.style.overflow = "auto";
+            wrapper.style.padding = "0.6rem";
+            wrapper.style.background = "#061018";
+            const blob = new Blob([svgText], { type: "image/svg+xml" });
+            const url = URL.createObjectURL(blob);
+            const obj = document.createElement("object");
+            obj.type = "image/svg+xml";
+            obj.data = url;
+            obj.style.width = "100%";
+            obj.style.border = "none";
+            wrapper.appendChild(obj);
+            const dl2 = document.createElement("a");
+            dl2.href = url;
+            wrapper.appendChild(dl2);
+            sections2.result.appendChild(wrapper);
+            return;
+          } catch (e2) {
           }
-        } catch (e2) {
         }
         if (outputs[key]) {
           sections2.result.textContent = __privateGet(this, _STRINGIFY).call(this, outputs[key]);
