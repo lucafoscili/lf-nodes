@@ -192,48 +192,84 @@ async def lf_nodes_run_workflow(request: web.Request) -> web.Response:
 # region Upload handler
 @PromptServer.instance.routes.post(f"{API_ROUTE_PREFIX}/upload")
 async def lf_nodes_upload(request: web.Request) -> web.Response:
-  """Accept a multipart file upload and save to Comfy temp directory.
+    """Accept a multipart file upload and save to Comfy temp directory.
 
-  Returns JSON: { "path": <path_to_use_in_workflow> }
-  The returned path is the absolute file path which can be passed to nodes that
-  expect an image path. Files are written with their original filename into
-  the temp directory.
-  """
-  reader = await request.multipart()
-  field = await reader.next()
-  if field is None or field.name != 'file':
-    return web.json_response({'error': 'missing_file'}, status=400)
+    Returns a run-style WorkflowAPIResponse wrapped by _make_run_payload.
+    The returned path is the absolute file path which can be passed to nodes
+    that expect an image path. Files are written with their original filename
+    into the temp directory.
+    """
+    # Expect a multipart form with one or more fields named 'file'
+    try:
+        reader = await request.multipart()
+    except Exception as exc:
+        logging.warning('Failed to parse multipart upload: %s', exc)
+        return web.json_response({
+            "message": str(exc),
+            "payload": {"detail": str(exc), "error": {"message": 'invalid_multipart'}},
+            "status": "error",
+        }, status=400)
 
-  raw_filename = field.filename or ""
-  sanitized = sanitize_filename(raw_filename)
-  if sanitized is None:
-    filename = f"upload_{int(time.time())}.png"
-  else:
-    filename = sanitized
-  # Ensure directory exists
-  temp_dir = folder_paths.get_temp_directory()
-  os.makedirs(temp_dir, exist_ok=True)
-  # Avoid clobbering: add a numeric suffix if file exists
-  dest_path = os.path.join(temp_dir, filename)
-  base, ext = os.path.splitext(dest_path)
-  counter = 1
-  while os.path.exists(dest_path):
-    dest_path = f"{base}_{counter}{ext}"
-    counter += 1
+    paths = []
+    temp_dir = folder_paths.get_temp_directory()
+    os.makedirs(temp_dir, exist_ok=True)
 
-  try:
-    with open(dest_path, 'wb') as f:
-      while True:
-        chunk = await field.read_chunk()
-        if not chunk:
-          break
-        f.write(chunk)
-  except Exception as exc:
-    logging.exception('Failed to save uploaded file: %s', exc)
-    return web.json_response({'error': 'save_failed', 'detail': str(exc)}, status=500)
+    # Iterate through all parts and save those with name 'file' (support multiple files)
+    try:
+        while True:
+            part = await reader.next()
+            if part is None:
+                break
 
-  # Return the absolute path which workflows expect for file inputs
-  return web.json_response({'path': dest_path})
+            # Only process file fields named 'file' (also accept 'files' for compatibility)
+            if part.name not in ('file', 'files'):
+                # skip other form fields
+                continue
+
+            raw_filename = part.filename or ""
+            sanitized = sanitize_filename(raw_filename)
+            if sanitized is None:
+                # add a timestamp suffix to create a filename
+                sanitized = f"upload_{int(time.time())}.png"
+
+            # Avoid clobbering: add a numeric suffix if file exists
+            dest_path = os.path.join(temp_dir, sanitized)
+            base, ext = os.path.splitext(dest_path)
+            counter = 1
+            while os.path.exists(dest_path):
+                dest_path = f"{base}_{counter}{ext}"
+                counter += 1
+
+            # Write file to disk
+            with open(dest_path, 'wb') as f:
+                while True:
+                    chunk = await part.read_chunk()
+                    if not chunk:
+                        break
+                    f.write(chunk)
+
+            paths.append(dest_path)
+    except Exception as exc:
+        logging.exception('Failed while saving uploaded files: %s', exc)
+        return web.json_response({
+            "message": str(exc),
+            "payload": {"detail": str(exc), "error": {"message": 'save_failed'}},
+            "status": "error",
+        }, status=500)
+
+    if not paths:
+        return web.json_response({
+            "message": "missing_file",
+            "payload": {"detail": "missing_file", "error": {"message": 'missing_file'}},
+            "status": "error",
+        }, status=400)
+
+    # Build a dedicated upload-style payload with saved paths
+    return web.json_response({
+        "message": "success",
+        "payload": {"detail": "success", "paths": paths},
+        "status": "ready",
+    }, status=200)
 # endregion
 
 # region Helpers
@@ -300,22 +336,68 @@ async def _wait_for_completion(prompt_id: str, timeout_seconds: float = 180.0) -
         await asyncio.sleep(0.35)
 
 def _sanitize_history(entry: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Sanitize a single history entry for safe JSON serialization.
+    This function processes a history entry dictionary and returns a sanitized
+    representation containing only the "status", "outputs", and "prompt" keys,
+    each run through a helper (_json_safe) to ensure JSON-serializability.
+    Behavior:
+    - The function reads entry.get("outputs", {}) and treats None as an empty dict.
+    - For each node_id -> node_out pair in outputs:
+        - If node_out is a dict:
+            - Make a shallow copy and rename any keys that start with "lf_" by removing
+                that prefix (e.g., "lf_key" -> "key"), but only if the resulting name is
+                non-empty and does not already exist in the dict. Other keys are preserved.
+        - If node_out is a list:
+            - Iterate elements; for any element that is a dict, apply the same
+                "lf_"-prefix renaming logic on a shallow copy of that element. Non-dict
+                elements are preserved as-is.
+        - Any other types for node_out are preserved unchanged.
+        - If processing a node_out raises an exception, the original node_out is
+            kept unchanged as a fallback.
+    - After processing all outputs, the function returns a dict with:
+            {"status": _json_safe(status_value),
+             "prompt": _json_safe(prompt_value)}
+    Parameters
+    ----------
+    entry : Dict[str, Any]
+            The history entry to sanitize. Expected to possibly contain the keys
+            "status", "outputs", and "prompt", where "outputs" is typically a mapping
+            of node identifiers to values (dict, list, or other).
+    Returns
+    -------
+    Dict[str, Any]
+            A sanitized dictionary with keys "status", "outputs", and "prompt",
+            suitable for JSON serialization via the helper _json_safe.
+    Notes
+    -----
+    - The function only removes the "lf_" prefix from keys when doing so will not
+        cause a key collision in the same mapping.
+    - _json_safe is an external helper assumed to convert arbitrary objects into
+        JSON-safe representations; consult its implementation for specific behavior.
+    """
     outputs = entry.get("outputs", {}) or {}
     safe_outputs = {}
     for node_id, node_out in outputs.items():
         try:
             if isinstance(node_out, dict):
                 node_copy = dict(node_out)
-                if 'lf_images' in node_copy and 'images' not in node_copy:
-                    node_copy['images'] = node_copy.pop('lf_images')
+                for key in list(node_copy.keys()):
+                    if key.startswith('lf_'):
+                        new_key = key[3:]
+                        if new_key and new_key not in node_copy:
+                            node_copy[new_key] = node_copy.pop(key)
                 safe_outputs[node_id] = node_copy
             elif isinstance(node_out, list):
                 new_list = []
                 for elem in node_out:
                     if isinstance(elem, dict):
                         elem_copy = dict(elem)
-                        if 'lf_images' in elem_copy and 'images' not in elem_copy:
-                            elem_copy['images'] = elem_copy.pop('lf_images')
+                        for key in list(elem_copy.keys()):
+                            if key.startswith('lf_'):
+                                new_key = key[3:]
+                                if new_key and new_key not in elem_copy:
+                                    elem_copy[new_key] = elem_copy.pop(key)
                         new_list.append(elem_copy)
                     else:
                         new_list.append(elem)
