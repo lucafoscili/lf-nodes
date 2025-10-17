@@ -1,4 +1,5 @@
-import { WorkflowRunnerManager, WorkflowState } from '../../types/workflow-runner/state';
+import { WorkflowRunnerManager } from '../../types/workflow-runner/manager';
+import { WorkflowState } from '../../types/workflow-runner/state';
 
 //#region Public API
 export const initState = (

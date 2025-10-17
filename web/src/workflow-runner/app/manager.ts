@@ -1,17 +1,14 @@
 import { getLfFramework } from '@lf-widgets/framework';
 import { APIEndpoints } from '../../types/api/api';
-import {
-  WorkflowAPIRunPayload,
-  WorkflowRunnerManager,
-  WorkflowState,
-  WorkflowStatus,
-} from '../../types/workflow-runner/state';
-import { uploadFiles } from '../../utils/common';
+import { WorkflowAPIRunPayload } from '../../types/workflow-runner/api';
+import { WorkflowRunnerManager } from '../../types/workflow-runner/manager';
+import { WorkflowState, WorkflowStatus } from '../../types/workflow-runner/state';
 import { invokeRunAPI } from '../api/run';
 import { drawerSection } from '../elements/layout.drawer';
 import { headerSection } from '../elements/layout.header';
 import { mainSection } from '../elements/layout.main';
 import { workflowSection } from '../elements/main.workflow';
+import { handleUploadField } from '../utils/common';
 import { initState } from './state';
 
 export class LfWorkflowRunnerManager implements WorkflowRunnerManager {
@@ -98,12 +95,14 @@ export class LfWorkflowRunnerManager implements WorkflowRunnerManager {
           break;
 
         case 'lf-upload':
-          this.setStatus('running', 'Uploading file…');
-          const files = value as File[];
-          const uploadEl = el as HTMLLfUploadElement;
-          const { filesStr } = await uploadFiles(files, uploadEl);
-          inputs[el.dataset.name] = filesStr;
-          this.setStatus('running', 'File uploaded, processing...');
+          try {
+            const files = value as File[];
+            const paths = await handleUploadField(this.#STATE, el.dataset.name, files);
+
+            inputs[el.dataset.name] = paths.length === 1 ? paths[0] : paths;
+          } catch (err) {
+            throw err;
+          }
           break;
 
         default:
@@ -124,7 +123,17 @@ export class LfWorkflowRunnerManager implements WorkflowRunnerManager {
     }
 
     this.setStatus('running', 'Submitting workflow…');
-    const inputs = await this.collectInputs();
+    let inputs: Record<string, unknown>;
+    try {
+      inputs = await this.collectInputs();
+    } catch (err) {
+      console.error('Failed to collect inputs:', err);
+      const short =
+        err && (err as Error).message ? (err as Error).message : 'Failed to collect inputs';
+      const userMessage = `Failed to collect inputs: ${short}`;
+      this.setStatus('error', userMessage);
+      return;
+    }
     const { message, payload, status } = await invokeRunAPI(current.workflow, inputs);
     if (payload.error?.input) {
       workflowSection.update.fieldWrapper(this.#STATE, payload.error.input, 'error');

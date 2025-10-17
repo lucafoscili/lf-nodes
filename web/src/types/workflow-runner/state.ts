@@ -1,12 +1,5 @@
-import { LfComponentTag } from '@lf-widgets/foundations/dist';
-
-//#region Manager
-export interface WorkflowRunnerManager {
-  runWorkflow: () => Promise<void>;
-  setStatus: (status: WorkflowStatus, message?: string) => void;
-  setWorkflow: (id: string) => Promise<void>;
-}
-//#endregion
+import { WorkflowAPIDefinition } from './api';
+import { WorkflowRunnerManager } from './manager';
 
 //#region State
 export type WorkflowStatus = 'ready' | 'running' | 'error';
@@ -47,39 +40,5 @@ export interface WorkflowState {
   manager: WorkflowRunnerManager;
   ui: WorkflowUI;
   workflows: WorkflowAPIDefinition[];
-}
-//#endregion
-
-//#region API
-export interface WorkflowAPIDefinition {
-  id: string;
-  label: string;
-  description: string;
-  fields: WorkflowAPIField[];
-}
-export interface WorkflowAPIField {
-  name: LfComponentTag;
-  label: string;
-  component: string;
-  description?: string;
-  required?: boolean;
-  default?: unknown;
-  extra?: Record<string, any>;
-}
-export interface WorkflowAPIRunPayload {
-  detail: string;
-  error?: {
-    input?: string;
-    message: string;
-  };
-  history: {
-    outputs?: Record<string, unknown>;
-  };
-  preferred_output?: string;
-}
-export interface WorkflowAPIResponse {
-  message: string;
-  payload: WorkflowAPIRunPayload;
-  status: WorkflowStatus;
 }
 //#endregion

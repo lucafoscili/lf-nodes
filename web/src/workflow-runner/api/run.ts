@@ -1,4 +1,4 @@
-import { WorkflowAPIResponse, WorkflowAPIRunPayload } from '../../types/workflow-runner/state';
+import { WorkflowAPIResponse, WorkflowAPIRunPayload } from '../../types/workflow-runner/api';
 
 //#region Helpers
 const _returnErrorResponse = (

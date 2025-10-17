@@ -1,7 +1,8 @@
 import { LfThemeUIState } from '@lf-widgets/core/dist/types/components';
 import { LfButtonInterface } from '@lf-widgets/foundations/dist';
 import { getLfFramework } from '@lf-widgets/framework';
-import { WorkflowAPIField, WorkflowState } from '../../types/workflow-runner/state';
+import { WorkflowAPIField } from '../../types/workflow-runner/api';
+import { WorkflowState } from '../../types/workflow-runner/state';
 import { createComponent } from './components';
 
 //#region Constants
