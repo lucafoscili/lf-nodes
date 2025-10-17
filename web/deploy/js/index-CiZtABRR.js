@@ -1,5 +1,3 @@
-import { api } from "/scripts/api.js";
-import { app } from "/scripts/app.js";
 const LF_ACCORDION_BLOCKS = {
   accordion: { _: "accordion" },
   node: {
@@ -13655,7 +13653,7 @@ var X = false, Z = (t2, e2, n2) => {
                         const n6 = t7.i.replace(/-/g, "_"), o6 = t7.T;
                         if (!o6) return;
                         const r3 = i.get(o6);
-                        return r3 ? r3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-0df37de3.entry.js": () => import("./p-0df37de3.entry-DlXr8hKm.js"), "./p-182c6c19.entry.js": () => import("./p-182c6c19.entry-iidR3Lyd.js"), "./p-28dd0bff.entry.js": () => import("./p-28dd0bff.entry-Bd9fmLD9.js"), "./p-36aa4a7f.entry.js": () => import("./p-36aa4a7f.entry-C4WbgGrj.js"), "./p-55c6a817.entry.js": () => import("./p-55c6a817.entry-J257fHxs.js"), "./p-5d51f267.entry.js": () => import("./p-5d51f267.entry-aoWKaCHD.js"), "./p-62695161.entry.js": () => import("./p-62695161.entry-BC33fPeF.js"), "./p-924ca284.entry.js": () => import("./p-924ca284.entry-Cic9ZA8r.js"), "./p-9738317a.entry.js": () => import("./p-9738317a.entry-CLG2Y3pm.js"), "./p-988ad9c7.entry.js": () => import("./p-988ad9c7.entry-CVlfnimW.js"), "./p-a6642965.entry.js": () => import("./p-a6642965.entry-CKuFECx2.js"), "./p-b1bf3d70.entry.js": () => import("./p-b1bf3d70.entry-C7Mgkia4.js"), "./p-e2900881.entry.js": () => import("./p-e2900881.entry-DbWs05AC.js"), "./p-e4e76694.entry.js": () => import("./p-e4e76694.entry-CfEHXRiw.js"), "./p-e6148250.entry.js": () => import("./p-e6148250.entry-qFJKdK0O.js"), "./p-f19de954.entry.js": () => import("./p-f19de954.entry-DBcKCQby.js") }), `./${o6}.entry.js`, 2).then(((t8) => (i.set(o6, t8), t8[n6])), ((t8) => {
+                        return r3 ? r3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-0df37de3.entry.js": () => import("./p-0df37de3.entry-DmKCRBVY.js"), "./p-182c6c19.entry.js": () => import("./p-182c6c19.entry-D6mV8dDQ.js"), "./p-28dd0bff.entry.js": () => import("./p-28dd0bff.entry-CYI7rKTr.js"), "./p-36aa4a7f.entry.js": () => import("./p-36aa4a7f.entry-C87o1jwi.js"), "./p-55c6a817.entry.js": () => import("./p-55c6a817.entry-ucnuz7uy.js"), "./p-5d51f267.entry.js": () => import("./p-5d51f267.entry-Ds4SyfmI.js"), "./p-62695161.entry.js": () => import("./p-62695161.entry-DB83Mpmm.js"), "./p-924ca284.entry.js": () => import("./p-924ca284.entry-9PrvAxCV.js"), "./p-9738317a.entry.js": () => import("./p-9738317a.entry-TSJLv7-Z.js"), "./p-988ad9c7.entry.js": () => import("./p-988ad9c7.entry-xspLlDvx.js"), "./p-a6642965.entry.js": () => import("./p-a6642965.entry-mbZtwMGh.js"), "./p-b1bf3d70.entry.js": () => import("./p-b1bf3d70.entry-B5IriZfq.js"), "./p-e2900881.entry.js": () => import("./p-e2900881.entry-DONhMagL.js"), "./p-e4e76694.entry.js": () => import("./p-e4e76694.entry-Bk5Og727.js"), "./p-e6148250.entry.js": () => import("./p-e6148250.entry-CG-D9y2N.js"), "./p-f19de954.entry.js": () => import("./p-f19de954.entry-BQRMJV5r.js") }), `./${o6}.entry.js`, 2).then(((t8) => (i.set(o6, t8), t8[n6])), ((t8) => {
                           l(t8, e3.$hostElement$);
                         }));
                         /*!__STENCIL_STATIC_IMPORT_SWITCH__*/
@@ -13741,28 +13739,29 @@ const o = () => {
 })().then((async (e2) => (await o(), St(JSON.parse('[["p-988ad9c7",[[257,"lf-imageviewer",{"lfDataset":[1040,"lf-dataset"],"lfLoadCallback":[1040,"lf-load-callback"],"lfNavigation":[1040,"lf-navigation"],"lfStyle":[1025,"lf-style"],"lfValue":[1040,"lf-value"],"debugInfo":[32],"currentShape":[32],"history":[32],"historyIndex":[32],"isNavigationTreeOpen":[32],"isSpinnerActive":[32],"addSnapshot":[64],"clearHistory":[64],"clearSelection":[64],"getComponents":[64],"getCurrentSnapshot":[64],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"reset":[64],"setSpinnerStatus":[64],"unmount":[64]}]]],["p-182c6c19",[[257,"lf-compare",{"lfDataset":[1040,"lf-dataset"],"lfShape":[1025,"lf-shape"],"lfStyle":[1025,"lf-style"],"lfView":[1025,"lf-view"],"debugInfo":[32],"isLeftPanelOpened":[32],"isRightPanelOpened":[32],"leftShape":[32],"rightShape":[32],"shapes":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["updateShapes"],"lfShape":["updateShapes"]}]]],["p-e4e76694",[[257,"lf-accordion",{"lfDataset":[1040,"lf-dataset"],"lfRipple":[1028,"lf-ripple"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"expandedNodes":[32],"selectedNodes":[32],"getDebugInfo":[64],"getProps":[64],"getSelectedNodes":[64],"refresh":[64],"toggleNode":[64],"unmount":[64]}]]],["p-62695161",[[257,"lf-article",{"lfDataset":[1040,"lf-dataset"],"lfEmpty":[1025,"lf-empty"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-5d51f267",[[257,"lf-carousel",{"lfDataset":[1040,"lf-dataset"],"lfAutoPlay":[4,"lf-auto-play"],"lfInterval":[2,"lf-interval"],"lfLightbox":[1540,"lf-lightbox"],"lfNavigation":[1028,"lf-navigation"],"lfShape":[1537,"lf-shape"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"currentIndex":[32],"shapes":[32],"getDebugInfo":[64],"getProps":[64],"goToSlide":[64],"nextSlide":[64],"prevSlide":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["updateShapes"],"lfShape":["updateShapes"]}]]],["p-28dd0bff",[[257,"lf-messenger",{"lfAutosave":[1028,"lf-autosave"],"lfDataset":[1040,"lf-dataset"],"lfStyle":[1025,"lf-style"],"lfValue":[16,"lf-value"],"debugInfo":[32],"chat":[32],"connectionStatus":[32],"covers":[32],"currentCharacter":[32],"formStatusMap":[32],"history":[32],"hoveredCustomizationOption":[32],"saveInProgress":[32],"ui":[32],"deleteOption":[64],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"reset":[64],"save":[64],"unmount":[64]}]]],["p-f19de954",[[257,"lf-drawer",{"lfDisplay":[1537,"lf-display"],"lfPosition":[1537,"lf-position"],"lfResponsive":[1026,"lf-responsive"],"lfStyle":[1025,"lf-style"],"lfValue":[1540,"lf-value"],"debugInfo":[32],"close":[64],"getDebugInfo":[64],"getProps":[64],"isOpened":[64],"open":[64],"refresh":[64],"toggle":[64],"unmount":[64]},[[0,"keydown","listenKeydown"]],{"lfDisplay":["onLfDisplayChange"],"lfResponsive":["onLfResponsiveChange"]}]]],["p-a6642965",[[257,"lf-header",{"lfStyle":[1025,"lf-style"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-e6148250",[[257,"lf-placeholder",{"lfIcon":[1,"lf-icon"],"lfProps":[16,"lf-props"],"lfStyle":[1025,"lf-style"],"lfThreshold":[2,"lf-threshold"],"lfTrigger":[1,"lf-trigger"],"lfValue":[1,"lf-value"],"debugInfo":[32],"isInViewport":[32],"getComponent":[64],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-36aa4a7f",[[257,"lf-slider",{"lfLabel":[1025,"lf-label"],"lfLeadingLabel":[1028,"lf-leading-label"],"lfMax":[2,"lf-max"],"lfMin":[2,"lf-min"],"lfStep":[2,"lf-step"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1026,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}]]],["p-0df37de3",[[257,"lf-splash",{"lfLabel":[1025,"lf-label"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"state":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-924ca284",[[257,"lf-toast",{"lfCloseIcon":[1025,"lf-close-icon"],"lfCloseCallback":[16,"lf-close-callback"],"lfIcon":[1025,"lf-icon"],"lfTimer":[2,"lf-timer"],"lfMessage":[1025,"lf-message"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-9738317a",[[257,"lf-card",{"lfDataset":[1040,"lf-dataset"],"lfLayout":[1025,"lf-layout"],"lfSizeX":[1025,"lf-size-x"],"lfSizeY":[1025,"lf-size-y"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"debugInfo":[32],"shapes":[32],"getDebugInfo":[64],"getProps":[64],"getShapes":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["updateShapes"]}],[257,"lf-badge",{"lfImageProps":[1040,"lf-image-props"],"lfLabel":[1025,"lf-label"],"lfPosition":[1537,"lf-position"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}],[257,"lf-canvas",{"lfBrush":[1025,"lf-brush"],"lfColor":[1025,"lf-color"],"lfCursor":[1025,"lf-cursor"],"lfImageProps":[1040,"lf-image-props"],"lfOpacity":[1026,"lf-opacity"],"lfPreview":[1028,"lf-preview"],"lfStrokeTolerance":[1026,"lf-stroke-tolerance"],"lfSize":[1026,"lf-size"],"lfStyle":[1025,"lf-style"],"boxing":[32],"debugInfo":[32],"isPainting":[32],"orientation":[32],"points":[32],"clearCanvas":[64],"getCanvas":[64],"getDebugInfo":[64],"getImage":[64],"getProps":[64],"refresh":[64],"resizeCanvas":[64],"setCanvasHeight":[64],"setCanvasWidth":[64],"unmount":[64]}],[257,"lf-photoframe",{"lfOverlay":[1040,"lf-overlay"],"lfPlaceholder":[16,"lf-placeholder"],"lfStyle":[1025,"lf-style"],"lfThreshold":[2,"lf-threshold"],"lfValue":[16,"lf-value"],"debugInfo":[32],"imageOrientation":[32],"isInViewport":[32],"isReady":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}],[257,"lf-chart",{"lfAxis":[1025,"lf-axis"],"lfColors":[1040,"lf-colors"],"lfDataset":[1040,"lf-dataset"],"lfLegend":[1025,"lf-legend"],"lfSeries":[1040,"lf-series"],"lfSizeX":[1025,"lf-size-x"],"lfSizeY":[1025,"lf-size-y"],"lfStyle":[1025,"lf-style"],"lfTypes":[1040,"lf-types"],"lfXAxis":[1040,"lf-x-axis"],"lfYAxis":[1040,"lf-y-axis"],"debugInfo":[32],"themeValues":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"resize":[64],"unmount":[64]}],[257,"lf-toggle",{"lfAriaLabel":[1025,"lf-aria-label"],"lfLabel":[1025,"lf-label"],"lfLeadingLabel":[1028,"lf-leading-label"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[4,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}],[257,"lf-upload",{"lfLabel":[1025,"lf-label"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfValue":[16,"lf-value"],"debugInfo":[32],"selectedFiles":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"unmount":[64]}],[257,"lf-chat",{"lfContextWindow":[1026,"lf-context-window"],"lfEmpty":[1025,"lf-empty"],"lfEndpointUrl":[1025,"lf-endpoint-url"],"lfLayout":[1025,"lf-layout"],"lfMaxTokens":[1026,"lf-max-tokens"],"lfPollingInterval":[1026,"lf-polling-interval"],"lfSeed":[1026,"lf-seed"],"lfStyle":[1025,"lf-style"],"lfSystem":[1025,"lf-system"],"lfTemperature":[1026,"lf-temperature"],"lfTypewriterProps":[1028,"lf-typewriter-props"],"lfUiSize":[1537,"lf-ui-size"],"lfValue":[1040,"lf-value"],"currentAbortStreaming":[32],"currentPrompt":[32],"currentTokens":[32],"debugInfo":[32],"history":[32],"status":[32],"view":[32],"abortStreaming":[64],"getDebugInfo":[64],"getHistory":[64],"getLastMessage":[64],"getProps":[64],"refresh":[64],"scrollToBottom":[64],"setHistory":[64],"unmount":[64]},[[0,"keydown","listenKeydown"]],{"lfPollingInterval":["updatePollingInterval"],"lfSystem":["updateTokensCount"]}],[257,"lf-chip",{"lfAriaLabel":[1025,"lf-aria-label"],"lfDataset":[1040,"lf-dataset"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfStyling":[1025,"lf-styling"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[16,"lf-value"],"debugInfo":[32],"expandedNodes":[32],"hiddenNodes":[32],"selectedNodes":[32],"getDebugInfo":[64],"getProps":[64],"getSelectedNodes":[64],"refresh":[64],"setSelectedNodes":[64],"unmount":[64]}],[257,"lf-code",{"lfFadeIn":[1028,"lf-fade-in"],"lfFormat":[1028,"lf-format"],"lfLanguage":[1025,"lf-language"],"lfPreserveSpaces":[1028,"lf-preserve-spaces"],"lfShowCopy":[1028,"lf-show-copy"],"lfShowHeader":[1028,"lf-show-header"],"lfStickyHeader":[1028,"lf-sticky-header"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfLanguage":["loadLanguage"]}],[257,"lf-progressbar",{"lfAnimated":[1540,"lf-animated"],"lfCenteredLabel":[1540,"lf-centered-label"],"lfIcon":[1537,"lf-icon"],"lfIsRadial":[1540,"lf-is-radial"],"lfLabel":[1025,"lf-label"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1026,"lf-value"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}],[257,"lf-textfield",{"lfHelper":[1040,"lf-helper"],"lfHtmlAttributes":[1040,"lf-html-attributes"],"lfIcon":[1025,"lf-icon"],"lfLabel":[1025,"lf-label"],"lfStretchX":[1540,"lf-stretch-x"],"lfStretchY":[1540,"lf-stretch-y"],"lfStyle":[1025,"lf-style"],"lfStyling":[1025,"lf-styling"],"lfTrailingIcon":[1540,"lf-trailing-icon"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1,"lf-value"],"debugInfo":[32],"status":[32],"value":[32],"getDebugInfo":[64],"getElement":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setBlur":[64],"setFocus":[64],"setValue":[64],"unmount":[64]}],[257,"lf-typewriter",{"lfCursor":[1025,"lf-cursor"],"lfDeleteSpeed":[1026,"lf-delete-speed"],"lfLoop":[1028,"lf-loop"],"lfPause":[1026,"lf-pause"],"lfSpeed":[1026,"lf-speed"],"lfStyle":[1025,"lf-style"],"lfTag":[1025,"lf-tag"],"lfUiSize":[1537,"lf-ui-size"],"lfUpdatable":[1028,"lf-updatable"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"displayedText":[32],"isDeleting":[32],"currentTextIndex":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfValue":["handleLfValueChange"]}],[257,"lf-image",{"lfHtmlAttributes":[1040,"lf-html-attributes"],"lfMode":[1537,"lf-mode"],"lfShowSpinner":[1028,"lf-show-spinner"],"lfSizeX":[1025,"lf-size-x"],"lfSizeY":[1025,"lf-size-y"],"lfStyle":[1025,"lf-style"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"error":[32],"isLoaded":[32],"resolvedSpriteName":[32],"getDebugInfo":[64],"getImage":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfValue":["resetState"]}],[257,"lf-button",{"lfAriaLabel":[1025,"lf-aria-label"],"lfDataset":[1040,"lf-dataset"],"lfIcon":[1025,"lf-icon"],"lfIconOff":[1025,"lf-icon-off"],"lfLabel":[1025,"lf-label"],"lfRipple":[1028,"lf-ripple"],"lfShowSpinner":[1540,"lf-show-spinner"],"lfStretchX":[1540,"lf-stretch-x"],"lfStretchY":[1540,"lf-stretch-y"],"lfStyle":[1025,"lf-style"],"lfStyling":[1025,"lf-styling"],"lfToggable":[1028,"lf-toggable"],"lfTrailingIcon":[1028,"lf-trailing-icon"],"lfType":[1025,"lf-type"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[4,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setMessage":[64],"setValue":[64],"unmount":[64]}],[257,"lf-list",{"lfDataset":[1040,"lf-dataset"],"lfEmpty":[1025,"lf-empty"],"lfEnableDeletions":[1028,"lf-enable-deletions"],"lfNavigation":[1028,"lf-navigation"],"lfRipple":[1028,"lf-ripple"],"lfSelectable":[1028,"lf-selectable"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[2,"lf-value"],"debugInfo":[32],"focused":[32],"selected":[32],"focusNext":[64],"focusPrevious":[64],"getDebugInfo":[64],"getProps":[64],"getSelected":[64],"refresh":[64],"selectNode":[64],"unmount":[64]},[[0,"keydown","listenKeydown"]]],[257,"lf-spinner",{"lfActive":[1540,"lf-active"],"lfBarVariant":[1540,"lf-bar-variant"],"lfDimensions":[1025,"lf-dimensions"],"lfFader":[1540,"lf-fader"],"lfFaderTimeout":[1026,"lf-fader-timeout"],"lfFullScreen":[1540,"lf-full-screen"],"lfLayout":[1026,"lf-layout"],"lfStyle":[1025,"lf-style"],"lfTimeout":[1026,"lf-timeout"],"bigWait":[32],"debugInfo":[32],"progress":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfActive":["onFaderChange"],"lfFader":["onFaderChange"],"lfFaderTimeout":["onFaderChange"],"lfBarVariant":["lfBarVariantChanged"],"lfTimeout":["lfTimeoutChanged"]}]]],["p-55c6a817",[[257,"lf-masonry",{"lfActions":[1028,"lf-actions"],"lfColumns":[1026,"lf-columns"],"lfDataset":[1040,"lf-dataset"],"lfSelectable":[1540,"lf-selectable"],"lfShape":[1025,"lf-shape"],"lfStyle":[1025,"lf-style"],"lfView":[1025,"lf-view"],"debugInfo":[32],"selectedShape":[32],"shapes":[32],"viewportWidth":[32],"getDebugInfo":[64],"getProps":[64],"getSelectedShape":[64],"redecorateShapes":[64],"refresh":[64],"setSelectedShape":[64],"unmount":[64]},null,{"lfColumns":["validateColumns"],"lfDataset":["updateShapes"],"lfShape":["updateShapes"]}]]],["p-e2900881",[[257,"lf-tabbar",{"lfAriaLabel":[1025,"lf-aria-label"],"lfDataset":[16,"lf-dataset"],"lfNavigation":[4,"lf-navigation"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[8,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}]]],["p-b1bf3d70",[[257,"lf-tree",{"lfAccordionLayout":[1540,"lf-accordion-layout"],"lfDataset":[1040,"lf-dataset"],"lfEmpty":[1025,"lf-empty"],"lfExpandedNodeIds":[1040,"lf-expanded-node-ids"],"lfFilter":[1028,"lf-filter"],"lfGrid":[1540,"lf-grid"],"lfInitialExpansionDepth":[1026,"lf-initial-expansion-depth"],"lfSelectedNodeIds":[1040,"lf-selected-node-ids"],"lfRipple":[1028,"lf-ripple"],"lfSelectable":[1540,"lf-selectable"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"debugInfo":[32],"expandedNodes":[32],"hiddenNodes":[32],"selectedNode":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"getExpandedNodeIds":[64],"getSelectedNodeIds":[64],"setExpandedNodes":[64],"setSelectedNodes":[64],"selectByPredicate":[64],"unmount":[64]},null,{"lfDataset":["handleDatasetChange"],"lfExpandedNodeIds":["handleExpandedPropChange"],"lfSelectedNodeIds":["handleSelectedPropChange"],"lfInitialExpansionDepth":["handleInitialDepthChange"],"lfSelectable":["handleSelectableChange"],"lfFilter":["handleFilterToggle"]}]]]]'), e2))));
 var APIEndpoints;
 (function(APIEndpoints2) {
+  APIEndpoints2["CleanOldBackups"] = "/lf-nodes/clean-old-backups";
   APIEndpoints2["ClearAnalytics"] = "/lf-nodes/clear-analytics";
   APIEndpoints2["ClearMetadata"] = "/lf-nodes/clear-metadata";
   APIEndpoints2["ClearPreviewCache"] = "/lf-nodes/clear-preview-cache";
-  APIEndpoints2["LFFree"] = "/lf-nodes/free";
-  APIEndpoints2["LFRefreshNodeDefs"] = "/lf-nodes/refresh-node-defs";
-  APIEndpoints2["GetAnalytics"] = "/lf-nodes/get-analytics";
-  APIEndpoints2["GetImage"] = "/lf-nodes/get-image";
+  APIEndpoints2["Free"] = "/lf-nodes/free";
   APIEndpoints2["ExploreFilesystem"] = "/lf-nodes/explore-filesystem";
+  APIEndpoints2["GetAnalytics"] = "/lf-nodes/get-analytics";
+  APIEndpoints2["GetCpuStats"] = "/lf-nodes/get-cpu-stats";
+  APIEndpoints2["GetDiskStats"] = "/lf-nodes/get-disk-stats";
+  APIEndpoints2["GetGpuStats"] = "/lf-nodes/get-gpu-stats";
+  APIEndpoints2["GetImage"] = "/lf-nodes/get-image";
   APIEndpoints2["GetJson"] = "/lf-nodes/get-json";
+  APIEndpoints2["GetRamStats"] = "/lf-nodes/get-ram-stats";
   APIEndpoints2["GetMetadata"] = "/lf-nodes/get-metadata";
   APIEndpoints2["GetPreviewStats"] = "/lf-nodes/get-preview-stats";
   APIEndpoints2["GetBackupStats"] = "/lf-nodes/get-backup-stats";
   APIEndpoints2["NewBackup"] = "/lf-nodes/new-backup";
-  APIEndpoints2["CleanOldBackups"] = "/lf-nodes/clean-old-backups";
   APIEndpoints2["ProcessImage"] = "/lf-nodes/process-image";
+  APIEndpoints2["RefreshNodeDefs"] = "/lf-nodes/refresh-node-defs";
   APIEndpoints2["SaveMetadata"] = "/lf-nodes/save-metadata";
   APIEndpoints2["UpdateJson"] = "/lf-nodes/update-json";
   APIEndpoints2["UpdateMetadataCover"] = "/lf-nodes/update-metadata-cover";
-  APIEndpoints2["GetGpuStats"] = "/lf-nodes/get-gpu-stats";
-  APIEndpoints2["GetDiskStats"] = "/lf-nodes/get-disk-stats";
-  APIEndpoints2["GetCpuStats"] = "/lf-nodes/get-cpu-stats";
-  APIEndpoints2["GetRamStats"] = "/lf-nodes/get-ram-stats";
+  APIEndpoints2["Workflows"] = "/lf-nodes/workflows";
 })(APIEndpoints || (APIEndpoints = {}));
 var LogSeverity;
 (function(LogSeverity2) {
@@ -13782,7 +13781,7 @@ const ANALYTICS_API = {
     try {
       const body = new FormData();
       body.append("type", type);
-      const response = await api.fetchApi(APIEndpoints.ClearAnalytics, {
+      const response = await getComfyAPI().fetchApi(APIEndpoints.ClearAnalytics, {
         body,
         method: "POST"
       });
@@ -13834,7 +13833,7 @@ const ANALYTICS_API = {
       const body = new FormData();
       body.append("directory", directory);
       body.append("type", type);
-      const response = await api.fetchApi(APIEndpoints.GetAnalytics, {
+      const response = await getComfyAPI().fetchApi(APIEndpoints.GetAnalytics, {
         body,
         method: "POST"
       });
@@ -13882,7 +13881,10 @@ const BACKUP_API = {
     try {
       const body = new FormData();
       body.append("backup_type", backupType);
-      const response = await api.fetchApi(APIEndpoints.NewBackup, { body, method: "POST" });
+      const response = await getComfyAPI().fetchApi(APIEndpoints.NewBackup, {
+        body,
+        method: "POST"
+      });
       const code2 = response.status;
       switch (code2) {
         case 200:
@@ -13918,7 +13920,7 @@ const BACKUP_API = {
       status: LogSeverity.Info
     };
     try {
-      const response = await api.fetchApi(APIEndpoints.GetBackupStats, { method: "GET" });
+      const response = await getComfyAPI().fetchApi(APIEndpoints.GetBackupStats, { method: "GET" });
       const code2 = response.status;
       switch (code2) {
         case 200:
@@ -13960,7 +13962,10 @@ const BACKUP_API = {
     try {
       const body = new FormData();
       body.append("max_backups", String(_maxBackups));
-      const response = await api.fetchApi(APIEndpoints.CleanOldBackups, { body, method: "POST" });
+      const response = await getComfyAPI().fetchApi(APIEndpoints.CleanOldBackups, {
+        body,
+        method: "POST"
+      });
       const code2 = response.status;
       switch (code2) {
         case 200:
@@ -13987,44 +13992,44 @@ const BACKUP_API = {
 const COMFY_API = {
   comfyUi: () => window.comfyAPI,
   event: (name, callback) => {
-    api.addEventListener(name, callback);
+    getComfyAPI().addEventListener(name, callback);
   },
   executeCommand: (name) => {
     try {
-      app.extensionManager.command.execute(name);
+      getComfyAPP().extensionManager.command.execute(name);
     } catch (error2) {
       getLfManager().log(`Command ${name} not executed!`, { error: error2 }, LogSeverity.Warning);
     }
   },
   getDragAndScale: () => {
-    return app.canvas.ds;
+    return getComfyAPP().canvas.ds;
   },
   getLinkById: (id) => {
-    return app.graph.links[String(id).valueOf()];
+    return getComfyAPP().graph.links[String(id).valueOf()];
   },
   getNodeById: (id) => {
-    return app.graph.getNodeById(+(id || app.runningNodeId));
+    return getComfyAPP().graph.getNodeById(+(id || getComfyAPP().runningNodeId));
   },
   getResourceUrl: (subfolder, filename, type = "output") => {
     const params = [
       "filename=" + encodeURIComponent(filename),
       "type=" + type,
       "subfolder=" + subfolder,
-      app.getRandParam().substring(1)
+      getComfyAPP().getRandParam().substring(1)
     ].join("&");
     return `/view?${params}`;
   },
   interrupt: () => {
-    return api.interrupt();
+    return getComfyAPI().interrupt();
   },
   queuePrompt: async () => {
-    app.queuePrompt(0);
+    getComfyAPP().queuePrompt(0);
   },
   redraw: () => {
-    app.graph.setDirtyCanvas(true, false);
+    getComfyAPP().graph.setDirtyCanvas(true, false);
   },
   redrawFull: () => {
-    app.graph.setDirtyCanvas(true, true);
+    getComfyAPP().graph.setDirtyCanvas(true, true);
   },
   scheduleRedraw: /* @__PURE__ */ (() => {
     let scheduled = false;
@@ -14032,7 +14037,7 @@ const COMFY_API = {
       if (immediate) {
         scheduled = false;
         try {
-          app.graph.setDirtyCanvas(true, true);
+          getComfyAPP().graph.setDirtyCanvas(true, true);
         } catch {
         }
         return;
@@ -14044,6 +14049,7 @@ const COMFY_API = {
       requestAnimationFrame(() => {
         scheduled = false;
         try {
+          const { app } = comfyAPI;
           app.graph.setDirtyCanvas(true, true);
         } catch {
         }
@@ -14051,10 +14057,10 @@ const COMFY_API = {
     };
   })(),
   register: (extension) => {
-    app.registerExtension(extension);
+    getComfyAPP().registerExtension(extension);
   },
   upload: async (body) => {
-    return await api.fetchApi("/upload/image", {
+    return await getComfyAPI().fetchApi("/upload/image", {
       method: "POST",
       body
     });
@@ -14113,7 +14119,7 @@ const IMAGE_API = {
       if (directory) {
         body.append("directory", directory);
       }
-      const response = await api.fetchApi(APIEndpoints.GetImage, {
+      const response = await getComfyAPI().fetchApi(APIEndpoints.GetImage, {
         body,
         method: "POST"
       });
@@ -14158,7 +14164,7 @@ const IMAGE_API = {
       body.append("url", url);
       body.append("type", type);
       body.append("settings", JSON.stringify(settings));
-      const response = await api.fetchApi(APIEndpoints.ProcessImage, {
+      const response = await getComfyAPI().fetchApi(APIEndpoints.ProcessImage, {
         body,
         method: "POST"
       });
@@ -14210,7 +14216,7 @@ const IMAGE_API = {
       if (nodePath) {
         body.append("node", nodePath);
       }
-      const response = await api.fetchApi(APIEndpoints.ExploreFilesystem, {
+      const response = await getComfyAPI().fetchApi(APIEndpoints.ExploreFilesystem, {
         body,
         method: "POST"
       });
@@ -14254,7 +14260,7 @@ const JSON_API = {
     try {
       const body = new FormData();
       body.append("file_path", filePath);
-      const response = await api.fetchApi(APIEndpoints.GetJson, {
+      const response = await getComfyAPI().fetchApi(APIEndpoints.GetJson, {
         body,
         method: "POST"
       });
@@ -14293,7 +14299,7 @@ const JSON_API = {
     body.append("file_path", filePath);
     body.append("dataset", JSON.stringify(dataset));
     try {
-      const response = await api.fetchApi(APIEndpoints.UpdateJson, {
+      const response = await getComfyAPI().fetchApi(APIEndpoints.UpdateJson, {
         body,
         method: "POST"
       });
@@ -14329,7 +14335,7 @@ const METADATA_API = {
       status: LogSeverity.Info
     };
     try {
-      const response = await api.fetchApi(APIEndpoints.ClearMetadata, {
+      const response = await getComfyAPI().fetchApi(APIEndpoints.ClearMetadata, {
         method: "POST"
       });
       const code2 = response.status;
@@ -14402,7 +14408,7 @@ const METADATA_API = {
       body.append("model_path", modelPath);
       body.append("metadata", JSON.stringify(dataset));
       body.append("forced_save", String(forcedSave).valueOf());
-      const response = await api.fetchApi(APIEndpoints.SaveMetadata, {
+      const response = await getComfyAPI().fetchApi(APIEndpoints.SaveMetadata, {
         method: "POST",
         body
       });
@@ -14439,7 +14445,7 @@ const METADATA_API = {
       const body = new FormData();
       body.append("model_path", modelPath);
       body.append("base64_image", b64image);
-      const response = await api.fetchApi(APIEndpoints.UpdateMetadataCover, {
+      const response = await getComfyAPI().fetchApi(APIEndpoints.UpdateMetadataCover, {
         method: "POST",
         body
       });
@@ -14467,10 +14473,11 @@ const METADATA_API = {
   //#endregion
 };
 const MODELS_API = {
+  //#region free
   free: async () => {
     const lfManager = getLfManager();
     try {
-      const response = await api.fetchApi(APIEndpoints.LFFree, { method: "POST" });
+      const response = await getComfyAPI().fetchApi(APIEndpoints.Free, { method: "POST" });
       if (response.status === 200) {
         return true;
       }
@@ -14481,10 +14488,14 @@ const MODELS_API = {
       return false;
     }
   },
+  //#endregion
+  //#region refresh
   refresh: async () => {
     const lfManager = getLfManager();
     try {
-      const response = await api.fetchApi(APIEndpoints.LFRefreshNodeDefs, { method: "POST" });
+      const response = await getComfyAPI().fetchApi(APIEndpoints.RefreshNodeDefs, {
+        method: "POST"
+      });
       if (response.status === 200) {
         return true;
       }
@@ -14495,6 +14506,7 @@ const MODELS_API = {
       return false;
     }
   }
+  //#endregion
 };
 const beforeFree = async (options) => {
   const lfManager = getLfManager();
@@ -14533,7 +14545,7 @@ const PREVIEW_API = {
       status: LogSeverity.Info
     };
     try {
-      const response = await api.fetchApi(APIEndpoints.ClearPreviewCache, {
+      const response = await getComfyAPI().fetchApi(APIEndpoints.ClearPreviewCache, {
         method: "POST"
       });
       const code2 = response.status;
@@ -14578,7 +14590,7 @@ const PREVIEW_API = {
       status: LogSeverity.Info
     };
     try {
-      const response = await api.fetchApi(APIEndpoints.GetPreviewStats, {
+      const response = await getComfyAPI().fetchApi(APIEndpoints.GetPreviewStats, {
         method: "POST"
       });
       const code2 = response.status;
@@ -14625,7 +14637,9 @@ const SYSTEM_API = {
       status: LogSeverity.Info
     };
     try {
-      const response = await api.fetchApi(APIEndpoints.GetGpuStats, { method: "GET" });
+      const response = await getComfyAPI().fetchApi(APIEndpoints.GetGpuStats, {
+        method: "GET"
+      });
       const code2 = response.status;
       switch (code2) {
         case 200: {
@@ -14659,7 +14673,9 @@ const SYSTEM_API = {
       status: LogSeverity.Info
     };
     try {
-      const response = await api.fetchApi(APIEndpoints.GetDiskStats, { method: "GET" });
+      const response = await getComfyAPI().fetchApi(APIEndpoints.GetDiskStats, {
+        method: "GET"
+      });
       const code2 = response.status;
       switch (code2) {
         case 200: {
@@ -14698,7 +14714,9 @@ const SYSTEM_API = {
       status: LogSeverity.Info
     };
     try {
-      const response = await api.fetchApi(APIEndpoints.GetCpuStats, { method: "GET" });
+      const response = await getComfyAPI().fetchApi(APIEndpoints.GetCpuStats, {
+        method: "GET"
+      });
       const code2 = response.status;
       switch (code2) {
         case 200: {
@@ -14739,7 +14757,9 @@ const SYSTEM_API = {
       status: LogSeverity.Info
     };
     try {
-      const response = await api.fetchApi(APIEndpoints.GetRamStats, { method: "GET" });
+      const response = await getComfyAPI().fetchApi(APIEndpoints.GetRamStats, {
+        method: "GET"
+      });
       const code2 = response.status;
       switch (code2) {
         case 200: {
@@ -15246,48 +15266,48 @@ const getLogStyle = () => {
     textOverflow: "ellipsis"
   };
 };
-function installLFBeforeFreeHooks(api2, opts = {}) {
+function installLFBeforeFreeHooks(api, opts = {}) {
   const attempts = opts.attempts ?? 20;
   const intervalMs = opts.intervalMs ?? 250;
   const logger = opts.logger ?? (() => {
   });
-  if (!isFreeHookAPI(api2)) {
+  if (!isFreeHookAPI(api)) {
     logger('"api" object not available; cannot install free hooks yet', {}, LogSeverity.Warning);
     return { freeMemoryHook: false, fetchFallbackHook: false };
   }
   const wrap = opts.freeWrapper ?? ((fn) => async function(options) {
     await beforeFree(options);
-    return fn.apply(this ?? api2, [options]);
+    return fn.apply(this ?? api, [options]);
   });
   const installFreeMemory = () => {
     try {
-      if (api2[LFFreeFlags.PatchedFree] === true)
+      if (api[LFFreeFlags.PatchedFree] === true)
         return true;
-      const current = api2.freeMemory;
+      const current = api.freeMemory;
       if (typeof current === "function") {
-        api2[LFFreeFlags.OriginalFreeRef] = current;
-        api2.freeMemory = wrap(current);
-        api2[LFFreeFlags.PatchedFree] = true;
+        api[LFFreeFlags.OriginalFreeRef] = current;
+        api.freeMemory = wrap(current);
+        api[LFFreeFlags.PatchedFree] = true;
         return true;
       }
-      const desc = Object.getOwnPropertyDescriptor(api2, "freeMemory");
+      const desc = Object.getOwnPropertyDescriptor(api, "freeMemory");
       if (!desc || desc.configurable) {
         let original;
-        Object.defineProperty(api2, "freeMemory", {
+        Object.defineProperty(api, "freeMemory", {
           configurable: true,
           enumerable: true,
           get() {
             return original;
           },
           set(fn) {
-            if (api2[LFFreeFlags.PatchedFree] === true) {
+            if (api[LFFreeFlags.PatchedFree] === true) {
               original = fn;
               return;
             }
             if (typeof fn === "function") {
-              api2[LFFreeFlags.OriginalFreeRef] = fn;
+              api[LFFreeFlags.OriginalFreeRef] = fn;
               original = wrap(fn);
-              api2[LFFreeFlags.PatchedFree] = true;
+              api[LFFreeFlags.PatchedFree] = true;
             } else {
               original = fn;
             }
@@ -15305,38 +15325,38 @@ function installLFBeforeFreeHooks(api2, opts = {}) {
     let count = 0;
     const iv = setInterval(() => {
       count += 1;
-      if (installFreeMemory() || api2[LFFreeFlags.PatchedFree] === true || count > attempts) {
+      if (installFreeMemory() || api[LFFreeFlags.PatchedFree] === true || count > attempts) {
         clearInterval(iv);
       }
     }, intervalMs);
   }
   const installFetchFallback = () => {
     try {
-      if (api2[LFFreeFlags.PatchedFetch] === true) {
+      if (api[LFFreeFlags.PatchedFetch] === true) {
         return true;
       }
-      const originalFetchApi = api2.fetchApi;
+      const originalFetchApi = api.fetchApi;
       if (typeof originalFetchApi !== "function") {
         return false;
       }
-      api2[LFFreeFlags.PatchedFetch] = true;
-      api2.fetchApi = async function(path, init) {
+      api[LFFreeFlags.PatchedFetch] = true;
+      api.fetchApi = async function(path, init) {
         try {
           const url = typeof path === "string" ? path : String(path ?? "");
           const isFree = url.endsWith("/free") || url.endsWith("/api/free");
           const isOur = url.includes("/lf-nodes/free");
           const method = ((init == null ? void 0 : init.method) ?? "GET").toUpperCase();
-          if (isFree && !isOur && method === "POST" && api2[LFFreeFlags.InBeforeFree] !== true) {
-            api2[LFFreeFlags.InBeforeFree] = true;
+          if (isFree && !isOur && method === "POST" && api[LFFreeFlags.InBeforeFree] !== true) {
+            api[LFFreeFlags.InBeforeFree] = true;
             try {
               await beforeFree(init);
             } finally {
-              api2[LFFreeFlags.InBeforeFree] = false;
+              api[LFFreeFlags.InBeforeFree] = false;
             }
           }
         } catch {
         }
-        return originalFetchApi.apply(this ?? api2, [path, init]);
+        return originalFetchApi.apply(this ?? api, [path, init]);
       };
       return true;
     } catch (e2) {
@@ -17674,10 +17694,9 @@ const createEventHandlers = ({ handleInterruptForState: handleInterruptForState2
   const handlers = {
     //#region Button
     button: async (state, e2) => {
-      var _a;
       const { comp, eventType } = e2.detail;
       if (eventType === "click") {
-        const isPatched = ((_a = api) == null ? void 0 : _a[LFInterruptFlags.PatchedInterrupt]) === true;
+        const isPatched = getComfyAPI()[LFInterruptFlags.PatchedInterrupt] === true;
         switch (comp.lfIcon) {
           case ImageEditorIcons.Interrupt:
             getApiRoutes().comfy.interrupt();
@@ -21952,7 +21971,6 @@ const treeFactory = {
 const EV_HANDLERS = {
   //#region Upload handler
   upload: async (state, e2) => {
-    var _a;
     const { eventType, selectedFiles } = e2.detail;
     const { upload } = state;
     switch (eventType) {
@@ -21960,34 +21978,8 @@ const EV_HANDLERS = {
         state.files = Array.from(selectedFiles, (file) => file.name).join(";") || "";
         return;
       case "upload":
-        const fileNames = /* @__PURE__ */ new Set();
-        for (let index = 0; index < selectedFiles.length; index++) {
-          const file = selectedFiles[index];
-          try {
-            const body = new FormData();
-            const i2 = file.webkitRelativePath.lastIndexOf("/");
-            const subfolder = file.webkitRelativePath.slice(0, i2 + 1);
-            const new_file = new File([file], file.name, {
-              type: file.type,
-              lastModified: file.lastModified
-            });
-            body.append("image", new_file);
-            if (i2 > 0) {
-              body.append("subfolder", subfolder);
-            }
-            const resp = await getApiRoutes().comfy.upload(body);
-            if (resp.status === 200 || resp.status === 201) {
-              getLfManager().log("POST result", { json: resp.json }, LogSeverity.Success);
-              fileNames.add(file.name);
-              upload.dataset.files = upload.dataset.files + ";" + file.name;
-            } else {
-              getLfManager().log("POST failed", { statusText: resp.statusText }, LogSeverity.Error);
-            }
-          } catch (error2) {
-            alert(`Upload failed: ${error2}`);
-          }
-        }
-        state.files = ((_a = Array.from(fileNames)) == null ? void 0 : _a.join(";")) || "";
+        const { filesStr } = await uploadFiles(selectedFiles, upload);
+        state.files = filesStr || "";
         break;
     }
   }
@@ -22301,6 +22293,8 @@ class LFManager {
   }
   //#region Initialize
   initialize() {
+    const api = getComfyAPI();
+    const app = getComfyAPP();
     installLFBeforeFreeHooks(api, {
       logger: (m2, a2, s2) => this.log(m2, a2, s2)
     });
@@ -22591,6 +22585,12 @@ const unescapeJson = (input) => {
 const getApiRoutes = () => {
   return getLfManager().getApiRoutes();
 };
+const getComfyAPI = () => {
+  return comfyAPI["api"].api;
+};
+const getComfyAPP = () => {
+  return comfyAPI["app"].app;
+};
 const getLfData = () => {
   var _a;
   return (_a = getLfManager().getManagers().lfFramework) == null ? void 0 : _a.data;
@@ -22743,6 +22743,36 @@ const refreshChart = (node) => {
     getLfManager().log("Whoops! It seems there is no chart. :V", { error: error2 }, LogSeverity.Error);
   }
 };
+const uploadFiles = async (files, uploadEl) => {
+  const fileNames = /* @__PURE__ */ new Set();
+  for (let index = 0; index < files.length; index++) {
+    const file = files[index];
+    try {
+      const body = new FormData();
+      const i2 = file.webkitRelativePath.lastIndexOf("/");
+      const subfolder = file.webkitRelativePath.slice(0, i2 + 1);
+      const new_file = new File([file], file.name, {
+        type: file.type,
+        lastModified: file.lastModified
+      });
+      body.append("image", new_file);
+      if (i2 > 0) {
+        body.append("subfolder", subfolder);
+      }
+      const resp = await getApiRoutes().comfy.upload(body);
+      if (resp.status === 200 || resp.status === 201) {
+        getLfManager().log("POST result", { json: resp.json }, LogSeverity.Success);
+        fileNames.add(file.name);
+        uploadEl.dataset.files = uploadEl.dataset.files + ";" + file.name;
+      } else {
+        getLfManager().log("POST failed", { statusText: resp.statusText }, LogSeverity.Error);
+      }
+    } catch (error2) {
+      alert(`Upload failed: ${error2}`);
+    }
+  }
+  return { files: Array.from(fileNames), filesStr: Array.from(fileNames).join(";") };
+};
 {
   console.log("LF modules loaded!");
 }
@@ -22750,7 +22780,7 @@ getLfFramework();
 {
   console.log("LF Framework initialized!");
 }
-const hasComfyApp = typeof window !== "undefined" && typeof window.LGraph !== "undefined";
+const hasComfyApp = (comfyAPI == null ? void 0 : comfyAPI.api) && (comfyAPI == null ? void 0 : comfyAPI.app);
 if (hasComfyApp) {
   initLfManager();
   const lfManager = getLfManager();

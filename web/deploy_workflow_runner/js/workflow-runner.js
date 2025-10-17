@@ -44338,7 +44338,7 @@ function requireIndex_cjs() {
   function _class2(obj) {
     return Object.prototype.toString.call(obj);
   }
-  function isString2(obj) {
+  function isString3(obj) {
     return _class2(obj) === "[object String]";
   }
   function isObject(obj) {
@@ -44485,7 +44485,7 @@ function requireIndex_cjs() {
         }
         return;
       }
-      if (isString2(val)) {
+      if (isString3(val)) {
         aliases.push(name);
         return;
       }
@@ -48335,148 +48335,4405 @@ var finalize = (framework) => {
   document.dispatchEvent(ev2);
 };
 
-// web/src/workflow/index.ts
-var _API_BASE, _ASSETS_BASE, _ASSETS_URL, _APP, _FIELD_RENDERERS, _MANAGERS, _STATE, _STRINGIFY, _LfWorkflowApp_instances, initializeElements_fn, _loadWorkflows;
-var LfWorkflowApp = class {
+// web/src/types/widgets/messenger.ts
+var BASE_CSS_CLASS = "lf-messenger";
+var MessengerCSS = ((MessengerCSS2) => {
+  MessengerCSS2[MessengerCSS2["Content"] = BASE_CSS_CLASS] = "Content";
+  MessengerCSS2["Widget"] = `${BASE_CSS_CLASS}__widget`;
+  MessengerCSS2["Placeholder"] = `${BASE_CSS_CLASS}__placeholder`;
+  MessengerCSS2["PlaceholderHidden"] = `${BASE_CSS_CLASS}__placeholder--hidden`;
+  return MessengerCSS2;
+})(MessengerCSS || {});
+
+// web/src/helpers/manager.ts
+var NODE_WIDGET_MAP = {
+  LF_BackgroundRemover: ["LF_COMPARE" /* compare */],
+  LF_Blend: ["LF_COMPARE" /* compare */],
+  LF_BlobToImage: ["LF_CODE" /* code */],
+  LF_Bloom: ["LF_COMPARE" /* compare */],
+  LF_BlurImages: ["LF_MASONRY" /* masonry */],
+  LF_Boolean: ["LF_HISTORY" /* history */],
+  LF_Brightness: ["LF_COMPARE" /* compare */],
+  LF_Brush: ["LF_COMPARE" /* compare */],
+  LF_CaptionImageWD14: ["LF_COUNT_BAR_CHART" /* countBarChart */],
+  LF_CharacterImpersonator: ["LF_CODE" /* code */],
+  LF_CheckpointSelector: ["LF_CARD" /* card */],
+  LF_CivitAIMetadataSetup: ["LF_CODE" /* code */],
+  LF_Clarity: ["LF_COMPARE" /* compare */],
+  LF_ColorAnalysis: ["LF_TAB_BAR_CHART" /* tabBarChart */],
+  LF_CompareImages: ["LF_COMPARE" /* compare */],
+  LF_Contrast: ["LF_COMPARE" /* compare */],
+  LF_ControlPanel: ["LF_CONTROL_PANEL" /* controlPanel */],
+  LF_CreateMask: ["LF_COMPARE" /* compare */],
+  LF_DetectRegions: ["LF_COMPARE" /* compare */],
+  LF_Desaturation: ["LF_COMPARE" /* compare */],
+  LF_DiffusionModelSelector: ["LF_CARD" /* card */],
+  LF_DisplayBoolean: ["LF_CODE" /* code */],
+  LF_DisplayFloat: ["LF_CODE" /* code */],
+  LF_DisplayInteger: ["LF_CODE" /* code */],
+  LF_DisplayJSON: ["LF_CODE" /* code */],
+  LF_DisplayPrimitiveAsJSON: ["LF_CODE" /* code */],
+  LF_DisplayString: ["LF_CODE" /* code */],
+  LF_EmbeddingSelector: ["LF_CARD" /* card */],
+  LF_EmptyImage: ["LF_MASONRY" /* masonry */],
+  LF_ExtractFaceEmbedding: ["LF_CODE" /* code */],
+  LF_ExtractPromptFromLoraTag: ["LF_CODE" /* code */],
+  LF_ExtractString: ["LF_CODE" /* code */],
+  LF_FilmGrain: ["LF_COMPARE" /* compare */],
+  LF_Float: ["LF_HISTORY" /* history */],
+  LF_GaussianBlur: ["LF_COMPARE" /* compare */],
+  LF_GetRandomKeyFromJSON: ["LF_CODE" /* code */],
+  LF_GetValueFromJSON: ["LF_CODE" /* code */],
+  LF_ImageClassifier: ["LF_CODE" /* code */],
+  LF_ImageHistogram: ["LF_TAB_BAR_CHART" /* tabBarChart */],
+  LF_ImageListFromJSON: ["LF_MASONRY" /* masonry */],
+  LF_ImagesEditingBreakpoint: ["LF_IMAGE_EDITOR" /* imageEditor */],
+  LF_ImagesSlideshow: ["LF_CAROUSEL" /* carousel */],
+  LF_ImageToSVG: ["LF_COMPARE" /* compare */],
+  LF_Inpaint: ["LF_COMPARE" /* compare */],
+  LF_InpaintAdvanced: ["LF_COMPARE" /* compare */],
+  LF_Integer: ["LF_HISTORY" /* history */],
+  LF_IsLandscape: ["LF_TREE" /* tree */],
+  LF_JSONPromptCombinator: ["LF_CODE" /* code */],
+  LF_KeywordCounter: ["LF_COUNT_BAR_CHART" /* countBarChart */],
+  LF_KeywordToggleFromJSON: ["LF_CHIP" /* chip */],
+  LF_Line: ["LF_COMPARE" /* compare */],
+  LF_LLMChat: ["LF_CHAT" /* chat */],
+  LF_LLMMessenger: ["LF_MESSENGER" /* messenger */],
+  LF_LoadAndEditImages: ["LF_IMAGE_EDITOR" /* imageEditor */],
+  LF_LoadFileOnce: ["LF_HISTORY" /* history */],
+  LF_LoadCLIPSegModel: ["LF_CODE" /* code */],
+  LF_LoadWD14Model: ["LF_CODE" /* code */],
+  LF_LoadImages: ["LF_MASONRY" /* masonry */],
+  LF_LoadLoraTags: ["LF_CARDS_WITH_CHIP" /* cardsWithChip */],
+  LF_LoadMetadata: ["LF_CODE" /* code */, "LF_UPLOAD" /* upload */],
+  LF_LoraAndEmbeddingSelector: ["LF_CARD" /* card */],
+  LF_LoraSelector: ["LF_CARD" /* card */],
+  LF_LUTApplication: ["LF_COMPARE" /* compare */],
+  LF_LUTGeneration: ["LF_TAB_BAR_CHART" /* tabBarChart */],
+  LF_MarkdownDocGenerator: ["LF_CODE" /* code */],
+  LF_MathOperation: ["LF_CODE" /* code */],
+  LF_MultipleImageResizeForWeb: ["LF_TREE" /* tree */],
+  LF_Notify: [],
+  LF_ParsePromptWithLoraTags: ["LF_CODE" /* code */],
+  LF_RandomBoolean: ["LF_PROGRESSBAR" /* progressbar */],
+  LF_RegexReplace: ["LF_CODE" /* code */],
+  LF_RegionExtractor: ["LF_CODE" /* code */],
+  LF_RegionMask: ["LF_COMPARE" /* compare */],
+  LF_ResizeImageByEdge: ["LF_TREE" /* tree */],
+  LF_ResizeImageToDimension: ["LF_TREE" /* tree */],
+  LF_ResizeImageToSquare: ["LF_TREE" /* tree */],
+  LF_ResolutionSwitcher: ["LF_PROGRESSBAR" /* progressbar */],
+  LF_SamplerSelector: ["LF_HISTORY" /* history */],
+  LF_Saturation: ["LF_COMPARE" /* compare */],
+  LF_SaveImageForCivitAI: ["LF_MASONRY" /* masonry */],
+  LF_SaveJSON: ["LF_TREE" /* tree */],
+  LF_SaveMarkdown: ["LF_TREE" /* tree */],
+  LF_SaveSVG: ["LF_MASONRY" /* masonry */],
+  LF_SaveText: ["LF_TREE" /* tree */],
+  LF_SchedulerSelector: ["LF_HISTORY" /* history */],
+  LF_Sepia: ["LF_COMPARE" /* compare */],
+  LF_SequentialSeedsGenerator: ["LF_HISTORY" /* history */],
+  LF_SetValueInJSON: ["LF_CODE" /* code */],
+  LF_ShuffleJSONKeys: ["LF_CODE" /* code */],
+  LF_Something2Number: ["LF_CODE" /* code */],
+  LF_Something2String: ["LF_CODE" /* code */],
+  LF_SortJSONKeys: ["LF_CODE" /* code */],
+  LF_SortTags: ["LF_CODE" /* code */],
+  LF_SplitTone: ["LF_COMPARE" /* compare */],
+  LF_String: ["LF_HISTORY" /* history */],
+  LF_StringReplace: ["LF_CODE" /* code */],
+  LF_StringTemplate: ["LF_CODE" /* code */],
+  LF_StringToJSON: ["LF_CODE" /* code */],
+  LF_SwitchFloat: ["LF_PROGRESSBAR" /* progressbar */],
+  LF_SwitchImage: ["LF_PROGRESSBAR" /* progressbar */],
+  LF_SwitchInteger: ["LF_PROGRESSBAR" /* progressbar */],
+  LF_SwitchJSON: ["LF_PROGRESSBAR" /* progressbar */],
+  LF_SwitchString: ["LF_PROGRESSBAR" /* progressbar */],
+  LF_TiledSuperRes: ["LF_COMPARE" /* compare */],
+  LF_TiltShift: ["LF_COMPARE" /* compare */],
+  LF_UpdateUsageStatistics: ["LF_CODE" /* code */],
+  LF_UpscaleModelSelector: ["LF_HISTORY" /* history */],
+  LF_UsageStatistics: ["LF_TAB_BAR_CHART" /* tabBarChart */],
+  LF_UrandomSeedGenerator: ["LF_TREE" /* tree */],
+  LF_VAEDecode: ["LF_CODE" /* code */],
+  LF_VAESelector: ["LF_HISTORY" /* history */],
+  LF_ONNXSelector: ["LF_HISTORY" /* history */],
+  LF_Vibrance: ["LF_COMPARE" /* compare */],
+  LF_ViewImages: ["LF_MASONRY" /* masonry */],
+  LF_ViewSVGs: ["LF_MASONRY" /* masonry */],
+  LF_Vignette: ["LF_COMPARE" /* compare */],
+  LF_WallOfText: ["LF_CODE" /* code */],
+  LF_WriteJSON: ["LF_TEXTAREA" /* textarea */]
+};
+
+// web/src/helpers/imageEditor/dataset.ts
+var applySelectionColumn = (dataset, selection) => {
+  const lfData = getLfManager()?.getManagers()?.lfFramework?.data;
+  const existingColumns = Array.isArray(dataset?.columns) ? dataset.columns : [];
+  const [existingSelectionColumn] = lfData ? lfData.column.find(existingColumns, { id: "selected" }) : [];
+  const updatedSelectionColumn = {
+    ...existingSelectionColumn ?? { id: "selected" },
+    title: selection
+  };
+  const nextColumns = existingSelectionColumn ? existingColumns.map((col) => col.id === "selected" ? updatedSelectionColumn : col) : [...existingColumns, updatedSelectionColumn];
+  return {
+    ...dataset,
+    columns: nextColumns,
+    selection
+  };
+};
+var buildSelectionPayload = ({
+  dataset,
+  index,
+  nodes,
+  selectedShape,
+  fallbackContextId
+}) => {
+  const resolvedContextId = dataset.context_id ?? dataset.selection?.context_id ?? fallbackContextId;
+  const selection = {
+    index,
+    context_id: resolvedContextId
+  };
+  const derivedName = deriveSelectionName(selectedShape);
+  if (derivedName) {
+    selection.name = derivedName;
+  }
+  const selectedNode = Array.isArray(nodes) && index >= 0 && index < nodes.length && nodes[index] ? nodes[index] : void 0;
+  if (selectedNode && typeof selectedNode === "object") {
+    const nodeId = asString(selectedNode.id);
+    if (nodeId) {
+      selection.node_id = nodeId;
+    }
+    const imageCell = selectedNode.cells?.lfImage;
+    const imageValue = asString(imageCell?.value) ?? asString(imageCell?.lfValue);
+    if (imageValue) {
+      selection.url = imageValue;
+    }
+  }
+  return { selection, contextId: resolvedContextId };
+};
+var deriveSelectionName = (selectedShape) => {
+  if (!selectedShape) {
+    return void 0;
+  }
+  const shape = selectedShape.shape;
+  const htmlProps = shape?.htmlProps ?? {};
+  const htmlTitle = asString(htmlProps["title"]);
+  const htmlId = asString(htmlProps["id"]);
+  const shapeValue = asString(shape?.value);
+  const lfValue = asString(shape?.lfValue);
+  return htmlTitle ?? htmlId ?? shapeValue ?? lfValue ?? void 0;
+};
+var ensureDatasetContext = (dataset, state) => {
+  if (!dataset) {
+    return state?.contextId;
+  }
+  const setStateContext = (contextId) => {
+    if (contextId && state) {
+      state.contextId = contextId;
+    }
+  };
+  if (dataset.context_id) {
+    setStateContext(dataset.context_id);
+  } else if (state?.contextId) {
+    dataset.context_id = state.contextId;
+  }
+  const selection = dataset.selection;
+  const resolvedContext = selection?.context_id ?? dataset.context_id ?? state?.contextId;
+  if (selection && resolvedContext) {
+    selection.context_id = selection.context_id ?? resolvedContext;
+    if (!dataset.context_id) {
+      dataset.context_id = resolvedContext;
+    }
+    setStateContext(resolvedContext);
+    return resolvedContext;
+  }
+  if (dataset.context_id) {
+    setStateContext(dataset.context_id);
+    return dataset.context_id;
+  }
+  if (state?.contextId) {
+    dataset.context_id = state.contextId;
+    return state.contextId;
+  }
+  return void 0;
+};
+var hasContextChanged = (previousContextId, nextContextId) => {
+  return previousContextId !== nextContextId;
+};
+var hasSelectionChanged = (previousSelection, nextSelection) => {
+  return JSON.stringify(previousSelection ?? null) !== JSON.stringify(nextSelection ?? null);
+};
+var resolveSelectionIndex = (selectedShape, nodes) => {
+  if (typeof selectedShape?.index === "number") {
+    return selectedShape.index;
+  }
+  if (!Array.isArray(nodes)) {
+    return void 0;
+  }
+  const shape = selectedShape?.shape;
+  const shapeId = asString(shape?.htmlProps?.["id"]);
+  const shapeValue = asString(shape?.value) ?? asString(shape?.lfValue);
+  const resolvedIndex = nodes.findIndex((node) => {
+    if (!node || typeof node !== "object") {
+      return false;
+    }
+    const imageCell = node.cells?.lfImage;
+    if (!imageCell) {
+      return false;
+    }
+    const cellId = asString(imageCell.htmlProps?.["id"]);
+    const cellValue = asString(imageCell.value) ?? asString(imageCell.lfValue);
+    if (shapeId && cellId === shapeId) {
+      return true;
+    }
+    if (shapeValue && cellValue === shapeValue) {
+      return true;
+    }
+    return false;
+  });
+  return resolvedIndex >= 0 ? resolvedIndex : void 0;
+};
+
+// web/src/helpers/imageEditor/manualApply.ts
+var MANUAL_APPLY_PROCESSING_LABEL = "Applying\u2026";
+var hasManualApplyPendingChanges = (state) => {
+  const manual = state.manualApply;
+  if (!manual) {
+    return false;
+  }
+  return manual.latestChangeId > manual.latestAppliedChangeId;
+};
+var updateManualApplyButton = (state) => {
+  const manual = state.manualApply;
+  if (!manual) {
+    return;
+  }
+  manual.dirty = hasManualApplyPendingChanges(state);
+  if (manual.isProcessing) {
+    manual.button.lfUiState = "disabled";
+    manual.button.lfLabel = MANUAL_APPLY_PROCESSING_LABEL;
+    return;
+  }
+  manual.button.lfLabel = manual.defaultLabel;
+  if (manual.dirty) {
+    manual.button.lfUiState = "success";
+  } else {
+    manual.button.lfUiState = "disabled";
+  }
+};
+var initManualApplyState = (state, button) => {
+  state.manualApply = {
+    button,
+    defaultLabel: button.lfLabel ?? "Apply",
+    dirty: false,
+    isProcessing: false,
+    changeCounter: 0,
+    latestChangeId: 0,
+    latestAppliedChangeId: 0,
+    activeRequestChangeId: 0
+  };
+  updateManualApplyButton(state);
+};
+var registerManualApplyChange = (state) => {
+  if (!state.filter?.requiresManualApply || !state.manualApply) {
+    return;
+  }
+  const manual = state.manualApply;
+  manual.latestChangeId = ++manual.changeCounter;
+  if (!manual.isProcessing) {
+    updateManualApplyButton(state);
+  }
+};
+var beginManualApplyRequest = (state) => {
+  if (!state.manualApply) {
+    return;
+  }
+  const manual = state.manualApply;
+  manual.isProcessing = true;
+  manual.activeRequestChangeId = manual.latestChangeId;
+  updateManualApplyButton(state);
+};
+var resolveManualApplyRequest = (state, wasSuccessful) => {
+  if (!state.manualApply) {
+    return;
+  }
+  const manual = state.manualApply;
+  if (wasSuccessful) {
+    manual.latestAppliedChangeId = Math.max(
+      manual.latestAppliedChangeId,
+      manual.activeRequestChangeId
+    );
+  }
+  manual.activeRequestChangeId = 0;
+  manual.isProcessing = false;
+  updateManualApplyButton(state);
+};
+
+// web/src/helpers/imageEditor/api.ts
+var apiCall = async (state, addSnapshot) => {
+  const { elements, filter, filterType } = state;
+  const { imageviewer } = elements;
+  const lfManager = getLfManager();
+  const snapshot = await imageviewer.getCurrentSnapshot();
+  if (!snapshot) {
+    lfManager.log("No snapshot available for processing!", {}, "warning" /* Warning */);
+    return false;
+  }
+  const snapshotValue = snapshot.value;
+  const baseSettings = filter.settings;
+  const payload = {
+    ...baseSettings
+  };
+  const contextDataset = imageviewer.lfDataset;
+  const contextId = ensureDatasetContext(contextDataset, state);
+  if (!contextId && filterType === "inpaint") {
+    lfManager.log(
+      "Missing editing context. Run the workflow to register an editing session before using inpaint.",
+      { dataset: contextDataset },
+      "warning" /* Warning */
+    );
+    if (state.manualApply?.isProcessing) {
+      resolveManualApplyRequest(state, false);
+    }
+    return false;
+  }
+  payload.context_id = contextId;
+  requestAnimationFrame(() => imageviewer.setSpinnerStatus(true));
+  let isSuccess = false;
+  try {
+    const response = await getApiRoutes().image.process(snapshotValue, filterType, payload);
+    if (response.mask) {
+      lfManager.log(
+        "Saved inpaint mask preview to temp",
+        { mask: response.mask },
+        "info" /* Info */
+      );
+    }
+    if (response.cutout) {
+      lfManager.log("Saved cutout preview to temp", { cutout: response.cutout }, "info" /* Info */);
+    }
+    if (response.stats) {
+      lfManager.log("Filter statistics", { stats: response.stats }, "info" /* Info */);
+    }
+    if (addSnapshot) {
+      await imageviewer.addSnapshot(response.data);
+    } else {
+      const { canvas } = (await imageviewer.getComponents()).details;
+      const image2 = await canvas.getImage();
+      requestAnimationFrame(() => image2.lfValue = response.data);
+    }
+    isSuccess = true;
+  } catch (error2) {
+    lfManager.log("Error processing image!", { error: error2 }, "error" /* Error */);
+  }
+  requestAnimationFrame(() => imageviewer.setSpinnerStatus(false));
+  if (state.manualApply?.isProcessing) {
+    resolveManualApplyRequest(state, isSuccess);
+  }
+  return isSuccess;
+};
+
+// web/src/types/widgets/imageEditor.ts
+var BASE_CSS_CLASS2 = "lf-imageeditor";
+var ImageEditorCSS = ((ImageEditorCSS2) => {
+  ImageEditorCSS2[ImageEditorCSS2["Content"] = BASE_CSS_CLASS2] = "Content";
+  ImageEditorCSS2["Widget"] = `${BASE_CSS_CLASS2}__widget`;
+  ImageEditorCSS2["Actions"] = `${BASE_CSS_CLASS2}__actions`;
+  ImageEditorCSS2["Grid"] = `${BASE_CSS_CLASS2}__grid`;
+  ImageEditorCSS2["GridHasActions"] = `${BASE_CSS_CLASS2}__grid--has-actions`;
+  ImageEditorCSS2["GridIsInactive"] = `${BASE_CSS_CLASS2}__grid--is-inactive`;
+  ImageEditorCSS2["Settings"] = `${BASE_CSS_CLASS2}__settings`;
+  ImageEditorCSS2["SettingsControls"] = `${BASE_CSS_CLASS2}__settings__controls`;
+  ImageEditorCSS2["SettingsButtons"] = `${BASE_CSS_CLASS2}__settings__buttons`;
+  return ImageEditorCSS2;
+})(ImageEditorCSS || {});
+var ImageEditorBackgroundRemoverIds = /* @__PURE__ */ ((ImageEditorBackgroundRemoverIds2) => {
+  ImageEditorBackgroundRemoverIds2["Color"] = "color";
+  ImageEditorBackgroundRemoverIds2["TransparentBackground"] = "transparent_background";
+  return ImageEditorBackgroundRemoverIds2;
+})(ImageEditorBackgroundRemoverIds || {});
+var ImageEditorBlendIds = /* @__PURE__ */ ((ImageEditorBlendIds2) => {
+  ImageEditorBlendIds2["Opacity"] = "opacity";
+  return ImageEditorBlendIds2;
+})(ImageEditorBlendIds || {});
+var ImageEditorBloomIds = /* @__PURE__ */ ((ImageEditorBloomIds2) => {
+  ImageEditorBloomIds2["Threshold"] = "threshold";
+  ImageEditorBloomIds2["Radius"] = "radius";
+  ImageEditorBloomIds2["Intensity"] = "intensity";
+  ImageEditorBloomIds2["Tint"] = "tint";
+  return ImageEditorBloomIds2;
+})(ImageEditorBloomIds || {});
+var ImageEditorBrightnessIds = /* @__PURE__ */ ((ImageEditorBrightnessIds2) => {
+  ImageEditorBrightnessIds2["Strength"] = "strength";
+  ImageEditorBrightnessIds2["Gamma"] = "gamma";
+  ImageEditorBrightnessIds2["Midpoint"] = "midpoint";
+  ImageEditorBrightnessIds2["Localized"] = "localized";
+  return ImageEditorBrightnessIds2;
+})(ImageEditorBrightnessIds || {});
+var ImageEditorBrushIds = /* @__PURE__ */ ((ImageEditorBrushIds2) => {
+  ImageEditorBrushIds2["B64Canvas"] = "b64_canvas";
+  ImageEditorBrushIds2["Color"] = "color";
+  ImageEditorBrushIds2["Opacity"] = "opacity";
+  ImageEditorBrushIds2["Size"] = "size";
+  return ImageEditorBrushIds2;
+})(ImageEditorBrushIds || {});
+var ImageEditorClarityIds = /* @__PURE__ */ ((ImageEditorClarityIds2) => {
+  ImageEditorClarityIds2["Amount"] = "clarity_amount";
+  return ImageEditorClarityIds2;
+})(ImageEditorClarityIds || {});
+var ImageEditorContrastIds = /* @__PURE__ */ ((ImageEditorContrastIds2) => {
+  ImageEditorContrastIds2["Strength"] = "strength";
+  ImageEditorContrastIds2["Localized"] = "contrast";
+  ImageEditorContrastIds2["Midpoint"] = "midpoint";
+  return ImageEditorContrastIds2;
+})(ImageEditorContrastIds || {});
+var ImageEditorDesaturateIds = /* @__PURE__ */ ((ImageEditorDesaturateIds2) => {
+  ImageEditorDesaturateIds2["RedChannel"] = "r_channel";
+  ImageEditorDesaturateIds2["GreenChannel"] = "g_channel";
+  ImageEditorDesaturateIds2["BlueChannel"] = "b_channel";
+  ImageEditorDesaturateIds2["Strength"] = "strength";
+  return ImageEditorDesaturateIds2;
+})(ImageEditorDesaturateIds || {});
+var ImageEditorFilmGrainIds = /* @__PURE__ */ ((ImageEditorFilmGrainIds2) => {
+  ImageEditorFilmGrainIds2["Intensity"] = "intensity";
+  ImageEditorFilmGrainIds2["Size"] = "size";
+  ImageEditorFilmGrainIds2["Tint"] = "tint";
+  ImageEditorFilmGrainIds2["SoftBlend"] = "soft_blend";
+  return ImageEditorFilmGrainIds2;
+})(ImageEditorFilmGrainIds || {});
+var ImageEditorGaussianBlurIds = /* @__PURE__ */ ((ImageEditorGaussianBlurIds2) => {
+  ImageEditorGaussianBlurIds2["BlurKernelSize"] = "blur_kernel_size";
+  ImageEditorGaussianBlurIds2["BlurSigma"] = "blur_sigma";
+  return ImageEditorGaussianBlurIds2;
+})(ImageEditorGaussianBlurIds || {});
+var ImageEditorLineIds = /* @__PURE__ */ ((ImageEditorLineIds2) => {
+  ImageEditorLineIds2["Color"] = "color";
+  ImageEditorLineIds2["Opacity"] = "opacity";
+  ImageEditorLineIds2["Points"] = "points";
+  ImageEditorLineIds2["Size"] = "size";
+  ImageEditorLineIds2["Smooth"] = "smooth";
+  return ImageEditorLineIds2;
+})(ImageEditorLineIds || {});
+var ImageEditorSaturationIds = /* @__PURE__ */ ((ImageEditorSaturationIds2) => {
+  ImageEditorSaturationIds2["Intensity"] = "intensity";
+  return ImageEditorSaturationIds2;
+})(ImageEditorSaturationIds || {});
+var ImageEditorSepiaIds = /* @__PURE__ */ ((ImageEditorSepiaIds2) => {
+  ImageEditorSepiaIds2["Intensity"] = "intensity";
+  return ImageEditorSepiaIds2;
+})(ImageEditorSepiaIds || {});
+var ImageEditorSplitToneIds = /* @__PURE__ */ ((ImageEditorSplitToneIds2) => {
+  ImageEditorSplitToneIds2["Balance"] = "balance";
+  ImageEditorSplitToneIds2["Highlights"] = "highlights";
+  ImageEditorSplitToneIds2["Intensity"] = "intensity";
+  ImageEditorSplitToneIds2["Shadows"] = "shadows";
+  ImageEditorSplitToneIds2["Softness"] = "softness";
+  return ImageEditorSplitToneIds2;
+})(ImageEditorSplitToneIds || {});
+var ImageEditorTiltShiftIds = /* @__PURE__ */ ((ImageEditorTiltShiftIds2) => {
+  ImageEditorTiltShiftIds2["FocusPosition"] = "focus_position";
+  ImageEditorTiltShiftIds2["FocusSize"] = "focus_size";
+  ImageEditorTiltShiftIds2["Radius"] = "radius";
+  ImageEditorTiltShiftIds2["Smooth"] = "smooth";
+  ImageEditorTiltShiftIds2["Vertical"] = "vertical";
+  return ImageEditorTiltShiftIds2;
+})(ImageEditorTiltShiftIds || {});
+var ImageEditorUnsharpMaskIds = /* @__PURE__ */ ((ImageEditorUnsharpMaskIds2) => {
+  ImageEditorUnsharpMaskIds2["Amount"] = "amount";
+  ImageEditorUnsharpMaskIds2["Radius"] = "radius";
+  ImageEditorUnsharpMaskIds2["Sigma"] = "sigma";
+  ImageEditorUnsharpMaskIds2["Threshold"] = "threshold";
+  return ImageEditorUnsharpMaskIds2;
+})(ImageEditorUnsharpMaskIds || {});
+var ImageEditorVibranceIds = /* @__PURE__ */ ((ImageEditorVibranceIds2) => {
+  ImageEditorVibranceIds2["Intensity"] = "intensity";
+  ImageEditorVibranceIds2["ClipSoft"] = "clip_soft";
+  ImageEditorVibranceIds2["ProtectSkin"] = "protect_skin";
+  return ImageEditorVibranceIds2;
+})(ImageEditorVibranceIds || {});
+var ImageEditorVignetteIds = /* @__PURE__ */ ((ImageEditorVignetteIds2) => {
+  ImageEditorVignetteIds2["Color"] = "color";
+  ImageEditorVignetteIds2["Intensity"] = "intensity";
+  ImageEditorVignetteIds2["Radius"] = "radius";
+  ImageEditorVignetteIds2["Shape"] = "shape";
+  return ImageEditorVignetteIds2;
+})(ImageEditorVignetteIds || {});
+var ImageEditorInpaintIds = /* @__PURE__ */ ((ImageEditorInpaintIds2) => {
+  ImageEditorInpaintIds2["B64Canvas"] = "b64_canvas";
+  ImageEditorInpaintIds2["Cfg"] = "cfg";
+  ImageEditorInpaintIds2["DenoisePercentage"] = "denoise_percentage";
+  ImageEditorInpaintIds2["NegativePrompt"] = "negative_prompt";
+  ImageEditorInpaintIds2["PositivePrompt"] = "positive_prompt";
+  ImageEditorInpaintIds2["Seed"] = "seed";
+  ImageEditorInpaintIds2["Steps"] = "steps";
+  ImageEditorInpaintIds2["UseConditioning"] = "use_conditioning";
+  ImageEditorInpaintIds2["RoiAuto"] = "roi_auto";
+  ImageEditorInpaintIds2["RoiPadding"] = "roi_padding";
+  ImageEditorInpaintIds2["RoiAlign"] = "roi_align";
+  ImageEditorInpaintIds2["RoiAlignAuto"] = "roi_align_auto";
+  ImageEditorInpaintIds2["RoiMinSize"] = "roi_min_size";
+  ImageEditorInpaintIds2["Dilate"] = "dilate";
+  ImageEditorInpaintIds2["Feather"] = "feather";
+  ImageEditorInpaintIds2["UpsampleTarget"] = "upsample_target";
+  return ImageEditorInpaintIds2;
+})(ImageEditorInpaintIds || {});
+
+// web/src/fixtures/imageEditor/settings/background.ts
+var BACKGROUND_SETTINGS = {
+  backgroundRemover: {
+    controlIds: ImageEditorBackgroundRemoverIds,
+    settings: {
+      color: "#000000",
+      transparent_background: true
+    },
+    configs: {
+      ["textfield" /* Textfield */]: [
+        {
+          ariaLabel: "Background color",
+          controlType: "textfield" /* Textfield */,
+          defaultValue: "#000000",
+          id: "color" /* Color */,
+          isMandatory: true,
+          title: "Used to fill the removed background when transparency is disabled.",
+          type: "color"
+        }
+      ],
+      ["toggle" /* Toggle */]: [
+        {
+          ariaLabel: "Transparent background",
+          controlType: "toggle" /* Toggle */,
+          defaultValue: true,
+          id: "transparent_background" /* TransparentBackground */,
+          off: "false",
+          on: "true",
+          title: "Keep an alpha channel instead of filling the background with the selected color."
+        }
+      ]
+    }
+  }
+};
+
+// web/src/fixtures/imageEditor/settings/basicAdjustments.ts
+var BASIC_ADJUSTMENT_SETTINGS = {
+  //#region Brightness
+  brightness: {
+    controlIds: ImageEditorBrightnessIds,
+    settings: {
+      strength: 0,
+      gamma: 0,
+      localized: false,
+      midpoint: 0.5
+    },
+    configs: {
+      ["slider" /* Slider */]: [
+        {
+          ariaLabel: "Brightness Strength",
+          controlType: "slider" /* Slider */,
+          defaultValue: 0,
+          id: "strength" /* Strength */,
+          isMandatory: true,
+          max: "1",
+          min: "-1",
+          step: "0.05",
+          title: "Adjust the brightness of the image. Negative values darken, positive values brighten."
+        },
+        {
+          ariaLabel: "Gamma",
+          controlType: "slider" /* Slider */,
+          defaultValue: 1,
+          id: "gamma" /* Gamma */,
+          max: "3",
+          min: "0.1",
+          step: "0.1",
+          title: "Adjust the gamma correction. Values < 1 brighten shadows, > 1 darken highlights."
+        },
+        {
+          ariaLabel: "Midpoint",
+          controlType: "slider" /* Slider */,
+          defaultValue: 0.5,
+          id: "midpoint" /* Midpoint */,
+          max: "1",
+          min: "0",
+          step: "0.05",
+          title: "Defines the tonal midpoint for brightness scaling."
+        }
+      ],
+      ["toggle" /* Toggle */]: [
+        {
+          ariaLabel: "Localized Brightness",
+          controlType: "toggle" /* Toggle */,
+          defaultValue: false,
+          id: "localized" /* Localized */,
+          off: "false",
+          on: "true",
+          title: "Enhance brightness locally in darker regions."
+        }
+      ]
+    }
+  },
+  //#endregion
+  //#region Clarity
+  clarity: {
+    controlIds: ImageEditorClarityIds,
+    settings: {
+      clarity_amount: 0
+    },
+    configs: {
+      ["slider" /* Slider */]: [
+        {
+          ariaLabel: "Clarity Amount",
+          controlType: "slider" /* Slider */,
+          defaultValue: 0,
+          id: "clarity_amount" /* ClarityAmount */,
+          isMandatory: true,
+          max: "1",
+          min: "-1",
+          step: "0.05",
+          title: "Lightroom-style clarity. Negative values soften details, positive values boost local contrast."
+        }
+      ]
+    }
+  },
+  //#endregion
+  //#region Contrast
+  contrast: {
+    controlIds: ImageEditorContrastIds,
+    settings: {
+      strength: 0,
+      localized: false,
+      midpoint: 0
+    },
+    configs: {
+      ["slider" /* Slider */]: [
+        {
+          ariaLabel: "Contrast Strength",
+          controlType: "slider" /* Slider */,
+          defaultValue: 0,
+          id: "strength" /* Strength */,
+          isMandatory: true,
+          max: "1",
+          min: "-1",
+          step: "0.05",
+          title: "Controls the intensity of the contrast adjustment. 1.0 is no change, below 1 reduces contrast, above 1 increases contrast."
+        },
+        {
+          ariaLabel: "Midpoint",
+          controlType: "slider" /* Slider */,
+          defaultValue: 0.5,
+          id: "midpoint" /* Midpoint */,
+          max: "1",
+          min: "0",
+          step: "0.05",
+          title: "Defines the tonal midpoint for contrast scaling."
+        }
+      ],
+      ["toggle" /* Toggle */]: [
+        {
+          ariaLabel: "Localized Contrast",
+          controlType: "toggle" /* Toggle */,
+          defaultValue: false,
+          id: "localized" /* Localized */,
+          off: "false",
+          on: "true",
+          title: "Apply contrast enhancement locally to edges and textures."
+        }
+      ]
+    }
+  },
+  //#endregion
+  //#region Desaturate
+  desaturate: {
+    controlIds: ImageEditorDesaturateIds,
+    settings: {
+      r_channel: 1,
+      g_channel: 1,
+      b_channel: 1,
+      strength: 0
+    },
+    configs: {
+      slider: [
+        {
+          ariaLabel: "Desaturation strength",
+          controlType: "slider" /* Slider */,
+          defaultValue: 0,
+          id: "strength" /* Strength */,
+          isMandatory: true,
+          max: "1",
+          min: "0",
+          step: "0.05",
+          title: "Controls the intensity of the desaturation. 0 is no effect, 1 is fully desaturated."
+        },
+        {
+          ariaLabel: "Red channel level",
+          controlType: "slider" /* Slider */,
+          defaultValue: 1,
+          id: "r_channel" /* RedChannel */,
+          max: "1",
+          min: "0",
+          step: "0.05",
+          title: "Controls the intensity of the red channel desaturation relative to the total strength of the filter."
+        },
+        {
+          ariaLabel: "Green channel level",
+          controlType: "slider" /* Slider */,
+          defaultValue: 1,
+          id: "g_channel" /* GreenChannel */,
+          max: "1",
+          min: "0",
+          step: "0.05",
+          title: "Controls the intensity of the green channel desaturation relative to the total strength of the filter."
+        },
+        {
+          ariaLabel: "Blue channel level",
+          controlType: "slider" /* Slider */,
+          defaultValue: 1,
+          id: "b_channel" /* BlueChannel */,
+          max: "1",
+          min: "0",
+          step: "0.05",
+          title: "Controls the intensity of the blue channel desaturation relative to the total strength of the filter."
+        }
+      ]
+    }
+  },
+  //#endregion
+  //#region Saturation
+  saturation: {
+    controlIds: ImageEditorSaturationIds,
+    settings: {
+      intensity: 1
+    },
+    configs: {
+      ["slider" /* Slider */]: [
+        {
+          ariaLabel: "Saturation Intensity",
+          controlType: "slider" /* Slider */,
+          defaultValue: 1,
+          id: "intensity" /* Intensity */,
+          isMandatory: true,
+          max: "5",
+          min: "0",
+          step: "0.1",
+          title: "Controls the intensity of the saturation adjustment. 1.0 is no change, below 1 reduces saturation, above 1 increases saturation."
+        }
+      ]
+    }
+  },
+  //#endregion
+  //#region Unsharp Mask
+  unsharpMask: {
+    controlIds: ImageEditorUnsharpMaskIds,
+    settings: {
+      amount: 0.5,
+      radius: 5,
+      sigma: 1,
+      threshold: 0
+    },
+    configs: {
+      ["slider" /* Slider */]: [
+        {
+          ariaLabel: "Sharpen Amount",
+          controlType: "slider" /* Slider */,
+          defaultValue: 0.5,
+          id: "amount" /* Amount */,
+          isMandatory: true,
+          max: "5",
+          min: "0",
+          step: "0.05",
+          title: "Overall strength applied to the high-frequency detail mask."
+        },
+        {
+          ariaLabel: "Radius",
+          controlType: "slider" /* Slider */,
+          defaultValue: 5,
+          id: "radius" /* Radius */,
+          isMandatory: true,
+          max: "31",
+          min: "1",
+          step: "2",
+          title: "Gaussian blur kernel size (odd numbers give the best results)."
+        },
+        {
+          ariaLabel: "Sigma",
+          controlType: "slider" /* Slider */,
+          defaultValue: 1,
+          id: "sigma" /* Sigma */,
+          isMandatory: true,
+          max: "5",
+          min: "0.1",
+          step: "0.1",
+          title: "Gaussian blur sigma controlling feather softness around edges."
+        },
+        {
+          ariaLabel: "Threshold",
+          controlType: "slider" /* Slider */,
+          defaultValue: 0,
+          id: "threshold" /* Threshold */,
+          isMandatory: true,
+          max: "1",
+          min: "0",
+          step: "0.01",
+          title: "Skip sharpening for pixels below this normalized contrast level."
+        }
+      ]
+    }
+    //#endregion
+  }
+};
+
+// web/src/fixtures/imageEditor/settings/creativeEffects.ts
+var CREATIVE_EFFECT_SETTINGS = {
+  //#region Blend
+  blend: {
+    controlIds: ImageEditorBlendIds,
+    settings: {
+      color: "#FF0000",
+      opacity: 0.5
+    },
+    configs: {
+      ["slider" /* Slider */]: [
+        {
+          ariaLabel: "Opacity",
+          controlType: "slider" /* Slider */,
+          defaultValue: 0,
+          id: "opacity" /* Opacity */,
+          isMandatory: true,
+          max: "1",
+          min: "0",
+          step: "0.01",
+          title: "Adjust the opacity of the blended layer."
+        }
+      ],
+      ["textfield" /* Textfield */]: [
+        {
+          ariaLabel: "Color",
+          controlType: "textfield" /* Textfield */,
+          defaultValue: "#FF0000",
+          id: "color" /* Color */,
+          isMandatory: true,
+          title: "Sets the solid color that will be blended onto the image.",
+          type: "color"
+        }
+      ]
+    }
+  },
+  //#endregion
+  //#region Bloom
+  bloom: {
+    controlIds: ImageEditorBloomIds,
+    settings: {
+      intensity: 0.6,
+      radius: 15,
+      threshold: 0.8,
+      tint: "#FFFFFF"
+    },
+    configs: {
+      ["slider" /* Slider */]: [
+        {
+          ariaLabel: "Bloom Intensity",
+          controlType: "slider" /* Slider */,
+          defaultValue: 0.6,
+          id: "intensity" /* Intensity */,
+          isMandatory: true,
+          max: "2",
+          min: "0",
+          step: "0.05",
+          title: "How strong the bloom reads after compositing. 1.0 = add the blurred highlights at full strength."
+        },
+        {
+          ariaLabel: "Bloom Radius",
+          controlType: "slider" /* Slider */,
+          defaultValue: 15,
+          id: "radius" /* Radius */,
+          isMandatory: true,
+          max: "127",
+          min: "3",
+          step: "2",
+          title: "Blur radius in pixels (odd numbers only). Bigger radius \u2192 softer, more cinematic glow."
+        },
+        {
+          ariaLabel: "Threshold",
+          controlType: "slider" /* Slider */,
+          defaultValue: 0.8,
+          id: "threshold" /* Threshold */,
+          isMandatory: true,
+          max: "1",
+          min: "0",
+          step: "0.01",
+          title: "Bright-pass cutoff. 0 = everything glows, 1 = nothing glows. For dim scenes start around 0.15-0.35."
+        }
+      ],
+      ["textfield" /* Textfield */]: [
+        {
+          ariaLabel: "Tint Color",
+          controlType: "textfield" /* Textfield */,
+          defaultValue: "#FFFFFF",
+          id: "color" /* Color */,
+          title: "Hex color for the glow (e.g., FFCCAA). Pure white FFFFFF keeps original hue.",
+          type: "color"
+        }
+      ]
+    }
+  },
+  //#endregion
+  //#region Film Grain
+  filmGrain: {
+    controlIds: ImageEditorFilmGrainIds,
+    settings: { intensity: 0, size: 1, soft_blend: false, tint: "#FFFFFF" },
+    configs: {
+      ["slider" /* Slider */]: [
+        {
+          ariaLabel: "Intensity",
+          controlType: "slider" /* Slider */,
+          defaultValue: 0,
+          id: "intensity" /* Intensity */,
+          isMandatory: true,
+          max: "1",
+          min: "0",
+          step: "0.05",
+          title: "Sets the strength of the filter."
+        },
+        {
+          ariaLabel: "Size",
+          controlType: "slider" /* Slider */,
+          defaultValue: 1,
+          id: "size" /* Size */,
+          isMandatory: true,
+          max: "5",
+          min: "0.5",
+          step: "0.1",
+          title: "Sets the size of the noise's granularity."
+        }
+      ],
+      ["textfield" /* Textfield */]: [
+        {
+          ariaLabel: "Tint",
+          controlType: "textfield" /* Textfield */,
+          defaultValue: "#FFFFFF",
+          id: "tint" /* Tint */,
+          isMandatory: true,
+          title: "Hexadecimal color (default is FFFFFF for no tint).",
+          type: "color"
+        }
+      ],
+      ["toggle" /* Toggle */]: [
+        {
+          ariaLabel: "Soft blend",
+          controlType: "toggle" /* Toggle */,
+          defaultValue: false,
+          id: "soft_blend" /* SoftBlend */,
+          title: "If True, uses a soft blending mode for the grain.",
+          off: "false",
+          on: "true"
+        }
+      ]
+    }
+  },
+  //#endregion
+  //#region Gaussian Blur
+  gaussianBlur: {
+    controlIds: ImageEditorGaussianBlurIds,
+    settings: {
+      blur_kernel_size: 1,
+      blur_sigma: 0
+    },
+    configs: {
+      ["slider" /* Slider */]: [
+        {
+          ariaLabel: "Blur Sigma",
+          controlType: "slider" /* Slider */,
+          defaultValue: 0,
+          id: "blur_sigma" /* BlurSigma */,
+          max: "10",
+          min: "0.1",
+          step: "0.1",
+          title: "Standard deviation for the Gaussian kernel. Controls blur intensity."
+        },
+        {
+          ariaLabel: "Blur Kernel Size",
+          controlType: "slider" /* Slider */,
+          defaultValue: 7,
+          id: "blur_kernel_size" /* BlurKernelSize */,
+          max: "51",
+          min: "1",
+          step: "2",
+          title: "Controls the size of the Gaussian blur kernel. Higher values mean more smoothing."
+        }
+      ]
+    }
+  },
+  //#endregion
+  //#region Sepia
+  sepia: {
+    controlIds: ImageEditorSepiaIds,
+    settings: {
+      intensity: 0
+    },
+    configs: {
+      ["slider" /* Slider */]: [
+        {
+          ariaLabel: "Sepia Intensity",
+          controlType: "slider" /* Slider */,
+          defaultValue: 0,
+          id: "intensity" /* Intensity */,
+          isMandatory: true,
+          max: "1",
+          min: "0",
+          step: "0.01",
+          title: "Controls the intensity of the sepia effect."
+        }
+      ]
+    }
+  },
+  //#endregion
+  //#region Split Tone
+  splitTone: {
+    controlIds: ImageEditorSplitToneIds,
+    settings: {
+      balance: 0.5,
+      highlights: "#FFAA55",
+      intensity: 0.6,
+      shadows: "#0066FF",
+      softness: 0.25
+    },
+    configs: {
+      ["slider" /* Slider */]: [
+        {
+          ariaLabel: "Intensity",
+          controlType: "slider" /* Slider */,
+          defaultValue: 0.6,
+          id: "intensity" /* Intensity */,
+          isMandatory: true,
+          max: "2",
+          min: "0",
+          step: "0.05",
+          title: "Strength of the tint applied."
+        },
+        {
+          ariaLabel: "Balance",
+          controlType: "slider" /* Slider */,
+          defaultValue: 0.5,
+          id: "balance" /* Balance */,
+          isMandatory: true,
+          max: "1",
+          min: "0",
+          step: "0.01",
+          title: "Luminance pivot. 0 = lift even deep blacks; 1 = tint only the brightest pixels."
+        },
+        {
+          ariaLabel: "Softness",
+          controlType: "slider" /* Slider */,
+          defaultValue: 0.25,
+          id: "softness" /* Softness */,
+          isMandatory: true,
+          max: "0.5",
+          min: "0.01",
+          step: "0.01",
+          title: "Width of the transition band around the balance value."
+        }
+      ],
+      ["textfield" /* Textfield */]: [
+        {
+          ariaLabel: "Highlights",
+          controlType: "textfield" /* Textfield */,
+          defaultValue: "#FFAA55",
+          id: "highlights" /* Highlights */,
+          title: "Hex colour applied to highlights (e.g. FFAA55).",
+          type: "color"
+        },
+        {
+          ariaLabel: "Shadows",
+          controlType: "textfield" /* Textfield */,
+          defaultValue: "#0066FF",
+          id: "shadows" /* Shadows */,
+          title: "Hex colour applied to shadows (e.g. 0066FF).",
+          type: "color"
+        }
+      ]
+    }
+  },
+  //#endregion
+  //#region Tilt Shift
+  tiltShift: {
+    controlIds: ImageEditorTiltShiftIds,
+    settings: {
+      focus_position: 0.5,
+      focus_size: 0.25,
+      radius: 25,
+      smooth: false,
+      vertical: false
+    },
+    configs: {
+      ["slider" /* Slider */]: [
+        {
+          ariaLabel: "Focus Position",
+          controlType: "slider" /* Slider */,
+          defaultValue: 0.5,
+          id: "focus_position" /* FocusPosition */,
+          isMandatory: true,
+          max: "1",
+          min: "0",
+          step: "0.01",
+          title: "Vertical center of the sharp band (0 = top, 1 = bottom)."
+        },
+        {
+          ariaLabel: "Focus Size",
+          controlType: "slider" /* Slider */,
+          defaultValue: 0.25,
+          id: "focus_size" /* FocusSize */,
+          isMandatory: true,
+          max: "0.9",
+          min: "0.05",
+          step: "0.01",
+          title: "Height of the sharp zone as a fraction of the image."
+        },
+        {
+          ariaLabel: "Blur Radius",
+          controlType: "slider" /* Slider */,
+          defaultValue: 25,
+          id: "radius" /* Radius */,
+          isMandatory: true,
+          max: "151",
+          min: "3",
+          step: "2",
+          title: "Gaussian radius for out-of-focus areas. Higher values mean more blur and less detail."
+        }
+      ],
+      ["toggle" /* Toggle */]: [
+        {
+          ariaLabel: "Smooth Fall-off Curve",
+          controlType: "toggle" /* Toggle */,
+          defaultValue: false,
+          id: "smoooth" /* Smooth */,
+          off: "linear",
+          on: "smooth",
+          title: "Fall-off curve of blur vs distance. Linear means a constant fall-off, smooth means a gradual transition."
+        },
+        {
+          ariaLabel: "Vertical Orientation",
+          controlType: "toggle" /* Toggle */,
+          defaultValue: false,
+          id: "vertical" /* Vertical */,
+          off: "horizontal",
+          on: "vertical",
+          title: "Direction of the focus band. Horizontal means the focus band is horizontal, vertical means it is vertical."
+        }
+      ]
+    }
+  },
+  //#endregion
+  //#region Vibrance
+  vibrance: {
+    controlIds: ImageEditorVibranceIds,
+    settings: {
+      intensity: 0,
+      protect_skin: true,
+      clip_soft: true
+    },
+    configs: {
+      ["slider" /* Slider */]: [
+        {
+          ariaLabel: "Vibrance Intensity",
+          controlType: "slider" /* Slider */,
+          defaultValue: 0,
+          id: "intensity" /* Intensity */,
+          isMandatory: true,
+          max: "2",
+          min: "-1",
+          step: "0.05",
+          title: "Controls the intensity of the vibrance adjustment. Negative values reduce vibrance, positive values increase it."
+        }
+      ],
+      ["toggle" /* Toggle */]: [
+        {
+          ariaLabel: "Protect Skin Tones",
+          controlType: "toggle" /* Toggle */,
+          defaultValue: true,
+          id: "protect_skin" /* ProtectSkin */,
+          off: "false",
+          on: "true",
+          title: "If true, skin tones are less affected by the vibrance adjustment."
+        },
+        {
+          ariaLabel: "Clip Softly",
+          controlType: "toggle" /* Toggle */,
+          defaultValue: true,
+          id: "clip_soft" /* ClipSoft */,
+          off: "false",
+          on: "true",
+          title: "If true, saturation is rolled off near maximum to avoid clipping."
+        }
+      ]
+    }
+  },
+  //#endregion
+  //#region Vignette
+  vignette: {
+    controlIds: ImageEditorVignetteIds,
+    settings: {
+      intensity: 0,
+      radius: 0,
+      shape: false,
+      color: "000000"
+    },
+    configs: {
+      ["slider" /* Slider */]: [
+        {
+          ariaLabel: "Vignette Intensity",
+          controlType: "slider" /* Slider */,
+          defaultValue: 0,
+          id: "intensity" /* Intensity */,
+          isMandatory: true,
+          max: "1",
+          min: "0",
+          step: "0.05",
+          title: "Controls the darkness of the vignette effect. Higher values mean darker edges."
+        },
+        {
+          ariaLabel: "Vignette Radius",
+          controlType: "slider" /* Slider */,
+          defaultValue: 0,
+          id: "radius" /* Radius */,
+          isMandatory: true,
+          max: "1",
+          min: "0",
+          step: "0.05",
+          title: "Controls the size of the vignette effect. Lower values mean a smaller vignette."
+        }
+      ],
+      ["textfield" /* Textfield */]: [
+        {
+          ariaLabel: "Color",
+          controlType: "textfield" /* Textfield */,
+          defaultValue: "#000000",
+          id: "color" /* Color */,
+          title: "Sets the color of the vignette.",
+          type: "color"
+        }
+      ],
+      ["toggle" /* Toggle */]: [
+        {
+          ariaLabel: "Circular",
+          controlType: "toggle" /* Toggle */,
+          defaultValue: false,
+          id: "shape" /* Shape */,
+          off: "elliptical",
+          on: "circular",
+          title: "Selects the shape of the vignette effect, defaults to elliptical."
+        }
+      ]
+    }
+  }
+  //#endregion
+};
+
+// web/src/fixtures/imageEditor/settings/diffusion.ts
+var DIFFUSION_SETTINGS = {
+  //#region Inpaint
+  inpaint: {
+    controlIds: ImageEditorInpaintIds,
+    hasCanvasAction: true,
+    requiresManualApply: true,
+    settings: {
+      b64_canvas: "",
+      cfg: 7,
+      denoise_percentage: 40,
+      steps: 16,
+      positive_prompt: "",
+      negative_prompt: "",
+      upsample_target: 1024,
+      use_conditioning: true
+    },
+    configs: {
+      ["textfield" /* Textfield */]: [
+        {
+          ariaLabel: "Positive prompt",
+          controlType: "textfield" /* Textfield */,
+          defaultValue: "",
+          id: "positive_prompt" /* PositivePrompt */,
+          isMandatory: false,
+          title: "Prompt applied to masked pixels.",
+          type: "text"
+        },
+        {
+          ariaLabel: "Negative prompt",
+          controlType: "textfield" /* Textfield */,
+          defaultValue: "",
+          id: "negative_prompt" /* NegativePrompt */,
+          isMandatory: false,
+          title: "Negative prompt applied to masked pixels.",
+          type: "text"
+        }
+      ],
+      ["toggle" /* Toggle */]: [
+        {
+          ariaLabel: "Use conditioning prompts",
+          controlType: "toggle" /* Toggle */,
+          defaultValue: true,
+          id: "use_conditioning" /* UseConditioning */,
+          isMandatory: false,
+          off: "false",
+          on: "true",
+          title: "If enabled, prepend the connected conditioning inputs to the prompts before sampling."
+        }
+      ],
+      ["slider" /* Slider */]: [
+        {
+          ariaLabel: "Denoise percentage",
+          controlType: "slider" /* Slider */,
+          defaultValue: 40,
+          id: "denoise_percentage" /* DenoisePercentage */,
+          isMandatory: true,
+          max: "100",
+          min: "0",
+          step: "1",
+          title: "Noise applied during inpaint. 0 keeps original pixels, 100 fully regenerates."
+        },
+        {
+          ariaLabel: "CFG scale",
+          controlType: "slider" /* Slider */,
+          defaultValue: 7,
+          id: "cfg" /* Cfg */,
+          isMandatory: true,
+          max: "30",
+          min: "1",
+          step: "0.5",
+          title: "Classifier-free guidance applied during the inpaint pass."
+        },
+        {
+          ariaLabel: "Steps",
+          controlType: "slider" /* Slider */,
+          defaultValue: 16,
+          id: "steps" /* Steps */,
+          isMandatory: true,
+          max: "30",
+          min: "1",
+          step: "1",
+          title: "Diffusion steps used for the inpaint sampler."
+        },
+        {
+          ariaLabel: "Upsample target (px)",
+          controlType: "slider" /* Slider */,
+          defaultValue: 1024,
+          id: "upsample_target" /* UpsampleTarget */,
+          isMandatory: false,
+          max: "2048",
+          min: "0",
+          step: "16",
+          title: "Detailer path: upscale ROI longer side to this size before inpaint (0 disables)."
+        }
+      ]
+    }
+  }
+  //#endregion
+};
+var INPAINT_ADV = {
+  //#region Inpaint (adv.)
+  controlIds: ImageEditorInpaintIds,
+  hasCanvasAction: true,
+  requiresManualApply: true,
+  settings: {
+    ...DIFFUSION_SETTINGS.inpaint.settings,
+    roi_auto: true,
+    roi_padding: 32,
+    roi_align: 8,
+    roi_align_auto: false,
+    roi_min_size: 64,
+    dilate: 0,
+    feather: 0,
+    seed: 42
+  },
+  configs: {
+    ["textfield" /* Textfield */]: [
+      {
+        ariaLabel: "Positive prompt",
+        controlType: "textfield" /* Textfield */,
+        defaultValue: "",
+        id: "positive_prompt" /* PositivePrompt */,
+        isMandatory: false,
+        title: "Prompt applied to masked pixels.",
+        type: "text"
+      },
+      {
+        ariaLabel: "Negative prompt",
+        controlType: "textfield" /* Textfield */,
+        defaultValue: "",
+        id: "negative_prompt" /* NegativePrompt */,
+        isMandatory: false,
+        title: "Negative prompt applied to masked pixels.",
+        type: "text"
+      },
+      {
+        ariaLabel: "Seed",
+        controlType: "textfield" /* Textfield */,
+        defaultValue: "",
+        id: "seed" /* Seed */,
+        isMandatory: false,
+        title: "Optional seed override. Leave blank for a random seed.",
+        type: "number"
+      }
+    ],
+    ["slider" /* Slider */]: [
+      {
+        ariaLabel: "Denoise percentage",
+        controlType: "slider" /* Slider */,
+        defaultValue: 40,
+        id: "denoise_percentage" /* DenoisePercentage */,
+        isMandatory: true,
+        max: "100",
+        min: "0",
+        step: "1",
+        title: "Noise applied during inpaint. 0 keeps original pixels, 100 fully regenerates."
+      },
+      {
+        ariaLabel: "CFG scale",
+        controlType: "slider" /* Slider */,
+        defaultValue: 7,
+        id: "cfg" /* Cfg */,
+        isMandatory: true,
+        max: "30",
+        min: "1",
+        step: "0.5",
+        title: "Classifier-free guidance applied during the inpaint pass."
+      },
+      {
+        ariaLabel: "Steps",
+        controlType: "slider" /* Slider */,
+        defaultValue: 16,
+        id: "steps" /* Steps */,
+        isMandatory: true,
+        max: "30",
+        min: "1",
+        step: "1",
+        title: "Diffusion steps used for the inpaint sampler."
+      },
+      {
+        ariaLabel: "Upsample target (px)",
+        controlType: "slider" /* Slider */,
+        defaultValue: 0,
+        id: "upsample_target" /* UpsampleTarget */,
+        isMandatory: false,
+        max: "2048",
+        min: "0",
+        step: "16",
+        title: "Detailer path: upscale ROI longer side to this size before inpaint (0 disables)."
+      },
+      {
+        ariaLabel: "ROI padding (px)",
+        controlType: "slider" /* Slider */,
+        defaultValue: 32,
+        id: "roi_padding" /* RoiPadding */,
+        isMandatory: false,
+        max: "256",
+        min: "0",
+        step: "1",
+        title: "Pixels of padding around the mask bounding box when cropping the ROI."
+      },
+      {
+        ariaLabel: "ROI align multiple",
+        controlType: "slider" /* Slider */,
+        defaultValue: 8,
+        id: "roi_align" /* RoiAlign */,
+        isMandatory: false,
+        max: "64",
+        min: "1",
+        step: "1",
+        title: "Align ROI size/position to this multiple. Keeps latent-friendly dims. Disable auto-align to use."
+      },
+      {
+        ariaLabel: "ROI minimum size (px)",
+        controlType: "slider" /* Slider */,
+        defaultValue: 64,
+        id: "roi_min_size" /* RoiMinSize */,
+        isMandatory: false,
+        max: "1024",
+        min: "1",
+        step: "1",
+        title: "Enforce a minimum width/height for the cropped ROI."
+      },
+      {
+        ariaLabel: "Dilate mask (px)",
+        controlType: "slider" /* Slider */,
+        defaultValue: 0,
+        id: "dilate" /* Dilate */,
+        isMandatory: false,
+        max: "64",
+        min: "0",
+        step: "1",
+        title: "Expand mask edges before inpaint to avoid seams."
+      },
+      {
+        ariaLabel: "Feather mask (px)",
+        controlType: "slider" /* Slider */,
+        defaultValue: 0,
+        id: "feather" /* Feather */,
+        isMandatory: false,
+        max: "64",
+        min: "0",
+        step: "1",
+        title: "Soften mask edges to blend the inpainted region."
+      }
+    ],
+    ["toggle" /* Toggle */]: [
+      {
+        ariaLabel: "Use conditioning prompts",
+        controlType: "toggle" /* Toggle */,
+        defaultValue: false,
+        id: "use_conditioning" /* UseConditioning */,
+        isMandatory: false,
+        off: "false",
+        on: "true",
+        title: "If enabled, prepend the connected conditioning inputs to the prompts before sampling."
+      },
+      {
+        ariaLabel: "Auto ROI crop",
+        controlType: "toggle" /* Toggle */,
+        defaultValue: true,
+        id: "roi_auto" /* RoiAuto */,
+        isMandatory: false,
+        off: "false",
+        on: "true",
+        title: "Automatically crop to mask bounding box to speed up inpainting."
+      },
+      {
+        ariaLabel: "Auto-align ROI",
+        controlType: "toggle" /* Toggle */,
+        defaultValue: false,
+        id: "roi_align_auto" /* RoiAlignAuto */,
+        isMandatory: false,
+        off: "false",
+        on: "true",
+        title: "Infer alignment multiple from VAE/model. Disable to set a manual multiple (see slider)."
+      }
+    ]
+  }
+  //#endregion
+};
+
+// web/src/fixtures/imageEditor/settings/drawing.ts
+var DRAWING_SETTINGS = {
+  //#region Brush
+  brush: {
+    controlIds: ImageEditorBrushIds,
+    hasCanvasAction: true,
+    settings: { b64_canvas: "", color: "#FF0000", opacity: 1, size: 50 },
+    configs: {
+      ["slider" /* Slider */]: [
+        {
+          ariaLabel: "Size",
+          controlType: "slider" /* Slider */,
+          defaultValue: 50,
+          id: "size" /* Size */,
+          isMandatory: true,
+          max: "500",
+          min: "1",
+          step: "1",
+          title: "Sets the size of the brush."
+        },
+        {
+          ariaLabel: "Opacity",
+          controlType: "slider" /* Slider */,
+          defaultValue: 1,
+          id: "opacity" /* Opacity */,
+          isMandatory: true,
+          max: "1",
+          min: "0.05",
+          step: "0.05",
+          title: "Sets the opacity of the brush."
+        }
+      ],
+      ["textfield" /* Textfield */]: [
+        {
+          ariaLabel: "Color",
+          controlType: "textfield" /* Textfield */,
+          defaultValue: "#FF0000",
+          id: "color" /* Color */,
+          isMandatory: true,
+          title: "Sets the color of the brush stroke.",
+          type: "color"
+        }
+      ]
+    }
+  },
+  //#endregion
+  //#region Line
+  line: {
+    controlIds: ImageEditorLineIds,
+    hasCanvasAction: true,
+    settings: { color: "#FF0000", opacity: 1, points: [], size: 10, smooth: false },
+    configs: {
+      ["canvas" /* Canvas */]: [],
+      ["slider" /* Slider */]: [
+        {
+          ariaLabel: "Size",
+          controlType: "slider" /* Slider */,
+          defaultValue: 10,
+          id: "size" /* Size */,
+          isMandatory: true,
+          max: "500",
+          min: "1",
+          step: "1",
+          title: "Sets the size of the brush."
+        },
+        {
+          ariaLabel: "Opacity",
+          controlType: "slider" /* Slider */,
+          defaultValue: 1,
+          id: "opacity" /* Opacity */,
+          isMandatory: true,
+          max: "1",
+          min: "0.05",
+          step: "0.05",
+          title: "Sets the opacity of the brush."
+        }
+      ],
+      ["textfield" /* Textfield */]: [
+        {
+          ariaLabel: "Color",
+          controlType: "textfield" /* Textfield */,
+          defaultValue: "#FF0000",
+          id: "color" /* Color */,
+          isMandatory: true,
+          title: "Sets the color of the brush stroke.",
+          type: "color"
+        }
+      ],
+      ["toggle" /* Toggle */]: [
+        {
+          ariaLabel: "Smooth",
+          controlType: "toggle" /* Toggle */,
+          defaultValue: false,
+          id: "smoooth" /* Smooth */,
+          title: "Draws a smooth line.",
+          off: "false",
+          on: "true"
+        }
+      ]
+    }
+  }
+  //#endregion
+};
+
+// web/src/fixtures/imageEditor/settings/index.ts
+var SETTINGS = {
+  ...BASIC_ADJUSTMENT_SETTINGS,
+  ...BACKGROUND_SETTINGS,
+  ...CREATIVE_EFFECT_SETTINGS,
+  ...DRAWING_SETTINGS,
+  ...DIFFUSION_SETTINGS
+};
+
+// web/src/fixtures/imageEditor/treeData.ts
+var TREE_DATA = {
+  nodes: [
+    //#region Settings
+    {
+      description: "Tool configuration.",
+      id: "settings",
+      icon: "brush",
+      value: "Settings",
+      children: [
+        {
+          description: "Brush configuration.",
+          cells: {
+            lfCode: {
+              shape: "code",
+              value: JSON.stringify(SETTINGS.brush)
+            }
+          },
+          id: "brush",
+          value: "Brush"
+        }
+      ]
+    },
+    //#endregion
+    //#region Diffusion Tools
+    {
+      description: "Diffusion-based retouching tools.",
+      id: "diffusion_tools",
+      value: "Diffusion Tools",
+      icon: "wand",
+      children: [
+        {
+          description: "Inpaint masked areas using the connected diffusion model.",
+          cells: {
+            lfCode: {
+              shape: "code",
+              value: JSON.stringify(SETTINGS.inpaint)
+            }
+          },
+          id: "inpaint",
+          value: "Inpaint"
+        },
+        {
+          description: "Inpaint with advanced ROI controls.",
+          cells: {
+            lfCode: {
+              shape: "code",
+              value: JSON.stringify(INPAINT_ADV)
+            }
+          },
+          id: "inpaint_adv",
+          value: "Inpaint (adv.)"
+        }
+      ]
+    },
+    //#endregion
+    //#region Cutouts
+    {
+      description: "Background removal and matting tools.",
+      id: "cutouts",
+      value: "Cutouts",
+      icon: "replace",
+      children: [
+        {
+          description: "Remove the background using rembg with optional solid fill.",
+          cells: {
+            lfCode: {
+              shape: "code",
+              value: JSON.stringify(SETTINGS.backgroundRemover)
+            }
+          },
+          id: "background_remover",
+          value: "Background remover"
+        }
+      ]
+    },
+    //#endregion
+    //#region Basic Adjustments
+    {
+      description: "Basic adjustments such as sharpening and color tuning.",
+      id: "basic_adjustments",
+      value: "Basic Adjustments",
+      icon: "settings",
+      children: [
+        {
+          description: "Adjusts the brightness.",
+          cells: {
+            lfCode: {
+              shape: "code",
+              value: JSON.stringify(SETTINGS.brightness)
+            }
+          },
+          id: "brightness",
+          value: "Brightness"
+        },
+        {
+          description: "Simulates the Lightroom clarity effect.",
+          cells: {
+            lfCode: {
+              shape: "code",
+              value: JSON.stringify(SETTINGS.clarity)
+            }
+          },
+          id: "clarity",
+          value: "Clarity"
+        },
+        {
+          description: "Sharpens edges using a classic unsharp mask pipeline.",
+          cells: {
+            lfCode: {
+              shape: "code",
+              value: JSON.stringify(SETTINGS.unsharpMask)
+            }
+          },
+          id: "unsharp_mask",
+          value: "Unsharp Mask"
+        },
+        {
+          description: "Adjusts the contrast.",
+          cells: {
+            lfCode: {
+              shape: "code",
+              value: JSON.stringify(SETTINGS.contrast)
+            }
+          },
+          id: "contrast",
+          value: "Contrast"
+        },
+        {
+          description: "Reduces the saturation.",
+          cells: {
+            lfCode: {
+              shape: "code",
+              value: JSON.stringify(SETTINGS.desaturate)
+            }
+          },
+          id: "desaturate",
+          value: "Desaturate"
+        },
+        {
+          description: "Adjusts the saturation.",
+          cells: {
+            lfCode: {
+              shape: "code",
+              value: JSON.stringify(SETTINGS.saturation)
+            }
+          },
+          id: "saturation",
+          value: "Saturation"
+        }
+      ]
+    },
+    //#endregion
+    //#region Creative Effects
+    {
+      description: "Artistic filters, such as vignette effect and gaussian blur.",
+      id: "creative_effects",
+      icon: "palette",
+      value: "Creative Effects",
+      children: [
+        {
+          cells: {
+            lfCode: {
+              shape: "code",
+              value: JSON.stringify(SETTINGS.blend)
+            }
+          },
+          description: "Blends a color layer onto the image.",
+          id: "blend",
+          value: "Blend"
+        },
+        {
+          description: "Applies a bloom effect.",
+          cells: {
+            lfCode: {
+              shape: "code",
+              value: JSON.stringify(SETTINGS.bloom)
+            }
+          },
+          id: "bloom",
+          value: "Bloom"
+        },
+        {
+          description: "Applies a film grain effect.",
+          cells: {
+            lfCode: {
+              shape: "code",
+              value: JSON.stringify(SETTINGS.filmGrain)
+            }
+          },
+          id: "film_grain",
+          value: "Film grain"
+        },
+        {
+          description: "Blurs the image.",
+          cells: {
+            lfCode: {
+              shape: "code",
+              value: JSON.stringify(SETTINGS.gaussianBlur)
+            }
+          },
+          id: "gaussian_blur",
+          value: "Gaussian blur"
+        },
+        {
+          description: "Draws a line.",
+          cells: {
+            lfCode: {
+              shape: "code",
+              value: JSON.stringify(SETTINGS.line)
+            }
+          },
+          id: "line",
+          value: "Line"
+        },
+        {
+          cells: {
+            lfCode: {
+              shape: "code",
+              value: JSON.stringify(SETTINGS.sepia)
+            }
+          },
+          description: "Applies a sepia effect to the image.",
+          id: "sepia",
+          value: "Sepia"
+        },
+        {
+          cells: {
+            lfCode: {
+              shape: "code",
+              value: JSON.stringify(SETTINGS.splitTone)
+            }
+          },
+          description: "Applies a split tone effect to the image.",
+          id: "split_tone",
+          value: "Split tone"
+        },
+        {
+          cells: {
+            lfCode: {
+              shape: "code",
+              value: JSON.stringify(SETTINGS.tiltShift)
+            }
+          },
+          description: "Applies a tilt-shift effect to the image.",
+          id: "tilt_shift",
+          value: "Tilt-shift"
+        },
+        {
+          cells: {
+            lfCode: {
+              shape: "code",
+              value: JSON.stringify(SETTINGS.vibrance)
+            }
+          },
+          description: "Applies a vibrance effect to the image.",
+          id: "vibrance",
+          value: "Vibrance"
+        },
+        {
+          cells: {
+            lfCode: {
+              shape: "code",
+              value: JSON.stringify(SETTINGS.vignette)
+            }
+          },
+          description: "Applies a vignetting effect to the image.",
+          id: "vignette",
+          value: "Vignette"
+        }
+      ]
+    }
+    //#endregion
+  ]
+};
+
+// web/src/helpers/imageEditor/selectors.ts
+function getPathColumn(dataset) {
+  return dataset?.columns?.find((c2) => c2.id === "path" /* Path */) || null;
+}
+function getStatusColumn(dataset) {
+  return dataset?.columns?.find((c2) => c2.id === "status" /* Status */) || null;
+}
+function parseLabel(data) {
+  return data.isMandatory ? `${data.ariaLabel}*` : data.ariaLabel;
+}
+
+// web/src/helpers/imageEditor/update.ts
+var refreshValues = async (state, addSnapshot = false) => {
+  const { elements, filter } = state;
+  const { controls } = elements;
+  const lfManager = getLfManager();
+  state.settingsStore = state.settingsStore ?? {};
+  const storeForFilter = state.settingsStore[state.filterType] = state.settingsStore[state.filterType] ?? {};
+  for (const key in controls) {
+    if (Object.prototype.hasOwnProperty.call(controls, key)) {
+      const id2 = key;
+      const control = controls[id2];
+      switch (control.tagName) {
+        case "LF-SLIDER": {
+          const slider = control;
+          const sliderValue = await slider.getValue();
+          const value = addSnapshot ? sliderValue.real : sliderValue.display;
+          filter.settings[id2] = value;
+          storeForFilter[id2] = value;
+          break;
+        }
+        case "LF-TEXTFIELD": {
+          const textfield = control;
+          const textfieldValue = await textfield.getValue();
+          filter.settings[id2] = textfieldValue;
+          storeForFilter[id2] = textfieldValue;
+          break;
+        }
+        case "LF-TOGGLE": {
+          const toggle = control;
+          const toggleValue = await toggle.getValue();
+          const value = toggleValue === "on" ? toggle.dataset.on : toggle.dataset.off;
+          filter.settings[id2] = value;
+          storeForFilter[id2] = value;
+          break;
+        }
+        default:
+          lfManager.log(
+            `Unhandled control type: ${control.tagName}`,
+            { control },
+            "warning" /* Warning */
+          );
+          continue;
+      }
+    }
+  }
+};
+var updateCb = async (state, addSnapshot = false, force = false) => {
+  await refreshValues(state, addSnapshot);
+  const { elements, filter } = state;
+  const { imageviewer } = elements;
+  if (!filter) {
+    return false;
+  }
+  const { settings } = filter;
+  const validValues = isValidObject(settings);
+  const isCanvasAction = settings.points || settings.b64_canvas;
+  const hasCanvasAction = filter.hasCanvasAction;
+  if (validValues && hasCanvasAction) {
+    const canvas = (await imageviewer.getComponents()).details.canvas;
+    const brushDefaults = {
+      ...SETTINGS.brush.settings,
+      ...state.lastBrushSettings
+    };
+    const candidateSettings = settings ?? {};
+    const brushSettings = {
+      ...brushDefaults,
+      color: candidateSettings.color ?? brushDefaults.color,
+      opacity: candidateSettings.opacity ?? brushDefaults.opacity,
+      size: candidateSettings.size ?? brushDefaults.size
+    };
+    canvas.lfColor = brushSettings.color;
+    canvas.lfOpacity = brushSettings.opacity;
+    canvas.lfSize = brushSettings.size;
+    state.lastBrushSettings = {
+      ...state.lastBrushSettings,
+      color: brushSettings.color,
+      opacity: brushSettings.opacity,
+      size: brushSettings.size
+    };
+  }
+  const shouldUpdate = validValues && (!hasCanvasAction || isCanvasAction);
+  const requiresManualApply = !!filter?.requiresManualApply;
+  let success = false;
+  if (shouldUpdate && (force || !requiresManualApply)) {
+    success = await apiCall(state, addSnapshot);
+  }
+  return success;
+};
+
+// web/src/helpers/imageEditor/settings.ts
+var createPrepSettings = (deps) => {
+  const { onSlider, onTextfield, onToggle } = deps;
+  return (state, node) => {
+    state.elements.controls = {};
+    state.filter = unescapeJson(node.cells.lfCode.value).parsedJson;
+    const idRaw = node.id || "brush";
+    const alias = idRaw === "inpaint_detail" || idRaw === "inpaint_adv" ? "inpaint" : idRaw;
+    state.filterType = alias;
+    state.manualApply = void 0;
+    const dataset = state.elements.imageviewer.lfDataset;
+    const defaults = dataset?.defaults?.[state.filterType];
+    if (defaults) {
+      applyFilterDefaults(state, defaults);
+    }
+    state.settingsStore = state.settingsStore ?? {};
+    const stored = state.settingsStore[state.filterType] ?? {};
+    const mutableSettings = state.filter.settings;
+    Object.keys(stored).forEach((id2) => {
+      const storedValue = stored[id2];
+      if (typeof storedValue === "undefined") {
+        return;
+      }
+      mutableSettings[id2] = storedValue;
+    });
+    const { elements, filter } = state;
+    const { settings } = elements;
+    if (!filter?.configs) {
+      return;
+    }
+    settings.innerHTML = "";
+    const controlsContainer = document.createElement("div" /* Div */);
+    controlsContainer.classList.add(ImageEditorCSS.SettingsControls);
+    settings.appendChild(controlsContainer);
+    const controlGroups = Object.keys(filter.configs);
+    controlGroups.forEach((controlType) => {
+      const configs = filter.configs[controlType];
+      if (!configs) {
+        return;
+      }
+      configs.forEach((config2) => {
+        switch (controlType) {
+          case "slider" /* Slider */: {
+            const sliderConfig = config2;
+            const slider = document.createElement("lf-slider" /* LfSlider */);
+            slider.lfLabel = parseLabel(sliderConfig);
+            slider.lfLeadingLabel = true;
+            slider.lfMax = Number(sliderConfig.max);
+            slider.lfMin = Number(sliderConfig.min);
+            slider.lfStep = Number(sliderConfig.step);
+            slider.lfStyle = ".form-field { width: 100%; }";
+            slider.lfValue = Number(sliderConfig.defaultValue);
+            slider.title = sliderConfig.title;
+            slider.dataset.id = sliderConfig.id;
+            slider.addEventListener("lf-slider-event" /* LfSlider */, (event) => onSlider(state, event));
+            const storedValue = stored[sliderConfig.id];
+            if (typeof storedValue !== "undefined") {
+              slider.lfValue = Number(storedValue);
+            }
+            controlsContainer.appendChild(slider);
+            state.elements.controls[sliderConfig.id] = slider;
+            break;
+          }
+          case "textfield" /* Textfield */: {
+            const textfieldConfig = config2;
+            const textfield = document.createElement("lf-textfield" /* LfTextfield */);
+            textfield.lfLabel = parseLabel(textfieldConfig);
+            textfield.lfHtmlAttributes = { type: textfieldConfig.type };
+            textfield.lfValue = String(textfieldConfig.defaultValue).valueOf();
+            textfield.title = textfieldConfig.title;
+            textfield.dataset.id = textfieldConfig.id;
+            textfield.addEventListener(
+              "lf-textfield-event" /* LfTextfield */,
+              (event) => onTextfield(state, event)
+            );
+            const storedValue = stored[textfieldConfig.id];
+            if (typeof storedValue !== "undefined") {
+              textfield.lfValue = String(storedValue);
+            }
+            controlsContainer.appendChild(textfield);
+            state.elements.controls[textfieldConfig.id] = textfield;
+            break;
+          }
+          case "toggle" /* Toggle */: {
+            const toggleConfig = config2;
+            const toggle = document.createElement("lf-toggle" /* LfToggle */);
+            toggle.dataset.off = toggleConfig.off;
+            toggle.dataset.on = toggleConfig.on;
+            toggle.lfLabel = parseLabel(toggleConfig);
+            toggle.lfValue = toggleConfig.defaultValue ?? false;
+            toggle.title = toggleConfig.title;
+            toggle.dataset.id = toggleConfig.id;
+            toggle.addEventListener("lf-toggle-event" /* LfToggle */, (event) => onToggle(state, event));
+            const storedValue = stored[toggleConfig.id];
+            if (typeof storedValue !== "undefined") {
+              const boolValue = storedValue === true || typeof storedValue === "string" && storedValue.toLowerCase() === "true";
+              toggle.lfValue = boolValue;
+            }
+            controlsContainer.appendChild(toggle);
+            state.elements.controls[toggleConfig.id] = toggle;
+            break;
+          }
+          default:
+            throw new Error(`Unknown control type: ${controlType}`);
+        }
+      });
+    });
+    const buttonsWrapper = document.createElement("div" /* Div */);
+    buttonsWrapper.classList.add(ImageEditorCSS.SettingsButtons);
+    settings.appendChild(buttonsWrapper);
+    const resetButton = document.createElement("lf-button" /* LfButton */);
+    resetButton.lfIcon = "refresh" /* Reset */;
+    resetButton.lfLabel = "Reset";
+    resetButton.lfStretchX = true;
+    resetButton.addEventListener("click", () => {
+      void (async () => {
+        await resetSettings(settings);
+        registerManualApplyChange(state);
+      })();
+    });
+    buttonsWrapper.appendChild(resetButton);
+    if (state.filterType === "brush") {
+      const brushSettings = state.filter.settings ?? {};
+      state.lastBrushSettings = {
+        ...state.lastBrushSettings,
+        ...JSON.parse(JSON.stringify(brushSettings))
+      };
+    }
+    if (filter?.hasCanvasAction) {
+      requestAnimationFrame(async () => {
+        const canvas = (await state.elements.imageviewer.getComponents()).details.canvas;
+        const brushSource = {
+          ...SETTINGS.brush.settings,
+          ...state.lastBrushSettings,
+          ...state.filter.settings ?? {}
+        };
+        if (brushSource.color) {
+          canvas.lfColor = brushSource.color;
+        }
+        if (typeof brushSource.opacity === "number") {
+          canvas.lfOpacity = brushSource.opacity;
+        }
+        if (typeof brushSource.size === "number") {
+          canvas.lfSize = brushSource.size;
+        }
+      });
+    }
+    if (filter?.requiresManualApply) {
+      const applyButton = document.createElement("lf-button" /* LfButton */);
+      applyButton.lfIcon = "check" /* Resume */;
+      applyButton.lfLabel = "Apply";
+      applyButton.lfStretchX = true;
+      initManualApplyState(state, applyButton);
+      applyButton.addEventListener("click", () => {
+        if (!state.manualApply || state.manualApply.isProcessing) {
+          return;
+        }
+        const hasPending = hasManualApplyPendingChanges(state);
+        if (!hasPending) {
+          return;
+        }
+        beginManualApplyRequest(state);
+        void updateCb(state, true, true);
+      });
+      buttonsWrapper.appendChild(applyButton);
+    }
+  };
+};
+async function resetSettings(settings) {
+  const controls = Array.from(settings.querySelectorAll("[data-id]"));
+  for (const control of controls) {
+    switch (control.tagName) {
+      case "LF-SLIDER": {
+        const slider = control;
+        await slider.setValue(slider.lfValue);
+        await slider.refresh();
+        break;
+      }
+      case "LF-TEXTFIELD": {
+        const textfield = control;
+        await textfield.setValue(textfield.lfValue);
+        break;
+      }
+      case "LF-TOGGLE": {
+        const toggle = control;
+        toggle.setValue(toggle.lfValue ? "on" : "off");
+        break;
+      }
+    }
+  }
+}
+var setBrush = async (canvas, lastBrushSettings) => {
+  if (canvas) {
+    const { color, opacity, size } = lastBrushSettings;
+    canvas.lfColor = color;
+    canvas.lfOpacity = opacity;
+    canvas.lfSize = size;
+  }
+};
+var applyFilterDefaults = (state, defaults) => {
+  const { filter } = state;
+  if (!filter) {
+    return;
+  }
+  const mutableSettings = filter.settings;
+  Object.keys(filter.configs).forEach((controlType) => {
+    const configs = filter.configs[controlType];
+    configs?.forEach((config2) => {
+      const defaultValue = defaults[config2.id];
+      if (typeof defaultValue === "undefined") {
+        return;
+      }
+      switch (controlType) {
+        case "slider" /* Slider */: {
+          const sliderConfig = config2;
+          const numericValue = typeof defaultValue === "number" ? defaultValue : Number(defaultValue);
+          sliderConfig.defaultValue = numericValue;
+          mutableSettings[sliderConfig.id] = numericValue;
+          break;
+        }
+        case "textfield" /* Textfield */: {
+          const textfieldConfig = config2;
+          const stringValue = defaultValue === null || typeof defaultValue === "undefined" ? "" : String(defaultValue);
+          textfieldConfig.defaultValue = stringValue;
+          mutableSettings[textfieldConfig.id] = stringValue;
+          break;
+        }
+        case "toggle" /* Toggle */: {
+          const toggleConfig = config2;
+          const boolValue = defaultValue === true || typeof defaultValue === "string" && defaultValue.toLowerCase() === "true";
+          toggleConfig.defaultValue = boolValue;
+          mutableSettings[toggleConfig.id] = boolValue ? toggleConfig.on : toggleConfig.off;
+          break;
+        }
+      }
+    });
+  });
+};
+
+// web/src/helpers/imageEditor/events.ts
+var createEventHandlers = ({
+  handleInterruptForState: handleInterruptForState2,
+  prepSettings: prepSettings2
+}) => {
+  const syncSelectionWithDataset = async (state, masonryEvent) => {
+    const { elements } = state;
+    const dataset = elements.imageviewer.lfDataset || {};
+    const effectiveContextId = ensureDatasetContext(dataset, state);
+    const previousSelection = dataset.selection;
+    const previousContextId = dataset.context_id ?? effectiveContextId;
+    const { comp, selectedShape: rawSelectedShape } = masonryEvent.detail;
+    const masonryComp = comp;
+    let selectedShape = rawSelectedShape;
+    if ((!selectedShape || typeof selectedShape.index !== "number") && masonryComp?.getSelectedShape) {
+      try {
+        selectedShape = await masonryComp.getSelectedShape();
+      } catch (error2) {
+        getLfManager().log("Failed to resolve masonry selection.", { error: error2 }, "warning" /* Warning */);
+      }
+    }
+    const nodes = Array.isArray(dataset?.nodes) ? dataset.nodes : [];
+    const selectionIndex = resolveSelectionIndex(selectedShape, nodes);
+    if (typeof selectionIndex !== "number") {
+      getLfManager().log(
+        "Unable to resolve selected masonry index.",
+        { selectedShape },
+        "warning" /* Warning */
+      );
+      return;
+    }
+    const { selection, contextId } = buildSelectionPayload({
+      dataset,
+      index: selectionIndex,
+      nodes,
+      selectedShape,
+      fallbackContextId: previousContextId ?? state.contextId
+    });
+    const resolvedContextId = selection.context_id ?? contextId ?? previousContextId ?? state.contextId;
+    if (resolvedContextId) {
+      state.contextId = resolvedContextId;
+      if (!selection.context_id) {
+        selection.context_id = resolvedContextId;
+      }
+    }
+    const nextDataset = applySelectionColumn(
+      {
+        ...dataset,
+        context_id: dataset.context_id ?? resolvedContextId
+      },
+      selection
+    );
+    if (resolvedContextId && nextDataset.selection) {
+      nextDataset.selection.context_id = resolvedContextId;
+    }
+    elements.imageviewer.lfDataset = nextDataset;
+    if (!resolvedContextId) {
+      return;
+    }
+    if (!hasSelectionChanged(previousSelection, nextDataset.selection) && !hasContextChanged(previousContextId, nextDataset.context_id)) {
+      return;
+    }
+    getApiRoutes().json.update(resolvedContextId, nextDataset).catch(
+      (error2) => getLfManager().log(
+        "Failed to persist image selection.",
+        { error: error2, contextId: resolvedContextId },
+        "warning" /* Warning */
+      )
+    );
+  };
+  const handlers = {
+    //#region Button
+    button: async (state, e2) => {
+      const { comp, eventType } = e2.detail;
+      if (eventType === "click") {
+        const isPatched = getComfyAPI()["_lf_patched_interrupt" /* PatchedInterrupt */] === true;
+        switch (comp.lfIcon) {
+          case "x" /* Interrupt */:
+            getApiRoutes().comfy.interrupt();
+            if (!isPatched) {
+              await handleInterruptForState2(state);
+            }
+            break;
+          case "check" /* Resume */:
+            await handleInterruptForState2(state);
+            break;
+          default:
+            break;
+        }
+      }
+    },
+    //#endregion
+    //#region Canvas
+    canvas: async (state, e2) => {
+      const { comp, eventType, points } = e2.detail;
+      const { filter, filterType } = state;
+      switch (eventType) {
+        case "stroke":
+          const originalFilter = filter;
+          const originalFilterType = filterType;
+          const canvas = await comp.getCanvas();
+          const b64Canvas = canvasToBase64(canvas);
+          if (filterType !== "brush" && !filter?.hasCanvasAction) {
+            state.filterType = "brush";
+          }
+          const brushDefaults = {
+            ...SETTINGS.brush.settings,
+            ...state.lastBrushSettings
+          };
+          const temporaryFilter = {
+            ...JSON.parse(JSON.stringify(SETTINGS.brush)),
+            settings: {
+              ...brushDefaults,
+              b64_canvas: b64Canvas,
+              color: comp.lfColor ?? brushDefaults.color,
+              opacity: comp.lfOpacity ?? brushDefaults.opacity,
+              points,
+              size: comp.lfSize ?? brushDefaults.size
+            }
+          };
+          state.filter = temporaryFilter;
+          try {
+            await updateCb(state, true, true);
+          } finally {
+            if (originalFilter?.hasCanvasAction) {
+              const existingSettings = originalFilter.settings ?? {};
+              originalFilter.settings = {
+                ...existingSettings,
+                b64_canvas: b64Canvas
+              };
+            }
+            state.filter = originalFilter;
+            state.filterType = originalFilterType;
+            await comp.clearCanvas();
+          }
+          break;
+      }
+    },
+    //#endregion
+    //#region Imageviewer
+    imageviewer: async (state, e2) => {
+      const { comp, eventType, originalEvent } = e2.detail;
+      const { node } = state;
+      switch (eventType) {
+        case "lf-event": {
+          const ogEv = originalEvent;
+          if (isTree(ogEv.detail.comp)) {
+            const treeEvent = ogEv;
+            const { id: id2, node: treeNode, eventType: eventType2 } = treeEvent.detail;
+            switch (id2) {
+              case "details-tree":
+                if (treeNode?.cells?.lfCode && eventType2 === "click") {
+                  prepSettings2(state, treeNode);
+                }
+                break;
+              case "navigation-tree":
+                if (!state.navigationManager || !treeNode || eventType2 !== "click") {
+                  break;
+                }
+                await state.navigationManager.handleTreeClick(treeNode);
+                const needsLazyLoad = !treeNode.children || treeNode.children.length === 0;
+                if (needsLazyLoad) {
+                  await state.navigationManager.expandNode(treeNode);
+                }
+                break;
+            }
+          }
+          switch (ogEv.detail.eventType) {
+            case "lf-event":
+              const masonryEvent = ogEv;
+              const isMasonryEvent = isMasonry(ogEv.detail.comp);
+              if (isMasonryEvent) {
+                const { selectedShape } = masonryEvent.detail;
+                switch (masonryEvent.detail.eventType) {
+                  case "lf-event":
+                    const subOgEv = masonryEvent.detail.originalEvent;
+                    const isImageEvent = isImage(subOgEv.detail.comp);
+                    if (isImageEvent) {
+                      switch (subOgEv.detail.eventType) {
+                        case "click":
+                          if (!selectedShape) {
+                            getLfManager().log(
+                              "Masonry selection cleared.",
+                              { selectedShape },
+                              "info" /* Info */
+                            );
+                            return;
+                          }
+                          await syncSelectionWithDataset(state, masonryEvent);
+                          break;
+                      }
+                    }
+                }
+                break;
+              }
+              break;
+            case "ready":
+              const c2 = ogEv.detail.comp;
+              const isCanvas = c2.rootElement.tagName.toLowerCase() === "lf-canvas";
+              if (isCanvas) {
+                const brushSettings = state?.lastBrushSettings ?? SETTINGS.brush.settings;
+                setBrush(c2, brushSettings);
+              }
+              break;
+            case "stroke": {
+              const canvasEv = ogEv;
+              await handlers.canvas(state, canvasEv);
+              break;
+            }
+          }
+          break;
+        }
+        case "ready": {
+          const { navigation } = await comp.getComponents();
+          switch (node.comfyClass) {
+            case "LF_ImagesEditingBreakpoint" /* imagesEditingBreakpoint */:
+              navigation.load.lfLabel = "";
+              navigation.load.lfUiState = "disabled";
+              navigation.textfield.lfLabel = "Previews are visible in your ComfyUI/temp folder";
+              navigation.textfield.lfUiState = "disabled";
+              break;
+            default:
+              navigation.textfield.lfLabel = "Directory (relative to ComfyUI/input)";
+              break;
+          }
+          break;
+        }
+      }
+    },
+    //#endregion
+    //#region Slider
+    slider: async (state, e2) => {
+      const { eventType } = e2.detail;
+      const { update } = state;
+      const { preview, snapshot } = update;
+      switch (eventType) {
+        case "change":
+          registerManualApplyChange(state);
+          snapshot();
+          break;
+        case "input":
+          registerManualApplyChange(state);
+          const debouncedSlider = debounce(preview, 300);
+          debouncedSlider();
+          break;
+      }
+    },
+    //#endregion
+    //#region Textfield
+    textfield: async (state, e2) => {
+      const { eventType } = e2.detail;
+      const { update } = state;
+      const { preview, snapshot } = update;
+      switch (eventType) {
+        case "change":
+          registerManualApplyChange(state);
+          snapshot();
+          break;
+        case "input":
+          registerManualApplyChange(state);
+          const debouncedTextfield = debounce(preview, 300);
+          debouncedTextfield();
+          break;
+      }
+    },
+    //#endregion
+    //#region Toggle
+    toggle: async (state, e2) => {
+      const { eventType } = e2.detail;
+      const { update } = state;
+      const { snapshot } = update;
+      switch (eventType) {
+        case "change":
+          registerManualApplyChange(state);
+          snapshot();
+          break;
+      }
+    }
+    //#endregion
+  };
+  return handlers;
+};
+
+// web/src/helpers/imageEditor/status.ts
+function setGridStatus(status, grid, actionButtons) {
+  const { interrupt, resume } = actionButtons;
+  switch (status) {
+    case "completed" /* Completed */:
+      requestAnimationFrame(() => {
+        if (interrupt) {
+          interrupt.lfUiState = "disabled";
+        }
+        if (resume) {
+          resume.lfUiState = "disabled";
+        }
+      });
+      grid?.classList.add(ImageEditorCSS.GridIsInactive);
+      break;
+    case "pending" /* Pending */:
+      requestAnimationFrame(() => {
+        if (interrupt) {
+          interrupt.lfUiState = "danger";
+        }
+        if (resume) {
+          resume.lfUiState = "success";
+        }
+      });
+      grid?.classList.remove(ImageEditorCSS.GridIsInactive);
+      break;
+  }
+}
+
+// web/src/helpers/imageEditor/interrupt.ts
+var handleInterruptForState = async (state) => {
+  const lfManager = getLfManager();
+  const { actionButtons, grid, imageviewer } = state.elements;
+  const dataset = imageviewer.lfDataset;
+  const statusColumn = getStatusColumn(dataset);
+  const pathColumn = getPathColumn(dataset);
+  const parsedPath = pathColumn ? unescapeJson(pathColumn).parsedJson : void 0;
+  const path = typeof parsedPath?.title === "string" ? parsedPath.title : null;
+  if (statusColumn?.title === "pending" /* Pending */) {
+    statusColumn.title = "completed" /* Completed */;
+    if (dataset && path) {
+      try {
+        await getApiRoutes().json.update(path, dataset);
+      } catch (error2) {
+        lfManager.log(
+          "Failed to update JSON after workflow interrupt.",
+          { error: error2, path },
+          "warning" /* Warning */
+        );
+      }
+    }
+    if (actionButtons?.interrupt && actionButtons?.resume) {
+      setGridStatus("completed" /* Completed */, grid, actionButtons);
+    } else {
+      grid?.classList.add(ImageEditorCSS.GridIsInactive);
+    }
+    try {
+      const components = await imageviewer.getComponents();
+      const navigation = components?.navigation;
+      await imageviewer.reset();
+      await navigation?.masonry?.setSelectedShape?.(null);
+    } catch (error2) {
+      lfManager.log(
+        "Failed to reset image viewer after workflow interrupt.",
+        { error: error2 },
+        "warning" /* Warning */
+      );
+    }
+  }
+  await resetSettings(imageviewer);
+};
+
+// web/src/helpers/imageEditor.ts
+var handlerRefs = {
+  slider: async () => {
+    throw new Error("Image editor slider handler not initialized.");
+  },
+  textfield: async () => {
+    throw new Error("Image editor textfield handler not initialized.");
+  },
+  toggle: async () => {
+    throw new Error("Image editor toggle handler not initialized.");
+  }
+};
+var prepSettings = createPrepSettings({
+  onSlider: (state, event) => handlerRefs.slider(state, event),
+  onTextfield: (state, event) => handlerRefs.textfield(state, event),
+  onToggle: (state, event) => handlerRefs.toggle(state, event)
+});
+var EV_HANDLERS = createEventHandlers({
+  handleInterruptForState,
+  prepSettings
+});
+handlerRefs.slider = EV_HANDLERS.slider;
+handlerRefs.textfield = EV_HANDLERS.textfield;
+handlerRefs.toggle = EV_HANDLERS.toggle;
+
+// web/src/nodes/reroute.ts
+var DISPLAY_NAME = "Reroute";
+var EXTENSION_NAME = `lf.virtual.${DISPLAY_NAME}`;
+
+// web/src/types/widgets/card.ts
+var BASE_CSS_CLASS3 = "lf-card";
+var CardCSS = ((CardCSS2) => {
+  CardCSS2[CardCSS2["Content"] = BASE_CSS_CLASS3] = "Content";
+  CardCSS2["ContentHasButton"] = `${BASE_CSS_CLASS3}--has-button`;
+  CardCSS2["Grid"] = `${BASE_CSS_CLASS3}__grid`;
+  return CardCSS2;
+})(CardCSS || {});
+
+// web/src/types/widgets/cardsWithChip.ts
+var BASE_CSS_CLASS4 = "lf-cardswithchip";
+var CardsWithChipCSS = ((CardsWithChipCSS2) => {
+  CardsWithChipCSS2[CardsWithChipCSS2["Content"] = BASE_CSS_CLASS4] = "Content";
+  CardsWithChipCSS2["Cards"] = `${BASE_CSS_CLASS4}__cards`;
+  CardsWithChipCSS2["Chip"] = `${BASE_CSS_CLASS4}__chip`;
+  CardsWithChipCSS2["Grid"] = `${BASE_CSS_CLASS4}__grid`;
+  return CardsWithChipCSS2;
+})(CardsWithChipCSS || {});
+
+// web/src/types/widgets/carousel.ts
+var BASE_CSS_CLASS5 = "lf-carousel";
+var CarouselCSS = ((CarouselCSS2) => {
+  CarouselCSS2[CarouselCSS2["Content"] = BASE_CSS_CLASS5] = "Content";
+  CarouselCSS2["Widget"] = `${BASE_CSS_CLASS5}__widget`;
+  return CarouselCSS2;
+})(CarouselCSS || {});
+
+// web/src/types/widgets/chat.ts
+var BASE_CSS_CLASS6 = "lf-chat";
+var ChatCSS = ((ChatCSS2) => {
+  ChatCSS2[ChatCSS2["Content"] = BASE_CSS_CLASS6] = "Content";
+  ChatCSS2["Widget"] = `${BASE_CSS_CLASS6}__widget`;
+  return ChatCSS2;
+})(ChatCSS || {});
+
+// web/src/types/widgets/chip.ts
+var BASE_CSS_CLASS7 = "lf-chip";
+var ChipCSS = ((ChipCSS2) => {
+  ChipCSS2[ChipCSS2["Content"] = BASE_CSS_CLASS7] = "Content";
+  ChipCSS2["Widget"] = `${BASE_CSS_CLASS7}__widget`;
+  return ChipCSS2;
+})(ChipCSS || {});
+
+// web/src/types/widgets/code.ts
+var BASE_CSS_CLASS8 = "lf-code";
+var CodeCSS = ((CodeCSS2) => {
+  CodeCSS2[CodeCSS2["Content"] = BASE_CSS_CLASS8] = "Content";
+  CodeCSS2["Widget"] = `${BASE_CSS_CLASS8}__widget`;
+  return CodeCSS2;
+})(CodeCSS || {});
+
+// web/src/types/widgets/compare.ts
+var BASE_CSS_CLASS9 = "lf-compare";
+var CompareCSS = ((CompareCSS2) => {
+  CompareCSS2[CompareCSS2["Content"] = BASE_CSS_CLASS9] = "Content";
+  CompareCSS2["Widget"] = `${BASE_CSS_CLASS9}__widget`;
+  return CompareCSS2;
+})(CompareCSS || {});
+
+// web/src/types/widgets/controlPanel.ts
+var BASE_CSS_CLASS10 = "lf-controlpanel";
+var ControlPanelCSS = ((ControlPanelCSS2) => {
+  ControlPanelCSS2[ControlPanelCSS2["Content"] = BASE_CSS_CLASS10] = "Content";
+  ControlPanelCSS2["Grid"] = `${BASE_CSS_CLASS10}__grid`;
+  ControlPanelCSS2["Spinner"] = `${BASE_CSS_CLASS10}__spinner`;
+  return ControlPanelCSS2;
+})(ControlPanelCSS || {});
+
+// web/src/fixtures/controlPanel/styles.ts
+var BUTTON_STYLE = ":host { margin: auto; padding: 1em 0; width: max-content; }";
+var STYLES = {
+  customization: () => ({
+    margin: "0"
+  }),
+  debugGrid: () => ({
+    display: "grid",
+    gridTemplateRows: "repeat(5, max-content) 1fr",
+    height: "100%",
+    margin: "0"
+  }),
+  debugLogs: () => ({
+    display: "grid",
+    gridGap: "0.75em",
+    gridTemplateRows: "320px 480px"
+  }),
+  logsArea: () => ({
+    backgroundColor: "rgba(var(--lf-color-on-bg), 0.075)",
+    borderRadius: "0.5em",
+    display: "block",
+    height: "100%",
+    marginBottom: "1em",
+    overflow: "auto"
+  }),
+  separator: () => ({
+    border: "1px solid rgb(var(--lf-color-border))",
+    display: "block",
+    margin: "0.75em auto 1.25em",
+    opacity: "0.25",
+    width: "50%"
+  })
+};
+
+// web/src/fixtures/controlPanel/analytics.ts
+var buildAnalyticsSection = () => {
+  const { theme } = getLfManager().getManagers().lfFramework;
+  const { "--lf-icon-clear": clearIcon } = theme.get.current().variables;
+  return {
+    icon: "chart-histogram" /* Analytics */,
+    id: "section" /* Section */,
+    value: "Analytics",
+    children: [
+      {
+        id: "paragraph" /* Paragraph */,
+        value: "Usage",
+        children: [
+          {
+            id: "content" /* Content */,
+            value: "Usage analytics can be enabled by saving datasets through the UpdateUsageStatistics node and displayed with the UsageStatistics node."
+          },
+          {
+            id: "content" /* Content */,
+            tagName: "br",
+            value: ""
+          },
+          {
+            id: "content" /* Content */,
+            value: "Once datasets are created (input folder of ComfyUI), the count for each resource used will increase everytime that particular resource is updated."
+          },
+          {
+            id: "content" /* Content */,
+            tagName: "br",
+            value: ""
+          },
+          {
+            id: "content" /* Content */,
+            value: "This button will clear all usage analytics data from your input folder."
+          },
+          {
+            id: "content" /* Content */,
+            tagName: "br",
+            value: ""
+          },
+          {
+            id: "content" /* Content */,
+            value: "This action is IRREVERSIBLE so use it with caution."
+          },
+          {
+            id: "content" /* Content */,
+            value: "",
+            cells: {
+              lfButton: {
+                lfIcon: clearIcon,
+                lfLabel: "Delete usage analytics info" /* DeleteUsage */,
+                lfStyle: BUTTON_STYLE,
+                lfStyling: "outlined",
+                lfUiState: "danger",
+                shape: "button",
+                value: ""
+              }
+            }
+          }
+        ]
+      }
+    ]
+  };
+};
+
+// web/src/fixtures/controlPanel/backup.ts
+var buildBackupSection = (stats) => {
+  const { theme } = getLfManager().getManagers().lfFramework;
+  const { "--lf-icon-download": downloadIcon, "--lf-icon-refresh": refreshIcon } = theme.get.current().variables;
+  const { progress } = theme.get.icons();
+  const totalBytes = stats?.totalSizeBytes ?? 0;
+  const fileCount = stats?.fileCount ?? 0;
+  const maxBytes = 1024 * 1024 * 1024;
+  const percentage = Math.min(totalBytes / maxBytes * 100, 100);
+  return {
+    icon: "download" /* Backup */,
+    id: "section" /* Section */,
+    value: "Backup",
+    children: [
+      {
+        id: "paragraph" /* Paragraph */,
+        value: "Toggle on/off",
+        children: [
+          {
+            id: "content" /* Content */,
+            value: "Toggle this toggle to automatically back up the folder <path/to/your/comfyui/user/LF_Nodes> once a day (the first time you open this workflow)."
+          },
+          { id: "content" /* Content */, tagName: "br", value: "" },
+          {
+            id: "content" /* Content */,
+            value: "",
+            cells: {
+              lfToggle: {
+                lfLabel: "Automatic Backup" /* AutoBackup */,
+                lfLeadingLabel: true,
+                lfStyle: ":host { text-align: center; padding: 1em 0; }",
+                shape: "toggle",
+                value: !!getLfManager().isBackupEnabled()
+              }
+            }
+          }
+        ]
+      },
+      {
+        cssStyle: STYLES.separator(),
+        id: "content_spearator" /* ContentSeparator */,
+        value: ""
+      },
+      {
+        id: "paragraph" /* Paragraph */,
+        value: "Backup statistics",
+        children: [
+          {
+            id: "content" /* Content */,
+            value: "Backup files are stored in the user/LF_Nodes folder. Monitor your backup folder size to ensure you have enough disk space."
+          },
+          { id: "content" /* Content */, tagName: "br", value: "" },
+          {
+            id: "content" /* Content */,
+            value: "",
+            children: [
+              {
+                id: "backup-info",
+                value: `Current backup: ${formatBytes(totalBytes)} (${fileCount} files)`,
+                cssStyle: { display: "block", marginBottom: "0.75em" }
+              },
+              {
+                id: "backup-progress",
+                value: "",
+                cells: {
+                  lfProgressbar: {
+                    lfIcon: progress,
+                    lfLabel: `${formatBytes(totalBytes)} (${percentage.toFixed(1)}%)`,
+                    shape: "progressbar",
+                    value: percentage
+                  }
+                }
+              }
+            ]
+          },
+          {
+            id: "content" /* Content */,
+            value: "",
+            cells: {
+              lfButton: {
+                lfIcon: refreshIcon,
+                lfLabel: "Refresh backup stats" /* RefreshBackupStats */,
+                lfStyle: BUTTON_STYLE,
+                lfStyling: "flat",
+                shape: "button",
+                value: ""
+              }
+            }
+          }
+        ]
+      },
+      {
+        cssStyle: STYLES.separator(),
+        id: "content_spearator" /* ContentSeparator */,
+        value: ""
+      },
+      {
+        id: "paragraph" /* Paragraph */,
+        value: "Rolling backup retention",
+        children: [
+          {
+            id: "content" /* Content */,
+            value: "Set the maximum number of backups to keep. When this limit is exceeded, the oldest backups will be automatically deleted. Set to 0 to disable this feature."
+          },
+          { id: "content" /* Content */, tagName: "br", value: "" },
+          {
+            id: "content" /* Content */,
+            value: "",
+            cells: {
+              lfTextfield: {
+                lfHtmlAttributes: { type: "number" },
+                lfLabel: "Maximum backups to keep" /* BackupRetention */,
+                lfStyle: ":host { text-align: center; padding: 1em 0; }",
+                lfValue: getLfManager().getBackupRetention().toString() || "14",
+                shape: "textfield",
+                value: ""
+              }
+            }
+          }
+        ]
+      },
+      {
+        cssStyle: STYLES.separator(),
+        id: "content_spearator" /* ContentSeparator */,
+        value: ""
+      },
+      {
+        id: "paragraph" /* Paragraph */,
+        value: "Backup files",
+        children: [
+          {
+            id: "content" /* Content */,
+            value: "This button will create a manual backup of the content in <path/to/your/comfyui/user/LF_Nodes>."
+          },
+          {
+            id: "content" /* Content */,
+            value: "",
+            cells: {
+              lfButton: {
+                lfIcon: downloadIcon,
+                lfLabel: "Backup now" /* Backup */,
+                lfStyle: BUTTON_STYLE,
+                lfStyling: "raised",
+                shape: "button",
+                value: ""
+              }
+            }
+          }
+        ]
+      }
+    ]
+  };
+};
+
+// web/src/fixtures/controlPanel/debug.ts
+var buildDebugSection = (logsData) => {
+  const { theme } = getLfManager().getManagers().lfFramework;
+  const { "--lf-icon-clear": clearIcon } = theme.get.current().variables;
+  return {
+    icon: "bug" /* Debug */,
+    id: "section" /* Section */,
+    cssStyle: STYLES.debugGrid(),
+    value: "Debug",
+    children: [
+      {
+        id: "paragraph" /* Paragraph */,
+        value: "Toggle on/off",
+        children: [
+          {
+            id: "content" /* Content */,
+            value: "Activating the debug will enable the display of verbose logging."
+          },
+          {
+            id: "content" /* Content */,
+            value: "",
+            cells: {
+              lfToggle: {
+                lfLabel: "Debug" /* Debug */,
+                lfLeadingLabel: true,
+                lfStyle: ":host { text-align: center; padding: 1em 0; }",
+                shape: "toggle",
+                value: !!getLfManager().isDebug()
+              }
+            }
+          }
+        ]
+      },
+      {
+        id: "paragraph" /* Paragraph */,
+        value: "Logs",
+        children: [
+          {
+            id: "content" /* Content */,
+            value: "Every time the node manager receives a message it will be printed below."
+          },
+          { id: "content" /* Content */, tagName: "br", value: "" },
+          {
+            id: "content" /* Content */,
+            value: "In the browser console there should be more informations."
+          },
+          { id: "content" /* Content */, tagName: "br", value: "" },
+          {
+            id: "content" /* Content */,
+            value: "Further below another card will display additional LF Widgets information."
+          },
+          {
+            id: "content" /* Content */,
+            value: "",
+            cells: {
+              lfButton: {
+                shape: "button",
+                lfIcon: clearIcon,
+                lfLabel: "Clear logs" /* ClearLogs */,
+                lfStretchX: true,
+                lfStyle: BUTTON_STYLE,
+                lfUiState: "danger",
+                value: ""
+              }
+            }
+          }
+        ]
+      },
+      {
+        id: "paragraph" /* Paragraph */,
+        cssStyle: STYLES.debugLogs(),
+        value: "",
+        children: [
+          {
+            id: "content-wrapper",
+            cssStyle: STYLES.logsArea(),
+            value: "",
+            children: logsData
+          },
+          {
+            id: "content-wrapper",
+            value: "",
+            cells: {
+              lfCard: {
+                lfDataset: {
+                  nodes: [
+                    {
+                      cells: {
+                        lfCode: { shape: "code", value: "" },
+                        lfButton: { shape: "button", value: "" },
+                        lfButton_2: { shape: "button", value: "" },
+                        lfToggle: {
+                          shape: "toggle",
+                          value: !!getLfManager().getManagers().lfFramework.debug.isEnabled()
+                        }
+                      },
+                      id: "debug"
+                    }
+                  ]
+                },
+                lfLayout: "debug",
+                shape: "card",
+                value: ""
+              }
+            }
+          }
+        ]
+      }
+    ]
+  };
+};
+
+// web/src/fixtures/controlPanel/externalPreviews.ts
+var buildExternalPreviewsSection = (stats) => {
+  const { theme } = getLfManager().getManagers().lfFramework;
+  const { "--lf-icon-delete": deleteIcon, "--lf-icon-refresh": refreshIcon } = theme.get.current().variables;
+  const { progress } = theme.get.icons();
+  const totalBytes = stats?.totalSizeBytes ?? 0;
+  const fileCount = stats?.fileCount ?? 0;
+  const maxBytes = 1024 * 1024 * 1024;
+  const percentage = Math.min(totalBytes / maxBytes * 100, 100);
+  return {
+    icon: "photo-search" /* ExternalPreviews */,
+    id: "section" /* Section */,
+    value: "External Previews",
+    children: [
+      {
+        id: "paragraph" /* Paragraph */,
+        value: "Cache statistics",
+        children: [
+          {
+            id: "content" /* Content */,
+            value: "External image previews are cached in the _lf_external_previews folder under ComfyUI/input to speed up loading."
+          },
+          { id: "content" /* Content */, tagName: "br", value: "" },
+          {
+            id: "content" /* Content */,
+            value: "",
+            children: [
+              {
+                id: "cache-info",
+                value: `Current cache: ${formatBytes(totalBytes)} (${fileCount} files)`,
+                cssStyle: { display: "block", marginBottom: "0.75em" }
+              },
+              {
+                id: "cache-progress",
+                value: "",
+                cells: {
+                  lfProgressbar: {
+                    lfIcon: progress,
+                    lfLabel: `${formatBytes(totalBytes)} (${percentage.toFixed(1)}%)`,
+                    shape: "progressbar",
+                    value: percentage
+                  }
+                }
+              }
+            ]
+          },
+          {
+            id: "content" /* Content */,
+            value: "",
+            cells: {
+              lfButton: {
+                lfIcon: refreshIcon,
+                lfLabel: "Refresh preview stats" /* RefreshPreviewStats */,
+                lfStyle: BUTTON_STYLE,
+                lfStyling: "flat",
+                shape: "button",
+                value: ""
+              }
+            }
+          }
+        ]
+      },
+      {
+        cssStyle: STYLES.separator(),
+        id: "content_spearator" /* ContentSeparator */,
+        value: ""
+      },
+      {
+        id: "paragraph" /* Paragraph */,
+        value: "Clear cache",
+        children: [
+          {
+            id: "content" /* Content */,
+            value: "This button will permanently delete the entire preview cache folder and all its contents."
+          },
+          { id: "content" /* Content */, tagName: "br", value: "" },
+          {
+            id: "content" /* Content */,
+            value: "This action is IRREVERSIBLE so use it with caution."
+          },
+          {
+            id: "content" /* Content */,
+            value: "",
+            cells: {
+              lfButton: {
+                lfIcon: deleteIcon,
+                lfLabel: "Clear preview cache" /* ClearPreviews */,
+                lfStyle: BUTTON_STYLE,
+                lfStyling: "outlined",
+                lfUiState: "danger",
+                shape: "button",
+                value: ""
+              }
+            }
+          }
+        ]
+      }
+    ]
+  };
+};
+
+// web/src/fixtures/controlPanel/github.ts
+var buildGitHubSection = () => {
+  const lfManager = getLfManager();
+  const releaseData = lfManager.getLatestRelease();
+  const { theme } = lfManager.getManagers().lfFramework;
+  const { brandGithub } = theme.get.icons();
+  return {
+    icon: "brand-github" /* GitHub */,
+    id: "section" /* Section */,
+    value: "",
+    children: [
+      {
+        id: "paragraph" /* Paragraph */,
+        value: `Version: ${releaseData?.tag_name || "N/A"}`,
+        children: [
+          {
+            cells: {
+              lfCode: {
+                lfLanguage: "markdown",
+                shape: "code",
+                value: releaseData?.body || "No changelog available"
+              }
+            },
+            id: "release-description"
+          },
+          {
+            id: "release-author",
+            children: [
+              {
+                id: "author-avatar",
+                value: "",
+                cssStyle: {
+                  backgroundImage: `url(${releaseData?.author?.avatar_url || ""})`,
+                  backgroundSize: "cover",
+                  borderRadius: "50%",
+                  display: "inline-block",
+                  height: "2em",
+                  marginRight: "0.5em",
+                  verticalAlign: "middle",
+                  width: "2em"
+                }
+              },
+              {
+                id: "author-name",
+                value: `Author: ${releaseData?.author?.login || "Unknown"}`,
+                cssStyle: {
+                  fontSize: "0.9em",
+                  color: "rgb(var(--lf-color-secondary))",
+                  verticalAlign: "middle"
+                }
+              }
+            ],
+            cssStyle: {
+              alignItems: "center",
+              display: "flex",
+              justifyContent: "center",
+              marginBottom: ".25em"
+            }
+          },
+          {
+            cssStyle: {
+              color: "rgb(var(--lf-color-secondary))",
+              display: "block",
+              fontSize: "0.9em",
+              fontStyle: "italic",
+              marginBottom: "2em",
+              textAlign: "center",
+              width: "100%"
+            },
+            id: "release-date",
+            value: `Published on: ${releaseData?.published_at ? new Date(releaseData.published_at).toLocaleDateString() : "Unknown"}`
+          },
+          {
+            cssStyle: STYLES.separator(),
+            id: "content_spearator" /* ContentSeparator */,
+            value: ""
+          },
+          {
+            id: "paragraph" /* Paragraph */,
+            value: "Bug report",
+            children: [
+              {
+                id: "content" /* Content */,
+                value: "If you find bugs or odd behaviors feel free to open an issue on GitHub, just follow the link below!"
+              },
+              { id: "content" /* Content */, tagName: "br", value: "" },
+              {
+                id: "content" /* Content */,
+                value: "Be sure to include as much information as you can, without sufficient data it's difficult to troubleshoot problems."
+              },
+              {
+                id: "content" /* Content */,
+                value: "",
+                cells: {
+                  lfButton: {
+                    lfIcon: brandGithub,
+                    lfLabel: "Open an issue" /* OpenIssue */,
+                    lfStyle: BUTTON_STYLE,
+                    lfStyling: "raised",
+                    shape: "button",
+                    value: ""
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  };
+};
+
+// web/src/fixtures/controlPanel/metadata.ts
+var buildMetadataSection = () => {
+  const { theme } = getLfManager().getManagers().lfFramework;
+  const { "--lf-icon-delete": deleteIcon } = theme.get.current().variables;
+  return {
+    icon: "info-hexagon" /* Metadata */,
+    id: "section" /* Section */,
+    value: "Metadata",
+    children: [
+      {
+        id: "paragraph" /* Paragraph */,
+        value: "Purge metadata files",
+        children: [
+          {
+            id: "content" /* Content */,
+            value: "Metadata pulled from CivitAI are stored in .info files saved in the same folders of the models to avoid unnecessary fetches from the API."
+          },
+          { id: "content" /* Content */, tagName: "div", value: "" },
+          {
+            id: "content" /* Content */,
+            value: "By pressing this button it's possible to delete every .info file created by fetching the metadata."
+          },
+          { id: "content" /* Content */, tagName: "br", value: "" },
+          {
+            id: "content" /* Content */,
+            value: "This action is IRREVERSIBLE so use it with caution."
+          },
+          {
+            id: "content" /* Content */,
+            value: "",
+            cells: {
+              lfButton: {
+                lfIcon: deleteIcon,
+                lfLabel: "Delete models info" /* DeleteMetadata */,
+                lfStyle: BUTTON_STYLE,
+                lfStyling: "outlined",
+                lfUiState: "danger",
+                shape: "button",
+                value: ""
+              }
+            }
+          }
+        ]
+      }
+    ]
+  };
+};
+
+// web/src/fixtures/controlPanel/systemDashboard.ts
+var buildSystemDashboardSection = (stats) => {
+  const { theme } = getLfManager().getManagers().lfFramework;
+  const { "--lf-icon-refresh": refreshIcon } = theme.get.current().variables;
+  const { progress } = theme.get.icons();
+  const refreshTimeout = getLfManager().getSystemTimeout() || 0;
+  const gpus = stats?.gpus ?? [];
+  const disks = stats?.disks ?? [];
+  const cpu = stats?.cpu;
+  const ram = stats?.ram;
+  const errors2 = stats?.errors ?? [];
+  const timestamp = stats?.timestamp ? new Date(stats.timestamp) : null;
+  const lastUpdated = timestamp ? timestamp.toLocaleString() : "Waiting for data";
+  const gpuNodes = gpus.length ? gpus.map((gpu) => {
+    const vramPercent = gpu.vram_total ? clampPercent(gpu.vram_used / gpu.vram_total * 100) : 0;
+    const utilPercent = clampPercent(gpu.utilization);
+    return {
+      id: `gpu-${gpu.index}`,
+      value: "",
+      cssStyle: { marginBottom: "1em" },
+      children: [
+        {
+          id: `gpu-${gpu.index}-title`,
+          value: `${gpu.name} (GPU ${gpu.index})`,
+          tagName: "strong"
+        },
+        buildProgressNode(
+          progress,
+          `gpu-${gpu.index}-vram`,
+          `VRAM ${formatBytes(gpu.vram_used)} / ${formatBytes(gpu.vram_total)} (${percentLabel(
+            vramPercent
+          )})`,
+          vramPercent
+        ),
+        buildProgressNode(
+          progress,
+          `gpu-${gpu.index}-util`,
+          `Utilization ${percentLabel(utilPercent)}`,
+          utilPercent
+        )
+      ]
+    };
+  }) : [
+    {
+      id: "gpu-none",
+      value: "No GPUs detected.",
+      cssStyle: { opacity: "0.7" }
+    }
+  ];
+  const cpuNodes = cpu ? [
+    buildProgressNode(
+      progress,
+      "cpu-average",
+      `Average usage ${percentLabel(cpu.average)}`,
+      clampPercent(cpu.average)
+    ),
+    {
+      id: "cpu-meta",
+      value: `Logical cores: ${cpu.count} \u2022 Physical cores: ${cpu.physical_count}`,
+      cssStyle: { fontSize: "0.9em", opacity: "0.8" }
+    },
+    {
+      id: "cpu-cores",
+      value: "",
+      cssStyle: {
+        display: "grid",
+        gap: "0.75em",
+        gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))"
+      },
+      children: cpu.cores.map(
+        (core) => buildProgressNode(
+          progress,
+          `cpu-core-${core.index}`,
+          `Core ${core.index} ${percentLabel(core.usage)}`,
+          clampPercent(core.usage)
+        )
+      )
+    }
+  ] : [
+    {
+      id: "cpu-none",
+      value: "CPU statistics unavailable.",
+      cssStyle: { opacity: "0.7" }
+    }
+  ];
+  const ramNodes = ram ? [
+    buildProgressNode(
+      progress,
+      "ram-usage",
+      `RAM ${formatBytes(ram.used)} / ${formatBytes(ram.total)} (${percentLabel(ram.percent)})`,
+      clampPercent(ram.percent)
+    ),
+    {
+      id: "ram-available",
+      value: `Available: ${formatBytes(ram.available)}`,
+      cssStyle: { fontSize: "0.9em", opacity: "0.8" }
+    },
+    ...ram.swap_total ? [
+      buildProgressNode(
+        progress,
+        "swap-usage",
+        `Swap ${formatBytes(ram.swap_used)} / ${formatBytes(
+          ram.swap_total
+        )} (${percentLabel(ram.swap_used / ram.swap_total * 100)})`,
+        clampPercent(ram.swap_used / ram.swap_total * 100)
+      )
+    ] : []
+  ] : [
+    {
+      id: "ram-none",
+      value: "RAM statistics unavailable.",
+      cssStyle: { opacity: "0.7" }
+    }
+  ];
+  const diskNodes = disks.length ? disks.map((disk, index) => {
+    const used = toNumber(disk.used);
+    const total = toNumber(disk.total);
+    const percent = total ? clampPercent(used / total * 100) : clampPercent(disk.percent);
+    const descriptor = [disk.device || disk.mountpoint, disk.label].filter(Boolean).join(" ");
+    return {
+      id: `disk-${index}`,
+      value: "",
+      cssStyle: { marginBottom: "1em" },
+      children: [
+        {
+          id: `disk-${index}-title`,
+          value: descriptor || disk.mountpoint,
+          tagName: "strong"
+        },
+        {
+          id: `disk-${index}-mount`,
+          value: `Mount: ${disk.mountpoint}`,
+          cssStyle: { fontSize: "0.9em", opacity: "0.8", marginBottom: "0.25em" }
+        },
+        buildProgressNode(
+          progress,
+          `disk-${index}-usage`,
+          `${formatBytes(disk.used)} / ${formatBytes(disk.total)} (${percentLabel(percent)})`,
+          percent
+        )
+      ]
+    };
+  }) : [
+    {
+      id: "disk-none",
+      value: "No disks detected.",
+      cssStyle: { opacity: "0.7" }
+    }
+  ];
+  const overviewChildren = [
+    {
+      id: "content" /* Content */,
+      value: "Monitor real-time hardware usage for GPUs, CPU, memory, and storage."
+    },
+    {
+      id: "content" /* Content */,
+      value: `Last updated: ${lastUpdated}`,
+      cssStyle: { fontSize: "0.85em", opacity: "0.75" }
+    },
+    {
+      id: "content" /* Content */,
+      value: refreshTimeout > 0 ? `Auto refresh every ${refreshTimeout}s` : "Auto refresh disabled.",
+      cssStyle: { fontSize: "0.85em", opacity: "0.75", marginTop: "0.3em" }
+    },
+    {
+      id: "content" /* Content */,
+      value: "",
+      cells: {
+        lfTextfield: {
+          lfHelper: { showWhenFocused: false, value: "Set to 0 to disable auto refresh" },
+          lfHtmlAttributes: { type: "number", min: "0", step: "any" },
+          lfLabel: "Auto refresh (seconds)" /* SystemAutoRefresh */,
+          lfStyle: ":host { display: block; margin: 0.75em auto; max-width: 240px; }",
+          lfValue: refreshTimeout > 0 ? refreshTimeout.toString() : "",
+          shape: "textfield",
+          value: ""
+        }
+      }
+    }
+  ];
+  if (errors2.length) {
+    overviewChildren.push({
+      id: "system-errors",
+      value: "",
+      children: errors2.map((message, index) => ({
+        id: `system-error-${index}`,
+        value: message,
+        cssStyle: {
+          color: "rgb(var(--lf-color-danger))",
+          fontSize: "0.85em"
+        }
+      }))
+    });
+  }
+  overviewChildren.push({
+    id: "content" /* Content */,
+    value: "",
+    cells: {
+      lfButton: {
+        lfIcon: refreshIcon,
+        lfLabel: "Refresh system stats" /* RefreshSystemStats */,
+        lfStyle: BUTTON_STYLE,
+        lfStyling: "flat",
+        shape: "button",
+        value: ""
+      }
+    }
+  });
+  return {
+    icon: "percentage-60" /* SystemDashboard */,
+    id: "section" /* Section */,
+    value: "System monitor",
+    children: [
+      {
+        id: "paragraph" /* Paragraph */,
+        value: "Overview",
+        children: overviewChildren
+      },
+      {
+        cssStyle: STYLES.separator(),
+        id: "content_spearator" /* ContentSeparator */,
+        value: ""
+      },
+      {
+        id: "paragraph" /* Paragraph */,
+        value: "GPU usage",
+        children: gpuNodes
+      },
+      {
+        cssStyle: STYLES.separator(),
+        id: "content_spearator" /* ContentSeparator */,
+        value: ""
+      },
+      {
+        id: "paragraph" /* Paragraph */,
+        value: "CPU usage",
+        children: cpuNodes
+      },
+      {
+        cssStyle: STYLES.separator(),
+        id: "content_spearator" /* ContentSeparator */,
+        value: ""
+      },
+      {
+        id: "paragraph" /* Paragraph */,
+        value: "Memory",
+        children: ramNodes
+      },
+      {
+        cssStyle: STYLES.separator(),
+        id: "content_spearator" /* ContentSeparator */,
+        value: ""
+      },
+      {
+        id: "paragraph" /* Paragraph */,
+        value: "Disk usage",
+        children: diskNodes
+      }
+    ]
+  };
+};
+var getUsageState = (percent) => {
+  const value = clampPercent(percent);
+  if (value >= 90) return "danger";
+  if (value >= 70) return "warning";
+  if (value === 0) return "primary";
+  return "success";
+};
+var buildProgressNode = (icon, id2, label, percent) => ({
+  id: id2,
+  value: "",
+  cells: {
+    lfProgressbar: {
+      lfIcon: icon,
+      lfLabel: label,
+      lfUiState: getUsageState(percent),
+      shape: "progressbar",
+      value: clampPercent(percent)
+    }
+  }
+});
+
+// web/src/fixtures/controlPanel/theme.ts
+var buildThemeSection = () => {
+  return {
+    icon: "color-swatch" /* Theme */,
+    id: "section" /* Section */,
+    value: "Customization",
+    cssStyle: STYLES.customization(),
+    children: [
+      {
+        id: "paragraph" /* Paragraph */,
+        value: "Theme selector",
+        children: [
+          {
+            id: "content" /* Content */,
+            value: "Through the button below it's possible to set a random theme for the LF Widgets components, or select one from the dropdown menu."
+          },
+          {
+            id: "content" /* Content */,
+            value: "",
+            cells: {
+              lfButton: {
+                lfDataset: getLfThemes(),
+                lfLabel: "Random theme" /* Theme */,
+                lfStyle: BUTTON_STYLE,
+                shape: "button",
+                value: ""
+              }
+            }
+          }
+        ]
+      }
+    ]
+  };
+};
+
+// web/src/fixtures/controlPanel/index.ts
+var SECTIONS = {
+  ["analytics" /* Analytics */]: buildAnalyticsSection,
+  ["backup" /* Backup */]: buildBackupSection,
+  ["debug" /* Debug */]: buildDebugSection,
+  ["external-previews" /* ExternalPreviews */]: buildExternalPreviewsSection,
+  ["github" /* GitHub */]: buildGitHubSection,
+  ["metadata" /* Metadata */]: buildMetadataSection,
+  ["system-dashboard" /* SystemDashboard */]: buildSystemDashboardSection,
+  ["theme" /* Theme */]: buildThemeSection
+};
+
+// web/src/helpers/controlPanel/events.ts
+var INTRO_SECTION = "github" /* GitHub */;
+
+// web/src/types/widgets/countBarChart.ts
+var BASE_CSS_CLASS11 = "lf-countbarchart";
+var CountBarChartCSS = ((CountBarChartCSS2) => {
+  CountBarChartCSS2[CountBarChartCSS2["Content"] = BASE_CSS_CLASS11] = "Content";
+  CountBarChartCSS2["Widget"] = `${BASE_CSS_CLASS11}__widget`;
+  return CountBarChartCSS2;
+})(CountBarChartCSS || {});
+
+// web/src/types/widgets/history.ts
+var BASE_CSS_CLASS12 = "lf-history";
+var HistoryCSS = ((HistoryCSS2) => {
+  HistoryCSS2[HistoryCSS2["Content"] = BASE_CSS_CLASS12] = "Content";
+  HistoryCSS2["Widget"] = `${BASE_CSS_CLASS12}__widget`;
+  return HistoryCSS2;
+})(HistoryCSS || {});
+
+// web/src/types/widgets/masonry.ts
+var BASE_CSS_CLASS13 = "lf-masonry";
+var MasonryCSS = ((MasonryCSS2) => {
+  MasonryCSS2[MasonryCSS2["Content"] = BASE_CSS_CLASS13] = "Content";
+  MasonryCSS2["Slot"] = `${BASE_CSS_CLASS13}__slot`;
+  MasonryCSS2["Widget"] = `${BASE_CSS_CLASS13}__widget`;
+  return MasonryCSS2;
+})(MasonryCSS || {});
+
+// web/src/types/widgets/tabBarChart.ts
+var BASE_CSS_CLASS14 = "lf-tabbarchart";
+var TabBarChartCSS = ((TabBarChartCSS2) => {
+  TabBarChartCSS2[TabBarChartCSS2["Content"] = BASE_CSS_CLASS14] = "Content";
+  TabBarChartCSS2["Directory"] = `${BASE_CSS_CLASS14}__directory`;
+  TabBarChartCSS2["DirectoryHidden"] = `${BASE_CSS_CLASS14}__directory--hidden`;
+  TabBarChartCSS2["Grid"] = `${BASE_CSS_CLASS14}__grid`;
+  TabBarChartCSS2["GridNoDirectory"] = `${BASE_CSS_CLASS14}__grid--no-directory`;
+  TabBarChartCSS2["Spinner"] = `${BASE_CSS_CLASS14}__spinner`;
+  TabBarChartCSS2["Tabbar"] = `${BASE_CSS_CLASS14}__tabbar`;
+  return TabBarChartCSS2;
+})(TabBarChartCSS || {});
+
+// web/src/types/widgets/textarea.ts
+var BASE_CSS_CLASS15 = "lf-textarea";
+var TextareaCSS = ((TextareaCSS2) => {
+  TextareaCSS2[TextareaCSS2["Content"] = BASE_CSS_CLASS15] = "Content";
+  TextareaCSS2["Widget"] = `${BASE_CSS_CLASS15}__widget`;
+  TextareaCSS2["WidgetError"] = `${BASE_CSS_CLASS15}__widget--error`;
+  return TextareaCSS2;
+})(TextareaCSS || {});
+
+// web/src/types/widgets/tree.ts
+var BASE_CSS_CLASS16 = "lf-tree";
+var TreeCSS = ((TreeCSS2) => {
+  TreeCSS2[TreeCSS2["Content"] = BASE_CSS_CLASS16] = "Content";
+  TreeCSS2["Widget"] = `${BASE_CSS_CLASS16}__widget`;
+  return TreeCSS2;
+})(TreeCSS || {});
+
+// web/src/types/widgets/upload.ts
+var BASE_CSS_CLASS17 = "lf-upload";
+var UploadCSS = ((UploadCSS2) => {
+  UploadCSS2[UploadCSS2["Content"] = BASE_CSS_CLASS17] = "Content";
+  UploadCSS2["Widget"] = `${BASE_CSS_CLASS17}__widget`;
+  return UploadCSS2;
+})(UploadCSS || {});
+
+// web/src/utils/common.ts
+var LF_MANAGER_SYMBOL_ID = "__LfManager__";
+var LF_MANAGER_SYMBOL = Symbol.for(LF_MANAGER_SYMBOL_ID);
+var timer;
+var isImage = (comp) => {
+  return comp.rootElement.tagName.toLowerCase() === "lf-image";
+};
+var isMasonry = (comp) => {
+  return comp.rootElement.tagName.toLowerCase() === "lf-masonry";
+};
+var isTree = (comp) => {
+  return comp.rootElement.tagName.toLowerCase() === "lf-tree";
+};
+var isJSONLikeString = (value) => {
+  if (typeof value !== "string") return false;
+  const trimmed = value.trim();
+  if (!(trimmed.startsWith("{") && trimmed.endsWith("}") || trimmed.startsWith("[") && trimmed.endsWith("]"))) {
+    return false;
+  }
+  if (trimmed.startsWith("{")) {
+    if (trimmed === "{}") return true;
+    if (/".*"\s*:\s*.+/.test(trimmed)) return true;
+    return false;
+  }
+  if (trimmed.indexOf('"') !== -1) return true;
+  const simpleArrayScalar = /^\[\s*(?:-?\d+(\.\d+)?|true|false|null)(\s*,\s*(?:-?\d+(\.\d+)?|true|false|null))*\s*\]$/i;
+  if (trimmed.startsWith("[") && simpleArrayScalar.test(trimmed)) return true;
+  return false;
+};
+var unescapeJson = (input) => {
+  let validJson = false;
+  let parsedJson = void 0;
+  let unescapedStr = input;
+  const recursiveUnescape = (inputStr) => {
+    let newStr = inputStr.replace(/\\(.)/g, "$1");
+    while (newStr !== inputStr) {
+      inputStr = newStr;
+      newStr = inputStr.replace(/\\(.)/g, "$1");
+    }
+    return newStr;
+  };
+  const deepParse = (data) => {
+    if (isJSONLikeString(data)) {
+      try {
+        const innerJson = JSON.parse(data);
+        if (typeof innerJson === "object" && innerJson !== null) {
+          return deepParse(innerJson);
+        }
+      } catch (e2) {
+        return data;
+      }
+    } else if (typeof data === "object" && data !== null) {
+      Object.keys(data).forEach((key) => {
+        data[key] = deepParse(data[key]);
+      });
+    }
+    return data;
+  };
+  try {
+    parsedJson = isJSONLikeString(input) ? JSON.parse(input) : input;
+    validJson = true;
+    parsedJson = deepParse(parsedJson);
+    unescapedStr = JSON.stringify(parsedJson, null, 2);
+  } catch (error2) {
+    if (typeof input === "object" && input !== null) {
+      try {
+        unescapedStr = JSON.stringify(input, null, 2);
+        validJson = true;
+        parsedJson = input;
+      } catch (stringifyError) {
+        unescapedStr = recursiveUnescape(input.toString());
+      }
+    } else {
+      unescapedStr = recursiveUnescape(input.toString());
+    }
+  }
+  return { validJson, parsedJson, unescapedStr };
+};
+var getApiRoutes = () => {
+  return getLfManager().getApiRoutes();
+};
+var getComfyAPI = () => {
+  return comfyAPI["api"].api;
+};
+var getLfManager = () => {
+  return window[LF_MANAGER_SYMBOL];
+};
+var getLfThemes = () => {
+  return getLfManager().getManagers().lfFramework.theme.get.themes().asDataset;
+};
+var clampPercent = (value) => {
+  if (typeof value !== "number" || Number.isNaN(value) || !Number.isFinite(value)) {
+    return 0;
+  }
+  return Math.min(100, Math.max(0, value));
+};
+var toNumber = (value) => {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return value;
+  }
+  return 0;
+};
+var asString = (value) => typeof value === "string" ? value : void 0;
+var formatBytes = (bytes) => {
+  if (!bytes) {
+    return "0 B";
+  }
+  const units = ["B", "KB", "MB", "GB"];
+  const index = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
+  const value = bytes / Math.pow(1024, index);
+  return `${value.toFixed(2)} ${units[index]}`;
+};
+var percentLabel = (value) => `${clampPercent(value).toFixed(1)}%`;
+var canvasToBase64 = (canvas) => {
+  return canvas.toDataURL("image/png");
+};
+var debounce = (func, delay) => {
+  return (...args) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => func(...args), delay);
+  };
+};
+var isValidObject = (obj) => {
+  return obj && typeof obj === "object" && Object.keys(obj).length > 0;
+};
+var uploadFiles = async (files, uploadEl) => {
+  const fileNames = /* @__PURE__ */ new Set();
+  for (let index = 0; index < files.length; index++) {
+    const file = files[index];
+    try {
+      const body = new FormData();
+      const i2 = file.webkitRelativePath.lastIndexOf("/");
+      const subfolder = file.webkitRelativePath.slice(0, i2 + 1);
+      const new_file = new File([file], file.name, {
+        type: file.type,
+        lastModified: file.lastModified
+      });
+      body.append("image", new_file);
+      if (i2 > 0) {
+        body.append("subfolder", subfolder);
+      }
+      const resp = await getApiRoutes().comfy.upload(body);
+      if (resp.status === 200 || resp.status === 201) {
+        getLfManager().log("POST result", { json: resp.json }, "success" /* Success */);
+        fileNames.add(file.name);
+        uploadEl.dataset.files = uploadEl.dataset.files + ";" + file.name;
+      } else {
+        getLfManager().log("POST failed", { statusText: resp.statusText }, "error" /* Error */);
+      }
+    } catch (error2) {
+      alert(`Upload failed: ${error2}`);
+    }
+  }
+  return { files: Array.from(fileNames), filesStr: Array.from(fileNames).join(";") };
+};
+
+// web/src/workflow-runner/api/run.ts
+var _returnErrorResponse = (message, payload) => ({
+  message,
+  payload,
+  status: "error"
+});
+var _returnSuccessResponse = (message, payload) => ({
+  message,
+  payload,
+  status: "ready"
+});
+var invokeRunAPI = async (id2, inputs) => {
+  try {
+    const response = await fetch(`/api/lf-nodes/run`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ workflowId: id2, inputs })
+    });
+    const responseBody = await response.json();
+    const payload = responseBody.payload;
+    if (!response.ok) {
+      const { detail, error: error2 } = payload;
+      const message = `Workflow execution failed: ${detail} (${error2?.message || error2})`;
+      console.error(message, payload);
+      return _returnErrorResponse(message, payload);
+    }
+    return _returnSuccessResponse("Workflow executed successfully.", payload);
+  } catch (error2) {
+    console.error("Error invoking run API:", error2);
+    const payload = {
+      detail: String(error2.message || error2),
+      history: {}
+    };
+    return _returnErrorResponse("Error invoking run API.", payload);
+  }
+};
+
+// web/src/workflow-runner/elements/layout.drawer.ts
+var ROOT_CLASS = "drawer-section";
+var _createSection = (state) => {
+  const { ui: ui2 } = state;
+  const section = document.createElement("lf-drawer");
+  section.className = ROOT_CLASS;
+  section.lfDisplay = "slide";
+  ui2.layout.drawer._root = section;
+  ui2.layout._root.appendChild(section);
+};
+var drawerSection = {
+  create: _createSection
+};
+
+// web/src/workflow-runner/elements/components.ts
+var _setProps = (comp, element, props) => {
+  const { sanitizeProps } = getLfFramework();
+  const el2 = element;
+  const safeProps = sanitizeProps(props, comp);
+  for (const key in safeProps) {
+    if (Object.hasOwn(safeProps, key)) {
+      const prop = safeProps[key];
+      el2[key] = prop;
+    }
+  }
+};
+var createComponent = {
+  button: (props) => {
+    const comp = document.createElement("lf-button");
+    _setProps("LfButton", comp, props);
+    return comp;
+  },
+  code: (props) => {
+    const comp = document.createElement("lf-code");
+    _setProps("LfCode", comp, props);
+    return comp;
+  },
+  textfield: (props) => {
+    const comp = document.createElement("lf-textfield");
+    _setProps("LfTextfield", comp, props);
+    return comp;
+  },
+  toggle: (props) => {
+    const comp = document.createElement("lf-toggle");
+    _setProps("LfToggle", comp, props);
+    return comp;
+  },
+  upload: (props) => {
+    const comp = document.createElement("lf-upload");
+    _setProps("LfUpload", comp, props);
+    return comp;
+  }
+};
+
+// web/src/workflow-runner/elements/layout.header.ts
+var ROOT_CLASS2 = "header-section";
+var _container = () => {
+  const container = document.createElement("div");
+  container.className = `${ROOT_CLASS2}__container`;
+  container.slot = "content";
+  return container;
+};
+var _drawerToggle = () => {
+  const { theme } = getLfFramework();
+  const { get } = theme;
+  const lfIcon = get.icon("menu2");
+  const props = {
+    lfAriaLabel: "Toggle drawer",
+    lfIcon,
+    lfStyling: "icon"
+  };
+  const drawerToggle = createComponent.button(props);
+  drawerToggle.className = `${ROOT_CLASS2}__drawer-toggle`;
+  return drawerToggle;
+};
+var _createSection2 = (state) => {
+  const { ui: ui2 } = state;
+  const section = document.createElement("lf-header");
+  section.className = ROOT_CLASS2;
+  const container = _container();
+  const drawerToggle = _drawerToggle();
+  ui2.layout.header.drawerToggle = drawerToggle;
+  section.appendChild(container);
+  container.appendChild(drawerToggle);
+  ui2.layout.header._root = section;
+  ui2.layout._root.appendChild(section);
+};
+var headerSection = {
+  create: _createSection2
+};
+
+// web/src/workflow-runner/elements/layout.main.ts
+var ROOT_CLASS3 = "main-section";
+var _createSection3 = (state) => {
+  const { ui: ui2 } = state;
+  const section = document.createElement("main");
+  section.className = ROOT_CLASS3;
+  ui2.layout.main._root = section;
+  ui2.layout._root.appendChild(section);
+};
+var mainSection = {
+  create: _createSection3
+};
+
+// web/src/workflow-runner/elements/main.workflow.ts
+var WORKFLOW_TEXT = "Select a workflow";
+var ROOT_CLASS4 = "workflow-section";
+var _getCurrentWorkflow = (state) => {
+  const { current, workflows } = state;
+  return workflows.find((wf2) => wf2.id === current.workflow) || null;
+};
+var _getWorkflowLabel = (state) => {
+  const workflow = _getCurrentWorkflow(state);
+  return workflow?.label || WORKFLOW_TEXT;
+};
+var _field = (field) => {
+  const {
+    component,
+    default: lfValue,
+    description,
+    extra: lfHtmlAttributes,
+    label: lfLabel
+  } = field;
+  const { sanitizeProps } = getLfFramework();
+  const safeHtmlAttributes = sanitizeProps(lfHtmlAttributes);
+  switch (component) {
+    case "lf-toggle": {
+      return createComponent.toggle({
+        lfAriaLabel: lfLabel,
+        lfLabel,
+        lfValue: Boolean(lfValue ?? false)
+      });
+    }
+    case "lf-upload": {
+      return createComponent.upload({
+        lfLabel
+      });
+    }
+    default:
+    case "lf-textfield": {
+      return createComponent.textfield({
+        lfHelper: { value: description ?? "", showWhenFocused: false },
+        lfHtmlAttributes: safeHtmlAttributes,
+        lfLabel,
+        lfValue: String(lfValue ?? "")
+      });
+    }
+  }
+};
+var _fieldWrapper = () => {
+  const fieldWrapper = document.createElement("div");
+  fieldWrapper.className = `${ROOT_CLASS4}__field`;
+  return fieldWrapper;
+};
+var _optionsWrapper = () => {
+  const optionsWrapper = document.createElement("div");
+  optionsWrapper.className = `${ROOT_CLASS4}__options`;
+  return optionsWrapper;
+};
+var _result = (output) => {
+  console.log(output);
+};
+var _resultWrapper = () => {
+  const resultWrapper = document.createElement("div");
+  resultWrapper.className = `${ROOT_CLASS4}__result`;
+  return resultWrapper;
+};
+var _runButton = (state) => {
+  const { runWorkflow } = state.manager;
+  const props = {
+    lfAriaLabel: "Run workflow",
+    lfLabel: "Run workflow",
+    lfStretchX: true
+  };
+  const run = createComponent.button(props);
+  run.className = `${ROOT_CLASS4}__run`;
+  run.onclick = () => runWorkflow();
+  return run;
+};
+var _statusWrapper = (tone = "info") => {
+  const statusWrapper = document.createElement("div");
+  statusWrapper.className = `${ROOT_CLASS4}__status`;
+  statusWrapper.dataset.tone = tone;
+  return statusWrapper;
+};
+var _title = (state) => {
+  const h3 = document.createElement("h3");
+  h3.className = `${ROOT_CLASS4}__title`;
+  h3.textContent = _getWorkflowLabel(state);
+  return h3;
+};
+var _createSection4 = (state) => {
+  const { ui: ui2 } = state;
+  const section = document.createElement("section");
+  section.className = ROOT_CLASS4;
+  const optionsWrapper = _optionsWrapper();
+  const runButton = _runButton(state);
+  const resultWrapper = _resultWrapper();
+  const statusWrapper = _statusWrapper();
+  const title = _title(state);
+  ui2.layout.main.workflow._root = section;
+  ui2.layout.main.workflow.options = optionsWrapper;
+  ui2.layout.main.workflow.result = resultWrapper;
+  ui2.layout.main.workflow.run = runButton;
+  ui2.layout.main.workflow.status = statusWrapper;
+  ui2.layout.main.workflow.title = title;
+  section.appendChild(title);
+  section.appendChild(optionsWrapper);
+  section.appendChild(runButton);
+  section.appendChild(statusWrapper);
+  section.appendChild(resultWrapper);
+  ui2.layout.main._root.appendChild(section);
+};
+var _updateSection = {
+  fieldWrapper: (state, name, status = "") => {
+    const { ui: ui2 } = state;
+    const field = ui2.layout.main.workflow.fields.find((el2) => el2.dataset.name === name);
+    const wrapper = field.parentElement;
+    if (field && wrapper) {
+      wrapper.dataset.status = status;
+    }
+  },
+  options: (state) => {
+    const { current, ui: ui2 } = state;
+    const element = ui2.layout.main.workflow.options;
+    if (!element) {
+      return;
+    }
+    element.childNodes.forEach((n2) => n2.remove());
+    if (!current.workflow) {
+      return;
+    }
+    ui2.layout.main.workflow.fields = [];
+    const workflow = _getCurrentWorkflow(state);
+    for (const field of workflow.fields ?? []) {
+      const wrapper = _fieldWrapper();
+      const fieldElement = _field(field);
+      fieldElement.dataset.name = field.name;
+      ui2.layout.main.workflow.fields.push(fieldElement);
+      wrapper.appendChild(fieldElement);
+      element.appendChild(wrapper);
+    }
+  },
+  result: (state, outputs) => {
+    const { ui: ui2 } = state;
+    const element = ui2.layout.main.workflow.result;
+    element.childNodes.forEach((n2) => n2.remove());
+    for (const key in outputs) {
+      _result(outputs[key]);
+    }
+  },
+  run: (state) => {
+    const { current, ui: ui2 } = state;
+    const element = ui2.layout.main.workflow.run;
+    element.lfShowSpinner = current.status === "running";
+  },
+  status: (state, message) => {
+    const { current, ui: ui2 } = state;
+    const element = ui2.layout.main.workflow.status;
+    switch (current.status) {
+      case "ready":
+        element.textContent = message || "Ready.";
+        break;
+      case "running":
+        element.textContent = message || "Running...";
+        break;
+      case "error":
+        element.textContent = message || "An error occurred while running the workflow.";
+        break;
+    }
+    element.dataset.tone = current.status;
+  },
+  title: (state) => {
+    const { ui: ui2 } = state;
+    const element = ui2.layout.main.workflow.title;
+    element.textContent = _getWorkflowLabel(state);
+  }
+};
+var workflowSection = {
+  create: _createSection4,
+  update: _updateSection
+};
+
+// web/src/workflow-runner/app/state.ts
+var initState = (appContainer, manager) => ({
+  current: { status: "ready", workflow: null },
+  manager,
+  ui: {
+    layout: {
+      _root: appContainer,
+      drawer: {
+        _root: null
+      },
+      header: {
+        _root: null,
+        drawerToggle: null,
+        themeSwitch: null
+      },
+      main: {
+        _root: null,
+        title: { _root: null },
+        workflow: {
+          _root: null,
+          fields: [],
+          options: null,
+          result: null,
+          run: null,
+          status: null,
+          title: null
+        }
+      }
+    }
+  },
+  workflows: []
+});
+
+// web/src/workflow-runner/app/manager.ts
+var _API_BASE, _ASSETS_BASE, _ASSETS_URL, _MANAGERS, _STATE, _LfWorkflowRunnerManager_instances, buildLayout_fn, initializeElements_fn, _loadWorkflows;
+var LfWorkflowRunnerManager = class {
+  //#endregion
+  //#region Constructor
   constructor() {
-    __privateAdd(this, _LfWorkflowApp_instances);
-    __privateAdd(this, _API_BASE, "/api/lf-nodes");
-    __privateAdd(this, _ASSETS_BASE, __privateGet(this, _API_BASE) + "/static/assets/");
+    __privateAdd(this, _LfWorkflowRunnerManager_instances);
+    //#region Private fields
+    __privateAdd(this, _API_BASE, "/api");
+    __privateAdd(this, _ASSETS_BASE, __privateGet(this, _API_BASE) + "/lf-nodes/static/assets/");
     __privateAdd(this, _ASSETS_URL, window.location.origin + __privateGet(this, _ASSETS_BASE));
-    __privateAdd(this, _APP, document.querySelector("#app"));
-    __privateAdd(this, _FIELD_RENDERERS, /* @__PURE__ */ new Map());
     __privateAdd(this, _MANAGERS, {
       lfFramework: null
     });
-    __privateAdd(this, _STATE, {
-      ui: {
-        buttons: {
-          run: null
-        },
-        fields: {
-          workflow: null
-        },
-        labels: {
-          workflow: null
-        },
-        sections: {
-          fields: null,
-          result: null,
-          status: null,
-          workflow: null
-        },
-        title: null
-      },
-      workflows: []
-    });
-    __privateAdd(this, _STRINGIFY, (value) => JSON.stringify(value, null, 2));
+    __privateAdd(this, _STATE, initState(document.querySelector("#app"), this));
+    //#endregion
     //#region loadWorkflows
     __privateAdd(this, _loadWorkflows, async () => {
-      const { ui: ui2 } = __privateGet(this, _STATE);
-      const { fields } = ui2;
-      const createFieldRenderer = (field) => {
-        const wrapper = document.createElement("div");
-        wrapper.className = "field";
-        const label = document.createElement("label");
-        label.textContent = field.label;
-        wrapper.appendChild(label);
-        let input;
-        if (field.name === "source_path") {
-          input = document.createElement("input");
-          input.type = "file";
-          input.accept = "image/*";
-          input.className = "fallback-input";
-        } else {
-          input = document.createElement("input");
-          input.type = "text";
-          input.value = field.default ?? "";
-          input.className = "fallback-input";
-          if (field.placeholder) input.placeholder = field.placeholder;
-        }
-        if (field.extra && field.extra.htmlAttributes) {
-          Object.entries(field.extra.htmlAttributes).forEach(([key, value]) => {
-            try {
-              input.setAttribute(key, String(value));
-            } catch (_11) {
-            }
-          });
-        }
-        wrapper.appendChild(input);
-        if (field.description) {
-          const desc = document.createElement("p");
-          desc.className = "field__description";
-          desc.textContent = field.description;
-          wrapper.appendChild(desc);
-        }
-        return {
-          element: wrapper,
-          async getValue() {
-            if (input.type === "file") {
-              return input.files && input.files.length > 0 ? input.files[0] : null;
-            }
-            return input.value;
-          }
-        };
-      };
-      const renderFields2 = async (workflowId) => {
-        const { ui: ui3 } = __privateGet(this, _STATE);
-        const { sections } = ui3;
-        __privateGet(this, _FIELD_RENDERERS).clear();
-        sections.fields.textContent = "";
-        const workflow = __privateGet(this, _STATE).workflows.find((wf2) => wf2.id === workflowId);
-        if (!workflow) {
-          return;
-        }
-        for (const field of workflow.fields ?? []) {
-          const renderer = createFieldRenderer(field);
-          sections.fields.appendChild(renderer.element);
-          __privateGet(this, _FIELD_RENDERERS).set(field.name, renderer);
-        }
-      };
-      const response = await fetch(`${__privateGet(this, _API_BASE)}/workflows`);
+      const response = await fetch(`${__privateGet(this, _API_BASE)}${"/lf-nodes/workflows" /* Workflows */}`);
       if (!response.ok) {
         throw new Error(`Failed to load workflows (${response.status})`);
       }
       const data = await response.json();
       __privateGet(this, _STATE).workflows = Array.isArray(data.workflows) ? data.workflows : [];
-      fields.workflow.innerHTML = "";
-      __privateGet(this, _STATE).workflows.forEach((wf2, index) => {
-        const option = document.createElement("option");
-        option.value = wf2.id;
-        option.textContent = wf2.label ?? wf2.id;
-        if (index === 0) {
-          option.selected = true;
-        }
-        fields.workflow.appendChild(option);
-      });
-      if (__privateGet(this, _STATE).workflows.length > 0) {
-        await renderFields2(__privateGet(this, _STATE).workflows[0].id);
+      const firstWorkflow = __privateGet(this, _STATE).workflows[0];
+      if (!firstWorkflow) {
+        throw new Error("No workflows available from the API.");
       }
+      this.setWorkflow(firstWorkflow.id);
     });
     //#endregion
-    //#region Setters
-    this.set = {
-      result: (message, tone = "info") => {
-        const { ui: ui2 } = __privateGet(this, _STATE);
-        const { sections } = ui2;
-        sections.result.textContent = message ?? "";
-        sections.result.dataset.tone = tone;
-      },
-      status: (message, tone = "info") => {
-        const { ui: ui2 } = __privateGet(this, _STATE);
-        const { sections } = ui2;
-        sections.status.textContent = message ?? "";
-        sections.status.dataset.tone = tone;
+    //#region Run Workflow
+    this.collectInputs = async () => {
+      const { fields } = __privateGet(this, _STATE).ui.layout.main.workflow;
+      const inputs = {};
+      for (const el2 of fields) {
+        const value = await el2.getValue();
+        workflowSection.update.fieldWrapper(__privateGet(this, _STATE), el2.dataset.name);
+        switch (el2.tagName.toLowerCase()) {
+          case "lf-toggle":
+            inputs[el2.dataset.name] = value === "off" ? false : true;
+            break;
+          case "lf-upload":
+            this.setStatus("running", "Uploading file\u2026");
+            const files = value;
+            const uploadEl = el2;
+            const { filesStr } = await uploadFiles(files, uploadEl);
+            inputs[el2.dataset.name] = filesStr;
+            this.setStatus("running", "File uploaded, processing...");
+            break;
+          default:
+          case "lf-textfield":
+            inputs[el2.dataset.name] = value;
+            break;
+        }
       }
+      return inputs;
+    };
+    this.runWorkflow = async () => {
+      const { current } = __privateGet(this, _STATE);
+      if (!current.workflow) {
+        this.setStatus("error", "No workflow selected.");
+        return;
+      }
+      this.setStatus("running", "Submitting workflow\u2026");
+      const inputs = await this.collectInputs();
+      const { message, payload, status } = await invokeRunAPI(current.workflow, inputs);
+      if (payload.error?.input) {
+        workflowSection.update.fieldWrapper(__privateGet(this, _STATE), payload.error.input, "error");
+      }
+      this.setStatus(status, message);
+      if (status === "ready") {
+        this.setResult(payload);
+      }
+    };
+    //#endregion
+    //#region Setters
+    this.setResult = (payload) => {
+      const outputs = payload.history && payload.history.outputs ? payload.history.outputs : {};
+      const outputKeys = Object.keys(outputs || {});
+      const preferred = payload.preferred_output;
+      let selectedKey = "";
+      if (preferred && outputs[preferred]) {
+        selectedKey = preferred;
+      } else if (outputKeys.length > 0) {
+        selectedKey = outputKeys[0];
+      }
+      workflowSection.update.result(__privateGet(this, _STATE), outputs);
+    };
+    this.setStatus = (status, message) => {
+      const { current } = __privateGet(this, _STATE);
+      current.status = status;
+      workflowSection.update.run(__privateGet(this, _STATE));
+      workflowSection.update.status(__privateGet(this, _STATE), message);
+    };
+    this.setWorkflow = async (id2) => {
+      const { current } = __privateGet(this, _STATE);
+      if (current.workflow === id2) {
+        return;
+      }
+      current.workflow = id2;
+      workflowSection.update.title(__privateGet(this, _STATE));
+      workflowSection.update.options(__privateGet(this, _STATE));
     };
     const assetsUrl = __privateGet(this, _ASSETS_URL);
     __privateGet(this, _MANAGERS).lfFramework = getLfFramework();
     __privateGet(this, _MANAGERS).lfFramework.assets.set(assetsUrl);
     __privateGet(this, _MANAGERS).lfFramework.theme.set("dark");
-    __privateMethod(this, _LfWorkflowApp_instances, initializeElements_fn).call(this);
-    __privateGet(this, _loadWorkflows).call(this).then(() => this.set.status("Ready.", "info")).catch((err) => {
+    __privateMethod(this, _LfWorkflowRunnerManager_instances, initializeElements_fn).call(this);
+    __privateGet(this, _loadWorkflows).call(this).then(() => this.setStatus("ready")).catch((err) => {
       console.error(err);
-      this.set.status("Unable to load workflows.", "error");
+      this.setStatus("error");
     });
   }
   //#endregion
@@ -48484,214 +52741,32 @@ var LfWorkflowApp = class {
 _API_BASE = new WeakMap();
 _ASSETS_BASE = new WeakMap();
 _ASSETS_URL = new WeakMap();
-_APP = new WeakMap();
-_FIELD_RENDERERS = new WeakMap();
 _MANAGERS = new WeakMap();
 _STATE = new WeakMap();
-_STRINGIFY = new WeakMap();
-_LfWorkflowApp_instances = new WeakSet();
+_LfWorkflowRunnerManager_instances = new WeakSet();
+//#endregion
+//#region Initialize
+buildLayout_fn = function() {
+  const { ui: ui2 } = __privateGet(this, _STATE);
+  ui2.layout._root.appendChild(ui2.layout.drawer._root);
+  ui2.layout._root.appendChild(ui2.layout.main._root);
+};
 initializeElements_fn = function() {
   const { ui: ui2 } = __privateGet(this, _STATE);
-  const { buttons, fields, labels, sections } = ui2;
-  ui2.title = document.createElement("h1");
-  ui2.title.textContent = "LF Nodes \u2014 Workflow Runner";
-  sections.workflow = document.createElement("section");
-  labels.workflow = document.createElement("label");
-  fields.workflow = document.createElement("select");
-  sections.workflow.className = "field-container";
-  labels.workflow.htmlFor = "workflow-select";
-  labels.workflow.textContent = "Workflow";
-  fields.workflow.id = "workflow-select";
-  fields.workflow.addEventListener("change", (event) => {
-    renderFields(event.target.value);
-  });
-  sections.fields = document.createElement("section");
-  sections.fields.id = "fields";
-  sections.fields.className = "field-container";
-  buttons.run = document.createElement("lf-button");
-  buttons.run.id = "run-button";
-  buttons.run.lfAriaLabel = "Run workflow";
-  buttons.run.lfLabel = "Run workflow";
-  buttons.run.addEventListener("click", async () => {
-    const { ui: ui3, workflows } = __privateGet(this, _STATE);
-    const { buttons: buttons2, fields: fields2, sections: sections2 } = ui3;
-    const workflowId = fields2.workflow.value;
-    if (!workflowId) {
-      this.set.status("Select a workflow to continue.", "warn");
-      return;
-    }
-    buttons2.run.lfUiState = "disabled";
-    this.set.status("Submitting workflow\u2026", "info");
-    this.set.result("");
-    const inputs = {};
-    for (const [name, renderer] of __privateGet(this, _FIELD_RENDERERS).entries()) {
-      const val = await renderer.getValue();
-      if (val instanceof File) {
-        this.set.status("Uploading file\u2026", "info");
-        const form = new FormData();
-        form.append("file", val, val.name);
-        try {
-          const uploadResp = await fetch(`${__privateGet(this, _API_BASE)}/upload`, {
-            method: "POST",
-            body: form
-          });
-          if (!uploadResp.ok) throw new Error(await uploadResp.text());
-          const uploadJson = await uploadResp.json();
-          inputs[name] = uploadJson.path;
-        } catch (err) {
-          this.set.status("File upload failed.", "error");
-          sections2.result.textContent = String(err);
-          buttons2.run.lfUiState = "primary";
-          return;
-        }
-      } else {
-        inputs[name] = val;
-      }
-    }
-    try {
-      const response = await fetch(`${__privateGet(this, _API_BASE)}/run`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ workflowId, inputs })
-      });
-      const payload = await response.json();
-      if (!response.ok) {
-        this.set.status(payload.detail ?? "Workflow execution failed.", "error");
-        sections2.result.textContent = __privateGet(this, _STRINGIFY).call(this, payload);
-        return;
-      }
-      this.set.status(`Workflow completed with status: ${payload.status}`, "info");
-      const outputs = payload.history && payload.history.outputs ? payload.history.outputs : {};
-      const outputKeys = Object.keys(outputs || {});
-      const preferred = payload.preferred_output;
-      let selectedKey = null;
-      if (preferred && outputs[preferred]) {
-        selectedKey = preferred;
-      } else if (outputKeys.length > 0) {
-        selectedKey = outputKeys[0];
-      }
-      const renderOutputForKey = (key) => {
-        this.set.result("");
-        if (!key || !outputs[key]) {
-          sections2.result.textContent = __privateGet(this, _STRINGIFY).call(this, outputs);
-          return;
-        }
-        const val = outputs[key];
-        const isSVG = typeof val === "string" && val.trim().startsWith("<svg") || Array.isArray(val) && val.length > 0 && typeof val[0] === "string" && val[0].trim().startsWith("<svg");
-        const isImage = val && val.images && Array.isArray(val.images) && val.images.length > 0;
-        if (isImage) {
-          const val2 = outputs[key];
-          const imgInfo = val2.images[0];
-          const filename = imgInfo.filename || imgInfo.name;
-          const type = imgInfo.type || "temp";
-          const subfolder = imgInfo.subfolder || "";
-          if (filename) {
-            const nonce = Date.now();
-            const url = `/view?filename=${encodeURIComponent(filename)}&type=${encodeURIComponent(
-              type
-            )}&subfolder=${encodeURIComponent(subfolder)}&nonce=${nonce}`;
-            const img = document.createElement("img");
-            img.src = url;
-            img.style.maxWidth = "100%";
-            img.style.borderRadius = "8px";
-            img.alt = filename;
-            img.title = filename;
-            sections2.result.appendChild(img);
-            return;
-          }
-        } else if (isSVG) {
-          const val2 = outputs[key];
-          const svgText = Array.isArray(val2.svg) ? val2.svg[0] : val2.svg;
-          try {
-            const wrapper = document.createElement("div");
-            wrapper.style.borderRadius = "8px";
-            wrapper.style.overflow = "auto";
-            wrapper.style.padding = "0.6rem";
-            wrapper.style.background = "#061018";
-            const blob = new Blob([svgText], { type: "image/svg+xml" });
-            const url = URL.createObjectURL(blob);
-            const obj = document.createElement("object");
-            obj.type = "image/svg+xml";
-            obj.data = url;
-            obj.style.width = "100%";
-            obj.style.border = "none";
-            wrapper.appendChild(obj);
-            const dl2 = document.createElement("a");
-            dl2.href = url;
-            wrapper.appendChild(dl2);
-            sections2.result.appendChild(wrapper);
-            return;
-          } catch (e2) {
-          }
-        }
-        if (outputs[key]) {
-          sections2.result.textContent = __privateGet(this, _STRINGIFY).call(this, outputs[key]);
-        } else {
-          sections2.result.textContent = __privateGet(this, _STRINGIFY).call(this, outputs);
-        }
-      };
-      let outputSelect = document.getElementById("output-select");
-      if (outputKeys.length > 1) {
-        if (!outputSelect) {
-          outputSelect = document.createElement("select");
-          outputSelect.id = "output-select";
-          outputSelect.style.marginTop = "0.6rem";
-          outputSelect.style.padding = "0.4rem 0.6rem";
-          outputSelect.style.borderRadius = "8px";
-          outputSelect.style.background = "#111520";
-          outputSelect.style.border = "1px solid #3a4154";
-          outputSelect.style.color = "inherit";
-          sections2.result.parentNode?.insertBefore(outputSelect, sections2.result);
-        }
-        outputSelect.innerHTML = "";
-        for (const key of outputKeys) {
-          const opt = document.createElement("option");
-          opt.value = key;
-          opt.textContent = `${key}` + (key === preferred ? " (preferred)" : "");
-          outputSelect.appendChild(opt);
-        }
-        outputSelect.value = selectedKey || "";
-        outputSelect.onchange = (e2) => {
-          renderOutputForKey(e2.target.value);
-        };
-      } else {
-        if (outputSelect && outputSelect.parentNode)
-          outputSelect.parentNode.removeChild(outputSelect);
-      }
-      renderOutputForKey(selectedKey);
-    } catch (error2) {
-      console.error(error2);
-      this.set.status("Failed to execute workflow.", "error");
-      if (sections2.result) {
-        sections2.result.textContent = String(error2);
-      }
-    } finally {
-      buttons2.run.lfUiState = "primary";
-    }
-  });
-  sections.status = document.createElement("div");
-  sections.status.id = "status";
-  sections.status.dataset.tone = "info";
-  sections.result = document.createElement("pre");
-  sections.result.id = "result";
-  __privateGet(this, _APP).childNodes.forEach((n2) => n2.remove());
-  __privateGet(this, _APP).appendChild(ui2.title);
-  sections.workflow.appendChild(labels.workflow);
-  sections.workflow.appendChild(fields.workflow);
-  __privateGet(this, _APP).appendChild(sections.workflow);
-  __privateGet(this, _APP).appendChild(sections.fields);
-  __privateGet(this, _APP).appendChild(buttons.run);
-  __privateGet(this, _APP).appendChild(sections.status);
-  __privateGet(this, _APP).appendChild(sections.result);
+  ui2.layout._root.childNodes.forEach((n2) => n2.remove());
+  drawerSection.create(__privateGet(this, _STATE));
+  headerSection.create(__privateGet(this, _STATE));
+  mainSection.create(__privateGet(this, _STATE));
+  workflowSection.create(__privateGet(this, _STATE));
+  __privateMethod(this, _LfWorkflowRunnerManager_instances, buildLayout_fn).call(this);
 };
 _loadWorkflows = new WeakMap();
-var hasComfyApp = typeof window !== "undefined" && typeof window.LGraph !== "undefined";
+
+// web/src/workflow-runner/index.ts
+var hasComfyApp = comfyAPI?.api && comfyAPI?.app;
 if (!hasComfyApp) {
-  new LfWorkflowApp();
+  new LfWorkflowRunnerManager();
 }
-export {
-  LfWorkflowApp
-};
 /*! Bundled license information:
 
 @lf-widgets/core/dist/lf-core/p-9738317a.entry.js:
@@ -48732,3 +52807,4 @@ export {
    * @public
    *)
 */
+//# sourceMappingURL=workflow-runner.js.map
