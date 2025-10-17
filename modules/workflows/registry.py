@@ -7,6 +7,13 @@ from typing import Any, Callable, Dict, Iterable, List
 
 import folder_paths
 
+# Custom exception for input-level validation failures. Carries the offending input name so
+# callers (the HTTP API) can map the problem back to the UI field to highlight.
+class InputValidationError(ValueError):
+    def __init__(self, message: str, input_name: str | None = None):
+        super().__init__(message)
+        self.input_name = input_name
+
 # region Helpers
 def _json_safe(value: Any) -> Any:
     """
@@ -118,7 +125,6 @@ class WorkflowField:
     label: str
     component: str
     description: str = ""
-    placeholder: str = ""
     required: bool = True
     default: Any | None = None
     extra: Dict[str, Any] = field(default_factory=dict)
@@ -129,7 +135,6 @@ class WorkflowField:
             "label": self.label,
             "component": self.component,
             "description": self.description,
-            "placeholder": self.placeholder,
             "required": self.required,
             "default": self.default,
         }
@@ -166,9 +171,20 @@ def _configure_image_to_svg_workflow(prompt: Dict[str, Any], inputs: Dict[str, A
         inputs_map = node.setdefault("inputs", {})
         
         if node_id == "16":  # Image Loader node
-            source_path = inputs.get("source_path")
+            input_name = "source_path"
+            source_path = inputs.get(input_name)
             if not source_path:
-                raise ValueError("Missing required input 'source_path'.")
+                raise InputValidationError("Missing required input 'source_path'.", input_name=input_name)
+
+            if isinstance(source_path, (list, tuple)):
+                source_path = next((v for v in source_path if v), source_path[0] if len(source_path) > 0 else None)
+
+            if isinstance(source_path, dict):
+                source_path = source_path.get('path') or source_path.get('file') or source_path.get('name')
+
+            if isinstance(source_path, str) and ';' in source_path:
+                parts = [p for p in (s.strip() for s in source_path.split(';')) if p]
+                source_path = parts[0] if parts else source_path
 
             resolved_path = Path(source_path).expanduser()
             if not resolved_path.exists():
@@ -178,19 +194,21 @@ def _configure_image_to_svg_workflow(prompt: Dict[str, Any], inputs: Dict[str, A
             inputs_map["image"] = resolved_str
         
         if node_id == "40":  # Color number node (optional)
-            input_value = int(inputs.get("number_of_colors", 0) or 0)
+            input_name = "number_of_colors"
+            input_value = int(inputs.get(input_name, 0) or 0)
             if input_value is not None and input_value > 0:
                 inputs_map["integer"] = input_value
 
         if node_id == "47":  # Icon name node (optional)
-            icon_name = inputs.get("icon_name")
+            input_name = "icon_name"
+            icon_name = inputs.get(input_name)
             if icon_name:
                 inputs_map["string"] = str(icon_name)
 
         if node_id == "51":  # Desaturate checkbox (optional)
-            desaturate = inputs.get("desaturate")
+            input_name = "desaturate"
+            desaturate = inputs.get(input_name)
             inputs_map["boolean"] = bool(desaturate)
-
 # endregion
 
 # region Workflow Definitions
@@ -208,33 +226,28 @@ WORKFLOW_DEFINITIONS["image-to-svg"] = WorkflowDefinition(
         WorkflowField(
             name="source_path",
             label="Source File or Directory",
-            component="lf-textfield",
+            component="lf-upload",
             description="Absolute path to the image file (or folder) to convert.",
-            placeholder="C:\\\\path\\\\to\\\\file.png",
-            extra={"htmlAttributes": {"autocomplete": "off"}},
         ),
         WorkflowField(
             name="icon_name",
             label="Icon Name",
             component="lf-textfield",
             description="Optional: The name of the icon to use.",
-            placeholder="icon",
-            extra={"htmlAttributes": {"autocomplete": "off", "type": "text"}},
+            extra={"htmlAttributes": {"autocomplete": "off", "placeholder": "icon", "type": "text"}},
         ),
         WorkflowField(
             name="number_of_colors",
             label="Number of Colors",
             component="lf-textfield",
             description="Optional: the number of colors to reduce the image to.",
-            placeholder="2",
-            extra={"htmlAttributes": {"autocomplete": "off", "type": "number", "min": "1", "max": "256"}},
+            extra={"htmlAttributes": {"autocomplete": "off", "type": "number", "min": "1", "max": "256", "placeholder": "2"}},
         ),
         WorkflowField(
             name="desaturate",
             label="Desaturate",
-            component="lf-textfield",
+            component="lf-toggle",
             description="Optional: sets whether to desaturate the image before converting.",
-            extra={"htmlAttributes": {"type": "checkbox"}},
         ),
     ],
     configure_prompt=_configure_image_to_svg_workflow,
