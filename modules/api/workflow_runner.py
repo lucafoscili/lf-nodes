@@ -14,7 +14,25 @@ from server import PromptServer
 from ..utils.constants import API_ROUTE_PREFIX, NOT_FND_HTML
 from ..utils.helpers.logic.sanitize_filename import sanitize_filename
 from ..workflows import get_workflow, list_workflows
-from ..workflows.registry import _json_safe as workflow_json_safe
+from ..workflows.registry import _json_safe as workflow_json_safe, InputValidationError
+
+# region Workflow runner page
+@PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/workflow-runner")
+async def lf_nodes_workflow_runner_page(_: web.Request) -> web.Response:
+    try:
+        module_root = Path(__file__).resolve().parents[2]
+        deploy_html = module_root / "web" / "deploy_workflow_runner" / "workflow-runner.html"
+        if not deploy_html.exists():
+            deploy_html = module_root / "web" / "deploy" / "workflow-runner.html"
+
+        if deploy_html.exists():
+            return web.FileResponse(str(deploy_html))
+
+    except Exception:
+        pass
+
+    return web.Response(text=NOT_FND_HTML, content_type="text/html", status=404)
+# endregion
 
 # region Static assets
 @PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/static/{{path:.*}}")
@@ -30,7 +48,7 @@ async def lf_nodes_static_asset(request: web.Request) -> web.Response:
 
         candidates = [
             module_root / 'web' / 'deploy' / Path(rel_path),
-            module_root / 'web' / 'deploy_workflow_app' / Path(rel_path),
+            module_root / 'web' / 'deploy_workflow_runner' / Path(rel_path),
         ]
 
         for asset_path in candidates:
@@ -43,7 +61,7 @@ async def lf_nodes_static_asset(request: web.Request) -> web.Response:
 # endregion
 
 # region Workflow static
-@PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/static-workflow/{'{path:.*}'}")
+@PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/static-workflow-runner/{'{path:.*}'}")
 async def lf_nodes_static_workflow(request: web.Request) -> web.Response:
     try:
         module_root = Path(__file__).resolve().parents[2]
@@ -51,31 +69,13 @@ async def lf_nodes_static_workflow(request: web.Request) -> web.Response:
         if '..' in rel_path or rel_path.startswith('/') or rel_path.startswith('\\'):
             return web.Response(status=400, text='Invalid path')
 
-        asset_path = module_root / 'web' / 'deploy_workflow_app' / Path(rel_path)
+        asset_path = module_root / 'web' / 'deploy_workflow_runner' / Path(rel_path)
         if asset_path.exists() and asset_path.is_file():
             return web.FileResponse(str(asset_path))
     except Exception:
         pass
 
     return web.Response(status=404, text='Not found')
-# endregion
-
-# region Submit prompt
-@PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/submit-prompt")
-async def lf_nodes_workflow_runner_page(_: web.Request) -> web.Response:
-    try:
-        module_root = Path(__file__).resolve().parents[2]
-        deploy_html = module_root / "web" / "deploy_workflow_app" / "submit-prompt.html"
-        if not deploy_html.exists():
-            deploy_html = module_root / "web" / "deploy" / "submit-prompt.html"
-
-        if deploy_html.exists():
-            return web.FileResponse(str(deploy_html))
-
-    except Exception:
-        pass
-
-    return web.Response(text=NOT_FND_HTML, content_type="text/html", status=404)
 # endregion
 
 # region Workflow
@@ -91,20 +91,20 @@ async def lf_nodes_run_workflow(request: web.Request) -> web.Response:
         payload = await request.json()
     except Exception as exc:  # pragma: no cover - defensive, logged to UI
         logging.warning("Failed to parse workflow request payload: %s", exc)
-        return web.json_response({"error": "invalid_json", "detail": str(exc)}, status=400)
+        return web.json_response(_make_run_payload(detail=str(exc), error_message="invalid_json"), status=400)
 
     workflow_id = payload.get("workflowId")
     inputs = payload.get("inputs", {})
     if not isinstance(inputs, dict):
         return web.json_response(
-            {"error": "invalid_inputs", "detail": "inputs must be an object"},
+            _make_run_payload(detail="inputs must be an object", error_message="invalid_inputs"),
             status=400,
         )
 
     definition = get_workflow(workflow_id or "")
     if definition is None:
         return web.json_response(
-            {"error": "unknown_workflow", "detail": f"No workflow found for id '{workflow_id}'."},
+            _make_run_payload(detail=f"No workflow found for id '{workflow_id}'.", error_message="unknown_workflow"),
             status=404,
         )
 
@@ -112,22 +112,26 @@ async def lf_nodes_run_workflow(request: web.Request) -> web.Response:
         prompt = definition.load_prompt()
         definition.configure_prompt(prompt, inputs)
     except FileNotFoundError as exc:
-        return web.json_response({"error": "missing_source", "detail": str(exc)}, status=400)
+        return web.json_response(_make_run_payload(detail=str(exc), error_message="missing_source"), status=400)
+    except InputValidationError as exc:
+        # Provide the offending input name so the UI can highlight the field
+        return web.json_response(_make_run_payload(detail=str(exc), error_message="invalid_input", error_input=getattr(exc, 'input_name', None)), status=400)
     except ValueError as exc:
-        return web.json_response({"error": "invalid_input", "detail": str(exc)}, status=400)
+        return web.json_response(_make_run_payload(detail=str(exc), error_message="invalid_input"), status=400)
     except Exception as exc:  # pragma: no cover - unexpected issues are surfaced to the UI
         logging.exception("Failed to prepare workflow '%s': %s", workflow_id, exc)
-        return web.json_response({"error": "configuration_failed", "detail": str(exc)}, status=500)
+        return web.json_response(_make_run_payload(detail=str(exc), error_message="configuration_failed"), status=500)
 
     prompt_id = payload.get("promptId") or uuid.uuid4().hex
     validation = await execution.validate_prompt(prompt_id, prompt, None)
     if not validation[0]:
+        # Include node_errors inside the history to keep the payload shape stable for the frontend
         return web.json_response(
-            {
-                "error": "validation_failed",
-                "detail": validation[1],
-                "node_errors": _json_safe(validation[3]),
-            },
+            _make_run_payload(
+                detail=validation[1],
+                error_message="validation_failed",
+                history={"outputs": {}, "node_errors": _json_safe(validation[3])},
+            ),
             status=400,
         )
 
@@ -143,7 +147,7 @@ async def lf_nodes_run_workflow(request: web.Request) -> web.Response:
     try:
         history_entry = await _wait_for_completion(prompt_id)
     except TimeoutError as exc:
-        return web.json_response({"error": "timeout", "detail": str(exc), "prompt_id": prompt_id}, status=504)
+        return web.json_response(_make_run_payload(detail=str(exc), error_message="timeout"), status=504)
 
     status = history_entry.get("status") or {}
     status_str = status.get("status_str", "unknown")
@@ -168,16 +172,20 @@ async def lf_nodes_run_workflow(request: web.Request) -> web.Response:
     except Exception:
         preferred_output = None
 
-    return web.json_response(
-        {
-            "prompt_id": prompt_id,
-            "status": status_str,
-            "history": _sanitize_history(history_entry),
-            "workflow_id": workflow_id,
-            "preferred_output": preferred_output,
-        },
-        status=http_status,
-    )
+    # Build payload matching WorkflowAPIRunPayload:
+    sanitized = _sanitize_history(history_entry)
+    history_outputs = sanitized.get("outputs", {}) if isinstance(sanitized, dict) else {}
+    if status_str == "success":
+        return web.json_response(
+            _make_run_payload(detail="success", history={"outputs": history_outputs}, preferred_output=preferred_output),
+            status=200,
+        )
+    else:
+        # Non-success execution -> surface an error object and return non-200 status
+        return web.json_response(
+            _make_run_payload(detail=status_str or "error", error_message="execution_failed", history={"outputs": history_outputs}, preferred_output=preferred_output),
+            status=http_status,
+        )
 # endregion
 
 
@@ -235,6 +243,37 @@ def _json_safe(value: Any) -> Any:
     clear within this module.
     """
     return workflow_json_safe(value)
+
+
+def _make_run_payload(
+    *,
+    detail: str = "",
+    error_message: str | None = None,
+    error_input: str | None = None,
+    history: Dict[str, Any] | None = None,
+    preferred_output: str | None = None,
+) -> Dict[str, Any]:
+    """
+    Build a response payload compatible with the frontend's WorkflowAPIRunPayload:
+
+    {
+      "detail": string,
+      "error": { "message": string, "input": string | undefined },
+      "history": { outputs?: {...} },
+      "preferred_output": string | undefined
+    }
+    """
+    payload: Dict[str, Any] = {"detail": detail or ""}
+    if error_message is not None:
+        payload["error"] = {"message": str(error_message)}
+        if error_input:
+            payload["error"]["input"] = str(error_input)
+
+    payload["history"] = history or {"outputs": {}}
+    if preferred_output is not None:
+        payload["preferred_output"] = preferred_output
+
+    return {"message": detail or "", "payload": payload, "status": "error" if error_message else "ready"}
 
 async def _wait_for_completion(prompt_id: str, timeout_seconds: float = 180.0) -> Dict[str, Any]:
     """

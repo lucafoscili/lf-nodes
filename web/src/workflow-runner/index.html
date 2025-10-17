@@ -9,11 +9,15 @@
         window.comfyAPI = {};
       }
     </script>
+    <style>
+      html {
+        background: black;
+        color: white;
+      }
+    </style>
   </head>
   <body>
-    <main>
-      <div id="app">Loading...</div>
-    </main>
-    <script type="module" src="/web/src/workflow/index.ts"></script>
+    <div id="app"></div>
+    <script type="module" src="/web/src/workflow-runner/index.ts"></script>
   </body>
 </html>

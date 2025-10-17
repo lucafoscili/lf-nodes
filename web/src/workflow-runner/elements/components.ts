@@ -4,9 +4,13 @@ import {
   LfComponentName,
   LfComponentPropsFor,
   LfComponentRootElement,
+  LfTextfieldInterface,
+  LfToggleInterface,
+  LfUploadInterface,
 } from '@lf-widgets/foundations/dist';
 import { getLfFramework } from '@lf-widgets/framework';
 
+//#region Helpers
 const _setProps = <T extends LfComponentName>(
   comp: T,
   element: LfComponentRootElement<T>,
@@ -24,7 +28,9 @@ const _setProps = <T extends LfComponentName>(
     }
   }
 };
+//#endregion
 
+//#region Public API
 export const createComponent = {
   button: (props: Partial<LfButtonInterface>) => {
     const comp = document.createElement('lf-button');
@@ -38,4 +44,23 @@ export const createComponent = {
     _setProps('LfCode', comp, props);
     return comp;
   },
+  textfield: (props: Partial<LfTextfieldInterface>) => {
+    const comp = document.createElement('lf-textfield');
+
+    _setProps('LfTextfield', comp, props);
+    return comp;
+  },
+  toggle: (props: Partial<LfToggleInterface>) => {
+    const comp = document.createElement('lf-toggle');
+
+    _setProps('LfToggle', comp, props);
+    return comp;
+  },
+  upload: (props: Partial<LfUploadInterface>) => {
+    const comp = document.createElement('lf-upload');
+
+    _setProps('LfUpload', comp, props);
+    return comp;
+  },
 };
+//#endregion

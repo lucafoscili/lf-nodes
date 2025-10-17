@@ -8,7 +8,7 @@ const svgPath = path.resolve('web/deploy/assets/svg');
 const tempPath = path.resolve('web/temp');
 
 async function clean() {
-  console.log('\x1b[31m%s\x1b[0m', '🗑 Cleaning build directory...');
+  console.log('\x1b[31m%s\x1b[0m', 'Cleaning build directory...');
   try {
     await rm(cssPath, { recursive: true, force: true });
     await rm(jsPath, { recursive: true, force: true });
