@@ -80,6 +80,8 @@ class LF_SaveImageForCivitAI:
         extension: str = normalize_list_to_value(kwargs.get("extension"))
         quality: int = normalize_list_to_value(kwargs.get("quality"))
         civitai_metadata: str = normalize_list_to_value(kwargs.get("civitai_metadata", None))
+        if civitai_metadata is None:
+            civitai_metadata = ""
 
         file_names: list[str] = []
 
@@ -141,11 +143,21 @@ class LF_SaveImageForCivitAI:
 
         return {
             "ui": {
-                "lf_civitai_metadata": (civitai_metadata, ),
-                "lf_file_names": (file_names, ),
-                "lf_masonry": ({
+                "_description": ["LF_SaveImageForCivitAI"],
+                "lf_code": [{
+                    "_description": "CivitAI metadata",
+                    "lfLanguage": "markdown",
+                    "lfValue": civitai_metadata
+                    }, {
+                    "_description": "Generated filenames",
+                    "lfLanguage": "markdown",
+                    "lfValue": '\n'.join(file_names)
+                    }
+                ],
+                "lf_masonry": [{
+                    "_description": "Saved images",
                     "lfDataset": dataset,
-                },),
+                }],
             },
             "result": (file_names, civitai_metadata)
         }
