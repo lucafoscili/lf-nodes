@@ -9,7 +9,6 @@ const _returnErrorResponse = (
   payload,
   status: 'error',
 });
-
 const _returnSuccessResponse = (
   message: string,
   payload: WorkflowAPIRunPayload,

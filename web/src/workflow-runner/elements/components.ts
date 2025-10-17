@@ -4,22 +4,60 @@ import {
   LfComponentName,
   LfComponentPropsFor,
   LfComponentRootElement,
+  LfMasonryInterface,
   LfTextfieldInterface,
   LfToggleInterface,
   LfUploadInterface,
 } from '@lf-widgets/foundations/dist';
 import { getLfFramework } from '@lf-widgets/framework';
+import { WorkflowAPIField, WorkflowAPIResult } from '../../types/workflow-runner/api';
+import { normalize_description } from '../utils/common';
 
 //#region Helpers
+const _chooseComponentForResult = <T extends LfComponentName>(
+  key: string,
+  props: Partial<LfComponentPropsFor<T>> & { _description?: string | string[] },
+) => {
+  const el = document.createElement('div');
+
+  const { _description } = props;
+  if (_description) {
+    const desc = document.createElement('div');
+    desc.innerHTML = normalize_description(_description);
+    el.appendChild(desc);
+  }
+
+  switch (key) {
+    case 'masonry':
+      const masonry = createComponent.masonry(props);
+      el.appendChild(masonry);
+      break;
+    default:
+    case 'code':
+      const code = createComponent.code(props);
+      el.appendChild(code);
+      break;
+  }
+
+  return el;
+};
 const _setProps = <T extends LfComponentName>(
   comp: T,
   element: LfComponentRootElement<T>,
-  props: Partial<LfComponentPropsFor<T>>,
+  props: Partial<LfComponentPropsFor<T>> & { _slotmap?: Record<string, string> },
 ) => {
+  if (!props) {
+    return;
+  }
+
   const { sanitizeProps } = getLfFramework();
 
-  const el = element as Partial<LfComponentPropsFor<T>>;
+  const hasSlots = props._slotmap && Object.keys(props._slotmap).length > 0;
+  if (hasSlots) {
+    _setSlots(comp, element, props);
+  }
 
+  const el = element as Partial<LfComponentPropsFor<T>>;
   const safeProps = sanitizeProps(props, comp);
   for (const key in safeProps) {
     if (Object.hasOwn(safeProps, key)) {
@@ -28,9 +66,49 @@ const _setProps = <T extends LfComponentName>(
     }
   }
 };
+const _setSlots = <T extends LfComponentName>(
+  _comp: T,
+  element: HTMLElement,
+  props: Partial<LfComponentPropsFor<T>> & { _slotmap?: Record<string, string> },
+) => {
+  for (const slotName in props._slotmap) {
+    const slotHtml = props._slotmap[slotName];
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = slotHtml;
+    wrapper.setAttribute('slot', slotName);
+    element.appendChild(wrapper);
+
+    if (slotName.toLowerCase().endsWith('.svg')) {
+      const dlButton = createComponent.button({
+        lfAriaLabel: 'Download SVG',
+        lfIcon: 'download',
+        lfLabel: 'Download SVG',
+        lfStretchX: true,
+      });
+      dlButton.onclick = () => {
+        const blob = new Blob([slotHtml], { type: 'image/svg+xml' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = slotName.toLowerCase().endsWith('.svg') ? slotName : `${slotName}.svg`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      };
+      dlButton.style.position = 'absolute';
+      dlButton.style.bottom = '0';
+      wrapper.style.display = 'grid';
+      wrapper.style.gridTemplateRows = '1fr auto';
+      wrapper.style.margin = '0 auto';
+      wrapper.style.maxWidth = '360px';
+      wrapper.style.position = 'relative';
+      wrapper.appendChild(dlButton);
+    }
+  }
+};
 //#endregion
 
-//#region Public API
+//#region Components
 export const createComponent = {
   button: (props: Partial<LfButtonInterface>) => {
     const comp = document.createElement('lf-button');
@@ -42,6 +120,12 @@ export const createComponent = {
     const comp = document.createElement('lf-code');
 
     _setProps('LfCode', comp, props);
+    return comp;
+  },
+  masonry: (props: Partial<LfMasonryInterface>) => {
+    const comp = document.createElement('lf-masonry');
+
+    _setProps('LfMasonry', comp, props);
     return comp;
   },
   textfield: (props: Partial<LfTextfieldInterface>) => {
@@ -62,5 +146,64 @@ export const createComponent = {
     _setProps('LfUpload', comp, props);
     return comp;
   },
+};
+//#endregion
+
+//#region Inputs
+export const createInputField = (field: WorkflowAPIField) => {
+  const {
+    component,
+    default: lfValue,
+    description,
+    extra: lfHtmlAttributes,
+    label: lfLabel,
+  } = field;
+  const { sanitizeProps } = getLfFramework();
+  const safeHtmlAttributes = sanitizeProps(lfHtmlAttributes);
+
+  switch (component) {
+    case 'lf-toggle': {
+      return createComponent.toggle({
+        lfAriaLabel: lfLabel,
+        lfLabel,
+        lfValue: Boolean(lfValue ?? false),
+      });
+    }
+    case 'lf-upload': {
+      return createComponent.upload({
+        lfLabel,
+      });
+    }
+    default:
+    case 'lf-textfield': {
+      return createComponent.textfield({
+        lfHelper: { value: description ?? '', showWhenFocused: false },
+        lfHtmlAttributes: safeHtmlAttributes,
+        lfLabel,
+        lfValue: String(lfValue ?? ''),
+      });
+    }
+  }
+};
+//#endregion
+
+//#region Outputs
+export const createOutputField = (key: string, result: WorkflowAPIResult) => {
+  const isArrayOfComps =
+    Array.isArray(result) && result.every((item) => typeof item === 'object') && result.length > 1;
+  if (isArrayOfComps) {
+    const wrapper = document.createElement('div');
+    wrapper.classList.add(`${key}-output-wrapper`);
+
+    for (const item of result) {
+      wrapper.appendChild(_chooseComponentForResult(key, item));
+    }
+
+    return wrapper;
+  }
+
+  const r = Array.isArray(result) ? result[0] : result;
+
+  return _chooseComponentForResult(key, r);
 };
 //#endregion

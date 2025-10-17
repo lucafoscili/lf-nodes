@@ -1,9 +1,13 @@
 import { LfThemeUIState } from '@lf-widgets/core/dist/types/components';
 import { LfButtonInterface } from '@lf-widgets/foundations/dist';
-import { getLfFramework } from '@lf-widgets/framework';
-import { WorkflowAPIField } from '../../types/workflow-runner/api';
+import {
+  WorkflowAPIResult,
+  WorkflowAPIResultKey,
+  WorkflowAPIUI,
+} from '../../types/workflow-runner/api';
 import { WorkflowState } from '../../types/workflow-runner/state';
-import { createComponent } from './components';
+import { normalize_description } from '../utils/common';
+import { createComponent, createInputField, createOutputField } from './components';
 
 //#region Constants
 const WORKFLOW_TEXT = 'Select a workflow';
@@ -22,41 +26,6 @@ const _getWorkflowLabel = (state: WorkflowState) => {
 //#endregion
 
 //#region Elements
-const _field = (field: WorkflowAPIField) => {
-  const {
-    component,
-    default: lfValue,
-    description,
-    extra: lfHtmlAttributes,
-    label: lfLabel,
-  } = field;
-  const { sanitizeProps } = getLfFramework();
-  const safeHtmlAttributes = sanitizeProps(lfHtmlAttributes);
-
-  switch (component) {
-    case 'lf-toggle': {
-      return createComponent.toggle({
-        lfAriaLabel: lfLabel,
-        lfLabel,
-        lfValue: Boolean(lfValue ?? false),
-      });
-    }
-    case 'lf-upload': {
-      return createComponent.upload({
-        lfLabel,
-      });
-    }
-    default:
-    case 'lf-textfield': {
-      return createComponent.textfield({
-        lfHelper: { value: description ?? '', showWhenFocused: false },
-        lfHtmlAttributes: safeHtmlAttributes,
-        lfLabel,
-        lfValue: String(lfValue ?? ''),
-      });
-    }
-  }
-};
 const _fieldWrapper = () => {
   const fieldWrapper = document.createElement('div');
   fieldWrapper.className = `${ROOT_CLASS}__field`;
@@ -66,9 +35,6 @@ const _optionsWrapper = () => {
   const optionsWrapper = document.createElement('div');
   optionsWrapper.className = `${ROOT_CLASS}__options`;
   return optionsWrapper;
-};
-const _result = (output: { lf_images?: any; lf_masonry?: any }) => {
-  console.log(output);
 };
 const _resultWrapper = () => {
   const resultWrapper = document.createElement('div');
@@ -149,7 +115,9 @@ const _updateSection = {
       return;
     }
 
-    element.childNodes.forEach((n) => n.remove());
+    while (element.firstChild) {
+      element.removeChild(element.firstChild);
+    }
     if (!current.workflow) {
       return;
     }
@@ -158,7 +126,7 @@ const _updateSection = {
     const workflow = _getCurrentWorkflow(state);
     for (const field of workflow.fields ?? []) {
       const wrapper = _fieldWrapper();
-      const fieldElement = _field(field);
+      const fieldElement = createInputField(field);
       fieldElement.dataset.name = field.name;
 
       ui.layout.main.workflow.fields.push(fieldElement);
@@ -167,16 +135,41 @@ const _updateSection = {
       element.appendChild(wrapper);
     }
   },
-  result: (state: WorkflowState, outputs: Record<string, unknown>) => {
+  result: (state: WorkflowState, outputs: WorkflowAPIUI) => {
     const { ui } = state;
 
     const element = ui.layout.main.workflow.result;
-    element.childNodes.forEach((n) => n.remove());
+    while (element.firstChild) {
+      element.removeChild(element.firstChild);
+    }
 
-    for (const key in outputs) {
-      _result(outputs[key]);
-      //const resultElement = _result(outputs[key]);
-      // element.appendChild(resultElement);
+    for (const nodeId in outputs) {
+      const nodeContent = outputs[nodeId] as WorkflowAPIResult;
+      const { _description } = nodeContent;
+
+      const title = document.createElement('h4');
+      title.className = `${ROOT_CLASS}__result-title`;
+      title.textContent = normalize_description(_description) || `Node #${nodeId}`;
+      element.appendChild(title);
+
+      const grid = document.createElement('div');
+      grid.className = `${ROOT_CLASS}__result-grid`;
+      element.appendChild(grid);
+
+      for (const resultKey in nodeContent) {
+        const rK = resultKey as WorkflowAPIResultKey;
+        switch (rK) {
+          case '_description':
+            break;
+          default:
+            const resultElement = createOutputField(resultKey, nodeContent[resultKey]);
+            resultElement.className = `${ROOT_CLASS}__result-item`;
+            if (resultElement) {
+              grid.appendChild(resultElement);
+            }
+            break;
+        }
+      }
     }
   },
   run: (state: WorkflowState) => {

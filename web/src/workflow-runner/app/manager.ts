@@ -50,7 +50,11 @@ export class LfWorkflowRunnerManager implements WorkflowRunnerManager {
   #initializeElements() {
     const { ui } = this.#STATE;
 
-    ui.layout._root.childNodes.forEach((n) => n.remove());
+    // Remove children using a snapshot-safe loop to avoid skipping when removing
+    // from a live NodeList. Using firstChild removal is widest-compatible.
+    while (ui.layout._root.firstChild) {
+      ui.layout._root.removeChild(ui.layout._root.firstChild);
+    }
 
     drawerSection.create(this.#STATE);
     headerSection.create(this.#STATE);
@@ -142,6 +146,10 @@ export class LfWorkflowRunnerManager implements WorkflowRunnerManager {
 
     if (status === 'ready') {
       this.setResult(payload);
+      this.#STATE.ui.layout.main.workflow.result.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
     }
   };
   //#endregion
@@ -149,15 +157,6 @@ export class LfWorkflowRunnerManager implements WorkflowRunnerManager {
   //#region Setters
   setResult = (payload: WorkflowAPIRunPayload) => {
     const outputs = payload.history && payload.history.outputs ? payload.history.outputs : {};
-    const outputKeys = Object.keys(outputs || {});
-    const preferred = payload.preferred_output;
-    let selectedKey = '';
-
-    if (preferred && outputs[preferred]) {
-      selectedKey = preferred;
-    } else if (outputKeys.length > 0) {
-      selectedKey = outputKeys[0];
-    }
 
     workflowSection.update.result(this.#STATE, outputs);
   };
