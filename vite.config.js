@@ -18,6 +18,7 @@ export default defineConfig({
       external: ['/scripts/api.js', '/scripts/app.js'],
       plugins: [visualizer({ open: false, filename: 'web/temp/bundle-stats.html' })],
     },
+    sourcemap: true,
   },
   root: resolve(__dirname, 'web/temp'),
 });
