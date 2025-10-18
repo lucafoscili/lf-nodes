@@ -13,7 +13,7 @@ dependencies = [
     "piexif",
     "Pillow",
     "psutil",
-    "pynvml",
+    "nvidia-ml-py",
     "rembg",
     "requests",
     "svgwrite",
