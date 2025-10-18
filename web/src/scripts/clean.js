@@ -6,6 +6,8 @@ const jsPath = path.resolve('web/deploy/js');
 const fontsPath = path.resolve('web/deploy/assets/fonts');
 const svgPath = path.resolve('web/deploy/assets/svg');
 const tempPath = path.resolve('web/temp');
+const workflowRunnerPath = path.resolve('web/deploy/workflow-runner');
+const legacyWorkflowRunnerPath = path.resolve('web/deploy_workflow_runner');
 
 async function clean() {
   console.log('\x1b[31m%s\x1b[0m', 'Cleaning build directory...');
@@ -14,6 +16,8 @@ async function clean() {
     await rm(jsPath, { recursive: true, force: true });
     await rm(fontsPath, { recursive: true, force: true });
     await rm(svgPath, { recursive: true, force: true });
+    await rm(workflowRunnerPath, { recursive: true, force: true });
+    await rm(legacyWorkflowRunnerPath, { recursive: true, force: true });
     await rm(tempPath, { recursive: true, force: true });
     console.log('\x1b[32m%s\x1b[0m', '✅ Clean complete.');
   } catch (err) {

@@ -21,9 +21,9 @@ from ..workflows.registry import _json_safe as workflow_json_safe, InputValidati
 async def lf_nodes_workflow_runner_page(_: web.Request) -> web.Response:
     try:
         module_root = Path(__file__).resolve().parents[2]
-        deploy_html = module_root / "web" / "deploy_workflow_runner" / "workflow-runner.html"
+        deploy_html = module_root / "web" / "deploy" / "workflow-runner" / "workflow-runner.html"
         if not deploy_html.exists():
-            deploy_html = module_root / "web" / "deploy" / "workflow-runner.html"
+            deploy_html = module_root / "web" / "deploy_workflow_runner" / "workflow-runner.html"
 
         if deploy_html.exists():
             return web.FileResponse(str(deploy_html))
@@ -48,6 +48,7 @@ async def lf_nodes_static_asset(request: web.Request) -> web.Response:
 
         candidates = [
             module_root / 'web' / 'deploy' / Path(rel_path),
+            module_root / 'web' / 'deploy' / 'workflow-runner' / Path(rel_path),
             module_root / 'web' / 'deploy_workflow_runner' / Path(rel_path),
         ]
 
@@ -56,6 +57,24 @@ async def lf_nodes_static_asset(request: web.Request) -> web.Response:
                 return web.FileResponse(str(asset_path))
     except Exception:
         logging.exception('Error while attempting to serve static asset: %s', request.path)
+
+    return web.Response(status=404, text='Not found')
+# endregion
+
+# region Shared JS
+@PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/js/{{path:.*}}")
+async def lf_nodes_static_js(request: web.Request) -> web.Response:
+    try:
+        module_root = Path(__file__).resolve().parents[2]
+        rel_path = request.match_info.get('path', '')
+        if '..' in rel_path or rel_path.startswith('/') or rel_path.startswith('\\'):
+            return web.Response(status=400, text='Invalid path')
+
+        candidate = module_root / 'web' / 'deploy' / 'js' / Path(rel_path)
+        if candidate.exists() and candidate.is_file():
+            return web.FileResponse(str(candidate))
+    except Exception:
+        logging.exception('Error while attempting to serve shared JS asset: %s', request.path)
 
     return web.Response(status=404, text='Not found')
 # endregion
@@ -69,9 +88,14 @@ async def lf_nodes_static_workflow(request: web.Request) -> web.Response:
         if '..' in rel_path or rel_path.startswith('/') or rel_path.startswith('\\'):
             return web.Response(status=400, text='Invalid path')
 
-        asset_path = module_root / 'web' / 'deploy_workflow_runner' / Path(rel_path)
-        if asset_path.exists() and asset_path.is_file():
-            return web.FileResponse(str(asset_path))
+        candidates = [
+            module_root / 'web' / 'deploy' / 'workflow-runner' / Path(rel_path),
+            module_root / 'web' / 'deploy_workflow_runner' / Path(rel_path),
+        ]
+
+        for asset_path in candidates:
+            if asset_path.exists() and asset_path.is_file():
+                return web.FileResponse(str(asset_path))
     except Exception:
         pass
 
@@ -125,7 +149,6 @@ async def lf_nodes_run_workflow(request: web.Request) -> web.Response:
     prompt_id = payload.get("promptId") or uuid.uuid4().hex
     validation = await execution.validate_prompt(prompt_id, prompt, None)
     if not validation[0]:
-        # Include node_errors inside the history to keep the payload shape stable for the frontend
         return web.json_response(
             _make_run_payload(
                 detail=validation[1],

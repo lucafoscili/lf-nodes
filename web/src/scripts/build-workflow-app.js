@@ -1,12 +1,13 @@
-import { build } from 'esbuild';
-import { readFile as fsReadFile, writeFile as fsWriteFile, mkdir } from 'fs/promises';
+import { access, readFile as fsReadFile, writeFile as fsWriteFile, mkdir } from 'fs/promises';
 import path from 'path';
 import * as sass from 'sass';
-const outDir = path.resolve('web/deploy_workflow_runner/js');
-const srcEntry = path.resolve('web/src/workflow-runner/index.ts');
+const deployRoot = path.resolve('web/deploy');
+const workflowRunnerRoot = path.join(deployRoot, 'workflow-runner');
+const outDir = path.join(workflowRunnerRoot, 'js');
+const cssOutDir = path.join(workflowRunnerRoot, 'css');
 const outFile = path.join(outDir, 'workflow-runner.js');
 const htmlSrc = path.resolve('web/src/workflow-runner/index.html');
-const htmlOut = path.resolve('web/deploy_workflow_runner/workflow-runner.html');
+const htmlOut = path.join(workflowRunnerRoot, 'workflow-runner.html');
 
 const logColor = '\x1b[36m%s\x1b[0m'; // cyan
 
@@ -22,19 +23,14 @@ async function run() {
   console.log(logColor, '*-------------------------------------------*');
   console.log(logColor, '*---*');
   await ensureDir(outDir);
+
   try {
-    await build({
-      entryPoints: [srcEntry],
-      bundle: true,
-      sourcemap: true,
-      format: 'esm',
-      target: ['es2020'],
-      outfile: outFile,
-      minify: false,
-    });
-    console.log(logColor, '✅ Built ' + outFile);
-  } catch (err) {
-    console.error(logColor, '❌ Build failed', err);
+    await access(outFile);
+  } catch {
+    console.error(
+      logColor,
+      `❌ Missing workflow runner bundle at ${outFile}. Did Vite finish building the multi-entry bundle?`,
+    );
     process.exit(1);
   }
 
@@ -45,10 +41,7 @@ async function run() {
       '',
     );
     try {
-      const cssOutDir = path.resolve('web/deploy_workflow_runner/css');
-      try {
-        await mkdir(cssOutDir, { recursive: true });
-      } catch (_) {}
+      await ensureDir(cssOutDir);
       const scssPath = path.resolve('web/src/workflow-runner/styles/global.scss');
       const cssOutFile = path.join(cssOutDir, 'workflow-runner.css');
       const cssResult = sass.compile(scssPath, { style: 'compressed' });
