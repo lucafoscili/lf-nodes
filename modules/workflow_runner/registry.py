@@ -212,58 +212,75 @@ def _configure_image_to_svg_workflow(prompt: Dict[str, Any], inputs: Dict[str, A
 # endregion
 
 # region Workflow Definitions
-WORKFLOW_DEFINITIONS: Dict[str, WorkflowDefinition] = {}
+class WorkflowRegistry:
+    def __init__(self) -> None:
+        self._definitions: Dict[str, WorkflowDefinition] = {}
+
+    def register(self, definition: WorkflowDefinition) -> None:
+        self._definitions[definition.workflow_id] = definition
+
+    def list(self) -> List[Dict[str, Any]]:
+        return [
+            {
+                "id": definition.workflow_id,
+                "label": definition.label,
+                "description": definition.description,
+                "fields": definition.fields_as_dict(),
+            }
+            for definition in self._definitions.values()
+        ]
+
+    def get(self, workflow_id: str) -> WorkflowDefinition | None:
+        return self._definitions.get(workflow_id)
+
+
+REGISTRY = WorkflowRegistry()
 
 image_to_svg_workflow_path = _resolve_user_path("default", "workflows", "ImageToSVG.json")
-WORKFLOW_DEFINITIONS["image-to-svg"] = WorkflowDefinition(
-    workflow_id="image-to-svg",
-    label="Image to SVG",
-    description=(
-        "Converts a raster image to SVG format using the configured image processing model."
-    ),
-    workflow_path=image_to_svg_workflow_path,
-    fields=[
-        WorkflowField(
-            name="source_path",
-            label="Source File or Directory",
-            component="lf-upload",
-            description="Absolute path to the image file (or folder) to convert.",
+REGISTRY.register(
+    WorkflowDefinition(
+        workflow_id="image-to-svg",
+        label="Image to SVG",
+        description=(
+            "Converts a raster image to SVG format using the configured image processing model."
         ),
-        WorkflowField(
-            name="icon_name",
-            label="Icon Name",
-            component="lf-textfield",
-            description="Optional: The name of the icon to use.",
-            extra={"htmlAttributes": {"autocomplete": "off", "placeholder": "icon", "type": "text"}},
-        ),
-        WorkflowField(
-            name="number_of_colors",
-            label="Number of Colors",
-            component="lf-textfield",
-            description="Optional: the number of colors to reduce the image to.",
-            extra={"htmlAttributes": {"autocomplete": "off", "type": "number", "min": "1", "max": "256", "placeholder": "2"}},
-        ),
-        WorkflowField(
-            name="desaturate",
-            label="Desaturate",
-            component="lf-toggle",
-            description="Optional: sets whether to desaturate the image before converting.",
-        ),
-    ],
-    configure_prompt=_configure_image_to_svg_workflow,
+        workflow_path=image_to_svg_workflow_path,
+        fields=[
+            WorkflowField(
+                name="source_path",
+                label="Source File or Directory",
+                component="lf-upload",
+                description="Absolute path to the image file (or folder) to convert.",
+            ),
+            WorkflowField(
+                name="icon_name",
+                label="Icon Name",
+                component="lf-textfield",
+                description="Optional: The name of the icon to use.",
+                extra={"htmlAttributes": {"autocomplete": "off", "placeholder": "icon", "type": "text"}},
+            ),
+            WorkflowField(
+                name="number_of_colors",
+                label="Number of Colors",
+                component="lf-textfield",
+                description="Optional: the number of colors to reduce the image to.",
+                extra={"htmlAttributes": {"autocomplete": "off", "type": "number", "min": "1", "max": "256", "placeholder": "2"}},
+            ),
+            WorkflowField(
+                name="desaturate",
+                label="Desaturate",
+                component="lf-toggle",
+                description="Optional: sets whether to desaturate the image before converting.",
+            ),
+        ],
+        configure_prompt=_configure_image_to_svg_workflow,
+    )
 )
-            
+
+
 def list_workflows() -> List[Dict[str, Any]]:
-    return [
-        {
-            "id": definition.workflow_id,
-            "label": definition.label,
-            "description": definition.description,
-            "fields": definition.fields_as_dict(),
-        }
-        for definition in WORKFLOW_DEFINITIONS.values()
-    ]
+    return REGISTRY.list()
+
 
 def get_workflow(workflow_id: str) -> WorkflowDefinition | None:
-    return WORKFLOW_DEFINITIONS.get(workflow_id)
-# endregion
+    return REGISTRY.get(workflow_id)

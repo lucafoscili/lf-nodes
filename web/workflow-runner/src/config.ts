@@ -1,10 +1,12 @@
+import runnerConfig from './runner.config.json';
 import { WorkflowStatus } from './types/state';
 
-export const API_BASE = '/api';
-export const API_ROUTE_PREFIX = '/lf-nodes';
+export const API_BASE = runnerConfig.apiBase;
+export const API_ROUTE_PREFIX = runnerConfig.apiRoutePrefix;
 export const API_ROOT = `${API_BASE}${API_ROUTE_PREFIX}`;
-export const STATIC_ASSETS_PATH = `${API_ROUTE_PREFIX}/static/assets/`;
-export const DEFAULT_THEME = 'dark';
+export const STATIC_ASSETS_PATH = runnerConfig.staticPaths.assets;
+export const STATIC_WORKFLOW_RUNNER_PATH = runnerConfig.staticPaths.workflowRunner;
+export const DEFAULT_THEME = runnerConfig.theme ?? 'dark';
 
 export const DEFAULT_STATUS_MESSAGES: Record<WorkflowStatus, string> = {
   ready: 'Ready.',
@@ -16,4 +18,4 @@ export const buildApiUrl = (path: string): string =>
   `${API_ROOT}${path.startsWith('/') ? path : `/${path}`}`;
 
 export const buildAssetsUrl = (origin: string = window.location.origin): string =>
-  `${origin}${API_BASE}${STATIC_ASSETS_PATH}`;
+  `${origin}${API_BASE}${STATIC_ASSETS_PATH.startsWith('/') ? STATIC_ASSETS_PATH : `/${STATIC_ASSETS_PATH}`}`;

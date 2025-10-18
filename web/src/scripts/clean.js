@@ -10,7 +10,6 @@ const targets = [
   path.join(deployRoot, 'assets/fonts'),
   path.join(deployRoot, 'assets/svg'),
   path.join(deployRoot, 'workflow-runner'),
-  path.resolve('web/deploy_workflow_runner'),
   tempPath,
 ];
 
@@ -20,9 +19,9 @@ async function clean() {
     for (const target of targets) {
       await rm(target, { recursive: true, force: true });
     }
-    console.log('\x1b[32m%s\x1b[0m', '✅ Clean complete.');
+    console.log('\x1b[32m%s\x1b[0m', 'Clean complete.');
   } catch (err) {
-    console.error('\x1b[31m%s\x1b[0m', '❌ Error during cleanup:', err);
+    console.error('\x1b[31m%s\x1b[0m', 'Error during cleanup:', err);
   }
 }
 

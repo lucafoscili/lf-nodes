@@ -11,15 +11,23 @@ from typing import Any, Dict, Iterable, Optional
 from aiohttp import web
 from server import PromptServer
 
+from .config import CONFIG as RUNNER_CONFIG
+from .registry import InputValidationError, get_workflow, list_workflows
+from .registry import _json_safe as workflow_json_safe
 from ..utils.constants import API_ROUTE_PREFIX, NOT_FND_HTML
 from ..utils.helpers.logic.sanitize_filename import sanitize_filename
-from ..workflows import get_workflow, list_workflows
-from ..workflows.registry import _json_safe as workflow_json_safe, InputValidationError
 
-MODULE_ROOT = Path(__file__).resolve().parents[2]
-DEPLOY_ROOT = MODULE_ROOT / "web" / "deploy"
-WORKFLOW_RUNNER_ROOT = DEPLOY_ROOT / "workflow-runner"
-LEGACY_WORKFLOW_RUNNER_ROOT = MODULE_ROOT / "web" / "deploy_workflow_runner"
+DEPLOY_ROOT = RUNNER_CONFIG.deploy_root
+WORKFLOW_RUNNER_ROOT = RUNNER_CONFIG.runner_root
+SHARED_JS_ROOT = RUNNER_CONFIG.shared_js_root
+
+ASSET_SEARCH_ROOTS = (
+    RUNNER_CONFIG.deploy_root,
+    RUNNER_CONFIG.runner_root,
+)
+
+WORKFLOW_STATIC_ROOTS = (RUNNER_CONFIG.runner_root,)
+WORKFLOW_HTML = RUNNER_CONFIG.workflow_html
 
 
 def _sanitize_rel_path(raw_path: str) -> Optional[Path]:
@@ -40,13 +48,7 @@ def _serve_first_existing(paths: Iterable[Path]) -> Optional[web.FileResponse]:
 @PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/workflow-runner")
 async def lf_nodes_workflow_runner_page(_: web.Request) -> web.Response:
     try:
-        response = _serve_first_existing(
-            (
-                WORKFLOW_RUNNER_ROOT / "workflow-runner.html",
-                DEPLOY_ROOT / "workflow-runner.html",
-                LEGACY_WORKFLOW_RUNNER_ROOT / "workflow-runner.html",
-            )
-        )
+        response = _serve_first_existing((WORKFLOW_HTML,))
 
         if response is not None:
             return response
@@ -69,13 +71,7 @@ async def lf_nodes_static_asset(request: web.Request) -> web.Response:
         if rel_path is None:
             return web.Response(status=400, text='Invalid path')
 
-        response = _serve_first_existing(
-            (
-                DEPLOY_ROOT / rel_path,
-                WORKFLOW_RUNNER_ROOT / rel_path,
-                LEGACY_WORKFLOW_RUNNER_ROOT / rel_path,
-            )
-        )
+        response = _serve_first_existing(root / rel_path for root in ASSET_SEARCH_ROOTS)
         if response is not None:
             return response
     except Exception:
@@ -93,7 +89,7 @@ async def lf_nodes_static_js(request: web.Request) -> web.Response:
         if rel_path is None:
             return web.Response(status=400, text='Invalid path')
 
-        response = _serve_first_existing((DEPLOY_ROOT / 'js' / rel_path,))
+        response = _serve_first_existing((SHARED_JS_ROOT / rel_path,))
         if response is not None:
             return response
     except Exception:
@@ -111,12 +107,7 @@ async def lf_nodes_static_workflow(request: web.Request) -> web.Response:
         if rel_path is None:
             return web.Response(status=400, text='Invalid path')
 
-        response = _serve_first_existing(
-            (
-                WORKFLOW_RUNNER_ROOT / rel_path,
-                LEGACY_WORKFLOW_RUNNER_ROOT / rel_path,
-            )
-        )
+        response = _serve_first_existing(root / rel_path for root in WORKFLOW_STATIC_ROOTS)
         if response is not None:
             return response
     except Exception:

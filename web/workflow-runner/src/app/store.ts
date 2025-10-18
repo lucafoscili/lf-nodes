@@ -1,11 +1,11 @@
 import { WorkflowState } from '../types/state';
 
-type StateMutator = (state: WorkflowState) => void;
+type StateUpdater = (state: WorkflowState) => WorkflowState;
 type StateListener = (state: WorkflowState) => void;
 
 export interface WorkflowRunnerStore {
   getState: () => WorkflowState;
-  setState: (mutator: StateMutator) => void;
+  setState: (updater: StateUpdater) => void;
   subscribe: (listener: StateListener) => () => void;
 }
 
@@ -15,9 +15,13 @@ export const createWorkflowRunnerStore = (initialState: WorkflowState): Workflow
 
   const getState = () => state;
 
-  const setState = (mutator: StateMutator) => {
-    mutator(state);
+  const setState = (updater: StateUpdater) => {
+    const nextState = updater(state);
+    if (nextState === state) {
+      return;
+    }
 
+    state = nextState;
     for (const listener of listeners) {
       listener(state);
     }

@@ -15,6 +15,7 @@
     "noImplicitReturns": true,
     "noImplicitThis": true,
     "outDir": "../temp/workflow-runner",
+    "rootDir": "./src",
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "strict": false,

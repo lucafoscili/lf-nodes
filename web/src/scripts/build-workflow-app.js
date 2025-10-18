@@ -2,13 +2,8 @@ import { access, readFile as fsReadFile, writeFile as fsWriteFile, mkdir } from 
 import path from 'path';
 import * as sass from 'sass';
 
-const deployRoot = path.resolve('web/deploy');
-const workflowRunnerRoot = path.join(deployRoot, 'workflow-runner');
-const outDir = path.join(workflowRunnerRoot, 'js');
-const cssOutDir = path.join(workflowRunnerRoot, 'css');
-const outFile = path.join(outDir, 'workflow-runner.js');
-const htmlSrc = path.resolve('web/workflow-runner/src/index.html');
-const htmlOut = path.join(workflowRunnerRoot, 'workflow-runner.html');
+const runnerConfigPath = path.resolve('web/workflow-runner/src/runner.config.json');
+const workflowSrcRoot = path.resolve('web/workflow-runner/src');
 
 const logColor = '\x1b[36m%s\x1b[0m'; // cyan
 
@@ -23,6 +18,15 @@ async function run() {
   console.log(logColor, '*   B u i l d   W o r k f l o w   A p p     *');
   console.log(logColor, '*-------------------------------------------*');
   console.log(logColor, '*---*');
+
+  const runnerConfig = JSON.parse(await fsReadFile(runnerConfigPath, 'utf8'));
+  const deployRoot = path.resolve(runnerConfig.deploy.root);
+  const workflowRunnerRoot = path.join(deployRoot, runnerConfig.deploy.runnerSubdir);
+  const outDir = path.join(workflowRunnerRoot, runnerConfig.deploy.jsDir);
+  const cssOutDir = path.join(workflowRunnerRoot, 'css');
+  const outFile = path.join(outDir, 'workflow-runner.js');
+  const htmlSrc = path.join(workflowSrcRoot, 'index.html');
+  const htmlOut = path.join(workflowRunnerRoot, 'workflow-runner.html');
 
   await ensureDir(outDir);
 
@@ -45,7 +49,7 @@ async function run() {
 
     try {
       await ensureDir(cssOutDir);
-      const scssPath = path.resolve('web/workflow-runner/src/styles/global.scss');
+      const scssPath = path.join(workflowSrcRoot, 'styles', 'global.scss');
       const cssOutFile = path.join(cssOutDir, 'workflow-runner.css');
       const cssResult = sass.compile(scssPath, { style: 'compressed' });
       await fsWriteFile(cssOutFile, cssResult.css);
@@ -58,8 +62,9 @@ async function run() {
       );
     }
 
-    const cssLink = `<link rel="stylesheet" href="/api/lf-nodes/static-workflow-runner/css/workflow-runner.css">`;
-    const scriptTag = `<script type="module" src="/api/lf-nodes/static-workflow-runner/js/workflow-runner.js"></script>`;
+    const workflowStaticBase = `${runnerConfig.apiBase}${runnerConfig.staticPaths.workflowRunner}`;
+    const cssLink = `<link rel="stylesheet" href="${workflowStaticBase}css/workflow-runner.css">`;
+    const scriptTag = `<script type="module" src="${workflowStaticBase}${runnerConfig.deploy.jsDir}/workflow-runner.js"></script>`;
     let finalHtml = rewritten.replace('</head>', `  ${cssLink}\n</head>`);
     finalHtml = finalHtml.replace('</body>', `  ${scriptTag}\n</body>`);
     await fsWriteFile(htmlOut, finalHtml, 'utf8');

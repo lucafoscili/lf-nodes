@@ -1,9 +1,4 @@
-import '@lf-widgets/core/dist/lf-core/lf-core.esm.js';
-import { LfWorkflowRunnerManager } from './app/manager';
+import { bootstrapWorkflowRunner } from './bootstrap';
 
-//#region Bootstrap
-const hasComfyApp = comfyAPI?.api && comfyAPI?.app;
-if (!hasComfyApp) {
-  new LfWorkflowRunnerManager();
-}
-//#endregion
+bootstrapWorkflowRunner();
+

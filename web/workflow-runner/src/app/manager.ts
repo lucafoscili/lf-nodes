@@ -39,9 +39,10 @@ export class LfWorkflowRunnerManager implements WorkflowRunnerManager {
       workflow: createWorkflowSection(),
     };
 
-    this.#store.setState((state) => {
-      state.manager = this;
-    });
+    this.#store.setState((state) => ({
+      ...state,
+      manager: this,
+    }));
 
     this.#initializeFramework();
     this.#initializeLayout();
@@ -79,20 +80,28 @@ export class LfWorkflowRunnerManager implements WorkflowRunnerManager {
 
     try {
       const response = await runWorkflowRequest(workflowId, inputs);
-      this.#store.setState((draft) => {
-        draft.current.status = response.status;
-        draft.current.message = response.message;
-        draft.current.preferredOutput = response.payload.preferred_output ?? null;
-        draft.results = response.payload.history?.outputs
+      this.#store.setState((state) => ({
+        ...state,
+        current: {
+          ...state.current,
+          status: response.status,
+          message: response.message,
+          preferredOutput: response.payload.preferred_output ?? null,
+        },
+        results: response.payload.history?.outputs
           ? { ...response.payload.history.outputs }
-          : null;
-      });
+          : null,
+      }));
     } catch (error) {
       if (error instanceof WorkflowApiError) {
-        this.#store.setState((draft) => {
-          draft.current.status = 'error';
-          draft.current.message = error.message;
-        });
+        this.#store.setState((state) => ({
+          ...state,
+          current: {
+            ...state.current,
+            status: 'error',
+            message: error.message,
+          },
+        }));
         const inputName = error.payload?.error?.input;
         if (inputName) {
           this.#sections.workflow.setFieldStatus(this.#store.getState(), inputName, 'error');
@@ -105,10 +114,14 @@ export class LfWorkflowRunnerManager implements WorkflowRunnerManager {
   }
 
   setStatus(status: WorkflowStatus, message?: string): void {
-    this.#store.setState((draft) => {
-      draft.current.status = status;
-      draft.current.message = message ?? DEFAULT_STATUS_MESSAGES[status];
-    });
+    this.#store.setState((state) => ({
+      ...state,
+      current: {
+        ...state.current,
+        status,
+        message: message ?? DEFAULT_STATUS_MESSAGES[status],
+      },
+    }));
   }
 
   async setWorkflow(id: string): Promise<void> {
@@ -117,11 +130,15 @@ export class LfWorkflowRunnerManager implements WorkflowRunnerManager {
       return;
     }
 
-    this.#store.setState((draft) => {
-      draft.current.workflow = id;
-      draft.current.preferredOutput = null;
-      draft.results = null;
-    });
+    this.#store.setState((state) => ({
+      ...state,
+      current: {
+        ...state.current,
+        workflow: id,
+        preferredOutput: null,
+      },
+      results: null,
+    }));
   }
 
   //#region Internal helpers
@@ -210,9 +227,10 @@ export class LfWorkflowRunnerManager implements WorkflowRunnerManager {
       throw new Error('No workflows available from the API.');
     }
 
-    this.#store.setState((draft) => {
-      draft.workflows = workflows;
-    });
+    this.#store.setState((state) => ({
+      ...state,
+      workflows,
+    }));
 
     await this.setWorkflow(workflows[0].id);
     this.setStatus('ready', 'Workflows loaded.');
