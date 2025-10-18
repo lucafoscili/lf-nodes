@@ -1,265 +1,26 @@
 import { g as getLfFramework } from "../../js/lf-widgets-6WpDY9VV.js";
-import { A as APIEndpoints } from "../../js/api-CvAQcIfO.js";
-const _returnErrorResponse$1 = (message, payload) => ({
-  message,
-  payload,
-  status: "error"
-});
-const _returnSuccessResponse$1 = (message, payload) => ({
-  message,
-  payload,
-  status: "ready"
-});
-const invokeRunAPI = async (id, inputs) => {
-  try {
-    const response = await fetch(`/api/lf-nodes/run`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ workflowId: id, inputs })
-    });
-    const responseBody = await response.json();
-    const payload = responseBody.payload;
-    if (!response.ok) {
-      const { detail, error } = payload;
-      const message = `Workflow execution failed: ${detail} (${(error == null ? void 0 : error.message) || error})`;
-      console.error(message, payload);
-      return _returnErrorResponse$1(message, payload);
-    }
-    return _returnSuccessResponse$1("Workflow executed successfully.", payload);
-  } catch (error) {
-    console.error("Error invoking run API:", error);
-    const payload = {
-      detail: String(error.message || error),
-      history: {}
-    };
-    return _returnErrorResponse$1("Error invoking run API.", payload);
-  }
+const apiBase = "/api";
+const apiRoutePrefix = "/lf-nodes";
+const staticPaths = { "assets": "/lf-nodes/static/assets/" };
+const theme = "dark";
+const runnerConfig = {
+  apiBase,
+  apiRoutePrefix,
+  staticPaths,
+  theme
 };
-const ROOT_CLASS$3 = "drawer-section";
-const _createSection$3 = (state) => {
-  const { ui } = state;
-  const section = document.createElement("lf-drawer");
-  section.className = ROOT_CLASS$3;
-  section.lfDisplay = "slide";
-  ui.layout.drawer._root = section;
-  ui.layout._root.appendChild(section);
+const API_BASE = runnerConfig.apiBase;
+const API_ROUTE_PREFIX = runnerConfig.apiRoutePrefix;
+const API_ROOT = `${API_BASE}${API_ROUTE_PREFIX}`;
+const STATIC_ASSETS_PATH = runnerConfig.staticPaths.assets;
+const DEFAULT_THEME = runnerConfig.theme;
+const DEFAULT_STATUS_MESSAGES = {
+  ready: "Ready.",
+  running: "Running...",
+  error: "An error occurred while running the workflow."
 };
-const drawerSection = {
-  create: _createSection$3
-};
-const _returnErrorResponse = (message, payload) => ({
-  message,
-  payload,
-  status: "error"
-});
-const _returnSuccessResponse = (message, payload) => ({
-  message,
-  payload,
-  status: "ready"
-});
-const invokeUploadAPI = async (files) => {
-  try {
-    const formData = new FormData();
-    if (!files || files.length === 0) {
-      const payload2 = { detail: "missing_file" };
-      return _returnErrorResponse("Missing file to upload.", payload2);
-    }
-    files.forEach((file) => formData.append("file", file));
-    const response = await fetch(`/api/lf-nodes/upload`, {
-      method: "POST",
-      body: formData
-    });
-    const responseBody = await response.json();
-    let payload;
-    if (isWorkflowAPIUploadResponse(responseBody)) {
-      payload = responseBody.payload;
-    } else if (isWorkflowAPIUploadPayload(responseBody)) {
-      payload = responseBody;
-    } else {
-      const errPayload = { detail: "invalid_response_shape" };
-      return _returnErrorResponse("Invalid response shape from upload API.", errPayload);
-    }
-    if (!response.ok) {
-      const { detail, error } = payload || { detail: "unknown", error: void 0 };
-      const message = `Upload failed: ${detail} (${(error == null ? void 0 : error.message) || error})`;
-      console.error(message, payload);
-      return _returnErrorResponse(message, payload || { detail: String(response.status) });
-    }
-    return _returnSuccessResponse("Upload completed successfully.", payload);
-  } catch (error) {
-    console.error("Error invoking run API:", error);
-    const payload = {
-      detail: String(error.message || error)
-    };
-    return _returnErrorResponse("Error invoking run API.", payload);
-  }
-};
-const WORKFLOW_TEXT = "Select a workflow";
-const ROOT_CLASS$2 = "workflow-section";
-const _getCurrentWorkflow = (state) => {
-  const { current, workflows } = state;
-  return workflows.find((wf) => wf.id === current.workflow) || null;
-};
-const _getWorkflowLabel = (state) => {
-  const workflow = _getCurrentWorkflow(state);
-  return (workflow == null ? void 0 : workflow.label) || WORKFLOW_TEXT;
-};
-const _fieldWrapper = () => {
-  const fieldWrapper = document.createElement("div");
-  fieldWrapper.className = `${ROOT_CLASS$2}__field`;
-  return fieldWrapper;
-};
-const _optionsWrapper = () => {
-  const optionsWrapper = document.createElement("div");
-  optionsWrapper.className = `${ROOT_CLASS$2}__options`;
-  return optionsWrapper;
-};
-const _resultWrapper = () => {
-  const resultWrapper = document.createElement("div");
-  resultWrapper.className = `${ROOT_CLASS$2}__result`;
-  return resultWrapper;
-};
-const _runButton = (state) => {
-  const { runWorkflow } = state.manager;
-  const props = {
-    lfAriaLabel: "Run workflow",
-    lfLabel: "Run workflow",
-    lfStretchX: true
-  };
-  const run = createComponent.button(props);
-  run.className = `${ROOT_CLASS$2}__run`;
-  run.onclick = () => runWorkflow();
-  return run;
-};
-const _statusWrapper = (tone = "info") => {
-  const statusWrapper = document.createElement("div");
-  statusWrapper.className = `${ROOT_CLASS$2}__status`;
-  statusWrapper.dataset.tone = tone;
-  return statusWrapper;
-};
-const _title = (state) => {
-  const h3 = document.createElement("h3");
-  h3.className = `${ROOT_CLASS$2}__title`;
-  h3.textContent = _getWorkflowLabel(state);
-  return h3;
-};
-const _createSection$2 = (state) => {
-  const { ui } = state;
-  const section = document.createElement("section");
-  section.className = ROOT_CLASS$2;
-  const optionsWrapper = _optionsWrapper();
-  const runButton = _runButton(state);
-  const resultWrapper = _resultWrapper();
-  const statusWrapper = _statusWrapper();
-  const title = _title(state);
-  ui.layout.main.workflow._root = section;
-  ui.layout.main.workflow.options = optionsWrapper;
-  ui.layout.main.workflow.result = resultWrapper;
-  ui.layout.main.workflow.run = runButton;
-  ui.layout.main.workflow.status = statusWrapper;
-  ui.layout.main.workflow.title = title;
-  section.appendChild(title);
-  section.appendChild(optionsWrapper);
-  section.appendChild(runButton);
-  section.appendChild(statusWrapper);
-  section.appendChild(resultWrapper);
-  ui.layout.main._root.appendChild(section);
-};
-const _updateSection = {
-  fieldWrapper: (state, name, status = "") => {
-    const { ui } = state;
-    const field = ui.layout.main.workflow.fields.find((el) => el.dataset.name === name);
-    const wrapper = field.parentElement;
-    if (field && wrapper) {
-      wrapper.dataset.status = status;
-    }
-  },
-  options: (state) => {
-    const { current, ui } = state;
-    const element = ui.layout.main.workflow.options;
-    if (!element) {
-      return;
-    }
-    while (element.firstChild) {
-      element.removeChild(element.firstChild);
-    }
-    if (!current.workflow) {
-      return;
-    }
-    ui.layout.main.workflow.fields = [];
-    const workflow = _getCurrentWorkflow(state);
-    for (const field of workflow.fields ?? []) {
-      const wrapper = _fieldWrapper();
-      const fieldElement = createInputField(field);
-      fieldElement.dataset.name = field.name;
-      ui.layout.main.workflow.fields.push(fieldElement);
-      wrapper.appendChild(fieldElement);
-      element.appendChild(wrapper);
-    }
-  },
-  result: (state, outputs) => {
-    const { ui } = state;
-    const element = ui.layout.main.workflow.result;
-    while (element.firstChild) {
-      element.removeChild(element.firstChild);
-    }
-    for (const nodeId in outputs) {
-      const nodeContent = outputs[nodeId];
-      const { _description } = nodeContent;
-      const title = document.createElement("h4");
-      title.className = `${ROOT_CLASS$2}__result-title`;
-      title.textContent = normalize_description(_description) || `Node #${nodeId}`;
-      element.appendChild(title);
-      const grid = document.createElement("div");
-      grid.className = `${ROOT_CLASS$2}__result-grid`;
-      element.appendChild(grid);
-      for (const resultKey in nodeContent) {
-        const rK = resultKey;
-        switch (rK) {
-          case "_description":
-            break;
-          default:
-            const resultElement = createOutputField(resultKey, nodeContent[resultKey]);
-            resultElement.className = `${ROOT_CLASS$2}__result-item`;
-            if (resultElement) {
-              grid.appendChild(resultElement);
-            }
-            break;
-        }
-      }
-    }
-  },
-  run: (state) => {
-    const { current, ui } = state;
-    const element = ui.layout.main.workflow.run;
-    element.lfShowSpinner = current.status === "running";
-  },
-  status: (state, message) => {
-    const { current, ui } = state;
-    const element = ui.layout.main.workflow.status;
-    switch (current.status) {
-      case "ready":
-        element.textContent = message || "Ready.";
-        break;
-      case "running":
-        element.textContent = message || "Running...";
-        break;
-      case "error":
-        element.textContent = message || "An error occurred while running the workflow.";
-        break;
-    }
-    element.dataset.tone = current.status;
-  },
-  title: (state) => {
-    const { ui } = state;
-    const element = ui.layout.main.workflow.title;
-    element.textContent = _getWorkflowLabel(state);
-  }
-};
-const workflowSection = {
-  create: _createSection$2,
-  update: _updateSection
-};
+const buildApiUrl = (path) => `${API_ROOT}${path.startsWith("/") ? path : `/${path}`}`;
+const buildAssetsUrl = (origin = window.location.origin) => `${origin}${API_BASE}${STATIC_ASSETS_PATH.startsWith("/") ? STATIC_ASSETS_PATH : `/${STATIC_ASSETS_PATH}`}`;
 const isObject = (v) => v !== null && typeof v === "object";
 const isString = (v) => typeof v === "string";
 const isStringArray = (v) => Array.isArray(v) && v.every((e) => typeof e === "string");
@@ -309,19 +70,136 @@ const normalize_description = (description) => {
     return "";
   }
 };
-const handleUploadField = async (state, fieldName, files) => {
-  var _a, _b, _c;
-  const { manager } = state;
-  manager.setStatus("running", "Uploading file…");
-  const response = await invokeUploadAPI(files);
-  if (!response || response.status !== "ready") {
-    workflowSection.update.fieldWrapper(state, fieldName, "error");
-    manager.setStatus("error", `Upload failed: ${((_a = response == null ? void 0 : response.payload) == null ? void 0 : _a.detail) ?? "unknown error"}`);
-    throw new Error(((_b = response == null ? void 0 : response.payload) == null ? void 0 : _b.detail) || "Upload failed");
+const clearChildren = (element) => {
+  if (!element) {
+    return;
   }
-  const paths = ((_c = response.payload) == null ? void 0 : _c.paths) || [];
-  manager.setStatus("running", "File uploaded, processing...");
-  return paths;
+  while (element.firstChild) {
+    element.removeChild(element.firstChild);
+  }
+};
+class WorkflowApiError extends Error {
+  constructor(message, options = {}) {
+    super(message);
+    this.name = "WorkflowApiError";
+    this.payload = options.payload;
+    this.status = options.status;
+  }
+}
+async function parseJson(response) {
+  try {
+    return await response.json();
+  } catch {
+    return null;
+  }
+}
+const fetchWorkflowDefinitions = async () => {
+  const response = await fetch(buildApiUrl("/workflows"), { method: "GET" });
+  const data = await parseJson(response);
+  if (!response.ok) {
+    const message = `Failed to load workflows (${response.status})`;
+    throw new WorkflowApiError(message, { status: response.status, payload: data });
+  }
+  if (!data || !Array.isArray(data.workflows)) {
+    throw new WorkflowApiError("Invalid workflows response shape.", { payload: data });
+  }
+  return data.workflows;
+};
+const runWorkflowRequest = async (workflowId, inputs) => {
+  const response = await fetch(buildApiUrl("/run"), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ workflowId, inputs })
+  });
+  const data = await parseJson(response);
+  const payload = data && data.payload || {
+    detail: response.statusText || "unknown",
+    history: {}
+  };
+  if (!response.ok || !data) {
+    const detail = (payload == null ? void 0 : payload.detail) || response.statusText || "unknown";
+    throw new WorkflowApiError(`Workflow execution failed: ${detail}`, {
+      status: response.status,
+      payload
+    });
+  }
+  return {
+    message: data.message,
+    payload,
+    status: data.status
+  };
+};
+const uploadWorkflowFiles = async (files) => {
+  if (!files || files.length === 0) {
+    throw new WorkflowApiError("Missing file to upload.", {
+      payload: { detail: "missing_file" }
+    });
+  }
+  const formData = new FormData();
+  files.forEach((file) => formData.append("file", file));
+  const response = await fetch(buildApiUrl("/upload"), {
+    method: "POST",
+    body: formData
+  });
+  const data = await parseJson(response);
+  if (isWorkflowAPIUploadResponse(data)) {
+    if (!response.ok) {
+      const { payload } = data;
+      const detail = (payload == null ? void 0 : payload.detail) || response.statusText || "unknown";
+      throw new WorkflowApiError(`Upload failed: ${detail}`, {
+        status: response.status,
+        payload
+      });
+    }
+    return data;
+  }
+  if (isWorkflowAPIUploadPayload(data)) {
+    if (!response.ok) {
+      const detail = data.detail || response.statusText || "unknown";
+      throw new WorkflowApiError(`Upload failed: ${detail}`, {
+        status: response.status,
+        payload: data
+      });
+    }
+    return {
+      message: "Upload completed successfully.",
+      payload: data,
+      status: "ready"
+    };
+  }
+  throw new WorkflowApiError("Invalid response shape from upload API.", {
+    status: response.status
+  });
+};
+const ROOT_CLASS$3 = "drawer-section";
+const createDrawerSection = () => {
+  let element = null;
+  let lastState = null;
+  const mount = (state) => {
+    var _a;
+    lastState = state;
+    const { ui } = state;
+    element = document.createElement("lf-drawer");
+    element.className = ROOT_CLASS$3;
+    element.lfDisplay = "slide";
+    ui.layout.drawer._root = element;
+    (_a = ui.layout._root) == null ? void 0 : _a.appendChild(element);
+  };
+  const render = () => {
+  };
+  const destroy = () => {
+    element == null ? void 0 : element.remove();
+    if (lastState) {
+      lastState.ui.layout.drawer._root = null;
+    }
+    element = null;
+    lastState = null;
+  };
+  return {
+    mount,
+    render,
+    destroy
+  };
 };
 const _chooseComponentForResult = (key, props) => {
   const el = document.createElement("div");
@@ -470,16 +348,16 @@ const createOutputField = (key, result) => {
   const r = Array.isArray(result) ? result[0] : result;
   return _chooseComponentForResult(key, r);
 };
-const ROOT_CLASS$1 = "header-section";
+const ROOT_CLASS$2 = "header-section";
 const _container = () => {
   const container = document.createElement("div");
-  container.className = `${ROOT_CLASS$1}__container`;
+  container.className = `${ROOT_CLASS$2}__container`;
   container.slot = "content";
   return container;
 };
 const _drawerToggle = () => {
-  const { theme } = getLfFramework();
-  const { get } = theme;
+  const { theme: theme2 } = getLfFramework();
+  const { get } = theme2;
   const lfIcon = get.icon("menu2");
   const props = {
     lfAriaLabel: "Toggle drawer",
@@ -487,38 +365,329 @@ const _drawerToggle = () => {
     lfStyling: "icon"
   };
   const drawerToggle = createComponent.button(props);
-  drawerToggle.className = `${ROOT_CLASS$1}__drawer-toggle`;
+  drawerToggle.className = `${ROOT_CLASS$2}__drawer-toggle`;
   return drawerToggle;
 };
-const _createSection$1 = (state) => {
-  const { ui } = state;
-  const section = document.createElement("lf-header");
-  section.className = ROOT_CLASS$1;
-  const container = _container();
-  const drawerToggle = _drawerToggle();
-  ui.layout.header.drawerToggle = drawerToggle;
-  section.appendChild(container);
-  container.appendChild(drawerToggle);
-  ui.layout.header._root = section;
-  ui.layout._root.appendChild(section);
+const createHeaderSection = () => {
+  let element = null;
+  let lastState = null;
+  const mount = (state) => {
+    var _a;
+    lastState = state;
+    const { ui } = state;
+    element = document.createElement("lf-header");
+    element.className = ROOT_CLASS$2;
+    const container = _container();
+    const drawerToggle = _drawerToggle();
+    ui.layout.header.drawerToggle = drawerToggle;
+    element.appendChild(container);
+    container.appendChild(drawerToggle);
+    ui.layout.header._root = element;
+    (_a = ui.layout._root) == null ? void 0 : _a.appendChild(element);
+  };
+  const render = () => {
+  };
+  const destroy = () => {
+    element == null ? void 0 : element.remove();
+    if (lastState) {
+      lastState.ui.layout.header._root = null;
+      lastState.ui.layout.header.drawerToggle = null;
+      lastState.ui.layout.header.themeSwitch = null;
+    }
+    element = null;
+    lastState = null;
+  };
+  return {
+    mount,
+    render,
+    destroy
+  };
 };
-const headerSection = {
-  create: _createSection$1
+const ROOT_CLASS$1 = "main-section";
+const createMainSection = () => {
+  let element = null;
+  let lastState = null;
+  const mount = (state) => {
+    var _a;
+    lastState = state;
+    const { ui } = state;
+    element = document.createElement("main");
+    element.className = ROOT_CLASS$1;
+    ui.layout.main._root = element;
+    (_a = ui.layout._root) == null ? void 0 : _a.appendChild(element);
+  };
+  const render = () => {
+  };
+  const destroy = () => {
+    element == null ? void 0 : element.remove();
+    if (lastState) {
+      lastState.ui.layout.main._root = null;
+    }
+    element = null;
+    lastState = null;
+  };
+  return {
+    mount,
+    render,
+    destroy
+  };
 };
-const ROOT_CLASS = "main-section";
-const _createSection = (state) => {
-  const { ui } = state;
-  const section = document.createElement("main");
-  section.className = ROOT_CLASS;
-  ui.layout.main._root = section;
-  ui.layout._root.appendChild(section);
+const WORKFLOW_TEXT = "Select a workflow";
+const ROOT_CLASS = "workflow-section";
+const getCurrentWorkflow = (state) => {
+  const { current, workflows } = state;
+  return workflows.find((wf) => wf.id === current.workflow) || null;
 };
-const mainSection = {
-  create: _createSection
+const getWorkflowLabel = (state) => {
+  const workflow = getCurrentWorkflow(state);
+  return (workflow == null ? void 0 : workflow.label) || WORKFLOW_TEXT;
 };
-const initState = (appContainer, manager) => ({
-  current: { status: "ready", workflow: null },
-  manager,
+const createFieldWrapper = () => {
+  const fieldWrapper = document.createElement("div");
+  fieldWrapper.className = `${ROOT_CLASS}__field`;
+  return fieldWrapper;
+};
+const createOptionsWrapper = () => {
+  const optionsWrapper = document.createElement("div");
+  optionsWrapper.className = `${ROOT_CLASS}__options`;
+  return optionsWrapper;
+};
+const createResultWrapper = () => {
+  const resultWrapper = document.createElement("div");
+  resultWrapper.className = `${ROOT_CLASS}__result`;
+  return resultWrapper;
+};
+const createRunButton = (state) => {
+  const props = {
+    lfAriaLabel: "Run workflow",
+    lfLabel: "Run workflow",
+    lfStretchX: true
+  };
+  const button = createComponent.button(props);
+  button.className = `${ROOT_CLASS}__run`;
+  button.onclick = () => {
+    var _a;
+    return (_a = state.manager) == null ? void 0 : _a.runWorkflow();
+  };
+  return button;
+};
+const createStatusWrapper = (tone = "info") => {
+  const statusWrapper = document.createElement("div");
+  statusWrapper.className = `${ROOT_CLASS}__status`;
+  statusWrapper.dataset.tone = tone;
+  return statusWrapper;
+};
+const createTitle = (state) => {
+  const h3 = document.createElement("h3");
+  h3.className = `${ROOT_CLASS}__title`;
+  h3.textContent = getWorkflowLabel(state);
+  return h3;
+};
+const createWorkflowSection = () => {
+  let section = null;
+  let optionsWrapper = null;
+  let resultWrapper = null;
+  let runButton = null;
+  let statusWrapper = null;
+  let titleElement = null;
+  let lastWorkflowId = null;
+  let lastStatus = null;
+  let lastMessage = null;
+  let lastResultsRef = null;
+  let mountedState = null;
+  const mount = (state) => {
+    var _a;
+    mountedState = state;
+    const { ui } = state;
+    section = document.createElement("section");
+    section.className = ROOT_CLASS;
+    titleElement = createTitle(state);
+    optionsWrapper = createOptionsWrapper();
+    runButton = createRunButton(state);
+    statusWrapper = createStatusWrapper("info");
+    resultWrapper = createResultWrapper();
+    ui.layout.main.workflow._root = section;
+    ui.layout.main.workflow.options = optionsWrapper;
+    ui.layout.main.workflow.result = resultWrapper;
+    ui.layout.main.workflow.run = runButton;
+    ui.layout.main.workflow.status = statusWrapper;
+    ui.layout.main.workflow.title = titleElement;
+    section.appendChild(titleElement);
+    section.appendChild(optionsWrapper);
+    section.appendChild(runButton);
+    section.appendChild(statusWrapper);
+    section.appendChild(resultWrapper);
+    (_a = ui.layout.main._root) == null ? void 0 : _a.appendChild(section);
+  };
+  const updateOptions = (state) => {
+    const { ui } = state;
+    const element = ui.layout.main.workflow.options;
+    if (!element) {
+      return;
+    }
+    clearChildren(element);
+    ui.layout.main.workflow.fields = [];
+    const workflow = getCurrentWorkflow(state);
+    if (!workflow || !workflow.fields) {
+      return;
+    }
+    for (const field of workflow.fields) {
+      const wrapper = createFieldWrapper();
+      const fieldElement = createInputField(field);
+      fieldElement.dataset.name = field.name;
+      ui.layout.main.workflow.fields.push(fieldElement);
+      wrapper.appendChild(fieldElement);
+      element.appendChild(wrapper);
+    }
+  };
+  const updateResult = (state) => {
+    const { ui } = state;
+    const element = ui.layout.main.workflow.result;
+    if (!element) {
+      return;
+    }
+    const outputs = state.results || {};
+    clearChildren(element);
+    const nodeIds = Object.keys(outputs || {});
+    if (nodeIds.length === 0) {
+      return;
+    }
+    for (const nodeId of nodeIds) {
+      const nodeContent = outputs[nodeId];
+      const { _description } = nodeContent;
+      const title = document.createElement("h4");
+      title.className = `${ROOT_CLASS}__result-title`;
+      title.textContent = normalize_description(_description) || `Node #${nodeId}`;
+      element.appendChild(title);
+      const grid = document.createElement("div");
+      grid.className = `${ROOT_CLASS}__result-grid`;
+      element.appendChild(grid);
+      for (const resultKey in nodeContent) {
+        const key = resultKey;
+        if (key === "_description") {
+          continue;
+        }
+        const resultElement = createOutputField(resultKey, nodeContent[resultKey]);
+        resultElement.className = `${ROOT_CLASS}__result-item`;
+        if (resultElement) {
+          grid.appendChild(resultElement);
+        }
+      }
+    }
+    element.scrollIntoView({
+      behavior: "smooth",
+      block: "start"
+    });
+  };
+  const updateRunButton = (state) => {
+    const button = state.ui.layout.main.workflow.run;
+    if (!button) {
+      return;
+    }
+    button.lfShowSpinner = state.current.status === "running";
+  };
+  const updateStatus = (state) => {
+    const element = state.ui.layout.main.workflow.status;
+    if (!element) {
+      return;
+    }
+    const message = state.current.message ?? DEFAULT_STATUS_MESSAGES[state.current.status];
+    element.textContent = message;
+    element.dataset.tone = state.current.status;
+  };
+  const updateTitle = (state) => {
+    const element = state.ui.layout.main.workflow.title;
+    if (!element) {
+      return;
+    }
+    element.textContent = getWorkflowLabel(state);
+  };
+  const render = (state) => {
+    if (!section) {
+      return;
+    }
+    if (state.current.workflow !== lastWorkflowId) {
+      updateTitle(state);
+      updateOptions(state);
+      lastWorkflowId = state.current.workflow;
+    }
+    if (state.current.status !== lastStatus || state.current.message !== lastMessage) {
+      updateRunButton(state);
+      updateStatus(state);
+      lastStatus = state.current.status;
+      lastMessage = state.current.message ?? null;
+    }
+    if (state.results !== lastResultsRef) {
+      updateResult(state);
+      lastResultsRef = state.results;
+    }
+  };
+  const setFieldStatus = (state, name, status = "") => {
+    const { ui } = state;
+    const field = ui.layout.main.workflow.fields.find((el) => el.dataset.name === name);
+    const wrapper = field == null ? void 0 : field.parentElement;
+    if (wrapper) {
+      wrapper.dataset.status = status;
+    }
+  };
+  const destroy = () => {
+    section == null ? void 0 : section.remove();
+    if (mountedState) {
+      const wf = mountedState.ui.layout.main.workflow;
+      wf._root = null;
+      wf.fields = [];
+      wf.options = null;
+      wf.result = null;
+      wf.run = null;
+      wf.status = null;
+      wf.title = null;
+    }
+    section = null;
+    optionsWrapper = null;
+    resultWrapper = null;
+    runButton = null;
+    statusWrapper = null;
+    titleElement = null;
+    lastWorkflowId = null;
+    lastStatus = null;
+    lastMessage = null;
+    lastResultsRef = null;
+    mountedState = null;
+  };
+  return {
+    mount,
+    render,
+    destroy,
+    setFieldStatus
+  };
+};
+const createWorkflowRunnerStore = (initialState) => {
+  let state = initialState;
+  const listeners = /* @__PURE__ */ new Set();
+  const getState = () => state;
+  const setState = (updater) => {
+    const nextState = updater(state);
+    if (nextState === state) {
+      return;
+    }
+    state = nextState;
+    for (const listener of listeners) {
+      listener(state);
+    }
+  };
+  const subscribe = (listener) => {
+    listeners.add(listener);
+    return () => listeners.delete(listener);
+  };
+  return {
+    getState,
+    setState,
+    subscribe
+  };
+};
+const initState = (appContainer) => ({
+  current: { status: "ready", message: "Ready.", workflow: null, preferredOutput: null },
+  manager: null,
   ui: {
     layout: {
       _root: appContainer,
@@ -545,144 +714,216 @@ const initState = (appContainer, manager) => ({
       }
     }
   },
-  workflows: []
+  workflows: [],
+  results: null
 });
+var __classPrivateFieldSet = function(receiver, state, value, kind, f) {
+  if (kind === "m") throw new TypeError("Private method is not writable");
+  if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
+  if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
+  return kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value), value;
+};
 var __classPrivateFieldGet = function(receiver, state, kind, f) {
   if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
   if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 };
-var _LfWorkflowRunnerManager_instances, _LfWorkflowRunnerManager_API_BASE, _LfWorkflowRunnerManager_ASSETS_BASE, _LfWorkflowRunnerManager_ASSETS_URL, _LfWorkflowRunnerManager_MANAGERS, _LfWorkflowRunnerManager_STATE, _LfWorkflowRunnerManager_buildLayout, _LfWorkflowRunnerManager_initializeElements, _LfWorkflowRunnerManager_loadWorkflows;
+var _LfWorkflowRunnerManager_instances, _LfWorkflowRunnerManager_framework, _LfWorkflowRunnerManager_store, _LfWorkflowRunnerManager_sections, _LfWorkflowRunnerManager_collectInputs, _LfWorkflowRunnerManager_handleUploadField, _LfWorkflowRunnerManager_initializeFramework, _LfWorkflowRunnerManager_initializeLayout, _LfWorkflowRunnerManager_subscribeToState, _LfWorkflowRunnerManager_loadWorkflows;
 class LfWorkflowRunnerManager {
-  //#endregion
-  //#region Constructor
   constructor() {
     _LfWorkflowRunnerManager_instances.add(this);
-    _LfWorkflowRunnerManager_API_BASE.set(this, "/api");
-    _LfWorkflowRunnerManager_ASSETS_BASE.set(this, __classPrivateFieldGet(this, _LfWorkflowRunnerManager_API_BASE, "f") + "/lf-nodes/static/assets/");
-    _LfWorkflowRunnerManager_ASSETS_URL.set(this, window.location.origin + __classPrivateFieldGet(this, _LfWorkflowRunnerManager_ASSETS_BASE, "f"));
-    _LfWorkflowRunnerManager_MANAGERS.set(this, {
-      lfFramework: null
-    });
-    _LfWorkflowRunnerManager_STATE.set(this, initState(document.querySelector("#app"), this));
-    _LfWorkflowRunnerManager_loadWorkflows.set(this, async () => {
-      const response = await fetch(`${__classPrivateFieldGet(this, _LfWorkflowRunnerManager_API_BASE, "f")}${APIEndpoints.Workflows}`);
-      if (!response.ok) {
-        throw new Error(`Failed to load workflows (${response.status})`);
-      }
-      const data = await response.json();
-      __classPrivateFieldGet(this, _LfWorkflowRunnerManager_STATE, "f").workflows = Array.isArray(data.workflows) ? data.workflows : [];
-      const firstWorkflow = __classPrivateFieldGet(this, _LfWorkflowRunnerManager_STATE, "f").workflows[0];
-      if (!firstWorkflow) {
-        throw new Error("No workflows available from the API.");
-      }
-      this.setWorkflow(firstWorkflow.id);
-    });
-    this.collectInputs = async () => {
-      const { fields } = __classPrivateFieldGet(this, _LfWorkflowRunnerManager_STATE, "f").ui.layout.main.workflow;
+    _LfWorkflowRunnerManager_framework.set(this, getLfFramework());
+    _LfWorkflowRunnerManager_store.set(this, void 0);
+    _LfWorkflowRunnerManager_sections.set(this, void 0);
+    _LfWorkflowRunnerManager_collectInputs.set(this, async () => {
+      const state = __classPrivateFieldGet(this, _LfWorkflowRunnerManager_store, "f").getState();
+      const { fields } = state.ui.layout.main.workflow;
       const inputs = {};
-      for (const el of fields) {
-        const value = await el.getValue();
-        workflowSection.update.fieldWrapper(__classPrivateFieldGet(this, _LfWorkflowRunnerManager_STATE, "f"), el.dataset.name);
-        switch (el.tagName.toLowerCase()) {
+      for (const element of fields) {
+        const fieldName = element.dataset.name || "";
+        if (!fieldName) {
+          continue;
+        }
+        __classPrivateFieldGet(this, _LfWorkflowRunnerManager_sections, "f").workflow.setFieldStatus(state, fieldName);
+        const value = await element.getValue();
+        switch (element.tagName.toLowerCase()) {
           case "lf-toggle":
-            inputs[el.dataset.name] = value === "off" ? false : true;
+            inputs[fieldName] = value === "off" ? false : true;
             break;
           case "lf-upload":
-            try {
-              const files = value;
-              const paths = await handleUploadField(__classPrivateFieldGet(this, _LfWorkflowRunnerManager_STATE, "f"), el.dataset.name, files);
-              inputs[el.dataset.name] = paths.length === 1 ? paths[0] : paths;
-            } catch (err) {
-              throw err;
-            }
+            inputs[fieldName] = await __classPrivateFieldGet(this, _LfWorkflowRunnerManager_handleUploadField, "f").call(this, fieldName, value);
             break;
           default:
-          case "lf-textfield":
-            inputs[el.dataset.name] = value;
-            break;
+            inputs[fieldName] = value;
         }
       }
       return inputs;
-    };
-    this.runWorkflow = async () => {
+    });
+    _LfWorkflowRunnerManager_handleUploadField.set(this, async (fieldName, rawValue) => {
       var _a;
-      const { current } = __classPrivateFieldGet(this, _LfWorkflowRunnerManager_STATE, "f");
-      if (!current.workflow) {
-        this.setStatus("error", "No workflow selected.");
-        return;
+      const files = Array.isArray(rawValue) ? rawValue : rawValue;
+      if (!files || files.length === 0) {
+        return [];
       }
-      this.setStatus("running", "Submitting workflow…");
-      let inputs;
       try {
-        inputs = await this.collectInputs();
-      } catch (err) {
-        console.error("Failed to collect inputs:", err);
-        const short = err && err.message ? err.message : "Failed to collect inputs";
-        const userMessage = `Failed to collect inputs: ${short}`;
-        this.setStatus("error", userMessage);
-        return;
+        this.setStatus("running", "Uploading file...");
+        const { payload } = await uploadWorkflowFiles(files);
+        const paths = (payload == null ? void 0 : payload.paths) || [];
+        this.setStatus("running", "File uploaded, processing...");
+        return paths.length === 1 ? paths[0] : paths;
+      } catch (error) {
+        if (error instanceof WorkflowApiError) {
+          __classPrivateFieldGet(this, _LfWorkflowRunnerManager_sections, "f").workflow.setFieldStatus(__classPrivateFieldGet(this, _LfWorkflowRunnerManager_store, "f").getState(), fieldName, "error");
+          this.setStatus("error", `Upload failed: ${((_a = error.payload) == null ? void 0 : _a.detail) || error.message}`);
+        }
+        throw error;
       }
-      const { message, payload, status } = await invokeRunAPI(current.workflow, inputs);
-      if ((_a = payload.error) == null ? void 0 : _a.input) {
-        workflowSection.update.fieldWrapper(__classPrivateFieldGet(this, _LfWorkflowRunnerManager_STATE, "f"), payload.error.input, "error");
+    });
+    _LfWorkflowRunnerManager_loadWorkflows.set(this, async () => {
+      const workflows = await fetchWorkflowDefinitions();
+      if (!workflows.length) {
+        throw new Error("No workflows available from the API.");
       }
-      this.setStatus(status, message);
-      if (status === "ready") {
-        this.setResult(payload);
-        __classPrivateFieldGet(this, _LfWorkflowRunnerManager_STATE, "f").ui.layout.main.workflow.result.scrollIntoView({
-          behavior: "smooth",
-          block: "start"
-        });
-      }
-    };
-    this.setResult = (payload) => {
-      const outputs = payload.history && payload.history.outputs ? payload.history.outputs : {};
-      workflowSection.update.result(__classPrivateFieldGet(this, _LfWorkflowRunnerManager_STATE, "f"), outputs);
-    };
-    this.setStatus = (status, message) => {
-      const { current } = __classPrivateFieldGet(this, _LfWorkflowRunnerManager_STATE, "f");
-      current.status = status;
-      workflowSection.update.run(__classPrivateFieldGet(this, _LfWorkflowRunnerManager_STATE, "f"));
-      workflowSection.update.status(__classPrivateFieldGet(this, _LfWorkflowRunnerManager_STATE, "f"), message);
-    };
-    this.setWorkflow = async (id) => {
-      const { current } = __classPrivateFieldGet(this, _LfWorkflowRunnerManager_STATE, "f");
-      if (current.workflow === id) {
-        return;
-      }
-      current.workflow = id;
-      workflowSection.update.title(__classPrivateFieldGet(this, _LfWorkflowRunnerManager_STATE, "f"));
-      workflowSection.update.options(__classPrivateFieldGet(this, _LfWorkflowRunnerManager_STATE, "f"));
-    };
-    const assetsUrl = __classPrivateFieldGet(this, _LfWorkflowRunnerManager_ASSETS_URL, "f");
-    __classPrivateFieldGet(this, _LfWorkflowRunnerManager_MANAGERS, "f").lfFramework = getLfFramework();
-    __classPrivateFieldGet(this, _LfWorkflowRunnerManager_MANAGERS, "f").lfFramework.assets.set(assetsUrl);
-    __classPrivateFieldGet(this, _LfWorkflowRunnerManager_MANAGERS, "f").lfFramework.theme.set("dark");
-    __classPrivateFieldGet(this, _LfWorkflowRunnerManager_instances, "m", _LfWorkflowRunnerManager_initializeElements).call(this);
-    __classPrivateFieldGet(this, _LfWorkflowRunnerManager_loadWorkflows, "f").call(this).then(() => this.setStatus("ready")).catch((err) => {
-      console.error(err);
-      this.setStatus("error");
+      __classPrivateFieldGet(this, _LfWorkflowRunnerManager_store, "f").setState((state) => ({
+        ...state,
+        workflows
+      }));
+      await this.setWorkflow(workflows[0].id);
+      this.setStatus("ready", "Workflows loaded.");
+    });
+    const container = document.querySelector("#app");
+    if (!container) {
+      throw new Error("Workflow runner container not found.");
+    }
+    __classPrivateFieldSet(this, _LfWorkflowRunnerManager_store, createWorkflowRunnerStore(initState(container)), "f");
+    __classPrivateFieldSet(this, _LfWorkflowRunnerManager_sections, {
+      drawer: createDrawerSection(),
+      header: createHeaderSection(),
+      main: createMainSection(),
+      workflow: createWorkflowSection()
+    }, "f");
+    __classPrivateFieldGet(this, _LfWorkflowRunnerManager_store, "f").setState((state) => ({
+      ...state,
+      manager: this
+    }));
+    __classPrivateFieldGet(this, _LfWorkflowRunnerManager_instances, "m", _LfWorkflowRunnerManager_initializeFramework).call(this);
+    __classPrivateFieldGet(this, _LfWorkflowRunnerManager_instances, "m", _LfWorkflowRunnerManager_initializeLayout).call(this);
+    __classPrivateFieldGet(this, _LfWorkflowRunnerManager_instances, "m", _LfWorkflowRunnerManager_subscribeToState).call(this);
+    this.setStatus("running", "Loading workflows...");
+    __classPrivateFieldGet(this, _LfWorkflowRunnerManager_loadWorkflows, "f").call(this).catch((error) => {
+      console.error("Failed to load workflows:", error);
+      const message = error instanceof Error ? error.message : "Failed to load workflows.";
+      this.setStatus("error", message);
     });
   }
-}
-_LfWorkflowRunnerManager_API_BASE = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_ASSETS_BASE = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_ASSETS_URL = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_MANAGERS = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_STATE = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_loadWorkflows = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_instances = /* @__PURE__ */ new WeakSet(), _LfWorkflowRunnerManager_buildLayout = function _LfWorkflowRunnerManager_buildLayout2() {
-  const { ui } = __classPrivateFieldGet(this, _LfWorkflowRunnerManager_STATE, "f");
-  ui.layout._root.appendChild(ui.layout.drawer._root);
-  ui.layout._root.appendChild(ui.layout.main._root);
-}, _LfWorkflowRunnerManager_initializeElements = function _LfWorkflowRunnerManager_initializeElements2() {
-  const { ui } = __classPrivateFieldGet(this, _LfWorkflowRunnerManager_STATE, "f");
-  while (ui.layout._root.firstChild) {
-    ui.layout._root.removeChild(ui.layout._root.firstChild);
+  async runWorkflow() {
+    var _a, _b, _c;
+    const state = __classPrivateFieldGet(this, _LfWorkflowRunnerManager_store, "f").getState();
+    const workflowId = state.current.workflow;
+    if (!workflowId) {
+      this.setStatus("error", "No workflow selected.");
+      return;
+    }
+    this.setStatus("running", "Submitting workflow...");
+    let inputs;
+    try {
+      inputs = await __classPrivateFieldGet(this, _LfWorkflowRunnerManager_collectInputs, "f").call(this);
+    } catch (error) {
+      console.error("Failed to collect inputs:", error);
+      const detail = error instanceof WorkflowApiError ? ((_a = error.payload) == null ? void 0 : _a.detail) || error.message : (error == null ? void 0 : error.message) || "Failed to collect inputs.";
+      this.setStatus("error", `Failed to collect inputs: ${detail}`);
+      return;
+    }
+    try {
+      const response = await runWorkflowRequest(workflowId, inputs);
+      __classPrivateFieldGet(this, _LfWorkflowRunnerManager_store, "f").setState((state2) => {
+        var _a2;
+        return {
+          ...state2,
+          current: {
+            ...state2.current,
+            status: response.status,
+            message: response.message,
+            preferredOutput: response.payload.preferred_output ?? null
+          },
+          results: ((_a2 = response.payload.history) == null ? void 0 : _a2.outputs) ? { ...response.payload.history.outputs } : null
+        };
+      });
+    } catch (error) {
+      if (error instanceof WorkflowApiError) {
+        __classPrivateFieldGet(this, _LfWorkflowRunnerManager_store, "f").setState((state2) => ({
+          ...state2,
+          current: {
+            ...state2.current,
+            status: "error",
+            message: error.message
+          }
+        }));
+        const inputName = (_c = (_b = error.payload) == null ? void 0 : _b.error) == null ? void 0 : _c.input;
+        if (inputName) {
+          __classPrivateFieldGet(this, _LfWorkflowRunnerManager_sections, "f").workflow.setFieldStatus(__classPrivateFieldGet(this, _LfWorkflowRunnerManager_store, "f").getState(), inputName, "error");
+        }
+      } else {
+        console.error("Unexpected error while running workflow:", error);
+        this.setStatus("error", "Unexpected error while running the workflow.");
+      }
+    }
   }
-  drawerSection.create(__classPrivateFieldGet(this, _LfWorkflowRunnerManager_STATE, "f"));
-  headerSection.create(__classPrivateFieldGet(this, _LfWorkflowRunnerManager_STATE, "f"));
-  mainSection.create(__classPrivateFieldGet(this, _LfWorkflowRunnerManager_STATE, "f"));
-  workflowSection.create(__classPrivateFieldGet(this, _LfWorkflowRunnerManager_STATE, "f"));
-  __classPrivateFieldGet(this, _LfWorkflowRunnerManager_instances, "m", _LfWorkflowRunnerManager_buildLayout).call(this);
-};
-const hasComfyApp = (comfyAPI == null ? void 0 : comfyAPI.api) && (comfyAPI == null ? void 0 : comfyAPI.app);
-if (!hasComfyApp) {
-  new LfWorkflowRunnerManager();
+  setStatus(status, message) {
+    __classPrivateFieldGet(this, _LfWorkflowRunnerManager_store, "f").setState((state) => ({
+      ...state,
+      current: {
+        ...state.current,
+        status,
+        message: message ?? DEFAULT_STATUS_MESSAGES[status]
+      }
+    }));
+  }
+  async setWorkflow(id) {
+    const state = __classPrivateFieldGet(this, _LfWorkflowRunnerManager_store, "f").getState();
+    if (state.current.workflow === id) {
+      return;
+    }
+    __classPrivateFieldGet(this, _LfWorkflowRunnerManager_store, "f").setState((state2) => ({
+      ...state2,
+      current: {
+        ...state2.current,
+        workflow: id,
+        preferredOutput: null
+      },
+      results: null
+    }));
+  }
 }
+_LfWorkflowRunnerManager_framework = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_store = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_sections = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_collectInputs = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_handleUploadField = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_loadWorkflows = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_instances = /* @__PURE__ */ new WeakSet(), _LfWorkflowRunnerManager_initializeFramework = function _LfWorkflowRunnerManager_initializeFramework2() {
+  const assetsUrl = buildAssetsUrl();
+  __classPrivateFieldGet(this, _LfWorkflowRunnerManager_framework, "f").assets.set(assetsUrl);
+  __classPrivateFieldGet(this, _LfWorkflowRunnerManager_framework, "f").theme.set(DEFAULT_THEME);
+}, _LfWorkflowRunnerManager_initializeLayout = function _LfWorkflowRunnerManager_initializeLayout2() {
+  const state = __classPrivateFieldGet(this, _LfWorkflowRunnerManager_store, "f").getState();
+  const root = state.ui.layout._root;
+  if (!root) {
+    return;
+  }
+  while (root.firstChild) {
+    root.removeChild(root.firstChild);
+  }
+  __classPrivateFieldGet(this, _LfWorkflowRunnerManager_sections, "f").drawer.mount(state);
+  __classPrivateFieldGet(this, _LfWorkflowRunnerManager_sections, "f").header.mount(state);
+  __classPrivateFieldGet(this, _LfWorkflowRunnerManager_sections, "f").main.mount(state);
+  __classPrivateFieldGet(this, _LfWorkflowRunnerManager_sections, "f").workflow.mount(state);
+  __classPrivateFieldGet(this, _LfWorkflowRunnerManager_sections, "f").workflow.render(state);
+}, _LfWorkflowRunnerManager_subscribeToState = function _LfWorkflowRunnerManager_subscribeToState2() {
+  __classPrivateFieldGet(this, _LfWorkflowRunnerManager_store, "f").subscribe((state) => {
+    __classPrivateFieldGet(this, _LfWorkflowRunnerManager_sections, "f").workflow.render(state);
+  });
+};
+const bootstrapWorkflowRunner = () => {
+  const hasComfyApp = typeof comfyAPI !== "undefined" && (comfyAPI == null ? void 0 : comfyAPI.api) && (comfyAPI == null ? void 0 : comfyAPI.app);
+  if (hasComfyApp) {
+    return null;
+  }
+  return new LfWorkflowRunnerManager();
+};
+bootstrapWorkflowRunner();
 //# sourceMappingURL=workflow-runner.js.map
