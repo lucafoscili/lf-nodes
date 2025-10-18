@@ -1,5 +1,6 @@
 from typing import Dict, Tuple
 
+import math
 import os
 import random
 import torch
@@ -16,17 +17,43 @@ from ..helpers.editing import get_editing_context
 from .unsharp_mask import unsharp_mask_effect
 
 # region Debug Preview Save
-# Toggle debug preview saves. Hardwired to False for normal runs; set True when debugging.
-DEBUG_PREVIEW_SAVES = True
+DEBUG_PREVIEW_SAVES = False # Toggle debug preview saves. Hardwired to False for normal runs; set True when debugging.
+
+FilterResult = Tuple[torch.Tensor, Dict[str, str]]
+
+# Sorted by area (ascending), expressed as (long_side, short_side)
+MAX_UPSAMPLE_ASPECT_RATIO = 3.0
+SDXL_RESOLUTION_PRESETS: tuple[tuple[int, int], ...] = (
+    (1024, 1024),
+    (1088, 960),
+    (1152, 896),
+    (1216, 832),
+    (1280, 768),
+    (1344, 768),
+    (1344, 704),
+    (1408, 704),
+    (1472, 704),
+    (1536, 640),
+    (1600, 640),
+    (1664, 576),
+    (1728, 576),
+)
 
 def _save_tensor_preview(tensor: torch.Tensor, filename_prefix: str, save_type: str = "temp") -> str | None:
-    """Save a tensor preview (first image in batch) to the comfy dir and return a resource URL.
+    """
+    Saves a tensor as a preview image for debugging purposes if DEBUG_PREVIEW_SAVES is enabled.
+    This function detaches the tensor, moves it to CPU, adjusts dimensions if necessary (e.g., adds batch dimension,
+    permutes channels from first to last if in (B, C, H, W) format), clamps values to [0, 1], converts to a PIL image,
+    and saves it as a PNG file. Only the first batch is processed and saved.
 
-    - tensor: expected shape (B,H,W,C) or (H,W,C) or (B,C,H,W); function will normalize.
-    - filename_prefix: passed to resolve_filepath (may include subfolder path).
-    - save_type: passed to get_comfy_dir (e.g., 'temp' or other resource types).
+    Args:
+        tensor (torch.Tensor): The input tensor to save as an image. Should be in shape (C, H, W) or (B, C, H, W).
+        filename_prefix (str): Prefix for the output filename.
+        save_type (str, optional): The type of save location (e.g., "temp"). Defaults to "temp".
 
-    Returns the resource URL string on success or None on failure.
+    Returns:
+        str | None: The URL of the saved image if successful and DEBUG_PREVIEW_SAVES is True, otherwise None.
+                    Returns None if an exception occurs or if DEBUG_PREVIEW_SAVES is False.
     """
     if not DEBUG_PREVIEW_SAVES:
         return None
@@ -55,7 +82,180 @@ def _save_tensor_preview(tensor: torch.Tensor, filename_prefix: str, save_type: 
         return None
 # endregion
 
-FilterResult = Tuple[torch.Tensor, Dict[str, str]]
+# region Upsample Planning
+def _align_up(value: int, alignment: int) -> int:
+    """
+    Aligns the given value up to the nearest multiple of the specified alignment.
+
+    This function ensures that the returned value is at least 1 and is a multiple of the alignment.
+    If alignment is less than or equal to 1, it simply returns the maximum of 1 and the integer value of the input.
+    Otherwise, it calculates the smallest multiple of alignment that is greater than or equal to the value.
+
+    Args:
+        value (int): The value to be aligned. It will be converted to an integer.
+        alignment (int): The alignment boundary. Must be an integer.
+
+    Returns:
+        int: The aligned value, which is a multiple of alignment and at least 1.
+    """
+    if alignment <= 1:
+        return max(1, int(value))
+    return max(alignment, ((int(value) + alignment - 1) // alignment) * alignment)
+
+
+def _select_preset_dimensions(longer: int, shorter: int, area_limit: int) -> tuple[int, int] | None:
+    """
+    Selects the best preset dimensions from SDXL_RESOLUTION_PRESETS that meet the given constraints.
+    This function iterates through predefined resolution presets and selects the one that:
+    - Has dimensions at least as large as the provided longer and shorter sides.
+    - Does not exceed the specified area limit.
+    - Provides the smallest aspect ratio error compared to the desired ratio (longer/shorter).
+    - Maximizes the area gain (among those with the same ratio error and area gain).
+
+    Args:
+        longer (int): The minimum required length for the longer dimension.
+        shorter (int): The minimum required length for the shorter dimension.
+        area_limit (int): The maximum allowed area (product of dimensions).
+
+    Returns:
+        tuple[int, int] | None: A tuple of (preset_long, preset_short) representing the best matching preset dimensions,
+        or None if no valid preset is found or if any input is non-positive.
+    """
+    if longer <= 0 or shorter <= 0 or area_limit <= 0:
+        return None
+
+    orig_area = longer * shorter
+    best_score: tuple[float, float, int] | None = None
+    best_dims: tuple[int, int] | None = None
+    desired_ratio = longer / shorter
+
+    for preset_long, preset_short in SDXL_RESOLUTION_PRESETS:
+        preset_area = preset_long * preset_short
+        if preset_area > area_limit:
+            continue
+        if preset_long < longer or preset_short < shorter:
+            continue
+        area_gain = preset_area - orig_area
+        if area_gain <= 0:
+            continue
+        ratio_error = abs((preset_long / preset_short) - desired_ratio)
+        score = (ratio_error, -area_gain, preset_long)
+        if best_score is None or score < best_score:
+            best_score = score
+            best_dims = (preset_long, preset_short)
+
+    return best_dims
+
+def _select_upsample_plan(
+    orig_h: int,
+    orig_w: int,
+    upsample_target: int | None,
+    align_multiple: int,
+) -> dict | None:
+    """
+    Selects an upsampling plan for image dimensions based on original height and width,
+    an optional upsample target, and an alignment multiple.
+    This function determines new dimensions for upsampling an image while respecting
+    constraints such as maximum aspect ratio (defined by MAX_UPSAMPLE_ASPECT_RATIO),
+    area limits, and alignment requirements. It prioritizes preset dimensions if available,
+    otherwise scales based on the upsample target. If the plan is invalid or no upsampling
+    is needed, it returns None.
+
+    Args:
+        orig_h (int): The original height of the image.
+        orig_w (int): The original width of the image.
+        upsample_target (int | None): The target size for the longer dimension after upsampling.
+                                      If None or <= 0, no upsampling plan is selected.
+        align_multiple (int): The multiple to which dimensions must be aligned (e.g., for hardware constraints).
+
+    Returns:
+        dict | None: A dictionary containing the upsampling plan with keys:
+            - "height" (int): The new height.
+            - "width" (int): The new width.
+            - "source" (str): The source of the dimensions ("preset" or "target").
+            - "ratio" (float): The aspect ratio of the new dimensions.
+            - "preset" (tuple[int, int] | None): The preset dimensions used, if applicable.
+            - "area" (int): The area of the new dimensions.
+        Returns None if no valid upsampling plan can be created (e.g., due to aspect ratio limits,
+        invalid inputs, or no upsampling needed).
+
+    Notes:
+        - The function uses helper functions like _select_preset_dimensions and _align_up (assumed to be defined elsewhere).
+        - Aspect ratio is calculated as max_dim / min_dim and must not exceed MAX_UPSAMPLE_ASPECT_RATIO.
+        - Dimensions are aligned upwards to the nearest multiple of align_multiple.
+        - If preset dimensions are selected, they take precedence over target-based scaling.
+    """
+    if not upsample_target or upsample_target <= 0:
+        return None
+
+    longer = max(orig_h, orig_w)
+    shorter = min(orig_h, orig_w)
+    if shorter <= 0:
+        return None
+
+    aspect_ratio = longer / shorter
+    if aspect_ratio > MAX_UPSAMPLE_ASPECT_RATIO + 1e-6:
+        return None
+
+    area_limit = int(upsample_target) * int(upsample_target)
+    preset_dims = _select_preset_dimensions(longer, shorter, area_limit)
+
+    new_long: int | None = None
+    new_short: int | None = None
+    source: str | None = None
+
+    if preset_dims:
+        new_long, new_short = preset_dims
+        source = "preset"
+    else:
+        if longer >= upsample_target:
+            return None
+        scale = upsample_target / float(longer)
+        if scale <= 1.0:
+            return None
+        new_long = max(longer, int(round(longer * scale)))
+        new_short = max(shorter, int(round(shorter * scale)))
+        source = "target"
+
+    new_long = _align_up(new_long, align_multiple)
+    new_short = _align_up(new_short, align_multiple)
+    if new_short <= 0 or new_long <= 0:
+        return None
+
+    new_ratio = max(new_long, new_short) / min(new_long, new_short)
+    if new_ratio > MAX_UPSAMPLE_ASPECT_RATIO + 1e-6:
+        if new_long >= new_short:
+            min_short = _align_up(int(math.ceil(new_long / MAX_UPSAMPLE_ASPECT_RATIO)), align_multiple)
+            new_short = max(new_short, min_short)
+        else:
+            min_long = _align_up(int(math.ceil(new_short / MAX_UPSAMPLE_ASPECT_RATIO)), align_multiple)
+            new_long = max(new_long, min_long)
+
+    if new_long <= longer and new_short <= shorter:
+        return None
+
+    if orig_h >= orig_w:
+        new_height, new_width = new_long, new_short
+        preset_ref = (new_long, new_short)
+    else:
+        new_height, new_width = new_short, new_long
+        preset_ref = (new_long, new_short)
+
+    final_ratio = max(new_height, new_width) / min(new_height, new_width)
+    if final_ratio > MAX_UPSAMPLE_ASPECT_RATIO + 1e-6:
+        return None
+
+    area = new_height * new_width
+
+    return {
+        "height": new_height,
+        "width": new_width,
+        "source": source or "target",
+        "ratio": final_ratio,
+        "preset": preset_ref if source == "preset" else None,
+        "area": area,
+    }
+# endregion
 
 # region Sample Without Preview
 def sample_without_preview(
@@ -143,6 +343,7 @@ def perform_inpaint(
     positive_conditioning=None,
     negative_conditioning=None,
     use_conditioning: bool = False,
+    conditioning_mix: float = 0.0,
 ) -> torch.Tensor:
     """
     Performs inpainting on the given image using the specified model, mask, and prompts.
@@ -165,6 +366,7 @@ def perform_inpaint(
         positive_conditioning: Optional additional conditioning for the positive prompt.
         negative_conditioning: Optional additional conditioning for the negative prompt.
         use_conditioning (bool, optional): If True, combines additional conditioning with prompts. Defaults to False.
+        conditioning_mix (float, optional): Blend factor between -1 (context conditioning only) and 1 (prompt only).
 
     Returns:
         torch.Tensor: The inpainted image tensor, blended with the original image according to the mask.
@@ -175,11 +377,47 @@ def perform_inpaint(
         negative = clip_encoder.encode(clip, negative_prompt)[0]
 
         if use_conditioning:
-            combine_node = nodes.ConditioningCombine()
+            mix_value = float(conditioning_mix if conditioning_mix is not None else 0.0)
+            if mix_value > 1.0:
+                mix_value = 1.0
+            if mix_value < -1.0:
+                mix_value = -1.0
+            prompt_weight = 0.5 * (mix_value + 1.0)
+            context_weight = 1.0 - prompt_weight
+            average_node = nodes.ConditioningAverage()
+
             if positive_conditioning is not None:
-                positive = combine_node.combine(positive_conditioning, positive)[0]
+                if context_weight >= 1.0 and prompt_weight <= 0.0:
+                    positive = positive_conditioning
+                elif prompt_weight >= 1.0 and context_weight <= 0.0:
+                    pass
+                elif context_weight <= 0.0:
+                    pass
+                else:
+                    positive = average_node.addWeighted(
+                        positive,
+                        positive_conditioning,
+                        float(prompt_weight),
+                    )[0]
+            elif context_weight >= 1.0 and prompt_weight <= 0.0:
+                # No prompt weight but context conditioning missing; fallback to prompts.
+                pass
+
             if negative_conditioning is not None:
-                negative = combine_node.combine(negative_conditioning, negative)[0]
+                if context_weight >= 1.0 and prompt_weight <= 0.0:
+                    negative = negative_conditioning
+                elif prompt_weight >= 1.0 and context_weight <= 0.0:
+                    pass
+                elif context_weight <= 0.0:
+                    pass
+                else:
+                    negative = average_node.addWeighted(
+                        negative,
+                        negative_conditioning,
+                        float(prompt_weight),
+                    )[0]
+            elif context_weight >= 1.0 and prompt_weight <= 0.0:
+                pass
 
         conditioning_node = nodes.InpaintModelConditioning()
         pos_cond, neg_cond, latent = conditioning_node.encode(
@@ -238,7 +476,7 @@ def perform_inpaint(
     return decoded * mask_to_blend + image * (1.0 - mask_to_blend)
 # endregion
 
-# region Helpers for Inpaint Node
+# region Helpers
 def _prepare_inpaint_region(
     base_image: torch.Tensor,
     mask_tensor: torch.Tensor,
@@ -289,6 +527,13 @@ def _prepare_inpaint_region(
     roi_align_auto = convert_to_boolean(settings.get("roi_align_auto", False)) or False
     roi_min_size = _normalize_int_setting(settings.get("roi_min_size", None), 64, min_value=1)
 
+    raw_upsample = settings.get("upsample")
+    if raw_upsample is None or raw_upsample == "":
+        raw_upsample = settings.get("upsample_target")
+    upsample_target = convert_to_int(raw_upsample) if raw_upsample is not None else None
+    if upsample_target is not None:
+        upsample_target = max(0, int(upsample_target))
+
     align_multiple = roi_align
     if roi_align_auto:
         candidates = [
@@ -305,6 +550,8 @@ def _prepare_inpaint_region(
     work_image = base_image
     work_mask = mask_tensor
     paste_roi = (0, 0, h, w)
+    base_roi_original = None
+    mask_roi_original = None
 
     if roi_auto:
         mask_any = (mask_tensor > 0.5).any(dim=0)
@@ -390,44 +637,17 @@ def _prepare_inpaint_region(
         )
         work_mask_soft = wm.squeeze(1)
     work_mask_soft = work_mask_soft.clamp(0.0, 1.0)
-
-    raw_upsample = settings.get("upsample")
-    if raw_upsample is None or raw_upsample == "":
-        raw_upsample = settings.get("upsample_target")
-    upsample_target = convert_to_int(raw_upsample) if raw_upsample is not None else None
-
     upsample_applied = False
-    upsample_info = None
-    if upsample_target is not None and upsample_target > 0:
+    upsample_info: dict | None = None
+    if upsample_target and upsample_target > 0:
         orig_h, orig_w = int(work_image.shape[1]), int(work_image.shape[2])
-        longest = max(orig_h, orig_w)
-        if longest < upsample_target:
-            scale = float(upsample_target) / float(longest)
-            # Compute target sizes using the same scale, then align the longest side
-            # and compute the other side proportionally to preserve aspect ratio.
-            target_h = max(1, int(round(orig_h * scale)))
-            target_w = max(1, int(round(orig_w * scale)))
+        plan = _select_upsample_plan(orig_h, orig_w, upsample_target, align_multiple)
+        if plan:
+            base_roi_original = work_image.clone()
+            mask_roi_original = work_mask_soft.clone()
 
-            def align_up(value: int, alignment: int) -> int:
-                return ((value + alignment - 1) // alignment) * alignment
-
-            def align_nearest(value: int, alignment: int) -> int:
-                # snap to nearest multiple of alignment (with minimum of alignment)
-                if alignment <= 1:
-                    return max(1, value)
-                half = alignment // 2
-                return max(alignment, ((value + half) // alignment) * alignment)
-
-            # Align the longest side up to meet alignment requirements
-            if orig_h >= orig_w:
-                new_h = align_up(target_h, align_multiple)
-                # compute width proportionally and snap to nearest alignment multiple
-                new_w = max(1, int(round(new_h * (orig_w / float(orig_h)))))
-                new_w = align_nearest(new_w, align_multiple)
-            else:
-                new_w = align_up(target_w, align_multiple)
-                new_h = max(1, int(round(new_w * (orig_h / float(orig_w)))))
-                new_h = align_nearest(new_h, align_multiple)
+            new_h = int(plan["height"])
+            new_w = int(plan["width"])
 
             wi = work_image.permute(0, 3, 1, 2)
             wi = F.interpolate(wi, size=(new_h, new_w), mode="bicubic", align_corners=False)
@@ -438,7 +658,24 @@ def _prepare_inpaint_region(
             work_mask_soft = wm.squeeze(1).contiguous()
 
             upsample_applied = True
-            upsample_info = (orig_h, orig_w, new_h, new_w)
+            upsample_info = {
+                "orig_height": orig_h,
+                "orig_width": orig_w,
+                "new_height": new_h,
+                "new_width": new_w,
+                "source": plan.get("source"),
+                "ratio": plan.get("ratio"),
+                "preset": plan.get("preset"),
+                "area": int(plan.get("area", new_h * new_w)),
+            }
+            preset = plan.get("preset")
+            ratio_val = plan.get("ratio")
+            preset_str = f"{preset[0]}x{preset[1]}" if preset else f"{new_w}x{new_h}"
+            ratio_str = f"{ratio_val:.2f}:1" if ratio_val else "n/a"
+            print(
+                f"[LF Inpaint] Upsample preset selected: {preset_str} "
+                f"(target={upsample_target}, source={plan.get('source')}, ratio={ratio_str})"
+            )
 
     meta = {
         "dilate_px": dilate_px,
@@ -446,6 +683,8 @@ def _prepare_inpaint_region(
         "upsample_applied": upsample_applied,
         "upsample_info": upsample_info,
         "image_shape": (h, w),
+        "base_roi": base_roi_original,
+        "mask_roi": mask_roi_original,
     }
 
     return work_image, work_mask_soft, paste_roi, meta
@@ -476,52 +715,75 @@ def _finalize_inpaint_output(
             - The finalized image tensor on CPU, clamped to [0, 1].
             - A dictionary with metadata about the operation (ROI, upsampling, edge processing).
     """
+    base_roi = meta.pop("base_roi", None)
+    mask_roi = meta.pop("mask_roi", None)
+
     upsample_applied = bool(meta.get("upsample_applied"))
-    upsample_info = meta.get("upsample_info")
+    upsample_info = meta.get("upsample_info") or {}
     dilate_px = int(meta.get("dilate_px", 4))
     feather_px = int(meta.get("feather_px", 2))
+    apply_unsharp_mask = meta.get("apply_unsharp_mask")
+    if apply_unsharp_mask is None:
+        apply_unsharp_mask = True
+    else:
+        apply_unsharp_mask = bool(apply_unsharp_mask)
 
     # Debug helpers: save intermediate previews to temp so user can compare
     debug_files: dict = {}
 
-    if upsample_applied and upsample_info is not None:
-        orig_h, orig_w, _, _ = upsample_info
-        # Save region before downscale (this is what the preview image was taken from)
-        url = _save_tensor_preview(processed_region, "inpaint_region_before_downscale", "temp")
-        if url:
-            debug_files["region_before_downscale"] = url
+    orig_h = 0
+    orig_w = 0
+    if upsample_applied:
+        orig_h = int(upsample_info.get("orig_height", 0))
+        orig_w = int(upsample_info.get("orig_width", 0))
+        new_h = int(upsample_info.get("new_height", 0))
+        new_w = int(upsample_info.get("new_width", 0))
+        if orig_h <= 0 or orig_w <= 0 or new_h <= 0 or new_w <= 0:
+            orig_h = orig_w = 0
+        if orig_h and orig_w:
+            # Save region before downscale (this is what the preview image was taken from)
+            url = _save_tensor_preview(processed_region, "inpaint_region_before_downscale", "temp")
+            if url:
+                debug_files["region_before_downscale"] = url
+            pr = processed_region.permute(0, 3, 1, 2)
+            # Use bicubic with antialias to preserve high-frequency detail when downscaling.
+            pr = F.interpolate(pr, size=(orig_h, orig_w), mode="bicubic", align_corners=False, antialias=True)
+            processed_region = pr.permute(0, 2, 3, 1).contiguous()
+            processed_region = processed_region.clamp(0.0, 1.0)
 
-        pr = processed_region.permute(0, 3, 1, 2)
-        # Use bicubic with antialias to preserve high-frequency detail when downscaling.
-        # antialias=True produces results that match Pillow for downsampling and generally
-        # reduces destructive low-pass effects. Clamp afterwards to avoid bicubic overshoot.
-        pr = F.interpolate(pr, size=(orig_h, orig_w), mode="bicubic", align_corners=False, antialias=True)
-        processed_region = pr.permute(0, 2, 3, 1).contiguous()
-        processed_region = processed_region.clamp(0.0, 1.0)
+            # Optionally apply a conservative unsharp mask to restore perceived sharpness
+            if apply_unsharp_mask:
+                try:
+                    us_amount = 0.3
+                    us_radius = 3
+                    us_sigma = 1.0
+                    us_threshold = 0.0
+                    sharpened = unsharp_mask_effect(processed_region, us_amount, us_radius, us_sigma, us_threshold)
+                    # Normalize returned tensor to float [0,1] and move to the processed_region device
+                    if not torch.is_floating_point(sharpened):
+                        # assume uint8 [0,255]
+                        sharpened = sharpened.to(dtype=torch.float32) / 255.0
+                    else:
+                        sharpened = sharpened.to(dtype=torch.float32)
+                    sharpened = sharpened.clamp(0.0, 1.0).to(device=processed_region.device, dtype=processed_region.dtype)
+                    processed_region = sharpened
+                except Exception:
+                    # sharpening is best-effort and non-fatal
+                    pass
 
-        # Optionally apply a conservative unsharp mask to restore perceived sharpness
-        try:
-            us_amount = 0.3
-            us_radius = 3
-            us_sigma = 1.0
-            us_threshold = 0.0
-            sharpened = unsharp_mask_effect(processed_region, us_amount, us_radius, us_sigma, us_threshold)
-            # Normalize returned tensor to float [0,1] and move to the processed_region device
-            if not torch.is_floating_point(sharpened):
-                # assume uint8 [0,255]
-                sharpened = sharpened.to(dtype=torch.float32) / 255.0
-            else:
-                sharpened = sharpened.to(dtype=torch.float32)
-            sharpened = sharpened.clamp(0.0, 1.0).to(device=processed_region.device, dtype=processed_region.dtype)
-            processed_region = sharpened
-        except Exception:
-            # sharpening is best-effort and non-fatal
-            pass
+            # Save region after downscale
+            url = _save_tensor_preview(processed_region, "inpaint_region_after_downscale", "temp")
+            if url:
+                debug_files["region_after_downscale"] = url
 
-        # Save region after downscale
-        url = _save_tensor_preview(processed_region, "inpaint_region_after_downscale", "temp")
-        if url:
-            debug_files["region_after_downscale"] = url
+    if base_roi is not None and mask_roi is not None:
+        mask_roi = mask_roi.to(dtype=processed_region.dtype, device=processed_region.device)
+        if mask_roi.dim() == 3:
+            mask_roi = mask_roi.unsqueeze(-1)
+        processed_region = processed_region * mask_roi + base_roi.to(
+            dtype=processed_region.dtype,
+            device=processed_region.device,
+        ) * (1.0 - mask_roi)
 
     h, w = meta.get("image_shape", (int(base_image.shape[1]), int(base_image.shape[2])))
     if paste_roi != (0, 0, h, w):
@@ -545,9 +807,23 @@ def _finalize_inpaint_output(
     if paste_roi != (0, 0, h, w):
         y0, x0, y1, x1 = paste_roi
         info["roi"] = f"y0={y0},x0={x0},y1={y1},x1={x1}"
-    if upsample_applied and upsample_info is not None:
-        oh, ow, nh, nw = upsample_info
-        info["upsample"] = f"{ow}x{oh} -> {nw}x{nh}"
+    if upsample_applied and orig_h and orig_w:
+        nh = int(upsample_info.get("new_height", 0))
+        nw = int(upsample_info.get("new_width", 0))
+        info["upsample"] = f"{orig_w}x{orig_h} -> {nw}x{nh}"
+        preset = upsample_info.get("preset")
+        if preset:
+            preset_long, preset_short = preset
+            info["upsample_preset"] = f"{preset_long}x{preset_short}"
+        ratio = upsample_info.get("ratio")
+        if ratio:
+            info["upsample_ratio"] = f"{ratio:.2f}:1"
+        source = upsample_info.get("source")
+        if source:
+            info["upsample_source"] = str(source)
+        area = upsample_info.get("area")
+        if area:
+            info["upsample_pixels"] = str(area)
     if dilate_px or feather_px:
         info["edges"] = f"dilate={dilate_px},feather={feather_px}"
 
@@ -600,6 +876,22 @@ def _normalize_cfg(raw_value):
         value = 7.0
 
     return float(value)
+
+def _normalize_conditioning_mix(raw_value):
+    """
+    Normalize the conditioning mix slider to [-1.0, 1.0].
+
+    -1.0 => input conditioning only, 0.0 => balanced, 1.0 => prompt only.
+    """
+    value = convert_to_float(raw_value) if raw_value is not None else None
+    if value is None:
+        value = 0.0
+    value = float(value)
+    if value > 1.0:
+        return 1.0
+    if value < -1.0:
+        return -1.0
+    return value
 
 def _normalize_seed(raw_value):
     """
@@ -815,12 +1107,18 @@ def apply_inpaint_filter(image: torch.Tensor, settings: dict) -> FilterResult:
     if use_conditioning is None:
         use_conditioning = False
 
+    conditioning_mix = _normalize_conditioning_mix(settings.get("conditioning_mix"))
+    apply_unsharp_mask = convert_to_boolean(settings.get("apply_unsharp_mask", True))
+    if apply_unsharp_mask is None:
+        apply_unsharp_mask = True
+
     work_image, work_mask_soft, paste_roi, region_meta = _prepare_inpaint_region(
         base_image=base_image,
         mask_tensor=mask_tensor,
         vae=vae,
         settings=settings,
     )
+    region_meta["apply_unsharp_mask"] = apply_unsharp_mask
 
     processed_region = perform_inpaint(
         model=model,
@@ -840,6 +1138,7 @@ def apply_inpaint_filter(image: torch.Tensor, settings: dict) -> FilterResult:
         positive_conditioning=context_positive_conditioning if use_conditioning else None,
         negative_conditioning=context_negative_conditioning if use_conditioning else None,
         use_conditioning=use_conditioning,
+        conditioning_mix=conditioning_mix if use_conditioning else 1.0,
     )
     # Save the raw processed region (before final downscale/stitch) to temp so user
     # can preview the area as generated. This mirrors how the mask preview is saved.
@@ -856,6 +1155,13 @@ def apply_inpaint_filter(image: torch.Tensor, settings: dict) -> FilterResult:
     info_with_mask.update(info)
     if region_url:
         info_with_mask["region"] = region_url
+    if not apply_unsharp_mask:
+        info_with_mask["unsharp_mask"] = "disabled"
+    print(
+        "[LF Inpaint] sampling "
+        f"steps={steps}, denoise={denoise_value:.3f}, cfg={cfg:.2f}, seed={seed}, "
+        f"use_conditioning={use_conditioning}, conditioning_mix={conditioning_mix:.2f}"
+    )
 
     return processed, info_with_mask
 # endregion
@@ -912,12 +1218,19 @@ def apply_inpaint_filter_tensor(
     m = m.clamp(0.0, 1.0)
     m = (m > 0.5).float()
 
+    use_conditioning = convert_to_boolean(settings.get("use_conditioning", False)) or False
+    conditioning_mix = _normalize_conditioning_mix(settings.get("conditioning_mix"))
+    apply_unsharp_mask = convert_to_boolean(settings.get("apply_unsharp_mask", True))
+    if apply_unsharp_mask is None:
+        apply_unsharp_mask = True
+
     work_image, work_mask_soft, paste_roi, region_meta = _prepare_inpaint_region(
         base_image=base_image,
         mask_tensor=m,
         vae=vae,
         settings=settings,
     )
+    region_meta["apply_unsharp_mask"] = apply_unsharp_mask
 
     processed_region = perform_inpaint(
         model=model,
@@ -934,9 +1247,10 @@ def apply_inpaint_filter_tensor(
         cfg=_normalize_cfg(settings.get("cfg")),
         seed=_normalize_seed(settings.get("seed")),
         disable_preview=True,
-        positive_conditioning=settings.get("positive_conditioning") if convert_to_boolean(settings.get("use_conditioning", False)) else None,
-        negative_conditioning=settings.get("negative_conditioning") if convert_to_boolean(settings.get("use_conditioning", False)) else None,
-        use_conditioning=convert_to_boolean(settings.get("use_conditioning", False)) or False,
+        positive_conditioning=settings.get("positive_conditioning") if use_conditioning else None,
+        negative_conditioning=settings.get("negative_conditioning") if use_conditioning else None,
+        use_conditioning=use_conditioning,
+        conditioning_mix=conditioning_mix if use_conditioning else 1.0,
     )
 
     _ = _save_tensor_preview(processed_region, "inpaint_region", str(settings.get("resource_type") or settings.get("output_type") or "temp"))
@@ -947,6 +1261,9 @@ def apply_inpaint_filter_tensor(
         paste_roi=paste_roi,
         meta=region_meta,
     )
+
+    if not apply_unsharp_mask:
+        info["unsharp_mask"] = "disabled"
 
     return processed, info
 # endregion
