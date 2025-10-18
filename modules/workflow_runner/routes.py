@@ -6,9 +6,9 @@ import os
 import time
 import uuid
 
+from aiohttp import web
 from pathlib import Path
 from typing import Any, Dict, Iterable, Optional
-from aiohttp import web
 from server import PromptServer
 
 from .config import CONFIG as RUNNER_CONFIG

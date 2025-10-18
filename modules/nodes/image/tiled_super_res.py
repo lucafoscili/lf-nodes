@@ -185,6 +185,7 @@ class LF_TiledSuperRes:
                 event=f"{EVENT_PREFIX}tiledsuperres",
                 input_target_size=(h, w),
                 filename_prefix="tiled_super_res",
+                resolve_filepath=resolve_filepath
             )
 
             for _, spec in enumerate(plan.tiles):
