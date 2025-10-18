@@ -1,11 +1,12 @@
 [project]
 name = "lf-nodes"
 description = "Custom nodes with a touch of extra UX ✨ Client-side LLM chat, mid-workflow image editing, history for primitives, JSON manipulation, analytics nodes, CivitAI metadata fetching and saving... and more!"
-version = "1.7.1"
+version = "1.8.0"
 license = {file = "LICENSE"}
 dependencies = [
     "GPUtil",
     "numpy",
+    "nvidia-ml-py",
     "onnxruntime",
     "openai",
     "opencv-python",
@@ -13,7 +14,6 @@ dependencies = [
     "piexif",
     "Pillow",
     "psutil",
-    "pynvml",
     "rembg",
     "requests",
     "svgwrite",

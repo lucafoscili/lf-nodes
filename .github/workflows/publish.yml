@@ -26,7 +26,8 @@ jobs:
       - name: Get Previous Tag
         id: previous_tag
         run: |
-          PREVIOUS_TAG=$(git tag --sort=-version:refname | head -n 1 || echo "")
+          # Resolve the most recent tag that precedes the commit we are about to release.
+          PREVIOUS_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
           echo "previous_tag=$PREVIOUS_TAG" >> $GITHUB_OUTPUT
       - name: Publish Custom Node
         uses: Comfy-Org/publish-node-action@v1
@@ -62,11 +63,9 @@ jobs:
             RANGE="$CURRENT_REF"
           fi
 
-          COMMITS=$(git log --oneline --no-merges $RANGE --max-count=50)
+          COMMITS=$(git log --pretty=format:"- %h %s" $RANGE)
           if [ -z "$COMMITS" ]; then
-            COMMITS="(no new non-merge commits detected)"
-          else
-            COMMITS=$(echo "$COMMITS" | sed 's/^/- /')
+            COMMITS="(no commits detected between $PREV_TAG and $CURRENT_REF)"
           fi
           echo "commits<<EOF" >> $GITHUB_OUTPUT
           echo "$COMMITS" >> $GITHUB_OUTPUT

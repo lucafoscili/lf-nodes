@@ -6,10 +6,9 @@ import torch.nn.functional as F
 
 from server import PromptServer
 
-from ...helpers.api import get_resource_url
-from ...helpers.comfy import resolve_filepath
-from ...helpers.conversion import tensor_to_pil
 from .create_compare_node import create_compare_node
+from ..api import get_resource_url
+from ..conversion import tensor_to_pil
 
 # region prepare_preview_destination
 def prepare_preview_destination(
@@ -19,6 +18,7 @@ def prepare_preview_destination(
     *,
     label: str = "preview",
     filename_prefix: str = "preview",
+    resolve_filepath: Callable[..., Tuple[str, str, str]]
 ) -> Dict[str, str]:
     """
     Create a deterministic filesystem destination for a preview image.
@@ -233,6 +233,8 @@ class ComparePreviewStream:
         URL/path returned by saving the input image on initialization.
     - _send_fn:
         Resolved sender function (either the provided send_fn or the default).
+    - _resolve_filepath: Callable[..., Tuple[str, str, str]]:
+        Resolved file path resolver function (either the provided resolve_filepath or the default).
 
     Key methods
     - save_preview(tensor: torch.Tensor, target_size: Optional[Tuple[int, int]] = None) -> str
@@ -269,6 +271,11 @@ class ComparePreviewStream:
             compare_nodes=[],
             event="dataset_update",
             input_target_size=(640, 480),
+            filename_prefix="preview",
+            resource_type="temp",
+            max_long_edge=512,
+            resolve_filepath=resolve_filepath,
+        )
         preview_url = cps.save_preview(some_tensor)
         cps.finalize(preview_url, title="Denoised")
     """
@@ -286,6 +293,7 @@ class ComparePreviewStream:
         resource_type: str = "temp",
         max_long_edge: int = 512,
         send_fn: Optional[Callable[[str, dict], None]] = None,
+        resolve_filepath: Callable[..., Tuple[str, str, str]]
     ) -> None:
         self.node_id = node_id
         self.index = index
@@ -295,6 +303,7 @@ class ComparePreviewStream:
         self.resource_type = resource_type
         self.max_long_edge = max_long_edge
         self._compare_node: Optional[dict] = None
+        self._resolve_filepath = resolve_filepath
 
         self._preview_destination = prepare_preview_destination(
             node_id,
@@ -302,6 +311,7 @@ class ComparePreviewStream:
             input_image,
             label="preview",
             filename_prefix=filename_prefix,
+            resolve_filepath=resolve_filepath,
         )
         self._input_destination = prepare_preview_destination(
             node_id,
@@ -309,6 +319,7 @@ class ComparePreviewStream:
             input_image,
             label="input",
             filename_prefix=filename_prefix,
+            resolve_filepath=resolve_filepath,
         )
 
         self.input_url = save_preview_image(
@@ -346,7 +357,7 @@ class ComparePreviewStream:
             return PromptServer.instance.send_sync
         except Exception:  # pragma: no cover - safety for test environments
             return None
-# endregion        
+# endregion
 
     @property
     def compare_node(self) -> Optional[dict]:

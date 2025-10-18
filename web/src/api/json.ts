@@ -1,8 +1,6 @@
 import { APIEndpoints, BaseAPIPayload, JSONAPIs } from '../types/api/api';
 import { LogSeverity } from '../types/manager/manager';
-import { getLfManager } from '../utils/common';
-/// @ts-ignore
-import { api } from '/scripts/api.js';
+import { getComfyAPI, getLfManager } from '../utils/common';
 
 export const JSON_API: JSONAPIs = {
   //#region get
@@ -19,7 +17,7 @@ export const JSON_API: JSONAPIs = {
       const body = new FormData();
       body.append('file_path', filePath);
 
-      const response = await api.fetchApi(APIEndpoints.GetJson, {
+      const response = await getComfyAPI().fetchApi(APIEndpoints.GetJson, {
         body,
         method: 'POST',
       });
@@ -65,7 +63,7 @@ export const JSON_API: JSONAPIs = {
     body.append('dataset', JSON.stringify(dataset));
 
     try {
-      const response = await api.fetchApi(APIEndpoints.UpdateJson, {
+      const response = await getComfyAPI().fetchApi(APIEndpoints.UpdateJson, {
         body,
         method: 'POST',
       });

@@ -5,9 +5,7 @@ import {
   GetBackupStatsAPIPayload,
 } from '../types/api/api';
 import { LogSeverity } from '../types/manager/manager';
-import { getLfManager } from '../utils/common';
-/// @ts-ignore
-import { api } from '/scripts/api.js';
+import { getComfyAPI, getLfManager } from '../utils/common';
 
 export const BACKUP_API: BackupAPIs = {
   //#region new
@@ -22,7 +20,10 @@ export const BACKUP_API: BackupAPIs = {
     try {
       const body = new FormData();
       body.append('backup_type', backupType);
-      const response = await api.fetchApi(APIEndpoints.NewBackup, { body, method: 'POST' });
+      const response = await getComfyAPI().fetchApi(APIEndpoints.NewBackup, {
+        body,
+        method: 'POST',
+      });
 
       const code = response.status;
 
@@ -64,7 +65,7 @@ export const BACKUP_API: BackupAPIs = {
     };
 
     try {
-      const response = await api.fetchApi(APIEndpoints.GetBackupStats, { method: 'GET' });
+      const response = await getComfyAPI().fetchApi(APIEndpoints.GetBackupStats, { method: 'GET' });
 
       const code = response.status;
 
@@ -112,7 +113,10 @@ export const BACKUP_API: BackupAPIs = {
     try {
       const body = new FormData();
       body.append('max_backups', String(_maxBackups));
-      const response = await api.fetchApi(APIEndpoints.CleanOldBackups, { body, method: 'POST' });
+      const response = await getComfyAPI().fetchApi(APIEndpoints.CleanOldBackups, {
+        body,
+        method: 'POST',
+      });
 
       const code = response.status;
 

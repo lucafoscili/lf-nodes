@@ -4,10 +4,10 @@
 /*   Mostly A.I. generated, not reliable           */
 /*-------------------------------------------------*/
 
-declare module '/scripts/api.js' {
-  export const api: {
-    fetchApi(endpoint: string, options?: { body?: FormData; method?: string }): Promise<Response>;
-  };
+declare const comfyAPI: ComfyUI;
+
+interface Window {
+  comfyAPI: ComfyUI;
 }
 
 declare interface GraphAppLike {
@@ -44,11 +44,18 @@ declare interface GitHubRelease {
 declare interface ComfyUI {
   api: {
     api: ComfyApi;
+    fetchApi(endpoint: string, options?: { body?: FormData; method?: string }): Promise<Response>;
+    register?: (ext: any) => void;
+    event?: (name: string, cb: any) => void;
+    [k: string]: any;
   };
   app: {
     ANIM_PREVIEW_WIDGET: string;
     app: ComfyApp;
     ComfyApp: Function;
+    assets?: { set?: (s: string) => void };
+    theme?: { set?: (t: string) => void };
+    [k: string]: any;
   };
   asyncDialog: {
     ComfyAsyncDialog: Function;
@@ -157,7 +164,6 @@ declare interface ComfyUI {
   };
 }
 declare interface NotificationOptions {
-  // Existing properties
   badge?: string;
   body?: string;
   data?: any;

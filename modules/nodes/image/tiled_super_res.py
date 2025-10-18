@@ -79,7 +79,7 @@ class LF_TiledSuperRes:
 
     def on_exec(self, **kwargs: dict):
         self._temp_cache.cleanup()
-        
+
         images = normalize_input_image(kwargs.get("image"))
         upscale_model = normalize_list_to_value(kwargs.get("upscale_model"))
         target_long_edge = int(normalize_list_to_value(kwargs.get("target_long_edge")))
@@ -185,6 +185,7 @@ class LF_TiledSuperRes:
                 event=f"{EVENT_PREFIX}tiledsuperres",
                 input_target_size=(h, w),
                 filename_prefix="tiled_super_res",
+                resolve_filepath=resolve_filepath
             )
 
             for _, spec in enumerate(plan.tiles):
@@ -459,7 +460,7 @@ class LF_TiledSuperRes:
 
         Returns:
             Image.Image: The resulting image with tile overlays rendered.
-            
+
         Notes:
             - Draws rectangles for each tile's outer and inner boundaries.
             - Labels each tile with its index if there are multiple tiles.

@@ -1,4 +1,6 @@
 import contextlib
+import importlib
+import warnings
 from typing import Dict, List, Tuple
 
 from aiohttp import web
@@ -17,10 +19,15 @@ try:  # Optional GPU helpers
 except Exception:  # pragma: no cover
     GPUtil = None  # type: ignore
 
-try:
-    import pynvml  # type: ignore
-except Exception:  # pragma: no cover
-    pynvml = None  # type: ignore
+pynvml = None  # type: ignore
+with contextlib.suppress(Exception):
+    with warnings.catch_warnings():
+        warnings.filterwarnings(
+            "ignore",
+            message="The pynvml package is deprecated. Please install nvidia-ml-py instead.",
+            category=FutureWarning,
+        )
+        pynvml = importlib.import_module("pynvml")  # type: ignore
 
 
 def _usage_state_message(resource: str, reason: str) -> web.Response:
@@ -68,7 +75,6 @@ def _collect_gpu_stats() -> Tuple[List[Dict[str, float]], str]:
         finally:
             with contextlib.suppress(Exception):
                 pynvml.nvmlShutdown()
-
     if not gpus and GPUtil:
         try:
             for gpu in GPUtil.getGPUs():
@@ -89,6 +95,9 @@ def _collect_gpu_stats() -> Tuple[List[Dict[str, float]], str]:
                 message = "GPU statistics retrieved via GPUtil."
         except Exception as exc:
             message = f"GPU statistics unavailable: {exc}"
+
+    if not gpus and not pynvml:
+        message = "NVML Python bindings not available. Install the 'nvidia-ml-py' package to enable detailed GPU metrics."
 
     return gpus, message
 

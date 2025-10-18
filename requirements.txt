@@ -1,5 +1,6 @@
 ﻿GPUtil
 numpy
+nvidia-ml-py
 openai
 opencv-python
 onnxruntime
@@ -7,7 +8,6 @@ pandas
 piexif
 Pillow
 psutil
-pynvml
 rembg
 requests
 svgwrite

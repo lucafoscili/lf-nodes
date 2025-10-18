@@ -5,9 +5,7 @@ import {
   GetAnalyticsAPIPayload,
 } from '../types/api/api';
 import { LogSeverity } from '../types/manager/manager';
-import { getLfManager } from '../utils/common';
-/// @ts-ignore
-import { api } from '/scripts/api.js';
+import { getComfyAPI, getLfManager } from '../utils/common';
 
 export const ANALYTICS_API: AnalyticsAPIs = {
   //#region clear
@@ -23,7 +21,7 @@ export const ANALYTICS_API: AnalyticsAPIs = {
       const body = new FormData();
       body.append('type', type);
 
-      const response: Response = await api.fetchApi(APIEndpoints.ClearAnalytics, {
+      const response: Response = await getComfyAPI().fetchApi(APIEndpoints.ClearAnalytics, {
         body,
         method: 'POST',
       });
@@ -85,7 +83,7 @@ export const ANALYTICS_API: AnalyticsAPIs = {
       body.append('directory', directory);
       body.append('type', type);
 
-      const response = await api.fetchApi(APIEndpoints.GetAnalytics, {
+      const response = await getComfyAPI().fetchApi(APIEndpoints.GetAnalytics, {
         body,
         method: 'POST',
       });

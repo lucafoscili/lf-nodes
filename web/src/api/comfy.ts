@@ -1,10 +1,6 @@
 import { ComfyAPIs } from '../types/api/api';
 import { LogSeverity } from '../types/manager/manager';
-import { getLfManager } from '../utils/common';
-/// @ts-ignore
-import { api } from '/scripts/api.js';
-/// @ts-ignore
-import { app } from '/scripts/app.js';
+import { getComfyAPI, getComfyAPP, getLfManager } from '../utils/common';
 
 declare global {
   interface Window {
@@ -16,44 +12,44 @@ declare global {
 export const COMFY_API: ComfyAPIs = {
   comfyUi: () => window.comfyAPI,
   event: (name, callback) => {
-    api.addEventListener(name, callback);
+    getComfyAPI().addEventListener(name, callback);
   },
   executeCommand: (name) => {
     try {
-      app.extensionManager.command.execute(name);
+      getComfyAPP().extensionManager.command.execute(name);
     } catch (error) {
       getLfManager().log(`Command ${name} not executed!`, { error }, LogSeverity.Warning);
     }
   },
   getDragAndScale: () => {
-    return app.canvas.ds as ComfyDS;
+    return getComfyAPP().canvas.ds as ComfyDS;
   },
   getLinkById: (id) => {
-    return app.graph.links[String(id).valueOf()];
+    return getComfyAPP().graph.links[String(id).valueOf()];
   },
   getNodeById: (id) => {
-    return app.graph.getNodeById(+(id || app.runningNodeId));
+    return getComfyAPP().graph.getNodeById(+(id || getComfyAPP().runningNodeId));
   },
   getResourceUrl: (subfolder, filename, type = 'output') => {
     const params = [
       'filename=' + encodeURIComponent(filename),
       'type=' + type,
       'subfolder=' + subfolder,
-      app.getRandParam().substring(1),
+      getComfyAPP().getRandParam().substring(1),
     ].join('&');
     return `/view?${params}`;
   },
   interrupt: () => {
-    return api.interrupt();
+    return getComfyAPI().interrupt();
   },
   queuePrompt: async () => {
-    app.queuePrompt(0);
+    getComfyAPP().queuePrompt(0);
   },
   redraw: () => {
-    app.graph.setDirtyCanvas(true, false);
+    getComfyAPP().graph.setDirtyCanvas(true, false);
   },
   redrawFull: () => {
-    app.graph.setDirtyCanvas(true, true);
+    getComfyAPP().graph.setDirtyCanvas(true, true);
   },
   scheduleRedraw: (() => {
     let scheduled = false;
@@ -62,7 +58,7 @@ export const COMFY_API: ComfyAPIs = {
       if (immediate) {
         scheduled = false;
         try {
-          app.graph.setDirtyCanvas(true, true);
+          getComfyAPP().graph.setDirtyCanvas(true, true);
         } catch {}
         return;
       }
@@ -73,16 +69,18 @@ export const COMFY_API: ComfyAPIs = {
       requestAnimationFrame(() => {
         scheduled = false;
         try {
+          const { app } = comfyAPI;
+
           app.graph.setDirtyCanvas(true, true);
         } catch {}
       });
     };
   })(),
   register: (extension) => {
-    app.registerExtension(extension);
+    getComfyAPP().registerExtension(extension);
   },
   upload: async (body) => {
-    return await api.fetchApi('/upload/image', {
+    return await getComfyAPI().fetchApi('/upload/image', {
       method: 'POST',
       body,
     });

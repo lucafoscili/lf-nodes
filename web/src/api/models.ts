@@ -1,14 +1,13 @@
 import { APIEndpoints, ModelsAPIs } from '../types/api/api';
 import { LogSeverity } from '../types/manager/manager';
-import { getLfManager } from '../utils/common';
-/// @ts-ignore
-import { api } from '/scripts/api.js';
+import { getComfyAPI, getLfManager } from '../utils/common';
 
 export const MODELS_API: ModelsAPIs = {
+  //#region free
   free: async () => {
     const lfManager = getLfManager();
     try {
-      const response = await api.fetchApi(APIEndpoints.LFFree, { method: 'POST' });
+      const response = await getComfyAPI().fetchApi(APIEndpoints.Free, { method: 'POST' });
       if (response.status === 200) {
         return true;
       }
@@ -23,10 +22,15 @@ export const MODELS_API: ModelsAPIs = {
       return false;
     }
   },
+  //#endregion
+
+  //#region refresh
   refresh: async () => {
     const lfManager = getLfManager();
     try {
-      const response = await api.fetchApi(APIEndpoints.LFRefreshNodeDefs, { method: 'POST' });
+      const response = await getComfyAPI().fetchApi(APIEndpoints.RefreshNodeDefs, {
+        method: 'POST',
+      });
       if (response.status === 200) {
         return true;
       }
@@ -41,6 +45,7 @@ export const MODELS_API: ModelsAPIs = {
       return false;
     }
   },
+  //#endregion
 };
 
 export const beforeFree = async (options?: any) => {

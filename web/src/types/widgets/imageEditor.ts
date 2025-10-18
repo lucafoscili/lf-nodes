@@ -174,6 +174,7 @@ export enum ImageEditorSliderIds {
   ClarityAmount = 'clarity_amount',
   DenoisePercentage = 'denoise_percentage',
   Cfg = 'cfg',
+  ConditioningMix = 'conditioning_mix',
   Dilate = 'dilate',
   FocusPosition = 'focus_position',
   FocusSize = 'focus_size',
@@ -218,6 +219,7 @@ export enum ImageEditorToggleIds {
   UseConditioning = 'use_conditioning',
   RoiAuto = 'roi_auto',
   RoiAlignAuto = 'roi_align_auto',
+  ApplyUnsharpMask = 'apply_unsharp_mask',
 }
 export type ImageEditorControlIds =
   | ImageEditorCanvasIds
@@ -398,22 +400,24 @@ export interface ImageEditorVignetteSettings extends ImageEditorFilterSettings {
   shape: boolean;
 }
 export interface ImageEditorInpaintSettings extends ImageEditorFilterSettings {
+  apply_unsharp_mask?: boolean;
   b64_canvas: string;
   cfg: number;
+  conditioning_mix?: number;
   denoise_percentage: number;
+  dilate?: number;
+  feather?: number;
   negative_prompt: string;
   positive_prompt: string;
+  roi_align?: number;
+  roi_align_auto?: boolean;
+  roi_auto?: boolean;
+  roi_min_size?: number;
+  roi_padding?: number;
+  seed?: number;
   steps: number;
   upsample_target: number;
   use_conditioning: boolean;
-  seed?: number;
-  roi_auto?: boolean;
-  roi_padding?: number;
-  roi_align?: number;
-  roi_align_auto?: boolean;
-  roi_min_size?: number;
-  dilate?: number;
-  feather?: number;
 }
 export enum ImageEditorBackgroundRemoverIds {
   Color = 'color',
@@ -510,7 +514,9 @@ export enum ImageEditorVignetteIds {
 }
 export enum ImageEditorInpaintIds {
   B64Canvas = 'b64_canvas',
+  ApplyUnsharpMask = 'apply_unsharp_mask',
   Cfg = 'cfg',
+  ConditioningMix = 'conditioning_mix',
   DenoisePercentage = 'denoise_percentage',
   NegativePrompt = 'negative_prompt',
   PositivePrompt = 'positive_prompt',

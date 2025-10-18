@@ -1,5 +1,4 @@
 import { beforeRefreshNodeDefs } from '../api/models';
-import { LogSeverity } from '../types/manager/manager';
 import {
   InstallRefreshHookOptions,
   InstallRefreshHookResult,
@@ -7,6 +6,7 @@ import {
   RefreshComboFn,
   RefreshHookApp,
 } from '../types/hooks/refresh';
+import { LogSeverity } from '../types/manager/manager';
 import { isRefreshHookApp, LFRefreshFlags } from '../utils/common';
 
 export function installLFRefreshNodeHook(

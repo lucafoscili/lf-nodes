@@ -52,6 +52,8 @@ class SVGTraceConfig:
     stroke_color_override: str | None = None
     background_color: str | None = None
     size_mode: str = "responsive"
+    # Optional override for the SVG viewBox. Expected format: "minX minY width height"
+    viewbox_override: str | None = None
 
     engine: str = "contour"
     vtracer_mode: str = "spline"
@@ -142,7 +144,58 @@ def _apply_svg_overrides(svg_str: str, cfg: SVGTraceConfig, width: int, height: 
     except ET.ParseError:
         return svg_str
 
-    root.set("viewBox", f"0 0 {width} {height}")
+    # If the user provided a viewbox override string, try to parse and apply it.
+    vb_minx, vb_miny, vb_w, vb_h = 0.0, 0.0, float(width), float(height)
+    if getattr(cfg, "viewbox_override", None):
+        try:
+            parts = str(cfg.viewbox_override).strip().split()
+            if len(parts) == 4:
+                parsed = [float(p) for p in parts]
+                if parsed[2] > 0 and parsed[3] > 0:
+                    vb_minx, vb_miny, vb_w, vb_h = parsed
+        except Exception:
+            # If parsing fails, fall back to default values.
+            pass
+
+    root.set("viewBox", f"{_format_coord(vb_minx)} {_format_coord(vb_miny)} {_format_coord(vb_w)} {_format_coord(vb_h)}")
+
+    # If an override is present, wrap the existing content (except defs)
+    # into a transform group that maps the original width/height to the
+    # requested viewBox. We assume the SVG originally used the provided
+    # width/height passed to this function (width, height arguments).
+    try:
+        if getattr(cfg, "viewbox_override", None):
+            # compute scale factors from original to target viewbox
+            sx = float(vb_w) / float(width) if float(width) != 0 else 1.0
+            sy = float(vb_h) / float(height) if float(height) != 0 else 1.0
+            transform = f"scale({_format_coord(sx)} {_format_coord(sy)}) translate({_format_coord(vb_minx)} {_format_coord(vb_miny)})"
+
+            # create a group and move non-defs children into it
+            group = ET.Element(f"{{{SVG_NS}}}g")
+            group.set("transform", transform)
+
+            # Move children (preserving defs at front)
+            children = list(root)
+            insert_idx = 0
+            if children and children[0].tag == f"{{{SVG_NS}}}defs":
+                insert_idx = 1
+
+            for i, child in enumerate(children):
+                if i == insert_idx and insert_idx == 1:
+                    # leave defs in place
+                    continue
+                # remove child from root and append to group
+                root.remove(child)
+                group.append(child)
+
+            # append group at end (or after defs)
+            if insert_idx == 1:
+                root.insert(1, group)
+            else:
+                root.append(group)
+    except Exception:
+        # On any error, leave the tree unchanged
+        pass
     root.set("preserveAspectRatio", "xMidYMid meet")
 
     if cfg.size_mode == "fixed":
@@ -154,10 +207,10 @@ def _apply_svg_overrides(svg_str: str, cfg: SVGTraceConfig, width: int, height: 
 
     if cfg.background_color:
         rect_attrs = {
-            "x": "0",
-            "y": "0",
-            "width": str(width),
-            "height": str(height),
+            "x": _format_coord(vb_minx),
+            "y": _format_coord(vb_miny),
+            "width": _format_coord(vb_w),
+            "height": _format_coord(vb_h),
             "fill": cfg.background_color
         }
         background = ET.Element(f"{{{SVG_NS}}}rect", rect_attrs)
@@ -460,7 +513,7 @@ def numpy_to_svg(arr: np.ndarray, config: Any = None) -> tuple[str, np.ndarray, 
     except Exception:
         pass
 
-    num_colors = max(1, min(int(cfg.num_colors), 64))
+    num_colors = max(1, min(int(cfg.num_colors), 256))
     simplify_tol = max(0.0, float(cfg.simplify_tol))
     min_area = max(1.0, float(cfg.min_area_ratio) * float(h * w))
 
@@ -535,9 +588,22 @@ def numpy_to_svg(arr: np.ndarray, config: Any = None) -> tuple[str, np.ndarray, 
                 "area": area_px
             })
 
+    # Determine the viewBox to use for the generated drawing. Allow an override
+    # string in the config in the form: "minX minY width height".
+    vb_minx, vb_miny, vb_w, vb_h = 0.0, 0.0, float(w), float(h)
+    if getattr(cfg, "viewbox_override", None):
+        try:
+            parts = str(cfg.viewbox_override).strip().split()
+            if len(parts) == 4:
+                parsed = [float(p) for p in parts]
+                if parsed[2] > 0 and parsed[3] > 0:
+                    vb_minx, vb_miny, vb_w, vb_h = parsed
+        except Exception:
+            pass
+
     dwg = svgwrite.Drawing(
         size=("100%", "100%"),
-        viewBox=f"0 0 {w} {h}",
+        viewBox=f"{_format_coord(vb_minx)} {_format_coord(vb_miny)} {_format_coord(vb_w)} {_format_coord(vb_h)}",
         preserveAspectRatio="xMidYMid meet"
     )
     dwg.attribs["shape-rendering"] = "geometricPrecision"
@@ -552,7 +618,21 @@ def numpy_to_svg(arr: np.ndarray, config: Any = None) -> tuple[str, np.ndarray, 
         dwg.attribs["height"] = "100%"
 
     if cfg.background_color:
-        dwg.add(dwg.rect(insert=(0, 0), size=(w, h), fill=cfg.background_color, stroke="none"))
+        dwg.add(dwg.rect(insert=(_format_coord(vb_minx), _format_coord(vb_miny)), size=(_format_coord(vb_w), _format_coord(vb_h)), fill=cfg.background_color, stroke="none"))
+
+    # If a viewbox override was provided, wrap geometry in a transform group so
+    # the original coordinates are mapped into the requested viewBox. This
+    # avoids rewriting path data and keeps the background rect as the canvas.
+    content_group = None
+    if getattr(cfg, "viewbox_override", None):
+        try:
+            sx = float(vb_w) / float(w)
+            sy = float(vb_h) / float(h)
+            transform_str = f"scale({_format_coord(sx)} {_format_coord(sy)}) translate({_format_coord(vb_minx)} {_format_coord(vb_miny)})"
+            content_group = dwg.g(transform=transform_str)
+            dwg.add(content_group)
+        except Exception:
+            content_group = None
 
     palette: list[str] = []
     mode = (cfg.vector_mode or "fill").lower()
@@ -592,7 +672,10 @@ def numpy_to_svg(arr: np.ndarray, config: Any = None) -> tuple[str, np.ndarray, 
                 path.attribs["stroke-width"] = 0
                 path.attribs["stroke"] = "none"
             path.attribs["style"] = "fill-rule:evenodd"
-            dwg.add(path)
+            if content_group is not None:
+                content_group.add(path)
+            else:
+                dwg.add(path)
 
     if not palette and color_regions:
         region = max(color_regions, key=lambda item: item["area"])

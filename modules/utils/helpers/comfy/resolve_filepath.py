@@ -10,13 +10,13 @@ from ....utils.constants import USER_FOLDER
 
 # region resolve_filepath
 def resolve_filepath(
-        filename_prefix: str = None, 
-        base_output_path: str = None, 
-        add_timestamp: bool = False, 
-        extension: str = "PNG", 
-        add_counter: bool = True, 
+        filename_prefix: str = None,
+        base_output_path: str = None,
+        add_timestamp: bool = False,
+        extension: str = "PNG",
+        add_counter: bool = True,
         image: torch.Tensor = None,
-        temp_cache: TempFileCache = None) -> str:
+        temp_cache: TempFileCache = None) -> tuple[str, str, str]:
     """
     Resolve and prepare a file path for saving an image produced by ComfyUI.
     This function builds a full output file path (and related metadata) from a
@@ -50,7 +50,7 @@ def resolve_filepath(
             - subfolder: The subfolder path returned by get_save_image_path (may be
                 empty or relative to base_output_path).
             - filename: The final filename (including extension and any counter).
-            
+
     Side effects:
     - Ensures the output folder exists (os.makedirs(..., exist_ok=True)).
     - May create or increment a filename counter by checking existing files on
@@ -69,7 +69,7 @@ def resolve_filepath(
     Example:
     - Typical return value:
             ("/path/to/output/subfolder/prefix_1.PNG", "subfolder", "prefix_1.PNG")
-    """    
+    """
     if filename_prefix == None:
         filename_prefix = f"{USER_FOLDER}/ComfyUI"
     else:
@@ -80,7 +80,7 @@ def resolve_filepath(
 
     if add_timestamp:
         filename_prefix = f"{filename_prefix}_%year%-%month%-%day%_%hour%-%minute%-%second%"
-    
+
     if isinstance(normalize_list_to_value(image), torch.Tensor):
         height = image.shape[1]
         width = image.shape[2]

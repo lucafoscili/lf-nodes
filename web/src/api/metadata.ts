@@ -5,9 +5,7 @@ import {
   MetadataAPIs,
 } from '../types/api/api';
 import { LogSeverity } from '../types/manager/manager';
-import { getLfManager } from '../utils/common';
-/// @ts-ignore
-import { api } from '/scripts/api.js';
+import { getComfyAPI, getLfManager } from '../utils/common';
 
 export const METADATA_API: MetadataAPIs = {
   //#region clear
@@ -20,7 +18,7 @@ export const METADATA_API: MetadataAPIs = {
     };
 
     try {
-      const response = await api.fetchApi(APIEndpoints.ClearMetadata, {
+      const response = await getComfyAPI().fetchApi(APIEndpoints.ClearMetadata, {
         method: 'POST',
       });
 
@@ -106,7 +104,7 @@ export const METADATA_API: MetadataAPIs = {
       body.append('metadata', JSON.stringify(dataset));
       body.append('forced_save', String(forcedSave).valueOf());
 
-      const response = await api.fetchApi(APIEndpoints.SaveMetadata, {
+      const response = await getComfyAPI().fetchApi(APIEndpoints.SaveMetadata, {
         method: 'POST',
         body,
       });
@@ -150,7 +148,7 @@ export const METADATA_API: MetadataAPIs = {
       body.append('model_path', modelPath);
       body.append('base64_image', b64image);
 
-      const response = await api.fetchApi(APIEndpoints.UpdateMetadataCover, {
+      const response = await getComfyAPI().fetchApi(APIEndpoints.UpdateMetadataCover, {
         method: 'POST',
         body,
       });

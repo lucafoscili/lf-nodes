@@ -4,12 +4,6 @@ import torch
 
 from typing import Any, Callable, Dict, Tuple
 
-from ..helpers.conversion import (
-    base64_to_tensor,
-    convert_to_boolean,
-    convert_to_float,
-    convert_to_int,
-)
 from .background_remover import background_remover_effect
 from .blend import blend_effect
 from .bloom import bloom_effect
@@ -28,7 +22,13 @@ from .split_tone import split_tone_effect
 from .tilt_shift import tilt_shift_effect
 from .vibrance import vibrance_effect
 from .vignette import vignette_effect
-from ..helpers.torch import create_colored_tensor
+from ...utils.helpers.conversion import (
+    base64_to_tensor,
+    convert_to_boolean,
+    convert_to_float,
+    convert_to_int,
+)
+from ...utils.helpers.torch import create_colored_tensor
 
 FilterPayload = Dict[str, Any]
 FilterResult = Tuple[torch.Tensor, FilterPayload]
@@ -109,8 +109,9 @@ def apply_blend_filter(image: torch.Tensor, settings: dict) -> FilterResult:
     """
     opacity = convert_to_float(settings.get("opacity", 1.0))
     color: str = settings.get("color", "FF0000")
+    mode: str = settings.get("mode") or settings.get("blend_mode") or "normal"
     overlay_image = create_colored_tensor(image, color)
-    return _as_result(blend_effect(image, overlay_image, opacity))
+    return _as_result(blend_effect(image, overlay_image, opacity, mode=mode))
 # endregion
 
 # region Bloom
@@ -471,7 +472,7 @@ def apply_unsharp_mask_filter(image: torch.Tensor, settings: dict) -> FilterResu
     """
     Applies an unsharp mask filter to the given image tensor using specified settings.
 
-    The unsharp mask filter enhances the edges in the image by subtracting a blurred version of the image from the original, 
+    The unsharp mask filter enhances the edges in the image by subtracting a blurred version of the image from the original,
     then scaling and adding it back. This is commonly used to increase perceived sharpness.
 
     Args:

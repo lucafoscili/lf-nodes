@@ -29,13 +29,10 @@ import {
   LogSeverity,
 } from '../types/manager/manager';
 import { CustomWidgetName, NodeName } from '../types/widgets/widgets';
+import { getComfyAPI, getComfyAPP } from '../utils/common';
 import { LFNodes } from './nodes';
 import { LFTooltip } from './tooltip';
 import { LFWidgets } from './widgets';
-/// @ts-ignore
-import { api } from '/scripts/api.js';
-/// @ts-ignore
-import { app } from '/scripts/app.js';
 
 export class LFManager {
   #APIS: APIRoutes = {
@@ -93,6 +90,9 @@ export class LFManager {
 
   //#region Initialize
   initialize() {
+    const api = getComfyAPI();
+    const app = getComfyAPP();
+
     installLFBeforeFreeHooks(api, {
       logger: (m, a, s) => this.log(m, a, s),
     });

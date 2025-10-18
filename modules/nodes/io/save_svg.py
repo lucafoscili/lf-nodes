@@ -1,3 +1,5 @@
+import os
+
 from server import PromptServer
 
 from . import CATEGORY
@@ -44,28 +46,18 @@ class LF_SaveSVG:
     RETURN_TYPES = (Input.STRING,)
 
     def on_exec(self, **kwargs: dict):
-        svg: dict = normalize_list_to_value(kwargs.get("svg"))
+        svg: str = normalize_list_to_value(kwargs.get("svg"))
         filename_prefix: str = normalize_list_to_value(kwargs.get("filename_prefix"))
         add_timestamp: bool = normalize_list_to_value(kwargs.get("add_timestamp"))
         add_counter: bool = normalize_list_to_value(kwargs.get("add_counter"))
 
         svg_blocks = split_svgs(svg)
 
+        filenames: list[str] = []
         nodes: list[dict] = []
         for index, block in enumerate(svg_blocks):
-            slot_name = f"slot-{index}"
-            nodes.append({
-                "cells": {
-                    "lfSlot": {
-                        "shape": "slot",
-                        "value": slot_name
-                    }
-                },
-                "id": str(index),
-                "value": str(index)
-            })
 
-            output_file, _, _ = resolve_filepath(
+            output_file, _, filename = resolve_filepath(
                 filename_prefix=filename_prefix,
                 base_output_path=get_comfy_dir("output"),
                 add_timestamp=add_timestamp,
@@ -84,11 +76,22 @@ class LF_SaveSVG:
 
             with open(output_file, 'w', encoding='utf-8') as svg_file:
                 svg_file.write(content)
+            
+            nodes.append({
+                "cells": {
+                    "lfSlot": {
+                        "shape": "slot",
+                        "value": filename
+                    }
+                },
+                "id": str(index),
+                "value": str(index)
+            })
+            filenames.append(filename)
 
         dataset: dict = { "nodes": nodes }
 
-        slot_names = [f"slot-{i}" for i in range(len(svg_blocks))]
-        slot_map = { name: block for name, block in zip(slot_names, svg_blocks) }
+        slot_map = { name: block for name, block in zip(filenames, svg_blocks) }
 
         PromptServer.instance.send_sync(f"{EVENT_PREFIX}savesvg", {
             "node": kwargs.get("node_id"),
@@ -97,7 +100,20 @@ class LF_SaveSVG:
         })
 
         return {
-            "ui": {"svg": (svg,)},
+            "ui": {
+                "_description": ["LF_SaveSVG"],
+                "lf_code": [{
+                    "_description": "SVG data",
+                    "lfLanguage": "html",
+                    "lfValue": svg
+                }],
+                "lf_masonry": [{
+                    "_description": "Saved SVGs",
+                    "_slotmap": slot_map,
+                    "lfDataset": dataset,
+                    "lfShape": "slot"
+                }],
+            },
             "result": (svg,)
         }
 # endregion

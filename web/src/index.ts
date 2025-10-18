@@ -1,6 +1,5 @@
 import { getLfFramework } from '@lf-widgets/framework';
 import './@lf-widgets/core/dist/lf-core/lf-core.esm.js';
-
 import { getLfManager, initLfManager } from './utils/common';
 
 const isDev = true;
@@ -13,7 +12,7 @@ if (isDev) {
   console.log('LF Framework initialized!');
 }
 
-const hasComfyApp = typeof window !== 'undefined' && typeof (window as any).LGraph !== 'undefined';
+const hasComfyApp = comfyAPI?.api && comfyAPI?.app;
 if (hasComfyApp) {
   initLfManager();
   const lfManager = getLfManager();
@@ -23,6 +22,6 @@ if (hasComfyApp) {
   }
 } else {
   if (isDev) {
-    console.log('Skipping dashboard bootstrap (no Comfy app detected)');
+    console.log('No Comfy app detected.');
   }
 }

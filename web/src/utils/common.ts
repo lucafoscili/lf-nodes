@@ -186,6 +186,12 @@ export const unescapeJson = (input: any): UnescapeJSONPayload => {
 export const getApiRoutes = () => {
   return getLfManager().getApiRoutes();
 };
+export const getComfyAPI = () => {
+  return comfyAPI['api'].api;
+};
+export const getComfyAPP = () => {
+  return comfyAPI['app'].app;
+};
 export const getLfData = () => {
   return getLfManager().getManagers().lfFramework?.data;
 };
@@ -417,5 +423,38 @@ export const refreshChart = (node: NodeType) => {
   } catch (error) {
     getLfManager().log('Whoops! It seems there is no chart. :V', { error }, LogSeverity.Error);
   }
+};
+export const uploadFiles = async (files: File[], uploadEl: HTMLLfUploadElement) => {
+  const fileNames: Set<string> = new Set();
+
+  for (let index = 0; index < files.length; index++) {
+    const file = files[index];
+    try {
+      const body = new FormData();
+      const i = file.webkitRelativePath.lastIndexOf('/');
+      const subfolder = file.webkitRelativePath.slice(0, i + 1);
+      const new_file = new File([file], file.name, {
+        type: file.type,
+        lastModified: file.lastModified,
+      });
+      body.append('image', new_file);
+      if (i > 0) {
+        body.append('subfolder', subfolder);
+      }
+      const resp = await getApiRoutes().comfy.upload(body);
+
+      if (resp.status === 200 || resp.status === 201) {
+        getLfManager().log('POST result', { json: resp.json }, LogSeverity.Success);
+        fileNames.add(file.name);
+        uploadEl.dataset.files = uploadEl.dataset.files + ';' + file.name;
+      } else {
+        getLfManager().log('POST failed', { statusText: resp.statusText }, LogSeverity.Error);
+      }
+    } catch (error) {
+      alert(`Upload failed: ${error}`);
+    }
+  }
+
+  return { files: Array.from(fileNames), filesStr: Array.from(fileNames).join(';') };
 };
 //#endregion
