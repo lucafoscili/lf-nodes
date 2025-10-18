@@ -9,7 +9,7 @@ This document walks through the moving parts behind the interactive image editor
 - **`LF_ImagesEditingBreakpoint`** snapshots the incoming batch, caches all diffusion context (model, clip, vae, prompts, conditioning, sampler options), writes a dataset JSON to `ComfyUI/temp`, and notifies the UI through the prompt server.
 - **The UI** reads and mutates that dataset file, renders masonry previews, and posts filter requests back to the backend. Manual-apply filters (including inpaint) hold changes until the user confirms.
 - **`POST /lf-nodes/process-image`** resolves the selected asset, routes the request through `process_filter`, saves outputs/masks with deterministic names from the UI, and returns payload metadata to update the history view.
-- **`apply_inpaint_filter`** adapts the masked ROI to SDXL-friendly presets (multiples of 64px, aspect ratio ≤ 3:1), blends prompt vs. stored conditioning via the `conditioning_mix` slider, runs denoising without preview, re-injects original background pixels to avoid seams, and optionally applies a light unsharp mask.
+- **`apply_inpaint_filter`** adapts the masked ROI to SDXL-friendly presets (multiples of 64px, aspect ratio <= 3:1), blends prompt vs. stored conditioning via the `conditioning_mix` slider, runs denoising without preview, re-injects original background pixels to avoid seams, and optionally applies a light unsharp mask.
 
 ---
 
@@ -31,10 +31,11 @@ This document walks through the moving parts behind the interactive image editor
 ## Request flow
 
 ### 1. Node execution
+
 1. `LF_ImagesEditingBreakpoint.on_exec` receives the batch, optional model components, prompts, conditioning, and UI widget state.
 2. Each image is normalised and saved to `temp/edit_breakpoint_<counter>.png` via `resolve_filepath`.
 3. A dataset JSON is written to `temp/<node_id>_<uuid>_edit_dataset.json` containing:
-   - `columns`: path + status markers (`pending` → `completed`).
+   - `columns`: path + status markers (`pending` -> `completed`).
    - `nodes`: masonry entries pointing to `/view?filename=...`.
    - `defaults`: inpaint UI defaults seeded from node inputs.
    - `context_id`: absolute dataset path, used as the lookup key.
@@ -44,6 +45,7 @@ This document walks through the moving parts behind the interactive image editor
 7. The node collects edited outputs from disk, converts them back to tensors, and returns them alongside original inputs for downstream comparison.
 
 ### 2. UI lifecycle
+
 1. The widget loads the dataset JSON, renders a masonry grid, and pre-fills settings with `defaults`.
 2. Canvas interactions capture mask strokes into base64 payloads.
 3. When the user requests an inpaint, the widget submits a multipart form to `/lf-nodes/process-image` containing the base image URL, filter `type`, and `settings`.
@@ -51,6 +53,7 @@ This document walks through the moving parts behind the interactive image editor
 5. Responses update the dataset (`nodes`, history snapshots, status) so the node can resume once the user is satisfied.
 
 ### 3. `/process-image`
+
 1. Resolves the URL back to a real file with `resolve_url`.
 2. Loads the tensor, builds a settings dict, and looks up the editing context with `context_id`.
 3. Dispatches to the registered filter function (e.g., `apply_inpaint_filter`).
@@ -71,8 +74,8 @@ This document walks through the moving parts behind the interactive image editor
 
 Additional behaviour:
 
-- **Prompts & conditioning**: When `use_conditioning` is enabled, the UI exposes a `conditioning_mix` slider (`-1` ⇒ stored conditioning only, `0` ⇒ balanced, `1` ⇒ prompt only). The backend logs the resolved mix factor for visibility.
-- **Adaptive presets**: `_select_upsample_plan` chooses the largest whitelist preset (multiples of 64) that fits the ROI area and respects the ≤ 3:1 aspect cap. If the ROI already exceeds the chosen size, no upscale occurs. Console logs print the preset that was selected.
+- **Prompts & conditioning**: When `use_conditioning` is enabled, the UI exposes a `conditioning_mix` slider (`-1` -> stored conditioning only, `0` -> balanced, `1` -> prompt only). The backend logs the resolved mix factor for visibility.
+- **Adaptive presets**: `_select_upsample_plan` chooses the largest whitelist preset (multiples of 64) that fits the ROI area and respects the <= 3:1 aspect cap. If the ROI already exceeds the chosen size, no upscale occurs. Console logs print the preset that was selected.
 - **Seamless background**: Original ROI pixels are re-blended after sampling so unmasked areas remain untouched, eliminating hard patch edges.
 - **Manual apply**: Inpaint defaults to manual-apply mode so multiple slider tweaks can be staged before triggering a backend call.
 
@@ -121,7 +124,7 @@ The UI mutates `columns[1].title` to `completed` when the workflow should resume
 
 | Setting | Type | Default | Purpose |
 | --- | --- | --- | --- |
-| `resource_type` / `output_type` | string | `"temp"` | Which ComfyUI directory (`temp`, `output`, `input`, …) should receive outputs. |
+| `resource_type` / `output_type` | string | `"temp"` | Which ComfyUI directory (`temp`, `output`, `input`, ...) should receive outputs. |
 | `subfolder` | string | `""` | Optional subdirectory under the selected resource; sanitised to avoid `..` escapes. |
 | `filename` | string | auto | Exact file name (extension optional) if deterministic naming is required. |
 | `filename_prefix` | string | filter type | Prefix passed to `resolve_filepath` when auto-generating numbered files. |
@@ -130,7 +133,7 @@ The UI mutates `columns[1].title` to `completed` when the workflow should resume
 Inpaint-specific settings:
 
 - `conditioning_mix` (float, default `0`): blend factor between stored conditioning (`-1`) and the live prompt (`1`).
-- `upsample_target` (int, default `1024`, commonly set to `2048`): desired longer edge for the ROI. The backend snaps to a preset that fits under `target²`.
+- `upsample_target` (int, default `1024`, commonly set to `2048`): desired longer edge for the ROI. The backend snaps to a preset that fits under `target^2`.
 - `apply_unsharp_mask` (bool, default `true`): toggles the conservative sharpening pass applied after downscaling the generated patch.
 
 The filter response can include extra metadata (mask URL, ROI coordinates, upsample info, debug previews) that the UI surfaces in the history view or console.
@@ -163,7 +166,7 @@ The filter response can include extra metadata (mask URL, ROI coordinates, upsam
 - **Empty masks**: Submitting without strokes raises `ValueError("Inpaint mask strokes are empty.")`; the UI prevents the call but the backend guards it.
 - **Missing context**: If `get_editing_context` returns `None`, confirm the dataset `context_id` still points to the active JSON and that the node has not cleaned up the session.
 - **Path issues**: `subfolder` is normalised; any attempt to escape (`..`) results in a HTTP 400.
-- **Unexpected seams**: Adaptive ROI blending now reuses original pixels, but extremely sharp masks may still need a small feather radius (1–2 px).
+- **Unexpected seams**: Adaptive ROI blending now reuses original pixels, but extremely sharp masks may still need a small feather radius (1-2 px).
 
 ---
 
@@ -172,12 +175,11 @@ The filter response can include extra metadata (mask URL, ROI coordinates, upsam
 - Start session: `LF_ImagesEditingBreakpoint.on_exec`
 - Finish session: dataset `columns[id="status"].title = "completed"`
 - API base: `/lf-nodes`
-  - `POST /get-image` – list available inputs
-  - `POST /process-image` – run filter + persist output
+  - `POST /get-image` - list available inputs
+  - `POST /process-image` - run filter + persist output
 - Filter registry: `modules/utils/filters/processors.py`
 - Editing context helpers: `modules/utils/helpers/editing/context.py`
 - Path helpers: `modules/utils/helpers/comfy/resolve_filepath.py`, `modules/utils/helpers/api/get_resource_url.py`
 - Inpaint implementation: `modules/utils/filters/inpaint.py`
 
 With these pieces connected, the image editor delivers a non-linear editing history that round-trips cleanly between the ComfyUI backend and the LF frontend. Follow the conventions above to extend the tooling or add new filters safely.
-
