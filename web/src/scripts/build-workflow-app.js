@@ -46,7 +46,7 @@ async function run() {
       const cssOutFile = path.join(cssOutDir, 'workflow-runner.css');
       const cssResult = sass.compile(scssPath, { style: 'compressed' });
       await fsWriteFile(cssOutFile, cssResult.css);
-      console.log(logColor, '✅ Built CSS' + cssOutFile);
+      console.log(logColor, '✅ Built CSS: ' + cssOutFile);
     } catch (cssErr) {
       console.warn(
         logColor,
@@ -60,7 +60,7 @@ async function run() {
     let finalHtml = rewritten.replace('</head>', `  ${cssLink}\n</head>`);
     finalHtml = finalHtml.replace('</body>', `  ${scriptTag}\n</body>`);
     await fsWriteFile(htmlOut, finalHtml, 'utf8');
-    console.log(logColor, '✅ Wrote production HTML to ' + htmlOut);
+    console.log(logColor, '✅ Wrote production HTML: ' + htmlOut);
   } catch (err) {
     console.error(logColor, '❌ Failed to copy HTML', err);
   }

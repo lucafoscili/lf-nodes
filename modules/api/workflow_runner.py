@@ -7,7 +7,7 @@ import time
 import uuid
 
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, Iterable, Optional
 from aiohttp import web
 from server import PromptServer
 
@@ -16,17 +16,40 @@ from ..utils.helpers.logic.sanitize_filename import sanitize_filename
 from ..workflows import get_workflow, list_workflows
 from ..workflows.registry import _json_safe as workflow_json_safe, InputValidationError
 
+MODULE_ROOT = Path(__file__).resolve().parents[2]
+DEPLOY_ROOT = MODULE_ROOT / "web" / "deploy"
+WORKFLOW_RUNNER_ROOT = DEPLOY_ROOT / "workflow-runner"
+LEGACY_WORKFLOW_RUNNER_ROOT = MODULE_ROOT / "web" / "deploy_workflow_runner"
+
+
+def _sanitize_rel_path(raw_path: str) -> Optional[Path]:
+    normalized = raw_path.replace("\\", "/")
+    if ".." in normalized or normalized.startswith("/"):
+        return None
+    parts = [part for part in normalized.split("/") if part]
+    return Path(*parts)
+
+
+def _serve_first_existing(paths: Iterable[Path]) -> Optional[web.FileResponse]:
+    for candidate in paths:
+        if candidate.exists() and candidate.is_file():
+            return web.FileResponse(str(candidate))
+    return None
+
 # region Workflow runner page
 @PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/workflow-runner")
 async def lf_nodes_workflow_runner_page(_: web.Request) -> web.Response:
     try:
-        module_root = Path(__file__).resolve().parents[2]
-        deploy_html = module_root / "web" / "deploy" / "workflow-runner" / "workflow-runner.html"
-        if not deploy_html.exists():
-            deploy_html = module_root / "web" / "deploy_workflow_runner" / "workflow-runner.html"
+        response = _serve_first_existing(
+            (
+                WORKFLOW_RUNNER_ROOT / "workflow-runner.html",
+                DEPLOY_ROOT / "workflow-runner.html",
+                LEGACY_WORKFLOW_RUNNER_ROOT / "workflow-runner.html",
+            )
+        )
 
-        if deploy_html.exists():
-            return web.FileResponse(str(deploy_html))
+        if response is not None:
+            return response
 
     except Exception:
         pass
@@ -38,23 +61,23 @@ async def lf_nodes_workflow_runner_page(_: web.Request) -> web.Response:
 @PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/static/{{path:.*}}")
 async def lf_nodes_static_asset(request: web.Request) -> web.Response:
     try:
-        module_root = Path(__file__).resolve().parents[2]
-        rel_path = request.match_info.get('path', '')
-        if '..' in rel_path or rel_path.startswith('/') or rel_path.startswith('\\'):
-            return web.Response(status=400, text='Invalid path')
-
-        if not rel_path.startswith('assets/'):
+        raw_path = request.match_info.get('path', '')
+        if not raw_path.startswith('assets/'):
             return web.Response(status=404, text='Not found')
 
-        candidates = [
-            module_root / 'web' / 'deploy' / Path(rel_path),
-            module_root / 'web' / 'deploy' / 'workflow-runner' / Path(rel_path),
-            module_root / 'web' / 'deploy_workflow_runner' / Path(rel_path),
-        ]
+        rel_path = _sanitize_rel_path(raw_path)
+        if rel_path is None:
+            return web.Response(status=400, text='Invalid path')
 
-        for asset_path in candidates:
-            if asset_path.exists() and asset_path.is_file():
-                return web.FileResponse(str(asset_path))
+        response = _serve_first_existing(
+            (
+                DEPLOY_ROOT / rel_path,
+                WORKFLOW_RUNNER_ROOT / rel_path,
+                LEGACY_WORKFLOW_RUNNER_ROOT / rel_path,
+            )
+        )
+        if response is not None:
+            return response
     except Exception:
         logging.exception('Error while attempting to serve static asset: %s', request.path)
 
@@ -65,14 +88,14 @@ async def lf_nodes_static_asset(request: web.Request) -> web.Response:
 @PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/js/{{path:.*}}")
 async def lf_nodes_static_js(request: web.Request) -> web.Response:
     try:
-        module_root = Path(__file__).resolve().parents[2]
-        rel_path = request.match_info.get('path', '')
-        if '..' in rel_path or rel_path.startswith('/') or rel_path.startswith('\\'):
+        raw_path = request.match_info.get('path', '')
+        rel_path = _sanitize_rel_path(raw_path)
+        if rel_path is None:
             return web.Response(status=400, text='Invalid path')
 
-        candidate = module_root / 'web' / 'deploy' / 'js' / Path(rel_path)
-        if candidate.exists() and candidate.is_file():
-            return web.FileResponse(str(candidate))
+        response = _serve_first_existing((DEPLOY_ROOT / 'js' / rel_path,))
+        if response is not None:
+            return response
     except Exception:
         logging.exception('Error while attempting to serve shared JS asset: %s', request.path)
 
@@ -83,19 +106,19 @@ async def lf_nodes_static_js(request: web.Request) -> web.Response:
 @PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/static-workflow-runner/{'{path:.*}'}")
 async def lf_nodes_static_workflow(request: web.Request) -> web.Response:
     try:
-        module_root = Path(__file__).resolve().parents[2]
-        rel_path = request.match_info.get('path', '')
-        if '..' in rel_path or rel_path.startswith('/') or rel_path.startswith('\\'):
+        raw_path = request.match_info.get('path', '')
+        rel_path = _sanitize_rel_path(raw_path)
+        if rel_path is None:
             return web.Response(status=400, text='Invalid path')
 
-        candidates = [
-            module_root / 'web' / 'deploy' / 'workflow-runner' / Path(rel_path),
-            module_root / 'web' / 'deploy_workflow_runner' / Path(rel_path),
-        ]
-
-        for asset_path in candidates:
-            if asset_path.exists() and asset_path.is_file():
-                return web.FileResponse(str(asset_path))
+        response = _serve_first_existing(
+            (
+                WORKFLOW_RUNNER_ROOT / rel_path,
+                LEGACY_WORKFLOW_RUNNER_ROOT / rel_path,
+            )
+        )
+        if response is not None:
+            return response
     except Exception:
         pass
 
