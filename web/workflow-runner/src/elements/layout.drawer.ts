@@ -1,4 +1,4 @@
-import { WorkflowState } from '../../types/workflow-runner/state';
+import { WorkflowState } from '../types/state';
 import { WorkflowSectionController } from './section';
 
 //#region Constants

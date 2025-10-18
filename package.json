@@ -10,7 +10,7 @@
   "scripts": {
     "clean": "node ./web/src/scripts/clean.js",
     "build:scss": "node ./web/src/scripts/compile-scss.js",
-    "build:ts": "tsc",
+    "build:ts": "tsc && tsc -p ./web/workflow-runner/tsconfig.json",
     "build:lfw": "node ./web/src/scripts/copy-widgets.js",
     "build:vite": "vite build",
     "build:submit": "node ./web/src/scripts/build-workflow-app.js",

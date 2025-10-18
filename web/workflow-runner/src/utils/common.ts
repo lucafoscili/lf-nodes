@@ -1,4 +1,4 @@
-import { WorkflowAPIUploadPayload, WorkflowAPIUploadResponse } from '../../types/workflow-runner/api';
+import { WorkflowAPIUploadPayload, WorkflowAPIUploadResponse } from '../types/api';
 
 //#region API
 export const isObject = (v: unknown): v is Record<string, unknown> =>

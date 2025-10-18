@@ -1,4 +1,4 @@
-import { WorkflowStatus } from '../types/workflow-runner/state';
+import { WorkflowStatus } from './types/state';
 
 export const API_BASE = '/api';
 export const API_ROUTE_PREFIX = '/lf-nodes';

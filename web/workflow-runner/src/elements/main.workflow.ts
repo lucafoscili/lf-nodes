@@ -5,8 +5,8 @@ import {
   WorkflowAPIResult,
   WorkflowAPIResultKey,
   WorkflowAPIUI,
-} from '../../types/workflow-runner/api';
-import { WorkflowState, WorkflowStatus } from '../../types/workflow-runner/state';
+} from '../types/api';
+import { WorkflowState, WorkflowStatus } from '../types/state';
 import { DEFAULT_STATUS_MESSAGES } from '../config';
 import { clearChildren, normalize_description } from '../utils/common';
 import { createComponent, createInputField, createOutputField } from './components';

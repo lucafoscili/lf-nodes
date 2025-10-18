@@ -10,7 +10,7 @@ import {
   LfUploadInterface,
 } from '@lf-widgets/foundations/dist';
 import { getLfFramework } from '@lf-widgets/framework';
-import { WorkflowAPIField, WorkflowAPIResult } from '../../types/workflow-runner/api';
+import { WorkflowAPIField, WorkflowAPIResult } from '../types/api';
 import { normalize_description } from '../utils/common';
 
 //#region Helpers

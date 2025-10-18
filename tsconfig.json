@@ -34,5 +34,5 @@
     "types": ["node", "@lf-widgets/core"]
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
-  "exclude": ["node_modules", "web/deploy"]
+  "exclude": ["node_modules", "web/deploy", "web/workflow-runner"]
 }

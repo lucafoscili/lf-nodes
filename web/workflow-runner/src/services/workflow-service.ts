@@ -4,8 +4,8 @@ import {
   WorkflowAPIRunPayload,
   WorkflowAPIUploadPayload,
   WorkflowAPIUploadResponse,
-} from '../../types/workflow-runner/api';
-import { WorkflowStatus } from '../../types/workflow-runner/state';
+} from '../types/api';
+import { WorkflowStatus } from '../types/state';
 import { buildApiUrl } from '../config';
 import { isWorkflowAPIUploadPayload, isWorkflowAPIUploadResponse } from '../utils/common';
 

@@ -1,4 +1,4 @@
-import { WorkflowState } from '../../types/workflow-runner/state';
+import { WorkflowState } from '../types/state';
 
 type StateMutator = (state: WorkflowState) => void;
 type StateListener = (state: WorkflowState) => void;

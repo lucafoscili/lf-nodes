@@ -1,6 +1,6 @@
 import { getLfFramework } from '@lf-widgets/framework';
-import { WorkflowRunnerManager } from '../../types/workflow-runner/manager';
-import { WorkflowStatus } from '../../types/workflow-runner/state';
+import { WorkflowRunnerManager } from '../types/manager';
+import { WorkflowStatus } from '../types/state';
 import {
   fetchWorkflowDefinitions,
   runWorkflowRequest,
