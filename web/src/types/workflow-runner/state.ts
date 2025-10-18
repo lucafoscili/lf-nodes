@@ -1,11 +1,13 @@
-import { WorkflowAPIDefinition } from './api';
+import { WorkflowAPIDefinition, WorkflowAPIUI } from './api';
 import { WorkflowRunnerManager } from './manager';
 
 //#region State
 export type WorkflowStatus = 'ready' | 'running' | 'error';
 export interface WorkflowCurrent {
   status: WorkflowStatus;
+  message: string | null;
   workflow: WorkflowAPIDefinition['id'] | null;
+  preferredOutput?: string | null;
 }
 export interface WorkflowUI {
   layout: {
@@ -37,8 +39,9 @@ export interface WorkflowUI {
 }
 export interface WorkflowState {
   current: WorkflowCurrent;
-  manager: WorkflowRunnerManager;
+  manager: WorkflowRunnerManager | null;
   ui: WorkflowUI;
   workflows: WorkflowAPIDefinition[];
+  results: WorkflowAPIUI | null;
 }
 //#endregion

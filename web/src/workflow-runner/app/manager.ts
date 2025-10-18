@@ -1,182 +1,221 @@
 import { getLfFramework } from '@lf-widgets/framework';
-import { APIEndpoints } from '../../types/api/api';
-import { WorkflowAPIRunPayload } from '../../types/workflow-runner/api';
 import { WorkflowRunnerManager } from '../../types/workflow-runner/manager';
-import { WorkflowState, WorkflowStatus } from '../../types/workflow-runner/state';
-import { invokeRunAPI } from '../api/run';
-import { drawerSection } from '../elements/layout.drawer';
-import { headerSection } from '../elements/layout.header';
-import { mainSection } from '../elements/layout.main';
-import { workflowSection } from '../elements/main.workflow';
-import { handleUploadField } from '../utils/common';
+import { WorkflowStatus } from '../../types/workflow-runner/state';
+import {
+  fetchWorkflowDefinitions,
+  runWorkflowRequest,
+  uploadWorkflowFiles,
+  WorkflowApiError,
+} from '../services/workflow-service';
+import { DEFAULT_STATUS_MESSAGES, DEFAULT_THEME, buildAssetsUrl } from '../config';
+import { createDrawerSection } from '../elements/layout.drawer';
+import { createHeaderSection } from '../elements/layout.header';
+import { createMainSection } from '../elements/layout.main';
+import { createWorkflowSection, WorkflowSectionHandle } from '../elements/main.workflow';
+import { createWorkflowRunnerStore, WorkflowRunnerStore } from './store';
 import { initState } from './state';
 
 export class LfWorkflowRunnerManager implements WorkflowRunnerManager {
-  //#region Private fields
-  #API_BASE = '/api';
-  #ASSETS_BASE = this.#API_BASE + '/lf-nodes/static/assets/';
-  #ASSETS_URL = window.location.origin + this.#ASSETS_BASE;
-  #MANAGERS: { lfFramework: ReturnType<typeof getLfFramework> | null } = {
-    lfFramework: null,
+  #framework = getLfFramework();
+  #store: WorkflowRunnerStore;
+  #sections: {
+    drawer: ReturnType<typeof createDrawerSection>;
+    header: ReturnType<typeof createHeaderSection>;
+    main: ReturnType<typeof createMainSection>;
+    workflow: WorkflowSectionHandle;
   };
-  #STATE: WorkflowState = initState(document.querySelector('#app'), this);
-  //#endregion
 
-  //#region Constructor
   constructor() {
-    const assetsUrl = this.#ASSETS_URL;
+    const container = document.querySelector<HTMLDivElement>('#app');
+    if (!container) {
+      throw new Error('Workflow runner container not found.');
+    }
 
-    this.#MANAGERS.lfFramework = getLfFramework();
-    this.#MANAGERS.lfFramework.assets.set(assetsUrl);
-    this.#MANAGERS.lfFramework.theme.set('dark');
+    this.#store = createWorkflowRunnerStore(initState(container));
+    this.#sections = {
+      drawer: createDrawerSection(),
+      header: createHeaderSection(),
+      main: createMainSection(),
+      workflow: createWorkflowSection(),
+    };
 
-    this.#initializeElements();
-    this.#loadWorkflows()
-      .then(() => this.setStatus('ready'))
-      .catch((err) => {
-        console.error(err);
-        this.setStatus('error');
+    this.#store.setState((state) => {
+      state.manager = this;
+    });
+
+    this.#initializeFramework();
+    this.#initializeLayout();
+    this.#subscribeToState();
+    this.setStatus('running', 'Loading workflows...');
+    this.#loadWorkflows().catch((error) => {
+      console.error('Failed to load workflows:', error);
+      const message = error instanceof Error ? error.message : 'Failed to load workflows.';
+      this.setStatus('error', message);
+    });
+  }
+
+  async runWorkflow(): Promise<void> {
+    const state = this.#store.getState();
+    const workflowId = state.current.workflow;
+    if (!workflowId) {
+      this.setStatus('error', 'No workflow selected.');
+      return;
+    }
+
+    this.setStatus('running', 'Submitting workflow...');
+
+    let inputs: Record<string, unknown>;
+    try {
+      inputs = await this.#collectInputs();
+    } catch (error) {
+      console.error('Failed to collect inputs:', error);
+      const detail =
+        error instanceof WorkflowApiError
+          ? error.payload?.detail || error.message
+          : (error as Error)?.message || 'Failed to collect inputs.';
+      this.setStatus('error', `Failed to collect inputs: ${detail}`);
+      return;
+    }
+
+    try {
+      const response = await runWorkflowRequest(workflowId, inputs);
+      this.#store.setState((draft) => {
+        draft.current.status = response.status;
+        draft.current.message = response.message;
+        draft.current.preferredOutput = response.payload.preferred_output ?? null;
+        draft.results = response.payload.history?.outputs
+          ? { ...response.payload.history.outputs }
+          : null;
       });
+    } catch (error) {
+      if (error instanceof WorkflowApiError) {
+        this.#store.setState((draft) => {
+          draft.current.status = 'error';
+          draft.current.message = error.message;
+        });
+        const inputName = error.payload?.error?.input;
+        if (inputName) {
+          this.#sections.workflow.setFieldStatus(this.#store.getState(), inputName, 'error');
+        }
+      } else {
+        console.error('Unexpected error while running workflow:', error);
+        this.setStatus('error', 'Unexpected error while running the workflow.');
+      }
+    }
   }
-  //#endregion
 
-  //#region Initialize
-  #buildLayout() {
-    const { ui } = this.#STATE;
-
-    ui.layout._root.appendChild(ui.layout.drawer._root);
-    ui.layout._root.appendChild(ui.layout.main._root);
+  setStatus(status: WorkflowStatus, message?: string): void {
+    this.#store.setState((draft) => {
+      draft.current.status = status;
+      draft.current.message = message ?? DEFAULT_STATUS_MESSAGES[status];
+    });
   }
-  #initializeElements() {
-    const { ui } = this.#STATE;
 
-    // Remove children using a snapshot-safe loop to avoid skipping when removing
-    // from a live NodeList. Using firstChild removal is widest-compatible.
-    while (ui.layout._root.firstChild) {
-      ui.layout._root.removeChild(ui.layout._root.firstChild);
+  async setWorkflow(id: string): Promise<void> {
+    const state = this.#store.getState();
+    if (state.current.workflow === id) {
+      return;
     }
 
-    drawerSection.create(this.#STATE);
-    headerSection.create(this.#STATE);
-    mainSection.create(this.#STATE);
-
-    workflowSection.create(this.#STATE);
-
-    this.#buildLayout();
+    this.#store.setState((draft) => {
+      draft.current.workflow = id;
+      draft.current.preferredOutput = null;
+      draft.results = null;
+    });
   }
-  //#endregion
 
-  //#region loadWorkflows
-  #loadWorkflows = async () => {
-    const response = await fetch(`${this.#API_BASE}${APIEndpoints.Workflows}`);
-    if (!response.ok) {
-      throw new Error(`Failed to load workflows (${response.status})`);
-    }
-
-    const data = await response.json();
-    this.#STATE.workflows = Array.isArray(data.workflows) ? data.workflows : [];
-    const firstWorkflow = this.#STATE.workflows[0];
-    if (!firstWorkflow) {
-      throw new Error('No workflows available from the API.');
-    }
-
-    this.setWorkflow(firstWorkflow.id);
-  };
-  //#endregion
-
-  //#region Run Workflow
-  collectInputs = async () => {
-    const { fields } = this.#STATE.ui.layout.main.workflow;
-
+  //#region Internal helpers
+  #collectInputs = async (): Promise<Record<string, unknown>> => {
+    const state = this.#store.getState();
+    const { fields } = state.ui.layout.main.workflow;
     const inputs: Record<string, unknown> = {};
-    for (const el of fields) {
-      const value: unknown = await el.getValue();
-      workflowSection.update.fieldWrapper(this.#STATE, el.dataset.name);
 
-      switch (el.tagName.toLowerCase()) {
+    for (const element of fields) {
+      const fieldName = element.dataset.name || '';
+      if (!fieldName) {
+        continue;
+      }
+
+      this.#sections.workflow.setFieldStatus(state, fieldName);
+      const value: unknown = await element.getValue();
+      switch (element.tagName.toLowerCase()) {
         case 'lf-toggle':
-          inputs[el.dataset.name] = value === 'off' ? false : true;
+          inputs[fieldName] = value === 'off' ? false : true;
           break;
-
         case 'lf-upload':
-          try {
-            const files = value as File[];
-            const paths = await handleUploadField(this.#STATE, el.dataset.name, files);
-
-            inputs[el.dataset.name] = paths.length === 1 ? paths[0] : paths;
-          } catch (err) {
-            throw err;
-          }
+          inputs[fieldName] = await this.#handleUploadField(fieldName, value);
           break;
-
         default:
-        case 'lf-textfield':
-          inputs[el.dataset.name] = value;
-          break;
+          inputs[fieldName] = value;
       }
     }
 
     return inputs;
   };
-  runWorkflow = async () => {
-    const { current } = this.#STATE;
 
-    if (!current.workflow) {
-      this.setStatus('error', 'No workflow selected.');
-      return;
+  #handleUploadField = async (fieldName: string, rawValue: unknown) => {
+    const files = Array.isArray(rawValue) ? rawValue : (rawValue as File[] | undefined);
+    if (!files || files.length === 0) {
+      return [];
     }
 
-    this.setStatus('running', 'Submitting workflow…');
-    let inputs: Record<string, unknown>;
     try {
-      inputs = await this.collectInputs();
-    } catch (err) {
-      console.error('Failed to collect inputs:', err);
-      const short =
-        err && (err as Error).message ? (err as Error).message : 'Failed to collect inputs';
-      const userMessage = `Failed to collect inputs: ${short}`;
-      this.setStatus('error', userMessage);
-      return;
-    }
-    const { message, payload, status } = await invokeRunAPI(current.workflow, inputs);
-    if (payload.error?.input) {
-      workflowSection.update.fieldWrapper(this.#STATE, payload.error.input, 'error');
-    }
-    this.setStatus(status, message);
-
-    if (status === 'ready') {
-      this.setResult(payload);
-      this.#STATE.ui.layout.main.workflow.result.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start',
-      });
+      this.setStatus('running', 'Uploading file...');
+      const { payload } = await uploadWorkflowFiles(files);
+      const paths = payload?.paths || [];
+      this.setStatus('running', 'File uploaded, processing...');
+      return paths.length === 1 ? paths[0] : paths;
+    } catch (error) {
+      if (error instanceof WorkflowApiError) {
+        this.#sections.workflow.setFieldStatus(this.#store.getState(), fieldName, 'error');
+        this.setStatus('error', `Upload failed: ${error.payload?.detail || error.message}`);
+      }
+      throw error;
     }
   };
-  //#endregion
 
-  //#region Setters
-  setResult = (payload: WorkflowAPIRunPayload) => {
-    const outputs = payload.history && payload.history.outputs ? payload.history.outputs : {};
+  #initializeFramework() {
+    const assetsUrl = buildAssetsUrl();
+    this.#framework.assets.set(assetsUrl);
+    this.#framework.theme.set(DEFAULT_THEME);
+  }
 
-    workflowSection.update.result(this.#STATE, outputs);
-  };
-  setStatus = (status: WorkflowStatus, message?: string) => {
-    const { current } = this.#STATE;
-
-    current.status = status;
-    workflowSection.update.run(this.#STATE);
-    workflowSection.update.status(this.#STATE, message);
-  };
-  setWorkflow = async (id: string) => {
-    const { current } = this.#STATE;
-
-    if (current.workflow === id) {
+  #initializeLayout() {
+    const state = this.#store.getState();
+    const root = state.ui.layout._root;
+    if (!root) {
       return;
     }
 
-    current.workflow = id;
-    workflowSection.update.title(this.#STATE);
-    workflowSection.update.options(this.#STATE);
+    while (root.firstChild) {
+      root.removeChild(root.firstChild);
+    }
+
+    this.#sections.drawer.mount(state);
+    this.#sections.header.mount(state);
+    this.#sections.main.mount(state);
+    this.#sections.workflow.mount(state);
+    this.#sections.workflow.render(state);
+  }
+
+  #subscribeToState() {
+    this.#store.subscribe((state) => {
+      this.#sections.workflow.render(state);
+    });
+  }
+
+  #loadWorkflows = async () => {
+    const workflows = await fetchWorkflowDefinitions();
+    if (!workflows.length) {
+      throw new Error('No workflows available from the API.');
+    }
+
+    this.#store.setState((draft) => {
+      draft.workflows = workflows;
+    });
+
+    await this.setWorkflow(workflows[0].id);
+    this.setStatus('ready', 'Workflows loaded.');
   };
   //#endregion
 }

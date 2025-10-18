@@ -2,6 +2,7 @@ import { LfButtonInterface } from '@lf-widgets/foundations/dist';
 import { getLfFramework } from '@lf-widgets/framework';
 import { WorkflowState } from '../../types/workflow-runner/state';
 import { createComponent } from './components';
+import { WorkflowSectionController } from './section';
 
 //#region Constants
 const ROOT_CLASS = 'header-section';
@@ -30,29 +31,47 @@ const _drawerToggle = () => {
 };
 //#endregion
 
-//#region Section
-const _createSection = (state: WorkflowState) => {
-  const { ui } = state;
+//#region Factory
+export const createHeaderSection = (): WorkflowSectionController => {
+  let element: HTMLLfHeaderElement | null = null;
+  let lastState: WorkflowState | null = null;
 
-  const section = document.createElement('lf-header');
-  section.className = ROOT_CLASS;
+  const mount = (state: WorkflowState) => {
+    lastState = state;
+    const { ui } = state;
 
-  const container = _container();
-  const drawerToggle = _drawerToggle();
+    element = document.createElement('lf-header');
+    element.className = ROOT_CLASS;
 
-  ui.layout.header.drawerToggle = drawerToggle;
+    const container = _container();
+    const drawerToggle = _drawerToggle();
 
-  section.appendChild(container);
+    ui.layout.header.drawerToggle = drawerToggle;
 
-  container.appendChild(drawerToggle);
+    element.appendChild(container);
+    container.appendChild(drawerToggle);
 
-  ui.layout.header._root = section;
-  ui.layout._root.appendChild(section);
-};
-//#endregion
+    ui.layout.header._root = element;
+    ui.layout._root?.appendChild(element);
+  };
 
-//#region Public API
-export const headerSection = {
-  create: _createSection,
+  const render = () => {};
+
+  const destroy = () => {
+    element?.remove();
+    if (lastState) {
+      lastState.ui.layout.header._root = null;
+      lastState.ui.layout.header.drawerToggle = null;
+      lastState.ui.layout.header.themeSwitch = null;
+    }
+    element = null;
+    lastState = null;
+  };
+
+  return {
+    mount,
+    render,
+    destroy,
+  };
 };
 //#endregion

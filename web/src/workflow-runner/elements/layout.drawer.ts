@@ -1,25 +1,42 @@
 import { WorkflowState } from '../../types/workflow-runner/state';
+import { WorkflowSectionController } from './section';
 
 //#region Constants
 const ROOT_CLASS = 'drawer-section';
 //#endregion
 
-//#region Section
-const _createSection = (state: WorkflowState) => {
-  const { ui } = state;
+//#region Factory
+export const createDrawerSection = (): WorkflowSectionController => {
+  let element: HTMLLfDrawerElement | null = null;
+  let lastState: WorkflowState | null = null;
 
-  const section = document.createElement('lf-drawer');
-  section.className = ROOT_CLASS;
+  const mount = (state: WorkflowState) => {
+    lastState = state;
+    const { ui } = state;
 
-  section.lfDisplay = 'slide';
+    element = document.createElement('lf-drawer');
+    element.className = ROOT_CLASS;
+    element.lfDisplay = 'slide';
 
-  ui.layout.drawer._root = section;
-  ui.layout._root.appendChild(section);
-};
-//#endregion
+    ui.layout.drawer._root = element;
+    ui.layout._root?.appendChild(element);
+  };
 
-//#region Public API
-export const drawerSection = {
-  create: _createSection,
+  const render = () => {};
+
+  const destroy = () => {
+    element?.remove();
+    if (lastState) {
+      lastState.ui.layout.drawer._root = null;
+    }
+    element = null;
+    lastState = null;
+  };
+
+  return {
+    mount,
+    render,
+    destroy,
+  };
 };
 //#endregion

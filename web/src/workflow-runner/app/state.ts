@@ -1,13 +1,9 @@
-import { WorkflowRunnerManager } from '../../types/workflow-runner/manager';
 import { WorkflowState } from '../../types/workflow-runner/state';
 
 //#region Public API
-export const initState = (
-  appContainer: HTMLDivElement,
-  manager: WorkflowRunnerManager,
-): WorkflowState => ({
-  current: { status: 'ready', workflow: null },
-  manager,
+export const initState = (appContainer: HTMLDivElement): WorkflowState => ({
+  current: { status: 'ready', message: 'Ready.', workflow: null, preferredOutput: null },
+  manager: null,
   ui: {
     layout: {
       _root: appContainer,
@@ -35,5 +31,6 @@ export const initState = (
     },
   },
   workflows: [],
+  results: null,
 });
 //#endregion

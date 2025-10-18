@@ -1,149 +1,167 @@
 import { LfThemeUIState } from '@lf-widgets/core/dist/types/components';
 import { LfButtonInterface } from '@lf-widgets/foundations/dist';
 import {
+  WorkflowAPIField,
   WorkflowAPIResult,
   WorkflowAPIResultKey,
   WorkflowAPIUI,
 } from '../../types/workflow-runner/api';
-import { WorkflowState } from '../../types/workflow-runner/state';
-import { normalize_description } from '../utils/common';
+import { WorkflowState, WorkflowStatus } from '../../types/workflow-runner/state';
+import { DEFAULT_STATUS_MESSAGES } from '../config';
+import { clearChildren, normalize_description } from '../utils/common';
 import { createComponent, createInputField, createOutputField } from './components';
+import { WorkflowSectionController } from './section';
 
-//#region Constants
+//#region Constants & helpers
 const WORKFLOW_TEXT = 'Select a workflow';
 const ROOT_CLASS = 'workflow-section';
-//#endregion
+type FieldStatus = 'error' | '';
 
-//#region Helpers
-const _getCurrentWorkflow = (state: WorkflowState) => {
+const getCurrentWorkflow = (state: WorkflowState) => {
   const { current, workflows } = state;
   return workflows.find((wf) => wf.id === current.workflow) || null;
 };
-const _getWorkflowLabel = (state: WorkflowState) => {
-  const workflow = _getCurrentWorkflow(state);
+
+const getWorkflowLabel = (state: WorkflowState) => {
+  const workflow = getCurrentWorkflow(state);
   return workflow?.label || WORKFLOW_TEXT;
 };
-//#endregion
 
-//#region Elements
-const _fieldWrapper = () => {
+const createFieldWrapper = () => {
   const fieldWrapper = document.createElement('div');
   fieldWrapper.className = `${ROOT_CLASS}__field`;
   return fieldWrapper;
 };
-const _optionsWrapper = () => {
+
+const createOptionsWrapper = () => {
   const optionsWrapper = document.createElement('div');
   optionsWrapper.className = `${ROOT_CLASS}__options`;
   return optionsWrapper;
 };
-const _resultWrapper = () => {
+
+const createResultWrapper = () => {
   const resultWrapper = document.createElement('div');
   resultWrapper.className = `${ROOT_CLASS}__result`;
   return resultWrapper;
 };
-const _runButton = (state: WorkflowState) => {
-  const { runWorkflow } = state.manager;
 
+const createRunButton = (state: WorkflowState) => {
   const props = {
     lfAriaLabel: 'Run workflow',
     lfLabel: 'Run workflow',
     lfStretchX: true,
   } as Partial<LfButtonInterface>;
-  const run = createComponent.button(props);
-  run.className = `${ROOT_CLASS}__run`;
-  run.onclick = () => runWorkflow();
-  return run;
+
+  const button = createComponent.button(props);
+  button.className = `${ROOT_CLASS}__run`;
+  button.onclick = () => state.manager?.runWorkflow();
+  return button;
 };
-const _statusWrapper = (tone: LfThemeUIState = 'info') => {
+
+const createStatusWrapper = (tone: LfThemeUIState = 'info') => {
   const statusWrapper = document.createElement('div');
   statusWrapper.className = `${ROOT_CLASS}__status`;
   statusWrapper.dataset.tone = tone;
   return statusWrapper;
 };
-const _title = (state: WorkflowState) => {
+
+const createTitle = (state: WorkflowState) => {
   const h3 = document.createElement('h3');
   h3.className = `${ROOT_CLASS}__title`;
-  h3.textContent = _getWorkflowLabel(state);
+  h3.textContent = getWorkflowLabel(state);
   return h3;
 };
 //#endregion
 
-//#region Section
-const _createSection = (state: WorkflowState) => {
-  const { ui } = state;
+export interface WorkflowSectionHandle extends WorkflowSectionController {
+  setFieldStatus: (state: WorkflowState, name: string, status?: FieldStatus) => void;
+}
 
-  const section = document.createElement('section');
-  section.className = ROOT_CLASS;
+//#region Factory
+export const createWorkflowSection = (): WorkflowSectionHandle => {
+  let section: HTMLElement | null = null;
+  let optionsWrapper: HTMLDivElement | null = null;
+  let resultWrapper: HTMLElement | null = null;
+  let runButton: HTMLLfButtonElement | null = null;
+  let statusWrapper: HTMLElement | null = null;
+  let titleElement: HTMLElement | null = null;
+  let lastWorkflowId: string | null = null;
+  let lastStatus: WorkflowStatus | null = null;
+  let lastMessage: string | null = null;
+  let lastResultsRef: WorkflowAPIUI | null = null;
+  let mountedState: WorkflowState | null = null;
 
-  const optionsWrapper = _optionsWrapper();
-  const runButton = _runButton(state);
-  const resultWrapper = _resultWrapper();
-  const statusWrapper = _statusWrapper();
-  const title = _title(state);
-
-  ui.layout.main.workflow._root = section;
-  ui.layout.main.workflow.options = optionsWrapper;
-  ui.layout.main.workflow.result = resultWrapper;
-  ui.layout.main.workflow.run = runButton;
-  ui.layout.main.workflow.status = statusWrapper;
-  ui.layout.main.workflow.title = title;
-
-  section.appendChild(title);
-  section.appendChild(optionsWrapper);
-  section.appendChild(runButton);
-  section.appendChild(statusWrapper);
-  section.appendChild(resultWrapper);
-
-  ui.layout.main._root.appendChild(section);
-};
-const _updateSection = {
-  fieldWrapper: (state: WorkflowState, name: string, status: 'error' | '' = '') => {
+  const mount = (state: WorkflowState) => {
+    mountedState = state;
     const { ui } = state;
 
-    const field = ui.layout.main.workflow.fields.find((el) => el.dataset.name === name);
-    const wrapper = field.parentElement;
+    section = document.createElement('section');
+    section.className = ROOT_CLASS;
 
-    if (field && wrapper) {
-      wrapper.dataset.status = status;
-    }
-  },
-  options: (state: WorkflowState) => {
-    const { current, ui } = state;
+    titleElement = createTitle(state);
+    optionsWrapper = createOptionsWrapper();
+    runButton = createRunButton(state);
+    statusWrapper = createStatusWrapper('info');
+    resultWrapper = createResultWrapper();
 
+    ui.layout.main.workflow._root = section;
+    ui.layout.main.workflow.options = optionsWrapper;
+    ui.layout.main.workflow.result = resultWrapper;
+    ui.layout.main.workflow.run = runButton;
+    ui.layout.main.workflow.status = statusWrapper;
+    ui.layout.main.workflow.title = titleElement;
+
+    section.appendChild(titleElement);
+    section.appendChild(optionsWrapper);
+    section.appendChild(runButton);
+    section.appendChild(statusWrapper);
+    section.appendChild(resultWrapper);
+
+    ui.layout.main._root?.appendChild(section);
+  };
+
+  const updateOptions = (state: WorkflowState) => {
+    const { ui } = state;
     const element = ui.layout.main.workflow.options;
     if (!element) {
       return;
     }
 
-    while (element.firstChild) {
-      element.removeChild(element.firstChild);
-    }
-    if (!current.workflow) {
+    clearChildren(element);
+    ui.layout.main.workflow.fields = [];
+
+    const workflow = getCurrentWorkflow(state);
+    if (!workflow || !workflow.fields) {
       return;
     }
 
-    ui.layout.main.workflow.fields = [];
-    const workflow = _getCurrentWorkflow(state);
-    for (const field of workflow.fields ?? []) {
-      const wrapper = _fieldWrapper();
-      const fieldElement = createInputField(field);
+    for (const field of workflow.fields) {
+      const wrapper = createFieldWrapper();
+      const fieldElement = createInputField(field as WorkflowAPIField);
       fieldElement.dataset.name = field.name;
 
       ui.layout.main.workflow.fields.push(fieldElement);
-
       wrapper.appendChild(fieldElement);
       element.appendChild(wrapper);
     }
-  },
-  result: (state: WorkflowState, outputs: WorkflowAPIUI) => {
-    const { ui } = state;
+  };
 
+  const updateResult = (state: WorkflowState) => {
+    const { ui } = state;
     const element = ui.layout.main.workflow.result;
-    while (element.firstChild) {
-      element.removeChild(element.firstChild);
+    if (!element) {
+      return;
     }
 
-    for (const nodeId in outputs) {
+    const outputs = state.results || {};
+    clearChildren(element);
+
+    const nodeIds = Object.keys(outputs || {});
+    if (nodeIds.length === 0) {
+      return;
+    }
+
+    for (const nodeId of nodeIds) {
       const nodeContent = outputs[nodeId] as WorkflowAPIResult;
       const { _description } = nodeContent;
 
@@ -157,57 +175,117 @@ const _updateSection = {
       element.appendChild(grid);
 
       for (const resultKey in nodeContent) {
-        const rK = resultKey as WorkflowAPIResultKey;
-        switch (rK) {
-          case '_description':
-            break;
-          default:
-            const resultElement = createOutputField(resultKey, nodeContent[resultKey]);
-            resultElement.className = `${ROOT_CLASS}__result-item`;
-            if (resultElement) {
-              grid.appendChild(resultElement);
-            }
-            break;
+        const key = resultKey as WorkflowAPIResultKey;
+        if (key === '_description') {
+          continue;
+        }
+
+        const resultElement = createOutputField(resultKey, nodeContent[resultKey]);
+        resultElement.className = `${ROOT_CLASS}__result-item`;
+        if (resultElement) {
+          grid.appendChild(resultElement);
         }
       }
     }
-  },
-  run: (state: WorkflowState) => {
-    const { current, ui } = state;
 
-    const element = ui.layout.main.workflow.run;
-    element.lfShowSpinner = current.status === 'running';
-  },
-  status: (state: WorkflowState, message?: string) => {
-    const { current, ui } = state;
+    element.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    });
+  };
 
-    const element = ui.layout.main.workflow.status;
-    switch (current.status) {
-      case 'ready':
-        element.textContent = message || 'Ready.';
-        break;
-      case 'running':
-        element.textContent = message || 'Running...';
-        break;
-      case 'error':
-        element.textContent = message || 'An error occurred while running the workflow.';
-        break;
+  const updateRunButton = (state: WorkflowState) => {
+    const button = state.ui.layout.main.workflow.run;
+    if (!button) {
+      return;
+    }
+    button.lfShowSpinner = state.current.status === 'running';
+  };
+
+  const updateStatus = (state: WorkflowState) => {
+    const element = state.ui.layout.main.workflow.status;
+    if (!element) {
+      return;
     }
 
-    element.dataset.tone = current.status;
-  },
-  title: (state: WorkflowState) => {
+    const message = state.current.message ?? DEFAULT_STATUS_MESSAGES[state.current.status];
+    element.textContent = message;
+    element.dataset.tone = state.current.status;
+  };
+
+  const updateTitle = (state: WorkflowState) => {
+    const element = state.ui.layout.main.workflow.title;
+    if (!element) {
+      return;
+    }
+
+    element.textContent = getWorkflowLabel(state);
+  };
+
+  const render = (state: WorkflowState) => {
+    if (!section) {
+      return;
+    }
+
+    if (state.current.workflow !== lastWorkflowId) {
+      updateTitle(state);
+      updateOptions(state);
+      lastWorkflowId = state.current.workflow;
+    }
+
+    if (state.current.status !== lastStatus || state.current.message !== lastMessage) {
+      updateRunButton(state);
+      updateStatus(state);
+      lastStatus = state.current.status;
+      lastMessage = state.current.message ?? null;
+    }
+
+    if (state.results !== lastResultsRef) {
+      updateResult(state);
+      lastResultsRef = state.results;
+    }
+  };
+
+  const setFieldStatus = (state: WorkflowState, name: string, status: FieldStatus = '') => {
     const { ui } = state;
+    const field = ui.layout.main.workflow.fields.find((el) => el.dataset.name === name);
+    const wrapper = field?.parentElement;
+    if (wrapper) {
+      wrapper.dataset.status = status;
+    }
+  };
 
-    const element = ui.layout.main.workflow.title;
-    element.textContent = _getWorkflowLabel(state);
-  },
-};
-//#endregion
+  const destroy = () => {
+    section?.remove();
+    if (mountedState) {
+      const wf = mountedState.ui.layout.main.workflow;
+      wf._root = null;
+      wf.fields = [];
+      wf.options = null;
+      wf.result = null;
+      wf.run = null;
+      wf.status = null;
+      wf.title = null;
+    }
 
-//#region Public API
-export const workflowSection = {
-  create: _createSection,
-  update: _updateSection,
+    section = null;
+    optionsWrapper = null;
+    resultWrapper = null;
+    runButton = null;
+    statusWrapper = null;
+    titleElement = null;
+    lastWorkflowId = null;
+    lastStatus = null;
+    lastMessage = null;
+    lastResultsRef = null;
+    mountedState = null;
+  };
+
+  return {
+    mount,
+    render,
+    destroy,
+    setFieldStatus,
+  };
 };
 //#endregion

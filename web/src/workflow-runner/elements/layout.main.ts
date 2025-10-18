@@ -1,23 +1,41 @@
 import { WorkflowState } from '../../types/workflow-runner/state';
+import { WorkflowSectionController } from './section';
 
 //#region Constants
 const ROOT_CLASS = 'main-section';
 //#endregion
 
-//#region Section
-const _createSection = (state: WorkflowState) => {
-  const { ui } = state;
+//#region Factory
+export const createMainSection = (): WorkflowSectionController => {
+  let element: HTMLElement | null = null;
+  let lastState: WorkflowState | null = null;
 
-  const section = document.createElement('main');
-  section.className = ROOT_CLASS;
+  const mount = (state: WorkflowState) => {
+    lastState = state;
+    const { ui } = state;
 
-  ui.layout.main._root = section;
-  ui.layout._root.appendChild(section);
-};
-//#endregion
+    element = document.createElement('main');
+    element.className = ROOT_CLASS;
 
-//#region Public API
-export const mainSection = {
-  create: _createSection,
+    ui.layout.main._root = element;
+    ui.layout._root?.appendChild(element);
+  };
+
+  const render = () => {};
+
+  const destroy = () => {
+    element?.remove();
+    if (lastState) {
+      lastState.ui.layout.main._root = null;
+    }
+    element = null;
+    lastState = null;
+  };
+
+  return {
+    mount,
+    render,
+    destroy,
+  };
 };
 //#endregion
