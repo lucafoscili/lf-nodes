@@ -1960,6 +1960,7 @@ var ImageEditorSliderIds;
   ImageEditorSliderIds2["ClarityAmount"] = "clarity_amount";
   ImageEditorSliderIds2["DenoisePercentage"] = "denoise_percentage";
   ImageEditorSliderIds2["Cfg"] = "cfg";
+  ImageEditorSliderIds2["ConditioningMix"] = "conditioning_mix";
   ImageEditorSliderIds2["Dilate"] = "dilate";
   ImageEditorSliderIds2["FocusPosition"] = "focus_position";
   ImageEditorSliderIds2["FocusSize"] = "focus_size";
@@ -2006,6 +2007,7 @@ var ImageEditorToggleIds;
   ImageEditorToggleIds2["UseConditioning"] = "use_conditioning";
   ImageEditorToggleIds2["RoiAuto"] = "roi_auto";
   ImageEditorToggleIds2["RoiAlignAuto"] = "roi_align_auto";
+  ImageEditorToggleIds2["ApplyUnsharpMask"] = "apply_unsharp_mask";
 })(ImageEditorToggleIds || (ImageEditorToggleIds = {}));
 var ImageEditorBackgroundRemoverIds;
 (function(ImageEditorBackgroundRemoverIds2) {
@@ -2128,6 +2130,7 @@ var ImageEditorInpaintIds;
   ImageEditorInpaintIds2["Seed"] = "seed";
   ImageEditorInpaintIds2["Steps"] = "steps";
   ImageEditorInpaintIds2["UseConditioning"] = "use_conditioning";
+  ImageEditorInpaintIds2["ConditioningMix"] = "conditioning_mix";
   ImageEditorInpaintIds2["RoiAuto"] = "roi_auto";
   ImageEditorInpaintIds2["RoiPadding"] = "roi_padding";
   ImageEditorInpaintIds2["RoiAlign"] = "roi_align";
@@ -2136,6 +2139,7 @@ var ImageEditorInpaintIds;
   ImageEditorInpaintIds2["Dilate"] = "dilate";
   ImageEditorInpaintIds2["Feather"] = "feather";
   ImageEditorInpaintIds2["UpsampleTarget"] = "upsample_target";
+  ImageEditorInpaintIds2["ApplyUnsharpMask"] = "apply_unsharp_mask";
 })(ImageEditorInpaintIds || (ImageEditorInpaintIds = {}));
 const BACKGROUND_SETTINGS = {
   backgroundRemover: {
@@ -2893,8 +2897,10 @@ const DIFFUSION_SETTINGS = {
       steps: 16,
       positive_prompt: "",
       negative_prompt: "",
-      upsample_target: 1024,
-      use_conditioning: true
+      upsample_target: 2048,
+      use_conditioning: true,
+      conditioning_mix: -1,
+      apply_unsharp_mask: true
     },
     configs: {
       [ImageEditorControls.Textfield]: [
@@ -2931,6 +2937,17 @@ const DIFFUSION_SETTINGS = {
       ],
       [ImageEditorControls.Slider]: [
         {
+          ariaLabel: "Conditioning mix",
+          controlType: ImageEditorControls.Slider,
+          defaultValue: -1,
+          id: ImageEditorSliderIds.ConditioningMix,
+          isMandatory: false,
+          max: "1",
+          min: "-1",
+          step: "0.1",
+          title: "Blend input conditioning (-1) with inpaint prompts (1). 0 keeps both contributions balanced."
+        },
+        {
           ariaLabel: "Denoise percentage",
           controlType: ImageEditorControls.Slider,
           defaultValue: 40,
@@ -2966,7 +2983,7 @@ const DIFFUSION_SETTINGS = {
         {
           ariaLabel: "Upsample target (px)",
           controlType: ImageEditorControls.Slider,
-          defaultValue: 1024,
+          defaultValue: 2048,
           id: ImageEditorSliderIds.UpsampleTarget,
           isMandatory: false,
           max: "2048",
@@ -2986,6 +3003,9 @@ const INPAINT_ADV = {
   requiresManualApply: true,
   settings: {
     ...DIFFUSION_SETTINGS.inpaint.settings,
+    use_conditioning: false,
+    conditioning_mix: 0,
+    apply_unsharp_mask: true,
     roi_auto: true,
     roi_padding: 32,
     roi_align: 8,
@@ -3027,6 +3047,17 @@ const INPAINT_ADV = {
     ],
     [ImageEditorControls.Slider]: [
       {
+        ariaLabel: "Conditioning mix",
+        controlType: ImageEditorControls.Slider,
+        defaultValue: -1,
+        id: ImageEditorSliderIds.ConditioningMix,
+        isMandatory: false,
+        max: "1",
+        min: "-1",
+        step: "0.1",
+        title: "Blend input conditioning (-1) with inpaint prompts (1). 0 keeps both contributions balanced."
+      },
+      {
         ariaLabel: "Denoise percentage",
         controlType: ImageEditorControls.Slider,
         defaultValue: 40,
@@ -3062,7 +3093,7 @@ const INPAINT_ADV = {
       {
         ariaLabel: "Upsample target (px)",
         controlType: ImageEditorControls.Slider,
-        defaultValue: 0,
+        defaultValue: 2048,
         id: ImageEditorSliderIds.UpsampleTarget,
         isMandatory: false,
         max: "2048",
@@ -3156,6 +3187,16 @@ const INPAINT_ADV = {
         off: "false",
         on: "true",
         title: "Infer alignment multiple from VAE/model. Disable to set a manual multiple (see slider)."
+      },
+      {
+        ariaLabel: "Apply unsharp mask",
+        controlType: ImageEditorControls.Toggle,
+        defaultValue: true,
+        id: ImageEditorToggleIds.ApplyUnsharpMask,
+        isMandatory: false,
+        off: "false",
+        on: "true",
+        title: "Apply a gentle unsharp mask after downscaling the inpainted region."
       }
     ]
   }
@@ -3166,13 +3207,13 @@ const DRAWING_SETTINGS = {
   brush: {
     controlIds: ImageEditorBrushIds,
     hasCanvasAction: true,
-    settings: { b64_canvas: "", color: "#FF0000", opacity: 1, size: 50 },
+    settings: { b64_canvas: "", color: "#FF0000", opacity: 0.2, size: 150 },
     configs: {
       [ImageEditorControls.Slider]: [
         {
           ariaLabel: "Size",
           controlType: ImageEditorControls.Slider,
-          defaultValue: 50,
+          defaultValue: 150,
           id: ImageEditorSliderIds.Size,
           isMandatory: true,
           max: "500",
@@ -3183,7 +3224,7 @@ const DRAWING_SETTINGS = {
         {
           ariaLabel: "Opacity",
           controlType: ImageEditorControls.Slider,
-          defaultValue: 1,
+          defaultValue: 0.2,
           id: ImageEditorSliderIds.Opacity,
           isMandatory: true,
           max: "1",
