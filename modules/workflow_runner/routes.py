@@ -15,7 +15,7 @@ from .config import CONFIG as RUNNER_CONFIG
 from .registry import InputValidationError, get_workflow, list_workflows
 from .registry import _json_safe as workflow_json_safe
 from ..utils.constants import API_ROUTE_PREFIX, NOT_FND_HTML
-from ..utils.helpers.logic.sanitize_filename import sanitize_filename
+from ..utils.helpers.logic import sanitize_filename
 
 DEPLOY_ROOT = RUNNER_CONFIG.deploy_root
 WORKFLOW_RUNNER_ROOT = RUNNER_CONFIG.runner_root
@@ -29,14 +29,12 @@ ASSET_SEARCH_ROOTS = (
 WORKFLOW_STATIC_ROOTS = (RUNNER_CONFIG.runner_root,)
 WORKFLOW_HTML = RUNNER_CONFIG.workflow_html
 
-
 def _sanitize_rel_path(raw_path: str) -> Optional[Path]:
     normalized = raw_path.replace("\\", "/")
     if ".." in normalized or normalized.startswith("/"):
         return None
     parts = [part for part in normalized.split("/") if part]
     return Path(*parts)
-
 
 def _serve_first_existing(paths: Iterable[Path]) -> Optional[web.FileResponse]:
     for candidate in paths:
@@ -189,7 +187,7 @@ async def lf_nodes_run_workflow(request: web.Request) -> web.Response:
     status = history_entry.get("status") or {}
     status_str = status.get("status_str", "unknown")
     http_status = 200 if status_str == "success" else 500
-    
+
     preferred_output = None
     try:
         outputs_in_history = set((history_entry.get('outputs') or {}).keys())
@@ -224,7 +222,6 @@ async def lf_nodes_run_workflow(request: web.Request) -> web.Response:
             status=http_status,
         )
 # endregion
-
 
 # region Upload handler
 @PromptServer.instance.routes.post(f"{API_ROUTE_PREFIX}/upload")
@@ -316,7 +313,6 @@ def _json_safe(value: Any) -> Any:
     clear within this module.
     """
     return workflow_json_safe(value)
-
 
 def _make_run_payload(
     *,

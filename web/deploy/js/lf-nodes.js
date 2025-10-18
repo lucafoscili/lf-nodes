@@ -2123,14 +2123,15 @@ var ImageEditorVignetteIds;
 var ImageEditorInpaintIds;
 (function(ImageEditorInpaintIds2) {
   ImageEditorInpaintIds2["B64Canvas"] = "b64_canvas";
+  ImageEditorInpaintIds2["ApplyUnsharpMask"] = "apply_unsharp_mask";
   ImageEditorInpaintIds2["Cfg"] = "cfg";
+  ImageEditorInpaintIds2["ConditioningMix"] = "conditioning_mix";
   ImageEditorInpaintIds2["DenoisePercentage"] = "denoise_percentage";
   ImageEditorInpaintIds2["NegativePrompt"] = "negative_prompt";
   ImageEditorInpaintIds2["PositivePrompt"] = "positive_prompt";
   ImageEditorInpaintIds2["Seed"] = "seed";
   ImageEditorInpaintIds2["Steps"] = "steps";
   ImageEditorInpaintIds2["UseConditioning"] = "use_conditioning";
-  ImageEditorInpaintIds2["ConditioningMix"] = "conditioning_mix";
   ImageEditorInpaintIds2["RoiAuto"] = "roi_auto";
   ImageEditorInpaintIds2["RoiPadding"] = "roi_padding";
   ImageEditorInpaintIds2["RoiAlign"] = "roi_align";
@@ -2139,7 +2140,6 @@ var ImageEditorInpaintIds;
   ImageEditorInpaintIds2["Dilate"] = "dilate";
   ImageEditorInpaintIds2["Feather"] = "feather";
   ImageEditorInpaintIds2["UpsampleTarget"] = "upsample_target";
-  ImageEditorInpaintIds2["ApplyUnsharpMask"] = "apply_unsharp_mask";
 })(ImageEditorInpaintIds || (ImageEditorInpaintIds = {}));
 const BACKGROUND_SETTINGS = {
   backgroundRemover: {

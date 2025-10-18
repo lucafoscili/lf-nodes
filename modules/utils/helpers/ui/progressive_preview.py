@@ -6,10 +6,10 @@ import torch.nn.functional as F
 
 from server import PromptServer
 
-from ...helpers.api import get_resource_url
-from ...helpers.comfy import resolve_filepath
-from ...helpers.conversion import tensor_to_pil
 from .create_compare_node import create_compare_node
+from ..api import get_resource_url
+from ..comfy import resolve_filepath
+from ..conversion import tensor_to_pil
 
 # region prepare_preview_destination
 def prepare_preview_destination(
@@ -346,7 +346,7 @@ class ComparePreviewStream:
             return PromptServer.instance.send_sync
         except Exception:  # pragma: no cover - safety for test environments
             return None
-# endregion        
+# endregion
 
     @property
     def compare_node(self) -> Optional[dict]:
