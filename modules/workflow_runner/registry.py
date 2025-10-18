@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -169,7 +167,7 @@ def _configure_image_to_svg_workflow(prompt: Dict[str, Any], inputs: Dict[str, A
             continue
 
         inputs_map = node.setdefault("inputs", {})
-        
+
         if node_id == "16":  # Image Loader node
             input_name = "source_path"
             source_path = inputs.get(input_name)
@@ -192,7 +190,7 @@ def _configure_image_to_svg_workflow(prompt: Dict[str, Any], inputs: Dict[str, A
 
             resolved_str = str(resolved_path)
             inputs_map["image"] = resolved_str
-        
+
         if node_id == "40":  # Color number node (optional)
             input_name = "number_of_colors"
             input_value = int(inputs.get(input_name, 0) or 0)

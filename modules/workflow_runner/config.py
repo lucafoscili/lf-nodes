@@ -1,13 +1,11 @@
-from __future__ import annotations
-
 import json
 import logging
+
 from dataclasses import dataclass
 from pathlib import Path
 
 MODULE_ROOT = Path(__file__).resolve().parents[2]
 CONFIG_PATH = MODULE_ROOT / "web" / "workflow-runner" / "src" / "runner.config.json"
-
 
 @dataclass(frozen=True)
 class WorkflowRunnerConfig:
