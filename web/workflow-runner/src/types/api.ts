@@ -1,8 +1,4 @@
-import {
-  LfCodeInterface,
-  LfComponentTag,
-  LfMasonryPropsInterface,
-} from '@lf-widgets/foundations/dist';
+import { LfCodeInterface, LfMasonryPropsInterface } from '@lf-widgets/foundations/dist';
 import { WorkflowStatus } from './state';
 
 //#region API
@@ -10,12 +6,6 @@ export interface WorkflowAPIResponse {
   message: string;
   payload: WorkflowAPIRunPayload;
   status: WorkflowStatus;
-}
-export interface WorkflowAPIDefinition {
-  id: string;
-  label: string;
-  description: string;
-  fields: WorkflowAPIField[];
 }
 export type WorkflowAPIResultKey = '_description' | 'code' | 'masonry';
 export type WorkflowAPIResult = {
@@ -32,38 +22,23 @@ export type WorkflowAPIResult = {
       }
     : never;
 };
-
-// typed representation of the node `ui` payload
-export interface LFCodeItem {
+export interface WorkflowAPIErrorOptions<TPayload> {
+  payload?: TPayload;
+  status?: number;
+}
+export interface LFCodeItem extends LfCodeInterface {
   _description?: string | string[];
-  lfLanguage?: string;
-  lfValue?: string;
 }
 
-export interface LFMasonryItem {
+export interface LFMasonryItem extends LfMasonryPropsInterface {
   _description?: string | string[];
-  lfDataset?: {
-    nodes?: Array<{
-      title?: string;
-      filename?: string;
-      url?: string;
-    }>;
-  };
+  _slotmap?: Record<string, string>;
 }
 
 export interface WorkflowAPIUI {
   _description?: string | string[];
   lf_code?: LFCodeItem[];
   lf_masonry?: LFMasonryItem[];
-}
-export interface WorkflowAPIField {
-  name: LfComponentTag;
-  label: string;
-  component: string;
-  description?: string;
-  required?: boolean;
-  default?: unknown;
-  extra?: Record<string, any>;
 }
 export interface WorkflowAPIRunPayload {
   detail: string;

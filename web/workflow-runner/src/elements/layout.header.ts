@@ -2,7 +2,7 @@ import { LfButtonInterface } from '@lf-widgets/foundations/dist';
 import { getLfFramework } from '@lf-widgets/framework';
 import { WorkflowState } from '../types/state';
 import { createComponent } from './components';
-import { WorkflowSectionController } from './section';
+import { WorkflowSectionController } from '../types/section';
 
 //#region Constants
 const ROOT_CLASS = 'header-section';
@@ -15,7 +15,8 @@ const _container = () => {
   container.slot = 'content';
   return container;
 };
-const _drawerToggle = () => {
+
+const _drawerToggle = (state: WorkflowState) => {
   const { theme } = getLfFramework();
   const { get } = theme;
   const lfIcon = get.icon('menu2');
@@ -27,6 +28,16 @@ const _drawerToggle = () => {
   } as Partial<LfButtonInterface>;
   const drawerToggle = createComponent.button(props);
   drawerToggle.className = `${ROOT_CLASS}__drawer-toggle`;
+  drawerToggle.addEventListener('lf-button-event', (e) => {
+    const { eventType } = e.detail;
+
+    switch (eventType) {
+      case 'click':
+        state.ui.layout.drawer._root.toggle();
+        break;
+    }
+  });
+
   return drawerToggle;
 };
 //#endregion
@@ -44,7 +55,7 @@ export const createHeaderSection = (): WorkflowSectionController => {
     element.className = ROOT_CLASS;
 
     const container = _container();
-    const drawerToggle = _drawerToggle();
+    const drawerToggle = _drawerToggle(state);
 
     ui.layout.header.drawerToggle = drawerToggle;
 

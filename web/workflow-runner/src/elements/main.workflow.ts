@@ -1,30 +1,25 @@
 import { LfThemeUIState } from '@lf-widgets/core/dist/types/components';
 import { LfButtonInterface } from '@lf-widgets/foundations/dist';
-import {
-  WorkflowAPIField,
-  WorkflowAPIResult,
-  WorkflowAPIResultKey,
-  WorkflowAPIUI,
-} from '../types/api';
-import { WorkflowState, WorkflowStatus } from '../types/state';
 import { DEFAULT_STATUS_MESSAGES } from '../config';
+import { WorkflowAPIResult, WorkflowAPIResultKey, WorkflowAPIUI } from '../types/api';
+import { WorkflowCellStatus, WorkflowSectionHandle } from '../types/section';
+import { WorkflowState, WorkflowStatus } from '../types/state';
 import { clearChildren, normalize_description } from '../utils/common';
-import { createComponent, createInputField, createOutputField } from './components';
-import { WorkflowSectionController } from './section';
+import { createComponent, createInputCell, createOutputField } from './components';
 
 //#region Constants & helpers
 const WORKFLOW_TEXT = 'Select a workflow';
 const ROOT_CLASS = 'workflow-section';
-type FieldStatus = 'error' | '';
 
 const getCurrentWorkflow = (state: WorkflowState) => {
   const { current, workflows } = state;
-  return workflows.find((wf) => wf.id === current.workflow) || null;
+  return workflows?.nodes?.find((wf) => wf.id === current.workflow) || null;
 };
 
 const getWorkflowLabel = (state: WorkflowState) => {
   const workflow = getCurrentWorkflow(state);
-  return workflow?.label || WORKFLOW_TEXT;
+  const str = typeof workflow?.value === 'string' ? workflow.value : String(workflow?.value || '');
+  return str || WORKFLOW_TEXT;
 };
 
 const createFieldWrapper = () => {
@@ -72,10 +67,6 @@ const createTitle = (state: WorkflowState) => {
   return h3;
 };
 //#endregion
-
-export interface WorkflowSectionHandle extends WorkflowSectionController {
-  setFieldStatus: (state: WorkflowState, name: string, status?: FieldStatus) => void;
-}
 
 //#region Factory
 export const createWorkflowSection = (): WorkflowSectionHandle => {
@@ -128,20 +119,19 @@ export const createWorkflowSection = (): WorkflowSectionHandle => {
     }
 
     clearChildren(element);
-    ui.layout.main.workflow.fields = [];
+    ui.layout.main.workflow.cells = [];
 
     const workflow = getCurrentWorkflow(state);
-    if (!workflow || !workflow.fields) {
+    if (!workflow || !workflow.cells) {
       return;
     }
-
-    for (const field of workflow.fields) {
+    for (const key in workflow.cells) {
+      const cell = workflow.cells[key];
       const wrapper = createFieldWrapper();
-      const fieldElement = createInputField(field as WorkflowAPIField);
-      fieldElement.dataset.name = field.name;
+      const cellElement = createInputCell(cell);
 
-      ui.layout.main.workflow.fields.push(fieldElement);
-      wrapper.appendChild(fieldElement);
+      ui.layout.main.workflow.cells.push(cellElement);
+      wrapper.appendChild(cellElement);
       element.appendChild(wrapper);
     }
   };
@@ -246,9 +236,9 @@ export const createWorkflowSection = (): WorkflowSectionHandle => {
     }
   };
 
-  const setFieldStatus = (state: WorkflowState, name: string, status: FieldStatus = '') => {
+  const setCellStatus = (state: WorkflowState, id: string, status: WorkflowCellStatus = '') => {
     const { ui } = state;
-    const field = ui.layout.main.workflow.fields.find((el) => el.dataset.name === name);
+    const field = ui.layout.main.workflow.cells.find((el) => el.id === id);
     const wrapper = field?.parentElement;
     if (wrapper) {
       wrapper.dataset.status = status;
@@ -260,7 +250,7 @@ export const createWorkflowSection = (): WorkflowSectionHandle => {
     if (mountedState) {
       const wf = mountedState.ui.layout.main.workflow;
       wf._root = null;
-      wf.fields = [];
+      wf.cells = [];
       wf.options = null;
       wf.result = null;
       wf.run = null;
@@ -285,7 +275,7 @@ export const createWorkflowSection = (): WorkflowSectionHandle => {
     mount,
     render,
     destroy,
-    setFieldStatus,
+    setCellStatus,
   };
 };
 //#endregion
