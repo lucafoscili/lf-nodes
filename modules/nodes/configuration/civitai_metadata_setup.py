@@ -96,7 +96,8 @@ class LF_CivitAIMetadataSetup:
                     "default": 1.5,
                     "tooltip": "Upscale factor for Hires-fix."
                 }),
-                "hires_upscaler": (get_comfy_list("upscale_models"), {
+                "hires_upscaler": (Input.COMBO, {
+                    "options": get_comfy_list("upscale_models"),
                     "tooltip": "Upscale model for Hires-fix."
                 }),
                 "ui_widget": (Input.LF_CODE, {

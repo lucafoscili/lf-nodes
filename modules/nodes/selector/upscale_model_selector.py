@@ -3,7 +3,7 @@ import random
 from server import PromptServer
 
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, INT_MAX
+from ...utils.constants import EVENT_PREFIX, FUNCTION, HAS_V3, Input, INT_MAX
 from ...utils.helpers.comfy import get_comfy_list
 from ...utils.helpers.logic import filter_list, normalize_json_input, normalize_list_to_value
 from ...utils.helpers.ui import create_history_node
@@ -11,31 +11,31 @@ from ...utils.helpers.ui import create_history_node
 # region LF_UpscaleModelSelector
 class LF_UpscaleModelSelector:
     initial_list = get_comfy_list("upscale_models")
-        
+
     @classmethod
     def INPUT_TYPES(self):
         return {
             "required": {
                 "upscale_model": (["None"] + self.initial_list, {
-                    "default": "None", 
+                    "default": "None",
                     "tooltip": "Upscale model used to upscale the image."
                 }),
                 "enable_history": (Input.BOOLEAN, {
-                    "default": True, 
+                    "default": True,
                     "tooltip": "Enables history, saving the execution value and date of the widget."
                 }),
                 "randomize": (Input.BOOLEAN, {
-                    "default": False, 
+                    "default": False,
                     "tooltip": "Selects a scheduler randomly."
                 }),
                 "filter": (Input.STRING, {
-                    "default": "", 
+                    "default": "",
                     "tooltip": "When randomization is active, this field can be used to filter upscale models names. Supports wildcards (*)."
                 }),
                 "seed": (Input.INTEGER, {
-                    "default": 42, 
-                    "min": 0, 
-                    "max": INT_MAX, 
+                    "default": 42,
+                    "min": 0,
+                    "max": INT_MAX,
                     "tooltip": "Seed value for when randomization is active."
                 }),
             },
@@ -50,8 +50,11 @@ class LF_UpscaleModelSelector:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     RETURN_NAMES = ("combo", "string")
-    RETURN_TYPES = (initial_list, Input.STRING)
-        
+    if HAS_V3:
+        RETURN_TYPES = (Input.COMBO, Input.STRING)
+    else:
+        RETURN_TYPES = (initial_list, Input.STRING)
+
     def on_exec(self, **kwargs: dict):
         upscale_model: str = normalize_list_to_value(kwargs.get("upscale_model"))
         enable_history: bool = normalize_list_to_value(kwargs.get("enable_history"))
@@ -74,7 +77,7 @@ class LF_UpscaleModelSelector:
                     raise ValueError(f"Not found a model with the specified filter: {filter}")
             random.seed(seed)
             upscale_model = random.choice(upscalers)
-        
+
         if enable_history:
             create_history_node(upscale_model, nodes)
 
