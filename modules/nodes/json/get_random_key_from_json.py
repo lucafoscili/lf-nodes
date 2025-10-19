@@ -13,27 +13,30 @@ class LF_GetRandomKeyFromJSON:
         return {
             "required": {
                 "seed": (Input.INTEGER, {
-                    "default": 0, 
-                    "min": 0, 
-                    "max": INT_MAX, 
+                    "default": 0,
+                    "min": 0,
+                    "max": INT_MAX,
                     "tooltip": "The seed for the random pick."
                 }),
-                "json_input": (Input.JSON, { 
+                "json_input": (Input.JSON, {
                     "tooltip": "JSON object from which a random key will be picked."
                 }),
             },
             "optional": {
-                "ui_widget": (Input.LF_CODE, { 
-                    "default": "" 
+                "ui_widget": (Input.LF_CODE, {
+                    "default": ""
                 }),
             },
-            "hidden": { 
+            "hidden": {
                 "node_id": "UNIQUE_ID"
             }
         }
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
+    OUTPUT_TOOLTIPS = (
+        "Randomly selected key from JSON.",
+    )
     RETURN_NAMES = ("string",)
     RETURN_TYPES = (Input.STRING,)
 

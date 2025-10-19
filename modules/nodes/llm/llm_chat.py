@@ -13,10 +13,17 @@ class LF_LLMChat:
                 }),
             },
         }
-    
+
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, False, False, False, True)
+    OUTPUT_TOOLTIPS = (
+        "Chat history as JSON.",
+        "Last message in the chat.",
+        "Last message from the user.",
+        "Last message from the LLM.",
+        "All messages in the chat."
+    )
     RETURN_NAMES = ("chat_history_json", "last_message", "last_user_message", "last_llm_message", "all_messages")
     RETURN_TYPES = (Input.JSON, Input.STRING, Input.STRING, Input.STRING, Input.STRING)
 

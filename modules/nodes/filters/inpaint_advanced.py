@@ -13,7 +13,7 @@ from ...utils.helpers.torch import process_and_save_image
 class LF_InpaintAdvanced:
     def __init__(self):
         self._temp_cache = TempFileCache()
-        
+
     @classmethod
     def INPUT_TYPES(cls):
         return {
@@ -141,6 +141,10 @@ class LF_InpaintAdvanced:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, True)
+    OUTPUT_TOOLTIPS = (
+        "Image tensor with inpainting effect applied.",
+        "List of image tensors with inpainting effect applied."
+    )
     RETURN_NAMES = ("image", "image_list")
     RETURN_TYPES = (Input.IMAGE, Input.IMAGE)
 

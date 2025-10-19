@@ -49,6 +49,10 @@ class LF_UpscaleModelSelector:
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
+    OUTPUT_TOOLTIPS = (
+        "Combo list of upscale models.",
+        "Selected upscale model item as a string.",
+    )
     RETURN_NAMES = ("combo", "string")
     if HAS_V3:
         RETURN_TYPES = (Input.COMBO, Input.STRING)

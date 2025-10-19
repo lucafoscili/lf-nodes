@@ -13,7 +13,7 @@ from ...utils.helpers.torch import process_and_save_image
 class LF_Vibrance:
     def __init__(self):
         self._temp_cache = TempFileCache()
-        
+
     @classmethod
     def INPUT_TYPES(cls):
         return {
@@ -22,8 +22,8 @@ class LF_Vibrance:
                     "tooltip": "Input image tensor or a list of image tensors."
                 }),
                 "intensity": (Input.FLOAT,  {
-                    "default": 0.6, 
-                    "min": -1.0, 
+                    "default": 0.6,
+                    "min": -1.0,
                     "max": 2.0,
                     "step": 0.05,
                     "tooltip": "Negative = tame colours, positive = boost muted hues"
@@ -44,10 +44,14 @@ class LF_Vibrance:
             },
             "hidden": { "node_id": "UNIQUE_ID" }
         }
-    
+
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, True)
+    OUTPUT_TOOLTIPS = (
+        "Image tensor with vibrance effect applied.",
+        "List of image tensors with vibrance effect applied."
+    )
     RETURN_NAMES = ("image", "image_list")
     RETURN_TYPES = (Input.IMAGE, Input.IMAGE)
 

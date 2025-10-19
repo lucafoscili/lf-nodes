@@ -8,12 +8,12 @@ from ...utils.filters import vignette_effect
 from ...utils.helpers.logic import normalize_input_image, normalize_list_to_value, normalize_output_image
 from ...utils.helpers.temp_cache import TempFileCache
 from ...utils.helpers.torch import process_and_save_image
-        
+
 # region LF_Vignette
 class LF_Vignette:
     def __init__(self):
         self._temp_cache = TempFileCache()
-        
+
     @classmethod
     def INPUT_TYPES(self):
         return {
@@ -40,7 +40,7 @@ class LF_Vignette:
                     "tooltip": "Selects the shape of the vignette effect."
                 }),
                 "color": (Input.STRING, {
-                    "default": "000000", 
+                    "default": "000000",
                     "tooltip": "Color to use for padding if 'pad' mode is selected (hexadecimal)."
                 })
             },
@@ -57,6 +57,10 @@ class LF_Vignette:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, True)
+    OUTPUT_TOOLTIPS = (
+        "Image tensor with vignette effect applied.",
+        "List of image tensors with vignette effect applied."
+    )
     RETURN_NAMES = ("image", "image_list")
     RETURN_TYPES = (Input.IMAGE, Input.IMAGE)
 

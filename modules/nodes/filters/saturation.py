@@ -13,7 +13,7 @@ from ...utils.helpers.torch import process_and_save_image
 class LF_Saturation:
     def __init__(self):
         self._temp_cache = TempFileCache()
-        
+
     @classmethod
     def INPUT_TYPES(cls):
         return {
@@ -22,10 +22,10 @@ class LF_Saturation:
                     "tooltip": "Input image tensor or a list of image tensors."
                 }),
                 "intensity": (Input.FLOAT, {
-                    "default": 1.2, 
-                    "min": 0.0, 
-                    "max": 5.0, 
-                    "step": 0.1, 
+                    "default": 1.2,
+                    "min": 0.0,
+                    "max": 5.0,
+                    "step": 0.1,
                     "tooltip": "1.0 = no change, <1 = desat, >1 = saturation boost."
                 }),
             },
@@ -42,6 +42,10 @@ class LF_Saturation:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, True)
+    OUTPUT_TOOLTIPS = (
+        "Image tensor with saturation effect applied.",
+        "List of image tensors with saturation effect applied."
+    )
     RETURN_NAMES = ("image", "image_list")
     RETURN_TYPES = (Input.IMAGE, Input.IMAGE)
 
@@ -68,7 +72,7 @@ class LF_Saturation:
         batch_list, image_list = normalize_output_image(processed)
 
         PromptServer.instance.send_sync(f"{EVENT_PREFIX}saturation", {
-            "node": kwargs.get("node_id"), 
+            "node": kwargs.get("node_id"),
             "dataset": dataset
         })
 

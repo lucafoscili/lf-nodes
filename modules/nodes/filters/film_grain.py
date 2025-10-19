@@ -13,7 +13,7 @@ from ...utils.helpers.torch import process_and_save_image
 class LF_FilmGrain:
     def __init__(self):
         self._temp_cache = TempFileCache()
-        
+
     @classmethod
     def INPUT_TYPES(self):
         return {
@@ -36,7 +36,7 @@ class LF_FilmGrain:
                     "tooltip": "Controls the size of the grain. Smaller values = finer grain."
                 }),
                 "tint": (Input.STRING, {
-                    "default": "FFFFFF", 
+                    "default": "FFFFFF",
                     "tooltip": "Hexadecimal color (default is FFFFFF for no tint)."
                 }),
                 "soft_blend": (Input.BOOLEAN, {
@@ -57,6 +57,10 @@ class LF_FilmGrain:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, True)
+    OUTPUT_TOOLTIPS = (
+        "Image tensor with film grain effect applied.",
+        "List of image tensors with film grain effect applied."
+    )
     RETURN_NAMES = ("image", "image_list")
     RETURN_TYPES = (Input.IMAGE, Input.IMAGE)
 

@@ -29,6 +29,10 @@ class LF_VAEDecode:
     FUNCTION = FUNCTION
     INPUT_IS_LIST = (True, False)
     OUTPUT_IS_LIST = (False, True)
+    OUTPUT_TOOLTIPS = (
+        "Decoded image.",
+        "List of decoded images."
+    )
     RETURN_NAMES = ("image", "image_list")
     RETURN_TYPES = (Input.IMAGE, Input.IMAGE)
 
@@ -88,7 +92,7 @@ class LF_VAEDecode:
         })
 
         batch_list, image_list = normalize_output_image(images)
-        
+
         return (batch_list[0], image_list)
 # endregion
 

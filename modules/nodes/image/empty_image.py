@@ -22,16 +22,16 @@ class LF_EmptyImage:
         return {
             "required": {
                 "width": (Input.INTEGER, {
-                    "default": 1024, 
-                    "min": 64, 
-                    "max": 8192, 
+                    "default": 1024,
+                    "min": 64,
+                    "max": 8192,
                     "step": 64,
                     "tooltip": "Width of the empty image."
                 }),
                 "height": (Input.INTEGER, {
-                    "default": 512, 
-                    "min": 1, 
-                    "max": 4096, 
+                    "default": 512,
+                    "min": 1,
+                    "max": 4096,
                     "step": 1,
                     "tooltip": "Height of the empty image."
                 }),
@@ -54,28 +54,32 @@ class LF_EmptyImage:
     FUNCTION = FUNCTION
     INPUT_IS_LIST = (True, True, True)
     OUTPUT_IS_LIST = (False, True)
+    OUTPUT_TOOLTIPS = (
+        "Generated empty image tensor.",
+        "List of generated empty image tensors."
+    )
     RETURN_NAMES = ("image",)
     RETURN_TYPES = (Input.IMAGE,)
 
     def on_exec(self, **kwargs: dict):
         self._temp_cache.cleanup()
-        
+
         width: list[int] = normalize_input_list(kwargs.get("width"))
         height: list[int] = normalize_input_list(kwargs.get("height"))
         color: list[int] = normalize_input_list(kwargs.get("color"))
-        
+
         nodes: list[dict] = []
         dataset: dict = { "nodes": nodes }
 
         if len(width) != len(height) or len(width) != len(color):
             raise ValueError("Width, height, and color lists must have the same length.")
-        
+
         empty_images = []
 
         for w, h, c in zip(width, height, color):
             if not isinstance(c, str) or not re.fullmatch(r"[0-9A-Fa-f]{6}", c):
                 raise ValueError("Color must be a hexadecimal string in the format RRGGBB.")
-            
+
             rgb = hex_to_tuple(c)
             pil_image = Image.new("RGB", (w, h), rgb)
             empty_image_tensor = pil_to_tensor(pil_image)
@@ -91,7 +95,7 @@ class LF_EmptyImage:
             nodes.append(create_masonry_node(filename, url, len(empty_images)))
 
             empty_images.append(empty_image_tensor)
-        
+
         image_batch, image_list = normalize_output_image(empty_images)
 
         PromptServer.instance.send_sync(f"{EVENT_PREFIX}emptyimage", {

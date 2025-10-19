@@ -43,6 +43,10 @@ class LF_BlobToImage:
     ]
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, True)
+    OUTPUT_TOOLTIPS = (
+        "Image tensor with blob-to-image conversion applied.",
+        "List of image tensors with blob-to-image conversion applied."
+    )
     RETURN_NAMES = ("image", "image_list")
     RETURN_TYPES = (Input.IMAGE, Input.IMAGE)
 
@@ -128,7 +132,7 @@ class LF_BlobToImage:
         image_batch, image_list = normalize_output_image(all_tensors)
 
         PromptServer.instance.send_sync(f"{EVENT_PREFIX}blobtoimage", {
-            "node": kwargs.get("node_id"), 
+            "node": kwargs.get("node_id"),
             "value": log_md
         })
 

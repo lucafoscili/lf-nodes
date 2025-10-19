@@ -11,17 +11,17 @@ class LF_SwitchString:
         return {
             "required": {
                 "on_true": (Input.STRING, {
-                    "lazy": True, 
-                    "multiline": True, 
+                    "lazy": True,
+                    "multiline": True,
                     "tooltip": "Value to return if the boolean condition is true."
                 }),
                 "on_false": (Input.STRING, {
-                    "lazy": True, 
-                    "multiline": True, 
+                    "lazy": True,
+                    "multiline": True,
                     "tooltip": "Value to return if the boolean condition is false."
                 }),
                 "boolean": (Input.BOOLEAN, {
-                    "default": False, 
+                    "default": False,
                     "tooltip": "Boolean condition to switch between 'on_true' and 'on_false' values."
                 }),
             },
@@ -31,13 +31,17 @@ class LF_SwitchString:
                 }),
             },
             "hidden": {
-                "node_id": "UNIQUE_ID" 
+                "node_id": "UNIQUE_ID"
             }
         }
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, True)
+    OUTPUT_TOOLTIPS = (
+        "Final output string.",
+        "List of all output strings (if any)."
+    )
     RETURN_NAMES = ("string", "string_list")
     RETURN_TYPES = (Input.STRING, Input.STRING)
 
@@ -52,10 +56,10 @@ class LF_SwitchString:
         boolean: bool = normalize_list_to_value(kwargs.get("boolean"))
         on_false: str = kwargs.get("on_false")
         on_true: str = kwargs.get("on_true")
-        
+
         PromptServer.instance.send_sync(f"{EVENT_PREFIX}switchstring", {
             "node": kwargs.get("node_id"),
-            "bool": boolean, 
+            "bool": boolean,
         })
 
         value = on_true if boolean else on_false

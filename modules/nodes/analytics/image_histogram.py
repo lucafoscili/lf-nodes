@@ -22,7 +22,7 @@ class LF_ImageHistogram:
                     "default": {}
                 })
             },
-            "hidden": { 
+            "hidden": {
                 "node_id": "UNIQUE_ID"
             }
         }
@@ -31,6 +31,11 @@ class LF_ImageHistogram:
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, True, False)
     OUTPUT_NODE = True
+    OUTPUT_TOOLTIPS = (
+        "Image tensor with histogram information.",
+        "List of image tensors with histogram information.",
+        "JSON object with dataset information."
+    )
     RETURN_NAMES = ("image", "image_list", "dataset")
     RETURN_TYPES = (Input.IMAGE, Input.IMAGE, Input.JSON)
 
@@ -96,7 +101,7 @@ class LF_ImageHistogram:
         b, l = normalize_output_image(image)
 
         PromptServer.instance.send_sync(f"{EVENT_PREFIX}imagehistogram", {
-            "node": kwargs.get("node_id"), 
+            "node": kwargs.get("node_id"),
             "datasets": datasets,
         })
 

@@ -11,17 +11,17 @@ class LF_StringToJSON:
         return {
             "required": {
                 "string": (Input.STRING, {
-                    "default": "{}", 
-                    "multiline": True, 
+                    "default": "{}",
+                    "multiline": True,
                     "tooltip": "Stringified JSON"
                 }),
             },
             "optional": {
-                "ui_widget": (Input.LF_CODE, { 
-                    "default": "" 
+                "ui_widget": (Input.LF_CODE, {
+                    "default": ""
                 }),
             },
-            "hidden": { 
+            "hidden": {
                 "node_id": "UNIQUE_ID"
             }
         }
@@ -30,6 +30,10 @@ class LF_StringToJSON:
     FUNCTION = FUNCTION
     INPUT_IS_LIST = (True,)
     OUTPUT_NODE = True
+    OUTPUT_TOOLTIPS = (
+        "Parsed JSON object.",
+        "List of parsed JSON objects."
+    )
     RETURN_NAMES = ("json",)
     RETURN_TYPES = (Input.JSON,)
 

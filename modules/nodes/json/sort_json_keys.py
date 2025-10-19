@@ -14,20 +14,20 @@ class LF_SortJSONKeys:
                     "tooltip": "Input JSON object."
                 }),
                 "ascending": (Input.BOOLEAN, {
-                    "default": True, 
+                    "default": True,
                     "tooltip": "Sort ascending (True) or descending (False)."
                 }),
                 "mutate_source": (Input.BOOLEAN, {
-                    "default": False, 
+                    "default": False,
                     "tooltip": "Sorts the input JSON in place without creating a new dictionary as a copy."
                 })
             },
             "optional": {
-                "ui_widget": (Input.LF_CODE, { 
-                    "default": "" 
+                "ui_widget": (Input.LF_CODE, {
+                    "default": ""
                 }),
             },
-            "hidden": { 
+            "hidden": {
                 "node_id": "UNIQUE_ID"
             }
         }
@@ -35,6 +35,10 @@ class LF_SortJSONKeys:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     OUTPUT_NODE = True
+    OUTPUT_TOOLTIPS = (
+        "Sorted JSON object.",
+        "List of sorted JSON objects."
+    )
     RETURN_NAMES = ("json",)
     RETURN_TYPES = (Input.JSON,)
 
@@ -42,7 +46,7 @@ class LF_SortJSONKeys:
         json_input: dict = normalize_json_input(kwargs.get("json_input"))
         mutate_source: bool = normalize_list_to_value(kwargs.get("mutate_source"))
         ascending: bool = normalize_list_to_value(kwargs.get("ascending"))
-            
+
         if mutate_source:
             items = {key: json_input[key] for key in json_input}
             json_input.clear()

@@ -6,13 +6,13 @@ from ...utils.helpers.logic import normalize_input_list
 
 # region LF_DisplayInteger
 class LF_DisplayInteger:
-    @classmethod 
+    @classmethod
     def INPUT_TYPES(self):
         return {
             "required": {
                 "integer": (Input.INTEGER, {
-                    "default": 0, 
-                    "forceInput": True, 
+                    "default": 0,
+                    "forceInput": True,
                     "tooltip": "Integer value."
                 }),
             },
@@ -29,6 +29,10 @@ class LF_DisplayInteger:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     OUTPUT_NODE = True
+    OUTPUT_TOOLTIPS = (
+        "Pass-through integer value.",
+        "Pass-through integer value as a list."
+    )
     RETURN_NAMES = ("integer",)
     RETURN_TYPES = (Input.INTEGER,)
 
@@ -42,7 +46,7 @@ class LF_DisplayInteger:
                 markdown_value = str(display_integer[0])
         else:
             markdown_value = ""
-        
+
         PromptServer.instance.send_sync(f"{EVENT_PREFIX}displayinteger", {
             "node": kwargs.get("node_id"),
             "value": markdown_value,

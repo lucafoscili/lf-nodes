@@ -18,15 +18,15 @@ class LF_ResizeImageToSquare:
                     "tooltip": "Input image tensor or a list of image tensors."
                 }),
                 "square_size": (Input.INTEGER, {
-                    "default": 1024, 
+                    "default": 1024,
                     "tooltip": "The length of the square's edge."
                 }),
                 "resize_method": (RESAMPLERS, {
-                    "default": "bicubic", 
+                    "default": "bicubic",
                     "tooltip": "Resampling method for resizing."
                 }),
                 "crop_position": (CROP_POSITION_COMBO, {
-                    "default": "center", 
+                    "default": "center",
                     "tooltip": "Where to crop the image."
                 })
             },
@@ -44,6 +44,11 @@ class LF_ResizeImageToSquare:
     FUNCTION = FUNCTION
     INPUT_IS_LIST = (True, True, False, False, False)
     OUTPUT_IS_LIST = (False, True, False)
+    OUTPUT_TOOLTIPS = (
+        "Resized image tensor.",
+        "List of resized image tensors.",
+        "Count of resized images."
+    )
     RETURN_NAMES = ("image", "image_list", "count")
     RETURN_TYPES = (Input.IMAGE, Input.IMAGE, Input.INTEGER)
 

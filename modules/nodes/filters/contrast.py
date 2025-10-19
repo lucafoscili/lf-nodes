@@ -13,7 +13,7 @@ from ...utils.helpers.torch import process_and_save_image
 class LF_Contrast:
     def __init__(self):
         self._temp_cache = TempFileCache()
-        
+
     @classmethod
     def INPUT_TYPES(self):
         return {
@@ -22,17 +22,17 @@ class LF_Contrast:
                     "tooltip": "Input image tensor or a list of image tensors."
                 }),
                 "contrast_strength": (Input.FLOAT, {
-                    "default": 0.25, 
-                    "min": -1.0, 
-                    "max": 1.0, 
-                    "step": 0.05, 
+                    "default": 0.25,
+                    "min": -1.0,
+                    "max": 1.0,
+                    "step": 0.05,
                     "tooltip": "Controls the intensity of the contrast adjustment. 1.0 is no change, below 1 reduces contrast, above 1 increases contrast."
                 }),
                 "midpoint": (Input.FLOAT, {
-                    "default": 0.5, 
-                    "min": 0.0, 
-                    "max": 1.0, 
-                    "step": 0.05, 
+                    "default": 0.5,
+                    "min": 0.0,
+                    "max": 1.0,
+                    "step": 0.05,
                     "tooltip": "Defines the tonal midpoint for contrast scaling."
                 }),
             },
@@ -53,6 +53,10 @@ class LF_Contrast:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, True)
+    OUTPUT_TOOLTIPS = (
+        "Image tensor with contrast effect applied.",
+        "List of image tensors with contrast effect applied."
+    )
     RETURN_NAMES = ("image", "image_list")
     RETURN_TYPES = (Input.IMAGE, Input.IMAGE)
 

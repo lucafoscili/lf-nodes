@@ -6,13 +6,13 @@ from ...utils.helpers.logic import normalize_input_list
 
 # region LF_DisplayString
 class LF_DisplayString:
-    @classmethod 
+    @classmethod
     def INPUT_TYPES(self):
         return {
             "required": {
                 "string": (Input.STRING, {
-                    "default": "", 
-                    "forceInput": True, 
+                    "default": "",
+                    "forceInput": True,
                     "tooltip": "String value."
                 }),
             },
@@ -29,6 +29,10 @@ class LF_DisplayString:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     OUTPUT_NODE = True
+    OUTPUT_TOOLTIPS = (
+        "Pass-through string value.",
+        "Pass-through string value as a list."
+    )
     RETURN_NAMES = ("string",)
     RETURN_TYPES = (Input.STRING,)
 
@@ -42,7 +46,7 @@ class LF_DisplayString:
                 markdown_value = display_string[0]
         else:
             markdown_value = ""
-        
+
         PromptServer.instance.send_sync(f"{EVENT_PREFIX}displaystring", {
             "node": kwargs.get("node_id"),
             "value": markdown_value,

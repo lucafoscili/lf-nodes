@@ -42,6 +42,9 @@ class LF_SaveSVG:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     OUTPUT_NODE = True
+    OUTPUT_TOOLTIPS = (
+        "Saved SVG string.",
+    )
     RETURN_NAMES = ("svg",)
     RETURN_TYPES = (Input.STRING,)
 
@@ -76,7 +79,7 @@ class LF_SaveSVG:
 
             with open(output_file, 'w', encoding='utf-8') as svg_file:
                 svg_file.write(content)
-            
+
             nodes.append({
                 "cells": {
                     "lfSlot": {

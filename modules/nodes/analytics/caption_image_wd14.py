@@ -65,9 +65,17 @@ class LF_CaptionImageWD14:
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
+    OUTPUT_IS_LIST = (False, True, False, True, False, False)
+    OUTPUT_TOOLTIPS = (
+        "Caption string or list of caption strings.",
+        "List of caption strings.",
+        "JSON object with additional metadata.",
+        "List of JSON objects with additional metadata.",
+        "Chart dataset for visualization.",
+        "Chip dataset for visualization."
+    )
     RETURN_NAMES = ("string", "string_list", "json", "json_list", "chart_dataset", "chip_dataset")
     RETURN_TYPES = (Input.STRING, Input.STRING, Input.JSON, Input.JSON, Input.JSON, Input.JSON)
-    OUTPUT_IS_LIST = (False, True, False, True, False, False)
 
     def on_exec(self, **kwargs: dict):
         images = normalize_input_image(kwargs["image"])
@@ -97,7 +105,7 @@ class LF_CaptionImageWD14:
             b.strip().lower().replace("_", " ")
             for b in blacklist.split(",")
             if b.strip()
-        ]        
+        ]
 
         id2lab = build_id2label(model)
 
@@ -116,7 +124,7 @@ class LF_CaptionImageWD14:
                         inputs = raw
                     else:
                         raise RuntimeError(f"Unsupported processor output: {type(raw)}")
-                    
+
             with torch.no_grad():
                 try:
                     outputs = model(**inputs)
@@ -164,12 +172,12 @@ class LF_CaptionImageWD14:
                     "title": "Confidence: {:.2f}".format(conf),
                     "value": tag,
                 }
-                
+
                 chart_nodes.append(chart_node)
                 chip_nodes.append(chip_node)
-            
+
             pairs_list.append(pairs)
-            
+
             complete_string = f"{prefix + ', ' if prefix else ''}{', '.join(tags)}{', ' + suffix if suffix else ''}"
             string_list.append(complete_string)
 
@@ -189,7 +197,7 @@ class LF_CaptionImageWD14:
             for pairs in pairs_list:
                 for tag, conf in pairs:
                     tag_counts[tag] = tag_counts.get(tag, 0) + 1
-            
+
             chart_nodes = []
             chip_nodes = []
             for tag, count in tag_counts.items():
@@ -208,7 +216,7 @@ class LF_CaptionImageWD14:
                     "value": tag,
                 }
                 chip_nodes.append(chip_node)
-            
+
             chart_dataset["columns"].append({
                 "id": "Series_0",
                 "shape": "number",
@@ -216,7 +224,7 @@ class LF_CaptionImageWD14:
             })
             chart_dataset["nodes"] = chart_nodes
             chip_dataset["nodes"] = chip_nodes
-            
+
         else:
             chart_dataset["columns"].append({
                 "id": "Series_0",

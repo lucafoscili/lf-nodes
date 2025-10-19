@@ -21,11 +21,11 @@ class LF_SetValueInJSON:
                 }),
             },
             "optional": {
-                "ui_widget": (Input.LF_CODE, { 
-                    "default": "" 
+                "ui_widget": (Input.LF_CODE, {
+                    "default": ""
                 }),
             },
-            "hidden": { 
+            "hidden": {
                 "node_id": "UNIQUE_ID"
             }
         }
@@ -33,6 +33,10 @@ class LF_SetValueInJSON:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     INPUT_IS_LIST = (False, False, True)
+    OUTPUT_TOOLTIPS = (
+        "Updated JSON object.",
+        "List of updated JSON objects."
+    )
     RETURN_NAMES = ("json", "json_list")
     RETURN_TYPES = (Input.JSON, Input.JSON)
 
@@ -40,9 +44,9 @@ class LF_SetValueInJSON:
         json_input: dict = normalize_json_input(kwargs.get("json_input"))
         key: str = normalize_list_to_value(kwargs.get("key"))
         value = normalize_input_list(kwargs.get("value"))
-    
+
         log = f"## Updated key\n{key}\n\n## Content:\n"
-    
+
         if isinstance(json_input, list):
             for index, item in enumerate(json_input):
                 v = normalize_list_item(value, index)
@@ -56,7 +60,7 @@ class LF_SetValueInJSON:
                             log += f"\n[{index}][{sub_index}]: {v}"
                 else:
                     log += f"\n[{index}]: Could not update non-dict item."
-    
+
             PromptServer.instance.send_sync(f"{EVENT_PREFIX}setvalueinjson", {
                 "node": kwargs.get("node_id"),
                 "value": log
@@ -64,14 +68,14 @@ class LF_SetValueInJSON:
         else:
             json_input[key] = value
             log += f"\n{value}"
-    
+
             PromptServer.instance.send_sync(f"{EVENT_PREFIX}setvalueinjson", {
                 "node": kwargs.get("node_id"),
                 "value": log
             })
-    
+
         s = json_input[0] if isinstance(json_input, list) and len(json_input) == 1 else json_input
-    
+
         return (s, json_input)
 # endregion
 

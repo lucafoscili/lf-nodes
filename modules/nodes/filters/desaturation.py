@@ -13,7 +13,7 @@ from ...utils.helpers.torch import process_and_save_image
 class LF_Desaturation:
     def __init__(self):
         self._temp_cache = TempFileCache()
-        
+
     @classmethod
     def INPUT_TYPES(self):
         return {
@@ -22,31 +22,31 @@ class LF_Desaturation:
                     "tooltip": "Input image tensor or a list of image tensors."
                 }),
                 "global_level": (Input.FLOAT, {
-                    "default": 0.5, 
-                    "min": 0.0, 
-                    "max": 1.0, 
-                    "step": 0.05, 
+                    "default": 0.5,
+                    "min": 0.0,
+                    "max": 1.0,
+                    "step": 0.05,
                     "tooltip": "Controls the total intensity of the desaturation. 0 is no effect, 1 is fully desaturated."
                 }),
                 "r_channel": (Input.FLOAT, {
-                    "default": 1, 
-                    "min": 0.0, 
-                    "max": 1.0, 
-                    "step": 0.05, 
+                    "default": 1,
+                    "min": 0.0,
+                    "max": 1.0,
+                    "step": 0.05,
                     "tooltip": "Controls the intensity of the red channel desaturation relative to the total strength of the filter."
                 }),
                 "g_channel": (Input.FLOAT, {
-                    "default": 1, 
-                    "min": 0.0, 
-                    "max": 1.0, 
-                    "step": 0.05, 
+                    "default": 1,
+                    "min": 0.0,
+                    "max": 1.0,
+                    "step": 0.05,
                     "tooltip": "Controls the intensity of the green channel desaturation relative to the total strength of the filter."
                 }),
                 "b_channel": (Input.FLOAT, {
-                    "default": 1, 
-                    "min": 0.0, 
-                    "max": 1.0, 
-                    "step": 0.05, 
+                    "default": 1,
+                    "min": 0.0,
+                    "max": 1.0,
+                    "step": 0.05,
                     "tooltip": "Controls the intensity of the blue channel desaturation relative to the total strength of the filter."
                 }),
             },
@@ -63,6 +63,10 @@ class LF_Desaturation:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, True)
+    OUTPUT_TOOLTIPS = (
+        "Image tensor with desaturation effect applied.",
+        "List of image tensors with desaturation effect applied."
+    )
     RETURN_NAMES = ("image", "image_list")
     RETURN_TYPES = (Input.IMAGE, Input.IMAGE)
 

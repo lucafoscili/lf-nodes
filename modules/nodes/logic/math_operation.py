@@ -15,7 +15,7 @@ class LF_MathOperation:
         return {
             "required": {
                 "operation": (Input.STRING, {
-                    "default": "a * b / c + d", 
+                    "default": "a * b / c + d",
                     "tooltip": "Math operation to execute. Use variables like 'a', 'b', 'c', 'd'."
                 }),
             },
@@ -43,6 +43,10 @@ class LF_MathOperation:
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
+    OUTPUT_TOOLTIPS = (
+        "Final result as integer.",
+        "Final result as float."
+    )
     RETURN_NAMES = ("int_result", "float_result")
     RETURN_TYPES = (Input.INTEGER, Input.FLOAT)
 
@@ -218,7 +222,7 @@ class LF_MathOperation:
 
             if len(normalized) > 1:
                 itemized_log = "\n".join(
-                    [f"    {i+1}. *{1 if val is True else 0 if val is False else val}* <{type(val).__name__}>" 
+                    [f"    {i+1}. *{1 if val is True else 0 if val is False else val}* <{type(val).__name__}>"
                      for i, val in enumerate(normalized)]
                 )
                 total_sum = sum(1 if val is True else 0 if val is False else val for val in normalized)
@@ -261,13 +265,13 @@ class LF_MathOperation:
 
 ## Full operation:
   {str_operation}
-        """    
+        """
 
         PromptServer.instance.send_sync(f"{EVENT_PREFIX}mathoperation", {
             "node": kwargs.get("node_id"),
             "value": log,
         })
-        
+
         int_result: int
         if isinstance(result, (int, float)):
             try:
@@ -281,7 +285,7 @@ class LF_MathOperation:
             int_result = 0
 
         return (int_result, result)
-    
+
     @classmethod
     def VALIDATE_INPUTS(self, **kwargs):
          return True

@@ -13,34 +13,34 @@ class LF_ResolutionSwitcher:
         return {
             "required": {
                 "chance_landscape": (Input.FLOAT, {
-                    "default": 20.0, 
-                    "step": 5, 
-                    "min": 0, 
-                    "max": 100, 
+                    "default": 20.0,
+                    "step": 5,
+                    "min": 0,
+                    "max": 100,
                     "tooltip": "Percentage chance for landscape output, 0-100."
                 }),
                 "portrait_width": (Input.INTEGER, {
-                    "default": 832, 
-                    "min": 1, 
-                    "step": 1, 
+                    "default": 832,
+                    "min": 1,
+                    "step": 1,
                     "tooltip": "Width when the image is portrait-oriented."
                 }),
                 "portrait_height": (Input.INTEGER, {
                     "default": 1216,
-                    "min": 1, 
-                    "step": 1, 
+                    "min": 1,
+                    "step": 1,
                     "tooltip": "Height when the image is portrait-oriented."
                 }),
                 "landscape_width": (Input.INTEGER, {
                     "default": 1216,
-                    "min": 1, 
-                    "step": 1, 
+                    "min": 1,
+                    "step": 1,
                     "tooltip": "Width when the image is landscape-oriented."
                 }),
                 "landscape_height": (Input.INTEGER, {
                     "default": 832,
-                    "min": 1, 
-                    "step": 1, 
+                    "min": 1,
+                    "step": 1,
                     "tooltip": "Height when the image is landscape-oriented."
                 }),
             },
@@ -54,6 +54,11 @@ class LF_ResolutionSwitcher:
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
+    OUTPUT_TOOLTIPS = (
+        "Width of the image depending on orientation.",
+        "Height of the image depending on orientation.",
+        "Whether the final image is in landscape orientation."
+    )
     RETURN_NAMES = ("width", "height", "is_landscape")
     RETURN_TYPES = (Input.INTEGER, Input.INTEGER, Input.BOOLEAN)
 

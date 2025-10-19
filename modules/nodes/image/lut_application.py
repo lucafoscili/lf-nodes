@@ -49,12 +49,20 @@ class LF_LUTApplication:
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, True)
     OUTPUT_NODE = True
+    OUTPUT_TOOLTIPS = (
+        "Adjusted image tensor.",
+        "List of adjusted image tensors.",
+        "Original image tensor.",
+        "List of original image tensors.",
+        "LUT applied to the image.",
+        "List of LUTs applied to the images."
+    )
     RETURN_NAMES = ("image", "image_list")
     RETURN_TYPES = (Input.IMAGE, Input.IMAGE)
 
     def on_exec(self, **kwargs: dict):
         self._temp_cache.cleanup()
-        
+
         image: list[torch.Tensor] = normalize_input_image(kwargs.get("image", []))
         strength: float = normalize_list_to_value(kwargs.get("strength"))
         lut_dataset: dict = normalize_json_input(kwargs.get("lut_dataset", {}))

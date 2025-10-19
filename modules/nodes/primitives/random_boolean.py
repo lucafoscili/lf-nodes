@@ -13,10 +13,10 @@ class LF_RandomBoolean:
         return {
             "required": {
                 "chance_true": (Input.FLOAT, {
-                    "default": 50.0, 
-                    "step": 1, 
-                    "min": 0, 
-                    "max": 100, 
+                    "default": 50.0,
+                    "step": 1,
+                    "min": 0,
+                    "max": 100,
                     "tooltip": "Percentage chance for True output, 0-100."
                 }),
             },
@@ -33,12 +33,16 @@ class LF_RandomBoolean:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, True)
+    OUTPUT_TOOLTIPS = (
+        "Randomly selected boolean value.",
+        "Randomly selected boolean value as a list."
+    )
     RETURN_NAMES = ("boolean", "boolean_list")
     RETURN_TYPES = (Input.BOOLEAN, Input.BOOLEAN)
 
     def on_exec(self, **kwargs: dict):
         chance_true: str = normalize_list_to_value(kwargs.get("chance_true"))
-        
+
         percentage = max(0, min(100, chance_true))
         random_value = random.uniform(0, 100)
 

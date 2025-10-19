@@ -13,7 +13,7 @@ from ...utils.helpers.torch import process_and_save_image
 class LF_Line:
     def __init__(self):
         self._temp_cache = TempFileCache()
-        
+
     @classmethod
     def INPUT_TYPES(self):
         return {
@@ -46,25 +46,25 @@ class LF_Line:
                     "tooltip": "Vertical position to end the line drawing, expressed as a value between 0 and 1."
                 }),
                 "size": (Input.INTEGER, {
-                    "default": 10, 
-                    "min": 1, 
-                    "max": 500, 
-                    "step": 1, 
+                    "default": 10,
+                    "min": 1,
+                    "max": 500,
+                    "step": 1,
                     "tooltip": "Diameter of the line in pixels."
                 }),
                 "color": (Input.STRING, {
-                    "default": "FF0000", 
+                    "default": "FF0000",
                     "tooltip": "Hex color of the line."
                 }),
                 "opacity": (Input.FLOAT, {
-                    "default": 1.0, 
-                    "min": 0.0, 
-                    "max": 1.0, 
-                    "step": 0.01, 
+                    "default": 1.0,
+                    "min": 0.0,
+                    "max": 1.0,
+                    "step": 0.01,
                     "tooltip": "Opacity of the line."
                 }),
                 "smooth": (Input.BOOLEAN, {
-                    "default": False, 
+                    "default": False,
                     "tooltip": "Draws a smooth line."
                 }),
             },
@@ -93,6 +93,10 @@ class LF_Line:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, True)
+    OUTPUT_TOOLTIPS = (
+        "Image tensor with line effect applied.",
+        "List of image tensors with line effect applied."
+    )
     RETURN_NAMES = ("image", "image_list")
     RETURN_TYPES = (Input.IMAGE, Input.IMAGE)
 

@@ -38,17 +38,21 @@ class LF_ImagesSlideshow:
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, True)
     OUTPUT_NODE = True
+    OUTPUT_TOOLTIPS = (
+        "Pass-through image tensor.",
+        "List of pass-through image tensors."
+    )
     RETURN_NAMES = ("image", "image_list")
     RETURN_TYPES = (Input.IMAGE, Input.IMAGE)
 
     def on_exec(self, **kwargs: dict):
         self._temp_cache.cleanup()
-        
+
         image: list[torch.Tensor] = normalize_input_image(kwargs.get("image"))
 
         nodes: list[dict] = []
         dataset: dict = { "nodes": nodes }
-        
+
         for index, img in enumerate(image):
             pil_image = tensor_to_pil(img)
 
@@ -61,14 +65,14 @@ class LF_ImagesSlideshow:
             url = get_resource_url(subfolder, filename, "temp")
 
             nodes.append(create_masonry_node(filename, url, index))
-        
+
         batch_list, image_list = normalize_output_image(image)
 
         PromptServer.instance.send_sync(f"{EVENT_PREFIX}imagesslideshow", {
             "node": kwargs.get("node_id"),
             "dataset": dataset,
         })
-        
+
         return (batch_list[0], image_list)
 # endregion
 

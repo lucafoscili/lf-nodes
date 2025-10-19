@@ -78,6 +78,17 @@ class LF_LoadImages:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, True, True, True, False, False, False, False, False)
+    OUTPUT_TOOLTIPS = (
+        "Loaded image tensor.",
+        "List of loaded image tensors.",
+        "Name of the loaded image.",
+        "Creation date of the loaded image.",
+        "Number of loaded images.",
+        "Selected image tensor.",
+        "Index of the selected image.",
+        "Name of the selected image.",
+        "Metadata of the images.",
+    )
     RETURN_NAMES = ("image", "image_list", "name", "creation_date", "nr", "selected_image", "selected_index", "selected_name", "metadata")
     RETURN_TYPES = (Input.IMAGE, Input.IMAGE, Input.STRING, Input.STRING, Input.INTEGER, Input.IMAGE, Input.INTEGER, Input.STRING, Input.JSON)
 

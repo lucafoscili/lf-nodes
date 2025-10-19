@@ -50,14 +50,14 @@ class LF_CreateMask:
             },
             "optional": {
                 "clip": (Input.CLIP, {
-                    "tooltip": 
+                    "tooltip":
                     f"Optional Stable-Diffusion CLIP model:\n "
                     f"⚠️ Embeddings from this CLIP will not perfectly match the segmentation head—"
                     f"expect degraded mask accuracy unless you fine-tune or insert an adapter."
                 }),
                 "threshold": (Input.FLOAT, {
-                    "default": 0.5, 
-                    "min": 0.0, 
+                    "default": 0.5,
+                    "min": 0.0,
                     "max": 1.0,
                     "step": 0.01,
                     "tooltip": "Binarization threshold on mask probabilities (0→1). Lower to include more pixels."
@@ -76,15 +76,21 @@ class LF_CreateMask:
             "hidden": {"node_id":"UNIQUE_ID"}
         }
 
-    CATEGORY       = CATEGORY
-    FUNCTION       = FUNCTION
+    CATEGORY = CATEGORY
+    FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, True, False, True)
-    RETURN_NAMES   = ("mask", "mask_list", "image", "image_list")
-    RETURN_TYPES   = (Input.MASK, Input.MASK, Input.IMAGE, Input.IMAGE)
+    OUTPUT_TOOLTIPS = (
+        "Generated mask tensor.",
+        "List of generated mask tensors.",
+        "Original image tensor.",
+        "List of original image tensors."
+    )
+    RETURN_NAMES = ("mask", "mask_list", "image", "image_list")
+    RETURN_TYPES = (Input.MASK, Input.MASK, Input.IMAGE, Input.IMAGE)
 
     def on_exec(self, **kwargs):
         self._temp_cache.cleanup()
-        
+
         images = normalize_input_image(kwargs["image"])
         proc = normalize_list_to_value(kwargs["processor"])
         seg_model = normalize_list_to_value(kwargs["model"])
@@ -131,7 +137,7 @@ class LF_CreateMask:
             if mode == "relative":
                 thresh = mask_prob.max().item() * rel_scale
             elif mode == "otsu":
-                prob_map = mask_prob.cpu().numpy() 
+                prob_map = mask_prob.cpu().numpy()
                 thresh = get_otsu_threshold(prob_map)
             else:
                 thresh = fixed_thresh

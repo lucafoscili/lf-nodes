@@ -40,6 +40,10 @@ class LF_SortTags:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, True)
+    OUTPUT_TOOLTIPS = (
+        "Final sorted caption string.",
+        "List of all sorted caption strings (if any)."
+    )
     RETURN_NAMES = ("string", "string_list")
     RETURN_TYPES = (Input.STRING, Input.STRING)
 
@@ -79,7 +83,7 @@ class LF_SortTags:
                 original (str): The original caption string.
                 sorted_caption (str): The sorted caption string.
                 token_count (int): The number of CLIP tokens in the sorted caption.
-            
+
             Returns:
                 str: A formatted string containing the log entry.
             """
@@ -95,7 +99,7 @@ class LF_SortTags:
                 f"<details><summary>Show tokens</summary>\n\n"
                 f"{token_lines}\n\n</details>"
             )
-        
+
         caption: str = normalize_list_to_value(kwargs.get("caption", ""))
         desired_order: str = normalize_list_to_value(kwargs.get("desired_order", ""))
         clip_limit: int = normalize_list_to_value(kwargs.get("clip_limit", 75))

@@ -17,57 +17,62 @@ class LF_CharacterImpersonator:
         return {
             "required": {
                 "temperature": (Input.FLOAT, {
-                    "max": 1.901, 
-                    "min": 0.1, 
-                    "step": 0.1, 
-                    "round": 0.1, 
-                    "default": 0.7, 
+                    "max": 1.901,
+                    "min": 0.1,
+                    "step": 0.1,
+                    "round": 0.1,
+                    "default": 0.7,
                     "tooltip": "Controls the randomness of the generated text. Higher values make the output more random."
                 }),
                 "max_tokens": (Input.INTEGER, {
-                    "max": 8000, 
-                    "min": 20, 
-                    "step": 10, 
-                    "default": 500, 
+                    "max": 8000,
+                    "min": 20,
+                    "step": 10,
+                    "default": 500,
                     "tooltip": "Limits the length of the generated text. Adjusting this value can help control the verbosity of the output."
                 }),
                 "prompt": (Input.STRING, {
-                    "multiline": True, 
-                    "default": "", 
+                    "multiline": True,
+                    "default": "",
                     "tooltip": "The initial input or question that guides the generation process. Can be a single line or multiple lines of text."
                 }),
                 "seed": (Input.INTEGER, {
-                    "default": 42, 
-                    "min": 0, 
-                    "max": INT_MAX, 
+                    "default": 42,
+                    "min": 0,
+                    "max": INT_MAX,
                     "tooltip": "Determines the starting point for generating random numbers. Setting a specific seed ensures reproducibility of results."
                 }),
                 "character_bio": (Input.STRING, {
-                    "multiline": True, 
-                    "default": "", 
+                    "multiline": True,
+                    "default": "",
                     "tooltip": "Biographical details of the character to be impersonated. Helps in shaping the tone and content of the generated text."
                 }),
                 "url": (Input.STRING, {
-                    "default": "http://localhost:5001/v1/chat/completions", 
+                    "default": "http://localhost:5001/v1/chat/completions",
                     "tooltip": "URL of the local endpoint where the request is sent."
                 }),
             },
             "optional":{
                 "image" : (Input.IMAGE, {
-                    "default": None, 
+                    "default": None,
                     "tooltip": "An optional image that can be included in the generation process to influence the output based on visual cues."
                 }),
                 "ui_widget" : (Input.LF_CODE, {
                     "default": ""
                 })
             },
-            "hidden": { 
+            "hidden": {
                 "node_id": "UNIQUE_ID"
             }
         }
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
+    OUTPUT_TOOLTIPS = (
+        "Request payload for the character impersonation.",
+        "Response from the character impersonation API.",
+        "Final generated answer from the character impersonation."
+    )
     RETURN_NAMES = ("request_json", "response_json", "answer")
     RETURN_TYPES = (Input.JSON, Input.JSON, Input.STRING)
 
@@ -88,7 +93,7 @@ class LF_CharacterImpersonator:
             b64_image = tensor_to_base64(image[0])
             image_url = f"{BASE64_PNG_PREFIX}{b64_image}"
             content.append({"type": "image_url", "image_url": {"url":image_url}})
-        
+
         if prompt:
             content.append({"type": "text", "text": prompt})
 
@@ -113,7 +118,7 @@ class LF_CharacterImpersonator:
         status_code, method, message = handle_response(response, method="POST")
         if status_code != 200:
             message = f"Whoops! Request failed with status code {status_code} and method {method}."
-        
+
         PromptServer.instance.send_sync(f"{EVENT_PREFIX}characterimpersonator", {
             "node": kwargs.get("node_id"),
             "value": message,

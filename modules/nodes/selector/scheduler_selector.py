@@ -14,25 +14,25 @@ class LF_SchedulerSelector:
         return {
             "required": {
                 "scheduler": (["None"] + SCHEDULERS, {
-                    "default": "None", 
+                    "default": "None",
                     "tooltip": "Scheduler used to generate the image."
                 }),
                 "enable_history": (Input.BOOLEAN, {
-                    "default": True, 
+                    "default": True,
                     "tooltip": "Enables history, saving the execution value and date of the widget."
                 }),
                 "randomize": (Input.BOOLEAN, {
-                    "default": False, 
+                    "default": False,
                     "tooltip": "Selects a scheduler randomly."
                 }),
                 "filter": (Input.STRING, {
-                    "default": "", 
+                    "default": "",
                     "tooltip": "When randomization is active, this field can be used to filter scheduler names. Supports wildcards (*)."
                 }),
                 "seed": (Input.INTEGER, {
-                    "default": 42, 
-                    "min": 0, 
-                    "max": INT_MAX, 
+                    "default": 42,
+                    "min": 0,
+                    "max": INT_MAX,
                     "tooltip": "Seed value for when randomization is active."
                 }),
             },
@@ -46,6 +46,10 @@ class LF_SchedulerSelector:
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
+    OUTPUT_TOOLTIPS = (
+        "Combo list of schedulers.",
+        "Selected scheduler item as a string.",
+    )
     RETURN_NAMES = ("combo", "string")
     RETURN_TYPES = (SCHEDULERS, Input.STRING)
 
@@ -71,7 +75,7 @@ class LF_SchedulerSelector:
                     raise ValueError(f"Not found a model with the specified filter: {filter}")
             random.seed(seed)
             scheduler = random.choice(schedulers)
-        
+
         if enable_history:
             create_history_node(scheduler, nodes)
 

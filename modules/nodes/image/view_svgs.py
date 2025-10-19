@@ -36,6 +36,10 @@ class LF_ViewSVGs:
     INPUT_IS_LIST = (False, False)
     OUTPUT_IS_LIST = (False, True)
     OUTPUT_NODE = True
+    OUTPUT_TOOLTIPS = (
+        "Pass-through SVG string.",
+        "List of pass-through SVG strings.",
+    )
     RETURN_NAMES = ("svg", "svg_list")
     RETURN_TYPES = (Input.STRING, Input.STRING)
 

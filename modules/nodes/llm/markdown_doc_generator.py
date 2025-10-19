@@ -15,47 +15,47 @@ class LF_MarkdownDocGenerator:
         return {
             "required": {
                 "prompt": (Input.STRING, {
-                    "default": "", 
-                    "multiline": True, 
+                    "default": "",
+                    "multiline": True,
                     "tooltip": "The source file to document."
                 }),
                 "temperature": (Input.FLOAT, {
-                    "max": 1.901, 
-                    "min": 0.1, 
-                    "step": 0.1, 
-                    "round": 0.1, 
-                    "default": 0.5, 
+                    "max": 1.901,
+                    "min": 0.1,
+                    "step": 0.1,
+                    "round": 0.1,
+                    "default": 0.5,
                     "tooltip": "Controls the randomness of the generated text. Higher values make the output more random."
                 }),
                 "max_tokens": (Input.INTEGER, {
-                    "max": 8000, 
-                    "min": 20, 
-                    "step": 10, 
-                    "default": 2000, 
+                    "max": 8000,
+                    "min": 20,
+                    "step": 10,
+                    "default": 2000,
                     "tooltip": "Limits the length of the generated text. Adjusting this value can help control the verbosity of the output."
                 }),
                 "seed": (Input.INTEGER, {
-                    "default": 42, 
-                    "min": 0, 
-                    "max": INT_MAX, 
+                    "default": 42,
+                    "min": 0,
+                    "max": INT_MAX,
                     "tooltip": "Determines the starting point for generating random numbers. Setting a specific seed ensures reproducibility of results."
                 }),
                 "url": (Input.STRING, {
-                    "default": "http://localhost:5001/v1/chat/completions", 
+                    "default": "http://localhost:5001/v1/chat/completions",
                     "tooltip": "URL of the local endpoint for the LLM."
                 }),
             },
-            "optional": { 
+            "optional": {
                 "extra_context": (Input.STRING, {
-                    "default": "", 
-                    "multiline": True, 
+                    "default": "",
+                    "multiline": True,
                     "tooltip": "Additional context to guide the LLM (out of scope constants and helpers definitions)."
                 }),
                 "ui_widget" : (Input.LF_CODE, {
                     "default": ""
                 })
             },
-            "hidden": { 
+            "hidden": {
                 "node_id": "UNIQUE_ID"
             }
         }
@@ -63,6 +63,12 @@ class LF_MarkdownDocGenerator:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, False, False, True)
+    OUTPUT_TOOLTIPS = (
+        "Request payload for the markdown generation.",
+        "Response from the markdown generation API.",
+        "Generated markdown content.",
+        "Generated markdown content as a list."
+    )
     RETURN_NAMES = ("request_json", "response_json", "markdown", "markdown_list")
     RETURN_TYPES = (Input.JSON, Input.JSON, Input.STRING, Input.STRING)
 
@@ -93,7 +99,7 @@ class LF_MarkdownDocGenerator:
         response = requests.post(url, headers=HEADERS, data=json.dumps(request))
         response_data = response.json()
         status_code, _, message = handle_response(response, method="POST")
-        
+
         if status_code != 200:
             message = f"Oops! Documentation generation failed with status code {status_code}."
 

@@ -25,16 +25,16 @@ class LF_BlurImages:
                     "tooltip": "List of images to blur."
                 }),
                 "blur_percentage": (Input.FLOAT, {
-                    "default": 0.25, 
-                    "min": 0.0, 
-                    "max": 1.0, 
-                    "step": 0.05, 
+                    "default": 0.25,
+                    "min": 0.0,
+                    "max": 1.0,
+                    "step": 0.05,
                     "tooltip": "0% Blur: No blur applied, the image remains as-is. 100% Blur: Maximum blur applied based on the image's dimensions, which would result in a highly blurred (almost unrecognizable) image."
                 }),
             },
             "optional": {
                 "file_name": (Input.STRING, {
-                    "forceInput": True, 
+                    "forceInput": True,
                     "tooltip": "Corresponding list of file names for the images."
                 }),
                 "ui_widget": (Input.LF_MASONRY, {
@@ -50,6 +50,12 @@ class LF_BlurImages:
     FUNCTION = FUNCTION
     INPUT_IS_LIST = (True, False, False, True)
     OUTPUT_IS_LIST = (False, True, True, False)
+    OUTPUT_TOOLTIPS = (
+        "Image tensor with blur effect applied.",
+        "List of image tensors with blur effect applied.",
+        "Corresponding list of file names for the images.",
+        "Total number of images processed."
+    )
     RETURN_NAMES = ("image", "image_list", "file_name", "count")
     RETURN_TYPES = (Input.IMAGE, Input.IMAGE, Input.STRING, Input.INTEGER)
 
@@ -75,15 +81,15 @@ class LF_BlurImages:
                     base_name = split_name[0]
             else:
                 base_name = ""
-            
+
             pil_image = tensor_to_pil(img)
-            
+
             width, height = pil_image.size
             min_dimension = min(width, height)
             adjusted_blur_radius: float = blur_percentage * (min_dimension / 10)
-            
+
             blurred_image = pil_image.filter(ImageFilter.GaussianBlur(adjusted_blur_radius))
-            
+
             blurred_tensor = pil_to_tensor(blurred_image)
             blurred_images.append(blurred_tensor)
 
@@ -102,7 +108,7 @@ class LF_BlurImages:
             nodes.append(create_masonry_node(filename, url, index))
 
         image_batch, image_list = normalize_output_image(blurred_images)
-        
+
         PromptServer.instance.send_sync(f"{EVENT_PREFIX}blurimages", {
             "node": kwargs.get("node_id"),
             "dataset": dataset,

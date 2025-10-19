@@ -16,11 +16,11 @@ class LF_MultipleImageResizeForWeb:
         return {
             "required": {
                 "image": (Input.IMAGE, {
-                    "type": "IMAGE", 
+                    "type": "IMAGE",
                     "tooltip": "List of images to process."
                 }),
                 "file_name": (Input.STRING, {
-                    "forceInput": True, 
+                    "forceInput": True,
                     "tooltip": "Corresponding list of file names for the images."
                 }),
             },
@@ -38,6 +38,14 @@ class LF_MultipleImageResizeForWeb:
     FUNCTION = FUNCTION
     INPUT_IS_LIST = (True, True)
     OUTPUT_IS_LIST = (False, True, False, True, True, False)
+    OUTPUT_TOOLTIPS = (
+        "Resized image tensor.",
+        "List of resized image tensors.",
+        "Original image tensor.",
+        "List of original image tensors.",
+        "Names with directory.",
+        "Dataset information for visualization."
+    )
     RETURN_NAMES = ("image", "image_list", "name", "name_list", "names_with_dir", "dataset")
     RETURN_TYPES = (Input.IMAGE, Input.IMAGE, Input.STRING, Input.STRING, Input.STRING, Input.JSON)
 
@@ -76,7 +84,7 @@ class LF_MultipleImageResizeForWeb:
 
             img_byte_arr = img_byte_arr.getvalue()
 
-            output_images.append(pil_to_tensor(img)) 
+            output_images.append(pil_to_tensor(img))
             output_file_names.append(f"{base_name}")
             output_file_names_with_dir.append(f"HD/{base_name}")
 

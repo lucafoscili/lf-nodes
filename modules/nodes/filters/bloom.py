@@ -13,7 +13,7 @@ from ...utils.helpers.torch import process_and_save_image
 class LF_Bloom:
     def __init__(self):
         self._temp_cache = TempFileCache()
-        
+
     @classmethod
     def INPUT_TYPES(cls):
         return {
@@ -80,6 +80,10 @@ class LF_Bloom:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, True)
+    OUTPUT_TOOLTIPS = (
+        "Image tensor with bloom effect applied.",
+        "List of image tensors with bloom effect applied."
+    )
     RETURN_NAMES = ("image", "image_list")
     RETURN_TYPES = (Input.IMAGE, Input.IMAGE)
 

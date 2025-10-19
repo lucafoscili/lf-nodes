@@ -10,23 +10,26 @@ class LF_DisplayJSON:
     def INPUT_TYPES(self):
         return {
             "required": {
-                "json_input": (Input.JSON, { 
+                "json_input": (Input.JSON, {
                     "tooltip": "JSON object to display."
                 }),
             },
             "optional": {
-                "ui_widget": (Input.LF_CODE, { 
-                    "default": "" 
+                "ui_widget": (Input.LF_CODE, {
+                    "default": ""
                 }),
             },
-            "hidden": { 
+            "hidden": {
                 "node_id": "UNIQUE_ID"
-            } 
-        }        
+            }
+        }
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     OUTPUT_NODE = True
+    OUTPUT_TOOLTIPS = (
+        "Pass-through JSON object.",
+    )
     RETURN_NAMES = ("json",)
     RETURN_TYPES = (Input.JSON,)
 
@@ -37,7 +40,7 @@ class LF_DisplayJSON:
             "node": kwargs.get("node_id"),
             "value": json_input,
         })
-        
+
         return (json_input,)
 # endregion
 

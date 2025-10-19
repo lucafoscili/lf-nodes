@@ -12,25 +12,25 @@ class LF_DisplayPrimitiveAsJSON:
             "required": {},
             "optional": {
                 "integer": (Input.INTEGER, {
-                    "default": 0, 
-                    "forceInput": True, 
-                    "max": INT_MAX, 
+                    "default": 0,
+                    "forceInput": True,
+                    "max": INT_MAX,
                     "tooltip": "Integer value."
                 }),
                 "float": (Input.FLOAT, {
-                    "default": 0.0, 
-                    "forceInput": True, 
-                    "step": 0.1, 
+                    "default": 0.0,
+                    "forceInput": True,
+                    "step": 0.1,
                     "tooltip": "Float value."
                 }),
                 "string": (Input.STRING, {
-                    "default": "", 
-                    "forceInput": True, 
+                    "default": "",
+                    "forceInput": True,
                     "tooltip": "String value."
                 }),
                 "boolean": (Input.BOOLEAN, {
-                    "default": False, 
-                    "forceInput": True, 
+                    "default": False,
+                    "forceInput": True,
                     "tooltip": "Boolean value."
                 }),
                 "ui_widget": (Input.LF_CODE, {
@@ -45,6 +45,10 @@ class LF_DisplayPrimitiveAsJSON:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     OUTPUT_NODE = True
+    OUTPUT_TOOLTIPS = (
+        "Pass-through JSON value.",
+        "Pass-through JSON value as a list."
+    )
     RETURN_NAMES = ("json",)
     RETURN_TYPES = (Input.JSON,)
 
@@ -63,21 +67,21 @@ class LF_DisplayPrimitiveAsJSON:
                     "children": [{"id": f"boolean_{idx}", "value": str(value)}],
                     "description": str(value), "id": f"boolean_{idx}", "value": "boolean"
                 })
-        
+
         if float_list:
             for idx, value in enumerate(float_list):
                 nodes.append({
                     "children": [{"id": f"float_{idx}", "value": str(value)}],
                     "description": str(value), "id": f"float_{idx}", "value": "float"
                 })
-        
+
         if integer_list:
             for idx, value in enumerate(integer_list):
                 nodes.append({
                     "children": [{"id": f"integer_{idx}", "value": str(value)}],
                     "description": str(value), "id": f"integer_{idx}", "value": "integer"
                 })
-        
+
         if string_list:
             for idx, value in enumerate(string_list):
                 nodes.append({

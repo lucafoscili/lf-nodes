@@ -17,11 +17,11 @@ class LF_SaveJSON:
                     "tooltip": "JSON data to save."
                 }),
                 "filename_prefix": (Input.STRING, {
-                    "default": '', 
+                    "default": '',
                     "tooltip": "Path and filename for saving the JSON. Use slashes to set directories."
                 }),
                 "add_timestamp": (Input.BOOLEAN, {
-                    "default": True, 
+                    "default": True,
                     "tooltip": "Add timestamp to the filename as a suffix."
                 }),
             },
@@ -30,14 +30,17 @@ class LF_SaveJSON:
                     "default": {}
                 }),
             },
-            "hidden": { 
+            "hidden": {
                 "node_id": "UNIQUE_ID",
-            } 
+            }
         }
-    
+
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     OUTPUT_NODE = True
+    OUTPUT_TOOLTIPS = (
+        "Saved JSON file path.",
+    )
     RETURN_NAMES = ("json",)
     RETURN_TYPES = (Input.JSON,)
 
@@ -52,20 +55,20 @@ class LF_SaveJSON:
             add_timestamp=add_timestamp,
             extension="json"
         )
- 
+
         with open(output_file, 'w', encoding='utf-8') as json_file:
             json.dump(json_data, json_file, ensure_ascii=False, indent=4)
- 
+
         nodes: list[dict] = []
         root: dict = { "children": nodes, "icon":"check", "id": "root", "value": "JSON saved successfully!" }
         dataset: dict = { "nodes": [root] }
         nodes.append({ "description": output_file, "icon": "code", "id": output_file, "value": output_file })
- 
+
         PromptServer.instance.send_sync(f"{EVENT_PREFIX}savejson", {
             "node": kwargs.get("node_id"),
             "dataset": dataset,
         })
- 
+
         return (json_data,)
 # endregion
 

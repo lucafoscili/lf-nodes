@@ -6,13 +6,13 @@ from ...utils.helpers.logic import normalize_input_list
 
 # region LF_DisplayBoolean
 class LF_DisplayBoolean:
-    @classmethod 
+    @classmethod
     def INPUT_TYPES(self):
         return {
             "required": {
                 "boolean": (Input.BOOLEAN, {
-                    "default": False, 
-                    "forceInput": True, 
+                    "default": False,
+                    "forceInput": True,
                     "tooltip": "Boolean value."
                 }),
             },
@@ -29,6 +29,10 @@ class LF_DisplayBoolean:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     OUTPUT_NODE = True
+    OUTPUT_TOOLTIPS = (
+        "Pass-through boolean value.",
+        "Pass-through boolean value as a list."
+    )
     RETURN_NAMES = ("boolean",)
     RETURN_TYPES = (Input.BOOLEAN,)
 
@@ -42,7 +46,7 @@ class LF_DisplayBoolean:
                 markdown_value = str(display_boolean[0])
         else:
             markdown_value = ""
-        
+
         PromptServer.instance.send_sync(f"{EVENT_PREFIX}displayboolean", {
             "node": kwargs.get("node_id"),
             "value": markdown_value,

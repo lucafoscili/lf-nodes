@@ -18,16 +18,16 @@ class LF_ResizeImageByEdge:
                     "tooltip": "Input image tensor or a list of image tensors."
                 }),
                 "longest_edge": (Input.BOOLEAN, {
-                    "default": False, 
+                    "default": False,
                     "tooltip": "Resizes the image by the longest side if set to True. Otherwise, resizes by the shortest side."
                 }),
                 "new_size": (Input.INTEGER, {
-                    "default": 1024, 
+                    "default": 1024,
                     "max": INT_MAX,
                     "tooltip": "The size of the longest edge of the output image."
                 }),
                 "resize_method": (RESAMPLERS, {
-                    "default": "bicubic", 
+                    "default": "bicubic",
                     "tooltip": "Method to resize the image."
                 })
             },
@@ -45,6 +45,11 @@ class LF_ResizeImageByEdge:
     FUNCTION = FUNCTION
     INPUT_IS_LIST = (True, False, True, False, False)
     OUTPUT_IS_LIST = (False, True, False)
+    OUTPUT_TOOLTIPS = (
+        "Resized image tensor.",
+        "List of resized image tensors.",
+        "Count of resized images."
+    )
     RETURN_NAMES = ("image", "image_list", "count")
     RETURN_TYPES = (Input.IMAGE, Input.IMAGE, Input.INTEGER)
 
@@ -80,7 +85,7 @@ class LF_ResizeImageByEdge:
             widths.append(new_width)
 
             nodes.append(create_resize_node(original_height, original_width, new_height, new_width, index))
-            
+
         num_resized = len(resized_images)
         summary_message = f"Resized {num_resized} {'image' if num_resized == 1 else 'images'}"
         root["id"] = summary_message

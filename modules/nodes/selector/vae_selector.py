@@ -25,31 +25,31 @@ class LF_VAESelector:
     initial_list: list[str] = []
     _CACHE = LazyCache()
     register_cache(_CACHE)
-        
+
     @classmethod
     def INPUT_TYPES(self):
         return {
             "required": {
                 "vae": (["None"] + self.initial_list, {
-                    "default": "None", 
+                    "default": "None",
                     "tooltip": "VAE used to generate the image."
                 }),
                 "enable_history": (Input.BOOLEAN, {
-                    "default": True, 
+                    "default": True,
                     "tooltip": "Enables history, saving the execution value and date of the widget."
                 }),
                 "randomize": (Input.BOOLEAN, {
-                    "default": False, 
+                    "default": False,
                     "tooltip": "Selects a VAE randomly."
                 }),
                 "filter": (Input.STRING, {
-                    "default": "", 
+                    "default": "",
                     "tooltip": "When randomization is active, this field can be used to filter VAE names. Supports wildcards (*)."
                 }),
                 "seed": (Input.INTEGER, {
-                    "default": 42, 
-                    "min": 0, 
-                    "max": INT_MAX, 
+                    "default": 42,
+                    "min": 0,
+                    "max": INT_MAX,
                     "tooltip": "Seed value for when randomization is active."
                 }),
             },
@@ -63,9 +63,14 @@ class LF_VAESelector:
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
+    OUTPUT_TOOLTIPS = (
+        "Combo list of VAEs.",
+        "Selected VAE item as a string.",
+        "Loaded VAE model.",
+    )
     RETURN_NAMES = ("combo", "string", "vae")
     RETURN_TYPES = (initial_list, Input.STRING, Input.VAE)
-        
+
     def on_exec(self, **kwargs: dict):
         vae: str = normalize_list_to_value(kwargs.get("vae"))
         enable_history: bool = normalize_list_to_value(kwargs.get("enable_history"))
@@ -88,7 +93,7 @@ class LF_VAESelector:
                     raise ValueError(f"Not found a model with the specified filter: {filter}")
             random.seed(seed)
             vae = random.choice(vaes)
-        
+
         vae_model = None
         if vae and vae != "None":
             if vae in ["taesd", "taesdxl", "taesd3", "taef1"]:
@@ -104,7 +109,7 @@ class LF_VAESelector:
                     m.throw_exception_if_invalid()
                     return m
                 vae_model = self._CACHE.get_or_set(("vae-obj", vae_path), _make_vae)
-        
+
         if enable_history:
             create_history_node(vae, nodes)
 

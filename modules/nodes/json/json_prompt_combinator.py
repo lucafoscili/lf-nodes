@@ -12,13 +12,13 @@ class LF_JSONPromptCombinator:
     def INPUT_TYPES(self):
         return {
             "required": {
-                "json_input": (Input.JSON, { 
+                "json_input": (Input.JSON, {
                     "tooltip": "Hierarchical JSON of prompt parts."
                 }),
             },
             "optional": {
                 "separator": (Input.STRING, {
-                    "default": ", ", 
+                    "default": ", ",
                     "tooltip": "Separator between merged parts."
                 }),
                 "include_keys": (Input.BOOLEAN, {
@@ -64,6 +64,12 @@ class LF_JSONPromptCombinator:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, True, False, False)
+    OUTPUT_TOOLTIPS = (
+        "Combined prompt string.",
+        "List of combined prompt strings.",
+        "Number of prompts generated.",
+        "JSON representation of all prompts."
+    )
     RETURN_NAMES = ("string", "string_list", "count", "json")
     RETURN_TYPES = (Input.STRING, Input.STRING, Input.INTEGER, Input.JSON)
 
@@ -211,10 +217,10 @@ class LF_JSONPromptCombinator:
 
         log_markdown = f"""## JSON Prompt Combinator
 
-**Generated:** {count} prompt(s)  
-**Theoretical (pre-cap):** {theoretical_total}  
-**Truncated:** {trunc_note}  
-**Root extras added:** {root_added if generate_root_prompts else 0}  
+**Generated:** {count} prompt(s)
+**Theoretical (pre-cap):** {theoretical_total}
+**Truncated:** {trunc_note}
+**Root extras added:** {root_added if generate_root_prompts else 0}
 **Duplicates removed:** {dedupe_note}
 
 ### Options
