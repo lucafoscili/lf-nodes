@@ -7,25 +7,25 @@ from ...utils.helpers.ui import create_history_node
 
 # region LF_String
 class LF_String:
-    @classmethod 
+    @classmethod
     def INPUT_TYPES(self):
         return {
             "required": {
                 "string": (Input.STRING, {
-                    "default": "", 
+                    "default": "",
                     "tooltip": "String value."
                 }),
                 "enable_history": (Input.BOOLEAN, {
-                    "default": True, 
+                    "default": True,
                     "tooltip": "Enables history, saving the execution value and date of the widget."
                 }),
                 "randomize": (Input.BOOLEAN, {
-                    "default": False, 
+                    "default": False,
                     "tooltip": "Randomly selects a previously used value (must be present in the history list)."
                 }),
                 "seed": (Input.INTEGER, {
-                    "default": 42, 
-                    "max": INT_MAX, 
+                    "default": 42,
+                    "max": INT_MAX,
                     "tooltip": "Seed to control the randomness when 'randomize' is active."
                 }),
             },
@@ -42,6 +42,10 @@ class LF_String:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, True)
+    OUTPUT_TOOLTIPS = (
+        "String value.",
+        "String value as a list."
+    )
     RETURN_NAMES = ("string", "string_list")
     RETURN_TYPES = (Input.STRING, Input.STRING)
 
@@ -61,10 +65,10 @@ class LF_String:
             create_history_node(string_input, nodes)
 
         if randomize:
-            string_input = randomize_from_history(nodes, seed)        
+            string_input = randomize_from_history(nodes, seed)
 
         PromptServer.instance.send_sync(f"{EVENT_PREFIX}string", {
-            "node": kwargs.get("node_id"), 
+            "node": kwargs.get("node_id"),
             "dataset": dataset,
         })
 

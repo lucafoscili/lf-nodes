@@ -78,6 +78,14 @@ class LF_BackgroundRemover:
     FUNCTION = FUNCTION
     INPUT_IS_LIST = (True, False, False, False, False)
     OUTPUT_IS_LIST = (False, True, True, False, True, False)
+    OUTPUT_TOOLTIPS = (
+        "Image tensor with background removed.",
+        "List of image tensors with background removed.",
+        "List of cutout image tensors.",
+        "Mask tensor used for background removal.",
+        "List of mask tensors used for background removal.",
+        "JSON object with statistics about the background removal process.",
+    )
     RETURN_NAMES = ("image", "image_list", "cutout_list", "mask", "mask_list", "stats")
     RETURN_TYPES = (Input.IMAGE, Input.IMAGE, Input.IMAGE, Input.MASK, Input.MASK, Input.JSON)
 

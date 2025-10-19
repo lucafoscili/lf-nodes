@@ -13,15 +13,15 @@ class LF_RegexReplace:
         return {
             "required": {
                 "input_text": (Input.STRING, {
-                    "default": "", 
+                    "default": "",
                     "tooltip": "The text where the regex replacements will occur."
                 }),
                 "pattern": (Input.STRING, {
-                    "default": "", 
+                    "default": "",
                     "tooltip": "The regex pattern to match."
                 }),
                 "replacement": (Input.STRING, {
-                    "default": "", 
+                    "default": "",
                     "tooltip": "The substring to replace the regex matches with."
                 }),
             },
@@ -42,6 +42,10 @@ class LF_RegexReplace:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, True)
+    OUTPUT_TOOLTIPS = (
+        "Final modified text after regex replacement.",
+        "List of all modified texts (if any)."
+    )
     RETURN_NAMES = ("string", "string_list")
     RETURN_TYPES = (Input.STRING, Input.STRING)
 

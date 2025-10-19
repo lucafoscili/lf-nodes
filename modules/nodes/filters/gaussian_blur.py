@@ -13,7 +13,7 @@ from ...utils.helpers.torch import process_and_save_image
 class LF_GaussianBlur:
     def __init__(self):
         self._temp_cache = TempFileCache()
-        
+
     @classmethod
     def INPUT_TYPES(self):
         return {
@@ -22,17 +22,17 @@ class LF_GaussianBlur:
                     "tooltip": "Input image tensor or a list of image tensors."
                 }),
                 "blur_kernel_size": (Input.INTEGER, {
-                    "default": 7, 
-                    "min": 1, 
-                    "max": 51, 
-                    "step": 2, 
+                    "default": 7,
+                    "min": 1,
+                    "max": 51,
+                    "step": 2,
                     "tooltip": "Controls the size of the Gaussian blur kernel. Higher values mean more smoothing."
                 }),
                 "blur_sigma": (Input.FLOAT, {
-                    "default": 1.0, 
-                    "min": 0.0, 
-                    "max": 10.0, 
-                    "step": 0.1, 
+                    "default": 1.0,
+                    "min": 0.0,
+                    "max": 10.0,
+                    "step": 0.1,
                     "tooltip": "Standard deviation for the Gaussian kernel. Controls blur intensity."
                 }),
             },
@@ -49,6 +49,10 @@ class LF_GaussianBlur:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, True)
+    OUTPUT_TOOLTIPS = (
+        "Image tensor with Gaussian blur effect applied.",
+        "List of image tensors with Gaussian blur effect applied."
+    )
     RETURN_NAMES = ("image", "image_list")
     RETURN_TYPES = (Input.IMAGE, Input.IMAGE)
 

@@ -31,6 +31,10 @@ class LF_KeywordCounter:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     OUTPUT_NODE = True
+    OUTPUT_TOOLTIPS = (
+        "Chart dataset for visualization.",
+        "Chip dataset for visualization."
+    )
     RETURN_NAMES = ("chart_dataset", "chip_dataset")
     RETURN_TYPES = (Input.JSON, Input.JSON)
 

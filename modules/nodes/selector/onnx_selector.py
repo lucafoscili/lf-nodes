@@ -46,6 +46,10 @@ class LF_ONNXSelector:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     INPUT_IS_LIST = (False, False, False)
+    OUTPUT_TOOLTIPS = (
+        "Selected ONNX detector model label.",
+        "File path of the selected ONNX detector model.",
+    )
     RETURN_NAMES = ("detector", "model_path")
     RETURN_TYPES = (Input.ONNX_DETECTOR, Input.ONNX_PATH)
 

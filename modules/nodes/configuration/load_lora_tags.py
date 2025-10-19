@@ -47,6 +47,10 @@ class LF_LoadLoraTags:
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
+    OUTPUT_TOOLTIPS = (
+        "Model with LoRA weights applied.",
+        "CLIP model with LoRA weights applied."
+    )
     RETURN_NAMES = ("model", "clip")
     RETURN_TYPES = (Input.MODEL, Input.CLIP)
 

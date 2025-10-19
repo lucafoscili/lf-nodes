@@ -14,7 +14,7 @@ class LF_LoadLocalJSON:
         return {
             "required": {
                 "url": (Input.STRING, {
-                    "default": "", 
+                    "default": "",
                     "tooltip": "The local URL where the JSON file is stored (i.e.: file://C:/myjson.json)."
                 }),
             },
@@ -23,13 +23,16 @@ class LF_LoadLocalJSON:
                     "default": {}
                 }),
             },
-            "hidden": { 
+            "hidden": {
                 "node_id": "UNIQUE_ID",
-            } 
+            }
         }
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
+    OUTPUT_TOOLTIPS = (
+        "Loaded JSON data.",
+    )
     RETURN_NAMES = ("json",)
     RETURN_TYPES = (Input.JSON,)
 
@@ -38,16 +41,16 @@ class LF_LoadLocalJSON:
 
         if not url.startswith("file://"):
             url = f"file://{url}"
-        
+
         file_path = requests.utils.unquote(url[7:])
         with open(file_path, 'r', encoding='utf-8') as file:
             data = json.load(file)
- 
+
         nodes: list[dict] = []
         root: dict = { "children": nodes, "icon":"check", "id": "root", "value": "JSON loaded successfully!" }
         dataset: dict = { "nodes": [root] }
         nodes.append({ "description": url, "icon": "json", "id": url, "value": url })
- 
+
         PromptServer.instance.send_sync(f"{EVENT_PREFIX}savejson", {
             "node": kwargs.get("node_id"),
             "dataset": dataset,

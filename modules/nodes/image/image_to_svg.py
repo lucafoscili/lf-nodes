@@ -213,6 +213,14 @@ class LF_ImageToSVG:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, True, False, True, False, True)
+    OUTPUT_TOOLTIPS = (
+        "Generated SVG string.",
+        "List of generated SVG strings.",
+        "Original image tensor.",
+        "List of original image tensors.",
+        "Palette used for the SVG.",
+        "List of palettes used for the SVG."
+    )
     RETURN_NAMES = ("svg", "svg_list", "image", "image_list", "palette", "palette_list")
     RETURN_TYPES = (Input.STRING, Input.STRING, Input.IMAGE, Input.IMAGE, Input.STRING, Input.STRING)
 

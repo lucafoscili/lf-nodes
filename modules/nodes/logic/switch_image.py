@@ -13,15 +13,15 @@ class LF_SwitchImage:
         return {
             "required": {
                 "on_true": (Input.IMAGE, {
-                    "lazy": True, 
+                    "lazy": True,
                     "tooltip": "Value to return if the boolean condition is true."
                 }),
                 "on_false": (Input.IMAGE, {
-                    "lazy": True, 
+                    "lazy": True,
                     "tooltip": "Value to return if the boolean condition is false."
                 }),
                 "boolean": (Input.BOOLEAN, {
-                    "default": False, 
+                    "default": False,
                     "tooltip": "Boolean condition to switch between 'on_true' and 'on_false' values."
                 }),
             },
@@ -38,6 +38,10 @@ class LF_SwitchImage:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, True)
+    OUTPUT_TOOLTIPS = (
+        "Final output image tensor.",
+        "List of all output image tensors (if any)."
+    )
     RETURN_NAMES = ("image", "image_list")
     RETURN_TYPES = (Input.IMAGE, Input.IMAGE)
 
@@ -55,7 +59,7 @@ class LF_SwitchImage:
 
         PromptServer.instance.send_sync(f"{EVENT_PREFIX}switchimage", {
             "node": kwargs.get("node_id"),
-            "bool": boolean, 
+            "bool": boolean,
         })
 
         value = on_true if boolean else on_false

@@ -23,6 +23,8 @@ jobs:
         with:
           fetch-depth: 0
           fetch-tags: true
+      - name: Fetch all branches
+        run: git fetch --all --tags
       - name: Get Previous Tag
         id: previous_tag
         run: |

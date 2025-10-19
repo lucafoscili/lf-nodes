@@ -17,19 +17,19 @@ class LF_Notify:
                     "tooltip": "Pass-through data."
                 }),
                 "title": (Input.STRING, {
-                    "default": "ComfyUI - LF Nodes", 
+                    "default": "ComfyUI - LF Nodes",
                     "tooltip": "The title displayed by the notification."
                 }),
                 "message": (Input.STRING, {
-                    "default": "Your ComfyUI workflow sent you a notification!", 
-                    "multiline": True, 
+                    "default": "Your ComfyUI workflow sent you a notification!",
+                    "multiline": True,
                     "tooltip": "The message displayed by the notification."
                 }),
                 "on_click_action": (NOTIFY_COMBO, {
                     "tooltip": "Action triggered when clicking on the notification."
                 }),
                 "silent": (Input.BOOLEAN, {
-                    "default": True, 
+                    "default": True,
                     "tooltip": "The notifications will be displayed without triggering a sound effect."
                 }),
             },
@@ -41,7 +41,7 @@ class LF_Notify:
                     "default": '', "tooltip": "Used to group notifications (old ones with the same tag will be replaced)."
                 }),
             },
-            "hidden": { 
+            "hidden": {
                 "node_id": "UNIQUE_ID"
             }
         }
@@ -50,6 +50,10 @@ class LF_Notify:
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, True)
     OUTPUT_NODE = True
+    OUTPUT_TOOLTIPS = (
+        "Pass-through data.",
+        "List containing the pass-through data."
+    )
     RETURN_NAMES = ("any", "any_list")
     RETURN_TYPES = (ANY, ANY)
 
@@ -63,7 +67,7 @@ class LF_Notify:
         image: list[torch.Tensor] = normalize_input_image(kwargs.get("image", []))
 
         PromptServer.instance.send_sync(f"{EVENT_PREFIX}notify", {
-            "node": kwargs.get("node_id"), 
+            "node": kwargs.get("node_id"),
             "title": title,
             "message": message,
             "action": on_click_action.lower(),

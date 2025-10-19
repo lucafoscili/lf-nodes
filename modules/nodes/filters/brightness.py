@@ -13,7 +13,7 @@ from ...utils.helpers.torch import process_and_save_image
 class LF_Brightness:
     def __init__(self):
         self._temp_cache = TempFileCache()
-        
+
     @classmethod
     def INPUT_TYPES(self):
         return {
@@ -22,26 +22,26 @@ class LF_Brightness:
                     "tooltip": "Input image tensor or a list of image tensors."
                 }),
                 "brightness_strength": (Input.FLOAT, {
-                    "default": 0.0, 
-                    "min": -1.0, 
-                    "max": 1.0, 
-                    "step": 0.05, 
+                    "default": 0.0,
+                    "min": -1.0,
+                    "max": 1.0,
+                    "step": 0.05,
                     "tooltip": "Adjust the brightness of the image. Negative values darken, positive values brighten."
                 }),
                 "gamma": (Input.FLOAT, {
-                    "default": 1.0, 
-                    "min": 0.1, 
-                    "max": 3.0, 
-                    "step": 0.1, 
+                    "default": 1.0,
+                    "min": 0.1,
+                    "max": 3.0,
+                    "step": 0.1,
                     "tooltip": "Adjust the gamma correction. Values < 1 brighten shadows, > 1 darken highlights."
                 }),
             },
             "optional": {
                 "midpoint": (Input.FLOAT, {
-                    "default": 0.5, 
-                    "min": 0.0, 
-                    "max": 1.0, 
-                    "step": 0.05, 
+                    "default": 0.5,
+                    "min": 0.0,
+                    "max": 1.0,
+                    "step": 0.05,
                     "tooltip": "Defines the tonal midpoint for brightness scaling."
                 }),
                 "localized_brightness": (Input.BOOLEAN, {
@@ -60,6 +60,10 @@ class LF_Brightness:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, True)
+    OUTPUT_TOOLTIPS = (
+        "Image tensor with brightness adjusted.",
+        "List of image tensors with brightness adjusted."
+    )
     RETURN_NAMES = ("image", "image_list")
     RETURN_TYPES = (Input.IMAGE, Input.IMAGE)
 

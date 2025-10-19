@@ -24,28 +24,28 @@ class LF_ImageListFromJSON:
                     "tooltip": "Input JSON containing keys to determine batch size."
                 }),
                 "add_noise": (Input.BOOLEAN, {
-                    "default": True, 
+                    "default": True,
                     "tooltip": "Add noise to the images."
                 }),
                 "width": (Input.INTEGER, {
-                    "default": 1024, 
+                    "default": 1024,
                     "tooltip": "Width of the images."
                 }),
                 "height": (Input.INTEGER, {
-                    "default": 1024, 
+                    "default": 1024,
                     "tooltip": "Height of the images."
                 }),
                 "seed": (Input.INTEGER, {
-                    "default": 42, 
+                    "default": 42,
                     "tooltip": "Seed for generating random noise."
                 }),
             },
             "optional": {
-                "ui_widget": (Input.LF_MASONRY, { 
-                    "default": {} 
+                "ui_widget": (Input.LF_MASONRY, {
+                    "default": {}
                 }),
             },
-            "hidden": { 
+            "hidden": {
                 "node_id": "UNIQUE_ID"
             }
         }
@@ -53,12 +53,20 @@ class LF_ImageListFromJSON:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, True, True, False, False, False)
+    OUTPUT_TOOLTIPS = (
+        "Generated image tensor.",
+        "List of generated image tensors.",
+        "List of generated keys.",
+        "Number of images generated.",
+        "Width of generated images.",
+        "Height of generated images.",
+    )
     RETURN_NAMES = ("image", "image_list", "keys", "nr", "width", "height")
     RETURN_TYPES = (Input.IMAGE, Input.IMAGE, Input.STRING, Input.INTEGER, Input.INTEGER, Input.INTEGER)
 
     def on_exec(self, **kwargs: dict):
         self._temp_cache.cleanup()
-        
+
         json_input: dict = normalize_json_input(kwargs.get("json_input"))
         add_noise: bool = normalize_list_to_value(kwargs.get("add_noise"))
         width: int = normalize_list_to_value(kwargs.get("width"))
@@ -90,7 +98,7 @@ class LF_ImageListFromJSON:
             )
             url = get_resource_url(subfolder, filename, "temp")
             pil_img.save(output_file, format="PNG")
-            
+
             image.append(img)
             nodes.append(create_masonry_node(filename, url, index))
 

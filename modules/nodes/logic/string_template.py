@@ -25,8 +25,8 @@ class LF_StringTemplate:
             },
             "optional": {
                 "seed": (Input.INTEGER, {
-                    "default": 42, 
-                    "max": INT_MAX, 
+                    "default": 42,
+                    "max": INT_MAX,
                     "tooltip": "Seed to control the randomness of the shuffling."
                 }),
                 "randomize": (Input.BOOLEAN, {
@@ -49,6 +49,10 @@ class LF_StringTemplate:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, True)
+    OUTPUT_TOOLTIPS = (
+        "Final filled template string.",
+        "List of all filled template strings (if any)."
+    )
     RETURN_NAMES = ("string", "string_list")
     RETURN_TYPES = (Input.STRING, Input.STRING)
 

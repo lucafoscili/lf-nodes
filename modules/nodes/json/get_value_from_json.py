@@ -14,26 +14,34 @@ class LF_GetValueFromJSON:
                     "tooltip": "JSON Object."
                 }),
                 "key": (Input.STRING, {
-                    "default": "", 
+                    "default": "",
                     "tooltip": "Key to select."
                 }),
                 "index": (Input.INTEGER, {
-                    "default": 0, 
+                    "default": 0,
                     "tooltip": "When the input is a list of JSON objects, it sets the index of the occurrence from which the value is extracted."
                 })
             },
             "optional": {
-                "ui_widget": (Input.LF_CODE, { 
-                    "default": "" 
+                "ui_widget": (Input.LF_CODE, {
+                    "default": ""
                 }),
             },
-            "hidden": { 
+            "hidden": {
                 "node_id": "UNIQUE_ID"
-            } 
+            }
         }
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
+    OUTPUT_TOOLTIPS = (
+        "Extracted value as a JSON object.",
+        "Extracted value as a string.",
+        "Extracted value as a number.",
+        "Extracted value as an integer.",
+        "Extracted value as a float.",
+        "Extracted value as a boolean."
+    )
     RETURN_NAMES = ("json", "string", "number", "int", "float", "boolean")
     RETURN_TYPES = (Input.JSON, Input.STRING, Input.NUMBER, Input.INTEGER, Input.FLOAT, Input.BOOLEAN)
 
@@ -60,9 +68,9 @@ class LF_GetValueFromJSON:
                 json_output = value
             else:
                 json_output = {"value": value}
-            
+
             string_output = str(value)
-            
+
             if isinstance(value, str):
                 try:
                     numeric_value = float(value)

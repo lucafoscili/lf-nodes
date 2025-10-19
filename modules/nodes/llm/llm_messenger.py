@@ -28,13 +28,26 @@ class LF_LLMMessenger:
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
+    OUTPUT_TOOLTIPS = (
+        "Chat history as JSON.",
+        "Chat history as a string.",
+        "Last message in the chat.",
+        "Last message from the user.",
+        "Last message from the LLM.",
+        "Styled prompt for the chat.",
+        "Character name.",
+        "Outfit name.",
+        "Location name.",
+        "Style name.",
+        "Timeframe name."
+    )
     RETURN_NAMES = (
-        "chat_history_json", "chat_history_string", 
-        "last_message", "last_user_message", "last_llm_message", "styled_prompt", 
+        "chat_history_json", "chat_history_string",
+        "last_message", "last_user_message", "last_llm_message", "styled_prompt",
         "character_name", "outfit_name", "location_name", "style_name", "timeframe_name"
     )
     RETURN_TYPES = (
-        Input.JSON, Input.STRING, Input.STRING, Input.STRING, Input.STRING, Input.STRING, 
+        Input.JSON, Input.STRING, Input.STRING, Input.STRING, Input.STRING, Input.STRING,
         Input.STRING, Input.STRING, Input.STRING, Input.STRING, Input.STRING
     )
 
@@ -46,11 +59,11 @@ class LF_LLMMessenger:
         def get_value_and_description(node: dict):
             """Returns the 'value' and 'description' fields from the node for styled prompt usage."""
             return node.get("value", "No data"), node.get("description", "")
-        
+
         ui_widget: dict = normalize_json_input(kwargs.get("ui_widget", {}))
         dataset: dict = ui_widget.get("dataset", {})
         config: dict = ui_widget.get("config", {})
-        
+
         if not dataset or not config:
             raise ValueError("It looks like the chat is empty!")
         if "currentCharacter" not in config:
@@ -108,7 +121,7 @@ class LF_LLMMessenger:
 
         # Return values with only names (no descriptions)
         return (
-            chat_data, chat_history_string, last_message, last_user_message, 
+            chat_data, chat_history_string, last_message, last_user_message,
             last_llm_message, styled_prompt, character_name, settings.get("outfit"),
             settings.get("location"), settings.get("style"), settings.get("timeframe")
         )

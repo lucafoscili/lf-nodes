@@ -12,16 +12,16 @@ class LF_ExtractString:
         return {
             "required": {
                 "text": (Input.STRING, {
-                    "default": "", 
-                    "multiline": True, 
+                    "default": "",
+                    "multiline": True,
                     "tooltip": "The string from which the output will be extracted."
                 }),
                 "starting_delimiter": (Input.STRING, {
-                    "default": "{", 
+                    "default": "{",
                     "tooltip": "The delimiter where extraction starts."
                 }),
                 "ending_delimiter": (Input.STRING, {
-                    "default": "}", 
+                    "default": "}",
                     "tooltip": "The delimiter where extraction ends."
                 }),
             },
@@ -37,6 +37,13 @@ class LF_ExtractString:
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
+    OUTPUT_TOOLTIPS = (
+        "Final extracted result as JSON.",
+        "Final extracted result as text.",
+        "Final extracted result as integer.",
+        "Final extracted result as float.",
+        "Final extracted result as boolean."
+    )
     RETURN_NAMES = ("result_as_json", "extracted_text", "result_as_int", "result_as_float", "result_as_boolean")
     RETURN_TYPES = (Input.JSON, Input.STRING, Input.INTEGER, Input.FLOAT, Input.BOOLEAN)
 
@@ -49,23 +56,23 @@ class LF_ExtractString:
             if end_idx == -1:
                 return ""
             return text[start_idx + len(start_delim):end_idx]
-    
+
         text: str = normalize_list_to_value(kwargs.get("text"))
         starting_delimiter: str = normalize_list_to_value(kwargs.get("starting_delimiter"))
         ending_delimiter: str = normalize_list_to_value(kwargs.get("ending_delimiter"))
-    
+
         extracted_text = extract_nested(text, starting_delimiter, ending_delimiter)
-        
+
         result_as_json: dict = convert_to_json(extracted_text)
         result_as_int: int = convert_to_int(extracted_text)
         result_as_float: float = convert_to_float(extracted_text)
         result_as_boolean: bool = convert_to_boolean(extracted_text)
-    
+
         PromptServer.instance.send_sync(f"{EVENT_PREFIX}extractstring", {
             "node": kwargs.get("node_id"),
             "value": extracted_text or "...No matches...",
         })
-        
+
         return (result_as_json, extracted_text, result_as_int, result_as_float, result_as_boolean)
 # endregion
 

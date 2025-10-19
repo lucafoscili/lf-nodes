@@ -24,15 +24,19 @@ class LF_LoadMetadata:
                     "default": ""
                 }),
             },
-            "hidden": { 
+            "hidden": {
                 "node_id": "UNIQUE_ID",
-            } 
+            }
         }
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, True)
     OUTPUT_NODE = True
+    OUTPUT_TOOLTIPS = (
+        "Metadata of the loaded image.",
+        "List of metadata for all loaded images.",
+    )
     RETURN_NAMES = ("metadata", "metadata_list")
     RETURN_TYPES = (Input.JSON, Input.JSON)
 

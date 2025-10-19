@@ -28,6 +28,9 @@ class LF_LUTGeneration:
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False,)
     OUTPUT_NODE = True
+    OUTPUT_TOOLTIPS = (
+        "LUT dataset for the image.",
+    )
     RETURN_NAMES = ("lut_dataset",)
     RETURN_TYPES = (Input.JSON,)
 

@@ -88,12 +88,16 @@ class LF_DetectRegions:
     FUNCTION = FUNCTION
     INPUT_IS_LIST = (True, False, False, False, False, False, False, False, False, False, False, False)
     OUTPUT_IS_LIST = (False, True)
+    OUTPUT_TOOLTIPS = (
+        "Detected region metadata.",
+        "List of all detected region metadata."
+    )
     RETURN_NAMES = ("region_meta", "region_meta_list")
     RETURN_TYPES = (Input.REGION_META, Input.REGION_META)
 
     def on_exec(self, **kwargs):
         self._temp_cache.cleanup()
-        
+
         node_id = kwargs.get("node_id")
         images = normalize_input_image(kwargs["image"])
 

@@ -39,6 +39,12 @@ class LF_Something2Number:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, False, True, True)
+    OUTPUT_TOOLTIPS = (
+        "Sum of all numbers as a float.",
+        "Sum of all numbers as an integer.",
+        "Sum of all numbers as a list of floats.",
+        "Sum of all numbers as a list of integers."
+    )
     RETURN_NAMES = ("float_sum", "int_sum", "float_list", "int_list")
     RETURN_TYPES = (Input.FLOAT, Input.INTEGER, Input.FLOAT, Input.INTEGER)
 
@@ -86,7 +92,7 @@ class LF_Something2Number:
 
         float_sum = sum(float_values)
         integer_sum = sum(integer_values)
-        
+
         float_log = "\n".join([str(val) for val in float_values]) if float_values else empty
         int_log = "\n".join([str(val) for val in integer_values]) if integer_values else empty
         breakdown_log = "\n".join([f"{i+1}. {val}" for i, val in enumerate(breakdown)]) if breakdown else empty
@@ -106,7 +112,7 @@ class LF_Something2Number:
   {breakdown_log}
     """
         PromptServer.instance.send_sync(f"{EVENT_PREFIX}something2number", {
-            "node": kwargs.get("node_id"), 
+            "node": kwargs.get("node_id"),
             "value": log,
         })
 

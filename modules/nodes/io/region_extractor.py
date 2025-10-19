@@ -18,15 +18,15 @@ class LF_RegionExtractor:
                     "tooltip": "Path to the directory or file containing the Python files."
                 }),
                 "subdir": (Input.BOOLEAN, {
-                    "default": False, 
+                    "default": False,
                     "tooltip": "Whether to load Python files from subdirectories as well."
                 }),
                 "enable_history": (Input.BOOLEAN, {
-                    "default": True, 
+                    "default": True,
                     "tooltip": "Tracks extracted regions to avoid reprocessing."
                 }),
                 "extension": (Input.STRING, {
-                    "default": "py", 
+                    "default": "py",
                     "tooltip": "Extension of the files that will be read."
                 }),
             },
@@ -35,14 +35,18 @@ class LF_RegionExtractor:
                     "default": {}
                 }),
             },
-            "hidden": { 
+            "hidden": {
                 "node_id": "UNIQUE_ID",
-            } 
+            }
         }
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, True)
+    OUTPUT_TOOLTIPS = (
+        "Extracted code regions.",
+        "List of all extracted code regions.",
+    )
     RETURN_NAMES = ("regions", "regions_list")
     RETURN_TYPES = (Input.JSON, Input.JSON)
 

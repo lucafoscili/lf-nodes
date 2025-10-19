@@ -75,6 +75,18 @@ class LF_LoadAndEditImages:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, True, True, True, False, False, False, False, False, False)
+    OUTPUT_TOOLTIPS = (
+        "Edited image tensor.",
+        "List of edited image tensors.",
+        "Names of the images.",
+        "Creation dates of the images.",
+        "Count of edited images.",
+        "Selected image tensor.",
+        "Index of the selected image.",
+        "Name of the selected image.",
+        "Metadata of the images.",
+        "Dataset for visualization."
+    )
     RETURN_NAMES = (
         "image",
         "image_list",

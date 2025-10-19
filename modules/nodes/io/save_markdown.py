@@ -12,16 +12,16 @@ class LF_SaveMarkdown:
         return {
             "required": {
                 "markdown_text": (Input.STRING, {
-                    "default": "", 
-                    "multiline": True, 
+                    "default": "",
+                    "multiline": True,
                     "tooltip": "Markdown data to save."
                 }),
                 "filename_prefix": (Input.STRING, {
-                    "default": '', 
+                    "default": '',
                     "tooltip": "Path and filename for saving the Markdown. Use slashes to set directories."
                 }),
                 "add_timestamp": (Input.BOOLEAN, {
-                    "default": True, 
+                    "default": True,
                     "tooltip": "Add timestamp to the filename as a suffix."
                 }),
             },
@@ -30,14 +30,17 @@ class LF_SaveMarkdown:
                     "default": {}
                 }),
             },
-            "hidden": { 
+            "hidden": {
                 "node_id": "UNIQUE_ID",
-            } 
+            }
         }
-    
+
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     OUTPUT_NODE = True
+    OUTPUT_TOOLTIPS = (
+        "Saved Markdown text.",
+    )
     RETURN_NAMES = ("string",)
     RETURN_TYPES = (Input.STRING,)
 

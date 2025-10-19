@@ -18,25 +18,25 @@ class LF_ResizeImageToDimension:
                     "tooltip": "Input image tensor or a list of image tensors."
                 }),
                 "height": (Input.INTEGER, {
-                    "default": 1216, 
+                    "default": 1216,
                     "max": INT_MAX,
                     "tooltip": "The target height for the output image."
                 }),
                 "width": (Input.INTEGER, {
-                    "default": 832, 
+                    "default": 832,
                     "max": INT_MAX,
                     "tooltip": "The target width for the output image."
                 }),
                 "resize_method": (RESAMPLERS, {
-                    "default": "bicubic", 
+                    "default": "bicubic",
                     "tooltip": "Method to resize the image."
                 }),
                 "resize_mode": (RESIZE_MODE_COMBO, {
-                    "default": "crop", 
+                    "default": "crop",
                     "tooltip": "Choose whether to crop or pad when resizing."
                 }),
                 "pad_color": (Input.STRING, {
-                    "default": "000000", 
+                    "default": "000000",
                     "tooltip": "Color to use for padding if 'pad' mode is selected (hexadecimal)."
                 })
             },
@@ -54,6 +54,11 @@ class LF_ResizeImageToDimension:
     FUNCTION = FUNCTION
     INPUT_IS_LIST = (True, True, True, False, False, False, False)
     OUTPUT_IS_LIST = (False, True, False)
+    OUTPUT_TOOLTIPS = (
+        "Resized image tensor.",
+        "List of resized image tensors.",
+        "Count of resized images."
+    )
     RETURN_NAMES = ("image", "image_list", "count")
     RETURN_TYPES = (Input.IMAGE, Input.IMAGE, Input.INTEGER)
 
@@ -92,7 +97,7 @@ class LF_ResizeImageToDimension:
             widths.append(new_width)
 
             nodes.append(create_resize_node(original_height, original_width, new_height, new_width, index))
-        
+
         num_resized = len(resized_images)
         summary_message = f"Resized {num_resized} {'image' if num_resized == 1 else 'images'}"
         root["id"] = summary_message

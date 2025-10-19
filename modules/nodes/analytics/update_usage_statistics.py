@@ -15,7 +15,7 @@ class LF_UpdateUsageStatistics:
         return {
             "required": {
                 "datasets_dir": (Input.STRING, {
-                    "default": "Workflow_name", 
+                    "default": "Workflow_name",
                     "tooltip": "The files are saved in the user directory of ComfyUI under LF_Nodes. This field can be used to add additional folders."
                 }),
                 "dataset": (Input.JSON, {
@@ -27,7 +27,7 @@ class LF_UpdateUsageStatistics:
                     "default": {}
                 })
             },
-            "hidden": { 
+            "hidden": {
                 "node_id": "UNIQUE_ID"
             }
         }
@@ -35,6 +35,10 @@ class LF_UpdateUsageStatistics:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     OUTPUT_NODE = True
+    OUTPUT_TOOLTIPS = (
+        "Directory path where the dataset is stored.",
+        "Dataset including the resources (produced by CivitAIMetadataSetup)."
+    )
     RETURN_NAMES = ("dir", "dataset")
     RETURN_TYPES = (Input.STRING, Input.JSON)
 
@@ -50,7 +54,7 @@ class LF_UpdateUsageStatistics:
                         json_data = template
             else:
                 json_data = template
-        
+
             for node in json_data["nodes"]:
                 resource = node["cells"]["name"]["value"]
                 if resource == resource_value:
@@ -70,14 +74,14 @@ class LF_UpdateUsageStatistics:
                     },
                     "id": str(new_id)
                 })
-            
+
             os.makedirs(os.path.dirname(resource_file), exist_ok=True)
             with open(resource_file, 'w') as file:
                 json.dump(json_data, file, indent=4)
-            
+
             return f"\n**{resource_value}** count: {oldValue} => {newValue}\n"
-        
-        def process_list(input, type): 
+
+        def process_list(input, type):
             filename = get_usage_filename(type)
             file = os.path.join(actual_path, filename)
             log = get_usage_title(filename, "markdown")
@@ -87,7 +91,7 @@ class LF_UpdateUsageStatistics:
 
         datasets_dir: str = normalize_list_to_value(kwargs.get("datasets_dir"))
         dataset: dict = normalize_json_input(kwargs.get("dataset"))
-        
+
         actual_path = os.path.join(get_comfy_dir("base"), datasets_dir)
 
         log_title = "# Update summary\n"
@@ -110,7 +114,7 @@ class LF_UpdateUsageStatistics:
             print(f"Unexpected dataset format: {dataset}")
 
         PromptServer.instance.send_sync(f"{EVENT_PREFIX}updateusagestatistics", {
-            "node": kwargs.get("node_id"), 
+            "node": kwargs.get("node_id"),
             "value": log_title + log if log else log_title + "\nThere were no updates this run!"
         })
 

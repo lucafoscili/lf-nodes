@@ -11,7 +11,7 @@ class LF_WriteJSON:
         return {
             "required": {
                 "ui_widget": (Input.LF_TEXTAREA, {
-                    "default": "{}", 
+                    "default": "{}",
                     "tooltip": "Write your JSON content here."
                 }),
             },
@@ -21,6 +21,10 @@ class LF_WriteJSON:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     OUTPUT_NODE = True
+    OUTPUT_TOOLTIPS = (
+        "Written JSON object.",
+        "List of written JSON objects."
+    )
     RETURN_NAMES = ("json",)
     RETURN_TYPES = (Input.JSON,)
 

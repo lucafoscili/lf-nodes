@@ -49,14 +49,14 @@ class PromptServerTqdm(tqdm):
                 f"_⏳ Downloading model files: {self.n}/{self.total} "
                 f"({pct:.0f}% • {rate}/s • elapsed {elapsed}s • ETA {remaining}s)_"
             )
-        
+
         log = "".join(self.log_lines)
 
         PromptServer.instance.send_sync(self.event_name, {
-            "node": self.node_id, 
+            "node": self.node_id,
             "value": log
         })
-            
+
 def create_custom_tqdm(node_id: str, event_name: str, model_id: str, log_lines: list[str]):
     """
     Creates a custom subclass of PromptServerTqdm with pre-configured initialization parameters.
@@ -109,9 +109,9 @@ class LF_LoadWD14Model:
                 "std": (Input.STRING, {
                     "default": "0.5,0.5,0.5",
                     "tooltip": "Std for normalization (comma-separated, e.g., 0.5,0.5,0.5)"
-                }),                                    
+                }),
             },
-            "optional": {            
+            "optional": {
                 "ui_widget": (Input.LF_CODE, {
                     "default": {}
                 })
@@ -123,6 +123,10 @@ class LF_LoadWD14Model:
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
+    OUTPUT_TOOLTIPS = (
+        "WD14 processor.",
+        "WD14 model."
+    )
     RETURN_NAMES = ("processor", "model")
     RETURN_TYPES = (Input.CLIP_PROCESSOR, Input.CLIP_MODEL)
 
@@ -178,7 +182,7 @@ class LF_LoadWD14Model:
                 raise RuntimeError(f"- ❌ Failed to load model: {e}")
 
         PromptServer.instance.send_sync(f"{EVENT_PREFIX}loadwd14model", {
-            "node": node_id, 
+            "node": node_id,
             "value": "".join(log_lines)
         })
 

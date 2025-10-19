@@ -18,35 +18,43 @@ class LF_LoadFileOnce:
                     "tooltip": "Path to the directory containing the images to load."
                 }),
                 "subdir": (Input.BOOLEAN, {
-                    "default": False, 
+                    "default": False,
                     "tooltip": "Indicates whether to also load images from subdirectories."
                 }),
                 "strip_ext": (Input.BOOLEAN, {
-                    "default": True, 
+                    "default": True,
                     "tooltip": "Whether to remove file extensions from filenames."
                 }),
                 "enable_history": (Input.BOOLEAN, {
-                    "default": True, 
+                    "default": True,
                     "tooltip": "Enables history, saving the execution value and date of the widget to prevent the same filename to be loaded twice."
                 }),
             },
             "optional": {
                 "filter": (Input.STRING, {
-                    "default": "", 
+                    "default": "",
                     "tooltip": "This field can be used to filter file names. Supports wildcards (*)."
                 }),
                 "ui_widget": (Input.LF_HISTORY, {
                     "default": {}
                 }),
             },
-            "hidden": { 
+            "hidden": {
                 "node_id": "UNIQUE_ID",
-            } 
+            }
         }
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, False, False, True, True, True)
+    OUTPUT_TOOLTIPS = (
+        "File-blob of the loaded file.",
+        "Content of the loaded file as string.",
+        "Name of the loaded file.",
+        "List of file-blobs of the loaded files.",
+        "List of contents of the loaded files as strings.",
+        "List of names of the loaded files."
+    )
     RETURN_NAMES = ("file_blob", "file_content", "name", "file_blob_list", "file_content_list", "name_list")
     RETURN_TYPES = (Input.FILE_BLOB, Input.STRING, Input.STRING, Input.FILE_BLOB, Input.STRING, Input.STRING)
 
@@ -62,23 +70,23 @@ class LF_LoadFileOnce:
         previous_files: dict = { node['value'] for node in nodes } if nodes else set()
 
         data, file_name, text = None, None, None
-        
+
         for root, dirs, filenames in os.walk(dir):
             if not subdir:
                 dirs[:] = []
-        
+
             if filter and os.sep in filter and filter not in os.path.join(root, ''):
                 continue
-            
+
             for filename in filenames:
                 if filter and os.sep not in filter:
                     if not fnmatch.fnmatch(filename, filter):
                         continue
-                    
+
                 file_name_stripped = os.path.splitext(filename)[0] if strip_ext else filename
                 if file_name_stripped in previous_files:
                     continue
-                
+
                 file_path = os.path.join(root, filename)
                 with open(file_path, "rb") as f:
                     data = f.read()
@@ -86,9 +94,9 @@ class LF_LoadFileOnce:
                     text = data.decode("utf-8")
                 except UnicodeDecodeError:
                     text = ""
-        
+
                 file_name = file_name_stripped
-        
+
                 if enable_history:
                     create_history_node(file_name_stripped, nodes)
                 break

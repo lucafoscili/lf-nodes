@@ -13,7 +13,7 @@ from ...utils.helpers.torch import process_and_save_image
 class LF_TiltShift:
     def __init__(self):
         self._temp_cache = TempFileCache()
-        
+
     @classmethod
     def INPUT_TYPES(cls):
         return {
@@ -22,23 +22,23 @@ class LF_TiltShift:
                     "tooltip": "Image to miniature-ify."
                 }),
                 "focus_position": (Input.FLOAT, {
-                    "default": 0.5, 
-                    "min": 0.0, 
-                    "max": 1.0, 
+                    "default": 0.5,
+                    "min": 0.0,
+                    "max": 1.0,
                     "step": 0.01,
                     "tooltip": "Vertical centre of sharp band (0 = top, 1 = bottom)."
                 }),
                 "focus_size": (Input.FLOAT, {
-                    "default": 0.25, 
-                    "min": 0.05, 
-                    "max": 0.9, 
+                    "default": 0.25,
+                    "min": 0.05,
+                    "max": 0.9,
                     "step": 0.01,
                     "tooltip": "Height of sharp zone as fraction of image."
                 }),
                 "blur_radius": (Input.INTEGER, {
-                    "default": 25, 
-                    "min": 3, 
-                    "max": 151, 
+                    "default": 25,
+                    "min": 3,
+                    "max": 151,
                     "step": 2,
                     "tooltip": "Gaussian radius for out-of-focus areas."
                 }),
@@ -62,6 +62,10 @@ class LF_TiltShift:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, True)
+    OUTPUT_TOOLTIPS = (
+        "Image tensor with tilt-shift effect applied.",
+        "List of image tensors with tilt-shift effect applied."
+    )
     RETURN_NAMES = ("image", "image_list")
     RETURN_TYPES = (Input.IMAGE, Input.IMAGE)
 

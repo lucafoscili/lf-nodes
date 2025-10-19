@@ -42,12 +42,18 @@ class LF_CompareImages:
     INPUT_IS_LIST = (True, True, False)
     OUTPUT_IS_LIST = (False, True, True, False)
     OUTPUT_NODE = True
+    OUTPUT_TOOLTIPS = (
+        "Passthrough image tensor.",
+        "List of passthrough image tensors.",
+        "All images involved in the comparison.",
+        "Dataset information for visualization."
+    )
     RETURN_NAMES = ("image", "image_list", "all_images", "dataset")
     RETURN_TYPES = (Input.IMAGE, Input.IMAGE, Input.IMAGE, Input.JSON)
 
     def on_exec(self, **kwargs: dict):
         self._temp_cache.cleanup()
-        
+
         has_before : bool = "image_before" in kwargs and kwargs["image_before"] is not None
 
         image_list_a : list[torch.Tensor] = normalize_input_image(kwargs["image_after"])

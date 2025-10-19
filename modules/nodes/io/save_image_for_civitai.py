@@ -24,31 +24,31 @@ class LF_SaveImageForCivitAI:
                     "tooltip": "Input images to save."
                 }),
                 "filename_prefix": (Input.STRING, {
-                    "default": '', 
+                    "default": '',
                     "tooltip": "Path and filename. Use slashes to specify directories."
                 }),
                 "add_timestamp": (Input.BOOLEAN, {
-                    "default": True, 
+                    "default": True,
                     "tooltip": "Sets the execution time's timestamp as a suffix of the file name."
                 }),
                 "embed_workflow": (Input.BOOLEAN, {
-                    "default": True, 
+                    "default": True,
                     "tooltip": "Whether to embed inside the images the current workflow or not."
                 }),
                 "extension": (IMAGE_EXTENSION_COMBO, {
-                    "default": "png", 
+                    "default": "png",
                     "tooltip": "Supported file formats."
                 }),
                 "quality": (Input.INTEGER, {
-                    "default": 100, 
-                    "min": 1, 
-                    "max": 100, 
+                    "default": 100,
+                    "min": 1,
+                    "max": 100,
                     "tooltip": "Quality of saved images in jpeg or webp format."
                 }),
             },
             "optional": {
                 "civitai_metadata": (Input.STRING, {
-                    "forceInput": True, 
+                    "forceInput": True,
                     "tooltip": "String containing CivitAI compatible metadata (created by the node LF_CivitAIMetadataSetup)."
                 }),
                 "ui_widget": (Input.LF_MASONRY, {
@@ -67,6 +67,10 @@ class LF_SaveImageForCivitAI:
     INPUT_IS_LIST = (True, True, False, False, False, False, False, False)
     OUTPUT_IS_LIST = (True, False)
     OUTPUT_NODE = True
+    OUTPUT_TOOLTIPS = (
+        "List of saved file names.",
+        "CivitAI metadata string.",
+    )
     RETURN_NAMES = ("file_names", "civitai_metadata")
     RETURN_TYPES = (Input.STRING, Input.STRING)
 
@@ -91,7 +95,7 @@ class LF_SaveImageForCivitAI:
         for index, img in enumerate(image):
             pil_img = tensor_to_pil(img)
 
-            use_filename_list = isinstance(filename_prefix, list) and len(filename_prefix) > 1 and len(filename_prefix) == len(image) 
+            use_filename_list = isinstance(filename_prefix, list) and len(filename_prefix) > 1 and len(filename_prefix) == len(image)
             if use_filename_list:
                 prefix = filename_prefix[index]
             else:
@@ -106,7 +110,7 @@ class LF_SaveImageForCivitAI:
                 add_counter=not use_filename_list
             )
             url = get_resource_url(subfolder, filename, "output")
-        
+
             if extension == 'png':
                 png_info = PngInfo()
                 if embed_workflow and not args.disable_metadata:
@@ -115,12 +119,12 @@ class LF_SaveImageForCivitAI:
                     if extra_pnginfo is not None:
                         for key, value in extra_pnginfo.items():
                             png_info.add_text(key, json.dumps(value))
-        
+
                 if civitai_metadata:
                     png_info.add_text("parameters", civitai_metadata)
-        
+
                 pil_img.save(output_file, format="PNG", pnginfo=png_info)
-        
+
             elif extension == 'jpeg':
                 exif_bytes = piexif.dump({
                     "Exif": {

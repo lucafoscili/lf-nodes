@@ -34,25 +34,25 @@ class LF_DiffusionModelSelector:
         return {
             "required": {
                 "diffusion_model": (["None"] + self.initial_list, {
-                    "default": "None", 
+                    "default": "None",
                     "tooltip": "Diffusion model used to generate the image ('unet' folder)."
                 }),
                 "get_civitai_info": (Input.BOOLEAN, {
-                    "default": True, 
+                    "default": True,
                     "tooltip": "Attempts to retrieve more info about the model from CivitAI."
                 }),
                 "randomize": (Input.BOOLEAN, {
-                    "default": False, 
+                    "default": False,
                     "tooltip": "Selects a checkpoint randomly from your checkpoints directory."
                 }),
                 "filter": (Input.STRING, {
-                    "default": "", 
+                    "default": "",
                     "tooltip": "When randomization is active, this field can be used to filter checkpoint file names. Supports wildcards (*)"
                 }),
                 "seed": (Input.INTEGER, {
-                    "default": 42, 
-                    "min": 0, 
-                    "max": INT_MAX, 
+                    "default": 42,
+                    "min": 0,
+                    "max": INT_MAX,
                     "tooltip": "Seed value for when randomization is active."
                 }),
                 "weight_dtype": (WEIGHT_DTYPE_COMBO, {
@@ -72,6 +72,13 @@ class LF_DiffusionModelSelector:
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
+    OUTPUT_TOOLTIPS = (
+        "Combo list of diffusion models.",
+        "Selected diffusion model item as a string.",
+        "Path to the selected diffusion model.",
+        "Cover image of the selected diffusion model.",
+        "Loaded diffusion model.",
+    )
     RETURN_NAMES = ("combo", "string", "path", "image", "model")
     RETURN_TYPES = (initial_list, Input.STRING, Input.STRING, Input.IMAGE, Input.MODEL)
 
@@ -195,7 +202,7 @@ class LF_DiffusionModelSelector:
             metadata.get("model_cover"),
             model_obj,
         )
-    
+
     @classmethod
     def VALIDATE_INPUTS(self, **kwargs):
          return True

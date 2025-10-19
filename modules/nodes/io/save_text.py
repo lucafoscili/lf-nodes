@@ -15,15 +15,15 @@ class LF_SaveText:
                     "tooltip": "Plain text data to save (.txt)."
                 }),
                 "filename_prefix": (Input.STRING, {
-                    "default": '', 
+                    "default": '',
                     "tooltip": "Path and filename for saving the text. Use slashes to set directories."
                 }),
                 "add_timestamp": (Input.BOOLEAN, {
-                    "default": True, 
+                    "default": True,
                     "tooltip": "Add timestamp to the filename as a suffix."
                 }),
                 "add_counter": (Input.BOOLEAN, {
-                    "default": True, 
+                    "default": True,
                     "tooltip": "Add a counter to the filename to avoid overwriting."
                 }),
             },
@@ -32,14 +32,17 @@ class LF_SaveText:
                     "default": {}
                 }),
             },
-            "hidden": { 
+            "hidden": {
                 "node_id": "UNIQUE_ID",
-            } 
+            }
         }
-    
+
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     OUTPUT_NODE = True
+    OUTPUT_TOOLTIPS = (
+        "Saved text.",
+    )
     RETURN_NAMES = ("text",)
     RETURN_TYPES = (Input.STRING,)
 
@@ -56,20 +59,20 @@ class LF_SaveText:
             extension="txt",
             add_counter=add_counter
         )
- 
+
         with open(output_file, 'w', encoding='utf-8') as txt_file:
             txt_file.write(text)
- 
+
         nodes: list[dict] = []
         root: dict = { "children": nodes, "icon":"check", "id": "root", "value": "TXT saved successfully!" }
         dataset: dict = { "nodes": [root] }
         nodes.append({ "description": output_file, "icon": "code", "id": output_file, "value": output_file })
- 
+
         PromptServer.instance.send_sync(f"{EVENT_PREFIX}savetext", {
             "node": kwargs.get("node_id"),
             "dataset": dataset,
         })
- 
+
         return (text,)
 # endregion
 

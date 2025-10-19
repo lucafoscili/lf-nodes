@@ -13,7 +13,7 @@ from ...utils.helpers.torch import process_and_save_image
 class LF_SplitTone:
     def __init__(self):
         self._temp_cache = TempFileCache()
-        
+
     @classmethod
     def INPUT_TYPES(cls):
         return {
@@ -30,24 +30,24 @@ class LF_SplitTone:
                     "tooltip": "Hex colour applied to highlights (e.g. FFAA55)."
                 }),
                 "balance": (Input.FLOAT, {
-                    "default": 0.50, 
-                    "min": 0.0, 
-                    "max": 1.0, 
+                    "default": 0.50,
+                    "min": 0.0,
+                    "max": 1.0,
                     "step": 0.01,
                     "tooltip": "Luminance pivot. 0 = lift even deep blacks; 1 = tint only the brightest pixels."
-                    
+
                 }),
                 "softness": (Input.FLOAT, {
-                    "default": 0.25, 
-                    "min": 0.01, 
-                    "max": 0.5, 
+                    "default": 0.25,
+                    "min": 0.01,
+                    "max": 0.5,
                     "step": 0.01,
                     "tooltip": "Width of the transition band around the balance value."
                 }),
                 "intensity": (Input.FLOAT, {
-                    "default": 0.60, 
-                    "min": 0.0, 
-                    "max": 2.0, 
+                    "default": 0.60,
+                    "min": 0.0,
+                    "max": 2.0,
                     "step": 0.05,
                     "tooltip": "Strength of the tint applied."
                 }),
@@ -63,6 +63,10 @@ class LF_SplitTone:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, True)
+    OUTPUT_TOOLTIPS = (
+        "Image tensor with split tone effect applied.",
+        "List of image tensors with split tone effect applied."
+    )
     RETURN_NAMES = ("image", "image_list")
     RETURN_TYPES = (Input.IMAGE, Input.IMAGE)
 

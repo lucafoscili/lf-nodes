@@ -16,22 +16,22 @@ class LF_ShuffleJSONKeys:
                     "tooltip": "Input JSON object."
                 }),
                 "mutate_source": (Input.BOOLEAN, {
-                    "default": False, 
+                    "default": False,
                     "tooltip": "Shuffles the input JSON in place without creating a new dictionary as a copy."
                 }),
                 "seed": (Input.INTEGER, {
-                    "default": 0, 
-                    "min": 0, 
-                    "max": INT_MAX, 
+                    "default": 0,
+                    "min": 0,
+                    "max": INT_MAX,
                     "tooltip": "Seed for the random shuffle."
                 })
             },
             "optional": {
-                "ui_widget": (Input.LF_CODE, { 
-                    "default": "" 
+                "ui_widget": (Input.LF_CODE, {
+                    "default": ""
                 }),
             },
-            "hidden": { 
+            "hidden": {
                 "node_id": "UNIQUE_ID"
             }
         }
@@ -39,6 +39,10 @@ class LF_ShuffleJSONKeys:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     OUTPUT_NODE = True
+    OUTPUT_TOOLTIPS = (
+        "Shuffled JSON object.",
+        "List of shuffled JSON objects."
+    )
     RETURN_NAMES = ("json",)
     RETURN_TYPES = (Input.JSON,)
 

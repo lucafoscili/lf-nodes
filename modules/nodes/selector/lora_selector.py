@@ -18,44 +18,44 @@ from ...utils.helpers.logic import (
 class LF_LoraSelector:
     initial_list: list[str] = []
     _LAST_SELECTION: dict[str, str] = {}
-        
+
     @classmethod
     def INPUT_TYPES(self):
         return {
             "required": {
                 "lora": (["None"] + self.initial_list, {
-                    "default": "None", 
+                    "default": "None",
                     "tooltip": "Lora model to use."
                 }),
                 "get_civitai_info": (Input.BOOLEAN, {
-                    "default": True, 
+                    "default": True,
                     "tooltip": "Attempts to retrieve more info about the model from CivitAI."
                 }),
                 "weight": (Input.FLOAT, {
-                    "default": 1.0, 
-                    "min": -3.0, 
-                    "max": 3.0, 
+                    "default": 1.0,
+                    "min": -3.0,
+                    "max": 3.0,
                     "tooltip": "Lora weight."
                 }),
                 "randomize": (Input.BOOLEAN, {
-                    "default": False, 
+                    "default": False,
                     "tooltip": "Selects a Lora randomly from your loras directory."
                 }),
                 "filter": (Input.STRING, {
-                    "default": "", 
+                    "default": "",
                     "tooltip": "When randomization is active, this field can be used to filter Lora file names. Supports wildcards (*)."
                 }),
                 "seed": (Input.INTEGER, {
-                    "default": 42, 
-                    "min": 0, 
-                    "max": INT_MAX, 
+                    "default": 42,
+                    "min": 0,
+                    "max": INT_MAX,
                     "tooltip": "Seed value for when randomization is active."
                 }),
             },
             "optional": {
                 "lora_stack": (Input.STRING, {
-                    "default": "", 
-                    "forceInput": True, 
+                    "default": "",
+                    "forceInput": True,
                     "tooltip": "Optional string usable to concatenate subsequent selector nodes."
                 }),
                 "ui_widget": (Input.LF_CARD, {
@@ -69,6 +69,14 @@ class LF_LoraSelector:
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
+    OUTPUT_TOOLTIPS = (
+        "Combo list of the LoRAs.",
+        "Selected LoRA item as a combo.",
+        "Selected LoRA item as a string.",
+        "File path of the LoRA.",
+        "Image of the LoRA (when available).",
+        "LoRA model.",
+    )
     RETURN_NAMES = ("lora", "lora_tag", "lora_name", "model_path", "model_cover")
     RETURN_TYPES = (initial_list, Input.STRING, Input.STRING, Input.STRING, Input.IMAGE)
 
@@ -98,7 +106,7 @@ class LF_LoraSelector:
                 self._LAST_SELECTION.pop(node_id, None)
 
             return (None, lora_stack, "", "", None)
-        
+
         loras = get_comfy_list("loras")
 
         if randomize:
@@ -182,7 +190,7 @@ class LF_LoraSelector:
         )
 
         return (lora, lora_tag, model_name, model_path, metadata.get("model_cover"))
-    
+
     @classmethod
     def VALIDATE_INPUTS(self, **kwargs):
          return True

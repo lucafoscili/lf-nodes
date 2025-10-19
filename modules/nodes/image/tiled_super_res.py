@@ -74,6 +74,11 @@ class LF_TiledSuperRes:
     FUNCTION = FUNCTION
     INPUT_IS_LIST = (True, False, False, False, False)
     OUTPUT_IS_LIST = (False, True, False)
+    OUTPUT_TOOLTIPS = (
+        "Upscaled image tensor.",
+        "List of upscaled image tensors.",
+        "Statistics about the upscaling process."
+    )
     RETURN_NAMES = ("image", "image_list", "stats")
     RETURN_TYPES = (Input.IMAGE, Input.IMAGE, Input.JSON)
 

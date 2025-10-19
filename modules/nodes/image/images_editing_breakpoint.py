@@ -72,6 +72,12 @@ class LF_ImagesEditingBreakpoint:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, True, False, True)
+    OUTPUT_TOOLTIPS = (
+        "Edited image tensor.",
+        "List of edited image tensors.",
+        "Original image tensor.",
+        "List of original image tensors."
+    )
     RETURN_NAMES = ("image", "image_list", "orig_image", "orig_image_list")
     RETURN_TYPES = (Input.IMAGE, Input.IMAGE, Input.IMAGE, Input.IMAGE)
 
@@ -156,7 +162,7 @@ class LF_ImagesEditingBreakpoint:
         results = session.collect_results(dataset)
         edited_batch_list, edited_image_list = results.batch_list, results.image_list
 
-        return (edited_batch_list[0], edited_image_list, batch_list[0], image_list)      
+        return (edited_batch_list[0], edited_image_list, batch_list[0], image_list)
 # endregion
 
 # region Mappings

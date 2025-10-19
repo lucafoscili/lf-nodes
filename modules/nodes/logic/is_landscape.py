@@ -29,7 +29,15 @@ class LF_IsLandscape:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, False, False, True, True, True)
-    RETURN_NAMES = ("is_landscape", "height", "width", 
+    OUTPUT_TOOLTIPS = (
+        "Is the image in landscape orientation?",
+        "Height of the image.",
+        "Width of the image.",
+        "List of landscape status for each image.",
+        "List of heights for each image.",
+        "List of widths for each image."
+    )
+    RETURN_NAMES = ("is_landscape", "height", "width",
                     "is_landscape_list", "heights_list", "widths_list")
     RETURN_TYPES = (Input.BOOLEAN, Input.INTEGER, Input.INTEGER,
                     Input.BOOLEAN, Input.INTEGER, Input.INTEGER)
@@ -54,7 +62,7 @@ class LF_IsLandscape:
             result = width >= height
             is_landscape_list.append(result)
             nodes.append({"icon": "check" if result else "x",
-                          "id": counter, 
+                          "id": counter,
                           "value": f"Image {counter}: {str(result)}"})
 
         PromptServer.instance.send_sync(f"{EVENT_PREFIX}islandscape", {
@@ -62,7 +70,7 @@ class LF_IsLandscape:
             "dataset": dataset,
         })
 
-        return (is_landscape_list[0], heights_list[0], widths_list[0], 
+        return (is_landscape_list[0], heights_list[0], widths_list[0],
                 is_landscape_list, heights_list, widths_list)
 # endregion
 

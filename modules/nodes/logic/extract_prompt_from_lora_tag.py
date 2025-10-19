@@ -14,11 +14,11 @@ class LF_ExtractPromptFromLoraTag:
         return {
             "required": {
                 "tag": (Input.STRING, {
-                    "multiline": True, 
+                    "multiline": True,
                     "tooltip": "The LoRA tag to be converted."
                 }),
-                "separator": (Input.STRING, { 
-                    "default": "SEP", 
+                "separator": (Input.STRING, {
+                    "default": "SEP",
                     "tooltip": "String separating each keyword in a LoRA filename."
                 }),
             },
@@ -27,13 +27,19 @@ class LF_ExtractPromptFromLoraTag:
                     "default": ""
                 })
             },
-            "hidden": { 
+            "hidden": {
                 "node_id": "UNIQUE_ID"
             }
         }
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
+    OUTPUT_TOOLTIPS = (
+        "Extracted keywords from the LoRA tag.",
+        "Count of keywords extracted.",
+        "List of all extracted keywords.",
+        "List of keyword counts for each entry."
+    )
     RETURN_NAMES = ("keywords", "keywords_count", "keywords_list", "keywords_count_list")
     RETURN_TYPES = (Input.STRING, Input.INTEGER, Input.STRING, Input.INTEGER)
 
@@ -49,14 +55,14 @@ class LF_ExtractPromptFromLoraTag:
             tags_in_entry = re.findall(LORA_TAG_REGEX, tag_entry)
 
             for t in tags_in_entry:
-                clean_lora = cleanse_lora_tag(t, separator)   
+                clean_lora = cleanse_lora_tag(t, separator)
                 keywords_count = count_words_in_comma_separated_string(clean_lora)
                 clean_loras.append(clean_lora)
                 keyword_counts.append(keywords_count)
 
                 log_entries.append(f"""
 ### LoRA Tag Entry:
-                                   
+
 - **Original Tag**: {t}
 - **Cleaned LoRA Tag**: {clean_lora}
 - **Number of Keywords**: {keywords_count}
@@ -74,7 +80,7 @@ class LF_ExtractPromptFromLoraTag:
         """
 
         PromptServer.instance.send_sync(f"{EVENT_PREFIX}extractpromptfromloratag", {
-            "node": kwargs.get("node_id"), 
+            "node": kwargs.get("node_id"),
             "value": log
         })
 

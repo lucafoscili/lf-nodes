@@ -18,38 +18,38 @@ class LF_EmbeddingSelector:
         return {
             "required": {
                 "embedding": (["None"] + self.initial_list, {
-                    "default": "None", 
+                    "default": "None",
                     "tooltip": "Embedding to use."
                 }),
                 "get_civitai_info": (Input.BOOLEAN, {
-                    "default": True, 
+                    "default": True,
                     "tooltip": "Attempts to retrieve more info about the model from CivitAI."
                 }),
                 "weight": (Input.FLOAT, {
-                    "default": 1.0, 
-                    "min": -3.0, 
-                    "max": 3.0, 
+                    "default": 1.0,
+                    "min": -3.0,
+                    "max": 3.0,
                     "tooltip": "Embedding's weight."
                 }),
                 "randomize": (Input.BOOLEAN, {
-                    "default": False, 
+                    "default": False,
                     "tooltip": "Selects an embedding randomly from your embeddings directory."
                 }),
                 "seed": (Input.INTEGER, {
-                    "default": 42, 
-                    "min": 0, 
-                    "max": INT_MAX, 
+                    "default": 42,
+                    "min": 0,
+                    "max": INT_MAX,
                     "tooltip": "Seed value for when randomization is active."
                 }),
                 "filter": (Input.STRING, {
-                    "default": "", 
+                    "default": "",
                     "tooltip": "When randomization is active, this field can be used to filter embedding file names. Supports wildcards (*)."
                 }),
             },
             "optional": {
                 "embedding_stack": (Input.STRING, {
-                    "default": "", 
-                    "forceInput": True, 
+                    "default": "",
+                    "forceInput": True,
                     "tooltip": "Optional string usable to concatenate subsequent selector nodes."
                 }),
                 "ui_widget": (Input.LF_CARD, {
@@ -63,6 +63,13 @@ class LF_EmbeddingSelector:
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
+    OUTPUT_TOOLTIPS = (
+        "Combo list of embeddings.",
+        "Selected embedding item as a prompt string.",
+        "Selected embedding item as a string.",
+        "Path to the selected embedding.",
+        "Cover image of the selected embedding.",
+    )
     RETURN_NAMES = ("combo", "prompt", "string", "path", "image")
     RETURN_TYPES = (initial_list, Input.STRING, Input.STRING, Input.STRING, Input.IMAGE)
 
@@ -92,7 +99,7 @@ class LF_EmbeddingSelector:
                 self._LAST_SELECTION.pop(node_id, None)
 
             return (None, embedding_stack, "", "", None)
-        
+
         embeddings = get_comfy_list("embeddings")
 
         if randomize:
@@ -178,7 +185,7 @@ class LF_EmbeddingSelector:
         )
 
         return (embedding, formatted_embedding, model_name, model_path, metadata.get("model_cover"))
-    
+
     @classmethod
     def VALIDATE_INPUTS(self, **kwargs):
          return True

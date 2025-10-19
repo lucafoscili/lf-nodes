@@ -3,6 +3,12 @@ import folder_paths
 from comfy.samplers import KSampler
 from pathlib import Path
 
+try:
+    from comfy_api.latest import io as v3io
+    HAS_V3 = hasattr(v3io, "Combo") and hasattr(v3io.Combo, "Output")
+except Exception:
+    HAS_V3 = False
+
 class AnyType(str):
     def __ne__(self, _: object) -> bool:
         return False
@@ -13,6 +19,7 @@ class Input:
     CLIP = "CLIP"
     CLIP_MODEL = "CLIP_MODEL"
     CLIP_PROCESSOR = "CLIP_PROCESSOR"
+    COMBO = "COMBO"
     CONDITIONING = "CONDITIONING"
     FILE_BLOB = "FILE_BLOB"
     FLOAT = "FLOAT"

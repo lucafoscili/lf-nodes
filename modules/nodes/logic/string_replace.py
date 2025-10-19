@@ -11,15 +11,15 @@ class LF_StringReplace:
         return {
             "required": {
                 "input_text": (Input.STRING, {
-                    "default": "", 
+                    "default": "",
                     "tooltip": "The text where replacements will occur."
                 }),
                 "target": (Input.STRING, {
-                    "default": "", 
+                    "default": "",
                     "tooltip": "The substring to be replaced."
                 }),
                 "replacement": (Input.STRING, {
-                    "default": "", 
+                    "default": "",
                     "tooltip": "The substring to replace the target with."
                 }),
             },
@@ -36,6 +36,10 @@ class LF_StringReplace:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, True)
+    OUTPUT_TOOLTIPS = (
+        "Final modified text after replacements.",
+        "List of all modified text strings (if any)."
+    )
     RETURN_NAMES = ("string", "string_list")
     RETURN_TYPES = (Input.STRING, Input.STRING)
 

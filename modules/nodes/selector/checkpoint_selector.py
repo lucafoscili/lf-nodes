@@ -66,6 +66,15 @@ class LF_CheckpointSelector:
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
+    OUTPUT_TOOLTIPS = (
+        "Combo list of the checkpoints.",
+        "Selected checkpoint item as a string.",
+        "Path to the selected checkpoint.",
+        "Cover image of the selected checkpoint.",
+        "Loaded model from the selected checkpoint.",
+        "Loaded CLIP from the selected checkpoint.",
+        "Loaded VAE from the selected checkpoint.",
+    )
     RETURN_NAMES = ("combo", "string", "path", "image", "model", "clip", "vae")
     RETURN_TYPES = (initial_list, Input.STRING, Input.STRING, Input.IMAGE, Input.MODEL, Input.CLIP, Input.VAE)
 

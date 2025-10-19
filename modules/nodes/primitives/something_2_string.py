@@ -14,7 +14,7 @@ class LF_Something2String:
         return {
             "required": {
                 "separator": (Input.STRING, {
-                    "default": ", ", 
+                    "default": ", ",
                     "tooltip": "Character(s) separating each string apart."
                 }),
             },
@@ -101,9 +101,9 @@ class LF_Something2String:
 ## Combination Results:
 {combinations_log}
         """
-        
+
         PromptServer.instance.send_sync(f"{EVENT_PREFIX}something2string", {
-            "node": kwargs.get("node_id"), 
+            "node": kwargs.get("node_id"),
             "value": log,
         })
 

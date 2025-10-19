@@ -30,9 +30,13 @@ class LF_LoadCLIPSegModel:
             },
             "hidden": {"node_id":"UNIQUE_ID"}
         }
-    
+
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
+    OUTPUT_TOOLTIPS = (
+        "CLIPSeg processor.",
+        "CLIPSeg model."
+    )
     RETURN_NAMES = ("processor", "model")
     RETURN_TYPES = (Input.CLIP_PROCESSOR, Input.CLIP_MODEL)
 
@@ -56,7 +60,7 @@ class LF_LoadCLIPSegModel:
             log_lines.append(f"- ⏳ Downloading **{model_id}** → `{model_dir}`")
 
         PromptServer.instance.send_sync(f"{EVENT_PREFIX}loadclipsegmodel", {
-            "node": node_id, 
+            "node": node_id,
             "value": "## Load CLIPSeg Model\n\n" + "\n".join(log_lines)
         })
 
@@ -81,9 +85,9 @@ class LF_LoadCLIPSegModel:
                 raise RuntimeError(
                     f"- ❌ Failed to load CLIPSeg model. Local: '{model_dir}' error: {e}; Hub '{model_id}' error: {e2}"
                 )
-        
+
         PromptServer.instance.send_sync(f"{EVENT_PREFIX}loadclipsegmodel", {
-            "node": node_id, 
+            "node": node_id,
             "value": "## Load CLIPSeg Model\n\n" + "\n".join(log_lines)
         })
 

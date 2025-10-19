@@ -16,7 +16,7 @@ from ...utils.helpers.ui import create_compare_node
 class LF_RegionMask:
     def __init__(self):
         self._temp_cache = TempFileCache()
-        
+
     @classmethod
     def INPUT_TYPES(cls):
         return {
@@ -76,12 +76,17 @@ class LF_RegionMask:
     FUNCTION = FUNCTION
     INPUT_IS_LIST = (True, True, False)
     OUTPUT_IS_LIST = (False, True, False)
+    OUTPUT_TOOLTIPS = (
+        "Region mask output.",
+        "Region mask output as a list.",
+        "Metadata of the region used to build the mask."
+    )
     RETURN_NAMES = ("mask", "mask_list", "region")
     RETURN_TYPES = (Input.MASK, Input.MASK, Input.REGION_META)
 
     def on_exec(self, **kwargs):
         self._temp_cache.cleanup()
-        
+
         node_id = kwargs.get("node_id")
         images = normalize_input_image(kwargs["image"])
         image_tensor = images[0]
@@ -112,7 +117,7 @@ class LF_RegionMask:
             target_region = regions[0]
         if target_region is None:
             raise ValueError("No region available to build a mask.")
-        
+
         nodes: list[dict] = []
         dataset: dict = {"nodes": nodes}
         masks_4d: list[torch.Tensor] = []

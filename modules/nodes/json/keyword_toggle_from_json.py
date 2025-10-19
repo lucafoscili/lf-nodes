@@ -19,14 +19,19 @@ class LF_KeywordToggleFromJSON:
                     "default": ""
                 })
             },
-            "hidden": { 
+            "hidden": {
                 "node_id": "UNIQUE_ID"
             }
         }
-    
+
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, False, True)
+    OUTPUT_TOOLTIPS = (
+        "Filtered JSON object with selected keywords.",
+        "Concatenated keywords string.",
+        "List of selected keywords."
+    )
     RETURN_NAMES = ("json", "keywords", "keywords_list")
     RETURN_TYPES = (Input.JSON, Input.STRING, Input.STRING)
 

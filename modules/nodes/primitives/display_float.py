@@ -6,13 +6,13 @@ from ...utils.helpers.logic import normalize_input_list
 
 # region LF_DisplayFloat
 class LF_DisplayFloat:
-    @classmethod 
+    @classmethod
     def INPUT_TYPES(self):
         return {
             "required": {
                 "float": (Input.FLOAT, {
-                    "default": 0, 
-                    "forceInput": True, 
+                    "default": 0,
+                    "forceInput": True,
                     "tooltip": "Float value."
                 }),
             },
@@ -29,6 +29,10 @@ class LF_DisplayFloat:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     OUTPUT_NODE = True
+    OUTPUT_TOOLTIPS = (
+        "Pass-through float value.",
+        "Pass-through float value as a list."
+    )
     RETURN_NAMES = ("float",)
     RETURN_TYPES = (Input.FLOAT,)
 
@@ -42,7 +46,7 @@ class LF_DisplayFloat:
                 markdown_value = str(display_float[0])
         else:
             markdown_value = ""
-        
+
         PromptServer.instance.send_sync(f"{EVENT_PREFIX}displayfloat", {
             "node": kwargs.get("node_id"),
             "value": markdown_value,

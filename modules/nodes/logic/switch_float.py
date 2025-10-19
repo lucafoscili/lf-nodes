@@ -11,17 +11,17 @@ class LF_SwitchFloat:
         return {
             "required": {
                 "on_true": (Input.FLOAT, {
-                    "lazy": True, 
-                    "default": 0, 
+                    "lazy": True,
+                    "default": 0,
                     "tooltip": "Value to return if the boolean condition is true."
                 }),
                 "on_false": (Input.FLOAT, {
-                    "lazy": True, 
-                    "default": 0, 
+                    "lazy": True,
+                    "default": 0,
                     "tooltip": "Value to return if the boolean condition is false."
                 }),
                 "boolean": (Input.BOOLEAN, {
-                    "default": False, 
+                    "default": False,
                     "tooltip": "Boolean condition to switch between 'on_true' and 'on_false' values."
                 }),
             },
@@ -38,6 +38,10 @@ class LF_SwitchFloat:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, True)
+    OUTPUT_TOOLTIPS = (
+        "Final output float value.",
+        "List of all output float values (if any)."
+    )
     RETURN_NAMES = ("float", "float_list")
     RETURN_TYPES = (Input.FLOAT, Input.FLOAT)
 
@@ -52,10 +56,10 @@ class LF_SwitchFloat:
         boolean: bool = normalize_list_to_value(kwargs.get("boolean"))
         on_false: float = kwargs.get("on_false")
         on_true: float = kwargs.get("on_true")
-        
+
         PromptServer.instance.send_sync(f"{EVENT_PREFIX}switchfloat", {
             "node": kwargs.get("node_id"),
-            "bool": boolean, 
+            "bool": boolean,
         })
 
         value = on_true if boolean else on_false

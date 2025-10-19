@@ -96,7 +96,8 @@ class LF_CivitAIMetadataSetup:
                     "default": 1.5,
                     "tooltip": "Upscale factor for Hires-fix."
                 }),
-                "hires_upscaler": (get_comfy_list("upscale_models"), {
+                "hires_upscaler": (Input.COMBO, {
+                    "options": get_comfy_list("upscale_models"),
                     "tooltip": "Upscale model for Hires-fix."
                 }),
                 "ui_widget": (Input.LF_CODE, {
@@ -114,6 +115,28 @@ class LF_CivitAIMetadataSetup:
                     "sampler", "scheduler", "embeddings", "lora_tags",
                     "full_pos_prompt", "neg_prompt", "steps", "denoising", "clip_skip", "cfg", "seed",
                     "width", "height", "hires_upscaler", "hires_upscale", "analytics_dataset")
+    OUTPUT_TOOLTIPS = (
+        "Metadata string for the image.",
+        "Checkpoint model used for the image.",
+        "UNet model used for the image.",
+        "VAE model used for the image.",
+        "Sampler used for the image.",
+        "Scheduler used for the image.",
+        "Embeddings used for the image.",
+        "LoRA tags used for the image.",
+        "Full positive prompt used for the image.",
+        "Negative prompt used for the image.",
+        "Steps used for the image.",
+        "Denoising strength used for the image.",
+        "CLIP skip used for the image.",
+        "CFG used for the image.",
+        "Seed used for the image.",
+        "Width of the image.",
+        "Height of the image.",
+        "Hires upscaler used for the image.",
+        "Hires upscale factor used for the image.",
+        "Analytics dataset for the image."
+    )
     RETURN_TYPES = (Input.STRING, get_comfy_list("checkpoints"), get_comfy_list("unet"), get_comfy_list("vae"),
                     SAMPLERS, SCHEDULERS, Input.STRING, Input.STRING,
                     Input.STRING, Input.STRING, Input.INTEGER, Input.FLOAT, Input.INTEGER, Input.FLOAT, Input.INTEGER,

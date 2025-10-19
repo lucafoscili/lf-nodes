@@ -26,10 +26,10 @@ class LF_Blend:
                     "tooltip": "The overlay image to blend onto the base image."
                 }),
                 "opacity": (Input.FLOAT, {
-                    "default": 0.5, 
-                    "min": 0.0, 
-                    "max": 1.0, 
-                    "step": 0.01, 
+                    "default": 0.5,
+                    "min": 0.0,
+                    "max": 1.0,
+                    "step": 0.01,
                     "tooltip": "Opacity of the overlay. 0 means invisible, 1 means fully opaque."
                 }),
                 "blend_mode": (BLEND_MODE_COMBO, {
@@ -50,6 +50,10 @@ class LF_Blend:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, True)
+    OUTPUT_TOOLTIPS = (
+        "Blended image tensor.",
+        "List of blended image tensors."
+    )
     RETURN_NAMES = ("image", "image_list")
     RETURN_TYPES = (Input.IMAGE, Input.IMAGE)
 

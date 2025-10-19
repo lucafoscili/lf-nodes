@@ -14,11 +14,11 @@ class LF_SamplerSelector:
         return {
             "required": {
                 "sampler": (["None"] + SAMPLERS, {
-                    "default": "None", 
+                    "default": "None",
                     "tooltip": "Sampler used to generate the image."
                 }),
                 "enable_history": (Input.BOOLEAN, {
-                    "default": True, 
+                    "default": True,
                     "tooltip": "Enables history, saving the execution value and date of the widget."
                     }),
                 "randomize": (Input.BOOLEAN, {
@@ -26,13 +26,13 @@ class LF_SamplerSelector:
                     "tooltip": "Selects a sampler randomly."
                 }),
                 "filter": (Input.STRING, {
-                    "default": "", 
+                    "default": "",
                     "tooltip": "When randomization is active, this field can be used to filter sampler names. Supports wildcards (*)."
                 }),
                 "seed": (Input.INTEGER, {
-                    "default": 42, 
-                    "min": 0, 
-                    "max": INT_MAX, 
+                    "default": 42,
+                    "min": 0,
+                    "max": INT_MAX,
                     "tooltip": "Seed value for when randomization is active."
                 }),
             },
@@ -48,6 +48,10 @@ class LF_SamplerSelector:
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
+    OUTPUT_TOOLTIPS = (
+        "Combo list of samplers.",
+        "Selected sampler item as a string.",
+    )
     RETURN_NAMES = ("combo", "string")
     RETURN_TYPES = (SAMPLERS, Input.STRING)
 
@@ -58,7 +62,7 @@ class LF_SamplerSelector:
         seed: int = normalize_list_to_value(kwargs.get("seed"))
         filter: str = normalize_list_to_value(kwargs.get("filter"))
         ui_widget: dict = normalize_json_input(kwargs.get("ui_widget", {}))
-        
+
         samplers = SAMPLERS
 
         nodes: list[dict] = ui_widget.get("nodes", [])
@@ -73,7 +77,7 @@ class LF_SamplerSelector:
                     raise ValueError(f"Not found a model with the specified filter: {filter}")
             random.seed(seed)
             sampler = random.choice(samplers)
-        
+
         if enable_history:
             create_history_node(sampler, nodes)
 

@@ -34,6 +34,11 @@ class LF_ColorAnalysis:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, True, False)
+    OUTPUT_TOOLTIPS = (
+        "Image tensor adjusted to match the source color pattern.",
+        "List of image tensors adjusted to match the source color pattern.",
+        "JSON object with mapping information."
+    )
     OUTPUT_NODE = True
     RETURN_NAMES = ("image", "image_list", "dataset")
     RETURN_TYPES = (Input.IMAGE, Input.IMAGE, Input.JSON)
