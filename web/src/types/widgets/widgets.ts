@@ -154,6 +154,7 @@ export enum NodeName {
   switchImage = 'LF_SwitchImage',
   switchInteger = 'LF_SwitchInteger',
   switchJson = 'LF_SwitchJSON',
+  switchMask = 'LF_SwitchMask',
   switchString = 'LF_SwitchString',
   tiledSuperRes = 'LF_TiledSuperRes',
   tiltShift = 'LF_TiltShift',
