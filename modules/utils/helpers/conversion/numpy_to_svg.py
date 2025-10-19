@@ -1,11 +1,13 @@
-from dataclasses import dataclass, fields
-from typing import Any, Dict, Iterable, Tuple
-
 import cv2
 import numpy as np
 import svgwrite
-from PIL import Image
+import torch
+import uuid
 import xml.etree.ElementTree as ET
+
+from dataclasses import dataclass, fields
+from PIL import Image
+from typing import Any, Dict, Tuple
 
 try:
     import vtracer
@@ -93,6 +95,55 @@ def _ensure_uint8(arr: np.ndarray) -> np.ndarray:
         data *= 255.0
     data = np.clip(data, 0, 255)
     return data.astype(np.uint8)
+
+
+def _normalize_mask(mask: Any, height: int, width: int) -> np.ndarray | None:
+    """
+    Convert assorted mask representations (torch tensors, numpy arrays, Python sequences)
+    into a binary uint8 mask with shape (height, width). Returns None when no mask is
+    provided or the mask collapses to an empty selection.
+    """
+    if mask is None:
+        return None
+
+    try:
+        if torch is not None and isinstance(mask, torch.Tensor):
+            mask_array = mask.detach().cpu().numpy()
+        else:
+            mask_array = np.asarray(mask)
+    except Exception:
+        return None
+
+    if mask_array.size == 0:
+        return None
+
+    mask_array = np.squeeze(mask_array)
+    if mask_array.ndim == 0:
+        return None
+
+    if mask_array.ndim == 1:
+        if mask_array.size != height * width:
+            return None
+        mask_array = mask_array.reshape((height, width))
+    elif mask_array.ndim > 2:
+        mask_array = np.squeeze(mask_array)
+        if mask_array.ndim != 2:
+            return None
+
+    if mask_array.shape != (height, width):
+        mask_array = cv2.resize(mask_array, (width, height), interpolation=cv2.INTER_NEAREST)
+
+    if mask_array.dtype == np.bool_:
+        mask_array = mask_array.astype(np.uint8) * 255
+    elif np.issubdtype(mask_array.dtype, np.floating):
+        mask_array = (np.clip(mask_array, 0.0, 1.0) * 255.0).round().astype(np.uint8)
+    else:
+        mask_array = np.clip(mask_array, 0, 255).astype(np.uint8)
+
+    mask_array = np.where(mask_array > 127, 255, 0).astype(np.uint8)
+    if cv2.countNonZero(mask_array) == 0:
+        return None
+    return mask_array
 
 
 def _unique_palette_from_image(img: np.ndarray, max_colors: int = 32) -> list[str]:
@@ -248,7 +299,12 @@ def _apply_svg_overrides(svg_str: str, cfg: SVGTraceConfig, width: int, height: 
     return ET.tostring(root, encoding="unicode")
 
 
-def _numpy_to_svg_vtracer(img_uint8: np.ndarray, cfg: SVGTraceConfig, num_colors: int) -> tuple[str, np.ndarray, list[str]]:
+def _numpy_to_svg_vtracer(
+    img_uint8: np.ndarray,
+    cfg: SVGTraceConfig,
+    num_colors: int,
+    mask: np.ndarray | None = None,
+) -> tuple[str, np.ndarray, list[str]]:
     pil_img = Image.fromarray(img_uint8)
     if num_colors > 0:
         quantized = pil_img.convert("RGB").quantize(colors=num_colors, method=Image.MEDIANCUT)
@@ -257,6 +313,15 @@ def _numpy_to_svg_vtracer(img_uint8: np.ndarray, cfg: SVGTraceConfig, num_colors
     else:
         preview_img = np.array(pil_img)
         rgba_img = pil_img.convert("RGBA")
+
+    if mask is not None:
+        mask_bool = mask.astype(bool)
+        preview_img = preview_img.copy()
+        preview_img[~mask_bool] = 0
+
+        rgba_array = np.array(rgba_img)
+        rgba_array[..., 3] = np.where(mask_bool, rgba_array[..., 3], 0)
+        rgba_img = Image.fromarray(rgba_array, mode="RGBA")
 
     pixels = list(rgba_img.getdata())
     size = rgba_img.size
@@ -493,7 +558,7 @@ def _mask_to_paths(
     return paths
 
 
-def numpy_to_svg(arr: np.ndarray, config: Any = None) -> tuple[str, np.ndarray, list[str]]:
+def numpy_to_svg(arr: np.ndarray, config: Any = None, mask: Any = None) -> tuple[str, np.ndarray, list[str]]:
     """
     Convert an RGB numpy image into SVG markup using contour tracing guided by the
     provided configuration. Returns (svg_string, preview_image, palette_hex_list).
@@ -502,6 +567,14 @@ def numpy_to_svg(arr: np.ndarray, config: Any = None) -> tuple[str, np.ndarray, 
 
     h, w = arr.shape[:2]
     img_uint8 = _ensure_uint8(arr)
+    mask_uint8 = _normalize_mask(mask, h, w)
+    keep_mask = None
+    if mask_uint8 is not None:
+        keep_mask = mask_uint8.copy()
+
+    processing_img = img_uint8.copy()
+    if keep_mask is not None:
+        processing_img[keep_mask == 0] = 0
 
     try:
         cv2.setNumThreads(1)
@@ -521,7 +594,7 @@ def numpy_to_svg(arr: np.ndarray, config: Any = None) -> tuple[str, np.ndarray, 
 
     if engine == "vtracer" and _VTRACER_AVAILABLE:
         try:
-            return _numpy_to_svg_vtracer(img_uint8, cfg, num_colors)
+            return _numpy_to_svg_vtracer(img_uint8, cfg, num_colors, keep_mask)
         except Exception as exc:
             # If vtracer fails, fall back to contour tracing.
             import traceback
@@ -533,11 +606,16 @@ def numpy_to_svg(arr: np.ndarray, config: Any = None) -> tuple[str, np.ndarray, 
     if cfg.pre_blur_sigma > 0:
         blur_sigma = float(cfg.pre_blur_sigma)
         blur_size = max(3, int(np.ceil(blur_sigma * 3)) * 2 + 1)
-        preproc_img = cv2.GaussianBlur(img_uint8, (blur_size, blur_size), blur_sigma)
+        preproc_img = cv2.GaussianBlur(processing_img, (blur_size, blur_size), blur_sigma)
     else:
-        preproc_img = img_uint8.copy()
+        preproc_img = processing_img.copy()
+
+    if keep_mask is not None:
+        preproc_img[keep_mask == 0] = 0
 
     color_regions: list[Dict[str, Any]] = []
+
+    alpha_channel = keep_mask.copy() if keep_mask is not None else None
 
     if num_colors > 1:
         pixels = preproc_img.reshape(-1, 3).astype(np.float32)
@@ -559,25 +637,38 @@ def numpy_to_svg(arr: np.ndarray, config: Any = None) -> tuple[str, np.ndarray, 
 
         flat_original = img_uint8.reshape(-1, 3)
         flat_labels = labels.flatten()
+        mask_filter = keep_mask.reshape(-1) > 0 if keep_mask is not None else None
 
         for idx, center in enumerate(centers):
             mask = np.where(label_map == idx, 255, 0).astype("uint8")
+            if keep_mask is not None:
+                mask = cv2.bitwise_and(mask, keep_mask)
             area_px = int(cv2.countNonZero(mask))
             if area_px == 0:
                 continue
 
-            cluster_pixels = flat_original[flat_labels == idx]
+            if mask_filter is not None:
+                cluster_selector = mask_filter & (flat_labels == idx)
+                cluster_pixels = flat_original[cluster_selector]
+            else:
+                cluster_pixels = flat_original[flat_labels == idx]
             mean_color = cluster_pixels.mean(axis=0) if cluster_pixels.size else center
             color_regions.append({
                 "mask": mask,
                 "color": _rgb_to_hex(mean_color),
                 "area": area_px
             })
+
+        if keep_mask is not None:
+            preview[keep_mask == 0] = 0
     else:
         gray = cv2.cvtColor(preproc_img, cv2.COLOR_RGB2GRAY)
         threshold_value = int(np.clip(cfg.threshold, 0.0, 1.0) * 255)
         _, mask = cv2.threshold(gray, threshold_value, 255, cv2.THRESH_BINARY)
         preview = cv2.cvtColor(mask, cv2.COLOR_GRAY2RGB)
+        if keep_mask is not None:
+            mask = cv2.bitwise_and(mask, keep_mask)
+            preview[keep_mask == 0] = 0
 
         area_px = int(cv2.countNonZero(mask))
         if area_px > 0:
@@ -617,7 +708,7 @@ def numpy_to_svg(arr: np.ndarray, config: Any = None) -> tuple[str, np.ndarray, 
         dwg.attribs["width"] = "100%"
         dwg.attribs["height"] = "100%"
 
-    if cfg.background_color:
+    if cfg.background_color and keep_mask is None:
         dwg.add(dwg.rect(insert=(_format_coord(vb_minx), _format_coord(vb_miny)), size=(_format_coord(vb_w), _format_coord(vb_h)), fill=cfg.background_color, stroke="none"))
 
     # If a viewbox override was provided, wrap geometry in a transform group so
@@ -633,6 +724,28 @@ def numpy_to_svg(arr: np.ndarray, config: Any = None) -> tuple[str, np.ndarray, 
             dwg.add(content_group)
         except Exception:
             content_group = None
+
+    geometry_parent = content_group if content_group is not None else dwg
+
+    if keep_mask is not None:
+        clip_mask, clip_scale = _prepare_region_mask(keep_mask, cfg)
+        clip_paths = _mask_to_paths(
+            clip_mask,
+            simplify_tol,
+            min_area,
+            clip_scale,
+            cfg.smooth_passes,
+            cfg.collinear_angle_tol,
+        )
+        if clip_paths:
+            clip_id = f"clip_{uuid.uuid4().hex}"
+            clip_node = dwg.defs.add(dwg.clipPath(id=clip_id, clipPathUnits="userSpaceOnUse"))
+            for clip_path in clip_paths:
+                clip_node.add(dwg.path(d=clip_path, fill="white"))
+            clipped_group = dwg.g(clip_path=f"url(#{clip_id})")
+            geometry_parent.add(clipped_group)
+            geometry_parent = clipped_group
+            print("[LF_ImageToSVG] clipPath applied with", len(clip_paths), "paths")
 
     palette: list[str] = []
     mode = (cfg.vector_mode or "fill").lower()
@@ -672,10 +785,7 @@ def numpy_to_svg(arr: np.ndarray, config: Any = None) -> tuple[str, np.ndarray, 
                 path.attribs["stroke-width"] = 0
                 path.attribs["stroke"] = "none"
             path.attribs["style"] = "fill-rule:evenodd"
-            if content_group is not None:
-                content_group.add(path)
-            else:
-                dwg.add(path)
+            geometry_parent.add(path)
 
     if not palette and color_regions:
         region = max(color_regions, key=lambda item: item["area"])
@@ -686,8 +796,11 @@ def numpy_to_svg(arr: np.ndarray, config: Any = None) -> tuple[str, np.ndarray, 
             rect.attribs["stroke-width"] = float(cfg.stroke_width)
         else:
             rect.attribs["stroke"] = "none"
-        dwg.add(rect)
+        geometry_parent.add(rect)
         palette.append(hex_color)
+
+    if alpha_channel is not None:
+        preview = np.dstack([preview, alpha_channel])
 
     return dwg.tostring(), preview, palette
 
