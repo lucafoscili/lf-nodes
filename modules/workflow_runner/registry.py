@@ -203,6 +203,12 @@ def _configure_image_to_svg_workflow(prompt: Dict[str, Any], inputs: Dict[str, A
             input_name = "desaturate"
             desaturate = inputs.get(input_name)
             inputs_map["boolean"] = bool(desaturate)
+
+        if node_id == "72":  # Keep transparency checkbox (optional)
+            input_name = "keep_transparency"
+            keep_transparency = inputs.get(input_name)
+            inputs_map["boolean"] = bool(keep_transparency)
+
 # endregion
 
 # region Workflow Defs
@@ -228,7 +234,7 @@ class WorkflowRegistry:
 
 REGISTRY = WorkflowRegistry()
 
-image_to_svg_workflow_path = _resolve_user_path("default", "workflows", "ImageToSVG.json")
+image_to_svg_workflow_path = _resolve_user_path("default", "workflows", "Image 2 SVG.json")
 REGISTRY.register(
     WorkflowNode(
         id="image-to-svg",
@@ -287,10 +293,20 @@ REGISTRY.register(
                 id="desaturate",
                 value="Desaturate",
                 shape="toggle",
-                description="Optional: sets whether to desaturate the image before converting.",
+                description="Sets whether to desaturate the image before converting.",
                 props={
                     "lfLabel": "Desaturate image",
                     "lfValue": False,
+                },
+            ),
+            WorkflowCell(
+                id="keep_transparency",
+                value="Keep Transparency",
+                shape="toggle",
+                description="Sets whether to keep the transparency of the image.",
+                props={
+                    "lfLabel": "Keep transparency",
+                    "lfValue": True,
                 },
             ),
         ],
