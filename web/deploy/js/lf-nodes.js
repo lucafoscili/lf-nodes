@@ -1193,6 +1193,7 @@ var NodeName;
   NodeName2["switchImage"] = "LF_SwitchImage";
   NodeName2["switchInteger"] = "LF_SwitchInteger";
   NodeName2["switchJson"] = "LF_SwitchJSON";
+  NodeName2["switchMask"] = "LF_SwitchMask";
   NodeName2["switchString"] = "LF_SwitchString";
   NodeName2["tiledSuperRes"] = "LF_TiledSuperRes";
   NodeName2["tiltShift"] = "LF_TiltShift";
@@ -1340,6 +1341,7 @@ const NODE_WIDGET_MAP = {
   LF_SwitchImage: [CustomWidgetName.progressbar],
   LF_SwitchInteger: [CustomWidgetName.progressbar],
   LF_SwitchJSON: [CustomWidgetName.progressbar],
+  LF_SwitchMask: [CustomWidgetName.progressbar],
   LF_SwitchString: [CustomWidgetName.progressbar],
   LF_TiledSuperRes: [CustomWidgetName.compare],
   LF_TiltShift: [CustomWidgetName.compare],
