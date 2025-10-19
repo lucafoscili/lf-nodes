@@ -1,24 +1,20 @@
+import { LfDataDataset } from '@lf-widgets/foundations/dist';
+import { buildApiUrl } from '../config';
 import {
-  WorkflowAPIDefinition,
+  WorkflowAPIErrorOptions,
   WorkflowAPIResponse,
   WorkflowAPIRunPayload,
   WorkflowAPIUploadPayload,
   WorkflowAPIUploadResponse,
 } from '../types/api';
 import { WorkflowStatus } from '../types/state';
-import { buildApiUrl } from '../config';
 import { isWorkflowAPIUploadPayload, isWorkflowAPIUploadResponse } from '../utils/common';
-
-export interface WorkflowApiErrorOptions<TPayload> {
-  payload?: TPayload;
-  status?: number;
-}
 
 export class WorkflowApiError<TPayload = unknown> extends Error {
   readonly payload?: TPayload;
   readonly status?: number;
 
-  constructor(message: string, options: WorkflowApiErrorOptions<TPayload> = {}) {
+  constructor(message: string, options: WorkflowAPIErrorOptions<TPayload> = {}) {
     super(message);
     this.name = 'WorkflowApiError';
     this.payload = options.payload;
@@ -36,16 +32,16 @@ async function parseJson(response: Response): Promise<JsonValue> {
   }
 }
 
-export const fetchWorkflowDefinitions = async (): Promise<WorkflowAPIDefinition[]> => {
+export const fetchWorkflowDefinitions = async (): Promise<LfDataDataset> => {
   const response = await fetch(buildApiUrl('/workflows'), { method: 'GET' });
-  const data = (await parseJson(response)) as { workflows?: WorkflowAPIDefinition[] } | null;
+  const data = (await parseJson(response)) as { workflows?: LfDataDataset } | null;
 
   if (!response.ok) {
     const message = `Failed to load workflows (${response.status})`;
     throw new WorkflowApiError(message, { status: response.status, payload: data });
   }
 
-  if (!data || !Array.isArray(data.workflows)) {
+  if (!data?.workflows || !Array.isArray(data.workflows.nodes)) {
     throw new WorkflowApiError('Invalid workflows response shape.', { payload: data });
   }
 

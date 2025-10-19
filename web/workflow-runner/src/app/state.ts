@@ -9,6 +9,7 @@ export const initState = (appContainer: HTMLDivElement): WorkflowState => ({
       _root: appContainer,
       drawer: {
         _root: null,
+        tree: null,
       },
       header: {
         _root: null,
@@ -20,7 +21,7 @@ export const initState = (appContainer: HTMLDivElement): WorkflowState => ({
         title: { _root: null },
         workflow: {
           _root: null,
-          fields: [],
+          cells: [],
           options: null,
           result: null,
           run: null,
@@ -30,7 +31,18 @@ export const initState = (appContainer: HTMLDivElement): WorkflowState => ({
       },
     },
   },
-  workflows: [],
+  workflows: {},
   results: null,
+  mutate: {
+    workflow: () => {
+      throw new Error('Mutate not initialized');
+    },
+    status: () => {
+      throw new Error('Mutate not initialized');
+    },
+    runResult: () => {
+      throw new Error('Mutate not initialized');
+    },
+  },
 });
 //#endregion

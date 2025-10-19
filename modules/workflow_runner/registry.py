@@ -13,6 +13,9 @@ class InputValidationError(ValueError):
         self.input_name = input_name
 
 # region Helpers
+def _resolve_user_path(*relative_parts: str) -> Path:
+    user_dir = Path(folder_paths.get_user_directory())
+    return user_dir.joinpath(*relative_parts).resolve()
 def _json_safe(value: Any) -> Any:
     """
     Recursively convert workflow values into JSON-safe types.
@@ -23,6 +26,7 @@ def _json_safe(value: Any) -> Any:
         return {str(k): _json_safe(v) for k, v in value.items()}
     if isinstance(value, (list, tuple, set)):
         return [_json_safe(v) for v in value]
+
     return str(value)
 
 def _workflow_to_prompt(workflow: Dict[str, Any]) -> Dict[str, Any]:
@@ -54,7 +58,6 @@ def _workflow_to_prompt(workflow: Dict[str, Any]) -> Dict[str, Any]:
             if len(maybe_nodes) > 0:
                 nodes_list = maybe_nodes
 
-    # Build links mapping (older format used a separate "links" array)
     links: Dict[int, tuple[str, int]] = {}
     for link in (workflow.get("links", []) if isinstance(workflow, dict) else []):
         if len(link) < 5:
@@ -68,10 +71,7 @@ def _workflow_to_prompt(workflow: Dict[str, Any]) -> Dict[str, Any]:
 
     for node in nodes_list:
         node_id = str(node.get("id"))
-        # Some formats call the node type "type", others use "class_type".
         class_type = node.get("class_type") or node.get("type")
-        # If the node already contains an "inputs" mapping (prompt-shaped dict),
-        # use it directly and skip the legacy/list-style parsing.
         raw_inputs = node.get("inputs", {})
         if isinstance(raw_inputs, dict):
             prompt[node_id] = {
@@ -80,13 +80,11 @@ def _workflow_to_prompt(workflow: Dict[str, Any]) -> Dict[str, Any]:
             }
             continue
 
-        # Legacy/list-style node inputs (the node defines an "inputs" list of input defs)
         prompt_inputs: Dict[str, Any] = {}
         widgets: List[Any] = list(node.get("widgets_values") or [])
         widget_index = 0
 
         for input_def in node.get("inputs", []):
-            # input_def is expected to be a dict with keys like 'name', 'link', 'widget'
             if not isinstance(input_def, dict):
                 continue
             input_name = input_def.get("name")
@@ -106,7 +104,6 @@ def _workflow_to_prompt(workflow: Dict[str, Any]) -> Dict[str, Any]:
             elif input_def.get("widget") is not None:
                 prompt_inputs[input_name] = _json_safe(widget_value)
             else:
-                # Older/list formats may provide a literal 'value' field.
                 if input_def.get("value") is not None:
                     prompt_inputs[input_name] = _json_safe(input_def.get("value"))
 
@@ -116,37 +113,38 @@ def _workflow_to_prompt(workflow: Dict[str, Any]) -> Dict[str, Any]:
         }
 
     return prompt
+# endregion
 
+# region Dataset
 @dataclass
-class WorkflowField:
-    name: str
-    label: str
-    component: str
+class WorkflowCell:
+    id: str
+    value: str
+    shape: str
     description: str = ""
-    required: bool = True
     default: Any | None = None
-    extra: Dict[str, Any] = field(default_factory=dict)
+    props: Dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         data = {
-            "name": self.name,
-            "label": self.label,
-            "component": self.component,
-            "description": self.description,
-            "required": self.required,
-            "default": self.default,
+            "id": self.id,
+            "value": self.value,
+            "shape": self.shape,
         }
-        if self.extra:
-            data["extra"] = self.extra
+        if self.props:
+            data.update(self.props)
+        if self.description:
+            data["description"] = self.description
+
         return _json_safe(data)
 
 @dataclass
-class WorkflowDefinition:
-    workflow_id: str
-    label: str
+class WorkflowNode:
+    id: str
+    value: str
     description: str
     workflow_path: Path
-    fields: Iterable[WorkflowField]
+    cells: Iterable[WorkflowCell]
     configure_prompt: Callable[[Dict[str, Any], Dict[str, Any]], None]
 
     def load_prompt(self) -> Dict[str, Any]:
@@ -154,13 +152,11 @@ class WorkflowDefinition:
             workflow_graph = json.load(workflow_file)
         return _workflow_to_prompt(workflow_graph)
 
-    def fields_as_dict(self) -> List[Dict[str, Any]]:
-        return [field.to_dict() for field in self.fields]
+    def cells_as_dict(self) -> Dict[str, Any]:
+        return {f"{cell.id}": cell.to_dict() for i, cell in enumerate(self.cells)}
+# endregion
 
-def _resolve_user_path(*relative_parts: str) -> Path:
-    user_dir = Path(folder_paths.get_user_directory())
-    return user_dir.joinpath(*relative_parts).resolve()
-
+# region Workflow Config
 def _configure_image_to_svg_workflow(prompt: Dict[str, Any], inputs: Dict[str, Any]) -> None:
     for (node_id, node) in prompt.items():
         if not isinstance(node, dict):
@@ -209,76 +205,102 @@ def _configure_image_to_svg_workflow(prompt: Dict[str, Any], inputs: Dict[str, A
             inputs_map["boolean"] = bool(desaturate)
 # endregion
 
-# region Workflow Definitions
+# region Workflow Defs
 class WorkflowRegistry:
     def __init__(self) -> None:
-        self._definitions: Dict[str, WorkflowDefinition] = {}
+        self._definitions: Dict[str, WorkflowNode] = {}
 
-    def register(self, definition: WorkflowDefinition) -> None:
-        self._definitions[definition.workflow_id] = definition
+    def register(self, definition: WorkflowNode) -> None:
+        self._definitions[definition.id] = definition
 
-    def list(self) -> List[Dict[str, Any]]:
-        return [
-            {
-                "id": definition.workflow_id,
-                "label": definition.label,
+    def list(self) -> Dict[str, List[Dict[str, Any]]]:
+        return {
+            "columns": [],
+            "nodes": [{
+                "id": definition.id,
+                "value": definition.value,
                 "description": definition.description,
-                "fields": definition.fields_as_dict(),
-            }
-            for definition in self._definitions.values()
-        ]
-
-    def get(self, workflow_id: str) -> WorkflowDefinition | None:
-        return self._definitions.get(workflow_id)
-
+                "cells": definition.cells_as_dict(),
+            } for definition in self._definitions.values()],
+        }
+    def get(self, id: str) -> WorkflowNode | None:
+        return self._definitions.get(id)
 
 REGISTRY = WorkflowRegistry()
 
 image_to_svg_workflow_path = _resolve_user_path("default", "workflows", "ImageToSVG.json")
 REGISTRY.register(
-    WorkflowDefinition(
-        workflow_id="image-to-svg",
-        label="Image to SVG",
-        description=(
-            "Converts a raster image to SVG format using the configured image processing model."
-        ),
+    WorkflowNode(
+        id="image-to-svg",
+        value="Image to SVG",
+        description="Converts a raster image to SVG format using the configured image processing model.",
         workflow_path=image_to_svg_workflow_path,
-        fields=[
-            WorkflowField(
-                name="source_path",
-                label="Source File or Directory",
-                component="lf-upload",
-                description="Absolute path to the image file (or folder) to convert.",
+        cells=[
+            WorkflowCell(
+                id="source_path",
+                value="Source File or Directory",
+                shape="upload",
+                props={
+                    "lfHtmlAttributes": {
+                        "accept": "image/*"
+                    },
+                    "lfLabel": "Source image",
+                },
             ),
-            WorkflowField(
-                name="icon_name",
-                label="Icon Name",
-                component="lf-textfield",
-                description="Optional: The name of the icon to use.",
-                extra={"htmlAttributes": {"autocomplete": "off", "placeholder": "icon", "type": "text"}},
+            WorkflowCell(
+                id="icon_name",
+                value="Icon Name",
+                shape="textfield",
+                props={
+                    "lfHtmlAttributes": {
+                        "autocomplete": "off",
+                        "type": "text"
+                    },
+                    "lfLabel": "Icon name",
+                    "lfHelper": {
+                        "showWhenFocused": False,
+                        "value": "Optional: The name of the icon to use. Default is 'icon'.",
+                    },
+                    "lfValue": "icon",
+                },
             ),
-            WorkflowField(
-                name="number_of_colors",
-                label="Number of Colors",
-                component="lf-textfield",
-                description="Optional: the number of colors to reduce the image to.",
-                extra={"htmlAttributes": {"autocomplete": "off", "type": "number", "min": "1", "max": "256", "placeholder": "2"}},
+            WorkflowCell(
+                id="number_of_colors",
+                value="Number of Colors",
+                shape="textfield",
+                props={
+                    "lfHtmlAttributes": {
+                        "autocomplete": "off",
+                        "type": "number",
+                        "min": 1,
+                        "max": 256
+                    },
+                    "lfHelper": {
+                        "showWhenFocused": False,
+                        "value": "Optional: the number of colors to reduce the image to. Default is 2.",
+                    },
+                    "lfLabel": "Number of colors",
+                    "lfValue": "2",
+                },
             ),
-            WorkflowField(
-                name="desaturate",
-                label="Desaturate",
-                component="lf-toggle",
+            WorkflowCell(
+                id="desaturate",
+                value="Desaturate",
+                shape="toggle",
                 description="Optional: sets whether to desaturate the image before converting.",
+                props={
+                    "lfLabel": "Desaturate image",
+                    "lfValue": False,
+                },
             ),
         ],
         configure_prompt=_configure_image_to_svg_workflow,
     )
 )
 
-
 def list_workflows() -> List[Dict[str, Any]]:
     return REGISTRY.list()
 
-
-def get_workflow(workflow_id: str) -> WorkflowDefinition | None:
-    return REGISTRY.get(workflow_id)
+def get_workflow(id: str) -> WorkflowNode | None:
+    return REGISTRY.get(id)
+# endregion

@@ -4,13 +4,14 @@ import {
   LfComponentName,
   LfComponentPropsFor,
   LfComponentRootElement,
+  LfDataCell,
   LfMasonryInterface,
   LfTextfieldInterface,
   LfToggleInterface,
   LfUploadInterface,
 } from '@lf-widgets/foundations/dist';
 import { getLfFramework } from '@lf-widgets/framework';
-import { WorkflowAPIField, WorkflowAPIResult } from '../types/api';
+import { WorkflowAPIResult } from '../types/api';
 import { normalize_description } from '../utils/common';
 
 //#region Helpers
@@ -84,6 +85,7 @@ const _setSlots = <T extends LfComponentName>(
         lfIcon: 'download',
         lfLabel: 'Download SVG',
         lfStretchX: true,
+        lfUiState: 'success',
       });
       dlButton.onclick = () => {
         const blob = new Blob([slotHtml], { type: 'image/svg+xml' });
@@ -150,38 +152,21 @@ export const createComponent = {
 //#endregion
 
 //#region Inputs
-export const createInputField = (field: WorkflowAPIField) => {
-  const {
-    component,
-    default: lfValue,
-    description,
-    extra: lfHtmlAttributes,
-    label: lfLabel,
-  } = field;
+export const createInputCell = (cell: LfDataCell) => {
   const { sanitizeProps } = getLfFramework();
-  const safeHtmlAttributes = sanitizeProps(lfHtmlAttributes);
 
-  switch (component) {
-    case 'lf-toggle': {
-      return createComponent.toggle({
-        lfAriaLabel: lfLabel,
-        lfLabel,
-        lfValue: Boolean(lfValue ?? false),
-      });
+  switch (cell.shape) {
+    case 'toggle': {
+      return createComponent.toggle(sanitizeProps(cell as LfDataCell<'toggle'>, 'LfToggle'));
     }
-    case 'lf-upload': {
-      return createComponent.upload({
-        lfLabel,
-      });
+    case 'upload': {
+      return createComponent.upload(sanitizeProps(cell as LfDataCell<'upload'>, 'LfUpload'));
     }
     default:
-    case 'lf-textfield': {
-      return createComponent.textfield({
-        lfHelper: { value: description ?? '', showWhenFocused: false },
-        lfHtmlAttributes: safeHtmlAttributes,
-        lfLabel,
-        lfValue: String(lfValue ?? ''),
-      });
+    case 'textfield': {
+      return createComponent.textfield(
+        sanitizeProps(cell as LfDataCell<'textfield'>, 'LfTextfield'),
+      );
     }
   }
 };

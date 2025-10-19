@@ -1,14 +1,14 @@
 {
   "apiBase": "/api",
   "apiRoutePrefix": "/lf-nodes",
-  "staticPaths": {
-    "assets": "/lf-nodes/static/assets/",
-    "workflowRunner": "/lf-nodes/static-workflow-runner/"
-  },
   "deploy": {
     "root": "./web/deploy",
     "runnerSubdir": "workflow-runner",
     "jsDir": "js"
+  },
+  "staticPaths": {
+    "assets": "/lf-nodes/static/assets/",
+    "workflowRunner": "/lf-nodes/static-workflow-runner/"
   },
   "theme": "dark"
 }

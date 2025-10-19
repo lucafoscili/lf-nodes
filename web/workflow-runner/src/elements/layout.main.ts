@@ -1,5 +1,5 @@
 import { WorkflowState } from '../types/state';
-import { WorkflowSectionController } from './section';
+import { WorkflowSectionController } from '../types/section';
 
 //#region Constants
 const ROOT_CLASS = 'main-section';

@@ -1,6 +1,7 @@
 import '@lf-widgets/core/dist/lf-core/lf-core.esm.js';
 import { LfWorkflowRunnerManager } from './app/manager';
 
+//#region Bootstrap
 export const bootstrapWorkflowRunner = (): LfWorkflowRunnerManager | null => {
   const hasComfyApp = typeof comfyAPI !== 'undefined' && comfyAPI?.api && comfyAPI?.app;
   if (hasComfyApp) {
@@ -9,3 +10,4 @@ export const bootstrapWorkflowRunner = (): LfWorkflowRunnerManager | null => {
 
   return new LfWorkflowRunnerManager();
 };
+//#endregion
