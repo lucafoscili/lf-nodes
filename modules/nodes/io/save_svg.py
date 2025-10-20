@@ -104,18 +104,29 @@ class LF_SaveSVG:
 
         return {
             "ui": {
-                "_description": ["LF_SaveSVG"],
-                "lf_code": [{
-                    "_description": "SVG data",
-                    "lfLanguage": "html",
-                    "lfValue": svg
-                }],
-                "lf_masonry": [{
-                    "_description": "Saved SVGs",
-                    "_slotmap": slot_map,
-                    "lfDataset": dataset,
-                    "lfShape": "slot"
-                }],
+                "lf_output": [
+                    {
+                        "id": "svg_data",
+                        "nodeId": kwargs.get("node_id"),
+                        "shape": "code",
+                        "title": "SVG data",
+                        "props": {
+                            "lfLanguage": "html",
+                            "lfValue": svg,
+                        },
+                    },
+                    {
+                        "id": "svg_file",
+                        "nodeId": kwargs.get("node_id"),
+                        "shape": "masonry",
+                        "title": "Saved SVGs",
+                        "props": {
+                            "_slotmap": slot_map,
+                            "lfDataset": dataset,
+                            "lfShape": "slot",
+                        },
+                    },
+                ],
             },
             "result": (svg,)
         }

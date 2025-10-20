@@ -123,10 +123,10 @@ def _workflow_to_prompt(workflow: Dict[str, Any]) -> Dict[str, Any]:
 @dataclass
 class WorkflowCell:
     id: str
+    node_id: str
     value: str
     shape: str
     description: str = ""
-    default: Any | None = None
     props: Dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
@@ -138,7 +138,9 @@ class WorkflowCell:
         if self.props:
             data.update(self.props)
         if self.description:
-            data["description"] = self.description
+            data["title"] = self.description
+        if self.node_id:
+            data["lfNodeId"] = self.node_id
 
         return _json_safe(data)
 
@@ -147,9 +149,10 @@ class WorkflowNode:
     id: str
     value: str
     description: str
-    workflow_path: Path
-    cells: Iterable[WorkflowCell]
+    inputs: Iterable[WorkflowCell]
+    outputs: Iterable[WorkflowCell]
     configure_prompt: Callable[[Dict[str, Any], Dict[str, Any]], None]
+    workflow_path: Path
 
     def load_prompt(self) -> Dict[str, Any]:
         with self.workflow_path.open("r", encoding="utf-8") as workflow_file:
@@ -157,7 +160,13 @@ class WorkflowNode:
         return _workflow_to_prompt(workflow_graph)
 
     def cells_as_dict(self) -> Dict[str, Any]:
-        return {f"{cell.id}": cell.to_dict() for i, cell in enumerate(self.cells)}
+        return self.inputs_as_dict()
+
+    def inputs_as_dict(self) -> Dict[str, Any]:
+        return {cell.id: cell.to_dict() for cell in self.inputs}
+
+    def outputs_as_dict(self) -> Dict[str, Any]:
+        return {cell.id: cell.to_dict() for cell in self.outputs}
 # endregion
 
 # region Workflow Defs
@@ -169,14 +178,38 @@ class WorkflowRegistry:
         self._definitions[definition.id] = definition
 
     def list(self) -> Dict[str, List[Dict[str, Any]]]:
-        return {
-            "columns": [],
-            "nodes": [{
+        nodes: List[Dict[str, Any]] = []
+        for definition in self._definitions.values():
+            workflow_node = {
                 "id": definition.id,
                 "value": definition.value,
                 "description": definition.description,
-                "cells": definition.cells_as_dict(),
-            } for definition in self._definitions.values()],
+                "children": [
+                    {
+                        "id": f"{definition.id}:inputs",
+                        "value": "Inputs",
+                        "description": "Workflow inputs",
+                        "props": {
+                            "lfSection": "inputs",
+                        },
+                        "cells": definition.inputs_as_dict(),
+                    },
+                    {
+                        "id": f"{definition.id}:outputs",
+                        "value": "Outputs",
+                        "description": "Workflow outputs",
+                        "props": {
+                            "lfSection": "outputs",
+                        },
+                        "cells": definition.outputs_as_dict(),
+                    },
+                ],
+            }
+            nodes.append(workflow_node)
+
+        return {
+            "columns": [],
+            "nodes": nodes,
         }
     def get(self, id: str) -> WorkflowNode | None:
         return self._definitions.get(id)
@@ -192,13 +225,13 @@ def _is_workflow_definition(definition: object) -> bool:
         "value",
         "description",
         "workflow_path",
-        "cells",
+        "inputs",
+        "outputs",
         "configure_prompt",
     )
     required_methods = ("load_prompt", "cells_as_dict")
 
     return all(hasattr(definition, attr) for attr in (*required_attrs, *required_methods))
-
 
 def _register_packaged_workflows() -> None:
     """
@@ -214,7 +247,6 @@ def _register_packaged_workflows() -> None:
                 f"Workflow definition '{definition!r}' is not compatible with WorkflowNode."
             )
         REGISTRY.register(definition)  # type: ignore[arg-type]
-
 
 _register_packaged_workflows()
 

@@ -147,21 +147,37 @@ class LF_SaveImageForCivitAI:
 
         return {
             "ui": {
-                "_description": ["LF_SaveImageForCivitAI"],
-                "lf_code": [{
-                    "_description": "CivitAI metadata",
-                    "lfLanguage": "markdown",
-                    "lfValue": civitai_metadata
-                    }, {
-                    "_description": "Generated filenames",
-                    "lfLanguage": "markdown",
-                    "lfValue": '\n'.join(file_names)
-                    }
+                "lf_output": [
+                    {
+                        "id": "civitai_metadata",
+                        "nodeId": kwargs.get("node_id"),
+                        "shape": "code",
+                        "title": "CivitAI metadata",
+                        "props": {
+                            "lfLanguage": "markdown",
+                            "lfValue": civitai_metadata,
+                        },
+                    },
+                    {
+                        "id": "file_names",
+                        "nodeId": kwargs.get("node_id"),
+                        "shape": "code",
+                        "title": "Generated filenames",
+                        "props": {
+                            "lfLanguage": "markdown",
+                            "lfValue": '\n'.join(file_names),
+                        },
+                    },
+                    {
+                        "id": "dataset",
+                        "nodeId": kwargs.get("node_id"),
+                        "shape": "masonry",
+                        "title": "Saved images",
+                        "props": {
+                            "lfDataset": dataset,
+                        },
+                    },
                 ],
-                "lf_masonry": [{
-                    "_description": "Saved images",
-                    "lfDataset": dataset,
-                }],
             },
             "result": (file_names, civitai_metadata)
         }

@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Any, Dict
 
-from ..registry import InputValidationError, resolve_user_path, WorkflowNode, WorkflowCell
+from ..registry import InputValidationError, WorkflowCell, resolve_user_path, WorkflowNode
 
 # region Workflow Config
 def _configure_image_to_svg_workflow(prompt: Dict[str, Any], inputs: Dict[str, Any]) -> None:
@@ -63,7 +63,8 @@ def _configure_image_to_svg_workflow(prompt: Dict[str, Any], inputs: Dict[str, A
 # endregion
 
 # region Inputs
-cell_upload = WorkflowCell(
+input_upload = WorkflowCell(
+    node_id="16",
     id="source_path",
     value="Source File or Directory",
     shape="upload",
@@ -74,7 +75,8 @@ cell_upload = WorkflowCell(
         "lfLabel": "Source image",
     },
 )
-cell_name = WorkflowCell(
+input_name = WorkflowCell(
+    node_id="47",
     id="icon_name",
     value="Icon Name",
     shape="textfield",
@@ -91,7 +93,8 @@ cell_name = WorkflowCell(
         "lfValue": "icon",
     },
 )
-cell_colors = WorkflowCell(
+input_colors = WorkflowCell(
+    node_id="40",
     id="number_of_colors",
     value="Number of Colors",
     shape="textfield",
@@ -110,7 +113,8 @@ cell_colors = WorkflowCell(
         "lfValue": "2",
     },
 )
-cell_desaturate = WorkflowCell(
+input_desaturate = WorkflowCell(
+    node_id="51",
     id="desaturate",
     value="Desaturate",
     shape="toggle",
@@ -120,7 +124,8 @@ cell_desaturate = WorkflowCell(
         "lfValue": False,
     },
 )
-cell_transparency = WorkflowCell(
+input_transparency = WorkflowCell(
+    node_id="71",
     id="keep_transparency",
     value="Keep Transparency",
     shape="toggle",
@@ -130,7 +135,8 @@ cell_transparency = WorkflowCell(
         "lfValue": True,
     },
 )
-cell_strip = WorkflowCell(
+input_strip = WorkflowCell(
+    node_id="80",
     id="strip_attributes",
     value="Strip Attributes",
     shape="toggle",
@@ -139,6 +145,36 @@ cell_strip = WorkflowCell(
         "lfLabel": "Strip attributes",
         "lfValue": True,
     },
+)
+# endregion
+
+# region Outputs
+output_svg_data = WorkflowCell(
+    node_id="20",
+    id="svg_data",
+    value="svg",
+    shape="code",
+    description="SVG Data",
+    props={
+        "lfLanguage": "html",
+    }
+)
+output_svg_file = WorkflowCell(
+    node_id="20",
+    id="svg_file",
+    value="dataset",
+    shape="masonry",
+    description="SVG File",
+    props={
+        "lfShape": "slot",
+    }
+)
+output_png = WorkflowCell(
+    node_id="61",
+    id="png_file",
+    value="dataset",
+    shape="masonry",
+    description="PNG File",
 )
 # endregion
 
@@ -151,16 +187,21 @@ image_2_svg = WorkflowNode(
     id=id,
     value=value,
     description=description,
-    workflow_path=image_to_svg_workflow_path,
-    cells=[
-        cell_upload,
-        cell_name,
-        cell_colors,
-        cell_transparency,
-        cell_strip,
-        cell_desaturate,
+    inputs=[
+        input_upload,
+        input_name,
+        input_colors,
+        input_transparency,
+        input_strip,
+        input_desaturate,
+    ],
+    outputs=[
+        output_svg_data,
+        output_svg_file,
+        output_png,
     ],
     configure_prompt=_configure_image_to_svg_workflow,
+    workflow_path=image_to_svg_workflow_path,
 )
 # endregion
 

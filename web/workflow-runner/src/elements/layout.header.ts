@@ -59,7 +59,7 @@ const _debugToggle = (state: WorkflowState) => {
 
     switch (eventType) {
       case 'click':
-        state.mutate.isDebug(!state.isDebug);
+        state.manager?.toggleDebug();
         break;
     }
   });

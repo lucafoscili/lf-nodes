@@ -1,5 +1,5 @@
 import { getLfFramework } from '@lf-widgets/framework';
-import { buildAssetsUrl, DEFAULT_THEME } from '../config';
+import { buildAssetsUrl, DEFAULT_STATUS_MESSAGES, DEFAULT_THEME } from '../config';
 import { createDevPanel } from '../elements/dev.panel';
 import { createActionButtonSection } from '../elements/layout.action-button';
 import { createDrawerSection } from '../elements/layout.drawer';
@@ -44,6 +44,7 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
     }
 
     this.#STORE = createWorkflowRunnerStore(initState(container));
+    this.#IS_DEBUG = this.#STORE.getState().isDebug;
     this.#SECTIONS = {
       actionButton: createActionButtonSection(),
       drawer: createDrawerSection(),
@@ -96,7 +97,6 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
     return inputs;
   };
   #handleUploadField = async (fieldName: string, rawValue: unknown) => {
-    const { UPLOAD_COMPLETED, UPLOAD_FAILED, UPLOAD_FAILED_UNEXPECTED } = DEBUG_MESSAGES;
     const { UPLOADING_FILE, FILE_PROCESSING } = STATUS_MESSAGES;
 
     const files = Array.isArray(rawValue) ? rawValue : (rawValue as File[] | undefined);
@@ -109,21 +109,13 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
       const { payload } = await uploadWorkflowFiles(files);
       const paths = payload?.paths || [];
       this.setStatus('running', FILE_PROCESSING);
-      debugLog(UPLOAD_COMPLETED, 'success', { fieldName, files: paths.length });
       return paths.length === 1 ? paths[0] : paths;
     } catch (error) {
       if (error instanceof WorkflowApiError) {
         this.#SECTIONS.workflow.setCellStatus(this.#STORE.getState(), fieldName, 'error');
         this.setStatus('error', `Upload failed: ${error.payload?.detail || error.message}`);
-        debugLog(UPLOAD_FAILED, 'error', {
-          fieldName,
-          detail: error.payload?.detail || error.message,
-        });
       } else {
-        debugLog(UPLOAD_FAILED_UNEXPECTED, 'error', {
-          fieldName,
-          message: (error as Error)?.message ?? null,
-        });
+        this.setStatus('error', 'Upload failed unexpectedly.');
       }
       throw error;
     }
@@ -167,11 +159,11 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
     }
 
     this.#STORE.getState().mutate.workflows(workflows);
-    debugLog(WORKFLOWS_LOADED, 'success', {
-      count: workflows.nodes?.length ?? 0,
-    });
 
-    this.setWorkflow(workflows.nodes[0].id);
+    const firstWorkflow = workflows.nodes?.[0];
+    if (firstWorkflow?.id) {
+      this.setWorkflow(firstWorkflow.id);
+    }
     this.setStatus('ready', WORKFLOWS_LOADED);
   };
   #subscribeToState() {
@@ -199,20 +191,14 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
 
   //#region Workflow execution
   async runWorkflow(): Promise<void> {
-    const {
-      INPUTS_COLLECTED,
-      INPUTS_FAILED,
-      WORKFLOW_COMPLETED,
-      WORKFLOW_DISPATCHING,
-      WORKFLOW_FAILED,
-      WORKFLOW_FAILED_UNEXPECTED,
-    } = DEBUG_MESSAGES;
+    const { INPUTS_COLLECTED, WORKFLOW_COMPLETED, WORKFLOW_DISPATCHING, WORKFLOW_NOT_SELECTED } =
+      DEBUG_MESSAGES;
     const { SUBMITTING_WORKFLOW } = STATUS_MESSAGES;
 
     const state = this.#STORE.getState();
-    const workflowId = state.current.id;
-    if (!workflowId) {
-      this.setStatus('error', 'No workflow selected.');
+    const id = state.current.id;
+    if (!id) {
+      this.setStatus('error', WORKFLOW_NOT_SELECTED);
       return;
     }
 
@@ -222,7 +208,7 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
     try {
       inputs = await this.#collectInputs();
       debugLog(INPUTS_COLLECTED, 'informational', {
-        workflowId,
+        id,
         inputKeys: Object.keys(inputs),
       });
     } catch (error) {
@@ -231,16 +217,15 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
           ? error.payload?.detail || error.message
           : (error as Error)?.message || 'Failed to collect inputs.';
       this.setStatus('error', `Failed to collect inputs: ${detail}`);
-      debugLog(INPUTS_FAILED, 'error', { workflowId, detail });
       return;
     }
 
     try {
       debugLog(WORKFLOW_DISPATCHING, 'informational', {
-        workflowId,
+        id,
         inputKeys: Object.keys(inputs),
       });
-      const { status, message, payload } = await runWorkflowRequest(workflowId, inputs);
+      const { status, message, payload } = await runWorkflowRequest(id, inputs);
 
       const runState = this.#STORE.getState();
       runState.mutate.runResult(
@@ -251,56 +236,49 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
 
       const resultCategory = status === 'error' ? 'error' : 'success';
       debugLog(WORKFLOW_COMPLETED, resultCategory, {
-        workflowId,
+        id,
         wfStatus: status,
         outputs: Object.keys(payload.history?.outputs ?? {}),
       });
     } catch (error) {
       if (error instanceof WorkflowApiError) {
-        this.setStatus('error', error.payload?.detail || error.message);
-        debugLog(WORKFLOW_FAILED, 'error', {
-          workflowId,
-          detail: error.payload?.detail || error.message,
-          input: error.payload?.error?.input,
-        });
         const inputName = error.payload?.error?.input;
         if (inputName) {
           this.#SECTIONS.workflow.setCellStatus(state, inputName, 'error');
         }
+        this.setStatus('error', error.payload?.detail || error.message);
       } else {
         this.setStatus('error', 'Unexpected error while running the workflow.');
-        debugLog(WORKFLOW_FAILED_UNEXPECTED, 'error', {
-          workflowId,
-          message: (error as Error)?.message ?? null,
-        });
       }
     }
   }
   //#endregion
 
+  //#region Getters
+  isDebugEnabled(): boolean {
+    return this.#STORE.getState().isDebug;
+  }
+  //#endregion
+
   //#region State mutators
   setStatus(status: WorkflowStatus, message?: string): void {
-    const { STATUS_UPDATED } = DEBUG_MESSAGES;
+    const { mutate } = this.#STORE.getState();
 
-    const state = this.#STORE.getState();
-    state.mutate.status(status, message);
-    const category =
-      status === 'error' ? 'error' : status === 'ready' ? 'success' : 'informational';
-    debugLog(STATUS_UPDATED, category, {
-      status,
-      message: message ?? null,
-    });
+    const resolved = message ?? DEFAULT_STATUS_MESSAGES[status];
+    mutate.status(status, resolved);
   }
   setWorkflow(id: string): void {
-    const { WORKFLOW_SELECTED } = DEBUG_MESSAGES;
-
     const state = this.#STORE.getState();
+
     if (state.current.id === id) {
       return;
     }
 
     state.mutate.workflow(id);
-    debugLog(WORKFLOW_SELECTED, 'informational', { id });
+  }
+  toggleDebug(): void {
+    const current = this.#STORE.getState().isDebug;
+    this.#STORE.getState().mutate.isDebug(!current);
   }
   //#endregion
 }

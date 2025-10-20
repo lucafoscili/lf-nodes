@@ -18,29 +18,26 @@ export interface WorkflowAPIResponse {
   payload: WorkflowAPIRunPayload;
   status: WorkflowStatus;
 }
-export type WorkflowAPIResult = {
-  [K in WorkflowAPIResultKey]?: K extends '_description'
-    ? string | string[]
-    : K extends 'code'
-    ? Partial<LfCodeInterface> & {
-        _description?: string | string[];
-      }
-    : K extends 'masonry'
-    ? Partial<LfMasonryPropsInterface> & {
-        _description?: string | string[];
-        _slotmap?: Record<string, string>;
-      }
-    : never;
-};
-export type WorkflowAPIResultKey = '_description' | 'code' | 'masonry';
-export interface WorkflowAPIUI {
-  _description?: string | string[];
-  lf_code?: LFCodeItem[];
-  lf_masonry?: LFMasonryItem[];
-}
 //#endregion
 
 //#region Run
+export interface WorkflowNodeOutputProps {
+  _slotmap?: Record<string, string>;
+  [key: string]: unknown;
+}
+export interface WorkflowNodeOutputItem {
+  id?: string;
+  nodeId?: string;
+  shape: string;
+  title?: string;
+  props?: WorkflowNodeOutputProps;
+}
+export interface WorkflowNodeOutputPayload {
+  lf_output?: WorkflowNodeOutputItem[] | WorkflowNodeOutputItem;
+  [key: string]: unknown;
+}
+export type WorkflowNodeOutputs = Record<string, WorkflowNodeOutputPayload>;
+
 export interface WorkflowAPIRunPayload {
   detail: string;
   error?: {
@@ -48,7 +45,7 @@ export interface WorkflowAPIRunPayload {
     message: string;
   };
   history: {
-    outputs?: WorkflowAPIUI;
+    outputs?: WorkflowNodeOutputs;
   };
 }
 export interface WorkflowAPIRunResult extends WorkflowAPIResponse {

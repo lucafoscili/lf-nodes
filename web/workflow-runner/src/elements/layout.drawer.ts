@@ -10,8 +10,13 @@ const ROOT_CLASS = 'drawer-section';
 
 //#region Helpers
 const _createDataset = (workflows: LfDataDataset) => {
+  const clone: LfDataDataset = JSON.parse(JSON.stringify(workflows));
+  clone.nodes?.forEach((child) => {
+    child.children = undefined;
+  });
+
   const dataset: LfDataDataset = {
-    nodes: [{ children: workflows.nodes, id: 'workflows', value: 'Workflows' }],
+    nodes: [{ children: clone.nodes, id: 'workflows', value: 'Workflows' }],
   };
   return dataset;
 };
@@ -35,12 +40,14 @@ const _tree = (state: WorkflowState): HTMLLfTreeElement => {
 
     switch (eventType) {
       case 'click':
-        const isLeaf = !node.children || node.children.length === 0;
-        if (!isLeaf) {
+        if (!manager) {
           return;
         }
 
-        manager.setWorkflow(node.id);
+        const isLeaf = !node.children || node.children.length === 0;
+        if (!isLeaf) {
+          manager.setWorkflow(node.id);
+        }
         break;
     }
   });

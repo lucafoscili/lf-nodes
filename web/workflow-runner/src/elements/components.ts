@@ -11,7 +11,7 @@ import {
   LfUploadInterface,
 } from '@lf-widgets/foundations/dist';
 import { getLfFramework } from '@lf-widgets/framework';
-import { WorkflowAPIResult } from '../types/api';
+import { WorkflowNodeOutputItem } from '../types/api';
 import { normalize_description } from '../utils/common';
 
 //#region Helpers
@@ -173,22 +173,19 @@ export const createInputCell = (cell: LfDataCell) => {
 //#endregion
 
 //#region Outputs
-export const createOutputField = (key: string, result: WorkflowAPIResult) => {
-  const isArrayOfComps =
-    Array.isArray(result) && result.every((item) => typeof item === 'object') && result.length > 1;
-  if (isArrayOfComps) {
-    const wrapper = document.createElement('div');
-    wrapper.classList.add(`${key}-output-wrapper`);
-
-    for (const item of result) {
-      wrapper.appendChild(_chooseComponentForResult(key, item));
-    }
-
-    return wrapper;
+export const createOutputComponent = (descriptor: WorkflowNodeOutputItem) => {
+  if (!descriptor) {
+    const fallback = document.createElement('pre');
+    fallback.textContent = 'No output available.';
+    return fallback;
   }
 
-  const r = Array.isArray(result) ? result[0] : result;
+  const key = descriptor.shape === 'masonry' ? 'masonry' : 'code';
+  const props = (descriptor.props || {}) as Partial<LfComponentPropsFor<LfComponentName>> & {
+    _description?: string | string[];
+    _slotmap?: Record<string, string>;
+  };
 
-  return _chooseComponentForResult(key, r);
+  return _chooseComponentForResult(key, props);
 };
 //#endregion

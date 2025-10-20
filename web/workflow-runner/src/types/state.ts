@@ -1,5 +1,5 @@
 import { LfDataDataset } from '@lf-widgets/foundations/dist';
-import { WorkflowAPIUI } from './api';
+import { WorkflowNodeOutputs } from './api';
 import { WorkflowManager } from './manager';
 import { WorkflowCells, WorkflowStatus } from './section';
 
@@ -17,12 +17,12 @@ export interface WorkflowState {
   isDebug: boolean;
   manager: WorkflowManager | null;
   mutate: WorkflowStateMutators;
-  results: WorkflowAPIUI | null;
+  results: WorkflowNodeOutputs | null;
   ui: WorkflowStateUI;
   workflows: LfDataDataset;
 }
 export interface WorkflowStateCurrent {
-  id: string;
+  id: string | null;
   message: string | null;
   status: WorkflowStatus;
 }
@@ -30,7 +30,7 @@ export type WorkflowStateListener = (state: WorkflowState) => void;
 export interface WorkflowStateMutators {
   isDebug: (isDebug: boolean) => void;
   manager: (manager: WorkflowManager | null) => void;
-  runResult: (status: WorkflowStatus, message: string, results: any) => void;
+  runResult: (status: WorkflowStatus, message: string, results: WorkflowNodeOutputs | null) => void;
   status: (status: WorkflowStatus, message?: string) => void;
   ui: (updater: (ui: WorkflowStateUI) => void) => void;
   workflow: (id: string) => void;
