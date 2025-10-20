@@ -7,6 +7,7 @@ export const initState = (appContainer: HTMLDivElement): WorkflowState => ({
   ui: {
     layout: {
       _root: appContainer,
+      actionButton: { _root: null },
       drawer: {
         _root: null,
         tree: null,

@@ -48,7 +48,18 @@ const createRunButton = (state: WorkflowState) => {
 
   const button = createComponent.button(props);
   button.className = `${ROOT_CLASS}__run`;
-  button.onclick = () => state.manager?.runWorkflow();
+  button.addEventListener('lf-button-event', (e) => {
+    const { eventType } = e.detail;
+
+    switch (eventType) {
+      case 'click':
+        state.manager?.runWorkflow();
+        break;
+      default:
+        return;
+    }
+  });
+
   return button;
 };
 const createStatusWrapper = (tone: LfThemeUIState = 'info') => {

@@ -27,10 +27,6 @@ body,
     grid-template-columns: 300px auto;
     grid-template-rows: auto 1fr;
   }
-
-  & > * {
-    overflow: auto;
-  }
 }
 
 body {
@@ -41,13 +37,22 @@ body {
   margin: 0;
 }
 
+.action-button-section {
+  bottom: 24px;
+  grid-area: action-button;
+  position: fixed;
+  right: 24px;
+}
+
 .drawer-section {
   grid-area: drawer;
+  overflow: auto;
 }
 
 .header-section {
   & {
     grid-area: header;
+    overflow: auto;
   }
 
   &__container {
@@ -73,12 +78,14 @@ body {
   border-radius: var(--lf-ui-border-radius);
   box-shadow: var(--lf-ui-box-shadow-modal);
   grid-area: main;
+  overflow: auto;
 }
 
 .workflow-section {
   & {
     margin: 0 auto;
     max-width: 600px;
+    overflow: auto;
   }
 
   &__field {

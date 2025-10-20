@@ -1,6 +1,7 @@
 import { getLfFramework } from '@lf-widgets/framework';
 import { buildAssetsUrl, DEFAULT_THEME } from '../config';
 import { createDevPanel } from '../elements/dev.panel';
+import { createActionButtonSection } from '../elements/layout.action-button';
 import { createDrawerSection } from '../elements/layout.drawer';
 import { createHeaderSection } from '../elements/layout.header';
 import { createMainSection } from '../elements/layout.main';
@@ -23,6 +24,7 @@ export class LfWorkflowRunnerManager implements WorkflowRunnerManager {
   #framework = getLfFramework();
   #store: WorkflowRunnerStore;
   #sections: {
+    actionButton: ReturnType<typeof createActionButtonSection>;
     drawer: ReturnType<typeof createDrawerSection>;
     header: ReturnType<typeof createHeaderSection>;
     main: ReturnType<typeof createMainSection>;
@@ -38,6 +40,7 @@ export class LfWorkflowRunnerManager implements WorkflowRunnerManager {
 
     this.#store = createWorkflowRunnerStore(initState(container));
     this.#sections = {
+      actionButton: createActionButtonSection(),
       drawer: createDrawerSection(),
       header: createHeaderSection(),
       main: createMainSection(),
@@ -134,6 +137,7 @@ export class LfWorkflowRunnerManager implements WorkflowRunnerManager {
       root.removeChild(root.firstChild);
     }
 
+    this.#sections.actionButton.mount(state);
     this.#sections.drawer.mount(state);
     this.#sections.header.mount(state);
     this.#sections.main.mount(state);
@@ -157,6 +161,7 @@ export class LfWorkflowRunnerManager implements WorkflowRunnerManager {
   };
   #subscribeToState() {
     this.#store.subscribe((state) => {
+      this.#sections.actionButton.render(state);
       this.#sections.drawer.render(state);
       this.#sections.header.render(state);
       this.#sections.main.render(state);

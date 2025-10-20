@@ -22,6 +22,7 @@ export interface WorkflowCurrent {
 export interface WorkflowUI {
   layout: {
     _root: HTMLDivElement | null;
+    actionButton: { _root: HTMLLfButtonElement | null };
     drawer: { _root: HTMLLfDrawerElement | null; tree: HTMLLfTreeElement | null };
     header: {
       _root: HTMLLfHeaderElement | null;
