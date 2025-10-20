@@ -1,1 +1,1531 @@
-{"id":"43add95e-a758-4307-8612-cd0278c7a46f","revision":0,"last_node_id":77,"last_link_id":129,"nodes":[{"id":40,"type":"LF_Integer","pos":[-508.11578369140625,-4171.4619140625],"size":[404.91754150390625,365.7881164550781],"flags":{},"order":0,"mode":0,"inputs":[{"localized_name":"integer","name":"integer","type":"INT","widget":{"name":"integer"},"link":null},{"localized_name":"enable_history","name":"enable_history","type":"BOOLEAN","widget":{"name":"enable_history"},"link":null},{"localized_name":"randomize","name":"randomize","type":"BOOLEAN","widget":{"name":"randomize"},"link":null},{"localized_name":"seed","name":"seed","type":"INT","widget":{"name":"seed"},"link":null},{"localized_name":"ui_widget","name":"ui_widget","shape":7,"type":"LF_HISTORY","widget":{"name":"ui_widget"},"link":null}],"outputs":[{"localized_name":"int","name":"int","type":"INT","links":[68]},{"localized_name":"int_list","name":"int_list","shape":6,"type":"INT","links":null}],"title":"N U M   C O L O R S","properties":{"cnr_id":"lf-nodes","ver":"33bbd352934942538da0db6e8b19717c0269b262","Node name for S&R":"LF_Integer"},"widgets_values":[2,true,false,656113249487589,"randomize",{"nodes":[{"icon":"history","id":"2","description":"Execution date: 20/10/2025, 09:06:00.","value":"2"}]}],"color":"#232","bgcolor":"#353","shape":1},{"id":42,"type":"LF_WallOfText","pos":[910,-2880],"size":[460.00665283203125,1116.1927490234375],"flags":{},"order":17,"mode":0,"inputs":[{"localized_name":"text_3","name":"text_3","shape":7,"type":"STRING","link":null},{"localized_name":"text_4","name":"text_4","shape":7,"type":"STRING","link":null},{"localized_name":"text_5","name":"text_5","shape":7,"type":"STRING","link":null},{"localized_name":"text_6","name":"text_6","shape":7,"type":"STRING","link":null},{"localized_name":"text_7","name":"text_7","shape":7,"type":"STRING","link":null},{"localized_name":"text_8","name":"text_8","shape":7,"type":"STRING","link":null},{"localized_name":"text_9","name":"text_9","shape":7,"type":"STRING","link":null},{"localized_name":"text_10","name":"text_10","shape":7,"type":"STRING","link":null},{"localized_name":"separator","name":"separator","type":"STRING","widget":{"name":"separator"},"link":null},{"localized_name":"text_1","name":"text_1","type":"STRING","widget":{"name":"text_1"},"link":null},{"localized_name":"text_2","name":"text_2","type":"STRING","widget":{"name":"text_2"},"link":75},{"localized_name":"shuffle_inputs","name":"shuffle_inputs","shape":7,"type":"BOOLEAN","widget":{"name":"shuffle_inputs"},"link":null},{"localized_name":"seed","name":"seed","shape":7,"type":"INT","widget":{"name":"seed"},"link":null},{"localized_name":"ui_widget","name":"ui_widget","shape":7,"type":"LF_CODE","widget":{"name":"ui_widget"},"link":null}],"outputs":[{"localized_name":"string","name":"string","type":"STRING","links":[72]},{"localized_name":"string_list","name":"string_list","shape":6,"type":"STRING","links":null}],"title":"A D D   H E A D","properties":{"cnr_id":"lf-nodes","ver":"33bbd352934942538da0db6e8b19717c0269b262","Node name for S&R":"LF_WallOfText"},"widgets_values":["","<?xml version=\"1.0\" encoding=\"UTF-8\"?> <!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">","",false,724350640804785,"randomize",""],"color":"#222","bgcolor":"#000","shape":1},{"id":29,"type":"LF_WriteJSON","pos":[-520,-3710],"size":[419.2137145996094,692.2568969726562],"flags":{},"order":1,"mode":0,"inputs":[{"localized_name":"ui_widget","name":"ui_widget","type":"LF_TEXTAREA","widget":{"name":"ui_widget"},"link":null}],"outputs":[{"localized_name":"json","name":"json","type":"JSON","links":[65]}],"title":"O P T I O N A L   C U S T O M   C O N F I G","properties":{"cnr_id":"lf-nodes","ver":"cda0bdd63a70a7bc3bd4e6beb47988d8b26d2bb5","Node name for S&R":"LF_WriteJSON"},"widgets_values":["{\n  \"num_colors\": 4,\n  \"simplify_tol\": 1e-9,\n  \"vector_mode\": \"fill\",\n  \"stroke_width\": 0,\n  \"upsample_scale\": 16,\n  \"mask_blur\": 1,\n  \"mask_offset\": 0,\n  \"mask_close_iters\": 2,\n  \"mask_open_iters\": 0,\n  \"smooth_passes\": 5,\n  \"min_area_ratio\": 2e-8,\n  \"pre_blur_sigma\": 0.15,\n  \"bilateral_d\": 5,\n  \"bilateral_sigma_color\": 50,\n  \"bilateral_sigma_space\": 20,\n  \"collinear_angle_tol\": 3,\n  \"engine\": \"vtracer\",\n  \"vtracer_mode\": \"spline\",\n  \"vtracer_hierarchical\": \"stacked\",\n  \"vtracer_filter_speckle\": 10,\n  \"vtracer_color_precision\": 200,\n  \"vtracer_layer_difference\": 2,\n  \"vtracer_corner_threshold\": 40,\n  \"vtracer_length_threshold\": 0.1,\n  \"vtracer_max_iterations\": 20000,\n  \"vtracer_splice_threshold\": 10,\n  \"vtracer_path_precision\": 10\n}"],"color":"#222","bgcolor":"#000","shape":1},{"id":44,"type":"LF_StringReplace","pos":[1700,-2900],"size":[285,420],"flags":{},"order":21,"mode":0,"inputs":[{"localized_name":"input_text","name":"input_text","type":"STRING","widget":{"name":"input_text"},"link":73},{"localized_name":"target","name":"target","type":"STRING","widget":{"name":"target"},"link":null},{"localized_name":"replacement","name":"replacement","type":"STRING","widget":{"name":"replacement"},"link":null},{"localized_name":"ui_widget","name":"ui_widget","shape":7,"type":"LF_CODE","widget":{"name":"ui_widget"},"link":null}],"outputs":[{"localized_name":"string","name":"string","type":"STRING","links":[74]},{"localized_name":"string_list","name":"string_list","shape":6,"type":"STRING","links":null}],"title":"R E M O V E   W I D T H","properties":{"cnr_id":"lf-nodes","ver":"33bbd352934942538da0db6e8b19717c0269b262","Node name for S&R":"LF_StringReplace"},"widgets_values":["","width=\"100%\"","",""],"color":"#222","bgcolor":"#000","shape":1},{"id":20,"type":"LF_SaveSVG","pos":[2345,-4090],"size":[1191.9913330078125,1340.0654296875],"flags":{},"order":22,"mode":0,"inputs":[{"localized_name":"svg","name":"svg","type":"STRING","widget":{"name":"svg"},"link":74},{"localized_name":"filename_prefix","name":"filename_prefix","type":"STRING","widget":{"name":"filename_prefix"},"link":76},{"localized_name":"add_timestamp","name":"add_timestamp","type":"BOOLEAN","widget":{"name":"add_timestamp"},"link":null},{"localized_name":"add_counter","name":"add_counter","type":"BOOLEAN","widget":{"name":"add_counter"},"link":null},{"localized_name":"ui_widget","name":"ui_widget","shape":7,"type":"LF_MASONRY","widget":{"name":"ui_widget"},"link":null}],"outputs":[{"localized_name":"svg","name":"svg","type":"STRING","links":null}],"title":"S A V E   S V G","properties":{"cnr_id":"lf-nodes","ver":"06c7bef1848001c0cea1a656cfff104c61991e46","Node name for S&R":"LF_SaveSVG"},"widgets_values":["","",false,false,{"columns":3,"dataset":{"nodes":[{"cells":{"lfSlot":{"shape":"slot","value":"icon.svg"}},"id":"0","value":"0"}]},"index":null,"name":"","view":"main"}],"color":"#222","bgcolor":"#000","shape":1},{"id":62,"type":"LF_ControlPanel","pos":[-1415,-4270],"size":[825,1255],"flags":{},"order":2,"mode":0,"inputs":[{"localized_name":"ui_widget","name":"ui_widget","shape":7,"type":"LF_CONTROL_PANEL","widget":{"name":"ui_widget"},"link":null}],"outputs":[],"properties":{"cnr_id":"lf-nodes","ver":"16d0ff0cd7a7fd416625bc50a98ad2433b5e3cfc","Node name for S&R":"LF_ControlPanel"},"widgets_values":[{"backup":true,"backupRetention":14,"debug":true,"systemTimeout":1,"themes":"pastel"}],"color":"#222","bgcolor":"#000","shape":1},{"id":38,"type":"LF_SetValueInJSON","pos":[10,-3710],"size":[345,340],"flags":{},"order":9,"mode":0,"inputs":[{"localized_name":"json_input","name":"json_input","type":"JSON","link":65},{"localized_name":"value","name":"value","type":"*","link":68},{"localized_name":"key","name":"key","type":"STRING","widget":{"name":"key"},"link":null},{"localized_name":"ui_widget","name":"ui_widget","shape":7,"type":"LF_CODE","widget":{"name":"ui_widget"},"link":null}],"outputs":[{"localized_name":"json","name":"json","type":"JSON","links":[66]},{"localized_name":"json_list","name":"json_list","type":"JSON","links":null}],"title":"S E T  N U M   C O L O R S","properties":{"cnr_id":"lf-nodes","ver":"33bbd352934942538da0db6e8b19717c0269b262","Node name for S&R":"LF_SetValueInJSON"},"widgets_values":["num_colors","## Updated key\nnum_colors\n\n## Content:\n\n[0]: 2"],"color":"#222","bgcolor":"#000","shape":1},{"id":43,"type":"LF_StringReplace","pos":[1410,-2900],"size":[280,420],"flags":{},"order":19,"mode":0,"inputs":[{"localized_name":"input_text","name":"input_text","type":"STRING","widget":{"name":"input_text"},"link":72},{"localized_name":"target","name":"target","type":"STRING","widget":{"name":"target"},"link":null},{"localized_name":"replacement","name":"replacement","type":"STRING","widget":{"name":"replacement"},"link":null},{"localized_name":"ui_widget","name":"ui_widget","shape":7,"type":"LF_CODE","widget":{"name":"ui_widget"},"link":null}],"outputs":[{"localized_name":"string","name":"string","type":"STRING","links":[73]},{"localized_name":"string_list","name":"string_list","shape":6,"type":"STRING","links":null}],"title":"R E M O V E   H E I G H T","properties":{"cnr_id":"lf-nodes","ver":"33bbd352934942538da0db6e8b19717c0269b262","Node name for S&R":"LF_StringReplace"},"widgets_values":["","height=\"100%\"","",""],"color":"#222","bgcolor":"#000","shape":1},{"id":34,"type":"LF_EmptyImage","pos":[-835,-2250],"size":[434.30859375,535.11962890625],"flags":{},"order":3,"mode":0,"inputs":[{"localized_name":"width","name":"width","type":"INT","widget":{"name":"width"},"link":null},{"localized_name":"height","name":"height","type":"INT","widget":{"name":"height"},"link":null},{"localized_name":"color","name":"color","type":"STRING","widget":{"name":"color"},"link":null},{"localized_name":"ui_widget","name":"ui_widget","shape":7,"type":"LF_MASONRY","widget":{"name":"ui_widget"},"link":null}],"outputs":[{"localized_name":"image","name":"image","type":"IMAGE","links":[]}],"title":"B A C K G R O U N D","properties":{"cnr_id":"lf-nodes","ver":"33bbd352934942538da0db6e8b19717c0269b262","Node name for S&R":"LF_EmptyImage"},"widgets_values":[512,512,"FFFFFF",{"columns":3,"dataset":{"nodes":[{"cells":{"lfImage":{"htmlProps":{"id":"emptyimage_2.PNG","title":"emptyimage_2.PNG"},"shape":"image","lfValue":"/view?filename=emptyimage_2.PNG&type=temp&subfolder=&nonce=9hypXC68","value":"/view?filename=emptyimage_2.PNG&type=temp&subfolder=&nonce=9hypXC68"}},"id":"1","value":"1"}]},"index":null,"name":"","view":"main"}],"color":"#222","bgcolor":"#000","shape":1},{"id":75,"type":"MaskToImage","pos":[-1345,-2280],"size":[184.62362670898438,26],"flags":{},"order":13,"mode":0,"inputs":[{"localized_name":"mask","name":"mask","type":"MASK","link":121}],"outputs":[{"localized_name":"IMAGE","name":"IMAGE","type":"IMAGE","links":[124]}],"title":"R A S T E R   M A S K","properties":{"cnr_id":"comfy-core","ver":"0.3.65","Node name for S&R":"MaskToImage"},"widgets_values":[],"color":"#332922","bgcolor":"#593930"},{"id":16,"type":"LoadImage","pos":[-2245,-2440],"size":[435.0561828613281,549.1685791015625],"flags":{},"order":4,"mode":0,"inputs":[{"localized_name":"image","name":"image","type":"COMBO","widget":{"name":"image"},"link":null},{"localized_name":"upload","name":"upload","type":"IMAGEUPLOAD","widget":{"name":"upload"},"link":null}],"outputs":[{"localized_name":"IMAGE","name":"IMAGE","type":"IMAGE","links":[22]},{"localized_name":"MASK","name":"MASK","type":"MASK","links":[118]}],"title":"I N P U T","properties":{"cnr_id":"comfy-core","ver":"0.3.65","Node name for S&R":"LoadImage"},"widgets_values":["Google.png","image"],"color":"#232","bgcolor":"#353"},{"id":52,"type":"LF_Desaturation","pos":[-10,-2780],"size":[365,735],"flags":{},"order":12,"mode":0,"inputs":[{"localized_name":"image","name":"image","type":"IMAGE","link":125},{"localized_name":"global_level","name":"global_level","type":"FLOAT","widget":{"name":"global_level"},"link":80},{"localized_name":"r_channel","name":"r_channel","type":"FLOAT","widget":{"name":"r_channel"},"link":null},{"localized_name":"g_channel","name":"g_channel","type":"FLOAT","widget":{"name":"g_channel"},"link":null},{"localized_name":"b_channel","name":"b_channel","type":"FLOAT","widget":{"name":"b_channel"},"link":null},{"localized_name":"ui_widget","name":"ui_widget","shape":7,"type":"LF_COMPARE","widget":{"name":"ui_widget"},"link":null}],"outputs":[{"localized_name":"image","name":"image","type":"IMAGE","links":[84]},{"localized_name":"image_list","name":"image_list","shape":6,"type":"IMAGE","links":null}],"properties":{"cnr_id":"lf-nodes","ver":"8b4a18a2dec69916835402c4d31020882e9fa81e","Node name for S&R":"LF_Desaturation"},"widgets_values":[0.5,1,1,1,{"nodes":[{"cells":{"lfImage":{"shape":"image","lfValue":"/view?filename=desaturation_s_1.PNG&type=temp&subfolder=&nonce=vUFlpwLa","value":""},"lfImage_after":{"shape":"image","lfValue":"/view?filename=desaturation_t_1.PNG&type=temp&subfolder=&nonce=sX6o3Vp2","value":""}},"id":"image_1","value":"Comparison 1"}]}],"color":"#222","bgcolor":"#000"},{"id":76,"type":"LF_ViewImages","pos":[-1115,-2180],"size":[245,270],"flags":{},"order":15,"mode":0,"inputs":[{"localized_name":"image","name":"image","type":"IMAGE","link":124},{"localized_name":"ui_widget","name":"ui_widget","shape":7,"type":"LF_MASONRY","widget":{"name":"ui_widget"},"link":null}],"outputs":[{"localized_name":"image","name":"image","type":"IMAGE","links":null},{"localized_name":"image_list","name":"image_list","shape":6,"type":"IMAGE","links":null}],"title":"P R E V I E W   M A S K","properties":{"cnr_id":"lf-nodes","ver":"5dcbd98c230752a160aca063391b05ddad00ede7","Node name for S&R":"LF_ViewImages"},"widgets_values":[{"columns":3,"dataset":{"nodes":[{"cells":{"lfImage":{"htmlProps":{"id":"view_1.PNG","title":"view_1.PNG"},"shape":"image","lfValue":"/view?filename=view_1.PNG&type=temp&subfolder=&nonce=nCZt7JQu","value":"/view?filename=view_1.PNG&type=temp&subfolder=&nonce=nCZt7JQu"}},"id":"1","value":"1"}]},"index":null,"name":"","view":"main"}],"color":"#332922","bgcolor":"#593930"},{"id":61,"type":"LF_SaveImageForCivitAI","pos":[1120,-3820],"size":[640,820],"flags":{},"order":20,"mode":0,"inputs":[{"localized_name":"image","name":"image","type":"IMAGE","link":102},{"localized_name":"civitai_metadata","name":"civitai_metadata","shape":7,"type":"STRING","link":null},{"localized_name":"filename_prefix","name":"filename_prefix","type":"STRING","widget":{"name":"filename_prefix"},"link":101},{"localized_name":"add_timestamp","name":"add_timestamp","type":"BOOLEAN","widget":{"name":"add_timestamp"},"link":null},{"localized_name":"embed_workflow","name":"embed_workflow","type":"BOOLEAN","widget":{"name":"embed_workflow"},"link":null},{"localized_name":"extension","name":"extension","type":"COMBO","widget":{"name":"extension"},"link":null},{"localized_name":"quality","name":"quality","type":"INT","widget":{"name":"quality"},"link":null},{"localized_name":"ui_widget","name":"ui_widget","shape":7,"type":"LF_MASONRY","widget":{"name":"ui_widget"},"link":null}],"outputs":[{"localized_name":"file_names","name":"file_names","shape":6,"type":"STRING","links":null},{"localized_name":"civitai_metadata","name":"civitai_metadata","type":"STRING","links":null}],"title":"S A V E   P N G","properties":{"cnr_id":"lf-nodes","ver":"8b4a18a2dec69916835402c4d31020882e9fa81e","Node name for S&R":"LF_SaveImageForCivitAI"},"widgets_values":["",false,true,"png",100,{"columns":3,"dataset":{"nodes":[{"cells":{"lfImage":{"htmlProps":{"id":"icon_68.png","title":"icon_68.png"},"shape":"image","lfValue":"/view?filename=icon_68.png&type=output&subfolder=&nonce=YIGQ8gIG","value":"/view?filename=icon_68.png&type=output&subfolder=&nonce=YIGQ8gIG"}},"id":"1","value":"1"}]},"index":null,"name":"","view":"main"}],"color":"#222","bgcolor":"#000","shape":1},{"id":51,"type":"LF_SwitchFloat","pos":[-365,-2650],"size":[270,340],"flags":{},"order":5,"mode":0,"inputs":[{"localized_name":"on_true","name":"on_true","type":"FLOAT","widget":{"name":"on_true"},"link":null},{"localized_name":"on_false","name":"on_false","type":"FLOAT","widget":{"name":"on_false"},"link":null},{"localized_name":"boolean","name":"boolean","type":"BOOLEAN","widget":{"name":"boolean"},"link":null},{"localized_name":"ui_widget","name":"ui_widget","shape":7,"type":"LF_PROGRESSBAR","widget":{"name":"ui_widget"},"link":null}],"outputs":[{"localized_name":"float","name":"float","type":"FLOAT","links":[80]},{"localized_name":"float_list","name":"float_list","shape":6,"type":"FLOAT","links":null}],"title":"D E S A T U R A T I O N","properties":{"cnr_id":"lf-nodes","ver":"8b4a18a2dec69916835402c4d31020882e9fa81e","Node name for S&R":"LF_SwitchFloat"},"widgets_values":[1,0,false,{"bool":false,"roll":100}],"color":"#232","bgcolor":"#353","shape":1},{"id":22,"type":"LF_ResizeImageByEdge","pos":[-910,-2780],"size":[437.1495056152344,327.1337585449219],"flags":{},"order":10,"mode":0,"inputs":[{"localized_name":"image","name":"image","type":"IMAGE","link":22},{"localized_name":"longest_edge","name":"longest_edge","type":"BOOLEAN","widget":{"name":"longest_edge"},"link":null},{"localized_name":"new_size","name":"new_size","type":"INT","widget":{"name":"new_size"},"link":null},{"localized_name":"resize_method","name":"resize_method","type":"COMBO","widget":{"name":"resize_method"},"link":null},{"localized_name":"ui_widget","name":"ui_widget","shape":7,"type":"LF_TREE","widget":{"name":"ui_widget"},"link":null}],"outputs":[{"localized_name":"image","name":"image","type":"IMAGE","links":[125]},{"localized_name":"image_list","name":"image_list","shape":6,"type":"IMAGE","links":null},{"localized_name":"count","name":"count","type":"INT","links":null}],"title":"T O   5 1 2 P X","properties":{"cnr_id":"lf-nodes","ver":"0b09bbdedf7212ce8c360a9411dd7c8766d429a9","Node name for S&R":"LF_ResizeImageByEdge"},"widgets_values":[true,512,"bicubic",{"nodes":[{"children":[{"id":"0","value":"[0] From 432x1192 to 186x512"}],"icon":"info-hexagon","id":"Resized 1 image","value":"Resized 1 image"}]}],"color":"#222","bgcolor":"#000","shape":1},{"id":70,"type":"SolidMask","pos":[-2125,-2950],"size":[320,106],"flags":{},"order":6,"mode":0,"inputs":[{"localized_name":"value","name":"value","type":"FLOAT","widget":{"name":"value"},"link":null},{"localized_name":"width","name":"width","type":"INT","widget":{"name":"width"},"link":null},{"localized_name":"height","name":"height","type":"INT","widget":{"name":"height"},"link":null}],"outputs":[{"localized_name":"MASK","name":"MASK","type":"MASK","links":[117]}],"title":"S O L I D   M A S K","properties":{"cnr_id":"comfy-core","ver":"0.3.65","Node name for S&R":"SolidMask"},"widgets_values":[1,512,512],"color":"#332922","bgcolor":"#593930"},{"id":72,"type":"LF_Boolean","pos":[-2155,-3535],"size":[345,410],"flags":{},"order":7,"mode":0,"inputs":[{"localized_name":"boolean","name":"boolean","type":"BOOLEAN","widget":{"name":"boolean"},"link":null},{"localized_name":"enable_history","name":"enable_history","type":"BOOLEAN","widget":{"name":"enable_history"},"link":null},{"localized_name":"randomize","name":"randomize","type":"BOOLEAN","widget":{"name":"randomize"},"link":null},{"localized_name":"seed","name":"seed","type":"INT","widget":{"name":"seed"},"link":null},{"localized_name":"ui_widget","name":"ui_widget","shape":7,"type":"LF_HISTORY","widget":{"name":"ui_widget"},"link":null}],"outputs":[{"localized_name":"boolean","name":"boolean","type":"BOOLEAN","links":[116]},{"localized_name":"boolean_list","name":"boolean_list","shape":6,"type":"BOOLEAN","links":null}],"title":"P R E S E R V E   A L P H A","properties":{"cnr_id":"lf-nodes","ver":"5dcbd98c230752a160aca063391b05ddad00ede7","Node name for S&R":"LF_Boolean"},"widgets_values":[true,false,false,844592157863327,"randomize",{"nodes":[]}],"color":"#232","bgcolor":"#353","shape":1},{"id":30,"type":"LF_ImageToSVG","pos":[400,-2970],"size":[408.798583984375,1060.113037109375],"flags":{},"order":16,"mode":0,"inputs":[{"localized_name":"image","name":"image","type":"IMAGE","link":84},{"localized_name":"mask","name":"mask","shape":7,"type":"MASK","link":127},{"localized_name":"advanced_config","name":"advanced_config","shape":7,"type":"JSON","link":66},{"localized_name":"preset","name":"preset","type":"COMBO","widget":{"name":"preset"},"link":null},{"localized_name":"render_mode","name":"render_mode","shape":7,"type":"COMBO","widget":{"name":"render_mode"},"link":null},{"localized_name":"fill_color","name":"fill_color","shape":7,"type":"STRING","widget":{"name":"fill_color"},"link":null},{"localized_name":"stroke_color","name":"stroke_color","shape":7,"type":"STRING","widget":{"name":"stroke_color"},"link":null},{"localized_name":"background_color","name":"background_color","shape":7,"type":"STRING","widget":{"name":"background_color"},"link":null},{"localized_name":"stroke_width","name":"stroke_width","shape":7,"type":"FLOAT","widget":{"name":"stroke_width"},"link":null},{"localized_name":"size_mode","name":"size_mode","shape":7,"type":"COMBO","widget":{"name":"size_mode"},"link":null},{"localized_name":"viewbox","name":"viewbox","shape":7,"type":"STRING","widget":{"name":"viewbox"},"link":null},{"localized_name":"ui_widget","name":"ui_widget","shape":7,"type":"LF_COMPARE","widget":{"name":"ui_widget"},"link":null}],"outputs":[{"localized_name":"svg","name":"svg","type":"STRING","links":[75]},{"localized_name":"svg_list","name":"svg_list","shape":6,"type":"STRING","links":null},{"localized_name":"image","name":"image","type":"IMAGE","links":[91]},{"localized_name":"image_list","name":"image_list","shape":6,"type":"IMAGE","links":null},{"localized_name":"palette","name":"palette","type":"STRING","links":null},{"localized_name":"palette_list","name":"palette_list","shape":6,"type":"STRING","links":null}],"title":"S V G   C O N V E R S I O N","properties":{"cnr_id":"lf-nodes","ver":"7b99438ecfb202362f95dd3aa73d6380e4e50d69","Node name for S&R":"LF_ImageToSVG"},"widgets_values":["max_quality","preset","","","",2,"preset","0 0 24 24",{"nodes":[{"cells":{"lfImage":{"shape":"image","lfValue":"/view?filename=svg_s_1.PNG&type=temp&subfolder=&nonce=aoEhr8GB","value":""},"lfImage_after":{"shape":"image","lfValue":"/view?filename=svg_t_1.PNG&type=temp&subfolder=&nonce=5sLAJIFj","value":""}},"id":"image_1","value":"Comparison 1"}]}],"color":"#222","bgcolor":"#000","shape":1},{"id":56,"type":"JoinImageWithAlpha","pos":[870,-3150],"size":[200,46],"flags":{},"order":18,"mode":0,"inputs":[{"localized_name":"image","name":"image","type":"IMAGE","link":91},{"localized_name":"alpha","name":"alpha","type":"MASK","link":129}],"outputs":[{"localized_name":"IMAGE","name":"IMAGE","type":"IMAGE","links":[102]}],"title":"A P P L Y   M A S K","properties":{"cnr_id":"comfy-core","ver":"0.3.65","Node name for S&R":"JoinImageWithAlpha"},"widgets_values":[],"color":"#332922","bgcolor":"#593930"},{"id":71,"type":"LF_SwitchMask","pos":[-1695,-2950],"size":[320,390],"flags":{},"order":11,"mode":0,"inputs":[{"localized_name":"on_true","name":"on_true","type":"MASK","link":118},{"localized_name":"on_false","name":"on_false","type":"MASK","link":117},{"localized_name":"boolean","name":"boolean","type":"BOOLEAN","widget":{"name":"boolean"},"link":116},{"localized_name":"ui_widget","name":"ui_widget","shape":7,"type":"LF_PROGRESSBAR","widget":{"name":"ui_widget"},"link":null}],"outputs":[{"localized_name":"mask","name":"mask","type":"MASK","links":[121,126,129]},{"localized_name":"mask_list","name":"mask_list","shape":6,"type":"MASK","links":null}],"title":"S W I T C H   M A S K","properties":{"cnr_id":"lf-nodes","ver":"5dcbd98c230752a160aca063391b05ddad00ede7","Node name for S&R":"LF_SwitchMask"},"widgets_values":[false,{"bool":true,"roll":100}],"color":"#222","bgcolor":"#000","shape":1},{"id":77,"type":"InvertMask","pos":[105,-2950],"size":[140,26],"flags":{},"order":14,"mode":0,"inputs":[{"localized_name":"mask","name":"mask","type":"MASK","link":126}],"outputs":[{"localized_name":"MASK","name":"MASK","type":"MASK","links":[127]}],"title":"I N V E R T   M A S K","properties":{"cnr_id":"comfy-core","ver":"0.3.65","Node name for S&R":"InvertMask"},"color":"#332922","bgcolor":"#593930"},{"id":47,"type":"LF_String","pos":[630,-4045],"size":[440,300],"flags":{},"order":8,"mode":0,"inputs":[{"localized_name":"string","name":"string","type":"STRING","widget":{"name":"string"},"link":null},{"localized_name":"enable_history","name":"enable_history","type":"BOOLEAN","widget":{"name":"enable_history"},"link":null},{"localized_name":"randomize","name":"randomize","type":"BOOLEAN","widget":{"name":"randomize"},"link":null},{"localized_name":"seed","name":"seed","type":"INT","widget":{"name":"seed"},"link":null},{"localized_name":"ui_widget","name":"ui_widget","shape":7,"type":"LF_HISTORY","widget":{"name":"ui_widget"},"link":null}],"outputs":[{"localized_name":"string","name":"string","type":"STRING","links":[76,101]},{"localized_name":"string_list","name":"string_list","shape":6,"type":"STRING","links":null}],"title":"N A M E","properties":{"cnr_id":"lf-nodes","ver":"1749c0b009716e91ee47565c9b11476eeccef3f8","Node name for S&R":"LF_String"},"widgets_values":["icon",true,false,999622705125337,"randomize",{"nodes":[{"icon":"history","id":"icon","description":"Execution date: 20/10/2025, 09:06:00.","value":"icon"}]}],"color":"#232","bgcolor":"#353","shape":1}],"links":[[22,16,0,22,0,"IMAGE"],[65,29,0,38,0,"JSON"],[66,38,0,30,2,"JSON"],[68,40,0,38,1,"*"],[72,42,0,43,0,"STRING"],[73,43,0,44,0,"STRING"],[74,44,0,20,0,"STRING"],[75,30,0,42,10,"STRING"],[76,47,0,20,1,"STRING"],[80,51,0,52,1,"FLOAT"],[84,52,0,30,0,"IMAGE"],[91,30,2,56,0,"IMAGE"],[101,47,0,61,2,"STRING"],[102,56,0,61,0,"IMAGE"],[116,72,0,71,2,"BOOLEAN"],[117,70,0,71,1,"MASK"],[118,16,1,71,0,"MASK"],[121,71,0,75,0,"MASK"],[124,75,0,76,0,"IMAGE"],[125,22,0,52,0,"IMAGE"],[126,71,0,77,0,"MASK"],[127,77,0,30,1,"MASK"],[129,71,0,56,1,"MASK"]],"groups":[],"config":{},"extra":{"ds":{"scale":0.3231167894408232,"offset":[3172.8855378010257,4351.552886257757]}},"version":0.4}
+{
+  "id": "43add95e-a758-4307-8612-cd0278c7a46f",
+  "revision": 0,
+  "last_node_id": 77,
+  "last_link_id": 129,
+  "nodes": [
+    {
+      "id": 40,
+      "type": "LF_Integer",
+      "pos": [-508.11578369140625, -4171.4619140625],
+      "size": [404.91754150390625, 365.7881164550781],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "integer",
+          "name": "integer",
+          "type": "INT",
+          "widget": { "name": "integer" },
+          "link": null
+        },
+        {
+          "localized_name": "enable_history",
+          "name": "enable_history",
+          "type": "BOOLEAN",
+          "widget": { "name": "enable_history" },
+          "link": null
+        },
+        {
+          "localized_name": "randomize",
+          "name": "randomize",
+          "type": "BOOLEAN",
+          "widget": { "name": "randomize" },
+          "link": null
+        },
+        {
+          "localized_name": "seed",
+          "name": "seed",
+          "type": "INT",
+          "widget": { "name": "seed" },
+          "link": null
+        },
+        {
+          "localized_name": "ui_widget",
+          "name": "ui_widget",
+          "shape": 7,
+          "type": "LF_HISTORY",
+          "widget": { "name": "ui_widget" },
+          "link": null
+        }
+      ],
+      "outputs": [
+        { "localized_name": "int", "name": "int", "type": "INT", "links": [68] },
+        {
+          "localized_name": "int_list",
+          "name": "int_list",
+          "shape": 6,
+          "type": "INT",
+          "links": null
+        }
+      ],
+      "title": "N U M   C O L O R S",
+      "properties": {
+        "cnr_id": "lf-nodes",
+        "ver": "33bbd352934942538da0db6e8b19717c0269b262",
+        "Node name for S&R": "LF_Integer"
+      },
+      "widgets_values": [
+        2,
+        true,
+        false,
+        656113249487589,
+        "randomize",
+        {
+          "nodes": [
+            {
+              "icon": "history",
+              "id": "2",
+              "description": "Execution date: 20/10/2025, 09:06:00.",
+              "value": "2"
+            }
+          ]
+        }
+      ],
+      "color": "#232",
+      "bgcolor": "#353",
+      "shape": 1
+    },
+    {
+      "id": 42,
+      "type": "LF_WallOfText",
+      "pos": [910, -2880],
+      "size": [460.00665283203125, 1116.1927490234375],
+      "flags": {},
+      "order": 17,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "text_3",
+          "name": "text_3",
+          "shape": 7,
+          "type": "STRING",
+          "link": null
+        },
+        {
+          "localized_name": "text_4",
+          "name": "text_4",
+          "shape": 7,
+          "type": "STRING",
+          "link": null
+        },
+        {
+          "localized_name": "text_5",
+          "name": "text_5",
+          "shape": 7,
+          "type": "STRING",
+          "link": null
+        },
+        {
+          "localized_name": "text_6",
+          "name": "text_6",
+          "shape": 7,
+          "type": "STRING",
+          "link": null
+        },
+        {
+          "localized_name": "text_7",
+          "name": "text_7",
+          "shape": 7,
+          "type": "STRING",
+          "link": null
+        },
+        {
+          "localized_name": "text_8",
+          "name": "text_8",
+          "shape": 7,
+          "type": "STRING",
+          "link": null
+        },
+        {
+          "localized_name": "text_9",
+          "name": "text_9",
+          "shape": 7,
+          "type": "STRING",
+          "link": null
+        },
+        {
+          "localized_name": "text_10",
+          "name": "text_10",
+          "shape": 7,
+          "type": "STRING",
+          "link": null
+        },
+        {
+          "localized_name": "separator",
+          "name": "separator",
+          "type": "STRING",
+          "widget": { "name": "separator" },
+          "link": null
+        },
+        {
+          "localized_name": "text_1",
+          "name": "text_1",
+          "type": "STRING",
+          "widget": { "name": "text_1" },
+          "link": null
+        },
+        {
+          "localized_name": "text_2",
+          "name": "text_2",
+          "type": "STRING",
+          "widget": { "name": "text_2" },
+          "link": 75
+        },
+        {
+          "localized_name": "shuffle_inputs",
+          "name": "shuffle_inputs",
+          "shape": 7,
+          "type": "BOOLEAN",
+          "widget": { "name": "shuffle_inputs" },
+          "link": null
+        },
+        {
+          "localized_name": "seed",
+          "name": "seed",
+          "shape": 7,
+          "type": "INT",
+          "widget": { "name": "seed" },
+          "link": null
+        },
+        {
+          "localized_name": "ui_widget",
+          "name": "ui_widget",
+          "shape": 7,
+          "type": "LF_CODE",
+          "widget": { "name": "ui_widget" },
+          "link": null
+        }
+      ],
+      "outputs": [
+        { "localized_name": "string", "name": "string", "type": "STRING", "links": [72] },
+        {
+          "localized_name": "string_list",
+          "name": "string_list",
+          "shape": 6,
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "title": "A D D   H E A D",
+      "properties": {
+        "cnr_id": "lf-nodes",
+        "ver": "33bbd352934942538da0db6e8b19717c0269b262",
+        "Node name for S&R": "LF_WallOfText"
+      },
+      "widgets_values": [
+        "",
+        "<?xml version=\"1.0\" encoding=\"UTF-8\"?> <!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">",
+        "",
+        false,
+        724350640804785,
+        "randomize",
+        ""
+      ],
+      "color": "#222",
+      "bgcolor": "#000",
+      "shape": 1
+    },
+    {
+      "id": 29,
+      "type": "LF_WriteJSON",
+      "pos": [-520, -3710],
+      "size": [419.2137145996094, 692.2568969726562],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "ui_widget",
+          "name": "ui_widget",
+          "type": "LF_TEXTAREA",
+          "widget": { "name": "ui_widget" },
+          "link": null
+        }
+      ],
+      "outputs": [{ "localized_name": "json", "name": "json", "type": "JSON", "links": [65] }],
+      "title": "O P T I O N A L   C U S T O M   C O N F I G",
+      "properties": {
+        "cnr_id": "lf-nodes",
+        "ver": "cda0bdd63a70a7bc3bd4e6beb47988d8b26d2bb5",
+        "Node name for S&R": "LF_WriteJSON"
+      },
+      "widgets_values": [
+        "{\n  \"num_colors\": 4,\n  \"simplify_tol\": 1e-9,\n  \"vector_mode\": \"fill\",\n  \"stroke_width\": 0,\n  \"upsample_scale\": 16,\n  \"mask_blur\": 1,\n  \"mask_offset\": 0,\n  \"mask_close_iters\": 2,\n  \"mask_open_iters\": 0,\n  \"smooth_passes\": 5,\n  \"min_area_ratio\": 2e-8,\n  \"pre_blur_sigma\": 0.15,\n  \"bilateral_d\": 5,\n  \"bilateral_sigma_color\": 50,\n  \"bilateral_sigma_space\": 20,\n  \"collinear_angle_tol\": 3,\n  \"engine\": \"vtracer\",\n  \"vtracer_mode\": \"spline\",\n  \"vtracer_hierarchical\": \"stacked\",\n  \"vtracer_filter_speckle\": 10,\n  \"vtracer_color_precision\": 200,\n  \"vtracer_layer_difference\": 2,\n  \"vtracer_corner_threshold\": 40,\n  \"vtracer_length_threshold\": 0.1,\n  \"vtracer_max_iterations\": 20000,\n  \"vtracer_splice_threshold\": 10,\n  \"vtracer_path_precision\": 10\n}"
+      ],
+      "color": "#222",
+      "bgcolor": "#000",
+      "shape": 1
+    },
+    {
+      "id": 44,
+      "type": "LF_StringReplace",
+      "pos": [1700, -2900],
+      "size": [285, 420],
+      "flags": {},
+      "order": 21,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "input_text",
+          "name": "input_text",
+          "type": "STRING",
+          "widget": { "name": "input_text" },
+          "link": 73
+        },
+        {
+          "localized_name": "target",
+          "name": "target",
+          "type": "STRING",
+          "widget": { "name": "target" },
+          "link": null
+        },
+        {
+          "localized_name": "replacement",
+          "name": "replacement",
+          "type": "STRING",
+          "widget": { "name": "replacement" },
+          "link": null
+        },
+        {
+          "localized_name": "ui_widget",
+          "name": "ui_widget",
+          "shape": 7,
+          "type": "LF_CODE",
+          "widget": { "name": "ui_widget" },
+          "link": null
+        }
+      ],
+      "outputs": [
+        { "localized_name": "string", "name": "string", "type": "STRING", "links": [74] },
+        {
+          "localized_name": "string_list",
+          "name": "string_list",
+          "shape": 6,
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "title": "R E M O V E   W I D T H",
+      "properties": {
+        "cnr_id": "lf-nodes",
+        "ver": "33bbd352934942538da0db6e8b19717c0269b262",
+        "Node name for S&R": "LF_StringReplace"
+      },
+      "widgets_values": ["", "width=\"100%\"", "", ""],
+      "color": "#222",
+      "bgcolor": "#000",
+      "shape": 1
+    },
+    {
+      "id": 20,
+      "type": "LF_SaveSVG",
+      "pos": [2345, -4090],
+      "size": [1191.9913330078125, 1340.0654296875],
+      "flags": {},
+      "order": 22,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "svg",
+          "name": "svg",
+          "type": "STRING",
+          "widget": { "name": "svg" },
+          "link": 74
+        },
+        {
+          "localized_name": "filename_prefix",
+          "name": "filename_prefix",
+          "type": "STRING",
+          "widget": { "name": "filename_prefix" },
+          "link": 76
+        },
+        {
+          "localized_name": "add_timestamp",
+          "name": "add_timestamp",
+          "type": "BOOLEAN",
+          "widget": { "name": "add_timestamp" },
+          "link": null
+        },
+        {
+          "localized_name": "add_counter",
+          "name": "add_counter",
+          "type": "BOOLEAN",
+          "widget": { "name": "add_counter" },
+          "link": null
+        },
+        {
+          "localized_name": "ui_widget",
+          "name": "ui_widget",
+          "shape": 7,
+          "type": "LF_MASONRY",
+          "widget": { "name": "ui_widget" },
+          "link": null
+        }
+      ],
+      "outputs": [{ "localized_name": "svg", "name": "svg", "type": "STRING", "links": null }],
+      "title": "S A V E   S V G",
+      "properties": {
+        "cnr_id": "lf-nodes",
+        "ver": "06c7bef1848001c0cea1a656cfff104c61991e46",
+        "Node name for S&R": "LF_SaveSVG"
+      },
+      "widgets_values": [
+        "",
+        "",
+        false,
+        false,
+        {
+          "columns": 3,
+          "dataset": {
+            "nodes": [
+              {
+                "cells": { "lfSlot": { "shape": "slot", "value": "icon.svg" } },
+                "id": "0",
+                "value": "0"
+              }
+            ]
+          },
+          "index": null,
+          "name": "",
+          "view": "main"
+        }
+      ],
+      "color": "#222",
+      "bgcolor": "#000",
+      "shape": 1
+    },
+    {
+      "id": 62,
+      "type": "LF_ControlPanel",
+      "pos": [-1415, -4270],
+      "size": [825, 1255],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "ui_widget",
+          "name": "ui_widget",
+          "shape": 7,
+          "type": "LF_CONTROL_PANEL",
+          "widget": { "name": "ui_widget" },
+          "link": null
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "lf-nodes",
+        "ver": "16d0ff0cd7a7fd416625bc50a98ad2433b5e3cfc",
+        "Node name for S&R": "LF_ControlPanel"
+      },
+      "widgets_values": [
+        {
+          "backup": true,
+          "backupRetention": 14,
+          "debug": true,
+          "systemTimeout": 1,
+          "themes": "pastel"
+        }
+      ],
+      "color": "#222",
+      "bgcolor": "#000",
+      "shape": 1
+    },
+    {
+      "id": 38,
+      "type": "LF_SetValueInJSON",
+      "pos": [10, -3710],
+      "size": [345, 340],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [
+        { "localized_name": "json_input", "name": "json_input", "type": "JSON", "link": 65 },
+        { "localized_name": "value", "name": "value", "type": "*", "link": 68 },
+        {
+          "localized_name": "key",
+          "name": "key",
+          "type": "STRING",
+          "widget": { "name": "key" },
+          "link": null
+        },
+        {
+          "localized_name": "ui_widget",
+          "name": "ui_widget",
+          "shape": 7,
+          "type": "LF_CODE",
+          "widget": { "name": "ui_widget" },
+          "link": null
+        }
+      ],
+      "outputs": [
+        { "localized_name": "json", "name": "json", "type": "JSON", "links": [66] },
+        { "localized_name": "json_list", "name": "json_list", "type": "JSON", "links": null }
+      ],
+      "title": "S E T  N U M   C O L O R S",
+      "properties": {
+        "cnr_id": "lf-nodes",
+        "ver": "33bbd352934942538da0db6e8b19717c0269b262",
+        "Node name for S&R": "LF_SetValueInJSON"
+      },
+      "widgets_values": ["num_colors", "## Updated key\nnum_colors\n\n## Content:\n\n[0]: 2"],
+      "color": "#222",
+      "bgcolor": "#000",
+      "shape": 1
+    },
+    {
+      "id": 43,
+      "type": "LF_StringReplace",
+      "pos": [1410, -2900],
+      "size": [280, 420],
+      "flags": {},
+      "order": 19,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "input_text",
+          "name": "input_text",
+          "type": "STRING",
+          "widget": { "name": "input_text" },
+          "link": 72
+        },
+        {
+          "localized_name": "target",
+          "name": "target",
+          "type": "STRING",
+          "widget": { "name": "target" },
+          "link": null
+        },
+        {
+          "localized_name": "replacement",
+          "name": "replacement",
+          "type": "STRING",
+          "widget": { "name": "replacement" },
+          "link": null
+        },
+        {
+          "localized_name": "ui_widget",
+          "name": "ui_widget",
+          "shape": 7,
+          "type": "LF_CODE",
+          "widget": { "name": "ui_widget" },
+          "link": null
+        }
+      ],
+      "outputs": [
+        { "localized_name": "string", "name": "string", "type": "STRING", "links": [73] },
+        {
+          "localized_name": "string_list",
+          "name": "string_list",
+          "shape": 6,
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "title": "R E M O V E   H E I G H T",
+      "properties": {
+        "cnr_id": "lf-nodes",
+        "ver": "33bbd352934942538da0db6e8b19717c0269b262",
+        "Node name for S&R": "LF_StringReplace"
+      },
+      "widgets_values": ["", "height=\"100%\"", "", ""],
+      "color": "#222",
+      "bgcolor": "#000",
+      "shape": 1
+    },
+    {
+      "id": 34,
+      "type": "LF_EmptyImage",
+      "pos": [-835, -2250],
+      "size": [434.30859375, 535.11962890625],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "width",
+          "name": "width",
+          "type": "INT",
+          "widget": { "name": "width" },
+          "link": null
+        },
+        {
+          "localized_name": "height",
+          "name": "height",
+          "type": "INT",
+          "widget": { "name": "height" },
+          "link": null
+        },
+        {
+          "localized_name": "color",
+          "name": "color",
+          "type": "STRING",
+          "widget": { "name": "color" },
+          "link": null
+        },
+        {
+          "localized_name": "ui_widget",
+          "name": "ui_widget",
+          "shape": 7,
+          "type": "LF_MASONRY",
+          "widget": { "name": "ui_widget" },
+          "link": null
+        }
+      ],
+      "outputs": [{ "localized_name": "image", "name": "image", "type": "IMAGE", "links": [] }],
+      "title": "B A C K G R O U N D",
+      "properties": {
+        "cnr_id": "lf-nodes",
+        "ver": "33bbd352934942538da0db6e8b19717c0269b262",
+        "Node name for S&R": "LF_EmptyImage"
+      },
+      "widgets_values": [
+        512,
+        512,
+        "FFFFFF",
+        {
+          "columns": 3,
+          "dataset": {
+            "nodes": [
+              {
+                "cells": {
+                  "lfImage": {
+                    "htmlProps": { "id": "emptyimage_2.PNG", "title": "emptyimage_2.PNG" },
+                    "shape": "image",
+                    "lfValue": "/view?filename=emptyimage_2.PNG&type=temp&subfolder=&nonce=9hypXC68",
+                    "value": "/view?filename=emptyimage_2.PNG&type=temp&subfolder=&nonce=9hypXC68"
+                  }
+                },
+                "id": "1",
+                "value": "1"
+              }
+            ]
+          },
+          "index": null,
+          "name": "",
+          "view": "main"
+        }
+      ],
+      "color": "#222",
+      "bgcolor": "#000",
+      "shape": 1
+    },
+    {
+      "id": 75,
+      "type": "MaskToImage",
+      "pos": [-1345, -2280],
+      "size": [184.62362670898438, 26],
+      "flags": {},
+      "order": 13,
+      "mode": 0,
+      "inputs": [{ "localized_name": "mask", "name": "mask", "type": "MASK", "link": 121 }],
+      "outputs": [{ "localized_name": "IMAGE", "name": "IMAGE", "type": "IMAGE", "links": [124] }],
+      "title": "R A S T E R   M A S K",
+      "properties": { "cnr_id": "comfy-core", "ver": "0.3.65", "Node name for S&R": "MaskToImage" },
+      "widgets_values": [],
+      "color": "#332922",
+      "bgcolor": "#593930"
+    },
+    {
+      "id": 16,
+      "type": "LoadImage",
+      "pos": [-2245, -2440],
+      "size": [435.0561828613281, 549.1685791015625],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "image",
+          "name": "image",
+          "type": "COMBO",
+          "widget": { "name": "image" },
+          "link": null
+        },
+        {
+          "localized_name": "upload",
+          "name": "upload",
+          "type": "IMAGEUPLOAD",
+          "widget": { "name": "upload" },
+          "link": null
+        }
+      ],
+      "outputs": [
+        { "localized_name": "IMAGE", "name": "IMAGE", "type": "IMAGE", "links": [22] },
+        { "localized_name": "MASK", "name": "MASK", "type": "MASK", "links": [118] }
+      ],
+      "title": "I N P U T",
+      "properties": { "cnr_id": "comfy-core", "ver": "0.3.65", "Node name for S&R": "LoadImage" },
+      "widgets_values": ["Google.png", "image"],
+      "color": "#232",
+      "bgcolor": "#353"
+    },
+    {
+      "id": 52,
+      "type": "LF_Desaturation",
+      "pos": [-10, -2780],
+      "size": [365, 735],
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "inputs": [
+        { "localized_name": "image", "name": "image", "type": "IMAGE", "link": 125 },
+        {
+          "localized_name": "global_level",
+          "name": "global_level",
+          "type": "FLOAT",
+          "widget": { "name": "global_level" },
+          "link": 80
+        },
+        {
+          "localized_name": "r_channel",
+          "name": "r_channel",
+          "type": "FLOAT",
+          "widget": { "name": "r_channel" },
+          "link": null
+        },
+        {
+          "localized_name": "g_channel",
+          "name": "g_channel",
+          "type": "FLOAT",
+          "widget": { "name": "g_channel" },
+          "link": null
+        },
+        {
+          "localized_name": "b_channel",
+          "name": "b_channel",
+          "type": "FLOAT",
+          "widget": { "name": "b_channel" },
+          "link": null
+        },
+        {
+          "localized_name": "ui_widget",
+          "name": "ui_widget",
+          "shape": 7,
+          "type": "LF_COMPARE",
+          "widget": { "name": "ui_widget" },
+          "link": null
+        }
+      ],
+      "outputs": [
+        { "localized_name": "image", "name": "image", "type": "IMAGE", "links": [84] },
+        {
+          "localized_name": "image_list",
+          "name": "image_list",
+          "shape": 6,
+          "type": "IMAGE",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "lf-nodes",
+        "ver": "8b4a18a2dec69916835402c4d31020882e9fa81e",
+        "Node name for S&R": "LF_Desaturation"
+      },
+      "widgets_values": [
+        0.5,
+        1,
+        1,
+        1,
+        {
+          "nodes": [
+            {
+              "cells": {
+                "lfImage": {
+                  "shape": "image",
+                  "lfValue": "/view?filename=desaturation_s_1.PNG&type=temp&subfolder=&nonce=vUFlpwLa",
+                  "value": ""
+                },
+                "lfImage_after": {
+                  "shape": "image",
+                  "lfValue": "/view?filename=desaturation_t_1.PNG&type=temp&subfolder=&nonce=sX6o3Vp2",
+                  "value": ""
+                }
+              },
+              "id": "image_1",
+              "value": "Comparison 1"
+            }
+          ]
+        }
+      ],
+      "color": "#222",
+      "bgcolor": "#000"
+    },
+    {
+      "id": 76,
+      "type": "LF_ViewImages",
+      "pos": [-1115, -2180],
+      "size": [245, 270],
+      "flags": {},
+      "order": 15,
+      "mode": 0,
+      "inputs": [
+        { "localized_name": "image", "name": "image", "type": "IMAGE", "link": 124 },
+        {
+          "localized_name": "ui_widget",
+          "name": "ui_widget",
+          "shape": 7,
+          "type": "LF_MASONRY",
+          "widget": { "name": "ui_widget" },
+          "link": null
+        }
+      ],
+      "outputs": [
+        { "localized_name": "image", "name": "image", "type": "IMAGE", "links": null },
+        {
+          "localized_name": "image_list",
+          "name": "image_list",
+          "shape": 6,
+          "type": "IMAGE",
+          "links": null
+        }
+      ],
+      "title": "P R E V I E W   M A S K",
+      "properties": {
+        "cnr_id": "lf-nodes",
+        "ver": "5dcbd98c230752a160aca063391b05ddad00ede7",
+        "Node name for S&R": "LF_ViewImages"
+      },
+      "widgets_values": [
+        {
+          "columns": 3,
+          "dataset": {
+            "nodes": [
+              {
+                "cells": {
+                  "lfImage": {
+                    "htmlProps": { "id": "view_1.PNG", "title": "view_1.PNG" },
+                    "shape": "image",
+                    "lfValue": "/view?filename=view_1.PNG&type=temp&subfolder=&nonce=nCZt7JQu",
+                    "value": "/view?filename=view_1.PNG&type=temp&subfolder=&nonce=nCZt7JQu"
+                  }
+                },
+                "id": "1",
+                "value": "1"
+              }
+            ]
+          },
+          "index": null,
+          "name": "",
+          "view": "main"
+        }
+      ],
+      "color": "#332922",
+      "bgcolor": "#593930"
+    },
+    {
+      "id": 61,
+      "type": "LF_SaveImageForCivitAI",
+      "pos": [1120, -3820],
+      "size": [640, 820],
+      "flags": {},
+      "order": 20,
+      "mode": 0,
+      "inputs": [
+        { "localized_name": "image", "name": "image", "type": "IMAGE", "link": 102 },
+        {
+          "localized_name": "civitai_metadata",
+          "name": "civitai_metadata",
+          "shape": 7,
+          "type": "STRING",
+          "link": null
+        },
+        {
+          "localized_name": "filename_prefix",
+          "name": "filename_prefix",
+          "type": "STRING",
+          "widget": { "name": "filename_prefix" },
+          "link": 101
+        },
+        {
+          "localized_name": "add_timestamp",
+          "name": "add_timestamp",
+          "type": "BOOLEAN",
+          "widget": { "name": "add_timestamp" },
+          "link": null
+        },
+        {
+          "localized_name": "embed_workflow",
+          "name": "embed_workflow",
+          "type": "BOOLEAN",
+          "widget": { "name": "embed_workflow" },
+          "link": null
+        },
+        {
+          "localized_name": "extension",
+          "name": "extension",
+          "type": "COMBO",
+          "widget": { "name": "extension" },
+          "link": null
+        },
+        {
+          "localized_name": "quality",
+          "name": "quality",
+          "type": "INT",
+          "widget": { "name": "quality" },
+          "link": null
+        },
+        {
+          "localized_name": "ui_widget",
+          "name": "ui_widget",
+          "shape": 7,
+          "type": "LF_MASONRY",
+          "widget": { "name": "ui_widget" },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "file_names",
+          "name": "file_names",
+          "shape": 6,
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "localized_name": "civitai_metadata",
+          "name": "civitai_metadata",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "title": "S A V E   P N G",
+      "properties": {
+        "cnr_id": "lf-nodes",
+        "ver": "8b4a18a2dec69916835402c4d31020882e9fa81e",
+        "Node name for S&R": "LF_SaveImageForCivitAI"
+      },
+      "widgets_values": [
+        "",
+        false,
+        true,
+        "png",
+        100,
+        {
+          "columns": 3,
+          "dataset": {
+            "nodes": [
+              {
+                "cells": {
+                  "lfImage": {
+                    "htmlProps": { "id": "icon_68.png", "title": "icon_68.png" },
+                    "shape": "image",
+                    "lfValue": "/view?filename=icon_68.png&type=output&subfolder=&nonce=YIGQ8gIG",
+                    "value": "/view?filename=icon_68.png&type=output&subfolder=&nonce=YIGQ8gIG"
+                  }
+                },
+                "id": "1",
+                "value": "1"
+              }
+            ]
+          },
+          "index": null,
+          "name": "",
+          "view": "main"
+        }
+      ],
+      "color": "#222",
+      "bgcolor": "#000",
+      "shape": 1
+    },
+    {
+      "id": 51,
+      "type": "LF_SwitchFloat",
+      "pos": [-365, -2650],
+      "size": [270, 340],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "on_true",
+          "name": "on_true",
+          "type": "FLOAT",
+          "widget": { "name": "on_true" },
+          "link": null
+        },
+        {
+          "localized_name": "on_false",
+          "name": "on_false",
+          "type": "FLOAT",
+          "widget": { "name": "on_false" },
+          "link": null
+        },
+        {
+          "localized_name": "boolean",
+          "name": "boolean",
+          "type": "BOOLEAN",
+          "widget": { "name": "boolean" },
+          "link": null
+        },
+        {
+          "localized_name": "ui_widget",
+          "name": "ui_widget",
+          "shape": 7,
+          "type": "LF_PROGRESSBAR",
+          "widget": { "name": "ui_widget" },
+          "link": null
+        }
+      ],
+      "outputs": [
+        { "localized_name": "float", "name": "float", "type": "FLOAT", "links": [80] },
+        {
+          "localized_name": "float_list",
+          "name": "float_list",
+          "shape": 6,
+          "type": "FLOAT",
+          "links": null
+        }
+      ],
+      "title": "D E S A T U R A T I O N",
+      "properties": {
+        "cnr_id": "lf-nodes",
+        "ver": "8b4a18a2dec69916835402c4d31020882e9fa81e",
+        "Node name for S&R": "LF_SwitchFloat"
+      },
+      "widgets_values": [1, 0, false, { "bool": false, "roll": 100 }],
+      "color": "#232",
+      "bgcolor": "#353",
+      "shape": 1
+    },
+    {
+      "id": 22,
+      "type": "LF_ResizeImageByEdge",
+      "pos": [-910, -2780],
+      "size": [437.1495056152344, 327.1337585449219],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [
+        { "localized_name": "image", "name": "image", "type": "IMAGE", "link": 22 },
+        {
+          "localized_name": "longest_edge",
+          "name": "longest_edge",
+          "type": "BOOLEAN",
+          "widget": { "name": "longest_edge" },
+          "link": null
+        },
+        {
+          "localized_name": "new_size",
+          "name": "new_size",
+          "type": "INT",
+          "widget": { "name": "new_size" },
+          "link": null
+        },
+        {
+          "localized_name": "resize_method",
+          "name": "resize_method",
+          "type": "COMBO",
+          "widget": { "name": "resize_method" },
+          "link": null
+        },
+        {
+          "localized_name": "ui_widget",
+          "name": "ui_widget",
+          "shape": 7,
+          "type": "LF_TREE",
+          "widget": { "name": "ui_widget" },
+          "link": null
+        }
+      ],
+      "outputs": [
+        { "localized_name": "image", "name": "image", "type": "IMAGE", "links": [125] },
+        {
+          "localized_name": "image_list",
+          "name": "image_list",
+          "shape": 6,
+          "type": "IMAGE",
+          "links": null
+        },
+        { "localized_name": "count", "name": "count", "type": "INT", "links": null }
+      ],
+      "title": "T O   5 1 2 P X",
+      "properties": {
+        "cnr_id": "lf-nodes",
+        "ver": "0b09bbdedf7212ce8c360a9411dd7c8766d429a9",
+        "Node name for S&R": "LF_ResizeImageByEdge"
+      },
+      "widgets_values": [
+        true,
+        512,
+        "bicubic",
+        {
+          "nodes": [
+            {
+              "children": [{ "id": "0", "value": "[0] From 432x1192 to 186x512" }],
+              "icon": "info-hexagon",
+              "id": "Resized 1 image",
+              "value": "Resized 1 image"
+            }
+          ]
+        }
+      ],
+      "color": "#222",
+      "bgcolor": "#000",
+      "shape": 1
+    },
+    {
+      "id": 70,
+      "type": "SolidMask",
+      "pos": [-2125, -2950],
+      "size": [320, 106],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "value",
+          "name": "value",
+          "type": "FLOAT",
+          "widget": { "name": "value" },
+          "link": null
+        },
+        {
+          "localized_name": "width",
+          "name": "width",
+          "type": "INT",
+          "widget": { "name": "width" },
+          "link": null
+        },
+        {
+          "localized_name": "height",
+          "name": "height",
+          "type": "INT",
+          "widget": { "name": "height" },
+          "link": null
+        }
+      ],
+      "outputs": [{ "localized_name": "MASK", "name": "MASK", "type": "MASK", "links": [117] }],
+      "title": "S O L I D   M A S K",
+      "properties": { "cnr_id": "comfy-core", "ver": "0.3.65", "Node name for S&R": "SolidMask" },
+      "widgets_values": [1, 512, 512],
+      "color": "#332922",
+      "bgcolor": "#593930"
+    },
+    {
+      "id": 72,
+      "type": "LF_Boolean",
+      "pos": [-2155, -3535],
+      "size": [345, 410],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "boolean",
+          "name": "boolean",
+          "type": "BOOLEAN",
+          "widget": { "name": "boolean" },
+          "link": null
+        },
+        {
+          "localized_name": "enable_history",
+          "name": "enable_history",
+          "type": "BOOLEAN",
+          "widget": { "name": "enable_history" },
+          "link": null
+        },
+        {
+          "localized_name": "randomize",
+          "name": "randomize",
+          "type": "BOOLEAN",
+          "widget": { "name": "randomize" },
+          "link": null
+        },
+        {
+          "localized_name": "seed",
+          "name": "seed",
+          "type": "INT",
+          "widget": { "name": "seed" },
+          "link": null
+        },
+        {
+          "localized_name": "ui_widget",
+          "name": "ui_widget",
+          "shape": 7,
+          "type": "LF_HISTORY",
+          "widget": { "name": "ui_widget" },
+          "link": null
+        }
+      ],
+      "outputs": [
+        { "localized_name": "boolean", "name": "boolean", "type": "BOOLEAN", "links": [116] },
+        {
+          "localized_name": "boolean_list",
+          "name": "boolean_list",
+          "shape": 6,
+          "type": "BOOLEAN",
+          "links": null
+        }
+      ],
+      "title": "P R E S E R V E   A L P H A",
+      "properties": {
+        "cnr_id": "lf-nodes",
+        "ver": "5dcbd98c230752a160aca063391b05ddad00ede7",
+        "Node name for S&R": "LF_Boolean"
+      },
+      "widgets_values": [true, false, false, 844592157863327, "randomize", { "nodes": [] }],
+      "color": "#232",
+      "bgcolor": "#353",
+      "shape": 1
+    },
+    {
+      "id": 30,
+      "type": "LF_ImageToSVG",
+      "pos": [400, -2970],
+      "size": [408.798583984375, 1060.113037109375],
+      "flags": {},
+      "order": 16,
+      "mode": 0,
+      "inputs": [
+        { "localized_name": "image", "name": "image", "type": "IMAGE", "link": 84 },
+        { "localized_name": "mask", "name": "mask", "shape": 7, "type": "MASK", "link": 127 },
+        {
+          "localized_name": "advanced_config",
+          "name": "advanced_config",
+          "shape": 7,
+          "type": "JSON",
+          "link": 66
+        },
+        {
+          "localized_name": "preset",
+          "name": "preset",
+          "type": "COMBO",
+          "widget": { "name": "preset" },
+          "link": null
+        },
+        {
+          "localized_name": "render_mode",
+          "name": "render_mode",
+          "shape": 7,
+          "type": "COMBO",
+          "widget": { "name": "render_mode" },
+          "link": null
+        },
+        {
+          "localized_name": "fill_color",
+          "name": "fill_color",
+          "shape": 7,
+          "type": "STRING",
+          "widget": { "name": "fill_color" },
+          "link": null
+        },
+        {
+          "localized_name": "stroke_color",
+          "name": "stroke_color",
+          "shape": 7,
+          "type": "STRING",
+          "widget": { "name": "stroke_color" },
+          "link": null
+        },
+        {
+          "localized_name": "background_color",
+          "name": "background_color",
+          "shape": 7,
+          "type": "STRING",
+          "widget": { "name": "background_color" },
+          "link": null
+        },
+        {
+          "localized_name": "stroke_width",
+          "name": "stroke_width",
+          "shape": 7,
+          "type": "FLOAT",
+          "widget": { "name": "stroke_width" },
+          "link": null
+        },
+        {
+          "localized_name": "size_mode",
+          "name": "size_mode",
+          "shape": 7,
+          "type": "COMBO",
+          "widget": { "name": "size_mode" },
+          "link": null
+        },
+        {
+          "localized_name": "viewbox",
+          "name": "viewbox",
+          "shape": 7,
+          "type": "STRING",
+          "widget": { "name": "viewbox" },
+          "link": null
+        },
+        {
+          "localized_name": "ui_widget",
+          "name": "ui_widget",
+          "shape": 7,
+          "type": "LF_COMPARE",
+          "widget": { "name": "ui_widget" },
+          "link": null
+        }
+      ],
+      "outputs": [
+        { "localized_name": "svg", "name": "svg", "type": "STRING", "links": [75] },
+        {
+          "localized_name": "svg_list",
+          "name": "svg_list",
+          "shape": 6,
+          "type": "STRING",
+          "links": null
+        },
+        { "localized_name": "image", "name": "image", "type": "IMAGE", "links": [91] },
+        {
+          "localized_name": "image_list",
+          "name": "image_list",
+          "shape": 6,
+          "type": "IMAGE",
+          "links": null
+        },
+        { "localized_name": "palette", "name": "palette", "type": "STRING", "links": null },
+        {
+          "localized_name": "palette_list",
+          "name": "palette_list",
+          "shape": 6,
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "title": "S V G   C O N V E R S I O N",
+      "properties": {
+        "cnr_id": "lf-nodes",
+        "ver": "7b99438ecfb202362f95dd3aa73d6380e4e50d69",
+        "Node name for S&R": "LF_ImageToSVG"
+      },
+      "widgets_values": [
+        "max_quality",
+        "preset",
+        "",
+        "",
+        "",
+        2,
+        "preset",
+        "0 0 24 24",
+        {
+          "nodes": [
+            {
+              "cells": {
+                "lfImage": {
+                  "shape": "image",
+                  "lfValue": "/view?filename=svg_s_1.PNG&type=temp&subfolder=&nonce=aoEhr8GB",
+                  "value": ""
+                },
+                "lfImage_after": {
+                  "shape": "image",
+                  "lfValue": "/view?filename=svg_t_1.PNG&type=temp&subfolder=&nonce=5sLAJIFj",
+                  "value": ""
+                }
+              },
+              "id": "image_1",
+              "value": "Comparison 1"
+            }
+          ]
+        }
+      ],
+      "color": "#222",
+      "bgcolor": "#000",
+      "shape": 1
+    },
+    {
+      "id": 56,
+      "type": "JoinImageWithAlpha",
+      "pos": [870, -3150],
+      "size": [200, 46],
+      "flags": {},
+      "order": 18,
+      "mode": 0,
+      "inputs": [
+        { "localized_name": "image", "name": "image", "type": "IMAGE", "link": 91 },
+        { "localized_name": "alpha", "name": "alpha", "type": "MASK", "link": 129 }
+      ],
+      "outputs": [{ "localized_name": "IMAGE", "name": "IMAGE", "type": "IMAGE", "links": [102] }],
+      "title": "A P P L Y   M A S K",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.65",
+        "Node name for S&R": "JoinImageWithAlpha"
+      },
+      "widgets_values": [],
+      "color": "#332922",
+      "bgcolor": "#593930"
+    },
+    {
+      "id": 71,
+      "type": "LF_SwitchMask",
+      "pos": [-1695, -2950],
+      "size": [320, 390],
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [
+        { "localized_name": "on_true", "name": "on_true", "type": "MASK", "link": 118 },
+        { "localized_name": "on_false", "name": "on_false", "type": "MASK", "link": 117 },
+        {
+          "localized_name": "boolean",
+          "name": "boolean",
+          "type": "BOOLEAN",
+          "widget": { "name": "boolean" },
+          "link": 116
+        },
+        {
+          "localized_name": "ui_widget",
+          "name": "ui_widget",
+          "shape": 7,
+          "type": "LF_PROGRESSBAR",
+          "widget": { "name": "ui_widget" },
+          "link": null
+        }
+      ],
+      "outputs": [
+        { "localized_name": "mask", "name": "mask", "type": "MASK", "links": [121, 126, 129] },
+        {
+          "localized_name": "mask_list",
+          "name": "mask_list",
+          "shape": 6,
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "title": "S W I T C H   M A S K",
+      "properties": {
+        "cnr_id": "lf-nodes",
+        "ver": "5dcbd98c230752a160aca063391b05ddad00ede7",
+        "Node name for S&R": "LF_SwitchMask"
+      },
+      "widgets_values": [false, { "bool": true, "roll": 100 }],
+      "color": "#222",
+      "bgcolor": "#000",
+      "shape": 1
+    },
+    {
+      "id": 77,
+      "type": "InvertMask",
+      "pos": [105, -2950],
+      "size": [140, 26],
+      "flags": {},
+      "order": 14,
+      "mode": 0,
+      "inputs": [{ "localized_name": "mask", "name": "mask", "type": "MASK", "link": 126 }],
+      "outputs": [{ "localized_name": "MASK", "name": "MASK", "type": "MASK", "links": [127] }],
+      "title": "I N V E R T   M A S K",
+      "properties": { "cnr_id": "comfy-core", "ver": "0.3.65", "Node name for S&R": "InvertMask" },
+      "color": "#332922",
+      "bgcolor": "#593930"
+    },
+    {
+      "id": 47,
+      "type": "LF_String",
+      "pos": [630, -4045],
+      "size": [440, 300],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "string",
+          "name": "string",
+          "type": "STRING",
+          "widget": { "name": "string" },
+          "link": null
+        },
+        {
+          "localized_name": "enable_history",
+          "name": "enable_history",
+          "type": "BOOLEAN",
+          "widget": { "name": "enable_history" },
+          "link": null
+        },
+        {
+          "localized_name": "randomize",
+          "name": "randomize",
+          "type": "BOOLEAN",
+          "widget": { "name": "randomize" },
+          "link": null
+        },
+        {
+          "localized_name": "seed",
+          "name": "seed",
+          "type": "INT",
+          "widget": { "name": "seed" },
+          "link": null
+        },
+        {
+          "localized_name": "ui_widget",
+          "name": "ui_widget",
+          "shape": 7,
+          "type": "LF_HISTORY",
+          "widget": { "name": "ui_widget" },
+          "link": null
+        }
+      ],
+      "outputs": [
+        { "localized_name": "string", "name": "string", "type": "STRING", "links": [76, 101] },
+        {
+          "localized_name": "string_list",
+          "name": "string_list",
+          "shape": 6,
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "title": "N A M E",
+      "properties": {
+        "cnr_id": "lf-nodes",
+        "ver": "1749c0b009716e91ee47565c9b11476eeccef3f8",
+        "Node name for S&R": "LF_String"
+      },
+      "widgets_values": [
+        "icon",
+        true,
+        false,
+        999622705125337,
+        "randomize",
+        {
+          "nodes": [
+            {
+              "icon": "history",
+              "id": "icon",
+              "description": "Execution date: 20/10/2025, 09:06:00.",
+              "value": "icon"
+            }
+          ]
+        }
+      ],
+      "color": "#232",
+      "bgcolor": "#353",
+      "shape": 1
+    }
+  ],
+  "links": [
+    [22, 16, 0, 22, 0, "IMAGE"],
+    [65, 29, 0, 38, 0, "JSON"],
+    [66, 38, 0, 30, 2, "JSON"],
+    [68, 40, 0, 38, 1, "*"],
+    [72, 42, 0, 43, 0, "STRING"],
+    [73, 43, 0, 44, 0, "STRING"],
+    [74, 44, 0, 20, 0, "STRING"],
+    [75, 30, 0, 42, 10, "STRING"],
+    [76, 47, 0, 20, 1, "STRING"],
+    [80, 51, 0, 52, 1, "FLOAT"],
+    [84, 52, 0, 30, 0, "IMAGE"],
+    [91, 30, 2, 56, 0, "IMAGE"],
+    [101, 47, 0, 61, 2, "STRING"],
+    [102, 56, 0, 61, 0, "IMAGE"],
+    [116, 72, 0, 71, 2, "BOOLEAN"],
+    [117, 70, 0, 71, 1, "MASK"],
+    [118, 16, 1, 71, 0, "MASK"],
+    [121, 71, 0, 75, 0, "MASK"],
+    [124, 75, 0, 76, 0, "IMAGE"],
+    [125, 22, 0, 52, 0, "IMAGE"],
+    [126, 71, 0, 77, 0, "MASK"],
+    [127, 77, 0, 30, 1, "MASK"],
+    [129, 71, 0, 56, 1, "MASK"]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": { "scale": 0.3231167894408232, "offset": [3172.8855378010257, 4351.552886257757] }
+  },
+  "version": 0.4
+}
