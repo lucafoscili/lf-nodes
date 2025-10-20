@@ -1,6 +1,8 @@
 import { LfDataDataset } from '@lf-widgets/foundations/dist';
 import { WorkflowSectionController } from '../types/section';
 import { WorkflowState } from '../types/state';
+import { DEBUG_MESSAGES } from '../utils/constants';
+import { debugLog } from '../utils/debug';
 
 //#region Constants
 const ROOT_CLASS = 'drawer-section';
@@ -53,6 +55,8 @@ const _tree = (state: WorkflowState): HTMLLfTreeElement => {
 
 //#region Factory
 export const createDrawerSection = (): WorkflowSectionController => {
+  const { DRAWER_DESTROYED, DRAWER_MOUNTED, DRAWER_UPDATED } = DEBUG_MESSAGES;
+
   let element: HTMLLfDrawerElement | null = null;
   let lastState: WorkflowState | null = null;
 
@@ -70,6 +74,10 @@ export const createDrawerSection = (): WorkflowSectionController => {
 
     element.appendChild(_container(state));
     ui.layout._root?.appendChild(element);
+
+    debugLog(DRAWER_MOUNTED, 'informational', {
+      workflowCount: state.workflows?.nodes?.length ?? 0,
+    });
   };
 
   const render = (state: WorkflowState) => {
@@ -77,11 +85,19 @@ export const createDrawerSection = (): WorkflowSectionController => {
       return;
     }
 
-    lastState = state ?? lastState;
+    const previousState = lastState;
+    lastState = state;
+
     const { ui } = state;
     const tree = ui.layout.drawer.tree;
-    if (!tree || !lastState.workflows) {
+    if (!tree) {
       return;
+    }
+
+    if (previousState?.workflows !== state.workflows) {
+      debugLog(DRAWER_UPDATED, 'informational', {
+        workflowCount: state.workflows?.nodes?.length ?? 0,
+      });
     }
 
     tree.lfDataset = _createDataset(state.workflows);
@@ -94,6 +110,7 @@ export const createDrawerSection = (): WorkflowSectionController => {
         ui.layout.drawer._root = null;
         ui.layout.drawer.tree = null;
       });
+      debugLog(DRAWER_DESTROYED, 'informational', {});
     }
     element = null;
     lastState = null;

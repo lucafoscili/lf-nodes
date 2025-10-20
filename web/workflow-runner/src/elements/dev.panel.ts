@@ -9,18 +9,18 @@ const CARD_CLASS = `${ROOT_CLASS}__card`;
 type LfCardElement = HTMLElementTagNameMap['lf-card'];
 //#endregion
 
-//#region Factory
-export const createDevPanel = (): WorkflowSectionController => {
+const buildDebugDataset = (): LfDataDataset => {
   const framework = getLfFramework();
-  const debugCardDataset: LfDataDataset = {
+  const enabled = framework.debug.isEnabled();
+  return {
     nodes: [
       {
         id: 'workflow-runner-debug',
         cells: {
           lfToggle: {
             shape: 'toggle',
-            lfValue: framework.debug.isEnabled(),
-            value: framework.debug.isEnabled(),
+            lfValue: enabled,
+            value: enabled,
           },
           lfCode: {
             shape: 'code',
@@ -38,7 +38,10 @@ export const createDevPanel = (): WorkflowSectionController => {
       },
     ],
   };
+};
 
+//#region Factory
+export const createDevPanel = (): WorkflowSectionController => {
   let container: HTMLDivElement | null = null;
   let card: LfCardElement | null = null;
   let mountedState: WorkflowState | null = null;
@@ -58,15 +61,11 @@ export const createDevPanel = (): WorkflowSectionController => {
     card = document.createElement('lf-card');
     card.className = CARD_CLASS;
     card.lfLayout = 'debug';
-    card.lfDataset = debugCardDataset;
+    card.lfDataset = buildDebugDataset();
 
+    const body = state.ui.layout._root?.ownerDocument?.body ?? document.body;
     container.appendChild(card);
-    (state.ui.layout._root?.ownerDocument?.body ?? document.body).appendChild(container);
-
-    if (state.dev.panel.open) {
-      container.dataset.open = 'true';
-      container.setAttribute('aria-hidden', 'false');
-    }
+    body.appendChild(container);
 
     state.mutate.ui((ui) => {
       ui.layout.dev._root = container;
@@ -79,9 +78,7 @@ export const createDevPanel = (): WorkflowSectionController => {
       return;
     }
 
-    const isOpen = state.dev.panel.open;
-    container.dataset.open = String(isOpen);
-    container.setAttribute('aria-hidden', String(!isOpen));
+    container.setAttribute('aria-hidden', String(!state.isDebug));
   };
 
   const destroy = () => {

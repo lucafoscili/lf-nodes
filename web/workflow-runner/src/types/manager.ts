@@ -1,7 +1,7 @@
-import { WorkflowStatus } from './state';
+import { WorkflowStatus } from './section';
 
 //#region Manager
-export interface WorkflowRunnerManager {
+export interface WorkflowManager {
   runWorkflow: () => Promise<void>;
   setStatus: (status: WorkflowStatus, message?: string) => void;
   setWorkflow: (id: string) => void;

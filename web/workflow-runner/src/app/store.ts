@@ -1,14 +1,15 @@
 import { DEFAULT_STATUS_MESSAGES } from '../config';
+import { WorkflowAPIRunResult } from '../types/api';
+import { WorkflowStatus } from '../types/section';
 import {
-  WorkflowRunnerStore,
   WorkflowState,
   WorkflowStateListener,
   WorkflowStateUpdater,
-  WorkflowStatus,
+  WorkflowStore,
 } from '../types/state';
 
 //#region Factory
-export const createWorkflowRunnerStore = (initialState: WorkflowState): WorkflowRunnerStore => {
+export const createWorkflowRunnerStore = (initialState: WorkflowState): WorkflowStore => {
   let state = initialState;
   const listeners = new Set<WorkflowStateListener>();
   const pendingMutations: Array<() => void> = [];
@@ -62,34 +63,26 @@ export const createWorkflowRunnerStore = (initialState: WorkflowState): Workflow
   };
 
   const mutate = {
-    workflow: (workflowId: string) => setWorkflow(workflowId, setState),
-    status: (status: WorkflowStatus, message: string) => setStatus(status, message, setState),
-    runResult: (status: WorkflowStatus, message: string, results: any) =>
-      setRunResult(status, message, results, setState),
+    isDebug: (isDebug: boolean) =>
+      applyMutation((draft) => {
+        draft.isDebug = isDebug;
+      }),
     manager: (manager: WorkflowState['manager']) =>
       applyMutation((draft) => {
         draft.manager = manager;
       }),
-    workflows: (workflows: WorkflowState['workflows']) =>
-      applyMutation((draft) => {
-        draft.workflows = workflows;
-      }),
+    status: (status: WorkflowStatus, message?: string) => setStatus(status, message, setState),
+    runResult: (status: WorkflowStatus, message: string, results: WorkflowAPIRunResult) =>
+      setRunResult(status, message, results, setState),
     ui: (updater: (ui: WorkflowState['ui']) => void) =>
       applyMutation((draft) => {
         updater(draft.ui);
       }),
-    dev: {
-      panel: {
-        set: (open: boolean) =>
-          applyMutation((draft) => {
-            draft.dev.panel.open = open;
-          }),
-        toggle: () =>
-          applyMutation((draft) => {
-            draft.dev.panel.open = !draft.dev.panel.open;
-          }),
-      },
-    },
+    workflow: (workflowId: string) => setWorkflow(workflowId, setState),
+    workflows: (workflows: WorkflowState['workflows']) =>
+      applyMutation((draft) => {
+        draft.workflows = workflows;
+      }),
   };
 
   state.mutate = mutate;
@@ -103,17 +96,6 @@ export const createWorkflowRunnerStore = (initialState: WorkflowState): Workflow
 //#endregion
 
 //#region Mutators
-const setWorkflow = (workflowId: string, setState: (updater: WorkflowStateUpdater) => void) => {
-  setState((state) => ({
-    ...state,
-    current: {
-      ...state.current,
-      workflow: workflowId,
-      preferredOutput: null,
-    },
-    results: null,
-  }));
-};
 const setRunResult = (
   status: WorkflowStatus,
   message: string,
@@ -132,7 +114,7 @@ const setRunResult = (
 };
 const setStatus = (
   status: WorkflowStatus,
-  message: string,
+  message: string | undefined,
   setState: (updater: WorkflowStateUpdater) => void,
 ) => {
   setState((state) => ({
@@ -142,6 +124,17 @@ const setStatus = (
       status,
       message: message ?? DEFAULT_STATUS_MESSAGES[status],
     },
+  }));
+};
+const setWorkflow = (workflowId: string, setState: (updater: WorkflowStateUpdater) => void) => {
+  setState((state) => ({
+    ...state,
+    current: {
+      ...state.current,
+      workflow: workflowId,
+      preferredOutput: null,
+    },
+    results: null,
   }));
 };
 //#endregion

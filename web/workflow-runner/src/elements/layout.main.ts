@@ -1,5 +1,7 @@
-import { WorkflowState } from '../types/state';
 import { WorkflowSectionController } from '../types/section';
+import { WorkflowState } from '../types/state';
+import { DEBUG_MESSAGES } from '../utils/constants';
+import { debugLog } from '../utils/debug';
 
 //#region Constants
 const ROOT_CLASS = 'main-section';
@@ -7,6 +9,8 @@ const ROOT_CLASS = 'main-section';
 
 //#region Factory
 export const createMainSection = (): WorkflowSectionController => {
+  const { MAIN_DESTROYED, MAIN_MOUNTED } = DEBUG_MESSAGES;
+
   let element: HTMLElement | null = null;
   let lastState: WorkflowState | null = null;
 
@@ -21,6 +25,8 @@ export const createMainSection = (): WorkflowSectionController => {
       uiState.layout.main._root = element;
     });
     ui.layout._root?.appendChild(element);
+
+    debugLog(MAIN_MOUNTED, 'informational', {});
   };
 
   const render = () => {};
@@ -31,6 +37,7 @@ export const createMainSection = (): WorkflowSectionController => {
       lastState.mutate.ui((uiState) => {
         uiState.layout.main._root = null;
       });
+      debugLog(MAIN_DESTROYED, 'informational', {});
     }
     element = null;
     lastState = null;

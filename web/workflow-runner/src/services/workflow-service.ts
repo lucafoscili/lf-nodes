@@ -1,14 +1,14 @@
 import { LfDataDataset } from '@lf-widgets/foundations/dist';
 import { buildApiUrl } from '../config';
 import {
-  RunWorkflowResult,
   WorkflowAPIErrorOptions,
   WorkflowAPIResponse,
   WorkflowAPIRunPayload,
+  WorkflowAPIRunResult,
   WorkflowAPIUploadPayload,
   WorkflowAPIUploadResponse,
 } from '../types/api';
-import { WorkflowStatus } from '../types/state';
+import { WorkflowStatus } from '../types/section';
 import { isWorkflowAPIUploadPayload, isWorkflowAPIUploadResponse } from '../utils/common';
 
 export class WorkflowApiError<TPayload = unknown> extends Error {
@@ -52,7 +52,7 @@ export const fetchWorkflowDefinitions = async (): Promise<LfDataDataset> => {
 export const runWorkflowRequest = async (
   workflowId: string,
   inputs: Record<string, unknown>,
-): Promise<RunWorkflowResult> => {
+): Promise<WorkflowAPIRunResult> => {
   const response = await fetch(buildApiUrl('/run'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

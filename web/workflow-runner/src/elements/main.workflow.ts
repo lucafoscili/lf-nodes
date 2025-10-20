@@ -2,9 +2,16 @@ import { LfThemeUIState } from '@lf-widgets/core/dist/types/components';
 import { LfButtonInterface } from '@lf-widgets/foundations/dist';
 import { DEFAULT_STATUS_MESSAGES } from '../config';
 import { WorkflowAPIResult, WorkflowAPIResultKey, WorkflowAPIUI } from '../types/api';
-import { WorkflowCellStatus, WorkflowSectionHandle } from '../types/section';
-import { WorkflowState, WorkflowStatus } from '../types/state';
+import {
+  WorkflowCells,
+  WorkflowCellStatus,
+  WorkflowSectionHandle,
+  WorkflowStatus,
+} from '../types/section';
+import { WorkflowState } from '../types/state';
 import { clearChildren, normalize_description } from '../utils/common';
+import { DEBUG_MESSAGES } from '../utils/constants';
+import { debugLog } from '../utils/debug';
 import { createComponent, createInputCell, createOutputField } from './components';
 
 //#region Constants & helpers
@@ -13,7 +20,7 @@ const ROOT_CLASS = 'workflow-section';
 
 const getCurrentWorkflow = (state: WorkflowState) => {
   const { current, workflows } = state;
-  return workflows?.nodes?.find((wf) => wf.id === current.workflow) || null;
+  return workflows?.nodes?.find((node) => node.id === current.id) || null;
 };
 const getWorkflowTitle = (state: WorkflowState) => {
   const workflow = getCurrentWorkflow(state);
@@ -84,6 +91,17 @@ const createDescription = (state: WorkflowState) => {
 
 //#region Factory
 export const createWorkflowSection = (): WorkflowSectionHandle => {
+  const {
+    STATUS_UPDATED,
+    WORKFLOW_INPUT_FLAGGED,
+    WORKFLOW_INPUTS_CLEARED,
+    WORKFLOW_INPUTS_RENDERED,
+    WORKFLOW_LAYOUT_DESTROYED,
+    WORKFLOW_LAYOUT_MOUNTED,
+    WORKFLOW_RESULTS_CLEARED,
+    WORKFLOW_RESULTS_RENDERED,
+  } = DEBUG_MESSAGES;
+
   let descriptionElement: HTMLElement | null = null;
   let lastMessage: string | null = null;
   let lastResultsRef: WorkflowAPIUI | null = null;
@@ -129,6 +147,10 @@ export const createWorkflowSection = (): WorkflowSectionHandle => {
     section.appendChild(resultWrapper);
 
     ui.layout.main._root?.appendChild(section);
+
+    debugLog(WORKFLOW_LAYOUT_MOUNTED, 'informational', {
+      workflowId: state.current.id ?? null,
+    });
   };
 
   const updateDescription = (state: WorkflowState) => {
@@ -151,7 +173,7 @@ export const createWorkflowSection = (): WorkflowSectionHandle => {
     clearChildren(element);
 
     const workflow = getCurrentWorkflow(state);
-    const cellElements: WorkflowState['ui']['layout']['main']['workflow']['cells'] = [];
+    const cellElements: WorkflowCells = [];
 
     if (workflow && workflow.cells) {
       for (const key in workflow.cells) {
@@ -168,6 +190,17 @@ export const createWorkflowSection = (): WorkflowSectionHandle => {
     state.mutate.ui((uiState) => {
       uiState.layout.main.workflow.cells = cellElements;
     });
+
+    if (workflow) {
+      debugLog(WORKFLOW_INPUTS_RENDERED, 'informational', {
+        workflowId: state.current.id,
+        cellCount: cellElements.length,
+      });
+    } else {
+      debugLog(WORKFLOW_INPUTS_CLEARED, 'informational', {
+        workflowId: state.current.id,
+      });
+    }
   };
 
   const updateResult = (state: WorkflowState) => {
@@ -182,6 +215,9 @@ export const createWorkflowSection = (): WorkflowSectionHandle => {
 
     const nodeIds = Object.keys(outputs || {});
     if (nodeIds.length === 0) {
+      debugLog(WORKFLOW_RESULTS_CLEARED, 'informational', {
+        workflowId: state.current.id,
+      });
       return;
     }
 
@@ -216,6 +252,11 @@ export const createWorkflowSection = (): WorkflowSectionHandle => {
       behavior: 'smooth',
       block: 'start',
     });
+
+    debugLog(WORKFLOW_RESULTS_RENDERED, 'informational', {
+      workflowId: state.current.id,
+      nodes: nodeIds,
+    });
   };
 
   const updateRunButton = (state: WorkflowState) => {
@@ -235,6 +276,18 @@ export const createWorkflowSection = (): WorkflowSectionHandle => {
     const message = state.current.message ?? DEFAULT_STATUS_MESSAGES[state.current.status];
     element.textContent = message;
     element.dataset.tone = state.current.status;
+
+    const category =
+      state.current.status === 'error'
+        ? 'error'
+        : state.current.status === 'ready'
+        ? 'success'
+        : 'informational';
+    debugLog(STATUS_UPDATED, category, {
+      workflowId: state.current.id,
+      status: state.current.status,
+      message,
+    });
   };
 
   const updateTitle = (state: WorkflowState) => {
@@ -251,11 +304,11 @@ export const createWorkflowSection = (): WorkflowSectionHandle => {
       return;
     }
 
-    if (state.current.workflow !== lastWorkflowId) {
+    if (state.current.id !== lastWorkflowId) {
       updateDescription(state);
       updateTitle(state);
       updateOptions(state);
-      lastWorkflowId = state.current.workflow;
+      lastWorkflowId = state.current.id;
     }
 
     if (state.current.status !== lastStatus || state.current.message !== lastMessage) {
@@ -273,10 +326,18 @@ export const createWorkflowSection = (): WorkflowSectionHandle => {
 
   const setCellStatus = (state: WorkflowState, id: string, status: WorkflowCellStatus = '') => {
     const { ui } = state;
+
     const field = ui.layout.main.workflow.cells.find((el) => el.id === id);
     const wrapper = field?.parentElement;
     if (wrapper) {
       wrapper.dataset.status = status;
+    }
+    if (status) {
+      debugLog(WORKFLOW_INPUT_FLAGGED, 'warning', {
+        workflowId: state.current.id,
+        field: id,
+        status,
+      });
     }
   };
 
@@ -292,6 +353,9 @@ export const createWorkflowSection = (): WorkflowSectionHandle => {
         wf.run = null;
         wf.status = null;
         wf.title = null;
+      });
+      debugLog(WORKFLOW_LAYOUT_DESTROYED, 'informational', {
+        workflowId: mountedState.current.id ?? null,
       });
     }
 

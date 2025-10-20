@@ -1,9 +1,25 @@
 import { WorkflowState } from '../types/state';
 
+const INIT_ERROR = 'Mutate not initialized';
+const INIT_CB = () => {
+  throw new Error(INIT_ERROR);
+};
+
 //#region Public API
 export const initState = (appContainer: HTMLDivElement): WorkflowState => ({
-  current: { status: 'ready', message: 'Ready.', workflow: null, preferredOutput: null },
+  current: { status: 'ready', message: 'Ready.', id: null },
+  isDebug: false,
   manager: null,
+  mutate: {
+    isDebug: INIT_CB,
+    manager: INIT_CB,
+    runResult: INIT_CB,
+    status: INIT_CB,
+    workflow: INIT_CB,
+    workflows: INIT_CB,
+    ui: INIT_CB,
+  },
+  results: null,
   ui: {
     layout: {
       _root: appContainer,
@@ -39,41 +55,5 @@ export const initState = (appContainer: HTMLDivElement): WorkflowState => ({
     },
   },
   workflows: {},
-  results: null,
-  mutate: {
-    workflow: () => {
-      throw new Error('Mutate not initialized');
-    },
-    status: () => {
-      throw new Error('Mutate not initialized');
-    },
-    runResult: () => {
-      throw new Error('Mutate not initialized');
-    },
-    manager: () => {
-      throw new Error('Mutate not initialized');
-    },
-    workflows: () => {
-      throw new Error('Mutate not initialized');
-    },
-    ui: () => {
-      throw new Error('Mutate not initialized');
-    },
-    dev: {
-      panel: {
-        set: () => {
-          throw new Error('Mutate not initialized');
-        },
-        toggle: () => {
-          throw new Error('Mutate not initialized');
-        },
-      },
-    },
-  },
-  dev: {
-    panel: {
-      open: false,
-    },
-  },
 });
 //#endregion

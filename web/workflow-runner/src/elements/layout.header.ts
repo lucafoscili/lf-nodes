@@ -59,7 +59,7 @@ const _debugToggle = (state: WorkflowState) => {
 
     switch (eventType) {
       case 'click':
-        state.mutate.dev.panel.toggle();
+        state.mutate.isDebug(!state.isDebug);
         break;
     }
   });
@@ -100,12 +100,12 @@ export const createHeaderSection = (): WorkflowSectionController => {
   };
 
   const render = (state: WorkflowState) => {
+    const { isDebug } = state;
+
     const debugToggle = state.ui.layout.header.debugToggle;
     if (debugToggle) {
-      debugToggle.lfUiState = state.dev.panel.open ? 'secondary' : 'info';
-      debugToggle.title = state.dev.panel.open
-        ? 'Hide developer console'
-        : 'Show developer console';
+      debugToggle.lfUiState = isDebug ? 'secondary' : 'info';
+      debugToggle.title = isDebug ? 'Hide developer console' : 'Show developer console';
     }
   };
 
