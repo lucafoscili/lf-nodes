@@ -568,13 +568,25 @@ def numpy_to_svg(arr: np.ndarray, config: Any = None, mask: Any = None) -> tuple
     h, w = arr.shape[:2]
     img_uint8 = _ensure_uint8(arr)
     mask_uint8 = _normalize_mask(mask, h, w)
-    keep_mask = None
+    processed_mask = None
+    clip_mask = None
+    clip_scale = 1.0
     if mask_uint8 is not None:
-        keep_mask = mask_uint8.copy()
+        try:
+            clip_mask, clip_scale = _prepare_region_mask(mask_uint8, cfg)
+            processed_mask = clip_mask.copy()
+            if clip_scale > 1:
+                processed_mask = cv2.resize(processed_mask, (w, h), interpolation=cv2.INTER_AREA)
+        except Exception:
+            clip_mask, clip_scale = None, 1.0
+            processed_mask = mask_uint8.copy()
+
+        if processed_mask is not None:
+            processed_mask = np.where(processed_mask > 127, 255, 0).astype("uint8")
 
     processing_img = img_uint8.copy()
-    if keep_mask is not None:
-        processing_img[keep_mask == 0] = 0
+    if processed_mask is not None:
+        processing_img[processed_mask == 0] = 0
 
     try:
         cv2.setNumThreads(1)
@@ -594,7 +606,7 @@ def numpy_to_svg(arr: np.ndarray, config: Any = None, mask: Any = None) -> tuple
 
     if engine == "vtracer" and _VTRACER_AVAILABLE:
         try:
-            return _numpy_to_svg_vtracer(img_uint8, cfg, num_colors, keep_mask)
+            return _numpy_to_svg_vtracer(img_uint8, cfg, num_colors, processed_mask)
         except Exception as exc:
             # If vtracer fails, fall back to contour tracing.
             import traceback
@@ -610,12 +622,12 @@ def numpy_to_svg(arr: np.ndarray, config: Any = None, mask: Any = None) -> tuple
     else:
         preproc_img = processing_img.copy()
 
-    if keep_mask is not None:
-        preproc_img[keep_mask == 0] = 0
+    if processed_mask is not None:
+        preproc_img[processed_mask == 0] = 0
 
     color_regions: list[Dict[str, Any]] = []
 
-    alpha_channel = keep_mask.copy() if keep_mask is not None else None
+    alpha_channel = processed_mask.copy() if processed_mask is not None else None
 
     if num_colors > 1:
         pixels = preproc_img.reshape(-1, 3).astype(np.float32)
@@ -637,12 +649,12 @@ def numpy_to_svg(arr: np.ndarray, config: Any = None, mask: Any = None) -> tuple
 
         flat_original = img_uint8.reshape(-1, 3)
         flat_labels = labels.flatten()
-        mask_filter = keep_mask.reshape(-1) > 0 if keep_mask is not None else None
+        mask_filter = processed_mask.reshape(-1) > 0 if processed_mask is not None else None
 
         for idx, center in enumerate(centers):
             mask = np.where(label_map == idx, 255, 0).astype("uint8")
-            if keep_mask is not None:
-                mask = cv2.bitwise_and(mask, keep_mask)
+            if processed_mask is not None:
+                mask = cv2.bitwise_and(mask, processed_mask)
             area_px = int(cv2.countNonZero(mask))
             if area_px == 0:
                 continue
@@ -659,16 +671,16 @@ def numpy_to_svg(arr: np.ndarray, config: Any = None, mask: Any = None) -> tuple
                 "area": area_px
             })
 
-        if keep_mask is not None:
-            preview[keep_mask == 0] = 0
+        if processed_mask is not None:
+            preview[processed_mask == 0] = 0
     else:
         gray = cv2.cvtColor(preproc_img, cv2.COLOR_RGB2GRAY)
         threshold_value = int(np.clip(cfg.threshold, 0.0, 1.0) * 255)
         _, mask = cv2.threshold(gray, threshold_value, 255, cv2.THRESH_BINARY)
         preview = cv2.cvtColor(mask, cv2.COLOR_GRAY2RGB)
-        if keep_mask is not None:
-            mask = cv2.bitwise_and(mask, keep_mask)
-            preview[keep_mask == 0] = 0
+        if processed_mask is not None:
+            mask = cv2.bitwise_and(mask, processed_mask)
+            preview[processed_mask == 0] = 0
 
         area_px = int(cv2.countNonZero(mask))
         if area_px > 0:
@@ -708,7 +720,7 @@ def numpy_to_svg(arr: np.ndarray, config: Any = None, mask: Any = None) -> tuple
         dwg.attribs["width"] = "100%"
         dwg.attribs["height"] = "100%"
 
-    if cfg.background_color and keep_mask is None:
+    if cfg.background_color and processed_mask is None:
         dwg.add(dwg.rect(insert=(_format_coord(vb_minx), _format_coord(vb_miny)), size=(_format_coord(vb_w), _format_coord(vb_h)), fill=cfg.background_color, stroke="none"))
 
     # If a viewbox override was provided, wrap geometry in a transform group so
@@ -727,8 +739,7 @@ def numpy_to_svg(arr: np.ndarray, config: Any = None, mask: Any = None) -> tuple
 
     geometry_parent = content_group if content_group is not None else dwg
 
-    if keep_mask is not None:
-        clip_mask, clip_scale = _prepare_region_mask(keep_mask, cfg)
+    if clip_mask is not None:
         clip_paths = _mask_to_paths(
             clip_mask,
             simplify_tol,
