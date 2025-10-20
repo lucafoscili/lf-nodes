@@ -41,10 +41,7 @@ export class LfWorkflowRunnerManager implements WorkflowRunnerManager {
       workflow: createWorkflowSection(),
     };
 
-    this.#store.setState((state) => ({
-      ...state,
-      manager: this,
-    }));
+    this.#store.getState().mutate.manager(this);
 
     this.#initializeFramework();
     this.#initializeLayout();
@@ -131,10 +128,7 @@ export class LfWorkflowRunnerManager implements WorkflowRunnerManager {
       throw new Error('No workflows available from the API.');
     }
 
-    this.#store.setState((state) => ({
-      ...state,
-      workflows,
-    }));
+    this.#store.getState().mutate.workflows(workflows);
 
     this.setWorkflow(workflows.nodes[0].id);
     this.setStatus('ready', 'Workflows loaded.');
@@ -185,8 +179,7 @@ export class LfWorkflowRunnerManager implements WorkflowRunnerManager {
       );
     } catch (error) {
       if (error instanceof WorkflowApiError) {
-        const state = this.#store.getState();
-        state.mutate.status('error', error.message);
+        this.setStatus('error', error.payload?.detail || error.message);
         const inputName = error.payload?.error?.input;
         if (inputName) {
           this.#sections.workflow.setCellStatus(state, inputName, 'error');
@@ -204,7 +197,6 @@ export class LfWorkflowRunnerManager implements WorkflowRunnerManager {
     const state = this.#store.getState();
     state.mutate.status(status, message);
   }
-
   setWorkflow(id: string): void {
     const state = this.#store.getState();
     if (state.current.workflow === id) {

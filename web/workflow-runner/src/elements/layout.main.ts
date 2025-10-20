@@ -17,7 +17,9 @@ export const createMainSection = (): WorkflowSectionController => {
     element = document.createElement('main');
     element.className = ROOT_CLASS;
 
-    ui.layout.main._root = element;
+    state.mutate.ui((uiState) => {
+      uiState.layout.main._root = element;
+    });
     ui.layout._root?.appendChild(element);
   };
 
@@ -26,7 +28,9 @@ export const createMainSection = (): WorkflowSectionController => {
   const destroy = () => {
     element?.remove();
     if (lastState) {
-      lastState.ui.layout.main._root = null;
+      lastState.mutate.ui((uiState) => {
+        uiState.layout.main._root = null;
+      });
     }
     element = null;
     lastState = null;

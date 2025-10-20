@@ -11,6 +11,8 @@ import { DEFAULT_STATUS_MESSAGES } from '../config';
 export const createWorkflowRunnerStore = (initialState: WorkflowState): WorkflowRunnerStore => {
   let state = initialState;
   const listeners = new Set<WorkflowStateListener>();
+  const pendingMutations: Array<() => void> = [];
+  let isApplyingMutation = false;
 
   const getState = () => state;
 
@@ -31,6 +33,34 @@ export const createWorkflowRunnerStore = (initialState: WorkflowState): Workflow
     return () => listeners.delete(listener);
   };
 
+  const enqueueMutation = (mutation: () => void) => {
+    pendingMutations.push(mutation);
+    if (isApplyingMutation) {
+      return;
+    }
+
+    isApplyingMutation = true;
+    try {
+      while (pendingMutations.length > 0) {
+        const nextMutation = pendingMutations.shift();
+        if (nextMutation) {
+          nextMutation();
+        }
+      }
+    } finally {
+      isApplyingMutation = false;
+    }
+  };
+
+  const applyMutation = (mutator: (draft: WorkflowState) => void) => {
+    enqueueMutation(() =>
+      setState((current) => {
+        mutator(current);
+        return { ...current };
+      }),
+    );
+  };
+
   const mutate = {
     workflow: (workflowId: string) => setWorkflow(workflowId, setState),
     status: (status: WorkflowStatus, message?: string) => setStatus(status, message, setState),
@@ -40,6 +70,18 @@ export const createWorkflowRunnerStore = (initialState: WorkflowState): Workflow
       preferredOutput: string | null,
       results: any,
     ) => setRunResult(status, message, preferredOutput, results, setState),
+    manager: (manager: WorkflowState['manager']) =>
+      applyMutation((draft) => {
+        draft.manager = manager;
+      }),
+    workflows: (workflows: WorkflowState['workflows']) =>
+      applyMutation((draft) => {
+        draft.workflows = workflows;
+      }),
+    ui: (updater: (ui: WorkflowState['ui']) => void) =>
+      applyMutation((draft) => {
+        updater(draft.ui);
+      }),
   };
 
   state.mutate = mutate;

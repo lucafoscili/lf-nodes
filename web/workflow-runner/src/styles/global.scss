@@ -85,6 +85,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 1.5em;
+    padding: 1.25em;
   }
 
   &__result,
@@ -96,7 +97,7 @@ body {
     & {
       background: rgba(var(--lf-color-surface), 0.75);
       border-radius: var(--lf-ui-border-radius);
-      padding: 1em 1.2em;
+      padding: 1.25em;
     }
 
     &__result-grid {

@@ -57,12 +57,16 @@ export const createHeaderSection = (): WorkflowSectionController => {
     const container = _container();
     const drawerToggle = _drawerToggle(state);
 
-    ui.layout.header.drawerToggle = drawerToggle;
+    state.mutate.ui((uiState) => {
+      uiState.layout.header.drawerToggle = drawerToggle;
+    });
 
     element.appendChild(container);
     container.appendChild(drawerToggle);
 
-    ui.layout.header._root = element;
+    state.mutate.ui((uiState) => {
+      uiState.layout.header._root = element;
+    });
     ui.layout._root?.appendChild(element);
   };
 
@@ -71,9 +75,11 @@ export const createHeaderSection = (): WorkflowSectionController => {
   const destroy = () => {
     element?.remove();
     if (lastState) {
-      lastState.ui.layout.header._root = null;
-      lastState.ui.layout.header.drawerToggle = null;
-      lastState.ui.layout.header.themeSwitch = null;
+      lastState.mutate.ui((uiState) => {
+        uiState.layout.header._root = null;
+        uiState.layout.header.drawerToggle = null;
+        uiState.layout.header.themeSwitch = null;
+      });
     }
     element = null;
     lastState = null;

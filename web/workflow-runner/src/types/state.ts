@@ -36,6 +36,7 @@ export interface WorkflowUI {
         cells: Array<
           HTMLLfButtonElement | HTMLLfTextfieldElement | HTMLLfToggleElement | HTMLLfUploadElement
         >;
+        description: HTMLElement | null;
         options: HTMLDivElement | null;
         result: HTMLElement | null;
         run: HTMLLfButtonElement | null;
@@ -45,19 +46,23 @@ export interface WorkflowUI {
     };
   };
 }
+export interface WorkflowStateMutators {
+  workflow: (id: string) => void;
+  status: (status: WorkflowStatus, message?: string) => void;
+  runResult: (
+    status: WorkflowStatus,
+    message: string,
+    preferredOutput: string | null,
+    results: any,
+  ) => void;
+  manager: (manager: WorkflowRunnerManager | null) => void;
+  workflows: (workflows: LfDataDataset) => void;
+  ui: (updater: (ui: WorkflowUI) => void) => void;
+}
 export interface WorkflowState {
   current: WorkflowCurrent;
   manager: WorkflowRunnerManager | null;
-  mutate: {
-    workflow: (id: string) => void;
-    status: (status: WorkflowStatus, message?: string) => void;
-    runResult: (
-      status: WorkflowStatus,
-      message: string,
-      preferredOutput: string | null,
-      results: any,
-    ) => void;
-  };
+  mutate: WorkflowStateMutators;
   results: WorkflowAPIUI | null;
   ui: WorkflowUI;
   workflows: LfDataDataset;

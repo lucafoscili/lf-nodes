@@ -43,7 +43,9 @@ const _tree = (state: WorkflowState): HTMLLfTreeElement => {
     }
   });
 
-  state.ui.layout.drawer.tree = tree;
+  state.mutate.ui((ui) => {
+    ui.layout.drawer.tree = tree;
+  });
 
   return tree;
 };
@@ -62,7 +64,9 @@ export const createDrawerSection = (): WorkflowSectionController => {
     element.className = ROOT_CLASS;
     element.lfDisplay = 'slide';
 
-    ui.layout.drawer._root = element;
+    state.mutate.ui((ui) => {
+      ui.layout.drawer._root = element;
+    });
 
     element.appendChild(_container(state));
     ui.layout._root?.appendChild(element);
@@ -86,8 +90,10 @@ export const createDrawerSection = (): WorkflowSectionController => {
   const destroy = () => {
     element?.remove();
     if (lastState) {
-      lastState.ui.layout.drawer._root = null;
-      lastState.ui.layout.drawer.tree = null;
+      lastState.mutate.ui((ui) => {
+        ui.layout.drawer._root = null;
+        ui.layout.drawer.tree = null;
+      });
     }
     element = null;
     lastState = null;

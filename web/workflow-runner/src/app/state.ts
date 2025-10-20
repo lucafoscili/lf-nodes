@@ -22,6 +22,7 @@ export const initState = (appContainer: HTMLDivElement): WorkflowState => ({
         workflow: {
           _root: null,
           cells: [],
+          description: null,
           options: null,
           result: null,
           run: null,
@@ -41,6 +42,15 @@ export const initState = (appContainer: HTMLDivElement): WorkflowState => ({
       throw new Error('Mutate not initialized');
     },
     runResult: () => {
+      throw new Error('Mutate not initialized');
+    },
+    manager: () => {
+      throw new Error('Mutate not initialized');
+    },
+    workflows: () => {
+      throw new Error('Mutate not initialized');
+    },
+    ui: () => {
       throw new Error('Mutate not initialized');
     },
   },

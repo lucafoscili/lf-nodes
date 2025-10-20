@@ -16,6 +16,10 @@ class InputValidationError(ValueError):
 def _resolve_user_path(*relative_parts: str) -> Path:
     user_dir = Path(folder_paths.get_user_directory())
     return user_dir.joinpath(*relative_parts).resolve()
+
+# Public alias for workflow modules.
+resolve_user_path = _resolve_user_path
+
 def _json_safe(value: Any) -> Any:
     """
     Recursively convert workflow values into JSON-safe types.
@@ -156,61 +160,6 @@ class WorkflowNode:
         return {f"{cell.id}": cell.to_dict() for i, cell in enumerate(self.cells)}
 # endregion
 
-# region Workflow Config
-def _configure_image_to_svg_workflow(prompt: Dict[str, Any], inputs: Dict[str, Any]) -> None:
-    for (node_id, node) in prompt.items():
-        if not isinstance(node, dict):
-            continue
-
-        inputs_map = node.setdefault("inputs", {})
-
-        if node_id == "16":  # Image Loader node
-            input_name = "source_path"
-            source_path = inputs.get(input_name)
-            if not source_path:
-                raise InputValidationError("Missing required input 'source_path'.", input_name=input_name)
-
-            if isinstance(source_path, (list, tuple)):
-                source_path = next((v for v in source_path if v), source_path[0] if len(source_path) > 0 else None)
-
-            if isinstance(source_path, dict):
-                source_path = source_path.get('path') or source_path.get('file') or source_path.get('name')
-
-            if isinstance(source_path, str) and ';' in source_path:
-                parts = [p for p in (s.strip() for s in source_path.split(';')) if p]
-                source_path = parts[0] if parts else source_path
-
-            resolved_path = Path(source_path).expanduser()
-            if not resolved_path.exists():
-                raise FileNotFoundError(f"Input path does not exist: {resolved_path}")
-
-            resolved_str = str(resolved_path)
-            inputs_map["image"] = resolved_str
-
-        if node_id == "40":  # Color number node (optional)
-            input_name = "number_of_colors"
-            input_value = int(inputs.get(input_name, 0) or 0)
-            if input_value is not None and input_value > 0:
-                inputs_map["integer"] = input_value
-
-        if node_id == "47":  # Icon name node (optional)
-            input_name = "icon_name"
-            icon_name = inputs.get(input_name)
-            if icon_name:
-                inputs_map["string"] = str(icon_name)
-
-        if node_id == "51":  # Desaturate checkbox (optional)
-            input_name = "desaturate"
-            desaturate = inputs.get(input_name)
-            inputs_map["boolean"] = bool(desaturate)
-
-        if node_id == "72":  # Keep transparency checkbox (optional)
-            input_name = "keep_transparency"
-            keep_transparency = inputs.get(input_name)
-            inputs_map["boolean"] = bool(keep_transparency)
-
-# endregion
-
 # region Workflow Defs
 class WorkflowRegistry:
     def __init__(self) -> None:
@@ -234,85 +183,40 @@ class WorkflowRegistry:
 
 REGISTRY = WorkflowRegistry()
 
-image_to_svg_workflow_path = _resolve_user_path("default", "workflows", "Image 2 SVG.json")
-REGISTRY.register(
-    WorkflowNode(
-        id="image-to-svg",
-        value="Image to SVG",
-        description="Converts a raster image to SVG format using the configured image processing model.",
-        workflow_path=image_to_svg_workflow_path,
-        cells=[
-            WorkflowCell(
-                id="source_path",
-                value="Source File or Directory",
-                shape="upload",
-                props={
-                    "lfHtmlAttributes": {
-                        "accept": "image/*"
-                    },
-                    "lfLabel": "Source image",
-                },
-            ),
-            WorkflowCell(
-                id="icon_name",
-                value="Icon Name",
-                shape="textfield",
-                props={
-                    "lfHtmlAttributes": {
-                        "autocomplete": "off",
-                        "type": "text"
-                    },
-                    "lfLabel": "Icon name",
-                    "lfHelper": {
-                        "showWhenFocused": False,
-                        "value": "Optional: The name of the icon to use. Default is 'icon'.",
-                    },
-                    "lfValue": "icon",
-                },
-            ),
-            WorkflowCell(
-                id="number_of_colors",
-                value="Number of Colors",
-                shape="textfield",
-                props={
-                    "lfHtmlAttributes": {
-                        "autocomplete": "off",
-                        "type": "number",
-                        "min": 1,
-                        "max": 256
-                    },
-                    "lfHelper": {
-                        "showWhenFocused": False,
-                        "value": "Optional: the number of colors to reduce the image to. Default is 2.",
-                    },
-                    "lfLabel": "Number of colors",
-                    "lfValue": "2",
-                },
-            ),
-            WorkflowCell(
-                id="desaturate",
-                value="Desaturate",
-                shape="toggle",
-                description="Sets whether to desaturate the image before converting.",
-                props={
-                    "lfLabel": "Desaturate image",
-                    "lfValue": False,
-                },
-            ),
-            WorkflowCell(
-                id="keep_transparency",
-                value="Keep Transparency",
-                shape="toggle",
-                description="Sets whether to keep the transparency of the image.",
-                props={
-                    "lfLabel": "Keep transparency",
-                    "lfValue": True,
-                },
-            ),
-        ],
-        configure_prompt=_configure_image_to_svg_workflow,
+def _is_workflow_definition(definition: object) -> bool:
+    if isinstance(definition, WorkflowNode):
+        return True
+
+    required_attrs = (
+        "id",
+        "value",
+        "description",
+        "workflow_path",
+        "cells",
+        "configure_prompt",
     )
-)
+    required_methods = ("load_prompt", "cells_as_dict")
+
+    return all(hasattr(definition, attr) for attr in (*required_attrs, *required_methods))
+
+
+def _register_packaged_workflows() -> None:
+    """
+    Import workflow definitions located in the workflows subpackage and add them to the registry.
+
+    Keeping the import local prevents circular imports while registry types are still being defined.
+    """
+    from .workflows import iter_workflow_definitions
+
+    for definition in iter_workflow_definitions():
+        if not _is_workflow_definition(definition):
+            raise TypeError(
+                f"Workflow definition '{definition!r}' is not compatible with WorkflowNode."
+            )
+        REGISTRY.register(definition)  # type: ignore[arg-type]
+
+
+_register_packaged_workflows()
 
 def list_workflows() -> List[Dict[str, Any]]:
     return REGISTRY.list()
