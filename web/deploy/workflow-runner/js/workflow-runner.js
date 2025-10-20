@@ -52,7 +52,9 @@ const _tree = (state) => {
         break;
     }
   });
-  state.ui.layout.drawer.tree = tree;
+  state.mutate.ui((ui) => {
+    ui.layout.drawer.tree = tree;
+  });
   return tree;
 };
 const createDrawerSection = () => {
@@ -65,7 +67,9 @@ const createDrawerSection = () => {
     element = document.createElement("lf-drawer");
     element.className = ROOT_CLASS$3;
     element.lfDisplay = "slide";
-    ui.layout.drawer._root = element;
+    state.mutate.ui((ui2) => {
+      ui2.layout.drawer._root = element;
+    });
     element.appendChild(_container$1(state));
     (_a = ui.layout._root) == null ? void 0 : _a.appendChild(element);
   };
@@ -84,8 +88,10 @@ const createDrawerSection = () => {
   const destroy = () => {
     element == null ? void 0 : element.remove();
     if (lastState) {
-      lastState.ui.layout.drawer._root = null;
-      lastState.ui.layout.drawer.tree = null;
+      lastState.mutate.ui((ui) => {
+        ui.layout.drawer._root = null;
+        ui.layout.drawer.tree = null;
+      });
     }
     element = null;
     lastState = null;
@@ -327,10 +333,14 @@ const createHeaderSection = () => {
     element.className = ROOT_CLASS$2;
     const container = _container();
     const drawerToggle = _drawerToggle(state);
-    ui.layout.header.drawerToggle = drawerToggle;
+    state.mutate.ui((uiState) => {
+      uiState.layout.header.drawerToggle = drawerToggle;
+    });
     element.appendChild(container);
     container.appendChild(drawerToggle);
-    ui.layout.header._root = element;
+    state.mutate.ui((uiState) => {
+      uiState.layout.header._root = element;
+    });
     (_a = ui.layout._root) == null ? void 0 : _a.appendChild(element);
   };
   const render = () => {
@@ -338,9 +348,11 @@ const createHeaderSection = () => {
   const destroy = () => {
     element == null ? void 0 : element.remove();
     if (lastState) {
-      lastState.ui.layout.header._root = null;
-      lastState.ui.layout.header.drawerToggle = null;
-      lastState.ui.layout.header.themeSwitch = null;
+      lastState.mutate.ui((uiState) => {
+        uiState.layout.header._root = null;
+        uiState.layout.header.drawerToggle = null;
+        uiState.layout.header.themeSwitch = null;
+      });
     }
     element = null;
     lastState = null;
@@ -361,7 +373,9 @@ const createMainSection = () => {
     const { ui } = state;
     element = document.createElement("main");
     element.className = ROOT_CLASS$1;
-    ui.layout.main._root = element;
+    state.mutate.ui((uiState) => {
+      uiState.layout.main._root = element;
+    });
     (_a = ui.layout._root) == null ? void 0 : _a.appendChild(element);
   };
   const render = () => {
@@ -369,7 +383,9 @@ const createMainSection = () => {
   const destroy = () => {
     element == null ? void 0 : element.remove();
     if (lastState) {
-      lastState.ui.layout.main._root = null;
+      lastState.mutate.ui((uiState) => {
+        uiState.layout.main._root = null;
+      });
     }
     element = null;
     lastState = null;
@@ -387,10 +403,14 @@ const getCurrentWorkflow = (state) => {
   const { current, workflows } = state;
   return ((_a = workflows == null ? void 0 : workflows.nodes) == null ? void 0 : _a.find((wf) => wf.id === current.workflow)) || null;
 };
-const getWorkflowLabel = (state) => {
+const getWorkflowTitle = (state) => {
   const workflow = getCurrentWorkflow(state);
   const str = typeof (workflow == null ? void 0 : workflow.value) === "string" ? workflow.value : String((workflow == null ? void 0 : workflow.value) || "");
   return str || WORKFLOW_TEXT;
+};
+const getWorkflowDescription = (state) => {
+  const workflow = getCurrentWorkflow(state);
+  return (workflow == null ? void 0 : workflow.description) || "";
 };
 const createFieldWrapper = () => {
   const fieldWrapper = document.createElement("div");
@@ -430,21 +450,28 @@ const createStatusWrapper = (tone = "info") => {
 const createTitle = (state) => {
   const h3 = document.createElement("h3");
   h3.className = `${ROOT_CLASS}__title`;
-  h3.textContent = getWorkflowLabel(state);
+  h3.textContent = getWorkflowTitle(state);
   return h3;
 };
+const createDescription = (state) => {
+  const p = document.createElement("p");
+  p.className = `${ROOT_CLASS}__description`;
+  p.textContent = getWorkflowDescription(state);
+  return p;
+};
 const createWorkflowSection = () => {
-  let section = null;
+  let descriptionElement = null;
+  let lastMessage = null;
+  let lastResultsRef = null;
+  let lastStatus = null;
+  let lastWorkflowId = null;
+  let mountedState = null;
   let optionsWrapper = null;
   let resultWrapper = null;
   let runButton = null;
+  let section = null;
   let statusWrapper = null;
   let titleElement = null;
-  let lastWorkflowId = null;
-  let lastStatus = null;
-  let lastMessage = null;
-  let lastResultsRef = null;
-  let mountedState = null;
   const mount = (state) => {
     var _a;
     mountedState = state;
@@ -452,22 +479,35 @@ const createWorkflowSection = () => {
     section = document.createElement("section");
     section.className = ROOT_CLASS;
     titleElement = createTitle(state);
+    descriptionElement = createDescription(state);
     optionsWrapper = createOptionsWrapper();
     runButton = createRunButton(state);
     statusWrapper = createStatusWrapper("info");
     resultWrapper = createResultWrapper();
-    ui.layout.main.workflow._root = section;
-    ui.layout.main.workflow.options = optionsWrapper;
-    ui.layout.main.workflow.result = resultWrapper;
-    ui.layout.main.workflow.run = runButton;
-    ui.layout.main.workflow.status = statusWrapper;
-    ui.layout.main.workflow.title = titleElement;
+    state.mutate.ui((uiState) => {
+      uiState.layout.main.workflow._root = section;
+      uiState.layout.main.workflow.description = descriptionElement;
+      uiState.layout.main.workflow.options = optionsWrapper;
+      uiState.layout.main.workflow.result = resultWrapper;
+      uiState.layout.main.workflow.run = runButton;
+      uiState.layout.main.workflow.status = statusWrapper;
+      uiState.layout.main.workflow.title = titleElement;
+    });
     section.appendChild(titleElement);
+    section.appendChild(descriptionElement);
     section.appendChild(optionsWrapper);
     section.appendChild(runButton);
     section.appendChild(statusWrapper);
     section.appendChild(resultWrapper);
     (_a = ui.layout.main._root) == null ? void 0 : _a.appendChild(section);
+  };
+  const updateDescription = (state) => {
+    const { ui } = state;
+    const element = ui.layout.main.workflow.description;
+    if (!element) {
+      return;
+    }
+    element.textContent = getWorkflowDescription(state);
   };
   const updateOptions = (state) => {
     const { ui } = state;
@@ -476,19 +516,21 @@ const createWorkflowSection = () => {
       return;
     }
     clearChildren(element);
-    ui.layout.main.workflow.cells = [];
     const workflow = getCurrentWorkflow(state);
-    if (!workflow || !workflow.cells) {
-      return;
+    const cellElements = [];
+    if (workflow && workflow.cells) {
+      for (const key in workflow.cells) {
+        const cell = workflow.cells[key];
+        const wrapper = createFieldWrapper();
+        const cellElement = createInputCell(cell);
+        cellElements.push(cellElement);
+        wrapper.appendChild(cellElement);
+        element.appendChild(wrapper);
+      }
     }
-    for (const key in workflow.cells) {
-      const cell = workflow.cells[key];
-      const wrapper = createFieldWrapper();
-      const cellElement = createInputCell(cell);
-      ui.layout.main.workflow.cells.push(cellElement);
-      wrapper.appendChild(cellElement);
-      element.appendChild(wrapper);
-    }
+    state.mutate.ui((uiState) => {
+      uiState.layout.main.workflow.cells = cellElements;
+    });
   };
   const updateResult = (state) => {
     const { ui } = state;
@@ -550,13 +592,14 @@ const createWorkflowSection = () => {
     if (!element) {
       return;
     }
-    element.textContent = getWorkflowLabel(state);
+    element.textContent = getWorkflowTitle(state);
   };
   const render = (state) => {
     if (!section) {
       return;
     }
     if (state.current.workflow !== lastWorkflowId) {
+      updateDescription(state);
       updateTitle(state);
       updateOptions(state);
       lastWorkflowId = state.current.workflow;
@@ -583,14 +626,16 @@ const createWorkflowSection = () => {
   const destroy = () => {
     section == null ? void 0 : section.remove();
     if (mountedState) {
-      const wf = mountedState.ui.layout.main.workflow;
-      wf._root = null;
-      wf.cells = [];
-      wf.options = null;
-      wf.result = null;
-      wf.run = null;
-      wf.status = null;
-      wf.title = null;
+      mountedState.mutate.ui((uiState) => {
+        const wf = uiState.layout.main.workflow;
+        wf._root = null;
+        wf.cells = [];
+        wf.options = null;
+        wf.result = null;
+        wf.run = null;
+        wf.status = null;
+        wf.title = null;
+      });
     }
     section = null;
     optionsWrapper = null;
@@ -725,6 +770,7 @@ const initState = (appContainer) => ({
         workflow: {
           _root: null,
           cells: [],
+          description: null,
           options: null,
           result: null,
           run: null,
@@ -745,12 +791,23 @@ const initState = (appContainer) => ({
     },
     runResult: () => {
       throw new Error("Mutate not initialized");
+    },
+    manager: () => {
+      throw new Error("Mutate not initialized");
+    },
+    workflows: () => {
+      throw new Error("Mutate not initialized");
+    },
+    ui: () => {
+      throw new Error("Mutate not initialized");
     }
   }
 });
 const createWorkflowRunnerStore = (initialState) => {
   let state = initialState;
   const listeners = /* @__PURE__ */ new Set();
+  const pendingMutations = [];
+  let isApplyingMutation = false;
   const getState = () => state;
   const setState = (updater) => {
     const nextState = updater(state);
@@ -766,10 +823,42 @@ const createWorkflowRunnerStore = (initialState) => {
     listeners.add(listener);
     return () => listeners.delete(listener);
   };
+  const enqueueMutation = (mutation) => {
+    pendingMutations.push(mutation);
+    if (isApplyingMutation) {
+      return;
+    }
+    isApplyingMutation = true;
+    try {
+      while (pendingMutations.length > 0) {
+        const nextMutation = pendingMutations.shift();
+        if (nextMutation) {
+          nextMutation();
+        }
+      }
+    } finally {
+      isApplyingMutation = false;
+    }
+  };
+  const applyMutation = (mutator) => {
+    enqueueMutation(() => setState((current) => {
+      mutator(current);
+      return { ...current };
+    }));
+  };
   const mutate = {
     workflow: (workflowId) => setWorkflow(workflowId, setState),
     status: (status, message) => setStatus(status, message, setState),
-    runResult: (status, message, preferredOutput, results) => setRunResult(status, message, preferredOutput, results, setState)
+    runResult: (status, message, preferredOutput, results) => setRunResult(status, message, preferredOutput, results, setState),
+    manager: (manager) => applyMutation((draft) => {
+      draft.manager = manager;
+    }),
+    workflows: (workflows) => applyMutation((draft) => {
+      draft.workflows = workflows;
+    }),
+    ui: (updater) => applyMutation((draft) => {
+      updater(draft.ui);
+    })
   };
   state.mutate = mutate;
   return {
@@ -875,10 +964,7 @@ class LfWorkflowRunnerManager {
       if (!workflows || !Object.keys(workflows).length) {
         throw new Error("No workflows available from the API.");
       }
-      __classPrivateFieldGet(this, _LfWorkflowRunnerManager_store, "f").setState((state) => ({
-        ...state,
-        workflows
-      }));
+      __classPrivateFieldGet(this, _LfWorkflowRunnerManager_store, "f").getState().mutate.workflows(workflows);
       this.setWorkflow(workflows.nodes[0].id);
       this.setStatus("ready", "Workflows loaded.");
     });
@@ -893,10 +979,7 @@ class LfWorkflowRunnerManager {
       main: createMainSection(),
       workflow: createWorkflowSection()
     }, "f");
-    __classPrivateFieldGet(this, _LfWorkflowRunnerManager_store, "f").setState((state) => ({
-      ...state,
-      manager: this
-    }));
+    __classPrivateFieldGet(this, _LfWorkflowRunnerManager_store, "f").getState().mutate.manager(this);
     __classPrivateFieldGet(this, _LfWorkflowRunnerManager_instances, "m", _LfWorkflowRunnerManager_initializeFramework).call(this);
     __classPrivateFieldGet(this, _LfWorkflowRunnerManager_instances, "m", _LfWorkflowRunnerManager_initializeLayout).call(this);
     __classPrivateFieldGet(this, _LfWorkflowRunnerManager_instances, "m", _LfWorkflowRunnerManager_subscribeToState).call(this);
@@ -910,7 +993,7 @@ class LfWorkflowRunnerManager {
   //#endregion
   //#region Workflow execution
   async runWorkflow() {
-    var _a, _b, _c, _d;
+    var _a, _b, _c, _d, _e;
     const state = __classPrivateFieldGet(this, _LfWorkflowRunnerManager_store, "f").getState();
     const workflowId = state.current.workflow;
     if (!workflowId) {
@@ -933,11 +1016,10 @@ class LfWorkflowRunnerManager {
       state2.mutate.runResult(status, message, payload.preferred_output ?? null, ((_b = payload.history) == null ? void 0 : _b.outputs) ? { ...payload.history.outputs } : null);
     } catch (error) {
       if (error instanceof WorkflowApiError) {
-        const state2 = __classPrivateFieldGet(this, _LfWorkflowRunnerManager_store, "f").getState();
-        state2.mutate.status("error", error.message);
-        const inputName = (_d = (_c = error.payload) == null ? void 0 : _c.error) == null ? void 0 : _d.input;
+        this.setStatus("error", ((_c = error.payload) == null ? void 0 : _c.detail) || error.message);
+        const inputName = (_e = (_d = error.payload) == null ? void 0 : _d.error) == null ? void 0 : _e.input;
         if (inputName) {
-          __classPrivateFieldGet(this, _LfWorkflowRunnerManager_sections, "f").workflow.setCellStatus(state2, inputName, "error");
+          __classPrivateFieldGet(this, _LfWorkflowRunnerManager_sections, "f").workflow.setCellStatus(state, inputName, "error");
         }
       } else {
         console.error("Unexpected error while running workflow:", error);
