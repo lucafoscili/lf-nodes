@@ -815,5 +815,4 @@ def numpy_to_svg(arr: np.ndarray, config: Any = None, mask: Any = None) -> tuple
 
     return dwg.tostring(), preview, palette
 
-
 __all__ = ["SVGTraceConfig", "numpy_to_svg"]

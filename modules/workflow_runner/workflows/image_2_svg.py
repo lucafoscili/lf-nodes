@@ -51,10 +51,15 @@ def _configure_image_to_svg_workflow(prompt: Dict[str, Any], inputs: Dict[str, A
             desaturate = inputs.get(input_name)
             inputs_map["boolean"] = bool(desaturate)
 
-        if node_id == "72":  # Keep transparency checkbox (optional)
+        if node_id == "71":  # Keep transparency checkbox (optional)
             input_name = "keep_transparency"
             keep_transparency = inputs.get(input_name)
             inputs_map["boolean"] = bool(keep_transparency)
+
+        if node_id == "80":  # Strip attributes checkbox (optional)
+            input_name = "strip_attributes"
+            strip_attributes = inputs.get(input_name)
+            inputs_map["boolean"] = bool(strip_attributes)
 # endregion
 
 # region Inputs
@@ -125,6 +130,16 @@ cell_transparency = WorkflowCell(
         "lfValue": True,
     },
 )
+cell_strip = WorkflowCell(
+    id="strip_attributes",
+    value="Strip Attributes",
+    shape="toggle",
+    description="Sets whether to strip attributes from the SVG output.",
+    props={
+        "lfLabel": "Strip attributes",
+        "lfValue": True,
+    },
+)
 # endregion
 
 # region Workflow Definition
@@ -141,8 +156,9 @@ image_2_svg = WorkflowNode(
         cell_upload,
         cell_name,
         cell_colors,
-        cell_desaturate,
         cell_transparency,
+        cell_strip,
+        cell_desaturate,
     ],
     configure_prompt=_configure_image_to_svg_workflow,
 )
