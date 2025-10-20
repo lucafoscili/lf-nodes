@@ -18,6 +18,7 @@ export const createActionButtonSection = (): WorkflowSectionController => {
     element.className = ROOT_CLASS;
     element.lfIcon = 'send';
     element.lfStyling = 'floating';
+    element.title = 'Run current workflow';
     element.addEventListener('lf-button-event', (e) => {
       const { eventType } = e.detail;
 

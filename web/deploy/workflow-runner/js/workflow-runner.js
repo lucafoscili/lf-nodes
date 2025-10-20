@@ -21,8 +21,8 @@ const DEFAULT_THEME = runnerConfig.theme;
 const STATIC_ASSETS_PATH = runnerConfig.staticPaths.assets;
 const buildApiUrl = (path) => `${API_ROOT}${path.startsWith("/") ? path : `/${path}`}`;
 const buildAssetsUrl = (origin = window.location.origin) => `${origin}${API_BASE}${STATIC_ASSETS_PATH.startsWith("/") ? STATIC_ASSETS_PATH : `/${STATIC_ASSETS_PATH}`}`;
-const ROOT_CLASS$4 = "dev-panel";
-const CARD_CLASS = `${ROOT_CLASS$4}__card`;
+const ROOT_CLASS$5 = "dev-panel";
+const CARD_CLASS = `${ROOT_CLASS$5}__card`;
 const createDevPanel = () => {
   const framework = getLfFramework();
   const debugCardDataset = {
@@ -61,7 +61,7 @@ const createDevPanel = () => {
     }
     mountedState = state;
     container = document.createElement("div");
-    container.className = ROOT_CLASS$4;
+    container.className = ROOT_CLASS$5;
     container.dataset.open = "false";
     container.setAttribute("aria-hidden", "true");
     card = document.createElement("lf-card");
@@ -100,6 +100,53 @@ const createDevPanel = () => {
     container = null;
     card = null;
     mountedState = null;
+  };
+  return {
+    mount,
+    render,
+    destroy
+  };
+};
+const ROOT_CLASS$4 = "action-button-section";
+const createActionButtonSection = () => {
+  let element = null;
+  let lastState = null;
+  const mount = (state) => {
+    var _a;
+    lastState = state;
+    const { ui } = state;
+    element = document.createElement("lf-button");
+    element.className = ROOT_CLASS$4;
+    element.lfIcon = "send";
+    element.lfStyling = "floating";
+    element.title = "Run current workflow";
+    element.addEventListener("lf-button-event", (e) => {
+      var _a2;
+      const { eventType } = e.detail;
+      switch (eventType) {
+        case "click":
+          (_a2 = state.manager) == null ? void 0 : _a2.runWorkflow();
+          break;
+        default:
+          return;
+      }
+    });
+    state.mutate.ui((uiState) => {
+      uiState.layout.actionButton._root = element;
+    });
+    (_a = ui.layout._root) == null ? void 0 : _a.appendChild(element);
+  };
+  const render = () => {
+  };
+  const destroy = () => {
+    element == null ? void 0 : element.remove();
+    if (lastState) {
+      lastState.mutate.ui((uiState) => {
+        uiState.layout.actionButton._root = null;
+      });
+    }
+    element = null;
+    lastState = null;
   };
   return {
     mount,
@@ -552,10 +599,17 @@ const createRunButton = (state) => {
   };
   const button = createComponent.button(props);
   button.className = `${ROOT_CLASS}__run`;
-  button.onclick = () => {
+  button.addEventListener("lf-button-event", (e) => {
     var _a;
-    return (_a = state.manager) == null ? void 0 : _a.runWorkflow();
-  };
+    const { eventType } = e.detail;
+    switch (eventType) {
+      case "click":
+        (_a = state.manager) == null ? void 0 : _a.runWorkflow();
+        break;
+      default:
+        return;
+    }
+  });
   return button;
 };
 const createStatusWrapper = (tone = "info") => {
@@ -902,6 +956,7 @@ const initState = (appContainer) => ({
   ui: {
     layout: {
       _root: appContainer,
+      actionButton: { _root: null },
       drawer: {
         _root: null,
         tree: null
@@ -1165,6 +1220,7 @@ class LfWorkflowRunnerManager {
     }
     __classPrivateFieldSet(this, _LfWorkflowRunnerManager_store, createWorkflowRunnerStore(initState(container)), "f");
     __classPrivateFieldSet(this, _LfWorkflowRunnerManager_sections, {
+      actionButton: createActionButtonSection(),
       drawer: createDrawerSection(),
       header: createHeaderSection(),
       main: createMainSection(),
@@ -1278,6 +1334,7 @@ _LfWorkflowRunnerManager_framework = /* @__PURE__ */ new WeakMap(), _LfWorkflowR
   while (root.firstChild) {
     root.removeChild(root.firstChild);
   }
+  __classPrivateFieldGet(this, _LfWorkflowRunnerManager_sections, "f").actionButton.mount(state);
   __classPrivateFieldGet(this, _LfWorkflowRunnerManager_sections, "f").drawer.mount(state);
   __classPrivateFieldGet(this, _LfWorkflowRunnerManager_sections, "f").header.mount(state);
   __classPrivateFieldGet(this, _LfWorkflowRunnerManager_sections, "f").main.mount(state);
@@ -1286,6 +1343,7 @@ _LfWorkflowRunnerManager_framework = /* @__PURE__ */ new WeakMap(), _LfWorkflowR
   __classPrivateFieldGet(this, _LfWorkflowRunnerManager_sections, "f").workflow.render(state);
 }, _LfWorkflowRunnerManager_subscribeToState = function _LfWorkflowRunnerManager_subscribeToState2() {
   __classPrivateFieldGet(this, _LfWorkflowRunnerManager_store, "f").subscribe((state) => {
+    __classPrivateFieldGet(this, _LfWorkflowRunnerManager_sections, "f").actionButton.render(state);
     __classPrivateFieldGet(this, _LfWorkflowRunnerManager_sections, "f").drawer.render(state);
     __classPrivateFieldGet(this, _LfWorkflowRunnerManager_sections, "f").header.render(state);
     __classPrivateFieldGet(this, _LfWorkflowRunnerManager_sections, "f").main.render(state);
