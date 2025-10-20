@@ -873,7 +873,7 @@ const runWorkflowRequest = async (workflowId, inputs) => {
     });
   }
   return {
-    message: data.message,
+    message: "Workflow execution completed.",
     payload,
     status: data.status
   };
@@ -1071,7 +1071,7 @@ const createWorkflowRunnerStore = (initialState) => {
   const mutate = {
     workflow: (workflowId) => setWorkflow(workflowId, setState),
     status: (status, message) => setStatus(status, message, setState),
-    runResult: (status, message, preferredOutput, results) => setRunResult(status, message, preferredOutput, results, setState),
+    runResult: (status, message, results) => setRunResult(status, message, results, setState),
     manager: (manager) => applyMutation((draft) => {
       draft.manager = manager;
     }),
@@ -1110,6 +1110,17 @@ const setWorkflow = (workflowId, setState) => {
     results: null
   }));
 };
+const setRunResult = (status, message, results, setState) => {
+  setState((state) => ({
+    ...state,
+    current: {
+      ...state.current,
+      status,
+      message
+    },
+    results
+  }));
+};
 const setStatus = (status, message, setState) => {
   setState((state) => ({
     ...state,
@@ -1118,18 +1129,6 @@ const setStatus = (status, message, setState) => {
       status,
       message: message ?? DEFAULT_STATUS_MESSAGES[status]
     }
-  }));
-};
-const setRunResult = (status, message, preferredOutput, results, setState) => {
-  setState((state) => ({
-    ...state,
-    current: {
-      ...state.current,
-      status,
-      message,
-      preferredOutput
-    },
-    results
   }));
 };
 var __classPrivateFieldSet = function(receiver, state, value, kind, f) {
@@ -1182,18 +1181,18 @@ class LfWorkflowRunnerManager {
         const { payload } = await uploadWorkflowFiles(files);
         const paths = (payload == null ? void 0 : payload.paths) || [];
         this.setStatus("running", "File uploaded, processing...");
-        void debugLog("Upload completed.", "success", { fieldName, files: paths.length });
+        debugLog("Upload completed.", "success", { fieldName, files: paths.length });
         return paths.length === 1 ? paths[0] : paths;
       } catch (error) {
         if (error instanceof WorkflowApiError) {
           __classPrivateFieldGet(this, _LfWorkflowRunnerManager_sections, "f").workflow.setCellStatus(__classPrivateFieldGet(this, _LfWorkflowRunnerManager_store, "f").getState(), fieldName, "error");
           this.setStatus("error", `Upload failed: ${((_a = error.payload) == null ? void 0 : _a.detail) || error.message}`);
-          void debugLog("Upload failed.", "error", {
+          debugLog("Upload failed.", "error", {
             fieldName,
             detail: ((_b = error.payload) == null ? void 0 : _b.detail) || error.message
           });
         } else {
-          void debugLog("Upload failed unexpectedly.", "error", {
+          debugLog("Upload failed unexpectedly.", "error", {
             fieldName,
             message: (error == null ? void 0 : error.message) ?? null
           });
@@ -1235,7 +1234,7 @@ class LfWorkflowRunnerManager {
     __classPrivateFieldGet(this, _LfWorkflowRunnerManager_loadWorkflows, "f").call(this).catch((error) => {
       console.error("Failed to load workflows:", error);
       const message = error instanceof Error ? error.message : "Failed to load workflows.";
-      void debugLog("Failed to load workflows.", "error", {
+      debugLog("Failed to load workflows.", "error", {
         message,
         stack: error instanceof Error ? error.stack : void 0
       });
@@ -1256,7 +1255,7 @@ class LfWorkflowRunnerManager {
     let inputs;
     try {
       inputs = await __classPrivateFieldGet(this, _LfWorkflowRunnerManager_collectInputs, "f").call(this);
-      void debugLog("Collected workflow inputs.", "informational", {
+      debugLog("Collected workflow inputs.", "informational", {
         workflowId,
         inputKeys: Object.keys(inputs)
       });
@@ -1264,28 +1263,28 @@ class LfWorkflowRunnerManager {
       console.error("Failed to collect inputs:", error);
       const detail = error instanceof WorkflowApiError ? ((_a = error.payload) == null ? void 0 : _a.detail) || error.message : (error == null ? void 0 : error.message) || "Failed to collect inputs.";
       this.setStatus("error", `Failed to collect inputs: ${detail}`);
-      void debugLog("Failed to collect workflow inputs.", "error", { workflowId, detail });
+      debugLog("Failed to collect workflow inputs.", "error", { workflowId, detail });
       return;
     }
     try {
-      void debugLog("Dispatching workflow execution.", "informational", {
+      debugLog("Dispatching workflow execution.", "informational", {
         workflowId,
         inputKeys: Object.keys(inputs)
       });
       const { status, message, payload } = await runWorkflowRequest(workflowId, inputs);
       const runState = __classPrivateFieldGet(this, _LfWorkflowRunnerManager_store, "f").getState();
-      runState.mutate.runResult(status, message, payload.preferred_output ?? null, ((_b = payload.history) == null ? void 0 : _b.outputs) ? { ...payload.history.outputs } : null);
+      runState.mutate.runResult(status, message, ((_b = payload.history) == null ? void 0 : _b.outputs) ? { ...payload.history.outputs } : null);
+      const wfStatus = status === "error" ? "error" : "ready";
       const resultCategory = status === "error" ? "error" : "success";
-      void debugLog("Workflow execution completed.", resultCategory, {
+      debugLog("Workflow execution completed.", resultCategory, {
         workflowId,
-        status,
-        preferredOutput: payload.preferred_output ?? null,
+        wfStatus,
         outputs: Object.keys(((_c = payload.history) == null ? void 0 : _c.outputs) ?? {})
       });
     } catch (error) {
       if (error instanceof WorkflowApiError) {
         this.setStatus("error", ((_d = error.payload) == null ? void 0 : _d.detail) || error.message);
-        void debugLog("Workflow execution failed.", "error", {
+        debugLog("Workflow execution failed.", "error", {
           workflowId,
           detail: ((_e = error.payload) == null ? void 0 : _e.detail) || error.message,
           input: (_g = (_f = error.payload) == null ? void 0 : _f.error) == null ? void 0 : _g.input
@@ -1297,7 +1296,7 @@ class LfWorkflowRunnerManager {
       } else {
         console.error("Unexpected error while running workflow:", error);
         this.setStatus("error", "Unexpected error while running the workflow.");
-        void debugLog("Workflow execution failed unexpectedly.", "error", {
+        debugLog("Workflow execution failed unexpectedly.", "error", {
           workflowId,
           message: (error == null ? void 0 : error.message) ?? null
         });
@@ -1310,7 +1309,7 @@ class LfWorkflowRunnerManager {
     const state = __classPrivateFieldGet(this, _LfWorkflowRunnerManager_store, "f").getState();
     state.mutate.status(status, message);
     const category = status === "error" ? "error" : status === "ready" ? "success" : "informational";
-    void debugLog(`Status changed: ${status}`, category, { message: message ?? null });
+    debugLog(`Status changed: ${status}`, category, { message: message ?? null });
   }
   setWorkflow(id) {
     const state = __classPrivateFieldGet(this, _LfWorkflowRunnerManager_store, "f").getState();
@@ -1318,7 +1317,7 @@ class LfWorkflowRunnerManager {
       return;
     }
     state.mutate.workflow(id);
-    void debugLog("Workflow selected.", "informational", { id });
+    debugLog("Workflow selected.", "informational", { id });
   }
 }
 _LfWorkflowRunnerManager_framework = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_store = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_sections = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_collectInputs = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_handleUploadField = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_loadWorkflows = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_instances = /* @__PURE__ */ new WeakSet(), _LfWorkflowRunnerManager_initializeFramework = function _LfWorkflowRunnerManager_initializeFramework2() {
