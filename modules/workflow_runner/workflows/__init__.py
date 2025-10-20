@@ -4,15 +4,13 @@ from typing import Iterable, Iterator, Sequence
 
 _WORKFLOW_MODULES: Sequence[str] = ("image_2_svg",)
 
-
+# region Workflow Imports
 def _import_workflow_module(module_name: str) -> ModuleType:
     return import_module(f"{__name__}.{module_name}")
-
 
 def iter_workflow_modules() -> Iterator[ModuleType]:
     for module_name in _WORKFLOW_MODULES:
         yield _import_workflow_module(module_name)
-
 
 def iter_workflow_definitions() -> Iterable[object]:
     """
@@ -34,3 +32,4 @@ def iter_workflow_definitions() -> Iterable[object]:
                     yield definition
         elif definitions is not None:
             yield definitions
+# endregion

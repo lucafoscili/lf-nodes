@@ -1,6 +1,7 @@
 import { LfDataDataset } from '@lf-widgets/foundations/dist';
 import { buildApiUrl } from '../config';
 import {
+  RunWorkflowResult,
   WorkflowAPIErrorOptions,
   WorkflowAPIResponse,
   WorkflowAPIRunPayload,
@@ -48,11 +49,6 @@ export const fetchWorkflowDefinitions = async (): Promise<LfDataDataset> => {
   return data.workflows;
 };
 
-export interface RunWorkflowResult extends WorkflowAPIResponse {
-  status: Extract<WorkflowStatus, 'ready' | 'error'>;
-  payload: WorkflowAPIRunPayload;
-}
-
 export const runWorkflowRequest = async (
   workflowId: string,
   inputs: Record<string, unknown>,
@@ -80,9 +76,9 @@ export const runWorkflowRequest = async (
   }
 
   return {
-    message: data.message,
+    message: 'Workflow execution completed.',
     payload,
-    status: data.status as RunWorkflowResult['status'],
+    status: data.status as Extract<WorkflowStatus, 'ready' | 'error'>,
   };
 };
 

@@ -2,6 +2,11 @@ import { LfCodeInterface, LfMasonryPropsInterface } from '@lf-widgets/foundation
 import { WorkflowStatus } from './state';
 
 //#region API
+export interface RunWorkflowResult extends WorkflowAPIResponse {
+  status: Extract<WorkflowStatus, 'ready' | 'error'>;
+  payload: WorkflowAPIRunPayload;
+}
+
 export interface WorkflowAPIResponse {
   message: string;
   payload: WorkflowAPIRunPayload;

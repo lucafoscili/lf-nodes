@@ -57,7 +57,7 @@ export class LfWorkflowRunnerManager implements WorkflowRunnerManager {
     this.#loadWorkflows().catch((error) => {
       console.error('Failed to load workflows:', error);
       const message = error instanceof Error ? error.message : 'Failed to load workflows.';
-      void debugLog('Failed to load workflows.', 'error', {
+      debugLog('Failed to load workflows.', 'error', {
         message,
         stack: error instanceof Error ? error.stack : undefined,
       });
@@ -102,18 +102,18 @@ export class LfWorkflowRunnerManager implements WorkflowRunnerManager {
       const { payload } = await uploadWorkflowFiles(files);
       const paths = payload?.paths || [];
       this.setStatus('running', 'File uploaded, processing...');
-      void debugLog('Upload completed.', 'success', { fieldName, files: paths.length });
+      debugLog('Upload completed.', 'success', { fieldName, files: paths.length });
       return paths.length === 1 ? paths[0] : paths;
     } catch (error) {
       if (error instanceof WorkflowApiError) {
         this.#sections.workflow.setCellStatus(this.#store.getState(), fieldName, 'error');
         this.setStatus('error', `Upload failed: ${error.payload?.detail || error.message}`);
-        void debugLog('Upload failed.', 'error', {
+        debugLog('Upload failed.', 'error', {
           fieldName,
           detail: error.payload?.detail || error.message,
         });
       } else {
-        void debugLog('Upload failed unexpectedly.', 'error', {
+        debugLog('Upload failed unexpectedly.', 'error', {
           fieldName,
           message: (error as Error)?.message ?? null,
         });
@@ -185,7 +185,7 @@ export class LfWorkflowRunnerManager implements WorkflowRunnerManager {
     let inputs: Record<string, unknown>;
     try {
       inputs = await this.#collectInputs();
-      void debugLog('Collected workflow inputs.', 'informational', {
+      debugLog('Collected workflow inputs.', 'informational', {
         workflowId,
         inputKeys: Object.keys(inputs),
       });
@@ -196,12 +196,12 @@ export class LfWorkflowRunnerManager implements WorkflowRunnerManager {
           ? error.payload?.detail || error.message
           : (error as Error)?.message || 'Failed to collect inputs.';
       this.setStatus('error', `Failed to collect inputs: ${detail}`);
-      void debugLog('Failed to collect workflow inputs.', 'error', { workflowId, detail });
+      debugLog('Failed to collect workflow inputs.', 'error', { workflowId, detail });
       return;
     }
 
     try {
-      void debugLog('Dispatching workflow execution.', 'informational', {
+      debugLog('Dispatching workflow execution.', 'informational', {
         workflowId,
         inputKeys: Object.keys(inputs),
       });
@@ -211,21 +211,20 @@ export class LfWorkflowRunnerManager implements WorkflowRunnerManager {
       runState.mutate.runResult(
         status,
         message,
-        payload.preferred_output ?? null,
         payload.history?.outputs ? { ...payload.history.outputs } : null,
       );
 
+      const wfStatus = status === 'error' ? 'error' : 'ready';
       const resultCategory = status === 'error' ? 'error' : 'success';
-      void debugLog('Workflow execution completed.', resultCategory, {
+      debugLog('Workflow execution completed.', resultCategory, {
         workflowId,
-        status,
-        preferredOutput: payload.preferred_output ?? null,
+        wfStatus,
         outputs: Object.keys(payload.history?.outputs ?? {}),
       });
     } catch (error) {
       if (error instanceof WorkflowApiError) {
         this.setStatus('error', error.payload?.detail || error.message);
-        void debugLog('Workflow execution failed.', 'error', {
+        debugLog('Workflow execution failed.', 'error', {
           workflowId,
           detail: error.payload?.detail || error.message,
           input: error.payload?.error?.input,
@@ -237,7 +236,7 @@ export class LfWorkflowRunnerManager implements WorkflowRunnerManager {
       } else {
         console.error('Unexpected error while running workflow:', error);
         this.setStatus('error', 'Unexpected error while running the workflow.');
-        void debugLog('Workflow execution failed unexpectedly.', 'error', {
+        debugLog('Workflow execution failed unexpectedly.', 'error', {
           workflowId,
           message: (error as Error)?.message ?? null,
         });
@@ -252,7 +251,7 @@ export class LfWorkflowRunnerManager implements WorkflowRunnerManager {
     state.mutate.status(status, message);
     const category =
       status === 'error' ? 'error' : status === 'ready' ? 'success' : 'informational';
-    void debugLog(`Status changed: ${status}`, category, { message: message ?? null });
+    debugLog(`Status changed: ${status}`, category, { message: message ?? null });
   }
   setWorkflow(id: string): void {
     const state = this.#store.getState();
@@ -261,7 +260,7 @@ export class LfWorkflowRunnerManager implements WorkflowRunnerManager {
     }
 
     state.mutate.workflow(id);
-    void debugLog('Workflow selected.', 'informational', { id });
+    debugLog('Workflow selected.', 'informational', { id });
   }
   //#endregion
 }

@@ -9,6 +9,7 @@ const CARD_CLASS = `${ROOT_CLASS}__card`;
 type LfCardElement = HTMLElementTagNameMap['lf-card'];
 //#endregion
 
+//#region Factory
 export const createDevPanel = (): WorkflowSectionController => {
   const framework = getLfFramework();
   const debugCardDataset: LfDataDataset = {
@@ -106,3 +107,4 @@ export const createDevPanel = (): WorkflowSectionController => {
     destroy,
   };
 };
+//#endregion

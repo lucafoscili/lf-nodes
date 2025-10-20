@@ -1,6 +1,5 @@
+import { LfDebugCategory } from '@lf-widgets/foundations/dist';
 import { getLfFramework } from '@lf-widgets/framework';
-
-export type DebugCategory = 'informational' | 'warning' | 'error' | 'success';
 
 const formatContext = (context: unknown): string | null => {
   if (context === undefined || context === null) {
@@ -21,7 +20,7 @@ const formatContext = (context: unknown): string | null => {
 
 export const debugLog = (
   message: string,
-  category: DebugCategory = 'informational',
+  category: LfDebugCategory = 'informational',
   context?: unknown,
 ): void => {
   try {
@@ -36,7 +35,6 @@ export const debugLog = (
     const formattedContext = formatContext(context);
     const payload = formattedContext ? `${message}\n\n${formattedContext}` : message;
 
-    // Use the debug manager as the source so messages appear in the debug card console.
     void logs.new(debug, payload, category);
   } catch {
     // Intentionally swallow debug errors to avoid interfering with user flows.

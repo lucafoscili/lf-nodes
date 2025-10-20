@@ -1,3 +1,4 @@
+import { DEFAULT_STATUS_MESSAGES } from '../config';
 import {
   WorkflowRunnerStore,
   WorkflowState,
@@ -5,7 +6,6 @@ import {
   WorkflowStateUpdater,
   WorkflowStatus,
 } from '../types/state';
-import { DEFAULT_STATUS_MESSAGES } from '../config';
 
 //#region Factory
 export const createWorkflowRunnerStore = (initialState: WorkflowState): WorkflowRunnerStore => {
@@ -63,13 +63,9 @@ export const createWorkflowRunnerStore = (initialState: WorkflowState): Workflow
 
   const mutate = {
     workflow: (workflowId: string) => setWorkflow(workflowId, setState),
-    status: (status: WorkflowStatus, message?: string) => setStatus(status, message, setState),
-    runResult: (
-      status: WorkflowStatus,
-      message: string,
-      preferredOutput: string | null,
-      results: any,
-    ) => setRunResult(status, message, preferredOutput, results, setState),
+    status: (status: WorkflowStatus, message: string) => setStatus(status, message, setState),
+    runResult: (status: WorkflowStatus, message: string, results: any) =>
+      setRunResult(status, message, results, setState),
     manager: (manager: WorkflowState['manager']) =>
       applyMutation((draft) => {
         draft.manager = manager;
@@ -118,26 +114,9 @@ const setWorkflow = (workflowId: string, setState: (updater: WorkflowStateUpdate
     results: null,
   }));
 };
-
-const setStatus = (
-  status: WorkflowStatus,
-  message: string | undefined,
-  setState: (updater: WorkflowStateUpdater) => void,
-) => {
-  setState((state) => ({
-    ...state,
-    current: {
-      ...state.current,
-      status,
-      message: message ?? DEFAULT_STATUS_MESSAGES[status],
-    },
-  }));
-};
-
 const setRunResult = (
   status: WorkflowStatus,
   message: string,
-  preferredOutput: string | null,
   results: any,
   setState: (updater: WorkflowStateUpdater) => void,
 ) => {
@@ -147,9 +126,22 @@ const setRunResult = (
       ...state.current,
       status,
       message,
-      preferredOutput,
     },
     results,
+  }));
+};
+const setStatus = (
+  status: WorkflowStatus,
+  message: string,
+  setState: (updater: WorkflowStateUpdater) => void,
+) => {
+  setState((state) => ({
+    ...state,
+    current: {
+      ...state.current,
+      status,
+      message: message ?? DEFAULT_STATUS_MESSAGES[status],
+    },
   }));
 };
 //#endregion

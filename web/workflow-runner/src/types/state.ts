@@ -62,12 +62,7 @@ export interface WorkflowDevState {
 export interface WorkflowStateMutators {
   workflow: (id: string) => void;
   status: (status: WorkflowStatus, message?: string) => void;
-  runResult: (
-    status: WorkflowStatus,
-    message: string,
-    preferredOutput: string | null,
-    results: any,
-  ) => void;
+  runResult: (status: WorkflowStatus, message: string, results: any) => void;
   manager: (manager: WorkflowRunnerManager | null) => void;
   workflows: (workflows: LfDataDataset) => void;
   ui: (updater: (ui: WorkflowUI) => void) => void;
