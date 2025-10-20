@@ -1,6 +1,7 @@
 import { LfThemeUIState } from '@lf-widgets/core/dist/types/components';
 import { LfButtonInterface } from '@lf-widgets/foundations/dist';
 import { DEFAULT_STATUS_MESSAGES } from '../config';
+import { executeWorkflowButton } from '../handlers/workflow';
 import { WorkflowAPIResult, WorkflowAPIResultKey, WorkflowAPIUI } from '../types/api';
 import {
   WorkflowCells,
@@ -55,17 +56,7 @@ const createRunButton = (state: WorkflowState) => {
 
   const button = createComponent.button(props);
   button.className = `${ROOT_CLASS}__run`;
-  button.addEventListener('lf-button-event', (e) => {
-    const { eventType } = e.detail;
-
-    switch (eventType) {
-      case 'click':
-        state.manager?.runWorkflow();
-        break;
-      default:
-        return;
-    }
-  });
+  button.addEventListener('lf-button-event', (e) => executeWorkflowButton(e, state));
 
   return button;
 };

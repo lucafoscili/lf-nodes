@@ -171,20 +171,11 @@ body {
     bottom: 24px;
     display: grid;
     max-height: calc(100vh - 120px);
-    opacity: 0;
-    pointer-events: none;
     position: fixed;
     right: 24px;
-    transform: translateY(12px) scale(0.98);
     transition: opacity 0.2s ease, transform 0.2s ease;
     width: min(420px, calc(100% - 32px));
     z-index: 30;
-  }
-
-  &[data-open='true'] {
-    opacity: 1;
-    pointer-events: auto;
-    transform: translateY(0) scale(1);
   }
 
   &__card {

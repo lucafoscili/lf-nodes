@@ -151,6 +151,12 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
     this.#SECTIONS.main.mount(state);
     this.#SECTIONS.workflow.mount(state);
     this.#SECTIONS.workflow.render(state);
+
+    if (state.isDebug) {
+      this.#SECTIONS.dev.mount(state);
+      this.#SECTIONS.dev.render(state);
+      this.#IS_DEBUG = true;
+    }
   }
   #loadWorkflows = async () => {
     const { WORKFLOWS_LOADED } = DEBUG_MESSAGES;
@@ -176,16 +182,16 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
       this.#SECTIONS.main.render(state);
       this.#SECTIONS.workflow.render(state);
 
-      switch (this.#IS_DEBUG) {
-        case false:
-          this.#SECTIONS.dev.mount(state);
-          this.#IS_DEBUG = true;
-          this.#SECTIONS.dev.render(state);
-          break;
-        case true:
-          this.#SECTIONS.dev.destroy();
-          this.#IS_DEBUG = false;
-          break;
+      const shouldShowDevPanel = state.isDebug;
+      if (shouldShowDevPanel && !this.#IS_DEBUG) {
+        this.#SECTIONS.dev.mount(state);
+        this.#IS_DEBUG = true;
+        this.#SECTIONS.dev.render(state);
+      } else if (!shouldShowDevPanel && this.#IS_DEBUG) {
+        this.#SECTIONS.dev.destroy();
+        this.#IS_DEBUG = false;
+      } else if (shouldShowDevPanel && this.#IS_DEBUG) {
+        this.#SECTIONS.dev.render(state);
       }
     });
   }

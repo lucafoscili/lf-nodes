@@ -102,39 +102,47 @@ const setRunResult = (
   results: any,
   setState: (updater: WorkflowStateUpdater) => void,
 ) => {
-  setState((state) => ({
-    ...state,
-    current: {
-      ...state.current,
-      status,
-      message,
-    },
-    results,
-  }));
+  setState(
+    (state) =>
+      ({
+        ...state,
+        current: {
+          ...state.current,
+          status,
+          message,
+        },
+        results,
+      } satisfies WorkflowState),
+  );
 };
 const setStatus = (
   status: WorkflowStatus,
   message: string | undefined,
   setState: (updater: WorkflowStateUpdater) => void,
 ) => {
-  setState((state) => ({
-    ...state,
-    current: {
-      ...state.current,
-      status,
-      message: message ?? DEFAULT_STATUS_MESSAGES[status],
-    },
-  }));
+  setState(
+    (state) =>
+      ({
+        ...state,
+        current: {
+          ...state.current,
+          status,
+          message: message ?? DEFAULT_STATUS_MESSAGES[status],
+        },
+      } satisfies WorkflowState),
+  );
 };
-const setWorkflow = (workflowId: string, setState: (updater: WorkflowStateUpdater) => void) => {
-  setState((state) => ({
-    ...state,
-    current: {
-      ...state.current,
-      workflow: workflowId,
-      preferredOutput: null,
-    },
-    results: null,
-  }));
+const setWorkflow = (id: string, setState: (updater: WorkflowStateUpdater) => void) => {
+  setState(
+    (state) =>
+      ({
+        ...state,
+        current: {
+          ...state.current,
+          id,
+        },
+        results: null,
+      } satisfies WorkflowState),
+  );
 };
 //#endregion

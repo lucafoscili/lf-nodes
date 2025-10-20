@@ -24,18 +24,13 @@ export const debugLog = (
   context?: unknown,
 ): void => {
   try {
-    const framework = getLfFramework();
-    const debug = framework?.debug;
-    const logs = debug?.logs;
-
-    if (!debug || !logs) {
-      return;
-    }
+    const { debug } = getLfFramework();
+    const { logs } = debug;
 
     const formattedContext = formatContext(context);
     const payload = formattedContext ? `${message}\n\n${formattedContext}` : message;
 
-    void logs.new(debug, payload, category);
+    logs.new(debug, payload, category);
   } catch {
     // Intentionally swallow debug errors to avoid interfering with user flows.
   }

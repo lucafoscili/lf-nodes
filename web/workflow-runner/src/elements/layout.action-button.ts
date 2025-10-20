@@ -1,3 +1,4 @@
+import { executeWorkflowButton } from '../handlers/workflow';
 import { WorkflowSectionController } from '../types/section';
 import { WorkflowState } from '../types/state';
 
@@ -19,17 +20,7 @@ export const createActionButtonSection = (): WorkflowSectionController => {
     element.lfIcon = 'send';
     element.lfStyling = 'floating';
     element.title = 'Run current workflow';
-    element.addEventListener('lf-button-event', (e) => {
-      const { eventType } = e.detail;
-
-      switch (eventType) {
-        case 'click':
-          state.manager?.runWorkflow();
-          break;
-        default:
-          return;
-      }
-    });
+    element.addEventListener('lf-button-event', (e) => executeWorkflowButton(e, state));
 
     state.mutate.ui((uiState) => {
       uiState.layout.actionButton._root = element;
