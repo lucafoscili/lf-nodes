@@ -14,6 +14,7 @@ export const initState = (appContainer: HTMLDivElement): WorkflowState => ({
       header: {
         _root: null,
         drawerToggle: null,
+        debugToggle: null,
         themeSwitch: null,
       },
       main: {
@@ -29,6 +30,10 @@ export const initState = (appContainer: HTMLDivElement): WorkflowState => ({
           status: null,
           title: null,
         },
+      },
+      dev: {
+        _root: null,
+        card: null,
       },
     },
   },
@@ -52,6 +57,21 @@ export const initState = (appContainer: HTMLDivElement): WorkflowState => ({
     },
     ui: () => {
       throw new Error('Mutate not initialized');
+    },
+    dev: {
+      panel: {
+        set: () => {
+          throw new Error('Mutate not initialized');
+        },
+        toggle: () => {
+          throw new Error('Mutate not initialized');
+        },
+      },
+    },
+  },
+  dev: {
+    panel: {
+      open: false,
     },
   },
 });

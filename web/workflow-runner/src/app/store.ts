@@ -82,6 +82,18 @@ export const createWorkflowRunnerStore = (initialState: WorkflowState): Workflow
       applyMutation((draft) => {
         updater(draft.ui);
       }),
+    dev: {
+      panel: {
+        set: (open: boolean) =>
+          applyMutation((draft) => {
+            draft.dev.panel.open = open;
+          }),
+        toggle: () =>
+          applyMutation((draft) => {
+            draft.dev.panel.open = !draft.dev.panel.open;
+          }),
+      },
+    },
   };
 
   state.mutate = mutate;

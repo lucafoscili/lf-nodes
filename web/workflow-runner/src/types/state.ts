@@ -2,6 +2,8 @@ import { LfDataDataset } from '@lf-widgets/foundations/dist';
 import { WorkflowAPIUI } from './api';
 import { WorkflowRunnerManager } from './manager';
 
+type LfCardElement = HTMLElementTagNameMap['lf-card'];
+
 //#region State
 export type WorkflowStateUpdater = (state: WorkflowState) => WorkflowState;
 export type WorkflowStateListener = (state: WorkflowState) => void;
@@ -24,6 +26,7 @@ export interface WorkflowUI {
     header: {
       _root: HTMLLfHeaderElement | null;
       drawerToggle: HTMLLfButtonElement | null;
+      debugToggle: HTMLLfButtonElement | null;
       themeSwitch: HTMLLfButtonElement | null;
     };
     main: {
@@ -44,6 +47,15 @@ export interface WorkflowUI {
         title: HTMLElement | null;
       };
     };
+    dev: {
+      _root: HTMLDivElement | null;
+      card: LfCardElement | null;
+    };
+  };
+}
+export interface WorkflowDevState {
+  panel: {
+    open: boolean;
   };
 }
 export interface WorkflowStateMutators {
@@ -58,6 +70,12 @@ export interface WorkflowStateMutators {
   manager: (manager: WorkflowRunnerManager | null) => void;
   workflows: (workflows: LfDataDataset) => void;
   ui: (updater: (ui: WorkflowUI) => void) => void;
+  dev: {
+    panel: {
+      set: (open: boolean) => void;
+      toggle: () => void;
+    };
+  };
 }
 export interface WorkflowState {
   current: WorkflowCurrent;
@@ -66,5 +84,6 @@ export interface WorkflowState {
   results: WorkflowAPIUI | null;
   ui: WorkflowUI;
   workflows: LfDataDataset;
+  dev: WorkflowDevState;
 }
 //#endregion

@@ -1,8 +1,8 @@
 import { LfButtonInterface } from '@lf-widgets/foundations/dist';
 import { getLfFramework } from '@lf-widgets/framework';
+import { WorkflowSectionController } from '../types/section';
 import { WorkflowState } from '../types/state';
 import { createComponent } from './components';
-import { WorkflowSectionController } from '../types/section';
 
 //#region Constants
 const ROOT_CLASS = 'header-section';
@@ -40,6 +40,32 @@ const _drawerToggle = (state: WorkflowState) => {
 
   return drawerToggle;
 };
+
+const _debugToggle = (state: WorkflowState) => {
+  const { theme } = getLfFramework();
+  const { get } = theme;
+  const lfIcon = get.icon('code');
+
+  const props = {
+    lfAriaLabel: 'Toggle developer console',
+    lfIcon,
+    lfStyling: 'icon',
+  } as Partial<LfButtonInterface>;
+  const debugToggle = createComponent.button(props);
+  debugToggle.lfUiState = 'info';
+  debugToggle.className = `${ROOT_CLASS}__debug-toggle`;
+  debugToggle.addEventListener('lf-button-event', (e) => {
+    const { eventType } = e.detail;
+
+    switch (eventType) {
+      case 'click':
+        state.mutate.dev.panel.toggle();
+        break;
+    }
+  });
+
+  return debugToggle;
+};
 //#endregion
 
 //#region Factory
@@ -56,13 +82,16 @@ export const createHeaderSection = (): WorkflowSectionController => {
 
     const container = _container();
     const drawerToggle = _drawerToggle(state);
+    const debugToggle = _debugToggle(state);
 
     state.mutate.ui((uiState) => {
       uiState.layout.header.drawerToggle = drawerToggle;
+      uiState.layout.header.debugToggle = debugToggle;
     });
 
     element.appendChild(container);
     container.appendChild(drawerToggle);
+    container.appendChild(debugToggle);
 
     state.mutate.ui((uiState) => {
       uiState.layout.header._root = element;
@@ -70,7 +99,15 @@ export const createHeaderSection = (): WorkflowSectionController => {
     ui.layout._root?.appendChild(element);
   };
 
-  const render = () => {};
+  const render = (state: WorkflowState) => {
+    const debugToggle = state.ui.layout.header.debugToggle;
+    if (debugToggle) {
+      debugToggle.lfUiState = state.dev.panel.open ? 'secondary' : 'info';
+      debugToggle.title = state.dev.panel.open
+        ? 'Hide developer console'
+        : 'Show developer console';
+    }
+  };
 
   const destroy = () => {
     element?.remove();
@@ -78,6 +115,7 @@ export const createHeaderSection = (): WorkflowSectionController => {
       lastState.mutate.ui((uiState) => {
         uiState.layout.header._root = null;
         uiState.layout.header.drawerToggle = null;
+        uiState.layout.header.debugToggle = null;
         uiState.layout.header.themeSwitch = null;
       });
     }

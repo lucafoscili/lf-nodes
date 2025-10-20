@@ -51,9 +51,20 @@ body {
   }
 
   &__container {
+    align-items: center;
     display: flex;
+    gap: 0.5rem;
     height: 100%;
+    padding: 0.5rem 1rem;
     width: 100%;
+  }
+
+  &__drawer-toggle {
+    margin-right: auto;
+  }
+
+  &__debug-toggle {
+    margin-left: auto;
   }
 }
 
@@ -145,5 +156,36 @@ body {
 
   &__title {
     padding: 1.25em 0;
+  }
+}
+
+.dev-panel {
+  & {
+    bottom: 24px;
+    display: grid;
+    max-height: calc(100vh - 120px);
+    opacity: 0;
+    pointer-events: none;
+    position: fixed;
+    right: 24px;
+    transform: translateY(12px) scale(0.98);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    width: min(420px, calc(100% - 32px));
+    z-index: 30;
+  }
+
+  &[data-open='true'] {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0) scale(1);
+  }
+
+  &__card {
+    backdrop-filter: blur(12px);
+    border-radius: var(--lf-ui-border-radius);
+    box-shadow: var(--lf-ui-box-shadow-modal);
+    max-height: inherit;
+    overflow: hidden;
+    width: 100%;
   }
 }
