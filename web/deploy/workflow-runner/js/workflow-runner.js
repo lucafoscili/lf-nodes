@@ -306,92 +306,14 @@ const createDrawerSection = () => {
     destroy
   };
 };
-const isObject = (v) => v !== null && typeof v === "object";
-const isString = (v) => typeof v === "string";
-const isStringArray = (v) => Array.isArray(v) && v.every((e) => typeof e === "string");
-const isWorkflowAPIUploadPayload = (v) => {
-  if (!isObject(v)) {
-    return false;
-  }
-  if (!("detail" in v) || !isString(v.detail)) {
-    return false;
-  }
-  if ("paths" in v && !(isStringArray(v.paths) || v.paths === void 0)) {
-    return false;
-  }
-  if ("error" in v) {
-    const err = v.error;
-    if (!isObject(err) || !("message" in err) || !isString(err.message)) {
-      return false;
-    }
-  }
-  return true;
-};
-const isWorkflowAPIUploadResponse = (v) => {
-  if (!isObject(v)) {
-    return false;
-  }
-  if (!("message" in v) || !isString(v.message)) {
-    return false;
-  }
-  if (!("status" in v) || !isString(v.status)) {
-    return false;
-  }
-  if (!("payload" in v) || !isWorkflowAPIUploadPayload(v.payload)) {
-    return false;
-  }
-  return true;
-};
-const normalize_description = (description) => {
-  if (!description) {
-    return "";
-  } else if (Array.isArray(description) && description.length > 1) {
-    return description.join("\n");
-  } else if (Array.isArray(description) && description.length === 1) {
-    return description[0];
-  } else if (typeof description === "string") {
-    return description;
-  } else {
-    return "";
-  }
-};
-const clearChildren = (element) => {
-  if (!element) {
-    return;
-  }
-  while (element.firstChild) {
-    element.removeChild(element.firstChild);
-  }
-};
-const _chooseComponentForResult = (key, props) => {
-  const el = document.createElement("div");
-  const { _description } = props;
-  if (_description) {
-    const desc = document.createElement("div");
-    desc.innerHTML = normalize_description(_description);
-    el.appendChild(desc);
-  }
-  switch (key) {
-    case "masonry":
-      const masonry = createComponent.masonry(props);
-      el.appendChild(masonry);
-      break;
-    default:
-    case "code":
-      const code = createComponent.code(props);
-      el.appendChild(code);
-      break;
-  }
-  return el;
-};
-const _setProps = (comp, element, props) => {
+const _setProps = (comp, element, props, slotMap = {}) => {
   if (!props) {
     return;
   }
   const { sanitizeProps } = getLfFramework();
-  const hasSlots = props._slotmap && Object.keys(props._slotmap).length > 0;
+  const hasSlots = Object.keys(slotMap).length > 0;
   if (hasSlots) {
-    _setSlots(comp, element, props);
+    _setSlots(comp, element, slotMap);
   }
   const el = element;
   const safeProps = sanitizeProps(props, comp);
@@ -402,9 +324,9 @@ const _setProps = (comp, element, props) => {
     }
   }
 };
-const _setSlots = (_comp, element, props) => {
-  for (const slotName in props._slotmap) {
-    const slotHtml = props._slotmap[slotName];
+const _setSlots = (_comp, element, slotMap) => {
+  for (const slotName in slotMap) {
+    const slotHtml = slotMap[slotName];
     const wrapper = document.createElement("div");
     wrapper.innerHTML = slotHtml;
     wrapper.setAttribute("slot", slotName);
@@ -449,9 +371,9 @@ const createComponent = {
     _setProps("LfCode", comp, props);
     return comp;
   },
-  masonry: (props) => {
+  masonry: (props, slot_map) => {
     const comp = document.createElement("lf-masonry");
-    _setProps("LfMasonry", comp, props);
+    _setProps("LfMasonry", comp, props, slot_map);
     return comp;
   },
   textfield: (props) => {
@@ -472,28 +394,49 @@ const createComponent = {
 };
 const createInputCell = (cell) => {
   const { sanitizeProps } = getLfFramework();
-  switch (cell.shape) {
+  const { props, shape } = cell;
+  switch (shape) {
     case "toggle": {
-      return createComponent.toggle(sanitizeProps(cell, "LfToggle"));
+      const p = props || {};
+      return createComponent.toggle(sanitizeProps(p, "LfToggle"));
     }
     case "upload": {
-      return createComponent.upload(sanitizeProps(cell, "LfUpload"));
+      const p = props || {};
+      return createComponent.upload(sanitizeProps(p, "LfUpload"));
     }
     default:
     case "textfield": {
-      return createComponent.textfield(sanitizeProps(cell, "LfTextfield"));
+      const p = props || {};
+      return createComponent.textfield(sanitizeProps(p, "LfTextfield"));
     }
   }
 };
 const createOutputComponent = (descriptor) => {
-  if (!descriptor) {
-    const fallback = document.createElement("pre");
-    fallback.textContent = "No output available.";
-    return fallback;
+  const { dataset, props, shape, slot_map, svg } = descriptor;
+  const el = document.createElement("div");
+  switch (shape) {
+    case "code": {
+      const p = props || {};
+      p.lfValue = svg;
+      const code = createComponent.code(p);
+      el.appendChild(code);
+      break;
+    }
+    case "masonry": {
+      const p = props || {};
+      p.lfDataset = dataset;
+      const masonry = createComponent.masonry(p, slot_map);
+      el.appendChild(masonry);
+      break;
+    }
+    default: {
+      const fallback = document.createElement("pre");
+      fallback.textContent = "No output available.";
+      el.appendChild(fallback);
+      break;
+    }
   }
-  const key = descriptor.shape === "masonry" ? "masonry" : "code";
-  const props = descriptor.props || {};
-  return _chooseComponentForResult(key, props);
+  return el;
 };
 const ROOT_CLASS$2 = "header-section";
 const _container = () => {
@@ -633,98 +576,74 @@ const createMainSection = () => {
     destroy
   };
 };
-const WORKFLOW_TEXT = "Select a workflow";
+const isObject = (v) => v !== null && typeof v === "object";
+const isString = (v) => typeof v === "string";
+const isStringArray = (v) => Array.isArray(v) && v.every((e) => typeof e === "string");
+const isWorkflowAPIUploadPayload = (v) => {
+  if (!isObject(v)) {
+    return false;
+  }
+  if (!("detail" in v) || !isString(v.detail)) {
+    return false;
+  }
+  if ("paths" in v && !(isStringArray(v.paths) || v.paths === void 0)) {
+    return false;
+  }
+  if ("error" in v) {
+    const err = v.error;
+    if (!isObject(err) || !("message" in err) || !isString(err.message)) {
+      return false;
+    }
+  }
+  return true;
+};
+const isWorkflowAPIUploadResponse = (v) => {
+  if (!isObject(v)) {
+    return false;
+  }
+  if (!("message" in v) || !isString(v.message)) {
+    return false;
+  }
+  if (!("status" in v) || !isString(v.status)) {
+    return false;
+  }
+  if (!("payload" in v) || !isWorkflowAPIUploadPayload(v.payload)) {
+    return false;
+  }
+  return true;
+};
+const clearChildren = (element) => {
+  if (!element) {
+    return;
+  }
+  while (element.firstChild) {
+    element.removeChild(element.firstChild);
+  }
+};
 const ROOT_CLASS = "workflow-section";
-const getCurrentWorkflow = (state) => {
-  var _a;
-  const { current, workflows } = state;
-  return ((_a = workflows == null ? void 0 : workflows.nodes) == null ? void 0 : _a.find((node) => node.id === current.id)) || null;
+const WORKFLOW_TEXT = "Select a workflow";
+const _createDescription = (state) => {
+  const p = document.createElement("p");
+  p.className = `${ROOT_CLASS}__description`;
+  p.textContent = _getWorkflowDescription(state);
+  return p;
 };
-const getWorkflowSection = (workflow, section) => {
-  var _a;
-  return ((_a = workflow == null ? void 0 : workflow.children) == null ? void 0 : _a.find((child) => {
-    var _a2;
-    return ((_a2 = child == null ? void 0 : child.props) == null ? void 0 : _a2.lfSection) === section;
-  })) || null;
-};
-const getWorkflowInputCells = (workflow) => {
-  const inputsSection = getWorkflowSection(workflow, "inputs");
-  return (inputsSection == null ? void 0 : inputsSection.cells) || {};
-};
-const getWorkflowOutputCells = (workflow) => {
-  const outputsSection = getWorkflowSection(workflow, "outputs");
-  return (outputsSection == null ? void 0 : outputsSection.cells) || {};
-};
-const groupOutputDefinitionsByNode = (workflow) => {
-  const outputCells = getWorkflowOutputCells(workflow);
-  const grouped = {};
-  for (const key in outputCells) {
-    if (!Object.prototype.hasOwnProperty.call(outputCells, key)) {
-      continue;
-    }
-    const cell = outputCells[key];
-    const nodeId = (cell == null ? void 0 : cell.lfNodeId) || (cell == null ? void 0 : cell.nodeId) || (cell == null ? void 0 : cell.node_id);
-    if (!nodeId) {
-      continue;
-    }
-    if (!grouped[nodeId]) {
-      grouped[nodeId] = [];
-    }
-    grouped[nodeId].push(cell);
-  }
-  return grouped;
-};
-const extractDefinitionProps = (definition) => {
-  if (!definition) {
-    return {};
-  }
-  const reservedKeys = /* @__PURE__ */ new Set(["id", "value", "shape", "title", "lfNodeId"]);
-  const props = {};
-  for (const key in definition) {
-    if (!Object.prototype.hasOwnProperty.call(definition, key)) {
-      continue;
-    }
-    if (!reservedKeys.has(key)) {
-      props[key] = definition[key];
-    }
-  }
-  return props;
-};
-const normalizeNodeOutputs = (payload) => {
-  if (!payload) {
-    return [];
-  }
-  const raw = payload.lf_output;
-  if (!raw) {
-    return [];
-  }
-  return Array.isArray(raw) ? raw : [raw];
-};
-const getWorkflowDescription = (state) => {
-  const workflow = getCurrentWorkflow(state);
-  return (workflow == null ? void 0 : workflow.description) || "";
-};
-const getWorkflowTitle = (state) => {
-  const workflow = getCurrentWorkflow(state);
-  const str = typeof (workflow == null ? void 0 : workflow.value) === "string" ? workflow.value : String((workflow == null ? void 0 : workflow.value) || "");
-  return str || WORKFLOW_TEXT;
-};
-const createFieldWrapper = () => {
+const _createFieldWrapper = () => {
   const fieldWrapper = document.createElement("div");
   fieldWrapper.className = `${ROOT_CLASS}__field`;
   return fieldWrapper;
 };
-const createOptionsWrapper = () => {
+const _createOptionsWrapper = () => {
   const optionsWrapper = document.createElement("div");
   optionsWrapper.className = `${ROOT_CLASS}__options`;
   return optionsWrapper;
 };
-const createResultWrapper = () => {
+const _createResultWrapper = () => {
   const resultWrapper = document.createElement("div");
   resultWrapper.className = `${ROOT_CLASS}__result`;
   return resultWrapper;
 };
-const createRunButton = (state) => {
+const _createRunButton = (state) => {
   const props = {
     lfAriaLabel: "Run workflow",
     lfLabel: "Run workflow",
@@ -735,31 +654,64 @@ const createRunButton = (state) => {
   button.addEventListener("lf-button-event", (e) => executeWorkflowButton(e, state));
   return button;
 };
-const createStatusWrapper = (tone = "info") => {
+const _createStatusWrapper = (tone = "info") => {
   const statusWrapper = document.createElement("div");
   statusWrapper.className = `${ROOT_CLASS}__status`;
   statusWrapper.dataset.tone = tone;
   return statusWrapper;
 };
-const createTitle = (state) => {
+const _createTitle = (state) => {
   const h3 = document.createElement("h3");
   h3.className = `${ROOT_CLASS}__title`;
-  h3.textContent = getWorkflowTitle(state);
+  h3.textContent = _getWorkflowTitle(state);
   return h3;
 };
-const createDescription = (state) => {
-  const p = document.createElement("p");
-  p.className = `${ROOT_CLASS}__description`;
-  p.textContent = getWorkflowDescription(state);
-  return p;
+const _deepMerge = (defs, outs) => {
+  var _a, _b;
+  const prep = [];
+  for (const id in defs) {
+    const cell = defs[id];
+    const { nodeId } = cell;
+    const result = ((_a = outs == null ? void 0 : outs[nodeId]) == null ? void 0 : _a.lf_output[0]) || ((_b = outs == null ? void 0 : outs[nodeId]) == null ? void 0 : _b[0]) || (outs == null ? void 0 : outs[nodeId]);
+    const item = {
+      ...JSON.parse(JSON.stringify(cell)),
+      ...JSON.parse(JSON.stringify(result || {}))
+    };
+    prep.push(item);
+  }
+  return prep;
+};
+const _getCurrentWorkflow = (state) => {
+  var _a;
+  const { current, workflows } = state;
+  return ((_a = workflows == null ? void 0 : workflows.nodes) == null ? void 0 : _a.find((node) => node.id === current.id)) || null;
+};
+const _getWorkflowInputCells = (workflow) => {
+  var _a;
+  const inputsSection = (_a = workflow.children) == null ? void 0 : _a.find((child) => child.id.includes("inputs"));
+  return (inputsSection == null ? void 0 : inputsSection.cells) || {};
+};
+const _getWorkflowOutputCells = (workflow) => {
+  var _a;
+  const outputsSection = (_a = workflow.children) == null ? void 0 : _a.find((child) => child.id.includes("outputs"));
+  return (outputsSection == null ? void 0 : outputsSection.cells) || {};
+};
+const _getWorkflowDescription = (state) => {
+  const workflow = _getCurrentWorkflow(state);
+  return (workflow == null ? void 0 : workflow.description) || "";
+};
+const _getWorkflowTitle = (state) => {
+  const workflow = _getCurrentWorkflow(state);
+  const str = typeof (workflow == null ? void 0 : workflow.value) === "string" ? workflow.value : String((workflow == null ? void 0 : workflow.value) || "");
+  return str || WORKFLOW_TEXT;
 };
 const createWorkflowSection = () => {
   const { STATUS_UPDATED, WORKFLOW_INPUT_FLAGGED, WORKFLOW_INPUTS_CLEARED, WORKFLOW_INPUTS_RENDERED, WORKFLOW_LAYOUT_DESTROYED, WORKFLOW_LAYOUT_MOUNTED, WORKFLOW_RESULTS_CLEARED, WORKFLOW_RESULTS_RENDERED } = DEBUG_MESSAGES;
   let descriptionElement = null;
+  let id = null;
   let lastMessage = null;
   let lastResultsRef = null;
   let lastStatus = null;
-  let lastWorkflowId = null;
   let mountedState = null;
   let optionsWrapper = null;
   let resultWrapper = null;
@@ -773,12 +725,12 @@ const createWorkflowSection = () => {
     const { ui } = state;
     section = document.createElement("section");
     section.className = ROOT_CLASS;
-    titleElement = createTitle(state);
-    descriptionElement = createDescription(state);
-    optionsWrapper = createOptionsWrapper();
-    runButton = createRunButton(state);
-    statusWrapper = createStatusWrapper("info");
-    resultWrapper = createResultWrapper();
+    titleElement = _createTitle(state);
+    descriptionElement = _createDescription(state);
+    optionsWrapper = _createOptionsWrapper();
+    runButton = _createRunButton(state);
+    statusWrapper = _createStatusWrapper("info");
+    resultWrapper = _createResultWrapper();
     state.mutate.ui((uiState) => {
       uiState.layout.main.workflow._root = section;
       uiState.layout.main.workflow.description = descriptionElement;
@@ -805,7 +757,7 @@ const createWorkflowSection = () => {
     if (!element) {
       return;
     }
-    element.textContent = getWorkflowDescription(state);
+    element.textContent = _getWorkflowDescription(state);
   };
   const updateOptions = (state) => {
     const { ui } = state;
@@ -814,19 +766,20 @@ const createWorkflowSection = () => {
       return;
     }
     clearChildren(element);
-    const workflow = getCurrentWorkflow(state);
+    const workflow = _getCurrentWorkflow(state);
     const cellElements = [];
     if (workflow) {
-      const inputCells = getWorkflowInputCells(workflow);
-      for (const key in inputCells) {
-        if (!Object.prototype.hasOwnProperty.call(inputCells, key)) {
+      const inputCells = _getWorkflowInputCells(workflow);
+      for (const id2 in inputCells) {
+        if (!Object.prototype.hasOwnProperty.call(inputCells, id2)) {
           continue;
         }
-        const cell = inputCells[key];
-        const wrapper = createFieldWrapper();
-        const cellElement = createInputCell(cell);
-        cellElements.push(cellElement);
-        wrapper.appendChild(cellElement);
+        const cell = inputCells[id2];
+        const wrapper = _createFieldWrapper();
+        const component = createInputCell(cell);
+        component.id = id2;
+        cellElements.push(component);
+        wrapper.appendChild(component);
         element.appendChild(wrapper);
       }
     }
@@ -845,7 +798,6 @@ const createWorkflowSection = () => {
     }
   };
   const updateResult = (state) => {
-    var _a, _b;
     const { ui } = state;
     const element = ui.layout.main.workflow.result;
     if (!element) {
@@ -860,64 +812,35 @@ const createWorkflowSection = () => {
       });
       return;
     }
-    const workflow = getCurrentWorkflow(state);
-    const definitionsByNode = workflow ? groupOutputDefinitionsByNode(workflow) : {};
-    let hasRendered = false;
-    for (const nodeId of nodeIds) {
-      const nodePayload = outputs[nodeId];
-      const items = normalizeNodeOutputs(nodePayload);
-      if (!items.length) {
-        continue;
-      }
-      const title = document.createElement("h4");
-      title.className = `${ROOT_CLASS}__result-title`;
-      const definitionGroup = definitionsByNode[nodeId] || [];
-      const nodeLabel = definitionGroup.length ? normalize_description(((_a = definitionGroup[0]) == null ? void 0 : _a.title) || ((_b = definitionGroup[0]) == null ? void 0 : _b.value)) : null;
-      title.textContent = nodeLabel || `Node #${nodeId}`;
-      element.appendChild(title);
+    const workflow = _getCurrentWorkflow(state);
+    const outputsDefs = workflow ? _getWorkflowOutputCells(workflow) : {};
+    debugLog(WORKFLOW_RESULTS_CLEARED, "informational", {
+      workflowId: state.current.id
+    });
+    const prepOutputs = _deepMerge(outputsDefs, outputs);
+    for (let i = 0; i < prepOutputs.length; i++) {
+      const output = prepOutputs[i];
+      const { id: id2, nodeId, title } = output;
+      const h4 = document.createElement("h4");
+      h4.className = `${ROOT_CLASS}__result-title`;
+      h4.textContent = title || `Node #${nodeId}`;
+      element.appendChild(h4);
       const grid = document.createElement("div");
       grid.className = `${ROOT_CLASS}__result-grid`;
       element.appendChild(grid);
-      items.forEach((item, index) => {
-        const definition = definitionGroup.find((candidate) => (candidate == null ? void 0 : candidate.id) === (item == null ? void 0 : item.id)) || definitionGroup[index];
-        const mergedProps = {
-          ...extractDefinitionProps(definition),
-          ...(item == null ? void 0 : item.props) || {}
-        };
-        const descriptor = {
-          ...item,
-          id: (item == null ? void 0 : item.id) ?? (definition == null ? void 0 : definition.id),
-          shape: (item == null ? void 0 : item.shape) || (definition == null ? void 0 : definition.shape) || "code",
-          title: (item == null ? void 0 : item.title) || (definition == null ? void 0 : definition.title) || (definition == null ? void 0 : definition.value) || ((item == null ? void 0 : item.id) ? normalize_description(item.id) : `Output ${index + 1}`),
-          props: mergedProps
-        };
-        const wrapper = document.createElement("div");
-        wrapper.className = `${ROOT_CLASS}__result-item`;
-        if (descriptor.title) {
-          const label = document.createElement("h5");
-          label.className = `${ROOT_CLASS}__result-subtitle`;
-          label.textContent = String(descriptor.title);
-          wrapper.appendChild(label);
-        }
-        const component = createOutputComponent(descriptor);
-        wrapper.appendChild(component);
-        grid.appendChild(wrapper);
-      });
-      hasRendered = true;
-    }
-    if (!hasRendered) {
-      debugLog(WORKFLOW_RESULTS_CLEARED, "informational", {
-        workflowId: state.current.id
-      });
-      return;
+      const wrapper = document.createElement("div");
+      wrapper.className = `${ROOT_CLASS}__result-item`;
+      const component = createOutputComponent(output);
+      component.id = id2;
+      wrapper.appendChild(component);
+      grid.appendChild(wrapper);
     }
     element.scrollIntoView({
       behavior: "smooth",
-      block: "start"
+      block: "center"
     });
     debugLog(WORKFLOW_RESULTS_RENDERED, "informational", {
-      workflowId: state.current.id,
-      nodes: nodeIds
+      workflowId: state.current.id
     });
   };
   const updateRunButton = (state) => {
@@ -947,17 +870,17 @@ const createWorkflowSection = () => {
     if (!element) {
       return;
     }
-    element.textContent = getWorkflowTitle(state);
+    element.textContent = _getWorkflowTitle(state);
   };
   const render = (state) => {
     if (!section) {
       return;
     }
-    if (state.current.id !== lastWorkflowId) {
+    if (state.current.id !== id) {
       updateDescription(state);
       updateTitle(state);
       updateOptions(state);
-      lastWorkflowId = state.current.id;
+      id = state.current.id;
     }
     if (state.current.status !== lastStatus || state.current.message !== lastMessage) {
       updateRunButton(state);
@@ -970,9 +893,9 @@ const createWorkflowSection = () => {
       lastResultsRef = state.results;
     }
   };
-  const setCellStatus = (state, id, status = "") => {
+  const setCellStatus = (state, id2, status = "") => {
     const { ui } = state;
-    const field = ui.layout.main.workflow.cells.find((el) => el.id === id);
+    const field = ui.layout.main.workflow.cells.find((el) => el.id === id2);
     const wrapper = field == null ? void 0 : field.parentElement;
     if (wrapper) {
       wrapper.dataset.status = status;
@@ -980,7 +903,7 @@ const createWorkflowSection = () => {
     if (status) {
       debugLog(WORKFLOW_INPUT_FLAGGED, "informational", {
         workflowId: state.current.id,
-        field: id,
+        field: id2,
         status
       });
     }
@@ -1008,7 +931,7 @@ const createWorkflowSection = () => {
     runButton = null;
     statusWrapper = null;
     titleElement = null;
-    lastWorkflowId = null;
+    id = null;
     lastStatus = null;
     lastMessage = null;
     lastResultsRef = null;
