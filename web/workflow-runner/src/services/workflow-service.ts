@@ -8,8 +8,8 @@ import {
   WorkflowAPIUploadPayload,
   WorkflowAPIUploadResponse,
 } from '../types/api';
-import { WorkflowStatus } from '../types/section';
 import { isWorkflowAPIUploadPayload, isWorkflowAPIUploadResponse } from '../utils/common';
+import { WorkflowStatus } from '../types/state';
 
 export class WorkflowApiError<TPayload = unknown> extends Error {
   readonly payload?: TPayload;

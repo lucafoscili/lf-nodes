@@ -4,48 +4,20 @@ import {
   LfComponentName,
   LfComponentPropsFor,
   LfComponentRootElement,
-  LfDataCell,
   LfMasonryInterface,
   LfTextfieldInterface,
   LfToggleInterface,
   LfUploadInterface,
 } from '@lf-widgets/foundations/dist';
 import { getLfFramework } from '@lf-widgets/framework';
-import { WorkflowNodeOutputItem } from '../types/api';
-import { normalize_description } from '../utils/common';
+import { WorkflowCellInput, WorkflowCellOutput } from '../types/api';
 
 //#region Helpers
-const _chooseComponentForResult = <T extends LfComponentName>(
-  key: string,
-  props: Partial<LfComponentPropsFor<T>> & { _description?: string | string[] },
-) => {
-  const el = document.createElement('div');
-
-  const { _description } = props;
-  if (_description) {
-    const desc = document.createElement('div');
-    desc.innerHTML = normalize_description(_description);
-    el.appendChild(desc);
-  }
-
-  switch (key) {
-    case 'masonry':
-      const masonry = createComponent.masonry(props);
-      el.appendChild(masonry);
-      break;
-    default:
-    case 'code':
-      const code = createComponent.code(props);
-      el.appendChild(code);
-      break;
-  }
-
-  return el;
-};
 const _setProps = <T extends LfComponentName>(
   comp: T,
   element: LfComponentRootElement<T>,
-  props: Partial<LfComponentPropsFor<T>> & { _slotmap?: Record<string, string> },
+  props: Partial<LfComponentPropsFor<T>>,
+  slotMap: Record<string, string> = {},
 ) => {
   if (!props) {
     return;
@@ -53,9 +25,9 @@ const _setProps = <T extends LfComponentName>(
 
   const { sanitizeProps } = getLfFramework();
 
-  const hasSlots = props._slotmap && Object.keys(props._slotmap).length > 0;
+  const hasSlots = Object.keys(slotMap).length > 0;
   if (hasSlots) {
-    _setSlots(comp, element, props);
+    _setSlots(comp, element, slotMap);
   }
 
   const el = element as Partial<LfComponentPropsFor<T>>;
@@ -70,10 +42,10 @@ const _setProps = <T extends LfComponentName>(
 const _setSlots = <T extends LfComponentName>(
   _comp: T,
   element: HTMLElement,
-  props: Partial<LfComponentPropsFor<T>> & { _slotmap?: Record<string, string> },
+  slotMap: Record<string, string>,
 ) => {
-  for (const slotName in props._slotmap) {
-    const slotHtml = props._slotmap[slotName];
+  for (const slotName in slotMap) {
+    const slotHtml = slotMap[slotName];
     const wrapper = document.createElement('div');
     wrapper.innerHTML = slotHtml;
     wrapper.setAttribute('slot', slotName);
@@ -124,10 +96,10 @@ export const createComponent = {
     _setProps('LfCode', comp, props);
     return comp;
   },
-  masonry: (props: Partial<LfMasonryInterface>) => {
+  masonry: (props: Partial<LfMasonryInterface>, slot_map?: Record<string, string>) => {
     const comp = document.createElement('lf-masonry');
 
-    _setProps('LfMasonry', comp, props);
+    _setProps('LfMasonry', comp, props, slot_map);
     return comp;
   },
   textfield: (props: Partial<LfTextfieldInterface>) => {
@@ -152,40 +124,56 @@ export const createComponent = {
 //#endregion
 
 //#region Inputs
-export const createInputCell = (cell: LfDataCell) => {
+export const createInputCell = (cell: WorkflowCellInput) => {
   const { sanitizeProps } = getLfFramework();
+  const { props, shape } = cell;
 
-  switch (cell.shape) {
+  switch (shape) {
     case 'toggle': {
-      return createComponent.toggle(sanitizeProps(cell as LfDataCell<'toggle'>, 'LfToggle'));
+      const p = (props || {}) as Partial<LfToggleInterface>;
+      return createComponent.toggle(sanitizeProps(p, 'LfToggle'));
     }
     case 'upload': {
-      return createComponent.upload(sanitizeProps(cell as LfDataCell<'upload'>, 'LfUpload'));
+      const p = (props || {}) as Partial<LfUploadInterface>;
+      return createComponent.upload(sanitizeProps(p, 'LfUpload'));
     }
     default:
     case 'textfield': {
-      return createComponent.textfield(
-        sanitizeProps(cell as LfDataCell<'textfield'>, 'LfTextfield'),
-      );
+      const p = (props || {}) as Partial<LfTextfieldInterface>;
+      return createComponent.textfield(sanitizeProps(p, 'LfTextfield'));
     }
   }
 };
 //#endregion
 
 //#region Outputs
-export const createOutputComponent = (descriptor: WorkflowNodeOutputItem) => {
-  if (!descriptor) {
-    const fallback = document.createElement('pre');
-    fallback.textContent = 'No output available.';
-    return fallback;
+export const createOutputComponent = (descriptor: WorkflowCellOutput) => {
+  const { dataset, props, shape, slot_map, svg } = descriptor;
+  const el = document.createElement('div');
+
+  switch (shape) {
+    case 'code': {
+      const p = (props || {}) as Partial<LfCodeInterface>;
+      p.lfValue = svg;
+      const code = createComponent.code(p);
+      el.appendChild(code);
+      break;
+    }
+    case 'masonry': {
+      const p = (props || {}) as Partial<LfMasonryInterface>;
+      p.lfDataset = dataset;
+      const masonry = createComponent.masonry(p, slot_map);
+      el.appendChild(masonry);
+      break;
+    }
+    default: {
+      const fallback = document.createElement('pre');
+      fallback.textContent = 'No output available.';
+      el.appendChild(fallback);
+      break;
+    }
   }
 
-  const key = descriptor.shape === 'masonry' ? 'masonry' : 'code';
-  const props = (descriptor.props || {}) as Partial<LfComponentPropsFor<LfComponentName>> & {
-    _description?: string | string[];
-    _slotmap?: Record<string, string>;
-  };
-
-  return _chooseComponentForResult(key, props);
+  return el;
 };
 //#endregion

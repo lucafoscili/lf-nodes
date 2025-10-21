@@ -147,37 +147,11 @@ class LF_SaveImageForCivitAI:
 
         return {
             "ui": {
-                "lf_output": [
-                    {
-                        "id": "civitai_metadata",
-                        "nodeId": kwargs.get("node_id"),
-                        "shape": "code",
-                        "title": "CivitAI metadata",
-                        "props": {
-                            "lfLanguage": "markdown",
-                            "lfValue": civitai_metadata,
-                        },
-                    },
-                    {
-                        "id": "file_names",
-                        "nodeId": kwargs.get("node_id"),
-                        "shape": "code",
-                        "title": "Generated filenames",
-                        "props": {
-                            "lfLanguage": "markdown",
-                            "lfValue": '\n'.join(file_names),
-                        },
-                    },
-                    {
-                        "id": "dataset",
-                        "nodeId": kwargs.get("node_id"),
-                        "shape": "masonry",
-                        "title": "Saved images",
-                        "props": {
-                            "lfDataset": dataset,
-                        },
-                    },
-                ],
+                "lf_output": [{
+                    "civitai_metadata": civitai_metadata,
+                    "dataset": dataset,
+                    "file_names": file_names,
+                }],
             },
             "result": (file_names, civitai_metadata)
         }

@@ -1,16 +1,9 @@
-import { LfCodeInterface, LfMasonryPropsInterface } from '@lf-widgets/foundations/dist';
-import { WorkflowStatus } from './section';
+import { LfComponentPropsFor, LfDataDataset } from '@lf-widgets/foundations/dist';
+import { WorkflowStatus } from './state';
 
 //#region API
-export interface LFCodeItem extends LfCodeInterface {
-  _description?: string | string[];
-}
-export interface LFMasonryItem extends LfMasonryPropsInterface {
-  _description?: string | string[];
-  _slotmap?: Record<string, string>;
-}
-export interface WorkflowAPIErrorOptions<TPayload> {
-  payload?: TPayload;
+export interface WorkflowAPIErrorOptions<T> {
+  payload?: T;
   status?: number;
 }
 export interface WorkflowAPIResponse {
@@ -20,24 +13,86 @@ export interface WorkflowAPIResponse {
 }
 //#endregion
 
-//#region Run
-export interface WorkflowNodeOutputProps {
-  _slotmap?: Record<string, string>;
-  [key: string]: unknown;
+//#region Nodes
+export interface SaveImageForCivitAINodeOutputs {
+  civitai_metadata: string;
+  dataset: LfDataDataset;
+  file_names: string[];
 }
-export interface WorkflowNodeOutputItem {
-  id?: string;
-  nodeId?: string;
-  shape: string;
-  title?: string;
-  props?: WorkflowNodeOutputProps;
+export interface SaveSVGNodeOutputs {
+  dataset: LfDataDataset;
+  slot_map: Record<string, string>;
+  svg: string;
 }
-export interface WorkflowNodeOutputPayload {
-  lf_output?: WorkflowNodeOutputItem[] | WorkflowNodeOutputItem;
-  [key: string]: unknown;
-}
-export type WorkflowNodeOutputs = Record<string, WorkflowNodeOutputPayload>;
+//#endregion
 
+//#region Cells
+// Common
+export interface WorkflowCellBase {
+  id: string;
+  nodeId: string;
+  title?: string;
+  value?: string;
+}
+
+// Inputs
+export interface WorkflowCellInput extends WorkflowCellBase {
+  props?: Partial<
+    LfComponentPropsFor<
+      'LfButton' | 'LfCode' | 'LfMasonry' | 'LfTextfield' | 'LfToggle' | 'LfUpload'
+    >
+  >;
+  shape?: 'textfield' | 'toggle' | 'upload';
+}
+export interface WorkflowCellsInputContainer {
+  [index: string]: WorkflowCellInput;
+}
+
+// Outputs
+export interface WorkflowCellOutput
+  extends SaveSVGNodeOutputs,
+    SaveImageForCivitAINodeOutputs,
+    WorkflowCellBase {
+  props?: Partial<LfComponentPropsFor<'LfCode' | 'LfMasonry'>>;
+  shape?: 'code' | 'masonry';
+}
+export type ShapeToComponentNameMap = {
+  button: 'LfButton';
+  code: 'LfCode';
+  masonry: 'LfMasonry';
+  textfield: 'LfTextfield';
+  toggle: 'LfToggle';
+  upload: 'LfUpload';
+};
+export type Shape = keyof ShapeToComponentNameMap;
+export type WorkflowCellOutputItemFor<S extends Shape> = WorkflowCellOutput & {
+  props?: Partial<LfComponentPropsFor<ShapeToComponentNameMap[S]>>;
+  shape: S;
+};
+export type WorkflowCellOutputItem = WorkflowCellOutputItemFor<Shape>;
+export interface WorkflowCellsOutputContainer {
+  [index: string]: WorkflowCellOutputItemFor<Shape>;
+}
+//#endregion
+//#endregion
+
+//#region Results
+export interface WorkflowNodeResultPayload {
+  lf_output?: [
+    {
+      civitai_metadata?: string;
+      file_names?: string[];
+      dataset?: LfDataDataset;
+      slot_map?: Record<string, string>;
+      svg?: string;
+    },
+  ];
+  [key: string]: unknown;
+}
+export type WorkflowNodeResults = Record<string, WorkflowNodeResultPayload>;
+//#endregion
+
+//#region Run
 export interface WorkflowAPIRunPayload {
   detail: string;
   error?: {
@@ -45,7 +100,7 @@ export interface WorkflowAPIRunPayload {
     message: string;
   };
   history: {
-    outputs?: WorkflowNodeOutputs;
+    outputs?: WorkflowNodeResults;
   };
 }
 export interface WorkflowAPIRunResult extends WorkflowAPIResponse {

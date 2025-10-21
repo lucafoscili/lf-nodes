@@ -1,7 +1,7 @@
 import { LfDataDataset } from '@lf-widgets/foundations/dist';
-import { WorkflowNodeOutputs } from './api';
+import { WorkflowNodeResults } from './api';
 import { WorkflowManager } from './manager';
-import { WorkflowCells, WorkflowStatus } from './section';
+import { WorkflowCells } from './section';
 
 //#region Store
 export interface WorkflowStore {
@@ -17,7 +17,7 @@ export interface WorkflowState {
   isDebug: boolean;
   manager: WorkflowManager | null;
   mutate: WorkflowStateMutators;
-  results: WorkflowNodeOutputs | null;
+  results: WorkflowNodeResults | null;
   ui: WorkflowStateUI;
   workflows: LfDataDataset;
 }
@@ -30,7 +30,7 @@ export type WorkflowStateListener = (state: WorkflowState) => void;
 export interface WorkflowStateMutators {
   isDebug: (isDebug: boolean) => void;
   manager: (manager: WorkflowManager | null) => void;
-  runResult: (status: WorkflowStatus, message: string, results: WorkflowNodeOutputs | null) => void;
+  runResult: (status: WorkflowStatus, message: string, results: WorkflowNodeResults | null) => void;
   status: (status: WorkflowStatus, message?: string) => void;
   ui: (updater: (ui: WorkflowStateUI) => void) => void;
   workflow: (id: string) => void;
@@ -70,4 +70,5 @@ export interface WorkflowStateUI {
   };
 }
 export type WorkflowStateUpdater = (state: WorkflowState) => WorkflowState;
+export type WorkflowStatus = 'ready' | 'running' | 'error';
 //#endregion

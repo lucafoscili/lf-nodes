@@ -1,5 +1,5 @@
 import runnerConfig from './runner.config.json';
-import { WorkflowStatus } from './types/section';
+import { WorkflowStatus } from './types/state';
 
 //#region Constants
 export const API_BASE = runnerConfig.apiBase;

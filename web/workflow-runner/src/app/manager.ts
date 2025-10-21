@@ -13,8 +13,8 @@ import {
   WorkflowApiError,
 } from '../services/workflow-service';
 import { WorkflowManager } from '../types/manager';
-import { WorkflowSectionHandle, WorkflowStatus } from '../types/section';
-import { WorkflowStore } from '../types/state';
+import { WorkflowSectionHandle } from '../types/section';
+import { WorkflowStatus, WorkflowStore } from '../types/state';
 import { DEBUG_MESSAGES, STATUS_MESSAGES } from '../utils/constants';
 import { debugLog } from '../utils/debug';
 import { initState } from './state';

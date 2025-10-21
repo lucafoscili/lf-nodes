@@ -35,30 +35,30 @@ def _configure_image_to_svg_workflow(prompt: Dict[str, Any], inputs: Dict[str, A
             inputs_map["image"] = resolved_str
 
         if node_id == "40":  # Color number (optional)
-            input_name = "number_of_colors"
-            input_value = int(inputs.get(input_name, 0) or 0)
+            name = "number_of_colors"
+            input_value = int(inputs.get(name, 0) or 0)
             if input_value is not None and input_value > 0:
                 inputs_map["integer"] = input_value
 
         if node_id == "47":  # Icon name (optional)
-            input_name = "icon_name"
-            icon_name = inputs.get(input_name)
+            name = "icon_name"
+            icon_name = inputs.get(name)
             if icon_name:
                 inputs_map["string"] = str(icon_name)
 
         if node_id == "51":  # Desaturate checkbox (optional)
-            input_name = "desaturate"
-            desaturate = inputs.get(input_name)
+            name = "desaturate"
+            desaturate = inputs.get(name)
             inputs_map["boolean"] = bool(desaturate)
 
         if node_id == "71":  # Keep transparency checkbox (optional)
-            input_name = "keep_transparency"
-            keep_transparency = inputs.get(input_name)
+            name = "keep_transparency"
+            keep_transparency = inputs.get(name)
             inputs_map["boolean"] = bool(keep_transparency)
 
         if node_id == "80":  # Strip attributes checkbox (optional)
-            input_name = "strip_attributes"
-            strip_attributes = inputs.get(input_name)
+            name = "strip_attributes"
+            strip_attributes = inputs.get(name)
             inputs_map["boolean"] = bool(strip_attributes)
 # endregion
 
@@ -114,10 +114,10 @@ input_colors = WorkflowCell(
     },
 )
 input_desaturate = WorkflowCell(
-    node_id="51",
     id="desaturate",
-    value="Desaturate",
+    node_id="51",
     shape="toggle",
+    value="Desaturate",
     description="Sets whether to desaturate the image before converting.",
     props={
         "lfLabel": "Desaturate image",
@@ -125,10 +125,10 @@ input_desaturate = WorkflowCell(
     },
 )
 input_transparency = WorkflowCell(
-    node_id="71",
     id="keep_transparency",
-    value="Keep Transparency",
+    node_id="71",
     shape="toggle",
+    value="Keep Transparency",
     description="Sets whether to keep the transparency of the image.",
     props={
         "lfLabel": "Keep transparency",
@@ -136,10 +136,10 @@ input_transparency = WorkflowCell(
     },
 )
 input_strip = WorkflowCell(
-    node_id="80",
     id="strip_attributes",
-    value="Strip Attributes",
+    node_id="80",
     shape="toggle",
+    value="Strip Attributes",
     description="Sets whether to strip attributes from the SVG output.",
     props={
         "lfLabel": "Strip attributes",
@@ -149,30 +149,27 @@ input_strip = WorkflowCell(
 # endregion
 
 # region Outputs
-output_svg_data = WorkflowCell(
-    node_id="20",
-    id="svg_data",
-    value="svg",
-    shape="code",
-    description="SVG Data",
-    props={
-        "lfLanguage": "html",
-    }
-)
 output_svg_file = WorkflowCell(
-    node_id="20",
     id="svg_file",
-    value="dataset",
+    node_id="20",
     shape="masonry",
     description="SVG File",
     props={
         "lfShape": "slot",
     }
 )
+output_svg_data = WorkflowCell(
+    id="svg_data",
+    node_id="20",
+    shape="code",
+    description="SVG Data",
+    props={
+        "lfLanguage": "html",
+    }
+)
 output_png = WorkflowCell(
-    node_id="61",
     id="png_file",
-    value="dataset",
+    node_id="61",
     shape="masonry",
     description="PNG File",
 )
@@ -196,8 +193,8 @@ image_2_svg = WorkflowNode(
         input_desaturate,
     ],
     outputs=[
-        output_svg_data,
         output_svg_file,
+        output_svg_data,
         output_png,
     ],
     configure_prompt=_configure_image_to_svg_workflow,

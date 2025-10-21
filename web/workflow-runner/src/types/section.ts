@@ -16,5 +16,4 @@ export interface WorkflowSectionController {
 export interface WorkflowSectionHandle extends WorkflowSectionController {
   setCellStatus: (state: WorkflowState, id: string, status?: WorkflowCellStatus) => void;
 }
-export type WorkflowStatus = 'ready' | 'running' | 'error';
 //#endregion

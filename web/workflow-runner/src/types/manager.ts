@@ -1,4 +1,4 @@
-import { WorkflowStatus } from './section';
+import { WorkflowStatus } from './state';
 
 //#region Manager
 export interface WorkflowManager {

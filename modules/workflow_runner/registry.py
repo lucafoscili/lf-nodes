@@ -124,23 +124,23 @@ def _workflow_to_prompt(workflow: Dict[str, Any]) -> Dict[str, Any]:
 class WorkflowCell:
     id: str
     node_id: str
-    value: str
-    shape: str
+    shape: str = ""
+    value: str = ""
     description: str = ""
     props: Dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         data = {
             "id": self.id,
-            "value": self.value,
+            "nodeId": self.node_id,
             "shape": self.shape,
         }
         if self.props:
-            data.update(self.props)
+            data["props"] = _json_safe(self.props)
+        if self.value:
+            data["value"] = self.value
         if self.description:
             data["title"] = self.description
-        if self.node_id:
-            data["lfNodeId"] = self.node_id
 
         return _json_safe(data)
 
@@ -184,24 +184,16 @@ class WorkflowRegistry:
                 "id": definition.id,
                 "value": definition.value,
                 "description": definition.description,
-                "children": [
-                    {
-                        "id": f"{definition.id}:inputs",
-                        "value": "Inputs",
-                        "description": "Workflow inputs",
-                        "props": {
-                            "lfSection": "inputs",
-                        },
-                        "cells": definition.inputs_as_dict(),
-                    },
-                    {
-                        "id": f"{definition.id}:outputs",
-                        "value": "Outputs",
-                        "description": "Workflow outputs",
-                        "props": {
-                            "lfSection": "outputs",
-                        },
-                        "cells": definition.outputs_as_dict(),
+                "children": [{
+                    "id": f"{definition.id}:inputs",
+                    "value": "Inputs",
+                    "description": "Workflow inputs",
+                    "cells": definition.inputs_as_dict(),
+                    },{
+                    "id": f"{definition.id}:outputs",
+                    "value": "Outputs",
+                    "description": "Workflow outputs",
+                    "cells": definition.outputs_as_dict(),
                     },
                 ],
             }
