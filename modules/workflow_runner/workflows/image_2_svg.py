@@ -12,10 +12,10 @@ def _configure_image_to_svg_workflow(prompt: Dict[str, Any], inputs: Dict[str, A
         inputs_map = node.setdefault("inputs", {})
 
         if node_id == "16":  # Image loader
-            input_name = "source_path"
-            source_path = inputs.get(input_name)
+            name = "source_path"
+            source_path = inputs.get(name)
             if not source_path:
-                raise InputValidationError("Missing required input 'source_path'.", input_name=input_name)
+                raise InputValidationError(name)
 
             if isinstance(source_path, (list, tuple)):
                 source_path = next((v for v in source_path if v), source_path[0] if len(source_path) > 0 else None)

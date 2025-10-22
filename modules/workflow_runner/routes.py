@@ -11,6 +11,28 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, Optional
 from server import PromptServer
 
+# Dev dotenv loader: load `.env` for local dev. The loader will run if either:
+#  - DEV_ENV=1 is already set in the environment, OR
+#  - a .env file exists next to this module (convenience for local dev).
+try:
+    env_path = Path(__file__).parent / ".env"
+    should_load = os.environ.get("DEV_ENV") == "1" or env_path.exists()
+    if should_load and env_path.exists():
+        # lightweight loader to avoid adding a runtime dependency
+        for line in env_path.read_text(encoding='utf-8').splitlines():
+            line = line.strip()
+            if not line or line.startswith('#'):
+                continue
+            if '=' not in line:
+                continue
+            k, v = line.split('=', 1)
+            k = k.strip()
+            v = v.strip().strip('"').strip("'")
+            if k and not os.environ.get(k):
+                os.environ[k] = v
+except Exception:
+    logging.exception('Failed to load local .env')
+
 from .config import CONFIG as RUNNER_CONFIG
 from .registry import InputValidationError, get_workflow, list_workflows
 from .registry import _json_safe as workflow_json_safe
@@ -118,6 +140,12 @@ async def lf_nodes_static_workflow(request: web.Request) -> web.Response:
 @PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/workflows")
 async def lf_nodes_list_workflows(_: web.Request) -> web.Response:
     return web.json_response({"workflows": list_workflows()})
+
+# Import proxy module to register proxy routes
+try:
+    from . import proxy  # noqa: F401 - registers routes
+except Exception:
+    logging.exception("Failed to import workflow-runner proxy module")
 # endregion
 
 # region Run

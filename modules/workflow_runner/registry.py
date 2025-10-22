@@ -8,8 +8,8 @@ import folder_paths
 # Custom exception for input-level validation failures. Carries the offending input name so
 # callers (the HTTP API) can map the problem back to the UI field to highlight.
 class InputValidationError(ValueError):
-    def __init__(self, message: str, input_name: str | None = None):
-        super().__init__(message)
+    def __init__(self, input_name: str | None = None):
+        super().__init__(f"Missing required input {input_name}.")
         self.input_name = input_name
 
 # region Helpers

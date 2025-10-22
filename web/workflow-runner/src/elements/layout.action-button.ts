@@ -1,6 +1,6 @@
 import { executeWorkflowButton } from '../handlers/workflow';
 import { WorkflowSectionController } from '../types/section';
-import { WorkflowState } from '../types/state';
+import { WorkflowState, WorkflowStatus } from '../types/state';
 
 //#region Constants
 const ROOT_CLASS = 'action-button-section';
@@ -9,7 +9,9 @@ const ROOT_CLASS = 'action-button-section';
 //#region Factory
 export const createActionButtonSection = (): WorkflowSectionController => {
   let element: HTMLLfButtonElement | null = null;
+  let lastMessage: string | null = null;
   let lastState: WorkflowState | null = null;
+  let lastStatus: WorkflowStatus | null = null;
 
   const mount = (state: WorkflowState) => {
     lastState = state;
@@ -28,7 +30,11 @@ export const createActionButtonSection = (): WorkflowSectionController => {
     ui.layout._root?.appendChild(element);
   };
 
-  const render = () => {};
+  const render = (state: WorkflowState) => {
+    if (state.current.status !== lastStatus || state.current.message !== lastMessage) {
+      element.lfShowSpinner = state.current.status === 'running';
+    }
+  };
 
   const destroy = () => {
     element?.remove();
@@ -39,6 +45,15 @@ export const createActionButtonSection = (): WorkflowSectionController => {
     }
     element = null;
     lastState = null;
+  };
+
+  const updateActionButton = (state: WorkflowState) => {
+    const button = state.ui.layout.actionButton._root;
+    if (!button) {
+      return;
+    }
+
+    button.lfShowSpinner = state.current.status === 'running';
   };
 
   return {

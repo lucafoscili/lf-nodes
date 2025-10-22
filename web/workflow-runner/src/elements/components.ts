@@ -49,6 +49,8 @@ const _setSlots = <T extends LfComponentName>(
     const wrapper = document.createElement('div');
     wrapper.innerHTML = slotHtml;
     wrapper.setAttribute('slot', slotName);
+    wrapper.style.fill = 'rgba(var(--lf-color-secondary, 1))';
+    wrapper.style.stroke = 'rgba(var(--lf-color-primary, 1))';
     element.appendChild(wrapper);
 
     if (slotName.toLowerCase().endsWith('.svg')) {

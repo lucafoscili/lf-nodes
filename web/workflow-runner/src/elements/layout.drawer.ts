@@ -45,7 +45,7 @@ const _tree = (state: WorkflowState): HTMLLfTreeElement => {
         }
 
         const isLeaf = !node.children || node.children.length === 0;
-        if (!isLeaf) {
+        if (isLeaf) {
           manager.setWorkflow(node.id);
         }
         break;

@@ -2,7 +2,7 @@ from importlib import import_module
 from types import ModuleType
 from typing import Iterable, Iterator, Sequence
 
-_WORKFLOW_MODULES: Sequence[str] = ("image_2_svg",)
+_WORKFLOW_MODULES: Sequence[str] = ("image_2_svg", "svg_generation_gemini")
 
 # region Workflow Imports
 def _import_workflow_module(module_name: str) -> ModuleType:
