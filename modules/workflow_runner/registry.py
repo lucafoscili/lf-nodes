@@ -160,8 +160,12 @@ class WorkflowNode:
             workflow_graph = json.load(workflow_file)
         return _workflow_to_prompt(workflow_graph)
 
-    def cells_as_dict(self) -> Dict[str, Any]:
-        return {cell.id: cell.to_dict() for cell in self.inputs}
+    def cells_as_dict(self, input_output: str) -> Dict[str, Any]:
+        if input_output == "inputs":
+            return {cell.id: cell.to_dict() for cell in self.inputs}
+        elif input_output == "outputs":
+            return {cell.id: cell.to_dict() for cell in self.outputs}
+        return {}
 # endregion
 
 # region Workflow Defs
@@ -184,12 +188,12 @@ class WorkflowRegistry:
                     "id": f"{definition.id}:inputs",
                     "value": "Inputs",
                     "description": "Workflow inputs",
-                    "cells": definition.cells_as_dict(),
+                    "cells": definition.cells_as_dict("inputs"),
                     },{
                     "id": f"{definition.id}:outputs",
                     "value": "Outputs",
                     "description": "Workflow outputs",
-                    "cells": definition.cells_as_dict(),
+                    "cells": definition.cells_as_dict("outputs"),
                     },
                 ],
             }

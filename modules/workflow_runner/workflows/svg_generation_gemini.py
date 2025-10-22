@@ -1,10 +1,9 @@
-from pathlib import Path
 from typing import Any, Dict
 
 from ..registry import InputValidationError, WorkflowCell, resolve_user_path, WorkflowNode
 
 # region Workflow Config
-def _configure_image_generation_gemini_workflow(prompt: Dict[str, Any], inputs: Dict[str, Any]) -> None:
+def _configure(prompt: Dict[str, Any], inputs: Dict[str, Any]) -> None:
     for (node_id, node) in prompt.items():
         if not isinstance(node, dict):
             continue
@@ -125,10 +124,11 @@ output_svg_data = WorkflowCell(
 
 # region Workflow Definition
 id = "svg-generation-gemini"
+category = "SVG"
 value = "SVG Generation (Gemini)"
 description = "Interfaces with the Gemini API prompting for SVG generation."
-svg_generation_gemini_workflow_path = resolve_user_path("default", "workflows", "SVG Generation (Gemini).json")
-svg_generation_gemini = WorkflowNode(
+path = resolve_user_path("default", "workflows", "SVG Generation (Gemini).json")
+node = WorkflowNode(
     id=id,
     value=value,
     description=description,
@@ -142,10 +142,10 @@ svg_generation_gemini = WorkflowNode(
         output_svg_file,
         output_svg_data,
     ],
-    configure_prompt=_configure_image_generation_gemini_workflow,
-    workflow_path=svg_generation_gemini_workflow_path,
-    category="SVG"
+    configure_prompt=_configure,
+    workflow_path=path,
+    category=category
 )
 # endregion
 
-WORKFLOW = svg_generation_gemini
+WORKFLOW = node

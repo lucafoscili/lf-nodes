@@ -4,7 +4,7 @@ from typing import Any, Dict
 from ..registry import InputValidationError, WorkflowCell, resolve_user_path, WorkflowNode
 
 # region Workflow Config
-def _configure_image_to_svg_workflow(prompt: Dict[str, Any], inputs: Dict[str, Any]) -> None:
+def _configure(prompt: Dict[str, Any], inputs: Dict[str, Any]) -> None:
     for (node_id, node) in prompt.items():
         if not isinstance(node, dict):
             continue
@@ -177,10 +177,11 @@ output_png = WorkflowCell(
 
 # region Workflow Definition
 id = "image-to-svg"
+category = "SVG"
 value = "Image to SVG"
 description = "Converts a raster image to SVG format using the configured image processing model."
-image_to_svg_workflow_path = resolve_user_path("default", "workflows", "Image 2 SVG.json")
-image_2_svg = WorkflowNode(
+path = resolve_user_path("default", "workflows", f"{value}.json")
+node = WorkflowNode(
     id=id,
     value=value,
     description=description,
@@ -197,10 +198,10 @@ image_2_svg = WorkflowNode(
         output_svg_data,
         output_png,
     ],
-    configure_prompt=_configure_image_to_svg_workflow,
-    workflow_path=image_to_svg_workflow_path,
-    category="SVG"
+    configure_prompt=_configure,
+    workflow_path=path,
+    category=category
 )
 # endregion
 
-WORKFLOW = image_2_svg
+WORKFLOW = node

@@ -38,19 +38,6 @@ export interface WorkflowAPIDataset {
 }
 //#endregion
 
-//#region Nodes
-export interface SaveImageForCivitAINodeOutputs {
-  civitai_metadata: string;
-  dataset: LfDataDataset;
-  file_names: string[];
-}
-export interface SaveSVGNodeOutputs {
-  dataset: LfDataDataset;
-  slot_map: Record<string, string>;
-  svg: string;
-}
-//#endregion
-
 //#region Cells
 // Common
 export interface WorkflowCellBase {
@@ -74,10 +61,7 @@ export interface WorkflowCellsInputContainer {
 }
 
 // Outputs
-export interface WorkflowCellOutput
-  extends SaveSVGNodeOutputs,
-    SaveImageForCivitAINodeOutputs,
-    WorkflowCellBase {
+export interface WorkflowCellOutput extends WorkflowNodeOutputs, WorkflowCellBase {
   props?: Partial<LfComponentPropsFor<'LfCode' | 'LfMasonry'>>;
   shape?: 'code' | 'masonry';
 }
@@ -99,6 +83,25 @@ export interface WorkflowCellsOutputContainer {
   [index: string]: WorkflowCellOutputItemFor<Shape>;
 }
 //#endregion
+
+//#region Nodes outputs
+export interface WorkflowNodeOutputs
+  extends DisplayJSONNodeOutputs,
+    SaveSVGNodeOutputs,
+    SaveImageForCivitAINodeOutputs {}
+export interface DisplayJSONNodeOutputs {
+  json: Record<string, unknown>;
+}
+export interface SaveImageForCivitAINodeOutputs {
+  civitai_metadata: string;
+  dataset: LfDataDataset;
+  file_names: string[];
+}
+export interface SaveSVGNodeOutputs {
+  dataset: LfDataDataset;
+  slot_map: Record<string, string>;
+  svg: string;
+}
 //#endregion
 
 //#region Results

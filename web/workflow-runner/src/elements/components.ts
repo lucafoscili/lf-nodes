@@ -150,13 +150,13 @@ export const createInputCell = (cell: WorkflowCellInput) => {
 
 //#region Outputs
 export const createOutputComponent = (descriptor: WorkflowCellOutput) => {
-  const { dataset, props, shape, slot_map, svg } = descriptor;
+  const { dataset, json, props, shape, slot_map, svg } = descriptor;
   const el = document.createElement('div');
 
   switch (shape) {
     case 'code': {
       const p = (props || {}) as Partial<LfCodeInterface>;
-      p.lfValue = svg;
+      p.lfValue = svg || JSON.stringify(json, null, 2);
       const code = createComponent.code(p);
       el.appendChild(code);
       break;
