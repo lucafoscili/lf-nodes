@@ -144,6 +144,7 @@ svg_generation_gemini = WorkflowNode(
     ],
     configure_prompt=_configure_image_generation_gemini_workflow,
     workflow_path=svg_generation_gemini_workflow_path,
+    category="SVG"
 )
 # endregion
 

@@ -153,6 +153,7 @@ class WorkflowNode:
     outputs: Iterable[WorkflowCell]
     configure_prompt: Callable[[Dict[str, Any], Dict[str, Any]], None]
     workflow_path: Path
+    category: str
 
     def load_prompt(self) -> Dict[str, Any]:
         with self.workflow_path.open("r", encoding="utf-8") as workflow_file:
@@ -160,13 +161,7 @@ class WorkflowNode:
         return _workflow_to_prompt(workflow_graph)
 
     def cells_as_dict(self) -> Dict[str, Any]:
-        return self.inputs_as_dict()
-
-    def inputs_as_dict(self) -> Dict[str, Any]:
         return {cell.id: cell.to_dict() for cell in self.inputs}
-
-    def outputs_as_dict(self) -> Dict[str, Any]:
-        return {cell.id: cell.to_dict() for cell in self.outputs}
 # endregion
 
 # region Workflow Defs
@@ -184,16 +179,17 @@ class WorkflowRegistry:
                 "id": definition.id,
                 "value": definition.value,
                 "description": definition.description,
+                "category": definition.category,
                 "children": [{
                     "id": f"{definition.id}:inputs",
                     "value": "Inputs",
                     "description": "Workflow inputs",
-                    "cells": definition.inputs_as_dict(),
+                    "cells": definition.cells_as_dict(),
                     },{
                     "id": f"{definition.id}:outputs",
                     "value": "Outputs",
                     "description": "Workflow outputs",
-                    "cells": definition.outputs_as_dict(),
+                    "cells": definition.cells_as_dict(),
                     },
                 ],
             }

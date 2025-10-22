@@ -199,6 +199,7 @@ image_2_svg = WorkflowNode(
     ],
     configure_prompt=_configure_image_to_svg_workflow,
     workflow_path=image_to_svg_workflow_path,
+    category="SVG"
 )
 # endregion
 
