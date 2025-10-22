@@ -2,6 +2,7 @@ import aiohttp
 import json
 import logging
 import os
+from time import time
 
 from aiohttp import web
 from typing import Any, Dict
@@ -58,6 +59,69 @@ def _read_secret(env_name: str, file_env_name: str | None = None) -> str | None:
 
 PROXY_SECRET = _read_secret("LF_PROXY_SECRET", "LF_PROXY_SECRET_FILE") or _read_secret("GEMINI_PROXY_SECRET", "GEMINI_PROXY_SECRET_FILE")
 PROXY_SECRET_HEADER = "X-LF-Proxy-Secret"
+# Simple in-memory fixed-window rate limiter store.
+# Keyed by (client_id, service) -> {"count": int, "start": float}
+_RATE_LIMIT_STORE: dict[tuple[str, str], dict] = {}
+
+# Global default rate limit (can be overridden per-service). Configure via
+# env PROXY_RATE_LIMIT_REQUESTS and PROXY_RATE_LIMIT_WINDOW_SECONDS.
+DEFAULT_RATE_LIMIT = {
+    "requests": int(os.environ.get("PROXY_RATE_LIMIT_REQUESTS", "60")),
+    "window_seconds": int(os.environ.get("PROXY_RATE_LIMIT_WINDOW_SECONDS", "60")),
+}
+
+def _get_client_id(request: web.Request) -> str:
+    # Prefer request.remote (IP). Fallback to peername if available.
+    try:
+        if getattr(request, 'remote', None):
+            return str(request.remote)
+        transport = request.transport
+        if transport is not None:
+            peer = transport.get_extra_info('peername')
+            if peer and isinstance(peer, (list, tuple)) and len(peer) >= 1:
+                return str(peer[0])
+    except Exception:
+        pass
+    return "unknown"
+
+def _check_rate_limit(client_id: str, service: str, cfg: dict) -> tuple[bool, int]:
+    """Returns (allowed, retry_after_seconds).
+
+    If rate limiting is disabled for the service (cfg rate_limit is falsy),
+    returns (True, 0).
+    """
+    # Determine rate limit config (service overrides global DEFAULT_RATE_LIMIT)
+    svc_limit = cfg.get("rate_limit") if cfg else None
+    if svc_limit is None:
+        limit = DEFAULT_RATE_LIMIT
+    else:
+        # Expect dict like {"requests": int, "window_seconds": int}
+        try:
+            limit = {
+                "requests": int(svc_limit.get("requests", DEFAULT_RATE_LIMIT["requests"])),
+                "window_seconds": int(svc_limit.get("window_seconds", DEFAULT_RATE_LIMIT["window_seconds"])),
+            }
+        except Exception:
+            limit = DEFAULT_RATE_LIMIT
+
+    # If requests set to 0 treat as disabled
+    if limit.get("requests", 0) <= 0:
+        return True, 0
+
+    key = (client_id, service)
+    now = time()
+    entry = _RATE_LIMIT_STORE.get(key)
+    if not entry or (now - entry.get("start", 0)) >= limit["window_seconds"]:
+        _RATE_LIMIT_STORE[key] = {"count": 1, "start": now}
+        return True, 0
+
+    if entry["count"] < limit["requests"]:
+        entry["count"] += 1
+        return True, 0
+
+    # Rate limited: compute retry-after
+    retry_after = int(limit["window_seconds"] - (now - entry.get("start", 0)))
+    return False, retry_after
 # endregion
 
 # region Proxy Handler
@@ -81,6 +145,16 @@ async def proxy_service(request: web.Request) -> web.Response:
         cfg = SERVICES.get(service)
         if cfg is None:
             return web.json_response({"detail": f"unknown_service: {service}"}, status=404)
+
+        # Rate limiting: check per-client limits (opt-in per service via cfg["rate_limit"]).
+        try:
+            client_id = _get_client_id(request)
+            allowed, retry_after = _check_rate_limit(client_id, service, cfg)
+            if not allowed:
+                return web.json_response({"detail": "rate_limited"}, status=429, headers={"Retry-After": str(retry_after)})
+        except Exception:
+            # Defensive: if rate limiter fails, proceed (don't block proxy)
+            LOG.exception("Rate limiter check failed; proceeding without limiting")
 
         try:
             body = await request.json()
@@ -127,6 +201,20 @@ async def proxy_service(request: web.Request) -> web.Response:
 
                         if isinstance(data, dict):
                             data.setdefault("lf_http_status", resp.status)
+
+                            # If the service defines a response_whitelist, return only
+                            # those top-level keys (if present). This is opt-in and
+                            # non-breaking: when unset we return the full response.
+                            whitelist = cfg.get("response_whitelist")
+                            if whitelist and isinstance(whitelist, list):
+                                filtered: Dict[str, Any] = {}
+                                for k in whitelist:
+                                    if k in data:
+                                        filtered[k] = data[k]
+                                # Always include lf_http_status for debugging
+                                filtered.setdefault("lf_http_status", data.get("lf_http_status", resp.status))
+                                return web.json_response(filtered, status=resp.status)
+
                             return web.json_response(data, status=resp.status)
                         else:
                             # Non-dict JSON (list etc.) return as-is
