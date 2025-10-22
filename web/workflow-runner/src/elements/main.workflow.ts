@@ -1,14 +1,15 @@
 import { LfThemeUIState } from '@lf-widgets/core/dist/types/components';
-import { LfButtonInterface, LfDataNode } from '@lf-widgets/foundations/dist';
+import { LfButtonInterface } from '@lf-widgets/foundations/dist';
 import { DEFAULT_STATUS_MESSAGES } from '../config';
 import { executeWorkflowButton } from '../handlers/workflow';
 import {
+  WorkflowAPIItem,
   WorkflowCellOutputItem,
   WorkflowCellsInputContainer,
   WorkflowCellsOutputContainer,
   WorkflowNodeResults,
 } from '../types/api';
-import { WorkflowCells, WorkflowCellStatus, WorkflowSectionHandle } from '../types/section';
+import { WorkflowCellStatus, WorkflowSectionHandle, WorkflowUICells } from '../types/section';
 import { WorkflowState, WorkflowStatus } from '../types/state';
 import { clearChildren } from '../utils/common';
 import { DEBUG_MESSAGES } from '../utils/constants';
@@ -88,12 +89,12 @@ const _getCurrentWorkflow = (state: WorkflowState) => {
   const { current, workflows } = state;
   return workflows?.nodes?.find((node) => node.id === current.id) || null;
 };
-const _getWorkflowInputCells = (workflow: LfDataNode) => {
-  const inputsSection = workflow.children?.find((child) => child.id.includes('inputs'));
+const _getWorkflowInputCells = (workflow: WorkflowAPIItem) => {
+  const inputsSection = workflow.children?.find((child) => child.id.endsWith(':inputs'));
   return (inputsSection?.cells || {}) as WorkflowCellsInputContainer;
 };
-const _getWorkflowOutputCells = (workflow: LfDataNode) => {
-  const outputsSection = workflow.children?.find((child) => child.id.includes('outputs'));
+const _getWorkflowOutputCells = (workflow: WorkflowAPIItem) => {
+  const outputsSection = workflow.children?.find((child) => child.id.endsWith(':outputs'));
   return (outputsSection?.cells || {}) as WorkflowCellsOutputContainer;
 };
 const _getWorkflowDescription = (state: WorkflowState) => {
@@ -191,7 +192,7 @@ export const createWorkflowSection = (): WorkflowSectionHandle => {
     clearChildren(element);
 
     const workflow = _getCurrentWorkflow(state);
-    const cellElements: WorkflowCells = [];
+    const cellElements: WorkflowUICells = [];
 
     if (workflow) {
       const inputCells = _getWorkflowInputCells(workflow);
@@ -267,14 +268,6 @@ export const createWorkflowSection = (): WorkflowSectionHandle => {
 
       const wrapper = document.createElement('div');
       wrapper.className = `${ROOT_CLASS}__result-item`;
-
-      /*
-      if (descriptor.title) {
-        const label = document.createElement('h5');
-        label.className = `${ROOT_CLASS}__result-subtitle`;
-        label.textContent = descrip;
-        wrapper.appendChild(label);
-      }*/
 
       const component = createOutputComponent(output);
       component.id = id;

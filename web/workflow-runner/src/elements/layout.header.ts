@@ -15,7 +15,6 @@ const _container = () => {
   container.slot = 'content';
   return container;
 };
-
 const _drawerToggle = (state: WorkflowState) => {
   const { theme } = getLfFramework();
   const { get } = theme;
@@ -40,7 +39,6 @@ const _drawerToggle = (state: WorkflowState) => {
 
   return drawerToggle;
 };
-
 const _debugToggle = (state: WorkflowState) => {
   const { theme } = getLfFramework();
   const { get } = theme;

@@ -1,7 +1,6 @@
-import { LfDataDataset } from '@lf-widgets/foundations/dist';
-import { WorkflowNodeResults } from './api';
+import { WorkflowAPIDataset, WorkflowNodeResults } from './api';
 import { WorkflowManager } from './manager';
-import { WorkflowCells } from './section';
+import { WorkflowUICells } from './section';
 
 //#region Store
 export interface WorkflowStore {
@@ -19,7 +18,7 @@ export interface WorkflowState {
   mutate: WorkflowStateMutators;
   results: WorkflowNodeResults | null;
   ui: WorkflowStateUI;
-  workflows: LfDataDataset;
+  workflows: WorkflowAPIDataset;
 }
 export interface WorkflowStateCurrent {
   id: string | null;
@@ -34,7 +33,7 @@ export interface WorkflowStateMutators {
   status: (status: WorkflowStatus, message?: string) => void;
   ui: (updater: (ui: WorkflowStateUI) => void) => void;
   workflow: (id: string) => void;
-  workflows: (workflows: LfDataDataset) => void;
+  workflows: (workflows: WorkflowAPIDataset) => void;
 }
 export interface WorkflowStateUI {
   layout: {
@@ -54,7 +53,7 @@ export interface WorkflowStateUI {
       };
       workflow: {
         _root: HTMLElement | null;
-        cells: WorkflowCells;
+        cells: WorkflowUICells | null;
         description: HTMLElement | null;
         options: HTMLDivElement | null;
         result: HTMLElement | null;

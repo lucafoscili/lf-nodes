@@ -1,4 +1,4 @@
-//#region Debug
+//#region Debug messages
 export const DEBUG_MESSAGES = {
   DRAWER_DESTROYED: 'Drawer section destroyed.',
   DRAWER_MOUNTED: 'Drawer section mounted.',
@@ -29,12 +29,23 @@ export const DEBUG_MESSAGES = {
 } as const;
 //#endregion
 
-//#region Status
+//#region Error messages
+export const ERROR_MESSAGES = {
+  RUN_GENERIC: 'Workflow execution failed.',
+  UPLOAD_GENERIC: 'Upload failed.',
+  UPLOAD_INVALID_RESPONSE: 'Invalid response shape from upload API.',
+  UPLOAD_MISSING_FILE: 'Missing file to upload.',
+} as const;
+//#endregion
+
+//#region Status messages
 export const STATUS_MESSAGES = {
   FILE_PROCESSING: 'File uploaded, processing...',
   LOADING_WORKFLOWS: 'Loading workflows...',
   SUBMITTING_WORKFLOW: 'Submitting workflow...',
+  UPLOAD_COMPLETED: 'Upload completed successfully.',
   UPLOADING_FILE: 'Uploading file...',
+  WORKFLOW_COMPLETED: 'Workflow execution completed successfully.',
   WORKFLOWS_LOADED: 'Workflows loaded.',
 } as const;
 //#endregion

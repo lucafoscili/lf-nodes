@@ -54,6 +54,8 @@ export const initState = (appContainer: HTMLDivElement): WorkflowState => ({
       },
     },
   },
-  workflows: {},
+  workflows: {
+    nodes: [],
+  },
 });
 //#endregion

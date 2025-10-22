@@ -1,4 +1,9 @@
-import { LfComponentPropsFor, LfDataDataset } from '@lf-widgets/foundations/dist';
+import {
+  LfComponentPropsFor,
+  LfDataColumn,
+  LfDataDataset,
+  LfDataNode,
+} from '@lf-widgets/foundations/dist';
 import { WorkflowStatus } from './state';
 
 //#region API
@@ -10,6 +15,26 @@ export interface WorkflowAPIResponse {
   message: string;
   payload: WorkflowAPIRunPayload;
   status: WorkflowStatus;
+}
+//#endregion
+
+//#region Dataset
+export type WorkflowLFNode = Omit<LfDataNode, 'children' | 'cells'>;
+export interface WorkflowAPIItem extends WorkflowLFNode {
+  children: [WorkflowAPIInputs?, WorkflowAPIOutputs?];
+  category: string;
+}
+export interface WorkflowAPIInputs extends WorkflowLFNode {
+  cells: WorkflowCellsInputContainer;
+  id: `${string}:inputs`;
+}
+export interface WorkflowAPIOutputs extends WorkflowLFNode {
+  cells: WorkflowCellsOutputContainer;
+  id: `${string}:outputs`;
+}
+export interface WorkflowAPIDataset {
+  columns?: Array<LfDataColumn>;
+  nodes: Array<WorkflowAPIItem>;
 }
 //#endregion
 

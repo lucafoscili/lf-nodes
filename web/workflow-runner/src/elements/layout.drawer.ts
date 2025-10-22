@@ -1,4 +1,5 @@
 import { LfDataDataset } from '@lf-widgets/foundations/dist';
+import { WorkflowAPIDataset, WorkflowLFNode } from '../types/api';
 import { WorkflowSectionController } from '../types/section';
 import { WorkflowState } from '../types/state';
 import { DEBUG_MESSAGES } from '../utils/constants';
@@ -9,14 +10,27 @@ const ROOT_CLASS = 'drawer-section';
 //#endregion
 
 //#region Helpers
-const _createDataset = (workflows: LfDataDataset) => {
-  const clone: LfDataDataset = JSON.parse(JSON.stringify(workflows));
+const _createDataset = (workflows: WorkflowAPIDataset) => {
+  const categories: Array<WorkflowLFNode & { children: WorkflowLFNode[] }> = [];
+  const root = { id: 'workflows', value: 'Workflows', children: categories };
+
+  const clone: WorkflowAPIDataset = JSON.parse(JSON.stringify(workflows));
   clone.nodes?.forEach((child) => {
     child.children = undefined;
   });
 
+  clone.nodes?.forEach((node) => {
+    const name = node?.category || 'Uncategorized';
+    let category = categories.find((cat) => cat.value === name);
+    if (!category) {
+      category = { id: name, value: name, children: [] };
+      categories.push(category);
+    }
+    category.children.push(node);
+  });
+
   const dataset: LfDataDataset = {
-    nodes: [{ children: clone.nodes, id: 'workflows', value: 'Workflows' }],
+    nodes: [root],
   };
   return dataset;
 };

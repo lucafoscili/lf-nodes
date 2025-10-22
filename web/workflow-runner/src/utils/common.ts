@@ -1,4 +1,8 @@
-import { WorkflowAPIUploadPayload, WorkflowAPIUploadResponse } from '../types/api';
+import {
+  WorkflowAPIResponse,
+  WorkflowAPIUploadPayload,
+  WorkflowAPIUploadResponse,
+} from '../types/api';
 
 //#region API
 export const isObject = (v: unknown): v is Record<string, unknown> =>
@@ -52,6 +56,13 @@ export const normalize_description = (description: string | string[] | undefined
     return description;
   } else {
     return '';
+  }
+};
+export const parseJson = async (response: Response) => {
+  try {
+    return (await response.json()) as WorkflowAPIResponse | Record<string, unknown>;
+  } catch {
+    return null;
   }
 };
 //#endregion
