@@ -179,11 +179,19 @@ const DEBUG_MESSAGES = {
   WORKFLOWS_LOAD_FAILED: "Failed to load workflows.",
   WORKFLOWS_LOADED: "Workflow definitions loaded."
 };
+const ERROR_MESSAGES = {
+  RUN_GENERIC: "Workflow execution failed.",
+  UPLOAD_GENERIC: "Upload failed.",
+  UPLOAD_INVALID_RESPONSE: "Invalid response shape from upload API.",
+  UPLOAD_MISSING_FILE: "Missing file to upload."
+};
 const STATUS_MESSAGES = {
   FILE_PROCESSING: "File uploaded, processing...",
   LOADING_WORKFLOWS: "Loading workflows...",
   SUBMITTING_WORKFLOW: "Submitting workflow...",
-  UPLOADING_FILE: "Uploading file..."
+  UPLOAD_COMPLETED: "Upload completed successfully.",
+  UPLOADING_FILE: "Uploading file...",
+  WORKFLOW_COMPLETED: "Workflow execution completed successfully."
 };
 const formatContext = (context) => {
   if (context === void 0 || context === null) {
@@ -213,13 +221,24 @@ ${formattedContext}` : message;
 };
 const ROOT_CLASS$3 = "drawer-section";
 const _createDataset = (workflows) => {
-  var _a;
+  var _a, _b;
+  const categories = [];
+  const root = { id: "workflows", value: "Workflows", children: categories };
   const clone = JSON.parse(JSON.stringify(workflows));
   (_a = clone.nodes) == null ? void 0 : _a.forEach((child) => {
     child.children = void 0;
   });
+  (_b = clone.nodes) == null ? void 0 : _b.forEach((node) => {
+    const name = (node == null ? void 0 : node.category) || "Uncategorized";
+    let category = categories.find((cat) => cat.value === name);
+    if (!category) {
+      category = { id: name, value: name, children: [] };
+      categories.push(category);
+    }
+    category.children.push(node);
+  });
   const dataset = {
-    nodes: [{ children: clone.nodes, id: "workflows", value: "Workflows" }]
+    nodes: [root]
   };
   return dataset;
 };
@@ -419,12 +438,12 @@ const createInputCell = (cell) => {
   }
 };
 const createOutputComponent = (descriptor) => {
-  const { dataset, props, shape, slot_map, svg } = descriptor;
+  const { dataset, json, props, shape, slot_map, svg } = descriptor;
   const el = document.createElement("div");
   switch (shape) {
     case "code": {
       const p = props || {};
-      p.lfValue = svg;
+      p.lfValue = svg || JSON.stringify(json, null, 2);
       const code = createComponent.code(p);
       el.appendChild(code);
       break;
@@ -619,6 +638,13 @@ const isWorkflowAPIUploadResponse = (v) => {
   }
   return true;
 };
+const parseJson = async (response) => {
+  try {
+    return await response.json();
+  } catch {
+    return null;
+  }
+};
 const clearChildren = (element) => {
   if (!element) {
     return;
@@ -695,12 +721,12 @@ const _getCurrentWorkflow = (state) => {
 };
 const _getWorkflowInputCells = (workflow) => {
   var _a;
-  const inputsSection = (_a = workflow.children) == null ? void 0 : _a.find((child) => child.id.includes("inputs"));
+  const inputsSection = (_a = workflow.children) == null ? void 0 : _a.find((child) => child.id.endsWith(":inputs"));
   return (inputsSection == null ? void 0 : inputsSection.cells) || {};
 };
 const _getWorkflowOutputCells = (workflow) => {
   var _a;
-  const outputsSection = (_a = workflow.children) == null ? void 0 : _a.find((child) => child.id.includes("outputs"));
+  const outputsSection = (_a = workflow.children) == null ? void 0 : _a.find((child) => child.id.endsWith(":outputs"));
   return (outputsSection == null ? void 0 : outputsSection.cells) || {};
 };
 const _getWorkflowDescription = (state) => {
@@ -959,13 +985,6 @@ class WorkflowApiError extends Error {
     this.status = options.status;
   }
 }
-async function parseJson(response) {
-  try {
-    return await response.json();
-  } catch {
-    return null;
-  }
-}
 const fetchWorkflowDefinitions = async () => {
   const response = await fetch(buildApiUrl("/workflows"), { method: "GET" });
   const data = await parseJson(response);
@@ -979,6 +998,8 @@ const fetchWorkflowDefinitions = async () => {
   return data.workflows;
 };
 const runWorkflowRequest = async (workflowId, inputs) => {
+  const { RUN_GENERIC } = ERROR_MESSAGES;
+  const { WORKFLOW_COMPLETED } = STATUS_MESSAGES;
   const response = await fetch(buildApiUrl("/run"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -986,25 +1007,27 @@ const runWorkflowRequest = async (workflowId, inputs) => {
   });
   const data = await parseJson(response);
   const payload = data && data.payload || {
-    detail: response.statusText || "unknown",
+    detail: response.statusText,
     history: {}
   };
   if (!response.ok || !data) {
-    const detail = (payload == null ? void 0 : payload.detail) || response.statusText || "unknown";
-    throw new WorkflowApiError(`Workflow execution failed: ${detail}`, {
+    const detail = (payload == null ? void 0 : payload.detail) || response.statusText;
+    throw new WorkflowApiError(`${RUN_GENERIC} (${detail})`, {
       status: response.status,
       payload
     });
   }
   return {
-    message: "Workflow execution completed.",
+    message: WORKFLOW_COMPLETED,
     payload,
     status: data.status
   };
 };
 const uploadWorkflowFiles = async (files) => {
+  const { UPLOAD_GENERIC, UPLOAD_INVALID_RESPONSE, UPLOAD_MISSING_FILE } = ERROR_MESSAGES;
+  const { UPLOAD_COMPLETED } = STATUS_MESSAGES;
   if (!files || files.length === 0) {
-    throw new WorkflowApiError("Missing file to upload.", {
+    throw new WorkflowApiError(UPLOAD_MISSING_FILE, {
       payload: { detail: "missing_file" }
     });
   }
@@ -1018,8 +1041,8 @@ const uploadWorkflowFiles = async (files) => {
   if (isWorkflowAPIUploadResponse(data)) {
     if (!response.ok) {
       const { payload } = data;
-      const detail = (payload == null ? void 0 : payload.detail) || response.statusText || "unknown";
-      throw new WorkflowApiError(`Upload failed: ${detail}`, {
+      const detail = (payload == null ? void 0 : payload.detail) || response.statusText;
+      throw new WorkflowApiError(`${UPLOAD_GENERIC} (${detail})`, {
         status: response.status,
         payload
       });
@@ -1028,19 +1051,19 @@ const uploadWorkflowFiles = async (files) => {
   }
   if (isWorkflowAPIUploadPayload(data)) {
     if (!response.ok) {
-      const detail = data.detail || response.statusText || "unknown";
-      throw new WorkflowApiError(`Upload failed: ${detail}`, {
+      const detail = data.detail || response.statusText;
+      throw new WorkflowApiError(`${UPLOAD_GENERIC} (${detail})`, {
         status: response.status,
         payload: data
       });
     }
     return {
-      message: "Upload completed successfully.",
+      message: UPLOAD_COMPLETED,
       payload: data,
       status: "ready"
     };
   }
-  throw new WorkflowApiError("Invalid response shape from upload API.", {
+  throw new WorkflowApiError(UPLOAD_INVALID_RESPONSE, {
     status: response.status
   });
 };
@@ -1096,7 +1119,9 @@ const initState = (appContainer) => ({
       }
     }
   },
-  workflows: {}
+  workflows: {
+    nodes: []
+  }
 });
 const createWorkflowRunnerStore = (initialState) => {
   let state = initialState;
