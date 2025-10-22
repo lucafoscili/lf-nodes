@@ -293,7 +293,7 @@ class LF_GeminiAPI:
 
         PromptServer.instance.send_sync(f"{EVENT_NAME}", {
             "node": kwargs.get("node_id"),
-            "value": raw_json,
+            "value": json_text,
         })
 
         return (extracted, clean_text, raw_json, json_text)
