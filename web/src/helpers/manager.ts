@@ -58,6 +58,7 @@ export const NODE_WIDGET_MAP: NodeWidgetMap = {
   LF_FilmGrain: [CustomWidgetName.compare],
   LF_Float: [CustomWidgetName.history],
   LF_GaussianBlur: [CustomWidgetName.compare],
+  LF_GeminiAPI: [CustomWidgetName.code],
   LF_GetRandomKeyFromJSON: [CustomWidgetName.code],
   LF_GetValueFromJSON: [CustomWidgetName.code],
   LF_ImageClassifier: [CustomWidgetName.code],

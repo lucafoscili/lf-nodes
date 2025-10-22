@@ -88,6 +88,7 @@ export enum NodeName {
   extractPromptFromLoraTag = 'LF_ExtractPromptFromLoraTag',
   extractString = 'LF_ExtractString',
   gaussianBlur = 'LF_GaussianBlur',
+  geminiAPI = 'LF_GeminiAPI',
   getValueFromJson = 'LF_GetValueFromJSON',
   getRandomKeyFromJson = 'LF_GetRandomKeyFromJSON',
   imageClassifier = 'LF_ImageClassifier',
