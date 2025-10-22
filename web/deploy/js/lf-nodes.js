@@ -1127,6 +1127,7 @@ var NodeName;
   NodeName2["extractPromptFromLoraTag"] = "LF_ExtractPromptFromLoraTag";
   NodeName2["extractString"] = "LF_ExtractString";
   NodeName2["gaussianBlur"] = "LF_GaussianBlur";
+  NodeName2["geminiAPI"] = "LF_GeminiAPI";
   NodeName2["getValueFromJson"] = "LF_GetValueFromJSON";
   NodeName2["getRandomKeyFromJson"] = "LF_GetRandomKeyFromJSON";
   NodeName2["imageClassifier"] = "LF_ImageClassifier";
@@ -1274,6 +1275,7 @@ const NODE_WIDGET_MAP = {
   LF_FilmGrain: [CustomWidgetName.compare],
   LF_Float: [CustomWidgetName.history],
   LF_GaussianBlur: [CustomWidgetName.compare],
+  LF_GeminiAPI: [CustomWidgetName.code],
   LF_GetRandomKeyFromJSON: [CustomWidgetName.code],
   LF_GetValueFromJSON: [CustomWidgetName.code],
   LF_ImageClassifier: [CustomWidgetName.code],
@@ -5944,6 +5946,7 @@ const codeFactory = {
     switch (node.comfyClass) {
       case NodeName.displayJson:
       case NodeName.displayPrimitiveAsJson:
+      case NodeName.geminiAPI:
       case NodeName.shuffleJsonKeys:
       case NodeName.sortJsonKeys:
       case NodeName.stringToJson:

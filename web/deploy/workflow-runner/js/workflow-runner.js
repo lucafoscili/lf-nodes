@@ -119,7 +119,9 @@ const executeWorkflowButton = (e, state) => {
 const ROOT_CLASS$4 = "action-button-section";
 const createActionButtonSection = () => {
   let element = null;
+  let lastMessage = null;
   let lastState = null;
+  let lastStatus = null;
   const mount = (state) => {
     var _a;
     lastState = state;
@@ -135,7 +137,10 @@ const createActionButtonSection = () => {
     });
     (_a = ui.layout._root) == null ? void 0 : _a.appendChild(element);
   };
-  const render = () => {
+  const render = (state) => {
+    if (state.current.status !== lastStatus || state.current.message !== lastMessage) {
+      element.lfShowSpinner = state.current.status === "running";
+    }
   };
   const destroy = () => {
     element == null ? void 0 : element.remove();
@@ -238,7 +243,7 @@ const _tree = (state) => {
           return;
         }
         const isLeaf = !node.children || node.children.length === 0;
-        if (!isLeaf) {
+        if (isLeaf) {
           manager.setWorkflow(node.id);
         }
         break;
@@ -330,6 +335,8 @@ const _setSlots = (_comp, element, slotMap) => {
     const wrapper = document.createElement("div");
     wrapper.innerHTML = slotHtml;
     wrapper.setAttribute("slot", slotName);
+    wrapper.style.fill = "rgba(var(--lf-color-secondary, 1))";
+    wrapper.style.stroke = "rgba(var(--lf-color-primary, 1))";
     element.appendChild(wrapper);
     if (slotName.toLowerCase().endsWith(".svg")) {
       const dlButton = createComponent.button({
