@@ -3,8 +3,6 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable, Dict, Iterable, List
 
-import folder_paths
-
 # Custom exception for input-level validation failures. Carries the offending input name so
 # callers (the HTTP API) can map the problem back to the UI field to highlight.
 class InputValidationError(ValueError):
@@ -13,13 +11,6 @@ class InputValidationError(ValueError):
         self.input_name = input_name
 
 # region Helpers
-def _resolve_user_path(*relative_parts: str) -> Path:
-    user_dir = Path(folder_paths.get_user_directory())
-    return user_dir.joinpath(*relative_parts).resolve()
-
-# Public alias for workflow modules.
-resolve_user_path = _resolve_user_path
-
 def _json_safe(value: Any) -> Any:
     """
     Recursively convert workflow values into JSON-safe types.
@@ -38,18 +29,10 @@ def _workflow_to_prompt(workflow: Dict[str, Any]) -> Dict[str, Any]:
     Convert a workflow graph (the format saved under user/default/workflows)
     into the prompt dictionary expected by ComfyUI's execution queue.
     """
-    # Workflows can be saved in two formats:
-    # 1) A dict with a "nodes" list (newer format produced by the web UI)
-    # 2) A dict keyed by node id -> node info (older/user-saved format)
-    # Normalize both into the prompt mapping expected by execution.validate_prompt.
-
-    # Helper: if the workflow contains an explicit "nodes" list, use that.
     nodes_list = None
     if isinstance(workflow, dict) and "nodes" in workflow and isinstance(workflow.get("nodes"), list):
         nodes_list = workflow.get("nodes", [])
     else:
-        # Detect a mapping of node_id -> node_info and convert to a list
-        # Expect node_info to contain at least a "class_type" or "type" key.
         if isinstance(workflow, dict):
             maybe_nodes = []
             for k, v in workflow.items():

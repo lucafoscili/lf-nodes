@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Any, Dict
 
-from ..registry import InputValidationError, WorkflowCell, resolve_user_path, WorkflowNode
+from ..registry import InputValidationError, WorkflowCell, WorkflowNode
 
 # region Workflow Config
 def _configure(prompt: Dict[str, Any], inputs: Dict[str, Any]) -> None:
@@ -176,11 +176,10 @@ output_png = WorkflowCell(
 # endregion
 
 # region Workflow Definition
-id = "image-to-svg"
+id = "image_to_svg"
 category = "SVG"
 value = "Image to SVG"
 description = "Converts a raster image to SVG format using the configured image processing model."
-path = resolve_user_path("default", "workflows", f"{value}.json")
 node = WorkflowNode(
     id=id,
     value=value,
@@ -199,7 +198,7 @@ node = WorkflowNode(
         output_png,
     ],
     configure_prompt=_configure,
-    workflow_path=path,
+    workflow_path=Path(__file__).resolve().parent / f"{id}.json",
     category=category
 )
 # endregion

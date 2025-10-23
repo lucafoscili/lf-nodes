@@ -1,6 +1,7 @@
+from pathlib import Path
 from typing import Any, Dict
 
-from ..registry import InputValidationError, WorkflowCell, resolve_user_path, WorkflowNode
+from ..registry import InputValidationError, WorkflowCell, WorkflowNode
 from ...utils.helpers.conversion import convert_to_json
 
 # region Workflow Config
@@ -77,11 +78,10 @@ output_json = WorkflowCell(
 # endregion
 
 # region Workflow Definition
-id = "sort-json-keys"
+id = "sort_json_keys"
 category = "JSON"
 value = "Sort JSON keys"
 description = "Sorts the keys of a JSON object."
-path = resolve_user_path("default", "workflows", f"{value}.json")
 node = WorkflowNode(
     id=id,
     value=value,
@@ -94,7 +94,7 @@ node = WorkflowNode(
         output_json,
     ],
     configure_prompt=_configure,
-    workflow_path=path,
+    workflow_path=Path(__file__).resolve().parent / f"{id}.json",
     category=category
 )
 # endregion
