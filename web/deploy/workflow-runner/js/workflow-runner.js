@@ -572,6 +572,7 @@ const createWorkflowSection = (store) => {
       wrapper.appendChild(component);
       grid.appendChild(wrapper);
     }
+    element.scrollIntoView({ behavior: "smooth", block: "center" });
     debugLog(WORKFLOW_RESULTS_RENDERED);
   };
   return {
@@ -687,7 +688,7 @@ const _collectInputs = async (state) => {
         break;
       case "lf-upload":
         try {
-          inputs[id] = await _handleUploadField(manager, value);
+          inputs[id] = await _handleUploadCell(manager, value);
         } catch (error) {
           _setCellStatus(state, id, "error");
           manager.setStatus("error", `Upload failed: ${((_a = error.payload) == null ? void 0 : _a.detail) || error.message}`);
@@ -700,7 +701,7 @@ const _collectInputs = async (state) => {
   }
   return inputs;
 };
-const _handleUploadField = async (manager, rawValue) => {
+const _handleUploadCell = async (manager, rawValue) => {
   var _a;
   const { UPLOADING_FILE, FILE_PROCESSING } = STATUS_MESSAGES;
   const files = Array.isArray(rawValue) ? rawValue : rawValue;
@@ -728,8 +729,8 @@ const _setCellStatus = (state, id, status = "") => {
   const { uiRegistry } = manager;
   const elements = uiRegistry.get();
   const cells = (elements == null ? void 0 : elements[WORKFLOW_CLASSES.cells]) || [];
-  const field = cells.find((el) => el.id === id);
-  const wrapper = field == null ? void 0 : field.parentElement;
+  const cell = cells.find((el) => el.id === id);
+  const wrapper = cell == null ? void 0 : cell.parentElement;
   if (wrapper) {
     wrapper.dataset.status = status;
   }
