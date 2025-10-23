@@ -3,8 +3,8 @@ from types import ModuleType
 from typing import Iterable, Iterator, Sequence
 
 _WORKFLOW_MODULES: Sequence[str] = (
+    "image_to_svg",
     "sort_json_keys",
-    "image_2_svg",
     "svg_generation_gemini",
 )
 

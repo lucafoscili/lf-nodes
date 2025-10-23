@@ -2,6 +2,7 @@ import json
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable, Dict, Iterable, List
+from unicodedata import category
 
 # Custom exception for input-level validation failures. Carries the offending input name so
 # callers (the HTTP API) can map the problem back to the UI field to highlight.
@@ -186,6 +187,7 @@ class WorkflowRegistry:
             "columns": [],
             "nodes": nodes,
         }
+    
     def get(self, id: str) -> WorkflowNode | None:
         return self._definitions.get(id)
 
