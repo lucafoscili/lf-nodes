@@ -24,7 +24,7 @@ body,
     grid-template:
       'header header'
       'drawer main';
-    grid-template-columns: 300px auto;
+    grid-template-columns: clamp(220px, 28vw, var(--lf-ui-width-drawer)) auto;
     grid-template-rows: auto 1fr;
   }
 }
@@ -42,6 +42,29 @@ body {
   grid-area: action-button;
   position: fixed;
   right: 24px;
+  z-index: calc(var(--lf-ui-zindex-backdrop) - 1);
+}
+
+.dev-section {
+  & {
+    bottom: 24px;
+    display: grid;
+    max-height: calc(100vh - 120px);
+    position: fixed;
+    left: 24px;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    width: min(420px, calc(100% - 32px));
+    z-index: 30;
+  }
+
+  &__card {
+    backdrop-filter: blur(12px);
+    border-radius: var(--lf-ui-border-radius);
+    box-shadow: var(--lf-ui-box-shadow-modal);
+    max-height: inherit;
+    overflow: hidden;
+    width: 100%;
+  }
 }
 
 .drawer-section {
@@ -58,9 +81,9 @@ body {
   &__container {
     align-items: center;
     display: flex;
-    gap: 0.5rem;
+    gap: 0.5em;
     height: 100%;
-    padding: 0.5rem 1rem;
+    padding: 0.5em 1em;
     width: 100%;
   }
 
@@ -79,12 +102,47 @@ body {
   box-shadow: var(--lf-ui-box-shadow-modal);
   grid-area: main;
   overflow: auto;
+  padding: 0.5em 1.25em;
+}
+
+.notifications-section {
+  & {
+    backdrop-filter: blur(12px);
+    display: none;
+    height: calc(100vh - var(--lf-ui-height-header));
+    grid-gap: 1.5em;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+    left: 0;
+    max-width: 320px;
+    min-width: 160px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding: 0.75em;
+    place-content: flex-end;
+    position: fixed;
+    bottom: 0;
+    width: min(320px, 25vw);
+    z-index: var(--lf-ui-zindex-portal);
+  }
+
+  &--active {
+    animation: fadeIn 0.3s ease forwards;
+    display: grid;
+  }
+
+  &__item {
+    animation: none;
+    height: max-content;
+    max-height: 480px;
+    overflow: auto;
+  }
 }
 
 .workflow-section {
   & {
     margin: 0 auto;
-    max-width: 600px;
+    max-width: min(900px, 90vw);
     overflow: auto;
   }
 
@@ -106,15 +164,11 @@ body {
     padding: 1.25em;
   }
 
-  &__result,
-  &__run {
-    margin-top: 1.5em;
-  }
-
   &__result {
     & {
       background: rgba(var(--lf-color-surface), 0.75);
       border-radius: var(--lf-ui-border-radius);
+      margin-top: 1.5em;
       padding: 1.25em;
     }
 
@@ -140,50 +194,49 @@ body {
     }
   }
 
-  &__status {
-    & {
-      margin-top: 1.25em;
-      min-height: 1.5em;
-      font-size: 0.95em;
-      transition: color 0.2s ease;
-    }
-
-    &[data-tone='success'] {
-      color: #6fcf97;
-    }
-
-    &[data-tone='warn'] {
-      color: #ffd166;
-    }
-
-    &[data-tone='error'] {
-      color: #ff6f6f;
-    }
-  }
-
   &__title {
     padding: 1.25em 0;
   }
 }
 
-.dev-panel {
-  & {
-    bottom: 24px;
-    display: grid;
-    max-height: calc(100vh - 120px);
-    position: fixed;
-    right: 24px;
-    transition: opacity 0.2s ease, transform 0.2s ease;
-    width: min(420px, calc(100% - 32px));
-    z-index: 30;
+@media (max-width: 900px) {
+  .notifications-section {
+    border-radius: 6px;
+    bottom: 16px;
+    box-shadow: var(--lf-ui-box-shadow-modal);
+    left: 1em;
+    height: max-content;
+    max-height: 40vh;
+    max-width: calc(100% - 2em);
+    min-width: 0;
+    padding: 0.5em;
+    place-content: center;
+    right: 1em;
+    width: auto;
   }
 
-  &__card {
-    backdrop-filter: blur(12px);
-    border-radius: var(--lf-ui-border-radius);
-    box-shadow: var(--lf-ui-box-shadow-modal);
-    max-height: inherit;
-    overflow: hidden;
-    width: 100%;
+  .notifications-section__item {
+    max-height: 50vh;
+  }
+}
+
+@media (max-width: 480px) {
+  .notifications-section {
+    border-radius: 8px;
+    bottom: 12px;
+    left: 50%;
+    max-width: calc(100% - 32px);
+    padding: 0.5em;
+    transform: translateX(-50%);
+    width: calc(100% - 32px);
+  }
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
   }
 }

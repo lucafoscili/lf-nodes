@@ -1,43 +1,30 @@
 import { LfButtonInterface } from '@lf-widgets/foundations/dist';
 import { getLfFramework } from '@lf-widgets/framework';
+import { toggleDebug, toggleDrawer } from '../handlers/layout';
 import { WorkflowSectionController } from '../types/section';
-import { WorkflowState } from '../types/state';
+import { WorkflowState, WorkflowStore } from '../types/state';
+import { DEBUG_MESSAGES } from '../utils/constants';
+import { debugLog } from '../utils/debug';
 import { createComponent } from './components';
 
-//#region Constants
+//#region CSS Classes
+const { theme } = getLfFramework();
 const ROOT_CLASS = 'header-section';
+export const HEADER_CLASSES = {
+  _: theme.bemClass(ROOT_CLASS),
+  container: theme.bemClass(ROOT_CLASS, 'container'),
+  debugToggle: theme.bemClass(ROOT_CLASS, 'debug-toggle'),
+  drawerToggle: theme.bemClass(ROOT_CLASS, 'drawer-toggle'),
+} as const;
 //#endregion
 
-//#region Elements
+//#region Helpers
 const _container = () => {
   const container = document.createElement('div');
-  container.className = `${ROOT_CLASS}__container`;
+  container.className = HEADER_CLASSES.container;
   container.slot = 'content';
+
   return container;
-};
-const _drawerToggle = (state: WorkflowState) => {
-  const { theme } = getLfFramework();
-  const { get } = theme;
-  const lfIcon = get.icon('menu2');
-
-  const props = {
-    lfAriaLabel: 'Toggle drawer',
-    lfIcon,
-    lfStyling: 'icon',
-  } as Partial<LfButtonInterface>;
-  const drawerToggle = createComponent.button(props);
-  drawerToggle.className = `${ROOT_CLASS}__drawer-toggle`;
-  drawerToggle.addEventListener('lf-button-event', (e) => {
-    const { eventType } = e.detail;
-
-    switch (eventType) {
-      case 'click':
-        state.ui.layout.drawer._root.toggle();
-        break;
-    }
-  });
-
-  return drawerToggle;
 };
 const _debugToggle = (state: WorkflowState) => {
   const { theme } = getLfFramework();
@@ -52,79 +39,109 @@ const _debugToggle = (state: WorkflowState) => {
   const debugToggle = createComponent.button(props);
   debugToggle.lfUiState = 'info';
   debugToggle.className = `${ROOT_CLASS}__debug-toggle`;
-  debugToggle.addEventListener('lf-button-event', (e) => {
-    const { eventType } = e.detail;
-
-    switch (eventType) {
-      case 'click':
-        state.manager?.toggleDebug();
-        break;
-    }
-  });
+  debugToggle.addEventListener('lf-button-event', (e) => toggleDebug(e, state));
 
   return debugToggle;
 };
+const _drawerToggle = (state: WorkflowState) => {
+  const lfIcon = theme.get.icon('menu2');
+
+  const props = {
+    lfAriaLabel: 'Toggle drawer',
+    lfIcon,
+    lfStyling: 'icon',
+  } as Partial<LfButtonInterface>;
+
+  const drawerToggle = createComponent.button(props);
+  drawerToggle.className = HEADER_CLASSES.drawerToggle;
+  drawerToggle.addEventListener('lf-button-event', (e) => toggleDrawer(e, state));
+
+  return drawerToggle;
+};
 //#endregion
 
-//#region Factory
-export const createHeaderSection = (): WorkflowSectionController => {
-  let element: HTMLLfHeaderElement | null = null;
-  let lastState: WorkflowState | null = null;
+export const createHeaderSection = (store: WorkflowStore): WorkflowSectionController => {
+  //#region Local variables
+  const { HEADER_DESTROYED, HEADER_MOUNTED, HEADER_UPDATED } = DEBUG_MESSAGES;
+  //#endregion
 
-  const mount = (state: WorkflowState) => {
-    lastState = state;
-    const { ui } = state;
+  //#region Destroy
+  const destroy = () => {
+    const state = store.getState();
+    if (!state.manager) {
+      return;
+    }
 
-    element = document.createElement('lf-header');
-    element.className = ROOT_CLASS;
+    const { manager } = state;
+    const { uiRegistry } = manager;
+
+    for (const cls in HEADER_CLASSES) {
+      const element = HEADER_CLASSES[cls];
+      uiRegistry.remove(element);
+    }
+
+    debugLog(HEADER_DESTROYED);
+  };
+  //#endregion
+
+  //#region Mount
+  const mount = () => {
+    const state = store.getState();
+    const { manager } = state;
+    const { uiRegistry } = manager;
+
+    const elements = uiRegistry.get();
+    if (elements && elements[HEADER_CLASSES._]) {
+      return;
+    }
+
+    const _root = document.createElement('lf-header');
+    _root.className = HEADER_CLASSES._;
 
     const container = _container();
     const drawerToggle = _drawerToggle(state);
     const debugToggle = _debugToggle(state);
 
-    state.mutate.ui((uiState) => {
-      uiState.layout.header.drawerToggle = drawerToggle;
-      uiState.layout.header.debugToggle = debugToggle;
-    });
-
-    element.appendChild(container);
+    _root.appendChild(container);
     container.appendChild(drawerToggle);
     container.appendChild(debugToggle);
 
-    state.mutate.ui((uiState) => {
-      uiState.layout.header._root = element;
-    });
-    ui.layout._root?.appendChild(element);
+    manager.getAppRoot().appendChild(_root);
+
+    uiRegistry.set(HEADER_CLASSES._, _root);
+    uiRegistry.set(HEADER_CLASSES.container, container);
+    uiRegistry.set(HEADER_CLASSES.debugToggle, debugToggle);
+    uiRegistry.set(HEADER_CLASSES.drawerToggle, drawerToggle);
+
+    debugLog(HEADER_MOUNTED);
   };
+  //#endregion
 
-  const render = (state: WorkflowState) => {
-    const { isDebug } = state;
+  //#region Render
+  const render = () => {
+    const state = store.getState();
+    const { manager } = state;
+    const { uiRegistry } = manager;
 
-    const debugToggle = state.ui.layout.header.debugToggle;
+    const elements = uiRegistry.get();
+    if (!elements) {
+      return;
+    }
+
+    const isDebug = state.manager.isDebugEnabled();
+    const debugToggle = elements[HEADER_CLASSES.debugToggle] as HTMLLfButtonElement;
     if (debugToggle) {
-      debugToggle.lfUiState = isDebug ? 'secondary' : 'info';
+      debugToggle.lfUiState = isDebug ? 'warning' : 'primary';
       debugToggle.title = isDebug ? 'Hide developer console' : 'Show developer console';
     }
-  };
 
-  const destroy = () => {
-    element?.remove();
-    if (lastState) {
-      lastState.mutate.ui((uiState) => {
-        uiState.layout.header._root = null;
-        uiState.layout.header.drawerToggle = null;
-        uiState.layout.header.debugToggle = null;
-        uiState.layout.header.themeSwitch = null;
-      });
-    }
-    element = null;
-    lastState = null;
+    debugLog(HEADER_UPDATED);
   };
+  //#endregion
 
   return {
+    destroy,
     mount,
     render,
-    destroy,
   };
 };
-//#endregion

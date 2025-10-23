@@ -1,17 +1,18 @@
 import { LfButtonEventPayload } from '@lf-widgets/foundations/dist';
 import { WorkflowState } from '../types/state';
 
-export const executeWorkflowButton = (
-  e: CustomEvent<LfButtonEventPayload>,
-  state: WorkflowState,
-) => {
+//#region Button Handlers
+export const executeWorkflow = (e: CustomEvent<LfButtonEventPayload>, state: WorkflowState) => {
   const { eventType } = e.detail;
+
+  const { manager } = state;
 
   switch (eventType) {
     case 'click':
-      state.manager?.runWorkflow();
+      manager.getDispatchers().runWorkflow();
       break;
     default:
       return;
   }
 };
+//#endregion

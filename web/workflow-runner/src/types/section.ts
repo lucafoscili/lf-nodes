@@ -1,5 +1,3 @@
-import { WorkflowState } from './state';
-
 //#region Workflow
 export type WorkflowUICell =
   | HTMLLfButtonElement
@@ -10,10 +8,10 @@ export type WorkflowUICells = Array<WorkflowUICell>;
 export type WorkflowCellStatus = 'error' | '';
 export interface WorkflowSectionController {
   destroy: () => void;
-  mount: (state: WorkflowState) => void;
-  render: (state: WorkflowState) => void;
+  mount: () => void;
+  render: () => void;
 }
 export interface WorkflowSectionHandle extends WorkflowSectionController {
-  setCellStatus: (state: WorkflowState, id: string, status?: WorkflowCellStatus) => void;
+  setCellStatus: (id: string, status?: WorkflowCellStatus) => void;
 }
 //#endregion

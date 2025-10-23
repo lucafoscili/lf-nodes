@@ -1,65 +1,101 @@
-import { executeWorkflowButton } from '../handlers/workflow';
+import { getLfFramework } from '@lf-widgets/framework';
+import { executeWorkflow } from '../handlers/workflow';
 import { WorkflowSectionController } from '../types/section';
-import { WorkflowState, WorkflowStatus } from '../types/state';
+import { WorkflowStatus, WorkflowStore } from '../types/state';
+import { DEBUG_MESSAGES } from '../utils/constants';
+import { debugLog } from '../utils/debug';
 
-//#region Constants
+//#region CSS Classes
+const { theme } = getLfFramework();
 const ROOT_CLASS = 'action-button-section';
+export const ACTION_BUTTON_CLASSES = {
+  _: theme.bemClass(ROOT_CLASS),
+} as const;
 //#endregion
 
-//#region Factory
-export const createActionButtonSection = (): WorkflowSectionController => {
-  let element: HTMLLfButtonElement | null = null;
+export const createActionButtonSection = (store: WorkflowStore): WorkflowSectionController => {
+  //#region Local variables
+  const { ACTION_BUTTON_DESTROYED, ACTION_BUTTON_MOUNTED, ACTION_BUTTON_UPDATED } = DEBUG_MESSAGES;
   let lastMessage: string | null = null;
-  let lastState: WorkflowState | null = null;
   let lastStatus: WorkflowStatus | null = null;
+  //#endregion
 
-  const mount = (state: WorkflowState) => {
-    lastState = state;
-    const { ui } = state;
-
-    element = document.createElement('lf-button');
-    element.className = ROOT_CLASS;
-    element.lfIcon = 'send';
-    element.lfStyling = 'floating';
-    element.title = 'Run current workflow';
-    element.addEventListener('lf-button-event', (e) => executeWorkflowButton(e, state));
-
-    state.mutate.ui((uiState) => {
-      uiState.layout.actionButton._root = element;
-    });
-    ui.layout._root?.appendChild(element);
-  };
-
-  const render = (state: WorkflowState) => {
-    if (state.current.status !== lastStatus || state.current.message !== lastMessage) {
-      element.lfShowSpinner = state.current.status === 'running';
-    }
-  };
-
+  //#region Destroy
   const destroy = () => {
-    element?.remove();
-    if (lastState) {
-      lastState.mutate.ui((uiState) => {
-        uiState.layout.actionButton._root = null;
-      });
-    }
-    element = null;
-    lastState = null;
-  };
-
-  const updateActionButton = (state: WorkflowState) => {
-    const button = state.ui.layout.actionButton._root;
-    if (!button) {
+    const state = store.getState();
+    if (!state.manager) {
       return;
     }
 
-    button.lfShowSpinner = state.current.status === 'running';
+    const { uiRegistry } = state.manager;
+
+    for (const cls in ACTION_BUTTON_CLASSES) {
+      const element = ACTION_BUTTON_CLASSES[cls];
+      uiRegistry.remove(element);
+    }
+
+    lastMessage = null;
+    lastStatus = null;
+
+    debugLog(ACTION_BUTTON_DESTROYED);
   };
+  //#endregion
+
+  //#region Mount
+  const mount = () => {
+    const state = store.getState();
+    const { manager } = state;
+    const { uiRegistry } = manager;
+
+    const elements = uiRegistry.get();
+    if (elements && elements[ACTION_BUTTON_CLASSES._]) {
+      return;
+    }
+
+    const _root = document.createElement('lf-button') as HTMLLfButtonElement;
+    _root.className = theme.bemClass(ACTION_BUTTON_CLASSES._);
+    _root.lfIcon = 'send';
+    _root.lfStyling = 'floating';
+    _root.title = 'Run current workflow';
+    _root.addEventListener('lf-button-event', (e) => executeWorkflow(e, store.getState()));
+
+    manager.getAppRoot().appendChild(_root);
+    uiRegistry.set(ACTION_BUTTON_CLASSES._, _root);
+
+    debugLog(ACTION_BUTTON_MOUNTED);
+  };
+  //#endregion
+
+  //#region Render
+  const render = () => {
+    const state = store.getState();
+    const { current, manager } = state;
+    const { uiRegistry } = manager;
+
+    const elements = uiRegistry.get();
+    if (!elements) {
+      return;
+    }
+
+    const _root = elements[ACTION_BUTTON_CLASSES._] as HTMLLfButtonElement;
+    if (!_root) {
+      return;
+    }
+
+    const shouldRefresh = current.status !== lastStatus || current.message !== lastMessage;
+    if (shouldRefresh) {
+      _root.lfShowSpinner = current.status === 'running';
+      lastStatus = current.status;
+      lastMessage = current.message;
+    }
+
+    debugLog(ACTION_BUTTON_UPDATED);
+  };
+  //#endregion
 
   return {
+    destroy,
     mount,
     render,
-    destroy,
   };
 };
-//#endregion

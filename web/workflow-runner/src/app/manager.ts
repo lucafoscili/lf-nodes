@@ -1,19 +1,15 @@
 import { getLfFramework } from '@lf-widgets/framework';
 import { buildAssetsUrl, DEFAULT_STATUS_MESSAGES, DEFAULT_THEME } from '../config';
-import { createDevPanel } from '../elements/dev.panel';
+import { workflowDispatcher } from '../dispatchers/workflow';
 import { createActionButtonSection } from '../elements/layout.action-button';
+import { createDevSection } from '../elements/layout.dev';
 import { createDrawerSection } from '../elements/layout.drawer';
 import { createHeaderSection } from '../elements/layout.header';
 import { createMainSection } from '../elements/layout.main';
-import { createWorkflowSection } from '../elements/main.workflow';
-import {
-  fetchWorkflowDefinitions,
-  runWorkflowRequest,
-  uploadWorkflowFiles,
-  WorkflowApiError,
-} from '../services/workflow-service';
-import { WorkflowManager } from '../types/manager';
-import { WorkflowSectionHandle } from '../types/section';
+import { createNotificationsSection } from '../elements/layout.notifications';
+import { fetchWorkflowDefinitions } from '../services/workflow-service';
+import { WorkflowDispatchers, WorkflowManager, WorkflowUIItem } from '../types/manager';
+import { WorkflowSectionController } from '../types/section';
 import { WorkflowStatus, WorkflowStore } from '../types/state';
 import { DEBUG_MESSAGES, STATUS_MESSAGES } from '../utils/constants';
 import { debugLog } from '../utils/debug';
@@ -22,36 +18,44 @@ import { createWorkflowRunnerStore } from './store';
 
 export class LfWorkflowRunnerManager implements WorkflowManager {
   //#region Initialization
+  #DISPATCHERS: WorkflowDispatchers;
   #FRAMEWORK = getLfFramework();
   #IS_DEBUG = false;
+  #APP_ROOT: HTMLDivElement;
   #SECTIONS: {
-    actionButton: ReturnType<typeof createActionButtonSection>;
-    dev: ReturnType<typeof createDevPanel>;
-    drawer: ReturnType<typeof createDrawerSection>;
-    header: ReturnType<typeof createHeaderSection>;
-    main: ReturnType<typeof createMainSection>;
-    workflow: WorkflowSectionHandle;
+    actionButton: WorkflowSectionController;
+    dev: WorkflowSectionController;
+    drawer: WorkflowSectionController;
+    header: WorkflowSectionController;
+    main: WorkflowSectionController;
+    notifications: WorkflowSectionController;
   };
   #STORE: WorkflowStore;
+  #UI_REGISTRY = new WeakMap();
 
   constructor() {
     const { WORKFLOWS_LOAD_FAILED } = DEBUG_MESSAGES;
     const { LOADING_WORKFLOWS } = STATUS_MESSAGES;
 
-    const container = document.querySelector<HTMLDivElement>('#app');
-    if (!container) {
+    this.#APP_ROOT = document.querySelector<HTMLDivElement>('#app');
+    if (!this.#APP_ROOT) {
       throw new Error('Workflow runner container not found.');
     }
 
-    this.#STORE = createWorkflowRunnerStore(initState(container));
+    this.#STORE = createWorkflowRunnerStore(initState(this.#APP_ROOT));
     this.#IS_DEBUG = this.#STORE.getState().isDebug;
+
+    this.#DISPATCHERS = {
+      runWorkflow: () => workflowDispatcher(this.#STORE),
+    };
+
     this.#SECTIONS = {
-      actionButton: createActionButtonSection(),
-      drawer: createDrawerSection(),
-      header: createHeaderSection(),
-      main: createMainSection(),
-      workflow: createWorkflowSection(),
-      dev: createDevPanel(),
+      actionButton: createActionButtonSection(this.#STORE),
+      dev: createDevSection(this.#STORE),
+      drawer: createDrawerSection(this.#STORE),
+      header: createHeaderSection(this.#STORE),
+      main: createMainSection(this.#STORE),
+      notifications: createNotificationsSection(this.#STORE),
     };
 
     this.#STORE.getState().mutate.manager(this);
@@ -72,54 +76,6 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
   //#endregion
 
   //#region Internal helpers
-  #collectInputs = async (): Promise<Record<string, unknown>> => {
-    const state = this.#STORE.getState();
-    const { cells } = state.ui.layout.main.workflow;
-    const inputs: Record<string, unknown> = {};
-
-    for (const cell of cells) {
-      const id = cell.id || '';
-      this.#SECTIONS.workflow.setCellStatus(state, id);
-      const value: unknown = await cell.getValue();
-
-      switch (cell.tagName.toLowerCase()) {
-        case 'lf-toggle':
-          inputs[id] = value === 'off' ? false : true;
-          break;
-        case 'lf-upload':
-          inputs[id] = await this.#handleUploadField(id, value);
-          break;
-        default:
-          inputs[id] = value;
-      }
-    }
-
-    return inputs;
-  };
-  #handleUploadField = async (fieldName: string, rawValue: unknown) => {
-    const { UPLOADING_FILE, FILE_PROCESSING } = STATUS_MESSAGES;
-
-    const files = Array.isArray(rawValue) ? rawValue : (rawValue as File[] | undefined);
-    if (!files || files.length === 0) {
-      return [];
-    }
-
-    try {
-      this.setStatus('running', UPLOADING_FILE);
-      const { payload } = await uploadWorkflowFiles(files);
-      const paths = payload?.paths || [];
-      this.setStatus('running', FILE_PROCESSING);
-      return paths.length === 1 ? paths[0] : paths;
-    } catch (error) {
-      if (error instanceof WorkflowApiError) {
-        this.#SECTIONS.workflow.setCellStatus(this.#STORE.getState(), fieldName, 'error');
-        this.setStatus('error', `Upload failed: ${error.payload?.detail || error.message}`);
-      } else {
-        this.setStatus('error', 'Upload failed unexpectedly.');
-      }
-      throw error;
-    }
-  };
   #initializeFramework() {
     const assetsUrl = buildAssetsUrl();
 
@@ -128,25 +84,20 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
   }
   #initializeLayout() {
     const state = this.#STORE.getState();
-    const root = state.ui.layout._root;
-    if (!root) {
-      return;
+
+    while (this.#APP_ROOT.firstChild) {
+      this.#APP_ROOT.removeChild(this.#APP_ROOT.firstChild);
     }
 
-    while (root.firstChild) {
-      root.removeChild(root.firstChild);
-    }
-
-    this.#SECTIONS.actionButton.mount(state);
-    this.#SECTIONS.drawer.mount(state);
-    this.#SECTIONS.header.mount(state);
-    this.#SECTIONS.main.mount(state);
-    this.#SECTIONS.workflow.mount(state);
-    this.#SECTIONS.workflow.render(state);
+    this.#SECTIONS.actionButton.mount();
+    this.#SECTIONS.drawer.mount();
+    this.#SECTIONS.header.mount();
+    this.#SECTIONS.main.mount();
+    this.#SECTIONS.notifications.mount();
 
     if (state.isDebug) {
-      this.#SECTIONS.dev.mount(state);
-      this.#SECTIONS.dev.render(state);
+      this.#SECTIONS.dev.mount();
+      this.#SECTIONS.dev.render();
       this.#IS_DEBUG = true;
     }
   }
@@ -164,98 +115,42 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
     if (firstWorkflow?.id) {
       this.setWorkflow(firstWorkflow.id);
     }
-    this.setStatus('ready', WORKFLOWS_LOADED);
+    this.setStatus('idle', WORKFLOWS_LOADED);
   };
   #subscribeToState() {
     this.#STORE.subscribe((state) => {
-      this.#SECTIONS.actionButton.render(state);
-      this.#SECTIONS.drawer.render(state);
-      this.#SECTIONS.header.render(state);
-      this.#SECTIONS.main.render(state);
-      this.#SECTIONS.workflow.render(state);
+      this.#SECTIONS.actionButton.render();
+      this.#SECTIONS.drawer.render();
+      this.#SECTIONS.header.render();
+      this.#SECTIONS.main.render();
+      this.#SECTIONS.notifications.render();
 
       const shouldShowDevPanel = state.isDebug;
       if (shouldShowDevPanel && !this.#IS_DEBUG) {
-        this.#SECTIONS.dev.mount(state);
+        this.#SECTIONS.dev.mount();
         this.#IS_DEBUG = true;
-        this.#SECTIONS.dev.render(state);
+        this.#SECTIONS.dev.render();
       } else if (!shouldShowDevPanel && this.#IS_DEBUG) {
         this.#SECTIONS.dev.destroy();
         this.#IS_DEBUG = false;
       } else if (shouldShowDevPanel && this.#IS_DEBUG) {
-        this.#SECTIONS.dev.render(state);
+        this.#SECTIONS.dev.render();
       }
     });
   }
   //#endregion
 
-  //#region Workflow execution
-  async runWorkflow(): Promise<void> {
-    const { INPUTS_COLLECTED, WORKFLOW_COMPLETED, WORKFLOW_DISPATCHING, WORKFLOW_NOT_SELECTED } =
-      DEBUG_MESSAGES;
-    const { SUBMITTING_WORKFLOW } = STATUS_MESSAGES;
-
-    const state = this.#STORE.getState();
-    const id = state.current.id;
-    if (!id) {
-      this.setStatus('error', WORKFLOW_NOT_SELECTED);
-      return;
-    }
-
-    this.setStatus('running', SUBMITTING_WORKFLOW);
-
-    let inputs: Record<string, unknown>;
-    try {
-      inputs = await this.#collectInputs();
-      debugLog(INPUTS_COLLECTED, 'informational', {
-        id,
-        inputKeys: Object.keys(inputs),
-      });
-    } catch (error) {
-      const detail =
-        error instanceof WorkflowApiError
-          ? error.payload?.detail || error.message
-          : (error as Error)?.message || 'Failed to collect inputs.';
-      this.setStatus('error', `Failed to collect inputs: ${detail}`);
-      return;
-    }
-
-    try {
-      debugLog(WORKFLOW_DISPATCHING, 'informational', {
-        id,
-        inputKeys: Object.keys(inputs),
-      });
-      const { status, message, payload } = await runWorkflowRequest(id, inputs);
-
-      const runState = this.#STORE.getState();
-      runState.mutate.runResult(
-        status,
-        message,
-        payload.history?.outputs ? { ...payload.history.outputs } : null,
-      );
-
-      const resultCategory = status === 'error' ? 'error' : 'success';
-      debugLog(WORKFLOW_COMPLETED, resultCategory, {
-        id,
-        wfStatus: status,
-        outputs: Object.keys(payload.history?.outputs ?? {}),
-      });
-    } catch (error) {
-      if (error instanceof WorkflowApiError) {
-        const inputName = error.payload?.error?.input;
-        if (inputName) {
-          this.#SECTIONS.workflow.setCellStatus(state, inputName, 'error');
-        }
-        this.setStatus('error', error.payload?.detail || error.message);
-      } else {
-        this.setStatus('error', 'Unexpected error while running the workflow.');
-      }
-    }
-  }
-  //#endregion
-
   //#region Getters
-  isDebugEnabled(): boolean {
+  getAppRoot() {
+    return this.#APP_ROOT;
+  }
+  getDispatchers() {
+    return this.#DISPATCHERS;
+  }
+  getStore() {
+    return this.#STORE;
+  }
+  isDebugEnabled() {
     return this.#STORE.getState().isDebug;
   }
   //#endregion
@@ -280,5 +175,41 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
     const current = this.#STORE.getState().isDebug;
     this.#STORE.getState().mutate.isDebug(!current);
   }
+  //#endregion
+
+  //#region UI registry
+  uiRegistry = {
+    delete: () => {
+      const elements = this.#UI_REGISTRY.get(this);
+      if (elements) {
+        for (const elementId in elements) {
+          const element = elements[elementId];
+          if (element && typeof element === 'object' && 'remove' in element) {
+            (element as HTMLElement).remove();
+          }
+        }
+      }
+      this.#UI_REGISTRY.delete(this);
+    },
+    get: () => {
+      return this.#UI_REGISTRY.get(this);
+    },
+    remove: (elementId: string) => {
+      const elements = this.#UI_REGISTRY.get(this);
+      if (elements && elements[elementId]) {
+        const element = elements[elementId];
+        if (element && typeof element === 'object' && 'remove' in element) {
+          (element as HTMLElement).remove();
+        }
+        delete elements[elementId];
+        this.#UI_REGISTRY.set(this, elements);
+      }
+    },
+    set: (elementId: string, element: WorkflowUIItem) => {
+      const elements = this.#UI_REGISTRY.get(this) || {};
+      elements[elementId] = element;
+      this.#UI_REGISTRY.set(this, elements);
+    },
+  };
   //#endregion
 }

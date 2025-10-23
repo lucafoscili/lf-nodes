@@ -6,7 +6,7 @@ export const API_BASE = runnerConfig.apiBase;
 export const API_ROUTE_PREFIX = runnerConfig.apiRoutePrefix;
 export const API_ROOT = `${API_BASE}${API_ROUTE_PREFIX}`;
 export const DEFAULT_STATUS_MESSAGES: Record<WorkflowStatus, string> = {
-  ready: 'Ready.',
+  idle: 'Ready.',
   running: 'Running...',
   error: 'An error occurred while running the workflow.',
 };

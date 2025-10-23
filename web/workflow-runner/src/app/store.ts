@@ -1,5 +1,6 @@
 import { DEFAULT_STATUS_MESSAGES } from '../config';
-import { WorkflowNodeResults } from '../types/api';
+import { WorkflowAPIDataset, WorkflowNodeResults } from '../types/api';
+import { WorkflowManager } from '../types/manager';
 import {
   WorkflowState,
   WorkflowStateListener,
@@ -67,19 +68,15 @@ export const createWorkflowRunnerStore = (initialState: WorkflowState): Workflow
       applyMutation((draft) => {
         draft.isDebug = isDebug;
       }),
-    manager: (manager: WorkflowState['manager']) =>
+    manager: (manager: WorkflowManager) =>
       applyMutation((draft) => {
         draft.manager = manager;
       }),
     status: (status: WorkflowStatus, message?: string) => setStatus(status, message, setState),
     runResult: (status: WorkflowStatus, message: string, results: WorkflowNodeResults | null) =>
       setRunResult(status, message, results, setState),
-    ui: (updater: (ui: WorkflowState['ui']) => void) =>
-      applyMutation((draft) => {
-        updater(draft.ui);
-      }),
     workflow: (workflowId: string) => setWorkflow(workflowId, setState),
-    workflows: (workflows: WorkflowState['workflows']) =>
+    workflows: (workflows: WorkflowAPIDataset) =>
       applyMutation((draft) => {
         draft.workflows = workflows;
       }),

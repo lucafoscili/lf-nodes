@@ -85,7 +85,6 @@ export const runWorkflowRequest = async (
 //#endregion
 
 //#region Upload image
-
 export const uploadWorkflowFiles = async (files: File[]): Promise<WorkflowAPIUploadResponse> => {
   const { UPLOAD_GENERIC, UPLOAD_INVALID_RESPONSE, UPLOAD_MISSING_FILE } = ERROR_MESSAGES;
   const { UPLOAD_COMPLETED } = STATUS_MESSAGES;
@@ -130,7 +129,7 @@ export const uploadWorkflowFiles = async (files: File[]): Promise<WorkflowAPIUpl
     return {
       message: UPLOAD_COMPLETED,
       payload: data,
-      status: 'ready',
+      status: 'idle',
     };
   }
 
