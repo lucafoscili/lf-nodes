@@ -232,7 +232,7 @@ const _createDataset = (workflows) => {
     const name = (node == null ? void 0 : node.category) || "Uncategorized";
     let category = categories.find((cat) => cat.value === name);
     if (!category) {
-      category = { id: name, value: name, children: [] };
+      category = { icon: _getIcon(name), id: name, value: name, children: [] };
       categories.push(category);
     }
     category.children.push(node);
@@ -241,6 +241,14 @@ const _createDataset = (workflows) => {
     nodes: [root]
   };
   return dataset;
+};
+const _getIcon = (category) => {
+  const { alertTriangle, codeCircle2, json } = getLfFramework().theme.get.icons();
+  const category_icons = {
+    SVG: codeCircle2,
+    JSON: json
+  };
+  return category_icons[category] || alertTriangle;
 };
 const _container$1 = (state) => {
   const container = document.createElement("div");
