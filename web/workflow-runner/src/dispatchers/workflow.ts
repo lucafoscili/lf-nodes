@@ -31,7 +31,7 @@ const _collectInputs = async (state: WorkflowState): Promise<Record<string, unkn
         break;
       case 'lf-upload':
         try {
-          inputs[id] = await _handleUploadField(manager, value);
+          inputs[id] = await _handleUploadCell(manager, value);
         } catch (error) {
           _setCellStatus(state, id, 'error');
           manager.setStatus('error', `Upload failed: ${error.payload?.detail || error.message}`);
@@ -45,7 +45,7 @@ const _collectInputs = async (state: WorkflowState): Promise<Record<string, unkn
 
   return inputs;
 };
-const _handleUploadField = async (manager: WorkflowManager, rawValue: unknown) => {
+const _handleUploadCell = async (manager: WorkflowManager, rawValue: unknown) => {
   const { UPLOADING_FILE, FILE_PROCESSING } = STATUS_MESSAGES;
 
   const files = Array.isArray(rawValue) ? rawValue : (rawValue as File[] | undefined);
@@ -76,8 +76,8 @@ const _setCellStatus = (state: WorkflowState, id: string, status: WorkflowCellSt
   const elements = uiRegistry.get();
   const cells = (elements?.[WORKFLOW_CLASSES.cells] as WorkflowUICells) || [];
 
-  const field = cells.find((el) => el.id === id);
-  const wrapper = field?.parentElement;
+  const cell = cells.find((el) => el.id === id);
+  const wrapper = cell?.parentElement;
   if (wrapper) {
     wrapper.dataset.status = status;
   }
@@ -144,6 +144,7 @@ export const workflowDispatcher = async (store: WorkflowStore) => {
       wfStatus: status,
       outputs: Object.keys(payload.history?.outputs ?? {}),
     });
+    
   } catch (error) {
     if (error instanceof WorkflowApiError) {
       const inputName = error.payload?.error?.input;

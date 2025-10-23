@@ -309,6 +309,8 @@ export const createWorkflowSection = (store: WorkflowStore): WorkflowSectionCont
       grid.appendChild(wrapper);
     }
 
+    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
     debugLog(WORKFLOW_RESULTS_RENDERED);
   };
 

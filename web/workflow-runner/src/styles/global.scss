@@ -146,7 +146,7 @@ body {
     overflow: auto;
   }
 
-  &__field {
+  &__cell {
     & {
       max-height: 80vh;
       transition: background-color 0.2s ease;
