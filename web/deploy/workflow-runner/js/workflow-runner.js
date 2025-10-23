@@ -1298,7 +1298,7 @@ const createNotificationsSection = (store) => {
       };
       element.lfIcon = status === "error" ? theme.get.icon("alertTriangle") : theme.get.icon("infoHexagon");
       element.lfMessage = message;
-      element.lfTimer = status === "error" ? 7e5 : 35e4;
+      element.lfTimer = status === "error" ? 5e3 : 5e3;
       element.lfUiState = _getStateCategory(status);
       _root.appendChild(element);
       _checkForVisible(_root);

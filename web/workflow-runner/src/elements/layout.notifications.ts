@@ -119,7 +119,7 @@ export const createNotificationsSection = (store: WorkflowStore): WorkflowSectio
       element.lfIcon =
         status === 'error' ? theme.get.icon('alertTriangle') : theme.get.icon('infoHexagon');
       element.lfMessage = message;
-      element.lfTimer = status === 'error' ? 5000 : 2500;
+      element.lfTimer = status === 'error' ? 5000 : 5000; //TODO: Update when the CSS variable is fixed LFW-side
       element.lfUiState = _getStateCategory(status);
 
       _root.appendChild(element);
