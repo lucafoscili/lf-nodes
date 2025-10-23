@@ -2,18 +2,18 @@ import { g as getLfFramework } from "../../js/lf-widgets-6WpDY9VV.js";
 const apiBase = "/api";
 const apiRoutePrefix = "/lf-nodes";
 const staticPaths = { "assets": "/lf-nodes/static/assets/" };
-const theme = "dark";
+const theme$7 = "dark";
 const runnerConfig = {
   apiBase,
   apiRoutePrefix,
   staticPaths,
-  theme
+  theme: theme$7
 };
 const API_BASE = runnerConfig.apiBase;
 const API_ROUTE_PREFIX = runnerConfig.apiRoutePrefix;
 const API_ROOT = `${API_BASE}${API_ROUTE_PREFIX}`;
 const DEFAULT_STATUS_MESSAGES = {
-  ready: "Ready.",
+  idle: "Ready.",
   running: "Running...",
   error: "An error occurred while running the workflow."
 };
@@ -21,155 +21,83 @@ const DEFAULT_THEME = runnerConfig.theme;
 const STATIC_ASSETS_PATH = runnerConfig.staticPaths.assets;
 const buildApiUrl = (path) => `${API_ROOT}${path.startsWith("/") ? path : `/${path}`}`;
 const buildAssetsUrl = (origin = window.location.origin) => `${origin}${API_BASE}${STATIC_ASSETS_PATH.startsWith("/") ? STATIC_ASSETS_PATH : `/${STATIC_ASSETS_PATH}`}`;
-const ROOT_CLASS$5 = "dev-panel";
-const CARD_CLASS = `${ROOT_CLASS$5}__card`;
-const buildDebugDataset = () => {
-  const framework = getLfFramework();
-  const enabled = framework.debug.isEnabled();
-  return {
-    nodes: [
-      {
-        id: "workflow-runner-debug",
-        cells: {
-          lfToggle: {
-            shape: "toggle",
-            lfValue: enabled,
-            value: enabled
-          },
-          lfCode: {
-            shape: "code",
-            value: ""
-          },
-          lfButton: {
-            shape: "button",
-            value: ""
-          },
-          lfButton_2: {
-            shape: "button",
-            value: ""
-          }
-        }
-      }
-    ]
-  };
+const isObject = (v) => v !== null && typeof v === "object";
+const isString = (v) => typeof v === "string";
+const isStringArray = (v) => Array.isArray(v) && v.every((e) => typeof e === "string");
+const isWorkflowAPIUploadPayload = (v) => {
+  if (!isObject(v)) {
+    return false;
+  }
+  if (!("detail" in v) || !isString(v.detail)) {
+    return false;
+  }
+  if ("paths" in v && !(isStringArray(v.paths) || v.paths === void 0)) {
+    return false;
+  }
+  if ("error" in v) {
+    const err = v.error;
+    if (!isObject(err) || !("message" in err) || !isString(err.message)) {
+      return false;
+    }
+  }
+  return true;
 };
-const createDevPanel = () => {
-  let container = null;
-  let card = null;
-  let mountedState = null;
-  const mount = (state) => {
-    var _a, _b;
-    if (container) {
-      return;
-    }
-    mountedState = state;
-    container = document.createElement("div");
-    container.className = ROOT_CLASS$5;
-    container.dataset.open = "false";
-    container.setAttribute("aria-hidden", "true");
-    card = document.createElement("lf-card");
-    card.className = CARD_CLASS;
-    card.lfLayout = "debug";
-    card.lfDataset = buildDebugDataset();
-    const body = ((_b = (_a = state.ui.layout._root) == null ? void 0 : _a.ownerDocument) == null ? void 0 : _b.body) ?? document.body;
-    container.appendChild(card);
-    body.appendChild(container);
-    state.mutate.ui((ui) => {
-      ui.layout.dev._root = container;
-      ui.layout.dev.card = card;
-    });
-  };
-  const render = (state) => {
-    if (!container) {
-      return;
-    }
-    container.setAttribute("aria-hidden", String(!state.isDebug));
-  };
-  const destroy = () => {
-    if (container == null ? void 0 : container.isConnected) {
-      container.remove();
-    }
-    if (mountedState) {
-      mountedState.mutate.ui((ui) => {
-        ui.layout.dev._root = null;
-        ui.layout.dev.card = null;
-      });
-    }
-    container = null;
-    card = null;
-    mountedState = null;
-  };
-  return {
-    mount,
-    render,
-    destroy
-  };
+const isWorkflowAPIUploadResponse = (v) => {
+  if (!isObject(v)) {
+    return false;
+  }
+  if (!("message" in v) || !isString(v.message)) {
+    return false;
+  }
+  if (!("status" in v) || !isString(v.status)) {
+    return false;
+  }
+  if (!("payload" in v) || !isWorkflowAPIUploadPayload(v.payload)) {
+    return false;
+  }
+  return true;
 };
-const executeWorkflowButton = (e, state) => {
-  var _a;
-  const { eventType } = e.detail;
-  switch (eventType) {
-    case "click":
-      (_a = state.manager) == null ? void 0 : _a.runWorkflow();
-      break;
-    default:
-      return;
+const parseJson = async (response) => {
+  try {
+    return await response.json();
+  } catch {
+    return null;
   }
 };
-const ROOT_CLASS$4 = "action-button-section";
-const createActionButtonSection = () => {
-  let element = null;
-  let lastMessage = null;
-  let lastState = null;
-  let lastStatus = null;
-  const mount = (state) => {
-    var _a;
-    lastState = state;
-    const { ui } = state;
-    element = document.createElement("lf-button");
-    element.className = ROOT_CLASS$4;
-    element.lfIcon = "send";
-    element.lfStyling = "floating";
-    element.title = "Run current workflow";
-    element.addEventListener("lf-button-event", (e) => executeWorkflowButton(e, state));
-    state.mutate.ui((uiState) => {
-      uiState.layout.actionButton._root = element;
-    });
-    (_a = ui.layout._root) == null ? void 0 : _a.appendChild(element);
-  };
-  const render = (state) => {
-    if (state.current.status !== lastStatus || state.current.message !== lastMessage) {
-      element.lfShowSpinner = state.current.status === "running";
-    }
-  };
-  const destroy = () => {
-    element == null ? void 0 : element.remove();
-    if (lastState) {
-      lastState.mutate.ui((uiState) => {
-        uiState.layout.actionButton._root = null;
-      });
-    }
-    element = null;
-    lastState = null;
-  };
-  return {
-    mount,
-    render,
-    destroy
-  };
+const clearChildren = (element) => {
+  if (!element) {
+    return;
+  }
+  while (element.firstChild) {
+    element.removeChild(element.firstChild);
+  }
 };
 const DEBUG_MESSAGES = {
+  ACTION_BUTTON_DESTROYED: "Action button section destroyed.",
+  ACTION_BUTTON_MOUNTED: "Action button section mounted.",
+  ACTION_BUTTON_UPDATED: "Action button section refreshed.",
+  DEV_SECTION_DESTROYED: "Dev section destroyed.",
+  DEV_SECTION_MOUNTED: "Dev section mounted.",
+  DEV_SECTION_UPDATED: "Dev section refreshed.",
   DRAWER_DESTROYED: "Drawer section destroyed.",
   DRAWER_MOUNTED: "Drawer section mounted.",
-  DRAWER_UPDATED: "Drawer dataset refreshed.",
+  DRAWER_UPDATED: "Drawer section refreshed.",
+  HEADER_DESTROYED: "Header section destroyed.",
+  HEADER_MOUNTED: "Header section mounted.",
+  HEADER_UPDATED: "Header section refreshed.",
   INPUTS_COLLECTED: "Collected workflow inputs.",
-  MAIN_DESTROYED: "Main content destroyed.",
-  MAIN_MOUNTED: "Main content mounted.",
+  MAIN_DESTROYED: "Main section destroyed.",
+  MAIN_MOUNTED: "Main section mounted.",
+  MAIN_UPDATED: "Main section updated.",
+  NOTIFICATIONS_DESTROYED: "Notifications section destroyed.",
+  NOTIFICATIONS_MOUNTED: "Notifications section mounted.",
+  NOTIFICATIONS_UPDATED: "Notifications section refreshed.",
   STATUS_UPDATED: "Workflow status updated.",
   WORKFLOW_COMPLETED: "Workflow execution completed.",
   WORKFLOW_DISPATCHING: "Dispatching workflow execution.",
   WORKFLOW_LAYOUT_DESTROYED: "Workflow layout destroyed.",
   WORKFLOW_LAYOUT_MOUNTED: "Workflow layout mounted.",
+  WORKFLOW_LAYOUT_UPDATED: "Workflow layout updated.",
   WORKFLOW_INPUT_FLAGGED: "Workflow input flagged.",
   WORKFLOW_INPUTS_CLEARED: "Workflow inputs cleared.",
   WORKFLOW_INPUTS_RENDERED: "Workflow inputs rendered.",
@@ -193,7 +121,7 @@ const STATUS_MESSAGES = {
   UPLOADING_FILE: "Uploading file...",
   WORKFLOW_COMPLETED: "Workflow execution completed successfully."
 };
-const formatContext = (context) => {
+const _formatContext = (context) => {
   if (context === void 0 || context === null) {
     return null;
   }
@@ -201,142 +129,34 @@ const formatContext = (context) => {
     return context;
   }
   try {
-    const serialized = JSON.stringify(context, null, 2);
+    const serialized = JSON.stringify(context);
     return serialized ? serialized : null;
   } catch {
     return String(context);
   }
 };
-const debugLog = (message, category = "informational", context) => {
+const _getLogLevel = (category) => {
+  let level;
+  switch (category) {
+    case "error":
+      level = "error";
+      break;
+    default:
+      level = "informational";
+  }
+  return level;
+};
+const debugLog = (message, category = "idle", context) => {
   try {
     const { debug } = getLfFramework();
     const { logs } = debug;
-    const formattedContext = formatContext(context);
+    const formattedContext = _formatContext(context);
     const payload = formattedContext ? `${message}
 
 ${formattedContext}` : message;
-    logs.new(debug, payload, category);
+    logs.new(debug, payload, _getLogLevel(category));
   } catch {
   }
-};
-const ROOT_CLASS$3 = "drawer-section";
-const _createDataset = (workflows) => {
-  var _a, _b;
-  const categories = [];
-  const root = { id: "workflows", value: "Workflows", children: categories };
-  const clone = JSON.parse(JSON.stringify(workflows));
-  (_a = clone.nodes) == null ? void 0 : _a.forEach((child) => {
-    child.children = void 0;
-  });
-  (_b = clone.nodes) == null ? void 0 : _b.forEach((node) => {
-    const name = (node == null ? void 0 : node.category) || "Uncategorized";
-    let category = categories.find((cat) => cat.value === name);
-    if (!category) {
-      category = { icon: _getIcon(name), id: name, value: name, children: [] };
-      categories.push(category);
-    }
-    category.children.push(node);
-  });
-  const dataset = {
-    nodes: [root]
-  };
-  return dataset;
-};
-const _getIcon = (category) => {
-  const { alertTriangle, codeCircle2, json } = getLfFramework().theme.get.icons();
-  const category_icons = {
-    SVG: codeCircle2,
-    JSON: json
-  };
-  return category_icons[category] || alertTriangle;
-};
-const _container$1 = (state) => {
-  const container = document.createElement("div");
-  container.className = `${ROOT_CLASS$3}__container`;
-  container.slot = "content";
-  container.appendChild(_tree(state));
-  return container;
-};
-const _tree = (state) => {
-  const { manager } = state;
-  const tree = document.createElement("lf-tree");
-  tree.className = `${ROOT_CLASS$3}__tree`;
-  tree.lfAccordionLayout = true;
-  tree.addEventListener("lf-tree-event", (e) => {
-    const { eventType, node } = e.detail;
-    switch (eventType) {
-      case "click":
-        if (!manager) {
-          return;
-        }
-        const isLeaf = !node.children || node.children.length === 0;
-        if (isLeaf) {
-          manager.setWorkflow(node.id);
-        }
-        break;
-    }
-  });
-  state.mutate.ui((ui) => {
-    ui.layout.drawer.tree = tree;
-  });
-  return tree;
-};
-const createDrawerSection = () => {
-  const { DRAWER_DESTROYED, DRAWER_MOUNTED, DRAWER_UPDATED } = DEBUG_MESSAGES;
-  let element = null;
-  let lastState = null;
-  const mount = (state) => {
-    var _a, _b, _c;
-    lastState = state;
-    const { ui } = state;
-    element = document.createElement("lf-drawer");
-    element.className = ROOT_CLASS$3;
-    element.lfDisplay = "slide";
-    state.mutate.ui((ui2) => {
-      ui2.layout.drawer._root = element;
-    });
-    element.appendChild(_container$1(state));
-    (_a = ui.layout._root) == null ? void 0 : _a.appendChild(element);
-    debugLog(DRAWER_MOUNTED, "informational", {
-      workflowCount: ((_c = (_b = state.workflows) == null ? void 0 : _b.nodes) == null ? void 0 : _c.length) ?? 0
-    });
-  };
-  const render = (state) => {
-    var _a, _b;
-    if (!element) {
-      return;
-    }
-    const previousState = lastState;
-    lastState = state;
-    const { ui } = state;
-    const tree = ui.layout.drawer.tree;
-    if (!tree) {
-      return;
-    }
-    if ((previousState == null ? void 0 : previousState.workflows) !== state.workflows) {
-      debugLog(DRAWER_UPDATED, "informational", {
-        workflowCount: ((_b = (_a = state.workflows) == null ? void 0 : _a.nodes) == null ? void 0 : _b.length) ?? 0
-      });
-    }
-    tree.lfDataset = _createDataset(state.workflows);
-  };
-  const destroy = () => {
-    element == null ? void 0 : element.remove();
-    if (lastState) {
-      lastState.mutate.ui((ui) => {
-        ui.layout.drawer._root = null;
-        ui.layout.drawer.tree = null;
-      });
-      debugLog(DRAWER_DESTROYED, "informational", {});
-    }
-    element = null;
-    lastState = null;
-  };
-  return {
-    mount,
-    render,
-    destroy
-  };
 };
 const _setProps = (comp, element, props, slotMap = {}) => {
   if (!props) {
@@ -472,238 +292,102 @@ const createOutputComponent = (descriptor) => {
   }
   return el;
 };
-const ROOT_CLASS$2 = "header-section";
-const _container = () => {
-  const container = document.createElement("div");
-  container.className = `${ROOT_CLASS$2}__container`;
-  container.slot = "content";
-  return container;
+const { theme: theme$6 } = getLfFramework();
+const ROOT_CLASS$6 = "main-section";
+const MAIN_CLASSES = {
+  _: theme$6.bemClass(ROOT_CLASS$6)
 };
-const _drawerToggle = (state) => {
-  const { theme: theme2 } = getLfFramework();
-  const { get } = theme2;
-  const lfIcon = get.icon("menu2");
-  const props = {
-    lfAriaLabel: "Toggle drawer",
-    lfIcon,
-    lfStyling: "icon"
-  };
-  const drawerToggle = createComponent.button(props);
-  drawerToggle.className = `${ROOT_CLASS$2}__drawer-toggle`;
-  drawerToggle.addEventListener("lf-button-event", (e) => {
-    const { eventType } = e.detail;
-    switch (eventType) {
-      case "click":
-        state.ui.layout.drawer._root.toggle();
-        break;
-    }
-  });
-  return drawerToggle;
-};
-const _debugToggle = (state) => {
-  const { theme: theme2 } = getLfFramework();
-  const { get } = theme2;
-  const lfIcon = get.icon("code");
-  const props = {
-    lfAriaLabel: "Toggle developer console",
-    lfIcon,
-    lfStyling: "icon"
-  };
-  const debugToggle = createComponent.button(props);
-  debugToggle.lfUiState = "info";
-  debugToggle.className = `${ROOT_CLASS$2}__debug-toggle`;
-  debugToggle.addEventListener("lf-button-event", (e) => {
-    var _a;
-    const { eventType } = e.detail;
-    switch (eventType) {
-      case "click":
-        (_a = state.manager) == null ? void 0 : _a.toggleDebug();
-        break;
-    }
-  });
-  return debugToggle;
-};
-const createHeaderSection = () => {
-  let element = null;
-  let lastState = null;
-  const mount = (state) => {
-    var _a;
-    lastState = state;
-    const { ui } = state;
-    element = document.createElement("lf-header");
-    element.className = ROOT_CLASS$2;
-    const container = _container();
-    const drawerToggle = _drawerToggle(state);
-    const debugToggle = _debugToggle(state);
-    state.mutate.ui((uiState) => {
-      uiState.layout.header.drawerToggle = drawerToggle;
-      uiState.layout.header.debugToggle = debugToggle;
-    });
-    element.appendChild(container);
-    container.appendChild(drawerToggle);
-    container.appendChild(debugToggle);
-    state.mutate.ui((uiState) => {
-      uiState.layout.header._root = element;
-    });
-    (_a = ui.layout._root) == null ? void 0 : _a.appendChild(element);
-  };
-  const render = (state) => {
-    const { isDebug } = state;
-    const debugToggle = state.ui.layout.header.debugToggle;
-    if (debugToggle) {
-      debugToggle.lfUiState = isDebug ? "secondary" : "info";
-      debugToggle.title = isDebug ? "Hide developer console" : "Show developer console";
-    }
-  };
+const createMainSection = (store) => {
+  const { MAIN_DESTROYED, MAIN_MOUNTED, MAIN_UPDATED } = DEBUG_MESSAGES;
+  let workflowSection = createWorkflowSection(store);
   const destroy = () => {
-    element == null ? void 0 : element.remove();
-    if (lastState) {
-      lastState.mutate.ui((uiState) => {
-        uiState.layout.header._root = null;
-        uiState.layout.header.drawerToggle = null;
-        uiState.layout.header.debugToggle = null;
-        uiState.layout.header.themeSwitch = null;
-      });
+    const state = store.getState();
+    if (!state.manager) {
+      return;
     }
-    element = null;
-    lastState = null;
+    const { manager } = state;
+    const { uiRegistry } = manager;
+    for (const cls in MAIN_CLASSES) {
+      const element = MAIN_CLASSES[cls];
+      uiRegistry.remove(element);
+    }
+    workflowSection.destroy();
+    debugLog(MAIN_DESTROYED);
   };
-  return {
-    mount,
-    render,
-    destroy
-  };
-};
-const ROOT_CLASS$1 = "main-section";
-const createMainSection = () => {
-  const { MAIN_DESTROYED, MAIN_MOUNTED } = DEBUG_MESSAGES;
-  let element = null;
-  let lastState = null;
-  const mount = (state) => {
-    var _a;
-    lastState = state;
-    const { ui } = state;
-    element = document.createElement("main");
-    element.className = ROOT_CLASS$1;
-    state.mutate.ui((uiState) => {
-      uiState.layout.main._root = element;
-    });
-    (_a = ui.layout._root) == null ? void 0 : _a.appendChild(element);
-    debugLog(MAIN_MOUNTED, "informational", {});
+  const mount = () => {
+    const state = store.getState();
+    const { manager } = state;
+    const { uiRegistry } = manager;
+    if (!manager) {
+      return;
+    }
+    const elements = uiRegistry.get();
+    if (elements && elements[MAIN_CLASSES._]) {
+      return;
+    }
+    const _root = document.createElement("main");
+    _root.className = ROOT_CLASS$6;
+    manager.getAppRoot().appendChild(_root);
+    uiRegistry.set(MAIN_CLASSES._, _root);
+    workflowSection.mount();
+    debugLog(MAIN_MOUNTED);
   };
   const render = () => {
-  };
-  const destroy = () => {
-    element == null ? void 0 : element.remove();
-    if (lastState) {
-      lastState.mutate.ui((uiState) => {
-        uiState.layout.main._root = null;
-      });
-      debugLog(MAIN_DESTROYED, "informational", {});
+    const state = store.getState();
+    const { manager } = state;
+    const { uiRegistry } = manager;
+    const elements = uiRegistry.get();
+    if (!elements) {
+      return;
     }
-    element = null;
-    lastState = null;
+    workflowSection.render();
+    debugLog(MAIN_UPDATED);
   };
   return {
+    destroy,
     mount,
-    render,
-    destroy
+    render
   };
 };
-const isObject = (v) => v !== null && typeof v === "object";
-const isString = (v) => typeof v === "string";
-const isStringArray = (v) => Array.isArray(v) && v.every((e) => typeof e === "string");
-const isWorkflowAPIUploadPayload = (v) => {
-  if (!isObject(v)) {
-    return false;
-  }
-  if (!("detail" in v) || !isString(v.detail)) {
-    return false;
-  }
-  if ("paths" in v && !(isStringArray(v.paths) || v.paths === void 0)) {
-    return false;
-  }
-  if ("error" in v) {
-    const err = v.error;
-    if (!isObject(err) || !("message" in err) || !isString(err.message)) {
-      return false;
-    }
-  }
-  return true;
-};
-const isWorkflowAPIUploadResponse = (v) => {
-  if (!isObject(v)) {
-    return false;
-  }
-  if (!("message" in v) || !isString(v.message)) {
-    return false;
-  }
-  if (!("status" in v) || !isString(v.status)) {
-    return false;
-  }
-  if (!("payload" in v) || !isWorkflowAPIUploadPayload(v.payload)) {
-    return false;
-  }
-  return true;
-};
-const parseJson = async (response) => {
-  try {
-    return await response.json();
-  } catch {
-    return null;
-  }
-};
-const clearChildren = (element) => {
-  if (!element) {
-    return;
-  }
-  while (element.firstChild) {
-    element.removeChild(element.firstChild);
-  }
-};
-const ROOT_CLASS = "workflow-section";
 const WORKFLOW_TEXT = "Select a workflow";
+const { theme: theme$5 } = getLfFramework();
+const ROOT_CLASS$5 = "workflow-section";
+const WORKFLOW_CLASSES = {
+  _: theme$5.bemClass(ROOT_CLASS$5),
+  cell: theme$5.bemClass(ROOT_CLASS$5, "cell"),
+  cells: theme$5.bemClass(ROOT_CLASS$5, "cells"),
+  description: theme$5.bemClass(ROOT_CLASS$5, "description"),
+  options: theme$5.bemClass(ROOT_CLASS$5, "options"),
+  result: theme$5.bemClass(ROOT_CLASS$5, "result"),
+  resultGrid: theme$5.bemClass(ROOT_CLASS$5, "result-grid"),
+  resultItem: theme$5.bemClass(ROOT_CLASS$5, "result-item"),
+  resultTitle: theme$5.bemClass(ROOT_CLASS$5, "result-title"),
+  title: theme$5.bemClass(ROOT_CLASS$5, "title")
+};
+const _createCellWrapper = () => {
+  const cellWrapper = document.createElement("div");
+  cellWrapper.className = WORKFLOW_CLASSES.cell;
+  return cellWrapper;
+};
 const _createDescription = (state) => {
   const p = document.createElement("p");
-  p.className = `${ROOT_CLASS}__description`;
+  p.className = WORKFLOW_CLASSES.description;
   p.textContent = _getWorkflowDescription(state);
   return p;
 };
-const _createFieldWrapper = () => {
-  const fieldWrapper = document.createElement("div");
-  fieldWrapper.className = `${ROOT_CLASS}__field`;
-  return fieldWrapper;
-};
 const _createOptionsWrapper = () => {
   const optionsWrapper = document.createElement("div");
-  optionsWrapper.className = `${ROOT_CLASS}__options`;
+  optionsWrapper.className = WORKFLOW_CLASSES.options;
   return optionsWrapper;
 };
 const _createResultWrapper = () => {
   const resultWrapper = document.createElement("div");
-  resultWrapper.className = `${ROOT_CLASS}__result`;
+  resultWrapper.className = WORKFLOW_CLASSES.result;
   return resultWrapper;
-};
-const _createRunButton = (state) => {
-  const props = {
-    lfAriaLabel: "Run workflow",
-    lfLabel: "Run workflow",
-    lfStretchX: true
-  };
-  const button = createComponent.button(props);
-  button.className = `${ROOT_CLASS}__run`;
-  button.addEventListener("lf-button-event", (e) => executeWorkflowButton(e, state));
-  return button;
-};
-const _createStatusWrapper = (tone = "info") => {
-  const statusWrapper = document.createElement("div");
-  statusWrapper.className = `${ROOT_CLASS}__status`;
-  statusWrapper.dataset.tone = tone;
-  return statusWrapper;
 };
 const _createTitle = (state) => {
   const h3 = document.createElement("h3");
-  h3.className = `${ROOT_CLASS}__title`;
+  h3.className = WORKFLOW_CLASSES.title;
   h3.textContent = _getWorkflowTitle(state);
   return h3;
 };
@@ -727,6 +411,10 @@ const _getCurrentWorkflow = (state) => {
   const { current, workflows } = state;
   return ((_a = workflows == null ? void 0 : workflows.nodes) == null ? void 0 : _a.find((node) => node.id === current.id)) || null;
 };
+const _getWorkflowDescription = (state) => {
+  const workflow = _getCurrentWorkflow(state);
+  return (workflow == null ? void 0 : workflow.description) || "";
+};
 const _getWorkflowInputCells = (workflow) => {
   var _a;
   const inputsSection = (_a = workflow.children) == null ? void 0 : _a.find((child) => child.id.endsWith(":inputs"));
@@ -737,72 +425,88 @@ const _getWorkflowOutputCells = (workflow) => {
   const outputsSection = (_a = workflow.children) == null ? void 0 : _a.find((child) => child.id.endsWith(":outputs"));
   return (outputsSection == null ? void 0 : outputsSection.cells) || {};
 };
-const _getWorkflowDescription = (state) => {
-  const workflow = _getCurrentWorkflow(state);
-  return (workflow == null ? void 0 : workflow.description) || "";
-};
 const _getWorkflowTitle = (state) => {
   const workflow = _getCurrentWorkflow(state);
   const str = typeof (workflow == null ? void 0 : workflow.value) === "string" ? workflow.value : String((workflow == null ? void 0 : workflow.value) || "");
   return str || WORKFLOW_TEXT;
 };
-const createWorkflowSection = () => {
-  const { STATUS_UPDATED, WORKFLOW_INPUT_FLAGGED, WORKFLOW_INPUTS_CLEARED, WORKFLOW_INPUTS_RENDERED, WORKFLOW_LAYOUT_DESTROYED, WORKFLOW_LAYOUT_MOUNTED, WORKFLOW_RESULTS_CLEARED, WORKFLOW_RESULTS_RENDERED } = DEBUG_MESSAGES;
-  let descriptionElement = null;
-  let id = null;
-  let lastMessage = null;
+const createWorkflowSection = (store) => {
+  const { WORKFLOW_INPUTS_CLEARED, WORKFLOW_INPUTS_RENDERED, WORKFLOW_LAYOUT_DESTROYED, WORKFLOW_LAYOUT_MOUNTED, WORKFLOW_LAYOUT_UPDATED, WORKFLOW_RESULTS_CLEARED, WORKFLOW_RESULTS_RENDERED } = DEBUG_MESSAGES;
+  let lastId = null;
   let lastResultsRef = null;
-  let lastStatus = null;
-  let mountedState = null;
-  let optionsWrapper = null;
-  let resultWrapper = null;
-  let runButton = null;
-  let section = null;
-  let statusWrapper = null;
-  let titleElement = null;
-  const mount = (state) => {
-    var _a;
-    mountedState = state;
-    const { ui } = state;
-    section = document.createElement("section");
-    section.className = ROOT_CLASS;
-    titleElement = _createTitle(state);
-    descriptionElement = _createDescription(state);
-    optionsWrapper = _createOptionsWrapper();
-    runButton = _createRunButton(state);
-    statusWrapper = _createStatusWrapper("info");
-    resultWrapper = _createResultWrapper();
-    state.mutate.ui((uiState) => {
-      uiState.layout.main.workflow._root = section;
-      uiState.layout.main.workflow.description = descriptionElement;
-      uiState.layout.main.workflow.options = optionsWrapper;
-      uiState.layout.main.workflow.result = resultWrapper;
-      uiState.layout.main.workflow.run = runButton;
-      uiState.layout.main.workflow.status = statusWrapper;
-      uiState.layout.main.workflow.title = titleElement;
-    });
-    section.appendChild(titleElement);
-    section.appendChild(descriptionElement);
-    section.appendChild(optionsWrapper);
-    section.appendChild(runButton);
-    section.appendChild(statusWrapper);
-    section.appendChild(resultWrapper);
-    (_a = ui.layout.main._root) == null ? void 0 : _a.appendChild(section);
-    debugLog(WORKFLOW_LAYOUT_MOUNTED, "informational", {
-      workflowId: state.current.id ?? null
-    });
-  };
-  const updateDescription = (state) => {
-    const { ui } = state;
-    const element = ui.layout.main.workflow.description;
-    if (!element) {
+  const destroy = () => {
+    const state = store.getState();
+    if (!state.manager) {
       return;
     }
-    element.textContent = _getWorkflowDescription(state);
+    const { manager } = state;
+    const { uiRegistry } = manager;
+    for (const cls in WORKFLOW_CLASSES) {
+      const element = WORKFLOW_CLASSES[cls];
+      uiRegistry.remove(element);
+    }
+    lastId = null;
+    lastResultsRef = null;
+    debugLog(WORKFLOW_LAYOUT_DESTROYED);
   };
-  const updateOptions = (state) => {
-    const { ui } = state;
-    const element = ui.layout.main.workflow.options;
+  const mount = () => {
+    const state = store.getState();
+    const { manager } = state;
+    const { uiRegistry } = manager;
+    if (!manager) {
+      return;
+    }
+    const elements = uiRegistry.get();
+    if (elements && elements[WORKFLOW_CLASSES._]) {
+      return;
+    }
+    const _root = document.createElement("section");
+    _root.className = WORKFLOW_CLASSES._;
+    const description = _createDescription(state);
+    const options = _createOptionsWrapper();
+    const result = _createResultWrapper();
+    const title = _createTitle(state);
+    _root.appendChild(title);
+    _root.appendChild(description);
+    _root.appendChild(options);
+    _root.appendChild(result);
+    elements[MAIN_CLASSES._].appendChild(_root);
+    uiRegistry.set(WORKFLOW_CLASSES._, _root);
+    uiRegistry.set(WORKFLOW_CLASSES.description, description);
+    uiRegistry.set(WORKFLOW_CLASSES.options, options);
+    uiRegistry.set(WORKFLOW_CLASSES.result, result);
+    uiRegistry.set(WORKFLOW_CLASSES.title, title);
+    debugLog(WORKFLOW_LAYOUT_MOUNTED);
+  };
+  const render = () => {
+    const state = store.getState();
+    const { current, manager } = state;
+    const { id } = current;
+    const { uiRegistry } = manager;
+    const elements = uiRegistry.get();
+    if (!elements) {
+      return;
+    }
+    if (id !== lastId) {
+      const descr = elements[WORKFLOW_CLASSES.description];
+      const title = elements[WORKFLOW_CLASSES.title];
+      descr.textContent = _getWorkflowDescription(state);
+      title.textContent = _getWorkflowTitle(state);
+      updateOptions();
+      lastId = id;
+    }
+    if (state.results !== lastResultsRef) {
+      updateResults();
+      lastResultsRef = state.results;
+    }
+    debugLog(WORKFLOW_LAYOUT_UPDATED);
+  };
+  const updateOptions = () => {
+    const state = store.getState();
+    const { manager } = state;
+    const { uiRegistry } = manager;
+    const elements = uiRegistry.get();
+    const element = elements[WORKFLOW_CLASSES.options];
     if (!element) {
       return;
     }
@@ -811,36 +515,32 @@ const createWorkflowSection = () => {
     const cellElements = [];
     if (workflow) {
       const inputCells = _getWorkflowInputCells(workflow);
-      for (const id2 in inputCells) {
-        if (!Object.prototype.hasOwnProperty.call(inputCells, id2)) {
+      for (const id in inputCells) {
+        if (!Object.prototype.hasOwnProperty.call(inputCells, id)) {
           continue;
         }
-        const cell = inputCells[id2];
-        const wrapper = _createFieldWrapper();
+        const cell = inputCells[id];
+        const wrapper = _createCellWrapper();
         const component = createInputCell(cell);
-        component.id = id2;
+        component.id = id;
         cellElements.push(component);
         wrapper.appendChild(component);
         element.appendChild(wrapper);
       }
     }
-    state.mutate.ui((uiState) => {
-      uiState.layout.main.workflow.cells = cellElements;
-    });
+    uiRegistry.set(WORKFLOW_CLASSES.cells, cellElements);
     if (workflow && cellElements.length) {
-      debugLog(WORKFLOW_INPUTS_RENDERED, "informational", {
-        workflowId: state.current.id,
-        cellCount: cellElements.length
-      });
+      debugLog(WORKFLOW_INPUTS_RENDERED);
     } else {
-      debugLog(WORKFLOW_INPUTS_CLEARED, "informational", {
-        workflowId: state.current.id
-      });
+      debugLog(WORKFLOW_INPUTS_CLEARED);
     }
   };
-  const updateResult = (state) => {
-    const { ui } = state;
-    const element = ui.layout.main.workflow.result;
+  const updateResults = () => {
+    const state = store.getState();
+    const { manager } = state;
+    const { uiRegistry } = manager;
+    const elements = uiRegistry.get();
+    const element = elements[WORKFLOW_CLASSES.result];
     if (!element) {
       return;
     }
@@ -848,141 +548,36 @@ const createWorkflowSection = () => {
     clearChildren(element);
     const nodeIds = Object.keys(outputs);
     if (nodeIds.length === 0) {
-      debugLog(WORKFLOW_RESULTS_CLEARED, "informational", {
-        workflowId: state.current.id
-      });
+      debugLog(WORKFLOW_RESULTS_CLEARED);
       return;
     }
     const workflow = _getCurrentWorkflow(state);
     const outputsDefs = workflow ? _getWorkflowOutputCells(workflow) : {};
-    debugLog(WORKFLOW_RESULTS_CLEARED, "informational", {
-      workflowId: state.current.id
-    });
+    debugLog(WORKFLOW_RESULTS_CLEARED);
     const prepOutputs = _deepMerge(outputsDefs, outputs);
     for (let i = 0; i < prepOutputs.length; i++) {
       const output = prepOutputs[i];
-      const { id: id2, nodeId, title } = output;
+      const { id, nodeId, title } = output;
       const h4 = document.createElement("h4");
-      h4.className = `${ROOT_CLASS}__result-title`;
+      h4.className = WORKFLOW_CLASSES.resultTitle;
       h4.textContent = title || `Node #${nodeId}`;
       element.appendChild(h4);
       const grid = document.createElement("div");
-      grid.className = `${ROOT_CLASS}__result-grid`;
+      grid.className = WORKFLOW_CLASSES.resultGrid;
       element.appendChild(grid);
       const wrapper = document.createElement("div");
-      wrapper.className = `${ROOT_CLASS}__result-item`;
+      wrapper.className = WORKFLOW_CLASSES.resultItem;
       const component = createOutputComponent(output);
-      component.id = id2;
+      component.id = id;
       wrapper.appendChild(component);
       grid.appendChild(wrapper);
     }
-    element.scrollIntoView({
-      behavior: "smooth",
-      block: "center"
-    });
-    debugLog(WORKFLOW_RESULTS_RENDERED, "informational", {
-      workflowId: state.current.id
-    });
-  };
-  const updateRunButton = (state) => {
-    const button = state.ui.layout.main.workflow.run;
-    if (!button) {
-      return;
-    }
-    button.lfShowSpinner = state.current.status === "running";
-  };
-  const updateStatus = (state) => {
-    const element = state.ui.layout.main.workflow.status;
-    if (!element) {
-      return;
-    }
-    const message = state.current.message ?? DEFAULT_STATUS_MESSAGES[state.current.status];
-    element.textContent = message;
-    element.dataset.tone = state.current.status;
-    const category = state.current.status === "error" ? "error" : state.current.status === "ready" ? "success" : "informational";
-    debugLog(STATUS_UPDATED, category, {
-      workflowId: state.current.id,
-      status: state.current.status,
-      message
-    });
-  };
-  const updateTitle = (state) => {
-    const element = state.ui.layout.main.workflow.title;
-    if (!element) {
-      return;
-    }
-    element.textContent = _getWorkflowTitle(state);
-  };
-  const render = (state) => {
-    if (!section) {
-      return;
-    }
-    if (state.current.id !== id) {
-      updateDescription(state);
-      updateTitle(state);
-      updateOptions(state);
-      id = state.current.id;
-    }
-    if (state.current.status !== lastStatus || state.current.message !== lastMessage) {
-      updateRunButton(state);
-      updateStatus(state);
-      lastStatus = state.current.status;
-      lastMessage = state.current.message ?? null;
-    }
-    if (state.results !== lastResultsRef) {
-      updateResult(state);
-      lastResultsRef = state.results;
-    }
-  };
-  const setCellStatus = (state, id2, status = "") => {
-    const { ui } = state;
-    const field = ui.layout.main.workflow.cells.find((el) => el.id === id2);
-    const wrapper = field == null ? void 0 : field.parentElement;
-    if (wrapper) {
-      wrapper.dataset.status = status;
-    }
-    if (status) {
-      debugLog(WORKFLOW_INPUT_FLAGGED, "informational", {
-        workflowId: state.current.id,
-        field: id2,
-        status
-      });
-    }
-  };
-  const destroy = () => {
-    section == null ? void 0 : section.remove();
-    if (mountedState) {
-      mountedState.mutate.ui((uiState) => {
-        const wf = uiState.layout.main.workflow;
-        wf._root = null;
-        wf.cells = [];
-        wf.options = null;
-        wf.result = null;
-        wf.run = null;
-        wf.status = null;
-        wf.title = null;
-      });
-      debugLog(WORKFLOW_LAYOUT_DESTROYED, "informational", {
-        workflowId: mountedState.current.id ?? null
-      });
-    }
-    section = null;
-    optionsWrapper = null;
-    resultWrapper = null;
-    runButton = null;
-    statusWrapper = null;
-    titleElement = null;
-    id = null;
-    lastStatus = null;
-    lastMessage = null;
-    lastResultsRef = null;
-    mountedState = null;
+    debugLog(WORKFLOW_RESULTS_RENDERED);
   };
   return {
-    mount,
-    render,
     destroy,
-    setCellStatus
+    mount,
+    render
   };
 };
 class WorkflowApiError extends Error {
@@ -1068,19 +663,668 @@ const uploadWorkflowFiles = async (files) => {
     return {
       message: UPLOAD_COMPLETED,
       payload: data,
-      status: "ready"
+      status: "idle"
     };
   }
   throw new WorkflowApiError(UPLOAD_INVALID_RESPONSE, {
     status: response.status
   });
 };
+const _collectInputs = async (state) => {
+  var _a;
+  const { manager } = state;
+  const { uiRegistry } = manager;
+  const elements = uiRegistry.get();
+  const cells = (elements == null ? void 0 : elements[WORKFLOW_CLASSES.cells]) || [];
+  const inputs = {};
+  for (const cell of cells) {
+    const id = cell.id || "";
+    _setCellStatus(state, id);
+    const value = await cell.getValue();
+    switch (cell.tagName.toLowerCase()) {
+      case "lf-toggle":
+        inputs[id] = value === "off" ? false : true;
+        break;
+      case "lf-upload":
+        try {
+          inputs[id] = await _handleUploadField(manager, value);
+        } catch (error) {
+          _setCellStatus(state, id, "error");
+          manager.setStatus("error", `Upload failed: ${((_a = error.payload) == null ? void 0 : _a.detail) || error.message}`);
+          throw error;
+        }
+        break;
+      default:
+        inputs[id] = value;
+    }
+  }
+  return inputs;
+};
+const _handleUploadField = async (manager, rawValue) => {
+  var _a;
+  const { UPLOADING_FILE, FILE_PROCESSING } = STATUS_MESSAGES;
+  const files = Array.isArray(rawValue) ? rawValue : rawValue;
+  if (!files || files.length === 0) {
+    return [];
+  }
+  try {
+    manager.setStatus("running", UPLOADING_FILE);
+    const { payload } = await uploadWorkflowFiles(files);
+    const paths = (payload == null ? void 0 : payload.paths) || [];
+    manager.setStatus("running", FILE_PROCESSING);
+    return paths.length === 1 ? paths[0] : paths;
+  } catch (error) {
+    if (error instanceof WorkflowApiError) {
+      manager.setStatus("error", `Upload failed: ${((_a = error.payload) == null ? void 0 : _a.detail) || error.message}`);
+    } else {
+      manager.setStatus("error", "Upload failed unexpectedly.");
+    }
+    throw error;
+  }
+};
+const _setCellStatus = (state, id, status = "") => {
+  const { WORKFLOW_INPUT_FLAGGED } = DEBUG_MESSAGES;
+  const { current, manager } = state;
+  const { uiRegistry } = manager;
+  const elements = uiRegistry.get();
+  const cells = (elements == null ? void 0 : elements[WORKFLOW_CLASSES.cells]) || [];
+  const field = cells.find((el) => el.id === id);
+  const wrapper = field == null ? void 0 : field.parentElement;
+  if (wrapper) {
+    wrapper.dataset.status = status;
+  }
+  if (status) {
+    debugLog(WORKFLOW_INPUT_FLAGGED, "informational", {
+      cell: id,
+      id: current.id,
+      status
+    });
+  }
+};
+const workflowDispatcher = async (store) => {
+  var _a, _b, _c, _d, _e, _f;
+  const { INPUTS_COLLECTED, WORKFLOW_COMPLETED, WORKFLOW_DISPATCHING, WORKFLOW_NOT_SELECTED } = DEBUG_MESSAGES;
+  const { SUBMITTING_WORKFLOW } = STATUS_MESSAGES;
+  const state = store.getState();
+  const { current, manager } = state;
+  const id = current.id;
+  if (!id) {
+    manager.setStatus("error", WORKFLOW_NOT_SELECTED);
+    return;
+  }
+  manager.setStatus("running", SUBMITTING_WORKFLOW);
+  let inputs;
+  try {
+    inputs = await _collectInputs(state);
+    debugLog(INPUTS_COLLECTED, "informational", {
+      id,
+      inputKeys: Object.keys(inputs)
+    });
+  } catch (error) {
+    const detail = error instanceof WorkflowApiError ? ((_a = error.payload) == null ? void 0 : _a.detail) || error.message : (error == null ? void 0 : error.message) || "Failed to collect inputs.";
+    manager.setStatus("error", `Failed to collect inputs: ${detail}`);
+    return;
+  }
+  try {
+    debugLog(WORKFLOW_DISPATCHING, "informational", {
+      id,
+      inputKeys: Object.keys(inputs)
+    });
+    const { status, message, payload } = await runWorkflowRequest(id, inputs);
+    const runState = store.getState();
+    runState.mutate.runResult(status, message, ((_b = payload.history) == null ? void 0 : _b.outputs) ? { ...payload.history.outputs } : null);
+    const resultCategory = status === "error" ? "error" : "success";
+    debugLog(WORKFLOW_COMPLETED, resultCategory, {
+      id,
+      wfStatus: status,
+      outputs: Object.keys(((_c = payload.history) == null ? void 0 : _c.outputs) ?? {})
+    });
+  } catch (error) {
+    if (error instanceof WorkflowApiError) {
+      const inputName = (_e = (_d = error.payload) == null ? void 0 : _d.error) == null ? void 0 : _e.input;
+      if (inputName) {
+        _setCellStatus(state, inputName, "error");
+      }
+      manager.setStatus("error", ((_f = error.payload) == null ? void 0 : _f.detail) || error.message);
+    } else {
+      manager.setStatus("error", "Unexpected error while running the workflow.");
+    }
+  }
+};
+const executeWorkflow = (e, state) => {
+  const { eventType } = e.detail;
+  const { manager } = state;
+  switch (eventType) {
+    case "click":
+      manager.getDispatchers().runWorkflow();
+      break;
+    default:
+      return;
+  }
+};
+const { theme: theme$4 } = getLfFramework();
+const ROOT_CLASS$4 = "action-button-section";
+const ACTION_BUTTON_CLASSES = {
+  _: theme$4.bemClass(ROOT_CLASS$4)
+};
+const createActionButtonSection = (store) => {
+  const { ACTION_BUTTON_DESTROYED, ACTION_BUTTON_MOUNTED, ACTION_BUTTON_UPDATED } = DEBUG_MESSAGES;
+  let lastMessage = null;
+  let lastStatus = null;
+  const destroy = () => {
+    const state = store.getState();
+    if (!state.manager) {
+      return;
+    }
+    const { uiRegistry } = state.manager;
+    for (const cls in ACTION_BUTTON_CLASSES) {
+      const element = ACTION_BUTTON_CLASSES[cls];
+      uiRegistry.remove(element);
+    }
+    lastMessage = null;
+    lastStatus = null;
+    debugLog(ACTION_BUTTON_DESTROYED);
+  };
+  const mount = () => {
+    const state = store.getState();
+    const { manager } = state;
+    const { uiRegistry } = manager;
+    const elements = uiRegistry.get();
+    if (elements && elements[ACTION_BUTTON_CLASSES._]) {
+      return;
+    }
+    const _root = document.createElement("lf-button");
+    _root.className = theme$4.bemClass(ACTION_BUTTON_CLASSES._);
+    _root.lfIcon = "send";
+    _root.lfStyling = "floating";
+    _root.title = "Run current workflow";
+    _root.addEventListener("lf-button-event", (e) => executeWorkflow(e, store.getState()));
+    manager.getAppRoot().appendChild(_root);
+    uiRegistry.set(ACTION_BUTTON_CLASSES._, _root);
+    debugLog(ACTION_BUTTON_MOUNTED);
+  };
+  const render = () => {
+    const state = store.getState();
+    const { current, manager } = state;
+    const { uiRegistry } = manager;
+    const elements = uiRegistry.get();
+    if (!elements) {
+      return;
+    }
+    const _root = elements[ACTION_BUTTON_CLASSES._];
+    if (!_root) {
+      return;
+    }
+    const shouldRefresh = current.status !== lastStatus || current.message !== lastMessage;
+    if (shouldRefresh) {
+      _root.lfShowSpinner = current.status === "running";
+      lastStatus = current.status;
+      lastMessage = current.message;
+    }
+    debugLog(ACTION_BUTTON_UPDATED);
+  };
+  return {
+    destroy,
+    mount,
+    render
+  };
+};
+const { theme: theme$3 } = getLfFramework();
+const ROOT_CLASS$3 = "dev-section";
+const DEV_CLASSES = {
+  _: theme$3.bemClass(ROOT_CLASS$3),
+  card: theme$3.bemClass(ROOT_CLASS$3, "card")
+};
+const _createDataset$1 = () => {
+  const framework = getLfFramework();
+  const enabled = framework.debug.isEnabled();
+  return {
+    nodes: [
+      {
+        id: "workflow-runner-debug",
+        cells: {
+          lfToggle: {
+            shape: "toggle",
+            lfValue: enabled,
+            value: enabled
+          },
+          lfCode: {
+            shape: "code",
+            value: ""
+          },
+          lfButton: {
+            shape: "button",
+            value: ""
+          },
+          lfButton_2: {
+            shape: "button",
+            value: ""
+          }
+        }
+      }
+    ]
+  };
+};
+const createDevSection = (store) => {
+  const { DEV_SECTION_DESTROYED, DEV_SECTION_MOUNTED, DEV_SECTION_UPDATED } = DEBUG_MESSAGES;
+  const destroy = () => {
+    const state = store.getState();
+    if (!state.manager) {
+      return;
+    }
+    const { manager } = state;
+    const { uiRegistry } = manager;
+    for (const cls in DEV_CLASSES) {
+      const element = DEV_CLASSES[cls];
+      uiRegistry.remove(element);
+    }
+    debugLog(DEV_SECTION_DESTROYED);
+  };
+  const mount = () => {
+    var _a, _b;
+    const state = store.getState();
+    const { manager } = state;
+    const { uiRegistry } = manager;
+    const elements = uiRegistry.get();
+    if (elements && elements[DEV_CLASSES._]) {
+      return;
+    }
+    const _root = document.createElement("div");
+    _root.className = DEV_CLASSES._;
+    _root.dataset.open = "false";
+    _root.setAttribute("aria-hidden", "true");
+    const card = document.createElement("lf-card");
+    card.className = DEV_CLASSES.card;
+    card.lfLayout = "debug";
+    card.lfDataset = _createDataset$1();
+    const body = ((_b = (_a = manager.getAppRoot()) == null ? void 0 : _a.ownerDocument) == null ? void 0 : _b.body) ?? document.body;
+    _root.appendChild(card);
+    body.appendChild(_root);
+    uiRegistry.set(DEV_CLASSES._, _root);
+    uiRegistry.set(DEV_CLASSES.card, card);
+    debugLog(DEV_SECTION_MOUNTED);
+  };
+  const render = () => {
+    const state = store.getState();
+    const { manager } = state;
+    const { uiRegistry } = manager;
+    if (!manager) {
+      return;
+    }
+    const elements = uiRegistry.get();
+    if (!elements) {
+      return;
+    }
+    const _root = elements[DEV_CLASSES._];
+    if (_root) {
+      _root.setAttribute("aria-hidden", String(!state.isDebug));
+    }
+    debugLog(DEV_SECTION_UPDATED);
+  };
+  return {
+    destroy,
+    mount,
+    render
+  };
+};
+const toggleDebug = (e, state) => {
+  const { eventType } = e.detail;
+  const { manager } = state;
+  switch (eventType) {
+    case "click":
+      manager.toggleDebug();
+      break;
+    default:
+      return;
+  }
+};
+const toggleDrawer = (e, state) => {
+  const { eventType } = e.detail;
+  const { manager } = state;
+  const elements = manager.uiRegistry.get();
+  const drawer = elements[DRAWER_CLASSES._];
+  switch (eventType) {
+    case "click":
+      drawer.toggle();
+      break;
+    default:
+      return;
+  }
+};
+const drawerNavigation = (e, state) => {
+  const { eventType, node } = e.detail;
+  const { manager } = state;
+  const elements = manager.uiRegistry.get();
+  const drawer = elements[DRAWER_CLASSES._];
+  switch (eventType) {
+    case "click":
+      if (!manager) {
+        return;
+      }
+      const isLeaf = !node.children || node.children.length === 0;
+      if (isLeaf) {
+        manager.setWorkflow(node.id);
+        drawer.close();
+      }
+      break;
+  }
+};
+const { theme: theme$2 } = getLfFramework();
+const ROOT_CLASS$2 = "drawer-section";
+const DRAWER_CLASSES = {
+  _: theme$2.bemClass(ROOT_CLASS$2),
+  container: theme$2.bemClass(ROOT_CLASS$2, "container"),
+  tree: theme$2.bemClass(ROOT_CLASS$2, "tree")
+};
+const _createDataset = (workflows) => {
+  var _a, _b;
+  const categories = [];
+  const root = { id: "workflows", value: "Workflows", children: categories };
+  const clone = JSON.parse(JSON.stringify(workflows));
+  (_a = clone.nodes) == null ? void 0 : _a.forEach((child) => {
+    child.children = void 0;
+  });
+  (_b = clone.nodes) == null ? void 0 : _b.forEach((node) => {
+    const name = (node == null ? void 0 : node.category) || "Uncategorized";
+    let category = categories.find((cat) => cat.value === name);
+    if (!category) {
+      category = { icon: _getIcon(name), id: name, value: name, children: [] };
+      categories.push(category);
+    }
+    category.children.push(node);
+  });
+  const dataset = {
+    nodes: [root]
+  };
+  return dataset;
+};
+const _getIcon = (category) => {
+  const { alertTriangle, codeCircle2, json } = getLfFramework().theme.get.icons();
+  const category_icons = {
+    SVG: codeCircle2,
+    JSON: json
+  };
+  return category_icons[category] || alertTriangle;
+};
+const _container$1 = (state) => {
+  const container = document.createElement("div");
+  container.className = DRAWER_CLASSES.container;
+  container.slot = "content";
+  const tree = _tree(state);
+  container.appendChild(tree);
+  return { container, tree };
+};
+const _tree = (state) => {
+  const tree = document.createElement("lf-tree");
+  tree.className = DRAWER_CLASSES.tree;
+  tree.lfAccordionLayout = true;
+  tree.addEventListener("lf-tree-event", (e) => drawerNavigation(e, state));
+  return tree;
+};
+const createDrawerSection = (store) => {
+  const { DRAWER_DESTROYED, DRAWER_MOUNTED, DRAWER_UPDATED } = DEBUG_MESSAGES;
+  const destroy = () => {
+    const state = store.getState();
+    if (!state.manager) {
+      return;
+    }
+    const { uiRegistry } = state.manager;
+    for (const cls in DRAWER_CLASSES) {
+      const element = DRAWER_CLASSES[cls];
+      uiRegistry.remove(element);
+    }
+    debugLog(DRAWER_DESTROYED);
+  };
+  const mount = () => {
+    const state = store.getState();
+    const { manager } = state;
+    const { uiRegistry } = manager;
+    const elements = uiRegistry.get();
+    if (elements && elements[DRAWER_CLASSES._]) {
+      return;
+    }
+    const _root = document.createElement("lf-drawer");
+    _root.className = ROOT_CLASS$2;
+    _root.lfDisplay = "slide";
+    const { container, tree } = _container$1(state);
+    _root.appendChild(container);
+    manager.getAppRoot().appendChild(_root);
+    uiRegistry.set(DRAWER_CLASSES._, _root);
+    uiRegistry.set(DRAWER_CLASSES.container, container);
+    uiRegistry.set(DRAWER_CLASSES.tree, tree);
+    debugLog(DRAWER_MOUNTED);
+  };
+  const render = () => {
+    const state = store.getState();
+    const { manager, workflows } = state;
+    const { uiRegistry } = manager;
+    if (!manager) {
+      return;
+    }
+    const elements = uiRegistry.get();
+    if (!elements) {
+      return;
+    }
+    const tree = elements[DRAWER_CLASSES.tree];
+    if (tree) {
+      tree.lfDataset = _createDataset(workflows);
+    }
+    debugLog(DRAWER_UPDATED);
+  };
+  return {
+    destroy,
+    mount,
+    render
+  };
+};
+const { theme: theme$1 } = getLfFramework();
+const ROOT_CLASS$1 = "header-section";
+const HEADER_CLASSES = {
+  _: theme$1.bemClass(ROOT_CLASS$1),
+  container: theme$1.bemClass(ROOT_CLASS$1, "container"),
+  debugToggle: theme$1.bemClass(ROOT_CLASS$1, "debug-toggle"),
+  drawerToggle: theme$1.bemClass(ROOT_CLASS$1, "drawer-toggle")
+};
+const _container = () => {
+  const container = document.createElement("div");
+  container.className = HEADER_CLASSES.container;
+  container.slot = "content";
+  return container;
+};
+const _debugToggle = (state) => {
+  const { theme: theme2 } = getLfFramework();
+  const { get } = theme2;
+  const lfIcon = get.icon("code");
+  const props = {
+    lfAriaLabel: "Toggle developer console",
+    lfIcon,
+    lfStyling: "icon"
+  };
+  const debugToggle = createComponent.button(props);
+  debugToggle.lfUiState = "info";
+  debugToggle.className = `${ROOT_CLASS$1}__debug-toggle`;
+  debugToggle.addEventListener("lf-button-event", (e) => toggleDebug(e, state));
+  return debugToggle;
+};
+const _drawerToggle = (state) => {
+  const lfIcon = theme$1.get.icon("menu2");
+  const props = {
+    lfAriaLabel: "Toggle drawer",
+    lfIcon,
+    lfStyling: "icon"
+  };
+  const drawerToggle = createComponent.button(props);
+  drawerToggle.className = HEADER_CLASSES.drawerToggle;
+  drawerToggle.addEventListener("lf-button-event", (e) => toggleDrawer(e, state));
+  return drawerToggle;
+};
+const createHeaderSection = (store) => {
+  const { HEADER_DESTROYED, HEADER_MOUNTED, HEADER_UPDATED } = DEBUG_MESSAGES;
+  const destroy = () => {
+    const state = store.getState();
+    if (!state.manager) {
+      return;
+    }
+    const { manager } = state;
+    const { uiRegistry } = manager;
+    for (const cls in HEADER_CLASSES) {
+      const element = HEADER_CLASSES[cls];
+      uiRegistry.remove(element);
+    }
+    debugLog(HEADER_DESTROYED);
+  };
+  const mount = () => {
+    const state = store.getState();
+    const { manager } = state;
+    const { uiRegistry } = manager;
+    const elements = uiRegistry.get();
+    if (elements && elements[HEADER_CLASSES._]) {
+      return;
+    }
+    const _root = document.createElement("lf-header");
+    _root.className = HEADER_CLASSES._;
+    const container = _container();
+    const drawerToggle = _drawerToggle(state);
+    const debugToggle = _debugToggle(state);
+    _root.appendChild(container);
+    container.appendChild(drawerToggle);
+    container.appendChild(debugToggle);
+    manager.getAppRoot().appendChild(_root);
+    uiRegistry.set(HEADER_CLASSES._, _root);
+    uiRegistry.set(HEADER_CLASSES.container, container);
+    uiRegistry.set(HEADER_CLASSES.debugToggle, debugToggle);
+    uiRegistry.set(HEADER_CLASSES.drawerToggle, drawerToggle);
+    debugLog(HEADER_MOUNTED);
+  };
+  const render = () => {
+    const state = store.getState();
+    const { manager } = state;
+    const { uiRegistry } = manager;
+    const elements = uiRegistry.get();
+    if (!elements) {
+      return;
+    }
+    const isDebug = state.manager.isDebugEnabled();
+    const debugToggle = elements[HEADER_CLASSES.debugToggle];
+    if (debugToggle) {
+      debugToggle.lfUiState = isDebug ? "warning" : "primary";
+      debugToggle.title = isDebug ? "Hide developer console" : "Show developer console";
+    }
+    debugLog(HEADER_UPDATED);
+  };
+  return {
+    destroy,
+    mount,
+    render
+  };
+};
+const { theme } = getLfFramework();
+const ROOT_CLASS = "notifications-section";
+const NOTIFICATIONS_CLASSES = {
+  _: theme.bemClass(ROOT_CLASS),
+  _visible: theme.bemClass(ROOT_CLASS, void 0, { active: true }),
+  item: theme.bemClass(ROOT_CLASS, "item")
+};
+const _checkForVisible = (_root) => {
+  if (_root.hasChildNodes()) {
+    _root.className = NOTIFICATIONS_CLASSES._visible;
+  } else {
+    _root.className = NOTIFICATIONS_CLASSES._;
+  }
+};
+const _getStateCategory = (status) => {
+  let category;
+  switch (status) {
+    case "danger":
+    case "error":
+      category = "danger";
+      break;
+    default:
+      category = "info";
+      break;
+  }
+  return category;
+};
+const createNotificationsSection = (store) => {
+  const { NOTIFICATIONS_DESTROYED, NOTIFICATIONS_MOUNTED, NOTIFICATIONS_UPDATED, STATUS_UPDATED } = DEBUG_MESSAGES;
+  let lastMessage = null;
+  let lastStatus = null;
+  const destroy = () => {
+    const state = store.getState();
+    if (!state.manager) {
+      return;
+    }
+    const { manager } = state;
+    const { uiRegistry } = manager;
+    for (const cls in NOTIFICATIONS_CLASSES) {
+      const element = NOTIFICATIONS_CLASSES[cls];
+      uiRegistry.remove(element);
+    }
+    lastMessage = null;
+    lastStatus = null;
+    debugLog(NOTIFICATIONS_DESTROYED);
+  };
+  const mount = () => {
+    const state = store.getState();
+    const { manager } = state;
+    const { uiRegistry } = manager;
+    const elements = uiRegistry.get();
+    if (elements && elements[NOTIFICATIONS_CLASSES._]) {
+      return;
+    }
+    const _root = document.createElement("div");
+    _root.className = NOTIFICATIONS_CLASSES._;
+    manager.getAppRoot().appendChild(_root);
+    uiRegistry.set(NOTIFICATIONS_CLASSES._, _root);
+    debugLog(NOTIFICATIONS_MOUNTED);
+  };
+  const render = () => {
+    const state = store.getState();
+    const { current, manager } = state;
+    const { id, message, status } = current;
+    const { uiRegistry } = manager;
+    const elements = uiRegistry.get();
+    if (!elements) {
+      return;
+    }
+    const _root = elements[NOTIFICATIONS_CLASSES._];
+    if (status !== lastStatus || message !== lastMessage) {
+      const timestamp = (/* @__PURE__ */ new Date()).getTime();
+      const element = document.createElement("lf-toast");
+      element.className = NOTIFICATIONS_CLASSES.item;
+      element.lfCloseCallback = () => {
+        uiRegistry.remove(NOTIFICATIONS_CLASSES.item + timestamp);
+        _checkForVisible(_root);
+      };
+      element.lfIcon = status === "error" ? theme.get.icon("alertTriangle") : theme.get.icon("infoHexagon");
+      element.lfMessage = message;
+      element.lfTimer = status === "error" ? 7e5 : 35e4;
+      element.lfUiState = _getStateCategory(status);
+      _root.appendChild(element);
+      _checkForVisible(_root);
+      uiRegistry.set(NOTIFICATIONS_CLASSES.item + timestamp, element);
+      lastStatus = status;
+      lastMessage = message;
+      debugLog(STATUS_UPDATED, status, {
+        id,
+        status,
+        message
+      });
+    }
+    debugLog(NOTIFICATIONS_UPDATED);
+  };
+  return {
+    destroy,
+    mount,
+    render
+  };
+};
 const INIT_ERROR = "Mutate not initialized";
 const INIT_CB = () => {
   throw new Error(INIT_ERROR);
 };
 const initState = (appContainer) => ({
-  current: { status: "ready", message: "Ready.", id: null },
+  current: { status: "idle", message: "", id: null },
   isDebug: false,
   manager: null,
   mutate: {
@@ -1089,44 +1333,9 @@ const initState = (appContainer) => ({
     runResult: INIT_CB,
     status: INIT_CB,
     workflow: INIT_CB,
-    workflows: INIT_CB,
-    ui: INIT_CB
+    workflows: INIT_CB
   },
   results: null,
-  ui: {
-    layout: {
-      _root: appContainer,
-      actionButton: { _root: null },
-      drawer: {
-        _root: null,
-        tree: null
-      },
-      header: {
-        _root: null,
-        drawerToggle: null,
-        debugToggle: null,
-        themeSwitch: null
-      },
-      main: {
-        _root: null,
-        title: { _root: null },
-        workflow: {
-          _root: null,
-          cells: [],
-          description: null,
-          options: null,
-          result: null,
-          run: null,
-          status: null,
-          title: null
-        }
-      },
-      dev: {
-        _root: null,
-        card: null
-      }
-    }
-  },
   workflows: {
     nodes: []
   }
@@ -1183,9 +1392,6 @@ const createWorkflowRunnerStore = (initialState) => {
     }),
     status: (status, message) => setStatus(status, message, setState),
     runResult: (status, message, results) => setRunResult(status, message, results, setState),
-    ui: (updater) => applyMutation((draft) => {
-      updater(draft.ui);
-    }),
     workflow: (workflowId) => setWorkflow(workflowId, setState),
     workflows: (workflows) => applyMutation((draft) => {
       draft.workflows = workflows;
@@ -1240,58 +1446,17 @@ var __classPrivateFieldGet = function(receiver, state, kind, f) {
   if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 };
-var _LfWorkflowRunnerManager_instances, _LfWorkflowRunnerManager_FRAMEWORK, _LfWorkflowRunnerManager_IS_DEBUG, _LfWorkflowRunnerManager_SECTIONS, _LfWorkflowRunnerManager_STORE, _LfWorkflowRunnerManager_collectInputs, _LfWorkflowRunnerManager_handleUploadField, _LfWorkflowRunnerManager_initializeFramework, _LfWorkflowRunnerManager_initializeLayout, _LfWorkflowRunnerManager_loadWorkflows, _LfWorkflowRunnerManager_subscribeToState;
+var _LfWorkflowRunnerManager_instances, _LfWorkflowRunnerManager_DISPATCHERS, _LfWorkflowRunnerManager_FRAMEWORK, _LfWorkflowRunnerManager_IS_DEBUG, _LfWorkflowRunnerManager_APP_ROOT, _LfWorkflowRunnerManager_SECTIONS, _LfWorkflowRunnerManager_STORE, _LfWorkflowRunnerManager_UI_REGISTRY, _LfWorkflowRunnerManager_initializeFramework, _LfWorkflowRunnerManager_initializeLayout, _LfWorkflowRunnerManager_loadWorkflows, _LfWorkflowRunnerManager_subscribeToState;
 class LfWorkflowRunnerManager {
   constructor() {
     _LfWorkflowRunnerManager_instances.add(this);
+    _LfWorkflowRunnerManager_DISPATCHERS.set(this, void 0);
     _LfWorkflowRunnerManager_FRAMEWORK.set(this, getLfFramework());
     _LfWorkflowRunnerManager_IS_DEBUG.set(this, false);
+    _LfWorkflowRunnerManager_APP_ROOT.set(this, void 0);
     _LfWorkflowRunnerManager_SECTIONS.set(this, void 0);
     _LfWorkflowRunnerManager_STORE.set(this, void 0);
-    _LfWorkflowRunnerManager_collectInputs.set(this, async () => {
-      const state = __classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f").getState();
-      const { cells } = state.ui.layout.main.workflow;
-      const inputs = {};
-      for (const cell of cells) {
-        const id = cell.id || "";
-        __classPrivateFieldGet(this, _LfWorkflowRunnerManager_SECTIONS, "f").workflow.setCellStatus(state, id);
-        const value = await cell.getValue();
-        switch (cell.tagName.toLowerCase()) {
-          case "lf-toggle":
-            inputs[id] = value === "off" ? false : true;
-            break;
-          case "lf-upload":
-            inputs[id] = await __classPrivateFieldGet(this, _LfWorkflowRunnerManager_handleUploadField, "f").call(this, id, value);
-            break;
-          default:
-            inputs[id] = value;
-        }
-      }
-      return inputs;
-    });
-    _LfWorkflowRunnerManager_handleUploadField.set(this, async (fieldName, rawValue) => {
-      var _a;
-      const { UPLOADING_FILE, FILE_PROCESSING } = STATUS_MESSAGES;
-      const files = Array.isArray(rawValue) ? rawValue : rawValue;
-      if (!files || files.length === 0) {
-        return [];
-      }
-      try {
-        this.setStatus("running", UPLOADING_FILE);
-        const { payload } = await uploadWorkflowFiles(files);
-        const paths = (payload == null ? void 0 : payload.paths) || [];
-        this.setStatus("running", FILE_PROCESSING);
-        return paths.length === 1 ? paths[0] : paths;
-      } catch (error) {
-        if (error instanceof WorkflowApiError) {
-          __classPrivateFieldGet(this, _LfWorkflowRunnerManager_SECTIONS, "f").workflow.setCellStatus(__classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f").getState(), fieldName, "error");
-          this.setStatus("error", `Upload failed: ${((_a = error.payload) == null ? void 0 : _a.detail) || error.message}`);
-        } else {
-          this.setStatus("error", "Upload failed unexpectedly.");
-        }
-        throw error;
-      }
-    });
+    _LfWorkflowRunnerManager_UI_REGISTRY.set(this, /* @__PURE__ */ new WeakMap());
     _LfWorkflowRunnerManager_loadWorkflows.set(this, async () => {
       var _a;
       const { WORKFLOWS_LOADED } = DEBUG_MESSAGES;
@@ -1304,23 +1469,59 @@ class LfWorkflowRunnerManager {
       if (firstWorkflow == null ? void 0 : firstWorkflow.id) {
         this.setWorkflow(firstWorkflow.id);
       }
-      this.setStatus("ready", WORKFLOWS_LOADED);
+      this.setStatus("idle", WORKFLOWS_LOADED);
     });
+    this.uiRegistry = {
+      delete: () => {
+        const elements = __classPrivateFieldGet(this, _LfWorkflowRunnerManager_UI_REGISTRY, "f").get(this);
+        if (elements) {
+          for (const elementId in elements) {
+            const element = elements[elementId];
+            if (element && typeof element === "object" && "remove" in element) {
+              element.remove();
+            }
+          }
+        }
+        __classPrivateFieldGet(this, _LfWorkflowRunnerManager_UI_REGISTRY, "f").delete(this);
+      },
+      get: () => {
+        return __classPrivateFieldGet(this, _LfWorkflowRunnerManager_UI_REGISTRY, "f").get(this);
+      },
+      remove: (elementId) => {
+        const elements = __classPrivateFieldGet(this, _LfWorkflowRunnerManager_UI_REGISTRY, "f").get(this);
+        if (elements && elements[elementId]) {
+          const element = elements[elementId];
+          if (element && typeof element === "object" && "remove" in element) {
+            element.remove();
+          }
+          delete elements[elementId];
+          __classPrivateFieldGet(this, _LfWorkflowRunnerManager_UI_REGISTRY, "f").set(this, elements);
+        }
+      },
+      set: (elementId, element) => {
+        const elements = __classPrivateFieldGet(this, _LfWorkflowRunnerManager_UI_REGISTRY, "f").get(this) || {};
+        elements[elementId] = element;
+        __classPrivateFieldGet(this, _LfWorkflowRunnerManager_UI_REGISTRY, "f").set(this, elements);
+      }
+    };
     const { WORKFLOWS_LOAD_FAILED } = DEBUG_MESSAGES;
     const { LOADING_WORKFLOWS } = STATUS_MESSAGES;
-    const container = document.querySelector("#app");
-    if (!container) {
+    __classPrivateFieldSet(this, _LfWorkflowRunnerManager_APP_ROOT, document.querySelector("#app"), "f");
+    if (!__classPrivateFieldGet(this, _LfWorkflowRunnerManager_APP_ROOT, "f")) {
       throw new Error("Workflow runner container not found.");
     }
-    __classPrivateFieldSet(this, _LfWorkflowRunnerManager_STORE, createWorkflowRunnerStore(initState(container)), "f");
+    __classPrivateFieldSet(this, _LfWorkflowRunnerManager_STORE, createWorkflowRunnerStore(initState(__classPrivateFieldGet(this, _LfWorkflowRunnerManager_APP_ROOT, "f"))), "f");
     __classPrivateFieldSet(this, _LfWorkflowRunnerManager_IS_DEBUG, __classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f").getState().isDebug, "f");
+    __classPrivateFieldSet(this, _LfWorkflowRunnerManager_DISPATCHERS, {
+      runWorkflow: () => workflowDispatcher(__classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f"))
+    }, "f");
     __classPrivateFieldSet(this, _LfWorkflowRunnerManager_SECTIONS, {
-      actionButton: createActionButtonSection(),
-      drawer: createDrawerSection(),
-      header: createHeaderSection(),
-      main: createMainSection(),
-      workflow: createWorkflowSection(),
-      dev: createDevPanel()
+      actionButton: createActionButtonSection(__classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f")),
+      dev: createDevSection(__classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f")),
+      drawer: createDrawerSection(__classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f")),
+      header: createHeaderSection(__classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f")),
+      main: createMainSection(__classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f")),
+      notifications: createNotificationsSection(__classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f"))
     }, "f");
     __classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f").getState().mutate.manager(this);
     __classPrivateFieldGet(this, _LfWorkflowRunnerManager_instances, "m", _LfWorkflowRunnerManager_initializeFramework).call(this);
@@ -1337,58 +1538,16 @@ class LfWorkflowRunnerManager {
     });
   }
   //#endregion
-  //#region Workflow execution
-  async runWorkflow() {
-    var _a, _b, _c, _d, _e, _f;
-    const { INPUTS_COLLECTED, WORKFLOW_COMPLETED, WORKFLOW_DISPATCHING, WORKFLOW_NOT_SELECTED } = DEBUG_MESSAGES;
-    const { SUBMITTING_WORKFLOW } = STATUS_MESSAGES;
-    const state = __classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f").getState();
-    const id = state.current.id;
-    if (!id) {
-      this.setStatus("error", WORKFLOW_NOT_SELECTED);
-      return;
-    }
-    this.setStatus("running", SUBMITTING_WORKFLOW);
-    let inputs;
-    try {
-      inputs = await __classPrivateFieldGet(this, _LfWorkflowRunnerManager_collectInputs, "f").call(this);
-      debugLog(INPUTS_COLLECTED, "informational", {
-        id,
-        inputKeys: Object.keys(inputs)
-      });
-    } catch (error) {
-      const detail = error instanceof WorkflowApiError ? ((_a = error.payload) == null ? void 0 : _a.detail) || error.message : (error == null ? void 0 : error.message) || "Failed to collect inputs.";
-      this.setStatus("error", `Failed to collect inputs: ${detail}`);
-      return;
-    }
-    try {
-      debugLog(WORKFLOW_DISPATCHING, "informational", {
-        id,
-        inputKeys: Object.keys(inputs)
-      });
-      const { status, message, payload } = await runWorkflowRequest(id, inputs);
-      const runState = __classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f").getState();
-      runState.mutate.runResult(status, message, ((_b = payload.history) == null ? void 0 : _b.outputs) ? { ...payload.history.outputs } : null);
-      const resultCategory = status === "error" ? "error" : "success";
-      debugLog(WORKFLOW_COMPLETED, resultCategory, {
-        id,
-        wfStatus: status,
-        outputs: Object.keys(((_c = payload.history) == null ? void 0 : _c.outputs) ?? {})
-      });
-    } catch (error) {
-      if (error instanceof WorkflowApiError) {
-        const inputName = (_e = (_d = error.payload) == null ? void 0 : _d.error) == null ? void 0 : _e.input;
-        if (inputName) {
-          __classPrivateFieldGet(this, _LfWorkflowRunnerManager_SECTIONS, "f").workflow.setCellStatus(state, inputName, "error");
-        }
-        this.setStatus("error", ((_f = error.payload) == null ? void 0 : _f.detail) || error.message);
-      } else {
-        this.setStatus("error", "Unexpected error while running the workflow.");
-      }
-    }
-  }
-  //#endregion
   //#region Getters
+  getAppRoot() {
+    return __classPrivateFieldGet(this, _LfWorkflowRunnerManager_APP_ROOT, "f");
+  }
+  getDispatchers() {
+    return __classPrivateFieldGet(this, _LfWorkflowRunnerManager_DISPATCHERS, "f");
+  }
+  getStore() {
+    return __classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f");
+  }
   isDebugEnabled() {
     return __classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f").getState().isDebug;
   }
@@ -1411,47 +1570,42 @@ class LfWorkflowRunnerManager {
     __classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f").getState().mutate.isDebug(!current);
   }
 }
-_LfWorkflowRunnerManager_FRAMEWORK = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_IS_DEBUG = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_SECTIONS = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_STORE = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_collectInputs = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_handleUploadField = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_loadWorkflows = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_instances = /* @__PURE__ */ new WeakSet(), _LfWorkflowRunnerManager_initializeFramework = function _LfWorkflowRunnerManager_initializeFramework2() {
+_LfWorkflowRunnerManager_DISPATCHERS = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_FRAMEWORK = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_IS_DEBUG = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_APP_ROOT = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_SECTIONS = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_STORE = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_UI_REGISTRY = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_loadWorkflows = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_instances = /* @__PURE__ */ new WeakSet(), _LfWorkflowRunnerManager_initializeFramework = function _LfWorkflowRunnerManager_initializeFramework2() {
   const assetsUrl = buildAssetsUrl();
   __classPrivateFieldGet(this, _LfWorkflowRunnerManager_FRAMEWORK, "f").assets.set(assetsUrl);
   __classPrivateFieldGet(this, _LfWorkflowRunnerManager_FRAMEWORK, "f").theme.set(DEFAULT_THEME);
 }, _LfWorkflowRunnerManager_initializeLayout = function _LfWorkflowRunnerManager_initializeLayout2() {
   const state = __classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f").getState();
-  const root = state.ui.layout._root;
-  if (!root) {
-    return;
+  while (__classPrivateFieldGet(this, _LfWorkflowRunnerManager_APP_ROOT, "f").firstChild) {
+    __classPrivateFieldGet(this, _LfWorkflowRunnerManager_APP_ROOT, "f").removeChild(__classPrivateFieldGet(this, _LfWorkflowRunnerManager_APP_ROOT, "f").firstChild);
   }
-  while (root.firstChild) {
-    root.removeChild(root.firstChild);
-  }
-  __classPrivateFieldGet(this, _LfWorkflowRunnerManager_SECTIONS, "f").actionButton.mount(state);
-  __classPrivateFieldGet(this, _LfWorkflowRunnerManager_SECTIONS, "f").drawer.mount(state);
-  __classPrivateFieldGet(this, _LfWorkflowRunnerManager_SECTIONS, "f").header.mount(state);
-  __classPrivateFieldGet(this, _LfWorkflowRunnerManager_SECTIONS, "f").main.mount(state);
-  __classPrivateFieldGet(this, _LfWorkflowRunnerManager_SECTIONS, "f").workflow.mount(state);
-  __classPrivateFieldGet(this, _LfWorkflowRunnerManager_SECTIONS, "f").workflow.render(state);
+  __classPrivateFieldGet(this, _LfWorkflowRunnerManager_SECTIONS, "f").actionButton.mount();
+  __classPrivateFieldGet(this, _LfWorkflowRunnerManager_SECTIONS, "f").drawer.mount();
+  __classPrivateFieldGet(this, _LfWorkflowRunnerManager_SECTIONS, "f").header.mount();
+  __classPrivateFieldGet(this, _LfWorkflowRunnerManager_SECTIONS, "f").main.mount();
+  __classPrivateFieldGet(this, _LfWorkflowRunnerManager_SECTIONS, "f").notifications.mount();
   if (state.isDebug) {
-    __classPrivateFieldGet(this, _LfWorkflowRunnerManager_SECTIONS, "f").dev.mount(state);
-    __classPrivateFieldGet(this, _LfWorkflowRunnerManager_SECTIONS, "f").dev.render(state);
+    __classPrivateFieldGet(this, _LfWorkflowRunnerManager_SECTIONS, "f").dev.mount();
+    __classPrivateFieldGet(this, _LfWorkflowRunnerManager_SECTIONS, "f").dev.render();
     __classPrivateFieldSet(this, _LfWorkflowRunnerManager_IS_DEBUG, true, "f");
   }
 }, _LfWorkflowRunnerManager_subscribeToState = function _LfWorkflowRunnerManager_subscribeToState2() {
   __classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f").subscribe((state) => {
-    __classPrivateFieldGet(this, _LfWorkflowRunnerManager_SECTIONS, "f").actionButton.render(state);
-    __classPrivateFieldGet(this, _LfWorkflowRunnerManager_SECTIONS, "f").drawer.render(state);
-    __classPrivateFieldGet(this, _LfWorkflowRunnerManager_SECTIONS, "f").header.render(state);
-    __classPrivateFieldGet(this, _LfWorkflowRunnerManager_SECTIONS, "f").main.render(state);
-    __classPrivateFieldGet(this, _LfWorkflowRunnerManager_SECTIONS, "f").workflow.render(state);
+    __classPrivateFieldGet(this, _LfWorkflowRunnerManager_SECTIONS, "f").actionButton.render();
+    __classPrivateFieldGet(this, _LfWorkflowRunnerManager_SECTIONS, "f").drawer.render();
+    __classPrivateFieldGet(this, _LfWorkflowRunnerManager_SECTIONS, "f").header.render();
+    __classPrivateFieldGet(this, _LfWorkflowRunnerManager_SECTIONS, "f").main.render();
+    __classPrivateFieldGet(this, _LfWorkflowRunnerManager_SECTIONS, "f").notifications.render();
     const shouldShowDevPanel = state.isDebug;
     if (shouldShowDevPanel && !__classPrivateFieldGet(this, _LfWorkflowRunnerManager_IS_DEBUG, "f")) {
-      __classPrivateFieldGet(this, _LfWorkflowRunnerManager_SECTIONS, "f").dev.mount(state);
+      __classPrivateFieldGet(this, _LfWorkflowRunnerManager_SECTIONS, "f").dev.mount();
       __classPrivateFieldSet(this, _LfWorkflowRunnerManager_IS_DEBUG, true, "f");
-      __classPrivateFieldGet(this, _LfWorkflowRunnerManager_SECTIONS, "f").dev.render(state);
+      __classPrivateFieldGet(this, _LfWorkflowRunnerManager_SECTIONS, "f").dev.render();
     } else if (!shouldShowDevPanel && __classPrivateFieldGet(this, _LfWorkflowRunnerManager_IS_DEBUG, "f")) {
       __classPrivateFieldGet(this, _LfWorkflowRunnerManager_SECTIONS, "f").dev.destroy();
       __classPrivateFieldSet(this, _LfWorkflowRunnerManager_IS_DEBUG, false, "f");
     } else if (shouldShowDevPanel && __classPrivateFieldGet(this, _LfWorkflowRunnerManager_IS_DEBUG, "f")) {
-      __classPrivateFieldGet(this, _LfWorkflowRunnerManager_SECTIONS, "f").dev.render(state);
+      __classPrivateFieldGet(this, _LfWorkflowRunnerManager_SECTIONS, "f").dev.render();
     }
   });
 };
