@@ -109,10 +109,16 @@ class LF_GeminiAPI:
                         host = getattr(ps_inst, 'address', None)
                         port = getattr(ps_inst, 'port', None)
                         if host and port:
+                            orig_host = host
+                            if host in ("0.0.0.0", "::"):
+                                host = "localhost"
+                                _send_log(f"Normalized PromptServer host {orig_host!r} to {host!r} for proxy URL.")
+
                             proxy_url = f"http://{host}:{port}/api/proxy/gemini"
                         else:
                             if os.environ.get("DEV_ENV") == "1":
                                 proxy_url = "http://localhost:8080/api/proxy/gemini"
+
                         _send_log("Using PromptServer proxy for Gemini API requests...")
                     except Exception:
 
