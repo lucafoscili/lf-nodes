@@ -1,47 +1,37 @@
-import { WorkflowAPIDefinition, WorkflowAPIUI } from './api';
-import { WorkflowRunnerManager } from './manager';
+import { WorkflowAPIDataset, WorkflowNodeResults } from './api';
+import { WorkflowManager } from './manager';
+
+//#region Store
+export interface WorkflowStore {
+  getState: () => WorkflowState;
+  setState: (updater: WorkflowStateUpdater) => void;
+  subscribe: (listener: WorkflowStateListener) => () => void;
+}
+//#endregion
 
 //#region State
-export type WorkflowStatus = 'ready' | 'running' | 'error';
-export interface WorkflowCurrent {
-  status: WorkflowStatus;
-  message: string | null;
-  workflow: WorkflowAPIDefinition['id'] | null;
-  preferredOutput?: string | null;
-}
-export interface WorkflowUI {
-  layout: {
-    _root: HTMLDivElement | null;
-    drawer: { _root: HTMLLfDrawerElement | null };
-    header: {
-      _root: HTMLLfHeaderElement | null;
-      drawerToggle: HTMLLfButtonElement | null;
-      themeSwitch: HTMLLfButtonElement | null;
-    };
-    main: {
-      _root: HTMLElement | null;
-      title: {
-        _root: HTMLElement | null;
-      };
-      workflow: {
-        _root: HTMLElement | null;
-        fields: Array<
-          HTMLLfButtonElement | HTMLLfTextfieldElement | HTMLLfToggleElement | HTMLLfUploadElement
-        >;
-        options: HTMLDivElement | null;
-        result: HTMLElement | null;
-        run: HTMLLfButtonElement | null;
-        status: HTMLElement | null;
-        title: HTMLElement | null;
-      };
-    };
-  };
-}
 export interface WorkflowState {
-  current: WorkflowCurrent;
-  manager: WorkflowRunnerManager | null;
-  ui: WorkflowUI;
-  workflows: WorkflowAPIDefinition[];
-  results: WorkflowAPIUI | null;
+  current: WorkflowStateCurrent;
+  isDebug: boolean;
+  manager: WorkflowManager | null;
+  mutate: WorkflowStateMutators;
+  results: WorkflowNodeResults | null;
+  workflows: WorkflowAPIDataset;
 }
+export interface WorkflowStateCurrent {
+  id: string | null;
+  message: string | null;
+  status: WorkflowStatus;
+}
+export type WorkflowStateListener = (state: WorkflowState) => void;
+export interface WorkflowStateMutators {
+  isDebug: (isDebug: boolean) => void;
+  manager: (manager: WorkflowManager) => void;
+  runResult: (status: WorkflowStatus, message: string, results: WorkflowNodeResults | null) => void;
+  status: (status: WorkflowStatus, message?: string) => void;
+  workflow: (id: string) => void;
+  workflows: (workflows: WorkflowAPIDataset) => void;
+}
+export type WorkflowStateUpdater = (state: WorkflowState) => WorkflowState;
+export type WorkflowStatus = 'running' | 'idle' | 'error';
 //#endregion

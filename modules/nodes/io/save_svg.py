@@ -104,17 +104,10 @@ class LF_SaveSVG:
 
         return {
             "ui": {
-                "_description": ["LF_SaveSVG"],
-                "lf_code": [{
-                    "_description": "SVG data",
-                    "lfLanguage": "html",
-                    "lfValue": svg
-                }],
-                "lf_masonry": [{
-                    "_description": "Saved SVGs",
-                    "_slotmap": slot_map,
-                    "lfDataset": dataset,
-                    "lfShape": "slot"
+                "lf_output": [{
+                    "dataset": dataset,
+                    "slot_map": slot_map,
+                    "svg": svg,
                 }],
             },
             "result": (svg,)

@@ -1,239 +1,215 @@
 import { getLfFramework } from '@lf-widgets/framework';
-import { WorkflowRunnerManager } from '../types/manager';
-import { WorkflowStatus } from '../types/state';
-import {
-  fetchWorkflowDefinitions,
-  runWorkflowRequest,
-  uploadWorkflowFiles,
-  WorkflowApiError,
-} from '../services/workflow-service';
-import { DEFAULT_STATUS_MESSAGES, DEFAULT_THEME, buildAssetsUrl } from '../config';
+import { buildAssetsUrl, DEFAULT_STATUS_MESSAGES, DEFAULT_THEME } from '../config';
+import { workflowDispatcher } from '../dispatchers/workflow';
+import { createActionButtonSection } from '../elements/layout.action-button';
+import { createDevSection } from '../elements/layout.dev';
 import { createDrawerSection } from '../elements/layout.drawer';
 import { createHeaderSection } from '../elements/layout.header';
 import { createMainSection } from '../elements/layout.main';
-import { createWorkflowSection, WorkflowSectionHandle } from '../elements/main.workflow';
-import { createWorkflowRunnerStore, WorkflowRunnerStore } from './store';
+import { createNotificationsSection } from '../elements/layout.notifications';
+import { fetchWorkflowDefinitions } from '../services/workflow-service';
+import { WorkflowDispatchers, WorkflowManager, WorkflowUIItem } from '../types/manager';
+import { WorkflowSectionController } from '../types/section';
+import { WorkflowStatus, WorkflowStore } from '../types/state';
+import { DEBUG_MESSAGES, STATUS_MESSAGES } from '../utils/constants';
+import { debugLog } from '../utils/debug';
 import { initState } from './state';
+import { createWorkflowRunnerStore } from './store';
 
-export class LfWorkflowRunnerManager implements WorkflowRunnerManager {
-  #framework = getLfFramework();
-  #store: WorkflowRunnerStore;
-  #sections: {
-    drawer: ReturnType<typeof createDrawerSection>;
-    header: ReturnType<typeof createHeaderSection>;
-    main: ReturnType<typeof createMainSection>;
-    workflow: WorkflowSectionHandle;
+export class LfWorkflowRunnerManager implements WorkflowManager {
+  //#region Initialization
+  #DISPATCHERS: WorkflowDispatchers;
+  #FRAMEWORK = getLfFramework();
+  #IS_DEBUG = false;
+  #APP_ROOT: HTMLDivElement;
+  #SECTIONS: {
+    actionButton: WorkflowSectionController;
+    dev: WorkflowSectionController;
+    drawer: WorkflowSectionController;
+    header: WorkflowSectionController;
+    main: WorkflowSectionController;
+    notifications: WorkflowSectionController;
   };
+  #STORE: WorkflowStore;
+  #UI_REGISTRY = new WeakMap();
 
   constructor() {
-    const container = document.querySelector<HTMLDivElement>('#app');
-    if (!container) {
+    const { WORKFLOWS_LOAD_FAILED } = DEBUG_MESSAGES;
+    const { LOADING_WORKFLOWS } = STATUS_MESSAGES;
+
+    this.#APP_ROOT = document.querySelector<HTMLDivElement>('#app');
+    if (!this.#APP_ROOT) {
       throw new Error('Workflow runner container not found.');
     }
 
-    this.#store = createWorkflowRunnerStore(initState(container));
-    this.#sections = {
-      drawer: createDrawerSection(),
-      header: createHeaderSection(),
-      main: createMainSection(),
-      workflow: createWorkflowSection(),
+    this.#STORE = createWorkflowRunnerStore(initState(this.#APP_ROOT));
+    this.#IS_DEBUG = this.#STORE.getState().isDebug;
+
+    this.#DISPATCHERS = {
+      runWorkflow: () => workflowDispatcher(this.#STORE),
     };
 
-    this.#store.setState((state) => ({
-      ...state,
-      manager: this,
-    }));
+    this.#SECTIONS = {
+      actionButton: createActionButtonSection(this.#STORE),
+      dev: createDevSection(this.#STORE),
+      drawer: createDrawerSection(this.#STORE),
+      header: createHeaderSection(this.#STORE),
+      main: createMainSection(this.#STORE),
+      notifications: createNotificationsSection(this.#STORE),
+    };
+
+    this.#STORE.getState().mutate.manager(this);
 
     this.#initializeFramework();
     this.#initializeLayout();
     this.#subscribeToState();
-    this.setStatus('running', 'Loading workflows...');
+    this.setStatus('running', LOADING_WORKFLOWS);
     this.#loadWorkflows().catch((error) => {
-      console.error('Failed to load workflows:', error);
-      const message = error instanceof Error ? error.message : 'Failed to load workflows.';
+      const message = error instanceof Error ? error.message : WORKFLOWS_LOAD_FAILED;
+      debugLog(WORKFLOWS_LOAD_FAILED, 'error', {
+        message,
+        stack: error instanceof Error ? error.stack : undefined,
+      });
       this.setStatus('error', message);
     });
   }
-
-  async runWorkflow(): Promise<void> {
-    const state = this.#store.getState();
-    const workflowId = state.current.workflow;
-    if (!workflowId) {
-      this.setStatus('error', 'No workflow selected.');
-      return;
-    }
-
-    this.setStatus('running', 'Submitting workflow...');
-
-    let inputs: Record<string, unknown>;
-    try {
-      inputs = await this.#collectInputs();
-    } catch (error) {
-      console.error('Failed to collect inputs:', error);
-      const detail =
-        error instanceof WorkflowApiError
-          ? error.payload?.detail || error.message
-          : (error as Error)?.message || 'Failed to collect inputs.';
-      this.setStatus('error', `Failed to collect inputs: ${detail}`);
-      return;
-    }
-
-    try {
-      const response = await runWorkflowRequest(workflowId, inputs);
-      this.#store.setState((state) => ({
-        ...state,
-        current: {
-          ...state.current,
-          status: response.status,
-          message: response.message,
-          preferredOutput: response.payload.preferred_output ?? null,
-        },
-        results: response.payload.history?.outputs
-          ? { ...response.payload.history.outputs }
-          : null,
-      }));
-    } catch (error) {
-      if (error instanceof WorkflowApiError) {
-        this.#store.setState((state) => ({
-          ...state,
-          current: {
-            ...state.current,
-            status: 'error',
-            message: error.message,
-          },
-        }));
-        const inputName = error.payload?.error?.input;
-        if (inputName) {
-          this.#sections.workflow.setFieldStatus(this.#store.getState(), inputName, 'error');
-        }
-      } else {
-        console.error('Unexpected error while running workflow:', error);
-        this.setStatus('error', 'Unexpected error while running the workflow.');
-      }
-    }
-  }
-
-  setStatus(status: WorkflowStatus, message?: string): void {
-    this.#store.setState((state) => ({
-      ...state,
-      current: {
-        ...state.current,
-        status,
-        message: message ?? DEFAULT_STATUS_MESSAGES[status],
-      },
-    }));
-  }
-
-  async setWorkflow(id: string): Promise<void> {
-    const state = this.#store.getState();
-    if (state.current.workflow === id) {
-      return;
-    }
-
-    this.#store.setState((state) => ({
-      ...state,
-      current: {
-        ...state.current,
-        workflow: id,
-        preferredOutput: null,
-      },
-      results: null,
-    }));
-  }
+  //#endregion
 
   //#region Internal helpers
-  #collectInputs = async (): Promise<Record<string, unknown>> => {
-    const state = this.#store.getState();
-    const { fields } = state.ui.layout.main.workflow;
-    const inputs: Record<string, unknown> = {};
-
-    for (const element of fields) {
-      const fieldName = element.dataset.name || '';
-      if (!fieldName) {
-        continue;
-      }
-
-      this.#sections.workflow.setFieldStatus(state, fieldName);
-      const value: unknown = await element.getValue();
-      switch (element.tagName.toLowerCase()) {
-        case 'lf-toggle':
-          inputs[fieldName] = value === 'off' ? false : true;
-          break;
-        case 'lf-upload':
-          inputs[fieldName] = await this.#handleUploadField(fieldName, value);
-          break;
-        default:
-          inputs[fieldName] = value;
-      }
-    }
-
-    return inputs;
-  };
-
-  #handleUploadField = async (fieldName: string, rawValue: unknown) => {
-    const files = Array.isArray(rawValue) ? rawValue : (rawValue as File[] | undefined);
-    if (!files || files.length === 0) {
-      return [];
-    }
-
-    try {
-      this.setStatus('running', 'Uploading file...');
-      const { payload } = await uploadWorkflowFiles(files);
-      const paths = payload?.paths || [];
-      this.setStatus('running', 'File uploaded, processing...');
-      return paths.length === 1 ? paths[0] : paths;
-    } catch (error) {
-      if (error instanceof WorkflowApiError) {
-        this.#sections.workflow.setFieldStatus(this.#store.getState(), fieldName, 'error');
-        this.setStatus('error', `Upload failed: ${error.payload?.detail || error.message}`);
-      }
-      throw error;
-    }
-  };
-
   #initializeFramework() {
     const assetsUrl = buildAssetsUrl();
-    this.#framework.assets.set(assetsUrl);
-    this.#framework.theme.set(DEFAULT_THEME);
-  }
 
+    this.#FRAMEWORK.assets.set(assetsUrl);
+    this.#FRAMEWORK.theme.set(DEFAULT_THEME);
+  }
   #initializeLayout() {
-    const state = this.#store.getState();
-    const root = state.ui.layout._root;
-    if (!root) {
-      return;
+    const state = this.#STORE.getState();
+
+    while (this.#APP_ROOT.firstChild) {
+      this.#APP_ROOT.removeChild(this.#APP_ROOT.firstChild);
     }
 
-    while (root.firstChild) {
-      root.removeChild(root.firstChild);
+    this.#SECTIONS.actionButton.mount();
+    this.#SECTIONS.drawer.mount();
+    this.#SECTIONS.header.mount();
+    this.#SECTIONS.main.mount();
+    this.#SECTIONS.notifications.mount();
+
+    if (state.isDebug) {
+      this.#SECTIONS.dev.mount();
+      this.#SECTIONS.dev.render();
+      this.#IS_DEBUG = true;
     }
-
-    this.#sections.drawer.mount(state);
-    this.#sections.header.mount(state);
-    this.#sections.main.mount(state);
-    this.#sections.workflow.mount(state);
-    this.#sections.workflow.render(state);
   }
-
-  #subscribeToState() {
-    this.#store.subscribe((state) => {
-      this.#sections.workflow.render(state);
-    });
-  }
-
   #loadWorkflows = async () => {
+    const { WORKFLOWS_LOADED } = DEBUG_MESSAGES;
+
     const workflows = await fetchWorkflowDefinitions();
-    if (!workflows.length) {
+    if (!workflows || !Object.keys(workflows).length) {
       throw new Error('No workflows available from the API.');
     }
 
-    this.#store.setState((state) => ({
-      ...state,
-      workflows,
-    }));
+    this.#STORE.getState().mutate.workflows(workflows);
 
-    await this.setWorkflow(workflows[0].id);
-    this.setStatus('ready', 'Workflows loaded.');
+    const firstWorkflow = workflows.nodes?.[0];
+    if (firstWorkflow?.id) {
+      this.setWorkflow(firstWorkflow.id);
+    }
+    this.setStatus('idle', WORKFLOWS_LOADED);
+  };
+  #subscribeToState() {
+    this.#STORE.subscribe((state) => {
+      this.#SECTIONS.actionButton.render();
+      this.#SECTIONS.drawer.render();
+      this.#SECTIONS.header.render();
+      this.#SECTIONS.main.render();
+      this.#SECTIONS.notifications.render();
+
+      const shouldShowDevPanel = state.isDebug;
+      if (shouldShowDevPanel && !this.#IS_DEBUG) {
+        this.#SECTIONS.dev.mount();
+        this.#IS_DEBUG = true;
+        this.#SECTIONS.dev.render();
+      } else if (!shouldShowDevPanel && this.#IS_DEBUG) {
+        this.#SECTIONS.dev.destroy();
+        this.#IS_DEBUG = false;
+      } else if (shouldShowDevPanel && this.#IS_DEBUG) {
+        this.#SECTIONS.dev.render();
+      }
+    });
+  }
+  //#endregion
+
+  //#region Getters
+  getAppRoot() {
+    return this.#APP_ROOT;
+  }
+  getDispatchers() {
+    return this.#DISPATCHERS;
+  }
+  getStore() {
+    return this.#STORE;
+  }
+  isDebugEnabled() {
+    return this.#STORE.getState().isDebug;
+  }
+  //#endregion
+
+  //#region State mutators
+  setStatus(status: WorkflowStatus, message?: string): void {
+    const { mutate } = this.#STORE.getState();
+
+    const resolved = message ?? DEFAULT_STATUS_MESSAGES[status];
+    mutate.status(status, resolved);
+  }
+  setWorkflow(id: string): void {
+    const state = this.#STORE.getState();
+
+    if (state.current.id === id) {
+      return;
+    }
+
+    state.mutate.workflow(id);
+  }
+  toggleDebug(): void {
+    const current = this.#STORE.getState().isDebug;
+    this.#STORE.getState().mutate.isDebug(!current);
+  }
+  //#endregion
+
+  //#region UI registry
+  uiRegistry = {
+    delete: () => {
+      const elements = this.#UI_REGISTRY.get(this);
+      if (elements) {
+        for (const elementId in elements) {
+          const element = elements[elementId];
+          if (element && typeof element === 'object' && 'remove' in element) {
+            (element as HTMLElement).remove();
+          }
+        }
+      }
+      this.#UI_REGISTRY.delete(this);
+    },
+    get: () => {
+      return this.#UI_REGISTRY.get(this);
+    },
+    remove: (elementId: string) => {
+      const elements = this.#UI_REGISTRY.get(this);
+      if (elements && elements[elementId]) {
+        const element = elements[elementId];
+        if (element && typeof element === 'object' && 'remove' in element) {
+          (element as HTMLElement).remove();
+        }
+        delete elements[elementId];
+        this.#UI_REGISTRY.set(this, elements);
+      }
+    },
+    set: (elementId: string, element: WorkflowUIItem) => {
+      const elements = this.#UI_REGISTRY.get(this) || {};
+      elements[elementId] = element;
+      this.#UI_REGISTRY.set(this, elements);
+    },
   };
   //#endregion
 }

@@ -1,21 +1,24 @@
-import { WorkflowState } from '../types/state';
+import { DEFAULT_STATUS_MESSAGES } from '../config';
+import { WorkflowAPIDataset, WorkflowNodeResults } from '../types/api';
+import { WorkflowManager } from '../types/manager';
+import {
+  WorkflowState,
+  WorkflowStateListener,
+  WorkflowStateUpdater,
+  WorkflowStatus,
+  WorkflowStore,
+} from '../types/state';
 
-type StateUpdater = (state: WorkflowState) => WorkflowState;
-type StateListener = (state: WorkflowState) => void;
-
-export interface WorkflowRunnerStore {
-  getState: () => WorkflowState;
-  setState: (updater: StateUpdater) => void;
-  subscribe: (listener: StateListener) => () => void;
-}
-
-export const createWorkflowRunnerStore = (initialState: WorkflowState): WorkflowRunnerStore => {
+//#region Factory
+export const createWorkflowRunnerStore = (initialState: WorkflowState): WorkflowStore => {
   let state = initialState;
-  const listeners = new Set<StateListener>();
+  const listeners = new Set<WorkflowStateListener>();
+  const pendingMutations: Array<() => void> = [];
+  let isApplyingMutation = false;
 
   const getState = () => state;
 
-  const setState = (updater: StateUpdater) => {
+  const setState = (updater: WorkflowStateUpdater) => {
     const nextState = updater(state);
     if (nextState === state) {
       return;
@@ -27,10 +30,59 @@ export const createWorkflowRunnerStore = (initialState: WorkflowState): Workflow
     }
   };
 
-  const subscribe = (listener: StateListener) => {
+  const subscribe = (listener: WorkflowStateListener) => {
     listeners.add(listener);
     return () => listeners.delete(listener);
   };
+
+  const enqueueMutation = (mutation: () => void) => {
+    pendingMutations.push(mutation);
+    if (isApplyingMutation) {
+      return;
+    }
+
+    isApplyingMutation = true;
+    try {
+      while (pendingMutations.length > 0) {
+        const nextMutation = pendingMutations.shift();
+        if (nextMutation) {
+          nextMutation();
+        }
+      }
+    } finally {
+      isApplyingMutation = false;
+    }
+  };
+
+  const applyMutation = (mutator: (draft: WorkflowState) => void) => {
+    enqueueMutation(() =>
+      setState((current) => {
+        mutator(current);
+        return { ...current };
+      }),
+    );
+  };
+
+  const mutate = {
+    isDebug: (isDebug: boolean) =>
+      applyMutation((draft) => {
+        draft.isDebug = isDebug;
+      }),
+    manager: (manager: WorkflowManager) =>
+      applyMutation((draft) => {
+        draft.manager = manager;
+      }),
+    status: (status: WorkflowStatus, message?: string) => setStatus(status, message, setState),
+    runResult: (status: WorkflowStatus, message: string, results: WorkflowNodeResults | null) =>
+      setRunResult(status, message, results, setState),
+    workflow: (workflowId: string) => setWorkflow(workflowId, setState),
+    workflows: (workflows: WorkflowAPIDataset) =>
+      applyMutation((draft) => {
+        draft.workflows = workflows;
+      }),
+  };
+
+  state.mutate = mutate;
 
   return {
     getState,
@@ -38,3 +90,56 @@ export const createWorkflowRunnerStore = (initialState: WorkflowState): Workflow
     subscribe,
   };
 };
+//#endregion
+
+//#region Mutators
+const setRunResult = (
+  status: WorkflowStatus,
+  message: string,
+  results: WorkflowNodeResults | null,
+  setState: (updater: WorkflowStateUpdater) => void,
+) => {
+  setState(
+    (state) =>
+      ({
+        ...state,
+        current: {
+          ...state.current,
+          status,
+          message,
+        },
+        results,
+      } satisfies WorkflowState),
+  );
+};
+const setStatus = (
+  status: WorkflowStatus,
+  message: string | undefined,
+  setState: (updater: WorkflowStateUpdater) => void,
+) => {
+  setState(
+    (state) =>
+      ({
+        ...state,
+        current: {
+          ...state.current,
+          status,
+          message: message ?? DEFAULT_STATUS_MESSAGES[status],
+        },
+      } satisfies WorkflowState),
+  );
+};
+const setWorkflow = (id: string, setState: (updater: WorkflowStateUpdater) => void) => {
+  setState(
+    (state) =>
+      ({
+        ...state,
+        current: {
+          ...state.current,
+          id,
+        },
+        results: null,
+      } satisfies WorkflowState),
+  );
+};
+//#endregion

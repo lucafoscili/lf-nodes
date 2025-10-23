@@ -9,6 +9,7 @@ from ..utils.constants import API_ROUTE_PREFIX
 MODULE_ROOT = Path(__file__).resolve().parents[2]
 CONFIG_PATH = MODULE_ROOT / "web" / "workflow-runner" / "src" / "runner.config.json"
 
+# region Workflow config
 @dataclass(frozen=True)
 class WorkflowRunnerConfig:
     api_base: str
@@ -27,7 +28,6 @@ class WorkflowRunnerConfig:
     def workflow_html(self) -> Path:
         return self.runner_root / "workflow-runner.html"
 
-
 def _load_config() -> WorkflowRunnerConfig:
     with CONFIG_PATH.open("r", encoding="utf-8") as config_file:
         data = json.load(config_file)
@@ -45,7 +45,6 @@ def _load_config() -> WorkflowRunnerConfig:
         js_dir=data["deploy"]["jsDir"],
     )
 
-
 CONFIG = _load_config()
 
 try:
@@ -58,3 +57,4 @@ try:
 except Exception:
     # constants import may fail in some tooling contexts; swallow to avoid circular import errors during package introspection.
     pass
+# endregion

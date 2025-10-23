@@ -11,6 +11,28 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, Optional
 from server import PromptServer
 
+# Dev dotenv loader: load `.env` for local dev. The loader will run if either:
+#  - DEV_ENV=1 is already set in the environment, OR
+#  - a .env file exists next to this module (convenience for local dev).
+try:
+    env_path = Path(__file__).parent / ".env"
+    should_load = os.environ.get("DEV_ENV") == "1" or env_path.exists()
+    if should_load and env_path.exists():
+        # lightweight loader to avoid adding a runtime dependency
+        for line in env_path.read_text(encoding='utf-8').splitlines():
+            line = line.strip()
+            if not line or line.startswith('#'):
+                continue
+            if '=' not in line:
+                continue
+            k, v = line.split('=', 1)
+            k = k.strip()
+            v = v.strip().strip('"').strip("'")
+            if k and not os.environ.get(k):
+                os.environ[k] = v
+except Exception:
+    logging.exception('Failed to load local .env')
+
 from .config import CONFIG as RUNNER_CONFIG
 from .registry import InputValidationError, get_workflow, list_workflows
 from .registry import _json_safe as workflow_json_safe
@@ -118,6 +140,12 @@ async def lf_nodes_static_workflow(request: web.Request) -> web.Response:
 @PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/workflows")
 async def lf_nodes_list_workflows(_: web.Request) -> web.Response:
     return web.json_response({"workflows": list_workflows()})
+
+# Import proxy module to register proxy routes
+try:
+    from . import proxy  # noqa: F401 - registers routes
+except Exception:
+    logging.exception("Failed to import workflow-runner proxy module")
 # endregion
 
 # region Run
@@ -371,74 +399,17 @@ async def _wait_for_completion(prompt_id: str, timeout_seconds: float = 180.0) -
 def _sanitize_history(entry: Dict[str, Any]) -> Dict[str, Any]:
     """
     Sanitize a single history entry for safe JSON serialization.
-    This function processes a history entry dictionary and returns a sanitized
-    representation containing only the "status", "outputs", and "prompt" keys,
-    each run through a helper (_json_safe) to ensure JSON-serializability.
-    Behavior:
-    - The function reads entry.get("outputs", {}) and treats None as an empty dict.
-    - For each node_id -> node_out pair in outputs:
-        - If node_out is a dict:
-            - Make a shallow copy and rename any keys that start with "lf_" by removing
-                that prefix (e.g., "lf_key" -> "key"), but only if the resulting name is
-                non-empty and does not already exist in the dict. Other keys are preserved.
-        - If node_out is a list:
-            - Iterate elements; for any element that is a dict, apply the same
-                "lf_"-prefix renaming logic on a shallow copy of that element. Non-dict
-                elements are preserved as-is.
-        - Any other types for node_out are preserved unchanged.
-        - If processing a node_out raises an exception, the original node_out is
-            kept unchanged as a fallback.
-    - After processing all outputs, the function returns a dict with:
-            {"status": _json_safe(status_value),
-             "prompt": _json_safe(prompt_value)}
-    Parameters
-    ----------
-    entry : Dict[str, Any]
-            The history entry to sanitize. Expected to possibly contain the keys
-            "status", "outputs", and "prompt", where "outputs" is typically a mapping
-            of node identifiers to values (dict, list, or other).
-    Returns
-    -------
-    Dict[str, Any]
-            A sanitized dictionary with keys "status", "outputs", and "prompt",
-            suitable for JSON serialization via the helper _json_safe.
-    Notes
-    -----
-    - The function only removes the "lf_" prefix from keys when doing so will not
-        cause a key collision in the same mapping.
-    - _json_safe is an external helper assumed to convert arbitrary objects into
-        JSON-safe representations; consult its implementation for specific behavior.
+    The function returns a dictionary containing only the "status", "outputs",
+    and "prompt" keys, each passed through `_json_safe` so nested values remain
+    JSON-serializable while preserving the original key names.
     """
     outputs = entry.get("outputs", {}) or {}
     safe_outputs = {}
     for node_id, node_out in outputs.items():
         try:
-            if isinstance(node_out, dict):
-                node_copy = dict(node_out)
-                for key in list(node_copy.keys()):
-                    if key.startswith('lf_'):
-                        new_key = key[3:]
-                        if new_key and new_key not in node_copy:
-                            node_copy[new_key] = node_copy.pop(key)
-                safe_outputs[node_id] = node_copy
-            elif isinstance(node_out, list):
-                new_list = []
-                for elem in node_out:
-                    if isinstance(elem, dict):
-                        elem_copy = dict(elem)
-                        for key in list(elem_copy.keys()):
-                            if key.startswith('lf_'):
-                                new_key = key[3:]
-                                if new_key and new_key not in elem_copy:
-                                    elem_copy[new_key] = elem_copy.pop(key)
-                        new_list.append(elem_copy)
-                    else:
-                        new_list.append(elem)
-                safe_outputs[node_id] = new_list
-            else:
-                safe_outputs[node_id] = node_out
+            safe_outputs[str(node_id)] = _json_safe(node_out)
         except Exception:
-            safe_outputs[node_id] = node_out
+            safe_outputs[str(node_id)] = node_out
 
     return {
         "status": _json_safe(entry.get("status")),

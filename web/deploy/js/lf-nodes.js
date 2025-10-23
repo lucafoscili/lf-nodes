@@ -1127,6 +1127,7 @@ var NodeName;
   NodeName2["extractPromptFromLoraTag"] = "LF_ExtractPromptFromLoraTag";
   NodeName2["extractString"] = "LF_ExtractString";
   NodeName2["gaussianBlur"] = "LF_GaussianBlur";
+  NodeName2["geminiAPI"] = "LF_GeminiAPI";
   NodeName2["getValueFromJson"] = "LF_GetValueFromJSON";
   NodeName2["getRandomKeyFromJson"] = "LF_GetRandomKeyFromJSON";
   NodeName2["imageClassifier"] = "LF_ImageClassifier";
@@ -1193,6 +1194,7 @@ var NodeName;
   NodeName2["switchImage"] = "LF_SwitchImage";
   NodeName2["switchInteger"] = "LF_SwitchInteger";
   NodeName2["switchJson"] = "LF_SwitchJSON";
+  NodeName2["switchMask"] = "LF_SwitchMask";
   NodeName2["switchString"] = "LF_SwitchString";
   NodeName2["tiledSuperRes"] = "LF_TiledSuperRes";
   NodeName2["tiltShift"] = "LF_TiltShift";
@@ -1273,6 +1275,7 @@ const NODE_WIDGET_MAP = {
   LF_FilmGrain: [CustomWidgetName.compare],
   LF_Float: [CustomWidgetName.history],
   LF_GaussianBlur: [CustomWidgetName.compare],
+  LF_GeminiAPI: [CustomWidgetName.code],
   LF_GetRandomKeyFromJSON: [CustomWidgetName.code],
   LF_GetValueFromJSON: [CustomWidgetName.code],
   LF_ImageClassifier: [CustomWidgetName.code],
@@ -1340,6 +1343,7 @@ const NODE_WIDGET_MAP = {
   LF_SwitchImage: [CustomWidgetName.progressbar],
   LF_SwitchInteger: [CustomWidgetName.progressbar],
   LF_SwitchJSON: [CustomWidgetName.progressbar],
+  LF_SwitchMask: [CustomWidgetName.progressbar],
   LF_SwitchString: [CustomWidgetName.progressbar],
   LF_TiledSuperRes: [CustomWidgetName.compare],
   LF_TiltShift: [CustomWidgetName.compare],
@@ -5942,6 +5946,7 @@ const codeFactory = {
     switch (node.comfyClass) {
       case NodeName.displayJson:
       case NodeName.displayPrimitiveAsJson:
+      case NodeName.geminiAPI:
       case NodeName.shuffleJsonKeys:
       case NodeName.sortJsonKeys:
       case NodeName.stringToJson:

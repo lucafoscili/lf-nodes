@@ -23,7 +23,12 @@ from ...utils.helpers.conversion import (
     tensor_to_numpy,
     tensor_to_pil,
 )
-from ...utils.helpers.logic import normalize_input_image, normalize_list_to_value, normalize_output_image
+from ...utils.helpers.logic import (
+    normalize_input_image,
+    normalize_list_to_value,
+    normalize_masks_for_images,
+    normalize_output_image,
+)
 from ...utils.helpers.temp_cache import TempFileCache
 from ...utils.helpers.ui import create_compare_node
 
@@ -166,6 +171,9 @@ class LF_ImageToSVG:
                 }),
             },
             "optional": {
+                "mask": (Input.MASK, {
+                    "tooltip": "Optional transparency mask (white/1 keeps pixels, black/0 becomes transparent). Broadcasts to all images if a single mask is provided."
+                }),
                 "advanced_config": (Input.JSON, {
                     "default": {},
                     "tooltip": "Optional overrides for preset values (keys map to SVGTraceConfig fields)."
@@ -288,9 +296,21 @@ class LF_ImageToSVG:
         svgs: list[str] = []
         palettes: list[list[str]] = []
 
+        if image:
+            raw_masks = kwargs.get("mask")
+            if raw_masks is not None:
+                masks_per_image = normalize_masks_for_images(raw_masks, len(image))
+                if len(masks_per_image) == 1 and len(image) > 1:
+                    masks_per_image = masks_per_image * len(image)
+            else:
+                masks_per_image = [None] * len(image)
+        else:
+            masks_per_image = []
+
         for index, img in enumerate(image):
             arr = tensor_to_numpy(img)
-            svg_str, proc, palette = numpy_to_svg(arr, config)
+            mask_value = masks_per_image[index] if index < len(masks_per_image) else None
+            svg_str, proc, palette = numpy_to_svg(arr, config, mask=mask_value)
             preview = numpy_to_tensor(proc)
 
             pil_image_original = tensor_to_pil(img)

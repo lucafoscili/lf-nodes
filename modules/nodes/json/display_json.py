@@ -41,7 +41,14 @@ class LF_DisplayJSON:
             "value": json_input,
         })
 
-        return (json_input,)
+        return {
+            "ui": {
+                "lf_output": [{
+                    "json": json_input
+                }],
+            },
+            "result": (json_input,)
+        }
 # endregion
 
 # region Mappings

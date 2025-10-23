@@ -1,66 +1,61 @@
+import { buildApiUrl } from '../config';
 import {
-  WorkflowAPIDefinition,
+  WorkflowAPIDataset,
+  WorkflowAPIErrorOptions,
   WorkflowAPIResponse,
   WorkflowAPIRunPayload,
+  WorkflowAPIRunResult,
   WorkflowAPIUploadPayload,
   WorkflowAPIUploadResponse,
 } from '../types/api';
 import { WorkflowStatus } from '../types/state';
-import { buildApiUrl } from '../config';
-import { isWorkflowAPIUploadPayload, isWorkflowAPIUploadResponse } from '../utils/common';
+import {
+  isWorkflowAPIUploadPayload,
+  isWorkflowAPIUploadResponse,
+  parseJson,
+} from '../utils/common';
+import { ERROR_MESSAGES, STATUS_MESSAGES } from '../utils/constants';
 
-export interface WorkflowApiErrorOptions<TPayload> {
-  payload?: TPayload;
-  status?: number;
-}
-
+//#region Errors
 export class WorkflowApiError<TPayload = unknown> extends Error {
   readonly payload?: TPayload;
   readonly status?: number;
 
-  constructor(message: string, options: WorkflowApiErrorOptions<TPayload> = {}) {
+  constructor(message: string, options: WorkflowAPIErrorOptions<TPayload> = {}) {
     super(message);
     this.name = 'WorkflowApiError';
     this.payload = options.payload;
     this.status = options.status;
   }
 }
+//#endregion
 
-type JsonValue = Record<string, unknown> | WorkflowAPIResponse | WorkflowAPIUploadResponse | null;
-
-async function parseJson(response: Response): Promise<JsonValue> {
-  try {
-    return (await response.json()) as JsonValue;
-  } catch {
-    return null;
-  }
-}
-
-export const fetchWorkflowDefinitions = async (): Promise<WorkflowAPIDefinition[]> => {
+//#region Fetchers
+export const fetchWorkflowDefinitions = async () => {
   const response = await fetch(buildApiUrl('/workflows'), { method: 'GET' });
-  const data = (await parseJson(response)) as { workflows?: WorkflowAPIDefinition[] } | null;
+  const data = (await parseJson(response)) as { workflows?: WorkflowAPIDataset } | null;
 
   if (!response.ok) {
     const message = `Failed to load workflows (${response.status})`;
     throw new WorkflowApiError(message, { status: response.status, payload: data });
   }
 
-  if (!data || !Array.isArray(data.workflows)) {
+  if (!data?.workflows || !Array.isArray(data.workflows.nodes)) {
     throw new WorkflowApiError('Invalid workflows response shape.', { payload: data });
   }
 
   return data.workflows;
 };
+//#endregion
 
-export interface RunWorkflowResult extends WorkflowAPIResponse {
-  status: Extract<WorkflowStatus, 'ready' | 'error'>;
-  payload: WorkflowAPIRunPayload;
-}
-
+//#region Run Workflow
 export const runWorkflowRequest = async (
   workflowId: string,
   inputs: Record<string, unknown>,
-): Promise<RunWorkflowResult> => {
+): Promise<WorkflowAPIRunResult> => {
+  const { RUN_GENERIC } = ERROR_MESSAGES;
+  const { WORKFLOW_COMPLETED } = STATUS_MESSAGES;
+
   const response = await fetch(buildApiUrl('/run'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -68,35 +63,34 @@ export const runWorkflowRequest = async (
   });
 
   const data = (await parseJson(response)) as WorkflowAPIResponse | null;
-  const payload: WorkflowAPIRunPayload =
-    (data && data.payload) ||
-    ({
-      detail: response.statusText || 'unknown',
-      history: {},
-    } as WorkflowAPIRunPayload);
+  const payload: WorkflowAPIRunPayload = (data && data.payload) || {
+    detail: response.statusText,
+    history: {},
+  };
 
   if (!response.ok || !data) {
-    const detail = payload?.detail || response.statusText || 'unknown';
-    throw new WorkflowApiError(`Workflow execution failed: ${detail}`, {
+    const detail = payload?.detail || response.statusText;
+    throw new WorkflowApiError(`${RUN_GENERIC} (${detail})`, {
       status: response.status,
       payload,
     });
   }
 
   return {
-    message: data.message,
+    message: WORKFLOW_COMPLETED,
     payload,
-    status: data.status as RunWorkflowResult['status'],
+    status: data.status as Extract<WorkflowStatus, 'ready' | 'error'>,
   };
 };
+//#endregion
 
-export interface UploadWorkflowResult extends WorkflowAPIUploadResponse {
-  payload: WorkflowAPIUploadPayload;
-}
+//#region Upload image
+export const uploadWorkflowFiles = async (files: File[]): Promise<WorkflowAPIUploadResponse> => {
+  const { UPLOAD_GENERIC, UPLOAD_INVALID_RESPONSE, UPLOAD_MISSING_FILE } = ERROR_MESSAGES;
+  const { UPLOAD_COMPLETED } = STATUS_MESSAGES;
 
-export const uploadWorkflowFiles = async (files: File[]): Promise<UploadWorkflowResult> => {
   if (!files || files.length === 0) {
-    throw new WorkflowApiError<WorkflowAPIUploadPayload>('Missing file to upload.', {
+    throw new WorkflowApiError<WorkflowAPIUploadPayload>(UPLOAD_MISSING_FILE, {
       payload: { detail: 'missing_file' },
     });
   }
@@ -113,8 +107,8 @@ export const uploadWorkflowFiles = async (files: File[]): Promise<UploadWorkflow
   if (isWorkflowAPIUploadResponse(data)) {
     if (!response.ok) {
       const { payload } = data;
-      const detail = payload?.detail || response.statusText || 'unknown';
-      throw new WorkflowApiError<WorkflowAPIUploadPayload>(`Upload failed: ${detail}`, {
+      const detail = payload?.detail || response.statusText;
+      throw new WorkflowApiError<WorkflowAPIUploadPayload>(`${UPLOAD_GENERIC} (${detail})`, {
         status: response.status,
         payload,
       });
@@ -125,21 +119,22 @@ export const uploadWorkflowFiles = async (files: File[]): Promise<UploadWorkflow
 
   if (isWorkflowAPIUploadPayload(data)) {
     if (!response.ok) {
-      const detail = data.detail || response.statusText || 'unknown';
-      throw new WorkflowApiError<WorkflowAPIUploadPayload>(`Upload failed: ${detail}`, {
+      const detail = data.detail || response.statusText;
+      throw new WorkflowApiError<WorkflowAPIUploadPayload>(`${UPLOAD_GENERIC} (${detail})`, {
         status: response.status,
         payload: data,
       });
     }
 
     return {
-      message: 'Upload completed successfully.',
+      message: UPLOAD_COMPLETED,
       payload: data,
-      status: 'ready',
+      status: 'idle',
     };
   }
 
-  throw new WorkflowApiError<WorkflowAPIUploadPayload>('Invalid response shape from upload API.', {
+  throw new WorkflowApiError<WorkflowAPIUploadPayload>(UPLOAD_INVALID_RESPONSE, {
     status: response.status,
   });
 };
+//#endregion

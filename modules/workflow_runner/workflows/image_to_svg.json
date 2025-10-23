@@ -1,0 +1,522 @@
+{
+  "16": {
+    "inputs": {
+      "image": "Google.png"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "I N P U T"
+    }
+  },
+  "20": {
+    "inputs": {
+      "svg": [
+        "44",
+        0
+      ],
+      "filename_prefix": [
+        "47",
+        0
+      ],
+      "add_timestamp": false,
+      "add_counter": false,
+      "ui_widget": {
+        "columns": 3,
+        "dataset": {
+          "nodes": [
+            {
+              "cells": {
+                "lfSlot": {
+                  "shape": "slot",
+                  "value": "icon.svg"
+                }
+              },
+              "id": "0",
+              "value": "0"
+            }
+          ]
+        },
+        "index": null,
+        "name": "",
+        "view": "main"
+      }
+    },
+    "class_type": "LF_SaveSVG",
+    "_meta": {
+      "title": "S A V E   S V G"
+    }
+  },
+  "22": {
+    "inputs": {
+      "longest_edge": true,
+      "new_size": 512,
+      "resize_method": "bicubic",
+      "ui_widget": {
+        "nodes": [
+          {
+            "children": [
+              {
+                "id": "0",
+                "value": "[0] From 432x1192 to 186x512"
+              }
+            ],
+            "icon": "info-hexagon",
+            "id": "Resized 1 image",
+            "value": "Resized 1 image"
+          }
+        ]
+      },
+      "image": [
+        "16",
+        0
+      ]
+    },
+    "class_type": "LF_ResizeImageByEdge",
+    "_meta": {
+      "title": "T O   5 1 2 P X"
+    }
+  },
+  "29": {
+    "inputs": {
+      "ui_widget": "{\n  \"num_colors\": 4,\n  \"simplify_tol\": 1e-9,\n  \"vector_mode\": \"fill\",\n  \"stroke_width\": 0,\n  \"upsample_scale\": 16,\n  \"mask_blur\": 1,\n  \"mask_offset\": 0,\n  \"mask_close_iters\": 2,\n  \"mask_open_iters\": 0,\n  \"smooth_passes\": 5,\n  \"min_area_ratio\": 2e-8,\n  \"pre_blur_sigma\": 0.15,\n  \"bilateral_d\": 5,\n  \"bilateral_sigma_color\": 50,\n  \"bilateral_sigma_space\": 20,\n  \"collinear_angle_tol\": 3,\n  \"engine\": \"vtracer\",\n  \"vtracer_mode\": \"spline\",\n  \"vtracer_hierarchical\": \"stacked\",\n  \"vtracer_filter_speckle\": 10,\n  \"vtracer_color_precision\": 200,\n  \"vtracer_layer_difference\": 2,\n  \"vtracer_corner_threshold\": 40,\n  \"vtracer_length_threshold\": 0.1,\n  \"vtracer_max_iterations\": 20000,\n  \"vtracer_splice_threshold\": 10,\n  \"vtracer_path_precision\": 10\n}"
+    },
+    "class_type": "LF_WriteJSON",
+    "_meta": {
+      "title": "O P T I O N A L   C U S T O M   C O N F I G"
+    }
+  },
+  "30": {
+    "inputs": {
+      "preset": "max_quality",
+      "render_mode": "preset",
+      "fill_color": "",
+      "stroke_color": "",
+      "background_color": "",
+      "stroke_width": 2,
+      "size_mode": "preset",
+      "viewbox": "0 0 24 24",
+      "ui_widget": {
+        "nodes": [
+          {
+            "cells": {
+              "lfImage": {
+                "shape": "image",
+                "lfValue": "/view?filename=svg_s_1.PNG&type=temp&subfolder=&nonce=aoEhr8GB",
+                "value": ""
+              },
+              "lfImage_after": {
+                "shape": "image",
+                "lfValue": "/view?filename=svg_t_1.PNG&type=temp&subfolder=&nonce=5sLAJIFj",
+                "value": ""
+              }
+            },
+            "id": "image_1",
+            "value": "Comparison 1"
+          }
+        ]
+      },
+      "image": [
+        "52",
+        0
+      ],
+      "mask": [
+        "77",
+        0
+      ],
+      "advanced_config": [
+        "38",
+        0
+      ]
+    },
+    "class_type": "LF_ImageToSVG",
+    "_meta": {
+      "title": "S V G   C O N V E R S I O N"
+    }
+  },
+  "34": {
+    "inputs": {
+      "width": 512,
+      "height": 512,
+      "color": "FFFFFF",
+      "ui_widget": {
+        "columns": 3,
+        "dataset": {
+          "nodes": [
+            {
+              "cells": {
+                "lfImage": {
+                  "htmlProps": {
+                    "id": "emptyimage_2.PNG",
+                    "title": "emptyimage_2.PNG"
+                  },
+                  "shape": "image",
+                  "lfValue": "/view?filename=emptyimage_2.PNG&type=temp&subfolder=&nonce=9hypXC68",
+                  "value": "/view?filename=emptyimage_2.PNG&type=temp&subfolder=&nonce=9hypXC68"
+                }
+              },
+              "id": "1",
+              "value": "1"
+            }
+          ]
+        },
+        "index": null,
+        "name": "",
+        "view": "main"
+      }
+    },
+    "class_type": "LF_EmptyImage",
+    "_meta": {
+      "title": "B A C K G R O U N D"
+    }
+  },
+  "38": {
+    "inputs": {
+      "key": "num_colors",
+      "ui_widget": "## Updated key\nnum_colors\n\n## Content:\n\n[0]: 2",
+      "json_input": [
+        "29",
+        0
+      ],
+      "value": [
+        "40",
+        0
+      ]
+    },
+    "class_type": "LF_SetValueInJSON",
+    "_meta": {
+      "title": "S E T  N U M   C O L O R S"
+    }
+  },
+  "40": {
+    "inputs": {
+      "integer": 2,
+      "enable_history": true,
+      "randomize": false,
+      "seed": 656113249487589,
+      "ui_widget": {
+        "nodes": [
+          {
+            "icon": "history",
+            "id": "2",
+            "description": "Execution date: 20/10/2025, 09:06:00.",
+            "value": "2"
+          }
+        ]
+      }
+    },
+    "class_type": "LF_Integer",
+    "_meta": {
+      "title": "N U M   C O L O R S"
+    }
+  },
+  "42": {
+    "inputs": {
+      "separator": "",
+      "text_1": "<?xml version=\"1.0\" encoding=\"UTF-8\"?> <!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">",
+      "text_2": [
+        "30",
+        0
+      ],
+      "shuffle_inputs": false,
+      "seed": 724350640804785,
+      "ui_widget": ""
+    },
+    "class_type": "LF_WallOfText",
+    "_meta": {
+      "title": "A D D   H E A D"
+    }
+  },
+  "43": {
+    "inputs": {
+      "input_text": [
+        "42",
+        0
+      ],
+      "target": "height=\"100%\"",
+      "replacement": "",
+      "ui_widget": ""
+    },
+    "class_type": "LF_StringReplace",
+    "_meta": {
+      "title": "R E M O V E   H E I G H T"
+    }
+  },
+  "44": {
+    "inputs": {
+      "input_text": [
+        "43",
+        0
+      ],
+      "target": "width=\"100%\"",
+      "replacement": "",
+      "ui_widget": ""
+    },
+    "class_type": "LF_StringReplace",
+    "_meta": {
+      "title": "R E M O V E   W I D T H"
+    }
+  },
+  "47": {
+    "inputs": {
+      "string": "icon",
+      "enable_history": true,
+      "randomize": false,
+      "seed": 999622705125337,
+      "ui_widget": {
+        "nodes": [
+          {
+            "icon": "history",
+            "id": "icon",
+            "description": "Execution date: 20/10/2025, 09:06:00.",
+            "value": "icon"
+          }
+        ]
+      }
+    },
+    "class_type": "LF_String",
+    "_meta": {
+      "title": "N A M E"
+    }
+  },
+  "51": {
+    "inputs": {
+      "on_true": 1,
+      "on_false": 0,
+      "boolean": false,
+      "ui_widget": {
+        "bool": false,
+        "roll": 100
+      }
+    },
+    "class_type": "LF_SwitchFloat",
+    "_meta": {
+      "title": "D E S A T U R A T I O N"
+    }
+  },
+  "52": {
+    "inputs": {
+      "global_level": [
+        "51",
+        0
+      ],
+      "r_channel": 1,
+      "g_channel": 1,
+      "b_channel": 1,
+      "ui_widget": {
+        "nodes": [
+          {
+            "cells": {
+              "lfImage": {
+                "shape": "image",
+                "lfValue": "/view?filename=desaturation_s_1.PNG&type=temp&subfolder=&nonce=vUFlpwLa",
+                "value": ""
+              },
+              "lfImage_after": {
+                "shape": "image",
+                "lfValue": "/view?filename=desaturation_t_1.PNG&type=temp&subfolder=&nonce=sX6o3Vp2",
+                "value": ""
+              }
+            },
+            "id": "image_1",
+            "value": "Comparison 1"
+          }
+        ]
+      },
+      "image": [
+        "22",
+        0
+      ]
+    },
+    "class_type": "LF_Desaturation",
+    "_meta": {
+      "title": "Desaturation"
+    }
+  },
+  "56": {
+    "inputs": {
+      "image": [
+        "30",
+        2
+      ],
+      "alpha": [
+        "71",
+        0
+      ]
+    },
+    "class_type": "JoinImageWithAlpha",
+    "_meta": {
+      "title": "A P P L Y   M A S K"
+    }
+  },
+  "61": {
+    "inputs": {
+      "filename_prefix": [
+        "47",
+        0
+      ],
+      "add_timestamp": false,
+      "embed_workflow": true,
+      "extension": "png",
+      "quality": 100,
+      "ui_widget": {
+        "columns": 3,
+        "dataset": {
+          "nodes": [
+            {
+              "cells": {
+                "lfImage": {
+                  "htmlProps": {
+                    "id": "icon_68.png",
+                    "title": "icon_68.png"
+                  },
+                  "shape": "image",
+                  "lfValue": "/view?filename=icon_68.png&type=output&subfolder=&nonce=YIGQ8gIG",
+                  "value": "/view?filename=icon_68.png&type=output&subfolder=&nonce=YIGQ8gIG"
+                }
+              },
+              "id": "1",
+              "value": "1"
+            }
+          ]
+        },
+        "index": null,
+        "name": "",
+        "view": "main"
+      },
+      "image": [
+        "56",
+        0
+      ]
+    },
+    "class_type": "LF_SaveImageForCivitAI",
+    "_meta": {
+      "title": "S A V E   P N G"
+    }
+  },
+  "62": {
+    "inputs": {
+      "ui_widget": {
+        "backup": true,
+        "backupRetention": 14,
+        "debug": true,
+        "systemTimeout": 1,
+        "themes": "pastel"
+      }
+    },
+    "class_type": "LF_ControlPanel",
+    "_meta": {
+      "title": "Control panel"
+    }
+  },
+  "70": {
+    "inputs": {
+      "value": 0,
+      "width": 512,
+      "height": 512
+    },
+    "class_type": "SolidMask",
+    "_meta": {
+      "title": "S O L I D   M A S K"
+    }
+  },
+  "71": {
+    "inputs": {
+      "boolean": [
+        "72",
+        0
+      ],
+      "ui_widget": {
+        "bool": true,
+        "roll": 100
+      },
+      "on_true": [
+        "16",
+        1
+      ],
+      "on_false": [
+        "70",
+        0
+      ]
+    },
+    "class_type": "LF_SwitchMask",
+    "_meta": {
+      "title": "S W I T C H   M A S K"
+    }
+  },
+  "72": {
+    "inputs": {
+      "boolean": true,
+      "enable_history": false,
+      "randomize": false,
+      "seed": 844592157863327,
+      "ui_widget": {
+        "nodes": []
+      }
+    },
+    "class_type": "LF_Boolean",
+    "_meta": {
+      "title": "P R E S E R V E   A L P H A"
+    }
+  },
+  "75": {
+    "inputs": {
+      "mask": [
+        "71",
+        0
+      ]
+    },
+    "class_type": "MaskToImage",
+    "_meta": {
+      "title": "R A S T E R   M A S K"
+    }
+  },
+  "76": {
+    "inputs": {
+      "ui_widget": {
+        "columns": 3,
+        "dataset": {
+          "nodes": [
+            {
+              "cells": {
+                "lfImage": {
+                  "htmlProps": {
+                    "id": "view_1.PNG",
+                    "title": "view_1.PNG"
+                  },
+                  "shape": "image",
+                  "lfValue": "/view?filename=view_1.PNG&type=temp&subfolder=&nonce=nCZt7JQu",
+                  "value": "/view?filename=view_1.PNG&type=temp&subfolder=&nonce=nCZt7JQu"
+                }
+              },
+              "id": "1",
+              "value": "1"
+            }
+          ]
+        },
+        "index": null,
+        "name": "",
+        "view": "main"
+      },
+      "image": [
+        "75",
+        0
+      ]
+    },
+    "class_type": "LF_ViewImages",
+    "_meta": {
+      "title": "P R E V I E W   M A S K"
+    }
+  },
+  "77": {
+    "inputs": {
+      "mask": [
+        "71",
+        0
+      ]
+    },
+    "class_type": "InvertMask",
+    "_meta": {
+      "title": "I N V E R T   M A S K"
+    }
+  }
+}

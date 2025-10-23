@@ -147,20 +147,10 @@ class LF_SaveImageForCivitAI:
 
         return {
             "ui": {
-                "_description": ["LF_SaveImageForCivitAI"],
-                "lf_code": [{
-                    "_description": "CivitAI metadata",
-                    "lfLanguage": "markdown",
-                    "lfValue": civitai_metadata
-                    }, {
-                    "_description": "Generated filenames",
-                    "lfLanguage": "markdown",
-                    "lfValue": '\n'.join(file_names)
-                    }
-                ],
-                "lf_masonry": [{
-                    "_description": "Saved images",
-                    "lfDataset": dataset,
+                "lf_output": [{
+                    "civitai_metadata": civitai_metadata,
+                    "dataset": dataset,
+                    "file_names": file_names,
                 }],
             },
             "result": (file_names, civitai_metadata)

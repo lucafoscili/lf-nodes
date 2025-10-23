@@ -1,154 +1,272 @@
-import { LfThemeUIState } from '@lf-widgets/core/dist/types/components';
-import { LfButtonInterface } from '@lf-widgets/foundations/dist';
+import { getLfFramework } from '@lf-widgets/framework';
 import {
-  WorkflowAPIField,
-  WorkflowAPIResult,
-  WorkflowAPIResultKey,
-  WorkflowAPIUI,
+  WorkflowAPIItem,
+  WorkflowCellOutputItem,
+  WorkflowCellsInputContainer,
+  WorkflowCellsOutputContainer,
+  WorkflowNodeResults,
 } from '../types/api';
-import { WorkflowState, WorkflowStatus } from '../types/state';
-import { DEFAULT_STATUS_MESSAGES } from '../config';
-import { clearChildren, normalize_description } from '../utils/common';
-import { createComponent, createInputField, createOutputField } from './components';
-import { WorkflowSectionController } from './section';
+import { WorkflowSectionController, WorkflowUICells } from '../types/section';
+import { WorkflowState, WorkflowStore } from '../types/state';
+import { clearChildren } from '../utils/common';
+import { DEBUG_MESSAGES } from '../utils/constants';
+import { debugLog } from '../utils/debug';
+import { createInputCell, createOutputComponent } from './components';
+import { MAIN_CLASSES } from './layout.main';
 
-//#region Constants & helpers
+//#region Constants
 const WORKFLOW_TEXT = 'Select a workflow';
+//#endregion
+
+//#region CSS Classes
+const { theme } = getLfFramework();
 const ROOT_CLASS = 'workflow-section';
-type FieldStatus = 'error' | '';
+export const WORKFLOW_CLASSES = {
+  _: theme.bemClass(ROOT_CLASS),
+  cell: theme.bemClass(ROOT_CLASS, 'cell'),
+  cells: theme.bemClass(ROOT_CLASS, 'cells'),
+  description: theme.bemClass(ROOT_CLASS, 'description'),
+  options: theme.bemClass(ROOT_CLASS, 'options'),
+  result: theme.bemClass(ROOT_CLASS, 'result'),
+  resultGrid: theme.bemClass(ROOT_CLASS, 'result-grid'),
+  resultItem: theme.bemClass(ROOT_CLASS, 'result-item'),
+  resultTitle: theme.bemClass(ROOT_CLASS, 'result-title'),
+  title: theme.bemClass(ROOT_CLASS, 'title'),
+} as const;
+//#endregion
 
-const getCurrentWorkflow = (state: WorkflowState) => {
-  const { current, workflows } = state;
-  return workflows.find((wf) => wf.id === current.workflow) || null;
+//#region Helpers
+const _createCellWrapper = () => {
+  const cellWrapper = document.createElement('div');
+  cellWrapper.className = WORKFLOW_CLASSES.cell;
+
+  return cellWrapper;
 };
+const _createDescription = (state: WorkflowState) => {
+  const p = document.createElement('p');
+  p.className = WORKFLOW_CLASSES.description;
+  p.textContent = _getWorkflowDescription(state);
 
-const getWorkflowLabel = (state: WorkflowState) => {
-  const workflow = getCurrentWorkflow(state);
-  return workflow?.label || WORKFLOW_TEXT;
+  return p;
 };
-
-const createFieldWrapper = () => {
-  const fieldWrapper = document.createElement('div');
-  fieldWrapper.className = `${ROOT_CLASS}__field`;
-  return fieldWrapper;
-};
-
-const createOptionsWrapper = () => {
+const _createOptionsWrapper = () => {
   const optionsWrapper = document.createElement('div');
-  optionsWrapper.className = `${ROOT_CLASS}__options`;
+  optionsWrapper.className = WORKFLOW_CLASSES.options;
+
   return optionsWrapper;
 };
-
-const createResultWrapper = () => {
+const _createResultWrapper = () => {
   const resultWrapper = document.createElement('div');
-  resultWrapper.className = `${ROOT_CLASS}__result`;
+  resultWrapper.className = WORKFLOW_CLASSES.result;
+
   return resultWrapper;
 };
-
-const createRunButton = (state: WorkflowState) => {
-  const props = {
-    lfAriaLabel: 'Run workflow',
-    lfLabel: 'Run workflow',
-    lfStretchX: true,
-  } as Partial<LfButtonInterface>;
-
-  const button = createComponent.button(props);
-  button.className = `${ROOT_CLASS}__run`;
-  button.onclick = () => state.manager?.runWorkflow();
-  return button;
-};
-
-const createStatusWrapper = (tone: LfThemeUIState = 'info') => {
-  const statusWrapper = document.createElement('div');
-  statusWrapper.className = `${ROOT_CLASS}__status`;
-  statusWrapper.dataset.tone = tone;
-  return statusWrapper;
-};
-
-const createTitle = (state: WorkflowState) => {
+const _createTitle = (state: WorkflowState) => {
   const h3 = document.createElement('h3');
-  h3.className = `${ROOT_CLASS}__title`;
-  h3.textContent = getWorkflowLabel(state);
+  h3.className = WORKFLOW_CLASSES.title;
+  h3.textContent = _getWorkflowTitle(state);
+
   return h3;
+};
+const _deepMerge = (defs: WorkflowCellsOutputContainer, outs: WorkflowNodeResults) => {
+  const prep: WorkflowCellOutputItem[] = [];
+
+  for (const id in defs) {
+    const cell = defs[id];
+    const { nodeId } = cell;
+    const result = outs?.[nodeId]?.lf_output[0] || outs?.[nodeId]?.[0] || outs?.[nodeId];
+
+    const item: WorkflowCellOutputItem = {
+      ...JSON.parse(JSON.stringify(cell)),
+      ...JSON.parse(JSON.stringify(result || {})),
+    };
+    prep.push(item);
+  }
+
+  return prep;
+};
+const _getCurrentWorkflow = (state: WorkflowState) => {
+  const { current, workflows } = state;
+  return workflows?.nodes?.find((node) => node.id === current.id) || null;
+};
+const _getWorkflowDescription = (state: WorkflowState) => {
+  const workflow = _getCurrentWorkflow(state);
+  return workflow?.description || '';
+};
+const _getWorkflowInputCells = (workflow: WorkflowAPIItem) => {
+  const inputsSection = workflow.children?.find((child) => child.id.endsWith(':inputs'));
+  return (inputsSection?.cells || {}) as WorkflowCellsInputContainer;
+};
+const _getWorkflowOutputCells = (workflow: WorkflowAPIItem) => {
+  const outputsSection = workflow.children?.find((child) => child.id.endsWith(':outputs'));
+  return (outputsSection?.cells || {}) as WorkflowCellsOutputContainer;
+};
+const _getWorkflowTitle = (state: WorkflowState) => {
+  const workflow = _getCurrentWorkflow(state);
+  const str = typeof workflow?.value === 'string' ? workflow.value : String(workflow?.value || '');
+  return str || WORKFLOW_TEXT;
 };
 //#endregion
 
-export interface WorkflowSectionHandle extends WorkflowSectionController {
-  setFieldStatus: (state: WorkflowState, name: string, status?: FieldStatus) => void;
-}
+export const createWorkflowSection = (store: WorkflowStore): WorkflowSectionController => {
+  //#region Local variables
+  const {
+    WORKFLOW_INPUTS_CLEARED,
+    WORKFLOW_INPUTS_RENDERED,
+    WORKFLOW_LAYOUT_DESTROYED,
+    WORKFLOW_LAYOUT_MOUNTED,
+    WORKFLOW_LAYOUT_UPDATED,
+    WORKFLOW_RESULTS_CLEARED,
+    WORKFLOW_RESULTS_RENDERED,
+  } = DEBUG_MESSAGES;
+  let lastId: string | null = null;
+  let lastResultsRef: WorkflowNodeResults | null = null;
+  //#endregion
 
-//#region Factory
-export const createWorkflowSection = (): WorkflowSectionHandle => {
-  let section: HTMLElement | null = null;
-  let optionsWrapper: HTMLDivElement | null = null;
-  let resultWrapper: HTMLElement | null = null;
-  let runButton: HTMLLfButtonElement | null = null;
-  let statusWrapper: HTMLElement | null = null;
-  let titleElement: HTMLElement | null = null;
-  let lastWorkflowId: string | null = null;
-  let lastStatus: WorkflowStatus | null = null;
-  let lastMessage: string | null = null;
-  let lastResultsRef: WorkflowAPIUI | null = null;
-  let mountedState: WorkflowState | null = null;
+  //#region Destroy
+  const destroy = () => {
+    const state = store.getState();
+    if (!state.manager) {
+      return;
+    }
 
-  const mount = (state: WorkflowState) => {
-    mountedState = state;
-    const { ui } = state;
+    const { manager } = state;
+    const { uiRegistry } = manager;
 
-    section = document.createElement('section');
-    section.className = ROOT_CLASS;
+    for (const cls in WORKFLOW_CLASSES) {
+      const element = WORKFLOW_CLASSES[cls];
+      uiRegistry.remove(element);
+    }
 
-    titleElement = createTitle(state);
-    optionsWrapper = createOptionsWrapper();
-    runButton = createRunButton(state);
-    statusWrapper = createStatusWrapper('info');
-    resultWrapper = createResultWrapper();
+    lastId = null;
+    lastResultsRef = null;
 
-    ui.layout.main.workflow._root = section;
-    ui.layout.main.workflow.options = optionsWrapper;
-    ui.layout.main.workflow.result = resultWrapper;
-    ui.layout.main.workflow.run = runButton;
-    ui.layout.main.workflow.status = statusWrapper;
-    ui.layout.main.workflow.title = titleElement;
-
-    section.appendChild(titleElement);
-    section.appendChild(optionsWrapper);
-    section.appendChild(runButton);
-    section.appendChild(statusWrapper);
-    section.appendChild(resultWrapper);
-
-    ui.layout.main._root?.appendChild(section);
+    debugLog(WORKFLOW_LAYOUT_DESTROYED);
   };
+  //#endregion
 
-  const updateOptions = (state: WorkflowState) => {
-    const { ui } = state;
-    const element = ui.layout.main.workflow.options;
+  //#region Mount
+  const mount = () => {
+    const state = store.getState();
+    const { manager } = state;
+    const { uiRegistry } = manager;
+
+    if (!manager) {
+      return;
+    }
+
+    const elements = uiRegistry.get();
+    if (elements && elements[WORKFLOW_CLASSES._]) {
+      return;
+    }
+
+    const _root = document.createElement('section');
+    _root.className = WORKFLOW_CLASSES._;
+
+    const description = _createDescription(state);
+    const options = _createOptionsWrapper();
+    const result = _createResultWrapper();
+    const title = _createTitle(state);
+
+    _root.appendChild(title);
+    _root.appendChild(description);
+    _root.appendChild(options);
+    _root.appendChild(result);
+
+    elements[MAIN_CLASSES._].appendChild(_root);
+
+    uiRegistry.set(WORKFLOW_CLASSES._, _root);
+    uiRegistry.set(WORKFLOW_CLASSES.description, description);
+    uiRegistry.set(WORKFLOW_CLASSES.options, options);
+    uiRegistry.set(WORKFLOW_CLASSES.result, result);
+    uiRegistry.set(WORKFLOW_CLASSES.title, title);
+
+    debugLog(WORKFLOW_LAYOUT_MOUNTED);
+  };
+  //#endregion
+
+  //#region Render
+  const render = () => {
+    const state = store.getState();
+    const { current, manager } = state;
+    const { id } = current;
+    const { uiRegistry } = manager;
+
+    const elements = uiRegistry.get();
+    if (!elements) {
+      return;
+    }
+
+    if (id !== lastId) {
+      const descr = elements[WORKFLOW_CLASSES.description] as HTMLElement;
+      const title = elements[WORKFLOW_CLASSES.title] as HTMLElement;
+      descr.textContent = _getWorkflowDescription(state);
+      title.textContent = _getWorkflowTitle(state);
+      updateOptions();
+      lastId = id;
+    }
+
+    if (state.results !== lastResultsRef) {
+      updateResults();
+      lastResultsRef = state.results;
+    }
+
+    debugLog(WORKFLOW_LAYOUT_UPDATED);
+  };
+  //#endregion
+
+  //#region Update options
+  const updateOptions = () => {
+    const state = store.getState();
+    const { manager } = state;
+    const { uiRegistry } = manager;
+
+    const elements = uiRegistry.get();
+    const element = elements[WORKFLOW_CLASSES.options] as HTMLElement;
     if (!element) {
       return;
     }
 
     clearChildren(element);
-    ui.layout.main.workflow.fields = [];
 
-    const workflow = getCurrentWorkflow(state);
-    if (!workflow || !workflow.fields) {
-      return;
+    const workflow = _getCurrentWorkflow(state);
+    const cellElements: WorkflowUICells = [];
+
+    if (workflow) {
+      const inputCells = _getWorkflowInputCells(workflow);
+      for (const id in inputCells) {
+        if (!Object.prototype.hasOwnProperty.call(inputCells, id)) {
+          continue;
+        }
+        const cell = inputCells[id];
+        const wrapper = _createCellWrapper();
+        const component = createInputCell(cell);
+        component.id = id;
+
+        cellElements.push(component);
+        wrapper.appendChild(component);
+        element.appendChild(wrapper);
+      }
     }
 
-    for (const field of workflow.fields) {
-      const wrapper = createFieldWrapper();
-      const fieldElement = createInputField(field as WorkflowAPIField);
-      fieldElement.dataset.name = field.name;
+    uiRegistry.set(WORKFLOW_CLASSES.cells, cellElements);
 
-      ui.layout.main.workflow.fields.push(fieldElement);
-      wrapper.appendChild(fieldElement);
-      element.appendChild(wrapper);
+    if (workflow && cellElements.length) {
+      debugLog(WORKFLOW_INPUTS_RENDERED);
+    } else {
+      debugLog(WORKFLOW_INPUTS_CLEARED);
     }
   };
+  //#endregion
 
-  const updateResult = (state: WorkflowState) => {
-    const { ui } = state;
-    const element = ui.layout.main.workflow.result;
+  //#region Update results
+  const updateResults = () => {
+    const state = store.getState();
+    const { manager } = state;
+    const { uiRegistry } = manager;
+
+    const elements = uiRegistry.get();
+    const element = elements[WORKFLOW_CLASSES.result] as HTMLElement;
     if (!element) {
       return;
     }
@@ -156,136 +274,50 @@ export const createWorkflowSection = (): WorkflowSectionHandle => {
     const outputs = state.results || {};
     clearChildren(element);
 
-    const nodeIds = Object.keys(outputs || {});
+    const nodeIds = Object.keys(outputs);
     if (nodeIds.length === 0) {
+      debugLog(WORKFLOW_RESULTS_CLEARED);
       return;
     }
 
-    for (const nodeId of nodeIds) {
-      const nodeContent = outputs[nodeId] as WorkflowAPIResult;
-      const { _description } = nodeContent;
+    const workflow = _getCurrentWorkflow(state);
+    const outputsDefs = workflow ? _getWorkflowOutputCells(workflow) : {};
+    debugLog(WORKFLOW_RESULTS_CLEARED);
 
-      const title = document.createElement('h4');
-      title.className = `${ROOT_CLASS}__result-title`;
-      title.textContent = normalize_description(_description) || `Node #${nodeId}`;
-      element.appendChild(title);
+    const prepOutputs = _deepMerge(outputsDefs, outputs);
+
+    for (let i = 0; i < prepOutputs.length; i++) {
+      const output = prepOutputs[i];
+      const { id, nodeId, title } = output;
+
+      const h4 = document.createElement('h4');
+      h4.className = WORKFLOW_CLASSES.resultTitle;
+      h4.textContent = title || `Node #${nodeId}`;
+      element.appendChild(h4);
 
       const grid = document.createElement('div');
-      grid.className = `${ROOT_CLASS}__result-grid`;
+      grid.className = WORKFLOW_CLASSES.resultGrid;
       element.appendChild(grid);
 
-      for (const resultKey in nodeContent) {
-        const key = resultKey as WorkflowAPIResultKey;
-        if (key === '_description') {
-          continue;
-        }
+      const wrapper = document.createElement('div');
+      wrapper.className = WORKFLOW_CLASSES.resultItem;
 
-        const resultElement = createOutputField(resultKey, nodeContent[resultKey]);
-        resultElement.className = `${ROOT_CLASS}__result-item`;
-        if (resultElement) {
-          grid.appendChild(resultElement);
-        }
-      }
+      const component = createOutputComponent(output);
+      component.id = id;
+
+      wrapper.appendChild(component);
+      grid.appendChild(wrapper);
     }
 
-    element.scrollIntoView({
-      behavior: 'smooth',
-      block: 'start',
-    });
-  };
+    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-  const updateRunButton = (state: WorkflowState) => {
-    const button = state.ui.layout.main.workflow.run;
-    if (!button) {
-      return;
-    }
-    button.lfShowSpinner = state.current.status === 'running';
-  };
-
-  const updateStatus = (state: WorkflowState) => {
-    const element = state.ui.layout.main.workflow.status;
-    if (!element) {
-      return;
-    }
-
-    const message = state.current.message ?? DEFAULT_STATUS_MESSAGES[state.current.status];
-    element.textContent = message;
-    element.dataset.tone = state.current.status;
-  };
-
-  const updateTitle = (state: WorkflowState) => {
-    const element = state.ui.layout.main.workflow.title;
-    if (!element) {
-      return;
-    }
-
-    element.textContent = getWorkflowLabel(state);
-  };
-
-  const render = (state: WorkflowState) => {
-    if (!section) {
-      return;
-    }
-
-    if (state.current.workflow !== lastWorkflowId) {
-      updateTitle(state);
-      updateOptions(state);
-      lastWorkflowId = state.current.workflow;
-    }
-
-    if (state.current.status !== lastStatus || state.current.message !== lastMessage) {
-      updateRunButton(state);
-      updateStatus(state);
-      lastStatus = state.current.status;
-      lastMessage = state.current.message ?? null;
-    }
-
-    if (state.results !== lastResultsRef) {
-      updateResult(state);
-      lastResultsRef = state.results;
-    }
-  };
-
-  const setFieldStatus = (state: WorkflowState, name: string, status: FieldStatus = '') => {
-    const { ui } = state;
-    const field = ui.layout.main.workflow.fields.find((el) => el.dataset.name === name);
-    const wrapper = field?.parentElement;
-    if (wrapper) {
-      wrapper.dataset.status = status;
-    }
-  };
-
-  const destroy = () => {
-    section?.remove();
-    if (mountedState) {
-      const wf = mountedState.ui.layout.main.workflow;
-      wf._root = null;
-      wf.fields = [];
-      wf.options = null;
-      wf.result = null;
-      wf.run = null;
-      wf.status = null;
-      wf.title = null;
-    }
-
-    section = null;
-    optionsWrapper = null;
-    resultWrapper = null;
-    runButton = null;
-    statusWrapper = null;
-    titleElement = null;
-    lastWorkflowId = null;
-    lastStatus = null;
-    lastMessage = null;
-    lastResultsRef = null;
-    mountedState = null;
+    debugLog(WORKFLOW_RESULTS_RENDERED);
   };
 
   return {
+    destroy,
     mount,
     render,
-    destroy,
-    setFieldStatus,
   };
 };
 //#endregion

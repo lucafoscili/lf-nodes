@@ -1,36 +1,28 @@
 import { WorkflowState } from '../types/state';
 
+//#region Constants
+const INIT_ERROR = 'Mutate not initialized';
+const INIT_CB = () => {
+  throw new Error(INIT_ERROR);
+};
+//#endregion
+
 //#region Public API
 export const initState = (appContainer: HTMLDivElement): WorkflowState => ({
-  current: { status: 'ready', message: 'Ready.', workflow: null, preferredOutput: null },
+  current: { status: 'idle', message: '', id: null },
+  isDebug: false,
   manager: null,
-  ui: {
-    layout: {
-      _root: appContainer,
-      drawer: {
-        _root: null,
-      },
-      header: {
-        _root: null,
-        drawerToggle: null,
-        themeSwitch: null,
-      },
-      main: {
-        _root: null,
-        title: { _root: null },
-        workflow: {
-          _root: null,
-          fields: [],
-          options: null,
-          result: null,
-          run: null,
-          status: null,
-          title: null,
-        },
-      },
-    },
+  mutate: {
+    isDebug: INIT_CB,
+    manager: INIT_CB,
+    runResult: INIT_CB,
+    status: INIT_CB,
+    workflow: INIT_CB,
+    workflows: INIT_CB,
   },
-  workflows: [],
   results: null,
+  workflows: {
+    nodes: [],
+  },
 });
 //#endregion

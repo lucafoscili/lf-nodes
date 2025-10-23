@@ -1,0 +1,26 @@
+{
+  "1": {
+    "inputs": {
+      "ascending": true,
+      "mutate_source": false,
+      "ui_widget": "{}"
+    },
+    "class_type": "LF_SortJSONKeys",
+    "_meta": {
+      "title": "Sort JSON keys"
+    }
+  },
+  "2": {
+    "inputs": {
+      "ui_widget": "{}",
+      "json_input": [
+        "1",
+        0
+      ]
+    },
+    "class_type": "LF_DisplayJSON",
+    "_meta": {
+      "title": "Display JSON"
+    }
+  }
+}

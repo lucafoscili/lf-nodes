@@ -1,70 +1,126 @@
 import {
-  LfCodeInterface,
-  LfComponentTag,
-  LfMasonryPropsInterface,
+  LfComponentPropsFor,
+  LfDataColumn,
+  LfDataDataset,
+  LfDataNode,
 } from '@lf-widgets/foundations/dist';
 import { WorkflowStatus } from './state';
 
 //#region API
+export interface WorkflowAPIErrorOptions<T> {
+  payload?: T;
+  status?: number;
+}
 export interface WorkflowAPIResponse {
   message: string;
   payload: WorkflowAPIRunPayload;
   status: WorkflowStatus;
 }
-export interface WorkflowAPIDefinition {
+//#endregion
+
+//#region Dataset
+export type WorkflowLFNode = Omit<LfDataNode, 'children' | 'cells'>;
+export interface WorkflowAPIItem extends WorkflowLFNode {
+  children: [WorkflowAPIInputs?, WorkflowAPIOutputs?];
+  category: string;
+}
+export interface WorkflowAPIInputs extends WorkflowLFNode {
+  cells: WorkflowCellsInputContainer;
+  id: `${string}:inputs`;
+}
+export interface WorkflowAPIOutputs extends WorkflowLFNode {
+  cells: WorkflowCellsOutputContainer;
+  id: `${string}:outputs`;
+}
+export interface WorkflowAPIDataset {
+  columns?: Array<LfDataColumn>;
+  nodes: Array<WorkflowAPIItem>;
+}
+//#endregion
+
+//#region Cells
+// Common
+export interface WorkflowCellBase {
   id: string;
-  label: string;
-  description: string;
-  fields: WorkflowAPIField[];
+  nodeId: string;
+  title?: string;
+  value?: string;
 }
-export type WorkflowAPIResultKey = '_description' | 'code' | 'masonry';
-export type WorkflowAPIResult = {
-  [K in WorkflowAPIResultKey]?: K extends '_description'
-    ? string | string[]
-    : K extends 'code'
-    ? Partial<LfCodeInterface> & {
-        _description?: string | string[];
-      }
-    : K extends 'masonry'
-    ? Partial<LfMasonryPropsInterface> & {
-        _description?: string | string[];
-        _slotmap?: Record<string, string>;
-      }
-    : never;
+
+// Inputs
+export interface WorkflowCellInput extends WorkflowCellBase {
+  props?: Partial<
+    LfComponentPropsFor<
+      'LfButton' | 'LfCode' | 'LfMasonry' | 'LfTextfield' | 'LfToggle' | 'LfUpload'
+    >
+  >;
+  shape?: 'textfield' | 'toggle' | 'upload';
+}
+export interface WorkflowCellsInputContainer {
+  [index: string]: WorkflowCellInput;
+}
+
+// Outputs
+export interface WorkflowCellOutput extends WorkflowNodeOutputs, WorkflowCellBase {
+  props?: Partial<LfComponentPropsFor<'LfCode' | 'LfMasonry'>>;
+  shape?: 'code' | 'masonry';
+}
+export type ShapeToComponentNameMap = {
+  button: 'LfButton';
+  code: 'LfCode';
+  masonry: 'LfMasonry';
+  textfield: 'LfTextfield';
+  toggle: 'LfToggle';
+  upload: 'LfUpload';
 };
+export type Shape = keyof ShapeToComponentNameMap;
+export type WorkflowCellOutputItemFor<S extends Shape> = WorkflowCellOutput & {
+  props?: Partial<LfComponentPropsFor<ShapeToComponentNameMap[S]>>;
+  shape: S;
+};
+export type WorkflowCellOutputItem = WorkflowCellOutputItemFor<Shape>;
+export interface WorkflowCellsOutputContainer {
+  [index: string]: WorkflowCellOutputItemFor<Shape>;
+}
+//#endregion
 
-// typed representation of the node `ui` payload
-export interface LFCodeItem {
-  _description?: string | string[];
-  lfLanguage?: string;
-  lfValue?: string;
+//#region Nodes outputs
+export interface WorkflowNodeOutputs
+  extends DisplayJSONNodeOutputs,
+    SaveSVGNodeOutputs,
+    SaveImageForCivitAINodeOutputs {}
+export interface DisplayJSONNodeOutputs {
+  json: Record<string, unknown>;
 }
+export interface SaveImageForCivitAINodeOutputs {
+  civitai_metadata: string;
+  dataset: LfDataDataset;
+  file_names: string[];
+}
+export interface SaveSVGNodeOutputs {
+  dataset: LfDataDataset;
+  slot_map: Record<string, string>;
+  svg: string;
+}
+//#endregion
 
-export interface LFMasonryItem {
-  _description?: string | string[];
-  lfDataset?: {
-    nodes?: Array<{
-      title?: string;
-      filename?: string;
-      url?: string;
-    }>;
-  };
+//#region Results
+export interface WorkflowNodeResultPayload {
+  lf_output?: [
+    {
+      civitai_metadata?: string;
+      file_names?: string[];
+      dataset?: LfDataDataset;
+      slot_map?: Record<string, string>;
+      svg?: string;
+    },
+  ];
+  [key: string]: unknown;
 }
+export type WorkflowNodeResults = Record<string, WorkflowNodeResultPayload>;
+//#endregion
 
-export interface WorkflowAPIUI {
-  _description?: string | string[];
-  lf_code?: LFCodeItem[];
-  lf_masonry?: LFMasonryItem[];
-}
-export interface WorkflowAPIField {
-  name: LfComponentTag;
-  label: string;
-  component: string;
-  description?: string;
-  required?: boolean;
-  default?: unknown;
-  extra?: Record<string, any>;
-}
+//#region Run
 export interface WorkflowAPIRunPayload {
   detail: string;
   error?: {
@@ -72,9 +128,12 @@ export interface WorkflowAPIRunPayload {
     message: string;
   };
   history: {
-    outputs?: WorkflowAPIUI;
+    outputs?: WorkflowNodeResults;
   };
-  preferred_output?: string;
+}
+export interface WorkflowAPIRunResult extends WorkflowAPIResponse {
+  status: Extract<WorkflowStatus, 'ready' | 'error'>;
+  payload: WorkflowAPIRunPayload;
 }
 //#endregion
 
