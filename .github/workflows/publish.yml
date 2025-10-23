@@ -25,7 +25,15 @@ jobs:
           fetch-tags: true
       - name: Fetch all history and branches
         run: |
-          git fetch --unshallow
+          # Only attempt to unshallow if this is a shallow clone. On a complete
+          # repository `git fetch --unshallow` fails with exit code 128.
+          # Use `git rev-parse --is-shallow-repository` which prints "true" or
+          # "false" so we can guard the call.
+          if [ "$(git rev-parse --is-shallow-repository 2>/dev/null)" = "true" ]; then
+            git fetch --unshallow
+          fi
+          # Always fetch all branches and tags to ensure history and tags exist
+          # for later steps that compute tags/commits.
           git fetch --all --tags
       - name: Get Previous Tag
         id: previous_tag
