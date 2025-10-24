@@ -105,6 +105,14 @@ body {
   &__drawer-toggle {
     margin-right: auto;
   }
+
+  &__server-indicator {
+    & {
+      align-items: center;
+      display: flex;
+      gap: 1.25em;
+    }
+  }
 }
 
 .main-section {

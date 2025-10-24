@@ -12,6 +12,7 @@ export type WorkflowUIItem = HTMLElement | HTMLElement[];
 export interface WorkflowManager {
   getAppRoot: () => HTMLDivElement;
   getDispatchers: () => WorkflowDispatchers;
+  getQueuedJobs: () => number;
   getStore: () => WorkflowStore;
   isDebugEnabled: () => boolean;
   setStatus: (status: WorkflowStatus, message?: string) => void;

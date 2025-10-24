@@ -18,10 +18,11 @@ import { createWorkflowRunnerStore } from './store';
 
 export class LfWorkflowRunnerManager implements WorkflowManager {
   //#region Initialization
+  #APP_ROOT: HTMLDivElement;
   #DISPATCHERS: WorkflowDispatchers;
   #FRAMEWORK = getLfFramework();
   #IS_DEBUG = false;
-  #APP_ROOT: HTMLDivElement;
+  #QUEUED_JOBS = -1;
   #SECTIONS: {
     actionButton: WorkflowSectionController;
     dev: WorkflowSectionController;
@@ -72,6 +73,8 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
       });
       this.setStatus('error', message);
     });
+
+    this.#startPolling();
   }
   //#endregion
 
@@ -117,6 +120,32 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
     }
     this.setStatus('idle', WORKFLOWS_LOADED);
   };
+  #startPolling() {
+    setInterval(async () => {
+      try {
+        const resp = await fetch('/queue');
+        if (!resp.ok) {
+          throw new Error('unreachable');
+        }
+
+        const { queue_running, queue_pending } = (await resp.json()) as {
+          queue_pending: Array<unknown>;
+          queue_running: Array<unknown>;
+        };
+        const qPending = Number(queue_pending?.length || 0);
+        const qRunning = Number(queue_running?.length || 0);
+        const busy = qPending + qRunning;
+
+        this.#QUEUED_JOBS = busy;
+      } catch (e) {
+        try {
+          this.#QUEUED_JOBS = -1;
+        } catch (err) {}
+      }
+
+      this.#SECTIONS.header.render();
+    }, 1000);
+  }
   #subscribeToState() {
     this.#STORE.subscribe((state) => {
       this.#SECTIONS.actionButton.render();
@@ -149,6 +178,9 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
   }
   getStore() {
     return this.#STORE;
+  }
+  getQueuedJobs() {
+    return this.#QUEUED_JOBS;
   }
   isDebugEnabled() {
     return this.#STORE.getState().isDebug;
