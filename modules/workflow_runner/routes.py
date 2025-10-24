@@ -1,6 +1,7 @@
 import asyncio
 import execution
 import folder_paths
+import json
 import logging
 import os
 import time
@@ -140,6 +141,25 @@ async def lf_nodes_static_workflow(request: web.Request) -> web.Response:
 @PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/workflows")
 async def lf_nodes_list_workflows(_: web.Request) -> web.Response:
     return web.json_response({"workflows": list_workflows()})
+
+@PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/workflows/{{workflow_id}}")
+async def lf_nodes_get_workflow(request: web.Request) -> web.Response:
+    workflow_id = request.match_info.get('workflow_id')
+    if not workflow_id:
+        return web.Response(status=400, text='Missing workflow_id')
+    
+    workflow = get_workflow(workflow_id)
+    if not workflow:
+        return web.Response(status=404, text='Workflow not found')
+    
+    try:
+        # Load the raw workflow JSON (not the processed prompt)
+        with workflow.workflow_path.open("r", encoding="utf-8") as workflow_file:
+            workflow_json = json.load(workflow_file)
+        return web.json_response(workflow_json)
+    except Exception as e:
+        logging.exception(f"Error loading workflow {workflow_id}")
+        return web.Response(status=500, text=f'Error loading workflow: {str(e)}')
 
 # Import proxy module to register proxy routes
 try:
