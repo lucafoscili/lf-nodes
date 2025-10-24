@@ -301,11 +301,7 @@ const createMainSection = (store) => {
   const { MAIN_DESTROYED, MAIN_MOUNTED, MAIN_UPDATED } = DEBUG_MESSAGES;
   let workflowSection = createWorkflowSection(store);
   const destroy = () => {
-    const state = store.getState();
-    if (!state.manager) {
-      return;
-    }
-    const { manager } = state;
+    const { manager } = store.getState();
     const { uiRegistry } = manager;
     for (const cls in MAIN_CLASSES) {
       const element = MAIN_CLASSES[cls];
@@ -315,12 +311,8 @@ const createMainSection = (store) => {
     debugLog(MAIN_DESTROYED);
   };
   const mount = () => {
-    const state = store.getState();
-    const { manager } = state;
+    const { manager } = store.getState();
     const { uiRegistry } = manager;
-    if (!manager) {
-      return;
-    }
     const elements = uiRegistry.get();
     if (elements && elements[MAIN_CLASSES._]) {
       return;
@@ -333,8 +325,7 @@ const createMainSection = (store) => {
     debugLog(MAIN_MOUNTED);
   };
   const render = () => {
-    const state = store.getState();
-    const { manager } = state;
+    const { manager } = store.getState();
     const { uiRegistry } = manager;
     const elements = uiRegistry.get();
     if (!elements) {
@@ -369,10 +360,10 @@ const _createCellWrapper = () => {
   cellWrapper.className = WORKFLOW_CLASSES.cell;
   return cellWrapper;
 };
-const _createDescription = (state) => {
+const _createDescription = (store) => {
   const p = document.createElement("p");
   p.className = WORKFLOW_CLASSES.description;
-  p.textContent = _getWorkflowDescription(state);
+  p.textContent = _getWorkflowDescription(store);
   return p;
 };
 const _createOptionsWrapper = () => {
@@ -385,10 +376,10 @@ const _createResultWrapper = () => {
   resultWrapper.className = WORKFLOW_CLASSES.result;
   return resultWrapper;
 };
-const _createTitle = (state) => {
+const _createTitle = (store) => {
   const h3 = document.createElement("h3");
   h3.className = WORKFLOW_CLASSES.title;
-  h3.textContent = _getWorkflowTitle(state);
+  h3.textContent = _getWorkflowTitle(store);
   return h3;
 };
 const _deepMerge = (defs, outs) => {
@@ -406,13 +397,13 @@ const _deepMerge = (defs, outs) => {
   }
   return prep;
 };
-const _getCurrentWorkflow = (state) => {
+const _getCurrentWorkflow = (store) => {
   var _a;
-  const { current, workflows } = state;
+  const { current, workflows } = store.getState();
   return ((_a = workflows == null ? void 0 : workflows.nodes) == null ? void 0 : _a.find((node) => node.id === current.id)) || null;
 };
-const _getWorkflowDescription = (state) => {
-  const workflow = _getCurrentWorkflow(state);
+const _getWorkflowDescription = (store) => {
+  const workflow = _getCurrentWorkflow(store);
   return (workflow == null ? void 0 : workflow.description) || "";
 };
 const _getWorkflowInputCells = (workflow) => {
@@ -425,8 +416,8 @@ const _getWorkflowOutputCells = (workflow) => {
   const outputsSection = (_a = workflow.children) == null ? void 0 : _a.find((child) => child.id.endsWith(":outputs"));
   return (outputsSection == null ? void 0 : outputsSection.cells) || {};
 };
-const _getWorkflowTitle = (state) => {
-  const workflow = _getCurrentWorkflow(state);
+const _getWorkflowTitle = (store) => {
+  const workflow = _getCurrentWorkflow(store);
   const str = typeof (workflow == null ? void 0 : workflow.value) === "string" ? workflow.value : String((workflow == null ? void 0 : workflow.value) || "");
   return str || WORKFLOW_TEXT;
 };
@@ -435,11 +426,7 @@ const createWorkflowSection = (store) => {
   let lastId = null;
   let lastResultsRef = null;
   const destroy = () => {
-    const state = store.getState();
-    if (!state.manager) {
-      return;
-    }
-    const { manager } = state;
+    const { manager } = store.getState();
     const { uiRegistry } = manager;
     for (const cls in WORKFLOW_CLASSES) {
       const element = WORKFLOW_CLASSES[cls];
@@ -450,22 +437,18 @@ const createWorkflowSection = (store) => {
     debugLog(WORKFLOW_LAYOUT_DESTROYED);
   };
   const mount = () => {
-    const state = store.getState();
-    const { manager } = state;
+    const { manager } = store.getState();
     const { uiRegistry } = manager;
-    if (!manager) {
-      return;
-    }
     const elements = uiRegistry.get();
     if (elements && elements[WORKFLOW_CLASSES._]) {
       return;
     }
     const _root = document.createElement("section");
     _root.className = WORKFLOW_CLASSES._;
-    const description = _createDescription(state);
+    const description = _createDescription(store);
     const options = _createOptionsWrapper();
     const result = _createResultWrapper();
-    const title = _createTitle(state);
+    const title = _createTitle(store);
     _root.appendChild(title);
     _root.appendChild(description);
     _root.appendChild(options);
@@ -490,8 +473,8 @@ const createWorkflowSection = (store) => {
     if (id !== lastId) {
       const descr = elements[WORKFLOW_CLASSES.description];
       const title = elements[WORKFLOW_CLASSES.title];
-      descr.textContent = _getWorkflowDescription(state);
-      title.textContent = _getWorkflowTitle(state);
+      descr.textContent = _getWorkflowDescription(store);
+      title.textContent = _getWorkflowTitle(store);
       updateOptions();
       lastId = id;
     }
@@ -502,8 +485,7 @@ const createWorkflowSection = (store) => {
     debugLog(WORKFLOW_LAYOUT_UPDATED);
   };
   const updateOptions = () => {
-    const state = store.getState();
-    const { manager } = state;
+    const { manager } = store.getState();
     const { uiRegistry } = manager;
     const elements = uiRegistry.get();
     const element = elements[WORKFLOW_CLASSES.options];
@@ -511,7 +493,7 @@ const createWorkflowSection = (store) => {
       return;
     }
     clearChildren(element);
-    const workflow = _getCurrentWorkflow(state);
+    const workflow = _getCurrentWorkflow(store);
     const cellElements = [];
     if (workflow) {
       const inputCells = _getWorkflowInputCells(workflow);
@@ -551,7 +533,7 @@ const createWorkflowSection = (store) => {
       debugLog(WORKFLOW_RESULTS_CLEARED);
       return;
     }
-    const workflow = _getCurrentWorkflow(state);
+    const workflow = _getCurrentWorkflow(store);
     const outputsDefs = workflow ? _getWorkflowOutputCells(workflow) : {};
     debugLog(WORKFLOW_RESULTS_CLEARED);
     const prepOutputs = _deepMerge(outputsDefs, outputs);
@@ -792,9 +774,9 @@ const workflowDispatcher = async (store) => {
     }
   }
 };
-const executeWorkflow = (e, state) => {
+const executeWorkflow = (e, store) => {
   const { eventType } = e.detail;
-  const { manager } = state;
+  const { manager } = store.getState();
   switch (eventType) {
     case "click":
       manager.getDispatchers().runWorkflow();
@@ -813,11 +795,8 @@ const createActionButtonSection = (store) => {
   let lastMessage = null;
   let lastStatus = null;
   const destroy = () => {
-    const state = store.getState();
-    if (!state.manager) {
-      return;
-    }
-    const { uiRegistry } = state.manager;
+    const { manager } = store.getState();
+    const { uiRegistry } = manager;
     for (const cls in ACTION_BUTTON_CLASSES) {
       const element = ACTION_BUTTON_CLASSES[cls];
       uiRegistry.remove(element);
@@ -827,8 +806,7 @@ const createActionButtonSection = (store) => {
     debugLog(ACTION_BUTTON_DESTROYED);
   };
   const mount = () => {
-    const state = store.getState();
-    const { manager } = state;
+    const { manager } = store.getState();
     const { uiRegistry } = manager;
     const elements = uiRegistry.get();
     if (elements && elements[ACTION_BUTTON_CLASSES._]) {
@@ -839,14 +817,13 @@ const createActionButtonSection = (store) => {
     _root.lfIcon = "send";
     _root.lfStyling = "floating";
     _root.title = "Run current workflow";
-    _root.addEventListener("lf-button-event", (e) => executeWorkflow(e, store.getState()));
+    _root.addEventListener("lf-button-event", (e) => executeWorkflow(e, store));
     manager.getAppRoot().appendChild(_root);
     uiRegistry.set(ACTION_BUTTON_CLASSES._, _root);
     debugLog(ACTION_BUTTON_MOUNTED);
   };
   const render = () => {
-    const state = store.getState();
-    const { current, manager } = state;
+    const { current, manager } = store.getState();
     const { uiRegistry } = manager;
     const elements = uiRegistry.get();
     if (!elements) {
@@ -877,8 +854,6 @@ const DEV_CLASSES = {
   card: theme$3.bemClass(ROOT_CLASS$3, "card")
 };
 const _createDataset$1 = () => {
-  const framework = getLfFramework();
-  const enabled = framework.debug.isEnabled();
   return {
     nodes: [
       {
@@ -886,8 +861,7 @@ const _createDataset$1 = () => {
         cells: {
           lfToggle: {
             shape: "toggle",
-            lfValue: enabled,
-            value: enabled
+            value: false
           },
           lfCode: {
             shape: "code",
@@ -909,11 +883,7 @@ const _createDataset$1 = () => {
 const createDevSection = (store) => {
   const { DEV_SECTION_DESTROYED, DEV_SECTION_MOUNTED, DEV_SECTION_UPDATED } = DEBUG_MESSAGES;
   const destroy = () => {
-    const state = store.getState();
-    if (!state.manager) {
-      return;
-    }
-    const { manager } = state;
+    const { manager } = store.getState();
     const { uiRegistry } = manager;
     for (const cls in DEV_CLASSES) {
       const element = DEV_CLASSES[cls];
@@ -932,8 +902,6 @@ const createDevSection = (store) => {
     }
     const _root = document.createElement("div");
     _root.className = DEV_CLASSES._;
-    _root.dataset.open = "false";
-    _root.setAttribute("aria-hidden", "true");
     const card = document.createElement("lf-card");
     card.className = DEV_CLASSES.card;
     card.lfLayout = "debug";
@@ -946,19 +914,11 @@ const createDevSection = (store) => {
     debugLog(DEV_SECTION_MOUNTED);
   };
   const render = () => {
-    const state = store.getState();
-    const { manager } = state;
+    const { manager } = store.getState();
     const { uiRegistry } = manager;
-    if (!manager) {
-      return;
-    }
     const elements = uiRegistry.get();
     if (!elements) {
       return;
-    }
-    const _root = elements[DEV_CLASSES._];
-    if (_root) {
-      _root.setAttribute("aria-hidden", String(!state.isDebug));
     }
     debugLog(DEV_SECTION_UPDATED);
   };
@@ -968,9 +928,27 @@ const createDevSection = (store) => {
     render
   };
 };
-const toggleDebug = (e, state) => {
+const openComfyUI = (e) => {
   const { eventType } = e.detail;
-  const { manager } = state;
+  switch (eventType) {
+    case "click":
+      const port = window.location.port || "3000";
+      window.open(`http://localhost:${port}`, "_blank");
+  }
+};
+const openGithubRepo = (e) => {
+  const { eventType } = e.detail;
+  switch (eventType) {
+    case "click":
+      window.open("https://github.com/lucafoscili/lf-nodes", "_blank");
+      break;
+    default:
+      return;
+  }
+};
+const toggleDebug = (e, store) => {
+  const { eventType } = e.detail;
+  const { manager } = store.getState();
   switch (eventType) {
     case "click":
       manager.toggleDebug();
@@ -979,9 +957,9 @@ const toggleDebug = (e, state) => {
       return;
   }
 };
-const toggleDrawer = (e, state) => {
+const toggleDrawer = (e, store) => {
   const { eventType } = e.detail;
-  const { manager } = state;
+  const { manager } = store.getState();
   const elements = manager.uiRegistry.get();
   const drawer = elements[DRAWER_CLASSES._];
   switch (eventType) {
@@ -992,9 +970,9 @@ const toggleDrawer = (e, state) => {
       return;
   }
 };
-const drawerNavigation = (e, state) => {
+const drawerNavigation = (e, store) => {
   const { eventType, node } = e.detail;
-  const { manager } = state;
+  const { manager } = store.getState();
   const elements = manager.uiRegistry.get();
   const drawer = elements[DRAWER_CLASSES._];
   switch (eventType) {
@@ -1014,8 +992,50 @@ const { theme: theme$2 } = getLfFramework();
 const ROOT_CLASS$2 = "drawer-section";
 const DRAWER_CLASSES = {
   _: theme$2.bemClass(ROOT_CLASS$2),
+  buttonComfyUi: theme$2.bemClass(ROOT_CLASS$2, "button-comfyui"),
+  buttonDebug: theme$2.bemClass(ROOT_CLASS$2, "button-debug"),
+  buttonGithub: theme$2.bemClass(ROOT_CLASS$2, "button-github"),
   container: theme$2.bemClass(ROOT_CLASS$2, "container"),
+  footer: theme$2.bemClass(ROOT_CLASS$2, "footer"),
   tree: theme$2.bemClass(ROOT_CLASS$2, "tree")
+};
+const _button = (icon, label, evCb, className) => {
+  const button = document.createElement("lf-button");
+  button.className = className;
+  button.lfAriaLabel = label;
+  button.lfIcon = icon;
+  button.lfStyling = "icon";
+  button.lfUiSize = "small";
+  button.title = label;
+  button.addEventListener("lf-button-event", evCb);
+  return button;
+};
+const _footer = (store) => {
+  const footer = document.createElement("div");
+  footer.className = DRAWER_CLASSES.footer;
+  let icon = getLfFramework().theme.get.icon("imageInPicture");
+  let label = "Open ComfyUI";
+  const comfyUi = _button(icon, label, (e) => openComfyUI(e), DRAWER_CLASSES.buttonComfyUi);
+  icon = getLfFramework().theme.get.icon("bug");
+  label = "Toggle developer console";
+  const debug = _button(icon, label, (e) => toggleDebug(e, store), DRAWER_CLASSES.buttonDebug);
+  icon = getLfFramework().theme.get.icon("brandGithub");
+  label = "Open GitHub repository";
+  const github = _button(icon, label, (e) => openGithubRepo(e), DRAWER_CLASSES.buttonGithub);
+  footer.appendChild(github);
+  footer.appendChild(comfyUi);
+  footer.appendChild(debug);
+  return { comfyUi, debug, footer, github };
+};
+const _container$1 = (store) => {
+  const container = document.createElement("div");
+  container.className = DRAWER_CLASSES.container;
+  container.slot = "content";
+  const { comfyUi, debug, footer, github } = _footer(store);
+  const tree = _tree(store);
+  container.appendChild(tree);
+  container.appendChild(footer);
+  return { comfyUi, container, debug, footer, github, tree };
 };
 const _createDataset = (workflows) => {
   var _a, _b;
@@ -1047,29 +1067,18 @@ const _getIcon = (category) => {
   };
   return category_icons[category] || alertTriangle;
 };
-const _container$1 = (state) => {
-  const container = document.createElement("div");
-  container.className = DRAWER_CLASSES.container;
-  container.slot = "content";
-  const tree = _tree(state);
-  container.appendChild(tree);
-  return { container, tree };
-};
-const _tree = (state) => {
+const _tree = (store) => {
   const tree = document.createElement("lf-tree");
   tree.className = DRAWER_CLASSES.tree;
   tree.lfAccordionLayout = true;
-  tree.addEventListener("lf-tree-event", (e) => drawerNavigation(e, state));
+  tree.addEventListener("lf-tree-event", (e) => drawerNavigation(e, store));
   return tree;
 };
 const createDrawerSection = (store) => {
   const { DRAWER_DESTROYED, DRAWER_MOUNTED, DRAWER_UPDATED } = DEBUG_MESSAGES;
   const destroy = () => {
-    const state = store.getState();
-    if (!state.manager) {
-      return;
-    }
-    const { uiRegistry } = state.manager;
+    const { manager } = store.getState();
+    const { uiRegistry } = manager;
     for (const cls in DRAWER_CLASSES) {
       const element = DRAWER_CLASSES[cls];
       uiRegistry.remove(element);
@@ -1077,8 +1086,7 @@ const createDrawerSection = (store) => {
     debugLog(DRAWER_DESTROYED);
   };
   const mount = () => {
-    const state = store.getState();
-    const { manager } = state;
+    const { manager } = store.getState();
     const { uiRegistry } = manager;
     const elements = uiRegistry.get();
     if (elements && elements[DRAWER_CLASSES._]) {
@@ -1087,26 +1095,32 @@ const createDrawerSection = (store) => {
     const _root = document.createElement("lf-drawer");
     _root.className = ROOT_CLASS$2;
     _root.lfDisplay = "slide";
-    const { container, tree } = _container$1(state);
+    const { comfyUi, debug, footer, github, container, tree } = _container$1(store);
     _root.appendChild(container);
     manager.getAppRoot().appendChild(_root);
     uiRegistry.set(DRAWER_CLASSES._, _root);
+    uiRegistry.set(DRAWER_CLASSES.buttonComfyUi, comfyUi);
+    uiRegistry.set(DRAWER_CLASSES.buttonDebug, debug);
+    uiRegistry.set(DRAWER_CLASSES.footer, footer);
+    uiRegistry.set(DRAWER_CLASSES.buttonGithub, github);
     uiRegistry.set(DRAWER_CLASSES.container, container);
     uiRegistry.set(DRAWER_CLASSES.tree, tree);
     debugLog(DRAWER_MOUNTED);
   };
   const render = () => {
-    const state = store.getState();
-    const { manager, workflows } = state;
+    const { manager, workflows } = store.getState();
     const { uiRegistry } = manager;
-    if (!manager) {
-      return;
-    }
+    const isDebug = manager.isDebugEnabled();
     const elements = uiRegistry.get();
     if (!elements) {
       return;
     }
+    const debug = elements[DRAWER_CLASSES.buttonDebug];
     const tree = elements[DRAWER_CLASSES.tree];
+    if (debug) {
+      debug.lfUiState = isDebug ? "warning" : "primary";
+      debug.title = isDebug ? "Hide developer console" : "Show developer console";
+    }
     if (tree) {
       tree.lfDataset = _createDataset(workflows);
     }
@@ -1123,7 +1137,6 @@ const ROOT_CLASS$1 = "header-section";
 const HEADER_CLASSES = {
   _: theme$1.bemClass(ROOT_CLASS$1),
   container: theme$1.bemClass(ROOT_CLASS$1, "container"),
-  debugToggle: theme$1.bemClass(ROOT_CLASS$1, "debug-toggle"),
   drawerToggle: theme$1.bemClass(ROOT_CLASS$1, "drawer-toggle")
 };
 const _container = () => {
@@ -1132,22 +1145,7 @@ const _container = () => {
   container.slot = "content";
   return container;
 };
-const _debugToggle = (state) => {
-  const { theme: theme2 } = getLfFramework();
-  const { get } = theme2;
-  const lfIcon = get.icon("code");
-  const props = {
-    lfAriaLabel: "Toggle developer console",
-    lfIcon,
-    lfStyling: "icon"
-  };
-  const debugToggle = createComponent.button(props);
-  debugToggle.lfUiState = "info";
-  debugToggle.className = `${ROOT_CLASS$1}__debug-toggle`;
-  debugToggle.addEventListener("lf-button-event", (e) => toggleDebug(e, state));
-  return debugToggle;
-};
-const _drawerToggle = (state) => {
+const _drawerToggle = (store) => {
   const lfIcon = theme$1.get.icon("menu2");
   const props = {
     lfAriaLabel: "Toggle drawer",
@@ -1156,17 +1154,13 @@ const _drawerToggle = (state) => {
   };
   const drawerToggle = createComponent.button(props);
   drawerToggle.className = HEADER_CLASSES.drawerToggle;
-  drawerToggle.addEventListener("lf-button-event", (e) => toggleDrawer(e, state));
+  drawerToggle.addEventListener("lf-button-event", (e) => toggleDrawer(e, store));
   return drawerToggle;
 };
 const createHeaderSection = (store) => {
   const { HEADER_DESTROYED, HEADER_MOUNTED, HEADER_UPDATED } = DEBUG_MESSAGES;
   const destroy = () => {
-    const state = store.getState();
-    if (!state.manager) {
-      return;
-    }
-    const { manager } = state;
+    const { manager } = store.getState();
     const { uiRegistry } = manager;
     for (const cls in HEADER_CLASSES) {
       const element = HEADER_CLASSES[cls];
@@ -1175,8 +1169,7 @@ const createHeaderSection = (store) => {
     debugLog(HEADER_DESTROYED);
   };
   const mount = () => {
-    const state = store.getState();
-    const { manager } = state;
+    const { manager } = store.getState();
     const { uiRegistry } = manager;
     const elements = uiRegistry.get();
     if (elements && elements[HEADER_CLASSES._]) {
@@ -1185,31 +1178,21 @@ const createHeaderSection = (store) => {
     const _root = document.createElement("lf-header");
     _root.className = HEADER_CLASSES._;
     const container = _container();
-    const drawerToggle = _drawerToggle(state);
-    const debugToggle = _debugToggle(state);
+    const drawerToggle = _drawerToggle(store);
     _root.appendChild(container);
     container.appendChild(drawerToggle);
-    container.appendChild(debugToggle);
     manager.getAppRoot().appendChild(_root);
     uiRegistry.set(HEADER_CLASSES._, _root);
     uiRegistry.set(HEADER_CLASSES.container, container);
-    uiRegistry.set(HEADER_CLASSES.debugToggle, debugToggle);
     uiRegistry.set(HEADER_CLASSES.drawerToggle, drawerToggle);
     debugLog(HEADER_MOUNTED);
   };
   const render = () => {
-    const state = store.getState();
-    const { manager } = state;
+    const { manager } = store.getState();
     const { uiRegistry } = manager;
     const elements = uiRegistry.get();
     if (!elements) {
       return;
-    }
-    const isDebug = state.manager.isDebugEnabled();
-    const debugToggle = elements[HEADER_CLASSES.debugToggle];
-    if (debugToggle) {
-      debugToggle.lfUiState = isDebug ? "warning" : "primary";
-      debugToggle.title = isDebug ? "Hide developer console" : "Show developer console";
     }
     debugLog(HEADER_UPDATED);
   };
@@ -1248,14 +1231,11 @@ const _getStateCategory = (status) => {
 };
 const createNotificationsSection = (store) => {
   const { NOTIFICATIONS_DESTROYED, NOTIFICATIONS_MOUNTED, NOTIFICATIONS_UPDATED, STATUS_UPDATED } = DEBUG_MESSAGES;
+  let counter = 0;
   let lastMessage = null;
   let lastStatus = null;
   const destroy = () => {
-    const state = store.getState();
-    if (!state.manager) {
-      return;
-    }
-    const { manager } = state;
+    const { manager } = store.getState();
     const { uiRegistry } = manager;
     for (const cls in NOTIFICATIONS_CLASSES) {
       const element = NOTIFICATIONS_CLASSES[cls];
@@ -1266,8 +1246,7 @@ const createNotificationsSection = (store) => {
     debugLog(NOTIFICATIONS_DESTROYED);
   };
   const mount = () => {
-    const state = store.getState();
-    const { manager } = state;
+    const { manager } = store.getState();
     const { uiRegistry } = manager;
     const elements = uiRegistry.get();
     if (elements && elements[NOTIFICATIONS_CLASSES._]) {
@@ -1280,8 +1259,7 @@ const createNotificationsSection = (store) => {
     debugLog(NOTIFICATIONS_MOUNTED);
   };
   const render = () => {
-    const state = store.getState();
-    const { current, manager } = state;
+    const { current, manager } = store.getState();
     const { id, message, status } = current;
     const { uiRegistry } = manager;
     const elements = uiRegistry.get();
@@ -1290,20 +1268,24 @@ const createNotificationsSection = (store) => {
     }
     const _root = elements[NOTIFICATIONS_CLASSES._];
     if (status !== lastStatus || message !== lastMessage) {
-      const timestamp = (/* @__PURE__ */ new Date()).getTime();
+      counter += 1;
+      const uid = `${NOTIFICATIONS_CLASSES.item}-${counter}`;
       const element = document.createElement("lf-toast");
       element.className = NOTIFICATIONS_CLASSES.item;
       element.lfCloseCallback = () => {
-        uiRegistry.remove(NOTIFICATIONS_CLASSES.item + timestamp);
+        uiRegistry.remove(uid);
         _checkForVisible(_root);
       };
       element.lfIcon = status === "error" ? theme.get.icon("alertTriangle") : theme.get.icon("infoHexagon");
       element.lfMessage = message;
-      element.lfTimer = status === "error" ? 5e3 : 5e3;
       element.lfUiState = _getStateCategory(status);
+      element.lfTimer = status === "error" ? 5e3 : 5e3;
       _root.appendChild(element);
+      requestAnimationFrame(() => {
+        _root.scrollTop = _root.scrollHeight;
+      });
       _checkForVisible(_root);
-      uiRegistry.set(NOTIFICATIONS_CLASSES.item + timestamp, element);
+      uiRegistry.set(uid, element);
       lastStatus = status;
       lastMessage = message;
       debugLog(STATUS_UPDATED, status, {
@@ -1324,7 +1306,7 @@ const INIT_ERROR = "Mutate not initialized";
 const INIT_CB = () => {
   throw new Error(INIT_ERROR);
 };
-const initState = (appContainer) => ({
+const initState = () => ({
   current: { status: "idle", message: "", id: null },
   isDebug: false,
   manager: null,
@@ -1511,7 +1493,7 @@ class LfWorkflowRunnerManager {
     if (!__classPrivateFieldGet(this, _LfWorkflowRunnerManager_APP_ROOT, "f")) {
       throw new Error("Workflow runner container not found.");
     }
-    __classPrivateFieldSet(this, _LfWorkflowRunnerManager_STORE, createWorkflowRunnerStore(initState(__classPrivateFieldGet(this, _LfWorkflowRunnerManager_APP_ROOT, "f"))), "f");
+    __classPrivateFieldSet(this, _LfWorkflowRunnerManager_STORE, createWorkflowRunnerStore(initState()), "f");
     __classPrivateFieldSet(this, _LfWorkflowRunnerManager_IS_DEBUG, __classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f").getState().isDebug, "f");
     __classPrivateFieldSet(this, _LfWorkflowRunnerManager_DISPATCHERS, {
       runWorkflow: () => workflowDispatcher(__classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f"))
