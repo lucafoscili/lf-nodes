@@ -121,6 +121,152 @@ const STATUS_MESSAGES = {
   UPLOADING_FILE: "Uploading file...",
   WORKFLOW_COMPLETED: "Workflow execution completed successfully."
 };
+class WorkflowApiError extends Error {
+  constructor(message, options = {}) {
+    super(message);
+    this.name = "WorkflowApiError";
+    this.payload = options.payload;
+    this.status = options.status;
+  }
+}
+const fetchWorkflowDefinitions = async () => {
+  const response = await fetch(buildApiUrl("/workflows"), { method: "GET" });
+  const data = await parseJson(response);
+  if (!response.ok) {
+    const message = `Failed to load workflows (${response.status})`;
+    throw new WorkflowApiError(message, { status: response.status, payload: data });
+  }
+  if (!(data == null ? void 0 : data.workflows) || !Array.isArray(data.workflows.nodes)) {
+    throw new WorkflowApiError("Invalid workflows response shape.", { payload: data });
+  }
+  return data.workflows;
+};
+const fetchWorkflowJSON = async (workflowId) => {
+  const response = await fetch(buildApiUrl(`/workflows/${workflowId}`), { method: "GET" });
+  const data = await parseJson(response);
+  if (!response.ok) {
+    const message = `Failed to load workflow JSON (${response.status})`;
+    throw new WorkflowApiError(message, { status: response.status, payload: data });
+  }
+  return data;
+};
+const runWorkflowRequest = async (workflowId, inputs) => {
+  const { RUN_GENERIC } = ERROR_MESSAGES;
+  const { WORKFLOW_COMPLETED } = STATUS_MESSAGES;
+  const response = await fetch(buildApiUrl("/run"), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ workflowId, inputs })
+  });
+  const data = await parseJson(response);
+  const payload = data && data.payload || {
+    detail: response.statusText,
+    history: {}
+  };
+  if (!response.ok || !data) {
+    const detail = (payload == null ? void 0 : payload.detail) || response.statusText;
+    throw new WorkflowApiError(`${RUN_GENERIC} (${detail})`, {
+      status: response.status,
+      payload
+    });
+  }
+  return {
+    message: WORKFLOW_COMPLETED,
+    payload,
+    status: data.status
+  };
+};
+const uploadWorkflowFiles = async (files) => {
+  const { UPLOAD_GENERIC, UPLOAD_INVALID_RESPONSE, UPLOAD_MISSING_FILE } = ERROR_MESSAGES;
+  const { UPLOAD_COMPLETED } = STATUS_MESSAGES;
+  if (!files || files.length === 0) {
+    throw new WorkflowApiError(UPLOAD_MISSING_FILE, {
+      payload: { detail: "missing_file" }
+    });
+  }
+  const formData = new FormData();
+  files.forEach((file) => formData.append("file", file));
+  const response = await fetch(buildApiUrl("/upload"), {
+    method: "POST",
+    body: formData
+  });
+  const data = await parseJson(response);
+  if (isWorkflowAPIUploadResponse(data)) {
+    if (!response.ok) {
+      const { payload } = data;
+      const detail = (payload == null ? void 0 : payload.detail) || response.statusText;
+      throw new WorkflowApiError(`${UPLOAD_GENERIC} (${detail})`, {
+        status: response.status,
+        payload
+      });
+    }
+    return data;
+  }
+  if (isWorkflowAPIUploadPayload(data)) {
+    if (!response.ok) {
+      const detail = data.detail || response.statusText;
+      throw new WorkflowApiError(`${UPLOAD_GENERIC} (${detail})`, {
+        status: response.status,
+        payload: data
+      });
+    }
+    return {
+      message: UPLOAD_COMPLETED,
+      payload: data,
+      status: "idle"
+    };
+  }
+  throw new WorkflowApiError(UPLOAD_INVALID_RESPONSE, {
+    status: response.status
+  });
+};
+const executeWorkflow = (e, store) => {
+  const { eventType } = e.detail;
+  const { manager } = store.getState();
+  switch (eventType) {
+    case "click":
+      manager.getDispatchers().runWorkflow();
+      break;
+    default:
+      return;
+  }
+};
+const openWorkflowInComfyUI = async (e, store) => {
+  const { eventType } = e.detail;
+  const { current, manager } = store.getState();
+  const { id } = current;
+  switch (eventType) {
+    case "click":
+      if (!id) {
+        manager.setStatus("error", "No workflow selected");
+        return;
+      }
+      try {
+        const workflowJSON = await fetchWorkflowJSON(id);
+        const workflowString = JSON.stringify(workflowJSON, null, 2);
+        const blob = new Blob([workflowString], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${id}.json`;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => {
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        }, 1e3);
+      } catch (error) {
+        if (error instanceof WorkflowApiError) {
+          manager.setStatus("error", `Failed to fetch workflow: ${error.message}`);
+        } else {
+          manager.setStatus("error", "Unexpected error while fetching workflow");
+        }
+      }
+      break;
+    default:
+      return;
+  }
+};
 const _formatContext = (context) => {
   if (context === void 0 || context === null) {
     return null;
@@ -348,6 +494,8 @@ const WORKFLOW_CLASSES = {
   cell: theme$5.bemClass(ROOT_CLASS$5, "cell"),
   cells: theme$5.bemClass(ROOT_CLASS$5, "cells"),
   description: theme$5.bemClass(ROOT_CLASS$5, "description"),
+  h3: theme$5.bemClass(ROOT_CLASS$5, "title-h3"),
+  openButton: theme$5.bemClass(ROOT_CLASS$5, "title-open-button"),
   options: theme$5.bemClass(ROOT_CLASS$5, "options"),
   result: theme$5.bemClass(ROOT_CLASS$5, "result"),
   resultGrid: theme$5.bemClass(ROOT_CLASS$5, "result-grid"),
@@ -375,12 +523,6 @@ const _createResultWrapper = () => {
   const resultWrapper = document.createElement("div");
   resultWrapper.className = WORKFLOW_CLASSES.result;
   return resultWrapper;
-};
-const _createTitle = (store) => {
-  const h3 = document.createElement("h3");
-  h3.className = WORKFLOW_CLASSES.title;
-  h3.textContent = _getWorkflowTitle(store);
-  return h3;
 };
 const _deepMerge = (defs, outs) => {
   var _a, _b;
@@ -421,6 +563,26 @@ const _getWorkflowTitle = (store) => {
   const str = typeof (workflow == null ? void 0 : workflow.value) === "string" ? workflow.value : String((workflow == null ? void 0 : workflow.value) || "");
   return str || WORKFLOW_TEXT;
 };
+const _title = (store) => {
+  const lfIcon = theme$5.get.icon("download");
+  const title = document.createElement("div");
+  const h3 = document.createElement("h3");
+  const openButton = document.createElement("lf-button");
+  title.className = WORKFLOW_CLASSES.title;
+  h3.className = WORKFLOW_CLASSES.h3;
+  h3.textContent = _getWorkflowTitle(store);
+  const label = "Download Workflow JSON";
+  openButton.className = WORKFLOW_CLASSES.openButton;
+  openButton.lfAriaLabel = label;
+  openButton.lfIcon = lfIcon;
+  openButton.lfStyling = "icon";
+  openButton.lfUiSize = "xsmall";
+  openButton.title = label;
+  openButton.addEventListener("lf-button-event", (e) => openWorkflowInComfyUI(e, store));
+  title.appendChild(h3);
+  title.appendChild(openButton);
+  return { h3, openButton, title };
+};
 const createWorkflowSection = (store) => {
   const { WORKFLOW_INPUTS_CLEARED, WORKFLOW_INPUTS_RENDERED, WORKFLOW_LAYOUT_DESTROYED, WORKFLOW_LAYOUT_MOUNTED, WORKFLOW_LAYOUT_UPDATED, WORKFLOW_RESULTS_CLEARED, WORKFLOW_RESULTS_RENDERED } = DEBUG_MESSAGES;
   let lastId = null;
@@ -448,7 +610,7 @@ const createWorkflowSection = (store) => {
     const description = _createDescription(store);
     const options = _createOptionsWrapper();
     const result = _createResultWrapper();
-    const title = _createTitle(store);
+    const { h3, openButton, title } = _title(store);
     _root.appendChild(title);
     _root.appendChild(description);
     _root.appendChild(options);
@@ -456,6 +618,8 @@ const createWorkflowSection = (store) => {
     elements[MAIN_CLASSES._].appendChild(_root);
     uiRegistry.set(WORKFLOW_CLASSES._, _root);
     uiRegistry.set(WORKFLOW_CLASSES.description, description);
+    uiRegistry.set(WORKFLOW_CLASSES.h3, h3);
+    uiRegistry.set(WORKFLOW_CLASSES.openButton, openButton);
     uiRegistry.set(WORKFLOW_CLASSES.options, options);
     uiRegistry.set(WORKFLOW_CLASSES.result, result);
     uiRegistry.set(WORKFLOW_CLASSES.title, title);
@@ -472,9 +636,9 @@ const createWorkflowSection = (store) => {
     }
     if (id !== lastId) {
       const descr = elements[WORKFLOW_CLASSES.description];
-      const title = elements[WORKFLOW_CLASSES.title];
+      const h3 = elements[WORKFLOW_CLASSES.h3];
       descr.textContent = _getWorkflowDescription(store);
-      title.textContent = _getWorkflowTitle(store);
+      h3.textContent = _getWorkflowTitle(store);
       updateOptions();
       lastId = id;
     }
@@ -562,96 +726,6 @@ const createWorkflowSection = (store) => {
     mount,
     render
   };
-};
-class WorkflowApiError extends Error {
-  constructor(message, options = {}) {
-    super(message);
-    this.name = "WorkflowApiError";
-    this.payload = options.payload;
-    this.status = options.status;
-  }
-}
-const fetchWorkflowDefinitions = async () => {
-  const response = await fetch(buildApiUrl("/workflows"), { method: "GET" });
-  const data = await parseJson(response);
-  if (!response.ok) {
-    const message = `Failed to load workflows (${response.status})`;
-    throw new WorkflowApiError(message, { status: response.status, payload: data });
-  }
-  if (!(data == null ? void 0 : data.workflows) || !Array.isArray(data.workflows.nodes)) {
-    throw new WorkflowApiError("Invalid workflows response shape.", { payload: data });
-  }
-  return data.workflows;
-};
-const runWorkflowRequest = async (workflowId, inputs) => {
-  const { RUN_GENERIC } = ERROR_MESSAGES;
-  const { WORKFLOW_COMPLETED } = STATUS_MESSAGES;
-  const response = await fetch(buildApiUrl("/run"), {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ workflowId, inputs })
-  });
-  const data = await parseJson(response);
-  const payload = data && data.payload || {
-    detail: response.statusText,
-    history: {}
-  };
-  if (!response.ok || !data) {
-    const detail = (payload == null ? void 0 : payload.detail) || response.statusText;
-    throw new WorkflowApiError(`${RUN_GENERIC} (${detail})`, {
-      status: response.status,
-      payload
-    });
-  }
-  return {
-    message: WORKFLOW_COMPLETED,
-    payload,
-    status: data.status
-  };
-};
-const uploadWorkflowFiles = async (files) => {
-  const { UPLOAD_GENERIC, UPLOAD_INVALID_RESPONSE, UPLOAD_MISSING_FILE } = ERROR_MESSAGES;
-  const { UPLOAD_COMPLETED } = STATUS_MESSAGES;
-  if (!files || files.length === 0) {
-    throw new WorkflowApiError(UPLOAD_MISSING_FILE, {
-      payload: { detail: "missing_file" }
-    });
-  }
-  const formData = new FormData();
-  files.forEach((file) => formData.append("file", file));
-  const response = await fetch(buildApiUrl("/upload"), {
-    method: "POST",
-    body: formData
-  });
-  const data = await parseJson(response);
-  if (isWorkflowAPIUploadResponse(data)) {
-    if (!response.ok) {
-      const { payload } = data;
-      const detail = (payload == null ? void 0 : payload.detail) || response.statusText;
-      throw new WorkflowApiError(`${UPLOAD_GENERIC} (${detail})`, {
-        status: response.status,
-        payload
-      });
-    }
-    return data;
-  }
-  if (isWorkflowAPIUploadPayload(data)) {
-    if (!response.ok) {
-      const detail = data.detail || response.statusText;
-      throw new WorkflowApiError(`${UPLOAD_GENERIC} (${detail})`, {
-        status: response.status,
-        payload: data
-      });
-    }
-    return {
-      message: UPLOAD_COMPLETED,
-      payload: data,
-      status: "idle"
-    };
-  }
-  throw new WorkflowApiError(UPLOAD_INVALID_RESPONSE, {
-    status: response.status
-  });
 };
 const _collectInputs = async (state) => {
   var _a;
@@ -772,17 +846,6 @@ const workflowDispatcher = async (store) => {
     } else {
       manager.setStatus("error", "Unexpected error while running the workflow.");
     }
-  }
-};
-const executeWorkflow = (e, store) => {
-  const { eventType } = e.detail;
-  const { manager } = store.getState();
-  switch (eventType) {
-    case "click":
-      manager.getDispatchers().runWorkflow();
-      break;
-    default:
-      return;
   }
 };
 const { theme: theme$4 } = getLfFramework();
@@ -1137,7 +1200,10 @@ const ROOT_CLASS$1 = "header-section";
 const HEADER_CLASSES = {
   _: theme$1.bemClass(ROOT_CLASS$1),
   container: theme$1.bemClass(ROOT_CLASS$1, "container"),
-  drawerToggle: theme$1.bemClass(ROOT_CLASS$1, "drawer-toggle")
+  drawerToggle: theme$1.bemClass(ROOT_CLASS$1, "drawer-toggle"),
+  serverIndicator: theme$1.bemClass(ROOT_CLASS$1, "server-indicator"),
+  serverIndicatorCounter: theme$1.bemClass(ROOT_CLASS$1, "server-indicator-counter"),
+  serverIndicatorLight: theme$1.bemClass(ROOT_CLASS$1, "server-indicator-light")
 };
 const _container = () => {
   const container = document.createElement("div");
@@ -1157,8 +1223,21 @@ const _drawerToggle = (store) => {
   drawerToggle.addEventListener("lf-button-event", (e) => toggleDrawer(e, store));
   return drawerToggle;
 };
+const _serverIndicator = () => {
+  const serverIndicator = document.createElement("div");
+  serverIndicator.className = HEADER_CLASSES.serverIndicator;
+  const light = document.createElement("lf-button");
+  light.className = HEADER_CLASSES.serverIndicatorLight;
+  light.lfUiSize = "large";
+  const counter = document.createElement("span");
+  counter.className = HEADER_CLASSES.serverIndicatorCounter;
+  serverIndicator.appendChild(counter);
+  serverIndicator.appendChild(light);
+  return { counter, light, serverIndicator };
+};
 const createHeaderSection = (store) => {
   const { HEADER_DESTROYED, HEADER_MOUNTED, HEADER_UPDATED } = DEBUG_MESSAGES;
+  let lastQueuedJobs = 0;
   const destroy = () => {
     const { manager } = store.getState();
     const { uiRegistry } = manager;
@@ -1179,22 +1258,49 @@ const createHeaderSection = (store) => {
     _root.className = HEADER_CLASSES._;
     const container = _container();
     const drawerToggle = _drawerToggle(store);
+    const { counter, light, serverIndicator } = _serverIndicator();
     _root.appendChild(container);
     container.appendChild(drawerToggle);
+    container.appendChild(serverIndicator);
     manager.getAppRoot().appendChild(_root);
     uiRegistry.set(HEADER_CLASSES._, _root);
     uiRegistry.set(HEADER_CLASSES.container, container);
     uiRegistry.set(HEADER_CLASSES.drawerToggle, drawerToggle);
+    uiRegistry.set(HEADER_CLASSES.serverIndicator, serverIndicator);
+    uiRegistry.set(HEADER_CLASSES.serverIndicatorCounter, counter);
+    uiRegistry.set(HEADER_CLASSES.serverIndicatorLight, light);
     debugLog(HEADER_MOUNTED);
   };
   const render = () => {
+    const { alertTriangle, check, hourglassLow } = theme$1.get.icons();
     const { manager } = store.getState();
     const { uiRegistry } = manager;
     const elements = uiRegistry.get();
     if (!elements) {
       return;
     }
-    debugLog(HEADER_UPDATED);
+    const queuedJobs = manager.getQueuedJobs();
+    if (lastQueuedJobs !== queuedJobs) {
+      const counter = elements[HEADER_CLASSES.serverIndicatorCounter];
+      const light = elements[HEADER_CLASSES.serverIndicatorLight];
+      counter.innerText = "";
+      if (queuedJobs < 0) {
+        light.lfIcon = alertTriangle;
+        light.lfUiState = "danger";
+        light.title = "Server disconnected";
+      } else if (queuedJobs === 0) {
+        light.lfIcon = check;
+        light.lfUiState = "success";
+        light.title = "Server idle";
+      } else {
+        counter.innerText = queuedJobs.toString();
+        light.lfIcon = hourglassLow;
+        light.lfUiState = "warning";
+        light.title = `Jobs in queue: ${queuedJobs}`;
+      }
+      lastQueuedJobs = queuedJobs;
+      debugLog(HEADER_UPDATED);
+    }
   };
   return {
     destroy,
@@ -1429,14 +1535,15 @@ var __classPrivateFieldGet = function(receiver, state, kind, f) {
   if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 };
-var _LfWorkflowRunnerManager_instances, _LfWorkflowRunnerManager_DISPATCHERS, _LfWorkflowRunnerManager_FRAMEWORK, _LfWorkflowRunnerManager_IS_DEBUG, _LfWorkflowRunnerManager_APP_ROOT, _LfWorkflowRunnerManager_SECTIONS, _LfWorkflowRunnerManager_STORE, _LfWorkflowRunnerManager_UI_REGISTRY, _LfWorkflowRunnerManager_initializeFramework, _LfWorkflowRunnerManager_initializeLayout, _LfWorkflowRunnerManager_loadWorkflows, _LfWorkflowRunnerManager_subscribeToState;
+var _LfWorkflowRunnerManager_instances, _LfWorkflowRunnerManager_APP_ROOT, _LfWorkflowRunnerManager_DISPATCHERS, _LfWorkflowRunnerManager_FRAMEWORK, _LfWorkflowRunnerManager_IS_DEBUG, _LfWorkflowRunnerManager_QUEUED_JOBS, _LfWorkflowRunnerManager_SECTIONS, _LfWorkflowRunnerManager_STORE, _LfWorkflowRunnerManager_UI_REGISTRY, _LfWorkflowRunnerManager_initializeFramework, _LfWorkflowRunnerManager_initializeLayout, _LfWorkflowRunnerManager_loadWorkflows, _LfWorkflowRunnerManager_startPolling, _LfWorkflowRunnerManager_subscribeToState;
 class LfWorkflowRunnerManager {
   constructor() {
     _LfWorkflowRunnerManager_instances.add(this);
+    _LfWorkflowRunnerManager_APP_ROOT.set(this, void 0);
     _LfWorkflowRunnerManager_DISPATCHERS.set(this, void 0);
     _LfWorkflowRunnerManager_FRAMEWORK.set(this, getLfFramework());
     _LfWorkflowRunnerManager_IS_DEBUG.set(this, false);
-    _LfWorkflowRunnerManager_APP_ROOT.set(this, void 0);
+    _LfWorkflowRunnerManager_QUEUED_JOBS.set(this, -1);
     _LfWorkflowRunnerManager_SECTIONS.set(this, void 0);
     _LfWorkflowRunnerManager_STORE.set(this, void 0);
     _LfWorkflowRunnerManager_UI_REGISTRY.set(this, /* @__PURE__ */ new WeakMap());
@@ -1519,6 +1626,7 @@ class LfWorkflowRunnerManager {
       });
       this.setStatus("error", message);
     });
+    __classPrivateFieldGet(this, _LfWorkflowRunnerManager_instances, "m", _LfWorkflowRunnerManager_startPolling).call(this);
   }
   //#endregion
   //#region Getters
@@ -1530,6 +1638,9 @@ class LfWorkflowRunnerManager {
   }
   getStore() {
     return __classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f");
+  }
+  getQueuedJobs() {
+    return __classPrivateFieldGet(this, _LfWorkflowRunnerManager_QUEUED_JOBS, "f");
   }
   isDebugEnabled() {
     return __classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f").getState().isDebug;
@@ -1553,7 +1664,7 @@ class LfWorkflowRunnerManager {
     __classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f").getState().mutate.isDebug(!current);
   }
 }
-_LfWorkflowRunnerManager_DISPATCHERS = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_FRAMEWORK = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_IS_DEBUG = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_APP_ROOT = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_SECTIONS = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_STORE = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_UI_REGISTRY = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_loadWorkflows = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_instances = /* @__PURE__ */ new WeakSet(), _LfWorkflowRunnerManager_initializeFramework = function _LfWorkflowRunnerManager_initializeFramework2() {
+_LfWorkflowRunnerManager_APP_ROOT = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_DISPATCHERS = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_FRAMEWORK = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_IS_DEBUG = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_QUEUED_JOBS = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_SECTIONS = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_STORE = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_UI_REGISTRY = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_loadWorkflows = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_instances = /* @__PURE__ */ new WeakSet(), _LfWorkflowRunnerManager_initializeFramework = function _LfWorkflowRunnerManager_initializeFramework2() {
   const assetsUrl = buildAssetsUrl();
   __classPrivateFieldGet(this, _LfWorkflowRunnerManager_FRAMEWORK, "f").assets.set(assetsUrl);
   __classPrivateFieldGet(this, _LfWorkflowRunnerManager_FRAMEWORK, "f").theme.set(DEFAULT_THEME);
@@ -1572,6 +1683,26 @@ _LfWorkflowRunnerManager_DISPATCHERS = /* @__PURE__ */ new WeakMap(), _LfWorkflo
     __classPrivateFieldGet(this, _LfWorkflowRunnerManager_SECTIONS, "f").dev.render();
     __classPrivateFieldSet(this, _LfWorkflowRunnerManager_IS_DEBUG, true, "f");
   }
+}, _LfWorkflowRunnerManager_startPolling = function _LfWorkflowRunnerManager_startPolling2() {
+  setInterval(async () => {
+    try {
+      const resp = await fetch("/queue");
+      if (!resp.ok) {
+        throw new Error("unreachable");
+      }
+      const { queue_running, queue_pending } = await resp.json();
+      const qPending = Number((queue_pending == null ? void 0 : queue_pending.length) || 0);
+      const qRunning = Number((queue_running == null ? void 0 : queue_running.length) || 0);
+      const busy = qPending + qRunning;
+      __classPrivateFieldSet(this, _LfWorkflowRunnerManager_QUEUED_JOBS, busy, "f");
+    } catch (e) {
+      try {
+        __classPrivateFieldSet(this, _LfWorkflowRunnerManager_QUEUED_JOBS, -1, "f");
+      } catch (err) {
+      }
+    }
+    __classPrivateFieldGet(this, _LfWorkflowRunnerManager_SECTIONS, "f").header.render();
+  }, 1e3);
 }, _LfWorkflowRunnerManager_subscribeToState = function _LfWorkflowRunnerManager_subscribeToState2() {
   __classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f").subscribe((state) => {
     __classPrivateFieldGet(this, _LfWorkflowRunnerManager_SECTIONS, "f").actionButton.render();
