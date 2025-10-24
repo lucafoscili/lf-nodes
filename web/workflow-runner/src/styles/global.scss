@@ -207,6 +207,8 @@ body {
   }
 
   &__title {
+    display: flex;
+    gap: 0.5em;
     padding: 1.25em 0;
   }
 }

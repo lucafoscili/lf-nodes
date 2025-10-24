@@ -46,6 +46,18 @@ export const fetchWorkflowDefinitions = async () => {
 
   return data.workflows;
 };
+
+export const fetchWorkflowJSON = async (workflowId: string) => {
+  const response = await fetch(buildApiUrl(`/workflows/${workflowId}`), { method: 'GET' });
+  const data = (await parseJson(response)) as Record<string, unknown> | null;
+
+  if (!response.ok) {
+    const message = `Failed to load workflow JSON (${response.status})`;
+    throw new WorkflowApiError(message, { status: response.status, payload: data });
+  }
+
+  return data;
+};
 //#endregion
 
 //#region Run Workflow

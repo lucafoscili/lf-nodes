@@ -1,4 +1,5 @@
 import { getLfFramework } from '@lf-widgets/framework';
+import { openWorkflowInComfyUI } from '../handlers/workflow';
 import {
   WorkflowAPIItem,
   WorkflowCellOutputItem,
@@ -26,6 +27,8 @@ export const WORKFLOW_CLASSES = {
   cell: theme.bemClass(ROOT_CLASS, 'cell'),
   cells: theme.bemClass(ROOT_CLASS, 'cells'),
   description: theme.bemClass(ROOT_CLASS, 'description'),
+  h3: theme.bemClass(ROOT_CLASS, 'title-h3'),
+  openButton: theme.bemClass(ROOT_CLASS, 'title-open-button'),
   options: theme.bemClass(ROOT_CLASS, 'options'),
   result: theme.bemClass(ROOT_CLASS, 'result'),
   resultGrid: theme.bemClass(ROOT_CLASS, 'result-grid'),
@@ -106,6 +109,32 @@ const _getWorkflowTitle = (store: WorkflowStore) => {
   const str = typeof workflow?.value === 'string' ? workflow.value : String(workflow?.value || '');
   return str || WORKFLOW_TEXT;
 };
+const _title = (store: WorkflowStore) => {
+  const lfIcon = theme.get.icon('download');
+
+  const title = document.createElement('div');
+  const h3 = document.createElement('h3');
+  const openButton = document.createElement('lf-button');
+
+  title.className = WORKFLOW_CLASSES.title;
+
+  h3.className = WORKFLOW_CLASSES.h3;
+  h3.textContent = _getWorkflowTitle(store);
+
+  const label = 'Download Workflow JSON';
+  openButton.className = WORKFLOW_CLASSES.openButton;
+  openButton.lfAriaLabel = label;
+  openButton.lfIcon = lfIcon;
+  openButton.lfStyling = 'icon';
+  openButton.lfUiSize = 'xsmall';
+  openButton.title = label;
+  openButton.addEventListener('lf-button-event', (e) => openWorkflowInComfyUI(e, store));
+
+  title.appendChild(h3);
+  title.appendChild(openButton);
+
+  return { h3, openButton, title };
+};
 //#endregion
 
 export const createWorkflowSection = (store: WorkflowStore): WorkflowSectionController => {
@@ -156,7 +185,7 @@ export const createWorkflowSection = (store: WorkflowStore): WorkflowSectionCont
     const description = _createDescription(store);
     const options = _createOptionsWrapper();
     const result = _createResultWrapper();
-    const title = _createTitle(store);
+    const { h3, openButton, title } = _title(store);
 
     _root.appendChild(title);
     _root.appendChild(description);
@@ -167,6 +196,8 @@ export const createWorkflowSection = (store: WorkflowStore): WorkflowSectionCont
 
     uiRegistry.set(WORKFLOW_CLASSES._, _root);
     uiRegistry.set(WORKFLOW_CLASSES.description, description);
+    uiRegistry.set(WORKFLOW_CLASSES.h3, h3);
+    uiRegistry.set(WORKFLOW_CLASSES.openButton, openButton);
     uiRegistry.set(WORKFLOW_CLASSES.options, options);
     uiRegistry.set(WORKFLOW_CLASSES.result, result);
     uiRegistry.set(WORKFLOW_CLASSES.title, title);
@@ -189,9 +220,9 @@ export const createWorkflowSection = (store: WorkflowStore): WorkflowSectionCont
 
     if (id !== lastId) {
       const descr = elements[WORKFLOW_CLASSES.description] as HTMLElement;
-      const title = elements[WORKFLOW_CLASSES.title] as HTMLElement;
+      const h3 = elements[WORKFLOW_CLASSES.h3] as HTMLElement;
       descr.textContent = _getWorkflowDescription(store);
-      title.textContent = _getWorkflowTitle(store);
+      h3.textContent = _getWorkflowTitle(store);
       updateOptions();
       lastId = id;
     }
