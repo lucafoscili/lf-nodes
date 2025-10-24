@@ -8,7 +8,7 @@ const INIT_CB = () => {
 //#endregion
 
 //#region Public API
-export const initState = (appContainer: HTMLDivElement): WorkflowState => ({
+export const initState = (): WorkflowState => ({
   current: { status: 'idle', message: '', id: null },
   isDebug: false,
   manager: null,

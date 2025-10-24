@@ -2,7 +2,7 @@ import { LfButtonInterface } from '@lf-widgets/foundations/dist';
 import { getLfFramework } from '@lf-widgets/framework';
 import { toggleDrawer } from '../handlers/layout';
 import { WorkflowSectionController } from '../types/section';
-import { WorkflowState, WorkflowStore } from '../types/state';
+import { WorkflowStore } from '../types/state';
 import { DEBUG_MESSAGES } from '../utils/constants';
 import { debugLog } from '../utils/debug';
 import { createComponent } from './components';
@@ -25,7 +25,7 @@ const _container = () => {
 
   return container;
 };
-const _drawerToggle = (state: WorkflowState) => {
+const _drawerToggle = (store: WorkflowStore) => {
   const lfIcon = theme.get.icon('menu2');
 
   const props = {
@@ -36,7 +36,7 @@ const _drawerToggle = (state: WorkflowState) => {
 
   const drawerToggle = createComponent.button(props);
   drawerToggle.className = HEADER_CLASSES.drawerToggle;
-  drawerToggle.addEventListener('lf-button-event', (e) => toggleDrawer(e, state));
+  drawerToggle.addEventListener('lf-button-event', (e) => toggleDrawer(e, store));
 
   return drawerToggle;
 };
@@ -49,12 +49,7 @@ export const createHeaderSection = (store: WorkflowStore): WorkflowSectionContro
 
   //#region Destroy
   const destroy = () => {
-    const state = store.getState();
-    if (!state.manager) {
-      return;
-    }
-
-    const { manager } = state;
+    const { manager } = store.getState();
     const { uiRegistry } = manager;
 
     for (const cls in HEADER_CLASSES) {
@@ -68,8 +63,7 @@ export const createHeaderSection = (store: WorkflowStore): WorkflowSectionContro
 
   //#region Mount
   const mount = () => {
-    const state = store.getState();
-    const { manager } = state;
+    const { manager } = store.getState();
     const { uiRegistry } = manager;
 
     const elements = uiRegistry.get();
@@ -81,7 +75,7 @@ export const createHeaderSection = (store: WorkflowStore): WorkflowSectionContro
     _root.className = HEADER_CLASSES._;
 
     const container = _container();
-    const drawerToggle = _drawerToggle(state);
+    const drawerToggle = _drawerToggle(store);
 
     _root.appendChild(container);
     container.appendChild(drawerToggle);
@@ -98,8 +92,7 @@ export const createHeaderSection = (store: WorkflowStore): WorkflowSectionContro
 
   //#region Render
   const render = () => {
-    const state = store.getState();
-    const { manager } = state;
+    const { manager } = store.getState();
     const { uiRegistry } = manager;
 
     const elements = uiRegistry.get();

@@ -7,7 +7,7 @@ import {
   WorkflowNodeResults,
 } from '../types/api';
 import { WorkflowSectionController, WorkflowUICells } from '../types/section';
-import { WorkflowState, WorkflowStore } from '../types/state';
+import { WorkflowStore } from '../types/state';
 import { clearChildren } from '../utils/common';
 import { DEBUG_MESSAGES } from '../utils/constants';
 import { debugLog } from '../utils/debug';
@@ -42,10 +42,10 @@ const _createCellWrapper = () => {
 
   return cellWrapper;
 };
-const _createDescription = (state: WorkflowState) => {
+const _createDescription = (store: WorkflowStore) => {
   const p = document.createElement('p');
   p.className = WORKFLOW_CLASSES.description;
-  p.textContent = _getWorkflowDescription(state);
+  p.textContent = _getWorkflowDescription(store);
 
   return p;
 };
@@ -61,10 +61,10 @@ const _createResultWrapper = () => {
 
   return resultWrapper;
 };
-const _createTitle = (state: WorkflowState) => {
+const _createTitle = (store: WorkflowStore) => {
   const h3 = document.createElement('h3');
   h3.className = WORKFLOW_CLASSES.title;
-  h3.textContent = _getWorkflowTitle(state);
+  h3.textContent = _getWorkflowTitle(store);
 
   return h3;
 };
@@ -85,12 +85,12 @@ const _deepMerge = (defs: WorkflowCellsOutputContainer, outs: WorkflowNodeResult
 
   return prep;
 };
-const _getCurrentWorkflow = (state: WorkflowState) => {
-  const { current, workflows } = state;
+const _getCurrentWorkflow = (store: WorkflowStore) => {
+  const { current, workflows } = store.getState();
   return workflows?.nodes?.find((node) => node.id === current.id) || null;
 };
-const _getWorkflowDescription = (state: WorkflowState) => {
-  const workflow = _getCurrentWorkflow(state);
+const _getWorkflowDescription = (store: WorkflowStore) => {
+  const workflow = _getCurrentWorkflow(store);
   return workflow?.description || '';
 };
 const _getWorkflowInputCells = (workflow: WorkflowAPIItem) => {
@@ -101,8 +101,8 @@ const _getWorkflowOutputCells = (workflow: WorkflowAPIItem) => {
   const outputsSection = workflow.children?.find((child) => child.id.endsWith(':outputs'));
   return (outputsSection?.cells || {}) as WorkflowCellsOutputContainer;
 };
-const _getWorkflowTitle = (state: WorkflowState) => {
-  const workflow = _getCurrentWorkflow(state);
+const _getWorkflowTitle = (store: WorkflowStore) => {
+  const workflow = _getCurrentWorkflow(store);
   const str = typeof workflow?.value === 'string' ? workflow.value : String(workflow?.value || '');
   return str || WORKFLOW_TEXT;
 };
@@ -125,12 +125,7 @@ export const createWorkflowSection = (store: WorkflowStore): WorkflowSectionCont
 
   //#region Destroy
   const destroy = () => {
-    const state = store.getState();
-    if (!state.manager) {
-      return;
-    }
-
-    const { manager } = state;
+    const { manager } = store.getState();
     const { uiRegistry } = manager;
 
     for (const cls in WORKFLOW_CLASSES) {
@@ -147,13 +142,8 @@ export const createWorkflowSection = (store: WorkflowStore): WorkflowSectionCont
 
   //#region Mount
   const mount = () => {
-    const state = store.getState();
-    const { manager } = state;
+    const { manager } = store.getState();
     const { uiRegistry } = manager;
-
-    if (!manager) {
-      return;
-    }
 
     const elements = uiRegistry.get();
     if (elements && elements[WORKFLOW_CLASSES._]) {
@@ -163,10 +153,10 @@ export const createWorkflowSection = (store: WorkflowStore): WorkflowSectionCont
     const _root = document.createElement('section');
     _root.className = WORKFLOW_CLASSES._;
 
-    const description = _createDescription(state);
+    const description = _createDescription(store);
     const options = _createOptionsWrapper();
     const result = _createResultWrapper();
-    const title = _createTitle(state);
+    const title = _createTitle(store);
 
     _root.appendChild(title);
     _root.appendChild(description);
@@ -200,8 +190,8 @@ export const createWorkflowSection = (store: WorkflowStore): WorkflowSectionCont
     if (id !== lastId) {
       const descr = elements[WORKFLOW_CLASSES.description] as HTMLElement;
       const title = elements[WORKFLOW_CLASSES.title] as HTMLElement;
-      descr.textContent = _getWorkflowDescription(state);
-      title.textContent = _getWorkflowTitle(state);
+      descr.textContent = _getWorkflowDescription(store);
+      title.textContent = _getWorkflowTitle(store);
       updateOptions();
       lastId = id;
     }
@@ -217,8 +207,7 @@ export const createWorkflowSection = (store: WorkflowStore): WorkflowSectionCont
 
   //#region Update options
   const updateOptions = () => {
-    const state = store.getState();
-    const { manager } = state;
+    const { manager } = store.getState();
     const { uiRegistry } = manager;
 
     const elements = uiRegistry.get();
@@ -229,7 +218,7 @@ export const createWorkflowSection = (store: WorkflowStore): WorkflowSectionCont
 
     clearChildren(element);
 
-    const workflow = _getCurrentWorkflow(state);
+    const workflow = _getCurrentWorkflow(store);
     const cellElements: WorkflowUICells = [];
 
     if (workflow) {
@@ -280,7 +269,7 @@ export const createWorkflowSection = (store: WorkflowStore): WorkflowSectionCont
       return;
     }
 
-    const workflow = _getCurrentWorkflow(state);
+    const workflow = _getCurrentWorkflow(store);
     const outputsDefs = workflow ? _getWorkflowOutputCells(workflow) : {};
     debugLog(WORKFLOW_RESULTS_CLEARED);
 

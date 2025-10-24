@@ -16,8 +16,6 @@ export const DEV_CLASSES = {
 
 //#region Helpers
 const _createDataset = (): LfDataDataset => {
-  const framework = getLfFramework();
-  const enabled = framework.debug.isEnabled();
   return {
     nodes: [
       {
@@ -25,8 +23,7 @@ const _createDataset = (): LfDataDataset => {
         cells: {
           lfToggle: {
             shape: 'toggle',
-            lfValue: enabled,
-            value: enabled,
+            value: false,
           },
           lfCode: {
             shape: 'code',
@@ -55,12 +52,7 @@ export const createDevSection = (store: WorkflowStore): WorkflowSectionControlle
 
   //#region Destroy
   const destroy = () => {
-    const state = store.getState();
-    if (!state.manager) {
-      return;
-    }
-
-    const { manager } = state;
+    const { manager } = store.getState();
     const { uiRegistry } = manager;
 
     for (const cls in DEV_CLASSES) {
@@ -85,8 +77,6 @@ export const createDevSection = (store: WorkflowStore): WorkflowSectionControlle
 
     const _root = document.createElement('div');
     _root.className = DEV_CLASSES._;
-    _root.dataset.open = 'false';
-    _root.setAttribute('aria-hidden', 'true');
 
     const card = document.createElement('lf-card') as HTMLLfCardElement;
     card.className = DEV_CLASSES.card;
@@ -106,22 +96,12 @@ export const createDevSection = (store: WorkflowStore): WorkflowSectionControlle
 
   //#region Render
   const render = () => {
-    const state = store.getState();
-    const { manager } = state;
+    const { manager } = store.getState();
     const { uiRegistry } = manager;
-
-    if (!manager) {
-      return;
-    }
 
     const elements = uiRegistry.get();
     if (!elements) {
       return;
-    }
-
-    const _root = elements[DEV_CLASSES._] as HTMLDivElement;
-    if (_root) {
-      _root.setAttribute('aria-hidden', String(!state.isDebug));
     }
 
     debugLog(DEV_SECTION_UPDATED);

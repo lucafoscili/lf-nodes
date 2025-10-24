@@ -21,12 +21,7 @@ export const createMainSection = (store: WorkflowStore): WorkflowSectionControll
 
   //#region Destroy
   const destroy = () => {
-    const state = store.getState();
-    if (!state.manager) {
-      return;
-    }
-
-    const { manager } = state;
+    const { manager } = store.getState();
     const { uiRegistry } = manager;
 
     for (const cls in MAIN_CLASSES) {
@@ -42,13 +37,8 @@ export const createMainSection = (store: WorkflowStore): WorkflowSectionControll
 
   //#region Mount
   const mount = () => {
-    const state = store.getState();
-    const { manager } = state;
+    const { manager } = store.getState();
     const { uiRegistry } = manager;
-
-    if (!manager) {
-      return;
-    }
 
     const elements = uiRegistry.get();
     if (elements && elements[MAIN_CLASSES._]) {
@@ -69,8 +59,7 @@ export const createMainSection = (store: WorkflowStore): WorkflowSectionControll
 
   //#region Render
   const render = () => {
-    const state = store.getState();
-    const { manager } = state;
+    const { manager } = store.getState();
     const { uiRegistry } = manager;
 
     const elements = uiRegistry.get();

@@ -52,12 +52,7 @@ export const createNotificationsSection = (store: WorkflowStore): WorkflowSectio
 
   //#region Destroy
   const destroy = () => {
-    const state = store.getState();
-    if (!state.manager) {
-      return;
-    }
-
-    const { manager } = state;
+    const { manager } = store.getState();
     const { uiRegistry } = manager;
 
     for (const cls in NOTIFICATIONS_CLASSES) {
@@ -74,8 +69,7 @@ export const createNotificationsSection = (store: WorkflowStore): WorkflowSectio
 
   //#region Mount
   const mount = () => {
-    const state = store.getState();
-    const { manager } = state;
+    const { manager } = store.getState();
     const { uiRegistry } = manager;
 
     const elements = uiRegistry.get();
@@ -96,8 +90,7 @@ export const createNotificationsSection = (store: WorkflowStore): WorkflowSectio
 
   //#region Render
   const render = () => {
-    const state = store.getState();
-    const { current, manager } = state;
+    const { current, manager } = store.getState();
     const { id, message, status } = current;
     const { uiRegistry } = manager;
 
@@ -124,6 +117,9 @@ export const createNotificationsSection = (store: WorkflowStore): WorkflowSectio
       element.lfTimer = status === 'error' ? 5000 : 5000; //TODO: Update when the CSS variable is fixed LFW-side
 
       _root.appendChild(element);
+      requestAnimationFrame(() => {
+        _root.scrollTop = _root.scrollHeight;
+      });
       _checkForVisible(_root);
 
       uiRegistry.set(uid, element);

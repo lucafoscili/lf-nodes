@@ -22,12 +22,8 @@ export const createActionButtonSection = (store: WorkflowStore): WorkflowSection
 
   //#region Destroy
   const destroy = () => {
-    const state = store.getState();
-    if (!state.manager) {
-      return;
-    }
-
-    const { uiRegistry } = state.manager;
+    const { manager } = store.getState();
+    const { uiRegistry } = manager;
 
     for (const cls in ACTION_BUTTON_CLASSES) {
       const element = ACTION_BUTTON_CLASSES[cls];
@@ -43,8 +39,7 @@ export const createActionButtonSection = (store: WorkflowStore): WorkflowSection
 
   //#region Mount
   const mount = () => {
-    const state = store.getState();
-    const { manager } = state;
+    const { manager } = store.getState();
     const { uiRegistry } = manager;
 
     const elements = uiRegistry.get();
@@ -57,7 +52,7 @@ export const createActionButtonSection = (store: WorkflowStore): WorkflowSection
     _root.lfIcon = 'send';
     _root.lfStyling = 'floating';
     _root.title = 'Run current workflow';
-    _root.addEventListener('lf-button-event', (e) => executeWorkflow(e, store.getState()));
+    _root.addEventListener('lf-button-event', (e) => executeWorkflow(e, store));
 
     manager.getAppRoot().appendChild(_root);
     uiRegistry.set(ACTION_BUTTON_CLASSES._, _root);
@@ -68,8 +63,7 @@ export const createActionButtonSection = (store: WorkflowStore): WorkflowSection
 
   //#region Render
   const render = () => {
-    const state = store.getState();
-    const { current, manager } = state;
+    const { current, manager } = store.getState();
     const { uiRegistry } = manager;
 
     const elements = uiRegistry.get();

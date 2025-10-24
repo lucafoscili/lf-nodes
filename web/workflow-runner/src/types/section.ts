@@ -11,7 +11,4 @@ export interface WorkflowSectionController {
   mount: () => void;
   render: () => void;
 }
-export interface WorkflowSectionHandle extends WorkflowSectionController {
-  setCellStatus: (id: string, status?: WorkflowCellStatus) => void;
-}
 //#endregion

@@ -1,9 +1,9 @@
-import { LfDataDataset } from '@lf-widgets/foundations/dist';
+import { LfButtonEventPayload, LfDataDataset } from '@lf-widgets/foundations/dist';
 import { getLfFramework } from '@lf-widgets/framework';
-import { drawerNavigation, openGithubRepo, toggleDebug } from '../handlers/layout';
+import { drawerNavigation, openComfyUI, openGithubRepo, toggleDebug } from '../handlers/layout';
 import { WorkflowAPIDataset, WorkflowLFNode } from '../types/api';
 import { WorkflowSectionController } from '../types/section';
-import { WorkflowState, WorkflowStore } from '../types/state';
+import { WorkflowStore } from '../types/state';
 import { DEBUG_MESSAGES } from '../utils/constants';
 import { debugLog } from '../utils/debug';
 
@@ -12,8 +12,9 @@ const { theme } = getLfFramework();
 const ROOT_CLASS = 'drawer-section';
 export const DRAWER_CLASSES = {
   _: theme.bemClass(ROOT_CLASS),
-  button: theme.bemClass(ROOT_CLASS, 'button'),
-  buttonDebug: theme.bemClass(ROOT_CLASS, 'button', { toggable: true }),
+  buttonComfyUi: theme.bemClass(ROOT_CLASS, 'button-comfyui'),
+  buttonDebug: theme.bemClass(ROOT_CLASS, 'button-debug'),
+  buttonGithub: theme.bemClass(ROOT_CLASS, 'button-github'),
   container: theme.bemClass(ROOT_CLASS, 'container'),
   footer: theme.bemClass(ROOT_CLASS, 'footer'),
   tree: theme.bemClass(ROOT_CLASS, 'tree'),
@@ -21,40 +22,56 @@ export const DRAWER_CLASSES = {
 //#endregion
 
 //#region Helpers
-const _footer = (state: WorkflowState) => {
+const _button = (
+  icon: string,
+  label: string,
+  evCb: (e: CustomEvent<LfButtonEventPayload>, ...args: any[]) => void,
+  className: string,
+) => {
+  const button = document.createElement('lf-button');
+  button.className = className;
+  button.lfAriaLabel = label;
+  button.lfIcon = icon;
+  button.lfStyling = 'icon';
+  button.lfUiSize = 'small';
+  button.title = label;
+  button.addEventListener('lf-button-event', evCb);
+
+  return button;
+};
+const _footer = (store: WorkflowStore) => {
   const footer = document.createElement('div');
   footer.className = DRAWER_CLASSES.footer;
 
-  const github = document.createElement('lf-button');
-  github.className = DRAWER_CLASSES.button;
-  github.lfIcon = getLfFramework().theme.get.icon('brandGithub');
-  github.lfStyling = 'icon';
-  github.lfUiSize = 'small';
-  github.addEventListener('lf-button-event', (e) => openGithubRepo(e));
+  let icon = getLfFramework().theme.get.icon('imageInPicture');
+  let label = 'Open ComfyUI';
+  const comfyUi = _button(icon, label, (e) => openComfyUI(e), DRAWER_CLASSES.buttonComfyUi);
 
-  const debug = document.createElement('lf-button');
-  debug.className = DRAWER_CLASSES.buttonDebug;
-  debug.lfIcon = getLfFramework().theme.get.icon('bug');
-  debug.lfStyling = 'icon';
-  debug.lfUiSize = 'small';
-  debug.addEventListener('lf-button-event', (e) => toggleDebug(e, state));
+  icon = getLfFramework().theme.get.icon('bug');
+  label = 'Toggle developer console';
+  const debug = _button(icon, label, (e) => toggleDebug(e, store), DRAWER_CLASSES.buttonDebug);
+
+  icon = getLfFramework().theme.get.icon('brandGithub');
+  label = 'Open GitHub repository';
+  const github = _button(icon, label, (e) => openGithubRepo(e), DRAWER_CLASSES.buttonGithub);
 
   footer.appendChild(github);
+  footer.appendChild(comfyUi);
   footer.appendChild(debug);
 
-  return { footer, debug, github };
+  return { comfyUi, debug, footer, github };
 };
-const _container = (state: WorkflowState) => {
+const _container = (store: WorkflowStore) => {
   const container = document.createElement('div');
   container.className = DRAWER_CLASSES.container;
   container.slot = 'content';
 
-  const { footer, debug, github } = _footer(state);
-  const tree = _tree(state);
+  const { comfyUi, debug, footer, github } = _footer(store);
+  const tree = _tree(store);
   container.appendChild(tree);
   container.appendChild(footer);
 
-  return { footer, container, debug, github, tree };
+  return { comfyUi, container, debug, footer, github, tree };
 };
 const _createDataset = (workflows: WorkflowAPIDataset) => {
   const categories: Array<WorkflowLFNode & { children: WorkflowLFNode[] }> = [];
@@ -90,11 +107,11 @@ const _getIcon = (category: string) => {
 
   return category_icons[category] || alertTriangle;
 };
-const _tree = (state: WorkflowState) => {
+const _tree = (store: WorkflowStore) => {
   const tree = document.createElement('lf-tree');
   tree.className = DRAWER_CLASSES.tree;
   tree.lfAccordionLayout = true;
-  tree.addEventListener('lf-tree-event', (e) => drawerNavigation(e, state));
+  tree.addEventListener('lf-tree-event', (e) => drawerNavigation(e, store));
 
   return tree;
 };
@@ -103,17 +120,12 @@ const _tree = (state: WorkflowState) => {
 export const createDrawerSection = (store: WorkflowStore): WorkflowSectionController => {
   //#region Local variables
   const { DRAWER_DESTROYED, DRAWER_MOUNTED, DRAWER_UPDATED } = DEBUG_MESSAGES;
-  const lastDebug: boolean | null = null;
   //#endregion
 
   //#region Destroy
   const destroy = () => {
-    const state = store.getState();
-    if (!state.manager) {
-      return;
-    }
-
-    const { uiRegistry } = state.manager;
+    const { manager } = store.getState();
+    const { uiRegistry } = manager;
 
     for (const cls in DRAWER_CLASSES) {
       const element = DRAWER_CLASSES[cls];
@@ -126,8 +138,7 @@ export const createDrawerSection = (store: WorkflowStore): WorkflowSectionContro
 
   //#region Mount
   const mount = () => {
-    const state = store.getState();
-    const { manager } = state;
+    const { manager } = store.getState();
     const { uiRegistry } = manager;
 
     const elements = uiRegistry.get();
@@ -139,15 +150,16 @@ export const createDrawerSection = (store: WorkflowStore): WorkflowSectionContro
     _root.className = ROOT_CLASS;
     _root.lfDisplay = 'slide';
 
-    const { footer, debug, github, container, tree } = _container(state);
+    const { comfyUi, debug, footer, github, container, tree } = _container(store);
     _root.appendChild(container);
     manager.getAppRoot().appendChild(_root);
 
     uiRegistry.set(DRAWER_CLASSES._, _root);
-    uiRegistry.set(DRAWER_CLASSES.button, footer);
-    uiRegistry.set(DRAWER_CLASSES.container, container);
+    uiRegistry.set(DRAWER_CLASSES.buttonComfyUi, comfyUi);
     uiRegistry.set(DRAWER_CLASSES.buttonDebug, debug);
-    uiRegistry.set(DRAWER_CLASSES.button, github);
+    uiRegistry.set(DRAWER_CLASSES.footer, footer);
+    uiRegistry.set(DRAWER_CLASSES.buttonGithub, github);
+    uiRegistry.set(DRAWER_CLASSES.container, container);
     uiRegistry.set(DRAWER_CLASSES.tree, tree);
 
     debugLog(DRAWER_MOUNTED);
@@ -156,14 +168,9 @@ export const createDrawerSection = (store: WorkflowStore): WorkflowSectionContro
 
   //#region Render
   const render = () => {
-    const state = store.getState();
-    const { manager, workflows } = state;
+    const { manager, workflows } = store.getState();
     const { uiRegistry } = manager;
     const isDebug = manager.isDebugEnabled();
-
-    if (!manager) {
-      return;
-    }
 
     const elements = uiRegistry.get();
     if (!elements) {

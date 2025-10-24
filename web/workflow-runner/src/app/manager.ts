@@ -42,7 +42,7 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
       throw new Error('Workflow runner container not found.');
     }
 
-    this.#STORE = createWorkflowRunnerStore(initState(this.#APP_ROOT));
+    this.#STORE = createWorkflowRunnerStore(initState());
     this.#IS_DEBUG = this.#STORE.getState().isDebug;
 
     this.#DISPATCHERS = {
