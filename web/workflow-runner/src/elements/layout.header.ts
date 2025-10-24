@@ -1,6 +1,6 @@
 import { LfButtonInterface } from '@lf-widgets/foundations/dist';
 import { getLfFramework } from '@lf-widgets/framework';
-import { toggleDebug, toggleDrawer } from '../handlers/layout';
+import { toggleDrawer } from '../handlers/layout';
 import { WorkflowSectionController } from '../types/section';
 import { WorkflowState, WorkflowStore } from '../types/state';
 import { DEBUG_MESSAGES } from '../utils/constants';
@@ -13,7 +13,6 @@ const ROOT_CLASS = 'header-section';
 export const HEADER_CLASSES = {
   _: theme.bemClass(ROOT_CLASS),
   container: theme.bemClass(ROOT_CLASS, 'container'),
-  debugToggle: theme.bemClass(ROOT_CLASS, 'debug-toggle'),
   drawerToggle: theme.bemClass(ROOT_CLASS, 'drawer-toggle'),
 } as const;
 //#endregion
@@ -25,23 +24,6 @@ const _container = () => {
   container.slot = 'content';
 
   return container;
-};
-const _debugToggle = (state: WorkflowState) => {
-  const { theme } = getLfFramework();
-  const { get } = theme;
-  const lfIcon = get.icon('code');
-
-  const props = {
-    lfAriaLabel: 'Toggle developer console',
-    lfIcon,
-    lfStyling: 'icon',
-  } as Partial<LfButtonInterface>;
-  const debugToggle = createComponent.button(props);
-  debugToggle.lfUiState = 'info';
-  debugToggle.className = `${ROOT_CLASS}__debug-toggle`;
-  debugToggle.addEventListener('lf-button-event', (e) => toggleDebug(e, state));
-
-  return debugToggle;
 };
 const _drawerToggle = (state: WorkflowState) => {
   const lfIcon = theme.get.icon('menu2');
@@ -100,17 +82,14 @@ export const createHeaderSection = (store: WorkflowStore): WorkflowSectionContro
 
     const container = _container();
     const drawerToggle = _drawerToggle(state);
-    const debugToggle = _debugToggle(state);
 
     _root.appendChild(container);
     container.appendChild(drawerToggle);
-    container.appendChild(debugToggle);
 
     manager.getAppRoot().appendChild(_root);
 
     uiRegistry.set(HEADER_CLASSES._, _root);
     uiRegistry.set(HEADER_CLASSES.container, container);
-    uiRegistry.set(HEADER_CLASSES.debugToggle, debugToggle);
     uiRegistry.set(HEADER_CLASSES.drawerToggle, drawerToggle);
 
     debugLog(HEADER_MOUNTED);
@@ -126,13 +105,6 @@ export const createHeaderSection = (store: WorkflowStore): WorkflowSectionContro
     const elements = uiRegistry.get();
     if (!elements) {
       return;
-    }
-
-    const isDebug = state.manager.isDebugEnabled();
-    const debugToggle = elements[HEADER_CLASSES.debugToggle] as HTMLLfButtonElement;
-    if (debugToggle) {
-      debugToggle.lfUiState = isDebug ? 'warning' : 'primary';
-      debugToggle.title = isDebug ? 'Hide developer console' : 'Show developer console';
     }
 
     debugLog(HEADER_UPDATED);

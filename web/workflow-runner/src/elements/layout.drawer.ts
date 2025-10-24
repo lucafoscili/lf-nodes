@@ -1,6 +1,6 @@
 import { LfDataDataset } from '@lf-widgets/foundations/dist';
 import { getLfFramework } from '@lf-widgets/framework';
-import { drawerNavigation } from '../handlers/layout';
+import { drawerNavigation, openGithubRepo, toggleDebug } from '../handlers/layout';
 import { WorkflowAPIDataset, WorkflowLFNode } from '../types/api';
 import { WorkflowSectionController } from '../types/section';
 import { WorkflowState, WorkflowStore } from '../types/state';
@@ -12,12 +12,50 @@ const { theme } = getLfFramework();
 const ROOT_CLASS = 'drawer-section';
 export const DRAWER_CLASSES = {
   _: theme.bemClass(ROOT_CLASS),
+  button: theme.bemClass(ROOT_CLASS, 'button'),
+  buttonDebug: theme.bemClass(ROOT_CLASS, 'button', { toggable: true }),
   container: theme.bemClass(ROOT_CLASS, 'container'),
+  footer: theme.bemClass(ROOT_CLASS, 'footer'),
   tree: theme.bemClass(ROOT_CLASS, 'tree'),
 } as const;
 //#endregion
 
 //#region Helpers
+const _footer = (state: WorkflowState) => {
+  const footer = document.createElement('div');
+  footer.className = DRAWER_CLASSES.footer;
+
+  const github = document.createElement('lf-button');
+  github.className = DRAWER_CLASSES.button;
+  github.lfIcon = getLfFramework().theme.get.icon('brandGithub');
+  github.lfStyling = 'icon';
+  github.lfUiSize = 'small';
+  github.addEventListener('lf-button-event', (e) => openGithubRepo(e));
+
+  const debug = document.createElement('lf-button');
+  debug.className = DRAWER_CLASSES.buttonDebug;
+  debug.lfIcon = getLfFramework().theme.get.icon('bug');
+  debug.lfStyling = 'icon';
+  debug.lfUiSize = 'small';
+  debug.addEventListener('lf-button-event', (e) => toggleDebug(e, state));
+
+  footer.appendChild(github);
+  footer.appendChild(debug);
+
+  return { footer, debug, github };
+};
+const _container = (state: WorkflowState) => {
+  const container = document.createElement('div');
+  container.className = DRAWER_CLASSES.container;
+  container.slot = 'content';
+
+  const { footer, debug, github } = _footer(state);
+  const tree = _tree(state);
+  container.appendChild(tree);
+  container.appendChild(footer);
+
+  return { footer, container, debug, github, tree };
+};
 const _createDataset = (workflows: WorkflowAPIDataset) => {
   const categories: Array<WorkflowLFNode & { children: WorkflowLFNode[] }> = [];
   const root = { id: 'workflows', value: 'Workflows', children: categories };
@@ -52,16 +90,6 @@ const _getIcon = (category: string) => {
 
   return category_icons[category] || alertTriangle;
 };
-const _container = (state: WorkflowState) => {
-  const container = document.createElement('div');
-  container.className = DRAWER_CLASSES.container;
-  container.slot = 'content';
-
-  const tree = _tree(state);
-  container.appendChild(tree);
-
-  return { container, tree };
-};
 const _tree = (state: WorkflowState) => {
   const tree = document.createElement('lf-tree');
   tree.className = DRAWER_CLASSES.tree;
@@ -75,6 +103,7 @@ const _tree = (state: WorkflowState) => {
 export const createDrawerSection = (store: WorkflowStore): WorkflowSectionController => {
   //#region Local variables
   const { DRAWER_DESTROYED, DRAWER_MOUNTED, DRAWER_UPDATED } = DEBUG_MESSAGES;
+  const lastDebug: boolean | null = null;
   //#endregion
 
   //#region Destroy
@@ -110,12 +139,15 @@ export const createDrawerSection = (store: WorkflowStore): WorkflowSectionContro
     _root.className = ROOT_CLASS;
     _root.lfDisplay = 'slide';
 
-    const { container, tree } = _container(state);
+    const { footer, debug, github, container, tree } = _container(state);
     _root.appendChild(container);
     manager.getAppRoot().appendChild(_root);
 
     uiRegistry.set(DRAWER_CLASSES._, _root);
+    uiRegistry.set(DRAWER_CLASSES.button, footer);
     uiRegistry.set(DRAWER_CLASSES.container, container);
+    uiRegistry.set(DRAWER_CLASSES.buttonDebug, debug);
+    uiRegistry.set(DRAWER_CLASSES.button, github);
     uiRegistry.set(DRAWER_CLASSES.tree, tree);
 
     debugLog(DRAWER_MOUNTED);
@@ -127,6 +159,7 @@ export const createDrawerSection = (store: WorkflowStore): WorkflowSectionContro
     const state = store.getState();
     const { manager, workflows } = state;
     const { uiRegistry } = manager;
+    const isDebug = manager.isDebugEnabled();
 
     if (!manager) {
       return;
@@ -137,7 +170,14 @@ export const createDrawerSection = (store: WorkflowStore): WorkflowSectionContro
       return;
     }
 
+    const debug = elements[DRAWER_CLASSES.buttonDebug] as HTMLLfButtonElement;
     const tree = elements[DRAWER_CLASSES.tree] as HTMLLfTreeElement;
+
+    if (debug) {
+      debug.lfUiState = isDebug ? 'warning' : 'primary';
+      debug.title = isDebug ? 'Hide developer console' : 'Show developer console';
+    }
+
     if (tree) {
       tree.lfDataset = _createDataset(workflows);
     }

@@ -3,6 +3,17 @@ import { DRAWER_CLASSES } from '../elements/layout.drawer';
 import { WorkflowState } from '../types/state';
 
 //#region Button Handlers
+export const openGithubRepo = (e: CustomEvent<LfButtonEventPayload>) => {
+  const { eventType } = e.detail;
+
+  switch (eventType) {
+    case 'click':
+      window.open('https://github.com/lucafoscili/lf-nodes', '_blank');
+      break;
+    default:
+      return;
+  }
+};
 export const toggleDebug = (e: CustomEvent<LfButtonEventPayload>, state: WorkflowState) => {
   const { eventType } = e.detail;
 
