@@ -72,6 +72,10 @@ export const createWorkflowRunnerStore = (initialState: WorkflowState): Workflow
       applyMutation((draft) => {
         draft.manager = manager;
       }),
+    queuedJobs: (count: number) =>
+      applyMutation((draft) => {
+        draft.queuedJobs = count;
+      }),
     status: (status: WorkflowStatus, message?: string) => setStatus(status, message, setState),
     runResult: (status: WorkflowStatus, message: string, results: WorkflowNodeResults | null) =>
       setRunResult(status, message, results, setState),

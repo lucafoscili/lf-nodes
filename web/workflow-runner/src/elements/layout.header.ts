@@ -65,7 +65,6 @@ const _serverIndicator = () => {
 export const createHeaderSection = (store: WorkflowStore): WorkflowSectionController => {
   //#region Local variables
   const { HEADER_DESTROYED, HEADER_MOUNTED, HEADER_UPDATED } = DEBUG_MESSAGES;
-  let lastQueuedJobs = 0;
   //#endregion
 
   //#region Destroy
@@ -128,30 +127,26 @@ export const createHeaderSection = (store: WorkflowStore): WorkflowSectionContro
     }
 
     const queuedJobs = manager.getQueuedJobs();
-    if (lastQueuedJobs !== queuedJobs) {
-      const counter = elements[HEADER_CLASSES.serverIndicatorCounter] as HTMLElement | undefined;
-      const light = elements[HEADER_CLASSES.serverIndicatorLight] as HTMLLfButtonElement;
-      counter.innerText = '';
+    const counter = elements[HEADER_CLASSES.serverIndicatorCounter] as HTMLElement | undefined;
+    const light = elements[HEADER_CLASSES.serverIndicatorLight] as HTMLLfButtonElement;
+    counter.innerText = '';
 
-      if (queuedJobs < 0) {
-        light.lfIcon = alertTriangle;
-        light.lfUiState = 'danger';
-        light.title = 'Server disconnected';
-      } else if (queuedJobs === 0) {
-        light.lfIcon = check;
-        light.lfUiState = 'success';
-        light.title = 'Server idle';
-      } else {
-        counter.innerText = queuedJobs.toString();
-        light.lfIcon = hourglassLow;
-        light.lfUiState = 'warning';
-        light.title = `Jobs in queue: ${queuedJobs}`;
-      }
-
-      lastQueuedJobs = queuedJobs;
-
-      debugLog(HEADER_UPDATED);
+    if (queuedJobs < 0) {
+      light.lfIcon = alertTriangle;
+      light.lfUiState = 'danger';
+      light.title = 'Server disconnected';
+    } else if (queuedJobs === 0) {
+      light.lfIcon = check;
+      light.lfUiState = 'success';
+      light.title = 'Server idle';
+    } else {
+      counter.innerText = queuedJobs.toString();
+      light.lfIcon = hourglassLow;
+      light.lfUiState = 'warning';
+      light.title = `Jobs in queue: ${queuedJobs}`;
     }
+
+    debugLog(HEADER_UPDATED);
   };
   //#endregion
 

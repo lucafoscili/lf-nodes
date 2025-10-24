@@ -46,8 +46,6 @@ export const createNotificationsSection = (store: WorkflowStore): WorkflowSectio
   const { NOTIFICATIONS_DESTROYED, NOTIFICATIONS_MOUNTED, NOTIFICATIONS_UPDATED, STATUS_UPDATED } =
     DEBUG_MESSAGES;
   let counter = 0;
-  let lastMessage: string | null = null;
-  let lastStatus: string | null = null;
   //#endregion
 
   //#region Destroy
@@ -59,9 +57,6 @@ export const createNotificationsSection = (store: WorkflowStore): WorkflowSectio
       const element = NOTIFICATIONS_CLASSES[cls];
       uiRegistry.remove(element);
     }
-
-    lastMessage = null;
-    lastStatus = null;
 
     debugLog(NOTIFICATIONS_DESTROYED);
   };
@@ -91,7 +86,7 @@ export const createNotificationsSection = (store: WorkflowStore): WorkflowSectio
   //#region Render
   const render = () => {
     const { current, manager } = store.getState();
-    const { id, message, status } = current;
+    const { message, status } = current;
     const { uiRegistry } = manager;
 
     const elements = uiRegistry.get();
@@ -101,37 +96,27 @@ export const createNotificationsSection = (store: WorkflowStore): WorkflowSectio
 
     const _root = elements[NOTIFICATIONS_CLASSES._] as HTMLDivElement;
 
-    if (status !== lastStatus || message !== lastMessage) {
-      counter += 1;
-      const uid = `${NOTIFICATIONS_CLASSES.item}-${counter}`;
-      const element = document.createElement('lf-toast');
-      element.className = NOTIFICATIONS_CLASSES.item;
-      element.lfCloseCallback = () => {
-        uiRegistry.remove(uid);
-        _checkForVisible(_root);
-      };
-      element.lfIcon =
-        status === 'error' ? theme.get.icon('alertTriangle') : theme.get.icon('infoHexagon');
-      element.lfMessage = message;
-      element.lfUiState = _getStateCategory(status);
-      element.lfTimer = status === 'error' ? 5000 : 5000; //TODO: Update when the CSS variable is fixed LFW-side
-
-      _root.appendChild(element);
-      requestAnimationFrame(() => {
-        _root.scrollTop = _root.scrollHeight;
-      });
+    counter += 1;
+    const uid = `${NOTIFICATIONS_CLASSES.item}-${counter}`;
+    const element = document.createElement('lf-toast');
+    element.className = NOTIFICATIONS_CLASSES.item;
+    element.lfCloseCallback = () => {
+      uiRegistry.remove(uid);
       _checkForVisible(_root);
+    };
+    element.lfIcon =
+      status === 'error' ? theme.get.icon('alertTriangle') : theme.get.icon('infoHexagon');
+    element.lfMessage = message;
+    element.lfUiState = _getStateCategory(status);
+    element.lfTimer = status === 'error' ? 5000 : 5000; //TODO: Update when the CSS variable is fixed LFW-side
 
-      uiRegistry.set(uid, element);
+    _root.appendChild(element);
+    requestAnimationFrame(() => {
+      _root.scrollTop = _root.scrollHeight;
+    });
+    _checkForVisible(_root);
 
-      lastStatus = status;
-      lastMessage = message;
-      debugLog(STATUS_UPDATED, status, {
-        id,
-        status,
-        message,
-      });
-    }
+    uiRegistry.set(uid, element);
 
     debugLog(NOTIFICATIONS_UPDATED);
   };

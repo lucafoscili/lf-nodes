@@ -64,13 +64,6 @@ const _createResultWrapper = () => {
 
   return resultWrapper;
 };
-const _createTitle = (store: WorkflowStore) => {
-  const h3 = document.createElement('h3');
-  h3.className = WORKFLOW_CLASSES.title;
-  h3.textContent = _getWorkflowTitle(store);
-
-  return h3;
-};
 const _deepMerge = (defs: WorkflowCellsOutputContainer, outs: WorkflowNodeResults) => {
   const prep: WorkflowCellOutputItem[] = [];
 
@@ -148,8 +141,6 @@ export const createWorkflowSection = (store: WorkflowStore): WorkflowSectionCont
     WORKFLOW_RESULTS_CLEARED,
     WORKFLOW_RESULTS_RENDERED,
   } = DEBUG_MESSAGES;
-  let lastId: string | null = null;
-  let lastResultsRef: WorkflowNodeResults | null = null;
   //#endregion
 
   //#region Destroy
@@ -161,9 +152,6 @@ export const createWorkflowSection = (store: WorkflowStore): WorkflowSectionCont
       const element = WORKFLOW_CLASSES[cls];
       uiRegistry.remove(element);
     }
-
-    lastId = null;
-    lastResultsRef = null;
 
     debugLog(WORKFLOW_LAYOUT_DESTROYED);
   };
@@ -218,19 +206,12 @@ export const createWorkflowSection = (store: WorkflowStore): WorkflowSectionCont
       return;
     }
 
-    if (id !== lastId) {
-      const descr = elements[WORKFLOW_CLASSES.description] as HTMLElement;
-      const h3 = elements[WORKFLOW_CLASSES.h3] as HTMLElement;
-      descr.textContent = _getWorkflowDescription(store);
-      h3.textContent = _getWorkflowTitle(store);
-      updateOptions();
-      lastId = id;
-    }
-
-    if (state.results !== lastResultsRef) {
-      updateResults();
-      lastResultsRef = state.results;
-    }
+    const descr = elements[WORKFLOW_CLASSES.description] as HTMLElement;
+    const h3 = elements[WORKFLOW_CLASSES.h3] as HTMLElement;
+    descr.textContent = _getWorkflowDescription(store);
+    h3.textContent = _getWorkflowTitle(store);
+    updateOptions();
+    updateResults();
 
     debugLog(WORKFLOW_LAYOUT_UPDATED);
   };

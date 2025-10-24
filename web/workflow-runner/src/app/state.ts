@@ -12,9 +12,11 @@ export const initState = (): WorkflowState => ({
   current: { status: 'idle', message: '', id: null },
   isDebug: false,
   manager: null,
+  queuedJobs: -1,
   mutate: {
     isDebug: INIT_CB,
     manager: INIT_CB,
+    queuedJobs: INIT_CB,
     runResult: INIT_CB,
     status: INIT_CB,
     workflow: INIT_CB,

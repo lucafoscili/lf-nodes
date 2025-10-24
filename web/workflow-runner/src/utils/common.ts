@@ -58,6 +58,19 @@ export const normalize_description = (description: string | string[] | undefined
     return '';
   }
 };
+export const parseCount = (v: unknown) => {
+  if (Array.isArray(v)) {
+    return v.length;
+  }
+  if (v === null || v === undefined) {
+    return 0;
+  }
+  if (typeof v === 'boolean') {
+    return v ? 1 : 0;
+  }
+  const n = Number(v as any);
+  return Number.isFinite(n) ? n : 0;
+};
 export const parseJson = async (response: Response) => {
   try {
     return (await response.json()) as WorkflowAPIResponse | Record<string, unknown>;

@@ -11,6 +11,7 @@ import { fetchWorkflowDefinitions } from '../services/workflow-service';
 import { WorkflowDispatchers, WorkflowManager, WorkflowUIItem } from '../types/manager';
 import { WorkflowSectionController } from '../types/section';
 import { WorkflowStatus, WorkflowStore } from '../types/state';
+import { parseCount } from '../utils/common';
 import { DEBUG_MESSAGES, STATUS_MESSAGES } from '../utils/constants';
 import { debugLog } from '../utils/debug';
 import { initState } from './state';
@@ -22,7 +23,7 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
   #DISPATCHERS: WorkflowDispatchers;
   #FRAMEWORK = getLfFramework();
   #IS_DEBUG = false;
-  #QUEUED_JOBS = -1;
+
   #SECTIONS: {
     actionButton: WorkflowSectionController;
     dev: WorkflowSectionController;
@@ -125,34 +126,78 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
       try {
         const resp = await fetch('/queue');
         if (!resp.ok) {
-          throw new Error('unreachable');
+          throw new Error('Failed to fetch queue status');
         }
 
         const { queue_running, queue_pending } = (await resp.json()) as {
-          queue_pending: Array<unknown>;
-          queue_running: Array<unknown>;
+          queue_pending: unknown;
+          queue_running: unknown;
         };
-        const qPending = Number(queue_pending?.length || 0);
-        const qRunning = Number(queue_running?.length || 0);
+
+        const qPending = parseCount(queue_pending);
+        const qRunning = parseCount(queue_running);
         const busy = qPending + qRunning;
 
-        this.#QUEUED_JOBS = busy;
+        const prev = this.#STORE.getState().queuedJobs ?? -1;
+        if (busy !== prev) {
+          this.#STORE.getState().mutate.queuedJobs(busy);
+        }
       } catch (e) {
         try {
-          this.#QUEUED_JOBS = -1;
+          const prev = this.#STORE.getState().queuedJobs ?? -1;
+          if (prev !== -1) {
+            this.#STORE.getState().mutate.queuedJobs(-1);
+          }
         } catch (err) {}
       }
-
-      this.#SECTIONS.header.render();
-    }, 1000);
+    }, 750);
   }
   #subscribeToState() {
+    const st = this.#STORE.getState();
+    let lastCurrentMessage = st.current.message;
+    let lastCurrentStatus = st.current.status;
+    let lastDebug = st.isDebug;
+    let lastId = st.current.id;
+    let lastQueued = st.queuedJobs ?? -1;
+    let lastResults = st.results;
+    let lastWorkflows = st.workflows;
+
+    let scheduled = false;
+    const needs = {
+      header: false,
+      drawer: false,
+      main: false,
+      actionButton: false,
+      notifications: false,
+    };
+
     this.#STORE.subscribe((state) => {
-      this.#SECTIONS.actionButton.render();
-      this.#SECTIONS.drawer.render();
-      this.#SECTIONS.header.render();
-      this.#SECTIONS.main.render();
-      this.#SECTIONS.notifications.render();
+      const { current, isDebug, queuedJobs, workflows } = state;
+      const { message, status } = current;
+
+      if (current.id !== lastId || state.results !== lastResults) {
+        needs.main = true;
+        lastId = current.id;
+        lastResults = state.results;
+      }
+
+      if (message !== lastCurrentMessage || status !== lastCurrentStatus) {
+        needs.actionButton = true;
+        needs.notifications = true;
+        lastCurrentMessage = message;
+        lastCurrentStatus = status;
+      }
+
+      if (queuedJobs !== lastQueued) {
+        needs.header = true;
+        lastQueued = queuedJobs;
+      }
+
+      if (workflows !== lastWorkflows || isDebug !== lastDebug) {
+        needs.drawer = true;
+        lastWorkflows = workflows;
+        lastDebug = isDebug;
+      }
 
       const shouldShowDevPanel = state.isDebug;
       if (shouldShowDevPanel && !this.#IS_DEBUG) {
@@ -164,6 +209,23 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
         this.#IS_DEBUG = false;
       } else if (shouldShowDevPanel && this.#IS_DEBUG) {
         this.#SECTIONS.dev.render();
+      }
+
+      if (!scheduled) {
+        scheduled = true;
+        requestAnimationFrame(() => {
+          scheduled = false;
+
+          for (const sectionKey in needs) {
+            const need = needs[sectionKey];
+            const section = this.#SECTIONS[sectionKey];
+            if (need) {
+              section.render();
+            }
+          }
+
+          Object.keys(needs).forEach((k) => (needs[k] = false));
+        });
       }
     });
   }
@@ -180,7 +242,7 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
     return this.#STORE;
   }
   getQueuedJobs() {
-    return this.#QUEUED_JOBS;
+    return this.#STORE.getState().queuedJobs;
   }
   isDebugEnabled() {
     return this.#STORE.getState().isDebug;
@@ -188,13 +250,13 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
   //#endregion
 
   //#region State mutators
-  setStatus(status: WorkflowStatus, message?: string): void {
+  setStatus(status: WorkflowStatus, message?: string) {
     const { mutate } = this.#STORE.getState();
 
     const resolved = message ?? DEFAULT_STATUS_MESSAGES[status];
     mutate.status(status, resolved);
   }
-  setWorkflow(id: string): void {
+  setWorkflow(id: string) {
     const state = this.#STORE.getState();
 
     if (state.current.id === id) {
@@ -203,7 +265,7 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
 
     state.mutate.workflow(id);
   }
-  toggleDebug(): void {
+  toggleDebug() {
     const current = this.#STORE.getState().isDebug;
     this.#STORE.getState().mutate.isDebug(!current);
   }

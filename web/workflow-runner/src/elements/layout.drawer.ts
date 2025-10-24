@@ -180,14 +180,9 @@ export const createDrawerSection = (store: WorkflowStore): WorkflowSectionContro
     const debug = elements[DRAWER_CLASSES.buttonDebug] as HTMLLfButtonElement;
     const tree = elements[DRAWER_CLASSES.tree] as HTMLLfTreeElement;
 
-    if (debug) {
-      debug.lfUiState = isDebug ? 'warning' : 'primary';
-      debug.title = isDebug ? 'Hide developer console' : 'Show developer console';
-    }
-
-    if (tree) {
-      tree.lfDataset = _createDataset(workflows);
-    }
+    debug.lfUiState = isDebug ? 'warning' : 'primary';
+    debug.title = isDebug ? 'Hide developer console' : 'Show developer console';
+    tree.lfDataset = _createDataset(workflows);
 
     debugLog(DRAWER_UPDATED);
   };

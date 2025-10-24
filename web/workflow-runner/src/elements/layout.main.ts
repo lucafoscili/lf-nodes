@@ -16,7 +16,7 @@ export const MAIN_CLASSES = {
 export const createMainSection = (store: WorkflowStore): WorkflowSectionController => {
   //#region Local variables
   const { MAIN_DESTROYED, MAIN_MOUNTED, MAIN_UPDATED } = DEBUG_MESSAGES;
-  let workflowSection = createWorkflowSection(store);
+  const WORKFLOW_SECTION = createWorkflowSection(store);
   //#endregion
 
   //#region Destroy
@@ -29,7 +29,7 @@ export const createMainSection = (store: WorkflowStore): WorkflowSectionControll
       uiRegistry.remove(element);
     }
 
-    workflowSection.destroy();
+    WORKFLOW_SECTION.destroy();
 
     debugLog(MAIN_DESTROYED);
   };
@@ -51,7 +51,7 @@ export const createMainSection = (store: WorkflowStore): WorkflowSectionControll
     manager.getAppRoot().appendChild(_root);
     uiRegistry.set(MAIN_CLASSES._, _root);
 
-    workflowSection.mount();
+    WORKFLOW_SECTION.mount();
 
     debugLog(MAIN_MOUNTED);
   };
@@ -67,7 +67,7 @@ export const createMainSection = (store: WorkflowStore): WorkflowSectionControll
       return;
     }
 
-    workflowSection.render();
+    WORKFLOW_SECTION.render();
 
     debugLog(MAIN_UPDATED);
   };

@@ -30,9 +30,6 @@ export const createActionButtonSection = (store: WorkflowStore): WorkflowSection
       uiRegistry.remove(element);
     }
 
-    lastMessage = null;
-    lastStatus = null;
-
     debugLog(ACTION_BUTTON_DESTROYED);
   };
   //#endregion
@@ -76,12 +73,7 @@ export const createActionButtonSection = (store: WorkflowStore): WorkflowSection
       return;
     }
 
-    const shouldRefresh = current.status !== lastStatus || current.message !== lastMessage;
-    if (shouldRefresh) {
-      _root.lfShowSpinner = current.status === 'running';
-      lastStatus = current.status;
-      lastMessage = current.message;
-    }
+    _root.lfShowSpinner = current.status === 'running';
 
     debugLog(ACTION_BUTTON_UPDATED);
   };
