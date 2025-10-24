@@ -45,6 +45,7 @@ export const createNotificationsSection = (store: WorkflowStore): WorkflowSectio
   //#region Local variables
   const { NOTIFICATIONS_DESTROYED, NOTIFICATIONS_MOUNTED, NOTIFICATIONS_UPDATED, STATUS_UPDATED } =
     DEBUG_MESSAGES;
+  let counter = 0;
   let lastMessage: string | null = null;
   let lastStatus: string | null = null;
   //#endregion
@@ -108,12 +109,12 @@ export const createNotificationsSection = (store: WorkflowStore): WorkflowSectio
     const _root = elements[NOTIFICATIONS_CLASSES._] as HTMLDivElement;
 
     if (status !== lastStatus || message !== lastMessage) {
-      const timestamp = new Date().getTime();
-
+      counter += 1;
+      const uid = `${NOTIFICATIONS_CLASSES.item}-${counter}`;
       const element = document.createElement('lf-toast');
       element.className = NOTIFICATIONS_CLASSES.item;
       element.lfCloseCallback = () => {
-        uiRegistry.remove(NOTIFICATIONS_CLASSES.item + timestamp);
+        uiRegistry.remove(uid);
         _checkForVisible(_root);
       };
       element.lfIcon =
@@ -125,7 +126,7 @@ export const createNotificationsSection = (store: WorkflowStore): WorkflowSectio
       _root.appendChild(element);
       _checkForVisible(_root);
 
-      uiRegistry.set(NOTIFICATIONS_CLASSES.item + timestamp, element);
+      uiRegistry.set(uid, element);
 
       lastStatus = status;
       lastMessage = message;
