@@ -92,7 +92,6 @@ const DEBUG_MESSAGES = {
   NOTIFICATIONS_DESTROYED: "Notifications section destroyed.",
   NOTIFICATIONS_MOUNTED: "Notifications section mounted.",
   NOTIFICATIONS_UPDATED: "Notifications section refreshed.",
-  STATUS_UPDATED: "Workflow status updated.",
   WORKFLOW_COMPLETED: "Workflow execution completed.",
   WORKFLOW_DISPATCHING: "Dispatching workflow execution.",
   WORKFLOW_LAYOUT_DESTROYED: "Workflow layout destroyed.",
@@ -445,7 +444,7 @@ const MAIN_CLASSES = {
 };
 const createMainSection = (store) => {
   const { MAIN_DESTROYED, MAIN_MOUNTED, MAIN_UPDATED } = DEBUG_MESSAGES;
-  let workflowSection = createWorkflowSection(store);
+  const WORKFLOW_SECTION = createWorkflowSection(store);
   const destroy = () => {
     const { manager } = store.getState();
     const { uiRegistry } = manager;
@@ -453,7 +452,7 @@ const createMainSection = (store) => {
       const element = MAIN_CLASSES[cls];
       uiRegistry.remove(element);
     }
-    workflowSection.destroy();
+    WORKFLOW_SECTION.destroy();
     debugLog(MAIN_DESTROYED);
   };
   const mount = () => {
@@ -467,7 +466,7 @@ const createMainSection = (store) => {
     _root.className = ROOT_CLASS$6;
     manager.getAppRoot().appendChild(_root);
     uiRegistry.set(MAIN_CLASSES._, _root);
-    workflowSection.mount();
+    WORKFLOW_SECTION.mount();
     debugLog(MAIN_MOUNTED);
   };
   const render = () => {
@@ -477,7 +476,7 @@ const createMainSection = (store) => {
     if (!elements) {
       return;
     }
-    workflowSection.render();
+    WORKFLOW_SECTION.render();
     debugLog(MAIN_UPDATED);
   };
   return {
@@ -585,8 +584,6 @@ const _title = (store) => {
 };
 const createWorkflowSection = (store) => {
   const { WORKFLOW_INPUTS_CLEARED, WORKFLOW_INPUTS_RENDERED, WORKFLOW_LAYOUT_DESTROYED, WORKFLOW_LAYOUT_MOUNTED, WORKFLOW_LAYOUT_UPDATED, WORKFLOW_RESULTS_CLEARED, WORKFLOW_RESULTS_RENDERED } = DEBUG_MESSAGES;
-  let lastId = null;
-  let lastResultsRef = null;
   const destroy = () => {
     const { manager } = store.getState();
     const { uiRegistry } = manager;
@@ -594,8 +591,6 @@ const createWorkflowSection = (store) => {
       const element = WORKFLOW_CLASSES[cls];
       uiRegistry.remove(element);
     }
-    lastId = null;
-    lastResultsRef = null;
     debugLog(WORKFLOW_LAYOUT_DESTROYED);
   };
   const mount = () => {
@@ -634,18 +629,12 @@ const createWorkflowSection = (store) => {
     if (!elements) {
       return;
     }
-    if (id !== lastId) {
-      const descr = elements[WORKFLOW_CLASSES.description];
-      const h3 = elements[WORKFLOW_CLASSES.h3];
-      descr.textContent = _getWorkflowDescription(store);
-      h3.textContent = _getWorkflowTitle(store);
-      updateOptions();
-      lastId = id;
-    }
-    if (state.results !== lastResultsRef) {
-      updateResults();
-      lastResultsRef = state.results;
-    }
+    const descr = elements[WORKFLOW_CLASSES.description];
+    const h3 = elements[WORKFLOW_CLASSES.h3];
+    descr.textContent = _getWorkflowDescription(store);
+    h3.textContent = _getWorkflowTitle(store);
+    updateOptions();
+    updateResults();
     debugLog(WORKFLOW_LAYOUT_UPDATED);
   };
   const updateOptions = () => {
@@ -855,8 +844,6 @@ const ACTION_BUTTON_CLASSES = {
 };
 const createActionButtonSection = (store) => {
   const { ACTION_BUTTON_DESTROYED, ACTION_BUTTON_MOUNTED, ACTION_BUTTON_UPDATED } = DEBUG_MESSAGES;
-  let lastMessage = null;
-  let lastStatus = null;
   const destroy = () => {
     const { manager } = store.getState();
     const { uiRegistry } = manager;
@@ -864,8 +851,6 @@ const createActionButtonSection = (store) => {
       const element = ACTION_BUTTON_CLASSES[cls];
       uiRegistry.remove(element);
     }
-    lastMessage = null;
-    lastStatus = null;
     debugLog(ACTION_BUTTON_DESTROYED);
   };
   const mount = () => {
@@ -896,12 +881,7 @@ const createActionButtonSection = (store) => {
     if (!_root) {
       return;
     }
-    const shouldRefresh = current.status !== lastStatus || current.message !== lastMessage;
-    if (shouldRefresh) {
-      _root.lfShowSpinner = current.status === "running";
-      lastStatus = current.status;
-      lastMessage = current.message;
-    }
+    _root.lfShowSpinner = current.status === "running";
     debugLog(ACTION_BUTTON_UPDATED);
   };
   return {
@@ -1180,13 +1160,9 @@ const createDrawerSection = (store) => {
     }
     const debug = elements[DRAWER_CLASSES.buttonDebug];
     const tree = elements[DRAWER_CLASSES.tree];
-    if (debug) {
-      debug.lfUiState = isDebug ? "warning" : "primary";
-      debug.title = isDebug ? "Hide developer console" : "Show developer console";
-    }
-    if (tree) {
-      tree.lfDataset = _createDataset(workflows);
-    }
+    debug.lfUiState = isDebug ? "warning" : "primary";
+    debug.title = isDebug ? "Hide developer console" : "Show developer console";
+    tree.lfDataset = _createDataset(workflows);
     debugLog(DRAWER_UPDATED);
   };
   return {
@@ -1237,7 +1213,6 @@ const _serverIndicator = () => {
 };
 const createHeaderSection = (store) => {
   const { HEADER_DESTROYED, HEADER_MOUNTED, HEADER_UPDATED } = DEBUG_MESSAGES;
-  let lastQueuedJobs = 0;
   const destroy = () => {
     const { manager } = store.getState();
     const { uiRegistry } = manager;
@@ -1280,27 +1255,24 @@ const createHeaderSection = (store) => {
       return;
     }
     const queuedJobs = manager.getQueuedJobs();
-    if (lastQueuedJobs !== queuedJobs) {
-      const counter = elements[HEADER_CLASSES.serverIndicatorCounter];
-      const light = elements[HEADER_CLASSES.serverIndicatorLight];
-      counter.innerText = "";
-      if (queuedJobs < 0) {
-        light.lfIcon = alertTriangle;
-        light.lfUiState = "danger";
-        light.title = "Server disconnected";
-      } else if (queuedJobs === 0) {
-        light.lfIcon = check;
-        light.lfUiState = "success";
-        light.title = "Server idle";
-      } else {
-        counter.innerText = queuedJobs.toString();
-        light.lfIcon = hourglassLow;
-        light.lfUiState = "warning";
-        light.title = `Jobs in queue: ${queuedJobs}`;
-      }
-      lastQueuedJobs = queuedJobs;
-      debugLog(HEADER_UPDATED);
+    const counter = elements[HEADER_CLASSES.serverIndicatorCounter];
+    const light = elements[HEADER_CLASSES.serverIndicatorLight];
+    counter.innerText = "";
+    if (queuedJobs < 0) {
+      light.lfIcon = alertTriangle;
+      light.lfUiState = "danger";
+      light.title = "Server disconnected";
+    } else if (queuedJobs === 0) {
+      light.lfIcon = check;
+      light.lfUiState = "success";
+      light.title = "Server idle";
+    } else {
+      counter.innerText = queuedJobs.toString();
+      light.lfIcon = hourglassLow;
+      light.lfUiState = "warning";
+      light.title = `Jobs in queue: ${queuedJobs}`;
     }
+    debugLog(HEADER_UPDATED);
   };
   return {
     destroy,
@@ -1336,10 +1308,8 @@ const _getStateCategory = (status) => {
   return category;
 };
 const createNotificationsSection = (store) => {
-  const { NOTIFICATIONS_DESTROYED, NOTIFICATIONS_MOUNTED, NOTIFICATIONS_UPDATED, STATUS_UPDATED } = DEBUG_MESSAGES;
+  const { NOTIFICATIONS_DESTROYED, NOTIFICATIONS_MOUNTED, NOTIFICATIONS_UPDATED } = DEBUG_MESSAGES;
   let counter = 0;
-  let lastMessage = null;
-  let lastStatus = null;
   const destroy = () => {
     const { manager } = store.getState();
     const { uiRegistry } = manager;
@@ -1347,8 +1317,6 @@ const createNotificationsSection = (store) => {
       const element = NOTIFICATIONS_CLASSES[cls];
       uiRegistry.remove(element);
     }
-    lastMessage = null;
-    lastStatus = null;
     debugLog(NOTIFICATIONS_DESTROYED);
   };
   const mount = () => {
@@ -1366,40 +1334,31 @@ const createNotificationsSection = (store) => {
   };
   const render = () => {
     const { current, manager } = store.getState();
-    const { id, message, status } = current;
+    const { message, status } = current;
     const { uiRegistry } = manager;
     const elements = uiRegistry.get();
     if (!elements) {
       return;
     }
     const _root = elements[NOTIFICATIONS_CLASSES._];
-    if (status !== lastStatus || message !== lastMessage) {
-      counter += 1;
-      const uid = `${NOTIFICATIONS_CLASSES.item}-${counter}`;
-      const element = document.createElement("lf-toast");
-      element.className = NOTIFICATIONS_CLASSES.item;
-      element.lfCloseCallback = () => {
-        uiRegistry.remove(uid);
-        _checkForVisible(_root);
-      };
-      element.lfIcon = status === "error" ? theme.get.icon("alertTriangle") : theme.get.icon("infoHexagon");
-      element.lfMessage = message;
-      element.lfUiState = _getStateCategory(status);
-      element.lfTimer = status === "error" ? 5e3 : 5e3;
-      _root.appendChild(element);
-      requestAnimationFrame(() => {
-        _root.scrollTop = _root.scrollHeight;
-      });
+    counter += 1;
+    const uid = `${NOTIFICATIONS_CLASSES.item}-${counter}`;
+    const element = document.createElement("lf-toast");
+    element.className = NOTIFICATIONS_CLASSES.item;
+    element.lfCloseCallback = () => {
+      uiRegistry.remove(uid);
       _checkForVisible(_root);
-      uiRegistry.set(uid, element);
-      lastStatus = status;
-      lastMessage = message;
-      debugLog(STATUS_UPDATED, status, {
-        id,
-        status,
-        message
-      });
-    }
+    };
+    element.lfIcon = status === "error" ? theme.get.icon("alertTriangle") : theme.get.icon("infoHexagon");
+    element.lfMessage = message;
+    element.lfUiState = _getStateCategory(status);
+    element.lfTimer = status === "error" ? 5e3 : 5e3;
+    _root.appendChild(element);
+    requestAnimationFrame(() => {
+      _root.scrollTop = _root.scrollHeight;
+    });
+    _checkForVisible(_root);
+    uiRegistry.set(uid, element);
     debugLog(NOTIFICATIONS_UPDATED);
   };
   return {
@@ -1416,9 +1375,11 @@ const initState = () => ({
   current: { status: "idle", message: "", id: null },
   isDebug: false,
   manager: null,
+  queuedJobs: -1,
   mutate: {
     isDebug: INIT_CB,
     manager: INIT_CB,
+    queuedJobs: INIT_CB,
     runResult: INIT_CB,
     status: INIT_CB,
     workflow: INIT_CB,
@@ -1479,6 +1440,9 @@ const createWorkflowRunnerStore = (initialState) => {
     manager: (manager) => applyMutation((draft) => {
       draft.manager = manager;
     }),
+    queuedJobs: (count) => applyMutation((draft) => {
+      draft.queuedJobs = count;
+    }),
     status: (status, message) => setStatus(status, message, setState),
     runResult: (status, message, results) => setRunResult(status, message, results, setState),
     workflow: (workflowId) => setWorkflow(workflowId, setState),
@@ -1535,7 +1499,7 @@ var __classPrivateFieldGet = function(receiver, state, kind, f) {
   if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 };
-var _LfWorkflowRunnerManager_instances, _LfWorkflowRunnerManager_APP_ROOT, _LfWorkflowRunnerManager_DISPATCHERS, _LfWorkflowRunnerManager_FRAMEWORK, _LfWorkflowRunnerManager_IS_DEBUG, _LfWorkflowRunnerManager_QUEUED_JOBS, _LfWorkflowRunnerManager_SECTIONS, _LfWorkflowRunnerManager_STORE, _LfWorkflowRunnerManager_UI_REGISTRY, _LfWorkflowRunnerManager_initializeFramework, _LfWorkflowRunnerManager_initializeLayout, _LfWorkflowRunnerManager_loadWorkflows, _LfWorkflowRunnerManager_startPolling, _LfWorkflowRunnerManager_subscribeToState;
+var _LfWorkflowRunnerManager_instances, _LfWorkflowRunnerManager_APP_ROOT, _LfWorkflowRunnerManager_DISPATCHERS, _LfWorkflowRunnerManager_FRAMEWORK, _LfWorkflowRunnerManager_IS_DEBUG, _LfWorkflowRunnerManager_SECTIONS, _LfWorkflowRunnerManager_STORE, _LfWorkflowRunnerManager_UI_REGISTRY, _LfWorkflowRunnerManager_initializeFramework, _LfWorkflowRunnerManager_initializeLayout, _LfWorkflowRunnerManager_loadWorkflows, _LfWorkflowRunnerManager_startPolling, _LfWorkflowRunnerManager_subscribeToState;
 class LfWorkflowRunnerManager {
   constructor() {
     _LfWorkflowRunnerManager_instances.add(this);
@@ -1543,7 +1507,6 @@ class LfWorkflowRunnerManager {
     _LfWorkflowRunnerManager_DISPATCHERS.set(this, void 0);
     _LfWorkflowRunnerManager_FRAMEWORK.set(this, getLfFramework());
     _LfWorkflowRunnerManager_IS_DEBUG.set(this, false);
-    _LfWorkflowRunnerManager_QUEUED_JOBS.set(this, -1);
     _LfWorkflowRunnerManager_SECTIONS.set(this, void 0);
     _LfWorkflowRunnerManager_STORE.set(this, void 0);
     _LfWorkflowRunnerManager_UI_REGISTRY.set(this, /* @__PURE__ */ new WeakMap());
@@ -1640,7 +1603,7 @@ class LfWorkflowRunnerManager {
     return __classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f");
   }
   getQueuedJobs() {
-    return __classPrivateFieldGet(this, _LfWorkflowRunnerManager_QUEUED_JOBS, "f");
+    return __classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f").getState().queuedJobs;
   }
   isDebugEnabled() {
     return __classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f").getState().isDebug;
@@ -1664,7 +1627,7 @@ class LfWorkflowRunnerManager {
     __classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f").getState().mutate.isDebug(!current);
   }
 }
-_LfWorkflowRunnerManager_APP_ROOT = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_DISPATCHERS = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_FRAMEWORK = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_IS_DEBUG = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_QUEUED_JOBS = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_SECTIONS = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_STORE = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_UI_REGISTRY = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_loadWorkflows = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_instances = /* @__PURE__ */ new WeakSet(), _LfWorkflowRunnerManager_initializeFramework = function _LfWorkflowRunnerManager_initializeFramework2() {
+_LfWorkflowRunnerManager_APP_ROOT = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_DISPATCHERS = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_FRAMEWORK = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_IS_DEBUG = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_SECTIONS = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_STORE = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_UI_REGISTRY = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_loadWorkflows = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_instances = /* @__PURE__ */ new WeakSet(), _LfWorkflowRunnerManager_initializeFramework = function _LfWorkflowRunnerManager_initializeFramework2() {
   const assetsUrl = buildAssetsUrl();
   __classPrivateFieldGet(this, _LfWorkflowRunnerManager_FRAMEWORK, "f").assets.set(assetsUrl);
   __classPrivateFieldGet(this, _LfWorkflowRunnerManager_FRAMEWORK, "f").theme.set(DEFAULT_THEME);
@@ -1691,25 +1654,76 @@ _LfWorkflowRunnerManager_APP_ROOT = /* @__PURE__ */ new WeakMap(), _LfWorkflowRu
         throw new Error("unreachable");
       }
       const { queue_running, queue_pending } = await resp.json();
-      const qPending = Number((queue_pending == null ? void 0 : queue_pending.length) || 0);
-      const qRunning = Number((queue_running == null ? void 0 : queue_running.length) || 0);
+      const parseCount = (v) => {
+        if (Array.isArray(v)) {
+          return v.length;
+        }
+        if (v === null || v === void 0) {
+          return 0;
+        }
+        if (typeof v === "boolean") {
+          return v ? 1 : 0;
+        }
+        const n = Number(v);
+        return Number.isFinite(n) ? n : 0;
+      };
+      const qPending = parseCount(queue_pending);
+      const qRunning = parseCount(queue_running);
       const busy = qPending + qRunning;
-      __classPrivateFieldSet(this, _LfWorkflowRunnerManager_QUEUED_JOBS, busy, "f");
+      const prev = __classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f").getState().queuedJobs ?? -1;
+      if (busy !== prev) {
+        __classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f").getState().mutate.queuedJobs(busy);
+      }
     } catch (e) {
       try {
-        __classPrivateFieldSet(this, _LfWorkflowRunnerManager_QUEUED_JOBS, -1, "f");
+        const prev = __classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f").getState().queuedJobs ?? -1;
+        if (prev !== -1) {
+          __classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f").getState().mutate.queuedJobs(-1);
+        }
       } catch (err) {
       }
     }
-    __classPrivateFieldGet(this, _LfWorkflowRunnerManager_SECTIONS, "f").header.render();
   }, 1e3);
 }, _LfWorkflowRunnerManager_subscribeToState = function _LfWorkflowRunnerManager_subscribeToState2() {
+  const st = __classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f").getState();
+  let lastCurrentMessage = st.current.message;
+  let lastCurrentStatus = st.current.status;
+  let lastDebug = st.isDebug;
+  let lastId = st.current.id;
+  let lastQueued = st.queuedJobs ?? -1;
+  let lastResults = st.results;
+  let lastWorkflows = st.workflows;
+  let scheduled = false;
+  const needs = {
+    header: false,
+    drawer: false,
+    main: false,
+    actionButton: false,
+    notifications: false
+  };
   __classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f").subscribe((state) => {
-    __classPrivateFieldGet(this, _LfWorkflowRunnerManager_SECTIONS, "f").actionButton.render();
-    __classPrivateFieldGet(this, _LfWorkflowRunnerManager_SECTIONS, "f").drawer.render();
-    __classPrivateFieldGet(this, _LfWorkflowRunnerManager_SECTIONS, "f").header.render();
-    __classPrivateFieldGet(this, _LfWorkflowRunnerManager_SECTIONS, "f").main.render();
-    __classPrivateFieldGet(this, _LfWorkflowRunnerManager_SECTIONS, "f").notifications.render();
+    const { current, isDebug, queuedJobs, workflows } = state;
+    const { message, status } = current;
+    if (current.id !== lastId || state.results !== lastResults) {
+      needs.main = true;
+      lastId = current.id;
+      lastResults = state.results;
+    }
+    if (message !== lastCurrentMessage || status !== lastCurrentStatus) {
+      needs.actionButton = true;
+      needs.notifications = true;
+      lastCurrentMessage = message;
+      lastCurrentStatus = status;
+    }
+    if (queuedJobs !== lastQueued) {
+      needs.header = true;
+      lastQueued = queuedJobs;
+    }
+    if (workflows !== lastWorkflows || isDebug !== lastDebug) {
+      needs.drawer = true;
+      lastWorkflows = workflows;
+      lastDebug = isDebug;
+    }
     const shouldShowDevPanel = state.isDebug;
     if (shouldShowDevPanel && !__classPrivateFieldGet(this, _LfWorkflowRunnerManager_IS_DEBUG, "f")) {
       __classPrivateFieldGet(this, _LfWorkflowRunnerManager_SECTIONS, "f").dev.mount();
@@ -1720,6 +1734,20 @@ _LfWorkflowRunnerManager_APP_ROOT = /* @__PURE__ */ new WeakMap(), _LfWorkflowRu
       __classPrivateFieldSet(this, _LfWorkflowRunnerManager_IS_DEBUG, false, "f");
     } else if (shouldShowDevPanel && __classPrivateFieldGet(this, _LfWorkflowRunnerManager_IS_DEBUG, "f")) {
       __classPrivateFieldGet(this, _LfWorkflowRunnerManager_SECTIONS, "f").dev.render();
+    }
+    if (!scheduled) {
+      scheduled = true;
+      requestAnimationFrame(() => {
+        scheduled = false;
+        for (const sectionKey in needs) {
+          const need = needs[sectionKey];
+          const section = __classPrivateFieldGet(this, _LfWorkflowRunnerManager_SECTIONS, "f")[sectionKey];
+          if (need) {
+            section.render();
+          }
+        }
+        Object.keys(needs).forEach((k) => needs[k] = false);
+      });
     }
   });
 };
