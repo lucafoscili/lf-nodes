@@ -1,0 +1,26 @@
+{
+  "10": {
+    "inputs": {
+      "file_names": "",
+      "upload_dir": "temp",
+      "ui_widget": ""
+    },
+    "class_type": "LF_LoadMetadata",
+    "_meta": {
+      "title": "Load metadata from image"
+    }
+  },
+  "12": {
+    "inputs": {
+      "ui_widget": "{}",
+      "json_input": [
+        "10",
+        0
+      ]
+    },
+    "class_type": "LF_DisplayJSON",
+    "_meta": {
+      "title": "Display JSON"
+    }
+  }
+}

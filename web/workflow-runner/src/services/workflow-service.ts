@@ -103,7 +103,7 @@ export const uploadWorkflowFiles = async (files: File[]): Promise<WorkflowAPIUpl
 
   if (!files || files.length === 0) {
     throw new WorkflowApiError<WorkflowAPIUploadPayload>(UPLOAD_MISSING_FILE, {
-      payload: { detail: 'missing_file' },
+      payload: { error: { message: 'missing_file' } },
     });
   }
 
@@ -119,7 +119,7 @@ export const uploadWorkflowFiles = async (files: File[]): Promise<WorkflowAPIUpl
   if (isWorkflowAPIUploadResponse(data)) {
     if (!response.ok) {
       const { payload } = data;
-      const detail = payload?.detail || response.statusText;
+      const detail = payload?.error?.message || response.statusText;
       throw new WorkflowApiError<WorkflowAPIUploadPayload>(`${UPLOAD_GENERIC} (${detail})`, {
         status: response.status,
         payload,
@@ -131,7 +131,7 @@ export const uploadWorkflowFiles = async (files: File[]): Promise<WorkflowAPIUpl
 
   if (isWorkflowAPIUploadPayload(data)) {
     if (!response.ok) {
-      const detail = data.detail || response.statusText;
+      const detail = data.error?.message || response.statusText;
       throw new WorkflowApiError<WorkflowAPIUploadPayload>(`${UPLOAD_GENERIC} (${detail})`, {
         status: response.status,
         payload: data,
