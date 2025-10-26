@@ -28,10 +28,9 @@ const isWorkflowAPIUploadPayload = (v) => {
   if (!isObject(v)) {
     return false;
   }
-  if (!("detail" in v) || !isString(v.detail)) {
-    return false;
-  }
-  if ("paths" in v && !(isStringArray(v.paths) || v.paths === void 0)) {
+  const hasPaths = "paths" in v && isStringArray(v.paths);
+  const hasError = "error" in v && isObject(v.error) && "message" in v.error && isString(v.error.message);
+  if (!hasPaths && !hasError) {
     return false;
   }
   if ("error" in v) {
@@ -57,12 +56,95 @@ const isWorkflowAPIUploadResponse = (v) => {
   }
   return true;
 };
+const parseCount = (v) => {
+  if (Array.isArray(v)) {
+    return v.length;
+  }
+  if (v === null || v === void 0) {
+    return 0;
+  }
+  if (typeof v === "boolean") {
+    return v ? 1 : 0;
+  }
+  const n = Number(v);
+  return Number.isFinite(n) ? n : 0;
+};
+const isJSONLikeString = (value) => {
+  if (typeof value !== "string")
+    return false;
+  const trimmed = value.trim();
+  if (!(trimmed.startsWith("{") && trimmed.endsWith("}") || trimmed.startsWith("[") && trimmed.endsWith("]"))) {
+    return false;
+  }
+  if (trimmed.startsWith("{")) {
+    if (trimmed === "{}")
+      return true;
+    if (/".*"\s*:\s*.+/.test(trimmed))
+      return true;
+    return false;
+  }
+  if (trimmed.indexOf('"') !== -1)
+    return true;
+  const simpleArrayScalar = /^\[\s*(?:-?\d+(\.\d+)?|true|false|null)(\s*,\s*(?:-?\d+(\.\d+)?|true|false|null))*\s*\]$/i;
+  if (trimmed.startsWith("[") && simpleArrayScalar.test(trimmed))
+    return true;
+  return false;
+};
 const parseJson = async (response) => {
   try {
     return await response.json();
   } catch {
     return null;
   }
+};
+const unescapeJson = (input) => {
+  let validJson = false;
+  let parsedJson = void 0;
+  let unescapedStr = input;
+  const recursiveUnescape = (inputStr) => {
+    let newStr = inputStr.replace(/\\(.)/g, "$1");
+    while (newStr !== inputStr) {
+      inputStr = newStr;
+      newStr = inputStr.replace(/\\(.)/g, "$1");
+    }
+    return newStr;
+  };
+  const deepParse = (data) => {
+    if (isJSONLikeString(data)) {
+      try {
+        const innerJson = JSON.parse(data);
+        if (typeof innerJson === "object" && innerJson !== null) {
+          return deepParse(innerJson);
+        }
+      } catch (e) {
+        return data;
+      }
+    } else if (typeof data === "object" && data !== null) {
+      Object.keys(data).forEach((key) => {
+        data[key] = deepParse(data[key]);
+      });
+    }
+    return data;
+  };
+  try {
+    parsedJson = isJSONLikeString(input) ? JSON.parse(input) : input;
+    validJson = true;
+    parsedJson = deepParse(parsedJson);
+    unescapedStr = JSON.stringify(parsedJson, null, 2);
+  } catch (error) {
+    if (typeof input === "object" && input !== null) {
+      try {
+        unescapedStr = JSON.stringify(input, null, 2);
+        validJson = true;
+        parsedJson = input;
+      } catch (stringifyError) {
+        unescapedStr = recursiveUnescape(input.toString());
+      }
+    } else {
+      unescapedStr = recursiveUnescape(input.toString());
+    }
+  }
+  return { validJson, parsedJson, unescapedStr };
 };
 const clearChildren = (element) => {
   if (!element) {
@@ -176,11 +258,12 @@ const runWorkflowRequest = async (workflowId, inputs) => {
   };
 };
 const uploadWorkflowFiles = async (files) => {
+  var _a, _b;
   const { UPLOAD_GENERIC, UPLOAD_INVALID_RESPONSE, UPLOAD_MISSING_FILE } = ERROR_MESSAGES;
   const { UPLOAD_COMPLETED } = STATUS_MESSAGES;
   if (!files || files.length === 0) {
     throw new WorkflowApiError(UPLOAD_MISSING_FILE, {
-      payload: { detail: "missing_file" }
+      payload: { error: { message: "missing_file" } }
     });
   }
   const formData = new FormData();
@@ -193,7 +276,7 @@ const uploadWorkflowFiles = async (files) => {
   if (isWorkflowAPIUploadResponse(data)) {
     if (!response.ok) {
       const { payload } = data;
-      const detail = (payload == null ? void 0 : payload.detail) || response.statusText;
+      const detail = ((_a = payload == null ? void 0 : payload.error) == null ? void 0 : _a.message) || response.statusText;
       throw new WorkflowApiError(`${UPLOAD_GENERIC} (${detail})`, {
         status: response.status,
         payload
@@ -203,7 +286,7 @@ const uploadWorkflowFiles = async (files) => {
   }
   if (isWorkflowAPIUploadPayload(data)) {
     if (!response.ok) {
-      const detail = data.detail || response.statusText;
+      const detail = ((_b = data.error) == null ? void 0 : _b.message) || response.statusText;
       throw new WorkflowApiError(`${UPLOAD_GENERIC} (${detail})`, {
         status: response.status,
         payload: data
@@ -411,12 +494,12 @@ const createInputCell = (cell) => {
   }
 };
 const createOutputComponent = (descriptor) => {
-  const { dataset, json, props, shape, slot_map, svg } = descriptor;
+  const { dataset, json, metadata, props, shape, slot_map, svg } = descriptor;
   const el = document.createElement("div");
   switch (shape) {
     case "code": {
       const p = props || {};
-      p.lfValue = svg || JSON.stringify(json, null, 2);
+      p.lfValue = svg || unescapeJson(json || metadata || dataset || { message: "No output available." }).unescapedStr;
       const code = createComponent.code(p);
       el.appendChild(code);
       break;
@@ -1651,22 +1734,9 @@ _LfWorkflowRunnerManager_APP_ROOT = /* @__PURE__ */ new WeakMap(), _LfWorkflowRu
     try {
       const resp = await fetch("/queue");
       if (!resp.ok) {
-        throw new Error("unreachable");
+        throw new Error("Failed to fetch queue status");
       }
       const { queue_running, queue_pending } = await resp.json();
-      const parseCount = (v) => {
-        if (Array.isArray(v)) {
-          return v.length;
-        }
-        if (v === null || v === void 0) {
-          return 0;
-        }
-        if (typeof v === "boolean") {
-          return v ? 1 : 0;
-        }
-        const n = Number(v);
-        return Number.isFinite(n) ? n : 0;
-      };
       const qPending = parseCount(queue_pending);
       const qRunning = parseCount(queue_running);
       const busy = qPending + qRunning;
@@ -1683,7 +1753,7 @@ _LfWorkflowRunnerManager_APP_ROOT = /* @__PURE__ */ new WeakMap(), _LfWorkflowRu
       } catch (err) {
       }
     }
-  }, 1e3);
+  }, 750);
 }, _LfWorkflowRunnerManager_subscribeToState = function _LfWorkflowRunnerManager_subscribeToState2() {
   const st = __classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f").getState();
   let lastCurrentMessage = st.current.message;

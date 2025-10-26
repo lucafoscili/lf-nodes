@@ -19,6 +19,7 @@ var APIEndpoints;
   APIEndpoints2["GetBackupStats"] = "/lf-nodes/get-backup-stats";
   APIEndpoints2["NewBackup"] = "/lf-nodes/new-backup";
   APIEndpoints2["ProcessImage"] = "/lf-nodes/process-image";
+  APIEndpoints2["UploadImage"] = "/lf-nodes/upload";
   APIEndpoints2["RefreshNodeDefs"] = "/lf-nodes/refresh-node-defs";
   APIEndpoints2["SaveMetadata"] = "/lf-nodes/save-metadata";
   APIEndpoints2["UpdateJson"] = "/lf-nodes/update-json";
@@ -412,52 +413,6 @@ const IMAGE_API = {
     return payload;
   },
   //#endregion
-  //#region process
-  process: async (url, type, settings) => {
-    const lfManager = getLfManager();
-    const payload = {
-      data: "",
-      mask: void 0,
-      message: "",
-      status: LogSeverity.Info
-    };
-    try {
-      const body = new FormData();
-      body.append("url", url);
-      body.append("type", type);
-      body.append("settings", JSON.stringify(settings));
-      const response = await getComfyAPI().fetchApi(APIEndpoints.ProcessImage, {
-        body,
-        method: "POST"
-      });
-      const code = response.status;
-      switch (code) {
-        case 200:
-          const p = await response.json();
-          if (p.status === "success") {
-            payload.data = p.data;
-            payload.mask = p.mask;
-            payload.message = "Image processed successfully.";
-            payload.status = LogSeverity.Success;
-            lfManager.log(payload.message, { payload }, payload.status);
-          }
-          break;
-        default:
-          {
-            const errorText = await response.text().catch(() => "");
-            payload.message = `Unexpected response from the process-image API (${code}): ${errorText || response.statusText}`;
-          }
-          payload.status = LogSeverity.Error;
-          break;
-      }
-    } catch (error) {
-      payload.message = error;
-      payload.status = LogSeverity.Error;
-    }
-    lfManager.log(payload.message, { payload }, payload.status);
-    return payload;
-  },
-  //#endregion
   //#region explore
   explore: async (directory, options = {}) => {
     const lfManager = getLfManager();
@@ -506,6 +461,99 @@ const IMAGE_API = {
       payload.status = LogSeverity.Error;
     }
     lfManager.log(payload.message, { payload, options }, payload.status);
+    return payload;
+  },
+  //#endregion
+  //#region process
+  process: async (url, type, settings) => {
+    const lfManager = getLfManager();
+    const payload = {
+      data: "",
+      mask: void 0,
+      message: "",
+      status: LogSeverity.Info
+    };
+    try {
+      const body = new FormData();
+      body.append("url", url);
+      body.append("type", type);
+      body.append("settings", JSON.stringify(settings));
+      const response = await getComfyAPI().fetchApi(APIEndpoints.ProcessImage, {
+        body,
+        method: "POST"
+      });
+      const code = response.status;
+      switch (code) {
+        case 200:
+          const p = await response.json();
+          if (p.status === "success") {
+            payload.data = p.data;
+            payload.mask = p.mask;
+            payload.message = "Image processed successfully.";
+            payload.status = LogSeverity.Success;
+            lfManager.log(payload.message, { payload }, payload.status);
+          }
+          break;
+        default:
+          {
+            const errorText = await response.text().catch(() => "");
+            payload.message = `Unexpected response from the process-image API (${code}): ${errorText || response.statusText}`;
+          }
+          payload.status = LogSeverity.Error;
+          break;
+      }
+    } catch (error) {
+      payload.message = error;
+      payload.status = LogSeverity.Error;
+    }
+    lfManager.log(payload.message, { payload }, payload.status);
+    return payload;
+  },
+  //#endregion
+  //#region upload
+  upload: async (file, directory = "temp") => {
+    var _a;
+    const lfManager = getLfManager();
+    const payload = {
+      payload: { paths: [] },
+      message: "",
+      status: LogSeverity.Info
+    };
+    try {
+      const body = new FormData();
+      body.append("file", file);
+      if (directory && directory !== "temp") {
+        body.append("directory", directory);
+      }
+      const response = await getComfyAPI().fetchApi(APIEndpoints.UploadImage, {
+        body,
+        method: "POST"
+      });
+      const code = response.status;
+      switch (code) {
+        case 200: {
+          const p = await response.json();
+          if (p.status === "success" && Array.isArray((_a = p.payload) == null ? void 0 : _a.paths) && p.payload.paths.length > 0) {
+            payload.payload.paths = [p.payload.paths[0]];
+            payload.message = "Image uploaded successfully.";
+            payload.status = LogSeverity.Success;
+            lfManager.log(payload.message, { payload }, payload.status);
+          }
+          break;
+        }
+        default:
+          {
+            const errorText = await response.text().catch(() => "");
+            payload.message = `Unexpected response from the upload-image API (${code}): ${errorText || response.statusText}`;
+          }
+          payload.status = LogSeverity.Error;
+          break;
+      }
+    } catch (error) {
+      payload.message = error;
+      payload.status = LogSeverity.Error;
+    }
+    lfManager.log(payload.message, { payload }, payload.status);
     return payload;
   }
   //#endregion
@@ -8279,6 +8327,7 @@ const treeFactory = {
 const EV_HANDLERS = {
   //#region Upload handler
   upload: async (state, e) => {
+    var _a;
     const { eventType, selectedFiles } = e.detail;
     const { upload } = state;
     switch (eventType) {
@@ -8286,7 +8335,9 @@ const EV_HANDLERS = {
         state.files = Array.from(selectedFiles, (file) => file.name).join(";") || "";
         return;
       case "upload":
-        const { filesStr } = await uploadFiles(selectedFiles, upload);
+        const socket = getWidget(state.node, ComfyWidgetName.combo);
+        const dir = ((_a = socket.value) == null ? void 0 : _a.toString()) || "temp";
+        const { filesStr } = await uploadFiles(selectedFiles, upload, dir);
         state.files = filesStr || "";
         break;
     }
@@ -9051,29 +9102,24 @@ const refreshChart = (node) => {
     getLfManager().log("Whoops! It seems there is no chart. :V", { error }, LogSeverity.Error);
   }
 };
-const uploadFiles = async (files, uploadEl) => {
+const uploadFiles = async (files, uploadEl, dir = "temp") => {
+  var _a;
   const fileNames = /* @__PURE__ */ new Set();
   for (let index = 0; index < files.length; index++) {
     const file = files[index];
     try {
-      const body = new FormData();
-      const i = file.webkitRelativePath.lastIndexOf("/");
-      const subfolder = file.webkitRelativePath.slice(0, i + 1);
       const new_file = new File([file], file.name, {
         type: file.type,
         lastModified: file.lastModified
       });
-      body.append("image", new_file);
-      if (i > 0) {
-        body.append("subfolder", subfolder);
-      }
-      const resp = await getApiRoutes().comfy.upload(body);
-      if (resp.status === 200 || resp.status === 201) {
-        getLfManager().log("POST result", { json: resp.json }, LogSeverity.Success);
+      const resp = await getApiRoutes().image.upload(new_file, dir);
+      if (resp && resp.status === "success" && Array.isArray((_a = resp.payload) == null ? void 0 : _a.paths) && resp.payload.paths.length > 0) {
+        getLfManager().log("Upload result", { paths: resp.payload.paths }, LogSeverity.Success);
         fileNames.add(file.name);
         uploadEl.dataset.files = uploadEl.dataset.files + ";" + file.name;
       } else {
-        getLfManager().log("POST failed", { statusText: resp.statusText }, LogSeverity.Error);
+        const detail = resp.message || "upload_failed";
+        getLfManager().log("POST failed", { detail }, LogSeverity.Error);
       }
     } catch (error) {
       alert(`Upload failed: ${error}`);
