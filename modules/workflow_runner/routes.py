@@ -1,6 +1,5 @@
 import asyncio
 import execution
-import folder_paths
 import json
 import logging
 import os
@@ -11,6 +10,11 @@ from aiohttp import web
 from pathlib import Path
 from typing import Any, Dict, Iterable, Optional
 from server import PromptServer
+
+from .config import CONFIG as RUNNER_CONFIG
+from .registry import InputValidationError, get_workflow, list_workflows
+from ..utils.constants import API_ROUTE_PREFIX, NOT_FND_HTML
+from ..utils.helpers.conversion import json_safe
 
 # Dev dotenv loader: load `.env` for local dev. The loader will run if either:
 #  - DEV_ENV=1 is already set in the environment, OR
@@ -34,12 +38,6 @@ try:
 except Exception:
     logging.exception('Failed to load local .env')
 
-from .config import CONFIG as RUNNER_CONFIG
-from .registry import InputValidationError, get_workflow, list_workflows
-from .registry import _json_safe as workflow_json_safe
-from ..utils.constants import API_ROUTE_PREFIX, NOT_FND_HTML
-from ..utils.helpers.logic import sanitize_filename
-
 DEPLOY_ROOT = RUNNER_CONFIG.deploy_root
 WORKFLOW_RUNNER_ROOT = RUNNER_CONFIG.runner_root
 SHARED_JS_ROOT = RUNNER_CONFIG.shared_js_root
@@ -52,7 +50,72 @@ ASSET_SEARCH_ROOTS = (
 WORKFLOW_STATIC_ROOTS = (RUNNER_CONFIG.runner_root,)
 WORKFLOW_HTML = RUNNER_CONFIG.workflow_html
 
+# region Helpers
+
+def _make_run_payload(
+    *,
+    detail: str = "",
+    error_message: str | None = None,
+    error_input: str | None = None,
+    history: Dict[str, Any] | None = None,
+    preferred_output: str | None = None,
+) -> Dict[str, Any]:
+    """
+    Build a response payload compatible with the frontend's WorkflowAPIRunPayload:
+
+    {
+      "detail": string,
+      "error": { "message": string, "input": string | undefined },
+      "history": { outputs?: {...} },
+      "preferred_output": string | undefined
+    }
+    """
+    payload: Dict[str, Any] = {"detail": detail or ""}
+    if error_message is not None:
+        payload["error"] = {"message": str(error_message)}
+        if error_input:
+            payload["error"]["input"] = str(error_input)
+
+    payload["history"] = history or {"outputs": {}}
+    if preferred_output is not None:
+        payload["preferred_output"] = preferred_output
+
+    return {"message": detail or "", "payload": payload, "status": "error" if error_message else "ready"}
+
+def _sanitize_history(entry: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Sanitize a single history entry for safe JSON serialization.
+    The function returns a dictionary containing only the "status", "outputs",
+    and "prompt" keys, each passed through `_json_safe` so nested values remain
+    JSON-serializable while preserving the original key names.
+    """
+    outputs = entry.get("outputs", {}) or {}
+    safe_outputs = {}
+    for node_id, node_out in outputs.items():
+        try:
+            safe_outputs[str(node_id)] = json_safe(node_out)
+        except Exception:
+            safe_outputs[str(node_id)] = node_out
+
+    return {
+        "status": json_safe(entry.get("status")),
+        "outputs": json_safe(safe_outputs),
+        "prompt": json_safe(entry.get("prompt")),
+    }
 def _sanitize_rel_path(raw_path: str) -> Optional[Path]:
+    """Sanitizes a relative path to prevent directory traversal and ensure safety.
+
+    This function normalizes the input path by converting backslashes to forward slashes,
+    checks for potentially unsafe elements like ".." or paths starting with "/", and
+    constructs a Path object from valid parts if the path is deemed safe.
+
+    Args:
+        raw_path (str): The raw path string to be sanitized.
+
+    Returns:
+        Optional[Path]: A Path object representing the sanitized relative path if valid,
+        or None if the path contains unsafe elements (e.g., ".." or absolute path indicators).
+    """
     normalized = raw_path.replace("\\", "/")
     if ".." in normalized or normalized.startswith("/"):
         return None
@@ -60,14 +123,51 @@ def _sanitize_rel_path(raw_path: str) -> Optional[Path]:
     return Path(*parts)
 
 def _serve_first_existing(paths: Iterable[Path]) -> Optional[web.FileResponse]:
+    """
+    Serves the first existing file from a list of candidate paths.
+
+    This function iterates through the provided paths and returns a web.FileResponse
+    for the first path that exists and is a file. If no such path is found, it returns None.
+
+    Args:
+        paths (Iterable[Path]): An iterable of Path objects to check for existence and file status.
+
+    Returns:
+        Optional[web.FileResponse]: A FileResponse for the first existing file, or None if no file is found.
+    """
     for candidate in paths:
         if candidate.exists() and candidate.is_file():
             return web.FileResponse(str(candidate))
     return None
 
+async def _wait_for_completion(prompt_id: str, timeout_seconds: float = 180.0) -> Dict[str, Any]:
+    """
+    Poll the prompt queue history until the prompt either completes, fails,
+    or the timeout is reached.
+    """
+    queue = PromptServer.instance.prompt_queue
+    start = time.perf_counter()
+
+    while True:
+        history = queue.get_history(prompt_id=prompt_id)
+        if prompt_id in history:
+            entry = history[prompt_id]
+            status = entry.get("status") or {}
+            if status.get("completed") is True or status.get("status_str") == "error":
+                return entry
+            if entry.get("outputs"):
+                # Some nodes don't populate status but still produce outputs.
+                return entry
+
+        if (time.perf_counter() - start) >= timeout_seconds:
+            raise TimeoutError(f"Prompt {prompt_id} did not finish within {timeout_seconds} seconds.")
+
+        await asyncio.sleep(0.35)
+# endregion
+
 # region Workflow runner page
 @PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/workflow-runner")
-async def lf_nodes_workflow_runner_page(_: web.Request) -> web.Response:
+async def route_workflow_runner_page(_: web.Request) -> web.Response:
     try:
         response = _serve_first_existing((WORKFLOW_HTML,))
 
@@ -80,100 +180,12 @@ async def lf_nodes_workflow_runner_page(_: web.Request) -> web.Response:
     return web.Response(text=NOT_FND_HTML, content_type="text/html", status=404)
 # endregion
 
-# region Static assets
-@PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/static/{{path:.*}}")
-async def lf_nodes_static_asset(request: web.Request) -> web.Response:
-    try:
-        raw_path = request.match_info.get('path', '')
-        if not raw_path.startswith('assets/'):
-            return web.Response(status=404, text='Not found')
-
-        rel_path = _sanitize_rel_path(raw_path)
-        if rel_path is None:
-            return web.Response(status=400, text='Invalid path')
-
-        response = _serve_first_existing(root / rel_path for root in ASSET_SEARCH_ROOTS)
-        if response is not None:
-            return response
-    except Exception:
-        logging.exception('Error while attempting to serve static asset: %s', request.path)
-
-    return web.Response(status=404, text='Not found')
-# endregion
-
-# region Shared JS
-@PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/js/{{path:.*}}")
-async def lf_nodes_static_js(request: web.Request) -> web.Response:
-    try:
-        raw_path = request.match_info.get('path', '')
-        rel_path = _sanitize_rel_path(raw_path)
-        if rel_path is None:
-            return web.Response(status=400, text='Invalid path')
-
-        response = _serve_first_existing((SHARED_JS_ROOT / rel_path,))
-        if response is not None:
-            return response
-    except Exception:
-        logging.exception('Error while attempting to serve shared JS asset: %s', request.path)
-
-    return web.Response(status=404, text='Not found')
-# endregion
-
-# region Workflow static
-@PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/static-workflow-runner/{'{path:.*}'}")
-async def lf_nodes_static_workflow(request: web.Request) -> web.Response:
-    try:
-        raw_path = request.match_info.get('path', '')
-        rel_path = _sanitize_rel_path(raw_path)
-        if rel_path is None:
-            return web.Response(status=400, text='Invalid path')
-
-        response = _serve_first_existing(root / rel_path for root in WORKFLOW_STATIC_ROOTS)
-        if response is not None:
-            return response
-    except Exception:
-        pass
-
-    return web.Response(status=404, text='Not found')
-# endregion
-
-# region Workflow
-@PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/workflows")
-async def lf_nodes_list_workflows(_: web.Request) -> web.Response:
-    return web.json_response({"workflows": list_workflows()})
-
-@PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/workflows/{{workflow_id}}")
-async def lf_nodes_get_workflow(request: web.Request) -> web.Response:
-    workflow_id = request.match_info.get('workflow_id')
-    if not workflow_id:
-        return web.Response(status=400, text='Missing workflow_id')
-    
-    workflow = get_workflow(workflow_id)
-    if not workflow:
-        return web.Response(status=404, text='Workflow not found')
-    
-    try:
-        # Load the raw workflow JSON (not the processed prompt)
-        with workflow.workflow_path.open("r", encoding="utf-8") as workflow_file:
-            workflow_json = json.load(workflow_file)
-        return web.json_response(workflow_json)
-    except Exception as e:
-        logging.exception(f"Error loading workflow {workflow_id}")
-        return web.Response(status=500, text=f'Error loading workflow: {str(e)}')
-
-# Import proxy module to register proxy routes
-try:
-    from . import proxy  # noqa: F401 - registers routes
-except Exception:
-    logging.exception("Failed to import workflow-runner proxy module")
-# endregion
-
 # region Run
 @PromptServer.instance.routes.post(f"{API_ROUTE_PREFIX}/run")
-async def lf_nodes_run_workflow(request: web.Request) -> web.Response:
+async def route_run_workflow(request: web.Request) -> web.Response:
     try:
         payload = await request.json()
-    except Exception as exc:  # pragma: no cover - defensive, logged to UI
+    except Exception as exc:
         logging.warning("Failed to parse workflow request payload: %s", exc)
         return web.json_response(_make_run_payload(detail=str(exc), error_message="invalid_json"), status=400)
 
@@ -198,11 +210,10 @@ async def lf_nodes_run_workflow(request: web.Request) -> web.Response:
     except FileNotFoundError as exc:
         return web.json_response(_make_run_payload(detail=str(exc), error_message="missing_source"), status=400)
     except InputValidationError as exc:
-        # Provide the offending input name so the UI can highlight the field
         return web.json_response(_make_run_payload(detail=str(exc), error_message="invalid_input", error_input=getattr(exc, 'input_name', None)), status=400)
     except ValueError as exc:
         return web.json_response(_make_run_payload(detail=str(exc), error_message="invalid_input"), status=400)
-    except Exception as exc:  # pragma: no cover - unexpected issues are surfaced to the UI
+    except Exception as exc:
         logging.exception("Failed to prepare workflow '%s': %s", workflow_id, exc)
         return web.json_response(_make_run_payload(detail=str(exc), error_message="configuration_failed"), status=500)
 
@@ -213,7 +224,7 @@ async def lf_nodes_run_workflow(request: web.Request) -> web.Response:
             _make_run_payload(
                 detail=validation[1],
                 error_message="validation_failed",
-                history={"outputs": {}, "node_errors": _json_safe(validation[3])},
+                history={"outputs": {}, "node_errors": json_safe(validation[3])},
             ),
             status=400,
         )
@@ -255,7 +266,6 @@ async def lf_nodes_run_workflow(request: web.Request) -> web.Response:
     except Exception:
         preferred_output = None
 
-    # Build payload matching WorkflowAPIRunPayload:
     sanitized = _sanitize_history(history_entry)
     history_outputs = sanitized.get("outputs", {}) if isinstance(sanitized, dict) else {}
     if status_str == "success":
@@ -264,93 +274,91 @@ async def lf_nodes_run_workflow(request: web.Request) -> web.Response:
             status=200,
         )
     else:
-        # Non-success execution -> surface an error object and return non-200 status
         return web.json_response(
             _make_run_payload(detail=status_str or "error", error_message="execution_failed", history={"outputs": history_outputs}, preferred_output=preferred_output),
             status=http_status,
         )
 # endregion
 
-# region Helpers
-def _json_safe(value: Any) -> Any:
-    """
-    Thin wrapper that reuses the workflow serializer while keeping the intent
-    clear within this module.
-    """
-    return workflow_json_safe(value)
+# region Static assets
+@PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/static/{{path:.*}}")
+async def route_static_asset(request: web.Request) -> web.Response:
+    try:
+        raw_path = request.match_info.get('path', '')
+        if not raw_path.startswith('assets/'):
+            return web.Response(status=404, text='Not found')
 
-def _make_run_payload(
-    *,
-    detail: str = "",
-    error_message: str | None = None,
-    error_input: str | None = None,
-    history: Dict[str, Any] | None = None,
-    preferred_output: str | None = None,
-) -> Dict[str, Any]:
-    """
-    Build a response payload compatible with the frontend's WorkflowAPIRunPayload:
+        rel_path = _sanitize_rel_path(raw_path)
+        if rel_path is None:
+            return web.Response(status=400, text='Invalid path')
 
-    {
-      "detail": string,
-      "error": { "message": string, "input": string | undefined },
-      "history": { outputs?: {...} },
-      "preferred_output": string | undefined
-    }
-    """
-    payload: Dict[str, Any] = {"detail": detail or ""}
-    if error_message is not None:
-        payload["error"] = {"message": str(error_message)}
-        if error_input:
-            payload["error"]["input"] = str(error_input)
+        response = _serve_first_existing(root / rel_path for root in ASSET_SEARCH_ROOTS)
+        if response is not None:
+            return response
+    except Exception:
+        logging.exception('Error while attempting to serve static asset: %s', request.path)
 
-    payload["history"] = history or {"outputs": {}}
-    if preferred_output is not None:
-        payload["preferred_output"] = preferred_output
+    return web.Response(status=404, text='Not found')
+# endregion
 
-    return {"message": detail or "", "payload": payload, "status": "error" if error_message else "ready"}
+# region Static JS
+@PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/js/{{path:.*}}")
+async def route_static_js(request: web.Request) -> web.Response:
+    try:
+        raw_path = request.match_info.get('path', '')
+        rel_path = _sanitize_rel_path(raw_path)
+        if rel_path is None:
+            return web.Response(status=400, text='Invalid path')
 
-async def _wait_for_completion(prompt_id: str, timeout_seconds: float = 180.0) -> Dict[str, Any]:
-    """
-    Poll the prompt queue history until the prompt either completes, fails,
-    or the timeout is reached.
-    """
-    queue = PromptServer.instance.prompt_queue
-    start = time.perf_counter()
+        response = _serve_first_existing((SHARED_JS_ROOT / rel_path,))
+        if response is not None:
+            return response
+    except Exception:
+        logging.exception('Error while attempting to serve shared JS asset: %s', request.path)
 
-    while True:
-        history = queue.get_history(prompt_id=prompt_id)
-        if prompt_id in history:
-            entry = history[prompt_id]
-            status = entry.get("status") or {}
-            if status.get("completed") is True or status.get("status_str") == "error":
-                return entry
-            if entry.get("outputs"):
-                # Some nodes don't populate status but still produce outputs.
-                return entry
+    return web.Response(status=404, text='Not found')
+# endregion
 
-        if (time.perf_counter() - start) >= timeout_seconds:
-            raise TimeoutError(f"Prompt {prompt_id} did not finish within {timeout_seconds} seconds.")
+# region Workflow static
+@PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/static-workflow-runner/{'{path:.*}'}")
+async def route_static_workflow(request: web.Request) -> web.Response:
+    try:
+        raw_path = request.match_info.get('path', '')
+        rel_path = _sanitize_rel_path(raw_path)
+        if rel_path is None:
+            return web.Response(status=400, text='Invalid path')
 
-        await asyncio.sleep(0.35)
+        response = _serve_first_existing(root / rel_path for root in WORKFLOW_STATIC_ROOTS)
+        if response is not None:
+            return response
+    except Exception:
+        pass
 
-def _sanitize_history(entry: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Sanitize a single history entry for safe JSON serialization.
-    The function returns a dictionary containing only the "status", "outputs",
-    and "prompt" keys, each passed through `_json_safe` so nested values remain
-    JSON-serializable while preserving the original key names.
-    """
-    outputs = entry.get("outputs", {}) or {}
-    safe_outputs = {}
-    for node_id, node_out in outputs.items():
-        try:
-            safe_outputs[str(node_id)] = _json_safe(node_out)
-        except Exception:
-            safe_outputs[str(node_id)] = node_out
+    return web.Response(status=404, text='Not found')
+# endregion
 
-    return {
-        "status": _json_safe(entry.get("status")),
-        "outputs": _json_safe(safe_outputs),
-        "prompt": _json_safe(entry.get("prompt")),
-    }
+# region List workflows
+@PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/workflows")
+async def route_list_workflows(_: web.Request) -> web.Response:
+    return web.json_response({"workflows": list_workflows()})
+# endregion
+
+# region Get workflow
+@PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/workflows/{{workflow_id}}")
+async def route_get_workflow(request: web.Request) -> web.Response:
+    workflow_id = request.match_info.get('workflow_id')
+    if not workflow_id:
+        return web.Response(status=400, text='Missing workflow_id')
+    
+    workflow = get_workflow(workflow_id)
+    if not workflow:
+        return web.Response(status=404, text='Workflow not found')
+    
+    try:
+        with workflow.workflow_path.open("r", encoding="utf-8") as workflow_file:
+            workflow_json = json.load(workflow_file)
+        return web.json_response(workflow_json)
+    except Exception as e:
+        logging.exception(f"Error loading workflow {workflow_id}")
+        return web.Response(status=500, text=f'Error loading workflow: {str(e)}')
 # endregion

@@ -1,8 +1,11 @@
 import json
+
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable, Dict, Iterable, List
 from unicodedata import category
+
+from ..utils.helpers.conversion import json_safe
 
 # Custom exception for input-level validation failures. Carries the offending input name so
 # callers (the HTTP API) can map the problem back to the UI field to highlight.
@@ -12,19 +15,6 @@ class InputValidationError(ValueError):
         self.input_name = input_name
 
 # region Helpers
-def _json_safe(value: Any) -> Any:
-    """
-    Recursively convert workflow values into JSON-safe types.
-    """
-    if value is None or isinstance(value, (str, int, float, bool)):
-        return value
-    if isinstance(value, dict):
-        return {str(k): _json_safe(v) for k, v in value.items()}
-    if isinstance(value, (list, tuple, set)):
-        return [_json_safe(v) for v in value]
-
-    return str(value)
-
 def _workflow_to_prompt(workflow: Dict[str, Any]) -> Dict[str, Any]:
     """
     Convert a workflow graph (the format saved under user/default/workflows)
@@ -64,7 +54,7 @@ def _workflow_to_prompt(workflow: Dict[str, Any]) -> Dict[str, Any]:
         if isinstance(raw_inputs, dict):
             prompt[node_id] = {
                 "class_type": class_type,
-                "inputs": _json_safe(raw_inputs),
+                "inputs": json_safe(raw_inputs),
             }
             continue
 
@@ -90,10 +80,10 @@ def _workflow_to_prompt(workflow: Dict[str, Any]) -> Dict[str, Any]:
                     continue
                 prompt_inputs[input_name] = [source[0], source[1]]
             elif input_def.get("widget") is not None:
-                prompt_inputs[input_name] = _json_safe(widget_value)
+                prompt_inputs[input_name] = json_safe(widget_value)
             else:
                 if input_def.get("value") is not None:
-                    prompt_inputs[input_name] = _json_safe(input_def.get("value"))
+                    prompt_inputs[input_name] = json_safe(input_def.get("value"))
 
         prompt[node_id] = {
             "class_type": class_type,
@@ -120,13 +110,13 @@ class WorkflowCell:
             "shape": self.shape,
         }
         if self.props:
-            data["props"] = _json_safe(self.props)
+            data["props"] = json_safe(self.props)
         if self.value:
             data["value"] = self.value
         if self.description:
             data["title"] = self.description
 
-        return _json_safe(data)
+        return json_safe(data)
 
 @dataclass
 class WorkflowNode:
