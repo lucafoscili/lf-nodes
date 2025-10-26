@@ -1,3 +1,4 @@
+import { LfThemeUIState } from '@lf-widgets/foundations/dist';
 import { WorkflowAPIDataset, WorkflowNodeResults } from './api';
 import { WorkflowManager } from './manager';
 
@@ -14,6 +15,8 @@ export interface WorkflowState {
   current: WorkflowStateCurrent;
   isDebug: boolean;
   manager: WorkflowManager | null;
+  notifications: WorkflowStateNotification[];
+  queuedJobs: number;
   mutate: WorkflowStateMutators;
   results: WorkflowNodeResults | null;
   workflows: WorkflowAPIDataset;
@@ -27,10 +30,21 @@ export type WorkflowStateListener = (state: WorkflowState) => void;
 export interface WorkflowStateMutators {
   isDebug: (isDebug: boolean) => void;
   manager: (manager: WorkflowManager) => void;
-  runResult: (status: WorkflowStatus, message: string, results: WorkflowNodeResults | null) => void;
+  notifications: {
+    add: (notification: WorkflowStateNotification) => void;
+    removeById: (id: string) => void;
+    removeByIndex: (index: number) => void;
+  };
+  queuedJobs: (count: number) => void;
+  results: (results: WorkflowNodeResults | null) => void;
   status: (status: WorkflowStatus, message?: string) => void;
   workflow: (id: string) => void;
   workflows: (workflows: WorkflowAPIDataset) => void;
+}
+export interface WorkflowStateNotification {
+  id: string;
+  message: string;
+  status: LfThemeUIState;
 }
 export type WorkflowStateUpdater = (state: WorkflowState) => WorkflowState;
 export type WorkflowStatus = 'running' | 'idle' | 'error';

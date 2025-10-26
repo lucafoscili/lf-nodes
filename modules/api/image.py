@@ -1,6 +1,9 @@
+import folder_paths
 import hashlib
 import json
+import logging
 import os
+import time
 import torch
 
 from aiohttp import web
@@ -253,6 +256,109 @@ async def process_image(request):
 
     except Exception as e:
         return web.Response(status=500, text=f"Error: {str(e)}")
+# endregion
+
+
+# region Upload
+@PromptServer.instance.routes.post(f"{API_ROUTE_PREFIX}/upload")
+async def lf_nodes_upload(request: web.Request) -> web.Response:
+    """Accept a multipart file upload and save to Comfy temp directory.
+
+    Returns a run-style WorkflowAPIResponse wrapped by _make_run_payload.
+    The returned path is the absolute file path which can be passed to nodes
+    that expect an image path. Files are written with their original filename
+    into the temp directory.
+    """
+    try:
+        reader = await request.multipart()
+    except Exception as exc:
+        logging.warning('Failed to parse multipart upload: %s', exc)
+        return web.json_response({
+            "message": str(exc),
+            "payload": {"detail": str(exc), "error": {"message": 'invalid_multipart'}},
+            "status": "error",
+        }, status=400)
+
+    paths = []
+    temp_dir = folder_paths.get_temp_directory()
+    os.makedirs(temp_dir, exist_ok=True)
+
+    try:
+        while True:
+            part = await reader.next()
+            if part is None:
+                break
+
+            if part.name in ('directory', 'dir') and not getattr(part, 'filename', None):
+                try:
+                    dir_value = (await part.text()).strip().lower()
+                except Exception:
+                    dir_value = ''
+
+                if dir_value:
+                    if dir_value not in ('input', 'output', 'temp'):
+                        return web.json_response({
+                            "message": "invalid_directory",
+                            "payload": {"detail": "invalid_directory", "error": {"message": 'invalid_directory_value'}},
+                            "status": "error",
+                        }, status=400)
+
+                    chosen_dir = folder_paths.get_directory_by_type(dir_value)
+                    if not chosen_dir:
+                        return web.json_response({
+                            "message": "invalid_directory",
+                            "payload": {"detail": "invalid_directory", "error": {"message": 'unknown_directory_type'}},
+                            "status": "error",
+                        }, status=400)
+
+                    temp_dir = chosen_dir
+                    os.makedirs(temp_dir, exist_ok=True)
+
+                continue
+
+            if part.name not in ('file', 'files'):
+                continue
+
+            raw_filename = part.filename or ""
+            sanitized = sanitize_filename(raw_filename)
+            if sanitized is None:
+                sanitized = f"upload_{int(time.time())}.png"
+
+            dest_path = os.path.join(temp_dir, sanitized)
+            base, ext = os.path.splitext(dest_path)
+            counter = 1
+            while os.path.exists(dest_path):
+                dest_path = f"{base}_{counter}{ext}"
+                counter += 1
+
+            with open(dest_path, 'wb') as f:
+                while True:
+                    chunk = await part.read_chunk()
+                    if not chunk:
+                        break
+                    f.write(chunk)
+
+            paths.append(dest_path)
+    except Exception as exc:
+        logging.exception('Failed while saving uploaded files: %s', exc)
+        return web.json_response({
+            "message": str(exc),
+            "payload": {"detail": str(exc), "error": {"message": 'save_failed'}},
+            "status": "error",
+        }, status=500)
+
+    if not paths:
+        return web.json_response({
+            "message": "missing_file",
+            "payload": {"error": {"message": 'missing_file'}},
+            "status": "error",
+        }, status=400)
+
+    return web.json_response({
+        "message": "Upload successful.",
+        "payload": {"paths": paths},
+        "status": "success",
+    }, status=200)
 # endregion
 
 # region helpers

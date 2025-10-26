@@ -20,6 +20,11 @@ class LF_LoadMetadata:
                 }),
             },
             "optional": {
+                "upload_dir": (Input.COMBO, {
+                    "default": "temp",
+                    "tooltip": "Directory where the files are uploaded.",
+                    "options": ["input", "output", "temp"],
+                }),
                 "ui_widget": (Input.LF_CODE, {
                     "default": ""
                 }),
@@ -42,8 +47,15 @@ class LF_LoadMetadata:
 
     def on_exec(self, **kwargs: dict):
         file_names: str = normalize_list_to_value(kwargs.get("file_names"))
+        upload_dir: str = normalize_list_to_value(kwargs.get("upload_dir"))
 
-        input_dir = get_comfy_dir("input")
+        if upload_dir == "output":
+            directory = get_comfy_dir("output")
+        elif upload_dir == "input":
+            directory = get_comfy_dir("input")
+        else:
+            directory = get_comfy_dir("temp")
+
         metadata_list: list[str] = []
         metadata = ""
 
@@ -51,7 +63,7 @@ class LF_LoadMetadata:
             file_names_list = file_names.split(';')
 
             for file_name in file_names_list:
-                file_path = os.path.join(input_dir, file_name.strip())
+                file_path = os.path.join(directory, file_name.strip())
 
                 try:
                     pil_image = Image.open(file_path)
@@ -72,7 +84,14 @@ class LF_LoadMetadata:
             "value": metadata,
         })
 
-        return (metadata_list, metadata_list)
+        return {
+            "ui": {
+                "lf_output": [{
+                    "metadata": metadata_list,
+                }],
+            },
+            "result": (metadata_list, metadata_list)
+        }
 # endregion
 
 # region Mappings

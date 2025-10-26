@@ -1,4 +1,9 @@
 //#region Workflow
+export type UnescapeJSONPayload = {
+  validJson: boolean;
+  parsedJson?: {};
+  unescapedStr: string;
+};
 export type WorkflowUICell =
   | HTMLLfButtonElement
   | HTMLLfTextfieldElement
@@ -10,8 +15,5 @@ export interface WorkflowSectionController {
   destroy: () => void;
   mount: () => void;
   render: () => void;
-}
-export interface WorkflowSectionHandle extends WorkflowSectionController {
-  setCellStatus: (id: string, status?: WorkflowCellStatus) => void;
 }
 //#endregion

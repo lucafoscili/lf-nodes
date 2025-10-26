@@ -1,6 +1,7 @@
 import { LfUploadEventPayload } from '@lf-widgets/foundations';
 import { UploadState } from '../types/widgets/upload';
-import { uploadFiles } from '../utils/common';
+import { ComfyWidgetName } from '../types/widgets/widgets';
+import { getWidget, uploadFiles } from '../utils/common';
 
 export const EV_HANDLERS = {
   //#region Upload handler
@@ -14,7 +15,9 @@ export const EV_HANDLERS = {
         state.files = Array.from(selectedFiles, (file) => file.name).join(';') || '';
         return;
       case 'upload':
-        const { filesStr } = await uploadFiles(selectedFiles, upload);
+        const socket = getWidget(state.node, ComfyWidgetName.combo);
+        const dir = socket.value?.toString() || 'temp';
+        const { filesStr } = await uploadFiles(selectedFiles, upload, dir);
 
         state.files = filesStr || '';
         break;

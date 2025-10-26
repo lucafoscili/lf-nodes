@@ -16,17 +16,12 @@ export const MAIN_CLASSES = {
 export const createMainSection = (store: WorkflowStore): WorkflowSectionController => {
   //#region Local variables
   const { MAIN_DESTROYED, MAIN_MOUNTED, MAIN_UPDATED } = DEBUG_MESSAGES;
-  let workflowSection = createWorkflowSection(store);
+  const WORKFLOW_SECTION = createWorkflowSection(store);
   //#endregion
 
   //#region Destroy
   const destroy = () => {
-    const state = store.getState();
-    if (!state.manager) {
-      return;
-    }
-
-    const { manager } = state;
+    const { manager } = store.getState();
     const { uiRegistry } = manager;
 
     for (const cls in MAIN_CLASSES) {
@@ -34,7 +29,7 @@ export const createMainSection = (store: WorkflowStore): WorkflowSectionControll
       uiRegistry.remove(element);
     }
 
-    workflowSection.destroy();
+    WORKFLOW_SECTION.destroy();
 
     debugLog(MAIN_DESTROYED);
   };
@@ -42,13 +37,8 @@ export const createMainSection = (store: WorkflowStore): WorkflowSectionControll
 
   //#region Mount
   const mount = () => {
-    const state = store.getState();
-    const { manager } = state;
+    const { manager } = store.getState();
     const { uiRegistry } = manager;
-
-    if (!manager) {
-      return;
-    }
 
     const elements = uiRegistry.get();
     if (elements && elements[MAIN_CLASSES._]) {
@@ -61,7 +51,7 @@ export const createMainSection = (store: WorkflowStore): WorkflowSectionControll
     manager.getAppRoot().appendChild(_root);
     uiRegistry.set(MAIN_CLASSES._, _root);
 
-    workflowSection.mount();
+    WORKFLOW_SECTION.mount();
 
     debugLog(MAIN_MOUNTED);
   };
@@ -69,8 +59,7 @@ export const createMainSection = (store: WorkflowStore): WorkflowSectionControll
 
   //#region Render
   const render = () => {
-    const state = store.getState();
-    const { manager } = state;
+    const { manager } = store.getState();
     const { uiRegistry } = manager;
 
     const elements = uiRegistry.get();
@@ -78,7 +67,7 @@ export const createMainSection = (store: WorkflowStore): WorkflowSectionControll
       return;
     }
 
-    workflowSection.render();
+    WORKFLOW_SECTION.render();
 
     debugLog(MAIN_UPDATED);
   };

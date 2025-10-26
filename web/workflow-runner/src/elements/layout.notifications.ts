@@ -43,20 +43,12 @@ const _getStateCategory = (status: WorkflowStatus | LfThemeUIState) => {
 //#region Factory
 export const createNotificationsSection = (store: WorkflowStore): WorkflowSectionController => {
   //#region Local variables
-  const { NOTIFICATIONS_DESTROYED, NOTIFICATIONS_MOUNTED, NOTIFICATIONS_UPDATED, STATUS_UPDATED } =
-    DEBUG_MESSAGES;
-  let lastMessage: string | null = null;
-  let lastStatus: string | null = null;
+  const { NOTIFICATIONS_DESTROYED, NOTIFICATIONS_MOUNTED, NOTIFICATIONS_UPDATED } = DEBUG_MESSAGES;
   //#endregion
 
   //#region Destroy
   const destroy = () => {
-    const state = store.getState();
-    if (!state.manager) {
-      return;
-    }
-
-    const { manager } = state;
+    const { manager } = store.getState();
     const { uiRegistry } = manager;
 
     for (const cls in NOTIFICATIONS_CLASSES) {
@@ -64,17 +56,13 @@ export const createNotificationsSection = (store: WorkflowStore): WorkflowSectio
       uiRegistry.remove(element);
     }
 
-    lastMessage = null;
-    lastStatus = null;
-
     debugLog(NOTIFICATIONS_DESTROYED);
   };
   //#endregion
 
   //#region Mount
   const mount = () => {
-    const state = store.getState();
-    const { manager } = state;
+    const { manager } = store.getState();
     const { uiRegistry } = manager;
 
     const elements = uiRegistry.get();
@@ -96,8 +84,7 @@ export const createNotificationsSection = (store: WorkflowStore): WorkflowSectio
   //#region Render
   const render = () => {
     const state = store.getState();
-    const { current, manager } = state;
-    const { id, message, status } = current;
+    const { manager, notifications } = state;
     const { uiRegistry } = manager;
 
     const elements = uiRegistry.get();
@@ -107,33 +94,31 @@ export const createNotificationsSection = (store: WorkflowStore): WorkflowSectio
 
     const _root = elements[NOTIFICATIONS_CLASSES._] as HTMLDivElement;
 
-    if (status !== lastStatus || message !== lastMessage) {
-      const timestamp = new Date().getTime();
+    for (const notif of notifications) {
+      const { id, message, status } = notif;
+      const uid = `${NOTIFICATIONS_CLASSES.item}-${id}`;
 
       const element = document.createElement('lf-toast');
       element.className = NOTIFICATIONS_CLASSES.item;
       element.lfCloseCallback = () => {
-        uiRegistry.remove(NOTIFICATIONS_CLASSES.item + timestamp);
+        uiRegistry.remove(uid);
         _checkForVisible(_root);
       };
       element.lfIcon =
-        status === 'error' ? theme.get.icon('alertTriangle') : theme.get.icon('infoHexagon');
+        status === 'danger' ? theme.get.icon('alertTriangle') : theme.get.icon('infoHexagon');
       element.lfMessage = message;
-      element.lfTimer = status === 'error' ? 5000 : 5000; //TODO: Update when the CSS variable is fixed LFW-side
       element.lfUiState = _getStateCategory(status);
+      element.lfTimer = status === 'danger' ? 5000 : 5000; //TODO: Update when the CSS variable is fixed LFW-side
 
       _root.appendChild(element);
+      requestAnimationFrame(() => {
+        _root.scrollTop = _root.scrollHeight;
+      });
       _checkForVisible(_root);
 
-      uiRegistry.set(NOTIFICATIONS_CLASSES.item + timestamp, element);
+      uiRegistry.set(uid, element);
 
-      lastStatus = status;
-      lastMessage = message;
-      debugLog(STATUS_UPDATED, status, {
-        id,
-        status,
-        message,
-      });
+      state.mutate.notifications.removeById(id);
     }
 
     debugLog(NOTIFICATIONS_UPDATED);

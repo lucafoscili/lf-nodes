@@ -4,17 +4,15 @@ import {
   WorkflowAPIErrorOptions,
   WorkflowAPIResponse,
   WorkflowAPIRunPayload,
-  WorkflowAPIRunResult,
   WorkflowAPIUploadPayload,
   WorkflowAPIUploadResponse,
 } from '../types/api';
-import { WorkflowStatus } from '../types/state';
 import {
   isWorkflowAPIUploadPayload,
   isWorkflowAPIUploadResponse,
   parseJson,
 } from '../utils/common';
-import { ERROR_MESSAGES, STATUS_MESSAGES } from '../utils/constants';
+import { ERROR_MESSAGES } from '../utils/constants';
 
 //#region Errors
 export class WorkflowApiError<TPayload = unknown> extends Error {
@@ -46,15 +44,26 @@ export const fetchWorkflowDefinitions = async () => {
 
   return data.workflows;
 };
+
+export const fetchWorkflowJSON = async (workflowId: string) => {
+  const response = await fetch(buildApiUrl(`/workflows/${workflowId}`), { method: 'GET' });
+  const data = (await parseJson(response)) as Record<string, unknown> | null;
+
+  if (!response.ok) {
+    const message = `Failed to load workflow JSON (${response.status})`;
+    throw new WorkflowApiError(message, { status: response.status, payload: data });
+  }
+
+  return data;
+};
 //#endregion
 
 //#region Run Workflow
 export const runWorkflowRequest = async (
   workflowId: string,
   inputs: Record<string, unknown>,
-): Promise<WorkflowAPIRunResult> => {
+): Promise<WorkflowAPIRunPayload> => {
   const { RUN_GENERIC } = ERROR_MESSAGES;
-  const { WORKFLOW_COMPLETED } = STATUS_MESSAGES;
 
   const response = await fetch(buildApiUrl('/run'), {
     method: 'POST',
@@ -71,27 +80,21 @@ export const runWorkflowRequest = async (
   if (!response.ok || !data) {
     const detail = payload?.detail || response.statusText;
     throw new WorkflowApiError(`${RUN_GENERIC} (${detail})`, {
-      status: response.status,
       payload,
     });
   }
 
-  return {
-    message: WORKFLOW_COMPLETED,
-    payload,
-    status: data.status as Extract<WorkflowStatus, 'ready' | 'error'>,
-  };
+  return payload;
 };
 //#endregion
 
 //#region Upload image
 export const uploadWorkflowFiles = async (files: File[]): Promise<WorkflowAPIUploadResponse> => {
   const { UPLOAD_GENERIC, UPLOAD_INVALID_RESPONSE, UPLOAD_MISSING_FILE } = ERROR_MESSAGES;
-  const { UPLOAD_COMPLETED } = STATUS_MESSAGES;
 
   if (!files || files.length === 0) {
     throw new WorkflowApiError<WorkflowAPIUploadPayload>(UPLOAD_MISSING_FILE, {
-      payload: { detail: 'missing_file' },
+      payload: { error: { message: 'missing_file' } },
     });
   }
 
@@ -107,9 +110,8 @@ export const uploadWorkflowFiles = async (files: File[]): Promise<WorkflowAPIUpl
   if (isWorkflowAPIUploadResponse(data)) {
     if (!response.ok) {
       const { payload } = data;
-      const detail = payload?.detail || response.statusText;
+      const detail = payload?.error?.message || response.statusText;
       throw new WorkflowApiError<WorkflowAPIUploadPayload>(`${UPLOAD_GENERIC} (${detail})`, {
-        status: response.status,
         payload,
       });
     }
@@ -119,17 +121,14 @@ export const uploadWorkflowFiles = async (files: File[]): Promise<WorkflowAPIUpl
 
   if (isWorkflowAPIUploadPayload(data)) {
     if (!response.ok) {
-      const detail = data.detail || response.statusText;
+      const detail = data.error?.message || response.statusText;
       throw new WorkflowApiError<WorkflowAPIUploadPayload>(`${UPLOAD_GENERIC} (${detail})`, {
-        status: response.status,
         payload: data,
       });
     }
 
     return {
-      message: UPLOAD_COMPLETED,
       payload: data,
-      status: 'idle',
     };
   }
 

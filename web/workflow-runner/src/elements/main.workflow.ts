@@ -1,4 +1,5 @@
 import { getLfFramework } from '@lf-widgets/framework';
+import { openWorkflowInComfyUI } from '../handlers/workflow';
 import {
   WorkflowAPIItem,
   WorkflowCellOutputItem,
@@ -7,7 +8,7 @@ import {
   WorkflowNodeResults,
 } from '../types/api';
 import { WorkflowSectionController, WorkflowUICells } from '../types/section';
-import { WorkflowState, WorkflowStore } from '../types/state';
+import { WorkflowStore } from '../types/state';
 import { clearChildren } from '../utils/common';
 import { DEBUG_MESSAGES } from '../utils/constants';
 import { debugLog } from '../utils/debug';
@@ -26,6 +27,8 @@ export const WORKFLOW_CLASSES = {
   cell: theme.bemClass(ROOT_CLASS, 'cell'),
   cells: theme.bemClass(ROOT_CLASS, 'cells'),
   description: theme.bemClass(ROOT_CLASS, 'description'),
+  h3: theme.bemClass(ROOT_CLASS, 'title-h3'),
+  openButton: theme.bemClass(ROOT_CLASS, 'title-open-button'),
   options: theme.bemClass(ROOT_CLASS, 'options'),
   result: theme.bemClass(ROOT_CLASS, 'result'),
   resultGrid: theme.bemClass(ROOT_CLASS, 'result-grid'),
@@ -42,10 +45,10 @@ const _createCellWrapper = () => {
 
   return cellWrapper;
 };
-const _createDescription = (state: WorkflowState) => {
+const _createDescription = (store: WorkflowStore) => {
   const p = document.createElement('p');
   p.className = WORKFLOW_CLASSES.description;
-  p.textContent = _getWorkflowDescription(state);
+  p.textContent = _getWorkflowDescription(store);
 
   return p;
 };
@@ -60,13 +63,6 @@ const _createResultWrapper = () => {
   resultWrapper.className = WORKFLOW_CLASSES.result;
 
   return resultWrapper;
-};
-const _createTitle = (state: WorkflowState) => {
-  const h3 = document.createElement('h3');
-  h3.className = WORKFLOW_CLASSES.title;
-  h3.textContent = _getWorkflowTitle(state);
-
-  return h3;
 };
 const _deepMerge = (defs: WorkflowCellsOutputContainer, outs: WorkflowNodeResults) => {
   const prep: WorkflowCellOutputItem[] = [];
@@ -85,12 +81,12 @@ const _deepMerge = (defs: WorkflowCellsOutputContainer, outs: WorkflowNodeResult
 
   return prep;
 };
-const _getCurrentWorkflow = (state: WorkflowState) => {
-  const { current, workflows } = state;
+const _getCurrentWorkflow = (store: WorkflowStore) => {
+  const { current, workflows } = store.getState();
   return workflows?.nodes?.find((node) => node.id === current.id) || null;
 };
-const _getWorkflowDescription = (state: WorkflowState) => {
-  const workflow = _getCurrentWorkflow(state);
+const _getWorkflowDescription = (store: WorkflowStore) => {
+  const workflow = _getCurrentWorkflow(store);
   return workflow?.description || '';
 };
 const _getWorkflowInputCells = (workflow: WorkflowAPIItem) => {
@@ -101,10 +97,36 @@ const _getWorkflowOutputCells = (workflow: WorkflowAPIItem) => {
   const outputsSection = workflow.children?.find((child) => child.id.endsWith(':outputs'));
   return (outputsSection?.cells || {}) as WorkflowCellsOutputContainer;
 };
-const _getWorkflowTitle = (state: WorkflowState) => {
-  const workflow = _getCurrentWorkflow(state);
+const _getWorkflowTitle = (store: WorkflowStore) => {
+  const workflow = _getCurrentWorkflow(store);
   const str = typeof workflow?.value === 'string' ? workflow.value : String(workflow?.value || '');
   return str || WORKFLOW_TEXT;
+};
+const _title = (store: WorkflowStore) => {
+  const lfIcon = theme.get.icon('download');
+
+  const title = document.createElement('div');
+  const h3 = document.createElement('h3');
+  const openButton = document.createElement('lf-button');
+
+  title.className = WORKFLOW_CLASSES.title;
+
+  h3.className = WORKFLOW_CLASSES.h3;
+  h3.textContent = _getWorkflowTitle(store);
+
+  const label = 'Download Workflow JSON';
+  openButton.className = WORKFLOW_CLASSES.openButton;
+  openButton.lfAriaLabel = label;
+  openButton.lfIcon = lfIcon;
+  openButton.lfStyling = 'icon';
+  openButton.lfUiSize = 'xsmall';
+  openButton.title = label;
+  openButton.addEventListener('lf-button-event', (e) => openWorkflowInComfyUI(e, store));
+
+  title.appendChild(h3);
+  title.appendChild(openButton);
+
+  return { h3, openButton, title };
 };
 //#endregion
 
@@ -119,18 +141,11 @@ export const createWorkflowSection = (store: WorkflowStore): WorkflowSectionCont
     WORKFLOW_RESULTS_CLEARED,
     WORKFLOW_RESULTS_RENDERED,
   } = DEBUG_MESSAGES;
-  let lastId: string | null = null;
-  let lastResultsRef: WorkflowNodeResults | null = null;
   //#endregion
 
   //#region Destroy
   const destroy = () => {
-    const state = store.getState();
-    if (!state.manager) {
-      return;
-    }
-
-    const { manager } = state;
+    const { manager } = store.getState();
     const { uiRegistry } = manager;
 
     for (const cls in WORKFLOW_CLASSES) {
@@ -138,22 +153,14 @@ export const createWorkflowSection = (store: WorkflowStore): WorkflowSectionCont
       uiRegistry.remove(element);
     }
 
-    lastId = null;
-    lastResultsRef = null;
-
     debugLog(WORKFLOW_LAYOUT_DESTROYED);
   };
   //#endregion
 
   //#region Mount
   const mount = () => {
-    const state = store.getState();
-    const { manager } = state;
+    const { manager } = store.getState();
     const { uiRegistry } = manager;
-
-    if (!manager) {
-      return;
-    }
 
     const elements = uiRegistry.get();
     if (elements && elements[WORKFLOW_CLASSES._]) {
@@ -163,10 +170,10 @@ export const createWorkflowSection = (store: WorkflowStore): WorkflowSectionCont
     const _root = document.createElement('section');
     _root.className = WORKFLOW_CLASSES._;
 
-    const description = _createDescription(state);
+    const description = _createDescription(store);
     const options = _createOptionsWrapper();
     const result = _createResultWrapper();
-    const title = _createTitle(state);
+    const { h3, openButton, title } = _title(store);
 
     _root.appendChild(title);
     _root.appendChild(description);
@@ -177,6 +184,8 @@ export const createWorkflowSection = (store: WorkflowStore): WorkflowSectionCont
 
     uiRegistry.set(WORKFLOW_CLASSES._, _root);
     uiRegistry.set(WORKFLOW_CLASSES.description, description);
+    uiRegistry.set(WORKFLOW_CLASSES.h3, h3);
+    uiRegistry.set(WORKFLOW_CLASSES.openButton, openButton);
     uiRegistry.set(WORKFLOW_CLASSES.options, options);
     uiRegistry.set(WORKFLOW_CLASSES.result, result);
     uiRegistry.set(WORKFLOW_CLASSES.title, title);
@@ -197,19 +206,12 @@ export const createWorkflowSection = (store: WorkflowStore): WorkflowSectionCont
       return;
     }
 
-    if (id !== lastId) {
-      const descr = elements[WORKFLOW_CLASSES.description] as HTMLElement;
-      const title = elements[WORKFLOW_CLASSES.title] as HTMLElement;
-      descr.textContent = _getWorkflowDescription(state);
-      title.textContent = _getWorkflowTitle(state);
-      updateOptions();
-      lastId = id;
-    }
-
-    if (state.results !== lastResultsRef) {
-      updateResults();
-      lastResultsRef = state.results;
-    }
+    const descr = elements[WORKFLOW_CLASSES.description] as HTMLElement;
+    const h3 = elements[WORKFLOW_CLASSES.h3] as HTMLElement;
+    descr.textContent = _getWorkflowDescription(store);
+    h3.textContent = _getWorkflowTitle(store);
+    updateOptions();
+    updateResults();
 
     debugLog(WORKFLOW_LAYOUT_UPDATED);
   };
@@ -217,8 +219,7 @@ export const createWorkflowSection = (store: WorkflowStore): WorkflowSectionCont
 
   //#region Update options
   const updateOptions = () => {
-    const state = store.getState();
-    const { manager } = state;
+    const { manager } = store.getState();
     const { uiRegistry } = manager;
 
     const elements = uiRegistry.get();
@@ -229,7 +230,7 @@ export const createWorkflowSection = (store: WorkflowStore): WorkflowSectionCont
 
     clearChildren(element);
 
-    const workflow = _getCurrentWorkflow(state);
+    const workflow = _getCurrentWorkflow(store);
     const cellElements: WorkflowUICells = [];
 
     if (workflow) {
@@ -280,7 +281,7 @@ export const createWorkflowSection = (store: WorkflowStore): WorkflowSectionCont
       return;
     }
 
-    const workflow = _getCurrentWorkflow(state);
+    const workflow = _getCurrentWorkflow(store);
     const outputsDefs = workflow ? _getWorkflowOutputCells(workflow) : {};
     debugLog(WORKFLOW_RESULTS_CLEARED);
 

@@ -8,18 +8,26 @@ const INIT_CB = () => {
 //#endregion
 
 //#region Public API
-export const initState = (appContainer: HTMLDivElement): WorkflowState => ({
+export const initState = (): WorkflowState => ({
   current: { status: 'idle', message: '', id: null },
   isDebug: false,
   manager: null,
+  queuedJobs: -1,
   mutate: {
     isDebug: INIT_CB,
     manager: INIT_CB,
-    runResult: INIT_CB,
+    queuedJobs: INIT_CB,
+    notifications: {
+      add: INIT_CB,
+      removeById: INIT_CB,
+      removeByIndex: INIT_CB,
+    },
+    results: INIT_CB,
     status: INIT_CB,
     workflow: INIT_CB,
     workflows: INIT_CB,
   },
+  notifications: [],
   results: null,
   workflows: {
     nodes: [],

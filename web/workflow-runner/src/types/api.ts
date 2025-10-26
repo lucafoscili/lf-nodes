@@ -87,10 +87,14 @@ export interface WorkflowCellsOutputContainer {
 //#region Nodes outputs
 export interface WorkflowNodeOutputs
   extends DisplayJSONNodeOutputs,
+    LoadMetadataNodeOutputs,
     SaveSVGNodeOutputs,
     SaveImageForCivitAINodeOutputs {}
 export interface DisplayJSONNodeOutputs {
   json: Record<string, unknown>;
+}
+export interface LoadMetadataNodeOutputs {
+  metadata: Record<string, unknown>;
 }
 export interface SaveImageForCivitAINodeOutputs {
   civitai_metadata: string;
@@ -131,23 +135,16 @@ export interface WorkflowAPIRunPayload {
     outputs?: WorkflowNodeResults;
   };
 }
-export interface WorkflowAPIRunResult extends WorkflowAPIResponse {
-  status: Extract<WorkflowStatus, 'ready' | 'error'>;
-  payload: WorkflowAPIRunPayload;
-}
 //#endregion
 
 //#region Upload
 export interface WorkflowAPIUploadPayload {
-  detail: string;
+  paths?: string[];
   error?: {
     message: string;
   };
-  paths?: string[];
 }
 export interface WorkflowAPIUploadResponse {
-  message: string;
   payload: WorkflowAPIUploadPayload;
-  status: WorkflowStatus;
 }
 //#endregion

@@ -4,6 +4,7 @@ import { WorkflowManager } from '../types/manager';
 import {
   WorkflowState,
   WorkflowStateListener,
+  WorkflowStateNotification,
   WorkflowStateUpdater,
   WorkflowStatus,
   WorkflowStore,
@@ -72,9 +73,29 @@ export const createWorkflowRunnerStore = (initialState: WorkflowState): Workflow
       applyMutation((draft) => {
         draft.manager = manager;
       }),
+    notifications: {
+      add: (notification: WorkflowStateNotification) =>
+        applyMutation((draft) => {
+          draft.notifications.push(notification);
+        }),
+      removeById: (id: string) =>
+        applyMutation((draft) => {
+          draft.notifications = draft.notifications.filter((n) => n.id !== id);
+        }),
+      removeByIndex: (index: number) =>
+        applyMutation((draft) => {
+          draft.notifications.splice(index, 1);
+        }),
+    },
+    queuedJobs: (count: number) =>
+      applyMutation((draft) => {
+        draft.queuedJobs = count;
+      }),
     status: (status: WorkflowStatus, message?: string) => setStatus(status, message, setState),
-    runResult: (status: WorkflowStatus, message: string, results: WorkflowNodeResults | null) =>
-      setRunResult(status, message, results, setState),
+    results: (results: WorkflowNodeResults | null) =>
+      applyMutation((draft) => {
+        draft.results = results;
+      }),
     workflow: (workflowId: string) => setWorkflow(workflowId, setState),
     workflows: (workflows: WorkflowAPIDataset) =>
       applyMutation((draft) => {
@@ -93,25 +114,6 @@ export const createWorkflowRunnerStore = (initialState: WorkflowState): Workflow
 //#endregion
 
 //#region Mutators
-const setRunResult = (
-  status: WorkflowStatus,
-  message: string,
-  results: WorkflowNodeResults | null,
-  setState: (updater: WorkflowStateUpdater) => void,
-) => {
-  setState(
-    (state) =>
-      ({
-        ...state,
-        current: {
-          ...state.current,
-          status,
-          message,
-        },
-        results,
-      } satisfies WorkflowState),
-  );
-};
 const setStatus = (
   status: WorkflowStatus,
   message: string | undefined,

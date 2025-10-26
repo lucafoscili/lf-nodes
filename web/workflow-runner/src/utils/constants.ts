@@ -13,33 +13,20 @@ export const DEBUG_MESSAGES = {
   HEADER_MOUNTED: 'Header section mounted.',
   HEADER_UPDATED: 'Header section refreshed.',
   INPUTS_COLLECTED: 'Collected workflow inputs.',
-  INPUTS_FAILED: 'Failed to collect workflow inputs.',
   MAIN_DESTROYED: 'Main section destroyed.',
   MAIN_MOUNTED: 'Main section mounted.',
   MAIN_UPDATED: 'Main section updated.',
   NOTIFICATIONS_DESTROYED: 'Notifications section destroyed.',
   NOTIFICATIONS_MOUNTED: 'Notifications section mounted.',
   NOTIFICATIONS_UPDATED: 'Notifications section refreshed.',
-  STATUS_UPDATED: 'Workflow status updated.',
-  UPLOAD_COMPLETED: 'Upload completed.',
-  UPLOAD_FAILED: 'Upload failed.',
-  UPLOAD_FAILED_UNEXPECTED: 'Upload failed unexpectedly.',
-  WORKFLOW_COMPLETED: 'Workflow execution completed.',
-  WORKFLOW_DISPATCHING: 'Dispatching workflow execution.',
-  WORKFLOW_FAILED: 'Workflow execution failed.',
-  WORKFLOW_FAILED_UNEXPECTED: 'Workflow execution failed unexpectedly.',
   WORKFLOW_LAYOUT_DESTROYED: 'Workflow layout destroyed.',
   WORKFLOW_LAYOUT_MOUNTED: 'Workflow layout mounted.',
   WORKFLOW_LAYOUT_UPDATED: 'Workflow layout updated.',
   WORKFLOW_INPUT_FLAGGED: 'Workflow input flagged.',
   WORKFLOW_INPUTS_CLEARED: 'Workflow inputs cleared.',
   WORKFLOW_INPUTS_RENDERED: 'Workflow inputs rendered.',
-  WORKFLOW_NOT_SELECTED: 'No workflow selected.',
   WORKFLOW_RESULTS_CLEARED: 'Workflow results cleared.',
   WORKFLOW_RESULTS_RENDERED: 'Workflow results rendered.',
-  WORKFLOW_SELECTED: 'Workflow selected.',
-  WORKFLOWS_LOAD_FAILED: 'Failed to load workflows.',
-  WORKFLOWS_LOADED: 'Workflow definitions loaded.',
 } as const;
 //#endregion
 
@@ -52,14 +39,28 @@ export const ERROR_MESSAGES = {
 } as const;
 //#endregion
 
+//#region Notifications messages
+export const NOTIFICATION_MESSAGES = {
+  NO_WORKFLOWS_AVAILABLE: 'No workflows available from the API.',
+  NO_WORKFLOW_SELECTED: 'No workflow selected.',
+  WORKFLOW_COMPLETED: 'Workflow execution completed successfully.',
+  WORKFLOWS_LOAD_FAILED: 'Failed to load workflows.',
+} as const;
+//#endregion
+
 //#region Status messages
 export const STATUS_MESSAGES = {
-  FILE_PROCESSING: 'File uploaded, processing...',
-  LOADING_WORKFLOWS: 'Loading workflows...',
-  SUBMITTING_WORKFLOW: 'Submitting workflow...',
-  UPLOAD_COMPLETED: 'Upload completed successfully.',
-  UPLOADING_FILE: 'Uploading file...',
-  WORKFLOW_COMPLETED: 'Workflow execution completed successfully.',
-  WORKFLOWS_LOADED: 'Workflows loaded.',
+  ERROR_FETCHING_WORKFLOW: 'Error fetching workflow!',
+  ERROR_FETCHING_WORKFLOWS: 'Error fetching workflows!',
+  ERROR_RUNNING_WORKFLOW: 'Error running workflow!',
+  ERROR_UPLOADING_FILE: 'Error uploading file!',
+  IDLE: 'Idle',
+  IDLE_WORKFLOWS_LOADED: 'Workflows loaded',
+  RUNNING_DISPATCHING_WORKFLOW: 'Dispatching workflow...',
+  RUNNING_INITIALIZING: 'Initializing...',
+  RUNNING_LOADING_WORKFLOWS: 'Loading workflows...',
+  RUNNING_SUBMITTING_WORKFLOW: 'Submitting workflow...',
+  RUNNING_UPLOAD_COMPLETED: 'File uploaded...',
+  RUNNING_UPLOADING_FILE: 'Uploading file...',
 } as const;
 //#endregion

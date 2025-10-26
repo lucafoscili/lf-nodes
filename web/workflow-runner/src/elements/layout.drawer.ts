@@ -1,9 +1,9 @@
-import { LfDataDataset } from '@lf-widgets/foundations/dist';
+import { LfButtonEventPayload, LfDataDataset } from '@lf-widgets/foundations/dist';
 import { getLfFramework } from '@lf-widgets/framework';
-import { drawerNavigation } from '../handlers/layout';
+import { drawerNavigation, openComfyUI, openGithubRepo, toggleDebug } from '../handlers/layout';
 import { WorkflowAPIDataset, WorkflowLFNode } from '../types/api';
 import { WorkflowSectionController } from '../types/section';
-import { WorkflowState, WorkflowStore } from '../types/state';
+import { WorkflowStore } from '../types/state';
 import { DEBUG_MESSAGES } from '../utils/constants';
 import { debugLog } from '../utils/debug';
 
@@ -12,12 +12,67 @@ const { theme } = getLfFramework();
 const ROOT_CLASS = 'drawer-section';
 export const DRAWER_CLASSES = {
   _: theme.bemClass(ROOT_CLASS),
+  buttonComfyUi: theme.bemClass(ROOT_CLASS, 'button-comfyui'),
+  buttonDebug: theme.bemClass(ROOT_CLASS, 'button-debug'),
+  buttonGithub: theme.bemClass(ROOT_CLASS, 'button-github'),
   container: theme.bemClass(ROOT_CLASS, 'container'),
+  footer: theme.bemClass(ROOT_CLASS, 'footer'),
   tree: theme.bemClass(ROOT_CLASS, 'tree'),
 } as const;
 //#endregion
 
 //#region Helpers
+const _button = (
+  icon: string,
+  label: string,
+  evCb: (e: CustomEvent<LfButtonEventPayload>, ...args: any[]) => void,
+  className: string,
+) => {
+  const button = document.createElement('lf-button');
+  button.className = className;
+  button.lfAriaLabel = label;
+  button.lfIcon = icon;
+  button.lfStyling = 'icon';
+  button.lfUiSize = 'small';
+  button.title = label;
+  button.addEventListener('lf-button-event', evCb);
+
+  return button;
+};
+const _footer = (store: WorkflowStore) => {
+  const footer = document.createElement('div');
+  footer.className = DRAWER_CLASSES.footer;
+
+  let icon = getLfFramework().theme.get.icon('imageInPicture');
+  let label = 'Open ComfyUI';
+  const comfyUi = _button(icon, label, (e) => openComfyUI(e), DRAWER_CLASSES.buttonComfyUi);
+
+  icon = getLfFramework().theme.get.icon('bug');
+  label = 'Toggle developer console';
+  const debug = _button(icon, label, (e) => toggleDebug(e, store), DRAWER_CLASSES.buttonDebug);
+
+  icon = getLfFramework().theme.get.icon('brandGithub');
+  label = 'Open GitHub repository';
+  const github = _button(icon, label, (e) => openGithubRepo(e), DRAWER_CLASSES.buttonGithub);
+
+  footer.appendChild(github);
+  footer.appendChild(comfyUi);
+  footer.appendChild(debug);
+
+  return { comfyUi, debug, footer, github };
+};
+const _container = (store: WorkflowStore) => {
+  const container = document.createElement('div');
+  container.className = DRAWER_CLASSES.container;
+  container.slot = 'content';
+
+  const { comfyUi, debug, footer, github } = _footer(store);
+  const tree = _tree(store);
+  container.appendChild(tree);
+  container.appendChild(footer);
+
+  return { comfyUi, container, debug, footer, github, tree };
+};
 const _createDataset = (workflows: WorkflowAPIDataset) => {
   const categories: Array<WorkflowLFNode & { children: WorkflowLFNode[] }> = [];
   const root = { id: 'workflows', value: 'Workflows', children: categories };
@@ -52,21 +107,11 @@ const _getIcon = (category: string) => {
 
   return category_icons[category] || alertTriangle;
 };
-const _container = (state: WorkflowState) => {
-  const container = document.createElement('div');
-  container.className = DRAWER_CLASSES.container;
-  container.slot = 'content';
-
-  const tree = _tree(state);
-  container.appendChild(tree);
-
-  return { container, tree };
-};
-const _tree = (state: WorkflowState) => {
+const _tree = (store: WorkflowStore) => {
   const tree = document.createElement('lf-tree');
   tree.className = DRAWER_CLASSES.tree;
   tree.lfAccordionLayout = true;
-  tree.addEventListener('lf-tree-event', (e) => drawerNavigation(e, state));
+  tree.addEventListener('lf-tree-event', (e) => drawerNavigation(e, store));
 
   return tree;
 };
@@ -79,12 +124,8 @@ export const createDrawerSection = (store: WorkflowStore): WorkflowSectionContro
 
   //#region Destroy
   const destroy = () => {
-    const state = store.getState();
-    if (!state.manager) {
-      return;
-    }
-
-    const { uiRegistry } = state.manager;
+    const { manager } = store.getState();
+    const { uiRegistry } = manager;
 
     for (const cls in DRAWER_CLASSES) {
       const element = DRAWER_CLASSES[cls];
@@ -97,8 +138,7 @@ export const createDrawerSection = (store: WorkflowStore): WorkflowSectionContro
 
   //#region Mount
   const mount = () => {
-    const state = store.getState();
-    const { manager } = state;
+    const { manager } = store.getState();
     const { uiRegistry } = manager;
 
     const elements = uiRegistry.get();
@@ -110,11 +150,15 @@ export const createDrawerSection = (store: WorkflowStore): WorkflowSectionContro
     _root.className = ROOT_CLASS;
     _root.lfDisplay = 'slide';
 
-    const { container, tree } = _container(state);
+    const { comfyUi, debug, footer, github, container, tree } = _container(store);
     _root.appendChild(container);
     manager.getAppRoot().appendChild(_root);
 
     uiRegistry.set(DRAWER_CLASSES._, _root);
+    uiRegistry.set(DRAWER_CLASSES.buttonComfyUi, comfyUi);
+    uiRegistry.set(DRAWER_CLASSES.buttonDebug, debug);
+    uiRegistry.set(DRAWER_CLASSES.footer, footer);
+    uiRegistry.set(DRAWER_CLASSES.buttonGithub, github);
     uiRegistry.set(DRAWER_CLASSES.container, container);
     uiRegistry.set(DRAWER_CLASSES.tree, tree);
 
@@ -125,22 +169,20 @@ export const createDrawerSection = (store: WorkflowStore): WorkflowSectionContro
   //#region Render
   const render = () => {
     const state = store.getState();
-    const { manager, workflows } = state;
+    const { isDebug, manager, workflows } = state;
     const { uiRegistry } = manager;
-
-    if (!manager) {
-      return;
-    }
 
     const elements = uiRegistry.get();
     if (!elements) {
       return;
     }
 
+    const debug = elements[DRAWER_CLASSES.buttonDebug] as HTMLLfButtonElement;
     const tree = elements[DRAWER_CLASSES.tree] as HTMLLfTreeElement;
-    if (tree) {
-      tree.lfDataset = _createDataset(workflows);
-    }
+
+    debug.lfUiState = isDebug ? 'warning' : 'primary';
+    debug.title = isDebug ? 'Hide developer console' : 'Show developer console';
+    tree.lfDataset = _createDataset(workflows);
 
     debugLog(DRAWER_UPDATED);
   };

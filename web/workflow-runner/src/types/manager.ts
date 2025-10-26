@@ -1,4 +1,4 @@
-import { WorkflowStatus, WorkflowStore } from './state';
+import { WorkflowStore } from './state';
 
 //#region Dispatchers
 export type WorkflowDispatcher = () => Promise<void>;
@@ -13,10 +13,6 @@ export interface WorkflowManager {
   getAppRoot: () => HTMLDivElement;
   getDispatchers: () => WorkflowDispatchers;
   getStore: () => WorkflowStore;
-  isDebugEnabled: () => boolean;
-  setStatus: (status: WorkflowStatus, message?: string) => void;
-  setWorkflow: (id: string) => void;
-  toggleDebug: () => void;
   uiRegistry: {
     delete: () => void;
     get: () => WeakMap<WeakKey, WorkflowUIItem>;
