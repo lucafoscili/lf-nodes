@@ -12,8 +12,7 @@ import { WorkflowDispatchers, WorkflowManager, WorkflowUIItem } from '../types/m
 import { WorkflowSectionController } from '../types/section';
 import { WorkflowStore } from '../types/state';
 import { parseCount } from '../utils/common';
-import { DEBUG_MESSAGES } from '../utils/constants';
-import { debugLog } from '../utils/debug';
+import { NOTIFICATION_MESSAGES, STATUS_MESSAGES } from '../utils/constants';
 import { initState } from './state';
 import { createWorkflowRunnerStore } from './store';
 
@@ -34,19 +33,19 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
   #UI_REGISTRY = new WeakMap();
 
   constructor() {
-    const { LOADING_WORKFLOWS, WORKFLOWS_LOAD_FAILED } = DEBUG_MESSAGES;
+    const {
+      ERROR_FETCHING_WORKFLOWS,
+      IDLE_WORKFLOWS_LOADED,
+      RUNNING_INITIALIZING,
+      RUNNING_LOADING_WORKFLOWS,
+    } = STATUS_MESSAGES;
+    const { WORKFLOWS_LOAD_FAILED } = NOTIFICATION_MESSAGES;
 
     this.#APP_ROOT = document.querySelector<HTMLDivElement>('#app');
-    if (!this.#APP_ROOT) {
-      throw new Error('Workflow runner container not found.');
-    }
-
     this.#STORE = createWorkflowRunnerStore(initState());
-
     this.#DISPATCHERS = {
       runWorkflow: () => workflowDispatcher(this.#STORE),
     };
-
     this.#SECTIONS = {
       actionButton: createActionButtonSection(this.#STORE),
       dev: createDevSection(this.#STORE),
@@ -62,17 +61,23 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
 
     this.#initializeFramework();
     this.#initializeLayout();
-    this.#subscribeToState();
-    debugLog(LOADING_WORKFLOWS);
 
-    this.#loadWorkflows().catch((error) => {
-      const message = error instanceof Error ? error.message : WORKFLOWS_LOAD_FAILED;
-      debugLog(WORKFLOWS_LOAD_FAILED, 'error', {
-        message,
-        stack: error instanceof Error ? error.stack : undefined,
+    state.mutate.status('running', RUNNING_INITIALIZING);
+    this.#subscribeToState();
+
+    state.mutate.status('running', RUNNING_LOADING_WORKFLOWS);
+    this.#loadWorkflows()
+      .catch((error) => {
+        state.mutate.notifications.add({
+          id: performance.now().toString(),
+          message: error instanceof Error ? error.message : WORKFLOWS_LOAD_FAILED,
+          status: 'danger',
+        });
+        state.mutate.status('error', ERROR_FETCHING_WORKFLOWS);
+      })
+      .then(() => {
+        state.mutate.status('idle', IDLE_WORKFLOWS_LOADED);
       });
-      state.mutate.status('error', message);
-    });
 
     this.#startPolling();
   }
@@ -104,13 +109,17 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
     }
   }
   #loadWorkflows = async () => {
-    const { WORKFLOWS_LOADED } = DEBUG_MESSAGES;
+    const { NO_WORKFLOWS_AVAILABLE } = NOTIFICATION_MESSAGES;
 
     const state = this.#STORE.getState();
 
     const workflows = await fetchWorkflowDefinitions();
     if (!workflows || !Object.keys(workflows).length) {
-      throw new Error('No workflows available from the API.');
+      state.mutate.notifications.add({
+        id: performance.now().toString(),
+        message: NO_WORKFLOWS_AVAILABLE,
+        status: 'danger',
+      });
     }
 
     state.mutate.workflows(workflows);
@@ -119,8 +128,6 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
     if (firstWorkflow?.id) {
       state.mutate.workflow(firstWorkflow.id);
     }
-
-    state.mutate.status('idle', WORKFLOWS_LOADED);
   };
   #startPolling() {
     setInterval(async () => {
@@ -159,9 +166,10 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
     let lastCurrentStatus = st.current.status;
     let lastDebug = st.isDebug;
     let lastId = st.current.id;
+    let lastNotificationsCount = st.notifications?.length ?? 0;
     let lastQueued = st.queuedJobs ?? -1;
     let lastResults = st.results;
-    let lastWorkflows = st.workflows;
+    let lastWorkflowsCount = st.workflows?.nodes?.length ?? 0;
 
     let scheduled = false;
     const needs = {
@@ -185,9 +193,14 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
 
       if (message !== lastCurrentMessage || status !== lastCurrentStatus) {
         needs.actionButton = true;
-        needs.notifications = true;
+        needs.header = true;
         lastCurrentMessage = message;
         lastCurrentStatus = status;
+      }
+
+      if (state.notifications.length !== lastNotificationsCount) {
+        needs.notifications = true;
+        lastNotificationsCount = state.notifications.length;
       }
 
       if (queuedJobs !== lastQueued) {
@@ -195,9 +208,9 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
         lastQueued = queuedJobs;
       }
 
-      if (workflows !== lastWorkflows) {
+      if (workflows?.nodes?.length !== lastWorkflowsCount) {
         needs.drawer = true;
-        lastWorkflows = workflows;
+        lastWorkflowsCount = workflows?.nodes?.length ?? 0;
       }
 
       if (isDebug !== lastDebug) {

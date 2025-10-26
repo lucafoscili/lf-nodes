@@ -135,23 +135,16 @@ export interface WorkflowAPIRunPayload {
     outputs?: WorkflowNodeResults;
   };
 }
-export interface WorkflowAPIRunResult extends WorkflowAPIResponse {
-  status: Extract<WorkflowStatus, 'ready' | 'error'>;
-  payload: WorkflowAPIRunPayload;
-}
 //#endregion
 
 //#region Upload
 export interface WorkflowAPIUploadPayload {
-  // New API: payload contains the saved absolute paths of uploaded files
   paths?: string[];
   error?: {
     message: string;
   };
 }
 export interface WorkflowAPIUploadResponse {
-  message: string;
   payload: WorkflowAPIUploadPayload;
-  status: WorkflowStatus;
 }
 //#endregion

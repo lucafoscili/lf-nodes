@@ -1,7 +1,7 @@
 import { LfButtonEventPayload } from '@lf-widgets/foundations/dist';
 import { fetchWorkflowJSON, WorkflowApiError } from '../services/workflow-service';
 import { WorkflowStore } from '../types/state';
-import { STATUS_MESSAGES } from '../utils/constants';
+import { NOTIFICATION_MESSAGES, STATUS_MESSAGES } from '../utils/constants';
 
 //#region Button Handlers
 export const executeWorkflow = (e: CustomEvent<LfButtonEventPayload>, store: WorkflowStore) => {
@@ -21,18 +21,23 @@ export const openWorkflowInComfyUI = async (
   e: CustomEvent<LfButtonEventPayload>,
   store: WorkflowStore,
 ) => {
-  const { NO_WORKFLOW_SELECTED } = STATUS_MESSAGES;
+  const { NO_WORKFLOW_SELECTED } = NOTIFICATION_MESSAGES;
+  const { ERROR_FETCHING_WORKFLOWS } = STATUS_MESSAGES;
 
   const { eventType } = e.detail;
 
   const state = store.getState();
-  const { current, manager } = state;
+  const { current } = state;
   const { id } = current;
 
   switch (eventType) {
     case 'click':
       if (!id) {
-        state.mutate.status('error', NO_WORKFLOW_SELECTED);
+        state.mutate.notifications.add({
+          id: performance.now().toString(),
+          message: NO_WORKFLOW_SELECTED,
+          status: 'warning',
+        });
         return;
       }
 
@@ -53,10 +58,13 @@ export const openWorkflowInComfyUI = async (
           URL.revokeObjectURL(url);
         }, 1000);
       } catch (error) {
+        state.mutate.status('error', ERROR_FETCHING_WORKFLOWS);
         if (error instanceof WorkflowApiError) {
-          state.mutate.status('error', `Failed to fetch workflow: ${error.message}`);
-        } else {
-          state.mutate.status('error', 'Unexpected error while fetching workflow');
+          state.mutate.notifications.add({
+            id: performance.now().toString(),
+            message: `Failed to fetch workflow: ${error.message}`,
+            status: 'danger',
+          });
         }
       }
 

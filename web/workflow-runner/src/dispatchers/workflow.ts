@@ -6,7 +6,7 @@ import {
 } from '../services/workflow-service';
 import { WorkflowCellStatus, WorkflowUICells } from '../types/section';
 import { WorkflowStore } from '../types/state';
-import { DEBUG_MESSAGES, STATUS_MESSAGES } from '../utils/constants';
+import { DEBUG_MESSAGES, NOTIFICATION_MESSAGES, STATUS_MESSAGES } from '../utils/constants';
 import { debugLog } from '../utils/debug';
 
 //#region Helpers
@@ -33,7 +33,6 @@ const _collectInputs = async (store: WorkflowStore): Promise<Record<string, unkn
           inputs[id] = await _handleUploadCell(store, value);
         } catch (error) {
           _setCellStatus(store, id, 'error');
-          state.mutate.status('error', `Upload failed: ${error.payload?.detail || error.message}`);
           throw error;
         }
         break;
@@ -45,7 +44,7 @@ const _collectInputs = async (store: WorkflowStore): Promise<Record<string, unkn
   return inputs;
 };
 const _handleUploadCell = async (store: WorkflowStore, rawValue: unknown) => {
-  const { UPLOADING_FILE, FILE_PROCESSING } = STATUS_MESSAGES;
+  const { ERROR_UPLOADING_FILE, RUNNING_UPLOADING_FILE } = STATUS_MESSAGES;
 
   const files = Array.isArray(rawValue) ? rawValue : (rawValue as File[] | undefined);
   if (!files || files.length === 0) {
@@ -55,16 +54,19 @@ const _handleUploadCell = async (store: WorkflowStore, rawValue: unknown) => {
   const state = store.getState();
 
   try {
-    state.mutate.status('running', UPLOADING_FILE);
+    state.mutate.status('running', RUNNING_UPLOADING_FILE);
     const { payload } = await uploadWorkflowFiles(files);
     const paths = payload?.paths || [];
-    state.mutate.status('running', FILE_PROCESSING);
     return paths.length === 1 ? paths[0] : paths;
   } catch (error) {
+    state.mutate.status('error', ERROR_UPLOADING_FILE);
+
     if (error instanceof WorkflowApiError) {
-      state.mutate.status('error', `Upload failed: ${error.payload?.detail || error.message}`);
-    } else {
-      state.mutate.status('error', 'Upload failed unexpectedly.');
+      state.mutate.notifications.add({
+        id: performance.now().toString(),
+        message: `Upload failed: ${error.payload?.detail || error.message}`,
+        status: 'danger',
+      });
     }
     throw error;
   }
@@ -94,20 +96,29 @@ const _setCellStatus = (store: WorkflowStore, id: string, status: WorkflowCellSt
 
 //#region Dispatcher
 export const workflowDispatcher = async (store: WorkflowStore) => {
-  const { INPUTS_COLLECTED, WORKFLOW_COMPLETED, WORKFLOW_DISPATCHING, WORKFLOW_NOT_SELECTED } =
-    DEBUG_MESSAGES;
-  const { SUBMITTING_WORKFLOW } = STATUS_MESSAGES;
+  const { INPUTS_COLLECTED } = DEBUG_MESSAGES;
+  const { NO_WORKFLOW_SELECTED, WORKFLOW_COMPLETED } = NOTIFICATION_MESSAGES;
+  const {
+    ERROR_RUNNING_WORKFLOW,
+    IDLE,
+    RUNNING_DISPATCHING_WORKFLOW,
+    RUNNING_SUBMITTING_WORKFLOW,
+  } = STATUS_MESSAGES;
 
   const state = store.getState();
-  const { current, manager } = state;
+  const { current } = state;
   const id = current.id;
 
   if (!id) {
-    state.mutate.status('error', WORKFLOW_NOT_SELECTED);
+    state.mutate.notifications.add({
+      id: performance.now().toString(),
+      message: NO_WORKFLOW_SELECTED,
+      status: 'warning',
+    });
     return;
   }
 
-  state.mutate.status('running', SUBMITTING_WORKFLOW);
+  state.mutate.status('running', RUNNING_SUBMITTING_WORKFLOW);
 
   let inputs: Record<string, unknown>;
   try {
@@ -122,39 +133,39 @@ export const workflowDispatcher = async (store: WorkflowStore) => {
         ? error.payload?.detail || error.message
         : (error as Error)?.message || 'Failed to collect inputs.';
 
-    state.mutate.status('error', `Failed to collect inputs: ${detail}`);
+    state.mutate.status('error', ERROR_RUNNING_WORKFLOW);
+    state.mutate.notifications.add({
+      id: performance.now().toString(),
+      message: `Failed to collect inputs: ${detail}`,
+      status: 'danger',
+    });
     return;
   }
 
   try {
-    debugLog(WORKFLOW_DISPATCHING, 'informational', {
-      id,
-      inputKeys: Object.keys(inputs),
-    });
-    const { status, message, payload } = await runWorkflowRequest(id, inputs);
+    state.mutate.status('running', RUNNING_DISPATCHING_WORKFLOW);
 
-    const runState = store.getState();
-    runState.mutate.runResult(
-      status,
-      message,
-      payload.history?.outputs ? { ...payload.history.outputs } : null,
-    );
+    const payload = await runWorkflowRequest(id, inputs);
 
-    const resultCategory = status === 'error' ? 'error' : 'success';
-    debugLog(WORKFLOW_COMPLETED, resultCategory, {
-      id,
-      wfStatus: status,
-      outputs: Object.keys(payload.history?.outputs ?? {}),
+    state.mutate.results(payload.history?.outputs ? { ...payload.history.outputs } : null);
+    state.mutate.notifications.add({
+      id: performance.now().toString(),
+      message: WORKFLOW_COMPLETED,
+      status: 'success',
     });
+    state.mutate.status('idle', IDLE);
   } catch (error) {
+    state.mutate.status('error', ERROR_RUNNING_WORKFLOW);
     if (error instanceof WorkflowApiError) {
       const inputName = error.payload?.error?.input;
       if (inputName) {
         _setCellStatus(store, inputName, 'error');
       }
-      state.mutate.status('error', error.payload?.detail || error.message);
-    } else {
-      state.mutate.status('error', 'Unexpected error while running the workflow.');
+      state.mutate.notifications.add({
+        id: performance.now().toString(),
+        message: `Workflow run failed: ${error.payload?.detail || error.message}`,
+        status: 'danger',
+      });
     }
   }
 };

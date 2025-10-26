@@ -1,7 +1,7 @@
 import { getLfFramework } from '@lf-widgets/framework';
 import { executeWorkflow } from '../handlers/workflow';
 import { WorkflowSectionController } from '../types/section';
-import { WorkflowStatus, WorkflowStore } from '../types/state';
+import { WorkflowStore } from '../types/state';
 import { DEBUG_MESSAGES } from '../utils/constants';
 import { debugLog } from '../utils/debug';
 
@@ -16,8 +16,6 @@ export const ACTION_BUTTON_CLASSES = {
 export const createActionButtonSection = (store: WorkflowStore): WorkflowSectionController => {
   //#region Local variables
   const { ACTION_BUTTON_DESTROYED, ACTION_BUTTON_MOUNTED, ACTION_BUTTON_UPDATED } = DEBUG_MESSAGES;
-  let lastMessage: string | null = null;
-  let lastStatus: WorkflowStatus | null = null;
   //#endregion
 
   //#region Destroy
