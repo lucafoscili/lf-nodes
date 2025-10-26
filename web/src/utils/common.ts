@@ -11,6 +11,7 @@ import {
   LfTreeInterface,
 } from '@lf-widgets/foundations';
 import { LFManager } from '../managers/manager';
+import { APIUploadDirectory, UploadImageAPIPayload } from '../types/api/api';
 import { BaseEventPayload } from '../types/events/events';
 import { FreeHookAPI } from '../types/hooks/free';
 import { InterruptHookAPI } from '../types/hooks/interrupt';
@@ -32,7 +33,6 @@ declare global {
     [LF_MANAGER_SYMBOL]: LFManager;
   }
 }
-
 // #region Constants
 export enum LFFreeFlags {
   PatchedFree = '_lf_patched_freeMemory',
@@ -424,31 +424,35 @@ export const refreshChart = (node: NodeType) => {
     getLfManager().log('Whoops! It seems there is no chart. :V', { error }, LogSeverity.Error);
   }
 };
-export const uploadFiles = async (files: File[], uploadEl: HTMLLfUploadElement) => {
+export const uploadFiles = async (
+  files: File[],
+  uploadEl: HTMLLfUploadElement,
+  dir: APIUploadDirectory = 'temp',
+) => {
   const fileNames: Set<string> = new Set();
 
   for (let index = 0; index < files.length; index++) {
     const file = files[index];
     try {
-      const body = new FormData();
-      const i = file.webkitRelativePath.lastIndexOf('/');
-      const subfolder = file.webkitRelativePath.slice(0, i + 1);
       const new_file = new File([file], file.name, {
         type: file.type,
         lastModified: file.lastModified,
       });
-      body.append('image', new_file);
-      if (i > 0) {
-        body.append('subfolder', subfolder);
-      }
-      const resp = await getApiRoutes().comfy.upload(body);
 
-      if (resp.status === 200 || resp.status === 201) {
-        getLfManager().log('POST result', { json: resp.json }, LogSeverity.Success);
+      const resp = await getApiRoutes().image.upload(new_file, dir);
+
+      if (
+        resp &&
+        resp.status === 'success' &&
+        Array.isArray(resp.payload?.paths) &&
+        resp.payload.paths.length > 0
+      ) {
+        getLfManager().log('Upload result', { paths: resp.payload.paths }, LogSeverity.Success);
         fileNames.add(file.name);
         uploadEl.dataset.files = uploadEl.dataset.files + ';' + file.name;
       } else {
-        getLfManager().log('POST failed', { statusText: resp.statusText }, LogSeverity.Error);
+        const detail = resp.message || 'upload_failed';
+        getLfManager().log('POST failed', { detail }, LogSeverity.Error);
       }
     } catch (error) {
       alert(`Upload failed: ${error}`);

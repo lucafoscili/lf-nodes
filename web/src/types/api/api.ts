@@ -61,15 +61,16 @@ export interface ModelsAPIs {
 }
 export interface ImageAPIs {
   get: (dir: string) => Promise<GetImageAPIPayload>;
+  explore: (
+    directory: string,
+    options?: ImageExplorerRequestOptions,
+  ) => Promise<GetFilesystemAPIPayload>;
   process: <T extends ImageEditorFilterType>(
     url: string,
     type: T,
     settings: ImageEditorRequestSettings<T>,
   ) => Promise<ProcessImageAPIPayload>;
-  explore: (
-    directory: string,
-    options?: ImageExplorerRequestOptions,
-  ) => Promise<GetFilesystemAPIPayload>;
+  upload: (file: File | Blob, directory?: ComfyURLType) => Promise<UploadImageAPIPayload>;
 }
 export interface JSONAPIs {
   get: (path: string) => Promise<GetJSONAPIPayload>;
@@ -101,6 +102,7 @@ export interface SystemAPIs {
   getCpuStats: () => Promise<GetCpuStatsAPIPayload>;
   getRamStats: () => Promise<GetRamStatsAPIPayload>;
 }
+export type APIUploadDirectory = 'input' | 'output' | 'temp';
 //#endregion
 
 //#region Payloads
@@ -128,12 +130,6 @@ export interface GetJSONAPIPayload extends BaseAPIPayload {
 }
 export interface GetMetadataAPIPayload extends BaseAPIPayload {
   data: CivitAIModelData;
-}
-export interface ProcessImageAPIPayload extends BaseAPIPayload {
-  data: string;
-  mask?: string;
-  cutout?: string;
-  stats?: Record<string, unknown>;
 }
 export interface GetPreviewStatsAPIPayload extends BaseAPIPayload {
   data: {
@@ -200,6 +196,18 @@ export interface ImageExplorerRequestOptions {
   scope?: ImageExplorerScope;
   nodePath?: string;
 }
+export interface ProcessImageAPIPayload extends BaseAPIPayload {
+  data: string;
+  mask?: string;
+  cutout?: string;
+  stats?: Record<string, unknown>;
+}
+export interface UploadImageAPIPayload extends BaseAPIPayload {
+  payload: {
+    paths: string[];
+    [key: string]: unknown;
+  };
+}
 //#endregion
 
 //#region Routes
@@ -222,6 +230,7 @@ export enum APIEndpoints {
   GetBackupStats = `/lf-nodes/get-backup-stats`,
   NewBackup = `/lf-nodes/new-backup`,
   ProcessImage = `/lf-nodes/process-image`,
+  UploadImage = `/lf-nodes/upload`,
   RefreshNodeDefs = `/lf-nodes/refresh-node-defs`,
   SaveMetadata = '/lf-nodes/save-metadata',
   UpdateJson = `/lf-nodes/update-json`,
