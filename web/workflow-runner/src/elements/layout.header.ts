@@ -118,7 +118,7 @@ export const createHeaderSection = (store: WorkflowStore): WorkflowSectionContro
   //#region Render
   const render = () => {
     const { alertTriangle, check, hourglassLow } = theme.get.icons();
-    const { manager } = store.getState();
+    const { manager, queuedJobs } = store.getState();
     const { uiRegistry } = manager;
 
     const elements = uiRegistry.get();
@@ -126,7 +126,6 @@ export const createHeaderSection = (store: WorkflowStore): WorkflowSectionContro
       return;
     }
 
-    const queuedJobs = manager.getQueuedJobs();
     const counter = elements[HEADER_CLASSES.serverIndicatorCounter] as HTMLElement | undefined;
     const light = elements[HEADER_CLASSES.serverIndicatorLight] as HTMLLfButtonElement;
     counter.innerText = '';

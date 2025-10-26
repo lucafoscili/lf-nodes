@@ -14,6 +14,7 @@ export const DEBUG_MESSAGES = {
   HEADER_UPDATED: 'Header section refreshed.',
   INPUTS_COLLECTED: 'Collected workflow inputs.',
   INPUTS_FAILED: 'Failed to collect workflow inputs.',
+  LOADING_WORKFLOWS: 'Loading workflows...',
   MAIN_DESTROYED: 'Main section destroyed.',
   MAIN_MOUNTED: 'Main section mounted.',
   MAIN_UPDATED: 'Main section updated.',
@@ -55,7 +56,7 @@ export const ERROR_MESSAGES = {
 //#region Status messages
 export const STATUS_MESSAGES = {
   FILE_PROCESSING: 'File uploaded, processing...',
-  LOADING_WORKFLOWS: 'Loading workflows...',
+  NO_WORKFLOW_SELECTED: 'No workflow selected.',
   SUBMITTING_WORKFLOW: 'Submitting workflow...',
   UPLOAD_COMPLETED: 'Upload completed successfully.',
   UPLOADING_FILE: 'Uploading file...',

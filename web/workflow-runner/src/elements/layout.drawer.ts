@@ -168,9 +168,9 @@ export const createDrawerSection = (store: WorkflowStore): WorkflowSectionContro
 
   //#region Render
   const render = () => {
-    const { manager, workflows } = store.getState();
+    const state = store.getState();
+    const { isDebug, manager, workflows } = state;
     const { uiRegistry } = manager;
-    const isDebug = manager.isDebugEnabled();
 
     const elements = uiRegistry.get();
     if (!elements) {

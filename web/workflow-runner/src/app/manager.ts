@@ -1,5 +1,5 @@
 import { getLfFramework } from '@lf-widgets/framework';
-import { buildAssetsUrl, DEFAULT_STATUS_MESSAGES, DEFAULT_THEME } from '../config';
+import { buildAssetsUrl, DEFAULT_THEME } from '../config';
 import { workflowDispatcher } from '../dispatchers/workflow';
 import { createActionButtonSection } from '../elements/layout.action-button';
 import { createDevSection } from '../elements/layout.dev';
@@ -10,9 +10,9 @@ import { createNotificationsSection } from '../elements/layout.notifications';
 import { fetchWorkflowDefinitions } from '../services/workflow-service';
 import { WorkflowDispatchers, WorkflowManager, WorkflowUIItem } from '../types/manager';
 import { WorkflowSectionController } from '../types/section';
-import { WorkflowStatus, WorkflowStore } from '../types/state';
+import { WorkflowStore } from '../types/state';
 import { parseCount } from '../utils/common';
-import { DEBUG_MESSAGES, STATUS_MESSAGES } from '../utils/constants';
+import { DEBUG_MESSAGES } from '../utils/constants';
 import { debugLog } from '../utils/debug';
 import { initState } from './state';
 import { createWorkflowRunnerStore } from './store';
@@ -22,8 +22,6 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
   #APP_ROOT: HTMLDivElement;
   #DISPATCHERS: WorkflowDispatchers;
   #FRAMEWORK = getLfFramework();
-  #IS_DEBUG = false;
-
   #SECTIONS: {
     actionButton: WorkflowSectionController;
     dev: WorkflowSectionController;
@@ -36,8 +34,7 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
   #UI_REGISTRY = new WeakMap();
 
   constructor() {
-    const { WORKFLOWS_LOAD_FAILED } = DEBUG_MESSAGES;
-    const { LOADING_WORKFLOWS } = STATUS_MESSAGES;
+    const { LOADING_WORKFLOWS, WORKFLOWS_LOAD_FAILED } = DEBUG_MESSAGES;
 
     this.#APP_ROOT = document.querySelector<HTMLDivElement>('#app');
     if (!this.#APP_ROOT) {
@@ -45,7 +42,6 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
     }
 
     this.#STORE = createWorkflowRunnerStore(initState());
-    this.#IS_DEBUG = this.#STORE.getState().isDebug;
 
     this.#DISPATCHERS = {
       runWorkflow: () => workflowDispatcher(this.#STORE),
@@ -60,19 +56,22 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
       notifications: createNotificationsSection(this.#STORE),
     };
 
-    this.#STORE.getState().mutate.manager(this);
+    const state = this.#STORE.getState();
+
+    state.mutate.manager(this);
 
     this.#initializeFramework();
     this.#initializeLayout();
     this.#subscribeToState();
-    this.setStatus('running', LOADING_WORKFLOWS);
+    debugLog(LOADING_WORKFLOWS);
+
     this.#loadWorkflows().catch((error) => {
       const message = error instanceof Error ? error.message : WORKFLOWS_LOAD_FAILED;
       debugLog(WORKFLOWS_LOAD_FAILED, 'error', {
         message,
         stack: error instanceof Error ? error.stack : undefined,
       });
-      this.setStatus('error', message);
+      state.mutate.status('error', message);
     });
 
     this.#startPolling();
@@ -102,24 +101,26 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
     if (state.isDebug) {
       this.#SECTIONS.dev.mount();
       this.#SECTIONS.dev.render();
-      this.#IS_DEBUG = true;
     }
   }
   #loadWorkflows = async () => {
     const { WORKFLOWS_LOADED } = DEBUG_MESSAGES;
+
+    const state = this.#STORE.getState();
 
     const workflows = await fetchWorkflowDefinitions();
     if (!workflows || !Object.keys(workflows).length) {
       throw new Error('No workflows available from the API.');
     }
 
-    this.#STORE.getState().mutate.workflows(workflows);
+    state.mutate.workflows(workflows);
 
     const firstWorkflow = workflows.nodes?.[0];
     if (firstWorkflow?.id) {
-      this.setWorkflow(firstWorkflow.id);
+      state.mutate.workflow(firstWorkflow.id);
     }
-    this.setStatus('idle', WORKFLOWS_LOADED);
+
+    state.mutate.status('idle', WORKFLOWS_LOADED);
   };
   #startPolling() {
     setInterval(async () => {
@@ -165,6 +166,7 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
     let scheduled = false;
     const needs = {
       header: false,
+      dev: false,
       drawer: false,
       main: false,
       actionButton: false,
@@ -193,22 +195,15 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
         lastQueued = queuedJobs;
       }
 
-      if (workflows !== lastWorkflows || isDebug !== lastDebug) {
+      if (workflows !== lastWorkflows) {
         needs.drawer = true;
         lastWorkflows = workflows;
-        lastDebug = isDebug;
       }
 
-      const shouldShowDevPanel = state.isDebug;
-      if (shouldShowDevPanel && !this.#IS_DEBUG) {
-        this.#SECTIONS.dev.mount();
-        this.#IS_DEBUG = true;
-        this.#SECTIONS.dev.render();
-      } else if (!shouldShowDevPanel && this.#IS_DEBUG) {
-        this.#SECTIONS.dev.destroy();
-        this.#IS_DEBUG = false;
-      } else if (shouldShowDevPanel && this.#IS_DEBUG) {
-        this.#SECTIONS.dev.render();
+      if (isDebug !== lastDebug) {
+        needs.dev = true;
+        needs.drawer = true;
+        lastDebug = isDebug;
       }
 
       if (!scheduled) {
@@ -216,11 +211,24 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
         requestAnimationFrame(() => {
           scheduled = false;
 
+          const sections = this.#SECTIONS;
           for (const sectionKey in needs) {
-            const need = needs[sectionKey];
-            const section = this.#SECTIONS[sectionKey];
+            const need = needs[sectionKey as keyof typeof needs];
+            const section = sections[sectionKey as keyof typeof sections];
             if (need) {
-              section.render();
+              switch (sectionKey) {
+                case 'dev':
+                  if (isDebug) {
+                    section.mount();
+                    section.render();
+                  } else {
+                    section.destroy();
+                  }
+                  break;
+                default:
+                  section.render();
+                  break;
+              }
             }
           }
 
@@ -240,34 +248,6 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
   }
   getStore() {
     return this.#STORE;
-  }
-  getQueuedJobs() {
-    return this.#STORE.getState().queuedJobs;
-  }
-  isDebugEnabled() {
-    return this.#STORE.getState().isDebug;
-  }
-  //#endregion
-
-  //#region State mutators
-  setStatus(status: WorkflowStatus, message?: string) {
-    const { mutate } = this.#STORE.getState();
-
-    const resolved = message ?? DEFAULT_STATUS_MESSAGES[status];
-    mutate.status(status, resolved);
-  }
-  setWorkflow(id: string) {
-    const state = this.#STORE.getState();
-
-    if (state.current.id === id) {
-      return;
-    }
-
-    state.mutate.workflow(id);
-  }
-  toggleDebug() {
-    const current = this.#STORE.getState().isDebug;
-    this.#STORE.getState().mutate.isDebug(!current);
   }
   //#endregion
 

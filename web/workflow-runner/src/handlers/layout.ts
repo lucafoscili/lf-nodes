@@ -26,11 +26,11 @@ export const openGithubRepo = (e: CustomEvent<LfButtonEventPayload>) => {
 export const toggleDebug = (e: CustomEvent<LfButtonEventPayload>, store: WorkflowStore) => {
   const { eventType } = e.detail;
 
-  const { manager } = store.getState();
+  const state = store.getState();
 
   switch (eventType) {
     case 'click':
-      manager.toggleDebug();
+      state.mutate.isDebug(!state.isDebug);
       break;
     default:
       return;
@@ -57,7 +57,8 @@ export const toggleDrawer = (e: CustomEvent<LfButtonEventPayload>, store: Workfl
 export const drawerNavigation = (e: CustomEvent<LfTreeEventPayload>, store: WorkflowStore) => {
   const { eventType, node } = e.detail;
 
-  const { manager } = store.getState();
+  const state = store.getState();
+  const { manager } = state;
   const elements = manager.uiRegistry.get();
   const drawer = elements[DRAWER_CLASSES._] as HTMLLfDrawerElement;
 
@@ -69,7 +70,7 @@ export const drawerNavigation = (e: CustomEvent<LfTreeEventPayload>, store: Work
 
       const isLeaf = !node.children || node.children.length === 0;
       if (isLeaf) {
-        manager.setWorkflow(node.id);
+        state.mutate.workflow(node.id);
         drawer.close();
       }
       break;

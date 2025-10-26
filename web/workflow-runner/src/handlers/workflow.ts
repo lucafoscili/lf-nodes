@@ -1,6 +1,7 @@
 import { LfButtonEventPayload } from '@lf-widgets/foundations/dist';
 import { fetchWorkflowJSON, WorkflowApiError } from '../services/workflow-service';
 import { WorkflowStore } from '../types/state';
+import { STATUS_MESSAGES } from '../utils/constants';
 
 //#region Button Handlers
 export const executeWorkflow = (e: CustomEvent<LfButtonEventPayload>, store: WorkflowStore) => {
@@ -20,15 +21,18 @@ export const openWorkflowInComfyUI = async (
   e: CustomEvent<LfButtonEventPayload>,
   store: WorkflowStore,
 ) => {
+  const { NO_WORKFLOW_SELECTED } = STATUS_MESSAGES;
+
   const { eventType } = e.detail;
 
-  const { current, manager } = store.getState();
+  const state = store.getState();
+  const { current, manager } = state;
   const { id } = current;
 
   switch (eventType) {
     case 'click':
       if (!id) {
-        manager.setStatus('error', 'No workflow selected');
+        state.mutate.status('error', NO_WORKFLOW_SELECTED);
         return;
       }
 
@@ -50,9 +54,9 @@ export const openWorkflowInComfyUI = async (
         }, 1000);
       } catch (error) {
         if (error instanceof WorkflowApiError) {
-          manager.setStatus('error', `Failed to fetch workflow: ${error.message}`);
+          state.mutate.status('error', `Failed to fetch workflow: ${error.message}`);
         } else {
-          manager.setStatus('error', 'Unexpected error while fetching workflow');
+          state.mutate.status('error', 'Unexpected error while fetching workflow');
         }
       }
 

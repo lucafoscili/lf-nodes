@@ -4,16 +4,15 @@ import {
   uploadWorkflowFiles,
   WorkflowApiError,
 } from '../services/workflow-service';
-import { WorkflowManager } from '../types/manager';
 import { WorkflowCellStatus, WorkflowUICells } from '../types/section';
-import { WorkflowState, WorkflowStore } from '../types/state';
+import { WorkflowStore } from '../types/state';
 import { DEBUG_MESSAGES, STATUS_MESSAGES } from '../utils/constants';
 import { debugLog } from '../utils/debug';
 
 //#region Helpers
-const _collectInputs = async (state: WorkflowState): Promise<Record<string, unknown>> => {
-  const { manager } = state;
-  const { uiRegistry } = manager;
+const _collectInputs = async (store: WorkflowStore): Promise<Record<string, unknown>> => {
+  const state = store.getState();
+  const { uiRegistry } = state.manager;
 
   const elements = uiRegistry.get();
   const cells = (elements?.[WORKFLOW_CLASSES.cells] as WorkflowUICells) || [];
@@ -22,7 +21,7 @@ const _collectInputs = async (state: WorkflowState): Promise<Record<string, unkn
 
   for (const cell of cells) {
     const id = cell.id || '';
-    _setCellStatus(state, id);
+    _setCellStatus(store, id);
     const value: unknown = await cell.getValue();
 
     switch (cell.tagName.toLowerCase()) {
@@ -31,10 +30,10 @@ const _collectInputs = async (state: WorkflowState): Promise<Record<string, unkn
         break;
       case 'lf-upload':
         try {
-          inputs[id] = await _handleUploadCell(manager, value);
+          inputs[id] = await _handleUploadCell(store, value);
         } catch (error) {
-          _setCellStatus(state, id, 'error');
-          manager.setStatus('error', `Upload failed: ${error.payload?.detail || error.message}`);
+          _setCellStatus(store, id, 'error');
+          state.mutate.status('error', `Upload failed: ${error.payload?.detail || error.message}`);
           throw error;
         }
         break;
@@ -45,7 +44,7 @@ const _collectInputs = async (state: WorkflowState): Promise<Record<string, unkn
 
   return inputs;
 };
-const _handleUploadCell = async (manager: WorkflowManager, rawValue: unknown) => {
+const _handleUploadCell = async (store: WorkflowStore, rawValue: unknown) => {
   const { UPLOADING_FILE, FILE_PROCESSING } = STATUS_MESSAGES;
 
   const files = Array.isArray(rawValue) ? rawValue : (rawValue as File[] | undefined);
@@ -53,24 +52,26 @@ const _handleUploadCell = async (manager: WorkflowManager, rawValue: unknown) =>
     return [];
   }
 
+  const state = store.getState();
+
   try {
-    manager.setStatus('running', UPLOADING_FILE);
+    state.mutate.status('running', UPLOADING_FILE);
     const { payload } = await uploadWorkflowFiles(files);
     const paths = payload?.paths || [];
-    manager.setStatus('running', FILE_PROCESSING);
+    state.mutate.status('running', FILE_PROCESSING);
     return paths.length === 1 ? paths[0] : paths;
   } catch (error) {
     if (error instanceof WorkflowApiError) {
-      manager.setStatus('error', `Upload failed: ${error.payload?.detail || error.message}`);
+      state.mutate.status('error', `Upload failed: ${error.payload?.detail || error.message}`);
     } else {
-      manager.setStatus('error', 'Upload failed unexpectedly.');
+      state.mutate.status('error', 'Upload failed unexpectedly.');
     }
     throw error;
   }
 };
-const _setCellStatus = (state: WorkflowState, id: string, status: WorkflowCellStatus = '') => {
+const _setCellStatus = (store: WorkflowStore, id: string, status: WorkflowCellStatus = '') => {
   const { WORKFLOW_INPUT_FLAGGED } = DEBUG_MESSAGES;
-  const { current, manager } = state;
+  const { current, manager } = store.getState();
   const { uiRegistry } = manager;
 
   const elements = uiRegistry.get();
@@ -102,15 +103,15 @@ export const workflowDispatcher = async (store: WorkflowStore) => {
   const id = current.id;
 
   if (!id) {
-    manager.setStatus('error', WORKFLOW_NOT_SELECTED);
+    state.mutate.status('error', WORKFLOW_NOT_SELECTED);
     return;
   }
 
-  manager.setStatus('running', SUBMITTING_WORKFLOW);
+  state.mutate.status('running', SUBMITTING_WORKFLOW);
 
   let inputs: Record<string, unknown>;
   try {
-    inputs = await _collectInputs(state);
+    inputs = await _collectInputs(store);
     debugLog(INPUTS_COLLECTED, 'informational', {
       id,
       inputKeys: Object.keys(inputs),
@@ -120,7 +121,8 @@ export const workflowDispatcher = async (store: WorkflowStore) => {
       error instanceof WorkflowApiError
         ? error.payload?.detail || error.message
         : (error as Error)?.message || 'Failed to collect inputs.';
-    manager.setStatus('error', `Failed to collect inputs: ${detail}`);
+
+    state.mutate.status('error', `Failed to collect inputs: ${detail}`);
     return;
   }
 
@@ -144,16 +146,15 @@ export const workflowDispatcher = async (store: WorkflowStore) => {
       wfStatus: status,
       outputs: Object.keys(payload.history?.outputs ?? {}),
     });
-    
   } catch (error) {
     if (error instanceof WorkflowApiError) {
       const inputName = error.payload?.error?.input;
       if (inputName) {
-        _setCellStatus(state, inputName, 'error');
+        _setCellStatus(store, inputName, 'error');
       }
-      manager.setStatus('error', error.payload?.detail || error.message);
+      state.mutate.status('error', error.payload?.detail || error.message);
     } else {
-      manager.setStatus('error', 'Unexpected error while running the workflow.');
+      state.mutate.status('error', 'Unexpected error while running the workflow.');
     }
   }
 };
