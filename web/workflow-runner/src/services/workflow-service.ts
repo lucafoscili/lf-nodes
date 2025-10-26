@@ -1,3 +1,4 @@
+import { getLfFramework } from '@lf-widgets/framework';
 import { buildApiUrl } from '../config';
 import {
   WorkflowAPIDataset,
@@ -7,11 +8,7 @@ import {
   WorkflowAPIUploadPayload,
   WorkflowAPIUploadResponse,
 } from '../types/api';
-import {
-  isWorkflowAPIUploadPayload,
-  isWorkflowAPIUploadResponse,
-  parseJson,
-} from '../utils/common';
+import { isWorkflowAPIUploadPayload, isWorkflowAPIUploadResponse } from '../utils/common';
 import { ERROR_MESSAGES } from '../utils/constants';
 
 //#region Errors
@@ -30,8 +27,9 @@ export class WorkflowApiError<TPayload = unknown> extends Error {
 
 //#region Fetchers
 export const fetchWorkflowDefinitions = async () => {
+  const { syntax } = getLfFramework();
   const response = await fetch(buildApiUrl('/workflows'), { method: 'GET' });
-  const data = (await parseJson(response)) as { workflows?: WorkflowAPIDataset } | null;
+  const data = (await syntax.json.parse(response)) as { workflows?: WorkflowAPIDataset } | null;
 
   if (!response.ok) {
     const message = `Failed to load workflows (${response.status})`;
@@ -46,8 +44,9 @@ export const fetchWorkflowDefinitions = async () => {
 };
 
 export const fetchWorkflowJSON = async (workflowId: string) => {
+  const { syntax } = getLfFramework();
   const response = await fetch(buildApiUrl(`/workflows/${workflowId}`), { method: 'GET' });
-  const data = (await parseJson(response)) as Record<string, unknown> | null;
+  const data = (await syntax.json.parse(response)) as Record<string, unknown> | null;
 
   if (!response.ok) {
     const message = `Failed to load workflow JSON (${response.status})`;
@@ -65,13 +64,15 @@ export const runWorkflowRequest = async (
 ): Promise<WorkflowAPIRunPayload> => {
   const { RUN_GENERIC } = ERROR_MESSAGES;
 
+  const { syntax } = getLfFramework();
+
   const response = await fetch(buildApiUrl('/run'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ workflowId, inputs }),
   });
 
-  const data = (await parseJson(response)) as WorkflowAPIResponse | null;
+  const data = (await syntax.json.parse(response)) as WorkflowAPIResponse | null;
   const payload: WorkflowAPIRunPayload = (data && data.payload) || {
     detail: response.statusText,
     history: {},
@@ -92,6 +93,8 @@ export const runWorkflowRequest = async (
 export const uploadWorkflowFiles = async (files: File[]): Promise<WorkflowAPIUploadResponse> => {
   const { UPLOAD_GENERIC, UPLOAD_INVALID_RESPONSE, UPLOAD_MISSING_FILE } = ERROR_MESSAGES;
 
+  const { syntax } = getLfFramework();
+
   if (!files || files.length === 0) {
     throw new WorkflowApiError<WorkflowAPIUploadPayload>(UPLOAD_MISSING_FILE, {
       payload: { error: { message: 'missing_file' } },
@@ -106,7 +109,7 @@ export const uploadWorkflowFiles = async (files: File[]): Promise<WorkflowAPIUpl
     body: formData,
   });
 
-  const data = (await parseJson(response)) as unknown;
+  const data = await syntax.json.parse(response);
   if (isWorkflowAPIUploadResponse(data)) {
     if (!response.ok) {
       const { payload } = data;

@@ -40,6 +40,12 @@ input_json = WorkflowCell(
     value="JSON Object",
     shape="textfield",
     props={
+        "lfFormatJSON": {
+            "displayBorderOnError": True,
+            "displayErrorAsTitle": True,
+            "onBlur": True,
+            "onInput": 800,
+        },
         "lfHtmlAttributes": {
             "autocomplete": "off",
             "type": "text"
