@@ -1,4 +1,4 @@
-import { g as getLfFramework } from "../../js/lf-widgets-6WpDY9VV.js";
+import { g as getLfFramework } from "../../js/lf-widgets-CAA2GbO2.js";
 const apiBase = "/api";
 const apiRoutePrefix = "/lf-nodes";
 const staticPaths = { "assets": "/lf-nodes/static/assets/" };
@@ -68,83 +68,6 @@ const parseCount = (v) => {
   }
   const n = Number(v);
   return Number.isFinite(n) ? n : 0;
-};
-const isJSONLikeString = (value) => {
-  if (typeof value !== "string")
-    return false;
-  const trimmed = value.trim();
-  if (!(trimmed.startsWith("{") && trimmed.endsWith("}") || trimmed.startsWith("[") && trimmed.endsWith("]"))) {
-    return false;
-  }
-  if (trimmed.startsWith("{")) {
-    if (trimmed === "{}")
-      return true;
-    if (/".*"\s*:\s*.+/.test(trimmed))
-      return true;
-    return false;
-  }
-  if (trimmed.indexOf('"') !== -1)
-    return true;
-  const simpleArrayScalar = /^\[\s*(?:-?\d+(\.\d+)?|true|false|null)(\s*,\s*(?:-?\d+(\.\d+)?|true|false|null))*\s*\]$/i;
-  if (trimmed.startsWith("[") && simpleArrayScalar.test(trimmed))
-    return true;
-  return false;
-};
-const parseJson = async (response) => {
-  try {
-    return await response.json();
-  } catch {
-    return null;
-  }
-};
-const unescapeJson = (input) => {
-  let validJson = false;
-  let parsedJson = void 0;
-  let unescapedStr = input;
-  const recursiveUnescape = (inputStr) => {
-    let newStr = inputStr.replace(/\\(.)/g, "$1");
-    while (newStr !== inputStr) {
-      inputStr = newStr;
-      newStr = inputStr.replace(/\\(.)/g, "$1");
-    }
-    return newStr;
-  };
-  const deepParse = (data) => {
-    if (isJSONLikeString(data)) {
-      try {
-        const innerJson = JSON.parse(data);
-        if (typeof innerJson === "object" && innerJson !== null) {
-          return deepParse(innerJson);
-        }
-      } catch (e) {
-        return data;
-      }
-    } else if (typeof data === "object" && data !== null) {
-      Object.keys(data).forEach((key) => {
-        data[key] = deepParse(data[key]);
-      });
-    }
-    return data;
-  };
-  try {
-    parsedJson = isJSONLikeString(input) ? JSON.parse(input) : input;
-    validJson = true;
-    parsedJson = deepParse(parsedJson);
-    unescapedStr = JSON.stringify(parsedJson, null, 2);
-  } catch (error) {
-    if (typeof input === "object" && input !== null) {
-      try {
-        unescapedStr = JSON.stringify(input, null, 2);
-        validJson = true;
-        parsedJson = input;
-      } catch (stringifyError) {
-        unescapedStr = recursiveUnescape(input.toString());
-      }
-    } else {
-      unescapedStr = recursiveUnescape(input.toString());
-    }
-  }
-  return { validJson, parsedJson, unescapedStr };
 };
 const clearChildren = (element) => {
   if (!element) {
@@ -216,8 +139,9 @@ class WorkflowApiError extends Error {
   }
 }
 const fetchWorkflowDefinitions = async () => {
+  const { syntax } = getLfFramework();
   const response = await fetch(buildApiUrl("/workflows"), { method: "GET" });
-  const data = await parseJson(response);
+  const data = await syntax.json.parse(response);
   if (!response.ok) {
     const message = `Failed to load workflows (${response.status})`;
     throw new WorkflowApiError(message, { status: response.status, payload: data });
@@ -228,8 +152,9 @@ const fetchWorkflowDefinitions = async () => {
   return data.workflows;
 };
 const fetchWorkflowJSON = async (workflowId) => {
+  const { syntax } = getLfFramework();
   const response = await fetch(buildApiUrl(`/workflows/${workflowId}`), { method: "GET" });
-  const data = await parseJson(response);
+  const data = await syntax.json.parse(response);
   if (!response.ok) {
     const message = `Failed to load workflow JSON (${response.status})`;
     throw new WorkflowApiError(message, { status: response.status, payload: data });
@@ -238,12 +163,13 @@ const fetchWorkflowJSON = async (workflowId) => {
 };
 const runWorkflowRequest = async (workflowId, inputs) => {
   const { RUN_GENERIC } = ERROR_MESSAGES;
+  const { syntax } = getLfFramework();
   const response = await fetch(buildApiUrl("/run"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ workflowId, inputs })
   });
-  const data = await parseJson(response);
+  const data = await syntax.json.parse(response);
   const payload = data && data.payload || {
     detail: response.statusText,
     history: {}
@@ -259,6 +185,7 @@ const runWorkflowRequest = async (workflowId, inputs) => {
 const uploadWorkflowFiles = async (files) => {
   var _a, _b;
   const { UPLOAD_GENERIC, UPLOAD_INVALID_RESPONSE, UPLOAD_MISSING_FILE } = ERROR_MESSAGES;
+  const { syntax } = getLfFramework();
   if (!files || files.length === 0) {
     throw new WorkflowApiError(UPLOAD_MISSING_FILE, {
       payload: { error: { message: "missing_file" } }
@@ -270,7 +197,7 @@ const uploadWorkflowFiles = async (files) => {
     method: "POST",
     body: formData
   });
-  const data = await parseJson(response);
+  const data = await syntax.json.parse(response);
   if (isWorkflowAPIUploadResponse(data)) {
     if (!response.ok) {
       const { payload } = data;
@@ -498,12 +425,13 @@ const createInputCell = (cell) => {
   }
 };
 const createOutputComponent = (descriptor) => {
+  const { syntax } = getLfFramework();
   const { dataset, json, metadata, props, shape, slot_map, svg } = descriptor;
   const el = document.createElement("div");
   switch (shape) {
     case "code": {
       const p = props || {};
-      p.lfValue = svg || unescapeJson(json || metadata || dataset || { message: "No output available." }).unescapedStr;
+      p.lfValue = svg || syntax.json.unescape(json || metadata || dataset || { message: "No output available." }).unescapedString;
       const code = createComponent.code(p);
       el.appendChild(code);
       break;
@@ -1502,7 +1430,7 @@ const createNotificationsSection = (store) => {
       element.lfIcon = status === "danger" ? theme.get.icon("alertTriangle") : theme.get.icon("infoHexagon");
       element.lfMessage = message;
       element.lfUiState = _getStateCategory(status);
-      element.lfTimer = status === "danger" ? 5e3 : 5e3;
+      element.lfTimer = status === "danger" ? 5e3 : 2500;
       _root.appendChild(element);
       requestAnimationFrame(() => {
         _root.scrollTop = _root.scrollHeight;
