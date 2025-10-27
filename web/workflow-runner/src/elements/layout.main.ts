@@ -95,7 +95,7 @@ export const createMainSection = (store: WorkflowStore): WorkflowSectionControll
       }
     });
 
-    scope.forEach((section) => {
+    scopeSet.forEach((section) => {
       switch (section) {
         case 'inputs':
           if (!LAST_SCOPE.find((s) => s === 'inputs')) {
@@ -118,7 +118,7 @@ export const createMainSection = (store: WorkflowStore): WorkflowSectionControll
       }
     });
 
-    LAST_SCOPE = [Array.from(scopeSet)].flat();
+    LAST_SCOPE = Array.from(scopeSet);
     debugLog(MAIN_UPDATED);
   };
   //#endregion
