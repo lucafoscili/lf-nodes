@@ -677,11 +677,11 @@ const MAIN_CLASSES = {
 };
 const createMainSection = (store) => {
   const { MAIN_DESTROYED, MAIN_MOUNTED, MAIN_UPDATED } = DEBUG_MESSAGES;
-  const DEFAULT_SCOPE = /* @__PURE__ */ new Set(["inputs", "outputs", "results"]);
+  const DEFAULT_SCOPE = ["inputs", "outputs"];
   const INPUTS = createInputsSection(store);
   const OUTPUTS = createOutputsSection(store);
   const RESULTS = createResultsSection(store);
-  let LAST_SCOPE = /* @__PURE__ */ new Set(["inputs", "outputs"]);
+  let LAST_SCOPE = [...DEFAULT_SCOPE];
   const destroy = () => {
     const { manager } = store.getState();
     const { uiRegistry } = manager;
@@ -710,15 +710,16 @@ const createMainSection = (store) => {
     RESULTS.mount();
     debugLog(MAIN_MOUNTED);
   };
-  const render = (scope = DEFAULT_SCOPE) => {
+  const render = (scope = [...DEFAULT_SCOPE]) => {
     const { manager } = store.getState();
     const { uiRegistry } = manager;
+    const scopeSet = new Set(scope);
     const elements = uiRegistry.get();
-    if (!elements || !scope.size) {
+    if (!elements || !scopeSet.size) {
       return;
     }
     LAST_SCOPE.forEach((section) => {
-      if (!scope.has(section)) {
+      if (!scopeSet.has(section)) {
         switch (section) {
           case "inputs":
             INPUTS.destroy();
@@ -732,30 +733,29 @@ const createMainSection = (store) => {
         }
       }
     });
-    scope.forEach((section) => {
+    scopeSet.forEach((section) => {
       switch (section) {
         case "inputs":
-          if (!LAST_SCOPE.has("inputs")) {
+          if (!LAST_SCOPE.find((s) => s === "inputs")) {
             INPUTS.mount();
           }
           INPUTS.render();
           break;
         case "outputs":
-          if (!LAST_SCOPE.has("outputs")) {
+          if (!LAST_SCOPE.find((s) => s === "outputs")) {
             OUTPUTS.mount();
           }
           OUTPUTS.render();
           break;
         case "results":
-          if (!LAST_SCOPE.has("results")) {
+          if (!LAST_SCOPE.find((s) => s === "results")) {
             RESULTS.mount();
           }
           RESULTS.render();
           break;
       }
     });
-    LAST_SCOPE.clear();
-    LAST_SCOPE = new Set(scope);
+    LAST_SCOPE = Array.from(scopeSet);
     debugLog(MAIN_UPDATED);
   };
   return {
