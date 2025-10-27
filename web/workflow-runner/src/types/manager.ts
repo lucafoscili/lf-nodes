@@ -1,3 +1,10 @@
+import {
+  WorkflowAPIItem,
+  WorkflowCellInputId,
+  WorkflowCellsInputContainer,
+  WorkflowCellsOutputContainer,
+  WorkflowCellType,
+} from './api';
 import { WorkflowStore } from './state';
 
 //#region Dispatchers
@@ -18,6 +25,14 @@ export interface WorkflowManager {
     get: () => WeakMap<WeakKey, WorkflowUIItem>;
     remove: (elementId: string) => void;
     set: (elementId: string, element: WorkflowUIItem) => void;
+  };
+  workflow: {
+    cells: <T extends WorkflowCellType>(
+      type: T,
+    ) => T extends WorkflowCellInputId ? WorkflowCellsInputContainer : WorkflowCellsOutputContainer;
+    current: () => WorkflowAPIItem;
+    description: () => string;
+    title: () => string;
   };
 }
 //#endregion

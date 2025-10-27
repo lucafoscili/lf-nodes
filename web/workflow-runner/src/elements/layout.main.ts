@@ -1,9 +1,11 @@
 import { getLfFramework } from '@lf-widgets/framework';
-import { WorkflowSectionController } from '../types/section';
+import { WorkflowMainSections, WorkflowSectionController } from '../types/section';
 import { WorkflowStore } from '../types/state';
 import { DEBUG_MESSAGES } from '../utils/constants';
 import { debugLog } from '../utils/debug';
-import { createWorkflowSection } from './main.workflow';
+import { createInputsSection } from './main.inputs';
+import { createOutputsSection } from './main.outputs';
+import { createResultsSection } from './main.results';
 
 //#region CSS Classes
 const { theme } = getLfFramework();
@@ -16,7 +18,11 @@ export const MAIN_CLASSES = {
 export const createMainSection = (store: WorkflowStore): WorkflowSectionController => {
   //#region Local variables
   const { MAIN_DESTROYED, MAIN_MOUNTED, MAIN_UPDATED } = DEBUG_MESSAGES;
-  const WORKFLOW_SECTION = createWorkflowSection(store);
+  const DEFAULT_SCOPE: Set<WorkflowMainSections> = new Set(['inputs', 'outputs', 'results']);
+  const INPUTS = createInputsSection(store);
+  const OUTPUTS = createOutputsSection(store);
+  const RESULTS = createResultsSection(store);
+  let LAST_SCOPE: Set<WorkflowMainSections> = new Set(['inputs', 'outputs']);
   //#endregion
 
   //#region Destroy
@@ -29,7 +35,9 @@ export const createMainSection = (store: WorkflowStore): WorkflowSectionControll
       uiRegistry.remove(element);
     }
 
-    WORKFLOW_SECTION.destroy();
+    INPUTS.destroy();
+    OUTPUTS.destroy();
+    RESULTS.destroy();
 
     debugLog(MAIN_DESTROYED);
   };
@@ -51,24 +59,65 @@ export const createMainSection = (store: WorkflowStore): WorkflowSectionControll
     manager.getAppRoot().appendChild(_root);
     uiRegistry.set(MAIN_CLASSES._, _root);
 
-    WORKFLOW_SECTION.mount();
+    INPUTS.mount();
+    OUTPUTS.mount();
+    RESULTS.mount();
 
     debugLog(MAIN_MOUNTED);
   };
   //#endregion
 
   //#region Render
-  const render = () => {
+  const render = (scope: Set<WorkflowMainSections> = DEFAULT_SCOPE) => {
     const { manager } = store.getState();
     const { uiRegistry } = manager;
 
     const elements = uiRegistry.get();
-    if (!elements) {
+    if (!elements || !scope.size) {
       return;
     }
 
-    WORKFLOW_SECTION.render();
+    LAST_SCOPE.forEach((section) => {
+      if (!scope.has(section)) {
+        switch (section) {
+          case 'inputs':
+            INPUTS.destroy();
+            break;
+          case 'outputs':
+            OUTPUTS.destroy();
+            break;
+          case 'results':
+            RESULTS.destroy();
+            break;
+        }
+      }
+    });
 
+    scope.forEach((section) => {
+      switch (section) {
+        case 'inputs':
+          if (!LAST_SCOPE.has('inputs')) {
+            INPUTS.mount();
+          }
+          INPUTS.render();
+          break;
+        case 'outputs':
+          if (!LAST_SCOPE.has('outputs')) {
+            OUTPUTS.mount();
+          }
+          OUTPUTS.render();
+          break;
+        case 'results':
+          if (!LAST_SCOPE.has('results')) {
+            RESULTS.mount();
+          }
+          RESULTS.render();
+          break;
+      }
+    });
+
+    LAST_SCOPE.clear();
+    LAST_SCOPE = new Set(scope);
     debugLog(MAIN_UPDATED);
   };
   //#endregion

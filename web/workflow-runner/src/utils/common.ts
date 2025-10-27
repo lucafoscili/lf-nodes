@@ -1,6 +1,29 @@
-import { WorkflowAPIUploadPayload, WorkflowAPIUploadResponse } from '../types/api';
+import {
+  WorkflowAPIUploadPayload,
+  WorkflowAPIUploadResponse,
+  WorkflowCellOutputItem,
+  WorkflowCellsOutputContainer,
+  WorkflowNodeResults,
+} from '../types/api';
 
 //#region API
+export const deepMerge = (defs: WorkflowCellsOutputContainer, outs: WorkflowNodeResults) => {
+  const prep: WorkflowCellOutputItem[] = [];
+
+  for (const id in defs) {
+    const cell = defs[id];
+    const { nodeId } = cell;
+    const result = outs?.[nodeId]?.lf_output[0] || outs?.[nodeId]?.[0] || outs?.[nodeId];
+
+    const item: WorkflowCellOutputItem = {
+      ...JSON.parse(JSON.stringify(cell)),
+      ...JSON.parse(JSON.stringify(result || {})),
+    };
+    prep.push(item);
+  }
+
+  return prep;
+};
 export const isObject = (v: unknown): v is Record<string, unknown> =>
   v !== null && typeof v === 'object';
 export const isString = (v: unknown): v is string => typeof v === 'string';

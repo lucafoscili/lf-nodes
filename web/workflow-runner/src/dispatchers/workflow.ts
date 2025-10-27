@@ -1,4 +1,4 @@
-import { WORKFLOW_CLASSES } from '../elements/main.workflow';
+import { WORKFLOW_CLASSES } from '../elements/main.inputs';
 import { runWorkflow, uploadWorkflowFiles, WorkflowApiError } from '../services/workflow-service';
 import { WorkflowCellStatus, WorkflowUICells } from '../types/section';
 import { WorkflowStore } from '../types/state';
@@ -94,11 +94,8 @@ const _setCellStatus = (store: WorkflowStore, id: string, status: WorkflowCellSt
 export const workflowDispatcher = async (store: WorkflowStore) => {
   const { INPUTS_COLLECTED } = DEBUG_MESSAGES;
   const { NO_WORKFLOW_SELECTED } = NOTIFICATION_MESSAGES;
-  const {
-    ERROR_RUNNING_WORKFLOW,
-    RUNNING_DISPATCHING_WORKFLOW,
-    RUNNING_SUBMITTING_WORKFLOW,
-  } = STATUS_MESSAGES;
+  const { ERROR_RUNNING_WORKFLOW, RUNNING_DISPATCHING_WORKFLOW, RUNNING_SUBMITTING_WORKFLOW } =
+    STATUS_MESSAGES;
 
   const state = store.getState();
   const { current } = state;

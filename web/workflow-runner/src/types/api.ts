@@ -26,11 +26,11 @@ export interface WorkflowAPIItem extends WorkflowLFNode {
 }
 export interface WorkflowAPIInputs extends WorkflowLFNode {
   cells: WorkflowCellsInputContainer;
-  id: `${string}:inputs`;
+  id: `${string}:${WorkflowCellInputId}s`;
 }
 export interface WorkflowAPIOutputs extends WorkflowLFNode {
   cells: WorkflowCellsOutputContainer;
-  id: `${string}:outputs`;
+  id: `${string}:${WorkflowCellOutputId}s`;
 }
 export interface WorkflowAPIDataset {
   columns?: Array<LfDataColumn>;
@@ -46,6 +46,9 @@ export interface WorkflowCellBase {
   title?: string;
   value?: string;
 }
+export type WorkflowCellInputId = 'input';
+export type WorkflowCellOutputId = 'output';
+export type WorkflowCellType = WorkflowCellInputId | WorkflowCellOutputId;
 
 // Inputs
 export interface WorkflowCellInput extends WorkflowCellBase {

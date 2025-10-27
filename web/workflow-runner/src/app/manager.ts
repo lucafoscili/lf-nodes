@@ -7,9 +7,15 @@ import { createDrawerSection } from '../elements/layout.drawer';
 import { createHeaderSection } from '../elements/layout.header';
 import { createMainSection } from '../elements/layout.main';
 import { createNotificationsSection } from '../elements/layout.notifications';
-import { WORKFLOW_CLASSES } from '../elements/main.workflow';
+import { WORKFLOW_CLASSES } from '../elements/main.inputs';
 import { fetchWorkflowDefinitions, getRunStatus } from '../services/workflow-service';
-import { WorkflowRunStatusResponse } from '../types/api';
+import {
+  WorkflowCellInputId,
+  WorkflowCellsInputContainer,
+  WorkflowCellsOutputContainer,
+  WorkflowCellType,
+  WorkflowRunStatusResponse,
+} from '../types/api';
 import { WorkflowDispatchers, WorkflowManager, WorkflowUIItem } from '../types/manager';
 import { WorkflowCellStatus, WorkflowSectionController, WorkflowUICells } from '../types/section';
 import { WorkflowStore } from '../types/state';
@@ -458,6 +464,32 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
       const elements = this.#UI_REGISTRY.get(this) || {};
       elements[elementId] = element;
       this.#UI_REGISTRY.set(this, elements);
+    },
+  };
+  //#endregion
+
+  //#region Workflow
+  workflow = {
+    cells: <T extends WorkflowCellType>(type: T) => {
+      const workflow = this.workflow.current();
+      const section = workflow?.children?.find((child) => child.id.endsWith(`:${type}s`));
+      return (section?.cells || {}) as T extends WorkflowCellInputId
+        ? WorkflowCellsInputContainer
+        : WorkflowCellsOutputContainer;
+    },
+    current: () => {
+      const { current, workflows } = this.#STORE.getState();
+      return workflows?.nodes?.find((node) => node.id === current.id) || null;
+    },
+    description: () => {
+      const workflow = this.workflow.current();
+      return workflow?.description || '';
+    },
+    title: () => {
+      const workflow = this.workflow.current();
+      const str =
+        typeof workflow?.value === 'string' ? workflow.value : String(workflow?.value || '');
+      return str || 'No workflow selected';
     },
   };
   //#endregion

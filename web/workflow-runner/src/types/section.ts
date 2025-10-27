@@ -1,9 +1,5 @@
 //#region Workflow
-export type UnescapeJSONPayload = {
-  validJson: boolean;
-  parsedJson?: {};
-  unescapedStr: string;
-};
+export type WorkflowMainSections = 'inputs' | 'outputs' | 'results';
 export type WorkflowUICell =
   | HTMLLfButtonElement
   | HTMLLfTextfieldElement
