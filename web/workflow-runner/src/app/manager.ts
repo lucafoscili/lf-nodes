@@ -29,10 +29,10 @@ import { NOTIFICATION_MESSAGES, STATUS_MESSAGES } from '../utils/constants';
 import { createPollingController } from './polling';
 import { createRoutingController } from './routing';
 import { createRunLifecycle } from './runs';
-import { sectionsForView } from './sections';
+import { resolveMainSections } from './sections';
 import { initState } from './state';
 import { createWorkflowRunnerStore } from './store';
-import { selectRun } from './store-actions';
+import { changeView, selectRun } from './store-actions';
 
 export class LfWorkflowRunnerManager implements WorkflowManager {
   //#region Initialization
@@ -288,8 +288,8 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
                   }
                   break;
                 case 'main':
-                  const views = sectionsForView(state.view);
-                  section.render(views);
+                  const mainSections = resolveMainSections(state);
+                  section.render(mainSections);
                   break;
                 default:
                   section.render();
@@ -328,7 +328,14 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
       return runs.find((run) => run.runId === runId) || null;
     },
     select: (runId: string | null, nextView?: WorkflowView) => {
-      selectRun(this.#STORE, runId, nextView);
+      if (!nextView) {
+        selectRun(this.#STORE, runId);
+        return;
+      }
+
+      changeView(this.#STORE, nextView, {
+        runId: nextView === 'run' ? runId : null,
+      });
     },
     selected: (): WorkflowRunEntry | null => {
       const { runs, selectedRunId } = this.#STORE.getState();

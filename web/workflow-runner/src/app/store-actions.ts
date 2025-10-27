@@ -26,7 +26,6 @@ export const setResults = (store: WorkflowStore, results: WorkflowNodeResults | 
 export const selectRun = (
   store: WorkflowStore,
   runId: string | null,
-  nextView?: WorkflowView,
   options?: { clearResults?: boolean },
 ) => {
   const state = store.getState();
@@ -36,12 +35,41 @@ export const selectRun = (
   if (shouldClearResults) {
     state.mutate.results(null);
   }
+};
 
-  if (nextView) {
-    state.mutate.view(nextView);
-  } else {
-    state.mutate.view(runId ? 'run' : 'workflow');
+export const setView = (store: WorkflowStore, view: WorkflowView) => {
+  const state = store.getState();
+  if (state.view !== view) {
+    state.mutate.view(view);
   }
+};
+
+export interface ChangeViewOptions {
+  runId?: string | null;
+  clearResults?: boolean;
+}
+
+export const changeView = (
+  store: WorkflowStore,
+  view: WorkflowView,
+  options: ChangeViewOptions = {},
+) => {
+  const runId = options.runId ?? null;
+  const clearResults = options.clearResults;
+
+  if (view === 'run') {
+    if (runId) {
+      selectRun(store, runId, { clearResults: clearResults ?? false });
+      setView(store, 'run');
+      return;
+    }
+    selectRun(store, null, { clearResults });
+    setView(store, 'workflow');
+    return;
+  }
+
+  selectRun(store, null, { clearResults });
+  setView(store, view);
 };
 //#endregion
 

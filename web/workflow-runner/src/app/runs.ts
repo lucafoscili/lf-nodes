@@ -1,13 +1,7 @@
 import { WorkflowNodeResults, WorkflowRunStatus, WorkflowRunStatusResponse } from '../types/api';
 import { CreateRunLifecycleOptions, RunLifecycleController } from '../types/manager';
 import { NOTIFICATION_MESSAGES, STATUS_MESSAGES } from '../utils/constants';
-import {
-  addNotification,
-  setResults,
-  setRunInFlight,
-  setStatus,
-  upsertRun,
-} from './store-actions';
+import { addNotification, setResults, setRunInFlight, setStatus, upsertRun } from './store-actions';
 
 //#region Helpers
 const _coerceTimestamp = (value: number | null | undefined, fallback: number) => {
@@ -51,7 +45,6 @@ export const createRunLifecycle = ({
 
   //#region Success
   const handleRunSuccess = (response: WorkflowRunStatusResponse) => {
-    const state = store.getState();
     const runId = response.run_id;
     const outputs = _extractRunOutputs(response);
     const now = Date.now();
@@ -67,9 +60,7 @@ export const createRunLifecycle = ({
       resultPayload: response.result ?? null,
     });
 
-    if (state.selectedRunId === runId) {
-      setResults(store, outputs);
-    }
+    setResults(store, outputs);
 
     addNotification(store, {
       id: performance.now().toString(),
@@ -83,7 +74,6 @@ export const createRunLifecycle = ({
 
   //#region Cancellation
   const handleRunFailure = (response: WorkflowRunStatusResponse) => {
-    const state = store.getState();
     const payload = response.result?.body?.payload;
     const runId = response.run_id;
     const detail =
@@ -93,6 +83,7 @@ export const createRunLifecycle = ({
       STATUS_MESSAGES.ERROR_RUNNING_WORKFLOW;
     const outputs = _extractRunOutputs(response);
     const now = Date.now();
+    const hasInputError = Boolean(payload?.error?.input);
 
     upsertRun(store, {
       runId,
@@ -105,12 +96,12 @@ export const createRunLifecycle = ({
       resultPayload: response.result ?? null,
     });
 
-    if (state.selectedRunId === runId) {
+    if (hasInputError) {
+      if (payload?.error?.input) {
+        setInputStatus?.(payload.error.input, 'error');
+      }
+    } else {
       setResults(store, outputs);
-    }
-
-    if (payload?.error?.input) {
-      setInputStatus?.(payload.error.input, 'error');
     }
 
     addNotification(store, {
@@ -125,7 +116,6 @@ export const createRunLifecycle = ({
 
   //#region Cancellation
   const handleRunCancellation = (response: WorkflowRunStatusResponse) => {
-    const state = store.getState();
     const runId = response.run_id;
     const outputs = _extractRunOutputs(response);
     const message = response.error || WORKFLOW_CANCELLED;
@@ -142,9 +132,7 @@ export const createRunLifecycle = ({
       resultPayload: response.result ?? null,
     });
 
-    if (state.selectedRunId === runId) {
-      setResults(store, outputs);
-    }
+    setResults(store, outputs);
 
     addNotification(store, {
       id: performance.now().toString(),

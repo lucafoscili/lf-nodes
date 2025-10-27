@@ -1,5 +1,5 @@
 import { getLfFramework } from '@lf-widgets/framework';
-import { HOME_PLACEHOLDER, sectionsForView } from '../app/sections';
+import { HOME_PLACEHOLDER, resolveMainSections } from '../app/sections';
 import { WorkflowMainSections, WorkflowSectionController } from '../types/section';
 import { WorkflowStore } from '../types/state';
 import { DEBUG_MESSAGES } from '../utils/constants';
@@ -61,10 +61,6 @@ export const createMainSection = (store: WorkflowStore): WorkflowSectionControll
     manager.getAppRoot().appendChild(_root);
     uiRegistry.set(MAIN_CLASSES._, _root);
 
-    INPUTS.mount();
-    OUTPUTS.mount();
-    RESULTS.mount();
-
     debugLog(MAIN_MOUNTED);
   };
   //#endregion
@@ -76,7 +72,7 @@ export const createMainSection = (store: WorkflowStore): WorkflowSectionControll
     const { manager } = state;
     const { uiRegistry } = manager;
 
-    const resolvedSections = scope ?? sectionsForView(state.view);
+    const resolvedSections = scope ?? resolveMainSections(state);
     const scopeSet = new Set<WorkflowMainSections>(resolvedSections);
 
     const elements = uiRegistry.get();

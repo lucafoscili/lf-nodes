@@ -52,7 +52,7 @@ const _handleUploadCell = async (store: WorkflowStore, rawValue: unknown) => {
 
   const files = Array.isArray(rawValue) ? rawValue : (rawValue as File[] | undefined);
   if (!files || files.length === 0) {
-    return [];
+    throw new Error('No files selected for upload.');
   }
 
   try {
@@ -163,7 +163,6 @@ export const workflowDispatcher = async (store: WorkflowStore) => {
       workflowId: id,
       workflowName,
     });
-    state.manager?.runs.select(runId, 'run');
     setRunInFlight(store, runId);
   } catch (error) {
     setStatus(store, 'error', ERROR_RUNNING_WORKFLOW);

@@ -1,12 +1,36 @@
 import { CreateRoutingControllerOptions, RoutingController } from '../types/manager';
-import { WorkflowRoute } from '../types/state';
+import { WorkflowRoute, WorkflowState, WorkflowView } from '../types/state';
 import {
   parseRouteFromLocation,
   replaceRouteInHistory,
   routesEqual,
   subscribeToRouteChanges,
 } from './router';
-import { selectRun } from './store-actions';
+import { changeView } from './store-actions';
+
+type RouteBuilder = (state: WorkflowState) => WorkflowRoute;
+
+const ROUTE_BUILDERS: Record<WorkflowView, RouteBuilder> = {
+  home: () => ({ view: 'home' }),
+  history: (state) => {
+    const workflowId = state.current.id ?? undefined;
+    return workflowId ? { view: 'history', workflowId } : { view: 'history' };
+  },
+  run: (state) => {
+    const workflowId = state.current.id ?? undefined;
+    const runId = state.selectedRunId ?? undefined;
+    if (runId) {
+      return { view: 'run', runId, workflowId };
+    }
+    return workflowId ? { view: 'workflow', workflowId } : { view: 'workflow' };
+  },
+  workflow: (state) => {
+    const workflowId = state.current.id ?? undefined;
+    return workflowId ? { view: 'workflow', workflowId } : { view: 'workflow' };
+  },
+};
+
+const DEFAULT_ROUTE_BUILDER = ROUTE_BUILDERS.workflow;
 
 //#region Routing Controller
 export const createRoutingController = ({
@@ -30,22 +54,8 @@ export const createRoutingController = ({
 
   const computeRouteFromState = (): WorkflowRoute => {
     const state = store.getState();
-    const workflowId = state.current.id ?? undefined;
-
-    switch (state.view) {
-      case 'home':
-        return { view: 'home' };
-      case 'history':
-        return { view: 'history', workflowId };
-      case 'run':
-        if (state.selectedRunId) {
-          return { view: 'run', runId: state.selectedRunId, workflowId };
-        }
-        return workflowId ? { view: 'workflow', workflowId } : { view: 'workflow' };
-      case 'workflow':
-      default:
-        return workflowId ? { view: 'workflow', workflowId } : { view: 'workflow' };
-    }
+    const builder = ROUTE_BUILDERS[state.view] ?? DEFAULT_ROUTE_BUILDER;
+    return builder(state);
   };
   //#endregion
 
@@ -80,24 +90,19 @@ export const createRoutingController = ({
         workflowId = state.current.id ?? null;
       }
 
-      switch (route.view) {
-        case 'home':
-          selectRun(store, null, 'home');
-          break;
-        case 'history':
-          selectRun(store, null, 'history');
-          break;
-        case 'run':
-          if (route.runId) {
-            selectRun(store, route.runId, 'run', { clearResults: false });
-          } else {
-            selectRun(store, null, 'workflow');
-          }
-          break;
-        case 'workflow':
-        default:
-          selectRun(store, null, 'workflow');
-          break;
+      const normalizedRoute: WorkflowRoute = {
+        view: route.view,
+        workflowId: workflowId ?? undefined,
+        runId: route.runId ?? undefined,
+      };
+
+      if (normalizedRoute.view === 'run') {
+        changeView(store, 'run', {
+          runId: normalizedRoute.runId ?? null,
+          clearResults: false,
+        });
+      } else {
+        changeView(store, normalizedRoute.view);
       }
     } finally {
       isApplyingRoute = false;
@@ -151,3 +156,6 @@ export const createRoutingController = ({
   };
 };
 //#endregion
+
+
+
