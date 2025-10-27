@@ -29,7 +29,7 @@ export const countBarChartFactory: CountBarChartFactory = {
         const { card, datasets } = STATE.get(wrapper);
 
         const callback: CountBarChartNormalizeCallback = (_, u) => {
-          const json = u.parsedJson as CountBarChartDeserializedValue;
+          const json = u.parsedJSON as CountBarChartDeserializedValue;
           datasets.chart = json.chart || {};
           datasets.chip = json.chip || {};
           card.lfDataset = {

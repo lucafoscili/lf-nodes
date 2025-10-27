@@ -11,7 +11,7 @@ import { LogSeverity, TooltipUploadCallback } from '../types/manager/manager';
 import { Card, CardDeserializedValue, CardState } from '../types/widgets/card';
 import { CardsWithChip, CardsWithChipState } from '../types/widgets/cardsWithChip';
 import { CustomWidgetName, TagName } from '../types/widgets/widgets';
-import { getApiRoutes, getCustomWidget, getLfManager, unescapeJson } from '../utils/common';
+import { getApiRoutes, getCustomWidget, getLfManager } from '../utils/common';
 
 export const CARD_PROPS_TO_SERIALIZE = ['lfDataset'];
 
@@ -202,6 +202,7 @@ const onResponse = async (
 
 //#region prepCards
 export const prepCards = (container: HTMLDivElement, propsArray: Partial<HTMLLfCardElement>[]) => {
+  const { syntax } = getLfManager().getManagers().lfFramework;
   let count = 0;
 
   const cards = container.querySelectorAll('lf-card');
@@ -219,7 +220,7 @@ export const prepCards = (container: HTMLDivElement, propsArray: Partial<HTMLLfC
           if ((key as keyof HTMLLfCardElement) === 'lfDataset') {
             try {
               if (typeof prop === 'string') {
-                card.lfDataset = unescapeJson(prop).parsedJson;
+                card.lfDataset = syntax.json.unescape(prop).parsedJSON;
               } else {
                 card.lfDataset = prop;
               }

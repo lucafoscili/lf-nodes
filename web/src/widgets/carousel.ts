@@ -25,7 +25,7 @@ export const carouselFactory: CarouselFactory = {
         const { carousel } = STATE.get(wrapper);
 
         const callback: CarouselNormalizeCallback = (_, u) => {
-          const dataset = u.parsedJson as CarouselDeserializedValue;
+          const dataset = u.parsedJSON as CarouselDeserializedValue;
           carousel.lfDataset = dataset || {};
         };
 

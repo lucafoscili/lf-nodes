@@ -26,7 +26,7 @@ export const codeFactory: CodeFactory = {
         const callback: CodeNormalizeCallback = (v, u) => {
           switch (code.lfLanguage) {
             case 'json':
-              code.lfValue = u.unescapedStr || '{}';
+              code.lfValue = u.unescapedString || '{}';
               break;
             default:
               code.lfValue = typeof v === 'string' ? v : '';

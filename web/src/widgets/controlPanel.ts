@@ -31,7 +31,7 @@ export const controlPanelFactory: ControlPanelFactory = {
       setValue(value) {
         const callback: ControlPanelNormalizeCallback = (_, u) => {
           const { backup, backupRetention, debug, systemTimeout, themes } =
-            u.parsedJson as ControlPanelDeserializedValue;
+            u.parsedJSON as ControlPanelDeserializedValue;
 
           if (backup === true || backup === false) {
             getLfManager().toggleBackup(backup);

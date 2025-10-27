@@ -30,7 +30,7 @@ export const cardsWithChipFactory: CardsWithChipFactory = {
         const { chip, grid } = STATE.get(wrapper);
 
         const callback: CardsWithChipNormalizeCallback = (v, u) => {
-          const dataset = u.parsedJson as CardsWithChipDeserializedValue;
+          const dataset = u.parsedJSON as unknown as CardsWithChipDeserializedValue;
           const cardsCount = prepCards(grid, dataset.props);
           if (!cardsCount || !v) {
             return;

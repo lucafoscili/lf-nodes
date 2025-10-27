@@ -29,7 +29,7 @@ export const progressbarFactory: ProgressbarFactory = {
         const { node, progressbar } = STATE.get(wrapper);
 
         const callback: ProgressbarNormalizeCallback = (_, u) => {
-          const { bool, roll } = u.parsedJson as ProgressbarDeserializedValue;
+          const { bool, roll } = u.parsedJSON as ProgressbarDeserializedValue;
 
           const isFalse = !!(bool === false);
           const isTrue = !!(bool === true);

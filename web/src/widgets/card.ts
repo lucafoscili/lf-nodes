@@ -29,7 +29,7 @@ export const cardFactory: CardFactory = {
         const { grid } = STATE.get(wrapper);
 
         const callback: CardNormalizeCallback = (_, u) => {
-          const { props } = u.parsedJson as CardDeserializedValue;
+          const { props } = u.parsedJSON as unknown as CardDeserializedValue;
           const len = props?.length > 1 ? 2 : 1;
           grid.style.setProperty('--card-grid', `repeat(1, 1fr) / repeat(${len}, 1fr)`);
           prepCards(grid, props);

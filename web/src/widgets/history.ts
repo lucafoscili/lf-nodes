@@ -27,7 +27,7 @@ export const historyFactory: HistoryFactory = {
         const { list } = STATE.get(wrapper);
 
         const callback: HistoryNormalizeCallback = (_, u) => {
-          list.lfDataset = (u.parsedJson as LfDataDataset) || {};
+          list.lfDataset = (u.parsedJSON as LfDataDataset) || {};
         };
 
         normalizeValue(value, callback, CustomWidgetName.history);

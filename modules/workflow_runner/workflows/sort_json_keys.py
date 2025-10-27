@@ -19,13 +19,14 @@ def _configure(prompt: Dict[str, Any], inputs: Dict[str, Any]) -> None:
                 raise InputValidationError(name)
             if not isinstance(json_input, str):
                 raise InputValidationError(name)
-            if isinstance(json_input, str):
-                parsed_json = convert_to_json(json_input)
-            elif isinstance(json_input, dict):
-                parsed_json = json_input
-            else:
+            parsed_json = convert_to_json(json_input)
+            if parsed_json is None:
                 raise InputValidationError(name)
-            inputs_map["json_input"] = parsed_json
+            # Comfy treats bare lists as links, so lists must be wrapped.
+            if isinstance(parsed_json, list):
+                inputs_map["json_input"] = {"__value__": parsed_json}
+            else:
+                inputs_map["json_input"] = parsed_json
 
         if node_id == "1":  # Sort ascending
             name = "ascending"

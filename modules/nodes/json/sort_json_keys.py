@@ -43,18 +43,31 @@ class LF_SortJSONKeys:
     RETURN_TYPES = (Input.JSON,)
 
     def on_exec(self, **kwargs: dict):
-        json_input: dict = normalize_json_input(kwargs.get("json_input"))
+        json_input = normalize_json_input(kwargs.get("json_input"))
         mutate_source: bool = normalize_list_to_value(kwargs.get("mutate_source"))
         ascending: bool = normalize_list_to_value(kwargs.get("ascending"))
 
-        if mutate_source:
-            items = {key: json_input[key] for key in json_input}
-            json_input.clear()
-            for key in sorted(items.keys(), reverse=not ascending):
-                json_input[key] = items[key]
+        is_wrapped_single_dict = (
+            isinstance(json_input, list)
+            and len(json_input) == 1
+            and isinstance(json_input[0], dict)
+        )
+
+        target = json_input[0] if is_wrapped_single_dict else json_input
+
+        if not isinstance(target, dict):
             sorted_json = json_input
+        elif mutate_source:
+            items = {key: target[key] for key in target}
+            target.clear()
+            for key in sorted(items.keys(), reverse=not ascending):
+                target[key] = items[key]
+            sorted_json = json_input if is_wrapped_single_dict else target
         else:
-            sorted_json = {k: json_input[k] for k in sorted(json_input.keys(), reverse=not ascending)}
+            sorted_target = {
+                key: target[key] for key in sorted(target.keys(), reverse=not ascending)
+            }
+            sorted_json = [sorted_target] if is_wrapped_single_dict else sorted_target
 
         PromptServer.instance.send_sync(f"{EVENT_PREFIX}sortjsonkeys", {
             "node": kwargs.get("node_id"),

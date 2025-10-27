@@ -25,7 +25,7 @@ export const treeFactory: TreeFactory = {
         const { tree } = STATE.get(wrapper);
 
         const callback: TreeNormalizeCallback = (_, u) => {
-          tree.lfDataset = (u.parsedJson as TreeDeserializedValue) || {};
+          tree.lfDataset = (u.parsedJSON as TreeDeserializedValue) || {};
         };
 
         normalizeValue(value, callback, CustomWidgetName.tree);

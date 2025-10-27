@@ -34,7 +34,7 @@ export const messengerFactory: MessengerFactory = {
         const { messenger, placeholder } = elements;
 
         const callback: MessengerNormalizeCallback = (_, u) => {
-          const { config, dataset } = u.parsedJson as MessengerDeserializedValue;
+          const { config, dataset } = u.parsedJSON as MessengerDeserializedValue;
           messenger.lfDataset = dataset;
 
           if (isValidObject(config)) {
