@@ -1337,10 +1337,12 @@ const createHeaderSection = (store) => {
       appMessage.dataset.visible = "true";
     }
     if (queuedJobs < 0) {
+      counter.innerText = "";
       light.lfIcon = alertTriangle;
       light.lfUiState = "danger";
       light.title = "Server disconnected";
     } else if (queuedJobs === 0) {
+      counter.innerText = "";
       light.lfIcon = check;
       light.lfUiState = "success";
       light.title = "Server idle";
@@ -1719,19 +1721,21 @@ _LfWorkflowRunnerManager_APP_ROOT = /* @__PURE__ */ new WeakMap(), _LfWorkflowRu
       if (!resp.ok) {
         throw new Error("Failed to fetch queue status");
       }
+      const state = __classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f").getState();
       const { queue_running, queue_pending } = await resp.json();
       const qPending = parseCount(queue_pending);
       const qRunning = parseCount(queue_running);
       const busy = qPending + qRunning;
-      const prev = __classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f").getState().queuedJobs ?? -1;
+      const prev = state.queuedJobs ?? -1;
       if (busy !== prev) {
-        __classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f").getState().mutate.queuedJobs(busy);
+        state.mutate.queuedJobs(busy);
       }
     } catch (e) {
+      const state = __classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f").getState();
       try {
-        const prev = __classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f").getState().queuedJobs ?? -1;
+        const prev = state.queuedJobs ?? -1;
         if (prev !== -1) {
-          __classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f").getState().mutate.queuedJobs(-1);
+          state.mutate.queuedJobs(-1);
         }
       } catch (err) {
       }
