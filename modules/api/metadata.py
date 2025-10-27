@@ -1,12 +1,11 @@
 import base64
 import json
 import os
+import asyncio
 import aiohttp
-import imghdr
-
-from aiohttp import web
+from aiohttp import web, ClientError
 from folder_paths import get_full_path
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 from io import BytesIO
 
 from ..utils.constants import API_ROUTE_PREFIX, BASE64_PNG_PREFIX
@@ -92,18 +91,28 @@ async def save_model_info(request):
                             resp.raise_for_status()
                             data = await resp.read()
 
-                    if imghdr.what(None, data) is None:
+                    try:
+                        with Image.open(BytesIO(data)) as probe:
+                            probe.verify()
+                    except (UnidentifiedImageError, OSError):
                         metadata_json["nodes"][0]["cells"]["lfImage"]["value"] = None
                     else:
-                        img = Image.open(BytesIO(data)).convert("RGB")
-                        img.thumbnail((1024, 1024), Image.LANCZOS)
+                        try:
+                            img = Image.open(BytesIO(data)).convert("RGB")
+                            img.thumbnail((1024, 1024), Image.LANCZOS)
 
-                        buf = BytesIO()
-                        img.save(buf, format="JPEG", quality=85)
-                        b64 = base64.b64encode(buf.getvalue()).decode("utf-8")
-                        metadata_json["nodes"][0]["cells"]["lfImage"]["value"] = f"{BASE64_PNG_PREFIX}{b64}"
+                            buf = BytesIO()
+                            img.save(buf, format="JPEG", quality=85)
+                            b64 = base64.b64encode(buf.getvalue()).decode("utf-8")
+                            metadata_json["nodes"][0]["cells"]["lfImage"]["value"] = f"{BASE64_PNG_PREFIX}{b64}"
+                        except (UnidentifiedImageError, OSError) as processing_error:
+                            metadata_json["nodes"][0]["cells"]["lfImage"]["value"] = None
+                        except Exception as processing_error:
+                            return web.Response(status=500, text=f"Error processing media: {processing_error}")
+            except (ClientError, asyncio.TimeoutError) as network_error:
+                metadata_json["nodes"][0]["cells"]["lfImage"]["value"] = None
             except Exception as e:
-                return web.Response(status=500, text=f"Error fetching or processing media: {e}")
+                return web.Response(status=500, text=f"Unexpected error while fetching media: {e}")
 
         with open(info_file_path, "w") as info_file:
             json.dump(metadata_json, info_file, indent=4)
