@@ -1,7 +1,8 @@
 import { DEFAULT_STATUS_MESSAGES } from '../config';
-import { WorkflowAPIDataset, WorkflowNodeResults } from '../types/api';
+import { WorkflowAPIDataset, WorkflowNodeResults, WorkflowRunStatus } from '../types/api';
 import { WorkflowManager } from '../types/manager';
 import {
+  WorkflowRunEntryUpdate,
   WorkflowState,
   WorkflowStateListener,
   WorkflowStateNotification,
@@ -95,15 +96,70 @@ export const createWorkflowRunnerStore = (initialState: WorkflowState): Workflow
       applyMutation((draft) => {
         draft.queuedJobs = count;
       }),
-    runId: (runId: string | null) =>
-      applyMutation((draft) => {
-        draft.currentRunId = runId;
-      }),
-    status: (status: WorkflowStatus, message?: string) => setStatus(status, message, setState),
     results: (results: WorkflowNodeResults | null) =>
       applyMutation((draft) => {
         draft.results = results;
       }),
+    runId: (runId: string | null) =>
+      applyMutation((draft) => {
+        draft.currentRunId = runId;
+      }),
+    runs: {
+      clear: () =>
+        applyMutation((draft) => {
+          draft.runs = [];
+        }),
+      upsert: (entry: WorkflowRunEntryUpdate) =>
+        applyMutation((draft) => {
+          const now = entry.updatedAt ?? Date.now();
+          const existingIndex = draft.runs.findIndex((run) => run.runId === entry.runId);
+
+          if (existingIndex >= 0) {
+            const current = draft.runs[existingIndex];
+            const createdAt = entry.createdAt ?? current.createdAt;
+            draft.runs[existingIndex] = {
+              ...current,
+              ...entry,
+              createdAt,
+              updatedAt: now,
+              status: entry.status ?? current.status,
+              workflowId: entry.workflowId ?? current.workflowId,
+              workflowName: entry.workflowName ?? current.workflowName,
+              inputs: entry.inputs ?? current.inputs,
+              outputs: entry.outputs ?? current.outputs,
+              error: entry.error ?? current.error ?? null,
+              httpStatus:
+                entry.httpStatus !== undefined ? entry.httpStatus : current.httpStatus,
+              resultPayload:
+                entry.resultPayload !== undefined ? entry.resultPayload : current.resultPayload,
+            };
+          } else {
+            const createdAt = entry.createdAt ?? now;
+            draft.runs = [
+              {
+                runId: entry.runId,
+                createdAt,
+                updatedAt: now,
+                status: (entry.status ?? 'pending') as WorkflowRunStatus,
+                workflowId: entry.workflowId ?? null,
+                workflowName: entry.workflowName ?? 'Unnamed workflow',
+                inputs: entry.inputs ?? {},
+                outputs: entry.outputs ?? null,
+                error: entry.error ?? null,
+                httpStatus: entry.httpStatus ?? null,
+                resultPayload:
+                  entry.resultPayload === undefined ? null : entry.resultPayload ?? null,
+              },
+              ...draft.runs.filter((run) => run.runId !== entry.runId),
+            ];
+          }
+        }),
+    },
+    selectRun: (runId: string | null) =>
+      applyMutation((draft) => {
+        draft.selectedRunId = runId;
+      }),
+    status: (status: WorkflowStatus, message?: string) => setStatus(status, message, setState),
     workflow: (workflowId: string) => setWorkflow(workflowId, setState),
     workflows: (workflows: WorkflowAPIDataset) =>
       applyMutation((draft) => {

@@ -5,7 +5,7 @@ import {
   WorkflowCellsOutputContainer,
   WorkflowCellType,
 } from './api';
-import { WorkflowStore } from './state';
+import { WorkflowRunEntry, WorkflowStore } from './state';
 
 //#region Dispatchers
 export type WorkflowDispatcher = () => Promise<void>;
@@ -25,6 +25,12 @@ export interface WorkflowManager {
     get: () => WeakMap<WeakKey, WorkflowUIItem>;
     remove: (elementId: string) => void;
     set: (elementId: string, element: WorkflowUIItem) => void;
+  };
+  runs: {
+    all: () => WorkflowRunEntry[];
+    get: (runId: string) => WorkflowRunEntry | null;
+    select: (runId: string | null) => void;
+    selected: () => WorkflowRunEntry | null;
   };
   workflow: {
     cells: <T extends WorkflowCellType>(

@@ -15,6 +15,7 @@ export const initState = (): WorkflowState => ({
   manager: null,
   pollingTimer: null,
   queuedJobs: -1,
+  runs: [],
   mutate: {
     isDebug: INIT_CB,
     manager: INIT_CB,
@@ -26,13 +27,19 @@ export const initState = (): WorkflowState => ({
     },
     pollingTimer: INIT_CB,
     results: INIT_CB,
+    runs: {
+      clear: INIT_CB,
+      upsert: INIT_CB,
+    },
     runId: INIT_CB,
+    selectRun: INIT_CB,
     status: INIT_CB,
     workflow: INIT_CB,
     workflows: INIT_CB,
   },
   notifications: [],
   results: null,
+  selectedRunId: null,
   workflows: {
     nodes: [],
   },

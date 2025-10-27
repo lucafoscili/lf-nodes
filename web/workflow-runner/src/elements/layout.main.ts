@@ -69,10 +69,16 @@ export const createMainSection = (store: WorkflowStore): WorkflowSectionControll
 
   //#region Render
   const render = (scope = [...DEFAULT_SCOPE]) => {
+    const snapshot = store.getState();
+    const sections = [...scope];
+    if ((snapshot.selectedRunId || snapshot.results) && !sections.includes('results')) {
+      sections.push('results');
+    }
+
     const { manager } = store.getState();
     const { uiRegistry } = manager;
 
-    const scopeSet = new Set<WorkflowMainSections>(scope as WorkflowMainSections[]);
+    const scopeSet = new Set<WorkflowMainSections>(sections as WorkflowMainSections[]);
 
     const elements = uiRegistry.get();
     if (!elements || !scopeSet.size) {

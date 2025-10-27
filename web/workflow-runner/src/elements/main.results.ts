@@ -13,6 +13,7 @@ const ROOT_CLASS = 'results-section';
 export const WORKFLOW_CLASSES = {
   _: theme.bemClass(ROOT_CLASS),
   description: theme.bemClass(ROOT_CLASS, 'description'),
+  empty: theme.bemClass(ROOT_CLASS, 'empty'),
   grid: theme.bemClass(ROOT_CLASS, 'grid'),
   h3: theme.bemClass(ROOT_CLASS, 'title-h3'),
   item: theme.bemClass(ROOT_CLASS, 'item'),
@@ -45,6 +46,15 @@ const _title = () => {
   title.appendChild(h3);
 
   return { h3, title };
+};
+const _formatStatus = (status: string) =>
+  status.charAt(0).toUpperCase() + status.slice(1);
+const _formatTimestamp = (timestamp: number) => {
+  const date = new Date(timestamp);
+  if (Number.isNaN(date.getTime())) {
+    return 'Unknown time';
+  }
+  return date.toLocaleString();
 };
 //#endregion
 
@@ -115,21 +125,35 @@ export const createResultsSection = (store: WorkflowStore): WorkflowSectionContr
     const descr = elements[WORKFLOW_CLASSES.description] as HTMLElement;
     const element = elements[WORKFLOW_CLASSES.results] as HTMLElement;
     const h3 = elements[WORKFLOW_CLASSES.h3] as HTMLElement;
-    descr.textContent = manager.workflow.description();
-    h3.textContent = manager.workflow.title();
+    const selectedRun = manager.runs.selected();
+    const titleText = selectedRun?.workflowName || manager.workflow.title();
+    const descriptionText = selectedRun
+      ? `Run ${selectedRun.runId.slice(0, 8)} • ${_formatStatus(selectedRun.status)} • ${_formatTimestamp(
+          selectedRun.updatedAt || selectedRun.createdAt,
+        )}`
+      : manager.workflow.description();
 
-    const outputs = state.results || {};
+    descr.textContent = descriptionText;
+    h3.textContent = titleText;
+
+    const outputs = state.results ?? selectedRun?.outputs ?? null;
     clearChildren(element);
 
-    const nodeIds = Object.keys(outputs);
+    const nodeIds = outputs ? Object.keys(outputs) : [];
     if (nodeIds.length === 0) {
+      const empty = document.createElement('p');
+      empty.className = WORKFLOW_CLASSES.empty;
+      empty.textContent = selectedRun
+        ? 'This run has not produced any outputs yet.'
+        : 'Select a run to inspect its outputs.';
+      element.appendChild(empty);
       return;
     }
 
     const workflow = manager.workflow.current();
     const outputsDefs = workflow ? manager.workflow.cells('output') : {};
 
-    const prepOutputs = deepMerge(outputsDefs, outputs);
+    const prepOutputs = deepMerge(outputsDefs, outputs || {});
 
     for (let i = 0; i < prepOutputs.length; i++) {
       const output = prepOutputs[i];

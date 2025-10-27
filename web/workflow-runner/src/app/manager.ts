@@ -14,11 +14,12 @@ import {
   WorkflowCellsInputContainer,
   WorkflowCellsOutputContainer,
   WorkflowCellType,
+  WorkflowRunStatus,
   WorkflowRunStatusResponse,
 } from '../types/api';
 import { WorkflowDispatchers, WorkflowManager, WorkflowUIItem } from '../types/manager';
 import { WorkflowCellStatus, WorkflowSectionController, WorkflowUICells } from '../types/section';
-import { WorkflowStore } from '../types/state';
+import { WorkflowRunEntry, WorkflowStore } from '../types/state';
 import { parseCount } from '../utils/common';
 import { NOTIFICATION_MESSAGES, STATUS_MESSAGES } from '../utils/constants';
 import { initState } from './state';
@@ -210,6 +211,25 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
       state.mutate.pollingTimer(null);
     }
   }
+  #coerceTimestamp(value: number | null | undefined, fallback: number) {
+    if (typeof value === 'number' && Number.isFinite(value)) {
+      return value > 1e12 ? Math.round(value) : Math.round(value * 1000);
+    }
+    return fallback;
+  }
+  #updateRunProgress(response: WorkflowRunStatusResponse) {
+    const state = this.#STORE.getState();
+    const now = Date.now();
+    state.mutate.runs.upsert({
+      runId: response.run_id,
+      createdAt: this.#coerceTimestamp(response.created_at, now),
+      updatedAt: now,
+      status: response.status,
+      error: response.error ?? null,
+      httpStatus: response.result?.http_status ?? null,
+      resultPayload: response.result ?? null,
+    });
+  }
   #handleRunPollingError(error: unknown) {
     const state = this.#STORE.getState();
     const detail = error instanceof Error ? error.message : STATUS_MESSAGES.ERROR_RUNNING_WORKFLOW;
@@ -220,11 +240,25 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
       message: `${NOTIFICATION_MESSAGES.WORKFLOW_STATUS_FAILED}: ${detail}`,
       status: 'danger',
     });
+    const runId = state.currentRunId;
+    if (runId) {
+      const now = Date.now();
+      state.mutate.runs.upsert({
+        runId,
+        updatedAt: now,
+        status: 'failed' as WorkflowRunStatus,
+        error: detail,
+      });
+      if (state.selectedRunId === runId) {
+        state.mutate.results(null);
+      }
+    }
     state.mutate.runId(null);
     this.#stopRunPolling();
   }
   #handleRunStatusResponse(response: WorkflowRunStatusResponse) {
     const state = this.#STORE.getState();
+    this.#updateRunProgress(response);
     const { status } = response;
 
     switch (status) {
@@ -257,9 +291,23 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
   }
   #handleRunSuccess(response: WorkflowRunStatusResponse) {
     const state = this.#STORE.getState();
+    const runId = response.run_id;
     const outputs = this.#extractRunOutputs(response);
+    const now = Date.now();
 
-    state.mutate.results(outputs);
+    state.mutate.runs.upsert({
+      runId,
+      createdAt: this.#coerceTimestamp(response.created_at, now),
+      updatedAt: now,
+      status: 'succeeded' as WorkflowRunStatus,
+      error: null,
+      outputs,
+      httpStatus: response.result?.http_status ?? null,
+      resultPayload: response.result ?? null,
+    });
+    if (state.selectedRunId === runId) {
+      state.mutate.results(outputs);
+    }
     state.mutate.notifications.add({
       id: performance.now().toString(),
       message: NOTIFICATION_MESSAGES.WORKFLOW_COMPLETED,
@@ -270,14 +318,28 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
   #handleRunFailure(response: WorkflowRunStatusResponse) {
     const state = this.#STORE.getState();
     const payload = response.result?.body?.payload;
+    const runId = response.run_id;
     const detail =
       payload?.detail ||
       payload?.error?.message ||
       response.error ||
       STATUS_MESSAGES.ERROR_RUNNING_WORKFLOW;
     const outputs = this.#extractRunOutputs(response);
+    const now = Date.now();
 
-    state.mutate.results(outputs);
+    state.mutate.runs.upsert({
+      runId,
+      createdAt: this.#coerceTimestamp(response.created_at, now),
+      updatedAt: now,
+      status: 'failed' as WorkflowRunStatus,
+      error: detail,
+      outputs,
+      httpStatus: response.result?.http_status ?? null,
+      resultPayload: response.result ?? null,
+    });
+    if (state.selectedRunId === runId) {
+      state.mutate.results(outputs);
+    }
     if (payload?.error?.input) {
       this.#setInputStatus(payload.error.input, 'error');
     }
@@ -290,10 +352,24 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
   }
   #handleRunCancellation(response: WorkflowRunStatusResponse) {
     const state = this.#STORE.getState();
+    const runId = response.run_id;
     const outputs = this.#extractRunOutputs(response);
     const message = response.error || NOTIFICATION_MESSAGES.WORKFLOW_CANCELLED;
+    const now = Date.now();
 
-    state.mutate.results(outputs);
+    state.mutate.runs.upsert({
+      runId,
+      createdAt: this.#coerceTimestamp(response.created_at, now),
+      updatedAt: now,
+      status: 'cancelled' as WorkflowRunStatus,
+      error: message,
+      outputs,
+      httpStatus: response.result?.http_status ?? null,
+      resultPayload: response.result ?? null,
+    });
+    if (state.selectedRunId === runId) {
+      state.mutate.results(outputs);
+    }
     state.mutate.notifications.add({
       id: performance.now().toString(),
       message,
@@ -328,6 +404,8 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
     let lastQueued = st.queuedJobs ?? -1;
     let lastResults = st.results;
     let lastRunId = st.currentRunId;
+    let lastRunsRef = st.runs;
+    let lastSelectedRunId = st.selectedRunId;
     let lastWorkflowsCount = st.workflows?.nodes?.length ?? 0;
 
     let scheduled = false;
@@ -357,6 +435,14 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
         needs.main = true;
         lastId = current.id;
         lastResults = state.results;
+      }
+      if (state.runs !== lastRunsRef) {
+        needs.main = true;
+        lastRunsRef = state.runs;
+      }
+      if (state.selectedRunId !== lastSelectedRunId) {
+        needs.main = true;
+        lastSelectedRunId = state.selectedRunId;
       }
 
       if (message !== lastCurrentMessage || status !== lastCurrentStatus) {
@@ -464,6 +550,28 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
       const elements = this.#UI_REGISTRY.get(this) || {};
       elements[elementId] = element;
       this.#UI_REGISTRY.set(this, elements);
+    },
+  };
+  //#endregion
+
+  //#region Runs
+  runs = {
+    all: (): WorkflowRunEntry[] => {
+      return [...this.#STORE.getState().runs];
+    },
+    get: (runId: string): WorkflowRunEntry | null => {
+      const { runs } = this.#STORE.getState();
+      return runs.find((run) => run.runId === runId) || null;
+    },
+    select: (runId: string | null) => {
+      this.#STORE.getState().mutate.selectRun(runId);
+    },
+    selected: (): WorkflowRunEntry | null => {
+      const { runs, selectedRunId } = this.#STORE.getState();
+      if (!selectedRunId) {
+        return null;
+      }
+      return runs.find((run) => run.runId === selectedRunId) || null;
     },
   };
   //#endregion
