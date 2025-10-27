@@ -22,7 +22,7 @@ import {
   PrepSettingsFn,
 } from '../../types/widgets/imageEditor';
 import { TagName } from '../../types/widgets/widgets';
-import { unescapeJson } from '../../utils/common';
+import { getLfManager } from '../../utils/common';
 import {
   beginManualApplyRequest,
   hasManualApplyPendingChanges,
@@ -37,8 +37,10 @@ export const createPrepSettings = (deps: PrepSettingsDeps): PrepSettingsFn => {
   const { onSlider, onTextfield, onToggle } = deps;
 
   return (state, node) => {
+    const { syntax } = getLfManager().getManagers().lfFramework;
     state.elements.controls = {};
-    state.filter = unescapeJson(node.cells.lfCode.value).parsedJson as ImageEditorFilter;
+    state.filter = syntax.json.unescape(node.cells.lfCode.value)
+      .parsedJSON as unknown as ImageEditorFilter;
     const idRaw = (node.id as string) || 'brush';
     const alias = idRaw === 'inpaint_detail' || idRaw === 'inpaint_adv' ? 'inpaint' : idRaw;
     state.filterType = alias as ImageEditorFilterType;

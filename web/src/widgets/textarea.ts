@@ -30,7 +30,7 @@ export const textareaFactory: TextareaFactory = {
         const { textarea } = STATE.get(wrapper);
 
         const callback: TextareaNormalizeCallback = (_, u) => {
-          const parsedJson = u.parsedJson as TextareaDeserializedValue;
+          const parsedJson = u.parsedJSON as TextareaDeserializedValue;
           textarea.value = JSON.stringify(parsedJson, null, 2) || '{}';
         };
 

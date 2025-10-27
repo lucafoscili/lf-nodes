@@ -137,6 +137,8 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
           throw new Error('Failed to fetch queue status');
         }
 
+        const state = this.#STORE.getState();
+
         const { queue_running, queue_pending } = (await resp.json()) as {
           queue_pending: unknown;
           queue_running: unknown;
@@ -146,15 +148,17 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
         const qRunning = parseCount(queue_running);
         const busy = qPending + qRunning;
 
-        const prev = this.#STORE.getState().queuedJobs ?? -1;
+        const prev = state.queuedJobs ?? -1;
         if (busy !== prev) {
-          this.#STORE.getState().mutate.queuedJobs(busy);
+          state.mutate.queuedJobs(busy);
         }
       } catch (e) {
+        const state = this.#STORE.getState();
+
         try {
-          const prev = this.#STORE.getState().queuedJobs ?? -1;
+          const prev = state.queuedJobs ?? -1;
           if (prev !== -1) {
-            this.#STORE.getState().mutate.queuedJobs(-1);
+            state.mutate.queuedJobs(-1);
           }
         } catch (err) {}
       }

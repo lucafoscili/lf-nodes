@@ -11,14 +11,11 @@ import {
   NodeWidgetMap,
 } from '../types/widgets/widgets';
 import {
-  areJSONEqual,
   getApiRoutes,
   getCustomWidget,
   getInput,
   getLfManager,
-  isValidJSON,
   refreshChart,
-  unescapeJson,
 } from '../utils/common';
 
 //#region Node-Widget map
@@ -247,6 +244,7 @@ export const onNodeCreated = async (nodeType: NodeType) => {
 //#region chipCb
 const chipCb = (node: NodeType) => {
   const lfManager = getLfManager();
+  const { syntax } = lfManager.getManagers().lfFramework;
   const routes = getApiRoutes().comfy;
   const textarea = getInput(node, ComfyWidgetName.json);
   const linkInput = routes.getLinkById(textarea?.link?.toString());
@@ -264,15 +262,15 @@ const chipCb = (node: NodeType) => {
   const dataset = datasetW.options.getValue();
   const chip = (chipW.options.getState() as ChipState).chip;
   try {
-    const newData = unescapeJson(dataset).parsedJson;
+    const newData = syntax.json.unescape(dataset).parsedJSON;
 
-    if (isValidJSON(newData) && isValidJSON(chip.lfDataset)) {
-      if (!areJSONEqual(newData, chip.lfDataset)) {
+    if (syntax.json.isValid(newData) && syntax.json.isValid(chip.lfDataset)) {
+      if (!syntax.json.areEqual(newData, chip.lfDataset)) {
         chip.lfDataset = newData;
         lfManager.log('Updated chip data', { dataset }, LogSeverity.Info);
       }
     } else {
-      if (isValidJSON(newData)) {
+      if (syntax.json.isValid(newData)) {
         chip.lfDataset = newData;
         lfManager.log('Set chip data', { dataset }, LogSeverity.Info);
       } else {
@@ -303,16 +301,17 @@ const messengerCb = (node: NodeType) => {
   const dataset = datasetW.options.getValue();
   const messenger = (messengerW?.options?.getState() as MessengerState).elements.messenger;
   try {
-    const newData = unescapeJson(dataset).parsedJson;
+    const { syntax } = getLfManager().getManagers().lfFramework;
+    const newData = syntax.json.unescape(dataset).parsedJSON;
 
-    if (isValidJSON(newData) && isValidJSON(messenger.lfDataset)) {
-      if (!areJSONEqual(newData, messenger.lfDataset)) {
+    if (syntax.json.isValid(newData) && syntax.json.isValid(messenger.lfDataset)) {
+      if (!syntax.json.areEqual(newData, messenger.lfDataset)) {
         messenger.lfDataset = newData as unknown as LfMessengerDataset;
         messenger.reset();
         getLfManager().log('Updated messenger data', { dataset }, LogSeverity.Info);
       }
     } else {
-      if (isValidJSON(newData)) {
+      if (syntax.json.isValid(newData)) {
         messenger.lfDataset = newData as unknown as LfMessengerDataset;
         messenger.reset();
         getLfManager().log('Set messenger data', { dataset }, LogSeverity.Info);

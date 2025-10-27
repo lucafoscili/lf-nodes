@@ -36,7 +36,7 @@ export const tabBarChartFactory: TabBarChartFactory = {
         const { chart, tabbar } = state.elements;
 
         const callback: TabBarChartNormalizeCallback = (_, u) => {
-          const parsedValue = u.parsedJson as TabBarChartDeserializedValue;
+          const parsedValue = u.parsedJSON as TabBarChartDeserializedValue;
 
           switch (state.node.comfyClass) {
             case NodeName.usageStatistics:

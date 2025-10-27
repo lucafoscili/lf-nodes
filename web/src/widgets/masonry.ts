@@ -35,7 +35,7 @@ export const masonryFactory: MasonryFactory = {
           const { masonry, selected } = STATE.get(wrapper);
 
           const { columns, dataset, index, name, view, slot_map } =
-            u.parsedJson as MasonryDeserializedValue;
+            u.parsedJSON as unknown as MasonryDeserializedValue;
 
           if (columns) {
             masonry.lfColumns = columns;

@@ -25,7 +25,7 @@ export const compareFactory: CompareFactory = {
         const { compare } = STATE.get(wrapper);
 
         const callback: CompareNormalizeCallback = (_, u) => {
-          compare.lfDataset = (u.parsedJson as LfDataDataset) || {};
+          compare.lfDataset = (u.parsedJSON as LfDataDataset) || {};
         };
 
         normalizeValue(value, callback, CustomWidgetName.compare);

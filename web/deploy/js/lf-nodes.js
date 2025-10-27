@@ -1,4 +1,4 @@
-import { g as getLfFramework } from "./lf-widgets-6WpDY9VV.js";
+import { g as getLfFramework } from "./lf-widgets-CAA2GbO2.js";
 var APIEndpoints;
 (function(APIEndpoints2) {
   APIEndpoints2["CleanOldBackups"] = "/lf-nodes/clean-old-backups";
@@ -1485,6 +1485,7 @@ const onNodeCreated = async (nodeType) => {
 const chipCb = (node) => {
   var _a, _b, _c, _d, _e;
   const lfManager = getLfManager();
+  const { syntax } = lfManager.getManagers().lfFramework;
   const routes = getApiRoutes().comfy;
   const textarea = getInput(node, ComfyWidgetName.json);
   const linkInput = routes.getLinkById((_a = textarea == null ? void 0 : textarea.link) == null ? void 0 : _a.toString());
@@ -1501,14 +1502,14 @@ const chipCb = (node) => {
   const dataset = datasetW.options.getValue();
   const chip = chipW.options.getState().chip;
   try {
-    const newData = unescapeJson(dataset).parsedJson;
-    if (isValidJSON(newData) && isValidJSON(chip.lfDataset)) {
-      if (!areJSONEqual(newData, chip.lfDataset)) {
+    const newData = syntax.json.unescape(dataset).parsedJSON;
+    if (syntax.json.isValid(newData) && syntax.json.isValid(chip.lfDataset)) {
+      if (!syntax.json.areEqual(newData, chip.lfDataset)) {
         chip.lfDataset = newData;
         lfManager.log("Updated chip data", { dataset }, LogSeverity.Info);
       }
     } else {
-      if (isValidJSON(newData)) {
+      if (syntax.json.isValid(newData)) {
         chip.lfDataset = newData;
         lfManager.log("Set chip data", { dataset }, LogSeverity.Info);
       } else {
@@ -1535,15 +1536,16 @@ const messengerCb = (node) => {
   const dataset = datasetW.options.getValue();
   const messenger = ((_e = messengerW == null ? void 0 : messengerW.options) == null ? void 0 : _e.getState()).elements.messenger;
   try {
-    const newData = unescapeJson(dataset).parsedJson;
-    if (isValidJSON(newData) && isValidJSON(messenger.lfDataset)) {
-      if (!areJSONEqual(newData, messenger.lfDataset)) {
+    const { syntax } = getLfManager().getManagers().lfFramework;
+    const newData = syntax.json.unescape(dataset).parsedJSON;
+    if (syntax.json.isValid(newData) && syntax.json.isValid(messenger.lfDataset)) {
+      if (!syntax.json.areEqual(newData, messenger.lfDataset)) {
         messenger.lfDataset = newData;
         messenger.reset();
         getLfManager().log("Updated messenger data", { dataset }, LogSeverity.Info);
       }
     } else {
-      if (isValidJSON(newData)) {
+      if (syntax.json.isValid(newData)) {
         messenger.lfDataset = newData;
         messenger.reset();
         getLfManager().log("Set messenger data", { dataset }, LogSeverity.Info);
@@ -3762,8 +3764,9 @@ const createPrepSettings = (deps) => {
   const { onSlider, onTextfield, onToggle } = deps;
   return (state, node) => {
     var _a;
+    const { syntax } = getLfManager().getManagers().lfFramework;
     state.elements.controls = {};
-    state.filter = unescapeJson(node.cells.lfCode.value).parsedJson;
+    state.filter = syntax.json.unescape(node.cells.lfCode.value).parsedJSON;
     const idRaw = node.id || "brush";
     const alias = idRaw === "inpaint_detail" || idRaw === "inpaint_adv" ? "inpaint" : idRaw;
     state.filterType = alias;
@@ -4283,11 +4286,12 @@ function setGridStatus(status, grid, actionButtons) {
 const handleInterruptForState = async (state) => {
   var _a, _b;
   const lfManager = getLfManager();
+  const { syntax } = lfManager.getManagers().lfFramework;
   const { actionButtons, grid, imageviewer } = state.elements;
   const dataset = imageviewer.lfDataset;
   const statusColumn = getStatusColumn(dataset);
   const pathColumn = getPathColumn(dataset);
-  const parsedPath = pathColumn ? unescapeJson(pathColumn).parsedJson : void 0;
+  const parsedPath = pathColumn ? syntax.json.unescape(pathColumn).parsedJSON : void 0;
   const path = typeof (parsedPath == null ? void 0 : parsedPath.title) === "string" ? parsedPath.title : null;
   if ((statusColumn == null ? void 0 : statusColumn.title) === ImageEditorStatus.Pending) {
     statusColumn.title = ImageEditorStatus.Completed;
@@ -4490,7 +4494,7 @@ const imageEditorFactory = {
         const { actionButtons, grid, imageviewer } = state.elements;
         const callback = (_, u) => {
           var _a, _b;
-          const parsedValue = u.parsedJson;
+          const parsedValue = u.parsedJSON;
           const isPending = ((_a = getStatusColumn(parsedValue)) == null ? void 0 : _a.title) === ImageEditorStatus.Pending;
           if (isPending) {
             setGridStatus(ImageEditorStatus.Pending, grid, actionButtons);
@@ -5541,6 +5545,7 @@ const onResponse = async (dataset, path, forcedSave, payload) => {
 };
 const prepCards = (container, propsArray) => {
   var _a;
+  const { syntax } = getLfManager().getManagers().lfFramework;
   let count = 0;
   const cards = container.querySelectorAll("lf-card");
   cards.forEach((c) => c.remove());
@@ -5555,7 +5560,7 @@ const prepCards = (container, propsArray) => {
           if (key === "lfDataset") {
             try {
               if (typeof prop === "string") {
-                card.lfDataset = unescapeJson(prop).parsedJson;
+                card.lfDataset = syntax.json.unescape(prop).parsedJSON;
               } else {
                 card.lfDataset = prop;
               }
@@ -5660,7 +5665,7 @@ const cardFactory = {
       setValue(value) {
         const { grid } = STATE$g.get(wrapper);
         const callback = (_, u) => {
-          const { props } = u.parsedJson;
+          const { props } = u.parsedJSON;
           const len = (props == null ? void 0 : props.length) > 1 ? 2 : 1;
           grid.style.setProperty("--card-grid", `repeat(1, 1fr) / repeat(${len}, 1fr)`);
           prepCards(grid, props);
@@ -5728,7 +5733,7 @@ const cardsWithChipFactory = {
       setValue(value) {
         const { chip, grid } = STATE$f.get(wrapper);
         const callback = (v, u) => {
-          const dataset = u.parsedJson;
+          const dataset = u.parsedJSON;
           const cardsCount = prepCards(grid, dataset.props);
           if (!cardsCount || !v) {
             return;
@@ -5787,7 +5792,7 @@ const carouselFactory = {
       setValue(value) {
         const { carousel } = STATE$e.get(wrapper);
         const callback = (_, u) => {
-          const dataset = u.parsedJson;
+          const dataset = u.parsedJSON;
           carousel.lfDataset = dataset || {};
         };
         normalizeValue(value, callback, CustomWidgetName.carousel);
@@ -5972,7 +5977,7 @@ const codeFactory = {
         const callback = (v, u) => {
           switch (code.lfLanguage) {
             case "json":
-              code.lfValue = u.unescapedStr || "{}";
+              code.lfValue = u.unescapedString || "{}";
               break;
             default:
               code.lfValue = typeof v === "string" ? v : "";
@@ -6036,7 +6041,7 @@ const compareFactory = {
       setValue(value) {
         const { compare } = STATE$a.get(wrapper);
         const callback = (_, u) => {
-          compare.lfDataset = u.parsedJson || {};
+          compare.lfDataset = u.parsedJSON || {};
         };
         normalizeValue(value, callback, CustomWidgetName.compare);
       }
@@ -7469,7 +7474,7 @@ const controlPanelFactory = {
       },
       setValue(value) {
         const callback = (_, u) => {
-          const { backup, backupRetention, debug, systemTimeout, themes } = u.parsedJson;
+          const { backup, backupRetention, debug, systemTimeout, themes } = u.parsedJSON;
           if (backup === true || backup === false) {
             getLfManager().toggleBackup(backup);
           }
@@ -7554,7 +7559,7 @@ const countBarChartFactory = {
       setValue(value) {
         const { card, datasets } = STATE$8.get(wrapper);
         const callback = (_, u) => {
-          const json = u.parsedJson;
+          const json = u.parsedJSON;
           datasets.chart = json.chart || {};
           datasets.chip = json.chip || {};
           card.lfDataset = {
@@ -7683,7 +7688,7 @@ const historyFactory = {
       setValue(value) {
         const { list } = STATE$7.get(wrapper);
         const callback = (_, u) => {
-          list.lfDataset = u.parsedJson || {};
+          list.lfDataset = u.parsedJSON || {};
         };
         normalizeValue(value, callback, CustomWidgetName.history);
       }
@@ -7768,7 +7773,7 @@ const masonryFactory = {
       setValue(value) {
         const callback = (_, u) => {
           const { masonry, selected } = STATE$6.get(wrapper);
-          const { columns, dataset, index, name, view, slot_map } = u.parsedJson;
+          const { columns, dataset, index, name, view, slot_map } = u.parsedJSON;
           if (columns) {
             masonry.lfColumns = columns;
           }
@@ -7868,7 +7873,7 @@ const messengerFactory = {
         const { elements } = state;
         const { messenger, placeholder } = elements;
         const callback = (_, u) => {
-          const { config, dataset } = u.parsedJson;
+          const { config, dataset } = u.parsedJSON;
           messenger.lfDataset = dataset;
           if (isValidObject(config)) {
             messenger.lfValue = config;
@@ -7936,7 +7941,7 @@ const progressbarFactory = {
       setValue(value) {
         const { node, progressbar } = STATE$4.get(wrapper);
         const callback = (_, u) => {
-          const { bool, roll } = u.parsedJson;
+          const { bool, roll } = u.parsedJSON;
           const isFalse = !!(bool === false);
           const isTrue = !!(bool === true);
           switch (node.comfyClass) {
@@ -8105,7 +8110,7 @@ const tabBarChartFactory = {
         const state = STATE$3.get(wrapper);
         const { chart, tabbar } = state.elements;
         const callback = (_, u) => {
-          const parsedValue = u.parsedJson;
+          const parsedValue = u.parsedJSON;
           switch (state.node.comfyClass) {
             case NodeName.usageStatistics:
               state.directory = parsedValue.directory;
@@ -8243,7 +8248,7 @@ const textareaFactory = {
       setValue(value) {
         const { textarea } = STATE$2.get(wrapper);
         const callback = (_, u) => {
-          const parsedJson = u.parsedJson;
+          const parsedJson = u.parsedJSON;
           textarea.value = JSON.stringify(parsedJson, null, 2) || "{}";
         };
         normalizeValue(value, callback, CustomWidgetName.textarea);
@@ -8289,7 +8294,7 @@ const treeFactory = {
       setValue(value) {
         const { tree } = STATE$1.get(wrapper);
         const callback = (_, u) => {
-          tree.lfDataset = u.parsedJson || {};
+          tree.lfDataset = u.parsedJSON || {};
         };
         normalizeValue(value, callback, CustomWidgetName.tree);
       }
@@ -8860,87 +8865,6 @@ const isTree = (comp) => {
 const isToggle = (comp) => {
   return comp.rootElement.tagName.toLowerCase() === "lf-toggle";
 };
-const areJSONEqual = (a, b) => {
-  return JSON.stringify(a) === JSON.stringify(b);
-};
-const isJSONLikeString = (value) => {
-  if (typeof value !== "string")
-    return false;
-  const trimmed = value.trim();
-  if (!(trimmed.startsWith("{") && trimmed.endsWith("}") || trimmed.startsWith("[") && trimmed.endsWith("]"))) {
-    return false;
-  }
-  if (trimmed.startsWith("{")) {
-    if (trimmed === "{}")
-      return true;
-    if (/".*"\s*:\s*.+/.test(trimmed))
-      return true;
-    return false;
-  }
-  if (trimmed.indexOf('"') !== -1)
-    return true;
-  const simpleArrayScalar = /^\[\s*(?:-?\d+(\.\d+)?|true|false|null)(\s*,\s*(?:-?\d+(\.\d+)?|true|false|null))*\s*\]$/i;
-  if (trimmed.startsWith("[") && simpleArrayScalar.test(trimmed))
-    return true;
-  return false;
-};
-const isValidJSON = (value) => {
-  try {
-    JSON.stringify(value);
-    return true;
-  } catch (error) {
-    return false;
-  }
-};
-const unescapeJson = (input) => {
-  let validJson = false;
-  let parsedJson = void 0;
-  let unescapedStr = input;
-  const recursiveUnescape = (inputStr) => {
-    let newStr = inputStr.replace(/\\(.)/g, "$1");
-    while (newStr !== inputStr) {
-      inputStr = newStr;
-      newStr = inputStr.replace(/\\(.)/g, "$1");
-    }
-    return newStr;
-  };
-  const deepParse = (data) => {
-    if (isJSONLikeString(data)) {
-      try {
-        const innerJson = JSON.parse(data);
-        if (typeof innerJson === "object" && innerJson !== null) {
-          return deepParse(innerJson);
-        }
-      } catch (e) {
-        return data;
-      }
-    } else if (typeof data === "object" && data !== null) {
-      Object.keys(data).forEach((key) => {
-        data[key] = deepParse(data[key]);
-      });
-    }
-    return data;
-  };
-  try {
-    parsedJson = isJSONLikeString(input) ? JSON.parse(input) : input;
-    validJson = true;
-    parsedJson = deepParse(parsedJson);
-    unescapedStr = JSON.stringify(parsedJson, null, 2);
-  } catch (error) {
-    if (typeof input === "object" && input !== null) {
-      try {
-        unescapedStr = JSON.stringify(input, null, 2);
-        validJson = true;
-        parsedJson = input;
-      } catch (stringifyError) {
-        unescapedStr = recursiveUnescape(input.toString());
-      }
-    } else {
-      unescapedStr = recursiveUnescape(input.toString());
-    }
-  }
-  return { validJson, parsedJson, unescapedStr };
-};
 const getApiRoutes = () => {
   return getLfManager().getApiRoutes();
 };
@@ -9074,8 +8998,9 @@ const isValidObject = (obj) => {
   return obj && typeof obj === "object" && Object.keys(obj).length > 0;
 };
 const normalizeValue = (value, callback, widget, onException) => {
+  const { syntax } = getLfManager().getManagers().lfFramework;
   try {
-    callback(value, unescapeJson(value));
+    callback(value, syntax.json.unescape(value));
   } catch (error) {
     if (onException) {
       onException();

@@ -51,7 +51,7 @@ export const imageEditorFactory: ImageEditorFactory = {
         const { actionButtons, grid, imageviewer } = state.elements;
 
         const callback: ImageEditorNormalizeCallback = (_, u) => {
-          const parsedValue = u.parsedJson as ImageEditorDeserializedValue;
+          const parsedValue = u.parsedJSON as ImageEditorDeserializedValue;
           const isPending = getStatusColumn(parsedValue)?.title === ImageEditorStatus.Pending;
           if (isPending) {
             setGridStatus(ImageEditorStatus.Pending, grid, actionButtons);

@@ -194,10 +194,12 @@ export const createHeaderSection = (store: WorkflowStore): WorkflowSectionContro
     }
 
     if (queuedJobs < 0) {
+      counter.innerText = '';
       light.lfIcon = alertTriangle;
       light.lfUiState = 'danger';
       light.title = 'Server disconnected';
     } else if (queuedJobs === 0) {
+      counter.innerText = '';
       light.lfIcon = check;
       light.lfUiState = 'success';
       light.title = 'Server idle';

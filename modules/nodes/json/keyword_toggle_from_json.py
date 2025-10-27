@@ -36,7 +36,13 @@ class LF_KeywordToggleFromJSON:
     RETURN_TYPES = (Input.JSON, Input.STRING, Input.STRING)
 
     def on_exec(self, **kwargs: dict):
-        json_input: dict = normalize_json_input(kwargs.get("json_input"))
+        json_input = normalize_json_input(kwargs.get("json_input"))
+        if (
+            isinstance(json_input, list)
+            and len(json_input) == 1
+            and isinstance(json_input[0], dict)
+        ):
+            json_input = json_input[0]
         separator: str = normalize_list_to_value(kwargs.get("separator"))
         ui_widget: str = normalize_list_to_value(kwargs.get("ui_widget", ""))
 

@@ -47,24 +47,35 @@ class LF_ShuffleJSONKeys:
     RETURN_TYPES = (Input.JSON,)
 
     def on_exec(self, **kwargs: dict):
-        json_input: dict = normalize_json_input(kwargs.get("json_input"))
+        json_input = normalize_json_input(kwargs.get("json_input"))
         mutate_source: bool = normalize_list_to_value(kwargs.get("mutate_source"))
         seed: int = normalize_list_to_value(kwargs.get("seed"))
 
         random.seed(seed)
 
-        if mutate_source:
-            items = {key: json_input[key] for key in json_input}
-            json_input.clear()
+        is_wrapped_single_dict = (
+            isinstance(json_input, list)
+            and len(json_input) == 1
+            and isinstance(json_input[0], dict)
+        )
+
+        target = json_input[0] if is_wrapped_single_dict else json_input
+
+        if not isinstance(target, dict):
+            shuffled_json = json_input
+        elif mutate_source:
+            items = {key: target[key] for key in target}
+            target.clear()
             keys = list(items.keys())
             random.shuffle(keys)
             for key in keys:
-                json_input[key] = items[key]
-            shuffled_json = json_input
+                target[key] = items[key]
+            shuffled_json = json_input if is_wrapped_single_dict else target
         else:
-            keys = list(json_input.keys())
+            keys = list(target.keys())
             random.shuffle(keys)
-            shuffled_json = {key: json_input[key] for key in keys}
+            shuffled_target = {key: target[key] for key in keys}
+            shuffled_json = [shuffled_target] if is_wrapped_single_dict else shuffled_target
 
         PromptServer.instance.send_sync(f"{EVENT_PREFIX}shufflejsonkeys", {
             "node": kwargs.get("node_id"),

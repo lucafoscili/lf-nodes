@@ -11,7 +11,6 @@ import {
 } from '@lf-widgets/foundations/dist';
 import { getLfFramework } from '@lf-widgets/framework';
 import { WorkflowCellInput, WorkflowCellOutput } from '../types/api';
-import { unescapeJson } from '../utils/common';
 
 //#region Helpers
 const _setProps = <T extends LfComponentName>(
@@ -151,6 +150,7 @@ export const createInputCell = (cell: WorkflowCellInput) => {
 
 //#region Outputs
 export const createOutputComponent = (descriptor: WorkflowCellOutput) => {
+  const { syntax } = getLfFramework();
   const { dataset, json, metadata, props, shape, slot_map, svg } = descriptor;
   const el = document.createElement('div');
 
@@ -159,8 +159,8 @@ export const createOutputComponent = (descriptor: WorkflowCellOutput) => {
       const p = (props || {}) as Partial<LfCodeInterface>;
       p.lfValue =
         svg ||
-        unescapeJson(json || metadata || dataset || { message: 'No output available.' })
-          .unescapedStr;
+        syntax.json.unescape(json || metadata || dataset || { message: 'No output available.' })
+          .unescapedString;
       const code = createComponent.code(p);
       el.appendChild(code);
       break;

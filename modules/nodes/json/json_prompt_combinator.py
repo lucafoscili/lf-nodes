@@ -1,5 +1,5 @@
 from itertools import product
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Tuple, Union
 from server import PromptServer
 
 from . import CATEGORY
@@ -74,7 +74,15 @@ class LF_JSONPromptCombinator:
     RETURN_TYPES = (Input.STRING, Input.STRING, Input.INTEGER, Input.JSON)
 
     def on_exec(self, **kwargs: Any) -> Tuple[str, List[str], int, Dict[str, str]]:
-        json_input: Dict[str, Any] = normalize_json_input(kwargs.get("json_input", {}))
+        json_input_raw: Union[Dict[str, Any], List[Any]] = normalize_json_input(kwargs.get("json_input", {}))
+        if (
+            isinstance(json_input_raw, list)
+            and len(json_input_raw) == 1
+            and isinstance(json_input_raw[0], dict)
+        ):
+            json_input = json_input_raw[0]
+        else:
+            json_input = json_input_raw
         separator: str = normalize_list_to_value(kwargs.get("separator", ", "))
         include_keys: bool = bool(normalize_list_to_value(kwargs.get("include_keys", False)))
         full_path_keys: bool = bool(normalize_list_to_value(kwargs.get("full_path_keys", False)))

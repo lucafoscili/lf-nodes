@@ -1,3 +1,4 @@
+import { LfSyntaxUnescapeJSONPayload } from '@lf-widgets/foundations/dist';
 import { Card, CardDeserializedValue } from './card';
 import { CardsWithChip, CardsWithChipDeserializedValue } from './cardsWithChip';
 import { Carousel, CarouselDeserializedValue } from './carousel';
@@ -264,15 +265,10 @@ export type NodeWidgetMap = {
 export type ComfyWidget = Widget<ComfyWidgetName>;
 export type CustomWidget = Card;
 export type GenericWidget = ComfyWidget | CustomWidget;
-export type UnescapeJSONPayload = {
-  validJson: boolean;
-  parsedJson?: {};
-  unescapedStr: string;
-};
 export type NormalizeValueCallback<
   V extends CustomWidgetDeserializedValuesMap<CustomWidgetName>,
   S extends BaseWidgetState = BaseWidgetState,
-> = (origValue: V, unescaped: UnescapeJSONPayload, state?: S) => void;
+> = (origValue: V, unescaped: LfSyntaxUnescapeJSONPayload, state?: S) => void;
 export type GenericWidgetCallback = ComfyWidgetCallback | CustomWidgetCallback;
 export type CustomWidgetCallback = <T extends CustomWidgetName>(
   node: NodeType,

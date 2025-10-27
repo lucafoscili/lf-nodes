@@ -42,15 +42,30 @@ class LF_GetRandomKeyFromJSON:
 
     def on_exec(self, **kwargs: dict):
         seed: int = normalize_list_to_value(kwargs.get("seed"))
-        json_input: dict = normalize_json_input(kwargs.get("json_input"))
+        json_input = normalize_json_input(kwargs.get("json_input"))
+
+        is_wrapped_single_dict = (
+            isinstance(json_input, list)
+            and len(json_input) == 1
+            and isinstance(json_input[0], dict)
+        )
+
+        target = json_input[0] if is_wrapped_single_dict else json_input
+
+        if not isinstance(target, dict) or not target:
+            PromptServer.instance.send_sync(f"{EVENT_PREFIX}getrandomkeyfromjson", {
+                "node": kwargs.get("node_id"),
+                "value": "**Warning**: JSON input does not contain any keys.",
+            })
+            return ("",)
 
         random.seed(seed)
-        keys = list(json_input.keys())
+        keys = list(target.keys())
         selected_key = random.choice(keys)
 
         PromptServer.instance.send_sync(f"{EVENT_PREFIX}getrandomkeyfromjson", {
             "node": kwargs.get("node_id"),
-            "value": f"## Selected key\n{selected_key}\n\n## Content:\n{json_input.get(selected_key)}",
+            "value": f"## Selected key\n{selected_key}\n\n## Content:\n{target.get(selected_key)}",
         })
 
         return (selected_key,)
