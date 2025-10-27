@@ -134,6 +134,25 @@ export interface WorkflowAPIRunPayload {
   history: {
     outputs?: WorkflowNodeResults;
   };
+  preferred_output?: string;
+}
+export interface WorkflowRunRequestPayload {
+  workflowId: string;
+  inputs: Record<string, unknown>;
+  promptId?: string;
+  extraData?: Record<string, unknown>;
+}
+export interface WorkflowRunResultPayload {
+  body: WorkflowAPIResponse;
+  http_status: number;
+}
+export type WorkflowRunStatus = 'pending' | 'running' | 'succeeded' | 'failed' | 'cancelled';
+export interface WorkflowRunStatusResponse {
+  created_at: number;
+  error?: string | null;
+  result: WorkflowRunResultPayload | null;
+  run_id: string;
+  status: WorkflowRunStatus;
 }
 //#endregion
 

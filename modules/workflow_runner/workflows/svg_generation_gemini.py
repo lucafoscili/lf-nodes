@@ -47,6 +47,7 @@ input_name = WorkflowCell(
     props={
         "lfHtmlAttributes": {
             "autocomplete": "off",
+            "name": "icon_name",
             "type": "text"
         },
         "lfLabel": "Icon name",
@@ -65,10 +66,11 @@ input_size = WorkflowCell(
     props={
         "lfHtmlAttributes": {
             "autocomplete": "off",
-            "type": "number",
             "min": 24,
             "max": 1024,
             "step": 8,
+            "name": "icon_size",
+            "type": "number",
         },
         "lfLabel": "Icon size",
         "lfHelper": {

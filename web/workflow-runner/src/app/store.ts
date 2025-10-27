@@ -87,9 +87,17 @@ export const createWorkflowRunnerStore = (initialState: WorkflowState): Workflow
           draft.notifications.splice(index, 1);
         }),
     },
+    pollingTimer: (timerId: number | null) =>
+      applyMutation((draft) => {
+        draft.pollingTimer = timerId;
+      }),
     queuedJobs: (count: number) =>
       applyMutation((draft) => {
         draft.queuedJobs = count;
+      }),
+    runId: (runId: string | null) =>
+      applyMutation((draft) => {
+        draft.currentRunId = runId;
       }),
     status: (status: WorkflowStatus, message?: string) => setStatus(status, message, setState),
     results: (results: WorkflowNodeResults | null) =>

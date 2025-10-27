@@ -7,9 +7,11 @@ import { createDrawerSection } from '../elements/layout.drawer';
 import { createHeaderSection } from '../elements/layout.header';
 import { createMainSection } from '../elements/layout.main';
 import { createNotificationsSection } from '../elements/layout.notifications';
-import { fetchWorkflowDefinitions } from '../services/workflow-service';
+import { WORKFLOW_CLASSES } from '../elements/main.workflow';
+import { fetchWorkflowDefinitions, getRunStatus } from '../services/workflow-service';
+import { WorkflowRunStatusResponse } from '../types/api';
 import { WorkflowDispatchers, WorkflowManager, WorkflowUIItem } from '../types/manager';
-import { WorkflowSectionController } from '../types/section';
+import { WorkflowCellStatus, WorkflowSectionController, WorkflowUICells } from '../types/section';
 import { WorkflowStore } from '../types/state';
 import { parseCount } from '../utils/common';
 import { NOTIFICATION_MESSAGES, STATUS_MESSAGES } from '../utils/constants';
@@ -79,7 +81,7 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
         state.mutate.status('idle', IDLE_WORKFLOWS_LOADED);
       });
 
-    this.#startPolling();
+    this.#startQueuePolling();
   }
   //#endregion
 
@@ -129,7 +131,7 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
       state.mutate.workflow(firstWorkflow.id);
     }
   };
-  #startPolling() {
+  #startQueuePolling() {
     setInterval(async () => {
       try {
         const resp = await fetch('/queue');
@@ -164,6 +166,152 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
       }
     }, 750);
   }
+  #beginRunPolling(runId: string) {
+    const state = this.#STORE.getState();
+    this.#stopRunPolling();
+
+    let isPolling = false;
+    const poll = async () => {
+      if (isPolling) {
+        return;
+      }
+
+      const currentState = this.#STORE.getState();
+      if (currentState.currentRunId !== runId) {
+        return;
+      }
+
+      isPolling = true;
+      try {
+        const response = await getRunStatus(runId);
+        this.#handleRunStatusResponse(response);
+      } catch (error) {
+        this.#handleRunPollingError(error);
+      } finally {
+        isPolling = false;
+      }
+    };
+
+    poll();
+    const timerId = window.setInterval(poll, 3000);
+    state.mutate.pollingTimer(Number(timerId));
+  }
+  #stopRunPolling() {
+    const state = this.#STORE.getState();
+    const timerId = state.pollingTimer;
+    if (typeof timerId === 'number') {
+      window.clearInterval(timerId);
+      state.mutate.pollingTimer(null);
+    }
+  }
+  #handleRunPollingError(error: unknown) {
+    const state = this.#STORE.getState();
+    const detail = error instanceof Error ? error.message : STATUS_MESSAGES.ERROR_RUNNING_WORKFLOW;
+
+    state.mutate.status('error', STATUS_MESSAGES.ERROR_RUNNING_WORKFLOW);
+    state.mutate.notifications.add({
+      id: performance.now().toString(),
+      message: `${NOTIFICATION_MESSAGES.WORKFLOW_STATUS_FAILED}: ${detail}`,
+      status: 'danger',
+    });
+    state.mutate.runId(null);
+    this.#stopRunPolling();
+  }
+  #handleRunStatusResponse(response: WorkflowRunStatusResponse) {
+    const state = this.#STORE.getState();
+    const { status } = response;
+
+    switch (status) {
+      case 'pending':
+      case 'running':
+        if (
+          state.current.status !== 'running' ||
+          state.current.message !== STATUS_MESSAGES.RUNNING_POLLING_WORKFLOW
+        ) {
+          state.mutate.status('running', STATUS_MESSAGES.RUNNING_POLLING_WORKFLOW);
+        }
+        break;
+      case 'succeeded':
+        this.#handleRunSuccess(response);
+        break;
+      case 'failed':
+        this.#handleRunFailure(response);
+        break;
+      case 'cancelled':
+        this.#handleRunCancellation(response);
+        break;
+      default:
+        break;
+    }
+
+    if (status === 'succeeded' || status === 'failed' || status === 'cancelled') {
+      this.#stopRunPolling();
+      state.mutate.runId(null);
+    }
+  }
+  #handleRunSuccess(response: WorkflowRunStatusResponse) {
+    const state = this.#STORE.getState();
+    const outputs = this.#extractRunOutputs(response);
+
+    state.mutate.results(outputs);
+    state.mutate.notifications.add({
+      id: performance.now().toString(),
+      message: NOTIFICATION_MESSAGES.WORKFLOW_COMPLETED,
+      status: 'success',
+    });
+    state.mutate.status('idle', STATUS_MESSAGES.IDLE);
+  }
+  #handleRunFailure(response: WorkflowRunStatusResponse) {
+    const state = this.#STORE.getState();
+    const payload = response.result?.body?.payload;
+    const detail =
+      payload?.detail ||
+      payload?.error?.message ||
+      response.error ||
+      STATUS_MESSAGES.ERROR_RUNNING_WORKFLOW;
+    const outputs = this.#extractRunOutputs(response);
+
+    state.mutate.results(outputs);
+    if (payload?.error?.input) {
+      this.#setInputStatus(payload.error.input, 'error');
+    }
+    state.mutate.notifications.add({
+      id: performance.now().toString(),
+      message: `Workflow run failed: ${detail}`,
+      status: 'danger',
+    });
+    state.mutate.status('error', STATUS_MESSAGES.ERROR_RUNNING_WORKFLOW);
+  }
+  #handleRunCancellation(response: WorkflowRunStatusResponse) {
+    const state = this.#STORE.getState();
+    const outputs = this.#extractRunOutputs(response);
+    const message = response.error || NOTIFICATION_MESSAGES.WORKFLOW_CANCELLED;
+
+    state.mutate.results(outputs);
+    state.mutate.notifications.add({
+      id: performance.now().toString(),
+      message,
+      status: 'warning',
+    });
+    state.mutate.status('idle', STATUS_MESSAGES.IDLE);
+  }
+  #extractRunOutputs(response: WorkflowRunStatusResponse) {
+    const outputs = response.result?.body?.payload?.history?.outputs;
+    if (!outputs) {
+      return null;
+    }
+    return { ...outputs };
+  }
+  #setInputStatus(inputId: string, status: WorkflowCellStatus) {
+    const elements = this.uiRegistry.get();
+    const cells = (elements?.[WORKFLOW_CLASSES.cells] as WorkflowUICells) || [];
+
+    const cell = cells.find((el) => el.id === inputId);
+    const wrapper = cell?.parentElement;
+    if (wrapper) {
+      wrapper.dataset.status = status;
+    }
+  }
   #subscribeToState() {
     const st = this.#STORE.getState();
     let lastCurrentMessage = st.current.message;
@@ -173,6 +321,7 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
     let lastNotificationsCount = st.notifications?.length ?? 0;
     let lastQueued = st.queuedJobs ?? -1;
     let lastResults = st.results;
+    let lastRunId = st.currentRunId;
     let lastWorkflowsCount = st.workflows?.nodes?.length ?? 0;
 
     let scheduled = false;
@@ -188,6 +337,15 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
     this.#STORE.subscribe((state) => {
       const { current, isDebug, queuedJobs, workflows } = state;
       const { message, status } = current;
+
+      if (state.currentRunId !== lastRunId) {
+        if (state.currentRunId) {
+          this.#beginRunPolling(state.currentRunId);
+        } else {
+          this.#stopRunPolling();
+        }
+        lastRunId = state.currentRunId;
+      }
 
       if (current.id !== lastId || state.results !== lastResults) {
         needs.main = true;

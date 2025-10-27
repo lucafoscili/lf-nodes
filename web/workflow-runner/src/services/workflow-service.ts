@@ -7,6 +7,8 @@ import {
   WorkflowAPIRunPayload,
   WorkflowAPIUploadPayload,
   WorkflowAPIUploadResponse,
+  WorkflowRunRequestPayload,
+  WorkflowRunStatusResponse,
 } from '../types/api';
 import { isWorkflowAPIUploadPayload, isWorkflowAPIUploadResponse } from '../utils/common';
 import { ERROR_MESSAGES } from '../utils/constants';
@@ -58,10 +60,7 @@ export const fetchWorkflowJSON = async (workflowId: string) => {
 //#endregion
 
 //#region Run Workflow
-export const runWorkflowRequest = async (
-  workflowId: string,
-  inputs: Record<string, unknown>,
-): Promise<WorkflowAPIRunPayload> => {
+export const runWorkflow = async (payload: WorkflowRunRequestPayload): Promise<string> => {
   const { RUN_GENERIC } = ERROR_MESSAGES;
 
   const { syntax } = getLfFramework();
@@ -69,23 +68,47 @@ export const runWorkflowRequest = async (
   const response = await fetch(buildApiUrl('/run'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ workflowId, inputs }),
+    body: JSON.stringify(payload),
   });
 
-  const data = (await syntax.json.parse(response)) as WorkflowAPIResponse | null;
-  const payload: WorkflowAPIRunPayload = (data && data.payload) || {
-    detail: response.statusText,
-    history: {},
-  };
+  const data = (await syntax.json.parse(response)) as WorkflowAPIResponse | { run_id?: string } | null;
 
   if (!response.ok || !data) {
-    const detail = payload?.detail || response.statusText;
+    const payloadData =
+      (data as WorkflowAPIResponse | null)?.payload || ({ detail: response.statusText } as WorkflowAPIRunPayload);
+    const detail = payloadData?.detail || response.statusText;
     throw new WorkflowApiError(`${RUN_GENERIC} (${detail})`, {
-      payload,
+      payload: payloadData,
+      status: response.status,
     });
   }
 
-  return payload;
+  const runId = (data as { run_id?: string }).run_id;
+  if (!runId) {
+    throw new WorkflowApiError(`${RUN_GENERIC} (invalid response)`, {
+      status: response.status,
+    });
+  }
+
+  return runId;
+};
+
+export const getRunStatus = async (runId: string): Promise<WorkflowRunStatusResponse> => {
+  const { RUN_GENERIC } = ERROR_MESSAGES;
+  const { syntax } = getLfFramework();
+
+  const response = await fetch(buildApiUrl(`/run/${runId}/status`), { method: 'GET' });
+  const data = (await syntax.json.parse(response)) as WorkflowRunStatusResponse | null;
+
+  if (!response.ok || !data) {
+    const detail = data?.error || response.statusText || runId;
+    throw new WorkflowApiError(`${RUN_GENERIC} (${detail})`, {
+      payload: data ?? undefined,
+      status: response.status,
+    });
+  }
+
+  return data;
 };
 //#endregion
 

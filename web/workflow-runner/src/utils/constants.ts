@@ -43,7 +43,9 @@ export const ERROR_MESSAGES = {
 export const NOTIFICATION_MESSAGES = {
   NO_WORKFLOWS_AVAILABLE: 'No workflows available from the API.',
   NO_WORKFLOW_SELECTED: 'No workflow selected.',
+  WORKFLOW_CANCELLED: 'Workflow run cancelled.',
   WORKFLOW_COMPLETED: 'Workflow execution completed successfully.',
+  WORKFLOW_STATUS_FAILED: 'Failed to fetch workflow status.',
   WORKFLOWS_LOAD_FAILED: 'Failed to load workflows.',
 } as const;
 //#endregion
@@ -59,6 +61,7 @@ export const STATUS_MESSAGES = {
   RUNNING_DISPATCHING_WORKFLOW: 'Dispatching workflow...',
   RUNNING_INITIALIZING: 'Initializing...',
   RUNNING_LOADING_WORKFLOWS: 'Loading workflows...',
+  RUNNING_POLLING_WORKFLOW: 'Processing workflow...',
   RUNNING_SUBMITTING_WORKFLOW: 'Submitting workflow...',
   RUNNING_UPLOAD_COMPLETED: 'File uploaded...',
   RUNNING_UPLOADING_FILE: 'Uploading file...',

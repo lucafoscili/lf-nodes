@@ -22,7 +22,6 @@ def _configure(prompt: Dict[str, Any], inputs: Dict[str, Any]) -> None:
             parsed_json = convert_to_json(json_input)
             if parsed_json is None:
                 raise InputValidationError(name)
-            # Comfy treats bare lists as links, so lists must be wrapped.
             if isinstance(parsed_json, list):
                 inputs_map["json_input"] = {"__value__": parsed_json}
             else:
@@ -49,6 +48,7 @@ input_json = WorkflowCell(
         },
         "lfHtmlAttributes": {
             "autocomplete": "off",
+            "name": "json",
             "type": "text"
         },
         "lfLabel": "JSON Object",

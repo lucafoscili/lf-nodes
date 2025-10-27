@@ -8,13 +8,14 @@ import uuid
 
 from aiohttp import web
 from pathlib import Path
-from typing import Any, Dict, Iterable, Optional
+from typing import Any, Dict, Iterable, Optional, Tuple
 from server import PromptServer
 
 from .config import CONFIG as RUNNER_CONFIG
 from .registry import InputValidationError, get_workflow, list_workflows
 from ..utils.constants import API_ROUTE_PREFIX, NOT_FND_HTML
 from ..utils.helpers.conversion import json_safe
+from .job_manager import JobStatus, create_job, get_job, set_job_status
 
 # Dev dotenv loader: load `.env` for local dev. The loader will run if either:
 #  - DEV_ENV=1 is already set in the environment, OR
@@ -165,6 +166,127 @@ async def _wait_for_completion(prompt_id: str, timeout_seconds: float = 180.0) -
         await asyncio.sleep(0.35)
 # endregion
 
+def _emit_run_progress(run_id: str, message: str, **extra: Any) -> None:
+    payload = {"run_id": run_id, "message": message}
+    if extra:
+        payload.update(extra)
+    try:
+        PromptServer.instance.send_sync("lf-runner:progress", payload)
+    except Exception:
+        logging.exception("Failed to send progress event for run %s", run_id)
+
+# region Workflow execution
+async def execute_workflow(payload: Dict[str, Any], run_id: str) -> Tuple[JobStatus, Dict[str, Any], int]:
+    workflow_id = payload.get("workflowId")
+    inputs = payload.get("inputs", {})
+    if not isinstance(inputs, dict):
+        response = _make_run_payload(
+            detail="inputs must be an object",
+            error_message="invalid_inputs",
+        )
+        return JobStatus.FAILED, response, 400
+
+    definition = get_workflow(workflow_id or "")
+    if definition is None:
+        response = _make_run_payload(
+            detail=f"No workflow found for id '{workflow_id}'.",
+            error_message="unknown_workflow",
+        )
+        return JobStatus.FAILED, response, 404
+
+    try:
+        prompt = definition.load_prompt()
+        definition.configure_prompt(prompt, inputs)
+    except FileNotFoundError as exc:
+        response = _make_run_payload(detail=str(exc), error_message="missing_source")
+        return JobStatus.FAILED, response, 400
+    except InputValidationError as exc:
+        response = _make_run_payload(
+            detail=str(exc),
+            error_message="invalid_input",
+            error_input=getattr(exc, "input_name", None),
+        )
+        return JobStatus.FAILED, response, 400
+    except ValueError as exc:
+        response = _make_run_payload(detail=str(exc), error_message="invalid_input")
+        return JobStatus.FAILED, response, 400
+    except Exception as exc:
+        logging.exception("Failed to prepare workflow '%s': %s", workflow_id, exc)
+        response = _make_run_payload(detail=str(exc), error_message="configuration_failed")
+        return JobStatus.FAILED, response, 500
+
+    prompt_id = payload.get("promptId") or uuid.uuid4().hex
+    validation = await execution.validate_prompt(prompt_id, prompt, None)
+    if not validation[0]:
+        response = _make_run_payload(
+            detail=validation[1],
+            error_message="validation_failed",
+            history={"outputs": {}, "node_errors": json_safe(validation[3])},
+        )
+        return JobStatus.FAILED, response, 400
+
+    server = PromptServer.instance
+    queue_number = server.number
+    server.number += 1
+
+    extra_data = {"lf_nodes": {"workflow_id": workflow_id, "run_id": run_id}}
+    extra_data.update(payload.get("extraData", {}))
+
+    server.prompt_queue.put((queue_number, prompt_id, prompt, extra_data, validation[2]))
+    _emit_run_progress(run_id, "workflow_queued", prompt_id=prompt_id)
+
+    try:
+        history_entry = await _wait_for_completion(prompt_id)
+    except TimeoutError as exc:
+        response = _make_run_payload(detail=str(exc), error_message="timeout")
+        return JobStatus.FAILED, response, 504
+
+    status = history_entry.get("status") or {}
+    status_str = status.get("status_str", "unknown")
+    http_status = 200 if status_str == "success" else 500
+
+    preferred_output = None
+    try:
+        outputs_in_history = set((history_entry.get("outputs") or {}).keys())
+        validated_outputs = (
+            validation[2] if isinstance(validation, (list, tuple)) and len(validation) > 2 else []
+        )
+        for output_name in validated_outputs:
+            if output_name in outputs_in_history:
+                preferred_output = output_name
+                break
+        if preferred_output is None:
+            for output_name, output_value in (history_entry.get("outputs") or {}).items():
+                try:
+                    if isinstance(output_value, dict) and (
+                        output_value.get("images") or output_value.get("lf_images")
+                    ):
+                        preferred_output = output_name
+                        break
+                except Exception:
+                    continue
+    except Exception:
+        preferred_output = None
+
+    sanitized = _sanitize_history(history_entry)
+    history_outputs = sanitized.get("outputs", {}) if isinstance(sanitized, dict) else {}
+    if status_str == "success":
+        response = _make_run_payload(
+            detail="success",
+            history={"outputs": history_outputs},
+            preferred_output=preferred_output,
+        )
+        return JobStatus.SUCCEEDED, response, http_status
+
+    response = _make_run_payload(
+        detail=status_str or "error",
+        error_message="execution_failed",
+        history={"outputs": history_outputs},
+        preferred_output=preferred_output,
+    )
+    return JobStatus.FAILED, response, http_status
+# endregion
+
 # region Workflow runner page
 @PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/workflow-runner")
 async def route_workflow_runner_page(_: web.Request) -> web.Response:
@@ -187,97 +309,66 @@ async def route_run_workflow(request: web.Request) -> web.Response:
         payload = await request.json()
     except Exception as exc:
         logging.warning("Failed to parse workflow request payload: %s", exc)
-        return web.json_response(_make_run_payload(detail=str(exc), error_message="invalid_json"), status=400)
-
-    workflow_id = payload.get("workflowId")
-    inputs = payload.get("inputs", {})
-    if not isinstance(inputs, dict):
         return web.json_response(
-            _make_run_payload(detail="inputs must be an object", error_message="invalid_inputs"),
+            _make_run_payload(detail=str(exc), error_message="invalid_json"),
             status=400,
         )
 
-    definition = get_workflow(workflow_id or "")
-    if definition is None:
+    if not isinstance(payload, dict):
         return web.json_response(
-            _make_run_payload(detail=f"No workflow found for id '{workflow_id}'.", error_message="unknown_workflow"),
-            status=404,
-        )
-
-    try:
-        prompt = definition.load_prompt()
-        definition.configure_prompt(prompt, inputs)
-    except FileNotFoundError as exc:
-        return web.json_response(_make_run_payload(detail=str(exc), error_message="missing_source"), status=400)
-    except InputValidationError as exc:
-        return web.json_response(_make_run_payload(detail=str(exc), error_message="invalid_input", error_input=getattr(exc, 'input_name', None)), status=400)
-    except ValueError as exc:
-        return web.json_response(_make_run_payload(detail=str(exc), error_message="invalid_input"), status=400)
-    except Exception as exc:
-        logging.exception("Failed to prepare workflow '%s': %s", workflow_id, exc)
-        return web.json_response(_make_run_payload(detail=str(exc), error_message="configuration_failed"), status=500)
-
-    prompt_id = payload.get("promptId") or uuid.uuid4().hex
-    validation = await execution.validate_prompt(prompt_id, prompt, None)
-    if not validation[0]:
-        return web.json_response(
-            _make_run_payload(
-                detail=validation[1],
-                error_message="validation_failed",
-                history={"outputs": {}, "node_errors": json_safe(validation[3])},
-            ),
+            _make_run_payload(detail="Payload must be a JSON object.", error_message="invalid_payload"),
             status=400,
         )
 
-    server = PromptServer.instance
-    queue_number = server.number
-    server.number += 1
+    run_id = str(uuid.uuid4())
+    await create_job(run_id)
+    _emit_run_progress(run_id, "workflow_received")
 
-    extra_data = {"lf_nodes": {"workflow_id": workflow_id}}
-    extra_data.update(payload.get("extraData", {}))
+    async def worker() -> None:
+        try:
+            await set_job_status(run_id, JobStatus.RUNNING)
+            _emit_run_progress(run_id, "workflow_started")
 
-    server.prompt_queue.put((queue_number, prompt_id, prompt, extra_data, validation[2]))
+            job_status, response_body, http_status = await execute_workflow(payload, run_id)
+            job_result = {"http_status": http_status, "body": response_body}
 
-    try:
-        history_entry = await _wait_for_completion(prompt_id)
-    except TimeoutError as exc:
-        return web.json_response(_make_run_payload(detail=str(exc), error_message="timeout"), status=504)
+            await set_job_status(run_id, job_status, result=job_result)
+            _emit_run_progress(run_id, "workflow_completed", status=job_status.value)
+        except asyncio.CancelledError:
+            await set_job_status(run_id, JobStatus.CANCELLED, error="cancelled")
+            _emit_run_progress(run_id, "workflow_cancelled")
+            raise
+        except Exception as exc:
+            logging.exception("Workflow run %s failed unexpectedly: %s", run_id, exc)
+            error_payload = _make_run_payload(detail=str(exc), error_message="unhandled_exception")
+            job_result = {"http_status": 500, "body": error_payload}
+            await set_job_status(run_id, JobStatus.FAILED, error=str(exc), result=job_result)
+            _emit_run_progress(run_id, "workflow_failed", error=str(exc))
 
-    status = history_entry.get("status") or {}
-    status_str = status.get("status_str", "unknown")
-    http_status = 200 if status_str == "success" else 500
+    PromptServer.instance.loop.create_task(worker())
 
-    preferred_output = None
-    try:
-        outputs_in_history = set((history_entry.get('outputs') or {}).keys())
-        validated_outputs = validation[2] if isinstance(validation, (list, tuple)) and len(validation) > 2 else []
-        for o in validated_outputs:
-            if o in outputs_in_history:
-                preferred_output = o
-                break
-        if preferred_output is None:
-            for o, v in (history_entry.get('outputs') or {}).items():
-                try:
-                    if isinstance(v, dict) and (v.get('images') or v.get('lf_images')):
-                        preferred_output = o
-                        break
-                except Exception:
-                    continue
-    except Exception:
-        preferred_output = None
+    return web.json_response({"run_id": run_id}, status=202)
 
-    sanitized = _sanitize_history(history_entry)
-    history_outputs = sanitized.get("outputs", {}) if isinstance(sanitized, dict) else {}
-    if status_str == "success":
-        return web.json_response(
-            _make_run_payload(detail="success", history={"outputs": history_outputs}, preferred_output=preferred_output),
-            status=200,
-        )
-    else:
-        return web.json_response(
-            _make_run_payload(detail=status_str or "error", error_message="execution_failed", history={"outputs": history_outputs}, preferred_output=preferred_output),
-            status=http_status,
-        )
+
+@PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/run/{{run_id}}/status")
+async def route_run_status(request: web.Request) -> web.Response:
+    run_id = request.match_info.get("run_id")
+    if not run_id:
+        raise web.HTTPNotFound(text="Unknown run id")
+
+    job = await get_job(run_id)
+    if job is None:
+        raise web.HTTPNotFound(text="Unknown run id")
+
+    is_terminal = job.status in {JobStatus.SUCCEEDED, JobStatus.FAILED, JobStatus.CANCELLED}
+    payload = {
+        "run_id": job.id,
+        "status": job.status.value,
+        "created_at": job.created_at,
+        "error": job.error,
+        "result": job.result if is_terminal else None,
+    }
+    return web.json_response(payload)
 # endregion
 
 # region Static assets

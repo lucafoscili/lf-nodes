@@ -1,9 +1,5 @@
 import { WORKFLOW_CLASSES } from '../elements/main.workflow';
-import {
-  runWorkflowRequest,
-  uploadWorkflowFiles,
-  WorkflowApiError,
-} from '../services/workflow-service';
+import { runWorkflow, uploadWorkflowFiles, WorkflowApiError } from '../services/workflow-service';
 import { WorkflowCellStatus, WorkflowUICells } from '../types/section';
 import { WorkflowStore } from '../types/state';
 import { DEBUG_MESSAGES, NOTIFICATION_MESSAGES, STATUS_MESSAGES } from '../utils/constants';
@@ -97,10 +93,9 @@ const _setCellStatus = (store: WorkflowStore, id: string, status: WorkflowCellSt
 //#region Dispatcher
 export const workflowDispatcher = async (store: WorkflowStore) => {
   const { INPUTS_COLLECTED } = DEBUG_MESSAGES;
-  const { NO_WORKFLOW_SELECTED, WORKFLOW_COMPLETED } = NOTIFICATION_MESSAGES;
+  const { NO_WORKFLOW_SELECTED } = NOTIFICATION_MESSAGES;
   const {
     ERROR_RUNNING_WORKFLOW,
-    IDLE,
     RUNNING_DISPATCHING_WORKFLOW,
     RUNNING_SUBMITTING_WORKFLOW,
   } = STATUS_MESSAGES;
@@ -145,15 +140,9 @@ export const workflowDispatcher = async (store: WorkflowStore) => {
   try {
     state.mutate.status('running', RUNNING_DISPATCHING_WORKFLOW);
 
-    const payload = await runWorkflowRequest(id, inputs);
-
-    state.mutate.results(payload.history?.outputs ? { ...payload.history.outputs } : null);
-    state.mutate.notifications.add({
-      id: performance.now().toString(),
-      message: WORKFLOW_COMPLETED,
-      status: 'success',
-    });
-    state.mutate.status('idle', IDLE);
+    state.mutate.results(null);
+    const runId = await runWorkflow({ workflowId: id, inputs });
+    state.mutate.runId(runId);
   } catch (error) {
     state.mutate.status('error', ERROR_RUNNING_WORKFLOW);
     if (error instanceof WorkflowApiError) {

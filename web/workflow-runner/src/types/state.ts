@@ -13,11 +13,13 @@ export interface WorkflowStore {
 //#region State
 export interface WorkflowState {
   current: WorkflowStateCurrent;
+  currentRunId: string | null;
   isDebug: boolean;
   manager: WorkflowManager | null;
-  notifications: WorkflowStateNotification[];
-  queuedJobs: number;
   mutate: WorkflowStateMutators;
+  notifications: WorkflowStateNotification[];
+  pollingTimer: number | null;
+  queuedJobs: number;
   results: WorkflowNodeResults | null;
   workflows: WorkflowAPIDataset;
 }
@@ -35,8 +37,10 @@ export interface WorkflowStateMutators {
     removeById: (id: string) => void;
     removeByIndex: (index: number) => void;
   };
+  pollingTimer: (timerId: number | null) => void;
   queuedJobs: (count: number) => void;
   results: (results: WorkflowNodeResults | null) => void;
+  runId: (runId: string | null) => void;
   status: (status: WorkflowStatus, message?: string) => void;
   workflow: (id: string) => void;
   workflows: (workflows: WorkflowAPIDataset) => void;

@@ -83,6 +83,7 @@ input_name = WorkflowCell(
     props={
         "lfHtmlAttributes": {
             "autocomplete": "off",
+            "name": "icon_name",
             "type": "text"
         },
         "lfLabel": "Icon name",
@@ -101,9 +102,10 @@ input_colors = WorkflowCell(
     props={
         "lfHtmlAttributes": {
             "autocomplete": "off",
-            "type": "number",
             "min": 1,
             "max": 256,
+            "name": "number_of_colors",
+            "type": "number",
         },
         "lfLabel": "Number of colors",
         "lfHelper": {
