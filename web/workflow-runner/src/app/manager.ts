@@ -16,6 +16,7 @@ import {
   WorkflowCellType,
 } from '../types/api';
 import {
+  RoutingController,
   RunLifecycleController,
   WorkflowDispatchers,
   WorkflowManager,
@@ -23,30 +24,23 @@ import {
   WorkflowUIItem,
 } from '../types/manager';
 import { WorkflowCellStatus, WorkflowSectionController, WorkflowUICells } from '../types/section';
-import { WorkflowRoute, WorkflowRunEntry, WorkflowStore, WorkflowView } from '../types/state';
+import { WorkflowRunEntry, WorkflowStore, WorkflowView } from '../types/state';
 import { NOTIFICATION_MESSAGES, STATUS_MESSAGES } from '../utils/constants';
 import { createPollingController } from './polling';
-import {
-  parseRouteFromLocation,
-  replaceRouteInHistory,
-  routesEqual,
-  subscribeToRouteChanges,
-} from './router';
+import { createRoutingController } from './routing';
 import { createRunLifecycle } from './runs';
 import { sectionsForView } from './sections';
 import { initState } from './state';
 import { createWorkflowRunnerStore } from './store';
+import { selectRun } from './store-actions';
 
 export class LfWorkflowRunnerManager implements WorkflowManager {
   //#region Initialization
   #APP_ROOT: HTMLDivElement;
-  #CURRENT_ROUTE: WorkflowRoute | null;
   #DISPATCHERS: WorkflowDispatchers;
   #FRAMEWORK = getLfFramework();
-  #IS_APPLYING_ROUTE = false;
-  #PENDING_ROUTE: WorkflowRoute | null;
   #POLLING: WorkflowPollingController;
-  #ROUTE_UNSUBSCRIBE?: () => void;
+  #ROUTING: RoutingController;
   #RUN_LIFECYCLE: RunLifecycleController;
   #SECTIONS: {
     actionButton: WorkflowSectionController;
@@ -91,12 +85,13 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
       runLifecycle: this.#RUN_LIFECYCLE,
       store: this.#STORE,
     });
+    this.#ROUTING = createRoutingController({ store: this.#STORE });
 
     const state = this.#STORE.getState();
 
     state.mutate.manager(this);
 
-    this.#initializeRouter();
+    this.#ROUTING.initialize();
     this.#initializeFramework();
     this.#initializeLayout();
 
@@ -115,7 +110,7 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
       })
       .then(() => {
         state.mutate.status('idle', IDLE_WORKFLOWS_LOADED);
-        this.#updateRouteFromState();
+        this.#ROUTING.updateRouteFromState();
       });
 
     this.#POLLING.startQueuePolling();
@@ -147,13 +142,6 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
       this.#SECTIONS.dev.render();
     }
   }
-  #initializeRouter() {
-    this.#CURRENT_ROUTE = parseRouteFromLocation();
-    this.#PENDING_ROUTE = this.#CURRENT_ROUTE;
-    this.#ROUTE_UNSUBSCRIBE = subscribeToRouteChanges((route) => {
-      this.#handleRouteChange(route);
-    });
-  }
   #loadWorkflows = async () => {
     const { NO_WORKFLOWS_AVAILABLE } = NOTIFICATION_MESSAGES;
 
@@ -171,7 +159,7 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
     state.mutate.workflows(workflows);
 
     const firstWorkflow = workflows.nodes?.[0];
-    const route = this.#PENDING_ROUTE;
+    const route = this.#ROUTING.getPendingRoute();
     const shouldSelectDefault =
       !route ||
       (!route.workflowId && (route.view === 'workflow' || route.view === 'history')) ||
@@ -181,7 +169,7 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
       state.mutate.workflow(firstWorkflow.id);
     }
 
-    this.#applyPendingRouteIfNeeded();
+    this.#ROUTING.applyPendingRouteIfNeeded();
   };
   #setInputStatus(inputId: string, status: WorkflowCellStatus) {
     const elements = this.uiRegistry.get();
@@ -205,8 +193,8 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
     let lastRunId = st.currentRunId;
     let lastRunsRef = st.runs;
     let lastSelectedRunId = st.selectedRunId;
-    let lastWorkflowsCount = st.workflows?.nodes?.length ?? 0;
     let lastView = st.view;
+    let lastWorkflowsCount = st.workflows?.nodes?.length ?? 0;
 
     let scheduled = false;
     const needs = {
@@ -313,111 +301,8 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
           Object.keys(needs).forEach((k) => (needs[k] = false));
         });
       }
-      this.#updateRouteFromState();
+      this.#ROUTING.updateRouteFromState();
     });
-  }
-  //#endregion
-
-  //#region Routing
-  #applyPendingRouteIfNeeded() {
-    if (this.#PENDING_ROUTE) {
-      const route = this.#PENDING_ROUTE;
-      this.#PENDING_ROUTE = null;
-      this.#applyRoute(route, false);
-    } else {
-      this.#updateRouteFromState();
-    }
-  }
-  #applyRoute(route: WorkflowRoute, allowDefer = true) {
-    if (allowDefer && !this.#hasWorkflowsLoaded()) {
-      this.#PENDING_ROUTE = route;
-      return;
-    }
-
-    this.#IS_APPLYING_ROUTE = true;
-    this.#PENDING_ROUTE = null;
-    try {
-      const state = this.#STORE.getState();
-      let workflowId = route.workflowId ?? null;
-      if (workflowId && this.#workflowExists(workflowId) && state.current.id !== workflowId) {
-        state.mutate.workflow(workflowId);
-      } else if (workflowId && !this.#workflowExists(workflowId)) {
-        workflowId = state.current.id ?? null;
-      }
-
-      switch (route.view) {
-        case 'home':
-          state.mutate.selectRun(null);
-          state.mutate.results(null);
-          state.mutate.view('home');
-          break;
-        case 'history':
-          state.mutate.selectRun(null);
-          state.mutate.results(null);
-          state.mutate.view('history');
-          break;
-        case 'run':
-          if (route.runId) {
-            state.mutate.selectRun(route.runId);
-            state.mutate.view('run');
-          } else {
-            state.mutate.selectRun(null);
-            state.mutate.results(null);
-            state.mutate.view('workflow');
-          }
-          break;
-        case 'workflow':
-        default:
-          state.mutate.selectRun(null);
-          state.mutate.results(null);
-          state.mutate.view('workflow');
-          break;
-      }
-    } finally {
-      this.#IS_APPLYING_ROUTE = false;
-      this.#updateRouteFromState();
-    }
-  }
-  #computeRouteFromState(): WorkflowRoute {
-    const state = this.#STORE.getState();
-    const workflowId = state.current.id ?? undefined;
-
-    switch (state.view) {
-      case 'home':
-        return { view: 'home' };
-      case 'history':
-        return { view: 'history', workflowId };
-      case 'run':
-        if (state.selectedRunId) {
-          return { view: 'run', runId: state.selectedRunId, workflowId };
-        }
-        return workflowId ? { view: 'workflow', workflowId } : { view: 'workflow' };
-      case 'workflow':
-      default:
-        return workflowId ? { view: 'workflow', workflowId } : { view: 'workflow' };
-    }
-  }
-  #handleRouteChange(route: WorkflowRoute) {
-    this.#PENDING_ROUTE = route;
-    this.#applyRoute(route);
-  }
-  #hasWorkflowsLoaded() {
-    const { workflows } = this.#STORE.getState();
-    return Array.isArray(workflows?.nodes) && workflows.nodes.length > 0;
-  }
-  #updateRouteFromState(precomputed?: WorkflowRoute) {
-    if (this.#IS_APPLYING_ROUTE) {
-      return;
-    }
-    const nextRoute = precomputed ?? this.#computeRouteFromState();
-    if (!routesEqual(nextRoute, this.#CURRENT_ROUTE)) {
-      this.#CURRENT_ROUTE = nextRoute;
-      replaceRouteInHistory(nextRoute);
-    }
-  }
-  #workflowExists(workflowId: string) {
-    const { workflows } = this.#STORE.getState();
-    return Boolean(workflows?.nodes?.some((node) => node.id === workflowId));
   }
   //#endregion
 
@@ -433,6 +318,28 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
   }
   //#endregion
 
+  //#region Runs
+  runs = {
+    all: (): WorkflowRunEntry[] => {
+      return [...this.#STORE.getState().runs];
+    },
+    get: (runId: string): WorkflowRunEntry | null => {
+      const { runs } = this.#STORE.getState();
+      return runs.find((run) => run.runId === runId) || null;
+    },
+    select: (runId: string | null, nextView?: WorkflowView) => {
+      selectRun(this.#STORE, runId, nextView);
+    },
+    selected: (): WorkflowRunEntry | null => {
+      const { runs, selectedRunId } = this.#STORE.getState();
+      if (!selectedRunId) {
+        return null;
+      }
+      return runs.find((run) => run.runId === selectedRunId) || null;
+    },
+  };
+  //#endregion
+
   //#region UI registry
   uiRegistry = {
     delete: () => {
@@ -446,10 +353,7 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
         }
       }
       this.#UI_REGISTRY.delete(this);
-      if (this.#ROUTE_UNSUBSCRIBE) {
-        this.#ROUTE_UNSUBSCRIBE();
-        this.#ROUTE_UNSUBSCRIBE = undefined;
-      }
+      this.#ROUTING.destroy();
     },
     get: () => {
       return this.#UI_REGISTRY.get(this);
@@ -469,37 +373,6 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
       const elements = this.#UI_REGISTRY.get(this) || {};
       elements[elementId] = element;
       this.#UI_REGISTRY.set(this, elements);
-    },
-  };
-  //#endregion
-
-  //#region Runs
-  runs = {
-    all: (): WorkflowRunEntry[] => {
-      return [...this.#STORE.getState().runs];
-    },
-    get: (runId: string): WorkflowRunEntry | null => {
-      const { runs } = this.#STORE.getState();
-      return runs.find((run) => run.runId === runId) || null;
-    },
-    select: (runId: string | null, nextView?: WorkflowView) => {
-      const state = this.#STORE.getState();
-      state.mutate.selectRun(runId);
-      if (nextView) {
-        state.mutate.view(nextView);
-      } else {
-        state.mutate.view(runId ? 'run' : 'workflow');
-      }
-      if (!runId) {
-        state.mutate.results(null);
-      }
-    },
-    selected: (): WorkflowRunEntry | null => {
-      const { runs, selectedRunId } = this.#STORE.getState();
-      if (!selectedRunId) {
-        return null;
-      }
-      return runs.find((run) => run.runId === selectedRunId) || null;
     },
   };
   //#endregion

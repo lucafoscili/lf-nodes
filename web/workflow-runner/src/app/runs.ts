@@ -1,6 +1,13 @@
 import { WorkflowNodeResults, WorkflowRunStatus, WorkflowRunStatusResponse } from '../types/api';
 import { CreateRunLifecycleOptions, RunLifecycleController } from '../types/manager';
 import { NOTIFICATION_MESSAGES, STATUS_MESSAGES } from '../utils/constants';
+import {
+  addNotification,
+  setResults,
+  setRunInFlight,
+  setStatus,
+  upsertRun,
+} from './store-actions';
 
 //#region Helpers
 const _coerceTimestamp = (value: number | null | undefined, fallback: number) => {
@@ -29,9 +36,8 @@ export const createRunLifecycle = ({
 
   //#region Progress update
   const updateProgress = (response: WorkflowRunStatusResponse) => {
-    const state = store.getState();
     const now = Date.now();
-    state.mutate.runs.upsert({
+    upsertRun(store, {
       runId: response.run_id,
       createdAt: _coerceTimestamp(response.created_at, now),
       updatedAt: now,
@@ -50,7 +56,7 @@ export const createRunLifecycle = ({
     const outputs = _extractRunOutputs(response);
     const now = Date.now();
 
-    state.mutate.runs.upsert({
+    upsertRun(store, {
       runId,
       createdAt: _coerceTimestamp(response.created_at, now),
       updatedAt: now,
@@ -62,16 +68,16 @@ export const createRunLifecycle = ({
     });
 
     if (state.selectedRunId === runId) {
-      state.mutate.results(outputs);
+      setResults(store, outputs);
     }
 
-    state.mutate.notifications.add({
+    addNotification(store, {
       id: performance.now().toString(),
       message: WORKFLOW_COMPLETED,
       status: 'success',
     });
 
-    state.mutate.status('idle', STATUS_MESSAGES.IDLE);
+    setStatus(store, 'idle', STATUS_MESSAGES.IDLE);
   };
   //#endregion
 
@@ -88,7 +94,7 @@ export const createRunLifecycle = ({
     const outputs = _extractRunOutputs(response);
     const now = Date.now();
 
-    state.mutate.runs.upsert({
+    upsertRun(store, {
       runId,
       createdAt: _coerceTimestamp(response.created_at, now),
       updatedAt: now,
@@ -100,20 +106,20 @@ export const createRunLifecycle = ({
     });
 
     if (state.selectedRunId === runId) {
-      state.mutate.results(outputs);
+      setResults(store, outputs);
     }
 
     if (payload?.error?.input) {
       setInputStatus?.(payload.error.input, 'error');
     }
 
-    state.mutate.notifications.add({
+    addNotification(store, {
       id: performance.now().toString(),
       message: `Workflow run failed: ${detail}`,
       status: 'danger',
     });
 
-    state.mutate.status('error', STATUS_MESSAGES.ERROR_RUNNING_WORKFLOW);
+    setStatus(store, 'error', STATUS_MESSAGES.ERROR_RUNNING_WORKFLOW);
   };
   //#endregion
 
@@ -125,7 +131,7 @@ export const createRunLifecycle = ({
     const message = response.error || WORKFLOW_CANCELLED;
     const now = Date.now();
 
-    state.mutate.runs.upsert({
+    upsertRun(store, {
       runId,
       createdAt: _coerceTimestamp(response.created_at, now),
       updatedAt: now,
@@ -137,16 +143,16 @@ export const createRunLifecycle = ({
     });
 
     if (state.selectedRunId === runId) {
-      state.mutate.results(outputs);
+      setResults(store, outputs);
     }
 
-    state.mutate.notifications.add({
+    addNotification(store, {
       id: performance.now().toString(),
       message,
       status: 'warning',
     });
 
-    state.mutate.status('idle', STATUS_MESSAGES.IDLE);
+    setStatus(store, 'idle', STATUS_MESSAGES.IDLE);
   };
   //#endregion
 
@@ -170,7 +176,7 @@ export const createRunLifecycle = ({
           state.current.status !== 'running' ||
           state.current.message !== STATUS_MESSAGES.RUNNING_POLLING_WORKFLOW
         ) {
-          state.mutate.status('running', STATUS_MESSAGES.RUNNING_POLLING_WORKFLOW);
+          setStatus(store, 'running', STATUS_MESSAGES.RUNNING_POLLING_WORKFLOW);
         }
         break;
       case 'succeeded':
@@ -181,7 +187,7 @@ export const createRunLifecycle = ({
     }
 
     if (status === 'succeeded' || status === 'failed' || status === 'cancelled') {
-      state.mutate.runId(null);
+      setRunInFlight(store, null);
       return { shouldStopPolling: true };
     }
 
@@ -194,9 +200,9 @@ export const createRunLifecycle = ({
     const state = store.getState();
     const detail = error instanceof Error ? error.message : STATUS_MESSAGES.ERROR_RUNNING_WORKFLOW;
 
-    state.mutate.status('error', STATUS_MESSAGES.ERROR_RUNNING_WORKFLOW);
+    setStatus(store, 'error', STATUS_MESSAGES.ERROR_RUNNING_WORKFLOW);
 
-    state.mutate.notifications.add({
+    addNotification(store, {
       id: performance.now().toString(),
       message: `${WORKFLOW_STATUS_FAILED}: ${detail}`,
       status: 'danger',
@@ -205,18 +211,18 @@ export const createRunLifecycle = ({
     const runId = state.currentRunId;
     if (runId) {
       const now = Date.now();
-      state.mutate.runs.upsert({
+      upsertRun(store, {
         runId,
         updatedAt: now,
         status: 'failed' as WorkflowRunStatus,
         error: detail,
       });
       if (state.selectedRunId === runId) {
-        state.mutate.results(null);
+        setResults(store, null);
       }
     }
 
-    state.mutate.runId(null);
+    setRunInFlight(store, null);
 
     return { shouldStopPolling: true };
   };

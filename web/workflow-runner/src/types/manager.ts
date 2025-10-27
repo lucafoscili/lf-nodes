@@ -8,7 +8,7 @@ import {
   WorkflowRunStatusResponse,
 } from './api';
 import { WorkflowCellStatus } from './section';
-import { WorkflowRunEntry, WorkflowStore, WorkflowView } from './state';
+import { WorkflowRoute, WorkflowRunEntry, WorkflowStore, WorkflowView } from './state';
 
 //#region Dispatchers
 export type WorkflowDispatcher = () => Promise<void>;
@@ -59,6 +59,19 @@ export interface WorkflowCreatePollingControllerOptions {
   queueIntervalMs?: number;
   runIntervalMs?: number;
   runLifecycle: RunLifecycleController;
+  store: WorkflowStore;
+}
+//#endregion
+
+//#region Routing
+export interface RoutingController {
+  applyPendingRouteIfNeeded: () => void;
+  destroy: () => void;
+  getPendingRoute: () => WorkflowRoute | null;
+  initialize: () => void;
+  updateRouteFromState: (precomputed?: WorkflowRoute) => void;
+}
+export interface CreateRoutingControllerOptions {
   store: WorkflowStore;
 }
 //#endregion

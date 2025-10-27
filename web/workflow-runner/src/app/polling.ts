@@ -1,3 +1,4 @@
+import { POLLING_INTERVALS } from '../config';
 import { getRunStatus as fetchRunStatus } from '../services/workflow-service';
 import { ComfyRawQueueStatus } from '../types/api';
 import {
@@ -5,11 +6,6 @@ import {
   WorkflowPollingController,
 } from '../types/manager';
 import { parseCount } from '../utils/common';
-
-//#region Constants
-const DEFAULT_QUEUE_INTERVAL = 750;
-const DEFAULT_RUN_INTERVAL = 3000;
-//#endregion
 
 //#region Helpers
 const _defaultQueueFetcher = async (): Promise<ComfyRawQueueStatus> => {
@@ -26,8 +22,8 @@ const _defaultQueueFetcher = async (): Promise<ComfyRawQueueStatus> => {
 export const createPollingController = ({
   fetchQueueStatus = _defaultQueueFetcher,
   getRunStatus = fetchRunStatus,
-  queueIntervalMs = DEFAULT_QUEUE_INTERVAL,
-  runIntervalMs = DEFAULT_RUN_INTERVAL,
+  queueIntervalMs = POLLING_INTERVALS.queue,
+  runIntervalMs = POLLING_INTERVALS.run,
   runLifecycle,
   store,
 }: WorkflowCreatePollingControllerOptions): WorkflowPollingController => {

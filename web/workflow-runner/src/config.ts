@@ -13,6 +13,12 @@ export const DEFAULT_STATUS_MESSAGES: Record<WorkflowStatus, string> = {
 export const DEFAULT_THEME = runnerConfig.theme ?? 'dark';
 export const STATIC_ASSETS_PATH = runnerConfig.staticPaths.assets;
 export const STATIC_WORKFLOW_RUNNER_PATH = runnerConfig.staticPaths.workflowRunner;
+const DEFAULT_QUEUE_POLL_INTERVAL = 750;
+const DEFAULT_RUN_POLL_INTERVAL = 3000;
+export const POLLING_INTERVALS = {
+  queue: runnerConfig.polling?.queueIntervalMs ?? DEFAULT_QUEUE_POLL_INTERVAL,
+  run: runnerConfig.polling?.runIntervalMs ?? DEFAULT_RUN_POLL_INTERVAL,
+} as const;
 //#endregion
 
 //#region Helpers
