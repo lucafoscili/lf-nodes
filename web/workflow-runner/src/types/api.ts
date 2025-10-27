@@ -7,6 +7,10 @@ import {
 import { WorkflowStatus } from './state';
 
 //#region API
+export interface ComfyRawQueueStatus {
+  queue_pending: unknown;
+  queue_running: unknown;
+}
 export interface WorkflowAPIErrorOptions<T> {
   payload?: T;
   status?: number;

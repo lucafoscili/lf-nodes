@@ -1,10 +1,13 @@
 import {
+  ComfyRawQueueStatus,
   WorkflowAPIItem,
   WorkflowCellInputId,
   WorkflowCellsInputContainer,
   WorkflowCellsOutputContainer,
   WorkflowCellType,
+  WorkflowRunStatusResponse,
 } from './api';
+import { WorkflowCellStatus } from './section';
 import { WorkflowRunEntry, WorkflowStore, WorkflowView } from './state';
 
 //#region Dispatchers
@@ -40,5 +43,34 @@ export interface WorkflowManager {
     description: () => string;
     title: () => string;
   };
+}
+//#endregion
+
+//#region Polling
+export interface WorkflowPollingController {
+  beginRunPolling: (runId: string) => void;
+  startQueuePolling: () => void;
+  stopQueuePolling: () => void;
+  stopRunPolling: () => void;
+}
+export interface WorkflowCreatePollingControllerOptions {
+  fetchQueueStatus?: () => Promise<ComfyRawQueueStatus>;
+  getRunStatus?: (runId: string) => Promise<WorkflowRunStatusResponse>;
+  queueIntervalMs?: number;
+  runIntervalMs?: number;
+  runLifecycle: RunLifecycleController;
+  store: WorkflowStore;
+}
+//#endregion
+
+//#region Run Lifecycle
+export interface RunLifecycleController {
+  handlePollingError: (error: unknown) => { shouldStopPolling: boolean };
+  handleStatusResponse: (response: WorkflowRunStatusResponse) => { shouldStopPolling: boolean };
+  updateProgress: (response: WorkflowRunStatusResponse) => void;
+}
+export interface CreateRunLifecycleOptions {
+  setInputStatus?: (inputId: string, status: WorkflowCellStatus) => void;
+  store: WorkflowStore;
 }
 //#endregion

@@ -1,6 +1,7 @@
 import { getLfFramework } from '@lf-widgets/framework';
+import { HOME_PLACEHOLDER, sectionsForView } from '../app/sections';
 import { WorkflowMainSections, WorkflowSectionController } from '../types/section';
-import { WorkflowStore, WorkflowView } from '../types/state';
+import { WorkflowStore } from '../types/state';
 import { DEBUG_MESSAGES } from '../utils/constants';
 import { debugLog } from '../utils/debug';
 import { createInputsSection } from './main.inputs';
@@ -14,22 +15,6 @@ export const MAIN_CLASSES = {
   _: theme.bemClass(ROOT_CLASS),
   home: theme.bemClass(ROOT_CLASS, 'home'),
 } as const;
-//#endregion
-
-//#region Helpers
-const _sectionsForView = (view: WorkflowView): WorkflowMainSections[] => {
-  switch (view) {
-    case 'history':
-      return ['outputs'];
-    case 'home':
-      return [];
-    case 'run':
-      return ['results'];
-    case 'workflow':
-    default:
-      return ['inputs', 'outputs'];
-  }
-};
 //#endregion
 
 export const createMainSection = (store: WorkflowStore): WorkflowSectionController => {
@@ -91,7 +76,7 @@ export const createMainSection = (store: WorkflowStore): WorkflowSectionControll
     const { manager } = state;
     const { uiRegistry } = manager;
 
-    const resolvedSections = scope ?? _sectionsForView(state.view);
+    const resolvedSections = scope ?? sectionsForView(state.view);
     const scopeSet = new Set<WorkflowMainSections>(resolvedSections);
 
     const elements = uiRegistry.get();
@@ -142,7 +127,7 @@ export const createMainSection = (store: WorkflowStore): WorkflowSectionControll
       if (!elements[MAIN_CLASSES.home]) {
         const placeholder = document.createElement('div');
         placeholder.className = MAIN_CLASSES.home;
-        placeholder.textContent = 'Select a workflow to get started.';
+        placeholder.textContent = HOME_PLACEHOLDER;
         const root = elements[MAIN_CLASSES._] as HTMLElement | undefined;
         if (root) {
           root.appendChild(placeholder);

@@ -8,31 +8,32 @@ import { createHeaderSection } from '../elements/layout.header';
 import { createMainSection } from '../elements/layout.main';
 import { createNotificationsSection } from '../elements/layout.notifications';
 import { WORKFLOW_CLASSES } from '../elements/main.inputs';
-import { fetchWorkflowDefinitions, getRunStatus } from '../services/workflow-service';
+import { fetchWorkflowDefinitions } from '../services/workflow-service';
 import {
   WorkflowCellInputId,
   WorkflowCellsInputContainer,
   WorkflowCellsOutputContainer,
   WorkflowCellType,
-  WorkflowRunStatus,
-  WorkflowRunStatusResponse,
 } from '../types/api';
-import { WorkflowDispatchers, WorkflowManager, WorkflowUIItem } from '../types/manager';
 import {
-  WorkflowCellStatus,
-  WorkflowMainSections,
-  WorkflowSectionController,
-  WorkflowUICells,
-} from '../types/section';
+  RunLifecycleController,
+  WorkflowDispatchers,
+  WorkflowManager,
+  WorkflowPollingController,
+  WorkflowUIItem,
+} from '../types/manager';
+import { WorkflowCellStatus, WorkflowSectionController, WorkflowUICells } from '../types/section';
 import { WorkflowRoute, WorkflowRunEntry, WorkflowStore, WorkflowView } from '../types/state';
-import { parseCount } from '../utils/common';
 import { NOTIFICATION_MESSAGES, STATUS_MESSAGES } from '../utils/constants';
+import { createPollingController } from './polling';
 import {
   parseRouteFromLocation,
   replaceRouteInHistory,
   routesEqual,
   subscribeToRouteChanges,
 } from './router';
+import { createRunLifecycle } from './runs';
+import { sectionsForView } from './sections';
 import { initState } from './state';
 import { createWorkflowRunnerStore } from './store';
 
@@ -44,7 +45,9 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
   #FRAMEWORK = getLfFramework();
   #IS_APPLYING_ROUTE = false;
   #PENDING_ROUTE: WorkflowRoute | null;
+  #POLLING: WorkflowPollingController;
   #ROUTE_UNSUBSCRIBE?: () => void;
+  #RUN_LIFECYCLE: RunLifecycleController;
   #SECTIONS: {
     actionButton: WorkflowSectionController;
     dev: WorkflowSectionController;
@@ -78,6 +81,16 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
       main: createMainSection(this.#STORE),
       notifications: createNotificationsSection(this.#STORE),
     };
+    this.#RUN_LIFECYCLE = createRunLifecycle({
+      store: this.#STORE,
+      setInputStatus: (inputId, status) => {
+        this.#setInputStatus(inputId, status);
+      },
+    });
+    this.#POLLING = createPollingController({
+      runLifecycle: this.#RUN_LIFECYCLE,
+      store: this.#STORE,
+    });
 
     const state = this.#STORE.getState();
 
@@ -105,7 +118,7 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
         this.#updateRouteFromState();
       });
 
-    this.#startQueuePolling();
+    this.#POLLING.startQueuePolling();
   }
   //#endregion
 
@@ -170,253 +183,6 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
 
     this.#applyPendingRouteIfNeeded();
   };
-  #beginRunPolling(runId: string) {
-    const state = this.#STORE.getState();
-    this.#stopRunPolling();
-
-    let isPolling = false;
-    const poll = async () => {
-      if (isPolling) {
-        return;
-      }
-
-      const currentState = this.#STORE.getState();
-      if (currentState.currentRunId !== runId) {
-        return;
-      }
-
-      isPolling = true;
-      try {
-        const response = await getRunStatus(runId);
-        this.#handleRunStatusResponse(response);
-      } catch (error) {
-        this.#handleRunPollingError(error);
-      } finally {
-        isPolling = false;
-      }
-    };
-
-    poll();
-    const timerId = window.setInterval(poll, 3000);
-    state.mutate.pollingTimer(Number(timerId));
-  }
-  #startQueuePolling() {
-    setInterval(async () => {
-      try {
-        const resp = await fetch('/queue');
-        if (!resp.ok) {
-          throw new Error('Failed to fetch queue status');
-        }
-
-        const state = this.#STORE.getState();
-
-        const { queue_running, queue_pending } = (await resp.json()) as {
-          queue_pending: unknown;
-          queue_running: unknown;
-        };
-
-        const qPending = parseCount(queue_pending);
-        const qRunning = parseCount(queue_running);
-        const busy = qPending + qRunning;
-
-        const prev = state.queuedJobs ?? -1;
-        if (busy !== prev) {
-          state.mutate.queuedJobs(busy);
-        }
-      } catch (e) {
-        const state = this.#STORE.getState();
-
-        try {
-          const prev = state.queuedJobs ?? -1;
-          if (prev !== -1) {
-            state.mutate.queuedJobs(-1);
-          }
-        } catch (err) {}
-      }
-    }, 750);
-  }
-  #stopRunPolling() {
-    const state = this.#STORE.getState();
-    const timerId = state.pollingTimer;
-    if (typeof timerId === 'number') {
-      window.clearInterval(timerId);
-      state.mutate.pollingTimer(null);
-    }
-  }
-  #coerceTimestamp(value: number | null | undefined, fallback: number) {
-    if (typeof value === 'number' && Number.isFinite(value)) {
-      return value > 1e12 ? Math.round(value) : Math.round(value * 1000);
-    }
-    return fallback;
-  }
-  #updateRunProgress(response: WorkflowRunStatusResponse) {
-    const state = this.#STORE.getState();
-    const now = Date.now();
-    state.mutate.runs.upsert({
-      runId: response.run_id,
-      createdAt: this.#coerceTimestamp(response.created_at, now),
-      updatedAt: now,
-      status: response.status,
-      error: response.error ?? null,
-      httpStatus: response.result?.http_status ?? null,
-      resultPayload: response.result ?? null,
-    });
-  }
-  #handleRunPollingError(error: unknown) {
-    const state = this.#STORE.getState();
-    const detail = error instanceof Error ? error.message : STATUS_MESSAGES.ERROR_RUNNING_WORKFLOW;
-
-    state.mutate.status('error', STATUS_MESSAGES.ERROR_RUNNING_WORKFLOW);
-    state.mutate.notifications.add({
-      id: performance.now().toString(),
-      message: `${NOTIFICATION_MESSAGES.WORKFLOW_STATUS_FAILED}: ${detail}`,
-      status: 'danger',
-    });
-    const runId = state.currentRunId;
-    if (runId) {
-      const now = Date.now();
-      state.mutate.runs.upsert({
-        runId,
-        updatedAt: now,
-        status: 'failed' as WorkflowRunStatus,
-        error: detail,
-      });
-      if (state.selectedRunId === runId) {
-        state.mutate.results(null);
-      }
-    }
-    state.mutate.runId(null);
-    this.#stopRunPolling();
-  }
-  #handleRunStatusResponse(response: WorkflowRunStatusResponse) {
-    const state = this.#STORE.getState();
-
-    this.#updateRunProgress(response);
-    const { status } = response;
-
-    switch (status) {
-      case 'cancelled':
-        this.#handleRunCancellation(response);
-        break;
-      case 'failed':
-        this.#handleRunFailure(response);
-        break;
-      case 'pending':
-      case 'running':
-        if (
-          state.current.status !== 'running' ||
-          state.current.message !== STATUS_MESSAGES.RUNNING_POLLING_WORKFLOW
-        ) {
-          state.mutate.status('running', STATUS_MESSAGES.RUNNING_POLLING_WORKFLOW);
-        }
-        break;
-      case 'succeeded':
-        this.#handleRunSuccess(response);
-        break;
-      default:
-        break;
-    }
-
-    if (status === 'succeeded' || status === 'failed' || status === 'cancelled') {
-      this.#stopRunPolling();
-      state.mutate.runId(null);
-    }
-  }
-  #handleRunSuccess(response: WorkflowRunStatusResponse) {
-    const state = this.#STORE.getState();
-    const runId = response.run_id;
-    const outputs = this.#extractRunOutputs(response);
-    const now = Date.now();
-
-    state.mutate.runs.upsert({
-      runId,
-      createdAt: this.#coerceTimestamp(response.created_at, now),
-      updatedAt: now,
-      status: 'succeeded' as WorkflowRunStatus,
-      error: null,
-      outputs,
-      httpStatus: response.result?.http_status ?? null,
-      resultPayload: response.result ?? null,
-    });
-    if (state.selectedRunId === runId) {
-      state.mutate.results(outputs);
-    }
-    state.mutate.notifications.add({
-      id: performance.now().toString(),
-      message: NOTIFICATION_MESSAGES.WORKFLOW_COMPLETED,
-      status: 'success',
-    });
-    state.mutate.status('idle', STATUS_MESSAGES.IDLE);
-  }
-  #handleRunFailure(response: WorkflowRunStatusResponse) {
-    const state = this.#STORE.getState();
-    const payload = response.result?.body?.payload;
-    const runId = response.run_id;
-    const detail =
-      payload?.detail ||
-      payload?.error?.message ||
-      response.error ||
-      STATUS_MESSAGES.ERROR_RUNNING_WORKFLOW;
-    const outputs = this.#extractRunOutputs(response);
-    const now = Date.now();
-
-    state.mutate.runs.upsert({
-      runId,
-      createdAt: this.#coerceTimestamp(response.created_at, now),
-      updatedAt: now,
-      status: 'failed' as WorkflowRunStatus,
-      error: detail,
-      outputs,
-      httpStatus: response.result?.http_status ?? null,
-      resultPayload: response.result ?? null,
-    });
-    if (state.selectedRunId === runId) {
-      state.mutate.results(outputs);
-    }
-    if (payload?.error?.input) {
-      this.#setInputStatus(payload.error.input, 'error');
-    }
-    state.mutate.notifications.add({
-      id: performance.now().toString(),
-      message: `Workflow run failed: ${detail}`,
-      status: 'danger',
-    });
-    state.mutate.status('error', STATUS_MESSAGES.ERROR_RUNNING_WORKFLOW);
-  }
-  #handleRunCancellation(response: WorkflowRunStatusResponse) {
-    const state = this.#STORE.getState();
-    const runId = response.run_id;
-    const outputs = this.#extractRunOutputs(response);
-    const message = response.error || NOTIFICATION_MESSAGES.WORKFLOW_CANCELLED;
-    const now = Date.now();
-
-    state.mutate.runs.upsert({
-      runId,
-      createdAt: this.#coerceTimestamp(response.created_at, now),
-      updatedAt: now,
-      status: 'cancelled' as WorkflowRunStatus,
-      error: message,
-      outputs,
-      httpStatus: response.result?.http_status ?? null,
-      resultPayload: response.result ?? null,
-    });
-    if (state.selectedRunId === runId) {
-      state.mutate.results(outputs);
-    }
-    state.mutate.notifications.add({
-      id: performance.now().toString(),
-      message,
-      status: 'warning',
-    });
-    state.mutate.status('idle', STATUS_MESSAGES.IDLE);
-  }
-  #extractRunOutputs(response: WorkflowRunStatusResponse) {
-    const outputs = response.result?.body?.payload?.history?.outputs;
-    if (!outputs) {
-      return null;
-    }
-    return { ...outputs };
-  }
   #setInputStatus(inputId: string, status: WorkflowCellStatus) {
     const elements = this.uiRegistry.get();
     const cells = (elements?.[WORKFLOW_CLASSES.cells] as WorkflowUICells) || [];
@@ -458,9 +224,9 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
 
       if (state.currentRunId !== lastRunId) {
         if (state.currentRunId) {
-          this.#beginRunPolling(state.currentRunId);
+          this.#POLLING.beginRunPolling(state.currentRunId);
         } else {
-          this.#stopRunPolling();
+          this.#POLLING.stopRunPolling();
         }
         lastRunId = state.currentRunId;
       }
@@ -534,7 +300,7 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
                   }
                   break;
                 case 'main':
-                  const views = this.#sectionsForView(state.view);
+                  const views = sectionsForView(state.view);
                   section.render(views);
                   break;
                 default:
@@ -638,19 +404,6 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
   #hasWorkflowsLoaded() {
     const { workflows } = this.#STORE.getState();
     return Array.isArray(workflows?.nodes) && workflows.nodes.length > 0;
-  }
-  #sectionsForView(view: WorkflowView): WorkflowMainSections[] {
-    switch (view) {
-      case 'home':
-        return [];
-      case 'history':
-        return ['outputs'];
-      case 'run':
-        return ['results'];
-      case 'workflow':
-      default:
-        return ['inputs', 'outputs'];
-    }
   }
   #updateRouteFromState(precomputed?: WorkflowRoute) {
     if (this.#IS_APPLYING_ROUTE) {
