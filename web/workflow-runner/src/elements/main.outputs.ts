@@ -13,6 +13,7 @@ export const WORKFLOW_CLASSES = {
   _: theme.bemClass(ROOT_CLASS),
   empty: theme.bemClass(ROOT_CLASS, 'empty'),
   h4: theme.bemClass(ROOT_CLASS, 'title-h4'),
+  controls: theme.bemClass(ROOT_CLASS, 'controls'),
   item: theme.bemClass(ROOT_CLASS, 'item'),
   itemHeader: theme.bemClass(ROOT_CLASS, 'item-header'),
   itemMeta: theme.bemClass(ROOT_CLASS, 'item-meta'),
@@ -53,14 +54,22 @@ const _cloneOutputs = (outputs: WorkflowNodeResults | null) => {
 const _title = () => {
   const title = document.createElement('div');
   const h4 = document.createElement('h4');
+  const controls = document.createElement('div');
+  const toggle = document.createElement('lf-button') as HTMLLfButtonElement;
 
   title.className = WORKFLOW_CLASSES.title;
+  controls.className = WORKFLOW_CLASSES.controls;
 
   h4.className = WORKFLOW_CLASSES.h4;
 
   title.appendChild(h4);
+  title.appendChild(controls);
+  controls.appendChild(toggle);
 
-  return { h4, title };
+  toggle.lfStyling = 'flat';
+  toggle.lfUiSize = 'small';
+
+  return { h4, title, controls, toggle };
 };
 //#endregion
 
@@ -97,7 +106,7 @@ export const createOutputsSection = (store: WorkflowStore): WorkflowSectionContr
     const _root = document.createElement('section');
     _root.className = WORKFLOW_CLASSES._;
 
-    const { h4, title } = _title();
+    const { h4, title, toggle } = _title();
     const masonry = _masonry();
 
     _root.appendChild(title);
@@ -109,6 +118,7 @@ export const createOutputsSection = (store: WorkflowStore): WorkflowSectionContr
     uiRegistry.set(WORKFLOW_CLASSES.h4, h4);
     uiRegistry.set(WORKFLOW_CLASSES.masonry, masonry);
     uiRegistry.set(WORKFLOW_CLASSES.title, title);
+    uiRegistry.set(WORKFLOW_CLASSES.controls, toggle);
 
     debugLog(WORKFLOW_OUTPUTS_MOUNTED);
   };
@@ -127,7 +137,8 @@ export const createOutputsSection = (store: WorkflowStore): WorkflowSectionContr
 
     const h4 = elements[WORKFLOW_CLASSES.h4] as HTMLElement;
     const masonry = elements[WORKFLOW_CLASSES.masonry] as HTMLDivElement;
-    if (!h4 || !masonry) {
+    const toggle = elements[WORKFLOW_CLASSES.controls] as HTMLLfButtonElement;
+    if (!h4 || !masonry || !toggle) {
       return;
     }
 
@@ -138,6 +149,17 @@ export const createOutputsSection = (store: WorkflowStore): WorkflowSectionContr
 
     const runs = manager.runs.all();
     const selectedRunId = state.selectedRunId;
+    const isHistoryView = state.view === 'history';
+
+    toggle.lfLabel = isHistoryView ? 'Back to workflow view' : 'Open full history';
+    toggle.toggleAttribute('disabled', !runs.length && !isHistoryView);
+    toggle.onclick = () => {
+      if (isHistoryView) {
+        manager.runs.select(null, 'workflow');
+      } else {
+        manager.runs.select(null, 'history');
+      }
+    };
 
     if (!runs.length) {
       const empty = document.createElement('p');
@@ -192,7 +214,7 @@ export const createOutputsSection = (store: WorkflowStore): WorkflowSectionContr
       item.appendChild(meta);
 
       item.addEventListener('click', () => {
-        manager.runs.select(run.runId);
+        manager.runs.select(run.runId, 'run');
         const selected = manager.runs.get(run.runId);
         const selectedOutputs = _cloneOutputs(selected?.outputs ?? null);
         store.getState().mutate.results(selectedOutputs);

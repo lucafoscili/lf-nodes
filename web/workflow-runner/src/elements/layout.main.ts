@@ -1,6 +1,6 @@
 import { getLfFramework } from '@lf-widgets/framework';
 import { WorkflowMainSections, WorkflowSectionController } from '../types/section';
-import { WorkflowStore } from '../types/state';
+import { WorkflowStore, WorkflowView } from '../types/state';
 import { DEBUG_MESSAGES } from '../utils/constants';
 import { debugLog } from '../utils/debug';
 import { createInputsSection } from './main.inputs';
@@ -12,17 +12,33 @@ const { theme } = getLfFramework();
 const ROOT_CLASS = 'main-section';
 export const MAIN_CLASSES = {
   _: theme.bemClass(ROOT_CLASS),
+  home: theme.bemClass(ROOT_CLASS, 'home'),
 } as const;
+//#endregion
+
+//#region Helpers
+const _sectionsForView = (view: WorkflowView): WorkflowMainSections[] => {
+  switch (view) {
+    case 'history':
+      return ['outputs'];
+    case 'home':
+      return [];
+    case 'run':
+      return ['results'];
+    case 'workflow':
+    default:
+      return ['inputs', 'outputs'];
+  }
+};
 //#endregion
 
 export const createMainSection = (store: WorkflowStore): WorkflowSectionController => {
   //#region Local variables
   const { MAIN_DESTROYED, MAIN_MOUNTED, MAIN_UPDATED } = DEBUG_MESSAGES;
-  const DEFAULT_SCOPE: WorkflowMainSections[] = ['inputs', 'outputs'];
   const INPUTS = createInputsSection(store);
   const OUTPUTS = createOutputsSection(store);
   const RESULTS = createResultsSection(store);
-  let LAST_SCOPE = [...DEFAULT_SCOPE];
+  let LAST_SCOPE: WorkflowMainSections[] = [];
   //#endregion
 
   //#region Destroy
@@ -38,6 +54,7 @@ export const createMainSection = (store: WorkflowStore): WorkflowSectionControll
     INPUTS.destroy();
     OUTPUTS.destroy();
     RESULTS.destroy();
+    uiRegistry.remove(MAIN_CLASSES.home);
 
     debugLog(MAIN_DESTROYED);
   };
@@ -68,20 +85,17 @@ export const createMainSection = (store: WorkflowStore): WorkflowSectionControll
   //#endregion
 
   //#region Render
-  const render = (scope = [...DEFAULT_SCOPE]) => {
-    const snapshot = store.getState();
-    const sections = [...scope];
-    if ((snapshot.selectedRunId || snapshot.results) && !sections.includes('results')) {
-      sections.push('results');
-    }
+  const render = (scope?: WorkflowMainSections[]) => {
+    const state = store.getState();
 
-    const { manager } = store.getState();
+    const { manager } = state;
     const { uiRegistry } = manager;
 
-    const scopeSet = new Set<WorkflowMainSections>(sections as WorkflowMainSections[]);
+    const resolvedSections = scope ?? _sectionsForView(state.view);
+    const scopeSet = new Set<WorkflowMainSections>(resolvedSections);
 
     const elements = uiRegistry.get();
-    if (!elements || !scopeSet.size) {
+    if (!elements) {
       return;
     }
 
@@ -124,7 +138,23 @@ export const createMainSection = (store: WorkflowStore): WorkflowSectionControll
       }
     });
 
+    if (resolvedSections.length === 0) {
+      if (!elements[MAIN_CLASSES.home]) {
+        const placeholder = document.createElement('div');
+        placeholder.className = MAIN_CLASSES.home;
+        placeholder.textContent = 'Select a workflow to get started.';
+        const root = elements[MAIN_CLASSES._] as HTMLElement | undefined;
+        if (root) {
+          root.appendChild(placeholder);
+          uiRegistry.set(MAIN_CLASSES.home, placeholder);
+        }
+      }
+    } else {
+      uiRegistry.remove(MAIN_CLASSES.home);
+    }
+
     LAST_SCOPE = Array.from(scopeSet);
+
     debugLog(MAIN_UPDATED);
   };
   //#endregion

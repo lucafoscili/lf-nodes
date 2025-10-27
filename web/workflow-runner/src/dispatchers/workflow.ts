@@ -1,10 +1,10 @@
 import { WORKFLOW_CLASSES } from '../elements/main.inputs';
 import { runWorkflow, uploadWorkflowFiles, WorkflowApiError } from '../services/workflow-service';
+import { WorkflowRunStatus } from '../types/api';
 import { WorkflowCellStatus, WorkflowUICells } from '../types/section';
 import { WorkflowStore } from '../types/state';
 import { DEBUG_MESSAGES, NOTIFICATION_MESSAGES, STATUS_MESSAGES } from '../utils/constants';
 import { debugLog } from '../utils/debug';
-import { WorkflowRunStatus } from '../types/api';
 
 //#region Helpers
 const _collectInputs = async (store: WorkflowStore): Promise<Record<string, unknown>> => {
@@ -146,19 +146,19 @@ export const workflowDispatcher = async (store: WorkflowStore) => {
     const clonedInputs = JSON.parse(JSON.stringify(inputs));
 
     state.mutate.runs.upsert({
-      runId,
       createdAt: timestamp,
-      updatedAt: timestamp,
-      status: 'pending' as WorkflowRunStatus,
-      workflowId: id,
-      workflowName,
-      inputs: clonedInputs,
-      outputs: null,
       error: null,
       httpStatus: null,
+      inputs: clonedInputs,
+      outputs: null,
       resultPayload: null,
+      runId,
+      status: 'pending' as WorkflowRunStatus,
+      updatedAt: timestamp,
+      workflowId: id,
+      workflowName,
     });
-    state.mutate.selectRun(runId);
+    state.manager?.runs.select(runId, 'run');
     state.mutate.runId(runId);
   } catch (error) {
     state.mutate.status('error', ERROR_RUNNING_WORKFLOW);

@@ -28,6 +28,7 @@ export interface WorkflowState {
   runs: WorkflowRunEntry[];
   results: WorkflowNodeResults | null;
   selectedRunId: string | null;
+  view: WorkflowView;
   workflows: WorkflowAPIDataset;
 }
 export interface WorkflowStateCurrent {
@@ -51,6 +52,7 @@ export interface WorkflowStateMutators {
   runs: WorkflowStateRunMutators;
   selectRun: (runId: string | null) => void;
   status: (status: WorkflowStatus, message?: string) => void;
+  view: (view: WorkflowView) => void;
   workflow: (id: string) => void;
   workflows: (workflows: WorkflowAPIDataset) => void;
 }
@@ -75,10 +77,16 @@ export interface WorkflowRunEntry {
 export type WorkflowRunEntryUpdate = Partial<Omit<WorkflowRunEntry, 'runId'>> & {
   runId: string;
 };
+export interface WorkflowRoute {
+  view: WorkflowView;
+  workflowId?: string | null;
+  runId?: string | null;
+}
 export interface WorkflowStateRunMutators {
   clear: () => void;
   upsert: (entry: WorkflowRunEntryUpdate) => void;
 }
 export type WorkflowStateUpdater = (state: WorkflowState) => WorkflowState;
 export type WorkflowStatus = 'running' | 'idle' | 'error';
+export type WorkflowView = 'home' | 'workflow' | 'history' | 'run';
 //#endregion

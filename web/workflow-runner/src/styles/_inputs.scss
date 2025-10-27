@@ -1,0 +1,25 @@
+.inputs-section {
+  &__cell {
+    & {
+      max-height: 80vh;
+      transition: background-color 0.2s ease;
+    }
+
+    &[data-status='error'] {
+      background: rgba(var(--lf-color-danger), 0.25);
+    }
+  }
+
+  &__options {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5em;
+    padding: 1.25em;
+  }
+
+  &__title {
+    display: flex;
+    gap: 0.5em;
+    padding: 1.25em 0;
+  }
+}

@@ -10,6 +10,6 @@ export type WorkflowCellStatus = 'error' | '';
 export interface WorkflowSectionController {
   destroy: () => void;
   mount: () => void;
-  render: () => void;
+  render: (scope?: WorkflowMainSections[]) => void;
 }
 //#endregion

@@ -33,13 +33,9 @@ export const isWorkflowAPIUploadPayload = (v: unknown): v is WorkflowAPIUploadPa
   if (!isObject(v)) {
     return false;
   }
-  // New API: either a 'paths' string array (success) or an 'error' object (failure) is acceptable
-  const hasPaths = 'paths' in (v as any) && isStringArray((v as any).paths);
+  const hasPaths = 'paths' in v && isStringArray(v.paths);
   const hasError =
-    'error' in (v as any) &&
-    isObject((v as any).error) &&
-    'message' in (v as any).error &&
-    isString((v as any).error.message);
+    'error' in v && isObject(v.error) && 'message' in v.error && isString(v.error.message);
 
   if (!hasPaths && !hasError) {
     return false;
@@ -94,6 +90,17 @@ export const parseCount = (v: unknown) => {
   }
   const n = Number(v as any);
   return Number.isFinite(n) ? n : 0;
+};
+//#endregion
+
+//#region Helpers
+export const formatStatus = (status: string) => status.charAt(0).toUpperCase() + status.slice(1);
+export const formatTimestamp = (timestamp: number) => {
+  const date = new Date(timestamp);
+  if (Number.isNaN(date.getTime())) {
+    return 'Unknown time';
+  }
+  return date.toLocaleString();
 };
 //#endregion
 

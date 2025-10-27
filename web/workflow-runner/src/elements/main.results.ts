@@ -1,7 +1,7 @@
 import { getLfFramework } from '@lf-widgets/framework';
 import { WorkflowSectionController } from '../types/section';
-import { WorkflowStore } from '../types/state';
-import { clearChildren, deepMerge } from '../utils/common';
+import { WorkflowRunEntry, WorkflowStore } from '../types/state';
+import { clearChildren, deepMerge, formatStatus, formatTimestamp } from '../utils/common';
 import { DEBUG_MESSAGES } from '../utils/constants';
 import { debugLog } from '../utils/debug';
 import { createOutputComponent } from './components';
@@ -12,10 +12,13 @@ const { theme } = getLfFramework();
 const ROOT_CLASS = 'results-section';
 export const WORKFLOW_CLASSES = {
   _: theme.bemClass(ROOT_CLASS),
+  actions: theme.bemClass(ROOT_CLASS, 'actions'),
+  back: theme.bemClass(ROOT_CLASS, 'back'),
   description: theme.bemClass(ROOT_CLASS, 'description'),
   empty: theme.bemClass(ROOT_CLASS, 'empty'),
   grid: theme.bemClass(ROOT_CLASS, 'grid'),
   h3: theme.bemClass(ROOT_CLASS, 'title-h3'),
+  history: theme.bemClass(ROOT_CLASS, 'history'),
   item: theme.bemClass(ROOT_CLASS, 'item'),
   results: theme.bemClass(ROOT_CLASS, 'results'),
   title: theme.bemClass(ROOT_CLASS, 'title'),
@@ -23,11 +26,12 @@ export const WORKFLOW_CLASSES = {
 //#endregion
 
 //#region Helpers
-const _results = () => {
-  const cellWrapper = document.createElement('div');
-  cellWrapper.className = WORKFLOW_CLASSES.results;
-
-  return cellWrapper;
+const _formatDescription = (selectedRun: WorkflowRunEntry | null, description: string) => {
+  return selectedRun
+    ? `Run ${selectedRun.runId.slice(0, 8)} • ${formatStatus(
+        selectedRun.status,
+      )} • ${formatTimestamp(selectedRun.updatedAt || selectedRun.createdAt)}`
+    : description;
 };
 const _description = () => {
   const p = document.createElement('p');
@@ -35,26 +39,46 @@ const _description = () => {
 
   return p;
 };
-const _title = () => {
+const _results = () => {
+  const cellWrapper = document.createElement('div');
+  cellWrapper.className = WORKFLOW_CLASSES.results;
+
+  return cellWrapper;
+};
+const _title = (store: WorkflowStore) => {
+  const { manager } = store.getState();
+
   const title = document.createElement('div');
   const h3 = document.createElement('h3');
+  const actions = document.createElement('div');
+  const backButton = document.createElement('lf-button');
+  const historyButton = document.createElement('lf-button');
 
   title.className = WORKFLOW_CLASSES.title;
+  actions.className = WORKFLOW_CLASSES.actions;
 
   h3.className = WORKFLOW_CLASSES.h3;
+  backButton.className = WORKFLOW_CLASSES.back;
+  historyButton.className = WORKFLOW_CLASSES.history;
+
+  backButton.lfLabel = 'Back to workflow';
+  backButton.lfStyling = 'flat';
+  backButton.lfUiSize = 'small';
+  backButton.onclick = () => manager.runs.select(null, 'workflow');
+  backButton.toggleAttribute('disabled', false);
+
+  historyButton.lfLabel = 'View all runs';
+  historyButton.lfStyling = 'flat';
+  historyButton.lfUiSize = 'small';
+  historyButton.onclick = () => manager.runs.select(null, 'history');
+  historyButton.toggleAttribute('disabled', manager.runs.all().length === 0);
 
   title.appendChild(h3);
+  title.appendChild(actions);
+  actions.appendChild(backButton);
+  actions.appendChild(historyButton);
 
-  return { h3, title };
-};
-const _formatStatus = (status: string) =>
-  status.charAt(0).toUpperCase() + status.slice(1);
-const _formatTimestamp = (timestamp: number) => {
-  const date = new Date(timestamp);
-  if (Number.isNaN(date.getTime())) {
-    return 'Unknown time';
-  }
-  return date.toLocaleString();
+  return { actions, backButton, h3, historyButton, title };
 };
 //#endregion
 
@@ -92,8 +116,8 @@ export const createResultsSection = (store: WorkflowStore): WorkflowSectionContr
     _root.className = WORKFLOW_CLASSES._;
 
     const results = _results();
-    const description = _description(); // TODO: description should include the id of the prompt
-    const { h3, title } = _title();
+    const description = _description();
+    const { actions, backButton, h3, historyButton, title } = _title(store);
 
     _root.appendChild(title);
     _root.appendChild(description);
@@ -102,8 +126,11 @@ export const createResultsSection = (store: WorkflowStore): WorkflowSectionContr
     elements[MAIN_CLASSES._].appendChild(_root);
 
     uiRegistry.set(WORKFLOW_CLASSES._, _root);
+    uiRegistry.set(WORKFLOW_CLASSES.actions, actions);
+    uiRegistry.set(WORKFLOW_CLASSES.back, backButton);
     uiRegistry.set(WORKFLOW_CLASSES.description, description);
     uiRegistry.set(WORKFLOW_CLASSES.h3, h3);
+    uiRegistry.set(WORKFLOW_CLASSES.history, historyButton);
     uiRegistry.set(WORKFLOW_CLASSES.results, results);
     uiRegistry.set(WORKFLOW_CLASSES.title, title);
 
@@ -126,15 +153,9 @@ export const createResultsSection = (store: WorkflowStore): WorkflowSectionContr
     const element = elements[WORKFLOW_CLASSES.results] as HTMLElement;
     const h3 = elements[WORKFLOW_CLASSES.h3] as HTMLElement;
     const selectedRun = manager.runs.selected();
-    const titleText = selectedRun?.workflowName || manager.workflow.title();
-    const descriptionText = selectedRun
-      ? `Run ${selectedRun.runId.slice(0, 8)} • ${_formatStatus(selectedRun.status)} • ${_formatTimestamp(
-          selectedRun.updatedAt || selectedRun.createdAt,
-        )}`
-      : manager.workflow.description();
 
-    descr.textContent = descriptionText;
-    h3.textContent = titleText;
+    descr.textContent = _formatDescription(selectedRun, manager.workflow.description());
+    h3.textContent = selectedRun?.workflowName || manager.workflow.title();
 
     const outputs = state.results ?? selectedRun?.outputs ?? null;
     clearChildren(element);

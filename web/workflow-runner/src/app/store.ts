@@ -9,6 +9,7 @@ import {
   WorkflowStateUpdater,
   WorkflowStatus,
   WorkflowStore,
+  WorkflowView,
 } from '../types/state';
 
 //#region Factory
@@ -128,8 +129,7 @@ export const createWorkflowRunnerStore = (initialState: WorkflowState): Workflow
               inputs: entry.inputs ?? current.inputs,
               outputs: entry.outputs ?? current.outputs,
               error: entry.error ?? current.error ?? null,
-              httpStatus:
-                entry.httpStatus !== undefined ? entry.httpStatus : current.httpStatus,
+              httpStatus: entry.httpStatus !== undefined ? entry.httpStatus : current.httpStatus,
               resultPayload:
                 entry.resultPayload !== undefined ? entry.resultPayload : current.resultPayload,
             };
@@ -158,6 +158,10 @@ export const createWorkflowRunnerStore = (initialState: WorkflowState): Workflow
     selectRun: (runId: string | null) =>
       applyMutation((draft) => {
         draft.selectedRunId = runId;
+      }),
+    view: (view: WorkflowView) =>
+      applyMutation((draft) => {
+        draft.view = view;
       }),
     status: (status: WorkflowStatus, message?: string) => setStatus(status, message, setState),
     workflow: (workflowId: string) => setWorkflow(workflowId, setState),
@@ -204,7 +208,10 @@ const setWorkflow = (id: string, setState: (updater: WorkflowStateUpdater) => vo
           ...state.current,
           id,
         },
+        currentRunId: null,
         results: null,
+        selectedRunId: null,
+        view: 'workflow',
       } satisfies WorkflowState),
   );
 };

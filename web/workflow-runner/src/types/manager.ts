@@ -5,7 +5,7 @@ import {
   WorkflowCellsOutputContainer,
   WorkflowCellType,
 } from './api';
-import { WorkflowRunEntry, WorkflowStore } from './state';
+import { WorkflowRunEntry, WorkflowStore, WorkflowView } from './state';
 
 //#region Dispatchers
 export type WorkflowDispatcher = () => Promise<void>;
@@ -29,7 +29,7 @@ export interface WorkflowManager {
   runs: {
     all: () => WorkflowRunEntry[];
     get: (runId: string) => WorkflowRunEntry | null;
-    select: (runId: string | null) => void;
+    select: (runId: string | null, view?: WorkflowView) => void;
     selected: () => WorkflowRunEntry | null;
   };
   workflow: {
