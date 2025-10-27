@@ -67,16 +67,19 @@ jobs:
         id: generate_notes
         run: |
           PREV_TAG='${{ steps.previous_tag.outputs.previous_tag }}'
-          CURRENT_REF='${{ github.sha }}'
-          RANGE=''
-          if [ -n "$PREV_TAG" ]; then
-            RANGE="$PREV_TAG..$CURRENT_REF"
+
+          if [ -n "$PREV_TAG" ] && git rev-parse --verify "$PREV_TAG" >/dev/null 2>&1; then
+            COMMITS=$(git log --oneline --no-merges "$PREV_TAG"..HEAD)
+          else
+            COMMITS=$(git log --oneline --no-merges --max-count=50)
           fi
 
-          COMMITS=$(git log --pretty=format:"- %h %s" $RANGE)
           if [ -z "$COMMITS" ]; then
-            COMMITS="(no commits detected between $PREV_TAG and $CURRENT_REF)"
+            RANGE_LABEL=$([ -n "$PREV_TAG" ] && echo "$PREV_TAG and HEAD" || echo "repository start and HEAD")
+            COMMITS="(no commits detected between $RANGE_LABEL)"
           fi
+
+          COMMITS=$(printf '%s\n' "$COMMITS" | sed 's/^/- /')
           echo "commits<<EOF" >> $GITHUB_OUTPUT
           echo "$COMMITS" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
