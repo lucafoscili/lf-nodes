@@ -18,11 +18,11 @@ export const MAIN_CLASSES = {
 export const createMainSection = (store: WorkflowStore): WorkflowSectionController => {
   //#region Local variables
   const { MAIN_DESTROYED, MAIN_MOUNTED, MAIN_UPDATED } = DEBUG_MESSAGES;
-  const DEFAULT_SCOPE: Set<WorkflowMainSections> = new Set(['inputs', 'outputs', 'results']);
+  const DEFAULT_SCOPE: WorkflowMainSections[] = ['inputs', 'outputs'];
   const INPUTS = createInputsSection(store);
   const OUTPUTS = createOutputsSection(store);
   const RESULTS = createResultsSection(store);
-  let LAST_SCOPE: Set<WorkflowMainSections> = new Set(['inputs', 'outputs']);
+  let LAST_SCOPE = [...DEFAULT_SCOPE];
   //#endregion
 
   //#region Destroy
@@ -68,17 +68,19 @@ export const createMainSection = (store: WorkflowStore): WorkflowSectionControll
   //#endregion
 
   //#region Render
-  const render = (scope: Set<WorkflowMainSections> = DEFAULT_SCOPE) => {
+  const render = (scope = [...DEFAULT_SCOPE]) => {
     const { manager } = store.getState();
     const { uiRegistry } = manager;
 
+    const scopeSet = new Set<WorkflowMainSections>(scope as WorkflowMainSections[]);
+
     const elements = uiRegistry.get();
-    if (!elements || !scope.size) {
+    if (!elements || !scopeSet.size) {
       return;
     }
 
     LAST_SCOPE.forEach((section) => {
-      if (!scope.has(section)) {
+      if (!scopeSet.has(section)) {
         switch (section) {
           case 'inputs':
             INPUTS.destroy();
@@ -96,19 +98,19 @@ export const createMainSection = (store: WorkflowStore): WorkflowSectionControll
     scope.forEach((section) => {
       switch (section) {
         case 'inputs':
-          if (!LAST_SCOPE.has('inputs')) {
+          if (!LAST_SCOPE.find((s) => s === 'inputs')) {
             INPUTS.mount();
           }
           INPUTS.render();
           break;
         case 'outputs':
-          if (!LAST_SCOPE.has('outputs')) {
+          if (!LAST_SCOPE.find((s) => s === 'outputs')) {
             OUTPUTS.mount();
           }
           OUTPUTS.render();
           break;
         case 'results':
-          if (!LAST_SCOPE.has('results')) {
+          if (!LAST_SCOPE.find((s) => s === 'results')) {
             RESULTS.mount();
           }
           RESULTS.render();
@@ -116,8 +118,7 @@ export const createMainSection = (store: WorkflowStore): WorkflowSectionControll
       }
     });
 
-    LAST_SCOPE.clear();
-    LAST_SCOPE = new Set(scope);
+    LAST_SCOPE = [Array.from(scopeSet)].flat();
     debugLog(MAIN_UPDATED);
   };
   //#endregion
