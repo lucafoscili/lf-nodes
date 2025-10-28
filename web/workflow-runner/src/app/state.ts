@@ -11,12 +11,9 @@ const INIT_CB = () => {
 export const initState = (): WorkflowState => ({
   current: { status: 'idle', message: '', id: null },
   currentRunId: null,
+  inputStatuses: {},
   isDebug: false,
   manager: null,
-  inputStatuses: {},
-  pollingTimer: null,
-  queuedJobs: -1,
-  runs: [],
   mutate: {
     isDebug: INIT_CB,
     manager: INIT_CB,
@@ -41,7 +38,10 @@ export const initState = (): WorkflowState => ({
     workflows: INIT_CB,
   },
   notifications: [],
+  pollingTimer: null,
+  queuedJobs: -1,
   results: null,
+  runs: [],
   selectedRunId: null,
   view: 'workflow',
   workflows: {

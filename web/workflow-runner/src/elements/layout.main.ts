@@ -24,6 +24,7 @@ export const createMainSection = (store: WorkflowStore): WorkflowSectionControll
   const OUTPUTS = createOutputsSection(store);
   const RESULTS = createResultsSection(store);
   let LAST_SCOPE: WorkflowMainSections[] = [];
+  let LAST_WORKFLOW_ID: string | null = store.getState().current.id;
   //#endregion
 
   //#region Destroy
@@ -71,6 +72,8 @@ export const createMainSection = (store: WorkflowStore): WorkflowSectionControll
 
     const { manager } = state;
     const { uiRegistry } = manager;
+    const workflowId = state.current.id ?? null;
+    const workflowChanged = workflowId !== LAST_WORKFLOW_ID;
 
     const resolvedSections = scope ?? resolveMainSections(state);
     const scopeSet = new Set<WorkflowMainSections>(resolvedSections);
@@ -78,6 +81,23 @@ export const createMainSection = (store: WorkflowStore): WorkflowSectionControll
     const elements = uiRegistry.get();
     if (!elements) {
       return;
+    }
+
+    if (workflowChanged && LAST_SCOPE.length > 0) {
+      LAST_SCOPE.forEach((section) => {
+        switch (section) {
+          case 'inputs':
+            INPUTS.destroy();
+            break;
+          case 'outputs':
+            OUTPUTS.destroy();
+            break;
+          case 'results':
+            RESULTS.destroy();
+            break;
+        }
+      });
+      LAST_SCOPE = [];
     }
 
     LAST_SCOPE.forEach((section) => {
@@ -135,6 +155,7 @@ export const createMainSection = (store: WorkflowStore): WorkflowSectionControll
     }
 
     LAST_SCOPE = Array.from(scopeSet);
+    LAST_WORKFLOW_ID = workflowId;
 
     debugLog(MAIN_UPDATED);
   };

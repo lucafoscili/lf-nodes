@@ -2,7 +2,6 @@ import { getLfFramework } from '@lf-widgets/framework';
 import { openWorkflowInComfyUI } from '../handlers/workflow';
 import { WorkflowSectionController, WorkflowUICells } from '../types/section';
 import { WorkflowStore } from '../types/state';
-import { clearChildren } from '../utils/common';
 import { DEBUG_MESSAGES } from '../utils/constants';
 import { debugLog } from '../utils/debug';
 import { createInputCell } from './components';
@@ -99,12 +98,38 @@ export const createInputsSection = (store: WorkflowStore): WorkflowSectionContro
       return;
     }
 
+    const workflow = manager.workflow.current();
+
     const _root = document.createElement('section');
     _root.className = WORKFLOW_CLASSES._;
 
     const description = _description();
     const options = _options();
     const { h3, openButton, title } = _title(store);
+
+    const cellElements: WorkflowUICells = [];
+    if (workflow) {
+      const inputCells = manager.workflow.cells('input');
+      for (const id in inputCells) {
+        if (!Object.prototype.hasOwnProperty.call(inputCells, id)) {
+          continue;
+        }
+
+        const cell = inputCells[id];
+
+        const wrapper = _cells();
+        wrapper.dataset.shape = cell.shape || '';
+
+        const component = createInputCell(cell);
+        component.id = id;
+
+        cellElements.push(component);
+        wrapper.appendChild(component);
+        options.appendChild(wrapper);
+      }
+    }
+
+    uiRegistry.set(WORKFLOW_CLASSES.cells, cellElements);
 
     _root.appendChild(title);
     _root.appendChild(description);
@@ -134,44 +159,26 @@ export const createInputsSection = (store: WorkflowStore): WorkflowSectionContro
       return;
     }
 
+    const cells = elements[WORKFLOW_CLASSES.cells] as WorkflowUICells;
     const descr = elements[WORKFLOW_CLASSES.description] as HTMLElement;
     const h3 = elements[WORKFLOW_CLASSES.h3] as HTMLElement;
-    const options = elements[WORKFLOW_CLASSES.options] as HTMLDivElement;
     descr.textContent = manager.workflow.description();
     h3.textContent = manager.workflow.title();
 
-    clearChildren(options);
-
-    const workflow = manager.workflow.current();
     const statuses = state.inputStatuses || {};
-    const cellElements: WorkflowUICells = [];
 
-    if (workflow) {
-      const inputCells = manager.workflow.cells('input');
-      for (const id in inputCells) {
-        if (!Object.prototype.hasOwnProperty.call(inputCells, id)) {
-          continue;
-        }
-
-        const cell = inputCells[id];
-        const wrapper = _cells();
-        const component = createInputCell(cell);
-        component.id = id;
-
-        const status = statuses[id] || '';
+    cells?.forEach((cell) => {
+      const id = cell.id;
+      const parent = cell?.parentElement;
+      const status = statuses[id] || '';
+      if (cell && parent) {
         if (status) {
-          wrapper.dataset.status = status;
+          parent.dataset.status = status;
         } else {
-          delete wrapper.dataset.status;
+          delete parent.dataset.status;
         }
-
-        cellElements.push(component);
-        wrapper.appendChild(component);
-        options.appendChild(wrapper);
       }
-    }
-
-    uiRegistry.set(WORKFLOW_CLASSES.cells, cellElements);
+    });
 
     debugLog(WORKFLOW_INPUTS_UPDATED);
   };
