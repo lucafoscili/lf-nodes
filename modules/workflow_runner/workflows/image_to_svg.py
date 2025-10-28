@@ -85,7 +85,7 @@ input_colors = WorkflowCell(
         "lfHtmlAttributes": {
             "autocomplete": "off",
             "min": 1,
-            "max": 2048,
+            "max": 256,
             "name": "number_of_colors",
             "type": "number",
         },
