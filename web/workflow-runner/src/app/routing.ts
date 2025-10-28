@@ -1,4 +1,8 @@
-import { CreateRoutingControllerOptions, RoutingController } from '../types/manager';
+import {
+  CreateRoutingControllerOptions,
+  NormalizedRouteResult,
+  RoutingController,
+} from '../types/manager';
 import { WorkflowRoute, WorkflowState } from '../types/state';
 import {
   parseRouteFromLocation,
@@ -12,11 +16,6 @@ import { changeView, computeRouteFromState } from './sections';
 export const createRoutingController = ({
   store,
 }: CreateRoutingControllerOptions): RoutingController => {
-  type NormalizedRouteResult = {
-    route: WorkflowRoute;
-    clearResults?: boolean;
-  };
-
   let currentRoute: WorkflowRoute | null = null;
   let pendingRoute: WorkflowRoute | null = null;
   let isApplyingRoute = false;
@@ -32,70 +31,7 @@ export const createRoutingController = ({
     const { workflows } = store.getState();
     return Boolean(workflows?.nodes?.some((node) => node.id === workflowId));
   };
-
-  const normalizeRoute = (route: WorkflowRoute, state: WorkflowState): NormalizedRouteResult => {
-    const { runs, current, workflows } = state;
-    const availableNodes = workflows?.nodes ?? [];
-    const workflowExists = (id?: string | null) =>
-      Boolean(id && availableNodes.some((node) => node.id === id));
-
-    const findRun = (runId?: string | null) =>
-      runId ? runs.find((run) => run.runId === runId) ?? null : null;
-
-    const run = findRun(route.runId ?? null);
-
-    let workflowId = route.workflowId ?? undefined;
-    if (workflowId && !workflowExists(workflowId)) {
-      workflowId = undefined;
-    }
-
-    const runWorkflowId = run?.workflowId ?? null;
-    if (workflowId === undefined && workflowExists(runWorkflowId)) {
-      workflowId = runWorkflowId ?? undefined;
-    } else if (workflowId === undefined && workflowExists(current.id)) {
-      workflowId = current.id ?? undefined;
-    }
-
-    let runId = run?.runId ?? undefined;
-    let view = route.view;
-
-    if (view === 'run') {
-      if (!runId) {
-        view = 'workflow';
-      }
-    } else if (view === 'history' || view === 'workflow') {
-      runId = undefined;
-    } else if (view === 'home') {
-      workflowId = undefined;
-      runId = undefined;
-    } else {
-      view = 'workflow';
-      runId = undefined;
-    }
-
-    if (view !== 'run') {
-      runId = undefined;
-    }
-
-    const normalizedRoute: WorkflowRoute = { view };
-    if (workflowId) {
-      normalizedRoute.workflowId = workflowId;
-    }
-    if (view === 'run' && runId) {
-      normalizedRoute.runId = runId;
-      if (runWorkflowId && workflowExists(runWorkflowId)) {
-        normalizedRoute.workflowId = runWorkflowId;
-      }
-    }
-
-    const clearResults =
-      normalizedRoute.view === 'run' && normalizedRoute.runId ? false : undefined;
-
-    return {
-      route: normalizedRoute,
-      clearResults,
-    };
-  };
+  //#endregion
 
   //#region Update Route
   const updateRouteFromState = (precomputed?: WorkflowRoute) => {
@@ -183,6 +119,74 @@ export const createRoutingController = ({
     getPendingRoute: () => pendingRoute,
     initialize,
     updateRouteFromState,
+  };
+};
+//#endregion
+
+//#region Normalize Route
+export const normalizeRoute = (
+  route: WorkflowRoute,
+  state: WorkflowState,
+): NormalizedRouteResult => {
+  const { runs, current, workflows } = state;
+  const availableNodes = workflows?.nodes ?? [];
+  const workflowExists = (id?: string | null) =>
+    Boolean(id && availableNodes.some((node) => node.id === id));
+
+  const findRun = (runId?: string | null) =>
+    runId ? runs.find((run) => run.runId === runId) ?? null : null;
+
+  const run = findRun(route.runId ?? null);
+
+  let workflowId = route.workflowId ?? undefined;
+  if (workflowId && !workflowExists(workflowId)) {
+    workflowId = undefined;
+  }
+
+  const runWorkflowId = run?.workflowId ?? null;
+  if (workflowId === undefined && workflowExists(runWorkflowId)) {
+    workflowId = runWorkflowId ?? undefined;
+  } else if (workflowId === undefined && workflowExists(current.id)) {
+    workflowId = current.id ?? undefined;
+  }
+
+  let runId = run?.runId ?? undefined;
+  let view = route.view;
+
+  if (view === 'run') {
+    if (!runId) {
+      view = 'workflow';
+    }
+  } else if (view === 'history' || view === 'workflow') {
+    runId = undefined;
+  } else if (view === 'home') {
+    workflowId = undefined;
+    runId = undefined;
+  } else {
+    view = 'workflow';
+    runId = undefined;
+  }
+
+  if (view !== 'run') {
+    runId = undefined;
+  }
+
+  const normalizedRoute: WorkflowRoute = { view };
+  if (workflowId) {
+    normalizedRoute.workflowId = workflowId;
+  }
+  if (view === 'run' && runId) {
+    normalizedRoute.runId = runId;
+    if (runWorkflowId && workflowExists(runWorkflowId)) {
+      normalizedRoute.workflowId = runWorkflowId;
+    }
+  }
+
+  const clearResults = normalizedRoute.view === 'run' && normalizedRoute.runId ? false : undefined;
+
+  return {
+    route: normalizedRoute,
+    clearResults,
   };
 };
 //#endregion

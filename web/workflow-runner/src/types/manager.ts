@@ -74,6 +74,10 @@ export interface RoutingController {
 export interface CreateRoutingControllerOptions {
   store: WorkflowStore;
 }
+export interface NormalizedRouteResult {
+  route: WorkflowRoute;
+  clearResults?: boolean;
+}
 //#endregion
 
 //#region Run Lifecycle
