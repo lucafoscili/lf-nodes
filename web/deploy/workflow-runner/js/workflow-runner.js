@@ -52,13 +52,42 @@ const setView = (store, view) => {
   }
 };
 const setRunInFlight = (store, runId) => {
-  store.getState().mutate.runId(runId);
+  const state = store.getState();
+  if (state.currentRunId === runId) {
+    return;
+  }
+  state.mutate.runId(runId);
 };
 const setStatus$1 = (store, status, message) => {
   store.getState().mutate.status(status, message);
 };
 const upsertRun = (store, entry) => {
   store.getState().mutate.runs.upsert(entry);
+};
+const ACTIVE_STATUSES = /* @__PURE__ */ new Set(["pending", "running"]);
+const ensureActiveRun = (store, preferredRunId) => {
+  const state = store.getState();
+  const activeRuns = state.runs.filter((run) => ACTIVE_STATUSES.has(run.status));
+  const currentRunId = state.currentRunId;
+  if (currentRunId && activeRuns.some((run) => run.runId === currentRunId)) {
+    return;
+  }
+  const preferred = preferredRunId !== void 0 ? activeRuns.find((run) => run.runId === preferredRunId) ?? null : null;
+  const nextRun = preferred ?? activeRuns.slice().sort((a, b) => {
+    if (a.createdAt !== b.createdAt) {
+      return a.createdAt - b.createdAt;
+    }
+    return a.updatedAt - b.updatedAt;
+  }).shift() ?? null;
+  if (!nextRun) {
+    if (currentRunId !== null) {
+      setRunInFlight(store, null);
+    }
+    return;
+  }
+  if (nextRun.runId !== currentRunId) {
+    setRunInFlight(store, nextRun.runId);
+  }
 };
 const DEBUG_MESSAGES = {
   ACTION_BUTTON_DESTROYED: "Action button section destroyed.",
@@ -1696,7 +1725,7 @@ const workflowDispatcher = async (store) => {
       workflowId: id,
       workflowName
     });
-    setRunInFlight(store, runId);
+    ensureActiveRun(store, runId);
   } catch (error) {
     setStatus$1(store, "error", ERROR_RUNNING_WORKFLOW);
     if (error instanceof WorkflowApiError) {
@@ -2326,6 +2355,7 @@ const createRunLifecycle = ({ setInputStatus, store }) => {
     }
     if (status === "succeeded" || status === "failed" || status === "cancelled") {
       setRunInFlight(store, null);
+      ensureActiveRun(store);
       return { shouldStopPolling: true };
     }
     return { shouldStopPolling: false };
@@ -2353,6 +2383,7 @@ const createRunLifecycle = ({ setInputStatus, store }) => {
       }
     }
     setRunInFlight(store, null);
+    ensureActiveRun(store);
     return { shouldStopPolling: true };
   };
   return {
