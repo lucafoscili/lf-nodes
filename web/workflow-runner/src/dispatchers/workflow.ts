@@ -1,13 +1,12 @@
 import {
   addNotification,
   clearResults,
-  setRunInFlight,
+  ensureActiveRun,
   setStatus,
   upsertRun,
 } from '../app/store-actions';
 import { INPUTS_CLASSES } from '../elements/main.inputs';
 import { runWorkflow, uploadWorkflowFiles, WorkflowApiError } from '../services/workflow-service';
-import { WorkflowRunStatus } from '../types/api';
 import { WorkflowCellStatus, WorkflowUICells } from '../types/section';
 import { WorkflowStore } from '../types/state';
 import { DEBUG_MESSAGES, NOTIFICATION_MESSAGES, STATUS_MESSAGES } from '../utils/constants';
@@ -166,12 +165,12 @@ export const workflowDispatcher = async (store: WorkflowStore) => {
       outputs: null,
       resultPayload: null,
       runId,
-      status: 'pending' as WorkflowRunStatus,
+      status: 'pending',
       updatedAt: timestamp,
       workflowId: id,
       workflowName,
     });
-    setRunInFlight(store, runId);
+    ensureActiveRun(store, runId);
   } catch (error) {
     setStatus(store, 'error', ERROR_RUNNING_WORKFLOW);
     if (error instanceof WorkflowApiError) {

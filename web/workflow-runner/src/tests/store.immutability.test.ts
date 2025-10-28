@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { createWorkflowRunnerStore } from '../store';
-import { initState } from '../state';
-import { WorkflowState } from '../../types/state';
+import { createWorkflowRunnerStore } from '../app/store';
+import { initState } from '../app/state';
+import { WorkflowState } from '../types/state';
 
 test('run upsert mutations notify subscribers with fresh state references', () => {
   const store = createWorkflowRunnerStore(initState());

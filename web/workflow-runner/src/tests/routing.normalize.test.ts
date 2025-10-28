@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { normalizeRoute } from '../routing';
-import { initState } from '../state';
-import { WorkflowRoute, WorkflowState } from '../../types/state';
+import { normalizeRoute } from '../app/routing';
+import { initState } from '../app/state';
+import { WorkflowRoute, WorkflowState } from '../types/state';
 
 const createState = (overrides: Partial<WorkflowState> = {}): WorkflowState => {
   const base = initState();
@@ -16,7 +16,7 @@ const createWorkflowNode = (id: string) =>
     category: 'test',
     title: `Workflow ${id}`,
     children: [],
-  }) as any;
+  } as any);
 
 test('normalizes run routes to include valid workflow and clearResults=false', () => {
   const state = createState({

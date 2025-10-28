@@ -1,7 +1,14 @@
 import { WorkflowNodeResults, WorkflowRunStatus, WorkflowRunStatusResponse } from '../types/api';
 import { CreateRunLifecycleOptions, RunLifecycleController } from '../types/manager';
 import { NOTIFICATION_MESSAGES, STATUS_MESSAGES } from '../utils/constants';
-import { addNotification, setResults, setRunInFlight, setStatus, upsertRun } from './store-actions';
+import {
+  addNotification,
+  ensureActiveRun,
+  setResults,
+  setRunInFlight,
+  setStatus,
+  upsertRun,
+} from './store-actions';
 
 //#region Helpers
 const _coerceTimestamp = (value: number | null | undefined, fallback: number) => {
@@ -176,6 +183,7 @@ export const createRunLifecycle = ({
 
     if (status === 'succeeded' || status === 'failed' || status === 'cancelled') {
       setRunInFlight(store, null);
+      ensureActiveRun(store);
       return { shouldStopPolling: true };
     }
 
@@ -211,6 +219,7 @@ export const createRunLifecycle = ({
     }
 
     setRunInFlight(store, null);
+    ensureActiveRun(store);
 
     return { shouldStopPolling: true };
   };
