@@ -19,6 +19,7 @@ class WorkflowRunnerConfig:
     deploy_root: Path
     runner_root: Path
     js_dir: str
+    prompt_timeout_seconds: float | None
 
     @property
     def shared_js_root(self) -> Path:
@@ -35,6 +36,15 @@ def _load_config() -> WorkflowRunnerConfig:
     deploy_root = (MODULE_ROOT / data["deploy"]["root"]).resolve()
     runner_root = (deploy_root / data["deploy"]["runnerSubdir"]).resolve()
 
+    raw_prompt_timeout = data.get("promptTimeoutSeconds")
+    prompt_timeout: float | None
+    try:
+        prompt_timeout = float(raw_prompt_timeout)
+        if prompt_timeout <= 0:
+            prompt_timeout = None
+    except (TypeError, ValueError):
+        prompt_timeout = None
+
     return WorkflowRunnerConfig(
         api_base=data["apiBase"],
         api_route_prefix=data["apiRoutePrefix"],
@@ -43,6 +53,7 @@ def _load_config() -> WorkflowRunnerConfig:
         deploy_root=deploy_root,
         runner_root=runner_root,
         js_dir=data["deploy"]["jsDir"],
+        prompt_timeout_seconds=prompt_timeout,
     )
 
 CONFIG = _load_config()

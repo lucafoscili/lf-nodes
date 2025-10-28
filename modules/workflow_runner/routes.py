@@ -169,13 +169,14 @@ def _serve_static(
 
     return web.Response(status=404, text=not_found_text)
 
-async def _wait_for_completion(prompt_id: str, timeout_seconds: float = 180.0) -> Dict[str, Any]:
+async def _wait_for_completion(prompt_id: str, timeout_seconds: float | None = None) -> Dict[str, Any]:
     """
     Poll the prompt queue history until the prompt either completes, fails,
     or the timeout is reached.
     """
     queue = PromptServer.instance.prompt_queue
     start = time.perf_counter()
+    deadline = start + timeout_seconds if timeout_seconds and timeout_seconds > 0 else None
 
     while True:
         history = queue.get_history(prompt_id=prompt_id)
@@ -188,7 +189,7 @@ async def _wait_for_completion(prompt_id: str, timeout_seconds: float = 180.0) -
                 # Some nodes don't populate status but still produce outputs.
                 return entry
 
-        if (time.perf_counter() - start) >= timeout_seconds:
+        if deadline is not None and time.perf_counter() >= deadline:
             raise TimeoutError(f"Prompt {prompt_id} did not finish within {timeout_seconds} seconds.")
 
         await asyncio.sleep(0.35)
@@ -298,7 +299,7 @@ async def execute_workflow(
     _emit_run_progress(run_id, "workflow_queued", prompt_id=prompt_id)
 
     try:
-        history_entry = await _wait_for_completion(prompt_id)
+        history_entry = await _wait_for_completion(prompt_id, RUNNER_CONFIG.prompt_timeout_seconds)
     except TimeoutError as exc:
         response = _make_run_payload(detail=str(exc), error_message="timeout")
         return JobStatus.FAILED, response, 504

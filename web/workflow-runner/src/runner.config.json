@@ -14,5 +14,6 @@
     "queueIntervalMs": 750,
     "runIntervalMs": 3000
   },
-  "theme": "dark"
+  "theme": "dark",
+  "promptTimeoutSeconds": 0
 }
