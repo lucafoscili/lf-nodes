@@ -58,7 +58,7 @@ export const createActionButtonSection = (store: WorkflowStore): WorkflowSection
 
   //#region Render
   const render = () => {
-    const { current, manager } = store.getState();
+    const { manager } = store.getState();
     const { uiRegistry } = manager;
 
     const elements = uiRegistry.get();
@@ -70,8 +70,6 @@ export const createActionButtonSection = (store: WorkflowStore): WorkflowSection
     if (!_root) {
       return;
     }
-
-    _root.lfShowSpinner = current.status === 'running';
 
     debugLog(ACTION_BUTTON_UPDATED);
   };

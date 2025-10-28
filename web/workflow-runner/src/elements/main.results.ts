@@ -1,4 +1,5 @@
 ﻿import { getLfFramework } from '@lf-widgets/framework';
+import { buttonHandler } from '../handlers/button';
 import { WorkflowSectionController } from '../types/section';
 import { WorkflowRunEntry, WorkflowStore } from '../types/state';
 import { clearChildren, deepMerge, formatStatus, formatTimestamp } from '../utils/common';
@@ -17,10 +18,10 @@ export const RESULTS_CLASSES = {
   description: theme.bemClass(ROOT_CLASS, 'description'),
   empty: theme.bemClass(ROOT_CLASS, 'empty'),
   grid: theme.bemClass(ROOT_CLASS, 'grid'),
-  h3: theme.bemClass(ROOT_CLASS, 'title-h3'),
   history: theme.bemClass(ROOT_CLASS, 'history'),
   item: theme.bemClass(ROOT_CLASS, 'item'),
   results: theme.bemClass(ROOT_CLASS, 'results'),
+  h3: theme.bemClass(ROOT_CLASS, 'title-h3'),
   title: theme.bemClass(ROOT_CLASS, 'title'),
 } as const;
 //#endregion
@@ -49,32 +50,35 @@ const _results = () => {
   return cellWrapper;
 };
 const _title = (store: WorkflowStore) => {
+  const { arrowBack, folder } = theme.get.icons();
   const { manager } = store.getState();
 
   const title = document.createElement('div');
-  const h3 = document.createElement('h3');
-  const actions = document.createElement('div');
-  const backButton = document.createElement('lf-button');
-  const historyButton = document.createElement('lf-button');
-
   title.className = RESULTS_CLASSES.title;
+
+  const h3 = document.createElement('h3');
+  h3.className = RESULTS_CLASSES.h3;
+
+  const actions = document.createElement('div');
   actions.className = RESULTS_CLASSES.actions;
 
-  h3.className = RESULTS_CLASSES.h3;
+  const backButton = document.createElement('lf-button');
   backButton.className = RESULTS_CLASSES.back;
-  historyButton.className = RESULTS_CLASSES.history;
-
+  backButton.lfIcon = arrowBack;
   backButton.lfLabel = 'Back to workflow';
   backButton.lfStyling = 'flat';
   backButton.lfUiSize = 'small';
-  backButton.onclick = () => manager.runs.select(null, 'workflow');
-  backButton.toggleAttribute('disabled', true);
+  backButton.lfUiState = 'disabled';
+  backButton.addEventListener('lf-button-event', (e) => buttonHandler(e, store));
 
+  const historyButton = document.createElement('lf-button');
+  historyButton.className = RESULTS_CLASSES.history;
+  historyButton.lfIcon = folder;
   historyButton.lfLabel = 'View all runs';
   historyButton.lfStyling = 'flat';
   historyButton.lfUiSize = 'small';
-  historyButton.onclick =  () => manager.runs.select(null, 'history');
-  historyButton.toggleAttribute('disabled', manager.runs.all().length === 0);
+  historyButton.lfUiState = manager.runs.all().length === 0 ? 'disabled' : 'primary';
+  historyButton.addEventListener('lf-button-event', (e) => buttonHandler(e, store));
 
   title.appendChild(h3);
   title.appendChild(actions);
@@ -126,7 +130,7 @@ export const createResultsSection = (store: WorkflowStore): WorkflowSectionContr
     _root.appendChild(description);
     _root.appendChild(results);
 
-    elements[MAIN_CLASSES._].appendChild(_root);
+    elements[MAIN_CLASSES._].prepend(_root);
 
     uiRegistry.set(RESULTS_CLASSES._, _root);
     uiRegistry.set(RESULTS_CLASSES.actions, actions);
@@ -152,19 +156,19 @@ export const createResultsSection = (store: WorkflowStore): WorkflowSectionContr
       return;
     }
 
+    const selectedRun = manager.runs.selected();
+    const runs = manager.runs.all();
+
     const descr = elements[RESULTS_CLASSES.description] as HTMLElement;
     const element = elements[RESULTS_CLASSES.results] as HTMLElement;
     const h3 = elements[RESULTS_CLASSES.h3] as HTMLElement;
-    const selectedRun = manager.runs.selected();
-    const runs = manager.runs.all();
     const backButton = elements[RESULTS_CLASSES.back] as HTMLLfButtonElement | undefined;
     const historyButton = elements[RESULTS_CLASSES.history] as HTMLLfButtonElement | undefined;
 
-    backButton?.toggleAttribute('disabled', !selectedRun);
-    historyButton?.toggleAttribute('disabled', runs.length === 0);
-
     descr.textContent = _formatDescription(selectedRun, manager.workflow.description());
     h3.textContent = selectedRun?.workflowName || manager.workflow.title();
+    backButton.lfUiState = selectedRun ? 'primary' : 'disabled';
+    historyButton.lfUiState = runs.length > 0 ? 'primary' : 'disabled';
 
     const outputs = state.results ?? selectedRun?.outputs ?? null;
     clearChildren(element);

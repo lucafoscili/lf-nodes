@@ -1,4 +1,5 @@
 import { getLfFramework } from '@lf-widgets/framework';
+import { buttonHandler } from '../handlers/button';
 import { WorkflowNodeResults } from '../types/api';
 import { WorkflowSectionController } from '../types/section';
 import { WorkflowStore } from '../types/state';
@@ -23,6 +24,7 @@ export const OUTPUTS_CLASSES = {
   status: theme.bemClass(ROOT_CLASS, 'status'),
   timestamp: theme.bemClass(ROOT_CLASS, 'timestamp'),
   title: theme.bemClass(ROOT_CLASS, 'title'),
+  toggle: theme.bemClass(ROOT_CLASS, 'toggle'),
 } as const;
 //#endregion
 
@@ -43,23 +45,25 @@ const _masonry = () => {
 
   return masonryWrapper;
 };
-const _title = () => {
+const _title = (store: WorkflowStore) => {
   const title = document.createElement('div');
-  const h4 = document.createElement('h4');
-  const controls = document.createElement('div');
-  const toggle = document.createElement('lf-button') as HTMLLfButtonElement;
-
   title.className = OUTPUTS_CLASSES.title;
+
+  const h4 = document.createElement('h4');
+  h4.className = OUTPUTS_CLASSES.h4;
+
+  const controls = document.createElement('div');
   controls.className = OUTPUTS_CLASSES.controls;
 
-  h4.className = OUTPUTS_CLASSES.h4;
+  const toggle = document.createElement('lf-button');
+  toggle.className = OUTPUTS_CLASSES.toggle;
+  toggle.lfStyling = 'flat';
+  toggle.lfUiSize = 'small';
+  toggle.addEventListener('lf-button-event', (e) => buttonHandler(e, store));
 
   title.appendChild(h4);
   title.appendChild(controls);
   controls.appendChild(toggle);
-
-  toggle.lfStyling = 'flat';
-  toggle.lfUiSize = 'small';
 
   return { h4, title, controls, toggle };
 };
@@ -98,7 +102,7 @@ export const createOutputsSection = (store: WorkflowStore): WorkflowSectionContr
     const _root = document.createElement('section');
     _root.className = OUTPUTS_CLASSES._;
 
-    const { h4, title, toggle } = _title();
+    const { controls, h4, title, toggle } = _title(store);
     const masonry = _masonry();
 
     _root.appendChild(title);
@@ -107,10 +111,11 @@ export const createOutputsSection = (store: WorkflowStore): WorkflowSectionContr
     elements[MAIN_CLASSES._].appendChild(_root);
 
     uiRegistry.set(OUTPUTS_CLASSES._, _root);
+    uiRegistry.set(OUTPUTS_CLASSES.controls, controls);
     uiRegistry.set(OUTPUTS_CLASSES.h4, h4);
     uiRegistry.set(OUTPUTS_CLASSES.masonry, masonry);
     uiRegistry.set(OUTPUTS_CLASSES.title, title);
-    uiRegistry.set(OUTPUTS_CLASSES.controls, toggle);
+    uiRegistry.set(OUTPUTS_CLASSES.toggle, toggle);
 
     debugLog(WORKFLOW_OUTPUTS_MOUNTED);
   };
@@ -118,6 +123,8 @@ export const createOutputsSection = (store: WorkflowStore): WorkflowSectionContr
 
   //#region Render
   const render = () => {
+    const { arrowBack, folder } = theme.get.icons();
+
     const state = store.getState();
     const { manager } = state;
     const { uiRegistry } = manager;
@@ -129,34 +136,29 @@ export const createOutputsSection = (store: WorkflowStore): WorkflowSectionContr
 
     const h4 = elements[OUTPUTS_CLASSES.h4] as HTMLElement;
     const masonry = elements[OUTPUTS_CLASSES.masonry] as HTMLDivElement;
-    const toggle = elements[OUTPUTS_CLASSES.controls] as HTMLLfButtonElement;
+    const toggle = elements[OUTPUTS_CLASSES.toggle] as HTMLLfButtonElement;
+
     if (!h4 || !masonry || !toggle) {
       return;
     }
 
+    const activeWorkflowId = state.current.id;
+    const allRuns = manager.runs.all();
+    const hasAnyRuns = allRuns.length > 0;
+    const isHistoryView = state.view === 'history';
+    const selectedRunId = state.selectedRunId;
     const workflowTitle = manager.workflow.title();
     h4.textContent = workflowTitle ? `${workflowTitle} outputs` : 'Workflow outputs';
 
     masonry.replaceChildren();
 
-    const allRuns = manager.runs.all();
-    const selectedRunId = state.selectedRunId;
-    const isHistoryView = state.view === 'history';
-    const activeWorkflowId = state.current.id;
     const runs = isHistoryView
       ? allRuns
       : allRuns.filter((run) => (run.workflowId ?? null) === (activeWorkflowId ?? null));
 
+    toggle.lfIcon = isHistoryView ? arrowBack : folder;
     toggle.lfLabel = isHistoryView ? 'Back to workflow view' : 'Open full history';
-    const hasAnyRuns = allRuns.length > 0;
-    toggle.toggleAttribute('disabled', !hasAnyRuns && !isHistoryView);
-    toggle.onclick = () => {
-      if (isHistoryView) {
-        manager.runs.select(null, 'workflow');
-      } else {
-        manager.runs.select(null, 'history');
-      }
-    };
+    toggle.lfUiState = hasAnyRuns || isHistoryView ? 'primary' : 'disabled';
 
     if (!runs.length) {
       const empty = document.createElement('p');
@@ -165,7 +167,9 @@ export const createOutputsSection = (store: WorkflowStore): WorkflowSectionContr
         ? 'Run a workflow to start building your history.'
         : 'No runs for this workflow yet. Open full history to browse previous runs.';
       masonry.appendChild(empty);
+
       debugLog(WORKFLOW_OUTPUTS_UPDATED);
+
       return;
     }
 

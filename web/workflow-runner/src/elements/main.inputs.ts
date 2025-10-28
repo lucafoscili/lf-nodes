@@ -135,7 +135,7 @@ export const createInputsSection = (store: WorkflowStore): WorkflowSectionContro
     _root.appendChild(description);
     _root.appendChild(options);
 
-    elements[MAIN_CLASSES._].appendChild(_root);
+    elements[MAIN_CLASSES._].prepend(_root);
 
     uiRegistry.set(INPUTS_CLASSES._, _root);
     uiRegistry.set(INPUTS_CLASSES.description, description);
