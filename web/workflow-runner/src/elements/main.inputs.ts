@@ -143,6 +143,7 @@ export const createInputsSection = (store: WorkflowStore): WorkflowSectionContro
     clearChildren(options);
 
     const workflow = manager.workflow.current();
+    const statuses = state.inputStatuses || {};
     const cellElements: WorkflowUICells = [];
 
     if (workflow) {
@@ -156,6 +157,13 @@ export const createInputsSection = (store: WorkflowStore): WorkflowSectionContro
         const wrapper = _cells();
         const component = createInputCell(cell);
         component.id = id;
+
+        const status = statuses[id] || '';
+        if (status) {
+          wrapper.dataset.status = status;
+        } else {
+          delete wrapper.dataset.status;
+        }
 
         cellElements.push(component);
         wrapper.appendChild(component);

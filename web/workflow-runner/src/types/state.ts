@@ -6,6 +6,7 @@ import {
   WorkflowRunStatus,
 } from './api';
 import { WorkflowManager } from './manager';
+import { WorkflowCellStatus } from './section';
 
 //#region Store
 export interface WorkflowStore {
@@ -21,6 +22,7 @@ export interface WorkflowState {
   currentRunId: string | null;
   isDebug: boolean;
   manager: WorkflowManager | null;
+  inputStatuses: Record<string, WorkflowCellStatus>;
   mutate: WorkflowStateMutators;
   notifications: WorkflowStateNotification[];
   pollingTimer: number | null;
@@ -40,6 +42,7 @@ export type WorkflowStateListener = (state: WorkflowState) => void;
 export interface WorkflowStateMutators {
   isDebug: (isDebug: boolean) => void;
   manager: (manager: WorkflowManager) => void;
+  inputStatus: (cellId: string, status: WorkflowCellStatus) => void;
   notifications: {
     add: (notification: WorkflowStateNotification) => void;
     removeById: (id: string) => void;

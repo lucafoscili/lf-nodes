@@ -1,6 +1,7 @@
 import { DEFAULT_STATUS_MESSAGES } from '../config';
 import { WorkflowAPIDataset, WorkflowNodeResults, WorkflowRunStatus } from '../types/api';
 import { WorkflowManager } from '../types/manager';
+import { WorkflowCellStatus } from '../types/section';
 import {
   WorkflowRunEntryUpdate,
   WorkflowState,
@@ -74,6 +75,18 @@ export const createWorkflowRunnerStore = (initialState: WorkflowState): Workflow
     manager: (manager: WorkflowManager) =>
       applyMutation((draft) => {
         draft.manager = manager;
+      }),
+    inputStatus: (cellId: string, status: WorkflowCellStatus) =>
+      applyMutation((draft) => {
+        if (status) {
+          draft.inputStatuses = {
+            ...draft.inputStatuses,
+            [cellId]: status,
+          };
+        } else if (cellId in draft.inputStatuses) {
+          const { [cellId]: _removed, ...rest } = draft.inputStatuses;
+          draft.inputStatuses = rest;
+        }
       }),
     notifications: {
       add: (notification: WorkflowStateNotification) =>
@@ -204,6 +217,7 @@ const setWorkflow = (id: string, setState: (updater: WorkflowStateUpdater) => vo
     (state) =>
       ({
         ...state,
+        inputStatuses: {},
         current: {
           ...state.current,
           id,

@@ -43,34 +43,6 @@ export const setView = (store: WorkflowStore, view: WorkflowView) => {
     state.mutate.view(view);
   }
 };
-
-export interface ChangeViewOptions {
-  runId?: string | null;
-  clearResults?: boolean;
-}
-
-export const changeView = (
-  store: WorkflowStore,
-  view: WorkflowView,
-  options: ChangeViewOptions = {},
-) => {
-  const runId = options.runId ?? null;
-  const clearResults = options.clearResults;
-
-  if (view === 'run') {
-    if (runId) {
-      selectRun(store, runId, { clearResults: clearResults ?? false });
-      setView(store, 'run');
-      return;
-    }
-    selectRun(store, null, { clearResults });
-    setView(store, 'workflow');
-    return;
-  }
-
-  selectRun(store, null, { clearResults });
-  setView(store, view);
-};
 //#endregion
 
 //#region Run Management

@@ -65,7 +65,7 @@ const _title = (store: WorkflowStore) => {
   backButton.lfStyling = 'flat';
   backButton.lfUiSize = 'small';
   backButton.onclick = () => manager.runs.select(null, 'workflow');
-  backButton.toggleAttribute('disabled', false);
+  backButton.toggleAttribute('disabled', true);
 
   historyButton.lfLabel = 'View all runs';
   historyButton.lfStyling = 'flat';
@@ -153,6 +153,12 @@ export const createResultsSection = (store: WorkflowStore): WorkflowSectionContr
     const element = elements[WORKFLOW_CLASSES.results] as HTMLElement;
     const h3 = elements[WORKFLOW_CLASSES.h3] as HTMLElement;
     const selectedRun = manager.runs.selected();
+    const runs = manager.runs.all();
+    const backButton = elements[WORKFLOW_CLASSES.back] as HTMLLfButtonElement | undefined;
+    const historyButton = elements[WORKFLOW_CLASSES.history] as HTMLLfButtonElement | undefined;
+
+    backButton?.toggleAttribute('disabled', !selectedRun);
+    historyButton?.toggleAttribute('disabled', runs.length === 0);
 
     descr.textContent = _formatDescription(selectedRun, manager.workflow.description());
     h3.textContent = selectedRun?.workflowName || manager.workflow.title();

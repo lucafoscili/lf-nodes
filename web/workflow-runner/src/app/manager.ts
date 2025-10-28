@@ -29,10 +29,10 @@ import { NOTIFICATION_MESSAGES, STATUS_MESSAGES } from '../utils/constants';
 import { createPollingController } from './polling';
 import { createRoutingController } from './routing';
 import { createRunLifecycle } from './runs';
-import { resolveMainSections } from './sections';
+import { changeView, resolveMainSections } from './sections';
 import { initState } from './state';
 import { createWorkflowRunnerStore } from './store';
-import { changeView, selectRun } from './store-actions';
+import { selectRun } from './store-actions';
 
 export class LfWorkflowRunnerManager implements WorkflowManager {
   //#region Initialization
@@ -183,10 +183,12 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
   }
   #subscribeToState() {
     const st = this.#STORE.getState();
+    let latestState = st;
     let lastCurrentMessage = st.current.message;
     let lastCurrentStatus = st.current.status;
     let lastDebug = st.isDebug;
     let lastId = st.current.id;
+    let lastInputStatuses = st.inputStatuses;
     let lastNotificationsCount = st.notifications?.length ?? 0;
     let lastQueued = st.queuedJobs ?? -1;
     let lastResults = st.results;
@@ -207,6 +209,7 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
     };
 
     this.#STORE.subscribe((state) => {
+      latestState = state;
       const { current, isDebug, queuedJobs, workflows } = state;
       const { message, status } = current;
 
@@ -238,6 +241,10 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
       if (state.view !== lastView) {
         needs.main = true;
         lastView = state.view;
+      }
+      if (state.inputStatuses !== lastInputStatuses) {
+        needs.main = true;
+        lastInputStatuses = state.inputStatuses;
       }
 
       if (message !== lastCurrentMessage || status !== lastCurrentStatus) {
@@ -273,6 +280,9 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
         requestAnimationFrame(() => {
           scheduled = false;
 
+          const stateSnapshot = latestState;
+          const snapshotDebug = stateSnapshot.isDebug;
+
           const sections = this.#SECTIONS;
           for (const sectionKey in needs) {
             const need = needs[sectionKey as keyof typeof needs];
@@ -280,7 +290,7 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
             if (need) {
               switch (sectionKey) {
                 case 'dev':
-                  if (isDebug) {
+                  if (snapshotDebug) {
                     section.mount();
                     section.render();
                   } else {
@@ -288,7 +298,7 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
                   }
                   break;
                 case 'main':
-                  const mainSections = resolveMainSections(state);
+                  const mainSections = resolveMainSections(stateSnapshot);
                   section.render(mainSections);
                   break;
                 default:

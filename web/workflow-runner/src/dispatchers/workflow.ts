@@ -75,7 +75,8 @@ const _handleUploadCell = async (store: WorkflowStore, rawValue: unknown) => {
 };
 const _setCellStatus = (store: WorkflowStore, id: string, status: WorkflowCellStatus = '') => {
   const { WORKFLOW_INPUT_FLAGGED } = DEBUG_MESSAGES;
-  const { current, manager } = store.getState();
+  const state = store.getState();
+  const { current, manager, mutate } = state;
   const { uiRegistry } = manager;
 
   const elements = uiRegistry.get();
@@ -84,8 +85,15 @@ const _setCellStatus = (store: WorkflowStore, id: string, status: WorkflowCellSt
   const cell = cells.find((el) => el.id === id);
   const wrapper = cell?.parentElement;
   if (wrapper) {
-    wrapper.dataset.status = status;
+    if (status) {
+      wrapper.dataset.status = status;
+    } else {
+      delete wrapper.dataset.status;
+    }
   }
+
+  mutate.inputStatus(id, status);
+
   if (status) {
     debugLog(WORKFLOW_INPUT_FLAGGED, 'informational', {
       cell: id,
