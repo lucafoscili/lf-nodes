@@ -1,6 +1,6 @@
 import { LfButtonEventPayload, LfDataDataset } from '@lf-widgets/foundations/dist';
 import { getLfFramework } from '@lf-widgets/framework';
-import { drawerNavigation, openComfyUI, openGithubRepo, toggleDebug } from '../handlers/layout';
+import { buttonHandler, drawerNavigation } from '../handlers/layout';
 import { WorkflowAPIDataset, WorkflowLFNode } from '../types/api';
 import { WorkflowSectionController } from '../types/section';
 import { WorkflowStore } from '../types/state';
@@ -45,15 +45,20 @@ const _footer = (store: WorkflowStore) => {
 
   let icon = getLfFramework().theme.get.icon('imageInPicture');
   let label = 'Open ComfyUI';
-  const comfyUi = _button(icon, label, (e) => openComfyUI(e), DRAWER_CLASSES.buttonComfyUi);
+  const comfyUi = _button(
+    icon,
+    label,
+    (e) => buttonHandler(e, store),
+    DRAWER_CLASSES.buttonComfyUi,
+  );
 
   icon = getLfFramework().theme.get.icon('bug');
   label = 'Toggle developer console';
-  const debug = _button(icon, label, (e) => toggleDebug(e, store), DRAWER_CLASSES.buttonDebug);
+  const debug = _button(icon, label, (e) => buttonHandler(e, store), DRAWER_CLASSES.buttonDebug);
 
   icon = getLfFramework().theme.get.icon('brandGithub');
   label = 'Open GitHub repository';
-  const github = _button(icon, label, (e) => openGithubRepo(e), DRAWER_CLASSES.buttonGithub);
+  const github = _button(icon, label, (e) => buttonHandler(e, store), DRAWER_CLASSES.buttonGithub);
 
   footer.appendChild(github);
   footer.appendChild(comfyUi);

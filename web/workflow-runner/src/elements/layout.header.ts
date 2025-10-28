@@ -1,6 +1,6 @@
 import { LfButtonInterface } from '@lf-widgets/foundations/dist';
 import { getLfFramework } from '@lf-widgets/framework';
-import { navigateToHistory, toggleDrawer } from '../handlers/layout';
+import { buttonHandler } from '../handlers/layout';
 import { WorkflowSectionController } from '../types/section';
 import { WorkflowStore } from '../types/state';
 import { DEBUG_MESSAGES } from '../utils/constants';
@@ -48,7 +48,7 @@ const _drawerToggle = (store: WorkflowStore) => {
 
   const drawerToggle = createComponent.button(props);
   drawerToggle.className = HEADER_CLASSES.drawerToggle;
-  drawerToggle.addEventListener('lf-button-event', (e) => toggleDrawer(e, store));
+  drawerToggle.addEventListener('lf-button-event', (e) => buttonHandler(e, store));
 
   return drawerToggle;
 };
@@ -60,7 +60,7 @@ const _serverIndicator = (store: WorkflowStore) => {
   const light = document.createElement('lf-button');
   light.className = HEADER_CLASSES.serverIndicatorLight;
   light.lfUiSize = 'large';
-  light.addEventListener('lf-button-event', (e) => navigateToHistory(e, store));
+  light.addEventListener('lf-button-event', (e) => buttonHandler(e, store));
 
   const counter = document.createElement('span');
   counter.className = HEADER_CLASSES.serverIndicatorCounter;

@@ -1,64 +1,38 @@
 import { LfButtonEventPayload, LfTreeEventPayload } from '@lf-widgets/foundations/dist';
 import { DRAWER_CLASSES } from '../elements/layout.drawer';
+import { HEADER_CLASSES } from '../elements/layout.header';
 import { WorkflowStore } from '../types/state';
 
 //#region Button Handlers
-export const navigateToHistory = (e: CustomEvent<LfButtonEventPayload>, store: WorkflowStore) => {
-  const { eventType } = e.detail;
+export const buttonHandler = (e: CustomEvent<LfButtonEventPayload>, store: WorkflowStore) => {
+  const { comp, eventType } = e.detail;
 
   const { manager } = store.getState();
 
   switch (eventType) {
     case 'click':
-      manager.runs.select(null, 'history');
-      break;
-    default:
-      return;
-  }
-};
-export const openComfyUI = (e: CustomEvent<LfButtonEventPayload>) => {
-  const { eventType } = e.detail;
-
-  switch (eventType) {
-    case 'click':
-      const port = window.location.port || '3000';
-      window.open(`http://localhost:${port}`, '_blank');
-  }
-};
-export const openGithubRepo = (e: CustomEvent<LfButtonEventPayload>) => {
-  const { eventType } = e.detail;
-
-  switch (eventType) {
-    case 'click':
-      window.open('https://github.com/lucafoscili/lf-nodes', '_blank');
-      break;
-    default:
-      return;
-  }
-};
-export const toggleDebug = (e: CustomEvent<LfButtonEventPayload>, store: WorkflowStore) => {
-  const { eventType } = e.detail;
-
-  const state = store.getState();
-
-  switch (eventType) {
-    case 'click':
-      state.mutate.isDebug(!state.isDebug);
-      break;
-    default:
-      return;
-  }
-};
-export const toggleDrawer = (e: CustomEvent<LfButtonEventPayload>, store: WorkflowStore) => {
-  const { eventType } = e.detail;
-
-  const { manager } = store.getState();
-  const elements = manager.uiRegistry.get();
-  const drawer = elements[DRAWER_CLASSES._] as HTMLLfDrawerElement;
-
-  switch (eventType) {
-    case 'click':
-      drawer.toggle();
+      switch (comp.rootElement.className) {
+        case HEADER_CLASSES.drawerToggle:
+          const elements = manager.uiRegistry.get();
+          const drawer = elements[DRAWER_CLASSES._] as HTMLLfDrawerElement;
+          drawer.toggle();
+          break;
+        case HEADER_CLASSES.serverIndicatorLight:
+          manager.runs.select(null, 'history');
+          break;
+        case DRAWER_CLASSES.buttonGithub:
+          window.open('https://github.com/lucafoscili/lf-nodes', '_blank');
+          break;
+        case DRAWER_CLASSES.buttonComfyUi:
+          const port = window.location.port || '8188';
+          window.open(`http://localhost:${port}`, '_blank');
+          break;
+        case DRAWER_CLASSES.buttonDebug:
+          store.getState().mutate.isDebug(!store.getState().isDebug);
+          break;
+        default:
+          break;
+      }
       break;
     default:
       return;
