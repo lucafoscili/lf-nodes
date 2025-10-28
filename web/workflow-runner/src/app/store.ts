@@ -16,9 +16,25 @@ import {
 //#region Factory
 export const createWorkflowRunnerStore = (initialState: WorkflowState): WorkflowStore => {
   let state = initialState;
+
   const listeners = new Set<WorkflowStateListener>();
   const pendingMutations: Array<() => void> = [];
   let isApplyingMutation = false;
+
+  const cloneWorkflowsDataset = (dataset: WorkflowAPIDataset): WorkflowAPIDataset => ({
+    ...dataset,
+    columns: dataset.columns ? dataset.columns.slice() : undefined,
+    nodes: Array.isArray(dataset.nodes) ? dataset.nodes.slice() : [],
+  });
+
+  const createDraft = (source: WorkflowState): WorkflowState => ({
+    ...source,
+    current: { ...source.current },
+    inputStatuses: { ...source.inputStatuses },
+    notifications: source.notifications.slice(),
+    runs: source.runs.map((run) => ({ ...run })),
+    workflows: cloneWorkflowsDataset(source.workflows),
+  });
 
   const getState = () => state;
 
@@ -61,8 +77,9 @@ export const createWorkflowRunnerStore = (initialState: WorkflowState): Workflow
   const applyMutation = (mutator: (draft: WorkflowState) => void) => {
     enqueueMutation(() =>
       setState((current) => {
-        mutator(current);
-        return { ...current };
+        const draft = createDraft(current);
+        mutator(draft);
+        return draft;
       }),
     );
   };
@@ -131,7 +148,8 @@ export const createWorkflowRunnerStore = (initialState: WorkflowState): Workflow
           if (existingIndex >= 0) {
             const current = draft.runs[existingIndex];
             const createdAt = entry.createdAt ?? current.createdAt;
-            draft.runs[existingIndex] = {
+            const nextRuns = draft.runs.slice();
+            nextRuns[existingIndex] = {
               ...current,
               ...entry,
               createdAt,
@@ -146,8 +164,10 @@ export const createWorkflowRunnerStore = (initialState: WorkflowState): Workflow
               resultPayload:
                 entry.resultPayload !== undefined ? entry.resultPayload : current.resultPayload,
             };
+            draft.runs = nextRuns;
           } else {
             const createdAt = entry.createdAt ?? now;
+            const nextRuns = draft.runs.filter((run) => run.runId !== entry.runId);
             draft.runs = [
               {
                 runId: entry.runId,
@@ -163,7 +183,7 @@ export const createWorkflowRunnerStore = (initialState: WorkflowState): Workflow
                 resultPayload:
                   entry.resultPayload === undefined ? null : entry.resultPayload ?? null,
               },
-              ...draft.runs.filter((run) => run.runId !== entry.runId),
+              ...nextRuns,
             ];
           }
         }),

@@ -1,4 +1,4 @@
-import { getLfFramework } from '@lf-widgets/framework';
+﻿import { getLfFramework } from '@lf-widgets/framework';
 import { WorkflowSectionController } from '../types/section';
 import { WorkflowRunEntry, WorkflowStore } from '../types/state';
 import { clearChildren, deepMerge, formatStatus, formatTimestamp } from '../utils/common';
@@ -27,11 +27,14 @@ export const WORKFLOW_CLASSES = {
 
 //#region Helpers
 const _formatDescription = (selectedRun: WorkflowRunEntry | null, description: string) => {
-  return selectedRun
-    ? `Run ${selectedRun.runId.slice(0, 8)} • ${formatStatus(
-        selectedRun.status,
-      )} • ${formatTimestamp(selectedRun.updatedAt || selectedRun.createdAt)}`
-    : description;
+  if (!selectedRun) {
+    return description;
+  }
+
+  const timestamp = selectedRun.updatedAt || selectedRun.createdAt;
+  return `Run ${selectedRun.runId.slice(0, 8)} - ${formatStatus(
+    selectedRun.status,
+  )} - ${formatTimestamp(timestamp)}`;
 };
 const _description = () => {
   const p = document.createElement('p');

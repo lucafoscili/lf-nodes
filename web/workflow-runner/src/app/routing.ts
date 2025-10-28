@@ -1,5 +1,5 @@
 import { CreateRoutingControllerOptions, RoutingController } from '../types/manager';
-import { WorkflowRoute } from '../types/state';
+import { WorkflowRoute, WorkflowState } from '../types/state';
 import {
   parseRouteFromLocation,
   replaceRouteInHistory,
@@ -12,6 +12,11 @@ import { changeView, computeRouteFromState } from './sections';
 export const createRoutingController = ({
   store,
 }: CreateRoutingControllerOptions): RoutingController => {
+  type NormalizedRouteResult = {
+    route: WorkflowRoute;
+    clearResults?: boolean;
+  };
+
   let currentRoute: WorkflowRoute | null = null;
   let pendingRoute: WorkflowRoute | null = null;
   let isApplyingRoute = false;
@@ -28,15 +33,81 @@ export const createRoutingController = ({
     return Boolean(workflows?.nodes?.some((node) => node.id === workflowId));
   };
 
+  const normalizeRoute = (route: WorkflowRoute, state: WorkflowState): NormalizedRouteResult => {
+    const { runs, current, workflows } = state;
+    const availableNodes = workflows?.nodes ?? [];
+    const workflowExists = (id?: string | null) =>
+      Boolean(id && availableNodes.some((node) => node.id === id));
+
+    const findRun = (runId?: string | null) =>
+      runId ? runs.find((run) => run.runId === runId) ?? null : null;
+
+    const run = findRun(route.runId ?? null);
+
+    let workflowId = route.workflowId ?? undefined;
+    if (workflowId && !workflowExists(workflowId)) {
+      workflowId = undefined;
+    }
+
+    const runWorkflowId = run?.workflowId ?? null;
+    if (workflowId === undefined && workflowExists(runWorkflowId)) {
+      workflowId = runWorkflowId ?? undefined;
+    } else if (workflowId === undefined && workflowExists(current.id)) {
+      workflowId = current.id ?? undefined;
+    }
+
+    let runId = run?.runId ?? undefined;
+    let view = route.view;
+
+    if (view === 'run') {
+      if (!runId) {
+        view = 'workflow';
+      }
+    } else if (view === 'history' || view === 'workflow') {
+      runId = undefined;
+    } else if (view === 'home') {
+      workflowId = undefined;
+      runId = undefined;
+    } else {
+      view = 'workflow';
+      runId = undefined;
+    }
+
+    if (view !== 'run') {
+      runId = undefined;
+    }
+
+    const normalizedRoute: WorkflowRoute = { view };
+    if (workflowId) {
+      normalizedRoute.workflowId = workflowId;
+    }
+    if (view === 'run' && runId) {
+      normalizedRoute.runId = runId;
+      if (runWorkflowId && workflowExists(runWorkflowId)) {
+        normalizedRoute.workflowId = runWorkflowId;
+      }
+    }
+
+    const clearResults =
+      normalizedRoute.view === 'run' && normalizedRoute.runId ? false : undefined;
+
+    return {
+      route: normalizedRoute,
+      clearResults,
+    };
+  };
+
   //#region Update Route
   const updateRouteFromState = (precomputed?: WorkflowRoute) => {
     if (isApplyingRoute) {
       return;
     }
-    const nextRoute = precomputed ?? computeRouteFromState(store.getState());
-    if (!routesEqual(nextRoute, currentRoute)) {
-      currentRoute = nextRoute;
-      replaceRouteInHistory(nextRoute);
+    const state = store.getState();
+    const nextRoute = precomputed ?? computeRouteFromState(state);
+    const normalized = normalizeRoute(nextRoute, state).route;
+    if (!routesEqual(normalized, currentRoute)) {
+      currentRoute = normalized;
+      replaceRouteInHistory(normalized);
     }
   };
   //#endregion
@@ -52,22 +123,16 @@ export const createRoutingController = ({
     pendingRoute = null;
     try {
       const state = store.getState();
-      let workflowId = route.workflowId ?? null;
-      if (workflowId && workflowExists(workflowId) && state.current.id !== workflowId) {
-        state.mutate.workflow(workflowId);
-      } else if (workflowId && !workflowExists(workflowId)) {
-        workflowId = state.current.id ?? null;
-      }
+      const { route: normalizedRoute, clearResults } = normalizeRoute(route, state);
 
-      const normalizedRoute: WorkflowRoute = {
-        view: route.view,
-        workflowId: workflowId ?? undefined,
-        runId: route.runId ?? undefined,
-      };
+      const workflowId = normalizedRoute.workflowId ?? null;
+      if (workflowId && state.current.id !== workflowId && workflowExists(workflowId)) {
+        state.mutate.workflow(workflowId);
+      }
 
       changeView(store, normalizedRoute.view, {
         runId: normalizedRoute.runId ?? null,
-        clearResults: normalizedRoute.view === 'run' ? false : undefined,
+        clearResults,
       });
     } finally {
       isApplyingRoute = false;
@@ -97,8 +162,8 @@ export const createRoutingController = ({
 
   //#region Initialize / Destroy
   const initialize = () => {
-    currentRoute = parseRouteFromLocation();
-    pendingRoute = currentRoute;
+    currentRoute = null;
+    pendingRoute = parseRouteFromLocation();
     unsubscribe = subscribeToRouteChanges((route) => {
       handleRouteChange(route);
     });
@@ -121,6 +186,3 @@ export const createRoutingController = ({
   };
 };
 //#endregion
-
-
-

@@ -23,6 +23,11 @@ export const createMainSection = (store: WorkflowStore): WorkflowSectionControll
   const INPUTS = createInputsSection(store);
   const OUTPUTS = createOutputsSection(store);
   const RESULTS = createResultsSection(store);
+  const SECTION_CONTROLLERS: Record<WorkflowMainSections, WorkflowSectionController> = {
+    inputs: INPUTS,
+    outputs: OUTPUTS,
+    results: RESULTS,
+  };
   let LAST_SCOPE: WorkflowMainSections[] = [];
   let LAST_WORKFLOW_ID: string | null = store.getState().current.id;
   //#endregion
@@ -32,15 +37,8 @@ export const createMainSection = (store: WorkflowStore): WorkflowSectionControll
     const { manager } = store.getState();
     const { uiRegistry } = manager;
 
-    for (const cls in MAIN_CLASSES) {
-      const element = MAIN_CLASSES[cls];
-      uiRegistry.remove(element);
-    }
-
-    INPUTS.destroy();
-    OUTPUTS.destroy();
-    RESULTS.destroy();
-    uiRegistry.remove(MAIN_CLASSES.home);
+    Object.values(MAIN_CLASSES).forEach((className) => uiRegistry.remove(className));
+    Object.values(SECTION_CONTROLLERS).forEach((controller) => controller.destroy());
 
     debugLog(MAIN_DESTROYED);
   };
@@ -83,60 +81,29 @@ export const createMainSection = (store: WorkflowStore): WorkflowSectionControll
       return;
     }
 
-    if (workflowChanged && LAST_SCOPE.length > 0) {
+    const previousSections = new Set<WorkflowMainSections>(LAST_SCOPE);
+
+    if (workflowChanged && previousSections.size > 0) {
+      previousSections.forEach((section) => {
+        SECTION_CONTROLLERS[section].destroy();
+      });
+      previousSections.clear();
+      LAST_SCOPE = [];
+    } else {
       LAST_SCOPE.forEach((section) => {
-        switch (section) {
-          case 'inputs':
-            INPUTS.destroy();
-            break;
-          case 'outputs':
-            OUTPUTS.destroy();
-            break;
-          case 'results':
-            RESULTS.destroy();
-            break;
+        if (!scopeSet.has(section)) {
+          SECTION_CONTROLLERS[section].destroy();
+          previousSections.delete(section);
         }
       });
-      LAST_SCOPE = [];
     }
 
-    LAST_SCOPE.forEach((section) => {
-      if (!scopeSet.has(section)) {
-        switch (section) {
-          case 'inputs':
-            INPUTS.destroy();
-            break;
-          case 'outputs':
-            OUTPUTS.destroy();
-            break;
-          case 'results':
-            RESULTS.destroy();
-            break;
-        }
-      }
-    });
-
     scopeSet.forEach((section) => {
-      switch (section) {
-        case 'inputs':
-          if (!LAST_SCOPE.find((s) => s === 'inputs')) {
-            INPUTS.mount();
-          }
-          INPUTS.render();
-          break;
-        case 'outputs':
-          if (!LAST_SCOPE.find((s) => s === 'outputs')) {
-            OUTPUTS.mount();
-          }
-          OUTPUTS.render();
-          break;
-        case 'results':
-          if (!LAST_SCOPE.find((s) => s === 'results')) {
-            RESULTS.mount();
-          }
-          RESULTS.render();
-          break;
+      const controller = SECTION_CONTROLLERS[section];
+      if (!previousSections.has(section)) {
+        controller.mount();
       }
+      controller.render();
     });
 
     if (resolvedSections.length === 0) {
