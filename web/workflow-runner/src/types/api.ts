@@ -18,7 +18,7 @@ export interface WorkflowAPIErrorOptions<T> {
 export interface WorkflowAPIResponse {
   message: string;
   payload: WorkflowAPIRunPayload;
-  status: WorkflowStatus;
+  status: WorkflowRunStatus;
 }
 //#endregion
 

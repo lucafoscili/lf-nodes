@@ -55,3 +55,26 @@ test('ensureActiveRun maintains a queue of pending runs', () => {
 
   assert.equal(store.getState().currentRunId, null);
 });
+
+test('ensureActiveRun honors preferred run when it is still pending', () => {
+  const store = createWorkflowRunnerStore(initState());
+
+  const runA = createRun('run-a', 'pending', 1000);
+  const runB = createRun('run-b', 'pending', 1000);
+  const runC = createRun('run-c', 'pending', 1000);
+
+  upsertRun(store, runA);
+  upsertRun(store, runB);
+  upsertRun(store, runC);
+
+  ensureActiveRun(store, runB.runId);
+  assert.equal(store.getState().currentRunId, 'run-b', 'preferred pending run should be selected');
+
+  upsertRun(store, { runId: 'run-b', status: 'succeeded', updatedAt: 2_000 });
+  setRunInFlight(store, null);
+  ensureActiveRun(store, runB.runId);
+
+  const fallbackRunId = store.getState().currentRunId;
+  assert.ok(fallbackRunId === 'run-a' || fallbackRunId === 'run-c', 'fallback should select another pending run');
+  assert.equal(store.getState().runs.find((run) => run.runId === fallbackRunId)?.status, 'pending');
+});
