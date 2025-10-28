@@ -7,8 +7,12 @@ import { createDrawerSection } from '../elements/layout.drawer';
 import { createHeaderSection } from '../elements/layout.header';
 import { createMainSection } from '../elements/layout.main';
 import { createNotificationsSection } from '../elements/layout.notifications';
-import { WORKFLOW_CLASSES } from '../elements/main.inputs';
-import { fetchWorkflowDefinitions } from '../services/workflow-service';
+import { INPUTS_CLASSES } from '../elements/main.inputs';
+import {
+  fetchWorkflowDefinitions,
+  fetchWorkflowJSON,
+  WorkflowApiError,
+} from '../services/workflow-service';
 import {
   WorkflowCellInputId,
   WorkflowCellsInputContainer,
@@ -32,7 +36,7 @@ import { createRunLifecycle } from './runs';
 import { changeView, resolveMainSections } from './sections';
 import { initState } from './state';
 import { createWorkflowRunnerStore } from './store';
-import { selectRun } from './store-actions';
+import { addNotification, selectRun } from './store-actions';
 
 export class LfWorkflowRunnerManager implements WorkflowManager {
   //#region Initialization
@@ -173,7 +177,7 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
   };
   #setInputStatus(inputId: string, status: WorkflowCellStatus) {
     const elements = this.uiRegistry.get();
-    const cells = (elements?.[WORKFLOW_CLASSES.cells] as WorkflowUICells) || [];
+    const cells = (elements?.[INPUTS_CLASSES.cells] as WorkflowUICells) || [];
 
     const cell = cells.find((el) => el.id === inputId);
     const wrapper = cell?.parentElement;
@@ -419,6 +423,39 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
     current: () => {
       const { current, workflows } = this.#STORE.getState();
       return workflows?.nodes?.find((node) => node.id === current.id) || null;
+    },
+    download: async (id?: string) => {
+      const { ERROR_FETCHING_WORKFLOWS } = STATUS_MESSAGES;
+
+      const state = this.#STORE.getState();
+      id = id || state.current.id;
+
+      try {
+        const workflowJSON = await fetchWorkflowJSON(id);
+
+        const workflowString = JSON.stringify(workflowJSON, null, 2);
+        const blob = new Blob([workflowString], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${id}.json`;
+        document.body.appendChild(a);
+        a.click();
+
+        setTimeout(() => {
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        }, 1000);
+      } catch (error) {
+        state.mutate.status('error', ERROR_FETCHING_WORKFLOWS);
+        if (error instanceof WorkflowApiError) {
+          addNotification(this.#STORE, {
+            id: performance.now().toString(),
+            message: `Failed to fetch workflow: ${error.message}`,
+            status: 'danger',
+          });
+        }
+      }
     },
     description: () => {
       const workflow = this.workflow.current();

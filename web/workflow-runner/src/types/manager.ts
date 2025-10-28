@@ -40,6 +40,7 @@ export interface WorkflowManager {
       type: T,
     ) => T extends WorkflowCellInputId ? WorkflowCellsInputContainer : WorkflowCellsOutputContainer;
     current: () => WorkflowAPIItem;
+    download: (id?: string) => Promise<void>;
     description: () => string;
     title: () => string;
   };

@@ -10,7 +10,7 @@ import { MAIN_CLASSES } from './layout.main';
 //#region CSS Classes
 const { theme } = getLfFramework();
 const ROOT_CLASS = 'results-section';
-export const WORKFLOW_CLASSES = {
+export const RESULTS_CLASSES = {
   _: theme.bemClass(ROOT_CLASS),
   actions: theme.bemClass(ROOT_CLASS, 'actions'),
   back: theme.bemClass(ROOT_CLASS, 'back'),
@@ -38,13 +38,13 @@ const _formatDescription = (selectedRun: WorkflowRunEntry | null, description: s
 };
 const _description = () => {
   const p = document.createElement('p');
-  p.className = WORKFLOW_CLASSES.description;
+  p.className = RESULTS_CLASSES.description;
 
   return p;
 };
 const _results = () => {
   const cellWrapper = document.createElement('div');
-  cellWrapper.className = WORKFLOW_CLASSES.results;
+  cellWrapper.className = RESULTS_CLASSES.results;
 
   return cellWrapper;
 };
@@ -57,12 +57,12 @@ const _title = (store: WorkflowStore) => {
   const backButton = document.createElement('lf-button');
   const historyButton = document.createElement('lf-button');
 
-  title.className = WORKFLOW_CLASSES.title;
-  actions.className = WORKFLOW_CLASSES.actions;
+  title.className = RESULTS_CLASSES.title;
+  actions.className = RESULTS_CLASSES.actions;
 
-  h3.className = WORKFLOW_CLASSES.h3;
-  backButton.className = WORKFLOW_CLASSES.back;
-  historyButton.className = WORKFLOW_CLASSES.history;
+  h3.className = RESULTS_CLASSES.h3;
+  backButton.className = RESULTS_CLASSES.back;
+  historyButton.className = RESULTS_CLASSES.history;
 
   backButton.lfLabel = 'Back to workflow';
   backButton.lfStyling = 'flat';
@@ -96,8 +96,8 @@ export const createResultsSection = (store: WorkflowStore): WorkflowSectionContr
     const { manager } = store.getState();
     const { uiRegistry } = manager;
 
-    for (const cls in WORKFLOW_CLASSES) {
-      const element = WORKFLOW_CLASSES[cls];
+    for (const cls in RESULTS_CLASSES) {
+      const element = RESULTS_CLASSES[cls];
       uiRegistry.remove(element);
     }
 
@@ -111,12 +111,12 @@ export const createResultsSection = (store: WorkflowStore): WorkflowSectionContr
     const { uiRegistry } = manager;
 
     const elements = uiRegistry.get();
-    if (elements && elements[WORKFLOW_CLASSES._]) {
+    if (elements && elements[RESULTS_CLASSES._]) {
       return;
     }
 
     const _root = document.createElement('section');
-    _root.className = WORKFLOW_CLASSES._;
+    _root.className = RESULTS_CLASSES._;
 
     const results = _results();
     const description = _description();
@@ -128,14 +128,14 @@ export const createResultsSection = (store: WorkflowStore): WorkflowSectionContr
 
     elements[MAIN_CLASSES._].appendChild(_root);
 
-    uiRegistry.set(WORKFLOW_CLASSES._, _root);
-    uiRegistry.set(WORKFLOW_CLASSES.actions, actions);
-    uiRegistry.set(WORKFLOW_CLASSES.back, backButton);
-    uiRegistry.set(WORKFLOW_CLASSES.description, description);
-    uiRegistry.set(WORKFLOW_CLASSES.h3, h3);
-    uiRegistry.set(WORKFLOW_CLASSES.history, historyButton);
-    uiRegistry.set(WORKFLOW_CLASSES.results, results);
-    uiRegistry.set(WORKFLOW_CLASSES.title, title);
+    uiRegistry.set(RESULTS_CLASSES._, _root);
+    uiRegistry.set(RESULTS_CLASSES.actions, actions);
+    uiRegistry.set(RESULTS_CLASSES.back, backButton);
+    uiRegistry.set(RESULTS_CLASSES.description, description);
+    uiRegistry.set(RESULTS_CLASSES.h3, h3);
+    uiRegistry.set(RESULTS_CLASSES.history, historyButton);
+    uiRegistry.set(RESULTS_CLASSES.results, results);
+    uiRegistry.set(RESULTS_CLASSES.title, title);
 
     debugLog(WORKFLOW_RESULTS_MOUNTED);
   };
@@ -152,13 +152,13 @@ export const createResultsSection = (store: WorkflowStore): WorkflowSectionContr
       return;
     }
 
-    const descr = elements[WORKFLOW_CLASSES.description] as HTMLElement;
-    const element = elements[WORKFLOW_CLASSES.results] as HTMLElement;
-    const h3 = elements[WORKFLOW_CLASSES.h3] as HTMLElement;
+    const descr = elements[RESULTS_CLASSES.description] as HTMLElement;
+    const element = elements[RESULTS_CLASSES.results] as HTMLElement;
+    const h3 = elements[RESULTS_CLASSES.h3] as HTMLElement;
     const selectedRun = manager.runs.selected();
     const runs = manager.runs.all();
-    const backButton = elements[WORKFLOW_CLASSES.back] as HTMLLfButtonElement | undefined;
-    const historyButton = elements[WORKFLOW_CLASSES.history] as HTMLLfButtonElement | undefined;
+    const backButton = elements[RESULTS_CLASSES.back] as HTMLLfButtonElement | undefined;
+    const historyButton = elements[RESULTS_CLASSES.history] as HTMLLfButtonElement | undefined;
 
     backButton?.toggleAttribute('disabled', !selectedRun);
     historyButton?.toggleAttribute('disabled', runs.length === 0);
@@ -172,7 +172,7 @@ export const createResultsSection = (store: WorkflowStore): WorkflowSectionContr
     const nodeIds = outputs ? Object.keys(outputs) : [];
     if (nodeIds.length === 0) {
       const empty = document.createElement('p');
-      empty.className = WORKFLOW_CLASSES.empty;
+      empty.className = RESULTS_CLASSES.empty;
       empty.textContent = selectedRun
         ? 'This run has not produced any outputs yet.'
         : 'Select a run to inspect its outputs.';
@@ -190,16 +190,16 @@ export const createResultsSection = (store: WorkflowStore): WorkflowSectionContr
       const { id, nodeId, title } = output;
 
       const h4 = document.createElement('h4');
-      h4.className = WORKFLOW_CLASSES.title;
+      h4.className = RESULTS_CLASSES.title;
       h4.textContent = title || `Node #${nodeId}`;
       element.appendChild(h4);
 
       const grid = document.createElement('div');
-      grid.className = WORKFLOW_CLASSES.grid;
+      grid.className = RESULTS_CLASSES.grid;
       element.appendChild(grid);
 
       const wrapper = document.createElement('div');
-      wrapper.className = WORKFLOW_CLASSES.item;
+      wrapper.className = RESULTS_CLASSES.item;
 
       const component = createOutputComponent(output);
       component.id = id;

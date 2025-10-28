@@ -1,6 +1,6 @@
 import { LfButtonInterface } from '@lf-widgets/foundations/dist';
 import { getLfFramework } from '@lf-widgets/framework';
-import { buttonHandler } from '../handlers/layout';
+import { buttonHandler } from '../handlers/button';
 import { WorkflowSectionController } from '../types/section';
 import { WorkflowStore } from '../types/state';
 import { DEBUG_MESSAGES } from '../utils/constants';

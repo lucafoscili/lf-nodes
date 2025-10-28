@@ -1,5 +1,5 @@
 import { getLfFramework } from '@lf-widgets/framework';
-import { openWorkflowInComfyUI } from '../handlers/workflow';
+import { buttonHandler } from '../handlers/button';
 import { WorkflowSectionController, WorkflowUICells } from '../types/section';
 import { WorkflowStore } from '../types/state';
 import { DEBUG_MESSAGES } from '../utils/constants';
@@ -10,7 +10,7 @@ import { MAIN_CLASSES } from './layout.main';
 //#region CSS Classes
 const { theme } = getLfFramework();
 const ROOT_CLASS = 'inputs-section';
-export const WORKFLOW_CLASSES = {
+export const INPUTS_CLASSES = {
   _: theme.bemClass(ROOT_CLASS),
   cell: theme.bemClass(ROOT_CLASS, 'cell'),
   cells: theme.bemClass(ROOT_CLASS, 'cells'),
@@ -25,19 +25,19 @@ export const WORKFLOW_CLASSES = {
 //#region Helpers
 const _cells = () => {
   const cellWrapper = document.createElement('div');
-  cellWrapper.className = WORKFLOW_CLASSES.cell;
+  cellWrapper.className = INPUTS_CLASSES.cell;
 
   return cellWrapper;
 };
 const _description = () => {
   const p = document.createElement('p');
-  p.className = WORKFLOW_CLASSES.description;
+  p.className = INPUTS_CLASSES.description;
 
   return p;
 };
 const _options = () => {
   const optionsWrapper = document.createElement('div');
-  optionsWrapper.className = WORKFLOW_CLASSES.options;
+  optionsWrapper.className = INPUTS_CLASSES.options;
 
   return optionsWrapper;
 };
@@ -48,18 +48,18 @@ const _title = (store: WorkflowStore) => {
   const h3 = document.createElement('h3');
   const openButton = document.createElement('lf-button');
 
-  title.className = WORKFLOW_CLASSES.title;
+  title.className = INPUTS_CLASSES.title;
 
-  h3.className = WORKFLOW_CLASSES.h3;
+  h3.className = INPUTS_CLASSES.h3;
 
   const label = 'Download Workflow JSON';
-  openButton.className = WORKFLOW_CLASSES.openButton;
+  openButton.className = INPUTS_CLASSES.openButton;
   openButton.lfAriaLabel = label;
   openButton.lfIcon = lfIcon;
   openButton.lfStyling = 'icon';
   openButton.lfUiSize = 'xsmall';
   openButton.title = label;
-  openButton.addEventListener('lf-button-event', (e) => openWorkflowInComfyUI(e, store));
+  openButton.addEventListener('lf-button-event', (e) => buttonHandler(e, store));
 
   title.appendChild(h3);
   title.appendChild(openButton);
@@ -79,8 +79,8 @@ export const createInputsSection = (store: WorkflowStore): WorkflowSectionContro
     const { manager } = store.getState();
     const { uiRegistry } = manager;
 
-    for (const cls in WORKFLOW_CLASSES) {
-      const element = WORKFLOW_CLASSES[cls];
+    for (const cls in INPUTS_CLASSES) {
+      const element = INPUTS_CLASSES[cls];
       uiRegistry.remove(element);
     }
 
@@ -94,14 +94,14 @@ export const createInputsSection = (store: WorkflowStore): WorkflowSectionContro
     const { uiRegistry } = manager;
 
     const elements = uiRegistry.get();
-    if (elements && elements[WORKFLOW_CLASSES._]) {
+    if (elements && elements[INPUTS_CLASSES._]) {
       return;
     }
 
     const workflow = manager.workflow.current();
 
     const _root = document.createElement('section');
-    _root.className = WORKFLOW_CLASSES._;
+    _root.className = INPUTS_CLASSES._;
 
     const description = _description();
     const options = _options();
@@ -129,7 +129,7 @@ export const createInputsSection = (store: WorkflowStore): WorkflowSectionContro
       }
     }
 
-    uiRegistry.set(WORKFLOW_CLASSES.cells, cellElements);
+    uiRegistry.set(INPUTS_CLASSES.cells, cellElements);
 
     _root.appendChild(title);
     _root.appendChild(description);
@@ -137,12 +137,12 @@ export const createInputsSection = (store: WorkflowStore): WorkflowSectionContro
 
     elements[MAIN_CLASSES._].appendChild(_root);
 
-    uiRegistry.set(WORKFLOW_CLASSES._, _root);
-    uiRegistry.set(WORKFLOW_CLASSES.description, description);
-    uiRegistry.set(WORKFLOW_CLASSES.h3, h3);
-    uiRegistry.set(WORKFLOW_CLASSES.openButton, openButton);
-    uiRegistry.set(WORKFLOW_CLASSES.options, options);
-    uiRegistry.set(WORKFLOW_CLASSES.title, title);
+    uiRegistry.set(INPUTS_CLASSES._, _root);
+    uiRegistry.set(INPUTS_CLASSES.description, description);
+    uiRegistry.set(INPUTS_CLASSES.h3, h3);
+    uiRegistry.set(INPUTS_CLASSES.openButton, openButton);
+    uiRegistry.set(INPUTS_CLASSES.options, options);
+    uiRegistry.set(INPUTS_CLASSES.title, title);
 
     debugLog(WORKFLOW_INPUTS_MOUNTED);
   };
@@ -159,9 +159,9 @@ export const createInputsSection = (store: WorkflowStore): WorkflowSectionContro
       return;
     }
 
-    const cells = elements[WORKFLOW_CLASSES.cells] as WorkflowUICells;
-    const descr = elements[WORKFLOW_CLASSES.description] as HTMLElement;
-    const h3 = elements[WORKFLOW_CLASSES.h3] as HTMLElement;
+    const cells = elements[INPUTS_CLASSES.cells] as WorkflowUICells;
+    const descr = elements[INPUTS_CLASSES.description] as HTMLElement;
+    const h3 = elements[INPUTS_CLASSES.h3] as HTMLElement;
     descr.textContent = manager.workflow.description();
     h3.textContent = manager.workflow.title();
 

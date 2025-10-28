@@ -1,6 +1,7 @@
-import { LfButtonEventPayload, LfDataDataset } from '@lf-widgets/foundations/dist';
+import { LfDataDataset } from '@lf-widgets/foundations/dist';
 import { getLfFramework } from '@lf-widgets/framework';
-import { buttonHandler, drawerNavigation } from '../handlers/layout';
+import { buttonHandler } from '../handlers/button';
+import { treeHandler } from '../handlers/tree';
 import { WorkflowAPIDataset, WorkflowLFNode } from '../types/api';
 import { WorkflowSectionController } from '../types/section';
 import { WorkflowStore } from '../types/state';
@@ -22,62 +23,6 @@ export const DRAWER_CLASSES = {
 //#endregion
 
 //#region Helpers
-const _button = (
-  icon: string,
-  label: string,
-  evCb: (e: CustomEvent<LfButtonEventPayload>, ...args: any[]) => void,
-  className: string,
-) => {
-  const button = document.createElement('lf-button');
-  button.className = className;
-  button.lfAriaLabel = label;
-  button.lfIcon = icon;
-  button.lfStyling = 'icon';
-  button.lfUiSize = 'small';
-  button.title = label;
-  button.addEventListener('lf-button-event', evCb);
-
-  return button;
-};
-const _footer = (store: WorkflowStore) => {
-  const footer = document.createElement('div');
-  footer.className = DRAWER_CLASSES.footer;
-
-  let icon = getLfFramework().theme.get.icon('imageInPicture');
-  let label = 'Open ComfyUI';
-  const comfyUi = _button(
-    icon,
-    label,
-    (e) => buttonHandler(e, store),
-    DRAWER_CLASSES.buttonComfyUi,
-  );
-
-  icon = getLfFramework().theme.get.icon('bug');
-  label = 'Toggle developer console';
-  const debug = _button(icon, label, (e) => buttonHandler(e, store), DRAWER_CLASSES.buttonDebug);
-
-  icon = getLfFramework().theme.get.icon('brandGithub');
-  label = 'Open GitHub repository';
-  const github = _button(icon, label, (e) => buttonHandler(e, store), DRAWER_CLASSES.buttonGithub);
-
-  footer.appendChild(github);
-  footer.appendChild(comfyUi);
-  footer.appendChild(debug);
-
-  return { comfyUi, debug, footer, github };
-};
-const _container = (store: WorkflowStore) => {
-  const container = document.createElement('div');
-  container.className = DRAWER_CLASSES.container;
-  container.slot = 'content';
-
-  const { comfyUi, debug, footer, github } = _footer(store);
-  const tree = _tree(store);
-  container.appendChild(tree);
-  container.appendChild(footer);
-
-  return { comfyUi, container, debug, footer, github, tree };
-};
 const _createDataset = (workflows: WorkflowAPIDataset) => {
   const categories: Array<WorkflowLFNode & { children: WorkflowLFNode[] }> = [];
   const root = { id: 'workflows', value: 'Workflows', children: categories };
@@ -106,17 +51,63 @@ const _createDataset = (workflows: WorkflowAPIDataset) => {
 const _getIcon = (category: string) => {
   const { alertTriangle, codeCircle2, json } = getLfFramework().theme.get.icons();
   const category_icons = {
-    SVG: codeCircle2,
     JSON: json,
+    SVG: codeCircle2,
   };
 
   return category_icons[category] || alertTriangle;
+};
+const _button = (store: WorkflowStore, icon: string, label: string, className: string) => {
+  const button = document.createElement('lf-button');
+  button.className = className;
+  button.lfAriaLabel = label;
+  button.lfIcon = icon;
+  button.lfStyling = 'icon';
+  button.lfUiSize = 'small';
+  button.title = label;
+  button.addEventListener('lf-button-event', (e) => buttonHandler(e, store));
+
+  return button;
+};
+const _container = (store: WorkflowStore) => {
+  const container = document.createElement('div');
+  container.className = DRAWER_CLASSES.container;
+  container.slot = 'content';
+
+  const { comfyUi, debug, footer, github } = _footer(store);
+  const tree = _tree(store);
+  container.appendChild(tree);
+  container.appendChild(footer);
+
+  return { comfyUi, container, debug, footer, github, tree };
+};
+const _footer = (store: WorkflowStore) => {
+  const footer = document.createElement('div');
+  footer.className = DRAWER_CLASSES.footer;
+
+  let icon = getLfFramework().theme.get.icon('imageInPicture');
+  let label = 'Open ComfyUI';
+  const comfyUi = _button(store, icon, label, DRAWER_CLASSES.buttonComfyUi);
+
+  icon = getLfFramework().theme.get.icon('bug');
+  label = 'Toggle developer console';
+  const debug = _button(store, icon, label, DRAWER_CLASSES.buttonDebug);
+
+  icon = getLfFramework().theme.get.icon('brandGithub');
+  label = 'Open GitHub repository';
+  const github = _button(store, icon, label, DRAWER_CLASSES.buttonGithub);
+
+  footer.appendChild(github);
+  footer.appendChild(comfyUi);
+  footer.appendChild(debug);
+
+  return { comfyUi, debug, footer, github };
 };
 const _tree = (store: WorkflowStore) => {
   const tree = document.createElement('lf-tree');
   tree.className = DRAWER_CLASSES.tree;
   tree.lfAccordionLayout = true;
-  tree.addEventListener('lf-tree-event', (e) => drawerNavigation(e, store));
+  tree.addEventListener('lf-tree-event', (e) => treeHandler(e, store));
 
   return tree;
 };

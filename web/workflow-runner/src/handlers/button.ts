@@ -1,6 +1,8 @@
 import { LfButtonEventPayload, LfTreeEventPayload } from '@lf-widgets/foundations/dist';
+import { ACTION_BUTTON_CLASSES } from '../elements/layout.action-button';
 import { DRAWER_CLASSES } from '../elements/layout.drawer';
 import { HEADER_CLASSES } from '../elements/layout.header';
+import { INPUTS_CLASSES } from '../elements/main.inputs';
 import { WorkflowStore } from '../types/state';
 
 //#region Button Handlers
@@ -12,6 +14,9 @@ export const buttonHandler = (e: CustomEvent<LfButtonEventPayload>, store: Workf
   switch (eventType) {
     case 'click':
       switch (comp.rootElement.className) {
+        case ACTION_BUTTON_CLASSES._:
+          manager.getDispatchers().runWorkflow();
+          break;
         case HEADER_CLASSES.drawerToggle:
           const elements = manager.uiRegistry.get();
           const drawer = elements[DRAWER_CLASSES._] as HTMLLfDrawerElement;
@@ -30,8 +35,11 @@ export const buttonHandler = (e: CustomEvent<LfButtonEventPayload>, store: Workf
         case DRAWER_CLASSES.buttonDebug:
           store.getState().mutate.isDebug(!store.getState().isDebug);
           break;
-        default:
+        case INPUTS_CLASSES.openButton:
+          manager.workflow.download();
           break;
+        default:
+          return;
       }
       break;
     default:

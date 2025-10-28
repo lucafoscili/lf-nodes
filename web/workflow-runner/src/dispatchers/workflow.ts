@@ -5,7 +5,7 @@ import {
   setStatus,
   upsertRun,
 } from '../app/store-actions';
-import { WORKFLOW_CLASSES } from '../elements/main.inputs';
+import { INPUTS_CLASSES } from '../elements/main.inputs';
 import { runWorkflow, uploadWorkflowFiles, WorkflowApiError } from '../services/workflow-service';
 import { WorkflowRunStatus } from '../types/api';
 import { WorkflowCellStatus, WorkflowUICells } from '../types/section';
@@ -19,7 +19,7 @@ const _collectInputs = async (store: WorkflowStore): Promise<Record<string, unkn
   const { uiRegistry } = state.manager;
 
   const elements = uiRegistry.get();
-  const cells = (elements?.[WORKFLOW_CLASSES.cells] as WorkflowUICells) || [];
+  const cells = (elements?.[INPUTS_CLASSES.cells] as WorkflowUICells) || [];
 
   const inputs: Record<string, unknown> = {};
 
@@ -80,7 +80,7 @@ const _setCellStatus = (store: WorkflowStore, id: string, status: WorkflowCellSt
   const { uiRegistry } = manager;
 
   const elements = uiRegistry.get();
-  const cells = (elements?.[WORKFLOW_CLASSES.cells] as WorkflowUICells) || [];
+  const cells = (elements?.[INPUTS_CLASSES.cells] as WorkflowUICells) || [];
 
   const cell = cells.find((el) => el.id === id);
   const wrapper = cell?.parentElement;

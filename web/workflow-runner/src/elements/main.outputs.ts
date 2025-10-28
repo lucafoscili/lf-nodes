@@ -10,7 +10,7 @@ import { MAIN_CLASSES } from './layout.main';
 //#region CSS Classes
 const { theme } = getLfFramework();
 const ROOT_CLASS = 'outputs-section';
-export const WORKFLOW_CLASSES = {
+export const OUTPUTS_CLASSES = {
   _: theme.bemClass(ROOT_CLASS),
   empty: theme.bemClass(ROOT_CLASS, 'empty'),
   h4: theme.bemClass(ROOT_CLASS, 'title-h4'),
@@ -39,7 +39,7 @@ const _cloneOutputs = (outputs: WorkflowNodeResults | null) => {
 };
 const _masonry = () => {
   const masonryWrapper = document.createElement('div');
-  masonryWrapper.className = WORKFLOW_CLASSES.masonry;
+  masonryWrapper.className = OUTPUTS_CLASSES.masonry;
 
   return masonryWrapper;
 };
@@ -49,10 +49,10 @@ const _title = () => {
   const controls = document.createElement('div');
   const toggle = document.createElement('lf-button') as HTMLLfButtonElement;
 
-  title.className = WORKFLOW_CLASSES.title;
-  controls.className = WORKFLOW_CLASSES.controls;
+  title.className = OUTPUTS_CLASSES.title;
+  controls.className = OUTPUTS_CLASSES.controls;
 
-  h4.className = WORKFLOW_CLASSES.h4;
+  h4.className = OUTPUTS_CLASSES.h4;
 
   title.appendChild(h4);
   title.appendChild(controls);
@@ -76,8 +76,8 @@ export const createOutputsSection = (store: WorkflowStore): WorkflowSectionContr
     const { manager } = store.getState();
     const { uiRegistry } = manager;
 
-    for (const cls in WORKFLOW_CLASSES) {
-      const element = WORKFLOW_CLASSES[cls];
+    for (const cls in OUTPUTS_CLASSES) {
+      const element = OUTPUTS_CLASSES[cls];
       uiRegistry.remove(element);
     }
 
@@ -91,12 +91,12 @@ export const createOutputsSection = (store: WorkflowStore): WorkflowSectionContr
     const { uiRegistry } = manager;
 
     const elements = uiRegistry.get();
-    if (elements && elements[WORKFLOW_CLASSES._]) {
+    if (elements && elements[OUTPUTS_CLASSES._]) {
       return;
     }
 
     const _root = document.createElement('section');
-    _root.className = WORKFLOW_CLASSES._;
+    _root.className = OUTPUTS_CLASSES._;
 
     const { h4, title, toggle } = _title();
     const masonry = _masonry();
@@ -106,11 +106,11 @@ export const createOutputsSection = (store: WorkflowStore): WorkflowSectionContr
 
     elements[MAIN_CLASSES._].appendChild(_root);
 
-    uiRegistry.set(WORKFLOW_CLASSES._, _root);
-    uiRegistry.set(WORKFLOW_CLASSES.h4, h4);
-    uiRegistry.set(WORKFLOW_CLASSES.masonry, masonry);
-    uiRegistry.set(WORKFLOW_CLASSES.title, title);
-    uiRegistry.set(WORKFLOW_CLASSES.controls, toggle);
+    uiRegistry.set(OUTPUTS_CLASSES._, _root);
+    uiRegistry.set(OUTPUTS_CLASSES.h4, h4);
+    uiRegistry.set(OUTPUTS_CLASSES.masonry, masonry);
+    uiRegistry.set(OUTPUTS_CLASSES.title, title);
+    uiRegistry.set(OUTPUTS_CLASSES.controls, toggle);
 
     debugLog(WORKFLOW_OUTPUTS_MOUNTED);
   };
@@ -127,9 +127,9 @@ export const createOutputsSection = (store: WorkflowStore): WorkflowSectionContr
       return;
     }
 
-    const h4 = elements[WORKFLOW_CLASSES.h4] as HTMLElement;
-    const masonry = elements[WORKFLOW_CLASSES.masonry] as HTMLDivElement;
-    const toggle = elements[WORKFLOW_CLASSES.controls] as HTMLLfButtonElement;
+    const h4 = elements[OUTPUTS_CLASSES.h4] as HTMLElement;
+    const masonry = elements[OUTPUTS_CLASSES.masonry] as HTMLDivElement;
+    const toggle = elements[OUTPUTS_CLASSES.controls] as HTMLLfButtonElement;
     if (!h4 || !masonry || !toggle) {
       return;
     }
@@ -160,7 +160,7 @@ export const createOutputsSection = (store: WorkflowStore): WorkflowSectionContr
 
     if (!runs.length) {
       const empty = document.createElement('p');
-      empty.className = WORKFLOW_CLASSES.empty;
+      empty.className = OUTPUTS_CLASSES.empty;
       empty.textContent = isHistoryView
         ? 'Run a workflow to start building your history.'
         : 'No runs for this workflow yet. Open full history to browse previous runs.';
@@ -172,21 +172,21 @@ export const createOutputsSection = (store: WorkflowStore): WorkflowSectionContr
     for (const run of runs) {
       const item = document.createElement('button');
       item.type = 'button';
-      item.className = WORKFLOW_CLASSES.item;
+      item.className = OUTPUTS_CLASSES.item;
       item.dataset.runId = run.runId;
       item.dataset.status = run.status;
       item.dataset.selected = String(run.runId === selectedRunId);
       item.setAttribute('aria-pressed', String(run.runId === selectedRunId));
 
       const header = document.createElement('div');
-      header.className = WORKFLOW_CLASSES.itemHeader;
+      header.className = OUTPUTS_CLASSES.itemHeader;
 
       const title = document.createElement('span');
-      title.className = WORKFLOW_CLASSES.itemTitle;
+      title.className = OUTPUTS_CLASSES.itemTitle;
       title.textContent = run.workflowName || workflowTitle || 'Workflow run';
 
       const status = document.createElement('span');
-      status.className = WORKFLOW_CLASSES.status;
+      status.className = OUTPUTS_CLASSES.status;
       status.textContent = formatStatus(run.status);
       status.dataset.state = run.status;
 
@@ -194,16 +194,16 @@ export const createOutputsSection = (store: WorkflowStore): WorkflowSectionContr
       header.appendChild(status);
 
       const meta = document.createElement('div');
-      meta.className = WORKFLOW_CLASSES.itemMeta;
+      meta.className = OUTPUTS_CLASSES.itemMeta;
 
       const timestamp = document.createElement('span');
-      timestamp.className = WORKFLOW_CLASSES.timestamp;
+      timestamp.className = OUTPUTS_CLASSES.timestamp;
       timestamp.textContent = formatTimestamp(run.updatedAt || run.createdAt);
       meta.appendChild(timestamp);
 
       if (run.error) {
         const error = document.createElement('span');
-        error.className = WORKFLOW_CLASSES.status;
+        error.className = OUTPUTS_CLASSES.status;
         error.dataset.state = 'error';
         error.textContent = run.error;
         meta.appendChild(error);
