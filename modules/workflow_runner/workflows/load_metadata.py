@@ -1,7 +1,9 @@
 from pathlib import Path
 from typing import Any, Dict
 
-from ..registry import InputValidationError, WorkflowCell, WorkflowNode
+from ..registry import WorkflowCell, WorkflowNode
+from .utils import resolve_upload_paths
+
 
 # region Workflow Config
 def _configure(prompt: Dict[str, Any], inputs: Dict[str, Any]) -> None:
@@ -12,27 +14,10 @@ def _configure(prompt: Dict[str, Any], inputs: Dict[str, Any]) -> None:
         inputs_map = node.setdefault("inputs", {})
 
         if node_id == "10":  # Image loader
-            name = "source_path"
-            source_path = inputs.get(name)
-            if not source_path:
-                raise InputValidationError(name)
-
-            if isinstance(source_path, (list, tuple)):
-                source_path = next((v for v in source_path if v), source_path[0] if len(source_path) > 0 else None)
-
-            if isinstance(source_path, dict):
-                source_path = source_path.get('path') or source_path.get('file') or source_path.get('name')
-
-            if isinstance(source_path, str) and ';' in source_path:
-                parts = [p for p in (s.strip() for s in source_path.split(';')) if p]
-                source_path = parts[0] if parts else source_path
-
-            resolved_path = Path(source_path).expanduser()
-            if not resolved_path.exists():
-                raise FileNotFoundError(f"Input path does not exist: {resolved_path}")
-
-            resolved_str = str(resolved_path)
-            inputs_map["file_names"] = resolved_str
+            resolved_paths = resolve_upload_paths(inputs, "source_path", allow_multiple=True)
+            inputs_map["file_names"] = (
+                resolved_paths[0] if len(resolved_paths) == 1 else ";".join(resolved_paths)
+            )
 # endregion
 
 # region Inputs
