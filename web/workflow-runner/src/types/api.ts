@@ -4,7 +4,6 @@ import {
   LfDataDataset,
   LfDataNode,
 } from '@lf-widgets/foundations/dist';
-import { WorkflowStatus } from './state';
 
 //#region API
 export interface ComfyRawQueueStatus {
@@ -117,15 +116,12 @@ export interface SaveSVGNodeOutputs {
 
 //#region Results
 export interface WorkflowNodeResultPayload {
-  lf_output?: [
-    {
-      civitai_metadata?: string;
-      file_names?: string[];
-      dataset?: LfDataDataset;
-      slot_map?: Record<string, string>;
-      svg?: string;
-    },
-  ];
+  lf_output?: Array<
+    DisplayJSONNodeOutputs &
+      LoadMetadataNodeOutputs &
+      SaveImageForCivitAINodeOutputs &
+      SaveSVGNodeOutputs
+  >;
   [key: string]: unknown;
 }
 export type WorkflowNodeResults = Record<string, WorkflowNodeResultPayload>;
