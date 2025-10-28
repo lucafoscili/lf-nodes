@@ -147,12 +147,17 @@ export const createOutputsSection = (store: WorkflowStore): WorkflowSectionContr
 
     masonry.replaceChildren();
 
-    const runs = manager.runs.all();
+    const allRuns = manager.runs.all();
     const selectedRunId = state.selectedRunId;
     const isHistoryView = state.view === 'history';
+    const activeWorkflowId = state.current.id;
+    const runs = isHistoryView
+      ? allRuns
+      : allRuns.filter((run) => (run.workflowId ?? null) === (activeWorkflowId ?? null));
 
     toggle.lfLabel = isHistoryView ? 'Back to workflow view' : 'Open full history';
-    toggle.toggleAttribute('disabled', !runs.length && !isHistoryView);
+    const hasAnyRuns = allRuns.length > 0;
+    toggle.toggleAttribute('disabled', !hasAnyRuns && !isHistoryView);
     toggle.onclick = () => {
       if (isHistoryView) {
         manager.runs.select(null, 'workflow');
@@ -164,7 +169,9 @@ export const createOutputsSection = (store: WorkflowStore): WorkflowSectionContr
     if (!runs.length) {
       const empty = document.createElement('p');
       empty.className = WORKFLOW_CLASSES.empty;
-      empty.textContent = 'Run a workflow to start building your history.';
+      empty.textContent = isHistoryView
+        ? 'Run a workflow to start building your history.'
+        : 'No runs for this workflow yet. Open full history to browse previous runs.';
       masonry.appendChild(empty);
       debugLog(WORKFLOW_OUTPUTS_UPDATED);
       return;
