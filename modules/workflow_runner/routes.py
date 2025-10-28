@@ -12,10 +12,10 @@ from typing import Any, Dict, Iterable, Optional, Tuple
 from server import PromptServer
 
 from .config import CONFIG as RUNNER_CONFIG
-from .registry import InputValidationError, get_workflow, list_workflows
+from .job_manager import JobStatus, create_job, get_job, set_job_status
+from .registry import InputValidationError, WorkflowNode, get_workflow, list_workflows
 from ..utils.constants import API_ROUTE_PREFIX, NOT_FND_HTML
 from ..utils.helpers.conversion import json_safe
-from .job_manager import JobStatus, create_job, get_job, set_job_status
 
 # Dev dotenv loader: load `.env` for local dev. The loader will run if either:
 #  - DEV_ENV=1 is already set in the environment, OR
@@ -175,45 +175,79 @@ def _emit_run_progress(run_id: str, message: str, **extra: Any) -> None:
     except Exception:
         logging.exception("Failed to send progress event for run %s", run_id)
 
-# region Workflow execution
-async def execute_workflow(payload: Dict[str, Any], run_id: str) -> Tuple[JobStatus, Dict[str, Any], int]:
-    workflow_id = payload.get("workflowId")
+
+class WorkflowPreparationError(Exception):
+    """
+    Raised when a workflow request fails basic preparation/validation before queueing.
+    Carries the response body and HTTP status code to bubble the failure upstream.
+    """
+
+    def __init__(self, response_body: Dict[str, Any], status: int) -> None:
+        super().__init__(response_body.get("detail") or "Workflow preparation failed.")
+        self.response_body = response_body
+        self.status = status
+
+
+def _prepare_workflow_execution(payload: Dict[str, Any]) -> Tuple[WorkflowNode, Dict[str, Any]]:
+    """
+    Perform synchronous validation for a workflow run request.
+
+    Ensures the workflow exists, inputs are well-formed, and the prompt can be configured.
+    Returns the workflow definition and configured prompt if successful.
+    """
     inputs = payload.get("inputs", {})
     if not isinstance(inputs, dict):
         response = _make_run_payload(
             detail="inputs must be an object",
             error_message="invalid_inputs",
         )
-        return JobStatus.FAILED, response, 400
+        raise WorkflowPreparationError(response, 400)
 
+    workflow_id = payload.get("workflowId")
     definition = get_workflow(workflow_id or "")
     if definition is None:
         response = _make_run_payload(
             detail=f"No workflow found for id '{workflow_id}'.",
             error_message="unknown_workflow",
         )
-        return JobStatus.FAILED, response, 404
+        raise WorkflowPreparationError(response, 404)
 
     try:
         prompt = definition.load_prompt()
         definition.configure_prompt(prompt, inputs)
     except FileNotFoundError as exc:
         response = _make_run_payload(detail=str(exc), error_message="missing_source")
-        return JobStatus.FAILED, response, 400
+        raise WorkflowPreparationError(response, 400) from exc
     except InputValidationError as exc:
         response = _make_run_payload(
             detail=str(exc),
             error_message="invalid_input",
             error_input=getattr(exc, "input_name", None),
         )
-        return JobStatus.FAILED, response, 400
+        raise WorkflowPreparationError(response, 400) from exc
     except ValueError as exc:
         response = _make_run_payload(detail=str(exc), error_message="invalid_input")
-        return JobStatus.FAILED, response, 400
+        raise WorkflowPreparationError(response, 400) from exc
     except Exception as exc:
         logging.exception("Failed to prepare workflow '%s': %s", workflow_id, exc)
         response = _make_run_payload(detail=str(exc), error_message="configuration_failed")
-        return JobStatus.FAILED, response, 500
+        raise WorkflowPreparationError(response, 500) from exc
+
+    return definition, prompt
+
+
+# region Workflow execution
+async def execute_workflow(
+    payload: Dict[str, Any],
+    run_id: str,
+    prepared: Tuple[WorkflowNode, Dict[str, Any]] | None = None,
+) -> Tuple[JobStatus, Dict[str, Any], int]:
+    try:
+        _, prompt = prepared or _prepare_workflow_execution(payload)
+    except WorkflowPreparationError as exc:
+        return JobStatus.FAILED, exc.response_body, exc.status
+
+    workflow_id = payload.get("workflowId")
 
     prompt_id = payload.get("promptId") or uuid.uuid4().hex
     validation = await execution.validate_prompt(prompt_id, prompt, None)
@@ -320,6 +354,11 @@ async def route_run_workflow(request: web.Request) -> web.Response:
             status=400,
         )
 
+    try:
+        prepared = _prepare_workflow_execution(payload)
+    except WorkflowPreparationError as exc:
+        return web.json_response(exc.response_body, status=exc.status)
+
     run_id = str(uuid.uuid4())
     await create_job(run_id)
     _emit_run_progress(run_id, "workflow_received")
@@ -329,7 +368,7 @@ async def route_run_workflow(request: web.Request) -> web.Response:
             await set_job_status(run_id, JobStatus.RUNNING)
             _emit_run_progress(run_id, "workflow_started")
 
-            job_status, response_body, http_status = await execute_workflow(payload, run_id)
+            job_status, response_body, http_status = await execute_workflow(payload, run_id, prepared)
             job_result = {"http_status": http_status, "body": response_body}
 
             await set_job_status(run_id, job_status, result=job_result)
