@@ -1,7 +1,8 @@
 import { getLfFramework } from '@lf-widgets/framework';
-import { WorkflowSectionController } from '../types/section';
 import { WorkflowNodeResults } from '../types/api';
+import { WorkflowSectionController } from '../types/section';
 import { WorkflowStore } from '../types/state';
+import { formatStatus, formatTimestamp } from '../utils/common';
 import { DEBUG_MESSAGES } from '../utils/constants';
 import { debugLog } from '../utils/debug';
 import { MAIN_CLASSES } from './layout.main';
@@ -26,21 +27,6 @@ export const WORKFLOW_CLASSES = {
 //#endregion
 
 //#region Helpers
-const _masonry = () => {
-  const masonryWrapper = document.createElement('div');
-  masonryWrapper.className = WORKFLOW_CLASSES.masonry;
-
-  return masonryWrapper;
-};
-const _formatStatus = (status: string) =>
-  status.charAt(0).toUpperCase() + status.slice(1);
-const _formatTimestamp = (timestamp: number) => {
-  const date = new Date(timestamp);
-  if (Number.isNaN(date.getTime())) {
-    return 'Unknown time';
-  }
-  return date.toLocaleString();
-};
 const _cloneOutputs = (outputs: WorkflowNodeResults | null) => {
   if (!outputs) {
     return null;
@@ -50,6 +36,12 @@ const _cloneOutputs = (outputs: WorkflowNodeResults | null) => {
   } catch (error) {
     return outputs;
   }
+};
+const _masonry = () => {
+  const masonryWrapper = document.createElement('div');
+  masonryWrapper.className = WORKFLOW_CLASSES.masonry;
+
+  return masonryWrapper;
 };
 const _title = () => {
   const title = document.createElement('div');
@@ -195,7 +187,7 @@ export const createOutputsSection = (store: WorkflowStore): WorkflowSectionContr
 
       const status = document.createElement('span');
       status.className = WORKFLOW_CLASSES.status;
-      status.textContent = _formatStatus(run.status);
+      status.textContent = formatStatus(run.status);
       status.dataset.state = run.status;
 
       header.appendChild(title);
@@ -206,7 +198,7 @@ export const createOutputsSection = (store: WorkflowStore): WorkflowSectionContr
 
       const timestamp = document.createElement('span');
       timestamp.className = WORKFLOW_CLASSES.timestamp;
-      timestamp.textContent = _formatTimestamp(run.updatedAt || run.createdAt);
+      timestamp.textContent = formatTimestamp(run.updatedAt || run.createdAt);
       meta.appendChild(timestamp);
 
       if (run.error) {

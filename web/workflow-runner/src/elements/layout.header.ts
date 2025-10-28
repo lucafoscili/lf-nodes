@@ -1,6 +1,6 @@
 import { LfButtonInterface } from '@lf-widgets/foundations/dist';
 import { getLfFramework } from '@lf-widgets/framework';
-import { toggleDrawer } from '../handlers/layout';
+import { navigateToHistory, toggleDrawer } from '../handlers/layout';
 import { WorkflowSectionController } from '../types/section';
 import { WorkflowStore } from '../types/state';
 import { DEBUG_MESSAGES } from '../utils/constants';
@@ -53,13 +53,14 @@ const _drawerToggle = (store: WorkflowStore) => {
   return drawerToggle;
 };
 
-const _serverIndicator = () => {
+const _serverIndicator = (store: WorkflowStore) => {
   const serverIndicator = document.createElement('div');
   serverIndicator.className = HEADER_CLASSES.serverIndicator;
 
   const light = document.createElement('lf-button');
   light.className = HEADER_CLASSES.serverIndicatorLight;
   light.lfUiSize = 'large';
+  light.addEventListener('lf-button-event', (e) => navigateToHistory(e, store));
 
   const counter = document.createElement('span');
   counter.className = HEADER_CLASSES.serverIndicatorCounter;
@@ -119,7 +120,7 @@ export const createHeaderSection = (store: WorkflowStore): WorkflowSectionContro
     const appMessage = _appMessage();
     const container = _container();
     const drawerToggle = _drawerToggle(store);
-    const { counter, light, serverIndicator } = _serverIndicator();
+    const { counter, light, serverIndicator } = _serverIndicator(store);
 
     _root.appendChild(container);
     container.appendChild(drawerToggle);

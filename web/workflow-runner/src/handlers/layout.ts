@@ -3,6 +3,19 @@ import { DRAWER_CLASSES } from '../elements/layout.drawer';
 import { WorkflowStore } from '../types/state';
 
 //#region Button Handlers
+export const navigateToHistory = (e: CustomEvent<LfButtonEventPayload>, store: WorkflowStore) => {
+  const { eventType } = e.detail;
+
+  const { manager } = store.getState();
+
+  switch (eventType) {
+    case 'click':
+      manager.runs.select(null, 'history');
+      break;
+    default:
+      return;
+  }
+};
 export const openComfyUI = (e: CustomEvent<LfButtonEventPayload>) => {
   const { eventType } = e.detail;
 

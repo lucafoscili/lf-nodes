@@ -73,7 +73,7 @@ const _title = (store: WorkflowStore) => {
   historyButton.lfLabel = 'View all runs';
   historyButton.lfStyling = 'flat';
   historyButton.lfUiSize = 'small';
-  historyButton.onclick = () => manager.runs.select(null, 'history');
+  historyButton.onclick =  () => manager.runs.select(null, 'history');
   historyButton.toggleAttribute('disabled', manager.runs.all().length === 0);
 
   title.appendChild(h3);
