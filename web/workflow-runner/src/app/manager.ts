@@ -343,6 +343,19 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
         return;
       }
 
+      if (nextView === 'run' && runId) {
+        const run = this.runs.get(runId);
+        const state = this.#STORE.getState();
+        if (run?.workflowId && run.workflowId !== state.current.id) {
+          state.mutate.workflow(run.workflowId);
+        }
+        changeView(this.#STORE, 'run', {
+          runId,
+          clearResults: false,
+        });
+        return;
+      }
+
       changeView(this.#STORE, nextView, {
         runId: nextView === 'run' ? runId : null,
       });
