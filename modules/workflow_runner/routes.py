@@ -141,6 +141,34 @@ def _serve_first_existing(paths: Iterable[Path]) -> Optional[web.FileResponse]:
             return web.FileResponse(str(candidate))
     return None
 
+def _serve_static(
+    request: web.Request,
+    *,
+    roots: Iterable[Path],
+    prefix: Optional[str] = None,
+    not_found_text: str = 'Not found',
+    log_context: str = 'static asset',
+    log_errors: bool = True,
+) -> web.Response:
+    raw_path = request.match_info.get('path', '')
+    if prefix and not raw_path.startswith(prefix):
+        return web.Response(status=404, text=not_found_text)
+
+    rel_path = _sanitize_rel_path(raw_path)
+    if rel_path is None:
+        return web.Response(status=400, text='Invalid path')
+
+    try:
+        response = _serve_first_existing(root / rel_path for root in roots)
+        if response is not None:
+            return response
+    except Exception:
+        if log_errors:
+            logging.exception('Error while attempting to serve %s: %s', log_context, request.path)
+        return web.Response(status=404, text=not_found_text)
+
+    return web.Response(status=404, text=not_found_text)
+
 async def _wait_for_completion(prompt_id: str, timeout_seconds: float = 180.0) -> Dict[str, Any]:
     """
     Poll the prompt queue history until the prompt either completes, fails,
@@ -413,58 +441,33 @@ async def route_run_status(request: web.Request) -> web.Response:
 # region Static assets
 @PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/static/{{path:.*}}")
 async def route_static_asset(request: web.Request) -> web.Response:
-    try:
-        raw_path = request.match_info.get('path', '')
-        if not raw_path.startswith('assets/'):
-            return web.Response(status=404, text='Not found')
-
-        rel_path = _sanitize_rel_path(raw_path)
-        if rel_path is None:
-            return web.Response(status=400, text='Invalid path')
-
-        response = _serve_first_existing(root / rel_path for root in ASSET_SEARCH_ROOTS)
-        if response is not None:
-            return response
-    except Exception:
-        logging.exception('Error while attempting to serve static asset: %s', request.path)
-
-    return web.Response(status=404, text='Not found')
+    return _serve_static(
+        request,
+        roots=ASSET_SEARCH_ROOTS,
+        prefix='assets/',
+        log_context='static asset',
+    )
 # endregion
 
 # region Static JS
 @PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/js/{{path:.*}}")
 async def route_static_js(request: web.Request) -> web.Response:
-    try:
-        raw_path = request.match_info.get('path', '')
-        rel_path = _sanitize_rel_path(raw_path)
-        if rel_path is None:
-            return web.Response(status=400, text='Invalid path')
-
-        response = _serve_first_existing((SHARED_JS_ROOT / rel_path,))
-        if response is not None:
-            return response
-    except Exception:
-        logging.exception('Error while attempting to serve shared JS asset: %s', request.path)
-
-    return web.Response(status=404, text='Not found')
+    return _serve_static(
+        request,
+        roots=(SHARED_JS_ROOT,),
+        log_context='shared JS asset',
+    )
 # endregion
 
 # region Workflow static
 @PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/static-workflow-runner/{'{path:.*}'}")
 async def route_static_workflow(request: web.Request) -> web.Response:
-    try:
-        raw_path = request.match_info.get('path', '')
-        rel_path = _sanitize_rel_path(raw_path)
-        if rel_path is None:
-            return web.Response(status=400, text='Invalid path')
-
-        response = _serve_first_existing(root / rel_path for root in WORKFLOW_STATIC_ROOTS)
-        if response is not None:
-            return response
-    except Exception:
-        pass
-
-    return web.Response(status=404, text='Not found')
+    return _serve_static(
+        request,
+        roots=WORKFLOW_STATIC_ROOTS,
+        log_context='workflow runner asset',
+        log_errors=False,
+    )
 # endregion
 
 # region List workflows
