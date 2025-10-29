@@ -1,6 +1,10 @@
 {
   "apiBase": "/api",
   "apiRoutePrefix": "/lf-nodes",
+  "chat": {
+    "provider": "kobold",
+    "useProxy": true
+  },
   "deploy": {
     "root": "./web/deploy",
     "runnerSubdir": "workflow-runner",

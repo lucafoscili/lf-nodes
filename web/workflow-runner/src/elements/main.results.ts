@@ -2,7 +2,14 @@
 import { buttonHandler } from '../handlers/button';
 import { WorkflowSectionController } from '../types/section';
 import { WorkflowRunEntry, WorkflowStore } from '../types/state';
-import { clearChildren, deepMerge, formatStatus, formatTimestamp, stringifyDetail, summarizeDetail } from '../utils/common';
+import {
+  clearChildren,
+  deepMerge,
+  formatStatus,
+  formatTimestamp,
+  stringifyDetail,
+  summarizeDetail,
+} from '../utils/common';
 import { DEBUG_MESSAGES } from '../utils/constants';
 import { debugLog } from '../utils/debug';
 import { createComponent, createOutputComponent } from './components';
@@ -18,10 +25,11 @@ export const RESULTS_CLASSES = {
   description: theme.bemClass(ROOT_CLASS, 'description'),
   empty: theme.bemClass(ROOT_CLASS, 'empty'),
   grid: theme.bemClass(ROOT_CLASS, 'grid'),
+  h3: theme.bemClass(ROOT_CLASS, 'title-h3'),
   history: theme.bemClass(ROOT_CLASS, 'history'),
   item: theme.bemClass(ROOT_CLASS, 'item'),
   results: theme.bemClass(ROOT_CLASS, 'results'),
-  h3: theme.bemClass(ROOT_CLASS, 'title-h3'),
+  subtitle: theme.bemClass(ROOT_CLASS, 'subtitle'),
   title: theme.bemClass(ROOT_CLASS, 'title'),
 } as const;
 //#endregion
@@ -194,7 +202,7 @@ export const createResultsSection = (store: WorkflowStore): WorkflowSectionContr
         const wrapper = document.createElement('div');
         wrapper.className = RESULTS_CLASSES.item;
         const heading = document.createElement('h4');
-        heading.className = RESULTS_CLASSES.title;
+        heading.className = RESULTS_CLASSES.subtitle;
         heading.textContent = label;
         wrapper.appendChild(heading);
         const code = createComponent.code({
@@ -224,7 +232,7 @@ export const createResultsSection = (store: WorkflowStore): WorkflowSectionContr
       const { id, nodeId, title } = output;
 
       const h4 = document.createElement('h4');
-      h4.className = RESULTS_CLASSES.title;
+      h4.className = RESULTS_CLASSES.subtitle;
       h4.textContent = title || `Node #${nodeId}`;
       element.appendChild(h4);
 
@@ -253,5 +261,3 @@ export const createResultsSection = (store: WorkflowStore): WorkflowSectionContr
   };
 };
 //#endregion
-
-

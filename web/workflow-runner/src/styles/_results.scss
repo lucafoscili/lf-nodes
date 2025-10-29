@@ -33,16 +33,28 @@
     padding: 1.25em;
   }
 
+  &__subtitle,
   &__title {
-    align-items: center;
-    background: rgba(var(--lf-color-bg));
     backdrop-filter: blur(8px);
-    display: flex;
-    font-family: var(--lf-font-family-monospace);
-    gap: 0.75em;
-    justify-content: space-between;
+    background: rgba(var(--lf-color-bg));
     margin: 0;
     padding: 1em;
+  }
+
+  &__subtitle {
+    margin: 0 0 0.5em 0;
+    font-family: var(--lf-font-family-monospace);
+    font-size: 1em;
+  }
+
+  &__title {
+    align-items: center;
+    display: flex;
+    gap: 0.75em;
+    justify-content: space-between;
+    position: sticky;
     text-align: center;
+    top: -0.5em;
+    z-index: 1;
   }
 }

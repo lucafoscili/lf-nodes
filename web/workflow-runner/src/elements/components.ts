@@ -11,6 +11,7 @@ import {
   LfUploadInterface,
 } from '@lf-widgets/foundations/dist';
 import { getLfFramework } from '@lf-widgets/framework';
+import { CHAT_ENDPOINT } from '../config';
 import { WorkflowCellInput, WorkflowCellOutput } from '../types/api';
 
 //#region Helpers
@@ -96,6 +97,9 @@ export const createComponent = {
   chat: (props: Partial<LfChatInterface>) => {
     const comp = document.createElement('lf-chat');
 
+    if (CHAT_ENDPOINT) {
+      comp.lfEndpointUrl = CHAT_ENDPOINT;
+    }
     _setProps('LfChat', comp, props);
     return comp;
   },
