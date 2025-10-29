@@ -4,12 +4,14 @@ import { g as getLfFramework } from "../../js/lf-widgets-framework-C98FQqUU.js";
 import "../../js/lf-widgets-foundations-LHw4zrea.js";
 const apiBase = "/api";
 const apiRoutePrefix = "/lf-nodes";
+const chat = { "provider": "kobold" };
 const staticPaths = { "assets": "/lf-nodes/static/assets/" };
 const polling = { "queueIntervalMs": 750, "runIntervalMs": 3e3 };
 const theme$9 = "dark";
 const runnerConfig = {
   apiBase,
   apiRoutePrefix,
+  chat,
   staticPaths,
   polling,
   theme: theme$9
@@ -17,6 +19,9 @@ const runnerConfig = {
 const API_BASE = runnerConfig.apiBase;
 const API_ROUTE_PREFIX = runnerConfig.apiRoutePrefix;
 const API_ROOT = `${API_BASE}${API_ROUTE_PREFIX}`;
+const CHAT_CFG = runnerConfig.chat;
+const ensureLeadingSlash = (p) => p ? p.startsWith("/") ? p : `/${p}` : void 0;
+const CHAT_ENDPOINT = `${API_ROOT}${ensureLeadingSlash(CHAT_CFG.path ?? `/proxy/${CHAT_CFG.provider}`)}`;
 const DEFAULT_STATUS_MESSAGES = {
   idle: "Ready.",
   running: "Running...",
@@ -299,8 +304,9 @@ const _createDataset$1 = (workflows) => {
   return dataset;
 };
 const _getIcon = (category) => {
-  const { alertTriangle, codeCircle2, json, robot } = getLfFramework().theme.get.icons();
+  const { alertTriangle, codeCircle2, photo, json, robot } = getLfFramework().theme.get.icons();
   const category_icons = {
+    "Image Processing": photo,
     JSON: json,
     LLM: robot,
     SVG: codeCircle2
@@ -470,6 +476,9 @@ const createComponent = {
   },
   chat: (props) => {
     const comp = document.createElement("lf-chat");
+    if (CHAT_ENDPOINT) {
+      comp.lfEndpointUrl = CHAT_ENDPOINT;
+    }
     _setProps("LfChat", comp, props);
     return comp;
   },
@@ -993,10 +1002,11 @@ const RESULTS_CLASSES = {
   description: theme$5.bemClass(ROOT_CLASS$5, "description"),
   empty: theme$5.bemClass(ROOT_CLASS$5, "empty"),
   grid: theme$5.bemClass(ROOT_CLASS$5, "grid"),
+  h3: theme$5.bemClass(ROOT_CLASS$5, "title-h3"),
   history: theme$5.bemClass(ROOT_CLASS$5, "history"),
   item: theme$5.bemClass(ROOT_CLASS$5, "item"),
   results: theme$5.bemClass(ROOT_CLASS$5, "results"),
-  h3: theme$5.bemClass(ROOT_CLASS$5, "title-h3"),
+  subtitle: theme$5.bemClass(ROOT_CLASS$5, "subtitle"),
   title: theme$5.bemClass(ROOT_CLASS$5, "title")
 };
 const _formatDescription = (selectedRun, description) => {
@@ -1124,7 +1134,7 @@ const createResultsSection = (store) => {
         const wrapper = document.createElement("div");
         wrapper.className = RESULTS_CLASSES.item;
         const heading = document.createElement("h4");
-        heading.className = RESULTS_CLASSES.title;
+        heading.className = RESULTS_CLASSES.subtitle;
         heading.textContent = label;
         wrapper.appendChild(heading);
         const code = createComponent.code({
@@ -1145,7 +1155,7 @@ const createResultsSection = (store) => {
       const output = prepOutputs[i];
       const { id, nodeId, title } = output;
       const h4 = document.createElement("h4");
-      h4.className = RESULTS_CLASSES.title;
+      h4.className = RESULTS_CLASSES.subtitle;
       h4.textContent = title || `Node #${nodeId}`;
       element.appendChild(h4);
       const grid = document.createElement("div");
