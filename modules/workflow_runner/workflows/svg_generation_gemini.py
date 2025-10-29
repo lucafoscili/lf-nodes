@@ -81,8 +81,8 @@ input_size = WorkflowCell(
     },
 )
 input_strip = WorkflowCell(
-    id="strip_attributes",
     node_id="29",
+    id="strip_attributes",
     shape="toggle",
     value="Strip Attributes",
     description="Sets whether to strip attributes from the SVG output.",
@@ -92,8 +92,8 @@ input_strip = WorkflowCell(
     },
 )
 input_italian = WorkflowCell(
-    id="italian",
     node_id="26",
+    id="italian",
     shape="toggle",
     value="Prompt in Italian",
     description="Sets whether to prompt in Italian.",
@@ -106,8 +106,8 @@ input_italian = WorkflowCell(
 
 # region Outputs
 output_svg_file = WorkflowCell(
-    id="svg_file",
     node_id="15",
+    id="svg_file",
     shape="masonry",
     description="SVG File",
     props={
@@ -115,8 +115,8 @@ output_svg_file = WorkflowCell(
     }
 )
 output_svg_data = WorkflowCell(
-    id="svg_data",
     node_id="15",
+    id="svg_data",
     shape="code",
     description="SVG Data",
     props={

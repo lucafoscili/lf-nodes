@@ -1,0 +1,21 @@
+{
+  "11": {
+    "inputs": {
+      "ui_widget": "[{\"role\":\"user\",\"content\":\"Hi!\"},{\"role\":\"assistant\",\"content\":\"Hi there! It's great to meet you!\"}]"
+    },
+    "class_type": "LF_LLMChat",
+    "_meta": {
+      "title": "C H A T"
+    }
+  },
+  "12": {
+    "inputs": {
+      "ui_widget": "[\n  {\n    \"role\": \"user\",\n    \"content\": \"Hi!\"\n  },\n  {\n    \"role\": \"assistant\",\n    \"content\": \"Hi there! It's great to meet you!\"\n  }\n]",
+      "json_input": ["11", 0]
+    },
+    "class_type": "LF_DisplayJSON",
+    "_meta": {
+      "title": "H I S T O R Y"
+    }
+  }
+}

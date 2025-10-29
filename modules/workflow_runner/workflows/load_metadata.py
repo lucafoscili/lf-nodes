@@ -4,7 +4,6 @@ from typing import Any, Dict
 from ..registry import WorkflowCell, WorkflowNode
 from .utils import resolve_upload_paths
 
-
 # region Workflow Config
 def _configure(prompt: Dict[str, Any], inputs: Dict[str, Any]) -> None:
     for (node_id, node) in prompt.items():

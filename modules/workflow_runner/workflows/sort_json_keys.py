@@ -56,12 +56,13 @@ input_json = WorkflowCell(
             "showWhenFocused": False,
             "value": "The JSON object to sort.",
         },
+        "lfStyle": ":host { height: 200px; }",
         "lfStyling": "textarea"
     },
 )
 input_ascending = WorkflowCell(
-    id="ascending",
     node_id="1",
+    id="ascending",
     shape="toggle",
     value="Sort ascending",
     description="Sets whether to sort the JSON keys in ascending order.",
@@ -74,8 +75,8 @@ input_ascending = WorkflowCell(
 
 # region Outputs
 output_json = WorkflowCell(
-    id="sorted_json",
     node_id="2",
+    id="sorted_json",
     shape="code",
     description="JSON Output",
     props={

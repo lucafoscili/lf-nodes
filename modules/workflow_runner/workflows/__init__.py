@@ -5,6 +5,7 @@ from typing import Iterable, Iterator, Sequence
 _WORKFLOW_MODULES: Sequence[str] = (
     "image_to_svg",
     "load_metadata",
+    "simple_chat",
     "sort_json_keys",
     "svg_generation_gemini",
 )

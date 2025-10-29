@@ -98,8 +98,8 @@ input_colors = WorkflowCell(
     },
 )
 input_desaturate = WorkflowCell(
-    id="desaturate",
     node_id="51",
+    id="desaturate",
     shape="toggle",
     value="Desaturate",
     description="Sets whether to desaturate the image before converting.",
@@ -109,8 +109,8 @@ input_desaturate = WorkflowCell(
     },
 )
 input_transparency = WorkflowCell(
-    id="keep_transparency",
     node_id="71",
+    id="keep_transparency",
     shape="toggle",
     value="Keep Transparency",
     description="Sets whether to keep the transparency of the image.",
@@ -120,8 +120,8 @@ input_transparency = WorkflowCell(
     },
 )
 input_strip = WorkflowCell(
-    id="strip_attributes",
     node_id="80",
+    id="strip_attributes",
     shape="toggle",
     value="Strip Attributes",
     description="Sets whether to strip attributes from the SVG output.",
@@ -134,8 +134,8 @@ input_strip = WorkflowCell(
 
 # region Outputs
 output_svg_file = WorkflowCell(
-    id="svg_file",
     node_id="20",
+    id="svg_file",
     shape="masonry",
     description="SVG File",
     props={
@@ -143,8 +143,8 @@ output_svg_file = WorkflowCell(
     }
 )
 output_svg_data = WorkflowCell(
-    id="svg_data",
     node_id="20",
+    id="svg_data",
     shape="code",
     description="SVG Data",
     props={
@@ -152,8 +152,8 @@ output_svg_data = WorkflowCell(
     }
 )
 output_png = WorkflowCell(
-    id="png_file",
     node_id="61",
+    id="png_file",
     shape="masonry",
     description="PNG File",
 )
