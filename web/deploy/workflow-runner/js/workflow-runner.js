@@ -1,5 +1,7 @@
 var _a, _b;
-import { g as getLfFramework } from "../../js/lf-widgets-B35YyXeC.js";
+import "../../js/lf-widgets-core-DnP2v7ei.js";
+import { g as getLfFramework } from "../../js/lf-widgets-framework-C98FQqUU.js";
+import "../../js/lf-widgets-foundations-LHw4zrea.js";
 const apiBase = "/api";
 const apiRoutePrefix = "/lf-nodes";
 const staticPaths = { "assets": "/lf-nodes/static/assets/" };
@@ -1303,9 +1305,9 @@ const _getUiState = (status) => {
     case "failed":
       return "danger";
     case "pending":
-      return "info";
-    case "running":
       return "primary";
+    case "running":
+      return "info";
     case "succeeded":
       return "success";
   }

@@ -24,7 +24,11 @@ export default defineConfig({
         assetFileNames: 'assets/[name]-[hash][extname]',
         manualChunks(id) {
           if (id.includes('@lf-widgets')) {
-            return 'lf-widgets';
+            const match = id.match(/@lf-widgets\/([^/]+)/);
+            if (match && match[1]) {
+              return `lf-widgets-${match[1]}`;
+            }
+            return 'lf-widgets-core';
           }
         },
       },
