@@ -86,64 +86,81 @@ const _getFirstOutputImageUrl = (outputs: WorkflowNodeResults | null) => {
     return '';
   }
 
-  const tryPayload = (payload: WorkflowNodeResultPayload | undefined): string | null => {
+  const tryPayload = (
+    payload: WorkflowNodeResultPayload | undefined,
+  ): { image: string | null; fallback: string | null } => {
     if (!payload || typeof payload !== 'object') {
-      return null;
+      return { image: null, fallback: null };
     }
     const { code: codeIcon, json: jsonIcon, photoX: fallback } = theme.get.icons();
 
-    const fromLfOutput = Array.isArray(payload.lf_output)
-      ? payload.lf_output
-          .map((entry) => {
-            const { dataset, file_names, json, metadata, svg } = entry;
-            return (
-              _extractImageFromDataset(dataset) ??
-              file_names?.find((name) => typeof name === 'string' && name) ??
-              (typeof svg === 'string' && svg ? codeIcon : null) ??
-              (json || metadata ? jsonIcon : null) ??
-              fallback
-            );
-          })
-          .find((value) => typeof value === 'string' && value)
-      : null;
-    if (fromLfOutput) {
-      return fromLfOutput;
+    let foundImage: string | null = null;
+    let fallbackCandidate: string | null = null;
+
+    if (Array.isArray(payload.lf_output)) {
+      for (const entry of payload.lf_output) {
+        const { dataset, file_names, json, metadata, svg } = entry;
+        const image =
+          _extractImageFromDataset(dataset) ??
+          file_names?.find((name) => typeof name === 'string' && name) ??
+          null;
+        if (image) {
+          foundImage = image;
+          break;
+        }
+        if (!fallbackCandidate) {
+          if (typeof svg === 'string' && svg) {
+            fallbackCandidate = codeIcon;
+          } else if (json || metadata) {
+            fallbackCandidate = jsonIcon;
+          }
+        }
+      }
+    }
+
+    if (foundImage) {
+      return { image: foundImage, fallback: null };
     }
 
     const dataset = (payload as { dataset?: LfDataDataset }).dataset;
     const fromDataset = _extractImageFromDataset(dataset);
     if (fromDataset) {
-      return fromDataset;
+      return { image: fromDataset, fallback: null };
     }
 
     const fileNames = (payload as { file_names?: string[] }).file_names;
     if (Array.isArray(fileNames)) {
       const fileName = fileNames.find((name) => typeof name === 'string' && name);
       if (fileName) {
-        return fileName;
+        return { image: fileName, fallback: null };
       }
     }
 
     const image = (payload as { image?: string }).image;
     if (typeof image === 'string' && image) {
-      return image;
+      return { image, fallback: null };
     }
 
-    return null;
+    return { image: null, fallback: fallbackCandidate ?? fallback };
   };
+
+  let fallbackImage: string | null = null;
 
   for (const nodeId in outputs) {
     if (!Object.prototype.hasOwnProperty.call(outputs, nodeId)) {
       continue;
     }
     const payload = outputs[nodeId];
-    const extracted = tryPayload(payload);
-    if (extracted) {
-      return extracted;
+    const { image, fallback: candidate } = tryPayload(payload);
+    if (image) {
+      return image;
+    }
+    if (!fallbackImage && candidate) {
+      fallbackImage = candidate;
     }
   }
 
-  return '';
+  return fallbackImage ?? '';
 };
 const _getLfIcon = (status: WorkflowRunStatus): string => {
   const { alertTriangle, check, wand, hourglassLow, x } = theme.get.icons();
@@ -177,7 +194,7 @@ const _getUiState = (status: WorkflowRunStatus): LfThemeUIState => {
 };
 const _itemCardCell = (run: WorkflowRunEntry) => {
   const { createdAt, error, httpStatus, runId, status, updatedAt, workflowName } = run;
-  const lfCard: LfDataCell<'card'> & { lfUiState: LfThemeUIState } = {
+  const lfCard: LfDataCell<'card'> = {
     lfDataset: {
       nodes: [
         {
@@ -353,10 +370,12 @@ export const createOutputsSection = (store: WorkflowStore): WorkflowSectionContr
 
     if (!runs.length) {
       dataset.nodes.push({ cells: { lfCard: _emptyCardCell() }, id: '' });
+      masonry.lfCollapseColumns = true;
       masonry.lfSelectable = false;
     } else {
       for (const run of runs) {
         dataset.nodes.push({ cells: { lfCard: _itemCardCell(run) }, id: run.runId });
+        masonry.lfCollapseColumns = false;
         masonry.lfSelectable = true;
       }
     }
