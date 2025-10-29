@@ -1,5 +1,5 @@
 var _a, _b;
-import { g as getLfFramework } from "../../js/lf-widgets-CAA2GbO2.js";
+import { g as getLfFramework } from "../../js/lf-widgets-B35YyXeC.js";
 const apiBase = "/api";
 const apiRoutePrefix = "/lf-nodes";
 const staticPaths = { "assets": "/lf-nodes/static/assets/" };
@@ -702,6 +702,30 @@ const createHeaderSection = (store) => {
     render
   };
 };
+const masonryHandler = (e, store) => {
+  var _a2, _b2, _c;
+  const { comp, originalEvent } = e.detail;
+  const ogEvent = originalEvent;
+  const { manager } = store.getState();
+  if (comp.rootElement.className === OUTPUTS_CLASSES.masonry) {
+    switch ((_a2 = ogEvent == null ? void 0 : ogEvent.detail) == null ? void 0 : _a2.eventType) {
+      case "click":
+        const card = ogEvent.detail.comp;
+        const node = (_c = (_b2 = card.lfDataset) == null ? void 0 : _b2.nodes) == null ? void 0 : _c[0];
+        const isValidCard = (node == null ? void 0 : node.id) && card.rootElement.tagName.toLowerCase() === "lf-card";
+        if (isValidCard) {
+          const { id } = node;
+          manager.runs.select(id, "run");
+          const selected = manager.runs.get(id);
+          const selectedOutputs = JSON.parse(JSON.stringify(selected.outputs)) || null;
+          store.getState().mutate.results(selectedOutputs);
+        }
+        break;
+      default:
+        return;
+    }
+  }
+};
 const deepMerge = (defs, outs) => {
   var _a2, _b2;
   const prep = [];
@@ -1145,20 +1169,202 @@ const OUTPUTS_CLASSES = {
   title: theme$3.bemClass(ROOT_CLASS$3, "title"),
   toggle: theme$3.bemClass(ROOT_CLASS$3, "toggle")
 };
-const _cloneOutputs = (outputs) => {
-  if (!outputs) {
+const _emptyCardCell = () => {
+  const lfCard = {
+    lfDataset: {
+      nodes: [
+        {
+          cells: {
+            "1": {
+              value: "Empty"
+            },
+            "2": {
+              value: "No outputs to display"
+            },
+            "3": {
+              value: "Run a workflow to start building your history."
+            }
+          },
+          description: "No outputs to display for this workflow.",
+          id: "empty-card"
+        }
+      ]
+    },
+    lfStyle: ".lf-card.material-layout__text-section { height: 100%; }",
+    shape: "card",
+    value: ""
+  };
+  return lfCard;
+};
+const _extractImageFromDataset = (dataset) => {
+  if (!(dataset == null ? void 0 : dataset.nodes)) {
     return null;
   }
-  try {
-    return JSON.parse(JSON.stringify(outputs));
-  } catch (error) {
-    return outputs;
+  for (const node of dataset.nodes) {
+    const cells = node.cells ?? {};
+    for (const key in cells) {
+      const cell = cells[key];
+      if (!cell || typeof cell !== "object") {
+        continue;
+      }
+      const shape = cell.shape;
+      const value = cell.value ?? cell.lfValue;
+      if (shape === "image" && typeof value === "string" && value) {
+        return value;
+      }
+    }
+  }
+  return null;
+};
+const _getFirstOutputImageUrl = (outputs) => {
+  if (!outputs) {
+    return "";
+  }
+  const tryPayload = (payload) => {
+    if (!payload || typeof payload !== "object") {
+      return { image: null, fallback: null };
+    }
+    const { code: codeIcon, json: jsonIcon, photoX: fallback } = theme$3.get.icons();
+    let foundImage = null;
+    let fallbackCandidate = null;
+    if (Array.isArray(payload.lf_output)) {
+      for (const entry of payload.lf_output) {
+        const { dataset: dataset2, file_names, json, metadata, svg } = entry;
+        const image2 = _extractImageFromDataset(dataset2) ?? (file_names == null ? void 0 : file_names.find((name) => typeof name === "string" && name)) ?? null;
+        if (image2) {
+          foundImage = image2;
+          break;
+        }
+        if (!fallbackCandidate) {
+          if (typeof svg === "string" && svg) {
+            fallbackCandidate = codeIcon;
+          } else if (json || metadata) {
+            fallbackCandidate = jsonIcon;
+          }
+        }
+      }
+    }
+    if (foundImage) {
+      return { image: foundImage, fallback: null };
+    }
+    const dataset = payload.dataset;
+    const fromDataset = _extractImageFromDataset(dataset);
+    if (fromDataset) {
+      return { image: fromDataset, fallback: null };
+    }
+    const fileNames = payload.file_names;
+    if (Array.isArray(fileNames)) {
+      const fileName = fileNames.find((name) => typeof name === "string" && name);
+      if (fileName) {
+        return { image: fileName, fallback: null };
+      }
+    }
+    const image = payload.image;
+    if (typeof image === "string" && image) {
+      return { image, fallback: null };
+    }
+    return { image: null, fallback: fallbackCandidate ?? fallback };
+  };
+  let fallbackImage = null;
+  for (const nodeId in outputs) {
+    if (!Object.prototype.hasOwnProperty.call(outputs, nodeId)) {
+      continue;
+    }
+    const payload = outputs[nodeId];
+    const { image, fallback: candidate } = tryPayload(payload);
+    if (image) {
+      return image;
+    }
+    if (!fallbackImage && candidate) {
+      fallbackImage = candidate;
+    }
+  }
+  return fallbackImage ?? "";
+};
+const _getLfIcon = (status) => {
+  const { alertTriangle, check, wand, hourglassLow, x } = theme$3.get.icons();
+  switch (status) {
+    case "cancelled":
+      return x;
+    case "failed":
+      return alertTriangle;
+    case "pending":
+      return hourglassLow;
+    case "running":
+      return wand;
+    case "succeeded":
+      return check;
   }
 };
-const _masonry = () => {
-  const masonryWrapper = document.createElement("div");
-  masonryWrapper.className = OUTPUTS_CLASSES.masonry;
-  return masonryWrapper;
+const _getUiState = (status) => {
+  switch (status) {
+    case "cancelled":
+      return "disabled";
+    case "failed":
+      return "danger";
+    case "pending":
+      return "info";
+    case "running":
+      return "primary";
+    case "succeeded":
+      return "success";
+  }
+};
+const _itemCardCell = (run) => {
+  const { createdAt, error, httpStatus, runId, status, updatedAt, workflowName } = run;
+  const lfCard = {
+    lfDataset: {
+      nodes: [
+        {
+          cells: {
+            "1": {
+              value: workflowName
+            },
+            "2": {
+              value: `Run ID: ${runId}`
+            },
+            "3": {
+              value: `
+Created at: ${formatTimestamp(createdAt)}
+Last updated: ${formatTimestamp(updatedAt)}
+
+${error ? `
+Error: ${error} 
+HTTP Status: ${httpStatus ?? "N/A"}
+` : ""}
+              `
+            },
+            lfButton: {
+              shape: "button",
+              value: "",
+              lfIcon: _getLfIcon(status),
+              lfLabel: status,
+              lfStyling: "flat",
+              lfUiState: _getUiState(status)
+            },
+            lfImage: {
+              shape: "image",
+              value: _getFirstOutputImageUrl(run.outputs)
+            }
+          },
+          description: `Output results for run ${runId}`,
+          id: `${runId}`
+        }
+      ]
+    },
+    lfStyle: ".lf-card.material-layout__text-section { height: 100%; }",
+    lfUiState: _getUiState(status),
+    shape: "card",
+    value: ""
+  };
+  return lfCard;
+};
+const _masonry = (store) => {
+  const masonry = document.createElement("lf-masonry");
+  masonry.className = OUTPUTS_CLASSES.masonry;
+  masonry.lfShape = "card";
+  masonry.addEventListener("lf-masonry-event", (e) => masonryHandler(e, store));
+  return masonry;
 };
 const _title$1 = (store) => {
   const title = document.createElement("div");
@@ -1198,7 +1404,7 @@ const createOutputsSection = (store) => {
     const _root = document.createElement("section");
     _root.className = OUTPUTS_CLASSES._;
     const { controls, h4, title, toggle } = _title$1(store);
-    const masonry = _masonry();
+    const masonry = _masonry(store);
     _root.appendChild(title);
     _root.appendChild(masonry);
     elements[MAIN_CLASSES._].appendChild(_root);
@@ -1229,64 +1435,25 @@ const createOutputsSection = (store) => {
     const allRuns = manager.runs.all();
     const hasAnyRuns = allRuns.length > 0;
     const isHistoryView = state.view === "history";
-    const selectedRunId = state.selectedRunId;
     const workflowTitle = manager.workflow.title();
     h4.textContent = workflowTitle ? `${workflowTitle} outputs` : "Workflow outputs";
-    masonry.replaceChildren();
     const runs = isHistoryView ? allRuns : allRuns.filter((run) => (run.workflowId ?? null) === (activeWorkflowId ?? null));
     toggle.lfIcon = isHistoryView ? arrowBack : folder;
     toggle.lfLabel = isHistoryView ? "Back to workflow view" : "Open full history";
     toggle.lfUiState = hasAnyRuns || isHistoryView ? "primary" : "disabled";
+    const dataset = { nodes: [] };
     if (!runs.length) {
-      const empty = document.createElement("p");
-      empty.className = OUTPUTS_CLASSES.empty;
-      empty.textContent = isHistoryView ? "Run a workflow to start building your history." : "No runs for this workflow yet. Open full history to browse previous runs.";
-      masonry.appendChild(empty);
-      debugLog(WORKFLOW_OUTPUTS_UPDATED);
-      return;
-    }
-    for (const run of runs) {
-      const item = document.createElement("button");
-      item.type = "button";
-      item.className = OUTPUTS_CLASSES.item;
-      item.dataset.runId = run.runId;
-      item.dataset.status = run.status;
-      item.dataset.selected = String(run.runId === selectedRunId);
-      item.setAttribute("aria-pressed", String(run.runId === selectedRunId));
-      const header = document.createElement("div");
-      header.className = OUTPUTS_CLASSES.itemHeader;
-      const title = document.createElement("span");
-      title.className = OUTPUTS_CLASSES.itemTitle;
-      title.textContent = run.workflowName || workflowTitle || "Workflow run";
-      const status = document.createElement("span");
-      status.className = OUTPUTS_CLASSES.status;
-      status.textContent = formatStatus(run.status);
-      status.dataset.state = run.status;
-      header.appendChild(title);
-      header.appendChild(status);
-      const meta = document.createElement("div");
-      meta.className = OUTPUTS_CLASSES.itemMeta;
-      const timestamp = document.createElement("span");
-      timestamp.className = OUTPUTS_CLASSES.timestamp;
-      timestamp.textContent = formatTimestamp(run.updatedAt || run.createdAt);
-      meta.appendChild(timestamp);
-      if (run.error) {
-        const error = document.createElement("span");
-        error.className = OUTPUTS_CLASSES.status;
-        error.dataset.state = "error";
-        error.textContent = run.error;
-        meta.appendChild(error);
+      dataset.nodes.push({ cells: { lfCard: _emptyCardCell() }, id: "" });
+      masonry.lfCollapseColumns = true;
+      masonry.lfSelectable = false;
+    } else {
+      for (const run of runs) {
+        dataset.nodes.push({ cells: { lfCard: _itemCardCell(run) }, id: run.runId });
+        masonry.lfCollapseColumns = false;
+        masonry.lfSelectable = true;
       }
-      item.appendChild(header);
-      item.appendChild(meta);
-      item.addEventListener("click", () => {
-        manager.runs.select(run.runId, "run");
-        const selected = manager.runs.get(run.runId);
-        const selectedOutputs = _cloneOutputs((selected == null ? void 0 : selected.outputs) ?? null);
-        store.getState().mutate.results(selectedOutputs);
-      });
-      masonry.appendChild(item);
     }
+    masonry.lfDataset = dataset;
     debugLog(WORKFLOW_OUTPUTS_UPDATED);
   };
   return {

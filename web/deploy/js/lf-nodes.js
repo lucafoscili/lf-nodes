@@ -1,4 +1,4 @@
-import { g as getLfFramework } from "./lf-widgets-CAA2GbO2.js";
+import { g as getLfFramework } from "./lf-widgets-B35YyXeC.js";
 var APIEndpoints;
 (function(APIEndpoints2) {
   APIEndpoints2["CleanOldBackups"] = "/lf-nodes/clean-old-backups";

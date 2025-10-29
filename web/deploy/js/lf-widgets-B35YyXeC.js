@@ -595,6 +595,7 @@ const LF_MASONRY_PARTS = {
 };
 const LF_MASONRY_PROPS = [
   "lfActions",
+  "lfCollapseColumns",
   "lfColumns",
   "lfDataset",
   "lfSelectable",
@@ -1419,7 +1420,9 @@ const LF_CARD_PROPS = [
   "lfLayout",
   "lfSizeX",
   "lfSizeY",
-  "lfStyle"
+  "lfStyle",
+  "lfUiSize",
+  "lfUiState"
 ];
 var LfMessengerProps;
 (function(LfMessengerProps2) {
@@ -13448,8 +13451,8 @@ var t$1 = Object.defineProperty, e$1 = (t5) => {
   } catch (t5) {
   }
   return false;
-})(), h$1 = !!d$2 && (() => !!u$a.document && Object.getOwnPropertyDescriptor(u$a.document.adoptedStyleSheets, "length").writable)(), p$8 = false, v$b = [], m$a = [], y$c = (t5, e2) => (n2) => {
-  t5.push(n2), p$8 || (p$8 = true, 4 & a$2.o ? $$5(b$9) : a$2.raf(b$9));
+})(), h$1 = !!d$2 && (() => !!u$a.document && Object.getOwnPropertyDescriptor(u$a.document.adoptedStyleSheets, "length").writable)(), p$8 = false, v$a = [], m$a = [], y$c = (t5, e2) => (n2) => {
+  t5.push(n2), p$8 || (p$8 = true, 4 & a$2.o ? $$5(b$a) : a$2.raf(b$a));
 }, w$d = (t5) => {
   for (let e2 = 0; e2 < t5.length; e2++) try {
     t5[e2](performance.now());
@@ -13457,8 +13460,8 @@ var t$1 = Object.defineProperty, e$1 = (t5) => {
     l$1(t6);
   }
   t5.length = 0;
-}, b$9 = () => {
-  w$d(v$b), w$d(m$a), (p$8 = v$b.length > 0) && a$2.raf(b$9);
+}, b$a = () => {
+  w$d(v$a), w$d(m$a), (p$8 = v$a.length > 0) && a$2.raf(b$a);
 }, $$5 = (t5) => f$2().then(t5), g$a = y$c(m$a), S$8 = (t5) => "object" == (t5 = typeof t5) || "function" === t5;
 function j$a(t5) {
   var e2, n2, o2;
@@ -13843,7 +13846,7 @@ var X$3 = false, Z$2 = (t5, e2, n2) => {
                         const n6 = t10.i.replace(/-/g, "_"), o6 = t10.T;
                         if (!o6) return;
                         const r3 = i$1.get(o6);
-                        return r3 ? r3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-0df37de3.entry.js": () => __vitePreload(() => Promise.resolve().then(() => p0df37de3_entry), true ? void 0 : void 0, import.meta.url), "./p-182c6c19.entry.js": () => __vitePreload(() => Promise.resolve().then(() => p182c6c19_entry), true ? void 0 : void 0, import.meta.url), "./p-28dd0bff.entry.js": () => __vitePreload(() => Promise.resolve().then(() => p28dd0bff_entry), true ? void 0 : void 0, import.meta.url), "./p-36aa4a7f.entry.js": () => __vitePreload(() => Promise.resolve().then(() => p36aa4a7f_entry), true ? void 0 : void 0, import.meta.url), "./p-555deef6.entry.js": () => __vitePreload(() => Promise.resolve().then(() => p555deef6_entry), true ? void 0 : void 0, import.meta.url), "./p-55c6a817.entry.js": () => __vitePreload(() => Promise.resolve().then(() => p55c6a817_entry), true ? void 0 : void 0, import.meta.url), "./p-5d51f267.entry.js": () => __vitePreload(() => Promise.resolve().then(() => p5d51f267_entry), true ? void 0 : void 0, import.meta.url), "./p-62695161.entry.js": () => __vitePreload(() => Promise.resolve().then(() => p62695161_entry), true ? void 0 : void 0, import.meta.url), "./p-988ad9c7.entry.js": () => __vitePreload(() => Promise.resolve().then(() => p988ad9c7_entry), true ? void 0 : void 0, import.meta.url), "./p-a6642965.entry.js": () => __vitePreload(() => Promise.resolve().then(() => pA6642965_entry), true ? void 0 : void 0, import.meta.url), "./p-b1bf3d70.entry.js": () => __vitePreload(() => Promise.resolve().then(() => pB1bf3d70_entry), true ? void 0 : void 0, import.meta.url), "./p-bb1b42f7.entry.js": () => __vitePreload(() => Promise.resolve().then(() => pBb1b42f7_entry), true ? void 0 : void 0, import.meta.url), "./p-e2900881.entry.js": () => __vitePreload(() => Promise.resolve().then(() => pE2900881_entry), true ? void 0 : void 0, import.meta.url), "./p-e4e76694.entry.js": () => __vitePreload(() => Promise.resolve().then(() => pE4e76694_entry), true ? void 0 : void 0, import.meta.url), "./p-e6148250.entry.js": () => __vitePreload(() => Promise.resolve().then(() => pE6148250_entry), true ? void 0 : void 0, import.meta.url), "./p-f19de954.entry.js": () => __vitePreload(() => Promise.resolve().then(() => pF19de954_entry), true ? void 0 : void 0, import.meta.url) }), `./${o6}.entry.js`, 2).then(((t11) => (i$1.set(o6, t11), t11[n6])), ((t11) => {
+                        return r3 ? r3[n6] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-0df37de3.entry.js": () => __vitePreload(() => Promise.resolve().then(() => p0df37de3_entry), true ? void 0 : void 0, import.meta.url), "./p-182c6c19.entry.js": () => __vitePreload(() => Promise.resolve().then(() => p182c6c19_entry), true ? void 0 : void 0, import.meta.url), "./p-28dd0bff.entry.js": () => __vitePreload(() => Promise.resolve().then(() => p28dd0bff_entry), true ? void 0 : void 0, import.meta.url), "./p-36aa4a7f.entry.js": () => __vitePreload(() => Promise.resolve().then(() => p36aa4a7f_entry), true ? void 0 : void 0, import.meta.url), "./p-48b2a65e.entry.js": () => __vitePreload(() => Promise.resolve().then(() => p48b2a65e_entry), true ? void 0 : void 0, import.meta.url), "./p-5d51f267.entry.js": () => __vitePreload(() => Promise.resolve().then(() => p5d51f267_entry), true ? void 0 : void 0, import.meta.url), "./p-62695161.entry.js": () => __vitePreload(() => Promise.resolve().then(() => p62695161_entry), true ? void 0 : void 0, import.meta.url), "./p-988ad9c7.entry.js": () => __vitePreload(() => Promise.resolve().then(() => p988ad9c7_entry), true ? void 0 : void 0, import.meta.url), "./p-a6642965.entry.js": () => __vitePreload(() => Promise.resolve().then(() => pA6642965_entry), true ? void 0 : void 0, import.meta.url), "./p-b1bf3d70.entry.js": () => __vitePreload(() => Promise.resolve().then(() => pB1bf3d70_entry), true ? void 0 : void 0, import.meta.url), "./p-bb1b42f7.entry.js": () => __vitePreload(() => Promise.resolve().then(() => pBb1b42f7_entry), true ? void 0 : void 0, import.meta.url), "./p-e2900881.entry.js": () => __vitePreload(() => Promise.resolve().then(() => pE2900881_entry), true ? void 0 : void 0, import.meta.url), "./p-e4e76694.entry.js": () => __vitePreload(() => Promise.resolve().then(() => pE4e76694_entry), true ? void 0 : void 0, import.meta.url), "./p-e6148250.entry.js": () => __vitePreload(() => Promise.resolve().then(() => pE6148250_entry), true ? void 0 : void 0, import.meta.url), "./p-f19de954.entry.js": () => __vitePreload(() => Promise.resolve().then(() => pF19de954_entry), true ? void 0 : void 0, import.meta.url), "./p-fc80bc8a.entry.js": () => __vitePreload(() => Promise.resolve().then(() => pFc80bc8a_entry), true ? void 0 : void 0, import.meta.url) }), `./${o6}.entry.js`, 2).then(((t11) => (i$1.set(o6, t11), t11[n6])), ((t11) => {
                           l$1(t11, e3.$hostElement$);
                         }));
                         /*!__STENCIL_STATIC_IMPORT_SWITCH__*/
@@ -13926,7 +13929,7 @@ const o$2 = () => {
 (() => {
   const l2 = import.meta.url, f2 = {};
   return "" !== l2 && (f2.resourcesUrl = new URL(".", l2).href), f$2(f2);
-})().then((async (e2) => (await o$2(), St$2(JSON.parse('[["p-988ad9c7",[[257,"lf-imageviewer",{"lfDataset":[1040,"lf-dataset"],"lfLoadCallback":[1040,"lf-load-callback"],"lfNavigation":[1040,"lf-navigation"],"lfStyle":[1025,"lf-style"],"lfValue":[1040,"lf-value"],"debugInfo":[32],"currentShape":[32],"history":[32],"historyIndex":[32],"isNavigationTreeOpen":[32],"isSpinnerActive":[32],"addSnapshot":[64],"clearHistory":[64],"clearSelection":[64],"getComponents":[64],"getCurrentSnapshot":[64],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"reset":[64],"setSpinnerStatus":[64],"unmount":[64]}]]],["p-182c6c19",[[257,"lf-compare",{"lfDataset":[1040,"lf-dataset"],"lfShape":[1025,"lf-shape"],"lfStyle":[1025,"lf-style"],"lfView":[1025,"lf-view"],"debugInfo":[32],"isLeftPanelOpened":[32],"isRightPanelOpened":[32],"leftShape":[32],"rightShape":[32],"shapes":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["updateShapes"],"lfShape":["updateShapes"]}]]],["p-e4e76694",[[257,"lf-accordion",{"lfDataset":[1040,"lf-dataset"],"lfRipple":[1028,"lf-ripple"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"expandedNodes":[32],"selectedNodes":[32],"getDebugInfo":[64],"getProps":[64],"getSelectedNodes":[64],"refresh":[64],"toggleNode":[64],"unmount":[64]}]]],["p-62695161",[[257,"lf-article",{"lfDataset":[1040,"lf-dataset"],"lfEmpty":[1025,"lf-empty"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-5d51f267",[[257,"lf-carousel",{"lfDataset":[1040,"lf-dataset"],"lfAutoPlay":[4,"lf-auto-play"],"lfInterval":[2,"lf-interval"],"lfLightbox":[1540,"lf-lightbox"],"lfNavigation":[1028,"lf-navigation"],"lfShape":[1537,"lf-shape"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"currentIndex":[32],"shapes":[32],"getDebugInfo":[64],"getProps":[64],"goToSlide":[64],"nextSlide":[64],"prevSlide":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["updateShapes"],"lfShape":["updateShapes"]}]]],["p-28dd0bff",[[257,"lf-messenger",{"lfAutosave":[1028,"lf-autosave"],"lfDataset":[1040,"lf-dataset"],"lfStyle":[1025,"lf-style"],"lfValue":[16,"lf-value"],"debugInfo":[32],"chat":[32],"connectionStatus":[32],"covers":[32],"currentCharacter":[32],"formStatusMap":[32],"history":[32],"hoveredCustomizationOption":[32],"saveInProgress":[32],"ui":[32],"deleteOption":[64],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"reset":[64],"save":[64],"unmount":[64]}]]],["p-f19de954",[[257,"lf-drawer",{"lfDisplay":[1537,"lf-display"],"lfPosition":[1537,"lf-position"],"lfResponsive":[1026,"lf-responsive"],"lfStyle":[1025,"lf-style"],"lfValue":[1540,"lf-value"],"debugInfo":[32],"close":[64],"getDebugInfo":[64],"getProps":[64],"isOpened":[64],"open":[64],"refresh":[64],"toggle":[64],"unmount":[64]},[[0,"keydown","listenKeydown"]],{"lfDisplay":["onLfDisplayChange"],"lfResponsive":["onLfResponsiveChange"]}]]],["p-a6642965",[[257,"lf-header",{"lfStyle":[1025,"lf-style"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-e6148250",[[257,"lf-placeholder",{"lfIcon":[1,"lf-icon"],"lfProps":[16,"lf-props"],"lfStyle":[1025,"lf-style"],"lfThreshold":[2,"lf-threshold"],"lfTrigger":[1,"lf-trigger"],"lfValue":[1,"lf-value"],"debugInfo":[32],"isInViewport":[32],"getComponent":[64],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-36aa4a7f",[[257,"lf-slider",{"lfLabel":[1025,"lf-label"],"lfLeadingLabel":[1028,"lf-leading-label"],"lfMax":[2,"lf-max"],"lfMin":[2,"lf-min"],"lfStep":[2,"lf-step"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1026,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}]]],["p-0df37de3",[[257,"lf-splash",{"lfLabel":[1025,"lf-label"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"state":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-bb1b42f7",[[257,"lf-toast",{"lfCloseIcon":[1025,"lf-close-icon"],"lfCloseCallback":[16,"lf-close-callback"],"lfIcon":[1025,"lf-icon"],"lfTimer":[2,"lf-timer"],"lfMessage":[1025,"lf-message"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-555deef6",[[257,"lf-card",{"lfDataset":[1040,"lf-dataset"],"lfLayout":[1025,"lf-layout"],"lfSizeX":[1025,"lf-size-x"],"lfSizeY":[1025,"lf-size-y"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"debugInfo":[32],"shapes":[32],"getDebugInfo":[64],"getProps":[64],"getShapes":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["updateShapes"]}],[257,"lf-badge",{"lfImageProps":[1040,"lf-image-props"],"lfLabel":[1025,"lf-label"],"lfPosition":[1537,"lf-position"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}],[257,"lf-canvas",{"lfBrush":[1025,"lf-brush"],"lfColor":[1025,"lf-color"],"lfCursor":[1025,"lf-cursor"],"lfImageProps":[1040,"lf-image-props"],"lfOpacity":[1026,"lf-opacity"],"lfPreview":[1028,"lf-preview"],"lfStrokeTolerance":[1026,"lf-stroke-tolerance"],"lfSize":[1026,"lf-size"],"lfStyle":[1025,"lf-style"],"boxing":[32],"debugInfo":[32],"isPainting":[32],"orientation":[32],"points":[32],"clearCanvas":[64],"getCanvas":[64],"getDebugInfo":[64],"getImage":[64],"getProps":[64],"refresh":[64],"resizeCanvas":[64],"setCanvasHeight":[64],"setCanvasWidth":[64],"unmount":[64]}],[257,"lf-photoframe",{"lfOverlay":[1040,"lf-overlay"],"lfPlaceholder":[16,"lf-placeholder"],"lfStyle":[1025,"lf-style"],"lfThreshold":[2,"lf-threshold"],"lfValue":[16,"lf-value"],"debugInfo":[32],"imageOrientation":[32],"isInViewport":[32],"isReady":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}],[257,"lf-chart",{"lfAxis":[1025,"lf-axis"],"lfColors":[1040,"lf-colors"],"lfDataset":[1040,"lf-dataset"],"lfLegend":[1025,"lf-legend"],"lfSeries":[1040,"lf-series"],"lfSizeX":[1025,"lf-size-x"],"lfSizeY":[1025,"lf-size-y"],"lfStyle":[1025,"lf-style"],"lfTypes":[1040,"lf-types"],"lfXAxis":[1040,"lf-x-axis"],"lfYAxis":[1040,"lf-y-axis"],"debugInfo":[32],"themeValues":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"resize":[64],"unmount":[64]}],[257,"lf-toggle",{"lfAriaLabel":[1025,"lf-aria-label"],"lfLabel":[1025,"lf-label"],"lfLeadingLabel":[1028,"lf-leading-label"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[4,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}],[257,"lf-upload",{"lfHtmlAttributes":[1040,"lf-html-attributes"],"lfLabel":[1025,"lf-label"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfValue":[16,"lf-value"],"debugInfo":[32],"selectedFiles":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"unmount":[64]}],[257,"lf-chat",{"lfContextWindow":[1026,"lf-context-window"],"lfEmpty":[1025,"lf-empty"],"lfEndpointUrl":[1025,"lf-endpoint-url"],"lfLayout":[1025,"lf-layout"],"lfMaxTokens":[1026,"lf-max-tokens"],"lfPollingInterval":[1026,"lf-polling-interval"],"lfSeed":[1026,"lf-seed"],"lfStyle":[1025,"lf-style"],"lfSystem":[1025,"lf-system"],"lfTemperature":[1026,"lf-temperature"],"lfTypewriterProps":[1028,"lf-typewriter-props"],"lfUiSize":[1537,"lf-ui-size"],"lfValue":[1040,"lf-value"],"currentAbortStreaming":[32],"currentPrompt":[32],"currentTokens":[32],"debugInfo":[32],"history":[32],"status":[32],"view":[32],"abortStreaming":[64],"getDebugInfo":[64],"getHistory":[64],"getLastMessage":[64],"getProps":[64],"refresh":[64],"scrollToBottom":[64],"setHistory":[64],"unmount":[64]},[[0,"keydown","listenKeydown"]],{"lfPollingInterval":["updatePollingInterval"],"lfSystem":["updateTokensCount"]}],[257,"lf-chip",{"lfAriaLabel":[1025,"lf-aria-label"],"lfDataset":[1040,"lf-dataset"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfStyling":[1025,"lf-styling"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[16,"lf-value"],"debugInfo":[32],"expandedNodes":[32],"hiddenNodes":[32],"selectedNodes":[32],"getDebugInfo":[64],"getProps":[64],"getSelectedNodes":[64],"refresh":[64],"setSelectedNodes":[64],"unmount":[64]}],[257,"lf-code",{"lfFadeIn":[1028,"lf-fade-in"],"lfFormat":[1028,"lf-format"],"lfLanguage":[1025,"lf-language"],"lfPreserveSpaces":[1028,"lf-preserve-spaces"],"lfShowCopy":[1028,"lf-show-copy"],"lfShowHeader":[1028,"lf-show-header"],"lfStickyHeader":[1028,"lf-sticky-header"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfLanguage":["loadLanguage"]}],[257,"lf-progressbar",{"lfAnimated":[1540,"lf-animated"],"lfCenteredLabel":[1540,"lf-centered-label"],"lfIcon":[1537,"lf-icon"],"lfIsRadial":[1540,"lf-is-radial"],"lfLabel":[1025,"lf-label"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1026,"lf-value"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}],[257,"lf-textfield",{"lfFormatJSON":[1040,"lf-format-j-s-o-n"],"lfHelper":[1040,"lf-helper"],"lfHtmlAttributes":[1040,"lf-html-attributes"],"lfIcon":[1025,"lf-icon"],"lfLabel":[1025,"lf-label"],"lfStretchX":[1540,"lf-stretch-x"],"lfStretchY":[1540,"lf-stretch-y"],"lfStyle":[1025,"lf-style"],"lfStyling":[1025,"lf-styling"],"lfTrailingIcon":[1540,"lf-trailing-icon"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1,"lf-value"],"debugInfo":[32],"status":[32],"value":[32],"formatJSON":[64],"getDebugInfo":[64],"getElement":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setBlur":[64],"setFocus":[64],"setValue":[64],"unmount":[64]}],[257,"lf-typewriter",{"lfCursor":[1025,"lf-cursor"],"lfDeleteSpeed":[1026,"lf-delete-speed"],"lfLoop":[1028,"lf-loop"],"lfPause":[1026,"lf-pause"],"lfSpeed":[1026,"lf-speed"],"lfStyle":[1025,"lf-style"],"lfTag":[1025,"lf-tag"],"lfUiSize":[1537,"lf-ui-size"],"lfUpdatable":[1028,"lf-updatable"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"displayedText":[32],"isDeleting":[32],"currentTextIndex":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfValue":["handleLfValueChange"]}],[257,"lf-image",{"lfHtmlAttributes":[1040,"lf-html-attributes"],"lfMode":[1537,"lf-mode"],"lfShowSpinner":[1028,"lf-show-spinner"],"lfSizeX":[1025,"lf-size-x"],"lfSizeY":[1025,"lf-size-y"],"lfStyle":[1025,"lf-style"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"error":[32],"isLoaded":[32],"resolvedSpriteName":[32],"getDebugInfo":[64],"getImage":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfValue":["resetState"]}],[257,"lf-button",{"lfAriaLabel":[1025,"lf-aria-label"],"lfDataset":[1040,"lf-dataset"],"lfIcon":[1025,"lf-icon"],"lfIconOff":[1025,"lf-icon-off"],"lfLabel":[1025,"lf-label"],"lfRipple":[1028,"lf-ripple"],"lfShowSpinner":[1540,"lf-show-spinner"],"lfStretchX":[1540,"lf-stretch-x"],"lfStretchY":[1540,"lf-stretch-y"],"lfStyle":[1025,"lf-style"],"lfStyling":[1025,"lf-styling"],"lfToggable":[1028,"lf-toggable"],"lfTrailingIcon":[1028,"lf-trailing-icon"],"lfType":[1025,"lf-type"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[4,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setMessage":[64],"setValue":[64],"unmount":[64]}],[257,"lf-list",{"lfDataset":[1040,"lf-dataset"],"lfEmpty":[1025,"lf-empty"],"lfEnableDeletions":[1028,"lf-enable-deletions"],"lfNavigation":[1028,"lf-navigation"],"lfRipple":[1028,"lf-ripple"],"lfSelectable":[1028,"lf-selectable"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[2,"lf-value"],"debugInfo":[32],"focused":[32],"selected":[32],"focusNext":[64],"focusPrevious":[64],"getDebugInfo":[64],"getProps":[64],"getSelected":[64],"refresh":[64],"selectNode":[64],"unmount":[64]},[[0,"keydown","listenKeydown"]]],[257,"lf-spinner",{"lfActive":[1540,"lf-active"],"lfBarVariant":[1540,"lf-bar-variant"],"lfDimensions":[1025,"lf-dimensions"],"lfFader":[1540,"lf-fader"],"lfFaderTimeout":[1026,"lf-fader-timeout"],"lfFullScreen":[1540,"lf-full-screen"],"lfLayout":[1026,"lf-layout"],"lfStyle":[1025,"lf-style"],"lfTimeout":[1026,"lf-timeout"],"bigWait":[32],"debugInfo":[32],"progress":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfActive":["onFaderChange"],"lfFader":["onFaderChange"],"lfFaderTimeout":["onFaderChange"],"lfBarVariant":["lfBarVariantChanged"],"lfTimeout":["lfTimeoutChanged"]}]]],["p-55c6a817",[[257,"lf-masonry",{"lfActions":[1028,"lf-actions"],"lfColumns":[1026,"lf-columns"],"lfDataset":[1040,"lf-dataset"],"lfSelectable":[1540,"lf-selectable"],"lfShape":[1025,"lf-shape"],"lfStyle":[1025,"lf-style"],"lfView":[1025,"lf-view"],"debugInfo":[32],"selectedShape":[32],"shapes":[32],"viewportWidth":[32],"getDebugInfo":[64],"getProps":[64],"getSelectedShape":[64],"redecorateShapes":[64],"refresh":[64],"setSelectedShape":[64],"unmount":[64]},null,{"lfColumns":["validateColumns"],"lfDataset":["updateShapes"],"lfShape":["updateShapes"]}]]],["p-e2900881",[[257,"lf-tabbar",{"lfAriaLabel":[1025,"lf-aria-label"],"lfDataset":[16,"lf-dataset"],"lfNavigation":[4,"lf-navigation"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[8,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}]]],["p-b1bf3d70",[[257,"lf-tree",{"lfAccordionLayout":[1540,"lf-accordion-layout"],"lfDataset":[1040,"lf-dataset"],"lfEmpty":[1025,"lf-empty"],"lfExpandedNodeIds":[1040,"lf-expanded-node-ids"],"lfFilter":[1028,"lf-filter"],"lfGrid":[1540,"lf-grid"],"lfInitialExpansionDepth":[1026,"lf-initial-expansion-depth"],"lfSelectedNodeIds":[1040,"lf-selected-node-ids"],"lfRipple":[1028,"lf-ripple"],"lfSelectable":[1540,"lf-selectable"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"debugInfo":[32],"expandedNodes":[32],"hiddenNodes":[32],"selectedNode":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"getExpandedNodeIds":[64],"getSelectedNodeIds":[64],"setExpandedNodes":[64],"setSelectedNodes":[64],"selectByPredicate":[64],"unmount":[64]},null,{"lfDataset":["handleDatasetChange"],"lfExpandedNodeIds":["handleExpandedPropChange"],"lfSelectedNodeIds":["handleSelectedPropChange"],"lfInitialExpansionDepth":["handleInitialDepthChange"],"lfSelectable":["handleSelectableChange"],"lfFilter":["handleFilterToggle"]}]]]]'), e2))));
+})().then((async (e2) => (await o$2(), St$2(JSON.parse('[["p-988ad9c7",[[257,"lf-imageviewer",{"lfDataset":[1040,"lf-dataset"],"lfLoadCallback":[1040,"lf-load-callback"],"lfNavigation":[1040,"lf-navigation"],"lfStyle":[1025,"lf-style"],"lfValue":[1040,"lf-value"],"debugInfo":[32],"currentShape":[32],"history":[32],"historyIndex":[32],"isNavigationTreeOpen":[32],"isSpinnerActive":[32],"addSnapshot":[64],"clearHistory":[64],"clearSelection":[64],"getComponents":[64],"getCurrentSnapshot":[64],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"reset":[64],"setSpinnerStatus":[64],"unmount":[64]}]]],["p-182c6c19",[[257,"lf-compare",{"lfDataset":[1040,"lf-dataset"],"lfShape":[1025,"lf-shape"],"lfStyle":[1025,"lf-style"],"lfView":[1025,"lf-view"],"debugInfo":[32],"isLeftPanelOpened":[32],"isRightPanelOpened":[32],"leftShape":[32],"rightShape":[32],"shapes":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["updateShapes"],"lfShape":["updateShapes"]}]]],["p-e4e76694",[[257,"lf-accordion",{"lfDataset":[1040,"lf-dataset"],"lfRipple":[1028,"lf-ripple"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"expandedNodes":[32],"selectedNodes":[32],"getDebugInfo":[64],"getProps":[64],"getSelectedNodes":[64],"refresh":[64],"toggleNode":[64],"unmount":[64]}]]],["p-62695161",[[257,"lf-article",{"lfDataset":[1040,"lf-dataset"],"lfEmpty":[1025,"lf-empty"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-5d51f267",[[257,"lf-carousel",{"lfDataset":[1040,"lf-dataset"],"lfAutoPlay":[4,"lf-auto-play"],"lfInterval":[2,"lf-interval"],"lfLightbox":[1540,"lf-lightbox"],"lfNavigation":[1028,"lf-navigation"],"lfShape":[1537,"lf-shape"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"currentIndex":[32],"shapes":[32],"getDebugInfo":[64],"getProps":[64],"goToSlide":[64],"nextSlide":[64],"prevSlide":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["updateShapes"],"lfShape":["updateShapes"]}]]],["p-28dd0bff",[[257,"lf-messenger",{"lfAutosave":[1028,"lf-autosave"],"lfDataset":[1040,"lf-dataset"],"lfStyle":[1025,"lf-style"],"lfValue":[16,"lf-value"],"debugInfo":[32],"chat":[32],"connectionStatus":[32],"covers":[32],"currentCharacter":[32],"formStatusMap":[32],"history":[32],"hoveredCustomizationOption":[32],"saveInProgress":[32],"ui":[32],"deleteOption":[64],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"reset":[64],"save":[64],"unmount":[64]}]]],["p-f19de954",[[257,"lf-drawer",{"lfDisplay":[1537,"lf-display"],"lfPosition":[1537,"lf-position"],"lfResponsive":[1026,"lf-responsive"],"lfStyle":[1025,"lf-style"],"lfValue":[1540,"lf-value"],"debugInfo":[32],"close":[64],"getDebugInfo":[64],"getProps":[64],"isOpened":[64],"open":[64],"refresh":[64],"toggle":[64],"unmount":[64]},[[0,"keydown","listenKeydown"]],{"lfDisplay":["onLfDisplayChange"],"lfResponsive":["onLfResponsiveChange"]}]]],["p-a6642965",[[257,"lf-header",{"lfStyle":[1025,"lf-style"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-e6148250",[[257,"lf-placeholder",{"lfIcon":[1,"lf-icon"],"lfProps":[16,"lf-props"],"lfStyle":[1025,"lf-style"],"lfThreshold":[2,"lf-threshold"],"lfTrigger":[1,"lf-trigger"],"lfValue":[1,"lf-value"],"debugInfo":[32],"isInViewport":[32],"getComponent":[64],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-36aa4a7f",[[257,"lf-slider",{"lfLabel":[1025,"lf-label"],"lfLeadingLabel":[1028,"lf-leading-label"],"lfMax":[2,"lf-max"],"lfMin":[2,"lf-min"],"lfStep":[2,"lf-step"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1026,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}]]],["p-0df37de3",[[257,"lf-splash",{"lfLabel":[1025,"lf-label"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"state":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-bb1b42f7",[[257,"lf-toast",{"lfCloseIcon":[1025,"lf-close-icon"],"lfCloseCallback":[16,"lf-close-callback"],"lfIcon":[1025,"lf-icon"],"lfTimer":[2,"lf-timer"],"lfMessage":[1025,"lf-message"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-48b2a65e",[[257,"lf-card",{"lfDataset":[1040,"lf-dataset"],"lfLayout":[1025,"lf-layout"],"lfSizeX":[1025,"lf-size-x"],"lfSizeY":[1025,"lf-size-y"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"debugInfo":[32],"shapes":[32],"getDebugInfo":[64],"getProps":[64],"getShapes":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["updateShapes"]}],[257,"lf-badge",{"lfImageProps":[1040,"lf-image-props"],"lfLabel":[1025,"lf-label"],"lfPosition":[1537,"lf-position"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}],[257,"lf-canvas",{"lfBrush":[1025,"lf-brush"],"lfColor":[1025,"lf-color"],"lfCursor":[1025,"lf-cursor"],"lfImageProps":[1040,"lf-image-props"],"lfOpacity":[1026,"lf-opacity"],"lfPreview":[1028,"lf-preview"],"lfStrokeTolerance":[1026,"lf-stroke-tolerance"],"lfSize":[1026,"lf-size"],"lfStyle":[1025,"lf-style"],"boxing":[32],"debugInfo":[32],"isPainting":[32],"orientation":[32],"points":[32],"clearCanvas":[64],"getCanvas":[64],"getDebugInfo":[64],"getImage":[64],"getProps":[64],"refresh":[64],"resizeCanvas":[64],"setCanvasHeight":[64],"setCanvasWidth":[64],"unmount":[64]}],[257,"lf-photoframe",{"lfOverlay":[1040,"lf-overlay"],"lfPlaceholder":[16,"lf-placeholder"],"lfStyle":[1025,"lf-style"],"lfThreshold":[2,"lf-threshold"],"lfValue":[16,"lf-value"],"debugInfo":[32],"imageOrientation":[32],"isInViewport":[32],"isReady":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}],[257,"lf-chart",{"lfAxis":[1025,"lf-axis"],"lfColors":[1040,"lf-colors"],"lfDataset":[1040,"lf-dataset"],"lfLegend":[1025,"lf-legend"],"lfSeries":[1040,"lf-series"],"lfSizeX":[1025,"lf-size-x"],"lfSizeY":[1025,"lf-size-y"],"lfStyle":[1025,"lf-style"],"lfTypes":[1040,"lf-types"],"lfXAxis":[1040,"lf-x-axis"],"lfYAxis":[1040,"lf-y-axis"],"debugInfo":[32],"themeValues":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"resize":[64],"unmount":[64]}],[257,"lf-toggle",{"lfAriaLabel":[1025,"lf-aria-label"],"lfLabel":[1025,"lf-label"],"lfLeadingLabel":[1028,"lf-leading-label"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[4,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}],[257,"lf-upload",{"lfHtmlAttributes":[1040,"lf-html-attributes"],"lfLabel":[1025,"lf-label"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfValue":[16,"lf-value"],"debugInfo":[32],"selectedFiles":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"unmount":[64]}],[257,"lf-chat",{"lfContextWindow":[1026,"lf-context-window"],"lfEmpty":[1025,"lf-empty"],"lfEndpointUrl":[1025,"lf-endpoint-url"],"lfLayout":[1025,"lf-layout"],"lfMaxTokens":[1026,"lf-max-tokens"],"lfPollingInterval":[1026,"lf-polling-interval"],"lfSeed":[1026,"lf-seed"],"lfStyle":[1025,"lf-style"],"lfSystem":[1025,"lf-system"],"lfTemperature":[1026,"lf-temperature"],"lfTypewriterProps":[1028,"lf-typewriter-props"],"lfUiSize":[1537,"lf-ui-size"],"lfValue":[1040,"lf-value"],"currentAbortStreaming":[32],"currentPrompt":[32],"currentTokens":[32],"debugInfo":[32],"history":[32],"status":[32],"view":[32],"abortStreaming":[64],"getDebugInfo":[64],"getHistory":[64],"getLastMessage":[64],"getProps":[64],"refresh":[64],"scrollToBottom":[64],"setHistory":[64],"unmount":[64]},[[0,"keydown","listenKeydown"]],{"lfPollingInterval":["updatePollingInterval"],"lfSystem":["updateTokensCount"]}],[257,"lf-chip",{"lfAriaLabel":[1025,"lf-aria-label"],"lfDataset":[1040,"lf-dataset"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfStyling":[1025,"lf-styling"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[16,"lf-value"],"debugInfo":[32],"expandedNodes":[32],"hiddenNodes":[32],"selectedNodes":[32],"getDebugInfo":[64],"getProps":[64],"getSelectedNodes":[64],"refresh":[64],"setSelectedNodes":[64],"unmount":[64]}],[257,"lf-code",{"lfFadeIn":[1028,"lf-fade-in"],"lfFormat":[1028,"lf-format"],"lfLanguage":[1025,"lf-language"],"lfPreserveSpaces":[1028,"lf-preserve-spaces"],"lfShowCopy":[1028,"lf-show-copy"],"lfShowHeader":[1028,"lf-show-header"],"lfStickyHeader":[1028,"lf-sticky-header"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfLanguage":["loadLanguage"]}],[257,"lf-progressbar",{"lfAnimated":[1540,"lf-animated"],"lfCenteredLabel":[1540,"lf-centered-label"],"lfIcon":[1537,"lf-icon"],"lfIsRadial":[1540,"lf-is-radial"],"lfLabel":[1025,"lf-label"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1026,"lf-value"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}],[257,"lf-textfield",{"lfFormatJSON":[1040,"lf-format-j-s-o-n"],"lfHelper":[1040,"lf-helper"],"lfHtmlAttributes":[1040,"lf-html-attributes"],"lfIcon":[1025,"lf-icon"],"lfLabel":[1025,"lf-label"],"lfStretchX":[1540,"lf-stretch-x"],"lfStretchY":[1540,"lf-stretch-y"],"lfStyle":[1025,"lf-style"],"lfStyling":[1025,"lf-styling"],"lfTrailingIcon":[1540,"lf-trailing-icon"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1,"lf-value"],"debugInfo":[32],"status":[32],"value":[32],"formatJSON":[64],"getDebugInfo":[64],"getElement":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setBlur":[64],"setFocus":[64],"setValue":[64],"unmount":[64]}],[257,"lf-typewriter",{"lfCursor":[1025,"lf-cursor"],"lfDeleteSpeed":[1026,"lf-delete-speed"],"lfLoop":[1028,"lf-loop"],"lfPause":[1026,"lf-pause"],"lfSpeed":[1026,"lf-speed"],"lfStyle":[1025,"lf-style"],"lfTag":[1025,"lf-tag"],"lfUiSize":[1537,"lf-ui-size"],"lfUpdatable":[1028,"lf-updatable"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"displayedText":[32],"isDeleting":[32],"currentTextIndex":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfValue":["handleLfValueChange"]}],[257,"lf-image",{"lfHtmlAttributes":[1040,"lf-html-attributes"],"lfMode":[1537,"lf-mode"],"lfShowSpinner":[1028,"lf-show-spinner"],"lfSizeX":[1025,"lf-size-x"],"lfSizeY":[1025,"lf-size-y"],"lfStyle":[1025,"lf-style"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"error":[32],"isLoaded":[32],"resolvedSpriteName":[32],"getDebugInfo":[64],"getImage":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfValue":["resetState"]}],[257,"lf-button",{"lfAriaLabel":[1025,"lf-aria-label"],"lfDataset":[1040,"lf-dataset"],"lfIcon":[1025,"lf-icon"],"lfIconOff":[1025,"lf-icon-off"],"lfLabel":[1025,"lf-label"],"lfRipple":[1028,"lf-ripple"],"lfShowSpinner":[1540,"lf-show-spinner"],"lfStretchX":[1540,"lf-stretch-x"],"lfStretchY":[1540,"lf-stretch-y"],"lfStyle":[1025,"lf-style"],"lfStyling":[1025,"lf-styling"],"lfToggable":[1028,"lf-toggable"],"lfTrailingIcon":[1028,"lf-trailing-icon"],"lfType":[1025,"lf-type"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[4,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setMessage":[64],"setValue":[64],"unmount":[64]}],[257,"lf-list",{"lfDataset":[1040,"lf-dataset"],"lfEmpty":[1025,"lf-empty"],"lfEnableDeletions":[1028,"lf-enable-deletions"],"lfNavigation":[1028,"lf-navigation"],"lfRipple":[1028,"lf-ripple"],"lfSelectable":[1028,"lf-selectable"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[2,"lf-value"],"debugInfo":[32],"focused":[32],"selected":[32],"focusNext":[64],"focusPrevious":[64],"getDebugInfo":[64],"getProps":[64],"getSelected":[64],"refresh":[64],"selectNode":[64],"unmount":[64]},[[0,"keydown","listenKeydown"]]],[257,"lf-spinner",{"lfActive":[1540,"lf-active"],"lfBarVariant":[1540,"lf-bar-variant"],"lfDimensions":[1025,"lf-dimensions"],"lfFader":[1540,"lf-fader"],"lfFaderTimeout":[1026,"lf-fader-timeout"],"lfFullScreen":[1540,"lf-full-screen"],"lfLayout":[1026,"lf-layout"],"lfStyle":[1025,"lf-style"],"lfTimeout":[1026,"lf-timeout"],"bigWait":[32],"debugInfo":[32],"progress":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfActive":["onFaderChange"],"lfFader":["onFaderChange"],"lfFaderTimeout":["onFaderChange"],"lfBarVariant":["lfBarVariantChanged"],"lfTimeout":["lfTimeoutChanged"]}]]],["p-fc80bc8a",[[257,"lf-masonry",{"lfActions":[1028,"lf-actions"],"lfCollapseColumns":[1028,"lf-collapse-columns"],"lfColumns":[1026,"lf-columns"],"lfDataset":[1040,"lf-dataset"],"lfSelectable":[1540,"lf-selectable"],"lfShape":[1025,"lf-shape"],"lfStyle":[1025,"lf-style"],"lfView":[1025,"lf-view"],"debugInfo":[32],"selectedShape":[32],"shapes":[32],"viewportWidth":[32],"getDebugInfo":[64],"getProps":[64],"getSelectedShape":[64],"redecorateShapes":[64],"refresh":[64],"setSelectedShape":[64],"unmount":[64]},null,{"lfColumns":["validateColumns"],"lfDataset":["updateShapes"],"lfShape":["updateShapes"]}]]],["p-e2900881",[[257,"lf-tabbar",{"lfAriaLabel":[1025,"lf-aria-label"],"lfDataset":[16,"lf-dataset"],"lfNavigation":[4,"lf-navigation"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[8,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}]]],["p-b1bf3d70",[[257,"lf-tree",{"lfAccordionLayout":[1540,"lf-accordion-layout"],"lfDataset":[1040,"lf-dataset"],"lfEmpty":[1025,"lf-empty"],"lfExpandedNodeIds":[1040,"lf-expanded-node-ids"],"lfFilter":[1028,"lf-filter"],"lfGrid":[1540,"lf-grid"],"lfInitialExpansionDepth":[1026,"lf-initial-expansion-depth"],"lfSelectedNodeIds":[1040,"lf-selected-node-ids"],"lfRipple":[1028,"lf-ripple"],"lfSelectable":[1540,"lf-selectable"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"debugInfo":[32],"expandedNodes":[32],"hiddenNodes":[32],"selectedNode":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"getExpandedNodeIds":[64],"getSelectedNodeIds":[64],"setExpandedNodes":[64],"setSelectedNodes":[64],"selectByPredicate":[64],"unmount":[64]},null,{"lfDataset":["handleDatasetChange"],"lfExpandedNodeIds":["handleExpandedPropChange"],"lfSelectedNodeIds":["handleSelectedPropChange"],"lfInitialExpansionDepth":["handleInitialDepthChange"],"lfSelectable":["handleSelectableChange"],"lfFilter":["handleFilterToggle"]}]]]]'), e2))));
 var t = Object.defineProperty, e = (t5) => {
   if (t5.__stencil__getHostRef) return t5.__stencil__getHostRef();
 }, o$1 = (t5, e2) => e2 in t5, l = (t5, e2) => (0, console.error)(t5, e2), i = /* @__PURE__ */ new Map(), r$1 = /* @__PURE__ */ new Map(), s = "slot-fb{display:contents}slot-fb[hidden]{display:none}", c = "http://www.w3.org/1999/xlink", u$9 = "undefined" != typeof window ? window : {}, a$1 = { o: 0, l: "", jmp: (t5) => t5(), raf: (t5) => requestAnimationFrame(t5), ael: (t5, e2, n2, o2) => t5.addEventListener(e2, n2, o2), rel: (t5, e2, n2, o2) => t5.removeEventListener(e2, n2, o2), ce: (t5, e2) => new CustomEvent(t5, e2) }, f$1 = (t5) => Promise.resolve(t5), d$1 = (() => {
@@ -13935,8 +13938,8 @@ var t = Object.defineProperty, e = (t5) => {
   } catch (t5) {
   }
   return false;
-})(), h = !!d$1 && (() => !!u$9.document && Object.getOwnPropertyDescriptor(u$9.document.adoptedStyleSheets, "length").writable)(), p$7 = false, v$a = [], m$9 = [], y$b = (t5, e2) => (n2) => {
-  t5.push(n2), p$7 || (p$7 = true, 4 & a$1.o ? $$4(b$8) : a$1.raf(b$8));
+})(), h = !!d$1 && (() => !!u$9.document && Object.getOwnPropertyDescriptor(u$9.document.adoptedStyleSheets, "length").writable)(), p$7 = false, v$9 = [], m$9 = [], y$b = (t5, e2) => (n2) => {
+  t5.push(n2), p$7 || (p$7 = true, 4 & a$1.o ? $$4(b$9) : a$1.raf(b$9));
 }, w$c = (t5) => {
   for (let e2 = 0; e2 < t5.length; e2++) try {
     t5[e2](performance.now());
@@ -13944,8 +13947,8 @@ var t = Object.defineProperty, e = (t5) => {
     l(t6);
   }
   t5.length = 0;
-}, b$8 = () => {
-  w$c(v$a), w$c(m$9), (p$7 = v$a.length > 0) && a$1.raf(b$8);
+}, b$9 = () => {
+  w$c(v$9), w$c(m$9), (p$7 = v$9.length > 0) && a$1.raf(b$9);
 }, $$4 = (t5) => f$1().then(t5), g$9 = y$b(m$9), S$7 = (t5) => "object" == (t5 = typeof t5) || "function" === t5;
 function j$9(t5) {
   var e2, n2, o2;
@@ -14387,19 +14390,19 @@ const o = () => {
 (() => {
   const l2 = import.meta.url, f2 = {};
   return "" !== l2 && (f2.resourcesUrl = new URL(".", l2).href), f$1(f2);
-})().then((async (e2) => (await o(), St$1(JSON.parse('[["p-988ad9c7",[[257,"lf-imageviewer",{"lfDataset":[1040,"lf-dataset"],"lfLoadCallback":[1040,"lf-load-callback"],"lfNavigation":[1040,"lf-navigation"],"lfStyle":[1025,"lf-style"],"lfValue":[1040,"lf-value"],"debugInfo":[32],"currentShape":[32],"history":[32],"historyIndex":[32],"isNavigationTreeOpen":[32],"isSpinnerActive":[32],"addSnapshot":[64],"clearHistory":[64],"clearSelection":[64],"getComponents":[64],"getCurrentSnapshot":[64],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"reset":[64],"setSpinnerStatus":[64],"unmount":[64]}]]],["p-182c6c19",[[257,"lf-compare",{"lfDataset":[1040,"lf-dataset"],"lfShape":[1025,"lf-shape"],"lfStyle":[1025,"lf-style"],"lfView":[1025,"lf-view"],"debugInfo":[32],"isLeftPanelOpened":[32],"isRightPanelOpened":[32],"leftShape":[32],"rightShape":[32],"shapes":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["updateShapes"],"lfShape":["updateShapes"]}]]],["p-e4e76694",[[257,"lf-accordion",{"lfDataset":[1040,"lf-dataset"],"lfRipple":[1028,"lf-ripple"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"expandedNodes":[32],"selectedNodes":[32],"getDebugInfo":[64],"getProps":[64],"getSelectedNodes":[64],"refresh":[64],"toggleNode":[64],"unmount":[64]}]]],["p-62695161",[[257,"lf-article",{"lfDataset":[1040,"lf-dataset"],"lfEmpty":[1025,"lf-empty"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-5d51f267",[[257,"lf-carousel",{"lfDataset":[1040,"lf-dataset"],"lfAutoPlay":[4,"lf-auto-play"],"lfInterval":[2,"lf-interval"],"lfLightbox":[1540,"lf-lightbox"],"lfNavigation":[1028,"lf-navigation"],"lfShape":[1537,"lf-shape"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"currentIndex":[32],"shapes":[32],"getDebugInfo":[64],"getProps":[64],"goToSlide":[64],"nextSlide":[64],"prevSlide":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["updateShapes"],"lfShape":["updateShapes"]}]]],["p-28dd0bff",[[257,"lf-messenger",{"lfAutosave":[1028,"lf-autosave"],"lfDataset":[1040,"lf-dataset"],"lfStyle":[1025,"lf-style"],"lfValue":[16,"lf-value"],"debugInfo":[32],"chat":[32],"connectionStatus":[32],"covers":[32],"currentCharacter":[32],"formStatusMap":[32],"history":[32],"hoveredCustomizationOption":[32],"saveInProgress":[32],"ui":[32],"deleteOption":[64],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"reset":[64],"save":[64],"unmount":[64]}]]],["p-f19de954",[[257,"lf-drawer",{"lfDisplay":[1537,"lf-display"],"lfPosition":[1537,"lf-position"],"lfResponsive":[1026,"lf-responsive"],"lfStyle":[1025,"lf-style"],"lfValue":[1540,"lf-value"],"debugInfo":[32],"close":[64],"getDebugInfo":[64],"getProps":[64],"isOpened":[64],"open":[64],"refresh":[64],"toggle":[64],"unmount":[64]},[[0,"keydown","listenKeydown"]],{"lfDisplay":["onLfDisplayChange"],"lfResponsive":["onLfResponsiveChange"]}]]],["p-a6642965",[[257,"lf-header",{"lfStyle":[1025,"lf-style"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-e6148250",[[257,"lf-placeholder",{"lfIcon":[1,"lf-icon"],"lfProps":[16,"lf-props"],"lfStyle":[1025,"lf-style"],"lfThreshold":[2,"lf-threshold"],"lfTrigger":[1,"lf-trigger"],"lfValue":[1,"lf-value"],"debugInfo":[32],"isInViewport":[32],"getComponent":[64],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-36aa4a7f",[[257,"lf-slider",{"lfLabel":[1025,"lf-label"],"lfLeadingLabel":[1028,"lf-leading-label"],"lfMax":[2,"lf-max"],"lfMin":[2,"lf-min"],"lfStep":[2,"lf-step"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1026,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}]]],["p-0df37de3",[[257,"lf-splash",{"lfLabel":[1025,"lf-label"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"state":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-bb1b42f7",[[257,"lf-toast",{"lfCloseIcon":[1025,"lf-close-icon"],"lfCloseCallback":[16,"lf-close-callback"],"lfIcon":[1025,"lf-icon"],"lfTimer":[2,"lf-timer"],"lfMessage":[1025,"lf-message"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-555deef6",[[257,"lf-card",{"lfDataset":[1040,"lf-dataset"],"lfLayout":[1025,"lf-layout"],"lfSizeX":[1025,"lf-size-x"],"lfSizeY":[1025,"lf-size-y"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"debugInfo":[32],"shapes":[32],"getDebugInfo":[64],"getProps":[64],"getShapes":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["updateShapes"]}],[257,"lf-badge",{"lfImageProps":[1040,"lf-image-props"],"lfLabel":[1025,"lf-label"],"lfPosition":[1537,"lf-position"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}],[257,"lf-canvas",{"lfBrush":[1025,"lf-brush"],"lfColor":[1025,"lf-color"],"lfCursor":[1025,"lf-cursor"],"lfImageProps":[1040,"lf-image-props"],"lfOpacity":[1026,"lf-opacity"],"lfPreview":[1028,"lf-preview"],"lfStrokeTolerance":[1026,"lf-stroke-tolerance"],"lfSize":[1026,"lf-size"],"lfStyle":[1025,"lf-style"],"boxing":[32],"debugInfo":[32],"isPainting":[32],"orientation":[32],"points":[32],"clearCanvas":[64],"getCanvas":[64],"getDebugInfo":[64],"getImage":[64],"getProps":[64],"refresh":[64],"resizeCanvas":[64],"setCanvasHeight":[64],"setCanvasWidth":[64],"unmount":[64]}],[257,"lf-photoframe",{"lfOverlay":[1040,"lf-overlay"],"lfPlaceholder":[16,"lf-placeholder"],"lfStyle":[1025,"lf-style"],"lfThreshold":[2,"lf-threshold"],"lfValue":[16,"lf-value"],"debugInfo":[32],"imageOrientation":[32],"isInViewport":[32],"isReady":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}],[257,"lf-chart",{"lfAxis":[1025,"lf-axis"],"lfColors":[1040,"lf-colors"],"lfDataset":[1040,"lf-dataset"],"lfLegend":[1025,"lf-legend"],"lfSeries":[1040,"lf-series"],"lfSizeX":[1025,"lf-size-x"],"lfSizeY":[1025,"lf-size-y"],"lfStyle":[1025,"lf-style"],"lfTypes":[1040,"lf-types"],"lfXAxis":[1040,"lf-x-axis"],"lfYAxis":[1040,"lf-y-axis"],"debugInfo":[32],"themeValues":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"resize":[64],"unmount":[64]}],[257,"lf-toggle",{"lfAriaLabel":[1025,"lf-aria-label"],"lfLabel":[1025,"lf-label"],"lfLeadingLabel":[1028,"lf-leading-label"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[4,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}],[257,"lf-upload",{"lfHtmlAttributes":[1040,"lf-html-attributes"],"lfLabel":[1025,"lf-label"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfValue":[16,"lf-value"],"debugInfo":[32],"selectedFiles":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"unmount":[64]}],[257,"lf-chat",{"lfContextWindow":[1026,"lf-context-window"],"lfEmpty":[1025,"lf-empty"],"lfEndpointUrl":[1025,"lf-endpoint-url"],"lfLayout":[1025,"lf-layout"],"lfMaxTokens":[1026,"lf-max-tokens"],"lfPollingInterval":[1026,"lf-polling-interval"],"lfSeed":[1026,"lf-seed"],"lfStyle":[1025,"lf-style"],"lfSystem":[1025,"lf-system"],"lfTemperature":[1026,"lf-temperature"],"lfTypewriterProps":[1028,"lf-typewriter-props"],"lfUiSize":[1537,"lf-ui-size"],"lfValue":[1040,"lf-value"],"currentAbortStreaming":[32],"currentPrompt":[32],"currentTokens":[32],"debugInfo":[32],"history":[32],"status":[32],"view":[32],"abortStreaming":[64],"getDebugInfo":[64],"getHistory":[64],"getLastMessage":[64],"getProps":[64],"refresh":[64],"scrollToBottom":[64],"setHistory":[64],"unmount":[64]},[[0,"keydown","listenKeydown"]],{"lfPollingInterval":["updatePollingInterval"],"lfSystem":["updateTokensCount"]}],[257,"lf-chip",{"lfAriaLabel":[1025,"lf-aria-label"],"lfDataset":[1040,"lf-dataset"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfStyling":[1025,"lf-styling"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[16,"lf-value"],"debugInfo":[32],"expandedNodes":[32],"hiddenNodes":[32],"selectedNodes":[32],"getDebugInfo":[64],"getProps":[64],"getSelectedNodes":[64],"refresh":[64],"setSelectedNodes":[64],"unmount":[64]}],[257,"lf-code",{"lfFadeIn":[1028,"lf-fade-in"],"lfFormat":[1028,"lf-format"],"lfLanguage":[1025,"lf-language"],"lfPreserveSpaces":[1028,"lf-preserve-spaces"],"lfShowCopy":[1028,"lf-show-copy"],"lfShowHeader":[1028,"lf-show-header"],"lfStickyHeader":[1028,"lf-sticky-header"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfLanguage":["loadLanguage"]}],[257,"lf-progressbar",{"lfAnimated":[1540,"lf-animated"],"lfCenteredLabel":[1540,"lf-centered-label"],"lfIcon":[1537,"lf-icon"],"lfIsRadial":[1540,"lf-is-radial"],"lfLabel":[1025,"lf-label"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1026,"lf-value"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}],[257,"lf-textfield",{"lfFormatJSON":[1040,"lf-format-j-s-o-n"],"lfHelper":[1040,"lf-helper"],"lfHtmlAttributes":[1040,"lf-html-attributes"],"lfIcon":[1025,"lf-icon"],"lfLabel":[1025,"lf-label"],"lfStretchX":[1540,"lf-stretch-x"],"lfStretchY":[1540,"lf-stretch-y"],"lfStyle":[1025,"lf-style"],"lfStyling":[1025,"lf-styling"],"lfTrailingIcon":[1540,"lf-trailing-icon"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1,"lf-value"],"debugInfo":[32],"status":[32],"value":[32],"formatJSON":[64],"getDebugInfo":[64],"getElement":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setBlur":[64],"setFocus":[64],"setValue":[64],"unmount":[64]}],[257,"lf-typewriter",{"lfCursor":[1025,"lf-cursor"],"lfDeleteSpeed":[1026,"lf-delete-speed"],"lfLoop":[1028,"lf-loop"],"lfPause":[1026,"lf-pause"],"lfSpeed":[1026,"lf-speed"],"lfStyle":[1025,"lf-style"],"lfTag":[1025,"lf-tag"],"lfUiSize":[1537,"lf-ui-size"],"lfUpdatable":[1028,"lf-updatable"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"displayedText":[32],"isDeleting":[32],"currentTextIndex":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfValue":["handleLfValueChange"]}],[257,"lf-image",{"lfHtmlAttributes":[1040,"lf-html-attributes"],"lfMode":[1537,"lf-mode"],"lfShowSpinner":[1028,"lf-show-spinner"],"lfSizeX":[1025,"lf-size-x"],"lfSizeY":[1025,"lf-size-y"],"lfStyle":[1025,"lf-style"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"error":[32],"isLoaded":[32],"resolvedSpriteName":[32],"getDebugInfo":[64],"getImage":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfValue":["resetState"]}],[257,"lf-button",{"lfAriaLabel":[1025,"lf-aria-label"],"lfDataset":[1040,"lf-dataset"],"lfIcon":[1025,"lf-icon"],"lfIconOff":[1025,"lf-icon-off"],"lfLabel":[1025,"lf-label"],"lfRipple":[1028,"lf-ripple"],"lfShowSpinner":[1540,"lf-show-spinner"],"lfStretchX":[1540,"lf-stretch-x"],"lfStretchY":[1540,"lf-stretch-y"],"lfStyle":[1025,"lf-style"],"lfStyling":[1025,"lf-styling"],"lfToggable":[1028,"lf-toggable"],"lfTrailingIcon":[1028,"lf-trailing-icon"],"lfType":[1025,"lf-type"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[4,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setMessage":[64],"setValue":[64],"unmount":[64]}],[257,"lf-list",{"lfDataset":[1040,"lf-dataset"],"lfEmpty":[1025,"lf-empty"],"lfEnableDeletions":[1028,"lf-enable-deletions"],"lfNavigation":[1028,"lf-navigation"],"lfRipple":[1028,"lf-ripple"],"lfSelectable":[1028,"lf-selectable"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[2,"lf-value"],"debugInfo":[32],"focused":[32],"selected":[32],"focusNext":[64],"focusPrevious":[64],"getDebugInfo":[64],"getProps":[64],"getSelected":[64],"refresh":[64],"selectNode":[64],"unmount":[64]},[[0,"keydown","listenKeydown"]]],[257,"lf-spinner",{"lfActive":[1540,"lf-active"],"lfBarVariant":[1540,"lf-bar-variant"],"lfDimensions":[1025,"lf-dimensions"],"lfFader":[1540,"lf-fader"],"lfFaderTimeout":[1026,"lf-fader-timeout"],"lfFullScreen":[1540,"lf-full-screen"],"lfLayout":[1026,"lf-layout"],"lfStyle":[1025,"lf-style"],"lfTimeout":[1026,"lf-timeout"],"bigWait":[32],"debugInfo":[32],"progress":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfActive":["onFaderChange"],"lfFader":["onFaderChange"],"lfFaderTimeout":["onFaderChange"],"lfBarVariant":["lfBarVariantChanged"],"lfTimeout":["lfTimeoutChanged"]}]]],["p-55c6a817",[[257,"lf-masonry",{"lfActions":[1028,"lf-actions"],"lfColumns":[1026,"lf-columns"],"lfDataset":[1040,"lf-dataset"],"lfSelectable":[1540,"lf-selectable"],"lfShape":[1025,"lf-shape"],"lfStyle":[1025,"lf-style"],"lfView":[1025,"lf-view"],"debugInfo":[32],"selectedShape":[32],"shapes":[32],"viewportWidth":[32],"getDebugInfo":[64],"getProps":[64],"getSelectedShape":[64],"redecorateShapes":[64],"refresh":[64],"setSelectedShape":[64],"unmount":[64]},null,{"lfColumns":["validateColumns"],"lfDataset":["updateShapes"],"lfShape":["updateShapes"]}]]],["p-e2900881",[[257,"lf-tabbar",{"lfAriaLabel":[1025,"lf-aria-label"],"lfDataset":[16,"lf-dataset"],"lfNavigation":[4,"lf-navigation"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[8,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}]]],["p-b1bf3d70",[[257,"lf-tree",{"lfAccordionLayout":[1540,"lf-accordion-layout"],"lfDataset":[1040,"lf-dataset"],"lfEmpty":[1025,"lf-empty"],"lfExpandedNodeIds":[1040,"lf-expanded-node-ids"],"lfFilter":[1028,"lf-filter"],"lfGrid":[1540,"lf-grid"],"lfInitialExpansionDepth":[1026,"lf-initial-expansion-depth"],"lfSelectedNodeIds":[1040,"lf-selected-node-ids"],"lfRipple":[1028,"lf-ripple"],"lfSelectable":[1540,"lf-selectable"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"debugInfo":[32],"expandedNodes":[32],"hiddenNodes":[32],"selectedNode":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"getExpandedNodeIds":[64],"getSelectedNodeIds":[64],"setExpandedNodes":[64],"setSelectedNodes":[64],"selectByPredicate":[64],"unmount":[64]},null,{"lfDataset":["handleDatasetChange"],"lfExpandedNodeIds":["handleExpandedPropChange"],"lfSelectedNodeIds":["handleSelectedPropChange"],"lfInitialExpansionDepth":["handleInitialDepthChange"],"lfSelectable":["handleSelectableChange"],"lfFilter":["handleFilterToggle"]}]]]]'), e2))));
+})().then((async (e2) => (await o(), St$1(JSON.parse('[["p-988ad9c7",[[257,"lf-imageviewer",{"lfDataset":[1040,"lf-dataset"],"lfLoadCallback":[1040,"lf-load-callback"],"lfNavigation":[1040,"lf-navigation"],"lfStyle":[1025,"lf-style"],"lfValue":[1040,"lf-value"],"debugInfo":[32],"currentShape":[32],"history":[32],"historyIndex":[32],"isNavigationTreeOpen":[32],"isSpinnerActive":[32],"addSnapshot":[64],"clearHistory":[64],"clearSelection":[64],"getComponents":[64],"getCurrentSnapshot":[64],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"reset":[64],"setSpinnerStatus":[64],"unmount":[64]}]]],["p-182c6c19",[[257,"lf-compare",{"lfDataset":[1040,"lf-dataset"],"lfShape":[1025,"lf-shape"],"lfStyle":[1025,"lf-style"],"lfView":[1025,"lf-view"],"debugInfo":[32],"isLeftPanelOpened":[32],"isRightPanelOpened":[32],"leftShape":[32],"rightShape":[32],"shapes":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["updateShapes"],"lfShape":["updateShapes"]}]]],["p-e4e76694",[[257,"lf-accordion",{"lfDataset":[1040,"lf-dataset"],"lfRipple":[1028,"lf-ripple"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"expandedNodes":[32],"selectedNodes":[32],"getDebugInfo":[64],"getProps":[64],"getSelectedNodes":[64],"refresh":[64],"toggleNode":[64],"unmount":[64]}]]],["p-62695161",[[257,"lf-article",{"lfDataset":[1040,"lf-dataset"],"lfEmpty":[1025,"lf-empty"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-5d51f267",[[257,"lf-carousel",{"lfDataset":[1040,"lf-dataset"],"lfAutoPlay":[4,"lf-auto-play"],"lfInterval":[2,"lf-interval"],"lfLightbox":[1540,"lf-lightbox"],"lfNavigation":[1028,"lf-navigation"],"lfShape":[1537,"lf-shape"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"currentIndex":[32],"shapes":[32],"getDebugInfo":[64],"getProps":[64],"goToSlide":[64],"nextSlide":[64],"prevSlide":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["updateShapes"],"lfShape":["updateShapes"]}]]],["p-28dd0bff",[[257,"lf-messenger",{"lfAutosave":[1028,"lf-autosave"],"lfDataset":[1040,"lf-dataset"],"lfStyle":[1025,"lf-style"],"lfValue":[16,"lf-value"],"debugInfo":[32],"chat":[32],"connectionStatus":[32],"covers":[32],"currentCharacter":[32],"formStatusMap":[32],"history":[32],"hoveredCustomizationOption":[32],"saveInProgress":[32],"ui":[32],"deleteOption":[64],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"reset":[64],"save":[64],"unmount":[64]}]]],["p-f19de954",[[257,"lf-drawer",{"lfDisplay":[1537,"lf-display"],"lfPosition":[1537,"lf-position"],"lfResponsive":[1026,"lf-responsive"],"lfStyle":[1025,"lf-style"],"lfValue":[1540,"lf-value"],"debugInfo":[32],"close":[64],"getDebugInfo":[64],"getProps":[64],"isOpened":[64],"open":[64],"refresh":[64],"toggle":[64],"unmount":[64]},[[0,"keydown","listenKeydown"]],{"lfDisplay":["onLfDisplayChange"],"lfResponsive":["onLfResponsiveChange"]}]]],["p-a6642965",[[257,"lf-header",{"lfStyle":[1025,"lf-style"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-e6148250",[[257,"lf-placeholder",{"lfIcon":[1,"lf-icon"],"lfProps":[16,"lf-props"],"lfStyle":[1025,"lf-style"],"lfThreshold":[2,"lf-threshold"],"lfTrigger":[1,"lf-trigger"],"lfValue":[1,"lf-value"],"debugInfo":[32],"isInViewport":[32],"getComponent":[64],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-36aa4a7f",[[257,"lf-slider",{"lfLabel":[1025,"lf-label"],"lfLeadingLabel":[1028,"lf-leading-label"],"lfMax":[2,"lf-max"],"lfMin":[2,"lf-min"],"lfStep":[2,"lf-step"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1026,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}]]],["p-0df37de3",[[257,"lf-splash",{"lfLabel":[1025,"lf-label"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"state":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-bb1b42f7",[[257,"lf-toast",{"lfCloseIcon":[1025,"lf-close-icon"],"lfCloseCallback":[16,"lf-close-callback"],"lfIcon":[1025,"lf-icon"],"lfTimer":[2,"lf-timer"],"lfMessage":[1025,"lf-message"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-48b2a65e",[[257,"lf-card",{"lfDataset":[1040,"lf-dataset"],"lfLayout":[1025,"lf-layout"],"lfSizeX":[1025,"lf-size-x"],"lfSizeY":[1025,"lf-size-y"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"debugInfo":[32],"shapes":[32],"getDebugInfo":[64],"getProps":[64],"getShapes":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["updateShapes"]}],[257,"lf-badge",{"lfImageProps":[1040,"lf-image-props"],"lfLabel":[1025,"lf-label"],"lfPosition":[1537,"lf-position"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}],[257,"lf-canvas",{"lfBrush":[1025,"lf-brush"],"lfColor":[1025,"lf-color"],"lfCursor":[1025,"lf-cursor"],"lfImageProps":[1040,"lf-image-props"],"lfOpacity":[1026,"lf-opacity"],"lfPreview":[1028,"lf-preview"],"lfStrokeTolerance":[1026,"lf-stroke-tolerance"],"lfSize":[1026,"lf-size"],"lfStyle":[1025,"lf-style"],"boxing":[32],"debugInfo":[32],"isPainting":[32],"orientation":[32],"points":[32],"clearCanvas":[64],"getCanvas":[64],"getDebugInfo":[64],"getImage":[64],"getProps":[64],"refresh":[64],"resizeCanvas":[64],"setCanvasHeight":[64],"setCanvasWidth":[64],"unmount":[64]}],[257,"lf-photoframe",{"lfOverlay":[1040,"lf-overlay"],"lfPlaceholder":[16,"lf-placeholder"],"lfStyle":[1025,"lf-style"],"lfThreshold":[2,"lf-threshold"],"lfValue":[16,"lf-value"],"debugInfo":[32],"imageOrientation":[32],"isInViewport":[32],"isReady":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}],[257,"lf-chart",{"lfAxis":[1025,"lf-axis"],"lfColors":[1040,"lf-colors"],"lfDataset":[1040,"lf-dataset"],"lfLegend":[1025,"lf-legend"],"lfSeries":[1040,"lf-series"],"lfSizeX":[1025,"lf-size-x"],"lfSizeY":[1025,"lf-size-y"],"lfStyle":[1025,"lf-style"],"lfTypes":[1040,"lf-types"],"lfXAxis":[1040,"lf-x-axis"],"lfYAxis":[1040,"lf-y-axis"],"debugInfo":[32],"themeValues":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"resize":[64],"unmount":[64]}],[257,"lf-toggle",{"lfAriaLabel":[1025,"lf-aria-label"],"lfLabel":[1025,"lf-label"],"lfLeadingLabel":[1028,"lf-leading-label"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[4,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}],[257,"lf-upload",{"lfHtmlAttributes":[1040,"lf-html-attributes"],"lfLabel":[1025,"lf-label"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfValue":[16,"lf-value"],"debugInfo":[32],"selectedFiles":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"unmount":[64]}],[257,"lf-chat",{"lfContextWindow":[1026,"lf-context-window"],"lfEmpty":[1025,"lf-empty"],"lfEndpointUrl":[1025,"lf-endpoint-url"],"lfLayout":[1025,"lf-layout"],"lfMaxTokens":[1026,"lf-max-tokens"],"lfPollingInterval":[1026,"lf-polling-interval"],"lfSeed":[1026,"lf-seed"],"lfStyle":[1025,"lf-style"],"lfSystem":[1025,"lf-system"],"lfTemperature":[1026,"lf-temperature"],"lfTypewriterProps":[1028,"lf-typewriter-props"],"lfUiSize":[1537,"lf-ui-size"],"lfValue":[1040,"lf-value"],"currentAbortStreaming":[32],"currentPrompt":[32],"currentTokens":[32],"debugInfo":[32],"history":[32],"status":[32],"view":[32],"abortStreaming":[64],"getDebugInfo":[64],"getHistory":[64],"getLastMessage":[64],"getProps":[64],"refresh":[64],"scrollToBottom":[64],"setHistory":[64],"unmount":[64]},[[0,"keydown","listenKeydown"]],{"lfPollingInterval":["updatePollingInterval"],"lfSystem":["updateTokensCount"]}],[257,"lf-chip",{"lfAriaLabel":[1025,"lf-aria-label"],"lfDataset":[1040,"lf-dataset"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfStyling":[1025,"lf-styling"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[16,"lf-value"],"debugInfo":[32],"expandedNodes":[32],"hiddenNodes":[32],"selectedNodes":[32],"getDebugInfo":[64],"getProps":[64],"getSelectedNodes":[64],"refresh":[64],"setSelectedNodes":[64],"unmount":[64]}],[257,"lf-code",{"lfFadeIn":[1028,"lf-fade-in"],"lfFormat":[1028,"lf-format"],"lfLanguage":[1025,"lf-language"],"lfPreserveSpaces":[1028,"lf-preserve-spaces"],"lfShowCopy":[1028,"lf-show-copy"],"lfShowHeader":[1028,"lf-show-header"],"lfStickyHeader":[1028,"lf-sticky-header"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfLanguage":["loadLanguage"]}],[257,"lf-progressbar",{"lfAnimated":[1540,"lf-animated"],"lfCenteredLabel":[1540,"lf-centered-label"],"lfIcon":[1537,"lf-icon"],"lfIsRadial":[1540,"lf-is-radial"],"lfLabel":[1025,"lf-label"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1026,"lf-value"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}],[257,"lf-textfield",{"lfFormatJSON":[1040,"lf-format-j-s-o-n"],"lfHelper":[1040,"lf-helper"],"lfHtmlAttributes":[1040,"lf-html-attributes"],"lfIcon":[1025,"lf-icon"],"lfLabel":[1025,"lf-label"],"lfStretchX":[1540,"lf-stretch-x"],"lfStretchY":[1540,"lf-stretch-y"],"lfStyle":[1025,"lf-style"],"lfStyling":[1025,"lf-styling"],"lfTrailingIcon":[1540,"lf-trailing-icon"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1,"lf-value"],"debugInfo":[32],"status":[32],"value":[32],"formatJSON":[64],"getDebugInfo":[64],"getElement":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setBlur":[64],"setFocus":[64],"setValue":[64],"unmount":[64]}],[257,"lf-typewriter",{"lfCursor":[1025,"lf-cursor"],"lfDeleteSpeed":[1026,"lf-delete-speed"],"lfLoop":[1028,"lf-loop"],"lfPause":[1026,"lf-pause"],"lfSpeed":[1026,"lf-speed"],"lfStyle":[1025,"lf-style"],"lfTag":[1025,"lf-tag"],"lfUiSize":[1537,"lf-ui-size"],"lfUpdatable":[1028,"lf-updatable"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"displayedText":[32],"isDeleting":[32],"currentTextIndex":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfValue":["handleLfValueChange"]}],[257,"lf-image",{"lfHtmlAttributes":[1040,"lf-html-attributes"],"lfMode":[1537,"lf-mode"],"lfShowSpinner":[1028,"lf-show-spinner"],"lfSizeX":[1025,"lf-size-x"],"lfSizeY":[1025,"lf-size-y"],"lfStyle":[1025,"lf-style"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"error":[32],"isLoaded":[32],"resolvedSpriteName":[32],"getDebugInfo":[64],"getImage":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfValue":["resetState"]}],[257,"lf-button",{"lfAriaLabel":[1025,"lf-aria-label"],"lfDataset":[1040,"lf-dataset"],"lfIcon":[1025,"lf-icon"],"lfIconOff":[1025,"lf-icon-off"],"lfLabel":[1025,"lf-label"],"lfRipple":[1028,"lf-ripple"],"lfShowSpinner":[1540,"lf-show-spinner"],"lfStretchX":[1540,"lf-stretch-x"],"lfStretchY":[1540,"lf-stretch-y"],"lfStyle":[1025,"lf-style"],"lfStyling":[1025,"lf-styling"],"lfToggable":[1028,"lf-toggable"],"lfTrailingIcon":[1028,"lf-trailing-icon"],"lfType":[1025,"lf-type"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[4,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setMessage":[64],"setValue":[64],"unmount":[64]}],[257,"lf-list",{"lfDataset":[1040,"lf-dataset"],"lfEmpty":[1025,"lf-empty"],"lfEnableDeletions":[1028,"lf-enable-deletions"],"lfNavigation":[1028,"lf-navigation"],"lfRipple":[1028,"lf-ripple"],"lfSelectable":[1028,"lf-selectable"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[2,"lf-value"],"debugInfo":[32],"focused":[32],"selected":[32],"focusNext":[64],"focusPrevious":[64],"getDebugInfo":[64],"getProps":[64],"getSelected":[64],"refresh":[64],"selectNode":[64],"unmount":[64]},[[0,"keydown","listenKeydown"]]],[257,"lf-spinner",{"lfActive":[1540,"lf-active"],"lfBarVariant":[1540,"lf-bar-variant"],"lfDimensions":[1025,"lf-dimensions"],"lfFader":[1540,"lf-fader"],"lfFaderTimeout":[1026,"lf-fader-timeout"],"lfFullScreen":[1540,"lf-full-screen"],"lfLayout":[1026,"lf-layout"],"lfStyle":[1025,"lf-style"],"lfTimeout":[1026,"lf-timeout"],"bigWait":[32],"debugInfo":[32],"progress":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfActive":["onFaderChange"],"lfFader":["onFaderChange"],"lfFaderTimeout":["onFaderChange"],"lfBarVariant":["lfBarVariantChanged"],"lfTimeout":["lfTimeoutChanged"]}]]],["p-fc80bc8a",[[257,"lf-masonry",{"lfActions":[1028,"lf-actions"],"lfCollapseColumns":[1028,"lf-collapse-columns"],"lfColumns":[1026,"lf-columns"],"lfDataset":[1040,"lf-dataset"],"lfSelectable":[1540,"lf-selectable"],"lfShape":[1025,"lf-shape"],"lfStyle":[1025,"lf-style"],"lfView":[1025,"lf-view"],"debugInfo":[32],"selectedShape":[32],"shapes":[32],"viewportWidth":[32],"getDebugInfo":[64],"getProps":[64],"getSelectedShape":[64],"redecorateShapes":[64],"refresh":[64],"setSelectedShape":[64],"unmount":[64]},null,{"lfColumns":["validateColumns"],"lfDataset":["updateShapes"],"lfShape":["updateShapes"]}]]],["p-e2900881",[[257,"lf-tabbar",{"lfAriaLabel":[1025,"lf-aria-label"],"lfDataset":[16,"lf-dataset"],"lfNavigation":[4,"lf-navigation"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[8,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}]]],["p-b1bf3d70",[[257,"lf-tree",{"lfAccordionLayout":[1540,"lf-accordion-layout"],"lfDataset":[1040,"lf-dataset"],"lfEmpty":[1025,"lf-empty"],"lfExpandedNodeIds":[1040,"lf-expanded-node-ids"],"lfFilter":[1028,"lf-filter"],"lfGrid":[1540,"lf-grid"],"lfInitialExpansionDepth":[1026,"lf-initial-expansion-depth"],"lfSelectedNodeIds":[1040,"lf-selected-node-ids"],"lfRipple":[1028,"lf-ripple"],"lfSelectable":[1540,"lf-selectable"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"debugInfo":[32],"expandedNodes":[32],"hiddenNodes":[32],"selectedNode":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"getExpandedNodeIds":[64],"getSelectedNodeIds":[64],"setExpandedNodes":[64],"setSelectedNodes":[64],"selectByPredicate":[64],"unmount":[64]},null,{"lfDataset":["handleDatasetChange"],"lfExpandedNodeIds":["handleExpandedPropChange"],"lfSelectedNodeIds":["handleSelectedPropChange"],"lfInitialExpansionDepth":["handleInitialDepthChange"],"lfSelectable":["handleSelectableChange"],"lfFilter":["handleFilterToggle"]}]]]]'), e2))));
 registerStencilAssetProxies("lf-core");
 const a = async (o2) => {
   const a2 = await onFrameworkReady;
   return o2.debugInfo = a2.debug.info.create(), a2.theme.register(o2), a2;
 };
-var d, p$6, v$9, m$8, b$7, u$8 = function(e2, t5, s2, a2) {
+var d, p$6, v$8, m$8, b$8, u$8 = function(e2, t5, s2, a2) {
   if ("function" == typeof t5 ? e2 !== t5 || true : !t5.has(e2)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return t5.get(e2);
 };
 const g$8 = class g {
   constructor(s2) {
-    n(this, s2), this.lfEvent = V$4(this, "lf-splash-event"), this.state = "initializing", this.lfLabel = "Loading...", this.lfStyle = "", d.set(this, void 0), p$6.set(this, LF_SPLASH_BLOCKS), v$9.set(this, LF_SPLASH_PARTS), m$8.set(this, LF_STYLE_ID), b$7.set(this, LF_WRAPPER_ID);
+    n(this, s2), this.lfEvent = V$4(this, "lf-splash-event"), this.state = "initializing", this.lfLabel = "Loading...", this.lfStyle = "", d.set(this, void 0), p$6.set(this, LF_SPLASH_BLOCKS), v$8.set(this, LF_SPLASH_PARTS), m$8.set(this, LF_STYLE_ID), b$8.set(this, LF_WRAPPER_ID);
   }
   onLfEvent(e2, t5) {
     this.lfEvent.emit({ comp: this, eventType: t5, id: this.rootElement.id, originalEvent: e2 });
@@ -14444,7 +14447,7 @@ const g$8 = class g {
   }
   render() {
     const { bemClass: e2, setLfStyle: t5 } = u$8(this, d).theme, { lfLabel: s2, lfStyle: l2, state: o2 } = this, r2 = "unmounting" === o2, { splash: f2 } = u$8(this, p$6);
-    return D$a(W$e, { key: "b2f8e4fa5ca16c1ec0835688eaf8c8db79e004de" }, l2 && D$a("style", { key: "01e56d34ff2df739886396381e1d9c3ee75c44c7", id: u$8(this, m$8) }, t5(this)), D$a("div", { key: "a63455f43781ab1dd0a7de874516107aeda037e4", id: u$8(this, b$7) }, D$a("div", { key: "28b288678d2c163dab061b917c84ea4b8dd8f1c1", class: e2(f2._, null, { active: r2 }), part: u$8(this, v$9).splash }, D$a("div", { key: "6939e6eff13d37bbfbf3f7c59f496c70699cd9c8", class: e2(f2._, f2.content), part: u$8(this, v$9).content }, D$a("div", { key: "ad9c8d8d3d00c153bf1d6bbee56fae140c5c462e", class: e2(f2._, f2.widget), part: u$8(this, v$9).widget }, D$a("slot", { key: "3b97f4a962a2a10527a568a2b935b79b43be6ca8" })), D$a("div", { key: "1e98521df8a0244361a51d011aba684d3b1fbfe1", class: e2(f2._, f2.label), part: u$8(this, v$9).label }, r2 ? "Ready!" : s2)))));
+    return D$a(W$e, { key: "b2f8e4fa5ca16c1ec0835688eaf8c8db79e004de" }, l2 && D$a("style", { key: "01e56d34ff2df739886396381e1d9c3ee75c44c7", id: u$8(this, m$8) }, t5(this)), D$a("div", { key: "a63455f43781ab1dd0a7de874516107aeda037e4", id: u$8(this, b$8) }, D$a("div", { key: "28b288678d2c163dab061b917c84ea4b8dd8f1c1", class: e2(f2._, null, { active: r2 }), part: u$8(this, v$8).splash }, D$a("div", { key: "6939e6eff13d37bbfbf3f7c59f496c70699cd9c8", class: e2(f2._, f2.content), part: u$8(this, v$8).content }, D$a("div", { key: "ad9c8d8d3d00c153bf1d6bbee56fae140c5c462e", class: e2(f2._, f2.widget), part: u$8(this, v$8).widget }, D$a("slot", { key: "3b97f4a962a2a10527a568a2b935b79b43be6ca8" })), D$a("div", { key: "1e98521df8a0244361a51d011aba684d3b1fbfe1", class: e2(f2._, f2.label), part: u$8(this, v$8).label }, r2 ? "Ready!" : s2)))));
   }
   disconnectedCallback() {
     var _a2;
@@ -14454,7 +14457,7 @@ const g$8 = class g {
     return z$d(this);
   }
 };
-d = /* @__PURE__ */ new WeakMap(), p$6 = /* @__PURE__ */ new WeakMap(), v$9 = /* @__PURE__ */ new WeakMap(), m$8 = /* @__PURE__ */ new WeakMap(), b$7 = /* @__PURE__ */ new WeakMap(), g$8.style = "::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}:host{display:block;font-family:var(--lf-splash-font-family, var(--lf-font-family-primary));font-size:var(--lf-splash-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-splash-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-splash-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-splash-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-splash-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-splash-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-splash-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-splash-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{margin:0}.splash{background-color:rgba(var(--lf-splash-color-bg, var(--lf-color-bg)), 1);color:rgb(var(--lf-splash-color-on-bg, var(--lf-color-on-bg)));display:flex;height:var(--lf-splash-height, 100dvh);left:var(--lf-splash-left, 0);opacity:1;position:var(--lf-splash-position, fixed);top:var(--lf-splash-top, 0);width:var(--lf-splash-width, 100dvw);z-index:var(--lf-ui-zindex-splash, 999)}.splash--active{transition:opacity 200ms cubic-bezier(0.4, 0, 0.6, 1);opacity:0}.splash__content{margin:auto}.splash__widget{height:var(--lf-splash-widget-height, 10em);margin:var(--lf-splash-widget-margin, auto);width:var(--lf-splash-widget-width, 10em)}.splash__label{font-size:0.875em;font-weight:500;line-height:1.375em;letter-spacing:0.01em;text-align:center}";
+d = /* @__PURE__ */ new WeakMap(), p$6 = /* @__PURE__ */ new WeakMap(), v$8 = /* @__PURE__ */ new WeakMap(), m$8 = /* @__PURE__ */ new WeakMap(), b$8 = /* @__PURE__ */ new WeakMap(), g$8.style = "::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}:host{display:block;font-family:var(--lf-splash-font-family, var(--lf-font-family-primary));font-size:var(--lf-splash-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-splash-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-splash-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-splash-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-splash-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-splash-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-splash-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-splash-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{margin:0}.splash{background-color:rgba(var(--lf-splash-color-bg, var(--lf-color-bg)), 1);color:rgb(var(--lf-splash-color-on-bg, var(--lf-color-on-bg)));display:flex;height:var(--lf-splash-height, 100dvh);left:var(--lf-splash-left, 0);opacity:1;position:var(--lf-splash-position, fixed);top:var(--lf-splash-top, 0);width:var(--lf-splash-width, 100dvw);z-index:var(--lf-ui-zindex-splash, 999)}.splash--active{transition:opacity 200ms cubic-bezier(0.4, 0, 0.6, 1);opacity:0}.splash__content{margin:auto}.splash__widget{height:var(--lf-splash-widget-height, 10em);margin:var(--lf-splash-widget-margin, auto);width:var(--lf-splash-widget-width, 10em)}.splash__label{font-size:0.875em;font-weight:500;line-height:1.375em;letter-spacing:0.01em;text-align:center}";
 const p0df37de3_entry = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   lf_splash: g$8
@@ -15249,7 +15252,7 @@ const p28dd0bff_entry = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.def
   __proto__: null,
   lf_messenger: Me$1
 }, Symbol.toStringTag, { value: "Module" }));
-var m$7, u$7, v$8, g$7, y$9, w$a, k$a, z$b, x$a, _$7, M$8, W$a = function(r2, e2, i2, l2) {
+var m$7, u$7, v$7, g$7, y$9, w$a, k$a, z$b, x$a, _$7, M$8, W$a = function(r2, e2, i2, l2) {
   if ("function" == typeof e2 ? r2 !== e2 || true : !e2.has(r2)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return e2.get(r2);
 }, E$9 = function(r2, e2, i2, l2, a2) {
@@ -15258,7 +15261,7 @@ var m$7, u$7, v$8, g$7, y$9, w$a, k$a, z$b, x$a, _$7, M$8, W$a = function(r2, e2
 };
 const C$9 = class C {
   constructor(i2) {
-    n(this, i2), this.lfEvent = V$4(this, "lf-slider-event"), this.value = { display: 0, real: 0 }, this.lfLabel = "", this.lfLeadingLabel = false, this.lfMax = 100, this.lfMin = 0, this.lfStep = 1, this.lfRipple = true, this.lfStyle = "", this.lfUiSize = "medium", this.lfUiState = "primary", this.lfValue = 50, m$7.set(this, void 0), u$7.set(this, LF_SLIDER_BLOCKS), v$8.set(this, CY_ATTRIBUTES), g$7.set(this, LF_ATTRIBUTES), y$9.set(this, LF_SLIDER_PARTS), w$a.set(this, LF_STYLE_ID), k$a.set(this, LF_SLIDER_CSS_VARIABLES), z$b.set(this, LF_WRAPPER_ID), x$a.set(this, void 0), _$7.set(this, void 0), M$8.set(this, (() => "disabled" === this.lfUiState));
+    n(this, i2), this.lfEvent = V$4(this, "lf-slider-event"), this.value = { display: 0, real: 0 }, this.lfLabel = "", this.lfLeadingLabel = false, this.lfMax = 100, this.lfMin = 0, this.lfStep = 1, this.lfRipple = true, this.lfStyle = "", this.lfUiSize = "medium", this.lfUiState = "primary", this.lfValue = 50, m$7.set(this, void 0), u$7.set(this, LF_SLIDER_BLOCKS), v$7.set(this, CY_ATTRIBUTES), g$7.set(this, LF_ATTRIBUTES), y$9.set(this, LF_SLIDER_PARTS), w$a.set(this, LF_STYLE_ID), k$a.set(this, LF_SLIDER_CSS_VARIABLES), z$b.set(this, LF_WRAPPER_ID), x$a.set(this, void 0), _$7.set(this, void 0), M$8.set(this, (() => "disabled" === this.lfUiState));
   }
   onLfEvent(r2, e2) {
     const { effects: i2 } = W$a(this, m$7);
@@ -15321,7 +15324,7 @@ const C$9 = class C {
             :host {
               ${W$a(this, k$a).value}: ${(p2.display - f2) / (n2 - f2) * 100}%;
             }
-          ${h2 && e2(this) || ""}`), D$a("div", { key: "84a3d75382ba4674c87f07ed67ed8934abc812b0", id: W$a(this, z$b) }, D$a("div", { key: "4e52a29997143eb6355c643925b84d7cf8f6ef2d", class: r2(i2._, null, { leading: s2 }), part: W$a(this, y$9).formField }, D$a("div", { key: "84da6408a117b44f452e675e211e42ff49adda2f", class: r2(t5._, null, { "has-value": p2.display > f2, disabled: W$a(this, M$8).call(this) }), "data-lf": W$a(this, g$7)[this.lfUiState], part: W$a(this, y$9).slider }, D$a("input", { key: "853c7de168bda53dddc3985f8258ab1f8cd65fe0", type: "range", class: r2(t5._, t5.nativeControl), "data-cy": W$a(this, v$8).input, disabled: W$a(this, M$8).call(this), max: n2, min: f2, onBlur: (r3) => {
+          ${h2 && e2(this) || ""}`), D$a("div", { key: "84a3d75382ba4674c87f07ed67ed8934abc812b0", id: W$a(this, z$b) }, D$a("div", { key: "4e52a29997143eb6355c643925b84d7cf8f6ef2d", class: r2(i2._, null, { leading: s2 }), part: W$a(this, y$9).formField }, D$a("div", { key: "84da6408a117b44f452e675e211e42ff49adda2f", class: r2(t5._, null, { "has-value": p2.display > f2, disabled: W$a(this, M$8).call(this) }), "data-lf": W$a(this, g$7)[this.lfUiState], part: W$a(this, y$9).slider }, D$a("input", { key: "853c7de168bda53dddc3985f8258ab1f8cd65fe0", type: "range", class: r2(t5._, t5.nativeControl), "data-cy": W$a(this, v$7).input, disabled: W$a(this, M$8).call(this), max: n2, min: f2, onBlur: (r3) => {
       this.onLfEvent(r3, "blur");
     }, onChange: (r3) => {
       this.onLfEvent(r3, "change");
@@ -15333,7 +15336,7 @@ const C$9 = class C {
       this.onLfEvent(r3, "pointerdown");
     }, part: W$a(this, y$9).nativeControl, ref: (r3) => {
       r3 && E$9(this, x$a, r3);
-    }, step: c2, value: p2.real }), D$a("div", { key: "54c390ac3f085b0183de9439e5b98a95d388025f", class: r2(t5._, t5.track) }, D$a("div", { key: "9d40003e9a5282121c81a134f0f244c89fe5c587", class: r2(t5._, t5.thumbUnderlay) }, D$a("div", { key: "3434a7859bb8aa2fc1c5974a7cbcce20d9b8899c", class: r2(t5._, t5.thumb), "data-cy": W$a(this, v$8).rippleSurface, "data-lf": W$a(this, g$7).rippleSurface, part: W$a(this, y$9).thumb, ref: (r3) => {
+    }, step: c2, value: p2.real }), D$a("div", { key: "54c390ac3f085b0183de9439e5b98a95d388025f", class: r2(t5._, t5.track) }, D$a("div", { key: "9d40003e9a5282121c81a134f0f244c89fe5c587", class: r2(t5._, t5.thumbUnderlay) }, D$a("div", { key: "3434a7859bb8aa2fc1c5974a7cbcce20d9b8899c", class: r2(t5._, t5.thumb), "data-cy": W$a(this, v$7).rippleSurface, "data-lf": W$a(this, g$7).rippleSurface, part: W$a(this, y$9).thumb, ref: (r3) => {
       d2 && E$9(this, _$7, r3);
     } }))), D$a("span", { key: "b9bb3173b021053ed83ac20add992b32d0206aff", class: r2(t5._, t5.value), part: W$a(this, y$9).value }, p2.display)), D$a("label", { key: "bab064df0606e7d0c6fe874bb92784f6451b0357", class: r2(i2._, i2.label), part: W$a(this, y$9).label }, o2))));
   }
@@ -15345,7 +15348,7 @@ const C$9 = class C {
     return z$d(this);
   }
 };
-m$7 = /* @__PURE__ */ new WeakMap(), u$7 = /* @__PURE__ */ new WeakMap(), v$8 = /* @__PURE__ */ new WeakMap(), g$7 = /* @__PURE__ */ new WeakMap(), y$9 = /* @__PURE__ */ new WeakMap(), w$a = /* @__PURE__ */ new WeakMap(), k$a = /* @__PURE__ */ new WeakMap(), z$b = /* @__PURE__ */ new WeakMap(), x$a = /* @__PURE__ */ new WeakMap(), _$7 = /* @__PURE__ */ new WeakMap(), M$8 = /* @__PURE__ */ new WeakMap(), C$9.style = '::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=ripple]{animation-duration:var(--lf-ui-duration-ripple, 675ms);animation-fill-mode:forwards;animation-name:lf-ripple;animation-timing-function:var(--lf-ui-timing-ripple, ease-out);background:var(--lf-ui-ripple-background, var(--lf-color-primary));border-radius:var(--lf-ui-radius-ripple, 50%);height:var(--lf-ui-ripple-height, 100%);left:var(--lf-ui-ripple-x, 50%);opacity:var(--lf-ui-opacity-ripple, 0.5);pointer-events:none;position:absolute;top:var(--lf-ui-ripple-y, 50%);transform:scale(0);width:var(--lf-ui-ripple-width, 100%)}@keyframes lf-ripple{from{transform:scale(0)}to{opacity:0;transform:scale(4)}}[data-lf=ripple-surface]{cursor:pointer;height:100%;left:0;overflow:hidden;position:absolute;top:0;width:100%}[data-lf=danger]{--lf-slider-color-primary:var(\n    --lf-slider-color-danger,\n    var(--lf-color-danger)\n  );--lf-slider-color-on-primary:var(\n    --lf-slider-color-danger,\n    var(--lf-color-on-danger)\n  )}[data-lf=disabled]{opacity:var(--lf-slider-ui-opacity-disabled, var(--lf-ui-opacity-disabled));pointer-events:none}[data-lf=info]{--lf-slider-color-primary:var(\n    --lf-slider-color-info,\n    var(--lf-color-info)\n  );--lf-slider-color-on-primary:var(\n    --lf-slider-color-info,\n    var(--lf-color-on-info)\n  )}[data-lf=secondary]{--lf-slider-color-primary:var(\n    --lf-slider-color-secondary,\n    var(--lf-color-secondary)\n  );--lf-slider-color-on-primary:var(\n    --lf-slider-color-secondary,\n    var(--lf-color-on-secondary)\n  )}[data-lf=success]{--lf-slider-color-primary:var(\n    --lf-slider-color-success,\n    var(--lf-color-success)\n  );--lf-slider-color-on-primary:var(\n    --lf-slider-color-success,\n    var(--lf-color-on-success)\n  )}[data-lf=warning]{--lf-slider-color-primary:var(\n    --lf-slider-color-warning,\n    var(--lf-color-warning)\n  );--lf-slider-color-on-primary:var(\n    --lf-slider-color-warning,\n    var(--lf-color-on-warning)\n  )}:host{display:block;font-family:var(--lf-slider-font-family, var(--lf-font-family-primary));font-size:var(--lf-slider-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-slider-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-slider-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-slider-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-slider-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-slider-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-slider-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-slider-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{width:100%;height:100%}.form-field{color:rgb(var(--lf-slider-color-on-bg, var(--lf-color-on-bg)));width:100%;height:100%;font-size:0.875em;font-weight:500;line-height:1.5em;letter-spacing:0.01em;align-items:center;box-sizing:border-box;display:inline-flex;padding:var(--lf-slider-padding, 2em 0.5em);vertical-align:middle}.form-field__label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:var(--lf-slider-label-min-width, max-content);padding-left:var(--lf-slider-label-padding-left, 1.5em)}.form-field--leading .form-field__label{margin-left:auto;margin-right:0;order:-1;padding-left:0;padding-right:var(--lf-slider-label-padding-right, 1.5em)}.slider{display:block;position:relative;outline:none;margin:var(--lf-slider-margin, 0 0.75em);min-width:var(--lf-slider-min-width, 7em);user-select:none;width:100%}.slider--has-value .slider__track:after{border:0;border-style:solid;border-radius:var(--lf-slider-border-radius, var(--lf-ui-border-radius));background-color:rgba(var(--lf-slider-color-primary, var(--lf-color-primary)), 0.75);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:all 300ms cubic-bezier(0.5, 1.7, 0.2, 1);position:absolute;content:"";height:100%;left:0;top:0;width:var(--lf_slider_value)}.slider__label{cursor:pointer;margin-left:0;margin-right:auto;padding-left:var(--lf-slider-label-padding-left, 0.5em);padding-right:0;user-select:none}.slider__value{color:rgb(var(--lf-slider-color-on-bg, var(--lf-color-on-bg)));font-size:0.775em;letter-spacing:0.0892857143em;line-height:inherit;text-transform:uppercase;bottom:var(--lf-slider-value-bottom-position, -3em);left:50%;position:absolute;transform:translateX(-50%);white-space:nowrap}.slider__track{border:0;border-style:solid;border-radius:var(--lf-slider-border-radius, var(--lf-ui-border-radius));background-color:rgba(var(--lf-slider-color-primary, var(--lf-color-primary)), 0.25);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:all 300ms cubic-bezier(0.5, 1.7, 0.2, 1);box-shadow:var(--lf-slider-box-shadow, 0 0.25em 0.5em rgba(var(--lf-comp-color-on-bg, var(--lf-color-on-bg)), 0.2));box-sizing:border-box;height:var(--lf-slider-track-height, 0.5em);width:100%}.slider__thumb-underlay{transition:all 300ms cubic-bezier(0.5, 1.7, 0.2, 1);align-items:center;border-radius:50%;display:flex;height:var(--lf-slider-thumb-height, 1.25em);justify-content:center;left:var(--lf_slider_value);pointer-events:none;position:absolute;top:var(--lf-slider-thumb-underlay-top, -0.6em);transform:translateX(-50%);width:var(--lf-slider-thumb-width, 1.25em)}.slider__thumb{background-color:rgba(var(--lf-slider-color-primary, var(--lf-color-primary)), 0.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:all 300ms cubic-bezier(0.5, 1.7, 0.2, 1);border-radius:50%;box-shadow:var(--lf-slider-thumb-box-shadow, 0 0.25em 0.5em rgba(var(--lf-comp-color-on-bg, var(--lf-color-on-bg)), 0.2));cursor:pointer;height:var(--lf-slider-thumb-height, 1.5em);width:var(--lf-slider-thumb-width, 1.5em)}.slider__thumb:hover{background-color:rgba(var(--lf-slider-color-primary, var(--lf-color-primary)), 0.8);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transform:scale(var(--lf-slider-thumb-hover-scale, 1.1))}.slider__native-control{cursor:pointer;height:var(--lf-slider-input-height, 3em);left:0;opacity:0;position:absolute;top:calc(var(--lf-slider-input-height, 3em) / -2);width:100%;z-index:2}';
+m$7 = /* @__PURE__ */ new WeakMap(), u$7 = /* @__PURE__ */ new WeakMap(), v$7 = /* @__PURE__ */ new WeakMap(), g$7 = /* @__PURE__ */ new WeakMap(), y$9 = /* @__PURE__ */ new WeakMap(), w$a = /* @__PURE__ */ new WeakMap(), k$a = /* @__PURE__ */ new WeakMap(), z$b = /* @__PURE__ */ new WeakMap(), x$a = /* @__PURE__ */ new WeakMap(), _$7 = /* @__PURE__ */ new WeakMap(), M$8 = /* @__PURE__ */ new WeakMap(), C$9.style = '::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=ripple]{animation-duration:var(--lf-ui-duration-ripple, 675ms);animation-fill-mode:forwards;animation-name:lf-ripple;animation-timing-function:var(--lf-ui-timing-ripple, ease-out);background:var(--lf-ui-ripple-background, var(--lf-color-primary));border-radius:var(--lf-ui-radius-ripple, 50%);height:var(--lf-ui-ripple-height, 100%);left:var(--lf-ui-ripple-x, 50%);opacity:var(--lf-ui-opacity-ripple, 0.5);pointer-events:none;position:absolute;top:var(--lf-ui-ripple-y, 50%);transform:scale(0);width:var(--lf-ui-ripple-width, 100%)}@keyframes lf-ripple{from{transform:scale(0)}to{opacity:0;transform:scale(4)}}[data-lf=ripple-surface]{cursor:pointer;height:100%;left:0;overflow:hidden;position:absolute;top:0;width:100%}[data-lf=danger]{--lf-slider-color-primary:var(\n    --lf-slider-color-danger,\n    var(--lf-color-danger)\n  );--lf-slider-color-on-primary:var(\n    --lf-slider-color-danger,\n    var(--lf-color-on-danger)\n  )}[data-lf=disabled]{opacity:var(--lf-slider-ui-opacity-disabled, var(--lf-ui-opacity-disabled));pointer-events:none}[data-lf=info]{--lf-slider-color-primary:var(\n    --lf-slider-color-info,\n    var(--lf-color-info)\n  );--lf-slider-color-on-primary:var(\n    --lf-slider-color-info,\n    var(--lf-color-on-info)\n  )}[data-lf=secondary]{--lf-slider-color-primary:var(\n    --lf-slider-color-secondary,\n    var(--lf-color-secondary)\n  );--lf-slider-color-on-primary:var(\n    --lf-slider-color-secondary,\n    var(--lf-color-on-secondary)\n  )}[data-lf=success]{--lf-slider-color-primary:var(\n    --lf-slider-color-success,\n    var(--lf-color-success)\n  );--lf-slider-color-on-primary:var(\n    --lf-slider-color-success,\n    var(--lf-color-on-success)\n  )}[data-lf=warning]{--lf-slider-color-primary:var(\n    --lf-slider-color-warning,\n    var(--lf-color-warning)\n  );--lf-slider-color-on-primary:var(\n    --lf-slider-color-warning,\n    var(--lf-color-on-warning)\n  )}:host{display:block;font-family:var(--lf-slider-font-family, var(--lf-font-family-primary));font-size:var(--lf-slider-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-slider-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-slider-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-slider-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-slider-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-slider-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-slider-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-slider-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{width:100%;height:100%}.form-field{color:rgb(var(--lf-slider-color-on-bg, var(--lf-color-on-bg)));width:100%;height:100%;font-size:0.875em;font-weight:500;line-height:1.5em;letter-spacing:0.01em;align-items:center;box-sizing:border-box;display:inline-flex;padding:var(--lf-slider-padding, 2em 0.5em);vertical-align:middle}.form-field__label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:var(--lf-slider-label-min-width, max-content);padding-left:var(--lf-slider-label-padding-left, 1.5em)}.form-field--leading .form-field__label{margin-left:auto;margin-right:0;order:-1;padding-left:0;padding-right:var(--lf-slider-label-padding-right, 1.5em)}.slider{display:block;position:relative;outline:none;margin:var(--lf-slider-margin, 0 0.75em);min-width:var(--lf-slider-min-width, 7em);user-select:none;width:100%}.slider--has-value .slider__track:after{border:0;border-style:solid;border-radius:var(--lf-slider-border-radius, var(--lf-ui-border-radius));background-color:rgba(var(--lf-slider-color-primary, var(--lf-color-primary)), 0.75);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:all 300ms cubic-bezier(0.5, 1.7, 0.2, 1);position:absolute;content:"";height:100%;left:0;top:0;width:var(--lf_slider_value)}.slider__label{cursor:pointer;margin-left:0;margin-right:auto;padding-left:var(--lf-slider-label-padding-left, 0.5em);padding-right:0;user-select:none}.slider__value{color:rgb(var(--lf-slider-color-on-bg, var(--lf-color-on-bg)));font-size:0.775em;letter-spacing:0.0892857143em;line-height:inherit;text-transform:uppercase;bottom:var(--lf-slider-value-bottom-position, -3em);left:50%;position:absolute;transform:translateX(-50%);white-space:nowrap}.slider__track{border:0;border-style:solid;border-radius:var(--lf-slider-border-radius, var(--lf-ui-border-radius));background-color:rgba(var(--lf-slider-color-primary, var(--lf-color-primary)), 0.25);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:all 300ms cubic-bezier(0.5, 1.7, 0.2, 1);box-shadow:var(--lf-slider-box-shadow, 0 0.25em 0.5em rgba(var(--lf-comp-color-on-bg, var(--lf-color-on-bg)), 0.2));box-sizing:border-box;height:var(--lf-slider-track-height, 0.5em);width:100%}.slider__thumb-underlay{transition:all 300ms cubic-bezier(0.5, 1.7, 0.2, 1);align-items:center;border-radius:50%;display:flex;height:var(--lf-slider-thumb-height, 1.25em);justify-content:center;left:var(--lf_slider_value);pointer-events:none;position:absolute;top:var(--lf-slider-thumb-underlay-top, -0.6em);transform:translateX(-50%);width:var(--lf-slider-thumb-width, 1.25em)}.slider__thumb{background-color:rgba(var(--lf-slider-color-primary, var(--lf-color-primary)), 0.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:all 300ms cubic-bezier(0.5, 1.7, 0.2, 1);border-radius:50%;box-shadow:var(--lf-slider-thumb-box-shadow, 0 0.25em 0.5em rgba(var(--lf-comp-color-on-bg, var(--lf-color-on-bg)), 0.2));cursor:pointer;height:var(--lf-slider-thumb-height, 1.5em);width:var(--lf-slider-thumb-width, 1.5em)}.slider__thumb:hover{background-color:rgba(var(--lf-slider-color-primary, var(--lf-color-primary)), 0.8);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transform:scale(var(--lf-slider-thumb-hover-scale, 1.1))}.slider__native-control{cursor:pointer;height:var(--lf-slider-input-height, 3em);left:0;opacity:0;position:absolute;top:calc(var(--lf-slider-input-height, 3em) / -2);width:100%;z-index:2}';
 const p36aa4a7f_entry = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   lf_slider: C$9
@@ -15448,8 +15451,8 @@ const Nt = (t5, i2 = false) => {
       u2(s2) ? l2(s2) : f2(s2, a2);
   }
 } }), Dt = (t5) => /* @__PURE__ */ ((t6) => ({ button: () => {
-  const i2 = t6(), { controller: n2, elements: e2 } = i2, { blocks: o2, compInstance: a2, cyAttributes: s2, isDisabled: l2, lfAttributes: u2, manager: f2, parts: c2, styling: h2 } = n2.get, { lfAriaLabel: v2, lfIcon: d2, lfLabel: p2, lfShowSpinner: m2, lfTrailingIcon: b2, lfType: g3, lfUiState: y2, rootElement: w3 } = a2, { assignRef: x2, theme: k2 } = f2, { bemClass: M2 } = k2, { refs: z2 } = e2, S2 = a2, C3 = (v2 || p2 || d2 || w3.id || "button").trim();
-  return D$a("button", { "aria-label": C3, class: M2(o2.button._, null, { [h2()]: true, disabled: l2(), "has-spinner": m2, "no-label": !p2 || " " === p2 }), "data-cy": s2.button, "data-lf": u2[y2], disabled: l2(), onBlur: (t7) => S2.onLfEvent(t7, "blur"), onClick: (t7) => S2.onLfEvent(t7, "click"), onFocus: (t7) => S2.onLfEvent(t7, "focus"), onPointerDown: (t7) => S2.onLfEvent(t7, "pointerdown"), part: c2.button, ref: x2(z2, "button"), type: g3 ?? "button" }, Tt(i2), b2 ? [_t(i2), d2 && Nt(i2)] : [d2 && Nt(i2), _t(i2)], It(i2));
+  const i2 = t6(), { controller: n2, elements: e2 } = i2, { blocks: o2, compInstance: a2, cyAttributes: s2, isDisabled: l2, lfAttributes: u2, manager: f2, parts: c2, styling: h2 } = n2.get, { lfAriaLabel: v2, lfIcon: d2, lfLabel: p2, lfShowSpinner: m2, lfTrailingIcon: b2, lfType: g3, lfUiState: y2, rootElement: w3 } = a2, { assignRef: x2, theme: k2 } = f2, { bemClass: M2 } = k2, { refs: z2 } = e2, S3 = a2, C3 = (v2 || p2 || d2 || w3.id || "button").trim();
+  return D$a("button", { "aria-label": C3, class: M2(o2.button._, null, { [h2()]: true, disabled: l2(), "has-spinner": m2, "no-label": !p2 || " " === p2 }), "data-cy": s2.button, "data-lf": u2[y2], disabled: l2(), onBlur: (t7) => S3.onLfEvent(t7, "blur"), onClick: (t7) => S3.onLfEvent(t7, "click"), onFocus: (t7) => S3.onLfEvent(t7, "focus"), onPointerDown: (t7) => S3.onLfEvent(t7, "pointerdown"), part: c2.button, ref: x2(z2, "button"), type: g3 ?? "button" }, Tt(i2), b2 ? [_t(i2), d2 && Nt(i2)] : [d2 && Nt(i2), _t(i2)], It(i2));
 }, dropdown: () => {
   const i2 = t6(), { controller: n2, elements: e2, handlers: o2 } = i2, { blocks: s2, compInstance: l2, cyAttributes: u2, isDisabled: f2, lfAttributes: c2, manager: h2, parts: v2, styling: d2 } = n2.get, { list: p2 } = n2.set, { lfDataset: m2, lfUiState: b2 } = l2, { assignRef: g3, theme: y2 } = h2, { bemClass: w3 } = y2, { refs: x2 } = e2, k2 = l2;
   return D$a(jt$1, null, D$a("button", { class: w3(s2.button._, null, { disabled: f2(), dropdown: true, [d2()]: true }), "data-cy": u2.dropdownButton, "data-lf": c2[b2], disabled: f2(), onClick: () => p2(), onPointerDown: (t7) => k2.onLfEvent(t7, "pointerdown", true), part: v2.dropdown, ref: g3(x2, "dropdown") }, Tt(i2, true), Nt(i2, true)), D$a("lf-list", { class: w3(s2.button._, s2.button.list), "data-cy": u2.dropdownMenu, "data-lf": c2.portal, lfDataset: { nodes: m2.nodes[0].children }, "onLf-list-event": o2.list, part: v2.list, ref: g3(x2, "list") }));
@@ -15882,34 +15885,34 @@ const Si = (t5) => ({ button: (i2) => {
 } }), Ai = (t5, i2) => ({ ...t5, defaults: LF_CARD_DEFAULTS(i2) }), Ni = (t5) => ({ debug: () => ((t6) => {
   const { controller: i2, elements: n2, handlers: e2 } = t6(), { refs: o2 } = n2, { layouts: a2 } = e2, { blocks: s2, compInstance: l2, defaults: u2, manager: f2, parts: c2, shapes: h2 } = i2.get, { debug: v2 } = u2, { theme: d2 } = f2, { bemClass: p2 } = d2, { debugLayout: m2 } = s2, { button: b2, code: g3, toggle: y2 } = h2(), w3 = l2, x2 = [], k2 = v2.button();
   for (let t7 = 0; t7 < b2.length; t7++) x2.push(D$a(r, { shape: "button", cell: k2[t7] ? Object.assign(k2[t7], b2[t7]) : b2[t7], index: t7, eventDispatcher: async (t8) => w3.onLfEvent(t8, "lf-event"), framework: f2, defaultCb: a2.debug.button, refCallback: (t8) => o2.layouts.debug.button = t8 }));
-  const M2 = Boolean(x2 == null ? void 0 : x2.length), z2 = Boolean((x2 == null ? void 0 : x2.length) > 1), S2 = [], C3 = v2.code();
-  for (let t7 = 0; t7 < g3.length; t7++) S2.push(D$a(r, { shape: "code", cell: C3[t7] ? Object.assign(C3[t7], g3[t7]) : g3[t7], index: t7, eventDispatcher: async (t8) => w3.onLfEvent(t8, "lf-event"), framework: f2, defaultCb: a2.debug.code, refCallback: (t8) => o2.layouts.debug.code = t8 }));
-  const A2 = Boolean(S2 == null ? void 0 : S2.length), N2 = [], _2 = v2.toggle();
+  const M2 = Boolean(x2 == null ? void 0 : x2.length), z2 = Boolean((x2 == null ? void 0 : x2.length) > 1), S3 = [], C3 = v2.code();
+  for (let t7 = 0; t7 < g3.length; t7++) S3.push(D$a(r, { shape: "code", cell: C3[t7] ? Object.assign(C3[t7], g3[t7]) : g3[t7], index: t7, eventDispatcher: async (t8) => w3.onLfEvent(t8, "lf-event"), framework: f2, defaultCb: a2.debug.code, refCallback: (t8) => o2.layouts.debug.code = t8 }));
+  const A3 = Boolean(S3 == null ? void 0 : S3.length), N2 = [], _2 = v2.toggle();
   for (let t7 = 0; t7 < y2.length; t7++) N2.push(D$a(r, { shape: "toggle", cell: _2[t7] ? Object.assign(_2[t7], y2[t7]) : y2[t7], index: t7, eventDispatcher: async (t8) => w3.onLfEvent(t8, "lf-event"), framework: f2, defaultCb: a2.debug.toggle, refCallback: (t8) => o2.layouts.debug.toggle = t8 }));
   const T4 = Boolean(N2 == null ? void 0 : N2.length);
-  return D$a("div", { class: p2(m2._), part: c2.debugLayout }, T4 && D$a("div", { class: p2(m2._, m2.section1) }, N2[0]), A2 && D$a("div", { class: p2(m2._, m2.section2) }, S2[0]), M2 && D$a("div", { class: p2(m2._, m2.section3) }, x2[0]), z2 && D$a("div", { class: p2(m2._, m2.section4) }, x2[1]));
+  return D$a("div", { class: p2(m2._), part: c2.debugLayout }, T4 && D$a("div", { class: p2(m2._, m2.section1) }, N2[0]), A3 && D$a("div", { class: p2(m2._, m2.section2) }, S3[0]), M2 && D$a("div", { class: p2(m2._, m2.section3) }, x2[0]), z2 && D$a("div", { class: p2(m2._, m2.section4) }, x2[1]));
 })(t5), keywords: () => ((t6) => {
   const { controller: i2, elements: n2, handlers: e2 } = t6(), { refs: o2 } = n2, { layouts: a2 } = e2, { blocks: s2, compInstance: l2, defaults: u2, manager: f2, parts: c2, shapes: h2 } = i2.get, { keywords: v2 } = u2, { theme: d2 } = f2, { bemClass: p2 } = d2, { keywordsLayout: m2 } = s2, { button: b2, chart: g3, chip: y2 } = h2(), w3 = l2, x2 = [], k2 = v2.button();
   for (let t7 = 0; t7 < b2.length; t7++) x2.push(D$a(r, { shape: "button", cell: k2[t7] ? Object.assign(k2[t7], b2[t7]) : b2[t7], index: t7, eventDispatcher: async (t8) => w3.onLfEvent(t8, "lf-event"), framework: f2, defaultCb: a2.keywords.button, refCallback: (t8) => o2.layouts.keywords.button = t8 }));
-  const M2 = Boolean(x2 == null ? void 0 : x2.length), z2 = [], S2 = v2.chart();
-  for (let t7 = 0; t7 < g3.length; t7++) z2.push(D$a(r, { shape: "chart", cell: S2[t7] ? Object.assign(S2[t7], g3[t7]) : g3[t7], index: t7, eventDispatcher: async (t8) => w3.onLfEvent(t8, "lf-event"), framework: f2 }));
-  const C3 = Boolean(z2 == null ? void 0 : z2.length), A2 = [], N2 = v2.chip();
-  for (let t7 = 0; t7 < g3.length; t7++) A2.push(D$a(r, { shape: "chip", cell: N2[t7] ? Object.assign(N2[t7], y2[t7]) : y2[t7], index: t7, eventDispatcher: async (t8) => w3.onLfEvent(t8, "lf-event"), framework: f2, refCallback: (t8) => o2.layouts.keywords.chip = t8 }));
+  const M2 = Boolean(x2 == null ? void 0 : x2.length), z2 = [], S3 = v2.chart();
+  for (let t7 = 0; t7 < g3.length; t7++) z2.push(D$a(r, { shape: "chart", cell: S3[t7] ? Object.assign(S3[t7], g3[t7]) : g3[t7], index: t7, eventDispatcher: async (t8) => w3.onLfEvent(t8, "lf-event"), framework: f2 }));
+  const C3 = Boolean(z2 == null ? void 0 : z2.length), A3 = [], N2 = v2.chip();
+  for (let t7 = 0; t7 < g3.length; t7++) A3.push(D$a(r, { shape: "chip", cell: N2[t7] ? Object.assign(N2[t7], y2[t7]) : y2[t7], index: t7, eventDispatcher: async (t8) => w3.onLfEvent(t8, "lf-event"), framework: f2, refCallback: (t8) => o2.layouts.keywords.chip = t8 }));
   const _2 = Boolean(z2 == null ? void 0 : z2.length);
-  return D$a("div", { class: p2(m2._), part: c2.keywordsLayout }, C3 && D$a("div", { class: p2(m2._, m2.section1) }, z2[0]), _2 && D$a("div", { class: p2(m2._, m2.section2) }, A2[0]), M2 && D$a("div", { class: p2(m2._, m2.section3) }, x2[0]));
+  return D$a("div", { class: p2(m2._), part: c2.keywordsLayout }, C3 && D$a("div", { class: p2(m2._, m2.section1) }, z2[0]), _2 && D$a("div", { class: p2(m2._, m2.section2) }, A3[0]), M2 && D$a("div", { class: p2(m2._, m2.section3) }, x2[0]));
 })(t5), material: () => ((t6) => {
   var _a2, _b2, _c2;
   const { blocks: i2, compInstance: n2, cyAttributes: e2, defaults: o2, lfAttributes: a2, manager: s2, parts: l2, shapes: u2 } = t6().controller.get, { material: f2 } = o2, { effects: c2, theme: h2 } = s2, { bemClass: v2 } = h2, { materialLayout: d2, textContent: p2 } = i2, { button: m2, image: b2, text: g3 } = u2(), y2 = n2, w3 = [];
   for (let t7 = 0; t7 < m2.length; t7++) w3.push(D$a(r, { shape: "button", cell: m2[t7], index: t7, eventDispatcher: async (t8) => y2.onLfEvent(t8, "lf-event"), framework: s2 }));
   const x2 = Boolean(w3 == null ? void 0 : w3.length), k2 = [], M2 = f2.image();
   for (let t7 = 0; t7 < b2.length; t7++) k2.push(D$a(r, { shape: "image", cell: M2[t7] ? Object.assign(M2[t7], b2[t7]) : b2[t7], index: t7, eventDispatcher: async (t8) => y2.onLfEvent(t8, "lf-event"), framework: s2 }));
-  const z2 = Boolean(k2 == null ? void 0 : k2.length), S2 = [];
-  for (let t7 = 0; t7 < g3.length; t7++) S2.push(D$a(r, { shape: "text", cell: g3[t7], index: t7, eventDispatcher: async (t8) => y2.onLfEvent(t8, "lf-event"), framework: s2 }));
-  const C3 = Boolean(S2 == null ? void 0 : S2.length), A2 = C3 && ((_a2 = g3 == null ? void 0 : g3[0]) == null ? void 0 : _a2.value) || null, N2 = C3 && ((_b2 = g3 == null ? void 0 : g3[1]) == null ? void 0 : _b2.value) || null, _2 = C3 && ((_c2 = g3 == null ? void 0 : g3[2]) == null ? void 0 : _c2.value) || null;
+  const z2 = Boolean(k2 == null ? void 0 : k2.length), S3 = [];
+  for (let t7 = 0; t7 < g3.length; t7++) S3.push(D$a(r, { shape: "text", cell: g3[t7], index: t7, eventDispatcher: async (t8) => y2.onLfEvent(t8, "lf-event"), framework: s2 }));
+  const C3 = Boolean(S3 == null ? void 0 : S3.length), A3 = C3 && ((_a2 = g3 == null ? void 0 : g3[0]) == null ? void 0 : _a2.value) || null, N2 = C3 && ((_b2 = g3 == null ? void 0 : g3[1]) == null ? void 0 : _b2.value) || null, _2 = C3 && ((_c2 = g3 == null ? void 0 : g3[2]) == null ? void 0 : _c2.value) || null;
   let T4;
   return D$a("div", { class: v2(d2._, null, { "has-actions": x2 }), "data-lf": a2[y2.lfUiState], onPointerDown: (t7) => {
     c2.ripple(t7, T4);
-  }, part: l2.materialLayout }, z2 && D$a("div", { class: v2(d2._, d2.coverSection) }, k2[0]), D$a("div", { class: v2(d2._, d2.textSection) }, A2 && D$a("div", { class: v2(p2._, p2.title) }, A2), N2 && D$a("div", { class: v2(p2._, p2.subtitle) }, N2), _2 && D$a("div", { class: v2(p2._, p2.description) }, _2)), D$a("div", { "data-cy": e2.rippleSurface, "data-lf": a2.rippleSurface, ref: (t7) => T4 = t7 }), x2 && D$a("div", { class: v2(d2._, d2.actionsSection) }, w3));
+  }, part: l2.materialLayout }, z2 && D$a("div", { class: v2(d2._, d2.coverSection) }, k2[0]), D$a("div", { class: v2(d2._, d2.textSection) }, A3 && D$a("div", { class: v2(p2._, p2.title) }, A3), N2 && D$a("div", { class: v2(p2._, p2.subtitle) }, N2), _2 && D$a("div", { class: v2(p2._, p2.description) }, _2)), D$a("div", { "data-cy": e2.rippleSurface, "data-lf": a2.rippleSurface, ref: (t7) => T4 = t7 }), x2 && D$a("div", { class: v2(d2._, d2.actionsSection) }, w3));
 })(t5), upload: () => ((t6) => {
   const { blocks: i2, compInstance: n2, defaults: e2, manager: o2, parts: a2, shapes: s2 } = t6().controller.get, { theme: l2 } = o2, { bemClass: u2 } = l2, { uploadLayout: f2 } = i2, { button: c2, upload: h2 } = s2(), v2 = n2, d2 = [], p2 = e2.upload.button();
   for (let t7 = 0; t7 < c2.length; t7++) d2.push(D$a(r, { shape: "button", cell: p2[t7] ? Object.assign(p2[t7], c2[t7]) : c2[t7], index: t7, eventDispatcher: async (t8) => v2.onLfEvent(t8, "lf-event"), framework: o2 }));
@@ -17259,8 +17262,8 @@ function Xe(t5, i2, n2, r2, e2, o2) {
       var b2 = We(d2), g3 = f2 * s2 + 1.5 * a2 * (-c2 + b2), y2 = f2 * s2 + 1.5 * a2 * (-c2 - b2);
       (z2 = (-s2 - ((g3 = g3 < 0 ? -De(-g3, Fe) : De(g3, Fe)) + (y2 = y2 < 0 ? -De(-y2, Fe) : De(y2, Fe)))) / (3 * a2)) >= 0 && z2 <= 1 && (o2[v2++] = z2);
     } else {
-      var w3 = (2 * f2 * s2 - 3 * a2 * c2) / (2 * We(f2 * f2 * f2)), x2 = Math.acos(w3) / 3, k2 = We(f2), M2 = Math.cos(x2), z2 = (-s2 - 2 * k2 * M2) / (3 * a2), S2 = (m2 = (-s2 + k2 * (M2 + Oe * Math.sin(x2))) / (3 * a2), (-s2 + k2 * (M2 - Oe * Math.sin(x2))) / (3 * a2));
-      z2 >= 0 && z2 <= 1 && (o2[v2++] = z2), m2 >= 0 && m2 <= 1 && (o2[v2++] = m2), S2 >= 0 && S2 <= 1 && (o2[v2++] = S2);
+      var w3 = (2 * f2 * s2 - 3 * a2 * c2) / (2 * We(f2 * f2 * f2)), x2 = Math.acos(w3) / 3, k2 = We(f2), M2 = Math.cos(x2), z2 = (-s2 - 2 * k2 * M2) / (3 * a2), S3 = (m2 = (-s2 + k2 * (M2 + Oe * Math.sin(x2))) / (3 * a2), (-s2 + k2 * (M2 - Oe * Math.sin(x2))) / (3 * a2));
+      z2 >= 0 && z2 <= 1 && (o2[v2++] = z2), m2 >= 0 && m2 <= 1 && (o2[v2++] = m2), S3 >= 0 && S3 <= 1 && (o2[v2++] = S3);
     }
   }
   return v2;
@@ -18528,16 +18531,16 @@ function is(t5, i2, n2) {
 }
 function ns(t5, i2, n2, r2, e2, o2, a2, s2) {
   for (var l2 = Cn(r2), u2 = e2.duration, f2 = e2.delay, c2 = e2.additive, h2 = e2.setToFinal, v2 = !Wn(o2), d2 = t5.animators, p2 = [], m2 = 0; m2 < l2.length; m2++) {
-    var b2 = r2[S2 = l2[m2]];
-    if (null != b2 && null != n2[S2] && (v2 || o2[S2])) if (!Wn(b2) || xn(b2) || Rn(b2)) p2.push(S2);
+    var b2 = r2[S3 = l2[m2]];
+    if (null != b2 && null != n2[S3] && (v2 || o2[S3])) if (!Wn(b2) || xn(b2) || Rn(b2)) p2.push(S3);
     else {
       if (i2) {
-        s2 || (n2[S2] = b2, t5.updateDuringAnimation(i2));
+        s2 || (n2[S3] = b2, t5.updateDuringAnimation(i2));
         continue;
       }
-      ns(t5, S2, n2[S2], b2, e2, o2 && o2[S2], a2, s2);
+      ns(t5, S3, n2[S3], b2, e2, o2 && o2[S3], a2, s2);
     }
-    else s2 || (n2[S2] = b2, t5.updateDuringAnimation(i2), p2.push(S2));
+    else s2 || (n2[S3] = b2, t5.updateDuringAnimation(i2), p2.push(S3));
   }
   var g3 = p2.length;
   if (!c2 && g3) {
@@ -18556,10 +18559,10 @@ function ns(t5, i2, n2, r2, e2, o2, a2, s2) {
     var i3, e3;
   })), g3 = p2.length), g3 > 0 || e2.force && !a2.length) {
     var x2, k2 = void 0, M2 = void 0, z2 = void 0;
-    if (s2) for (M2 = {}, h2 && (k2 = {}), y2 = 0; y2 < g3; y2++) M2[S2 = p2[y2]] = n2[S2], h2 ? k2[S2] = r2[S2] : n2[S2] = r2[S2];
+    if (s2) for (M2 = {}, h2 && (k2 = {}), y2 = 0; y2 < g3; y2++) M2[S3 = p2[y2]] = n2[S3], h2 ? k2[S3] = r2[S3] : n2[S3] = r2[S3];
     else if (h2) for (z2 = {}, y2 = 0; y2 < g3; y2++) {
-      var S2;
-      z2[S2 = p2[y2]] = Qo(n2[S2]), is(n2, r2, S2);
+      var S3;
+      z2[S3 = p2[y2]] = Qo(n2[S3]), is(n2, r2, S3);
     }
     (x2 = new oa(n2, false, false, c2 ? Sn(d2, (function(t6) {
       return t6.targetName === i2;
@@ -19533,8 +19536,8 @@ var bu = (function() {
           d2 = io(e2, o2, b2 = t6[c2++], g3 = t6[c2++], p2 = t6[c2++], y2 = t6[c2++], 10), e2 = p2, o2 = y2;
           break;
         case Ql.A:
-          var k2 = t6[c2++], M2 = t6[c2++], z2 = t6[c2++], S2 = t6[c2++], C3 = t6[c2++], A2 = t6[c2++], N2 = A2 + C3;
-          c2 += 1, v2 && (a2 = lu(C3) * z2 + k2, s2 = uu(C3) * S2 + M2), d2 = su(z2, S2) * au(hu, Math.abs(A2)), e2 = lu(N2) * z2 + k2, o2 = uu(N2) * S2 + M2;
+          var k2 = t6[c2++], M2 = t6[c2++], z2 = t6[c2++], S3 = t6[c2++], C3 = t6[c2++], A3 = t6[c2++], N2 = A3 + C3;
+          c2 += 1, v2 && (a2 = lu(C3) * z2 + k2, s2 = uu(C3) * S3 + M2), d2 = su(z2, S3) * au(hu, Math.abs(A3)), e2 = lu(N2) * z2 + k2, o2 = uu(N2) * S3 + M2;
           break;
         case Ql.R:
           a2 = e2 = t6[c2++], s2 = o2 = t6[c2++], d2 = 2 * t6[c2++] + 2 * t6[c2++];
@@ -19567,34 +19570,34 @@ var bu = (function() {
             }
             t6.lineTo(a2, s2), e2 = a2, o2 = s2, y2 = 0;
           } else {
-            var S2 = M2 * M2 + z2 * z2;
-            S2 > y2 && (f2 = a2, c2 = s2, y2 = S2);
+            var S3 = M2 * M2 + z2 * z2;
+            S3 > y2 && (f2 = a2, c2 = s2, y2 = S3);
           }
           break;
         case Ql.C:
-          var C3 = h2[w3++], A2 = h2[w3++], N2 = h2[w3++], _2 = h2[w3++], T4 = h2[w3++], I2 = h2[w3++];
+          var C3 = h2[w3++], A3 = h2[w3++], N2 = h2[w3++], _2 = h2[w3++], T4 = h2[w3++], I2 = h2[w3++];
           if (m2) {
             if (b2 + ($3 = l2[g3++]) > u2) {
-              $e(e2, C3, N2, T4, G2 = (u2 - b2) / $3, tu), $e(o2, A2, _2, I2, G2, iu), t6.bezierCurveTo(tu[1], iu[1], tu[2], iu[2], tu[3], iu[3]);
+              $e(e2, C3, N2, T4, G2 = (u2 - b2) / $3, tu), $e(o2, A3, _2, I2, G2, iu), t6.bezierCurveTo(tu[1], iu[1], tu[2], iu[2], tu[3], iu[3]);
               break t;
             }
             b2 += $3;
           }
-          t6.bezierCurveTo(C3, A2, N2, _2, T4, I2), e2 = T4, o2 = I2;
+          t6.bezierCurveTo(C3, A3, N2, _2, T4, I2), e2 = T4, o2 = I2;
           break;
         case Ql.Q:
-          if (C3 = h2[w3++], A2 = h2[w3++], N2 = h2[w3++], _2 = h2[w3++], m2) {
+          if (C3 = h2[w3++], A3 = h2[w3++], N2 = h2[w3++], _2 = h2[w3++], m2) {
             if (b2 + ($3 = l2[g3++]) > u2) {
-              Qe(e2, C3, N2, G2 = (u2 - b2) / $3, tu), Qe(o2, A2, _2, G2, iu), t6.quadraticCurveTo(tu[1], iu[1], tu[2], iu[2]);
+              Qe(e2, C3, N2, G2 = (u2 - b2) / $3, tu), Qe(o2, A3, _2, G2, iu), t6.quadraticCurveTo(tu[1], iu[1], tu[2], iu[2]);
               break t;
             }
             b2 += $3;
           }
-          t6.quadraticCurveTo(C3, A2, N2, _2), e2 = N2, o2 = _2;
+          t6.quadraticCurveTo(C3, A3, N2, _2), e2 = N2, o2 = _2;
           break;
         case Ql.A:
-          var L2 = h2[w3++], D2 = h2[w3++], W3 = h2[w3++], E3 = h2[w3++], O3 = h2[w3++], F3 = h2[w3++], R2 = h2[w3++], P2 = !h2[w3++], B2 = W3 > E3 ? W3 : E3, V2 = fu(W3 - E3) > 1e-3, j2 = O3 + F3, H2 = false;
-          if (m2 && (b2 + ($3 = l2[g3++]) > u2 && (j2 = O3 + F3 * (u2 - b2) / $3, H2 = true), b2 += $3), V2 && t6.ellipse ? t6.ellipse(L2, D2, W3, E3, R2, O3, j2, P2) : t6.arc(L2, D2, B2, O3, j2, P2), H2) break t;
+          var L2 = h2[w3++], D2 = h2[w3++], W3 = h2[w3++], E3 = h2[w3++], O3 = h2[w3++], F3 = h2[w3++], R2 = h2[w3++], P2 = !h2[w3++], B3 = W3 > E3 ? W3 : E3, V2 = fu(W3 - E3) > 1e-3, j2 = O3 + F3, H2 = false;
+          if (m2 && (b2 + ($3 = l2[g3++]) > u2 && (j2 = O3 + F3 * (u2 - b2) / $3, H2 = true), b2 += $3), V2 && t6.ellipse ? t6.ellipse(L2, D2, W3, E3, R2, O3, j2, P2) : t6.arc(L2, D2, B3, O3, j2, P2), H2) break t;
           k2 && (n2 = lu(O3) * W3 + L2, r2 = uu(O3) * E3 + D2), e2 = lu(j2) * W3 + L2, o2 = uu(j2) * E3 + D2;
           break;
         case Ql.R:
@@ -20128,9 +20131,9 @@ var qu = { fill: "#000" }, Ju = { style: gn({ fill: true, stroke: true, fillOpac
       e2 && this._renderBackground(t6, t6, g3, y2, s2, a2);
     }
     b2 += f2 / 2, n2 && (m2 = uf(h2, d2, n2), "top" === p2 ? b2 += n2[0] : "bottom" === p2 && (b2 -= n2[2]));
-    for (var w3 = 0, x2 = false, k2 = lf("fill" in t6 ? t6.fill : (x2 = true, c2.fill)), M2 = sf("stroke" in t6 ? t6.stroke : o2 || c2.autoStroke && !x2 ? null : (w3 = 2, c2.stroke)), z2 = t6.textShadowBlur > 0, S2 = null != t6.width && ("truncate" === t6.overflow || "break" === t6.overflow || "breakAll" === t6.overflow), C3 = r2.calculatedLineHeight, A2 = 0; A2 < u2.length; A2++) {
+    for (var w3 = 0, x2 = false, k2 = lf("fill" in t6 ? t6.fill : (x2 = true, c2.fill)), M2 = sf("stroke" in t6 ? t6.stroke : o2 || c2.autoStroke && !x2 ? null : (w3 = 2, c2.stroke)), z2 = t6.textShadowBlur > 0, S3 = null != t6.width && ("truncate" === t6.overflow || "break" === t6.overflow || "breakAll" === t6.overflow), C3 = r2.calculatedLineHeight, A3 = 0; A3 < u2.length; A3++) {
       var N2 = this._getOrCreateChild(Pu), _2 = N2.createStyle();
-      N2.useStyle(_2), _2.text = u2[A2], _2.x = m2, _2.y = b2, _2.textAlign = d2, _2.textBaseline = "middle", _2.opacity = t6.opacity, _2.strokeFirst = true, z2 && (_2.shadowBlur = t6.textShadowBlur || 0, _2.shadowColor = t6.textShadowColor || "transparent", _2.shadowOffsetX = t6.textShadowOffsetX || 0, _2.shadowOffsetY = t6.textShadowOffsetY || 0), _2.stroke = M2, _2.fill = k2, M2 && (_2.lineWidth = t6.lineWidth || w3, _2.lineDash = t6.lineDash, _2.lineDashOffset = t6.lineDashOffset || 0), _2.font = i3, ef(_2, t6), b2 += f2, S2 && N2.setBoundingRect(new ce(ja(_2.x, l2, _2.textAlign), Ha(_2.y, C3, _2.textBaseline), l2, C3));
+      N2.useStyle(_2), _2.text = u2[A3], _2.x = m2, _2.y = b2, _2.textAlign = d2, _2.textBaseline = "middle", _2.opacity = t6.opacity, _2.strokeFirst = true, z2 && (_2.shadowBlur = t6.textShadowBlur || 0, _2.shadowColor = t6.textShadowColor || "transparent", _2.shadowOffsetX = t6.textShadowOffsetX || 0, _2.shadowOffsetY = t6.textShadowOffsetY || 0), _2.stroke = M2, _2.fill = k2, M2 && (_2.lineWidth = t6.lineWidth || w3, _2.lineDash = t6.lineDash, _2.lineDashOffset = t6.lineDashOffset || 0), _2.font = i3, ef(_2, t6), b2 += f2, S3 && N2.setBoundingRect(new ce(ja(_2.x, l2, _2.textAlign), Ha(_2.y, C3, _2.textBaseline), l2, C3));
     }
   }, i2.prototype._updateRichTexts = function() {
     var t6 = this.style, i3 = (function(t7, i4) {
@@ -20147,10 +20150,10 @@ var qu = { fill: "#000" }, Ju = { style: gn({ fill: true, stroke: true, fillOpac
       }
       t: for (var g4 = 0; g4 < n3.lines.length; g4++) {
         for (var y3 = n3.lines[g4], w4 = 0, x3 = 0, k3 = 0; k3 < y3.tokens.length; k3++) {
-          var M3 = (W3 = y3.tokens[k3]).styleName && i4.rich[W3.styleName] || {}, z3 = W3.textPadding = M3.padding, S3 = z3 ? z3[1] + z3[3] : 0, C4 = W3.font = M3.font || i4.font;
+          var M3 = (W3 = y3.tokens[k3]).styleName && i4.rich[W3.styleName] || {}, z3 = W3.textPadding = M3.padding, S4 = z3 ? z3[1] + z3[3] : 0, C4 = W3.font = M3.font || i4.font;
           W3.contentHeight = Ya(C4);
-          var A3 = Vn(M3.height, W3.contentHeight);
-          if (W3.innerHeight = A3, z3 && (A3 += z3[0] + z3[2]), W3.height = A3, W3.lineHeight = jn(M3.lineHeight, i4.lineHeight, A3), W3.align = M3 && M3.align || i4.align, W3.verticalAlign = M3 && M3.verticalAlign || "middle", p3 && null != o3 && c3 + W3.lineHeight > o3) {
+          var A4 = Vn(M3.height, W3.contentHeight);
+          if (W3.innerHeight = A4, z3 && (A4 += z3[0] + z3[2]), W3.height = A4, W3.lineHeight = jn(M3.lineHeight, i4.lineHeight, A4), W3.align = M3 && M3.align || i4.align, W3.verticalAlign = M3 && M3.verticalAlign || "middle", p3 && null != o3 && c3 + W3.lineHeight > o3) {
             var N2 = n3.lines.length;
             k3 > 0 ? (y3.tokens = y3.tokens.slice(0, k3), b3(y3, x3, w4), n3.lines = n3.lines.slice(0, g4 + 1)) : n3.lines = n3.lines.slice(0, g4), n3.isTruncated = n3.isTruncated || n3.lines.length < N2;
             break t;
@@ -20160,12 +20163,12 @@ var qu = { fill: "#000" }, Ju = { style: gn({ fill: true, stroke: true, fillOpac
           else {
             if (T4) {
               var I2 = M3.backgroundColor, L2 = I2 && I2.image;
-              L2 && bl(L2 = dl(L2)) && (W3.width = Math.max(W3.width, L2.width * A3 / L2.height));
+              L2 && bl(L2 = dl(L2)) && (W3.width = Math.max(W3.width, L2.width * A4 / L2.height));
             }
             var D2 = d3 && null != e3 ? e3 - x3 : null;
-            null != D2 && D2 < W3.width ? !T4 || D2 < S3 ? (W3.text = "", W3.width = W3.contentWidth = 0) : (yl(m3, W3.text, D2 - S3, C4, i4.ellipsis, { minChar: i4.truncateMinChar }), W3.text = m3.text, n3.isTruncated = n3.isTruncated || m3.isTruncated, W3.width = W3.contentWidth = Pa(W3.text, C4)) : W3.contentWidth = Pa(W3.text, C4);
+            null != D2 && D2 < W3.width ? !T4 || D2 < S4 ? (W3.text = "", W3.width = W3.contentWidth = 0) : (yl(m3, W3.text, D2 - S4, C4, i4.ellipsis, { minChar: i4.truncateMinChar }), W3.text = m3.text, n3.isTruncated = n3.isTruncated || m3.isTruncated, W3.width = W3.contentWidth = Pa(W3.text, C4)) : W3.contentWidth = Pa(W3.text, C4);
           }
-          W3.width += S3, x3 += W3.width, M3 && (w4 = Math.max(w4, W3.lineHeight));
+          W3.width += S4, x3 += W3.width, M3 && (w4 = Math.max(w4, W3.lineHeight));
         }
         b3(y3, x3, w4);
       }
@@ -20181,9 +20184,9 @@ var qu = { fill: "#000" }, Ju = { style: gn({ fill: true, stroke: true, fillOpac
     var p2 = v2 + n2;
     cf(t6) && this._renderBackground(t6, t6, c2, h2, r2, e2);
     for (var m2 = !!t6.backgroundColor, b2 = 0; b2 < i3.lines.length; b2++) {
-      for (var g3 = i3.lines[b2], y2 = g3.tokens, w3 = y2.length, x2 = g3.lineHeight, k2 = g3.width, M2 = 0, z2 = v2, S2 = p2, C3 = w3 - 1, A2 = void 0; M2 < w3 && (!(A2 = y2[M2]).align || "left" === A2.align); ) this._placeToken(A2, t6, x2, d2, z2, "left", m2), k2 -= A2.width, z2 += A2.width, M2++;
-      for (; C3 >= 0 && "right" === (A2 = y2[C3]).align; ) this._placeToken(A2, t6, x2, d2, S2, "right", m2), k2 -= A2.width, S2 -= A2.width, C3--;
-      for (z2 += (n2 - (z2 - v2) - (p2 - S2) - k2) / 2; M2 <= C3; ) this._placeToken(A2 = y2[M2], t6, x2, d2, z2 + A2.width / 2, "center", m2), z2 += A2.width, M2++;
+      for (var g3 = i3.lines[b2], y2 = g3.tokens, w3 = y2.length, x2 = g3.lineHeight, k2 = g3.width, M2 = 0, z2 = v2, S3 = p2, C3 = w3 - 1, A3 = void 0; M2 < w3 && (!(A3 = y2[M2]).align || "left" === A3.align); ) this._placeToken(A3, t6, x2, d2, z2, "left", m2), k2 -= A3.width, z2 += A3.width, M2++;
+      for (; C3 >= 0 && "right" === (A3 = y2[C3]).align; ) this._placeToken(A3, t6, x2, d2, S3, "right", m2), k2 -= A3.width, S3 -= A3.width, C3--;
+      for (z2 += (n2 - (z2 - v2) - (p2 - S3) - k2) / 2; M2 <= C3; ) this._placeToken(A3 = y2[M2], t6, x2, d2, z2 + A3.width / 2, "center", m2), z2 += A3.width, M2++;
       d2 += x2;
     }
   }, i2.prototype._placeToken = function(t6, i3, n2, r2, e2, o2, a2) {
@@ -20581,7 +20584,7 @@ function Cc(t5, i2) {
     for (var u2 = 0; u2 < l2.length; u2++) {
       for (var f2 = l2[u2], c2 = f2.charAt(0), h2 = void 0, v2 = f2.match(Mc) || [], d2 = v2.length, p2 = 0; p2 < d2; p2++) v2[p2] = parseFloat(v2[p2]);
       for (var m2 = 0; m2 < d2; ) {
-        var b2 = void 0, g3 = void 0, y2 = void 0, w3 = void 0, x2 = void 0, k2 = void 0, M2 = void 0, z2 = r3, S2 = e2, C3 = void 0, A2 = void 0;
+        var b2 = void 0, g3 = void 0, y2 = void 0, w3 = void 0, x2 = void 0, k2 = void 0, M2 = void 0, z2 = r3, S3 = e2, C3 = void 0, A3 = void 0;
         switch (c2) {
           case "l":
             r3 += v2[m2++], e2 += v2[m2++], i3.addData(h2 = s2.L, r3, e2);
@@ -20614,28 +20617,28 @@ function Cc(t5, i2) {
             i3.addData(h2 = s2.C, v2[m2++] + r3, v2[m2++] + e2, v2[m2++] + r3, v2[m2++] + e2, v2[m2++] + r3, v2[m2++] + e2), r3 += v2[m2 - 2], e2 += v2[m2 - 1];
             break;
           case "S":
-            b2 = r3, g3 = e2, C3 = i3.len(), A2 = i3.data, n3 === s2.C && (b2 += r3 - A2[C3 - 4], g3 += e2 - A2[C3 - 3]), z2 = v2[m2++], S2 = v2[m2++], r3 = v2[m2++], e2 = v2[m2++], i3.addData(h2 = s2.C, b2, g3, z2, S2, r3, e2);
+            b2 = r3, g3 = e2, C3 = i3.len(), A3 = i3.data, n3 === s2.C && (b2 += r3 - A3[C3 - 4], g3 += e2 - A3[C3 - 3]), z2 = v2[m2++], S3 = v2[m2++], r3 = v2[m2++], e2 = v2[m2++], i3.addData(h2 = s2.C, b2, g3, z2, S3, r3, e2);
             break;
           case "s":
-            b2 = r3, g3 = e2, C3 = i3.len(), A2 = i3.data, n3 === s2.C && (b2 += r3 - A2[C3 - 4], g3 += e2 - A2[C3 - 3]), z2 = r3 + v2[m2++], S2 = e2 + v2[m2++], r3 += v2[m2++], e2 += v2[m2++], i3.addData(h2 = s2.C, b2, g3, z2, S2, r3, e2);
+            b2 = r3, g3 = e2, C3 = i3.len(), A3 = i3.data, n3 === s2.C && (b2 += r3 - A3[C3 - 4], g3 += e2 - A3[C3 - 3]), z2 = r3 + v2[m2++], S3 = e2 + v2[m2++], r3 += v2[m2++], e2 += v2[m2++], i3.addData(h2 = s2.C, b2, g3, z2, S3, r3, e2);
             break;
           case "Q":
-            z2 = v2[m2++], S2 = v2[m2++], r3 = v2[m2++], e2 = v2[m2++], i3.addData(h2 = s2.Q, z2, S2, r3, e2);
+            z2 = v2[m2++], S3 = v2[m2++], r3 = v2[m2++], e2 = v2[m2++], i3.addData(h2 = s2.Q, z2, S3, r3, e2);
             break;
           case "q":
-            z2 = v2[m2++] + r3, S2 = v2[m2++] + e2, r3 += v2[m2++], e2 += v2[m2++], i3.addData(h2 = s2.Q, z2, S2, r3, e2);
+            z2 = v2[m2++] + r3, S3 = v2[m2++] + e2, r3 += v2[m2++], e2 += v2[m2++], i3.addData(h2 = s2.Q, z2, S3, r3, e2);
             break;
           case "T":
-            b2 = r3, g3 = e2, C3 = i3.len(), A2 = i3.data, n3 === s2.Q && (b2 += r3 - A2[C3 - 4], g3 += e2 - A2[C3 - 3]), r3 = v2[m2++], e2 = v2[m2++], i3.addData(h2 = s2.Q, b2, g3, r3, e2);
+            b2 = r3, g3 = e2, C3 = i3.len(), A3 = i3.data, n3 === s2.Q && (b2 += r3 - A3[C3 - 4], g3 += e2 - A3[C3 - 3]), r3 = v2[m2++], e2 = v2[m2++], i3.addData(h2 = s2.Q, b2, g3, r3, e2);
             break;
           case "t":
-            b2 = r3, g3 = e2, C3 = i3.len(), A2 = i3.data, n3 === s2.Q && (b2 += r3 - A2[C3 - 4], g3 += e2 - A2[C3 - 3]), r3 += v2[m2++], e2 += v2[m2++], i3.addData(h2 = s2.Q, b2, g3, r3, e2);
+            b2 = r3, g3 = e2, C3 = i3.len(), A3 = i3.data, n3 === s2.Q && (b2 += r3 - A3[C3 - 4], g3 += e2 - A3[C3 - 3]), r3 += v2[m2++], e2 += v2[m2++], i3.addData(h2 = s2.Q, b2, g3, r3, e2);
             break;
           case "A":
-            y2 = v2[m2++], w3 = v2[m2++], x2 = v2[m2++], k2 = v2[m2++], M2 = v2[m2++], xc(z2 = r3, S2 = e2, r3 = v2[m2++], e2 = v2[m2++], k2, M2, y2, w3, x2, h2 = s2.A, i3);
+            y2 = v2[m2++], w3 = v2[m2++], x2 = v2[m2++], k2 = v2[m2++], M2 = v2[m2++], xc(z2 = r3, S3 = e2, r3 = v2[m2++], e2 = v2[m2++], k2, M2, y2, w3, x2, h2 = s2.A, i3);
             break;
           case "a":
-            y2 = v2[m2++], w3 = v2[m2++], x2 = v2[m2++], k2 = v2[m2++], M2 = v2[m2++], xc(z2 = r3, S2 = e2, r3 += v2[m2++], e2 += v2[m2++], k2, M2, y2, w3, x2, h2 = s2.A, i3);
+            y2 = v2[m2++], w3 = v2[m2++], x2 = v2[m2++], k2 = v2[m2++], M2 = v2[m2++], xc(z2 = r3, S3 = e2, r3 += v2[m2++], e2 += v2[m2++], k2, M2, y2, w3, x2, h2 = s2.A, i3);
         }
       }
       "z" !== c2 && "Z" !== c2 || (i3.addData(h2 = s2.Z), r3 = o2, e2 = a2), n3 = h2;
@@ -20686,8 +20689,8 @@ var Ic = function() {
 Lc.prototype.type = "ellipse";
 var Dc = Math.PI, Wc = 2 * Dc, Ec = Math.sin, Oc = Math.cos, Fc = Math.acos, Rc = Math.atan2, Pc = Math.abs, Bc = Math.sqrt, Vc = Math.max, jc = Math.min, Hc = 1e-4;
 function Yc(t5, i2, n2, r2, e2, o2, a2) {
-  var s2 = t5 - n2, l2 = i2 - r2, u2 = (a2 ? o2 : -o2) / Bc(s2 * s2 + l2 * l2), f2 = u2 * l2, c2 = -u2 * s2, h2 = t5 + f2, v2 = i2 + c2, d2 = n2 + f2, p2 = r2 + c2, m2 = (h2 + d2) / 2, b2 = (v2 + p2) / 2, g3 = d2 - h2, y2 = p2 - v2, w3 = g3 * g3 + y2 * y2, x2 = e2 - o2, k2 = h2 * p2 - d2 * v2, M2 = (y2 < 0 ? -1 : 1) * Bc(Vc(0, x2 * x2 * w3 - k2 * k2)), z2 = (k2 * y2 - g3 * M2) / w3, S2 = (-k2 * g3 - y2 * M2) / w3, C3 = (k2 * y2 + g3 * M2) / w3, A2 = (-k2 * g3 + y2 * M2) / w3, N2 = z2 - m2, _2 = S2 - b2, T4 = C3 - m2, I2 = A2 - b2;
-  return N2 * N2 + _2 * _2 > T4 * T4 + I2 * I2 && (z2 = C3, S2 = A2), { cx: z2, cy: S2, x0: -f2, y0: -c2, x1: z2 * (e2 / x2 - 1), y1: S2 * (e2 / x2 - 1) };
+  var s2 = t5 - n2, l2 = i2 - r2, u2 = (a2 ? o2 : -o2) / Bc(s2 * s2 + l2 * l2), f2 = u2 * l2, c2 = -u2 * s2, h2 = t5 + f2, v2 = i2 + c2, d2 = n2 + f2, p2 = r2 + c2, m2 = (h2 + d2) / 2, b2 = (v2 + p2) / 2, g3 = d2 - h2, y2 = p2 - v2, w3 = g3 * g3 + y2 * y2, x2 = e2 - o2, k2 = h2 * p2 - d2 * v2, M2 = (y2 < 0 ? -1 : 1) * Bc(Vc(0, x2 * x2 * w3 - k2 * k2)), z2 = (k2 * y2 - g3 * M2) / w3, S3 = (-k2 * g3 - y2 * M2) / w3, C3 = (k2 * y2 + g3 * M2) / w3, A3 = (-k2 * g3 + y2 * M2) / w3, N2 = z2 - m2, _2 = S3 - b2, T4 = C3 - m2, I2 = A3 - b2;
+  return N2 * N2 + _2 * _2 > T4 * T4 + I2 * I2 && (z2 = C3, S3 = A3), { cx: z2, cy: S3, x0: -f2, y0: -c2, x1: z2 * (e2 / x2 - 1), y1: S3 * (e2 / x2 - 1) };
 }
 var Xc = function() {
   this.cx = 0, this.cy = 0, this.r0 = 0, this.r = 0, this.startAngle = 0, this.endAngle = 2 * Math.PI, this.clockwise = true, this.cornerRadius = 0;
@@ -20710,7 +20713,7 @@ var Xc = function() {
           var u2 = i4.cx, f2 = i4.cy, c2 = !!i4.clockwise, h2 = Pc(l2 - s2), v2 = h2 > Wc && h2 % Wc;
           if (v2 > Hc && (h2 = v2), r2 > Hc) if (h2 > Wc - Hc) t7.moveTo(u2 + r2 * Oc(s2), f2 + r2 * Ec(s2)), t7.arc(u2, f2, r2, s2, l2, !c2), e2 > Hc && (t7.moveTo(u2 + e2 * Oc(l2), f2 + e2 * Ec(l2)), t7.arc(u2, f2, e2, l2, s2, c2));
           else {
-            var d2 = void 0, p2 = void 0, m2 = void 0, b2 = void 0, g3 = void 0, y2 = void 0, w3 = void 0, x2 = void 0, k2 = void 0, M2 = void 0, z2 = void 0, S2 = void 0, C3 = void 0, A2 = void 0, N2 = void 0, _2 = void 0, T4 = r2 * Oc(s2), I2 = r2 * Ec(s2), L2 = e2 * Oc(l2), D2 = e2 * Ec(l2), W3 = h2 > Hc;
+            var d2 = void 0, p2 = void 0, m2 = void 0, b2 = void 0, g3 = void 0, y2 = void 0, w3 = void 0, x2 = void 0, k2 = void 0, M2 = void 0, z2 = void 0, S3 = void 0, C3 = void 0, A3 = void 0, N2 = void 0, _2 = void 0, T4 = r2 * Oc(s2), I2 = r2 * Ec(s2), L2 = e2 * Oc(l2), D2 = e2 * Ec(l2), W3 = h2 > Hc;
             if (W3) {
               var E3 = i4.cornerRadius;
               E3 && (n2 = (function(t8) {
@@ -20723,23 +20726,23 @@ var Xc = function() {
                 return i5;
               })(E3), d2 = n2[0], p2 = n2[1], m2 = n2[2], b2 = n2[3]);
               var O3 = Pc(r2 - e2) / 2;
-              if (g3 = jc(O3, m2), y2 = jc(O3, b2), w3 = jc(O3, d2), x2 = jc(O3, p2), z2 = k2 = Vc(g3, y2), S2 = M2 = Vc(w3, x2), (k2 > Hc || M2 > Hc) && (C3 = r2 * Oc(l2), A2 = r2 * Ec(l2), N2 = e2 * Oc(s2), _2 = e2 * Ec(s2), h2 < Dc)) {
+              if (g3 = jc(O3, m2), y2 = jc(O3, b2), w3 = jc(O3, d2), x2 = jc(O3, p2), z2 = k2 = Vc(g3, y2), S3 = M2 = Vc(w3, x2), (k2 > Hc || M2 > Hc) && (C3 = r2 * Oc(l2), A3 = r2 * Ec(l2), N2 = e2 * Oc(s2), _2 = e2 * Ec(s2), h2 < Dc)) {
                 var F3 = (function(t8, i5, n3, r3, e3, o3, a3, s3) {
                   var l3 = n3 - t8, u3 = r3 - i5, f3 = a3 - e3, c3 = s3 - o3, h3 = c3 * l3 - f3 * u3;
                   if (!(h3 * h3 < Hc)) return [t8 + (h3 = (f3 * (i5 - o3) - c3 * (t8 - e3)) / h3) * l3, i5 + h3 * u3];
-                })(T4, I2, N2, _2, C3, A2, L2, D2);
+                })(T4, I2, N2, _2, C3, A3, L2, D2);
                 if (F3) {
-                  var R2 = T4 - F3[0], P2 = I2 - F3[1], B2 = C3 - F3[0], V2 = A2 - F3[1], j2 = 1 / Ec(Fc((R2 * B2 + P2 * V2) / (Bc(R2 * R2 + P2 * P2) * Bc(B2 * B2 + V2 * V2))) / 2), H2 = Bc(F3[0] * F3[0] + F3[1] * F3[1]);
-                  z2 = jc(k2, (r2 - H2) / (j2 + 1)), S2 = jc(M2, (e2 - H2) / (j2 - 1));
+                  var R2 = T4 - F3[0], P2 = I2 - F3[1], B3 = C3 - F3[0], V2 = A3 - F3[1], j2 = 1 / Ec(Fc((R2 * B3 + P2 * V2) / (Bc(R2 * R2 + P2 * P2) * Bc(B3 * B3 + V2 * V2))) / 2), H2 = Bc(F3[0] * F3[0] + F3[1] * F3[1]);
+                  z2 = jc(k2, (r2 - H2) / (j2 + 1)), S3 = jc(M2, (e2 - H2) / (j2 - 1));
                 }
               }
             }
             if (W3) if (z2 > Hc) {
-              var Y2 = jc(m2, z2), X2 = jc(b2, z2), U2 = Yc(N2, _2, T4, I2, r2, Y2, c2), $3 = Yc(C3, A2, L2, D2, r2, X2, c2);
+              var Y2 = jc(m2, z2), X2 = jc(b2, z2), U2 = Yc(N2, _2, T4, I2, r2, Y2, c2), $3 = Yc(C3, A3, L2, D2, r2, X2, c2);
               t7.moveTo(u2 + U2.cx + U2.x0, f2 + U2.cy + U2.y0), z2 < k2 && Y2 === X2 ? t7.arc(u2 + U2.cx, f2 + U2.cy, z2, Rc(U2.y0, U2.x0), Rc($3.y0, $3.x0), !c2) : (Y2 > 0 && t7.arc(u2 + U2.cx, f2 + U2.cy, Y2, Rc(U2.y0, U2.x0), Rc(U2.y1, U2.x1), !c2), t7.arc(u2, f2, r2, Rc(U2.cy + U2.y1, U2.cx + U2.x1), Rc($3.cy + $3.y1, $3.cx + $3.x1), !c2), X2 > 0 && t7.arc(u2 + $3.cx, f2 + $3.cy, X2, Rc($3.y1, $3.x1), Rc($3.y0, $3.x0), !c2));
             } else t7.moveTo(u2 + T4, f2 + I2), t7.arc(u2, f2, r2, s2, l2, !c2);
             else t7.moveTo(u2 + T4, f2 + I2);
-            e2 > Hc && W3 ? S2 > Hc ? (Y2 = jc(d2, S2), U2 = Yc(L2, D2, C3, A2, e2, -(X2 = jc(p2, S2)), c2), $3 = Yc(T4, I2, N2, _2, e2, -Y2, c2), t7.lineTo(u2 + U2.cx + U2.x0, f2 + U2.cy + U2.y0), S2 < M2 && Y2 === X2 ? t7.arc(u2 + U2.cx, f2 + U2.cy, S2, Rc(U2.y0, U2.x0), Rc($3.y0, $3.x0), !c2) : (X2 > 0 && t7.arc(u2 + U2.cx, f2 + U2.cy, X2, Rc(U2.y0, U2.x0), Rc(U2.y1, U2.x1), !c2), t7.arc(u2, f2, e2, Rc(U2.cy + U2.y1, U2.cx + U2.x1), Rc($3.cy + $3.y1, $3.cx + $3.x1), c2), Y2 > 0 && t7.arc(u2 + $3.cx, f2 + $3.cy, Y2, Rc($3.y1, $3.x1), Rc($3.y0, $3.x0), !c2))) : (t7.lineTo(u2 + L2, f2 + D2), t7.arc(u2, f2, e2, l2, s2, c2)) : t7.lineTo(u2 + L2, f2 + D2);
+            e2 > Hc && W3 ? S3 > Hc ? (Y2 = jc(d2, S3), U2 = Yc(L2, D2, C3, A3, e2, -(X2 = jc(p2, S3)), c2), $3 = Yc(T4, I2, N2, _2, e2, -Y2, c2), t7.lineTo(u2 + U2.cx + U2.x0, f2 + U2.cy + U2.y0), S3 < M2 && Y2 === X2 ? t7.arc(u2 + U2.cx, f2 + U2.cy, S3, Rc(U2.y0, U2.x0), Rc($3.y0, $3.x0), !c2) : (X2 > 0 && t7.arc(u2 + U2.cx, f2 + U2.cy, X2, Rc(U2.y0, U2.x0), Rc(U2.y1, U2.x1), !c2), t7.arc(u2, f2, e2, Rc(U2.cy + U2.y1, U2.cx + U2.x1), Rc($3.cy + $3.y1, $3.cx + $3.x1), c2), Y2 > 0 && t7.arc(u2 + $3.cx, f2 + $3.cy, Y2, Rc($3.y1, $3.x1), Rc($3.y0, $3.x0), !c2))) : (t7.lineTo(u2 + L2, f2 + D2), t7.arc(u2, f2, e2, l2, s2, c2)) : t7.lineTo(u2 + L2, f2 + D2);
           }
           else t7.moveTo(u2, f2);
           t7.closePath();
@@ -23052,7 +23055,7 @@ var jm = (function() {
     c2[l2++] = f2;
     for (var h2 = 1; h2 < s2 - 1; h2 += u2) {
       for (var v2 = Math.min(h2 + u2, s2 - 1), d2 = Math.min(h2 + 2 * u2, s2), p2 = (d2 + v2) / 2, m2 = 0, b2 = v2; b2 < d2; b2++) {
-        var g3 = a2[S2 = this.getRawIndex(b2)];
+        var g3 = a2[S3 = this.getRawIndex(b2)];
         isNaN(g3) || (m2 += g3);
       }
       m2 /= d2 - v2;
@@ -23060,8 +23063,8 @@ var jm = (function() {
       n2 = -1, e2 = y2;
       var M2 = -1, z2 = 0;
       for (b2 = y2; b2 < w3; b2++) {
-        var S2;
-        g3 = a2[S2 = this.getRawIndex(b2)], isNaN(g3) ? (z2++, M2 < 0 && (M2 = S2)) : (r2 = Math.abs((x2 - p2) * (g3 - k2) - (x2 - b2) * (m2 - k2))) > n2 && (n2 = r2, e2 = S2);
+        var S3;
+        g3 = a2[S3 = this.getRawIndex(b2)], isNaN(g3) ? (z2++, M2 < 0 && (M2 = S3)) : (r2 = Math.abs((x2 - p2) * (g3 - k2) - (x2 - b2) * (m2 - k2))) > n2 && (n2 = r2, e2 = S3);
       }
       z2 > 0 && z2 < w3 - y2 && (c2[l2++] = Math.min(M2, e2), e2 = Math.max(M2, e2)), c2[l2++] = e2, f2 = e2;
     }
@@ -24246,8 +24249,8 @@ function ay(t5, i2, n2, r2) {
         var h3 = n3.fill, v3 = n3.stroke, d2 = a3 && !!h3.colorStops, p2 = o3 && !!v3.colorStops, m2 = a3 && !!h3.image, b2 = o3 && !!v3.image, g3 = void 0, y2 = void 0, w3 = void 0, x2 = void 0, k2 = void 0;
         (d2 || p2) && (k2 = i3.getBoundingRect()), d2 && (g3 = c3 ? Vg(t6, h3, k2) : i3.__canvasFillGradient, i3.__canvasFillGradient = g3), p2 && (y2 = c3 ? Vg(t6, v3, k2) : i3.__canvasStrokeGradient, i3.__canvasStrokeGradient = y2), m2 && (w3 = c3 || !i3.__canvasFillPattern ? Jg(t6, h3, i3) : i3.__canvasFillPattern, i3.__canvasFillPattern = w3), b2 && (x2 = c3 || !i3.__canvasStrokePattern ? Jg(t6, v3, i3) : i3.__canvasStrokePattern, i3.__canvasStrokePattern = w3), d2 ? t6.fillStyle = g3 : m2 && (w3 ? t6.fillStyle = w3 : a3 = false), p2 ? t6.strokeStyle = y2 : b2 && (x2 ? t6.strokeStyle = x2 : o3 = false);
       }
-      var M2, z2, S2 = i3.getGlobalScale();
-      f3.setScale(S2[0], S2[1], i3.segmentIgnoreThreshold), t6.setLineDash && n3.lineDash && (M2 = (e3 = Yg(i3))[0], z2 = e3[1]);
+      var M2, z2, S3 = i3.getGlobalScale();
+      f3.setScale(S3[0], S3[1], i3.segmentIgnoreThreshold), t6.setLineDash && n3.lineDash && (M2 = (e3 = Yg(i3))[0], z2 = e3[1]);
       var C3 = true;
       (u3 || 4 & c3) && (f3.setDPR(t6.dpr), l3 ? f3.setContext(null) : (f3.setContext(t6), C3 = false), f3.reset(), i3.buildPath(f3, i3.shape, r3), f3.toStatic(), i3.pathUpdated()), C3 && f3.rebuildPath(t6, l3 ? s3 : 1), M2 && (t6.setLineDash(M2), t6.lineDashOffset = z2), r3 || (n3.strokeFirst ? (o3 && qg(t6, n3), a3 && Zg(t6, n3)) : (a3 && Zg(t6, n3), o3 && qg(t6, n3))), M2 && t6.setLineDash([]);
     })(t5, i2, v2, h2), h2 && (n2.batchFill = v2.fill || "", n2.batchStroke = v2.stroke || "")) : i2 instanceof Pu ? (3 !== n2.lastDrawType && (l2 = true, n2.lastDrawType = 3), iy(t5, i2, u2, l2, n2), (function(t6, i3, n3) {
@@ -26067,14 +26070,14 @@ function Ax(t5) {
       })(0, e2), v2 = _x(t6), d2 = t6.get("barMinHeight") || 0, p2 = u2 && i2.getDimensionIndex(u2), m2 = i2.getLayout("size"), b2 = i2.getLayout("offset");
       return { progress: function(t7, i3) {
         for (var r3, e3 = t7.count, l3 = v2 && gx(3 * e3), u3 = v2 && s2 && gx(3 * e3), g3 = v2 && gx(e3), y2 = n2.master.getRect(), w3 = c2 ? y2.width : y2.height, x2 = i3.getStore(), k2 = 0; null != (r3 = t7.next()); ) {
-          var M2 = x2.get(f2 ? p2 : o2, r3), z2 = x2.get(a2, r3), S2 = h2, C3 = void 0;
+          var M2 = x2.get(f2 ? p2 : o2, r3), z2 = x2.get(a2, r3), S3 = h2, C3 = void 0;
           f2 && (C3 = +M2 - x2.get(o2, r3));
-          var A2 = void 0, N2 = void 0, _2 = void 0, T4 = void 0;
+          var A3 = void 0, N2 = void 0, _2 = void 0, T4 = void 0;
           if (c2) {
             var I2 = n2.dataToPoint([M2, z2]);
-            f2 && (S2 = n2.dataToPoint([C3, z2])[0]), A2 = S2, N2 = I2[1] + b2, _2 = I2[0] - S2, T4 = m2, Math.abs(_2) < d2 && (_2 = (_2 < 0 ? -1 : 1) * d2);
-          } else I2 = n2.dataToPoint([z2, M2]), f2 && (S2 = n2.dataToPoint([z2, C3])[1]), A2 = I2[0] + b2, N2 = S2, _2 = m2, T4 = I2[1] - S2, Math.abs(T4) < d2 && (T4 = (T4 <= 0 ? -1 : 1) * d2);
-          v2 ? (l3[k2] = A2, l3[k2 + 1] = N2, l3[k2 + 2] = c2 ? _2 : T4, u3 && (u3[k2] = c2 ? y2.x : A2, u3[k2 + 1] = c2 ? N2 : y2.y, u3[k2 + 2] = w3), g3[r3] = r3) : i3.setItemLayout(r3, { x: A2, y: N2, width: _2, height: T4 }), k2 += 3;
+            f2 && (S3 = n2.dataToPoint([C3, z2])[0]), A3 = S3, N2 = I2[1] + b2, _2 = I2[0] - S3, T4 = m2, Math.abs(_2) < d2 && (_2 = (_2 < 0 ? -1 : 1) * d2);
+          } else I2 = n2.dataToPoint([z2, M2]), f2 && (S3 = n2.dataToPoint([z2, C3])[1]), A3 = I2[0] + b2, N2 = S3, _2 = m2, T4 = I2[1] - S3, Math.abs(T4) < d2 && (T4 = (T4 <= 0 ? -1 : 1) * d2);
+          v2 ? (l3[k2] = A3, l3[k2 + 1] = N2, l3[k2 + 2] = c2 ? _2 : T4, u3 && (u3[k2] = c2 ? y2.x : A3, u3[k2 + 1] = c2 ? N2 : y2.y, u3[k2 + 2] = w3), g3[r3] = r3) : i3.setItemLayout(r3, { x: A3, y: N2, width: _2, height: T4 }), k2 += 3;
         }
         v2 && i3.setLayout({ largePoints: l3, largeDataIndices: g3, largeBackgroundPoints: u3, valueAxisHorizontal: c2 });
       } };
@@ -27365,20 +27368,20 @@ function HM(t5, i2, n2, r2) {
         return BM[t6];
       }));
     }
-    var z2, S2 = Cn(f3), C3 = true;
-    for (v3 = 1; v3 < S2.length; v3++) {
-      var A2 = S2[v3 - 1];
-      if (f3[A2][FM] !== f3[S2[v3]][FM]) {
+    var z2, S3 = Cn(f3), C3 = true;
+    for (v3 = 1; v3 < S3.length; v3++) {
+      var A3 = S3[v3 - 1];
+      if (f3[A3][FM] !== f3[S3[v3]][FM]) {
         C3 = false;
         break;
       }
-      z2 = f3[A2][FM];
+      z2 = f3[A3][FM];
     }
     if (C3 && z2) {
       for (var d3 in f3) f3[d3][FM] && delete f3[d3][FM];
       i2[FM] = z2;
     }
-    if (Sn(S2, (function(t6) {
+    if (Sn(S3, (function(t6) {
       return Cn(f3[t6]).length > 0;
     })).length) return VM(f3, n2) + " " + e3[0] + " both";
   }
@@ -27585,8 +27588,8 @@ function az(t5, i2, n2, r2) {
     u2 ? y2 = w3 = 1 : f2 ? (w3 = 1, y2 = s2.width / a2.width) : c2 ? (y2 = 1, w3 = s2.height / a2.height) : s2.patternUnits = "userSpaceOnUse", null == y2 || isNaN(y2) || (s2.width = y2), null == w3 || isNaN(w3) || (s2.height = w3);
     var x2 = Yo(o2);
     x2 && (s2.patternTransform = x2);
-    var k2 = TM("pattern", "", s2, [e2]), M2 = IM(k2), z2 = r2.patternCache, S2 = z2[M2];
-    S2 || (S2 = r2.zrId + "-p" + r2.patternIdx++, z2[M2] = S2, s2.id = S2, k2 = r2.defs[S2] = TM("pattern", S2, s2, [e2])), i2[n2] = jo(S2);
+    var k2 = TM("pattern", "", s2, [e2]), M2 = IM(k2), z2 = r2.patternCache, S3 = z2[M2];
+    S3 || (S3 = r2.zrId + "-p" + r2.patternIdx++, z2[M2] = S3, s2.id = S3, k2 = r2.defs[S3] = TM("pattern", S3, s2, [e2])), i2[n2] = jo(S3);
   }
 }
 function sz(t5, i2, n2) {
@@ -28211,14 +28214,14 @@ var Oz = (function(t5) {
     } else d2.useStyle(d2.__isEmptyBrush ? bn({}, w3) : w3), d2.style.decal = null, d2.setColor(x2, e2 && e2.symbolInnerColor), d2.style.strokeNoScale = true;
     var M2 = t6.getItemVisual(i3, "liftZ"), z2 = this._z2;
     null != M2 ? null == z2 && (this._z2 = d2.z2, d2.z2 += M2) : null != z2 && (d2.z2 = z2, this._z2 = null);
-    var S2 = e2 && e2.useNameLabel;
+    var S3 = e2 && e2.useNameLabel;
     ov(d2, c2, { labelFetcher: p2, labelDataIndex: i3, defaultText: function(i4) {
-      return S2 ? t6.getName(i4) : Wz(t6, i4);
+      return S3 ? t6.getName(i4) : Wz(t6, i4);
     }, inheritColor: x2, defaultOpacity: w3.opacity }), this._sizeX = n2[0] / 2, this._sizeY = n2[1] / 2;
     var C3 = d2.ensureState("emphasis");
     C3.style = o2, d2.ensureState("select").style = s2, d2.ensureState("blur").style = a2;
-    var A2 = null == h2 || true === h2 ? Math.max(1.1, 3 / this._sizeY) : isFinite(h2) && h2 > 0 ? +h2 : 1;
-    C3.scaleX = this._sizeX * A2, C3.scaleY = this._sizeY * A2, this.setSymbolScale(1), tc(this, l2, u2, f2);
+    var A3 = null == h2 || true === h2 ? Math.max(1.1, 3 / this._sizeY) : isFinite(h2) && h2 > 0 ? +h2 : 1;
+    C3.scaleX = this._sizeX * A3, C3.scaleY = this._sizeY * A3, this.setSymbolScale(1), tc(this, l2, u2, f2);
   }, i2.prototype.setSymbolScale = function(t6) {
     this.scaleX = this.scaleY = t6;
   }, i2.prototype.fadeOut = function(t6, i3, n2) {
@@ -28352,18 +28355,18 @@ function $z(t5, i2, n2, r2, e2, o2, a2, s2, l2) {
         for (var x2 = p2 + o2, k2 = i2[2 * x2], M2 = i2[2 * x2 + 1]; k2 === b2 && M2 === g3 && m2 < r2; ) m2++, k2 = i2[2 * (x2 += o2)], M2 = i2[2 * x2 + 1], y2 = (b2 = i2[2 * (p2 += o2)]) - u2, w3 = (g3 = i2[2 * p2 + 1]) - f2;
         var z2 = m2 + 1;
         if (l2) for (; Uz(k2, M2) && z2 < r2; ) z2++, k2 = i2[2 * (x2 += o2)], M2 = i2[2 * x2 + 1];
-        var S2 = 0.5, C3 = 0, A2 = 0, N2 = void 0, _2 = void 0;
+        var S3 = 0.5, C3 = 0, A3 = 0, N2 = void 0, _2 = void 0;
         if (z2 >= r2 || Uz(k2, M2)) v2 = b2, d2 = g3;
         else {
-          C3 = k2 - u2, A2 = M2 - f2;
+          C3 = k2 - u2, A3 = M2 - f2;
           var T4 = b2 - u2, I2 = k2 - b2, L2 = g3 - f2, D2 = M2 - g3, W3 = void 0, E3 = void 0;
           if ("x" === s2) {
             var O3 = C3 > 0 ? 1 : -1;
             v2 = b2 - O3 * (W3 = Math.abs(T4)) * a2, d2 = g3, N2 = b2 + O3 * (E3 = Math.abs(I2)) * a2, _2 = g3;
           } else if ("y" === s2) {
-            var F3 = A2 > 0 ? 1 : -1;
+            var F3 = A3 > 0 ? 1 : -1;
             v2 = b2, d2 = g3 - F3 * (W3 = Math.abs(L2)) * a2, N2 = b2, _2 = g3 + F3 * (E3 = Math.abs(D2)) * a2;
-          } else W3 = Math.sqrt(T4 * T4 + L2 * L2), v2 = b2 - C3 * a2 * (1 - (S2 = (E3 = Math.sqrt(I2 * I2 + D2 * D2)) / (E3 + W3))), d2 = g3 - A2 * a2 * (1 - S2), _2 = g3 + A2 * a2 * S2, N2 = Yz(N2 = b2 + C3 * a2 * S2, Xz(k2, b2)), _2 = Yz(_2, Xz(M2, g3)), N2 = Xz(N2, Yz(k2, b2)), d2 = g3 - (A2 = (_2 = Xz(_2, Yz(M2, g3))) - g3) * W3 / E3, v2 = Yz(v2 = b2 - (C3 = N2 - b2) * W3 / E3, Xz(u2, b2)), d2 = Yz(d2, Xz(f2, g3)), N2 = b2 + (C3 = b2 - (v2 = Xz(v2, Yz(u2, b2)))) * E3 / W3, _2 = g3 + (A2 = g3 - (d2 = Xz(d2, Yz(f2, g3)))) * E3 / W3;
+          } else W3 = Math.sqrt(T4 * T4 + L2 * L2), v2 = b2 - C3 * a2 * (1 - (S3 = (E3 = Math.sqrt(I2 * I2 + D2 * D2)) / (E3 + W3))), d2 = g3 - A3 * a2 * (1 - S3), _2 = g3 + A3 * a2 * S3, N2 = Yz(N2 = b2 + C3 * a2 * S3, Xz(k2, b2)), _2 = Yz(_2, Xz(M2, g3)), N2 = Xz(N2, Yz(k2, b2)), d2 = g3 - (A3 = (_2 = Xz(_2, Yz(M2, g3))) - g3) * W3 / E3, v2 = Yz(v2 = b2 - (C3 = N2 - b2) * W3 / E3, Xz(u2, b2)), d2 = Yz(d2, Xz(f2, g3)), N2 = b2 + (C3 = b2 - (v2 = Xz(v2, Yz(u2, b2)))) * E3 / W3, _2 = g3 + (A3 = g3 - (d2 = Xz(d2, Yz(f2, g3)))) * E3 / W3;
         }
         t5.bezierCurveTo(c2, h2, v2, d2, b2, g3), c2 = N2, h2 = _2;
       } else t5.lineTo(b2, g3);
@@ -28568,7 +28571,7 @@ var fS = (function(t5) {
     M2 && M2.eachItemGraphicEl((function(t7, i4) {
       t7.__temp && (e2.remove(t7), M2.setItemGraphicEl(i4, null));
     })), w3 || c2.remove(), e2.add(d2);
-    var z2, S2 = !u2 && t6.get("step");
+    var z2, S3 = !u2 && t6.get("step");
     r2 && r2.getArea && t6.get("clip", true) && (null != (z2 = r2.getArea()).width ? (z2.x -= 0.1, z2.y -= 0.1, z2.width += 0.2, z2.height += 0.2) : z2.r0 && (z2.r0 -= 0.5, z2.r += 0.5)), this._clipShapeForSymbol = z2;
     var C3 = (function(t7, i4, n3) {
       var r3 = t7.getVisual("visualMeta");
@@ -28620,15 +28623,15 @@ var fS = (function(t5) {
         }
       }
     })(o2, r2, n2) || o2.getVisual("style")[o2.getVisual("drawType")];
-    if (h2 && f2.type === r2.type && S2 === this._step) {
+    if (h2 && f2.type === r2.type && S3 === this._step) {
       m2 && !v2 ? v2 = this._newPolygon(l2, y2) : v2 && !m2 && (d2.remove(v2), v2 = this._polygon = null), u2 || this._initOrUpdateEndLabel(t6, r2, xd(C3));
-      var A2 = d2.getClipPath();
-      A2 ? zh(A2, { shape: uS(this, r2, false, t6).shape }, t6) : d2.setClipPath(uS(this, r2, true, t6)), w3 && c2.updateData(o2, { isIgnore: k2, clipShape: z2, disableAnimation: true, getSymbolPoint: function(t7) {
+      var A3 = d2.getClipPath();
+      A3 ? zh(A3, { shape: uS(this, r2, false, t6).shape }, t6) : d2.setClipPath(uS(this, r2, true, t6)), w3 && c2.updateData(o2, { isIgnore: k2, clipShape: z2, disableAnimation: true, getSymbolPoint: function(t7) {
         return [l2[2 * t7], l2[2 * t7 + 1]];
-      } }), nS(this._stackedOnPoints, y2) && nS(this._points, l2) || (p2 ? this._doUpdateAnimation(o2, y2, r2, n2, S2, b2, x2) : (S2 && (y2 && (y2 = aS(y2, l2, r2, S2, x2)), l2 = aS(l2, null, r2, S2, x2)), h2.setShape({ points: l2 }), v2 && v2.setShape({ points: l2, stackedOnPoints: y2 })));
+      } }), nS(this._stackedOnPoints, y2) && nS(this._points, l2) || (p2 ? this._doUpdateAnimation(o2, y2, r2, n2, S3, b2, x2) : (S3 && (y2 && (y2 = aS(y2, l2, r2, S3, x2)), l2 = aS(l2, null, r2, S3, x2)), h2.setShape({ points: l2 }), v2 && v2.setShape({ points: l2, stackedOnPoints: y2 })));
     } else w3 && c2.updateData(o2, { isIgnore: k2, clipShape: z2, disableAnimation: true, getSymbolPoint: function(t7) {
       return [l2[2 * t7], l2[2 * t7 + 1]];
-    } }), p2 && this._initSymbolLabelAnimation(o2, r2, z2), S2 && (y2 && (y2 = aS(y2, l2, r2, S2, x2)), l2 = aS(l2, null, r2, S2, x2)), h2 = this._newPolyline(l2), m2 ? v2 = this._newPolygon(l2, y2) : v2 && (d2.remove(v2), v2 = this._polygon = null), u2 || this._initOrUpdateEndLabel(t6, r2, xd(C3)), d2.setClipPath(uS(this, r2, true, t6));
+    } }), p2 && this._initSymbolLabelAnimation(o2, r2, z2), S3 && (y2 && (y2 = aS(y2, l2, r2, S3, x2)), l2 = aS(l2, null, r2, S3, x2)), h2 = this._newPolyline(l2), m2 ? v2 = this._newPolygon(l2, y2) : v2 && (d2.remove(v2), v2 = this._polygon = null), u2 || this._initOrUpdateEndLabel(t6, r2, xd(C3)), d2.setClipPath(uS(this, r2, true, t6));
     var N2 = t6.getModel("emphasis"), _2 = N2.get("focus"), T4 = N2.get("blurScope"), I2 = N2.get("disabled");
     h2.useStyle(gn(a2.getLineStyle(), { fill: "none", stroke: C3, lineJoin: "bevel" })), ec(h2, t6, "lineStyle"), h2.style.lineWidth > 0 && "bolder" === t6.get(["emphasis", "lineStyle", "width"]) && (h2.getState("emphasis").style.lineWidth = +h2.style.lineWidth + 1), hf(h2).seriesIndex = t6.seriesIndex, tc(h2, _2, T4, I2);
     var L2 = oS(t6.get("smooth")), D2 = t6.get("smoothMonotone");
@@ -28639,7 +28642,7 @@ var fS = (function(t5) {
     var O3 = this._changePolyState;
     o2.eachItemGraphicEl((function(t7) {
       t7 && (t7.onHoverStateChange = O3);
-    })), this._polyline.onHoverStateChange = O3, this._data = o2, this._coordSys = r2, this._stackedOnPoints = y2, this._points = l2, this._step = S2, this._valueOrigin = b2, t6.get("triggerLineEvent") && (this.packEventData(t6, h2), v2 && this.packEventData(t6, v2));
+    })), this._polyline.onHoverStateChange = O3, this._data = o2, this._coordSys = r2, this._stackedOnPoints = y2, this._points = l2, this._step = S3, this._valueOrigin = b2, t6.get("triggerLineEvent") && (this.packEventData(t6, h2), v2 && this.packEventData(t6, v2));
   }, i2.prototype.packEventData = function(t6, i3) {
     hf(i3).eventData = { componentType: "series", componentSubType: "line", componentIndex: t6.componentIndex, seriesIndex: t6.seriesIndex, seriesName: t6.name, seriesType: "line" };
   }, i2.prototype.highlight = function(t6, i3, n2, r2) {
@@ -28723,24 +28726,24 @@ var fS = (function(t5) {
           s3 = u3, r3 = e3;
         } else r3 = e3;
         return { range: [s3, l3], t: (i4 - r3) / (e3 - r3) };
-      })(u2, g3, x2), M2 = k2.range, z2 = M2[1] - M2[0], S2 = void 0;
+      })(u2, g3, x2), M2 = k2.range, z2 = M2[1] - M2[0], S3 = void 0;
       if (z2 >= 1) {
         if (z2 > 1 && !c2) {
           var C3 = sS(u2, M2[0]);
-          s2.attr({ x: C3[0] + y2, y: C3[1] + w3 }), e2 && (S2 = f2.getRawValue(M2[0]));
+          s2.attr({ x: C3[0] + y2, y: C3[1] + w3 }), e2 && (S3 = f2.getRawValue(M2[0]));
         } else {
           (C3 = l2.getPointOn(g3, x2)) && s2.attr({ x: C3[0] + y2, y: C3[1] + w3 });
-          var A2 = f2.getRawValue(M2[0]), N2 = f2.getRawValue(M2[1]);
-          e2 && (S2 = tl(n2, h2, A2, N2, k2.t));
+          var A3 = f2.getRawValue(M2[0]), N2 = f2.getRawValue(M2[1]);
+          e2 && (S3 = tl(n2, h2, A3, N2, k2.t));
         }
         r2.lastFrameIndex = M2[0];
       } else {
         var _2 = 1 === t6 || r2.lastFrameIndex > 0 ? M2[0] : 0;
-        C3 = sS(u2, _2), e2 && (S2 = f2.getRawValue(_2)), s2.attr({ x: C3[0] + y2, y: C3[1] + w3 });
+        C3 = sS(u2, _2), e2 && (S3 = f2.getRawValue(_2)), s2.attr({ x: C3[0] + y2, y: C3[1] + w3 });
       }
       if (e2) {
         var T4 = dv(s2);
-        "function" == typeof T4.setLabelText && T4.setLabelText(S2);
+        "function" == typeof T4.setLabelText && T4.setLabelText(S3);
       }
     }
   }, i2.prototype._doUpdateAnimation = function(t6, i3, n2, r2, e2, o2, a2) {
@@ -28758,14 +28761,14 @@ var fS = (function(t5) {
         var y3 = s3[g4], w3 = true, x2 = void 0, k2 = void 0;
         switch (y3.cmd) {
           case "=":
-            var M2 = m3[x2 = 2 * y3.idx], z2 = m3[x2 + 1], S2 = b3[k2 = 2 * y3.idx1], C3 = b3[k2 + 1];
-            (isNaN(M2) || isNaN(z2)) && (M2 = S2, z2 = C3), l3.push(M2, z2), u3.push(S2, C3), f3.push(n3[x2], n3[x2 + 1]), c3.push(r3[k2], r3[k2 + 1]), d3.push(i4.getRawIndex(y3.idx1));
+            var M2 = m3[x2 = 2 * y3.idx], z2 = m3[x2 + 1], S3 = b3[k2 = 2 * y3.idx1], C3 = b3[k2 + 1];
+            (isNaN(M2) || isNaN(z2)) && (M2 = S3, z2 = C3), l3.push(M2, z2), u3.push(S3, C3), f3.push(n3[x2], n3[x2 + 1]), c3.push(r3[k2], r3[k2 + 1]), d3.push(i4.getRawIndex(y3.idx1));
             break;
           case "+":
-            var A2 = y3.idx, N2 = p3.dataDimsForPoint, _2 = e3.dataToPoint([i4.get(N2[0], A2), i4.get(N2[1], A2)]);
-            k2 = 2 * A2, l3.push(_2[0], _2[1]), u3.push(b3[k2], b3[k2 + 1]);
-            var T4 = Hz(p3, e3, i4, A2);
-            f3.push(T4[0], T4[1]), c3.push(r3[k2], r3[k2 + 1]), d3.push(i4.getRawIndex(A2));
+            var A3 = y3.idx, N2 = p3.dataDimsForPoint, _2 = e3.dataToPoint([i4.get(N2[0], A3), i4.get(N2[1], A3)]);
+            k2 = 2 * A3, l3.push(_2[0], _2[1]), u3.push(b3[k2], b3[k2 + 1]);
+            var T4 = Hz(p3, e3, i4, A3);
+            f3.push(T4[0], T4[1]), c3.push(r3[k2], r3[k2 + 1]), d3.push(i4.getRawIndex(A3));
             break;
           case "-":
             w3 = false;
@@ -29003,20 +29006,20 @@ var kS = Math.max, MS = Math.min, zS = (function(t5) {
       if (p2) {
         var z3 = void 0;
         0 === y2.length ? z3 = k2(n3) : ((z3 = y2[n3]).useStyle(m2.getItemStyle()), z3.setShape("cartesian2d" === l2.type ? "r" : "cornerRadius", b2), g3[i4] = z3);
-        var S2 = LS[l2.type](a2, i4);
-        Mh(z3, { shape: PS(e2, S2, l2) }, f2, i4);
+        var S3 = LS[l2.type](a2, i4);
+        Mh(z3, { shape: PS(e2, S3, l2) }, f2, i4);
       }
       var C3 = s2.getItemGraphicEl(n3);
       if (a2.hasValue(i4) && IS[l2.type](M3)) {
-        var A2 = false;
-        if (h2 && (A2 = SS[l2.type](v2, M3)) && o2.remove(C3), C3 ? _h(C3) : C3 = CS[l2.type](t6, a2, i4, M3, e2, f2, u2.model, !!C3, d2), c2 && (C3.forceLabelAnimation = true), x2) {
+        var A3 = false;
+        if (h2 && (A3 = SS[l2.type](v2, M3)) && o2.remove(C3), C3 ? _h(C3) : C3 = CS[l2.type](t6, a2, i4, M3, e2, f2, u2.model, !!C3, d2), c2 && (C3.forceLabelAnimation = true), x2) {
           var N2 = C3.getTextContent();
           if (N2) {
             var _2 = dv(N2);
             null != _2.prevValue && (_2.prevValue = _2.value);
           }
         } else WS(C3, a2, i4, r3, M3, t6, e2, "polar" === l2.type);
-        w3 ? C3.attr({ shape: M3 }) : c2 ? AS(c2, f2, C3, M3, i4, e2, true, x2) : Mh(C3, { shape: M3 }, t6, i4, null), a2.setItemGraphicEl(i4, C3), C3.ignore = A2, o2.add(C3);
+        w3 ? C3.attr({ shape: M3 }) : c2 ? AS(c2, f2, C3, M3, i4, e2, true, x2) : Mh(C3, { shape: M3 }, t6, i4, null), a2.setItemGraphicEl(i4, C3), C3.ignore = A3, o2.add(C3);
       } else o2.remove(C3);
     })).remove((function(i4) {
       var n3 = s2.getItemGraphicEl(i4);
@@ -29319,17 +29322,17 @@ function YS(t5, i2, n2) {
     mu(k2, !b2), f2 = k2[0], c2 = k2[1];
     var z2 = XS(t6);
     z2.startAngle = f2, z2.endAngle = c2, z2.clockwise = b2;
-    var S2 = Math.abs(c2 - f2), C3 = S2, A2 = 0, N2 = f2;
+    var S3 = Math.abs(c2 - f2), C3 = S3, A3 = 0, N2 = f2;
     if (i3.setLayout({ viewRect: e2, r: l2 }), i3.each(r2, (function(t7, n3) {
       var r3;
       if (isNaN(t7)) i3.setItemLayout(n3, { angle: NaN, startAngle: NaN, endAngle: NaN, clockwise: b2, cx: a2, cy: s2, r0: u2, r: g3 ? NaN : l2 });
       else {
-        (r3 = "area" !== g3 ? 0 === p2 && y2 ? m2 : t7 * m2 : S2 / d2) < v2 ? (r3 = v2, C3 -= v2) : A2 += t7;
+        (r3 = "area" !== g3 ? 0 === p2 && y2 ? m2 : t7 * m2 : S3 / d2) < v2 ? (r3 = v2, C3 -= v2) : A3 += t7;
         var e3 = N2 + x2 * r3, o3 = 0, f3 = 0;
         h2 > r3 ? f3 = o3 = N2 + x2 * r3 / 2 : (o3 = N2 + M2, f3 = e3 - M2), i3.setItemLayout(n3, { angle: r3, startAngle: o3, endAngle: f3, clockwise: b2, cx: a2, cy: s2, r0: u2, r: g3 ? ls(t7, w3, [u2, l2]) : l2 }), N2 = e3;
       }
     })), C3 < BS && d2) if (C3 <= 1e-3) {
-      var _2 = S2 / d2;
+      var _2 = S3 / d2;
       i3.each(r2, (function(t7, n3) {
         if (!isNaN(t7)) {
           var r3 = i3.getItemLayout(n3);
@@ -29338,7 +29341,7 @@ function YS(t5, i2, n2) {
           _2 < h2 ? o3 = e3 = f2 + x2 * (n3 + 0.5) * _2 : (e3 = f2 + x2 * n3 * _2 + M2, o3 = f2 + x2 * (n3 + 1) * _2 - M2), r3.startAngle = e3, r3.endAngle = o3;
         }
       }));
-    } else m2 = C3 / A2, N2 = f2, i3.each(r2, (function(t7, n3) {
+    } else m2 = C3 / A3, N2 = f2, i3.each(r2, (function(t7, n3) {
       if (!isNaN(t7)) {
         var r3 = i3.getItemLayout(n3), e3 = r3.angle === v2 ? v2 : t7 * m2, o3 = 0, a3 = 0;
         e3 < h2 ? a3 = o3 = N2 + x2 * e3 / 2 : (o3 = N2 + M2, a3 = N2 + x2 * e3 - M2), r3.startAngle = o3, r3.endAngle = a3, N2 += x2 * e3;
@@ -29475,27 +29478,27 @@ var JS = (function(t5) {
           for (var i5 in t9.states) if (false === t9.states[i5].ignore) return true;
           return false;
         })(h3)) {
-          var S2, C3, A2, N2, _2 = (c3.startAngle + c3.endAngle) / 2, T4 = Math.cos(_2), I2 = Math.sin(_2);
+          var S3, C3, A3, N2, _2 = (c3.startAngle + c3.endAngle) / 2, T4 = Math.cos(_2), I2 = Math.sin(_2);
           i4 = c3.cx, n3 = c3.cy;
           var L2 = "inside" === b3 || "inner" === b3;
-          if ("center" === b3) S2 = c3.cx, C3 = c3.cy, N2 = "center";
+          if ("center" === b3) S3 = c3.cx, C3 = c3.cy, N2 = "center";
           else {
             var D2 = (L2 ? (c3.r + c3.r0) / 2 * T4 : c3.r * T4) + i4, W3 = (L2 ? (c3.r + c3.r0) / 2 * I2 : c3.r * I2) + n3;
-            if (S2 = D2 + 3 * T4, C3 = W3 + 3 * I2, !L2) {
+            if (S3 = D2 + 3 * T4, C3 = W3 + 3 * I2, !L2) {
               var E3 = D2 + T4 * (M2 + l3 - c3.r), O3 = W3 + I2 * (M2 + l3 - c3.r), F3 = E3 + (T4 < 0 ? -1 : 1) * z2;
-              S2 = "edge" === y3 ? T4 < 0 ? f3 + w4 : f3 + u3 - w4 : F3 + (T4 < 0 ? -g4 : g4), C3 = O3, A2 = [[D2, W3], [E3, O3], [F3, O3]];
+              S3 = "edge" === y3 ? T4 < 0 ? f3 + w4 : f3 + u3 - w4 : F3 + (T4 < 0 ? -g4 : g4), C3 = O3, A3 = [[D2, W3], [E3, O3], [F3, O3]];
             }
             N2 = L2 ? "center" : "edge" === y3 ? T4 > 0 ? "right" : "left" : T4 > 0 ? "left" : "right";
           }
-          var R2 = Math.PI, P2 = 0, B2 = m3.get("rotate");
-          if (Dn(B2)) P2 = B2 * (R2 / 180);
+          var R2 = Math.PI, P2 = 0, B3 = m3.get("rotate");
+          if (Dn(B3)) P2 = B3 * (R2 / 180);
           else if ("center" === b3) P2 = 0;
-          else if ("radial" === B2 || true === B2) P2 = T4 < 0 ? -_2 + R2 : -_2;
-          else if ("tangential" === B2 && "outside" !== b3 && "outer" !== b3) {
+          else if ("radial" === B3 || true === B3) P2 = T4 < 0 ? -_2 + R2 : -_2;
+          else if ("tangential" === B3 && "outside" !== b3 && "outer" !== b3) {
             var V2 = Math.atan2(T4, I2);
             V2 < 0 && (V2 = 2 * R2 + V2), I2 > 0 && (V2 = R2 + V2), P2 = V2 - R2;
           }
-          if (o3 = !!P2, h3.x = S2, h3.y = C3, h3.rotation = P2, h3.setStyle({ verticalAlign: "middle" }), L2) {
+          if (o3 = !!P2, h3.x = S3, h3.y = C3, h3.rotation = P2, h3.setStyle({ verticalAlign: "middle" }), L2) {
             h3.setStyle({ align: N2 });
             var j2 = h3.states.select;
             j2 && (j2.x += h3.x, j2.y += h3.y);
@@ -29503,7 +29506,7 @@ var JS = (function(t5) {
             var H2 = h3.getBoundingRect().clone();
             H2.applyTransform(h3.getComputedTransform());
             var Y2 = (h3.style.margin || 0) + 2.1;
-            H2.y -= Y2 / 2, H2.height += Y2, e3.push({ label: h3, labelLine: d3, position: b3, len: M2, len2: z2, minTurnAngle: k2.get("minTurnAngle"), maxSurfaceAngle: k2.get("maxSurfaceAngle"), surfaceNormal: new ne(T4, I2), linePoints: A2, textAlign: N2, labelDistance: g4, labelAlignTo: y3, edgeDistance: w4, bleedMargin: x2, rect: H2, unconstrainedWidth: H2.width, labelStyleWidth: h3.style.width });
+            H2.y -= Y2 / 2, H2.height += Y2, e3.push({ label: h3, labelLine: d3, position: b3, len: M2, len2: z2, minTurnAngle: k2.get("minTurnAngle"), maxSurfaceAngle: k2.get("maxSurfaceAngle"), surfaceNormal: new ne(T4, I2), linePoints: A3, textAlign: N2, labelDistance: g4, labelAlignTo: y3, edgeDistance: w4, bleedMargin: x2, rect: H2, unconstrainedWidth: H2.width, labelStyleWidth: h3.style.width });
           }
           s4.setTextConfig({ inside: L2 });
         }
@@ -30169,7 +30172,7 @@ var IC = Math.PI, LC = (function() {
           var y2 = f2[p2];
           Wn(y2) && y2.textStyle && (g3 = new _v(y2.textStyle, o3, n3.ecModel));
         }
-        var w3 = g3.getTextColor() || n3.get(["axisLine", "lineStyle", "color"]), x2 = e3.dataToCoord(p2), k2 = g3.getShallow("align", true) || u2.textAlign, M2 = Vn(g3.getShallow("alignMinLabel", true), k2), z2 = Vn(g3.getShallow("alignMaxLabel", true), k2), S2 = g3.getShallow("verticalAlign", true) || g3.getShallow("baseline", true) || u2.textVerticalAlign, C3 = Vn(g3.getShallow("verticalAlignMinLabel", true), S2), A2 = Vn(g3.getShallow("verticalAlignMaxLabel", true), S2), N2 = new Ku({ x: x2, y: r3.labelOffset + r3.labelDirection * a2, rotation: u2.rotation, silent: h2, z2: 10 + (l3.level || 0), style: sv(g3, { text: m2, align: 0 === d2 ? M2 : d2 === s2.length - 1 ? z2 : k2, verticalAlign: 0 === d2 ? C3 : d2 === s2.length - 1 ? A2 : S2, fill: Tn(w3) ? w3("category" === e3.type ? b2 : "value" === e3.type ? p2 + "" : p2, d2) : w3 }) });
+        var w3 = g3.getTextColor() || n3.get(["axisLine", "lineStyle", "color"]), x2 = e3.dataToCoord(p2), k2 = g3.getShallow("align", true) || u2.textAlign, M2 = Vn(g3.getShallow("alignMinLabel", true), k2), z2 = Vn(g3.getShallow("alignMaxLabel", true), k2), S3 = g3.getShallow("verticalAlign", true) || g3.getShallow("baseline", true) || u2.textVerticalAlign, C3 = Vn(g3.getShallow("verticalAlignMinLabel", true), S3), A3 = Vn(g3.getShallow("verticalAlignMaxLabel", true), S3), N2 = new Ku({ x: x2, y: r3.labelOffset + r3.labelDirection * a2, rotation: u2.rotation, silent: h2, z2: 10 + (l3.level || 0), style: sv(g3, { text: m2, align: 0 === d2 ? M2 : d2 === s2.length - 1 ? z2 : k2, verticalAlign: 0 === d2 ? C3 : d2 === s2.length - 1 ? A3 : S3, fill: Tn(w3) ? w3("category" === e3.type ? b2 : "value" === e3.type ? p2 + "" : p2, d2) : w3 }) });
         if (N2.anid = "label_" + p2, Kh({ el: N2, componentModel: n3, itemName: m2, formatterParamsExtra: { isTruncated: function() {
           return N2.isTruncated;
         }, value: b2, tickIndex: d2 } }), v2) {
@@ -30558,7 +30561,7 @@ var fA = (function(t5) {
     var i3 = t6.coordinateSystem, n2 = i3.getIndicatorAxes();
     if (n2.length) {
       var r2 = t6.get("shape"), e2 = t6.getModel("splitLine"), o2 = t6.getModel("splitArea"), a2 = e2.getModel("lineStyle"), s2 = o2.getModel("areaStyle"), l2 = e2.get("show"), u2 = o2.get("show"), f2 = a2.get("color"), c2 = s2.get("color"), h2 = _n(f2) ? f2 : [f2], v2 = _n(c2) ? c2 : [c2], d2 = [], p2 = [];
-      if ("circle" === r2) for (var m2 = n2[0].getTicksCoords(), b2 = i3.cx, g3 = i3.cy, y2 = 0; y2 < m2.length; y2++) l2 && d2[A2(d2, h2, y2)].push(new Tc({ shape: { cx: b2, cy: g3, r: m2[y2].coord } })), u2 && y2 < m2.length - 1 && p2[A2(p2, v2, y2)].push(new Gc({ shape: { cx: b2, cy: g3, r0: m2[y2].coord, r: m2[y2 + 1].coord } }));
+      if ("circle" === r2) for (var m2 = n2[0].getTicksCoords(), b2 = i3.cx, g3 = i3.cy, y2 = 0; y2 < m2.length; y2++) l2 && d2[A3(d2, h2, y2)].push(new Tc({ shape: { cx: b2, cy: g3, r: m2[y2].coord } })), u2 && y2 < m2.length - 1 && p2[A3(p2, v2, y2)].push(new Gc({ shape: { cx: b2, cy: g3, r0: m2[y2].coord, r: m2[y2 + 1].coord } }));
       else {
         var w3, x2 = Mn(n2, (function(t7, n3) {
           var r3 = t7.getTicksCoords();
@@ -30568,17 +30571,17 @@ var fA = (function(t5) {
         })), k2 = [];
         for (y2 = 0; y2 <= w3; y2++) {
           for (var M2 = [], z2 = 0; z2 < n2.length; z2++) M2.push(x2[z2][y2]);
-          M2[0] && M2.push(M2[0].slice()), l2 && d2[A2(d2, h2, y2)].push(new Qc({ shape: { points: M2 } })), u2 && k2 && p2[A2(p2, v2, y2 - 1)].push(new Jc({ shape: { points: M2.concat(k2) } })), k2 = M2.slice().reverse();
+          M2[0] && M2.push(M2[0].slice()), l2 && d2[A3(d2, h2, y2)].push(new Qc({ shape: { points: M2 } })), u2 && k2 && p2[A3(p2, v2, y2 - 1)].push(new Jc({ shape: { points: M2.concat(k2) } })), k2 = M2.slice().reverse();
         }
       }
-      var S2 = a2.getLineStyle(), C3 = s2.getAreaStyle();
+      var S3 = a2.getLineStyle(), C3 = s2.getAreaStyle();
       kn(p2, (function(t7, i4) {
         this.group.add(Rh(t7, { style: gn({ stroke: "none", fill: v2[i4 % v2.length] }, C3), silent: true }));
       }), this), kn(d2, (function(t7, i4) {
-        this.group.add(Rh(t7, { style: gn({ fill: "none", stroke: h2[i4 % h2.length] }, S2), silent: true }));
+        this.group.add(Rh(t7, { style: gn({ fill: "none", stroke: h2[i4 % h2.length] }, S3), silent: true }));
       }), this);
     }
-    function A2(t7, i4, n3) {
+    function A3(t7, i4, n3) {
       var r3 = n3 % i4.length;
       return t7[r3] = t7[r3] || [], r3;
     }
@@ -31940,8 +31943,8 @@ function n_(t5, i2, n2, r2, e2) {
       var k2 = { x: (b2.children[0].getLayout().x + b2.children[y2 - 1].getLayout().x) / 2, y: (b2.children[0].getLayout().y + b2.children[y2 - 1].getLayout().y) / 2 };
       (w3 = Math.atan2(k2.y - g3.y, k2.x - g3.x)) < 0 && (w3 = 2 * Math.PI + w3), (x2 = k2.x < g3.x) && (w3 -= Math.PI);
     } else (w3 = Math.atan2(p2.y - g3.y, p2.x - g3.x)) < 0 && (w3 = 2 * Math.PI + w3), 0 === a2.children.length || 0 !== a2.children.length && false === a2.isExpand ? (x2 = p2.x < g3.x) && (w3 -= Math.PI) : (x2 = p2.x > g3.x) || (w3 -= Math.PI);
-    var M2 = x2 ? "left" : "right", z2 = s2.getModel("label"), S2 = z2.get("rotate"), C3 = S2 * (Math.PI / 180), A2 = m2.getTextContent();
-    A2 && (m2.setTextConfig({ position: z2.get("position") || M2, rotation: null == S2 ? -w3 : C3, origin: "center" }), A2.setStyle("verticalAlign", "middle"));
+    var M2 = x2 ? "left" : "right", z2 = s2.getModel("label"), S3 = z2.get("rotate"), C3 = S3 * (Math.PI / 180), A3 = m2.getTextContent();
+    A3 && (m2.setTextConfig({ position: z2.get("position") || M2, rotation: null == S3 ? -w3 : C3, origin: "center" }), A3.setStyle("verticalAlign", "middle"));
   }
   var N2 = s2.get(["emphasis", "focus"]), _2 = "relative" === N2 ? tr(a2.getAncestorsIndices(), a2.getDescendantIndices()) : "ancestor" === N2 ? a2.getAncestorsIndices() : "descendant" === N2 ? a2.getDescendantIndices() : null;
   _2 && (hf(n2).focus = _2), (function(t6, i3, n3, r3, e3, o3, a3, s3) {
@@ -32358,10 +32361,10 @@ var T_ = (function() {
     }
   }, t5.prototype._renderContent = function(t6, i2, n2, r2, e2, o2, a2) {
     for (var s2, l2, u2, f2, c2, h2, v2, d2, p2, m2 = 0, b2 = i2.emptyItemWidth, g3 = t6.get(["breadcrumb", "height"]), y2 = (c2 = (l2 = i2.box).height, h2 = us((s2 = i2.pos).left, f2 = l2.width), v2 = us(s2.top, c2), d2 = us(s2.right, f2), p2 = us(s2.bottom, c2), (isNaN(h2) || isNaN(parseFloat(s2.left))) && (h2 = 0), (isNaN(d2) || isNaN(parseFloat(s2.right))) && (d2 = f2), (isNaN(v2) || isNaN(parseFloat(s2.top))) && (v2 = 0), (isNaN(p2) || isNaN(parseFloat(s2.bottom))) && (p2 = c2), u2 = md(u2 || 0), { width: Math.max(d2 - h2 - u2[1] - u2[3], 0), height: Math.max(p2 - v2 - u2[0] - u2[2], 0) }), w3 = i2.totalWidth, x2 = i2.renderList, k2 = r2.getModel("itemStyle").getItemStyle(), M2 = x2.length - 1; M2 >= 0; M2--) {
-      var z2 = x2[M2], S2 = z2.node, C3 = z2.width, A2 = z2.text;
-      w3 > y2.width && (w3 -= C3 - b2, C3 = b2, A2 = null);
-      var N2 = new Jc({ shape: { points: I_(m2, 0, C3, g3, M2 === x2.length - 1, 0 === M2) }, style: gn(n2.getItemStyle(), { lineJoin: "bevel" }), textContent: new Ku({ style: sv(e2, { text: A2 }) }), textConfig: { position: "inside" }, z2: 1e5, onclick: Nn(a2, S2) });
-      N2.disableLabelAnimation = true, N2.getTextContent().ensureState("emphasis").style = sv(o2, { text: A2 }), N2.ensureState("emphasis").style = k2, tc(N2, r2.get("focus"), r2.get("blurScope"), r2.get("disabled")), this.group.add(N2), L_(N2, t6, S2), m2 += C3 + 8;
+      var z2 = x2[M2], S3 = z2.node, C3 = z2.width, A3 = z2.text;
+      w3 > y2.width && (w3 -= C3 - b2, C3 = b2, A3 = null);
+      var N2 = new Jc({ shape: { points: I_(m2, 0, C3, g3, M2 === x2.length - 1, 0 === M2) }, style: gn(n2.getItemStyle(), { lineJoin: "bevel" }), textContent: new Ku({ style: sv(e2, { text: A3 }) }), textConfig: { position: "inside" }, z2: 1e5, onclick: Nn(a2, S3) });
+      N2.disableLabelAnimation = true, N2.getTextContent().ensureState("emphasis").style = sv(o2, { text: A3 }), N2.ensureState("emphasis").style = k2, tc(N2, r2.get("focus"), r2.get("blurScope"), r2.get("disabled")), this.group.add(N2), L_(N2, t6, S3), m2 += C3 + 8;
     }
   }, t5.prototype.remove = function() {
     this.group.removeAll();
@@ -32415,9 +32418,9 @@ var D_ = (function() {
         if (a3) {
           var f3 = a3.getLayout(), c3 = t8.getData(), h3 = a3.getModel();
           if (c3.setItemGraphicEl(a3.dataIndex, null), f3 && f3.isInView) {
-            var v2 = f3.width, d2 = f3.height, p2 = f3.borderWidth, m2 = f3.invisible, b2 = a3.getRawIndex(), g3 = s3 && s3.getRawIndex(), y2 = a3.viewChildren, w3 = f3.upperHeight, x2 = y2 && y2.length, k2 = h3.getModel("itemStyle"), M2 = h3.getModel(["emphasis", "itemStyle"]), z2 = h3.getModel(["blur", "itemStyle"]), S2 = h3.getModel(["select", "itemStyle"]), C3 = k2.get("borderRadius") || 0, A2 = P2("nodeGroup", W_);
-            if (A2) {
-              if (l3.add(A2), A2.x = f3.x || 0, A2.y = f3.y || 0, A2.markRedraw(), B_(A2).nodeWidth = v2, B_(A2).nodeHeight = d2, f3.isAboveViewRoot) return A2;
+            var v2 = f3.width, d2 = f3.height, p2 = f3.borderWidth, m2 = f3.invisible, b2 = a3.getRawIndex(), g3 = s3 && s3.getRawIndex(), y2 = a3.viewChildren, w3 = f3.upperHeight, x2 = y2 && y2.length, k2 = h3.getModel("itemStyle"), M2 = h3.getModel(["emphasis", "itemStyle"]), z2 = h3.getModel(["blur", "itemStyle"]), S3 = h3.getModel(["select", "itemStyle"]), C3 = k2.get("borderRadius") || 0, A3 = P2("nodeGroup", W_);
+            if (A3) {
+              if (l3.add(A3), A3.x = f3.x || 0, A3.y = f3.y || 0, A3.markRedraw(), B_(A3).nodeWidth = v2, B_(A3).nodeHeight = d2, f3.isAboveViewRoot) return A3;
               var N2 = P2("background", E_, u4, 20);
               N2 && (function(i5, n4, r5) {
                 var e5 = hf(n4);
@@ -32430,13 +32433,13 @@ var D_ = (function() {
                   u5.fill = M2.get("borderColor");
                   var f4 = R_(z2);
                   f4.fill = z2.get("borderColor");
-                  var c4 = R_(S2);
-                  c4.fill = S2.get("borderColor"), r5 ? F3(n4, s4, o4.opacity, { x: p2, y: 0, width: v2 - 2 * p2, height: w3 }) : n4.removeTextContent(), n4.setStyle(l4), n4.ensureState("emphasis").style = u5, n4.ensureState("blur").style = f4, n4.ensureState("select").style = c4, Ff(n4);
+                  var c4 = R_(S3);
+                  c4.fill = S3.get("borderColor"), r5 ? F3(n4, s4, o4.opacity, { x: p2, y: 0, width: v2 - 2 * p2, height: w3 }) : n4.removeTextContent(), n4.setStyle(l4), n4.ensureState("emphasis").style = u5, n4.ensureState("blur").style = f4, n4.ensureState("select").style = c4, Ff(n4);
                 }
                 i5.add(n4);
-              })(A2, N2, x2 && f3.upperLabelHeight);
+              })(A3, N2, x2 && f3.upperLabelHeight);
               var _2 = h3.getModel("emphasis"), T4 = _2.get("focus"), I2 = _2.get("blurScope"), L2 = _2.get("disabled"), D2 = "ancestor" === T4 ? a3.getAncestorsIndices() : "descendant" === T4 ? a3.getDescendantIndices() : T4;
-              if (x2) ac(A2) && oc(A2, false), N2 && (oc(N2, !L2), c3.setItemGraphicEl(a3.dataIndex, N2), ic(N2, D2, I2));
+              if (x2) ac(A3) && oc(A3, false), N2 && (oc(N2, !L2), c3.setItemGraphicEl(a3.dataIndex, N2), ic(N2, D2, I2));
               else {
                 var W3 = P2("content", E_, u4, 30);
                 W3 && (function(i5, n4) {
@@ -32448,15 +32451,15 @@ var D_ = (function() {
                     n4.invisible = false;
                     var s4 = a3.getVisual("style"), l4 = s4.fill, u5 = P_(k2);
                     u5.fill = l4, u5.decal = s4.decal;
-                    var f4 = R_(M2), c4 = R_(z2), h4 = R_(S2);
+                    var f4 = R_(M2), c4 = R_(z2), h4 = R_(S3);
                     F3(n4, l4, s4.opacity, null), n4.setStyle(u5), n4.ensureState("emphasis").style = f4, n4.ensureState("blur").style = c4, n4.ensureState("select").style = h4, Ff(n4);
                   }
                   i5.add(n4);
-                })(A2, W3), N2.disableMorphing = true, N2 && ac(N2) && oc(N2, false), oc(A2, !L2), c3.setItemGraphicEl(a3.dataIndex, A2);
+                })(A3, W3), N2.disableMorphing = true, N2 && ac(N2) && oc(N2, false), oc(A3, !L2), c3.setItemGraphicEl(a3.dataIndex, A3);
                 var E3 = h3.getShallow("cursor");
-                E3 && W3.attr("cursor", E3), ic(A2, D2, I2);
+                E3 && W3.attr("cursor", E3), ic(A3, D2, I2);
               }
-              return A2;
+              return A3;
             }
           }
         }
@@ -33944,10 +33947,10 @@ var TI = (function(t5) {
     };
     this._renderTicks(t6, i3, n2, w3, e2, s2, l2, a2, v2), this._renderTitleAndDetail(t6, i3, n2, w3, e2), this._renderAnchor(t6, e2), this._renderPointer(t6, i3, n2, w3, e2, s2, l2, a2, v2);
   }, i2.prototype._renderTicks = function(t6, i3, n2, r2, e2, o2, a2, s2, l2) {
-    for (var u2, f2, c2 = this.group, h2 = e2.cx, v2 = e2.cy, d2 = e2.r, p2 = +t6.get("min"), m2 = +t6.get("max"), b2 = t6.getModel("splitLine"), g3 = t6.getModel("axisTick"), y2 = t6.getModel("axisLabel"), w3 = t6.get("splitNumber"), x2 = g3.get("splitNumber"), k2 = us(b2.get("length"), d2), M2 = us(g3.get("length"), d2), z2 = o2, S2 = (a2 - o2) / w3, C3 = S2 / x2, A2 = b2.getModel("lineStyle").getLineStyle(), N2 = g3.getModel("lineStyle").getLineStyle(), _2 = b2.get("distance"), T4 = 0; T4 <= w3; T4++) {
+    for (var u2, f2, c2 = this.group, h2 = e2.cx, v2 = e2.cy, d2 = e2.r, p2 = +t6.get("min"), m2 = +t6.get("max"), b2 = t6.getModel("splitLine"), g3 = t6.getModel("axisTick"), y2 = t6.getModel("axisLabel"), w3 = t6.get("splitNumber"), x2 = g3.get("splitNumber"), k2 = us(b2.get("length"), d2), M2 = us(g3.get("length"), d2), z2 = o2, S3 = (a2 - o2) / w3, C3 = S3 / x2, A3 = b2.getModel("lineStyle").getLineStyle(), N2 = g3.getModel("lineStyle").getLineStyle(), _2 = b2.get("distance"), T4 = 0; T4 <= w3; T4++) {
       if (u2 = Math.cos(z2), f2 = Math.sin(z2), b2.get("show")) {
-        var I2 = new nh({ shape: { x1: u2 * (d2 - (L2 = _2 ? _2 + l2 : l2)) + h2, y1: f2 * (d2 - L2) + v2, x2: u2 * (d2 - k2 - L2) + h2, y2: f2 * (d2 - k2 - L2) + v2 }, style: A2, silent: true });
-        "auto" === A2.stroke && I2.setStyle({ stroke: r2(T4 / w3) }), c2.add(I2);
+        var I2 = new nh({ shape: { x1: u2 * (d2 - (L2 = _2 ? _2 + l2 : l2)) + h2, y1: f2 * (d2 - L2) + v2, x2: u2 * (d2 - k2 - L2) + h2, y2: f2 * (d2 - k2 - L2) + v2 }, style: A3, silent: true });
+        "auto" === A3.stroke && I2.setStyle({ stroke: r2(T4 / w3) }), c2.add(I2);
       }
       if (y2.get("show")) {
         var L2 = y2.get("distance") + _2, D2 = _I(fs(T4 / w3 * (m2 - p2) + p2), y2.get("formatter")), W3 = r2(T4 / w3), E3 = u2 * (d2 - k2 - L2) + h2, O3 = f2 * (d2 - k2 - L2) + v2, F3 = y2.get("rotate"), R2 = 0;
@@ -33957,11 +33960,11 @@ var TI = (function(t5) {
         L2 = (L2 = g3.get("distance")) ? L2 + l2 : l2;
         for (var P2 = 0; P2 <= x2; P2++) {
           u2 = Math.cos(z2), f2 = Math.sin(z2);
-          var B2 = new nh({ shape: { x1: u2 * (d2 - L2) + h2, y1: f2 * (d2 - L2) + v2, x2: u2 * (d2 - M2 - L2) + h2, y2: f2 * (d2 - M2 - L2) + v2 }, silent: true, style: N2 });
-          "auto" === N2.stroke && B2.setStyle({ stroke: r2((T4 + P2 / x2) / w3) }), c2.add(B2), z2 += C3;
+          var B3 = new nh({ shape: { x1: u2 * (d2 - L2) + h2, y1: f2 * (d2 - L2) + v2, x2: u2 * (d2 - M2 - L2) + h2, y2: f2 * (d2 - M2 - L2) + v2 }, silent: true, style: N2 });
+          "auto" === N2.stroke && B3.setStyle({ stroke: r2((T4 + P2 / x2) / w3) }), c2.add(B3), z2 += C3;
         }
         z2 -= C3;
-      } else z2 += S2;
+      } else z2 += S3;
     }
   }, i2.prototype._renderPointer = function(t6, i3, n2, r2, e2, o2, a2, s2, l2) {
     var u2 = this.group, f2 = this._data, c2 = this._progressEls, h2 = [], v2 = t6.get(["pointer", "show"]), d2 = t6.getModel("progress"), p2 = d2.get("show"), m2 = t6.getData(), b2 = m2.mapDimension("value"), g3 = +t6.get("min"), y2 = +t6.get("max"), w3 = [g3, y2], x2 = [o2, a2];
@@ -34028,8 +34031,8 @@ var TI = (function(t5) {
       }
       var x2 = n3.getModel("detail");
       if (x2.get("show")) {
-        var k2 = x2.get("offsetCenter"), M2 = e2.cx + us(k2[0], e2.r), z2 = e2.cy + us(k2[1], e2.r), S2 = us(x2.get("width"), e2.r), C3 = us(x2.get("height"), e2.r), A2 = t6.get(["progress", "show"]) ? a2.getItemVisual(i4, "style").fill : m2, N2 = h2[i4], _2 = x2.get("formatter");
-        N2.attr({ z2: d2 ? 0 : 2, style: sv(x2, { x: M2, y: z2, text: _I(o3, _2), width: isNaN(S2) ? null : S2, height: isNaN(C3) ? null : C3, align: "center", verticalAlign: "middle" }, { inheritColor: A2 }) }), pv(N2, { normal: x2 }, o3, (function(t7) {
+        var k2 = x2.get("offsetCenter"), M2 = e2.cx + us(k2[0], e2.r), z2 = e2.cy + us(k2[1], e2.r), S3 = us(x2.get("width"), e2.r), C3 = us(x2.get("height"), e2.r), A3 = t6.get(["progress", "show"]) ? a2.getItemVisual(i4, "style").fill : m2, N2 = h2[i4], _2 = x2.get("formatter");
+        N2.attr({ z2: d2 ? 0 : 2, style: sv(x2, { x: M2, y: z2, text: _I(o3, _2), width: isNaN(S3) ? null : S3, height: isNaN(C3) ? null : C3, align: "center", verticalAlign: "middle" }, { inheritColor: A3 }) }), pv(N2, { normal: x2 }, o3, (function(t7) {
           return _I(t7, _2);
         })), v2 && mv(N2, i4, a2, t6, { getFormattedLabel: function(t7, i5, n4, r3, e3, a3) {
           return _I(a3 ? a3.interpolatedValue : o3, _2);
@@ -34145,11 +34148,11 @@ function OI(t5, i2) {
       if ("horizontal" === a2) {
         var z2 = M2.get(["itemStyle", "width"]);
         null == z2 ? z2 = g3 : (z2 = us(z2, s2), "ascending" === e2 && (z2 = -z2));
-        var S2 = y2(x2, f2), C3 = y2(k2, f2 + z2);
-        f2 += z2 + b2, n2.setItemLayout(x2, { points: S2.concat(C3.slice().reverse()) });
+        var S3 = y2(x2, f2), C3 = y2(k2, f2 + z2);
+        f2 += z2 + b2, n2.setItemLayout(x2, { points: S3.concat(C3.slice().reverse()) });
       } else {
-        var A2 = M2.get(["itemStyle", "height"]);
-        null == A2 ? A2 = g3 : (A2 = us(A2, l2), "ascending" === e2 && (A2 = -A2)), S2 = y2(x2, c2), C3 = y2(k2, c2 + A2), c2 += A2 + b2, n2.setItemLayout(x2, { points: S2.concat(C3.slice().reverse()) });
+        var A3 = M2.get(["itemStyle", "height"]);
+        null == A3 ? A3 = g3 : (A3 = us(A3, l2), "ascending" === e2 && (A3 = -A3)), S3 = y2(x2, c2), C3 = y2(k2, c2 + A3), c2 += A3 + b2, n2.setItemLayout(x2, { points: S3.concat(C3.slice().reverse()) });
       }
     }
     !(function(t7) {
@@ -34888,8 +34891,8 @@ var uD = function() {
     this._model = t6, o2.removeAll(), o2.x = a2.x, o2.y = a2.y, e2.eachEdge((function(i4) {
       var n3 = new fD(), r3 = hf(n3);
       r3.dataIndex = i4.dataIndex, r3.seriesIndex = t6.seriesIndex, r3.dataType = "edge";
-      var e3, a3, u3, h2, v2, d2, p2, m2, b2 = i4.getModel(), g3 = b2.getModel("lineStyle"), y2 = g3.get("curveness"), w3 = i4.node1.getLayout(), x2 = i4.node1.getModel(), k2 = x2.get("localX"), M2 = x2.get("localY"), z2 = i4.node2.getLayout(), S2 = i4.node2.getModel(), C3 = S2.get("localX"), A2 = S2.get("localY"), N2 = i4.getLayout();
-      n3.shape.extent = Math.max(1, N2.dy), n3.shape.orient = c2, "vertical" === c2 ? (v2 = e3 = (null != k2 ? k2 * s2 : w3.x) + N2.sy, d2 = (a3 = (null != M2 ? M2 * l2 : w3.y) + w3.dy) * (1 - y2) + (h2 = null != A2 ? A2 * l2 : z2.y) * y2, p2 = u3 = (null != C3 ? C3 * s2 : z2.x) + N2.ty, m2 = a3 * y2 + h2 * (1 - y2)) : (v2 = (e3 = (null != k2 ? k2 * s2 : w3.x) + w3.dx) * (1 - y2) + (u3 = null != C3 ? C3 * s2 : z2.x) * y2, d2 = a3 = (null != M2 ? M2 * l2 : w3.y) + N2.sy, p2 = e3 * y2 + u3 * (1 - y2), m2 = h2 = (null != A2 ? A2 * l2 : z2.y) + N2.ty), n3.setShape({ x1: e3, y1: a3, x2: u3, y2: h2, cpx1: v2, cpy1: d2, cpx2: p2, cpy2: m2 }), n3.useStyle(g3.getItemStyle()), hD(n3.style, c2, i4);
+      var e3, a3, u3, h2, v2, d2, p2, m2, b2 = i4.getModel(), g3 = b2.getModel("lineStyle"), y2 = g3.get("curveness"), w3 = i4.node1.getLayout(), x2 = i4.node1.getModel(), k2 = x2.get("localX"), M2 = x2.get("localY"), z2 = i4.node2.getLayout(), S3 = i4.node2.getModel(), C3 = S3.get("localX"), A3 = S3.get("localY"), N2 = i4.getLayout();
+      n3.shape.extent = Math.max(1, N2.dy), n3.shape.orient = c2, "vertical" === c2 ? (v2 = e3 = (null != k2 ? k2 * s2 : w3.x) + N2.sy, d2 = (a3 = (null != M2 ? M2 * l2 : w3.y) + w3.dy) * (1 - y2) + (h2 = null != A3 ? A3 * l2 : z2.y) * y2, p2 = u3 = (null != C3 ? C3 * s2 : z2.x) + N2.ty, m2 = a3 * y2 + h2 * (1 - y2)) : (v2 = (e3 = (null != k2 ? k2 * s2 : w3.x) + w3.dx) * (1 - y2) + (u3 = null != C3 ? C3 * s2 : z2.x) * y2, d2 = a3 = (null != M2 ? M2 * l2 : w3.y) + N2.sy, p2 = e3 * y2 + u3 * (1 - y2), m2 = h2 = (null != A3 ? A3 * l2 : z2.y) + N2.ty), n3.setShape({ x1: e3, y1: a3, x2: u3, y2: h2, cpx1: v2, cpy1: d2, cpx2: p2, cpy2: m2 }), n3.useStyle(g3.getItemStyle()), hD(n3.style, c2, i4);
       var _2 = "" + b2.get("value"), T4 = av(b2, "edgeLabel");
       ov(n3, T4, { labelFetcher: { getFormattedLabel: function(i5, n4, r4, e4, o3, a4) {
         return t6.getFormattedLabel(i5, n4, "edge", e4, jn(o3, T4.normal && T4.normal.get("formatter"), _2), a4);
@@ -35520,7 +35523,7 @@ var aW = { seriesType: "candlestick", plan: kb(), reset: function(t5) {
   } : function(t6, n3) {
     for (var e3, a3 = n3.getStore(); null != (e3 = t6.next()); ) {
       var c2 = a3.get(o2, e3), h2 = a3.get(s2, e3), v2 = a3.get(l2, e3), d2 = a3.get(u2, e3), p2 = a3.get(f2, e3), m2 = Math.min(h2, v2), b2 = Math.max(h2, v2), g3 = z2(m2, c2), y2 = z2(b2, c2), w3 = z2(d2, c2), x2 = z2(p2, c2), k2 = [];
-      S2(k2, y2, 0), S2(k2, g3, 1), k2.push(A2(x2), A2(y2), A2(w3), A2(g3));
+      S3(k2, y2, 0), S3(k2, g3, 1), k2.push(A3(x2), A3(y2), A3(w3), A3(g3));
       var M2 = !!n3.getItemModel(e3).get(["itemStyle", "borderColorDoji"]);
       n3.setItemLayout(e3, { sign: sW(a3, e3, h2, v2, l2, M2), initBaseline: h2 > v2 ? y2[1] : g3[1], ends: k2, brushRect: C3(d2, p2, c2) });
     }
@@ -35528,7 +35531,7 @@ var aW = { seriesType: "candlestick", plan: kb(), reset: function(t5) {
       var r3 = [];
       return r3[0] = n4, r3[1] = t7, isNaN(n4) || isNaN(t7) ? [NaN, NaN] : i2.dataToPoint(r3);
     }
-    function S2(t7, i3, n4) {
+    function S3(t7, i3, n4) {
       var e4 = i3.slice(), o3 = i3.slice();
       e4[0] = Vh(e4[0] + r2 / 2, 1, false), o3[0] = Vh(o3[0] - r2 / 2, 1, true), n4 ? t7.push(e4, o3) : t7.push(o3, e4);
     }
@@ -35536,7 +35539,7 @@ var aW = { seriesType: "candlestick", plan: kb(), reset: function(t5) {
       var e4 = z2(t7, n4), o3 = z2(i3, n4);
       return e4[0] -= r2 / 2, o3[0] -= r2 / 2, { x: e4[0], y: e4[1], width: r2, height: o3[1] - e4[1] };
     }
-    function A2(t7) {
+    function A3(t7) {
       return t7[0] = Vh(t7[0], 1), t7;
     }
   } };
@@ -36006,8 +36009,8 @@ var SW = { seriesType: "lines", reset: function(t5) {
       b2 = y2[w3 + 3] / 256;
       var z2 = 4 * Math.floor(255 * b2);
       if (b2 > 0) {
-        var S2 = o2(b2) ? s2 : l2;
-        b2 > 0 && (b2 = b2 * M2 + k2), y2[w3++] = S2[z2], y2[w3++] = S2[z2 + 1], y2[w3++] = S2[z2 + 2], y2[w3++] = S2[z2 + 3] * b2 * 256;
+        var S3 = o2(b2) ? s2 : l2;
+        b2 > 0 && (b2 = b2 * M2 + k2), y2[w3++] = S3[z2], y2[w3++] = S3[z2 + 1], y2[w3++] = S3[z2 + 2], y2[w3++] = S3[z2 + 3] * b2 * 256;
       } else w3 += 4;
     }
     return c2.putImageData(g3, 0, 0), f2;
@@ -36052,24 +36055,24 @@ var NW = (function(t5) {
       var c2 = u2.getAxis("x"), h2 = u2.getAxis("y");
       o2 = c2.getBandWidth() + 0.5, a2 = h2.getBandWidth() + 0.5, s2 = c2.scale.getExtent(), l2 = h2.scale.getExtent();
     }
-    for (var v2 = this.group, d2 = t6.getData(), p2 = t6.getModel(["emphasis", "itemStyle"]).getItemStyle(), m2 = t6.getModel(["blur", "itemStyle"]).getItemStyle(), b2 = t6.getModel(["select", "itemStyle"]).getItemStyle(), g3 = t6.get(["itemStyle", "borderRadius"]), y2 = av(t6), w3 = t6.getModel("emphasis"), x2 = w3.get("focus"), k2 = w3.get("blurScope"), M2 = w3.get("disabled"), z2 = f2 ? [d2.mapDimension("x"), d2.mapDimension("y"), d2.mapDimension("value")] : [d2.mapDimension("time"), d2.mapDimension("value")], S2 = n2; S2 < r2; S2++) {
-      var C3 = void 0, A2 = d2.getItemVisual(S2, "style");
+    for (var v2 = this.group, d2 = t6.getData(), p2 = t6.getModel(["emphasis", "itemStyle"]).getItemStyle(), m2 = t6.getModel(["blur", "itemStyle"]).getItemStyle(), b2 = t6.getModel(["select", "itemStyle"]).getItemStyle(), g3 = t6.get(["itemStyle", "borderRadius"]), y2 = av(t6), w3 = t6.getModel("emphasis"), x2 = w3.get("focus"), k2 = w3.get("blurScope"), M2 = w3.get("disabled"), z2 = f2 ? [d2.mapDimension("x"), d2.mapDimension("y"), d2.mapDimension("value")] : [d2.mapDimension("time"), d2.mapDimension("value")], S3 = n2; S3 < r2; S3++) {
+      var C3 = void 0, A3 = d2.getItemVisual(S3, "style");
       if (f2) {
-        var N2 = d2.get(z2[0], S2), _2 = d2.get(z2[1], S2);
-        if (isNaN(d2.get(z2[2], S2)) || isNaN(N2) || isNaN(_2) || N2 < s2[0] || N2 > s2[1] || _2 < l2[0] || _2 > l2[1]) continue;
+        var N2 = d2.get(z2[0], S3), _2 = d2.get(z2[1], S3);
+        if (isNaN(d2.get(z2[2], S3)) || isNaN(N2) || isNaN(_2) || N2 < s2[0] || N2 > s2[1] || _2 < l2[0] || _2 > l2[1]) continue;
         var T4 = u2.dataToPoint([N2, _2]);
-        C3 = new Zu({ shape: { x: T4[0] - o2 / 2, y: T4[1] - a2 / 2, width: o2, height: a2 }, style: A2 });
+        C3 = new Zu({ shape: { x: T4[0] - o2 / 2, y: T4[1] - a2 / 2, width: o2, height: a2 }, style: A3 });
       } else {
-        if (isNaN(d2.get(z2[1], S2))) continue;
-        C3 = new Zu({ z2: 1, shape: u2.dataToRect([d2.get(z2[0], S2)]).contentShape, style: A2 });
+        if (isNaN(d2.get(z2[1], S3))) continue;
+        C3 = new Zu({ z2: 1, shape: u2.dataToRect([d2.get(z2[0], S3)]).contentShape, style: A3 });
       }
       if (d2.hasItemOption) {
-        var I2 = d2.getItemModel(S2), L2 = I2.getModel("emphasis");
+        var I2 = d2.getItemModel(S3), L2 = I2.getModel("emphasis");
         p2 = L2.getModel("itemStyle").getItemStyle(), m2 = I2.getModel(["blur", "itemStyle"]).getItemStyle(), b2 = I2.getModel(["select", "itemStyle"]).getItemStyle(), g3 = I2.get(["itemStyle", "borderRadius"]), x2 = L2.get("focus"), k2 = L2.get("blurScope"), M2 = L2.get("disabled"), y2 = av(I2);
       }
       C3.shape.r = g3;
-      var D2 = t6.getRawValue(S2), W3 = "-";
-      D2 && null != D2[2] && (W3 = D2[2] + ""), ov(C3, y2, { labelFetcher: t6, labelDataIndex: S2, defaultOpacity: A2.opacity, defaultText: W3 }), C3.ensureState("emphasis").style = p2, C3.ensureState("blur").style = m2, C3.ensureState("select").style = b2, tc(C3, x2, k2, M2), C3.incremental = e2, e2 && (C3.states.emphasis.hoverLayer = true), v2.add(C3), d2.setItemGraphicEl(S2, C3), this._progressiveEls && this._progressiveEls.push(C3);
+      var D2 = t6.getRawValue(S3), W3 = "-";
+      D2 && null != D2[2] && (W3 = D2[2] + ""), ov(C3, y2, { labelFetcher: t6, labelDataIndex: S3, defaultOpacity: A3.opacity, defaultText: W3 }), C3.ensureState("emphasis").style = p2, C3.ensureState("blur").style = m2, C3.ensureState("select").style = b2, tc(C3, x2, k2, M2), C3.incremental = e2, e2 && (C3.states.emphasis.hoverLayer = true), v2.add(C3), d2.setItemGraphicEl(S3, C3), this._progressiveEls && this._progressiveEls.push(C3);
     }
   }, i2.prototype._renderOnGeo = function(t6, i3, n2, r2) {
     var e2 = n2.targetVisuals.inRange, o2 = n2.targetVisuals.outOfRange, a2 = i3.getData(), s2 = this._hmLayer || this._hmLayer || new CW();
@@ -36179,12 +36182,12 @@ function WW(t5, i2, n2, r2) {
       var w3 = us(g3, i3[v3.index]), x2 = Math.max(p2 + 2 * w3, 0), k2 = y2 ? 0 : 2 * w3, M2 = Ss(r3), z2 = M2 ? r3 : qW((b2 + k2) / x2);
       x2 = p2 + 2 * (w3 = (b2 - z2 * p2) / 2 / (y2 ? z2 : Math.max(z2 - 1, 1))), k2 = y2 ? 0 : 2 * w3, M2 || "fixed" === r3 || (z2 = u3 ? qW((Math.abs(u3) + k2) / x2) : 0), m2 = z2 * x2 - k2, c3.repeatTimes = z2, c3.symbolMargin = w3;
     }
-    var S2 = d2 * (m2 / 2), C3 = c3.pathPosition = [];
-    C3[h3.index] = n3[h3.wh] / 2, C3[v3.index] = "start" === a3 ? S2 : "end" === a3 ? l3 - S2 : l3 / 2, o3 && (C3[0] += o3[0], C3[1] += o3[1]);
-    var A2 = c3.bundlePosition = [];
-    A2[h3.index] = n3[h3.xy], A2[v3.index] = n3[v3.xy];
+    var S3 = d2 * (m2 / 2), C3 = c3.pathPosition = [];
+    C3[h3.index] = n3[h3.wh] / 2, C3[v3.index] = "start" === a3 ? S3 : "end" === a3 ? l3 - S3 : l3 / 2, o3 && (C3[0] += o3[0], C3[1] += o3[1]);
+    var A3 = c3.bundlePosition = [];
+    A3[h3.index] = n3[h3.xy], A3[v3.index] = n3[v3.xy];
     var N2 = c3.barRectShape = bn({}, n3);
-    N2[v3.wh] = d2 * Math.max(Math.abs(n3[v3.wh]), Math.abs(C3[v3.index] + S2)), N2[h3.wh] = n3[h3.wh];
+    N2[v3.wh] = d2 * Math.max(Math.abs(n3[v3.wh]), Math.abs(C3[v3.index] + S3)), N2[h3.wh] = n3[h3.wh];
     var _2 = c3.clipShape = {};
     _2[h3.xy] = -n3[h3.xy], _2[h3.wh] = f3.ecSize[h3.wh], _2[v3.xy] = 0, _2[v3.wh] = n3[v3.wh];
   })(n2, h2, e2, o2, 0, v2, s2, c2.valueLineWidth, c2.boundingLength, c2.repeatCutLength, r2, c2), c2;
@@ -36452,7 +36455,7 @@ var nE = (function(t5) {
       null == b2 || v3 || (p2.ignore = !b2);
       var g3, y2 = d2(h3, "position"), w3 = v3 ? u2 : u2.states[r3], x2 = w3.style.fill;
       w3.textConfig = { outsideFill: "inherit" === h3.get("color") ? x2 : null, inside: "outside" !== y2 };
-      var k2 = d2(h3, "distance") || 0, M2 = d2(h3, "align"), z2 = d2(h3, "rotate"), S2 = 0.5 * Math.PI, C3 = 1.5 * Math.PI, A2 = ku("tangential" === z2 ? Math.PI / 2 - a2 : a2), N2 = A2 > S2 && !bs(A2 - S2) && A2 < C3;
+      var k2 = d2(h3, "distance") || 0, M2 = d2(h3, "align"), z2 = d2(h3, "rotate"), S3 = 0.5 * Math.PI, C3 = 1.5 * Math.PI, A3 = ku("tangential" === z2 ? Math.PI / 2 - a2 : a2), N2 = A3 > S3 && !bs(A3 - S3) && A3 < C3;
       "outside" === y2 ? (g3 = e2.r + k2, M2 = N2 ? "right" : "left") : M2 && "center" !== M2 ? "left" === M2 ? (g3 = e2.r0 + k2, M2 = N2 ? "right" : "left") : "right" === M2 && (g3 = e2.r - k2, M2 = N2 ? "left" : "right") : (g3 = o2 === 2 * Math.PI && 0 === e2.r0 ? 0 : (e2.r + e2.r0) / 2, M2 = "center"), p2.style.align = M2, p2.style.verticalAlign = d2(h3, "verticalAlign") || "middle", p2.x = g3 * s2 + e2.cx, p2.y = g3 * l2 + e2.cy;
       var _2 = 0;
       "radial" === z2 ? _2 = ku(-a2) + (N2 ? Math.PI : 0) : "tangential" === z2 ? _2 = ku(Math.PI / 2 - a2) + (N2 ? Math.PI : 0) : Dn(z2) && (_2 = z2 * Math.PI / 180), p2.rotation = ku(_2);
@@ -36571,7 +36574,7 @@ function uE(t5, i2, n2) {
     kn(d2.children, (function(t7) {
       !isNaN(t7.getValue()) && b2++;
     }));
-    var g3 = d2.getValue(), y2 = Math.PI / (g3 || b2) * 2, w3 = d2.depth > 0, x2 = (f2 - u2) / (d2.height - (w3 ? -1 : 1) || 1), k2 = t6.get("clockwise"), M2 = t6.get("stillShowZeroSum"), z2 = k2 ? 1 : -1, S2 = function(i4, n3) {
+    var g3 = d2.getValue(), y2 = Math.PI / (g3 || b2) * 2, w3 = d2.depth > 0, x2 = (f2 - u2) / (d2.height - (w3 ? -1 : 1) || 1), k2 = t6.get("clockwise"), M2 = t6.get("stillShowZeroSum"), z2 = k2 ? 1 : -1, S3 = function(i4, n3) {
       if (i4) {
         var r3 = n3;
         if (i4 !== v2) {
@@ -36579,15 +36582,15 @@ function uE(t5, i2, n2) {
           o3 < h2 && (o3 = h2), r3 = n3 + z2 * o3;
           var f3 = i4.depth - p2 - (w3 ? -1 : 1), c3 = u2 + x2 * f3, d3 = u2 + x2 * (f3 + 1), m3 = t6.getLevelModel(i4);
           if (m3) {
-            var b3 = m3.get("r0", true), C4 = m3.get("r", true), A2 = m3.get("radius", true);
-            null != A2 && (b3 = A2[0], C4 = A2[1]), null != b3 && (c3 = us(b3, a2 / 2)), null != C4 && (d3 = us(C4, a2 / 2));
+            var b3 = m3.get("r0", true), C4 = m3.get("r", true), A3 = m3.get("radius", true);
+            null != A3 && (b3 = A3[0], C4 = A3[1]), null != b3 && (c3 = us(b3, a2 / 2)), null != C4 && (d3 = us(C4, a2 / 2));
           }
           i4.setLayout({ angle: o3, startAngle: n3, endAngle: r3, clockwise: k2, cx: s2, cy: l2, r0: c3, r: d3 });
         }
         if (i4.children && i4.children.length) {
           var N2 = 0;
           kn(i4.children, (function(t7) {
-            N2 += S2(t7, n3 + N2);
+            N2 += S3(t7, n3 + N2);
           }));
         }
         return r3 - n3;
@@ -36597,7 +36600,7 @@ function uE(t5, i2, n2) {
       var C3 = 2 * Math.PI;
       v2.setLayout({ angle: C3, startAngle: c2, endAngle: c2 + C3, clockwise: k2, cx: s2, cy: l2, r0: u2, r: u2 + x2 });
     }
-    S2(d2, c2);
+    S3(d2, c2);
   }));
 }
 function fE(t5, i2) {
@@ -38023,15 +38026,15 @@ function IF(t5, i2) {
       var i3 = t6.getData(), e2 = t6.coordinateSystem, o2 = e2.getBaseAxis(), a2 = TF(e2, o2), s2 = _F(t6), l2 = r2[a2][s2], u2 = l2.offset, f2 = l2.width, c2 = e2.getOtherAxis(o2), h2 = t6.coordinateSystem.cx, v2 = t6.coordinateSystem.cy, d2 = t6.get("barMinHeight") || 0, p2 = t6.get("barMinAngle") || 0;
       n2[s2] = n2[s2] || [];
       for (var m2 = i3.mapDimension(c2.dim), b2 = i3.mapDimension(o2.dim), g3 = Qw(i3, m2), y2 = "radius" !== o2.dim || !t6.get("roundCap", true), w3 = c2.model.get("startValue"), x2 = c2.dataToCoord(w3 || 0), k2 = 0, M2 = i3.count(); k2 < M2; k2++) {
-        var z2 = i3.get(m2, k2), S2 = i3.get(b2, k2), C3 = z2 >= 0 ? "p" : "n", A2 = x2;
-        g3 && (n2[s2][S2] || (n2[s2][S2] = { p: x2, n: x2 }), A2 = n2[s2][S2][C3]);
+        var z2 = i3.get(m2, k2), S3 = i3.get(b2, k2), C3 = z2 >= 0 ? "p" : "n", A3 = x2;
+        g3 && (n2[s2][S3] || (n2[s2][S3] = { p: x2, n: x2 }), A3 = n2[s2][S3][C3]);
         var N2 = void 0, _2 = void 0, T4 = void 0, I2 = void 0;
         if ("radius" === c2.dim) {
-          var L2 = c2.dataToCoord(z2) - x2, D2 = o2.dataToCoord(S2);
-          Math.abs(L2) < d2 && (L2 = (L2 < 0 ? -1 : 1) * d2), N2 = A2, _2 = A2 + L2, I2 = (T4 = D2 - u2) - f2, g3 && (n2[s2][S2][C3] = _2);
+          var L2 = c2.dataToCoord(z2) - x2, D2 = o2.dataToCoord(S3);
+          Math.abs(L2) < d2 && (L2 = (L2 < 0 ? -1 : 1) * d2), N2 = A3, _2 = A3 + L2, I2 = (T4 = D2 - u2) - f2, g3 && (n2[s2][S3][C3] = _2);
         } else {
-          var W3 = c2.dataToCoord(z2, y2) - x2, E3 = o2.dataToCoord(S2);
-          Math.abs(W3) < p2 && (W3 = (W3 < 0 ? -1 : 1) * p2), _2 = (N2 = E3 + u2) + f2, T4 = A2, I2 = A2 + W3, g3 && (n2[s2][S2][C3] = I2);
+          var W3 = c2.dataToCoord(z2, y2) - x2, E3 = o2.dataToCoord(S3);
+          Math.abs(W3) < p2 && (W3 = (W3 < 0 ? -1 : 1) * p2), _2 = (N2 = E3 + u2) + f2, T4 = A3, I2 = A3 + W3, g3 && (n2[s2][S3][C3] = I2);
         }
         i3.setItemLayout(k2, { cx: h2, cy: v2, r0: N2, r: _2, startAngle: -T4 * Math.PI / 180, endAngle: -I2 * Math.PI / 180, clockwise: T4 >= I2 });
       }
@@ -38548,12 +38551,12 @@ var uR = (function(t5) {
         if (x2) {
           var M2 = i4.clipPath;
           if (M2) {
-            var z2 = M2.type, S2 = void 0, C3 = false;
+            var z2 = M2.type, S3 = void 0, C3 = false;
             if (b2) {
-              var A2 = x2.getClipPath();
-              S2 = (C3 = !A2 || cR(A2).type !== z2) ? vR(z2) : A2;
-            } else g3 && (C3 = true, S2 = vR(z2));
-            x2.setClipPath(S2), TE(S2, M2, t6, { isInit: C3 }), HE(S2, M2.keyframeAnimation, t6);
+              var A3 = x2.getClipPath();
+              S3 = (C3 = !A3 || cR(A3).type !== z2) ? vR(z2) : A3;
+            } else g3 && (C3 = true, S3 = vR(z2));
+            x2.setClipPath(S3), TE(S3, M2, t6, { isInit: C3 }), HE(S3, M2.keyframeAnimation, t6);
           }
           var N2 = cR(x2);
           x2.setTextConfig(v2), N2.option = i4, (function(t7, i5, n3) {
@@ -40345,8 +40348,8 @@ var vB = (function(t5) {
     g3 = g3 * pB / 180;
     var y2 = v2.get("position", true), w3 = d2 && v2.get("showPlayBtn", true), x2 = d2 && v2.get("showPrevBtn", true), k2 = d2 && v2.get("showNextBtn", true), M2 = 0, z2 = h2;
     "left" === y2 || "bottom" === y2 ? (w3 && (r2 = [0, 0], M2 += b2), x2 && (e2 = [M2, 0], M2 += b2), k2 && (o2 = [z2 - p2, 0], z2 -= b2)) : (w3 && (r2 = [z2 - p2, 0], z2 -= b2), x2 && (e2 = [0, 0], M2 += b2), k2 && (o2 = [z2 - p2, 0], z2 -= b2));
-    var S2 = [M2, z2];
-    return t6.get("inverse") && S2.reverse(), { viewRect: l2, mainLength: h2, orient: s2, rotation: c2[s2], labelRotation: g3, labelPosOpt: n2, labelAlign: t6.get(["label", "align"]) || u2[s2], labelBaseline: t6.get(["label", "verticalAlign"]) || t6.get(["label", "baseline"]) || f2[s2], playPosition: r2, prevBtnPosition: e2, nextBtnPosition: o2, axisExtent: S2, controlSize: p2, controlGap: m2 };
+    var S3 = [M2, z2];
+    return t6.get("inverse") && S3.reverse(), { viewRect: l2, mainLength: h2, orient: s2, rotation: c2[s2], labelRotation: g3, labelPosOpt: n2, labelAlign: t6.get(["label", "align"]) || u2[s2], labelBaseline: t6.get(["label", "verticalAlign"]) || t6.get(["label", "baseline"]) || f2[s2], playPosition: r2, prevBtnPosition: e2, nextBtnPosition: o2, axisExtent: S3, controlSize: p2, controlGap: m2 };
   }, i2.prototype._position = function(t6) {
     var i3 = this._mainGroup, n2 = this._labelGroup, r2 = t6.viewRect;
     if ("vertical" === t6.orient) {
@@ -41082,10 +41085,10 @@ var iV = [["x0", "y0"], ["x1", "y0"], ["x1", "y1"], ["x0", "y1"]], nV = (functio
       var z2 = "inherit" === w3 && t6.getData().getVisual("symbol") ? "inherit" === g3 ? t6.getData().getVisual("symbolRotate") : g3 : 0;
       k2.add(((v2 = Fg(h2 = (c2 = { itemWidth: p2, itemHeight: m2, icon: l2, iconRotate: z2, itemStyle: x2.itemStyle, symbolKeepAspect: y2 }).icon || "roundRect", 0, 0, c2.itemWidth, c2.itemHeight, c2.itemStyle.fill, c2.symbolKeepAspect)).setStyle(c2.itemStyle), v2.rotation = (c2.iconRotate || 0) * Math.PI / 180, v2.setOrigin([c2.itemWidth / 2, c2.itemHeight / 2]), h2.indexOf("empty") > -1 && (v2.style.stroke = v2.style.fill, v2.style.fill = "#fff", v2.style.lineWidth = 2), v2));
     } else k2.add(t6.getLegendIcon({ itemWidth: p2, itemHeight: m2, icon: l2, iconRotate: g3, itemStyle: x2.itemStyle, lineStyle: x2.lineStyle, symbolKeepAspect: y2 }));
-    var S2 = "left" === o2 ? p2 + 5 : -5, C3 = o2, A2 = e2.get("formatter"), N2 = i3;
-    In(A2) && A2 ? N2 = A2.replace("{name}", null != i3 ? i3 : "") : Tn(A2) && (N2 = A2(i3));
+    var S3 = "left" === o2 ? p2 + 5 : -5, C3 = o2, A3 = e2.get("formatter"), N2 = i3;
+    In(A3) && A3 ? N2 = A3.replace("{name}", null != i3 ? i3 : "") : Tn(A3) && (N2 = A3(i3));
     var _2 = b2 ? M2.getTextColor() : r2.get("inactiveColor");
-    k2.add(new Ku({ style: sv(M2, { text: N2, x: S2, y: m2 / 2, fill: _2, align: C3, verticalAlign: "middle" }, { inheritColor: _2 }) }));
+    k2.add(new Ku({ style: sv(M2, { text: N2, x: S3, y: m2 / 2, fill: _2, align: C3, verticalAlign: "middle" }, { inheritColor: _2 }) }));
     var T4 = new Zu({ shape: k2.getBoundingRect(), style: { fill: "transparent" } }), I2 = r2.getModel("tooltip");
     return I2.get("show") && Kh({ el: T4, componentModel: e2, itemName: i3, itemTooltipOption: I2.option }), k2.add(T4), k2.eachChild((function(t7) {
       t7.silent = true;
@@ -42553,9 +42556,9 @@ function Zj(t5) {
       case $j.A:
         var y2 = a2[m2++], w3 = a2[m2++], x2 = a2[m2++], k2 = a2[m2++], M2 = a2[m2++], z2 = a2[m2++] + M2;
         m2 += 1;
-        var S2 = !a2[m2++];
+        var S3 = !a2[m2++];
         n2 = Math.cos(M2) * x2 + y2, r2 = Math.sin(M2) * k2 + w3, g3 ? v2(c2 = n2, h2 = r2) : d2(u2, f2, n2, r2), u2 = Math.cos(z2) * x2 + y2, f2 = Math.sin(z2) * k2 + w3;
-        for (var C3 = (S2 ? -1 : 1) * Math.PI / 2, A2 = M2; S2 ? A2 > z2 : A2 < z2; A2 += C3) p2(A2, S2 ? Math.max(A2 + C3, z2) : Math.min(A2 + C3, z2), y2, w3, x2, k2);
+        for (var C3 = (S3 ? -1 : 1) * Math.PI / 2, A3 = M2; S3 ? A3 > z2 : A3 < z2; A3 += C3) p2(A3, S3 ? Math.max(A3 + C3, z2) : Math.min(A3 + C3, z2), y2, w3, x2, k2);
         break;
       case $j.R:
         c2 = u2 = a2[m2++], h2 = f2 = a2[m2++], n2 = c2 + a2[m2++], r2 = h2 + a2[m2++], v2(n2, h2), d2(n2, h2, n2, r2), d2(n2, r2, c2, r2), d2(c2, r2, c2, h2), d2(c2, h2, n2, h2);
@@ -42738,15 +42741,15 @@ function mH(t5, i2) {
       }
       c2[0] = s3[b2] - u3[0], c2[1] = s3[b2 + 1] - u3[1];
       for (var x2 = r3 / 10, k2 = -r3 / 2; k2 <= r3 / 2; k2 += x2) {
-        var M2 = Math.sin(k2), z2 = Math.cos(k2), S2 = 0;
+        var M2 = Math.sin(k2), z2 = Math.cos(k2), S3 = 0;
         for (y2 = 0; y2 < s3.length; y2 += 2) {
-          var C3 = c2[y2], A2 = c2[y2 + 1], N2 = l3[y2] - f3[0], _2 = l3[y2 + 1] - f3[1], T4 = N2 * z2 - _2 * M2, I2 = N2 * M2 + _2 * z2;
+          var C3 = c2[y2], A3 = c2[y2 + 1], N2 = l3[y2] - f3[0], _2 = l3[y2 + 1] - f3[1], T4 = N2 * z2 - _2 * M2, I2 = N2 * M2 + _2 * z2;
           p2[y2] = T4, p2[y2 + 1] = I2;
-          var L2 = T4 - C3, D2 = I2 - A2;
-          S2 += L2 * L2 + D2 * D2;
+          var L2 = T4 - C3, D2 = I2 - A3;
+          S3 += L2 * L2 + D2 * D2;
         }
-        if (S2 < d2) {
-          d2 = S2, v2 = k2;
+        if (S3 < d2) {
+          d2 = S3, v2 = k2;
           for (var W3 = 0; W3 < p2.length; W3++) h2[W3] = p2[W3];
         }
       }
@@ -42764,8 +42767,8 @@ function mH(t5, i2) {
       }
       var y2 = f2[0], w3 = f2[1];
       for (t6.moveTo(y2, w3), m2 = 2; m2 < s3.length; ) {
-        var x2 = f2[m2++], k2 = f2[m2++], M2 = f2[m2++], z2 = f2[m2++], S2 = f2[m2++], C3 = f2[m2++];
-        y2 === x2 && w3 === k2 && M2 === S2 && z2 === C3 ? t6.lineTo(S2, C3) : t6.bezierCurveTo(x2, k2, M2, z2, S2, C3), y2 = S2, w3 = C3;
+        var x2 = f2[m2++], k2 = f2[m2++], M2 = f2[m2++], z2 = f2[m2++], S3 = f2[m2++], C3 = f2[m2++];
+        y2 === x2 && w3 === k2 && M2 === S3 && z2 === C3 ? t6.lineTo(S3, C3) : t6.bezierCurveTo(x2, k2, M2, z2, S3, C3), y2 = S3, w3 = C3;
       }
     }
   } });
@@ -43499,8 +43502,8 @@ const VH = (t5, i2) => ({ ...t5, options: { basic: () => ((t6) => {
     var _a2, _b2, _c2;
     const i4 = f2((_a2 = t7.cells[d2]) == null ? void 0 : _a2.value) || "", n3 = f2((_b2 = t7.cells[p2]) == null ? void 0 : _b2.value) || "", r3 = parseFloat(f2((_c2 = t7.cells[m2]) == null ? void 0 : _c2.value) || "0");
     return b2.add(i4), g3.add(n3), [i4, n3, r3];
-  })), w3 = Array.from(b2), x2 = Array.from(g3), k2 = new Map(w3.map(((t7, i4) => [t7, i4]))), M2 = new Map(x2.map(((t7, i4) => [t7, i4]))), z2 = y2.map((([t7, i4, n3]) => [k2.get(f2(t7)), M2.get(f2(i4)), n3])), S2 = s2(1);
-  return { color: S2[0], xAxis: { type: "category", data: w3, axisLabel: { color: v2, fontFamily: h2 } }, yAxis: { type: "category", data: x2, axisLabel: { color: v2, fontFamily: h2 } }, series: [{ type: "heatmap", data: z2, label: { show: false }, itemStyle: { borderColor: c2, borderWidth: 1 }, emphasis: { itemStyle: { shadowBlur: 10, shadowColor: "rgba(0, 0, 0, 0.5)" } } }], tooltip: u2(), visualMap: { min: Math.min(...z2.map(((t7) => Number(t7[2])))), max: Math.max(...z2.map(((t7) => Number(t7[2])))), calculable: true, orient: "vertical", left: "left", bottom: "15%", inRange: { color: ["#f6efa6", S2[0]] }, text: ["High", "Low"], textStyle: { color: v2, fontFamily: h2 } } };
+  })), w3 = Array.from(b2), x2 = Array.from(g3), k2 = new Map(w3.map(((t7, i4) => [t7, i4]))), M2 = new Map(x2.map(((t7, i4) => [t7, i4]))), z2 = y2.map((([t7, i4, n3]) => [k2.get(f2(t7)), M2.get(f2(i4)), n3])), S3 = s2(1);
+  return { color: S3[0], xAxis: { type: "category", data: w3, axisLabel: { color: v2, fontFamily: h2 } }, yAxis: { type: "category", data: x2, axisLabel: { color: v2, fontFamily: h2 } }, series: [{ type: "heatmap", data: z2, label: { show: false }, itemStyle: { borderColor: c2, borderWidth: 1 }, emphasis: { itemStyle: { shadowBlur: 10, shadowColor: "rgba(0, 0, 0, 0.5)" } } }], tooltip: u2(), visualMap: { min: Math.min(...z2.map(((t7) => Number(t7[2])))), max: Math.max(...z2.map(((t7) => Number(t7[2])))), calculable: true, orient: "vertical", left: "left", bottom: "15%", inRange: { color: ["#f6efa6", S3[0]] }, text: ["High", "Low"], textStyle: { color: v2, fontFamily: h2 } } };
 })(i2), pie: () => ((t6) => {
   const { columnById: i3, compInstance: n2, manager: r2, seriesData: e2, style: o2 } = t6().controller.get, { lfAxis: a2 } = n2, { compute: s2 } = r2.color, { label: l2, legend: u2, seriesColor: f2, tooltip: c2 } = o2, h2 = e2().map(((t7) => ({ name: t7.name, value: t7.data.reduce(((t8, i4) => t8 + i4), 0) })));
   return { color: f2(h2.length).map(((t7) => {
@@ -44458,8 +44461,22 @@ const hU = class {
   onLfEvent(t5, i2) {
     this.lfEvent.emit({ comp: this, id: this.rootElement.id, originalEvent: t5, eventType: i2 });
   }
-  async resetState() {
-    fU(this, $X, "f") && (this.error = false, this.isLoaded = false, this.resolvedSpriteName = void 0, cU(this, rU, void 0));
+  async resetState(t5, i2) {
+    if (fU(this, $X, "f") && (this.error = false, this.isLoaded = false, this.resolvedSpriteName = void 0, cU(this, rU, void 0), t5 && !fU(this, UX, "m", aU).call(this))) {
+      if ("sprite" === this.lfMode) {
+        this.isLoaded = true;
+        try {
+          const { theme: t6 } = fU(this, $X, "f");
+          t6.get.sprite.ids();
+        } catch (t6) {
+        }
+      }
+      if ("mask" === this.lfMode) try {
+        await fU(this, UX, "m", sU).call(this, t5), this.isLoaded = true;
+      } catch (t6) {
+        this.error = true;
+      }
+    }
   }
   async getDebugInfo() {
     return this.debugInfo;
@@ -45394,7 +45411,7 @@ IG = /* @__PURE__ */ new WeakMap(), LG = /* @__PURE__ */ new WeakMap(), DG = /* 
   const { bemClass: t5 } = YG(this, IG, "f").theme, { fileInfo: i2 } = YG(this, LG, "f");
   return this.selectedFiles.map(((n2, e2) => D$a("div", { class: t5(i2._, i2.item), "data-lf": YG(this, WG, "f").fadeIn, key: e2 }, YG(this, HG, "f").call(this, n2), D$a("span", { class: t5(i2._, i2.name), title: n2.name }, n2.name), D$a("span", { class: t5(i2._, i2.size), title: n2.size.toString() }, YG(this, TG, "m", BG).call(this, n2.size)), YG(this, HG, "f").call(this, n2, true))));
 }, UG.style = "::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=ripple]{animation-duration:var(--lf-ui-duration-ripple, 675ms);animation-fill-mode:forwards;animation-name:lf-ripple;animation-timing-function:var(--lf-ui-timing-ripple, ease-out);background:var(--lf-ui-ripple-background, var(--lf-color-primary));border-radius:var(--lf-ui-radius-ripple, 50%);height:var(--lf-ui-ripple-height, 100%);left:var(--lf-ui-ripple-x, 50%);opacity:var(--lf-ui-opacity-ripple, 0.5);pointer-events:none;position:absolute;top:var(--lf-ui-ripple-y, 50%);transform:scale(0);width:var(--lf-ui-ripple-width, 100%)}@keyframes lf-ripple{from{transform:scale(0)}to{opacity:0;transform:scale(4)}}[data-lf=ripple-surface]{cursor:pointer;height:100%;left:0;overflow:hidden;position:absolute;top:0;width:100%}[data-lf=fade-in]{display:block;animation:lf-fade-in-block 0.25s ease-out forwards}@keyframes lf-fade-in-block{from{visibility:hidden;opacity:0}to{visibility:visible;opacity:1}}:host{display:block;font-family:var(--lf-upload-font-family, var(--lf-font-family-primary));font-size:var(--lf-upload-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-upload-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-upload-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-upload-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-upload-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-upload-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-upload-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-upload-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{width:100%;height:100%}.upload{border:0;border-style:solid;border-color:rgba(var(--lf-upload-border-color, var(--lf-color-border)), 1);border-width:1px;border-radius:var(--lf-upload-border-radius, var(--lf-ui-border-radius));background-color:rgba(var(--lf-upload-color-surface, var(--lf-color-surface)), 0.175);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);width:100%;height:100%;box-sizing:border-box;display:grid;grid-template-rows:1fr;min-height:var(--lf-upload-min-height, 8em);padding:var(--lf-upload-padding, 1em)}.upload--has-description{grid-gap:var(--lf-upload-grid-gap, 1.25em);grid-template-rows:var(--lf-upload-button-height, 2.75em) var(--lf-upload-info-height, minmax(auto, 25vh))}.upload--has-description .file-info{padding:var(--lf-upload-item-padding, 0.75em)}.file-upload{border:0;border-style:solid;border-color:rgba(var(--lf-upload-border-color, var(--lf-color-border)), 1);border-width:1px;border-radius:var(--lf-upload-border-radius, var(--lf-ui-border-radius));background-color:rgba(var(--lf-upload-color-surface, var(--lf-color-surface)), 0.175);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:all 300ms cubic-bezier(0.4, 0, 0.2, 1);display:flex}.file-upload__input{display:none}.file-upload__label{width:100%;height:100%;font-size:0.775em;letter-spacing:0.0892857143em;line-height:inherit;text-transform:uppercase;align-content:center;cursor:pointer;display:block;margin:auto;text-align:center}.file-upload:hover{box-shadow:0 5px 5px -3px rgba(var(--lf-color-on-bg), 0.25), 0 8px 10px 1px rgba(var(--lf-color-on-bg), 0.18), 0 3px 14px 2px rgba(var(--lf-color-on-bg), 0.15)}.file-info{transition:all 300ms cubic-bezier(0.4, 0, 0.2, 1);max-height:25dvh;overflow:auto}.file-info__icon{background-color:rgba(var(--lf-upload-color-on-bg, var(--lf-color-on-bg)), 1);height:1.5em;width:1.5em;overflow:hidden}.file-info__icon--has-actions{transition:all 300ms cubic-bezier(0.4, 0, 0.2, 1);cursor:pointer}.file-info__icon--has-actions:hover{opacity:0.75}.file-info__item{align-items:center;display:flex;justify-content:center}.file-info__name,.file-info__size{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:0.875em;font-weight:400;line-height:1.25em;letter-spacing:0.2em;flex-grow:1}.file-info__name{padding:0 0.5em;width:100%}.file-info__size{min-width:max-content;padding:0 0.5em}";
-const p555deef6_entry = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const p48b2a65e_entry = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   lf_badge: At,
   lf_button: Qt,
@@ -45414,182 +45431,6 @@ const p555deef6_entry = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.def
   lf_typewriter: _G,
   lf_upload: UG
 }, Symbol.toStringTag, { value: "Module" }));
-const v$7 = (e2) => /* @__PURE__ */ ((e3) => ({ addColumn: () => {
-  const { controller: s2, elements: i2, handlers: a2 } = e3(), { refs: r2 } = i2, { button: n2 } = a2, { blocks: l2, cyAttributes: f2, lfAttributes: h2, manager: c2, parts: d2 } = s2.get, { assignRef: m2, theme: u2 } = c2, { bemClass: p2, get: g3 } = u2, { "--lf-icon-plus": y2 } = g3.current().variables;
-  return D$a("lf-button", { class: p2(l2.grid._, l2.grid.addColumn), "data-cy": f2.button, "data-lf": h2.fadeIn, id: LF_MASONRY_IDS.addColumn, key: LF_MASONRY_IDS.addColumn, lfIcon: y2, lfStyling: "floating", lfUiSize: "xxsmall", "onLf-button-event": n2, part: d2.addColumn, ref: m2(r2, "addColumn"), title: "Click to add a column to the masonry." });
-}, removeColumn: () => {
-  const { controller: s2, elements: i2, handlers: a2 } = e3(), { refs: r2 } = i2, { button: n2 } = a2, { blocks: l2, cyAttributes: f2, lfAttributes: h2, manager: c2, parts: d2 } = s2.get, { assignRef: m2, theme: u2 } = c2, { bemClass: p2, get: g3 } = u2, { "--lf-icon-minus": y2 } = g3.current().variables;
-  return D$a("lf-button", { class: p2(l2.grid._, l2.grid.removeColumn), "data-cy": f2.button, "data-lf": h2.fadeIn, id: LF_MASONRY_IDS.removeColumn, key: LF_MASONRY_IDS.removeColumn, lfIcon: y2, lfStyling: "floating", lfUiSize: "xxsmall", "onLf-button-event": n2, part: d2.removeColumn, ref: m2(r2, "removeColumn"), title: "Click to remove a column from the masonry." });
-}, changeView: () => {
-  const { controller: s2, elements: i2, handlers: a2 } = e3(), { refs: r2 } = i2, { blocks: n2, cyAttributes: l2, isMasonry: f2, isVertical: h2, manager: c2, parts: d2 } = s2.get, { button: m2 } = a2, { assignRef: u2, theme: p2 } = c2, { bemClass: g3, get: y2 } = p2, { layoutBoardSplit: b2, viewportTall: v2, viewportWide: w3 } = y2.icons();
-  return D$a("lf-button", { class: g3(n2.grid._, n2.grid.changeViewe), "data-cy": l2.button, id: LF_MASONRY_IDS.masonry, key: LF_MASONRY_IDS.masonry, lfIcon: f2() ? v2 : h2() ? w3 : b2, lfStyling: "floating", lfUiSize: "xsmall", "onLf-button-event": m2, part: d2.changeView, ref: u2(r2, "changeView"), title: f2() ? "Click to view the images arranged vertically." : h2() ? "Click to view the images arranged horizontally." : "Click to view the images arranged in a masonry." });
-} }))(e2), w$9 = (t5) => /* @__PURE__ */ ((t6) => ({ button: (e2) => {
-  const { eventType: s2, id: i2 } = e2.detail;
-  if ("click" === s2) switch (i2) {
-    case LF_MASONRY_IDS.masonry:
-      (async (t7) => {
-        const { compInstance: e3, isMasonry: s3, isVertical: i3 } = t7.controller.get;
-        e3.lfView = s3() ? "vertical" : i3() ? "horizontal" : "main";
-      })(t6());
-      break;
-    case LF_MASONRY_IDS.removeColumn:
-      (async (t7) => {
-        const { get: e3 } = t7.controller, { compInstance: s3, currentColumns: i3 } = e3, a2 = s3, r2 = i3();
-        r2 > 1 && (a2.lfColumns = r2 - 1);
-      })(t6());
-      break;
-    case LF_MASONRY_IDS.addColumn:
-      (async (t7) => {
-        const { get: e3 } = t7.controller, { compInstance: s3, currentColumns: i3 } = e3, a2 = i3();
-        s3.lfColumns = a2 + 1;
-      })(t6());
-  }
-} }))(t5);
-var k$9, z$a, x$9, C$8, S$5, M$7, W$9, _$6, A$4, T$7, E$8, j$6, I$3, V$1, L$4, D$6, P$3, R$2, U$1, B$3, H$3, O$2, F$2, K, Y = function(t5, e2, s2, i2) {
-  if ("a" === s2 && !i2) throw new TypeError("Private accessor was defined without a getter");
-  if ("function" == typeof e2 ? t5 !== e2 || !i2 : !e2.has(t5)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
-  return "m" === s2 ? i2 : "a" === s2 ? i2.call(t5) : i2 ? i2.value : e2.get(t5);
-}, $$1 = function(t5, e2, s2, i2, a2) {
-  if ("function" == typeof e2 ? t5 !== e2 || true : !e2.has(t5)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
-  return e2.set(t5, s2), s2;
-};
-const q = class {
-  constructor(a2) {
-    n(this, a2), this.lfEvent = V$4(this, "lf-masonry-event"), k$9.add(this), this.selectedShape = {}, this.shapes = {}, this.lfActions = false, this.lfColumns = Array.from(LF_MASONRY_DEFAULT_COLUMNS), this.lfDataset = null, this.lfSelectable = false, this.lfShape = "image", this.lfStyle = "", this.lfView = "main", z$a.set(this, void 0), x$9.set(this, LF_MASONRY_BLOCKS), C$8.set(this, CY_ATTRIBUTES), S$5.set(this, LF_ATTRIBUTES), M$7.set(this, LF_MASONRY_PARTS), W$9.set(this, LF_STYLE_ID), _$6.set(this, LF_MASONRY_CSS_VARS), A$4.set(this, LF_WRAPPER_ID), T$7.set(this, void 0), E$8.set(this, void 0), j$6.set(this, void 0), I$3.set(this, (() => {
-      var t5;
-      $$1(this, j$6, { controller: { get: { blocks: Y(this, x$9, "f"), compInstance: this, currentColumns: () => Y(this, T$7, "f"), cyAttributes: Y(this, C$8, "f"), isMasonry: () => Y(this, L$4, "f").call(this), isVertical: () => Y(this, D$6, "f").call(this), lfAttributes: Y(this, S$5, "f"), manager: Y(this, z$a, "f"), parts: Y(this, M$7, "f"), shapes: () => this.shapes } }, elements: { jsx: v$7(t5 = () => Y(this, j$6, "f")), refs: { addColumn: null, removeColumn: null, changeView: null } }, handlers: w$9(t5) });
-    })), V$1.set(this, (() => {
-      var _a2;
-      return !!((_a2 = this.shapes) == null ? void 0 : _a2[this.lfShape]);
-    })), L$4.set(this, (() => "main" === this.lfView)), D$6.set(this, (() => "vertical" === this.lfView)), P$3.set(this, ((t5, e2) => () => {
-      clearTimeout(Y(this, E$8, "f")), $$1(this, E$8, setTimeout(t5, e2));
-    })), R$2.set(this, ((t5) => t5.every(((t6, e2, s2) => 0 === e2 || s2[e2 - 1] < t6)))), B$3.set(this, (() => {
-      const { lfShape: e2, selectedShape: s2, shapes: i2 } = this, a3 = i2[this.lfShape].map((() => ({ htmlProps: { dataset: { lf: Y(this, S$5, "f").fadeIn, selected: "" } } })));
-      void 0 !== s2.index && (a3[s2.index] = { htmlProps: { dataset: { lf: Y(this, S$5, "f").fadeIn, selected: "true" } } });
-      const r$12 = Array.from({ length: Y(this, T$7, "f") }, (() => []), []);
-      for (let s3 = 0; s3 < i2[e2].length; s3++) {
-        const n2 = i2[e2][s3], o2 = a3[s3];
-        r$12[s3 % Y(this, T$7, "f")].push(D$a(r, { cell: Object.assign(o2, n2), index: s3, shape: e2, eventDispatcher: async (t5) => this.onLfEvent(t5, "lf-event"), framework: Y(this, z$a, "f") }));
-      }
-      return r$12;
-    })), H$3.set(this, Y(this, P$3, "f").call(this, (() => {
-      this.viewportWidth = window.innerWidth;
-    }), 200)), O$2.set(this, (() => {
-      const { bemClass: e2 } = Y(this, z$a, "f").theme, { grid: s2 } = Y(this, x$9, "f"), { addColumn: i2, changeView: a3, removeColumn: r2 } = Y(this, j$6, "f").elements.jsx;
-      return D$a("div", { class: e2(s2._, s2.actions), "data-lf": Y(this, S$5, "f").fadeIn }, Y(this, L$4, "f").call(this) && D$a("div", { class: e2(s2._, s2.sub) }, i2(), r2()), a3());
-    })), F$2.set(this, (() => {
-      const { bemClass: e2 } = Y(this, z$a, "f").theme, { grid: s2 } = Y(this, x$9, "f");
-      return Y(this, B$3, "f").call(this).map(((a3, r2) => D$a("div", { key: r2, class: e2(s2._, s2.column) }, a3.map(((e3) => D$a(jt$1, null, e3))))));
-    })), K.set(this, (() => {
-      var _a2;
-      const { bemClass: e2 } = Y(this, z$a, "f").theme, { grid: s2 } = Y(this, x$9, "f"), { lfActions: a3, lfShape: r2, lfView: n2, shapes: o2 } = this;
-      return Y(this, V$1, "f").call(this) && ((_a2 = o2[r2]) == null ? void 0 : _a2.length) ? D$a(jt$1, null, D$a("div", { class: e2(s2._, null, { [n2]: true }) }, Y(this, F$2, "f").call(this)), a3 && Y(this, O$2, "f").call(this)) : null;
-    }));
-  }
-  onLfEvent(t5, e2) {
-    const { lfSelectable: s2, lfShape: i2, selectedShape: a2, shapes: r2 } = this;
-    let n2 = false;
-    const o2 = {};
-    if ("lf-event" === e2) {
-      const { comp: e3, eventType: l2 } = t5.detail;
-      if ("click" === l2 && s2) {
-        const t6 = parseInt(e3.rootElement.dataset.index);
-        a2.index !== t6 && (o2.index = t6, o2.shape = r2[i2][t6]), n2 = true;
-      }
-    }
-    n2 && (this.selectedShape = o2), this.lfEvent.emit({ comp: this, eventType: e2, id: this.rootElement.id, originalEvent: t5, selectedShape: this.selectedShape });
-  }
-  validateColumns() {
-    if (!Y(this, z$a, "f")) return;
-    const { debug: t5 } = Y(this, z$a, "f");
-    Array.isArray(this.lfColumns) && !Y(this, R$2, "f").call(this, this.lfColumns) && (t5.logs.new(this, "Invalid breakpoints in lfColumns: must be sorted in ascending order.", "warning"), this.lfColumns = [...LF_MASONRY_DEFAULT_COLUMNS]);
-  }
-  async updateShapes() {
-    if (!Y(this, z$a, "f")) return;
-    const { data: t5, debug: e2 } = Y(this, z$a, "f");
-    try {
-      this.shapes = t5.cell.shapes.getAll(this.lfDataset);
-    } catch (t6) {
-      e2.logs.new(this, "Error updating shapes: " + t6, "error");
-    }
-  }
-  async getDebugInfo() {
-    return this.debugInfo;
-  }
-  async getProps() {
-    const t5 = LF_MASONRY_PROPS.map(((t6) => [t6, this[t6]]));
-    return Object.fromEntries(t5);
-  }
-  async getSelectedShape() {
-    return this.selectedShape;
-  }
-  async redecorateShapes() {
-    this.updateShapes();
-  }
-  async refresh() {
-    pt(this);
-  }
-  async setSelectedShape(t5) {
-    var _a2, _b2;
-    const { debug: e2 } = Y(this, z$a, "f"), s2 = (_b2 = (_a2 = this.shapes) == null ? void 0 : _a2[this.lfShape]) == null ? void 0 : _b2[t5];
-    s2 ? this.selectedShape = { index: t5, shape: s2 } : (this.selectedShape = {}, e2.logs.new(this, `Couldn't set shape with index: ${t5}`)), this.updateShapes();
-  }
-  async unmount(t5 = 0) {
-    setTimeout((() => {
-      this.onLfEvent(new CustomEvent("unmount"), "unmount"), this.rootElement.remove();
-    }), t5);
-  }
-  connectedCallback() {
-    Y(this, z$a, "f") && Y(this, z$a, "f").theme.register(this);
-  }
-  async componentWillLoad() {
-    $$1(this, z$a, await a(this)), Y(this, I$3, "f").call(this), this.updateShapes();
-  }
-  componentDidLoad() {
-    window.addEventListener("resize", Y(this, H$3, "f")), this.viewportWidth = window.innerWidth;
-    const { info: t5 } = Y(this, z$a, "f").debug;
-    this.onLfEvent(new CustomEvent("ready"), "ready"), t5.update(this, "did-load");
-  }
-  componentWillRender() {
-    const { info: t5 } = Y(this, z$a, "f").debug;
-    $$1(this, T$7, Y(this, L$4, "f").call(this) ? Y(this, k$9, "m", U$1).call(this) : 1), t5.update(this, "will-render");
-  }
-  componentDidRender() {
-    const { info: t5 } = Y(this, z$a, "f").debug;
-    t5.update(this, "did-render");
-  }
-  render() {
-    const { bemClass: e2, setLfStyle: s2 } = Y(this, z$a, "f").theme, { masonry: i2 } = Y(this, x$9, "f"), { lfStyle: a2 } = this, n2 = { [Y(this, _$6, "f").columns]: String(Y(this, T$7, "f")) };
-    return D$a(W$e, { key: "badbb6aa631769c02b287aeb7244293e15f1b81f", style: n2 }, a2 && D$a("style", { key: "f7d6a9aee293e23aff45c85c5c48927de3416edb", id: Y(this, W$9, "f") }, s2(this)), D$a("div", { key: "3d0ec51656b8fb1726406a24ed184207609ea2f1", id: Y(this, A$4, "f") }, D$a("div", { key: "d3f7292aaee793b705fba479363c8668bc57c79a", class: e2(i2._) }, Y(this, K, "f").call(this))));
-  }
-  disconnectedCallback() {
-    var _a2;
-    (_a2 = Y(this, z$a, "f")) == null ? void 0 : _a2.theme.unregister(this), window.removeEventListener("resize", Y(this, H$3, "f"));
-  }
-  get rootElement() {
-    return z$d(this);
-  }
-  static get watchers() {
-    return { lfColumns: ["validateColumns"], lfDataset: ["updateShapes"], lfShape: ["updateShapes"] };
-  }
-};
-z$a = /* @__PURE__ */ new WeakMap(), x$9 = /* @__PURE__ */ new WeakMap(), C$8 = /* @__PURE__ */ new WeakMap(), S$5 = /* @__PURE__ */ new WeakMap(), M$7 = /* @__PURE__ */ new WeakMap(), W$9 = /* @__PURE__ */ new WeakMap(), _$6 = /* @__PURE__ */ new WeakMap(), A$4 = /* @__PURE__ */ new WeakMap(), T$7 = /* @__PURE__ */ new WeakMap(), E$8 = /* @__PURE__ */ new WeakMap(), j$6 = /* @__PURE__ */ new WeakMap(), I$3 = /* @__PURE__ */ new WeakMap(), V$1 = /* @__PURE__ */ new WeakMap(), L$4 = /* @__PURE__ */ new WeakMap(), D$6 = /* @__PURE__ */ new WeakMap(), P$3 = /* @__PURE__ */ new WeakMap(), R$2 = /* @__PURE__ */ new WeakMap(), B$3 = /* @__PURE__ */ new WeakMap(), H$3 = /* @__PURE__ */ new WeakMap(), O$2 = /* @__PURE__ */ new WeakMap(), F$2 = /* @__PURE__ */ new WeakMap(), K = /* @__PURE__ */ new WeakMap(), k$9 = /* @__PURE__ */ new WeakSet(), U$1 = function() {
-  var _a2, _b2;
-  const { lfColumns: t5, viewportWidth: e2, shapes: s2, lfShape: i2 } = this;
-  if (!Y(this, V$1, "f").call(this)) return 1;
-  if ("number" == typeof t5) return Math.min(t5, ((_a2 = s2[i2]) == null ? void 0 : _a2.length) || 0);
-  if (Array.isArray(t5)) {
-    const a2 = t5;
-    let r2 = 1;
-    for (let t6 = 0; t6 < a2.length && e2 >= a2[t6]; t6++) r2 = t6 + 1;
-    return Math.min(r2, ((_b2 = s2 == null ? void 0 : s2[i2]) == null ? void 0 : _b2.length) || 0);
-  }
-  return 1;
-}, q.style = "::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=fade-in]{display:block;animation:lf-fade-in-block 0.25s ease-out forwards}@keyframes lf-fade-in-block{from{visibility:hidden;opacity:0}to{visibility:visible;opacity:1}}:host{display:block;font-family:var(--lf-masonry-font-family, var(--lf-font-family-primary));font-size:var(--lf-masonry-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-masonry-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-masonry-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-masonry-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-masonry-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-masonry-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-masonry-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-masonry-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{width:100%;height:100%}:host([lf-selectable]) lf-image{transition:all 200ms cubic-bezier(0.4, 0, 0.6, 1);box-sizing:border-box;cursor:pointer;overflow:hidden}:host([lf-selectable]) lf-image:hover,:host([lf-selectable]) lf-image[data-selected=true]{filter:var(--lf-comp-selected-filter, brightness(110%) drop-shadow(0 0 0.5em rgb(var(--lf-color-secondary))))}:host([lf-selectable]) lf-image[data-selected=true]{border:var(--lf-masonry-selected-border, 1px solid rgba(var(--lf-color-secondary, 0.875)))}.masonry{width:100%;height:100%;box-sizing:border-box;display:flex;gap:var(--lf-masonry-grid-gap, 0.5em);overflow:auto;padding:var(--lf-masonry-padding, 0.75em);position:relative}.masonry:not(:hover) .grid__actions{display:none}.grid{width:100%;height:100%;align-items:var(--lf-masonry-grid-items-alignment, start);column-gap:var(--lf-masonry-grid-gap, 0.5em);display:grid;overflow-y:auto;overflow-x:hidden}.grid--horizontal{grid-template-rows:1fr;overflow-x:auto;overflow-y:hidden}.grid--horizontal .grid__column{flex-direction:row;height:100%;min-height:max-content;width:auto}.grid--main{grid-template-columns:repeat(var(--lf_masonry_columns), var(--lf-masonry-column-size, minmax(0px, 1fr)))}.grid--main .grid__column{flex-direction:column}.grid--vertical{grid-template-columns:1fr}.grid--vertical .grid__column{flex-direction:column}.grid__column{display:flex;flex:1;gap:var(--lf-masonry-grid-gap, 0.5em);width:100%}.grid__actions{backdrop-filter:var(--lf-masonry-actions-backdrop, blur(10px));background-color:var(--lf-masonry-actions-background, rgba(var(--lf-color-surface), 0.75));border-radius:var(--lf-masonry-actions-border-radius, 50px);bottom:var(--lf-masonry-button-bottom, 1em);display:grid;grid-auto-flow:row;grid-gap:var(--lf-masonry-grid-gap-actions, 0.5em);justify-items:center;margin:var(--lf-masonry-actions-margin, 0 0.5em 0.5em 0);padding:var(--lf-masonry-actions-padding, 0.75em);position:absolute;right:var(--lf-masonry-button-right, 1em);z-index:var(--lf-masonry-actions-z-index, 2)}.grid__sub{display:grid;grid-gap:var(--lf-masonry-grid-gap-actions-sub, 0.25em)}";
-const p55c6a817_entry = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
-  __proto__: null,
-  lf_masonry: q
-}, Symbol.toStringTag, { value: "Module" }));
 const m$6 = { start: (t5) => {
   const { controller: e2 } = t5, { get: s2, set: i2 } = e2, { compInstance: r2 } = s2, { lfAutoPlay: a2, lfInterval: o2 } = r2;
   a2 && o2 > 0 && i2.interval(setInterval((() => {
@@ -45607,7 +45448,7 @@ const m$6 = { start: (t5) => {
 }, forward: () => {
   const { controller: s2, elements: i2, handlers: r2 } = e3(), { blocks: a2, cyAttributes: o2, manager: n2, parts: c2 } = s2.get, { assignRef: f2, theme: h2 } = n2, { refs: u2 } = i2, { button: d2 } = r2, { "--lf-icon-next": b2 } = h2.get.current().variables;
   return D$a("lf-button", { class: h2.bemClass(a2.carousel._, a2.carousel.forward), "data-cy": o2.button, id: LF_CAROUSEL_IDS.forward, lfIcon: b2, lfStyling: "icon", lfUiSize: "large", "onLf-button-event": d2, part: c2.forward, ref: f2(u2, "forward"), title: "Next slide." });
-} }))(e2), w$8 = (t5) => /* @__PURE__ */ ((t6) => ({ button: (e2) => {
+} }))(e2), w$9 = (t5) => /* @__PURE__ */ ((t6) => ({ button: (e2) => {
   const { eventType: s2, id: i2 } = e2.detail, { next: r2, previous: a2 } = t6().controller.set.index;
   if ("click" === s2) switch (i2) {
     case LF_CAROUSEL_IDS.back:
@@ -45617,29 +45458,29 @@ const m$6 = { start: (t5) => {
       r2();
   }
 } }))(t5);
-var k$8, z$9, x$8, _$5, S$4, E$7, W$8, j$5, C$7, M$6, T$6, I$2, L$3, P$2, D$5, A$3, R$1, H$2 = function(t5, e2, s2, i2) {
+var k$9, z$a, x$9, _$6, S$5, E$8, W$9, j$6, C$8, M$7, T$7, I$3, L$4, P$3, D$6, A$4, R$2, H$3 = function(t5, e2, s2, i2) {
   if ("a" === s2 && !i2) throw new TypeError("Private accessor was defined without a getter");
   if ("function" == typeof e2 ? t5 !== e2 || !i2 : !e2.has(t5)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return "m" === s2 ? i2 : "a" === s2 ? i2.call(t5) : i2 ? i2.value : e2.get(t5);
-}, B$2 = function(t5, e2, s2, i2, r2) {
+}, B$3 = function(t5, e2, s2, i2, r2) {
   if ("function" == typeof e2 ? t5 !== e2 || true : !e2.has(t5)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
   return e2.set(t5, s2), s2;
 };
-const O$1 = class O {
+const O$2 = class O {
   constructor(t5) {
-    n(this, t5), this.lfEvent = V$4(this, "lf-carousel-event"), k$8.add(this), this.currentIndex = 0, this.shapes = {}, this.lfDataset = null, this.lfAutoPlay = false, this.lfInterval = 3e3, this.lfLightbox = false, this.lfNavigation = false, this.lfShape = "image", this.lfStyle = "", z$9.set(this, void 0), x$8.set(this, LF_CAROUSEL_BLOCKS), _$5.set(this, CY_ATTRIBUTES), S$4.set(this, LF_ATTRIBUTES), E$7.set(this, LF_CAROUSEL_PARTS), W$8.set(this, LF_STYLE_ID), j$5.set(this, LF_WRAPPER_ID), C$7.set(this, void 0), M$6.set(this, void 0), T$6.set(this, void 0), I$2.set(this, (() => {
+    n(this, t5), this.lfEvent = V$4(this, "lf-carousel-event"), k$9.add(this), this.currentIndex = 0, this.shapes = {}, this.lfDataset = null, this.lfAutoPlay = false, this.lfInterval = 3e3, this.lfLightbox = false, this.lfNavigation = false, this.lfShape = "image", this.lfStyle = "", z$a.set(this, void 0), x$9.set(this, LF_CAROUSEL_BLOCKS), _$6.set(this, CY_ATTRIBUTES), S$5.set(this, LF_ATTRIBUTES), E$8.set(this, LF_CAROUSEL_PARTS), W$9.set(this, LF_STYLE_ID), j$6.set(this, LF_WRAPPER_ID), C$8.set(this, void 0), M$7.set(this, void 0), T$7.set(this, void 0), I$3.set(this, (() => {
       var t6;
-      B$2(this, T$6, { controller: { get: { blocks: H$2(this, x$8, "f"), compInstance: this, cyAttributes: CY_ATTRIBUTES, index: { current: () => this.currentIndex }, interval: () => H$2(this, M$6, "f"), manager: H$2(this, z$9, "f"), parts: LF_CAROUSEL_PARTS, totalSlides: () => H$2(this, k$8, "m", L$3).call(this) }, set: g$6({ index: { current: (t7) => this.currentIndex = t7, next: () => {
+      B$3(this, T$7, { controller: { get: { blocks: H$3(this, x$9, "f"), compInstance: this, cyAttributes: CY_ATTRIBUTES, index: { current: () => this.currentIndex }, interval: () => H$3(this, M$7, "f"), manager: H$3(this, z$a, "f"), parts: LF_CAROUSEL_PARTS, totalSlides: () => H$3(this, k$9, "m", L$4).call(this) }, set: g$6({ index: { current: (t7) => this.currentIndex = t7, next: () => {
         var t7, e2;
-        this.currentIndex = (t7 = this.currentIndex, e2 = H$2(this, k$8, "m", L$3).call(this), (t7 + 1) % e2);
+        this.currentIndex = (t7 = this.currentIndex, e2 = H$3(this, k$9, "m", L$4).call(this), (t7 + 1) % e2);
       }, previous: () => {
         var t7, e2;
-        this.currentIndex = (t7 = this.currentIndex, e2 = H$2(this, k$8, "m", L$3).call(this), (t7 - 1 + e2) % e2);
-      } }, interval: (t7) => B$2(this, M$6, t7, "f") }, t6 = () => H$2(this, T$6, "f")) }, elements: { jsx: y$8(t6), refs: { back: null, forward: null } }, handlers: w$8(t6) });
+        this.currentIndex = (t7 = this.currentIndex, e2 = H$3(this, k$9, "m", L$4).call(this), (t7 - 1 + e2) % e2);
+      } }, interval: (t7) => B$3(this, M$7, t7, "f") }, t6 = () => H$3(this, T$7, "f")) }, elements: { jsx: y$8(t6), refs: { back: null, forward: null } }, handlers: w$9(t6) });
     }));
   }
   onLfEvent(t5, e2) {
-    const { lightbox: s2 } = H$2(this, z$9, "f").effects;
+    const { lightbox: s2 } = H$3(this, z$a, "f").effects;
     if ("lf-event" === e2 && this.lfLightbox) {
       const { comp: e3, eventType: i2 } = t5.detail;
       if ("click" === i2) {
@@ -45650,8 +45491,8 @@ const O$1 = class O {
     this.lfEvent.emit({ comp: this, eventType: e2, id: this.rootElement.id, originalEvent: t5 });
   }
   async updateShapes() {
-    if (!H$2(this, z$9, "f")) return;
-    const { data: t5, debug: e2 } = H$2(this, z$9, "f");
+    if (!H$3(this, z$a, "f")) return;
+    const { data: t5, debug: e2 } = H$3(this, z$a, "f");
     try {
       this.shapes = t5.cell.shapes.getAll(this.lfDataset);
     } catch (t6) {
@@ -45666,15 +45507,15 @@ const O$1 = class O {
     return Object.fromEntries(t5);
   }
   async goToSlide(t5) {
-    const { current: e2 } = H$2(this, T$6, "f").controller.set.index;
+    const { current: e2 } = H$3(this, T$7, "f").controller.set.index;
     e2(t5);
   }
   async nextSlide() {
-    const { next: t5 } = H$2(this, T$6, "f").controller.set.index;
+    const { next: t5 } = H$3(this, T$7, "f").controller.set.index;
     t5();
   }
   async prevSlide() {
-    const { previous: t5 } = H$2(this, T$6, "f").controller.set.index;
+    const { previous: t5 } = H$3(this, T$7, "f").controller.set.index;
     t5();
   }
   async refresh() {
@@ -45686,14 +45527,14 @@ const O$1 = class O {
     }), t5);
   }
   connectedCallback() {
-    H$2(this, z$9, "f") && H$2(this, z$9, "f").theme.register(this);
+    H$3(this, z$a, "f") && H$3(this, z$a, "f").theme.register(this);
   }
   async componentWillLoad() {
-    B$2(this, z$9, await a(this)), H$2(this, I$2, "f").call(this), this.updateShapes(), this.lfAutoPlay && m$6.start(H$2(this, T$6, "f"));
+    B$3(this, z$a, await a(this)), H$3(this, I$3, "f").call(this), this.updateShapes(), this.lfAutoPlay && m$6.start(H$3(this, T$7, "f"));
   }
   componentDidLoad() {
-    const { info: t5 } = H$2(this, z$9, "f").debug, { register: e2 } = H$2(this, z$9, "f").drag, { next: s2, previous: i2 } = H$2(this, T$6, "f").controller.set.index;
-    e2.swipe(H$2(this, C$7, "f"), { onEnd: (t6, e3) => {
+    const { info: t5 } = H$3(this, z$a, "f").debug, { register: e2 } = H$3(this, z$a, "f").drag, { next: s2, previous: i2 } = H$3(this, T$7, "f").controller.set.index;
+    e2.swipe(H$3(this, C$8, "f"), { onEnd: (t6, e3) => {
       var _a2;
       if ((_a2 = e3.swipeData) == null ? void 0 : _a2.direction) {
         const { direction: t7 } = e3.swipeData;
@@ -45702,22 +45543,22 @@ const O$1 = class O {
     } }), this.onLfEvent(new CustomEvent("ready"), "ready"), t5.update(this, "did-load");
   }
   componentWillRender() {
-    const { info: t5 } = H$2(this, z$9, "f").debug;
+    const { info: t5 } = H$3(this, z$a, "f").debug;
     t5.update(this, "will-render");
   }
   componentDidRender() {
-    const { info: t5 } = H$2(this, z$9, "f").debug;
+    const { info: t5 } = H$3(this, z$a, "f").debug;
     t5.update(this, "did-render");
   }
   render() {
-    const { bemClass: e2, setLfStyle: s2 } = H$2(this, z$9, "f").theme, { lfStyle: i2 } = this, { carousel: a2 } = H$2(this, x$8, "f");
-    return D$a(W$e, { key: "80540b7fb5566ef47c904a27811e0f15de3b4f3e" }, i2 && D$a("style", { key: "07913ca7e055a83fde61905b79e923092bdb3f9e", id: H$2(this, W$8, "f") }, s2(this)), D$a("div", { key: "901aef70c78f967fe0e8925f21146e3ff7453a69", id: H$2(this, j$5, "f") }, D$a("div", { key: "2ab6f3383322d90fcd4b4fb0cfe68999d24f3c87", class: e2(a2._), part: H$2(this, E$7, "f").carousel, ref: (t5) => {
-      t5 && B$2(this, C$7, t5);
-    }, role: "region" }, H$2(this, k$8, "m", D$5).call(this))));
+    const { bemClass: e2, setLfStyle: s2 } = H$3(this, z$a, "f").theme, { lfStyle: i2 } = this, { carousel: a2 } = H$3(this, x$9, "f");
+    return D$a(W$e, { key: "80540b7fb5566ef47c904a27811e0f15de3b4f3e" }, i2 && D$a("style", { key: "07913ca7e055a83fde61905b79e923092bdb3f9e", id: H$3(this, W$9, "f") }, s2(this)), D$a("div", { key: "901aef70c78f967fe0e8925f21146e3ff7453a69", id: H$3(this, j$6, "f") }, D$a("div", { key: "2ab6f3383322d90fcd4b4fb0cfe68999d24f3c87", class: e2(a2._), part: H$3(this, E$8, "f").carousel, ref: (t5) => {
+      t5 && B$3(this, C$8, t5);
+    }, role: "region" }, H$3(this, k$9, "m", D$6).call(this))));
   }
   disconnectedCallback() {
     var _a2, _b2;
-    (_a2 = H$2(this, z$9, "f")) == null ? void 0 : _a2.drag.unregister.swipe(H$2(this, C$7, "f")), (_b2 = H$2(this, z$9, "f")) == null ? void 0 : _b2.theme.unregister(this), m$6.stop(H$2(this, T$6, "f"));
+    (_a2 = H$3(this, z$a, "f")) == null ? void 0 : _a2.drag.unregister.swipe(H$3(this, C$8, "f")), (_b2 = H$3(this, z$a, "f")) == null ? void 0 : _b2.theme.unregister(this), m$6.stop(H$3(this, T$7, "f"));
   }
   get rootElement() {
     return z$d(this);
@@ -45726,42 +45567,42 @@ const O$1 = class O {
     return { lfDataset: ["updateShapes"], lfShape: ["updateShapes"] };
   }
 };
-z$9 = /* @__PURE__ */ new WeakMap(), x$8 = /* @__PURE__ */ new WeakMap(), _$5 = /* @__PURE__ */ new WeakMap(), S$4 = /* @__PURE__ */ new WeakMap(), E$7 = /* @__PURE__ */ new WeakMap(), W$8 = /* @__PURE__ */ new WeakMap(), j$5 = /* @__PURE__ */ new WeakMap(), C$7 = /* @__PURE__ */ new WeakMap(), M$6 = /* @__PURE__ */ new WeakMap(), T$6 = /* @__PURE__ */ new WeakMap(), I$2 = /* @__PURE__ */ new WeakMap(), k$8 = /* @__PURE__ */ new WeakSet(), L$3 = function() {
+z$a = /* @__PURE__ */ new WeakMap(), x$9 = /* @__PURE__ */ new WeakMap(), _$6 = /* @__PURE__ */ new WeakMap(), S$5 = /* @__PURE__ */ new WeakMap(), E$8 = /* @__PURE__ */ new WeakMap(), W$9 = /* @__PURE__ */ new WeakMap(), j$6 = /* @__PURE__ */ new WeakMap(), C$8 = /* @__PURE__ */ new WeakMap(), M$7 = /* @__PURE__ */ new WeakMap(), T$7 = /* @__PURE__ */ new WeakMap(), I$3 = /* @__PURE__ */ new WeakMap(), k$9 = /* @__PURE__ */ new WeakSet(), L$4 = function() {
   var _a2, _b2;
   return ((_b2 = (_a2 = this.shapes) == null ? void 0 : _a2[this.lfShape]) == null ? void 0 : _b2.length) || 0;
-}, P$2 = function() {
+}, P$3 = function() {
   var _a2;
   return !!((_a2 = this.shapes) == null ? void 0 : _a2[this.lfShape]);
-}, D$5 = function() {
-  const { bemClass: e2 } = H$2(this, z$9, "f").theme, { carousel: s2 } = H$2(this, x$8, "f"), { elements: i2 } = H$2(this, T$6, "f"), { jsx: r2 } = i2, { back: a2, forward: l2 } = r2;
-  if (H$2(this, k$8, "m", P$2).call(this)) {
+}, D$6 = function() {
+  const { bemClass: e2 } = H$3(this, z$a, "f").theme, { carousel: s2 } = H$3(this, x$9, "f"), { elements: i2 } = H$3(this, T$7, "f"), { jsx: r2 } = i2, { back: a2, forward: l2 } = r2;
+  if (H$3(this, k$9, "m", P$3).call(this)) {
     const i3 = this.shapes[this.lfShape];
-    if (i3 == null ? void 0 : i3.length) return D$a(jt$1, null, D$a("div", { "aria-live": "polite", class: e2(s2._, s2.track), part: H$2(this, E$7, "f").track, role: "region" }, H$2(this, k$8, "m", R$1).call(this), this.lfNavigation && a2(), this.lfNavigation && l2()), H$2(this, k$8, "m", A$3).call(this));
+    if (i3 == null ? void 0 : i3.length) return D$a(jt$1, null, D$a("div", { "aria-live": "polite", class: e2(s2._, s2.track), part: H$3(this, E$8, "f").track, role: "region" }, H$3(this, k$9, "m", R$2).call(this), this.lfNavigation && a2(), this.lfNavigation && l2()), H$3(this, k$9, "m", A$4).call(this));
   }
   return null;
-}, A$3 = function() {
-  const { bemClass: e2 } = H$2(this, z$9, "f").theme, { slideBar: s2 } = H$2(this, x$8, "f"), i2 = H$2(this, k$8, "m", L$3).call(this), r2 = [];
+}, A$4 = function() {
+  const { bemClass: e2 } = H$3(this, z$a, "f").theme, { slideBar: s2 } = H$3(this, x$9, "f"), i2 = H$3(this, k$9, "m", L$4).call(this), r2 = [];
   for (let a2 = 0; a2 < i2; a2++) {
     const i3 = `Jump to slide ${a2 + 1}`;
-    r2.push(D$a("div", { "aria-label": i3, class: e2(s2._, s2.segment, { active: a2 === this.currentIndex }), "data-cy": H$2(this, _$5, "f").button, "data-index": a2, onClick: async () => this.goToSlide(a2), part: H$2(this, E$7, "f").segment, role: "button", tabIndex: 0, title: i3 }));
+    r2.push(D$a("div", { "aria-label": i3, class: e2(s2._, s2.segment, { active: a2 === this.currentIndex }), "data-cy": H$3(this, _$6, "f").button, "data-index": a2, onClick: async () => this.goToSlide(a2), part: H$3(this, E$8, "f").segment, role: "button", tabIndex: 0, title: i3 }));
   }
-  return D$a("div", { class: e2(s2._), part: H$2(this, E$7, "f").slideBar }, r2);
-}, R$1 = function() {
-  const { bemClass: e2 } = H$2(this, z$9, "f").theme, { currentIndex: s2, lfShape: i2 } = this, { carousel: r$12 } = H$2(this, x$8, "f"), a2 = this.shapes[i2].map((() => ({ htmlProps: { dataset: { lf: H$2(this, S$4, "f").fadeIn } } }))), o2 = this.shapes[i2][s2], l2 = a2[s2];
-  return D$a("div", { class: e2(r$12._, r$12.slide), "data-index": s2 }, D$a(r, { cell: Object.assign(l2, o2), index: s2, shape: i2, eventDispatcher: async (t5) => this.onLfEvent(t5, "lf-event"), framework: H$2(this, z$9, "f") }));
-}, O$1.style = "::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=fade-in]{display:block;animation:lf-fade-in-block 0.25s ease-out forwards}@keyframes lf-fade-in-block{from{visibility:hidden;opacity:0}to{visibility:visible;opacity:1}}:host{display:block;font-family:var(--lf-carousel-font-family, var(--lf-font-family-primary));font-size:var(--lf-carousel-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-carousel-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-carousel-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-carousel-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-carousel-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-carousel-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-carousel-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-carousel-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{width:100%;height:100%;margin:auto;overflow:hidden;position:relative}:host([lf-lightbox]) [data-lf=fade-in]{cursor:pointer}.carousel{border:0;border-style:solid;border-radius:var(--lf-carousel-border-radius, var(--lf-ui-border-radius));width:100%;height:100%;display:flex;justify-content:center;overflow:hidden;position:relative}.carousel:hover .slide-bar{opacity:1}.carousel:hover .carousel__back,.carousel:hover .carousel__forward{opacity:1}.carousel:hover .carousel__back{left:0.5em}.carousel:hover .carousel__forward{right:0.5em}.carousel__back,.carousel__forward{transition:all 250ms cubic-bezier(0.34, 1.56, 0.64, 1);opacity:0;position:absolute;top:50%;transform:translateY(-50%)}.carousel__back{left:0}.carousel__forward{right:0}.carousel__track{width:100%;height:100%;transition:all 250ms cubic-bezier(0.34, 1.56, 0.64, 1);display:flex;will-change:transform}.carousel__slide{width:100%;height:100%;align-items:center;flex-shrink:0;justify-content:center}.slide-bar{background-color:rgba(var(--lf-carousel-color-surface, var(--lf-color-surface)), 0.75);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:all 300ms cubic-bezier(0.4, 0, 0.2, 1);align-items:center;bottom:0;box-sizing:border-box;display:flex;flex-wrap:nowrap;height:var(--lf-carousel-slide-bar-height, 0.75em);left:0;opacity:var(--lf-carousel-slide-bar-opacity, 0.75);position:absolute;width:100%}.slide-bar:hover{opacity:var(--lf-carousel-slide-bar-opacity-hover, 1)}.slide-bar__segment{background-color:rgba(var(--lf-carousel-color-surface, var(--lf-color-surface)), 1);width:100%;height:100%;transition:all 300ms cubic-bezier(0.4, 0, 0.2, 1);cursor:pointer}.slide-bar__segment:not(.slide-bar__segment--active):hover{background-color:rgba(var(--lf-carousel-color-on-surface, var(--lf-color-on-surface)), 0.5)}.slide-bar__segment--active{background-color:rgba(var(--lf-carousel-color-on-surface, var(--lf-color-on-surface)), 1)}";
+  return D$a("div", { class: e2(s2._), part: H$3(this, E$8, "f").slideBar }, r2);
+}, R$2 = function() {
+  const { bemClass: e2 } = H$3(this, z$a, "f").theme, { currentIndex: s2, lfShape: i2 } = this, { carousel: r$12 } = H$3(this, x$9, "f"), a2 = this.shapes[i2].map((() => ({ htmlProps: { dataset: { lf: H$3(this, S$5, "f").fadeIn } } }))), o2 = this.shapes[i2][s2], l2 = a2[s2];
+  return D$a("div", { class: e2(r$12._, r$12.slide), "data-index": s2 }, D$a(r, { cell: Object.assign(l2, o2), index: s2, shape: i2, eventDispatcher: async (t5) => this.onLfEvent(t5, "lf-event"), framework: H$3(this, z$a, "f") }));
+}, O$2.style = "::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=fade-in]{display:block;animation:lf-fade-in-block 0.25s ease-out forwards}@keyframes lf-fade-in-block{from{visibility:hidden;opacity:0}to{visibility:visible;opacity:1}}:host{display:block;font-family:var(--lf-carousel-font-family, var(--lf-font-family-primary));font-size:var(--lf-carousel-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-carousel-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-carousel-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-carousel-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-carousel-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-carousel-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-carousel-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-carousel-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{width:100%;height:100%;margin:auto;overflow:hidden;position:relative}:host([lf-lightbox]) [data-lf=fade-in]{cursor:pointer}.carousel{border:0;border-style:solid;border-radius:var(--lf-carousel-border-radius, var(--lf-ui-border-radius));width:100%;height:100%;display:flex;justify-content:center;overflow:hidden;position:relative}.carousel:hover .slide-bar{opacity:1}.carousel:hover .carousel__back,.carousel:hover .carousel__forward{opacity:1}.carousel:hover .carousel__back{left:0.5em}.carousel:hover .carousel__forward{right:0.5em}.carousel__back,.carousel__forward{transition:all 250ms cubic-bezier(0.34, 1.56, 0.64, 1);opacity:0;position:absolute;top:50%;transform:translateY(-50%)}.carousel__back{left:0}.carousel__forward{right:0}.carousel__track{width:100%;height:100%;transition:all 250ms cubic-bezier(0.34, 1.56, 0.64, 1);display:flex;will-change:transform}.carousel__slide{width:100%;height:100%;align-items:center;flex-shrink:0;justify-content:center}.slide-bar{background-color:rgba(var(--lf-carousel-color-surface, var(--lf-color-surface)), 0.75);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:all 300ms cubic-bezier(0.4, 0, 0.2, 1);align-items:center;bottom:0;box-sizing:border-box;display:flex;flex-wrap:nowrap;height:var(--lf-carousel-slide-bar-height, 0.75em);left:0;opacity:var(--lf-carousel-slide-bar-opacity, 0.75);position:absolute;width:100%}.slide-bar:hover{opacity:var(--lf-carousel-slide-bar-opacity-hover, 1)}.slide-bar__segment{background-color:rgba(var(--lf-carousel-color-surface, var(--lf-color-surface)), 1);width:100%;height:100%;transition:all 300ms cubic-bezier(0.4, 0, 0.2, 1);cursor:pointer}.slide-bar__segment:not(.slide-bar__segment--active):hover{background-color:rgba(var(--lf-carousel-color-on-surface, var(--lf-color-on-surface)), 0.5)}.slide-bar__segment--active{background-color:rgba(var(--lf-carousel-color-on-surface, var(--lf-color-on-surface)), 1)}";
 const p5d51f267_entry = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
-  lf_carousel: O$1
+  lf_carousel: O$2
 }, Symbol.toStringTag, { value: "Module" }));
-var g$5, u$6, p$5, y$7, b$6, z$8, w$7, k$7, x$7, C$6, E$6, j$4, W$7, S$3, D$4 = function(t5, e2, i2, a2) {
+var g$5, u$6, p$5, y$7, b$7, z$9, w$8, k$8, x$8, C$7, E$7, j$5, W$8, S$4, D$5 = function(t5, e2, i2, a2) {
   if ("a" === i2 && !a2) throw new TypeError("Private accessor was defined without a getter");
   if ("function" == typeof e2 ? t5 !== e2 || !a2 : !e2.has(t5)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return "m" === i2 ? a2 : "a" === i2 ? a2.call(t5) : a2 ? a2.value : e2.get(t5);
 };
-const T$5 = class T {
+const T$6 = class T {
   constructor(i2) {
-    n(this, i2), this.lfEvent = V$4(this, "lf-article-event"), g$5.add(this), this.lfDataset = null, this.lfEmpty = "Empty data.", this.lfStyle = "", this.lfUiSize = "medium", u$6.set(this, void 0), p$5.set(this, LF_ARTICLE_BLOCKS), y$7.set(this, CY_ATTRIBUTES), b$6.set(this, LF_ARTICLE_PARTS), z$8.set(this, LF_STYLE_ID), w$7.set(this, LF_WRAPPER_ID);
+    n(this, i2), this.lfEvent = V$4(this, "lf-article-event"), g$5.add(this), this.lfDataset = null, this.lfEmpty = "Empty data.", this.lfStyle = "", this.lfUiSize = "medium", u$6.set(this, void 0), p$5.set(this, LF_ARTICLE_BLOCKS), y$7.set(this, CY_ATTRIBUTES), b$7.set(this, LF_ARTICLE_PARTS), z$9.set(this, LF_STYLE_ID), w$8.set(this, LF_WRAPPER_ID);
   }
   onLfEvent(t5, e2) {
     this.lfEvent.emit({ comp: this, eventType: e2, id: this.rootElement.id, originalEvent: t5 });
@@ -45782,7 +45623,7 @@ const T$5 = class T {
     }), t5);
   }
   connectedCallback() {
-    D$4(this, u$6, "f") && D$4(this, u$6, "f").theme.register(this);
+    D$5(this, u$6, "f") && D$5(this, u$6, "f").theme.register(this);
   }
   async componentWillLoad() {
     !(function(t5, e2, i2, a2, r2) {
@@ -45791,77 +45632,77 @@ const T$5 = class T {
     })(this, u$6, await a(this));
   }
   componentDidLoad() {
-    const { info: t5 } = D$4(this, u$6, "f").debug;
+    const { info: t5 } = D$5(this, u$6, "f").debug;
     this.onLfEvent(new CustomEvent("ready"), "ready"), t5.update(this, "did-load");
   }
   componentWillRender() {
-    const { info: t5 } = D$4(this, u$6, "f").debug;
+    const { info: t5 } = D$5(this, u$6, "f").debug;
     t5.update(this, "will-render");
   }
   componentDidRender() {
-    const { info: t5 } = D$4(this, u$6, "f").debug;
+    const { info: t5 } = D$5(this, u$6, "f").debug;
     t5.update(this, "did-render");
   }
   render() {
     var _a2;
-    const { theme: t5 } = D$4(this, u$6, "f"), { bemClass: e2, setLfStyle: i2 } = t5, { lfDataset: l2, lfEmpty: o2, lfStyle: s2 } = this, { emptyData: n2 } = D$4(this, p$5, "f");
-    return D$a(W$e, { key: "facc45a56c7f608d4ea63431396e1a044bf952cc" }, s2 && D$a("style", { key: "32ff6a90169431aa5dba003da5e168715cbeb1f5", id: D$4(this, z$8, "f") }, i2(this)), D$a("div", { key: "c5549c09dd1786060182280c0586fee4d7c45985", id: D$4(this, w$7, "f") }, ((_a2 = l2 == null ? void 0 : l2.nodes) == null ? void 0 : _a2.length) ? D$4(this, g$5, "m", x$7).call(this) : D$a("div", { class: e2(n2._), part: D$4(this, b$6, "f").emptyData }, D$a("div", { class: e2(n2._, n2.text) }, o2))));
+    const { theme: t5 } = D$5(this, u$6, "f"), { bemClass: e2, setLfStyle: i2 } = t5, { lfDataset: l2, lfEmpty: o2, lfStyle: s2 } = this, { emptyData: n2 } = D$5(this, p$5, "f");
+    return D$a(W$e, { key: "facc45a56c7f608d4ea63431396e1a044bf952cc" }, s2 && D$a("style", { key: "32ff6a90169431aa5dba003da5e168715cbeb1f5", id: D$5(this, z$9, "f") }, i2(this)), D$a("div", { key: "c5549c09dd1786060182280c0586fee4d7c45985", id: D$5(this, w$8, "f") }, ((_a2 = l2 == null ? void 0 : l2.nodes) == null ? void 0 : _a2.length) ? D$5(this, g$5, "m", x$8).call(this) : D$a("div", { class: e2(n2._), part: D$5(this, b$7, "f").emptyData }, D$a("div", { class: e2(n2._, n2.text) }, o2))));
   }
   disconnectedCallback() {
     var _a2;
-    (_a2 = D$4(this, u$6, "f")) == null ? void 0 : _a2.theme.unregister(this);
+    (_a2 = D$5(this, u$6, "f")) == null ? void 0 : _a2.theme.unregister(this);
   }
   get rootElement() {
     return z$d(this);
   }
 };
-u$6 = /* @__PURE__ */ new WeakMap(), p$5 = /* @__PURE__ */ new WeakMap(), y$7 = /* @__PURE__ */ new WeakMap(), b$6 = /* @__PURE__ */ new WeakMap(), z$8 = /* @__PURE__ */ new WeakMap(), w$7 = /* @__PURE__ */ new WeakMap(), g$5 = /* @__PURE__ */ new WeakSet(), k$7 = function(t5, e2) {
+u$6 = /* @__PURE__ */ new WeakMap(), p$5 = /* @__PURE__ */ new WeakMap(), y$7 = /* @__PURE__ */ new WeakMap(), b$7 = /* @__PURE__ */ new WeakMap(), z$9 = /* @__PURE__ */ new WeakMap(), w$8 = /* @__PURE__ */ new WeakMap(), g$5 = /* @__PURE__ */ new WeakSet(), k$8 = function(t5, e2) {
   var _a2;
   switch (e2) {
     case 0:
-      return D$4(this, g$5, "m", C$6).call(this, t5, e2);
+      return D$5(this, g$5, "m", C$7).call(this, t5, e2);
     case 1:
-      return D$4(this, g$5, "m", E$6).call(this, t5, e2);
+      return D$5(this, g$5, "m", E$7).call(this, t5, e2);
     case 2:
-      return D$4(this, g$5, "m", W$7).call(this, t5, e2);
+      return D$5(this, g$5, "m", W$8).call(this, t5, e2);
     default:
-      return ((_a2 = t5.children) == null ? void 0 : _a2.length) ? D$4(this, g$5, "m", j$4).call(this, t5, e2) : D$4(this, g$5, "m", S$3).call(this, t5, e2);
+      return ((_a2 = t5.children) == null ? void 0 : _a2.length) ? D$5(this, g$5, "m", j$5).call(this, t5, e2) : D$5(this, g$5, "m", S$4).call(this, t5, e2);
   }
-}, x$7 = function() {
+}, x$8 = function() {
   const t5 = [], { nodes: e2 } = this.lfDataset;
   for (let i2 = 0; i2 < e2.length; i2++) {
     const a2 = e2[i2];
-    t5.push(D$4(this, g$5, "m", k$7).call(this, a2, 0));
+    t5.push(D$5(this, g$5, "m", k$8).call(this, a2, 0));
   }
   return D$a(jt$1, null, t5);
-}, C$6 = function(t5, e2) {
-  const { bemClass: i2 } = D$4(this, u$6, "f").theme, { children: r2, cssStyle: l2, value: s2 } = t5;
-  return D$a(jt$1, null, D$a("article", { class: i2(D$4(this, p$5, "f").article._), "data-cy": D$4(this, y$7, "f").node, "data-depth": e2.toString(), part: D$4(this, b$6, "f").article, style: l2 }, s2 && D$a("h1", null, s2), r2 && t5.children.map(((t6) => D$4(this, g$5, "m", k$7).call(this, t6, e2 + 1)))));
-}, E$6 = function(t5, e2) {
-  const { bemClass: i2 } = D$4(this, u$6, "f").theme, { children: r2, cssStyle: l2, value: s2 } = t5;
-  return D$a(jt$1, null, D$a("section", { class: i2(D$4(this, p$5, "f").section._), "data-cy": D$4(this, y$7, "f").node, "data-depth": e2.toString(), part: D$4(this, b$6, "f").section, style: l2 }, s2 && D$a("h2", null, s2), r2 && r2.map(((t6) => D$4(this, g$5, "m", k$7).call(this, t6, e2 + 1)))));
-}, j$4 = function(t5, e2) {
-  const { bemClass: i2 } = D$4(this, u$6, "f").theme, { children: r2, cssStyle: l2, tagName: s2, value: n2 } = t5, f2 = (r2 == null ? void 0 : r2.some(((t6) => "li" === t6.tagName))) ? "ul" : s2 || "div";
-  return D$a(jt$1, null, n2 && D$a("div", null, n2), D$a(f2, { class: i2(D$4(this, p$5, "f").content._), "data-cy": D$4(this, y$7, "f").node, "data-depth": e2.toString(), part: D$4(this, b$6, "f").content, style: l2 }, r2 && r2.map(((t6) => D$4(this, g$5, "m", k$7).call(this, t6, e2 + 1)))));
-}, W$7 = function(t5, e2) {
-  const { bemClass: i2 } = D$4(this, u$6, "f").theme, { children: r2, cssStyle: l2, value: s2 } = t5;
-  return D$a(jt$1, null, D$a("p", { class: i2(D$4(this, p$5, "f").paragraph._), "data-cy": D$4(this, y$7, "f").node, "data-depth": e2.toString(), part: D$4(this, b$6, "f").paragraph, style: l2 }, s2 && D$a("h3", null, s2), r2 && r2.map(((t6) => D$4(this, g$5, "m", k$7).call(this, t6, e2 + 1)))));
-}, S$3 = function(t5, e2) {
-  const { theme: i2 } = D$4(this, u$6, "f"), { cells: r$12, cssStyle: l2, tagName: o2, value: s2 } = t5, n2 = r$12 && Object.keys(r$12)[0], f2 = r$12 == null ? void 0 : r$12[n2], { content: c2 } = D$4(this, p$5, "f");
-  if (f2) return D$a(r, { cell: f2, index: 0, shape: f2.shape, eventDispatcher: async (t6) => this.onLfEvent(t6, "lf-event"), framework: D$4(this, u$6, "f") });
+}, C$7 = function(t5, e2) {
+  const { bemClass: i2 } = D$5(this, u$6, "f").theme, { children: r2, cssStyle: l2, value: s2 } = t5;
+  return D$a(jt$1, null, D$a("article", { class: i2(D$5(this, p$5, "f").article._), "data-cy": D$5(this, y$7, "f").node, "data-depth": e2.toString(), part: D$5(this, b$7, "f").article, style: l2 }, s2 && D$a("h1", null, s2), r2 && t5.children.map(((t6) => D$5(this, g$5, "m", k$8).call(this, t6, e2 + 1)))));
+}, E$7 = function(t5, e2) {
+  const { bemClass: i2 } = D$5(this, u$6, "f").theme, { children: r2, cssStyle: l2, value: s2 } = t5;
+  return D$a(jt$1, null, D$a("section", { class: i2(D$5(this, p$5, "f").section._), "data-cy": D$5(this, y$7, "f").node, "data-depth": e2.toString(), part: D$5(this, b$7, "f").section, style: l2 }, s2 && D$a("h2", null, s2), r2 && r2.map(((t6) => D$5(this, g$5, "m", k$8).call(this, t6, e2 + 1)))));
+}, j$5 = function(t5, e2) {
+  const { bemClass: i2 } = D$5(this, u$6, "f").theme, { children: r2, cssStyle: l2, tagName: s2, value: n2 } = t5, f2 = (r2 == null ? void 0 : r2.some(((t6) => "li" === t6.tagName))) ? "ul" : s2 || "div";
+  return D$a(jt$1, null, n2 && D$a("div", null, n2), D$a(f2, { class: i2(D$5(this, p$5, "f").content._), "data-cy": D$5(this, y$7, "f").node, "data-depth": e2.toString(), part: D$5(this, b$7, "f").content, style: l2 }, r2 && r2.map(((t6) => D$5(this, g$5, "m", k$8).call(this, t6, e2 + 1)))));
+}, W$8 = function(t5, e2) {
+  const { bemClass: i2 } = D$5(this, u$6, "f").theme, { children: r2, cssStyle: l2, value: s2 } = t5;
+  return D$a(jt$1, null, D$a("p", { class: i2(D$5(this, p$5, "f").paragraph._), "data-cy": D$5(this, y$7, "f").node, "data-depth": e2.toString(), part: D$5(this, b$7, "f").paragraph, style: l2 }, s2 && D$a("h3", null, s2), r2 && r2.map(((t6) => D$5(this, g$5, "m", k$8).call(this, t6, e2 + 1)))));
+}, S$4 = function(t5, e2) {
+  const { theme: i2 } = D$5(this, u$6, "f"), { cells: r$12, cssStyle: l2, tagName: o2, value: s2 } = t5, n2 = r$12 && Object.keys(r$12)[0], f2 = r$12 == null ? void 0 : r$12[n2], { content: c2 } = D$5(this, p$5, "f");
+  if (f2) return D$a(r, { cell: f2, index: 0, shape: f2.shape, eventDispatcher: async (t6) => this.onLfEvent(t6, "lf-event"), framework: D$5(this, u$6, "f") });
   {
     const t6 = o2 || "span";
-    return D$a(t6, { class: i2.bemClass(c2._, c2.body, { [t6]: Boolean(t6) }), "data-depth": e2.toString(), part: D$4(this, b$6, "f").content, style: l2 }, s2);
+    return D$a(t6, { class: i2.bemClass(c2._, c2.body, { [t6]: Boolean(t6) }), "data-depth": e2.toString(), part: D$5(this, b$7, "f").content, style: l2 }, s2);
   }
-}, T$5.style = "h1{font-size:2em;font-weight:600;line-height:1.2em;letter-spacing:0em;margin-bottom:0.5em;color:rgb(var(--lf-article-color-h1, var(--lf-color-on-bg)));font-family:var(--lf-article-font-family-h1, var(--lf-font-family-primary));font-size:var(--lf-article-font-size-h1, 2em);margin-top:0;margin-bottom:1em;word-break:break-word}h2{font-size:1.75em;font-weight:500;line-height:1.3em;letter-spacing:0em;margin-bottom:0.5em;color:rgb(var(--lf-article-color-h2, var(--lf-color-on-bg)));font-family:var(--lf-article-font-family-h2, var(--lf-font-family-primary));font-size:var(--lf-article-font-size-h2, 1.75em);margin:1.5em 0 0.5em}h3{font-size:1.5em;font-weight:500;line-height:1.4em;letter-spacing:0em;margin-bottom:0.5em;color:rgb(var(--lf-article-color-h3, var(--lf-color-on-bg)));font-family:var(--lf-article-font-family-h3, var(--lf-font-family-primary));font-size:var(--lf-article-font-size-h3, 1.5em);margin:1em 0 0.5em}h4{font-size:1.25em;font-weight:500;line-height:1.5em;letter-spacing:0em;margin-bottom:0.5em;color:rgb(var(--lf-article-color-h4, var(--lf-color-on-bg)));font-family:var(--lf-article-font-family-h4, var(--lf-font-family-primary));font-size:var(--lf-article-font-size-h4, 1.25em);margin:1em 0 0.5em}h5{font-size:1.125em;font-weight:500;line-height:1.6em;letter-spacing:0em;margin-bottom:0.5em;color:rgb(var(--lf-article-color-h5, var(--lf-color-on-bg)));font-family:var(--lf-article-font-family-h5, var(--lf-font-family-primary));font-size:var(--lf-article-font-size-h5, 1.125em);margin:1em 0 0.5em}h6{font-size:1em;font-weight:500;line-height:1.5em;letter-spacing:0em;margin-bottom:0.5em;color:rgb(var(--lf-article-color-h6, var(--lf-color-on-bg)));font-family:var(--lf-article-font-family-h6, var(--lf-font-family-primary));font-size:var(--lf-article-font-size-h6, 1em);margin:1em 0 0.5em}ul,ol{font-size:1em;font-weight:400;line-height:1.6em;letter-spacing:0em;margin-bottom:0.5em;margin-left:1.5em;margin:1em 0;padding-inline-start:var(--lf-article-padding-ul, 1.25em)}::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}:host{display:block;font-family:var(--lf-article-font-family, var(--lf-font-family-primary));font-size:var(--lf-article-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-article-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-article-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-article-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-article-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-article-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-article-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-article-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{border:0;border-style:solid;border-radius:var(--lf-article-border-radius, var(--lf-ui-border-radius));color:rgb(var(--lf-article-color-on-bg, var(--lf-color-on-bg)))}.article{background-color:rgba(var(--lf-article-color-bg, var(--lf-color-bg)), 0.375);color:rgb(var(--lf-article-color-on-bg, var(--lf-color-on-bg)));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);margin:var(--lf-article-margin, auto);max-width:var(--lf-article-max-width, 1200px);padding:var(--lf-article-padding, 2.5em)}.content__body{font-size:1em;font-weight:400;line-height:1.6em;letter-spacing:0em;margin-bottom:1em;font-family:var(--lf-article-font-family-body, var(--lf-font-family-primary));font-size:var(--lf-article-font-size-body, var(--lf-font-size))}.empty-data{width:100%;height:100%;align-items:center;display:flex;justify-content:center}[data-component=LfCode]{max-width:max-content;margin:auto;padding:1.75em 0}";
+}, T$6.style = "h1{font-size:2em;font-weight:600;line-height:1.2em;letter-spacing:0em;margin-bottom:0.5em;color:rgb(var(--lf-article-color-h1, var(--lf-color-on-bg)));font-family:var(--lf-article-font-family-h1, var(--lf-font-family-primary));font-size:var(--lf-article-font-size-h1, 2em);margin-top:0;margin-bottom:1em;word-break:break-word}h2{font-size:1.75em;font-weight:500;line-height:1.3em;letter-spacing:0em;margin-bottom:0.5em;color:rgb(var(--lf-article-color-h2, var(--lf-color-on-bg)));font-family:var(--lf-article-font-family-h2, var(--lf-font-family-primary));font-size:var(--lf-article-font-size-h2, 1.75em);margin:1.5em 0 0.5em}h3{font-size:1.5em;font-weight:500;line-height:1.4em;letter-spacing:0em;margin-bottom:0.5em;color:rgb(var(--lf-article-color-h3, var(--lf-color-on-bg)));font-family:var(--lf-article-font-family-h3, var(--lf-font-family-primary));font-size:var(--lf-article-font-size-h3, 1.5em);margin:1em 0 0.5em}h4{font-size:1.25em;font-weight:500;line-height:1.5em;letter-spacing:0em;margin-bottom:0.5em;color:rgb(var(--lf-article-color-h4, var(--lf-color-on-bg)));font-family:var(--lf-article-font-family-h4, var(--lf-font-family-primary));font-size:var(--lf-article-font-size-h4, 1.25em);margin:1em 0 0.5em}h5{font-size:1.125em;font-weight:500;line-height:1.6em;letter-spacing:0em;margin-bottom:0.5em;color:rgb(var(--lf-article-color-h5, var(--lf-color-on-bg)));font-family:var(--lf-article-font-family-h5, var(--lf-font-family-primary));font-size:var(--lf-article-font-size-h5, 1.125em);margin:1em 0 0.5em}h6{font-size:1em;font-weight:500;line-height:1.5em;letter-spacing:0em;margin-bottom:0.5em;color:rgb(var(--lf-article-color-h6, var(--lf-color-on-bg)));font-family:var(--lf-article-font-family-h6, var(--lf-font-family-primary));font-size:var(--lf-article-font-size-h6, 1em);margin:1em 0 0.5em}ul,ol{font-size:1em;font-weight:400;line-height:1.6em;letter-spacing:0em;margin-bottom:0.5em;margin-left:1.5em;margin:1em 0;padding-inline-start:var(--lf-article-padding-ul, 1.25em)}::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}:host{display:block;font-family:var(--lf-article-font-family, var(--lf-font-family-primary));font-size:var(--lf-article-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-article-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-article-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-article-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-article-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-article-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-article-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-article-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{border:0;border-style:solid;border-radius:var(--lf-article-border-radius, var(--lf-ui-border-radius));color:rgb(var(--lf-article-color-on-bg, var(--lf-color-on-bg)))}.article{background-color:rgba(var(--lf-article-color-bg, var(--lf-color-bg)), 0.375);color:rgb(var(--lf-article-color-on-bg, var(--lf-color-on-bg)));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);margin:var(--lf-article-margin, auto);max-width:var(--lf-article-max-width, 1200px);padding:var(--lf-article-padding, 2.5em)}.content__body{font-size:1em;font-weight:400;line-height:1.6em;letter-spacing:0em;margin-bottom:1em;font-family:var(--lf-article-font-family-body, var(--lf-font-family-primary));font-size:var(--lf-article-font-size-body, var(--lf-font-size))}.empty-data{width:100%;height:100%;align-items:center;display:flex;justify-content:center}[data-component=LfCode]{max-width:max-content;margin:auto;padding:1.75em 0}";
 const p62695161_entry = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
-  lf_article: T$5
+  lf_article: T$6
 }, Symbol.toStringTag, { value: "Module" }));
 const u$5 = async (e2, t5 = null) => {
   const { history: a2 } = e2.controller.set;
-  null === t5 ? (a2.pop(), b$5(e2)) : a2.pop(t5);
-}, b$5 = async (e2) => {
+  null === t5 ? (a2.pop(), b$6(e2)) : a2.pop(t5);
+}, b$6 = async (e2) => {
   const { controller: t5, elements: a2 } = e2, { masonry: s2 } = a2.refs.navigation, { set: i2 } = t5;
   i2.currentShape({}), i2.history.index(null), s2.setSelectedShape(null);
 }, v$6 = (e2) => {
@@ -45872,7 +45713,7 @@ const u$5 = async (e2, t5 = null) => {
 }, y$6 = (e2, t5) => {
   const a2 = e2;
   e2.value = t5, a2.lfValue && (a2.lfValue = t5);
-}, w$6 = (t5) => ({ canvas: () => {
+}, w$7 = (t5) => ({ canvas: () => {
   const { controller: a2, elements: s2, handlers: i2 } = t5(), { blocks: n2, history: l2, lfAttribute: o2, manager: c2 } = a2.get, { details: f2 } = s2.refs, { canvas: d2 } = i2.details, { currentSnapshot: h2 } = l2, { assignRef: g3, theme: m2 } = c2, { bemClass: u2 } = m2, b2 = h2();
   if (b2) return D$a("lf-canvas", { class: u2(n2.detailsGrid._, n2.detailsGrid.canvas), "data-lf": o2.fadeIn, id: IDS.details.canvas, lfImageProps: { lfValue: b2.value }, "onLf-canvas-event": d2, ref: g3(f2, "canvas") });
 }, clearHistory: () => {
@@ -45899,7 +45740,7 @@ const u$5 = async (e2, t5 = null) => {
   var _a2;
   const { controller: a2, elements: s2, handlers: i2 } = t5(), { blocks: n2, cyAttributes: l2, history: o2, manager: c2 } = a2.get, { current: f2, index: d2 } = o2, { details: h2 } = s2.refs, { button: g3 } = i2.details, { assignRef: m2, theme: u2 } = c2, { bemClass: b2, get: v2 } = u2, { "--lf-icon-previous": p2 } = v2.current().variables, y2 = !(((_a2 = f2()) == null ? void 0 : _a2.length) && d2() > 0);
   return D$a("lf-button", { class: b2(n2.detailsGrid._, n2.detailsGrid.undo), "data-cy": l2.button, id: IDS.details.undo, lfIcon: p2, lfLabel: "Undo", lfStretchX: true, lfStyling: "flat", lfUiState: y2 ? "disabled" : "primary", "onLf-button-event": g3, ref: m2(h2, "undo") });
-} }), x$6 = (t5) => ({ load: () => {
+} }), x$7 = (t5) => ({ load: () => {
   const { controller: a2, elements: s2, handlers: i2 } = t5(), { blocks: n2, cyAttributes: l2, manager: o2 } = a2.get, { navigation: c2 } = s2.refs, { button: f2 } = i2.navigation, { assignRef: d2, theme: h2 } = o2, { bemClass: g3 } = h2;
   return D$a("lf-button", { class: g3(n2.navigationGrid._, n2.navigationGrid.button), "data-cy": l2.button, id: IDS.navigation.load, lfLabel: "Load", lfStretchX: true, "onLf-button-event": f2, ref: d2(c2, "load") }, D$a("lf-spinner", { lfActive: true, lfDimensions: "2px", lfLayout: 1, slot: "spinner" }));
 }, masonry: () => {
@@ -45914,7 +45755,7 @@ const u$5 = async (e2, t5 = null) => {
 }, tree: () => {
   const { controller: a2, elements: s2, handlers: i2 } = t5(), { blocks: n2, compInstance: l2, manager: o2 } = a2.get, { navigation: c2 } = s2.refs, { tree: f2 } = i2.navigation, { assignRef: d2, sanitizeProps: h2, theme: g3 } = o2, { bemClass: m2 } = g3, u2 = l2.lfNavigation || {};
   return D$a("lf-tree", { class: m2(n2.navigationGrid._, n2.navigationGrid.tree), id: IDS.navigation.tree, "onLf-tree-event": f2, ref: d2(c2, "tree"), ...h2(u2.treeProps, "LfTree") });
-} }), k$6 = (e2) => ({ button: async (t5) => {
+} }), k$7 = (e2) => ({ button: async (t5) => {
   const { comp: a2, eventType: s2, id: i2 } = t5.detail, n2 = e2(), { compInstance: l2, currentShape: o2 } = n2.controller.get;
   if (l2.onLfEvent(t5, "lf-event"), "click" === s2) switch (i2) {
     case IDS.details.clearHistory:
@@ -45926,7 +45767,7 @@ const u$5 = async (e2, t5 = null) => {
         const { compInstance: t6, currentShape: a3, manager: s3 } = e4.controller.get, { lfDataset: i3 } = t6, { findNodeByCell: n3, pop: r2 } = s3.data.node;
         await u$5(e4, a3().shape.index);
         const l3 = n3(i3, v$6(e4));
-        r2(i3.nodes, l3), t6.lfDataset = { ...i3 }, await b$5(e4);
+        r2(i3.nodes, l3), t6.lfDataset = { ...i3 }, await b$6(e4);
       })(n2)));
       break;
     case IDS.details.redo:
@@ -45955,7 +45796,7 @@ const u$5 = async (e2, t5 = null) => {
 }, tree: (t5) => {
   const a2 = e2(), { compInstance: s2 } = a2.controller.get;
   s2.onLfEvent(t5, "lf-event");
-} }), z$7 = (e2) => ({ button: async (t5) => {
+} }), z$8 = (e2) => ({ button: async (t5) => {
   const { comp: a2, eventType: s2 } = t5.detail, i2 = e2(), { compInstance: n2 } = i2.controller.get;
   n2.onLfEvent(t5, "lf-event"), "click" === s2 && p$4(a2, (() => (async (e3) => {
     const { controller: t6, elements: a3 } = e3, { textfield: s3 } = a3.refs.navigation, { compInstance: i3 } = t6.get, { lfLoadCallback: n3 } = i3;
@@ -45970,7 +45811,7 @@ const u$5 = async (e2, t5 = null) => {
   const { eventType: a2, originalEvent: s2, selectedShape: i2 } = t5.detail, n2 = e2(), { controller: r2 } = n2, { get: l2, set: o2 } = r2, { compInstance: c2, history: f2 } = l2, { current: d2 } = f2;
   if (c2.onLfEvent(t5, "lf-event"), "lf-event" === a2 && "click" === s2.detail.eventType) {
     const e3 = l2.currentShape();
-    if (((_a2 = e3 == null ? void 0 : e3.shape) == null ? void 0 : _a2.index) === i2.index) b$5(n2);
+    if (((_a2 = e3 == null ? void 0 : e3.shape) == null ? void 0 : _a2.index) === i2.index) b$6(n2);
     else {
       o2.currentShape(i2);
       const e4 = d2();
@@ -45986,27 +45827,27 @@ const u$5 = async (e2, t5 = null) => {
 }, tree: (t5) => {
   const a2 = e2(), { compInstance: s2 } = a2.controller.get;
   s2.onLfEvent(t5, "lf-event");
-} }), S$2 = (e2, t5) => ({ ...e2, spinnerStatus: (e3) => t5().elements.refs.details.spinner.lfActive = e3 }), L$2 = (e2) => ({ details: w$6(e2), navigation: x$6(e2) }), C$5 = (e2) => ({ details: k$6(e2), navigation: z$7(e2) });
-var _$4, I$1, T$4, A$2, R, D$3, E$5, W$6, M$5, j$3, H$1, P$1, U, X, O2 = function(e2, t5, a2, s2) {
+} }), S$3 = (e2, t5) => ({ ...e2, spinnerStatus: (e3) => t5().elements.refs.details.spinner.lfActive = e3 }), L$3 = (e2) => ({ details: w$7(e2), navigation: x$7(e2) }), C$6 = (e2) => ({ details: k$7(e2), navigation: z$8(e2) });
+var _$5, I$2, T$5, A$3, R$1, D$4, E$6, W$7, M$6, j$4, H$2, P$2, U$1, X, O$1 = function(e2, t5, a2, s2) {
   if ("a" === a2 && !s2) throw new TypeError("Private accessor was defined without a getter");
   if ("function" == typeof t5 ? e2 !== t5 || !s2 : !t5.has(e2)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return "m" === a2 ? s2 : "a" === a2 ? s2.call(e2) : s2 ? s2.value : t5.get(e2);
-}, B$1 = function(e2, t5, a2, s2, i2) {
+}, B$2 = function(e2, t5, a2, s2, i2) {
   if ("function" == typeof t5 ? e2 !== t5 || true : !t5.has(e2)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
   return t5.set(e2, a2), a2;
 };
-const F$1 = class F {
+const F$2 = class F {
   constructor(e2) {
-    n(this, e2), this.lfEvent = V$4(this, "lf-imageviewer-event"), _$4.add(this), this.currentShape = {}, this.history = {}, this.historyIndex = null, this.isNavigationTreeOpen = false, this.isSpinnerActive = false, this.lfDataset = {}, this.lfLoadCallback = null, this.lfStyle = "", this.lfValue = {}, I$1.set(this, void 0), T$4.set(this, LF_IMAGEVIEWER_BLOCKS), A$2.set(this, CY_ATTRIBUTES), R.set(this, LF_ATTRIBUTES), D$3.set(this, LF_IMAGEVIEWER_PARTS), E$5.set(this, LF_STYLE_ID), W$6.set(this, LF_WRAPPER_ID), M$5.set(this, void 0), j$3.set(this, (() => {
+    n(this, e2), this.lfEvent = V$4(this, "lf-imageviewer-event"), _$5.add(this), this.currentShape = {}, this.history = {}, this.historyIndex = null, this.isNavigationTreeOpen = false, this.isSpinnerActive = false, this.lfDataset = {}, this.lfLoadCallback = null, this.lfStyle = "", this.lfValue = {}, I$2.set(this, void 0), T$5.set(this, LF_IMAGEVIEWER_BLOCKS), A$3.set(this, CY_ATTRIBUTES), R$1.set(this, LF_ATTRIBUTES), D$4.set(this, LF_IMAGEVIEWER_PARTS), E$6.set(this, LF_STYLE_ID), W$7.set(this, LF_WRAPPER_ID), M$6.set(this, void 0), j$4.set(this, (() => {
       var e3;
-      B$1(this, M$5, { controller: { get: { blocks: O2(this, T$4, "f"), compInstance: this, currentShape: () => O2(this, _$4, "m", H$1).call(this, this.currentShape), cyAttributes: O2(this, A$2, "f"), history: { current: () => this.history[this.currentShape.index], currentSnapshot: () => {
+      B$2(this, M$6, { controller: { get: { blocks: O$1(this, T$5, "f"), compInstance: this, currentShape: () => O$1(this, _$5, "m", H$2).call(this, this.currentShape), cyAttributes: O$1(this, A$3, "f"), history: { current: () => this.history[this.currentShape.index], currentSnapshot: () => {
         if (null === this.historyIndex) return null;
         const e4 = this.history[this.currentShape.index][this.historyIndex];
-        return O2(this, _$4, "m", H$1).call(this, e4);
-      }, full: () => this.history, index: () => this.historyIndex }, lfAttribute: O2(this, R, "f"), manager: O2(this, I$1, "f"), navigation: { hasNav: () => {
+        return O$1(this, _$5, "m", H$2).call(this, e4);
+      }, full: () => this.history, index: () => this.historyIndex }, lfAttribute: O$1(this, R$1, "f"), manager: O$1(this, I$2, "f"), navigation: { hasNav: () => {
         var _a2, _b2;
         return Boolean((_b2 = (_a2 = this.lfNavigation) == null ? void 0 : _a2.treeProps) == null ? void 0 : _b2.lfDataset);
-      }, isTreeOpen: () => this.isNavigationTreeOpen }, parts: O2(this, D$3, "f"), spinnerStatus: () => this.isSpinnerActive }, set: S$2({ currentShape: (e4) => this.currentShape = e4, history: { index: (e4) => this.historyIndex = e4, new: (e4, t5 = false) => {
+      }, isTreeOpen: () => this.isNavigationTreeOpen }, parts: O$1(this, D$4, "f"), spinnerStatus: () => this.isSpinnerActive }, set: S$3({ currentShape: (e4) => this.currentShape = e4, history: { index: (e4) => this.historyIndex = e4, new: (e4, t5 = false) => {
         var _a2;
         const a2 = ((_a2 = this.history) == null ? void 0 : _a2[e4.index]) || [];
         this.historyIndex < a2.length - 1 && a2.splice(this.historyIndex + 1), !(a2 == null ? void 0 : a2.length) || t5 ? (a2.push(e4), this.history[e4.index] = a2, this.historyIndex = a2.length - 1) : a2[0] = e4;
@@ -46016,7 +45857,7 @@ const F$1 = class F {
         this.isNavigationTreeOpen = e4;
       }, toggleTree: () => {
         this.isNavigationTreeOpen = !this.isNavigationTreeOpen;
-      } } }, e3 = () => O2(this, M$5, "f")) }, elements: { jsx: L$2(e3), refs: { details: { canvas: null, clearHistory: null, deleteShape: null, redo: null, save: null, spinner: null, undo: null, tree: null }, navigation: { load: null, masonry: null, navToggle: null, tree: null, textfield: null } } }, handlers: C$5(e3) });
+      } } }, e3 = () => O$1(this, M$6, "f")) }, elements: { jsx: L$3(e3), refs: { details: { canvas: null, clearHistory: null, deleteShape: null, redo: null, save: null, spinner: null, undo: null, tree: null }, navigation: { load: null, masonry: null, navToggle: null, tree: null, textfield: null } } }, handlers: C$6(e3) });
     }));
   }
   onLfEvent(e2, t5) {
@@ -46026,20 +45867,20 @@ const F$1 = class F {
     var _a2;
     const { currentShape: t5 } = this;
     if (!t5 || !((_a2 = Object.keys(t5)) == null ? void 0 : _a2.length)) return;
-    const { history: a2 } = O2(this, M$5, "f").controller.set, s2 = JSON.parse(JSON.stringify(t5));
+    const { history: a2 } = O$1(this, M$6, "f").controller.set, s2 = JSON.parse(JSON.stringify(t5));
     y$6(s2.shape, e2), a2.new(s2, true);
   }
   async clearHistory(e2 = null) {
-    await u$5(O2(this, M$5, "f"), e2);
+    await u$5(O$1(this, M$6, "f"), e2);
   }
   async clearSelection() {
-    await b$5(O2(this, M$5, "f"));
+    await b$6(O$1(this, M$6, "f"));
   }
   async getComponents() {
-    return O2(this, M$5, "f").elements.refs;
+    return O$1(this, M$6, "f").elements.refs;
   }
   async getCurrentSnapshot() {
-    return O2(this, M$5, "f").controller.get.history.currentSnapshot();
+    return O$1(this, M$6, "f").controller.get.history.currentSnapshot();
   }
   async getDebugInfo() {
     return this.debugInfo;
@@ -46052,7 +45893,7 @@ const F$1 = class F {
     pt(this);
   }
   async reset() {
-    await u$5(O2(this, M$5, "f")), await b$5(O2(this, M$5, "f"));
+    await u$5(O$1(this, M$6, "f")), await b$6(O$1(this, M$6, "f"));
   }
   async setSpinnerStatus(e2) {
     this.isSpinnerActive = e2;
@@ -46063,60 +45904,60 @@ const F$1 = class F {
     }), e2);
   }
   connectedCallback() {
-    O2(this, I$1, "f") && O2(this, I$1, "f").theme.register(this);
+    O$1(this, I$2, "f") && O$1(this, I$2, "f").theme.register(this);
   }
   async componentWillLoad() {
-    B$1(this, I$1, await a(this)), O2(this, j$3, "f").call(this), O2(this, M$5, "f").controller.get.navigation.hasNav() && (this.isNavigationTreeOpen = true);
+    B$2(this, I$2, await a(this)), O$1(this, j$4, "f").call(this), O$1(this, M$6, "f").controller.get.navigation.hasNav() && (this.isNavigationTreeOpen = true);
   }
   componentDidLoad() {
-    const { info: e2 } = O2(this, I$1, "f").debug;
+    const { info: e2 } = O$1(this, I$2, "f").debug;
     this.onLfEvent(new CustomEvent("ready"), "ready"), e2.update(this, "did-load");
   }
   componentWillRender() {
-    const { info: e2 } = O2(this, I$1, "f").debug;
+    const { info: e2 } = O$1(this, I$2, "f").debug;
     e2.update(this, "will-render");
   }
   componentDidRender() {
-    const { info: e2 } = O2(this, I$1, "f").debug;
+    const { info: e2 } = O$1(this, I$2, "f").debug;
     e2.update(this, "did-render");
   }
   render() {
-    const { bemClass: t5, setLfStyle: a2 } = O2(this, I$1, "f").theme, { lfStyle: s2 } = this;
-    return D$a(W$e, { key: "fbd19d0e1e615d75bbc7158fc9f9733dee8f350e" }, s2 && D$a("style", { key: "d1bb9217fe9805fbe843e672e56a2cf7d606b6f5", id: O2(this, E$5, "f") }, a2(this)), D$a("div", { key: "d40bd5f1c362aa925e808d0cc889d0ce021b5d3d", id: O2(this, W$6, "f") }, D$a("div", { key: "18f1b3febb27f6919d4a62590f87e3515212dd6c", class: t5(O2(this, T$4, "f").imageviewer._), part: O2(this, D$3, "f").imageviewer }, O2(this, _$4, "m", U).call(this))));
+    const { bemClass: t5, setLfStyle: a2 } = O$1(this, I$2, "f").theme, { lfStyle: s2 } = this;
+    return D$a(W$e, { key: "fbd19d0e1e615d75bbc7158fc9f9733dee8f350e" }, s2 && D$a("style", { key: "d1bb9217fe9805fbe843e672e56a2cf7d606b6f5", id: O$1(this, E$6, "f") }, a2(this)), D$a("div", { key: "d40bd5f1c362aa925e808d0cc889d0ce021b5d3d", id: O$1(this, W$7, "f") }, D$a("div", { key: "18f1b3febb27f6919d4a62590f87e3515212dd6c", class: t5(O$1(this, T$5, "f").imageviewer._), part: O$1(this, D$4, "f").imageviewer }, O$1(this, _$5, "m", U$1).call(this))));
   }
   disconnectedCallback() {
     var _a2;
-    (_a2 = O2(this, I$1, "f")) == null ? void 0 : _a2.theme.unregister(this);
+    (_a2 = O$1(this, I$2, "f")) == null ? void 0 : _a2.theme.unregister(this);
   }
   get rootElement() {
     return z$d(this);
   }
 };
-I$1 = /* @__PURE__ */ new WeakMap(), T$4 = /* @__PURE__ */ new WeakMap(), A$2 = /* @__PURE__ */ new WeakMap(), R = /* @__PURE__ */ new WeakMap(), D$3 = /* @__PURE__ */ new WeakMap(), E$5 = /* @__PURE__ */ new WeakMap(), W$6 = /* @__PURE__ */ new WeakMap(), M$5 = /* @__PURE__ */ new WeakMap(), j$3 = /* @__PURE__ */ new WeakMap(), _$4 = /* @__PURE__ */ new WeakSet(), H$1 = function(e2) {
-  const { data: t5 } = O2(this, I$1, "f"), { cell: a2 } = t5, { stringify: s2 } = a2;
+I$2 = /* @__PURE__ */ new WeakMap(), T$5 = /* @__PURE__ */ new WeakMap(), A$3 = /* @__PURE__ */ new WeakMap(), R$1 = /* @__PURE__ */ new WeakMap(), D$4 = /* @__PURE__ */ new WeakMap(), E$6 = /* @__PURE__ */ new WeakMap(), W$7 = /* @__PURE__ */ new WeakMap(), M$6 = /* @__PURE__ */ new WeakMap(), j$4 = /* @__PURE__ */ new WeakMap(), _$5 = /* @__PURE__ */ new WeakSet(), H$2 = function(e2) {
+  const { data: t5 } = O$1(this, I$2, "f"), { cell: a2 } = t5, { stringify: s2 } = a2;
   return void 0 !== e2.index ? { shape: e2, value: s2(e2.shape.value || e2.shape.lfValue) } : null;
-}, P$1 = function() {
-  const { bemClass: t5 } = O2(this, I$1, "f").theme, { detailsGrid: a2 } = O2(this, T$4, "f"), { canvas: s2, clearHistory: i2, deleteShape: n2, redo: r2, save: l2, spinner: o2, tree: c2, undo: f2 } = O2(this, M$5, "f").elements.jsx.details;
-  return D$a("div", { class: t5(a2._), part: O2(this, D$3, "f").details }, D$a("div", { class: t5(a2._, a2.preview) }, s2(), o2()), D$a("div", { class: t5(a2._, a2.actions) }, n2(), i2(), f2(), r2(), l2()), c2(), D$a("div", { class: t5(a2._, a2.settings) }, D$a("slot", { name: "settings" })));
-}, U = function() {
-  const { bemClass: t5 } = O2(this, I$1, "f").theme, { currentShape: a2 } = O2(this, M$5, "f").controller.get;
-  return D$a("div", { class: t5(O2(this, T$4, "f").mainGrid._, null, { selected: !!a2() }) }, O2(this, _$4, "m", X).call(this), O2(this, _$4, "m", P$1).call(this));
+}, P$2 = function() {
+  const { bemClass: t5 } = O$1(this, I$2, "f").theme, { detailsGrid: a2 } = O$1(this, T$5, "f"), { canvas: s2, clearHistory: i2, deleteShape: n2, redo: r2, save: l2, spinner: o2, tree: c2, undo: f2 } = O$1(this, M$6, "f").elements.jsx.details;
+  return D$a("div", { class: t5(a2._), part: O$1(this, D$4, "f").details }, D$a("div", { class: t5(a2._, a2.preview) }, s2(), o2()), D$a("div", { class: t5(a2._, a2.actions) }, n2(), i2(), f2(), r2(), l2()), c2(), D$a("div", { class: t5(a2._, a2.settings) }, D$a("slot", { name: "settings" })));
+}, U$1 = function() {
+  const { bemClass: t5 } = O$1(this, I$2, "f").theme, { currentShape: a2 } = O$1(this, M$6, "f").controller.get;
+  return D$a("div", { class: t5(O$1(this, T$5, "f").mainGrid._, null, { selected: !!a2() }) }, O$1(this, _$5, "m", X).call(this), O$1(this, _$5, "m", P$2).call(this));
 }, X = function() {
   var _a2, _b2, _c2, _d2;
-  const { bemClass: t5 } = O2(this, I$1, "f").theme, { load: a2, masonry: s2, navToggle: i2, textfield: n2, tree: r2 } = O2(this, M$5, "f").elements.jsx.navigation, l2 = O2(this, T$4, "f").navigationGrid, o2 = Boolean((_b2 = (_a2 = this.lfNavigation) == null ? void 0 : _a2.treeProps) == null ? void 0 : _b2.lfDataset) && Boolean((_d2 = (_c2 = this.lfNavigation) == null ? void 0 : _c2.treeProps) == null ? void 0 : _d2.lfDataset), c2 = t5(l2._, void 0, { "has-drawer": o2 && this.isNavigationTreeOpen, "has-nav": o2 });
-  return D$a("div", { class: c2, part: O2(this, D$3, "f").navigation }, r2(), i2(), n2(), a2(), s2());
-}, F$1.style = '::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=fade-in]{display:block;animation:lf-fade-in-block 0.25s ease-out forwards}@keyframes lf-fade-in-block{from{visibility:hidden;opacity:0}to{visibility:visible;opacity:1}}:host{display:block;font-family:var(--lf-imageviewer-font-family, var(--lf-font-family-primary));font-size:var(--lf-imageviewer-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-imageviewer-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-imageviewer-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-imageviewer-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-imageviewer-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-imageviewer-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-imageviewer-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-imageviewer-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{background-color:rgba(var(--lf-imageviewer-color-bg, var(--lf-color-bg)), 0.125);color:rgb(var(--lf-imageviewer-color-on-bg, var(--lf-color-on-bg)));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);width:100%;height:100%}.imageviewer{width:100%;height:100%}.main-grid{border:0;border-style:solid;border-color:rgba(var(--lf-imageviewer-border-color, var(--lf-color-border)), 1);border-width:1px;border-radius:var(--lf-imageviewer-border-radius, var(--lf-ui-border-radius));width:100%;height:100%;box-sizing:border-box;display:grid;grid-template-columns:100% 0;overflow:auto}.main-grid--selected{grid-template-columns:30% 70%}.main-grid--selected .details-grid{display:grid}.navigation-grid{width:100%;height:100%;box-sizing:border-box;display:grid;grid-template-areas:"textfield" "button" "masonry";grid-template-columns:1fr;grid-template-rows:repeat(2, auto) 1fr;overflow:hidden}.navigation-grid--has-nav{grid-template-areas:"nav-toggle textfield" "nav-toggle button" "nav-toggle masonry";grid-template-columns:auto 1fr}.navigation-grid--has-nav .navigation-grid__nav-toggle{display:block}.navigation-grid--has-drawer{grid-template-areas:"tree nav-toggle textfield" "tree nav-toggle button" "tree nav-toggle masonry";grid-template-columns:var(--lf-imageviewer-nav-width, auto) auto 1fr}.navigation-grid--has-drawer .navigation-grid__tree{display:grid}.navigation-grid__button{grid-area:button;padding-bottom:0.75em}.navigation-grid__masonry{grid-area:masonry;overflow:auto;position:relative}.navigation-grid__nav-toggle{border-right:1px solid rgba(var(--lf-color-border));box-sizing:border-box;display:none;grid-area:nav-toggle}.navigation-grid__textfield{grid-area:textfield;padding:0}.navigation-grid__tree{display:none;grid-area:tree;overflow:auto}.details-grid{width:100%;height:100%;border-left:1px solid rgba(var(--lf-color-border));box-sizing:border-box;display:none;grid-template-areas:"image image" "actions actions" "tree settings";grid-template-columns:40% 1fr;grid-template-rows:60% auto 1fr;overflow:auto}.details-grid__actions{border-left:1px solid rgba(var(--lf-color-border));box-sizing:border-box;display:flex;grid-area:actions}.details-grid__canvas{border-bottom:1px solid rgba(var(--lf-color-border));box-sizing:border-box}.details-grid__preview{align-content:center;grid-area:image;position:relative}.details-grid__spinner{width:100%;height:100%;left:0;pointer-events:none;position:absolute;top:0}.details-grid__tree{border-right:1px solid rgba(var(--lf-color-border));box-sizing:border-box;grid-area:tree;overflow:auto}.details-grid__settings{grid-area:settings;overflow:auto}';
+  const { bemClass: t5 } = O$1(this, I$2, "f").theme, { load: a2, masonry: s2, navToggle: i2, textfield: n2, tree: r2 } = O$1(this, M$6, "f").elements.jsx.navigation, l2 = O$1(this, T$5, "f").navigationGrid, o2 = Boolean((_b2 = (_a2 = this.lfNavigation) == null ? void 0 : _a2.treeProps) == null ? void 0 : _b2.lfDataset) && Boolean((_d2 = (_c2 = this.lfNavigation) == null ? void 0 : _c2.treeProps) == null ? void 0 : _d2.lfDataset), c2 = t5(l2._, void 0, { "has-drawer": o2 && this.isNavigationTreeOpen, "has-nav": o2 });
+  return D$a("div", { class: c2, part: O$1(this, D$4, "f").navigation }, r2(), i2(), n2(), a2(), s2());
+}, F$2.style = '::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=fade-in]{display:block;animation:lf-fade-in-block 0.25s ease-out forwards}@keyframes lf-fade-in-block{from{visibility:hidden;opacity:0}to{visibility:visible;opacity:1}}:host{display:block;font-family:var(--lf-imageviewer-font-family, var(--lf-font-family-primary));font-size:var(--lf-imageviewer-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-imageviewer-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-imageviewer-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-imageviewer-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-imageviewer-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-imageviewer-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-imageviewer-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-imageviewer-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{background-color:rgba(var(--lf-imageviewer-color-bg, var(--lf-color-bg)), 0.125);color:rgb(var(--lf-imageviewer-color-on-bg, var(--lf-color-on-bg)));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);width:100%;height:100%}.imageviewer{width:100%;height:100%}.main-grid{border:0;border-style:solid;border-color:rgba(var(--lf-imageviewer-border-color, var(--lf-color-border)), 1);border-width:1px;border-radius:var(--lf-imageviewer-border-radius, var(--lf-ui-border-radius));width:100%;height:100%;box-sizing:border-box;display:grid;grid-template-columns:100% 0;overflow:auto}.main-grid--selected{grid-template-columns:30% 70%}.main-grid--selected .details-grid{display:grid}.navigation-grid{width:100%;height:100%;box-sizing:border-box;display:grid;grid-template-areas:"textfield" "button" "masonry";grid-template-columns:1fr;grid-template-rows:repeat(2, auto) 1fr;overflow:hidden}.navigation-grid--has-nav{grid-template-areas:"nav-toggle textfield" "nav-toggle button" "nav-toggle masonry";grid-template-columns:auto 1fr}.navigation-grid--has-nav .navigation-grid__nav-toggle{display:block}.navigation-grid--has-drawer{grid-template-areas:"tree nav-toggle textfield" "tree nav-toggle button" "tree nav-toggle masonry";grid-template-columns:var(--lf-imageviewer-nav-width, auto) auto 1fr}.navigation-grid--has-drawer .navigation-grid__tree{display:grid}.navigation-grid__button{grid-area:button;padding-bottom:0.75em}.navigation-grid__masonry{grid-area:masonry;overflow:auto;position:relative}.navigation-grid__nav-toggle{border-right:1px solid rgba(var(--lf-color-border));box-sizing:border-box;display:none;grid-area:nav-toggle}.navigation-grid__textfield{grid-area:textfield;padding:0}.navigation-grid__tree{display:none;grid-area:tree;overflow:auto}.details-grid{width:100%;height:100%;border-left:1px solid rgba(var(--lf-color-border));box-sizing:border-box;display:none;grid-template-areas:"image image" "actions actions" "tree settings";grid-template-columns:40% 1fr;grid-template-rows:60% auto 1fr;overflow:auto}.details-grid__actions{border-left:1px solid rgba(var(--lf-color-border));box-sizing:border-box;display:flex;grid-area:actions}.details-grid__canvas{border-bottom:1px solid rgba(var(--lf-color-border));box-sizing:border-box}.details-grid__preview{align-content:center;grid-area:image;position:relative}.details-grid__spinner{width:100%;height:100%;left:0;pointer-events:none;position:absolute;top:0}.details-grid__tree{border-right:1px solid rgba(var(--lf-color-border));box-sizing:border-box;grid-area:tree;overflow:auto}.details-grid__settings{grid-area:settings;overflow:auto}';
 const p988ad9c7_entry = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
-  lf_imageviewer: F$1
+  lf_imageviewer: F$2
 }, Symbol.toStringTag, { value: "Module" }));
-var b$4, u$4, p$3, v$5, m$5, z$6 = function(e2, r2, a2, i2) {
+var b$5, u$4, p$3, v$5, m$5, z$7 = function(e2, r2, a2, i2) {
   if ("function" == typeof r2 ? e2 !== r2 || true : !r2.has(e2)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return r2.get(e2);
 };
-const w$5 = class w {
+const w$6 = class w {
   constructor(a2) {
-    n(this, a2), this.lfEvent = V$4(this, "lf-header-event"), this.lfStyle = "", b$4.set(this, void 0), u$4.set(this, LF_HEADER_BLOCKS), p$3.set(this, LF_HEADER_PARTS), v$5.set(this, LF_STYLE_ID), m$5.set(this, LF_WRAPPER_ID);
+    n(this, a2), this.lfEvent = V$4(this, "lf-header-event"), this.lfStyle = "", b$5.set(this, void 0), u$4.set(this, LF_HEADER_BLOCKS), p$3.set(this, LF_HEADER_PARTS), v$5.set(this, LF_STYLE_ID), m$5.set(this, LF_WRAPPER_ID);
   }
   onLfEvent(e2, r2) {
     this.lfEvent.emit({ comp: this, id: this.rootElement.id, originalEvent: e2, eventType: r2 });
@@ -46137,42 +45978,42 @@ const w$5 = class w {
     }), e2);
   }
   connectedCallback() {
-    z$6(this, b$4) && z$6(this, b$4).theme.register(this);
+    z$7(this, b$5) && z$7(this, b$5).theme.register(this);
   }
   async componentWillLoad() {
     !(function(e2, r2, a2, i2, t5) {
       if ("function" == typeof r2 ? e2 !== r2 || true : !r2.has(e2)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
       r2.set(e2, a2);
-    })(this, b$4, await a(this));
+    })(this, b$5, await a(this));
   }
   componentDidLoad() {
-    const { info: e2 } = z$6(this, b$4).debug;
+    const { info: e2 } = z$7(this, b$5).debug;
     this.onLfEvent(new CustomEvent("ready"), "ready"), e2.update(this, "did-load");
   }
   componentWillRender() {
-    const { info: e2 } = z$6(this, b$4).debug;
+    const { info: e2 } = z$7(this, b$5).debug;
     e2.update(this, "will-render");
   }
   componentDidRender() {
-    const { info: e2 } = z$6(this, b$4).debug;
+    const { info: e2 } = z$7(this, b$5).debug;
     e2.update(this, "did-render");
   }
   render() {
-    const { bemClass: e2, setLfStyle: r2 } = z$6(this, b$4).theme, { header: a2 } = z$6(this, u$4), { lfStyle: o2 } = this;
-    return D$a(W$e, { key: "d08eda643b8a9c7bc9d1bb117f09ab64660180f8" }, o2 && D$a("style", { key: "daa7eb123c72b285ce1c827f8adfdc0b0900f59c", id: z$6(this, v$5) }, r2(this)), D$a("div", { key: "b7499d58b9725b78bc9a608d82b051d5e63cefc3", id: z$6(this, m$5) }, D$a("header", { key: "027236b510cbaf1326bcd6a1e948f428670fbb40", class: e2(a2._), part: z$6(this, p$3).header }, D$a("section", { key: "11efdf4a877acc8d00e1e2aecb14fdce8963972f", class: e2(a2._, a2.section), part: z$6(this, p$3).section }, D$a("slot", { key: "87c980b4af04a6144b0f3000796a249d8a72bc00", name: LF_HEADER_SLOT })))));
+    const { bemClass: e2, setLfStyle: r2 } = z$7(this, b$5).theme, { header: a2 } = z$7(this, u$4), { lfStyle: o2 } = this;
+    return D$a(W$e, { key: "d08eda643b8a9c7bc9d1bb117f09ab64660180f8" }, o2 && D$a("style", { key: "daa7eb123c72b285ce1c827f8adfdc0b0900f59c", id: z$7(this, v$5) }, r2(this)), D$a("div", { key: "b7499d58b9725b78bc9a608d82b051d5e63cefc3", id: z$7(this, m$5) }, D$a("header", { key: "027236b510cbaf1326bcd6a1e948f428670fbb40", class: e2(a2._), part: z$7(this, p$3).header }, D$a("section", { key: "11efdf4a877acc8d00e1e2aecb14fdce8963972f", class: e2(a2._, a2.section), part: z$7(this, p$3).section }, D$a("slot", { key: "87c980b4af04a6144b0f3000796a249d8a72bc00", name: LF_HEADER_SLOT })))));
   }
   disconnectedCallback() {
     var _a2;
-    (_a2 = z$6(this, b$4)) == null ? void 0 : _a2.theme.unregister(this);
+    (_a2 = z$7(this, b$5)) == null ? void 0 : _a2.theme.unregister(this);
   }
   get rootElement() {
     return z$d(this);
   }
 };
-b$4 = /* @__PURE__ */ new WeakMap(), u$4 = /* @__PURE__ */ new WeakMap(), p$3 = /* @__PURE__ */ new WeakMap(), v$5 = /* @__PURE__ */ new WeakMap(), m$5 = /* @__PURE__ */ new WeakMap(), w$5.style = "::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}:host{display:block;font-family:var(--lf-header-font-family, var(--lf-font-family-primary));font-size:var(--lf-header-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-header-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-header-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-header-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-header-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-header-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-header-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-header-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{border:0;border-style:solid;border-radius:var(--lf-header-border-radius, var(--lf-ui-border-radius));border-top-left-radius:0;border-top-right-radius:0;background-color:rgba(var(--lf-header-color-header, var(--lf-color-header)), 0.375);color:rgb(var(--lf-header-color-on-header, var(--lf-color-on-header)));backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);transition:all 300ms cubic-bezier(0.4, 0, 0.2, 1);box-shadow:0 2px 4px -1px rgba(var(--lf-color-on-header), 0.2), 0 4px 5px 0 rgba(var(--lf-color-on-header), 0.14), 0 1px 10px 0 rgba(var(--lf-color-on-header), 0.12);box-sizing:border-box;display:block;height:var(--lf-ui-height-header);left:0;top:0;width:100%;z-index:var(--lf-ui-zindex-header)}.header{width:100%;height:100%;box-sizing:border-box;display:flex;flex-direction:column;justify-content:var(--lf-header-justify, space-between);padding:var(--lf-header-padding, 0.5em 0.75em)}.header__section{width:100%;height:100%;box-sizing:border-box;display:flex;position:relative}";
+b$5 = /* @__PURE__ */ new WeakMap(), u$4 = /* @__PURE__ */ new WeakMap(), p$3 = /* @__PURE__ */ new WeakMap(), v$5 = /* @__PURE__ */ new WeakMap(), m$5 = /* @__PURE__ */ new WeakMap(), w$6.style = "::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}:host{display:block;font-family:var(--lf-header-font-family, var(--lf-font-family-primary));font-size:var(--lf-header-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-header-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-header-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-header-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-header-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-header-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-header-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-header-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{border:0;border-style:solid;border-radius:var(--lf-header-border-radius, var(--lf-ui-border-radius));border-top-left-radius:0;border-top-right-radius:0;background-color:rgba(var(--lf-header-color-header, var(--lf-color-header)), 0.375);color:rgb(var(--lf-header-color-on-header, var(--lf-color-on-header)));backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);transition:all 300ms cubic-bezier(0.4, 0, 0.2, 1);box-shadow:0 2px 4px -1px rgba(var(--lf-color-on-header), 0.2), 0 4px 5px 0 rgba(var(--lf-color-on-header), 0.14), 0 1px 10px 0 rgba(var(--lf-color-on-header), 0.12);box-sizing:border-box;display:block;height:var(--lf-ui-height-header);left:0;top:0;width:100%;z-index:var(--lf-ui-zindex-header)}.header{width:100%;height:100%;box-sizing:border-box;display:flex;flex-direction:column;justify-content:var(--lf-header-justify, space-between);padding:var(--lf-header-padding, 0.5em 0.75em)}.header__section{width:100%;height:100%;box-sizing:border-box;display:flex;position:relative}";
 const pA6642965_entry = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
-  lf_header: w$5
+  lf_header: w$6
 }, Symbol.toStringTag, { value: "Module" }));
 const m$4 = ({ depth: t5, expanded: r2 = false, manager: i2, node: o2, onClickExpand: n2, type: d2 }) => {
   const { get: c2 } = i2.assets, { bemClass: f2 } = i2.theme;
@@ -46189,7 +46030,7 @@ const m$4 = ({ depth: t5, expanded: r2 = false, manager: i2, node: o2, onClickEx
     default:
       return D$a("div", { class: f2(LF_TREE_BLOCKS.node._, LF_TREE_BLOCKS.node.expand, { hidden: true }) });
   }
-}, b$3 = (t5) => {
+}, b$4 = (t5) => {
   var _a2, _b2;
   const { manager: r2 } = t5, { bemClass: i2 } = r2.theme, { accordionLayout: o2, depth: n2, elements: s2, events: c2, expanded: f2, node: h2, selected: p2 } = t5 || {}, u2 = D$a(m$4, h2.icon ? { manager: r2, node: h2, type: "icon" } : { manager: r2, type: "placeholder" });
   return o2 ? D$a("div", { class: i2(LF_TREE_BLOCKS.node._, null, { expanded: f2, selected: p2 }), "data-cy": CY_ATTRIBUTES.node, "data-depth": n2.toString(), key: h2.id, onClick: c2.onClickExpand, onPointerDown: c2.onPointerDown, part: LF_TREE_PARTS.node, title: h2.description }, D$a("div", { class: i2(LF_TREE_BLOCKS.node._, LF_TREE_BLOCKS.node.content) }, s2.ripple, u2, s2.value, D$a(m$4, ((_a2 = h2.children) == null ? void 0 : _a2.length) ? { expanded: f2, manager: r2, node: h2, type: "dropdown" } : { manager: r2, type: "placeholder" }))) : D$a("div", { class: i2(LF_TREE_BLOCKS.node._, null, { expanded: f2, selected: p2 }), "data-cy": CY_ATTRIBUTES.node, "data-depth": n2.toString(), key: h2.id, onClick: c2.onClick, onPointerDown: c2.onPointerDown, title: h2.description }, D$a("div", { class: "node__content" }, s2.ripple, D$a(m$4, { depth: n2, manager: r2, type: "padding" }), D$a(m$4, ((_b2 = h2.children) == null ? void 0 : _b2.length) ? { expanded: f2, manager: r2, node: h2, onClickExpand: c2.onClickExpand, type: "expand" } : { manager: r2, type: "placeholder" }), u2, s2.value));
@@ -46219,7 +46060,7 @@ const m$4 = ({ depth: t5, expanded: r2 = false, manager: i2, node: o2, onClickEx
         return D$a("div", { class: c2(o3._, o3.gridCell), "data-column": r$16.id }, f4 ? h2(u3) : D$a(r, { framework: l2, shape: d3, index: 0, cell: p4, eventDispatcher: async (e2) => a2.compInstance.onLfEvent(e2, "lf-event", { node: t8 }) }));
       })(t7, r$15, 0 === i4))));
     })(t6), w4 = a2.compInstance.lfGrid && v3 ? D$a("div", { class: c2(p3._, p3.value, { grid: true }) }, v3) : D$a("div", { class: c2(p3._, p3.value) }, h2(t6.value));
-    return D$a(b$3, { accordionLayout: a2.compInstance.lfAccordionLayout && 0 === r$13, depth: r$13, elements: { ripple: D$a("div", { "data-cy": a2.cyAttributes.rippleSurface, "data-lf": a2.lfAttributes.rippleSurface, ref: (e2) => {
+    return D$a(b$4, { accordionLayout: a2.compInstance.lfAccordionLayout && 0 === r$13, depth: r$13, elements: { ripple: D$a("div", { "data-cy": a2.cyAttributes.rippleSurface, "data-lf": a2.lfAttributes.rippleSurface, ref: (e2) => {
       e2 && a2.compInstance.lfRipple && (o2.refs.rippleSurfaces[t6.id] = e2);
     } }), value: w4 }, events: { onClick: (e2) => n2.node.click(e2, t6), onClickExpand: (e2) => n2.node.expand(e2, t6), onPointerDown: (e2) => n2.node.pointerDown(e2, t6) }, expanded: i3, manager: l2, node: t6, selected: f3 });
   }));
@@ -46232,7 +46073,7 @@ const m$4 = ({ depth: t5, expanded: r2 = false, manager: i2, node: o2, onClickEx
 }, empty: () => {
   const { controller: r2 } = t5(), { compInstance: i2, manager: o2 } = r2.get, { theme: n2 } = o2, { bemClass: a2 } = n2, s2 = r2.get.blocks, { emptyData: l2 } = s2, d2 = r2.get.parts;
   return D$a("div", { class: a2(l2._), part: d2.emptyData }, D$a("div", { class: a2(l2._, l2.text) }, i2.lfEmpty));
-} }), w$4 = (e2) => ({ filter: { input: (t5) => {
+} }), w$5 = (e2) => ({ filter: { input: (t5) => {
   var _a2, _b2;
   const r2 = e2(), { controller: i2 } = r2, o2 = i2.get.compInstance, n2 = ((_a2 = t5.detail.inputValue) == null ? void 0 : _a2.toLowerCase()) || "";
   clearTimeout(o2._filterTimeout), o2._filterTimeout = setTimeout((() => {
@@ -46250,16 +46091,16 @@ const m$4 = ({ depth: t5, expanded: r2 = false, manager: i2, node: o2, onClickEx
   var _a2;
   const i2 = e2(), { controller: o2 } = i2, n2 = o2.get.compInstance;
   (_a2 = n2.onLfEvent) == null ? void 0 : _a2.call(n2, t5, "pointerdown", { node: r2 });
-} } }), k$5 = /* @__PURE__ */ new WeakMap();
+} } }), k$6 = /* @__PURE__ */ new WeakMap();
 let y$5 = 0;
-const x$5 = (e2) => {
+const x$6 = (e2) => {
   if (null == e2) return [];
   if (Array.isArray(e2)) return e2.map(((e3) => "string" == typeof e3 || "number" == typeof e3 ? String(e3) : null)).filter(((e3) => !!e3));
   if (e2 instanceof Set) return Array.from(e2).map(((e3) => "string" == typeof e3 || "number" == typeof e3 ? String(e3) : null)).filter(((e3) => !!e3));
   if ("string" == typeof e2) {
     try {
       const t5 = JSON.parse(e2);
-      if (Array.isArray(t5)) return x$5(t5);
+      if (Array.isArray(t5)) return x$6(t5);
     } catch (t5) {
       const r2 = e2.split(/[\,\s]+/).map(((e3) => e3.trim())).filter(Boolean);
       if (r2.length) return r2;
@@ -46267,48 +46108,48 @@ const x$5 = (e2) => {
     return e2 ? [e2] : [];
   }
   return [];
-}, _$3 = (e2) => null == e2 ? [] : Array.isArray(e2) ? e2 : [e2], z$5 = (e2) => {
+}, _$4 = (e2) => null == e2 ? [] : Array.isArray(e2) ? e2 : [e2], z$6 = (e2) => {
   if (!e2) return null;
   const t5 = e2.id;
   if (null != t5) {
     const r3 = String(t5).trim();
-    if (r3) return k$5.delete(e2), r3;
+    if (r3) return k$6.delete(e2), r3;
   }
-  const r2 = k$5.get(e2);
+  const r2 = k$6.get(e2);
   if (r2) return e2.id = r2, r2;
   var i2;
   const o2 = `${("string" == typeof (i2 = e2.value) && i2.trim() ? i2.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 32) || null : "number" != typeof i2 || Number.isNaN(i2) ? null : String(i2)) ?? "node"}-${(++y$5).toString(36)}`;
-  return k$5.set(e2, o2), e2.id = o2, o2;
-}, S$1 = (e2) => {
+  return k$6.set(e2, o2), e2.id = o2, o2;
+}, S$2 = (e2) => {
   const t5 = [];
   for (const r2 of e2) if ("string" == typeof r2 || "number" == typeof r2) {
     const e3 = String(r2);
     e3 && t5.push(e3);
   } else {
-    const e3 = z$5(r2);
+    const e3 = z$6(r2);
     e3 && t5.push(e3);
   }
   return t5;
-}, P = (e2, t5) => {
+}, P$1 = (e2, t5) => {
   let r2, i2 = false;
   const o2 = (e3) => {
     var r3, o3;
-    (r3 = x$5(t5.getProp())).length === (o3 = e3).length && r3.every(((e4, t6) => e4 === o3[t6])) || (i2 = true, t5.setProp([...e3]), i2 = false);
+    (r3 = x$6(t5.getProp())).length === (o3 = e3).length && r3.every(((e4, t6) => e4 === o3[t6])) || (i2 = true, t5.setProp([...e3]), i2 = false);
   };
   return { syncProp: o2, applyIdsWithSanitization: (e3, i3, o3) => {
-    const n2 = x$5(e3), a2 = t5.getManager();
+    const n2 = x$6(e3), a2 = t5.getManager();
     if (!a2) return r2 = [...n2], o3(n2, i3), n2;
     const { ids: s2 } = a2.data.node.sanitizeIds(t5.getDataset(), n2);
     return r2 = void 0, o3(s2, i3), s2;
   }, handlePropChange: (e3, t6) => {
     if (i2) return;
-    const r3 = t6(x$5(e3), { emit: false, updateProp: false });
+    const r3 = t6(x$6(e3), { emit: false, updateProp: false });
     o2(r3);
   }, initialisePersistentState: (e3, t6, i3) => {
-    const o3 = x$5(e3);
+    const o3 = x$6(e3);
     return o3.length ? (t6(o3, { emit: false, updateProp: true }), void (r2 = void 0)) : r2 && r2.length ? (t6(r2, { emit: false, updateProp: true }), void (r2 = void 0)) : void (i3 && i3());
   }, reconcileAfterDatasetChange: (e3, r3, i3) => {
-    const n2 = x$5(t5.getProp());
+    const n2 = x$6(t5.getProp());
     if (n2.length) {
       const e4 = r3(n2, { emit: false, updateProp: false });
       o2(e4);
@@ -46323,46 +46164,46 @@ const x$5 = (e2) => {
     r2 = void 0;
   } };
 };
-var C$4, E$4, D$2, I, A$1, N, M$4, W$5, T$3, j$2, L$1, F2, H, V = function(e2, t5, r2, i2) {
+var C$5, E$5, D$3, I$1, A$2, N, M$5, W$6, T$4, j$3, L$2, F$1, H$1, V$1 = function(e2, t5, r2, i2) {
   if ("a" === r2 && !i2) throw new TypeError("Private accessor was defined without a getter");
   if ("function" == typeof t5 ? e2 !== t5 || !i2 : !t5.has(e2)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return "m" === r2 ? i2 : "a" === r2 ? i2.call(e2) : i2 ? i2.value : t5.get(e2);
-}, $2 = function(e2, t5, r2, i2, o2) {
+}, $$1 = function(e2, t5, r2, i2, o2) {
   if ("function" == typeof t5 ? e2 !== t5 || true : !t5.has(e2)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
   return t5.set(e2, r2), r2;
 };
-const B = class {
+const B$1 = class B {
   constructor(e2) {
-    n(this, e2), this.lfEvent = V$4(this, "lf-tree-event"), C$4.add(this), this.expandedNodes = /* @__PURE__ */ new Set(), this.hiddenNodes = /* @__PURE__ */ new Set(), this.selectedNode = null, this.lfAccordionLayout = true, this.lfDataset = null, this.lfEmpty = "Empty data.", this.lfFilter = true, this.lfGrid = false, this.lfRipple = true, this.lfSelectable = true, this.lfStyle = "", this.lfUiSize = "medium", E$4.set(this, void 0), D$2.set(this, LF_TREE_BLOCKS), I.set(this, LF_TREE_PARTS), A$1.set(this, CY_ATTRIBUTES), N.set(this, LF_ATTRIBUTES), M$4.set(this, LF_STYLE_ID), W$5.set(this, LF_WRAPPER_ID), this._filterValue = "", T$3.set(this, void 0), j$2.set(this, void 0), L$1.set(this, void 0);
+    n(this, e2), this.lfEvent = V$4(this, "lf-tree-event"), C$5.add(this), this.expandedNodes = /* @__PURE__ */ new Set(), this.hiddenNodes = /* @__PURE__ */ new Set(), this.selectedNode = null, this.lfAccordionLayout = true, this.lfDataset = null, this.lfEmpty = "Empty data.", this.lfFilter = true, this.lfGrid = false, this.lfRipple = true, this.lfSelectable = true, this.lfStyle = "", this.lfUiSize = "medium", E$5.set(this, void 0), D$3.set(this, LF_TREE_BLOCKS), I$1.set(this, LF_TREE_PARTS), A$2.set(this, CY_ATTRIBUTES), N.set(this, LF_ATTRIBUTES), M$5.set(this, LF_STYLE_ID), W$6.set(this, LF_WRAPPER_ID), this._filterValue = "", T$4.set(this, void 0), j$3.set(this, void 0), L$2.set(this, void 0);
   }
   handleDatasetChange() {
-    if (!V(this, E$4, "f") || !V(this, j$2, "f") || !V(this, L$1, "f")) return;
-    const e2 = new Set(this.expandedNodes), t5 = z$5(this.selectedNode);
-    V(this, j$2, "f").reconcileAfterDatasetChange(e2), V(this, L$1, "f").reconcileAfterDatasetChange(t5), this.hiddenNodes = /* @__PURE__ */ new Set();
+    if (!V$1(this, E$5, "f") || !V$1(this, j$3, "f") || !V$1(this, L$2, "f")) return;
+    const e2 = new Set(this.expandedNodes), t5 = z$6(this.selectedNode);
+    V$1(this, j$3, "f").reconcileAfterDatasetChange(e2), V$1(this, L$2, "f").reconcileAfterDatasetChange(t5), this.hiddenNodes = /* @__PURE__ */ new Set();
   }
   handleExpandedPropChange(e2) {
-    V(this, j$2, "f") && V(this, j$2, "f").handlePropChange(e2);
+    V$1(this, j$3, "f") && V$1(this, j$3, "f").handlePropChange(e2);
   }
   handleSelectedPropChange(e2) {
-    V(this, L$1, "f") && V(this, L$1, "f").handlePropChange(e2);
+    V$1(this, L$2, "f") && V$1(this, L$2, "f").handlePropChange(e2);
   }
   handleInitialDepthChange() {
-    V(this, j$2, "f") && V(this, j$2, "f").handleInitialDepthChange(new Set(this.expandedNodes));
+    V$1(this, j$3, "f") && V$1(this, j$3, "f").handleInitialDepthChange(new Set(this.expandedNodes));
   }
   handleSelectableChange(e2) {
-    V(this, L$1, "f") && V(this, L$1, "f").handleSelectableChange(!!e2);
+    V$1(this, L$2, "f") && V$1(this, L$2, "f").handleSelectableChange(!!e2);
   }
   handleFilterToggle(e2) {
     e2 || (this._filterValue = "", this.hiddenNodes = /* @__PURE__ */ new Set());
   }
   onLfEvent(e2, t5, r2 = {}) {
     var _a2, _b2;
-    const i2 = V(this, E$4, "f"), o2 = r2.node ?? null;
+    const i2 = V$1(this, E$5, "f"), o2 = r2.node ?? null;
     if (i2 && "pointerdown" === t5 && this.lfRipple) {
-      const t6 = z$5(o2), r3 = t6 ? (_a2 = V(this, T$3, "f")) == null ? void 0 : _a2.elements.refs.rippleSurfaces[t6] : void 0;
+      const t6 = z$6(o2), r3 = t6 ? (_a2 = V$1(this, T$4, "f")) == null ? void 0 : _a2.elements.refs.rippleSurfaces[t6] : void 0;
       r3 && i2.effects.ripple(e2, r3);
     }
-    const n2 = { comp: this, eventType: t5, id: (_b2 = this.rootElement) == null ? void 0 : _b2.id, originalEvent: e2, node: o2 ?? void 0, expandedNodeIds: r2.expandedNodeIds ?? (V(this, j$2, "f") ? V(this, j$2, "f").getIds() : []), selectedNodeIds: r2.selectedNodeIds ?? (V(this, L$1, "f") ? V(this, L$1, "f").getIds() : []) };
+    const n2 = { comp: this, eventType: t5, id: (_b2 = this.rootElement) == null ? void 0 : _b2.id, originalEvent: e2, node: o2 ?? void 0, expandedNodeIds: r2.expandedNodeIds ?? (V$1(this, j$3, "f") ? V$1(this, j$3, "f").getIds() : []), selectedNodeIds: r2.selectedNodeIds ?? (V$1(this, L$2, "f") ? V$1(this, L$2, "f").getIds() : []) };
     this.lfEvent.emit(n2);
   }
   async getDebugInfo() {
@@ -46376,23 +46217,23 @@ const B = class {
     pt(this);
   }
   async getExpandedNodeIds() {
-    return V(this, j$2, "f") ? V(this, j$2, "f").getIds() : [];
+    return V$1(this, j$3, "f") ? V$1(this, j$3, "f").getIds() : [];
   }
   async getSelectedNodeIds() {
-    return V(this, L$1, "f") ? V(this, L$1, "f").getIds() : [];
+    return V$1(this, L$2, "f") ? V$1(this, L$2, "f").getIds() : [];
   }
   async setExpandedNodes(e2) {
-    if (!V(this, j$2, "f")) return;
-    if (null == e2) return void V(this, j$2, "f").applyIds([], { emit: true, updateProp: true });
-    const t5 = _$3(e2), r2 = S$1(t5);
-    V(this, j$2, "f").applyIds(r2, { emit: true, updateProp: true });
+    if (!V$1(this, j$3, "f")) return;
+    if (null == e2) return void V$1(this, j$3, "f").applyIds([], { emit: true, updateProp: true });
+    const t5 = _$4(e2), r2 = S$2(t5);
+    V$1(this, j$3, "f").applyIds(r2, { emit: true, updateProp: true });
   }
   async setSelectedNodes(e2) {
-    V(this, L$1, "f") && (null != e2 ? V(this, L$1, "f").applyTargets(e2, { emit: true, updateProp: true }) : V(this, L$1, "f").applyIds([], { emit: true, updateProp: true }));
+    V$1(this, L$2, "f") && (null != e2 ? V$1(this, L$2, "f").applyTargets(e2, { emit: true, updateProp: true }) : V$1(this, L$2, "f").applyIds([], { emit: true, updateProp: true }));
   }
   async selectByPredicate(e2) {
-    if (!V(this, E$4, "f") || !this.lfDataset) return;
-    const t5 = V(this, E$4, "f").data.node.find(this.lfDataset, e2);
+    if (!V$1(this, E$5, "f") || !this.lfDataset) return;
+    const t5 = V$1(this, E$5, "f").data.node.find(this.lfDataset, e2);
     if (t5) return await this.setSelectedNodes(t5), t5;
     await this.setSelectedNodes(null);
   }
@@ -46402,60 +46243,60 @@ const B = class {
     }), e2);
   }
   connectedCallback() {
-    V(this, E$4, "f") && V(this, E$4, "f").theme.register(this);
+    V$1(this, E$5, "f") && V$1(this, E$5, "f").theme.register(this);
   }
   async componentWillLoad() {
     var e2;
-    $2(this, E$4, await a(this)), $2(this, T$3, { controller: { get: { blocks: V(this, D$2, "f"), columns: () => {
+    $$1(this, E$5, await a(this)), $$1(this, T$4, { controller: { get: { blocks: V$1(this, D$3, "f"), columns: () => {
       var _a2;
       return ((_a2 = this.lfDataset) == null ? void 0 : _a2.columns) || [];
-    }, compInstance: this, cyAttributes: V(this, A$1, "f"), dataset: () => this.lfDataset, filterValue: () => this._filterValue, isExpanded: (e3) => {
-      const t5 = z$5(e3);
+    }, compInstance: this, cyAttributes: V$1(this, A$2, "f"), dataset: () => this.lfDataset, filterValue: () => this._filterValue, isExpanded: (e3) => {
+      const t5 = z$6(e3);
       return !!t5 && this.expandedNodes.has(t5);
     }, isGrid: () => {
       var _a2, _b2;
       return !(!this.lfGrid || !((_b2 = (_a2 = this.lfDataset) == null ? void 0 : _a2.columns) == null ? void 0 : _b2.length));
-    }, isHidden: (e3) => this.hiddenNodes.has(e3), isSelected: (e3) => this.selectedNode === e3, lfAttributes: V(this, N, "f"), manager: V(this, E$4, "f"), parts: V(this, I, "f"), state: { expansion: { ids: () => {
+    }, isHidden: (e3) => this.hiddenNodes.has(e3), isSelected: (e3) => this.selectedNode === e3, lfAttributes: V$1(this, N, "f"), manager: V$1(this, E$5, "f"), parts: V$1(this, I$1, "f"), state: { expansion: { ids: () => {
       var _a2;
-      return ((_a2 = V(this, j$2, "f")) == null ? void 0 : _a2.getIds()) ?? Array.from(this.expandedNodes);
+      return ((_a2 = V$1(this, j$3, "f")) == null ? void 0 : _a2.getIds()) ?? Array.from(this.expandedNodes);
     }, nodes: () => this.expandedNodes }, selection: { ids: () => {
-      if (V(this, L$1, "f")) return V(this, L$1, "f").getIds();
-      const e3 = z$5(this.selectedNode);
+      if (V$1(this, L$2, "f")) return V$1(this, L$2, "f").getIds();
+      const e3 = z$6(this.selectedNode);
       return e3 ? [e3] : [];
-    }, node: () => this.selectedNode } }, expandedProp: () => this.lfExpandedNodeIds, selectedProp: () => this.lfSelectedNodeIds, initialExpansionDepth: () => this.lfInitialExpansionDepth, selectable: () => this.lfSelectable, allowsMultiSelect: () => V(this, C$4, "m", F2).call(this), canSelectNode: (e3) => V(this, C$4, "m", H).call(this, e3) }, set: { filter: { apply: (e3) => {
-      if (!V(this, E$4, "f") || !this.lfDataset) return void (this.hiddenNodes = /* @__PURE__ */ new Set());
+    }, node: () => this.selectedNode } }, expandedProp: () => this.lfExpandedNodeIds, selectedProp: () => this.lfSelectedNodeIds, initialExpansionDepth: () => this.lfInitialExpansionDepth, selectable: () => this.lfSelectable, allowsMultiSelect: () => V$1(this, C$5, "m", F$1).call(this), canSelectNode: (e3) => V$1(this, C$5, "m", H$1).call(this, e3) }, set: { filter: { apply: (e3) => {
+      if (!V$1(this, E$5, "f") || !this.lfDataset) return void (this.hiddenNodes = /* @__PURE__ */ new Set());
       if (!e3) return void (this.hiddenNodes = /* @__PURE__ */ new Set());
-      const { filter: t5 } = V(this, E$4, "f").data.node, { ancestorNodes: r2, remainingNodes: i2 } = t5(this.lfDataset, { value: e3 }, true), o2 = new Set(i2);
+      const { filter: t5 } = V$1(this, E$5, "f").data.node, { ancestorNodes: r2, remainingNodes: i2 } = t5(this.lfDataset, { value: e3 }, true), o2 = new Set(i2);
       r2 && r2.forEach(((e4) => o2.delete(e4))), this.hiddenNodes = o2;
     }, setValue: (e3) => {
       this._filterValue = e3;
     } }, state: { expansion: { apply: () => {
       var _a2, _b2;
-      const e3 = (_a2 = V(this, j$2, "f")) == null ? void 0 : _a2.getIds();
-      void 0 !== e3 && ((_b2 = V(this, j$2, "f")) == null ? void 0 : _b2.applyIds(e3, { emit: false, updateProp: true }));
+      const e3 = (_a2 = V$1(this, j$3, "f")) == null ? void 0 : _a2.getIds();
+      void 0 !== e3 && ((_b2 = V$1(this, j$3, "f")) == null ? void 0 : _b2.applyIds(e3, { emit: false, updateProp: true }));
     }, toggle: (e3) => {
       var _a2;
-      return (_a2 = V(this, j$2, "f")) == null ? void 0 : _a2.toggle(e3);
+      return (_a2 = V$1(this, j$3, "f")) == null ? void 0 : _a2.toggle(e3);
     }, setNodes: (e3) => {
       this.expandedNodes = new Set(e3);
     }, setProp: (e3) => {
       this.lfExpandedNodeIds = e3;
     } }, selection: { apply: () => {
       var _a2, _b2;
-      const e3 = (_a2 = V(this, L$1, "f")) == null ? void 0 : _a2.getIds();
-      void 0 !== e3 && ((_b2 = V(this, L$1, "f")) == null ? void 0 : _b2.applyIds(e3, { emit: false, updateProp: true }));
+      const e3 = (_a2 = V$1(this, L$2, "f")) == null ? void 0 : _a2.getIds();
+      void 0 !== e3 && ((_b2 = V$1(this, L$2, "f")) == null ? void 0 : _b2.applyIds(e3, { emit: false, updateProp: true }));
     }, set: (e3) => {
       var _a2;
-      return (_a2 = V(this, L$1, "f")) == null ? void 0 : _a2.applyTargets(e3, { emit: true, updateProp: true, node: e3 });
+      return (_a2 = V$1(this, L$2, "f")) == null ? void 0 : _a2.applyTargets(e3, { emit: true, updateProp: true, node: e3 });
     }, clear: () => {
       var _a2;
-      (_a2 = V(this, L$1, "f")) == null ? void 0 : _a2.clearSelection({ emit: true, updateProp: true });
+      (_a2 = V$1(this, L$2, "f")) == null ? void 0 : _a2.clearSelection({ emit: true, updateProp: true });
     }, setNode: (e3) => {
       this.selectedNode = e3 ?? null;
     }, setProp: (e3) => {
       this.lfSelectedNodeIds = e3;
-    } } } } }, elements: { jsx: v$4(e2 = () => V(this, T$3, "f")), refs: { rippleSurfaces: {}, filterField: null } }, handlers: w$4(e2) }), $2(this, j$2, ((e3) => {
-      const { controller: t5 } = e3(), r2 = P(0, { getProp: () => t5.get.expandedProp(), setProp: (e4) => t5.set.state.expansion.setProp(e4), getDataset: () => t5.get.dataset(), getManager: () => t5.get.manager }), i2 = () => {
+    } } } } }, elements: { jsx: v$4(e2 = () => V$1(this, T$4, "f")), refs: { rippleSurfaces: {}, filterField: null } }, handlers: w$5(e2) }), $$1(this, j$3, ((e3) => {
+      const { controller: t5 } = e3(), r2 = P$1(0, { getProp: () => t5.get.expandedProp(), setProp: (e4) => t5.set.state.expansion.setProp(e4), getDataset: () => t5.get.dataset(), getManager: () => t5.get.manager }), i2 = () => {
         const e4 = t5.get.state.expansion.nodes();
         return Array.from(e4 ?? /* @__PURE__ */ new Set());
       }, o2 = (e4, i3 = {}) => {
@@ -46465,7 +46306,7 @@ const B = class {
       })), a2 = (e4) => {
         const r3 = t5.get.initialExpansionDepth(), i3 = t5.get.dataset(), n3 = (i3 == null ? void 0 : i3.nodes) ?? [], a3 = e4 ? new Set(e4) : /* @__PURE__ */ new Set(), s2 = /* @__PURE__ */ new Set(), l2 = (e5, t6) => {
           for (const i4 of e5) {
-            const e6 = z$5(i4);
+            const e6 = z$6(i4);
             e6 && (null == r3 || t6 < r3 || a3.has(e6)) && s2.add(e6), Array.isArray(i4.children) && i4.children.length > 0 && l2(i4.children, t6 + 1);
           }
         };
@@ -46481,7 +46322,7 @@ const B = class {
       }, handleInitialDepthChange(e4) {
         a2(e4);
       }, toggle: (e4) => {
-        const t6 = z$5(e4);
+        const t6 = z$6(e4);
         if (!t6) return;
         const r3 = new Set(i2());
         r3.has(t6) ? r3.delete(t6) : r3.add(t6), n2(Array.from(r3), { emit: true, updateProp: true, node: e4 });
@@ -46490,8 +46331,8 @@ const B = class {
           a2(new Set(i2()));
         }));
       } };
-    })((() => V(this, T$3, "f")))), $2(this, L$1, ((e3) => {
-      const { controller: t5 } = e3(), r2 = P(0, { getProp: () => t5.get.selectedProp(), setProp: (e4) => t5.set.state.selection.setProp(e4), getDataset: () => t5.get.dataset(), getManager: () => t5.get.manager });
+    })((() => V$1(this, T$4, "f")))), $$1(this, L$2, ((e3) => {
+      const { controller: t5 } = e3(), r2 = P$1(0, { getProp: () => t5.get.selectedProp(), setProp: (e4) => t5.set.state.selection.setProp(e4), getDataset: () => t5.get.dataset(), getManager: () => t5.get.manager });
       let i2 = [];
       const o2 = (e4, o3, n3 = {}) => {
         const a3 = t5.get.allowsMultiSelect() ? e4 : e4.slice(0, 1);
@@ -46512,7 +46353,7 @@ const B = class {
       };
       return { applyIds: a2, applyTargets: (e4, t6 = {}) => {
         if (null == e4) return a2([], t6);
-        const r3 = _$3(e4), i3 = S$1(r3);
+        const r3 = _$4(e4), i3 = S$2(r3);
         return a2(i3, t6);
       }, handlePropChange: (e4) => {
         r2.handlePropChange(e4, a2);
@@ -46527,28 +46368,28 @@ const B = class {
       }, handleSelectableChange: (e4) => {
         e4 || n2({ updateProp: true });
       }, getIds: () => [...i2], clearSelection: n2 };
-    })((() => V(this, T$3, "f")))), V(this, j$2, "f").initialisePersistentState(this.lfExpandedNodeIds), V(this, L$1, "f").initialisePersistentState(this.lfSelectedNodeIds), V(this, L$1, "f").handleSelectableChange(this.lfSelectable), this.handleDatasetChange();
+    })((() => V$1(this, T$4, "f")))), V$1(this, j$3, "f").initialisePersistentState(this.lfExpandedNodeIds), V$1(this, L$2, "f").initialisePersistentState(this.lfSelectedNodeIds), V$1(this, L$2, "f").handleSelectableChange(this.lfSelectable), this.handleDatasetChange();
   }
   componentDidLoad() {
-    const { info: e2 } = V(this, E$4, "f").debug;
+    const { info: e2 } = V$1(this, E$5, "f").debug;
     this.onLfEvent(new CustomEvent("ready"), "ready"), e2.update(this, "did-load");
   }
   componentWillRender() {
-    const { info: e2 } = V(this, E$4, "f").debug;
+    const { info: e2 } = V$1(this, E$5, "f").debug;
     e2.update(this, "will-render");
   }
   componentDidRender() {
-    const { debug: e2 } = V(this, E$4, "f");
+    const { debug: e2 } = V$1(this, E$5, "f");
     e2.info.update(this, "did-render");
   }
   render() {
     var _a2, _b2;
-    const { bemClass: t5, setLfStyle: r2 } = V(this, E$4, "f").theme, { tree: i2 } = V(this, D$2, "f"), { lfDataset: n2, lfStyle: a2, lfGrid: s2 } = this, l2 = (_a2 = V(this, T$3, "f")) == null ? void 0 : _a2.elements.jsx, d2 = !((_b2 = n2 == null ? void 0 : n2.nodes) == null ? void 0 : _b2.length);
-    return D$a(W$e, { key: "bb981ab53aaaa3837054ca638c97601e46a58cfe" }, a2 && D$a("style", { key: "87d22f0df77b8522e5a1f8465a7f7b49f30a6142", id: V(this, M$4, "f") }, r2(this)), D$a("div", { key: "e9aaa9ae39004cbc097228bf92cfd17efa336506", id: V(this, W$5, "f") }, D$a("div", { key: "4f1c47a323a598ad7d22ce45b7ebd49d6ed5fa4e", class: t5(i2._) + (s2 ? " tree--grid" : ""), part: V(this, I, "f").tree }, l2 == null ? void 0 : l2.filter(), l2 == null ? void 0 : l2.header(), d2 ? l2 == null ? void 0 : l2.empty() : l2 == null ? void 0 : l2.nodes())));
+    const { bemClass: t5, setLfStyle: r2 } = V$1(this, E$5, "f").theme, { tree: i2 } = V$1(this, D$3, "f"), { lfDataset: n2, lfStyle: a2, lfGrid: s2 } = this, l2 = (_a2 = V$1(this, T$4, "f")) == null ? void 0 : _a2.elements.jsx, d2 = !((_b2 = n2 == null ? void 0 : n2.nodes) == null ? void 0 : _b2.length);
+    return D$a(W$e, { key: "bb981ab53aaaa3837054ca638c97601e46a58cfe" }, a2 && D$a("style", { key: "87d22f0df77b8522e5a1f8465a7f7b49f30a6142", id: V$1(this, M$5, "f") }, r2(this)), D$a("div", { key: "e9aaa9ae39004cbc097228bf92cfd17efa336506", id: V$1(this, W$6, "f") }, D$a("div", { key: "4f1c47a323a598ad7d22ce45b7ebd49d6ed5fa4e", class: t5(i2._) + (s2 ? " tree--grid" : ""), part: V$1(this, I$1, "f").tree }, l2 == null ? void 0 : l2.filter(), l2 == null ? void 0 : l2.header(), d2 ? l2 == null ? void 0 : l2.empty() : l2 == null ? void 0 : l2.nodes())));
   }
   disconnectedCallback() {
     var _a2;
-    (_a2 = V(this, E$4, "f")) == null ? void 0 : _a2.theme.unregister(this);
+    (_a2 = V$1(this, E$5, "f")) == null ? void 0 : _a2.theme.unregister(this);
   }
   get rootElement() {
     return z$d(this);
@@ -46557,26 +46398,26 @@ const B = class {
     return { lfDataset: ["handleDatasetChange"], lfExpandedNodeIds: ["handleExpandedPropChange"], lfSelectedNodeIds: ["handleSelectedPropChange"], lfInitialExpansionDepth: ["handleInitialDepthChange"], lfSelectable: ["handleSelectableChange"], lfFilter: ["handleFilterToggle"] };
   }
 };
-E$4 = /* @__PURE__ */ new WeakMap(), D$2 = /* @__PURE__ */ new WeakMap(), I = /* @__PURE__ */ new WeakMap(), A$1 = /* @__PURE__ */ new WeakMap(), N = /* @__PURE__ */ new WeakMap(), M$4 = /* @__PURE__ */ new WeakMap(), W$5 = /* @__PURE__ */ new WeakMap(), T$3 = /* @__PURE__ */ new WeakMap(), j$2 = /* @__PURE__ */ new WeakMap(), L$1 = /* @__PURE__ */ new WeakMap(), C$4 = /* @__PURE__ */ new WeakSet(), F2 = function() {
+E$5 = /* @__PURE__ */ new WeakMap(), D$3 = /* @__PURE__ */ new WeakMap(), I$1 = /* @__PURE__ */ new WeakMap(), A$2 = /* @__PURE__ */ new WeakMap(), N = /* @__PURE__ */ new WeakMap(), M$5 = /* @__PURE__ */ new WeakMap(), W$6 = /* @__PURE__ */ new WeakMap(), T$4 = /* @__PURE__ */ new WeakMap(), j$3 = /* @__PURE__ */ new WeakMap(), L$2 = /* @__PURE__ */ new WeakMap(), C$5 = /* @__PURE__ */ new WeakSet(), F$1 = function() {
   return false;
-}, H = function(e2) {
+}, H$1 = function(e2) {
   return !!e2 && !!this.lfSelectable && true !== e2.isDisabled;
-}, B.style = '::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=ripple]{animation-duration:var(--lf-ui-duration-ripple, 675ms);animation-fill-mode:forwards;animation-name:lf-ripple;animation-timing-function:var(--lf-ui-timing-ripple, ease-out);background:var(--lf-ui-ripple-background, var(--lf-color-primary));border-radius:var(--lf-ui-radius-ripple, 50%);height:var(--lf-ui-ripple-height, 100%);left:var(--lf-ui-ripple-x, 50%);opacity:var(--lf-ui-opacity-ripple, 0.5);pointer-events:none;position:absolute;top:var(--lf-ui-ripple-y, 50%);transform:scale(0);width:var(--lf-ui-ripple-width, 100%)}@keyframes lf-ripple{from{transform:scale(0)}to{opacity:0;transform:scale(4)}}[data-lf=ripple-surface]{cursor:pointer;height:100%;left:0;overflow:hidden;position:absolute;top:0;width:100%}:host{display:block;font-family:var(--lf-tree-font-family, var(--lf-font-family-primary));font-size:var(--lf-tree-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-tree-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-tree-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-tree-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-tree-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-tree-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-tree-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-tree-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{width:100%;height:100%}:host([lf-accordion-layout]) .node[data-depth="0"]{border:0;border-style:solid;border-radius:var(--lf-tree-border-radius, var(--lf-ui-border-radius));background-color:rgba(var(--lf-tree-color-surface, var(--lf-color-surface)), 0.375);color:rgb(var(--lf-tree-color-on-surface, var(--lf-color-on-surface)));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);font-size:1em;height:var(--lf-tree-accordion-node-height, 4em)}:host([lf-accordion-layout]) .node[data-depth="0"] .node__value{font-size:0.775em;letter-spacing:0.0892857143em;line-height:inherit;text-transform:uppercase;font-size:1em}:host([lf-selectable]) .node:hover{background-color:rgba(var(--lf-tree-color-on-bg, var(--lf-color-on-bg)), 0.075);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}:host([lf-selectable]) .node--selected{background-color:rgba(var(--lf-tree-color-on-bg, var(--lf-color-on-bg)), 0.175);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}:host([lf-selectable]) .node--selected:hover{background-color:rgba(var(--lf-tree-color-on-bg, var(--lf-color-on-bg)), 0.225);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.tree{border:0;border-style:solid;border-radius:var(--lf-tree-border-radius, var(--lf-ui-border-radius));background-color:rgba(var(--lf-tree-color-bg, var(--lf-color-bg)), 0.275);color:rgb(var(--lf-tree-color-on-bg, var(--lf-color-on-bg)));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:var(--lf-tree-padding, 0)}.tree__filter{border:0;border-style:solid;border-radius:var(--lf-tree-border-radius, var(--lf-ui-border-radius));border-bottom-left-radius:0;border-bottom-right-radius:0;background-color:rgba(var(--lf-tree-color-surface, var(--lf-color-surface)), 0.875);color:rgb(var(--lf-tree-color-on-surface, var(--lf-color-on-surface)));backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px);position:sticky;top:0;z-index:1}.tree--grid{align-content:start;display:grid;height:100%;overflow:auto;width:100%}.tree--grid .header{position:sticky;top:0;z-index:2;background:var(--lf-tree-color-bg, rgba(0, 0, 0, 0.3));backdrop-filter:blur(10px);font-size:0.85em;line-height:1.2}.tree--grid .header__row{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(120px, auto);column-gap:0.5em;padding:0.5em 1em 0.25em 3.25em;box-sizing:border-box}.tree--grid .header__cell{font-size:0.875em;font-weight:400;line-height:1.25em;letter-spacing:0.2em;font-weight:600;text-transform:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.node{color:rgb(var(--lf-tree-color-on-bg, var(--lf-color-on-bg)));transition:all 200ms cubic-bezier(0.4, 0, 0.6, 1);box-sizing:border-box;height:var(--lf-tree-node-height, 2em);padding:var(--lftree-node-padding, 0 1em);position:relative}.node__content{width:100%;height:100%;align-items:center;display:flex}.node__dropdown,.node__expand,.node__icon{cursor:pointer;margin:0}.node__dropdown,.node__expand{transition:all 200ms cubic-bezier(0.4, 0, 0.6, 1);overflow:hidden}.node__dropdown:hover,.node__expand:hover{opacity:0.75}.node__dropdown{-webkit-mask:var(--lf-icon-dropdown);mask:var(--lf-icon-dropdown);-webkit-mask-position:center;-webkit-mask-repeat:no-repeat;-webkit-mask-size:contain;mask-position:center;mask-repeat:no-repeat;mask-size:contain;background-color:rgba(var(--lf-tree-color-on-bg, var(--lf-color-on-bg)), 1);height:1.5em;width:1.5em;overflow:hidden}.node__dropdown--expanded{transform:rotate(180deg)}.node__dropdown--expanded:hover{opacity:0.75}.node__dropdown--hidden{visibility:hidden}.node__expand{-webkit-mask:var(--lf-icon-collapsed);mask:var(--lf-icon-collapsed);-webkit-mask-position:center;-webkit-mask-repeat:no-repeat;-webkit-mask-size:contain;mask-position:center;mask-repeat:no-repeat;mask-size:contain;background-color:rgba(var(--lf-tree-color-on-bg, var(--lf-color-on-bg)), 1);height:1.5em;width:1.5em;overflow:hidden}.node__expand--expanded{-webkit-mask:var(--lf-icon-expanded);mask:var(--lf-icon-expanded);-webkit-mask-position:center;-webkit-mask-repeat:no-repeat;-webkit-mask-size:contain;mask-position:center;mask-repeat:no-repeat;mask-size:contain;background-color:rgba(var(--lf-tree-color-on-bg, var(--lf-color-on-bg)), 1);height:1.5em;width:1.5em;overflow:hidden}.node__expand--hidden{visibility:hidden}.node__icon{background-color:rgba(var(--lf-tree-color-on-bg, var(--lf-color-on-bg)), 1);height:1.5em;width:1.5em;overflow:hidden}.node__padding{height:100%;width:calc(1.75em * var(--lf_tree_padding_multiplier))}.node__value{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:0.875em;font-weight:500;line-height:1.5em;letter-spacing:0.01em;margin:0 0 0 0.5em;width:100%}.node__value--grid .node__grid{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(120px, auto);column-gap:0.5em;align-items:center;padding:0 1em 0 0;box-sizing:border-box;min-height:100%}.node__value--grid .node__grid-cell{font-size:0.875em;font-weight:500;line-height:1.5em;letter-spacing:0.01em;display:flex;align-items:center;min-height:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.node__value--grid .node__grid-cell--value{font-weight:500}.no-matches{color:rgb(var(--lf-tree-color-on-bg, var(--lf-color-on-bg)));align-items:center;box-sizing:border-box;display:flex;justify-content:center;margin:auto;padding:1em;width:100%}.no-matches__icon{-webkit-mask:var(--lf-icon-warning);mask:var(--lf-icon-warning);-webkit-mask-position:center;-webkit-mask-repeat:no-repeat;-webkit-mask-size:contain;mask-position:center;mask-repeat:no-repeat;mask-size:contain;background-color:rgba(var(--lf-tree-color-on-bg, var(--lf-color-on-bg)), 1);height:1.5em;width:1.5em;overflow:hidden;margin-right:0.375em}.no-matches__text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:0.875em;font-weight:400;line-height:1.25em;letter-spacing:0.2em}.no-matches__filter{color:var(--lf-primary-color)}.empty-data{width:100%;height:100%;font-size:1em;font-weight:400;line-height:1.6em;letter-spacing:0em;margin-bottom:1em;align-items:center;display:flex;justify-content:center;margin:1em 0}';
+}, B$1.style = '::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=ripple]{animation-duration:var(--lf-ui-duration-ripple, 675ms);animation-fill-mode:forwards;animation-name:lf-ripple;animation-timing-function:var(--lf-ui-timing-ripple, ease-out);background:var(--lf-ui-ripple-background, var(--lf-color-primary));border-radius:var(--lf-ui-radius-ripple, 50%);height:var(--lf-ui-ripple-height, 100%);left:var(--lf-ui-ripple-x, 50%);opacity:var(--lf-ui-opacity-ripple, 0.5);pointer-events:none;position:absolute;top:var(--lf-ui-ripple-y, 50%);transform:scale(0);width:var(--lf-ui-ripple-width, 100%)}@keyframes lf-ripple{from{transform:scale(0)}to{opacity:0;transform:scale(4)}}[data-lf=ripple-surface]{cursor:pointer;height:100%;left:0;overflow:hidden;position:absolute;top:0;width:100%}:host{display:block;font-family:var(--lf-tree-font-family, var(--lf-font-family-primary));font-size:var(--lf-tree-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-tree-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-tree-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-tree-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-tree-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-tree-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-tree-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-tree-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{width:100%;height:100%}:host([lf-accordion-layout]) .node[data-depth="0"]{border:0;border-style:solid;border-radius:var(--lf-tree-border-radius, var(--lf-ui-border-radius));background-color:rgba(var(--lf-tree-color-surface, var(--lf-color-surface)), 0.375);color:rgb(var(--lf-tree-color-on-surface, var(--lf-color-on-surface)));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);font-size:1em;height:var(--lf-tree-accordion-node-height, 4em)}:host([lf-accordion-layout]) .node[data-depth="0"] .node__value{font-size:0.775em;letter-spacing:0.0892857143em;line-height:inherit;text-transform:uppercase;font-size:1em}:host([lf-selectable]) .node:hover{background-color:rgba(var(--lf-tree-color-on-bg, var(--lf-color-on-bg)), 0.075);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}:host([lf-selectable]) .node--selected{background-color:rgba(var(--lf-tree-color-on-bg, var(--lf-color-on-bg)), 0.175);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}:host([lf-selectable]) .node--selected:hover{background-color:rgba(var(--lf-tree-color-on-bg, var(--lf-color-on-bg)), 0.225);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.tree{border:0;border-style:solid;border-radius:var(--lf-tree-border-radius, var(--lf-ui-border-radius));background-color:rgba(var(--lf-tree-color-bg, var(--lf-color-bg)), 0.275);color:rgb(var(--lf-tree-color-on-bg, var(--lf-color-on-bg)));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:var(--lf-tree-padding, 0)}.tree__filter{border:0;border-style:solid;border-radius:var(--lf-tree-border-radius, var(--lf-ui-border-radius));border-bottom-left-radius:0;border-bottom-right-radius:0;background-color:rgba(var(--lf-tree-color-surface, var(--lf-color-surface)), 0.875);color:rgb(var(--lf-tree-color-on-surface, var(--lf-color-on-surface)));backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px);position:sticky;top:0;z-index:1}.tree--grid{align-content:start;display:grid;height:100%;overflow:auto;width:100%}.tree--grid .header{position:sticky;top:0;z-index:2;background:var(--lf-tree-color-bg, rgba(0, 0, 0, 0.3));backdrop-filter:blur(10px);font-size:0.85em;line-height:1.2}.tree--grid .header__row{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(120px, auto);column-gap:0.5em;padding:0.5em 1em 0.25em 3.25em;box-sizing:border-box}.tree--grid .header__cell{font-size:0.875em;font-weight:400;line-height:1.25em;letter-spacing:0.2em;font-weight:600;text-transform:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.node{color:rgb(var(--lf-tree-color-on-bg, var(--lf-color-on-bg)));transition:all 200ms cubic-bezier(0.4, 0, 0.6, 1);box-sizing:border-box;height:var(--lf-tree-node-height, 2em);padding:var(--lftree-node-padding, 0 1em);position:relative}.node__content{width:100%;height:100%;align-items:center;display:flex}.node__dropdown,.node__expand,.node__icon{cursor:pointer;margin:0}.node__dropdown,.node__expand{transition:all 200ms cubic-bezier(0.4, 0, 0.6, 1);overflow:hidden}.node__dropdown:hover,.node__expand:hover{opacity:0.75}.node__dropdown{-webkit-mask:var(--lf-icon-dropdown);mask:var(--lf-icon-dropdown);-webkit-mask-position:center;-webkit-mask-repeat:no-repeat;-webkit-mask-size:contain;mask-position:center;mask-repeat:no-repeat;mask-size:contain;background-color:rgba(var(--lf-tree-color-on-bg, var(--lf-color-on-bg)), 1);height:1.5em;width:1.5em;overflow:hidden}.node__dropdown--expanded{transform:rotate(180deg)}.node__dropdown--expanded:hover{opacity:0.75}.node__dropdown--hidden{visibility:hidden}.node__expand{-webkit-mask:var(--lf-icon-collapsed);mask:var(--lf-icon-collapsed);-webkit-mask-position:center;-webkit-mask-repeat:no-repeat;-webkit-mask-size:contain;mask-position:center;mask-repeat:no-repeat;mask-size:contain;background-color:rgba(var(--lf-tree-color-on-bg, var(--lf-color-on-bg)), 1);height:1.5em;width:1.5em;overflow:hidden}.node__expand--expanded{-webkit-mask:var(--lf-icon-expanded);mask:var(--lf-icon-expanded);-webkit-mask-position:center;-webkit-mask-repeat:no-repeat;-webkit-mask-size:contain;mask-position:center;mask-repeat:no-repeat;mask-size:contain;background-color:rgba(var(--lf-tree-color-on-bg, var(--lf-color-on-bg)), 1);height:1.5em;width:1.5em;overflow:hidden}.node__expand--hidden{visibility:hidden}.node__icon{background-color:rgba(var(--lf-tree-color-on-bg, var(--lf-color-on-bg)), 1);height:1.5em;width:1.5em;overflow:hidden}.node__padding{height:100%;width:calc(1.75em * var(--lf_tree_padding_multiplier))}.node__value{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:0.875em;font-weight:500;line-height:1.5em;letter-spacing:0.01em;margin:0 0 0 0.5em;width:100%}.node__value--grid .node__grid{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(120px, auto);column-gap:0.5em;align-items:center;padding:0 1em 0 0;box-sizing:border-box;min-height:100%}.node__value--grid .node__grid-cell{font-size:0.875em;font-weight:500;line-height:1.5em;letter-spacing:0.01em;display:flex;align-items:center;min-height:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.node__value--grid .node__grid-cell--value{font-weight:500}.no-matches{color:rgb(var(--lf-tree-color-on-bg, var(--lf-color-on-bg)));align-items:center;box-sizing:border-box;display:flex;justify-content:center;margin:auto;padding:1em;width:100%}.no-matches__icon{-webkit-mask:var(--lf-icon-warning);mask:var(--lf-icon-warning);-webkit-mask-position:center;-webkit-mask-repeat:no-repeat;-webkit-mask-size:contain;mask-position:center;mask-repeat:no-repeat;mask-size:contain;background-color:rgba(var(--lf-tree-color-on-bg, var(--lf-color-on-bg)), 1);height:1.5em;width:1.5em;overflow:hidden;margin-right:0.375em}.no-matches__text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:0.875em;font-weight:400;line-height:1.25em;letter-spacing:0.2em}.no-matches__filter{color:var(--lf-primary-color)}.empty-data{width:100%;height:100%;font-size:1em;font-weight:400;line-height:1.6em;letter-spacing:0em;margin-bottom:1em;align-items:center;display:flex;justify-content:center;margin:1em 0}';
 const pB1bf3d70_entry = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
-  lf_tree: B
+  lf_tree: B$1
 }, Symbol.toStringTag, { value: "Module" }));
-var p$2, u$3, b$2, g$4, y$4, w$3, k$4, z$4, x$4, _$2 = function(t5, a2, o2, s2) {
+var p$2, u$3, b$3, g$4, y$4, w$4, k$5, z$5, x$5, _$3 = function(t5, a2, o2, s2) {
   if ("function" == typeof a2 ? t5 !== a2 || true : !a2.has(t5)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return a2.get(t5);
 };
-const W$4 = class W {
+const W$5 = class W {
   constructor(s2) {
     n(this, s2), this.lfEvent = V$4(this, "lf-toast-event"), this.lfCloseIcon = "", this.lfCloseCallback = () => {
       this.unmount();
-    }, this.lfTimer = null, this.lfMessage = "", this.lfStyle = "", this.lfUiSize = "medium", this.lfUiState = "primary", p$2.set(this, void 0), u$3.set(this, LF_TOAST_BLOCKS), b$2.set(this, CY_ATTRIBUTES), g$4.set(this, LF_ATTRIBUTES), y$4.set(this, LF_TOAST_PARTS), w$3.set(this, LF_STYLE_ID), k$4.set(this, LF_TOAST_CSS_VARIABLES), z$4.set(this, LF_WRAPPER_ID), x$4.set(this, ((t5 = false) => {
-      const { assets: a2, theme: s3 } = _$2(this, p$2), { get: r2 } = a2, { bemClass: e2 } = s3, { toast: i2 } = _$2(this, u$3), { style: l2 } = r2(`./assets/svg/${t5 ? this.lfCloseIcon : this.lfIcon}.svg`);
-      return D$a("div", { class: e2(i2._, i2.icon, { "has-actions": t5 }), "data-cy": _$2(this, b$2).maskedSvg, onPointerDown: t5 ? (t6) => this.lfCloseCallback(this, t6) : null, part: _$2(this, y$4).icon, style: l2, tabIndex: t5 && 0 });
+    }, this.lfTimer = null, this.lfMessage = "", this.lfStyle = "", this.lfUiSize = "medium", this.lfUiState = "primary", p$2.set(this, void 0), u$3.set(this, LF_TOAST_BLOCKS), b$3.set(this, CY_ATTRIBUTES), g$4.set(this, LF_ATTRIBUTES), y$4.set(this, LF_TOAST_PARTS), w$4.set(this, LF_STYLE_ID), k$5.set(this, LF_TOAST_CSS_VARIABLES), z$5.set(this, LF_WRAPPER_ID), x$5.set(this, ((t5 = false) => {
+      const { assets: a2, theme: s3 } = _$3(this, p$2), { get: r2 } = a2, { bemClass: e2 } = s3, { toast: i2 } = _$3(this, u$3), { style: l2 } = r2(`./assets/svg/${t5 ? this.lfCloseIcon : this.lfIcon}.svg`);
+      return D$a("div", { class: e2(i2._, i2.icon, { "has-actions": t5 }), "data-cy": _$3(this, b$3).maskedSvg, onPointerDown: t5 ? (t6) => this.lfCloseCallback(this, t6) : null, part: _$3(this, y$4).icon, style: l2, tabIndex: t5 && 0 });
     }));
   }
   onLfEvent(t5, a2) {
@@ -46598,51 +46439,51 @@ const W$4 = class W {
     }), t5);
   }
   connectedCallback() {
-    _$2(this, p$2) && _$2(this, p$2).theme.register(this);
+    _$3(this, p$2) && _$3(this, p$2).theme.register(this);
   }
   async componentWillLoad() {
     if ((function(t5, a2, o2, s2, r2) {
       if ("function" == typeof a2 ? t5 !== a2 || true : !a2.has(t5)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
       a2.set(t5, o2);
     })(this, p$2, await a(this)), "" === this.lfCloseIcon) {
-      const { "--lf-icon-delete": t5 } = _$2(this, p$2).theme.get.current().variables;
+      const { "--lf-icon-delete": t5 } = _$3(this, p$2).theme.get.current().variables;
       this.lfCloseIcon = t5;
     }
   }
   componentDidLoad() {
-    const { info: t5 } = _$2(this, p$2).debug;
+    const { info: t5 } = _$3(this, p$2).debug;
     this.onLfEvent(new CustomEvent("ready"), "ready"), t5.update(this, "did-load");
   }
   componentWillRender() {
-    const { info: t5 } = _$2(this, p$2).debug;
+    const { info: t5 } = _$3(this, p$2).debug;
     t5.update(this, "will-render");
   }
   componentDidRender() {
-    const { info: t5 } = _$2(this, p$2).debug, { lfTimer: a2 } = this;
+    const { info: t5 } = _$3(this, p$2).debug, { lfTimer: a2 } = this;
     a2 && setTimeout((() => {
       this.lfCloseCallback ? this.lfCloseCallback(this, null) : this.unmount();
     }), a2), t5.update(this, "did-render");
   }
   render() {
-    const { theme: t5 } = _$2(this, p$2), { bemClass: a2, setLfStyle: s2 } = t5, { toast: e2 } = _$2(this, u$3), { lfCloseIcon: i2, lfIcon: l2, lfMessage: n2, lfStyle: f2, lfTimer: c2 } = this;
-    return D$a(W$e, { key: "93f2712f80c3bc24cc6bf2b3d58a6a6b51b47092" }, D$a("style", { key: "42dbb4395076e39224a5ca44029b57220ab1434c", id: _$2(this, w$3) }, `
+    const { theme: t5 } = _$3(this, p$2), { bemClass: a2, setLfStyle: s2 } = t5, { toast: e2 } = _$3(this, u$3), { lfCloseIcon: i2, lfIcon: l2, lfMessage: n2, lfStyle: f2, lfTimer: c2 } = this;
+    return D$a(W$e, { key: "93f2712f80c3bc24cc6bf2b3d58a6a6b51b47092" }, D$a("style", { key: "42dbb4395076e39224a5ca44029b57220ab1434c", id: _$3(this, w$4) }, `
           :host {
-            ${c2 ? `${_$2(this, k$4).timer}: ${c2}ms;` : ""}
+            ${c2 ? `${_$3(this, k$5).timer}: ${c2}ms;` : ""}
           }
-        ${f2 && s2(this) || ""}`), D$a("div", { key: "4c17a74bfe36236f0d4940ad7a7a109825d82d26", id: _$2(this, z$4), "data-lf": _$2(this, g$4).fadeIn }, D$a("div", { key: "25368e35f0232a729b6a0f686436438267494d4e", class: a2(e2._), "data-lf": _$2(this, g$4)[this.lfUiState] }, D$a("div", { key: "0d914343dcc49dc47cf397e996175c75f7a431ab", class: a2(e2._, e2.accent, { temporary: !!c2 }) }), D$a("div", { key: "07650a14597f3a70c286958f24b08bec5621d115", class: a2(e2._, e2.messageWrapper, { full: Boolean(l2) && Boolean(i2), "has-actions": Boolean(i2), "has-icon": Boolean(l2) }) }, l2 && _$2(this, x$4).call(this), n2 && D$a("div", { key: "f4898608ad075e0b530a530b520e7430ae012b40", class: a2(e2._, e2.message) }, n2), i2 && _$2(this, x$4).call(this, true)))));
+        ${f2 && s2(this) || ""}`), D$a("div", { key: "4c17a74bfe36236f0d4940ad7a7a109825d82d26", id: _$3(this, z$5), "data-lf": _$3(this, g$4).fadeIn }, D$a("div", { key: "25368e35f0232a729b6a0f686436438267494d4e", class: a2(e2._), "data-lf": _$3(this, g$4)[this.lfUiState] }, D$a("div", { key: "0d914343dcc49dc47cf397e996175c75f7a431ab", class: a2(e2._, e2.accent, { temporary: !!c2 }) }), D$a("div", { key: "07650a14597f3a70c286958f24b08bec5621d115", class: a2(e2._, e2.messageWrapper, { full: Boolean(l2) && Boolean(i2), "has-actions": Boolean(i2), "has-icon": Boolean(l2) }) }, l2 && _$3(this, x$5).call(this), n2 && D$a("div", { key: "f4898608ad075e0b530a530b520e7430ae012b40", class: a2(e2._, e2.message) }, n2), i2 && _$3(this, x$5).call(this, true)))));
   }
   disconnectedCallback() {
     var _a2;
-    (_a2 = _$2(this, p$2)) == null ? void 0 : _a2.theme.unregister(this);
+    (_a2 = _$3(this, p$2)) == null ? void 0 : _a2.theme.unregister(this);
   }
   get rootElement() {
     return z$d(this);
   }
 };
-p$2 = /* @__PURE__ */ new WeakMap(), u$3 = /* @__PURE__ */ new WeakMap(), b$2 = /* @__PURE__ */ new WeakMap(), g$4 = /* @__PURE__ */ new WeakMap(), y$4 = /* @__PURE__ */ new WeakMap(), w$3 = /* @__PURE__ */ new WeakMap(), k$4 = /* @__PURE__ */ new WeakMap(), z$4 = /* @__PURE__ */ new WeakMap(), x$4 = /* @__PURE__ */ new WeakMap(), W$4.style = "::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=danger]{--lf-toast-color-primary:var(\n    --lf-toast-color-danger,\n    var(--lf-color-danger)\n  );--lf-toast-color-on-primary:var(\n    --lf-toast-color-danger,\n    var(--lf-color-on-danger)\n  )}[data-lf=disabled]{opacity:var(--lf-toast-ui-opacity-disabled, var(--lf-ui-opacity-disabled));pointer-events:none}[data-lf=info]{--lf-toast-color-primary:var(\n    --lf-toast-color-info,\n    var(--lf-color-info)\n  );--lf-toast-color-on-primary:var(\n    --lf-toast-color-info,\n    var(--lf-color-on-info)\n  )}[data-lf=secondary]{--lf-toast-color-primary:var(\n    --lf-toast-color-secondary,\n    var(--lf-color-secondary)\n  );--lf-toast-color-on-primary:var(\n    --lf-toast-color-secondary,\n    var(--lf-color-on-secondary)\n  )}[data-lf=success]{--lf-toast-color-primary:var(\n    --lf-toast-color-success,\n    var(--lf-color-success)\n  );--lf-toast-color-on-primary:var(\n    --lf-toast-color-success,\n    var(--lf-color-on-success)\n  )}[data-lf=warning]{--lf-toast-color-primary:var(\n    --lf-toast-color-warning,\n    var(--lf-color-warning)\n  );--lf-toast-color-on-primary:var(\n    --lf-toast-color-warning,\n    var(--lf-color-on-warning)\n  )}[data-lf=fade-in]{display:block;animation:lf-fade-in-block 0.25s ease-out forwards}@keyframes lf-fade-in-block{from{visibility:hidden;opacity:0}to{visibility:visible;opacity:1}}:host{display:block;font-family:var(--lf-toast-font-family, var(--lf-font-family-primary));font-size:var(--lf-toast-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-toast-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-toast-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-toast-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-toast-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-toast-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-toast-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-toast-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{width:100%;height:100%;animation:slideIn 250ms ease-out;box-sizing:border-box;z-index:var(--lf-ui-zindex-toast, 998)}.toast{border:0;border-style:solid;border-radius:var(--lf-toast-border-radius, var(--lf-ui-border-radius));background-color:rgba(var(--lf-toast-color-surface, var(--lf-color-surface)), 0.675);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);width:100%;height:100%;box-shadow:var(--lf-ui-box-shadow-modal);display:grid;grid-template-rows:auto 1fr;overflow:hidden}.toast__accent{background-color:rgba(var(--lf-toast-color-primary, var(--lf-color-primary)), 0.75);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);height:var(--lf-toast-accent-height, 0.25em);width:100%}.toast__accent--temporary{animation:reduceWidthToZero linear var(--lf_toast_timer, 5000ms) forwards}.toast__message-wrapper{align-content:var(--lf-toast-message-align-content, center);box-sizing:border-box;display:grid;gap:1em;grid-template-columns:1fr;height:100%;overflow:auto;padding:var(--lf-toast-padding, 0.75em)}.toast__message-wrapper--has-icon{grid-template-columns:auto 1fr}.toast__message-wrapper--has-actions{grid-template-columns:1fr auto}.toast__message-wrapper--full{grid-template-columns:auto 1fr auto}.toast__icon{background-color:rgba(var(--lf-comp-color-on-bg, var(--lf-color-on-bg)), 1);height:1.5em;width:1.5em;overflow:hidden;margin:var(--lf-toast-icon-margin, auto 0.5em);opacity:var(--lf-toast-icon-opacity, 1)}.toast__icon--has-actions{-webkit-mask:var(--lf-icon-clear);mask:var(--lf-icon-clear);-webkit-mask-position:center;-webkit-mask-repeat:no-repeat;-webkit-mask-size:contain;mask-position:center;mask-repeat:no-repeat;mask-size:contain;background-color:rgba(var(--lf-toast-color-on-bg, var(--lf-color-on-bg)), 1);height:1.5em;width:1.5em;overflow:hidden;transition:all 300ms cubic-bezier(0.4, 0, 0.2, 1);cursor:pointer;margin:auto 0.5em auto auto;position:relative}.toast__icon--has-actions:hover{opacity:0.75}.toast__message{color:rgb(var(--lf-toast-color-on-bg, var(--lf-color-on-bg)));overflow:auto;padding:var(--lf-toast-message-padding, 0.75em 0.75em 0.75em 0)}@media only screen and (max-width: 600px){:host{animation:slideUp 250ms ease-out}}@keyframes reduceWidthToZero{0%{width:100%}100%{width:0}}@keyframes slideIn{0%{transform:var(--lf-toast-slidein-from, translateX(100%))}100%{transform:var(--lf-toast-slidein-to, translateX(0))}}@keyframes slideUp{0%{transform:var(--lf-toast-slideup-from, translateY(100%))}100%{transform:var(--lf-toast-slideup-to, translateY(0))}}";
+p$2 = /* @__PURE__ */ new WeakMap(), u$3 = /* @__PURE__ */ new WeakMap(), b$3 = /* @__PURE__ */ new WeakMap(), g$4 = /* @__PURE__ */ new WeakMap(), y$4 = /* @__PURE__ */ new WeakMap(), w$4 = /* @__PURE__ */ new WeakMap(), k$5 = /* @__PURE__ */ new WeakMap(), z$5 = /* @__PURE__ */ new WeakMap(), x$5 = /* @__PURE__ */ new WeakMap(), W$5.style = "::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=danger]{--lf-toast-color-primary:var(\n    --lf-toast-color-danger,\n    var(--lf-color-danger)\n  );--lf-toast-color-on-primary:var(\n    --lf-toast-color-danger,\n    var(--lf-color-on-danger)\n  )}[data-lf=disabled]{opacity:var(--lf-toast-ui-opacity-disabled, var(--lf-ui-opacity-disabled));pointer-events:none}[data-lf=info]{--lf-toast-color-primary:var(\n    --lf-toast-color-info,\n    var(--lf-color-info)\n  );--lf-toast-color-on-primary:var(\n    --lf-toast-color-info,\n    var(--lf-color-on-info)\n  )}[data-lf=secondary]{--lf-toast-color-primary:var(\n    --lf-toast-color-secondary,\n    var(--lf-color-secondary)\n  );--lf-toast-color-on-primary:var(\n    --lf-toast-color-secondary,\n    var(--lf-color-on-secondary)\n  )}[data-lf=success]{--lf-toast-color-primary:var(\n    --lf-toast-color-success,\n    var(--lf-color-success)\n  );--lf-toast-color-on-primary:var(\n    --lf-toast-color-success,\n    var(--lf-color-on-success)\n  )}[data-lf=warning]{--lf-toast-color-primary:var(\n    --lf-toast-color-warning,\n    var(--lf-color-warning)\n  );--lf-toast-color-on-primary:var(\n    --lf-toast-color-warning,\n    var(--lf-color-on-warning)\n  )}[data-lf=fade-in]{display:block;animation:lf-fade-in-block 0.25s ease-out forwards}@keyframes lf-fade-in-block{from{visibility:hidden;opacity:0}to{visibility:visible;opacity:1}}:host{display:block;font-family:var(--lf-toast-font-family, var(--lf-font-family-primary));font-size:var(--lf-toast-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-toast-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-toast-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-toast-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-toast-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-toast-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-toast-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-toast-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{width:100%;height:100%;animation:slideIn 250ms ease-out;box-sizing:border-box;z-index:var(--lf-ui-zindex-toast, 998)}.toast{border:0;border-style:solid;border-radius:var(--lf-toast-border-radius, var(--lf-ui-border-radius));background-color:rgba(var(--lf-toast-color-surface, var(--lf-color-surface)), 0.675);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);width:100%;height:100%;box-shadow:var(--lf-ui-box-shadow-modal);display:grid;grid-template-rows:auto 1fr;overflow:hidden}.toast__accent{background-color:rgba(var(--lf-toast-color-primary, var(--lf-color-primary)), 0.75);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);height:var(--lf-toast-accent-height, 0.25em);width:100%}.toast__accent--temporary{animation:reduceWidthToZero linear var(--lf_toast_timer, 5000ms) forwards}.toast__message-wrapper{align-content:var(--lf-toast-message-align-content, center);box-sizing:border-box;display:grid;gap:1em;grid-template-columns:1fr;height:100%;overflow:auto;padding:var(--lf-toast-padding, 0.75em)}.toast__message-wrapper--has-icon{grid-template-columns:auto 1fr}.toast__message-wrapper--has-actions{grid-template-columns:1fr auto}.toast__message-wrapper--full{grid-template-columns:auto 1fr auto}.toast__icon{background-color:rgba(var(--lf-comp-color-on-bg, var(--lf-color-on-bg)), 1);height:1.5em;width:1.5em;overflow:hidden;margin:var(--lf-toast-icon-margin, auto 0.5em);opacity:var(--lf-toast-icon-opacity, 1)}.toast__icon--has-actions{-webkit-mask:var(--lf-icon-clear);mask:var(--lf-icon-clear);-webkit-mask-position:center;-webkit-mask-repeat:no-repeat;-webkit-mask-size:contain;mask-position:center;mask-repeat:no-repeat;mask-size:contain;background-color:rgba(var(--lf-toast-color-on-bg, var(--lf-color-on-bg)), 1);height:1.5em;width:1.5em;overflow:hidden;transition:all 300ms cubic-bezier(0.4, 0, 0.2, 1);cursor:pointer;margin:auto 0.5em auto auto;position:relative}.toast__icon--has-actions:hover{opacity:0.75}.toast__message{color:rgb(var(--lf-toast-color-on-bg, var(--lf-color-on-bg)));overflow:auto;padding:var(--lf-toast-message-padding, 0.75em 0.75em 0.75em 0)}@media only screen and (max-width: 600px){:host{animation:slideUp 250ms ease-out}}@keyframes reduceWidthToZero{0%{width:100%}100%{width:0}}@keyframes slideIn{0%{transform:var(--lf-toast-slidein-from, translateX(100%))}100%{transform:var(--lf-toast-slidein-to, translateX(0))}}@keyframes slideUp{0%{transform:var(--lf-toast-slideup-from, translateY(100%))}100%{transform:var(--lf-toast-slideup-to, translateY(0))}}";
 const pBb1b42f7_entry = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
-  lf_toast: W$4
+  lf_toast: W$5
 }, Symbol.toStringTag, { value: "Module" }));
 const p$1 = (t5, r2) => {
   if (t5) {
@@ -46650,37 +46491,37 @@ const p$1 = (t5, r2) => {
     t5.scrollTo({ left: "left" === r2 ? a2 - 200 : a2 + 200, behavior: "smooth" });
   }
 };
-var u$2, v$3, m$3, g$3, y$3, w$2, z$3, k$3, x$3, _$1, W$3, M$3 = function(t5, r2, a2, i2) {
+var u$2, v$3, m$3, g$3, y$3, w$3, z$4, k$4, x$4, _$2, W$4, M$4 = function(t5, r2, a2, i2) {
   if ("function" == typeof r2 ? t5 !== r2 || !i2 : !r2.has(t5)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return "m" === a2 ? i2 : "a" === a2 ? i2.call(t5) : i2 ? i2.value : r2.get(t5);
-}, C$3 = function(t5, r2, a2, i2, o2) {
+}, C$4 = function(t5, r2, a2, i2, o2) {
   if ("function" == typeof r2 ? t5 !== r2 || true : !r2.has(t5)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
   return r2.set(t5, a2), a2;
 };
-const E$3 = class E {
+const E$4 = class E {
   constructor(i2) {
-    n(this, i2), this.lfEvent = V$4(this, "lf-tabbar-event"), this.value = null, this.lfAriaLabel = "", this.lfDataset = null, this.lfNavigation = false, this.lfRipple = true, this.lfStyle = "", this.lfUiSize = "medium", this.lfUiState = "primary", this.lfValue = null, u$2.set(this, void 0), v$3.set(this, LF_TABBAR_BLOCKS), m$3.set(this, CY_ATTRIBUTES), g$3.set(this, LF_ATTRIBUTES), y$3.set(this, LF_TABBAR_PARTS), w$2.set(this, LF_STYLE_ID), z$3.set(this, LF_WRAPPER_ID), k$3.set(this, void 0), x$3.set(this, void 0), _$1.set(this, ((t5) => {
-      const { get: r2 } = M$3(this, u$2, "f").assets, { bemClass: i3 } = M$3(this, u$2, "f").theme, { tab: o2 } = M$3(this, v$3, "f"), { style: e2 } = r2(`./assets/svg/${t5.icon}.svg`);
-      return D$a("div", { class: i3(o2._, o2.icon), "data-cy": M$3(this, m$3, "f").maskedSvg, style: e2 });
-    })), W$3.set(this, ((t5, r2) => {
-      const { theme: i3 } = M$3(this, u$2, "f"), { bemClass: o2 } = i3, { tab: e2 } = M$3(this, v$3, "f"), { lfRipple: l2, value: n2 } = this, s2 = t5 === (n2 == null ? void 0 : n2.node);
-      return D$a("button", { "aria-selected": s2, "aria-label": (this.lfAriaLabel && t5.value ? `${this.lfAriaLabel} ${t5.value}` : t5.value || this.lfAriaLabel || t5.icon || this.rootElement.id || "tab").toString().trim(), class: o2(e2._, null, { active: s2 }), "data-cy": M$3(this, m$3, "f").button, "data-lf": M$3(this, g$3, "f")[this.lfUiState], onClick: (a2) => {
+    n(this, i2), this.lfEvent = V$4(this, "lf-tabbar-event"), this.value = null, this.lfAriaLabel = "", this.lfDataset = null, this.lfNavigation = false, this.lfRipple = true, this.lfStyle = "", this.lfUiSize = "medium", this.lfUiState = "primary", this.lfValue = null, u$2.set(this, void 0), v$3.set(this, LF_TABBAR_BLOCKS), m$3.set(this, CY_ATTRIBUTES), g$3.set(this, LF_ATTRIBUTES), y$3.set(this, LF_TABBAR_PARTS), w$3.set(this, LF_STYLE_ID), z$4.set(this, LF_WRAPPER_ID), k$4.set(this, void 0), x$4.set(this, void 0), _$2.set(this, ((t5) => {
+      const { get: r2 } = M$4(this, u$2, "f").assets, { bemClass: i3 } = M$4(this, u$2, "f").theme, { tab: o2 } = M$4(this, v$3, "f"), { style: e2 } = r2(`./assets/svg/${t5.icon}.svg`);
+      return D$a("div", { class: i3(o2._, o2.icon), "data-cy": M$4(this, m$3, "f").maskedSvg, style: e2 });
+    })), W$4.set(this, ((t5, r2) => {
+      const { theme: i3 } = M$4(this, u$2, "f"), { bemClass: o2 } = i3, { tab: e2 } = M$4(this, v$3, "f"), { lfRipple: l2, value: n2 } = this, s2 = t5 === (n2 == null ? void 0 : n2.node);
+      return D$a("button", { "aria-selected": s2, "aria-label": (this.lfAriaLabel && t5.value ? `${this.lfAriaLabel} ${t5.value}` : t5.value || this.lfAriaLabel || t5.icon || this.rootElement.id || "tab").toString().trim(), class: o2(e2._, null, { active: s2 }), "data-cy": M$4(this, m$3, "f").button, "data-lf": M$4(this, g$3, "f")[this.lfUiState], onClick: (a2) => {
         this.onLfEvent(a2, "click", r2, t5);
       }, onPointerDown: (a2) => {
         this.onLfEvent(a2, "pointerdown", r2, t5);
-      }, part: M$3(this, y$3, "f").tab, role: "tab", tabIndex: r2, title: (t5 == null ? void 0 : t5.description) || "" }, D$a("div", { "data-cy": M$3(this, m$3, "f").rippleSurface, "data-lf": M$3(this, g$3, "f").rippleSurface, ref: (t6) => {
-        t6 && l2 && M$3(this, k$3, "f").push(t6);
-      } }), D$a("span", { class: o2(e2._, e2.content), "data-cy": M$3(this, m$3, "f").node }, t5.icon && M$3(this, _$1, "f").call(this, t5), t5.value && D$a("span", { class: o2(e2._, e2.label) }, t5.value)), D$a("span", { class: o2(e2._, e2.indicator, { active: s2 }) }, D$a("span", { class: o2(e2._, e2.indicatorContent, { active: true }) })));
+      }, part: M$4(this, y$3, "f").tab, role: "tab", tabIndex: r2, title: (t5 == null ? void 0 : t5.description) || "" }, D$a("div", { "data-cy": M$4(this, m$3, "f").rippleSurface, "data-lf": M$4(this, g$3, "f").rippleSurface, ref: (t6) => {
+        t6 && l2 && M$4(this, k$4, "f").push(t6);
+      } }), D$a("span", { class: o2(e2._, e2.content), "data-cy": M$4(this, m$3, "f").node }, t5.icon && M$4(this, _$2, "f").call(this, t5), t5.value && D$a("span", { class: o2(e2._, e2.label) }, t5.value)), D$a("span", { class: o2(e2._, e2.indicator, { active: s2 }) }, D$a("span", { class: o2(e2._, e2.indicatorContent, { active: true }) })));
     }));
   }
   onLfEvent(t5, r2, a2 = 0, i2) {
-    const { effects: o2 } = M$3(this, u$2, "f");
+    const { effects: o2 } = M$4(this, u$2, "f");
     switch (r2) {
       case "click":
         this.value = { index: a2, node: i2 };
         break;
       case "pointerdown":
-        this.lfRipple && o2.ripple(t5, M$3(this, k$3, "f")[a2]);
+        this.lfRipple && o2.ripple(t5, M$4(this, k$4, "f")[a2]);
     }
     this.lfEvent.emit({ comp: this, eventType: r2, id: this.rootElement.id, originalEvent: t5, node: i2 });
   }
@@ -46707,11 +46548,11 @@ const E$3 = class E {
     }), t5);
   }
   connectedCallback() {
-    M$3(this, u$2, "f") && M$3(this, u$2, "f").theme.register(this);
+    M$4(this, u$2, "f") && M$4(this, u$2, "f").theme.register(this);
   }
   async componentWillLoad() {
-    C$3(this, u$2, await a(this));
-    const { debug: t5 } = M$3(this, u$2, "f"), { lfDataset: r2, lfValue: a$12 } = this;
+    C$4(this, u$2, await a(this));
+    const { debug: t5 } = M$4(this, u$2, "f"), { lfDataset: r2, lfValue: a$12 } = this;
     try {
       if (null !== a$12 && ("number" == typeof a$12 && (this.value = { index: a$12, node: r2.nodes[a$12] }), "string" == typeof a$12)) {
         const t6 = r2.nodes.find(((t7) => t7.id === a$12));
@@ -46722,57 +46563,57 @@ const E$3 = class E {
     }
   }
   componentDidLoad() {
-    const { debug: t5, drag: r2 } = M$3(this, u$2, "f");
-    M$3(this, x$3, "f") && r2.register.dragToScroll(M$3(this, x$3, "f")), this.onLfEvent(new CustomEvent("ready"), "ready"), t5.info.update(this, "did-load");
+    const { debug: t5, drag: r2 } = M$4(this, u$2, "f");
+    M$4(this, x$4, "f") && r2.register.dragToScroll(M$4(this, x$4, "f")), this.onLfEvent(new CustomEvent("ready"), "ready"), t5.info.update(this, "did-load");
   }
   componentWillRender() {
-    const { debug: t5 } = M$3(this, u$2, "f");
+    const { debug: t5 } = M$4(this, u$2, "f");
     t5.info.update(this, "will-render");
   }
   componentDidRender() {
-    const { info: t5 } = M$3(this, u$2, "f").debug;
+    const { info: t5 } = M$4(this, u$2, "f").debug;
     t5.update(this, "did-render");
   }
   render() {
-    const { data: t5, theme: r2 } = M$3(this, u$2, "f"), { bemClass: i2, get: e2, setLfStyle: l2 } = r2, { "--lf-icon-next": n2, "--lf-icon-previous": s2 } = e2.current().variables, { tabbar: f2 } = M$3(this, v$3, "f"), { lfDataset: c2, lfStyle: b2 } = this;
+    const { data: t5, theme: r2 } = M$4(this, u$2, "f"), { bemClass: i2, get: e2, setLfStyle: l2 } = r2, { "--lf-icon-next": n2, "--lf-icon-previous": s2 } = e2.current().variables, { tabbar: f2 } = M$4(this, v$3, "f"), { lfDataset: c2, lfStyle: b2 } = this;
     if (!t5.node.exists(c2)) return;
-    C$3(this, k$3, []);
+    C$4(this, k$4, []);
     const d2 = c2.nodes;
-    return D$a(W$e, null, b2 && D$a("style", { id: M$3(this, w$2, "f") }, l2(this)), D$a("div", { id: M$3(this, z$3, "f") }, D$a("div", { class: i2(f2._), part: M$3(this, y$3, "f").tabbbar, role: "tablist" }, this.lfNavigation && D$a("lf-button", { lfIcon: s2, lfStretchY: true, lfStyling: "flat", lfUiSize: this.lfUiSize, "onLf-button-event": () => p$1(M$3(this, x$3, "f"), "left") }), D$a("div", { class: i2(f2._, f2.scroll), ref: (t6) => {
-      t6 && C$3(this, x$3, t6);
-    } }, d2.map(((t6, r3) => M$3(this, W$3, "f").call(this, t6, r3)))), this.lfNavigation && D$a("lf-button", { lfIcon: n2, lfStretchY: true, lfStyling: "flat", lfUiSize: this.lfUiSize, "onLf-button-event": () => p$1(M$3(this, x$3, "f"), "right") }))));
+    return D$a(W$e, null, b2 && D$a("style", { id: M$4(this, w$3, "f") }, l2(this)), D$a("div", { id: M$4(this, z$4, "f") }, D$a("div", { class: i2(f2._), part: M$4(this, y$3, "f").tabbbar, role: "tablist" }, this.lfNavigation && D$a("lf-button", { lfIcon: s2, lfStretchY: true, lfStyling: "flat", lfUiSize: this.lfUiSize, "onLf-button-event": () => p$1(M$4(this, x$4, "f"), "left") }), D$a("div", { class: i2(f2._, f2.scroll), ref: (t6) => {
+      t6 && C$4(this, x$4, t6);
+    } }, d2.map(((t6, r3) => M$4(this, W$4, "f").call(this, t6, r3)))), this.lfNavigation && D$a("lf-button", { lfIcon: n2, lfStretchY: true, lfStyling: "flat", lfUiSize: this.lfUiSize, "onLf-button-event": () => p$1(M$4(this, x$4, "f"), "right") }))));
   }
   disconnectedCallback() {
     var _a2, _b2, _c2;
-    ((_a2 = M$3(this, u$2, "f")) == null ? void 0 : _a2.drag.getActiveSession(M$3(this, x$3, "f"))) && ((_b2 = M$3(this, u$2, "f")) == null ? void 0 : _b2.drag.unregister.dragToScroll(M$3(this, x$3, "f"))), (_c2 = M$3(this, u$2, "f")) == null ? void 0 : _c2.theme.unregister(this);
+    ((_a2 = M$4(this, u$2, "f")) == null ? void 0 : _a2.drag.getActiveSession(M$4(this, x$4, "f"))) && ((_b2 = M$4(this, u$2, "f")) == null ? void 0 : _b2.drag.unregister.dragToScroll(M$4(this, x$4, "f"))), (_c2 = M$4(this, u$2, "f")) == null ? void 0 : _c2.theme.unregister(this);
   }
   get rootElement() {
     return z$d(this);
   }
 };
-u$2 = /* @__PURE__ */ new WeakMap(), v$3 = /* @__PURE__ */ new WeakMap(), m$3 = /* @__PURE__ */ new WeakMap(), g$3 = /* @__PURE__ */ new WeakMap(), y$3 = /* @__PURE__ */ new WeakMap(), w$2 = /* @__PURE__ */ new WeakMap(), z$3 = /* @__PURE__ */ new WeakMap(), k$3 = /* @__PURE__ */ new WeakMap(), x$3 = /* @__PURE__ */ new WeakMap(), _$1 = /* @__PURE__ */ new WeakMap(), W$3 = /* @__PURE__ */ new WeakMap(), E$3.style = "::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=ripple]{animation-duration:var(--lf-ui-duration-ripple, 675ms);animation-fill-mode:forwards;animation-name:lf-ripple;animation-timing-function:var(--lf-ui-timing-ripple, ease-out);background:var(--lf-ui-ripple-background, var(--lf-color-primary));border-radius:var(--lf-ui-radius-ripple, 50%);height:var(--lf-ui-ripple-height, 100%);left:var(--lf-ui-ripple-x, 50%);opacity:var(--lf-ui-opacity-ripple, 0.5);pointer-events:none;position:absolute;top:var(--lf-ui-ripple-y, 50%);transform:scale(0);width:var(--lf-ui-ripple-width, 100%)}@keyframes lf-ripple{from{transform:scale(0)}to{opacity:0;transform:scale(4)}}[data-lf=ripple-surface]{cursor:pointer;height:100%;left:0;overflow:hidden;position:absolute;top:0;width:100%}[data-lf=danger]{--lf-tabbar-color-primary:var(\n    --lf-tabbar-color-danger,\n    var(--lf-color-danger)\n  );--lf-tabbar-color-on-primary:var(\n    --lf-tabbar-color-danger,\n    var(--lf-color-on-danger)\n  )}[data-lf=disabled]{opacity:var(--lf-tabbar-ui-opacity-disabled, var(--lf-ui-opacity-disabled));pointer-events:none}[data-lf=info]{--lf-tabbar-color-primary:var(\n    --lf-tabbar-color-info,\n    var(--lf-color-info)\n  );--lf-tabbar-color-on-primary:var(\n    --lf-tabbar-color-info,\n    var(--lf-color-on-info)\n  )}[data-lf=secondary]{--lf-tabbar-color-primary:var(\n    --lf-tabbar-color-secondary,\n    var(--lf-color-secondary)\n  );--lf-tabbar-color-on-primary:var(\n    --lf-tabbar-color-secondary,\n    var(--lf-color-on-secondary)\n  )}[data-lf=success]{--lf-tabbar-color-primary:var(\n    --lf-tabbar-color-success,\n    var(--lf-color-success)\n  );--lf-tabbar-color-on-primary:var(\n    --lf-tabbar-color-success,\n    var(--lf-color-on-success)\n  )}[data-lf=warning]{--lf-tabbar-color-primary:var(\n    --lf-tabbar-color-warning,\n    var(--lf-color-warning)\n  );--lf-tabbar-color-on-primary:var(\n    --lf-tabbar-color-warning,\n    var(--lf-color-on-warning)\n  )}:host{display:block;font-family:var(--lf-tabbar-font-family, var(--lf-font-family-primary));font-size:var(--lf-tabbar-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-tabbar-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-tabbar-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-tabbar-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-tabbar-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-tabbar-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-tabbar-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-tabbar-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{width:100%}.tabbar{display:flex;height:var(--lf-tabbar-height, 2.25em);width:100%}.tabbar__scroll{display:flex;overflow:hidden;width:100%}.tab{font-family:var(--lf-tabbar-font-family, var(--lf-font-family-primary));background-color:rgba(var(--lf-tabbar-color-bg, var(--lf-color-bg)), 0.375);color:rgb(var(--lf-tabbar-color-on-bg, var(--lf-color-on-bg)));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:all 300ms cubic-bezier(0.4, 0, 0.2, 1);appearance:none;border:none;box-sizing:border-box;cursor:pointer;display:flex;flex:1 0 auto;height:100%;justify-content:center;margin:0;min-width:var(--lf-tabbar-min-width, 5em);outline:none;padding:var(--lf-tabbar-tab-padding, 0 1.25em);position:relative;text-align:center}.tab:first-child{border:0;border-style:solid;border-radius:var(--lf-tabbar-border-radius, var(--lf-ui-border-radius));border-bottom-left-radius:0;border-bottom-right-radius:0;border-top-right-radius:0}.tab:last-child{border:0;border-style:solid;border-radius:var(--lf-tabbar-border-radius, var(--lf-ui-border-radius));border-bottom-left-radius:0;border-bottom-right-radius:0;border-top-left-radius:0}.tab:hover{background-color:rgba(var(--lf-tabbar-color-primary, var(--lf-color-primary)), 0.125);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.tab--active{background-color:rgba(var(--lf-tabbar-color-primary, var(--lf-color-primary)), 0.225);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.tab--active:hover{background-color:rgba(var(--lf-tabbar-color-primary, var(--lf-color-primary)), 0.325);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.tab--active .tab__icon{background-color:rgba(var(--lf-tabbar-color-primary, var(--lf-color-primary)), 1)}.tab--active .tab__label{color:rgb(var(--lf-tabbar-color-primary, var(--lf-color-primary)));font-weight:600;opacity:1}.tab__icon{background-color:rgba(var(--lf-tabbar-color-on-bg, var(--lf-color-on-bg)), 1);height:1.5em;width:1.5em;overflow:hidden;transition:all 300ms cubic-bezier(0.4, 0, 0.2, 1)}.tab__content{align-items:center;display:flex;height:inherit;justify-content:center;pointer-events:none;position:relative}.tab__label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:0.775em;letter-spacing:0.0892857143em;line-height:inherit;text-transform:uppercase;opacity:0.75}.tab__icon+.tab__label{padding-left:0.5em;padding-right:0}.tab__indicator{width:100%;height:100%;transition:all 300ms cubic-bezier(0.4, 0, 0.2, 1);display:flex;justify-content:center;left:0;pointer-events:none;position:absolute;top:0}.tab__indicator--active .tab__indicator-content{opacity:1}.tab__indicator-content{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);opacity:0;transform-origin:left center}.tab__indicator-content--active{align-self:flex-end;border-color:rgb(var(--lf-tabbar-color-indicator, var(--lf-tabbar-color-primary)));border-top-style:solid;border-top-width:2px;box-sizing:border-box;width:100%}";
+u$2 = /* @__PURE__ */ new WeakMap(), v$3 = /* @__PURE__ */ new WeakMap(), m$3 = /* @__PURE__ */ new WeakMap(), g$3 = /* @__PURE__ */ new WeakMap(), y$3 = /* @__PURE__ */ new WeakMap(), w$3 = /* @__PURE__ */ new WeakMap(), z$4 = /* @__PURE__ */ new WeakMap(), k$4 = /* @__PURE__ */ new WeakMap(), x$4 = /* @__PURE__ */ new WeakMap(), _$2 = /* @__PURE__ */ new WeakMap(), W$4 = /* @__PURE__ */ new WeakMap(), E$4.style = "::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=ripple]{animation-duration:var(--lf-ui-duration-ripple, 675ms);animation-fill-mode:forwards;animation-name:lf-ripple;animation-timing-function:var(--lf-ui-timing-ripple, ease-out);background:var(--lf-ui-ripple-background, var(--lf-color-primary));border-radius:var(--lf-ui-radius-ripple, 50%);height:var(--lf-ui-ripple-height, 100%);left:var(--lf-ui-ripple-x, 50%);opacity:var(--lf-ui-opacity-ripple, 0.5);pointer-events:none;position:absolute;top:var(--lf-ui-ripple-y, 50%);transform:scale(0);width:var(--lf-ui-ripple-width, 100%)}@keyframes lf-ripple{from{transform:scale(0)}to{opacity:0;transform:scale(4)}}[data-lf=ripple-surface]{cursor:pointer;height:100%;left:0;overflow:hidden;position:absolute;top:0;width:100%}[data-lf=danger]{--lf-tabbar-color-primary:var(\n    --lf-tabbar-color-danger,\n    var(--lf-color-danger)\n  );--lf-tabbar-color-on-primary:var(\n    --lf-tabbar-color-danger,\n    var(--lf-color-on-danger)\n  )}[data-lf=disabled]{opacity:var(--lf-tabbar-ui-opacity-disabled, var(--lf-ui-opacity-disabled));pointer-events:none}[data-lf=info]{--lf-tabbar-color-primary:var(\n    --lf-tabbar-color-info,\n    var(--lf-color-info)\n  );--lf-tabbar-color-on-primary:var(\n    --lf-tabbar-color-info,\n    var(--lf-color-on-info)\n  )}[data-lf=secondary]{--lf-tabbar-color-primary:var(\n    --lf-tabbar-color-secondary,\n    var(--lf-color-secondary)\n  );--lf-tabbar-color-on-primary:var(\n    --lf-tabbar-color-secondary,\n    var(--lf-color-on-secondary)\n  )}[data-lf=success]{--lf-tabbar-color-primary:var(\n    --lf-tabbar-color-success,\n    var(--lf-color-success)\n  );--lf-tabbar-color-on-primary:var(\n    --lf-tabbar-color-success,\n    var(--lf-color-on-success)\n  )}[data-lf=warning]{--lf-tabbar-color-primary:var(\n    --lf-tabbar-color-warning,\n    var(--lf-color-warning)\n  );--lf-tabbar-color-on-primary:var(\n    --lf-tabbar-color-warning,\n    var(--lf-color-on-warning)\n  )}:host{display:block;font-family:var(--lf-tabbar-font-family, var(--lf-font-family-primary));font-size:var(--lf-tabbar-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-tabbar-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-tabbar-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-tabbar-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-tabbar-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-tabbar-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-tabbar-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-tabbar-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{width:100%}.tabbar{display:flex;height:var(--lf-tabbar-height, 2.25em);width:100%}.tabbar__scroll{display:flex;overflow:hidden;width:100%}.tab{font-family:var(--lf-tabbar-font-family, var(--lf-font-family-primary));background-color:rgba(var(--lf-tabbar-color-bg, var(--lf-color-bg)), 0.375);color:rgb(var(--lf-tabbar-color-on-bg, var(--lf-color-on-bg)));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:all 300ms cubic-bezier(0.4, 0, 0.2, 1);appearance:none;border:none;box-sizing:border-box;cursor:pointer;display:flex;flex:1 0 auto;height:100%;justify-content:center;margin:0;min-width:var(--lf-tabbar-min-width, 5em);outline:none;padding:var(--lf-tabbar-tab-padding, 0 1.25em);position:relative;text-align:center}.tab:first-child{border:0;border-style:solid;border-radius:var(--lf-tabbar-border-radius, var(--lf-ui-border-radius));border-bottom-left-radius:0;border-bottom-right-radius:0;border-top-right-radius:0}.tab:last-child{border:0;border-style:solid;border-radius:var(--lf-tabbar-border-radius, var(--lf-ui-border-radius));border-bottom-left-radius:0;border-bottom-right-radius:0;border-top-left-radius:0}.tab:hover{background-color:rgba(var(--lf-tabbar-color-primary, var(--lf-color-primary)), 0.125);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.tab--active{background-color:rgba(var(--lf-tabbar-color-primary, var(--lf-color-primary)), 0.225);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.tab--active:hover{background-color:rgba(var(--lf-tabbar-color-primary, var(--lf-color-primary)), 0.325);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.tab--active .tab__icon{background-color:rgba(var(--lf-tabbar-color-primary, var(--lf-color-primary)), 1)}.tab--active .tab__label{color:rgb(var(--lf-tabbar-color-primary, var(--lf-color-primary)));font-weight:600;opacity:1}.tab__icon{background-color:rgba(var(--lf-tabbar-color-on-bg, var(--lf-color-on-bg)), 1);height:1.5em;width:1.5em;overflow:hidden;transition:all 300ms cubic-bezier(0.4, 0, 0.2, 1)}.tab__content{align-items:center;display:flex;height:inherit;justify-content:center;pointer-events:none;position:relative}.tab__label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:0.775em;letter-spacing:0.0892857143em;line-height:inherit;text-transform:uppercase;opacity:0.75}.tab__icon+.tab__label{padding-left:0.5em;padding-right:0}.tab__indicator{width:100%;height:100%;transition:all 300ms cubic-bezier(0.4, 0, 0.2, 1);display:flex;justify-content:center;left:0;pointer-events:none;position:absolute;top:0}.tab__indicator--active .tab__indicator-content{opacity:1}.tab__indicator-content{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);opacity:0;transform-origin:left center}.tab__indicator-content--active{align-self:flex-end;border-color:rgb(var(--lf-tabbar-color-indicator, var(--lf-tabbar-color-primary)));border-top-style:solid;border-top-width:2px;box-sizing:border-box;width:100%}";
 const pE2900881_entry = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
-  lf_tabbar: E$3
+  lf_tabbar: E$4
 }, Symbol.toStringTag, { value: "Module" }));
-var v$2, m$2, u$1, g$2, y$2, w$1, k$2, x$2, z$2, _, E$2, W$2, C$2, j$1, M$2, D$1 = function(r2, o2, i2, a2) {
+var v$2, m$2, u$1, g$2, y$2, w$2, k$3, x$3, z$3, _$1, E$3, W$3, C$3, j$2, M$3, D$2 = function(r2, o2, i2, a2) {
   if ("a" === i2 && !a2) throw new TypeError("Private accessor was defined without a getter");
   if ("function" == typeof o2 ? r2 !== o2 || !a2 : !o2.has(r2)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return "m" === i2 ? a2 : "a" === i2 ? a2.call(r2) : a2 ? a2.value : o2.get(r2);
-}, T$2 = function(r2, o2, i2, a2, e2) {
+}, T$3 = function(r2, o2, i2, a2, e2) {
   if ("function" == typeof o2 ? r2 !== o2 || true : !o2.has(r2)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
   return o2.set(r2, i2), i2;
 };
-const S = class {
+const S$1 = class S {
   constructor(a2) {
-    n(this, a2), this.lfEvent = V$4(this, "lf-accordion-event"), v$2.add(this), this.expandedNodes = /* @__PURE__ */ new Set(), this.selectedNodes = /* @__PURE__ */ new Set(), this.lfDataset = null, this.lfRipple = true, this.lfUiSize = "medium", this.lfUiState = "primary", this.lfStyle = "", m$2.set(this, void 0), u$1.set(this, LF_ACCORDION_BLOCKS), g$2.set(this, CY_ATTRIBUTES), y$2.set(this, LF_ATTRIBUTES), w$1.set(this, LF_ACCORDION_PARTS), k$2.set(this, LF_STYLE_ID), x$2.set(this, LF_WRAPPER_ID), z$2.set(this, {}), M$2.set(this, ((r$12) => {
+    n(this, a2), this.lfEvent = V$4(this, "lf-accordion-event"), v$2.add(this), this.expandedNodes = /* @__PURE__ */ new Set(), this.selectedNodes = /* @__PURE__ */ new Set(), this.lfDataset = null, this.lfRipple = true, this.lfUiSize = "medium", this.lfUiState = "primary", this.lfStyle = "", m$2.set(this, void 0), u$1.set(this, LF_ACCORDION_BLOCKS), g$2.set(this, CY_ATTRIBUTES), y$2.set(this, LF_ATTRIBUTES), w$2.set(this, LF_ACCORDION_PARTS), k$3.set(this, LF_STYLE_ID), x$3.set(this, LF_WRAPPER_ID), z$3.set(this, {}), M$3.set(this, ((r$12) => {
       const { cells: o2 } = r$12, a3 = o2 && Object.keys(o2)[0], e2 = o2 == null ? void 0 : o2[a3];
-      return D$a(r, { cell: e2, index: 0, shape: e2.shape, eventDispatcher: async (r2) => this.onLfEvent(r2, "lf-event"), framework: D$1(this, m$2, "f") });
+      return D$a(r, { cell: e2, index: 0, shape: e2.shape, eventDispatcher: async (r2) => this.onLfEvent(r2, "lf-event"), framework: D$2(this, m$2, "f") });
     }));
   }
   onLfEvent(r2, o2, i2) {
-    const { effects: a2 } = D$1(this, m$2, "f"), { lfRipple: e2, rootElement: t5 } = this;
-    "pointerdown" === o2 && e2 && a2.ripple(r2, D$1(this, z$2, "f")[i2.id]), this.lfEvent.emit({ comp: this, eventType: o2, id: t5.id, originalEvent: r2 });
+    const { effects: a2 } = D$2(this, m$2, "f"), { lfRipple: e2, rootElement: t5 } = this;
+    "pointerdown" === o2 && e2 && a2.ripple(r2, D$2(this, z$3, "f")[i2.id]), this.lfEvent.emit({ comp: this, eventType: o2, id: t5.id, originalEvent: r2 });
   }
   async getDebugInfo() {
     return this.debugInfo;
@@ -46789,7 +46630,7 @@ const S = class {
   }
   async toggleNode(r2, o2) {
     const i2 = this.lfDataset.nodes.find(((o3) => o3.id === r2));
-    i2 && (D$1(this, v$2, "m", E$2).call(this, i2) ? D$1(this, v$2, "m", _).call(this, i2) ? this.expandedNodes.delete(i2) : this.expandedNodes.add(i2) : D$1(this, v$2, "m", W$2).call(this, i2) ? this.selectedNodes.delete(i2) : this.selectedNodes.add(i2), D$1(this, v$2, "m", E$2).call(this, i2) || this.onLfEvent(o2 || new CustomEvent("click"), "click"), this.refresh());
+    i2 && (D$2(this, v$2, "m", E$3).call(this, i2) ? D$2(this, v$2, "m", _$1).call(this, i2) ? this.expandedNodes.delete(i2) : this.expandedNodes.add(i2) : D$2(this, v$2, "m", W$3).call(this, i2) ? this.selectedNodes.delete(i2) : this.selectedNodes.add(i2), D$2(this, v$2, "m", E$3).call(this, i2) || this.onLfEvent(o2 || new CustomEvent("click"), "click"), this.refresh());
   }
   async unmount(r2 = 0) {
     setTimeout((() => {
@@ -46797,79 +46638,79 @@ const S = class {
     }), r2);
   }
   connectedCallback() {
-    D$1(this, m$2, "f") && D$1(this, m$2, "f").theme.register(this);
+    D$2(this, m$2, "f") && D$2(this, m$2, "f").theme.register(this);
   }
   async componentWillLoad() {
-    T$2(this, m$2, await a(this));
+    T$3(this, m$2, await a(this));
   }
   componentDidLoad() {
-    const { info: r2 } = D$1(this, m$2, "f").debug;
+    const { info: r2 } = D$2(this, m$2, "f").debug;
     this.onLfEvent(new CustomEvent("ready"), "ready"), r2.update(this, "did-load");
   }
   componentWillRender() {
-    const { info: r2 } = D$1(this, m$2, "f").debug;
+    const { info: r2 } = D$2(this, m$2, "f").debug;
     r2.update(this, "will-render");
   }
   componentDidRender() {
-    const { debug: r2 } = D$1(this, m$2, "f");
+    const { debug: r2 } = D$2(this, m$2, "f");
     r2.info.update(this, "did-render");
   }
   render() {
-    const { bemClass: r2, setLfStyle: o2 } = D$1(this, m$2, "f").theme, { lfStyle: a2 } = this;
-    T$2(this, z$2, {});
-    const { accordion: t5 } = D$1(this, u$1, "f");
-    return D$a(W$e, { key: "cf05618985fae22815dc9feb7bcb3bcfeb67daf5" }, a2 && D$a("style", { key: "2248a586b39ae7758361616bcf82494baf6f43b1", id: D$1(this, k$2, "f") }, o2(this)), D$a("div", { key: "02dacfdfddd9e16e776e0ab666b273e04390c263", id: D$1(this, x$2, "f") }, D$a("div", { key: "b98095b71dcadbfab5de9cdedba3bbd06470d924", class: r2(t5._), part: D$1(this, w$1, "f").accordion }, D$1(this, v$2, "m", j$1).call(this))));
+    const { bemClass: r2, setLfStyle: o2 } = D$2(this, m$2, "f").theme, { lfStyle: a2 } = this;
+    T$3(this, z$3, {});
+    const { accordion: t5 } = D$2(this, u$1, "f");
+    return D$a(W$e, { key: "cf05618985fae22815dc9feb7bcb3bcfeb67daf5" }, a2 && D$a("style", { key: "2248a586b39ae7758361616bcf82494baf6f43b1", id: D$2(this, k$3, "f") }, o2(this)), D$a("div", { key: "02dacfdfddd9e16e776e0ab666b273e04390c263", id: D$2(this, x$3, "f") }, D$a("div", { key: "b98095b71dcadbfab5de9cdedba3bbd06470d924", class: r2(t5._), part: D$2(this, w$2, "f").accordion }, D$2(this, v$2, "m", j$2).call(this))));
   }
   disconnectedCallback() {
     var _a2;
-    (_a2 = D$1(this, m$2, "f")) == null ? void 0 : _a2.theme.unregister(this);
+    (_a2 = D$2(this, m$2, "f")) == null ? void 0 : _a2.theme.unregister(this);
   }
   get rootElement() {
     return z$d(this);
   }
 };
-m$2 = /* @__PURE__ */ new WeakMap(), u$1 = /* @__PURE__ */ new WeakMap(), g$2 = /* @__PURE__ */ new WeakMap(), y$2 = /* @__PURE__ */ new WeakMap(), w$1 = /* @__PURE__ */ new WeakMap(), k$2 = /* @__PURE__ */ new WeakMap(), x$2 = /* @__PURE__ */ new WeakMap(), z$2 = /* @__PURE__ */ new WeakMap(), M$2 = /* @__PURE__ */ new WeakMap(), v$2 = /* @__PURE__ */ new WeakSet(), _ = function(r2) {
+m$2 = /* @__PURE__ */ new WeakMap(), u$1 = /* @__PURE__ */ new WeakMap(), g$2 = /* @__PURE__ */ new WeakMap(), y$2 = /* @__PURE__ */ new WeakMap(), w$2 = /* @__PURE__ */ new WeakMap(), k$3 = /* @__PURE__ */ new WeakMap(), x$3 = /* @__PURE__ */ new WeakMap(), z$3 = /* @__PURE__ */ new WeakMap(), M$3 = /* @__PURE__ */ new WeakMap(), v$2 = /* @__PURE__ */ new WeakSet(), _$1 = function(r2) {
   return this.expandedNodes.has(r2);
-}, E$2 = function(r2) {
+}, E$3 = function(r2) {
   return r2.cells && Object.keys(r2.cells).length > 0;
-}, W$2 = function(r2) {
+}, W$3 = function(r2) {
   return this.selectedNodes.has(r2);
-}, C$2 = function(r2) {
-  const { assets: o2, theme: a2 } = D$1(this, m$2, "f"), { style: e2 } = o2.get(`./assets/svg/${r2}.svg`), { node: t5 } = D$1(this, u$1, "f");
-  return D$a("div", { class: a2.bemClass(t5._, t5.icon), "data-cy": D$1(this, g$2, "f").maskedSvg, part: D$1(this, w$1, "f").icon, style: e2 });
-}, j$1 = function() {
-  const { bemClass: r2 } = D$1(this, m$2, "f").theme, { lfDataset: o2 } = this, a2 = [];
+}, C$3 = function(r2) {
+  const { assets: o2, theme: a2 } = D$2(this, m$2, "f"), { style: e2 } = o2.get(`./assets/svg/${r2}.svg`), { node: t5 } = D$2(this, u$1, "f");
+  return D$a("div", { class: a2.bemClass(t5._, t5.icon), "data-cy": D$2(this, g$2, "f").maskedSvg, part: D$2(this, w$2, "f").icon, style: e2 });
+}, j$2 = function() {
+  const { bemClass: r2 } = D$2(this, m$2, "f").theme, { lfDataset: o2 } = this, a2 = [];
   for (let e2 = 0; e2 < o2.nodes.length; e2++) {
-    const t5 = o2.nodes[e2], n2 = D$1(this, v$2, "m", _).call(this, t5), l2 = D$1(this, v$2, "m", E$2).call(this, t5), s2 = D$1(this, v$2, "m", W$2).call(this, t5);
-    a2.push(D$a("div", { class: r2(D$1(this, u$1, "f").node._), "data-cy": D$1(this, g$2, "f").node, "data-lf": D$1(this, y$2, "f")[this.lfUiState] }, D$a("div", { class: r2(D$1(this, u$1, "f").node._, D$1(this, u$1, "f").node.header, { expanded: l2 && n2, selected: !l2 && s2 }), "data-cy": !l2 && D$1(this, g$2, "f").button, onClick: (r3) => this.toggleNode(t5.id, r3), onPointerDown: (r3) => {
+    const t5 = o2.nodes[e2], n2 = D$2(this, v$2, "m", _$1).call(this, t5), l2 = D$2(this, v$2, "m", E$3).call(this, t5), s2 = D$2(this, v$2, "m", W$3).call(this, t5);
+    a2.push(D$a("div", { class: r2(D$2(this, u$1, "f").node._), "data-cy": D$2(this, g$2, "f").node, "data-lf": D$2(this, y$2, "f")[this.lfUiState] }, D$a("div", { class: r2(D$2(this, u$1, "f").node._, D$2(this, u$1, "f").node.header, { expanded: l2 && n2, selected: !l2 && s2 }), "data-cy": !l2 && D$2(this, g$2, "f").button, onClick: (r3) => this.toggleNode(t5.id, r3), onPointerDown: (r3) => {
       this.onLfEvent(r3, "pointerdown", t5);
-    }, part: D$1(this, w$1, "f").header, tabindex: "1", title: t5.description }, D$a("div", { "data-cy": D$1(this, g$2, "f").rippleSurface, "data-lf": D$1(this, y$2, "f").rippleSurface, part: D$1(this, w$1, "f").rippleSurface, ref: (r3) => {
-      r3 && this.lfRipple && (D$1(this, z$2, "f")[t5.id] = r3);
-    } }), t5.icon ? D$1(this, v$2, "m", C$2).call(this, t5.icon) : null, D$a("span", { class: r2(D$1(this, u$1, "f").node._, D$1(this, u$1, "f").node.text), part: D$1(this, w$1, "f").text }, t5.value), l2 && D$a("div", { class: r2(D$1(this, u$1, "f").node._, D$1(this, u$1, "f").node.expand, { expanded: n2 }), "data-cy": D$1(this, g$2, "f").dropdownButton, "data-lf": D$1(this, y$2, "f").icon, part: D$1(this, w$1, "f").icon })), n2 && D$a("div", { class: r2(D$1(this, u$1, "f").node._, D$1(this, u$1, "f").node.content, { selected: s2 }), "data-lf": D$1(this, y$2, "f").fadeIn, part: D$1(this, w$1, "f").content }, D$1(this, M$2, "f").call(this, t5))));
+    }, part: D$2(this, w$2, "f").header, tabindex: "1", title: t5.description }, D$a("div", { "data-cy": D$2(this, g$2, "f").rippleSurface, "data-lf": D$2(this, y$2, "f").rippleSurface, part: D$2(this, w$2, "f").rippleSurface, ref: (r3) => {
+      r3 && this.lfRipple && (D$2(this, z$3, "f")[t5.id] = r3);
+    } }), t5.icon ? D$2(this, v$2, "m", C$3).call(this, t5.icon) : null, D$a("span", { class: r2(D$2(this, u$1, "f").node._, D$2(this, u$1, "f").node.text), part: D$2(this, w$2, "f").text }, t5.value), l2 && D$a("div", { class: r2(D$2(this, u$1, "f").node._, D$2(this, u$1, "f").node.expand, { expanded: n2 }), "data-cy": D$2(this, g$2, "f").dropdownButton, "data-lf": D$2(this, y$2, "f").icon, part: D$2(this, w$2, "f").icon })), n2 && D$a("div", { class: r2(D$2(this, u$1, "f").node._, D$2(this, u$1, "f").node.content, { selected: s2 }), "data-lf": D$2(this, y$2, "f").fadeIn, part: D$2(this, w$2, "f").content }, D$2(this, M$3, "f").call(this, t5))));
   }
   return a2;
-}, S.style = ".node{border:0;border-style:solid;border-color:rgba(var(--lf-accordion-border-color, var(--lf-color-border)), 1);border-width:1px;border-radius:var(--lf-accordion-border-radius, var(--lf-ui-border-radius));background-color:rgba(var(--lf-accordion-color-bg, var(--lf-color-bg)), 0.375);color:rgb(var(--lf-accordion-color-on-bg, var(--lf-color-on-bg)));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:0;border-top:0;box-sizing:border-box;width:100%}.node:not(:first-of-type){border:0;border-style:solid;border-color:rgba(var(--lf-accordion-border-color, var(--lf-color-border)), 1);border-width:1px;margin-bottom:0;margin-left:0;margin-right:0}.node__content,.node__content ::slotted(*){border:0;border-style:solid;border-radius:var(--lf-accordion-border-radius, var(--lf-ui-border-radius));border-top-left-radius:0;border-top-right-radius:0}.node__header{border:0;border-style:solid;border-radius:var(--lf-accordion-border-radius, var(--lf-ui-border-radius));color:rgb(var(--lf-accordion-color-on-bg, var(--lf-color-on-bg)));transition:all 150ms cubic-bezier(0.42, 0, 0.58, 1);align-items:center;border:none;box-sizing:border-box;cursor:var(--lf-accordion-cursor, pointer);display:flex;line-height:var(--lf-accordion-line-height, 1.75em);outline:none;padding:var(--lf-accordion-padding, 1em);position:relative;text-align:var(--lf-accordion-text-align, left);width:100%}.node__header:hover{background-color:rgba(var(--lf-accordion-color-primary, var(--lf-color-primary)), 0.175)}.node__header--expanded{border-bottom-left-radius:0;border-bottom-right-radius:0}.node__header--selected{background-color:rgba(var(--lf-accordion-color-primary, var(--lf-color-primary)), 0.375)}.node__header--selected:hover{background-color:rgba(var(--lf-accordion-color-primary, var(--lf-color-primary)), 0.475)}.node__text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:1.25em;font-weight:500;line-height:1.4em;letter-spacing:0em;margin:var(--lf-accordion-text-margin, 0 0.5em 0 0)}.node__text--highlighted{background-color:rgba(var(--lf-accordion-color-primary, var(--lf-color-primary)), 1);color:rgb(var(--lf-accordion-color-on-primary, var(--lf-color-on-primary)))}.node__expand,.node__icon{margin:0}.node__icon{background-color:rgba(var(--lf-accordion-color-on-bg, var(--lf-color-on-bg)), 1);height:1.5em;width:1.5em;overflow:hidden;margin:var(--lf-accordion-icon-margin, 0 0.5em 0 0)}.node__expand{-webkit-mask:var(--lf-icon-dropdown);mask:var(--lf-icon-dropdown);-webkit-mask-position:center;-webkit-mask-repeat:no-repeat;-webkit-mask-size:contain;mask-position:center;mask-repeat:no-repeat;mask-size:contain;background-color:rgba(var(--lf-accordion-color-on-bg, var(--lf-color-on-bg)), 1);height:1.5em;width:1.5em;overflow:hidden;transition:all 150ms cubic-bezier(0.42, 0, 0.58, 1);margin:var(--lf-accordion-expand-margin, 0 0 0 auto)}.node__expand--expanded{transform:rotate(-180deg)}.node__expand--placeholder{visibility:hidden}::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=ripple]{animation-duration:var(--lf-ui-duration-ripple, 675ms);animation-fill-mode:forwards;animation-name:lf-ripple;animation-timing-function:var(--lf-ui-timing-ripple, ease-out);background:var(--lf-ui-ripple-background, var(--lf-color-primary));border-radius:var(--lf-ui-radius-ripple, 50%);height:var(--lf-ui-ripple-height, 100%);left:var(--lf-ui-ripple-x, 50%);opacity:var(--lf-ui-opacity-ripple, 0.5);pointer-events:none;position:absolute;top:var(--lf-ui-ripple-y, 50%);transform:scale(0);width:var(--lf-ui-ripple-width, 100%)}@keyframes lf-ripple{from{transform:scale(0)}to{opacity:0;transform:scale(4)}}[data-lf=ripple-surface]{cursor:pointer;height:100%;left:0;overflow:hidden;position:absolute;top:0;width:100%}[data-lf=danger]{--lf-accordion-color-primary:var(\n    --lf-accordion-color-danger,\n    var(--lf-color-danger)\n  );--lf-accordion-color-on-primary:var(\n    --lf-accordion-color-danger,\n    var(--lf-color-on-danger)\n  )}[data-lf=disabled]{opacity:var(--lf-accordion-ui-opacity-disabled, var(--lf-ui-opacity-disabled));pointer-events:none}[data-lf=info]{--lf-accordion-color-primary:var(\n    --lf-accordion-color-info,\n    var(--lf-color-info)\n  );--lf-accordion-color-on-primary:var(\n    --lf-accordion-color-info,\n    var(--lf-color-on-info)\n  )}[data-lf=secondary]{--lf-accordion-color-primary:var(\n    --lf-accordion-color-secondary,\n    var(--lf-color-secondary)\n  );--lf-accordion-color-on-primary:var(\n    --lf-accordion-color-secondary,\n    var(--lf-color-on-secondary)\n  )}[data-lf=success]{--lf-accordion-color-primary:var(\n    --lf-accordion-color-success,\n    var(--lf-color-success)\n  );--lf-accordion-color-on-primary:var(\n    --lf-accordion-color-success,\n    var(--lf-color-on-success)\n  )}[data-lf=warning]{--lf-accordion-color-primary:var(\n    --lf-accordion-color-warning,\n    var(--lf-color-warning)\n  );--lf-accordion-color-on-primary:var(\n    --lf-accordion-color-warning,\n    var(--lf-color-on-warning)\n  )}[data-lf=fade-in]{display:block;animation:lf-fade-in-block 0.25s ease-out forwards}@keyframes lf-fade-in-block{from{visibility:hidden;opacity:0}to{visibility:visible;opacity:1}}:host{display:block;font-family:var(--lf-accordion-font-family, var(--lf-font-family-primary));font-size:var(--lf-accordion-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-accordion-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-accordion-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-accordion-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-accordion-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-accordion-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-accordion-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-accordion-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}.accordion{border:0;border-style:solid;border-color:rgba(var(--lf-accordion-border-color, var(--lf-color-border)), 1);border-width:1px;border-radius:var(--lf-accordion-border-radius, var(--lf-ui-border-radius));border-left:0;border-right:0;width:100%;height:100%;box-sizing:border-box;display:flex;flex-direction:var(--lf-accordion-flex-direction, column);flex-wrap:var(--lf-accordion-flex-wrap, nowrap);width:100%}";
+}, S$1.style = ".node{border:0;border-style:solid;border-color:rgba(var(--lf-accordion-border-color, var(--lf-color-border)), 1);border-width:1px;border-radius:var(--lf-accordion-border-radius, var(--lf-ui-border-radius));background-color:rgba(var(--lf-accordion-color-bg, var(--lf-color-bg)), 0.375);color:rgb(var(--lf-accordion-color-on-bg, var(--lf-color-on-bg)));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:0;border-top:0;box-sizing:border-box;width:100%}.node:not(:first-of-type){border:0;border-style:solid;border-color:rgba(var(--lf-accordion-border-color, var(--lf-color-border)), 1);border-width:1px;margin-bottom:0;margin-left:0;margin-right:0}.node__content,.node__content ::slotted(*){border:0;border-style:solid;border-radius:var(--lf-accordion-border-radius, var(--lf-ui-border-radius));border-top-left-radius:0;border-top-right-radius:0}.node__header{border:0;border-style:solid;border-radius:var(--lf-accordion-border-radius, var(--lf-ui-border-radius));color:rgb(var(--lf-accordion-color-on-bg, var(--lf-color-on-bg)));transition:all 150ms cubic-bezier(0.42, 0, 0.58, 1);align-items:center;border:none;box-sizing:border-box;cursor:var(--lf-accordion-cursor, pointer);display:flex;line-height:var(--lf-accordion-line-height, 1.75em);outline:none;padding:var(--lf-accordion-padding, 1em);position:relative;text-align:var(--lf-accordion-text-align, left);width:100%}.node__header:hover{background-color:rgba(var(--lf-accordion-color-primary, var(--lf-color-primary)), 0.175)}.node__header--expanded{border-bottom-left-radius:0;border-bottom-right-radius:0}.node__header--selected{background-color:rgba(var(--lf-accordion-color-primary, var(--lf-color-primary)), 0.375)}.node__header--selected:hover{background-color:rgba(var(--lf-accordion-color-primary, var(--lf-color-primary)), 0.475)}.node__text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:1.25em;font-weight:500;line-height:1.4em;letter-spacing:0em;margin:var(--lf-accordion-text-margin, 0 0.5em 0 0)}.node__text--highlighted{background-color:rgba(var(--lf-accordion-color-primary, var(--lf-color-primary)), 1);color:rgb(var(--lf-accordion-color-on-primary, var(--lf-color-on-primary)))}.node__expand,.node__icon{margin:0}.node__icon{background-color:rgba(var(--lf-accordion-color-on-bg, var(--lf-color-on-bg)), 1);height:1.5em;width:1.5em;overflow:hidden;margin:var(--lf-accordion-icon-margin, 0 0.5em 0 0)}.node__expand{-webkit-mask:var(--lf-icon-dropdown);mask:var(--lf-icon-dropdown);-webkit-mask-position:center;-webkit-mask-repeat:no-repeat;-webkit-mask-size:contain;mask-position:center;mask-repeat:no-repeat;mask-size:contain;background-color:rgba(var(--lf-accordion-color-on-bg, var(--lf-color-on-bg)), 1);height:1.5em;width:1.5em;overflow:hidden;transition:all 150ms cubic-bezier(0.42, 0, 0.58, 1);margin:var(--lf-accordion-expand-margin, 0 0 0 auto)}.node__expand--expanded{transform:rotate(-180deg)}.node__expand--placeholder{visibility:hidden}::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=ripple]{animation-duration:var(--lf-ui-duration-ripple, 675ms);animation-fill-mode:forwards;animation-name:lf-ripple;animation-timing-function:var(--lf-ui-timing-ripple, ease-out);background:var(--lf-ui-ripple-background, var(--lf-color-primary));border-radius:var(--lf-ui-radius-ripple, 50%);height:var(--lf-ui-ripple-height, 100%);left:var(--lf-ui-ripple-x, 50%);opacity:var(--lf-ui-opacity-ripple, 0.5);pointer-events:none;position:absolute;top:var(--lf-ui-ripple-y, 50%);transform:scale(0);width:var(--lf-ui-ripple-width, 100%)}@keyframes lf-ripple{from{transform:scale(0)}to{opacity:0;transform:scale(4)}}[data-lf=ripple-surface]{cursor:pointer;height:100%;left:0;overflow:hidden;position:absolute;top:0;width:100%}[data-lf=danger]{--lf-accordion-color-primary:var(\n    --lf-accordion-color-danger,\n    var(--lf-color-danger)\n  );--lf-accordion-color-on-primary:var(\n    --lf-accordion-color-danger,\n    var(--lf-color-on-danger)\n  )}[data-lf=disabled]{opacity:var(--lf-accordion-ui-opacity-disabled, var(--lf-ui-opacity-disabled));pointer-events:none}[data-lf=info]{--lf-accordion-color-primary:var(\n    --lf-accordion-color-info,\n    var(--lf-color-info)\n  );--lf-accordion-color-on-primary:var(\n    --lf-accordion-color-info,\n    var(--lf-color-on-info)\n  )}[data-lf=secondary]{--lf-accordion-color-primary:var(\n    --lf-accordion-color-secondary,\n    var(--lf-color-secondary)\n  );--lf-accordion-color-on-primary:var(\n    --lf-accordion-color-secondary,\n    var(--lf-color-on-secondary)\n  )}[data-lf=success]{--lf-accordion-color-primary:var(\n    --lf-accordion-color-success,\n    var(--lf-color-success)\n  );--lf-accordion-color-on-primary:var(\n    --lf-accordion-color-success,\n    var(--lf-color-on-success)\n  )}[data-lf=warning]{--lf-accordion-color-primary:var(\n    --lf-accordion-color-warning,\n    var(--lf-color-warning)\n  );--lf-accordion-color-on-primary:var(\n    --lf-accordion-color-warning,\n    var(--lf-color-on-warning)\n  )}[data-lf=fade-in]{display:block;animation:lf-fade-in-block 0.25s ease-out forwards}@keyframes lf-fade-in-block{from{visibility:hidden;opacity:0}to{visibility:visible;opacity:1}}:host{display:block;font-family:var(--lf-accordion-font-family, var(--lf-font-family-primary));font-size:var(--lf-accordion-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-accordion-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-accordion-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-accordion-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-accordion-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-accordion-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-accordion-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-accordion-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}.accordion{border:0;border-style:solid;border-color:rgba(var(--lf-accordion-border-color, var(--lf-color-border)), 1);border-width:1px;border-radius:var(--lf-accordion-border-radius, var(--lf-ui-border-radius));border-left:0;border-right:0;width:100%;height:100%;box-sizing:border-box;display:flex;flex-direction:var(--lf-accordion-flex-direction, column);flex-wrap:var(--lf-accordion-flex-wrap, nowrap);width:100%}";
 const pE4e76694_entry = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
-  lf_accordion: S
+  lf_accordion: S$1
 }, Symbol.toStringTag, { value: "Module" }));
-var m$1, v$1, b$1, u, w2, y$1, z$1, g$1, k$1, x$1, W$1, E$1, C$1 = function(e2, t5, i2, s2) {
+var m$1, v$1, b$2, u, w$1, y$1, z$2, g$1, k$2, x$2, W$2, E$2, C$2 = function(e2, t5, i2, s2) {
   if ("a" === i2 && !s2) throw new TypeError("Private accessor was defined without a getter");
   if ("function" == typeof t5 ? e2 !== t5 || !s2 : !t5.has(e2)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return "m" === i2 ? s2 : "a" === i2 ? s2.call(e2) : s2 ? s2.value : t5.get(e2);
-}, M$1 = function(e2, t5, i2, s2, a2) {
+}, M$2 = function(e2, t5, i2, s2, a2) {
   if ("function" == typeof t5 ? e2 !== t5 || true : !t5.has(e2)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
   return t5.set(e2, i2), i2;
 };
-const T$1 = class T2 {
+const T$2 = class T2 {
   constructor(i2) {
-    n(this, i2), this.lfEvent = V$4(this, "lf-placeholder-event"), m$1.add(this), this.isInViewport = false, this.lfIcon = "template", this.lfProps = {}, this.lfStyle = "", this.lfThreshold = 0.25, this.lfTrigger = "both", this.lfValue = "LfCard", v$1.set(this, void 0), b$1.set(this, LF_PLACEHOLDER_BLOCKS), u.set(this, CY_ATTRIBUTES), w2.set(this, LF_ATTRIBUTES), y$1.set(this, LF_PLACEHOLDER_PARTS), z$1.set(this, LF_STYLE_ID), g$1.set(this, LF_WRAPPER_ID), k$1.set(this, null), x$1.set(this, null), W$1.set(this, false);
+    n(this, i2), this.lfEvent = V$4(this, "lf-placeholder-event"), m$1.add(this), this.isInViewport = false, this.lfIcon = "template", this.lfProps = {}, this.lfStyle = "", this.lfThreshold = 0.25, this.lfTrigger = "both", this.lfValue = "LfCard", v$1.set(this, void 0), b$2.set(this, LF_PLACEHOLDER_BLOCKS), u.set(this, CY_ATTRIBUTES), w$1.set(this, LF_ATTRIBUTES), y$1.set(this, LF_PLACEHOLDER_PARTS), z$2.set(this, LF_STYLE_ID), g$1.set(this, LF_WRAPPER_ID), k$2.set(this, null), x$2.set(this, null), W$2.set(this, false);
   }
   onLfEvent(e2, t5) {
     this.lfEvent.emit({ comp: this, id: this.rootElement.id, originalEvent: e2, eventType: t5 });
   }
   async getComponent() {
-    return C$1(this, x$1, "f");
+    return C$2(this, x$2, "f");
   }
   async getDebugInfo() {
     return this.debugInfo;
@@ -46887,69 +46728,69 @@ const T$1 = class T2 {
     }), e2);
   }
   connectedCallback() {
-    C$1(this, v$1, "f") && (C$1(this, v$1, "f").theme.register(this), C$1(this, m$1, "m", E$1).call(this));
+    C$2(this, v$1, "f") && (C$2(this, v$1, "f").theme.register(this), C$2(this, m$1, "m", E$2).call(this));
   }
   async componentWillLoad() {
-    M$1(this, v$1, await a(this));
+    M$2(this, v$1, await a(this));
   }
   componentDidLoad() {
-    const { info: e2 } = C$1(this, v$1, "f").debug;
-    C$1(this, m$1, "m", E$1).call(this), C$1(this, k$1, "f").observe(this.rootElement), this.onLfEvent(new CustomEvent("ready"), "ready"), e2.update(this, "did-load");
+    const { info: e2 } = C$2(this, v$1, "f").debug;
+    C$2(this, m$1, "m", E$2).call(this), C$2(this, k$2, "f").observe(this.rootElement), this.onLfEvent(new CustomEvent("ready"), "ready"), e2.update(this, "did-load");
   }
   componentWillRender() {
-    const { info: e2 } = C$1(this, v$1, "f").debug;
+    const { info: e2 } = C$2(this, v$1, "f").debug;
     e2.update(this, "will-render");
   }
   componentDidRender() {
-    const { info: e2 } = C$1(this, v$1, "f").debug;
-    C$1(this, x$1, "f") && !C$1(this, W$1, "f") && (M$1(this, W$1, true), this.onLfEvent(new CustomEvent("load"), "load")), e2.update(this, "did-render");
+    const { info: e2 } = C$2(this, v$1, "f").debug;
+    C$2(this, x$2, "f") && !C$2(this, W$2, "f") && (M$2(this, W$2, true), this.onLfEvent(new CustomEvent("load"), "load")), e2.update(this, "did-render");
   }
   render() {
-    const { assets: e2, sanitizeProps: t5, theme: i2 } = C$1(this, v$1, "f"), { bemClass: o2, setLfStyle: l2 } = i2, { placeholder: r2 } = C$1(this, b$1, "f"), { isInViewport: f2, lfValue: h2, lfProps: c2, lfTrigger: d2, lfIcon: p2, lfStyle: m2 } = this;
+    const { assets: e2, sanitizeProps: t5, theme: i2 } = C$2(this, v$1, "f"), { bemClass: o2, setLfStyle: l2 } = i2, { placeholder: r2 } = C$2(this, b$2, "f"), { isInViewport: f2, lfValue: h2, lfProps: c2, lfTrigger: d2, lfIcon: p2, lfStyle: m2 } = this;
     let k2;
     if (Boolean("viewport" === d2 && f2 || "props" === d2 && c2 || "both" === d2 && c2 && f2)) {
       const e3 = h2.toLowerCase().replace("lf", ""), i3 = { [`onLf-${e3}-event`]: (e4) => {
         this.onLfEvent(e4, "lf-event");
       } };
-      k2 = D$a("lf-" + e3, { key: "70059493fdccb2a95269d9f9ac36f9e45e2bee96", ...t5(c2, h2), ...i3, "data-lf": LF_ATTRIBUTES.fadeIn, ref: (e4) => M$1(this, x$1, e4) });
+      k2 = D$a("lf-" + e3, { key: "70059493fdccb2a95269d9f9ac36f9e45e2bee96", ...t5(c2, h2), ...i3, "data-lf": LF_ATTRIBUTES.fadeIn, ref: (e4) => M$2(this, x$2, e4) });
     } else if (p2) {
       const { style: t6 } = e2.get(`./assets/svg/${p2}.svg`);
-      k2 = D$a("div", { key: "8c229eb0faf998bb18e493136ef1c926cf8c0367", class: o2(r2._, r2.icon), "data-cy": C$1(this, u, "f").maskedSvg, "data-lf": C$1(this, w2, "f").fadeIn, part: C$1(this, y$1, "f").icon, style: t6 });
+      k2 = D$a("div", { key: "8c229eb0faf998bb18e493136ef1c926cf8c0367", class: o2(r2._, r2.icon), "data-cy": C$2(this, u, "f").maskedSvg, "data-lf": C$2(this, w$1, "f").fadeIn, part: C$2(this, y$1, "f").icon, style: t6 });
     }
-    return D$a(W$e, { key: "181cee7151ead42ebbb4c9bdea49020254e8ee77" }, m2 && D$a("style", { key: "67b201b596c66625d0c033b5715199c6181688a8", id: C$1(this, z$1, "f") }, l2(this)), D$a("div", { key: "8db285c023bd3380a282c6c00b72b62d5a34ddaf", id: C$1(this, g$1, "f") }, D$a("div", { key: "160905b3bcda5345ff27624d04f79b2276de16db", class: o2(r2._), part: C$1(this, y$1, "f").placeholder }, k2)));
+    return D$a(W$e, { key: "181cee7151ead42ebbb4c9bdea49020254e8ee77" }, m2 && D$a("style", { key: "67b201b596c66625d0c033b5715199c6181688a8", id: C$2(this, z$2, "f") }, l2(this)), D$a("div", { key: "8db285c023bd3380a282c6c00b72b62d5a34ddaf", id: C$2(this, g$1, "f") }, D$a("div", { key: "160905b3bcda5345ff27624d04f79b2276de16db", class: o2(r2._), part: C$2(this, y$1, "f").placeholder }, k2)));
   }
   disconnectedCallback() {
     var _a2, _b2;
-    (_a2 = C$1(this, v$1, "f")) == null ? void 0 : _a2.theme.unregister(this), (_b2 = C$1(this, k$1, "f")) == null ? void 0 : _b2.unobserve(this.rootElement);
+    (_a2 = C$2(this, v$1, "f")) == null ? void 0 : _a2.theme.unregister(this), (_b2 = C$2(this, k$2, "f")) == null ? void 0 : _b2.unobserve(this.rootElement);
   }
   get rootElement() {
     return z$d(this);
   }
 };
-v$1 = /* @__PURE__ */ new WeakMap(), b$1 = /* @__PURE__ */ new WeakMap(), u = /* @__PURE__ */ new WeakMap(), w2 = /* @__PURE__ */ new WeakMap(), y$1 = /* @__PURE__ */ new WeakMap(), z$1 = /* @__PURE__ */ new WeakMap(), g$1 = /* @__PURE__ */ new WeakMap(), k$1 = /* @__PURE__ */ new WeakMap(), x$1 = /* @__PURE__ */ new WeakMap(), W$1 = /* @__PURE__ */ new WeakMap(), m$1 = /* @__PURE__ */ new WeakSet(), E$1 = function() {
-  const { debug: e2 } = C$1(this, v$1, "f");
-  M$1(this, k$1, new IntersectionObserver(((t5) => {
+v$1 = /* @__PURE__ */ new WeakMap(), b$2 = /* @__PURE__ */ new WeakMap(), u = /* @__PURE__ */ new WeakMap(), w$1 = /* @__PURE__ */ new WeakMap(), y$1 = /* @__PURE__ */ new WeakMap(), z$2 = /* @__PURE__ */ new WeakMap(), g$1 = /* @__PURE__ */ new WeakMap(), k$2 = /* @__PURE__ */ new WeakMap(), x$2 = /* @__PURE__ */ new WeakMap(), W$2 = /* @__PURE__ */ new WeakMap(), m$1 = /* @__PURE__ */ new WeakSet(), E$2 = function() {
+  const { debug: e2 } = C$2(this, v$1, "f");
+  M$2(this, k$2, new IntersectionObserver(((t5) => {
     t5.forEach(((t6) => {
       const i2 = this.rootElement.hasAttribute("lf-hydrated");
-      t6.isIntersecting && i2 && (e2.logs.new(this, "lf-placeholder entering the viewport, rendering " + this.lfValue + "."), this.isInViewport = true, C$1(this, k$1, "f").unobserve(this.rootElement));
+      t6.isIntersecting && i2 && (e2.logs.new(this, "lf-placeholder entering the viewport, rendering " + this.lfValue + "."), this.isInViewport = true, C$2(this, k$2, "f").unobserve(this.rootElement));
     }));
   }), { threshold: this.lfThreshold }));
-}, T$1.style = "::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=fade-in]{display:block;animation:lf-fade-in-block 0.25s ease-out forwards}@keyframes lf-fade-in-block{from{visibility:hidden;opacity:0}to{visibility:visible;opacity:1}}:host{display:block;font-family:var(--lf-placeholder-font-family, var(--lf-font-family-primary));font-size:var(--lf-placeholder-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-placeholder-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-placeholder-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-placeholder-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-placeholder-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-placeholder-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-placeholder-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-placeholder-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{width:100%;height:100%;position:relative}.placeholder{align-items:var(--lf-placeholder-ver-alignment, center);display:flex;height:var(--lf-placeholder-height, 100%);justify-content:var(--lf-placeholder-hor-alignment, center);width:var(--lf-placeholder-width, 100%)}.placeholder__icon{background-color:rgba(var(--lf-placeholder-color-on-bg, var(--lf-color-on-bg)), 1);height:1.5em;width:1.5em;overflow:hidden;width:100%;height:100%;animation:shine ease 2s infinite}@keyframes shine{0%{opacity:0.4}50%{opacity:0.8}100%{opacity:0.4}}";
+}, T$2.style = "::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=fade-in]{display:block;animation:lf-fade-in-block 0.25s ease-out forwards}@keyframes lf-fade-in-block{from{visibility:hidden;opacity:0}to{visibility:visible;opacity:1}}:host{display:block;font-family:var(--lf-placeholder-font-family, var(--lf-font-family-primary));font-size:var(--lf-placeholder-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-placeholder-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-placeholder-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-placeholder-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-placeholder-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-placeholder-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-placeholder-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-placeholder-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{width:100%;height:100%;position:relative}.placeholder{align-items:var(--lf-placeholder-ver-alignment, center);display:flex;height:var(--lf-placeholder-height, 100%);justify-content:var(--lf-placeholder-hor-alignment, center);width:var(--lf-placeholder-width, 100%)}.placeholder__icon{background-color:rgba(var(--lf-placeholder-color-on-bg, var(--lf-color-on-bg)), 1);height:1.5em;width:1.5em;overflow:hidden;width:100%;height:100%;animation:shine ease 2s infinite}@keyframes shine{0%{opacity:0.4}50%{opacity:0.8}100%{opacity:0.4}}";
 const pE6148250_entry = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
-  lf_placeholder: T$1
+  lf_placeholder: T$2
 }, Symbol.toStringTag, { value: "Module" }));
-var b, p, v, m, y, g2, z, x, k, C2, E2, W2, M, T3, L, D = function(i2, t5, e2, r2) {
+var b$1, p, v, m, y, g2, z$1, x$1, k$1, C$1, E$1, W$1, M$1, T$1, L$1, D$1 = function(i2, t5, e2, r2) {
   if ("a" === e2 && !r2) throw new TypeError("Private accessor was defined without a getter");
   if ("function" == typeof t5 ? i2 !== t5 || !r2 : !t5.has(i2)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return "m" === e2 ? r2 : "a" === e2 ? r2.call(i2) : r2 ? r2.value : t5.get(i2);
-}, j = function(i2, t5, e2, r2, s2) {
+}, j$1 = function(i2, t5, e2, r2, s2) {
   if ("function" == typeof t5 ? i2 !== t5 || true : !t5.has(i2)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
   return t5.set(i2, e2), e2;
 };
-const A = class {
+const A$1 = class A {
   constructor(e2) {
-    n(this, e2), this.lfEvent = V$4(this, "lf-drawer-event"), b.add(this), this.lfDisplay = "slide", this.lfPosition = "left", this.lfResponsive = 0, this.lfStyle = "", this.lfValue = false, p.set(this, void 0), v.set(this, LF_DRAWER_BLOCKS), m.set(this, LF_ATTRIBUTES), y.set(this, LF_DRAWER_PARTS), g2.set(this, LF_STYLE_ID), z.set(this, LF_WRAPPER_ID), x.set(this, void 0), k.set(this, null), C2.set(this, void 0), E2.set(this, void 0);
+    n(this, e2), this.lfEvent = V$4(this, "lf-drawer-event"), b$1.add(this), this.lfDisplay = "slide", this.lfPosition = "left", this.lfResponsive = 0, this.lfStyle = "", this.lfValue = false, p.set(this, void 0), v.set(this, LF_DRAWER_BLOCKS), m.set(this, LF_ATTRIBUTES), y.set(this, LF_DRAWER_PARTS), g2.set(this, LF_STYLE_ID), z$1.set(this, LF_WRAPPER_ID), x$1.set(this, void 0), k$1.set(this, null), C$1.set(this, void 0), E$1.set(this, void 0);
   }
   onLfEvent(i2, t5) {
     this.lfEvent.emit({ comp: this, eventType: t5, id: this.rootElement.id, originalEvent: i2 });
@@ -46960,22 +46801,22 @@ const A = class {
         i2.preventDefault(), this.close();
         break;
       case "Tab":
-        D(this, b, "m", L).call(this, i2);
+        D$1(this, b$1, "m", L$1).call(this, i2);
     }
   }
   onLfDisplayChange(i2, t5) {
-    D(this, p, "f") && D(this, b, "m", M).call(this, t5, i2);
+    D$1(this, p, "f") && D$1(this, b$1, "m", M$1).call(this, t5, i2);
   }
   onLfResponsiveChange() {
-    D(this, p, "f") && (this.lfResponsive > 0 ? (D(this, b, "m", W2).call(this), D(this, C2, "f") || (j(this, C2, (async () => {
-      D(this, E2, "f") && clearTimeout(D(this, E2, "f")), j(this, E2, window.setTimeout((() => {
-        D(this, b, "m", W2).call(this), j(this, E2, null, "f");
+    D$1(this, p, "f") && (this.lfResponsive > 0 ? (D$1(this, b$1, "m", W$1).call(this), D$1(this, C$1, "f") || (j$1(this, C$1, (async () => {
+      D$1(this, E$1, "f") && clearTimeout(D$1(this, E$1, "f")), j$1(this, E$1, window.setTimeout((() => {
+        D$1(this, b$1, "m", W$1).call(this), j$1(this, E$1, null, "f");
       }), 200), "f");
-    })), window.addEventListener("resize", D(this, C2, "f")))) : D(this, C2, "f") && (window.removeEventListener("resize", D(this, C2, "f")), j(this, C2, null)));
+    })), window.addEventListener("resize", D$1(this, C$1, "f")))) : D$1(this, C$1, "f") && (window.removeEventListener("resize", D$1(this, C$1, "f")), j$1(this, C$1, null)));
   }
   async close() {
     this.lfValue && requestAnimationFrame((() => {
-      this.lfValue = false, this.onLfEvent(new CustomEvent("close"), "close"), D(this, p, "f").effects.backdrop.hide(), D(this, k, "f") && (D(this, k, "f").focus(), j(this, k, null));
+      this.lfValue = false, this.onLfEvent(new CustomEvent("close"), "close"), D$1(this, p, "f").effects.backdrop.hide(), D$1(this, k$1, "f") && (D$1(this, k$1, "f").focus(), j$1(this, k$1, null));
     }));
   }
   async getDebugInfo() {
@@ -46989,9 +46830,9 @@ const A = class {
     return this.lfValue;
   }
   async open() {
-    this.lfValue || (j(this, k, document.activeElement), requestAnimationFrame((() => {
-      this.lfValue = true, this.onLfEvent(new CustomEvent("open"), "open"), "slide" === this.lfDisplay && D(this, p, "f").effects.backdrop.show((() => this.close())), requestAnimationFrame((() => {
-        D(this, b, "m", T3).call(this);
+    this.lfValue || (j$1(this, k$1, document.activeElement), requestAnimationFrame((() => {
+      this.lfValue = true, this.onLfEvent(new CustomEvent("open"), "open"), "slide" === this.lfDisplay && D$1(this, p, "f").effects.backdrop.show((() => this.close())), requestAnimationFrame((() => {
+        D$1(this, b$1, "m", T$1).call(this);
       }));
     })));
   }
@@ -47003,40 +46844,40 @@ const A = class {
   }
   async unmount(i2 = 0) {
     setTimeout((() => {
-      D(this, p, "f").effects.backdrop.hide(), this.onLfEvent(new CustomEvent("unmount"), "unmount"), this.rootElement.remove();
+      D$1(this, p, "f").effects.backdrop.hide(), this.onLfEvent(new CustomEvent("unmount"), "unmount"), this.rootElement.remove();
     }), i2);
   }
   connectedCallback() {
-    D(this, p, "f") && D(this, p, "f").theme.register(this);
+    D$1(this, p, "f") && D$1(this, p, "f").theme.register(this);
   }
   async componentWillLoad() {
-    j(this, p, await a(this)), this.lfResponsive > 0 && (D(this, b, "m", W2).call(this), j(this, C2, (async () => {
-      D(this, E2, "f") && clearTimeout(D(this, E2, "f")), j(this, E2, window.setTimeout((() => {
-        D(this, b, "m", W2).call(this), j(this, E2, null, "f");
+    j$1(this, p, await a(this)), this.lfResponsive > 0 && (D$1(this, b$1, "m", W$1).call(this), j$1(this, C$1, (async () => {
+      D$1(this, E$1, "f") && clearTimeout(D$1(this, E$1, "f")), j$1(this, E$1, window.setTimeout((() => {
+        D$1(this, b$1, "m", W$1).call(this), j$1(this, E$1, null, "f");
       }), 200), "f");
-    })), window.addEventListener("resize", D(this, C2, "f")));
+    })), window.addEventListener("resize", D$1(this, C$1, "f")));
   }
   componentDidLoad() {
-    const { info: i2 } = D(this, p, "f").debug;
+    const { info: i2 } = D$1(this, p, "f").debug;
     this.onLfEvent(new CustomEvent("ready"), "ready"), i2.update(this, "did-load");
   }
   componentWillRender() {
-    const { info: i2 } = D(this, p, "f").debug;
+    const { info: i2 } = D$1(this, p, "f").debug;
     i2.update(this, "will-render");
   }
   componentDidRender() {
-    const { info: i2 } = D(this, p, "f").debug;
+    const { info: i2 } = D$1(this, p, "f").debug;
     i2.update(this, "did-render");
   }
   render() {
-    const { bemClass: i2, setLfStyle: t5 } = D(this, p, "f").theme, { drawer: e2 } = D(this, v, "f"), { lfStyle: a2 } = this, o2 = "slide" === this.lfDisplay && this.lfValue;
-    return D$a(W$e, { key: "f4bd7c5cb658a7c2743f363caeefd92c20f0d9e4" }, a2 && D$a("style", { key: "388b3ce0fcfaa65fa066189ca34f768a1d9a0170", id: D(this, g2, "f") }, t5(this)), D$a("div", { key: "be76c4d9fe59c1fb2905e304f1e7d6cc46a05d49", "aria-modal": o2, id: D(this, z, "f"), ref: (i3) => {
-      i3 && j(this, x, i3);
-    }, role: "dialog" }, D$a("div", { key: "3710b99c4db058f755a9f5a5a25b41969b4d59f0", class: i2(e2._), part: D(this, y, "f").drawer }, D$a("div", { key: "161a88e84b887d17f0e5675b923f15bc35aae12d", class: i2(e2._, e2.content), "lf-data": D(this, m, "f").fadeIn, part: D(this, y, "f").content }, D$a("slot", { key: "a31ab9b41206e945077320ffa5e94fec39eb5786", name: LF_DRAWER_SLOT })))));
+    const { bemClass: i2, setLfStyle: t5 } = D$1(this, p, "f").theme, { drawer: e2 } = D$1(this, v, "f"), { lfStyle: a2 } = this, o2 = "slide" === this.lfDisplay && this.lfValue;
+    return D$a(W$e, { key: "f4bd7c5cb658a7c2743f363caeefd92c20f0d9e4" }, a2 && D$a("style", { key: "388b3ce0fcfaa65fa066189ca34f768a1d9a0170", id: D$1(this, g2, "f") }, t5(this)), D$a("div", { key: "be76c4d9fe59c1fb2905e304f1e7d6cc46a05d49", "aria-modal": o2, id: D$1(this, z$1, "f"), ref: (i3) => {
+      i3 && j$1(this, x$1, i3);
+    }, role: "dialog" }, D$a("div", { key: "3710b99c4db058f755a9f5a5a25b41969b4d59f0", class: i2(e2._), part: D$1(this, y, "f").drawer }, D$a("div", { key: "161a88e84b887d17f0e5675b923f15bc35aae12d", class: i2(e2._, e2.content), "lf-data": D$1(this, m, "f").fadeIn, part: D$1(this, y, "f").content }, D$a("slot", { key: "a31ab9b41206e945077320ffa5e94fec39eb5786", name: LF_DRAWER_SLOT })))));
   }
   disconnectedCallback() {
     var _a2, _b2;
-    D(this, C2, "f") && window.removeEventListener("resize", D(this, C2, "f")), (_a2 = D(this, p, "f")) == null ? void 0 : _a2.effects.backdrop.hide(), (_b2 = D(this, p, "f")) == null ? void 0 : _b2.theme.unregister(this);
+    D$1(this, C$1, "f") && window.removeEventListener("resize", D$1(this, C$1, "f")), (_a2 = D$1(this, p, "f")) == null ? void 0 : _a2.effects.backdrop.hide(), (_b2 = D$1(this, p, "f")) == null ? void 0 : _b2.theme.unregister(this);
   }
   get rootElement() {
     return z$d(this);
@@ -47045,29 +46886,205 @@ const A = class {
     return { lfDisplay: ["onLfDisplayChange"], lfResponsive: ["onLfResponsiveChange"] };
   }
 };
-p = /* @__PURE__ */ new WeakMap(), v = /* @__PURE__ */ new WeakMap(), m = /* @__PURE__ */ new WeakMap(), y = /* @__PURE__ */ new WeakMap(), g2 = /* @__PURE__ */ new WeakMap(), z = /* @__PURE__ */ new WeakMap(), x = /* @__PURE__ */ new WeakMap(), k = /* @__PURE__ */ new WeakMap(), C2 = /* @__PURE__ */ new WeakMap(), E2 = /* @__PURE__ */ new WeakMap(), b = /* @__PURE__ */ new WeakSet(), W2 = function() {
+p = /* @__PURE__ */ new WeakMap(), v = /* @__PURE__ */ new WeakMap(), m = /* @__PURE__ */ new WeakMap(), y = /* @__PURE__ */ new WeakMap(), g2 = /* @__PURE__ */ new WeakMap(), z$1 = /* @__PURE__ */ new WeakMap(), x$1 = /* @__PURE__ */ new WeakMap(), k$1 = /* @__PURE__ */ new WeakMap(), C$1 = /* @__PURE__ */ new WeakMap(), E$1 = /* @__PURE__ */ new WeakMap(), b$1 = /* @__PURE__ */ new WeakSet(), W$1 = function() {
   if (this.lfResponsive <= 0) return;
   const i2 = this.lfDisplay, t5 = window.innerWidth >= this.lfResponsive ? "dock" : "slide";
-  t5 !== i2 && (this.lfDisplay = t5, D(this, b, "m", M).call(this, i2, t5));
-}, M = function(i2, t5) {
-  this.lfValue && ("slide" === i2 && "dock" === t5 ? D(this, p, "f").effects.backdrop.hide() : "dock" === i2 && "slide" === t5 && D(this, p, "f").effects.backdrop.show((() => this.close())));
-}, T3 = function() {
+  t5 !== i2 && (this.lfDisplay = t5, D$1(this, b$1, "m", M$1).call(this, i2, t5));
+}, M$1 = function(i2, t5) {
+  this.lfValue && ("slide" === i2 && "dock" === t5 ? D$1(this, p, "f").effects.backdrop.hide() : "dock" === i2 && "slide" === t5 && D$1(this, p, "f").effects.backdrop.show((() => this.close())));
+}, T$1 = function() {
   if (!this.lfValue) return;
-  if (!D(this, x, "f")) return;
-  const i2 = D(this, x, "f").querySelector(LF_EFFECTS_FOCUSABLES.join(","));
-  i2 ? i2.focus() : D(this, x, "f").focus();
-}, L = function(i2) {
-  if (!this.lfValue || !D(this, x, "f")) return;
-  const t5 = Array.from(D(this, x, "f").querySelectorAll(LF_EFFECTS_FOCUSABLES.join(","))).filter(((i3) => i3.offsetWidth > 0 || i3.offsetHeight > 0 || i3 === document.activeElement));
+  if (!D$1(this, x$1, "f")) return;
+  const i2 = D$1(this, x$1, "f").querySelector(LF_EFFECTS_FOCUSABLES.join(","));
+  i2 ? i2.focus() : D$1(this, x$1, "f").focus();
+}, L$1 = function(i2) {
+  if (!this.lfValue || !D$1(this, x$1, "f")) return;
+  const t5 = Array.from(D$1(this, x$1, "f").querySelectorAll(LF_EFFECTS_FOCUSABLES.join(","))).filter(((i3) => i3.offsetWidth > 0 || i3.offsetHeight > 0 || i3 === document.activeElement));
   if (0 === t5.length) return void i2.preventDefault();
   const e2 = t5[0], r2 = t5[t5.length - 1];
   i2.shiftKey && document.activeElement === e2 ? (i2.preventDefault(), r2.focus()) : i2.shiftKey || document.activeElement !== r2 || (i2.preventDefault(), e2.focus());
-}, A.style = "::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=fade-in]{display:block;animation:lf-fade-in-block 0.25s ease-out forwards}@keyframes lf-fade-in-block{from{visibility:hidden;opacity:0}to{visibility:visible;opacity:1}}:host{display:block;font-family:var(--lf-drawer-font-family, var(--lf-font-family-primary));font-size:var(--lf-drawer-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-drawer-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-drawer-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-drawer-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-drawer-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-drawer-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-drawer-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-drawer-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{border:0;border-style:solid;border-radius:var(--lf-drawer-border-radius, var(--lf-ui-border-radius));background-color:rgba(var(--lf-drawer-color-drawer, var(--lf-color-drawer)), 0.375);color:rgb(var(--lf-drawer-color-on-drawer, var(--lf-color-on-drawer)));backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-sizing:border-box;display:block;height:100dvh;left:calc(var(--lf-ui-width-drawer) * -1);position:absolute;top:0;width:var(--lf-ui-width-drawer);z-index:var(--lf-ui-zindex-drawer)}:host([lf-position=left]){transition:left 300ms cubic-bezier(0.4, 0, 0.2, 1);border-bottom-left-radius:0;border-top-left-radius:0;border-right:var(--lf-drawer-border, 1px solid rgba(var(--lf-color-border), 0.75));left:calc(var(--lf-ui-width-drawer) * -1);right:auto}:host([lf-position=right]){transition:right 300ms cubic-bezier(0.4, 0, 0.2, 1);border-bottom-right-radius:0;border-top-right-radius:0;border-left:var(--lf-drawer-border, 1px solid rgba(var(--lf-color-border), 0.75));left:auto;right:calc(var(--lf-ui-width-drawer) * -1)}:host([lf-display=dock]){box-shadow:none}:host([lf-display=dock])[lf-position=left]{left:0}:host([lf-display=dock])[lf-position=right]{right:0}:host([lf-value]){left:0}:host([lf-value][lf-position=left][lf-display=slide]){box-shadow:var(--lf-drawer-left-box-shadow, 4px 0 10px -2px rgba(var(--lf-color-on-drawer), 0.2), 8px 0 16px 2px rgba(var(--lf-color-on-drawer), 0.14), 2px 0 20px 5px rgba(var(--lf-color-on-drawer), 0.14))}:host([lf-value][lf-position=right][lf-display=slide]){box-shadow:var(--lf-drawer-right-box-shadow, -4px 0 10px -2px rgba(var(--lf-color-on-drawer), 0.2), -8px 0 16px 2px rgba(var(--lf-color-on-drawer), 0.14), -2px 0 20px 5px rgba(var(--lf-color-on-drawer), 0.14))}.drawer,.drawer__content{width:100%;height:100%}";
+}, A$1.style = "::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=fade-in]{display:block;animation:lf-fade-in-block 0.25s ease-out forwards}@keyframes lf-fade-in-block{from{visibility:hidden;opacity:0}to{visibility:visible;opacity:1}}:host{display:block;font-family:var(--lf-drawer-font-family, var(--lf-font-family-primary));font-size:var(--lf-drawer-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-drawer-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-drawer-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-drawer-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-drawer-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-drawer-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-drawer-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-drawer-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{border:0;border-style:solid;border-radius:var(--lf-drawer-border-radius, var(--lf-ui-border-radius));background-color:rgba(var(--lf-drawer-color-drawer, var(--lf-color-drawer)), 0.375);color:rgb(var(--lf-drawer-color-on-drawer, var(--lf-color-on-drawer)));backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-sizing:border-box;display:block;height:100dvh;left:calc(var(--lf-ui-width-drawer) * -1);position:absolute;top:0;width:var(--lf-ui-width-drawer);z-index:var(--lf-ui-zindex-drawer)}:host([lf-position=left]){transition:left 300ms cubic-bezier(0.4, 0, 0.2, 1);border-bottom-left-radius:0;border-top-left-radius:0;border-right:var(--lf-drawer-border, 1px solid rgba(var(--lf-color-border), 0.75));left:calc(var(--lf-ui-width-drawer) * -1);right:auto}:host([lf-position=right]){transition:right 300ms cubic-bezier(0.4, 0, 0.2, 1);border-bottom-right-radius:0;border-top-right-radius:0;border-left:var(--lf-drawer-border, 1px solid rgba(var(--lf-color-border), 0.75));left:auto;right:calc(var(--lf-ui-width-drawer) * -1)}:host([lf-display=dock]){box-shadow:none}:host([lf-display=dock])[lf-position=left]{left:0}:host([lf-display=dock])[lf-position=right]{right:0}:host([lf-value]){left:0}:host([lf-value][lf-position=left][lf-display=slide]){box-shadow:var(--lf-drawer-left-box-shadow, 4px 0 10px -2px rgba(var(--lf-color-on-drawer), 0.2), 8px 0 16px 2px rgba(var(--lf-color-on-drawer), 0.14), 2px 0 20px 5px rgba(var(--lf-color-on-drawer), 0.14))}:host([lf-value][lf-position=right][lf-display=slide]){box-shadow:var(--lf-drawer-right-box-shadow, -4px 0 10px -2px rgba(var(--lf-color-on-drawer), 0.2), -8px 0 16px 2px rgba(var(--lf-color-on-drawer), 0.14), -2px 0 20px 5px rgba(var(--lf-color-on-drawer), 0.14))}.drawer,.drawer__content{width:100%;height:100%}";
 const pF19de954_entry = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
-  lf_drawer: A
+  lf_drawer: A$1
+}, Symbol.toStringTag, { value: "Module" }));
+const b = (e2) => /* @__PURE__ */ ((e3) => ({ addColumn: () => {
+  const { controller: s2, elements: i2, handlers: a2 } = e3(), { refs: r2 } = i2, { button: n2 } = a2, { blocks: l2, cyAttributes: f2, lfAttributes: h2, manager: c2, parts: d2 } = s2.get, { assignRef: m2, theme: u2 } = c2, { bemClass: p2, get: g3 } = u2, { "--lf-icon-plus": y2 } = g3.current().variables;
+  return D$a("lf-button", { class: p2(l2.grid._, l2.grid.addColumn), "data-cy": f2.button, "data-lf": h2.fadeIn, id: LF_MASONRY_IDS.addColumn, key: LF_MASONRY_IDS.addColumn, lfIcon: y2, lfStyling: "floating", lfUiSize: "xxsmall", "onLf-button-event": n2, part: d2.addColumn, ref: m2(r2, "addColumn"), title: "Click to add a column to the masonry." });
+}, removeColumn: () => {
+  const { controller: s2, elements: i2, handlers: a2 } = e3(), { refs: r2 } = i2, { button: n2 } = a2, { blocks: l2, cyAttributes: f2, lfAttributes: h2, manager: c2, parts: d2 } = s2.get, { assignRef: m2, theme: u2 } = c2, { bemClass: p2, get: g3 } = u2, { "--lf-icon-minus": y2 } = g3.current().variables;
+  return D$a("lf-button", { class: p2(l2.grid._, l2.grid.removeColumn), "data-cy": f2.button, "data-lf": h2.fadeIn, id: LF_MASONRY_IDS.removeColumn, key: LF_MASONRY_IDS.removeColumn, lfIcon: y2, lfStyling: "floating", lfUiSize: "xxsmall", "onLf-button-event": n2, part: d2.removeColumn, ref: m2(r2, "removeColumn"), title: "Click to remove a column from the masonry." });
+}, changeView: () => {
+  const { controller: s2, elements: i2, handlers: a2 } = e3(), { refs: r2 } = i2, { blocks: n2, cyAttributes: l2, isMasonry: f2, isVertical: h2, manager: c2, parts: d2 } = s2.get, { button: m2 } = a2, { assignRef: u2, theme: p2 } = c2, { bemClass: g3, get: y2 } = p2, { layoutBoardSplit: v2, viewportTall: b2, viewportWide: w3 } = y2.icons();
+  return D$a("lf-button", { class: g3(n2.grid._, n2.grid.changeViewe), "data-cy": l2.button, id: LF_MASONRY_IDS.masonry, key: LF_MASONRY_IDS.masonry, lfIcon: f2() ? b2 : h2() ? w3 : v2, lfStyling: "floating", lfUiSize: "xsmall", "onLf-button-event": m2, part: d2.changeView, ref: u2(r2, "changeView"), title: f2() ? "Click to view the images arranged vertically." : h2() ? "Click to view the images arranged horizontally." : "Click to view the images arranged in a masonry." });
+} }))(e2), w2 = (t5) => /* @__PURE__ */ ((t6) => ({ button: (e2) => {
+  const { eventType: s2, id: i2 } = e2.detail;
+  if ("click" === s2) switch (i2) {
+    case LF_MASONRY_IDS.masonry:
+      (async (t7) => {
+        const { compInstance: e3, isMasonry: s3, isVertical: i3 } = t7.controller.get;
+        e3.lfView = s3() ? "vertical" : i3() ? "horizontal" : "main";
+      })(t6());
+      break;
+    case LF_MASONRY_IDS.removeColumn:
+      (async (t7) => {
+        const { get: e3 } = t7.controller, { compInstance: s3, currentColumns: i3 } = e3, a2 = s3, r2 = i3();
+        r2 > 1 && (a2.lfColumns = r2 - 1);
+      })(t6());
+      break;
+    case LF_MASONRY_IDS.addColumn:
+      (async (t7) => {
+        const { get: e3 } = t7.controller, { compInstance: s3, currentColumns: i3 } = e3, a2 = i3();
+        s3.lfColumns = a2 + 1;
+      })(t6());
+  }
+} }))(t5);
+var k, z, x, C2, S2, M, W2, _, A2, T3, E2, j, I, V, L, D, P, R, U, B2, H, O2, F2, K, Y = function(t5, e2, s2, i2) {
+  if ("a" === s2 && !i2) throw new TypeError("Private accessor was defined without a getter");
+  if ("function" == typeof e2 ? t5 !== e2 || !i2 : !e2.has(t5)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+  return "m" === s2 ? i2 : "a" === s2 ? i2.call(t5) : i2 ? i2.value : e2.get(t5);
+}, $2 = function(t5, e2, s2, i2, a2) {
+  if ("function" == typeof e2 ? t5 !== e2 || true : !e2.has(t5)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
+  return e2.set(t5, s2), s2;
+};
+const q = class {
+  constructor(a2) {
+    n(this, a2), this.lfEvent = V$4(this, "lf-masonry-event"), k.add(this), this.selectedShape = {}, this.shapes = {}, this.lfActions = false, this.lfCollapseColumns = true, this.lfColumns = Array.from(LF_MASONRY_DEFAULT_COLUMNS), this.lfDataset = null, this.lfSelectable = false, this.lfShape = "image", this.lfStyle = "", this.lfView = "main", z.set(this, void 0), x.set(this, LF_MASONRY_BLOCKS), C2.set(this, CY_ATTRIBUTES), S2.set(this, LF_ATTRIBUTES), M.set(this, LF_MASONRY_PARTS), W2.set(this, LF_STYLE_ID), _.set(this, LF_MASONRY_CSS_VARS), A2.set(this, LF_WRAPPER_ID), T3.set(this, void 0), E2.set(this, void 0), j.set(this, void 0), I.set(this, (() => {
+      var t5;
+      $2(this, j, { controller: { get: { blocks: Y(this, x, "f"), compInstance: this, currentColumns: () => Y(this, T3, "f"), cyAttributes: Y(this, C2, "f"), isMasonry: () => Y(this, L, "f").call(this), isVertical: () => Y(this, D, "f").call(this), lfAttributes: Y(this, S2, "f"), manager: Y(this, z, "f"), parts: Y(this, M, "f"), shapes: () => this.shapes } }, elements: { jsx: b(t5 = () => Y(this, j, "f")), refs: { addColumn: null, removeColumn: null, changeView: null } }, handlers: w2(t5) });
+    })), V.set(this, (() => {
+      var _a2;
+      return !!((_a2 = this.shapes) == null ? void 0 : _a2[this.lfShape]);
+    })), L.set(this, (() => "main" === this.lfView)), D.set(this, (() => "vertical" === this.lfView)), P.set(this, ((t5, e2) => () => {
+      clearTimeout(Y(this, E2, "f")), $2(this, E2, setTimeout(t5, e2));
+    })), R.set(this, ((t5) => t5.every(((t6, e2, s2) => 0 === e2 || s2[e2 - 1] < t6)))), B2.set(this, (() => {
+      const { lfShape: e2, selectedShape: s2, shapes: i2 } = this, a3 = i2[this.lfShape].map((() => ({ htmlProps: { dataset: { lf: Y(this, S2, "f").fadeIn, selected: "" } } })));
+      void 0 !== s2.index && (a3[s2.index] = { htmlProps: { dataset: { lf: Y(this, S2, "f").fadeIn, selected: "true" } } });
+      const r$12 = Array.from({ length: Y(this, T3, "f") }, (() => []), []);
+      for (let s3 = 0; s3 < i2[e2].length; s3++) {
+        const n2 = i2[e2][s3], o2 = a3[s3];
+        r$12[s3 % Y(this, T3, "f")].push(D$a(r, { cell: Object.assign(o2, n2), index: s3, shape: e2, eventDispatcher: async (t5) => this.onLfEvent(t5, "lf-event"), framework: Y(this, z, "f") }));
+      }
+      return r$12;
+    })), H.set(this, Y(this, P, "f").call(this, (() => {
+      this.viewportWidth = window.innerWidth;
+    }), 200)), O2.set(this, (() => {
+      const { bemClass: e2 } = Y(this, z, "f").theme, { grid: s2 } = Y(this, x, "f"), { addColumn: i2, changeView: a3, removeColumn: r2 } = Y(this, j, "f").elements.jsx;
+      return D$a("div", { class: e2(s2._, s2.actions), "data-lf": Y(this, S2, "f").fadeIn }, Y(this, L, "f").call(this) && D$a("div", { class: e2(s2._, s2.sub) }, i2(), r2()), a3());
+    })), F2.set(this, (() => {
+      const { bemClass: e2 } = Y(this, z, "f").theme, { grid: s2 } = Y(this, x, "f");
+      return Y(this, B2, "f").call(this).map(((a3, r2) => D$a("div", { key: r2, class: e2(s2._, s2.column) }, a3.map(((e3) => D$a(jt$1, null, e3))))));
+    })), K.set(this, (() => {
+      var _a2;
+      const { bemClass: e2 } = Y(this, z, "f").theme, { grid: s2 } = Y(this, x, "f"), { lfActions: a3, lfShape: r2, lfView: n2, shapes: o2 } = this;
+      return Y(this, V, "f").call(this) && ((_a2 = o2[r2]) == null ? void 0 : _a2.length) ? D$a(jt$1, null, D$a("div", { class: e2(s2._, null, { [n2]: true }) }, Y(this, F2, "f").call(this)), a3 && Y(this, O2, "f").call(this)) : null;
+    }));
+  }
+  onLfEvent(t5, e2) {
+    const { lfSelectable: s2, lfShape: i2, selectedShape: a2, shapes: r2 } = this;
+    let n2 = false;
+    const o2 = {};
+    if ("lf-event" === e2) {
+      const { comp: e3, eventType: l2 } = t5.detail;
+      if ("click" === l2 && s2) {
+        const t6 = parseInt(e3.rootElement.dataset.index);
+        a2.index !== t6 && (o2.index = t6, o2.shape = r2[i2][t6]), n2 = true;
+      }
+    }
+    n2 && (this.selectedShape = o2), this.lfEvent.emit({ comp: this, eventType: e2, id: this.rootElement.id, originalEvent: t5, selectedShape: this.selectedShape });
+  }
+  validateColumns() {
+    if (!Y(this, z, "f")) return;
+    const { debug: t5 } = Y(this, z, "f");
+    Array.isArray(this.lfColumns) && !Y(this, R, "f").call(this, this.lfColumns) && (t5.logs.new(this, "Invalid breakpoints in lfColumns: must be sorted in ascending order.", "warning"), this.lfColumns = [...LF_MASONRY_DEFAULT_COLUMNS]);
+  }
+  async updateShapes() {
+    if (!Y(this, z, "f")) return;
+    const { data: t5, debug: e2 } = Y(this, z, "f");
+    try {
+      this.shapes = t5.cell.shapes.getAll(this.lfDataset);
+    } catch (t6) {
+      e2.logs.new(this, "Error updating shapes: " + t6, "error");
+    }
+  }
+  async getDebugInfo() {
+    return this.debugInfo;
+  }
+  async getProps() {
+    const t5 = LF_MASONRY_PROPS.map(((t6) => [t6, this[t6]]));
+    return Object.fromEntries(t5);
+  }
+  async getSelectedShape() {
+    return this.selectedShape;
+  }
+  async redecorateShapes() {
+    this.updateShapes();
+  }
+  async refresh() {
+    pt(this);
+  }
+  async setSelectedShape(t5) {
+    var _a2, _b2;
+    const { debug: e2 } = Y(this, z, "f"), s2 = (_b2 = (_a2 = this.shapes) == null ? void 0 : _a2[this.lfShape]) == null ? void 0 : _b2[t5];
+    s2 ? this.selectedShape = { index: t5, shape: s2 } : (this.selectedShape = {}, e2.logs.new(this, `Couldn't set shape with index: ${t5}`)), this.updateShapes();
+  }
+  async unmount(t5 = 0) {
+    setTimeout((() => {
+      this.onLfEvent(new CustomEvent("unmount"), "unmount"), this.rootElement.remove();
+    }), t5);
+  }
+  connectedCallback() {
+    Y(this, z, "f") && Y(this, z, "f").theme.register(this);
+  }
+  async componentWillLoad() {
+    $2(this, z, await a(this)), Y(this, I, "f").call(this), this.updateShapes();
+  }
+  componentDidLoad() {
+    window.addEventListener("resize", Y(this, H, "f")), this.viewportWidth = window.innerWidth;
+    const { info: t5 } = Y(this, z, "f").debug;
+    this.onLfEvent(new CustomEvent("ready"), "ready"), t5.update(this, "did-load");
+  }
+  componentWillRender() {
+    const { info: t5 } = Y(this, z, "f").debug;
+    $2(this, T3, Y(this, L, "f").call(this) ? Y(this, k, "m", U).call(this) : 1), t5.update(this, "will-render");
+  }
+  componentDidRender() {
+    const { info: t5 } = Y(this, z, "f").debug;
+    t5.update(this, "did-render");
+  }
+  render() {
+    const { bemClass: e2, setLfStyle: s2 } = Y(this, z, "f").theme, { masonry: i2 } = Y(this, x, "f"), { lfStyle: a2 } = this, n2 = { [Y(this, _, "f").columns]: String(Y(this, T3, "f")) };
+    return D$a(W$e, { key: "80143874350a40e35b8e1cae7d4b6c85dd141dfb", style: n2 }, a2 && D$a("style", { key: "9fd6f49f87efec5e6bb48586454247f81e2c65cb", id: Y(this, W2, "f") }, s2(this)), D$a("div", { key: "a789ad2bd1006fa7dbe8047999f41c239ef962c6", id: Y(this, A2, "f") }, D$a("div", { key: "29523887c9963105ae7915a1852e435a17aa163c", class: e2(i2._) }, Y(this, K, "f").call(this))));
+  }
+  disconnectedCallback() {
+    var _a2;
+    (_a2 = Y(this, z, "f")) == null ? void 0 : _a2.theme.unregister(this), window.removeEventListener("resize", Y(this, H, "f"));
+  }
+  get rootElement() {
+    return z$d(this);
+  }
+  static get watchers() {
+    return { lfColumns: ["validateColumns"], lfDataset: ["updateShapes"], lfShape: ["updateShapes"] };
+  }
+};
+z = /* @__PURE__ */ new WeakMap(), x = /* @__PURE__ */ new WeakMap(), C2 = /* @__PURE__ */ new WeakMap(), S2 = /* @__PURE__ */ new WeakMap(), M = /* @__PURE__ */ new WeakMap(), W2 = /* @__PURE__ */ new WeakMap(), _ = /* @__PURE__ */ new WeakMap(), A2 = /* @__PURE__ */ new WeakMap(), T3 = /* @__PURE__ */ new WeakMap(), E2 = /* @__PURE__ */ new WeakMap(), j = /* @__PURE__ */ new WeakMap(), I = /* @__PURE__ */ new WeakMap(), V = /* @__PURE__ */ new WeakMap(), L = /* @__PURE__ */ new WeakMap(), D = /* @__PURE__ */ new WeakMap(), P = /* @__PURE__ */ new WeakMap(), R = /* @__PURE__ */ new WeakMap(), B2 = /* @__PURE__ */ new WeakMap(), H = /* @__PURE__ */ new WeakMap(), O2 = /* @__PURE__ */ new WeakMap(), F2 = /* @__PURE__ */ new WeakMap(), K = /* @__PURE__ */ new WeakMap(), k = /* @__PURE__ */ new WeakSet(), U = function() {
+  var _a2, _b2;
+  const { lfColumns: t5, viewportWidth: e2, shapes: s2, lfShape: i2 } = this;
+  if (!Y(this, V, "f").call(this)) return 1;
+  if ("number" == typeof t5) return this.lfCollapseColumns ? Math.min(t5, ((_a2 = s2[i2]) == null ? void 0 : _a2.length) || 0) : t5;
+  if (Array.isArray(t5)) {
+    const a2 = t5;
+    let r2 = 1;
+    for (let t6 = 0; t6 < a2.length && e2 >= a2[t6]; t6++) r2 = t6 + 1;
+    return this.lfCollapseColumns ? Math.min(r2, ((_b2 = s2 == null ? void 0 : s2[i2]) == null ? void 0 : _b2.length) || 0) : r2;
+  }
+  return 1;
+}, q.style = "::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=fade-in]{display:block;animation:lf-fade-in-block 0.25s ease-out forwards}@keyframes lf-fade-in-block{from{visibility:hidden;opacity:0}to{visibility:visible;opacity:1}}:host{display:block;font-family:var(--lf-masonry-font-family, var(--lf-font-family-primary));font-size:var(--lf-masonry-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-masonry-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-masonry-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-masonry-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-masonry-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-masonry-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-masonry-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-masonry-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{width:100%;height:100%}:host([lf-selectable]) lf-image{transition:all 200ms cubic-bezier(0.4, 0, 0.6, 1);box-sizing:border-box;cursor:pointer;overflow:hidden}:host([lf-selectable]) lf-image:hover,:host([lf-selectable]) lf-image[data-selected=true]{filter:var(--lf-comp-selected-filter, brightness(110%) drop-shadow(0 0 0.5em rgb(var(--lf-color-secondary))))}:host([lf-selectable]) lf-image[data-selected=true]{border:var(--lf-masonry-selected-border, 1px solid rgba(var(--lf-color-secondary, 0.875)))}.masonry{width:100%;height:100%;box-sizing:border-box;display:flex;gap:var(--lf-masonry-grid-gap, 0.5em);overflow:auto;padding:var(--lf-masonry-padding, 0.75em);position:relative}.masonry:not(:hover) .grid__actions{display:none}.grid{width:100%;height:100%;align-items:var(--lf-masonry-grid-items-alignment, start);column-gap:var(--lf-masonry-grid-gap, 0.5em);display:grid;overflow-y:auto;overflow-x:hidden}.grid--horizontal{grid-template-rows:1fr;overflow-x:auto;overflow-y:hidden}.grid--horizontal .grid__column{flex-direction:row;height:100%;min-height:max-content;width:auto}.grid--main{grid-template-columns:repeat(var(--lf_masonry_columns), var(--lf-masonry-column-size, minmax(0px, 1fr)))}.grid--main .grid__column{flex-direction:column}.grid--vertical{grid-template-columns:1fr}.grid--vertical .grid__column{flex-direction:column}.grid__column{display:flex;flex:1;gap:var(--lf-masonry-grid-gap, 0.5em);width:100%}.grid__actions{backdrop-filter:var(--lf-masonry-actions-backdrop, blur(10px));background-color:var(--lf-masonry-actions-background, rgba(var(--lf-color-surface), 0.75));border-radius:var(--lf-masonry-actions-border-radius, 50px);bottom:var(--lf-masonry-button-bottom, 1em);display:grid;grid-auto-flow:row;grid-gap:var(--lf-masonry-grid-gap-actions, 0.5em);justify-items:center;margin:var(--lf-masonry-actions-margin, 0 0.5em 0.5em 0);padding:var(--lf-masonry-actions-padding, 0.75em);position:absolute;right:var(--lf-masonry-button-right, 1em);z-index:var(--lf-masonry-actions-z-index, 2)}.grid__sub{display:grid;grid-gap:var(--lf-masonry-grid-gap-actions-sub, 0.25em)}";
+const pFc80bc8a_entry = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  lf_masonry: q
 }, Symbol.toStringTag, { value: "Module" }));
 export {
   getLfFramework as g
 };
-//# sourceMappingURL=lf-widgets-CAA2GbO2.js.map
+//# sourceMappingURL=lf-widgets-B35YyXeC.js.map
