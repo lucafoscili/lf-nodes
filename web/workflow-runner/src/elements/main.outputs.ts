@@ -185,9 +185,9 @@ const _getUiState = (status: WorkflowRunStatus): LfThemeUIState => {
     case 'failed':
       return 'danger';
     case 'pending':
-      return 'info';
-    case 'running':
       return 'primary';
+    case 'running':
+      return 'info';
     case 'succeeded':
       return 'success';
   }
