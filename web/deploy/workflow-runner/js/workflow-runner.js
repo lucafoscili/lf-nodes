@@ -299,9 +299,10 @@ const _createDataset$1 = (workflows) => {
   return dataset;
 };
 const _getIcon = (category) => {
-  const { alertTriangle, codeCircle2, json } = getLfFramework().theme.get.icons();
+  const { alertTriangle, codeCircle2, json, robot } = getLfFramework().theme.get.icons();
   const category_icons = {
     JSON: json,
+    LLM: robot,
     SVG: codeCircle2
   };
   return category_icons[category] || alertTriangle;
@@ -467,6 +468,11 @@ const createComponent = {
     _setProps("LfButton", comp, props);
     return comp;
   },
+  chat: (props) => {
+    const comp = document.createElement("lf-chat");
+    _setProps("LfChat", comp, props);
+    return comp;
+  },
   code: (props) => {
     const comp = document.createElement("lf-code");
     _setProps("LfCode", comp, props);
@@ -497,6 +503,10 @@ const createInputCell = (cell) => {
   const { sanitizeProps } = getLfFramework();
   const { props, shape } = cell;
   switch (shape) {
+    case "chat": {
+      const p = props || {};
+      return createComponent.chat(sanitizeProps(p, "LfChat"));
+    }
     case "toggle": {
       const p = props || {};
       return createComponent.toggle(sanitizeProps(p, "LfToggle"));
@@ -514,12 +524,12 @@ const createInputCell = (cell) => {
 };
 const createOutputComponent = (descriptor) => {
   const { syntax } = getLfFramework();
-  const { dataset, json, metadata, props, shape, slot_map, svg } = descriptor;
+  const { civitai_metadata, dataset, file_names, json, metadata, props, shape, slot_map, svg } = descriptor;
   const el = document.createElement("div");
   switch (shape) {
     case "code": {
       const p = props || {};
-      p.lfValue = svg || syntax.json.unescape(json || metadata || dataset || { message: "No output available." }).unescapedString;
+      p.lfValue = svg || civitai_metadata || (file_names == null ? void 0 : file_names.join("\n")) || syntax.json.unescape(json || metadata || dataset || { message: "No output available." }).unescapedString;
       const code = createComponent.code(p);
       el.appendChild(code);
       break;
@@ -799,6 +809,79 @@ const formatTimestamp = (timestamp) => {
   }
   return date.toLocaleString();
 };
+const _tryParseJson = (value) => {
+  try {
+    return JSON.parse(value);
+  } catch {
+    return null;
+  }
+};
+const stringifyDetail = (value) => {
+  if (value === null || value === void 0) {
+    return null;
+  }
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    if (!trimmed) {
+      return null;
+    }
+    const parsed = _tryParseJson(trimmed);
+    if (parsed !== null) {
+      try {
+        return JSON.stringify(parsed, null, 2);
+      } catch {
+        return trimmed;
+      }
+    }
+    return trimmed;
+  }
+  try {
+    return JSON.stringify(value, null, 2);
+  } catch {
+    return String(value);
+  }
+};
+const summarizeDetail = (value) => {
+  if (value === null || value === void 0) {
+    return null;
+  }
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    if (!trimmed) {
+      return null;
+    }
+    const parsed = _tryParseJson(trimmed);
+    if (parsed && typeof parsed === "object") {
+      const message = parsed.message;
+      if (typeof message === "string" && message.trim()) {
+        return message.trim();
+      }
+      const detail = parsed.detail;
+      if (typeof detail === "string" && detail.trim()) {
+        return detail.trim();
+      }
+      return JSON.stringify(parsed);
+    }
+    return trimmed;
+  }
+  if (typeof value === "object") {
+    const message = value.message;
+    if (typeof message === "string" && message.trim()) {
+      return message.trim();
+    }
+    const detail = value.detail;
+    if (typeof detail === "string" && detail.trim()) {
+      return detail.trim();
+    }
+    try {
+      const str = JSON.stringify(value);
+      return str.length > 200 ? `${str.slice(0, 197)}...` : str;
+    } catch {
+      return "[object Object]";
+    }
+  }
+  return String(value);
+};
 const clearChildren = (element) => {
   if (!element) {
     return;
@@ -1002,6 +1085,7 @@ const createResultsSection = (store) => {
     debugLog(WORKFLOW_RESULTS_MOUNTED);
   };
   const render = () => {
+    var _a2;
     const state = store.getState();
     const { manager } = state;
     const { uiRegistry } = manager;
@@ -1026,8 +1110,32 @@ const createResultsSection = (store) => {
     if (nodeIds.length === 0) {
       const empty = document.createElement("p");
       empty.className = RESULTS_CLASSES.empty;
-      empty.textContent = selectedRun ? "This run has not produced any outputs yet." : "Select a run to inspect its outputs.";
+      const summary = summarizeDetail((selectedRun == null ? void 0 : selectedRun.error) ?? null);
+      if (selectedRun) {
+        empty.textContent = summary ? `This run has not produced any outputs yet. ${summary}` : "This run has not produced any outputs yet.";
+      } else {
+        empty.textContent = "Select a run to inspect its outputs.";
+      }
       element.appendChild(empty);
+      const appendCodeBlock = (label, content) => {
+        if (!content) {
+          return;
+        }
+        const wrapper = document.createElement("div");
+        wrapper.className = RESULTS_CLASSES.item;
+        const heading = document.createElement("h4");
+        heading.className = RESULTS_CLASSES.title;
+        heading.textContent = label;
+        wrapper.appendChild(heading);
+        const code = createComponent.code({
+          lfLanguage: "json",
+          lfValue: content
+        });
+        wrapper.appendChild(code);
+        element.appendChild(wrapper);
+      };
+      appendCodeBlock("Error detail", stringifyDetail((selectedRun == null ? void 0 : selectedRun.error) ?? null));
+      appendCodeBlock("Run payload", stringifyDetail(((_a2 = selectedRun == null ? void 0 : selectedRun.resultPayload) == null ? void 0 : _a2.body) ?? (selectedRun == null ? void 0 : selectedRun.resultPayload) ?? null));
       return;
     }
     const workflow = manager.workflow.current();
@@ -1314,41 +1422,45 @@ const _getUiState = (status) => {
 };
 const _itemCardCell = (run) => {
   const { createdAt, error, httpStatus, runId, status, updatedAt, workflowName } = run;
+  const errorSummary = summarizeDetail(error);
+  const detailLines = [
+    `Created at: ${formatTimestamp(createdAt)}`,
+    `Last updated: ${formatTimestamp(updatedAt)}`
+  ];
+  if (errorSummary) {
+    detailLines.push("", `Error: ${errorSummary}`);
+  }
+  if (httpStatus !== null && httpStatus !== void 0) {
+    detailLines.push(`HTTP Status: ${httpStatus}`);
+  }
+  const cells = {
+    "1": {
+      value: workflowName || "Workflow run"
+    },
+    "2": {
+      value: `Run ID: ${runId}`
+    },
+    "3": {
+      value: detailLines.join("\n").trim()
+    },
+    lfButton: {
+      shape: "button",
+      value: "",
+      lfIcon: _getLfIcon(status),
+      lfLabel: formatStatus(status),
+      lfStyling: "flat",
+      lfUiState: _getUiState(status)
+    },
+    lfImage: {
+      shape: "image",
+      value: _getFirstOutputImageUrl(run.outputs)
+    }
+  };
   const lfCard = {
     lfDataset: {
       nodes: [
         {
-          cells: {
-            "1": {
-              value: workflowName
-            },
-            "2": {
-              value: `Run ID: ${runId}`
-            },
-            "3": {
-              value: `
-Created at: ${formatTimestamp(createdAt)}
-Last updated: ${formatTimestamp(updatedAt)}
-
-${error ? `
-Error: ${error} 
-HTTP Status: ${httpStatus ?? "N/A"}
-` : ""}
-              `
-            },
-            lfButton: {
-              shape: "button",
-              value: "",
-              lfIcon: _getLfIcon(status),
-              lfLabel: status,
-              lfStyling: "flat",
-              lfUiState: _getUiState(status)
-            },
-            lfImage: {
-              shape: "image",
-              value: _getFirstOutputImageUrl(run.outputs)
-            }
-          },
+          cells,
           description: `Output results for run ${runId}`,
           id: `${runId}`
         }
@@ -1709,12 +1821,13 @@ const runWorkflow = async (payload) => {
   return runId;
 };
 const getRunStatus = async (runId) => {
+  var _a2, _b2, _c, _d, _e;
   const { RUN_GENERIC } = ERROR_MESSAGES;
   const { syntax } = getLfFramework();
   const response = await fetch(buildApiUrl(`/run/${runId}/status`), { method: "GET" });
   const data = await syntax.json.parse(response);
   if (!response.ok || !data) {
-    const detail = (data == null ? void 0 : data.error) || response.statusText || runId;
+    const detail = typeof (data == null ? void 0 : data.error) === "string" && data.error || typeof ((_c = (_b2 = (_a2 = data == null ? void 0 : data.result) == null ? void 0 : _a2.body) == null ? void 0 : _b2.payload) == null ? void 0 : _c.detail) === "string" && data.result.body.payload.detail || (((_e = (_d = data == null ? void 0 : data.result) == null ? void 0 : _d.body) == null ? void 0 : _e.payload) ? JSON.stringify(data.result.body.payload) : response.statusText) || runId;
     throw new WorkflowApiError(`${RUN_GENERIC} (${detail})`, {
       payload: data ?? void 0,
       status: response.status
@@ -1772,21 +1885,31 @@ const _collectInputs = async (store) => {
   for (const cell of cells) {
     const id = cell.id || "";
     _setCellStatus(store, id);
-    const value = await cell.getValue();
     switch (cell.tagName.toLowerCase()) {
-      case "lf-toggle":
+      case "lf-chat": {
+        const value = cell.lfValue;
+        inputs[id] = JSON.stringify(value);
+        break;
+      }
+      case "lf-toggle": {
+        const value = await cell.getValue();
         inputs[id] = value === "off" ? false : true;
         break;
-      case "lf-upload":
+      }
+      case "lf-upload": {
         try {
+          const value = await cell.getValue();
           inputs[id] = await _handleUploadCell(store, value);
         } catch (error) {
           _setCellStatus(store, id, "error");
           throw error;
         }
         break;
-      default:
+      }
+      default: {
+        const value = await cell.getValue();
         inputs[id] = value;
+      }
     }
   }
   return inputs;
@@ -2449,7 +2572,14 @@ const createRunLifecycle = ({ setInputStatus, store }) => {
     var _a2, _b2, _c, _d, _e, _f;
     const payload = (_b2 = (_a2 = response.result) == null ? void 0 : _a2.body) == null ? void 0 : _b2.payload;
     const runId = response.run_id;
-    const detail = (payload == null ? void 0 : payload.detail) || ((_c = payload == null ? void 0 : payload.error) == null ? void 0 : _c.message) || response.error || STATUS_MESSAGES.ERROR_RUNNING_WORKFLOW;
+    const rawDetail = (payload == null ? void 0 : payload.detail) ?? ((_c = payload == null ? void 0 : payload.error) == null ? void 0 : _c.message) ?? response.error ?? STATUS_MESSAGES.ERROR_RUNNING_WORKFLOW;
+    const detail = typeof rawDetail === "string" ? rawDetail : rawDetail ? (() => {
+      try {
+        return JSON.stringify(rawDetail);
+      } catch {
+        return String(rawDetail);
+      }
+    })() : STATUS_MESSAGES.ERROR_RUNNING_WORKFLOW;
     const outputs = _extractRunOutputs(response);
     const now = Date.now();
     const hasInputError = Boolean((_d = payload == null ? void 0 : payload.error) == null ? void 0 : _d.input);
