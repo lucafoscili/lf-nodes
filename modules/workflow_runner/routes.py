@@ -16,9 +16,19 @@ from .job_manager import JobStatus, create_job, get_job, set_job_status
 from .registry import InputValidationError, WorkflowNode, get_workflow, list_workflows
 from ..utils.constants import API_ROUTE_PREFIX, NOT_FND_HTML
 from ..utils.helpers.conversion import json_safe
-from .google_oauth import verify_id_token_with_google, load_allowed_users_from_file
+from .auth import (
+    _ENABLE_GOOGLE_OAUTH,
+    _require_auth,
+    _WF_DEBUG,
+    create_server_session,
+    _extract_token_from_request,
+    _verify_session,
+    _verify_token_and_email,
+    _GOOGLE_CLIENT_IDS,
+    _SESSION_TTL,
+    _SESSION_STORE,
+)
 import base64
-import asyncio
 import time as _time
 
 # Executor helpers (moved out of routes.py)
@@ -31,138 +41,9 @@ from .services.executor import (
     WorkflowPreparationError,
 )
 
-# Dev dotenv loader: load `.env` for local dev. The loader will run if either:
-#  - DEV_ENV=1 is already set in the environment, OR
-#  - a .env file exists next to this module (convenience for local dev).
-try:
-    env_path = Path(__file__).parent / ".env"
-    should_load = os.environ.get("DEV_ENV") == "1" or env_path.exists()
-    if should_load and env_path.exists():
-        # lightweight loader to avoid adding a runtime dependency
-        for line in env_path.read_text(encoding='utf-8').splitlines():
-            line = line.strip()
-            if not line or line.startswith('#'):
-                continue
-            if '=' not in line:
-                continue
-            k, v = line.split('=', 1)
-            k = k.strip()
-            v = v.strip().strip('"').strip("'")
-            if k and not os.environ.get(k):
-                os.environ[k] = v
-except Exception:
-    logging.exception('Failed to load local .env')
+# Authentication helpers moved to auth.py
 
-# Google OAuth opt-in configuration (read at import)
-_ENABLE_GOOGLE_OAUTH = os.environ.get("ENABLE_GOOGLE_OAUTH", "").lower() in ("1", "true", "yes")
-_ALLOWED_USERS_FILE = os.environ.get("ALLOWED_USERS_FILE", "")
-_ALLOWED_USERS_ENV = os.environ.get("ALLOWED_USERS", "")
-# strip surrounding quotes if present and split on commas
-_GOOGLE_CLIENT_IDS = [s.strip().strip("'\"") for s in os.environ.get("GOOGLE_CLIENT_IDS", "").split(",") if s.strip()]
-
-# Simple in-memory token cache: id_token -> (email, expires_at)
-_TOKEN_CACHE: dict[str, tuple[str, float]] = {}
-_TOKEN_CACHE_TTL = int(os.environ.get("GOOGLE_IDTOKEN_CACHE_SECONDS", "300"))
-
-# Require explicit allowlist? If true and no allowed users are configured, logins will be denied.
-_REQUIRE_ALLOWED_USERS = os.environ.get("REQUIRE_ALLOWED_USERS", "1").lower() in ("1", "true", "yes")
-
-# Server-side sessions: session_id -> (email, expires_at)
-_SESSION_STORE: dict[str, tuple[str, float]] = {}
-_SESSION_TTL = int(os.environ.get("SESSION_TTL_SECONDS", str(_TOKEN_CACHE_TTL)))
-# Enable verbose debug for the workflow-runner verify handler
-_WF_DEBUG = os.environ.get("WORKFLOW_RUNNER_DEBUG", "0").lower() in ("1", "true", "yes")
-
-def _load_allowed_users() -> set:
-    users = set()
-    if _ALLOWED_USERS_FILE:
-        users.update(load_allowed_users_from_file(_ALLOWED_USERS_FILE))
-    if _ALLOWED_USERS_ENV:
-        users.update(u.strip().lower() for u in _ALLOWED_USERS_ENV.split(",") if u.strip())
-    return users
-
-_ALLOWED_USERS = _load_allowed_users()
-
-async def _verify_token_and_email(id_token: str) -> tuple[bool, str | None]:
-    """Verify token (possibly cached) and ensure email is allowed.
-
-    Returns (True, email) on success, (False, None) otherwise.
-    """
-    if not id_token:
-        return False, None
-
-    # check cache
-    now = _time.time()
-    cached = _TOKEN_CACHE.get(id_token)
-    if cached and cached[1] > now:
-        return True, cached[0]
-
-    claims = await verify_id_token_with_google(id_token, expected_audiences=_GOOGLE_CLIENT_IDS or None)
-    if not claims:
-        return False, None
-
-    email = (claims.get("email") or "").lower()
-    return True, email
-
-
-def _extract_token_from_request(request: web.Request) -> str | None:
-    # Authorization header
-    auth = request.headers.get("Authorization", "")
-    if auth.startswith("Bearer "):
-        return auth.split(" ", 1)[1].strip()
-    # fallback: cookie LF_SESSION (server-side session id)
-    cookie = request.cookies.get("LF_SESSION")
-    if cookie:
-        return cookie
-    return None
-
-
-def _cleanup_expired_sessions() -> None:
-    now = _time.time()
-    to_delete = [s for s, v in _SESSION_STORE.items() if v[1] <= now]
-    for s in to_delete:
-        _SESSION_STORE.pop(s, None)
-
-
-async def _verify_session(session_id: str) -> tuple[bool, str | None]:
-    if not session_id:
-        return False, None
-    _cleanup_expired_sessions()
-    now = _time.time()
-    val = _SESSION_STORE.get(session_id)
-    if not val:
-        return False, None
-    email, exp = val
-    if exp <= now:
-        try:
-            _SESSION_STORE.pop(session_id, None)
-        except Exception:
-            pass
-        return False, None
-    return True, email
-
-async def _require_auth(request: web.Request) -> web.Response | None:
-    if not _ENABLE_GOOGLE_OAUTH:
-        return None
-    token = _extract_token_from_request(request)
-    if not token:
-        logging.info("Auth missing for request %s %s", request.method, request.path)
-        return web.json_response({"detail": "missing_bearer_token"}, status=401)
-    # First, accept server-side sessions (LF_SESSION cookie)
-    ok, email = await _verify_session(token)
-    if not ok:
-        # Fallback: treat token as an id_token and verify with Google
-        ok, email = await _verify_token_and_email(token)
-    if not ok:
-        logging.info("Auth failed for request %s %s (invalid token or forbidden)", request.method, request.path)
-        return web.json_response({"detail": "invalid_token_or_forbidden"}, status=401)
-    # attach email to request for downstream use
-    try:
-        request['google_oauth_email'] = email
-    except Exception:
-        setattr(request, 'google_oauth_email', email)
-    logging.info("Auth accepted for %s as %s on %s %s", email, request.remote, request.method, request.path)
-    return None
+# Authentication helpers moved to auth.py
 
 # Dev dotenv loader: load `.env` for local dev. The loader will run if either:
 #  - DEV_ENV=1 is already set in the environment, OR
@@ -198,149 +79,9 @@ ASSET_SEARCH_ROOTS = (
 WORKFLOW_STATIC_ROOTS = (RUNNER_CONFIG.runner_root,)
 WORKFLOW_HTML = RUNNER_CONFIG.workflow_html
 
-# region Helpers
-
-def _make_run_payload(
-    *,
-    detail: str = "",
-    error_message: str | None = None,
-    error_input: str | None = None,
-    history: Dict[str, Any] | None = None,
-    preferred_output: str | None = None,
-) -> Dict[str, Any]:
-    """
-    Build a response payload compatible with the frontend's WorkflowAPIRunPayload:
-
-    {
-      "detail": string,
-      "error": { "message": string, "input": string | undefined },
-      "history": { outputs?: {...} },
-      "preferred_output": string | undefined
-    }
-    """
-    payload: Dict[str, Any] = {"detail": detail or ""}
-    if error_message is not None:
-        payload["error"] = {"message": str(error_message)}
-        if error_input:
-            payload["error"]["input"] = str(error_input)
-
-    payload["history"] = history or {"outputs": {}}
-    if preferred_output is not None:
-        payload["preferred_output"] = preferred_output
-
-    return {"message": detail or "", "payload": payload, "status": "error" if error_message else "ready"}
-
-def _sanitize_history(entry: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Sanitize a single history entry for safe JSON serialization.
-    The function returns a dictionary containing only the "status", "outputs",
-    and "prompt" keys, each passed through `_json_safe` so nested values remain
-    JSON-serializable while preserving the original key names.
-    """
-    outputs = entry.get("outputs", {}) or {}
-    safe_outputs = {}
-    for node_id, node_out in outputs.items():
-        try:
-            safe_outputs[str(node_id)] = json_safe(node_out)
-        except Exception:
-            safe_outputs[str(node_id)] = node_out
-
-    return {
-        "status": json_safe(entry.get("status")),
-        "outputs": json_safe(safe_outputs),
-        "prompt": json_safe(entry.get("prompt")),
-    }
-def _sanitize_rel_path(raw_path: str) -> Optional[Path]:
-    """Sanitizes a relative path to prevent directory traversal and ensure safety.
-
-    This function normalizes the input path by converting backslashes to forward slashes,
-    checks for potentially unsafe elements like ".." or paths starting with "/", and
-    constructs a Path object from valid parts if the path is deemed safe.
-
-    Args:
-        raw_path (str): The raw path string to be sanitized.
-
-    Returns:
-        Optional[Path]: A Path object representing the sanitized relative path if valid,
-        or None if the path contains unsafe elements (e.g., ".." or absolute path indicators).
-    """
-    normalized = raw_path.replace("\\", "/")
-    if ".." in normalized or normalized.startswith("/"):
-        return None
-    parts = [part for part in normalized.split("/") if part]
-    return Path(*parts)
-
-def _serve_first_existing(paths: Iterable[Path]) -> Optional[web.FileResponse]:
-    """
-    Serves the first existing file from a list of candidate paths.
-
-    This function iterates through the provided paths and returns a web.FileResponse
-    for the first path that exists and is a file. If no such path is found, it returns None.
-
-    Args:
-        paths (Iterable[Path]): An iterable of Path objects to check for existence and file status.
-
-    Returns:
-        Optional[web.FileResponse]: A FileResponse for the first existing file, or None if no file is found.
-    """
-    for candidate in paths:
-        if candidate.exists() and candidate.is_file():
-            return web.FileResponse(str(candidate))
-    return None
-
-def _serve_static(
-    request: web.Request,
-    *,
-    roots: Iterable[Path],
-    prefix: Optional[str] = None,
-    not_found_text: str = 'Not found',
-    log_context: str = 'static asset',
-    log_errors: bool = True,
-) -> web.Response:
-    raw_path = request.match_info.get('path', '')
-    if prefix and not raw_path.startswith(prefix):
-        return web.Response(status=404, text=not_found_text)
-
-    rel_path = _sanitize_rel_path(raw_path)
-    if rel_path is None:
-        return web.Response(status=400, text='Invalid path')
-
-    try:
-        response = _serve_first_existing(root / rel_path for root in roots)
-        if response is not None:
-            return response
-    except Exception:
-        if log_errors:
-            logging.exception('Error while attempting to serve %s: %s', log_context, request.path)
-        return web.Response(status=404, text=not_found_text)
-
-    return web.Response(status=404, text=not_found_text)
-
-async def _wait_for_completion(prompt_id: str, timeout_seconds: float | None = None) -> Dict[str, Any]:
-    """
-    Poll the prompt queue history until the prompt either completes, fails,
-    or the timeout is reached.
-    """
-    queue = PromptServer.instance.prompt_queue
-    start = time.perf_counter()
-    deadline = start + timeout_seconds if timeout_seconds and timeout_seconds > 0 else None
-
-    while True:
-        history = queue.get_history(prompt_id=prompt_id)
-        if prompt_id in history:
-            entry = history[prompt_id]
-            status = entry.get("status") or {}
-            if status.get("completed") is True or status.get("status_str") == "error":
-                return entry
-            if entry.get("outputs"):
-                # Some nodes don't populate status but still produce outputs.
-                return entry
-
-        if deadline is not None and time.perf_counter() >= deadline:
-            raise TimeoutError(f"Prompt {prompt_id} did not finish within {timeout_seconds} seconds.")
-
-        await asyncio.sleep(0.35)
-# endregion
+# Helpers moved to smaller modules:
+from .helpers import _emit_run_progress
+from .assets import _serve_first_existing
 
 
 # Catch-all protections: deny any other API paths not explicitly handled.
@@ -522,12 +263,11 @@ async def route_workflow_runner_verify(request: web.Request) -> web.Response:
         return web.json_response({"detail": "invalid_token_or_forbidden"}, status=401)
 
     # Create a server-side session and set an opaque session cookie (LF_SESSION).
-    session_id = uuid.uuid4().hex
-    expires_at = _time.time() + _SESSION_TTL
     try:
-        _SESSION_STORE[session_id] = (email, expires_at)
+        session_id, expires_at = create_server_session(email)
     except Exception:
         logging.exception("Failed to create session in store")
+        return web.json_response({"detail": "server_error"}, status=500)
         return web.json_response({"detail": "server_error"}, status=500)
 
     resp = web.json_response({"detail": "ok"})
@@ -564,9 +304,11 @@ async def route_workflow_runner_debug_login(request: web.Request) -> web.Respons
     except Exception:
         return web.json_response({"detail": "invalid_json"}, status=400)
     email = (body.get("email") or "test@example.com").lower()
-    session_id = uuid.uuid4().hex
-    expires_at = _time.time() + _SESSION_TTL
-    _SESSION_STORE[session_id] = (email, expires_at)
+    try:
+        session_id, expires_at = create_server_session(email)
+    except Exception:
+        logging.exception("Failed to create debug session in store")
+        return web.json_response({"detail": "server_error"}, status=500)
     resp = web.json_response({"detail": "ok", "email": email})
     try:
         resp.set_cookie("LF_SESSION", session_id, max_age=_SESSION_TTL, httponly=True, samesite="Lax", secure=True)
@@ -659,55 +401,7 @@ async def route_run_status(request: web.Request) -> web.Response:
     return web.json_response(payload)
 # endregion
 
-# region Static assets
-@PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/static/{{path:.*}}")
-async def route_static_asset(request: web.Request) -> web.Response:
-    # require auth for static assets (the UI will send the auth cookie)
-    if _ENABLE_GOOGLE_OAUTH:
-        auth_resp = await _require_auth(request)
-        if isinstance(auth_resp, web.Response):
-            return auth_resp
-
-    return _serve_static(
-        request,
-        roots=ASSET_SEARCH_ROOTS,
-        prefix='assets/',
-        log_context='static asset',
-    )
-# endregion
-
-# region Static JS
-@PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/js/{{path:.*}}")
-async def route_static_js(request: web.Request) -> web.Response:
-    # require auth for shared JS assets
-    if _ENABLE_GOOGLE_OAUTH:
-        auth_resp = await _require_auth(request)
-        if isinstance(auth_resp, web.Response):
-            return auth_resp
-
-    return _serve_static(
-        request,
-        roots=(SHARED_JS_ROOT,),
-        log_context='shared JS asset',
-    )
-# endregion
-
-# region Workflow static
-@PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/static-workflow-runner/{'{path:.*}'}")
-async def route_static_workflow(request: web.Request) -> web.Response:
-    # require auth for workflow-runner static assets
-    if _ENABLE_GOOGLE_OAUTH:
-        auth_resp = await _require_auth(request)
-        if isinstance(auth_resp, web.Response):
-            return auth_resp
-
-    return _serve_static(
-        request,
-        roots=WORKFLOW_STATIC_ROOTS,
-        log_context='workflow runner asset',
-        log_errors=False,
-    )
-# endregion
+# Static asset routes moved to assets.py
 
 # region List workflows
 @PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/workflows")
