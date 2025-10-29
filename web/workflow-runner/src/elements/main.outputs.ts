@@ -1,11 +1,16 @@
-﻿import { LfDataCell, LfDataDataset, LfThemeUIState } from '@lf-widgets/foundations/dist';
+﻿import {
+  LfDataCell,
+  LfDataCellContainer,
+  LfDataDataset,
+  LfThemeUIState,
+} from '@lf-widgets/foundations/dist';
 import { getLfFramework } from '@lf-widgets/framework';
 import { buttonHandler } from '../handlers/button';
 import { masonryHandler } from '../handlers/masonry';
 import { WorkflowNodeResultPayload, WorkflowNodeResults, WorkflowRunStatus } from '../types/api';
 import { WorkflowSectionController } from '../types/section';
 import { WorkflowRunEntry, WorkflowStore } from '../types/state';
-import { formatTimestamp } from '../utils/common';
+import { formatStatus, formatTimestamp, summarizeDetail } from '../utils/common';
 import { DEBUG_MESSAGES } from '../utils/constants';
 import { debugLog } from '../utils/debug';
 import { MAIN_CLASSES } from './layout.main';
@@ -194,45 +199,47 @@ const _getUiState = (status: WorkflowRunStatus): LfThemeUIState => {
 };
 const _itemCardCell = (run: WorkflowRunEntry) => {
   const { createdAt, error, httpStatus, runId, status, updatedAt, workflowName } = run;
+  const errorSummary = summarizeDetail(error);
+  const detailLines: string[] = [
+    `Created at: ${formatTimestamp(createdAt)}`,
+    `Last updated: ${formatTimestamp(updatedAt)}`,
+  ];
+  if (errorSummary) {
+    detailLines.push('', `Error: ${errorSummary}`);
+  }
+  if (httpStatus !== null && httpStatus !== undefined) {
+    detailLines.push(`HTTP Status: ${httpStatus}`);
+  }
+
+  const cells: LfDataCellContainer = {
+    '1': {
+      value: workflowName || 'Workflow run',
+    },
+    '2': {
+      value: `Run ID: ${runId}`,
+    },
+    '3': {
+      value: detailLines.join('\n').trim(),
+    },
+    lfButton: {
+      shape: 'button',
+      value: '',
+      lfIcon: _getLfIcon(status),
+      lfLabel: formatStatus(status),
+      lfStyling: 'flat',
+      lfUiState: _getUiState(status),
+    },
+    lfImage: {
+      shape: 'image',
+      value: _getFirstOutputImageUrl(run.outputs),
+    },
+  };
+
   const lfCard: LfDataCell<'card'> = {
     lfDataset: {
       nodes: [
         {
-          cells: {
-            '1': {
-              value: workflowName,
-            },
-            '2': {
-              value: `Run ID: ${runId}`,
-            },
-            '3': {
-              value: `
-Created at: ${formatTimestamp(createdAt)}
-Last updated: ${formatTimestamp(updatedAt)}
-
-${
-  error
-    ? `
-Error: ${error} 
-HTTP Status: ${httpStatus ?? 'N/A'}
-`
-    : ''
-}
-              `,
-            },
-            lfButton: {
-              shape: 'button',
-              value: '',
-              lfIcon: _getLfIcon(status),
-              lfLabel: status,
-              lfStyling: 'flat',
-              lfUiState: _getUiState(status),
-            },
-            lfImage: {
-              shape: 'image',
-              value: _getFirstOutputImageUrl(run.outputs),
-            },
-          },
+          cells,
           description: `Output results for run ${runId}`,
           id: `${runId}`,
         },

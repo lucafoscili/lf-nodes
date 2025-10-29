@@ -49,9 +49,10 @@ const _createDataset = (workflows: WorkflowAPIDataset) => {
   return dataset;
 };
 const _getIcon = (category: string) => {
-  const { alertTriangle, codeCircle2, json } = getLfFramework().theme.get.icons();
+  const { alertTriangle, codeCircle2, json, robot } = getLfFramework().theme.get.icons();
   const category_icons = {
     JSON: json,
+    LLM: robot,
     SVG: codeCircle2,
   };
 

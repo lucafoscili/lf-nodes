@@ -25,22 +25,32 @@ const _collectInputs = async (store: WorkflowStore): Promise<Record<string, unkn
   for (const cell of cells) {
     const id = cell.id || '';
     _setCellStatus(store, id);
-    const value: unknown = await cell.getValue();
 
     switch (cell.tagName.toLowerCase()) {
-      case 'lf-toggle':
+      case 'lf-chat': {
+        const value = (cell as HTMLLfChatElement).lfValue;
+        inputs[id] = JSON.stringify(value);
+        break;
+      }
+      case 'lf-toggle': {
+        const value = await (cell as HTMLLfToggleElement).getValue();
         inputs[id] = value === 'off' ? false : true;
         break;
-      case 'lf-upload':
+      }
+      case 'lf-upload': {
         try {
+          const value = await (cell as HTMLLfUploadElement).getValue();
           inputs[id] = await _handleUploadCell(store, value);
         } catch (error) {
           _setCellStatus(store, id, 'error');
           throw error;
         }
         break;
-      default:
+      }
+      default: {
+        const value = await (cell as HTMLLfTextfieldElement).getValue();
         inputs[id] = value;
+      }
     }
   }
 

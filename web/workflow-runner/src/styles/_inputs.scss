@@ -11,9 +11,9 @@
   }
 
   &__options {
-    display: flex;
-    flex-direction: column;
+    display: grid;
     gap: 1.5em;
+    grid-template-columns: 1fr;
     padding: 1.25em;
   }
 

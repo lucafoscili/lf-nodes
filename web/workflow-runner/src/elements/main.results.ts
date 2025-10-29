@@ -2,10 +2,10 @@
 import { buttonHandler } from '../handlers/button';
 import { WorkflowSectionController } from '../types/section';
 import { WorkflowRunEntry, WorkflowStore } from '../types/state';
-import { clearChildren, deepMerge, formatStatus, formatTimestamp } from '../utils/common';
+import { clearChildren, deepMerge, formatStatus, formatTimestamp, stringifyDetail, summarizeDetail } from '../utils/common';
 import { DEBUG_MESSAGES } from '../utils/constants';
 import { debugLog } from '../utils/debug';
-import { createOutputComponent } from './components';
+import { createComponent, createOutputComponent } from './components';
 import { MAIN_CLASSES } from './layout.main';
 
 //#region CSS Classes
@@ -177,10 +177,40 @@ export const createResultsSection = (store: WorkflowStore): WorkflowSectionContr
     if (nodeIds.length === 0) {
       const empty = document.createElement('p');
       empty.className = RESULTS_CLASSES.empty;
-      empty.textContent = selectedRun
-        ? 'This run has not produced any outputs yet.'
-        : 'Select a run to inspect its outputs.';
+      const summary = summarizeDetail(selectedRun?.error ?? null);
+      if (selectedRun) {
+        empty.textContent = summary
+          ? `This run has not produced any outputs yet. ${summary}`
+          : 'This run has not produced any outputs yet.';
+      } else {
+        empty.textContent = 'Select a run to inspect its outputs.';
+      }
       element.appendChild(empty);
+
+      const appendCodeBlock = (label: string, content: string | null) => {
+        if (!content) {
+          return;
+        }
+        const wrapper = document.createElement('div');
+        wrapper.className = RESULTS_CLASSES.item;
+        const heading = document.createElement('h4');
+        heading.className = RESULTS_CLASSES.title;
+        heading.textContent = label;
+        wrapper.appendChild(heading);
+        const code = createComponent.code({
+          lfLanguage: 'json',
+          lfValue: content,
+        });
+        wrapper.appendChild(code);
+        element.appendChild(wrapper);
+      };
+
+      appendCodeBlock('Error detail', stringifyDetail(selectedRun?.error ?? null));
+      appendCodeBlock(
+        'Run payload',
+        stringifyDetail(selectedRun?.resultPayload?.body ?? selectedRun?.resultPayload ?? null),
+      );
+
       return;
     }
 
@@ -223,3 +253,5 @@ export const createResultsSection = (store: WorkflowStore): WorkflowSectionContr
   };
 };
 //#endregion
+
+

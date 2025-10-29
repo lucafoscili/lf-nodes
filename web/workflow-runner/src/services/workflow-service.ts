@@ -71,11 +71,15 @@ export const runWorkflow = async (payload: WorkflowRunRequestPayload): Promise<s
     body: JSON.stringify(payload),
   });
 
-  const data = (await syntax.json.parse(response)) as WorkflowAPIResponse | { run_id?: string } | null;
+  const data = (await syntax.json.parse(response)) as
+    | WorkflowAPIResponse
+    | { run_id?: string }
+    | null;
 
   if (!response.ok || !data) {
     const payloadData =
-      (data as WorkflowAPIResponse | null)?.payload || ({ detail: response.statusText } as WorkflowAPIRunPayload);
+      (data as WorkflowAPIResponse | null)?.payload ||
+      ({ detail: response.statusText } as WorkflowAPIRunPayload);
     const detail = payloadData?.detail || response.statusText;
     throw new WorkflowApiError(`${RUN_GENERIC} (${detail})`, {
       payload: payloadData,
@@ -101,7 +105,14 @@ export const getRunStatus = async (runId: string): Promise<WorkflowRunStatusResp
   const data = (await syntax.json.parse(response)) as WorkflowRunStatusResponse | null;
 
   if (!response.ok || !data) {
-    const detail = data?.error || response.statusText || runId;
+    const detail =
+      (typeof data?.error === 'string' && data.error) ||
+      (typeof data?.result?.body?.payload?.detail === 'string' &&
+        data.result.body.payload.detail) ||
+      (data?.result?.body?.payload
+        ? JSON.stringify(data.result.body.payload)
+        : response.statusText) ||
+      runId;
     throw new WorkflowApiError(`${RUN_GENERIC} (${detail})`, {
       payload: data ?? undefined,
       status: response.status,

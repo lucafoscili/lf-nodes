@@ -83,11 +83,20 @@ export const createRunLifecycle = ({
   const handleRunFailure = (response: WorkflowRunStatusResponse) => {
     const payload = response.result?.body?.payload;
     const runId = response.run_id;
+    const rawDetail =
+      payload?.detail ?? payload?.error?.message ?? response.error ?? STATUS_MESSAGES.ERROR_RUNNING_WORKFLOW;
     const detail =
-      payload?.detail ||
-      payload?.error?.message ||
-      response.error ||
-      STATUS_MESSAGES.ERROR_RUNNING_WORKFLOW;
+      typeof rawDetail === 'string'
+        ? rawDetail
+        : rawDetail
+        ? (() => {
+            try {
+              return JSON.stringify(rawDetail);
+            } catch {
+              return String(rawDetail);
+            }
+          })()
+        : STATUS_MESSAGES.ERROR_RUNNING_WORKFLOW;
     const outputs = _extractRunOutputs(response);
     const now = Date.now();
     const hasInputError = Boolean(payload?.error?.input);

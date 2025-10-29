@@ -57,10 +57,10 @@ export type WorkflowCellType = WorkflowCellInputId | WorkflowCellOutputId;
 export interface WorkflowCellInput extends WorkflowCellBase {
   props?: Partial<
     LfComponentPropsFor<
-      'LfButton' | 'LfCode' | 'LfMasonry' | 'LfTextfield' | 'LfToggle' | 'LfUpload'
+      'LfButton' | 'LfChat' | 'LfCode' | 'LfMasonry' | 'LfTextfield' | 'LfToggle' | 'LfUpload'
     >
   >;
-  shape?: 'textfield' | 'toggle' | 'upload';
+  shape?: 'chat' | 'textfield' | 'toggle' | 'upload';
 }
 export interface WorkflowCellsInputContainer {
   [index: string]: WorkflowCellInput;

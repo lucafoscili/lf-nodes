@@ -2,6 +2,7 @@
 export type WorkflowMainSections = 'inputs' | 'outputs' | 'results';
 export type WorkflowUICell =
   | HTMLLfButtonElement
+  | HTMLLfChatElement
   | HTMLLfTextfieldElement
   | HTMLLfToggleElement
   | HTMLLfUploadElement;

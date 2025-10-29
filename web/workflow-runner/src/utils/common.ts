@@ -102,6 +102,79 @@ export const formatTimestamp = (timestamp: number) => {
   }
   return date.toLocaleString();
 };
+const _tryParseJson = (value: string) => {
+  try {
+    return JSON.parse(value);
+  } catch {
+    return null;
+  }
+};
+export const stringifyDetail = (value: unknown): string | null => {
+  if (value === null || value === undefined) {
+    return null;
+  }
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    if (!trimmed) {
+      return null;
+    }
+    const parsed = _tryParseJson(trimmed);
+    if (parsed !== null) {
+      try {
+        return JSON.stringify(parsed, null, 2);
+      } catch {
+        return trimmed;
+      }
+    }
+    return trimmed;
+  }
+  try {
+    return JSON.stringify(value, null, 2);
+  } catch {
+    return String(value);
+  }
+};
+export const summarizeDetail = (value: unknown): string | null => {
+  if (value === null || value === undefined) {
+    return null;
+  }
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    if (!trimmed) {
+      return null;
+    }
+    const parsed = _tryParseJson(trimmed);
+    if (parsed && typeof parsed === 'object') {
+      const message = (parsed as { message?: unknown }).message;
+      if (typeof message === 'string' && message.trim()) {
+        return message.trim();
+      }
+      const detail = (parsed as { detail?: unknown }).detail;
+      if (typeof detail === 'string' && detail.trim()) {
+        return detail.trim();
+      }
+      return JSON.stringify(parsed);
+    }
+    return trimmed;
+  }
+  if (typeof value === 'object') {
+    const message = (value as { message?: unknown }).message;
+    if (typeof message === 'string' && message.trim()) {
+      return message.trim();
+    }
+    const detail = (value as { detail?: unknown }).detail;
+    if (typeof detail === 'string' && detail.trim()) {
+      return detail.trim();
+    }
+    try {
+      const str = JSON.stringify(value);
+      return str.length > 200 ? `${str.slice(0, 197)}...` : str;
+    } catch {
+      return '[object Object]';
+    }
+  }
+  return String(value);
+};
 //#endregion
 
 //#region Upload
