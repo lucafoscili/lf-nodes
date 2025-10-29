@@ -21,6 +21,16 @@ import base64
 import asyncio
 import time as _time
 
+# Executor helpers (moved out of routes.py)
+from .services.executor import (
+    execute_workflow,
+    _prepare_workflow_execution,
+    _make_run_payload,
+    _sanitize_history,
+    _wait_for_completion,
+    WorkflowPreparationError,
+)
+
 # Dev dotenv loader: load `.env` for local dev. The loader will run if either:
 #  - DEV_ENV=1 is already set in the environment, OR
 #  - a .env file exists next to this module (convenience for local dev).
@@ -92,22 +102,8 @@ async def _verify_token_and_email(id_token: str) -> tuple[bool, str | None]:
         return False, None
 
     email = (claims.get("email") or "").lower()
-    if not email:
-        return False, None
-
-    # if allowed list provided, check membership
-    if _ALLOWED_USERS and email not in _ALLOWED_USERS:
-        return False, None
-
-    # if configured to require an allowlist but none is provided, reject until configured
-    if _REQUIRE_ALLOWED_USERS and not _ALLOWED_USERS:
-        logging.info("Login rejected: REQUIRE_ALLOWED_USERS set but no allowed users configured")
-        return False, None
-
-    # cache for short time
-    exp = now + _TOKEN_CACHE_TTL
-    _TOKEN_CACHE[id_token] = (email, exp)
     return True, email
+
 
 def _extract_token_from_request(request: web.Request) -> str | None:
     # Authorization header
@@ -381,155 +377,27 @@ def _emit_run_progress(run_id: str, message: str, **extra: Any) -> None:
         logging.exception("Failed to send progress event for run %s", run_id)
 
 
-class WorkflowPreparationError(Exception):
-    """
-    Raised when a workflow request fails basic preparation/validation before queueing.
-    Carries the response body and HTTP status code to bubble the failure upstream.
-    """
-
-    def __init__(self, response_body: Dict[str, Any], status: int) -> None:
-        super().__init__(response_body.get("detail") or "Workflow preparation failed.")
-        self.response_body = response_body
-        self.status = status
-
-
-def _prepare_workflow_execution(payload: Dict[str, Any]) -> Tuple[WorkflowNode, Dict[str, Any]]:
-    """
-    Perform synchronous validation for a workflow run request.
-
-    Ensures the workflow exists, inputs are well-formed, and the prompt can be configured.
-    Returns the workflow definition and configured prompt if successful.
-    """
-    inputs = payload.get("inputs", {})
-    if not isinstance(inputs, dict):
-        response = _make_run_payload(
-            detail="inputs must be an object",
-            error_message="invalid_inputs",
-        )
-        raise WorkflowPreparationError(response, 400)
-
-    workflow_id = payload.get("workflowId")
-    definition = get_workflow(workflow_id or "")
-    if definition is None:
-        response = _make_run_payload(
-            detail=f"No workflow found for id '{workflow_id}'.",
-            error_message="unknown_workflow",
-        )
-        raise WorkflowPreparationError(response, 404)
-
-    try:
-        prompt = definition.load_prompt()
-        definition.configure_prompt(prompt, inputs)
-    except FileNotFoundError as exc:
-        response = _make_run_payload(detail=str(exc), error_message="missing_source")
-        raise WorkflowPreparationError(response, 400) from exc
-    except InputValidationError as exc:
-        response = _make_run_payload(
-            detail=str(exc),
-            error_message="invalid_input",
-            error_input=getattr(exc, "input_name", None),
-        )
-        raise WorkflowPreparationError(response, 400) from exc
-    except ValueError as exc:
-        response = _make_run_payload(detail=str(exc), error_message="invalid_input")
-        raise WorkflowPreparationError(response, 400) from exc
-    except Exception as exc:
-        logging.exception("Failed to prepare workflow '%s': %s", workflow_id, exc)
-        response = _make_run_payload(detail=str(exc), error_message="configuration_failed")
-        raise WorkflowPreparationError(response, 500) from exc
-
-    return definition, prompt
-
-
-# region Workflow execution
-async def execute_workflow(
-    payload: Dict[str, Any],
-    run_id: str,
-    prepared: Tuple[WorkflowNode, Dict[str, Any]] | None = None,
-) -> Tuple[JobStatus, Dict[str, Any], int]:
-    try:
-        _, prompt = prepared or _prepare_workflow_execution(payload)
-    except WorkflowPreparationError as exc:
-        return JobStatus.FAILED, exc.response_body, exc.status
-
-    workflow_id = payload.get("workflowId")
-
-    prompt_id = payload.get("promptId") or uuid.uuid4().hex
-    validation = await execution.validate_prompt(prompt_id, prompt, None)
-    if not validation[0]:
-        response = _make_run_payload(
-            detail=validation[1],
-            error_message="validation_failed",
-            history={"outputs": {}, "node_errors": json_safe(validation[3])},
-        )
-        return JobStatus.FAILED, response, 400
-
-    server = PromptServer.instance
-    queue_number = server.number
-    server.number += 1
-
-    extra_data = {"lf_nodes": {"workflow_id": workflow_id, "run_id": run_id}}
-    extra_data.update(payload.get("extraData", {}))
-
-    server.prompt_queue.put((queue_number, prompt_id, prompt, extra_data, validation[2]))
-    _emit_run_progress(run_id, "workflow_queued", prompt_id=prompt_id)
-
-    try:
-        history_entry = await _wait_for_completion(prompt_id, RUNNER_CONFIG.prompt_timeout_seconds)
-    except TimeoutError as exc:
-        response = _make_run_payload(detail=str(exc), error_message="timeout")
-        return JobStatus.FAILED, response, 504
-
-    status = history_entry.get("status") or {}
-    status_str = status.get("status_str", "unknown")
-    http_status = 200 if status_str == "success" else 500
-
-    preferred_output = None
-    try:
-        outputs_in_history = set((history_entry.get("outputs") or {}).keys())
-        validated_outputs = (
-            validation[2] if isinstance(validation, (list, tuple)) and len(validation) > 2 else []
-        )
-        for output_name in validated_outputs:
-            if output_name in outputs_in_history:
-                preferred_output = output_name
-                break
-        if preferred_output is None:
-            for output_name, output_value in (history_entry.get("outputs") or {}).items():
-                try:
-                    if isinstance(output_value, dict) and (
-                        output_value.get("images") or output_value.get("lf_images")
-                    ):
-                        preferred_output = output_name
-                        break
-                except Exception:
-                    continue
-    except Exception:
-        preferred_output = None
-
-    sanitized = _sanitize_history(history_entry)
-    history_outputs = sanitized.get("outputs", {}) if isinstance(sanitized, dict) else {}
-    if status_str == "success":
-        response = _make_run_payload(
-            detail="success",
-            history={"outputs": history_outputs},
-            preferred_output=preferred_output,
-        )
-        return JobStatus.SUCCEEDED, response, http_status
-
-    response = _make_run_payload(
-        detail=status_str or "error",
-        error_message="execution_failed",
-        history={"outputs": history_outputs},
-        preferred_output=preferred_output,
-    )
-    return JobStatus.FAILED, response, http_status
-# endregion
+# Execution helpers have been moved to `services.executor`.
 
 # region Workflow runner page
 @PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/workflow-runner")
 async def route_workflow_runner_page(request: web.Request) -> web.Response:
     try:
+        # Lazily start background tasks (pruners) the first time the runner page
+        # is accessed so we don't run background work for users who never use it.
+        try:
+            from .services import background as _background
+            app = PromptServer.instance.app
+            try:
+                # schedule as a task on the server loop if available
+                PromptServer.instance.loop.create_task(_background.start_background_tasks(app))
+            except Exception:
+                # fallback: create a local asyncio task
+                asyncio.create_task(_background.start_background_tasks(app))
+        except Exception:
+            # best-effort only; don't fail the request if background startup fails
+            logging.debug("Background starter not available or failed to schedule")
+
         if _ENABLE_GOOGLE_OAUTH:
             token = _extract_token_from_request(request)
             if token:
@@ -878,56 +746,5 @@ async def route_get_workflow(request: web.Request) -> web.Response:
 # endregion
 
 
-# Background session prune task
-_SESSION_PRUNE_INTERVAL = int(os.environ.get("SESSION_PRUNE_INTERVAL_SECONDS", "60"))
-
-async def _session_pruner() -> None:
-    """Background task that periodically removes expired sessions from _SESSION_STORE."""
-    try:
-        while True:
-            try:
-                before = len(_SESSION_STORE)
-                _cleanup_expired_sessions()
-                after = len(_SESSION_STORE)
-                if before != after:
-                    logging.debug("Session pruner removed %d expired sessions", before - after)
-            except Exception:
-                logging.exception("Error while pruning sessions")
-            await asyncio.sleep(_SESSION_PRUNE_INTERVAL)
-    except asyncio.CancelledError:
-        logging.debug("Session pruner task cancelled")
-
-
-async def _start_session_pruner(app: web.Application) -> None:
-    """Start the session pruner background task and attach it to the app for lifecycle management."""
-    try:
-        if app.get("_session_pruner_task"):
-            return
-    except Exception:
-        pass
-    task = asyncio.create_task(_session_pruner())
-    app["_session_pruner_task"] = task
-    logging.info("Started session pruner task (interval=%s seconds)", _SESSION_PRUNE_INTERVAL)
-
-
-async def _stop_session_pruner(app: web.Application) -> None:
-    """Cancel the session pruner task on app cleanup."""
-    task = app.pop("_session_pruner_task", None)
-    if task is not None:
-        task.cancel()
-        try:
-            await task
-        except Exception:
-            pass
-        logging.info("Stopped session pruner task")
-
-
-# Register startup/cleanup handlers with the PromptServer app if available
-try:
-    app = PromptServer.instance.app
-    # attach handlers; duplicates are safe because aiohttp will call them once per registration
-    app.on_startup.append(_start_session_pruner)
-    app.on_cleanup.append(_stop_session_pruner)
-except Exception:
-    # If PromptServer.instance is not ready at import time, defer registration; nothing to do here.
-    logging.debug("PromptServer not available for session pruner registration at import time")
+# NOTE: session pruner implementation was moved to `services/background.py`.
+# Lifecycle is started on-demand when the workflow-runner page is first accessed.
