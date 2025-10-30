@@ -14,7 +14,7 @@ from server import PromptServer
 
 from ..job_manager import JobStatus, create_job, set_job_status
 from .executor import execute_workflow, _make_run_payload, _prepare_workflow_execution, WorkflowPreparationError
-from ..helpers import _emit_run_progress
+from ..utils.helpers import _emit_run_progress
 
 
 async def run_workflow(payload: Dict[str, Any]) -> Dict[str, Any]:

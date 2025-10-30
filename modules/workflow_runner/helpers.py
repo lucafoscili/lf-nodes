@@ -1,14 +1,11 @@
-import logging
-from typing import Any
+"""Compatibility shim.
 
-from server import PromptServer
+The helpers implementation has moved to `utils.helpers`. This file keeps a
+thin import shim so existing imports that reference
+`workflow_runner.helpers._emit_run_progress` continue to work during the
+refactor.
+"""
 
+from .utils.helpers import _emit_run_progress  # type: ignore
 
-def _emit_run_progress(run_id: str, message: str, **extra: Any) -> None:
-    payload = {"run_id": run_id, "message": message}
-    if extra:
-        payload.update(extra)
-    try:
-        PromptServer.instance.send_sync("lf-runner:progress", payload)
-    except Exception:
-        logging.exception("Failed to send progress event for run %s", run_id)
+__all__ = ["_emit_run_progress"]
