@@ -1,10 +1,9 @@
-import aiohttp
 import json
 import logging
 import os
 from time import time
 from urllib.parse import urlsplit
-from typing import Any, Dict, Iterable, Optional, Tuple
+from typing import Any, Dict, Optional, Tuple
 
 from aiohttp import web
 
@@ -37,31 +36,51 @@ SERVICES: Dict[str, Dict[str, Any]] = {
     },
 }
 
-
 def _read_secret(env_name: str, file_env_name: Optional[str] = None) -> Optional[str]:
+    # First, prefer an in-memory env var if present (unchanged behaviour)
     val = os.environ.get(env_name)
     if val:
         return val
+
+    # If a *_FILE env var was supplied, prefer the centralized Settings value
+    # (if present) for that file path, otherwise fall back to the raw env var.
     if file_env_name:
-        path = os.environ.get(file_env_name)
+        path = None
+        try:
+            # Import and read settings lazily to avoid import-time ordering issues
+            from ..config import get_settings
+
+            _settings_local = get_settings()
+            # If Settings defines an attribute matching the file env var name, use it
+            if hasattr(_settings_local, file_env_name):
+                path = getattr(_settings_local, file_env_name) or None
+        except Exception:
+            path = None
+
+        if not path:
+            path = os.environ.get(file_env_name)
+
         if path and os.path.exists(path):
             try:
                 with open(path, "r", encoding="utf-8") as fh:
                     return fh.read().strip()
             except Exception:
                 LOG.exception("Failed reading secret file %s", path)
-    return None
 
+    return None
 
 PROXY_SECRET = _read_secret("LF_PROXY_SECRET", "LF_PROXY_SECRET_FILE") or _read_secret("GEMINI_PROXY_SECRET", "GEMINI_PROXY_SECRET_FILE")
 PROXY_SECRET_HEADER = "X-LF-Proxy-Secret"
 _RATE_LIMIT_STORE: dict[tuple[str, str], dict] = {}
 
-DEFAULT_RATE_LIMIT = {
-    "requests": int(os.environ.get("PROXY_RATE_LIMIT_REQUESTS", "60")),
-    "window_seconds": int(os.environ.get("PROXY_RATE_LIMIT_WINDOW_SECONDS", "60")),
-}
+from ..config import get_settings
 
+_settings = get_settings()
+
+DEFAULT_RATE_LIMIT = {
+    "requests": int(_settings.PROXY_RATE_LIMIT_REQUESTS or 60),
+    "window_seconds": int(_settings.PROXY_RATE_LIMIT_WINDOW_SECONDS or 60),
+}
 
 def _get_client_id(request: web.Request) -> str:
     try:
@@ -75,7 +94,6 @@ def _get_client_id(request: web.Request) -> str:
     except Exception:
         pass
     return "unknown"
-
 
 def _check_rate_limit(client_id: str, service: str, cfg: dict) -> Tuple[bool, int]:
     svc_limit = cfg.get("rate_limit") if cfg else None
@@ -106,7 +124,6 @@ def _check_rate_limit(client_id: str, service: str, cfg: dict) -> Tuple[bool, in
 
     retry_after = int(limit["window_seconds"] - (now - entry.get("start", 0)))
     return False, retry_after
-
 
 def _build_upstream_and_headers(cfg: Dict[str, Any], body: Dict[str, Any], proxypath: Optional[str]) -> Tuple[str, Dict[str, str], int, Dict[str, Any]]:
     headers: Dict[str, str] = {}
@@ -236,6 +253,7 @@ def _build_upstream_and_headers(cfg: Dict[str, Any], body: Dict[str, Any], proxy
             forward_body = {k: v for k, v in body.items() if k != "path"}
 
     return upstream, headers, timeout, forward_body
+# endregion
 
 __all__ = [
     "SERVICES",

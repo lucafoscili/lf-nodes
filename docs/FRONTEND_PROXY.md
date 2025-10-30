@@ -18,7 +18,7 @@ This document describes the lightweight frontend proxy used to expose a very sma
 - Accepts incoming HTTP requests and only allows requests whose path starts with an allowed prefix (configured in `PROXY_ALLOWED_PREFIXES`).
 - Forwards the request to the configured backend URL (`COMFY_BACKEND_URL`), copying headers and preserving Host and X-Forwarded-* headers.
 - Returns the upstream response body, status code and relevant headers (e.g., Set-Cookie) to the client.
-- Optional debug mode (`PROXY_DEBUG`) returns upstream traceback text in 502 responses to help troubleshooting locally (do NOT enable in public production).
+- Optional debug mode (`WORKFLOW_RUNNER_DEBUG`) returns upstream traceback text in 502 responses to help troubleshooting locally (do NOT enable in public production).
 
 ## Configuration (env vars / config values)
 
@@ -27,7 +27,7 @@ Key values read by the proxy / routes module (see the code for defaults):
 - `PROXY_FRONTEND_PORT` — port the proxy listens on (e.g., 9188).
 - `COMFY_BACKEND_URL` — full URL of the local Comfy backend, e.g. `http://127.0.0.1:8188`.
 - `PROXY_ALLOWED_PREFIXES` — list/tuple of path prefixes that are permitted (deny-by-default). Examples added for workflow-runner: `/api/lf-nodes/workflow-runner`, `/queue`, `/api/lf-nodes/workflows`, `/api/lf-nodes/run`, `/view`, `/favicon.ico`.
-- `PROXY_DEBUG` — boolean flag, when enabled returns more upstream details for debugging.
+- `WORKFLOW_RUNNER_DEBUG` — boolean flag, when enabled returns more upstream details for debugging.
 
 The exact variable names and defaults live in `frontend_proxy.py` and `routes.py` — check those files when changing behavior.
 
@@ -46,7 +46,7 @@ If you set environment variables before running in PowerShell, use `setx` (persi
 ```powershell
 $env:COMFY_BACKEND_URL = 'http://127.0.0.1:8188'
 $env:PROXY_FRONTEND_PORT = '9188'
-$env:PROXY_DEBUG = '1'
+$env:WORKFLOW_RUNNER_DEBUG = '1'
 & "C:\Users\luca.foscili_smeup\Documents\GitHub\ComfyUI\.venv\Scripts\python.exe" .\modules\workflow_runner\frontend_proxy.py
 ```
 
@@ -66,7 +66,7 @@ Note: when using VS Code devtunnels (or other tunnels) make sure the tunnel term
   - Adding rate-limiting to the `/verify` token endpoint (per-IP and per-session sliding window).
   - Storing sessions in a persistent backend (Redis) and adding a background session prune job.
   - Using signed, short-lived download URLs if you need to expose `/view` outputs publicly.
-  - Turning off `PROXY_DEBUG` and any debug endpoints before making the service publicly accessible.
+  - Turning off `WORKFLOW_RUNNER_DEBUG` and any debug endpoints before making the service publicly accessible.
 
 ## Google OAuth (optional) — env vars and setup notes
 

@@ -1,20 +1,14 @@
-"""Lightweight Google ID token verification helper (moved into services).
-
-Copied from the original module; used by the auth service.
-"""
-from __future__ import annotations
-
-import os
-import logging
-from typing import Optional, Dict, List
-
 import aiohttp
+import logging
+import os
+
+from typing import Optional, Dict, List
 
 LOG = logging.getLogger(__name__)
 
 GOOGLE_TOKENINFO_URL = "https://oauth2.googleapis.com/tokeninfo"
 
-
+# region ID token verification
 async def verify_id_token_with_google(id_token: str, expected_audiences: Optional[List[str]] = None) -> Optional[Dict]:
     if not id_token:
         return None
@@ -50,8 +44,9 @@ async def verify_id_token_with_google(id_token: str, expected_audiences: Optiona
     except Exception as e:
         LOG.exception("Failed to verify id token with Google: %s", e)
         return None
+# endregion
 
-
+# region Allowed users loader
 def load_allowed_users_from_file(path: str) -> List[str]:
     try:
         if not path or not os.path.exists(path):
@@ -63,3 +58,4 @@ def load_allowed_users_from_file(path: str) -> List[str]:
     except Exception:
         LOG.exception("Failed to load allowed users file: %s", path)
         return []
+# endregion

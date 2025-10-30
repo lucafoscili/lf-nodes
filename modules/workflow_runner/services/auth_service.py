@@ -1,8 +1,7 @@
 import logging
-import os
 import time as _time
 import uuid
-from pathlib import Path
+
 from typing import Optional
 
 from aiohttp import web
@@ -10,42 +9,29 @@ from aiohttp import web
 from .google_oauth import verify_id_token_with_google, load_allowed_users_from_file
 from ..config import get_settings
 
-# Read canonical settings from central config
+# region Settings and globals
 _settings = get_settings()
 _ENABLE_GOOGLE_OAUTH = _settings.ENABLE_GOOGLE_OAUTH
 _GOOGLE_CLIENT_IDS = _settings.GOOGLE_CLIENT_IDS
-_WF_DEBUG = _settings.WF_DEBUG
-_ALLOWED_USERS_FILE = os.environ.get("ALLOWED_USERS_FILE", "")
-_ALLOWED_USERS_ENV = os.environ.get("ALLOWED_USERS", "")
+_ALLOWED_USERS_FILE = _settings.ALLOWED_USERS_FILE
+_ALLOWED_USERS_ENV_LIST = _settings.ALLOWED_USERS
+_TOKEN_CACHE: dict[str, tuple[str, float]] = {}
+_TOKEN_CACHE_TTL = int(_settings.GOOGLE_IDTOKEN_CACHE_SECONDS)
+_REQUIRE_ALLOWED_USERS = bool(_settings.REQUIRE_ALLOWED_USERS)
+_SESSION_STORE: dict[str, tuple[str, float]] = {}
+_SESSION_TTL = int(_settings.SESSION_TTL_SECONDS or _TOKEN_CACHE_TTL)
+_WF_DEBUG = bool(_settings.WORKFLOW_RUNNER_DEBUG)
 
 LOG = logging.getLogger(__name__)
-LOG.info(
-    "workflow-runner auth: ENABLE_GOOGLE_OAUTH=%s, GOOGLE_CLIENT_IDS=%s, WF_DEBUG=%s",
-    _ENABLE_GOOGLE_OAUTH,
-    _GOOGLE_CLIENT_IDS,
-    _WF_DEBUG,
-)
+# endregion
 
-# Simple in-memory token cache: id_token -> (email, expires_at)
-_TOKEN_CACHE: dict[str, tuple[str, float]] = {}
-_TOKEN_CACHE_TTL = int(os.environ.get("GOOGLE_IDTOKEN_CACHE_SECONDS", "300"))
-
-# Require explicit allowlist? If true and no allowed users are configured, logins will be denied.
-_REQUIRE_ALLOWED_USERS = os.environ.get("REQUIRE_ALLOWED_USERS", "1").lower() in ("1", "true", "yes")
-
-# Server-side sessions: session_id -> (email, expires_at)
-_SESSION_STORE: dict[str, tuple[str, float]] = {}
-_SESSION_TTL = int(os.environ.get("SESSION_TTL_SECONDS", str(_TOKEN_CACHE_TTL)))
-# Enable verbose debug for the workflow-runner verify handler
-_WF_DEBUG = os.environ.get("WORKFLOW_RUNNER_DEBUG", "0").lower() in ("1", "true", "yes")
-
-
+# region Helpers
 def _load_allowed_users() -> set:
     users = set()
     if _ALLOWED_USERS_FILE:
         users.update(load_allowed_users_from_file(_ALLOWED_USERS_FILE))
-    if _ALLOWED_USERS_ENV:
-        users.update(u.strip().lower() for u in _ALLOWED_USERS_ENV.split(",") if u.strip())
+    if _ALLOWED_USERS_ENV_LIST:
+        users.update(u.strip().lower() for u in _ALLOWED_USERS_ENV_LIST if u and u.strip())
     return users
 
 _ALLOWED_USERS = _load_allowed_users()
@@ -84,7 +70,6 @@ async def _verify_token_and_email(id_token: str) -> tuple[bool, Optional[str]]:
 
     return True, email
 
-
 def _extract_token_from_request(request: web.Request) -> Optional[str]:
     auth = request.headers.get("Authorization", "")
     if auth.startswith("Bearer "):
@@ -94,13 +79,11 @@ def _extract_token_from_request(request: web.Request) -> Optional[str]:
         return cookie
     return None
 
-
 def _cleanup_expired_sessions() -> None:
     now = _time.time()
     to_delete = [s for s, v in _SESSION_STORE.items() if v[1] <= now]
     for s in to_delete:
         _SESSION_STORE.pop(s, None)
-
 
 async def _verify_session(session_id: str) -> tuple[bool, Optional[str]]:
     if not session_id:
@@ -118,7 +101,6 @@ async def _verify_session(session_id: str) -> tuple[bool, Optional[str]]:
             pass
         return False, None
     return True, email
-
 
 async def _require_auth(request: web.Request) -> Optional[web.Response]:
     if not _ENABLE_GOOGLE_OAUTH:
@@ -139,14 +121,15 @@ async def _require_auth(request: web.Request) -> Optional[web.Response]:
         setattr(request, 'google_oauth_email', email)
     logging.info("Auth accepted for %s as %s on %s %s", email, request.remote, request.method, request.path)
     return None
+# endregion
 
-
+# region Session creation
 def create_server_session(email: str) -> tuple[str, float]:
     session_id = uuid.uuid4().hex
     expires_at = _time.time() + _SESSION_TTL
     _SESSION_STORE[session_id] = (email, expires_at)
     return session_id, expires_at
-
+# endregion
 
 __all__ = [
     "_ENABLE_GOOGLE_OAUTH",

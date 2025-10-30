@@ -1,10 +1,3 @@
-"""
-API controllers for the workflow_runner miniapp.
-
-These are thin adapters between the aiohttp request/response objects and the
-service layer. Keep them small: validate/deserialize input, call services,
-and translate exceptions into HTTP responses.
-"""
 import json
 import logging
 
@@ -219,12 +212,12 @@ async def verify_controller(request: web.Request) -> web.Response:
 async def debug_login_controller(request: web.Request) -> web.Response:
     """
     Asynchronous handler for the POST /workflow-runner/debug-login endpoint.
-    This endpoint is only available when the _WF_DEBUG flag is set to True.
-    It allows creating a test session for debugging purposes. The handler
-    parses the request body for an optional 'email' field, defaulting to
-    'test@example.com' if not provided. It then creates a server session
-    using the provided or default email and sets an LF_SESSION cookie in
-    the response.
+    This endpoint is only available when the `WORKFLOW_RUNNER_DEBUG` flag is
+    enabled (represented in-code as `_WF_DEBUG`). It allows creating a test
+    session for debugging purposes. The handler parses the request body for an
+    optional 'email' field, defaulting to 'test@example.com' if not provided.
+    It then creates a server session using the provided or default email and
+    sets an LF_SESSION cookie in the response.
 
     Parameters:
         request (web.Request): The incoming web request object containing
@@ -237,15 +230,10 @@ async def debug_login_controller(request: web.Request) -> web.Response:
             - On invalid JSON: {"detail": "invalid_json"} (400)
             - On session creation failure: {"detail": "server_error"} (500)
 
-    Raises:
-        None: Exceptions are caught and handled internally, returning
-        appropriate error responses.
-        
     Notes:
         - The LF_SESSION cookie is set with httponly=True, samesite="Lax",
           secure=True, and max_age=_SESSION_TTL.
-        - Any exceptions during session creation or cookie setting are
-          logged but do not prevent the response from being returned.
+        - Do NOT enable this flag in production environments.
     """
     if not _WF_DEBUG:
         return web.json_response({"detail": "not_enabled"}, status=404)

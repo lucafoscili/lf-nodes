@@ -1,7 +1,6 @@
 import asyncio
 import time
-import logging
-import os
+
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Dict, Optional
@@ -24,15 +23,15 @@ class Job:
 _jobs: Dict[str, Job] = {}
 _lock = asyncio.Lock()
 
-# NOTE: job pruner implementation is now in `services/background.py`.
-# Background lifecycle is started on-demand when the workflow-runner page is accessed.
-
+# region create
 async def create_job(job_id: str) -> Job:
     async with _lock:
         job = Job(id=job_id)
         _jobs[job_id] = job
         return job
+# endregion
 
+# region read/update/delete
 async def get_job(job_id: str) -> Optional[Job]:
     async with _lock:
         return _jobs.get(job_id)
@@ -63,6 +62,7 @@ async def list_jobs() -> Dict[str, Job]:
 async def remove_job(job_id: str) -> Optional[Job]:
     async with _lock:
         return _jobs.pop(job_id, None)
+# endregion
 
 __all__ = [
     "Job",
@@ -73,7 +73,3 @@ __all__ = [
     "remove_job",
     "set_job_status",
 ]
-
-# NOTE: job pruner registration is deferred and managed by
-# `services/background.py` to allow on-demand startup when the workflow-runner
-# app is actually used.

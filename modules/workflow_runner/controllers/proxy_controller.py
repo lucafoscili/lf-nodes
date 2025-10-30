@@ -9,7 +9,7 @@ from typing import Any, Dict, TYPE_CHECKING, cast
 
 from server import PromptServer
 
-from ..api_constants import API_ROUTE_PREFIX
+from ..config import API_ROUTE_PREFIX
 
 if TYPE_CHECKING:
     from ..services import proxy_service as proxy_service_typing

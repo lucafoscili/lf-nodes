@@ -1,14 +1,18 @@
 import asyncio
 import logging
-import os
 import time
 
 from typing import Any
 
+from ..config import get_settings
+
+_settings = get_settings()
+
+
 # region Pruner configuration
-_JOB_TTL_SECONDS = int(os.environ.get("JOB_TTL_SECONDS", "300"))
-_JOB_PRUNE_INTERVAL = int(os.environ.get("JOB_PRUNE_INTERVAL_SECONDS", "60"))
-_SESSION_PRUNE_INTERVAL = int(os.environ.get("SESSION_PRUNE_INTERVAL_SECONDS", "60"))
+_JOB_TTL_SECONDS = int(_settings.JOB_TTL_SECONDS or 300)
+_JOB_PRUNE_INTERVAL = int(_settings.JOB_PRUNE_INTERVAL_SECONDS or 60)
+_SESSION_PRUNE_INTERVAL = int(_settings.SESSION_PRUNE_INTERVAL_SECONDS or 60)
 # endregion
 
 # region Helpers

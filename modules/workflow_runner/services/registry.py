@@ -6,68 +6,19 @@ from typing import Any, Callable, Dict, Iterable, List
 
 from ...utils.helpers.conversion import json_safe
 
-
-# Custom exception for input-level validation failures. Carries the offending input name so
-# callers (the HTTP API) can map the problem back to the UI field to highlight.
+# region Exceptions
 class InputValidationError(ValueError):
     def __init__(self, input_name: str | None = None):
         super().__init__(f"Missing required input {input_name}.")
         self.input_name = input_name
+# endregion
 
-
-# region Dataset
-@dataclass
-class WorkflowCell:
-    id: str
-    node_id: str
-    shape: str = ""
-    value: str = ""
-    description: str = ""
-    props: Dict[str, Any] = field(default_factory=dict)
-
-    def to_dict(self) -> Dict[str, Any]:
-        data = {
-            "id": self.id,
-            "nodeId": self.node_id,
-            "shape": self.shape,
-        }
-        if self.props:
-            data["props"] = json_safe(self.props)
-        if self.value:
-            data["value"] = self.value
-        if self.description:
-            data["title"] = self.description
-
-        return json_safe(data)
-
-
-@dataclass
-class WorkflowNode:
-    id: str
-    value: str
-    description: str
-    inputs: Iterable[WorkflowCell]
-    outputs: Iterable[WorkflowCell]
-    configure_prompt: Callable[[Dict[str, Any], Dict[str, Any]], None]
-    workflow_path: Path
-    category: str
-
-    def load_prompt(self) -> Dict[str, Any]:
-        with self.workflow_path.open("r", encoding="utf-8") as workflow_file:
-            workflow_graph = json.load(workflow_file)
-        # Delegate to the conversion helper already available in utils
-        return _workflow_to_prompt(workflow_graph)
-
-    def cells_as_dict(self, input_output: str) -> Dict[str, Any]:
-        if input_output == "inputs":
-            return {cell.id: cell.to_dict() for cell in self.inputs}
-        elif input_output == "outputs":
-            return {cell.id: cell.to_dict() for cell in self.outputs}
-        return {}
-
-
-# region Workflow conversion
+# region Helpers
 def _workflow_to_prompt(workflow: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Convert a workflow graph (the format saved under user/default/workflows)
+    into the prompt dictionary expected by ComfyUI's execution queue.
+    """
     nodes_list = None
     if isinstance(workflow, dict) and "nodes" in workflow and isinstance(workflow.get("nodes"), list):
         nodes_list = workflow.get("nodes", [])
@@ -139,9 +90,57 @@ def _workflow_to_prompt(workflow: Dict[str, Any]) -> Dict[str, Any]:
         }
 
     return prompt
-
 # endregion
 
+# region Dataset
+@dataclass
+class WorkflowCell:
+    id: str
+    node_id: str
+    shape: str = ""
+    value: str = ""
+    description: str = ""
+    props: Dict[str, Any] = field(default_factory=dict)
+
+    def to_dict(self) -> Dict[str, Any]:
+        data = {
+            "id": self.id,
+            "nodeId": self.node_id,
+            "shape": self.shape,
+        }
+        if self.props:
+            data["props"] = json_safe(self.props)
+        if self.value:
+            data["value"] = self.value
+        if self.description:
+            data["title"] = self.description
+
+        return json_safe(data)
+
+@dataclass
+class WorkflowNode:
+    id: str
+    value: str
+    description: str
+    inputs: Iterable[WorkflowCell]
+    outputs: Iterable[WorkflowCell]
+    configure_prompt: Callable[[Dict[str, Any], Dict[str, Any]], None]
+    workflow_path: Path
+    category: str
+
+    def load_prompt(self) -> Dict[str, Any]:
+        with self.workflow_path.open("r", encoding="utf-8") as workflow_file:
+            workflow_graph = json.load(workflow_file)
+        # Delegate to the conversion helper already available in utils
+        return _workflow_to_prompt(workflow_graph)
+
+    def cells_as_dict(self, input_output: str) -> Dict[str, Any]:
+        if input_output == "inputs":
+            return {cell.id: cell.to_dict() for cell in self.inputs}
+        elif input_output == "outputs":
+            return {cell.id: cell.to_dict() for cell in self.outputs}
+        return {}
+# endregion
 
 # region Registry
 class WorkflowRegistry:
@@ -182,9 +181,7 @@ class WorkflowRegistry:
     def get(self, id: str) -> WorkflowNode | None:
         return self._definitions.get(id)
 
-
 REGISTRY = WorkflowRegistry()
-
 
 def _is_workflow_definition(definition: object) -> bool:
     if isinstance(definition, WorkflowNode):
@@ -203,7 +200,6 @@ def _is_workflow_definition(definition: object) -> bool:
 
     return all(hasattr(definition, attr) for attr in (*required_attrs, *required_methods))
 
-
 def _register_packaged_workflows() -> None:
     """
     Import workflow definitions located in the workflows subpackage and add them to the registry.
@@ -218,13 +214,8 @@ def _register_packaged_workflows() -> None:
                 f"Workflow definition '{definition!r}' is not compatible with WorkflowNode."
             )
         REGISTRY.register(definition)  # type: ignore[arg-type]
- 
 
-# Lazily register packaged workflows to avoid import-time cycles. Call
-# _ensure_registered() before any operation that requires the registry to be
-# populated.
 _registered = False
-
 
 def _ensure_registered() -> None:
     global _registered
@@ -236,9 +227,7 @@ def list_workflows() -> List[Dict[str, Any]]:
     _ensure_registered()
     return REGISTRY.list()
 
-
 def get_workflow(id: str) -> WorkflowNode | None:
     _ensure_registered()
     return REGISTRY.get(id)
-
 # endregion

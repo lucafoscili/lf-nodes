@@ -9,8 +9,7 @@ from pathlib import Path
 from server import PromptServer
 
 from .assets_controller import _serve_first_existing
-from ..api_constants import API_ROUTE_PREFIX
-from ..config import CONFIG as RUNNER_CONFIG
+from ..config import CONFIG as RUNNER_CONFIG, API_ROUTE_PREFIX
 from ..services.auth_service import (
     _ENABLE_GOOGLE_OAUTH,
     _GOOGLE_CLIENT_IDS,

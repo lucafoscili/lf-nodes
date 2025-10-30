@@ -5,7 +5,7 @@ from aiohttp import web
 
 from server import PromptServer
 
-from ..api_constants import API_ROUTE_PREFIX
+from ..config import API_ROUTE_PREFIX
 
 # region Helpers
 def _get_api_controllers():

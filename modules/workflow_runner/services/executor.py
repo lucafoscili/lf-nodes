@@ -1,19 +1,19 @@
 import asyncio
-import json
+import execution
 import logging
 import time
 import uuid
-from typing import Any, Dict, Tuple, Optional
 
-from aiohttp import web
+from typing import Any, Dict, Tuple
+
 from server import PromptServer
 
-from ..config import CONFIG as RUNNER_CONFIG
 from .job_store import JobStatus
 from .registry import InputValidationError, WorkflowNode, get_workflow, list_workflows
+from ..config import CONFIG as RUNNER_CONFIG
 from ...utils.helpers.conversion import json_safe
-import execution
 
+# region Exceptions
 class WorkflowPreparationError(Exception):
     """
     Raised when a workflow request fails basic preparation/validation before queueing.
@@ -24,7 +24,9 @@ class WorkflowPreparationError(Exception):
         super().__init__(response_body.get("detail") or "Workflow preparation failed.")
         self.response_body = response_body
         self.status = status
+# endregion
 
+# region Helpers
 def _make_run_payload(
     *,
     detail: str = "",
@@ -110,7 +112,9 @@ def _prepare_workflow_execution(payload: Dict[str, Any]) -> Tuple[WorkflowNode, 
         raise WorkflowPreparationError(response, 500) from exc
 
     return definition, prompt
+# endregion
 
+# region Execution
 async def execute_workflow(
     payload: Dict[str, Any], run_id: str, prepared: Tuple[WorkflowNode, Dict[str, Any]] | None = None
 ) -> Tuple[JobStatus, Dict[str, Any], int]:
@@ -173,6 +177,7 @@ async def execute_workflow(
 
     response = _make_run_payload(detail=status_str or "error", error_message="execution_failed", history={"outputs": history_outputs}, preferred_output=preferred_output)
     return JobStatus.FAILED, response, http_status
+# endregion
 
 __all__ = [
     "execute_workflow",

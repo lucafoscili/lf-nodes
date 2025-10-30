@@ -1,18 +1,12 @@
-"""Utility helpers moved from the module root into `utils` for SoC.
+"""Utility helpers for workflow-runner.
 
-This module provides small helpers used across the workflow_runner package.
+Note: the `_emit_run_progress` helper was moved into
+`services/run_service.py` where it's used. This module is kept as a
+placeholder for other small helpers and to avoid breaking imports.
 """
+
 import logging
 from typing import Any
 
-from server import PromptServer
-
-
-def _emit_run_progress(run_id: str, message: str, **extra: Any) -> None:
-    payload = {"run_id": run_id, "message": message}
-    if extra:
-        payload.update(extra)
-    try:
-        PromptServer.instance.send_sync("lf-runner:progress", payload)
-    except Exception:
-        logging.exception("Failed to send progress event for run %s", run_id)
+# Other helper functions may live here in future. The progress-emitting
+# helper is intentionally colocated with the run orchestration logic.

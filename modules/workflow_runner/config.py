@@ -41,6 +41,18 @@ def _list_env(key: str) -> List[str]:
         return []
     parts = [p.strip() for p in v.replace(";", ",").split(",") if p.strip()]
     return parts
+
+def _int_env(key: str, default: int) -> int:
+    v = os.environ.get(key)
+    if v is None:
+        return default
+    try:
+        return int(v)
+    except Exception:
+        return default
+
+def _str_env(key: str, default: str = "") -> str:
+    return os.environ.get(key, default)
 # endregion
 
 # region Settings
@@ -48,29 +60,54 @@ def _list_env(key: str) -> List[str]:
 class Settings:
     ENABLE_GOOGLE_OAUTH: bool
     GOOGLE_CLIENT_IDS: List[str]
-    WF_DEBUG: bool
-    # other settings can be added here
+    ALLOWED_USERS_FILE: str
+    ALLOWED_USERS: List[str]
+    REQUIRE_ALLOWED_USERS: bool
+    GOOGLE_IDTOKEN_CACHE_SECONDS: int
+    SESSION_TTL_SECONDS: int
+    WORKFLOW_RUNNER_DEBUG: bool
+    DEV_ENV: bool
+    PROXY_FRONTEND_PORT: int
+    COMFY_BACKEND_URL: str
+    LF_PROXY_SERVICE_FILE: str
+    KOBOLDCPP_BASE_FILE: str
+    GEMINI_API_KEY_FILE: str
+    OPENAI_API_KEY_FILE: str
+    PROXY_ALLOWED_PREFIXES: List[str]
+    PROXY_RATE_LIMIT_REQUESTS: int
+    PROXY_RATE_LIMIT_WINDOW_SECONDS: int
+    JOB_TTL_SECONDS: int
+    JOB_PRUNE_INTERVAL_SECONDS: int
+    SESSION_PRUNE_INTERVAL_SECONDS: int
 
 
-# Load local .env placed next to this file (dev convenience). Do not override real env vars.
 _pkg_root = Path(__file__).parent
 _maybe_load_dotenv(_pkg_root / ".env")
 
 
-# Compute settings once at import
 _SETTINGS = Settings(
     ENABLE_GOOGLE_OAUTH=_bool_env("ENABLE_GOOGLE_OAUTH", False),
     GOOGLE_CLIENT_IDS=_list_env("GOOGLE_CLIENT_IDS"),
-    WF_DEBUG=_bool_env("WF_DEBUG", False),
+    ALLOWED_USERS_FILE=_str_env("ALLOWED_USERS_FILE", ""),
+    ALLOWED_USERS=_list_env("ALLOWED_USERS"),
+    REQUIRE_ALLOWED_USERS=_bool_env("REQUIRE_ALLOWED_USERS", True),
+    GOOGLE_IDTOKEN_CACHE_SECONDS=_int_env("GOOGLE_IDTOKEN_CACHE_SECONDS", 300),
+    SESSION_TTL_SECONDS=_int_env("SESSION_TTL_SECONDS", _int_env("GOOGLE_IDTOKEN_CACHE_SECONDS", 300)),
+    WORKFLOW_RUNNER_DEBUG=_bool_env("WORKFLOW_RUNNER_DEBUG", False),
+    DEV_ENV=_bool_env("DEV_ENV", False),
+    PROXY_FRONTEND_PORT=_int_env("PROXY_FRONTEND_PORT", 0),
+    COMFY_BACKEND_URL=_str_env("COMFY_BACKEND_URL", ""),
+    LF_PROXY_SERVICE_FILE=_str_env("LF_PROXY_SERVICE_FILE", ""),
+    KOBOLDCPP_BASE_FILE=_str_env("KOBOLDCPP_BASE_FILE", ""),
+    GEMINI_API_KEY_FILE=_str_env("GEMINI_API_KEY_FILE", ""),
+    OPENAI_API_KEY_FILE=_str_env("OPENAI_API_KEY_FILE", ""),
+    PROXY_ALLOWED_PREFIXES=_list_env("PROXY_ALLOWED_PREFIXES"),
+    PROXY_RATE_LIMIT_REQUESTS=_int_env("PROXY_RATE_LIMIT_REQUESTS", 60),
+    PROXY_RATE_LIMIT_WINDOW_SECONDS=_int_env("PROXY_RATE_LIMIT_WINDOW_SECONDS", 60),
+    JOB_TTL_SECONDS=_int_env("JOB_TTL_SECONDS", 300),
+    JOB_PRUNE_INTERVAL_SECONDS=_int_env("JOB_PRUNE_INTERVAL_SECONDS", 60),
+    SESSION_PRUNE_INTERVAL_SECONDS=_int_env("SESSION_PRUNE_INTERVAL_SECONDS", 60),
 )
-
-_LOG.info(
-    "workflow-runner settings: ENABLE_GOOGLE_OAUTH=%s, GOOGLE_CLIENT_IDS=%s, WF_DEBUG=%s",
-    _SETTINGS.ENABLE_GOOGLE_OAUTH,
-    _SETTINGS.GOOGLE_CLIENT_IDS,
-    _SETTINGS.WF_DEBUG,
-)
-
 
 def get_settings() -> Settings:
     return _SETTINGS
@@ -80,6 +117,7 @@ import logging
 from dataclasses import dataclass
 from pathlib import Path
 
+API_ROUTE_PREFIX = "/lf-nodes" # Match the same in utils.constants
 MODULE_ROOT = Path(__file__).resolve().parents[2]
 CONFIG_PATH = MODULE_ROOT / "web" / "workflow-runner" / "src" / "runner.config.json"
 # endregion

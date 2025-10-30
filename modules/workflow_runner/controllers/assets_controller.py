@@ -7,8 +7,7 @@ from typing import Iterable, Optional
 
 from server import PromptServer
 
-from ..api_constants import API_ROUTE_PREFIX
-from ..config import CONFIG as RUNNER_CONFIG
+from ..config import CONFIG as RUNNER_CONFIG, API_ROUTE_PREFIX
 from ..services.auth_service import _ENABLE_GOOGLE_OAUTH, _require_auth
 
 # region Helpers

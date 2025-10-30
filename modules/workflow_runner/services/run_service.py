@@ -1,22 +1,26 @@
-"""Core orchestration for running workflows.
-
-This is a minimal stub. Over the refactor we'll migrate pieces from
-`handlers.py` (execute_workflow, preparation, payload handling) into here.
-"""
 import asyncio
-import uuid
 import logging
-from typing import Any, Dict
+import uuid
 
-from aiohttp import web
+from typing import Any, Dict
 
 from server import PromptServer
 
 from .job_store import JobStatus, create_job, set_job_status
 from .executor import execute_workflow, _make_run_payload, _prepare_workflow_execution, WorkflowPreparationError
-from ..utils.helpers import _emit_run_progress
 
+# region Helpers
+def _emit_run_progress(run_id: str, message: str, **extra: Any) -> None:
+    payload = {"run_id": run_id, "message": message}
+    if extra:
+        payload.update(extra)
+    try:
+        PromptServer.instance.send_sync("lf-runner:progress", payload)
+    except Exception:
+        logging.exception("Failed to send progress event for run %s", run_id)
+# endregion
 
+# region Run Workflow
 async def run_workflow(payload: Dict[str, Any]) -> Dict[str, Any]:
     """Orchestrate running a workflow payload.
 
@@ -24,11 +28,9 @@ async def run_workflow(payload: Dict[str, Any]) -> Dict[str, Any]:
     `handlers.route_run_workflow`: it creates a job, schedules the worker
     coroutine and returns a 202-like response containing the run_id.
     """
-    # Prepare payload validation and raise friendly errors as executor does
     try:
         prepared = _prepare_workflow_execution(payload)
     except WorkflowPreparationError as exc:
-        # Surface the preparation failure so controllers can map to a 4xx/5xx
         raise
 
     run_id = str(uuid.uuid4())
@@ -59,7 +61,7 @@ async def run_workflow(payload: Dict[str, Any]) -> Dict[str, Any]:
     try:
         PromptServer.instance.loop.create_task(worker())
     except Exception:
-        # fallback to top-level asyncio if PromptServer loop isn't available
         asyncio.create_task(worker())
 
     return {"run_id": run_id}
+# endregion
