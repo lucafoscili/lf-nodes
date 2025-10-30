@@ -8,7 +8,7 @@ from typing import Optional
 from aiohttp import web
 
 from .google_oauth import verify_id_token_with_google, load_allowed_users_from_file
-from lf_nodes.modules.workflow_runner.config import get_settings
+from ..config import get_settings
 
 # Read canonical settings from central config
 _settings = get_settings()
