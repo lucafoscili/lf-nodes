@@ -1,34 +1,11 @@
 import json
 from typing import Any, Dict, List
 
-# Import the shared json_safe helper from the top-level modules utils package.
-# Use the same three-dot relative import pattern used elsewhere in services.
-from importlib import util
-from pathlib import Path
-
-# Dynamically load the shared conversion helpers by file path. This avoids
-# ambiguous package-relative imports that can resolve to the local
-# `workflow_runner.utils` package (which doesn't contain `conversion`).
-_conv_path = (
-    Path(__file__).parent.parent.parent
-    / "utils"
-    / "helpers"
-    / "conversion"
-    / "json_safe.py"
-)
-if not _conv_path.exists():
-    # Fallback to the package-style module if the file layout differs.
-    try:
-        from ...utils.helpers.conversion import json_safe  # type: ignore
-    except Exception:
-        raise ImportError("Could not locate json_safe conversion helper")
-else:
-    spec = util.spec_from_file_location("workflow_runner._json_safe", str(_conv_path))
-    if spec is None or spec.loader is None:
-        raise ImportError("Could not load json_safe helper module")
-    _mod = util.module_from_spec(spec)
-    spec.loader.exec_module(_mod)
-    json_safe = getattr(_mod, "json_safe")
+# Import the canonical shared helper by absolute package path to avoid
+# ambiguity with a local `workflow_runner.utils` package that may exist
+# during refactor. The `lf_nodes` package is registered by the
+# `custom_nodes/lf-nodes/__init__.py` bootstrap during runtime.
+from ...utils.helpers.conversion import json_safe
 
 
 def _workflow_to_prompt(workflow: Dict[str, Any]) -> Dict[str, Any]:
