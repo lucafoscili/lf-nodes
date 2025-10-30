@@ -48,9 +48,7 @@ def _load_allowed_users() -> set:
         users.update(u.strip().lower() for u in _ALLOWED_USERS_ENV.split(",") if u.strip())
     return users
 
-
 _ALLOWED_USERS = _load_allowed_users()
-
 
 async def _verify_token_and_email(id_token: str) -> tuple[bool, Optional[str]]:
     if not id_token:
@@ -66,6 +64,24 @@ async def _verify_token_and_email(id_token: str) -> tuple[bool, Optional[str]]:
         return False, None
 
     email = (claims.get("email") or "").lower()
+    email_verified = claims.get("email_verified") in (True, "true", "True", "1", 1)
+    if not email or not email_verified:
+        LOG.warning("ID token missing or unverified email claim for token")
+        return False, None
+
+    if _REQUIRE_ALLOWED_USERS:
+        if not _ALLOWED_USERS:
+            LOG.warning("Require allowed users is set but no allowed users configured; denying login")
+            return False, None
+        if email.lower() not in _ALLOWED_USERS:
+            LOG.info("Email %s not in allowed users list", email)
+            return False, None
+
+    try:
+        _TOKEN_CACHE[id_token] = (email, now + _TOKEN_CACHE_TTL)
+    except Exception:
+        pass
+
     return True, email
 
 

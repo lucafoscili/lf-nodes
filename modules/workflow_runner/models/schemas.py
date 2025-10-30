@@ -1,4 +1,5 @@
-"""Simple request/response schemas for workflow_runner.
+"""
+Simple request/response schemas for workflow_runner.
 
 This module intentionally avoids external dependencies; use a lightweight
 dataclass-based schema for now. If the project prefers pydantic we can swap
@@ -7,7 +8,7 @@ to pydantic models later.
 from dataclasses import dataclass, field
 from typing import Any, Dict, Optional
 
-
+# region Workflow start
 @dataclass
 class StartWorkflowSchema:
     name: str
@@ -25,3 +26,4 @@ class StartWorkflowSchema:
             user=obj.get('user'),
             run_async=obj.get('run_async', True),
         )
+# endregion

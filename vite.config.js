@@ -16,6 +16,14 @@ export default defineConfig({
       input: {
         'js/lf-nodes': resolve(tempRoot, 'index.js'),
         'workflow-runner/js/workflow-runner': resolve(tempRoot, 'workflow-runner/index.js'),
+        'workflow-runner/js/bootstrap-login': resolve(
+          tempRoot,
+          'workflow-runner/bootstrap-login.js',
+        ),
+        'workflow-runner/js/bootstrap-not-found': resolve(
+          tempRoot,
+          'workflow-runner/bootstrap-not-found.js',
+        ),
       },
       external: ['/scripts/api.js', '/scripts/app.js'],
       output: {

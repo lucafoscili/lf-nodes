@@ -1,4 +1,5 @@
 import logging
+import re
 
 from aiohttp import web
 from pathlib import Path
@@ -56,7 +57,10 @@ def _serve_static(
 # region Static route
 @PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/static/{{path:.*}}")
 async def route_static_asset(request: web.Request) -> web.Response:
-    if _ENABLE_GOOGLE_OAUTH:
+    raw_path = request.match_info.get('path', '')
+    allow_public = raw_path.endswith('.woff') or raw_path.endswith('.woff2')
+
+    if _ENABLE_GOOGLE_OAUTH and not allow_public:
         auth_resp = await _require_auth(request)
         if isinstance(auth_resp, web.Response):
             return auth_resp
@@ -68,7 +72,15 @@ async def route_static_asset(request: web.Request) -> web.Response:
 # region Static JS route
 @PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/js/{{path:.*}}")
 async def route_static_js(request: web.Request) -> web.Response:
-    if _ENABLE_GOOGLE_OAUTH:
+    raw_path = request.match_info.get('path', '')
+    allow_public = False
+    try:
+        if re.match(r'^(lf-widgets|lf-).*\.js$', raw_path):
+            allow_public = True
+    except Exception:
+        allow_public = False
+
+    if _ENABLE_GOOGLE_OAUTH and not allow_public:
         auth_resp = await _require_auth(request)
         if isinstance(auth_resp, web.Response):
             return auth_resp
@@ -80,13 +92,51 @@ async def route_static_js(request: web.Request) -> web.Response:
 # region JS route
 @PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/static-workflow-runner/{{path:.*}}")
 async def route_static_workflow(request: web.Request) -> web.Response:
-    if _ENABLE_GOOGLE_OAUTH:
+    raw_path = request.match_info.get('path', '')
+    allow_public = False
+    try:
+        if raw_path.startswith('css/') or raw_path.endswith('.css'):
+            allow_public = True
+        elif re.match(r'^js/lf-widgets(?:-[^/]+)*\.js$', raw_path):
+            allow_public = True
+        elif raw_path in ('js/bootstrap-login.js', 'js/bootstrap-not-found.js'):
+            allow_public = True
+    except Exception:
+        allow_public = False
+
+    if _ENABLE_GOOGLE_OAUTH and not allow_public:
         auth_resp = await _require_auth(request)
         if isinstance(auth_resp, web.Response):
             return auth_resp
 
     roots = (RUNNER_CONFIG.runner_root,)
     return _serve_static(request, roots=roots, log_context='workflow runner asset', log_errors=False)
+# endregion
+
+# region Fonts route
+@PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/fonts/{{path:.*}}")
+async def route_fonts(request: web.Request) -> web.Response:
+    raw_path = request.match_info.get('path', '')
+    allow_public = raw_path.endswith('.woff') or raw_path.endswith('.woff2')
+
+    if _ENABLE_GOOGLE_OAUTH and not allow_public:
+        auth_resp = await _require_auth(request)
+        if isinstance(auth_resp, web.Response):
+            return auth_resp
+
+    rel_path = _sanitize_rel_path(raw_path)
+    if rel_path is None:
+        return web.Response(status=400, text='Invalid path')
+
+    try:
+        response = _serve_first_existing((RUNNER_CONFIG.deploy_root / 'assets' / 'fonts' / rel_path,))
+        if response is not None:
+            return response
+    except Exception:
+        logging.exception('Error while attempting to serve font: %s', request.path)
+        return web.Response(status=404, text='Not found')
+
+    return web.Response(status=404, text='Not found')
 # endregion
 
 __all__ = [
