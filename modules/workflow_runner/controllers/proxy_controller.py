@@ -8,7 +8,12 @@ from aiohttp import web
 
 from server import PromptServer
 import importlib
-from ...utils.constants import API_ROUTE_PREFIX
+"""Use a lightweight local API prefix to avoid importing heavy global
+constants at module import time. Keep this literal in sync with
+`utils.constants.API_ROUTE_PREFIX`.
+"""
+
+API_ROUTE_PREFIX = "/lf-nodes"
 
 # Import the services proxy module explicitly to avoid name shadowing with the
 # route handler function (the handler is named `proxy_service`). We import
