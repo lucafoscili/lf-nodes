@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        margin: 0;
+      }
+      .card {
+        padding: 24px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h2>Sign in to continue</h2>
+      <div
+        id="g_id_onload"
+        data-client_id="{CLIENT_ID}"
+        data-login_uri="{LOGIN_URI}"
+        data-auto_prompt="false"
+      ></div>
+      <div class="g_id_signin" data-type="standard" data-shape="rectangular"></div>
+      <p id="message"></p>
+    </div>
+    <script>
+      function handleCredentialResponse(response) {
+        var id_token = response.credential;
+        fetch('/api/lf-nodes/workflow-runner/verify', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id_token: id_token }),
+        })
+          .then(function (r) {
+            if (r.ok) {
+              setTimeout(function () {
+                window.location.href = window.location.origin + '/api/lf-nodes/workflow-runner';
+              }, 150);
+            } else {
+              r.json()
+                .then(function (j) {
+                  document.getElementById('message').innerText = j.detail || 'Login failed';
+                })
+                .catch(function () {
+                  document.getElementById('message').innerText = 'Login failed';
+                });
+            }
+          })
+          .catch(function (e) {
+            document.getElementById('message').innerText = 'Network error';
+          });
+      }
+      window.handleCredentialResponse = handleCredentialResponse;
+      window.onload = function () {
+        if (window.google && google.accounts && google.accounts.id) {
+          google.accounts.id.initialize({
+            client_id: '{CLIENT_ID}',
+            callback: handleCredentialResponse,
+          });
+          google.accounts.id.renderButton(document.querySelector('.g_id_signin'), {
+            theme: 'outline',
+            size: 'large',
+          });
+        } else {
+          document.getElementById('message').innerText = 'Google Identity SDK not available.';
+        }
+      };
+    </script>
+  </body>
+</html>

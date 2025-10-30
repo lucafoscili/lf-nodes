@@ -7,9 +7,10 @@ from typing import List
 
 _LOG = logging.getLogger(__name__)
 
-
+# region Helpers
 def _maybe_load_dotenv(path: Path) -> None:
-    """Load a simple .env file into os.environ without external deps.
+    """
+    Load a simple .env file into os.environ without external deps.
 
     This function will not override existing environment variables.
     """
@@ -28,13 +29,11 @@ def _maybe_load_dotenv(path: Path) -> None:
     except Exception:
         _LOG.exception("failed to load .env at %s", path)
 
-
 def _bool_env(key: str, default: bool = False) -> bool:
     v = os.environ.get(key)
     if v is None:
         return default
     return v.lower() in ("1", "true", "yes", "on")
-
 
 def _list_env(key: str) -> List[str]:
     v = os.environ.get(key, "")
@@ -42,8 +41,9 @@ def _list_env(key: str) -> List[str]:
         return []
     parts = [p.strip() for p in v.replace(";", ",").split(",") if p.strip()]
     return parts
+# endregion
 
-
+# region Settings
 @dataclass(frozen=True)
 class Settings:
     ENABLE_GOOGLE_OAUTH: bool
@@ -82,6 +82,7 @@ from pathlib import Path
 
 MODULE_ROOT = Path(__file__).resolve().parents[2]
 CONFIG_PATH = MODULE_ROOT / "web" / "workflow-runner" / "src" / "runner.config.json"
+# endregion
 
 # region Workflow config
 @dataclass(frozen=True)

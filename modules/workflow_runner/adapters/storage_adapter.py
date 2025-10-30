@@ -1,14 +1,15 @@
-"""Storage adapter abstraction for workflow_runner.
+"""
+Storage adapter abstraction for workflow_runner.
 
 Provide a simple interface and a local filesystem implementation. The real
 project already has its own storage and persistence helpers; this adapter
 is a small scaffold to make moving code safer and easier.
 """
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 from pathlib import Path
 
-
+# region Storage Adapter
 class StorageAdapter(ABC):
     @abstractmethod
     def save(self, key: str, data: Any) -> None:
@@ -17,7 +18,6 @@ class StorageAdapter(ABC):
     @abstractmethod
     def load(self, key: str) -> Optional[Any]:
         pass
-
 
 class LocalFileStorageAdapter(StorageAdapter):
     def __init__(self, root: str | Path):
@@ -33,3 +33,4 @@ class LocalFileStorageAdapter(StorageAdapter):
         if not p.exists():
             return None
         return p.read_text(encoding="utf-8")
+# endregion

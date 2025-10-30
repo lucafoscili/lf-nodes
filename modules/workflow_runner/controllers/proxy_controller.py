@@ -1,29 +1,28 @@
+import aiohttp
+import importlib
 import json
 import logging
-from time import time
-from typing import Any, Dict, Optional
 
-import aiohttp
 from aiohttp import web
+from time import time
+from typing import Any, Dict, TYPE_CHECKING, cast
 
 from server import PromptServer
-import importlib
-"""Use a lightweight local API prefix to avoid importing heavy global
-constants at module import time. Keep this literal in sync with
-`utils.constants.API_ROUTE_PREFIX`.
-"""
 
-API_ROUTE_PREFIX = "/lf-nodes"
+from ..api_constants import API_ROUTE_PREFIX
+
+if TYPE_CHECKING:
+    from ..services import proxy_service as proxy_service_typing
 
 # Import the services proxy module explicitly to avoid name shadowing with the
 # route handler function (the handler is named `proxy_service`). We import
 # by full module path to make sure we get the submodule object, not a
 # package-level attribute that could be replaced.
-proxy_svc = importlib.import_module("lf_nodes.modules.workflow_runner.services.proxy_service")
+proxy_svc = cast("proxy_service_typing", importlib.import_module("lf_nodes.modules.workflow_runner.services.proxy_service"))
 
 LOG = logging.getLogger(__name__)
 
-
+# region Proxy endpoint
 @PromptServer.instance.routes.post(f"{API_ROUTE_PREFIX}/proxy/{{service}}")
 async def proxy_service(request: web.Request) -> web.Response:
     try:
@@ -93,8 +92,9 @@ async def proxy_service(request: web.Request) -> web.Response:
     except Exception as exc_outer:
         LOG.exception("Proxy handler failed: %s", exc_outer)
         return web.json_response({"detail": "proxy_error", "error": str(exc_outer)}, status=500)
+# endregion
 
-
+# region Proxy service status
 @PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/proxy/{{service}}")
 async def proxy_service_status(request: web.Request) -> web.Response:
     try:
@@ -129,8 +129,9 @@ async def proxy_service_status(request: web.Request) -> web.Response:
     except Exception as exc:
         LOG.exception("Proxy status check failed: %s", exc)
         return web.json_response({"detail": "proxy_error", "error": str(exc)}, status=500)
+# endregion
 
-
+# region Proxy service with path
 @PromptServer.instance.routes.post(f"{API_ROUTE_PREFIX}/proxy/{{service}}/{{proxypath:.*}}")
 async def proxy_service_with_path(request: web.Request) -> web.Response:
     try:
@@ -261,3 +262,4 @@ async def proxy_service_with_path(request: web.Request) -> web.Response:
     except Exception as exc_outer:
         LOG.exception("Proxy handler with path failed: %s", exc_outer)
         return web.json_response({"detail": "proxy_error", "error": str(exc_outer)}, status=500)
+# endregion
