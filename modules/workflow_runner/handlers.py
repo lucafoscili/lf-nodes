@@ -37,6 +37,7 @@ from .services.executor import (
 # Helpers / assets
 from .helpers import _emit_run_progress
 from .assets import _serve_first_existing
+from .controllers import api_controllers
 
 
 DEPLOY_ROOT = RUNNER_CONFIG.deploy_root
@@ -256,117 +257,27 @@ async def route_workflow_runner_debug_login(request: web.Request) -> web.Respons
 # region Run
 @PromptServer.instance.routes.post(f"{API_ROUTE_PREFIX}/run")
 async def route_run_workflow(request: web.Request) -> web.Response:
-    if _ENABLE_GOOGLE_OAUTH:
-        auth_resp = await _require_auth(request)
-        if isinstance(auth_resp, web.Response):
-            return auth_resp
-    try:
-        payload = await request.json()
-    except Exception as exc:
-        logging.warning("Failed to parse workflow request payload: %s", exc)
-        return web.json_response(
-            _make_run_payload(detail=str(exc), error_message="invalid_json"),
-            status=400,
-        )
-
-    if not isinstance(payload, dict):
-        return web.json_response(
-            _make_run_payload(detail="Payload must be a JSON object.", error_message="invalid_payload"),
-            status=400,
-        )
-
-    try:
-        prepared = _prepare_workflow_execution(payload)
-    except WorkflowPreparationError as exc:
-        return web.json_response(exc.response_body, status=exc.status)
-
-    run_id = str(uuid.uuid4())
-    await create_job(run_id)
-    _emit_run_progress(run_id, "workflow_received")
-
-    async def worker() -> None:
-        try:
-            await set_job_status(run_id, JobStatus.RUNNING)
-            _emit_run_progress(run_id, "workflow_started")
-
-            job_status, response_body, http_status = await execute_workflow(payload, run_id, prepared)
-            job_result = {"http_status": http_status, "body": response_body}
-
-            await set_job_status(run_id, job_status, result=job_result)
-            _emit_run_progress(run_id, "workflow_completed", status=job_status.value)
-        except asyncio.CancelledError:
-            await set_job_status(run_id, JobStatus.CANCELLED, error="cancelled")
-            _emit_run_progress(run_id, "workflow_cancelled")
-            raise
-        except Exception as exc:
-            logging.exception("Workflow run %s failed unexpectedly: %s", run_id, exc)
-            error_payload = _make_run_payload(detail=str(exc), error_message="unhandled_exception")
-            job_result = {"http_status": 500, "body": error_payload}
-            await set_job_status(run_id, JobStatus.FAILED, error=str(exc), result=job_result)
-            _emit_run_progress(run_id, "workflow_failed", error=str(exc))
-
-    PromptServer.instance.loop.create_task(worker())
-
-    return web.json_response({"run_id": run_id}, status=202)
+    # Delegate to the new controller while preserving the route registration.
+    return await api_controllers.start_workflow_controller(request)
 
 
 @PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/run/{{run_id}}/status")
 async def route_run_status(request: web.Request) -> web.Response:
-    if _ENABLE_GOOGLE_OAUTH:
-        auth_resp = await _require_auth(request)
-        if isinstance(auth_resp, web.Response):
-            return auth_resp
-
-    run_id = request.match_info.get("run_id")
-    if not run_id:
-        raise web.HTTPNotFound(text="Unknown run id")
-
-    job = await get_job(run_id)
-    if job is None:
-        raise web.HTTPNotFound(text="Unknown run id")
-
-    is_terminal = job.status in {JobStatus.SUCCEEDED, JobStatus.FAILED, JobStatus.CANCELLED}
-    payload = {
-        "run_id": job.id,
-        "status": job.status.value,
-        "created_at": job.created_at,
-        "error": job.error,
-        "result": job.result if is_terminal else None,
-    }
-    return web.json_response(payload)
+    # Delegate to controller for status lookup.
+    return await api_controllers.get_workflow_status_controller(request)
 # endregion
 
 
 # region List workflows
 @PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/workflows")
 async def route_list_workflows(_: web.Request) -> web.Response:
-    if _ENABLE_GOOGLE_OAUTH:
-        auth_resp = await _require_auth(_)
-        if isinstance(auth_resp, web.Response):
-            return auth_resp
-    return web.json_response({"workflows": list_workflows()})
+    # Delegate to controller which handles auth and service call
+    return await api_controllers.list_workflows_controller(_)
 # endregion
 
 
 # region Get workflow
 @PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/workflows/{{workflow_id}}")
 async def route_get_workflow(request: web.Request) -> web.Response:
-    workflow_id = request.match_info.get('workflow_id')
-    if not workflow_id:
-        return web.Response(status=400, text='Missing workflow_id')
-    if _ENABLE_GOOGLE_OAUTH:
-        auth_resp = await _require_auth(request)
-        if isinstance(auth_resp, web.Response):
-            return auth_resp
-
-    workflow = get_workflow(workflow_id)
-    if not workflow:
-        return web.Response(status=404, text='Workflow not found')
-    try:
-        with workflow.workflow_path.open("r", encoding="utf-8") as workflow_file:
-            workflow_json = json.load(workflow_file)
-        return web.json_response(workflow_json)
-    except Exception as e:
-        logging.exception(f"Error loading workflow {workflow_id}")
-        return web.Response(status=500, text=f'Error loading workflow: {str(e)}')
+    return await api_controllers.get_workflow_controller(request)
 # endregion
