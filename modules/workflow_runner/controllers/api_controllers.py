@@ -13,6 +13,17 @@ from ..services.job_service import get_job_status
 from ..services.executor import WorkflowPreparationError
 from ..services.workflow_service import list_workflows as svc_list_workflows, get_workflow_content
 from ..auth import _ENABLE_GOOGLE_OAUTH, _require_auth
+import json
+import logging
+
+from ..auth import (
+    create_server_session,
+    _extract_token_from_request,
+    _verify_token_and_email,
+    _verify_session,
+    _WF_DEBUG,
+    _SESSION_TTL,
+)
 
 
 async def start_workflow_controller(request: web.Request) -> web.Response:
@@ -69,3 +80,84 @@ async def get_workflow_controller(request: web.Request) -> web.Response:
     if content is None:
         return web.Response(status=404, text='Workflow not found')
     return web.json_response(content)
+
+
+# Auth endpoints (moved from handlers.py)
+async def verify_controller(request: web.Request) -> web.Response:
+    """Handle POST /workflow-runner/verify
+
+    Validates a Google id_token via existing auth helpers and sets a session
+    cookie on success. Mirrors original behaviour in handlers.py.
+    """
+    if not _ENABLE_GOOGLE_OAUTH:
+        return web.json_response({"detail": "oauth_not_enabled"}, status=400)
+
+    try:
+        raw = await request.read()
+        try:
+            body = json.loads(raw.decode('utf-8')) if raw else {}
+        except Exception:
+            body = None
+    except Exception:
+        return web.json_response({"detail": "invalid_json"}, status=400)
+
+    id_token = body.get("id_token") if isinstance(body, dict) else None
+    if not id_token:
+        return web.json_response({"detail": "missing_id_token"}, status=400)
+
+    ok, email = await _verify_token_and_email(id_token)
+    if not ok:
+        return web.json_response({"detail": "invalid_token_or_forbidden"}, status=401)
+
+    try:
+        session_id, expires_at = create_server_session(email)
+    except Exception:
+        logging.exception("Failed to create session in store")
+        return web.json_response({"detail": "server_error"}, status=500)
+
+    resp = web.json_response({"detail": "ok"})
+    try:
+        secure_flag = getattr(request, 'secure', None)
+        if secure_flag is None:
+            secure_flag = (getattr(request, 'scheme', '') == 'https')
+
+        resp.set_cookie(
+            "LF_SESSION",
+            session_id,
+            max_age=_SESSION_TTL,
+            httponly=True,
+            samesite="Lax",
+            secure=bool(secure_flag),
+        )
+        if request.cookies.get('LF_AUTH'):
+            resp.del_cookie('LF_AUTH')
+    except Exception:
+        logging.exception("Failed to set session cookie")
+
+    return resp
+
+
+async def debug_login_controller(request: web.Request) -> web.Response:
+    """Handle POST /workflow-runner/debug-login
+
+    Only enabled when _WF_DEBUG is True. Creates a test session for the
+    supplied email (or default) and sets an LF_SESSION cookie.
+    """
+    if not _WF_DEBUG:
+        return web.json_response({"detail": "not_enabled"}, status=404)
+    try:
+        body = await request.json()
+    except Exception:
+        return web.json_response({"detail": "invalid_json"}, status=400)
+    email = (body.get("email") or "test@example.com").lower()
+    try:
+        session_id, expires_at = create_server_session(email)
+    except Exception:
+        logging.exception("Failed to create debug session in store")
+        return web.json_response({"detail": "server_error"}, status=500)
+    resp = web.json_response({"detail": "ok", "email": email})
+    try:
+        resp.set_cookie("LF_SESSION", session_id, max_age=_SESSION_TTL, httponly=True, samesite="Lax", secure=True)
+    except Exception:
+        logging.exception("Failed to set debug session cookie")
+    return resp

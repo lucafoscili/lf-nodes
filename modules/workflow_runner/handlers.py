@@ -174,84 +174,14 @@ async def route_workflow_runner_page(request: web.Request) -> web.Response:
 # Endpoint the client-side login splash posts to with the Google id_token.
 @PromptServer.instance.routes.post(f"{API_ROUTE_PREFIX}/workflow-runner/verify")
 async def route_workflow_runner_verify(request: web.Request) -> web.Response:
-    if not _ENABLE_GOOGLE_OAUTH:
-        return web.json_response({"detail": "oauth_not_enabled"}, status=400)
-
-    try:
-        raw = await request.read()
-        try:
-            body = json.loads(raw.decode('utf-8')) if raw else {}
-        except Exception:
-            body = None
-    except Exception:
-        return web.json_response({"detail": "invalid_json"}, status=400)
-
-    if _WF_DEBUG:
-        try:
-            logging.debug("Verify request headers: %s", dict(request.headers))
-            logging.debug("Verify raw body: %s", raw.decode('utf-8', errors='replace'))
-        except Exception:
-            logging.exception("Failed to log verify request for debug")
-
-    id_token = body.get("id_token") if isinstance(body, dict) else None
-    if not id_token:
-        return web.json_response({"detail": "missing_id_token"}, status=400)
-
-    ok, email = await _verify_token_and_email(id_token)
-    if not ok:
-        if _WF_DEBUG:
-            return web.json_response({"detail": "invalid_token_or_forbidden", "debug": "token_verification_failed"}, status=401)
-        return web.json_response({"detail": "invalid_token_or_forbidden"}, status=401)
-
-    try:
-        session_id, expires_at = create_server_session(email)
-    except Exception:
-        logging.exception("Failed to create session in store")
-        return web.json_response({"detail": "server_error"}, status=500)
-
-    resp = web.json_response({"detail": "ok"})
-    try:
-        secure_flag = getattr(request, 'secure', None)
-        if secure_flag is None:
-            secure_flag = (getattr(request, 'scheme', '') == 'https')
-
-        resp.set_cookie(
-            "LF_SESSION",
-            session_id,
-            max_age=_SESSION_TTL,
-            httponly=True,
-            samesite="Lax",
-            secure=bool(secure_flag),
-        )
-        if request.cookies.get('LF_AUTH'):
-            resp.del_cookie('LF_AUTH')
-    except Exception:
-        logging.exception("Failed to set session cookie")
-
-    return resp
+    # Delegate to controller which contains the logic and cookie handling
+    return await api_controllers.verify_controller(request)
 
 
 # Debug-only quick login to create a test session (only when WORKFLOW_RUNNER_DEBUG=1).
 @PromptServer.instance.routes.post(f"{API_ROUTE_PREFIX}/workflow-runner/debug-login")
 async def route_workflow_runner_debug_login(request: web.Request) -> web.Response:
-    if not _WF_DEBUG:
-        return web.json_response({"detail": "not_enabled"}, status=404)
-    try:
-        body = await request.json()
-    except Exception:
-        return web.json_response({"detail": "invalid_json"}, status=400)
-    email = (body.get("email") or "test@example.com").lower()
-    try:
-        session_id, expires_at = create_server_session(email)
-    except Exception:
-        logging.exception("Failed to create debug session in store")
-        return web.json_response({"detail": "server_error"}, status=500)
-    resp = web.json_response({"detail": "ok", "email": email})
-    try:
-        resp.set_cookie("LF_SESSION", session_id, max_age=_SESSION_TTL, httponly=True, samesite="Lax", secure=True)
-    except Exception:
-        logging.exception("Failed to set debug session cookie")
-    return resp
+    return await api_controllers.debug_login_controller(request)
 
 
 # region Run

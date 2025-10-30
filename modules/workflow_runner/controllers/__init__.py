@@ -10,6 +10,8 @@ from .api_controllers import (
     get_workflow_status_controller,
     list_workflows_controller,
     get_workflow_controller,
+    verify_controller,
+    debug_login_controller,
 )
 
 __all__ = [
@@ -17,4 +19,6 @@ __all__ = [
     "get_workflow_status_controller",
     "list_workflows_controller",
     "get_workflow_controller",
+    "verify_controller",
+    "debug_login_controller",
 ]
