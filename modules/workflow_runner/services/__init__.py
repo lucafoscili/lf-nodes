@@ -1,9 +1,10 @@
 """Services package for workflow_runner.
 
 Place business logic here. Keep functions small and easily testable.
+
+This __init__ avoids eager imports. Importing individual service modules
+should be done using explicit submodule imports (e.g. ``from . import run_service``)
+to prevent import-time side effects and circular imports during refactors.
 """
 
-from .run_service import run_workflow
-from .job_service import create_job, get_job_status
-
-__all__ = ["run_workflow", "create_job", "get_job_status"]
+__all__ = []
