@@ -1038,7 +1038,7 @@ const _title$2 = (store) => {
   const backButton = document.createElement("lf-button");
   backButton.className = RESULTS_CLASSES.back;
   backButton.lfIcon = arrowBack;
-  backButton.lfLabel = "Back to workflow";
+  backButton.lfLabel = "Back";
   backButton.lfStyling = "flat";
   backButton.lfUiSize = "small";
   backButton.lfUiState = "disabled";
@@ -1046,7 +1046,7 @@ const _title$2 = (store) => {
   const historyButton = document.createElement("lf-button");
   historyButton.className = RESULTS_CLASSES.history;
   historyButton.lfIcon = folder;
-  historyButton.lfLabel = "View all runs";
+  historyButton.lfLabel = "History";
   historyButton.lfStyling = "flat";
   historyButton.lfUiSize = "small";
   historyButton.lfUiState = manager.runs.all().length === 0 ? "disabled" : "primary";
@@ -1216,7 +1216,7 @@ const createMainSection = (store) => {
   };
   const render = (scope) => {
     const state = store.getState();
-    const { manager } = state;
+    const { manager, view } = state;
     const { uiRegistry } = manager;
     const workflowId = state.current.id ?? null;
     const workflowChanged = workflowId !== LAST_WORKFLOW_ID;
@@ -1226,6 +1226,8 @@ const createMainSection = (store) => {
     if (!elements) {
       return;
     }
+    const root = elements[MAIN_CLASSES._];
+    root.dataset.view = view;
     const previousSections = new Set(LAST_SCOPE);
     if (workflowChanged && previousSections.size > 0) {
       previousSections.forEach((section) => {
@@ -1253,7 +1255,6 @@ const createMainSection = (store) => {
         const placeholder = document.createElement("div");
         placeholder.className = MAIN_CLASSES.home;
         placeholder.textContent = HOME_PLACEHOLDER;
-        const root = elements[MAIN_CLASSES._];
         if (root) {
           root.appendChild(placeholder);
           uiRegistry.set(MAIN_CLASSES.home, placeholder);
