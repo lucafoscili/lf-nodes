@@ -1,0 +1,57 @@
+@use '_variables';
+
+@include variables.respond(variables.$media-md) {
+  .inputs-section__options {
+    padding: 0;
+  }
+
+  .notifications-section {
+    & {
+      border-radius: 6px;
+      bottom: 16px;
+      box-shadow: var(--lf-ui-box-shadow-modal);
+      left: 1em;
+      height: max-content;
+      max-height: 40vh;
+      max-width: calc(100% - 2em);
+      min-width: 0;
+      padding: 0.5em;
+      place-content: center;
+      right: 1em;
+      width: auto;
+    }
+
+    &__item {
+      max-height: 40vh;
+    }
+  }
+}
+
+@include variables.respond(variables.$media-sm) {
+  .notifications-section {
+    border-radius: 8px;
+    bottom: 12px;
+    left: 50%;
+    max-width: calc(100% - 32px);
+    padding: 0.5em;
+    transform: translateX(-50%);
+    width: calc(100% - 32px);
+  }
+}
+
+@include variables.respond-up(variables.$media-md) {
+  .main-section {
+    &[data-view='workflow'] {
+      & {
+        grid-template-columns: 1fr 1fr;
+        overflow: hidden;
+      }
+
+      & .inputs-section,
+      & .outputs-section {
+        height: 100%;
+        overflow: auto;
+      }
+    }
+  }
+}

@@ -10,8 +10,10 @@
       font-size: 0.875em;
       font-weight: 500;
       opacity: 1;
+      text-overflow: ellipsis;
       transition: opacity 0.35s ease, transform 0.35s ease;
       transform: translateY(0);
+      white-space: nowrap;
       will-change: opacity, transform, background-position;
     }
 
@@ -71,31 +73,5 @@
       min-width: 2.5em;
       text-align: right;
     }
-  }
-}
-
-/* Gentle pulse for the error status to give it subtle motion */
-@keyframes lf-pulse {
-  0% {
-    transform: translateY(0);
-    opacity: 1;
-  }
-  50% {
-    transform: translateY(-1px);
-    opacity: 0.95;
-  }
-  100% {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-/* Shimmer animation used for the running status */
-@keyframes lf-shimmer {
-  0% {
-    background-position: 100% 0;
-  }
-  100% {
-    background-position: -100% 0;
   }
 }

@@ -1,6 +1,8 @@
 .inputs-section {
   &__cell {
     & {
+      --lf-chat-padding: 0;
+
       max-height: 80vh;
       transition: background-color 0.2s ease;
     }

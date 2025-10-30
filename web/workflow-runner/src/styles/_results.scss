@@ -55,6 +55,6 @@
     position: sticky;
     text-align: center;
     top: -0.5em;
-    z-index: 1;
+    z-index: calc(var(--lf-ui-zindex-backdrop) - 1);
   }
 }

@@ -72,6 +72,8 @@ body {
     background: rgba(var(--lf-color-surface), 0.75);
     border-radius: var(--lf-ui-border-radius);
     box-shadow: var(--lf-ui-box-shadow-modal);
+    display: grid;
+    grid-template-columns: 1fr;
     overflow: auto;
     padding: 0.5em 1.25em;
   }
