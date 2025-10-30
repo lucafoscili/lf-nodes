@@ -52,6 +52,18 @@
         height: 100%;
         overflow: auto;
       }
+
+      & .inputs-section {
+        & {
+          display: grid;
+          grid-template-rows: auto auto 1fr;
+        }
+
+        &__cell,
+        &__options {
+          overflow: auto;
+        }
+      }
     }
   }
 }

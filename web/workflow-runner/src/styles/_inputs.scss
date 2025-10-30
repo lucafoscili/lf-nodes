@@ -12,6 +12,10 @@
     }
   }
 
+  &__description {
+    margin: 0.5em 0px 2em 0;
+  }
+
   &__options {
     display: grid;
     gap: 1.5em;
@@ -22,6 +26,6 @@
   &__title {
     display: flex;
     gap: 0.5em;
-    padding: 1.25em 0;
+    padding: 0.5em 0;
   }
 }

@@ -12,6 +12,8 @@ body,
 
 #app {
   & {
+    --lf-ui-header-height: 60px;
+
     display: grid;
     grid-template:
       'header'

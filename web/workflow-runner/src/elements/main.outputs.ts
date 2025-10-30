@@ -257,6 +257,7 @@ const _masonry = (store: WorkflowStore) => {
   const masonry = document.createElement('lf-masonry');
   masonry.className = OUTPUTS_CLASSES.masonry;
   masonry.lfShape = 'card';
+  masonry.lfStyle = '.masonry .grid { overflow-x: unset; overflow-y: unset; }'; // FIXME: Experimental
   masonry.addEventListener('lf-masonry-event', (e) => masonryHandler(e, store));
 
   return masonry;
