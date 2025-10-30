@@ -6,13 +6,13 @@ from controllers while we migrate logic out of handlers.py incrementally.
 """
 from typing import Any, Dict, Optional
 
-from .. import job_manager
-from ..job_manager import JobStatus
+from . import job_store
+from .job_store import JobStatus
 
 
 async def create_job(run_id: str) -> None:
     """Create a job record for run_id by delegating to the shared job_manager."""
-    await job_manager.create_job(run_id)
+    await job_store.create_job(run_id)
 
 
 async def get_job_status(run_id: str) -> Optional[Dict[str, Any]]:
@@ -21,7 +21,7 @@ async def get_job_status(run_id: str) -> Optional[Dict[str, Any]]:
     The shape mirrors what `handlers.route_run_status` returned before the
     refactor so the frontend receives the expected fields.
     """
-    job = await job_manager.get_job(run_id)
+    job = await job_store.get_job(run_id)
     if job is None:
         return None
 

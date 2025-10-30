@@ -9,7 +9,7 @@ from aiohttp import web
 from server import PromptServer
 
 from ..config import CONFIG as RUNNER_CONFIG
-from ..job_manager import JobStatus
+from .job_store import JobStatus
 from ..registry import InputValidationError, WorkflowNode, get_workflow, list_workflows
 from ...utils.helpers.conversion import json_safe
 import execution

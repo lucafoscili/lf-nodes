@@ -12,7 +12,7 @@ from aiohttp import web
 
 from server import PromptServer
 
-from ..job_manager import JobStatus, create_job, set_job_status
+from .job_store import JobStatus, create_job, set_job_status
 from .executor import execute_workflow, _make_run_payload, _prepare_workflow_execution, WorkflowPreparationError
 from ..utils.helpers import _emit_run_progress
 
