@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Any, Dict
 
-from ..registry import WorkflowCell, WorkflowNode
+from ..services.registry import WorkflowCell, WorkflowNode
 from .utils import resolve_upload_paths
 
 # region Workflow Config

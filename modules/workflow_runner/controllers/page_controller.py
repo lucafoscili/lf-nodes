@@ -5,14 +5,15 @@ from aiohttp import web
 from server import PromptServer
 
 from ..config import CONFIG as RUNNER_CONFIG
-from ..auth import (
+from ..services.auth_service import (
     _ENABLE_GOOGLE_OAUTH,
+    _GOOGLE_CLIENT_IDS,
     _extract_token_from_request,
     _verify_session,
     _verify_token_and_email,
 )
-from ..assets import _serve_first_existing
-from ..controllers import api_controllers
+from .assets_controller import _serve_first_existing
+import importlib
 """Use a lightweight local API route prefix to avoid importing global
 constants that pull in heavy dependencies during import-time.
 Keep this value in sync with `utils.constants.API_ROUTE_PREFIX`.
@@ -73,12 +74,8 @@ async def route_workflow_runner_page(request: web.Request) -> web.Response:
                         return response
 
             # serve the login splash page
-            client_id_val = ''
-            try:
-                from ..auth import _GOOGLE_CLIENT_IDS
-                client_id_val = _GOOGLE_CLIENT_IDS[0] if _GOOGLE_CLIENT_IDS else ''
-            except Exception:
-                client_id_val = ''
+            # prefer canonical auth_service values (avoids importing removed root-level shims)
+            client_id_val = _GOOGLE_CLIENT_IDS[0] if (_GOOGLE_CLIENT_IDS and len(_GOOGLE_CLIENT_IDS) > 0) else ''
 
             login_template = '''<!doctype html>
 <html>
@@ -154,10 +151,14 @@ async def route_workflow_runner_page(request: web.Request) -> web.Response:
 
 @PromptServer.instance.routes.post(f"{API_ROUTE_PREFIX}/workflow-runner/verify")
 async def route_workflow_runner_verify(request: web.Request) -> web.Response:
-    # Delegate to controller which contains the logic and cookie handling
+    # Delegate to controller which contains the logic and cookie handling.
+    # Import the controllers module lazily to avoid pulling heavy imports at
+    # module-import time.
+    api_controllers = importlib.import_module("lf_nodes.modules.workflow_runner.controllers.api_controllers")
     return await api_controllers.verify_controller(request)
 
 
 @PromptServer.instance.routes.post(f"{API_ROUTE_PREFIX}/workflow-runner/debug-login")
 async def route_workflow_runner_debug_login(request: web.Request) -> web.Response:
+    api_controllers = importlib.import_module("lf_nodes.modules.workflow_runner.controllers.api_controllers")
     return await api_controllers.debug_login_controller(request)

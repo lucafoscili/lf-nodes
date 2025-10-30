@@ -6,7 +6,7 @@ from aiohttp import web
 from server import PromptServer
 
 from ..config import CONFIG as RUNNER_CONFIG
-from ..auth import _ENABLE_GOOGLE_OAUTH, _require_auth
+from ..services.auth_service import _ENABLE_GOOGLE_OAUTH, _require_auth
 """Use a local lightweight API prefix and not-found page to avoid importing
 global constants that pull in large dependencies during import-time.
 Keep the literal in sync with `utils.constants.API_ROUTE_PREFIX`.

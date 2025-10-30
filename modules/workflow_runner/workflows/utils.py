@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, Iterator, List
 
-from ..registry import InputValidationError
+from ..services.registry import InputValidationError
 
 _CANDIDATE_KEYS = ("path", "file", "name", "value")
 

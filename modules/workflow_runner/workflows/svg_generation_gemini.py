@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Any, Dict
 
-from ..registry import InputValidationError, WorkflowCell, WorkflowNode
+from ..services.registry import InputValidationError, WorkflowCell, WorkflowNode
 
 # region Workflow Config
 def _configure(prompt: Dict[str, Any], inputs: Dict[str, Any]) -> None:

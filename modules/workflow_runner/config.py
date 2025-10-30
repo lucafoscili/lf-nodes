@@ -1,6 +1,6 @@
-from __future__ import annotations
 import os
 import logging
+
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List
@@ -80,8 +80,6 @@ import logging
 from dataclasses import dataclass
 from pathlib import Path
 
-from ..utils.constants import API_ROUTE_PREFIX
-
 MODULE_ROOT = Path(__file__).resolve().parents[2]
 CONFIG_PATH = MODULE_ROOT / "web" / "workflow-runner" / "src" / "runner.config.json"
 
@@ -135,6 +133,10 @@ def _load_config() -> WorkflowRunnerConfig:
 CONFIG = _load_config()
 
 try:
+    # Import constants lazily inside the try/except so that heavy dependencies pulled in by
+    # `utils.constants` (for example `comfy` / `torch`) don't run at import-time here.
+    from ..utils.constants import API_ROUTE_PREFIX
+
     if CONFIG.api_route_prefix != API_ROUTE_PREFIX:
         logging.warning(
             "Workflow runner configuration mismatch: JSON apiRoutePrefix '%s' != constants.API_ROUTE_PREFIX '%s'",

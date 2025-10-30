@@ -7,7 +7,7 @@ import json
 import logging
 from typing import Any, Dict, List, Optional
 
-from ..registry import get_workflow as _get_workflow, list_workflows as _list_workflows
+from .registry import get_workflow as _get_workflow, list_workflows as _list_workflows
 
 
 def list_workflows() -> List[Dict[str, Any]]:

@@ -12,11 +12,11 @@ from ..services.run_service import run_workflow
 from ..services.job_service import get_job_status
 from ..services.executor import WorkflowPreparationError
 from ..services.workflow_service import list_workflows as svc_list_workflows, get_workflow_content
-from ..auth import _ENABLE_GOOGLE_OAUTH, _require_auth
+from ..services.auth_service import _ENABLE_GOOGLE_OAUTH, _require_auth
 import json
 import logging
 
-from ..auth import (
+from ..services.auth_service import (
     create_server_session,
     _extract_token_from_request,
     _verify_token_and_email,

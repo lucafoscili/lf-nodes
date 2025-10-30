@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Any, Dict
 
-from ..registry import InputValidationError, WorkflowCell, WorkflowNode
+from ..services.registry import InputValidationError, WorkflowCell, WorkflowNode
 from ...utils.helpers.conversion import convert_to_json
 
 # region Workflow Config
