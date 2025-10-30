@@ -1488,6 +1488,7 @@ const _masonry = (store) => {
   const masonry = document.createElement("lf-masonry");
   masonry.className = OUTPUTS_CLASSES.masonry;
   masonry.lfShape = "card";
+  masonry.lfStyle = ".masonry .grid { overflow-x: unset; overflow-y: unset; }";
   masonry.addEventListener("lf-masonry-event", (e) => masonryHandler(e, store));
   return masonry;
 };
@@ -1564,7 +1565,7 @@ const createOutputsSection = (store) => {
     h4.textContent = workflowTitle ? `${workflowTitle} outputs` : "Workflow outputs";
     const runs = isHistoryView ? allRuns : allRuns.filter((run) => (run.workflowId ?? null) === (activeWorkflowId ?? null));
     toggle.lfIcon = isHistoryView ? arrowBack : folder;
-    toggle.lfLabel = isHistoryView ? "Back to workflow view" : "Open full history";
+    toggle.lfLabel = isHistoryView ? "Back" : "History";
     toggle.lfUiState = hasAnyRuns || isHistoryView ? "primary" : "disabled";
     const dataset = { nodes: [] };
     if (!runs.length) {
