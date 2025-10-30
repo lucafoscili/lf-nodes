@@ -8,12 +8,23 @@ from typing import Optional
 from aiohttp import web
 
 from .google_oauth import verify_id_token_with_google, load_allowed_users_from_file
+from lf_nodes.modules.workflow_runner.config import get_settings
 
-# Google OAuth opt-in configuration (read at import)
-_ENABLE_GOOGLE_OAUTH = os.environ.get("ENABLE_GOOGLE_OAUTH", "").lower() in ("1", "true", "yes")
+# Read canonical settings from central config
+_settings = get_settings()
+_ENABLE_GOOGLE_OAUTH = _settings.ENABLE_GOOGLE_OAUTH
+_GOOGLE_CLIENT_IDS = _settings.GOOGLE_CLIENT_IDS
+_WF_DEBUG = _settings.WF_DEBUG
 _ALLOWED_USERS_FILE = os.environ.get("ALLOWED_USERS_FILE", "")
 _ALLOWED_USERS_ENV = os.environ.get("ALLOWED_USERS", "")
-_GOOGLE_CLIENT_IDS = [s.strip().strip('"\'"') for s in os.environ.get("GOOGLE_CLIENT_IDS", "").split(",") if s.strip()]
+
+LOG = logging.getLogger(__name__)
+LOG.info(
+    "workflow-runner auth: ENABLE_GOOGLE_OAUTH=%s, GOOGLE_CLIENT_IDS=%s, WF_DEBUG=%s",
+    _ENABLE_GOOGLE_OAUTH,
+    _GOOGLE_CLIENT_IDS,
+    _WF_DEBUG,
+)
 
 # Simple in-memory token cache: id_token -> (email, expires_at)
 _TOKEN_CACHE: dict[str, tuple[str, float]] = {}
