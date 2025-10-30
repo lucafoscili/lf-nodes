@@ -370,7 +370,7 @@ export const createOutputsSection = (store: WorkflowStore): WorkflowSectionContr
       : allRuns.filter((run) => (run.workflowId ?? null) === (activeWorkflowId ?? null));
 
     toggle.lfIcon = isHistoryView ? arrowBack : folder;
-    toggle.lfLabel = isHistoryView ? 'Back to workflow view' : 'Open full history';
+    toggle.lfLabel = isHistoryView ? 'Back' : 'History';
     toggle.lfUiState = hasAnyRuns || isHistoryView ? 'primary' : 'disabled';
 
     const dataset: LfDataDataset = { nodes: [] };

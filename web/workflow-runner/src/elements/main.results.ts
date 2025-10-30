@@ -73,7 +73,7 @@ const _title = (store: WorkflowStore) => {
   const backButton = document.createElement('lf-button');
   backButton.className = RESULTS_CLASSES.back;
   backButton.lfIcon = arrowBack;
-  backButton.lfLabel = 'Back to workflow';
+  backButton.lfLabel = 'Back';
   backButton.lfStyling = 'flat';
   backButton.lfUiSize = 'small';
   backButton.lfUiState = 'disabled';
@@ -82,7 +82,7 @@ const _title = (store: WorkflowStore) => {
   const historyButton = document.createElement('lf-button');
   historyButton.className = RESULTS_CLASSES.history;
   historyButton.lfIcon = folder;
-  historyButton.lfLabel = 'View all runs';
+  historyButton.lfLabel = 'History';
   historyButton.lfStyling = 'flat';
   historyButton.lfUiSize = 'small';
   historyButton.lfUiState = manager.runs.all().length === 0 ? 'disabled' : 'primary';
