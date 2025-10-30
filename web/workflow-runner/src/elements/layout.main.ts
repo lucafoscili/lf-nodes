@@ -68,7 +68,7 @@ export const createMainSection = (store: WorkflowStore): WorkflowSectionControll
   const render = (scope?: WorkflowMainSections[]) => {
     const state = store.getState();
 
-    const { manager } = state;
+    const { manager, view } = state;
     const { uiRegistry } = manager;
     const workflowId = state.current.id ?? null;
     const workflowChanged = workflowId !== LAST_WORKFLOW_ID;
@@ -80,6 +80,9 @@ export const createMainSection = (store: WorkflowStore): WorkflowSectionControll
     if (!elements) {
       return;
     }
+
+    const root = elements[MAIN_CLASSES._] as HTMLElement | undefined;
+    root.dataset.view = view;
 
     const previousSections = new Set<WorkflowMainSections>(LAST_SCOPE);
 
@@ -111,7 +114,6 @@ export const createMainSection = (store: WorkflowStore): WorkflowSectionControll
         const placeholder = document.createElement('div');
         placeholder.className = MAIN_CLASSES.home;
         placeholder.textContent = HOME_PLACEHOLDER;
-        const root = elements[MAIN_CLASSES._] as HTMLElement | undefined;
         if (root) {
           root.appendChild(placeholder);
           uiRegistry.set(MAIN_CLASSES.home, placeholder);

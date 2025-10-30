@@ -1,10 +1,5 @@
 import { WorkflowMainSections } from '../types/section';
-import {
-  WorkflowRoute,
-  WorkflowState,
-  WorkflowStore,
-  WorkflowView,
-} from '../types/state';
+import { WorkflowRoute, WorkflowState, WorkflowStore, WorkflowView } from '../types/state';
 import { selectRun, setView } from './store-actions';
 
 export const HOME_PLACEHOLDER = 'Select a workflow to get started.';
@@ -90,10 +85,8 @@ const VIEW_DEFINITIONS: Record<WorkflowView, ViewDefinition> = {
     enter: (store, options) => {
       const requestedRunId = options.runId ?? null;
       const state = store.getState();
-      const runId =
-        requestedRunId ?? state.selectedRunId ?? null;
-      const hasRun =
-        Boolean(runId && state.runs.some((run) => run.runId === runId));
+      const runId = requestedRunId ?? state.selectedRunId ?? null;
+      const hasRun = Boolean(runId && state.runs.some((run) => run.runId === runId));
 
       if (!hasRun) {
         selectRunWithDefaults(store, null, options.clearResults);
@@ -125,16 +118,19 @@ export const changeView = (
   const definition = getViewDefinition(view);
   const resolvedView = definition.enter(store, options);
   setView(store, resolvedView);
+
   return resolvedView;
 };
 
 export const resolveMainSections = (state: WorkflowState): WorkflowMainSections[] => {
   const definition = getViewDefinition(state.view);
+
   return definition.sections(state);
 };
 
 export const computeRouteFromState = (state: WorkflowState): WorkflowRoute => {
   const definition = getViewDefinition(state.view);
+
   return definition.toRoute(state);
 };
 
