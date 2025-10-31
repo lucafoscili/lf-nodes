@@ -8,8 +8,8 @@ from typing import Any, Dict, Tuple
 
 from server import PromptServer
 
-from .job_store import JobStatus
-from .registry import InputValidationError, WorkflowNode, get_workflow, list_workflows
+from .job_store import JobStatus, set_job_status
+from .registry import InputValidationError, WorkflowNode, get_workflow
 from ..config import CONFIG as RUNNER_CONFIG
 from ...utils.helpers.conversion import json_safe
 
@@ -19,7 +19,6 @@ class WorkflowPreparationError(Exception):
     Raised when a workflow request fails basic preparation/validation before queueing.
     Carries the response body and HTTP status code to bubble the failure upstream.
     """
-
     def __init__(self, response_body: Dict[str, Any], status: int) -> None:
         super().__init__(response_body.get("detail") or "Workflow preparation failed.")
         self.response_body = response_body
@@ -46,41 +45,6 @@ def _make_run_payload(
         payload["preferred_output"] = preferred_output
 
     return {"message": detail or "", "payload": payload, "status": "error" if error_message else "ready"}
-
-def _sanitize_history(entry: Dict[str, Any]) -> Dict[str, Any]:
-    outputs = entry.get("outputs", {}) or {}
-    safe_outputs = {}
-    for node_id, node_out in outputs.items():
-        try:
-            safe_outputs[str(node_id)] = json_safe(node_out)
-        except Exception:
-            safe_outputs[str(node_id)] = node_out
-
-    return {
-        "status": json_safe(entry.get("status")),
-        "outputs": json_safe(safe_outputs),
-        "prompt": json_safe(entry.get("prompt")),
-    }
-
-async def _wait_for_completion(prompt_id: str, timeout_seconds: float | None = None) -> Dict[str, Any]:
-    queue = PromptServer.instance.prompt_queue
-    start = time.perf_counter()
-    deadline = start + timeout_seconds if timeout_seconds and timeout_seconds > 0 else None
-
-    while True:
-        history = queue.get_history(prompt_id=prompt_id)
-        if prompt_id in history:
-            entry = history[prompt_id]
-            status = entry.get("status") or {}
-            if status.get("completed") is True or status.get("status_str") == "error":
-                return entry
-            if entry.get("outputs"):
-                return entry
-
-        if deadline is not None and time.perf_counter() >= deadline:
-            raise TimeoutError(f"Prompt {prompt_id} did not finish within {timeout_seconds} seconds.")
-
-        await asyncio.sleep(0.35)
 
 def _prepare_workflow_execution(payload: Dict[str, Any]) -> Tuple[WorkflowNode, Dict[str, Any]]:
     inputs = payload.get("inputs", {})
@@ -112,6 +76,94 @@ def _prepare_workflow_execution(payload: Dict[str, Any]) -> Tuple[WorkflowNode, 
         raise WorkflowPreparationError(response, 500) from exc
 
     return definition, prompt
+
+def _sanitize_history(entry: Dict[str, Any]) -> Dict[str, Any]:
+    outputs = entry.get("outputs", {}) or {}
+    safe_outputs = {}
+    for node_id, node_out in outputs.items():
+        try:
+            safe_outputs[str(node_id)] = json_safe(node_out)
+        except Exception:
+            safe_outputs[str(node_id)] = node_out
+
+    return {
+        "status": json_safe(entry.get("status")),
+        "outputs": json_safe(safe_outputs),
+        "prompt": json_safe(entry.get("prompt")),
+    }
+
+async def _wait_for_completion(prompt_id: str, timeout_seconds: float | None = None) -> Dict[str, Any]:
+    """
+    Asynchronously waits for the completion of a prompt execution identified by the given prompt_id.
+    This function polls the prompt queue's history at regular intervals until the prompt is either
+    completed successfully, encounters an error, or produces outputs. If a timeout is specified,
+    it will raise a TimeoutError if the prompt does not finish within the allotted time.
+
+    Args:
+        prompt_id (str): The unique identifier of the prompt to wait for.
+        timeout_seconds (float | None, optional): The maximum time in seconds to wait for completion.
+            If None or 0, waits indefinitely. Defaults to None.
+
+    Returns:
+        Dict[str, Any]: The history entry for the prompt, containing status and outputs.
+
+    Raises:
+        TimeoutError: If the prompt does not complete within the specified timeout_seconds.
+    """
+    queue = PromptServer.instance.prompt_queue
+    start = time.perf_counter()
+    deadline = start + timeout_seconds if timeout_seconds and timeout_seconds > 0 else None
+
+    while True:
+        history = queue.get_history(prompt_id=prompt_id)
+        if prompt_id in history:
+            entry = history[prompt_id]
+            status = entry.get("status") or {}
+            if status.get("completed") is True or status.get("status_str") == "error":
+                return entry
+            if entry.get("outputs"):
+                return entry
+
+        if deadline is not None and time.perf_counter() >= deadline:
+            raise TimeoutError(f"Prompt {prompt_id} did not finish within {timeout_seconds} seconds.")
+
+        await asyncio.sleep(0.35)
+
+async def _wait_for_running(prompt_id: str, run_id: str) -> None:
+    """
+    Asynchronously waits for a prompt to start running by polling the current queue.
+
+    This function periodically checks the PromptServer's queue for the specified prompt_id
+    to determine when it has been dequeued and is running. Once detected, it updates the
+    job status to RUNNING and logs the event. If the prompt does not start within the
+    configured timeout, the loop exits without further action.
+
+    Args:
+        prompt_id (str): The unique identifier of the prompt to wait for.
+        run_id (str): The unique identifier of the run associated with the prompt.
+
+    Returns:
+        None
+
+    Raises:
+        None: Exceptions during status update or polling are caught and logged internally.
+    """
+    try:
+        timeout = RUNNER_CONFIG.prompt_timeout_seconds or 300
+        checks = int((timeout / 0.35)) if timeout > 0 else 10000 # TODO: replace with configurable value (env or runner.json)
+        for _ in range(checks):
+            running, _ = PromptServer.instance.prompt_queue.get_current_queue_volatile()
+            # running is a list of prompt items; prompt_id is item[1]
+            if any((r[1] == prompt_id) for r in running):
+                try:
+                    await set_job_status(run_id, JobStatus.RUNNING)
+                    logging.info("Run %s: marked RUNNING (prompt dequeued)", run_id)
+                except Exception:
+                    logging.exception("Failed to set job RUNNING for %s", run_id)
+                break
+            await asyncio.sleep(0.35)
+    except Exception:
+        logging.exception("Error while waiting for prompt to start for run %s", run_id)
 # endregion
 
 # region Execution
@@ -139,6 +191,8 @@ async def execute_workflow(
     extra_data.update(payload.get("extraData", {}))
 
     server.prompt_queue.put((queue_number, prompt_id, prompt, extra_data, validation[2]))
+
+    await _wait_for_running(prompt_id, run_id)
 
     try:
         history_entry = await _wait_for_completion(prompt_id, RUNNER_CONFIG.prompt_timeout_seconds)

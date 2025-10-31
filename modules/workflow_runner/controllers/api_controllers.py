@@ -4,18 +4,62 @@ import logging
 
 from aiohttp import web
 
-from ..services.auth_service import _ENABLE_GOOGLE_OAUTH, _require_auth
-from ..services.executor import WorkflowPreparationError
-from ..services.job_service import get_job_status
-from ..services.run_service import run_workflow
-from ..services.workflow_service import list_workflows as svc_list_workflows, get_workflow_content
 from ..services.auth_service import (
     create_server_session,
+    _require_auth,
     _verify_token_and_email,
+    _ENABLE_GOOGLE_OAUTH,
     _WF_DEBUG,
     _SESSION_TTL,
 )
+from ..services.executor import WorkflowPreparationError
+from ..services.job_service import get_job_status
 from ..services import job_store
+from ..services.run_service import run_workflow
+from ..services.workflow_service import list_workflows as svc_list_workflows, get_workflow_content
+
+# region Helpers
+async def _send_initial_snapshot(resp: web.Response) -> None:
+        """
+        Send an initial snapshot of active (pending or running) jobs to the SSE client.
+
+        This function retrieves all jobs from the job store, filters for those with
+        statuses PENDING or RUNNING, and sends each as an event to the client via
+        Server-Sent Events (SSE). It ensures clients receive the current state before
+        live events. If the client disconnects during sending, it stops gracefully.
+        Handles exceptions for connection issues and general failures.
+
+        Returns:
+            None
+
+        Raises:
+            Logs exceptions for failures in building or sending the snapshot.
+        """
+        try:
+            jobs = await job_store.list_jobs()
+            for job in jobs.values():
+                # only include runs that are active (pending or running)
+                if job.status in (job_store.JobStatus.PENDING, job_store.JobStatus.RUNNING):
+                    event = {
+                        "run_id": job.id,
+                        "status": job.status.value,
+                        "created_at": job.created_at,
+                        "error": job.error,
+                        "result": job.result if job.status in (job_store.JobStatus.SUCCEEDED, job_store.JobStatus.FAILED, job_store.JobStatus.CANCELLED) else None,
+                    }
+                    try:
+                        data = json.dumps(event)
+                        payload = f"event: run\ndata: {data}\n\n".encode('utf-8')
+                        await resp.write(payload)
+                        await resp.drain()
+                    except (ConnectionResetError, asyncio.CancelledError):
+                        # client disconnected while sending snapshot
+                        break
+                    except Exception:
+                        logging.exception("Failed to send snapshot event to SSE client")
+        except Exception:
+            logging.exception("Failed to build/send run snapshot for SSE client")
+# endregion
 
 # region Start
 async def start_workflow_controller(request: web.Request) -> web.Response:
@@ -111,8 +155,8 @@ async def stream_runs_controller(request: web.Request) -> web.Response:
     q = job_store.subscribe_events()
 
     try:
-        # send an initial comment to establish the stream
         await resp.write(b": connected\n\n")
+        await _send_initial_snapshot(resp)
 
         while True:
             try:
