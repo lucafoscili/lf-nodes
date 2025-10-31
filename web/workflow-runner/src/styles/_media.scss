@@ -56,7 +56,7 @@
       & .inputs-section {
         & {
           display: grid;
-          grid-template-rows: auto auto 1fr;
+          grid-template-rows: repeat(2, auto) minmax(max-content, 1fr);
         }
 
         &__cell,
