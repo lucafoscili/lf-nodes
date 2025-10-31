@@ -13,6 +13,7 @@ _settings = get_settings()
 _JOB_TTL_SECONDS = int(_settings.JOB_TTL_SECONDS or 300)
 _JOB_PRUNE_INTERVAL = int(_settings.JOB_PRUNE_INTERVAL_SECONDS or 60)
 _SESSION_PRUNE_INTERVAL = int(_settings.SESSION_PRUNE_INTERVAL_SECONDS or 60)
+_QUEUE_STATUS_INTERVAL = 1  # Send queue updates every second
 # endregion
 
 # region Helpers
@@ -62,6 +63,35 @@ async def _job_pruner_loop(job_manager_module) -> None:
             await asyncio.sleep(_JOB_PRUNE_INTERVAL)
     except asyncio.CancelledError:
         logging.debug("Job pruner cancelled")
+
+async def _queue_status_publisher_loop(job_store_module) -> None:
+    try:
+        while True:
+            try:
+                # Fetch queue status from ComfyUI
+                import aiohttp
+                async with aiohttp.ClientSession() as session:
+                    try:
+                        async with session.get('http://127.0.0.1:8188/queue') as resp:
+                            if resp.status == 200:
+                                queue_data = await resp.json()
+                                pending = len(queue_data.get('queue_pending', []))
+                                running = len(queue_data.get('queue_running', []))
+                                
+                                # Publish queue status event
+                                event = {
+                                    "type": "queue_status",
+                                    "pending": pending,
+                                    "running": running,
+                                }
+                                job_store_module.publish_event(event)
+                    except Exception:
+                        logging.debug("Failed to fetch queue status")
+            except Exception:
+                logging.exception("Error in queue status publisher")
+            await asyncio.sleep(_QUEUE_STATUS_INTERVAL)
+    except asyncio.CancelledError:
+        logging.debug("Queue status publisher cancelled")
 # endregion
 
 # region Background task management
@@ -97,7 +127,7 @@ async def start_background_tasks(app: Any) -> None:
         routes_mod = None
 
     try:
-        from .. import job_manager as job_manager_mod
+        from ..services import job_store as job_manager_mod
     except Exception:
         job_manager_mod = None
 
@@ -110,6 +140,11 @@ async def start_background_tasks(app: Any) -> None:
         task = asyncio.create_task(_job_pruner_loop(job_manager_mod))
         app["_job_pruner_task"] = task
         logging.info("Started job pruner task (ttl=%s seconds, interval=%s seconds)", _JOB_TTL_SECONDS, _JOB_PRUNE_INTERVAL)
+
+        # Start queue status publisher
+        task = asyncio.create_task(_queue_status_publisher_loop(job_manager_mod))
+        app["_queue_status_publisher_task"] = task
+        logging.info("Started queue status publisher task (interval=%s seconds)", _QUEUE_STATUS_INTERVAL)
 
     app["_workflow_runner_bg_started"] = True
 
@@ -144,6 +179,15 @@ async def stop_background_tasks(app: Any) -> None:
         except Exception:
             pass
         logging.info("Stopped job pruner task")
+
+    task = app.pop("_queue_status_publisher_task", None)
+    if task is not None:
+        task.cancel()
+        try:
+            await task
+        except Exception:
+            pass
+        logging.info("Stopped queue status publisher task")
 
     app.pop("_workflow_runner_bg_started", None)
     logging.info("Workflow-runner background tasks stopped")

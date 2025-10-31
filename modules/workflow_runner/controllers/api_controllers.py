@@ -125,7 +125,8 @@ async def stream_runs_controller(request: web.Request) -> web.Response:
                 break
 
             data = json.dumps(event)
-            payload = f"event: run\ndata: {data}\n\n".encode('utf-8')
+            event_type = "queue" if event.get("type") == "queue_status" else "run"
+            payload = f"event: {event_type}\ndata: {data}\n\n".encode('utf-8')
             try:
                 await resp.write(payload)
                 await resp.drain()

@@ -24,7 +24,6 @@ export const initState = (): WorkflowState => ({
       removeById: INIT_CB,
       removeByIndex: INIT_CB,
     },
-    pollingTimer: INIT_CB,
     results: INIT_CB,
     runs: {
       clear: INIT_CB,
@@ -38,7 +37,6 @@ export const initState = (): WorkflowState => ({
     workflows: INIT_CB,
   },
   notifications: [],
-  pollingTimer: null,
   queuedJobs: -1,
   results: null,
   runs: [],

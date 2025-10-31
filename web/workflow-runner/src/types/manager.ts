@@ -1,5 +1,4 @@
 import {
-  ComfyRawQueueStatus,
   WorkflowAPIItem,
   WorkflowCellInputId,
   WorkflowCellsInputContainer,
@@ -47,14 +46,12 @@ export interface WorkflowManager {
 }
 //#endregion
 
-//#region Polling
-export interface WorkflowPollingController {
-  startQueuePolling: () => void;
-  stopQueuePolling: () => void;
+//#region Realtime (SSE)
+export interface WorkflowRealtimeController {
+  startRealtimeUpdates: () => void;
+  stopRealtimeUpdates: () => void;
 }
-export interface WorkflowCreatePollingControllerOptions {
-  fetchQueueStatus?: () => Promise<ComfyRawQueueStatus>;
-  queueIntervalMs?: number;
+export interface WorkflowCreateRealtimeControllerOptions {
   runLifecycle: RunLifecycleController;
   store: WorkflowStore;
 }

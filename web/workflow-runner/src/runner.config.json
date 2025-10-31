@@ -14,9 +14,6 @@
     "assets": "/lf-nodes/static/assets/",
     "workflowRunner": "/lf-nodes/static-workflow-runner/"
   },
-  "polling": {
-    "queueIntervalMs": 750
-  },
   "theme": "dark",
   "promptTimeoutSeconds": 0
 }

@@ -7,6 +7,7 @@ import {
   WorkflowAPIRunPayload,
   WorkflowAPIUploadPayload,
   WorkflowAPIUploadResponse,
+  WorkflowQueueStatus,
   WorkflowRunRequestPayload,
   WorkflowRunStatusResponse,
 } from '../types/api';
@@ -146,6 +147,30 @@ export const subscribeRunEvents = (
         onEvent(data);
       } catch (err) {
         // ignore
+      }
+    });
+
+    return es;
+  } catch (err) {
+    return null;
+  }
+};
+//#endregion
+
+//#region Server-Sent Events (Queue updates)
+export const subscribeQueueEvents = (
+  onEvent: (ev: WorkflowQueueStatus) => void,
+): EventSource | null => {
+  try {
+    const url = buildApiUrl('/run/events');
+    const es = new EventSource(url);
+
+    es.addEventListener('queue', (ev: MessageEvent) => {
+      try {
+        const data = JSON.parse(ev.data) as WorkflowQueueStatus;
+        onEvent(data);
+      } catch (err) {
+        // ignore malformed messages
       }
     });
 

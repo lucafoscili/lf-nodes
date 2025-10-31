@@ -6,9 +6,9 @@ import {
 } from '@lf-widgets/foundations/dist';
 
 //#region API
-export interface ComfyRawQueueStatus {
-  queue_pending: unknown;
-  queue_running: unknown;
+export interface WorkflowQueueStatus {
+  pending: number;
+  running: number;
 }
 export interface WorkflowAPIErrorOptions<T> {
   payload?: T;

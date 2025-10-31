@@ -24,13 +24,13 @@ import {
   RunLifecycleController,
   WorkflowDispatchers,
   WorkflowManager,
-  WorkflowPollingController,
+  WorkflowRealtimeController,
   WorkflowUIItem,
 } from '../types/manager';
 import { WorkflowCellStatus, WorkflowSectionController, WorkflowUICells } from '../types/section';
 import { WorkflowRunEntry, WorkflowStore, WorkflowView } from '../types/state';
 import { NOTIFICATION_MESSAGES, STATUS_MESSAGES } from '../utils/constants';
-import { createPollingController } from './polling';
+import { createRealtimeController } from './realtime';
 import { createRoutingController } from './routing';
 import { createRunLifecycle } from './runs';
 import { changeView, resolveMainSections } from './sections';
@@ -43,7 +43,7 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
   #APP_ROOT: HTMLDivElement;
   #DISPATCHERS: WorkflowDispatchers;
   #FRAMEWORK = getLfFramework();
-  #POLLING: WorkflowPollingController;
+  #REALTIME: WorkflowRealtimeController;
   #ROUTING: RoutingController;
   #RUN_LIFECYCLE: RunLifecycleController;
   #SECTIONS: {
@@ -85,7 +85,7 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
         this.#setInputStatus(inputId, status);
       },
     });
-    this.#POLLING = createPollingController({
+    this.#REALTIME = createRealtimeController({
       runLifecycle: this.#RUN_LIFECYCLE,
       store: this.#STORE,
     });
@@ -117,7 +117,7 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
         this.#ROUTING.updateRouteFromState();
       });
 
-    this.#POLLING.startQueuePolling();
+    this.#REALTIME.startRealtimeUpdates();
   }
   //#endregion
 

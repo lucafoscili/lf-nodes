@@ -119,7 +119,7 @@ async def proxy_request(request: web.Request) -> web.Response:
                     req_path = ""
 
                 if PROXY_STREAMING_ONLY_PROXY:
-                    allowed_by_path = req_path.startswith("/api/lf-nodes/proxy") or req_path.startswith("/api/lf-nodes/run")
+                    allowed_by_path = req_path.startswith("/api/lf-nodes/proxy") or req_path.startswith("/api/lf-nodes/run") or req_path.startswith("/api/lf-nodes/queue")
                 else:
                     allowed_by_path = True
 

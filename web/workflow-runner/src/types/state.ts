@@ -25,7 +25,6 @@ export interface WorkflowState {
   inputStatuses: Record<string, WorkflowCellStatus>;
   mutate: WorkflowStateMutators;
   notifications: WorkflowStateNotification[];
-  pollingTimer: number | null;
   queuedJobs: number;
   runs: WorkflowRunEntry[];
   results: WorkflowNodeResults | null;
@@ -48,7 +47,6 @@ export interface WorkflowStateMutators {
     removeById: (id: string) => void;
     removeByIndex: (index: number) => void;
   };
-  pollingTimer: (timerId: number | null) => void;
   queuedJobs: (count: number) => void;
   results: (results: WorkflowNodeResults | null) => void;
   runId: (runId: string | null) => void;
