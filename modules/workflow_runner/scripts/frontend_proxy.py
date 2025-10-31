@@ -53,6 +53,8 @@ logging.basicConfig(level=logging.DEBUG if PROXY_DEBUG else logging.INFO, format
 # region Main handler
 async def handle(request: web.Request) -> web.Response:
     path = request.rel_url.path
+    if path == "/favicon.ico":
+        return web.Response(status=204)
     if path == "/health":
         return web.json_response({"status": "ok"}, status=200)
     for prefix in ALLOWED_PREFIXES:
