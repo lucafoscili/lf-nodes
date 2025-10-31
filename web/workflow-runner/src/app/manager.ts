@@ -218,11 +218,7 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
       const { message, status } = current;
 
       if (state.currentRunId !== lastRunId) {
-        if (state.currentRunId) {
-          this.#POLLING.beginRunPolling(state.currentRunId);
-        } else {
-          this.#POLLING.stopRunPolling();
-        }
+        // Run polling removed - SSE handles status updates
         lastRunId = state.currentRunId;
       }
 

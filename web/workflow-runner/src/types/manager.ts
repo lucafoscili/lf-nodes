@@ -49,16 +49,12 @@ export interface WorkflowManager {
 
 //#region Polling
 export interface WorkflowPollingController {
-  beginRunPolling: (runId: string) => void;
   startQueuePolling: () => void;
   stopQueuePolling: () => void;
-  stopRunPolling: () => void;
 }
 export interface WorkflowCreatePollingControllerOptions {
   fetchQueueStatus?: () => Promise<ComfyRawQueueStatus>;
-  getRunStatus?: (runId: string) => Promise<WorkflowRunStatusResponse>;
   queueIntervalMs?: number;
-  runIntervalMs?: number;
   runLifecycle: RunLifecycleController;
   store: WorkflowStore;
 }
@@ -83,7 +79,6 @@ export interface NormalizedRouteResult {
 
 //#region Run Lifecycle
 export interface RunLifecycleController {
-  handlePollingError: (error: unknown) => { shouldStopPolling: boolean };
   handleStatusResponse: (response: WorkflowRunStatusResponse) => { shouldStopPolling: boolean };
   updateProgress: (response: WorkflowRunStatusResponse) => void;
 }

@@ -84,7 +84,10 @@ export const createRunLifecycle = ({
     const payload = response.result?.body?.payload;
     const runId = response.run_id;
     const rawDetail =
-      payload?.detail ?? payload?.error?.message ?? response.error ?? STATUS_MESSAGES.ERROR_RUNNING_WORKFLOW;
+      payload?.detail ??
+      payload?.error?.message ??
+      response.error ??
+      STATUS_MESSAGES.ERROR_RUNNING_WORKFLOW;
     const detail =
       typeof rawDetail === 'string'
         ? rawDetail
@@ -200,42 +203,7 @@ export const createRunLifecycle = ({
   };
   //#endregion
 
-  //#region Error
-  const handlePollingError = (error: unknown) => {
-    const state = store.getState();
-    const detail = error instanceof Error ? error.message : STATUS_MESSAGES.ERROR_RUNNING_WORKFLOW;
-
-    setStatus(store, 'error', STATUS_MESSAGES.ERROR_RUNNING_WORKFLOW);
-
-    addNotification(store, {
-      id: performance.now().toString(),
-      message: `${WORKFLOW_STATUS_FAILED}: ${detail}`,
-      status: 'danger',
-    });
-
-    const runId = state.currentRunId;
-    if (runId) {
-      const now = Date.now();
-      upsertRun(store, {
-        runId,
-        updatedAt: now,
-        status: 'failed' as WorkflowRunStatus,
-        error: detail,
-      });
-      if (state.selectedRunId === runId) {
-        setResults(store, null);
-      }
-    }
-
-    setRunInFlight(store, null);
-    ensureActiveRun(store);
-
-    return { shouldStopPolling: true };
-  };
-  //#endregion
-
   return {
-    handlePollingError,
     handleStatusResponse,
     updateProgress,
   };
