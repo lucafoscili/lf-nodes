@@ -1,5 +1,5 @@
 import { getLfFramework } from '@lf-widgets/framework';
-import { buildApiUrl } from '../config';
+import { buildApiUrl, API_BASE, STATIC_WORKFLOW_RUNNER_PATH } from '../config';
 import {
   WorkflowAPIDataset,
   WorkflowAPIErrorOptions,
@@ -33,6 +33,15 @@ export class WorkflowApiError<TPayload = unknown> extends Error {
 export const fetchWorkflowDefinitions = async () => {
   const { syntax } = getLfFramework();
   const response = await fetch(buildApiUrl('/workflows'), { method: 'GET' });
+  if (response.status === 401) {
+    // session expired or unauthorized -> redirect to hosted login page
+    try {
+      window.location.href = `${window.location.origin}${API_BASE}${STATIC_WORKFLOW_RUNNER_PATH}login.html`;
+    } catch (err) {
+      // ignore in non-browser contexts
+    }
+    throw new WorkflowApiError('Unauthorized', { status: 401 });
+  }
   const data = (await syntax.json.parse(response)) as { workflows?: WorkflowAPIDataset } | null;
 
   if (!response.ok) {
@@ -50,6 +59,12 @@ export const fetchWorkflowDefinitions = async () => {
 export const fetchWorkflowJSON = async (workflowId: string) => {
   const { syntax } = getLfFramework();
   const response = await fetch(buildApiUrl(`/workflows/${workflowId}`), { method: 'GET' });
+  if (response.status === 401) {
+    try {
+      window.location.href = `${window.location.origin}${API_BASE}${STATIC_WORKFLOW_RUNNER_PATH}login.html`;
+    } catch (err) {}
+    throw new WorkflowApiError('Unauthorized', { status: 401 });
+  }
   const data = (await syntax.json.parse(response)) as Record<string, unknown> | null;
 
   if (!response.ok) {
@@ -72,6 +87,13 @@ export const runWorkflow = async (payload: WorkflowRunRequestPayload): Promise<s
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   });
+
+  if (response.status === 401) {
+    try {
+      window.location.href = `${window.location.origin}${API_BASE}${STATIC_WORKFLOW_RUNNER_PATH}login.html`;
+    } catch (err) {}
+    throw new WorkflowApiError('Unauthorized', { status: 401 });
+  }
 
   const data = (await syntax.json.parse(response)) as
     | WorkflowAPIResponse
@@ -104,6 +126,12 @@ export const getRunStatus = async (runId: string): Promise<WorkflowRunStatusResp
   const { syntax } = getLfFramework();
 
   const response = await fetch(buildApiUrl(`/run/${runId}/status`), { method: 'GET' });
+  if (response.status === 401) {
+    try {
+      window.location.href = `${window.location.origin}${API_BASE}${STATIC_WORKFLOW_RUNNER_PATH}login.html`;
+    } catch (err) {}
+    throw new WorkflowApiError('Unauthorized', { status: 401 });
+  }
   const data = (await syntax.json.parse(response)) as WorkflowRunStatusResponse | null;
 
   if (!response.ok || !data) {
@@ -201,6 +229,13 @@ export const uploadWorkflowFiles = async (files: File[]): Promise<WorkflowAPIUpl
     method: 'POST',
     body: formData,
   });
+
+  if (response.status === 401) {
+    try {
+      window.location.href = `${window.location.origin}${API_BASE}${STATIC_WORKFLOW_RUNNER_PATH}login.html`;
+    } catch (err) {}
+    throw new WorkflowApiError('Unauthorized', { status: 401 });
+  }
 
   const data = await syntax.json.parse(response);
   if (isWorkflowAPIUploadResponse(data)) {
