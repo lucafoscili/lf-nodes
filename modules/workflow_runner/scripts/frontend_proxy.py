@@ -24,6 +24,7 @@ from aiohttp import web, ClientSession
 DEFAULT_BACKEND = os.environ.get("COMFY_BACKEND_URL", "http://127.0.0.1:8188")
 FRONTEND_PORT = int(os.environ.get("PROXY_FRONTEND_PORT", "9188"))
 DEFAULT_PREFIXES = [
+    "/favicon.ico",
     "/queue",
     "/view",
     "/api/lf-nodes/fonts",
@@ -118,7 +119,7 @@ async def proxy_request(request: web.Request) -> web.Response:
                     req_path = ""
 
                 if PROXY_STREAMING_ONLY_PROXY:
-                    allowed_by_path = req_path.startswith("/api/lf-nodes/proxy")
+                    allowed_by_path = req_path.startswith("/api/lf-nodes/proxy") or req_path.startswith("/api/lf-nodes/run")
                 else:
                     allowed_by_path = True
 
