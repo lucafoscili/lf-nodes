@@ -43,7 +43,8 @@ input_prompt = WorkflowCell(
             "showWhenFocused": False,
             "value": "The prompt to generate the image.",
         },
-        "lfStyling": "textarea"
+        "lfStyling": "textarea",
+        "lfValue": "sports car, night, traffic lights, urban, cinematic, dramatic lighting, highly detailed, 8k",
     },
 )
 input_size = WorkflowCell(

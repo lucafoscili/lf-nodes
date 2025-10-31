@@ -3,26 +3,14 @@
     "inputs": {
       "seed": 1059651312773620,
       "steps": 12,
-      "cfg": 8,
+      "cfg": 2,
       "sampler_name": "lcm",
       "scheduler": "karras",
       "denoise": 1,
-      "model": [
-        "4",
-        0
-      ],
-      "positive": [
-        "6",
-        0
-      ],
-      "negative": [
-        "7",
-        0
-      ],
-      "latent_image": [
-        "5",
-        0
-      ]
+      "model": ["4", 0],
+      "positive": ["6", 0],
+      "negative": ["7", 0],
+      "latent_image": ["5", 0]
     },
     "class_type": "KSampler",
     "_meta": {
@@ -51,14 +39,8 @@
   },
   "6": {
     "inputs": {
-      "text": [
-        "13",
-        0
-      ],
-      "clip": [
-        "11",
-        0
-      ]
+      "text": ["13", 0],
+      "clip": ["11", 0]
     },
     "class_type": "CLIPTextEncode",
     "_meta": {
@@ -68,10 +50,7 @@
   "7": {
     "inputs": {
       "text": "text, watermark, bad quality, worst quality, nsfw",
-      "clip": [
-        "11",
-        0
-      ]
+      "clip": ["11", 0]
     },
     "class_type": "CLIPTextEncode",
     "_meta": {
@@ -80,14 +59,8 @@
   },
   "8": {
     "inputs": {
-      "samples": [
-        "3",
-        0
-      ],
-      "vae": [
-        "4",
-        2
-      ]
+      "samples": ["3", 0],
+      "vae": ["4", 2]
     },
     "class_type": "VAEDecode",
     "_meta": {
@@ -108,10 +81,7 @@
         "name": "",
         "view": "main"
       },
-      "image": [
-        "8",
-        0
-      ]
+      "image": ["8", 0]
     },
     "class_type": "LF_SaveImageForCivitAI",
     "_meta": {
@@ -121,10 +91,7 @@
   "11": {
     "inputs": {
       "stop_at_clip_layer": -2,
-      "clip": [
-        "4",
-        1
-      ]
+      "clip": ["4", 1]
     },
     "class_type": "CLIPSetLastLayer",
     "_meta": {
@@ -148,10 +115,7 @@
     "inputs": {
       "separator": ", ",
       "text_1": "best quality, masterpiece, 4k, absurdres",
-      "text_2": [
-        "12",
-        0
-      ],
+      "text_2": ["12", 0],
       "shuffle_inputs": false,
       "seed": 42,
       "ui_widget": ""
