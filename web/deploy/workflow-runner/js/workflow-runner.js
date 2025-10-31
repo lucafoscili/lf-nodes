@@ -1847,6 +1847,29 @@ const getRunStatus = async (runId) => {
   }
   return data;
 };
+const subscribeRunEvents = (onEvent) => {
+  try {
+    const url = buildApiUrl("/run/events");
+    const es = new EventSource(url);
+    es.addEventListener("run", (ev) => {
+      try {
+        const data = JSON.parse(ev.data);
+        onEvent(data);
+      } catch (err) {
+      }
+    });
+    es.addEventListener("message", (ev) => {
+      try {
+        const data = JSON.parse(ev.data);
+        onEvent(data);
+      } catch (err) {
+      }
+    });
+    return es;
+  } catch (err) {
+    return null;
+  }
+};
 const uploadWorkflowFiles = async (files) => {
   var _a2, _b2;
   const { UPLOAD_GENERIC, UPLOAD_INVALID_RESPONSE, UPLOAD_MISSING_FILE } = ERROR_MESSAGES;
@@ -2227,6 +2250,11 @@ const createPollingController = ({ fetchQueueStatus = _defaultQueueFetcher, getR
   let runTimerId = null;
   let isRunPolling = false;
   let activeRunId = null;
+  const perRunPolling = /* @__PURE__ */ new Map();
+  let sseEnabled = false;
+  let sseSource = null;
+  const MAX_CONCURRENT_RUN_REQUESTS = 3;
+  let concurrentRunRequests = 0;
   const stopRunPolling = () => {
     if (typeof runTimerId === "number") {
       window.clearInterval(runTimerId);
@@ -2261,8 +2289,7 @@ const createPollingController = ({ fetchQueueStatus = _defaultQueueFetcher, getR
     if (isRunPolling) {
       return;
     }
-    const currentState = store.getState();
-    if (currentState.currentRunId !== runId) {
+    if (activeRunId !== runId) {
       return;
     }
     isRunPolling = true;
@@ -2281,6 +2308,27 @@ const createPollingController = ({ fetchQueueStatus = _defaultQueueFetcher, getR
       isRunPolling = false;
     }
   };
+  const pollSingleRun = async (runId) => {
+    if (perRunPolling.get(runId)) {
+      return;
+    }
+    if (concurrentRunRequests >= MAX_CONCURRENT_RUN_REQUESTS) {
+      return;
+    }
+    perRunPolling.set(runId, true);
+    concurrentRunRequests += 1;
+    try {
+      const response = await getRunStatus$1(runId);
+      const { shouldStopPolling } = runLifecycle.handleStatusResponse(response);
+      if (shouldStopPolling) {
+      }
+    } catch (error) {
+      runLifecycle.handlePollingError(error);
+    } finally {
+      perRunPolling.delete(runId);
+      concurrentRunRequests = Math.max(0, concurrentRunRequests - 1);
+    }
+  };
   const startQueuePolling = () => {
     if (queueTimerId !== null) {
       return;
@@ -2290,6 +2338,29 @@ const createPollingController = ({ fetchQueueStatus = _defaultQueueFetcher, getR
     };
     poll();
     queueTimerId = window.setInterval(poll, queueIntervalMs);
+    try {
+      if (!sseEnabled) {
+        const es = subscribeRunEvents((ev) => {
+          try {
+            const { shouldStopPolling } = runLifecycle.handleStatusResponse(ev);
+          } catch (err) {
+          }
+        });
+        if (es) {
+          sseEnabled = true;
+          sseSource = es;
+          es.onerror = () => {
+            try {
+              es.close();
+            } catch {
+            }
+            sseEnabled = false;
+            sseSource = null;
+          };
+        }
+      }
+    } catch (err) {
+    }
   };
   const pollQueue = async () => {
     try {
@@ -2301,6 +2372,14 @@ const createPollingController = ({ fetchQueueStatus = _defaultQueueFetcher, getR
       const prev = state.queuedJobs ?? -1;
       if (busy !== prev) {
         state.mutate.queuedJobs(busy);
+      }
+      if (!sseEnabled) {
+        const activeRuns = state.runs.filter((r) => ["pending", "running"].includes(r.status));
+        for (const run of activeRuns) {
+          if (run.runId) {
+            void pollSingleRun(run.runId);
+          }
+        }
       }
     } catch (error) {
       const state = store.getState();
