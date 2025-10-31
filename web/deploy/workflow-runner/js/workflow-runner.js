@@ -294,15 +294,17 @@ const _createDataset$1 = (workflows) => {
   const dataset = {
     nodes: [root]
   };
+  categories.sort((a, b) => String(a.value).localeCompare(String(b.value)));
   return dataset;
 };
 const _getIcon = (category) => {
-  const { alertTriangle, codeCircle2, photo, json, robot } = getLfFramework().theme.get.icons();
+  const { alertTriangle, codeCircle2, photo, json, robot, wand } = getLfFramework().theme.get.icons();
   const category_icons = {
-    "Image Processing": photo,
+    "Image Processing": wand,
     JSON: json,
     LLM: robot,
-    SVG: codeCircle2
+    SVG: codeCircle2,
+    "Text to Image": photo
   };
   return category_icons[category] || alertTriangle;
 };
