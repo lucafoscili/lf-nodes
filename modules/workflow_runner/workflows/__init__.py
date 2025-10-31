@@ -9,6 +9,7 @@ _WORKFLOW_MODULES: Sequence[str] = (
     "simple_chat",
     "sort_json_keys",
     "svg_generation_gemini",
+    "t2i_15_lcm",
 )
 
 # region Workflow Imports
