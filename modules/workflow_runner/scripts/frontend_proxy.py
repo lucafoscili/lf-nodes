@@ -43,7 +43,7 @@ if _allowed:
 else:
     ALLOWED_PREFIXES = DEFAULT_PREFIXES
 
-PROXY_DEBUG = os.environ.get("PROXY_DEBUG", "0").lower() in ("1", "true", "yes")
+PROXY_DEBUG = os.environ.get("WORKFLOW_RUNNER_DEBUG", "0").lower() in ("1", "true", "yes")
 logging.basicConfig(level=logging.DEBUG if PROXY_DEBUG else logging.INFO, format="[frontend-proxy] %(levelname)s: %(message)s")
 # endregion
 
@@ -98,6 +98,53 @@ async def proxy_request(request: web.Request) -> web.Response:
     async with ClientSession() as sess:
         try:
             async with sess.request(method, upstream, data=data, headers=headers, allow_redirects=False) as resp:
+                # Determine if we should stream the response instead of buffering it.
+                content_type = resp.headers.get("Content-Type", "")
+                transfer_enc = resp.headers.get("Transfer-Encoding", "")
+                should_stream = False
+                try:
+                    if content_type.lower().startswith("text/event-stream"):
+                        should_stream = True
+                    elif transfer_enc.lower() == "chunked":
+                        should_stream = True
+                except Exception:
+                    should_stream = False
+
+                # If streaming, forward chunks directly to the caller without
+                # buffering the entire response in memory. Preserve most
+                # response headers except hop-by-hop headers.
+                if should_stream:
+                    sresp = web.StreamResponse(status=resp.status, reason=resp.reason)
+                    # copy headers (skip hop-by-hop)
+                    for name, value in resp.headers.items():
+                        lname = name.lower()
+                        if lname in ("connection", "keep-alive", "proxy-authenticate", "proxy-authorization", "te", "trailers", "transfer-encoding", "upgrade"):
+                            continue
+                        try:
+                            sresp.headers.add(name, value)
+                        except Exception:
+                            sresp.headers[name] = value
+
+                    await sresp.prepare(request)
+                    try:
+                        async for chunk in resp.content.iter_chunked(1024):
+                            if not chunk:
+                                continue
+                            try:
+                                await sresp.write(chunk)
+                                await sresp.drain()
+                            except (ConnectionResetError, asyncio.CancelledError):
+                                break
+                            except Exception:
+                                logging.exception("Failed to write chunk to client for %s -> %s", request.remote, upstream)
+                        return sresp
+                    finally:
+                        try:
+                            await sresp.write_eof()
+                        except Exception:
+                            pass
+
+                # Non-streaming: buffer and return as a normal response
                 body = await resp.read()
                 response = web.Response(status=resp.status, body=body)
                 for name, value in resp.headers.items():

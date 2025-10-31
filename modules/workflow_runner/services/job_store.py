@@ -1,5 +1,7 @@
 import asyncio
 import time
+import logging
+import json
 
 from dataclasses import dataclass, field
 from enum import Enum
@@ -23,6 +25,8 @@ class Job:
 _jobs: Dict[str, Job] = {}
 _lock = asyncio.Lock()
 _subscribers: list[asyncio.Queue] = []
+
+LOG = logging.getLogger(__name__)
 
 # region create
 async def create_job(job_id: str) -> Job:
@@ -70,7 +74,24 @@ async def set_job_status(
             job.result = result
         if error is not None:
             job.error = error
-        return job
+        updated = job
+
+    # Notify subscribers outside of the lock to avoid blocking other callers.
+    event = {
+        "run_id": updated.id,
+        "status": updated.status.value,
+        "created_at": updated.created_at,
+        "error": updated.error,
+        "result": updated.result if updated.status in {JobStatus.SUCCEEDED, JobStatus.FAILED, JobStatus.CANCELLED} else None,
+    }
+    for q in list(_subscribers):
+        try:
+            q.put_nowait(event)
+        except Exception:
+            # If a subscriber's queue is full or closed, best-effort ignore.
+            pass
+
+    return updated
 
 async def list_jobs() -> Dict[str, Job]:
     async with _lock:
@@ -109,3 +130,25 @@ def unsubscribe_events(q: asyncio.Queue) -> None:
     except ValueError:
         pass
 # endregion
+
+
+def publish_event(event: Dict[str, Any]) -> None:
+    """Publish an arbitrary event dict to all subscribers.
+
+    This is useful for streaming proxy outputs (kobold messages) into the
+    same SSE channel used for run updates. The event dict should be JSON
+    serializable and include an identifying key (for example, 'type' or
+    'run_id').
+    """
+    # Log a brief summary of the published event for debugging (avoid huge payloads)
+    try:
+        summary = event if isinstance(event, dict) and len(json.dumps(event)) < 1000 else {k: event.get(k) for k in ("type", "run_id") if isinstance(event, dict) and k in event}
+        LOG.info("Publishing event to %d subscribers: %s", len(_subscribers), summary)
+    except Exception:
+        LOG.exception("Failed creating publish_event summary")
+
+    for q in list(_subscribers):
+        try:
+            q.put_nowait(event)
+        except Exception:
+            LOG.exception("Failed to enqueue event to subscriber queue")

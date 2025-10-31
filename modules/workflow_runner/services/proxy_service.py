@@ -17,7 +17,23 @@ SERVICES: Dict[str, Dict[str, Any]] = {
         "allowed_paths": [
             "/api/v1/generate",
             "/api/v1/generate/stream",
+            # Accept the OpenAI-compatible chat completions path when the
+            # upstream implements the OpenAI-compatible API.
+            "/v1/chat/completions",
+            "/v1/chat/completions/stream",
         ],
+        # If the upstream implements an OpenAI-compatible API at /v1/chat/completions
+        # set map_openai_to_generate to False so incoming OpenAI-style proxypaths
+        # (e.g., v1/chat/completions) are forwarded directly instead of being
+        # remapped to the legacy /api/v1/generate paths. Set to False for servers
+        # that expose OpenAI-compatible endpoints (koboldcpp builds that enable
+        # the OpenAI route).
+        "map_openai_to_generate": False,
+    # When true, forward upstream SSE exactly as raw `data:` lines and
+    # avoid sending the wrapper `event: proxy` messages. This helps
+    # OpenAI-compatible frontends that listen for default SSE `message`
+    # events and expect `data: {...}` lines.
+    "forward_raw_sse": True,
         "timeout": 60,
     },
     "gemini": {
@@ -162,12 +178,22 @@ def _build_upstream_and_headers(cfg: Dict[str, Any], body: Dict[str, Any], proxy
 
         allowed = cfg.get("allowed_paths")
         mapped_for_openai_chat = False
+        stream = body.get("stream")
+        # Allow services to opt-out of the automatic mapping from OpenAI-style
+        # `/v1/chat/completions` to the legacy `/api/v1/generate` endpoints. Some
+        # upstreams implement an OpenAI-compatible API and should receive the
+        # original path instead of being remapped.
+        map_openai = bool(cfg.get("map_openai_to_generate", True))
         if path.lstrip("/").startswith("v1/chat/completions"):
             mapped_for_openai_chat = True
-            if bool(body.get("stream")):
-                path = "/api/v1/generate"
+            if map_openai:
+                if bool(stream):
+                    path = "/api/v1/generate/stream"
+                else:
+                    path = "/api/v1/generate"
             else:
-                path = "/api/v1/generate"
+                # Do not remap; forward the OpenAI-compatible path as-is.
+                path = "/v1/chat/completions"
 
         if isinstance(allowed, list) and path not in allowed:
             raise web.HTTPBadRequest(text=json.dumps({"detail": "path_not_allowed", "path": path}))
@@ -230,6 +256,8 @@ def _build_upstream_and_headers(cfg: Dict[str, Any], body: Dict[str, Any], proxy
                 forward_body["top_k"] = int(top_k)
             if isinstance(min_p, (int, float)):
                 forward_body["min_p"] = float(min_p)
+            if isinstance(stream, bool):
+                forward_body["stream"] = stream
             if isinstance(repetition_penalty, (int, float)):
                 forward_body["repetition_penalty"] = float(repetition_penalty)
             if stop is not None:
