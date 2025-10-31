@@ -1075,6 +1075,7 @@ const createResultsSection = (store) => {
   };
   const render = () => {
     var _a;
+    const { syntax } = getLfFramework();
     const state = store.getState();
     const { manager } = state;
     const { uiRegistry } = manager;
@@ -1115,11 +1116,13 @@ const createResultsSection = (store) => {
         const heading = document.createElement("h4");
         heading.className = RESULTS_CLASSES.subtitle;
         heading.textContent = label;
-        wrapper.appendChild(heading);
         const code = createComponent.code({
-          lfLanguage: "json",
+          lfLanguage: syntax.json.isLikeString(content) ? "json" : "markdown",
+          lfStickyHeader: false,
+          lfUiState: "danger",
           lfValue: content
         });
+        wrapper.appendChild(heading);
         wrapper.appendChild(code);
         element.appendChild(wrapper);
       };
@@ -1820,6 +1823,7 @@ const subscribeRunEvents = (onEvent) => {
         const data = JSON.parse(ev.data);
         onEvent(data);
       } catch (err) {
+        debugLog("Failed to parse run event data:", err);
       }
     });
     es.addEventListener("message", (ev) => {
@@ -1827,6 +1831,7 @@ const subscribeRunEvents = (onEvent) => {
         const data = JSON.parse(ev.data);
         onEvent(data);
       } catch (err) {
+        debugLog("Failed to parse run event data:", err);
       }
     });
     return es;
@@ -1843,6 +1848,7 @@ const subscribeQueueEvents = (onEvent) => {
         const data = JSON.parse(ev.data);
         onEvent(data);
       } catch (err) {
+        debugLog("Failed to parse queue event data:", err);
       }
     });
     return es;
