@@ -22,13 +22,30 @@ class Job:
 
 _jobs: Dict[str, Job] = {}
 _lock = asyncio.Lock()
+_subscribers: list[asyncio.Queue] = []
 
 # region create
 async def create_job(job_id: str) -> Job:
     async with _lock:
         job = Job(id=job_id)
         _jobs[job_id] = job
-        return job
+        updated = job
+
+    event = {
+        "run_id": updated.id,
+        "status": updated.status.value,
+        "created_at": updated.created_at,
+        "error": updated.error,
+        "result": updated.result if updated.status in {JobStatus.SUCCEEDED, JobStatus.FAILED, JobStatus.CANCELLED} else None,
+    }
+    for q in list(_subscribers):
+        try:
+            q.put_nowait(event)
+        except Exception:
+            # If a subscriber's queue is full or closed, best-effort ignore.
+            pass
+
+    return updated
 # endregion
 
 # region read/update/delete
@@ -73,3 +90,22 @@ __all__ = [
     "remove_job",
     "set_job_status",
 ]
+
+# region PubSub for job events
+def subscribe_events() -> asyncio.Queue:
+    """
+    Return a new asyncio.Queue that will receive job event dicts.
+
+    Caller is responsible for consuming and ensuring the queue does not grow
+    unbounded. Use `unsubscribe_events` to remove the queue when done.
+    """
+    q: asyncio.Queue = asyncio.Queue()
+    _subscribers.append(q)
+    return q
+
+def unsubscribe_events(q: asyncio.Queue) -> None:
+    try:
+        _subscribers.remove(q)
+    except ValueError:
+        pass
+# endregion

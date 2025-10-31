@@ -64,6 +64,13 @@ async def route_run_status(request: web.Request) -> web.Response:
     return await api_controllers.get_workflow_status_controller(request)
 # endregion
 
+# region Run Events (SSE)
+@PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/run/events")
+async def route_run_events(request: web.Request) -> web.Response:
+    api_controllers = _get_api_controllers()
+    return await api_controllers.stream_runs_controller(request)
+# endregion
+
 # region Workflows
 @PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/workflows")
 async def route_list_workflows(request: web.Request) -> web.Response:

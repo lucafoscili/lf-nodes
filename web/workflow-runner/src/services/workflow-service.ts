@@ -123,6 +123,39 @@ export const getRunStatus = async (runId: string): Promise<WorkflowRunStatusResp
 };
 //#endregion
 
+//#region Server-Sent Events (Run updates)
+export const subscribeRunEvents = (
+  onEvent: (ev: WorkflowRunStatusResponse) => void,
+): EventSource | null => {
+  try {
+    const url = buildApiUrl('/run/events');
+    const es = new EventSource(url);
+
+    es.addEventListener('run', (ev: MessageEvent) => {
+      try {
+        const data = JSON.parse(ev.data) as WorkflowRunStatusResponse;
+        onEvent(data);
+      } catch (err) {
+        // ignore malformed messages
+      }
+    });
+
+    es.addEventListener('message', (ev: MessageEvent) => {
+      try {
+        const data = JSON.parse(ev.data) as WorkflowRunStatusResponse;
+        onEvent(data);
+      } catch (err) {
+        // ignore
+      }
+    });
+
+    return es;
+  } catch (err) {
+    return null;
+  }
+};
+//#endregion
+
 //#region Upload image
 export const uploadWorkflowFiles = async (files: File[]): Promise<WorkflowAPIUploadResponse> => {
   const { UPLOAD_GENERIC, UPLOAD_INVALID_RESPONSE, UPLOAD_MISSING_FILE } = ERROR_MESSAGES;

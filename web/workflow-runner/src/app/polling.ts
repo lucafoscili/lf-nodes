@@ -1,5 +1,5 @@
 import { POLLING_INTERVALS } from '../config';
-import { getRunStatus as fetchRunStatus } from '../services/workflow-service';
+import { getRunStatus as fetchRunStatus, subscribeRunEvents } from '../services/workflow-service';
 import { ComfyRawQueueStatus } from '../types/api';
 import {
   WorkflowCreatePollingControllerOptions,
@@ -31,6 +31,11 @@ export const createPollingController = ({
   let runTimerId: number | null = null;
   let isRunPolling = false;
   let activeRunId: string | null = null;
+  const perRunPolling = new Map<string, boolean>();
+  let sseEnabled = false;
+  let sseSource: EventSource | null = null;
+  const MAX_CONCURRENT_RUN_REQUESTS = 3;
+  let concurrentRunRequests = 0;
 
   //#region Stop
   const stopRunPolling = () => {
@@ -73,8 +78,7 @@ export const createPollingController = ({
       return;
     }
 
-    const currentState = store.getState();
-    if (currentState.currentRunId !== runId) {
+    if (activeRunId !== runId) {
       return;
     }
 
@@ -94,6 +98,32 @@ export const createPollingController = ({
       isRunPolling = false;
     }
   };
+
+  const pollSingleRun = async (runId: string) => {
+    if (perRunPolling.get(runId)) {
+      return;
+    }
+
+    if (concurrentRunRequests >= MAX_CONCURRENT_RUN_REQUESTS) {
+      return;
+    }
+
+    perRunPolling.set(runId, true);
+    concurrentRunRequests += 1;
+    try {
+      const response = await getRunStatus(runId);
+      const { shouldStopPolling } = runLifecycle.handleStatusResponse(response);
+      if (shouldStopPolling) {
+        // nothing extra to do here; lifecycle already handled removal of
+        // current run if needed.
+      }
+    } catch (error) {
+      runLifecycle.handlePollingError(error);
+    } finally {
+      perRunPolling.delete(runId);
+      concurrentRunRequests = Math.max(0, concurrentRunRequests - 1);
+    }
+  };
   const startQueuePolling = () => {
     if (queueTimerId !== null) {
       return;
@@ -105,6 +135,30 @@ export const createPollingController = ({
 
     poll();
     queueTimerId = window.setInterval(poll, queueIntervalMs);
+    try {
+      if (!sseEnabled) {
+        const es = subscribeRunEvents((ev) => {
+          try {
+            const { shouldStopPolling } = runLifecycle.handleStatusResponse(ev as any);
+            // lifecycle will handle run in-flight changes; we don't explicitly
+            // stop per-run polling here because SSE is authoritative.
+          } catch (err) {}
+        });
+        if (es) {
+          sseEnabled = true;
+          sseSource = es;
+          es.onerror = () => {
+            try {
+              es.close();
+            } catch {}
+            sseEnabled = false;
+            sseSource = null;
+          };
+        }
+      }
+    } catch (err) {
+      // ignore
+    }
   };
   //#endregion
 
@@ -121,6 +175,14 @@ export const createPollingController = ({
       const prev = state.queuedJobs ?? -1;
       if (busy !== prev) {
         state.mutate.queuedJobs(busy);
+      }
+      if (!sseEnabled) {
+        const activeRuns = state.runs.filter((r) => ['pending', 'running'].includes(r.status));
+        for (const run of activeRuns) {
+          if (run.runId) {
+            void pollSingleRun(run.runId);
+          }
+        }
       }
     } catch (error) {
       const state = store.getState();

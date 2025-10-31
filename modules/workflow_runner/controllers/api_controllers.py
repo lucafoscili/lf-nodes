@@ -1,3 +1,4 @@
+import asyncio
 import json
 import logging
 
@@ -14,6 +15,7 @@ from ..services.auth_service import (
     _WF_DEBUG,
     _SESSION_TTL,
 )
+from ..services import job_store
 
 # region Start
 async def start_workflow_controller(request: web.Request) -> web.Response:
@@ -82,6 +84,59 @@ async def get_workflow_status_controller(request: web.Request) -> web.Response:
     if status is None:
         raise web.HTTPNotFound(text="Unknown run id")
     return web.json_response(status)
+# endregion
+
+# region Events (SSE)
+async def stream_runs_controller(request: web.Request) -> web.Response:
+    """
+    Server-Sent Events endpoint streaming job status updates.
+
+    Each connected client receives events of shape matching the job status
+    payloads produced by `job_store`. The client should send an `Accept:` or
+    simply open an EventSource to this endpoint.
+    """
+    # Optional auth for SSE — re-use existing auth flow if enabled.
+    if _ENABLE_GOOGLE_OAUTH:
+        auth_resp = await _require_auth(request)
+        if isinstance(auth_resp, web.Response):
+            return auth_resp
+
+    resp = web.StreamResponse(status=200, reason='OK')
+    resp.content_type = 'text/event-stream'
+    resp.headers['Cache-Control'] = 'no-cache'
+    resp.headers['Connection'] = 'keep-alive'
+
+    await resp.prepare(request)
+
+    q = job_store.subscribe_events()
+
+    try:
+        # send an initial comment to establish the stream
+        await resp.write(b": connected\n\n")
+
+        while True:
+            try:
+                event = await q.get()
+            except asyncio.CancelledError:
+                break
+
+            if event is None:
+                # sentinel to close
+                break
+
+            data = json.dumps(event)
+            payload = f"event: run\ndata: {data}\n\n".encode('utf-8')
+            try:
+                await resp.write(payload)
+                await resp.drain()
+            except (ConnectionResetError, asyncio.CancelledError):
+                break
+
+            # periodic keepalive handled by the event loop if needed
+    finally:
+        job_store.unsubscribe_events(q)
+
+    return resp
 # endregion
 
 # region List
