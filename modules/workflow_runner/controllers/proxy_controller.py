@@ -57,74 +57,22 @@ async def proxy_service(request: web.Request) -> web.Response:
             body_text = ""
 
         try:
-            LOG.info("Raw proxy request body (trunc 1000): %s", (body_text[:1000] + "...") if isinstance(body_text, str) and len(body_text) > 1000 else body_text)
+            LOG.debug("Raw proxy request body (trunc 1000): %s", (body_text[:1000] + "...") if isinstance(body_text, str) and len(body_text) > 1000 else body_text)
         except Exception:
             LOG.exception("Failed to log raw proxy request body")
 
         try:
             body = json.loads(body_text) if body_text else {}
         except Exception:
-            # Attempt to parse a JS-like object literal (unquoted keys) that some clients send
-            try:
-                def _parse_js_like(text: str) -> dict:
-                    out: dict = {}
-                    # stream flag
-                    m = re.search(r"\bstream\s*:\s*(true|false)", text, re.IGNORECASE)
-                    if m:
-                        out["stream"] = m.group(1).lower() == "true"
-
-                    # numeric fields
-                    for k in ("temperature", "max_tokens", "seed", "max_length", "top_k", "top_p"):
-                        m = re.search(rf"\b{k}\s*:\s*([-+]?[0-9]*\.?[0-9]+)", text)
-                        if m:
-                            val = m.group(1)
-                            try:
-                                if "." in val:
-                                    out[k] = float(val)
-                                else:
-                                    out[k] = int(val)
-                            except Exception:
-                                out[k] = float(val)
-
-                    # messages array parsing (simple heuristic)
-                    mm = re.search(r"messages\s*:\s*\[(.*?)\]\s*(,|\})", text, re.S)
-                    if mm:
-                        entries = mm.group(1)
-                        parts = re.split(r"\},\s*\{", entries)
-                        msgs = []
-                        for part in parts:
-                            p = part.strip().lstrip("{").rstrip("}")
-                            # role
-                            mr = re.search(r"role\s*:\s*([a-zA-Z0-9_\'\"]+)", p)
-                            mc = re.search(r"content\s*:\s*(.+)$", p, re.S)
-                            role = "user"
-                            if mr:
-                                role = mr.group(1).strip().strip('\"\'')
-                            content = ""
-                            if mc:
-                                content = mc.group(1).strip().rstrip(',').strip()
-                                # strip quotes if present
-                                if (content.startswith('"') and content.endswith('"')) or (content.startswith("'") and content.endswith("'")):
-                                    content = content[1:-1]
-                            msgs.append({"role": role, "content": content})
-                        out["messages"] = msgs
-
-                    return out
-
-                body = _parse_js_like(body_text) if body_text else {}
-            except Exception:
-                try:
-                    body = await request.json()
-                except Exception:
-                    body = {}
+            body = {}
 
         try:
             if isinstance(body, dict):
-                LOG.info("Parsed proxy request body keys=%s", list(body.keys()))
+                LOG.debug("Parsed proxy request body keys=%s", list(body.keys()))
                 if body.get("messages") and isinstance(body.get("messages"), list):
-                    LOG.info("First message preview: %s", str(body.get("messages")[0])[:200])
-            else:
-                LOG.info("Parsed proxy request body type=%s", type(body))
+                    LOG.debug("First message preview: %s", str(body.get("messages")[0])[:200])
+                else:
+                    LOG.debug("Parsed proxy request body type=%s", type(body))
         except Exception:
             LOG.exception("Failed logging parsed proxy request body")
 
@@ -147,9 +95,8 @@ async def proxy_service(request: web.Request) -> web.Response:
 
         async with aiohttp.ClientSession() as sess:
             try:
-                # Log what we're forwarding upstream so we can verify prompt mapping
                 try:
-                    LOG.info("Proxy upstream=%s forward_body_keys=%s", upstream, list(forward_body.keys()) if isinstance(forward_body, dict) else str(type(forward_body)))
+                    LOG.debug("Proxy upstream=%s forward_body_keys=%s", upstream, list(forward_body.keys()) if isinstance(forward_body, dict) else str(type(forward_body)))
                     if isinstance(forward_body, dict):
                         # Log truncated prompt if present
                         if "prompt" in forward_body:
@@ -185,7 +132,7 @@ async def proxy_service(request: web.Request) -> web.Response:
                             chunk_idx = 0
                             stream_start = time()
                             try:
-                                LOG.info("Streaming start trace_id=%s upstream=%s service=%s", trace_id, upstream, service)
+                                LOG.debug("Streaming start trace_id=%s upstream=%s service=%s", trace_id, upstream, service)
                             except Exception:
                                 pass
 
@@ -196,7 +143,7 @@ async def proxy_service(request: web.Request) -> web.Response:
                                 now = time()
                                 elapsed_ms = int((now - stream_start) * 1000)
                                 try:
-                                    LOG.info("Upstream chunk idx=%d len=%d elapsed_ms=%d", chunk_idx, len(chunk), elapsed_ms)
+                                    LOG.debug("Upstream chunk idx=%d len=%d elapsed_ms=%d", chunk_idx, len(chunk), elapsed_ms)
                                 except Exception:
                                     pass
 
@@ -209,7 +156,7 @@ async def proxy_service(request: web.Request) -> web.Response:
                                 if first_chunk:
                                     try:
                                         preview = text_chunk[:1000]
-                                        LOG.info("First upstream chunk preview: %s", preview)
+                                        LOG.debug("First upstream chunk preview: %s", preview)
                                     except Exception:
                                         LOG.exception("Failed to log first upstream chunk preview")
                                     first_chunk = False
@@ -321,7 +268,7 @@ async def proxy_service(request: web.Request) -> web.Response:
                                         LOG.exception("Failed to write raw SSE chunk to client")
 
                             try:
-                                LOG.info("Streaming finished trace_id=%s upstream=%s service=%s total_chunks=%d total_elapsed_ms=%d", trace_id, upstream, service, chunk_idx, int((time() - stream_start) * 1000))
+                                LOG.debug("Streaming finished trace_id=%s upstream=%s service=%s total_chunks=%d total_elapsed_ms=%d", trace_id, upstream, service, chunk_idx, int((time() - stream_start) * 1000))
                             except Exception:
                                 pass
 
@@ -412,7 +359,7 @@ async def proxy_service_with_path(request: web.Request) -> web.Response:
         # Log the incoming request early so we know the route was matched
         try:
             hdrs = {k: request.headers.get(k) for k in ("Content-Type", "Origin", "User-Agent") if request.headers.get(k)}
-            LOG.info("Incoming proxy_with_path request: %s %s from=%s headers=%s", request.method, request.path, request.remote, hdrs)
+            LOG.debug("Incoming proxy_with_path request: %s %s from=%s headers=%s", request.method, request.path, request.remote, hdrs)
         except Exception:
             LOG.exception("Failed to log incoming proxy request")
 
@@ -445,7 +392,7 @@ async def proxy_service_with_path(request: web.Request) -> web.Response:
             body_text = ""
 
         try:
-            LOG.info("Raw proxy (path) request body (trunc 1000): %s", (body_text[:1000] + "...") if isinstance(body_text, str) and len(body_text) > 1000 else body_text)
+            LOG.debug("Raw proxy (path) request body (trunc 1000): %s", (body_text[:1000] + "...") if isinstance(body_text, str) and len(body_text) > 1000 else body_text)
         except Exception:
             LOG.exception("Failed to log raw proxy (path) request body")
 
@@ -460,7 +407,7 @@ async def proxy_service_with_path(request: web.Request) -> web.Response:
                 peer = request.transport.get_extra_info("peername") if request.transport is not None else None
             except Exception:
                 peer = None
-            LOG.info("Proxy (path) request meta trace_id=%s remote=%s peer=%s ua=%s xff=%s content_type=%s content_length=%s", trace_id, request.remote, peer, ua, xff, ct, cl)
+            LOG.debug("Proxy (path) request meta trace_id=%s remote=%s peer=%s ua=%s xff=%s content_type=%s content_length=%s", trace_id, request.remote, peer, ua, xff, ct, cl)
         except Exception:
             LOG.exception("Failed to log proxy (path) request meta")
 
@@ -483,11 +430,11 @@ async def proxy_service_with_path(request: web.Request) -> web.Response:
         upstream, headers, timeout, forward_body = proxy_svc._build_upstream_and_headers(cfg, body, proxypath=proxypath)
         # Log what we're forwarding upstream so we can verify prompt mapping
         try:
-            LOG.info("Proxy upstream=%s forward_body_keys=%s", upstream, list(forward_body.keys()) if isinstance(forward_body, dict) else str(type(forward_body)))
+            LOG.debug("Proxy upstream=%s forward_body_keys=%s", upstream, list(forward_body.keys()) if isinstance(forward_body, dict) else str(type(forward_body)))
             if isinstance(forward_body, dict):
                 if "prompt" in forward_body:
                     p = forward_body.get("prompt")
-                    LOG.info("Proxy forward prompt (trunc): %s", (p[:1000] + "...") if isinstance(p, str) and len(p) > 1000 else p)
+                    LOG.debug("Proxy forward prompt (trunc): %s", (p[:1000] + "...") if isinstance(p, str) and len(p) > 1000 else p)
             # Warn if upstream forward body looks like it's missing messages/prompts
             try:
                 if isinstance(forward_body, dict):
@@ -520,7 +467,7 @@ async def proxy_service_with_path(request: web.Request) -> web.Response:
                             chunk_idx = 0
                             stream_start = time()
                             try:
-                                LOG.info("Streaming start (proxypath) trace_id=%s upstream=%s service=%s proxypath=%s", trace_id, upstream, service, proxypath)
+                                LOG.debug("Streaming start (proxypath) trace_id=%s upstream=%s service=%s proxypath=%s", trace_id, upstream, service, proxypath)
                             except Exception:
                                 pass
 
@@ -531,7 +478,7 @@ async def proxy_service_with_path(request: web.Request) -> web.Response:
                                 now = time()
                                 elapsed_ms = int((now - stream_start) * 1000)
                                 try:
-                                    LOG.info("Upstream chunk (proxypath) idx=%d len=%d elapsed_ms=%d", chunk_idx, len(chunk), elapsed_ms)
+                                    LOG.debug("Upstream chunk (proxypath) idx=%d len=%d elapsed_ms=%d", chunk_idx, len(chunk), elapsed_ms)
                                 except Exception:
                                     pass
 
@@ -573,7 +520,7 @@ async def proxy_service_with_path(request: web.Request) -> web.Response:
                                     LOG.exception("Failed to write raw SSE chunk to client (proxypath)")
 
                             try:
-                                LOG.info("Streaming finished (proxypath) trace_id=%s upstream=%s service=%s proxypath=%s total_chunks=%d total_elapsed_ms=%d", trace_id, upstream, service, proxypath, chunk_idx, int((time() - stream_start) * 1000))
+                                LOG.debug("Streaming finished (proxypath) trace_id=%s upstream=%s service=%s proxypath=%s total_chunks=%d total_elapsed_ms=%d", trace_id, upstream, service, proxypath, chunk_idx, int((time() - stream_start) * 1000))
                             except Exception:
                                 pass
 
