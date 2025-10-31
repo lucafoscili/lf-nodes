@@ -26,6 +26,7 @@ FRONTEND_PORT = int(os.environ.get("PROXY_FRONTEND_PORT", "9188"))
 DEFAULT_PREFIXES = [
     "/queue",
     "/view",
+    "/api/lf-nodes/fonts",
     "/api/lf-nodes/js",
     "/api/lf-nodes/proxy",
     "/api/lf-nodes/run",
