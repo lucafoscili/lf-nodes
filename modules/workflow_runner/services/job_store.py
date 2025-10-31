@@ -133,20 +133,14 @@ def unsubscribe_events(q: asyncio.Queue) -> None:
 
 
 def publish_event(event: Dict[str, Any]) -> None:
-    """Publish an arbitrary event dict to all subscribers.
+    """
+    Publish an arbitrary event dict to all subscribers.
 
     This is useful for streaming proxy outputs (kobold messages) into the
     same SSE channel used for run updates. The event dict should be JSON
     serializable and include an identifying key (for example, 'type' or
     'run_id').
     """
-    # Log a brief summary of the published event for debugging (avoid huge payloads)
-    try:
-        summary = event if isinstance(event, dict) and len(json.dumps(event)) < 1000 else {k: event.get(k) for k in ("type", "run_id") if isinstance(event, dict) and k in event}
-        LOG.info("Publishing event to %d subscribers: %s", len(_subscribers), summary)
-    except Exception:
-        LOG.exception("Failed creating publish_event summary")
-
     for q in list(_subscribers):
         try:
             q.put_nowait(event)

@@ -17,7 +17,6 @@ from ..services import job_store
 
 if TYPE_CHECKING:
     from ..services import proxy_service as proxy_service_typing
-
 # Import the services proxy module explicitly to avoid name shadowing with the
 # route handler function (the handler is named `proxy_service`). We import
 # by full module path to make sure we get the submodule object, not a
@@ -119,7 +118,6 @@ async def proxy_service(request: web.Request) -> web.Response:
                 except Exception:
                     body = {}
 
-        # Log parsed request body so we can verify what was received
         try:
             if isinstance(body, dict):
                 LOG.info("Parsed proxy request body keys=%s", list(body.keys()))
@@ -130,8 +128,6 @@ async def proxy_service(request: web.Request) -> web.Response:
         except Exception:
             LOG.exception("Failed logging parsed proxy request body")
 
-        # Additional diagnostic: if the parsed body is empty, log headers and a truncated raw body so
-        # we can identify the caller (user-agent / forwarded-for / peer)
         try:
             if not body:
                 ua = request.headers.get("User-Agent", "")
@@ -158,7 +154,6 @@ async def proxy_service(request: web.Request) -> web.Response:
                         # Log truncated prompt if present
                         if "prompt" in forward_body:
                             p = forward_body.get("prompt")
-                            LOG.info("Proxy forward prompt (trunc): %s", (p[:1000] + "...") if isinstance(p, str) and len(p) > 1000 else p)
                     # Warn if upstream forward body looks like it's missing messages/prompts
                     try:
                         if isinstance(forward_body, dict):
@@ -295,10 +290,6 @@ async def proxy_service(request: web.Request) -> web.Response:
                                     try:
                                         await sresp.write(raw.encode("utf-8"))
                                         await sresp.drain()
-                                        try:
-                                            LOG.info("Wrote raw-only SSE chunk idx=%d to client elapsed_ms=%d", chunk_idx, elapsed_ms)
-                                        except Exception:
-                                            pass
                                     except (ConnectionResetError, asyncio.CancelledError):
                                         break
                                     except Exception:
@@ -317,10 +308,6 @@ async def proxy_service(request: web.Request) -> web.Response:
                                             payload = json.dumps({"service": service, "chunk": text_chunk})
                                             await sresp.write(f"event: proxy\ndata: {payload}\n\n".encode("utf-8"))
                                             await sresp.drain()
-                                        try:
-                                            LOG.info("Wrote chunk idx=%d to client elapsed_ms=%d", chunk_idx, elapsed_ms)
-                                        except Exception:
-                                            pass
                                     except (ConnectionResetError, asyncio.CancelledError):
                                         break
                                     except Exception:
@@ -330,10 +317,6 @@ async def proxy_service(request: web.Request) -> web.Response:
                                     try:
                                         await sresp.write(raw.encode("utf-8"))
                                         await sresp.drain()
-                                        try:
-                                            LOG.info("Wrote raw SSE chunk idx=%d to client elapsed_ms=%d", chunk_idx, elapsed_ms)
-                                        except Exception:
-                                            pass
                                     except Exception:
                                         LOG.exception("Failed to write raw SSE chunk to client")
 
@@ -570,10 +553,6 @@ async def proxy_service_with_path(request: web.Request) -> web.Response:
                                 try:
                                     await sresp.write(f"event: proxy\ndata: {payload}\n\n".encode("utf-8"))
                                     await sresp.drain()
-                                    try:
-                                        LOG.info("Wrote chunk (proxypath) idx=%d to client elapsed_ms=%d", chunk_idx, elapsed_ms)
-                                    except Exception:
-                                        pass
                                 except (ConnectionResetError, asyncio.CancelledError):
                                     break
 
@@ -590,10 +569,6 @@ async def proxy_service_with_path(request: web.Request) -> web.Response:
                                         raw_sse = "".join(f"data: {l}\n" for l in lines) + "\n\n"
                                         await sresp.write(raw_sse.encode("utf-8"))
                                     await sresp.drain()
-                                    try:
-                                        LOG.info("Wrote raw SSE chunk (proxypath) idx=%d to client elapsed_ms=%d", chunk_idx, elapsed_ms)
-                                    except Exception:
-                                        pass
                                 except Exception:
                                     LOG.exception("Failed to write raw SSE chunk to client (proxypath)")
 

@@ -80,7 +80,9 @@ DEFAULT_RATE_LIMIT = {
     "requests": int(_settings.PROXY_RATE_LIMIT_REQUESTS or 60),
     "window_seconds": int(_settings.PROXY_RATE_LIMIT_WINDOW_SECONDS or 60),
 }
+# endregion
 
+# region Helpers
 def _get_client_id(request: web.Request) -> str:
     try:
         if getattr(request, "remote", None):
@@ -124,6 +126,96 @@ def _check_rate_limit(client_id: str, service: str, cfg: dict) -> Tuple[bool, in
     retry_after = int(limit["window_seconds"] - (now - entry.get("start", 0)))
     return False, retry_after
 
+def _build_body_for_openai(body: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Return a forward_body that preserves the OpenAI chat shape (messages, model, stream, etc.).
+
+    We keep all keys except an explicit proxy `path` key so the upstream chat endpoint
+    receives the original OpenAI-style payload.
+    """
+    return {k: v for k, v in body.items() if k != "path"}
+
+def _build_body_for_legacy(body: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Build a legacy 'generate' style body from an OpenAI chat `messages` list.
+
+    Mirrors previous inlined behavior: flattens messages into a single `prompt` string,
+    maps common parameters (max_tokens->max_length, temperature, top_p, etc.), and
+    sets sensible defaults for stop sequences.
+    """
+    messages = body.get("messages", [])
+
+    def _extract_content(msg: Any) -> str:
+        try:
+            c = msg.get("content")
+            if isinstance(c, list):
+                return " ".join(str(p.get("text", "")) for p in c if isinstance(p, dict))
+            return str(c)
+        except Exception:
+            return ""
+
+    system_parts: list[str] = []
+    dialogue_lines: list[str] = []
+    for m in messages:
+        role = (m.get("role") if isinstance(m, dict) else "").strip() or "user"
+        content = _extract_content(m).strip()
+        if not content:
+            continue
+        if role == "system":
+            system_parts.append(content)
+        elif role == "assistant":
+            dialogue_lines.append(f"Assistant: {content}")
+        else:
+            dialogue_lines.append(f"User: {content}")
+
+    prompt_lines: list[str] = []
+    if system_parts:
+        prompt_lines.append(f"System: {' '.join(system_parts)}")
+        prompt_lines.append("")
+    prompt_lines.extend(dialogue_lines)
+    prompt_lines.append("Assistant:")
+    prompt = "\n".join(prompt_lines).strip()
+
+    forward_body: Dict[str, Any] = {"prompt": prompt}
+
+    if isinstance(body.get("max_tokens"), int):
+        forward_body["max_length"] = body.get("max_tokens")
+    if isinstance(body.get("temperature"), (int, float)):
+        forward_body["temperature"] = float(body.get("temperature"))
+    if body.get("seed") is not None:
+        forward_body["seed"] = body.get("seed")
+    if isinstance(body.get("top_p"), (int, float)):
+        forward_body["top_p"] = float(body.get("top_p"))
+    if isinstance(body.get("top_k"), int):
+        forward_body["top_k"] = int(body.get("top_k"))
+    if isinstance(body.get("min_p"), (int, float)):
+        forward_body["min_p"] = float(body.get("min_p"))
+    if isinstance(body.get("stream"), bool):
+        forward_body["stream"] = body.get("stream")
+    if isinstance(body.get("repetition_penalty"), (int, float)):
+        forward_body["repetition_penalty"] = float(body.get("repetition_penalty"))
+
+    stop = body.get("stop")
+    if stop is not None:
+        forward_body["stop_sequence"] = stop
+    else:
+        forward_body["stop_sequence"] = ["\nUser:", "\nSystem:"]
+
+    for extra_key in (
+        "mirostat",
+        "mirostat_eta",
+        "mirostat_tau",
+        "typical_p",
+        "tfs",
+        "sampler",
+        "sampler_order",
+        "use_default_prompt_template",
+    ):
+        if extra_key in body:
+            forward_body[extra_key] = body[extra_key]
+
+    return forward_body
+
 def _build_upstream_and_headers(cfg: Dict[str, Any], body: Dict[str, Any], proxypath: Optional[str]) -> Tuple[str, Dict[str, str], int, Dict[str, Any]]:
     headers: Dict[str, str] = {}
     timeout = int(cfg.get("timeout", 60))
@@ -162,20 +254,16 @@ def _build_upstream_and_headers(cfg: Dict[str, Any], body: Dict[str, Any], proxy
         allowed = cfg.get("allowed_paths")
         mapped_for_openai_chat = False
         stream = body.get("stream")
-        # Allow services to opt-out of the automatic mapping from OpenAI-style
-        # `/v1/chat/completions` to the legacy `/api/v1/generate` endpoints. Some
-        # upstreams implement an OpenAI-compatible API and should receive the
-        # original path instead of being remapped.
         map_openai = bool(cfg.get("map_openai_to_generate", True))
         if path.lstrip("/").startswith("v1/chat/completions"):
             mapped_for_openai_chat = True
-            if map_openai:
+            use_legacy = isinstance(body.get("prompt"), str) or (map_openai and isinstance(body.get("messages"), list))
+            if use_legacy:
                 if bool(stream):
                     path = "/api/v1/generate/stream"
                 else:
                     path = "/api/v1/generate"
             else:
-                # Do not remap; forward the OpenAI-compatible path as-is.
                 path = "/v1/chat/completions"
 
         if isinstance(allowed, list) and path not in allowed:
@@ -183,85 +271,11 @@ def _build_upstream_and_headers(cfg: Dict[str, Any], body: Dict[str, Any], proxy
 
         upstream = base_url.rstrip("/") + path
 
-        if mapped_for_openai_chat and isinstance(body.get("messages"), list):
-            messages = body.get("messages", [])
-
-            def _extract_content(msg: Any) -> str:
-                try:
-                    c = msg.get("content")
-                    if isinstance(c, list):
-                        return " ".join(str(p.get("text", "")) for p in c if isinstance(p, dict))
-                    return str(c)
-                except Exception:
-                    return ""
-
-            system_parts: list[str] = []
-            dialogue_lines: list[str] = []
-            for m in messages:
-                role = (m.get("role") if isinstance(m, dict) else "").strip() or "user"
-                content = _extract_content(m).strip()
-                if not content:
-                    continue
-                if role == "system":
-                    system_parts.append(content)
-                elif role == "assistant":
-                    dialogue_lines.append(f"Assistant: {content}")
-                else:
-                    dialogue_lines.append(f"User: {content}")
-
-            prompt_lines: list[str] = []
-            if system_parts:
-                prompt_lines.append(f"System: {' '.join(system_parts)}")
-                prompt_lines.append("")
-            prompt_lines.extend(dialogue_lines)
-            prompt_lines.append("Assistant:")
-            prompt = "\n".join(prompt_lines).strip()
-
-            max_tokens = body.get("max_tokens")
-            temperature = body.get("temperature")
-            stop = body.get("stop")
-            seed = body.get("seed")
-            top_p = body.get("top_p")
-            top_k = body.get("top_k")
-            min_p = body.get("min_p")
-            repetition_penalty = body.get("repetition_penalty")
-
-            forward_body = {"prompt": prompt}
-            if isinstance(max_tokens, int):
-                forward_body["max_length"] = max_tokens
-            if isinstance(temperature, (int, float)):
-                forward_body["temperature"] = float(temperature)
-            if seed is not None:
-                forward_body["seed"] = seed
-            if isinstance(top_p, (int, float)):
-                forward_body["top_p"] = float(top_p)
-            if isinstance(top_k, int):
-                forward_body["top_k"] = int(top_k)
-            if isinstance(min_p, (int, float)):
-                forward_body["min_p"] = float(min_p)
-            if isinstance(stream, bool):
-                forward_body["stream"] = stream
-            if isinstance(repetition_penalty, (int, float)):
-                forward_body["repetition_penalty"] = float(repetition_penalty)
-            if stop is not None:
-                forward_body["stop_sequence"] = stop
+        if mapped_for_openai_chat:
+            if locals().get("use_legacy"):
+                forward_body = _build_body_for_legacy(body)
             else:
-                forward_body["stop_sequence"] = ["\nUser:", "\nSystem:"]
-
-            for extra_key in (
-                "mirostat",
-                "mirostat_eta",
-                "mirostat_tau",
-                "typical_p",
-                "tfs",
-                "sampler",
-                "sampler_order",
-                "use_default_prompt_template",
-            ):
-                if extra_key in body:
-                    forward_body[extra_key] = body[extra_key]
-        else:
-            forward_body = {k: v for k, v in body.items() if k != "path"}
+                forward_body = _build_body_for_openai(body)
 
     return upstream, headers, timeout, forward_body
 # endregion
