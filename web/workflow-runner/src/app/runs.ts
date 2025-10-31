@@ -33,7 +33,7 @@ export const createRunLifecycle = ({
   setInputStatus,
   store,
 }: CreateRunLifecycleOptions): RunLifecycleController => {
-  const { WORKFLOW_COMPLETED, WORKFLOW_STATUS_FAILED, WORKFLOW_CANCELLED } = NOTIFICATION_MESSAGES;
+  const { WORKFLOW_COMPLETED, WORKFLOW_CANCELLED } = NOTIFICATION_MESSAGES;
 
   //#region Progress update
   const updateProgress = (response: WorkflowRunStatusResponse) => {
@@ -79,7 +79,7 @@ export const createRunLifecycle = ({
   };
   //#endregion
 
-  //#region Cancellation
+  //#region Failure
   const handleRunFailure = (response: WorkflowRunStatusResponse) => {
     const payload = response.result?.body?.payload;
     const runId = response.run_id;
@@ -183,7 +183,6 @@ export const createRunLifecycle = ({
           state.current.status !== 'running' ||
           state.current.message !== STATUS_MESSAGES.RUNNING_POLLING_WORKFLOW
         ) {
-          setStatus(store, 'running', STATUS_MESSAGES.RUNNING_POLLING_WORKFLOW);
         }
         break;
       case 'succeeded':
