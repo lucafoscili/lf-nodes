@@ -117,7 +117,10 @@ MIT License
 For an overview of how this nodes suite is structured and how it integrates with the UI, see:
 
 - [Architecture](docs/ARCHITECTURE.md)
+- [Frontend Proxy](docs/FRONTEND_PROXY.md)
 - [Image Editor](docs/IMAGE_EDITOR.md)
 - [Node Template](docs/NODE_TEMPLATE.md)
+- [Proxy](docs/PROXY.md)
+- [Workflow Runner](docs/WORKFLOW_RUNNER.md)
 
 ![Simple pipeline](https://github.com/lucafoscili/lucafoscili/blob/e988f5c1df6299e96f2bf6b164c3b99e6df841f7/lf-nodes/screenshots/Screenshot%202025-02-18%20094817.png "Simple pipeline")
