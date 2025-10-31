@@ -1838,6 +1838,28 @@ const runWorkflow = async (payload) => {
   }
   return runId;
 };
+const getRunStatus = async (runId) => {
+  var _a, _b, _c, _d, _e;
+  const { RUN_GENERIC } = ERROR_MESSAGES;
+  const { syntax } = getLfFramework();
+  const response = await fetch(buildApiUrl(`/run/${runId}/status`), { method: "GET" });
+  if (response.status === 401) {
+    try {
+      window.location.href = `${window.location.origin}${API_BASE}${STATIC_WORKFLOW_RUNNER_PATH}login.html`;
+    } catch (err) {
+    }
+    throw new WorkflowApiError("Unauthorized", { status: 401 });
+  }
+  const data = await syntax.json.parse(response);
+  if (!response.ok || !data) {
+    const detail = typeof (data == null ? void 0 : data.error) === "string" && data.error || typeof ((_c = (_b = (_a = data == null ? void 0 : data.result) == null ? void 0 : _a.body) == null ? void 0 : _b.payload) == null ? void 0 : _c.detail) === "string" && data.result.body.payload.detail || (((_e = (_d = data == null ? void 0 : data.result) == null ? void 0 : _d.body) == null ? void 0 : _e.payload) ? JSON.stringify(data.result.body.payload) : response.statusText) || runId;
+    throw new WorkflowApiError(`${RUN_GENERIC} (${detail})`, {
+      payload: data ?? void 0,
+      status: response.status
+    });
+  }
+  return data;
+};
 const subscribeRunEvents = (onEvent) => {
   try {
     const url = buildApiUrl("/run/events");
@@ -2016,7 +2038,7 @@ const _setCellStatus = (store, id, status = "") => {
   }
 };
 const workflowDispatcher = async (store) => {
-  var _a, _b, _c, _d, _e;
+  var _a, _b, _c, _d, _e, _f;
   const { INPUTS_COLLECTED } = DEBUG_MESSAGES;
   const { NO_WORKFLOW_SELECTED } = NOTIFICATION_MESSAGES;
   const { ERROR_RUNNING_WORKFLOW, RUNNING_DISPATCHING_WORKFLOW, RUNNING_SUBMITTING_WORKFLOW } = STATUS_MESSAGES;
@@ -2070,16 +2092,44 @@ const workflowDispatcher = async (store) => {
       workflowName
     });
     ensureActiveRun(store, runId);
+    try {
+      const manager = store.getState().manager;
+      const lifecycle = (_c = manager == null ? void 0 : manager.getRunLifecycle) == null ? void 0 : _c.call(manager);
+      if (lifecycle && typeof lifecycle.handleStatusResponse === "function") {
+        (async () => {
+          const maxAttempts = 5;
+          let attempt = 0;
+          while (attempt < maxAttempts) {
+            try {
+              const resp = await getRunStatus(runId);
+              const result = lifecycle.handleStatusResponse(resp);
+              if (result && result.shouldStopPolling) {
+                break;
+              }
+            } catch (err) {
+            }
+            attempt += 1;
+            await new Promise((res) => setTimeout(res, 1e3 * attempt));
+            const run = store.getState().runs.find((r) => r.runId === runId);
+            if (!run || !["pending", "running"].includes(run.status)) {
+              break;
+            }
+          }
+        })();
+      }
+    } catch (err) {
+      debugLog("Failed to start run polling fallback", "warning");
+    }
   } catch (error) {
     setStatus$1(store, "error", ERROR_RUNNING_WORKFLOW);
     if (error instanceof WorkflowApiError) {
-      const inputName = (_d = (_c = error.payload) == null ? void 0 : _c.error) == null ? void 0 : _d.input;
+      const inputName = (_e = (_d = error.payload) == null ? void 0 : _d.error) == null ? void 0 : _e.input;
       if (inputName) {
         _setCellStatus(store, inputName, "error");
       }
       addNotification(store, {
         id: performance.now().toString(),
-        message: `Workflow run failed: ${((_e = error.payload) == null ? void 0 : _e.detail) || error.message}`,
+        message: `Workflow run failed: ${((_f = error.payload) == null ? void 0 : _f.detail) || error.message}`,
         status: "danger"
       });
     }
@@ -2662,6 +2712,10 @@ const createRunLifecycle = ({ setInputStatus, store }) => {
         if (state.current.status !== "running" || state.current.message !== STATUS_MESSAGES.RUNNING_POLLING_WORKFLOW) {
           setStatus$1(store, "running", STATUS_MESSAGES.RUNNING_POLLING_WORKFLOW);
         }
+        try {
+          ensureActiveRun(store, response.run_id);
+        } catch {
+        }
         break;
       case "succeeded":
         handleRunSuccess(response);
@@ -3120,6 +3174,11 @@ class LfWorkflowRunnerManager {
       __classPrivateFieldGet(this, _LfWorkflowRunnerManager_ROUTING, "f").updateRouteFromState();
     });
     __classPrivateFieldGet(this, _LfWorkflowRunnerManager_REALTIME, "f").startRealtimeUpdates();
+  }
+  //#endregion
+  //#region Expose run lifecycle
+  getRunLifecycle() {
+    return __classPrivateFieldGet(this, _LfWorkflowRunnerManager_RUN_LIFECYCLE, "f");
   }
   //#endregion
   //#region Getters
