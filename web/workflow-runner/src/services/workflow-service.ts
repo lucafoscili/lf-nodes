@@ -13,6 +13,7 @@ import {
 } from '../types/api';
 import { isWorkflowAPIUploadPayload, isWorkflowAPIUploadResponse } from '../utils/common';
 import { ERROR_MESSAGES } from '../utils/constants';
+import { debugLog } from '../utils/debug';
 
 //#region Errors
 export class WorkflowApiError<TPayload = unknown> extends Error {
@@ -137,7 +138,7 @@ export const subscribeRunEvents = (
         const data = JSON.parse(ev.data) as WorkflowRunStatusResponse;
         onEvent(data);
       } catch (err) {
-        // ignore malformed messages
+        debugLog('Failed to parse run event data:', err);
       }
     });
 
@@ -146,7 +147,7 @@ export const subscribeRunEvents = (
         const data = JSON.parse(ev.data) as WorkflowRunStatusResponse;
         onEvent(data);
       } catch (err) {
-        // ignore
+        debugLog('Failed to parse run event data:', err);
       }
     });
 
@@ -170,7 +171,7 @@ export const subscribeQueueEvents = (
         const data = JSON.parse(ev.data) as WorkflowQueueStatus;
         onEvent(data);
       } catch (err) {
-        // ignore malformed messages
+        debugLog('Failed to parse queue event data:', err);
       }
     });
 

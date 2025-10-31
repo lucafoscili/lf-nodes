@@ -155,6 +155,7 @@ export const createResultsSection = (store: WorkflowStore): WorkflowSectionContr
 
   //#region Render
   const render = () => {
+    const { syntax } = getLfFramework();
     const state = store.getState();
     const { manager } = state;
     const { uiRegistry } = manager;
@@ -199,17 +200,24 @@ export const createResultsSection = (store: WorkflowStore): WorkflowSectionContr
         if (!content) {
           return;
         }
+
         const wrapper = document.createElement('div');
         wrapper.className = RESULTS_CLASSES.item;
+
         const heading = document.createElement('h4');
         heading.className = RESULTS_CLASSES.subtitle;
         heading.textContent = label;
-        wrapper.appendChild(heading);
+
         const code = createComponent.code({
-          lfLanguage: 'json',
+          lfLanguage: syntax.json.isLikeString(content) ? 'json' : 'markdown',
+          lfStickyHeader: false,
+          lfUiState: 'danger',
           lfValue: content,
         });
+
+        wrapper.appendChild(heading);
         wrapper.appendChild(code);
+
         element.appendChild(wrapper);
       };
 
