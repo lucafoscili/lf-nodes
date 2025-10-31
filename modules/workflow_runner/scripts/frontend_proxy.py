@@ -44,6 +44,7 @@ else:
     ALLOWED_PREFIXES = DEFAULT_PREFIXES
 
 PROXY_DEBUG = os.environ.get("WORKFLOW_RUNNER_DEBUG", "0").lower() in ("1", "true", "yes")
+PROXY_STREAMING_ONLY_PROXY = os.environ.get("PROXY_STREAMING_ONLY_PROXY", "1").lower() in ("1", "true", "yes")
 logging.basicConfig(level=logging.DEBUG if PROXY_DEBUG else logging.INFO, format="[frontend-proxy] %(levelname)s: %(message)s")
 # endregion
 
@@ -110,12 +111,22 @@ async def proxy_request(request: web.Request) -> web.Response:
                 except Exception:
                     should_stream = False
 
-                # If streaming, forward chunks directly to the caller without
-                # buffering the entire response in memory. Preserve most
-                # response headers except hop-by-hop headers.
+                try:
+                    req_path = request.rel_url.path
+                except Exception:
+                    req_path = ""
+
+                if PROXY_STREAMING_ONLY_PROXY:
+                    allowed_by_path = req_path.startswith("/api/lf-nodes/proxy")
+                else:
+                    allowed_by_path = True
+
                 if should_stream:
-                    sresp = web.StreamResponse(status=resp.status, reason=resp.reason)
-                    # copy headers (skip hop-by-hop)
+                    if not allowed_by_path:
+                        logging.info("Streaming response blocked by gate for path %s; buffering instead", req_path)
+                        should_stream = False
+                    else:
+                        sresp = web.StreamResponse(status=resp.status, reason=resp.reason)
                     for name, value in resp.headers.items():
                         lname = name.lower()
                         if lname in ("connection", "keep-alive", "proxy-authenticate", "proxy-authorization", "te", "trailers", "transfer-encoding", "upgrade"):
@@ -144,7 +155,6 @@ async def proxy_request(request: web.Request) -> web.Response:
                         except Exception:
                             pass
 
-                # Non-streaming: buffer and return as a normal response
                 body = await resp.read()
                 response = web.Response(status=resp.status, body=body)
                 for name, value in resp.headers.items():

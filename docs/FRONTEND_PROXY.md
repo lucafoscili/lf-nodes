@@ -10,7 +10,7 @@ This document describes the lightweight frontend proxy used to expose a very sma
 
 ## Location
 
-`custom_nodes/lf-nodes/modules/workflow_runner/frontend_proxy.py`
+`custom_nodes/lf-nodes/modules/workflow_runner/scripts/frontend_proxy.py`
 
 ## How it works (summary)
 
@@ -38,7 +38,7 @@ From the repository root (recommended), run the proxy in the `custom_nodes/lf-no
 ```powershell
 cd C:\Users\luca.foscili_smeup\Documents\GitHub\ComfyUI\custom_nodes\lf-nodes
 # Run with the repo's Python environment
-& "C:\Users\luca.foscili_smeup\Documents\GitHub\ComfyUI\.venv\Scripts\python.exe" .\modules\workflow_runner\frontend_proxy.py
+& "C:\Users\luca.foscili_smeup\Documents\GitHub\ComfyUI\.venv\Scripts\python.exe" .\modules\workflow_runner\scripts\frontend_proxy.py
 ```
 
 If you set environment variables before running in PowerShell, use `setx` (persist) or `$env:VAR = 'value'` for the session:
@@ -57,6 +57,16 @@ Note: when using VS Code devtunnels (or other tunnels) make sure the tunnel term
 - If you see 403 from Comfy: verify the proxy forwards the original `Host` header and `X-Forwarded-Proto` header. Comfy verifies origin/host and will return 403 otherwise.
 - If the UI shows a persistent login splash: ensure these endpoints are allowed by the proxy and returning 200: `/queue`, `/api/lf-nodes/workflows`, `/api/lf-nodes/run`. Also ensure the login flow sets `LF_SESSION` cookie (HttpOnly) and that the client includes cookies in requests (UI uses fetch with `credentials:'include'`).
 - Use the debug-only endpoint (if enabled) to create a session for testing: `/api/lf-nodes/workflow-runner/debug-login` (guarded by the `WORKFLOW_RUNNER_DEBUG` flag in the code). Do NOT enable this flag in a public environment.
+
+## Streaming behaviour (dev proxy)
+
+- The dev reverse proxy now supports streaming responses (SSE / chunked) and will forward upstream chunks directly to the client when appropriate. This avoids buffering streaming responses which previously prevented the UI from receiving incremental deltas.
+- Streaming is detected heuristically by the proxy when the upstream response has `Content-Type: text/event-stream` or `Transfer-Encoding: chunked`.
+- By default streaming is gated to the internal proxy endpoint to avoid exposing raw streamed content for arbitrary proxied paths. The env var `PROXY_STREAMING_ONLY_PROXY` (default `1`) controls this behaviour:
+  - `PROXY_STREAMING_ONLY_PROXY=1` (default): only allow streaming when the incoming path starts with `/api/lf-nodes/proxy`.
+  - `PROXY_STREAMING_ONLY_PROXY=0`: allow streaming for any allowed proxied path.
+
+When streaming is blocked by the gate the proxy falls back to the previous buffered behaviour and returns the full response only after the upstream completes.
 
 ## Security considerations & recommendations
 

@@ -17,22 +17,10 @@ SERVICES: Dict[str, Dict[str, Any]] = {
         "allowed_paths": [
             "/api/v1/generate",
             "/api/v1/generate/stream",
-            # Accept the OpenAI-compatible chat completions path when the
-            # upstream implements the OpenAI-compatible API.
             "/v1/chat/completions",
             "/v1/chat/completions/stream",
         ],
-        # If the upstream implements an OpenAI-compatible API at /v1/chat/completions
-        # set map_openai_to_generate to False so incoming OpenAI-style proxypaths
-        # (e.g., v1/chat/completions) are forwarded directly instead of being
-        # remapped to the legacy /api/v1/generate paths. Set to False for servers
-        # that expose OpenAI-compatible endpoints (koboldcpp builds that enable
-        # the OpenAI route).
         "map_openai_to_generate": False,
-    # When true, forward upstream SSE exactly as raw `data:` lines and
-    # avoid sending the wrapper `event: proxy` messages. This helps
-    # OpenAI-compatible frontends that listen for default SSE `message`
-    # events and expect `data: {...}` lines.
     "forward_raw_sse": True,
         "timeout": 60,
     },
@@ -53,21 +41,16 @@ SERVICES: Dict[str, Dict[str, Any]] = {
 }
 
 def _read_secret(env_name: str, file_env_name: Optional[str] = None) -> Optional[str]:
-    # First, prefer an in-memory env var if present (unchanged behaviour)
     val = os.environ.get(env_name)
     if val:
         return val
 
-    # If a *_FILE env var was supplied, prefer the centralized Settings value
-    # (if present) for that file path, otherwise fall back to the raw env var.
     if file_env_name:
         path = None
         try:
-            # Import and read settings lazily to avoid import-time ordering issues
             from ..config import get_settings
 
             _settings_local = get_settings()
-            # If Settings defines an attribute matching the file env var name, use it
             if hasattr(_settings_local, file_env_name):
                 path = getattr(_settings_local, file_env_name) or None
         except Exception:

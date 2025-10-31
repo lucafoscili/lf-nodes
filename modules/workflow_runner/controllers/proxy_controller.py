@@ -2,9 +2,9 @@ import aiohttp
 import asyncio
 import importlib
 import json
-import uuid
 import logging
 import re
+import uuid
 
 from aiohttp import web
 from time import time
@@ -179,12 +179,6 @@ async def proxy_service(request: web.Request) -> web.Response:
                         LOG.exception("Failed to log upstream response headers/status")
 
                     if is_streaming:
-                        # Stream upstream chunks to the calling client and also
-                        # publish them to the internal pubsub so SSE clients
-                        # receive proxy stream events. Add transient diagnostics
-                        # to help identify stalls: log when streaming starts,
-                        # log per-chunk index/length and elapsed time, and when
-                        # streaming finishes.
                         sresp = web.StreamResponse(status=200, reason="OK")
                         sresp.content_type = "text/event-stream"
                         sresp.headers["Cache-Control"] = "no-cache"
@@ -279,22 +273,12 @@ async def proxy_service(request: web.Request) -> web.Response:
                                 except Exception:
                                     LOG.exception("Failed to publish proxy stream event")
 
-                                # Decide whether to send the wrapper event or only raw
-                                # SSE lines. Some OpenAI-compatible frontends expect
-                                # plain SSE `data: ...` lines (default message event)
-                                # rather than a named 'proxy' event. Allow services to
-                                # opt-in to raw SSE forwarding by setting
-                                # `forward_raw_sse` in the service config.
                                 forward_raw = False
                                 try:
                                     forward_raw = bool(cfg.get("forward_raw_sse", False))
                                 except Exception:
                                     forward_raw = False
 
-                                # Prepare raw SSE payload from the chunk and
-                                # also prepare wrapper/event payloads based on
-                                # parsed JSON objects so the frontend gets clean
-                                # JSON in event.data.
                                 try:
                                     lines = text_chunk.splitlines()
                                     if any(l.lstrip().startswith("data:") or l.lstrip().startswith("event:") for l in lines):
@@ -320,9 +304,6 @@ async def proxy_service(request: web.Request) -> web.Response:
                                     except Exception:
                                         LOG.exception("Failed to write raw-only SSE chunk to client")
                                 else:
-                                    # Default behaviour: send structured events for
-                                    # each parsed JSON object (so event.data is
-                                    # JSON), then optionally send the raw SSE.
                                     try:
                                         if parsed_objects:
                                             for obj in parsed_objects:
