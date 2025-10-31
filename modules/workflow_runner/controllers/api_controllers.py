@@ -252,11 +252,12 @@ async def verify_controller(request: web.Request) -> web.Response:
             session_id,
             max_age=_SESSION_TTL,
             httponly=True,
+            path="/api/lf-nodes/",
             samesite="Lax",
             secure=bool(secure_flag),
         )
         if request.cookies.get('LF_AUTH'):
-            resp.del_cookie('LF_AUTH')
+            resp.del_cookie('LF_AUTH', path="/api/lf-nodes/")
     except Exception:
         logging.exception("Failed to set session cookie")
 
@@ -304,7 +305,7 @@ async def debug_login_controller(request: web.Request) -> web.Response:
         return web.json_response({"detail": "server_error"}, status=500)
     resp = web.json_response({"detail": "ok", "email": email})
     try:
-        resp.set_cookie("LF_SESSION", session_id, max_age=_SESSION_TTL, httponly=True, samesite="Lax", secure=True)
+        resp.set_cookie("LF_SESSION", session_id, max_age=_SESSION_TTL, httponly=True, path="/api/lf-nodes/", samesite="Lax", secure=True)
     except Exception:
         logging.exception("Failed to set debug session cookie")
     return resp
