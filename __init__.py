@@ -12,22 +12,27 @@ MODULES_DIR = os.path.join(os.path.dirname(__file__), "modules")
 sys.modules["lf_nodes"] = sys.modules[__name__]
 
 for dirpath, _, filenames in os.walk(MODULES_DIR):
+    if "tests" in dirpath or "test" in dirpath or "__pycache__" in dirpath:
+        continue
+    
     for filename in filenames:
-        if filename.endswith(".py") and filename != "__init__.py":
-            relative_path = os.path.relpath(os.path.join(dirpath, filename), MODULES_DIR)
-            module_name = os.path.splitext(relative_path.replace(os.path.sep, "."))[0]
-            full_module_name = f"lf_nodes.modules.{module_name}"
+        if not filename.endswith(".py") or filename == "__init__.py" or filename.startswith("test_"):
+            continue
+            
+        relative_path = os.path.relpath(os.path.join(dirpath, filename), MODULES_DIR)
+        module_name = os.path.splitext(relative_path.replace(os.path.sep, "."))[0]
+        full_module_name = f"lf_nodes.modules.{module_name}"
 
-            try:
-                spec = importlib.util.spec_from_file_location(full_module_name, os.path.join(dirpath, filename))
-                if spec and spec.loader:
-                    module = importlib.util.module_from_spec(spec)
-                    spec.loader.exec_module(module)
+        try:
+            spec = importlib.util.spec_from_file_location(full_module_name, os.path.join(dirpath, filename))
+            if spec and spec.loader:
+                module = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(module)
 
-                    NODE_CLASS_MAPPINGS.update(getattr(module, "NODE_CLASS_MAPPINGS", {}))
-                    NODE_DISPLAY_NAME_MAPPINGS.update(getattr(module, "NODE_DISPLAY_NAME_MAPPINGS", {}))
-            except Exception as e:
-                print(f"\033[31m❌ Failed to import {full_module_name}: {e}\033[0m")
+                NODE_CLASS_MAPPINGS.update(getattr(module, "NODE_CLASS_MAPPINGS", {}))
+                NODE_DISPLAY_NAME_MAPPINGS.update(getattr(module, "NODE_DISPLAY_NAME_MAPPINGS", {}))
+        except Exception as e:
+            print(f"\033[31m❌ Failed to import {full_module_name}: {e}\033[0m")
 
 WEB_DIRECTORY = "./web/deploy"
 
