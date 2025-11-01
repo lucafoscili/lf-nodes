@@ -15,21 +15,23 @@
     "build:vite": "vite build",
     "build:submit": "node ./web/src/scripts/build-workflow-app.js",
     "build": "yarn clean && yarn build:scss && yarn build:ts && yarn build:lfw && yarn build:vite && yarn build:submit",
-    "test": "tsx --test \"web/workflow-runner/src/tests/*.test.ts\""
+    "test": "vitest run web/src web/workflow-runner/src",
+    "test:watch": "vitest"
   },
   "devDependencies": {
     "@lf-widgets/assets": "1.3.0",
     "@lf-widgets/core": "1.3.0",
     "@lf-widgets/foundations": "1.3.0",
     "@lf-widgets/framework": "1.3.0",
-    "@types/node": "^22",
+    "@types/node": "^24.9.2",
     "fs-extra": "^11",
     "rollup-plugin-visualizer": "^5",
     "sass": "^1",
     "ts-node": "^10",
     "tsx": "^4",
     "typescript": "^5",
-    "vite": "^6"
+    "vite": "^6",
+    "vitest": "^4.0.6"
   },
   "packageManager": "yarn@4.6.0"
 }
