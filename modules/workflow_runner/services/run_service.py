@@ -30,14 +30,21 @@ async def run_workflow(payload: Dict[str, Any], owner_id: str | None = None) -> 
     `handlers.route_run_workflow`: it creates a job, schedules the worker
     coroutine and returns a 202-like response containing the run_id.
     """
+    from .job_store import _WF_DEBUG
+    
     try:
         prepared = _prepare_workflow_execution(payload)
     except WorkflowPreparationError as exc:
         raise
 
     run_id = str(uuid.uuid4())
-    LOG.info("Creating workflow run %s", run_id)
-    await create_job(run_id, owner_id=owner_id)
+    workflow_id = payload.get("workflowId")
+    LOG.info("Creating workflow run %s for workflow %s", run_id, workflow_id)
+    
+    if _WF_DEBUG:
+        LOG.info(f"[DEBUG] run_workflow: owner_id={owner_id}, workflow_id={workflow_id}")
+    
+    await create_job(run_id, owner_id=owner_id, workflow_id=workflow_id)
     LOG.debug("Created run %s and published pending event", run_id)
     _emit_run_progress(run_id, "workflow_received")
 

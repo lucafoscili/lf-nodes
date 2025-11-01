@@ -34,6 +34,7 @@ _subscribers: list[asyncio.Queue] = []
 @dataclass
 class JobRecord:
     run_id: str
+    workflow_id: Optional[str] = None
     created_at: float = field(default_factory=time.time)
     updated_at: float = field(default_factory=time.time)
     status: str = "pending"
@@ -47,6 +48,7 @@ def _build_event(rec: JobRecord) -> dict:
     return {
         "id": f"{rec.run_id}:{rec.seq}",
         "run_id": rec.run_id,
+        "workflow_id": getattr(rec, "workflow_id", None),
         "status": rec.status,
         "created_at": rec.created_at,
         "updated_at": rec.updated_at,
@@ -78,6 +80,7 @@ async def _ensure_conn():
         await _conn.execute("""
             CREATE TABLE IF NOT EXISTS runs (
                 run_id TEXT PRIMARY KEY,
+                workflow_id TEXT,
                 status TEXT,
                 created_at REAL,
                 updated_at REAL,
@@ -116,15 +119,25 @@ async def close() -> None:
         finally:
             _conn = None
 
-async def create_job(run_id: str, owner_id: Optional[str] = None) -> JobRecord:
+async def create_job(run_id: str, workflow_id: str, owner_id: Optional[str] = None) -> JobRecord:
     conn = await _ensure_conn()
     now = time.time()
+    # Single statement; do not clobber existing rows
     await conn.execute(
-        "INSERT OR REPLACE INTO runs(run_id, status, created_at, updated_at, result, error, seq, owner_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-        (run_id, "pending", now, now, None, None, 0, owner_id),
+        """
+        INSERT INTO runs (run_id, workflow_id, status, created_at, updated_at, result, error, seq, owner_id)
+        VALUES (?, ?, 'pending', ?, ?, NULL, NULL, 0, ?)
+        ON CONFLICT(run_id) DO NOTHING
+        """,
+        (run_id, workflow_id, now, now, owner_id),
     )
     await conn.commit()
-    rec = JobRecord(run_id=run_id, created_at=now, updated_at=now, status="pending", seq=0, owner_id=owner_id)
+
+    # Read back the row (may have pre-existed)
+    rec = await get_job(run_id)
+    if rec is None:
+        rec = JobRecord(run_id=run_id, workflow_id=workflow_id, created_at=now, updated_at=now,
+                        status="pending", seq=0, owner_id=owner_id)
     event = _build_event(rec)
     for q in list(_subscribers):
         try:
@@ -135,16 +148,18 @@ async def create_job(run_id: str, owner_id: Optional[str] = None) -> JobRecord:
 
 async def get_job(run_id: str) -> Optional[JobRecord]:
     conn = await _ensure_conn()
-    cur = await conn.execute("SELECT run_id, status, created_at, updated_at, result, error, seq, owner_id FROM runs WHERE run_id = ?", (run_id,))
+    cur = await conn.execute("SELECT run_id, workflow_id, status, created_at, updated_at, result, error, seq, owner_id FROM runs WHERE run_id = ?", (run_id,))
     row = await cur.fetchone()
     if not row:
         return None
     result = None
     try:
-        result = json.loads(row[4]) if row[4] else None
+        # result column is at index 5
+        result = json.loads(row[5]) if row[5] else None
     except Exception:
-        result = row[4]
-    return JobRecord(run_id=row[0], status=row[1], created_at=row[2], updated_at=row[3], result=result, error=row[5], seq=row[6] or 0, owner_id=row[7])
+        result = row[5]
+    # row mapping: 0=run_id,1=workflow_id,2=status,3=created_at,4=updated_at,5=result,6=error,7=seq,8=owner_id
+    return JobRecord(run_id=row[0], workflow_id=row[1], status=row[2], created_at=row[3], updated_at=row[4], result=result, error=row[6], seq=row[7] or 0, owner_id=row[8])
 
 async def set_job_status(run_id: str, status: str, *, result: Optional[Any] = None, error: Optional[str] = None) -> Optional[JobRecord]:
     conn = await _ensure_conn()
@@ -158,33 +173,27 @@ async def set_job_status(run_id: str, status: str, *, result: Optional[Any] = No
     else:
         result_json = None
 
-    # BEGIN IMMEDIATE to avoid write races
-    await conn.execute("BEGIN IMMEDIATE;")
-    try:
-        # Insert-or-bump: if row exists, increment seq atomically and keep owner_id
-        await conn.execute(
-            """
-            INSERT INTO runs (run_id, status, created_at, updated_at, result, error, seq, owner_id)
-            VALUES (?, ?, ?, ?, ?, ?, 1, NULL)
-            ON CONFLICT(run_id) DO UPDATE SET
-              status=excluded.status,
-              updated_at=excluded.updated_at,
-              result=excluded.result,
-              error=excluded.error,
-              seq=COALESCE(runs.seq,0) + 1
-            """,
-            (run_id, status, now, now, result_json, error),
-        )
-        await conn.execute(
-            "UPDATE runs SET owner_id = COALESCE(owner_id, (SELECT owner_id FROM runs WHERE run_id=?)) WHERE run_id=?",
-            (run_id, run_id),
-        )
-        await conn.commit()
-    except Exception:
-        await conn.rollback()
-        raise
+    # Single atomic statement; no explicit BEGIN
+    await conn.execute(
+        """
+        INSERT INTO runs (run_id, workflow_id, status, created_at, updated_at, result, error, seq, owner_id)
+        VALUES (?, NULL, ?, ?, ?, ?, ?, 1, NULL)
+        ON CONFLICT(run_id) DO UPDATE SET
+          status      = excluded.status,
+          updated_at  = excluded.updated_at,
+          result      = excluded.result,
+          error       = excluded.error,
+          seq         = COALESCE(runs.seq, 0) + 1,
+          owner_id    = COALESCE(runs.owner_id, excluded.owner_id),
+          workflow_id = COALESCE(runs.workflow_id, excluded.workflow_id)
+        """,
+        (run_id, status, now, now, result_json, error),
+    )
+    await conn.commit()
 
     rec = await get_job(run_id)
+    if not rec:
+        return None
     event = _build_event(rec)
     for q in list(_subscribers):
         try:
@@ -200,7 +209,7 @@ async def list_jobs(owner_id: Optional[str] = None, status: Optional[str] = None
     """
     conn = await _ensure_conn()
     out: Dict[str, JobRecord] = {}
-    q = "SELECT run_id, status, created_at, updated_at, result, error, seq, owner_id FROM runs"
+    q = "SELECT run_id, workflow_id, status, created_at, updated_at, result, error, seq, owner_id FROM runs"
     params: list = []
     clauses: list = []
     if owner_id is not None:
@@ -216,10 +225,12 @@ async def list_jobs(owner_id: Optional[str] = None, status: Optional[str] = None
     for row in rows:
         result = None
         try:
-            result = json.loads(row[4]) if row[4] else None
+            # result column is at index 5
+            result = json.loads(row[5]) if row[5] else None
         except Exception:
-            result = row[4]
-        out[row[0]] = JobRecord(run_id=row[0], status=row[1], created_at=row[2], updated_at=row[3], result=result, error=row[5], seq=row[6] or 0, owner_id=row[7])
+            result = row[5]
+        # row mapping: 0=run_id,1=workflow_id,2=status,3=created_at,4=updated_at,5=result,6=error,7=seq,8=owner_id
+        out[row[0]] = JobRecord(run_id=row[0], workflow_id=row[1], status=row[2], created_at=row[3], updated_at=row[4], result=result, error=row[6], seq=row[7] or 0, owner_id=row[8])
     return out
 
 async def remove_job(run_id: str) -> Optional[JobRecord]:

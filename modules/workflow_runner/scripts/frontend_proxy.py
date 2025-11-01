@@ -121,43 +121,50 @@ async def proxy_request(request: web.Request) -> web.Response:
                     req_path = ""
 
                 if PROXY_STREAMING_ONLY_PROXY:
-                    allowed_by_path = req_path.startswith("/api/lf-nodes/proxy") or req_path.startswith("/api/lf-nodes/run") or req_path.startswith("/api/lf-nodes/queue")
+                    # Allow streaming for proxy endpoints, runs and queue —
+                    # and also explicitly allow workflow-runner SSE endpoint.
+                    allowed_by_path = (
+                        req_path.startswith("/api/lf-nodes/proxy")
+                        or req_path.startswith("/api/lf-nodes/run")
+                        or req_path.startswith("/api/lf-nodes/queue")
+                        or req_path.startswith("/api/lf-nodes/workflow-runner/events")
+                    )
                 else:
                     allowed_by_path = True
 
                 if should_stream:
                     if not allowed_by_path:
                         logging.info("Streaming response blocked by gate for path %s; buffering instead", req_path)
-                        should_stream = False
+                        # fall back to buffered response (do nothing here)
                     else:
                         sresp = web.StreamResponse(status=resp.status, reason=resp.reason)
-                    for name, value in resp.headers.items():
-                        lname = name.lower()
-                        if lname in ("connection", "keep-alive", "proxy-authenticate", "proxy-authorization", "te", "trailers", "transfer-encoding", "upgrade"):
-                            continue
-                        try:
-                            sresp.headers.add(name, value)
-                        except Exception:
-                            sresp.headers[name] = value
-
-                    await sresp.prepare(request)
-                    try:
-                        async for chunk in resp.content.iter_chunked(1024):
-                            if not chunk:
+                        for name, value in resp.headers.items():
+                            lname = name.lower()
+                            if lname in ("connection", "keep-alive", "proxy-authenticate", "proxy-authorization", "te", "trailers", "transfer-encoding", "upgrade"):
                                 continue
                             try:
-                                await sresp.write(chunk)
-                                await sresp.drain()
-                            except (ConnectionResetError, asyncio.CancelledError):
-                                break
+                                sresp.headers.add(name, value)
                             except Exception:
-                                logging.exception("Failed to write chunk to client for %s -> %s", request.remote, upstream)
-                        return sresp
-                    finally:
+                                sresp.headers[name] = value
+
+                        await sresp.prepare(request)
                         try:
-                            await sresp.write_eof()
-                        except Exception:
-                            pass
+                            async for chunk in resp.content.iter_chunked(1024):
+                                if not chunk:
+                                    continue
+                                try:
+                                    await sresp.write(chunk)
+                                    await sresp.drain()
+                                except (ConnectionResetError, asyncio.CancelledError):
+                                    break
+                                except Exception:
+                                    logging.exception("Failed to write chunk to client for %s -> %s", request.remote, upstream)
+                            return sresp
+                        finally:
+                            try:
+                                await sresp.write_eof()
+                            except Exception:
+                                pass
 
                 body = await resp.read()
                 response = web.Response(status=resp.status, body=body)

@@ -153,60 +153,31 @@ export const getRunStatus = async (runId: string): Promise<WorkflowRunStatusResp
 };
 //#endregion
 
-//#region Server-Sent Events (Run updates)
+//#region Server-Sent Events (LEGACY - REMOVED)
+/**
+ * DEPRECATED: subscribeRunEvents is deprecated.
+ * Use WorkflowRunnerClient for all run state ingestion.
+ * See: WORKFLOW_RUNNER_CLIENT_ANALYSIS.md
+ */
 export const subscribeRunEvents = (
-  onEvent: (ev: WorkflowRunStatusResponse) => void,
+  _onEvent: (ev: WorkflowRunStatusResponse) => void,
 ): EventSource | null => {
-  try {
-    const url = buildApiUrl('/run/events');
-    const es = new EventSource(url);
-
-    es.addEventListener('run', (ev: MessageEvent) => {
-      try {
-        const data = JSON.parse(ev.data) as WorkflowRunStatusResponse;
-        onEvent(data);
-      } catch (err) {
-        debugLog('Failed to parse run event data:', err);
-      }
-    });
-
-    es.addEventListener('message', (ev: MessageEvent) => {
-      try {
-        const data = JSON.parse(ev.data) as WorkflowRunStatusResponse;
-        onEvent(data);
-      } catch (err) {
-        debugLog('Failed to parse run event data:', err);
-      }
-    });
-
-    return es;
-  } catch (err) {
-    return null;
-  }
+  console.warn('[DEPRECATED] subscribeRunEvents is deprecated. Use WorkflowRunnerClient instead.');
+  return null;
 };
-//#endregion
 
-//#region Server-Sent Events (Queue updates)
+/**
+ * DEPRECATED: subscribeQueueEvents is deprecated.
+ * Use WorkflowRunnerClient for all run state ingestion.
+ * See: WORKFLOW_RUNNER_CLIENT_ANALYSIS.md
+ */
 export const subscribeQueueEvents = (
-  onEvent: (ev: WorkflowQueueStatus) => void,
+  _onEvent: (ev: WorkflowQueueStatus) => void,
 ): EventSource | null => {
-  try {
-    const url = buildApiUrl('/run/events');
-    const es = new EventSource(url);
-
-    es.addEventListener('queue', (ev: MessageEvent) => {
-      try {
-        const data = JSON.parse(ev.data) as WorkflowQueueStatus;
-        onEvent(data);
-      } catch (err) {
-        debugLog('Failed to parse queue event data:', err);
-      }
-    });
-
-    return es;
-  } catch (err) {
-    return null;
-  }
+  console.warn(
+    '[DEPRECATED] subscribeQueueEvents is deprecated. Use WorkflowRunnerClient instead.',
+  );
+  return null;
 };
 //#endregion
 

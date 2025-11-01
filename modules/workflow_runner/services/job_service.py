@@ -4,11 +4,13 @@ from . import job_store
 from .job_store import JobStatus
 
 # region Job service functions
-async def create_job(run_id: str, owner_id: str | None = None) -> None:
+async def create_job(run_id: str, workflow_id: str, owner_id: str | None = None) -> None:
     """
-    Create a job record for run_id by delegating to the shared job_manager.
+    Create a job record for run_id by delegating to the shared job_store.
+
+    `workflow_id` is mandatory and will be forwarded to the underlying job_store.
     """
-    await job_store.create_job(run_id, owner_id=owner_id)
+    await job_store.create_job(run_id, owner_id=owner_id, workflow_id=workflow_id)
 
 async def get_job_status(run_id: str) -> Optional[Dict[str, Any]]:
     """
@@ -24,10 +26,14 @@ async def get_job_status(run_id: str) -> Optional[Dict[str, Any]]:
     is_terminal = job.status in {JobStatus.SUCCEEDED, JobStatus.FAILED, JobStatus.CANCELLED}
     payload = {
         "run_id": job.id,
+        "workflow_id": job.workflow_id,
         "status": job.status.value,
         "created_at": job.created_at,
         "error": job.error,
         "result": job.result if is_terminal else None,
+        "seq": getattr(job, "seq", 0),
+        "owner_id": job.owner_id,
+        "updated_at": getattr(job, "updated_at", None),
     }
     return payload
 # endregion

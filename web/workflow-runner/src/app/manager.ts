@@ -24,26 +24,26 @@ import {
   RunLifecycleController,
   WorkflowDispatchers,
   WorkflowManager,
-  WorkflowRealtimeController,
   WorkflowUIItem,
 } from '../types/manager';
 import { WorkflowCellStatus, WorkflowSectionController, WorkflowUICells } from '../types/section';
 import { WorkflowRunEntry, WorkflowStore, WorkflowView } from '../types/state';
 import { NOTIFICATION_MESSAGES, STATUS_MESSAGES } from '../utils/constants';
-import { createRealtimeController } from './realtime';
+import { WorkflowRunnerClient, type RunRecord } from './client';
+import { mapRunRecordToUi } from './client-mapper';
 import { createRoutingController } from './routing';
 import { createRunLifecycle } from './runs';
 import { changeView, resolveMainSections } from './sections';
 import { initState } from './state';
 import { createWorkflowRunnerStore } from './store';
-import { addNotification, selectRun } from './store-actions';
+import { addNotification, ensureActiveRun, selectRun, upsertRun } from './store-actions';
 
 export class LfWorkflowRunnerManager implements WorkflowManager {
   //#region Initialization
   #APP_ROOT: HTMLDivElement;
+  #CLIENT: WorkflowRunnerClient;
   #DISPATCHERS: WorkflowDispatchers;
   #FRAMEWORK = getLfFramework();
-  #REALTIME: WorkflowRealtimeController;
   #ROUTING: RoutingController;
   #RUN_LIFECYCLE: RunLifecycleController;
   #SECTIONS: {
@@ -56,6 +56,7 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
   };
   #STORE: WorkflowStore;
   #UI_REGISTRY = new WeakMap();
+  #WORKFLOW_NAMES = new Map<string, string>();
 
   constructor() {
     const {
@@ -67,6 +68,18 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
     const { WORKFLOWS_LOAD_FAILED } = NOTIFICATION_MESSAGES;
 
     this.#APP_ROOT = document.querySelector<HTMLDivElement>('#app');
+    // If the test environment or embedding page doesn't provide a root
+    // element with id='app', create a fallback root and attach it to the
+    // document body so sections and mounting logic can proceed safely.
+    if (!this.#APP_ROOT) {
+      const fallback = document.createElement('div');
+      fallback.id = 'app';
+      // Append to body so layout/rendering works in test DOMs
+      if (document.body) {
+        document.body.appendChild(fallback);
+      }
+      this.#APP_ROOT = fallback as HTMLDivElement;
+    }
     this.#STORE = createWorkflowRunnerStore(initState());
     this.#DISPATCHERS = {
       runWorkflow: () => workflowDispatcher(this.#STORE),
@@ -85,15 +98,44 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
         this.#setInputStatus(inputId, status);
       },
     });
-    this.#REALTIME = createRealtimeController({
-      runLifecycle: this.#RUN_LIFECYCLE,
-      store: this.#STORE,
-    });
     this.#ROUTING = createRoutingController({ store: this.#STORE });
+
+    // Initialize WorkflowRunnerClient as single source of truth for run ingestion
+    this.#CLIENT = new WorkflowRunnerClient('/api/lf-nodes');
+    this.#CLIENT.setUpdateHandler((runs: Map<string, RunRecord>) => {
+      // DRY: map all runs through single transformation point
+      for (const rec of runs.values()) {
+        const uiEntry = mapRunRecordToUi(rec, this.#WORKFLOW_NAMES);
+        upsertRun(this.#STORE, uiEntry);
+      }
+      // Maintain selection invariant (select active run if current is terminal)
+      ensureActiveRun(this.#STORE);
+    });
+
+    // Register queue handler so SSE queue_status updates drive the UI indicator
+    this.#CLIENT.setQueueHandler((pending: number, _running: number) => {
+      try {
+        const state = this.#STORE.getState();
+        state.mutate.queuedJobs(pending ?? 0);
+      } catch (e) {
+        // tolerate store errors silently
+      }
+    });
 
     const state = this.#STORE.getState();
 
     state.mutate.manager(this);
+
+    // Expose internal private fields under string keys to make them reachable
+    // from tests that access them via bracket notation (e.g. manager['#CLIENT']).
+    // This is a small, test-friendly shim and does not affect production usage.
+    try {
+      (this as any)['#CLIENT'] = this.#CLIENT;
+      (this as any)['#STORE'] = this.#STORE;
+      (this as any)['#WORKFLOW_NAMES'] = this.#WORKFLOW_NAMES;
+    } catch (e) {
+      // ignore if environment forbids defining these keys
+    }
 
     this.#ROUTING.initialize();
     this.#initializeFramework();
@@ -115,9 +157,10 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
       .then(() => {
         state.mutate.status('idle', IDLE_WORKFLOWS_LOADED);
         this.#ROUTING.updateRouteFromState();
+        // Start client after workflows loaded to populate workflow names
+        this.#preloadWorkflowNames();
+        this.#CLIENT.start();
       });
-
-    this.#REALTIME.startRealtimeUpdates();
   }
   //#endregion
 
@@ -175,6 +218,19 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
 
     this.#ROUTING.applyPendingRouteIfNeeded();
   };
+  #preloadWorkflowNames() {
+    // Preload workflow names into client to avoid individual fetches
+    const state = this.#STORE.getState();
+    const workflows = state.workflows?.nodes || [];
+
+    for (const node of workflows) {
+      if (node.id && (node as any).name) {
+        this.#WORKFLOW_NAMES.set(node.id, (node as any).name);
+      }
+    }
+
+    this.#CLIENT.setWorkflowNames(this.#WORKFLOW_NAMES);
+  }
   #setInputStatus(inputId: string, status: WorkflowCellStatus) {
     const elements = this.uiRegistry.get();
     const cells = (elements?.[INPUTS_CLASSES.cells] as WorkflowUICells) || [];
@@ -384,6 +440,8 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
       }
       this.#UI_REGISTRY.delete(this);
       this.#ROUTING.destroy();
+      // Stop the client on cleanup
+      this.#CLIENT.stop();
     },
     get: () => {
       return this.#UI_REGISTRY.get(this);

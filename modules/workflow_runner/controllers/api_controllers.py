@@ -18,6 +18,8 @@ from ..services import job_store
 from ..services.run_service import run_workflow
 from ..services.workflow_service import list_workflows as svc_list_workflows, get_workflow_content
 
+LOG = logging.getLogger(__name__)
+
 # region Helpers
 async def _send_initial_snapshot(resp: web.Response, subscriber_owner: str | None = None, last_event: tuple[str, int] | None = None) -> None:
         """
@@ -36,53 +38,54 @@ async def _send_initial_snapshot(resp: web.Response, subscriber_owner: str | Non
             Logs exceptions for failures in building or sending the snapshot.
         """
         try:
-            jobs = await job_store.list_jobs()
+            jobs = await job_store.list_jobs(owner_id=subscriber_owner if subscriber_owner else None)
+            
+            LOG.debug(f"[_send_initial_snapshot] Total jobs for owner: {len(jobs)}")
+            
             for job in jobs.values():
-                # only include runs that are active (pending or running)
-                if job.status in (job_store.JobStatus.PENDING, job_store.JobStatus.RUNNING):
-                    owner = getattr(job, "owner_id", None)
-                    # owner filtering: if subscriber_owner is set, only send matching owner events
-                    if subscriber_owner and owner and owner != subscriber_owner:
-                        continue
-                    # honor Last-Event-ID: if the client supplied last_event and the
-                    # job matches that run and its seq is <= the last seen seq,
-                    # skip sending the snapshot for that run to avoid duplicates.
-                    if last_event is not None:
-                        try:
-                            last_run_id, last_seq = last_event
-                            jid = getattr(job, "id", getattr(job, "run_id", None))
-                            if jid == last_run_id and (getattr(job, "seq", 0) or 0) <= last_seq:
-                                continue
-                        except Exception:
-                            # if parsing fails, be conservative and send the snapshot
-                            pass
-                    seq = getattr(job, "seq", 0) or 0
-                    event = {
-                        "id": f"{getattr(job, 'id', getattr(job, 'run_id', None))}:{seq}",
-                        "run_id": getattr(job, "id", getattr(job, "run_id", None)),
-                        "status": job.status.value if hasattr(job.status, "value") else str(job.status),
-                        "created_at": getattr(job, "created_at", None),
-                        "error": getattr(job, "error", None),
-                        "result": getattr(job, "result", None)
-                        if (getattr(job, "status", None) in (job_store.JobStatus.SUCCEEDED, job_store.JobStatus.FAILED, job_store.JobStatus.CANCELLED))
-                        else None,
-                        "owner_id": owner,
-                        "seq": seq,
-                    }
+                owner = getattr(job, "owner_id", None)
+                if subscriber_owner and owner and owner != subscriber_owner:
+                    continue
+                if last_event is not None:
                     try:
-                        data = json.dumps(event)
-                        event_type = "queue" if event.get("type") == "queue_status" else "run"
-                        event_id = event.get("id")
-                        payload = f"id: {event_id}\nevent: {event_type}\ndata: {data}\n\n".encode("utf-8")
-                        await resp.write(payload)
-                        await resp.drain()
-                    except (ConnectionResetError, asyncio.CancelledError):
-                        # client disconnected while sending snapshot
-                        break
+                        last_run_id, last_seq = last_event
+                        jid = getattr(job, "id", getattr(job, "run_id", None))
+                        if jid == last_run_id and (getattr(job, "seq", 0) or 0) <= last_seq:
+                            continue
                     except Exception:
-                        logging.exception("Failed to send snapshot event to SSE client")
+                        pass
+                seq = getattr(job, "seq", 0) or 0
+                event = {
+                    "id": f"{getattr(job, 'id', getattr(job, 'run_id', None))}:{seq}",
+                    "run_id": getattr(job, "id", getattr(job, "run_id", None)),
+                    "workflow_id": getattr(job, "workflow_id", None),
+                    "status": job.status.value if hasattr(job.status, "value") else str(job.status),
+                    "created_at": getattr(job, "created_at", None),
+                    "updated_at": getattr(job, "updated_at", None),
+                    "error": getattr(job, "error", None),
+                    "result": getattr(job, "result", None)
+                    if (getattr(job, "status", None) in (job_store.JobStatus.SUCCEEDED, job_store.JobStatus.FAILED, job_store.JobStatus.CANCELLED))
+                    else None,
+                    "owner_id": owner,
+                    "seq": seq,
+                }
+
+                LOG.debug(f"[_send_initial_snapshot] Sending event for run {event['run_id']}, status={event['status']}")
+
+                try:
+                    data = json.dumps(event)
+                    event_type = "queue" if event.get("type") == "queue_status" else "run"
+                    event_id = event.get("id")
+                    payload = f"id: {event_id}\nevent: {event_type}\ndata: {data}\n\n".encode("utf-8")
+                    await resp.write(payload)
+                    await resp.drain()
+                except (ConnectionResetError, asyncio.CancelledError):
+                    # client disconnected while sending snapshot
+                    break
+                except Exception:
+                    LOG.exception("Failed to send snapshot event to SSE client")
         except Exception:
-            logging.exception("Failed to build/send run snapshot for SSE client")
+            LOG.exception("Failed to build/send run snapshot for SSE client")
 # endregion
 
 # region Start
@@ -108,13 +111,36 @@ async def start_workflow_controller(request: web.Request) -> web.Response:
         auth_resp = await _require_auth(request)
         if isinstance(auth_resp, web.Response):
             return auth_resp
-        # derive opaque owner id from the authenticated email (or subject)
         try:
-            subj = request.get('google_oauth_email') if isinstance(request, dict) else getattr(request, 'google_oauth_email', None)
+            subj = None
+            try:
+                cache = getattr(request, "_cache", None)
+                if isinstance(cache, dict):
+                    subj = cache.get("google_oauth_email") or cache.get("email")
+            except Exception:
+                pass
+
+            if subj is None:
+                try:
+                    subj = request.get('google_oauth_email', None)
+                except Exception:
+                    subj = getattr(request, 'google_oauth_email', None)
+
+            # Ensure we have a plain string (some mocks return Mock objects)
+            if subj is not None and not isinstance(subj, str):
+                try:
+                    subj = str(subj)
+                except Exception:
+                    subj = None
+
             from ..services.auth_service import derive_owner_id
 
+            LOG.debug(f"Controller: subj={subj}, type(request)={type(request)}")
             owner_id = derive_owner_id(subj or "")
-        except Exception:
+            LOG.debug(f"Controller: derived owner_id={owner_id[:16] if owner_id else 'None'}... (len={len(owner_id) if owner_id else 0})")
+        except Exception as e:
+            if _WF_DEBUG:
+                LOG.exception(f"Controller: Failed to derive owner_id: {e}")
             owner_id = None
     try:
         payload = await request.json()
@@ -201,10 +227,14 @@ async def stream_runs_controller(request: web.Request) -> web.Response:
     subscriber_owner = None
     if _ENABLE_GOOGLE_OAUTH:
         try:
-            subj = request.get('google_oauth_email') if isinstance(request, dict) else getattr(request, 'google_oauth_email', None)
+            subj = request.get('google_oauth_email', None)
+            if _WF_DEBUG:
+                print(f"[stream_runs_controller] Extracted email for SSE filtering: {subj}")
             from ..services.auth_service import derive_owner_id
 
             subscriber_owner = derive_owner_id(subj or "")
+            if _WF_DEBUG:
+                print(f"[stream_runs_controller] Derived subscriber_owner: {subscriber_owner}")
         except Exception:
             subscriber_owner = None
 
@@ -230,10 +260,10 @@ async def stream_runs_controller(request: web.Request) -> web.Response:
                 except (ConnectionResetError, asyncio.CancelledError):
                     pass
                 except Exception:
-                    logging.exception("Failed to write initial queue_status to SSE client")
+                    LOG.exception("Failed to write initial queue_status to SSE client")
         except Exception:
             # keep SSE path robust; if background helper is unavailable just continue
-            logging.debug("Could not fetch/send initial queue status snapshot")
+            LOG.debug("Could not fetch/send initial queue status snapshot")
 
         await _send_initial_snapshot(resp, subscriber_owner, last_event)
 
@@ -308,10 +338,17 @@ async def list_runs_controller(request: web.Request) -> web.Response:
     Returns a JSON payload:
       { runs: [ { run_id, status, seq, owner_id?, created_at, updated_at, result?, error? }, ... ] }
     """
+    if _WF_DEBUG:
+        print(f"[list_runs_controller] Called with query: {dict(request.query)}")
+    
     if _ENABLE_GOOGLE_OAUTH:
         auth_resp = await _require_auth(request)
         if isinstance(auth_resp, web.Response):
+            if _WF_DEBUG:
+                print(f"[list_runs_controller] Auth failed, returning {auth_resp.status}")
             return auth_resp
+        if _WF_DEBUG:
+            print(f"[list_runs_controller] Auth succeeded")
 
     # parse query params
     status_q = request.query.get("status")
@@ -331,9 +368,13 @@ async def list_runs_controller(request: web.Request) -> web.Response:
     owner_id = None
     if owner_q == "me" and _ENABLE_GOOGLE_OAUTH:
         try:
-            subj = request.get('google_oauth_email') if isinstance(request, dict) else getattr(request, 'google_oauth_email', None)
+            subj = request.get('google_oauth_email', None)
+            if _WF_DEBUG:
+                print(f"[list_runs_controller] Extracted email for owner filtering: {subj}")
             from ..services.auth_service import derive_owner_id
             owner_id = derive_owner_id(subj or "")
+            if _WF_DEBUG:
+                print(f"[list_runs_controller] Derived owner_id for filtering: {owner_id}")
         except Exception:
             owner_id = None
     elif owner_q and owner_q != "me":
@@ -351,6 +392,7 @@ async def list_runs_controller(request: web.Request) -> web.Response:
                 seen.add(k)
                 runs_out.append({
                     "run_id": job.id,
+                    "workflow_id": job.workflow_id,
                     "status": job.status.value,
                     "seq": getattr(job, "seq", 0),
                     "owner_id": job.owner_id,
@@ -368,6 +410,7 @@ async def list_runs_controller(request: web.Request) -> web.Response:
         for k, job in recs.items():
             runs_out.append({
                 "run_id": job.id,
+                "workflow_id": job.workflow_id,
                 "status": job.status.value,
                 "seq": getattr(job, "seq", 0),
                 "owner_id": job.owner_id,
@@ -380,6 +423,120 @@ async def list_runs_controller(request: web.Request) -> web.Response:
                 break
 
     return web.json_response({"runs": runs_out})
+# endregion
+
+
+# region Admin debug UI (debug-only)
+async def admin_runs_page(request: web.Request) -> web.Response:
+        """Serve a tiny debug HTML page that fetches the admin runs JSON endpoint.
+
+        This page is only available when workflow-runner debug mode (`_WF_DEBUG`) is enabled.
+        """
+        if not _WF_DEBUG:
+                return web.json_response({"detail": "not_enabled"}, status=404)
+
+        html = """
+        <!doctype html>
+        <html>
+        <head>
+            <meta charset="utf-8" />
+            <title>Workflow Runner - Admin Runs</title>
+            <style>
+                body { font-family: Arial, Helvetica, sans-serif; margin: 20px; }
+                table { border-collapse: collapse; width: 100%; }
+                th, td { border: 1px solid #ddd; padding: 8px; }
+                th { background: #f4f4f4; }
+                tr:nth-child(even){background-color: #f9f9f9;}
+            </style>
+        </head>
+        <body>
+            <h2>Workflow Runner — Runs (debug)</h2>
+            <p>
+                <button id="refresh">Refresh</button>
+                <span id="status" style="margin-left:12px; color: #666"></span>
+            </p>
+            <div id="content">Loading…</div>
+
+        <script>
+                    async function loadRuns(){
+                        document.getElementById('status').textContent = 'Fetching...';
+                        try{
+                                                        // Build runs URL relative to the current pathname so we hit
+                                                        // /.../admin/runs (not the sibling /.../runs)
+                                                            const pathname = window.location.pathname;
+                                                            const base = pathname.endsWith('/') ? pathname.slice(0, -1) : pathname;
+                                                            const runsUrl = base + '/runs';
+                                                        const resp = await fetch(runsUrl);
+                    if(!resp.ok){
+                        document.getElementById('content').textContent = 'Error: ' + resp.status;
+                        document.getElementById('status').textContent = '';
+                        return;
+                    }
+                    const j = await resp.json();
+                    const runs = j.runs || [];
+                    if(runs.length===0){
+                        document.getElementById('content').textContent = 'No runs found';
+                        document.getElementById('status').textContent = runs.length + ' runs';
+                        return;
+                    }
+                    let html = '<table><thead><tr>'+
+                                         '<th>run_id</th><th>workflow_id</th><th>status</th><th>seq</th><th>owner_id</th><th>created_at</th><th>updated_at</th><th>error</th><th>result</th>'+
+                                         '</tr></thead><tbody>';
+                    for(const r of runs){
+                        html += '<tr>'+
+                                        `<td>${r.run_id}</td>`+
+                                        `<td>${r.workflow_id ?? ''}</td>`+
+                                        `<td>${r.status}</td>`+
+                                        `<td>${r.seq ?? ''}</td>`+
+                                        `<td>${r.owner_id ?? ''}</td>`+
+                                        `<td>${new Date((r.created_at||0)*1000).toLocaleString()}</td>`+
+                                        `<td>${r.updated_at? new Date(r.updated_at*1000).toLocaleString() : ''}</td>`+
+                                        `<td>${r.error ?? ''}</td>`+
+                                        `<td><pre style='white-space:pre-wrap'>${JSON.stringify(r.result || '')}</pre></td>`+
+                                        '</tr>';
+                    }
+                    html += '</tbody></table>';
+                    document.getElementById('content').innerHTML = html;
+                    document.getElementById('status').textContent = runs.length + ' runs';
+                }catch(e){
+                    document.getElementById('content').textContent = 'Error: ' + e;
+                    document.getElementById('status').textContent = '';
+                }
+            }
+            document.getElementById('refresh').addEventListener('click', loadRuns);
+            loadRuns();
+        </script>
+        </body>
+        </html>
+        """
+
+        return web.Response(text=html, content_type='text/html')
+
+
+async def admin_runs_api(request: web.Request) -> web.Response:
+        """Return JSON list of all runs (debug-only).
+
+        This returns the same shape as the client cold-load endpoint but is explicitly
+        intended for debugging and browsing via the admin page.
+        """
+        if not _WF_DEBUG:
+                return web.json_response({"detail": "not_enabled"}, status=404)
+
+        recs = await job_store.list_jobs(owner_id=None, status=None)
+        out = []
+        for k, job in recs.items():
+                out.append({
+                        "run_id": job.id,
+                        "workflow_id": getattr(job, "workflow_id", None),
+                        "status": job.status.value if hasattr(job.status, 'value') else str(job.status),
+                        "seq": getattr(job, 'seq', 0),
+                        "owner_id": getattr(job, 'owner_id', None),
+                        "created_at": getattr(job, 'created_at', None),
+                        "updated_at": getattr(job, 'updated_at', None),
+                        "result": getattr(job, 'result', None),
+                        "error": getattr(job, 'error', None),
+                })
+        return web.json_response({"runs": out})
 # endregion
 
 # region Get Workflow
@@ -460,7 +617,7 @@ async def verify_controller(request: web.Request) -> web.Response:
     try:
         session_id, expires_at = create_server_session(email)
     except Exception:
-        logging.exception("Failed to create session in store")
+        LOG.exception("Failed to create session in store")
         return web.json_response({"detail": "server_error"}, status=500)
 
     resp = web.json_response({"detail": "ok"})
@@ -481,7 +638,7 @@ async def verify_controller(request: web.Request) -> web.Response:
         if request.cookies.get('LF_AUTH'):
             resp.del_cookie('LF_AUTH', path="/api/lf-nodes/")
     except Exception:
-        logging.exception("Failed to set session cookie")
+        LOG.exception("Failed to set session cookie")
 
     return resp
 # endregion
@@ -523,12 +680,12 @@ async def debug_login_controller(request: web.Request) -> web.Response:
     try:
         session_id, expires_at = create_server_session(email)
     except Exception:
-        logging.exception("Failed to create debug session in store")
+        LOG.exception("Failed to create debug session in store")
         return web.json_response({"detail": "server_error"}, status=500)
     resp = web.json_response({"detail": "ok", "email": email})
     try:
         resp.set_cookie("LF_SESSION", session_id, max_age=_SESSION_TTL, httponly=True, path="/api/lf-nodes/", samesite="Lax", secure=True)
     except Exception:
-        logging.exception("Failed to set debug session cookie")
+        LOG.exception("Failed to set debug session cookie")
     return resp
 # endregion

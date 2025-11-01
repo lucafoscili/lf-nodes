@@ -9,6 +9,8 @@ from typing import Any, Dict, Optional
 
 from ..config import get_settings
 
+_settings = get_settings()
+_WF_DEBUG = bool(_settings.WORKFLOW_RUNNER_DEBUG)
 
 class JobStatus(str, Enum):
     PENDING = "pending"
@@ -21,6 +23,7 @@ class JobStatus(str, Enum):
 @dataclass
 class Job:
     id: str
+    workflow_id: str
     created_at: float = field(default_factory=time.time)
     status: JobStatus = JobStatus.PENDING
     result: Optional[Any] = None
@@ -28,6 +31,8 @@ class Job:
     owner_id: Optional[str] = None
     # seq for event reconciliation; in-memory store maintains this for parity with sqlite
     seq: int = 0
+    # updated_at tracks last status/result change; defaults to created_at
+    updated_at: Optional[float] = None
 
 
 _jobs: Dict[str, Job] = {}
@@ -60,20 +65,27 @@ async def _get_adapter():
 LOG = logging.getLogger(__name__)
 
 # region create
-async def create_job(job_id: str, owner_id: Optional[str] = None) -> Job:
+async def create_job(job_id: str, workflow_id: str, owner_id: Optional[str] = None) -> Job:
+    if _WF_DEBUG:
+        LOG.info(f"[DEBUG] create_job called: job_id={job_id}, workflow_id={workflow_id}, owner_id={owner_id}")
+    
     if _USE_PERSISTENCE:
         adapter = await _get_adapter()
         if adapter is not None:
-            return await adapter.create_job(job_id, owner_id)
+            if _WF_DEBUG:
+                LOG.info(f"[DEBUG] create_job: calling adapter.create_job with workflow_id={workflow_id}, owner_id={owner_id}")
+            # Call adapter with keyword args to avoid positional signature mismatches
+            return await adapter.create_job(job_id, workflow_id=workflow_id, owner_id=owner_id)
 
     async with _lock:
-        job = Job(id=job_id, owner_id=owner_id, seq=0)
+        job = Job(id=job_id, workflow_id=workflow_id, owner_id=owner_id, seq=0)
         _jobs[job_id] = job
         updated = job
 
     event = {
         "id": f"{updated.id}:{updated.seq}",
         "run_id": updated.id,
+        "workflow_id": updated.workflow_id,
         "status": updated.status.value,
         "created_at": updated.created_at,
         "error": updated.error,
@@ -102,12 +114,14 @@ async def get_job(job_id: str) -> Optional[Job]:
             # convert to in-memory Job dataclass for compatibility
             job = Job(
                 id=rec.run_id,
+                workflow_id=str(getattr(rec, "workflow_id", "")),
                 created_at=rec.created_at,
                 status=JobStatus(rec.status),
                 result=rec.result,
                 error=rec.error,
                 owner_id=getattr(rec, "owner_id", None),
                 seq=getattr(rec, "seq", 0),
+                updated_at=getattr(rec, "updated_at", rec.created_at),
             )
             return job
     async with _lock:
@@ -128,12 +142,14 @@ async def set_job_status(
                 return None
             job = Job(
                 id=rec.run_id,
+                workflow_id=str(getattr(rec, "workflow_id", "")),
                 created_at=rec.created_at,
                 status=JobStatus(rec.status),
                 result=rec.result,
                 error=rec.error,
                 owner_id=getattr(rec, "owner_id", None),
                 seq=getattr(rec, "seq", 0),
+                updated_at=getattr(rec, "updated_at", rec.created_at),
             )
             return job
 
@@ -152,12 +168,15 @@ async def set_job_status(
             job.seq = (job.seq or 0) + 1
         except Exception:
             job.seq = 1
+        # Update timestamp for in-memory jobs
+        job.updated_at = time.time()
         updated = job
 
     # Notify subscribers outside of the lock to avoid blocking other callers.
     event = {
         "id": f"{updated.id}:{updated.seq}",
         "run_id": updated.id,
+        "workflow_id": updated.workflow_id,
         "status": updated.status.value,
         "created_at": updated.created_at,
         "error": updated.error,
@@ -187,12 +206,14 @@ async def list_jobs(owner_id: Optional[str] = None, status: Optional[str] = None
             for k, r in recs.items():
                 out[k] = Job(
                     id=r.run_id,
+                    workflow_id=str(getattr(r, "workflow_id", "")),
                     created_at=r.created_at,
                     status=JobStatus(r.status),
                     result=r.result,
                     error=r.error,
                     owner_id=getattr(r, "owner_id", None),
                     seq=getattr(r, "seq", 0),
+                    updated_at=getattr(r, "updated_at", r.created_at),
                 )
             return out
     async with _lock:

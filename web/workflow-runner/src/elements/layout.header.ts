@@ -153,9 +153,15 @@ export const createHeaderSection = (store: WorkflowStore): WorkflowSectionContro
       return;
     }
 
-    const appMessage = elements[HEADER_CLASSES.appMessage] as HTMLElement;
-    const counter = elements[HEADER_CLASSES.serverIndicatorCounter] as HTMLElement;
-    const light = elements[HEADER_CLASSES.serverIndicatorLight] as HTMLLfButtonElement;
+    const appMessage = elements[HEADER_CLASSES.appMessage] as HTMLElement | undefined;
+    const counter = elements[HEADER_CLASSES.serverIndicatorCounter] as HTMLElement | undefined;
+    const light = elements[HEADER_CLASSES.serverIndicatorLight] as HTMLLfButtonElement | undefined;
+
+    // Be defensive: if the mount did not complete or elements are missing in
+    // the test DOM, skip rendering to avoid throwing during tests.
+    if (!appMessage || !counter || !light) {
+      return;
+    }
 
     const isIdle = status === 'idle';
 

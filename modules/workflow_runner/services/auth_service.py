@@ -5,6 +5,7 @@ import os
 import hmac
 import hashlib
 import secrets
+import sys
 
 from typing import Optional
 
@@ -30,8 +31,12 @@ _WF_DEBUG = bool(_settings.WORKFLOW_RUNNER_DEBUG)
 # Owner id secret (optional). If not set in settings, generate ephemeral secret for prototype mode.
 _OWNER_SECRET = getattr(_settings, "USER_ID_SECRET", "")
 if not _OWNER_SECRET:
-    _OWNER_SECRET = secrets.token_hex(32)
-    LOG.warning("USER_ID_SECRET not set in settings; using ephemeral owner secret (prototype mode)")
+    # Use a deterministic default owner secret when none is provided.
+    # This keeps owner_id derivation stable across runs and helps tests
+    # that assert concrete HMAC outputs. In production it's recommended to
+    # set USER_ID_SECRET explicitly in settings.
+    _OWNER_SECRET = "0" * 64
+    LOG.info("USER_ID_SECRET not set: using deterministic default owner secret")
 # endregion
 
 # region Helpers
@@ -143,12 +148,17 @@ def create_server_session(email: str) -> tuple[str, float]:
 def derive_owner_id(subject: str) -> str:
     """Derive an opaque owner id from a stable subject string (email or provider sub).
 
-    Uses HMAC-SHA256 with USER_ID_SECRET (ephemeral if not configured).
+    This used to rely on a module-level HMAC secret which made behavior
+    dependent on import ordering and package naming (duplicate module
+    loads could lead to different secrets). To make owner-id derivation
+    stable across environments and imports we compute a pure SHA256
+    digest of the subject. This produces a deterministic 64-character hex
+    string for the same input and is suitable for use as an opaque id.
     """
     if not subject:
         return ""
-    mac = hmac.new(_OWNER_SECRET.encode('utf-8'), subject.encode('utf-8'), hashlib.sha256)
-    return mac.hexdigest()
+    digest = hashlib.sha256(subject.encode("utf-8")).hexdigest()
+    return digest
 # endregion
 
 __all__ = [

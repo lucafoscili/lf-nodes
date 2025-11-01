@@ -24,30 +24,8 @@ def _get_api_controllers():
         raise
 # endregion
 
-# region API Catch-All GET
-@PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/{{path:.*}}")
-async def route_api_catch_all_get(request: web.Request) -> web.Response:
-    path = request.path
-    # allow the workflow-runner page and verify endpoint to be publicly reachable
-    if path.startswith(f"{API_ROUTE_PREFIX}/workflow-runner") or path.endswith("/verify"):
-        # Not handled here; return 404 so more specific routes can match if present
-        return web.Response(status=404, text="Not found")
-
-    logging.info("Denied unauthenticated GET to %s", path)
-    return web.json_response({"detail": "forbidden"}, status=403)
-# endregion
-
-# region API Catch-All POST
-@PromptServer.instance.routes.post(f"{API_ROUTE_PREFIX}/{{path:.*}}")
-async def route_api_catch_all_post(request: web.Request) -> web.Response:
-    path = request.path
-    # allow verify post to be processed
-    if path.endswith("/verify"):
-        return web.Response(status=404, text="Not found")
-
-    logging.info("Denied unauthenticated POST to %s", path)
-    return web.json_response({"detail": "forbidden"}, status=403)
-# endregion
+# IMPORTANT: Specific routes must be registered BEFORE catch-all routes!
+# aiohttp evaluates routes in registration order, so catch-alls must come last.
 
 # region Run Workflow
 @PromptServer.instance.routes.post(f"{API_ROUTE_PREFIX}/run")
@@ -83,4 +61,50 @@ async def route_list_workflows(request: web.Request) -> web.Response:
 async def route_get_workflow(request: web.Request) -> web.Response:
     api_controllers = _get_api_controllers()
     return await api_controllers.get_workflow_controller(request)
+# endregion
+
+# region Workflow Runner - List Runs
+@PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/workflow-runner/runs")
+async def route_list_runs(request: web.Request) -> web.Response:
+    api_controllers = _get_api_controllers()
+    return await api_controllers.list_runs_controller(request)
+# endregion
+
+# region Workflow Runner - Events (SSE)
+@PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/workflow-runner/events")
+async def route_workflow_runner_events(request: web.Request) -> web.Response:
+    api_controllers = _get_api_controllers()
+    return await api_controllers.stream_runs_controller(request)
+# endregion
+
+# region Admin debug UI routes
+@PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/workflow-runner/admin")
+async def route_admin_page(request: web.Request) -> web.Response:
+    api_controllers = _get_api_controllers()
+    return await api_controllers.admin_runs_page(request)
+
+@PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/workflow-runner/admin/runs")
+async def route_admin_runs(request: web.Request) -> web.Response:
+    api_controllers = _get_api_controllers()
+    return await api_controllers.admin_runs_api(request)
+# endregion
+
+# region API Catch-All Routes (MUST BE LAST!)
+@PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/{{path:.*}}")
+async def route_api_catch_all_get(request: web.Request) -> web.Response:
+    path = request.path
+    if path.startswith(f"{API_ROUTE_PREFIX}/workflow-runner") or path.endswith("/verify"):
+        return web.Response(status=404, text="Not found")
+
+    logging.info("Denied unauthenticated GET to %s", path)
+    return web.json_response({"detail": "forbidden"}, status=403)
+
+@PromptServer.instance.routes.post(f"{API_ROUTE_PREFIX}/{{path:.*}}")
+async def route_api_catch_all_post(request: web.Request) -> web.Response:
+    path = request.path
+    if path.endswith("/verify"):
+        return web.Response(status=404, text="Not found")
+
+    logging.info("Denied unauthenticated POST to %s", path)
+    return web.json_response({"detail": "forbidden"}, status=403)
 # endregion
