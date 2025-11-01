@@ -7,12 +7,16 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Dict, Optional
 
+from ..config import get_settings
+
+
 class JobStatus(str, Enum):
     PENDING = "pending"
     RUNNING = "running"
     SUCCEEDED = "succeeded"
     FAILED = "failed"
     CANCELLED = "cancelled"
+
 
 @dataclass
 class Job:
@@ -21,26 +25,61 @@ class Job:
     status: JobStatus = JobStatus.PENDING
     result: Optional[Any] = None
     error: Optional[str] = None
+    owner_id: Optional[str] = None
+    # seq for event reconciliation; in-memory store maintains this for parity with sqlite
+    seq: int = 0
+
 
 _jobs: Dict[str, Job] = {}
 _lock = asyncio.Lock()
 _subscribers: list[asyncio.Queue] = []
 
+# Use centralized settings instead of direct env reads
+_settings = get_settings()
+_USE_PERSISTENCE = getattr(_settings, "WORKFLOW_RUNNER_USE_PERSISTENCE", False)
+_adapter = None
+
+async def _get_adapter():
+    global _adapter
+    if _adapter is not None:
+        return _adapter
+    # Lazy import of heavy dependency
+    try:
+        from . import job_store_sqlite as _job_store_sqlite
+        # configure adapter with DB path from settings (adapter handles None/default)
+        try:
+            db_path = getattr(_settings, "WORKFLOW_RUNNER_DB_PATH", "") or None
+            _job_store_sqlite.configure(db_path)
+        except Exception:
+            LOG.debug("Failed to configure sqlite adapter with provided DB path; adapter will choose default")
+        _adapter = _job_store_sqlite
+    except Exception:
+        _adapter = None
+    return _adapter
+
 LOG = logging.getLogger(__name__)
 
 # region create
-async def create_job(job_id: str) -> Job:
+async def create_job(job_id: str, owner_id: Optional[str] = None) -> Job:
+    if _USE_PERSISTENCE:
+        adapter = await _get_adapter()
+        if adapter is not None:
+            return await adapter.create_job(job_id, owner_id)
+
     async with _lock:
-        job = Job(id=job_id)
+        job = Job(id=job_id, owner_id=owner_id, seq=0)
         _jobs[job_id] = job
         updated = job
 
     event = {
+        "id": f"{updated.id}:{updated.seq}",
         "run_id": updated.id,
         "status": updated.status.value,
         "created_at": updated.created_at,
         "error": updated.error,
         "result": updated.result if updated.status in {JobStatus.SUCCEEDED, JobStatus.FAILED, JobStatus.CANCELLED} else None,
+        "owner_id": updated.owner_id,
+        "seq": updated.seq,
     }
     for q in list(_subscribers):
         try:
@@ -54,6 +93,23 @@ async def create_job(job_id: str) -> Job:
 
 # region read/update/delete
 async def get_job(job_id: str) -> Optional[Job]:
+    if _USE_PERSISTENCE:
+        adapter = await _get_adapter()
+        if adapter is not None:
+            rec = await adapter.get_job(job_id)
+            if rec is None:
+                return None
+            # convert to in-memory Job dataclass for compatibility
+            job = Job(
+                id=rec.run_id,
+                created_at=rec.created_at,
+                status=JobStatus(rec.status),
+                result=rec.result,
+                error=rec.error,
+                owner_id=getattr(rec, "owner_id", None),
+                seq=getattr(rec, "seq", 0),
+            )
+            return job
     async with _lock:
         return _jobs.get(job_id)
 
@@ -64,6 +120,23 @@ async def set_job_status(
     result: Optional[Any] = None,
     error: Optional[str] = None,
 ) -> Optional[Job]:
+    if _USE_PERSISTENCE:
+        adapter = await _get_adapter()
+        if adapter is not None:
+            rec = await adapter.set_job_status(job_id, status.value if isinstance(status, JobStatus) else str(status), result=result, error=error)
+            if rec is None:
+                return None
+            job = Job(
+                id=rec.run_id,
+                created_at=rec.created_at,
+                status=JobStatus(rec.status),
+                result=rec.result,
+                error=rec.error,
+                owner_id=getattr(rec, "owner_id", None),
+                seq=getattr(rec, "seq", 0),
+            )
+            return job
+
     async with _lock:
         job = _jobs.get(job_id)
         if job is None:
@@ -74,15 +147,23 @@ async def set_job_status(
             job.result = result
         if error is not None:
             job.error = error
+        # increment seq for event ordering
+        try:
+            job.seq = (job.seq or 0) + 1
+        except Exception:
+            job.seq = 1
         updated = job
 
     # Notify subscribers outside of the lock to avoid blocking other callers.
     event = {
+        "id": f"{updated.id}:{updated.seq}",
         "run_id": updated.id,
         "status": updated.status.value,
         "created_at": updated.created_at,
         "error": updated.error,
         "result": updated.result if updated.status in {JobStatus.SUCCEEDED, JobStatus.FAILED, JobStatus.CANCELLED} else None,
+        "owner_id": updated.owner_id,
+        "seq": updated.seq,
     }
     for q in list(_subscribers):
         try:
@@ -93,9 +174,37 @@ async def set_job_status(
 
     return updated
 
-async def list_jobs() -> Dict[str, Job]:
+async def list_jobs(owner_id: Optional[str] = None, status: Optional[str] = None) -> Dict[str, Job]:
+    """List jobs, optionally filtered by owner_id and/or status.
+
+    Returns a mapping of job_id -> Job dataclass.
+    """
+    if _USE_PERSISTENCE:
+        adapter = await _get_adapter()
+        if adapter is not None:
+            recs = await adapter.list_jobs(owner_id=owner_id, status=status)
+            out: Dict[str, Job] = {}
+            for k, r in recs.items():
+                out[k] = Job(
+                    id=r.run_id,
+                    created_at=r.created_at,
+                    status=JobStatus(r.status),
+                    result=r.result,
+                    error=r.error,
+                    owner_id=getattr(r, "owner_id", None),
+                    seq=getattr(r, "seq", 0),
+                )
+            return out
     async with _lock:
-        return dict(_jobs)
+        # filter in-memory jobs
+        out = {}
+        for k, job in _jobs.items():
+            if owner_id is not None and getattr(job, "owner_id", None) != owner_id:
+                continue
+            if status is not None and job.status.value != status:
+                continue
+            out[k] = job
+        return out
 
 async def remove_job(job_id: str) -> Optional[Job]:
     async with _lock:
@@ -120,12 +229,36 @@ def subscribe_events() -> asyncio.Queue:
     Caller is responsible for consuming and ensuring the queue does not grow
     unbounded. Use `unsubscribe_events` to remove the queue when done.
     """
+    if _USE_PERSISTENCE:
+        # delegate to adapter if available (import synchronously and configure)
+        try:
+            adapter = __import__(__package__ + ".job_store_sqlite", fromlist=["*"])
+            try:
+                db_path = getattr(_settings, "WORKFLOW_RUNNER_DB_PATH", "") or None
+                adapter.configure(db_path)
+            except Exception:
+                LOG.debug("sqlite adapter configure() failed in subscribe_events; continuing")
+            return adapter.subscribe_events()
+        except Exception:
+            # fall back to in-memory pubsub
+            pass
     q: asyncio.Queue = asyncio.Queue()
     _subscribers.append(q)
     return q
 
 def unsubscribe_events(q: asyncio.Queue) -> None:
     try:
+        if _USE_PERSISTENCE:
+            try:
+                adapter = __import__(__package__ + ".job_store_sqlite", fromlist=["*"])
+                try:
+                    db_path = getattr(_settings, "WORKFLOW_RUNNER_DB_PATH", "") or None
+                    adapter.configure(db_path)
+                except Exception:
+                    LOG.debug("sqlite adapter configure() failed in unsubscribe_events; continuing")
+                return adapter.unsubscribe_events(q)
+            except Exception:
+                pass
         _subscribers.remove(q)
     except ValueError:
         pass
@@ -141,6 +274,18 @@ def publish_event(event: Dict[str, Any]) -> None:
     serializable and include an identifying key (for example, 'type' or
     'run_id').
     """
+    if _USE_PERSISTENCE:
+        try:
+            adapter = __import__(__package__ + ".job_store_sqlite", fromlist=["*"])
+            try:
+                db_path = getattr(_settings, "WORKFLOW_RUNNER_DB_PATH", "") or None
+                adapter.configure(db_path)
+            except Exception:
+                LOG.debug("sqlite adapter configure() failed in publish_event; continuing")
+            return adapter.publish_event(event)
+        except Exception:
+            LOG.exception("Failed to publish via sqlite adapter; falling back to in-memory pubsub")
+
     for q in list(_subscribers):
         try:
             q.put_nowait(event)

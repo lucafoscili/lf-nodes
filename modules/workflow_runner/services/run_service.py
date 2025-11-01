@@ -23,7 +23,7 @@ def _emit_run_progress(run_id: str, message: str, **extra: Any) -> None:
 # endregion
 
 # region Run Workflow
-async def run_workflow(payload: Dict[str, Any]) -> Dict[str, Any]:
+async def run_workflow(payload: Dict[str, Any], owner_id: str | None = None) -> Dict[str, Any]:
     """Orchestrate running a workflow payload.
 
     This function mirrors the behaviour previously implemented inline in
@@ -37,7 +37,7 @@ async def run_workflow(payload: Dict[str, Any]) -> Dict[str, Any]:
 
     run_id = str(uuid.uuid4())
     LOG.info("Creating workflow run %s", run_id)
-    await create_job(run_id)
+    await create_job(run_id, owner_id=owner_id)
     LOG.debug("Created run %s and published pending event", run_id)
     _emit_run_progress(run_id, "workflow_received")
 

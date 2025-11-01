@@ -1,6 +1,10 @@
 import logging
 import time as _time
 import uuid
+import os
+import hmac
+import hashlib
+import secrets
 
 from typing import Optional
 
@@ -11,6 +15,7 @@ from ..config import get_settings
 
 # region Settings and globals
 _settings = get_settings()
+LOG = logging.getLogger(__name__)
 _ENABLE_GOOGLE_OAUTH = _settings.ENABLE_GOOGLE_OAUTH
 _GOOGLE_CLIENT_IDS = _settings.GOOGLE_CLIENT_IDS
 _ALLOWED_USERS_FILE = _settings.ALLOWED_USERS_FILE
@@ -22,7 +27,11 @@ _SESSION_STORE: dict[str, tuple[str, float]] = {}
 _SESSION_TTL = int(_settings.SESSION_TTL_SECONDS or _TOKEN_CACHE_TTL)
 _WF_DEBUG = bool(_settings.WORKFLOW_RUNNER_DEBUG)
 
-LOG = logging.getLogger(__name__)
+# Owner id secret (optional). If not set in settings, generate ephemeral secret for prototype mode.
+_OWNER_SECRET = getattr(_settings, "USER_ID_SECRET", "")
+if not _OWNER_SECRET:
+    _OWNER_SECRET = secrets.token_hex(32)
+    LOG.warning("USER_ID_SECRET not set in settings; using ephemeral owner secret (prototype mode)")
 # endregion
 
 # region Helpers
@@ -129,6 +138,17 @@ def create_server_session(email: str) -> tuple[str, float]:
     expires_at = _time.time() + _SESSION_TTL
     _SESSION_STORE[session_id] = (email, expires_at)
     return session_id, expires_at
+
+
+def derive_owner_id(subject: str) -> str:
+    """Derive an opaque owner id from a stable subject string (email or provider sub).
+
+    Uses HMAC-SHA256 with USER_ID_SECRET (ephemeral if not configured).
+    """
+    if not subject:
+        return ""
+    mac = hmac.new(_OWNER_SECRET.encode('utf-8'), subject.encode('utf-8'), hashlib.sha256)
+    return mac.hexdigest()
 # endregion
 
 __all__ = [

@@ -66,6 +66,11 @@ async def _job_pruner_loop(job_manager_module) -> None:
 
 async def _queue_status_publisher_loop(job_store_module) -> None:
     try:
+        # Track last seen counts so we can avoid publishing duplicate identical
+        # queue status events every interval. This significantly reduces SSE
+        # noise when nothing has changed.
+        last_pending = None
+        last_running = None
         while True:
             try:
                 # Fetch queue status from ComfyUI
@@ -77,14 +82,21 @@ async def _queue_status_publisher_loop(job_store_module) -> None:
                                 queue_data = await resp.json()
                                 pending = len(queue_data.get('queue_pending', []))
                                 running = len(queue_data.get('queue_running', []))
-                                
-                                # Publish queue status event
-                                event = {
-                                    "type": "queue_status",
-                                    "pending": pending,
-                                    "running": running,
-                                }
-                                job_store_module.publish_event(event)
+
+                                # Only publish when counts change to avoid flooding
+                                # subscribers with identical periodic updates.
+                                if pending != last_pending or running != last_running:
+                                    event = {
+                                        "type": "queue_status",
+                                        "pending": pending,
+                                        "running": running,
+                                    }
+                                    try:
+                                        job_store_module.publish_event(event)
+                                    except Exception:
+                                        logging.exception("Failed to publish queue_status event")
+                                    last_pending = pending
+                                    last_running = running
                     except Exception:
                         logging.debug("Failed to fetch queue status")
             except Exception:
@@ -92,6 +104,39 @@ async def _queue_status_publisher_loop(job_store_module) -> None:
             await asyncio.sleep(_QUEUE_STATUS_INTERVAL)
     except asyncio.CancelledError:
         logging.debug("Queue status publisher cancelled")
+
+
+async def fetch_queue_status() -> dict | None:
+    """
+    Asynchronously fetches the current queue status from the local ComfyUI queue endpoint.
+    This helper function makes an HTTP GET request to 'http://127.0.0.1:8188/queue' and parses the response
+    to extract the number of pending and running tasks in the queue. It is designed to be exported for use
+    by other modules, such as the SSE controller, to provide an initial queue status snapshot to newly
+    connected clients without duplicating HTTP request logic.
+
+    Returns:
+        dict | None: A dictionary containing 'pending' (int) and 'running' (int) counts if successful,
+                     or None if an error occurs during the request or parsing.
+                     
+    Raises:
+        No exceptions are raised; errors are logged and None is returned on failure.
+    """
+    try:
+        import aiohttp
+
+        async with aiohttp.ClientSession() as session:
+            try:
+                async with session.get('http://127.0.0.1:8188/queue') as resp:
+                    if resp.status == 200:
+                        queue_data = await resp.json()
+                        pending = len(queue_data.get('queue_pending', []))
+                        running = len(queue_data.get('queue_running', []))
+                        return {"pending": pending, "running": running}
+            except Exception:
+                logging.debug("Failed to fetch queue status (fetch_queue_status)")
+    except Exception:
+        logging.exception("Unexpected error while fetching queue status")
+    return None
 # endregion
 
 # region Background task management

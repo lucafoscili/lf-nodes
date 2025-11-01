@@ -4,11 +4,11 @@ from . import job_store
 from .job_store import JobStatus
 
 # region Job service functions
-async def create_job(run_id: str) -> None:
+async def create_job(run_id: str, owner_id: str | None = None) -> None:
     """
     Create a job record for run_id by delegating to the shared job_manager.
     """
-    await job_store.create_job(run_id)
+    await job_store.create_job(run_id, owner_id=owner_id)
 
 async def get_job_status(run_id: str) -> Optional[Dict[str, Any]]:
     """

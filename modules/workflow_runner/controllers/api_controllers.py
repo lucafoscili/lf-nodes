@@ -19,7 +19,7 @@ from ..services.run_service import run_workflow
 from ..services.workflow_service import list_workflows as svc_list_workflows, get_workflow_content
 
 # region Helpers
-async def _send_initial_snapshot(resp: web.Response) -> None:
+async def _send_initial_snapshot(resp: web.Response, subscriber_owner: str | None = None, last_event: tuple[str, int] | None = None) -> None:
         """
         Send an initial snapshot of active (pending or running) jobs to the SSE client.
 
@@ -40,16 +40,40 @@ async def _send_initial_snapshot(resp: web.Response) -> None:
             for job in jobs.values():
                 # only include runs that are active (pending or running)
                 if job.status in (job_store.JobStatus.PENDING, job_store.JobStatus.RUNNING):
+                    owner = getattr(job, "owner_id", None)
+                    # owner filtering: if subscriber_owner is set, only send matching owner events
+                    if subscriber_owner and owner and owner != subscriber_owner:
+                        continue
+                    # honor Last-Event-ID: if the client supplied last_event and the
+                    # job matches that run and its seq is <= the last seen seq,
+                    # skip sending the snapshot for that run to avoid duplicates.
+                    if last_event is not None:
+                        try:
+                            last_run_id, last_seq = last_event
+                            jid = getattr(job, "id", getattr(job, "run_id", None))
+                            if jid == last_run_id and (getattr(job, "seq", 0) or 0) <= last_seq:
+                                continue
+                        except Exception:
+                            # if parsing fails, be conservative and send the snapshot
+                            pass
+                    seq = getattr(job, "seq", 0) or 0
                     event = {
-                        "run_id": job.id,
-                        "status": job.status.value,
-                        "created_at": job.created_at,
-                        "error": job.error,
-                        "result": job.result if job.status in (job_store.JobStatus.SUCCEEDED, job_store.JobStatus.FAILED, job_store.JobStatus.CANCELLED) else None,
+                        "id": f"{getattr(job, 'id', getattr(job, 'run_id', None))}:{seq}",
+                        "run_id": getattr(job, "id", getattr(job, "run_id", None)),
+                        "status": job.status.value if hasattr(job.status, "value") else str(job.status),
+                        "created_at": getattr(job, "created_at", None),
+                        "error": getattr(job, "error", None),
+                        "result": getattr(job, "result", None)
+                        if (getattr(job, "status", None) in (job_store.JobStatus.SUCCEEDED, job_store.JobStatus.FAILED, job_store.JobStatus.CANCELLED))
+                        else None,
+                        "owner_id": owner,
+                        "seq": seq,
                     }
                     try:
                         data = json.dumps(event)
-                        payload = f"event: run\ndata: {data}\n\n".encode('utf-8')
+                        event_type = "queue" if event.get("type") == "queue_status" else "run"
+                        event_id = event.get("id")
+                        payload = f"id: {event_id}\nevent: {event_type}\ndata: {data}\n\n".encode("utf-8")
                         await resp.write(payload)
                         await resp.drain()
                     except (ConnectionResetError, asyncio.CancelledError):
@@ -79,10 +103,19 @@ async def start_workflow_controller(request: web.Request) -> web.Response:
     Returns:
         web.Response: A JSON response with the workflow result or an error message.
     """
+    owner_id = None
     if _ENABLE_GOOGLE_OAUTH:
         auth_resp = await _require_auth(request)
         if isinstance(auth_resp, web.Response):
             return auth_resp
+        # derive opaque owner id from the authenticated email (or subject)
+        try:
+            subj = request.get('google_oauth_email') if isinstance(request, dict) else getattr(request, 'google_oauth_email', None)
+            from ..services.auth_service import derive_owner_id
+
+            owner_id = derive_owner_id(subj or "")
+        except Exception:
+            owner_id = None
     try:
         payload = await request.json()
     except Exception:
@@ -92,7 +125,7 @@ async def start_workflow_controller(request: web.Request) -> web.Response:
         return web.json_response({"detail": "invalid_payload"}, status=400)
 
     try:
-        result = await run_workflow(payload)
+        result = await run_workflow(payload, owner_id=owner_id)
         return web.json_response(result, status=202)
     except WorkflowPreparationError as exc:
         # Bubble the prepared response body and status (matches previous behaviour)
@@ -136,8 +169,7 @@ async def stream_runs_controller(request: web.Request) -> web.Response:
     Server-Sent Events endpoint streaming job status updates.
 
     Each connected client receives events of shape matching the job status
-    payloads produced by `job_store`. The client should send an `Accept:` or
-    simply open an EventSource to this endpoint.
+    payloads produced by `job_store`. The client should open an EventSource to this endpoint.
     """
     # Optional auth for SSE — re-use existing auth flow if enabled.
     if _ENABLE_GOOGLE_OAUTH:
@@ -150,13 +182,60 @@ async def stream_runs_controller(request: web.Request) -> web.Response:
     resp.headers['Cache-Control'] = 'no-cache'
     resp.headers['Connection'] = 'keep-alive'
 
+    # examine Last-Event-ID header for resume semantics. Expect format '<run_id>:<seq>'
+    last_event_header = request.headers.get("Last-Event-ID")
+    last_event: tuple[str, int] | None = None
+    if last_event_header:
+        try:
+            parts = last_event_header.split(":", 1)
+            if len(parts) == 2:
+                last_event = (parts[0], int(parts[1]))
+        except Exception:
+            last_event = None
+
     await resp.prepare(request)
 
     q = job_store.subscribe_events()
 
+    # Determine subscriber owner if auth is enabled so snapshot can be filtered
+    subscriber_owner = None
+    if _ENABLE_GOOGLE_OAUTH:
+        try:
+            subj = request.get('google_oauth_email') if isinstance(request, dict) else getattr(request, 'google_oauth_email', None)
+            from ..services.auth_service import derive_owner_id
+
+            subscriber_owner = derive_owner_id(subj or "")
+        except Exception:
+            subscriber_owner = None
+
     try:
         await resp.write(b": connected\n\n")
-        await _send_initial_snapshot(resp)
+
+        # Send an initial queue status snapshot so freshly connected clients
+        # see the server queue state immediately (avoids UI showing a 'down'
+        # indicator when nothing else is occurring). Use the background
+        # helper to keep HTTP queue-fetching logic in one place (SoC).
+        try:
+            from ..services import background as _bg
+
+            qinfo = await _bg.fetch_queue_status()
+            if qinfo is not None:
+                qevent = {"type": "queue_status", "pending": qinfo.get("pending", 0), "running": qinfo.get("running", 0)}
+                try:
+                    data = json.dumps(qevent)
+                    # allow event id to be None; controller will normalize
+                    payload = f"id: {qevent.get('id')}\nevent: queue\ndata: {data}\n\n".encode("utf-8")
+                    await resp.write(payload)
+                    await resp.drain()
+                except (ConnectionResetError, asyncio.CancelledError):
+                    pass
+                except Exception:
+                    logging.exception("Failed to write initial queue_status to SSE client")
+        except Exception:
+            # keep SSE path robust; if background helper is unavailable just continue
+            logging.debug("Could not fetch/send initial queue status snapshot")
+
+        await _send_initial_snapshot(resp, subscriber_owner, last_event)
 
         while True:
             try:
@@ -168,10 +247,28 @@ async def stream_runs_controller(request: web.Request) -> web.Response:
                 # sentinel to close
                 break
 
-            data = json.dumps(event)
-            event_type = "queue" if event.get("type") == "queue_status" else "run"
-            payload = f"event: {event_type}\ndata: {data}\n\n".encode('utf-8')
+            # If the client supplied Last-Event-ID, avoid resending events that
+            # are for the same run and have seq <= last_seq. This is a best-effort
+            # per-run resume: we don't maintain a global event ordering across runs.
+            if last_event is not None:
+                try:
+                    last_run_id, last_seq = last_event
+                    ev_run = event.get("run_id")
+                    ev_seq = int(event.get("seq")) if event.get("seq") is not None else None
+                    if ev_run is not None and ev_seq is not None:
+                        if ev_run == last_run_id and ev_seq <= last_seq:
+                            # skip duplicated/older event
+                            continue
+                except Exception:
+                    # fall through and send the event if parsing fails
+                    pass
+
             try:
+                # ensure event has a resume-friendly id (run_id:seq) when available
+                event_type = "queue" if event.get("type") == "queue_status" else "run"
+                event_id = event.get("id") or (f"{event.get('run_id')}:{event.get('seq', 0)}")
+                data = json.dumps(event)
+                payload = f"id: {event_id}\nevent: {event_type}\ndata: {data}\n\n".encode("utf-8")
                 await resp.write(payload)
                 await resp.drain()
             except (ConnectionResetError, asyncio.CancelledError):
@@ -203,6 +300,86 @@ async def list_workflows_controller(request: web.Request) -> web.Response:
         if isinstance(auth_resp, web.Response):
             return auth_resp
     return web.json_response({"workflows": svc_list_workflows()})
+
+
+async def list_runs_controller(request: web.Request) -> web.Response:
+    """GET /workflow-runner/runs?status=pending,running&owner=me&limit=100
+
+    Returns a JSON payload:
+      { runs: [ { run_id, status, seq, owner_id?, created_at, updated_at, result?, error? }, ... ] }
+    """
+    if _ENABLE_GOOGLE_OAUTH:
+        auth_resp = await _require_auth(request)
+        if isinstance(auth_resp, web.Response):
+            return auth_resp
+
+    # parse query params
+    status_q = request.query.get("status")
+    owner_q = request.query.get("owner")
+    limit_q = request.query.get("limit")
+    try:
+        limit = int(limit_q) if limit_q else 100
+    except Exception:
+        limit = 100
+
+    statuses = None
+    if status_q:
+        # allow comma-separated list, server supports single status filter per adapter call;
+        # if multiple statuses provided we will fetch all and filter.
+        statuses = [s.strip() for s in status_q.split(",") if s.strip()]
+
+    owner_id = None
+    if owner_q == "me" and _ENABLE_GOOGLE_OAUTH:
+        try:
+            subj = request.get('google_oauth_email') if isinstance(request, dict) else getattr(request, 'google_oauth_email', None)
+            from ..services.auth_service import derive_owner_id
+            owner_id = derive_owner_id(subj or "")
+        except Exception:
+            owner_id = None
+    elif owner_q and owner_q != "me":
+        owner_id = owner_q
+
+    runs_out = []
+    # If multiple statuses requested, call list_jobs once per status and merge (bounded)
+    if statuses:
+        seen = set()
+        for s in statuses:
+            recs = await job_store.list_jobs(owner_id=owner_id, status=s)
+            for k, job in recs.items():
+                if k in seen:
+                    continue
+                seen.add(k)
+                runs_out.append({
+                    "run_id": job.id,
+                    "status": job.status.value,
+                    "seq": getattr(job, "seq", 0),
+                    "owner_id": job.owner_id,
+                    "created_at": job.created_at,
+                    "updated_at": getattr(job, "updated_at", None),
+                    "result": job.result,
+                    "error": job.error,
+                })
+                if len(runs_out) >= limit:
+                    break
+            if len(runs_out) >= limit:
+                break
+    else:
+        recs = await job_store.list_jobs(owner_id=owner_id, status=None)
+        for k, job in recs.items():
+            runs_out.append({
+                "run_id": job.id,
+                "status": job.status.value,
+                "seq": getattr(job, "seq", 0),
+                "owner_id": job.owner_id,
+                "created_at": job.created_at,
+                "updated_at": getattr(job, "updated_at", None),
+                "result": job.result,
+                "error": job.error,
+            })
+            if len(runs_out) >= limit:
+                break
+
+    return web.json_response({"runs": runs_out})
 # endregion
 
 # region Get Workflow
