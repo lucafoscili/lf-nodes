@@ -55,6 +55,7 @@ To see some example workflow you can check the [example_workflows folder](exampl
     - [Manual](#manual)
       - [Method 1: Download ZIP](#method-1-download-zip)
       - [Method 2: Git Clone](#method-2-git-clone)
+  - [Workflow Runner](#workflow-runner)
   - [Notes](#notes)
   - [Contributing](#contributing)
   - [License](#license)
@@ -82,6 +83,18 @@ To see some example workflow you can check the [example_workflows folder](exampl
 - Go to the `ComfyUI/custom_nodes` folder.
 - Open a terminal.
 - Copy and paste this command `git clone https://github.com/lucafoscili/lf-nodes.git`.
+
+## Workflow Runner
+
+The Workflow Runner miniapp is included in this package but is disabled by default.
+To enable it you must set the environment variable `WORKFLOW_RUNNER_ENABLED=true` before starting ComfyUI.
+
+By default the runner will not register its HTTP routes or static frontend when `WORKFLOW_RUNNER_ENABLED` is not set or set to a false value. This makes the runner opt-in and prevents accidental exposure of the runner endpoints.
+
+Configuration is loaded from the repository-level `.env` file (at the project root).
+Set `WORKFLOW_RUNNER_ENABLED=true` to enable the runner.
+
+If you do enable it, ensure authentication/allowed-users are configured (see `docs/WORKFLOW_RUNNER.md`) to avoid unauthorised access.
 
 ## Notes
 

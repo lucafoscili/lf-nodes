@@ -5,54 +5,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import List
 
-_LOG = logging.getLogger(__name__)
-
 # region Helpers
-def _maybe_load_dotenv(path: Path) -> None:
-    """
-    Load a simple .env file into os.environ without external deps.
-
-    This function will not override existing environment variables.
-    """
-    if not path.exists():
-        return
-    try:
-        for line in path.read_text(encoding="utf-8").splitlines():
-            line = line.strip()
-            if not line or line.startswith("#") or "=" not in line:
-                continue
-            k, v = line.split("=", 1)
-            k = k.strip()
-            v = v.strip().strip('"').strip("'")
-            if k and os.environ.get(k) is None:
-                os.environ[k] = v
-    except Exception:
-        _LOG.exception("failed to load .env at %s", path)
-
-def _bool_env(key: str, default: bool = False) -> bool:
-    v = os.environ.get(key)
-    if v is None:
-        return default
-    return v.lower() in ("1", "true", "yes", "on")
-
-def _list_env(key: str) -> List[str]:
-    v = os.environ.get(key, "")
-    if not v:
-        return []
-    parts = [p.strip() for p in v.replace(";", ",").split(",") if p.strip()]
-    return parts
-
-def _int_env(key: str, default: int) -> int:
-    v = os.environ.get(key)
-    if v is None:
-        return default
-    try:
-        return int(v)
-    except Exception:
-        return default
-
-def _str_env(key: str, default: str = "") -> str:
-    return os.environ.get(key, default)
+from ..utils.env import maybe_load_dotenv, bool_env, list_env, int_env, str_env
 # endregion
 
 # region Settings
@@ -81,38 +35,42 @@ class Settings:
     SESSION_PRUNE_INTERVAL_SECONDS: int
     WORKFLOW_RUNNER_USE_PERSISTENCE: bool
     WORKFLOW_RUNNER_DB_PATH: str
+    WORKFLOW_RUNNER_ENABLED: bool
     USER_ID_SECRET: str
 
 
 _pkg_root = Path(__file__).parent
-_maybe_load_dotenv(_pkg_root / ".env")
+
+repo_root = Path(__file__).resolve().parents[4]
+maybe_load_dotenv(repo_root / ".env")  # Prefer repository-level .env if present (makes configuration easier for deployments).
 
 
 _SETTINGS = Settings(
-    ENABLE_GOOGLE_OAUTH=_bool_env("ENABLE_GOOGLE_OAUTH", False),
-    GOOGLE_CLIENT_IDS=_list_env("GOOGLE_CLIENT_IDS"),
-    ALLOWED_USERS_FILE=_str_env("ALLOWED_USERS_FILE", ""),
-    ALLOWED_USERS=_list_env("ALLOWED_USERS"),
-    REQUIRE_ALLOWED_USERS=_bool_env("REQUIRE_ALLOWED_USERS", True),
-    GOOGLE_IDTOKEN_CACHE_SECONDS=_int_env("GOOGLE_IDTOKEN_CACHE_SECONDS", 3600),
-    SESSION_TTL_SECONDS=_int_env("SESSION_TTL_SECONDS", _int_env("GOOGLE_IDTOKEN_CACHE_SECONDS", 3600)),
-    WORKFLOW_RUNNER_DEBUG=_bool_env("WORKFLOW_RUNNER_DEBUG", False),
-    DEV_ENV=_bool_env("DEV_ENV", False),
-    PROXY_FRONTEND_PORT=_int_env("PROXY_FRONTEND_PORT", 0),
-    COMFY_BACKEND_URL=_str_env("COMFY_BACKEND_URL", ""),
-    LF_PROXY_SERVICE_FILE=_str_env("LF_PROXY_SERVICE_FILE", ""),
-    KOBOLDCPP_BASE_FILE=_str_env("KOBOLDCPP_BASE_FILE", ""),
-    GEMINI_API_KEY_FILE=_str_env("GEMINI_API_KEY_FILE", ""),
-    OPENAI_API_KEY_FILE=_str_env("OPENAI_API_KEY_FILE", ""),
-    PROXY_ALLOWED_PREFIXES=_list_env("PROXY_ALLOWED_PREFIXES"),
-    PROXY_RATE_LIMIT_REQUESTS=_int_env("PROXY_RATE_LIMIT_REQUESTS", 60),
-    PROXY_RATE_LIMIT_WINDOW_SECONDS=_int_env("PROXY_RATE_LIMIT_WINDOW_SECONDS", 60),
-    JOB_TTL_SECONDS=_int_env("JOB_TTL_SECONDS", 300),
-    JOB_PRUNE_INTERVAL_SECONDS=_int_env("JOB_PRUNE_INTERVAL_SECONDS", 60),
-    SESSION_PRUNE_INTERVAL_SECONDS=_int_env("SESSION_PRUNE_INTERVAL_SECONDS", 60),
-    WORKFLOW_RUNNER_USE_PERSISTENCE=_bool_env("WORKFLOW_RUNNER_USE_PERSISTENCE", False),
-    WORKFLOW_RUNNER_DB_PATH=_str_env("WORKFLOW_RUNNER_DB_PATH", ""),
-    USER_ID_SECRET=_str_env("USER_ID_SECRET", ""),
+    ENABLE_GOOGLE_OAUTH=bool_env("ENABLE_GOOGLE_OAUTH", False),
+    GOOGLE_CLIENT_IDS=list_env("GOOGLE_CLIENT_IDS"),
+    ALLOWED_USERS_FILE=str_env("ALLOWED_USERS_FILE", ""),
+    ALLOWED_USERS=list_env("ALLOWED_USERS"),
+    REQUIRE_ALLOWED_USERS=bool_env("REQUIRE_ALLOWED_USERS", True),
+    GOOGLE_IDTOKEN_CACHE_SECONDS=int_env("GOOGLE_IDTOKEN_CACHE_SECONDS", 3600),
+    SESSION_TTL_SECONDS=int_env("SESSION_TTL_SECONDS", int_env("GOOGLE_IDTOKEN_CACHE_SECONDS", 3600)),
+    WORKFLOW_RUNNER_DEBUG=bool_env("WORKFLOW_RUNNER_DEBUG", False),
+    DEV_ENV=bool_env("DEV_ENV", False),
+    PROXY_FRONTEND_PORT=int_env("PROXY_FRONTEND_PORT", 0),
+    COMFY_BACKEND_URL=str_env("COMFY_BACKEND_URL", ""),
+    LF_PROXY_SERVICE_FILE=str_env("LF_PROXY_SERVICE_FILE", ""),
+    KOBOLDCPP_BASE_FILE=str_env("KOBOLDCPP_BASE_FILE", ""),
+    GEMINI_API_KEY_FILE=str_env("GEMINI_API_KEY_FILE", ""),
+    OPENAI_API_KEY_FILE=str_env("OPENAI_API_KEY_FILE", ""),
+    PROXY_ALLOWED_PREFIXES=list_env("PROXY_ALLOWED_PREFIXES"),
+    PROXY_RATE_LIMIT_REQUESTS=int_env("PROXY_RATE_LIMIT_REQUESTS", 60),
+    PROXY_RATE_LIMIT_WINDOW_SECONDS=int_env("PROXY_RATE_LIMIT_WINDOW_SECONDS", 60),
+    JOB_TTL_SECONDS=int_env("JOB_TTL_SECONDS", 300),
+    JOB_PRUNE_INTERVAL_SECONDS=int_env("JOB_PRUNE_INTERVAL_SECONDS", 60),
+    SESSION_PRUNE_INTERVAL_SECONDS=int_env("SESSION_PRUNE_INTERVAL_SECONDS", 60),
+    WORKFLOW_RUNNER_USE_PERSISTENCE=bool_env("WORKFLOW_RUNNER_USE_PERSISTENCE", False),
+    WORKFLOW_RUNNER_DB_PATH=str_env("WORKFLOW_RUNNER_DB_PATH", ""),
+    WORKFLOW_RUNNER_ENABLED=bool_env("WORKFLOW_RUNNER_ENABLED", False),
+    USER_ID_SECRET=str_env("USER_ID_SECRET", ""),
 )
 
 def get_settings() -> Settings:

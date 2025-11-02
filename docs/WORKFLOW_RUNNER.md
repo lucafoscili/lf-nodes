@@ -217,6 +217,13 @@ tests/
 - `WORKFLOW_RUNNER_DEBUG`: Enable debug logging
 - `ALLOWED_USERS_FILE`: Path to allowed users file
 - `SESSION_TTL_SECONDS`: Session timeout
+- `WORKFLOW_RUNNER_ENABLED`: When set to a truthy value (for example `1` or `true`), the Workflow Runner will register its HTTP routes and static frontend at startup. Default: `false`.
+
+Notes:
+
+- The runner is shipped inside the `lf-nodes` package but is opt-in by default. If `WORKFLOW_RUNNER_ENABLED` is not set or is false, route registration is skipped and the runner will not expose its APIs or UI.
+- Configuration is read from the repository-level `.env` (project root).
+- If you enable the runner, please also configure authentication/allowed-users to avoid exposing the endpoints unintentionally.
 
 ### Settings Class
 
