@@ -56,6 +56,7 @@ To see some example workflow you can check the [example_workflows folder](exampl
       - [Method 1: Download ZIP](#method-1-download-zip)
       - [Method 2: Git Clone](#method-2-git-clone)
   - [Workflow Runner](#workflow-runner)
+    - [Adding New Workflows](#adding-new-workflows)
   - [Notes](#notes)
   - [Contributing](#contributing)
   - [License](#license)
@@ -95,6 +96,36 @@ Configuration is loaded from the repository-level `.env` file (at the project ro
 Set `WORKFLOW_RUNNER_ENABLED=true` to enable the runner.
 
 If you do enable it, ensure authentication/allowed-users are configured (see `docs/WORKFLOW_RUNNER.md`) to avoid unauthorised access.
+
+### Adding New Workflows
+
+To add a new workflow to the Workflow Runner, follow these steps:
+
+1. **Create the workflow JSON file**  
+   Export your ComfyUI workflow and save it as `modules/workflow_runner/workflows/<workflow_name>.json`
+
+2. **Create the workflow Python module**  
+   Create a corresponding Python file `modules/workflow_runner/workflows/<workflow_name>.py` with:
+   - **Workflow configuration function**: `_configure(prompt, inputs)` that maps user inputs to workflow node inputs
+   - **Input cells**: Define `WorkflowCell` objects for each user input (uploads, text fields, checkboxes, etc.)
+   - **Output cells**: Define `WorkflowCell` objects for each output (images, strings, JSON, etc.)
+   - **Workflow definition**: Create a `WorkflowNode` object with metadata and export it as `WORKFLOW`
+
+3. **Register the workflow**  
+   Add your workflow module name to the `_WORKFLOW_MODULES` tuple in `modules/workflow_runner/workflows/__init__.py`
+
+4. **Update frontend types** (if adding new output types)  
+   If your workflow produces new output types:
+   - Add the output interface to `web/workflow-runner/src/types/api.ts`
+   - Update `WorkflowNodeOutputs` interface to include your new type
+   - Update output rendering in `web/workflow-runner/src/elements/components.ts` and `main.outputs.ts`
+
+5. **Update node outputs** (if needed)  
+   If using custom nodes, ensure they return data in the expected format:
+   - Set `OUTPUT_IS_LIST` appropriately for batch/list outputs
+   - Return structured data via `ui.lf_output` for frontend consumption
+
+**Example commit:** See commit `2fbb49e` which adds the `caption_image_vision` workflow, demonstrating all these steps including updating `LF_DisplayString` to support string outputs and frontend components to render them.
 
 ## Notes
 
