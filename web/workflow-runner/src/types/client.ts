@@ -1,10 +1,10 @@
-import { WorkflowRunResultPayload } from './api';
+import { WorkflowRunResultPayload, WorkflowRunStatus } from './api';
 
 //#region Run record
 export type RunRecord = {
   run_id: string;
   workflow_id?: string | null;
-  status: string;
+  status: WorkflowRunStatus;
   seq: number;
   owner_id?: string | null;
   created_at?: number | null;

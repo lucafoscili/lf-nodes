@@ -9,6 +9,14 @@ import {
 import { RunRecord } from '../types/client';
 import type { WorkflowRunEntryUpdate } from '../types/state';
 
+const _tryParseJson = (value: string) => {
+  try {
+    return JSON.parse(value);
+  } catch {
+    return null;
+  }
+};
+
 //#region API
 export const deepMerge = (defs: WorkflowCellsOutputContainer, outs: WorkflowNodeResults) => {
   const prep: WorkflowCellOutputItem[] = [];
@@ -96,7 +104,15 @@ export const parseCount = (v: unknown) => {
 };
 //#endregion
 
-//#region Client
+//#region Helpers
+export const formatStatus = (status: string) => status.charAt(0).toUpperCase() + status.slice(1);
+export const formatTimestamp = (timestamp: number) => {
+  const date = new Date(timestamp);
+  if (Number.isNaN(date.getTime())) {
+    return 'Unknown time';
+  }
+  return date.toLocaleString();
+};
 export const recordToUI = (rec: RunRecord, workflowNames?: Map<string, string>) => {
   const { created_at, error, result, run_id, status, updated_at, workflow_id } = rec;
 
@@ -116,24 +132,6 @@ export const recordToUI = (rec: RunRecord, workflowNames?: Map<string, string>) 
   };
 
   return map;
-};
-//#endregion
-
-//#region Helpers
-export const formatStatus = (status: string) => status.charAt(0).toUpperCase() + status.slice(1);
-export const formatTimestamp = (timestamp: number) => {
-  const date = new Date(timestamp);
-  if (Number.isNaN(date.getTime())) {
-    return 'Unknown time';
-  }
-  return date.toLocaleString();
-};
-const _tryParseJson = (value: string) => {
-  try {
-    return JSON.parse(value);
-  } catch {
-    return null;
-  }
 };
 export const stringifyDetail = (value: unknown): string | null => {
   if (value === null || value === undefined) {

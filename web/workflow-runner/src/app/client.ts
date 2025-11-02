@@ -1,14 +1,17 @@
 import { API_ROOT } from '../config';
 import { EventPayload, RunRecord, UpdateHandler } from '../types/client';
+import { WorkflowStore } from '../types/state';
+import { recordToUI } from '../utils/common';
+import { debugLog } from '../utils/debug';
+import { ensureActiveRun, upsertRun } from './store-actions';
 
 export class WorkflowRunnerClient {
+  #STORE: WorkflowStore;
   private es: EventSource | null = null;
   private lastSeq: Map<string, number> = new Map();
   private runs: Map<string, RunRecord> = new Map();
   private workflowNames: Map<string, string> = new Map();
-  private onUpdate: UpdateHandler | null = null;
   // optional queue status handler: (pending, running) => void
-  private queueHandler: ((pending: number, running: number) => void) | null = null;
   private pollingInterval = 3000; // ms
   private pollingTimer: any = null;
   private pollAbortController: AbortController | null = null;
@@ -21,6 +24,29 @@ export class WorkflowRunnerClient {
   private processingSnapshot = false;
   private cacheKey = 'lf-runs-cache';
   private inflightReconciles = new Map<string, Promise<void>>();
+
+  constructor(store: WorkflowStore) {
+    this.#STORE = store;
+  }
+
+  onUpdate = (runs: Map<string, RunRecord>) => {
+    for (const rec of runs.values()) {
+      const uiEntry = recordToUI(rec);
+      upsertRun(this.#STORE, uiEntry);
+    }
+
+    ensureActiveRun(this.#STORE);
+  };
+
+  queueHandler = (pending: number, running: number) => {
+    try {
+      const state = this.#STORE.getState();
+      const nr = pending + running;
+      state.mutate.queuedJobs(nr);
+    } catch (e) {
+      debugLog('queueHandler error', 'informational', e);
+    }
+  };
 
   setUpdateHandler(h: UpdateHandler) {
     this.onUpdate = h;
@@ -333,54 +359,28 @@ export class WorkflowRunnerClient {
     }
   }
 
-  // Start SSE connection and install handlers
+  //#region SSE Connection
   async start() {
-    if (this.es) return;
-    // If a start is already in progress, avoid attempting to create another
-    // EventSource. This prevents duplicate connections in test mocks and
-    // during jittery reconnect flows.
-    if (this.connecting) return;
+    if (this.es || this.connecting) {
+      return;
+    }
+
     this.connecting = true;
 
-    // First, load cached runs from localStorage for optimistic rendering
     this.loadCache();
-
-    // Then, cold-load persisted runs from server to restore authoritative state
     await this.coldLoadRuns();
 
-    const lastEventId = this.buildLastEventId();
     const url = `${API_ROOT}/workflow-runner/events`;
-    const headers: any = {};
-    // Browser EventSource doesn't support custom headers; use Last-Event-ID via constructor if available
-    const opts: any = {} as any;
-    if (lastEventId) {
-      // EventSource accepts lastEventId via the URL hash workaround or via the header in some polyfills.
-      // We'll append it as a query param to be robust: server will read Last-Event-ID header but not query.
-      // Instead, use native Last-Event-ID: rely on browser to send it from previous events when reconnecting.
-    }
 
-    // Some test environments mock EventSource as a plain factory (vi.fn(() => mock))
-    // which is not constructable with `new`. Try to create with `new` first,
-    // and fall back to calling the function directly when that fails so unit
-    // tests that provide a factory-style mock still work.
     try {
-      // Typical browser environment
-      // eslint-disable-next-line new-cap
-      this.es = new (EventSource as any)(url);
+      this.es = new EventSource(url);
     } catch (err) {
-      // Fallback for test mocks that return an instance when invoked
-      // as a function (not as a constructor).
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      this.es = (EventSource as any)(url);
+      this.es = (EventSource as any)(url); // FIXME: workaround for some test environments
     }
 
-    // Ensure a generic message handler exists for servers that emit 'message'
-    // events (non-named events). Some EventSource mocks rely on `onmessage`
-    // being present so we assign a safe handler here.
     try {
-      if (this.es && typeof (this.es as any) === 'object') {
-        (this.es as any).onmessage = (e: MessageEvent) => {
+      if (this.es && typeof this.es === 'object') {
+        this.es.onmessage = (e: MessageEvent) => {
           try {
             const payload = JSON.parse(e.data) as EventPayload;
             this.applyEvent({
@@ -395,29 +395,34 @@ export class WorkflowRunnerClient {
               error: payload.error,
             });
           } catch (err) {
-            // ignore non-json or heartbeat messages
+            debugLog('invalid generic event message', 'informational', err);
           }
-          if (this.processingSnapshot) this.processingSnapshot = false;
+
+          if (this.processingSnapshot) {
+            this.processingSnapshot = false;
+          }
         };
       }
     } catch (e) {
-      // ignore if assignment isn't possible on mocked EventSource
+      debugLog('EventSource onmessage assignment failed', 'informational', e);
     }
 
     this.processingSnapshot = true;
 
     this.es.onopen = () => {
       this.connected = true;
-      this.backoffMs = 1000;
-      // stop polling fallback when SSE stable
+      this.backoffMs = 1000; // FIXME: make configurable
+
       if (this.pollingTimer) {
         clearInterval(this.pollingTimer);
         this.pollingTimer = null;
-        // abort any in-flight polling fetch
+
         if (this.pollAbortController) {
           try {
             this.pollAbortController.abort();
-          } catch {}
+          } catch {
+            // ignore
+          }
           this.pollAbortController = null;
         }
       }
@@ -425,21 +430,24 @@ export class WorkflowRunnerClient {
 
     this.es.onerror = () => {
       this.connected = false;
-      // exponential backoff for reconnect attempts
+
       if (this.es) {
         try {
           this.es.close();
-        } catch {}
+        } catch {
+          debugLog('EventSource close failed', 'informational');
+        }
         this.es = null;
       }
       this.startPollingFallback();
-      // schedule reconnect with jittered backoff (coldLoadRuns will be called in start())
+
       const delay = this.backoffWithJitter();
       setTimeout(() => this.start(), delay);
       this.backoffMs = Math.min(this.backoffMs * 2, this.maxBackoffMs);
     };
 
     this.es.addEventListener('run', (e: MessageEvent) => {
+      // FIXME: declare name as constant
       try {
         const payload = JSON.parse(e.data) as EventPayload;
         // payload contains seq and run_id
@@ -460,6 +468,7 @@ export class WorkflowRunnerClient {
     });
 
     this.es.addEventListener('queue', (e: MessageEvent) => {
+      // FIXME: declare name as constant
       try {
         const payload = JSON.parse(e.data) as any;
         this.handleQueuePayload(payload);
@@ -467,25 +476,26 @@ export class WorkflowRunnerClient {
         console.warn('invalid queue event', err);
       }
     });
-    // Start completed: allow future start() calls to proceed only if the
-    // current ES has been closed (prevents duplicate opens).
+
     this.connecting = false;
   }
 
-  // Exposed for testing: handle a parsed queue payload from SSE. This will
-  // call the registered queueHandler for queue_status snapshots, or fall
-  // back to applying a run-like payload when appropriate.
   handleQueuePayload(payload: any) {
-    if (!payload) return;
+    // FIXME: proper typing
+    if (!payload) {
+      return;
+    }
+
     try {
       if (payload && (payload.type === 'queue_status' || typeof payload.pending === 'number')) {
         const pending = Number(payload.pending || 0) || 0;
         const running = Number(payload.running || 0) || 0;
-        if (this.queueHandler) this.queueHandler(pending, running);
+        if (this.queueHandler) {
+          this.queueHandler(pending, running);
+        }
         return;
       }
 
-      // fallback: if payload looks like a run event, apply it
       if (payload && (payload.run_id || payload.status || payload.seq !== undefined)) {
         this.applyEvent({
           run_id: payload.run_id,
@@ -500,17 +510,15 @@ export class WorkflowRunnerClient {
         });
       }
     } catch (e) {
-      console.warn('handleQueuePayload error', e);
+      debugLog('handleQueuePayload error', 'warning', e);
     }
 
-    // Generic message handler for snapshot items if server sends them as events
     try {
-      if (this.es && typeof (this.es as any) === 'object') {
-        (this.es as any).onmessage = (e: MessageEvent) => {
-          // If processing snapshot, treat initial messages as part of snapshot until a short grace elapses
+      if (this.es && typeof this.es === 'object') {
+        this.es.onmessage = (e: MessageEvent) => {
           try {
             const payload = JSON.parse(e.data) as EventPayload;
-            // if snapshot contains multiple events in quick succession, we'll process them normally
+
             this.applyEvent({
               run_id: payload.run_id,
               workflow_id: payload.workflow_id,
@@ -525,15 +533,14 @@ export class WorkflowRunnerClient {
           } catch (err) {
             // non-json messages (heartbeats) ignored
           }
-          // After a brief grace, mark snapshot processing complete
+
           if (this.processingSnapshot) {
             this.processingSnapshot = false;
           }
         };
       }
     } catch (e) {
-      // Defensive: if underlying EventSource mock doesn't support onmessage assignment,
-      // ignore and continue — tests may simulate messages directly on the mock.
+      debugLog('EventSource onmessage reassignment failed', 'informational', e);
     }
   }
 
@@ -544,11 +551,12 @@ export class WorkflowRunnerClient {
       } catch {}
       this.es = null;
     }
+
     if (this.pollingTimer) {
       clearInterval(this.pollingTimer);
       this.pollingTimer = null;
     }
-    // abort any in-flight polling request
+
     if (this.pollAbortController) {
       try {
         this.pollAbortController.abort();
@@ -557,67 +565,57 @@ export class WorkflowRunnerClient {
     }
   }
 
-  private buildLastEventId() {
-    // pick highest lastSeq and return as '<run_id>:<seq>' — EventSource will send Last-Event-ID automatically
-    let maxRun: string | null = null;
-    let maxSeq = -1;
-    for (const [run, seq] of this.lastSeq.entries()) {
-      if (seq > maxSeq) {
-        maxSeq = seq;
-        maxRun = run;
-      }
-    }
-    if (!maxRun) return null;
-    return `${maxRun}:${maxSeq}`;
-  }
-
   private startPollingFallback() {
-    if (this.pollingTimer) return;
-    // poll active runs every pollingInterval ms until SSE stabilizes
+    if (this.pollingTimer) {
+      return;
+    }
+
     this.pollingTimer = setInterval(() => this.pollActiveRuns(), this.pollingInterval);
-    // run immediately once
     this.pollActiveRuns();
   }
 
   private async pollActiveRuns() {
     try {
-      // abort previous in-flight poll if any
       if (this.pollAbortController) {
         try {
           this.pollAbortController.abort();
         } catch {}
         this.pollAbortController = null;
       }
+
       const ac = new AbortController();
       this.pollAbortController = ac;
+
       const resp = await fetch(
         `${API_ROOT}/workflow-runner/runs?status=pending,running&owner=me&limit=200`,
         { signal: ac.signal, credentials: 'include' },
       );
-      if (!resp.ok) return;
+      if (!resp.ok) {
+        return;
+      }
+
       const data = await resp.json();
       const arr: RunRecord[] = (data.runs || []) as RunRecord[];
-      // merge snapshot via shared handler (always performs reconciliation)
       this.processSnapshotArray(arr);
-      // clear controller on success
-      if (this.pollAbortController === ac) this.pollAbortController = null;
+      if (this.pollAbortController === ac) {
+        this.pollAbortController = null;
+      }
     } catch (e) {
-      // AbortError is expected when controller aborts; log others
       if (
         (e && (e.name === 'AbortError' || e.code === 'ABORT_ERR')) ||
         (e instanceof DOMException && e.name === 'AbortError')
       ) {
         // expected abort
       } else {
-        console.warn('pollActiveRuns error', e);
+        debugLog('pollActiveRuns error', 'warning', e);
       }
     }
   }
 
-  // return a backoff delay in ms with jitter applied (randomized between 50% and 100% of backoffMs)
   private backoffWithJitter() {
     const base = this.backoffMs;
     const jitterFactor = 0.5 + Math.random() * 0.5; // 0.5 .. 1.0
+
     return Math.floor(base * jitterFactor);
   }
 }

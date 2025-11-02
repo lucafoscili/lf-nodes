@@ -7,7 +7,6 @@ import { createDrawerSection } from '../elements/layout.drawer';
 import { createHeaderSection } from '../elements/layout.header';
 import { createMainSection } from '../elements/layout.main';
 import { createNotificationsSection } from '../elements/layout.notifications';
-import { INPUTS_CLASSES } from '../elements/main.inputs';
 import {
   fetchWorkflowDefinitions,
   fetchWorkflowJSON,
@@ -19,23 +18,21 @@ import {
   WorkflowCellsOutputContainer,
   WorkflowCellType,
 } from '../types/api';
-import { RunRecord } from '../types/client';
 import {
   RoutingController,
   WorkflowDispatchers,
   WorkflowManager,
   WorkflowUIItem,
 } from '../types/manager';
-import { WorkflowCellStatus, WorkflowSectionController, WorkflowUICells } from '../types/section';
+import { WorkflowSectionController } from '../types/section';
 import { WorkflowRunEntry, WorkflowStore, WorkflowView } from '../types/state';
-import { recordToUI } from '../utils/common';
 import { NOTIFICATION_MESSAGES, STATUS_MESSAGES } from '../utils/constants';
 import { WorkflowRunnerClient } from './client';
 import { createRoutingController } from './routing';
 import { changeView, resolveMainSections } from './sections';
 import { initState } from './state';
 import { createWorkflowRunnerStore } from './store';
-import { addNotification, ensureActiveRun, selectRun, upsertRun } from './store-actions';
+import { addNotification, selectRun } from './store-actions';
 
 export class LfWorkflowRunnerManager implements WorkflowManager {
   //#region Initialization
@@ -54,7 +51,6 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
   };
   #STORE: WorkflowStore;
   #UI_REGISTRY = new WeakMap();
-  #WORKFLOW_NAMES = new Map<string, string>();
 
   constructor() {
     const {
@@ -72,10 +68,11 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
       if (document.body) {
         document.body.appendChild(fallback);
       }
-      this.#APP_ROOT = fallback as HTMLDivElement;
+      this.#APP_ROOT = fallback;
     }
 
     this.#STORE = createWorkflowRunnerStore(initState());
+    this.#CLIENT = new WorkflowRunnerClient(this.#STORE);
 
     this.#DISPATCHERS = {
       runWorkflow: () => workflowDispatcher(this.#STORE),
@@ -90,41 +87,9 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
     };
     this.#ROUTING = createRoutingController({ store: this.#STORE });
 
-    this.#CLIENT = new WorkflowRunnerClient();
-    this.#CLIENT.setUpdateHandler((runs: Map<string, RunRecord>) => {
-      // DRY: map all runs through single transformation point
-      for (const rec of runs.values()) {
-        const uiEntry = recordToUI(rec, this.#WORKFLOW_NAMES);
-        upsertRun(this.#STORE, uiEntry);
-      }
-      // Maintain selection invariant (select active run if current is terminal)
-      ensureActiveRun(this.#STORE);
-    });
-
-    // Register queue handler so SSE queue_status updates drive the UI indicator
-    this.#CLIENT.setQueueHandler((pending: number, _running: number) => {
-      try {
-        const state = this.#STORE.getState();
-        state.mutate.queuedJobs(pending ?? 0);
-      } catch (e) {
-        // tolerate store errors silently
-      }
-    });
-
     const state = this.#STORE.getState();
 
     state.mutate.manager(this);
-
-    // Expose internal private fields under string keys to make them reachable
-    // from tests that access them via bracket notation (e.g. manager['#CLIENT']).
-    // This is a small, test-friendly shim and does not affect production usage.
-    try {
-      (this as any)['#CLIENT'] = this.#CLIENT;
-      (this as any)['#STORE'] = this.#STORE;
-      (this as any)['#WORKFLOW_NAMES'] = this.#WORKFLOW_NAMES;
-    } catch (e) {
-      // ignore if environment forbids defining these keys
-    }
 
     this.#ROUTING.initialize();
     this.#initializeFramework();
@@ -136,7 +101,7 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
     state.mutate.status('running', RUNNING_LOADING_WORKFLOWS);
     this.#loadWorkflows()
       .catch((error) => {
-        state.mutate.notifications.add({
+        addNotification(this.#STORE, {
           id: performance.now().toString(),
           message: error instanceof Error ? error.message : WORKFLOWS_LOAD_FAILED,
           status: 'danger',
@@ -146,8 +111,6 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
       .then(() => {
         state.mutate.status('idle', IDLE_WORKFLOWS_LOADED);
         this.#ROUTING.updateRouteFromState();
-        // Start client after workflows loaded to populate workflow names
-        this.#preloadWorkflowNames();
         this.#CLIENT.start();
       });
   }
@@ -207,29 +170,6 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
 
     this.#ROUTING.applyPendingRouteIfNeeded();
   };
-  #preloadWorkflowNames() {
-    // Preload workflow names into client to avoid individual fetches
-    const state = this.#STORE.getState();
-    const workflows = state.workflows?.nodes || [];
-
-    for (const node of workflows) {
-      if (node.id && (node as any).name) {
-        this.#WORKFLOW_NAMES.set(node.id, (node as any).name);
-      }
-    }
-
-    this.#CLIENT.setWorkflowNames(this.#WORKFLOW_NAMES);
-  }
-  #setInputStatus(inputId: string, status: WorkflowCellStatus) {
-    const elements = this.uiRegistry.get();
-    const cells = (elements?.[INPUTS_CLASSES.cells] as WorkflowUICells) || [];
-
-    const cell = cells.find((el) => el.id === inputId);
-    const wrapper = cell?.parentElement;
-    if (wrapper) {
-      wrapper.dataset.status = status;
-    }
-  }
   #subscribeToState() {
     const st = this.#STORE.getState();
     let latestState = st;
@@ -364,6 +304,9 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
   //#region Getters
   getAppRoot() {
     return this.#APP_ROOT;
+  }
+  getClient() {
+    return this.#CLIENT;
   }
   getDispatchers() {
     return this.#DISPATCHERS;
