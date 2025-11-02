@@ -55,6 +55,9 @@ To see some example workflow you can check the [example_workflows folder](exampl
     - [Manual](#manual)
       - [Method 1: Download ZIP](#method-1-download-zip)
       - [Method 2: Git Clone](#method-2-git-clone)
+  - [Workflow Runner](#workflow-runner)
+    - [Adding New Workflows](#adding-new-workflows)
+  - [Image editor](#image-editor)
   - [Notes](#notes)
   - [Contributing](#contributing)
   - [License](#license)
@@ -82,6 +85,57 @@ To see some example workflow you can check the [example_workflows folder](exampl
 - Go to the `ComfyUI/custom_nodes` folder.
 - Open a terminal.
 - Copy and paste this command `git clone https://github.com/lucafoscili/lf-nodes.git`.
+
+## Workflow Runner
+
+The Workflow Runner miniapp is included in this package but is disabled by default.
+To enable it you must set the environment variable `WORKFLOW_RUNNER_ENABLED=true` before starting ComfyUI.
+
+By default the runner will not register its HTTP routes or static frontend when `WORKFLOW_RUNNER_ENABLED` is not set or set to a false value. This makes the runner opt-in and prevents accidental exposure of the runner endpoints.
+
+Configuration is loaded from the repository-level `.env` file (at the project root).
+Set `WORKFLOW_RUNNER_ENABLED=true` to enable the runner.
+
+If you do enable it, ensure authentication/allowed-users are configured (see `docs/WORKFLOW_RUNNER.md`) to avoid unauthorised access.
+
+![Workflow Runner UI](https://github.com/lucafoscili/lucafoscili/blob/c105d85a06460433607f22e5027cfd97a75a33b4/lf-nodes/screenshots/WorkflowRunnerUI.png "Workflow Runner UI")
+
+### Adding New Workflows
+
+To add a new workflow to the Workflow Runner, follow these steps:
+
+1. **Create the workflow JSON file**  
+   Export your ComfyUI workflow and save it as `modules/workflow_runner/workflows/<workflow_name>.json`
+
+2. **Create the workflow Python module**  
+   Create a corresponding Python file `modules/workflow_runner/workflows/<workflow_name>.py` with:
+   - **Workflow configuration function**: `_configure(prompt, inputs)` that maps user inputs to workflow node inputs
+   - **Input cells**: Define `WorkflowCell` objects for each user input (uploads, text fields, checkboxes, etc.)
+   - **Output cells**: Define `WorkflowCell` objects for each output (images, strings, JSON, etc.)
+   - **Workflow definition**: Create a `WorkflowNode` object with metadata and export it as `WORKFLOW`
+
+3. **Register the workflow**  
+   Add your workflow module name to the `_WORKFLOW_MODULES` tuple in `modules/workflow_runner/workflows/__init__.py`
+
+4. **Update frontend types** (if adding new output types)  
+   If your workflow produces new output types:
+   - Add the output interface to `web/workflow-runner/src/types/api.ts`
+   - Update `WorkflowNodeOutputs` interface to include your new type
+   - Update output rendering in `web/workflow-runner/src/elements/components.ts` and `main.outputs.ts`
+
+5. **Update node outputs** (if needed)  
+   If using custom nodes, ensure they return data in the expected format:
+   - Set `OUTPUT_IS_LIST` appropriately for batch/list outputs
+   - Return structured data via `ui.lf_output` for frontend consumption
+
+**Example commit:** See commit `2fbb49e` which adds the `caption_image_vision` workflow, demonstrating all these steps including updating `LF_DisplayString` to support string outputs and frontend components to render them.
+
+## Image editor
+
+The image editor node (`LF_LoadAndEditImages`) allows users to load images from disk and perform editing operations such as inpainting, adjusting saturations, brightness, contrast, and more, all through an interactive interface.
+It's possible to select the images from the file system tree and then send them downstream to other nodes for further processing.
+
+![Load and Edit Images](https://github.com/lucafoscili/lucafoscili/blob/e59725f22c9d0c965a291fd735729d0b57166199/lf-nodes/screenshots/LoadAndEditImages.png "Load and Edit Images")
 
 ## Notes
 
@@ -117,7 +171,10 @@ MIT License
 For an overview of how this nodes suite is structured and how it integrates with the UI, see:
 
 - [Architecture](docs/ARCHITECTURE.md)
+- [Frontend Proxy](docs/FRONTEND_PROXY.md)
 - [Image Editor](docs/IMAGE_EDITOR.md)
 - [Node Template](docs/NODE_TEMPLATE.md)
+- [Proxy](docs/PROXY.md)
+- [Workflow Runner](docs/WORKFLOW_RUNNER.md)
 
 ![Simple pipeline](https://github.com/lucafoscili/lucafoscili/blob/e988f5c1df6299e96f2bf6b164c3b99e6df841f7/lf-nodes/screenshots/Screenshot%202025-02-18%20094817.png "Simple pipeline")

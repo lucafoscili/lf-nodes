@@ -1,0 +1,31 @@
+.inputs-section {
+  &__cell {
+    & {
+      --lf-chat-padding: 0;
+
+      max-height: 80vh;
+      transition: background-color 0.2s ease;
+    }
+
+    &[data-status='error'] {
+      background: rgba(var(--lf-color-danger), 0.25);
+    }
+  }
+
+  &__description {
+    margin: 0.5em 0px 2em 0;
+  }
+
+  &__options {
+    display: grid;
+    gap: 1.5em;
+    grid-template-columns: 1fr;
+    padding: 1.25em;
+  }
+
+  &__title {
+    display: flex;
+    gap: 0.5em;
+    padding: 0.5em 0;
+  }
+}

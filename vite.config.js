@@ -16,6 +16,14 @@ export default defineConfig({
       input: {
         'js/lf-nodes': resolve(tempRoot, 'index.js'),
         'workflow-runner/js/workflow-runner': resolve(tempRoot, 'workflow-runner/index.js'),
+        'workflow-runner/js/bootstrap-login': resolve(
+          tempRoot,
+          'workflow-runner/bootstrap-login.js',
+        ),
+        'workflow-runner/js/bootstrap-not-found': resolve(
+          tempRoot,
+          'workflow-runner/bootstrap-not-found.js',
+        ),
       },
       external: ['/scripts/api.js', '/scripts/app.js'],
       output: {
@@ -24,7 +32,11 @@ export default defineConfig({
         assetFileNames: 'assets/[name]-[hash][extname]',
         manualChunks(id) {
           if (id.includes('@lf-widgets')) {
-            return 'lf-widgets';
+            const match = id.match(/@lf-widgets\/([^/]+)/);
+            if (match && match[1]) {
+              return `lf-widgets-${match[1]}`;
+            }
+            return 'lf-widgets-core';
           }
         },
       },

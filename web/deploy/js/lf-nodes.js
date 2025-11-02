@@ -1,4 +1,6 @@
-import { g as getLfFramework } from "./lf-widgets-CAA2GbO2.js";
+import { g as getLfFramework } from "./lf-widgets-framework-C98FQqUU.js";
+import "./lf-widgets-core-DnP2v7ei.js";
+import "./lf-widgets-foundations-LHw4zrea.js";
 var APIEndpoints;
 (function(APIEndpoints2) {
   APIEndpoints2["CleanOldBackups"] = "/lf-nodes/clean-old-backups";
@@ -1208,6 +1210,7 @@ var NodeName;
   NodeName2["mathOperation"] = "LF_MathOperation";
   NodeName2["multipleImageResizeForWeb"] = "LF_MultipleImageResizeForWeb";
   NodeName2["notify"] = "LF_Notify";
+  NodeName2["onnxSelector"] = "LF_ONNXSelector";
   NodeName2["parsePromptWithLoraTags"] = "LF_ParsePromptWithLoraTags";
   NodeName2["randomBoolean"] = "LF_RandomBoolean";
   NodeName2["regexReplace"] = "LF_RegexReplace";
@@ -1247,12 +1250,12 @@ var NodeName;
   NodeName2["tiledSuperRes"] = "LF_TiledSuperRes";
   NodeName2["tiltShift"] = "LF_TiltShift";
   NodeName2["updateUsageStatistics"] = "LF_UpdateUsageStatistics";
+  NodeName2["uploadImages"] = "LF_UploadImages";
   NodeName2["upscaleModelSelector"] = "LF_UpscaleModelSelector";
   NodeName2["urandomSeedGenerator"] = "LF_UrandomSeedGenerator";
   NodeName2["usageStatistics"] = "LF_UsageStatistics";
   NodeName2["vaeDecode"] = "LF_VAEDecode";
   NodeName2["vaeSelector"] = "LF_VAESelector";
-  NodeName2["onnxSelector"] = "LF_ONNXSelector";
   NodeName2["viewImages"] = "LF_ViewImages";
   NodeName2["viewSVGs"] = "LF_ViewSVGs";
   NodeName2["vibrance"] = "LF_Vibrance";
@@ -1348,7 +1351,7 @@ const NODE_WIDGET_MAP = {
   LF_LoadWD14Model: [CustomWidgetName.code],
   LF_LoadImages: [CustomWidgetName.masonry],
   LF_LoadLoraTags: [CustomWidgetName.cardsWithChip],
-  LF_LoadMetadata: [CustomWidgetName.code, CustomWidgetName.upload],
+  LF_LoadMetadata: [CustomWidgetName.upload],
   LF_LoraAndEmbeddingSelector: [CustomWidgetName.card],
   LF_LoraSelector: [CustomWidgetName.card],
   LF_LUTApplication: [CustomWidgetName.compare],
@@ -1396,6 +1399,7 @@ const NODE_WIDGET_MAP = {
   LF_TiledSuperRes: [CustomWidgetName.compare],
   LF_TiltShift: [CustomWidgetName.compare],
   LF_UpdateUsageStatistics: [CustomWidgetName.code],
+  LF_UploadImages: [CustomWidgetName.upload],
   LF_UpscaleModelSelector: [CustomWidgetName.history],
   LF_UsageStatistics: [CustomWidgetName.tabBarChart],
   LF_UrandomSeedGenerator: [CustomWidgetName.tree],

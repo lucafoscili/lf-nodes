@@ -1,0 +1,41 @@
+@use 'sass:map' as map;
+
+// Media query breakpoints
+$media-xs: (
+  max-width: 400px,
+);
+$media-sm: (
+  max-width: 600px,
+);
+$media-md: (
+  max-width: 900px,
+);
+$media-lg: (
+  max-width: 1200px,
+);
+$media-xl: (
+  max-width: 1800px,
+);
+
+// Mixin for responding to max-width media queries
+@mixin respond($breakpoint) {
+  @media (max-width: #{map.get($breakpoint, max-width)}) {
+    @content;
+  }
+}
+
+// Mixin for responding to min-width media queries
+@mixin respond-up($breakpoint) {
+  @media (min-width: #{map.get($breakpoint, max-width)}) {
+    @content;
+  }
+}
+
+// Mixin for responding between two breakpoints
+@mixin respond-between($lower-breakpoint, $upper-breakpoint) {
+  $lower: map.get($lower-breakpoint, max-width);
+  $upper: map.get($upper-breakpoint, max-width);
+  @media (min-width: #{$lower}) and (max-width: #{$upper}) {
+    @content;
+  }
+}

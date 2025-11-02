@@ -3,16 +3,15 @@ import json
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable, Dict, Iterable, List
-from unicodedata import category
 
-from ..utils.helpers.conversion import json_safe
+from ...utils.helpers.conversion import json_safe
 
-# Custom exception for input-level validation failures. Carries the offending input name so
-# callers (the HTTP API) can map the problem back to the UI field to highlight.
+# region Exceptions
 class InputValidationError(ValueError):
     def __init__(self, input_name: str | None = None):
         super().__init__(f"Missing required input {input_name}.")
         self.input_name = input_name
+# endregion
 
 # region Helpers
 def _workflow_to_prompt(workflow: Dict[str, Any]) -> Dict[str, Any]:
@@ -132,6 +131,7 @@ class WorkflowNode:
     def load_prompt(self) -> Dict[str, Any]:
         with self.workflow_path.open("r", encoding="utf-8") as workflow_file:
             workflow_graph = json.load(workflow_file)
+        # Delegate to the conversion helper already available in utils
         return _workflow_to_prompt(workflow_graph)
 
     def cells_as_dict(self, input_output: str) -> Dict[str, Any]:
@@ -142,7 +142,7 @@ class WorkflowNode:
         return {}
 # endregion
 
-# region Workflow Defs
+# region Registry
 class WorkflowRegistry:
     def __init__(self) -> None:
         self._definitions: Dict[str, WorkflowNode] = {}
@@ -206,7 +206,7 @@ def _register_packaged_workflows() -> None:
 
     Keeping the import local prevents circular imports while registry types are still being defined.
     """
-    from .workflows import iter_workflow_definitions
+    from ..workflows import iter_workflow_definitions
 
     for definition in iter_workflow_definitions():
         if not _is_workflow_definition(definition):
@@ -215,11 +215,19 @@ def _register_packaged_workflows() -> None:
             )
         REGISTRY.register(definition)  # type: ignore[arg-type]
 
-_register_packaged_workflows()
+_registered = False
 
+def _ensure_registered() -> None:
+    global _registered
+    if _registered:
+        return
+    _register_packaged_workflows()
+    _registered = True
 def list_workflows() -> List[Dict[str, Any]]:
+    _ensure_registered()
     return REGISTRY.list()
 
 def get_workflow(id: str) -> WorkflowNode | None:
+    _ensure_registered()
     return REGISTRY.get(id)
 # endregion

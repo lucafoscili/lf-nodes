@@ -28,13 +28,14 @@ class LF_DisplayString:
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
+    OUTPUT_IS_LIST = (False, True)
     OUTPUT_NODE = True
     OUTPUT_TOOLTIPS = (
         "Pass-through string value.",
         "Pass-through string value as a list."
     )
-    RETURN_NAMES = ("string",)
-    RETURN_TYPES = (Input.STRING,)
+    RETURN_NAMES = ("string", "string_list")
+    RETURN_TYPES = (Input.STRING, Input.STRING)
 
     def on_exec(self, **kwargs: dict):
         display_string:str = normalize_input_list(kwargs.get("string"))
@@ -52,7 +53,17 @@ class LF_DisplayString:
             "value": markdown_value,
         })
 
-        return (kwargs.get("string"),)
+        out_string = display_string[0] if isinstance(display_string, list) else display_string
+        out_list = display_string if isinstance(display_string, list) else [display_string]
+
+        return {
+            "ui": {
+                "lf_output": [{
+                    "string": out_string,
+                }],
+            },
+            "result": (out_string, out_list),
+        }
 # endregion
 
 # region Mappings

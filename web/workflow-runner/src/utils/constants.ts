@@ -15,18 +15,20 @@ export const DEBUG_MESSAGES = {
   INPUTS_COLLECTED: 'Collected workflow inputs.',
   MAIN_DESTROYED: 'Main section destroyed.',
   MAIN_MOUNTED: 'Main section mounted.',
-  MAIN_UPDATED: 'Main section updated.',
+  MAIN_UPDATED: 'Main section refreshed.',
   NOTIFICATIONS_DESTROYED: 'Notifications section destroyed.',
   NOTIFICATIONS_MOUNTED: 'Notifications section mounted.',
   NOTIFICATIONS_UPDATED: 'Notifications section refreshed.',
-  WORKFLOW_LAYOUT_DESTROYED: 'Workflow layout destroyed.',
-  WORKFLOW_LAYOUT_MOUNTED: 'Workflow layout mounted.',
-  WORKFLOW_LAYOUT_UPDATED: 'Workflow layout updated.',
   WORKFLOW_INPUT_FLAGGED: 'Workflow input flagged.',
-  WORKFLOW_INPUTS_CLEARED: 'Workflow inputs cleared.',
-  WORKFLOW_INPUTS_RENDERED: 'Workflow inputs rendered.',
-  WORKFLOW_RESULTS_CLEARED: 'Workflow results cleared.',
-  WORKFLOW_RESULTS_RENDERED: 'Workflow results rendered.',
+  WORKFLOW_INPUTS_DESTROYED: 'Workflow inputs destroyed.',
+  WORKFLOW_INPUTS_MOUNTED: 'Workflow inputs mounted.',
+  WORKFLOW_INPUTS_UPDATED: 'Workflow inputs refreshed.',
+  WORKFLOW_OUTPUTS_DESTROYED: 'Workflow outputs destroyed.',
+  WORKFLOW_OUTPUTS_MOUNTED: 'Workflow outputs mounted.',
+  WORKFLOW_OUTPUTS_UPDATED: 'Workflow outputs refreshed.',
+  WORKFLOW_RESULTS_DESTROYED: 'Workflow results destroyed.',
+  WORKFLOW_RESULTS_MOUNTED: 'Workflow results mounted.',
+  WORKFLOW_RESULTS_UPDATED: 'Workflow results refreshed.',
 } as const;
 //#endregion
 
@@ -43,7 +45,9 @@ export const ERROR_MESSAGES = {
 export const NOTIFICATION_MESSAGES = {
   NO_WORKFLOWS_AVAILABLE: 'No workflows available from the API.',
   NO_WORKFLOW_SELECTED: 'No workflow selected.',
+  WORKFLOW_CANCELLED: 'Workflow run cancelled.',
   WORKFLOW_COMPLETED: 'Workflow execution completed successfully.',
+  WORKFLOW_STATUS_FAILED: 'Failed to fetch workflow status.',
   WORKFLOWS_LOAD_FAILED: 'Failed to load workflows.',
 } as const;
 //#endregion
@@ -59,6 +63,7 @@ export const STATUS_MESSAGES = {
   RUNNING_DISPATCHING_WORKFLOW: 'Dispatching workflow...',
   RUNNING_INITIALIZING: 'Initializing...',
   RUNNING_LOADING_WORKFLOWS: 'Loading workflows...',
+  RUNNING_POLLING_WORKFLOW: 'Processing workflow...',
   RUNNING_SUBMITTING_WORKFLOW: 'Submitting workflow...',
   RUNNING_UPLOAD_COMPLETED: 'File uploaded...',
   RUNNING_UPLOADING_FILE: 'Uploading file...',

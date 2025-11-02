@@ -1,6 +1,10 @@
 {
   "apiBase": "/api",
   "apiRoutePrefix": "/lf-nodes",
+  "chat": {
+    "provider": "kobold",
+    "useProxy": true
+  },
   "deploy": {
     "root": "./web/deploy",
     "runnerSubdir": "workflow-runner",
@@ -10,5 +14,6 @@
     "assets": "/lf-nodes/static/assets/",
     "workflowRunner": "/lf-nodes/static-workflow-runner/"
   },
-  "theme": "dark"
+  "theme": "dark",
+  "promptTimeoutSeconds": 0
 }

@@ -1,0 +1,128 @@
+{
+  "3": {
+    "inputs": {
+      "seed": 1059651312773620,
+      "steps": 12,
+      "cfg": 2,
+      "sampler_name": "lcm",
+      "scheduler": "karras",
+      "denoise": 1,
+      "model": ["4", 0],
+      "positive": ["6", 0],
+      "negative": ["7", 0],
+      "latent_image": ["5", 0]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "KSampler"
+    }
+  },
+  "4": {
+    "inputs": {
+      "ckpt_name": "dreamshaper_8LCM.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "Load Checkpoint"
+    }
+  },
+  "5": {
+    "inputs": {
+      "width": 512,
+      "height": 512,
+      "batch_size": 1
+    },
+    "class_type": "EmptyLatentImage",
+    "_meta": {
+      "title": "Empty Latent Image"
+    }
+  },
+  "6": {
+    "inputs": {
+      "text": ["13", 0],
+      "clip": ["11", 0]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Prompt)"
+    }
+  },
+  "7": {
+    "inputs": {
+      "text": "text, watermark, bad quality, worst quality, nsfw",
+      "clip": ["11", 0]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Prompt)"
+    }
+  },
+  "8": {
+    "inputs": {
+      "samples": ["3", 0],
+      "vae": ["4", 2]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode"
+    }
+  },
+  "10": {
+    "inputs": {
+      "filename_prefix": "",
+      "add_timestamp": true,
+      "embed_workflow": true,
+      "extension": "png",
+      "quality": 100,
+      "ui_widget": {
+        "columns": 3,
+        "dataset": {},
+        "index": null,
+        "name": "",
+        "view": "main"
+      },
+      "image": ["8", 0]
+    },
+    "class_type": "LF_SaveImageForCivitAI",
+    "_meta": {
+      "title": "Save image with CivitAI-compatible metadata"
+    }
+  },
+  "11": {
+    "inputs": {
+      "stop_at_clip_layer": -2,
+      "clip": ["4", 1]
+    },
+    "class_type": "CLIPSetLastLayer",
+    "_meta": {
+      "title": "CLIP Set Last Layer"
+    }
+  },
+  "12": {
+    "inputs": {
+      "string": "",
+      "enable_history": true,
+      "randomize": false,
+      "seed": 42,
+      "ui_widget": {}
+    },
+    "class_type": "LF_String",
+    "_meta": {
+      "title": "String"
+    }
+  },
+  "13": {
+    "inputs": {
+      "separator": ", ",
+      "text_1": "best quality, masterpiece, 4k, absurdres",
+      "text_2": ["12", 0],
+      "shuffle_inputs": false,
+      "seed": 42,
+      "ui_widget": ""
+    },
+    "class_type": "LF_WallOfText",
+    "_meta": {
+      "title": "Wall of text"
+    }
+  }
+}

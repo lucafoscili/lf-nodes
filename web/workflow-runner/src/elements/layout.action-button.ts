@@ -1,5 +1,5 @@
 import { getLfFramework } from '@lf-widgets/framework';
-import { executeWorkflow } from '../handlers/workflow';
+import { buttonHandler } from '../handlers/button';
 import { WorkflowSectionController } from '../types/section';
 import { WorkflowStore } from '../types/state';
 import { DEBUG_MESSAGES } from '../utils/constants';
@@ -42,12 +42,12 @@ export const createActionButtonSection = (store: WorkflowStore): WorkflowSection
       return;
     }
 
-    const _root = document.createElement('lf-button') as HTMLLfButtonElement;
+    const _root = document.createElement('lf-button');
     _root.className = theme.bemClass(ACTION_BUTTON_CLASSES._);
     _root.lfIcon = 'send';
     _root.lfStyling = 'floating';
     _root.title = 'Run current workflow';
-    _root.addEventListener('lf-button-event', (e) => executeWorkflow(e, store));
+    _root.addEventListener('lf-button-event', (e) => buttonHandler(e, store));
 
     manager.getAppRoot().appendChild(_root);
     uiRegistry.set(ACTION_BUTTON_CLASSES._, _root);
@@ -58,7 +58,7 @@ export const createActionButtonSection = (store: WorkflowStore): WorkflowSection
 
   //#region Render
   const render = () => {
-    const { current, manager } = store.getState();
+    const { manager } = store.getState();
     const { uiRegistry } = manager;
 
     const elements = uiRegistry.get();
@@ -70,8 +70,6 @@ export const createActionButtonSection = (store: WorkflowStore): WorkflowSection
     if (!_root) {
       return;
     }
-
-    _root.lfShowSpinner = current.status === 'running';
 
     debugLog(ACTION_BUTTON_UPDATED);
   };

@@ -10,12 +10,14 @@ const INIT_CB = () => {
 //#region Public API
 export const initState = (): WorkflowState => ({
   current: { status: 'idle', message: '', id: null },
+  currentRunId: null,
+  inputStatuses: {},
   isDebug: false,
   manager: null,
-  queuedJobs: -1,
   mutate: {
     isDebug: INIT_CB,
     manager: INIT_CB,
+    inputStatus: INIT_CB,
     queuedJobs: INIT_CB,
     notifications: {
       add: INIT_CB,
@@ -23,12 +25,23 @@ export const initState = (): WorkflowState => ({
       removeByIndex: INIT_CB,
     },
     results: INIT_CB,
+    runs: {
+      clear: INIT_CB,
+      upsert: INIT_CB,
+    },
+    runId: INIT_CB,
+    selectRun: INIT_CB,
     status: INIT_CB,
+    view: INIT_CB,
     workflow: INIT_CB,
     workflows: INIT_CB,
   },
   notifications: [],
+  queuedJobs: -1,
   results: null,
+  runs: [],
+  selectedRunId: null,
+  view: 'workflow',
   workflows: {
     nodes: [],
   },

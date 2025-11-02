@@ -1,5 +1,5 @@
 {
-  "compilerOptions": {
+    "compilerOptions": {
     "allowJs": false,
     "alwaysStrict": true,
     "baseUrl": ".",
@@ -15,7 +15,7 @@
     "noImplicitReturns": true,
     "noImplicitThis": true,
     "outDir": "../temp/workflow-runner",
-    "rootDir": "./src",
+    "rootDir": "src",
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "strict": false,

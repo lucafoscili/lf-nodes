@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Workflow Runner Not Found</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <script>
+      if (typeof window !== 'undefined' && !window.comfyAPI) {
+        window.comfyAPI = {};
+      }
+    </script>
+    <link rel="stylesheet" href="/api/lf-nodes/static-workflow-runner/css/workflow-runner.css" />
+    <style>
+      html {
+        background: #000000;
+      }
+      body {
+        background: rgba(var(--lf-color-bg), 1);
+        color: rgba(var(--lf-color-on-bg), 1);
+        font-family: var(--lf-font-family-primary, Segoe UI, system-ui, Arial, sans-serif);
+        font-size: var(--lf-font-size, 16px);
+        margin: 0;
+      }
+      .notfound-card {
+        max-width: 720px;
+        margin: 6vh auto;
+        background: rgba(var(--lf-color-surface), 0.8);
+        padding: 1.5em;
+        border-radius: 12px;
+        border: 1px solid rgba(var(--lf-color-border), 1);
+      }
+      code {
+        background: #0b0f14;
+        padding: 0.15rem 0.35rem;
+        border-radius: 4px;
+      }
+      pre {
+        background: rgba(var(--lf-color-surface), 0.6);
+        padding: 0.6em;
+        border-radius: var(--lf-ui-border-radius, 6px);
+        color: rgba(var(--lf-color-on-surface), 1);
+      }
+    </style>
+    <script
+      type="module"
+      src="/api/lf-nodes/static-workflow-runner/js/bootstrap-not-found.js"
+    ></script>
+  </head>
+  <body>
+    <main class="main-section main-section__home">
+      <div class="notfound-card">
+        <h1>LF Nodes — Workflow Runner</h1>
+        <p>
+          The workflow runner UI is not built or not available in the extension's
+          <code>web/deploy</code> directory.
+        </p>
+        <p>
+          To build the frontend, change into the extension directory and run the project build (this
+          will produce <code>web/deploy/submit-prompt.html</code> and related JS):
+        </p>
+        <pre>cd custom_nodes/lf-nodes; yarn build</pre>
+        <p>
+          After building, refresh this page. If you want to work on the frontend in dev mode, edit
+          <code>web/src/workflow</code> and run the dev server described in the project's README.
+        </p>
+      </div>
+    </main>
+  </body>
+</html>

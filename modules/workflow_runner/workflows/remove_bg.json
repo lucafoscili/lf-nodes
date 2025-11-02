@@ -1,0 +1,47 @@
+{
+  "1": {
+    "inputs": {
+      "transparent_background": false,
+      "background_color": "#000000",
+      "model": "u2net",
+      "ui_widget": {},
+      "image": ["6", 1]
+    },
+    "class_type": "LF_BackgroundRemover",
+    "_meta": {
+      "title": "R E M O V E R"
+    }
+  },
+  "5": {
+    "inputs": {
+      "filename_prefix": "",
+      "add_timestamp": true,
+      "embed_workflow": true,
+      "extension": "png",
+      "quality": 100,
+      "ui_widget": {
+        "columns": 3,
+        "dataset": {},
+        "index": null,
+        "name": "",
+        "view": "main"
+      },
+      "image": ["1", 1]
+    },
+    "class_type": "LF_SaveImageForCivitAI",
+    "_meta": {
+      "title": "O U T P U T"
+    }
+  },
+  "6": {
+    "inputs": {
+      "file_names": "",
+      "upload_dir": "temp",
+      "ui_widget": ""
+    },
+    "class_type": "LF_UploadImages",
+    "_meta": {
+      "title": "Upload images"
+    }
+  }
+}

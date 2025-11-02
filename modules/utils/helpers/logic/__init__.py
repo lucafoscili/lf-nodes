@@ -13,6 +13,7 @@ from .normalize_output_image import *
 from .normalize_output_mask import *
 from .not_none import *
 from .randomize_from_history import *
+from .resolve_uploaded_filepath import *
 from .sanitize_filename import *
 from .selector_utils import *
 from .split_svgs import *

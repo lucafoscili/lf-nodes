@@ -3,10 +3,14 @@ from types import ModuleType
 from typing import Iterable, Iterator, Sequence
 
 _WORKFLOW_MODULES: Sequence[str] = (
+    "caption_image_vision",
     "image_to_svg",
     "load_metadata",
+    "remove_bg",
+    "simple_chat",
     "sort_json_keys",
     "svg_generation_gemini",
+    "t2i_15_lcm",
 )
 
 # region Workflow Imports

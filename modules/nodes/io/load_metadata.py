@@ -1,12 +1,10 @@
-import os
-
 from PIL import Image
 from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
 from ...utils.helpers.comfy import get_comfy_dir
-from ...utils.helpers.logic import normalize_list_to_value
+from ...utils.helpers.logic import normalize_list_to_value, resolve_uploaded_filepath
 from ...utils.helpers.metadata import extract_jpeg_metadata, extract_png_metadata
 
 # region LF_LoadMetadata
@@ -24,9 +22,6 @@ class LF_LoadMetadata:
                     "default": "temp",
                     "tooltip": "Directory where the files are uploaded.",
                     "options": ["input", "output", "temp"],
-                }),
-                "ui_widget": (Input.LF_CODE, {
-                    "default": ""
                 }),
             },
             "hidden": {
@@ -63,25 +58,31 @@ class LF_LoadMetadata:
             file_names_list = file_names.split(';')
 
             for file_name in file_names_list:
-                file_path = os.path.join(directory, file_name.strip())
+                file_name = file_name.strip()
+                if not file_name:
+                    continue
+
+                file_path, actual_name = resolve_uploaded_filepath(directory, file_name)
 
                 try:
                     pil_image = Image.open(file_path)
 
                     if pil_image.format == "JPEG":
+                        # pass the original requested name for metadata context, but
+                        # store the actual filename used for the returned entry
                         metadata = extract_jpeg_metadata(pil_image, file_name)
                     elif pil_image.format == "PNG":
                         metadata = extract_png_metadata(pil_image)
                     else:
                         metadata = {"error": f"Unsupported image format for {file_name}"}
 
-                    metadata_list.append({"file": file_name, "metadata": metadata})
+                    metadata_list.append({"file": actual_name, "metadata": metadata})
                 except Exception as e:
                     metadata_list.append({"file": file_name, "error": str(e)})
 
         PromptServer.instance.send_sync(f"{EVENT_PREFIX}loadmetadata", {
             "node": kwargs.get("node_id"),
-            "value": metadata,
+            "value": file_names,
         })
 
         return {

@@ -1,0 +1,20 @@
+.outputs-section {
+  & {
+    display: grid;
+    gap: 1em;
+    grid-template-rows: auto 1fr;
+  }
+
+  &__title {
+    align-items: center;
+    display: flex;
+    gap: 0.75em;
+    justify-content: space-between;
+  }
+
+  &__controls {
+    align-items: center;
+    display: flex;
+    gap: 0.5em;
+  }
+}

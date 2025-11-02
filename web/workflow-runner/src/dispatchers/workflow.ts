@@ -1,9 +1,12 @@
-import { WORKFLOW_CLASSES } from '../elements/main.workflow';
 import {
-  runWorkflowRequest,
-  uploadWorkflowFiles,
-  WorkflowApiError,
-} from '../services/workflow-service';
+  addNotification,
+  clearResults,
+  ensureActiveRun,
+  setStatus,
+  upsertRun,
+} from '../app/store-actions';
+import { INPUTS_CLASSES } from '../elements/main.inputs';
+import { runWorkflow, uploadWorkflowFiles, WorkflowApiError } from '../services/workflow-service';
 import { WorkflowCellStatus, WorkflowUICells } from '../types/section';
 import { WorkflowStore } from '../types/state';
 import { DEBUG_MESSAGES, NOTIFICATION_MESSAGES, STATUS_MESSAGES } from '../utils/constants';
@@ -15,29 +18,39 @@ const _collectInputs = async (store: WorkflowStore): Promise<Record<string, unkn
   const { uiRegistry } = state.manager;
 
   const elements = uiRegistry.get();
-  const cells = (elements?.[WORKFLOW_CLASSES.cells] as WorkflowUICells) || [];
+  const cells = (elements?.[INPUTS_CLASSES.cells] as WorkflowUICells) || [];
 
   const inputs: Record<string, unknown> = {};
 
   for (const cell of cells) {
     const id = cell.id || '';
     _setCellStatus(store, id);
-    const value: unknown = await cell.getValue();
 
     switch (cell.tagName.toLowerCase()) {
-      case 'lf-toggle':
+      case 'lf-chat': {
+        const value = await (cell as HTMLLfChatElement).getHistory();
+        inputs[id] = value;
+        break;
+      }
+      case 'lf-toggle': {
+        const value = await (cell as HTMLLfToggleElement).getValue();
         inputs[id] = value === 'off' ? false : true;
         break;
-      case 'lf-upload':
+      }
+      case 'lf-upload': {
         try {
+          const value = await (cell as HTMLLfUploadElement).getValue();
           inputs[id] = await _handleUploadCell(store, value);
         } catch (error) {
           _setCellStatus(store, id, 'error');
           throw error;
         }
         break;
-      default:
+      }
+      default: {
+        const value = await (cell as HTMLLfTextfieldElement).getValue();
         inputs[id] = value;
+      }
     }
   }
 
@@ -48,21 +61,19 @@ const _handleUploadCell = async (store: WorkflowStore, rawValue: unknown) => {
 
   const files = Array.isArray(rawValue) ? rawValue : (rawValue as File[] | undefined);
   if (!files || files.length === 0) {
-    return [];
+    throw new Error('No files selected for upload.');
   }
 
-  const state = store.getState();
-
   try {
-    state.mutate.status('running', RUNNING_UPLOADING_FILE);
+    setStatus(store, 'running', RUNNING_UPLOADING_FILE);
     const { payload } = await uploadWorkflowFiles(files);
     const paths = payload?.paths || [];
     return paths.length === 1 ? paths[0] : paths;
   } catch (error) {
-    state.mutate.status('error', ERROR_UPLOADING_FILE);
+    setStatus(store, 'error', ERROR_UPLOADING_FILE);
 
     if (error instanceof WorkflowApiError) {
-      state.mutate.notifications.add({
+      addNotification(store, {
         id: performance.now().toString(),
         message: `Upload failed: ${error.payload?.detail || error.message}`,
         status: 'danger',
@@ -73,17 +84,25 @@ const _handleUploadCell = async (store: WorkflowStore, rawValue: unknown) => {
 };
 const _setCellStatus = (store: WorkflowStore, id: string, status: WorkflowCellStatus = '') => {
   const { WORKFLOW_INPUT_FLAGGED } = DEBUG_MESSAGES;
-  const { current, manager } = store.getState();
+  const state = store.getState();
+  const { current, manager, mutate } = state;
   const { uiRegistry } = manager;
 
   const elements = uiRegistry.get();
-  const cells = (elements?.[WORKFLOW_CLASSES.cells] as WorkflowUICells) || [];
+  const cells = (elements?.[INPUTS_CLASSES.cells] as WorkflowUICells) || [];
 
   const cell = cells.find((el) => el.id === id);
   const wrapper = cell?.parentElement;
   if (wrapper) {
-    wrapper.dataset.status = status;
+    if (status) {
+      wrapper.dataset.status = status;
+    } else {
+      delete wrapper.dataset.status;
+    }
   }
+
+  mutate.inputStatus(id, status);
+
   if (status) {
     debugLog(WORKFLOW_INPUT_FLAGGED, 'informational', {
       cell: id,
@@ -97,20 +116,16 @@ const _setCellStatus = (store: WorkflowStore, id: string, status: WorkflowCellSt
 //#region Dispatcher
 export const workflowDispatcher = async (store: WorkflowStore) => {
   const { INPUTS_COLLECTED } = DEBUG_MESSAGES;
-  const { NO_WORKFLOW_SELECTED, WORKFLOW_COMPLETED } = NOTIFICATION_MESSAGES;
-  const {
-    ERROR_RUNNING_WORKFLOW,
-    IDLE,
-    RUNNING_DISPATCHING_WORKFLOW,
-    RUNNING_SUBMITTING_WORKFLOW,
-  } = STATUS_MESSAGES;
+  const { NO_WORKFLOW_SELECTED } = NOTIFICATION_MESSAGES;
+  const { ERROR_RUNNING_WORKFLOW, RUNNING_DISPATCHING_WORKFLOW, RUNNING_SUBMITTING_WORKFLOW } =
+    STATUS_MESSAGES;
 
   const state = store.getState();
   const { current } = state;
   const id = current.id;
 
   if (!id) {
-    state.mutate.notifications.add({
+    addNotification(store, {
       id: performance.now().toString(),
       message: NO_WORKFLOW_SELECTED,
       status: 'warning',
@@ -118,7 +133,7 @@ export const workflowDispatcher = async (store: WorkflowStore) => {
     return;
   }
 
-  state.mutate.status('running', RUNNING_SUBMITTING_WORKFLOW);
+  setStatus(store, 'running', RUNNING_SUBMITTING_WORKFLOW);
 
   let inputs: Record<string, unknown>;
   try {
@@ -133,8 +148,8 @@ export const workflowDispatcher = async (store: WorkflowStore) => {
         ? error.payload?.detail || error.message
         : (error as Error)?.message || 'Failed to collect inputs.';
 
-    state.mutate.status('error', ERROR_RUNNING_WORKFLOW);
-    state.mutate.notifications.add({
+    setStatus(store, 'error', ERROR_RUNNING_WORKFLOW);
+    addNotification(store, {
       id: performance.now().toString(),
       message: `Failed to collect inputs: ${detail}`,
       status: 'danger',
@@ -143,25 +158,37 @@ export const workflowDispatcher = async (store: WorkflowStore) => {
   }
 
   try {
-    state.mutate.status('running', RUNNING_DISPATCHING_WORKFLOW);
+    setStatus(store, 'running', RUNNING_DISPATCHING_WORKFLOW);
 
-    const payload = await runWorkflowRequest(id, inputs);
+    clearResults(store);
+    const runId = await runWorkflow({ workflowId: id, inputs });
+    const workflowName = state.manager?.workflow.title() ?? id;
+    const timestamp = Date.now();
 
-    state.mutate.results(payload.history?.outputs ? { ...payload.history.outputs } : null);
-    state.mutate.notifications.add({
-      id: performance.now().toString(),
-      message: WORKFLOW_COMPLETED,
-      status: 'success',
+    const clonedInputs = JSON.parse(JSON.stringify(inputs));
+
+    upsertRun(store, {
+      createdAt: timestamp,
+      error: null,
+      httpStatus: null,
+      inputs: clonedInputs,
+      outputs: null,
+      resultPayload: null,
+      runId,
+      status: 'pending',
+      updatedAt: timestamp,
+      workflowId: id,
+      workflowName,
     });
-    state.mutate.status('idle', IDLE);
+    ensureActiveRun(store, runId);
   } catch (error) {
-    state.mutate.status('error', ERROR_RUNNING_WORKFLOW);
+    setStatus(store, 'error', ERROR_RUNNING_WORKFLOW);
     if (error instanceof WorkflowApiError) {
       const inputName = error.payload?.error?.input;
       if (inputName) {
         _setCellStatus(store, inputName, 'error');
       }
-      state.mutate.notifications.add({
+      addNotification(store, {
         id: performance.now().toString(),
         message: `Workflow run failed: ${error.payload?.detail || error.message}`,
         status: 'danger',

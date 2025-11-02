@@ -5,6 +5,20 @@ import { WorkflowStatus } from './types/state';
 export const API_BASE = runnerConfig.apiBase;
 export const API_ROUTE_PREFIX = runnerConfig.apiRoutePrefix;
 export const API_ROOT = `${API_BASE}${API_ROUTE_PREFIX}`;
+
+type ChatConfig = {
+  useProxy?: boolean;
+  provider?: 'openai' | 'gemini' | 'kobold' | string;
+  path?: string; // optional custom path relative to API_ROOT
+};
+
+const CHAT_CFG: ChatConfig | undefined = runnerConfig.chat;
+
+const ensureLeadingSlash = (p?: string) => (p ? (p.startsWith('/') ? p : `/${p}`) : undefined);
+
+export const CHAT_ENDPOINT = CHAT_CFG?.useProxy
+  ? `${API_ROOT}${ensureLeadingSlash(CHAT_CFG.path ?? `/proxy/${CHAT_CFG.provider ?? 'openai'}`)}`
+  : '';
 export const DEFAULT_STATUS_MESSAGES: Record<WorkflowStatus, string> = {
   idle: 'Ready.',
   running: 'Running...',

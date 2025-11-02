@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Any, Dict
 
-from ..registry import InputValidationError, WorkflowCell, WorkflowNode
+from ..services.registry import InputValidationError, WorkflowCell, WorkflowNode
 from ...utils.helpers.conversion import convert_to_json
 
 # region Workflow Config
@@ -22,7 +22,6 @@ def _configure(prompt: Dict[str, Any], inputs: Dict[str, Any]) -> None:
             parsed_json = convert_to_json(json_input)
             if parsed_json is None:
                 raise InputValidationError(name)
-            # Comfy treats bare lists as links, so lists must be wrapped.
             if isinstance(parsed_json, list):
                 inputs_map["json_input"] = {"__value__": parsed_json}
             else:
@@ -49,6 +48,7 @@ input_json = WorkflowCell(
         },
         "lfHtmlAttributes": {
             "autocomplete": "off",
+            "name": "json",
             "type": "text"
         },
         "lfLabel": "JSON Object",
@@ -56,12 +56,13 @@ input_json = WorkflowCell(
             "showWhenFocused": False,
             "value": "The JSON object to sort.",
         },
+        "lfStyle": ":host { height: 200px; }",
         "lfStyling": "textarea"
     },
 )
 input_ascending = WorkflowCell(
-    id="ascending",
     node_id="1",
+    id="ascending",
     shape="toggle",
     value="Sort ascending",
     description="Sets whether to sort the JSON keys in ascending order.",
@@ -74,8 +75,8 @@ input_ascending = WorkflowCell(
 
 # region Outputs
 output_json = WorkflowCell(
-    id="sorted_json",
     node_id="2",
+    id="sorted_json",
     shape="code",
     description="JSON Output",
     props={

@@ -1,6 +1,6 @@
 import { LfButtonInterface } from '@lf-widgets/foundations/dist';
 import { getLfFramework } from '@lf-widgets/framework';
-import { toggleDrawer } from '../handlers/layout';
+import { buttonHandler } from '../handlers/button';
 import { WorkflowSectionController } from '../types/section';
 import { WorkflowStore } from '../types/state';
 import { DEBUG_MESSAGES } from '../utils/constants';
@@ -48,18 +48,19 @@ const _drawerToggle = (store: WorkflowStore) => {
 
   const drawerToggle = createComponent.button(props);
   drawerToggle.className = HEADER_CLASSES.drawerToggle;
-  drawerToggle.addEventListener('lf-button-event', (e) => toggleDrawer(e, store));
+  drawerToggle.addEventListener('lf-button-event', (e) => buttonHandler(e, store));
 
   return drawerToggle;
 };
 
-const _serverIndicator = () => {
+const _serverIndicator = (store: WorkflowStore) => {
   const serverIndicator = document.createElement('div');
   serverIndicator.className = HEADER_CLASSES.serverIndicator;
 
   const light = document.createElement('lf-button');
   light.className = HEADER_CLASSES.serverIndicatorLight;
   light.lfUiSize = 'large';
+  light.addEventListener('lf-button-event', (e) => buttonHandler(e, store));
 
   const counter = document.createElement('span');
   counter.className = HEADER_CLASSES.serverIndicatorCounter;
@@ -119,7 +120,7 @@ export const createHeaderSection = (store: WorkflowStore): WorkflowSectionContro
     const appMessage = _appMessage();
     const container = _container();
     const drawerToggle = _drawerToggle(store);
-    const { counter, light, serverIndicator } = _serverIndicator();
+    const { counter, light, serverIndicator } = _serverIndicator(store);
 
     _root.appendChild(container);
     container.appendChild(drawerToggle);
@@ -143,7 +144,7 @@ export const createHeaderSection = (store: WorkflowStore): WorkflowSectionContro
   //#region Render
   const render = () => {
     const { alertTriangle, check, hourglassLow } = theme.get.icons();
-    const { current, manager, queuedJobs } = store.getState();
+    const { current, manager, queuedJobs, currentRunId } = store.getState();
     const { message, status } = current;
     const { uiRegistry } = manager;
 
@@ -152,9 +153,15 @@ export const createHeaderSection = (store: WorkflowStore): WorkflowSectionContro
       return;
     }
 
-    const appMessage = elements[HEADER_CLASSES.appMessage] as HTMLElement;
-    const counter = elements[HEADER_CLASSES.serverIndicatorCounter] as HTMLElement;
-    const light = elements[HEADER_CLASSES.serverIndicatorLight] as HTMLLfButtonElement;
+    const appMessage = elements[HEADER_CLASSES.appMessage] as HTMLElement | undefined;
+    const counter = elements[HEADER_CLASSES.serverIndicatorCounter] as HTMLElement | undefined;
+    const light = elements[HEADER_CLASSES.serverIndicatorLight] as HTMLLfButtonElement | undefined;
+
+    // Be defensive: if the mount did not complete or elements are missing in
+    // the test DOM, skip rendering to avoid throwing during tests.
+    if (!appMessage || !counter || !light) {
+      return;
+    }
 
     const isIdle = status === 'idle';
 
@@ -188,7 +195,14 @@ export const createHeaderSection = (store: WorkflowStore): WorkflowSectionContro
         appMessage[HIDE_KEY] = undefined;
       }
 
-      appMessage.innerText = message || '';
+      let displayMessage = message || '';
+      if (currentRunId) {
+        const parts = currentRunId.split('-');
+        const prefix = parts[0] || currentRunId.slice(0, 8);
+        displayMessage = `Processing ${prefix}`;
+      }
+
+      appMessage.innerText = displayMessage;
       appMessage.dataset.status = status || '';
       appMessage.dataset.visible = 'true';
     }

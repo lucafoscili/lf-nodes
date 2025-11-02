@@ -69,17 +69,25 @@ jobs:
           PREV_TAG='${{ steps.previous_tag.outputs.previous_tag }}'
 
           if [ -n "$PREV_TAG" ] && git rev-parse --verify "$PREV_TAG" >/dev/null 2>&1; then
-            COMMITS=$(git log --oneline --no-merges "$PREV_TAG"..HEAD)
+            REV_RANGE="$PREV_TAG..HEAD"
           else
-            COMMITS=$(git log --oneline --no-merges --max-count=50)
+            REV_RANGE="HEAD"
           fi
 
-          if [ -z "$COMMITS" ]; then
+          COMMITS_RAW=$(git rev-list --no-merges $REV_RANGE)
+
+          if [ -z "$COMMITS_RAW" ]; then
             RANGE_LABEL=$([ -n "$PREV_TAG" ] && echo "$PREV_TAG and HEAD" || echo "repository start and HEAD")
-            COMMITS="(no commits detected between $RANGE_LABEL)"
+            COMMITS="- (no commits detected between $RANGE_LABEL)"
+          else
+            COMMITS=""
+            while read -r commit_sha; do
+              [ -z "$commit_sha" ] && continue
+              entry=$(git show -s --format="%h %s" "$commit_sha")
+              COMMITS="$COMMITS- $entry"$'\n'
+            done <<< "$COMMITS_RAW"
+            COMMITS="${COMMITS%"$'\n'"}"
           fi
-
-          COMMITS=$(printf '%s\n' "$COMMITS" | sed 's/^/- /')
           echo "commits<<EOF" >> $GITHUB_OUTPUT
           echo "$COMMITS" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT

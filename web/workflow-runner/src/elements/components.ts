@@ -1,5 +1,6 @@
 import {
   LfButtonInterface,
+  LfChatInterface,
   LfCodeInterface,
   LfComponentName,
   LfComponentPropsFor,
@@ -10,6 +11,7 @@ import {
   LfUploadInterface,
 } from '@lf-widgets/foundations/dist';
 import { getLfFramework } from '@lf-widgets/framework';
+import { CHAT_ENDPOINT } from '../config';
 import { WorkflowCellInput, WorkflowCellOutput } from '../types/api';
 
 //#region Helpers
@@ -92,6 +94,15 @@ export const createComponent = {
     _setProps('LfButton', comp, props);
     return comp;
   },
+  chat: (props: Partial<LfChatInterface>) => {
+    const comp = document.createElement('lf-chat');
+
+    if (CHAT_ENDPOINT) {
+      comp.lfEndpointUrl = CHAT_ENDPOINT;
+    }
+    _setProps('LfChat', comp, props);
+    return comp;
+  },
   code: (props: Partial<LfCodeInterface>) => {
     const comp = document.createElement('lf-code');
 
@@ -131,6 +142,10 @@ export const createInputCell = (cell: WorkflowCellInput) => {
   const { props, shape } = cell;
 
   switch (shape) {
+    case 'chat': {
+      const p = (props || {}) as Partial<LfChatInterface>;
+      return createComponent.chat(sanitizeProps(p, 'LfChat'));
+    }
     case 'toggle': {
       const p = (props || {}) as Partial<LfToggleInterface>;
       return createComponent.toggle(sanitizeProps(p, 'LfToggle'));
@@ -151,14 +166,28 @@ export const createInputCell = (cell: WorkflowCellInput) => {
 //#region Outputs
 export const createOutputComponent = (descriptor: WorkflowCellOutput) => {
   const { syntax } = getLfFramework();
-  const { dataset, json, metadata, props, shape, slot_map, svg } = descriptor;
+  const {
+    civitai_metadata,
+    dataset,
+    file_names,
+    json,
+    metadata,
+    props,
+    shape,
+    slot_map,
+    string,
+    svg,
+  } = descriptor;
   const el = document.createElement('div');
 
   switch (shape) {
     case 'code': {
       const p = (props || {}) as Partial<LfCodeInterface>;
       p.lfValue =
+        string ||
         svg ||
+        civitai_metadata ||
+        file_names?.join('\n') ||
         syntax.json.unescape(json || metadata || dataset || { message: 'No output available.' })
           .unescapedString;
       const code = createComponent.code(p);

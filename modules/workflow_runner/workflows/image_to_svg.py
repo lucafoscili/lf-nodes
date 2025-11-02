@@ -1,7 +1,8 @@
 from pathlib import Path
 from typing import Any, Dict
 
-from ..registry import InputValidationError, WorkflowCell, WorkflowNode
+from ..services.registry import WorkflowCell, WorkflowNode
+from .utils import resolve_upload_paths
 
 # region Workflow Config
 def _configure(prompt: Dict[str, Any], inputs: Dict[str, Any]) -> None:
@@ -12,27 +13,8 @@ def _configure(prompt: Dict[str, Any], inputs: Dict[str, Any]) -> None:
         inputs_map = node.setdefault("inputs", {})
 
         if node_id == "16":  # Image loader
-            name = "source_path"
-            source_path = inputs.get(name)
-            if not source_path:
-                raise InputValidationError(name)
-
-            if isinstance(source_path, (list, tuple)):
-                source_path = next((v for v in source_path if v), source_path[0] if len(source_path) > 0 else None)
-
-            if isinstance(source_path, dict):
-                source_path = source_path.get('path') or source_path.get('file') or source_path.get('name')
-
-            if isinstance(source_path, str) and ';' in source_path:
-                parts = [p for p in (s.strip() for s in source_path.split(';')) if p]
-                source_path = parts[0] if parts else source_path
-
-            resolved_path = Path(source_path).expanduser()
-            if not resolved_path.exists():
-                raise FileNotFoundError(f"Input path does not exist: {resolved_path}")
-
-            resolved_str = str(resolved_path)
-            inputs_map["image"] = resolved_str
+            resolved_paths = resolve_upload_paths(inputs, "source_path", allow_multiple=False)
+            inputs_map["image"] = resolved_paths[0]
 
         if node_id == "40":  # Color number (optional)
             name = "number_of_colors"
@@ -83,6 +65,7 @@ input_name = WorkflowCell(
     props={
         "lfHtmlAttributes": {
             "autocomplete": "off",
+            "name": "icon_name",
             "type": "text"
         },
         "lfLabel": "Icon name",
@@ -101,9 +84,10 @@ input_colors = WorkflowCell(
     props={
         "lfHtmlAttributes": {
             "autocomplete": "off",
-            "type": "number",
             "min": 1,
             "max": 256,
+            "name": "number_of_colors",
+            "type": "number",
         },
         "lfLabel": "Number of colors",
         "lfHelper": {
@@ -114,8 +98,8 @@ input_colors = WorkflowCell(
     },
 )
 input_desaturate = WorkflowCell(
-    id="desaturate",
     node_id="51",
+    id="desaturate",
     shape="toggle",
     value="Desaturate",
     description="Sets whether to desaturate the image before converting.",
@@ -125,8 +109,8 @@ input_desaturate = WorkflowCell(
     },
 )
 input_transparency = WorkflowCell(
-    id="keep_transparency",
     node_id="71",
+    id="keep_transparency",
     shape="toggle",
     value="Keep Transparency",
     description="Sets whether to keep the transparency of the image.",
@@ -136,8 +120,8 @@ input_transparency = WorkflowCell(
     },
 )
 input_strip = WorkflowCell(
-    id="strip_attributes",
     node_id="80",
+    id="strip_attributes",
     shape="toggle",
     value="Strip Attributes",
     description="Sets whether to strip attributes from the SVG output.",
@@ -150,8 +134,8 @@ input_strip = WorkflowCell(
 
 # region Outputs
 output_svg_file = WorkflowCell(
-    id="svg_file",
     node_id="20",
+    id="svg_file",
     shape="masonry",
     description="SVG File",
     props={
@@ -159,8 +143,8 @@ output_svg_file = WorkflowCell(
     }
 )
 output_svg_data = WorkflowCell(
-    id="svg_data",
     node_id="20",
+    id="svg_data",
     shape="code",
     description="SVG Data",
     props={
@@ -168,8 +152,8 @@ output_svg_data = WorkflowCell(
     }
 )
 output_png = WorkflowCell(
-    id="png_file",
     node_id="61",
+    id="png_file",
     shape="masonry",
     description="PNG File",
 )

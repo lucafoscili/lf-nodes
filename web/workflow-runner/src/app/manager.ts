@@ -7,20 +7,40 @@ import { createDrawerSection } from '../elements/layout.drawer';
 import { createHeaderSection } from '../elements/layout.header';
 import { createMainSection } from '../elements/layout.main';
 import { createNotificationsSection } from '../elements/layout.notifications';
-import { fetchWorkflowDefinitions } from '../services/workflow-service';
-import { WorkflowDispatchers, WorkflowManager, WorkflowUIItem } from '../types/manager';
+import {
+  fetchWorkflowDefinitions,
+  fetchWorkflowJSON,
+  WorkflowApiError,
+} from '../services/workflow-service';
+import {
+  WorkflowCellInputId,
+  WorkflowCellsInputContainer,
+  WorkflowCellsOutputContainer,
+  WorkflowCellType,
+} from '../types/api';
+import {
+  RoutingController,
+  WorkflowDispatchers,
+  WorkflowManager,
+  WorkflowUIItem,
+} from '../types/manager';
 import { WorkflowSectionController } from '../types/section';
-import { WorkflowStore } from '../types/state';
-import { parseCount } from '../utils/common';
+import { WorkflowRunEntry, WorkflowStore, WorkflowView } from '../types/state';
 import { NOTIFICATION_MESSAGES, STATUS_MESSAGES } from '../utils/constants';
+import { WorkflowRunnerClient } from './client';
+import { createRoutingController } from './routing';
+import { changeView, resolveMainSections } from './sections';
 import { initState } from './state';
 import { createWorkflowRunnerStore } from './store';
+import { addNotification, selectRun, setStatus } from './store-actions';
 
 export class LfWorkflowRunnerManager implements WorkflowManager {
   //#region Initialization
   #APP_ROOT: HTMLDivElement;
+  #CLIENT: WorkflowRunnerClient;
   #DISPATCHERS: WorkflowDispatchers;
   #FRAMEWORK = getLfFramework();
+  #ROUTING: RoutingController;
   #SECTIONS: {
     actionButton: WorkflowSectionController;
     dev: WorkflowSectionController;
@@ -42,7 +62,18 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
     const { WORKFLOWS_LOAD_FAILED } = NOTIFICATION_MESSAGES;
 
     this.#APP_ROOT = document.querySelector<HTMLDivElement>('#app');
+    if (!this.#APP_ROOT) {
+      const fallback = document.createElement('div');
+      fallback.id = 'app';
+      if (document.body) {
+        document.body.appendChild(fallback);
+      }
+      this.#APP_ROOT = fallback;
+    }
+
     this.#STORE = createWorkflowRunnerStore(initState());
+    this.#CLIENT = new WorkflowRunnerClient(this.#STORE);
+
     this.#DISPATCHERS = {
       runWorkflow: () => workflowDispatcher(this.#STORE),
     };
@@ -54,11 +85,13 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
       main: createMainSection(this.#STORE),
       notifications: createNotificationsSection(this.#STORE),
     };
+    this.#ROUTING = createRoutingController({ store: this.#STORE });
 
     const state = this.#STORE.getState();
 
     state.mutate.manager(this);
 
+    this.#ROUTING.initialize();
     this.#initializeFramework();
     this.#initializeLayout();
 
@@ -68,18 +101,18 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
     state.mutate.status('running', RUNNING_LOADING_WORKFLOWS);
     this.#loadWorkflows()
       .catch((error) => {
-        state.mutate.notifications.add({
+        addNotification(this.#STORE, {
           id: performance.now().toString(),
           message: error instanceof Error ? error.message : WORKFLOWS_LOAD_FAILED,
           status: 'danger',
         });
-        state.mutate.status('error', ERROR_FETCHING_WORKFLOWS);
+        setStatus(this.#STORE, 'error', ERROR_FETCHING_WORKFLOWS);
       })
       .then(() => {
-        state.mutate.status('idle', IDLE_WORKFLOWS_LOADED);
+        setStatus(this.#STORE, 'idle', IDLE_WORKFLOWS_LOADED);
+        this.#ROUTING.updateRouteFromState();
+        this.#CLIENT.start();
       });
-
-    this.#startPolling();
   }
   //#endregion
 
@@ -125,54 +158,33 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
     state.mutate.workflows(workflows);
 
     const firstWorkflow = workflows.nodes?.[0];
-    if (firstWorkflow?.id) {
+    const route = this.#ROUTING.getPendingRoute();
+    const shouldSelectDefault =
+      !route ||
+      (!route.workflowId && (route.view === 'workflow' || route.view === 'history')) ||
+      (route.view === 'run' && !route.workflowId);
+
+    if (shouldSelectDefault && firstWorkflow?.id) {
       state.mutate.workflow(firstWorkflow.id);
     }
+
+    this.#ROUTING.applyPendingRouteIfNeeded();
   };
-  #startPolling() {
-    setInterval(async () => {
-      try {
-        const resp = await fetch('/queue');
-        if (!resp.ok) {
-          throw new Error('Failed to fetch queue status');
-        }
-
-        const state = this.#STORE.getState();
-
-        const { queue_running, queue_pending } = (await resp.json()) as {
-          queue_pending: unknown;
-          queue_running: unknown;
-        };
-
-        const qPending = parseCount(queue_pending);
-        const qRunning = parseCount(queue_running);
-        const busy = qPending + qRunning;
-
-        const prev = state.queuedJobs ?? -1;
-        if (busy !== prev) {
-          state.mutate.queuedJobs(busy);
-        }
-      } catch (e) {
-        const state = this.#STORE.getState();
-
-        try {
-          const prev = state.queuedJobs ?? -1;
-          if (prev !== -1) {
-            state.mutate.queuedJobs(-1);
-          }
-        } catch (err) {}
-      }
-    }, 750);
-  }
   #subscribeToState() {
     const st = this.#STORE.getState();
+    let latestState = st;
     let lastCurrentMessage = st.current.message;
     let lastCurrentStatus = st.current.status;
     let lastDebug = st.isDebug;
     let lastId = st.current.id;
+    let lastInputStatuses = st.inputStatuses;
     let lastNotificationsCount = st.notifications?.length ?? 0;
     let lastQueued = st.queuedJobs ?? -1;
     let lastResults = st.results;
+    let lastRunId = st.currentRunId;
+    let lastRunsRef = st.runs;
+    let lastSelectedRunId = st.selectedRunId;
+    let lastView = st.view;
     let lastWorkflowsCount = st.workflows?.nodes?.length ?? 0;
 
     let scheduled = false;
@@ -186,13 +198,38 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
     };
 
     this.#STORE.subscribe((state) => {
+      latestState = state;
       const { current, isDebug, queuedJobs, workflows } = state;
       const { message, status } = current;
 
-      if (current.id !== lastId || state.results !== lastResults) {
+      if (state.currentRunId !== lastRunId) {
+        // Run polling removed - SSE handles status updates
+        lastRunId = state.currentRunId;
+      }
+
+      if (current.id !== lastId) {
         needs.main = true;
         lastId = current.id;
+      }
+      if (state.results !== lastResults) {
+        needs.main = true;
         lastResults = state.results;
+      }
+      if (state.runs !== lastRunsRef) {
+        needs.main = true;
+        lastRunsRef = state.runs;
+      }
+      if (state.selectedRunId !== lastSelectedRunId) {
+        needs.main = true;
+        lastSelectedRunId = state.selectedRunId;
+      }
+      if (state.view !== lastView) {
+        needs.main = true;
+        lastView = state.view;
+      }
+      if (state.inputStatuses !== lastInputStatuses) {
+        needs.main = true;
+        lastInputStatuses = state.inputStatuses;
       }
 
       if (message !== lastCurrentMessage || status !== lastCurrentStatus) {
@@ -228,6 +265,9 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
         requestAnimationFrame(() => {
           scheduled = false;
 
+          const stateSnapshot = latestState;
+          const snapshotDebug = stateSnapshot.isDebug;
+
           const sections = this.#SECTIONS;
           for (const sectionKey in needs) {
             const need = needs[sectionKey as keyof typeof needs];
@@ -235,12 +275,16 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
             if (need) {
               switch (sectionKey) {
                 case 'dev':
-                  if (isDebug) {
+                  if (snapshotDebug) {
                     section.mount();
                     section.render();
                   } else {
                     section.destroy();
                   }
+                  break;
+                case 'main':
+                  const mainSections = resolveMainSections(stateSnapshot);
+                  section.render(mainSections);
                   break;
                 default:
                   section.render();
@@ -252,6 +296,7 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
           Object.keys(needs).forEach((k) => (needs[k] = false));
         });
       }
+      this.#ROUTING.updateRouteFromState();
     });
   }
   //#endregion
@@ -260,12 +305,57 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
   getAppRoot() {
     return this.#APP_ROOT;
   }
+  getClient() {
+    return this.#CLIENT;
+  }
   getDispatchers() {
     return this.#DISPATCHERS;
   }
   getStore() {
     return this.#STORE;
   }
+  //#endregion
+
+  //#region Runs
+  runs = {
+    all: (): WorkflowRunEntry[] => {
+      return [...this.#STORE.getState().runs];
+    },
+    get: (runId: string): WorkflowRunEntry | null => {
+      const { runs } = this.#STORE.getState();
+      return runs.find((run) => run.runId === runId) || null;
+    },
+    select: (runId: string | null, nextView?: WorkflowView) => {
+      if (!nextView) {
+        selectRun(this.#STORE, runId);
+        return;
+      }
+
+      if (nextView === 'run' && runId) {
+        const run = this.runs.get(runId);
+        const state = this.#STORE.getState();
+        if (run?.workflowId && run.workflowId !== state.current.id) {
+          state.mutate.workflow(run.workflowId);
+        }
+        changeView(this.#STORE, 'run', {
+          runId,
+          clearResults: false,
+        });
+        return;
+      }
+
+      changeView(this.#STORE, nextView, {
+        runId: nextView === 'run' ? runId : null,
+      });
+    },
+    selected: (): WorkflowRunEntry | null => {
+      const { runs, selectedRunId } = this.#STORE.getState();
+      if (!selectedRunId) {
+        return null;
+      }
+      return runs.find((run) => run.runId === selectedRunId) || null;
+    },
+  };
   //#endregion
 
   //#region UI registry
@@ -281,6 +371,9 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
         }
       }
       this.#UI_REGISTRY.delete(this);
+      this.#ROUTING.destroy();
+      // Stop the client on cleanup
+      this.#CLIENT.stop();
     },
     get: () => {
       return this.#UI_REGISTRY.get(this);
@@ -300,6 +393,65 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
       const elements = this.#UI_REGISTRY.get(this) || {};
       elements[elementId] = element;
       this.#UI_REGISTRY.set(this, elements);
+    },
+  };
+  //#endregion
+
+  //#region Workflow
+  workflow = {
+    cells: <T extends WorkflowCellType>(type: T) => {
+      const workflow = this.workflow.current();
+      const section = workflow?.children?.find((child) => child.id.endsWith(`:${type}s`));
+      return (section?.cells || {}) as T extends WorkflowCellInputId
+        ? WorkflowCellsInputContainer
+        : WorkflowCellsOutputContainer;
+    },
+    current: () => {
+      const { current, workflows } = this.#STORE.getState();
+      return workflows?.nodes?.find((node) => node.id === current.id) || null;
+    },
+    download: async (id?: string) => {
+      const { ERROR_FETCHING_WORKFLOWS } = STATUS_MESSAGES;
+
+      const state = this.#STORE.getState();
+      id = id || state.current.id;
+
+      try {
+        const workflowJSON = await fetchWorkflowJSON(id);
+
+        const workflowString = JSON.stringify(workflowJSON, null, 2);
+        const blob = new Blob([workflowString], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${id}.json`;
+        document.body.appendChild(a);
+        a.click();
+
+        setTimeout(() => {
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        }, 1000);
+      } catch (error) {
+        state.mutate.status('error', ERROR_FETCHING_WORKFLOWS);
+        if (error instanceof WorkflowApiError) {
+          addNotification(this.#STORE, {
+            id: performance.now().toString(),
+            message: `Failed to fetch workflow: ${error.message}`,
+            status: 'danger',
+          });
+        }
+      }
+    },
+    description: () => {
+      const workflow = this.workflow.current();
+      return workflow?.description || '';
+    },
+    title: () => {
+      const workflow = this.workflow.current();
+      const str =
+        typeof workflow?.value === 'string' ? workflow.value : String(workflow?.value || '');
+      return str || 'No workflow selected';
     },
   };
   //#endregion

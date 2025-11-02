@@ -4,9 +4,12 @@ import {
   LfDataDataset,
   LfDataNode,
 } from '@lf-widgets/foundations/dist';
-import { WorkflowStatus } from './state';
 
 //#region API
+export interface WorkflowQueueStatus {
+  pending: number;
+  running: number;
+}
 export interface WorkflowAPIErrorOptions<T> {
   payload?: T;
   status?: number;
@@ -14,7 +17,7 @@ export interface WorkflowAPIErrorOptions<T> {
 export interface WorkflowAPIResponse {
   message: string;
   payload: WorkflowAPIRunPayload;
-  status: WorkflowStatus;
+  status: WorkflowRunStatus;
 }
 //#endregion
 
@@ -26,11 +29,11 @@ export interface WorkflowAPIItem extends WorkflowLFNode {
 }
 export interface WorkflowAPIInputs extends WorkflowLFNode {
   cells: WorkflowCellsInputContainer;
-  id: `${string}:inputs`;
+  id: `${string}:${WorkflowCellInputId}s`;
 }
 export interface WorkflowAPIOutputs extends WorkflowLFNode {
   cells: WorkflowCellsOutputContainer;
-  id: `${string}:outputs`;
+  id: `${string}:${WorkflowCellOutputId}s`;
 }
 export interface WorkflowAPIDataset {
   columns?: Array<LfDataColumn>;
@@ -46,15 +49,18 @@ export interface WorkflowCellBase {
   title?: string;
   value?: string;
 }
+export type WorkflowCellInputId = 'input';
+export type WorkflowCellOutputId = 'output';
+export type WorkflowCellType = WorkflowCellInputId | WorkflowCellOutputId;
 
 // Inputs
 export interface WorkflowCellInput extends WorkflowCellBase {
   props?: Partial<
     LfComponentPropsFor<
-      'LfButton' | 'LfCode' | 'LfMasonry' | 'LfTextfield' | 'LfToggle' | 'LfUpload'
+      'LfButton' | 'LfChat' | 'LfCode' | 'LfMasonry' | 'LfTextfield' | 'LfToggle' | 'LfUpload'
     >
   >;
-  shape?: 'textfield' | 'toggle' | 'upload';
+  shape?: 'chat' | 'textfield' | 'toggle' | 'upload';
 }
 export interface WorkflowCellsInputContainer {
   [index: string]: WorkflowCellInput;
@@ -87,11 +93,15 @@ export interface WorkflowCellsOutputContainer {
 //#region Nodes outputs
 export interface WorkflowNodeOutputs
   extends DisplayJSONNodeOutputs,
+    DisplayStringNodeOutputs,
     LoadMetadataNodeOutputs,
     SaveSVGNodeOutputs,
     SaveImageForCivitAINodeOutputs {}
 export interface DisplayJSONNodeOutputs {
   json: Record<string, unknown>;
+}
+export interface DisplayStringNodeOutputs {
+  string: string;
 }
 export interface LoadMetadataNodeOutputs {
   metadata: Record<string, unknown>;
@@ -110,15 +120,7 @@ export interface SaveSVGNodeOutputs {
 
 //#region Results
 export interface WorkflowNodeResultPayload {
-  lf_output?: [
-    {
-      civitai_metadata?: string;
-      file_names?: string[];
-      dataset?: LfDataDataset;
-      slot_map?: Record<string, string>;
-      svg?: string;
-    },
-  ];
+  lf_output?: Array<WorkflowNodeOutputs>;
   [key: string]: unknown;
 }
 export type WorkflowNodeResults = Record<string, WorkflowNodeResultPayload>;
@@ -134,6 +136,25 @@ export interface WorkflowAPIRunPayload {
   history: {
     outputs?: WorkflowNodeResults;
   };
+  preferred_output?: string;
+}
+export interface WorkflowRunRequestPayload {
+  workflowId: string;
+  inputs: Record<string, unknown>;
+  promptId?: string;
+  extraData?: Record<string, unknown>;
+}
+export interface WorkflowRunResultPayload {
+  body: WorkflowAPIResponse;
+  http_status: number;
+}
+export type WorkflowRunStatus = 'pending' | 'running' | 'succeeded' | 'failed' | 'cancelled';
+export interface WorkflowRunStatusResponse {
+  created_at: number;
+  error?: string | null;
+  result: WorkflowRunResultPayload | null;
+  run_id: string;
+  status: WorkflowRunStatus;
 }
 //#endregion
 
