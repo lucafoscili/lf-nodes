@@ -1930,8 +1930,8 @@ const _collectInputs = async (store) => {
     _setCellStatus(store, id);
     switch (cell.tagName.toLowerCase()) {
       case "lf-chat": {
-        const value = cell.lfValue;
-        inputs[id] = JSON.stringify(value);
+        const value = await cell.getHistory();
+        inputs[id] = value;
         break;
       }
       case "lf-toggle": {

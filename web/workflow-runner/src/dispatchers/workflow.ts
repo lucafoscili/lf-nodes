@@ -28,8 +28,8 @@ const _collectInputs = async (store: WorkflowStore): Promise<Record<string, unkn
 
     switch (cell.tagName.toLowerCase()) {
       case 'lf-chat': {
-        const value = (cell as HTMLLfChatElement).lfValue;
-        inputs[id] = JSON.stringify(value);
+        const value = await (cell as HTMLLfChatElement).getHistory();
+        inputs[id] = value;
         break;
       }
       case 'lf-toggle': {
