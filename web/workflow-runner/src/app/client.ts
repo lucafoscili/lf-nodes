@@ -1,23 +1,7 @@
-// TypeScript client for Workflow Runner SSE + polling fallback
-
-export type RunRecord = {
-  run_id: string;
-  workflow_id?: string | null;
-  status: string;
-  seq: number;
-  owner_id?: string | null;
-  created_at?: number | null;
-  updated_at?: number | null;
-  result?: any;
-  error?: string | null;
-};
-
-export type UpdateHandler = (runs: Map<string, RunRecord>) => void;
-
-type EventPayload = RunRecord & { type?: string };
+import { API_ROOT } from '../config';
+import { EventPayload, RunRecord, UpdateHandler } from '../types/client';
 
 export class WorkflowRunnerClient {
-  private baseUrl: string;
   private es: EventSource | null = null;
   private lastSeq: Map<string, number> = new Map();
   private runs: Map<string, RunRecord> = new Map();
@@ -37,10 +21,6 @@ export class WorkflowRunnerClient {
   private processingSnapshot = false;
   private cacheKey = 'lf-runs-cache';
   private inflightReconciles = new Map<string, Promise<void>>();
-
-  constructor(baseUrl = '/api/lf-nodes') {
-    this.baseUrl = baseUrl.replace(/\/$/, '');
-  }
 
   setUpdateHandler(h: UpdateHandler) {
     this.onUpdate = h;
@@ -85,7 +65,7 @@ export class WorkflowRunnerClient {
 
   private async _reconcileRunOnce(run_id: string): Promise<void> {
     try {
-      const resp = await fetch(`${this.baseUrl}/run/${encodeURIComponent(run_id)}/status`, {
+      const resp = await fetch(`${API_ROOT}/run/${encodeURIComponent(run_id)}/status`, {
         credentials: 'include',
       });
       if (!resp || !resp.ok) {
@@ -216,10 +196,9 @@ export class WorkflowRunnerClient {
     const needs = ids.filter((id) => !!id && !this.workflowNames.has(id));
     if (needs.length === 0) return;
     try {
-      const resp = await fetch(
-        `${this.baseUrl}/workflows?ids=${encodeURIComponent(needs.join(','))}`,
-        { credentials: 'include' },
-      );
+      const resp = await fetch(`${API_ROOT}/workflows?ids=${encodeURIComponent(needs.join(','))}`, {
+        credentials: 'include',
+      });
       if (!resp || !resp.ok) return;
       const data = await resp.json();
       // Normalize multiple possible shapes returned by the server:
@@ -338,7 +317,7 @@ export class WorkflowRunnerClient {
   private async coldLoadRuns(): Promise<void> {
     try {
       const resp = await fetch(
-        `${this.baseUrl}/workflow-runner/runs?status=pending,running,succeeded,failed,cancelled,timeout&owner=me&limit=200`,
+        `${API_ROOT}/workflow-runner/runs?status=pending,running,succeeded,failed,cancelled,timeout&owner=me&limit=200`,
         { credentials: 'include' },
       );
       if (!resp || !resp.ok) {
@@ -370,7 +349,7 @@ export class WorkflowRunnerClient {
     await this.coldLoadRuns();
 
     const lastEventId = this.buildLastEventId();
-    const url = `${this.baseUrl}/workflow-runner/events`;
+    const url = `${API_ROOT}/workflow-runner/events`;
     const headers: any = {};
     // Browser EventSource doesn't support custom headers; use Last-Event-ID via constructor if available
     const opts: any = {} as any;
@@ -612,7 +591,7 @@ export class WorkflowRunnerClient {
       const ac = new AbortController();
       this.pollAbortController = ac;
       const resp = await fetch(
-        `${this.baseUrl}/workflow-runner/runs?status=pending,running&owner=me&limit=200`,
+        `${API_ROOT}/workflow-runner/runs?status=pending,running&owner=me&limit=200`,
         { signal: ac.signal, credentials: 'include' },
       );
       if (!resp.ok) return;

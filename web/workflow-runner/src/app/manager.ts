@@ -19,20 +19,19 @@ import {
   WorkflowCellsOutputContainer,
   WorkflowCellType,
 } from '../types/api';
+import { RunRecord } from '../types/client';
 import {
   RoutingController,
-  RunLifecycleController,
   WorkflowDispatchers,
   WorkflowManager,
   WorkflowUIItem,
 } from '../types/manager';
 import { WorkflowCellStatus, WorkflowSectionController, WorkflowUICells } from '../types/section';
 import { WorkflowRunEntry, WorkflowStore, WorkflowView } from '../types/state';
+import { recordToUI } from '../utils/common';
 import { NOTIFICATION_MESSAGES, STATUS_MESSAGES } from '../utils/constants';
-import { WorkflowRunnerClient, type RunRecord } from './client';
-import { mapRunRecordToUi } from './client-mapper';
+import { WorkflowRunnerClient } from './client';
 import { createRoutingController } from './routing';
-import { createRunLifecycle } from './runs';
 import { changeView, resolveMainSections } from './sections';
 import { initState } from './state';
 import { createWorkflowRunnerStore } from './store';
@@ -45,7 +44,6 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
   #DISPATCHERS: WorkflowDispatchers;
   #FRAMEWORK = getLfFramework();
   #ROUTING: RoutingController;
-  #RUN_LIFECYCLE: RunLifecycleController;
   #SECTIONS: {
     actionButton: WorkflowSectionController;
     dev: WorkflowSectionController;
@@ -68,19 +66,17 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
     const { WORKFLOWS_LOAD_FAILED } = NOTIFICATION_MESSAGES;
 
     this.#APP_ROOT = document.querySelector<HTMLDivElement>('#app');
-    // If the test environment or embedding page doesn't provide a root
-    // element with id='app', create a fallback root and attach it to the
-    // document body so sections and mounting logic can proceed safely.
     if (!this.#APP_ROOT) {
       const fallback = document.createElement('div');
       fallback.id = 'app';
-      // Append to body so layout/rendering works in test DOMs
       if (document.body) {
         document.body.appendChild(fallback);
       }
       this.#APP_ROOT = fallback as HTMLDivElement;
     }
+
     this.#STORE = createWorkflowRunnerStore(initState());
+
     this.#DISPATCHERS = {
       runWorkflow: () => workflowDispatcher(this.#STORE),
     };
@@ -92,20 +88,13 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
       main: createMainSection(this.#STORE),
       notifications: createNotificationsSection(this.#STORE),
     };
-    this.#RUN_LIFECYCLE = createRunLifecycle({
-      store: this.#STORE,
-      setInputStatus: (inputId, status) => {
-        this.#setInputStatus(inputId, status);
-      },
-    });
     this.#ROUTING = createRoutingController({ store: this.#STORE });
 
-    // Initialize WorkflowRunnerClient as single source of truth for run ingestion
-    this.#CLIENT = new WorkflowRunnerClient('/api/lf-nodes');
+    this.#CLIENT = new WorkflowRunnerClient();
     this.#CLIENT.setUpdateHandler((runs: Map<string, RunRecord>) => {
       // DRY: map all runs through single transformation point
       for (const rec of runs.values()) {
-        const uiEntry = mapRunRecordToUi(rec, this.#WORKFLOW_NAMES);
+        const uiEntry = recordToUI(rec, this.#WORKFLOW_NAMES);
         upsertRun(this.#STORE, uiEntry);
       }
       // Maintain selection invariant (select active run if current is terminal)

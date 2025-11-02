@@ -4,7 +4,10 @@ import {
   WorkflowCellOutputItem,
   WorkflowCellsOutputContainer,
   WorkflowNodeResults,
+  WorkflowRunStatus,
 } from '../types/api';
+import { RunRecord } from '../types/client';
+import type { WorkflowRunEntryUpdate } from '../types/state';
 
 //#region API
 export const deepMerge = (defs: WorkflowCellsOutputContainer, outs: WorkflowNodeResults) => {
@@ -90,6 +93,29 @@ export const parseCount = (v: unknown) => {
   }
   const n = Number(v as any);
   return Number.isFinite(n) ? n : 0;
+};
+//#endregion
+
+//#region Client
+export const recordToUI = (rec: RunRecord, workflowNames?: Map<string, string>) => {
+  const { created_at, error, result, run_id, status, updated_at, workflow_id } = rec;
+
+  const now = Date.now();
+  const map: WorkflowRunEntryUpdate = {
+    runId: run_id,
+    status: status as WorkflowRunStatus,
+    createdAt: created_at ?? now,
+    updatedAt: updated_at ?? now,
+    workflowId: workflow_id ?? null,
+    workflowName: (workflow_id && workflowNames?.get(workflow_id)) || 'Unnamed Workflow',
+    error: error ?? null,
+    httpStatus: result?.http_status ?? null,
+    resultPayload: result ?? null,
+    outputs: result?.body?.payload?.history?.outputs || null,
+    inputs: {}, // TODO: populate if available in rec
+  };
+
+  return map;
 };
 //#endregion
 

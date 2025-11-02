@@ -1,5 +1,6 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { WorkflowRunnerClient, type RunRecord, type UpdateHandler } from '../app/client';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { WorkflowRunnerClient } from '../app/client';
+import { RunRecord, UpdateHandler } from '../types/client';
 
 // Mock localStorage for Node environment
 const mockLocalStorage = (() => {
@@ -44,7 +45,7 @@ describe('WorkflowRunnerClient', () => {
       constructor(public url: string) {}
     } as unknown as typeof EventSource;
 
-    client = new WorkflowRunnerClient('/api/test');
+    client = new WorkflowRunnerClient();
     updateHandler = vi.fn<UpdateHandler>();
     client.setUpdateHandler(updateHandler);
   });
@@ -58,12 +59,12 @@ describe('WorkflowRunnerClient', () => {
 
   describe('Client instantiation', () => {
     it('should create client with correct baseUrl', () => {
-      const testClient = new WorkflowRunnerClient('/api/custom');
+      const testClient = new WorkflowRunnerClient();
       expect(testClient).toBeDefined();
     });
 
     it('should strip trailing slash from baseUrl', () => {
-      const testClient = new WorkflowRunnerClient('/api/test/');
+      const testClient = new WorkflowRunnerClient();
       expect(testClient).toBeDefined();
       // baseUrl is private, but behavior should be consistent
     });
@@ -95,7 +96,7 @@ describe('WorkflowRunnerClient', () => {
 
       localStorage.setItem('lf-runs-cache', JSON.stringify(cachedRuns));
 
-      const testClient = new WorkflowRunnerClient('/api/test');
+      const testClient = new WorkflowRunnerClient();
       const handler = vi.fn();
       testClient.setUpdateHandler(handler);
 
@@ -115,7 +116,7 @@ describe('WorkflowRunnerClient', () => {
     it('should handle corrupted localStorage gracefully', async () => {
       localStorage.setItem('lf-runs-cache', 'invalid-json{');
 
-      const testClient = new WorkflowRunnerClient('/api/test');
+      const testClient = new WorkflowRunnerClient();
       const handler = vi.fn();
       testClient.setUpdateHandler(handler);
 
