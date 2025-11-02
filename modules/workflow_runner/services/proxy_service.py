@@ -255,9 +255,9 @@ def _build_upstream_and_headers(cfg: Dict[str, Any], body: Dict[str, Any], proxy
         mapped_for_openai_chat = False
         stream = body.get("stream")
         map_openai = bool(cfg.get("map_openai_to_generate", True))
-        # initialize decision flag early (clear and explicit for SoC/DRY)
         use_legacy = False
-        if path.lstrip("/").startswith("v1/chat/completions"):
+
+        if path.lstrip("/").startswith("v1/chat/completions") or isinstance(body.get("messages"), list):
             mapped_for_openai_chat = True
             use_legacy = isinstance(body.get("prompt"), str) or (map_openai and isinstance(body.get("messages"), list))
             if use_legacy:
@@ -272,6 +272,8 @@ def _build_upstream_and_headers(cfg: Dict[str, Any], body: Dict[str, Any], proxy
             raise web.HTTPBadRequest(text=json.dumps({"detail": "path_not_allowed", "path": path}))
 
         upstream = base_url.rstrip("/") + path
+
+        forward_body = body
 
         if mapped_for_openai_chat:
             if use_legacy:

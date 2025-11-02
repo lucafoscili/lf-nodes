@@ -1,8 +1,11 @@
 import json
 import requests
+import urllib.parse
+from comfy.cli_args import args as comfy_args
 import torch
 
 from server import PromptServer
+from ...utils.helpers.api.resolve_url import resolve_api_url
 
 from . import CATEGORY
 from ...utils.constants import BASE64_PNG_PREFIX, EVENT_PREFIX, FUNCTION, HEADERS, Input, INT_MAX, get_image_classifier_system
@@ -112,7 +115,10 @@ class LF_ImageClassifier:
             ],
         }
 
-        response = requests.post(url, headers=HEADERS, data=json.dumps(request))
+        # Resolve relative/local proxy paths to absolute URL using helper
+        resolved_url = resolve_api_url(url)
+
+        response = requests.post(resolved_url, headers=HEADERS, data=json.dumps(request))
         response_data = response.json()
         status_code, method, message = handle_response(response, method="POST")
         if status_code != 200:
