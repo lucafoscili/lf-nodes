@@ -128,6 +128,7 @@ export const NODE_WIDGET_MAP: NodeWidgetMap = {
   LF_TiledSuperRes: [CustomWidgetName.compare],
   LF_TiltShift: [CustomWidgetName.compare],
   LF_UpdateUsageStatistics: [CustomWidgetName.code],
+  LF_UploadImages:  [CustomWidgetName.code, CustomWidgetName.upload],
   LF_UpscaleModelSelector: [CustomWidgetName.history],
   LF_UsageStatistics: [CustomWidgetName.tabBarChart],
   LF_UrandomSeedGenerator: [CustomWidgetName.tree],

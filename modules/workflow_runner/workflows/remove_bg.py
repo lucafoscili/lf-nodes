@@ -12,9 +12,9 @@ def _configure(prompt: Dict[str, Any], inputs: Dict[str, Any]) -> None:
 
         inputs_map = node.setdefault("inputs", {})
 
-        if node_id == "4":  # Image loader
+        if node_id == "6":  # Image loader
             resolved_paths = resolve_upload_paths(inputs, "source_path", allow_multiple=True)
-            inputs_map["image"] = (
+            inputs_map["file_names"] = (
                 resolved_paths[0] if len(resolved_paths) == 1 else ";".join(resolved_paths)
             )
         

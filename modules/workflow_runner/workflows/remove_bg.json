@@ -4,59 +4,12 @@
       "transparent_background": false,
       "background_color": "#000000",
       "model": "u2net",
-      "ui_widget": {
-        "nodes": [
-          {
-            "cells": {
-              "lfImage": {
-                "shape": "image",
-                "lfValue": "/view?filename=background_src_5.PNG&type=temp&subfolder=&nonce=8b0209au",
-                "value": ""
-              },
-              "lfImage_after": {
-                "shape": "image",
-                "lfValue": "/view?filename=background_result_5.PNG&type=temp&subfolder=&nonce=ACxLuvdq",
-                "value": ""
-              }
-            },
-            "id": "image_1",
-            "value": "Comparison 1"
-          },
-          {
-            "cells": {
-              "lfImage": {
-                "shape": "image",
-                "lfValue": "/view?filename=background_cutout_5.PNG&type=temp&subfolder=&nonce=vluarUqr",
-                "value": ""
-              },
-              "lfImage_after": {
-                "shape": "image",
-                "lfValue": "/view?filename=background_mask_5.PNG&type=temp&subfolder=&nonce=vv0QYnp0",
-                "value": ""
-              }
-            },
-            "id": "image_2",
-            "value": "Comparison 2"
-          }
-        ]
-      },
-      "image": [
-        "4",
-        0
-      ]
+      "ui_widget": {},
+      "image": ["6", 1]
     },
     "class_type": "LF_BackgroundRemover",
     "_meta": {
       "title": "R E M O V E R"
-    }
-  },
-  "4": {
-    "inputs": {
-      "image": "icon_1.png"
-    },
-    "class_type": "LoadImage",
-    "_meta": {
-      "title": "I M A G E"
     }
   },
   "5": {
@@ -68,37 +21,27 @@
       "quality": 100,
       "ui_widget": {
         "columns": 3,
-        "dataset": {
-          "nodes": [
-            {
-              "cells": {
-                "lfImage": {
-                  "htmlProps": {
-                    "id": "_2025-10-29_14-36-22_1.png",
-                    "title": "_2025-10-29_14-36-22_1.png"
-                  },
-                  "shape": "image",
-                  "lfValue": "/view?filename=_2025-10-29_14-36-22_1.png&type=output&subfolder=&nonce=1Ckc38Pm",
-                  "value": "/view?filename=_2025-10-29_14-36-22_1.png&type=output&subfolder=&nonce=1Ckc38Pm"
-                }
-              },
-              "id": "1",
-              "value": "1"
-            }
-          ]
-        },
+        "dataset": {},
         "index": null,
         "name": "",
         "view": "main"
       },
-      "image": [
-        "1",
-        0
-      ]
+      "image": ["1", 1]
     },
     "class_type": "LF_SaveImageForCivitAI",
     "_meta": {
       "title": "O U T P U T"
+    }
+  },
+  "6": {
+    "inputs": {
+      "file_names": "",
+      "upload_dir": "temp",
+      "ui_widget": ""
+    },
+    "class_type": "LF_UploadImages",
+    "_meta": {
+      "title": "Upload images"
     }
   }
 }
