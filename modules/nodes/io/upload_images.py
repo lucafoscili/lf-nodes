@@ -39,7 +39,6 @@ class LF_UploadImages:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     OUTPUT_IS_LIST = (False, True)
-    OUTPUT_NODE = True
     OUTPUT_TOOLTIPS = (
         "Uploaded images.",
         "List of uploaded images.",
@@ -102,22 +101,12 @@ class LF_UploadImages:
 
         PromptServer.instance.send_sync(f"{EVENT_PREFIX}uploadimages", {
             "node": kwargs.get("node_id"),
-            "value": {
-                "files": file_list,
-                "count": len(image_list),
-            }
+            "value": file_names
         })
 
         first_batch = batch_list[0] if batch_list else None
 
-        return {
-            "ui": { 
-                "lf_output": [{
-                    "files": file_list
-                }]
-            },
-            "result": (first_batch, image_list)
-        }
+        return (first_batch, image_list)
 # endregion
 
 # region Mappings
