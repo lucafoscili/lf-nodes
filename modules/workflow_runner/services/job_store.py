@@ -82,17 +82,9 @@ async def create_job(job_id: str, workflow_id: str, owner_id: Optional[str] = No
         _jobs[job_id] = job
         updated = job
 
-    event = {
-        "id": f"{updated.id}:{updated.seq}",
-        "run_id": updated.id,
-        "workflow_id": updated.workflow_id,
-        "status": updated.status.value,
-        "created_at": updated.created_at,
-        "error": updated.error,
-        "result": updated.result if updated.status in {JobStatus.SUCCEEDED, JobStatus.FAILED, JobStatus.CANCELLED} else None,
-        "owner_id": updated.owner_id,
-        "seq": updated.seq,
-    }
+    # Use shared serializer to build the event dict
+    from ..utils.serialize import serialize_job as _serialize_job
+    event = _serialize_job(updated)
     for q in list(_subscribers):
         try:
             q.put_nowait(event)
@@ -173,17 +165,9 @@ async def set_job_status(
         updated = job
 
     # Notify subscribers outside of the lock to avoid blocking other callers.
-    event = {
-        "id": f"{updated.id}:{updated.seq}",
-        "run_id": updated.id,
-        "workflow_id": updated.workflow_id,
-        "status": updated.status.value,
-        "created_at": updated.created_at,
-        "error": updated.error,
-        "result": updated.result if updated.status in {JobStatus.SUCCEEDED, JobStatus.FAILED, JobStatus.CANCELLED} else None,
-        "owner_id": updated.owner_id,
-        "seq": updated.seq,
-    }
+    # Use shared serializer to build the event dict
+    from ..utils.serialize import serialize_job as _serialize_job
+    event = _serialize_job(updated)
     for q in list(_subscribers):
         try:
             q.put_nowait(event)
