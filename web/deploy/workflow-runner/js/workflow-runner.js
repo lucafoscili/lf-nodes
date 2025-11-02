@@ -80,6 +80,7 @@ const ensureActiveRun = (store, preferredRunId) => {
   if (!nextRun) {
     if (currentRunId !== null) {
       setRunInFlight(store, null);
+      setStatus$1(store, "idle");
     }
     return;
   }
@@ -648,7 +649,7 @@ const createHeaderSection = (store) => {
   };
   const render = () => {
     const { alertTriangle, check, hourglassLow } = theme$6.get.icons();
-    const { current, manager, queuedJobs } = store.getState();
+    const { current, manager, queuedJobs, currentRunId } = store.getState();
     const { message, status } = current;
     const { uiRegistry } = manager;
     const elements = uiRegistry.get();
@@ -686,7 +687,13 @@ const createHeaderSection = (store) => {
         clearTimeout(prev);
         appMessage[HIDE_KEY] = void 0;
       }
-      appMessage.innerText = message || "";
+      let displayMessage = message || "";
+      if (currentRunId) {
+        const parts = currentRunId.split("-");
+        const prefix = parts[0] || currentRunId.slice(0, 8);
+        displayMessage = `Processing ${prefix}`;
+      }
+      appMessage.innerText = displayMessage;
       appMessage.dataset.status = status || "";
       appMessage.dataset.visible = "true";
     }
