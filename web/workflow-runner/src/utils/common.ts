@@ -89,6 +89,16 @@ export const normalize_description = (description: string | string[] | undefined
     return '';
   }
 };
+export const normalizeTimestamp = (v: unknown, fallback: number) => {
+  if (v === null || v === undefined) {
+    return fallback;
+  }
+  const n = typeof v === 'string' ? Number(v) : (v as number);
+  if (!Number.isFinite(n) || Number.isNaN(n)) {
+    return fallback;
+  }
+  return n < 1e12 ? Math.floor(n * 1000) : Math.floor(n);
+};
 export const parseCount = (v: unknown) => {
   if (Array.isArray(v)) {
     return v.length;
@@ -120,8 +130,8 @@ export const recordToUI = (rec: RunRecord, wfs: Record<string, string> = {}) => 
   const map: WorkflowRunEntryUpdate = {
     runId: run_id,
     status: status as WorkflowRunStatus,
-    createdAt: created_at ?? now,
-    updatedAt: updated_at ?? now,
+    createdAt: normalizeTimestamp(created_at, now),
+    updatedAt: normalizeTimestamp(updated_at, now),
     workflowId: workflow_id ?? null,
     workflowName: (workflow_id && wfs[workflow_id]) || 'Unknown workflow',
     error: error ?? null,
