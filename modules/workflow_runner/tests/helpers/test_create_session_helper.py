@@ -34,12 +34,11 @@ def test_create_and_set_session_cookie_success():
         return "sess-123", 999999
 
     resp = MockResponse()
-    req = MockRequest(cache={"LF_AUTH": "1"}, attr={"scheme": "https"})
+    req = MockRequest(attr={"scheme": "https"})
     sid, exp = helpers.create_and_set_session_cookie(resp, req, "u@e", create_session_fn=stub_create)
     assert sid == "sess-123"
     assert exp == 999999
     assert resp.cookies_set.get("LF_SESSION") is not None
-    assert resp.cookies_deleted and resp.cookies_deleted[0][0] == "LF_AUTH"
 
 
 def test_create_and_set_session_cookie_failure():

@@ -530,7 +530,6 @@ async def verify_controller(request: web.Request) -> web.Response:
     Asynchronous handler for POST /workflow-runner/verify endpoint.
     Validates a Google id_token using existing authentication helpers. On successful validation,
     creates a server session and sets a secure session cookie ("LF_SESSION") in the response.
-    Deletes any existing "LF_AUTH" cookie if present. Mirrors original behavior from handlers.py.
     If Google OAuth is not enabled, returns a 400 error with "oauth_not_enabled".
     If the request body is invalid JSON, returns a 400 error with "invalid_json".
     If the id_token is missing, returns a 400 error with "missing_id_token".

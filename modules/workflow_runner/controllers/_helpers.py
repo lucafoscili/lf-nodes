@@ -87,8 +87,7 @@ def create_and_set_session_cookie(resp, request, email, create_session_fn=None):
 
     Parameters:
     - resp: object providing set_cookie(name, value, ...) and del_cookie(name, ...)
-    - request: aiohttp Request-like object used to determine 'secure' and to
-               inspect cookies for LF_AUTH deletion
+    - request: aiohttp Request-like object used to determine 'secure'
     - email: str email to create session for
     - create_session_fn: optional callable(email) -> (session_id, expires_at).
                          If None, the function will import the local
@@ -140,7 +139,7 @@ def create_and_set_session_cookie(resp, request, email, create_session_fn=None):
                 secure=bool(secure_flag),
             )
 
-        # Legacy LF_AUTH support removed: only set LF_SESSION cookie here.
+    # Set LF_SESSION cookie for the created session.
     except Exception:
         LOG.exception("Failed to set session cookie")
         return session_id, expires_at
