@@ -100,8 +100,14 @@ export class WorkflowRunnerClient {
       const resp = await fetch(`${API_ROOT}/run/${encodeURIComponent(run_id)}/status`, {
         credentials: 'include',
       });
+
+      if (resp.status === 404) {
+        this.removeRun(run_id);
+        return;
+      }
+
       if (!resp || !resp.ok) {
-        console.warn('reconcileRun: fetch failed', resp?.status);
+        debugLog('reconcileRun: fetch failed', 'informational', resp?.status);
         return;
       }
       const data = await resp.json();
@@ -118,7 +124,7 @@ export class WorkflowRunnerClient {
       };
       this.upsertRun(rec);
     } catch (e) {
-      console.warn('reconcileRun error', e);
+      debugLog('reconcileRun error', 'warning', e);
       throw e;
     }
   }
@@ -126,7 +132,7 @@ export class WorkflowRunnerClient {
   private applyEvent(ev: RunRecord) {
     // Validate mandatory fields
     if (!ev || !ev.run_id || typeof ev.status === 'undefined' || ev.status === null) {
-      console.warn('applyEvent: invalid run record (missing run_id or status)', ev);
+      debugLog('applyEvent: invalid run record (missing run_id or status)', 'warning', ev);
       return;
     }
 
@@ -156,6 +162,13 @@ export class WorkflowRunnerClient {
     }
 
     this.emitUpdate();
+  }
+
+  // Remove a run completely from state and cache (used when server returns 404)
+  private removeRun(runId: string) {
+    this.runs.delete(runId);
+    this.lastSeq.delete(runId);
+    this.emitUpdate(); // triggers push to UI and saveCache
   }
 
   private processSnapshotArray(arr: RunRecord[]) {
@@ -270,7 +283,7 @@ export class WorkflowRunnerClient {
         }
       } catch (e) {
         // Normalization failed — fall back to empty items to avoid breaking the UI
-        console.warn('fetchWorkflowNames: failed to normalize response', e, data);
+        debugLog('fetchWorkflowNames: failed to normalize response', 'warning', e);
         items = [];
       }
 
@@ -286,82 +299,98 @@ export class WorkflowRunnerClient {
           if (id && name) this.workflowNames.set(id, name);
         } catch (e) {
           // be robust against malformed entries
-          console.warn('fetchWorkflowNames: skipping malformed item', it, e);
+          debugLog('fetchWorkflowNames: skipping malformed item', 'warning', e);
         }
       }
       // After populating names, emit an update so UI can re-render with names
       this.emitUpdate();
     } catch (e) {
-      console.warn('fetchWorkflowNames error', e);
+      debugLog('fetchWorkflowNames error', 'warning', e);
     }
   }
 
-  // Save active runs to localStorage for fast restore on page reload
+  // Save active runs to localStorage (IDs-only for schema stability)
   private saveCache() {
     try {
-      // Check if localStorage is available
       if (typeof localStorage === 'undefined') return;
 
-      // Only cache runs that are potentially still active or recently completed
-      const toCache: any[] = [];
-      for (const [_id, rec] of this.runs.entries()) {
-        // Cache all non-cancelled runs for now; limit total entries to 200 most recent
-        if (rec.status !== 'cancelled') {
-          toCache.push({
-            run_id: rec.run_id,
-            workflow_id: rec.workflow_id,
-            status: rec.status,
-            seq: rec.seq,
-            updated_at: rec.updated_at,
-            created_at: rec.created_at,
-            owner_id: rec.owner_id,
-            // omit result/error to keep cache small
-          });
-        }
-      }
-      // Sort by updated_at descending and keep only most recent 200
-      toCache.sort((a, b) => (b.updated_at || 0) - (a.updated_at || 0));
-      const limited = toCache.slice(0, 200);
-      localStorage.setItem(this.cacheKey, JSON.stringify(limited));
+      const ids = Array.from(this.runs.keys());
+      const payload = {
+        version: 1,
+        cached_at: Date.now(),
+        run_ids: ids.slice(-300), // cap to recent 300 runs
+      };
+      localStorage.setItem(this.cacheKey, JSON.stringify(payload));
     } catch (e) {
-      // localStorage quota exceeded or disabled; fail silently
-      console.warn('saveCache error', e);
+      debugLog('LocalStorage write skipped', 'warning', e);
     }
   }
 
-  // Load cached runs from localStorage for optimistic rendering
-  private loadCache() {
+  // Load cached run IDs (optimistic placeholders until hydrated)
+  private loadCacheIds(): string[] {
     try {
-      // Check if localStorage is available
-      if (typeof localStorage === 'undefined') return;
+      if (typeof localStorage === 'undefined') return [];
 
       const raw = localStorage.getItem(this.cacheKey);
-      if (!raw) return;
-      const arr: RunRecord[] = JSON.parse(raw);
-      // Merge cached runs using processSnapshotArray (respects seq monotonicity)
-      this.processSnapshotArray(arr);
+      if (!raw) return [];
+
+      const parsed = JSON.parse(raw);
+      if (parsed.version !== 1) return [];
+
+      // Optional expiry: ignore cache older than 60 minutes
+      const cacheAge = Date.now() - (parsed.cached_at ?? 0);
+      if (cacheAge > 60 * 60 * 1000) return [];
+
+      return Array.isArray(parsed.run_ids) ? parsed.run_ids : [];
     } catch (e) {
-      console.warn('loadCache error', e);
+      debugLog('loadCacheIds error', 'warning', e);
+      return [];
     }
+  }
+
+  // Seed placeholder entries for optimistic UI (hydrated later)
+  private seedPlaceholders(ids: string[]) {
+    for (const id of ids) {
+      if (!this.runs.has(id)) {
+        this.runs.set(id, {
+          run_id: id,
+          status: 'pending', // placeholder status; harmless until hydrated
+          seq: -1,
+          created_at: 0,
+          updated_at: 0,
+          owner_id: null,
+          workflow_id: null,
+          // no result/error
+        });
+      }
+    }
+    this.emitUpdate();
   }
 
   // Cold-load runs from server before SSE connection (restores state after refresh)
   private async coldLoadRuns(): Promise<void> {
     try {
       const resp = await fetch(
-        `${API_ROOT}/workflow-runner/runs?status=pending,running,succeeded,failed,cancelled,timeout&owner=me&limit=200`,
+        `${API_ROOT}/workflow-runner/runs?status=pending,running,succeeded,failed,cancelled,timeout&owner=me&limit=200`, // FIXME: make configurable, use constants
         { credentials: 'include' },
       );
       if (!resp || !resp.ok) {
-        console.warn('coldLoadRuns: fetch failed', resp?.status);
+        debugLog('coldLoadRuns: fetch failed', 'informational', resp?.status);
         return;
       }
       const data = await resp.json();
       const arr: RunRecord[] = (data.runs || []) as RunRecord[];
-      // merge via shared snapshot handler
+      const serverIds = new Set(arr.map((r) => r.run_id));
+
       this.processSnapshotArray(arr);
+
+      for (const localId of Array.from(this.runs.keys())) {
+        if (!serverIds.has(localId)) {
+          this.reconcileRun(localId);
+        }
+      }
     } catch (e) {
-      console.warn('coldLoadRuns error', e);
+      debugLog('coldLoadRuns error', 'warning', e);
     }
   }
 
@@ -373,9 +402,33 @@ export class WorkflowRunnerClient {
 
     this.connecting = true;
 
-    this.loadCache();
+    // 1) Load cached IDs and show placeholders
+    const cachedIds = this.loadCacheIds();
+    if (cachedIds.length > 0) {
+      this.seedPlaceholders(cachedIds);
+    }
+
+    // 2) Cold-load authoritative runs
     await this.coldLoadRuns();
 
+    // 3) Hydrate IDs that server didn't list
+    const serverIds = new Set(
+      Array.from(this.runs.keys()).filter((id) => {
+        const run = this.runs.get(id);
+        return run && run.seq >= 0; // anything we've actually hydrated
+      }),
+    );
+    for (const id of cachedIds) {
+      if (!serverIds.has(id)) {
+        this.reconcileRun(id); // 404 => removeRun
+      }
+    }
+
+    // 4) Open SSE
+    this.openSse();
+  }
+
+  private openSse() {
     const url = `${API_ROOT}/workflow-runner/events`;
 
     try {
@@ -466,7 +519,7 @@ export class WorkflowRunnerClient {
           error: payload.error,
         });
       } catch (err) {
-        console.warn('invalid run event', err);
+        debugLog('Invalid run event', 'warning', err);
       }
     });
 
@@ -476,7 +529,7 @@ export class WorkflowRunnerClient {
         const payload = JSON.parse(e.data) as any;
         this.handleQueuePayload(payload);
       } catch (err) {
-        console.warn('invalid queue event', err);
+        debugLog('Invalid queue event', 'warning', err);
       }
     });
 

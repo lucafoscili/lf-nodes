@@ -859,4 +859,381 @@ describe('workflowRunnerClient (compat tests)', () => {
     expect(rec.workflow_id).toBe('w-remote');
     expect((client as any).lastSeq.get(runId)).toBe(2);
   });
+
+  describe('404 eviction (DB reset robustness)', () => {
+    it('removes run from state and cache when server returns 404', async () => {
+      const client = new WorkflowRunnerClient(store);
+
+      // Seed cache with run A
+      const runA = { run_id: 'runA', status: 'succeeded', seq: 1 };
+      (client as any).runs.set('runA', runA);
+      (client as any).lastSeq.set('runA', 1);
+      (client as any).saveCache();
+
+      // Verify run is in cache
+      expect((client as any).runs.has('runA')).toBe(true);
+
+      // Mock fetch: coldLoadRuns returns empty, status endpoint returns 404 for runA
+      (global as any).fetch = vi.fn(async (url: string) => {
+        if (url.includes('/workflow-runner/runs')) {
+          return { ok: true, json: async () => ({ runs: [] }) };
+        }
+        if (url.endsWith('/run/runA/status')) {
+          return { status: 404, ok: false };
+        }
+        return { ok: false };
+      });
+
+      await (client as any).coldLoadRuns();
+
+      // Wait for reconcile to complete
+      const promise = (client as any).inflightReconciles.get('runA');
+      if (promise) await promise;
+
+      // Verify runA is removed from state
+      expect((client as any).runs.has('runA')).toBe(false);
+      expect((client as any).lastSeq.has('runA')).toBe(false);
+
+      // Verify cache no longer contains runA
+      const cacheRaw = localStorage.getItem((client as any).cacheKey);
+      if (cacheRaw) {
+        const cached = JSON.parse(cacheRaw);
+        expect(cached.some((r: any) => r.run_id === 'runA')).toBe(false);
+      }
+    });
+
+    it('removes only missing runs when server returns partial set', async () => {
+      const client = new WorkflowRunnerClient(store);
+
+      // Cache runs A and B
+      (client as any).runs.set('runA', { run_id: 'runA', status: 'succeeded', seq: 1 });
+      (client as any).runs.set('runB', { run_id: 'runB', status: 'succeeded', seq: 2 });
+      (client as any).lastSeq.set('runA', 1);
+      (client as any).lastSeq.set('runB', 2);
+
+      // Mock fetch: server only returns runB, runA returns 404
+      (global as any).fetch = vi.fn(async (url: string) => {
+        if (url.includes('/workflow-runner/runs')) {
+          return {
+            ok: true,
+            json: async () => ({
+              runs: [{ run_id: 'runB', status: 'succeeded', seq: 2 }],
+            }),
+          };
+        }
+        if (url.endsWith('/run/runA/status')) {
+          return { status: 404, ok: false };
+        }
+        if (url.endsWith('/run/runB/status')) {
+          return {
+            ok: true,
+            json: async () => ({ run_id: 'runB', status: 'succeeded', seq: 2 }),
+          };
+        }
+        return { ok: false };
+      });
+
+      await (client as any).coldLoadRuns();
+
+      // Wait for reconcile to complete
+      const promiseA = (client as any).inflightReconciles.get('runA');
+      if (promiseA) await promiseA;
+
+      // runA should be removed
+      expect((client as any).runs.has('runA')).toBe(false);
+      expect((client as any).lastSeq.has('runA')).toBe(false);
+
+      // runB should remain
+      expect((client as any).runs.has('runB')).toBe(true);
+      expect((client as any).runs.get('runB').status).toBe('succeeded');
+    });
+
+    it('de-dupes multiple reconcile requests for the same run', async () => {
+      const client = new WorkflowRunnerClient(store);
+      let fetchCount = 0;
+
+      (global as any).fetch = vi.fn(async (url: string) => {
+        if (url.endsWith('/run/runX/status')) {
+          fetchCount++;
+          return { status: 404, ok: false };
+        }
+        return { ok: false };
+      });
+
+      // Fire two reconcile requests quickly
+      (client as any).reconcileRun('runX');
+      (client as any).reconcileRun('runX');
+
+      // Wait for reconcile to complete
+      const promise = (client as any).inflightReconciles.get('runX');
+      if (promise) await promise;
+
+      // Should only fetch once due to de-duplication
+      expect(fetchCount).toBe(1);
+    });
+
+    it('handles mixed snapshot where some runs exist and others return 404', async () => {
+      const client = new WorkflowRunnerClient(store);
+
+      // Cache three runs
+      (client as any).runs.set('run1', { run_id: 'run1', status: 'succeeded', seq: 1 });
+      (client as any).runs.set('run2', { run_id: 'run2', status: 'succeeded', seq: 2 });
+      (client as any).runs.set('run3', { run_id: 'run3', status: 'succeeded', seq: 3 });
+      (client as any).lastSeq.set('run1', 1);
+      (client as any).lastSeq.set('run2', 2);
+      (client as any).lastSeq.set('run3', 3);
+
+      // Server returns only run2 and run3
+      (global as any).fetch = vi.fn(async (url: string) => {
+        if (url.includes('/workflow-runner/runs')) {
+          return {
+            ok: true,
+            json: async () => ({
+              runs: [
+                { run_id: 'run2', status: 'succeeded', seq: 2 },
+                { run_id: 'run3', status: 'succeeded', seq: 3 },
+              ],
+            }),
+          };
+        }
+        if (url.endsWith('/run/run1/status')) {
+          return { status: 404, ok: false };
+        }
+        if (url.endsWith('/run/run2/status')) {
+          return {
+            ok: true,
+            json: async () => ({ run_id: 'run2', status: 'succeeded', seq: 2 }),
+          };
+        }
+        if (url.endsWith('/run/run3/status')) {
+          return {
+            ok: true,
+            json: async () => ({ run_id: 'run3', status: 'succeeded', seq: 3 }),
+          };
+        }
+        return { ok: false };
+      });
+
+      await (client as any).coldLoadRuns();
+
+      // Wait for reconciles
+      const promise1 = (client as any).inflightReconciles.get('run1');
+      if (promise1) await promise1;
+
+      // run1 should be removed (404)
+      expect((client as any).runs.has('run1')).toBe(false);
+
+      // run2 and run3 should remain
+      expect((client as any).runs.has('run2')).toBe(true);
+      expect((client as any).runs.has('run3')).toBe(true);
+    });
+  });
+
+  describe('IDs-only cache + hydrate', () => {
+    it('boots with IDs-only cache and hydrates missing runs', async () => {
+      const client = new WorkflowRunnerClient(store);
+
+      // Setup cache with run IDs A and B
+      const cachePayload = {
+        version: 1,
+        cached_at: Date.now(),
+        run_ids: ['runA', 'runB'],
+      };
+      localStorage.setItem('lf-runs-cache', JSON.stringify(cachePayload));
+
+      // Mock fetch: coldLoadRuns returns only runB, runA returns 404
+      (global as any).fetch = vi.fn(async (url: string) => {
+        if (url.includes('/workflow-runner/runs')) {
+          return {
+            ok: true,
+            json: async () => ({
+              runs: [{ run_id: 'runB', status: 'succeeded', seq: 2, workflow_id: 'wf1' }],
+            }),
+          };
+        }
+        if (url.endsWith('/run/runA/status')) {
+          return { status: 404, ok: false };
+        }
+        if (url.endsWith('/run/runB/status')) {
+          return {
+            ok: true,
+            json: async () => ({ run_id: 'runB', status: 'succeeded', seq: 2 }),
+          };
+        }
+        return { ok: false };
+      });
+
+      // Mock EventSource to prevent actual SSE connection
+      const mockES = {
+        onopen: null,
+        onerror: null,
+        onmessage: null,
+        addEventListener: vi.fn(),
+        close: vi.fn(),
+      };
+      (global as any).EventSource = vi.fn(() => mockES);
+
+      await client.start();
+
+      // Wait for reconciles
+      const promiseA = (client as any).inflightReconciles.get('runA');
+      if (promiseA) await promiseA;
+
+      // runA should be removed (404)
+      expect((client as any).runs.has('runA')).toBe(false);
+
+      // runB should exist with hydrated data
+      expect((client as any).runs.has('runB')).toBe(true);
+      const runB = (client as any).runs.get('runB');
+      expect(runB.seq).toBe(2);
+      expect(runB.status).toBe('succeeded');
+    });
+
+    it('does not create duplicate hydration requests', async () => {
+      const client = new WorkflowRunnerClient(store);
+      let fetchCount = 0;
+
+      (global as any).fetch = vi.fn(async (url: string) => {
+        if (url.endsWith('/run/runX/status')) {
+          fetchCount++;
+          return {
+            ok: true,
+            json: async () => ({ run_id: 'runX', status: 'succeeded', seq: 1 }),
+          };
+        }
+        return { ok: false };
+      });
+
+      // Fire two reconcile requests quickly
+      (client as any).reconcileRun('runX');
+      (client as any).reconcileRun('runX');
+
+      // Wait for reconcile to complete
+      const promise = (client as any).inflightReconciles.get('runX');
+      if (promise) await promise;
+
+      // Should only fetch once due to de-duplication
+      expect(fetchCount).toBe(1);
+    });
+
+    it('respects cache expiry (60 minutes)', () => {
+      const client = new WorkflowRunnerClient(store);
+
+      // Setup cache that is 61 minutes old
+      const oldTimestamp = Date.now() - 61 * 60 * 1000;
+      const cachePayload = {
+        version: 1,
+        cached_at: oldTimestamp,
+        run_ids: ['runOld1', 'runOld2'],
+      };
+      localStorage.setItem('lf-runs-cache', JSON.stringify(cachePayload));
+
+      const ids = (client as any).loadCacheIds();
+
+      // Should return empty array due to expiry
+      expect(ids).toEqual([]);
+    });
+
+    it('accepts cache within expiry window', () => {
+      const client = new WorkflowRunnerClient(store);
+
+      // Setup cache that is 30 minutes old (within 60 min window)
+      const recentTimestamp = Date.now() - 30 * 60 * 1000;
+      const cachePayload = {
+        version: 1,
+        cached_at: recentTimestamp,
+        run_ids: ['runRecent1', 'runRecent2'],
+      };
+      localStorage.setItem('lf-runs-cache', JSON.stringify(cachePayload));
+
+      const ids = (client as any).loadCacheIds();
+
+      // Should return the cached IDs
+      expect(ids).toEqual(['runRecent1', 'runRecent2']);
+    });
+
+    it('ignores cache with wrong version', () => {
+      const client = new WorkflowRunnerClient(store);
+
+      const cachePayload = {
+        version: 2, // wrong version
+        cached_at: Date.now(),
+        run_ids: ['run1', 'run2'],
+      };
+      localStorage.setItem('lf-runs-cache', JSON.stringify(cachePayload));
+
+      const ids = (client as any).loadCacheIds();
+
+      // Should return empty array due to version mismatch
+      expect(ids).toEqual([]);
+    });
+
+    it('saves IDs-only after SSE event', () => {
+      const client = new WorkflowRunnerClient(store);
+
+      // Clear cache first
+      localStorage.removeItem('lf-runs-cache');
+
+      // Apply an event
+      const ev: RunRecord = {
+        run_id: 'newRun',
+        status: 'succeeded',
+        seq: 1,
+        workflow_id: 'wf1',
+      };
+      (client as any).applyEvent(ev);
+
+      // Check cache format
+      const cached = localStorage.getItem('lf-runs-cache');
+      expect(cached).toBeTruthy();
+
+      const parsed = JSON.parse(cached!);
+      expect(parsed.version).toBe(1);
+      expect(parsed.run_ids).toEqual(['newRun']);
+      expect(parsed.cached_at).toBeGreaterThan(0);
+
+      // Ensure result/error are NOT in cache
+      const cacheString = JSON.stringify(parsed);
+      expect(cacheString.includes('result')).toBe(false);
+      expect(cacheString.includes('error')).toBe(false);
+    });
+
+    it('seeds placeholders correctly', () => {
+      const client = new WorkflowRunnerClient(store);
+
+      const ids = ['ph1', 'ph2', 'ph3'];
+      (client as any).seedPlaceholders(ids);
+
+      // All should exist with placeholder status
+      expect((client as any).runs.size).toBe(3);
+      expect((client as any).runs.get('ph1').status).toBe('pending');
+      expect((client as any).runs.get('ph1').seq).toBe(-1);
+      expect((client as any).runs.get('ph2').status).toBe('pending');
+      expect((client as any).runs.get('ph3').status).toBe('pending');
+    });
+
+    it('does not overwrite existing runs when seeding placeholders', () => {
+      const client = new WorkflowRunnerClient(store);
+
+      // Add an existing run
+      (client as any).runs.set('existing', {
+        run_id: 'existing',
+        status: 'succeeded',
+        seq: 5,
+        result: { data: 'important' },
+      });
+
+      // Seed placeholders including the existing run
+      (client as any).seedPlaceholders(['existing', 'new1']);
+
+      // Existing run should not be overwritten
+      expect((client as any).runs.get('existing').status).toBe('succeeded');
+      expect((client as any).runs.get('existing').seq).toBe(5);
+      expect((client as any).runs.get('existing').result.data).toBe('important');
+
+      // New run should be placeholder
+      expect((client as any).runs.get('new1').status).toBe('pending');
+      expect((client as any).runs.get('new1').seq).toBe(-1);
+    });
+  });
 });
