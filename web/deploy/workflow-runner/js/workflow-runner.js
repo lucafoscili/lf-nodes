@@ -522,12 +522,12 @@ const createInputCell = (cell) => {
 };
 const createOutputComponent = (descriptor) => {
   const { syntax } = getLfFramework();
-  const { civitai_metadata, dataset, file_names, json, metadata, props, shape, slot_map, svg } = descriptor;
+  const { civitai_metadata, dataset, file_names, json, metadata, props, shape, slot_map, string, svg } = descriptor;
   const el = document.createElement("div");
   switch (shape) {
     case "code": {
       const p = props || {};
-      p.lfValue = svg || civitai_metadata || (file_names == null ? void 0 : file_names.join("\n")) || syntax.json.unescape(json || metadata || dataset || { message: "No output available." }).unescapedString;
+      p.lfValue = string || svg || civitai_metadata || (file_names == null ? void 0 : file_names.join("\n")) || syntax.json.unescape(json || metadata || dataset || { message: "No output available." }).unescapedString;
       const code = createComponent.code(p);
       el.appendChild(code);
       break;
@@ -1363,12 +1363,12 @@ const _getFirstOutputImageUrl = (outputs) => {
     if (!payload || typeof payload !== "object") {
       return { image: null, fallback: null };
     }
-    const { code: codeIcon, json: jsonIcon, photoX: fallback } = theme$3.get.icons();
+    const { code: codeIcon, forms: stringIcon, json: jsonIcon, photoX: fallback } = theme$3.get.icons();
     let foundImage = null;
     let fallbackCandidate = null;
     if (Array.isArray(payload.lf_output)) {
       for (const entry of payload.lf_output) {
-        const { dataset: dataset2, file_names, json, metadata, svg } = entry;
+        const { dataset: dataset2, file_names, json, metadata, string, svg } = entry;
         const image2 = _extractImageFromDataset(dataset2) ?? (file_names == null ? void 0 : file_names.find((name) => typeof name === "string" && name)) ?? null;
         if (image2) {
           foundImage = image2;
@@ -1377,6 +1377,8 @@ const _getFirstOutputImageUrl = (outputs) => {
         if (!fallbackCandidate) {
           if (typeof svg === "string" && svg) {
             fallbackCandidate = codeIcon;
+          } else if (typeof string === "string" && string) {
+            fallbackCandidate = stringIcon;
           } else if (json || metadata) {
             fallbackCandidate = jsonIcon;
           }
