@@ -57,6 +57,7 @@ To see some example workflow you can check the [example_workflows folder](exampl
       - [Method 2: Git Clone](#method-2-git-clone)
   - [Workflow Runner](#workflow-runner)
     - [Adding New Workflows](#adding-new-workflows)
+  - [Image editor](#image-editor)
   - [Notes](#notes)
   - [Contributing](#contributing)
   - [License](#license)
@@ -97,6 +98,8 @@ Set `WORKFLOW_RUNNER_ENABLED=true` to enable the runner.
 
 If you do enable it, ensure authentication/allowed-users are configured (see `docs/WORKFLOW_RUNNER.md`) to avoid unauthorised access.
 
+![Workflow Runner UI](https://github.com/lucafoscili/lucafoscili/blob/c105d85a06460433607f22e5027cfd97a75a33b4/lf-nodes/screenshots/WorkflowRunnerUI.png "Workflow Runner UI")
+
 ### Adding New Workflows
 
 To add a new workflow to the Workflow Runner, follow these steps:
@@ -126,6 +129,13 @@ To add a new workflow to the Workflow Runner, follow these steps:
    - Return structured data via `ui.lf_output` for frontend consumption
 
 **Example commit:** See commit `2fbb49e` which adds the `caption_image_vision` workflow, demonstrating all these steps including updating `LF_DisplayString` to support string outputs and frontend components to render them.
+
+## Image editor
+
+The image editor node (`LF_LoadAndEditImages`) allows users to load images from disk and perform editing operations such as inpainting, adjusting saturations, brightness, contrast, and more, all through an interactive interface.
+It's possible to select the images from the file system tree and then send them downstream to other nodes for further processing.
+
+![Load and Edit Images](https://github.com/lucafoscili/lucafoscili/blob/e59725f22c9d0c965a291fd735729d0b57166199/lf-nodes/screenshots/LoadAndEditImages.png "Load and Edit Images")
 
 ## Notes
 
