@@ -35,16 +35,8 @@ const addNotification = (store, notification) => {
 const clearResults = (store) => {
   store.getState().mutate.results(null);
 };
-const setResults = (store, results) => {
-  store.getState().mutate.results(results);
-};
-const selectRun = (store, runId, options) => {
-  const state = store.getState();
-  state.mutate.selectRun(runId);
-  const shouldClearResults = (options == null ? void 0 : options.clearResults) ?? !runId;
-  if (shouldClearResults) {
-    state.mutate.results(null);
-  }
+const setStatus$1 = (store, status, message) => {
+  store.getState().mutate.status(status, message);
 };
 const setView = (store, view) => {
   const state = store.getState();
@@ -59,8 +51,13 @@ const setRunInFlight = (store, runId) => {
   }
   state.mutate.runId(runId);
 };
-const setStatus$1 = (store, status, message) => {
-  store.getState().mutate.status(status, message);
+const selectRun = (store, runId, options) => {
+  const state = store.getState();
+  state.mutate.selectRun(runId);
+  const shouldClearResults = (options == null ? void 0 : options.clearResults) ?? !runId;
+  if (shouldClearResults) {
+    state.mutate.results(null);
+  }
 };
 const upsertRun = (store, entry) => {
   store.getState().mutate.runs.upsert(entry);
@@ -130,20 +127,16 @@ const ERROR_MESSAGES = {
 const NOTIFICATION_MESSAGES = {
   NO_WORKFLOWS_AVAILABLE: "No workflows available from the API.",
   NO_WORKFLOW_SELECTED: "No workflow selected.",
-  WORKFLOW_CANCELLED: "Workflow run cancelled.",
-  WORKFLOW_COMPLETED: "Workflow execution completed successfully.",
   WORKFLOWS_LOAD_FAILED: "Failed to load workflows."
 };
 const STATUS_MESSAGES = {
   ERROR_FETCHING_WORKFLOWS: "Error fetching workflows!",
   ERROR_RUNNING_WORKFLOW: "Error running workflow!",
   ERROR_UPLOADING_FILE: "Error uploading file!",
-  IDLE: "Idle",
   IDLE_WORKFLOWS_LOADED: "Workflows loaded",
   RUNNING_DISPATCHING_WORKFLOW: "Dispatching workflow...",
   RUNNING_INITIALIZING: "Initializing...",
   RUNNING_LOADING_WORKFLOWS: "Loading workflows...",
-  RUNNING_POLLING_WORKFLOW: "Processing workflow...",
   RUNNING_SUBMITTING_WORKFLOW: "Submitting workflow...",
   RUNNING_UPLOADING_FILE: "Uploading file..."
 };
@@ -665,6 +658,9 @@ const createHeaderSection = (store) => {
     const appMessage = elements[HEADER_CLASSES.appMessage];
     const counter = elements[HEADER_CLASSES.serverIndicatorCounter];
     const light = elements[HEADER_CLASSES.serverIndicatorLight];
+    if (!appMessage || !counter || !light) {
+      return;
+    }
     const isIdle = status === "idle";
     if (isIdle) {
       appMessage.dataset.status = current.status || "";
@@ -742,6 +738,13 @@ const masonryHandler = (e, store) => {
     }
   }
 };
+const _tryParseJson = (value) => {
+  try {
+    return JSON.parse(value);
+  } catch {
+    return null;
+  }
+};
 const deepMerge = (defs, outs) => {
   var _a, _b;
   const prep = [];
@@ -800,12 +803,25 @@ const formatTimestamp = (timestamp) => {
   }
   return date.toLocaleString();
 };
-const _tryParseJson = (value) => {
-  try {
-    return JSON.parse(value);
-  } catch {
-    return null;
-  }
+const recordToUI = (rec, wfs = {}) => {
+  var _a, _b, _c;
+  const { created_at, error, result, run_id, status, updated_at, workflow_id } = rec;
+  const now = Date.now();
+  const map = {
+    runId: run_id,
+    status,
+    createdAt: created_at ?? now,
+    updatedAt: updated_at ?? now,
+    workflowId: workflow_id ?? null,
+    workflowName: workflow_id && wfs[workflow_id] || "Unknown workflow",
+    error: error ?? null,
+    httpStatus: (result == null ? void 0 : result.http_status) ?? null,
+    resultPayload: result ?? null,
+    outputs: ((_c = (_b = (_a = result == null ? void 0 : result.body) == null ? void 0 : _a.payload) == null ? void 0 : _b.history) == null ? void 0 : _c.outputs) || null,
+    inputs: {}
+    // TODO: populate if available in rec
+  };
+  return map;
 };
 const stringifyDetail = (value) => {
   if (value === null || value === void 0) {
@@ -2213,24 +2229,60 @@ const createNotificationsSection = (store) => {
     render
   };
 };
+var __classPrivateFieldSet$1 = function(receiver, state, value, kind, f) {
+  if (kind === "m") throw new TypeError("Private method is not writable");
+  if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
+  if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
+  return kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value), value;
+};
+var __classPrivateFieldGet$1 = function(receiver, state, kind, f) {
+  if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
+  if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+  return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
+};
+var _WorkflowRunnerClient_ES, _WorkflowRunnerClient_STORE, _WorkflowRunnerClient_WORKFLOW_NAMES;
 class WorkflowRunnerClient {
-  constructor(baseUrl = "/api/lf-nodes") {
-    this.es = null;
+  constructor(store) {
+    _WorkflowRunnerClient_ES.set(this, null);
+    _WorkflowRunnerClient_STORE.set(this, void 0);
+    _WorkflowRunnerClient_WORKFLOW_NAMES.set(this, {});
     this.lastSeq = /* @__PURE__ */ new Map();
     this.runs = /* @__PURE__ */ new Map();
     this.workflowNames = /* @__PURE__ */ new Map();
-    this.onUpdate = null;
-    this.queueHandler = null;
     this.pollingInterval = 3e3;
     this.pollingTimer = null;
     this.pollAbortController = null;
     this.backoffMs = 1e3;
     this.maxBackoffMs = 3e4;
-    this.connected = false;
+    this.connecting = false;
     this.processingSnapshot = false;
     this.cacheKey = "lf-runs-cache";
     this.inflightReconciles = /* @__PURE__ */ new Map();
-    this.baseUrl = baseUrl.replace(/\/$/, "");
+    this.onUpdate = (runs) => {
+      var _a;
+      if (Object.keys(__classPrivateFieldGet$1(this, _WorkflowRunnerClient_WORKFLOW_NAMES, "f")).length === 0) {
+        const workflows = ((_a = __classPrivateFieldGet$1(this, _WorkflowRunnerClient_STORE, "f").getState().workflows) == null ? void 0 : _a.nodes) || [];
+        for (let i = 0; i < workflows.length; i++) {
+          const w = workflows[i];
+          __classPrivateFieldGet$1(this, _WorkflowRunnerClient_WORKFLOW_NAMES, "f")[w.id] = String(w.value);
+        }
+      }
+      for (const rec of runs.values()) {
+        const uiEntry = recordToUI(rec, __classPrivateFieldGet$1(this, _WorkflowRunnerClient_WORKFLOW_NAMES, "f"));
+        upsertRun(__classPrivateFieldGet$1(this, _WorkflowRunnerClient_STORE, "f"), uiEntry);
+      }
+      ensureActiveRun(__classPrivateFieldGet$1(this, _WorkflowRunnerClient_STORE, "f"));
+    };
+    this.queueHandler = (pending, running) => {
+      try {
+        const state = __classPrivateFieldGet$1(this, _WorkflowRunnerClient_STORE, "f").getState();
+        const nr = pending + running;
+        state.mutate.queuedJobs(nr);
+      } catch (e) {
+        debugLog("queueHandler error", "informational", e);
+      }
+    };
+    __classPrivateFieldSet$1(this, _WorkflowRunnerClient_STORE, store, "f");
   }
   setUpdateHandler(h) {
     this.onUpdate = h;
@@ -2263,11 +2315,11 @@ class WorkflowRunnerClient {
   }
   async _reconcileRunOnce(run_id) {
     try {
-      const resp = await fetch(`${this.baseUrl}/run/${encodeURIComponent(run_id)}/status`, {
+      const resp = await fetch(`${API_ROOT}/run/${encodeURIComponent(run_id)}/status`, {
         credentials: "include"
       });
-      if (!resp.ok) {
-        console.warn("reconcileRun: fetch failed", resp.status);
+      if (!resp || !resp.ok) {
+        console.warn("reconcileRun: fetch failed", resp == null ? void 0 : resp.status);
         return;
       }
       const data = await resp.json();
@@ -2367,8 +2419,10 @@ class WorkflowRunnerClient {
     if (needs.length === 0)
       return;
     try {
-      const resp = await fetch(`${this.baseUrl}/workflows?ids=${encodeURIComponent(needs.join(","))}`, { credentials: "include" });
-      if (!resp.ok)
+      const resp = await fetch(`${API_ROOT}/workflows?ids=${encodeURIComponent(needs.join(","))}`, {
+        credentials: "include"
+      });
+      if (!resp || !resp.ok)
         return;
       const data = await resp.json();
       let items = [];
@@ -2465,9 +2519,9 @@ class WorkflowRunnerClient {
   // Cold-load runs from server before SSE connection (restores state after refresh)
   async coldLoadRuns() {
     try {
-      const resp = await fetch(`${this.baseUrl}/workflow-runner/runs?status=pending,running,succeeded,failed,cancelled,timeout&owner=me&limit=200`, { credentials: "include" });
-      if (!resp.ok) {
-        console.warn("coldLoadRuns: fetch failed", resp.status);
+      const resp = await fetch(`${API_ROOT}/workflow-runner/runs?status=pending,running,succeeded,failed,cancelled,timeout&owner=me&limit=200`, { credentials: "include" });
+      if (!resp || !resp.ok) {
+        console.warn("coldLoadRuns: fetch failed", resp == null ? void 0 : resp.status);
         return;
       }
       const data = await resp.json();
@@ -2477,18 +2531,49 @@ class WorkflowRunnerClient {
       console.warn("coldLoadRuns error", e);
     }
   }
-  // Start SSE connection and install handlers
+  //#region SSE Connection
   async start() {
-    if (this.es)
+    if (__classPrivateFieldGet$1(this, _WorkflowRunnerClient_ES, "f") || this.connecting) {
       return;
+    }
+    this.connecting = true;
     this.loadCache();
     await this.coldLoadRuns();
-    this.buildLastEventId();
-    const url = `${this.baseUrl}/workflow-runner/events`;
-    this.es = new EventSource(url);
+    const url = `${API_ROOT}/workflow-runner/events`;
+    try {
+      __classPrivateFieldSet$1(this, _WorkflowRunnerClient_ES, new EventSource(url), "f");
+    } catch (err) {
+      __classPrivateFieldSet$1(this, _WorkflowRunnerClient_ES, EventSource(url), "f");
+    }
+    try {
+      if (__classPrivateFieldGet$1(this, _WorkflowRunnerClient_ES, "f") && typeof __classPrivateFieldGet$1(this, _WorkflowRunnerClient_ES, "f") === "object") {
+        __classPrivateFieldGet$1(this, _WorkflowRunnerClient_ES, "f").onmessage = (e) => {
+          try {
+            const payload = JSON.parse(e.data);
+            this.applyEvent({
+              run_id: payload.run_id,
+              workflow_id: payload.workflow_id,
+              status: payload.status,
+              seq: payload.seq ?? 0,
+              owner_id: payload.owner_id,
+              created_at: payload.created_at,
+              updated_at: payload.updated_at,
+              result: payload.result,
+              error: payload.error
+            });
+          } catch (err) {
+            debugLog("invalid generic event message", "informational", err);
+          }
+          if (this.processingSnapshot) {
+            this.processingSnapshot = false;
+          }
+        };
+      }
+    } catch (e) {
+      debugLog("EventSource onmessage assignment failed", "informational", e);
+    }
     this.processingSnapshot = true;
-    this.es.onopen = () => {
-      this.connected = true;
+    __classPrivateFieldGet$1(this, _WorkflowRunnerClient_ES, "f").onopen = () => {
       this.backoffMs = 1e3;
       if (this.pollingTimer) {
         clearInterval(this.pollingTimer);
@@ -2502,21 +2587,21 @@ class WorkflowRunnerClient {
         }
       }
     };
-    this.es.onerror = () => {
-      this.connected = false;
-      if (this.es) {
+    __classPrivateFieldGet$1(this, _WorkflowRunnerClient_ES, "f").onerror = () => {
+      if (__classPrivateFieldGet$1(this, _WorkflowRunnerClient_ES, "f")) {
         try {
-          this.es.close();
+          __classPrivateFieldGet$1(this, _WorkflowRunnerClient_ES, "f").close();
         } catch {
+          debugLog("EventSource close failed", "informational");
         }
-        this.es = null;
+        __classPrivateFieldSet$1(this, _WorkflowRunnerClient_ES, null, "f");
       }
       this.startPollingFallback();
       const delay = this.backoffWithJitter();
       setTimeout(() => this.start(), delay);
       this.backoffMs = Math.min(this.backoffMs * 2, this.maxBackoffMs);
     };
-    this.es.addEventListener("run", (e) => {
+    __classPrivateFieldGet$1(this, _WorkflowRunnerClient_ES, "f").addEventListener("run", (e) => {
       try {
         const payload = JSON.parse(e.data);
         this.applyEvent({
@@ -2534,7 +2619,7 @@ class WorkflowRunnerClient {
         console.warn("invalid run event", err);
       }
     });
-    this.es.addEventListener("queue", (e) => {
+    __classPrivateFieldGet$1(this, _WorkflowRunnerClient_ES, "f").addEventListener("queue", (e) => {
       try {
         const payload = JSON.parse(e.data);
         this.handleQueuePayload(payload);
@@ -2542,19 +2627,19 @@ class WorkflowRunnerClient {
         console.warn("invalid queue event", err);
       }
     });
+    this.connecting = false;
   }
-  // Exposed for testing: handle a parsed queue payload from SSE. This will
-  // call the registered queueHandler for queue_status snapshots, or fall
-  // back to applying a run-like payload when appropriate.
   handleQueuePayload(payload) {
-    if (!payload)
+    if (!payload) {
       return;
+    }
     try {
       if (payload && (payload.type === "queue_status" || typeof payload.pending === "number")) {
         const pending = Number(payload.pending || 0) || 0;
         const running = Number(payload.running || 0) || 0;
-        if (this.queueHandler)
+        if (this.queueHandler) {
           this.queueHandler(pending, running);
+        }
         return;
       }
       if (payload && (payload.run_id || payload.status || payload.seq !== void 0)) {
@@ -2571,36 +2656,42 @@ class WorkflowRunnerClient {
         });
       }
     } catch (e) {
-      console.warn("handleQueuePayload error", e);
+      debugLog("handleQueuePayload error", "warning", e);
     }
-    this.es.onmessage = (e) => {
-      try {
-        const payload2 = JSON.parse(e.data);
-        this.applyEvent({
-          run_id: payload2.run_id,
-          workflow_id: payload2.workflow_id,
-          status: payload2.status,
-          seq: payload2.seq ?? 0,
-          owner_id: payload2.owner_id,
-          created_at: payload2.created_at,
-          updated_at: payload2.updated_at,
-          result: payload2.result,
-          error: payload2.error
-        });
-      } catch (err) {
+    try {
+      if (__classPrivateFieldGet$1(this, _WorkflowRunnerClient_ES, "f") && typeof __classPrivateFieldGet$1(this, _WorkflowRunnerClient_ES, "f") === "object") {
+        __classPrivateFieldGet$1(this, _WorkflowRunnerClient_ES, "f").onmessage = (e) => {
+          try {
+            const payload2 = JSON.parse(e.data);
+            this.applyEvent({
+              run_id: payload2.run_id,
+              workflow_id: payload2.workflow_id,
+              status: payload2.status,
+              seq: payload2.seq ?? 0,
+              owner_id: payload2.owner_id,
+              created_at: payload2.created_at,
+              updated_at: payload2.updated_at,
+              result: payload2.result,
+              error: payload2.error
+            });
+          } catch (err) {
+          }
+          if (this.processingSnapshot) {
+            this.processingSnapshot = false;
+          }
+        };
       }
-      if (this.processingSnapshot) {
-        this.processingSnapshot = false;
-      }
-    };
+    } catch (e) {
+      debugLog("EventSource onmessage reassignment failed", "informational", e);
+    }
   }
   stop() {
-    if (this.es) {
+    if (__classPrivateFieldGet$1(this, _WorkflowRunnerClient_ES, "f")) {
       try {
-        this.es.close();
+        __classPrivateFieldGet$1(this, _WorkflowRunnerClient_ES, "f").close();
       } catch {
       }
-      this.es = null;
+      __classPrivateFieldSet$1(this, _WorkflowRunnerClient_ES, null, "f");
     }
     if (this.pollingTimer) {
       clearInterval(this.pollingTimer);
@@ -2614,22 +2705,10 @@ class WorkflowRunnerClient {
       this.pollAbortController = null;
     }
   }
-  buildLastEventId() {
-    let maxRun = null;
-    let maxSeq = -1;
-    for (const [run, seq] of this.lastSeq.entries()) {
-      if (seq > maxSeq) {
-        maxSeq = seq;
-        maxRun = run;
-      }
-    }
-    if (!maxRun)
-      return null;
-    return `${maxRun}:${maxSeq}`;
-  }
   startPollingFallback() {
-    if (this.pollingTimer)
+    if (this.pollingTimer) {
       return;
+    }
     this.pollingTimer = setInterval(() => this.pollActiveRuns(), this.pollingInterval);
     this.pollActiveRuns();
   }
@@ -2644,54 +2723,30 @@ class WorkflowRunnerClient {
       }
       const ac = new AbortController();
       this.pollAbortController = ac;
-      const resp = await fetch(`${this.baseUrl}/workflow-runner/runs?status=pending,running&owner=me&limit=200`, { signal: ac.signal, credentials: "include" });
-      if (!resp.ok)
+      const resp = await fetch(`${API_ROOT}/workflow-runner/runs?status=pending,running&owner=me&limit=200`, { signal: ac.signal, credentials: "include" });
+      if (!resp.ok) {
         return;
+      }
       const data = await resp.json();
       const arr = data.runs || [];
       this.processSnapshotArray(arr);
-      if (this.pollAbortController === ac)
+      if (this.pollAbortController === ac) {
         this.pollAbortController = null;
+      }
     } catch (e) {
       if (e && (e.name === "AbortError" || e.code === "ABORT_ERR") || e instanceof DOMException && e.name === "AbortError") ;
       else {
-        console.warn("pollActiveRuns error", e);
+        debugLog("pollActiveRuns error", "warning", e);
       }
     }
   }
-  // return a backoff delay in ms with jitter applied (randomized between 50% and 100% of backoffMs)
   backoffWithJitter() {
     const base = this.backoffMs;
     const jitterFactor = 0.5 + Math.random() * 0.5;
     return Math.floor(base * jitterFactor);
   }
 }
-function mapRunRecordToUi(rec, workflowNames) {
-  var _a;
-  const now = Date.now();
-  return {
-    runId: rec.run_id,
-    status: rec.status,
-    // WorkflowRunStatus is compatible
-    createdAt: rec.created_at ?? now,
-    updatedAt: rec.updated_at ?? now,
-    workflowId: rec.workflow_id ?? null,
-    workflowName: rec.workflow_id && (workflowNames == null ? void 0 : workflowNames.get(rec.workflow_id)) || "Unnamed Workflow",
-    error: rec.error ?? null,
-    httpStatus: ((_a = rec.result) == null ? void 0 : _a.http_status) ?? null,
-    resultPayload: rec.result ?? null,
-    outputs: extractRunOutputs(rec),
-    inputs: {}
-    // TODO: populate if available in rec
-  };
-}
-function extractRunOutputs(rec) {
-  var _a, _b, _c, _d;
-  const outputs = (_d = (_c = (_b = (_a = rec.result) == null ? void 0 : _a.body) == null ? void 0 : _b.payload) == null ? void 0 : _c.history) == null ? void 0 : _d.outputs;
-  if (!outputs)
-    return null;
-  return { ...outputs };
-}
+_WorkflowRunnerClient_ES = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_STORE = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_WORKFLOW_NAMES = /* @__PURE__ */ new WeakMap();
 const RUN_PARAM = "runId";
 const VIEW_PARAM = "view";
 const WORKFLOW_PARAM = "workflowId";
@@ -2901,152 +2956,6 @@ const normalizeRoute = (route, state) => {
   return {
     route: normalizedRoute,
     clearResults: clearResults2
-  };
-};
-const _coerceTimestamp = (value, fallback) => {
-  if (typeof value === "number" && Number.isFinite(value)) {
-    return value > 1e12 ? Math.round(value) : Math.round(value * 1e3);
-  }
-  return fallback;
-};
-const _extractRunOutputs = (response) => {
-  var _a, _b, _c, _d;
-  const outputs = (_d = (_c = (_b = (_a = response.result) == null ? void 0 : _a.body) == null ? void 0 : _b.payload) == null ? void 0 : _c.history) == null ? void 0 : _d.outputs;
-  if (!outputs) {
-    return null;
-  }
-  return { ...outputs };
-};
-const createRunLifecycle = ({ setInputStatus, store }) => {
-  const { WORKFLOW_COMPLETED, WORKFLOW_CANCELLED } = NOTIFICATION_MESSAGES;
-  const updateProgress = (response) => {
-    var _a;
-    const now = Date.now();
-    upsertRun(store, {
-      runId: response.run_id,
-      createdAt: _coerceTimestamp(response.created_at, now),
-      updatedAt: now,
-      status: response.status,
-      error: response.error ?? null,
-      httpStatus: ((_a = response.result) == null ? void 0 : _a.http_status) ?? null,
-      resultPayload: response.result ?? null
-    });
-  };
-  const handleRunSuccess = (response) => {
-    var _a;
-    const runId = response.run_id;
-    const outputs = _extractRunOutputs(response);
-    const now = Date.now();
-    upsertRun(store, {
-      runId,
-      createdAt: _coerceTimestamp(response.created_at, now),
-      updatedAt: now,
-      status: "succeeded",
-      error: null,
-      outputs,
-      httpStatus: ((_a = response.result) == null ? void 0 : _a.http_status) ?? null,
-      resultPayload: response.result ?? null
-    });
-    setResults(store, outputs);
-    addNotification(store, {
-      id: performance.now().toString(),
-      message: WORKFLOW_COMPLETED,
-      status: "success"
-    });
-    setStatus$1(store, "idle", STATUS_MESSAGES.IDLE);
-  };
-  const handleRunFailure = (response) => {
-    var _a, _b, _c, _d, _e, _f;
-    const payload = (_b = (_a = response.result) == null ? void 0 : _a.body) == null ? void 0 : _b.payload;
-    const runId = response.run_id;
-    const rawDetail = (payload == null ? void 0 : payload.detail) ?? ((_c = payload == null ? void 0 : payload.error) == null ? void 0 : _c.message) ?? response.error ?? STATUS_MESSAGES.ERROR_RUNNING_WORKFLOW;
-    const detail = typeof rawDetail === "string" ? rawDetail : rawDetail ? (() => {
-      try {
-        return JSON.stringify(rawDetail);
-      } catch {
-        return String(rawDetail);
-      }
-    })() : STATUS_MESSAGES.ERROR_RUNNING_WORKFLOW;
-    const outputs = _extractRunOutputs(response);
-    const now = Date.now();
-    const hasInputError = Boolean((_d = payload == null ? void 0 : payload.error) == null ? void 0 : _d.input);
-    upsertRun(store, {
-      runId,
-      createdAt: _coerceTimestamp(response.created_at, now),
-      updatedAt: now,
-      status: "failed",
-      error: detail,
-      outputs,
-      httpStatus: ((_e = response.result) == null ? void 0 : _e.http_status) ?? null,
-      resultPayload: response.result ?? null
-    });
-    if (hasInputError) {
-      if ((_f = payload == null ? void 0 : payload.error) == null ? void 0 : _f.input) {
-        setInputStatus == null ? void 0 : setInputStatus(payload.error.input, "error");
-      }
-    } else {
-      setResults(store, outputs);
-    }
-    addNotification(store, {
-      id: performance.now().toString(),
-      message: `Workflow run failed: ${detail}`,
-      status: "danger"
-    });
-    setStatus$1(store, "error", STATUS_MESSAGES.ERROR_RUNNING_WORKFLOW);
-  };
-  const handleRunCancellation = (response) => {
-    var _a;
-    const runId = response.run_id;
-    const outputs = _extractRunOutputs(response);
-    const message = response.error || WORKFLOW_CANCELLED;
-    const now = Date.now();
-    upsertRun(store, {
-      runId,
-      createdAt: _coerceTimestamp(response.created_at, now),
-      updatedAt: now,
-      status: "cancelled",
-      error: message,
-      outputs,
-      httpStatus: ((_a = response.result) == null ? void 0 : _a.http_status) ?? null,
-      resultPayload: response.result ?? null
-    });
-    setResults(store, outputs);
-    addNotification(store, {
-      id: performance.now().toString(),
-      message,
-      status: "warning"
-    });
-    setStatus$1(store, "idle", STATUS_MESSAGES.IDLE);
-  };
-  const handleStatusResponse = (response) => {
-    const state = store.getState();
-    updateProgress(response);
-    const { status } = response;
-    switch (status) {
-      case "cancelled":
-        handleRunCancellation(response);
-        break;
-      case "failed":
-        handleRunFailure(response);
-        break;
-      case "pending":
-      case "running":
-        if (state.current.status !== "running" || state.current.message !== STATUS_MESSAGES.RUNNING_POLLING_WORKFLOW) ;
-        break;
-      case "succeeded":
-        handleRunSuccess(response);
-        break;
-    }
-    if (status === "succeeded" || status === "failed" || status === "cancelled") {
-      setRunInFlight(store, null);
-      ensureActiveRun(store);
-      return { shouldStopPolling: true };
-    }
-    return { shouldStopPolling: false };
-  };
-  return {
-    handleStatusResponse,
-    updateProgress
   };
 };
 const INIT_ERROR = "Mutate not initialized";
@@ -3288,7 +3197,7 @@ var __classPrivateFieldGet = function(receiver, state, kind, f) {
   if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 };
-var _LfWorkflowRunnerManager_instances, _LfWorkflowRunnerManager_APP_ROOT, _LfWorkflowRunnerManager_CLIENT, _LfWorkflowRunnerManager_DISPATCHERS, _LfWorkflowRunnerManager_FRAMEWORK, _LfWorkflowRunnerManager_ROUTING, _LfWorkflowRunnerManager_RUN_LIFECYCLE, _LfWorkflowRunnerManager_SECTIONS, _LfWorkflowRunnerManager_STORE, _LfWorkflowRunnerManager_UI_REGISTRY, _LfWorkflowRunnerManager_WORKFLOW_NAMES, _LfWorkflowRunnerManager_initializeFramework, _LfWorkflowRunnerManager_initializeLayout, _LfWorkflowRunnerManager_loadWorkflows, _LfWorkflowRunnerManager_preloadWorkflowNames, _LfWorkflowRunnerManager_setInputStatus, _LfWorkflowRunnerManager_subscribeToState;
+var _LfWorkflowRunnerManager_instances, _LfWorkflowRunnerManager_APP_ROOT, _LfWorkflowRunnerManager_CLIENT, _LfWorkflowRunnerManager_DISPATCHERS, _LfWorkflowRunnerManager_FRAMEWORK, _LfWorkflowRunnerManager_ROUTING, _LfWorkflowRunnerManager_SECTIONS, _LfWorkflowRunnerManager_STORE, _LfWorkflowRunnerManager_UI_REGISTRY, _LfWorkflowRunnerManager_initializeFramework, _LfWorkflowRunnerManager_initializeLayout, _LfWorkflowRunnerManager_loadWorkflows, _LfWorkflowRunnerManager_subscribeToState;
 class LfWorkflowRunnerManager {
   constructor() {
     _LfWorkflowRunnerManager_instances.add(this);
@@ -3297,11 +3206,9 @@ class LfWorkflowRunnerManager {
     _LfWorkflowRunnerManager_DISPATCHERS.set(this, void 0);
     _LfWorkflowRunnerManager_FRAMEWORK.set(this, getLfFramework());
     _LfWorkflowRunnerManager_ROUTING.set(this, void 0);
-    _LfWorkflowRunnerManager_RUN_LIFECYCLE.set(this, void 0);
     _LfWorkflowRunnerManager_SECTIONS.set(this, void 0);
     _LfWorkflowRunnerManager_STORE.set(this, void 0);
     _LfWorkflowRunnerManager_UI_REGISTRY.set(this, /* @__PURE__ */ new WeakMap());
-    _LfWorkflowRunnerManager_WORKFLOW_NAMES.set(this, /* @__PURE__ */ new Map());
     _LfWorkflowRunnerManager_loadWorkflows.set(this, async () => {
       var _a;
       const { NO_WORKFLOWS_AVAILABLE } = NOTIFICATION_MESSAGES;
@@ -3449,7 +3356,16 @@ class LfWorkflowRunnerManager {
     const { ERROR_FETCHING_WORKFLOWS, IDLE_WORKFLOWS_LOADED, RUNNING_INITIALIZING, RUNNING_LOADING_WORKFLOWS } = STATUS_MESSAGES;
     const { WORKFLOWS_LOAD_FAILED } = NOTIFICATION_MESSAGES;
     __classPrivateFieldSet(this, _LfWorkflowRunnerManager_APP_ROOT, document.querySelector("#app"), "f");
+    if (!__classPrivateFieldGet(this, _LfWorkflowRunnerManager_APP_ROOT, "f")) {
+      const fallback = document.createElement("div");
+      fallback.id = "app";
+      if (document.body) {
+        document.body.appendChild(fallback);
+      }
+      __classPrivateFieldSet(this, _LfWorkflowRunnerManager_APP_ROOT, fallback, "f");
+    }
     __classPrivateFieldSet(this, _LfWorkflowRunnerManager_STORE, createWorkflowRunnerStore(initState()), "f");
+    __classPrivateFieldSet(this, _LfWorkflowRunnerManager_CLIENT, new WorkflowRunnerClient(__classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f")), "f");
     __classPrivateFieldSet(this, _LfWorkflowRunnerManager_DISPATCHERS, {
       runWorkflow: () => workflowDispatcher(__classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f"))
     }, "f");
@@ -3461,28 +3377,7 @@ class LfWorkflowRunnerManager {
       main: createMainSection(__classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f")),
       notifications: createNotificationsSection(__classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f"))
     }, "f");
-    __classPrivateFieldSet(this, _LfWorkflowRunnerManager_RUN_LIFECYCLE, createRunLifecycle({
-      store: __classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f"),
-      setInputStatus: (inputId, status) => {
-        __classPrivateFieldGet(this, _LfWorkflowRunnerManager_instances, "m", _LfWorkflowRunnerManager_setInputStatus).call(this, inputId, status);
-      }
-    }), "f");
     __classPrivateFieldSet(this, _LfWorkflowRunnerManager_ROUTING, createRoutingController({ store: __classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f") }), "f");
-    __classPrivateFieldSet(this, _LfWorkflowRunnerManager_CLIENT, new WorkflowRunnerClient("/api/lf-nodes"), "f");
-    __classPrivateFieldGet(this, _LfWorkflowRunnerManager_CLIENT, "f").setUpdateHandler((runs) => {
-      for (const rec of runs.values()) {
-        const uiEntry = mapRunRecordToUi(rec, __classPrivateFieldGet(this, _LfWorkflowRunnerManager_WORKFLOW_NAMES, "f"));
-        upsertRun(__classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f"), uiEntry);
-      }
-      ensureActiveRun(__classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f"));
-    });
-    __classPrivateFieldGet(this, _LfWorkflowRunnerManager_CLIENT, "f").setQueueHandler((pending, _running) => {
-      try {
-        const state2 = __classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f").getState();
-        state2.mutate.queuedJobs(pending ?? 0);
-      } catch (e) {
-      }
-    });
     const state = __classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f").getState();
     state.mutate.manager(this);
     __classPrivateFieldGet(this, _LfWorkflowRunnerManager_ROUTING, "f").initialize();
@@ -3492,16 +3387,15 @@ class LfWorkflowRunnerManager {
     __classPrivateFieldGet(this, _LfWorkflowRunnerManager_instances, "m", _LfWorkflowRunnerManager_subscribeToState).call(this);
     state.mutate.status("running", RUNNING_LOADING_WORKFLOWS);
     __classPrivateFieldGet(this, _LfWorkflowRunnerManager_loadWorkflows, "f").call(this).catch((error) => {
-      state.mutate.notifications.add({
+      addNotification(__classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f"), {
         id: performance.now().toString(),
         message: error instanceof Error ? error.message : WORKFLOWS_LOAD_FAILED,
         status: "danger"
       });
-      state.mutate.status("error", ERROR_FETCHING_WORKFLOWS);
+      setStatus$1(__classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f"), "error", ERROR_FETCHING_WORKFLOWS);
     }).then(() => {
-      state.mutate.status("idle", IDLE_WORKFLOWS_LOADED);
+      setStatus$1(__classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f"), "idle", IDLE_WORKFLOWS_LOADED);
       __classPrivateFieldGet(this, _LfWorkflowRunnerManager_ROUTING, "f").updateRouteFromState();
-      __classPrivateFieldGet(this, _LfWorkflowRunnerManager_instances, "m", _LfWorkflowRunnerManager_preloadWorkflowNames).call(this);
       __classPrivateFieldGet(this, _LfWorkflowRunnerManager_CLIENT, "f").start();
     });
   }
@@ -3510,6 +3404,9 @@ class LfWorkflowRunnerManager {
   getAppRoot() {
     return __classPrivateFieldGet(this, _LfWorkflowRunnerManager_APP_ROOT, "f");
   }
+  getClient() {
+    return __classPrivateFieldGet(this, _LfWorkflowRunnerManager_CLIENT, "f");
+  }
   getDispatchers() {
     return __classPrivateFieldGet(this, _LfWorkflowRunnerManager_DISPATCHERS, "f");
   }
@@ -3517,7 +3414,7 @@ class LfWorkflowRunnerManager {
     return __classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f");
   }
 }
-_LfWorkflowRunnerManager_APP_ROOT = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_CLIENT = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_DISPATCHERS = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_FRAMEWORK = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_ROUTING = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_RUN_LIFECYCLE = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_SECTIONS = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_STORE = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_UI_REGISTRY = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_WORKFLOW_NAMES = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_loadWorkflows = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_instances = /* @__PURE__ */ new WeakSet(), _LfWorkflowRunnerManager_initializeFramework = function _LfWorkflowRunnerManager_initializeFramework2() {
+_LfWorkflowRunnerManager_APP_ROOT = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_CLIENT = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_DISPATCHERS = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_FRAMEWORK = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_ROUTING = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_SECTIONS = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_STORE = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_UI_REGISTRY = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_loadWorkflows = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_instances = /* @__PURE__ */ new WeakSet(), _LfWorkflowRunnerManager_initializeFramework = function _LfWorkflowRunnerManager_initializeFramework2() {
   const assetsUrl = buildAssetsUrl();
   __classPrivateFieldGet(this, _LfWorkflowRunnerManager_FRAMEWORK, "f").assets.set(assetsUrl);
   __classPrivateFieldGet(this, _LfWorkflowRunnerManager_FRAMEWORK, "f").theme.set(DEFAULT_THEME);
@@ -3534,24 +3431,6 @@ _LfWorkflowRunnerManager_APP_ROOT = /* @__PURE__ */ new WeakMap(), _LfWorkflowRu
   if (state.isDebug) {
     __classPrivateFieldGet(this, _LfWorkflowRunnerManager_SECTIONS, "f").dev.mount();
     __classPrivateFieldGet(this, _LfWorkflowRunnerManager_SECTIONS, "f").dev.render();
-  }
-}, _LfWorkflowRunnerManager_preloadWorkflowNames = function _LfWorkflowRunnerManager_preloadWorkflowNames2() {
-  var _a;
-  const state = __classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f").getState();
-  const workflows = ((_a = state.workflows) == null ? void 0 : _a.nodes) || [];
-  for (const node of workflows) {
-    if (node.id && node.name) {
-      __classPrivateFieldGet(this, _LfWorkflowRunnerManager_WORKFLOW_NAMES, "f").set(node.id, node.name);
-    }
-  }
-  __classPrivateFieldGet(this, _LfWorkflowRunnerManager_CLIENT, "f").setWorkflowNames(__classPrivateFieldGet(this, _LfWorkflowRunnerManager_WORKFLOW_NAMES, "f"));
-}, _LfWorkflowRunnerManager_setInputStatus = function _LfWorkflowRunnerManager_setInputStatus2(inputId, status) {
-  const elements = this.uiRegistry.get();
-  const cells = (elements == null ? void 0 : elements[INPUTS_CLASSES.cells]) || [];
-  const cell = cells.find((el) => el.id === inputId);
-  const wrapper = cell == null ? void 0 : cell.parentElement;
-  if (wrapper) {
-    wrapper.dataset.status = status;
   }
 }, _LfWorkflowRunnerManager_subscribeToState = function _LfWorkflowRunnerManager_subscribeToState2() {
   var _a, _b, _c;
