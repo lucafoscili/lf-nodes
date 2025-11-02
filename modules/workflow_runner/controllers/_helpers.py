@@ -2,6 +2,7 @@ import logging
 import json
 import asyncio
 from aiohttp import web
+from typing import Optional
 
 LOG = logging.getLogger(__name__)
 
@@ -139,13 +140,7 @@ def create_and_set_session_cookie(resp, request, email, create_session_fn=None):
                 secure=bool(secure_flag),
             )
 
-        # Remove legacy LF_AUTH cookie when present
-        try:
-            cookies = getattr(request, "cookies", None) or {}
-            if cookies.get("LF_AUTH"):
-                resp.del_cookie("LF_AUTH", path="/api/lf-nodes/")
-        except Exception:
-            LOG.debug("Failed to inspect/delete LF_AUTH cookie", exc_info=True)
+        # Legacy LF_AUTH support removed: only set LF_SESSION cookie here.
     except Exception:
         LOG.exception("Failed to set session cookie")
         return session_id, expires_at
@@ -224,3 +219,30 @@ def serialize_job(job, include_result_for_terminal: bool = False) -> dict:
     except Exception:
         LOG.exception("serialize_job: failed to serialize job")
         return {}
+
+
+def parse_last_event_id(header: Optional[str]) -> Optional[tuple[str, int]]:
+    """Parse Last-Event-ID header into (run_id, seq) or return None.
+
+    Accepts values like "run-123:45" or just "run-123" (seq defaults to 0).
+    Returns None for malformed inputs or non-string headers.
+    """
+    try:
+        if not header or not isinstance(header, str):
+            return None
+        header = header.strip()
+        if not header:
+            return None
+        parts = header.split(":", 1)
+        if len(parts) == 1:
+            return (parts[0], 0)
+        run_id = parts[0]
+        seq_raw = parts[1]
+        try:
+            seq = int(seq_raw)
+        except Exception:
+            return None
+        return (run_id, seq)
+    except Exception:
+        LOG.debug("parse_last_event_id: failed to parse header", exc_info=True)
+        return None

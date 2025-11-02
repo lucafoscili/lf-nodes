@@ -169,14 +169,13 @@ async def stream_runs_controller(request: web.Request) -> web.Response:
 
     # examine Last-Event-ID header for resume semantics. Expect format '<run_id>:<seq>'
     last_event_header = request.headers.get("Last-Event-ID")
-    last_event: tuple[str, int] | None = None
-    if last_event_header:
-        try:
-            parts = last_event_header.split(":", 1)
-            if len(parts) == 2:
-                last_event = (parts[0], int(parts[1]))
-        except Exception:
-            last_event = None
+    # centralized parsing helper handles validation and malformed inputs
+    try:
+        from ._helpers import parse_last_event_id
+
+        last_event = parse_last_event_id(last_event_header)
+    except Exception:
+        last_event = None
 
     await resp.prepare(request)
 
