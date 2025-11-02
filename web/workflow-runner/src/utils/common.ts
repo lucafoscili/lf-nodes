@@ -113,7 +113,7 @@ export const formatTimestamp = (timestamp: number) => {
   }
   return date.toLocaleString();
 };
-export const recordToUI = (rec: RunRecord, workflowNames?: Map<string, string>) => {
+export const recordToUI = (rec: RunRecord, wfs: Record<string, string> = {}) => {
   const { created_at, error, result, run_id, status, updated_at, workflow_id } = rec;
 
   const now = Date.now();
@@ -123,7 +123,7 @@ export const recordToUI = (rec: RunRecord, workflowNames?: Map<string, string>) 
     createdAt: created_at ?? now,
     updatedAt: updated_at ?? now,
     workflowId: workflow_id ?? null,
-    workflowName: (workflow_id && workflowNames?.get(workflow_id)) || 'Unnamed Workflow',
+    workflowName: (workflow_id && wfs[workflow_id]) || 'Unknown workflow',
     error: error ?? null,
     httpStatus: result?.http_status ?? null,
     resultPayload: result ?? null,

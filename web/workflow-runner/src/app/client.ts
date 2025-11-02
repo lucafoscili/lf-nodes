@@ -6,20 +6,18 @@ import { debugLog } from '../utils/debug';
 import { ensureActiveRun, upsertRun } from './store-actions';
 
 export class WorkflowRunnerClient {
+  #ES: EventSource | null = null;
   #STORE: WorkflowStore;
-  private es: EventSource | null = null;
+  #WORKFLOW_NAMES: Record<string, string> = {};
+
   private lastSeq: Map<string, number> = new Map();
   private runs: Map<string, RunRecord> = new Map();
   private workflowNames: Map<string, string> = new Map();
-  // optional queue status handler: (pending, running) => void
-  private pollingInterval = 3000; // ms
+  private pollingInterval = 3000; // FIXME: make configurable
   private pollingTimer: any = null;
   private pollAbortController: AbortController | null = null;
   private backoffMs = 1000;
   private maxBackoffMs = 30000;
-  private connected = false;
-  // Guard to prevent concurrent start() invocations from creating multiple
-  // EventSource instances in racey test environments or during reconnects.
   private connecting = false;
   private processingSnapshot = false;
   private cacheKey = 'lf-runs-cache';
@@ -30,8 +28,16 @@ export class WorkflowRunnerClient {
   }
 
   onUpdate = (runs: Map<string, RunRecord>) => {
+    if (Object.keys(this.#WORKFLOW_NAMES).length === 0) {
+      const workflows = this.#STORE.getState().workflows?.nodes || [];
+      for (let i = 0; i < workflows.length; i++) {
+        const w = workflows[i];
+        this.#WORKFLOW_NAMES[w.id] = String(w.value);
+      }
+    }
+
     for (const rec of runs.values()) {
-      const uiEntry = recordToUI(rec);
+      const uiEntry = recordToUI(rec, this.#WORKFLOW_NAMES);
       upsertRun(this.#STORE, uiEntry);
     }
 
@@ -361,7 +367,7 @@ export class WorkflowRunnerClient {
 
   //#region SSE Connection
   async start() {
-    if (this.es || this.connecting) {
+    if (this.#ES || this.connecting) {
       return;
     }
 
@@ -373,14 +379,14 @@ export class WorkflowRunnerClient {
     const url = `${API_ROOT}/workflow-runner/events`;
 
     try {
-      this.es = new EventSource(url);
+      this.#ES = new EventSource(url);
     } catch (err) {
-      this.es = (EventSource as any)(url); // FIXME: workaround for some test environments
+      this.#ES = (EventSource as any)(url); // FIXME: workaround for some test environments
     }
 
     try {
-      if (this.es && typeof this.es === 'object') {
-        this.es.onmessage = (e: MessageEvent) => {
+      if (this.#ES && typeof this.#ES === 'object') {
+        this.#ES.onmessage = (e: MessageEvent) => {
           try {
             const payload = JSON.parse(e.data) as EventPayload;
             this.applyEvent({
@@ -409,8 +415,7 @@ export class WorkflowRunnerClient {
 
     this.processingSnapshot = true;
 
-    this.es.onopen = () => {
-      this.connected = true;
+    this.#ES.onopen = () => {
       this.backoffMs = 1000; // FIXME: make configurable
 
       if (this.pollingTimer) {
@@ -428,16 +433,14 @@ export class WorkflowRunnerClient {
       }
     };
 
-    this.es.onerror = () => {
-      this.connected = false;
-
-      if (this.es) {
+    this.#ES.onerror = () => {
+      if (this.#ES) {
         try {
-          this.es.close();
+          this.#ES.close();
         } catch {
           debugLog('EventSource close failed', 'informational');
         }
-        this.es = null;
+        this.#ES = null;
       }
       this.startPollingFallback();
 
@@ -446,7 +449,7 @@ export class WorkflowRunnerClient {
       this.backoffMs = Math.min(this.backoffMs * 2, this.maxBackoffMs);
     };
 
-    this.es.addEventListener('run', (e: MessageEvent) => {
+    this.#ES.addEventListener('run', (e: MessageEvent) => {
       // FIXME: declare name as constant
       try {
         const payload = JSON.parse(e.data) as EventPayload;
@@ -467,7 +470,7 @@ export class WorkflowRunnerClient {
       }
     });
 
-    this.es.addEventListener('queue', (e: MessageEvent) => {
+    this.#ES.addEventListener('queue', (e: MessageEvent) => {
       // FIXME: declare name as constant
       try {
         const payload = JSON.parse(e.data) as any;
@@ -514,8 +517,8 @@ export class WorkflowRunnerClient {
     }
 
     try {
-      if (this.es && typeof this.es === 'object') {
-        this.es.onmessage = (e: MessageEvent) => {
+      if (this.#ES && typeof this.#ES === 'object') {
+        this.#ES.onmessage = (e: MessageEvent) => {
           try {
             const payload = JSON.parse(e.data) as EventPayload;
 
@@ -545,11 +548,11 @@ export class WorkflowRunnerClient {
   }
 
   stop() {
-    if (this.es) {
+    if (this.#ES) {
       try {
-        this.es.close();
+        this.#ES.close();
       } catch {}
-      this.es = null;
+      this.#ES = null;
     }
 
     if (this.pollingTimer) {

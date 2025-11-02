@@ -32,7 +32,7 @@ import { createRoutingController } from './routing';
 import { changeView, resolveMainSections } from './sections';
 import { initState } from './state';
 import { createWorkflowRunnerStore } from './store';
-import { addNotification, selectRun } from './store-actions';
+import { addNotification, selectRun, setStatus } from './store-actions';
 
 export class LfWorkflowRunnerManager implements WorkflowManager {
   //#region Initialization
@@ -106,10 +106,10 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
           message: error instanceof Error ? error.message : WORKFLOWS_LOAD_FAILED,
           status: 'danger',
         });
-        state.mutate.status('error', ERROR_FETCHING_WORKFLOWS);
+        setStatus(this.#STORE, 'error', ERROR_FETCHING_WORKFLOWS);
       })
       .then(() => {
-        state.mutate.status('idle', IDLE_WORKFLOWS_LOADED);
+        setStatus(this.#STORE, 'idle', IDLE_WORKFLOWS_LOADED);
         this.#ROUTING.updateRouteFromState();
         this.#CLIENT.start();
       });
