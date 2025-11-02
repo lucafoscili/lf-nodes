@@ -1,33 +1,84 @@
 # region handle_response
 def handle_response(response: dict, method: str = "GET"):
     """
-    Handles the response from a Language Model (LLM) endpoint.
+    Handles the response from a Language Model (LLM) endpoint and tries to
+    extract a human-usable string result from common response shapes.
 
-    Args:
-    - response (dict): The response dictionary from the LLM endpoint.
-    - method (str): The HTTP method used for the request. Defaults to "GET".
+    Supports (in order of preference):
+      - OpenAI-style: { choices: [ { message: { content: ... } } ] }
+      - OpenAI legacy-style: { choices: [ { text: ... } ] }
+      - Top-level `text` string
+      - `result` or `output` fields
+      - `generations` / `generation` lists with `text` entries
 
-    Returns:
-    - tuple: A tuple containing the status code, method, and the content of the response.
+    Returns a tuple (status_code, method, message).
     """
-    if response.status_code == 400:
-        return response.status_code, method, "Bad Request"
-    elif response.status_code == 401:
-        return response.status_code, method, "Unauthorized"
-    elif response.status_code == 403:
-        return response.status_code, method, "Forbidden"
-    elif response.status_code == 404:
-        return response.status_code, method, "Not Found"
-    elif response.status_code == 500:
-        return response.status_code, method, "Internal Server Error"
-    else:
-        if response.status_code == 200:
+    try:
+        status = int(getattr(response, "status_code", getattr(response, "status", None)))
+    except Exception:
+        status = None
+
+    if status == 400:
+        return status, method, "Bad Request"
+    if status == 401:
+        return status, method, "Unauthorized"
+    if status == 403:
+        return status, method, "Forbidden"
+    if status == 404:
+        return status, method, "Not Found"
+    if status == 500:
+        return status, method, "Internal Server Error"
+
+    if status == 200:
+        try:
             llm_result = response.json()
-            if 'choices' in llm_result and len(llm_result['choices']) > 0:
-                first_choice = llm_result['choices'][0]
-                if 'message' in first_choice and 'content' in first_choice['message']:
-                    answer = first_choice['message']['content']
-                    return response.status_code, method, answer
-                
-        return response.status_code, method, "Whoops! Something went wrong."
+        except Exception:
+            try:
+                content = getattr(response, "content", None)
+                if isinstance(content, (bytes, bytearray)):
+                    return status, method, content.decode("utf-8", errors="replace")
+            except Exception:
+                pass
+            return status, method, "Whoops! Something went wrong."
+
+        try:
+            if isinstance(llm_result, dict) and "choices" in llm_result and len(llm_result["choices"]) > 0:
+                first = llm_result["choices"][0]
+                # OpenAI chat-style
+                if isinstance(first, dict) and "message" in first and isinstance(first["message"], dict) and "content" in first["message"]:
+                    return status, method, first["message"]["content"]
+                # OpenAI legacy choice.text
+                if isinstance(first, dict) and "text" in first:
+                    return status, method, first["text"]
+        except Exception:
+            pass
+
+        try:
+            if isinstance(llm_result, dict):
+                for key in ("text", "result", "output", "content"):
+                    if key in llm_result and isinstance(llm_result[key], str):
+                        return status, method, llm_result[key]
+
+                for gen_key in ("generations", "generation", "results"):
+                    if gen_key in llm_result and isinstance(llm_result[gen_key], (list, tuple)) and len(llm_result[gen_key]) > 0:
+                        first_gen = llm_result[gen_key][0]
+                        if isinstance(first_gen, dict):
+                            # look for common text fields
+                            for tkey in ("text", "content", "output", "result"):
+                                if tkey in first_gen and isinstance(first_gen[tkey], str):
+                                    return status, method, first_gen[tkey]
+                        elif isinstance(first_gen, str):
+                            return status, method, first_gen
+        except Exception:
+            pass
+
+        try:
+            import json as _json
+
+            pretty = _json.dumps(llm_result)
+            return status, method, pretty
+        except Exception:
+            return status, method, "Whoops! Something went wrong."
+
+    return status, method, "Whoops! Something went wrong."
 # endregion
