@@ -1,10 +1,14 @@
 import { describe, expect, it, vi } from 'vitest';
 import { WorkflowRunnerClient } from '../app/client';
+import { initState } from '../app/state';
+import { createWorkflowRunnerStore } from '../app/store';
 import { RunRecord } from '../types/client';
+
+const store = createWorkflowRunnerStore(initState());
 
 describe('workflowRunnerClient (compat tests)', () => {
   it('ignores duplicate events', () => {
-    const client = new WorkflowRunnerClient();
+    const client = new WorkflowRunnerClient(store);
     const ev: RunRecord = { run_id: 'r1', status: 'pending', seq: 1 };
     (client as any).applyEvent(ev);
     (client as any).applyEvent(ev);
@@ -13,7 +17,7 @@ describe('workflowRunnerClient (compat tests)', () => {
   });
 
   it('triggers reconcile on gap detection', async () => {
-    const client = new WorkflowRunnerClient();
+    const client = new WorkflowRunnerClient(store);
     (client as any).lastSeq.set('r2', 1);
     let reconciled = false;
     (client as any).reconcileRun = async (_run_id: string) => {
@@ -26,7 +30,7 @@ describe('workflowRunnerClient (compat tests)', () => {
   });
 
   it('reconcileRun updates state', async () => {
-    const client = new WorkflowRunnerClient();
+    const client = new WorkflowRunnerClient(store);
     (global as any).fetch = vi.fn(async () => ({
       ok: true,
       json: async () => ({ run_id: 'r3', status: 'succeeded', seq: 5, result: { ok: true } }),
@@ -40,7 +44,7 @@ describe('workflowRunnerClient (compat tests)', () => {
   });
 
   it('polling merges snapshot', async () => {
-    const client = new WorkflowRunnerClient();
+    const client = new WorkflowRunnerClient(store);
     (global as any).fetch = vi.fn(async () => ({
       ok: true,
       json: async () => ({ runs: [{ run_id: 'r4', status: 'pending', seq: 2 }] }),
@@ -51,7 +55,7 @@ describe('workflowRunnerClient (compat tests)', () => {
   });
 
   it('aborts in-flight polling on stop', async () => {
-    const client = new WorkflowRunnerClient();
+    const client = new WorkflowRunnerClient(store);
     let fetchCalled = false;
     (global as any).fetch = vi.fn((_url: string, opts?: any) => {
       fetchCalled = true;
@@ -72,7 +76,7 @@ describe('workflowRunnerClient (compat tests)', () => {
   });
 
   it('reconciles runs missing from snapshot on reconnect', async () => {
-    const client = new WorkflowRunnerClient();
+    const client = new WorkflowRunnerClient(store);
     // seed client with a run that was previously running
     (client as any).runs.set('rx', { run_id: 'rx', status: 'running', seq: 2 });
     (client as any).lastSeq.set('rx', 2);
@@ -100,7 +104,7 @@ describe('workflowRunnerClient (compat tests)', () => {
   });
 
   it('coldLoadRuns fetches and merges runs before SSE starts', async () => {
-    const client = new WorkflowRunnerClient();
+    const client = new WorkflowRunnerClient(store);
     const mockRuns = [
       { run_id: 'cold1', status: 'pending', seq: 1, created_at: 1000 },
       { run_id: 'cold2', status: 'running', seq: 2, created_at: 2000 },
@@ -127,7 +131,7 @@ describe('workflowRunnerClient (compat tests)', () => {
   });
 
   it('coldLoadRuns handles fetch errors gracefully', async () => {
-    const client = new WorkflowRunnerClient();
+    const client = new WorkflowRunnerClient(store);
     const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
     (global as any).fetch = vi.fn(async () => {
@@ -142,7 +146,7 @@ describe('workflowRunnerClient (compat tests)', () => {
   });
 
   it('saveCache stores runs to localStorage', () => {
-    const client = new WorkflowRunnerClient();
+    const client = new WorkflowRunnerClient(store);
     (client as any).runs.set('cache1', {
       run_id: 'cache1',
       status: 'running',
@@ -178,7 +182,7 @@ describe('workflowRunnerClient (compat tests)', () => {
   });
 
   it('loadCache restores runs from localStorage', () => {
-    const client = new WorkflowRunnerClient();
+    const client = new WorkflowRunnerClient(store);
     const cachedRuns = [
       { run_id: 'restore1', status: 'pending', seq: 3, updated_at: 7000 },
       { run_id: 'restore2', status: 'running', seq: 4, updated_at: 8000 },
@@ -208,7 +212,7 @@ describe('workflowRunnerClient (compat tests)', () => {
   });
 
   it('loadCache handles missing or invalid cache gracefully', () => {
-    const client = new WorkflowRunnerClient();
+    const client = new WorkflowRunnerClient(store);
     const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
     (global as any).localStorage = {
@@ -229,7 +233,7 @@ describe('workflowRunnerClient (compat tests)', () => {
   });
 
   it('prevents duplicate runs when cache + coldLoad + SSE overlap', async () => {
-    const client = new WorkflowRunnerClient();
+    const client = new WorkflowRunnerClient(store);
 
     // Cached run from localStorage (seq=1)
     const cachedRuns = [{ run_id: 'dup1', status: 'pending', seq: 1, updated_at: 1000 }];
@@ -271,7 +275,7 @@ describe('workflowRunnerClient (compat tests)', () => {
   });
 
   it('limits cache to 200 most recent runs', () => {
-    const client = new WorkflowRunnerClient();
+    const client = new WorkflowRunnerClient(store);
 
     // Add 250 runs with different updated_at timestamps
     for (let i = 0; i < 250; i++) {
@@ -304,7 +308,7 @@ describe('workflowRunnerClient (compat tests)', () => {
   // ===== workflow_id Tests =====
 
   it('stores and retrieves workflow_id correctly', () => {
-    const client = new WorkflowRunnerClient();
+    const client = new WorkflowRunnerClient(store);
     const ev: RunRecord = {
       run_id: 'wf-test-1',
       workflow_id: 't2i_15_lcm',
@@ -319,7 +323,7 @@ describe('workflowRunnerClient (compat tests)', () => {
   });
 
   it('coldLoadRuns includes workflow_id from server', async () => {
-    const client = new WorkflowRunnerClient();
+    const client = new WorkflowRunnerClient(store);
     const mockRuns = [
       {
         run_id: 'cold-wf-1',
@@ -355,7 +359,7 @@ describe('workflowRunnerClient (compat tests)', () => {
   });
 
   it('caches workflow_id in localStorage', () => {
-    const client = new WorkflowRunnerClient();
+    const client = new WorkflowRunnerClient(store);
     (client as any).runs.set('cache-wf-1', {
       run_id: 'cache-wf-1',
       workflow_id: 't2i_15_lcm',
@@ -383,7 +387,7 @@ describe('workflowRunnerClient (compat tests)', () => {
   });
 
   it('restores workflow_id from localStorage', () => {
-    const client = new WorkflowRunnerClient();
+    const client = new WorkflowRunnerClient(store);
     const cachedRuns = [
       {
         run_id: 'restore-wf-1',
@@ -415,7 +419,7 @@ describe('workflowRunnerClient (compat tests)', () => {
   });
 
   it('workflow_id survives reconciliation', async () => {
-    const client = new WorkflowRunnerClient();
+    const client = new WorkflowRunnerClient(store);
     const initialRun: RunRecord = {
       run_id: 'reconcile-wf-1',
       workflow_id: 't2i_15_lcm',
@@ -452,7 +456,7 @@ describe('workflowRunnerClient (compat tests)', () => {
   });
 
   it('handles null workflow_id correctly', () => {
-    const client = new WorkflowRunnerClient();
+    const client = new WorkflowRunnerClient(store);
     const ev: RunRecord = {
       run_id: 'no-wf-1',
       workflow_id: null,
@@ -467,7 +471,7 @@ describe('workflowRunnerClient (compat tests)', () => {
   });
 
   it('handles undefined workflow_id correctly', () => {
-    const client = new WorkflowRunnerClient();
+    const client = new WorkflowRunnerClient(store);
     const ev: RunRecord = {
       run_id: 'no-wf-2',
       status: 'pending',
@@ -481,7 +485,7 @@ describe('workflowRunnerClient (compat tests)', () => {
   });
 
   it('multiple runs with same workflow_id are handled correctly', () => {
-    const client = new WorkflowRunnerClient();
+    const client = new WorkflowRunnerClient(store);
     const workflow_id = 'shared_workflow';
 
     const runs = [
@@ -500,7 +504,7 @@ describe('workflowRunnerClient (compat tests)', () => {
   });
 
   it('workflow_id is preserved through cache → cold-load → SSE flow', async () => {
-    const client = new WorkflowRunnerClient();
+    const client = new WorkflowRunnerClient(store);
     const workflow_id = 't2i_15_lcm';
     const run_id = 'flow-test-1';
 
@@ -574,7 +578,7 @@ describe('workflowRunnerClient (compat tests)', () => {
   });
 
   it('start() merges initial SSE snapshot (message/run) into state', async () => {
-    const client = new WorkflowRunnerClient();
+    const client = new WorkflowRunnerClient(store);
 
     // Mock coldLoadRuns to be empty (server snapshot via SSE will provide data)
     (global as any).fetch = vi.fn(async (url: string) => {
@@ -640,7 +644,7 @@ describe('workflowRunnerClient (compat tests)', () => {
   });
 
   it('processSnapshotArray ignores older snapshot entries when local seq is higher', async () => {
-    const client = new WorkflowRunnerClient();
+    const client = new WorkflowRunnerClient(store);
     // seed with a newer local seq
     (client as any).lastSeq.set('r_old', 5);
     (client as any).runs.set('r_old', { run_id: 'r_old', status: 'running', seq: 5 });
@@ -652,7 +656,7 @@ describe('workflowRunnerClient (compat tests)', () => {
   });
 
   it('processSnapshotArray accepts snapshot entries with higher seq', async () => {
-    const client = new WorkflowRunnerClient();
+    const client = new WorkflowRunnerClient(store);
     (client as any).lastSeq.set('r_up', 2);
     (client as any).runs.set('r_up', { run_id: 'r_up', status: 'pending', seq: 2 });
 
@@ -663,7 +667,7 @@ describe('workflowRunnerClient (compat tests)', () => {
   });
 
   it('start() clears processingSnapshot after receiving initial messages', async () => {
-    const client = new WorkflowRunnerClient();
+    const client = new WorkflowRunnerClient(store);
 
     (global as any).fetch = vi.fn(async (url: string) => {
       if (url.includes('/workflow-runner/runs'))
@@ -712,7 +716,7 @@ describe('workflowRunnerClient (compat tests)', () => {
   });
 
   it('buildLastEventId returns the run_id:seq for highest seq', () => {
-    const client = new WorkflowRunnerClient();
+    const client = new WorkflowRunnerClient(store);
     (client as any).lastSeq.set('a', 1);
     (client as any).lastSeq.set('b', 5);
     (client as any).lastSeq.set('c', 3);
@@ -721,7 +725,7 @@ describe('workflowRunnerClient (compat tests)', () => {
   });
 
   it('coldLoadRuns uses the expected URL params', async () => {
-    const client = new WorkflowRunnerClient();
+    const client = new WorkflowRunnerClient(store);
     let calledUrl = '';
     (global as any).fetch = vi.fn(async (url: string) => {
       calledUrl = url;
@@ -734,7 +738,7 @@ describe('workflowRunnerClient (compat tests)', () => {
   });
 
   it('ignores runs missing mandatory fields (run_id, status) from coldLoadRuns', async () => {
-    const client = new WorkflowRunnerClient();
+    const client = new WorkflowRunnerClient(store);
     const mockRuns = [
       { run_id: 'good1', status: 'pending', seq: 1 },
       { /* missing run_id */ status: 'succeeded', seq: 2 },
@@ -767,7 +771,7 @@ describe('workflowRunnerClient (compat tests)', () => {
   });
 
   it('fetches workflow names when runs include workflow_id but name is missing', async () => {
-    const client = new WorkflowRunnerClient();
+    const client = new WorkflowRunnerClient(store);
 
     const mockRuns = [
       { run_id: 'r1', workflow_id: 'w1', status: 'succeeded', seq: 1 },
@@ -804,7 +808,7 @@ describe('workflowRunnerClient (compat tests)', () => {
   });
 
   it('does not call workflows endpoint when workflow_id is missing', async () => {
-    const client = new WorkflowRunnerClient();
+    const client = new WorkflowRunnerClient(store);
     const mockRuns = [{ run_id: 'r1', status: 'succeeded', seq: 1 }];
     let workflowsCalled = false;
     (global as any).fetch = vi.fn(async (url: string) => {
@@ -824,7 +828,7 @@ describe('workflowRunnerClient (compat tests)', () => {
   });
 
   it('reconciles runs missing workflow_id by calling status endpoint and populating workflow_id', async () => {
-    const client = new WorkflowRunnerClient();
+    const client = new WorkflowRunnerClient(store);
     const runId = 'r-missing-wf';
     const mockRuns = [{ run_id: runId, status: 'succeeded', seq: 1 }];
 

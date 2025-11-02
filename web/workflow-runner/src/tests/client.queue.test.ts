@@ -1,9 +1,13 @@
 import { describe, expect, it, vi } from 'vitest';
 import { WorkflowRunnerClient } from '../app/client';
+import { initState } from '../app/state';
+import { createWorkflowRunnerStore } from '../app/store';
+
+const store = createWorkflowRunnerStore(initState());
 
 describe('WorkflowRunnerClient queue handling', () => {
   it('calls queueHandler with pending/running and does not call applyEvent', () => {
-    const client = new WorkflowRunnerClient();
+    const client = new WorkflowRunnerClient(store);
     const spyQueue = vi.fn();
     (client as any).setQueueHandler(spyQueue);
 
@@ -21,7 +25,7 @@ describe('WorkflowRunnerClient queue handling', () => {
   });
 
   it('falls back to applyEvent for run-like payloads', () => {
-    const client = new WorkflowRunnerClient();
+    const client = new WorkflowRunnerClient(store);
 
     const ev = { run_id: 'r-q', status: 'pending', seq: 1 };
     (client as any).handleQueuePayload(ev);

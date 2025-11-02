@@ -1,6 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { WorkflowRunnerClient } from '../app/client';
+import { initState } from '../app/state';
+import { createWorkflowRunnerStore } from '../app/store';
 import { RunRecord, UpdateHandler } from '../types/client';
+
+const store = createWorkflowRunnerStore(initState());
 
 // Mock localStorage for Node environment
 const mockLocalStorage = (() => {
@@ -45,7 +49,7 @@ describe('WorkflowRunnerClient', () => {
       constructor(public url: string) {}
     } as unknown as typeof EventSource;
 
-    client = new WorkflowRunnerClient();
+    client = new WorkflowRunnerClient(store);
     updateHandler = vi.fn<UpdateHandler>();
     client.setUpdateHandler(updateHandler);
   });
@@ -59,12 +63,12 @@ describe('WorkflowRunnerClient', () => {
 
   describe('Client instantiation', () => {
     it('should create client with correct baseUrl', () => {
-      const testClient = new WorkflowRunnerClient();
+      const testClient = new WorkflowRunnerClient(store);
       expect(testClient).toBeDefined();
     });
 
     it('should strip trailing slash from baseUrl', () => {
-      const testClient = new WorkflowRunnerClient();
+      const testClient = new WorkflowRunnerClient(store);
       expect(testClient).toBeDefined();
       // baseUrl is private, but behavior should be consistent
     });
@@ -96,7 +100,7 @@ describe('WorkflowRunnerClient', () => {
 
       localStorage.setItem('lf-runs-cache', JSON.stringify(cachedRuns));
 
-      const testClient = new WorkflowRunnerClient();
+      const testClient = new WorkflowRunnerClient(store);
       const handler = vi.fn();
       testClient.setUpdateHandler(handler);
 
@@ -116,7 +120,7 @@ describe('WorkflowRunnerClient', () => {
     it('should handle corrupted localStorage gracefully', async () => {
       localStorage.setItem('lf-runs-cache', 'invalid-json{');
 
-      const testClient = new WorkflowRunnerClient();
+      const testClient = new WorkflowRunnerClient(store);
       const handler = vi.fn();
       testClient.setUpdateHandler(handler);
 
