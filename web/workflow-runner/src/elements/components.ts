@@ -166,14 +166,25 @@ export const createInputCell = (cell: WorkflowCellInput) => {
 //#region Outputs
 export const createOutputComponent = (descriptor: WorkflowCellOutput) => {
   const { syntax } = getLfFramework();
-  const { civitai_metadata, dataset, file_names, json, metadata, props, shape, slot_map, svg } =
-    descriptor;
+  const {
+    civitai_metadata,
+    dataset,
+    file_names,
+    json,
+    metadata,
+    props,
+    shape,
+    slot_map,
+    string,
+    svg,
+  } = descriptor;
   const el = document.createElement('div');
 
   switch (shape) {
     case 'code': {
       const p = (props || {}) as Partial<LfCodeInterface>;
       p.lfValue =
+        string ||
         svg ||
         civitai_metadata ||
         file_names?.join('\n') ||

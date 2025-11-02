@@ -3,6 +3,7 @@ from types import ModuleType
 from typing import Iterable, Iterator, Sequence
 
 _WORKFLOW_MODULES: Sequence[str] = (
+    "caption_image_vision",
     "image_to_svg",
     "load_metadata",
     "remove_bg",

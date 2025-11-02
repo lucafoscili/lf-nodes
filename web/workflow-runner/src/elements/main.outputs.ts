@@ -97,14 +97,19 @@ const _getFirstOutputImageUrl = (outputs: WorkflowNodeResults | null) => {
     if (!payload || typeof payload !== 'object') {
       return { image: null, fallback: null };
     }
-    const { code: codeIcon, json: jsonIcon, photoX: fallback } = theme.get.icons();
+    const {
+      code: codeIcon,
+      forms: stringIcon,
+      json: jsonIcon,
+      photoX: fallback,
+    } = theme.get.icons();
 
     let foundImage: string | null = null;
     let fallbackCandidate: string | null = null;
 
     if (Array.isArray(payload.lf_output)) {
       for (const entry of payload.lf_output) {
-        const { dataset, file_names, json, metadata, svg } = entry;
+        const { dataset, file_names, json, metadata, string, svg } = entry;
         const image =
           _extractImageFromDataset(dataset) ??
           file_names?.find((name) => typeof name === 'string' && name) ??
@@ -116,6 +121,8 @@ const _getFirstOutputImageUrl = (outputs: WorkflowNodeResults | null) => {
         if (!fallbackCandidate) {
           if (typeof svg === 'string' && svg) {
             fallbackCandidate = codeIcon;
+          } else if (typeof string === 'string' && string) {
+            fallbackCandidate = stringIcon;
           } else if (json || metadata) {
             fallbackCandidate = jsonIcon;
           }

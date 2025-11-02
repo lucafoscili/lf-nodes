@@ -93,11 +93,15 @@ export interface WorkflowCellsOutputContainer {
 //#region Nodes outputs
 export interface WorkflowNodeOutputs
   extends DisplayJSONNodeOutputs,
+    DisplayStringNodeOutputs,
     LoadMetadataNodeOutputs,
     SaveSVGNodeOutputs,
     SaveImageForCivitAINodeOutputs {}
 export interface DisplayJSONNodeOutputs {
   json: Record<string, unknown>;
+}
+export interface DisplayStringNodeOutputs {
+  string: string;
 }
 export interface LoadMetadataNodeOutputs {
   metadata: Record<string, unknown>;
@@ -116,12 +120,7 @@ export interface SaveSVGNodeOutputs {
 
 //#region Results
 export interface WorkflowNodeResultPayload {
-  lf_output?: Array<
-    DisplayJSONNodeOutputs &
-      LoadMetadataNodeOutputs &
-      SaveImageForCivitAINodeOutputs &
-      SaveSVGNodeOutputs
-  >;
+  lf_output?: Array<WorkflowNodeOutputs>;
   [key: string]: unknown;
 }
 export type WorkflowNodeResults = Record<string, WorkflowNodeResultPayload>;
