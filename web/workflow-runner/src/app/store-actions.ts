@@ -95,6 +95,7 @@ export const ensureActiveRun = (store: WorkflowStore, preferredRunId?: string) =
   if (!nextRun) {
     if (currentRunId !== null) {
       setRunInFlight(store, null);
+      setStatus(store, 'idle');
     }
     return;
   }

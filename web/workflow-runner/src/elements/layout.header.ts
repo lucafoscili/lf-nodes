@@ -144,7 +144,7 @@ export const createHeaderSection = (store: WorkflowStore): WorkflowSectionContro
   //#region Render
   const render = () => {
     const { alertTriangle, check, hourglassLow } = theme.get.icons();
-    const { current, manager, queuedJobs } = store.getState();
+    const { current, manager, queuedJobs, currentRunId } = store.getState();
     const { message, status } = current;
     const { uiRegistry } = manager;
 
@@ -195,7 +195,14 @@ export const createHeaderSection = (store: WorkflowStore): WorkflowSectionContro
         appMessage[HIDE_KEY] = undefined;
       }
 
-      appMessage.innerText = message || '';
+      let displayMessage = message || '';
+      if (currentRunId) {
+        const parts = currentRunId.split('-');
+        const prefix = parts[0] || currentRunId.slice(0, 8);
+        displayMessage = `Processing ${prefix}`;
+      }
+
+      appMessage.innerText = displayMessage;
       appMessage.dataset.status = status || '';
       appMessage.dataset.visible = 'true';
     }
