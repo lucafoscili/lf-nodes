@@ -210,6 +210,64 @@ es.onerror
          stopPollingFallback()
 ```
 
+## Server-Side Execution State Management
+
+The server monitors ComfyUI's execution queue and updates run status accurately:
+
+```plaintext
+Workflow submitted
+     ↓
+Job created: PENDING (seq=0)
+     ↓
+Queued in ComfyUI
+     ↓
+_monitor_execution_state() starts polling
+     ↓
+┌────────────────────────────────────────────┐
+│ Check ComfyUI queue state (every 350ms)   │
+├────────────────────────────────────────────┤
+│ Prompt in currently_running?              │ ─── YES ──→ Status: RUNNING (seq++)
+│   (Only 1 item max in currently_running)  │            SSE event published
+│                                            │            Exit monitoring
+│                NO                          │
+│                ↓                           │
+│ Prompt in history?                        │ ─── YES ──→ Already completed
+│   (Fast execution - completed before      │            (skip RUNNING)
+│    monitoring could detect it)            │            Exit monitoring
+│                                            │
+│                NO                          │
+│                ↓                           │
+│ Prompt still in queue?                    │ ─── YES ──→ Keep polling
+│   (Waiting for execution)                 │            Status stays PENDING
+│                                            │
+│                NO                          │
+│                ↓                           │
+│ Prompt lost (not in queue/running/hist)   │ ─── YES ──→ Log warning
+│                                            │            Exit monitoring
+└────────────────────────────────────────────┘
+                    ↓
+        _wait_for_completion()
+                    ↓
+        Status: SUCCEEDED/FAILED (seq++)
+                    ↓
+            SSE event published
+```
+
+**Key Properties:**
+
+- **Single-execution constraint**: Only 1 run shows as RUNNING (ComfyUI processes 1 job at a time)
+- **Fast-execution handling**: Workflows that complete before monitoring detects them skip RUNNING state
+- **No stuck PENDING**: All runs either transition to RUNNING or complete directly
+- **Accurate queue representation**: PENDING means queued, RUNNING means executing
+
+**State Transitions:**
+
+```plaintext
+Normal workflow:     PENDING → RUNNING → SUCCEEDED/FAILED
+Fast workflow:       PENDING → SUCCEEDED/FAILED (skip RUNNING)
+Queued workflow:     PENDING (stays until execution starts)
+```
+
 ## Constraints & Invariants
 
 ### ✅ DO

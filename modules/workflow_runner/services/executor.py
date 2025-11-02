@@ -129,41 +129,59 @@ async def _wait_for_completion(prompt_id: str, timeout_seconds: float | None = N
 
         await asyncio.sleep(0.35)
 
-async def _wait_for_running(prompt_id: str, run_id: str) -> None:
+async def _monitor_execution_state(prompt_id: str, run_id: str) -> None:
     """
-    Asynchronously waits for a prompt to start running by polling the current queue.
-
-    This function periodically checks the PromptServer's queue for the specified prompt_id
-    to determine when it has been dequeued and is running. Once detected, it updates the
-    job status to RUNNING and logs the event. If the prompt does not start within the
-    configured timeout, the loop exits without further action.
-
+    Monitor execution state and update job status appropriately.
+    
+    This function handles three scenarios:
+    1. Normal execution: Prompt moves to currently_running, we mark it RUNNING
+    2. Fast execution: Prompt completes before we can detect it running
+    3. Queue wait: Prompt is still queued, keep status as PENDING
+    
     Args:
-        prompt_id (str): The unique identifier of the prompt to wait for.
+        prompt_id (str): The unique identifier of the prompt to monitor.
         run_id (str): The unique identifier of the run associated with the prompt.
-
-    Returns:
-        None
-
-    Raises:
-        None: Exceptions during status update or polling are caught and logged internally.
     """
     try:
+        queue = PromptServer.instance.prompt_queue
         timeout = RUNNER_CONFIG.prompt_timeout_seconds or 300
-        checks = int((timeout / 0.35)) if timeout > 0 else 10000 # TODO: replace with configurable value (env or runner.json)
+        checks = int((timeout / 0.35)) if timeout > 0 else 10000
+        
         for _ in range(checks):
-            running, _ = PromptServer.instance.prompt_queue.get_current_queue_volatile()
-            # running is a list of prompt items; prompt_id is item[1]
+            # Check if prompt is currently executing
+            running, queued = queue.get_current_queue_volatile()
+            
+            # Scenario 1: Prompt is in currently_running (actively executing)
             if any((r[1] == prompt_id) for r in running):
                 try:
                     await set_job_status(run_id, JobStatus.RUNNING)
-                    logging.info("Run %s: marked RUNNING (prompt dequeued)", run_id)
+                    logging.info("Run %s: marked RUNNING (executing)", run_id)
                 except Exception:
                     logging.exception("Failed to set job RUNNING for %s", run_id)
                 break
+            
+            # Scenario 2: Prompt already completed (fast execution)
+            # Check if it's in history but not in queue anymore
+            history = queue.get_history(prompt_id=prompt_id)
+            if prompt_id in history:
+                # Prompt completed before we could mark it RUNNING
+                # Don't update status here - _wait_for_completion will handle it
+                logging.debug("Run %s: completed before RUNNING state could be set", run_id)
+                break
+            
+            # Scenario 3: Prompt is still queued (waiting)
+            # Check if our prompt is still in the queue
+            is_queued = any((q[1] == prompt_id) for q in queued)
+            if not is_queued:
+                # Prompt is neither running, queued, nor in history - something went wrong
+                logging.warning("Run %s: prompt %s not found in queue or history", run_id, prompt_id)
+                break
+            
+            # Still queued, keep checking
             await asyncio.sleep(0.35)
+            
     except Exception:
-        logging.exception("Error while waiting for prompt to start for run %s", run_id)
+        logging.exception("Error monitoring execution state for run %s", run_id)
 # endregion
 
 # region Execution
@@ -192,7 +210,9 @@ async def execute_workflow(
 
     server.prompt_queue.put((queue_number, prompt_id, prompt, extra_data, validation[2]))
 
-    await _wait_for_running(prompt_id, run_id)
+    # Monitor queue state and update job status accordingly.
+    # This handles both normal execution and fast-completing workflows.
+    await _monitor_execution_state(prompt_id, run_id)
 
     try:
         history_entry = await _wait_for_completion(prompt_id, RUNNER_CONFIG.prompt_timeout_seconds)
