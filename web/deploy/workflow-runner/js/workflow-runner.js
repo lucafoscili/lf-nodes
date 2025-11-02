@@ -802,6 +802,16 @@ const isWorkflowAPIUploadResponse = (v) => {
   }
   return true;
 };
+const normalizeTimestamp = (v, fallback) => {
+  if (v === null || v === void 0) {
+    return fallback;
+  }
+  const n = typeof v === "string" ? Number(v) : v;
+  if (!Number.isFinite(n) || Number.isNaN(n)) {
+    return fallback;
+  }
+  return n < 1e12 ? Math.floor(n * 1e3) : Math.floor(n);
+};
 const formatStatus = (status) => status.charAt(0).toUpperCase() + status.slice(1);
 const formatTimestamp = (timestamp) => {
   const date = new Date(timestamp);
@@ -817,8 +827,8 @@ const recordToUI = (rec, wfs = {}) => {
   const map = {
     runId: run_id,
     status,
-    createdAt: created_at ?? now,
-    updatedAt: updated_at ?? now,
+    createdAt: normalizeTimestamp(created_at, now),
+    updatedAt: normalizeTimestamp(updated_at, now),
     workflowId: workflow_id ?? null,
     workflowName: workflow_id && wfs[workflow_id] || "Unknown workflow",
     error: error ?? null,
