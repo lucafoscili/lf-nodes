@@ -63,22 +63,30 @@
 ### Constructor
 
 ```typescript
-const client = new WorkflowRunnerClient(baseUrl?: string);
+const client = new WorkflowRunnerClient(store: WorkflowStore);
 ```
 
 **Parameters:**
 
-- `baseUrl` (optional): API base URL. Defaults to `/api/lf-nodes`. Trailing slash is stripped.
+- `store` (required): The workflow store instance. The client needs direct access to the store for updating workflow names and queue status.
 
 ### Methods
 
 #### `setUpdateHandler(handler: UpdateHandler): void`
 
-Sets the callback invoked when run state changes. This is the **single integration point** with the application.
+Sets the callback invoked when run state changes. The client provides a default `onUpdate` handler that integrates with the store, but this can be overridden for custom behavior.
 
 ```typescript
 type UpdateHandler = (runs: Map<string, RunRecord>) => void;
 
+// Default behavior (built-in)
+client.onUpdate = (runs) => {
+  // Auto-extracts workflow names from store
+  // Converts records to UI format
+  // Calls upsertRun and ensureActiveRun
+};
+
+// Custom override (optional)
 client.setUpdateHandler((runs) => {
   for (const [runId, rec] of runs) {
     const uiEntry = mapRunRecordToUi(rec, workflowNames);
@@ -94,6 +102,24 @@ client.setUpdateHandler((runs) => {
 - Receives a **snapshot** of all known runs (Map is fresh copy)
 - Handler should be **idempotent** (may be called with same state)
 - Handler should be **fast** (no async I/O, minimal compute)
+
+#### `setQueueHandler(handler: (pending: number, running: number) => void): void`
+
+Sets the callback invoked when queue status updates arrive via SSE. The client provides a default handler that updates store state.
+
+```typescript
+// Default behavior (built-in)
+client.queueHandler = (pending, running) => {
+  const state = this.#STORE.getState();
+  state.mutate.queuedJobs(pending + running);
+};
+
+// Custom override (optional)
+client.setQueueHandler((pending, running) => {
+  console.log(`Queue: ${pending} pending, ${running} running`);
+  updateQueueIndicator(pending + running);
+});
+```
 
 #### `setWorkflowNames(names: Map<string, string>): void`
 
@@ -154,18 +180,20 @@ User opens app
      ↓
 manager.constructor()
      ↓
-client = new WorkflowRunnerClient()
+client = new WorkflowRunnerClient(store)
      ↓
-client.setUpdateHandler(...)
+[Client has default onUpdate handler built-in]
      ↓
 [workflows load]
      ↓
-client.setWorkflowNames(...)
+client.setWorkflowNames(...) [optional]
      ↓
 client.start()
-     ├─→ loadCache() ────────────→ onUpdate (optimistic)
-     ├─→ coldLoadRuns() ─────────→ onUpdate (authoritative)
-     └─→ SSE.connect() ──────────→ (listen for events)
+     ├─→ loadCacheIds() ─────────→ seedPlaceholders() → onUpdate (optimistic)
+     ├─→ coldLoadRuns() ─────────→ processSnapshotArray() → onUpdate (authoritative)
+     │   └─→ reconcileRun() for local IDs not in server response
+     ├─→ reconcileRun() for cached IDs not hydrated by coldLoad
+     └─→ openSse() ──────────────→ (listen for events)
 ```
 
 ### Runtime (SSE Events)
@@ -173,21 +201,29 @@ client.start()
 ```plaintext
 Server emits SSE event
      ↓
-client receives 'run' event
+client receives event (type: 'run', 'queue', or generic)
      ↓
-applyEvent(rec)
-     ├─→ validate (run_id, status, seq present?)
-     ├─→ gap detection (seq > last+1?)
-     │       ├─→ YES: reconcileRun(run_id) [async, de-duped]
-     │       └─→ NO: continue
-     ├─→ upsertRun(rec)
-     │       ├─→ seq <= last? → REJECT (no update)
-     │       └─→ seq > last? → ACCEPT
-     │               ├─→ lastSeq[run_id] = rec.seq
-     │               ├─→ runs[run_id] = rec
-     │               ├─→ fetchWorkflowNames([rec.workflow_id]) if missing
-     │               └─→ emitUpdate()
-     └─→ onUpdate(runs) → manager → store
+     ├─→ 'run' event or generic message
+     │   ↓
+     │   applyEvent(rec)
+     │   ├─→ validate (run_id, status, seq present?)
+     │   ├─→ gap detection (seq > last+1?)
+     │   │       ├─→ YES: reconcileRun(run_id) [async, de-duped]
+     │   │       └─→ NO: continue
+     │   ├─→ upsertRun(rec)
+     │   │       ├─→ seq <= last? → REJECT (no update)
+     │   │       └─→ seq > last? → ACCEPT
+     │   │               ├─→ lastSeq[run_id] = rec.seq
+     │   │               ├─→ runs[run_id] = rec
+     │   │               ├─→ fetchWorkflowNames([rec.workflow_id]) if missing
+     │   │               └─→ emitUpdate()
+     │   └─→ onUpdate(runs) → store
+     │
+     └─→ 'queue' event
+         ↓
+         handleQueuePayload(payload)
+         ├─→ extract pending & running counts
+         └─→ queueHandler(pending, running) → update store
 ```
 
 ### Reconnection
@@ -196,18 +232,19 @@ applyEvent(rec)
 SSE error
      ↓
 es.onerror
-     ├─→ startPollingFallback() [every 3s]
-     └─→ setTimeout(start, backoffMs)
+     ├─→ close existing EventSource
+     ├─→ startPollingFallback() [every 3s, status=pending,running]
+     └─→ setTimeout(openSse, backoffWithJitter())
          ↓
-         [exponential backoff: 1s → 2s → 4s → ... → 30s]
+         [exponential backoff with jitter: 1s → 2s → 4s → ... → 30s]
          ↓
-     client.start() [retry]
+     openSse() [retry]
          ↓
          [if SSE succeeds]
          ↓
          es.onopen
-         ↓
-         stopPollingFallback()
+         ├─→ reset backoffMs to 1000
+         └─→ stop polling fallback (clearInterval + abort)
 ```
 
 ## Server-Side Execution State Management
@@ -272,20 +309,22 @@ Queued workflow:     PENDING (stays until execution starts)
 
 ### ✅ DO
 
-- **Instantiate once** at the manager/root level
+- **Instantiate once** at the manager/root level with store instance
 - **Call `start()` exactly once** per application lifecycle
 - **Call `stop()` on cleanup** (unmount, destroy)
-- **Keep `onUpdate` handler fast** (< 5ms)
-- **Map run records in one place** (DRY: `mapRunRecordToUi()`)
+- **Keep `onUpdate` handler fast** (< 5ms) if overriding default
+- **Keep `queueHandler` fast** if overriding default
+- **Use default handlers** unless custom behavior is needed (they integrate with store)
 - **Trust the client** for network concerns (don't open EventSource elsewhere)
 
 ### ❌ DON'T
 
+- **Don't instantiate without a store** (store is required parameter)
 - **Don't open EventSource elsewhere** (breaks single-source-of-truth)
 - **Don't fetch runs directly** (use client's cold load)
 - **Don't poll manually** (client handles fallback)
 - **Don't mutate `runs` Map** (it's a snapshot; mutations won't propagate)
-- **Don't make `onUpdate` async** (fire-and-forget side effects only)
+- **Don't make handlers async** (fire-and-forget side effects only)
 - **Don't call `start()` multiple times** (idempotent but wasteful)
 
 ## Sequence Monotonicity
@@ -350,6 +389,13 @@ inflightReconciles.set('run-1', promise)
 - Reduce server load
 - Faster reconciliation
 
+**Additional Reconciliation Triggers:**
+
+- **404 responses**: When reconciliation returns 404, the run is removed from state (via `removeRun`)
+- **Missing workflow_id**: Runs without workflow_id trigger reconciliation to fetch complete details
+- **Stale local state**: During cold load, local runs not in server response are reconciled
+- **Disappeared running runs**: After snapshot/reconnect, locally-running runs not in snapshot are reconciled
+
 ## Workflow Name Resolution
 
 The client automatically fetches missing workflow names:
@@ -372,7 +418,7 @@ upsertRun({ run_id: 'run-1', workflow_id: 'wf-1' })
 
 ## Cache Persistence
 
-The client saves runs to `localStorage` for fast hydration on refresh:
+The client saves run IDs to `localStorage` for fast hydration on refresh:
 
 ```typescript
 // After every update
@@ -380,14 +426,21 @@ emitUpdate()
      ↓
      saveCache()
      ↓
-     localStorage.setItem('lf-runs-cache', JSON.stringify(runs))
+     localStorage.setItem('lf-runs-cache', JSON.stringify({
+       version: 1,
+       cached_at: Date.now(),
+       run_ids: ids.slice(-300) // cap to recent 300 IDs
+     }))
 ```
 
-**Limits:**
+**Cache Strategy:**
 
-- Keeps **200 most recent** runs (sorted by `updated_at` desc)
-- Omits `result` and `error` fields (reduce size)
-- Handles quota exceeded gracefully (silent failure)
+- **V1 Schema**: Stores only run IDs (not full records) for schema stability
+- **Optimistic placeholders**: On startup, seeds placeholder entries for cached IDs
+- **Hydration**: Full run data fetched via REST cold load
+- **Expiry**: Cache older than 60 minutes is ignored
+- **Limits**: Keeps **300 most recent** run IDs
+- **Graceful degradation**: Handles quota exceeded silently (cache disabled)
 
 ## Error Handling
 
@@ -446,22 +499,34 @@ realtime.startRealtimeUpdates();
 **After (`WorkflowRunnerClient`):**
 
 ```typescript
-const client = new WorkflowRunnerClient();
+// Client integrates directly with store
+const client = new WorkflowRunnerClient(store);
+
+// Default handlers are built-in, but can be customized
 client.setUpdateHandler((runs) => {
+  // Custom update logic if needed
   for (const rec of runs.values()) {
     upsertRun(store, mapRunRecordToUi(rec));
   }
 });
+
+client.setQueueHandler((pending, running) => {
+  // Custom queue status logic if needed
+  updateQueueDisplay(pending + running);
+});
+
 await client.start();
 ```
 
 **Benefits:**
 
-- ✅ Hydration on refresh (localStorage cache)
-- ✅ Resilience (reconnection + polling fallback)
+- ✅ Hydration on refresh (localStorage cache with 60min expiry)
+- ✅ Resilience (reconnection with jittered backoff + polling fallback)
 - ✅ Correctness (deduplication, gap detection, seq monotonicity)
-- ✅ Workflow name resolution
+- ✅ Workflow name resolution (batch fetching, multiple response shapes)
 - ✅ Single source of truth (no duplicate ingestion paths)
+- ✅ Queue status tracking (via 'queue' SSE events)
+- ✅ Run removal on 404 (cleans up deleted runs)
 
 ## Testing
 
@@ -478,16 +543,21 @@ See `tests/client.test.ts` and `tests/manager-integration.test.ts` for comprehen
 
 ### Runs not appearing after refresh
 
-**Cause:** Cold load not completing or cache corrupted
+**Cause:** Cold load not completing, cache expired, or cache corrupted
 
 **Fix:**
 
 ```typescript
-// Check localStorage
-localStorage.getItem('lf-runs-cache') // should be valid JSON
+// Check localStorage cache
+const cache = localStorage.getItem('lf-runs-cache');
+const parsed = JSON.parse(cache);
+console.log('Cache version:', parsed.version); // should be 1
+console.log('Cache age:', Date.now() - parsed.cached_at); // should be < 3600000ms
+console.log('Cached IDs:', parsed.run_ids); // should be array of run_ids
 
 // Check network
 // Look for GET /api/lf-nodes/workflow-runner/runs?status=...
+// Look for GET /api/lf-nodes/run/{run_id}/status (reconciliation)
 ```
 
 ### "Unnamed Workflow" showing in UI
@@ -521,8 +591,38 @@ client.setWorkflowNames(names);
 - Remove all legacy `subscribeRunEvents` / `createRealtimeController` calls
 - Check for deprecation warnings in console
 
+### Queue status not updating
+
+**Cause:** 'queue' SSE events not being received or handler not set
+
+**Fix:**
+
+```typescript
+// Check if queue handler is set (default should exist)
+console.log('Queue handler:', typeof client.queueHandler); // should be 'function'
+
+// Monitor SSE events in browser DevTools
+// Look for event type: 'queue' with payload: { pending, running }
+
+// Check store state
+const state = store.getState();
+console.log('Queued jobs:', state.queuedJobs); // should reflect queue count
+```
+
 ---
 
 ## Summary
 
-`WorkflowRunnerClient` is the **only** way to ingest run state. It owns all network concerns and provides a clean, reactive interface via `onUpdate`. Keep it simple: instantiate once, bind once, start once, stop on cleanup.
+`WorkflowRunnerClient` is the **only** way to ingest run state. It owns all network concerns and provides a clean, reactive interface via built-in handlers that integrate directly with the store.
+
+**Key Points:**
+
+- **Constructor requires store**: `new WorkflowRunnerClient(store)`
+- **Built-in handlers**: Default `onUpdate` and `queueHandler` work out-of-the-box
+- **Optional customization**: Override handlers only if needed
+- **Cache v1 schema**: Stores run IDs only (300 max, 60min expiry)
+- **Queue tracking**: Handles 'queue' SSE events automatically
+- **404 cleanup**: Removes deleted runs from state
+- **Jittered backoff**: Reconnection uses randomized delays to reduce thundering herd
+
+Keep it simple: instantiate once with store, start once, stop on cleanup. The client handles everything else.

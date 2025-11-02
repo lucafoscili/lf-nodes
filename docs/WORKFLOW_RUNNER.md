@@ -35,19 +35,18 @@ To avoid importing heavy dependencies (Torch, CUDA, etc.) at package import time
 ```text
 modules/workflow_runner/
 ├── __init__.py              # Package exports with lazy loading
-├── api_constants.py         # Lightweight API constants (no heavy imports)
 ├── config.py                # Centralized configuration management
-├── routes.py                # Route registration and controller imports
-├── google_oauth.py          # REMOVED - was compatibility shim
 ├── adapters/                # External system interfaces
 │   └── storage_adapter.py   # Abstract storage interface
 ├── controllers/             # HTTP request handlers
 │   ├── __init__.py          # Lazy forwarding layer
 │   ├── api_controllers.py   # Core API endpoints
-│   ├── api_routes.py        # Route decorators
+│   ├── api_routes.py        # Route registration decorators
+│   ├── routes.py            # Compatibility shim for imports
 │   ├── page_controller.py   # Page serving
 │   ├── assets_controller.py # Static asset serving
-│   └── proxy_controller.py  # API proxying
+│   ├── proxy_controller.py  # API proxying
+│   └── _helpers.py          # Shared controller utilities
 ├── models/                  # Data structures
 │   ├── __init__.py
 │   └── schemas.py           # Request/response schemas
@@ -61,12 +60,14 @@ modules/workflow_runner/
 │   ├── background.py        # Background task management
 │   ├── google_oauth.py      # OAuth token verification
 │   ├── job_store.py         # In-memory job storage
+│   ├── job_store_sqlite.py  # SQLite-based persistent job storage
 │   ├── proxy_service.py     # API proxy logic
 │   └── registry.py          # Workflow registry
 ├── utils/                   # Shared utilities
 │   ├── __init__.py
 │   ├── errors.py            # Custom exception types
-│   └── helpers.py           # Common helper functions
+│   ├── helpers.py           # Common helper functions
+│   └── serialize.py         # Job serialization utilities
 ├── scripts/                 # Utility scripts
 │   └── frontend_proxy.py    # Reverse proxy for development
 ├── tests/                   # Unit tests
@@ -75,13 +76,15 @@ modules/workflow_runner/
 │   └── test_workflow_conversion.py
 └── workflows/               # Workflow definitions
     ├── __init__.py
-    ├── image_to_svg.py
-    ├── load_metadata.py
-    ├── remove_bg.py
-    ├── simple_chat.py
-    ├── sort_json_keys.py
-    ├── svg_generation_gemini.py
-    └── utils.py
+    ├── caption_image_vision.py/.json  # Image captioning with vision LLM
+    ├── image_to_svg.py/.json          # Convert images to SVG
+    ├── load_metadata.py/.json         # Extract image metadata
+    ├── remove_bg.py/.json             # Background removal
+    ├── simple_chat.py/.json           # Simple LLM chat interface
+    ├── sort_json_keys.py/.json        # Sort JSON keys alphabetically
+    ├── svg_generation_gemini.py/.json # Generate SVG with Gemini
+    ├── t2i_15_lcm.py/.json            # Text-to-image with LCM
+    └── utils.py                       # Shared workflow utilities
 ```
 
 ## Key Components
@@ -94,13 +97,16 @@ Thin HTTP adapters that:
 - Call service layer functions
 - Handle HTTP-specific concerns (status codes, content types)
 - Avoid business logic
+- Use shared utilities from `_helpers.py` for common operations (JSON parsing, job serialization)
 
 **Example:**
 
 ```python
 async def start_workflow_controller(request: web.Request) -> web.Response:
-    # Validate input
-    payload = await request.json()
+    # Validate input with helpers
+    payload, error_response = await parse_json_body(request)
+    if error_response:
+        return error_response
 
     # Call service
     result = await run_workflow(payload)
@@ -117,7 +123,10 @@ Contains all business logic:
 - **run_service.py**: Workflow execution orchestration
 - **job_service.py**: Job status tracking and persistence
 - **workflow_service.py**: Workflow metadata and file operations
-- **executor.py**: Core workflow execution logic
+- **executor.py**: Core workflow execution logic, including queue state monitoring
+  - Monitors workflow execution state transitions (PENDING → RUNNING → completed)
+  - Handles three scenarios: normal execution, fast completion, and queued waiting
+  - Uses indefinite polling until job starts or completes (no fixed iteration limit)
 
 ### Models Layer
 
@@ -133,6 +142,24 @@ Abstractions for external systems:
 
 - **storage_adapter.py**: Pluggable storage interface
 - Allows swapping storage backends (filesystem, database, etc.)
+
+### Job Storage Layer
+
+Dual implementation for different deployment scenarios:
+
+- **job_store.py** (In-Memory):
+  - Fast, simple dict-based storage
+  - Suitable for development and single-session use
+  - No persistence across restarts
+  
+- **job_store_sqlite.py** (Persistent):
+  - Async SQLite operations via `aiosqlite`
+  - Persistent job history across restarts
+  - Built-in SSE event streaming with resume support
+  - Configurable database path via environment variable
+  - Thread-safe with async lock coordination
+
+The active storage backend is determined by configuration in `job_service.py`.
 
 ## Data Flow
 
@@ -169,15 +196,16 @@ Abstractions for external systems:
 
 ### 3. Autoregistration for Routes
 
-- Routes register themselves via decorators in controller modules
-- `routes.py` imports controllers to trigger registration
+- Routes register themselves via decorators in `api_routes.py`
+- `controllers/routes.py` is a compatibility shim for test imports
 - No manual route registration required
 
-### 4. In-Memory Job Storage
+### 4. Persistent Job Storage
 
-- Simple dict-based storage for job status
-- Suitable for single-instance deployments
-- Can be extended with persistent storage adapters
+- **In-Memory** (`job_store.py`): Simple dict-based storage for job status
+- **SQLite** (`job_store_sqlite.py`): Persistent storage with async operations
+- Configurable storage backend via `job_service.py`
+- SQLite adapter includes SSE event streaming and job history persistence
 
 ### 5. WebSocket Progress Updates
 
@@ -212,18 +240,49 @@ tests/
 
 ### Environment Variables
 
-- `ENABLE_GOOGLE_OAUTH`: Enable OAuth authentication
-- `GOOGLE_CLIENT_IDS`: Allowed OAuth client IDs
-- `WORKFLOW_RUNNER_DEBUG`: Enable debug logging
-- `ALLOWED_USERS_FILE`: Path to allowed users file
-- `SESSION_TTL_SECONDS`: Session timeout
-- `WORKFLOW_RUNNER_ENABLED`: When set to a truthy value (for example `1` or `true`), the Workflow Runner will register its HTTP routes and static frontend at startup. Default: `false`.
+**Core Settings:**
 
-Notes:
+- `WORKFLOW_RUNNER_ENABLED`: When set to a truthy value (e.g., `1` or `true`), the Workflow Runner will register its HTTP routes and static frontend at startup. Default: `false`
+- `WORKFLOW_RUNNER_DEBUG`: Enable debug logging. Default: `false`
+- `DEV_ENV`: Enable development environment features. Default: `false`
+
+**Authentication & Authorization:**
+
+- `ENABLE_GOOGLE_OAUTH`: Enable OAuth authentication. Default: `false`
+- `GOOGLE_CLIENT_IDS`: Comma-separated list of allowed OAuth client IDs
+- `GOOGLE_IDTOKEN_CACHE_SECONDS`: OAuth token cache duration. Default: `3600`
+- `ALLOWED_USERS_FILE`: Path to file containing allowed user emails (one per line)
+- `ALLOWED_USERS`: Comma-separated list of allowed user emails
+- `REQUIRE_ALLOWED_USERS`: Require users to be in allowlist. Default: `true`
+- `SESSION_TTL_SECONDS`: Session timeout in seconds. Default: same as `GOOGLE_IDTOKEN_CACHE_SECONDS`
+- `SESSION_PRUNE_INTERVAL_SECONDS`: How often to clean up expired sessions. Default: `60`
+- `USER_ID_SECRET`: Secret for deterministic owner ID generation (uses default if not set)
+
+**Job Storage:**
+
+- `WORKFLOW_RUNNER_USE_PERSISTENCE`: Use SQLite for persistent storage instead of in-memory. Default: `false`
+- `WORKFLOW_RUNNER_DB_PATH`: Path to SQLite database file (uses default location if not set)
+- `JOB_TTL_SECONDS`: How long to keep completed jobs in storage. Default: `300`
+- `JOB_PRUNE_INTERVAL_SECONDS`: How often to clean up old jobs. Default: `60`
+
+**Proxy Settings:**
+
+- `COMFY_BACKEND_URL`: ComfyUI backend URL for proxying
+- `PROXY_FRONTEND_PORT`: Port for development frontend proxy. Default: `0`
+- `LF_PROXY_SERVICE_FILE`: Path to proxy service configuration file
+- `KOBOLDCPP_BASE_FILE`: Path to KoboldCpp base URL file
+- `GEMINI_API_KEY_FILE`: Path to Gemini API key file
+- `OPENAI_API_KEY_FILE`: Path to OpenAI API key file
+- `PROXY_ALLOWED_PREFIXES`: Comma-separated list of allowed proxy URL prefixes
+- `PROXY_RATE_LIMIT_REQUESTS`: Max requests per time window. Default: `60`
+- `PROXY_RATE_LIMIT_WINDOW_SECONDS`: Rate limit time window in seconds. Default: `60`
+
+**Notes:**
 
 - The runner is shipped inside the `lf-nodes` package but is opt-in by default. If `WORKFLOW_RUNNER_ENABLED` is not set or is false, route registration is skipped and the runner will not expose its APIs or UI.
 - Configuration is read from the repository-level `.env` (project root).
 - If you enable the runner, please also configure authentication/allowed-users to avoid exposing the endpoints unintentionally.
+- For persistence, set `WORKFLOW_RUNNER_USE_PERSISTENCE=true` to enable SQLite storage for job history.
 
 ### Settings Class
 
@@ -291,9 +350,9 @@ Centralized configuration in `config.py`:
 
 ### Scalability
 
-- Job storage could be moved to persistent storage
+- ✅ Job storage now supports SQLite for persistence (`job_store_sqlite.py`)
 - Session storage could use Redis/external store
-- Horizontal scaling would require shared storage
+- Horizontal scaling would require distributed lock coordination for SQLite or migration to PostgreSQL/MySQL
 
 ### Extensibility
 
