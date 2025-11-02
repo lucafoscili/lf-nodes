@@ -144,11 +144,8 @@ async def _monitor_execution_state(prompt_id: str, run_id: str) -> None:
     """
     try:
         queue = PromptServer.instance.prompt_queue
-        timeout = RUNNER_CONFIG.prompt_timeout_seconds or 300
-        checks = int((timeout / 0.35)) if timeout > 0 else 10000
         
-        for _ in range(checks):
-            # Check if prompt is currently executing
+        while True:
             running, queued = queue.get_current_queue_volatile()
             
             # Scenario 1: Prompt is in currently_running (actively executing)
@@ -161,7 +158,6 @@ async def _monitor_execution_state(prompt_id: str, run_id: str) -> None:
                 break
             
             # Scenario 2: Prompt already completed (fast execution)
-            # Check if it's in history but not in queue anymore
             history = queue.get_history(prompt_id=prompt_id)
             if prompt_id in history:
                 # Prompt completed before we could mark it RUNNING
@@ -170,10 +166,8 @@ async def _monitor_execution_state(prompt_id: str, run_id: str) -> None:
                 break
             
             # Scenario 3: Prompt is still queued (waiting)
-            # Check if our prompt is still in the queue
             is_queued = any((q[1] == prompt_id) for q in queued)
             if not is_queued:
-                # Prompt is neither running, queued, nor in history - something went wrong
                 logging.warning("Run %s: prompt %s not found in queue or history", run_id, prompt_id)
                 break
             
