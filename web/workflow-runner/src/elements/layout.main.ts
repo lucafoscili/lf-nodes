@@ -1,9 +1,10 @@
 import { getLfFramework } from '@lf-widgets/framework';
-import { HOME_PLACEHOLDER, resolveMainSections } from '../app/sections';
+import { resolveMainSections } from '../app/sections';
 import { WorkflowMainSections, WorkflowSectionController } from '../types/section';
 import { WorkflowStore } from '../types/state';
 import { DEBUG_MESSAGES } from '../utils/constants';
 import { debugLog } from '../utils/debug';
+import { createHomeSection } from './main.home';
 import { createInputsSection } from './main.inputs';
 import { createOutputsSection } from './main.outputs';
 import { createResultsSection } from './main.results';
@@ -20,10 +21,12 @@ export const MAIN_CLASSES = {
 export const createMainSection = (store: WorkflowStore): WorkflowSectionController => {
   //#region Local variables
   const { MAIN_DESTROYED, MAIN_MOUNTED, MAIN_UPDATED } = DEBUG_MESSAGES;
+  const HOME = createHomeSection(store);
   const INPUTS = createInputsSection(store);
   const OUTPUTS = createOutputsSection(store);
   const RESULTS = createResultsSection(store);
   const SECTION_CONTROLLERS: Record<WorkflowMainSections, WorkflowSectionController> = {
+    home: HOME,
     inputs: INPUTS,
     outputs: OUTPUTS,
     results: RESULTS,
@@ -108,20 +111,6 @@ export const createMainSection = (store: WorkflowStore): WorkflowSectionControll
       }
       controller.render();
     });
-
-    if (resolvedSections.length === 0) {
-      if (!elements[MAIN_CLASSES.home]) {
-        const placeholder = document.createElement('div');
-        placeholder.className = MAIN_CLASSES.home;
-        placeholder.textContent = HOME_PLACEHOLDER;
-        if (root) {
-          root.appendChild(placeholder);
-          uiRegistry.set(MAIN_CLASSES.home, placeholder);
-        }
-      }
-    } else {
-      uiRegistry.remove(MAIN_CLASSES.home);
-    }
 
     LAST_SCOPE = Array.from(scopeSet);
     LAST_WORKFLOW_ID = workflowId;

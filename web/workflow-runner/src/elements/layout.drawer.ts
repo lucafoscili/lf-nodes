@@ -24,15 +24,16 @@ export const DRAWER_CLASSES = {
 
 //#region Helpers
 const _createDataset = (workflows: WorkflowAPIDataset) => {
+  const { article, listTree } = getLfFramework().theme.get.icons();
+
   const categories: Array<WorkflowLFNode & { children: WorkflowLFNode[] }> = [];
-  const root = { id: 'workflows', value: 'Workflows', children: categories };
+  const home = { icon: article, id: 'home', value: 'Home' };
+  const wfs = { icon: listTree, id: 'workflows', value: 'Workflows', children: categories };
 
   const clone: WorkflowAPIDataset = JSON.parse(JSON.stringify(workflows));
-  clone.nodes?.forEach((child) => {
-    child.children = undefined;
-  });
 
   clone.nodes?.forEach((node) => {
+    node.children = undefined;
     const name = node?.category || 'Uncategorized';
     let category = categories.find((cat) => cat.value === name);
     if (!category) {
@@ -43,7 +44,7 @@ const _createDataset = (workflows: WorkflowAPIDataset) => {
   });
 
   const dataset: LfDataDataset = {
-    nodes: [root],
+    nodes: [home, wfs],
   };
 
   categories.sort((a, b) => String(a.value).localeCompare(String(b.value)));
