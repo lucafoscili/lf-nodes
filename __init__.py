@@ -7,7 +7,7 @@ from pathlib import Path
 
 from .modules.utils.env import maybe_load_dotenv, bool_env
 
-VERSION = "2.0.0"
+VERSION = "2.0.1"
 
 NODE_CLASS_MAPPINGS = {}
 NODE_DISPLAY_NAME_MAPPINGS = {}
