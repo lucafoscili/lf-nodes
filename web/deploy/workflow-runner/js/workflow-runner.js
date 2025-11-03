@@ -5,13 +5,13 @@ const apiBase = "/api";
 const apiRoutePrefix = "/lf-nodes";
 const chat = { "provider": "kobold" };
 const staticPaths = { "assets": "/lf-nodes/static/assets/", "workflowRunner": "/lf-nodes/static-workflow-runner/" };
-const theme$9 = "dark";
+const theme$a = "dark";
 const runnerConfig = {
   apiBase,
   apiRoutePrefix,
   chat,
   staticPaths,
-  theme: theme$9
+  theme: theme$a
 };
 const API_BASE = runnerConfig.apiBase;
 const API_ROUTE_PREFIX = runnerConfig.apiRoutePrefix;
@@ -101,6 +101,9 @@ const DEBUG_MESSAGES = {
   HEADER_DESTROYED: "Header section destroyed.",
   HEADER_MOUNTED: "Header section mounted.",
   HEADER_UPDATED: "Header section refreshed.",
+  HOME_DESTROYED: "Home section destroyed.",
+  HOME_MOUNTED: "Home section mounted.",
+  HOME_UPDATED: "Home section refreshed.",
   INPUTS_COLLECTED: "Collected workflow inputs.",
   MAIN_DESTROYED: "Main section destroyed.",
   MAIN_MOUNTED: "Main section mounted.",
@@ -178,10 +181,10 @@ ${formattedContext}` : message;
   } catch {
   }
 };
-const { theme: theme$8 } = getLfFramework();
-const ROOT_CLASS$8 = "action-button-section";
+const { theme: theme$9 } = getLfFramework();
+const ROOT_CLASS$9 = "action-button-section";
 const ACTION_BUTTON_CLASSES = {
-  _: theme$8.bemClass(ROOT_CLASS$8)
+  _: theme$9.bemClass(ROOT_CLASS$9)
 };
 const createActionButtonSection = (store) => {
   const { ACTION_BUTTON_DESTROYED, ACTION_BUTTON_MOUNTED, ACTION_BUTTON_UPDATED } = DEBUG_MESSAGES;
@@ -202,7 +205,7 @@ const createActionButtonSection = (store) => {
       return;
     }
     const _root = document.createElement("lf-button");
-    _root.className = theme$8.bemClass(ACTION_BUTTON_CLASSES._);
+    _root.className = theme$9.bemClass(ACTION_BUTTON_CLASSES._);
     _root.lfIcon = "send";
     _root.lfStyling = "floating";
     _root.title = "Run current workflow";
@@ -244,10 +247,13 @@ const treeHandler = (e, store) => {
             return;
           }
           const isLeaf = !node.children || node.children.length === 0;
-          if (isLeaf) {
+          const isHome = node.id === "home";
+          if (isHome) {
+            state.mutate.view("home");
+          } else if (isLeaf) {
             state.mutate.workflow(node.id);
-            drawer.close();
           }
+          drawer.close();
           break;
         default:
           return;
@@ -257,26 +263,26 @@ const treeHandler = (e, store) => {
       return;
   }
 };
-const { theme: theme$7 } = getLfFramework();
-const ROOT_CLASS$7 = "drawer-section";
+const { theme: theme$8 } = getLfFramework();
+const ROOT_CLASS$8 = "drawer-section";
 const DRAWER_CLASSES = {
-  _: theme$7.bemClass(ROOT_CLASS$7),
-  buttonComfyUi: theme$7.bemClass(ROOT_CLASS$7, "button-comfyui"),
-  buttonDebug: theme$7.bemClass(ROOT_CLASS$7, "button-debug"),
-  buttonGithub: theme$7.bemClass(ROOT_CLASS$7, "button-github"),
-  container: theme$7.bemClass(ROOT_CLASS$7, "container"),
-  footer: theme$7.bemClass(ROOT_CLASS$7, "footer"),
-  tree: theme$7.bemClass(ROOT_CLASS$7, "tree")
+  _: theme$8.bemClass(ROOT_CLASS$8),
+  buttonComfyUi: theme$8.bemClass(ROOT_CLASS$8, "button-comfyui"),
+  buttonDebug: theme$8.bemClass(ROOT_CLASS$8, "button-debug"),
+  buttonGithub: theme$8.bemClass(ROOT_CLASS$8, "button-github"),
+  container: theme$8.bemClass(ROOT_CLASS$8, "container"),
+  footer: theme$8.bemClass(ROOT_CLASS$8, "footer"),
+  tree: theme$8.bemClass(ROOT_CLASS$8, "tree")
 };
-const _createDataset$1 = (workflows) => {
-  var _a, _b;
+const _createDataset$2 = (workflows) => {
+  var _a;
+  const { article, listTree } = getLfFramework().theme.get.icons();
   const categories = [];
-  const root = { id: "workflows", value: "Workflows", children: categories };
+  const home = { icon: article, id: "home", value: "Home" };
+  const wfs = { icon: listTree, id: "workflows", value: "Workflows", children: categories };
   const clone = JSON.parse(JSON.stringify(workflows));
-  (_a = clone.nodes) == null ? void 0 : _a.forEach((child) => {
-    child.children = void 0;
-  });
-  (_b = clone.nodes) == null ? void 0 : _b.forEach((node) => {
+  (_a = clone.nodes) == null ? void 0 : _a.forEach((node) => {
+    node.children = void 0;
     const name = (node == null ? void 0 : node.category) || "Uncategorized";
     let category = categories.find((cat) => cat.value === name);
     if (!category) {
@@ -286,7 +292,7 @@ const _createDataset$1 = (workflows) => {
     category.children.push(node);
   });
   const dataset = {
-    nodes: [root]
+    nodes: [home, wfs]
   };
   categories.sort((a, b) => String(a.value).localeCompare(String(b.value)));
   return dataset;
@@ -366,7 +372,7 @@ const createDrawerSection = (store) => {
       return;
     }
     const _root = document.createElement("lf-drawer");
-    _root.className = ROOT_CLASS$7;
+    _root.className = ROOT_CLASS$8;
     _root.lfDisplay = "slide";
     const { comfyUi, debug, footer, github, container, tree } = _container$1(store);
     _root.appendChild(container);
@@ -392,7 +398,7 @@ const createDrawerSection = (store) => {
     const tree = elements[DRAWER_CLASSES.tree];
     debug.lfUiState = isDebug ? "warning" : "primary";
     debug.title = isDebug ? "Hide developer console" : "Show developer console";
-    tree.lfDataset = _createDataset$1(workflows);
+    tree.lfDataset = _createDataset$2(workflows);
     debugLog(DRAWER_UPDATED);
   };
   return {
@@ -548,16 +554,16 @@ const createOutputComponent = (descriptor) => {
   }
   return el;
 };
-const { theme: theme$6 } = getLfFramework();
-const ROOT_CLASS$6 = "header-section";
+const { theme: theme$7 } = getLfFramework();
+const ROOT_CLASS$7 = "header-section";
 const HEADER_CLASSES = {
-  _: theme$6.bemClass(ROOT_CLASS$6),
-  appMessage: theme$6.bemClass(ROOT_CLASS$6, "app-message"),
-  container: theme$6.bemClass(ROOT_CLASS$6, "container"),
-  drawerToggle: theme$6.bemClass(ROOT_CLASS$6, "drawer-toggle"),
-  serverIndicator: theme$6.bemClass(ROOT_CLASS$6, "server-indicator"),
-  serverIndicatorCounter: theme$6.bemClass(ROOT_CLASS$6, "server-indicator-counter"),
-  serverIndicatorLight: theme$6.bemClass(ROOT_CLASS$6, "server-indicator-light")
+  _: theme$7.bemClass(ROOT_CLASS$7),
+  appMessage: theme$7.bemClass(ROOT_CLASS$7, "app-message"),
+  container: theme$7.bemClass(ROOT_CLASS$7, "container"),
+  drawerToggle: theme$7.bemClass(ROOT_CLASS$7, "drawer-toggle"),
+  serverIndicator: theme$7.bemClass(ROOT_CLASS$7, "server-indicator"),
+  serverIndicatorCounter: theme$7.bemClass(ROOT_CLASS$7, "server-indicator-counter"),
+  serverIndicatorLight: theme$7.bemClass(ROOT_CLASS$7, "server-indicator-light")
 };
 const _appMessage = () => {
   const appMessage = document.createElement("div");
@@ -573,7 +579,7 @@ const _container = () => {
   return container;
 };
 const _drawerToggle = (store) => {
-  const lfIcon = theme$6.get.icon("menu2");
+  const lfIcon = theme$7.get.icon("menu2");
   const props = {
     lfAriaLabel: "Toggle drawer",
     lfIcon,
@@ -648,7 +654,7 @@ const createHeaderSection = (store) => {
     debugLog(HEADER_MOUNTED);
   };
   const render = () => {
-    const { alertTriangle, check, hourglassLow } = theme$6.get.icons();
+    const { alertTriangle, check, hourglassLow } = theme$7.get.icons();
     const { current, manager, queuedJobs, currentRunId } = store.getState();
     const { message, status } = current;
     const { uiRegistry } = manager;
@@ -721,29 +727,106 @@ const createHeaderSection = (store) => {
     render
   };
 };
-const masonryHandler = (e, store) => {
-  var _a, _b, _c;
-  const { comp, originalEvent } = e.detail;
-  const ogEvent = originalEvent;
-  const { manager } = store.getState();
-  if (comp.rootElement.className === OUTPUTS_CLASSES.masonry) {
-    switch ((_a = ogEvent == null ? void 0 : ogEvent.detail) == null ? void 0 : _a.eventType) {
-      case "click":
-        const card = ogEvent.detail.comp;
-        const node = (_c = (_b = card.lfDataset) == null ? void 0 : _b.nodes) == null ? void 0 : _c[0];
-        const isValidCard = (node == null ? void 0 : node.id) && card.rootElement.tagName.toLowerCase() === "lf-card";
-        if (isValidCard) {
-          const { id } = node;
-          manager.runs.select(id, "run");
-          const selected = manager.runs.get(id);
-          const selectedOutputs = JSON.parse(JSON.stringify(selected.outputs)) || null;
-          store.getState().mutate.results(selectedOutputs);
-        }
-        break;
-      default:
-        return;
+const DEFAULT_VIEW = "workflow";
+const SECTION_PRESETS = {
+  home: ["home"],
+  history: ["outputs"],
+  run: ["results"],
+  workflow: ["inputs", "outputs"]
+};
+const cloneSections = (sections) => sections.slice();
+const selectRunWithDefaults = (store, runId, clearResults2) => {
+  if (clearResults2 === void 0) {
+    selectRun(store, runId);
+  } else {
+    selectRun(store, runId, { clearResults: clearResults2 });
+  }
+};
+const resolveRunSections = (state) => {
+  const { runs, selectedRunId } = state;
+  if (selectedRunId && runs.some((run) => run.runId === selectedRunId)) {
+    return cloneSections(SECTION_PRESETS.run);
+  }
+  return [];
+};
+const buildWorkflowRoute = (state) => {
+  const workflowId = state.current.id ?? void 0;
+  return workflowId ? { view: "workflow", workflowId } : { view: "workflow" };
+};
+const VIEW_DEFINITIONS = {
+  //#region Home
+  home: {
+    sections: () => cloneSections(SECTION_PRESETS.home),
+    toRoute: () => ({ view: "home" }),
+    enter: (store, options) => {
+      selectRunWithDefaults(store, null, options.clearResults);
+      return "home";
+    }
+  },
+  //#endregion
+  //#region History
+  history: {
+    sections: () => cloneSections(SECTION_PRESETS.history),
+    toRoute: (state) => {
+      const workflowId = state.current.id ?? void 0;
+      return workflowId ? { view: "history", workflowId } : { view: "history" };
+    },
+    enter: (store, options) => {
+      selectRunWithDefaults(store, null, options.clearResults);
+      return "history";
+    }
+  },
+  //#endregion
+  //#region Run
+  run: {
+    sections: resolveRunSections,
+    toRoute: (state) => {
+      const workflowId = state.current.id ?? void 0;
+      const runId = state.selectedRunId ?? void 0;
+      if (runId) {
+        return { view: "run", runId, workflowId };
+      }
+      return VIEW_DEFINITIONS.workflow.toRoute(state);
+    },
+    enter: (store, options) => {
+      const requestedRunId = options.runId ?? null;
+      const state = store.getState();
+      const runId = requestedRunId ?? state.selectedRunId ?? null;
+      const hasRun = Boolean(runId && state.runs.some((run) => run.runId === runId));
+      if (!hasRun) {
+        selectRunWithDefaults(store, null, options.clearResults);
+        return "workflow";
+      }
+      selectRunWithDefaults(store, runId, options.clearResults);
+      return "run";
+    }
+  },
+  //#endregion
+  //#region Workflow
+  workflow: {
+    sections: () => cloneSections(SECTION_PRESETS.workflow),
+    toRoute: buildWorkflowRoute,
+    enter: (store, options) => {
+      selectRunWithDefaults(store, null, options.clearResults);
+      return "workflow";
     }
   }
+  //#endregion
+};
+const getViewDefinition = (view) => VIEW_DEFINITIONS[view] ?? VIEW_DEFINITIONS[DEFAULT_VIEW];
+const changeView = (store, view, options = {}) => {
+  const definition = getViewDefinition(view);
+  const resolvedView = definition.enter(store, options);
+  setView(store, resolvedView);
+  return resolvedView;
+};
+const resolveMainSections = (state) => {
+  const definition = getViewDefinition(state.view);
+  return definition.sections(state);
+};
+const computeRouteFromState = (state) => {
+  const definition = getViewDefinition(state.view);
+  return definition.toRoute(state);
 };
 const _tryParseJson = (value) => {
   try {
@@ -914,115 +997,21 @@ const clearChildren = (element) => {
     element.removeChild(element.firstChild);
   }
 };
-const HOME_PLACEHOLDER = "Select a workflow to get started.";
-const DEFAULT_VIEW = "workflow";
-const SECTION_PRESETS = {
-  home: [],
-  history: ["outputs"],
-  run: ["results"],
-  workflow: ["inputs", "outputs"]
-};
-const cloneSections = (sections) => sections.slice();
-const selectRunWithDefaults = (store, runId, clearResults2) => {
-  if (clearResults2 === void 0) {
-    selectRun(store, runId);
-  } else {
-    selectRun(store, runId, { clearResults: clearResults2 });
-  }
-};
-const resolveRunSections = (state) => {
-  const { runs, selectedRunId } = state;
-  if (selectedRunId && runs.some((run) => run.runId === selectedRunId)) {
-    return cloneSections(SECTION_PRESETS.run);
-  }
-  return [];
-};
-const buildWorkflowRoute = (state) => {
-  const workflowId = state.current.id ?? void 0;
-  return workflowId ? { view: "workflow", workflowId } : { view: "workflow" };
-};
-const VIEW_DEFINITIONS = {
-  home: {
-    sections: () => cloneSections(SECTION_PRESETS.home),
-    toRoute: () => ({ view: "home" }),
-    enter: (store, options) => {
-      selectRunWithDefaults(store, null, options.clearResults);
-      return "home";
-    }
-  },
-  history: {
-    sections: () => cloneSections(SECTION_PRESETS.history),
-    toRoute: (state) => {
-      const workflowId = state.current.id ?? void 0;
-      return workflowId ? { view: "history", workflowId } : { view: "history" };
-    },
-    enter: (store, options) => {
-      selectRunWithDefaults(store, null, options.clearResults);
-      return "history";
-    }
-  },
-  run: {
-    sections: resolveRunSections,
-    toRoute: (state) => {
-      const workflowId = state.current.id ?? void 0;
-      const runId = state.selectedRunId ?? void 0;
-      if (runId) {
-        return { view: "run", runId, workflowId };
-      }
-      return VIEW_DEFINITIONS.workflow.toRoute(state);
-    },
-    enter: (store, options) => {
-      const requestedRunId = options.runId ?? null;
-      const state = store.getState();
-      const runId = requestedRunId ?? state.selectedRunId ?? null;
-      const hasRun = Boolean(runId && state.runs.some((run) => run.runId === runId));
-      if (!hasRun) {
-        selectRunWithDefaults(store, null, options.clearResults);
-        return "workflow";
-      }
-      selectRunWithDefaults(store, runId, options.clearResults);
-      return "run";
-    }
-  },
-  workflow: {
-    sections: () => cloneSections(SECTION_PRESETS.workflow),
-    toRoute: buildWorkflowRoute,
-    enter: (store, options) => {
-      selectRunWithDefaults(store, null, options.clearResults);
-      return "workflow";
-    }
-  }
-};
-const getViewDefinition = (view) => VIEW_DEFINITIONS[view] ?? VIEW_DEFINITIONS[DEFAULT_VIEW];
-const changeView = (store, view, options = {}) => {
-  const definition = getViewDefinition(view);
-  const resolvedView = definition.enter(store, options);
-  setView(store, resolvedView);
-  return resolvedView;
-};
-const resolveMainSections = (state) => {
-  const definition = getViewDefinition(state.view);
-  return definition.sections(state);
-};
-const computeRouteFromState = (state) => {
-  const definition = getViewDefinition(state.view);
-  return definition.toRoute(state);
-};
-const { theme: theme$5 } = getLfFramework();
-const ROOT_CLASS$5 = "results-section";
+const { theme: theme$6 } = getLfFramework();
+const ROOT_CLASS$6 = "results-section";
 const RESULTS_CLASSES = {
-  _: theme$5.bemClass(ROOT_CLASS$5),
-  actions: theme$5.bemClass(ROOT_CLASS$5, "actions"),
-  back: theme$5.bemClass(ROOT_CLASS$5, "back"),
-  description: theme$5.bemClass(ROOT_CLASS$5, "description"),
-  empty: theme$5.bemClass(ROOT_CLASS$5, "empty"),
-  grid: theme$5.bemClass(ROOT_CLASS$5, "grid"),
-  h3: theme$5.bemClass(ROOT_CLASS$5, "title-h3"),
-  history: theme$5.bemClass(ROOT_CLASS$5, "history"),
-  item: theme$5.bemClass(ROOT_CLASS$5, "item"),
-  results: theme$5.bemClass(ROOT_CLASS$5, "results"),
-  subtitle: theme$5.bemClass(ROOT_CLASS$5, "subtitle"),
-  title: theme$5.bemClass(ROOT_CLASS$5, "title")
+  _: theme$6.bemClass(ROOT_CLASS$6),
+  actions: theme$6.bemClass(ROOT_CLASS$6, "actions"),
+  back: theme$6.bemClass(ROOT_CLASS$6, "back"),
+  description: theme$6.bemClass(ROOT_CLASS$6, "description"),
+  empty: theme$6.bemClass(ROOT_CLASS$6, "empty"),
+  grid: theme$6.bemClass(ROOT_CLASS$6, "grid"),
+  h3: theme$6.bemClass(ROOT_CLASS$6, "title-h3"),
+  history: theme$6.bemClass(ROOT_CLASS$6, "history"),
+  item: theme$6.bemClass(ROOT_CLASS$6, "item"),
+  results: theme$6.bemClass(ROOT_CLASS$6, "results"),
+  subtitle: theme$6.bemClass(ROOT_CLASS$6, "subtitle"),
+  title: theme$6.bemClass(ROOT_CLASS$6, "title")
 };
 const _formatDescription = (selectedRun, description) => {
   if (!selectedRun) {
@@ -1031,7 +1020,7 @@ const _formatDescription = (selectedRun, description) => {
   const timestamp = selectedRun.updatedAt || selectedRun.createdAt;
   return `Run ${selectedRun.runId.slice(0, 8)} - ${formatStatus(selectedRun.status)} - ${formatTimestamp(timestamp)}`;
 };
-const _description$1 = () => {
+const _description$2 = () => {
   const p = document.createElement("p");
   p.className = RESULTS_CLASSES.description;
   return p;
@@ -1041,8 +1030,8 @@ const _results = () => {
   cellWrapper.className = RESULTS_CLASSES.results;
   return cellWrapper;
 };
-const _title$2 = (store) => {
-  const { arrowBack, folder } = theme$5.get.icons();
+const _title$3 = (store) => {
+  const { arrowBack, folder } = theme$6.get.icons();
   const { manager } = store.getState();
   const title = document.createElement("div");
   title.className = RESULTS_CLASSES.title;
@@ -1093,8 +1082,8 @@ const createResultsSection = (store) => {
     const _root = document.createElement("section");
     _root.className = RESULTS_CLASSES._;
     const results = _results();
-    const description = _description$1();
-    const { actions, backButton, h3, historyButton, title } = _title$2(store);
+    const description = _description$2();
+    const { actions, backButton, h3, historyButton, title } = _title$3(store);
     _root.appendChild(title);
     _root.appendChild(description);
     _root.appendChild(results);
@@ -1194,18 +1183,20 @@ const createResultsSection = (store) => {
     render
   };
 };
-const { theme: theme$4 } = getLfFramework();
-const ROOT_CLASS$4 = "main-section";
+const { theme: theme$5 } = getLfFramework();
+const ROOT_CLASS$5 = "main-section";
 const MAIN_CLASSES = {
-  _: theme$4.bemClass(ROOT_CLASS$4),
-  home: theme$4.bemClass(ROOT_CLASS$4, "home")
+  _: theme$5.bemClass(ROOT_CLASS$5),
+  home: theme$5.bemClass(ROOT_CLASS$5, "home")
 };
 const createMainSection = (store) => {
   const { MAIN_DESTROYED, MAIN_MOUNTED, MAIN_UPDATED } = DEBUG_MESSAGES;
+  const HOME = createHomeSection(store);
   const INPUTS = createInputsSection(store);
   const OUTPUTS = createOutputsSection(store);
   const RESULTS = createResultsSection(store);
   const SECTION_CONTROLLERS = {
+    home: HOME,
     inputs: INPUTS,
     outputs: OUTPUTS,
     results: RESULTS
@@ -1227,7 +1218,7 @@ const createMainSection = (store) => {
       return;
     }
     const _root = document.createElement("main");
-    _root.className = ROOT_CLASS$4;
+    _root.className = ROOT_CLASS$5;
     manager.getAppRoot().appendChild(_root);
     uiRegistry.set(MAIN_CLASSES._, _root);
     debugLog(MAIN_MOUNTED);
@@ -1268,19 +1259,6 @@ const createMainSection = (store) => {
       }
       controller.render();
     });
-    if (resolvedSections.length === 0) {
-      if (!elements[MAIN_CLASSES.home]) {
-        const placeholder = document.createElement("div");
-        placeholder.className = MAIN_CLASSES.home;
-        placeholder.textContent = HOME_PLACEHOLDER;
-        if (root) {
-          root.appendChild(placeholder);
-          uiRegistry.set(MAIN_CLASSES.home, placeholder);
-        }
-      }
-    } else {
-      uiRegistry.remove(MAIN_CLASSES.home);
-    }
     LAST_SCOPE = Array.from(scopeSet);
     LAST_WORKFLOW_ID = workflowId;
     debugLog(MAIN_UPDATED);
@@ -1290,6 +1268,165 @@ const createMainSection = (store) => {
     mount,
     render
   };
+};
+const { theme: theme$4 } = getLfFramework();
+const ROOT_CLASS$4 = "home-section";
+const HOME_CLASSES = {
+  _: theme$4.bemClass(ROOT_CLASS$4),
+  description: theme$4.bemClass(ROOT_CLASS$4, "description"),
+  h1: theme$4.bemClass(ROOT_CLASS$4, "title-h1"),
+  masonry: theme$4.bemClass(ROOT_CLASS$4, "masonry"),
+  title: theme$4.bemClass(ROOT_CLASS$4, "title")
+};
+const _createDataset$1 = (store) => {
+  var _a;
+  const { workflows } = store.getState();
+  const clone = JSON.parse(JSON.stringify(workflows));
+  const root = { cells: {}, id: "root", value: "Workflows" };
+  (_a = clone.nodes) == null ? void 0 : _a.forEach((node) => {
+    const id = node.id;
+    root.cells[id] = {
+      lfDataset: {
+        nodes: [
+          {
+            cells: {
+              "1": {
+                value: String(node.value)
+              },
+              "2": {
+                value: node.category
+              },
+              "3": {
+                value: node.description
+              }
+            },
+            id
+          }
+        ]
+      },
+      shape: "card",
+      value: ""
+    };
+  });
+  const dataset = {
+    nodes: [root]
+  };
+  return dataset;
+};
+const _masonry$1 = (store) => {
+  const masonry = document.createElement("lf-masonry");
+  masonry.className = HOME_CLASSES.masonry;
+  masonry.lfShape = "card";
+  masonry.lfStyle = ".masonry .grid { overflow-x: unset; overflow-y: unset; }";
+  masonry.addEventListener("lf-masonry-event", (e) => masonryHandler(e, store));
+  return masonry;
+};
+const _description$1 = () => {
+  const p = document.createElement("p");
+  p.className = HOME_CLASSES.description;
+  p.textContent = "Below a list of the available workflows.";
+  return p;
+};
+const _title$2 = () => {
+  const title = document.createElement("div");
+  const h1 = document.createElement("h1");
+  title.className = HOME_CLASSES.title;
+  h1.className = HOME_CLASSES.h1;
+  h1.textContent = "Workflow Runner";
+  title.appendChild(h1);
+  return { h1, title };
+};
+const createHomeSection = (store) => {
+  const { HOME_DESTROYED, HOME_MOUNTED, HOME_UPDATED } = DEBUG_MESSAGES;
+  const destroy = () => {
+    const { manager } = store.getState();
+    const { uiRegistry } = manager;
+    for (const cls in HOME_CLASSES) {
+      const element = HOME_CLASSES[cls];
+      uiRegistry.remove(element);
+    }
+    debugLog(HOME_DESTROYED);
+  };
+  const mount = () => {
+    const { manager } = store.getState();
+    const { uiRegistry } = manager;
+    const elements = uiRegistry.get();
+    if (elements && elements[HOME_CLASSES._]) {
+      return;
+    }
+    const _root = document.createElement("section");
+    _root.className = HOME_CLASSES._;
+    const description = _description$1();
+    const masonry = _masonry$1(store);
+    const { h1, title } = _title$2();
+    _root.appendChild(title);
+    _root.appendChild(description);
+    _root.appendChild(masonry);
+    elements[MAIN_CLASSES._].prepend(_root);
+    uiRegistry.set(HOME_CLASSES._, _root);
+    uiRegistry.set(HOME_CLASSES.description, description);
+    uiRegistry.set(HOME_CLASSES.h1, h1);
+    uiRegistry.set(HOME_CLASSES.masonry, masonry);
+    uiRegistry.set(HOME_CLASSES.title, title);
+    debugLog(HOME_MOUNTED);
+  };
+  const render = () => {
+    const state = store.getState();
+    const { manager } = state;
+    const { uiRegistry } = manager;
+    const elements = uiRegistry.get();
+    if (!elements) {
+      return;
+    }
+    const masonry = elements[HOME_CLASSES.masonry];
+    masonry.lfDataset = _createDataset$1(store);
+    debugLog(HOME_UPDATED);
+  };
+  return {
+    destroy,
+    mount,
+    render
+  };
+};
+const masonryHandler = (e, store) => {
+  var _a, _b, _c, _d, _e, _f;
+  const { comp, originalEvent } = e.detail;
+  const ogEvent = originalEvent;
+  const { manager, mutate } = store.getState();
+  if (comp.rootElement.className === OUTPUTS_CLASSES.masonry) {
+    switch ((_a = ogEvent == null ? void 0 : ogEvent.detail) == null ? void 0 : _a.eventType) {
+      case "click":
+        const card = ogEvent.detail.comp;
+        const node = (_c = (_b = card.lfDataset) == null ? void 0 : _b.nodes) == null ? void 0 : _c[0];
+        const isValidCard = (node == null ? void 0 : node.id) && card.rootElement.tagName.toLowerCase() === "lf-card";
+        if (isValidCard) {
+          const { id } = node;
+          manager.runs.select(id, "run");
+          const selected = manager.runs.get(id);
+          const selectedOutputs = JSON.parse(JSON.stringify(selected.outputs)) || null;
+          store.getState().mutate.results(selectedOutputs);
+        }
+        break;
+      default:
+        return;
+    }
+  }
+  if (comp.rootElement.className === HOME_CLASSES.masonry) {
+    switch ((_d = ogEvent == null ? void 0 : ogEvent.detail) == null ? void 0 : _d.eventType) {
+      case "click":
+        const card = ogEvent.detail.comp;
+        const node = (_f = (_e = card.lfDataset) == null ? void 0 : _e.nodes) == null ? void 0 : _f[0];
+        const isValidCard = (node == null ? void 0 : node.id) && card.rootElement.tagName.toLowerCase() === "lf-card";
+        if (isValidCard) {
+          const { id } = node;
+          mutate.workflow(id);
+          setView(store, "workflow");
+        }
+        break;
+      default:
+        return;
+    }
+  }
 };
 const { theme: theme$3 } = getLfFramework();
 const ROOT_CLASS$3 = "outputs-section";
