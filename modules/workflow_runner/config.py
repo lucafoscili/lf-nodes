@@ -1,4 +1,3 @@
-import os
 import logging
 
 from dataclasses import dataclass
@@ -38,12 +37,8 @@ class Settings:
     WORKFLOW_RUNNER_ENABLED: bool
     USER_ID_SECRET: str
 
-
-_pkg_root = Path(__file__).parent
-
-repo_root = Path(__file__).resolve().parents[4]
-maybe_load_dotenv(repo_root / ".env")  # Prefer repository-level .env if present (makes configuration easier for deployments).
-
+repo_root = Path(__file__).resolve().parents[2]
+maybe_load_dotenv(repo_root / ".env")
 
 _SETTINGS = Settings(
     ENABLE_GOOGLE_OAUTH=bool_env("ENABLE_GOOGLE_OAUTH", False),
@@ -75,6 +70,7 @@ _SETTINGS = Settings(
 
 def get_settings() -> Settings:
     return _SETTINGS
+
 import json
 import logging
 

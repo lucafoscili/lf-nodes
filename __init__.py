@@ -16,7 +16,7 @@ MODULES_DIR = os.path.join(os.path.dirname(__file__), "modules")
 
 LOG = logging.getLogger(__name__)
 
-repo_root = Path(__file__).resolve().parents[2]
+repo_root = Path(__file__).resolve().parent
 maybe_load_dotenv(repo_root / ".env")
 _WF_ENABLED = bool_env("WORKFLOW_RUNNER_ENABLED", False)
 
