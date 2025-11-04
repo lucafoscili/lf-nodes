@@ -1,6 +1,7 @@
 from importlib import import_module
 from types import ModuleType
 from typing import Iterable, Iterator, Sequence
+import pkgutil
 
 _WORKFLOW_MODULES: Sequence[str] = (
     "caption_image_vision",
@@ -20,6 +21,19 @@ def _import_workflow_module(module_name: str) -> ModuleType:
 def iter_workflow_modules() -> Iterator[ModuleType]:
     for module_name in _WORKFLOW_MODULES:
         yield _import_workflow_module(module_name)
+
+    try:
+        custom_pkg = import_module(f"{__name__}.custom")
+    except ModuleNotFoundError:
+        custom_pkg = None
+
+    if custom_pkg is not None and hasattr(custom_pkg, "__path__"):
+        for _, name, _ in pkgutil.iter_modules(custom_pkg.__path__):
+            module_name = f"custom.{name}"
+            try:
+                yield _import_workflow_module(module_name)
+            except Exception:
+                continue
 
 def iter_workflow_definitions() -> Iterable[object]:
     """
