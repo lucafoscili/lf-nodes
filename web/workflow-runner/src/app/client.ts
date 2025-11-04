@@ -1,6 +1,7 @@
 import { API_ROOT } from '../config';
-import { EventPayload, RunRecord, UpdateHandler } from '../types/client';
+import { EventPayload, RunRecord } from '../types/client';
 import { WorkflowStore } from '../types/state';
+import type { ClientInternals, ClientInternalsMethods } from '../types/test-utils';
 import { recordToUI } from '../utils/common';
 import { debugLog } from '../utils/debug';
 import { ensureActiveRun, upsertRun } from './store-actions';
@@ -53,14 +54,6 @@ export class WorkflowRunnerClient {
       debugLog('queueHandler error', 'informational', e);
     }
   };
-
-  setUpdateHandler(h: UpdateHandler) {
-    this.onUpdate = h;
-  }
-
-  setQueueHandler(h: (pending: number, running: number) => void) {
-    this.queueHandler = h;
-  }
 
   // Preload workflow names to avoid fetching them individually
   setWorkflowNames(names: Map<string, string>) {
@@ -619,6 +612,47 @@ export class WorkflowRunnerClient {
       } catch {}
       this.pollAbortController = null;
     }
+  }
+
+  getRuns(): Map<string, RunRecord> {
+    return this.runs;
+  }
+
+  getLastSeq(): Map<string, number> {
+    return this.lastSeq;
+  }
+
+  /**
+   * Test API: returns a minimal test-only facade exposing internal maps
+   * and operations used by unit tests. Prefer public behavior where
+   * possible; this API exists solely to avoid fragile `as any` casts in
+   * tests and is intentionally small.
+   */
+  getTestApi(): ClientInternals & ClientInternalsMethods {
+    const self: any = this;
+    self.applyEvent = this.applyEvent.bind(this);
+    self.upsertRun = this.upsertRun.bind(this);
+    self.reconcileRun = this.reconcileRun.bind(this);
+    self.pollActiveRuns = this.pollActiveRuns.bind(this);
+    self.coldLoadRuns = this.coldLoadRuns.bind(this);
+    self.processSnapshotArray = this.processSnapshotArray.bind(this);
+    self.saveCache = this.saveCache.bind(this);
+    self.loadCacheIds = this.loadCacheIds.bind(this);
+    self.seedPlaceholders = this.seedPlaceholders.bind(this);
+    self.start = this.start.bind(this);
+    self.stop = this.stop.bind(this);
+    self.fetchWorkflowNames = this.fetchWorkflowNames.bind(this);
+    self.setWorkflowNames = this.setWorkflowNames.bind(this);
+
+    self.lastSeq = this.lastSeq;
+    self.runs = this.runs;
+    self.inflightReconciles = this.inflightReconciles;
+    self.processingSnapshot = this.processingSnapshot;
+    self.cacheKey = this.cacheKey;
+    self.workflowNames = this.workflowNames;
+    self.store = this.#STORE;
+
+    return this as unknown as ClientInternals & ClientInternalsMethods;
   }
 
   private startPollingFallback() {

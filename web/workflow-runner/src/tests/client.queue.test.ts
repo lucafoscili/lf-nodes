@@ -6,31 +6,35 @@ import { createWorkflowRunnerStore } from '../app/store';
 const store = createWorkflowRunnerStore(initState());
 
 describe('WorkflowRunnerClient queue handling', () => {
+  //#region queueHandler tests
   it('calls queueHandler with pending/running and does not call applyEvent', () => {
     const client = new WorkflowRunnerClient(store);
     const spyQueue = vi.fn();
-    (client as any).setQueueHandler(spyQueue);
+    // use public API: assign to the public `queueHandler` field
+    client.queueHandler = spyQueue;
 
     const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
-    // Simulate a queue_status payload from SSE
     const payload = { type: 'queue_status', pending: 3, running: 1 };
-    (client as any).handleQueuePayload(payload);
+    client.handleQueuePayload(payload);
 
     expect(spyQueue).toHaveBeenCalledWith(3, 1);
-    // ensure no invalid-run warnings
     expect(consoleWarn).toHaveBeenCalledTimes(0);
 
     consoleWarn.mockRestore();
   });
+  //#endregion
 
+  //#region applyEvent
   it('falls back to applyEvent for run-like payloads', () => {
     const client = new WorkflowRunnerClient(store);
 
     const ev = { run_id: 'r-q', status: 'pending', seq: 1 };
-    (client as any).handleQueuePayload(ev);
+    client.handleQueuePayload(ev);
 
-    expect((client as any).runs.get('r-q').status).toBe('pending');
-    expect((client as any).lastSeq.get('r-q')).toBe(1);
+    // Use the explicit test getters on the client rather than poking internals
+    expect(client.getRuns().get('r-q')?.status).toBe('pending');
+    expect(client.getLastSeq().get('r-q')).toBe(1);
   });
+  //#endregion
 });
