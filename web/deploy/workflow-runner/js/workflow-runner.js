@@ -4,7 +4,7 @@ import "../../js/lf-widgets-foundations-LHw4zrea.js";
 const apiBase = "/api";
 const apiRoutePrefix = "/lf-nodes";
 const chat = { "provider": "kobold" };
-const staticPaths = { "assets": "/lf-nodes/static/assets/", "workflowRunner": "/lf-nodes/static-workflow-runner/" };
+const staticPaths = { "assets": "/lf-nodes/static/assets/" };
 const theme$a = "dark";
 const runnerConfig = {
   apiBase,
@@ -26,7 +26,6 @@ const DEFAULT_STATUS_MESSAGES = {
 };
 const DEFAULT_THEME = runnerConfig.theme;
 const STATIC_ASSETS_PATH = runnerConfig.staticPaths.assets;
-const STATIC_WORKFLOW_RUNNER_PATH = runnerConfig.staticPaths.workflowRunner;
 const buildApiUrl = (path) => `${API_ROOT}${path.startsWith("/") ? path : `/${path}`}`;
 const buildAssetsUrl = (origin = window.location.origin) => `${origin}${API_BASE}${STATIC_ASSETS_PATH.startsWith("/") ? STATIC_ASSETS_PATH : `/${STATIC_ASSETS_PATH}`}`;
 const addNotification = (store, notification) => {
@@ -1946,7 +1945,7 @@ const fetchWorkflowDefinitions = async () => {
   const response = await fetch(buildApiUrl("/workflows"), { method: "GET" });
   if (response.status === 401) {
     try {
-      window.location.href = `${window.location.origin}${API_BASE}${STATIC_WORKFLOW_RUNNER_PATH}login.html`;
+      window.location.href = `${window.location.origin}${API_BASE}/workflow-runner`;
     } catch (err) {
     }
     throw new WorkflowApiError("Unauthorized", { status: 401 });
@@ -1966,7 +1965,7 @@ const fetchWorkflowJSON = async (workflowId) => {
   const response = await fetch(buildApiUrl(`/workflows/${workflowId}`), { method: "GET" });
   if (response.status === 401) {
     try {
-      window.location.href = `${window.location.origin}${API_BASE}${STATIC_WORKFLOW_RUNNER_PATH}login.html`;
+      window.location.href = `${window.location.origin}${API_BASE}/workflow-runner`;
     } catch (err) {
     }
     throw new WorkflowApiError("Unauthorized", { status: 401 });
@@ -1988,7 +1987,7 @@ const runWorkflow = async (payload) => {
   });
   if (response.status === 401) {
     try {
-      window.location.href = `${window.location.origin}${API_BASE}${STATIC_WORKFLOW_RUNNER_PATH}login.html`;
+      window.location.href = `${window.location.origin}${API_BASE}/workflow-runner`;
     } catch (err) {
     }
     throw new WorkflowApiError("Unauthorized", { status: 401 });
@@ -2027,7 +2026,7 @@ const uploadWorkflowFiles = async (files) => {
   });
   if (response.status === 401) {
     try {
-      window.location.href = `${window.location.origin}${API_BASE}${STATIC_WORKFLOW_RUNNER_PATH}login.html`;
+      window.location.href = `${window.location.origin}${API_BASE}/workflow-runner`;
     } catch (err) {
     }
     throw new WorkflowApiError("Unauthorized", { status: 401 });
