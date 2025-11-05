@@ -48,9 +48,9 @@ async def _send_initial_snapshot(resp: web.Response, subscriber_owner: str | Non
         """
         try:
             jobs = await job_store.list_jobs(owner_id=subscriber_owner if subscriber_owner else None)
-            
+
             LOG.debug(f"[_send_initial_snapshot] Total jobs for owner: {len(jobs)}")
-            
+
             for job in jobs.values():
                     owner = getattr(job, "owner_id", None)
                     if subscriber_owner and owner and owner != subscriber_owner:
@@ -285,7 +285,7 @@ async def list_runs_controller(request: web.Request) -> web.Response:
     """
     if _WF_DEBUG:
         print(f"[list_runs_controller] Called with query: {dict(request.query)}")
-    
+
     if _ENABLE_GOOGLE_OAUTH:
         auth_resp = await _require_auth(request)
         if isinstance(auth_resp, web.Response):
@@ -335,7 +335,7 @@ async def list_runs_controller(request: web.Request) -> web.Response:
                 if k in seen:
                     continue
                 seen.add(k)
-                
+
                 # Use centralized serializer to maintain a single representation
                 s = serialize_job(job, include_result_for_terminal=True)
                 runs_out.append({
