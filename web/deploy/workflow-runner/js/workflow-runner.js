@@ -2395,24 +2395,31 @@ var __classPrivateFieldGet$1 = function(receiver, state, kind, f) {
   if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 };
-var _WorkflowRunnerClient_ES, _WorkflowRunnerClient_STORE, _WorkflowRunnerClient_WORKFLOW_NAMES;
+var _WorkflowRunnerClient_ES, _WorkflowRunnerClient_STORE, _WorkflowRunnerClient_WORKFLOW_NAMES, _WorkflowRunnerClient_CACHE_KEY, _WorkflowRunnerClient_CACHE_EXPIRY_MS, _WorkflowRunnerClient_INITIAL_BACKOFF_MS, _WorkflowRunnerClient_MAX_BACKOFF_MS, _WorkflowRunnerClient_POLLING_INTERVAL_MS, _WorkflowRunnerClient_RUNS_QUERY_LIMIT, _WorkflowRunnerClient_LAST_SEQ, _WorkflowRunnerClient_RUNS, _WorkflowRunnerClient_WORKFLOW_CACHE, _WorkflowRunnerClient_STATE, _WorkflowRunnerClient_POLLING, _WorkflowRunnerClient_BACKOFF_MS, _WorkflowRunnerClient_INFLIGHT_RECONCILES;
 class WorkflowRunnerClient {
   constructor(store) {
     _WorkflowRunnerClient_ES.set(this, null);
     _WorkflowRunnerClient_STORE.set(this, void 0);
     _WorkflowRunnerClient_WORKFLOW_NAMES.set(this, {});
-    this.lastSeq = /* @__PURE__ */ new Map();
-    this.runs = /* @__PURE__ */ new Map();
-    this.workflowNames = /* @__PURE__ */ new Map();
-    this.pollingInterval = 3e3;
-    this.pollingTimer = null;
-    this.pollAbortController = null;
-    this.backoffMs = 1e3;
-    this.maxBackoffMs = 3e4;
-    this.connecting = false;
-    this.processingSnapshot = false;
-    this.cacheKey = "lf-runs-cache";
-    this.inflightReconciles = /* @__PURE__ */ new Map();
+    _WorkflowRunnerClient_CACHE_KEY.set(this, "lf-runs-cache");
+    _WorkflowRunnerClient_CACHE_EXPIRY_MS.set(this, 60 * 60 * 1e3);
+    _WorkflowRunnerClient_INITIAL_BACKOFF_MS.set(this, 1e3);
+    _WorkflowRunnerClient_MAX_BACKOFF_MS.set(this, 3e4);
+    _WorkflowRunnerClient_POLLING_INTERVAL_MS.set(this, 3e3);
+    _WorkflowRunnerClient_RUNS_QUERY_LIMIT.set(this, 200);
+    _WorkflowRunnerClient_LAST_SEQ.set(this, /* @__PURE__ */ new Map());
+    _WorkflowRunnerClient_RUNS.set(this, /* @__PURE__ */ new Map());
+    _WorkflowRunnerClient_WORKFLOW_CACHE.set(this, /* @__PURE__ */ new Map());
+    _WorkflowRunnerClient_STATE.set(this, {
+      connecting: false,
+      processingSnapshot: false
+    });
+    _WorkflowRunnerClient_POLLING.set(this, {
+      timer: null,
+      abortController: null
+    });
+    _WorkflowRunnerClient_BACKOFF_MS.set(this, 1e3);
+    _WorkflowRunnerClient_INFLIGHT_RECONCILES.set(this, /* @__PURE__ */ new Map());
     this.onUpdate = (runs) => {
       var _a;
       if (Object.keys(__classPrivateFieldGet$1(this, _WorkflowRunnerClient_WORKFLOW_NAMES, "f")).length === 0) {
@@ -2439,34 +2446,28 @@ class WorkflowRunnerClient {
     };
     __classPrivateFieldSet$1(this, _WorkflowRunnerClient_STORE, store, "f");
   }
-  setUpdateHandler(h) {
-    this.onUpdate = h;
-  }
-  setQueueHandler(h) {
-    this.queueHandler = h;
-  }
   // Preload workflow names to avoid fetching them individually
   setWorkflowNames(names) {
     for (const [id, name] of names) {
-      this.workflowNames.set(id, name);
+      __classPrivateFieldGet$1(this, _WorkflowRunnerClient_WORKFLOW_CACHE, "f").set(id, name);
     }
     this.emitUpdate();
   }
   emitUpdate() {
     if (this.onUpdate)
-      this.onUpdate(new Map(this.runs));
+      this.onUpdate(new Map(__classPrivateFieldGet$1(this, _WorkflowRunnerClient_RUNS, "f")));
     this.saveCache();
   }
   // Reconcile server record for a run via REST (de-duplicated)
   reconcileRun(run_id) {
-    if (this.inflightReconciles.has(run_id)) {
+    if (__classPrivateFieldGet$1(this, _WorkflowRunnerClient_INFLIGHT_RECONCILES, "f").has(run_id)) {
       return;
     }
     const promise = this._reconcileRunOnce(run_id).catch(() => {
     }).finally(() => {
-      this.inflightReconciles.delete(run_id);
+      __classPrivateFieldGet$1(this, _WorkflowRunnerClient_INFLIGHT_RECONCILES, "f").delete(run_id);
     });
-    this.inflightReconciles.set(run_id, promise);
+    __classPrivateFieldGet$1(this, _WorkflowRunnerClient_INFLIGHT_RECONCILES, "f").set(run_id, promise);
   }
   async _reconcileRunOnce(run_id) {
     try {
@@ -2504,7 +2505,7 @@ class WorkflowRunnerClient {
       debugLog("applyEvent: invalid run record (missing run_id or status)", "warning", ev);
       return;
     }
-    const last = this.lastSeq.get(ev.run_id) ?? -1;
+    const last = __classPrivateFieldGet$1(this, _WorkflowRunnerClient_LAST_SEQ, "f").get(ev.run_id) ?? -1;
     if (last >= 0 && ev.seq > last + 1) {
       this.reconcileRun(ev.run_id);
     }
@@ -2512,20 +2513,20 @@ class WorkflowRunnerClient {
   }
   // Upsert with seq monotonicity guard and workflow name fetch
   upsertRun(rec) {
-    const last = this.lastSeq.get(rec.run_id) ?? -1;
+    const last = __classPrivateFieldGet$1(this, _WorkflowRunnerClient_LAST_SEQ, "f").get(rec.run_id) ?? -1;
     if (rec.seq <= last)
       return;
-    this.lastSeq.set(rec.run_id, rec.seq);
-    this.runs.set(rec.run_id, rec);
-    if (rec.workflow_id && !this.workflowNames.has(rec.workflow_id)) {
+    __classPrivateFieldGet$1(this, _WorkflowRunnerClient_LAST_SEQ, "f").set(rec.run_id, rec.seq);
+    __classPrivateFieldGet$1(this, _WorkflowRunnerClient_RUNS, "f").set(rec.run_id, rec);
+    if (rec.workflow_id && !__classPrivateFieldGet$1(this, _WorkflowRunnerClient_WORKFLOW_CACHE, "f").has(rec.workflow_id)) {
       this.fetchWorkflowNames([rec.workflow_id]);
     }
     this.emitUpdate();
   }
   // Remove a run completely from state and cache (used when server returns 404)
   removeRun(runId) {
-    this.runs.delete(runId);
-    this.lastSeq.delete(runId);
+    __classPrivateFieldGet$1(this, _WorkflowRunnerClient_RUNS, "f").delete(runId);
+    __classPrivateFieldGet$1(this, _WorkflowRunnerClient_LAST_SEQ, "f").delete(runId);
     this.emitUpdate();
   }
   processSnapshotArray(arr) {
@@ -2538,12 +2539,12 @@ class WorkflowRunnerClient {
         continue;
       }
       activeSet.add(s.run_id);
-      const last = this.lastSeq.get(s.run_id) ?? -1;
+      const last = __classPrivateFieldGet$1(this, _WorkflowRunnerClient_LAST_SEQ, "f").get(s.run_id) ?? -1;
       if (s.seq <= last)
         continue;
-      this.lastSeq.set(s.run_id, s.seq);
-      this.runs.set(s.run_id, s);
-      if (s.workflow_id && !this.workflowNames.has(s.workflow_id)) {
+      __classPrivateFieldGet$1(this, _WorkflowRunnerClient_LAST_SEQ, "f").set(s.run_id, s.seq);
+      __classPrivateFieldGet$1(this, _WorkflowRunnerClient_RUNS, "f").set(s.run_id, s);
+      if (s.workflow_id && !__classPrivateFieldGet$1(this, _WorkflowRunnerClient_WORKFLOW_CACHE, "f").has(s.workflow_id)) {
         missingWorkflowIds.add(s.workflow_id);
       }
       if (!s.workflow_id) {
@@ -2554,7 +2555,7 @@ class WorkflowRunnerClient {
     (async () => {
       try {
         const toReconcile = [];
-        for (const [id, rec] of this.runs.entries()) {
+        for (const [id, rec] of __classPrivateFieldGet$1(this, _WorkflowRunnerClient_RUNS, "f").entries()) {
           if (rec.status === "running" && !activeSet.has(id)) {
             toReconcile.push(id);
           }
@@ -2580,7 +2581,7 @@ class WorkflowRunnerClient {
   }
   // Fetch human-friendly workflow names for given ids and cache them
   async fetchWorkflowNames(ids) {
-    const needs = ids.filter((id) => !!id && !this.workflowNames.has(id));
+    const needs = ids.filter((id) => !!id && !__classPrivateFieldGet$1(this, _WorkflowRunnerClient_WORKFLOW_CACHE, "f").has(id));
     if (needs.length === 0)
       return;
     try {
@@ -2630,7 +2631,7 @@ class WorkflowRunnerClient {
           const id = it.workflow_id ?? it.id ?? it.workflowId ?? it.key;
           const name = it.name ?? it.title ?? it.workflow_name ?? it.value ?? null;
           if (id && name)
-            this.workflowNames.set(id, name);
+            __classPrivateFieldGet$1(this, _WorkflowRunnerClient_WORKFLOW_CACHE, "f").set(id, name);
         } catch (e) {
           debugLog("fetchWorkflowNames: skipping malformed item", "warning", e);
         }
@@ -2645,14 +2646,14 @@ class WorkflowRunnerClient {
     try {
       if (typeof localStorage === "undefined")
         return;
-      const ids = Array.from(this.runs.keys());
+      const ids = Array.from(__classPrivateFieldGet$1(this, _WorkflowRunnerClient_RUNS, "f").keys());
       const payload = {
         version: 1,
         cached_at: Date.now(),
         run_ids: ids.slice(-300)
         // cap to recent 300 runs
       };
-      localStorage.setItem(this.cacheKey, JSON.stringify(payload));
+      localStorage.setItem(__classPrivateFieldGet$1(this, _WorkflowRunnerClient_CACHE_KEY, "f"), JSON.stringify(payload));
     } catch (e) {
       debugLog("LocalStorage write skipped", "warning", e);
     }
@@ -2662,14 +2663,14 @@ class WorkflowRunnerClient {
     try {
       if (typeof localStorage === "undefined")
         return [];
-      const raw = localStorage.getItem(this.cacheKey);
+      const raw = localStorage.getItem(__classPrivateFieldGet$1(this, _WorkflowRunnerClient_CACHE_KEY, "f"));
       if (!raw)
         return [];
       const parsed = JSON.parse(raw);
       if (parsed.version !== 1)
         return [];
       const cacheAge = Date.now() - (parsed.cached_at ?? 0);
-      if (cacheAge > 60 * 60 * 1e3)
+      if (cacheAge > __classPrivateFieldGet$1(this, _WorkflowRunnerClient_CACHE_EXPIRY_MS, "f"))
         return [];
       return Array.isArray(parsed.run_ids) ? parsed.run_ids : [];
     } catch (e) {
@@ -2680,8 +2681,8 @@ class WorkflowRunnerClient {
   // Seed placeholder entries for optimistic UI (hydrated later)
   seedPlaceholders(ids) {
     for (const id of ids) {
-      if (!this.runs.has(id)) {
-        this.runs.set(id, {
+      if (!__classPrivateFieldGet$1(this, _WorkflowRunnerClient_RUNS, "f").has(id)) {
+        __classPrivateFieldGet$1(this, _WorkflowRunnerClient_RUNS, "f").set(id, {
           run_id: id,
           status: "pending",
           // placeholder status; harmless until hydrated
@@ -2700,7 +2701,7 @@ class WorkflowRunnerClient {
   async coldLoadRuns() {
     try {
       const resp = await fetch(
-        `${API_ROOT}/workflow-runner/runs?status=pending,running,succeeded,failed,cancelled,timeout&owner=me&limit=200`,
+        `${API_ROOT}/workflow-runner/runs?status=pending,running,succeeded,failed,cancelled,timeout&owner=me&limit=${__classPrivateFieldGet$1(this, _WorkflowRunnerClient_RUNS_QUERY_LIMIT, "f")}`,
         // FIXME: make configurable, use constants
         { credentials: "include" }
       );
@@ -2712,7 +2713,7 @@ class WorkflowRunnerClient {
       const arr = data.runs || [];
       const serverIds = new Set(arr.map((r) => r.run_id));
       this.processSnapshotArray(arr);
-      for (const localId of Array.from(this.runs.keys())) {
+      for (const localId of Array.from(__classPrivateFieldGet$1(this, _WorkflowRunnerClient_RUNS, "f").keys())) {
         if (!serverIds.has(localId)) {
           this.reconcileRun(localId);
         }
@@ -2723,17 +2724,17 @@ class WorkflowRunnerClient {
   }
   //#region SSE Connection
   async start() {
-    if (__classPrivateFieldGet$1(this, _WorkflowRunnerClient_ES, "f") || this.connecting) {
+    if (__classPrivateFieldGet$1(this, _WorkflowRunnerClient_ES, "f") || __classPrivateFieldGet$1(this, _WorkflowRunnerClient_STATE, "f").connecting) {
       return;
     }
-    this.connecting = true;
+    __classPrivateFieldGet$1(this, _WorkflowRunnerClient_STATE, "f").connecting = true;
     const cachedIds = this.loadCacheIds();
     if (cachedIds.length > 0) {
       this.seedPlaceholders(cachedIds);
     }
     await this.coldLoadRuns();
-    const serverIds = new Set(Array.from(this.runs.keys()).filter((id) => {
-      const run = this.runs.get(id);
+    const serverIds = new Set(Array.from(__classPrivateFieldGet$1(this, _WorkflowRunnerClient_RUNS, "f").keys()).filter((id) => {
+      const run = __classPrivateFieldGet$1(this, _WorkflowRunnerClient_RUNS, "f").get(id);
       return run && run.seq >= 0;
     }));
     for (const id of cachedIds) {
@@ -2769,26 +2770,26 @@ class WorkflowRunnerClient {
           } catch (err) {
             debugLog("invalid generic event message", "informational", err);
           }
-          if (this.processingSnapshot) {
-            this.processingSnapshot = false;
+          if (__classPrivateFieldGet$1(this, _WorkflowRunnerClient_STATE, "f").processingSnapshot) {
+            __classPrivateFieldGet$1(this, _WorkflowRunnerClient_STATE, "f").processingSnapshot = false;
           }
         };
       }
     } catch (e) {
       debugLog("EventSource onmessage assignment failed", "informational", e);
     }
-    this.processingSnapshot = true;
+    __classPrivateFieldGet$1(this, _WorkflowRunnerClient_STATE, "f").processingSnapshot = true;
     __classPrivateFieldGet$1(this, _WorkflowRunnerClient_ES, "f").onopen = () => {
-      this.backoffMs = 1e3;
-      if (this.pollingTimer) {
-        clearInterval(this.pollingTimer);
-        this.pollingTimer = null;
-        if (this.pollAbortController) {
+      __classPrivateFieldSet$1(this, _WorkflowRunnerClient_BACKOFF_MS, __classPrivateFieldGet$1(this, _WorkflowRunnerClient_INITIAL_BACKOFF_MS, "f"), "f");
+      if (__classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").timer) {
+        clearInterval(__classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").timer);
+        __classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").timer = null;
+        if (__classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").abortController) {
           try {
-            this.pollAbortController.abort();
+            __classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").abortController.abort();
           } catch {
           }
-          this.pollAbortController = null;
+          __classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").abortController = null;
         }
       }
     };
@@ -2804,7 +2805,7 @@ class WorkflowRunnerClient {
       this.startPollingFallback();
       const delay = this.backoffWithJitter();
       setTimeout(() => this.start(), delay);
-      this.backoffMs = Math.min(this.backoffMs * 2, this.maxBackoffMs);
+      __classPrivateFieldSet$1(this, _WorkflowRunnerClient_BACKOFF_MS, Math.min(__classPrivateFieldGet$1(this, _WorkflowRunnerClient_BACKOFF_MS, "f") * 2, __classPrivateFieldGet$1(this, _WorkflowRunnerClient_MAX_BACKOFF_MS, "f")), "f");
     };
     __classPrivateFieldGet$1(this, _WorkflowRunnerClient_ES, "f").addEventListener("run", (e) => {
       try {
@@ -2832,7 +2833,7 @@ class WorkflowRunnerClient {
         debugLog("Invalid queue event", "warning", err);
       }
     });
-    this.connecting = false;
+    __classPrivateFieldGet$1(this, _WorkflowRunnerClient_STATE, "f").connecting = false;
   }
   handleQueuePayload(payload) {
     if (!payload) {
@@ -2881,8 +2882,8 @@ class WorkflowRunnerClient {
             });
           } catch (err) {
           }
-          if (this.processingSnapshot) {
-            this.processingSnapshot = false;
+          if (__classPrivateFieldGet$1(this, _WorkflowRunnerClient_STATE, "f").processingSnapshot) {
+            __classPrivateFieldGet$1(this, _WorkflowRunnerClient_STATE, "f").processingSnapshot = false;
           }
         };
       }
@@ -2898,45 +2899,81 @@ class WorkflowRunnerClient {
       }
       __classPrivateFieldSet$1(this, _WorkflowRunnerClient_ES, null, "f");
     }
-    if (this.pollingTimer) {
-      clearInterval(this.pollingTimer);
-      this.pollingTimer = null;
+    if (__classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").timer) {
+      clearInterval(__classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").timer);
+      __classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").timer = null;
     }
-    if (this.pollAbortController) {
+    if (__classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").abortController) {
       try {
-        this.pollAbortController.abort();
+        __classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").abortController.abort();
       } catch {
       }
-      this.pollAbortController = null;
+      __classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").abortController = null;
     }
   }
+  getRuns() {
+    return __classPrivateFieldGet$1(this, _WorkflowRunnerClient_RUNS, "f");
+  }
+  getLastSeq() {
+    return __classPrivateFieldGet$1(this, _WorkflowRunnerClient_LAST_SEQ, "f");
+  }
+  /**
+   * Test API: returns a minimal test-only facade exposing internal maps
+   * and operations used by unit tests. Prefer public behavior where
+   * possible; this API exists solely to avoid fragile `as any` casts in
+   * tests and is intentionally small.
+   */
+  getTestApi() {
+    const self = this;
+    self.applyEvent = this.applyEvent.bind(this);
+    self.upsertRun = this.upsertRun.bind(this);
+    self.reconcileRun = this.reconcileRun.bind(this);
+    self.pollActiveRuns = this.pollActiveRuns.bind(this);
+    self.coldLoadRuns = this.coldLoadRuns.bind(this);
+    self.processSnapshotArray = this.processSnapshotArray.bind(this);
+    self.saveCache = this.saveCache.bind(this);
+    self.loadCacheIds = this.loadCacheIds.bind(this);
+    self.seedPlaceholders = this.seedPlaceholders.bind(this);
+    self.start = this.start.bind(this);
+    self.stop = this.stop.bind(this);
+    self.fetchWorkflowNames = this.fetchWorkflowNames.bind(this);
+    self.setWorkflowNames = this.setWorkflowNames.bind(this);
+    self.lastSeq = __classPrivateFieldGet$1(this, _WorkflowRunnerClient_LAST_SEQ, "f");
+    self.runs = __classPrivateFieldGet$1(this, _WorkflowRunnerClient_RUNS, "f");
+    self.inflightReconciles = __classPrivateFieldGet$1(this, _WorkflowRunnerClient_INFLIGHT_RECONCILES, "f");
+    self.processingSnapshot = __classPrivateFieldGet$1(this, _WorkflowRunnerClient_STATE, "f").processingSnapshot;
+    self.cacheKey = __classPrivateFieldGet$1(this, _WorkflowRunnerClient_CACHE_KEY, "f");
+    self.workflowNames = __classPrivateFieldGet$1(this, _WorkflowRunnerClient_WORKFLOW_CACHE, "f");
+    self.store = __classPrivateFieldGet$1(this, _WorkflowRunnerClient_STORE, "f");
+    return this;
+  }
   startPollingFallback() {
-    if (this.pollingTimer) {
+    if (__classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").timer) {
       return;
     }
-    this.pollingTimer = setInterval(() => this.pollActiveRuns(), this.pollingInterval);
+    __classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").timer = setInterval(() => this.pollActiveRuns(), __classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING_INTERVAL_MS, "f"));
     this.pollActiveRuns();
   }
   async pollActiveRuns() {
     try {
-      if (this.pollAbortController) {
+      if (__classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").abortController) {
         try {
-          this.pollAbortController.abort();
+          __classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").abortController.abort();
         } catch {
         }
-        this.pollAbortController = null;
+        __classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").abortController = null;
       }
       const ac = new AbortController();
-      this.pollAbortController = ac;
-      const resp = await fetch(`${API_ROOT}/workflow-runner/runs?status=pending,running&owner=me&limit=200`, { signal: ac.signal, credentials: "include" });
+      __classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").abortController = ac;
+      const resp = await fetch(`${API_ROOT}/workflow-runner/runs?status=pending,running&owner=me&limit=${__classPrivateFieldGet$1(this, _WorkflowRunnerClient_RUNS_QUERY_LIMIT, "f")}`, { signal: ac.signal, credentials: "include" });
       if (!resp.ok) {
         return;
       }
       const data = await resp.json();
       const arr = data.runs || [];
       this.processSnapshotArray(arr);
-      if (this.pollAbortController === ac) {
-        this.pollAbortController = null;
+      if (__classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").abortController === ac) {
+        __classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").abortController = null;
       }
     } catch (e) {
       if (e && (e.name === "AbortError" || e.code === "ABORT_ERR") || e instanceof DOMException && e.name === "AbortError") ;
@@ -2946,12 +2983,12 @@ class WorkflowRunnerClient {
     }
   }
   backoffWithJitter() {
-    const base = this.backoffMs;
+    const base = __classPrivateFieldGet$1(this, _WorkflowRunnerClient_BACKOFF_MS, "f");
     const jitterFactor = 0.5 + Math.random() * 0.5;
     return Math.floor(base * jitterFactor);
   }
 }
-_WorkflowRunnerClient_ES = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_STORE = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_WORKFLOW_NAMES = /* @__PURE__ */ new WeakMap();
+_WorkflowRunnerClient_ES = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_STORE = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_WORKFLOW_NAMES = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_CACHE_KEY = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_CACHE_EXPIRY_MS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_INITIAL_BACKOFF_MS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_MAX_BACKOFF_MS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_POLLING_INTERVAL_MS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_RUNS_QUERY_LIMIT = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_LAST_SEQ = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_RUNS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_WORKFLOW_CACHE = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_STATE = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_POLLING = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_BACKOFF_MS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_INFLIGHT_RECONCILES = /* @__PURE__ */ new WeakMap();
 const RUN_PARAM = "runId";
 const VIEW_PARAM = "view";
 const WORKFLOW_PARAM = "workflowId";
