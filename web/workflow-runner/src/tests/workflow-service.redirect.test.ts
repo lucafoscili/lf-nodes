@@ -13,7 +13,9 @@ import { API_BASE } from '../config';
 // Narrowly-typed test alias for globalThis to avoid `as any` in tests.
 const G = globalThis as unknown as {
   location?: { href?: string; origin?: string };
-  window?: unknown;
+  window?: {
+    location?: { href?: string; origin?: string };
+  } & Record<string, unknown>;
   fetch?: unknown;
 };
 
@@ -37,6 +39,10 @@ describe('workflow-service redirect on 401', () => {
     if (!G.window) {
       G.window = globalThis;
     }
+    // Ensure window.location points to the same location object
+    if (G.window && !G.window.location) {
+      G.window.location = G.location;
+    }
   });
 
   afterEach(() => {
@@ -53,12 +59,20 @@ describe('workflow-service redirect on 401', () => {
   });
 
   it('navigates to controller login page when server returns 401', async () => {
+    // Mock window.location.href assignment
+    const mockLocation = { href: 'http://localhost:3000/app/' };
+    Object.defineProperty(G.window, 'location', {
+      value: mockLocation,
+      writable: true,
+      configurable: true,
+    });
+
     // mock fetch to return an object with status 401
     globalThis.fetch = vi.fn().mockResolvedValue({ status: 401 });
 
     await expect(fetchWorkflowDefinitions()).rejects.toThrow();
 
     const expected = `${G.location?.origin}${API_BASE}/workflow-runner`;
-    expect(G.location?.href).toBe(expected);
+    expect(mockLocation.href).toBe(expected);
   });
 });

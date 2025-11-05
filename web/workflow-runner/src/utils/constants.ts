@@ -72,3 +72,10 @@ export const STATUS_MESSAGES = {
   RUNNING_UPLOADING_FILE: 'Uploading file...',
 } as const;
 //#endregion
+
+//#region UI Constants
+export const UI_CONSTANTS = {
+  MASONRY_STYLE: '.masonry .grid { overflow-x: unset; overflow-y: unset; }',
+  DOWNLOAD_CLEANUP_DELAY_MS: 1000,
+} as const;
+//#endregion

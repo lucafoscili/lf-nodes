@@ -1,5 +1,11 @@
 import { API_ROOT } from '../config';
-import { EventPayload, RunRecord } from '../types/client';
+import {
+  EventPayload,
+  QueuePayload,
+  RunRecord,
+  WorkflowApiResponse,
+  WorkflowNameItem,
+} from '../types/client';
 import { WorkflowStore } from '../types/state';
 import type { ClientInternals, ClientInternalsMethods } from '../types/test-utils';
 import { recordToUI } from '../utils/common';
@@ -7,6 +13,7 @@ import { debugLog } from '../utils/debug';
 import { ensureActiveRun, upsertRun } from './store-actions';
 
 export class WorkflowRunnerClient {
+  // Core
   #ES: EventSource | null = null;
   #STORE: WorkflowStore;
   #WORKFLOW_NAMES: Record<string, string> = {};
@@ -18,6 +25,10 @@ export class WorkflowRunnerClient {
   #MAX_BACKOFF_MS = 30000;
   #POLLING_INTERVAL_MS = 3000;
   #RUNS_QUERY_LIMIT = 200;
+
+  // Event constants
+  #EVENT_RUN = 'run';
+  #EVENT_QUEUE = 'queue';
 
   // Core data structures
   #LAST_SEQ: Map<string, number> = new Map();
@@ -256,13 +267,13 @@ export class WorkflowRunnerClient {
         credentials: 'include',
       });
       if (!resp || !resp.ok) return;
-      const data = await resp.json();
+      const data: WorkflowApiResponse = await resp.json();
       // Normalize multiple possible shapes returned by the server:
       // - Array of {workflow_id, name}
       // - { workflows: [ { ... } ] }
       // - { workflows: { nodes: [ { id, value, ... } ] } }
       // - { workflows: { <id>: "name", ... } }
-      let items: any[] = [];
+      let items: WorkflowNameItem[] = [];
       try {
         if (Array.isArray(data)) {
           items = data;
@@ -273,7 +284,7 @@ export class WorkflowRunnerClient {
             items = data.items;
           } else if (data.workflows && Array.isArray(data.workflows.nodes)) {
             // transform registry shape { workflows: { nodes: [...] } }
-            items = data.workflows.nodes.map((n: any) => ({
+            items = data.workflows.nodes.map((n: WorkflowNameItem) => ({
               workflow_id: n.id ?? n.key ?? n.value,
               name: n.value ?? n.title ?? n.name,
             }));
@@ -384,7 +395,7 @@ export class WorkflowRunnerClient {
       const resp = await fetch(
         `${API_ROOT}/workflow-runner/runs?status=pending,running,succeeded,failed,cancelled,timeout&owner=me&limit=${
           this.#RUNS_QUERY_LIMIT
-        }`, // FIXME: make configurable, use constants
+        }`,
         { credentials: 'include' },
       );
       if (!resp || !resp.ok) {
@@ -447,7 +458,7 @@ export class WorkflowRunnerClient {
     try {
       this.#ES = new EventSource(url);
     } catch (err) {
-      this.#ES = (EventSource as any)(url); // FIXME: workaround for some test environments
+      this.#ES = (EventSource as any)(url); // Workaround for test environments where EventSource constructor differs
     }
 
     try {
@@ -482,7 +493,7 @@ export class WorkflowRunnerClient {
     this.#STATE.processingSnapshot = true;
 
     this.#ES.onopen = () => {
-      this.#BACKOFF_MS = this.#INITIAL_BACKOFF_MS; // FIXME: make configurable
+      this.#BACKOFF_MS = this.#INITIAL_BACKOFF_MS;
 
       if (this.#POLLING.timer) {
         clearInterval(this.#POLLING.timer);
@@ -512,11 +523,10 @@ export class WorkflowRunnerClient {
 
       const delay = this.backoffWithJitter();
       setTimeout(() => this.start(), delay);
-      this.#BACKOFF_MS = Math.min(this.#BACKOFF_MS * 2, this.#MAX_BACKOFF_MS);
+      // Note: backoff is increased in backoffWithJitter()
     };
 
-    this.#ES.addEventListener('run', (e: MessageEvent) => {
-      // FIXME: declare name as constant
+    this.#ES.addEventListener(this.#EVENT_RUN, (e: MessageEvent) => {
       try {
         const payload = JSON.parse(e.data) as EventPayload;
         // payload contains seq and run_id
@@ -536,8 +546,7 @@ export class WorkflowRunnerClient {
       }
     });
 
-    this.#ES.addEventListener('queue', (e: MessageEvent) => {
-      // FIXME: declare name as constant
+    this.#ES.addEventListener(this.#EVENT_QUEUE, (e: MessageEvent) => {
       try {
         const payload = JSON.parse(e.data) as any;
         this.handleQueuePayload(payload);
@@ -549,8 +558,7 @@ export class WorkflowRunnerClient {
     this.#STATE.connecting = false;
   }
 
-  handleQueuePayload(payload: any) {
-    // FIXME: proper typing
+  handleQueuePayload(payload: QueuePayload) {
     if (!payload) {
       return;
     }
@@ -632,6 +640,8 @@ export class WorkflowRunnerClient {
       } catch {}
       this.#POLLING.abortController = null;
     }
+
+    this.#INFLIGHT_RECONCILES.clear();
   }
 
   getRuns(): Map<string, RunRecord> {

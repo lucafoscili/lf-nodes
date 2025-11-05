@@ -26,7 +26,7 @@ import {
 } from '../types/manager';
 import { WorkflowSectionController } from '../types/section';
 import { WorkflowRunEntry, WorkflowStore, WorkflowView } from '../types/state';
-import { NOTIFICATION_MESSAGES, STATUS_MESSAGES } from '../utils/constants';
+import { NOTIFICATION_MESSAGES, STATUS_MESSAGES, UI_CONSTANTS } from '../utils/constants';
 import { WorkflowRunnerClient } from './client';
 import { createRoutingController } from './routing';
 import { changeView, resolveMainSections } from './sections';
@@ -36,11 +36,13 @@ import { addNotification, selectRun, setStatus } from './store-actions';
 
 export class LfWorkflowRunnerManager implements WorkflowManager {
   //#region Initialization
-  #APP_ROOT: HTMLDivElement;
-  #CLIENT: WorkflowRunnerClient;
-  #DISPATCHERS: WorkflowDispatchers;
+  // Core infrastructure
   #FRAMEWORK = getLfFramework();
-  #ROUTING: RoutingController;
+  #STORE: WorkflowStore;
+  #CLIENT: WorkflowRunnerClient;
+
+  // UI components
+  #APP_ROOT: HTMLDivElement;
   #SECTIONS: {
     actionButton: WorkflowSectionController;
     dev: WorkflowSectionController;
@@ -49,8 +51,11 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
     main: WorkflowSectionController;
     notifications: WorkflowSectionController;
   };
-  #STORE: WorkflowStore;
   #UI_REGISTRY = new WeakMap();
+
+  // Controllers
+  #DISPATCHERS: WorkflowDispatchers;
+  #ROUTING: RoutingController;
 
   constructor() {
     const {
@@ -431,7 +436,7 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
         setTimeout(() => {
           document.body.removeChild(a);
           URL.revokeObjectURL(url);
-        }, 1000);
+        }, UI_CONSTANTS.DOWNLOAD_CLEANUP_DELAY_MS);
       } catch (error) {
         state.mutate.status('error', ERROR_FETCHING_WORKFLOWS);
         if (error instanceof WorkflowApiError) {
