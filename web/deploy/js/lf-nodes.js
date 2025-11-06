@@ -1255,6 +1255,7 @@ var NodeName;
   NodeName2["urandomSeedGenerator"] = "LF_UrandomSeedGenerator";
   NodeName2["usageStatistics"] = "LF_UsageStatistics";
   NodeName2["vaeDecode"] = "LF_VAEDecode";
+  NodeName2["vaeEncode"] = "LF_VAEEncode";
   NodeName2["vaeSelector"] = "LF_VAESelector";
   NodeName2["viewImages"] = "LF_ViewImages";
   NodeName2["viewSVGs"] = "LF_ViewSVGs";
@@ -1360,6 +1361,7 @@ const NODE_WIDGET_MAP = {
   LF_MathOperation: [CustomWidgetName.code],
   LF_MultipleImageResizeForWeb: [CustomWidgetName.tree],
   LF_Notify: [],
+  LF_ONNXSelector: [CustomWidgetName.history],
   LF_ParsePromptWithLoraTags: [CustomWidgetName.code],
   LF_RandomBoolean: [CustomWidgetName.progressbar],
   LF_RegexReplace: [CustomWidgetName.code],
@@ -1404,8 +1406,8 @@ const NODE_WIDGET_MAP = {
   LF_UsageStatistics: [CustomWidgetName.tabBarChart],
   LF_UrandomSeedGenerator: [CustomWidgetName.tree],
   LF_VAEDecode: [CustomWidgetName.code],
+  LF_VAEEncode: [CustomWidgetName.code],
   LF_VAESelector: [CustomWidgetName.history],
-  LF_ONNXSelector: [CustomWidgetName.history],
   LF_Vibrance: [CustomWidgetName.compare],
   LF_ViewImages: [CustomWidgetName.masonry],
   LF_ViewSVGs: [CustomWidgetName.masonry],

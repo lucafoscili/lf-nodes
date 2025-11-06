@@ -143,6 +143,10 @@ const STATUS_MESSAGES = {
   RUNNING_SUBMITTING_WORKFLOW: "Submitting workflow...",
   RUNNING_UPLOADING_FILE: "Uploading file..."
 };
+const UI_CONSTANTS = {
+  MASONRY_STYLE: ".masonry .grid { overflow-x: unset; overflow-y: unset; }",
+  DOWNLOAD_CLEANUP_DELAY_MS: 1e3
+};
 const _formatContext = (context) => {
   if (context === void 0 || context === null) {
     return null;
@@ -1316,7 +1320,7 @@ const _masonry$1 = (store) => {
   const masonry = document.createElement("lf-masonry");
   masonry.className = HOME_CLASSES.masonry;
   masonry.lfShape = "card";
-  masonry.lfStyle = ".masonry .grid { overflow-x: unset; overflow-y: unset; }";
+  masonry.lfStyle = UI_CONSTANTS.MASONRY_STYLE;
   masonry.addEventListener("lf-masonry-event", (e) => masonryHandler(e, store));
   return masonry;
 };
@@ -1644,7 +1648,7 @@ const _masonry = (store) => {
   const masonry = document.createElement("lf-masonry");
   masonry.className = OUTPUTS_CLASSES.masonry;
   masonry.lfShape = "card";
-  masonry.lfStyle = ".masonry .grid { overflow-x: unset; overflow-y: unset; }";
+  masonry.lfStyle = UI_CONSTANTS.MASONRY_STYLE;
   masonry.addEventListener("lf-masonry-event", (e) => masonryHandler(e, store));
   return masonry;
 };
@@ -2395,7 +2399,7 @@ var __classPrivateFieldGet$1 = function(receiver, state, kind, f) {
   if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 };
-var _WorkflowRunnerClient_ES, _WorkflowRunnerClient_STORE, _WorkflowRunnerClient_WORKFLOW_NAMES, _WorkflowRunnerClient_CACHE_KEY, _WorkflowRunnerClient_CACHE_EXPIRY_MS, _WorkflowRunnerClient_INITIAL_BACKOFF_MS, _WorkflowRunnerClient_MAX_BACKOFF_MS, _WorkflowRunnerClient_POLLING_INTERVAL_MS, _WorkflowRunnerClient_RUNS_QUERY_LIMIT, _WorkflowRunnerClient_LAST_SEQ, _WorkflowRunnerClient_RUNS, _WorkflowRunnerClient_WORKFLOW_CACHE, _WorkflowRunnerClient_STATE, _WorkflowRunnerClient_POLLING, _WorkflowRunnerClient_BACKOFF_MS, _WorkflowRunnerClient_INFLIGHT_RECONCILES;
+var _WorkflowRunnerClient_ES, _WorkflowRunnerClient_STORE, _WorkflowRunnerClient_WORKFLOW_NAMES, _WorkflowRunnerClient_CACHE_KEY, _WorkflowRunnerClient_CACHE_EXPIRY_MS, _WorkflowRunnerClient_INITIAL_BACKOFF_MS, _WorkflowRunnerClient_MAX_BACKOFF_MS, _WorkflowRunnerClient_POLLING_INTERVAL_MS, _WorkflowRunnerClient_RUNS_QUERY_LIMIT, _WorkflowRunnerClient_EVENT_RUN, _WorkflowRunnerClient_EVENT_QUEUE, _WorkflowRunnerClient_LAST_SEQ, _WorkflowRunnerClient_RUNS, _WorkflowRunnerClient_WORKFLOW_CACHE, _WorkflowRunnerClient_STATE, _WorkflowRunnerClient_POLLING, _WorkflowRunnerClient_BACKOFF_MS, _WorkflowRunnerClient_INFLIGHT_RECONCILES;
 class WorkflowRunnerClient {
   constructor(store) {
     _WorkflowRunnerClient_ES.set(this, null);
@@ -2407,6 +2411,8 @@ class WorkflowRunnerClient {
     _WorkflowRunnerClient_MAX_BACKOFF_MS.set(this, 3e4);
     _WorkflowRunnerClient_POLLING_INTERVAL_MS.set(this, 3e3);
     _WorkflowRunnerClient_RUNS_QUERY_LIMIT.set(this, 200);
+    _WorkflowRunnerClient_EVENT_RUN.set(this, "run");
+    _WorkflowRunnerClient_EVENT_QUEUE.set(this, "queue");
     _WorkflowRunnerClient_LAST_SEQ.set(this, /* @__PURE__ */ new Map());
     _WorkflowRunnerClient_RUNS.set(this, /* @__PURE__ */ new Map());
     _WorkflowRunnerClient_WORKFLOW_CACHE.set(this, /* @__PURE__ */ new Map());
@@ -2700,11 +2706,7 @@ class WorkflowRunnerClient {
   // Cold-load runs from server before SSE connection (restores state after refresh)
   async coldLoadRuns() {
     try {
-      const resp = await fetch(
-        `${API_ROOT}/workflow-runner/runs?status=pending,running,succeeded,failed,cancelled,timeout&owner=me&limit=${__classPrivateFieldGet$1(this, _WorkflowRunnerClient_RUNS_QUERY_LIMIT, "f")}`,
-        // FIXME: make configurable, use constants
-        { credentials: "include" }
-      );
+      const resp = await fetch(`${API_ROOT}/workflow-runner/runs?status=pending,running,succeeded,failed,cancelled,timeout&owner=me&limit=${__classPrivateFieldGet$1(this, _WorkflowRunnerClient_RUNS_QUERY_LIMIT, "f")}`, { credentials: "include" });
       if (!resp || !resp.ok) {
         debugLog("coldLoadRuns: fetch failed", "informational", resp == null ? void 0 : resp.status);
         return;
@@ -2805,9 +2807,8 @@ class WorkflowRunnerClient {
       this.startPollingFallback();
       const delay = this.backoffWithJitter();
       setTimeout(() => this.start(), delay);
-      __classPrivateFieldSet$1(this, _WorkflowRunnerClient_BACKOFF_MS, Math.min(__classPrivateFieldGet$1(this, _WorkflowRunnerClient_BACKOFF_MS, "f") * 2, __classPrivateFieldGet$1(this, _WorkflowRunnerClient_MAX_BACKOFF_MS, "f")), "f");
     };
-    __classPrivateFieldGet$1(this, _WorkflowRunnerClient_ES, "f").addEventListener("run", (e) => {
+    __classPrivateFieldGet$1(this, _WorkflowRunnerClient_ES, "f").addEventListener(__classPrivateFieldGet$1(this, _WorkflowRunnerClient_EVENT_RUN, "f"), (e) => {
       try {
         const payload = JSON.parse(e.data);
         this.applyEvent({
@@ -2825,7 +2826,7 @@ class WorkflowRunnerClient {
         debugLog("Invalid run event", "warning", err);
       }
     });
-    __classPrivateFieldGet$1(this, _WorkflowRunnerClient_ES, "f").addEventListener("queue", (e) => {
+    __classPrivateFieldGet$1(this, _WorkflowRunnerClient_ES, "f").addEventListener(__classPrivateFieldGet$1(this, _WorkflowRunnerClient_EVENT_QUEUE, "f"), (e) => {
       try {
         const payload = JSON.parse(e.data);
         this.handleQueuePayload(payload);
@@ -2910,6 +2911,7 @@ class WorkflowRunnerClient {
       }
       __classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").abortController = null;
     }
+    __classPrivateFieldGet$1(this, _WorkflowRunnerClient_INFLIGHT_RECONCILES, "f").clear();
   }
   getRuns() {
     return __classPrivateFieldGet$1(this, _WorkflowRunnerClient_RUNS, "f");
@@ -2988,7 +2990,7 @@ class WorkflowRunnerClient {
     return Math.floor(base * jitterFactor);
   }
 }
-_WorkflowRunnerClient_ES = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_STORE = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_WORKFLOW_NAMES = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_CACHE_KEY = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_CACHE_EXPIRY_MS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_INITIAL_BACKOFF_MS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_MAX_BACKOFF_MS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_POLLING_INTERVAL_MS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_RUNS_QUERY_LIMIT = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_LAST_SEQ = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_RUNS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_WORKFLOW_CACHE = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_STATE = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_POLLING = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_BACKOFF_MS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_INFLIGHT_RECONCILES = /* @__PURE__ */ new WeakMap();
+_WorkflowRunnerClient_ES = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_STORE = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_WORKFLOW_NAMES = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_CACHE_KEY = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_CACHE_EXPIRY_MS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_INITIAL_BACKOFF_MS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_MAX_BACKOFF_MS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_POLLING_INTERVAL_MS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_RUNS_QUERY_LIMIT = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_EVENT_RUN = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_EVENT_QUEUE = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_LAST_SEQ = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_RUNS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_WORKFLOW_CACHE = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_STATE = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_POLLING = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_BACKOFF_MS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_INFLIGHT_RECONCILES = /* @__PURE__ */ new WeakMap();
 const RUN_PARAM = "runId";
 const VIEW_PARAM = "view";
 const WORKFLOW_PARAM = "workflowId";
@@ -3439,18 +3441,18 @@ var __classPrivateFieldGet = function(receiver, state, kind, f) {
   if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 };
-var _LfWorkflowRunnerManager_instances, _LfWorkflowRunnerManager_APP_ROOT, _LfWorkflowRunnerManager_CLIENT, _LfWorkflowRunnerManager_DISPATCHERS, _LfWorkflowRunnerManager_FRAMEWORK, _LfWorkflowRunnerManager_ROUTING, _LfWorkflowRunnerManager_SECTIONS, _LfWorkflowRunnerManager_STORE, _LfWorkflowRunnerManager_UI_REGISTRY, _LfWorkflowRunnerManager_initializeFramework, _LfWorkflowRunnerManager_initializeLayout, _LfWorkflowRunnerManager_loadWorkflows, _LfWorkflowRunnerManager_subscribeToState;
+var _LfWorkflowRunnerManager_instances, _LfWorkflowRunnerManager_FRAMEWORK, _LfWorkflowRunnerManager_STORE, _LfWorkflowRunnerManager_CLIENT, _LfWorkflowRunnerManager_APP_ROOT, _LfWorkflowRunnerManager_SECTIONS, _LfWorkflowRunnerManager_UI_REGISTRY, _LfWorkflowRunnerManager_DISPATCHERS, _LfWorkflowRunnerManager_ROUTING, _LfWorkflowRunnerManager_initializeFramework, _LfWorkflowRunnerManager_initializeLayout, _LfWorkflowRunnerManager_loadWorkflows, _LfWorkflowRunnerManager_subscribeToState;
 class LfWorkflowRunnerManager {
   constructor() {
     _LfWorkflowRunnerManager_instances.add(this);
-    _LfWorkflowRunnerManager_APP_ROOT.set(this, void 0);
-    _LfWorkflowRunnerManager_CLIENT.set(this, void 0);
-    _LfWorkflowRunnerManager_DISPATCHERS.set(this, void 0);
     _LfWorkflowRunnerManager_FRAMEWORK.set(this, getLfFramework());
-    _LfWorkflowRunnerManager_ROUTING.set(this, void 0);
-    _LfWorkflowRunnerManager_SECTIONS.set(this, void 0);
     _LfWorkflowRunnerManager_STORE.set(this, void 0);
+    _LfWorkflowRunnerManager_CLIENT.set(this, void 0);
+    _LfWorkflowRunnerManager_APP_ROOT.set(this, void 0);
+    _LfWorkflowRunnerManager_SECTIONS.set(this, void 0);
     _LfWorkflowRunnerManager_UI_REGISTRY.set(this, /* @__PURE__ */ new WeakMap());
+    _LfWorkflowRunnerManager_DISPATCHERS.set(this, void 0);
+    _LfWorkflowRunnerManager_ROUTING.set(this, void 0);
     _LfWorkflowRunnerManager_loadWorkflows.set(this, async () => {
       var _a;
       const { NO_WORKFLOWS_AVAILABLE } = NOTIFICATION_MESSAGES;
@@ -3573,7 +3575,7 @@ class LfWorkflowRunnerManager {
           setTimeout(() => {
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
-          }, 1e3);
+          }, UI_CONSTANTS.DOWNLOAD_CLEANUP_DELAY_MS);
         } catch (error) {
           state2.mutate.status("error", ERROR_FETCHING_WORKFLOWS2);
           if (error instanceof WorkflowApiError) {
@@ -3656,7 +3658,7 @@ class LfWorkflowRunnerManager {
     return __classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f");
   }
 }
-_LfWorkflowRunnerManager_APP_ROOT = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_CLIENT = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_DISPATCHERS = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_FRAMEWORK = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_ROUTING = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_SECTIONS = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_STORE = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_UI_REGISTRY = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_loadWorkflows = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_instances = /* @__PURE__ */ new WeakSet(), _LfWorkflowRunnerManager_initializeFramework = function _LfWorkflowRunnerManager_initializeFramework2() {
+_LfWorkflowRunnerManager_FRAMEWORK = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_STORE = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_CLIENT = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_APP_ROOT = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_SECTIONS = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_UI_REGISTRY = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_DISPATCHERS = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_ROUTING = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_loadWorkflows = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_instances = /* @__PURE__ */ new WeakSet(), _LfWorkflowRunnerManager_initializeFramework = function _LfWorkflowRunnerManager_initializeFramework2() {
   const assetsUrl = buildAssetsUrl();
   __classPrivateFieldGet(this, _LfWorkflowRunnerManager_FRAMEWORK, "f").assets.set(assetsUrl);
   __classPrivateFieldGet(this, _LfWorkflowRunnerManager_FRAMEWORK, "f").theme.set(DEFAULT_THEME);
