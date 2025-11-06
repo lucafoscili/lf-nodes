@@ -167,6 +167,7 @@ export enum NodeName {
   urandomSeedGenerator = 'LF_UrandomSeedGenerator',
   usageStatistics = 'LF_UsageStatistics',
   vaeDecode = 'LF_VAEDecode',
+  vaeEncode = 'LF_VAEEncode',
   vaeSelector = 'LF_VAESelector',
   viewImages = 'LF_ViewImages',
   viewSVGs = 'LF_ViewSVGs',
