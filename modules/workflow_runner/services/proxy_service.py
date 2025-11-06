@@ -83,58 +83,6 @@ DEFAULT_RATE_LIMIT = {
 # endregion
 
 # region Helpers
-def _get_client_id(request: web.Request) -> str:
-    try:
-        if getattr(request, "remote", None):
-            return str(request.remote)
-        transport = request.transport
-        if transport is not None:
-            peer = transport.get_extra_info("peername")
-            if peer and isinstance(peer, (list, tuple)) and len(peer) >= 1:
-                return str(peer[0])
-    except Exception:
-        pass
-    return "unknown"
-
-def _check_rate_limit(client_id: str, service: str, cfg: dict) -> Tuple[bool, int]:
-    svc_limit = cfg.get("rate_limit") if cfg else None
-    if svc_limit is None:
-        limit = DEFAULT_RATE_LIMIT
-    else:
-        try:
-            limit = {
-                "requests": int(svc_limit.get("requests", DEFAULT_RATE_LIMIT["requests"])),
-                "window_seconds": int(svc_limit.get("window_seconds", DEFAULT_RATE_LIMIT["window_seconds"])),
-            }
-        except Exception:
-            limit = DEFAULT_RATE_LIMIT
-
-    if limit.get("requests", 0) <= 0:
-        return True, 0
-
-    key = (client_id, service)
-    now = time()
-    entry = _RATE_LIMIT_STORE.get(key)
-    if not entry or (now - entry.get("start", 0)) >= limit["window_seconds"]:
-        _RATE_LIMIT_STORE[key] = {"count": 1, "start": now}
-        return True, 0
-
-    if entry["count"] < limit["requests"]:
-        entry["count"] += 1
-        return True, 0
-
-    retry_after = int(limit["window_seconds"] - (now - entry.get("start", 0)))
-    return False, retry_after
-
-def _build_body_for_openai(body: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Return a forward_body that preserves the OpenAI chat shape (messages, model, stream, etc.).
-
-    We keep all keys except an explicit proxy `path` key so the upstream chat endpoint
-    receives the original OpenAI-style payload.
-    """
-    return {k: v for k, v in body.items() if k != "path"}
-
 def _build_body_for_legacy(body: Dict[str, Any]) -> Dict[str, Any]:
     """
     Build a legacy 'generate' style body from an OpenAI chat `messages` list.
@@ -216,6 +164,15 @@ def _build_body_for_legacy(body: Dict[str, Any]) -> Dict[str, Any]:
 
     return forward_body
 
+def _build_body_for_openai(body: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Return a forward_body that preserves the OpenAI chat shape (messages, model, stream, etc.).
+
+    We keep all keys except an explicit proxy `path` key so the upstream chat endpoint
+    receives the original OpenAI-style payload.
+    """
+    return {k: v for k, v in body.items() if k != "path"}
+
 def _build_upstream_and_headers(cfg: Dict[str, Any], body: Dict[str, Any], proxypath: Optional[str]) -> Tuple[str, Dict[str, str], int, Dict[str, Any]]:
     headers: Dict[str, str] = {}
     timeout = int(cfg.get("timeout", 60))
@@ -282,6 +239,49 @@ def _build_upstream_and_headers(cfg: Dict[str, Any], body: Dict[str, Any], proxy
                 forward_body = _build_body_for_openai(body)
 
     return upstream, headers, timeout, forward_body
+
+def _check_rate_limit(client_id: str, service: str, cfg: dict) -> Tuple[bool, int]:
+    svc_limit = cfg.get("rate_limit") if cfg else None
+    if svc_limit is None:
+        limit = DEFAULT_RATE_LIMIT
+    else:
+        try:
+            limit = {
+                "requests": int(svc_limit.get("requests", DEFAULT_RATE_LIMIT["requests"])),
+                "window_seconds": int(svc_limit.get("window_seconds", DEFAULT_RATE_LIMIT["window_seconds"])),
+            }
+        except Exception:
+            limit = DEFAULT_RATE_LIMIT
+
+    if limit.get("requests", 0) <= 0:
+        return True, 0
+
+    key = (client_id, service)
+    now = time()
+    entry = _RATE_LIMIT_STORE.get(key)
+    if not entry or (now - entry.get("start", 0)) >= limit["window_seconds"]:
+        _RATE_LIMIT_STORE[key] = {"count": 1, "start": now}
+        return True, 0
+
+    if entry["count"] < limit["requests"]:
+        entry["count"] += 1
+        return True, 0
+
+    retry_after = int(limit["window_seconds"] - (now - entry.get("start", 0)))
+    return False, retry_after
+
+def _get_client_id(request: web.Request) -> str:
+    try:
+        if getattr(request, "remote", None):
+            return str(request.remote)
+        transport = request.transport
+        if transport is not None:
+            peer = transport.get_extra_info("peername")
+            if peer and isinstance(peer, (list, tuple)) and len(peer) >= 1:
+                return str(peer[0])
+    except Exception:
+        pass
+    return "unknown"
 # endregion
 
 __all__ = [
