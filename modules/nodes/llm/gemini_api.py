@@ -1,5 +1,4 @@
 import aiohttp
-import html
 import json
 import os
 
@@ -9,7 +8,7 @@ from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import API_ROUTE_PREFIX, EVENT_PREFIX, FUNCTION, Input
-from ...utils.helpers.api import clean_code_fences, create_ui_logger, parse_gemini_response, parse_json_from_text, read_secret
+from ...utils.helpers.api import clean_code_fences, create_ui_logger, parse_gemini_json_output, parse_gemini_response, read_secret
 
 EVENT_NAME = f"{EVENT_PREFIX}geminiapi"
 
@@ -117,69 +116,12 @@ class LF_GeminiAPI:
         else:
             data = {"response": data, "lf_http_status": resp.status}
 
-        logger.log("Request completed successfully.")
-
         extracted = parse_gemini_response(data)
-
         raw_json = json.dumps(data, ensure_ascii=False)
-
         clean_text = clean_code_fences(extracted)
+        json_text = parse_gemini_json_output(data, clean_text)
 
-        json_text = ""
-
-        parsed = None
-        try:
-            parsed = parse_json_from_text(clean_text)
-        except Exception:
-            parsed = None
-
-        if parsed is None and extracted:
-            try:
-                parsed = parse_json_from_text(extracted)
-            except Exception:
-                parsed = None
-
-        if parsed is None:
-            try:
-                candidates = data.get('candidates') if isinstance(data, dict) else None
-                if candidates and isinstance(candidates, list) and len(candidates) > 0:
-                    first = candidates[0]
-                    if isinstance(first, dict):
-                        out = first.get('output')
-                        if isinstance(out, (dict, list)):
-                            parsed = out
-                        elif isinstance(out, str):
-                            parsed = parse_json_from_text(out)
-
-                        if parsed is None and isinstance(first.get('content'), list):
-                            txt = ''.join([chunk.get('text', '') for chunk in first.get('content', []) if isinstance(chunk, dict)])
-                            parsed = parse_json_from_text(txt)
-
-                if parsed is None and isinstance(data, dict) and isinstance(data.get('response'), dict):
-                    out = data['response'].get('output')
-                    if isinstance(out, (dict, list)):
-                        parsed = out
-                    elif isinstance(out, str):
-                                                    parsed = parse_json_from_text(txt)
-            except Exception:
-                parsed = None
-
-        if parsed is not None:
-            try:
-                json_text = json.dumps(parsed, ensure_ascii=False)
-            except Exception:
-                json_text = ''
-
-        if json_text:
-            try:
-                json_text = html.unescape(json_text)
-            except Exception:
-                pass
-
-        PromptServer.instance.send_sync(f"{EVENT_NAME}", {
-            "node": kwargs.get("node_id"),
-            "value": json_text,
-        })
+        logger.log("Request completed successfully.")
 
         return (extracted, clean_text, raw_json, json_text)
 
