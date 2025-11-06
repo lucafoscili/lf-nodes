@@ -3,7 +3,6 @@ import asyncio
 import importlib
 import json
 import logging
-import re
 import uuid
 
 from aiohttp import web
