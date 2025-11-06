@@ -127,6 +127,114 @@ def normalize_hex_color(color):
     return None
 
 
+# Additional embedded implementations for missing functions
+
+def convert_to_boolean(text):
+    """
+    Convert a string to a boolean.
+    """
+    if isinstance(text, bool):
+        return text
+    if text is None:
+        return False
+
+    text_lower = str(text).strip().lower()
+    if text_lower in ['true', 'yes']:
+        return True
+    elif text_lower in ['false', 'no', '']:
+        return False
+    
+    return None
+
+def pil_to_tensor(image):
+    """
+    Convert a PIL Image to a PyTorch tensor.
+    """
+    np_image = np.array(image).astype("float32") / 255.0
+    
+    # Handle different channel configurations
+    if np_image.ndim == 2:  # Grayscale [H, W]
+        tensor = torch.tensor(np_image).unsqueeze(0).unsqueeze(0)  # [1, 1, H, W]
+    elif np_image.ndim == 3:  # RGB/RGBA [H, W, C]
+        tensor = torch.tensor(np_image).permute(2, 0, 1).unsqueeze(0)  # [1, C, H, W]
+    else:
+        raise ValueError(f"Unsupported image dimensions: {np_image.ndim}")
+    
+    return tensor
+
+def tensor_to_pil(tensor):
+    """
+    Convert a PyTorch tensor to a PIL Image.
+    """
+    # Handle different tensor shapes
+    if tensor.dim() == 4:  # [B, C, H, W]
+        tensor = tensor.squeeze(0)  # Remove batch dimension
+    
+    # Permute from [C, H, W] to [H, W, C]
+    if tensor.dim() == 3:
+        tensor = tensor.permute(1, 2, 0)
+    
+    # Convert to numpy and scale to 0-255
+    np_image = (tensor.detach().cpu().numpy() * 255).astype(np.uint8)
+    
+    # Create PIL image
+    if np_image.shape[-1] == 1:  # Grayscale
+        return Image.fromarray(np_image.squeeze(-1), mode='L')
+    elif np_image.shape[-1] == 3:  # RGB
+        return Image.fromarray(np_image, mode='RGB')
+    elif np_image.shape[-1] == 4:  # RGBA
+        return Image.fromarray(np_image, mode='RGBA')
+    else:
+        raise ValueError(f"Unsupported number of channels: {np_image.shape[-1]}")
+
+def hex_to_tuple(color: str):
+    """
+    Converts a HEX color to a tuple.
+    """
+    return tuple(int(color.lstrip('#')[i:i+2], 16) for i in (0, 2, 4))
+
+def json_safe(obj):
+    """
+    Convert an object to a JSON-safe representation.
+    """
+    if obj is None:
+        return None
+    elif isinstance(obj, (str, int, float, bool)):
+        return obj
+    elif isinstance(obj, (list, tuple)):
+        return [json_safe(item) for item in obj]
+    elif isinstance(obj, dict):
+        return {str(k): json_safe(v) for k, v in obj.items()}
+    else:
+        return str(obj)
+
+def numpy_to_svg(arr):
+    """
+    Convert a numpy array to SVG path data.
+    """
+    if arr is None or len(arr) == 0:
+        return ""
+    
+    # Simple conversion - just create a path from points
+    path_data = "M"
+    for i, point in enumerate(arr):
+        if i > 0:
+            path_data += " L"
+        x, y = point[:2]  # Take first two coordinates
+        path_data += f"{x},{y}"
+    
+    return path_data
+
+def tensor_to_bytes(tensor):
+    """
+    Convert a tensor to bytes.
+    """
+    # Convert tensor to numpy array
+    arr = tensor.detach().cpu().numpy()
+    # Convert to bytes
+    return arr.tobytes()
+
+
 class TestConversionHelpers(unittest.TestCase):
     """Test suite for conversion helper functions."""
 
@@ -321,6 +429,184 @@ class TestConversionHelpers(unittest.TestCase):
         # Test with lowercase
         result = normalize_hex_color("ff0000")
         self.assertEqual(result, "#ff0000")
+
+    # Tests for convert_to_boolean
+    def test_convert_to_boolean_truthy_values(self):
+        """Test convert_to_boolean with truthy values."""
+        self.assertTrue(convert_to_boolean("true"))
+        self.assertTrue(convert_to_boolean("TRUE"))
+        self.assertTrue(convert_to_boolean("yes"))
+        self.assertTrue(convert_to_boolean("YES"))
+        self.assertTrue(convert_to_boolean(True))
+
+    def test_convert_to_boolean_falsy_values(self):
+        """Test convert_to_boolean with falsy values."""
+        self.assertFalse(convert_to_boolean("false"))
+        self.assertFalse(convert_to_boolean("FALSE"))
+        self.assertFalse(convert_to_boolean("no"))
+        self.assertFalse(convert_to_boolean("NO"))
+        self.assertFalse(convert_to_boolean(""))
+        self.assertFalse(convert_to_boolean(False))
+        self.assertFalse(convert_to_boolean(None))
+
+    def test_convert_to_boolean_invalid_values(self):
+        """Test convert_to_boolean with invalid values defaults to None."""
+        self.assertIsNone(convert_to_boolean("maybe"))
+        self.assertIsNone(convert_to_boolean("invalid"))
+        self.assertIsNone(convert_to_boolean(123))
+
+    # Tests for pil_to_tensor
+    def test_pil_to_tensor_rgb_image(self):
+        """Test pil_to_tensor with RGB PIL image."""
+        # Create a simple RGB PIL image
+        img = Image.new('RGB', (10, 10), color='red')
+        tensor = pil_to_tensor(img)
+        
+        self.assertEqual(tensor.shape, (1, 3, 10, 10))
+        self.assertEqual(tensor.dtype, torch.float32)
+        # Check that values are normalized to [0, 1]
+        self.assertTrue(torch.all(tensor >= 0) and torch.all(tensor <= 1))
+
+    def test_pil_to_tensor_grayscale_image(self):
+        """Test pil_to_tensor with grayscale PIL image."""
+        # Create a simple grayscale PIL image
+        img = Image.new('L', (5, 5), color=128)
+        tensor = pil_to_tensor(img)
+        
+        self.assertEqual(tensor.shape, (1, 1, 5, 5))
+        self.assertEqual(tensor.dtype, torch.float32)
+
+    def test_pil_to_tensor_rgba_image(self):
+        """Test pil_to_tensor with RGBA PIL image."""
+        # Create a simple RGBA PIL image
+        img = Image.new('RGBA', (8, 8), color=(255, 0, 0, 128))
+        tensor = pil_to_tensor(img)
+        
+        self.assertEqual(tensor.shape, (1, 4, 8, 8))
+        self.assertEqual(tensor.dtype, torch.float32)
+
+    # Tests for tensor_to_pil
+    def test_tensor_to_pil_rgb_tensor(self):
+        """Test tensor_to_pil with RGB tensor."""
+        # Create a tensor with shape [3, 10, 10]
+        tensor = torch.rand(3, 10, 10)
+        pil_img = tensor_to_pil(tensor)
+        
+        self.assertEqual(pil_img.mode, 'RGB')
+        self.assertEqual(pil_img.size, (10, 10))
+
+    def test_tensor_to_pil_grayscale_tensor(self):
+        """Test tensor_to_pil with grayscale tensor."""
+        # Create a tensor with shape [1, 10, 10]
+        tensor = torch.rand(1, 10, 10)
+        pil_img = tensor_to_pil(tensor)
+        
+        self.assertEqual(pil_img.mode, 'L')
+        self.assertEqual(pil_img.size, (10, 10))
+
+    def test_tensor_to_pil_batch_tensor(self):
+        """Test tensor_to_pil with batch tensor."""
+        # Create a tensor with shape [1, 3, 10, 10]
+        tensor = torch.rand(1, 3, 10, 10)
+        pil_img = tensor_to_pil(tensor)
+        
+        self.assertEqual(pil_img.mode, 'RGB')
+        self.assertEqual(pil_img.size, (10, 10))
+
+    def test_tensor_to_pil_rgba_tensor(self):
+        """Test tensor_to_pil with RGBA tensor."""
+        # Create a tensor with shape [4, 10, 10]
+        tensor = torch.rand(4, 10, 10)
+        pil_img = tensor_to_pil(tensor)
+        
+        self.assertEqual(pil_img.mode, 'RGBA')
+        self.assertEqual(pil_img.size, (10, 10))
+
+    # Tests for hex_to_tuple
+    def test_hex_to_tuple_valid_hex(self):
+        """Test hex_to_tuple with valid hex colors."""
+        self.assertEqual(hex_to_tuple("#ff0000"), (255, 0, 0))
+        self.assertEqual(hex_to_tuple("00ff00"), (0, 255, 0))
+        self.assertEqual(hex_to_tuple("#0000ff"), (0, 0, 255))
+        self.assertEqual(hex_to_tuple("ffffff"), (255, 255, 255))
+
+    def test_hex_to_tuple_invalid_hex(self):
+        """Test hex_to_tuple with invalid hex (should raise ValueError)."""
+        with self.assertRaises(ValueError):
+            hex_to_tuple("invalid")
+        with self.assertRaises(ValueError):
+            hex_to_tuple("#12")
+
+    # Tests for json_safe
+    def test_json_safe_primitives(self):
+        """Test json_safe with primitive types."""
+        self.assertEqual(json_safe("string"), "string")
+        self.assertEqual(json_safe(42), 42)
+        self.assertEqual(json_safe(3.14), 3.14)
+        self.assertEqual(json_safe(True), True)
+        self.assertEqual(json_safe(None), None)
+
+    def test_json_safe_lists(self):
+        """Test json_safe with lists."""
+        input_list = [1, "string", None, {"key": "value"}]
+        result = json_safe(input_list)
+        expected = [1, "string", None, {"key": "value"}]
+        self.assertEqual(result, expected)
+
+    def test_json_safe_dicts(self):
+        """Test json_safe with dictionaries."""
+        input_dict = {"key": "value", "number": 42, "list": [1, 2, 3]}
+        result = json_safe(input_dict)
+        self.assertEqual(result, input_dict)
+
+    def test_json_safe_complex_objects(self):
+        """Test json_safe with complex objects."""
+        class CustomObject:
+            pass
+        
+        obj = CustomObject()
+        result = json_safe(obj)
+        self.assertIsInstance(result, str)  # Should be converted to string
+
+    # Tests for numpy_to_svg
+    def test_numpy_to_svg_valid_array(self):
+        """Test numpy_to_svg with valid numpy array."""
+        arr = np.array([[10, 20], [30, 40], [50, 60]])
+        result = numpy_to_svg(arr)
+        self.assertIn("M10,20 L30,40 L50,60", result)
+
+    def test_numpy_to_svg_empty_array(self):
+        """Test numpy_to_svg with empty array."""
+        self.assertEqual(numpy_to_svg([]), "")
+        self.assertEqual(numpy_to_svg(None), "")
+
+    def test_numpy_to_svg_single_point(self):
+        """Test numpy_to_svg with single point."""
+        arr = np.array([[100, 200]])
+        result = numpy_to_svg(arr)
+        self.assertEqual(result, "M100,200")
+
+    # Tests for tensor_to_bytes
+    def test_tensor_to_bytes_basic(self):
+        """Test tensor_to_bytes with basic tensor."""
+        tensor = torch.tensor([1, 2, 3, 4], dtype=torch.int32)
+        result = tensor_to_bytes(tensor)
+        self.assertIsInstance(result, bytes)
+        self.assertEqual(len(result), 16)  # 4 * 4 bytes for int32
+
+    def test_tensor_to_bytes_float_tensor(self):
+        """Test tensor_to_bytes with float tensor."""
+        tensor = torch.tensor([1.0, 2.0, 3.0], dtype=torch.float32)
+        result = tensor_to_bytes(tensor)
+        self.assertIsInstance(result, bytes)
+        self.assertEqual(len(result), 12)  # 3 * 4 bytes for float32
+
+    def test_tensor_to_bytes_multidimensional(self):
+        """Test tensor_to_bytes with multidimensional tensor."""
+        tensor = torch.tensor([[1, 2], [3, 4]], dtype=torch.int32)
+        result = tensor_to_bytes(tensor)
+        self.assertIsInstance(result, bytes)
+        self.assertEqual(len(result), 16)  # 4 * 4 bytes for int32
 
 
 if __name__ == '__main__':
