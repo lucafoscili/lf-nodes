@@ -1,12 +1,34 @@
-# region llm_logger
+# region ui_logger
+"""
+UI Logger for real-time feedback in ComfyUI nodes.
+
+This logger is designed for any node that performs async operations and needs to provide
+real-time feedback to users via LF_CODE widgets. It's not limited to LLM operations.
+
+Usage examples:
+- API calls (LLM, image generation, etc.)
+- File processing operations
+- Batch processing with progress updates
+- Long-running computations
+- Network requests
+
+Example:
+    from ...utils.helpers.api import create_ui_logger
+
+    logger = create_ui_logger(f"{EVENT_PREFIX}myoperation", node_id)
+    logger.log("Starting operation...")
+    # ... do work ...
+    logger.log("Operation completed!")
+"""
 import json
 from typing import Any
 
 from server import PromptServer
 
-class LLMLogger:
+class UILogger:
     """
-    Helper class for logging LLM API interactions with real-time UI updates.
+    Helper class for logging operations with real-time UI updates.
+    Useful for any async operations that need to provide feedback via LF_CODE widgets.
     """
 
     def __init__(self, event_name: str, node_id: str):
@@ -39,16 +61,16 @@ class LLMLogger:
         """Returns the complete log as a single string."""
         return "\n\n".join(self.log_lines)
 
-def create_llm_logger(event_name: str, node_id: str) -> LLMLogger:
+def create_ui_logger(event_name: str, node_id: str) -> UILogger:
     """
-    Factory function to create an LLM logger.
+    Factory function to create a UI logger.
 
     Args:
         event_name: The event name for PromptServer updates
         node_id: The node ID for UI targeting
 
     Returns:
-        A configured LLMLogger instance
+        A configured UILogger instance
     """
-    return LLMLogger(event_name, node_id)
+    return UILogger(event_name, node_id)
 # endregion

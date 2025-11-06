@@ -8,8 +8,8 @@ from typing import Any
 from server import PromptServer
 
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
-from ...utils.helpers.api import clean_code_fences, create_llm_logger, parse_gemini_response, parse_json_from_text, read_secret
+from ...utils.constants import API_ROUTE_PREFIX, EVENT_PREFIX, FUNCTION, Input
+from ...utils.helpers.api import clean_code_fences, create_ui_logger, parse_gemini_response, parse_json_from_text, read_secret
 
 EVENT_NAME = f"{EVENT_PREFIX}geminiapi"
 
@@ -28,14 +28,6 @@ class LF_GeminiAPI:
                 "model": (Input.STRING, {
                     "default": "gemini-2.0-flash",
                     "tooltip": "Gemini model to call."
-                }),
-                "api_key": (Input.STRING, {
-                    "default": "",
-                    "tooltip": "Google API key; leave empty to use environment variable GEMINI_API_KEY (recommended)."
-                }),
-                "proxy_url": (Input.STRING, {
-                    "default": "",
-                    "tooltip": "Optional server-side proxy URL to call instead of the Google endpoint. If set, the node will POST to this URL and will NOT send the X-goog-api-key header." 
                 }),
                 "timeout": (Input.INTEGER, {
                     "default": 60,
@@ -64,39 +56,30 @@ class LF_GeminiAPI:
     async def on_exec(self, **kwargs: dict) -> tuple[str, str]:
         prompt: str = kwargs.get("prompt", "")
         model: str = kwargs.get("model") or "gemini-2.0-flash"
-        logger = create_llm_logger(EVENT_NAME, kwargs.get("node_id"))
+        logger = create_ui_logger(EVENT_NAME, kwargs.get("node_id"))
 
         logger.log("Sending request...")
 
-        api_key: str = kwargs.get("api_key") or read_secret("GEMINI_API_KEY") or ""
-        proxy_url: str = kwargs.get("proxy_url") or os.environ.get("GEMINI_PROXY_URL", "")
+        proxy_url = os.environ.get("GEMINI_PROXY_URL")
         if not proxy_url:
-            if read_secret("LF_PROXY_SECRET") or read_secret("GEMINI_PROXY_SECRET"):
-                env_proxy = os.environ.get("GEMINI_PROXY_URL")
-                if env_proxy:
-                    proxy_url = env_proxy
-                else:
-                    try:
-                        ps_inst = getattr(PromptServer, 'instance', None)
-                        host = getattr(ps_inst, 'address', None)
-                        port = getattr(ps_inst, 'port', None)
-                        if host and port:
-                            orig_host = host
-                            if host in ("0.0.0.0", "::"):
-                                host = "localhost"
-                                logger.log(f"Normalized PromptServer host {orig_host!r} to {host!r} for proxy URL.")
+            try:
+                ps_inst = getattr(PromptServer, 'instance', None)
+                host = getattr(ps_inst, 'address', None)
+                port = getattr(ps_inst, 'port', None)
+                if host and port:
+                    if host in ("0.0.0.0", "::"):
+                        host = "localhost"
+                    proxy_url = f"http://{host}:{port}{API_ROUTE_PREFIX}/proxy/gemini"
+                elif os.environ.get("DEV_ENV") == "1":
+                    proxy_url = f"http://localhost:8080{API_ROUTE_PREFIX}/proxy/gemini"
+            except Exception:
+                if os.environ.get("DEV_ENV") == "1":
+                    proxy_url = f"http://localhost:8080{API_ROUTE_PREFIX}/proxy/gemini"
 
-                            proxy_url = f"http://{host}:{port}/api/proxy/gemini"
-                        else:
-                            if os.environ.get("DEV_ENV") == "1":
-                                proxy_url = "http://localhost:8080/api/proxy/gemini"
+        if not proxy_url:
+            logger.log("No proxy URL configured. Set GEMINI_PROXY_URL environment variable or ensure PromptServer is running.")
+            raise ValueError("No proxy URL configured. Set GEMINI_PROXY_URL environment variable or ensure PromptServer is running.")
 
-                        logger.log("Using PromptServer proxy for Gemini API requests...")
-                    except Exception:
-
-                        logger.log("Could not determine PromptServer address for proxy; proceeding without proxy.")
-                        if os.environ.get("DEV_ENV") == "1":
-                            proxy_url = "http://localhost:8080/api/proxy/gemini"
         timeout_sec: int = int(kwargs.get("timeout", 60) or 60)
 
         if not prompt:
@@ -110,28 +93,17 @@ class LF_GeminiAPI:
                         {"text": prompt}
                     ]
                 }
-            ]
+            ],
+            "model": model
         }
 
-        if proxy_url:
-            url = proxy_url
-            headers = {"Content-Type": "application/json"}
-            proxy_secret = read_secret("LF_PROXY_SECRET") or read_secret("GEMINI_PROXY_SECRET")
-            if proxy_secret:
-                headers["X-LF-Proxy-Secret"] = proxy_secret
-        else:
-            if not api_key:
-                logger.log("No API key provided. Set the 'api_key' input or environment variable GEMINI_API_KEY, or configure a proxy via proxy_url/GEMINI_PROXY_URL.")
-                raise ValueError("No API key provided. Set the 'api_key' input or environment variable GEMINI_API_KEY, or configure a proxy via proxy_url/GEMINI_PROXY_URL.")
-
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
-            headers = {
-                "Content-Type": "application/json",
-                "X-goog-api-key": api_key,
-            }
+        headers = {"Content-Type": "application/json"}
+        proxy_secret = read_secret("LF_PROXY_SECRET") or read_secret("GEMINI_PROXY_SECRET")
+        if proxy_secret:
+            headers["X-LF-Proxy-Secret"] = proxy_secret
 
         async with aiohttp.ClientSession() as session:
-            async with session.post(url, headers=headers, json=payload, timeout=timeout_sec) as resp:
+            async with session.post(proxy_url, headers=headers, json=payload, timeout=timeout_sec) as resp:
                 text_status = await resp.text()
                 try:
                     data = await resp.json()
