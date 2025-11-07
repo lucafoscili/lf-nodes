@@ -54,11 +54,39 @@ def setup_common_mocks():
     sys.modules['modules.utils.helpers'] = MagicMock()
     sys.modules['modules.utils.helpers.api'] = MagicMock()
     sys.modules['modules.utils.helpers.comfy'] = MagicMock()
+    sys.modules['modules.utils.helpers.conversion'] = MagicMock()
     sys.modules['modules.utils.helpers.detection'] = MagicMock()
+    sys.modules['modules.utils.helpers.editing'] = MagicMock()
     sys.modules['modules.utils.helpers.logic'] = MagicMock()
     sys.modules['modules.utils.helpers.torch'] = MagicMock()
     sys.modules['modules.utils.helpers.ui'] = MagicMock()
     sys.modules['modules.utils.helpers.tagging'] = MagicMock()
+
+    # Mock specific functions that need special behavior
+    def mock_normalize_output_image(images):
+        """Mock normalize_output_image to return proper tuple format."""
+        if isinstance(images, list):
+            return [images[0]] if images else [], images
+        else:
+            return [images], [images]
+
+    def mock_normalize_input_image(image):
+        """Mock normalize_input_image to return proper list format."""
+        if image is None:
+            return []
+        if isinstance(image, list):
+            # If it's already a list of tensors, return it
+            return image
+        # For tensors, simulate the real normalization logic
+        # Check if it's a batch tensor (4D with first dim > 1)
+        if hasattr(image, 'shape') and len(image.shape) == 4 and image.shape[0] > 1:
+            # Split batch into individual images, keeping batch dimension as 1
+            return [image[i:i+1] for i in range(image.shape[0])]
+        # For single tensors, return as list
+        return [image]
+
+    sys.modules['modules.utils.helpers.logic'].normalize_output_image = mock_normalize_output_image
+    sys.modules['modules.utils.helpers.logic'].normalize_input_image = mock_normalize_input_image
 
     # Mock filters modules
     sys.modules['modules.utils.filters'] = MagicMock()
