@@ -19,7 +19,7 @@ def run_all_helper_tests():
 
     # API helpers (completed)
     try:
-        from test_api_helpers import TestAPIHelpers
+        from helpers.test_api_helpers import TestAPIHelpers
         test_classes.append(TestAPIHelpers)
         print("✓ Loaded API helpers tests")
     except ImportError as e:
@@ -27,7 +27,7 @@ def run_all_helper_tests():
 
     # Comfy helpers (completed)
     try:
-        from test_comfy_helpers import TestComfyHelpers
+        from helpers.test_comfy_helpers import TestComfyHelpers
         test_classes.append(TestComfyHelpers)
         print("✓ Loaded Comfy helpers tests")
     except ImportError as e:
@@ -35,7 +35,7 @@ def run_all_helper_tests():
 
     # Conversion helpers (existing)
     try:
-        from test_conversion_helpers import TestConversionHelpers
+        from helpers.test_conversion_helpers import TestConversionHelpers
         test_classes.append(TestConversionHelpers)
         print("✓ Loaded Conversion helpers tests")
     except ImportError as e:
@@ -43,7 +43,7 @@ def run_all_helper_tests():
 
     # Detection helpers (existing)
     try:
-        from test_detection_helpers import TestDetectionHelpers
+        from helpers.test_detection_helpers import TestDetectionHelpers
         test_classes.append(TestDetectionHelpers)
         print("✓ Loaded Detection helpers tests")
     except ImportError as e:
@@ -51,7 +51,7 @@ def run_all_helper_tests():
 
     # Editing helpers (completed)
     try:
-        from test_editing_helpers import TestEditingHelpers
+        from helpers.test_editing_helpers import TestEditingHelpers
         test_classes.append(TestEditingHelpers)
         print("✓ Loaded Editing helpers tests")
     except ImportError as e:
@@ -59,7 +59,7 @@ def run_all_helper_tests():
 
     # Logic helpers (existing)
     try:
-        from test_logic_helpers import TestLogicHelpers
+        from helpers.test_logic_helpers import TestLogicHelpers
         test_classes.append(TestLogicHelpers)
         print("✓ Loaded Logic helpers tests")
     except ImportError as e:
@@ -67,7 +67,7 @@ def run_all_helper_tests():
 
     # Torch helpers (existing)
     try:
-        from test_torch_helpers import TestTorchHelpers
+        from helpers.test_torch_helpers import TestTorchHelpers
         test_classes.append(TestTorchHelpers)
         print("✓ Loaded Torch helpers tests")
     except ImportError as e:
