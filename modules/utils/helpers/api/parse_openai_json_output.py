@@ -3,7 +3,7 @@ import json
 
 from .parse_json_from_text import parse_json_from_text
 
-
+# region parse_openai_json_output
 def parse_openai_json_output(data: dict, extracted_text: str) -> str:
     """
     Parses JSON output from OpenAI API response with multiple fallback strategies.
@@ -69,3 +69,4 @@ def parse_openai_json_output(data: dict, extracted_text: str) -> str:
             pass
 
     return json_text
+# endregion

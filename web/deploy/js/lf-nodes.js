@@ -1211,6 +1211,7 @@ var NodeName;
   NodeName2["multipleImageResizeForWeb"] = "LF_MultipleImageResizeForWeb";
   NodeName2["notify"] = "LF_Notify";
   NodeName2["onnxSelector"] = "LF_ONNXSelector";
+  NodeName2["openAIAPI"] = "LF_OpenAIAPI";
   NodeName2["parsePromptWithLoraTags"] = "LF_ParsePromptWithLoraTags";
   NodeName2["randomBoolean"] = "LF_RandomBoolean";
   NodeName2["regexReplace"] = "LF_RegexReplace";
@@ -1362,6 +1363,7 @@ const NODE_WIDGET_MAP = {
   LF_MultipleImageResizeForWeb: [CustomWidgetName.tree],
   LF_Notify: [],
   LF_ONNXSelector: [CustomWidgetName.history],
+  LF_OpenAIAPI: [CustomWidgetName.code],
   LF_ParsePromptWithLoraTags: [CustomWidgetName.code],
   LF_RandomBoolean: [CustomWidgetName.progressbar],
   LF_RegexReplace: [CustomWidgetName.code],

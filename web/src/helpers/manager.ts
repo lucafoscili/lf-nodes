@@ -90,6 +90,7 @@ export const NODE_WIDGET_MAP: NodeWidgetMap = {
   LF_MultipleImageResizeForWeb: [CustomWidgetName.tree],
   LF_Notify: [],
   LF_ONNXSelector: [CustomWidgetName.history],
+  LF_OpenAIAPI: [CustomWidgetName.code],
   LF_ParsePromptWithLoraTags: [CustomWidgetName.code],
   LF_RandomBoolean: [CustomWidgetName.progressbar],
   LF_RegexReplace: [CustomWidgetName.code],

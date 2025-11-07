@@ -123,6 +123,7 @@ export enum NodeName {
   multipleImageResizeForWeb = 'LF_MultipleImageResizeForWeb',
   notify = 'LF_Notify',
   onnxSelector = 'LF_ONNXSelector',
+  openAIAPI = 'LF_OpenAIAPI',
   parsePromptWithLoraTags = 'LF_ParsePromptWithLoraTags',
   randomBoolean = 'LF_RandomBoolean',
   regexReplace = 'LF_RegexReplace',
