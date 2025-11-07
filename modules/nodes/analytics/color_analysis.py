@@ -5,6 +5,7 @@ from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import BLUE_CHANNEL_ID, EVENT_PREFIX, FUNCTION, GREEN_CHANNEL_ID, Input, INTENSITY_ID, RED_CHANNEL_ID
+from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.conversion import tensor_to_numpy
 from ...utils.helpers.logic import normalize_input_image, normalize_output_image
 
@@ -46,6 +47,9 @@ class LF_ColorAnalysis:
     def on_exec(self, **kwargs: dict):
         source_image: list[torch.Tensor] = normalize_input_image(kwargs.get("source_image", []))
         target_image: list[torch.Tensor] = normalize_input_image(kwargs.get("target_image", []))
+
+        if not source_image or not target_image:
+            raise ValueError("Source and target images are required")
 
         if len(source_image) != len(target_image):
             raise ValueError("Source and Target batches should have the same number of images.")
@@ -99,12 +103,15 @@ class LF_ColorAnalysis:
 
             mapping_datasets[f"Image #{idx + 1}"] = dataset
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}coloranalysis", {
-            "node": kwargs.get("node_id"),
+        safe_send_sync("coloranalysis", {
             "datasets": mapping_datasets
-        })
+        }, kwargs.get("node_id"))
 
         image_batch, image_list = normalize_output_image(target_image)
+
+        # Handle empty input case
+        if not image_batch:
+            return None, [], {}
 
         return (image_batch[0], image_list, mapping_datasets)
 

@@ -5,6 +5,7 @@ from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import BLUE_CHANNEL_ID, EVENT_PREFIX, FUNCTION, GREEN_CHANNEL_ID, Input, INTENSITY_ID, RED_CHANNEL_ID, SUM_ID
+from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.logic import normalize_input_image, normalize_output_image
 
 # region LF_ImageHistogram
@@ -100,10 +101,9 @@ class LF_ImageHistogram:
 
         b, l = normalize_output_image(image)
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}imagehistogram", {
-            "node": kwargs.get("node_id"),
+        safe_send_sync("imagehistogram", {
             "datasets": datasets,
-        })
+        }, kwargs.get("node_id"))
 
         return (b[0], l, datasets)
 # endregion
