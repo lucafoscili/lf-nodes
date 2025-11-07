@@ -7,6 +7,7 @@ from server import PromptServer
 from . import CATEGORY
 from ...utils.constants import BASE64_PNG_PREFIX, EVENT_PREFIX, FUNCTION, HEADERS, Input, INT_MAX, get_character_impersonator_system
 from ...utils.helpers.api import handle_response
+from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.conversion import tensor_to_base64
 from ...utils.helpers.logic import normalize_input_image, normalize_list_to_value
 
@@ -119,10 +120,9 @@ class LF_CharacterImpersonator:
         if status_code != 200:
             message = f"Whoops! Request failed with status code {status_code} and method {method}."
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}characterimpersonator", {
-            "node": kwargs.get("node_id"),
+        safe_send_sync("characterimpersonator", {
             "value": message,
-        })
+        }, kwargs.get("node_id"))
 
         return (request, response_data, message)
 # endregion

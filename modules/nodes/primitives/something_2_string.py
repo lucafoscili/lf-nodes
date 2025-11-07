@@ -6,6 +6,7 @@ from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
+from ...utils.helpers.comfy import safe_send_sync
 
 # region LF_Something2String
 class LF_Something2String:
@@ -102,10 +103,9 @@ class LF_Something2String:
 {combinations_log}
         """
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}something2string", {
-            "node": kwargs.get("node_id"),
+        safe_send_sync("something2string", {
             "value": log,
-        })
+        }, kwargs.get("node_id"))
 
         return tuple(results)
 # endregion

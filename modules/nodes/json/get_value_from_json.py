@@ -2,6 +2,7 @@ from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
+from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.logic import normalize_list_to_value, normalize_json_input
 
 # region LF_GetValueFromJSON
@@ -92,10 +93,9 @@ class LF_GetValueFromJSON:
                 int_output = None
                 float_output = None
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}getvaluefromjson", {
-            "node": kwargs.get("node_id"),
+        safe_send_sync("getvaluefromjson", {
             "value": f"## Selected key\n{key}\n\n## Content:\n{string_output}",
-        })
+        }, kwargs.get("node_id"))
 
         return (json_output, string_output, number_output, int_output, float_output, boolean_output)
 # endregion

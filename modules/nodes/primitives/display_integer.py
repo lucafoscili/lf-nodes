@@ -2,6 +2,7 @@ from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
+from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.logic import normalize_input_list
 
 # region LF_DisplayInteger
@@ -47,10 +48,9 @@ class LF_DisplayInteger:
         else:
             markdown_value = ""
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}displayinteger", {
-            "node": kwargs.get("node_id"),
+        safe_send_sync("displayinteger", {
             "value": markdown_value,
-        })
+        }, kwargs.get("node_id"))
 
         return (kwargs.get("integer"),)
 # endregion

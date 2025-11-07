@@ -2,6 +2,7 @@ from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
+from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.logic import normalize_list_to_value
 
 # region LF_SwitchString
@@ -57,10 +58,9 @@ class LF_SwitchString:
         on_false: str = kwargs.get("on_false")
         on_true: str = kwargs.get("on_true")
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}switchstring", {
-            "node": kwargs.get("node_id"),
+        safe_send_sync("switchstring", {
             "bool": boolean,
-        })
+        }, kwargs.get("node_id"))
 
         value = on_true if boolean else on_false
 

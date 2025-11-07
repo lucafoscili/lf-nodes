@@ -2,6 +2,7 @@ from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
+from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.logic import normalize_input_list
 
 # region LF_DisplayString
@@ -48,10 +49,9 @@ class LF_DisplayString:
         else:
             markdown_value = ""
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}displaystring", {
-            "node": kwargs.get("node_id"),
+        safe_send_sync("displaystring", {
             "value": markdown_value,
-        })
+        }, kwargs.get("node_id"))
 
         out_string = display_string[0] if isinstance(display_string, list) else display_string
         out_list = display_string if isinstance(display_string, list) else [display_string]

@@ -153,10 +153,7 @@ class LF_RegionMask:
         target_region.setdefault("feather", feather)
         target_region.setdefault("invert", invert)
 
-        PromptServer.instance.send_sync(
-            f"{EVENT_PREFIX}regionmask",
-            {"node": node_id, "dataset": dataset},
-        )
+        safe_send_sync("regionmask", {"dataset": dataset}, node_id)
 
         mask_batch_4d, mask_list_4d = normalize_output_image(masks_4d)
 

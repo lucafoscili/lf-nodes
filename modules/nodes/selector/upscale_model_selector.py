@@ -4,7 +4,7 @@ from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, HAS_V3, Input, INT_MAX
-from ...utils.helpers.comfy import get_comfy_list
+from ...utils.helpers.comfy import get_comfy_list, safe_send_sync
 from ...utils.helpers.logic import filter_list, normalize_json_input, normalize_list_to_value
 from ...utils.helpers.ui import create_history_node
 
@@ -85,10 +85,9 @@ class LF_UpscaleModelSelector:
         if enable_history:
             create_history_node(upscale_model, nodes)
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}upscalemodelselector", {
-            "node": kwargs.get("node_id"),
+        safe_send_sync("upscalemodelselector", {
             "dataset": dataset,
-        })
+        }, kwargs.get("node_id"))
 
         return (upscale_model, upscale_model)
 # endregion

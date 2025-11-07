@@ -6,6 +6,7 @@ from transformers import CLIPSegProcessor, CLIPSegForImageSegmentation
 
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
+from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.logic import normalize_list_to_value
 
 # region LF_LoadCLIPSegModel
@@ -59,10 +60,9 @@ class LF_LoadCLIPSegModel:
         else:
             log_lines.append(f"- ⏳ Downloading **{model_id}** → `{model_dir}`")
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}loadclipsegmodel", {
-            "node": node_id,
+        safe_send_sync("loadclipsegmodel", {
             "value": "## Load CLIPSeg Model\n\n" + "\n".join(log_lines)
-        })
+        }, node_id)
 
         try:
             if exists:
@@ -86,10 +86,9 @@ class LF_LoadCLIPSegModel:
                     f"- ❌ Failed to load CLIPSeg model. Local: '{model_dir}' error: {e}; Hub '{model_id}' error: {e2}"
                 )
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}loadclipsegmodel", {
-            "node": node_id,
+        safe_send_sync("loadclipsegmodel", {
             "value": "## Load CLIPSeg Model\n\n" + "\n".join(log_lines)
-        })
+        }, node_id)
 
         return (processor, model)
 # endregion

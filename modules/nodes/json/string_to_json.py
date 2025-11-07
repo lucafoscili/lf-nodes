@@ -2,6 +2,7 @@ from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
+from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.logic import normalize_json_input
 
 # region LF_StringToJSON
@@ -40,10 +41,9 @@ class LF_StringToJSON:
     def on_exec(self, **kwargs: dict):
         json_data: dict = normalize_json_input(kwargs.get("string"))
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}stringtojson", {
-            "node": kwargs.get("node_id"),
+        safe_send_sync("stringtojson", {
             "value": kwargs.get("string"),
-        })
+        }, kwargs.get("node_id"))
 
         return (json_data,)
 # endregion

@@ -2,6 +2,7 @@ from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, INT_MAX
+from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.logic import normalize_input_list
 
 # region LF_DisplayPrimitiveAsJSON
@@ -89,10 +90,9 @@ class LF_DisplayPrimitiveAsJSON:
                     "description": value, "id": f"string_{idx}", "value": "string"
                 })
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}displayprimitiveasjson", {
-            "node": kwargs.get("node_id"),
+        safe_send_sync("displayprimitiveasjson", {
             "value": dataset,
-        })
+        }, kwargs.get("node_id"))
 
         return (dataset,)
 # endregion

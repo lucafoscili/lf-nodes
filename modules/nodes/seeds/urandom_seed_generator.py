@@ -9,6 +9,7 @@ from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
+from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.logic import normalize_json_input
 
 # region LF_UrandomSeedGenerator
@@ -88,10 +89,9 @@ class LF_UrandomSeedGenerator:
             ]
         }
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}urandomseedgenerator", {
-            "node": kwargs.get("node_id"), 
+        safe_send_sync("urandomseedgenerator", {
             "dataset": json_input,
-        })
+        }, kwargs.get("node_id"))
 
         return (json_input, *existing_seeds)
 

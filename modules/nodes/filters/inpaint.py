@@ -8,6 +8,7 @@ from ...utils.filters.inpaint import apply_inpaint_filter_tensor
 from ...utils.helpers.logic import normalize_input_image, normalize_list_to_value, normalize_masks_for_images, normalize_output_image
 from ...utils.helpers.temp_cache import TempFileCache
 from ...utils.helpers.torch import process_and_save_image
+from ...utils.helpers.comfy import safe_send_sync
 
 # region LF_Inpaint
 class LF_Inpaint:
@@ -172,12 +173,12 @@ class LF_Inpaint:
             temp_cache=self._temp_cache,
         )
 
-        PromptServer.instance.send_sync(
-            f"{EVENT_PREFIX}inpaint",
+        safe_send_sync(
+            "inpaint",
             {
-                "node": node_id,
                 "dataset": dataset,
             },
+            node_id,
         )
 
         batch_list, image_list = normalize_output_image(processed_images)

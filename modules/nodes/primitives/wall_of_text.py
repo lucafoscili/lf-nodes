@@ -4,6 +4,7 @@ from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, INT_MAX
+from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.logic import normalize_list_to_value
 
 # region LF_WallOfText
@@ -105,10 +106,9 @@ class LF_WallOfText:
         else:
             wall_of_text = texts[0]
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}walloftext", {
-            "node": kwargs.get("node_id"),
+        safe_send_sync("walloftext", {
             "value": wall_of_text,
-        })
+        }, kwargs.get("node_id"))
 
         return (wall_of_text, wall_of_text)
 # endregion

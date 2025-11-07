@@ -12,6 +12,7 @@ from ...utils.helpers.logic import (
 )
 from ...utils.helpers.temp_cache import TempFileCache
 from ...utils.helpers.torch import process_and_save_image
+from ...utils.helpers.comfy import safe_send_sync
 
 # region LF_UnsharpMask
 class LF_UnsharpMask:
@@ -117,12 +118,12 @@ class LF_UnsharpMask:
 
         batch_list, image_list = normalize_output_image(processed_images)
 
-        PromptServer.instance.send_sync(
-            f"{EVENT_PREFIX}unsharpmask",
+        safe_send_sync(
+            "unsharpmask",
             {
-                "node": kwargs.get("node_id"),
                 "dataset": dataset,
             },
+            kwargs.get("node_id"),
         )
 
         return batch_list[0], image_list

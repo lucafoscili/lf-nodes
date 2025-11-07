@@ -2,6 +2,7 @@ from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
+from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.logic import normalize_input_list
 
 # region LF_DisplayBoolean
@@ -47,10 +48,9 @@ class LF_DisplayBoolean:
         else:
             markdown_value = ""
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}displayboolean", {
-            "node": kwargs.get("node_id"),
+        safe_send_sync("displayboolean", {
             "value": markdown_value,
-        })
+        }, kwargs.get("node_id"))
 
         return (kwargs.get("boolean"),)
 # endregion

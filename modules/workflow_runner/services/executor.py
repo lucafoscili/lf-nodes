@@ -243,10 +243,6 @@ async def execute_workflow(
             response = _make_run_payload(detail=f"Failed to queue prompt: {exc}", error_message="queue_failed")
             return JobStatus.FAILED, response, 500
 
-        # Mark as PENDING immediately after successful submission
-        await set_job_status(run_id, JobStatus.PENDING)
-
-        # Monitor execution state and update job status accordingly
         await _monitor_execution_state(prompt_id, run_id, comfy_url, session)
 
         try:

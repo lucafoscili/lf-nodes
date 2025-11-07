@@ -6,6 +6,7 @@ from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, LORA_TAG_REGEX
 from ...utils.helpers.logic import normalize_input_list, normalize_list_to_value
 from ...utils.helpers.prompt import count_words_in_comma_separated_string, cleanse_lora_tag
+from ...utils.helpers.comfy import safe_send_sync
 
 # region LF_ExtractPromptFromLoraTag
 class LF_ExtractPromptFromLoraTag:
@@ -79,10 +80,9 @@ class LF_ExtractPromptFromLoraTag:
 {''.join(log_entries)}
         """
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}extractpromptfromloratag", {
-            "node": kwargs.get("node_id"),
+        safe_send_sync("extractpromptfromloratag", {
             "value": log
-        })
+        }, kwargs.get("node_id"))
 
         return (clean_loras, keyword_counts, clean_loras, keyword_counts)
 # endregion

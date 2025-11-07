@@ -2,6 +2,7 @@ from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
+from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.logic import normalize_list_to_value
 
 # region LF_KeywordCounter
@@ -81,13 +82,12 @@ class LF_KeywordCounter:
             }
             chip_nodes.append(node)
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}keywordcounter", {
-            "node": kwargs.get("node_id"),
+        safe_send_sync("keywordcounter", {
             "datasets": {
                 "chart": chart_dataset,
                 "chip": chip_dataset,
             }
-        })
+        }, kwargs.get("node_id"))
 
         return (chart_dataset, chip_dataset)
 # endregion

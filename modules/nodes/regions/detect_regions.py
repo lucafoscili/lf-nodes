@@ -7,6 +7,7 @@ from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, SELECTION_STRATEGY_COMBO
+from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.detection import append_compare_entry, build_overlay, detect_regions, load_label_map, load_yolo_session, parse_class_filter, parse_class_labels, select_region
 from ...utils.helpers.logic import normalize_input_image, normalize_json_input, normalize_list_to_value
 from ...utils.helpers.temp_cache import TempFileCache
@@ -228,10 +229,7 @@ class LF_DetectRegions:
             }
             region_meta_list.append(meta)
 
-        PromptServer.instance.send_sync(
-            f"{EVENT_PREFIX}detectregions",
-            {"node": node_id, "dataset": dataset},
-        )
+        safe_send_sync("detectregions", {"dataset": dataset}, node_id)
 
         if region_meta_list:
             region_meta = region_meta_list[0]

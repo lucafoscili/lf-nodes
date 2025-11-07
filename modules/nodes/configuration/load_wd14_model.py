@@ -8,6 +8,7 @@ from torchvision import transforms
 
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
+from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.logic import normalize_list_to_value
 
 class PromptServerTqdm(tqdm):
@@ -52,10 +53,9 @@ class PromptServerTqdm(tqdm):
 
         log = "".join(self.log_lines)
 
-        PromptServer.instance.send_sync(self.event_name, {
-            "node": self.node_id,
+        safe_send_sync("loadwd14model", {
             "value": log
-        })
+        }, self.node_id)
 
 def create_custom_tqdm(node_id: str, event_name: str, model_id: str, log_lines: list[str]):
     """
@@ -181,10 +181,9 @@ class LF_LoadWD14Model:
             except Exception as e:
                 raise RuntimeError(f"- ❌ Failed to load model: {e}")
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}loadwd14model", {
-            "node": node_id,
+        safe_send_sync("loadwd14model", {
             "value": "".join(log_lines)
-        })
+        }, node_id)
 
         return (processor, model)
 # endregion

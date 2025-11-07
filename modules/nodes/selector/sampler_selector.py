@@ -6,6 +6,7 @@ from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, INT_MAX, SAMPLERS
 from ...utils.helpers.logic import filter_list, normalize_json_input, normalize_list_to_value
 from ...utils.helpers.ui import create_history_node
+from ...utils.helpers.comfy import safe_send_sync
 
 # region LF_SamplerSelector
 class LF_SamplerSelector:
@@ -81,10 +82,9 @@ class LF_SamplerSelector:
         if enable_history:
             create_history_node(sampler, nodes)
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}samplerselector", {
-            "node": kwargs.get("node_id"),
+        safe_send_sync("samplerselector", {
             "dataset": dataset,
-        })
+        }, kwargs.get("node_id"))
 
         return (sampler, sampler)
 # endregion

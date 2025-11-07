@@ -6,7 +6,7 @@ from server import PromptServer
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
 from ...utils.helpers.api import get_resource_url
-from ...utils.helpers.comfy import resolve_filepath
+from ...utils.helpers.comfy import resolve_filepath, safe_send_sync
 from ...utils.helpers.conversion import pil_to_tensor, tensor_to_pil
 from ...utils.helpers.logic import normalize_input_image, normalize_input_list, normalize_list_to_value, normalize_output_image
 from ...utils.helpers.temp_cache import TempFileCache
@@ -109,10 +109,9 @@ class LF_BlurImages:
 
         image_batch, image_list = normalize_output_image(blurred_images)
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}blurimages", {
-            "node": kwargs.get("node_id"),
+        safe_send_sync("blurimages", {
             "dataset": dataset,
-        })
+        }, kwargs.get("node_id"))
 
         return (image_batch[0], image_list, blurred_file_names, len(image_list))
 # endregion

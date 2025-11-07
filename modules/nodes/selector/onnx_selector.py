@@ -10,6 +10,7 @@ from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
 from ...utils.helpers.detection import discover_ultralytics_models
 from ...utils.helpers.logic import normalize_json_input, normalize_list_to_value
 from ...utils.helpers.ui import create_history_node
+from ...utils.helpers.comfy import safe_send_sync
 
 
 class LF_ONNXSelector:
@@ -74,7 +75,7 @@ class LF_ONNXSelector:
             create_history_node(detector_label, nodes)
 
         dataset = {"nodes": nodes}
-        PromptServer.instance.send_sync(self.EVENT_KEY, {"node": kwargs.get("node_id"), "dataset": dataset})
+        safe_send_sync("onnxselector", {"dataset": dataset}, kwargs.get("node_id"))
 
         return (detector_label, str(model_path))
 

@@ -4,6 +4,7 @@ from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, INT_MAX
+from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.logic import normalize_list_to_value, normalize_json_input
 
 # region LF_GetRandomKeyFromJSON
@@ -53,20 +54,18 @@ class LF_GetRandomKeyFromJSON:
         target = json_input[0] if is_wrapped_single_dict else json_input
 
         if not isinstance(target, dict) or not target:
-            PromptServer.instance.send_sync(f"{EVENT_PREFIX}getrandomkeyfromjson", {
-                "node": kwargs.get("node_id"),
+            safe_send_sync("getrandomkeyfromjson", {
                 "value": "**Warning**: JSON input does not contain any keys.",
-            })
+            }, kwargs.get("node_id"))
             return ("",)
 
         random.seed(seed)
         keys = list(target.keys())
         selected_key = random.choice(keys)
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}getrandomkeyfromjson", {
-            "node": kwargs.get("node_id"),
+        safe_send_sync("getrandomkeyfromjson", {
             "value": f"## Selected key\n{selected_key}\n\n## Content:\n{target.get(selected_key)}",
-        })
+        }, kwargs.get("node_id"))
 
         return (selected_key,)
 # endregion

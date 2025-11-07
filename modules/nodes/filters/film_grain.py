@@ -8,6 +8,7 @@ from ...utils.filters import film_grain_effect
 from ...utils.helpers.logic import normalize_input_image, normalize_list_to_value, normalize_output_image
 from ...utils.helpers.temp_cache import TempFileCache
 from ...utils.helpers.torch import process_and_save_image
+from ...utils.helpers.comfy import safe_send_sync
 
 # region LF_FilmGrain
 class LF_FilmGrain:
@@ -92,10 +93,9 @@ class LF_FilmGrain:
 
         batch_list, image_list = normalize_output_image(processed_images)
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}filmgrain", {
-            "node": kwargs.get("node_id"),
+        safe_send_sync("filmgrain", {
             "dataset": dataset,
-        })
+        }, kwargs.get("node_id"))
 
         return (batch_list[0], image_list)
 # endregion

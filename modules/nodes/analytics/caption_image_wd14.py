@@ -4,6 +4,7 @@ from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
+from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.conversion import tensor_to_pil
 from ...utils.helpers.logic import normalize_input_image, normalize_list_to_value
 from ...utils.helpers.tagging import build_id2label
@@ -181,13 +182,12 @@ class LF_CaptionImageWD14:
             complete_string = f"{prefix + ', ' if prefix else ''}{', '.join(tags)}{', ' + suffix if suffix else ''}"
             string_list.append(complete_string)
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}captionimagewd14", {
-            "node": kwargs.get("node_id"),
+        safe_send_sync("captionimagewd14", {
             "datasets": {
                 "chart": chart_dataset,
                 "chip": chip_dataset,
             }
-        })
+        }, kwargs.get("node_id"))
 
         string_o = string_list[0] if len(string_list) == 1 else string_list
         pairs_o = pairs_list[0] if len(pairs_list) == 1 else pairs_list

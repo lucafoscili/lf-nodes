@@ -4,6 +4,7 @@ from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
 from ...utils.helpers.logic import normalize_list_to_value
 from ...utils.helpers.torch import get_clip_tokens
+from ...utils.helpers.comfy import safe_send_sync
 
 # region LF_SortTags
 class LF_SortTags:
@@ -121,9 +122,9 @@ class LF_SortTags:
             out_lines.append(sorted_caption)
             logs.append(make_log(original, sorted_caption))
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}sorttags", {
-            "node": node_id, "value": "\n".join(logs)},
-        )
+        safe_send_sync("sorttags", {
+            "value": "\n".join(logs)},
+        node_id)
 
         result = "\n".join(out_lines)
         return (result, [result])

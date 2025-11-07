@@ -5,7 +5,7 @@ from server import PromptServer
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
 from ...utils.helpers.api import get_resource_url
-from ...utils.helpers.comfy import resolve_filepath
+from ...utils.helpers.comfy import resolve_filepath, safe_send_sync
 from ...utils.helpers.conversion import numpy_to_tensor, tensor_to_pil
 from ...utils.helpers.logic import normalize_output_image, normalize_list_to_value, normalize_json_input
 from ...utils.helpers.temp_cache import TempFileCache
@@ -109,10 +109,9 @@ class LF_ImageListFromJSON:
             nodes.append(create_masonry_node(filename, url, index))
 
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}imagelistfromjson", {
-            "node": kwargs.get("node_id"),
+        safe_send_sync("imagelistfromjson", {
             "dataset": dataset,
-        })
+        }, kwargs.get("node_id"))
 
         image_batch, image_list = normalize_output_image(image)
 

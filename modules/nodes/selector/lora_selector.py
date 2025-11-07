@@ -5,7 +5,7 @@ from server import PromptServer
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, INT_MAX
 from ...utils.helpers.api import process_model_async
-from ...utils.helpers.comfy import get_comfy_list
+from ...utils.helpers.comfy import get_comfy_list, safe_send_sync
 from ...utils.helpers.logic import (
     dataset_from_metadata,
     filter_list,
@@ -97,10 +97,9 @@ class LF_LoraSelector:
 
         if passthrough:
 
-            PromptServer.instance.send_sync(f"{EVENT_PREFIX}loraselector", {
-                "node": node_id,
+            safe_send_sync("loraselector", {
                 "apiFlags": [False],
-            })
+            }, node_id)
 
             if node_id:
                 self._LAST_SELECTION.pop(node_id, None)
@@ -137,15 +136,15 @@ class LF_LoraSelector:
                     and bool(hash_event_ready)
                 )
 
-                PromptServer.instance.send_sync(
-                    event_name,
+                safe_send_sync(
+                    "loraselector",
                     {
-                        "node": node_id,
                         "datasets": [dataset_ready],
                         "hashes": [hash_event_ready],
                         "apiFlags": [fetch_flag_ready],
                         "paths": [model_path_ready or ""],
                     },
+                    node_id,
                 )
 
             callback = _metadata_callback
@@ -178,15 +177,15 @@ class LF_LoraSelector:
         if lora_stack:
             lora_tag = f"{lora_tag}, {lora_stack}"
 
-        PromptServer.instance.send_sync(
-            event_name,
+        safe_send_sync(
+            "loraselector",
             {
-                "node": node_id,
                 "datasets": [dataset],
                 "hashes": [hash_event],
                 "apiFlags": [fetch_now],
                 "paths": [path_event],
             },
+            node_id,
         )
 
         return (lora, lora_tag, model_name, model_path, metadata.get("model_cover"))

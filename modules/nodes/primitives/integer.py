@@ -2,6 +2,7 @@ from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, INT_MAX
+from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.logic import normalize_json_input, normalize_list_to_value, randomize_from_history
 from ...utils.helpers.ui import create_history_node
 
@@ -68,10 +69,9 @@ class LF_Integer:
         if randomize:
             integer_input = int(randomize_from_history(nodes, seed))
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}integer", {
-            "node": kwargs.get("node_id"),
+        safe_send_sync("integer", {
             "dataset": dataset
-        })
+        }, kwargs.get("node_id"))
 
         return (integer_input, [integer_input])
 # endregion

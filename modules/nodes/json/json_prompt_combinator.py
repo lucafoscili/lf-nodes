@@ -4,6 +4,7 @@ from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
+from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.logic import normalize_json_input, normalize_list_to_value
 
 # region LF_JSONPromptCombinator
@@ -245,10 +246,9 @@ class LF_JSONPromptCombinator:
 
 """
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}jsonpromptcombinator", {
-            "node": kwargs.get("node_id"),
+        safe_send_sync("jsonpromptcombinator", {
             "value": log_markdown,
-        })
+        }, kwargs.get("node_id"))
 
         return ("\n".join(combinations), combinations, count, flat_json)
 # endregion

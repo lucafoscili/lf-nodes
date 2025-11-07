@@ -8,7 +8,7 @@ from server import PromptServer
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, INT_MAX, WEIGHT_DTYPE_COMBO
 from ...utils.helpers.api import process_model_async
-from ...utils.helpers.comfy import get_comfy_list
+from ...utils.helpers.comfy import get_comfy_list, safe_send_sync
 from ...utils.helpers.logic import (
     build_is_changed_tuple,
     dataset_from_metadata,
@@ -156,15 +156,15 @@ class LF_DiffusionModelSelector:
                 hash_event_ready = hash_ready if hash_ready and hash_ready != "Unknown" else ""
                 fetch_flag_ready = should_fetch_civitai and bool(hash_event_ready)
 
-                PromptServer.instance.send_sync(
-                    event_name,
+                safe_send_sync(
+                    "diffusionmodelselector",
                     {
-                        "node": node_id,
                         "datasets": [dataset_ready],
                         "hashes": [hash_event_ready],
                         "apiFlags": [fetch_flag_ready],
                         "paths": [model_path_ready or ""],
                     },
+                    node_id,
                 )
 
             callback = _metadata_callback
@@ -184,15 +184,15 @@ class LF_DiffusionModelSelector:
         fetch_now = should_fetch_civitai and not metadata_pending and bool(hash_event)
         path_event = model_path or ""
 
-        PromptServer.instance.send_sync(
-            event_name,
+        safe_send_sync(
+            "diffusionmodelselector",
             {
-                "node": node_id,
                 "datasets": [dataset],
                 "hashes": [hash_event],
                 "apiFlags": [fetch_now],
                 "paths": [path_event],
             },
+            node_id,
         )
 
         return (

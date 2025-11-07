@@ -2,7 +2,7 @@ from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
-from ...utils.helpers.comfy import get_comfy_dir, resolve_filepath
+from ...utils.helpers.comfy import get_comfy_dir, resolve_filepath, safe_send_sync
 from ...utils.helpers.logic import normalize_list_to_value
 
 # region LF_SaveText
@@ -68,10 +68,9 @@ class LF_SaveText:
         dataset: dict = { "nodes": [root] }
         nodes.append({ "description": output_file, "icon": "code", "id": output_file, "value": output_file })
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}savetext", {
-            "node": kwargs.get("node_id"),
+        safe_send_sync("savetext", {
             "dataset": dataset,
-        })
+        }, kwargs.get("node_id"))
 
         return (text,)
 # endregion

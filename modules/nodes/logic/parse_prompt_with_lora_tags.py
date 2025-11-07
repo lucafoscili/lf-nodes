@@ -6,6 +6,7 @@ from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, LORA_TAG_REGEX
 from ...utils.helpers.logic import normalize_list_to_value
 from ...utils.helpers.prompt import cleanse_lora_tag
+from ...utils.helpers.comfy import safe_send_sync
 
 # region LF_ParsePromptWithLoraTags
 class LF_ParsePromptWithLoraTags:
@@ -86,10 +87,9 @@ class LF_ParsePromptWithLoraTags:
 
         log = "\n".join(log_entries)
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}parsepromptwithloratags", {
-            "node": kwargs.get("node_id"),
+        safe_send_sync("parsepromptwithloratags", {
             "value": log
-        })
+        }, kwargs.get("node_id"))
 
         return (text, loras_string)
 # endregion

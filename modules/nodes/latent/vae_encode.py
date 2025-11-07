@@ -3,6 +3,7 @@ from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
+from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.logic import normalize_input_image, normalize_list_to_value, normalize_output_latent
 
 # region LF_VAEEncode
@@ -51,10 +52,9 @@ class LF_VAEEncode:
 
         total = len(image_list)
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}vaeencode", {
-            "node": node_id,
+        safe_send_sync("vaeencode", {
             "value": f"## VAE Encode\n\n- Starting encode for `{total}` image(s)…",
-        })
+        }, node_id)
 
         # Process images in batches if multiple
         if len(image_list) == 1:
@@ -97,10 +97,9 @@ class LF_VAEEncode:
         if temporal is not None:
             log_lines.append(f"- Temporal compression (encode): `{temporal}`")
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}vaeencode", {
-            "node": node_id,
+        safe_send_sync("vaeencode", {
             "value": "\n".join(log_lines),
-        })
+        }, node_id)
 
         latent_batch, latent_list = normalize_output_latent(latent_dict)
 

@@ -12,6 +12,7 @@ from server import PromptServer
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
 from ...utils.filters.unsharp_mask import unsharp_mask_effect
+from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.logic import (
     normalize_input_image,
     normalize_list_to_value,
@@ -309,12 +310,12 @@ class LF_TiledSuperRes:
 
         batch_list, image_list = normalize_output_image(upscaled_images)
 
-        PromptServer.instance.send_sync(
-            f"{EVENT_PREFIX}tiledsuperres",
+        safe_send_sync(
+            "tiledsuperres",
             {
-                "node": node_id,
                 "dataset": dataset,
             },
+            node_id,
         )
 
         return batch_list[0], image_list, {"runs": stats_rows}

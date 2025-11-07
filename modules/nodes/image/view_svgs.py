@@ -4,6 +4,7 @@ from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
+from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.temp_cache import TempFileCache
 from ...utils.helpers.logic.split_svgs import split_svgs
 from ...utils.helpers.logic import normalize_list_to_value
@@ -77,11 +78,10 @@ class LF_ViewSVGs:
         slot_names = [f"slot-{i}" for i in range(len(svg_blocks))]
         slot_map = { name: block for name, block in zip(slot_names, svg_blocks) }
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}viewsvgs", {
-            "node": kwargs.get("node_id"),
+        safe_send_sync("viewsvgs", {
             "dataset": dataset,
             "slot_map": slot_map,
-        })
+        }, kwargs.get("node_id"))
 
         return (svg_string, svg_blocks)
 # endregion

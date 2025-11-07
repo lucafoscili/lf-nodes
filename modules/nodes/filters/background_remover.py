@@ -9,7 +9,7 @@ from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
 from ...utils.filters import apply_background_remover_filter
 from ...utils.helpers.api import get_resource_url
-from ...utils.helpers.comfy import resolve_filepath
+from ...utils.helpers.comfy import resolve_filepath, safe_send_sync
 from ...utils.helpers.conversion import tensor_to_pil
 from ...utils.helpers.logic import (
     normalize_input_image,
@@ -157,9 +157,10 @@ class LF_BackgroundRemover:
             if cutout_url and mask_url:
                 nodes.append(create_compare_node(cutout_url, mask_url, len(nodes)))
 
-        PromptServer.instance.send_sync(
-            f"{EVENT_PREFIX}backgroundremover",
-            {"node": node_id, "dataset": dataset},
+        safe_send_sync(
+            "backgroundremover",
+            {"dataset": dataset},
+            node_id,
         )
 
         composite_batches, composite_list = normalize_output_image(composite_images)

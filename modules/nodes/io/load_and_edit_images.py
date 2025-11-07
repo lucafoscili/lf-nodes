@@ -5,6 +5,7 @@ from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, SAMPLERS, SCHEDULERS
+from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.editing import (
     EditingSession,
     ensure_dataset_context,
@@ -176,12 +177,12 @@ class LF_LoadAndEditImages:
             negative_conditioning=negative_conditioning_value,
         )
 
-        PromptServer.instance.send_sync(
-            f"{EVENT_PREFIX}loadandeditimages",
+        safe_send_sync(
+            "loadandeditimages",
             {
-                "node": node_id,
                 "dataset": dataset,
             },
+            node_id,
         )
 
         results = session.collect_results(dataset)

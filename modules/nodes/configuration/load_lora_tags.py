@@ -10,7 +10,7 @@ import comfy.utils
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
 from ...utils.helpers.api import process_model
-from ...utils.helpers.comfy import get_comfy_list
+from ...utils.helpers.comfy import get_comfy_list, safe_send_sync
 from ...utils.helpers.logic import normalize_list_to_value
 from ...utils.helpers.ui import  prepare_model_dataset
 
@@ -99,10 +99,9 @@ class LF_LoadLoraTags:
 
         if not found_tags:
 
-            PromptServer.instance.send_sync(f"{EVENT_PREFIX}loadloratags", {
-                "node": kwargs.get("node_id"),
+            safe_send_sync("loadloratags", {
                 "apiFlags": [False],
-            })
+            }, kwargs.get("node_id"))
 
             return (model, clip)
 
@@ -153,14 +152,13 @@ class LF_LoadLoraTags:
                            "value": "LoRA loaded successfully!" })
 
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}loadloratags", {
-            "node": kwargs.get("node_id"),
+        safe_send_sync("loadloratags", {
             "datasets": datasets,
             "hashes": hashes,
             "apiFlags": api_flags,
             "paths": lora_paths,
             "chip": chip_dataset
-        })
+        }, kwargs.get("node_id"))
 
         return (model, clip)
 # endregion

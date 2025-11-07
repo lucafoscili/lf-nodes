@@ -2,6 +2,7 @@ from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import BLUE_CHANNEL_ID, EVENT_PREFIX, FUNCTION, GREEN_CHANNEL_ID, Input, INTENSITY_ID, RED_CHANNEL_ID
+from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.logic import normalize_json_input
 
 # region LF_LUTGeneration
@@ -69,10 +70,9 @@ class LF_LUTGeneration:
 
             lut_datasets[image_key] = dataset
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}lutgeneration", {
-            "node": kwargs.get("node_id"),
+        safe_send_sync("lutgeneration", {
             "datasets": lut_datasets
-        })
+        }, kwargs.get("node_id"))
 
         return (lut_datasets,)
 # endregion

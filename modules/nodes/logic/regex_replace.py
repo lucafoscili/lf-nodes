@@ -5,6 +5,7 @@ from server import PromptServer
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
 from ...utils.helpers.logic import normalize_list_to_value
+from ...utils.helpers.comfy import safe_send_sync
 
 # region LF_RegexReplace
 class LF_RegexReplace:
@@ -70,10 +71,9 @@ class LF_RegexReplace:
 
         if not input_text or not pattern:
             log = f"**Error**: Input text or pattern is empty. Replacement cannot proceed."
-            PromptServer.instance.send_sync(f"{EVENT_PREFIX}regexreplace", {
-                "node": kwargs.get("node_id"),
+            safe_send_sync("regexreplace", {
                 "value": log,
-            })
+            }, kwargs.get("node_id"))
             return ("", [])
 
         replacement_count = 0
@@ -86,10 +86,9 @@ class LF_RegexReplace:
   **Invalid Pattern**: {pattern}
   **Error Message**: {str(e)}
             """
-            PromptServer.instance.send_sync(f"{EVENT_PREFIX}regexreplace", {
-                "node": kwargs.get("node_id"),
+            safe_send_sync("regexreplace", {
                 "value": log,
-            })
+            }, kwargs.get("node_id"))
             return ("", [])
 
         log = f"""## Result:
@@ -102,10 +101,9 @@ class LF_RegexReplace:
   **Replacements Made**: {replacement_count}
         """
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}regexreplace", {
-            "node": kwargs.get("node_id"),
+        safe_send_sync("regexreplace", {
             "value": log,
-        })
+        }, kwargs.get("node_id"))
 
         return (modified_text, [modified_text])
 

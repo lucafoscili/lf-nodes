@@ -4,7 +4,7 @@ from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
-from ...utils.helpers.comfy import get_comfy_dir, resolve_filepath
+from ...utils.helpers.comfy import get_comfy_dir, resolve_filepath, safe_send_sync
 from ...utils.helpers.logic import normalize_list_to_value, split_svgs
 
 # region LF_SaveSVG
@@ -96,11 +96,10 @@ class LF_SaveSVG:
 
         slot_map = { name: block for name, block in zip(filenames, svg_blocks) }
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}savesvg", {
-            "node": kwargs.get("node_id"),
+        safe_send_sync("savesvg", {
             "dataset": dataset,
             "slot_map": slot_map,
-        })
+        }, kwargs.get("node_id"))
 
         return {
             "ui": {

@@ -6,7 +6,7 @@ from server import PromptServer
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, MASK_THRESHOLD_COMBO
 from ...utils.helpers.api import get_resource_url
-from ...utils.helpers.comfy import get_tokenizer_from_clip, resolve_filepath
+from ...utils.helpers.comfy import get_tokenizer_from_clip, resolve_filepath, safe_send_sync
 from ...utils.helpers.conversion import tensor_to_pil
 from ...utils.helpers.logic import (
     get_otsu_threshold,
@@ -163,10 +163,9 @@ class LF_CreateMask:
                                                get_resource_url(sm,nm,"temp"),
                                                idx))
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}createmask", {
-            "node": kwargs.get("node_id"),
+        safe_send_sync("createmask", {
             "dataset": dataset
-        })
+        }, kwargs.get("node_id"))
 
         image_batch, image_list = normalize_output_image(mask_images)
         mask_batch, mask_list = normalize_output_mask(mask_tensors)
