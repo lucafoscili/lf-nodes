@@ -23,7 +23,7 @@ Example:
 import json
 from typing import Any
 
-from server import PromptServer
+from ....utils.helpers.comfy import safe_send_sync
 
 class UILogger:
     """
@@ -52,10 +52,10 @@ class UILogger:
         self.log_lines.append(value)
         full_log = "\n\n".join(self.log_lines)
 
-        PromptServer.instance.send_sync(self.event_name, {
+        safe_send_sync(self.event_name, {
             "node": self.node_id,
             "value": full_log,
-        })
+        }, self.node_id)
 
     def get_full_log(self) -> str:
         """Returns the complete log as a single string."""

@@ -1,10 +1,7 @@
 {
   "11": {
     "inputs": {
-      "string": [
-        "13",
-        1
-      ],
+      "string": ["33", 1],
       "regex_pattern": "<svg(?:\\s[^>]*)?>.*?</svg>",
       "mode": "First Match",
       "case_insensitive": true,
@@ -20,10 +17,7 @@
   "12": {
     "inputs": {
       "ui_widget": "",
-      "string": [
-        "30",
-        0
-      ]
+      "string": ["30", 0]
     },
     "class_type": "LF_DisplayString",
     "_meta": {
@@ -64,14 +58,8 @@
   },
   "15": {
     "inputs": {
-      "svg": [
-        "30",
-        0
-      ],
-      "filename_prefix": [
-        "25",
-        0
-      ],
+      "svg": ["30", 0],
+      "filename_prefix": ["25", 0],
       "add_timestamp": false,
       "add_counter": false,
       "ui_widget": {
@@ -111,10 +99,7 @@
       "shuffle": false,
       "limit": 0,
       "ui_widget": "",
-      "json_input": [
-        "26",
-        0
-      ]
+      "json_input": ["26", 0]
     },
     "class_type": "LF_JSONPromptCombinator",
     "_meta": {
@@ -132,15 +117,9 @@
   },
   "21": {
     "inputs": {
-      "input_text": [
-        "19",
-        0
-      ],
+      "input_text": ["19", 0],
       "target": "${VAR_NAME}",
-      "replacement": [
-        "25",
-        0
-      ],
+      "replacement": ["25", 0],
       "ui_widget": ""
     },
     "class_type": "LF_StringReplace",
@@ -150,10 +129,7 @@
   },
   "22": {
     "inputs": {
-      "input_text": [
-        "21",
-        0
-      ],
+      "input_text": ["21", 0],
       "target": "${VAR_SIZE}",
       "replacement": "24",
       "ui_widget": ""
@@ -168,13 +144,13 @@
       "string": "icon",
       "enable_history": true,
       "randomize": false,
-      "seed": 363062992441432,
+      "seed": 1060563310857976,
       "ui_widget": {
         "nodes": [
           {
             "icon": "history",
             "id": "icon",
-            "description": "Execution date: 22/10/2025, 15:22:01.",
+            "description": "Execution date: 08/11/2025, 09:45:13.",
             "value": "icon"
           }
         ]
@@ -192,14 +168,8 @@
         "bool": false,
         "roll": 100
       },
-      "on_true": [
-        "27",
-        0
-      ],
-      "on_false": [
-        "20",
-        0
-      ]
+      "on_true": ["27", 0],
+      "on_false": ["20", 0]
     },
     "class_type": "LF_SwitchJSON",
     "_meta": {
@@ -217,10 +187,7 @@
   },
   "28": {
     "inputs": {
-      "input_text": [
-        "32",
-        0
-      ],
+      "input_text": ["32", 0],
       "pattern": "\\b(?<![-\\w])(height|width|fill|stroke|color)=\"[^\"]*\"",
       "replacement": "",
       "flags": "0",
@@ -233,14 +200,8 @@
   },
   "29": {
     "inputs": {
-      "on_true": [
-        "28",
-        0
-      ],
-      "on_false": [
-        "32",
-        0
-      ],
+      "on_true": ["28", 0],
+      "on_false": ["32", 0],
       "boolean": true,
       "ui_widget": {
         "bool": true,
@@ -256,12 +217,9 @@
     "inputs": {
       "separator": "",
       "text_1": "<?xml version=\"1.0\" encoding=\"UTF-8\"?> <!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">",
-      "text_2": [
-        "29",
-        0
-      ],
+      "text_2": ["29", 0],
       "shuffle_inputs": false,
-      "seed": 568463703351547,
+      "seed": 900060739358150,
       "ui_widget": ""
     },
     "class_type": "LF_WallOfText",
@@ -271,10 +229,7 @@
   },
   "32": {
     "inputs": {
-      "input_text": [
-        "11",
-        0
-      ],
+      "input_text": ["11", 0],
       "target": "\\n",
       "replacement": "",
       "ui_widget": ""
@@ -282,6 +237,18 @@
     "class_type": "LF_StringReplace",
     "_meta": {
       "title": "C L E A N S E   N E W   L I N E"
+    }
+  },
+  "33": {
+    "inputs": {
+      "prompt": ["22", 0],
+      "model": "gemini-2.0-flash",
+      "timeout": 60,
+      "ui_widget": ""
+    },
+    "class_type": "LF_GeminiAPI",
+    "_meta": {
+      "title": "Gemini API (Google)"
     }
   }
 }

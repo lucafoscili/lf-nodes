@@ -10,6 +10,7 @@ LOG = logging.getLogger(__name__)
 
 from .job_store import JobStatus, create_job, set_job_status
 from .executor import execute_workflow, _make_run_payload, _prepare_workflow_execution, WorkflowPreparationError
+from ...utils.helpers.comfy import safe_send_sync
 
 # region Helpers
 def _emit_run_progress(run_id: str, message: str, **extra: Any) -> None:
@@ -17,7 +18,7 @@ def _emit_run_progress(run_id: str, message: str, **extra: Any) -> None:
     if extra:
         payload.update(extra)
     try:
-        PromptServer.instance.send_sync("lf-runner:progress", payload)
+        safe_send_sync("lf-runner:progress", payload, run_id)
     except Exception:
         logging.exception("Failed to send progress event for run %s", run_id)
 # endregion

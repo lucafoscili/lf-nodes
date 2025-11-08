@@ -153,7 +153,7 @@ async def _monitor_execution_state(prompt_id: str, run_id: str, comfy_url: str =
     Monitor execution state and update job status appropriately.
 
     Since we're using the HTTP API, we can't directly check queue state.
-    Instead, we poll the history API to see if the prompt has started executing.
+    Instead, we poll the queue API to see if the prompt is currently running.
 
     Args:
         prompt_id (str): The unique identifier of the prompt to monitor.
@@ -163,29 +163,40 @@ async def _monitor_execution_state(prompt_id: str, run_id: str, comfy_url: str =
         # Give ComfyUI a moment to start processing the prompt
         await asyncio.sleep(0.5)
 
-        # Use provided session or create a new one
         session_to_use = session
         should_close_session = session_to_use is None
         if session_to_use is None:
             session_to_use = aiohttp.ClientSession()
 
         try:
-            # Check if the prompt appears in history (meaning it started)
-            async with session_to_use.get(f"{comfy_url}/history/{prompt_id}") as resp:
+            async with session_to_use.get(f"{comfy_url}/queue") as resp:
                 if resp.status == 200:
-                    history = await resp.json()
-                    if prompt_id in history:
-                        # Prompt has started (it's in history)
-                        try:
-                            await set_job_status(run_id, JobStatus.RUNNING)
-                            logging.info("Run %s: marked RUNNING (found in history)", run_id)
-                        except Exception:
-                            logging.exception("Failed to set job RUNNING for %s", run_id)
-                    else:
-                        # Prompt not in history yet, assume it's queued
-                        logging.debug("Run %s: prompt not yet in history, assuming queued", run_id)
+                    queue_data = await resp.json()
+                    queue_running = queue_data.get("queue_running", [])
+                    queue_pending = queue_data.get("queue_pending", [])
+
+                    for item in queue_running:
+                        if isinstance(item, list) and len(item) >= 2:
+                            item_prompt_id = item[1]  # ComfyUI queue format: [number, prompt_id, ...]
+                            if item_prompt_id == prompt_id:
+                                try:
+                                    await set_job_status(run_id, JobStatus.RUNNING)
+                                    logging.debug("Run %s: marked RUNNING (found in running queue)", run_id)
+                                except Exception:
+                                    logging.exception("Failed to set job RUNNING for %s", run_id)
+                                return
+
+                    for item in queue_pending:
+                        if isinstance(item, list) and len(item) >= 2:
+                            item_prompt_id = item[1]  # ComfyUI queue format: [number, prompt_id, ...]
+                            if item_prompt_id == prompt_id:
+                                logging.debug("Run %s: prompt still in pending queue", run_id)
+                                return
+
+                    # Prompt not found in queue - might have completed or failed
+                    logging.debug("Run %s: prompt not found in queue", run_id)
                 else:
-                    logging.warning("Failed to check history for prompt %s: HTTP %d", prompt_id, resp.status)
+                    logging.warning("Failed to check queue for prompt %s: HTTP %d", prompt_id, resp.status)
         finally:
             if should_close_session and session_to_use:
                 await session_to_use.close()
@@ -207,7 +218,7 @@ async def execute_workflow(
 
     workflow_id = payload.get("workflowId")
     client_id = payload.get("clientId") or uuid.uuid4().hex
-    # Don't generate prompt_id here - ComfyUI will provide it
+
     try:
         validation = await execution.validate_prompt(uuid.uuid4().hex, prompt, None)
     except Exception as exc:
@@ -217,7 +228,6 @@ async def execute_workflow(
         response = _make_run_payload(detail=validation[1], error_message="validation_failed", history={"outputs": {}, "node_errors": json_safe(validation[3])})
         return JobStatus.FAILED, response, 400
 
-    # Use ComfyUI's public HTTP API instead of manipulating internal queue
     extra_data = {"lf_nodes": {"workflow_id": workflow_id, "run_id": run_id}}
     extra_data.update(payload.get("extraData", {}))
 
