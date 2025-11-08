@@ -1,8 +1,9 @@
-import asyncio
 import aiosqlite
+import asyncio
 import json
 import logging
 import time
+
 from typing import Any, Dict, Optional
 
 from dataclasses import dataclass, field
@@ -15,7 +16,7 @@ from pathlib import Path
 # module directory will be used when initializing the connection.
 _DB_PATH: Optional[str] = None
 
-
+# region Configuration
 def configure(db_path: Optional[str]) -> None:
     """Configure the adapter with a database file path.
 
@@ -29,7 +30,7 @@ _conn_lock = asyncio.Lock()
 
 # in-memory pubsub (subscribers receive event dicts)
 _subscribers: list[asyncio.Queue] = []
-
+# endregion
 
 @dataclass
 class JobRecord:
@@ -119,15 +120,20 @@ async def close() -> None:
         finally:
             _conn = None
 
+# region Create
 async def create_job(run_id: str, workflow_id: str, owner_id: Optional[str] = None) -> JobRecord:
     conn = await _ensure_conn()
     now = time.time()
-    # Single statement; do not clobber existing rows
+    # Upsert logic: if the row already exists (likely created by a prior status update before
+    # we had workflow_id/owner_id), update those columns ONLY if they are currently NULL.
+    # Preserve existing status/created_at/seq/result/error fields.
     await conn.execute(
         """
         INSERT INTO runs (run_id, workflow_id, status, created_at, updated_at, result, error, seq, owner_id)
         VALUES (?, ?, 'pending', ?, ?, NULL, NULL, 0, ?)
-        ON CONFLICT(run_id) DO NOTHING
+        ON CONFLICT(run_id) DO UPDATE SET
+          workflow_id = COALESCE(runs.workflow_id, excluded.workflow_id),
+          owner_id    = COALESCE(runs.owner_id,    excluded.owner_id)
         """,
         (run_id, workflow_id, now, now, owner_id),
     )
@@ -145,7 +151,9 @@ async def create_job(run_id: str, workflow_id: str, owner_id: Optional[str] = No
         except Exception:
             pass
     return rec
+# endregion
 
+# region Read
 async def get_job(run_id: str) -> Optional[JobRecord]:
     conn = await _ensure_conn()
     cur = await conn.execute("SELECT run_id, workflow_id, status, created_at, updated_at, result, error, seq, owner_id FROM runs WHERE run_id = ?", (run_id,))
@@ -160,7 +168,9 @@ async def get_job(run_id: str) -> Optional[JobRecord]:
         result = row[5]
     # row mapping: 0=run_id,1=workflow_id,2=status,3=created_at,4=updated_at,5=result,6=error,7=seq,8=owner_id
     return JobRecord(run_id=row[0], workflow_id=row[1], status=row[2], created_at=row[3], updated_at=row[4], result=result, error=row[6], seq=row[7] or 0, owner_id=row[8])
+# endregion
 
+# region Update
 async def set_job_status(run_id: str, status: str, *, result: Optional[Any] = None, error: Optional[str] = None) -> Optional[JobRecord]:
     conn = await _ensure_conn()
     now = time.time()
@@ -201,7 +211,9 @@ async def set_job_status(run_id: str, status: str, *, result: Optional[Any] = No
         except Exception:
             pass
     return rec
+# endregion
 
+# region List
 async def list_jobs(owner_id: Optional[str] = None, status: Optional[str] = None) -> Dict[str, JobRecord]:
     """List jobs optionally filtered by owner_id and/or status.
 
@@ -232,12 +244,16 @@ async def list_jobs(owner_id: Optional[str] = None, status: Optional[str] = None
         # row mapping: 0=run_id,1=workflow_id,2=status,3=created_at,4=updated_at,5=result,6=error,7=seq,8=owner_id
         out[row[0]] = JobRecord(run_id=row[0], workflow_id=row[1], status=row[2], created_at=row[3], updated_at=row[4], result=result, error=row[6], seq=row[7] or 0, owner_id=row[8])
     return out
+# endregion
 
+# region Delete
 async def remove_job(run_id: str) -> Optional[JobRecord]:
     # Soft delete: mark deleted + bump seq
     rec = await set_job_status(run_id, "deleted")
     return rec
+# endregion
 
+# region PubSub
 def subscribe_events() -> asyncio.Queue:
     q: asyncio.Queue = asyncio.Queue()
     _subscribers.append(q)
@@ -255,6 +271,7 @@ def publish_event(event: Dict[str, Any]) -> None:
             q.put_nowait(event)
         except Exception:
             LOG.exception("Failed to enqueue event to subscriber queue")
+# endregion
 
 __all__ = [
     "create_job",
