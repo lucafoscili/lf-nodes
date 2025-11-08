@@ -2,8 +2,17 @@
 # Set up common mocks before any imports
 import sys
 import os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
-from common_mocks import setup_common_mocks
+from pathlib import Path
+
+# Ensure lf-nodes root and tests common_mocks are importable
+LF_ROOT = Path(__file__).resolve().parents[3]
+if str(LF_ROOT) not in sys.path:
+    sys.path.insert(0, str(LF_ROOT))
+TESTS_ROOT = Path(__file__).resolve().parents[2]
+if str(TESTS_ROOT) not in sys.path:
+    sys.path.insert(0, str(TESTS_ROOT))
+
+from modules.tests.common_mocks import setup_common_mocks  # type: ignore
 setup_common_mocks()
 
 import json
@@ -15,7 +24,7 @@ import torch
 # Import the actual node implementation
 from modules.nodes.analytics.color_analysis import LF_ColorAnalysis, NODE_CLASS_MAPPINGS, NODE_DISPLAY_NAME_MAPPINGS
 from modules.utils.constants import Input
-from common_mocks import mock_prompt_server
+from modules.tests.common_mocks import mock_prompt_server  # type: ignore
 
 
 class TestColorAnalysisNode(unittest.TestCase):

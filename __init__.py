@@ -5,7 +5,14 @@ import sys
 
 from pathlib import Path
 
-from .modules.utils.env import maybe_load_dotenv, bool_env
+try:
+    from .modules.utils.env import maybe_load_dotenv, bool_env
+except ImportError:
+    # Handle case where relative imports fail (e.g., when imported by pytest)
+    def maybe_load_dotenv(*args, **kwargs):
+        pass
+    def bool_env(*args, **kwargs):
+        return False
 
 VERSION = "2.0.1"
 

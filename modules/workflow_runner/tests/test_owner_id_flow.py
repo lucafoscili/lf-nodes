@@ -122,10 +122,23 @@ class TestRunServicePropagation:
         # Mock the entire execution flow to avoid side effects
         with patch('modules.workflow_runner.services.run_service.create_job', side_effect=mock_create_job), \
              patch('modules.workflow_runner.services.run_service._prepare_workflow_execution') as mock_prep, \
+             patch('modules.workflow_runner.services.run_service.submit_workflow') as mock_submit, \
              patch('modules.workflow_runner.services.run_service._emit_run_progress'), \
              patch('modules.workflow_runner.services.run_service.PromptServer') as mock_server:
             
-            mock_prep.return_value = {"mock": "prepared"}
+            # Mock _prepare_workflow_execution to return (definition, prompt) tuple
+            mock_definition = Mock()
+            mock_prompt = {"mock": "prompt"}
+            mock_prep.return_value = (mock_definition, mock_prompt)
+            
+            # Mock submit_workflow to return (prompt_id, client_id, comfy_url, prompt, validation, workflow_id)
+            mock_prompt_id = "mock-prompt-123"
+            mock_client_id = "mock-client-456"
+            mock_comfy_url = "http://mock:8188"
+            mock_validation = (True, "", [], [])  # Valid
+            mock_workflow_id = "test-workflow"
+            mock_submit.return_value = (mock_prompt_id, mock_client_id, mock_comfy_url, mock_prompt, mock_validation, mock_workflow_id)
+            
             mock_loop = Mock()
             mock_loop.create_task = Mock()
             mock_server.instance.loop = mock_loop
@@ -165,10 +178,23 @@ class TestRunServicePropagation:
         
         with patch('modules.workflow_runner.services.run_service.create_job', side_effect=mock_create_job), \
              patch('modules.workflow_runner.services.run_service._prepare_workflow_execution') as mock_prep, \
+             patch('modules.workflow_runner.services.run_service.submit_workflow') as mock_submit, \
              patch('modules.workflow_runner.services.run_service._emit_run_progress'), \
              patch('modules.workflow_runner.services.run_service.PromptServer') as mock_server:
             
-            mock_prep.return_value = {"mock": "prepared"}
+            # Mock _prepare_workflow_execution to return (definition, prompt) tuple
+            mock_definition = Mock()
+            mock_prompt = {"mock": "prompt"}
+            mock_prep.return_value = (mock_definition, mock_prompt)
+            
+            # Mock submit_workflow to return (prompt_id, client_id, comfy_url, prompt, validation, workflow_id)
+            mock_prompt_id = "mock-prompt-123"
+            mock_client_id = "mock-client-456"
+            mock_comfy_url = "http://mock:8188"
+            mock_validation = (True, "", [], [])  # Valid
+            mock_workflow_id = "test-workflow"
+            mock_submit.return_value = (mock_prompt_id, mock_client_id, mock_comfy_url, mock_prompt, mock_validation, mock_workflow_id)
+            
             mock_loop = Mock()
             mock_loop.create_task = Mock()
             mock_server.instance.loop = mock_loop
@@ -191,6 +217,7 @@ class TestControllerOwnerIdExtraction:
         # Create mock request with authenticated email
         mock_request = Mock(spec=web.Request)
         mock_request.google_oauth_email = "user@example.com"
+        mock_request.get = Mock(return_value=None)
         mock_request.json = AsyncMock(return_value={
             "workflowId": "test-workflow",
             "workflow": {},

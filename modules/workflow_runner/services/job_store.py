@@ -77,7 +77,49 @@ async def create_job(job_id: str, workflow_id: str, owner_id: Optional[str] = No
         if adapter is not None:
             if _WF_DEBUG:
                 LOG.info(f"[DEBUG] create_job: calling adapter.create_job with workflow_id={workflow_id}, owner_id={owner_id}")
-            return await adapter.create_job(job_id, workflow_id, owner_id)
+            rec = await adapter.create_job(job_id, workflow_id=workflow_id, owner_id=owner_id)
+            # Normalize adapter record to in-memory Job dataclass for API consistency
+            def _coerce_status(val: Any) -> JobStatus:
+                try:
+                    if isinstance(val, JobStatus):
+                        return val
+                    if isinstance(val, str) and val:
+                        try:
+                            return JobStatus(val)
+                        except Exception:
+                            return JobStatus.PENDING
+                    return JobStatus.PENDING
+                except Exception:
+                    return JobStatus.PENDING
+
+            try:
+                status_val = getattr(rec, "status", JobStatus.PENDING.value)
+                job = Job(
+                    id=getattr(rec, "run_id"),
+                    workflow_id=str(getattr(rec, "workflow_id", "")),
+                    created_at=getattr(rec, "created_at", time.time()),
+                    status=_coerce_status(status_val),
+                    result=getattr(rec, "result", None),
+                    error=getattr(rec, "error", None),
+                    owner_id=getattr(rec, "owner_id", None),
+                    seq=getattr(rec, "seq", 0),
+                    updated_at=getattr(rec, "updated_at", None),
+                )
+            except Exception:
+                # Fallback if adapter returns a dict-like or Mock
+                status_val = getattr(rec, "status", JobStatus.PENDING.value)
+                job = Job(
+                    id=getattr(rec, "run_id", getattr(rec, "id", str(job_id))),
+                    workflow_id=str(getattr(rec, "workflow_id", workflow_id)),
+                    created_at=getattr(rec, "created_at", time.time()),
+                    status=_coerce_status(status_val),
+                    result=getattr(rec, "result", None),
+                    error=getattr(rec, "error", None),
+                    owner_id=getattr(rec, "owner_id", owner_id),
+                    seq=getattr(rec, "seq", 0),
+                    updated_at=getattr(rec, "updated_at", None),
+                )
+            return job
 
     async with _lock:
         job = Job(id=job_id, workflow_id=workflow_id, owner_id=owner_id, seq=0)

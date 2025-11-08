@@ -13,6 +13,7 @@ Tests cover the new HTTP API approach:
 import asyncio
 import json
 import pytest
+pytestmark = [pytest.mark.asyncio, pytest.mark.integration]
 from unittest.mock import AsyncMock, MagicMock, patch
 from typing import Dict, Any, Tuple
 

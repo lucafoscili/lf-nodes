@@ -73,37 +73,73 @@ async def run_workflow(payload: Dict[str, Any], owner_id: str | None = None) -> 
     _emit_run_progress(prompt_id, "workflow_received")
 
     # Background finalize: monitor + wait and set terminal status when done
-    async def worker() -> None:
-        try:
-            final_status, response_body, http_status = await finalize_workflow(
-                prompt_id, client_id, comfy_url, validation
-            )
-            job_result = {"http_status": http_status, "body": response_body}
-            await set_job_status(prompt_id, final_status, result=job_result)
-            _emit_run_progress(prompt_id, "workflow_completed", status=final_status.value)
-        except asyncio.CancelledError:
-            await set_job_status(prompt_id, JobStatus.CANCELLED, error="cancelled")
-            _emit_run_progress(prompt_id, "workflow_cancelled")
-            raise
-        except WorkflowPreparationError as exc:
-            # Shouldn't happen here, but convert to FAILED
-            logging.exception("Finalize failed for %s with prep error: %s", prompt_id, exc)
-            job_result = {"http_status": exc.status, "body": exc.response_body}
-            await set_job_status(prompt_id, JobStatus.FAILED, error="prep_failed", result=job_result)
-            _emit_run_progress(prompt_id, "workflow_failed", error="prep_failed")
-        except Exception as exc:
-            logging.exception("Workflow prompt %s failed unexpectedly: %s", prompt_id, exc)
-            error_payload = _make_run_payload(detail=str(exc), error_message="unhandled_exception")
-            job_result = {"http_status": 500, "body": error_payload}
-            await set_job_status(prompt_id, JobStatus.FAILED, error=str(exc), result=job_result)
-            _emit_run_progress(prompt_id, "workflow_failed", error=str(exc))
-
+    # Schedule background finalize without assuming an asyncio event loop exists (trio/anyio friendly)
     try:
-        PromptServer.instance.loop.create_task(worker())
-        LOG.debug("Scheduled worker coroutine on PromptServer loop for prompt %s", prompt_id)
+        loop = getattr(getattr(PromptServer, "instance", None), "loop", None)
+        if loop is not None:
+            async def worker() -> None:
+                try:
+                    final_status, response_body, http_status = await finalize_workflow(
+                        prompt_id, client_id, comfy_url, validation
+                    )
+                    job_result = {"http_status": http_status, "body": response_body}
+                    await set_job_status(prompt_id, final_status, result=job_result)
+                    _emit_run_progress(prompt_id, "workflow_completed", status=final_status.value)
+                except asyncio.CancelledError:
+                    await set_job_status(prompt_id, JobStatus.CANCELLED, error="cancelled")
+                    _emit_run_progress(prompt_id, "workflow_cancelled")
+                    raise
+                except WorkflowPreparationError as exc:
+                    # Shouldn't happen here, but convert to FAILED
+                    logging.exception("Finalize failed for %s with prep error: %s", prompt_id, exc)
+                    job_result = {"http_status": exc.status, "body": exc.response_body}
+                    await set_job_status(prompt_id, JobStatus.FAILED, error="prep_failed", result=job_result)
+                    _emit_run_progress(prompt_id, "workflow_failed", error="prep_failed")
+                except Exception as exc:
+                    logging.exception("Workflow prompt %s failed unexpectedly: %s", prompt_id, exc)
+                    error_payload = _make_run_payload(detail=str(exc), error_message="unhandled_exception")
+                    job_result = {"http_status": 500, "body": error_payload}
+                    await set_job_status(prompt_id, JobStatus.FAILED, error=str(exc), result=job_result)
+                    _emit_run_progress(prompt_id, "workflow_failed", error=str(exc))
+            
+            loop.create_task(worker())
+            LOG.debug("Scheduled worker coroutine on PromptServer loop for prompt %s", prompt_id)
+        else:
+            # Try the currently running asyncio loop
+            running_loop = asyncio.get_running_loop()
+            
+            async def worker() -> None:
+                try:
+                    final_status, response_body, http_status = await finalize_workflow(
+                        prompt_id, client_id, comfy_url, validation
+                    )
+                    job_result = {"http_status": http_status, "body": response_body}
+                    await set_job_status(prompt_id, final_status, result=job_result)
+                    _emit_run_progress(prompt_id, "workflow_completed", status=final_status.value)
+                except asyncio.CancelledError:
+                    await set_job_status(prompt_id, JobStatus.CANCELLED, error="cancelled")
+                    _emit_run_progress(prompt_id, "workflow_cancelled")
+                    raise
+                except WorkflowPreparationError as exc:
+                    # Shouldn't happen here, but convert to FAILED
+                    logging.exception("Finalize failed for %s with prep error: %s", prompt_id, exc)
+                    job_result = {"http_status": exc.status, "body": exc.response_body}
+                    await set_job_status(prompt_id, JobStatus.FAILED, error="prep_failed", result=job_result)
+                    _emit_run_progress(prompt_id, "workflow_failed", error="prep_failed")
+                except Exception as exc:
+                    logging.exception("Workflow prompt %s failed unexpectedly: %s", prompt_id, exc)
+                    error_payload = _make_run_payload(detail=str(exc), error_message="unhandled_exception")
+                    job_result = {"http_status": 500, "body": error_payload}
+                    await set_job_status(prompt_id, JobStatus.FAILED, error=str(exc), result=job_result)
+                    _emit_run_progress(prompt_id, "workflow_failed", error=str(exc))
+            
+            running_loop.create_task(worker())
+            LOG.debug("Scheduled worker coroutine on running asyncio loop for prompt %s", prompt_id)
+    except RuntimeError:
+        # No running event loop (e.g., trio test backend) – skip background scheduling
+        LOG.warning("No running asyncio loop; skipping background worker scheduling for prompt %s (test/CLI context)", prompt_id)
     except Exception:
-        LOG.exception("Failed to schedule worker on PromptServer loop for prompt %s; falling back to asyncio.create_task", prompt_id)
-        asyncio.create_task(worker())
+        LOG.exception("Unexpected error scheduling background worker for prompt %s; skipping", prompt_id)
 
     return {"run_id": prompt_id}
 # endregion

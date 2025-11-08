@@ -8,44 +8,51 @@ import sys
 from unittest.mock import MagicMock
 
 
-def setup_common_mocks():
+def setup_common_mocks(torch_enabled=False):
     """
     Set up common mocks for LF Nodes testing.
     This includes torch, torchvision, transformers, and other dependencies
     that are commonly needed to avoid CUDA initialization and import issues.
+
+    Args:
+        torch_enabled: If True, don't mock torch modules, allowing real torch usage.
+                      If False, mock torch to avoid CUDA and import issues.
     """
-    # Mock torch.cuda to avoid CUDA initialization
-    torch_mock = MagicMock()
-    torch_cuda_mock = MagicMock()
-    torch_cuda_mock.current_device.return_value = 0
-    torch_mock.cuda = torch_cuda_mock
+    # Conditionally mock torch based on torch_enabled parameter
+    if not torch_enabled:
+        # Mock torch.cuda to avoid CUDA initialization
+        torch_mock = MagicMock()
+        torch_cuda_mock = MagicMock()
+        torch_cuda_mock.current_device.return_value = 0
+        torch_mock.cuda = torch_cuda_mock
 
-    # Mock torch.nn and its submodules
-    torch_nn_mock = MagicMock()
-    torch_nn_functional_mock = MagicMock()
-    torch_nn_mock.functional = torch_nn_functional_mock
-    torch_mock.nn = torch_nn_mock
+        # Mock torch.nn and its submodules
+        torch_nn_mock = MagicMock()
+        torch_nn_functional_mock = MagicMock()
+        torch_nn_mock.functional = torch_nn_functional_mock
+        torch_mock.nn = torch_nn_mock
 
-    # Mock torch.hub
-    torch_hub_mock = MagicMock()
-    torch_mock.hub = torch_hub_mock
+        # Mock torch.hub
+        torch_hub_mock = MagicMock()
+        torch_mock.hub = torch_hub_mock
 
-    # Mock torch.device
-    torch_device_mock = MagicMock()
-    torch_mock.device = torch_device_mock
+        # Mock torch.device
+        torch_device_mock = MagicMock()
+        torch_mock.device = torch_device_mock
 
-    # Apply torch mocks
-    sys.modules['torch'] = torch_mock
-    sys.modules['torch.cuda'] = torch_cuda_mock
-    sys.modules['torch.nn'] = torch_nn_mock
-    sys.modules['torch.nn.functional'] = torch_nn_functional_mock
-    sys.modules['torch.hub'] = torch_hub_mock
-    sys.modules['torch.device'] = torch_device_mock
+        # Apply torch mocks
+        sys.modules['torch'] = torch_mock
+        sys.modules['torch.cuda'] = torch_cuda_mock
+        sys.modules['torch.nn'] = torch_nn_mock
+        sys.modules['torch.nn.functional'] = torch_nn_functional_mock
+        sys.modules['torch.hub'] = torch_hub_mock
+        sys.modules['torch.device'] = torch_device_mock
 
-    # Mock torchvision to avoid complex import chains
-    sys.modules['torchvision'] = MagicMock()
-    sys.modules['torchvision.transforms'] = MagicMock()
-    sys.modules['torchvision.transforms.functional'] = MagicMock()
+        # Mock torchvision to avoid complex import chains
+        sys.modules['torchvision'] = MagicMock()
+        sys.modules['torchvision.transforms'] = MagicMock()
+        sys.modules['torchvision.transforms.functional'] = MagicMock()
+    # If torch_enabled=True, don't mock torch - let tests use real torch
 
     # Mock transformers to avoid import issues
     sys.modules['transformers'] = MagicMock()

@@ -1,6 +1,7 @@
 import aiohttp
 import json
 import os
+import asyncio
 
 from typing import Any
 
@@ -117,7 +118,11 @@ class LF_OpenAIAPI:
         if proxy_secret:
             headers["X-LF-Proxy-Secret"] = proxy_secret
 
-        async with aiohttp.ClientSession() as session:
+        # Allow tests to inject a mocked aiohttp session via kwargs (dependency inversion for unit tests)
+        injected_session = kwargs.get("_test_session")
+        session_cm = injected_session if injected_session is not None else aiohttp.ClientSession()
+        # Support both context-managed mock objects and real sessions
+        async with session_cm as session:
             async with session.post(proxy_url, headers=headers, json=payload, timeout=timeout_sec) as resp:
                 text_status = await resp.text()
                 try:

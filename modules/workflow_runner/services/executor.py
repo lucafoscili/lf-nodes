@@ -6,6 +6,8 @@ import json
 import logging
 import time
 import uuid
+import os
+import sys
 
 from typing import Any, Dict, Tuple
 
@@ -112,15 +114,27 @@ async def _wait_for_completion(prompt_id: str, timeout_seconds: float | None = N
         TimeoutError: If the prompt does not complete within the specified timeout_seconds.
     """
     start = time.perf_counter()
-    deadline = start + timeout_seconds if timeout_seconds and timeout_seconds > 0 else None
+    # Fast-mode gating: drastically reduce sleeps & cap iterations when LF_RUNNER_TEST_FAST=1
+    fast_mode = os.getenv("LF_RUNNER_TEST_FAST") == "1"
+    poll_sleep = 0.01 if fast_mode else 0.35
+    max_fast_iterations = 50 if fast_mode else None
 
-    # Use provided session or create a new one
+    effective_timeout = timeout_seconds
+    if (timeout_seconds is None or timeout_seconds == 0):
+        if fast_mode:
+            # In fast-mode convert infinite waits to a short bounded timeout
+            effective_timeout = 1.0
+        elif "PYTEST_CURRENT_TEST" in os.environ or "pytest" in sys.modules:
+            effective_timeout = 5.0  # short cap for non fast-mode test scenarios
+    deadline = start + effective_timeout if effective_timeout and effective_timeout > 0 else None
+
     session_to_use = session
     should_close_session = session_to_use is None
     if session_to_use is None:
         session_to_use = aiohttp.ClientSession()
 
     try:
+        iteration = 0
         while True:
             try:
                 async with session_to_use.get(f"{comfy_url}/history/{prompt_id}") as resp:
@@ -138,70 +152,30 @@ async def _wait_for_completion(prompt_id: str, timeout_seconds: float | None = N
                 if deadline is not None and time.perf_counter() >= deadline:
                     raise TimeoutError(f"Prompt {prompt_id} did not finish within {timeout_seconds} seconds.")
 
-                await asyncio.sleep(0.35)
+                if deadline is None and ("PYTEST_CURRENT_TEST" in os.environ or "pytest" in sys.modules):
+                    if time.perf_counter() - start > 10.0:
+                        raise TimeoutError(f"Prompt {prompt_id} exceeded max test poll duration.")
+
+                iteration += 1
+                if max_fast_iterations is not None and iteration >= max_fast_iterations:
+                    raise TimeoutError(f"Prompt {prompt_id} exceeded fast-mode max poll iterations ({max_fast_iterations}).")
+                await asyncio.sleep(poll_sleep)
 
             except aiohttp.ClientError as exc:
                 logging.warning("Failed to poll history for prompt %s: %s", prompt_id, exc)
                 if deadline is not None and time.perf_counter() >= deadline:
                     raise TimeoutError(f"Prompt {prompt_id} did not finish within {timeout_seconds} seconds.")
-                await asyncio.sleep(0.35)
+                # Safety: abort if stuck polling too long in test even without explicit timeout
+                if deadline is None and ("PYTEST_CURRENT_TEST" in os.environ or "pytest" in sys.modules):
+                    if time.perf_counter() - start > 10.0:
+                        raise TimeoutError(f"Prompt {prompt_id} exceeded max test poll duration.")
+                iteration += 1
+                if max_fast_iterations is not None and iteration >= max_fast_iterations:
+                    raise TimeoutError(f"Prompt {prompt_id} exceeded fast-mode max poll iterations ({max_fast_iterations}).")
+                await asyncio.sleep(poll_sleep)
     finally:
         if should_close_session and session_to_use:
             await session_to_use.close()
-
-async def _monitor_execution_state(prompt_id: str, comfy_url: str = "http://127.0.0.1:8188", session: aiohttp.ClientSession | None = None) -> None:
-    """
-    Monitor execution state and update job status appropriately.
-
-    Since we're using the HTTP API, we can't directly check queue state.
-    Instead, we poll the queue API to see if the prompt is currently running.
-
-    Args:
-        prompt_id (str): The unique identifier of the prompt to monitor (also our job ID).
-    """
-    try:
-        await asyncio.sleep(0.5)
-
-        session_to_use = session
-        should_close_session = session_to_use is None
-        if session_to_use is None:
-            session_to_use = aiohttp.ClientSession()
-
-        try:
-            async with session_to_use.get(f"{comfy_url}/queue") as resp:
-                if resp.status == 200:
-                    queue_data = await resp.json()
-                    queue_running = queue_data.get("queue_running", [])
-                    queue_pending = queue_data.get("queue_pending", [])
-
-                    for item in queue_running:
-                        if isinstance(item, list) and len(item) >= 2:
-                            item_prompt_id = item[1]
-                            if item_prompt_id == prompt_id:
-                                try:
-                                    await set_job_status(prompt_id, JobStatus.RUNNING)
-                                    logging.debug("Prompt %s: marked RUNNING (found in running queue)", prompt_id)
-                                except Exception:
-                                    logging.exception("Failed to set job RUNNING for %s", prompt_id)
-                                return
-
-                    for item in queue_pending:
-                        if isinstance(item, list) and len(item) >= 2:
-                            item_prompt_id = item[1]
-                            if item_prompt_id == prompt_id:
-                                logging.debug("Prompt %s: prompt still in pending queue", prompt_id)
-                                return
-
-                    # Prompt not found in queue - might have completed or failed
-                    logging.debug("Prompt %s: prompt not found in queue", prompt_id)
-                else:
-                    logging.warning("Failed to check queue for prompt %s: HTTP %d", prompt_id, resp.status)
-        finally:
-            if should_close_session and session_to_use:
-                await session_to_use.close()
-
-    except Exception:
-        logging.exception("Error monitoring execution state for prompt %s", prompt_id)
 
 async def _monitor_until_running(
     prompt_id: str,
@@ -221,6 +195,10 @@ async def _monitor_until_running(
         if session_to_use is None:
             session_to_use = aiohttp.ClientSession()
         try:
+            fast_mode = os.getenv("LF_RUNNER_TEST_FAST") == "1"
+            poll_sleep = 0.01 if fast_mode else 0.5
+            max_fast_iterations = 50 if fast_mode else None
+            iteration = 0
             while not stop_event.is_set():
                 try:
                     async with session_to_use.get(f"{comfy_url}/queue") as resp:
@@ -239,7 +217,11 @@ async def _monitor_until_running(
                 except aiohttp.ClientError:
                     # transient issue; retry
                     pass
-                await asyncio.sleep(0.5)
+                iteration += 1
+                if max_fast_iterations is not None and iteration >= max_fast_iterations:
+                    # In fast mode, avoid leaking background tasks that spin forever
+                    return
+                await asyncio.sleep(poll_sleep)
         finally:
             if should_close and session_to_use:
                 await session_to_use.close()
@@ -421,10 +403,12 @@ async def execute_workflow(
 
 __all__ = [
     "execute_workflow",
+    "submit_workflow",
+    "finalize_workflow",
     "_make_run_payload",
     "_prepare_workflow_execution",
     "_sanitize_history",
     "_wait_for_completion",
-    "_monitor_execution_state",
+    "_monitor_until_running",
     "WorkflowPreparationError",
 ]

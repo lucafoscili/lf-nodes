@@ -9,10 +9,22 @@ import json
 import sys
 from pathlib import Path
 
-# Add package root to path
-pkg_root = Path(__file__).resolve().parents[3]
+import sys
+from pathlib import Path
+
+# Add package root to path BEFORE any imports
+pkg_root = Path(__file__).resolve().parents[2]
 if str(pkg_root) not in sys.path:
     sys.path.insert(0, str(pkg_root))
+
+try:
+    from modules.workflow_runner.services.job_store import JobStatus
+except ImportError:
+    # Fallback: try adding the path again
+    pkg_root = Path(__file__).resolve().parents[2]
+    if str(pkg_root) not in sys.path:
+        sys.path.insert(0, str(pkg_root))
+    from modules.workflow_runner.services.job_store import JobStatus
 
 # Mock server module before imports
 sys.modules['server'] = Mock()
@@ -89,6 +101,7 @@ class TestColdLoadWithAuth:
             # Ensure clean in-memory store for test isolation
             job_store._jobs.clear()
             await job_store.create_job(test_job_id, "test_workflow", owner_id=expected_owner_id)
+            await job_store.set_job_status(test_job_id, JobStatus.SUCCEEDED)
             
             # Mock auth to succeed
             with patch('modules.workflow_runner.controllers.api_controllers._ENABLE_GOOGLE_OAUTH', True), \
