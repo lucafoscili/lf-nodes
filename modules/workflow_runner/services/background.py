@@ -8,7 +8,6 @@ from ..config import get_settings
 
 _settings = get_settings()
 
-
 # region Pruner configuration
 _JOB_TTL_SECONDS = int(_settings.JOB_TTL_SECONDS or 300)
 _JOB_PRUNE_INTERVAL = int(_settings.JOB_PRUNE_INTERVAL_SECONDS or 60)

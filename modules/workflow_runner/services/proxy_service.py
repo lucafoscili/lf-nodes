@@ -1,11 +1,11 @@
 import json
 import logging
 import os
-from time import time
-from urllib.parse import urlsplit
-from typing import Any, Dict, Optional, Tuple
 
 from aiohttp import web
+from time import time
+from typing import Any, Dict, Optional, Tuple
+from urllib.parse import urlsplit
 
 LOG = logging.getLogger(__name__)
 

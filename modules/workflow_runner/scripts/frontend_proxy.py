@@ -21,7 +21,6 @@ import ssl
 from aiohttp import web, ClientSession
 from pathlib import Path
 import importlib.util
-import sys
 
 try:
     from ...utils.env import bool_env, int_env, list_env, maybe_load_dotenv, str_env
@@ -42,6 +41,9 @@ except Exception:
 # region Constants
 DEFAULT_PREFIXES = [
     "/favicon.ico",
+    "/history",
+    "/models",
+    "/prompt",
     "/queue",
     "/view",
     "/api/lf-nodes/fonts",

@@ -1,15 +1,10 @@
 import logging
 import time as _time
 import uuid
-import os
-import hmac
 import hashlib
-import secrets
-import sys
-
-from typing import Optional
 
 from aiohttp import web
+from typing import Optional
 
 from .google_oauth import verify_id_token_with_google, load_allowed_users_from_file
 from ..config import get_settings
@@ -28,7 +23,6 @@ _SESSION_STORE: dict[str, tuple[str, float]] = {}
 _SESSION_TTL = int(_settings.SESSION_TTL_SECONDS or _TOKEN_CACHE_TTL)
 _WF_DEBUG = bool(_settings.WORKFLOW_RUNNER_DEBUG)
 
-# Owner id secret (optional). If not set in settings, generate ephemeral secret for prototype mode.
 _OWNER_SECRET = getattr(_settings, "USER_ID_SECRET", "")
 if not _OWNER_SECRET:
     # Use a deterministic default owner secret when none is provided.

@@ -1,9 +1,10 @@
 import logging
-from typing import Any, Optional
+
+from typing import Any
 
 LOG = logging.getLogger(__name__)
 
-
+# region Serialize job
 def serialize_job(job: Any, include_result_for_terminal: bool = False) -> dict:
     """Serialize a Job-like object into the JSON-friendly dict used by APIs and SSE.
 
@@ -26,7 +27,6 @@ def serialize_job(job: Any, include_result_for_terminal: bool = False) -> dict:
         owner_id = getattr(job, "owner_id", None)
         seq = getattr(job, "seq", 0) or 0
 
-        # Only include result for terminal statuses unless caller requests otherwise
         terminal_statuses = {"succeeded", "failed", "cancelled"}
         if not include_result_for_terminal and (status not in terminal_statuses):
             result = None
@@ -46,6 +46,7 @@ def serialize_job(job: Any, include_result_for_terminal: bool = False) -> dict:
     except Exception:
         LOG.exception("serialize_job: failed to serialize job")
         return {}
+# endregion
 
 
 __all__ = ["serialize_job"]

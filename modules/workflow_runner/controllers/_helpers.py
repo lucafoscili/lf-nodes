@@ -8,7 +8,7 @@ LOG = logging.getLogger(__name__)
 
 from ..utils.serialize import serialize_job
 
-
+# region Parse body
 async def parse_json_body(request, expected_type=dict, allow_empty=False):
     """Parse JSON body from an aiohttp request and validate its type.
 
@@ -37,8 +37,9 @@ async def parse_json_body(request, expected_type=dict, allow_empty=False):
         return None, web.json_response({"detail": "invalid_payload"}, status=400)
 
     return body, None
+# endregion
 
-
+# region Get owner
 async def get_owner_from_request(request) -> str | None:
     """Extract the subject (email or provider sub) from the request and derive
     an opaque owner id (SHA256 hex digest).
@@ -82,8 +83,9 @@ async def get_owner_from_request(request) -> str | None:
     except Exception:
         LOG.debug("get_owner_from_request: failed to derive owner", exc_info=True)
         return None
+# endregion
 
-
+# region Session cookie
 def create_and_set_session_cookie(resp, request, email, create_session_fn=None):
     """Create a server session and set the LF_SESSION cookie on the response.
 
@@ -147,8 +149,9 @@ def create_and_set_session_cookie(resp, request, email, create_session_fn=None):
         return session_id, expires_at
 
     return session_id, expires_at
+# endregion
 
-
+# region SSE
 async def write_sse_event(resp, event: dict) -> bool:
     """Write an event to an aiohttp StreamResponse in SSE format.
 
@@ -173,10 +176,6 @@ async def write_sse_event(resp, event: dict) -> bool:
     except Exception:
         LOG.exception("Failed to write SSE event")
         return True
-
-
-# serialize_job is provided by utils.serialize; imported above
-
 
 def parse_last_event_id(header: Optional[str]) -> Optional[tuple[str, int]]:
     """Parse Last-Event-ID header into (run_id, seq) or return None.
@@ -203,3 +202,4 @@ def parse_last_event_id(header: Optional[str]) -> Optional[tuple[str, int]]:
     except Exception:
         LOG.debug("parse_last_event_id: failed to parse header", exc_info=True)
         return None
+# endregion

@@ -10,7 +10,6 @@ from ..services.auth_service import (
     _verify_token_and_email,
     _ENABLE_GOOGLE_OAUTH,
     _WF_DEBUG,
-    _SESSION_TTL,
 )
 from ..services.executor import WorkflowPreparationError
 from ..services.job_service import get_job_status
@@ -18,9 +17,6 @@ from ..services import job_store
 from ..services.run_service import run_workflow
 from ..services.workflow_service import list_workflows as svc_list_workflows, get_workflow_content
 
-LOG = logging.getLogger(__name__)
-
-# Reuse extracted helpers to reduce duplication and centralize logic
 from ._helpers import (
     parse_json_body,
     get_owner_from_request,
@@ -28,6 +24,8 @@ from ._helpers import (
     write_sse_event,
     create_and_set_session_cookie,
 )
+
+LOG = logging.getLogger(__name__)
 
 # region Helpers
 async def _send_initial_snapshot(resp: web.Response, subscriber_owner: str | None = None, last_event: tuple[str, int] | None = None) -> None:
@@ -276,7 +274,6 @@ async def list_workflows_controller(request: web.Request) -> web.Response:
             return auth_resp
     return web.json_response({"workflows": svc_list_workflows()})
 
-
 async def list_runs_controller(request: web.Request) -> web.Response:
     """GET /workflow-runner/runs?status=pending,running&owner=me&limit=100
 
@@ -374,7 +371,6 @@ async def list_runs_controller(request: web.Request) -> web.Response:
     return web.json_response({"runs": runs_out})
 # endregion
 
-
 # region Admin debug UI (debug-only)
 async def admin_runs_page(request: web.Request) -> web.Response:
         """Serve a tiny debug HTML page that fetches the admin runs JSON endpoint.
@@ -460,7 +456,6 @@ async def admin_runs_page(request: web.Request) -> web.Response:
         """
 
         return web.Response(text=html, content_type='text/html')
-
 
 async def admin_runs_api(request: web.Request) -> web.Response:
     """Return JSON list of all runs (debug-only).

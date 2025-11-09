@@ -4,16 +4,13 @@ import json
 import logging
 import time
 
-from typing import Any, Dict, Optional
-
 from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Any, Dict, Optional
 
 LOG = logging.getLogger(__name__)
 
-from pathlib import Path
-
-# Path to sqlite DB file (set via configure). If None, a sensible default under the
-# module directory will be used when initializing the connection.
+# Path to sqlite DB file (set via configure).
 _DB_PATH: Optional[str] = None
 
 # region Configuration
@@ -44,6 +41,7 @@ class JobRecord:
     seq: int = 0
     owner_id: Optional[str] = None
 
+# region Connection
 def _build_event(rec: JobRecord) -> dict:
     # SSE resume-friendly id: "<run_id>:<seq>"
     return {
@@ -105,7 +103,6 @@ async def _ensure_conn():
         await _conn.commit()
     return _conn
 
-
 async def close() -> None:
     """Close the adapter connection if open. Safe to call on shutdown.
 
@@ -119,6 +116,7 @@ async def close() -> None:
             LOG.exception("Error closing sqlite connection")
         finally:
             _conn = None
+# endregion
 
 # region Create
 async def create_job(run_id: str, workflow_id: str, owner_id: Optional[str] = None) -> JobRecord:
@@ -166,7 +164,7 @@ async def get_job(run_id: str) -> Optional[JobRecord]:
         result = json.loads(row[5]) if row[5] else None
     except Exception:
         result = row[5]
-    # row mapping: 0=run_id,1=workflow_id,2=status,3=created_at,4=updated_at,5=result,6=error,7=seq,8=owner_id
+
     return JobRecord(run_id=row[0], workflow_id=row[1], status=row[2], created_at=row[3], updated_at=row[4], result=result, error=row[6], seq=row[7] or 0, owner_id=row[8])
 # endregion
 
@@ -241,7 +239,6 @@ async def list_jobs(owner_id: Optional[str] = None, status: Optional[str] = None
             result = json.loads(row[5]) if row[5] else None
         except Exception:
             result = row[5]
-        # row mapping: 0=run_id,1=workflow_id,2=status,3=created_at,4=updated_at,5=result,6=error,7=seq,8=owner_id
         out[row[0]] = JobRecord(run_id=row[0], workflow_id=row[1], status=row[2], created_at=row[3], updated_at=row[4], result=result, error=row[6], seq=row[7] or 0, owner_id=row[8])
     return out
 # endregion
