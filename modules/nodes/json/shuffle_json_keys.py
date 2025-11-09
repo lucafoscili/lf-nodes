@@ -1,9 +1,8 @@
 import random
 
-from server import PromptServer
-
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, INT_MAX
+from ...utils.constants import FUNCTION, Input, INT_MAX
+from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.logic import normalize_list_to_value, normalize_json_input
 
 # region LF_ShuffleJSONKeys
@@ -77,10 +76,9 @@ class LF_ShuffleJSONKeys:
             shuffled_target = {key: target[key] for key in keys}
             shuffled_json = [shuffled_target] if is_wrapped_single_dict else shuffled_target
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}shufflejsonkeys", {
-            "node": kwargs.get("node_id"),
+        safe_send_sync("shufflejsonkeys", {
             "value": shuffled_json,
-        })
+        }, kwargs.get("node_id"))
 
         return (shuffled_json,)
 # endregion

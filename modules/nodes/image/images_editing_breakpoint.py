@@ -1,9 +1,8 @@
 import torch
 
-from server import PromptServer
-
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, SAMPLERS, SCHEDULERS
+from ...utils.constants import FUNCTION, Input, SAMPLERS, SCHEDULERS
+from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.editing import EditingSession
 from ...utils.helpers.logic import normalize_conditioning, normalize_input_image, normalize_list_to_value, normalize_output_image
 from ...utils.helpers.temp_cache import TempFileCache
@@ -146,12 +145,12 @@ class LF_ImagesEditingBreakpoint:
         )
 
         try:
-            PromptServer.instance.send_sync(
-                f"{EVENT_PREFIX}imageseditingbreakpoint",
+            safe_send_sync(
+                "imageseditingbreakpoint",
                 {
-                    "node": kwargs.get("node_id"),
                     "value": dataset.get("context_id"),
                 },
+                kwargs.get("node_id"),
             )
             dataset = session.wait_for_completion(dataset)
         except Exception:

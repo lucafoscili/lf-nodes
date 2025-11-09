@@ -1,7 +1,6 @@
-from server import PromptServer
-
 from . import CATEGORY
-from ...utils.constants import ANY, EVENT_PREFIX, FUNCTION, Input
+from ...utils.constants import ANY, FUNCTION, Input
+from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.logic import normalize_input_list, normalize_list_item, normalize_list_to_value, normalize_json_input
 
 # region LF_SetValueInJSON
@@ -61,18 +60,16 @@ class LF_SetValueInJSON:
                 else:
                     log += f"\n[{index}]: Could not update non-dict item."
 
-            PromptServer.instance.send_sync(f"{EVENT_PREFIX}setvalueinjson", {
-                "node": kwargs.get("node_id"),
+            safe_send_sync("setvalueinjson", {
                 "value": log
-            })
+            }, kwargs.get("node_id"))
         else:
             json_input[key] = value
             log += f"\n{value}"
 
-            PromptServer.instance.send_sync(f"{EVENT_PREFIX}setvalueinjson", {
-                "node": kwargs.get("node_id"),
+            safe_send_sync("setvalueinjson", {
                 "value": log
-            })
+            }, kwargs.get("node_id"))
 
         s = json_input[0] if isinstance(json_input, list) and len(json_input) == 1 else json_input
 

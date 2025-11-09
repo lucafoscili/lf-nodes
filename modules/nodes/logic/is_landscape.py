@@ -1,10 +1,9 @@
 import torch
 
-from server import PromptServer
-
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
+from ...utils.constants import FUNCTION, Input
 from ...utils.helpers.logic import normalize_input_image
+from ...utils.helpers.comfy import safe_send_sync
 
 # region LF_IsLandscape
 class LF_IsLandscape:
@@ -65,10 +64,9 @@ class LF_IsLandscape:
                           "id": counter,
                           "value": f"Image {counter}: {str(result)}"})
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}islandscape", {
-            "node": kwargs.get("node_id"),
+        safe_send_sync("islandscape", {
             "dataset": dataset,
-        })
+        }, kwargs.get("node_id"))
 
         return (is_landscape_list[0], heights_list[0], widths_list[0],
                 is_landscape_list, heights_list, widths_list)

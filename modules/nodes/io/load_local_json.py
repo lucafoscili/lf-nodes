@@ -1,10 +1,9 @@
 import json
 import requests
 
-from server import PromptServer
-
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
+from ...utils.constants import FUNCTION, Input
+from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.logic import normalize_list_to_value
 
 # region LF_LoadLocalJSON
@@ -51,10 +50,9 @@ class LF_LoadLocalJSON:
         dataset: dict = { "nodes": [root] }
         nodes.append({ "description": url, "icon": "json", "id": url, "value": url })
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}savejson", {
-            "node": kwargs.get("node_id"),
+        safe_send_sync("loadlocaljson", {
             "dataset": dataset,
-        })
+        }, kwargs.get("node_id"))
 
         return (data,)
 # endregion

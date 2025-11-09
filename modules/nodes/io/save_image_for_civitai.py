@@ -4,12 +4,11 @@ import torch
 
 from comfy.cli_args import args
 from PIL.PngImagePlugin import PngInfo
-from server import PromptServer
 
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, IMAGE_EXTENSION_COMBO, Input
+from ...utils.constants import FUNCTION, IMAGE_EXTENSION_COMBO, Input
 from ...utils.helpers.api import get_resource_url
-from ...utils.helpers.comfy import get_comfy_dir, resolve_filepath
+from ...utils.helpers.comfy import get_comfy_dir, resolve_filepath, safe_send_sync
 from ...utils.helpers.conversion import tensor_to_pil
 from ...utils.helpers.logic import normalize_input_image, normalize_input_list, normalize_list_to_value
 from ...utils.helpers.ui import create_masonry_node
@@ -140,10 +139,9 @@ class LF_SaveImageForCivitAI:
             nodes.append(create_masonry_node(filename, url, index))
             file_names.append(filename)
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}saveimageforcivitai", {
-            "node": kwargs.get("node_id"),
+        safe_send_sync("saveimageforcivitai", {
             "dataset": dataset,
-        })
+        }, kwargs.get("node_id"))
 
         return {
             "ui": {

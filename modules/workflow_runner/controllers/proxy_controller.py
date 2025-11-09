@@ -3,7 +3,6 @@ import asyncio
 import importlib
 import json
 import logging
-import re
 import uuid
 
 from aiohttp import web
@@ -17,6 +16,7 @@ from ..services import job_store
 
 if TYPE_CHECKING:
     from ..services import proxy_service as proxy_service_typing
+    
 # Import the services proxy module explicitly to avoid name shadowing with the
 # route handler function (the handler is named `proxy_service`). We import
 # by full module path to make sure we get the submodule object, not a

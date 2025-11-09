@@ -1,12 +1,10 @@
 import numpy as np
 import torch
 
-from server import PromptServer
-
 from . import CATEGORY
-from ...utils.constants import BLUE_CHANNEL_ID, EVENT_PREFIX, FUNCTION, GREEN_CHANNEL_ID, Input, RED_CHANNEL_ID
+from ...utils.constants import BLUE_CHANNEL_ID, FUNCTION, GREEN_CHANNEL_ID, Input, RED_CHANNEL_ID
 from ...utils.helpers.api import get_resource_url
-from ...utils.helpers.comfy import resolve_filepath
+from ...utils.helpers.comfy import resolve_filepath, safe_send_sync
 from ...utils.helpers.conversion import numpy_to_tensor, tensor_to_numpy, tensor_to_pil
 from ...utils.helpers.logic import normalize_input_image, normalize_json_input, normalize_list_to_value, normalize_output_image
 from ...utils.helpers.temp_cache import TempFileCache
@@ -121,10 +119,9 @@ class LF_LUTApplication:
 
         image_batch, image_list = normalize_output_image(adjusted_images)
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}lutapplication", {
-            "node": kwargs.get("node_id"),
+        safe_send_sync("lutapplication", {
             "dataset": dataset
-        })
+        }, kwargs.get("node_id"))
 
         return (image_batch[0], image_list)
 # endregion

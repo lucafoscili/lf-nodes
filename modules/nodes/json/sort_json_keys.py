@@ -1,7 +1,6 @@
-from server import PromptServer
-
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
+from ...utils.constants import FUNCTION, Input
+from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.logic import normalize_list_to_value, normalize_json_input
 
 # region LF_SortJSONKeys
@@ -69,10 +68,9 @@ class LF_SortJSONKeys:
             }
             sorted_json = [sorted_target] if is_wrapped_single_dict else sorted_target
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}sortjsonkeys", {
-            "node": kwargs.get("node_id"),
+        safe_send_sync("sortjsonkeys", {
             "value": sorted_json,
-        })
+        }, kwargs.get("node_id"))
 
         return (sorted_json,)
 # endregion

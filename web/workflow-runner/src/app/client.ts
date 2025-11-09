@@ -1,27 +1,57 @@
 import { API_ROOT } from '../config';
-import { EventPayload, RunRecord, UpdateHandler } from '../types/client';
+import {
+  EventPayload,
+  QueuePayload,
+  RunRecord,
+  WorkflowApiResponse,
+  WorkflowNameItem,
+} from '../types/client';
 import { WorkflowStore } from '../types/state';
+import type { ClientInternals, ClientInternalsMethods } from '../types/test-utils';
 import { recordToUI } from '../utils/common';
 import { debugLog } from '../utils/debug';
 import { ensureActiveRun, upsertRun } from './store-actions';
 
 export class WorkflowRunnerClient {
+  // Core
   #ES: EventSource | null = null;
   #STORE: WorkflowStore;
   #WORKFLOW_NAMES: Record<string, string> = {};
 
-  private lastSeq: Map<string, number> = new Map();
-  private runs: Map<string, RunRecord> = new Map();
-  private workflowNames: Map<string, string> = new Map();
-  private pollingInterval = 3000; // FIXME: make configurable
-  private pollingTimer: any = null;
-  private pollAbortController: AbortController | null = null;
-  private backoffMs = 1000;
-  private maxBackoffMs = 30000;
-  private connecting = false;
-  private processingSnapshot = false;
-  private cacheKey = 'lf-runs-cache';
-  private inflightReconciles = new Map<string, Promise<void>>();
+  // Configuration constants
+  #CACHE_KEY = 'lf-runs-cache';
+  #CACHE_EXPIRY_MS = 60 * 60 * 1000; // 1 hour
+  #INITIAL_BACKOFF_MS = 1000;
+  #MAX_BACKOFF_MS = 30000;
+  #POLLING_INTERVAL_MS = 3000;
+  #RUNS_QUERY_LIMIT = 200;
+
+  // Event constants
+  #EVENT_RUN = 'run';
+  #EVENT_QUEUE = 'queue';
+
+  // Core data structures
+  #LAST_SEQ: Map<string, number> = new Map();
+  #RUNS: Map<string, RunRecord> = new Map();
+  #WORKFLOW_CACHE: Map<string, string> = new Map();
+
+  // Runtime state
+  #STATE = {
+    connecting: false,
+    processingSnapshot: false,
+  };
+
+  // Polling configuration and state
+  #POLLING = {
+    timer: null,
+    abortController: null as AbortController | null,
+  };
+
+  // Backoff state
+  #BACKOFF_MS = 1000;
+
+  // Async operation deduplication
+  #INFLIGHT_RECONCILES = new Map<string, Promise<void>>();
 
   constructor(store: WorkflowStore) {
     this.#STORE = store;
@@ -54,25 +84,17 @@ export class WorkflowRunnerClient {
     }
   };
 
-  setUpdateHandler(h: UpdateHandler) {
-    this.onUpdate = h;
-  }
-
-  setQueueHandler(h: (pending: number, running: number) => void) {
-    this.queueHandler = h;
-  }
-
   // Preload workflow names to avoid fetching them individually
   setWorkflowNames(names: Map<string, string>) {
     for (const [id, name] of names) {
-      this.workflowNames.set(id, name);
+      this.#WORKFLOW_CACHE.set(id, name);
     }
     // Emit update to refresh UI with names
     this.emitUpdate();
   }
 
   private emitUpdate() {
-    if (this.onUpdate) this.onUpdate(new Map(this.runs));
+    if (this.onUpdate) this.onUpdate(new Map(this.#RUNS));
     // Save to cache after each update for persistence across reloads
     this.saveCache();
   }
@@ -80,7 +102,7 @@ export class WorkflowRunnerClient {
   // Reconcile server record for a run via REST (de-duplicated)
   private reconcileRun(run_id: string) {
     // De-dupe inflight reconciles
-    if (this.inflightReconciles.has(run_id)) {
+    if (this.#INFLIGHT_RECONCILES.has(run_id)) {
       return;
     }
 
@@ -89,10 +111,10 @@ export class WorkflowRunnerClient {
         // ignore transient errors
       })
       .finally(() => {
-        this.inflightReconciles.delete(run_id);
+        this.#INFLIGHT_RECONCILES.delete(run_id);
       });
 
-    this.inflightReconciles.set(run_id, promise);
+    this.#INFLIGHT_RECONCILES.set(run_id, promise);
   }
 
   private async _reconcileRunOnce(run_id: string): Promise<void> {
@@ -136,7 +158,7 @@ export class WorkflowRunnerClient {
       return;
     }
 
-    const last = this.lastSeq.get(ev.run_id) ?? -1;
+    const last = this.#LAST_SEQ.get(ev.run_id) ?? -1;
     // gap detection: if ev.seq > last+1 then reconcile first
     if (last >= 0 && ev.seq > last + 1) {
       // async reconcile; don't block applying this event but request authoritative state
@@ -149,15 +171,15 @@ export class WorkflowRunnerClient {
 
   // Upsert with seq monotonicity guard and workflow name fetch
   private upsertRun(rec: RunRecord) {
-    const last = this.lastSeq.get(rec.run_id) ?? -1;
+    const last = this.#LAST_SEQ.get(rec.run_id) ?? -1;
     if (rec.seq <= last) return; // duplicate or older - don't regress seq
 
     // Accept record
-    this.lastSeq.set(rec.run_id, rec.seq);
-    this.runs.set(rec.run_id, rec);
+    this.#LAST_SEQ.set(rec.run_id, rec.seq);
+    this.#RUNS.set(rec.run_id, rec);
 
     // Fetch workflow name if workflow_id is present but name is unknown
-    if (rec.workflow_id && !this.workflowNames.has(rec.workflow_id)) {
+    if (rec.workflow_id && !this.#WORKFLOW_CACHE.has(rec.workflow_id)) {
       this.fetchWorkflowNames([rec.workflow_id]);
     }
 
@@ -166,8 +188,8 @@ export class WorkflowRunnerClient {
 
   // Remove a run completely from state and cache (used when server returns 404)
   private removeRun(runId: string) {
-    this.runs.delete(runId);
-    this.lastSeq.delete(runId);
+    this.#RUNS.delete(runId);
+    this.#LAST_SEQ.delete(runId);
     this.emitUpdate(); // triggers push to UI and saveCache
   }
 
@@ -183,11 +205,11 @@ export class WorkflowRunnerClient {
         continue;
       }
       activeSet.add(s.run_id);
-      const last = this.lastSeq.get(s.run_id) ?? -1;
+      const last = this.#LAST_SEQ.get(s.run_id) ?? -1;
       if (s.seq <= last) continue;
-      this.lastSeq.set(s.run_id, s.seq);
-      this.runs.set(s.run_id, s);
-      if (s.workflow_id && !this.workflowNames.has(s.workflow_id)) {
+      this.#LAST_SEQ.set(s.run_id, s.seq);
+      this.#RUNS.set(s.run_id, s);
+      if (s.workflow_id && !this.#WORKFLOW_CACHE.has(s.workflow_id)) {
         missingWorkflowIds.add(s.workflow_id);
       }
       if (!s.workflow_id) {
@@ -203,7 +225,7 @@ export class WorkflowRunnerClient {
     (async () => {
       try {
         const toReconcile: string[] = [];
-        for (const [id, rec] of this.runs.entries()) {
+        for (const [id, rec] of this.#RUNS.entries()) {
           if (rec.status === 'running' && !activeSet.has(id)) {
             toReconcile.push(id);
           }
@@ -238,20 +260,20 @@ export class WorkflowRunnerClient {
   // Fetch human-friendly workflow names for given ids and cache them
   private async fetchWorkflowNames(ids: string[]) {
     // filter out ids we already have
-    const needs = ids.filter((id) => !!id && !this.workflowNames.has(id));
+    const needs = ids.filter((id) => !!id && !this.#WORKFLOW_CACHE.has(id));
     if (needs.length === 0) return;
     try {
       const resp = await fetch(`${API_ROOT}/workflows?ids=${encodeURIComponent(needs.join(','))}`, {
         credentials: 'include',
       });
       if (!resp || !resp.ok) return;
-      const data = await resp.json();
+      const data: WorkflowApiResponse = await resp.json();
       // Normalize multiple possible shapes returned by the server:
       // - Array of {workflow_id, name}
       // - { workflows: [ { ... } ] }
       // - { workflows: { nodes: [ { id, value, ... } ] } }
       // - { workflows: { <id>: "name", ... } }
-      let items: any[] = [];
+      let items: WorkflowNameItem[] = [];
       try {
         if (Array.isArray(data)) {
           items = data;
@@ -262,7 +284,7 @@ export class WorkflowRunnerClient {
             items = data.items;
           } else if (data.workflows && Array.isArray(data.workflows.nodes)) {
             // transform registry shape { workflows: { nodes: [...] } }
-            items = data.workflows.nodes.map((n: any) => ({
+            items = data.workflows.nodes.map((n: WorkflowNameItem) => ({
               workflow_id: n.id ?? n.key ?? n.value,
               name: n.value ?? n.title ?? n.name,
             }));
@@ -296,7 +318,7 @@ export class WorkflowRunnerClient {
         try {
           const id = it.workflow_id ?? it.id ?? it.workflowId ?? it.key;
           const name = it.name ?? it.title ?? it.workflow_name ?? it.value ?? null;
-          if (id && name) this.workflowNames.set(id, name);
+          if (id && name) this.#WORKFLOW_CACHE.set(id, name);
         } catch (e) {
           // be robust against malformed entries
           debugLog('fetchWorkflowNames: skipping malformed item', 'warning', e);
@@ -314,13 +336,13 @@ export class WorkflowRunnerClient {
     try {
       if (typeof localStorage === 'undefined') return;
 
-      const ids = Array.from(this.runs.keys());
+      const ids = Array.from(this.#RUNS.keys());
       const payload = {
         version: 1,
         cached_at: Date.now(),
         run_ids: ids.slice(-300), // cap to recent 300 runs
       };
-      localStorage.setItem(this.cacheKey, JSON.stringify(payload));
+      localStorage.setItem(this.#CACHE_KEY, JSON.stringify(payload));
     } catch (e) {
       debugLog('LocalStorage write skipped', 'warning', e);
     }
@@ -331,7 +353,7 @@ export class WorkflowRunnerClient {
     try {
       if (typeof localStorage === 'undefined') return [];
 
-      const raw = localStorage.getItem(this.cacheKey);
+      const raw = localStorage.getItem(this.#CACHE_KEY);
       if (!raw) return [];
 
       const parsed = JSON.parse(raw);
@@ -339,7 +361,7 @@ export class WorkflowRunnerClient {
 
       // Optional expiry: ignore cache older than 60 minutes
       const cacheAge = Date.now() - (parsed.cached_at ?? 0);
-      if (cacheAge > 60 * 60 * 1000) return [];
+      if (cacheAge > this.#CACHE_EXPIRY_MS) return [];
 
       return Array.isArray(parsed.run_ids) ? parsed.run_ids : [];
     } catch (e) {
@@ -351,8 +373,8 @@ export class WorkflowRunnerClient {
   // Seed placeholder entries for optimistic UI (hydrated later)
   private seedPlaceholders(ids: string[]) {
     for (const id of ids) {
-      if (!this.runs.has(id)) {
-        this.runs.set(id, {
+      if (!this.#RUNS.has(id)) {
+        this.#RUNS.set(id, {
           run_id: id,
           status: 'pending', // placeholder status; harmless until hydrated
           seq: -1,
@@ -371,7 +393,9 @@ export class WorkflowRunnerClient {
   private async coldLoadRuns(): Promise<void> {
     try {
       const resp = await fetch(
-        `${API_ROOT}/workflow-runner/runs?status=pending,running,succeeded,failed,cancelled,timeout&owner=me&limit=200`, // FIXME: make configurable, use constants
+        `${API_ROOT}/workflow-runner/runs?status=pending,running,succeeded,failed,cancelled,timeout&owner=me&limit=${
+          this.#RUNS_QUERY_LIMIT
+        }`,
         { credentials: 'include' },
       );
       if (!resp || !resp.ok) {
@@ -384,7 +408,7 @@ export class WorkflowRunnerClient {
 
       this.processSnapshotArray(arr);
 
-      for (const localId of Array.from(this.runs.keys())) {
+      for (const localId of Array.from(this.#RUNS.keys())) {
         if (!serverIds.has(localId)) {
           this.reconcileRun(localId);
         }
@@ -396,11 +420,11 @@ export class WorkflowRunnerClient {
 
   //#region SSE Connection
   async start() {
-    if (this.#ES || this.connecting) {
+    if (this.#ES || this.#STATE.connecting) {
       return;
     }
 
-    this.connecting = true;
+    this.#STATE.connecting = true;
 
     // 1) Load cached IDs and show placeholders
     const cachedIds = this.loadCacheIds();
@@ -413,8 +437,8 @@ export class WorkflowRunnerClient {
 
     // 3) Hydrate IDs that server didn't list
     const serverIds = new Set(
-      Array.from(this.runs.keys()).filter((id) => {
-        const run = this.runs.get(id);
+      Array.from(this.#RUNS.keys()).filter((id) => {
+        const run = this.#RUNS.get(id);
         return run && run.seq >= 0; // anything we've actually hydrated
       }),
     );
@@ -434,7 +458,7 @@ export class WorkflowRunnerClient {
     try {
       this.#ES = new EventSource(url);
     } catch (err) {
-      this.#ES = (EventSource as any)(url); // FIXME: workaround for some test environments
+      this.#ES = (EventSource as any)(url); // Workaround for test environments where EventSource constructor differs
     }
 
     try {
@@ -457,8 +481,8 @@ export class WorkflowRunnerClient {
             debugLog('invalid generic event message', 'informational', err);
           }
 
-          if (this.processingSnapshot) {
-            this.processingSnapshot = false;
+          if (this.#STATE.processingSnapshot) {
+            this.#STATE.processingSnapshot = false;
           }
         };
       }
@@ -466,22 +490,22 @@ export class WorkflowRunnerClient {
       debugLog('EventSource onmessage assignment failed', 'informational', e);
     }
 
-    this.processingSnapshot = true;
+    this.#STATE.processingSnapshot = true;
 
     this.#ES.onopen = () => {
-      this.backoffMs = 1000; // FIXME: make configurable
+      this.#BACKOFF_MS = this.#INITIAL_BACKOFF_MS;
 
-      if (this.pollingTimer) {
-        clearInterval(this.pollingTimer);
-        this.pollingTimer = null;
+      if (this.#POLLING.timer) {
+        clearInterval(this.#POLLING.timer);
+        this.#POLLING.timer = null;
 
-        if (this.pollAbortController) {
+        if (this.#POLLING.abortController) {
           try {
-            this.pollAbortController.abort();
+            this.#POLLING.abortController.abort();
           } catch {
             // ignore
           }
-          this.pollAbortController = null;
+          this.#POLLING.abortController = null;
         }
       }
     };
@@ -499,11 +523,10 @@ export class WorkflowRunnerClient {
 
       const delay = this.backoffWithJitter();
       setTimeout(() => this.start(), delay);
-      this.backoffMs = Math.min(this.backoffMs * 2, this.maxBackoffMs);
+      // Note: backoff is increased in backoffWithJitter()
     };
 
-    this.#ES.addEventListener('run', (e: MessageEvent) => {
-      // FIXME: declare name as constant
+    this.#ES.addEventListener(this.#EVENT_RUN, (e: MessageEvent) => {
       try {
         const payload = JSON.parse(e.data) as EventPayload;
         // payload contains seq and run_id
@@ -523,8 +546,7 @@ export class WorkflowRunnerClient {
       }
     });
 
-    this.#ES.addEventListener('queue', (e: MessageEvent) => {
-      // FIXME: declare name as constant
+    this.#ES.addEventListener(this.#EVENT_QUEUE, (e: MessageEvent) => {
       try {
         const payload = JSON.parse(e.data) as any;
         this.handleQueuePayload(payload);
@@ -533,11 +555,10 @@ export class WorkflowRunnerClient {
       }
     });
 
-    this.connecting = false;
+    this.#STATE.connecting = false;
   }
 
-  handleQueuePayload(payload: any) {
-    // FIXME: proper typing
+  handleQueuePayload(payload: QueuePayload) {
     if (!payload) {
       return;
     }
@@ -590,8 +611,8 @@ export class WorkflowRunnerClient {
             // non-json messages (heartbeats) ignored
           }
 
-          if (this.processingSnapshot) {
-            this.processingSnapshot = false;
+          if (this.#STATE.processingSnapshot) {
+            this.#STATE.processingSnapshot = false;
           }
         };
       }
@@ -608,42 +629,87 @@ export class WorkflowRunnerClient {
       this.#ES = null;
     }
 
-    if (this.pollingTimer) {
-      clearInterval(this.pollingTimer);
-      this.pollingTimer = null;
+    if (this.#POLLING.timer) {
+      clearInterval(this.#POLLING.timer);
+      this.#POLLING.timer = null;
     }
 
-    if (this.pollAbortController) {
+    if (this.#POLLING.abortController) {
       try {
-        this.pollAbortController.abort();
+        this.#POLLING.abortController.abort();
       } catch {}
-      this.pollAbortController = null;
+      this.#POLLING.abortController = null;
     }
+
+    this.#INFLIGHT_RECONCILES.clear();
+  }
+
+  getRuns(): Map<string, RunRecord> {
+    return this.#RUNS;
+  }
+
+  getLastSeq(): Map<string, number> {
+    return this.#LAST_SEQ;
+  }
+
+  /**
+   * Test API: returns a minimal test-only facade exposing internal maps
+   * and operations used by unit tests. Prefer public behavior where
+   * possible; this API exists solely to avoid fragile `as any` casts in
+   * tests and is intentionally small.
+   */
+  getTestApi(): ClientInternals & ClientInternalsMethods {
+    const self: any = this;
+    self.applyEvent = this.applyEvent.bind(this);
+    self.upsertRun = this.upsertRun.bind(this);
+    self.reconcileRun = this.reconcileRun.bind(this);
+    self.pollActiveRuns = this.pollActiveRuns.bind(this);
+    self.coldLoadRuns = this.coldLoadRuns.bind(this);
+    self.processSnapshotArray = this.processSnapshotArray.bind(this);
+    self.saveCache = this.saveCache.bind(this);
+    self.loadCacheIds = this.loadCacheIds.bind(this);
+    self.seedPlaceholders = this.seedPlaceholders.bind(this);
+    self.start = this.start.bind(this);
+    self.stop = this.stop.bind(this);
+    self.fetchWorkflowNames = this.fetchWorkflowNames.bind(this);
+    self.setWorkflowNames = this.setWorkflowNames.bind(this);
+
+    self.lastSeq = this.#LAST_SEQ;
+    self.runs = this.#RUNS;
+    self.inflightReconciles = this.#INFLIGHT_RECONCILES;
+    self.processingSnapshot = this.#STATE.processingSnapshot;
+    self.cacheKey = this.#CACHE_KEY;
+    self.workflowNames = this.#WORKFLOW_CACHE;
+    self.store = this.#STORE;
+
+    return this as unknown as ClientInternals & ClientInternalsMethods;
   }
 
   private startPollingFallback() {
-    if (this.pollingTimer) {
+    if (this.#POLLING.timer) {
       return;
     }
 
-    this.pollingTimer = setInterval(() => this.pollActiveRuns(), this.pollingInterval);
+    this.#POLLING.timer = setInterval(() => this.pollActiveRuns(), this.#POLLING_INTERVAL_MS);
     this.pollActiveRuns();
   }
 
   private async pollActiveRuns() {
     try {
-      if (this.pollAbortController) {
+      if (this.#POLLING.abortController) {
         try {
-          this.pollAbortController.abort();
+          this.#POLLING.abortController.abort();
         } catch {}
-        this.pollAbortController = null;
+        this.#POLLING.abortController = null;
       }
 
       const ac = new AbortController();
-      this.pollAbortController = ac;
+      this.#POLLING.abortController = ac;
 
       const resp = await fetch(
-        `${API_ROOT}/workflow-runner/runs?status=pending,running&owner=me&limit=200`,
+        `${API_ROOT}/workflow-runner/runs?status=pending,running&owner=me&limit=${
+          this.#RUNS_QUERY_LIMIT
+        }`,
         { signal: ac.signal, credentials: 'include' },
       );
       if (!resp.ok) {
@@ -653,8 +719,8 @@ export class WorkflowRunnerClient {
       const data = await resp.json();
       const arr: RunRecord[] = (data.runs || []) as RunRecord[];
       this.processSnapshotArray(arr);
-      if (this.pollAbortController === ac) {
-        this.pollAbortController = null;
+      if (this.#POLLING.abortController === ac) {
+        this.#POLLING.abortController = null;
       }
     } catch (e) {
       if (
@@ -669,7 +735,7 @@ export class WorkflowRunnerClient {
   }
 
   private backoffWithJitter() {
-    const base = this.backoffMs;
+    const base = this.#BACKOFF_MS;
     const jitterFactor = 0.5 + Math.random() * 0.5; // 0.5 .. 1.0
 
     return Math.floor(base * jitterFactor);

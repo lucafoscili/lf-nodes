@@ -1,7 +1,6 @@
-from server import PromptServer
-
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
+from ...utils.constants import FUNCTION, Input
+from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.logic import normalize_input_latent, normalize_list_to_value, normalize_output_image
 
 # region LF_VAEDecode
@@ -51,10 +50,9 @@ class LF_VAEDecode:
             raise RuntimeError("Invalid latent input: missing 'samples'.")
         total = int(latent_tensor.shape[0]) if hasattr(latent_tensor, "dim") and latent_tensor.dim() >= 1 else 1
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}vaedecode", {
-            "node": node_id,
+        safe_send_sync("vaedecode", {
             "value": f"## VAE Decode\n\n- Starting decode for `{total}` sample(s)…",
-        })
+        }, node_id)
 
         images = vae.decode(latent_tensor)
         if hasattr(images, "dim") and images.dim() == 5:
@@ -86,10 +84,9 @@ class LF_VAEDecode:
         if temporal is not None:
             log_lines.append(f"- Temporal compression (decode): `{temporal}`")
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}vaedecode", {
-            "node": node_id,
+        safe_send_sync("vaedecode", {
             "value": "\n".join(log_lines),
-        })
+        }, node_id)
 
         batch_list, image_list = normalize_output_image(images)
 

@@ -1,11 +1,9 @@
 import torch
 
-from server import PromptServer
-
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
+from ...utils.constants import FUNCTION, Input
 from ...utils.helpers.api import get_resource_url
-from ...utils.helpers.comfy import resolve_filepath
+from ...utils.helpers.comfy import resolve_filepath, safe_send_sync
 from ...utils.helpers.conversion import tensor_to_pil
 from ...utils.helpers.logic import normalize_input_image, normalize_output_image
 from ...utils.helpers.temp_cache import TempFileCache
@@ -69,10 +67,9 @@ class LF_ViewImages:
 
         batch_list, image_list = normalize_output_image(image)
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}viewimages", {
-            "node": kwargs.get("node_id"),
+        safe_send_sync("viewimages", {
             "dataset": dataset,
-        })
+        }, kwargs.get("node_id"))
 
         return (batch_list[0], image_list)
 # endregion

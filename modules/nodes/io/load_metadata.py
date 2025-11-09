@@ -1,9 +1,8 @@
 from PIL import Image
-from server import PromptServer
 
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
-from ...utils.helpers.comfy import get_comfy_dir
+from ...utils.constants import FUNCTION, Input
+from ...utils.helpers.comfy import get_comfy_dir, safe_send_sync
 from ...utils.helpers.logic import normalize_list_to_value, resolve_uploaded_filepath
 from ...utils.helpers.metadata import extract_jpeg_metadata, extract_png_metadata
 
@@ -80,10 +79,9 @@ class LF_LoadMetadata:
                 except Exception as e:
                     metadata_list.append({"file": file_name, "error": str(e)})
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}loadmetadata", {
-            "node": kwargs.get("node_id"),
+        safe_send_sync("loadmetadata", {
             "value": file_names,
-        })
+        }, kwargs.get("node_id"))
 
         return {
             "ui": {

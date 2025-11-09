@@ -52,7 +52,6 @@ export const codeFactory: CodeFactory = {
     switch (node.comfyClass) {
       case NodeName.displayJson:
       case NodeName.displayPrimitiveAsJson:
-      case NodeName.geminiAPI:
       case NodeName.shuffleJsonKeys:
       case NodeName.sortJsonKeys:
       case NodeName.stringToJson:

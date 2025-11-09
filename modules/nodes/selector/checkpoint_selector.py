@@ -2,12 +2,10 @@ import comfy.sd
 import folder_paths
 import random
 
-from server import PromptServer
-
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, INT_MAX
+from ...utils.constants import FUNCTION, Input, INT_MAX
 from ...utils.helpers.api import process_model_async
-from ...utils.helpers.comfy import get_comfy_list
+from ...utils.helpers.comfy import get_comfy_list, safe_send_sync
 from ...utils.helpers.logic import (
     build_is_changed_tuple,
     dataset_from_metadata,
@@ -117,7 +115,6 @@ class LF_CheckpointSelector:
             model, clip, vae = out[:3]
 
         should_fetch_civitai = bool(get_civitai_info)
-        event_name = f"{EVENT_PREFIX}checkpointselector"
         node_id = kwargs.get("node_id")
 
         callback = None
@@ -137,15 +134,15 @@ class LF_CheckpointSelector:
                     and bool(hash_event_ready)
                 )
 
-                PromptServer.instance.send_sync(
-                    event_name,
+                safe_send_sync(
+                    "checkpointselector",
                     {
-                        "node": node_id,
                         "datasets": [dataset_ready],
                         "hashes": [hash_event_ready],
                         "apiFlags": [fetch_flag_ready],
                         "paths": [model_path_ready or ""],
                     },
+                    node_id,
                 )
 
             callback = _metadata_callback
@@ -173,15 +170,15 @@ class LF_CheckpointSelector:
         )
         path_event = model_path or ""
 
-        PromptServer.instance.send_sync(
-            event_name,
+        safe_send_sync(
+            "checkpointselector",
             {
-                "node": node_id,
                 "datasets": [dataset],
                 "hashes": [hash_event],
                 "apiFlags": [fetch_now],
                 "paths": [path_event],
             },
+            node_id,
         )
 
         return (

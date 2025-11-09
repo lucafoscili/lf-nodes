@@ -1,7 +1,6 @@
 import asyncio
-import time
 import logging
-import json
+import time
 
 from dataclasses import dataclass, field
 from enum import Enum
@@ -9,6 +8,7 @@ from typing import Any, Dict, Optional
 
 from ..config import get_settings
 
+#region Definitions
 _settings = get_settings()
 _WF_DEBUG = bool(_settings.WORKFLOW_RUNNER_DEBUG)
 
@@ -19,7 +19,6 @@ class JobStatus(str, Enum):
     FAILED = "failed"
     CANCELLED = "cancelled"
 
-
 @dataclass
 class Job:
     id: str
@@ -29,17 +28,15 @@ class Job:
     result: Optional[Any] = None
     error: Optional[str] = None
     owner_id: Optional[str] = None
-    # seq for event reconciliation; in-memory store maintains this for parity with sqlite
+    # seq for event reconciliation; in-memory storage maintains this for parity with sqlite
     seq: int = 0
     # updated_at tracks last status/result change; defaults to created_at
     updated_at: Optional[float] = None
-
 
 _jobs: Dict[str, Job] = {}
 _lock = asyncio.Lock()
 _subscribers: list[asyncio.Queue] = []
 
-# Use centralized settings instead of direct env reads
 _settings = get_settings()
 _USE_PERSISTENCE = getattr(_settings, "WORKFLOW_RUNNER_USE_PERSISTENCE", False)
 _adapter = None
@@ -48,10 +45,8 @@ async def _get_adapter():
     global _adapter
     if _adapter is not None:
         return _adapter
-    # Lazy import of heavy dependency
     try:
         from . import job_store_sqlite as _job_store_sqlite
-        # configure adapter with DB path from settings (adapter handles None/default)
         try:
             db_path = getattr(_settings, "WORKFLOW_RUNNER_DB_PATH", "") or None
             _job_store_sqlite.configure(db_path)
@@ -63,9 +58,17 @@ async def _get_adapter():
     return _adapter
 
 LOG = logging.getLogger(__name__)
+#endregion
 
 # region create
 async def create_job(job_id: str, workflow_id: str, owner_id: Optional[str] = None) -> Job:
+    """Create a new job with the given ID (ComfyUI's prompt_id).
+    
+    Args:
+        job_id: ComfyUI's prompt_id for this execution
+        workflow_id: The workflow definition identifier
+        owner_id: Optional owner/user identifier
+    """
     if _WF_DEBUG:
         LOG.info(f"[DEBUG] create_job called: job_id={job_id}, workflow_id={workflow_id}, owner_id={owner_id}")
     
@@ -74,22 +77,61 @@ async def create_job(job_id: str, workflow_id: str, owner_id: Optional[str] = No
         if adapter is not None:
             if _WF_DEBUG:
                 LOG.info(f"[DEBUG] create_job: calling adapter.create_job with workflow_id={workflow_id}, owner_id={owner_id}")
-            # Call adapter with keyword args to avoid positional signature mismatches
-            return await adapter.create_job(job_id, workflow_id=workflow_id, owner_id=owner_id)
+            rec = await adapter.create_job(job_id, workflow_id=workflow_id, owner_id=owner_id)
+            # Normalize adapter record to in-memory Job dataclass for API consistency
+            def _coerce_status(val: Any) -> JobStatus:
+                try:
+                    if isinstance(val, JobStatus):
+                        return val
+                    if isinstance(val, str) and val:
+                        try:
+                            return JobStatus(val)
+                        except Exception:
+                            return JobStatus.PENDING
+                    return JobStatus.PENDING
+                except Exception:
+                    return JobStatus.PENDING
+
+            try:
+                status_val = getattr(rec, "status", JobStatus.PENDING.value)
+                job = Job(
+                    id=getattr(rec, "run_id"),
+                    workflow_id=str(getattr(rec, "workflow_id", "")),
+                    created_at=getattr(rec, "created_at", time.time()),
+                    status=_coerce_status(status_val),
+                    result=getattr(rec, "result", None),
+                    error=getattr(rec, "error", None),
+                    owner_id=getattr(rec, "owner_id", None),
+                    seq=getattr(rec, "seq", 0),
+                    updated_at=getattr(rec, "updated_at", None),
+                )
+            except Exception:
+                # Fallback if adapter returns a dict-like or Mock
+                status_val = getattr(rec, "status", JobStatus.PENDING.value)
+                job = Job(
+                    id=getattr(rec, "run_id", getattr(rec, "id", str(job_id))),
+                    workflow_id=str(getattr(rec, "workflow_id", workflow_id)),
+                    created_at=getattr(rec, "created_at", time.time()),
+                    status=_coerce_status(status_val),
+                    result=getattr(rec, "result", None),
+                    error=getattr(rec, "error", None),
+                    owner_id=getattr(rec, "owner_id", owner_id),
+                    seq=getattr(rec, "seq", 0),
+                    updated_at=getattr(rec, "updated_at", None),
+                )
+            return job
 
     async with _lock:
         job = Job(id=job_id, workflow_id=workflow_id, owner_id=owner_id, seq=0)
         _jobs[job_id] = job
         updated = job
 
-    # Use shared serializer to build the event dict
     from ..utils.serialize import serialize_job as _serialize_job
     event = _serialize_job(updated)
     for q in list(_subscribers):
         try:
             q.put_nowait(event)
         except Exception:
-            # If a subscriber's queue is full or closed, best-effort ignore.
             pass
 
     return updated
@@ -178,7 +220,8 @@ async def set_job_status(
     return updated
 
 async def list_jobs(owner_id: Optional[str] = None, status: Optional[str] = None) -> Dict[str, Job]:
-    """List jobs, optionally filtered by owner_id and/or status.
+    """
+    List jobs, optionally filtered by owner_id and/or status.
 
     Returns a mapping of job_id -> Job dataclass.
     """
@@ -215,16 +258,6 @@ async def remove_job(job_id: str) -> Optional[Job]:
     async with _lock:
         return _jobs.pop(job_id, None)
 # endregion
-
-__all__ = [
-    "Job",
-    "JobStatus",
-    "create_job",
-    "get_job",
-    "list_jobs",
-    "remove_job",
-    "set_job_status",
-]
 
 # region PubSub for job events
 def subscribe_events() -> asyncio.Queue:
@@ -267,8 +300,6 @@ def unsubscribe_events(q: asyncio.Queue) -> None:
         _subscribers.remove(q)
     except ValueError:
         pass
-# endregion
-
 
 def publish_event(event: Dict[str, Any]) -> None:
     """
@@ -296,3 +327,14 @@ def publish_event(event: Dict[str, Any]) -> None:
             q.put_nowait(event)
         except Exception:
             LOG.exception("Failed to enqueue event to subscriber queue")
+# endregion
+
+__all__ = [
+    "Job",
+    "JobStatus",
+    "create_job",
+    "get_job",
+    "list_jobs",
+    "remove_job",
+    "set_job_status",
+]

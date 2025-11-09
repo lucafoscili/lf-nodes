@@ -1,0 +1,23 @@
+.home-section {
+  & {
+    display: grid;
+    grid-template-rows: repeat(2, auto) 1fr;
+    justify-items: center;
+    overflow: auto;
+  }
+
+  &__description {
+    margin: 1em 0 2em 0;
+  }
+
+  &__masonry {
+    overflow: auto;
+  }
+
+  &__title-h1 {
+    margin: 0;
+    font-size: 1.5em;
+    font-weight: 600;
+    margin: 1em 0 0.5em 0;
+  }
+}

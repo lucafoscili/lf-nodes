@@ -3,16 +3,16 @@ import torch
 
 from datetime import datetime
 from PIL import Image
-from server import PromptServer
 
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, IMAGE_FILE_EXTENSIONS, Input
+from ...utils.constants import FUNCTION, IMAGE_FILE_EXTENSIONS, Input
 from ...utils.helpers.api import get_resource_url
 from ...utils.helpers.comfy import (
     ensure_external_preview,
     get_comfy_dir,
     resolve_filepath,
     resolve_input_directory_path,
+    safe_send_sync,
 )
 from ...utils.helpers.conversion import pil_to_tensor
 from ...utils.helpers.logic import (
@@ -170,11 +170,11 @@ class LF_LoadImages:
                 sel_img, sel_idx, sel_name, metadata_list
             )
 
-            PromptServer.instance.send_sync(
-                f"{EVENT_PREFIX}loadimages", {
-                    "node": kwargs.get("node_id"),
+            safe_send_sync(
+                "loadimages", {
                     "dataset": cached_dataset
-                }
+                },
+                kwargs.get("node_id")
             )
             return new_output
 
@@ -355,10 +355,9 @@ class LF_LoadImages:
         if cache_images:
             self._cached_images[cache_key] = (output_tuple, dataset)
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}loadimages", {
-            "node": kwargs.get("node_id"),
+        safe_send_sync("loadimages", {
             "dataset": dataset,
-        })
+        }, kwargs.get("node_id"))
 
         return output_tuple
 # endregion

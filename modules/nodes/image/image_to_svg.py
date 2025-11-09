@@ -3,11 +3,8 @@ import torch
 
 from dataclasses import replace
 
-from server import PromptServer
-
 from . import CATEGORY
 from ...utils.constants import (
-    EVENT_PREFIX,
     FUNCTION,
     Input,
     OPTIONAL_VECTOR_MODE_COMBO,
@@ -15,7 +12,7 @@ from ...utils.constants import (
     TRACE_PRESET_COMBO
 )
 from ...utils.helpers.api import get_resource_url
-from ...utils.helpers.comfy import resolve_filepath
+from ...utils.helpers.comfy import resolve_filepath, safe_send_sync
 from ...utils.helpers.conversion import (
     SVGTraceConfig,
     numpy_to_tensor,
@@ -336,10 +333,9 @@ class LF_ImageToSVG:
             palettes.append(palette)
             nodes.append(create_compare_node(filename_s, filename_t, index))
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}imagetosvg", {
-            "node": kwargs.get("node_id"),
+        safe_send_sync("imagetosvg", {
             "dataset": dataset
-        })
+        }, kwargs.get("node_id"))
 
         image_batch, image_list = normalize_output_image(previews)
 

@@ -1,9 +1,8 @@
 import random
 
-from server import PromptServer
-
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
+from ...utils.constants import FUNCTION, Input
+from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.logic import normalize_list_to_value
 
 # region LF_RandomBoolean
@@ -48,11 +47,10 @@ class LF_RandomBoolean:
 
         result = random_value <= percentage
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}randomboolean", {
-            "node": kwargs.get("node_id"),
+        safe_send_sync("randomboolean", {
             "bool": result,
             "roll": random_value,
-        })
+        }, kwargs.get("node_id"))
 
         return (result, [result])
 

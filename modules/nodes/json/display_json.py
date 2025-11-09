@@ -1,7 +1,6 @@
-from server import PromptServer
-
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
+from ...utils.constants import FUNCTION, Input
+from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.logic import normalize_json_input
 
 # region LF_DisplayJSON
@@ -36,10 +35,9 @@ class LF_DisplayJSON:
     def on_exec(self, **kwargs: dict):
         json_input: dict = normalize_json_input(kwargs.get("json_input"))
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}displayjson", {
-            "node": kwargs.get("node_id"),
+        safe_send_sync("displayjson", {
             "value": json_input,
-        })
+        }, kwargs.get("node_id"))
 
         return {
             "ui": {

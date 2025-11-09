@@ -1,11 +1,9 @@
 import json
 import os
 
-from server import PromptServer
-
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, get_usage_filename, get_usage_title, Input
-from ...utils.helpers.comfy import get_comfy_dir
+from ...utils.constants import FUNCTION, get_usage_filename, get_usage_title, Input
+from ...utils.helpers.comfy import get_comfy_dir, safe_send_sync
 from ...utils.helpers.logic import normalize_json_input, normalize_list_to_value
 
 # region LF_UpdateUsageStatistics
@@ -113,10 +111,9 @@ class LF_UpdateUsageStatistics:
         else:
             print(f"Unexpected dataset format: {dataset}")
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}updateusagestatistics", {
-            "node": kwargs.get("node_id"),
+        safe_send_sync("updateusagestatistics", {
             "value": log_title + log if log else log_title + "\nThere were no updates this run!"
-        })
+        }, kwargs.get("node_id"))
 
         return (actual_path, dataset)
 # endregion

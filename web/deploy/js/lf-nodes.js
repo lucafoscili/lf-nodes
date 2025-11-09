@@ -1,6 +1,6 @@
-import { g as getLfFramework } from "./lf-widgets-framework-C98FQqUU.js";
-import "./lf-widgets-core-DnP2v7ei.js";
-import "./lf-widgets-foundations-LHw4zrea.js";
+import { g as getLfFramework } from "./lf-widgets-framework-DcaHVr-f.js";
+import "./lf-widgets-core-DIEht-jK.js";
+import "./lf-widgets-foundations-Bbv1isuU.js";
 var APIEndpoints;
 (function(APIEndpoints2) {
   APIEndpoints2["CleanOldBackups"] = "/lf-nodes/clean-old-backups";
@@ -1211,6 +1211,7 @@ var NodeName;
   NodeName2["multipleImageResizeForWeb"] = "LF_MultipleImageResizeForWeb";
   NodeName2["notify"] = "LF_Notify";
   NodeName2["onnxSelector"] = "LF_ONNXSelector";
+  NodeName2["openAIAPI"] = "LF_OpenAIAPI";
   NodeName2["parsePromptWithLoraTags"] = "LF_ParsePromptWithLoraTags";
   NodeName2["randomBoolean"] = "LF_RandomBoolean";
   NodeName2["regexReplace"] = "LF_RegexReplace";
@@ -1255,6 +1256,7 @@ var NodeName;
   NodeName2["urandomSeedGenerator"] = "LF_UrandomSeedGenerator";
   NodeName2["usageStatistics"] = "LF_UsageStatistics";
   NodeName2["vaeDecode"] = "LF_VAEDecode";
+  NodeName2["vaeEncode"] = "LF_VAEEncode";
   NodeName2["vaeSelector"] = "LF_VAESelector";
   NodeName2["viewImages"] = "LF_ViewImages";
   NodeName2["viewSVGs"] = "LF_ViewSVGs";
@@ -1360,6 +1362,8 @@ const NODE_WIDGET_MAP = {
   LF_MathOperation: [CustomWidgetName.code],
   LF_MultipleImageResizeForWeb: [CustomWidgetName.tree],
   LF_Notify: [],
+  LF_ONNXSelector: [CustomWidgetName.history],
+  LF_OpenAIAPI: [CustomWidgetName.code],
   LF_ParsePromptWithLoraTags: [CustomWidgetName.code],
   LF_RandomBoolean: [CustomWidgetName.progressbar],
   LF_RegexReplace: [CustomWidgetName.code],
@@ -1404,8 +1408,8 @@ const NODE_WIDGET_MAP = {
   LF_UsageStatistics: [CustomWidgetName.tabBarChart],
   LF_UrandomSeedGenerator: [CustomWidgetName.tree],
   LF_VAEDecode: [CustomWidgetName.code],
+  LF_VAEEncode: [CustomWidgetName.code],
   LF_VAESelector: [CustomWidgetName.history],
-  LF_ONNXSelector: [CustomWidgetName.history],
   LF_Vibrance: [CustomWidgetName.compare],
   LF_ViewImages: [CustomWidgetName.masonry],
   LF_ViewSVGs: [CustomWidgetName.masonry],
@@ -6003,7 +6007,6 @@ const codeFactory = {
     switch (node.comfyClass) {
       case NodeName.displayJson:
       case NodeName.displayPrimitiveAsJson:
-      case NodeName.geminiAPI:
       case NodeName.shuffleJsonKeys:
       case NodeName.sortJsonKeys:
       case NodeName.stringToJson:

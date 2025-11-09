@@ -1,7 +1,6 @@
-from server import PromptServer
-
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, INT_MAX
+from ...utils.constants import FUNCTION, Input, INT_MAX
+from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.logic import normalize_json_input, normalize_list_to_value, randomize_from_history
 from ...utils.helpers.ui import create_history_node
 
@@ -67,10 +66,9 @@ class LF_String:
         if randomize:
             string_input = randomize_from_history(nodes, seed)
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}string", {
-            "node": kwargs.get("node_id"),
+        safe_send_sync("string", {
             "dataset": dataset,
-        })
+        }, kwargs.get("node_id"))
 
         return (string_input, [string_input])
 # endregion

@@ -1,9 +1,8 @@
 import torch
 
-from server import PromptServer
-
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, INT_MAX, RESAMPLERS
+from ...utils.constants import FUNCTION, Input, INT_MAX, RESAMPLERS
+from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.logic import normalize_input_image, normalize_input_list, normalize_list_item, normalize_list_to_value, normalize_output_image
 from ...utils.helpers.torch import resize_image
 from ...utils.helpers.ui import create_resize_node
@@ -93,10 +92,9 @@ class LF_ResizeImageByEdge:
 
         image_batch, image_list = normalize_output_image(resized_images)
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}resizeimagebyedge", {
-            "node": kwargs.get("node_id"),
+        safe_send_sync("resizeimagebyedge", {
             "dataset": dataset,
-        })
+        }, kwargs.get("node_id"))
 
         return (image_batch[0], image_list, num_resized)
 # endregion

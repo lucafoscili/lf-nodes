@@ -1,9 +1,8 @@
 import torch
 
-from server import PromptServer
-
 from . import CATEGORY
-from ...utils.constants import ANY, BASE64_PNG_PREFIX, EVENT_PREFIX, FUNCTION, Input, NOTIFY_COMBO
+from ...utils.constants import ANY, BASE64_PNG_PREFIX, FUNCTION, Input, NOTIFY_COMBO
+from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.conversion import tensor_to_base64
 from ...utils.helpers.logic import normalize_input_image, normalize_list_to_value
 
@@ -66,15 +65,14 @@ class LF_Notify:
         tag: str = normalize_list_to_value(kwargs.get("tag"))
         image: list[torch.Tensor] = normalize_input_image(kwargs.get("image", []))
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}notify", {
-            "node": kwargs.get("node_id"),
+        safe_send_sync("notify", {
             "title": title,
             "message": message,
             "action": on_click_action.lower(),
             "image": f"{BASE64_PNG_PREFIX}{tensor_to_base64(image[0])}" if image else None,
             "silent": silent,
             "tag": tag
-        })
+        }, kwargs.get("node_id"))
 
         return (any, any)
 # endregion

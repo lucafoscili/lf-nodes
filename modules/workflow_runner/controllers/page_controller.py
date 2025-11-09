@@ -1,6 +1,7 @@
 import asyncio
 import importlib
 import logging
+
 from typing import TYPE_CHECKING, cast
 
 from aiohttp import web
@@ -57,7 +58,6 @@ async def route_workflow_runner_page(request: web.Request) -> web.Response:
                         return response
 
             # serve the login splash page
-            # prefer canonical auth_service values (avoids importing removed root-level shims)
             client_id_val = _GOOGLE_CLIENT_IDS[0] if (_GOOGLE_CLIENT_IDS and len(_GOOGLE_CLIENT_IDS) > 0) else ''
 
             host = request.headers.get('Host') or getattr(request, 'host', '')

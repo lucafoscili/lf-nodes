@@ -1,13 +1,12 @@
 import torch
 
-from server import PromptServer
-
 from . import CATEGORY
-from ...utils.constants import BLUR_FEATHER_COMBO, EVENT_PREFIX, FUNCTION, Input, TILT_SHIFT_ORIENTATION_COMBO
+from ...utils.constants import BLUR_FEATHER_COMBO, FUNCTION, Input, TILT_SHIFT_ORIENTATION_COMBO
 from ...utils.filters import tilt_shift_effect
 from ...utils.helpers.logic import normalize_input_image, normalize_list_to_value, normalize_output_image
 from ...utils.helpers.temp_cache import TempFileCache
 from ...utils.helpers.torch import process_and_save_image
+from ...utils.helpers.comfy import safe_send_sync
 
 # region LF_TiltShift
 class LF_TiltShift:
@@ -99,10 +98,9 @@ class LF_TiltShift:
 
         batch_list, image_list = normalize_output_image(processed_images)
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}tiltshift", {
-            "node": kwargs.get("node_id"),
+        safe_send_sync("tiltshift", {
             "dataset": dataset,
-        })
+        }, kwargs.get("node_id"))
 
         return (batch_list[0], image_list)
 # endregion

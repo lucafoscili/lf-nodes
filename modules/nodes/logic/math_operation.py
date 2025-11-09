@@ -2,11 +2,10 @@ import ast
 import math
 import re
 
-from server import PromptServer
-
 from . import CATEGORY
-from ...utils.constants import ANY, EVENT_PREFIX, FUNCTION, Input
+from ...utils.constants import ANY, FUNCTION, Input
 from ...utils.helpers.logic import normalize_input_list, normalize_list_to_value, not_none
+from ...utils.helpers.comfy import safe_send_sync
 
 # region LF_MathOperation
 class LF_MathOperation:
@@ -267,10 +266,9 @@ class LF_MathOperation:
   {str_operation}
         """
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}mathoperation", {
-            "node": kwargs.get("node_id"),
+        safe_send_sync("mathoperation", {
             "value": log,
-        })
+        }, kwargs.get("node_id"))
 
         int_result: int
         if isinstance(result, (int, float)):

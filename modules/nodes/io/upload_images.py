@@ -1,9 +1,8 @@
 from PIL import Image
-from server import PromptServer
 
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
-from ...utils.helpers.comfy import get_comfy_dir
+from ...utils.constants import FUNCTION, Input
+from ...utils.helpers.comfy import get_comfy_dir, safe_send_sync
 from ...utils.helpers.conversion import pil_to_tensor
 from ...utils.helpers.logic import (
     normalize_list_to_value,
@@ -76,17 +75,15 @@ class LF_UploadImages:
                     # record the actual filename used on disk
                     file_list.append(actual_name)
                 except Exception as e:
-                    PromptServer.instance.send_sync(f"{EVENT_PREFIX}uploadimages", {
-                        "node": kwargs.get("node_id"),
+                    safe_send_sync("uploadimages", {
                         "value": f"Failed to load {file_name}: {str(e)}",
-                    })
+                    }, kwargs.get("node_id"))
 
         batch_list, image_list = normalize_output_image(images) if images else ([], [])
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}uploadimages", {
-            "node": kwargs.get("node_id"),
+        safe_send_sync("uploadimages", {
             "value": file_names
-        })
+        }, kwargs.get("node_id"))
 
         first_batch = batch_list[0] if batch_list else None
 

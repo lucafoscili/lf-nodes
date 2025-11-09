@@ -1,5 +1,5 @@
-import { bl as LF_FRAMEWORK_SYMBOL, bm as LF_FRAMEWORK_ALLOWED_ATTRS, bn as LF_FRAMEWORK_ALLOWED_PREFIXES, bo as getComponentProps, bp as markFrameworkReady, bq as LF_COLOR_CODES, C as CY_ATTRIBUTES, f as LF_ATTRIBUTES, br as LF_EFFECTS_VARS, bs as GLOBAL_STYLES, bt as LF_THEME_ICONS_PREFIX, bu as LF_THEME_COLORS_PREFIX, bv as LF_THEME_ATTRIBUTE, bw as LF_ICONS_REGISTRY, bx as LF_FRAMEWORK_EVENT_NAME, by as THEME_LIST } from "./lf-widgets-foundations-LHw4zrea.js";
-function _mergeNamespaces(n, m) {
+import { bo as LF_FRAMEWORK_SYMBOL, bp as LF_FRAMEWORK_ALLOWED_ATTRS, bq as LF_FRAMEWORK_ALLOWED_PREFIXES, br as getComponentProps, bs as markFrameworkReady, bt as LF_COLOR_CODES, C as CY_ATTRIBUTES, b as LF_ATTRIBUTES, bu as LF_EFFECTS_VARS, bv as GLOBAL_STYLES, bw as LF_THEME_ICONS_PREFIX, bx as LF_THEME_COLORS_PREFIX, by as LF_THEME_ATTRIBUTE, bz as LF_ICONS_REGISTRY, bA as LF_FRAMEWORK_EVENT_NAME, bB as THEME_LIST } from "./lf-widgets-foundations-Bbv1isuU.js";
+function _mergeNamespaces$1(n, m) {
   m.forEach(function(e) {
     e && typeof e !== "string" && !Array.isArray(e) && Object.keys(e).forEach(function(k) {
       if (k !== "default" && !(k in n)) {
@@ -817,16 +817,17 @@ var __classPrivateFieldGet$7 = function(receiver, state, kind, f) {
     throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 };
-var _LfDebug_COMPONENTS, _LfDebug_IS_ENABLED, _LfDebug_IS_PROD, _LfDebug_LOG_LIMIT, _LfDebug_LOGS, _LfDebug_codeDispatcher, _LfDebug_toggleDispatcher;
+var _LfDebug_AUTO_PRINT, _LfDebug_COMPONENTS, _LfDebug_IS_ENABLED, _LfDebug_IS_PROD, _LfDebug_LOG_LIMIT, _LfDebug_LOGS, _LfDebug_codeDispatcher, _LfDebug_toggleDispatcher;
 class LfDebug {
   constructor(_lfFramework) {
+    _LfDebug_AUTO_PRINT.set(this, false);
     _LfDebug_COMPONENTS.set(this, {
       codes: /* @__PURE__ */ new Set(),
       toggles: /* @__PURE__ */ new Set()
     });
     _LfDebug_IS_ENABLED.set(this, false);
     _LfDebug_IS_PROD.set(this, false);
-    _LfDebug_LOG_LIMIT.set(this, 250);
+    _LfDebug_LOG_LIMIT.set(this, 50);
     _LfDebug_LOGS.set(this, []);
     _LfDebug_codeDispatcher.set(this, (log) => {
       Array.from(__classPrivateFieldGet$7(this, _LfDebug_COMPONENTS, "f").codes).forEach((comp) => {
@@ -861,13 +862,13 @@ ${comp.lfValue}`;
       update: async (comp, lifecycle) => {
         switch (lifecycle) {
           case "custom":
-            if (this.isEnabled()) {
+            if (__classPrivateFieldGet$7(this, _LfDebug_IS_ENABLED, "f")) {
               this.logs.new(comp, "Custom breakpoint  took " + (window.performance.now() - comp.debugInfo.renderStart) + "ms.");
             }
             break;
           case "did-render":
             comp.debugInfo.renderEnd = window.performance.now();
-            if (this.isEnabled()) {
+            if (__classPrivateFieldGet$7(this, _LfDebug_IS_ENABLED, "f")) {
               this.logs.new(comp, "Render #" + comp.debugInfo.renderCount + " took " + (comp.debugInfo.renderEnd - comp.debugInfo.renderStart) + "ms.");
             }
             break;
@@ -913,21 +914,23 @@ ${comp.lfValue}`;
           type: message.indexOf("Render #") > -1 ? "render" : message.indexOf("Component ready") > -1 ? "load" : message.indexOf("Size changed") > -1 ? "resize" : "misc"
         };
         if (__classPrivateFieldGet$7(this, _LfDebug_LOGS, "f").length > __classPrivateFieldGet$7(this, _LfDebug_LOG_LIMIT, "f")) {
-          if (__classPrivateFieldGet$7(this, _LfDebug_IS_ENABLED, "f")) {
-            console.warn(log.date.toLocaleDateString() + " lf-debug => Too many logs (> " + __classPrivateFieldGet$7(this, _LfDebug_LOG_LIMIT, "f") + ")! Dumping (increase debug.logLimit to store more logs)... .");
-          }
           this.logs.dump();
         }
         __classPrivateFieldGet$7(this, _LfDebug_LOGS, "f").push(log);
-        switch (category) {
-          case "error":
-            console.error(`${log.date.toLocaleDateString()} ${log.id} ${log.message}`, log.class);
-            break;
-          case "warning":
-            console.warn(`${log.date.toLocaleDateString()} ${log.id} ${log.message}`, log.class);
-            break;
+        if (__classPrivateFieldGet$7(this, _LfDebug_AUTO_PRINT, "f")) {
+          switch (category) {
+            case "error":
+              console.error(`${log.date.getMonth() + 1}/${log.date.getDate()}/${log.date.getFullYear()} ${log.id} ${log.message}`, log.class);
+              break;
+            case "warning":
+              console.warn(`${log.date.getMonth() + 1}/${log.date.getDate()}/${log.date.getFullYear()} ${log.id} ${log.message}`, log.class);
+              break;
+            default:
+              console.log(log.date, log.id + log.message, log.class);
+              break;
+          }
         }
-        if (this.isEnabled()) {
+        if (__classPrivateFieldGet$7(this, _LfDebug_IS_ENABLED, "f")) {
           __classPrivateFieldGet$7(this, _LfDebug_codeDispatcher, "f").call(this, log);
         }
       },
@@ -979,6 +982,12 @@ ${comp.lfValue}`;
         __classPrivateFieldGet$7(this, _LfDebug_COMPONENTS, "f").toggles.add(comp);
       }
     };
+    this.setLogLimit = (limit) => {
+      __classPrivateFieldSet$7(this, _LfDebug_LOG_LIMIT, limit);
+      if (__classPrivateFieldGet$7(this, _LfDebug_LOGS, "f").length > __classPrivateFieldGet$7(this, _LfDebug_LOG_LIMIT, "f")) {
+        __classPrivateFieldGet$7(this, _LfDebug_LOGS, "f").splice(0, __classPrivateFieldGet$7(this, _LfDebug_LOGS, "f").length - __classPrivateFieldGet$7(this, _LfDebug_LOG_LIMIT, "f"));
+      }
+    };
     this.toggle = (value, dispatch = true) => {
       if (value === false || value === true) {
         __classPrivateFieldSet$7(this, _LfDebug_IS_ENABLED, value);
@@ -990,6 +999,12 @@ ${comp.lfValue}`;
       }
       return __classPrivateFieldGet$7(this, _LfDebug_IS_ENABLED, "f");
     };
+    this.toggleAutoPrint = (value) => {
+      if (value === false || value === true) {
+        __classPrivateFieldSet$7(this, _LfDebug_AUTO_PRINT, value);
+      }
+      return __classPrivateFieldGet$7(this, _LfDebug_AUTO_PRINT, "f");
+    };
     this.unregister = (comp) => {
       if (comp.rootElement.tagName.toLowerCase() === "lf-code") {
         __classPrivateFieldGet$7(this, _LfDebug_COMPONENTS, "f").codes.delete(comp);
@@ -1000,7 +1015,7 @@ ${comp.lfValue}`;
     __classPrivateFieldSet$7(this, _LfDebug_IS_PROD, typeof process !== "undefined" && true);
   }
 }
-_LfDebug_COMPONENTS = /* @__PURE__ */ new WeakMap(), _LfDebug_IS_ENABLED = /* @__PURE__ */ new WeakMap(), _LfDebug_IS_PROD = /* @__PURE__ */ new WeakMap(), _LfDebug_LOG_LIMIT = /* @__PURE__ */ new WeakMap(), _LfDebug_LOGS = /* @__PURE__ */ new WeakMap(), _LfDebug_codeDispatcher = /* @__PURE__ */ new WeakMap(), _LfDebug_toggleDispatcher = /* @__PURE__ */ new WeakMap();
+_LfDebug_AUTO_PRINT = /* @__PURE__ */ new WeakMap(), _LfDebug_COMPONENTS = /* @__PURE__ */ new WeakMap(), _LfDebug_IS_ENABLED = /* @__PURE__ */ new WeakMap(), _LfDebug_IS_PROD = /* @__PURE__ */ new WeakMap(), _LfDebug_LOG_LIMIT = /* @__PURE__ */ new WeakMap(), _LfDebug_LOGS = /* @__PURE__ */ new WeakMap(), _LfDebug_codeDispatcher = /* @__PURE__ */ new WeakMap(), _LfDebug_toggleDispatcher = /* @__PURE__ */ new WeakMap();
 var __classPrivateFieldSet$6 = function(receiver, state, value, kind, f) {
   if (typeof state === "function" ? receiver !== state || true : !state.has(receiver))
     throw new TypeError("Cannot write private member to an object whose class did not declare it");
@@ -1819,7 +1834,7 @@ class LfLLM {
     };
     this.createAbort = () => new AbortController();
     this.stream = async function* (request, url, opts) {
-      var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p;
+      var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p, _q, _r, _s, _t, _u, _v;
       const payload = { ...request, stream: request.stream ?? true };
       let response = null;
       try {
@@ -1876,8 +1891,13 @@ class LfLLM {
             try {
               const obj = JSON.parse(jsonPart);
               const delta = ((_g = (_f = (_e = obj.choices) == null ? void 0 : _e[0]) == null ? void 0 : _f.delta) == null ? void 0 : _g.content) || ((_j = (_i = (_h = obj.choices) == null ? void 0 : _h[0]) == null ? void 0 : _i.message) == null ? void 0 : _j.content);
-              if (delta) {
-                yield { contentDelta: delta, raw: obj };
+              const toolCalls = (_m = (_l = (_k = obj.choices) == null ? void 0 : _k[0]) == null ? void 0 : _l.delta) == null ? void 0 : _m.tool_calls;
+              if (delta || toolCalls) {
+                yield {
+                  contentDelta: delta,
+                  toolCalls,
+                  raw: obj
+                };
               }
             } catch (_err) {
             }
@@ -1891,9 +1911,14 @@ class LfLLM {
             return;
           }
           const obj = JSON.parse(buffered.trim());
-          const delta = ((_m = (_l = (_k = obj.choices) == null ? void 0 : _k[0]) == null ? void 0 : _l.delta) == null ? void 0 : _m.content) || ((_p = (_o = (_n = obj.choices) == null ? void 0 : _n[0]) == null ? void 0 : _o.message) == null ? void 0 : _p.content);
-          if (delta) {
-            yield { contentDelta: delta, raw: obj };
+          const delta = ((_p = (_o = (_n = obj.choices) == null ? void 0 : _n[0]) == null ? void 0 : _o.delta) == null ? void 0 : _p.content) || ((_s = (_r = (_q = obj.choices) == null ? void 0 : _q[0]) == null ? void 0 : _r.message) == null ? void 0 : _s.content);
+          const toolCalls = (_v = (_u = (_t = obj.choices) == null ? void 0 : _t[0]) == null ? void 0 : _u.delta) == null ? void 0 : _v.tool_calls;
+          if (delta || toolCalls) {
+            yield {
+              contentDelta: delta,
+              toolCalls,
+              raw: obj
+            };
           }
         } catch {
         }
@@ -2574,7 +2599,7 @@ function requireIndex_cjs$2() {
 }
 var index_cjsExports$2 = requireIndex_cjs$2();
 var index_cjs$3 = /* @__PURE__ */ getDefaultExportFromCjs(index_cjsExports$2);
-var mdurl = /* @__PURE__ */ _mergeNamespaces({
+var mdurl = /* @__PURE__ */ _mergeNamespaces$1({
   __proto__: null,
   default: index_cjs$3
 }, [index_cjsExports$2]);
@@ -2599,7 +2624,7 @@ function requireIndex_cjs$1() {
 }
 var index_cjsExports$1 = requireIndex_cjs$1();
 var index_cjs$1 = /* @__PURE__ */ getDefaultExportFromCjs(index_cjsExports$1);
-var ucmicro = /* @__PURE__ */ _mergeNamespaces({
+var ucmicro = /* @__PURE__ */ _mergeNamespaces$1({
   __proto__: null,
   default: index_cjs$1
 }, [index_cjsExports$1]);
@@ -2638,10 +2663,10 @@ var hasRequiredDecode_codepoint;
 function requireDecode_codepoint() {
   if (hasRequiredDecode_codepoint) return decode_codepoint;
   hasRequiredDecode_codepoint = 1;
-  (function(exports) {
+  (function(exports$1) {
     var _a;
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.replaceCodePoint = exports.fromCodePoint = void 0;
+    Object.defineProperty(exports$1, "__esModule", { value: true });
+    exports$1.replaceCodePoint = exports$1.fromCodePoint = void 0;
     var decodeMap = /* @__PURE__ */ new Map([
       [0, 65533],
       // C1 Unicode control character reference replacements
@@ -2673,7 +2698,7 @@ function requireDecode_codepoint() {
       [158, 382],
       [159, 376]
     ]);
-    exports.fromCodePoint = // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, node/no-unsupported-features/es-builtins
+    exports$1.fromCodePoint = // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, node/no-unsupported-features/es-builtins
     (_a = String.fromCodePoint) !== null && _a !== void 0 ? _a : function(codePoint) {
       var output = "";
       if (codePoint > 65535) {
@@ -2691,11 +2716,11 @@ function requireDecode_codepoint() {
       }
       return (_a2 = decodeMap.get(codePoint)) !== null && _a2 !== void 0 ? _a2 : codePoint;
     }
-    exports.replaceCodePoint = replaceCodePoint;
+    exports$1.replaceCodePoint = replaceCodePoint;
     function decodeCodePoint(codePoint) {
-      return (0, exports.fromCodePoint)(replaceCodePoint(codePoint));
+      return (0, exports$1.fromCodePoint)(replaceCodePoint(codePoint));
     }
-    exports.default = decodeCodePoint;
+    exports$1.default = decodeCodePoint;
   })(decode_codepoint);
   return decode_codepoint;
 }
@@ -2703,7 +2728,7 @@ var hasRequiredDecode;
 function requireDecode() {
   if (hasRequiredDecode) return decode$1;
   hasRequiredDecode = 1;
-  (function(exports) {
+  (function(exports$1) {
     var __createBinding = decode$1 && decode$1.__createBinding || (Object.create ? (function(o, m, k, k2) {
       if (k2 === void 0) k2 = k;
       var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -2734,19 +2759,19 @@ function requireDecode() {
     var __importDefault = decode$1 && decode$1.__importDefault || function(mod) {
       return mod && mod.__esModule ? mod : { "default": mod };
     };
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.decodeXML = exports.decodeHTMLStrict = exports.decodeHTMLAttribute = exports.decodeHTML = exports.determineBranch = exports.EntityDecoder = exports.DecodingMode = exports.BinTrieFlags = exports.fromCodePoint = exports.replaceCodePoint = exports.decodeCodePoint = exports.xmlDecodeTree = exports.htmlDecodeTree = void 0;
+    Object.defineProperty(exports$1, "__esModule", { value: true });
+    exports$1.decodeXML = exports$1.decodeHTMLStrict = exports$1.decodeHTMLAttribute = exports$1.decodeHTML = exports$1.determineBranch = exports$1.EntityDecoder = exports$1.DecodingMode = exports$1.BinTrieFlags = exports$1.fromCodePoint = exports$1.replaceCodePoint = exports$1.decodeCodePoint = exports$1.xmlDecodeTree = exports$1.htmlDecodeTree = void 0;
     var decode_data_html_js_1 = __importDefault(/* @__PURE__ */ requireDecodeDataHtml());
-    exports.htmlDecodeTree = decode_data_html_js_1.default;
+    exports$1.htmlDecodeTree = decode_data_html_js_1.default;
     var decode_data_xml_js_1 = __importDefault(/* @__PURE__ */ requireDecodeDataXml());
-    exports.xmlDecodeTree = decode_data_xml_js_1.default;
+    exports$1.xmlDecodeTree = decode_data_xml_js_1.default;
     var decode_codepoint_js_1 = __importStar(/* @__PURE__ */ requireDecode_codepoint());
-    exports.decodeCodePoint = decode_codepoint_js_1.default;
+    exports$1.decodeCodePoint = decode_codepoint_js_1.default;
     var decode_codepoint_js_2 = /* @__PURE__ */ requireDecode_codepoint();
-    Object.defineProperty(exports, "replaceCodePoint", { enumerable: true, get: function() {
+    Object.defineProperty(exports$1, "replaceCodePoint", { enumerable: true, get: function() {
       return decode_codepoint_js_2.replaceCodePoint;
     } });
-    Object.defineProperty(exports, "fromCodePoint", { enumerable: true, get: function() {
+    Object.defineProperty(exports$1, "fromCodePoint", { enumerable: true, get: function() {
       return decode_codepoint_js_2.fromCodePoint;
     } });
     var CharCodes;
@@ -2770,7 +2795,7 @@ function requireDecode() {
       BinTrieFlags2[BinTrieFlags2["VALUE_LENGTH"] = 49152] = "VALUE_LENGTH";
       BinTrieFlags2[BinTrieFlags2["BRANCH_LENGTH"] = 16256] = "BRANCH_LENGTH";
       BinTrieFlags2[BinTrieFlags2["JUMP_TABLE"] = 127] = "JUMP_TABLE";
-    })(BinTrieFlags = exports.BinTrieFlags || (exports.BinTrieFlags = {}));
+    })(BinTrieFlags = exports$1.BinTrieFlags || (exports$1.BinTrieFlags = {}));
     function isNumber(code2) {
       return code2 >= CharCodes.ZERO && code2 <= CharCodes.NINE;
     }
@@ -2796,7 +2821,7 @@ function requireDecode() {
       DecodingMode2[DecodingMode2["Legacy"] = 0] = "Legacy";
       DecodingMode2[DecodingMode2["Strict"] = 1] = "Strict";
       DecodingMode2[DecodingMode2["Attribute"] = 2] = "Attribute";
-    })(DecodingMode = exports.DecodingMode || (exports.DecodingMode = {}));
+    })(DecodingMode = exports$1.DecodingMode || (exports$1.DecodingMode = {}));
     var EntityDecoder = (
       /** @class */
       (function() {
@@ -2980,7 +3005,7 @@ function requireDecode() {
         return EntityDecoder2;
       })()
     );
-    exports.EntityDecoder = EntityDecoder;
+    exports$1.EntityDecoder = EntityDecoder;
     function getDecoder(decodeTree) {
       var ret = "";
       var decoder = new EntityDecoder(decodeTree, function(str) {
@@ -3034,7 +3059,7 @@ function requireDecode() {
       }
       return -1;
     }
-    exports.determineBranch = determineBranch;
+    exports$1.determineBranch = determineBranch;
     var htmlDecoder = getDecoder(decode_data_html_js_1.default);
     var xmlDecoder = getDecoder(decode_data_xml_js_1.default);
     function decodeHTML(str, mode) {
@@ -3043,19 +3068,19 @@ function requireDecode() {
       }
       return htmlDecoder(str, mode);
     }
-    exports.decodeHTML = decodeHTML;
+    exports$1.decodeHTML = decodeHTML;
     function decodeHTMLAttribute(str) {
       return htmlDecoder(str, DecodingMode.Attribute);
     }
-    exports.decodeHTMLAttribute = decodeHTMLAttribute;
+    exports$1.decodeHTMLAttribute = decodeHTMLAttribute;
     function decodeHTMLStrict(str) {
       return htmlDecoder(str, DecodingMode.Strict);
     }
-    exports.decodeHTMLStrict = decodeHTMLStrict;
+    exports$1.decodeHTMLStrict = decodeHTMLStrict;
     function decodeXML(str) {
       return xmlDecoder(str, DecodingMode.Strict);
     }
-    exports.decodeXML = decodeXML;
+    exports$1.decodeXML = decodeXML;
   })(decode$1);
   return decode$1;
 }
@@ -3080,10 +3105,10 @@ var hasRequired_escape;
 function require_escape() {
   if (hasRequired_escape) return _escape;
   hasRequired_escape = 1;
-  (function(exports) {
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.escapeText = exports.escapeAttribute = exports.escapeUTF8 = exports.escape = exports.encodeXML = exports.getCodePoint = exports.xmlReplacer = void 0;
-    exports.xmlReplacer = /["&'<>$\x80-\uFFFF]/g;
+  (function(exports$1) {
+    Object.defineProperty(exports$1, "__esModule", { value: true });
+    exports$1.escapeText = exports$1.escapeAttribute = exports$1.escapeUTF8 = exports$1.escape = exports$1.encodeXML = exports$1.getCodePoint = exports$1.xmlReplacer = void 0;
+    exports$1.xmlReplacer = /["&'<>$\x80-\uFFFF]/g;
     var xmlCodeMap = /* @__PURE__ */ new Map([
       [34, "&quot;"],
       [38, "&amp;"],
@@ -3091,7 +3116,7 @@ function require_escape() {
       [60, "&lt;"],
       [62, "&gt;"]
     ]);
-    exports.getCodePoint = // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    exports$1.getCodePoint = // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     String.prototype.codePointAt != null ? function(str, index) {
       return str.codePointAt(index);
     } : (
@@ -3104,7 +3129,7 @@ function require_escape() {
       var ret = "";
       var lastIdx = 0;
       var match;
-      while ((match = exports.xmlReplacer.exec(str)) !== null) {
+      while ((match = exports$1.xmlReplacer.exec(str)) !== null) {
         var i = match.index;
         var char = str.charCodeAt(i);
         var next = xmlCodeMap.get(char);
@@ -3112,14 +3137,14 @@ function require_escape() {
           ret += str.substring(lastIdx, i) + next;
           lastIdx = i + 1;
         } else {
-          ret += "".concat(str.substring(lastIdx, i), "&#x").concat((0, exports.getCodePoint)(str, i).toString(16), ";");
-          lastIdx = exports.xmlReplacer.lastIndex += Number((char & 64512) === 55296);
+          ret += "".concat(str.substring(lastIdx, i), "&#x").concat((0, exports$1.getCodePoint)(str, i).toString(16), ";");
+          lastIdx = exports$1.xmlReplacer.lastIndex += Number((char & 64512) === 55296);
         }
       }
       return ret + str.substr(lastIdx);
     }
-    exports.encodeXML = encodeXML;
-    exports.escape = encodeXML;
+    exports$1.encodeXML = encodeXML;
+    exports$1.escape = encodeXML;
     function getEscaper(regex, map2) {
       return function escape2(data) {
         var match;
@@ -3135,13 +3160,13 @@ function require_escape() {
         return result + data.substring(lastIdx);
       };
     }
-    exports.escapeUTF8 = getEscaper(/[&<>'"]/g, xmlCodeMap);
-    exports.escapeAttribute = getEscaper(/["&\u00A0]/g, /* @__PURE__ */ new Map([
+    exports$1.escapeUTF8 = getEscaper(/[&<>'"]/g, xmlCodeMap);
+    exports$1.escapeAttribute = getEscaper(/["&\u00A0]/g, /* @__PURE__ */ new Map([
       [34, "&quot;"],
       [38, "&amp;"],
       [160, "&nbsp;"]
     ]));
-    exports.escapeText = getEscaper(/[&<>\u00A0]/g, /* @__PURE__ */ new Map([
+    exports$1.escapeText = getEscaper(/[&<>\u00A0]/g, /* @__PURE__ */ new Map([
       [38, "&amp;"],
       [60, "&lt;"],
       [62, "&gt;"],
@@ -3208,9 +3233,9 @@ var hasRequiredLib;
 function requireLib() {
   if (hasRequiredLib) return lib$1;
   hasRequiredLib = 1;
-  (function(exports) {
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.decodeXMLStrict = exports.decodeHTML5Strict = exports.decodeHTML4Strict = exports.decodeHTML5 = exports.decodeHTML4 = exports.decodeHTMLAttribute = exports.decodeHTMLStrict = exports.decodeHTML = exports.decodeXML = exports.DecodingMode = exports.EntityDecoder = exports.encodeHTML5 = exports.encodeHTML4 = exports.encodeNonAsciiHTML = exports.encodeHTML = exports.escapeText = exports.escapeAttribute = exports.escapeUTF8 = exports.escape = exports.encodeXML = exports.encode = exports.decodeStrict = exports.decode = exports.EncodingMode = exports.EntityLevel = void 0;
+  (function(exports$1) {
+    Object.defineProperty(exports$1, "__esModule", { value: true });
+    exports$1.decodeXMLStrict = exports$1.decodeHTML5Strict = exports$1.decodeHTML4Strict = exports$1.decodeHTML5 = exports$1.decodeHTML4 = exports$1.decodeHTMLAttribute = exports$1.decodeHTMLStrict = exports$1.decodeHTML = exports$1.decodeXML = exports$1.DecodingMode = exports$1.EntityDecoder = exports$1.encodeHTML5 = exports$1.encodeHTML4 = exports$1.encodeNonAsciiHTML = exports$1.encodeHTML = exports$1.escapeText = exports$1.escapeAttribute = exports$1.escapeUTF8 = exports$1.escape = exports$1.encodeXML = exports$1.encode = exports$1.decodeStrict = exports$1.decode = exports$1.EncodingMode = exports$1.EntityLevel = void 0;
     var decode_js_1 = /* @__PURE__ */ requireDecode();
     var encode_js_1 = /* @__PURE__ */ requireEncode();
     var escape_js_1 = /* @__PURE__ */ require_escape();
@@ -3218,7 +3243,7 @@ function requireLib() {
     (function(EntityLevel2) {
       EntityLevel2[EntityLevel2["XML"] = 0] = "XML";
       EntityLevel2[EntityLevel2["HTML"] = 1] = "HTML";
-    })(EntityLevel = exports.EntityLevel || (exports.EntityLevel = {}));
+    })(EntityLevel = exports$1.EntityLevel || (exports$1.EntityLevel = {}));
     var EncodingMode;
     (function(EncodingMode2) {
       EncodingMode2[EncodingMode2["UTF8"] = 0] = "UTF8";
@@ -3226,7 +3251,7 @@ function requireLib() {
       EncodingMode2[EncodingMode2["Extensive"] = 2] = "Extensive";
       EncodingMode2[EncodingMode2["Attribute"] = 3] = "Attribute";
       EncodingMode2[EncodingMode2["Text"] = 4] = "Text";
-    })(EncodingMode = exports.EncodingMode || (exports.EncodingMode = {}));
+    })(EncodingMode = exports$1.EncodingMode || (exports$1.EncodingMode = {}));
     function decode2(data, options) {
       if (options === void 0) {
         options = EntityLevel.XML;
@@ -3238,7 +3263,7 @@ function requireLib() {
       }
       return (0, decode_js_1.decodeXML)(data);
     }
-    exports.decode = decode2;
+    exports$1.decode = decode2;
     function decodeStrict(data, options) {
       var _a;
       if (options === void 0) {
@@ -3248,7 +3273,7 @@ function requireLib() {
       (_a = opts.mode) !== null && _a !== void 0 ? _a : opts.mode = decode_js_1.DecodingMode.Strict;
       return decode2(data, opts);
     }
-    exports.decodeStrict = decodeStrict;
+    exports$1.decodeStrict = decodeStrict;
     function encode2(data, options) {
       if (options === void 0) {
         options = EntityLevel.XML;
@@ -3268,68 +3293,68 @@ function requireLib() {
       }
       return (0, escape_js_1.encodeXML)(data);
     }
-    exports.encode = encode2;
+    exports$1.encode = encode2;
     var escape_js_2 = /* @__PURE__ */ require_escape();
-    Object.defineProperty(exports, "encodeXML", { enumerable: true, get: function() {
+    Object.defineProperty(exports$1, "encodeXML", { enumerable: true, get: function() {
       return escape_js_2.encodeXML;
     } });
-    Object.defineProperty(exports, "escape", { enumerable: true, get: function() {
+    Object.defineProperty(exports$1, "escape", { enumerable: true, get: function() {
       return escape_js_2.escape;
     } });
-    Object.defineProperty(exports, "escapeUTF8", { enumerable: true, get: function() {
+    Object.defineProperty(exports$1, "escapeUTF8", { enumerable: true, get: function() {
       return escape_js_2.escapeUTF8;
     } });
-    Object.defineProperty(exports, "escapeAttribute", { enumerable: true, get: function() {
+    Object.defineProperty(exports$1, "escapeAttribute", { enumerable: true, get: function() {
       return escape_js_2.escapeAttribute;
     } });
-    Object.defineProperty(exports, "escapeText", { enumerable: true, get: function() {
+    Object.defineProperty(exports$1, "escapeText", { enumerable: true, get: function() {
       return escape_js_2.escapeText;
     } });
     var encode_js_2 = /* @__PURE__ */ requireEncode();
-    Object.defineProperty(exports, "encodeHTML", { enumerable: true, get: function() {
+    Object.defineProperty(exports$1, "encodeHTML", { enumerable: true, get: function() {
       return encode_js_2.encodeHTML;
     } });
-    Object.defineProperty(exports, "encodeNonAsciiHTML", { enumerable: true, get: function() {
+    Object.defineProperty(exports$1, "encodeNonAsciiHTML", { enumerable: true, get: function() {
       return encode_js_2.encodeNonAsciiHTML;
     } });
-    Object.defineProperty(exports, "encodeHTML4", { enumerable: true, get: function() {
+    Object.defineProperty(exports$1, "encodeHTML4", { enumerable: true, get: function() {
       return encode_js_2.encodeHTML;
     } });
-    Object.defineProperty(exports, "encodeHTML5", { enumerable: true, get: function() {
+    Object.defineProperty(exports$1, "encodeHTML5", { enumerable: true, get: function() {
       return encode_js_2.encodeHTML;
     } });
     var decode_js_2 = /* @__PURE__ */ requireDecode();
-    Object.defineProperty(exports, "EntityDecoder", { enumerable: true, get: function() {
+    Object.defineProperty(exports$1, "EntityDecoder", { enumerable: true, get: function() {
       return decode_js_2.EntityDecoder;
     } });
-    Object.defineProperty(exports, "DecodingMode", { enumerable: true, get: function() {
+    Object.defineProperty(exports$1, "DecodingMode", { enumerable: true, get: function() {
       return decode_js_2.DecodingMode;
     } });
-    Object.defineProperty(exports, "decodeXML", { enumerable: true, get: function() {
+    Object.defineProperty(exports$1, "decodeXML", { enumerable: true, get: function() {
       return decode_js_2.decodeXML;
     } });
-    Object.defineProperty(exports, "decodeHTML", { enumerable: true, get: function() {
+    Object.defineProperty(exports$1, "decodeHTML", { enumerable: true, get: function() {
       return decode_js_2.decodeHTML;
     } });
-    Object.defineProperty(exports, "decodeHTMLStrict", { enumerable: true, get: function() {
+    Object.defineProperty(exports$1, "decodeHTMLStrict", { enumerable: true, get: function() {
       return decode_js_2.decodeHTMLStrict;
     } });
-    Object.defineProperty(exports, "decodeHTMLAttribute", { enumerable: true, get: function() {
+    Object.defineProperty(exports$1, "decodeHTMLAttribute", { enumerable: true, get: function() {
       return decode_js_2.decodeHTMLAttribute;
     } });
-    Object.defineProperty(exports, "decodeHTML4", { enumerable: true, get: function() {
+    Object.defineProperty(exports$1, "decodeHTML4", { enumerable: true, get: function() {
       return decode_js_2.decodeHTML;
     } });
-    Object.defineProperty(exports, "decodeHTML5", { enumerable: true, get: function() {
+    Object.defineProperty(exports$1, "decodeHTML5", { enumerable: true, get: function() {
       return decode_js_2.decodeHTML;
     } });
-    Object.defineProperty(exports, "decodeHTML4Strict", { enumerable: true, get: function() {
+    Object.defineProperty(exports$1, "decodeHTML4Strict", { enumerable: true, get: function() {
       return decode_js_2.decodeHTMLStrict;
     } });
-    Object.defineProperty(exports, "decodeHTML5Strict", { enumerable: true, get: function() {
+    Object.defineProperty(exports$1, "decodeHTML5Strict", { enumerable: true, get: function() {
       return decode_js_2.decodeHTMLStrict;
     } });
-    Object.defineProperty(exports, "decodeXMLStrict", { enumerable: true, get: function() {
+    Object.defineProperty(exports$1, "decodeXMLStrict", { enumerable: true, get: function() {
       return decode_js_2.decodeXML;
     } });
   })(lib$1);
@@ -9194,7 +9219,7 @@ function requirePrism() {
 }
 var prismExports = requirePrism();
 var prism = /* @__PURE__ */ getDefaultExportFromCjs(prismExports);
-var Prism = /* @__PURE__ */ _mergeNamespaces({
+var Prism = /* @__PURE__ */ _mergeNamespaces$1({
   __proto__: null,
   default: prism
 }, [prismExports]);
@@ -10902,4 +10927,4 @@ const finalize = (framework) => {
 export {
   getLfFramework as g
 };
-//# sourceMappingURL=lf-widgets-framework-C98FQqUU.js.map
+//# sourceMappingURL=lf-widgets-framework-DcaHVr-f.js.map

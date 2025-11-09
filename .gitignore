@@ -48,4 +48,6 @@ node_modules/
 web/temp
 web/deploy/assets/messenger/**/*.*
 !web/deploy/assets/messenger/**/*.gitkeep
+modules/workflow_runner/workflows/custom/**/*
+!modules/workflow_runner/workflows/custom/**/.gitkeep
 workflow_runner_history.db*

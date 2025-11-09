@@ -16,15 +16,34 @@ It forwards headers, cookies and body and preserves response status and content-
 """
 import asyncio
 import logging
-import os
+import ssl
 
 from aiohttp import web, ClientSession
+from pathlib import Path
+import importlib.util
+
+try:
+    from ...utils.env import bool_env, int_env, list_env, maybe_load_dotenv, str_env
+except Exception:
+    env_path = Path(__file__).resolve().parents[2] / "utils" / "env.py"
+    if env_path.exists():
+        spec = importlib.util.spec_from_file_location("lf_nodes.modules.utils.env", str(env_path))
+        env_mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(env_mod)
+        bool_env = env_mod.bool_env
+        int_env = env_mod.int_env
+        list_env = env_mod.list_env
+        maybe_load_dotenv = env_mod.maybe_load_dotenv
+        str_env = env_mod.str_env
+    else:
+        raise
 
 # region Constants
-DEFAULT_BACKEND = os.environ.get("COMFY_BACKEND_URL", "http://127.0.0.1:8188")
-FRONTEND_PORT = int(os.environ.get("PROXY_FRONTEND_PORT", "9188"))
 DEFAULT_PREFIXES = [
     "/favicon.ico",
+    "/history",
+    "/models",
+    "/prompt",
     "/queue",
     "/view",
     "/api/lf-nodes/fonts",
@@ -39,14 +58,22 @@ DEFAULT_PREFIXES = [
     "/api/lf-nodes/workflows",
 ]
 
-_allowed = os.environ.get("PROXY_ALLOWED_PREFIXES")
+repo_root = Path(__file__).resolve().parents[3]
+logging.debug("Determined repo root: %s", repo_root)
+maybe_load_dotenv(repo_root / ".env")
+
+DEFAULT_BACKEND = str_env("COMFY_BACKEND_URL", "http://127.0.0.1:8188")
+FRONTEND_PORT = int_env("PROXY_FRONTEND_PORT", 9188)
+_allowed = list_env("PROXY_ALLOWED_PREFIXES")
 if _allowed:
-    ALLOWED_PREFIXES = [p.strip() for p in _allowed.split(",") if p.strip()]
+    ALLOWED_PREFIXES = [p.strip() for p in _allowed if p.strip()]
 else:
     ALLOWED_PREFIXES = DEFAULT_PREFIXES
-
-PROXY_DEBUG = os.environ.get("WORKFLOW_RUNNER_DEBUG", "0").lower() in ("1", "true", "yes")
-PROXY_STREAMING_ONLY_PROXY = os.environ.get("PROXY_STREAMING_ONLY_PROXY", "1").lower() in ("1", "true", "yes")
+PROXY_DEBUG = bool_env("WORKFLOW_RUNNER_DEBUG", False)
+PROXY_SSL_CERT =  str_env("PROXY_SSL_CERT")
+PROXY_SSL_KEY =  str_env("PROXY_SSL_KEY")
+PROXY_SSL_KEY_PASSWORD = str_env("PROXY_SSL_KEY_PASSWORD")
+PROXY_STREAMING_ONLY_PROXY = bool_env("PROXY_STREAMING_ONLY_PROXY", True)
 logging.basicConfig(level=logging.DEBUG if PROXY_DEBUG else logging.INFO, format="[frontend-proxy] %(levelname)s: %(message)s")
 # endregion
 
@@ -199,8 +226,23 @@ async def start_app() -> None:
 
     runner = web.AppRunner(app)
     await runner.setup()
-    site = web.TCPSite(runner, "0.0.0.0", FRONTEND_PORT)
-    logging.info("Starting frontend proxy on port %s forwarding to %s", FRONTEND_PORT, DEFAULT_BACKEND)
+    # If TLS cert+key are provided, create an SSL context and serve HTTPS
+    ssl_context = None
+    if PROXY_SSL_CERT and PROXY_SSL_KEY:
+        try:
+            ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+            if PROXY_SSL_KEY_PASSWORD:
+                ssl_context.load_cert_chain(PROXY_SSL_CERT, PROXY_SSL_KEY, password=PROXY_SSL_KEY_PASSWORD)
+            else:
+                ssl_context.load_cert_chain(PROXY_SSL_CERT, PROXY_SSL_KEY)
+            logging.info("Loaded SSL cert %s and key %s; serving HTTPS", PROXY_SSL_CERT, PROXY_SSL_KEY)
+        except Exception as e:
+            logging.exception("Failed to load SSL cert/key: %s", e)
+            raise
+
+    site = web.TCPSite(runner, "0.0.0.0", FRONTEND_PORT, ssl_context=ssl_context)
+    scheme = "https" if ssl_context else "http"
+    logging.info("Starting frontend proxy on %s://0.0.0.0:%s forwarding to %s", scheme, FRONTEND_PORT, DEFAULT_BACKEND)
     await site.start()
 
     # run forever

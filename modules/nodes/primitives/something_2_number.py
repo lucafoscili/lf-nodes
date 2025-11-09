@@ -1,9 +1,8 @@
 import json
 
-from server import PromptServer
-
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
+from ...utils.constants import FUNCTION, Input
+from ...utils.helpers.comfy import safe_send_sync
 
 # region LF_Something2Number
 class LF_Something2Number:
@@ -111,10 +110,10 @@ class LF_Something2Number:
 
   {breakdown_log}
     """
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}something2number", {
-            "node": kwargs.get("node_id"),
+
+        safe_send_sync("something2number", {
             "value": log,
-        })
+        }, kwargs.get("node_id"))
 
         return (float_sum, integer_sum, float_values, integer_values)
 # endregion

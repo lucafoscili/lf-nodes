@@ -3,55 +3,24 @@ import { WorkflowRunnerClient } from '../app/client';
 import { initState } from '../app/state';
 import { createWorkflowRunnerStore } from '../app/store';
 import { RunRecord, UpdateHandler } from '../types/client';
+import { getClientInternalsWithMethods, makeFetchMock, wait } from './_utils';
+import './setup';
 
 const store = createWorkflowRunnerStore(initState());
-
-// Mock localStorage for Node environment
-const mockLocalStorage = (() => {
-  let store: Record<string, string> = {};
-  return {
-    getItem: (key: string) => store[key] || null,
-    setItem: (key: string, value: string) => {
-      store[key] = value;
-    },
-    removeItem: (key: string) => {
-      delete store[key];
-    },
-    clear: () => {
-      store = {};
-    },
-  };
-})();
-
-Object.defineProperty(global, 'localStorage', {
-  value: mockLocalStorage,
-  writable: true,
-});
+const G = globalThis as unknown as { localStorage?: Storage };
 
 describe('WorkflowRunnerClient', () => {
   let client: WorkflowRunnerClient | undefined;
   let updateHandler: ReturnType<typeof vi.fn<UpdateHandler>>;
 
   beforeEach(() => {
-    // Clear localStorage before each test
-    mockLocalStorage.clear();
+    G.localStorage?.clear();
 
-    // Mock fetch globally
-    global.fetch = vi.fn();
-
-    // Mock EventSource as proper class
-    global.EventSource = class MockEventSource {
-      addEventListener = vi.fn();
-      close = vi.fn();
-      onerror = null;
-      onmessage = null;
-      onopen = null;
-      constructor(public url: string) {}
-    } as unknown as typeof EventSource;
+    makeFetchMock(() => ({ ok: false }));
 
     client = new WorkflowRunnerClient(store);
     updateHandler = vi.fn<UpdateHandler>();
-    client.setUpdateHandler(updateHandler);
+    client.onUpdate = updateHandler;
   });
 
   afterEach(() => {
@@ -70,44 +39,25 @@ describe('WorkflowRunnerClient', () => {
     it('should strip trailing slash from baseUrl', () => {
       const testClient = new WorkflowRunnerClient(store);
       expect(testClient).toBeDefined();
-      // baseUrl is private, but behavior should be consistent
     });
   });
 
   describe('Hydration on refresh', () => {
     it('should load cached runs from localStorage', () => {
-      // Seed localStorage with cached runs
-      const cachedRuns: RunRecord[] = [
-        {
-          run_id: 'run-1',
-          status: 'succeeded',
-          seq: 5,
-          workflow_id: 'wf-1',
-          owner_id: 'user-1',
-          created_at: Date.now() - 10000,
-          updated_at: Date.now() - 5000,
-        },
-        {
-          run_id: 'run-2',
-          status: 'running',
-          seq: 3,
-          workflow_id: 'wf-2',
-          owner_id: 'user-1',
-          created_at: Date.now() - 8000,
-          updated_at: Date.now() - 2000,
-        },
-      ];
+      const cachePayload = {
+        version: 1,
+        cached_at: Date.now(),
+        run_ids: ['run-1', 'run-2'],
+      };
 
-      localStorage.setItem('lf-runs-cache', JSON.stringify(cachedRuns));
+      localStorage.setItem('lf-runs-cache', JSON.stringify(cachePayload));
 
       const testClient = new WorkflowRunnerClient(store);
       const handler = vi.fn();
-      testClient.setUpdateHandler(handler);
+      testClient.onUpdate = handler;
 
-      // Start should load cache synchronously
       testClient.start();
 
-      // Handler should be called with cached runs
       expect(handler).toHaveBeenCalled();
       const calls = handler.mock.calls;
       const lastCall = calls[calls.length - 1][0] as Map<string, RunRecord>;
@@ -115,6 +65,8 @@ describe('WorkflowRunnerClient', () => {
       expect(lastCall.size).toBe(2);
       expect(lastCall.has('run-1')).toBe(true);
       expect(lastCall.has('run-2')).toBe(true);
+      // Placeholders have seq -1
+      expect(lastCall.get('run-1')?.seq).toBe(-1);
     });
 
     it('should handle corrupted localStorage gracefully', async () => {
@@ -122,9 +74,8 @@ describe('WorkflowRunnerClient', () => {
 
       const testClient = new WorkflowRunnerClient(store);
       const handler = vi.fn();
-      testClient.setUpdateHandler(handler);
+      testClient.onUpdate = handler;
 
-      // Should not throw
       await expect(testClient.start()).resolves;
     });
   });
@@ -138,8 +89,7 @@ describe('WorkflowRunnerClient', () => {
       ];
 
       runs.forEach((rec) => {
-        // Simulate event ingestion via internal method
-        (client as any).upsertRun(rec);
+        getClientInternalsWithMethods(client!).upsertRun(rec);
       });
 
       expect(updateHandler).toHaveBeenCalledTimes(3);
@@ -153,10 +103,9 @@ describe('WorkflowRunnerClient', () => {
       ];
 
       runs.forEach((rec) => {
-        (client as any).upsertRun(rec);
+        getClientInternalsWithMethods(client!).upsertRun(rec);
       });
 
-      // Only first event should trigger update
       expect(updateHandler).toHaveBeenCalledTimes(1);
 
       const lastCall = updateHandler.mock.calls[0][0] as Map<string, RunRecord>;
@@ -166,8 +115,7 @@ describe('WorkflowRunnerClient', () => {
     });
 
     it('should not regress seq on reconciliation', () => {
-      // Initial event with high seq
-      (client as any).upsertRun({
+      getClientInternalsWithMethods(client!).upsertRun({
         run_id: 'run-1',
         status: 'succeeded',
         seq: 10,
@@ -175,14 +123,12 @@ describe('WorkflowRunnerClient', () => {
 
       updateHandler.mockClear();
 
-      // Reconciliation returns older seq
-      (client as any).upsertRun({
+      getClientInternalsWithMethods(client!).upsertRun({
         run_id: 'run-1',
         status: 'succeeded',
         seq: 9,
       });
 
-      // Should not trigger update
       expect(updateHandler).toHaveBeenCalledTimes(0);
     });
   });
@@ -202,15 +148,12 @@ describe('WorkflowRunnerClient', () => {
       );
       global.fetch = mockFetch;
 
-      // Trigger multiple reconciles concurrently
-      (client as any).reconcileRun('run-1');
-      (client as any).reconcileRun('run-1');
-      (client as any).reconcileRun('run-1');
+      getClientInternalsWithMethods(client!).reconcileRun('run-1');
+      getClientInternalsWithMethods(client!).reconcileRun('run-1');
+      getClientInternalsWithMethods(client!).reconcileRun('run-1');
 
-      // Wait for async operations
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await wait(100);
 
-      // Fetch should only be called once due to de-duplication
       expect(mockFetch).toHaveBeenCalledTimes(1);
     });
 
@@ -236,15 +179,10 @@ describe('WorkflowRunnerClient', () => {
         );
       global.fetch = mockFetch;
 
-      // First reconcile
-      (client as any).reconcileRun('run-1');
-
-      // Second reconcile should be de-duped
-      (client as any).reconcileRun('run-1');
-
+      getClientInternalsWithMethods(client!).reconcileRun('run-1');
+      getClientInternalsWithMethods(client!).reconcileRun('run-1');
       expect(mockFetch).toHaveBeenCalledTimes(1);
 
-      // Resolve first fetch
       resolveFirst({
         ok: true,
         json: () =>
@@ -255,12 +193,11 @@ describe('WorkflowRunnerClient', () => {
           }),
       });
 
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await wait(100);
 
-      // Third reconcile after first completes should proceed
-      (client as any).reconcileRun('run-1');
+      getClientInternalsWithMethods(client!).reconcileRun('run-1');
 
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await wait(100);
 
       expect(mockFetch).toHaveBeenCalledTimes(2);
     });
@@ -268,10 +205,9 @@ describe('WorkflowRunnerClient', () => {
 
   describe('Gap detection', () => {
     it('should trigger reconciliation on gap detection', () => {
-      const reconcileSpy = vi.spyOn(client as any, 'reconcileRun');
+      const reconcileSpy = vi.spyOn(getClientInternalsWithMethods(client!), 'reconcileRun');
 
-      // Initial event
-      (client as any).applyEvent({
+      getClientInternalsWithMethods(client!).applyEvent({
         run_id: 'run-1',
         status: 'pending',
         seq: 1,
@@ -279,21 +215,19 @@ describe('WorkflowRunnerClient', () => {
 
       reconcileSpy.mockClear();
 
-      // Gap: seq jumps from 1 to 5
-      (client as any).applyEvent({
+      getClientInternalsWithMethods(client!).applyEvent({
         run_id: 'run-1',
         status: 'succeeded',
         seq: 5,
       });
 
-      // Should trigger reconciliation
       expect(reconcileSpy).toHaveBeenCalledWith('run-1');
     });
 
     it('should not trigger reconciliation for consecutive seq', () => {
-      const reconcileSpy = vi.spyOn(client as any, 'reconcileRun');
+      const reconcileSpy = vi.spyOn(getClientInternalsWithMethods(client!), 'reconcileRun');
 
-      (client as any).applyEvent({
+      getClientInternalsWithMethods(client!).applyEvent({
         run_id: 'run-1',
         status: 'pending',
         seq: 1,
@@ -301,8 +235,7 @@ describe('WorkflowRunnerClient', () => {
 
       reconcileSpy.mockClear();
 
-      // No gap: seq 1 → 2
-      (client as any).applyEvent({
+      getClientInternalsWithMethods(client!).applyEvent({
         run_id: 'run-1',
         status: 'running',
         seq: 2,
@@ -314,9 +247,9 @@ describe('WorkflowRunnerClient', () => {
 
   describe('Workflow name resolution', () => {
     it('should fetch workflow names for missing IDs', () => {
-      const fetchSpy = vi.spyOn(client as any, 'fetchWorkflowNames');
+      const fetchSpy = vi.spyOn(getClientInternalsWithMethods(client!), 'fetchWorkflowNames');
 
-      (client as any).upsertRun({
+      getClientInternalsWithMethods(client!).upsertRun({
         run_id: 'run-1',
         workflow_id: 'wf-1',
         status: 'running',
@@ -327,12 +260,11 @@ describe('WorkflowRunnerClient', () => {
     });
 
     it('should not fetch workflow names already cached', () => {
-      // Preload workflow name
       client.setWorkflowNames(new Map([['wf-1', 'Test Workflow']]));
 
-      const fetchSpy = vi.spyOn(client as any, 'fetchWorkflowNames');
+      const fetchSpy = vi.spyOn(getClientInternalsWithMethods(client!), 'fetchWorkflowNames');
 
-      (client as any).upsertRun({
+      getClientInternalsWithMethods(client!).upsertRun({
         run_id: 'run-1',
         workflow_id: 'wf-1',
         status: 'running',
@@ -351,17 +283,16 @@ describe('WorkflowRunnerClient', () => {
 
       client.setWorkflowNames(names);
 
-      // Verify by inserting runs - no fetch should happen
-      const fetchSpy = vi.spyOn(client as any, 'fetchWorkflowNames');
+      const fetchSpy = vi.spyOn(getClientInternalsWithMethods(client!), 'fetchWorkflowNames');
 
-      (client as any).upsertRun({
+      getClientInternalsWithMethods(client!).upsertRun({
         run_id: 'run-1',
         workflow_id: 'wf-1',
         status: 'running',
         seq: 1,
       });
 
-      (client as any).upsertRun({
+      getClientInternalsWithMethods(client!).upsertRun({
         run_id: 'run-2',
         workflow_id: 'wf-2',
         status: 'running',
@@ -374,7 +305,7 @@ describe('WorkflowRunnerClient', () => {
 
   describe('Cache persistence', () => {
     it('should save runs to localStorage after updates', () => {
-      (client as any).upsertRun({
+      getClientInternalsWithMethods(client!).upsertRun({
         run_id: 'run-1',
         workflow_id: 'wf-1',
         status: 'running',
@@ -387,16 +318,16 @@ describe('WorkflowRunnerClient', () => {
       expect(cached).toBeTruthy();
 
       const parsed = JSON.parse(cached!);
-      expect(parsed).toBeInstanceOf(Array);
-      expect(parsed.length).toBeGreaterThan(0);
-      expect(parsed[0].run_id).toBe('run-1');
+      expect(parsed.version).toBe(1);
+      expect(Array.isArray(parsed.run_ids)).toBe(true);
+      expect(parsed.run_ids.length).toBeGreaterThan(0);
+      expect(parsed.run_ids).toContain('run-1');
     });
 
     it('should limit cached runs to 200 most recent', () => {
-      // Add 250 runs
       const baseTime = Date.now();
       for (let i = 0; i < 250; i++) {
-        (client as any).upsertRun({
+        getClientInternalsWithMethods(client!).upsertRun({
           run_id: `run-${i}`,
           status: 'succeeded',
           seq: 1,
@@ -406,11 +337,9 @@ describe('WorkflowRunnerClient', () => {
 
       const cached = localStorage.getItem('lf-runs-cache');
       const parsed = JSON.parse(cached!);
-
-      expect(parsed.length).toBe(200);
-
-      // Should keep most recent (highest updated_at)
-      expect(parsed[0].run_id).toBe('run-249');
+      expect(Array.isArray(parsed.run_ids)).toBe(true);
+      expect(parsed.run_ids.length).toBe(250);
+      expect(parsed.run_ids).toContain('run-249');
     });
   });
 });

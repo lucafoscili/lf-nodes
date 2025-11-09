@@ -2,10 +2,10 @@ import io
 import re
 
 from PIL import Image
-from server import PromptServer
 
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
+from ...utils.constants import FUNCTION, Input
+from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.conversion import pil_to_tensor
 from ...utils.helpers.logic import normalize_list_to_value, normalize_output_image
 
@@ -131,10 +131,9 @@ class LF_BlobToImage:
 
         image_batch, image_list = normalize_output_image(all_tensors)
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}blobtoimage", {
-            "node": kwargs.get("node_id"),
+        safe_send_sync("blobtoimage", {
             "value": log_md
-        })
+        }, kwargs.get("node_id"))
 
         return (image_batch[0], image_list)
 # endregion

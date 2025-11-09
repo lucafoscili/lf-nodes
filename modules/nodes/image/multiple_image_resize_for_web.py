@@ -2,10 +2,10 @@ import io
 import torch
 
 from PIL import Image
-from server import PromptServer
 
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
+from ...utils.constants import FUNCTION, Input
+from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.conversion import pil_to_tensor, tensor_to_pil
 from ...utils.helpers.logic import normalize_input_image, normalize_input_list, normalize_output_image
 
@@ -121,10 +121,9 @@ class LF_MultipleImageResizeForWeb:
 
             nodes.append(rootNode)
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}multipleimageresizeforweb", {
-            "node": kwargs.get("node_id"),
+        safe_send_sync("multipleimageresizeforweb", {
             "dataset": dataset,
-        })
+        }, kwargs.get("node_id"))
 
         image_batch, image_list = normalize_output_image(output_images)
 

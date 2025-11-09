@@ -1,12 +1,11 @@
 import random
+
 from typing import Optional, Tuple
 
-from server import PromptServer
-
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, INT_MAX
+from ...utils.constants import FUNCTION, Input, INT_MAX
 from ...utils.helpers.api import process_model_async
-from ...utils.helpers.comfy import get_comfy_list
+from ...utils.helpers.comfy import get_comfy_list, safe_send_sync
 from ...utils.helpers.logic import dataset_from_metadata, filter_list, is_none, normalize_list_to_value
 
 # region LF_LoraAndEmbeddingSelector
@@ -105,10 +104,9 @@ class LF_LoraAndEmbeddingSelector:
 
         if passthrough:
 
-            PromptServer.instance.send_sync(f"{EVENT_PREFIX}loraandembeddingselector", {
-                "node": node_id,
+            safe_send_sync("loraandembeddingselector", {
                 "apiFlags": [False],
-            })
+            }, node_id)
 
             if node_id:
                 self._LAST_SELECTION.pop(node_id, None)
@@ -131,7 +129,6 @@ class LF_LoraAndEmbeddingSelector:
             raise ValueError(f"Not found an embedding named {lora}")
 
         should_fetch_civitai = bool(get_civitai_info)
-        event_name = f"{EVENT_PREFIX}loraandembeddingselector"
 
         combined_metadata = {"lora": None, "embedding": None}
 
@@ -161,10 +158,9 @@ class LF_LoraAndEmbeddingSelector:
                 _should_fetch(e_metadata, e_hash, e_pending),
             ]
 
-            PromptServer.instance.send_sync(
-                event_name,
+            safe_send_sync(
+                "loraandembeddingselector",
                 {
-                    "node": node_id,
                     "datasets": [l_dataset, e_dataset],
                     "hashes": [l_hash if l_hash else "", e_hash if e_hash else ""],
                     "apiFlags": fetch_flags,
@@ -173,6 +169,7 @@ class LF_LoraAndEmbeddingSelector:
                         e_metadata.get("model_path") or "",
                     ],
                 },
+                node_id,
             )
 
         def _metadata_callback(kind: str):

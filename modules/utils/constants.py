@@ -1,6 +1,12 @@
 import folder_paths
 
-from comfy.samplers import KSampler
+try:
+    from comfy.samplers import KSampler
+except Exception:  # pragma: no cover - fallback for test isolation
+    class _FallbackKSampler:
+        SAMPLERS = []
+        SCHEDULERS = []
+    KSampler = _FallbackKSampler()
 from pathlib import Path
 
 try:

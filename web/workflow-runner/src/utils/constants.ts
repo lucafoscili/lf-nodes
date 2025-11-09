@@ -12,6 +12,9 @@ export const DEBUG_MESSAGES = {
   HEADER_DESTROYED: 'Header section destroyed.',
   HEADER_MOUNTED: 'Header section mounted.',
   HEADER_UPDATED: 'Header section refreshed.',
+  HOME_DESTROYED: 'Home section destroyed.',
+  HOME_MOUNTED: 'Home section mounted.',
+  HOME_UPDATED: 'Home section refreshed.',
   INPUTS_COLLECTED: 'Collected workflow inputs.',
   MAIN_DESTROYED: 'Main section destroyed.',
   MAIN_MOUNTED: 'Main section mounted.',
@@ -67,5 +70,12 @@ export const STATUS_MESSAGES = {
   RUNNING_SUBMITTING_WORKFLOW: 'Submitting workflow...',
   RUNNING_UPLOAD_COMPLETED: 'File uploaded...',
   RUNNING_UPLOADING_FILE: 'Uploading file...',
+} as const;
+//#endregion
+
+//#region UI Constants
+export const UI_CONSTANTS = {
+  MASONRY_STYLE: '.masonry .grid { overflow-x: unset; overflow-y: unset; }',
+  DOWNLOAD_CLEANUP_DELAY_MS: 1000,
 } as const;
 //#endregion

@@ -20,10 +20,15 @@ export const treeHandler = (e: CustomEvent<LfTreeEventPayload>, store: WorkflowS
           }
 
           const isLeaf = !node.children || node.children.length === 0;
-          if (isLeaf) {
+          const isHome = node.id === 'home';
+
+          if (isHome) {
+            state.mutate.view('home');
+          } else if (isLeaf) {
             state.mutate.workflow(node.id);
-            drawer.close();
           }
+
+          drawer.close();
           break;
         default:
           return;

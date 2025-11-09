@@ -11,7 +11,7 @@ import { WorkflowNodeResultPayload, WorkflowNodeResults, WorkflowRunStatus } fro
 import { WorkflowSectionController } from '../types/section';
 import { WorkflowRunEntry, WorkflowStore } from '../types/state';
 import { formatStatus, formatTimestamp, summarizeDetail } from '../utils/common';
-import { DEBUG_MESSAGES } from '../utils/constants';
+import { DEBUG_MESSAGES, UI_CONSTANTS } from '../utils/constants';
 import { debugLog } from '../utils/debug';
 import { MAIN_CLASSES } from './layout.main';
 
@@ -264,7 +264,7 @@ const _masonry = (store: WorkflowStore) => {
   const masonry = document.createElement('lf-masonry');
   masonry.className = OUTPUTS_CLASSES.masonry;
   masonry.lfShape = 'card';
-  masonry.lfStyle = '.masonry .grid { overflow-x: unset; overflow-y: unset; }'; // FIXME: Experimental
+  masonry.lfStyle = UI_CONSTANTS.MASONRY_STYLE;
   masonry.addEventListener('lf-masonry-event', (e) => masonryHandler(e, store));
 
   return masonry;

@@ -1,12 +1,11 @@
 import re
 
 from PIL import Image
-from server import PromptServer
 
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
+from ...utils.constants import FUNCTION, Input
 from ...utils.helpers.api import get_resource_url
-from ...utils.helpers.comfy import resolve_filepath
+from ...utils.helpers.comfy import resolve_filepath, safe_send_sync
 from ...utils.helpers.conversion import hex_to_tuple, pil_to_tensor
 from ...utils.helpers.logic import normalize_input_list, normalize_output_image
 from ...utils.helpers.temp_cache import TempFileCache
@@ -98,10 +97,9 @@ class LF_EmptyImage:
 
         image_batch, image_list = normalize_output_image(empty_images)
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}emptyimage", {
-            "node": kwargs.get("node_id"),
+        safe_send_sync("emptyimage", {
             "dataset": dataset,
-        })
+        }, kwargs.get("node_id"))
 
         return (image_batch[0], image_list)
 # endregion

@@ -1,10 +1,9 @@
 import random
 
-from server import PromptServer
-
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
+from ...utils.constants import FUNCTION, Input
 from ...utils.helpers.logic import normalize_list_to_value
+from ...utils.helpers.comfy import safe_send_sync
 
 # region LF_ResolutionSwitcher
 class LF_ResolutionSwitcher:
@@ -77,11 +76,10 @@ class LF_ResolutionSwitcher:
         width = landscape_width if is_landscape else portrait_width
         height = landscape_height if is_landscape else portrait_height
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}resolutionswitcher", {
-            "node": kwargs.get("node_id"),
+        safe_send_sync("resolutionswitcher", {
             "bool": is_landscape,
             "roll": random_value,
-        })
+        }, kwargs.get("node_id"))
 
         return (width, height, is_landscape)
 # endregion

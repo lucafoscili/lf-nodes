@@ -4,11 +4,9 @@ import folder_paths
 import random
 import torch
 
-from server import PromptServer
-
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, INT_MAX
-from ...utils.helpers.comfy import get_comfy_list
+from ...utils.constants import FUNCTION, Input, INT_MAX
+from ...utils.helpers.comfy import get_comfy_list, safe_send_sync
 from ...utils.helpers.logic import (
     build_is_changed_tuple,
     filter_list,
@@ -113,10 +111,9 @@ class LF_VAESelector:
         if enable_history:
             create_history_node(vae, nodes)
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}vaeselector", {
-            "node": kwargs.get("node_id"),
+        safe_send_sync("vaeselector", {
             "dataset": dataset,
-        })
+        }, kwargs.get("node_id"))
 
         return (vae, vae, vae_model)
 

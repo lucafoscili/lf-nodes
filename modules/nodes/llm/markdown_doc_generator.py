@@ -1,11 +1,10 @@
 import json
 import requests
 
-from server import PromptServer
-
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, HEADERS, Input, INT_MAX, get_doc_generator_system
+from ...utils.constants import FUNCTION, HEADERS, Input, INT_MAX, get_doc_generator_system
 from ...utils.helpers.api import handle_response
+from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.logic import normalize_list_to_value
 
 # region LF_MarkdownDocGenerator
@@ -103,10 +102,9 @@ class LF_MarkdownDocGenerator:
         if status_code != 200:
             message = f"Oops! Documentation generation failed with status code {status_code}."
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}markdowndocgenerator", {
-            "node": kwargs.get("node_id"),
+        safe_send_sync("markdowndocgenerator", {
             "value": message,
-        })
+        }, kwargs.get("node_id"))
 
         return (request, response_data, message, [message])
 # endregion

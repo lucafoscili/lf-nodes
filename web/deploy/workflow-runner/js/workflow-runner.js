@@ -1,17 +1,17 @@
-import "../../js/lf-widgets-core-DnP2v7ei.js";
-import { g as getLfFramework } from "../../js/lf-widgets-framework-C98FQqUU.js";
-import "../../js/lf-widgets-foundations-LHw4zrea.js";
+import "../../js/lf-widgets-core-DIEht-jK.js";
+import { g as getLfFramework } from "../../js/lf-widgets-framework-DcaHVr-f.js";
+import "../../js/lf-widgets-foundations-Bbv1isuU.js";
 const apiBase = "/api";
 const apiRoutePrefix = "/lf-nodes";
 const chat = { "provider": "kobold" };
-const staticPaths = { "assets": "/lf-nodes/static/assets/", "workflowRunner": "/lf-nodes/static-workflow-runner/" };
-const theme$9 = "dark";
+const staticPaths = { "assets": "/lf-nodes/static/assets/" };
+const theme$a = "dark";
 const runnerConfig = {
   apiBase,
   apiRoutePrefix,
   chat,
   staticPaths,
-  theme: theme$9
+  theme: theme$a
 };
 const API_BASE = runnerConfig.apiBase;
 const API_ROUTE_PREFIX = runnerConfig.apiRoutePrefix;
@@ -26,7 +26,6 @@ const DEFAULT_STATUS_MESSAGES = {
 };
 const DEFAULT_THEME = runnerConfig.theme;
 const STATIC_ASSETS_PATH = runnerConfig.staticPaths.assets;
-const STATIC_WORKFLOW_RUNNER_PATH = runnerConfig.staticPaths.workflowRunner;
 const buildApiUrl = (path) => `${API_ROOT}${path.startsWith("/") ? path : `/${path}`}`;
 const buildAssetsUrl = (origin = window.location.origin) => `${origin}${API_BASE}${STATIC_ASSETS_PATH.startsWith("/") ? STATIC_ASSETS_PATH : `/${STATIC_ASSETS_PATH}`}`;
 const addNotification = (store, notification) => {
@@ -101,6 +100,9 @@ const DEBUG_MESSAGES = {
   HEADER_DESTROYED: "Header section destroyed.",
   HEADER_MOUNTED: "Header section mounted.",
   HEADER_UPDATED: "Header section refreshed.",
+  HOME_DESTROYED: "Home section destroyed.",
+  HOME_MOUNTED: "Home section mounted.",
+  HOME_UPDATED: "Home section refreshed.",
   INPUTS_COLLECTED: "Collected workflow inputs.",
   MAIN_DESTROYED: "Main section destroyed.",
   MAIN_MOUNTED: "Main section mounted.",
@@ -141,6 +143,10 @@ const STATUS_MESSAGES = {
   RUNNING_SUBMITTING_WORKFLOW: "Submitting workflow...",
   RUNNING_UPLOADING_FILE: "Uploading file..."
 };
+const UI_CONSTANTS = {
+  MASONRY_STYLE: ".masonry .grid { overflow-x: unset; overflow-y: unset; }",
+  DOWNLOAD_CLEANUP_DELAY_MS: 1e3
+};
 const _formatContext = (context) => {
   if (context === void 0 || context === null) {
     return null;
@@ -178,10 +184,10 @@ ${formattedContext}` : message;
   } catch {
   }
 };
-const { theme: theme$8 } = getLfFramework();
-const ROOT_CLASS$8 = "action-button-section";
+const { theme: theme$9 } = getLfFramework();
+const ROOT_CLASS$9 = "action-button-section";
 const ACTION_BUTTON_CLASSES = {
-  _: theme$8.bemClass(ROOT_CLASS$8)
+  _: theme$9.bemClass(ROOT_CLASS$9)
 };
 const createActionButtonSection = (store) => {
   const { ACTION_BUTTON_DESTROYED, ACTION_BUTTON_MOUNTED, ACTION_BUTTON_UPDATED } = DEBUG_MESSAGES;
@@ -202,7 +208,7 @@ const createActionButtonSection = (store) => {
       return;
     }
     const _root = document.createElement("lf-button");
-    _root.className = theme$8.bemClass(ACTION_BUTTON_CLASSES._);
+    _root.className = theme$9.bemClass(ACTION_BUTTON_CLASSES._);
     _root.lfIcon = "send";
     _root.lfStyling = "floating";
     _root.title = "Run current workflow";
@@ -244,10 +250,13 @@ const treeHandler = (e, store) => {
             return;
           }
           const isLeaf = !node.children || node.children.length === 0;
-          if (isLeaf) {
+          const isHome = node.id === "home";
+          if (isHome) {
+            state.mutate.view("home");
+          } else if (isLeaf) {
             state.mutate.workflow(node.id);
-            drawer.close();
           }
+          drawer.close();
           break;
         default:
           return;
@@ -257,26 +266,26 @@ const treeHandler = (e, store) => {
       return;
   }
 };
-const { theme: theme$7 } = getLfFramework();
-const ROOT_CLASS$7 = "drawer-section";
+const { theme: theme$8 } = getLfFramework();
+const ROOT_CLASS$8 = "drawer-section";
 const DRAWER_CLASSES = {
-  _: theme$7.bemClass(ROOT_CLASS$7),
-  buttonComfyUi: theme$7.bemClass(ROOT_CLASS$7, "button-comfyui"),
-  buttonDebug: theme$7.bemClass(ROOT_CLASS$7, "button-debug"),
-  buttonGithub: theme$7.bemClass(ROOT_CLASS$7, "button-github"),
-  container: theme$7.bemClass(ROOT_CLASS$7, "container"),
-  footer: theme$7.bemClass(ROOT_CLASS$7, "footer"),
-  tree: theme$7.bemClass(ROOT_CLASS$7, "tree")
+  _: theme$8.bemClass(ROOT_CLASS$8),
+  buttonComfyUi: theme$8.bemClass(ROOT_CLASS$8, "button-comfyui"),
+  buttonDebug: theme$8.bemClass(ROOT_CLASS$8, "button-debug"),
+  buttonGithub: theme$8.bemClass(ROOT_CLASS$8, "button-github"),
+  container: theme$8.bemClass(ROOT_CLASS$8, "container"),
+  footer: theme$8.bemClass(ROOT_CLASS$8, "footer"),
+  tree: theme$8.bemClass(ROOT_CLASS$8, "tree")
 };
-const _createDataset$1 = (workflows) => {
-  var _a, _b;
+const _createDataset$2 = (workflows) => {
+  var _a;
+  const { article, listTree } = getLfFramework().theme.get.icons();
   const categories = [];
-  const root = { id: "workflows", value: "Workflows", children: categories };
+  const home = { icon: article, id: "home", value: "Home" };
+  const wfs = { icon: listTree, id: "workflows", value: "Workflows", children: categories };
   const clone = JSON.parse(JSON.stringify(workflows));
-  (_a = clone.nodes) == null ? void 0 : _a.forEach((child) => {
-    child.children = void 0;
-  });
-  (_b = clone.nodes) == null ? void 0 : _b.forEach((node) => {
+  (_a = clone.nodes) == null ? void 0 : _a.forEach((node) => {
+    node.children = void 0;
     const name = (node == null ? void 0 : node.category) || "Uncategorized";
     let category = categories.find((cat) => cat.value === name);
     if (!category) {
@@ -286,7 +295,7 @@ const _createDataset$1 = (workflows) => {
     category.children.push(node);
   });
   const dataset = {
-    nodes: [root]
+    nodes: [home, wfs]
   };
   categories.sort((a, b) => String(a.value).localeCompare(String(b.value)));
   return dataset;
@@ -366,7 +375,7 @@ const createDrawerSection = (store) => {
       return;
     }
     const _root = document.createElement("lf-drawer");
-    _root.className = ROOT_CLASS$7;
+    _root.className = ROOT_CLASS$8;
     _root.lfDisplay = "slide";
     const { comfyUi, debug, footer, github, container, tree } = _container$1(store);
     _root.appendChild(container);
@@ -392,7 +401,7 @@ const createDrawerSection = (store) => {
     const tree = elements[DRAWER_CLASSES.tree];
     debug.lfUiState = isDebug ? "warning" : "primary";
     debug.title = isDebug ? "Hide developer console" : "Show developer console";
-    tree.lfDataset = _createDataset$1(workflows);
+    tree.lfDataset = _createDataset$2(workflows);
     debugLog(DRAWER_UPDATED);
   };
   return {
@@ -548,16 +557,16 @@ const createOutputComponent = (descriptor) => {
   }
   return el;
 };
-const { theme: theme$6 } = getLfFramework();
-const ROOT_CLASS$6 = "header-section";
+const { theme: theme$7 } = getLfFramework();
+const ROOT_CLASS$7 = "header-section";
 const HEADER_CLASSES = {
-  _: theme$6.bemClass(ROOT_CLASS$6),
-  appMessage: theme$6.bemClass(ROOT_CLASS$6, "app-message"),
-  container: theme$6.bemClass(ROOT_CLASS$6, "container"),
-  drawerToggle: theme$6.bemClass(ROOT_CLASS$6, "drawer-toggle"),
-  serverIndicator: theme$6.bemClass(ROOT_CLASS$6, "server-indicator"),
-  serverIndicatorCounter: theme$6.bemClass(ROOT_CLASS$6, "server-indicator-counter"),
-  serverIndicatorLight: theme$6.bemClass(ROOT_CLASS$6, "server-indicator-light")
+  _: theme$7.bemClass(ROOT_CLASS$7),
+  appMessage: theme$7.bemClass(ROOT_CLASS$7, "app-message"),
+  container: theme$7.bemClass(ROOT_CLASS$7, "container"),
+  drawerToggle: theme$7.bemClass(ROOT_CLASS$7, "drawer-toggle"),
+  serverIndicator: theme$7.bemClass(ROOT_CLASS$7, "server-indicator"),
+  serverIndicatorCounter: theme$7.bemClass(ROOT_CLASS$7, "server-indicator-counter"),
+  serverIndicatorLight: theme$7.bemClass(ROOT_CLASS$7, "server-indicator-light")
 };
 const _appMessage = () => {
   const appMessage = document.createElement("div");
@@ -573,7 +582,7 @@ const _container = () => {
   return container;
 };
 const _drawerToggle = (store) => {
-  const lfIcon = theme$6.get.icon("menu2");
+  const lfIcon = theme$7.get.icon("menu2");
   const props = {
     lfAriaLabel: "Toggle drawer",
     lfIcon,
@@ -648,7 +657,7 @@ const createHeaderSection = (store) => {
     debugLog(HEADER_MOUNTED);
   };
   const render = () => {
-    const { alertTriangle, check, hourglassLow } = theme$6.get.icons();
+    const { alertTriangle, check, hourglassLow } = theme$7.get.icons();
     const { current, manager, queuedJobs, currentRunId } = store.getState();
     const { message, status } = current;
     const { uiRegistry } = manager;
@@ -721,29 +730,106 @@ const createHeaderSection = (store) => {
     render
   };
 };
-const masonryHandler = (e, store) => {
-  var _a, _b, _c;
-  const { comp, originalEvent } = e.detail;
-  const ogEvent = originalEvent;
-  const { manager } = store.getState();
-  if (comp.rootElement.className === OUTPUTS_CLASSES.masonry) {
-    switch ((_a = ogEvent == null ? void 0 : ogEvent.detail) == null ? void 0 : _a.eventType) {
-      case "click":
-        const card = ogEvent.detail.comp;
-        const node = (_c = (_b = card.lfDataset) == null ? void 0 : _b.nodes) == null ? void 0 : _c[0];
-        const isValidCard = (node == null ? void 0 : node.id) && card.rootElement.tagName.toLowerCase() === "lf-card";
-        if (isValidCard) {
-          const { id } = node;
-          manager.runs.select(id, "run");
-          const selected = manager.runs.get(id);
-          const selectedOutputs = JSON.parse(JSON.stringify(selected.outputs)) || null;
-          store.getState().mutate.results(selectedOutputs);
-        }
-        break;
-      default:
-        return;
+const DEFAULT_VIEW = "workflow";
+const SECTION_PRESETS = {
+  home: ["home"],
+  history: ["outputs"],
+  run: ["results"],
+  workflow: ["inputs", "outputs"]
+};
+const cloneSections = (sections) => sections.slice();
+const selectRunWithDefaults = (store, runId, clearResults2) => {
+  if (clearResults2 === void 0) {
+    selectRun(store, runId);
+  } else {
+    selectRun(store, runId, { clearResults: clearResults2 });
+  }
+};
+const resolveRunSections = (state) => {
+  const { runs, selectedRunId } = state;
+  if (selectedRunId && runs.some((run) => run.runId === selectedRunId)) {
+    return cloneSections(SECTION_PRESETS.run);
+  }
+  return [];
+};
+const buildWorkflowRoute = (state) => {
+  const workflowId = state.current.id ?? void 0;
+  return workflowId ? { view: "workflow", workflowId } : { view: "workflow" };
+};
+const VIEW_DEFINITIONS = {
+  //#region Home
+  home: {
+    sections: () => cloneSections(SECTION_PRESETS.home),
+    toRoute: () => ({ view: "home" }),
+    enter: (store, options) => {
+      selectRunWithDefaults(store, null, options.clearResults);
+      return "home";
+    }
+  },
+  //#endregion
+  //#region History
+  history: {
+    sections: () => cloneSections(SECTION_PRESETS.history),
+    toRoute: (state) => {
+      const workflowId = state.current.id ?? void 0;
+      return workflowId ? { view: "history", workflowId } : { view: "history" };
+    },
+    enter: (store, options) => {
+      selectRunWithDefaults(store, null, options.clearResults);
+      return "history";
+    }
+  },
+  //#endregion
+  //#region Run
+  run: {
+    sections: resolveRunSections,
+    toRoute: (state) => {
+      const workflowId = state.current.id ?? void 0;
+      const runId = state.selectedRunId ?? void 0;
+      if (runId) {
+        return { view: "run", runId, workflowId };
+      }
+      return VIEW_DEFINITIONS.workflow.toRoute(state);
+    },
+    enter: (store, options) => {
+      const requestedRunId = options.runId ?? null;
+      const state = store.getState();
+      const runId = requestedRunId ?? state.selectedRunId ?? null;
+      const hasRun = Boolean(runId && state.runs.some((run) => run.runId === runId));
+      if (!hasRun) {
+        selectRunWithDefaults(store, null, options.clearResults);
+        return "workflow";
+      }
+      selectRunWithDefaults(store, runId, options.clearResults);
+      return "run";
+    }
+  },
+  //#endregion
+  //#region Workflow
+  workflow: {
+    sections: () => cloneSections(SECTION_PRESETS.workflow),
+    toRoute: buildWorkflowRoute,
+    enter: (store, options) => {
+      selectRunWithDefaults(store, null, options.clearResults);
+      return "workflow";
     }
   }
+  //#endregion
+};
+const getViewDefinition = (view) => VIEW_DEFINITIONS[view] ?? VIEW_DEFINITIONS[DEFAULT_VIEW];
+const changeView = (store, view, options = {}) => {
+  const definition = getViewDefinition(view);
+  const resolvedView = definition.enter(store, options);
+  setView(store, resolvedView);
+  return resolvedView;
+};
+const resolveMainSections = (state) => {
+  const definition = getViewDefinition(state.view);
+  return definition.sections(state);
+};
+const computeRouteFromState = (state) => {
+  const definition = getViewDefinition(state.view);
+  return definition.toRoute(state);
 };
 const _tryParseJson = (value) => {
   try {
@@ -914,115 +1000,21 @@ const clearChildren = (element) => {
     element.removeChild(element.firstChild);
   }
 };
-const HOME_PLACEHOLDER = "Select a workflow to get started.";
-const DEFAULT_VIEW = "workflow";
-const SECTION_PRESETS = {
-  home: [],
-  history: ["outputs"],
-  run: ["results"],
-  workflow: ["inputs", "outputs"]
-};
-const cloneSections = (sections) => sections.slice();
-const selectRunWithDefaults = (store, runId, clearResults2) => {
-  if (clearResults2 === void 0) {
-    selectRun(store, runId);
-  } else {
-    selectRun(store, runId, { clearResults: clearResults2 });
-  }
-};
-const resolveRunSections = (state) => {
-  const { runs, selectedRunId } = state;
-  if (selectedRunId && runs.some((run) => run.runId === selectedRunId)) {
-    return cloneSections(SECTION_PRESETS.run);
-  }
-  return [];
-};
-const buildWorkflowRoute = (state) => {
-  const workflowId = state.current.id ?? void 0;
-  return workflowId ? { view: "workflow", workflowId } : { view: "workflow" };
-};
-const VIEW_DEFINITIONS = {
-  home: {
-    sections: () => cloneSections(SECTION_PRESETS.home),
-    toRoute: () => ({ view: "home" }),
-    enter: (store, options) => {
-      selectRunWithDefaults(store, null, options.clearResults);
-      return "home";
-    }
-  },
-  history: {
-    sections: () => cloneSections(SECTION_PRESETS.history),
-    toRoute: (state) => {
-      const workflowId = state.current.id ?? void 0;
-      return workflowId ? { view: "history", workflowId } : { view: "history" };
-    },
-    enter: (store, options) => {
-      selectRunWithDefaults(store, null, options.clearResults);
-      return "history";
-    }
-  },
-  run: {
-    sections: resolveRunSections,
-    toRoute: (state) => {
-      const workflowId = state.current.id ?? void 0;
-      const runId = state.selectedRunId ?? void 0;
-      if (runId) {
-        return { view: "run", runId, workflowId };
-      }
-      return VIEW_DEFINITIONS.workflow.toRoute(state);
-    },
-    enter: (store, options) => {
-      const requestedRunId = options.runId ?? null;
-      const state = store.getState();
-      const runId = requestedRunId ?? state.selectedRunId ?? null;
-      const hasRun = Boolean(runId && state.runs.some((run) => run.runId === runId));
-      if (!hasRun) {
-        selectRunWithDefaults(store, null, options.clearResults);
-        return "workflow";
-      }
-      selectRunWithDefaults(store, runId, options.clearResults);
-      return "run";
-    }
-  },
-  workflow: {
-    sections: () => cloneSections(SECTION_PRESETS.workflow),
-    toRoute: buildWorkflowRoute,
-    enter: (store, options) => {
-      selectRunWithDefaults(store, null, options.clearResults);
-      return "workflow";
-    }
-  }
-};
-const getViewDefinition = (view) => VIEW_DEFINITIONS[view] ?? VIEW_DEFINITIONS[DEFAULT_VIEW];
-const changeView = (store, view, options = {}) => {
-  const definition = getViewDefinition(view);
-  const resolvedView = definition.enter(store, options);
-  setView(store, resolvedView);
-  return resolvedView;
-};
-const resolveMainSections = (state) => {
-  const definition = getViewDefinition(state.view);
-  return definition.sections(state);
-};
-const computeRouteFromState = (state) => {
-  const definition = getViewDefinition(state.view);
-  return definition.toRoute(state);
-};
-const { theme: theme$5 } = getLfFramework();
-const ROOT_CLASS$5 = "results-section";
+const { theme: theme$6 } = getLfFramework();
+const ROOT_CLASS$6 = "results-section";
 const RESULTS_CLASSES = {
-  _: theme$5.bemClass(ROOT_CLASS$5),
-  actions: theme$5.bemClass(ROOT_CLASS$5, "actions"),
-  back: theme$5.bemClass(ROOT_CLASS$5, "back"),
-  description: theme$5.bemClass(ROOT_CLASS$5, "description"),
-  empty: theme$5.bemClass(ROOT_CLASS$5, "empty"),
-  grid: theme$5.bemClass(ROOT_CLASS$5, "grid"),
-  h3: theme$5.bemClass(ROOT_CLASS$5, "title-h3"),
-  history: theme$5.bemClass(ROOT_CLASS$5, "history"),
-  item: theme$5.bemClass(ROOT_CLASS$5, "item"),
-  results: theme$5.bemClass(ROOT_CLASS$5, "results"),
-  subtitle: theme$5.bemClass(ROOT_CLASS$5, "subtitle"),
-  title: theme$5.bemClass(ROOT_CLASS$5, "title")
+  _: theme$6.bemClass(ROOT_CLASS$6),
+  actions: theme$6.bemClass(ROOT_CLASS$6, "actions"),
+  back: theme$6.bemClass(ROOT_CLASS$6, "back"),
+  description: theme$6.bemClass(ROOT_CLASS$6, "description"),
+  empty: theme$6.bemClass(ROOT_CLASS$6, "empty"),
+  grid: theme$6.bemClass(ROOT_CLASS$6, "grid"),
+  h3: theme$6.bemClass(ROOT_CLASS$6, "title-h3"),
+  history: theme$6.bemClass(ROOT_CLASS$6, "history"),
+  item: theme$6.bemClass(ROOT_CLASS$6, "item"),
+  results: theme$6.bemClass(ROOT_CLASS$6, "results"),
+  subtitle: theme$6.bemClass(ROOT_CLASS$6, "subtitle"),
+  title: theme$6.bemClass(ROOT_CLASS$6, "title")
 };
 const _formatDescription = (selectedRun, description) => {
   if (!selectedRun) {
@@ -1031,7 +1023,7 @@ const _formatDescription = (selectedRun, description) => {
   const timestamp = selectedRun.updatedAt || selectedRun.createdAt;
   return `Run ${selectedRun.runId.slice(0, 8)} - ${formatStatus(selectedRun.status)} - ${formatTimestamp(timestamp)}`;
 };
-const _description$1 = () => {
+const _description$2 = () => {
   const p = document.createElement("p");
   p.className = RESULTS_CLASSES.description;
   return p;
@@ -1041,8 +1033,8 @@ const _results = () => {
   cellWrapper.className = RESULTS_CLASSES.results;
   return cellWrapper;
 };
-const _title$2 = (store) => {
-  const { arrowBack, folder } = theme$5.get.icons();
+const _title$3 = (store) => {
+  const { arrowBack, folder } = theme$6.get.icons();
   const { manager } = store.getState();
   const title = document.createElement("div");
   title.className = RESULTS_CLASSES.title;
@@ -1093,8 +1085,8 @@ const createResultsSection = (store) => {
     const _root = document.createElement("section");
     _root.className = RESULTS_CLASSES._;
     const results = _results();
-    const description = _description$1();
-    const { actions, backButton, h3, historyButton, title } = _title$2(store);
+    const description = _description$2();
+    const { actions, backButton, h3, historyButton, title } = _title$3(store);
     _root.appendChild(title);
     _root.appendChild(description);
     _root.appendChild(results);
@@ -1194,18 +1186,20 @@ const createResultsSection = (store) => {
     render
   };
 };
-const { theme: theme$4 } = getLfFramework();
-const ROOT_CLASS$4 = "main-section";
+const { theme: theme$5 } = getLfFramework();
+const ROOT_CLASS$5 = "main-section";
 const MAIN_CLASSES = {
-  _: theme$4.bemClass(ROOT_CLASS$4),
-  home: theme$4.bemClass(ROOT_CLASS$4, "home")
+  _: theme$5.bemClass(ROOT_CLASS$5),
+  home: theme$5.bemClass(ROOT_CLASS$5, "home")
 };
 const createMainSection = (store) => {
   const { MAIN_DESTROYED, MAIN_MOUNTED, MAIN_UPDATED } = DEBUG_MESSAGES;
+  const HOME = createHomeSection(store);
   const INPUTS = createInputsSection(store);
   const OUTPUTS = createOutputsSection(store);
   const RESULTS = createResultsSection(store);
   const SECTION_CONTROLLERS = {
+    home: HOME,
     inputs: INPUTS,
     outputs: OUTPUTS,
     results: RESULTS
@@ -1227,7 +1221,7 @@ const createMainSection = (store) => {
       return;
     }
     const _root = document.createElement("main");
-    _root.className = ROOT_CLASS$4;
+    _root.className = ROOT_CLASS$5;
     manager.getAppRoot().appendChild(_root);
     uiRegistry.set(MAIN_CLASSES._, _root);
     debugLog(MAIN_MOUNTED);
@@ -1268,19 +1262,6 @@ const createMainSection = (store) => {
       }
       controller.render();
     });
-    if (resolvedSections.length === 0) {
-      if (!elements[MAIN_CLASSES.home]) {
-        const placeholder = document.createElement("div");
-        placeholder.className = MAIN_CLASSES.home;
-        placeholder.textContent = HOME_PLACEHOLDER;
-        if (root) {
-          root.appendChild(placeholder);
-          uiRegistry.set(MAIN_CLASSES.home, placeholder);
-        }
-      }
-    } else {
-      uiRegistry.remove(MAIN_CLASSES.home);
-    }
     LAST_SCOPE = Array.from(scopeSet);
     LAST_WORKFLOW_ID = workflowId;
     debugLog(MAIN_UPDATED);
@@ -1290,6 +1271,165 @@ const createMainSection = (store) => {
     mount,
     render
   };
+};
+const { theme: theme$4 } = getLfFramework();
+const ROOT_CLASS$4 = "home-section";
+const HOME_CLASSES = {
+  _: theme$4.bemClass(ROOT_CLASS$4),
+  description: theme$4.bemClass(ROOT_CLASS$4, "description"),
+  h1: theme$4.bemClass(ROOT_CLASS$4, "title-h1"),
+  masonry: theme$4.bemClass(ROOT_CLASS$4, "masonry"),
+  title: theme$4.bemClass(ROOT_CLASS$4, "title")
+};
+const _createDataset$1 = (store) => {
+  var _a;
+  const { workflows } = store.getState();
+  const clone = JSON.parse(JSON.stringify(workflows));
+  const root = { cells: {}, id: "root", value: "Workflows" };
+  (_a = clone.nodes) == null ? void 0 : _a.forEach((node) => {
+    const id = node.id;
+    root.cells[id] = {
+      lfDataset: {
+        nodes: [
+          {
+            cells: {
+              "1": {
+                value: String(node.value)
+              },
+              "2": {
+                value: node.category
+              },
+              "3": {
+                value: node.description
+              }
+            },
+            id
+          }
+        ]
+      },
+      shape: "card",
+      value: ""
+    };
+  });
+  const dataset = {
+    nodes: [root]
+  };
+  return dataset;
+};
+const _masonry$1 = (store) => {
+  const masonry = document.createElement("lf-masonry");
+  masonry.className = HOME_CLASSES.masonry;
+  masonry.lfShape = "card";
+  masonry.lfStyle = UI_CONSTANTS.MASONRY_STYLE;
+  masonry.addEventListener("lf-masonry-event", (e) => masonryHandler(e, store));
+  return masonry;
+};
+const _description$1 = () => {
+  const p = document.createElement("p");
+  p.className = HOME_CLASSES.description;
+  p.textContent = "Below a list of the available workflows.";
+  return p;
+};
+const _title$2 = () => {
+  const title = document.createElement("div");
+  const h1 = document.createElement("h1");
+  title.className = HOME_CLASSES.title;
+  h1.className = HOME_CLASSES.h1;
+  h1.textContent = "Workflow Runner";
+  title.appendChild(h1);
+  return { h1, title };
+};
+const createHomeSection = (store) => {
+  const { HOME_DESTROYED, HOME_MOUNTED, HOME_UPDATED } = DEBUG_MESSAGES;
+  const destroy = () => {
+    const { manager } = store.getState();
+    const { uiRegistry } = manager;
+    for (const cls in HOME_CLASSES) {
+      const element = HOME_CLASSES[cls];
+      uiRegistry.remove(element);
+    }
+    debugLog(HOME_DESTROYED);
+  };
+  const mount = () => {
+    const { manager } = store.getState();
+    const { uiRegistry } = manager;
+    const elements = uiRegistry.get();
+    if (elements && elements[HOME_CLASSES._]) {
+      return;
+    }
+    const _root = document.createElement("section");
+    _root.className = HOME_CLASSES._;
+    const description = _description$1();
+    const masonry = _masonry$1(store);
+    const { h1, title } = _title$2();
+    _root.appendChild(title);
+    _root.appendChild(description);
+    _root.appendChild(masonry);
+    elements[MAIN_CLASSES._].prepend(_root);
+    uiRegistry.set(HOME_CLASSES._, _root);
+    uiRegistry.set(HOME_CLASSES.description, description);
+    uiRegistry.set(HOME_CLASSES.h1, h1);
+    uiRegistry.set(HOME_CLASSES.masonry, masonry);
+    uiRegistry.set(HOME_CLASSES.title, title);
+    debugLog(HOME_MOUNTED);
+  };
+  const render = () => {
+    const state = store.getState();
+    const { manager } = state;
+    const { uiRegistry } = manager;
+    const elements = uiRegistry.get();
+    if (!elements) {
+      return;
+    }
+    const masonry = elements[HOME_CLASSES.masonry];
+    masonry.lfDataset = _createDataset$1(store);
+    debugLog(HOME_UPDATED);
+  };
+  return {
+    destroy,
+    mount,
+    render
+  };
+};
+const masonryHandler = (e, store) => {
+  var _a, _b, _c, _d, _e, _f;
+  const { comp, originalEvent } = e.detail;
+  const ogEvent = originalEvent;
+  const { manager, mutate } = store.getState();
+  if (comp.rootElement.className === OUTPUTS_CLASSES.masonry) {
+    switch ((_a = ogEvent == null ? void 0 : ogEvent.detail) == null ? void 0 : _a.eventType) {
+      case "click":
+        const card = ogEvent.detail.comp;
+        const node = (_c = (_b = card.lfDataset) == null ? void 0 : _b.nodes) == null ? void 0 : _c[0];
+        const isValidCard = (node == null ? void 0 : node.id) && card.rootElement.tagName.toLowerCase() === "lf-card";
+        if (isValidCard) {
+          const { id } = node;
+          manager.runs.select(id, "run");
+          const selected = manager.runs.get(id);
+          const selectedOutputs = JSON.parse(JSON.stringify(selected.outputs)) || null;
+          store.getState().mutate.results(selectedOutputs);
+        }
+        break;
+      default:
+        return;
+    }
+  }
+  if (comp.rootElement.className === HOME_CLASSES.masonry) {
+    switch ((_d = ogEvent == null ? void 0 : ogEvent.detail) == null ? void 0 : _d.eventType) {
+      case "click":
+        const card = ogEvent.detail.comp;
+        const node = (_f = (_e = card.lfDataset) == null ? void 0 : _e.nodes) == null ? void 0 : _f[0];
+        const isValidCard = (node == null ? void 0 : node.id) && card.rootElement.tagName.toLowerCase() === "lf-card";
+        if (isValidCard) {
+          const { id } = node;
+          mutate.workflow(id);
+          setView(store, "workflow");
+        }
+        break;
+      default:
+        return;
+    }
+  }
 };
 const { theme: theme$3 } = getLfFramework();
 const ROOT_CLASS$3 = "outputs-section";
@@ -1508,7 +1648,7 @@ const _masonry = (store) => {
   const masonry = document.createElement("lf-masonry");
   masonry.className = OUTPUTS_CLASSES.masonry;
   masonry.lfShape = "card";
-  masonry.lfStyle = ".masonry .grid { overflow-x: unset; overflow-y: unset; }";
+  masonry.lfStyle = UI_CONSTANTS.MASONRY_STYLE;
   masonry.addEventListener("lf-masonry-event", (e) => masonryHandler(e, store));
   return masonry;
 };
@@ -1809,7 +1949,7 @@ const fetchWorkflowDefinitions = async () => {
   const response = await fetch(buildApiUrl("/workflows"), { method: "GET" });
   if (response.status === 401) {
     try {
-      window.location.href = `${window.location.origin}${API_BASE}${STATIC_WORKFLOW_RUNNER_PATH}login.html`;
+      window.location.href = `${window.location.origin}${API_BASE}/workflow-runner`;
     } catch (err) {
     }
     throw new WorkflowApiError("Unauthorized", { status: 401 });
@@ -1829,7 +1969,7 @@ const fetchWorkflowJSON = async (workflowId) => {
   const response = await fetch(buildApiUrl(`/workflows/${workflowId}`), { method: "GET" });
   if (response.status === 401) {
     try {
-      window.location.href = `${window.location.origin}${API_BASE}${STATIC_WORKFLOW_RUNNER_PATH}login.html`;
+      window.location.href = `${window.location.origin}${API_BASE}/workflow-runner`;
     } catch (err) {
     }
     throw new WorkflowApiError("Unauthorized", { status: 401 });
@@ -1851,7 +1991,7 @@ const runWorkflow = async (payload) => {
   });
   if (response.status === 401) {
     try {
-      window.location.href = `${window.location.origin}${API_BASE}${STATIC_WORKFLOW_RUNNER_PATH}login.html`;
+      window.location.href = `${window.location.origin}${API_BASE}/workflow-runner`;
     } catch (err) {
     }
     throw new WorkflowApiError("Unauthorized", { status: 401 });
@@ -1890,7 +2030,7 @@ const uploadWorkflowFiles = async (files) => {
   });
   if (response.status === 401) {
     try {
-      window.location.href = `${window.location.origin}${API_BASE}${STATIC_WORKFLOW_RUNNER_PATH}login.html`;
+      window.location.href = `${window.location.origin}${API_BASE}/workflow-runner`;
     } catch (err) {
     }
     throw new WorkflowApiError("Unauthorized", { status: 401 });
@@ -2228,7 +2368,7 @@ const createNotificationsSection = (store) => {
         uiRegistry.remove(uid);
         _checkForVisible(_root);
       };
-      element.lfIcon = status === "danger" ? theme.get.icon("alertTriangle") : theme.get.icon("infoHexagon");
+      element.lfIcon = status === "danger" ? theme.get.icon("alertTriangle") : theme.get.icon("hexagonInfo");
       element.lfMessage = message;
       element.lfUiState = _getStateCategory(status);
       element.lfTimer = status === "danger" ? 5e3 : 2500;
@@ -2259,24 +2399,33 @@ var __classPrivateFieldGet$1 = function(receiver, state, kind, f) {
   if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 };
-var _WorkflowRunnerClient_ES, _WorkflowRunnerClient_STORE, _WorkflowRunnerClient_WORKFLOW_NAMES;
+var _WorkflowRunnerClient_ES, _WorkflowRunnerClient_STORE, _WorkflowRunnerClient_WORKFLOW_NAMES, _WorkflowRunnerClient_CACHE_KEY, _WorkflowRunnerClient_CACHE_EXPIRY_MS, _WorkflowRunnerClient_INITIAL_BACKOFF_MS, _WorkflowRunnerClient_MAX_BACKOFF_MS, _WorkflowRunnerClient_POLLING_INTERVAL_MS, _WorkflowRunnerClient_RUNS_QUERY_LIMIT, _WorkflowRunnerClient_EVENT_RUN, _WorkflowRunnerClient_EVENT_QUEUE, _WorkflowRunnerClient_LAST_SEQ, _WorkflowRunnerClient_RUNS, _WorkflowRunnerClient_WORKFLOW_CACHE, _WorkflowRunnerClient_STATE, _WorkflowRunnerClient_POLLING, _WorkflowRunnerClient_BACKOFF_MS, _WorkflowRunnerClient_INFLIGHT_RECONCILES;
 class WorkflowRunnerClient {
   constructor(store) {
     _WorkflowRunnerClient_ES.set(this, null);
     _WorkflowRunnerClient_STORE.set(this, void 0);
     _WorkflowRunnerClient_WORKFLOW_NAMES.set(this, {});
-    this.lastSeq = /* @__PURE__ */ new Map();
-    this.runs = /* @__PURE__ */ new Map();
-    this.workflowNames = /* @__PURE__ */ new Map();
-    this.pollingInterval = 3e3;
-    this.pollingTimer = null;
-    this.pollAbortController = null;
-    this.backoffMs = 1e3;
-    this.maxBackoffMs = 3e4;
-    this.connecting = false;
-    this.processingSnapshot = false;
-    this.cacheKey = "lf-runs-cache";
-    this.inflightReconciles = /* @__PURE__ */ new Map();
+    _WorkflowRunnerClient_CACHE_KEY.set(this, "lf-runs-cache");
+    _WorkflowRunnerClient_CACHE_EXPIRY_MS.set(this, 60 * 60 * 1e3);
+    _WorkflowRunnerClient_INITIAL_BACKOFF_MS.set(this, 1e3);
+    _WorkflowRunnerClient_MAX_BACKOFF_MS.set(this, 3e4);
+    _WorkflowRunnerClient_POLLING_INTERVAL_MS.set(this, 3e3);
+    _WorkflowRunnerClient_RUNS_QUERY_LIMIT.set(this, 200);
+    _WorkflowRunnerClient_EVENT_RUN.set(this, "run");
+    _WorkflowRunnerClient_EVENT_QUEUE.set(this, "queue");
+    _WorkflowRunnerClient_LAST_SEQ.set(this, /* @__PURE__ */ new Map());
+    _WorkflowRunnerClient_RUNS.set(this, /* @__PURE__ */ new Map());
+    _WorkflowRunnerClient_WORKFLOW_CACHE.set(this, /* @__PURE__ */ new Map());
+    _WorkflowRunnerClient_STATE.set(this, {
+      connecting: false,
+      processingSnapshot: false
+    });
+    _WorkflowRunnerClient_POLLING.set(this, {
+      timer: null,
+      abortController: null
+    });
+    _WorkflowRunnerClient_BACKOFF_MS.set(this, 1e3);
+    _WorkflowRunnerClient_INFLIGHT_RECONCILES.set(this, /* @__PURE__ */ new Map());
     this.onUpdate = (runs) => {
       var _a;
       if (Object.keys(__classPrivateFieldGet$1(this, _WorkflowRunnerClient_WORKFLOW_NAMES, "f")).length === 0) {
@@ -2303,34 +2452,28 @@ class WorkflowRunnerClient {
     };
     __classPrivateFieldSet$1(this, _WorkflowRunnerClient_STORE, store, "f");
   }
-  setUpdateHandler(h) {
-    this.onUpdate = h;
-  }
-  setQueueHandler(h) {
-    this.queueHandler = h;
-  }
   // Preload workflow names to avoid fetching them individually
   setWorkflowNames(names) {
     for (const [id, name] of names) {
-      this.workflowNames.set(id, name);
+      __classPrivateFieldGet$1(this, _WorkflowRunnerClient_WORKFLOW_CACHE, "f").set(id, name);
     }
     this.emitUpdate();
   }
   emitUpdate() {
     if (this.onUpdate)
-      this.onUpdate(new Map(this.runs));
+      this.onUpdate(new Map(__classPrivateFieldGet$1(this, _WorkflowRunnerClient_RUNS, "f")));
     this.saveCache();
   }
   // Reconcile server record for a run via REST (de-duplicated)
   reconcileRun(run_id) {
-    if (this.inflightReconciles.has(run_id)) {
+    if (__classPrivateFieldGet$1(this, _WorkflowRunnerClient_INFLIGHT_RECONCILES, "f").has(run_id)) {
       return;
     }
     const promise = this._reconcileRunOnce(run_id).catch(() => {
     }).finally(() => {
-      this.inflightReconciles.delete(run_id);
+      __classPrivateFieldGet$1(this, _WorkflowRunnerClient_INFLIGHT_RECONCILES, "f").delete(run_id);
     });
-    this.inflightReconciles.set(run_id, promise);
+    __classPrivateFieldGet$1(this, _WorkflowRunnerClient_INFLIGHT_RECONCILES, "f").set(run_id, promise);
   }
   async _reconcileRunOnce(run_id) {
     try {
@@ -2368,7 +2511,7 @@ class WorkflowRunnerClient {
       debugLog("applyEvent: invalid run record (missing run_id or status)", "warning", ev);
       return;
     }
-    const last = this.lastSeq.get(ev.run_id) ?? -1;
+    const last = __classPrivateFieldGet$1(this, _WorkflowRunnerClient_LAST_SEQ, "f").get(ev.run_id) ?? -1;
     if (last >= 0 && ev.seq > last + 1) {
       this.reconcileRun(ev.run_id);
     }
@@ -2376,20 +2519,20 @@ class WorkflowRunnerClient {
   }
   // Upsert with seq monotonicity guard and workflow name fetch
   upsertRun(rec) {
-    const last = this.lastSeq.get(rec.run_id) ?? -1;
+    const last = __classPrivateFieldGet$1(this, _WorkflowRunnerClient_LAST_SEQ, "f").get(rec.run_id) ?? -1;
     if (rec.seq <= last)
       return;
-    this.lastSeq.set(rec.run_id, rec.seq);
-    this.runs.set(rec.run_id, rec);
-    if (rec.workflow_id && !this.workflowNames.has(rec.workflow_id)) {
+    __classPrivateFieldGet$1(this, _WorkflowRunnerClient_LAST_SEQ, "f").set(rec.run_id, rec.seq);
+    __classPrivateFieldGet$1(this, _WorkflowRunnerClient_RUNS, "f").set(rec.run_id, rec);
+    if (rec.workflow_id && !__classPrivateFieldGet$1(this, _WorkflowRunnerClient_WORKFLOW_CACHE, "f").has(rec.workflow_id)) {
       this.fetchWorkflowNames([rec.workflow_id]);
     }
     this.emitUpdate();
   }
   // Remove a run completely from state and cache (used when server returns 404)
   removeRun(runId) {
-    this.runs.delete(runId);
-    this.lastSeq.delete(runId);
+    __classPrivateFieldGet$1(this, _WorkflowRunnerClient_RUNS, "f").delete(runId);
+    __classPrivateFieldGet$1(this, _WorkflowRunnerClient_LAST_SEQ, "f").delete(runId);
     this.emitUpdate();
   }
   processSnapshotArray(arr) {
@@ -2402,12 +2545,12 @@ class WorkflowRunnerClient {
         continue;
       }
       activeSet.add(s.run_id);
-      const last = this.lastSeq.get(s.run_id) ?? -1;
+      const last = __classPrivateFieldGet$1(this, _WorkflowRunnerClient_LAST_SEQ, "f").get(s.run_id) ?? -1;
       if (s.seq <= last)
         continue;
-      this.lastSeq.set(s.run_id, s.seq);
-      this.runs.set(s.run_id, s);
-      if (s.workflow_id && !this.workflowNames.has(s.workflow_id)) {
+      __classPrivateFieldGet$1(this, _WorkflowRunnerClient_LAST_SEQ, "f").set(s.run_id, s.seq);
+      __classPrivateFieldGet$1(this, _WorkflowRunnerClient_RUNS, "f").set(s.run_id, s);
+      if (s.workflow_id && !__classPrivateFieldGet$1(this, _WorkflowRunnerClient_WORKFLOW_CACHE, "f").has(s.workflow_id)) {
         missingWorkflowIds.add(s.workflow_id);
       }
       if (!s.workflow_id) {
@@ -2418,7 +2561,7 @@ class WorkflowRunnerClient {
     (async () => {
       try {
         const toReconcile = [];
-        for (const [id, rec] of this.runs.entries()) {
+        for (const [id, rec] of __classPrivateFieldGet$1(this, _WorkflowRunnerClient_RUNS, "f").entries()) {
           if (rec.status === "running" && !activeSet.has(id)) {
             toReconcile.push(id);
           }
@@ -2444,7 +2587,7 @@ class WorkflowRunnerClient {
   }
   // Fetch human-friendly workflow names for given ids and cache them
   async fetchWorkflowNames(ids) {
-    const needs = ids.filter((id) => !!id && !this.workflowNames.has(id));
+    const needs = ids.filter((id) => !!id && !__classPrivateFieldGet$1(this, _WorkflowRunnerClient_WORKFLOW_CACHE, "f").has(id));
     if (needs.length === 0)
       return;
     try {
@@ -2494,7 +2637,7 @@ class WorkflowRunnerClient {
           const id = it.workflow_id ?? it.id ?? it.workflowId ?? it.key;
           const name = it.name ?? it.title ?? it.workflow_name ?? it.value ?? null;
           if (id && name)
-            this.workflowNames.set(id, name);
+            __classPrivateFieldGet$1(this, _WorkflowRunnerClient_WORKFLOW_CACHE, "f").set(id, name);
         } catch (e) {
           debugLog("fetchWorkflowNames: skipping malformed item", "warning", e);
         }
@@ -2509,14 +2652,14 @@ class WorkflowRunnerClient {
     try {
       if (typeof localStorage === "undefined")
         return;
-      const ids = Array.from(this.runs.keys());
+      const ids = Array.from(__classPrivateFieldGet$1(this, _WorkflowRunnerClient_RUNS, "f").keys());
       const payload = {
         version: 1,
         cached_at: Date.now(),
         run_ids: ids.slice(-300)
         // cap to recent 300 runs
       };
-      localStorage.setItem(this.cacheKey, JSON.stringify(payload));
+      localStorage.setItem(__classPrivateFieldGet$1(this, _WorkflowRunnerClient_CACHE_KEY, "f"), JSON.stringify(payload));
     } catch (e) {
       debugLog("LocalStorage write skipped", "warning", e);
     }
@@ -2526,14 +2669,14 @@ class WorkflowRunnerClient {
     try {
       if (typeof localStorage === "undefined")
         return [];
-      const raw = localStorage.getItem(this.cacheKey);
+      const raw = localStorage.getItem(__classPrivateFieldGet$1(this, _WorkflowRunnerClient_CACHE_KEY, "f"));
       if (!raw)
         return [];
       const parsed = JSON.parse(raw);
       if (parsed.version !== 1)
         return [];
       const cacheAge = Date.now() - (parsed.cached_at ?? 0);
-      if (cacheAge > 60 * 60 * 1e3)
+      if (cacheAge > __classPrivateFieldGet$1(this, _WorkflowRunnerClient_CACHE_EXPIRY_MS, "f"))
         return [];
       return Array.isArray(parsed.run_ids) ? parsed.run_ids : [];
     } catch (e) {
@@ -2544,8 +2687,8 @@ class WorkflowRunnerClient {
   // Seed placeholder entries for optimistic UI (hydrated later)
   seedPlaceholders(ids) {
     for (const id of ids) {
-      if (!this.runs.has(id)) {
-        this.runs.set(id, {
+      if (!__classPrivateFieldGet$1(this, _WorkflowRunnerClient_RUNS, "f").has(id)) {
+        __classPrivateFieldGet$1(this, _WorkflowRunnerClient_RUNS, "f").set(id, {
           run_id: id,
           status: "pending",
           // placeholder status; harmless until hydrated
@@ -2563,11 +2706,7 @@ class WorkflowRunnerClient {
   // Cold-load runs from server before SSE connection (restores state after refresh)
   async coldLoadRuns() {
     try {
-      const resp = await fetch(
-        `${API_ROOT}/workflow-runner/runs?status=pending,running,succeeded,failed,cancelled,timeout&owner=me&limit=200`,
-        // FIXME: make configurable, use constants
-        { credentials: "include" }
-      );
+      const resp = await fetch(`${API_ROOT}/workflow-runner/runs?status=pending,running,succeeded,failed,cancelled,timeout&owner=me&limit=${__classPrivateFieldGet$1(this, _WorkflowRunnerClient_RUNS_QUERY_LIMIT, "f")}`, { credentials: "include" });
       if (!resp || !resp.ok) {
         debugLog("coldLoadRuns: fetch failed", "informational", resp == null ? void 0 : resp.status);
         return;
@@ -2576,7 +2715,7 @@ class WorkflowRunnerClient {
       const arr = data.runs || [];
       const serverIds = new Set(arr.map((r) => r.run_id));
       this.processSnapshotArray(arr);
-      for (const localId of Array.from(this.runs.keys())) {
+      for (const localId of Array.from(__classPrivateFieldGet$1(this, _WorkflowRunnerClient_RUNS, "f").keys())) {
         if (!serverIds.has(localId)) {
           this.reconcileRun(localId);
         }
@@ -2587,17 +2726,17 @@ class WorkflowRunnerClient {
   }
   //#region SSE Connection
   async start() {
-    if (__classPrivateFieldGet$1(this, _WorkflowRunnerClient_ES, "f") || this.connecting) {
+    if (__classPrivateFieldGet$1(this, _WorkflowRunnerClient_ES, "f") || __classPrivateFieldGet$1(this, _WorkflowRunnerClient_STATE, "f").connecting) {
       return;
     }
-    this.connecting = true;
+    __classPrivateFieldGet$1(this, _WorkflowRunnerClient_STATE, "f").connecting = true;
     const cachedIds = this.loadCacheIds();
     if (cachedIds.length > 0) {
       this.seedPlaceholders(cachedIds);
     }
     await this.coldLoadRuns();
-    const serverIds = new Set(Array.from(this.runs.keys()).filter((id) => {
-      const run = this.runs.get(id);
+    const serverIds = new Set(Array.from(__classPrivateFieldGet$1(this, _WorkflowRunnerClient_RUNS, "f").keys()).filter((id) => {
+      const run = __classPrivateFieldGet$1(this, _WorkflowRunnerClient_RUNS, "f").get(id);
       return run && run.seq >= 0;
     }));
     for (const id of cachedIds) {
@@ -2633,26 +2772,26 @@ class WorkflowRunnerClient {
           } catch (err) {
             debugLog("invalid generic event message", "informational", err);
           }
-          if (this.processingSnapshot) {
-            this.processingSnapshot = false;
+          if (__classPrivateFieldGet$1(this, _WorkflowRunnerClient_STATE, "f").processingSnapshot) {
+            __classPrivateFieldGet$1(this, _WorkflowRunnerClient_STATE, "f").processingSnapshot = false;
           }
         };
       }
     } catch (e) {
       debugLog("EventSource onmessage assignment failed", "informational", e);
     }
-    this.processingSnapshot = true;
+    __classPrivateFieldGet$1(this, _WorkflowRunnerClient_STATE, "f").processingSnapshot = true;
     __classPrivateFieldGet$1(this, _WorkflowRunnerClient_ES, "f").onopen = () => {
-      this.backoffMs = 1e3;
-      if (this.pollingTimer) {
-        clearInterval(this.pollingTimer);
-        this.pollingTimer = null;
-        if (this.pollAbortController) {
+      __classPrivateFieldSet$1(this, _WorkflowRunnerClient_BACKOFF_MS, __classPrivateFieldGet$1(this, _WorkflowRunnerClient_INITIAL_BACKOFF_MS, "f"), "f");
+      if (__classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").timer) {
+        clearInterval(__classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").timer);
+        __classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").timer = null;
+        if (__classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").abortController) {
           try {
-            this.pollAbortController.abort();
+            __classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").abortController.abort();
           } catch {
           }
-          this.pollAbortController = null;
+          __classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").abortController = null;
         }
       }
     };
@@ -2668,9 +2807,8 @@ class WorkflowRunnerClient {
       this.startPollingFallback();
       const delay = this.backoffWithJitter();
       setTimeout(() => this.start(), delay);
-      this.backoffMs = Math.min(this.backoffMs * 2, this.maxBackoffMs);
     };
-    __classPrivateFieldGet$1(this, _WorkflowRunnerClient_ES, "f").addEventListener("run", (e) => {
+    __classPrivateFieldGet$1(this, _WorkflowRunnerClient_ES, "f").addEventListener(__classPrivateFieldGet$1(this, _WorkflowRunnerClient_EVENT_RUN, "f"), (e) => {
       try {
         const payload = JSON.parse(e.data);
         this.applyEvent({
@@ -2688,7 +2826,7 @@ class WorkflowRunnerClient {
         debugLog("Invalid run event", "warning", err);
       }
     });
-    __classPrivateFieldGet$1(this, _WorkflowRunnerClient_ES, "f").addEventListener("queue", (e) => {
+    __classPrivateFieldGet$1(this, _WorkflowRunnerClient_ES, "f").addEventListener(__classPrivateFieldGet$1(this, _WorkflowRunnerClient_EVENT_QUEUE, "f"), (e) => {
       try {
         const payload = JSON.parse(e.data);
         this.handleQueuePayload(payload);
@@ -2696,7 +2834,7 @@ class WorkflowRunnerClient {
         debugLog("Invalid queue event", "warning", err);
       }
     });
-    this.connecting = false;
+    __classPrivateFieldGet$1(this, _WorkflowRunnerClient_STATE, "f").connecting = false;
   }
   handleQueuePayload(payload) {
     if (!payload) {
@@ -2745,8 +2883,8 @@ class WorkflowRunnerClient {
             });
           } catch (err) {
           }
-          if (this.processingSnapshot) {
-            this.processingSnapshot = false;
+          if (__classPrivateFieldGet$1(this, _WorkflowRunnerClient_STATE, "f").processingSnapshot) {
+            __classPrivateFieldGet$1(this, _WorkflowRunnerClient_STATE, "f").processingSnapshot = false;
           }
         };
       }
@@ -2762,45 +2900,82 @@ class WorkflowRunnerClient {
       }
       __classPrivateFieldSet$1(this, _WorkflowRunnerClient_ES, null, "f");
     }
-    if (this.pollingTimer) {
-      clearInterval(this.pollingTimer);
-      this.pollingTimer = null;
+    if (__classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").timer) {
+      clearInterval(__classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").timer);
+      __classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").timer = null;
     }
-    if (this.pollAbortController) {
+    if (__classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").abortController) {
       try {
-        this.pollAbortController.abort();
+        __classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").abortController.abort();
       } catch {
       }
-      this.pollAbortController = null;
+      __classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").abortController = null;
     }
+    __classPrivateFieldGet$1(this, _WorkflowRunnerClient_INFLIGHT_RECONCILES, "f").clear();
+  }
+  getRuns() {
+    return __classPrivateFieldGet$1(this, _WorkflowRunnerClient_RUNS, "f");
+  }
+  getLastSeq() {
+    return __classPrivateFieldGet$1(this, _WorkflowRunnerClient_LAST_SEQ, "f");
+  }
+  /**
+   * Test API: returns a minimal test-only facade exposing internal maps
+   * and operations used by unit tests. Prefer public behavior where
+   * possible; this API exists solely to avoid fragile `as any` casts in
+   * tests and is intentionally small.
+   */
+  getTestApi() {
+    const self = this;
+    self.applyEvent = this.applyEvent.bind(this);
+    self.upsertRun = this.upsertRun.bind(this);
+    self.reconcileRun = this.reconcileRun.bind(this);
+    self.pollActiveRuns = this.pollActiveRuns.bind(this);
+    self.coldLoadRuns = this.coldLoadRuns.bind(this);
+    self.processSnapshotArray = this.processSnapshotArray.bind(this);
+    self.saveCache = this.saveCache.bind(this);
+    self.loadCacheIds = this.loadCacheIds.bind(this);
+    self.seedPlaceholders = this.seedPlaceholders.bind(this);
+    self.start = this.start.bind(this);
+    self.stop = this.stop.bind(this);
+    self.fetchWorkflowNames = this.fetchWorkflowNames.bind(this);
+    self.setWorkflowNames = this.setWorkflowNames.bind(this);
+    self.lastSeq = __classPrivateFieldGet$1(this, _WorkflowRunnerClient_LAST_SEQ, "f");
+    self.runs = __classPrivateFieldGet$1(this, _WorkflowRunnerClient_RUNS, "f");
+    self.inflightReconciles = __classPrivateFieldGet$1(this, _WorkflowRunnerClient_INFLIGHT_RECONCILES, "f");
+    self.processingSnapshot = __classPrivateFieldGet$1(this, _WorkflowRunnerClient_STATE, "f").processingSnapshot;
+    self.cacheKey = __classPrivateFieldGet$1(this, _WorkflowRunnerClient_CACHE_KEY, "f");
+    self.workflowNames = __classPrivateFieldGet$1(this, _WorkflowRunnerClient_WORKFLOW_CACHE, "f");
+    self.store = __classPrivateFieldGet$1(this, _WorkflowRunnerClient_STORE, "f");
+    return this;
   }
   startPollingFallback() {
-    if (this.pollingTimer) {
+    if (__classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").timer) {
       return;
     }
-    this.pollingTimer = setInterval(() => this.pollActiveRuns(), this.pollingInterval);
+    __classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").timer = setInterval(() => this.pollActiveRuns(), __classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING_INTERVAL_MS, "f"));
     this.pollActiveRuns();
   }
   async pollActiveRuns() {
     try {
-      if (this.pollAbortController) {
+      if (__classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").abortController) {
         try {
-          this.pollAbortController.abort();
+          __classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").abortController.abort();
         } catch {
         }
-        this.pollAbortController = null;
+        __classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").abortController = null;
       }
       const ac = new AbortController();
-      this.pollAbortController = ac;
-      const resp = await fetch(`${API_ROOT}/workflow-runner/runs?status=pending,running&owner=me&limit=200`, { signal: ac.signal, credentials: "include" });
+      __classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").abortController = ac;
+      const resp = await fetch(`${API_ROOT}/workflow-runner/runs?status=pending,running&owner=me&limit=${__classPrivateFieldGet$1(this, _WorkflowRunnerClient_RUNS_QUERY_LIMIT, "f")}`, { signal: ac.signal, credentials: "include" });
       if (!resp.ok) {
         return;
       }
       const data = await resp.json();
       const arr = data.runs || [];
       this.processSnapshotArray(arr);
-      if (this.pollAbortController === ac) {
-        this.pollAbortController = null;
+      if (__classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").abortController === ac) {
+        __classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").abortController = null;
       }
     } catch (e) {
       if (e && (e.name === "AbortError" || e.code === "ABORT_ERR") || e instanceof DOMException && e.name === "AbortError") ;
@@ -2810,12 +2985,12 @@ class WorkflowRunnerClient {
     }
   }
   backoffWithJitter() {
-    const base = this.backoffMs;
+    const base = __classPrivateFieldGet$1(this, _WorkflowRunnerClient_BACKOFF_MS, "f");
     const jitterFactor = 0.5 + Math.random() * 0.5;
     return Math.floor(base * jitterFactor);
   }
 }
-_WorkflowRunnerClient_ES = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_STORE = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_WORKFLOW_NAMES = /* @__PURE__ */ new WeakMap();
+_WorkflowRunnerClient_ES = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_STORE = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_WORKFLOW_NAMES = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_CACHE_KEY = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_CACHE_EXPIRY_MS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_INITIAL_BACKOFF_MS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_MAX_BACKOFF_MS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_POLLING_INTERVAL_MS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_RUNS_QUERY_LIMIT = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_EVENT_RUN = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_EVENT_QUEUE = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_LAST_SEQ = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_RUNS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_WORKFLOW_CACHE = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_STATE = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_POLLING = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_BACKOFF_MS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_INFLIGHT_RECONCILES = /* @__PURE__ */ new WeakMap();
 const RUN_PARAM = "runId";
 const VIEW_PARAM = "view";
 const WORKFLOW_PARAM = "workflowId";
@@ -3266,18 +3441,18 @@ var __classPrivateFieldGet = function(receiver, state, kind, f) {
   if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 };
-var _LfWorkflowRunnerManager_instances, _LfWorkflowRunnerManager_APP_ROOT, _LfWorkflowRunnerManager_CLIENT, _LfWorkflowRunnerManager_DISPATCHERS, _LfWorkflowRunnerManager_FRAMEWORK, _LfWorkflowRunnerManager_ROUTING, _LfWorkflowRunnerManager_SECTIONS, _LfWorkflowRunnerManager_STORE, _LfWorkflowRunnerManager_UI_REGISTRY, _LfWorkflowRunnerManager_initializeFramework, _LfWorkflowRunnerManager_initializeLayout, _LfWorkflowRunnerManager_loadWorkflows, _LfWorkflowRunnerManager_subscribeToState;
+var _LfWorkflowRunnerManager_instances, _LfWorkflowRunnerManager_FRAMEWORK, _LfWorkflowRunnerManager_STORE, _LfWorkflowRunnerManager_CLIENT, _LfWorkflowRunnerManager_APP_ROOT, _LfWorkflowRunnerManager_SECTIONS, _LfWorkflowRunnerManager_UI_REGISTRY, _LfWorkflowRunnerManager_DISPATCHERS, _LfWorkflowRunnerManager_ROUTING, _LfWorkflowRunnerManager_initializeFramework, _LfWorkflowRunnerManager_initializeLayout, _LfWorkflowRunnerManager_loadWorkflows, _LfWorkflowRunnerManager_subscribeToState;
 class LfWorkflowRunnerManager {
   constructor() {
     _LfWorkflowRunnerManager_instances.add(this);
-    _LfWorkflowRunnerManager_APP_ROOT.set(this, void 0);
-    _LfWorkflowRunnerManager_CLIENT.set(this, void 0);
-    _LfWorkflowRunnerManager_DISPATCHERS.set(this, void 0);
     _LfWorkflowRunnerManager_FRAMEWORK.set(this, getLfFramework());
-    _LfWorkflowRunnerManager_ROUTING.set(this, void 0);
-    _LfWorkflowRunnerManager_SECTIONS.set(this, void 0);
     _LfWorkflowRunnerManager_STORE.set(this, void 0);
+    _LfWorkflowRunnerManager_CLIENT.set(this, void 0);
+    _LfWorkflowRunnerManager_APP_ROOT.set(this, void 0);
+    _LfWorkflowRunnerManager_SECTIONS.set(this, void 0);
     _LfWorkflowRunnerManager_UI_REGISTRY.set(this, /* @__PURE__ */ new WeakMap());
+    _LfWorkflowRunnerManager_DISPATCHERS.set(this, void 0);
+    _LfWorkflowRunnerManager_ROUTING.set(this, void 0);
     _LfWorkflowRunnerManager_loadWorkflows.set(this, async () => {
       var _a;
       const { NO_WORKFLOWS_AVAILABLE } = NOTIFICATION_MESSAGES;
@@ -3400,7 +3575,7 @@ class LfWorkflowRunnerManager {
           setTimeout(() => {
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
-          }, 1e3);
+          }, UI_CONSTANTS.DOWNLOAD_CLEANUP_DELAY_MS);
         } catch (error) {
           state2.mutate.status("error", ERROR_FETCHING_WORKFLOWS2);
           if (error instanceof WorkflowApiError) {
@@ -3483,7 +3658,7 @@ class LfWorkflowRunnerManager {
     return __classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f");
   }
 }
-_LfWorkflowRunnerManager_APP_ROOT = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_CLIENT = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_DISPATCHERS = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_FRAMEWORK = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_ROUTING = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_SECTIONS = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_STORE = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_UI_REGISTRY = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_loadWorkflows = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_instances = /* @__PURE__ */ new WeakSet(), _LfWorkflowRunnerManager_initializeFramework = function _LfWorkflowRunnerManager_initializeFramework2() {
+_LfWorkflowRunnerManager_FRAMEWORK = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_STORE = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_CLIENT = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_APP_ROOT = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_SECTIONS = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_UI_REGISTRY = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_DISPATCHERS = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_ROUTING = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_loadWorkflows = /* @__PURE__ */ new WeakMap(), _LfWorkflowRunnerManager_instances = /* @__PURE__ */ new WeakSet(), _LfWorkflowRunnerManager_initializeFramework = function _LfWorkflowRunnerManager_initializeFramework2() {
   const assetsUrl = buildAssetsUrl();
   __classPrivateFieldGet(this, _LfWorkflowRunnerManager_FRAMEWORK, "f").assets.set(assetsUrl);
   __classPrivateFieldGet(this, _LfWorkflowRunnerManager_FRAMEWORK, "f").theme.set(DEFAULT_THEME);

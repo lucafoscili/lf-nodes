@@ -1,9 +1,8 @@
-from server import PromptServer
-
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
+from ...utils.constants import FUNCTION, Input
 from ...utils.helpers.conversion import convert_to_boolean, convert_to_float, convert_to_int, convert_to_json
 from ...utils.helpers.logic import normalize_list_to_value
+from ...utils.helpers.comfy import safe_send_sync
 
 # region LF_ExtractString
 class LF_ExtractString:
@@ -68,10 +67,9 @@ class LF_ExtractString:
         result_as_float: float = convert_to_float(extracted_text)
         result_as_boolean: bool = convert_to_boolean(extracted_text)
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}extractstring", {
-            "node": kwargs.get("node_id"),
+        safe_send_sync("extractstring", {
             "value": extracted_text or "...No matches...",
-        })
+        }, kwargs.get("node_id"))
 
         return (result_as_json, extracted_text, result_as_int, result_as_float, result_as_boolean)
 # endregion

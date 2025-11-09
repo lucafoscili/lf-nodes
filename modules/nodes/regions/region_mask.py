@@ -1,11 +1,9 @@
 import torch
 
-from server import PromptServer
-
 from . import CATEGORY
-from ...utils.constants import FUNCTION, Input, EVENT_PREFIX, MASK_SHAPE_COMBO
+from ...utils.constants import FUNCTION, Input, MASK_SHAPE_COMBO
 from ...utils.helpers.api import get_resource_url
-from ...utils.helpers.comfy import resolve_filepath
+from ...utils.helpers.comfy import resolve_filepath, safe_send_sync
 from ...utils.helpers.conversion import tensor_to_pil
 from ...utils.helpers.detection import build_region_mask
 from ...utils.helpers.logic import normalize_input_image, normalize_list_to_value, normalize_output_image
@@ -153,10 +151,7 @@ class LF_RegionMask:
         target_region.setdefault("feather", feather)
         target_region.setdefault("invert", invert)
 
-        PromptServer.instance.send_sync(
-            f"{EVENT_PREFIX}regionmask",
-            {"node": node_id, "dataset": dataset},
-        )
+        safe_send_sync("regionmask", {"dataset": dataset}, node_id)
 
         mask_batch_4d, mask_list_4d = normalize_output_image(masks_4d)
 
