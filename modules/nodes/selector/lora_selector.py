@@ -1,9 +1,7 @@
 import random
 
-from server import PromptServer
-
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, INT_MAX
+from ...utils.constants import FUNCTION, Input, INT_MAX
 from ...utils.helpers.api import process_model_async
 from ...utils.helpers.comfy import get_comfy_list, safe_send_sync
 from ...utils.helpers.logic import (
@@ -117,7 +115,6 @@ class LF_LoraSelector:
             lora = random.choice(loras)
 
         should_fetch_civitai = bool(get_civitai_info)
-        event_name = f"{EVENT_PREFIX}loraselector"
 
         callback = None
         if node_id and lora:

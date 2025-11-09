@@ -1,9 +1,7 @@
 import torch
 
-from server import PromptServer
-
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, VIGNETTE_SHAPE_COMBO
+from ...utils.constants import FUNCTION, Input, VIGNETTE_SHAPE_COMBO
 from ...utils.filters import vignette_effect
 from ...utils.helpers.logic import normalize_input_image, normalize_list_to_value, normalize_output_image
 from ...utils.helpers.temp_cache import TempFileCache

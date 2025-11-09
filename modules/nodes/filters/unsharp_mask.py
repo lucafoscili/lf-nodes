@@ -1,9 +1,7 @@
 import torch
 
-from server import PromptServer
-
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
+from ...utils.constants import FUNCTION, Input
 from ...utils.filters import unsharp_mask_effect
 from ...utils.helpers.logic import (
     normalize_input_image,

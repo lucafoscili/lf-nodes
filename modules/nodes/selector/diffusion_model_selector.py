@@ -3,10 +3,8 @@ import folder_paths
 import random
 import torch
 
-from server import PromptServer
-
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, INT_MAX, WEIGHT_DTYPE_COMBO
+from ...utils.constants import FUNCTION, Input, INT_MAX, WEIGHT_DTYPE_COMBO
 from ...utils.helpers.api import process_model_async
 from ...utils.helpers.comfy import get_comfy_list, safe_send_sync
 from ...utils.helpers.logic import (
@@ -141,7 +139,6 @@ class LF_DiffusionModelSelector:
                     model_obj = None
 
         should_fetch_civitai = bool(get_civitai_info)
-        event_name = f"{EVENT_PREFIX}diffusionmodelselector"
 
         callback = None
         if node_id and diffusion_model:

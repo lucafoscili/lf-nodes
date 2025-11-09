@@ -1,14 +1,11 @@
 import json
 import requests
-import urllib.parse
-from comfy.cli_args import args as comfy_args
 import torch
 
-from server import PromptServer
 from ...utils.helpers.api.resolve_url import resolve_api_url
 
 from . import CATEGORY
-from ...utils.constants import BASE64_PNG_PREFIX, EVENT_PREFIX, FUNCTION, HEADERS, Input, INT_MAX, get_image_classifier_system
+from ...utils.constants import BASE64_PNG_PREFIX, FUNCTION, HEADERS, Input, INT_MAX, get_image_classifier_system
 from ...utils.helpers.api import handle_response
 from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.conversion import tensor_to_base64

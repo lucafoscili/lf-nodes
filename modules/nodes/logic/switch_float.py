@@ -1,7 +1,6 @@
-from server import PromptServer
-
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
+from ...utils.constants import FUNCTION, Input
+from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.logic import normalize_list_to_value
 
 # region LF_SwitchFloat
@@ -57,7 +56,7 @@ class LF_SwitchFloat:
         on_false: float = kwargs.get("on_false")
         on_true: float = kwargs.get("on_true")
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}switchfloat", {
+        safe_send_sync("switchfloat", {
             "node": kwargs.get("node_id"),
             "bool": boolean,
         })

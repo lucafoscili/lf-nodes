@@ -1,9 +1,7 @@
 import numpy as np
 
-from server import PromptServer
-
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
+from ...utils.constants import FUNCTION, Input
 from ...utils.helpers.api import get_resource_url
 from ...utils.helpers.comfy import resolve_filepath, safe_send_sync
 from ...utils.helpers.conversion import numpy_to_tensor, tensor_to_pil

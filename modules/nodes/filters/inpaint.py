@@ -1,9 +1,7 @@
 import torch
 
-from server import PromptServer
-
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, SAMPLERS, SCHEDULERS
+from ...utils.constants import FUNCTION, Input, SAMPLERS, SCHEDULERS
 from ...utils.filters.inpaint import apply_inpaint_filter_tensor
 from ...utils.helpers.logic import normalize_input_image, normalize_list_to_value, normalize_masks_for_images, normalize_output_image
 from ...utils.helpers.temp_cache import TempFileCache

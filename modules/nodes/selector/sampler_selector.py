@@ -1,9 +1,7 @@
 import random
 
-from server import PromptServer
-
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, INT_MAX, SAMPLERS
+from ...utils.constants import FUNCTION, Input, INT_MAX, SAMPLERS
 from ...utils.helpers.logic import filter_list, normalize_json_input, normalize_list_to_value
 from ...utils.helpers.ui import create_history_node
 from ...utils.helpers.comfy import safe_send_sync

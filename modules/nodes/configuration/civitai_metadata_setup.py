@@ -1,8 +1,7 @@
 from folder_paths import get_full_path
-from server import PromptServer
 
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, INT_MAX, SAMPLERS, SCHEDULERS, UNET_DIFFUSION_COMBO
+from ...utils.constants import FUNCTION, Input, INT_MAX, SAMPLERS, SCHEDULERS, UNET_DIFFUSION_COMBO
 from ...utils.helpers.api import get_embedding_hashes, get_sha256, get_lora_hashes
 from ...utils.helpers.comfy import get_comfy_list, safe_send_sync
 from ...utils.helpers.logic import normalize_list_to_value

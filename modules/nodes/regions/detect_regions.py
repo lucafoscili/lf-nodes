@@ -3,10 +3,8 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from server import PromptServer
-
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, SELECTION_STRATEGY_COMBO
+from ...utils.constants import FUNCTION, Input, SELECTION_STRATEGY_COMBO
 from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.detection import append_compare_entry, build_overlay, detect_regions, load_label_map, load_yolo_session, parse_class_filter, parse_class_labels, select_region
 from ...utils.helpers.logic import normalize_input_image, normalize_json_input, normalize_list_to_value

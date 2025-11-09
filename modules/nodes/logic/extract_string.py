@@ -1,7 +1,5 @@
-from server import PromptServer
-
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
+from ...utils.constants import FUNCTION, Input
 from ...utils.helpers.conversion import convert_to_boolean, convert_to_float, convert_to_int, convert_to_json
 from ...utils.helpers.logic import normalize_list_to_value
 from ...utils.helpers.comfy import safe_send_sync

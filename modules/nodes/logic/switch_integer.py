@@ -1,7 +1,6 @@
-from server import PromptServer
-
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, INT_MAX
+from ...utils.constants import FUNCTION, Input, INT_MAX
+from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.logic import normalize_list_to_value
 
 # region LF_SwitchInteger
@@ -52,7 +51,7 @@ class LF_SwitchInteger:
         on_true = normalize_list_to_value(on_true)
         on_false = normalize_list_to_value(on_false)
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}switchinteger", {
+        safe_send_sync("switchinteger", {
             "node": kwargs.get("node_id"),
             "bool": boolean,
         })

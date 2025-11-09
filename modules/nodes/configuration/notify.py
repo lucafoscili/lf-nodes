@@ -1,9 +1,7 @@
 import torch
 
-from server import PromptServer
-
 from . import CATEGORY
-from ...utils.constants import ANY, BASE64_PNG_PREFIX, EVENT_PREFIX, FUNCTION, Input, NOTIFY_COMBO
+from ...utils.constants import ANY, BASE64_PNG_PREFIX, FUNCTION, Input, NOTIFY_COMBO
 from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.conversion import tensor_to_base64
 from ...utils.helpers.logic import normalize_input_image, normalize_list_to_value

@@ -3,10 +3,9 @@ from __future__ import annotations
 from typing import Any, Dict, List
 
 import torch
-from server import PromptServer
 
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
+from ...utils.constants import FUNCTION, Input
 from ...utils.filters import apply_background_remover_filter
 from ...utils.helpers.api import get_resource_url
 from ...utils.helpers.comfy import resolve_filepath, safe_send_sync

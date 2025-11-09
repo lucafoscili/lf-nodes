@@ -2,10 +2,8 @@ import ast
 import math
 import re
 
-from server import PromptServer
-
 from . import CATEGORY
-from ...utils.constants import ANY, EVENT_PREFIX, FUNCTION, Input
+from ...utils.constants import ANY, FUNCTION, Input
 from ...utils.helpers.logic import normalize_input_list, normalize_list_to_value, not_none
 from ...utils.helpers.comfy import safe_send_sync
 

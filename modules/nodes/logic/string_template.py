@@ -1,10 +1,9 @@
 import random
 import re
 
-from server import PromptServer
-
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, INT_MAX
+from ...utils.constants import FUNCTION, Input, INT_MAX
+from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.logic import normalize_json_input, normalize_list_to_value
 
 # region LF_StringTemplate
@@ -65,7 +64,7 @@ class LF_StringTemplate:
 
         if not isinstance(replacements_list, list) or not all(isinstance(d, dict) for d in replacements_list):
             log = "**Error**: Replacements must be a list of dictionaries."
-            PromptServer.instance.send_sync(f"{EVENT_PREFIX}stringtemplate", {
+            safe_send_sync("stringtemplate", {
                 "node": kwargs.get("node_id"),
                 "value": log,
             })
@@ -85,7 +84,7 @@ class LF_StringTemplate:
 
         except Exception as e:
             log = f"**Error**: {str(e)}"
-            PromptServer.instance.send_sync(f"{EVENT_PREFIX}stringtemplate", {
+            safe_send_sync("stringtemplate", {
                 "node": kwargs.get("node_id"),
                 "value": log,
             })
@@ -100,7 +99,7 @@ class LF_StringTemplate:
   **Result**: {filled_templates}
         """
 
-        PromptServer.instance.send_sync(f"{EVENT_PREFIX}stringtemplate", {
+        safe_send_sync("stringtemplate", {
             "node": kwargs.get("node_id"),
             "value": log,
         })

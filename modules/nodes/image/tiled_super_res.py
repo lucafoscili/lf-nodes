@@ -1,13 +1,11 @@
 import time
-from typing import List
-
-from PIL import Image, ImageDraw, ImageFont
-
 import torch
 import torch.nn.functional as F
 
+from PIL import Image, ImageDraw, ImageFont
+from typing import List
+
 from comfy import model_management
-from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import EVENT_PREFIX, FUNCTION, Input

@@ -1,9 +1,7 @@
 import re
 
-from server import PromptServer
-
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, LORA_TAG_REGEX
+from ...utils.constants import FUNCTION, Input, LORA_TAG_REGEX
 from ...utils.helpers.logic import normalize_input_list, normalize_list_to_value
 from ...utils.helpers.prompt import count_words_in_comma_separated_string, cleanse_lora_tag
 from ...utils.helpers.comfy import safe_send_sync

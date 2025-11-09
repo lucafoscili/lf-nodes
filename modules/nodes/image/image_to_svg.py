@@ -3,11 +3,8 @@ import torch
 
 from dataclasses import replace
 
-from server import PromptServer
-
 from . import CATEGORY
 from ...utils.constants import (
-    EVENT_PREFIX,
     FUNCTION,
     Input,
     OPTIONAL_VECTOR_MODE_COMBO,

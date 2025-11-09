@@ -1,10 +1,8 @@
 import copy
 import torch
 
-from server import PromptServer
-
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, SAMPLERS, SCHEDULERS
+from ...utils.constants import FUNCTION, Input, SAMPLERS, SCHEDULERS
 from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.editing import (
     EditingSession,

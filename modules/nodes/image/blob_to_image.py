@@ -2,10 +2,9 @@ import io
 import re
 
 from PIL import Image
-from server import PromptServer
 
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
+from ...utils.constants import FUNCTION, Input
 from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.conversion import pil_to_tensor
 from ...utils.helpers.logic import normalize_list_to_value, normalize_output_image

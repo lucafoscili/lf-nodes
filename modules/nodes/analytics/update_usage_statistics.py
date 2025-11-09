@@ -1,10 +1,8 @@
 import json
 import os
 
-from server import PromptServer
-
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, get_usage_filename, get_usage_title, Input
+from ...utils.constants import FUNCTION, get_usage_filename, get_usage_title, Input
 from ...utils.helpers.comfy import get_comfy_dir, safe_send_sync
 from ...utils.helpers.logic import normalize_json_input, normalize_list_to_value
 

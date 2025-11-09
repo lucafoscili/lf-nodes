@@ -1,9 +1,7 @@
 import random
 
-from server import PromptServer
-
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, INT_MAX
+from ...utils.constants import FUNCTION, Input, INT_MAX
 from ...utils.helpers.api import process_model_async
 from ...utils.helpers.comfy import get_comfy_list, safe_send_sync
 from ...utils.helpers.logic import dataset_from_metadata, filter_list, is_none, normalize_list_to_value
@@ -110,7 +108,6 @@ class LF_EmbeddingSelector:
             embedding = random.choice(embeddings)
 
         should_fetch_civitai = bool(get_civitai_info)
-        event_name = f"{EVENT_PREFIX}embeddingselector"
 
         callback = None
         if node_id and embedding:

@@ -2,10 +2,8 @@ import json
 
 from itertools import combinations
 
-from server import PromptServer
-
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
+from ...utils.constants import FUNCTION, Input
 from ...utils.helpers.comfy import safe_send_sync
 
 # region LF_Something2String

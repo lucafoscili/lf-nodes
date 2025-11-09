@@ -3,10 +3,9 @@ import torch
 
 from datetime import datetime
 from PIL import Image
-from server import PromptServer
 
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, IMAGE_FILE_EXTENSIONS, Input
+from ...utils.constants import FUNCTION, IMAGE_FILE_EXTENSIONS, Input
 from ...utils.helpers.api import get_resource_url
 from ...utils.helpers.comfy import (
     ensure_external_preview,

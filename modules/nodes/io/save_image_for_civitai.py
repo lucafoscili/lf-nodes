@@ -4,10 +4,9 @@ import torch
 
 from comfy.cli_args import args
 from PIL.PngImagePlugin import PngInfo
-from server import PromptServer
 
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, IMAGE_EXTENSION_COMBO, Input
+from ...utils.constants import FUNCTION, IMAGE_EXTENSION_COMBO, Input
 from ...utils.helpers.api import get_resource_url
 from ...utils.helpers.comfy import get_comfy_dir, resolve_filepath, safe_send_sync
 from ...utils.helpers.conversion import tensor_to_pil

@@ -2,10 +2,8 @@ import json
 import requests
 import torch
 
-from server import PromptServer
-
 from . import CATEGORY
-from ...utils.constants import BASE64_PNG_PREFIX, EVENT_PREFIX, FUNCTION, HEADERS, Input, INT_MAX, get_character_impersonator_system
+from ...utils.constants import BASE64_PNG_PREFIX, FUNCTION, HEADERS, Input, INT_MAX, get_character_impersonator_system
 from ...utils.helpers.api import handle_response
 from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.conversion import tensor_to_base64

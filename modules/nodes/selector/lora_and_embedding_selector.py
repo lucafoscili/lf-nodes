@@ -1,10 +1,9 @@
 import random
+
 from typing import Optional, Tuple
 
-from server import PromptServer
-
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, INT_MAX
+from ...utils.constants import FUNCTION, Input, INT_MAX
 from ...utils.helpers.api import process_model_async
 from ...utils.helpers.comfy import get_comfy_list, safe_send_sync
 from ...utils.helpers.logic import dataset_from_metadata, filter_list, is_none, normalize_list_to_value
@@ -130,7 +129,6 @@ class LF_LoraAndEmbeddingSelector:
             raise ValueError(f"Not found an embedding named {lora}")
 
         should_fetch_civitai = bool(get_civitai_info)
-        event_name = f"{EVENT_PREFIX}loraandembeddingselector"
 
         combined_metadata = {"lora": None, "embedding": None}
 

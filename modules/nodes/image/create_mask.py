@@ -1,10 +1,8 @@
 import torch
 import torch.nn.functional as F
 
-from server import PromptServer
-
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input, MASK_THRESHOLD_COMBO
+from ...utils.constants import FUNCTION, Input, MASK_THRESHOLD_COMBO
 from ...utils.helpers.api import get_resource_url
 from ...utils.helpers.comfy import get_tokenizer_from_clip, resolve_filepath, safe_send_sync
 from ...utils.helpers.conversion import tensor_to_pil

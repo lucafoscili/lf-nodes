@@ -1,9 +1,8 @@
 from itertools import product
 from typing import Any, Dict, List, Tuple, Union
-from server import PromptServer
 
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
+from ...utils.constants import FUNCTION, Input
 from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.logic import normalize_json_input, normalize_list_to_value
 

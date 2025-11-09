@@ -1,11 +1,9 @@
 import torch
 
-from server import PromptServer
-
 from . import CATEGORY
-from ...utils.constants import FUNCTION, Input, EVENT_PREFIX, MASK_SHAPE_COMBO
+from ...utils.constants import FUNCTION, Input, MASK_SHAPE_COMBO
 from ...utils.helpers.api import get_resource_url
-from ...utils.helpers.comfy import resolve_filepath
+from ...utils.helpers.comfy import resolve_filepath, safe_send_sync
 from ...utils.helpers.conversion import tensor_to_pil
 from ...utils.helpers.detection import build_region_mask
 from ...utils.helpers.logic import normalize_input_image, normalize_list_to_value, normalize_output_image

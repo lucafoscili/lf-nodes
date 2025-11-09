@@ -1,13 +1,12 @@
 import timm
 
 from huggingface_hub import snapshot_download
-from server import PromptServer
 from tqdm.auto import tqdm
 from timm.data import create_transform, resolve_data_config
 from torchvision import transforms
 
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
+from ...utils.constants import FUNCTION, Input
 from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.logic import normalize_list_to_value
 
@@ -18,7 +17,6 @@ class PromptServerTqdm(tqdm):
     Args:
         *args: Positional arguments passed to the tqdm constructor.
         node_id (str): Identifier for the node associated with this progress.
-        event_name (str): Name of the event to send updates for.
         model_id (str): Identifier of the model being processed.
         log_lines (list[str]): List to append log messages to.
         **kwargs: Additional keyword arguments passed to the tqdm constructor.
@@ -27,12 +25,11 @@ class PromptServerTqdm(tqdm):
         update(n=1):
             Advances the progress bar by n steps, logs progress messages, and sends updates to the PromptServer.
     """
-    def __init__(self, *args, node_id: str, event_name: str, model_id: str, log_lines: list[str], **kwargs):
+    def __init__(self, *args, node_id: str, model_id: str, log_lines: list[str], **kwargs):
         super().__init__(*args, **kwargs)
         self.node_id = node_id
-        self.event_name = event_name
-        self.log_lines = log_lines
         self.model_id = model_id
+        self.log_lines = log_lines
 
     def update(self, n=1):
         super().update(n)
@@ -57,13 +54,12 @@ class PromptServerTqdm(tqdm):
             "value": log
         }, self.node_id)
 
-def create_custom_tqdm(node_id: str, event_name: str, model_id: str, log_lines: list[str]):
+def create_custom_tqdm(node_id: str, model_id: str, log_lines: list[str]):
     """
     Creates a custom subclass of PromptServerTqdm with pre-configured initialization parameters.
 
     Args:
         node_id (str): The unique identifier for the node.
-        event_name (str): The name of the event associated with the tqdm instance.
         model_id (str): The identifier for the model being used.
         log_lines (list[str]): A list of log lines to be associated with the tqdm instance.
 
@@ -74,7 +70,6 @@ def create_custom_tqdm(node_id: str, event_name: str, model_id: str, log_lines: 
         def __init__(self, *args, **kwargs):
             super().__init__(*args,
                              node_id=node_id,
-                             event_name=event_name,
                              model_id=model_id,
                              log_lines=log_lines,
                              **kwargs)
@@ -139,12 +134,11 @@ class LF_LoadWD14Model:
         mean: str = normalize_list_to_value(kwargs.get("mean", "0.5,0.5,0.5"))
         std: str = normalize_list_to_value(kwargs.get("std", "0.5,0.5,0.5"))
 
-        event_name: str = f"{EVENT_PREFIX}loadwd14model"
         log_lines: list[str] = ["## Load WD14 Model\n\n"]
         float_mean: list[float] = [float(x) for x in mean.split(",")]
         float_std: list[float] = [float(x) for x in std.split(",")]
 
-        CustomTqdm = create_custom_tqdm(node_id, event_name, model_id, log_lines)
+        CustomTqdm = create_custom_tqdm(node_id, model_id, log_lines)
 
         snapshot_download(
             repo_id=model_id,

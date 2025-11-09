@@ -1,9 +1,7 @@
 import torch
 
-from server import PromptServer
-
 from . import CATEGORY
-from ...utils.constants import BLUR_FEATHER_COMBO, EVENT_PREFIX, FUNCTION, Input, TILT_SHIFT_ORIENTATION_COMBO
+from ...utils.constants import BLUR_FEATHER_COMBO, FUNCTION, Input, TILT_SHIFT_ORIENTATION_COMBO
 from ...utils.filters import tilt_shift_effect
 from ...utils.helpers.logic import normalize_input_image, normalize_list_to_value, normalize_output_image
 from ...utils.helpers.temp_cache import TempFileCache

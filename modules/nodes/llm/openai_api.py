@@ -1,7 +1,6 @@
 import aiohttp
 import json
 import os
-import asyncio
 
 from typing import Any
 

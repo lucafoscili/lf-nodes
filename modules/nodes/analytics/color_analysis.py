@@ -1,10 +1,8 @@
 import numpy as np
 import torch
 
-from server import PromptServer
-
 from . import CATEGORY
-from ...utils.constants import BLUE_CHANNEL_ID, EVENT_PREFIX, FUNCTION, GREEN_CHANNEL_ID, Input, INTENSITY_ID, RED_CHANNEL_ID
+from ...utils.constants import BLUE_CHANNEL_ID, FUNCTION, GREEN_CHANNEL_ID, Input, INTENSITY_ID, RED_CHANNEL_ID
 from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.conversion import tensor_to_numpy
 from ...utils.helpers.logic import normalize_input_image, normalize_output_image

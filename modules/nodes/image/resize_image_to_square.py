@@ -1,9 +1,7 @@
 import torch
 
-from server import PromptServer
-
 from . import CATEGORY
-from ...utils.constants import CROP_POSITION_COMBO, EVENT_PREFIX, FUNCTION, Input, RESAMPLERS
+from ...utils.constants import CROP_POSITION_COMBO, FUNCTION, Input, RESAMPLERS
 from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.logic import normalize_input_image, normalize_input_list, normalize_list_item, normalize_list_to_value, normalize_output_image
 from ...utils.helpers.torch import resize_to_square
