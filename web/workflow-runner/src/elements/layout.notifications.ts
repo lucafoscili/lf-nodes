@@ -105,7 +105,7 @@ export const createNotificationsSection = (store: WorkflowStore): WorkflowSectio
         _checkForVisible(_root);
       };
       element.lfIcon =
-        status === 'danger' ? theme.get.icon('alertTriangle') : theme.get.icon('infoHexagon');
+        status === 'danger' ? theme.get.icon('alertTriangle') : theme.get.icon('hexagonInfo');
       element.lfMessage = message;
       element.lfUiState = _getStateCategory(status);
       element.lfTimer = status === 'danger' ? 5000 : 2500;

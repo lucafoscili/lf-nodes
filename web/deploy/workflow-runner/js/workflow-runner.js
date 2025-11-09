@@ -1,6 +1,6 @@
-import "../../js/lf-widgets-core-DnP2v7ei.js";
-import { g as getLfFramework } from "../../js/lf-widgets-framework-C98FQqUU.js";
-import "../../js/lf-widgets-foundations-LHw4zrea.js";
+import "../../js/lf-widgets-core-DIEht-jK.js";
+import { g as getLfFramework } from "../../js/lf-widgets-framework-DcaHVr-f.js";
+import "../../js/lf-widgets-foundations-Bbv1isuU.js";
 const apiBase = "/api";
 const apiRoutePrefix = "/lf-nodes";
 const chat = { "provider": "kobold" };
@@ -2368,7 +2368,7 @@ const createNotificationsSection = (store) => {
         uiRegistry.remove(uid);
         _checkForVisible(_root);
       };
-      element.lfIcon = status === "danger" ? theme.get.icon("alertTriangle") : theme.get.icon("infoHexagon");
+      element.lfIcon = status === "danger" ? theme.get.icon("alertTriangle") : theme.get.icon("hexagonInfo");
       element.lfMessage = message;
       element.lfUiState = _getStateCategory(status);
       element.lfTimer = status === "danger" ? 5e3 : 2500;
