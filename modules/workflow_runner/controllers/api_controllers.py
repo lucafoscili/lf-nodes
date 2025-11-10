@@ -32,42 +32,6 @@ from ._helpers import (
 LOG = logging.getLogger(__name__)
 
 # region Helpers
-def _build_job_status_from_history(run_id: str, entry: dict) -> dict:
-    """Build job status dict from ComfyUI history entry for headless runs."""
-    status = entry.get("status") or {}
-    completed = status.get("completed")
-    status_str = status.get("status_str", "unknown")
-    
-    base = {
-        "run_id": run_id,
-        "workflow_id": "unknown",
-        "seq": 0,
-        "owner_id": None,
-        "created_at": entry.get("prompt", {}).get("created_at", time.time()),
-        "updated_at": time.time(),
-    }
-    
-    if completed is True or status_str == "success":
-        base.update({
-            "status": "succeeded",
-            "result": {"http_status": 200, "body": _make_run_payload(history=entry)},
-        })
-    elif status_str == "error":
-        base.update({
-            "status": "failed",
-            "error": "execution_error",
-            "result": {"http_status": 500, "body": _make_run_payload(history=entry, error_message="execution_error")},
-        })
-    elif entry.get("outputs"):
-        base.update({
-            "status": "succeeded",
-            "result": {"http_status": 200, "body": _make_run_payload(history=entry)},
-        })
-    else:
-        base.update({"status": "running"})
-    
-    return base
-
 async def _update_job_status_from_history(run_id: str, entry: dict):
     """Update stored job status from ComfyUI history entry."""
     status = entry.get("status") or {}
@@ -471,12 +435,23 @@ async def get_workflow_status_controller(request: web.Request) -> web.Response:
                         outputs = entry.get(run_id).get("outputs") if entry.get(run_id) else entry.get("outputs")
                         if outputs:
                             # Add base64 data for successful runs
-                            data_tuple = extract_base64_data_from_result(outputs)
+                            # Create the expected result structure for extract_base64_data_from_result
+                            mock_result = {
+                                "http_status": 200,
+                                "body": {
+                                    "payload": {
+                                        "history": {
+                                            "outputs": outputs
+                                        }
+                                    }
+                                }
+                            }
+                            data_tuple = extract_base64_data_from_result(mock_result)
                             if data_tuple:
                                 mime_type, base64_data = data_tuple
                                 return web.json_response({"data": base64_data}, content_type=mime_type)
                         
-                        return web.json_response(response_data)
+                        return web.json_response({"status": "completed"})
                     else:
                         return web.json_response({"detail": "run_not_found"}, status=404)
         except Exception as e:
@@ -516,7 +491,7 @@ async def admin_runs_page(request: web.Request) -> web.Response:
         This page is only available when workflow-runner debug mode (`_WF_DEBUG`) is enabled.
         """
         if not _WF_DEBUG:
-                return web.json_response({"detail": "not_enabled"}, status=404)
+            return web.json_response({"detail": "not_enabled"}, status=404)
 
         html = """
         <!doctype html>

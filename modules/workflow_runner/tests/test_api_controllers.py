@@ -92,10 +92,10 @@ def load_api_controllers_module():
     helpers_mock.extract_base64_data_from_result = MagicMock(side_effect=lambda result: ("image/png", base64.b64encode(b'mock_png_data').decode('utf-8')) if result and result.get("body", {}).get("payload", {}).get("history", {}).get("outputs") else None)
     sys.modules["lf_nodes.modules.workflow_runner.controllers._helpers"] = helpers_mock
 
-    # Set up serialize mock
-    serialize_mock = MagicMock()
-    serialize_mock.serialize_job = MagicMock()
-    sys.modules["lf_nodes.modules.workflow_runner.utils.serialize"] = serialize_mock
+    # Set up config mock
+    config_mock = MagicMock()
+    config_mock.get_settings = MagicMock(return_value=MagicMock(COMFY_BACKEND_URL="http://127.0.0.1:8188"))
+    sys.modules["lf_nodes.modules.workflow_runner.config"] = config_mock
 
     # Load required modules
     required_modules = {
@@ -108,7 +108,8 @@ def load_api_controllers_module():
         "services.run_service": "run_service",
         "services.workflow_service": "workflow_service",
         "controllers._helpers": "_helpers",
-        "utils.serialize": "serialize"
+        "utils.serialize": "serialize",
+        "config": "config"
     }
 
     for mod_key, mod_name in required_modules.items():
@@ -148,6 +149,8 @@ def load_api_controllers_module():
                 mock_mod.serialize_job = MagicMock()
             elif mod_key == "utils.serialize":
                 mock_mod.serialize_job = MagicMock()
+            elif mod_key == "config":
+                mock_mod.get_settings = MagicMock(return_value=MagicMock(COMFY_BACKEND_URL="http://127.0.0.1:8188"))
             sys.modules[f"{pkg_prefix}.{mod_key}.{mod_name}"] = mock_mod
 
     # Load the api_controllers module
@@ -383,12 +386,20 @@ class TestApiControllers:
         # Mock get_job_status returning None
         async def mock_get_job_status(run_id):
             return None
-        with patch.object(api_controllers, 'get_job_status', side_effect=mock_get_job_status):
+        
+        # Mock aiohttp session to simulate history fetch failure
+        mock_session = MagicMock()
+        mock_response = MagicMock()
+        mock_response.status = 404
+        mock_session.get.return_value.__aenter__.return_value = mock_response
+        
+        with patch.object(api_controllers, 'get_job_status', side_effect=mock_get_job_status), \
+             patch('aiohttp.ClientSession', return_value=mock_session):
             response = await api_controllers.get_workflow_status_controller(mock_request)
 
         assert response.status == 404
         response_data = json.loads(response.text)
-        assert response_data["detail"] == "run_not_found"
+        assert response_data["detail"] == "Headless run not found"
 
     @pytest.mark.asyncio
     async def test_get_workflow_status_controller_missing_run_id(self, api_controllers):
@@ -402,3 +413,147 @@ class TestApiControllers:
         assert response.status == 400
         response_data = json.loads(response.text)
         assert response_data["detail"] == "missing_run_id"
+
+    @pytest.mark.asyncio
+    async def test_get_workflow_status_controller_headless_run_success(self, api_controllers):
+        """Test status controller handles headless runs found in ComfyUI history with successful output."""
+        # Mock request
+        mock_request = MagicMock()
+        mock_request.match_info = {"run_id": "headless-run-123"}
+
+        # Mock get_job_status returning None (not in DB)
+        async def mock_get_job_status(run_id):
+            return None
+
+        # Mock aiohttp session (similar to working unknown_run_id test)
+        from unittest.mock import AsyncMock
+        mock_session = MagicMock()
+        mock_response = MagicMock()
+        mock_response.status = 200
+        mock_response.json = AsyncMock(return_value={
+            "headless-run-123": {
+                "status": {"completed": True},
+                "outputs": {
+                    "1": {
+                        "images": [
+                            {
+                                "filename": "result.png",
+                                "subfolder": "",
+                                "type": "output"
+                            }
+                        ]
+                    }
+                }
+            }
+        })
+        mock_session.get.return_value.__aenter__.return_value = mock_response
+        mock_session.get.return_value.__aexit__.return_value = None
+        # Also need to mock the session context manager
+        mock_session.__aenter__.return_value = mock_session
+        mock_session.__aexit__.return_value = None
+
+        with patch.object(api_controllers, 'get_job_status', side_effect=mock_get_job_status), \
+             patch('aiohttp.ClientSession', return_value=mock_session), \
+             patch('lf_nodes.modules.workflow_runner.controllers._helpers.folder_paths.get_directory_by_type', return_value='/tmp/output'), \
+             patch('lf_nodes.modules.workflow_runner.controllers._helpers.os.path.exists', return_value=True), \
+             patch('lf_nodes.modules.workflow_runner.controllers._helpers.PIL.Image.open') as mock_img_open, \
+             patch('lf_nodes.modules.workflow_runner.controllers._helpers.builtins.open', MagicMock()):
+
+            # Mock image processing
+            mock_img = mock_img_open.return_value.__enter__.return_value
+            mock_img.mode = 'RGB'
+            mock_img.convert.return_value = mock_img
+
+            response = await api_controllers.get_workflow_status_controller(mock_request)
+
+        assert response.status == 200
+        assert response.content_type == "image/png"
+        response_data = json.loads(response.text)
+        assert "data" in response_data
+        assert response_data["data"] == base64.b64encode(b'mock_png_data').decode('utf-8')
+
+    @pytest.mark.asyncio
+    async def test_get_workflow_status_controller_headless_run_no_outputs(self, api_controllers):
+        """Test status controller handles headless runs found in ComfyUI history with no outputs."""
+        # Mock request
+        mock_request = MagicMock()
+        mock_request.match_info = {"run_id": "headless-run-456"}
+
+        # Mock get_job_status returning None (not in DB)
+        async def mock_get_job_status(run_id):
+            return None
+
+        # Mock aiohttp session (similar to working unknown_run_id test)
+        from unittest.mock import AsyncMock
+        mock_session = MagicMock()
+        mock_response = MagicMock()
+        mock_response.status = 200
+        mock_response.json = AsyncMock(return_value={
+            "headless-run-456": {
+                "status": {"completed": True},
+                "outputs": {}
+            }
+        })
+        mock_session.get.return_value.__aenter__.return_value = mock_response
+        mock_session.get.return_value.__aexit__.return_value = None
+        # Also need to mock the session context manager
+        mock_session.__aenter__.return_value = mock_session
+        mock_session.__aexit__.return_value = None
+
+        with patch.object(api_controllers, 'get_job_status', side_effect=mock_get_job_status), \
+             patch('aiohttp.ClientSession', return_value=mock_session):
+            response = await api_controllers.get_workflow_status_controller(mock_request)
+
+        assert response.status == 200
+        response_data = json.loads(response.text)
+        assert "data" not in response_data
+
+    @pytest.mark.asyncio
+    async def test_get_workflow_status_controller_pending_job_updated_from_history(self, api_controllers):
+        """Test status controller handles pending jobs (existing functionality)."""
+        # Mock request
+        mock_request = MagicMock()
+        mock_request.match_info = {"run_id": "pending-run-789"}
+
+        # Mock job status as pending
+        mock_job_status = {
+            "run_id": "pending-run-789",
+            "status": "pending",
+            "result": None
+        }
+
+        # Mock get_job_status
+        async def mock_get_job_status(run_id):
+            return mock_job_status
+
+        with patch.object(api_controllers, 'get_job_status', side_effect=mock_get_job_status):
+            response = await api_controllers.get_workflow_status_controller(mock_request)
+
+        assert response.status == 200
+        response_data = json.loads(response.text)
+        assert response_data["run_id"] == "pending-run-789"
+        assert response_data["status"] == "pending"
+        assert "data" not in response_data
+
+    @pytest.mark.asyncio
+    async def test_get_workflow_status_controller_history_fetch_error(self, api_controllers):
+        """Test status controller handles errors when fetching ComfyUI history."""
+        # Mock request
+        mock_request = MagicMock()
+        mock_request.match_info = {"run_id": "error-run-999"}
+
+        # Mock get_job_status returning None (not in DB)
+        async def mock_get_job_status(run_id):
+            return None
+
+        # Mock aiohttp session to raise exception
+        mock_session = MagicMock()
+        mock_session.get.side_effect = Exception("Connection failed")
+
+        with patch.object(api_controllers, 'get_job_status', side_effect=mock_get_job_status), \
+             patch('aiohttp.ClientSession', return_value=mock_session):
+            response = await api_controllers.get_workflow_status_controller(mock_request)
+
+        assert response.status == 404
+        response_data = json.loads(response.text)
+        assert response_data["detail"] == "Headless run not found"
