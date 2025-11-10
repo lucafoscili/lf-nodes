@@ -12,7 +12,6 @@ spec.loader.exec_module(test_utils)
 helpers = test_utils.load_helpers_module()
 MockRequest = test_utils.MockRequest
 
-
 class MockResponse:
     def __init__(self):
         self.cookies_set = {}
@@ -23,7 +22,6 @@ class MockResponse:
 
     def del_cookie(self, name, **kwargs):
         self.cookies_deleted.append((name, kwargs))
-
 
 async def run_checks():
     def stub_create(email):

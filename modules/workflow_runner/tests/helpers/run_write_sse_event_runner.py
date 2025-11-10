@@ -11,7 +11,6 @@ spec.loader.exec_module(test_utils)
 
 helpers = test_utils.load_helpers_module()
 
-
 class MockStreamResp:
     def __init__(self, fail_write=False, fail_drain=False):
         self.writes = []
@@ -28,7 +27,6 @@ class MockStreamResp:
             raise asyncio.CancelledError()
         return None
 
-
 async def run_checks():
     resp = MockStreamResp()
     ev = {"run_id": "r1", "seq": 1, "status": "running"}
@@ -44,7 +42,6 @@ async def run_checks():
     ev = {"run_id": "r3", "seq": 3}
     ok = await helpers.write_sse_event(resp, ev)
     assert ok is False
-
 
 if __name__ == "__main__":
     asyncio.run(run_checks())

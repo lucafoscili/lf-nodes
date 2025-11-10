@@ -6,8 +6,9 @@ Validates that:
 3. Retrieval by prompt_id returns the same job
 """
 
-import sys
 import pytest
+import sys
+
 from pathlib import Path
 
 pkg_root = Path(__file__).resolve().parents[3]

@@ -2,14 +2,13 @@
 Test the SSE snapshot functionality end-to-end.
 This should reveal why runs aren't showing up after refresh.
 """
-import pytest
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
-from aiohttp import web
 import json
-import asyncio
+import pytest
+
+from unittest.mock import Mock, patch
+from aiohttp import web
 
 pytestmark = pytest.mark.anyio
-
 
 class MockStreamResponse:
     """Mock aiohttp StreamResponse for testing."""
@@ -33,7 +32,6 @@ class MockStreamResponse:
     def get_written_text(self) -> str:
         """Decode all written data to text."""
         return b''.join(self.written_data).decode('utf-8')
-
 
 class TestSSESnapshot:
     """Test the SSE initial snapshot that should send runs on connection."""
@@ -223,7 +221,6 @@ class TestSSESnapshot:
                 print(f"  ✓ SSE event format is valid!")
                 print(f"  ✓ Parsed data: {data}")
 
-
 class TestUIEventProcessing:
     """Test how the UI should process SSE events."""
     
@@ -253,7 +250,6 @@ class TestUIEventProcessing:
         print(f"  - event: run")
         print(f"  - data: <JSON with run_id, status, etc>")
         print(f"  - Event listener: es.addEventListener('run', ...)")
-
 
 if __name__ == "__main__":
     import sys

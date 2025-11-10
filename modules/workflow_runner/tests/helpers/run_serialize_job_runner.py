@@ -10,7 +10,6 @@ spec.loader.exec_module(test_utils)
 
 helpers = test_utils.load_helpers_module()
 
-
 class MockJob:
     def __init__(self, id, workflow_id, status, result=None, seq=0):
         self.id = id
@@ -19,7 +18,6 @@ class MockJob:
         self.status = status
         self.result = result
         self.seq = seq
-
 
 def run_checks():
     j1 = MockJob("r1", "w1", "running", result={"a": 1}, seq=1)
@@ -33,7 +31,6 @@ def run_checks():
     j3 = MockJob("r3", "w3", "running", result={"x": 1}, seq=3)
     out3 = helpers.serialize_job(j3, include_result_for_terminal=True)
     assert out3["result"] == {"x": 1}
-
 
 if __name__ == "__main__":
     run_checks()

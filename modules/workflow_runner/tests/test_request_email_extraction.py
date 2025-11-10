@@ -3,11 +3,11 @@ Simple integration test to verify owner_id extraction from request works correct
 This test doesn't require torch/CUDA since it mocks the downstream dependencies.
 """
 import pytest
-from unittest.mock import Mock, AsyncMock, patch
+
 from aiohttp import web
+from unittest.mock import Mock, AsyncMock, patch
 
 pytestmark = pytest.mark.anyio
-
 
 async def test_controller_extracts_email_from_request_dict_access():
     """Test that controller correctly extracts email using request['google_oauth_email']"""

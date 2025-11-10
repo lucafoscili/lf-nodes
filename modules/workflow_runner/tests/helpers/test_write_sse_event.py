@@ -1,8 +1,7 @@
+import asyncio
 import importlib.util
 import pathlib
 import pytest
-import asyncio
-
 
 spec = importlib.util.spec_from_file_location(
     "test_utils",
@@ -12,7 +11,6 @@ test_utils = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(test_utils)
 
 helpers = test_utils.load_helpers_module()
-
 
 class MockStreamResp:
     def __init__(self, fail_write=False, fail_drain=False):
@@ -30,7 +28,6 @@ class MockStreamResp:
             raise asyncio.CancelledError()
         return None
 
-
 @pytest.mark.asyncio
 async def test_write_sse_event_success():
     resp = MockStreamResp()
@@ -42,14 +39,12 @@ async def test_write_sse_event_success():
     assert "event: run" in payload
     assert '"run_id": "r1"' in payload
 
-
 @pytest.mark.asyncio
 async def test_write_sse_event_client_disconnect_on_write():
     resp = MockStreamResp(fail_write=True)
     ev = {"run_id": "r2", "seq": 2}
     ok = await helpers.write_sse_event(resp, ev)
     assert ok is False
-
 
 @pytest.mark.asyncio
 async def test_write_sse_event_client_disconnect_on_drain():

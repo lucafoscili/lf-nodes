@@ -1,7 +1,7 @@
 import importlib.util
+
 from pathlib import Path
 from typing import Any
-
 
 def find_workflow_runner_base(start: Path | str = None) -> Path:
     p = Path(start or __file__).resolve()
@@ -9,7 +9,6 @@ def find_workflow_runner_base(start: Path | str = None) -> Path:
     if base is None:
         raise RuntimeError("could not locate workflow_runner ancestor")
     return base
-
 
 def load_helpers_module() -> Any:
     """Dynamically load the controllers._helpers module for tests."""
@@ -51,7 +50,6 @@ def load_helpers_module() -> Any:
     mod.__package__ = pkg_prefix + ".controllers"
     spec.loader.exec_module(mod)
     return mod
-
 
 class MockRequest:
     """Lightweight mock request used by multiple workflow_runner tests.

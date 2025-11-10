@@ -30,20 +30,24 @@ def fast_mode_env(monkeypatch):
 @pytest.fixture(autouse=True)
 def reset_job_store_state():
 	"""Ensure job_store globals are cleared between tests to avoid cross-test contamination."""
-	from modules.workflow_runner.services import job_store
-	# Force in-memory mode for tests to avoid adapter dependence
-	job_store._USE_PERSISTENCE = False  # type: ignore[attr-defined]
-	# Reset in-memory collections
-	job_store._jobs.clear()  # type: ignore[attr-defined]
-	job_store._subscribers.clear()  # type: ignore[attr-defined]
-	# Reset adapter to force lazy re-init logic each test
-	job_store._adapter = None  # type: ignore[attr-defined]
-	yield
-	# Post-test cleanup (idempotent)
-	job_store._USE_PERSISTENCE = False  # type: ignore[attr-defined]
-	job_store._jobs.clear()  # type: ignore[attr-defined]
-	job_store._subscribers.clear()  # type: ignore[attr-defined]
-	job_store._adapter = None  # type: ignore[attr-defined]
+	try:
+		from modules.workflow_runner.services import job_store
+		# Force in-memory mode for tests to avoid adapter dependence
+		job_store._USE_PERSISTENCE = False  # type: ignore[attr-defined]
+		# Reset in-memory collections
+		job_store._jobs.clear()  # type: ignore[attr-defined]
+		job_store._subscribers.clear()  # type: ignore[attr-defined]
+		# Reset adapter to force lazy re-init logic each test
+		job_store._adapter = None  # type: ignore[attr-defined]
+		yield
+		# Post-test cleanup (idempotent)
+		job_store._USE_PERSISTENCE = False  # type: ignore[attr-defined]
+		job_store._jobs.clear()  # type: ignore[attr-defined]
+		job_store._subscribers.clear()  # type: ignore[attr-defined]
+		job_store._adapter = None  # type: ignore[attr-defined]
+	except ImportError:
+		# If modules can't be imported, skip the fixture
+		yield
 
 
 @pytest.fixture(autouse=True)

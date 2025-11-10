@@ -1,6 +1,7 @@
-import sys
-from pathlib import Path
 import pytest
+import sys
+
+from pathlib import Path
 from unittest.mock import patch
 
 # make package imports work
@@ -14,8 +15,6 @@ sys.modules['execution'] = Mock()
 sys.modules['server'] = Mock()
 sys.modules['server'].PromptServer = Mock()
 
-import pytest
-
 # Some import paths pull heavy GPU-related modules (torch.cuda) at import time
 # which raise on machines without CUDA support. If that happens, skip these
 # tests gracefully so the CI/dev run stays stable on CPU-only environments.
@@ -27,7 +26,6 @@ except AssertionError as e:
 
 pytestmark = pytest.mark.anyio
 
-
 class FakeResponse:
     def __init__(self):
         self.written = []
@@ -38,7 +36,6 @@ class FakeResponse:
 
     async def drain(self):
         return None
-
 
 async def test_send_initial_snapshot_includes_workflow_id_and_updated_at():
     # create a Job instance to be returned by job_store.list_jobs

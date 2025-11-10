@@ -1,7 +1,6 @@
 import asyncio
 import importlib.util
 import pathlib
-import sys
 
 spec = importlib.util.spec_from_file_location(
     "test_utils", str(pathlib.Path(__file__).resolve().parent / "test_utils.py")
@@ -11,7 +10,6 @@ spec.loader.exec_module(test_utils)
 
 load_helpers_module = test_utils.load_helpers_module
 MockRequest = test_utils.MockRequest
-
 
 async def run_checks():
     helpers = load_helpers_module()
@@ -40,7 +38,6 @@ async def run_checks():
     req = MockRequest(payload=[1])
     body, err = await helpers.parse_json_body(req, expected_type=list)
     assert err is None and body == [1]
-
 
 if __name__ == "__main__":
     try:

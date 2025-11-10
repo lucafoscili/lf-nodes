@@ -1,8 +1,9 @@
 """Negative test: non-dict inputs should raise WorkflowPreparationError (400)."""
 
-import sys
-from pathlib import Path
 import pytest
+import sys
+
+from pathlib import Path
 
 pkg_root = Path(__file__).resolve().parents[3]
 if str(pkg_root) not in sys.path:

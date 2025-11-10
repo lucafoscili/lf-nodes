@@ -1,7 +1,5 @@
 import importlib.util
 import pathlib
-import pytest
-
 
 spec = importlib.util.spec_from_file_location(
     "test_utils",
@@ -13,7 +11,6 @@ spec.loader.exec_module(test_utils)
 helpers = test_utils.load_helpers_module()
 MockRequest = test_utils.MockRequest
 
-
 class MockResponse:
     def __init__(self):
         self.cookies_set = {}
@@ -24,7 +21,6 @@ class MockResponse:
 
     def del_cookie(self, name, **kwargs):
         self.cookies_deleted.append((name, kwargs))
-
 
 def test_create_and_set_session_cookie_success():
     called = {}
@@ -39,7 +35,6 @@ def test_create_and_set_session_cookie_success():
     assert sid == "sess-123"
     assert exp == 999999
     assert resp.cookies_set.get("LF_SESSION") is not None
-
 
 def test_create_and_set_session_cookie_failure():
     def bad_create(email):
