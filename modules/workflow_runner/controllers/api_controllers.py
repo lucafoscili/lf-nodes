@@ -23,6 +23,7 @@ from ._helpers import (
     serialize_job,
     write_sse_event,
     create_and_set_session_cookie,
+    extract_base64_data_from_result,
 )
 
 LOG = logging.getLogger(__name__)
@@ -145,6 +146,9 @@ async def get_workflow_status_controller(request: web.Request) -> web.Response:
     status, and returns it as a JSON response. If the run_id is missing or unknown,
     appropriate HTTP errors are raised.
 
+    When the job is successful and contains image outputs, a "data" field with
+    base64 encoded image data is included in the response.
+
     Args:
         request (web.Request): The incoming web request containing the run_id in the URL match info.
 
@@ -161,6 +165,13 @@ async def get_workflow_status_controller(request: web.Request) -> web.Response:
     status = await get_job_status(run_id)
     if status is None:
         raise web.HTTPNotFound(text="Unknown run id")
+
+    # Add base64 data field if the job succeeded and has results
+    if status.get("status") in ("succeeded", "ready") and status.get("result"):
+        base64_data = extract_base64_data_from_result(status["result"])
+        if base64_data:
+            status["data"] = base64_data
+
     return web.json_response(status)
 # endregion
 

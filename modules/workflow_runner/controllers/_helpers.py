@@ -203,3 +203,154 @@ def parse_last_event_id(header: Optional[str]) -> Optional[tuple[str, int]]:
         LOG.debug("parse_last_event_id: failed to parse header", exc_info=True)
         return None
 # endregion
+
+# region Extract data
+def extract_base64_data_from_result(result: dict) -> Optional[str]:
+    """
+    Extract base64 encoded image/SVG data from workflow result.
+
+    Args:
+        result: The job result dict containing workflow execution data
+
+    Returns:
+        Base64 encoded data string, or None if no suitable data found
+    """
+    import base64
+    import folder_paths
+    import os
+    from PIL import Image
+    import io
+
+    try:
+        if not result or not isinstance(result, dict):
+            return None
+
+        # The result structure is: {"http_status": int, "body": dict}
+        body = result.get("body", {})
+        if not isinstance(body, dict):
+            return None
+
+        # Look for history outputs in the response body
+        history = body.get("payload", {}).get("history", {})
+        outputs = history.get("outputs", {})
+
+        if not outputs:
+            # Fallback for LF workflows: look for recently created files in output directory
+            # This handles cases where ComfyUI history doesn't contain outputs for custom nodes
+            try:
+                output_dir = folder_paths.get_directory_by_type("output")
+                if output_dir and os.path.exists(output_dir):
+                    # Look for PNG files (most common for LF workflows)
+                    png_files = [f for f in os.listdir(output_dir) if f.endswith('.png')]
+                    if png_files:
+                        # Sort by modification time, take the most recent
+                        png_files.sort(key=lambda f: os.path.getmtime(os.path.join(output_dir, f)), reverse=True)
+                        image_filename = png_files[0]
+                        img_type = "output"
+                        subfolder = ""
+                    else:
+                        return None
+                else:
+                    return None
+            except Exception as fallback_exc:
+                LOG.warning(f"Fallback file search failed: {fallback_exc}")
+                return None
+        else:
+            # Normal processing with history outputs
+            # Find the preferred output or any output with images
+            preferred_output = body.get("payload", {}).get("preferred_output")
+            target_output = None
+
+            if preferred_output and preferred_output in outputs:
+                target_output = outputs[preferred_output]
+            else:
+                # Find any output with images (either standard ComfyUI format or LF format)
+                for output_name, output_data in outputs.items():
+                    if isinstance(output_data, dict):
+                        # Check for standard ComfyUI images
+                        if output_data.get("images") or output_data.get("lf_images"):
+                            target_output = output_data
+                            break
+                        # Check for LF custom format
+                        if output_data.get("lf_output"):
+                            lf_output = output_data.get("lf_output")
+                            if isinstance(lf_output, list) and lf_output and isinstance(lf_output[0], dict):
+                                if lf_output[0].get("file_names"):
+                                    target_output = output_data
+                                    break
+
+            if not target_output:
+                return None
+
+            # Extract images from the output
+            image_filename = None
+
+            # Try standard ComfyUI format first
+            images = target_output.get("images") or target_output.get("lf_images", [])
+            if images and isinstance(images, list) and images:
+                first_image = images[0]
+                if isinstance(first_image, dict):
+                    filename = first_image.get("filename")
+                    subfolder = first_image.get("subfolder", "")
+                    img_type = first_image.get("type", "output")
+                    image_filename = filename
+                    img_type = img_type
+                    subfolder = subfolder
+
+            # Try LF custom format
+            if not image_filename:
+                lf_output = target_output.get("lf_output")
+                if isinstance(lf_output, list) and lf_output:
+                    first_lf = lf_output[0]
+                    if isinstance(first_lf, dict):
+                        file_names = first_lf.get("file_names")
+                        if isinstance(file_names, list) and file_names:
+                            image_filename = file_names[0]
+                            img_type = "output"
+                            subfolder = ""
+
+            if not image_filename:
+                return None
+
+        # Build the full path
+        output_dir = folder_paths.get_directory_by_type(img_type)
+        if not output_dir:
+            return None
+
+        if subfolder:
+            full_path = os.path.join(output_dir, subfolder, image_filename)
+        else:
+            full_path = os.path.join(output_dir, image_filename)
+
+        # Check if file exists
+        if not os.path.exists(full_path):
+            LOG.warning(f"Image file not found: {full_path}")
+            return None
+
+        # Read and encode the image
+        try:
+            with Image.open(full_path) as img:
+                # Convert to RGB if necessary
+                if img.mode not in ('RGB', 'RGBA'):
+                    img = img.convert('RGB')
+
+                # Save to bytes buffer
+                buffer = io.BytesIO()
+                img.save(buffer, format='PNG')
+                buffer.seek(0)
+
+                # Encode to base64
+                image_data = buffer.getvalue()
+                base64_data = base64.b64encode(image_data).decode('utf-8')
+
+                # Return with data URL format
+                return f"data:image/png;base64,{base64_data}"
+
+        except Exception as img_exc:
+            LOG.exception(f"Failed to process image {full_path}")
+            return None
+
+    except Exception as exc:
+        LOG.exception("Failed to extract base64 data from result")
+        return None
+# endregion
