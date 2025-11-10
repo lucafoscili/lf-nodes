@@ -1,6 +1,8 @@
+import aiohttp
 import asyncio
 import json
 import logging
+import time
 
 from aiohttp import web
 
@@ -11,11 +13,12 @@ from ..services.auth_service import (
     _ENABLE_GOOGLE_OAUTH,
     _WF_DEBUG,
 )
-from ..services.executor import WorkflowPreparationError
+from ..services.executor import WorkflowPreparationError, execute_workflow, _make_run_payload
 from ..services.job_service import get_job_status
 from ..services import job_store
 from ..services.run_service import run_workflow
 from ..services.workflow_service import list_workflows as svc_list_workflows, get_workflow_content
+from ..config import get_settings
 
 from ._helpers import (
     parse_json_body,
@@ -23,11 +26,25 @@ from ._helpers import (
     serialize_job,
     write_sse_event,
     create_and_set_session_cookie,
+    extract_base64_data_from_result,
 )
 
 LOG = logging.getLogger(__name__)
 
 # region Helpers
+async def _update_job_status_from_history(run_id: str, entry: dict):
+    """Update stored job status from ComfyUI history entry."""
+    status = entry.get("status") or {}
+    if status.get("completed") is True:
+        result = {"http_status": 200, "body": _make_run_payload(history=entry)}
+        await job_store.set_job_status(run_id, job_store.JobStatus.SUCCEEDED, result=result)
+    elif status.get("status_str") == "error":
+        result = {"http_status": 500, "body": _make_run_payload(history=entry, error_message="execution_error")}
+        await job_store.set_job_status(run_id, job_store.JobStatus.FAILED, result=result, error="execution_error")
+    elif entry.get("outputs"):
+        result = {"http_status": 200, "body": _make_run_payload(history=entry)}
+        await job_store.set_job_status(run_id, job_store.JobStatus.SUCCEEDED, result=result)
+
 async def _send_initial_snapshot(resp: web.Response, subscriber_owner: str | None = None, last_event: tuple[str, int] | None = None) -> None:
         """
         Send an initial snapshot of active (pending or running) jobs to the SSE client.
@@ -107,11 +124,21 @@ async def start_workflow_controller(request: web.Request) -> web.Response:
     if err:
         return err
 
+    user_agent = request.headers.get('User-Agent', '').lower()
+    origin = request.headers.get('Origin')
+    referer = request.headers.get('Referer', '')
+    is_headless = (
+        'curl' in user_agent or
+        'python' in user_agent or
+        'wget' in user_agent or
+        (not origin and not referer) or
+        'postman' in user_agent.lower()
+    )
+
     try:
-        result = await run_workflow(payload, owner_id=owner_id)
+        result = await run_workflow(payload, owner_id=owner_id, is_api_call=is_headless)
         return web.json_response(result, status=202)
     except WorkflowPreparationError as exc:
-        # Bubble the prepared response body and status (matches previous behaviour)
         return web.json_response(exc.response_body, status=exc.status)
     except Exception as exc:
         return web.json_response({"detail": "service_error", "error": str(exc)}, status=500)
@@ -126,6 +153,9 @@ async def get_workflow_status_controller(request: web.Request) -> web.Response:
     identified by its run_id. It validates the presence of the run_id, queries the job
     status, and returns it as a JSON response. If the run_id is missing or unknown,
     appropriate HTTP errors are raised.
+
+    When the job is successful and contains image outputs, a "data" field with
+    base64 encoded image data is included in the response.
 
     Args:
         request (web.Request): The incoming web request containing the run_id in the URL match info.
@@ -143,6 +173,13 @@ async def get_workflow_status_controller(request: web.Request) -> web.Response:
     status = await get_job_status(run_id)
     if status is None:
         raise web.HTTPNotFound(text="Unknown run id")
+
+    # Add base64 data field if the job succeeded and has results
+    if status.get("status") in ("succeeded", "ready") and status.get("result"):
+        base64_data = extract_base64_data_from_result(status["result"])
+        if base64_data:
+            status["data"] = base64_data
+
     return web.json_response(status)
 # endregion
 
@@ -185,8 +222,7 @@ async def stream_runs_controller(request: web.Request) -> web.Response:
         try:
             # reuse centralized helper; it's defensive and avoids importing auth_service here
             subscriber_owner = await get_owner_from_request(request)
-            if _WF_DEBUG:
-                print(f"[stream_runs_controller] Derived subscriber_owner: {subscriber_owner}")
+            LOG.debug(f"[stream_runs_controller] Derived subscriber_owner: {subscriber_owner}")
         except Exception:
             subscriber_owner = None
 
@@ -280,17 +316,17 @@ async def list_runs_controller(request: web.Request) -> web.Response:
     Returns a JSON payload:
       { runs: [ { run_id, status, seq, owner_id?, created_at, updated_at, result?, error? }, ... ] }
     """
-    if _WF_DEBUG:
-        print(f"[list_runs_controller] Called with query: {dict(request.query)}")
+    
+    LOG.debug(f"[list_runs_controller] Called with query: {dict(request.query)}")
 
     if _ENABLE_GOOGLE_OAUTH:
         auth_resp = await _require_auth(request)
+
         if isinstance(auth_resp, web.Response):
-            if _WF_DEBUG:
-                print(f"[list_runs_controller] Auth failed, returning {auth_resp.status}")
+            LOG.debug(f"[list_runs_controller] Auth failed, returning {auth_resp.status}")
             return auth_resp
-        if _WF_DEBUG:
-            print(f"[list_runs_controller] Auth succeeded")
+        
+        LOG.debug(f"[list_runs_controller] Auth succeeded")
 
     # parse query params
     status_q = request.query.get("status")
@@ -311,12 +347,10 @@ async def list_runs_controller(request: web.Request) -> web.Response:
     if owner_q == "me" and _ENABLE_GOOGLE_OAUTH:
         try:
             subj = request.get('google_oauth_email', None)
-            if _WF_DEBUG:
-                print(f"[list_runs_controller] Extracted email for owner filtering: {subj}")
+            LOG.debug(f"[list_runs_controller] Extracted email for owner filtering: {subj}")
             from ..services.auth_service import derive_owner_id
             owner_id = derive_owner_id(subj or "")
-            if _WF_DEBUG:
-                print(f"[list_runs_controller] Derived owner_id for filtering: {owner_id}")
+            LOG.debug(f"[list_runs_controller] Derived owner_id for filtering: {owner_id}")
         except Exception:
             owner_id = None
     elif owner_q and owner_q != "me":
@@ -371,6 +405,85 @@ async def list_runs_controller(request: web.Request) -> web.Response:
     return web.json_response({"runs": runs_out})
 # endregion
 
+# region Get Workflow Status
+async def get_workflow_status_controller(request: web.Request) -> web.Response:
+    """
+    Get the status of a specific workflow run.
+
+    Returns workflow status with optional base64 encoded data field for completed runs.
+    Sets appropriate Content-Type header based on the data type (image/png, image/jpeg, image/svg+xml).
+    """
+    run_id = request.match_info.get('run_id')
+    if not run_id:
+        return web.json_response({"detail": "missing_run_id"}, status=400)
+
+    if _ENABLE_GOOGLE_OAUTH:
+        auth_resp = await _require_auth(request)
+        if isinstance(auth_resp, web.Response):
+            return auth_resp
+
+    job_status = await get_job_status(run_id)
+    if not job_status:
+        # Not found in DB, try fetching from ComfyUI history (for headless runs)
+        settings = get_settings()
+        comfy_url = settings.COMFY_BACKEND_URL
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(f"{comfy_url}/history/{run_id}") as resp:
+                    if resp.status == 200:
+                        entry : dict [str, dict | list] = await resp.json()
+                        outputs = entry.get(run_id).get("outputs") if entry.get(run_id) else entry.get("outputs")
+                        if outputs:
+                            # Add base64 data for successful runs
+                            # Create the expected result structure for extract_base64_data_from_result
+                            mock_result = {
+                                "http_status": 200,
+                                "body": {
+                                    "payload": {
+                                        "history": {
+                                            "outputs": outputs
+                                        }
+                                    }
+                                }
+                            }
+                            data_tuple = extract_base64_data_from_result(mock_result)
+                            if data_tuple:
+                                mime_type, base64_data = data_tuple
+                                return web.json_response({"data": base64_data}, content_type=mime_type)
+                        
+                        return web.json_response({"status": "completed"})
+                    else:
+                        return web.json_response({"detail": "run_not_found"}, status=404)
+        except Exception as e:
+            LOG.warning("Failed to fetch history for %s: %s", run_id, e)
+            return web.json_response({"detail": "Headless run not found"}, status=404)
+    else:
+        # For stored jobs, check if pending and update from history
+        if job_status.get("status") == "pending":
+            settings = get_settings()
+            comfy_url = settings.COMFY_BACKEND_URL
+            try:
+                async with aiohttp.ClientSession() as session:
+                    async with session.get(f"{comfy_url}/history/{run_id}") as resp:
+                        if resp.status == 200:
+                            entry = await resp.json()
+                            await _update_job_status_from_history(run_id, entry)
+                            job_status = await get_job_status(run_id)
+            except Exception as e:
+                LOG.warning("Failed to check history for stored job %s: %s", run_id, e)
+        
+        response_data = serialize_job(job_status)
+
+        if response_data.get("status") == "succeeded" and response_data.get("result"):
+            data_tuple = extract_base64_data_from_result(response_data["result"])
+            if data_tuple:
+                mime_type, base64_data = data_tuple
+                response_data["data"] = base64_data
+                return web.json_response(response_data, content_type=mime_type)
+
+        return web.json_response(response_data)
+# endregion
+
 # region Admin debug UI (debug-only)
 async def admin_runs_page(request: web.Request) -> web.Response:
         """Serve a tiny debug HTML page that fetches the admin runs JSON endpoint.
@@ -378,7 +491,7 @@ async def admin_runs_page(request: web.Request) -> web.Response:
         This page is only available when workflow-runner debug mode (`_WF_DEBUG`) is enabled.
         """
         if not _WF_DEBUG:
-                return web.json_response({"detail": "not_enabled"}, status=404)
+            return web.json_response({"detail": "not_enabled"}, status=404)
 
         html = """
         <!doctype html>
@@ -482,6 +595,23 @@ async def admin_runs_api(request: web.Request) -> web.Response:
             "error": s.get("error"),
         })
     return web.json_response({"runs": out})
+# endregion
+
+# region Models
+async def list_models_controller(request: web.Request) -> web.Response:
+    """
+    Asynchronous handler for retrieving available models from all engines.
+
+    Returns a JSON response with engines and their models.
+    """
+    from ..services.model_service import get_all_models
+
+    try:
+        models_data = await get_all_models()
+        return web.json_response(models_data)
+    except Exception as exc:
+        LOG.exception("Error retrieving models")
+        return web.json_response({"detail": "service_error", "error": str(exc)}, status=500)
 # endregion
 
 # region Get Workflow

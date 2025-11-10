@@ -55,6 +55,13 @@ else:
         return await api_controllers.stream_runs_controller(request)
     # endregion
 
+    # region Models
+    @PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/models")
+    async def route_list_models(request: web.Request) -> web.Response:
+        api_controllers = _get_api_controllers()
+        return await api_controllers.list_models_controller(request)
+    # endregion
+
     # region Workflows
     @PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/workflows")
     async def route_list_workflows(request: web.Request) -> web.Response:

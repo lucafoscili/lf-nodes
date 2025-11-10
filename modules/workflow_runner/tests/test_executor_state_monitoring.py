@@ -1,11 +1,12 @@
 ﻿"""Tests for _monitor_until_running function."""
 import asyncio
 import pytest
-pytestmark = [pytest.mark.asyncio, pytest.mark.integration]
+import sys
+
+from pathlib import Path
 from unittest.mock import AsyncMock, patch
 
-import sys
-from pathlib import Path
+pytestmark = [pytest.mark.asyncio, pytest.mark.integration]
 
 # Add package root to path (same as other working tests)
 pkg_root = Path(__file__).resolve().parents[3]

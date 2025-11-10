@@ -4,11 +4,11 @@ Comprehensive test suite for owner_id propagation through the workflow runner.
 This test file traces owner_id from authentication through to persistence,
 helping identify where the value gets lost or incorrectly passed.
 """
-import asyncio
 import pytest
 import sys
+
 from pathlib import Path
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
+from unittest.mock import Mock, AsyncMock, patch
 
 # Add package root to path so imports resolve
 pkg_root = Path(__file__).resolve().parents[3]

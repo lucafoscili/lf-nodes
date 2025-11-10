@@ -1,7 +1,5 @@
 import importlib.util
 import pathlib
-import pytest
-
 
 spec = importlib.util.spec_from_file_location(
     "test_utils",
@@ -11,7 +9,6 @@ test_utils = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(test_utils)
 
 helpers = test_utils.load_helpers_module()
-
 
 class MockJob:
     def __init__(self, id, workflow_id, status, result=None, error=None, owner_id=None, seq=0, created_at=1.0, updated_at=None):
@@ -26,7 +23,6 @@ class MockJob:
         self.created_at = created_at
         self.updated_at = updated_at
 
-
 def test_serialize_job_non_terminal_hides_result():
     job = MockJob("run-1", "wf-1", "running", result={"foo": "bar"}, seq=5)
     out = helpers.serialize_job(job)
@@ -34,12 +30,10 @@ def test_serialize_job_non_terminal_hides_result():
     assert out["seq"] == 5
     assert out["result"] is None
 
-
 def test_serialize_job_terminal_includes_result():
     job = MockJob("run-2", "wf-2", "succeeded", result={"ok": True}, seq=2)
     out = helpers.serialize_job(job)
     assert out["result"] == {"ok": True}
-
 
 def test_serialize_job_force_include_result():
     job = MockJob("run-3", "wf-3", "running", result={"x": 1}, seq=3)

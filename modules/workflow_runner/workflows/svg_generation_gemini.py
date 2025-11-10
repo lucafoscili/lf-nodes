@@ -19,7 +19,7 @@ def _configure(prompt: Dict[str, Any], inputs: Dict[str, Any]) -> None:
             else:
                 raise InputValidationError(name)
         
-        if node_id == "22":  # Icon size
+        if node_id == "22":  # Icon size (optional)
             name = "icon_size"
             icon_size = inputs.get(name)
             if icon_size:

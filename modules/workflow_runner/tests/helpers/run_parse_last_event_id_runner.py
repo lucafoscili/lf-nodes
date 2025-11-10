@@ -10,14 +10,12 @@ spec.loader.exec_module(test_utils)
 
 helpers = test_utils.load_helpers_module()
 
-
 def run_checks():
     assert helpers.parse_last_event_id("run-1:5") == ("run-1", 5)
     assert helpers.parse_last_event_id("run-x") == ("run-x", 0)
     assert helpers.parse_last_event_id("") is None
     assert helpers.parse_last_event_id(None) is None
     assert helpers.parse_last_event_id("bad:seq") is None
-
 
 if __name__ == "__main__":
     run_checks()

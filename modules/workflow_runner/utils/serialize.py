@@ -31,8 +31,11 @@ def serialize_job(job: Any, include_result_for_terminal: bool = False) -> dict:
         if not include_result_for_terminal and (status not in terminal_statuses):
             result = None
 
+        # Only build id if run_id exists
+        job_id = f"{run_id}:{seq}" if run_id else None
+
         return {
-            "id": f"{run_id}:{seq}",
+            "id": job_id,
             "run_id": run_id,
             "workflow_id": workflow_id,
             "status": status,

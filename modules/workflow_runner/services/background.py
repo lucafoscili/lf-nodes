@@ -13,6 +13,8 @@ _JOB_TTL_SECONDS = int(_settings.JOB_TTL_SECONDS or 300)
 _JOB_PRUNE_INTERVAL = int(_settings.JOB_PRUNE_INTERVAL_SECONDS or 60)
 _SESSION_PRUNE_INTERVAL = int(_settings.SESSION_PRUNE_INTERVAL_SECONDS or 60)
 _QUEUE_STATUS_INTERVAL = 1  # Send queue updates every second
+# Stuck pending jobs are jobs that have been pending for too long without background processing
+_STUCK_PENDING_TTL_SECONDS = 600  # 10 minutes - much shorter than regular job TTL
 # endregion
 
 # region Helpers
@@ -48,6 +50,22 @@ async def _job_pruner_loop(job_manager_module) -> None:
                     if job.status in {job_manager_module.JobStatus.SUCCEEDED, job_manager_module.JobStatus.FAILED, job_manager_module.JobStatus.CANCELLED}:
                         if (job.created_at + _JOB_TTL_SECONDS) <= now:
                             to_remove.append(jid)
+                    elif job.status == job_manager_module.JobStatus.PENDING:
+                        # Handle stuck pending jobs - these indicate background processing failed
+                        if (job.created_at + _STUCK_PENDING_TTL_SECONDS) <= now:
+                            logging.warning("Found stuck pending job %s (created %d seconds ago), marking as failed", 
+                                          jid, int(now - job.created_at))
+                            try:
+                                # Mark as failed with a clear error message
+                                await job_manager_module.set_job_status(
+                                    jid, 
+                                    job_manager_module.JobStatus.FAILED, 
+                                    error="background_processing_failed",
+                                    result={"http_status": 500, "body": {"detail": "background_processing_failed", "error": "Background processing unavailable"}}
+                                )
+                                # Now it will be cleaned up on the next prune cycle
+                            except Exception:
+                                logging.exception("Failed to mark stuck pending job %s as failed", jid)
 
                 for jid in to_remove:
                     try:

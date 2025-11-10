@@ -8,11 +8,11 @@ Verifies that:
 4. create_job doesn't clobber existing rows
 """
 
-import sys
-from pathlib import Path
-import pytest
 import asyncio
-import tempfile
+import pytest
+import sys
+
+from pathlib import Path
 
 # ensure package root on path
 pkg_root = Path(__file__).resolve().parents[3]

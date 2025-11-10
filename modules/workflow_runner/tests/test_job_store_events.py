@@ -1,6 +1,7 @@
-import sys
-from pathlib import Path
 import pytest
+import sys
+
+from pathlib import Path
 from unittest.mock import patch
 
 # ensure package root on path
@@ -11,7 +12,6 @@ if str(pkg_root) not in sys.path:
 from modules.workflow_runner.services import job_store
 
 pytestmark = pytest.mark.anyio
-
 
 async def test_create_job_publishes_event_with_workflow_and_updated_at():
     # use in-memory store
@@ -26,7 +26,6 @@ async def test_create_job_publishes_event_with_workflow_and_updated_at():
         assert 'created_at' in ev
         assert 'seq' in ev
         job_store.unsubscribe_events(q)
-
 
 async def test_set_job_status_publishes_event_preserving_workflow_id():
     with patch.object(job_store, '_USE_PERSISTENCE', False):

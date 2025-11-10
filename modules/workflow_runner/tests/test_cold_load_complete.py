@@ -2,15 +2,14 @@
 Test suite for cold-load (page refresh) with real authenticated requests.
 Tests the complete flow: browser refresh → GET /runs?owner=me → list_runs_controller
 """
-import pytest
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
-from aiohttp import web
 import json
+import pytest
 import sys
+
+from aiohttp import web
 from pathlib import Path
 
-import sys
-from pathlib import Path
+from unittest.mock import Mock, patch
 
 # Add package root to path BEFORE any imports
 pkg_root = Path(__file__).resolve().parents[2]
@@ -31,7 +30,6 @@ sys.modules['server'] = Mock()
 sys.modules['server'].PromptServer = Mock()
 
 pytestmark = pytest.mark.anyio
-
 
 class TestColdLoadWithAuth:
     """Test cold-load behavior with authentication."""
@@ -189,7 +187,6 @@ class TestColdLoadWithAuth:
                 print(f"  ✓ UI cold-load correctly filters by owner_id!")
                 print(f"  ✓ User sees only their 2 jobs, not other user's job")
 
-
 class TestColdLoadFailureModes:
     """Test what happens when cold-load fails."""
     
@@ -260,9 +257,7 @@ class TestColdLoadFailureModes:
                 assert len(runs) >= 1
                 print(f"    ✓ Returns all jobs (owner=me ignored)")
 
-
 if __name__ == "__main__":
-    import asyncio
     import sys
     
     print("=" * 60)

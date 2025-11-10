@@ -3,7 +3,7 @@ Test suite for cold-load (page refresh) functionality.
 Investigates why UI shows empty run history after refresh.
 """
 import pytest
-from unittest.mock import Mock, AsyncMock, patch
+from unittest.mock import Mock, patch
 import sys
 from pathlib import Path
 
@@ -20,7 +20,6 @@ from modules.workflow_runner.services import job_store
 from modules.workflow_runner.services.job_store import JobStatus, Job
 
 pytestmark = pytest.mark.anyio
-
 
 class TestListJobsFiltering:
     """Test that list_jobs correctly filters by owner_id."""
@@ -63,7 +62,6 @@ class TestListJobsFiltering:
             
             assert len(all_jobs) >= 2, f"Expected at least 2 jobs, got {len(all_jobs)}"
 
-
 class TestListRunsAPIEndpoint:
     """Test the list_runs_controller endpoint with owner filtering."""
     
@@ -80,7 +78,6 @@ class TestListRunsAPIEndpoint:
         
         # Mock job_store to capture the owner_id parameter
         captured_owner_ids = []
-        original_list_jobs = job_store.list_jobs
         
         async def mock_list_jobs(owner_id=None, status=None):
             captured_owner_ids.append(owner_id)
@@ -146,7 +143,6 @@ class TestListRunsAPIEndpoint:
             assert run["run_id"] == "test-123"
             assert run["owner_id"] == "owner123"
             assert run["updated_at"] == 12345.0
-
 
 class TestOwnerIdDerivationConsistency:
     """Test that owner_id derivation is consistent across endpoints."""

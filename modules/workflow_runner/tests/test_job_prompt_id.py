@@ -4,8 +4,8 @@ Tests the job store and serialization without requiring CUDA/ComfyUI imports.
 Replaces print-based validation with direct assertions and removes duplicate class wrapper.
 """
 
-import asyncio
 import pytest
+
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from enum import Enum
@@ -14,7 +14,6 @@ from typing import Optional, Dict, Any
 # Configure pytest-anyio to use asyncio backend for all async tests
 pytestmark = pytest.mark.anyio
 
-
 # Minimal local definitions to avoid imports
 class JobStatus(Enum):
     PENDING = "pending"
@@ -22,7 +21,6 @@ class JobStatus(Enum):
     SUCCESS = "success"
     FAILED = "failed"
     CANCELLED = "cancelled"
-
 
 @dataclass
 class Job:
@@ -43,7 +41,6 @@ class Job:
         if self.updated_at is None:
             self.updated_at = self.created_at
 
-
 def serialize_job(job: Job) -> Dict[str, Any]:
     """Simplified version of serialize_job from utils/serialize.py."""
     run_id = getattr(job, "id", None) or getattr(job, "run_id", None)
@@ -56,7 +53,6 @@ def serialize_job(job: Job) -> Dict[str, Any]:
         "updatedAt": job.updated_at.isoformat() if job.updated_at else None,
         "error": job.error,
     }
-
 
 async def test_job_structure():
     """Test that Job structure and serialization work correctly with prompt_id."""

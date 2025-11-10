@@ -11,11 +11,12 @@ Tests cover the new HTTP API approach:
 """
 
 import asyncio
-import json
 import pytest
-pytestmark = [pytest.mark.asyncio, pytest.mark.integration]
-from unittest.mock import AsyncMock, MagicMock, patch
+
+from unittest.mock import patch
 from typing import Dict, Any, Tuple
+
+pytestmark = [pytest.mark.asyncio, pytest.mark.integration]
 
 # region Embedded function implementations for standalone testing
 class JobStatus(str):
@@ -283,7 +284,6 @@ async def set_job_status(run_id, status):
 
 # endregion
 
-
 class MockResponse:
     """Mock aiohttp response."""
     def __init__(self, status: int = 200, json_data: Dict[str, Any] = None, text: str = ""):
@@ -306,7 +306,6 @@ class MockResponse:
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         pass
-
 
 class MockSession:
     """Mock aiohttp ClientSession."""
@@ -340,12 +339,10 @@ class MockSession:
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         pass
 
-
 @pytest.fixture
 def mock_session():
     """Create mock aiohttp session."""
     return MockSession()
-
 
 @pytest.fixture
 def mock_aiohttp_session(mock_session):
@@ -353,30 +350,25 @@ def mock_aiohttp_session(mock_session):
     with patch('aiohttp.ClientSession', return_value=mock_session):
         yield mock_session
 
-
 @pytest.fixture
 def mock_validation():
     """Mock validation - no longer needed since we embedded the function."""
     yield None
-
 
 @pytest.fixture
 def mock_set_job_status():
     """Mock set_job_status function - no longer needed since we embedded it."""
     yield None
 
-
 @pytest.fixture
 def mock_get_settings():
     """Mock get_settings - no longer needed since we embedded it."""
     yield None
 
-
 @pytest.fixture
 def mock_runner_config():
     """Mock RUNNER_CONFIG - no longer needed since we embedded it."""
     yield None
-
 
 # Test 1: Successful prompt submission
 @pytest.mark.asyncio
@@ -414,7 +406,6 @@ async def test_successful_prompt_submission(mock_aiohttp_session):
     assert mock_aiohttp_session.post_call_count == 1
     assert mock_aiohttp_session.get_call_count == 2  # One for monitor, one for wait
 
-
 # Test 2: Configurable backend URL
 @pytest.mark.asyncio
 async def test_configurable_backend_url(mock_aiohttp_session):
@@ -442,7 +433,6 @@ async def test_configurable_backend_url(mock_aiohttp_session):
     # Verify the correct URL was used
     # Note: We can't easily inspect the URL in our mock, but the test passes if it works
 
-
 # Test 3: HTTP error handling - prompt submission failure
 @pytest.mark.asyncio
 async def test_prompt_submission_failure(mock_aiohttp_session):
@@ -463,7 +453,6 @@ async def test_prompt_submission_failure(mock_aiohttp_session):
     assert http_code == 500
     assert response["status"] == "error"
     assert "Failed to queue prompt" in response["payload"]["detail"]
-
 
 # Test 4: Timeout behavior
 @pytest.mark.asyncio
@@ -488,7 +477,6 @@ async def test_execution_timeout(mock_aiohttp_session):
     assert status == JobStatus.FAILED
     assert http_code == 504
 
-
 # Test 5: _wait_for_completion function
 @pytest.mark.asyncio
 async def test_wait_for_completion_success(mock_aiohttp_session):
@@ -507,7 +495,6 @@ async def test_wait_for_completion_success(mock_aiohttp_session):
     assert result["status"]["status_str"] == "success"
     assert result["outputs"]["1"]["images"] == []
 
-
 # Test 6: _monitor_execution_state function
 @pytest.mark.asyncio
 async def test_monitor_execution_state(mock_aiohttp_session):
@@ -525,7 +512,6 @@ async def test_monitor_execution_state(mock_aiohttp_session):
 
     # Test completes without error (embedded set_job_status does nothing)
 
-
 # Test 7: Validation failure handling
 @pytest.mark.asyncio
 async def test_validation_failure():
@@ -541,7 +527,6 @@ async def test_validation_failure():
     assert status == JobStatus.FAILED
     assert http_code == 400
     assert "validation_failed" in response["payload"]["error"]["message"]
-
 
 # Test 8: Workflow not found
 @pytest.mark.asyncio

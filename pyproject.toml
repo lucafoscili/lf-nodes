@@ -1,7 +1,7 @@
 [project]
 name = "lf-nodes"
 description = "Custom nodes with a touch of extra UX ✨ Client-side LLM chat, mid-workflow image editing, history for primitives, JSON manipulation, analytics nodes, CivitAI metadata fetching and saving... and more!"
-version = "2.1.0"
+version = "2.2.0"
 license = {file = "LICENSE"}
 dependencies = [
     "GPUtil",
@@ -32,4 +32,4 @@ Repository = "https://github.com/lucafoscili/lf-nodes"
 [tool.comfy]
 PublisherId = "lucafoscili"
 DisplayName = "LF Nodes"
-Icon = "https://github.com/lucafoscili/lucafoscili/blob/996cb0c00612e3278798c32eea80f1332277132e/lf-nodes/logo/LFN.png"
+Icon = "https://github.com/lucafoscili/lucafoscili/blob/996cb0c00612e3278798c32eea80f1332277132e/lf-nodes/logo/LFN.png?raw=true"

@@ -3,10 +3,11 @@ Test suite for updated_at field propagation in workflow runner.
 Investigates why updated_at remains NULL/empty in database.
 """
 import pytest
-import time
-from unittest.mock import Mock, AsyncMock, patch
 import sys
+import time
+
 from pathlib import Path
+from unittest.mock import Mock, AsyncMock, patch
 
 # Add package root to path
 pkg_root = Path(__file__).resolve().parents[3]
@@ -21,7 +22,6 @@ from modules.workflow_runner.services import job_store
 from modules.workflow_runner.services.job_store import JobStatus
 
 pytestmark = pytest.mark.anyio
-
 
 class TestUpdatedAtInMemory:
     """Test that in-memory job store would handle updated_at if the field existed."""
@@ -69,7 +69,6 @@ class TestUpdatedAtInMemory:
             # In-memory Job dataclass now includes updated_at and it should be set on status update
             assert hasattr(updated, 'updated_at')
             assert isinstance(updated.updated_at, float)
-
 
 class TestUpdatedAtSQLite:
     """Test SQLite adapter's handling of updated_at field."""
