@@ -32,4 +32,4 @@ Repository = "https://github.com/lucafoscili/lf-nodes"
 [tool.comfy]
 PublisherId = "lucafoscili"
 DisplayName = "LF Nodes"
-Icon = "https://github.com/lucafoscili/lucafoscili/blob/996cb0c00612e3278798c32eea80f1332277132e/lf-nodes/logo/LFN.png"
+Icon = "https://github.com/lucafoscili/lucafoscili/blob/996cb0c00612e3278798c32eea80f1332277132e/lf-nodes/logo/LFN.png?raw=true"
