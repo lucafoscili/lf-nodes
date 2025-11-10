@@ -11,7 +11,7 @@ from ..services.auth_service import (
     _ENABLE_GOOGLE_OAUTH,
     _WF_DEBUG,
 )
-from ..services.executor import WorkflowPreparationError
+from ..services.executor import WorkflowPreparationError, execute_workflow
 from ..services.job_service import get_job_status
 from ..services import job_store
 from ..services.run_service import run_workflow
@@ -107,9 +107,27 @@ async def start_workflow_controller(request: web.Request) -> web.Response:
     if err:
         return err
 
+    user_agent = request.headers.get('User-Agent', '').lower()
+    origin = request.headers.get('Origin')
+    referer = request.headers.get('Referer', '')
+    is_headless = (
+        'curl' in user_agent or
+        'python' in user_agent or
+        'wget' in user_agent or
+        (not origin and not referer) or
+        'postman' in user_agent.lower()
+    )
+
     try:
-        result = await run_workflow(payload, owner_id=owner_id)
-        return web.json_response(result, status=202)
+        if is_headless:
+            # Execute synchronously for headless requests - no job tracking
+            LOG.debug("Detected headless request, executing synchronously")
+            prompt_id, status, response, http_status = await execute_workflow(payload)
+            return web.json_response(response, status=http_status)
+        else:
+            # Use async job system for web UI requests
+            result = await run_workflow(payload, owner_id=owner_id)
+            return web.json_response(result, status=202)
     except WorkflowPreparationError as exc:
         # Bubble the prepared response body and status (matches previous behaviour)
         return web.json_response(exc.response_body, status=exc.status)
