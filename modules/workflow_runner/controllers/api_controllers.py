@@ -502,6 +502,23 @@ async def admin_runs_api(request: web.Request) -> web.Response:
     return web.json_response({"runs": out})
 # endregion
 
+# region Models
+async def list_models_controller(request: web.Request) -> web.Response:
+    """
+    Asynchronous handler for retrieving available models from all engines.
+
+    Returns a JSON response with engines and their models.
+    """
+    from ..services.model_service import get_all_models
+
+    try:
+        models_data = await get_all_models()
+        return web.json_response(models_data)
+    except Exception as exc:
+        LOG.exception("Error retrieving models")
+        return web.json_response({"detail": "service_error", "error": str(exc)}, status=500)
+# endregion
+
 # region Get Workflow
 async def get_workflow_controller(request: web.Request) -> web.Response:
     """
