@@ -2,6 +2,7 @@
 """
 Tests for extract_base64_data_from_result function
 """
+import base64
 import importlib.util
 import pathlib
 import pytest
@@ -123,12 +124,11 @@ class TestExtractBase64DataFromResult:
     @patch('PIL.Image.open')
     def test_standard_comfyui_format(self, mock_image_open, mock_exists, mock_get_dir, helpers):
         """Test with standard ComfyUI output format."""
-        # Create a mock image with save method that writes actual data
+        # Create a mock image
         mock_img = mock_image_open.return_value.__enter__.return_value
         mock_img.mode = 'RGB'
         mock_img.convert.return_value = mock_img
-        mock_img.save = lambda buffer, format: buffer.write(b'mock_png_data')
-
+        
         # Mock the file system
         mock_get_dir.return_value = '/tmp/output'
         mock_exists.return_value = True
@@ -155,23 +155,29 @@ class TestExtractBase64DataFromResult:
             }
         }
 
-        with patch('builtins.open', mock_open()) as mock_file:
+        with patch('io.BytesIO') as mock_buffer_class:
+            mock_buffer = mock_buffer_class.return_value
+            mock_buffer.getvalue.return_value = b'mock_png_data'
+            
             result_data = helpers.extract_base64_data_from_result(result)
 
         assert result_data is not None
-        assert result_data.startswith('data:image/png;base64,')
+        assert isinstance(result_data, tuple)
+        assert len(result_data) == 2
+        mime_type, base64_data = result_data
+        assert mime_type == "image/png"
+        assert base64_data == base64.b64encode(b'mock_png_data').decode('utf-8')
 
     @patch('folder_paths.get_directory_by_type')
     @patch('os.path.exists')
     @patch('PIL.Image.open')
     def test_lf_custom_format(self, mock_image_open, mock_exists, mock_get_dir, helpers):
         """Test with LF custom output format."""
-        # Create a mock image with save method that writes actual data
+        # Create a mock image
         mock_img = mock_image_open.return_value.__enter__.return_value
         mock_img.mode = 'RGB'
         mock_img.convert.return_value = mock_img
-        mock_img.save = lambda buffer, format: buffer.write(b'mock_png_data')
-
+        
         # Mock the file system
         mock_get_dir.return_value = '/tmp/output'
         mock_exists.return_value = True
@@ -196,11 +202,106 @@ class TestExtractBase64DataFromResult:
             }
         }
 
-        with patch('builtins.open', mock_open()) as mock_file:
+        with patch('io.BytesIO') as mock_buffer_class:
+            mock_buffer = mock_buffer_class.return_value
+            mock_buffer.getvalue.return_value = b'mock_png_data'
+            
             result_data = helpers.extract_base64_data_from_result(result)
 
         assert result_data is not None
-        assert result_data.startswith('data:image/png;base64,')
+        assert isinstance(result_data, tuple)
+        assert len(result_data) == 2
+        mime_type, base64_data = result_data
+        assert mime_type == "image/png"
+        assert base64_data == base64.b64encode(b'mock_png_data').decode('utf-8')
+
+    def test_lf_svg_direct_content(self, helpers):
+        """Test with LF SVG direct content in slot_map."""
+        # Create test result with LF SVG direct content
+        svg_content = '<svg xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="40"/></svg>'
+        result = {
+            "http_status": 200,
+            "body": {
+                "payload": {
+                    "history": {
+                        "outputs": {
+                            "20": {
+                                "lf_output": [
+                                    {
+                                        "dataset": {
+                                            "nodes": [
+                                                {
+                                                    "cells": {
+                                                        "lfSlot": {
+                                                            "shape": "slot",
+                                                            "value": "icon.svg"
+                                                        }
+                                                    },
+                                                    "id": "0",
+                                                    "value": "0"
+                                                }
+                                            ]
+                                        },
+                                        "slot_map": {
+                                            "icon.svg": svg_content
+                                        },
+                                        "svg": "plain svg string"
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        result_data = helpers.extract_base64_data_from_result(result)
+
+        assert result_data is not None
+        assert isinstance(result_data, tuple)
+        assert len(result_data) == 2
+        mime_type, base64_data = result_data
+        assert mime_type == "image/svg+xml"
+        # Verify the base64 data decodes back to the original SVG
+        decoded_svg = base64.b64decode(base64_data).decode('utf-8')
+        assert decoded_svg == svg_content
+
+    def test_lf_svg_json_escaped_content(self, helpers):
+        """Test with LF SVG content that has JSON escaping."""
+        # Create test result with JSON-escaped SVG content
+        escaped_svg = '\\u003Csvg xmlns=\\"http://www.w3.org/2000/svg\\"\\u003E\\u003Ccircle cx=\\"50\\" cy=\\"50\\" r=\\"40\\"/\\u003E\\u003C/svg\\u003E'
+        expected_svg = '<svg xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="40"/></svg>'
+        result = {
+            "http_status": 200,
+            "body": {
+                "payload": {
+                    "history": {
+                        "outputs": {
+                            "20": {
+                                "lf_output": [
+                                    {
+                                        "slot_map": {
+                                            "icon.svg": escaped_svg
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        result_data = helpers.extract_base64_data_from_result(result)
+
+        assert result_data is not None
+        assert isinstance(result_data, tuple)
+        assert len(result_data) == 2
+        mime_type, base64_data = result_data
+        assert mime_type == "image/svg+xml"
+        # Verify the base64 data decodes back to the unescaped SVG
+        decoded_svg = base64.b64decode(base64_data).decode('utf-8')
+        assert decoded_svg == expected_svg
 
     @patch('folder_paths.get_directory_by_type')
     @patch('os.listdir')
@@ -227,11 +328,18 @@ class TestExtractBase64DataFromResult:
                 "body": {"payload": {"history": {"outputs": {}}}}
             }
 
-            with patch('builtins.open', mock_open()) as mock_file:
+            with patch('io.BytesIO') as mock_buffer_class:
+                mock_buffer = mock_buffer_class.return_value
+                mock_buffer.getvalue.return_value = b'mock_png_data'
+                
                 result_data = helpers.extract_base64_data_from_result(result)
 
             assert result_data is not None
-            assert result_data.startswith('data:image/png;base64,')
+            assert isinstance(result_data, tuple)
+            assert len(result_data) == 2
+            mime_type, base64_data = result_data
+            assert mime_type == "image/png"
+            assert base64_data == base64.b64encode(b'mock_png_data').decode('utf-8')
 
     @patch('folder_paths.get_directory_by_type')
     def test_file_not_found(self, mock_get_dir, helpers):

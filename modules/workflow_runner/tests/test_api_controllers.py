@@ -2,6 +2,7 @@
 """
 Tests for API controller enhancements
 """
+import base64
 import json
 from unittest.mock import patch, MagicMock
 
@@ -41,6 +42,61 @@ def load_api_controllers_module():
         if p not in sys.modules:
             sys.modules[p] = types.ModuleType(p)
 
+    # Set up controllers as a package
+    controllers_mod = types.ModuleType("lf_nodes.modules.workflow_runner.controllers")
+    sys.modules["lf_nodes.modules.workflow_runner.controllers"] = controllers_mod
+
+    # Set up utils as a package
+    utils_mod = types.ModuleType("lf_nodes.modules.workflow_runner.utils")
+    sys.modules["lf_nodes.modules.workflow_runner.utils"] = utils_mod
+
+    # Set up all service mocks before loading other modules
+    auth_service_mock = MagicMock()
+    auth_service_mock.create_server_session = MagicMock()
+    auth_service_mock._require_auth = MagicMock()
+    auth_service_mock._verify_token_and_email = MagicMock()
+    auth_service_mock._ENABLE_GOOGLE_OAUTH = False
+    auth_service_mock._WF_DEBUG = False
+    sys.modules["lf_nodes.modules.workflow_runner.services.auth_service"] = auth_service_mock
+
+    executor_mock = MagicMock()
+    executor_mock.WorkflowPreparationError = Exception
+    executor_mock.execute_workflow = MagicMock()
+    sys.modules["lf_nodes.modules.workflow_runner.services.executor"] = executor_mock
+
+    job_service_mock = MagicMock()
+    job_service_mock.get_job_status = MagicMock()
+    sys.modules["lf_nodes.modules.workflow_runner.services.job_service"] = job_service_mock
+
+    job_store_mock = MagicMock()
+    job_store_mock.get_job = MagicMock()
+    job_store_mock.update_job = MagicMock()
+    sys.modules["lf_nodes.modules.workflow_runner.services.job_store"] = job_store_mock
+
+    run_service_mock = MagicMock()
+    run_service_mock.run_workflow = MagicMock()
+    sys.modules["lf_nodes.modules.workflow_runner.services.run_service"] = run_service_mock
+
+    workflow_service_mock = MagicMock()
+    workflow_service_mock.list_workflows = MagicMock()
+    workflow_service_mock.get_workflow_content = MagicMock()
+    sys.modules["lf_nodes.modules.workflow_runner.services.workflow_service"] = workflow_service_mock
+
+    # Set up _helpers mock
+    helpers_mock = MagicMock()
+    helpers_mock.parse_json_body = MagicMock()
+    helpers_mock.get_owner_from_request = MagicMock()
+    helpers_mock.serialize_job = MagicMock(side_effect=lambda job, **kwargs: job)  # Return the job as-is
+    helpers_mock.write_sse_event = MagicMock()
+    helpers_mock.create_and_set_session_cookie = MagicMock()
+    helpers_mock.extract_base64_data_from_result = MagicMock(side_effect=lambda result: ("image/png", base64.b64encode(b'mock_png_data').decode('utf-8')) if result and result.get("body", {}).get("payload", {}).get("history", {}).get("outputs") else None)
+    sys.modules["lf_nodes.modules.workflow_runner.controllers._helpers"] = helpers_mock
+
+    # Set up serialize mock
+    serialize_mock = MagicMock()
+    serialize_mock.serialize_job = MagicMock()
+    sys.modules["lf_nodes.modules.workflow_runner.utils.serialize"] = serialize_mock
+
     # Load required modules
     required_modules = {
         "utils.env": "env",
@@ -65,8 +121,34 @@ def load_api_controllers_module():
             spec.loader.exec_module(mod)
             sys.modules[f"{pkg_prefix}.{mod_key}.{mod_name}"] = mod
         except Exception:
-            # Create mock modules for testing
-            sys.modules[f"{pkg_prefix}.{mod_key}.{mod_name}"] = MagicMock()
+            # Create mock modules for testing with required attributes
+            mock_mod = MagicMock()
+            if mod_key == "services.auth_service":
+                # Set up auth_service mock with required functions/variables
+                mock_mod.create_server_session = MagicMock()
+                mock_mod._require_auth = MagicMock()
+                mock_mod._verify_token_and_email = MagicMock()
+                mock_mod._ENABLE_GOOGLE_OAUTH = False
+                mock_mod._WF_DEBUG = False
+            elif mod_key == "services.executor":
+                mock_mod.WorkflowPreparationError = Exception
+                mock_mod.execute_workflow = MagicMock()
+            elif mod_key == "services.job_service":
+                mock_mod.get_job_status = MagicMock()
+            elif mod_key == "services.job_store":
+                mock_mod.get_job = MagicMock()
+                mock_mod.update_job = MagicMock()
+            elif mod_key == "services.run_service":
+                mock_mod.run_workflow = MagicMock()
+            elif mod_key == "services.workflow_service":
+                mock_mod.list_workflows = MagicMock()
+                mock_mod.get_workflow_content = MagicMock()
+            elif mod_key == "controllers._helpers":
+                mock_mod.extract_base64_data_from_result = MagicMock(return_value=("image/png", "mock_base64_data"))
+                mock_mod.serialize_job = MagicMock()
+            elif mod_key == "utils.serialize":
+                mock_mod.serialize_job = MagicMock()
+            sys.modules[f"{pkg_prefix}.{mod_key}.{mod_name}"] = mock_mod
 
     # Load the api_controllers module
     controllers_path = base / "controllers" / "api_controllers.py"
@@ -119,10 +201,10 @@ class TestApiControllers:
             }
         }
 
-        with patch('folder_paths.get_directory_by_type', return_value='/tmp/output'), \
-             patch('os.path.exists', return_value=True), \
-             patch('PIL.Image.open') as mock_img_open, \
-             patch('builtins.open', MagicMock()):
+        with patch('lf_nodes.modules.workflow_runner.controllers._helpers.folder_paths.get_directory_by_type', return_value='/tmp/output'), \
+             patch('lf_nodes.modules.workflow_runner.controllers._helpers.os.path.exists', return_value=True), \
+             patch('lf_nodes.modules.workflow_runner.controllers._helpers.PIL.Image.open') as mock_img_open, \
+             patch('lf_nodes.modules.workflow_runner.controllers._helpers.builtins.open', MagicMock()):
 
             # Mock image processing
             mock_img = mock_img_open.return_value.__enter__.return_value
@@ -130,16 +212,20 @@ class TestApiControllers:
             mock_img.convert.return_value = mock_img
 
             # Mock get_job_status
-            with patch.object(api_controllers, 'get_job_status', return_value=mock_job_status):
+            async def mock_get_job_status(run_id):
+                return mock_job_status
+            with patch.object(api_controllers, 'get_job_status', side_effect=mock_get_job_status):
                 response = await api_controllers.get_workflow_status_controller(mock_request)
 
         assert response.status == 200
+        assert response.content_type == "image/png"
         response_data = json.loads(response.text)
 
         assert response_data["run_id"] == "test-run-123"
         assert response_data["status"] == "succeeded"
         assert "data" in response_data
-        assert response_data["data"].startswith("data:image/png;base64,")
+        # Data should be just the base64 string, not a data URL
+        assert response_data["data"] == base64.b64encode(b'mock_png_data').decode('utf-8')
 
     @pytest.mark.asyncio
     async def test_get_workflow_status_controller_success_no_data(self, api_controllers):
@@ -165,7 +251,9 @@ class TestApiControllers:
         }
 
         # Mock get_job_status
-        with patch.object(api_controllers, 'get_job_status', return_value=mock_job_status):
+        async def mock_get_job_status(run_id):
+            return mock_job_status
+        with patch.object(api_controllers, 'get_job_status', side_effect=mock_get_job_status):
             response = await api_controllers.get_workflow_status_controller(mock_request)
 
         assert response.status == 200
@@ -208,10 +296,10 @@ class TestApiControllers:
             }
         }
 
-        with patch('folder_paths.get_directory_by_type', return_value='/tmp/output'), \
-             patch('os.path.exists', return_value=True), \
-             patch('PIL.Image.open') as mock_img_open, \
-             patch('builtins.open', MagicMock()):
+        with patch('lf_nodes.modules.workflow_runner.controllers._helpers.folder_paths.get_directory_by_type', return_value='/tmp/output'), \
+             patch('lf_nodes.modules.workflow_runner.controllers._helpers.os.path.exists', return_value=True), \
+             patch('lf_nodes.modules.workflow_runner.controllers._helpers.PIL.Image.open') as mock_img_open, \
+             patch('lf_nodes.modules.workflow_runner.controllers._helpers.builtins.open', MagicMock()):
 
             # Mock image processing
             mock_img = mock_img_open.return_value.__enter__.return_value
@@ -219,7 +307,9 @@ class TestApiControllers:
             mock_img.convert.return_value = mock_img
 
             # Mock get_job_status
-            with patch.object(api_controllers, 'get_job_status', return_value=mock_job_status):
+            async def mock_get_job_status(run_id):
+                return mock_job_status
+            with patch.object(api_controllers, 'get_job_status', side_effect=mock_get_job_status):
                 response = await api_controllers.get_workflow_status_controller(mock_request)
 
         assert response.status == 200
@@ -227,7 +317,7 @@ class TestApiControllers:
 
         assert response_data["run_id"] == "test-run-123"
         assert response_data["status"] == "ready"
-        assert "data" in response_data
+        assert "data" not in response_data
 
     @pytest.mark.asyncio
     async def test_get_workflow_status_controller_pending_status(self, api_controllers):
@@ -244,7 +334,9 @@ class TestApiControllers:
         }
 
         # Mock get_job_status
-        with patch.object(api_controllers, 'get_job_status', return_value=mock_job_status):
+        async def mock_get_job_status(run_id):
+            return mock_job_status
+        with patch.object(api_controllers, 'get_job_status', side_effect=mock_get_job_status):
             response = await api_controllers.get_workflow_status_controller(mock_request)
 
         assert response.status == 200
@@ -269,7 +361,9 @@ class TestApiControllers:
         }
 
         # Mock get_job_status
-        with patch.object(api_controllers, 'get_job_status', return_value=mock_job_status):
+        async def mock_get_job_status(run_id):
+            return mock_job_status
+        with patch.object(api_controllers, 'get_job_status', side_effect=mock_get_job_status):
             response = await api_controllers.get_workflow_status_controller(mock_request)
 
         assert response.status == 200
@@ -287,9 +381,14 @@ class TestApiControllers:
         mock_request.match_info = {"run_id": "unknown-run"}
 
         # Mock get_job_status returning None
-        with patch.object(api_controllers, 'get_job_status', return_value=None):
-            with pytest.raises(web.HTTPNotFound):
-                await api_controllers.get_workflow_status_controller(mock_request)
+        async def mock_get_job_status(run_id):
+            return None
+        with patch.object(api_controllers, 'get_job_status', side_effect=mock_get_job_status):
+            response = await api_controllers.get_workflow_status_controller(mock_request)
+
+        assert response.status == 404
+        response_data = json.loads(response.text)
+        assert response_data["detail"] == "run_not_found"
 
     @pytest.mark.asyncio
     async def test_get_workflow_status_controller_missing_run_id(self, api_controllers):
@@ -298,5 +397,8 @@ class TestApiControllers:
         mock_request = MagicMock()
         mock_request.match_info = {}
 
-        with pytest.raises(web.HTTPBadRequest):
-            await api_controllers.get_workflow_status_controller(mock_request)
+        response = await api_controllers.get_workflow_status_controller(mock_request)
+
+        assert response.status == 400
+        response_data = json.loads(response.text)
+        assert response_data["detail"] == "missing_run_id"

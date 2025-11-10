@@ -1,6 +1,8 @@
+import aiohttp
 import asyncio
 import json
 import logging
+import time
 
 from aiohttp import web
 
@@ -11,11 +13,12 @@ from ..services.auth_service import (
     _ENABLE_GOOGLE_OAUTH,
     _WF_DEBUG,
 )
-from ..services.executor import WorkflowPreparationError, execute_workflow
+from ..services.executor import WorkflowPreparationError, execute_workflow, _make_run_payload
 from ..services.job_service import get_job_status
 from ..services import job_store
 from ..services.run_service import run_workflow
 from ..services.workflow_service import list_workflows as svc_list_workflows, get_workflow_content
+from ..config import get_settings
 
 from ._helpers import (
     parse_json_body,
@@ -29,6 +32,55 @@ from ._helpers import (
 LOG = logging.getLogger(__name__)
 
 # region Helpers
+def _build_job_status_from_history(run_id: str, entry: dict) -> dict:
+    """Build job status dict from ComfyUI history entry for headless runs."""
+    status = entry.get("status") or {}
+    completed = status.get("completed")
+    status_str = status.get("status_str", "unknown")
+    
+    base = {
+        "run_id": run_id,
+        "workflow_id": "unknown",
+        "seq": 0,
+        "owner_id": None,
+        "created_at": entry.get("prompt", {}).get("created_at", time.time()),
+        "updated_at": time.time(),
+    }
+    
+    if completed is True or status_str == "success":
+        base.update({
+            "status": "succeeded",
+            "result": {"http_status": 200, "body": _make_run_payload(history=entry)},
+        })
+    elif status_str == "error":
+        base.update({
+            "status": "failed",
+            "error": "execution_error",
+            "result": {"http_status": 500, "body": _make_run_payload(history=entry, error_message="execution_error")},
+        })
+    elif entry.get("outputs"):
+        base.update({
+            "status": "succeeded",
+            "result": {"http_status": 200, "body": _make_run_payload(history=entry)},
+        })
+    else:
+        base.update({"status": "running"})
+    
+    return base
+
+async def _update_job_status_from_history(run_id: str, entry: dict):
+    """Update stored job status from ComfyUI history entry."""
+    status = entry.get("status") or {}
+    if status.get("completed") is True:
+        result = {"http_status": 200, "body": _make_run_payload(history=entry)}
+        await job_store.set_job_status(run_id, job_store.JobStatus.SUCCEEDED, result=result)
+    elif status.get("status_str") == "error":
+        result = {"http_status": 500, "body": _make_run_payload(history=entry, error_message="execution_error")}
+        await job_store.set_job_status(run_id, job_store.JobStatus.FAILED, result=result, error="execution_error")
+    elif entry.get("outputs"):
+        result = {"http_status": 200, "body": _make_run_payload(history=entry)}
+        await job_store.set_job_status(run_id, job_store.JobStatus.SUCCEEDED, result=result)
+
 async def _send_initial_snapshot(resp: web.Response, subscriber_owner: str | None = None, last_event: tuple[str, int] | None = None) -> None:
         """
         Send an initial snapshot of active (pending or running) jobs to the SSE client.
@@ -120,17 +172,9 @@ async def start_workflow_controller(request: web.Request) -> web.Response:
     )
 
     try:
-        if is_headless:
-            # Execute synchronously for headless requests - no job tracking
-            LOG.debug("Detected headless request, executing synchronously")
-            prompt_id, status, response, http_status = await execute_workflow(payload)
-            return web.json_response(response, status=http_status)
-        else:
-            # Use async job system for web UI requests
-            result = await run_workflow(payload, owner_id=owner_id)
-            return web.json_response(result, status=202)
+        result = await run_workflow(payload, owner_id=owner_id, is_api_call=is_headless)
+        return web.json_response(result, status=202)
     except WorkflowPreparationError as exc:
-        # Bubble the prepared response body and status (matches previous behaviour)
         return web.json_response(exc.response_body, status=exc.status)
     except Exception as exc:
         return web.json_response({"detail": "service_error", "error": str(exc)}, status=500)
@@ -214,8 +258,7 @@ async def stream_runs_controller(request: web.Request) -> web.Response:
         try:
             # reuse centralized helper; it's defensive and avoids importing auth_service here
             subscriber_owner = await get_owner_from_request(request)
-            if _WF_DEBUG:
-                print(f"[stream_runs_controller] Derived subscriber_owner: {subscriber_owner}")
+            LOG.debug(f"[stream_runs_controller] Derived subscriber_owner: {subscriber_owner}")
         except Exception:
             subscriber_owner = None
 
@@ -309,17 +352,17 @@ async def list_runs_controller(request: web.Request) -> web.Response:
     Returns a JSON payload:
       { runs: [ { run_id, status, seq, owner_id?, created_at, updated_at, result?, error? }, ... ] }
     """
-    if _WF_DEBUG:
-        print(f"[list_runs_controller] Called with query: {dict(request.query)}")
+    
+    LOG.debug(f"[list_runs_controller] Called with query: {dict(request.query)}")
 
     if _ENABLE_GOOGLE_OAUTH:
         auth_resp = await _require_auth(request)
+
         if isinstance(auth_resp, web.Response):
-            if _WF_DEBUG:
-                print(f"[list_runs_controller] Auth failed, returning {auth_resp.status}")
+            LOG.debug(f"[list_runs_controller] Auth failed, returning {auth_resp.status}")
             return auth_resp
-        if _WF_DEBUG:
-            print(f"[list_runs_controller] Auth succeeded")
+        
+        LOG.debug(f"[list_runs_controller] Auth succeeded")
 
     # parse query params
     status_q = request.query.get("status")
@@ -340,12 +383,10 @@ async def list_runs_controller(request: web.Request) -> web.Response:
     if owner_q == "me" and _ENABLE_GOOGLE_OAUTH:
         try:
             subj = request.get('google_oauth_email', None)
-            if _WF_DEBUG:
-                print(f"[list_runs_controller] Extracted email for owner filtering: {subj}")
+            LOG.debug(f"[list_runs_controller] Extracted email for owner filtering: {subj}")
             from ..services.auth_service import derive_owner_id
             owner_id = derive_owner_id(subj or "")
-            if _WF_DEBUG:
-                print(f"[list_runs_controller] Derived owner_id for filtering: {owner_id}")
+            LOG.debug(f"[list_runs_controller] Derived owner_id for filtering: {owner_id}")
         except Exception:
             owner_id = None
     elif owner_q and owner_q != "me":
@@ -398,6 +439,74 @@ async def list_runs_controller(request: web.Request) -> web.Response:
                 break
 
     return web.json_response({"runs": runs_out})
+# endregion
+
+# region Get Workflow Status
+async def get_workflow_status_controller(request: web.Request) -> web.Response:
+    """
+    Get the status of a specific workflow run.
+
+    Returns workflow status with optional base64 encoded data field for completed runs.
+    Sets appropriate Content-Type header based on the data type (image/png, image/jpeg, image/svg+xml).
+    """
+    run_id = request.match_info.get('run_id')
+    if not run_id:
+        return web.json_response({"detail": "missing_run_id"}, status=400)
+
+    if _ENABLE_GOOGLE_OAUTH:
+        auth_resp = await _require_auth(request)
+        if isinstance(auth_resp, web.Response):
+            return auth_resp
+
+    job_status = await get_job_status(run_id)
+    if not job_status:
+        # Not found in DB, try fetching from ComfyUI history (for headless runs)
+        settings = get_settings()
+        comfy_url = settings.COMFY_BACKEND_URL
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(f"{comfy_url}/history/{run_id}") as resp:
+                    if resp.status == 200:
+                        entry : dict [str, dict | list] = await resp.json()
+                        outputs = entry.get(run_id).get("outputs") if entry.get(run_id) else entry.get("outputs")
+                        if outputs:
+                            # Add base64 data for successful runs
+                            data_tuple = extract_base64_data_from_result(outputs)
+                            if data_tuple:
+                                mime_type, base64_data = data_tuple
+                                return web.json_response({"data": base64_data}, content_type=mime_type)
+                        
+                        return web.json_response(response_data)
+                    else:
+                        return web.json_response({"detail": "run_not_found"}, status=404)
+        except Exception as e:
+            LOG.warning("Failed to fetch history for %s: %s", run_id, e)
+            return web.json_response({"detail": "Headless run not found"}, status=404)
+    else:
+        # For stored jobs, check if pending and update from history
+        if job_status.get("status") == "pending":
+            settings = get_settings()
+            comfy_url = settings.COMFY_BACKEND_URL
+            try:
+                async with aiohttp.ClientSession() as session:
+                    async with session.get(f"{comfy_url}/history/{run_id}") as resp:
+                        if resp.status == 200:
+                            entry = await resp.json()
+                            await _update_job_status_from_history(run_id, entry)
+                            job_status = await get_job_status(run_id)
+            except Exception as e:
+                LOG.warning("Failed to check history for stored job %s: %s", run_id, e)
+        
+        response_data = serialize_job(job_status)
+
+        if response_data.get("status") == "succeeded" and response_data.get("result"):
+            data_tuple = extract_base64_data_from_result(response_data["result"])
+            if data_tuple:
+                mime_type, base64_data = data_tuple
+                response_data["data"] = base64_data
+                return web.json_response(response_data, content_type=mime_type)
+
+        return web.json_response(response_data)
 # endregion
 
 # region Admin debug UI (debug-only)
