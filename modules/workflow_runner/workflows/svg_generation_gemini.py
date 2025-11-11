@@ -11,11 +11,11 @@ def _configure(prompt: Dict[str, Any], inputs: Dict[str, Any]) -> None:
 
         inputs_map = node.setdefault("inputs", {})
 
-        if node_id == "25":  # Icon name
-            name = "icon_name"
+        if node_id == "21":  # Prompt
+            name = "prompt"
             icon_name = inputs.get(name)
             if icon_name:
-                inputs_map["string"] = str(icon_name)
+                inputs_map["replacement"] = str(icon_name)
             else:
                 raise InputValidationError(name)
         
@@ -40,21 +40,20 @@ def _configure(prompt: Dict[str, Any], inputs: Dict[str, Any]) -> None:
 # endregion
 
 # region Inputs
-input_name = WorkflowCell(
-    node_id="25",
-    id="icon_name",
-    value="Icon name",
+input_prompt = WorkflowCell(
+    node_id="21",
+    id="prompt",
+    value="",
     shape="textfield",
     props={
         "lfHtmlAttributes": {
-            "autocomplete": "off",
-            "name": "icon_name",
+            "name": "prompt",
             "type": "text"
         },
-        "lfLabel": "Icon name",
+        "lfLabel": "Prompt",
         "lfHelper": {
             "showWhenFocused": False,
-            "value": "Optional: The name of the icon to generate. Default is 'Una persona'.",
+            "value": "The prompt for the icon to generate. Default is 'Una persona'.",
         },
         "lfValue": "Una persona",
     },
@@ -143,7 +142,7 @@ node = WorkflowNode(
     value=value,
     description=description,
     inputs=[
-        input_name,
+        input_prompt,
         input_size,
         input_strip,
         input_model,
