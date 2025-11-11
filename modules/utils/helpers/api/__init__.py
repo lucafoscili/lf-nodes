@@ -10,6 +10,7 @@ from .get_sha256 import *
 from .handle_response import *
 from .mock_responses import *
 from .parse_claude_json_output import *
+from .parse_gemini_image import *
 from .parse_gemini_json_output import *
 from .parse_gemini_response import *
 from .parse_json_from_text import *

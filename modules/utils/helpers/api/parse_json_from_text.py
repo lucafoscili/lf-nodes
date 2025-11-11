@@ -1,7 +1,6 @@
 # region parse_json_from_text
 import json
 import re
-from typing import Any
 
 def parse_json_from_text(text: str) -> dict | list | None:
     """

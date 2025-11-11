@@ -8,9 +8,15 @@ from server import PromptServer
 
 from . import CATEGORY
 from ...utils.constants import API_ROUTE_PREFIX, EVENT_PREFIX, FUNCTION, Input
-from ...utils.helpers.api import clean_code_fences, create_ui_logger, parse_gemini_json_output, parse_gemini_response, read_secret
-
-EVENT_NAME = f"{EVENT_PREFIX}geminiapi"
+from ...utils.helpers.api import (
+    clean_code_fences, 
+    create_ui_logger,
+    parse_gemini_image,
+    parse_gemini_json_output,
+    parse_gemini_response,
+    read_secret
+)
+from ...utils.helpers.conversion.tensor_to_base64 import tensor_to_base64
 
 # region LF_GeminiAPI
 class LF_GeminiAPI:
@@ -25,12 +31,15 @@ class LF_GeminiAPI:
             },
             "optional": {
                 "model": (Input.STRING, {
-                    "default": "gemini-2.0-flash",
+                    "default": "gemini-2.5-image",
                     "tooltip": "Gemini model to call."
                 }),
                 "timeout": (Input.INTEGER, {
                     "default": 60,
                     "tooltip": "Request timeout in seconds."
+                }),
+                "image": (Input.IMAGE, {
+                    "tooltip": "Optional reference image for multimodal models."
                 }),
                 "ui_widget": (Input.LF_CODE, {
                     "default": "",
@@ -48,14 +57,16 @@ class LF_GeminiAPI:
         "Cleaned text output with code fences removed (plain SVG or text).",
         "Full Gemini JSON response as string.",
         "Parsed JSON string when the output is valid JSON, otherwise empty.",
+        "Generated or processed image from multimodal models.",
     )
-    RETURN_NAMES = ("text", "clean", "raw_json", "json")
-    RETURN_TYPES = (Input.STRING, Input.STRING, Input.JSON, Input.JSON)
+    RETURN_NAMES = ("text", "clean", "raw_json", "json", "image")
+    RETURN_TYPES = (Input.STRING, Input.STRING, Input.JSON, Input.JSON, Input.IMAGE)
 
     async def on_exec(self, **kwargs: dict) -> tuple[str, str]:
         prompt: str = kwargs.get("prompt", "")
-        model: str = kwargs.get("model") or "gemini-2.0-flash"
-        logger = create_ui_logger(EVENT_NAME, kwargs.get("node_id"))
+        model: str = kwargs.get("model") or "gemini-2.5-flash-image"
+        image = kwargs.get("image")
+        logger = create_ui_logger("geminiapi", kwargs.get("node_id"))
 
         logger.log("Sending request...")
 
@@ -85,12 +96,24 @@ class LF_GeminiAPI:
             logger.log("Prompt must not be empty.")
             raise ValueError("Prompt must not be empty.")
 
+        parts = [{"text": prompt}]
+        
+        if image is not None:
+            base64_data = tensor_to_base64(image)
+            if isinstance(base64_data, list):
+                base64_data = base64_data[0]
+            
+            parts.append({
+                "inline_data": {
+                    "mime_type": "image/jpeg",  # Assume JPEG for now
+                    "data": base64_data
+                }
+            })
+
         payload: dict[str, Any] = {
             "contents": [
                 {
-                    "parts": [
-                        {"text": prompt}
-                    ]
+                    "parts": parts
                 }
             ],
             "model": model
@@ -113,6 +136,12 @@ class LF_GeminiAPI:
                     wrapper = {"body": text_status, "lf_http_status": resp.status}
                     return (text_status, json.dumps(wrapper, ensure_ascii=False))
 
+        logger.log(f"Received response with status {resp.status}.")
+        if resp.status != 200:
+            logger.log(f"Error from Gemini API: {resp.status} {text_status}")
+            wrapper = {"body": data, "lf_http_status": resp.status}
+            return (text_status, json.dumps(wrapper, ensure_ascii=False))
+        
         if isinstance(data, dict):
             data.setdefault("lf_http_status", resp.status)
         else:
@@ -122,11 +151,14 @@ class LF_GeminiAPI:
         raw_json = json.dumps(data, ensure_ascii=False)
         clean_text = clean_code_fences(extracted)
         json_text = parse_gemini_json_output(data, clean_text)
+        
+        output_image = parse_gemini_image(data)
+        if output_image is None:
+            output_image = image  # Fallback to input image
 
         logger.log("Request completed successfully.")
 
-        return (extracted, clean_text, raw_json, json_text)
-
+        return (extracted, clean_text, raw_json, json_text, output_image)
 # endregion
 
 # region Mappings

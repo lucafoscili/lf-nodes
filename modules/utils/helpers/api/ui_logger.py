@@ -66,7 +66,7 @@ def create_ui_logger(event_name: str, node_id: str) -> UILogger:
     Factory function to create a UI logger.
 
     Args:
-        event_name: The event name for PromptServer updates
+        event_name: Unprefixed event name for PromptServer updates
         node_id: The node ID for UI targeting
 
     Returns:
