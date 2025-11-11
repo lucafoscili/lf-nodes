@@ -14,7 +14,7 @@ except ImportError:
     def bool_env(*args, **kwargs):
         return False
 
-VERSION = "2.1.0"
+VERSION = "2.2.0"
 
 NODE_CLASS_MAPPINGS = {}
 NODE_DISPLAY_NAME_MAPPINGS = {}
@@ -32,11 +32,11 @@ sys.modules["lf_nodes"] = sys.modules[__name__]
 for dirpath, _, filenames in os.walk(MODULES_DIR):
     if "tests" in dirpath or "test" in dirpath or "__pycache__" in dirpath:
         continue
-    
+
     for filename in filenames:
         if not filename.endswith(".py") or filename == "__init__.py" or filename.startswith("test_"):
             continue
-            
+
         relative_path = os.path.relpath(os.path.join(dirpath, filename), MODULES_DIR)
         first_component = relative_path.split(os.path.sep)[0]
         if first_component == "workflow_runner" and not _WF_ENABLED:
