@@ -24,8 +24,6 @@ def _configure(prompt: Dict[str, Any], inputs: Dict[str, Any]) -> None:
             icon_size = inputs.get(name)
             if icon_size:
                 inputs_map["integer"] = int(icon_size)
-            else:
-                raise InputValidationError(name)
 
         if node_id == "29":  # Strip attributes checkbox (optional)
             name = "strip_attributes"
