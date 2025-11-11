@@ -31,11 +31,12 @@ def _configure(prompt: Dict[str, Any], inputs: Dict[str, Any]) -> None:
             name = "strip_attributes"
             strip_attributes = inputs.get(name)
             inputs_map["boolean"] = bool(strip_attributes)
-        
-        if node_id == "26":  # Prompt in Italian checkbox (optional)
-            name = "italian"
-            italian = inputs.get(name)
-            inputs_map["boolean"] = bool(italian)
+
+        if node_id == "33":  # Gemini model (optional)
+            name = "gemini_model"
+            gemini_model = inputs.get(name)
+            if gemini_model:
+                inputs_map["model"] = str(gemini_model)
 # endregion
 
 # region Inputs
@@ -53,9 +54,9 @@ input_name = WorkflowCell(
         "lfLabel": "Icon name",
         "lfHelper": {
             "showWhenFocused": False,
-            "value": "Optional: The name of the icon to generate. Default is 'icon'.",
+            "value": "Optional: The name of the icon to generate. Default is 'Una persona'.",
         },
-        "lfValue": "icon",
+        "lfValue": "Una persona",
     },
 )
 input_size = WorkflowCell(
@@ -67,7 +68,7 @@ input_size = WorkflowCell(
         "lfHtmlAttributes": {
             "autocomplete": "off",
             "min": 24,
-            "max": 1024,
+            "max": 2048,
             "step": 8,
             "name": "icon_size",
             "type": "number",
@@ -80,6 +81,24 @@ input_size = WorkflowCell(
         "lfValue": "24",
     },
 )
+input_model = WorkflowCell(
+    node_id="33",
+    id="gemini_model",
+    value="Gemini Model",
+    shape="textfield",
+    props={
+        "lfHtmlAttributes": {
+            "name": "gemini_model",
+            "type": "text"
+        },
+        "lfLabel": "Gemini Model",
+        "lfHelper": {
+            "showWhenFocused": False,
+            "value": "Optional: the Gemini model to use. Default is 'gemini-2.5-flash-image' (Nano Banana).",
+        },
+        "lfValue": "gemini-2.5-flash-image",
+    },
+)
 input_strip = WorkflowCell(
     node_id="29",
     id="strip_attributes",
@@ -89,17 +108,6 @@ input_strip = WorkflowCell(
     props={
         "lfLabel": "Strip attributes",
         "lfValue": True,
-    },
-)
-input_italian = WorkflowCell(
-    node_id="26",
-    id="italian",
-    shape="toggle",
-    value="Prompt in Italian",
-    description="Sets whether to prompt in Italian.",
-    props={
-        "lfLabel": "Prompt in Italian",
-        "lfValue": False,
     },
 )
 # endregion
@@ -138,7 +146,7 @@ node = WorkflowNode(
         input_name,
         input_size,
         input_strip,
-        input_italian,
+        input_model,
     ],
     outputs=[
         output_svg_file,
