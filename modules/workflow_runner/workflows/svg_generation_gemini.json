@@ -24,59 +24,16 @@
       "title": "S V G   D A T A"
     }
   },
-  "13": {
-    "inputs": {
-      "prompt": [
-        "22",
-        0
-      ],
-      "model": "gemini-2.0-flash",
-      "api_key": "",
-      "proxy_url": "",
-      "timeout": 60,
-      "ui_widget": "{}"
-    },
-    "class_type": "LF_GeminiAPI",
-    "_meta": {
-      "title": "G E M I N I   A P I"
-    }
-  },
-  "14": {
-    "inputs": {
-      "ui_widget": {
-        "backup": true,
-        "backupRetention": 14,
-        "debug": true,
-        "systemTimeout": 0,
-        "themes": "light"
-      }
-    },
-    "class_type": "LF_ControlPanel",
-    "_meta": {
-      "title": "Control panel"
-    }
-  },
   "15": {
     "inputs": {
       "svg": ["30", 0],
-      "filename_prefix": ["25", 0],
+      "filename_prefix": "",
       "add_timestamp": false,
       "add_counter": false,
       "ui_widget": {
         "columns": 3,
         "dataset": {
-          "nodes": [
-            {
-              "cells": {
-                "lfSlot": {
-                  "shape": "slot",
-                  "value": "icon.svg"
-                }
-              },
-              "id": "0",
-              "value": "0"
-            }
-          ]
+          "nodes": []
         },
         "index": null,
         "name": "",
@@ -99,7 +56,7 @@
       "shuffle": false,
       "limit": 0,
       "ui_widget": "",
-      "json_input": ["26", 0]
+      "json_input": ["20", 0]
     },
     "class_type": "LF_JSONPromptCombinator",
     "_meta": {
@@ -108,18 +65,18 @@
   },
   "20": {
     "inputs": {
-      "ui_widget": "{\n  \"prompt_start\": \"Ho bisogno di un'icona in stile Material Design che rappresenti: **\",\n  \"icon_name\": {\n    \"0\": \"${VAR_NAME}\"\n  },\n  \"prompt_middle\": \"**. Genera l'icona in formato SVG, con dimensioni: **\",\n  \"icon_size\": {\n    \"0\": \"${VAR_SIZE}\"\n  },\n  \"prompt_end\": \"dp** e senza colori. Nell'output, includi soltanto il tag SVG dell'icona stessa.\"\n}"
+      "ui_widget": "{\n  \"prompt_start\": \"Genera un'icona in stile Material Design che rappresenti: **\",\n  \"icon_name\": {\n    \"0\": \"${VAR_NAME}\"\n  },\n  \"prompt_middle\": \"**. L'icona deve essere in formato SVG, con dimensioni: **\",\n  \"icon_size\": {\n    \"0\": \"${VAR_SIZE}\"\n  },\n  \"prompt_end\": \"dp**. Nella risposta includi soltanto il tag SVG dell'icona stessa.\"\n}"
     },
     "class_type": "LF_WriteJSON",
     "_meta": {
-      "title": "I T"
+      "title": "P R O M P T   J S O N"
     }
   },
   "21": {
     "inputs": {
       "input_text": ["19", 0],
       "target": "${VAR_NAME}",
-      "replacement": ["25", 0],
+      "replacement": "una persona",
       "ui_widget": ""
     },
     "class_type": "LF_StringReplace",
@@ -139,56 +96,10 @@
       "title": "S E T   S I Z E"
     }
   },
-  "25": {
-    "inputs": {
-      "string": "icon",
-      "enable_history": true,
-      "randomize": false,
-      "seed": 1060563310857976,
-      "ui_widget": {
-        "nodes": [
-          {
-            "icon": "history",
-            "id": "icon",
-            "description": "Execution date: 08/11/2025, 09:45:13.",
-            "value": "icon"
-          }
-        ]
-      }
-    },
-    "class_type": "LF_String",
-    "_meta": {
-      "title": "S E T   N A M E"
-    }
-  },
-  "26": {
-    "inputs": {
-      "boolean": false,
-      "ui_widget": {
-        "bool": false,
-        "roll": 100
-      },
-      "on_true": ["27", 0],
-      "on_false": ["20", 0]
-    },
-    "class_type": "LF_SwitchJSON",
-    "_meta": {
-      "title": "I T A L I A N   S W I T C H"
-    }
-  },
-  "27": {
-    "inputs": {
-      "ui_widget": "{\n  \"prompt_start\": \"I need a Material Design style icon that represents: **\",\n  \"icon_name\": {\n    \"0\": \"${VAR_NAME}\"\n  },\n  \"prompt_middle\": \"**. Generate the icon in SVG format, with dimensions: **\",\n  \"icon_size\": {\n    \"0\": \"${VAR_SIZE}\"\n  },\n  \"prompt_end\": \"DPI** and without colors. In the output, include only the SVG tag of the icon itself.\"\n}"
-    },
-    "class_type": "LF_WriteJSON",
-    "_meta": {
-      "title": "E N"
-    }
-  },
   "28": {
     "inputs": {
       "input_text": ["32", 0],
-      "pattern": "\\b(?<![-\\w])(height|width|fill|stroke|color)=\"[^\"]*\"",
+      "pattern": "\\b(?<![-\\w])(height|width|stroke|color)=\"[^\"]*\"",
       "replacement": "",
       "flags": "0",
       "ui_widget": ""
@@ -219,8 +130,8 @@
       "text_1": "<?xml version=\"1.0\" encoding=\"UTF-8\"?> <!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">",
       "text_2": ["29", 0],
       "shuffle_inputs": false,
-      "seed": 900060739358150,
-      "ui_widget": ""
+      "seed": 1006676603932964,
+      "ui_widget": "<?xml version=\"1.0\" encoding=\"UTF-8\"?> <!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">"
     },
     "class_type": "LF_WallOfText",
     "_meta": {
@@ -242,13 +153,13 @@
   "33": {
     "inputs": {
       "prompt": ["22", 0],
-      "model": "gemini-2.0-flash",
+      "model": "gemini-2.5-image",
       "timeout": 60,
       "ui_widget": ""
     },
     "class_type": "LF_GeminiAPI",
     "_meta": {
-      "title": "Gemini API (Google)"
+      "title": "A P I   C A L L"
     }
   }
 }

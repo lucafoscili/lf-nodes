@@ -67,7 +67,7 @@ export enum ControlPanelIcons {
   Debug = 'bug',
   ExternalPreviews = 'photo-search',
   GitHub = 'brand-github',
-  Metadata = 'info-hexagon',
+  Metadata = 'hexagon-info',
   SystemDashboard = 'percentage-60',
   Theme = 'color-swatch',
 }

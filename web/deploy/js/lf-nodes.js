@@ -6091,7 +6091,7 @@ var ControlPanelIcons;
   ControlPanelIcons2["Debug"] = "bug";
   ControlPanelIcons2["ExternalPreviews"] = "photo-search";
   ControlPanelIcons2["GitHub"] = "brand-github";
-  ControlPanelIcons2["Metadata"] = "info-hexagon";
+  ControlPanelIcons2["Metadata"] = "hexagon-info";
   ControlPanelIcons2["SystemDashboard"] = "percentage-60";
   ControlPanelIcons2["Theme"] = "color-swatch";
 })(ControlPanelIcons || (ControlPanelIcons = {}));
