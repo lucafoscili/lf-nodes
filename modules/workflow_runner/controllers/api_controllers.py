@@ -598,16 +598,23 @@ async def admin_runs_api(request: web.Request) -> web.Response:
 # endregion
 
 # region Models
-async def list_models_controller(request: web.Request) -> web.Response:
+async def list_models_controller(request: web.Request, is_image_models: bool = False) -> web.Response:
     """
     Asynchronous handler for retrieving available models from all engines.
+
+    Args:
+        request (web.Request): The incoming web request object.
+        is_image_models (bool): Flag indicating whether to retrieve image models.
+
+    Returns:
+        web.Response: A JSON response containing engines and their models.
 
     Returns a JSON response with engines and their models.
     """
     from ..services.model_service import get_all_models
 
     try:
-        models_data = await get_all_models()
+        models_data = await get_all_models(is_image_models=is_image_models)
         return web.json_response(models_data)
     except Exception as exc:
         LOG.exception("Error retrieving models")
