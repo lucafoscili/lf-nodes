@@ -1238,6 +1238,7 @@ var NodeName;
   NodeName2["sortJsonKeys"] = "LF_SortJSONKeys";
   NodeName2["sortTags"] = "LF_SortTags";
   NodeName2["splitTone"] = "LF_SplitTone";
+  NodeName2["stabilityAPI"] = "LF_StabilityAPI";
   NodeName2["string"] = "LF_String";
   NodeName2["stringReplace"] = "LF_StringReplace";
   NodeName2["stringTemplate"] = "LF_StringTemplate";
@@ -1390,6 +1391,7 @@ const NODE_WIDGET_MAP = {
   LF_SortJSONKeys: [CustomWidgetName.code],
   LF_SortTags: [CustomWidgetName.code],
   LF_SplitTone: [CustomWidgetName.compare],
+  LF_StabilityAPI: [CustomWidgetName.code],
   LF_String: [CustomWidgetName.history],
   LF_StringReplace: [CustomWidgetName.code],
   LF_StringTemplate: [CustomWidgetName.code],
