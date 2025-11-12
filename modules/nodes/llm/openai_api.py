@@ -7,10 +7,15 @@ from typing import Any
 from server import PromptServer
 
 from . import CATEGORY
-from ...utils.constants import API_ROUTE_PREFIX, EVENT_PREFIX, FUNCTION, Input
-from ...utils.helpers.api import clean_code_fences, create_ui_logger, parse_openai_json_output, parse_openai_response, read_secret
-
-EVENT_NAME = f"{EVENT_PREFIX}openaiapi"
+from ...utils.constants import API_ROUTE_PREFIX, FUNCTION, Input
+from ...utils.helpers.api import (
+    build_openai_multimodal_content,
+    clean_code_fences,
+    create_ui_logger,
+    parse_openai_json_output,
+    parse_openai_response,
+    read_secret
+)
 
 # region LF_OpenAIAPI
 class LF_OpenAIAPI:
@@ -48,6 +53,9 @@ class LF_OpenAIAPI:
                 "timeout": (Input.INTEGER, {
                     "default": 60,
                     "tooltip": "Request timeout in seconds."
+                }),
+                "image": (Input.IMAGE, {
+                    "tooltip": "Optional reference image for multimodal models."
                 })
             },
             "hidden": {
@@ -62,9 +70,10 @@ class LF_OpenAIAPI:
         "Cleaned text output with code fences removed.",
         "Full OpenAI JSON response as string.",
         "Parsed JSON string when the output is valid JSON, otherwise empty.",
+        "Input image for multimodal models.",
     )
-    RETURN_NAMES = ("text", "clean", "raw_json", "json")
-    RETURN_TYPES = (Input.STRING, Input.STRING, Input.JSON, Input.JSON)
+    RETURN_NAMES = ("text", "clean", "raw_json", "json", "image")
+    RETURN_TYPES = (Input.STRING, Input.STRING, Input.JSON, Input.JSON, Input.IMAGE)
 
     async def on_exec(self, **kwargs: dict) -> tuple[str, str]:
         prompt: str = kwargs.get("prompt", "")
@@ -72,7 +81,8 @@ class LF_OpenAIAPI:
         system_message: str = kwargs.get("system_message") or "You are a helpful assistant."
         temperature: float = float(kwargs.get("temperature", 0.7))
         max_tokens: int = int(kwargs.get("max_tokens", 1000))
-        logger = create_ui_logger(EVENT_NAME, kwargs.get("node_id"))
+        image = kwargs.get("image")
+        logger = create_ui_logger("openaiapi", kwargs.get("node_id"))
 
         logger.log("Sending request...")
 
@@ -102,11 +112,14 @@ class LF_OpenAIAPI:
             logger.log("Prompt must not be empty.")
             raise ValueError("Prompt must not be empty.")
 
+        # Build user message content
+        user_content = build_openai_multimodal_content(image, prompt)
+
         payload: dict[str, Any] = {
             "model": model,
             "messages": [
                 {"role": "system", "content": system_message},
-                {"role": "user", "content": prompt}
+                {"role": "user", "content": user_content}
             ],
             "temperature": temperature,
             "max_tokens": max_tokens
@@ -117,10 +130,8 @@ class LF_OpenAIAPI:
         if proxy_secret:
             headers["X-LF-Proxy-Secret"] = proxy_secret
 
-        # Allow tests to inject a mocked aiohttp session via kwargs (dependency inversion for unit tests)
         injected_session = kwargs.get("_test_session")
         session_cm = injected_session if injected_session is not None else aiohttp.ClientSession()
-        # Support both context-managed mock objects and real sessions
         async with session_cm as session:
             async with session.post(proxy_url, headers=headers, json=payload, timeout=timeout_sec) as resp:
                 text_status = await resp.text()
@@ -143,7 +154,7 @@ class LF_OpenAIAPI:
 
         logger.log("Request completed successfully.")
 
-        return (extracted, clean_text, raw_json, json_text)
+        return (extracted, clean_text, raw_json, json_text, image)
 # endregion
 
 # region Mappings

@@ -2,15 +2,13 @@
 Unit tests for API helper functions.
 Tests cover endpoint validation, response handling, URL resolution, hashing, and secret management.
 """
-
 import hashlib
-import json
 import os
 import tempfile
 import unittest
-from unittest.mock import MagicMock, patch, mock_open
 import urllib.parse
 
+from unittest.mock import MagicMock, patch
 
 # region Embedded function implementations for standalone testing
 def clean_code_fences(text: str) -> str:
@@ -34,7 +32,6 @@ def clean_code_fences(text: str) -> str:
     else:
         # Remove backticks but preserve other content
         return text.replace('`', '').strip()
-
 
 def get_sha256(file_path: str):
     """
@@ -76,7 +73,6 @@ def get_sha256(file_path: str):
         return hex_hash
     except (IOError, OSError) as e:
         raise RuntimeError(f"Error calculating hash for {file_path}: {e}")
-
 
 def handle_response(response: dict, method: str = "GET"):
     """
@@ -166,7 +162,6 @@ def handle_response(response: dict, method: str = "GET"):
 
     return status, method, "Whoops! Something went wrong."
 
-
 def get_random_parameter(length: int = 8) -> str:
     """
     Generate a random parameter string.
@@ -174,7 +169,6 @@ def get_random_parameter(length: int = 8) -> str:
     import random
     import string
     return "nonce=" + ''.join(random.choices(string.ascii_letters + string.digits, k=length))
-
 
 def get_resource_url(subfolder: str, filename: str, resource_type: str = 'output'):
     """
@@ -188,7 +182,6 @@ def get_resource_url(subfolder: str, filename: str, resource_type: str = 'output
     ]
 
     return f"/view?{'&'.join(params)}"
-
 
 def resolve_url(api_url: str):
     """
@@ -204,7 +197,6 @@ def resolve_url(api_url: str):
     subfolder = query_params.get("subfolder", [None])[0]
 
     return filename, file_type, subfolder
-
 
 def read_secret(env_name: str) -> str | None:
     """
@@ -228,6 +220,51 @@ def read_secret(env_name: str) -> str | None:
     return None
 # endregion
 
+# region Embedded function implementations for standalone testing
+def build_openai_multimodal_content(
+    image,  # Type hint omitted for test isolation
+    text: str,
+    base64_prefix: str = "data:image/png;charset=utf-8;base64,"
+):
+    """
+    Build multimodal content array for OpenAI-style APIs.
+
+    Args:
+        image: Optional image tensor or list of tensors to include (uses first if list)
+        text: Text prompt to include
+        base64_prefix: Prefix for base64 encoded images
+
+    Returns:
+        List of content items for the message
+    """
+    content = []
+
+    if image is not None and (not isinstance(image, list) or len(image) > 0):
+        # Handle both single tensor and list of tensors
+        if isinstance(image, list) and len(image) > 0:
+            image_tensor = image[0]
+        else:
+            image_tensor = image
+
+        # Mock base64 conversion for testing
+        base64_data = "mock_base64_data"
+        if isinstance(base64_data, list):
+            base64_data = base64_data[0]
+
+        image_url = f"{base64_prefix}{base64_data}"
+        content.append({
+            "type": "image_url",
+            "image_url": {"url": image_url}
+        })
+
+    if text:
+        content.append({
+            "type": "text",
+            "text": text
+        })
+
+    return content
+# endregion
 
 class TestAPIHelpers(unittest.TestCase):
     """Test suite for API helper functions."""
@@ -649,6 +686,95 @@ function test() {
         finally:
             os.unlink(temp_path)
 
+
+    def test_build_openai_multimodal_content_text_only(self):
+        """Test build_openai_multimodal_content with text only."""
+        result = build_openai_multimodal_content(None, "Hello world")
+        expected = [
+            {
+                "type": "text",
+                "text": "Hello world"
+            }
+        ]
+        self.assertEqual(result, expected)
+
+    def test_build_openai_multimodal_content_image_only(self):
+        """Test build_openai_multimodal_content with image only."""
+        mock_image = "mock_tensor"
+        result = build_openai_multimodal_content(mock_image, "")
+        expected = [
+            {
+                "type": "image_url",
+                "image_url": {"url": "data:image/png;charset=utf-8;base64,mock_base64_data"}
+            }
+        ]
+        self.assertEqual(result, expected)
+
+    def test_build_openai_multimodal_content_image_and_text(self):
+        """Test build_openai_multimodal_content with both image and text."""
+        mock_image = "mock_tensor"
+        result = build_openai_multimodal_content(mock_image, "Describe this image")
+        expected = [
+            {
+                "type": "image_url",
+                "image_url": {"url": "data:image/png;charset=utf-8;base64,mock_base64_data"}
+            },
+            {
+                "type": "text",
+                "text": "Describe this image"
+            }
+        ]
+        self.assertEqual(result, expected)
+
+    def test_build_openai_multimodal_content_image_list(self):
+        """Test build_openai_multimodal_content with image list."""
+        mock_images = ["mock_tensor1", "mock_tensor2"]
+        result = build_openai_multimodal_content(mock_images, "Describe this image")
+        expected = [
+            {
+                "type": "image_url",
+                "image_url": {"url": "data:image/png;charset=utf-8;base64,mock_base64_data"}
+            },
+            {
+                "type": "text",
+                "text": "Describe this image"
+            }
+        ]
+        self.assertEqual(result, expected)
+
+    def test_build_openai_multimodal_content_empty_list(self):
+        """Test build_openai_multimodal_content with empty image list."""
+        result = build_openai_multimodal_content([], "Hello")
+        expected = [
+            {
+                "type": "text",
+                "text": "Hello"
+            }
+        ]
+        self.assertEqual(result, expected)
+
+    def test_build_openai_multimodal_content_custom_prefix(self):
+        """Test build_openai_multimodal_content with custom base64 prefix."""
+        mock_image = "mock_tensor"
+        custom_prefix = "data:image/jpeg;base64,"
+        result = build_openai_multimodal_content(mock_image, "Test", custom_prefix)
+        expected = [
+            {
+                "type": "image_url",
+                "image_url": {"url": "data:image/jpeg;base64,mock_base64_data"}
+            },
+            {
+                "type": "text",
+                "text": "Test"
+            }
+        ]
+        self.assertEqual(result, expected)
+
+    def test_build_openai_multimodal_content_no_text_no_image(self):
+        """Test build_openai_multimodal_content with neither text nor image."""
+        result = build_openai_multimodal_content(None, "")
+        expected = []
+        self.assertEqual(result, expected)
 
 if __name__ == '__main__':
     unittest.main()
