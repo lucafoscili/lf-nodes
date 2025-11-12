@@ -7,7 +7,7 @@ from typing import Any
 from server import PromptServer
 
 from . import CATEGORY
-from ...utils.constants import API_ROUTE_PREFIX, EVENT_PREFIX, FUNCTION, Input
+from ...utils.constants import API_ROUTE_PREFIX, FUNCTION, Input
 from ...utils.helpers.api import (
     clean_code_fences, 
     create_ui_logger,
