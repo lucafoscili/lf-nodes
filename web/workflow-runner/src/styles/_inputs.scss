@@ -24,8 +24,15 @@
   }
 
   &__title {
-    display: flex;
-    gap: 0.5em;
-    padding: 0.5em 0;
+    & {
+      align-items: center;
+      display: flex;
+      gap: 0.5em;
+      padding: 0.5em 0;
+    }
+
+    &-h3 {
+      margin: 0;
+    }
   }
 }
