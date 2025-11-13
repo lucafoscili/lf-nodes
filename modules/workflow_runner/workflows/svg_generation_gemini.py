@@ -80,12 +80,12 @@ input_size = WorkflowCell(
 )
 input_model = WorkflowCell(
     node_id="33",
-    id="gemini_model",
+    id="model",
     value="Gemini Model",
     shape="textfield",
     props={
         "lfHtmlAttributes": {
-            "name": "gemini_model",
+            "name": "model",
             "type": "text"
         },
         "lfLabel": "Gemini Model",

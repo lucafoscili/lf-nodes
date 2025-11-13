@@ -1,5 +1,6 @@
 # Re-export all public helpers from the api package
 
+from .build_multimodal_content import *
 from .clean_code_fences import *
 from .find_checkpoint_image import *
 from .get_embedding_hashes import *

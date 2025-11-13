@@ -153,7 +153,7 @@
   "33": {
     "inputs": {
       "prompt": ["22", 0],
-      "model": "gemini-2.5-image",
+      "model": "gemini-2.5-flash-image",
       "timeout": 60,
       "ui_widget": ""
     },

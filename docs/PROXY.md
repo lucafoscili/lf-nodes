@@ -7,7 +7,7 @@ Endpoints
 ---------
 
 - POST /api/lf-nodes/proxy/{service}
-  - service: openai, gemini, or kobold (see Services below)
+  - service: openai, gemini, kobold, or stability (see Services below)
   - Auth: if LF_PROXY_SECRET is set, the request must include header X-LF-Proxy-Secret: `<secret>`
   - Body: JSON payload in the shape expected by the upstream provider. The proxy injects keys and forwards it.
   - Response: Upstream JSON with an additional lf_http_status field or a normalized error payload.
@@ -32,6 +32,12 @@ Services
     - Note: the proxy also accepts OpenAI-compatible proxypaths when the upstream implements them (for example `/v1/chat/completions` and `/v1/chat/completions/stream`). Whether the proxy remaps incoming OpenAI-style paths to the legacy `/api/v1/generate` endpoints is controlled by the service flag `map_openai_to_generate` in the server configuration (default may vary). If `map_openai_to_generate` is False the proxypath is forwarded unchanged.
   - Streaming behaviour / SSE compatibility: some upstreams emit Server-Sent-Events (SSE) using `data: ...` lines. The proxy can either forward raw SSE lines (useful for OpenAI-compatible clients) or wrap parsed JSON events into `event: proxy` wrapper events. This is controlled per-service by the `forward_raw_sse` flag in the service configuration. For development the Kobold entry may opt-in to `forward_raw_sse` to preserve OpenAI-style SSE semantics.
 
+- stability
+  - Upstream: `https://api.stability.ai/v1/generation/{model}/text-to-image`
+  - Env: STABILITY_API_KEY (or STABILITY_API_KEY_FILE)
+  - Default model: stable-diffusion-xl-1024-v1-0 (override by including model in the request body)
+  - Timeout: 120 seconds (longer timeout for image generation)
+
 Rate limiting
 -------------
 
@@ -49,6 +55,7 @@ Use one secret per file and set the corresponding *_FILE environment variable wh
 
 - OPENAI_API_KEY or OPENAI_API_KEY_FILE
 - GEMINI_API_KEY or GEMINI_API_KEY_FILE
+- STABILITY_API_KEY or STABILITY_API_KEY_FILE
 - LF_PROXY_SECRET or LF_PROXY_SECRET_FILE (shared secret required by the proxy endpoint)
 - KOBOLDCPP_BASE or KOBOLDCPP_BASE_FILE (base URL for LAN/self-hosted KoboldCPP)
 
@@ -68,11 +75,13 @@ DEV_ENV=1
 # Option A: Direct keys (development convenience)
 OPENAI_API_KEY=sk.example_openai_key
 GEMINI_API_KEY=ya29.example_key
+STABILITY_API_KEY=sk.example_stability_key
 LF_PROXY_SECRET=replace_with_secret
 
 # Option B: Preferred: point to per‑secret files
 OPENAI_API_KEY_FILE=C:\my_secret_secrets\openai.txt
 GEMINI_API_KEY_FILE=C:\my_secret_secrets\gemini.txt
+STABILITY_API_KEY_FILE=C:\my_secret_secrets\stability.txt
 LF_PROXY_SECRET_FILE=C:\my_secret_secrets\lf_proxy_secret.txt
 KOBOLDCPP_BASE_FILE=C:\my_secret_secrets\kobold_base.txt
 ```
@@ -117,6 +126,34 @@ Environment required for KoboldCPP:
 KOBOLDCPP_BASE=http://192.168.1.50:5001
 `
 
+Example request to Stability AI image generation via the proxy (PowerShell):
+
+```powershell
+$body = @{ 
+  model = 'stable-diffusion-xl-1024-v1-0'
+  text_prompts = @(
+    @{ text = 'A beautiful sunset over mountains'; weight = 1 }
+  )
+  cfg_scale = 7.0
+  height = 1024
+  width = 1024
+  samples = 1
+  steps = 20
+} | ConvertTo-Json -Depth 6
+
+Invoke-RestMethod \
+  -Method Post \
+  -Uri http://localhost:8188/api/lf-nodes/proxy/stability \
+  -Headers @{ 'Content-Type'='application/json'; 'X-LF-Proxy-Secret'='replace_with_secret' } \
+  -Body $body
+```
+
+Environment required for Stability AI:
+
+`plaintext
+STABILITY_API_KEY=your_stability_api_key
+`
+
 Front‑end integration (runner)
 -------------------------------
 
@@ -127,7 +164,7 @@ Prefer routing chat through the proxy so API keys remain server‑side. A minima
 {
   "chat": {
     "useProxy": true,
-    // One of: "openai", "gemini", "kobold"
+    // One of: "openai", "gemini", "kobold", "stability"
     "provider": "kobold"
     // Optional: custom path under the API root (defaults to /proxy/{provider})
     // "path": "/proxy/kobold"

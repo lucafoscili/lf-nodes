@@ -150,6 +150,7 @@ export enum NodeName {
   sortJsonKeys = 'LF_SortJSONKeys',
   sortTags = 'LF_SortTags',
   splitTone = 'LF_SplitTone',
+  stabilityAPI = 'LF_StabilityAPI',
   string = 'LF_String',
   stringReplace = 'LF_StringReplace',
   stringTemplate = 'LF_StringTemplate',

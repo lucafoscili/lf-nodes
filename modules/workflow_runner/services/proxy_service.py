@@ -38,6 +38,13 @@ SERVICES: Dict[str, Dict[str, Any]] = {
         "default_model": "gpt-4o",
         "timeout": 60,
     },
+    "stability": {
+        "endpoint": "https://api.stability.ai/v1/generation/{model}/text-to-image",
+        "api_key_env": "STABILITY_API_KEY",
+        "api_key_header": "Authorization",
+        "default_model": "stable-diffusion-xl-1024-v1-0",
+        "timeout": 120,
+    },
 }
 
 def _read_secret(env_name: str, file_env_name: Optional[str] = None) -> Optional[str]:
@@ -72,14 +79,19 @@ PROXY_SECRET = _read_secret("LF_PROXY_SECRET", "LF_PROXY_SECRET_FILE") or _read_
 PROXY_SECRET_HEADER = "X-LF-Proxy-Secret"
 _RATE_LIMIT_STORE: dict[tuple[str, str], dict] = {}
 
-from ..config import get_settings
-
-_settings = get_settings()
-
-DEFAULT_RATE_LIMIT = {
-    "requests": int(_settings.PROXY_RATE_LIMIT_REQUESTS or 60),
-    "window_seconds": int(_settings.PROXY_RATE_LIMIT_WINDOW_SECONDS or 60),
-}
+try:
+    from ..config import get_settings
+    _settings = get_settings()
+    DEFAULT_RATE_LIMIT = {
+        "requests": int(_settings.PROXY_RATE_LIMIT_REQUESTS or 60),
+        "window_seconds": int(_settings.PROXY_RATE_LIMIT_WINDOW_SECONDS or 60),
+    }
+except ImportError:
+    # Fallback for testing or when config is not available
+    DEFAULT_RATE_LIMIT = {
+        "requests": 60,
+        "window_seconds": 60,
+    }
 # endregion
 
 # region Helpers
