@@ -873,74 +873,90 @@ def _finalize_inpaint_output(
             mf = F.interpolate(mf, size=(processed_region.shape[1], processed_region.shape[2]), mode="nearest")
             mask_for_paste = mf.permute(0, 2, 3, 1)
 
-        # If the mask touches an image edge, harden that edge band to 1.0 to prevent halos.
-        edge_touch = meta.get("edge_touch", {})
-        roi_edge_touch = meta.get("roi_edge_touch", {})
-        edge_band = max(1, int(meta.get("dilate_px", 0)) + int(meta.get("feather_px", 0)) + 1)
-        if edge_touch.get("top"):
-            band = min(edge_band, mask_for_paste.shape[1])
-            mask_for_paste[:, :band, :, :] = 1.0
-        if edge_touch.get("bottom"):
-            band = min(edge_band, mask_for_paste.shape[1])
-            mask_for_paste[:, -band:, :, :] = 1.0
-        if edge_touch.get("left"):
-            band = min(edge_band, mask_for_paste.shape[2])
-            mask_for_paste[:, :, :band, :] = 1.0
-        if edge_touch.get("right"):
-            band = min(edge_band, mask_for_paste.shape[2])
-            mask_for_paste[:, :, -band:, :] = 1.0
-
-        # Debug: print mask stats to catch any residual softness at edges.
-        def _band_stat(tensor, axis, idx):
-            if axis == 1:
-                slice_t = tensor[:, idx:idx + 1, :, :]
-            else:
-                slice_t = tensor[:, :, idx:idx + 1, :]
-            return (float(slice_t.min().item()), float(slice_t.max().item()))
-
-        top_minmax = _band_stat(mask_for_paste, 1, 0)
-        bottom_minmax = _band_stat(mask_for_paste, 1, mask_for_paste.shape[1] - 1)
-        left_minmax = _band_stat(mask_for_paste, 2, 0)
-        right_minmax = _band_stat(mask_for_paste, 2, mask_for_paste.shape[2] - 1)
-        print(
-            "[LF Inpaint Debug] mask edge min/max",
-            f"top={top_minmax}",
-            f"bottom={bottom_minmax}",
-            f"left={left_minmax}",
-            f"right={right_minmax}",
-            f"paste_roi={paste_roi}",
-            f"edge_band={edge_band}",
-            f"roi_edge_touch={roi_edge_touch}",
-        )
-
-        # For final compositing, use a binary mask to fully zero any residual outside-ROI changes.
+        mask_for_paste = mask_for_paste.clamp(0.0, 1.0)
         mask_for_paste_bin = (mask_for_paste > 0.5).to(dtype=processed.dtype, device=processed.device)
 
         if paste_roi != (0, 0, h, w):
             y0, x0, y1, x1 = paste_roi
             full_mask = torch.zeros_like(processed)
             full_mask[:, y0:y1, x0:x1, :] = mask_for_paste_bin
-            # If ROI touches image borders and mask was hardened there, overwrite those bands entirely.
-            if edge_touch.get("top") and y0 == 0:
-                full_mask[:, 0:edge_band, :, :] = 1.0
-            if edge_touch.get("bottom") and y1 == h:
-                full_mask[:, -edge_band:, :, :] = 1.0
-            if edge_touch.get("left") and x0 == 0:
-                full_mask[:, :, 0:edge_band, :] = 1.0
-            if edge_touch.get("right") and x1 == w:
-                full_mask[:, :, -edge_band:, :] = 1.0
-            # Also, if the softened mask touched the crop edges, overwrite those crop bands in the full mask.
-            if roi_edge_touch.get("top"):
-                full_mask[:, y0 : y0 + edge_band, x0:x1, :] = 1.0
-            if roi_edge_touch.get("bottom"):
-                full_mask[:, y1 - edge_band : y1, x0:x1, :] = 1.0
-            if roi_edge_touch.get("left"):
-                full_mask[:, y0:y1, x0 : x0 + edge_band, :] = 1.0
-            if roi_edge_touch.get("right"):
-                full_mask[:, y0:y1, x1 - edge_band : x1, :] = 1.0
             processed = processed * full_mask + base_image.cpu().to(dtype=processed.dtype) * (1.0 - full_mask)
         else:
             processed = processed * mask_for_paste_bin + base_image.cpu().to(dtype=processed.dtype) * (1.0 - mask_for_paste_bin)
+
+    # Seam detection + conditional “darker/lighter” edge merge.
+    # This only activates near edges where the mask/ROI actually touched,
+    # and only when a visible step between edge and interior is detected.
+    edge_touch = meta.get("edge_touch", {}) or {}
+    roi_edge_touch = meta.get("roi_edge_touch", {}) or {}
+    if any(edge_touch.values()) or any(roi_edge_touch.values()):
+        base_full = base_image.cpu().to(dtype=processed.dtype)
+        band = 1
+        thresh = 0.03
+
+        def _analyze_edge(edge_slice, inner_slice, base_slice, label: str):
+            # Convert to approximate luminance
+            edge_l = edge_slice.mean(dim=-1)
+            inner_l = inner_slice.mean(dim=-1)
+            base_l = base_slice.mean(dim=-1)
+
+            edge_mean = float(edge_l.mean().item())
+            inner_mean = float(inner_l.mean().item())
+            base_mean = float(base_l.mean().item())
+
+            if max(abs(edge_mean - inner_mean), abs(edge_mean - base_mean)) < thresh:
+                return None  # no visible seam
+
+            # Decide whether the seam band is brighter or darker than both neighbors.
+            if edge_mean > inner_mean and edge_mean > base_mean:
+                return "brighter"
+            if edge_mean < inner_mean and edge_mean < base_mean:
+                return "darker"
+            return None
+
+        # Top edge
+        if (edge_touch.get("top") or roi_edge_touch.get("top")) and processed.shape[1] > band + 1:
+            edge = processed[:, :band, :, :]
+            inner = processed[:, band : band + 1, :, :]
+            base_edge = base_full[:, :band, :, :]
+            mode = _analyze_edge(edge, inner, base_edge, "top")
+            if mode == "brighter":
+                processed[:, :band, :, :] = torch.minimum(inner, base_edge)
+            elif mode == "darker":
+                processed[:, :band, :, :] = torch.maximum(inner, base_edge)
+
+        # Bottom edge
+        if (edge_touch.get("bottom") or roi_edge_touch.get("bottom")) and processed.shape[1] > band + 1:
+            edge = processed[:, -band:, :, :]
+            inner = processed[:, -band - 1 : -band, :, :]
+            base_edge = base_full[:, -band:, :, :]
+            mode = _analyze_edge(edge, inner, base_edge, "bottom")
+            if mode == "brighter":
+                processed[:, -band:, :, :] = torch.minimum(inner, base_edge)
+            elif mode == "darker":
+                processed[:, -band:, :, :] = torch.maximum(inner, base_edge)
+
+        # Left edge
+        if (edge_touch.get("left") or roi_edge_touch.get("left")) and processed.shape[2] > band + 1:
+            edge = processed[:, :, :band, :]
+            inner = processed[:, :, band : band + 1, :]
+            base_edge = base_full[:, :, :band, :]
+            mode = _analyze_edge(edge, inner, base_edge, "left")
+            if mode == "brighter":
+                processed[:, :, :band, :] = torch.minimum(inner, base_edge)
+            elif mode == "darker":
+                processed[:, :, :band, :] = torch.maximum(inner, base_edge)
+
+        # Right edge
+        if (edge_touch.get("right") or roi_edge_touch.get("right")) and processed.shape[2] > band + 1:
+            edge = processed[:, :, -band:, :]
+            inner = processed[:, :, -band - 1 : -band, :]
+            base_edge = base_full[:, :, -band:, :]
+            mode = _analyze_edge(edge, inner, base_edge, "right")
+            if mode == "brighter":
+                processed[:, :, -band:, :] = torch.minimum(inner, base_edge)
+            elif mode == "darker":
+                processed[:, :, -band:, :] = torch.maximum(inner, base_edge)
 
     info: Dict[str, str] = {}
     # merge any debug file URLs collected earlier
@@ -1254,51 +1270,42 @@ def apply_inpaint_filter(image: torch.Tensor, settings: dict) -> FilterResult:
     if apply_unsharp_mask is None:
         apply_unsharp_mask = True
 
-    work_image, work_mask_soft, paste_roi, region_meta = _prepare_inpaint_region(
-        base_image=base_image,
-        mask_tensor=mask_tensor,
-        vae=vae,
-        settings=settings,
+    # Reuse the tensor-based inpaint path so outpainting / safe-border logic
+    # stays consistent between the editor filter and the node.
+    tensor_settings = dict(settings)
+    tensor_settings.update(
+        {
+            "steps": steps,
+            "denoise": denoise_value,
+            "cfg": cfg,
+            "sampler": sampler_name,
+            "scheduler": scheduler_name,
+            "seed": seed,
+            "positive_prompt": positive_prompt,
+            "negative_prompt": negative_prompt,
+            "use_conditioning": use_conditioning,
+            "conditioning_mix": conditioning_mix,
+            "positive_conditioning": context_positive_conditioning,
+            "negative_conditioning": context_negative_conditioning,
+            "apply_unsharp_mask": apply_unsharp_mask,
+        }
     )
-    region_meta["apply_unsharp_mask"] = apply_unsharp_mask
 
-    processed_region = perform_inpaint(
+    processed, info = apply_inpaint_filter_tensor(
+        image=base_image,
+        mask=mask_tensor,
         model=model,
         clip=clip,
         vae=vae,
-        image=work_image,
-        mask=work_mask_soft,
-        positive_prompt=positive_prompt,
-        negative_prompt=negative_prompt,
-        sampler_name=sampler_name,
-        scheduler_name=scheduler_name,
-        steps=steps,
-        denoise=denoise_value,
-        cfg=cfg,
-        seed=seed,
-        disable_preview=True,
-        positive_conditioning=context_positive_conditioning if use_conditioning else None,
-        negative_conditioning=context_negative_conditioning if use_conditioning else None,
-        use_conditioning=use_conditioning,
-        conditioning_mix=conditioning_mix if use_conditioning else 1.0,
-    )
-    # Save the raw processed region (before final downscale/stitch) to temp so user
-    # can preview the area as generated. This mirrors how the mask preview is saved.
-    region_url = _save_tensor_preview(processed_region, "inpaint_region", str(settings.get("resource_type") or settings.get("output_type") or "temp"))
-
-    processed, info = _finalize_inpaint_output(
-        processed_region=processed_region,
-        base_image=base_image,
-        paste_roi=paste_roi,
-        meta=region_meta,
+        settings=tensor_settings,
     )
 
+    # Attach mask URL for UI/debug parity with the original filter path.
     info_with_mask = {"mask": mask_url}
     info_with_mask.update(info)
-    if region_url:
-        info_with_mask["region"] = region_url
     if not apply_unsharp_mask:
         info_with_mask["unsharp_mask"] = "disabled"
+
     print(
         "[LF Inpaint] sampling "
         f"steps={steps}, denoise={denoise_value:.3f}, cfg={cfg:.2f}, seed={seed}, "
@@ -1353,13 +1360,52 @@ def apply_inpaint_filter_tensor(
     else:
         raise ValueError("Unsupported MASK tensor shape.")
 
-    h, w = int(base_image.shape[1]), int(base_image.shape[2])
+    # Original image size before any padding (used for final crop)
+    orig_h, orig_w = int(base_image.shape[1]), int(base_image.shape[2])
+
+    h, w = orig_h, orig_w
     m = m.to(device=base_image.device, dtype=torch.float32)
     if m.shape[-2] != h or m.shape[-1] != w:
         m = F.interpolate(m.unsqueeze(1), size=(h, w), mode="nearest").squeeze(1)
     m = m.clamp(0.0, 1.0)
     # Use a binary version for ROI/conditioning; a processed soft mask is captured later for final compositing.
     m = (m > 0.5).float()
+
+    # If the brush comes close to image edges, pad the image/mask outward so any
+    # model boundary artifacts fall outside the original frame (cheap outpainting).
+    # Use a small band instead of a single pixel so near-edge strokes also trigger.
+    edge_band = 4
+    touches_top = bool((m[:, :edge_band, :] > 0.5).any())
+    touches_bottom = bool((m[:, -edge_band:, :] > 0.5).any())
+    touches_left = bool((m[:, :, :edge_band] > 0.5).any())
+    touches_right = bool((m[:, :, -edge_band:] > 0.5).any())
+
+    pad_margin = 32  # outpainting margin in pixels
+    pad_top = pad_margin if touches_top else 0
+    pad_bottom = pad_margin if touches_bottom else 0
+    pad_left = pad_margin if touches_left else 0
+    pad_right = pad_margin if touches_right else 0
+
+    if pad_top or pad_bottom or pad_left or pad_right:
+        # Pad image by replicating edge pixels outward.
+        # base_image: (B, H, W, C) -> pad H and W, keep channels unchanged.
+        base_image = F.pad(
+            base_image,
+            (0, 0, pad_left, pad_right, pad_top, pad_bottom),
+            mode="replicate",
+        )
+        # Pad mask with ones so the inpaint region extends into the outpaint margin.
+        # This lets the model hallucinate beyond the original frame; the final
+        # crop and safe-border logic will decide what remains visible.
+        m = F.pad(
+            m.unsqueeze(1),
+            (pad_left, pad_right, pad_top, pad_bottom),
+            mode="constant",
+            value=1.0,
+        ).squeeze(1)
+
+    # Updated working size after optional padding.
+    h, w = int(base_image.shape[1]), int(base_image.shape[2])
 
     use_conditioning = convert_to_boolean(settings.get("use_conditioning", False)) or False
     conditioning_mix = _normalize_conditioning_mix(settings.get("conditioning_mix"))
@@ -1404,6 +1450,16 @@ def apply_inpaint_filter_tensor(
         paste_roi=paste_roi,
         meta=region_meta,
     )
+
+    # If we padded for outpainting, crop back to the original frame.
+    if pad_top or pad_bottom or pad_left or pad_right:
+        crop_y0 = pad_top
+        crop_y1 = pad_top + orig_h
+        crop_x0 = pad_left
+        crop_x1 = pad_left + orig_w
+        processed = processed[:, crop_y0:crop_y1, crop_x0:crop_x1, :]
+    else:
+        processed = processed[:, :orig_h, :orig_w, :]
     if not apply_unsharp_mask:
         info["unsharp_mask"] = "disabled"
 
