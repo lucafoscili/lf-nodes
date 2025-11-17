@@ -601,6 +601,13 @@ def _prepare_inpaint_region(
             work_image = base_image[:, y0:y1, x0:x1, :]
             work_mask = mask_tensor[:, y0:y1, x0:x1]
 
+    # Track whether the user brush actually touches an image edge so we can avoid
+    # introducing a soft falloff along the border (which can look like a white halo).
+    mask_touches_top = paste_roi[0] == 0 and bool((work_mask[:, 0:1, :] > 0.5).any())
+    mask_touches_bottom = paste_roi[2] == h and bool((work_mask[:, -1:, :] > 0.5).any())
+    mask_touches_left = paste_roi[1] == 0 and bool((work_mask[:, :, 0:1] > 0.5).any())
+    mask_touches_right = paste_roi[3] == w and bool((work_mask[:, :, -1:] > 0.5).any())
+
     # Preserve explicit 0 values from settings. Only fall back to defaults when
     # the setting is missing or convert_to_int returns None.
     raw_dilate = settings.get("dilate", None)
@@ -637,6 +644,44 @@ def _prepare_inpaint_region(
         )
         work_mask_soft = wm.squeeze(1)
     work_mask_soft = work_mask_soft.clamp(0.0, 1.0)
+
+    # If the mask touches an image border, keep the corresponding band fully opaque
+    # to avoid partially transparent edges when the brush is dragged out of bounds.
+    edge_band = max(dilate_px + feather_px, 1)
+    if mask_touches_top:
+        band = min(edge_band, work_mask_soft.shape[1])
+        top_cols = (work_mask[:, 0:1, :] > 0.5).expand(-1, band, -1)
+        work_mask_soft[:, :band, :] = torch.where(
+            top_cols,
+            torch.ones_like(work_mask_soft[:, :band, :]),
+            work_mask_soft[:, :band, :],
+        )
+    if mask_touches_bottom:
+        band = min(edge_band, work_mask_soft.shape[1])
+        bottom_cols = (work_mask[:, -1:, :] > 0.5).expand(-1, band, -1)
+        work_mask_soft[:, -band:, :] = torch.where(
+            bottom_cols,
+            torch.ones_like(work_mask_soft[:, -band:, :]),
+            work_mask_soft[:, -band:, :],
+        )
+    if mask_touches_left:
+        band = min(edge_band, work_mask_soft.shape[2])
+        left_rows = (work_mask[:, :, 0:1] > 0.5).expand(-1, -1, band)
+        work_mask_soft[:, :, :band] = torch.where(
+            left_rows,
+            torch.ones_like(work_mask_soft[:, :, :band]),
+            work_mask_soft[:, :, :band],
+        )
+    if mask_touches_right:
+        band = min(edge_band, work_mask_soft.shape[2])
+        right_rows = (work_mask[:, :, -1:] > 0.5).expand(-1, -1, band)
+        work_mask_soft[:, :, -band:] = torch.where(
+            right_rows,
+            torch.ones_like(work_mask_soft[:, :, -band:]),
+            work_mask_soft[:, :, -band:],
+        )
+    work_mask_soft = work_mask_soft.clamp(0.0, 1.0)
+
     upsample_applied = False
     upsample_info: dict | None = None
     if upsample_target and upsample_target > 0:
@@ -685,6 +730,7 @@ def _prepare_inpaint_region(
         "image_shape": (h, w),
         "base_roi": base_roi_original,
         "mask_roi": mask_roi_original,
+        "mask_for_paste": work_mask_soft.detach(),
     }
 
     return work_image, work_mask_soft, paste_roi, meta
@@ -799,6 +845,25 @@ def _finalize_inpaint_output(
         processed = processed_region
 
     processed = processed.detach().clamp(0.0, 1.0).to(torch.float32).cpu().contiguous()
+
+    # Optionally re-composite with the processed mask so any residual changes outside the mask are removed.
+    mask_for_paste = meta.pop("mask_for_paste", None)
+    if mask_for_paste is not None:
+        mask_for_paste = mask_for_paste.to(dtype=processed.dtype, device=processed.device)
+        if mask_for_paste.dim() == 3:
+            mask_for_paste = mask_for_paste.unsqueeze(-1)
+        # If the mask was upsampled earlier, downscale to match the processed_region before stitching.
+        if mask_for_paste.shape[1] != processed_region.shape[1] or mask_for_paste.shape[2] != processed_region.shape[2]:
+            mf = mask_for_paste.permute(0, 3, 1, 2)
+            mf = F.interpolate(mf, size=(processed_region.shape[1], processed_region.shape[2]), mode="nearest")
+            mask_for_paste = mf.permute(0, 2, 3, 1)
+        if paste_roi != (0, 0, h, w):
+            y0, x0, y1, x1 = paste_roi
+            full_mask = torch.zeros_like(processed)
+            full_mask[:, y0:y1, x0:x1, :] = mask_for_paste
+            processed = processed * full_mask + base_image.cpu().to(dtype=processed.dtype) * (1.0 - full_mask)
+        else:
+            processed = processed * mask_for_paste + base_image.cpu().to(dtype=processed.dtype) * (1.0 - mask_for_paste)
 
     info: Dict[str, str] = {}
     # merge any debug file URLs collected earlier
@@ -1216,6 +1281,8 @@ def apply_inpaint_filter_tensor(
     if m.shape[-2] != h or m.shape[-1] != w:
         m = F.interpolate(m.unsqueeze(1), size=(h, w), mode="nearest").squeeze(1)
     m = m.clamp(0.0, 1.0)
+    # Preserve a soft version for final compositing; use a binary version for ROI/conditioning.
+    final_mask_soft = m
     m = (m > 0.5).float()
 
     use_conditioning = convert_to_boolean(settings.get("use_conditioning", False)) or False
@@ -1230,6 +1297,8 @@ def apply_inpaint_filter_tensor(
         vae=vae,
         settings=settings,
     )
+    # Keep the processed mask (with dilate/feather/upsample) to re-apply on the final paste.
+    region_meta["mask_for_paste"] = work_mask_soft.detach()
     region_meta["apply_unsharp_mask"] = apply_unsharp_mask
 
     processed_region = perform_inpaint(
@@ -1261,6 +1330,19 @@ def apply_inpaint_filter_tensor(
         paste_roi=paste_roi,
         meta=region_meta,
     )
+    # Re-composite once more with the original (soft) mask to ensure no edge pixels outside
+    # the brush area are altered when the ROI touches image borders.
+    if final_mask_soft is not None:
+        fm = final_mask_soft.to(dtype=processed.dtype, device=processed.device)
+        if fm.dim() == 3:
+            fm = fm.unsqueeze(-1)
+        if fm.shape[1] != processed.shape[1] or fm.shape[2] != processed.shape[2]:
+            fm = F.interpolate(
+                fm.permute(0, 3, 1, 2),
+                size=(processed.shape[1], processed.shape[2]),
+                mode="nearest",
+            ).permute(0, 2, 3, 1)
+        processed = processed * fm + base_image.cpu().to(dtype=processed.dtype) * (1.0 - fm)
 
     if not apply_unsharp_mask:
         info["unsharp_mask"] = "disabled"
