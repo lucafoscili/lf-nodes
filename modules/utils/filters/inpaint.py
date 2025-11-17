@@ -645,6 +645,14 @@ def _prepare_inpaint_region(
         work_mask_soft = wm.squeeze(1)
     work_mask_soft = work_mask_soft.clamp(0.0, 1.0)
 
+    # Track whether the softened mask touches the cropped ROI edges (not just image edges).
+    roi_edge_touch = {
+        "top": bool((work_mask_soft[:, 0:1, :] > 0).any()),
+        "bottom": bool((work_mask_soft[:, -1:, :] > 0).any()),
+        "left": bool((work_mask_soft[:, :, 0:1] > 0).any()),
+        "right": bool((work_mask_soft[:, :, -1:] > 0).any()),
+    }
+
     # If the mask touches an image border, keep the corresponding band fully opaque
     # to avoid partially transparent edges when the brush is dragged out of bounds.
     edge_band = max(dilate_px + feather_px, 1)
@@ -725,6 +733,13 @@ def _prepare_inpaint_region(
     meta = {
         "dilate_px": dilate_px,
         "feather_px": feather_px,
+        "edge_touch": {
+            "top": mask_touches_top,
+            "bottom": mask_touches_bottom,
+            "left": mask_touches_left,
+            "right": mask_touches_right,
+        },
+        "roi_edge_touch": roi_edge_touch,
         "upsample_applied": upsample_applied,
         "upsample_info": upsample_info,
         "image_shape": (h, w),
@@ -857,13 +872,75 @@ def _finalize_inpaint_output(
             mf = mask_for_paste.permute(0, 3, 1, 2)
             mf = F.interpolate(mf, size=(processed_region.shape[1], processed_region.shape[2]), mode="nearest")
             mask_for_paste = mf.permute(0, 2, 3, 1)
+
+        # If the mask touches an image edge, harden that edge band to 1.0 to prevent halos.
+        edge_touch = meta.get("edge_touch", {})
+        roi_edge_touch = meta.get("roi_edge_touch", {})
+        edge_band = max(1, int(meta.get("dilate_px", 0)) + int(meta.get("feather_px", 0)) + 1)
+        if edge_touch.get("top"):
+            band = min(edge_band, mask_for_paste.shape[1])
+            mask_for_paste[:, :band, :, :] = 1.0
+        if edge_touch.get("bottom"):
+            band = min(edge_band, mask_for_paste.shape[1])
+            mask_for_paste[:, -band:, :, :] = 1.0
+        if edge_touch.get("left"):
+            band = min(edge_band, mask_for_paste.shape[2])
+            mask_for_paste[:, :, :band, :] = 1.0
+        if edge_touch.get("right"):
+            band = min(edge_band, mask_for_paste.shape[2])
+            mask_for_paste[:, :, -band:, :] = 1.0
+
+        # Debug: print mask stats to catch any residual softness at edges.
+        def _band_stat(tensor, axis, idx):
+            if axis == 1:
+                slice_t = tensor[:, idx:idx + 1, :, :]
+            else:
+                slice_t = tensor[:, :, idx:idx + 1, :]
+            return (float(slice_t.min().item()), float(slice_t.max().item()))
+
+        top_minmax = _band_stat(mask_for_paste, 1, 0)
+        bottom_minmax = _band_stat(mask_for_paste, 1, mask_for_paste.shape[1] - 1)
+        left_minmax = _band_stat(mask_for_paste, 2, 0)
+        right_minmax = _band_stat(mask_for_paste, 2, mask_for_paste.shape[2] - 1)
+        print(
+            "[LF Inpaint Debug] mask edge min/max",
+            f"top={top_minmax}",
+            f"bottom={bottom_minmax}",
+            f"left={left_minmax}",
+            f"right={right_minmax}",
+            f"paste_roi={paste_roi}",
+            f"edge_band={edge_band}",
+            f"roi_edge_touch={roi_edge_touch}",
+        )
+
+        # For final compositing, use a binary mask to fully zero any residual outside-ROI changes.
+        mask_for_paste_bin = (mask_for_paste > 0.5).to(dtype=processed.dtype, device=processed.device)
+
         if paste_roi != (0, 0, h, w):
             y0, x0, y1, x1 = paste_roi
             full_mask = torch.zeros_like(processed)
-            full_mask[:, y0:y1, x0:x1, :] = mask_for_paste
+            full_mask[:, y0:y1, x0:x1, :] = mask_for_paste_bin
+            # If ROI touches image borders and mask was hardened there, overwrite those bands entirely.
+            if edge_touch.get("top") and y0 == 0:
+                full_mask[:, 0:edge_band, :, :] = 1.0
+            if edge_touch.get("bottom") and y1 == h:
+                full_mask[:, -edge_band:, :, :] = 1.0
+            if edge_touch.get("left") and x0 == 0:
+                full_mask[:, :, 0:edge_band, :] = 1.0
+            if edge_touch.get("right") and x1 == w:
+                full_mask[:, :, -edge_band:, :] = 1.0
+            # Also, if the softened mask touched the crop edges, overwrite those crop bands in the full mask.
+            if roi_edge_touch.get("top"):
+                full_mask[:, y0 : y0 + edge_band, x0:x1, :] = 1.0
+            if roi_edge_touch.get("bottom"):
+                full_mask[:, y1 - edge_band : y1, x0:x1, :] = 1.0
+            if roi_edge_touch.get("left"):
+                full_mask[:, y0:y1, x0 : x0 + edge_band, :] = 1.0
+            if roi_edge_touch.get("right"):
+                full_mask[:, y0:y1, x1 - edge_band : x1, :] = 1.0
             processed = processed * full_mask + base_image.cpu().to(dtype=processed.dtype) * (1.0 - full_mask)
         else:
-            processed = processed * mask_for_paste + base_image.cpu().to(dtype=processed.dtype) * (1.0 - mask_for_paste)
+            processed = processed * mask_for_paste_bin + base_image.cpu().to(dtype=processed.dtype) * (1.0 - mask_for_paste_bin)
 
     info: Dict[str, str] = {}
     # merge any debug file URLs collected earlier
