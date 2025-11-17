@@ -1281,8 +1281,7 @@ def apply_inpaint_filter_tensor(
     if m.shape[-2] != h or m.shape[-1] != w:
         m = F.interpolate(m.unsqueeze(1), size=(h, w), mode="nearest").squeeze(1)
     m = m.clamp(0.0, 1.0)
-    # Preserve a soft version for final compositing; use a binary version for ROI/conditioning.
-    final_mask_soft = m
+    # Use a binary version for ROI/conditioning; a processed soft mask is captured later for final compositing.
     m = (m > 0.5).float()
 
     use_conditioning = convert_to_boolean(settings.get("use_conditioning", False)) or False
@@ -1297,8 +1296,6 @@ def apply_inpaint_filter_tensor(
         vae=vae,
         settings=settings,
     )
-    # Keep the processed mask (with dilate/feather/upsample) to re-apply on the final paste.
-    region_meta["mask_for_paste"] = work_mask_soft.detach()
     region_meta["apply_unsharp_mask"] = apply_unsharp_mask
 
     processed_region = perform_inpaint(
@@ -1330,20 +1327,6 @@ def apply_inpaint_filter_tensor(
         paste_roi=paste_roi,
         meta=region_meta,
     )
-    # Re-composite once more with the original (soft) mask to ensure no edge pixels outside
-    # the brush area are altered when the ROI touches image borders.
-    if final_mask_soft is not None:
-        fm = final_mask_soft.to(dtype=processed.dtype, device=processed.device)
-        if fm.dim() == 3:
-            fm = fm.unsqueeze(-1)
-        if fm.shape[1] != processed.shape[1] or fm.shape[2] != processed.shape[2]:
-            fm = F.interpolate(
-                fm.permute(0, 3, 1, 2),
-                size=(processed.shape[1], processed.shape[2]),
-                mode="nearest",
-            ).permute(0, 2, 3, 1)
-        processed = processed * fm + base_image.cpu().to(dtype=processed.dtype) * (1.0 - fm)
-
     if not apply_unsharp_mask:
         info["unsharp_mask"] = "disabled"
 
