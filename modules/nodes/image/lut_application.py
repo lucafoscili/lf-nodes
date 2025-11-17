@@ -34,6 +34,11 @@ class LF_LUTApplication:
                 }),
             },
             "optional": {
+                "preset": (Input.COMBO, {
+                    "default": "auto_photoreal",
+                    "options": ["auto_photoreal", "auto_anime", "highlights_safe", "aggressive", "legacy"],
+                    "tooltip": "auto_photoreal: Balanced for photorealistic images with banding reduction and moderate neutral highlights.\nauto_anime: Optimized for stylized/anime images with stronger neutral highlights and lower banding threshold.\nhighlights_safe: Conservative approach with very strong highlight preservation and moderate banding protection.\naggressive: Full LUT application without banding reduction or highlight preservation.\nlegacy: Original behavior without enhancements."
+                }),
                 "ui_widget": (Input.LF_COMPARE, {
                     "default": {}
                 })
@@ -64,6 +69,51 @@ class LF_LUTApplication:
         image: list[torch.Tensor] = normalize_input_image(kwargs.get("image", []))
         strength: float = normalize_list_to_value(kwargs.get("strength"))
         lut_dataset: dict = normalize_json_input(kwargs.get("lut_dataset", {}))
+        preset: str = str(kwargs.get("preset", "auto_photoreal") or "auto_photoreal").lower()
+
+        if preset in ("auto_photoreal", "photoreal", "auto"):
+            smooth_interpolation = True
+            preserve_neutral_highlights = True
+            neutral_strength = 0.55
+            auto_limit_strength = True
+            banding_threshold = 0.15
+            banding_max_reduction = 0.5
+        elif preset in ("auto_anime", "anime", "stylized"):
+            smooth_interpolation = True
+            preserve_neutral_highlights = True
+            neutral_strength = 0.65
+            auto_limit_strength = True
+            banding_threshold = 0.10
+            banding_max_reduction = 0.7
+        elif preset in ("highlights_safe", "safe"):
+            smooth_interpolation = True
+            preserve_neutral_highlights = True
+            neutral_strength = 0.75
+            auto_limit_strength = True
+            banding_threshold = 0.12
+            banding_max_reduction = 0.6
+        elif preset in ("aggressive",):
+            smooth_interpolation = True
+            preserve_neutral_highlights = False
+            neutral_strength = 0.0
+            auto_limit_strength = False
+            banding_threshold = 0.15  # not used
+            banding_max_reduction = 0.5  # not used
+        elif preset in ("legacy",):
+            smooth_interpolation = False
+            preserve_neutral_highlights = False
+            neutral_strength = 0.0
+            auto_limit_strength = False
+            banding_threshold = 0.15  # not used
+            banding_max_reduction = 0.5  # not used
+        else:
+            # Fallback to auto_photoreal
+            smooth_interpolation = True
+            preserve_neutral_highlights = True
+            neutral_strength = 0.55
+            auto_limit_strength = True
+            banding_threshold = 0.15
+            banding_max_reduction = 0.5
 
         nodes: list[dict] = []
         dataset: dict = { "nodes": nodes }
@@ -77,22 +127,60 @@ class LF_LUTApplication:
             if not lut:
                 raise ValueError(f"LUT for Image #{index + 1} not found in dataset.")
 
-            r = np.array([int(node["cells"][RED_CHANNEL_ID]["value"]) for node in lut["nodes"]], dtype=np.uint8)
-            g = np.array([int(node["cells"][GREEN_CHANNEL_ID]["value"]) for node in lut["nodes"]], dtype=np.uint8)
-            b = np.array([int(node["cells"][BLUE_CHANNEL_ID]["value"]) for node in lut["nodes"]], dtype=np.uint8)
+            r = np.array([int(node["cells"][RED_CHANNEL_ID]["value"]) for node in lut["nodes"]], dtype=np.float32)
+            g = np.array([int(node["cells"][GREEN_CHANNEL_ID]["value"]) for node in lut["nodes"]], dtype=np.float32)
+            b = np.array([int(node["cells"][BLUE_CHANNEL_ID]["value"]) for node in lut["nodes"]], dtype=np.float32)
 
-            image_np = tensor_to_numpy(img)
-            image_np = image_np.astype(np.uint8)
-            adjusted_np = np.zeros_like(image_np)
+            image_np_float = tensor_to_numpy(img, dtype=np.float32) * 255.0
+            adjusted_np_float = np.zeros_like(image_np_float, dtype=np.float32)
 
-            adjusted_np[:, :, 0] = r[image_np[:, :, 0]]
-            adjusted_np[:, :, 1] = g[image_np[:, :, 1]]
-            adjusted_np[:, :, 2] = b[image_np[:, :, 2]]
+            if smooth_interpolation:
+                xp = np.arange(256, dtype=np.float32)
+                adjusted_np_float[:, :, 0] = np.interp(image_np_float[:, :, 0], xp, r)
+                adjusted_np_float[:, :, 1] = np.interp(image_np_float[:, :, 1], xp, g)
+                adjusted_np_float[:, :, 2] = np.interp(image_np_float[:, :, 2], xp, b)
+            else:
+                image_uint8 = np.clip(image_np_float, 0, 255).astype(np.uint8)
+                adjusted_np_float[:, :, 0] = r[image_uint8[:, :, 0]]
+                adjusted_np_float[:, :, 1] = g[image_uint8[:, :, 1]]
+                adjusted_np_float[:, :, 2] = b[image_uint8[:, :, 2]]
 
-            image_np_float = image_np.astype(np.float32)
-            adjusted_np_float = adjusted_np.astype(np.float32)
+            if preserve_neutral_highlights and neutral_strength > 0:
+                # Luma estimate (Rec.709)
+                luma = 0.2126 * adjusted_np_float[:, :, 0] + 0.7152 * adjusted_np_float[:, :, 1] + 0.0722 * adjusted_np_float[:, :, 2]
+                # Near-neutral chroma check
+                delta = (np.max(adjusted_np_float, axis=2) - np.min(adjusted_np_float, axis=2))
+                mask = (luma >= 230.0) & (delta <= 12.0)
+                if np.any(mask):
+                    avg = adjusted_np_float.mean(axis=2, keepdims=True)
+                    # Blend towards neutral average
+                    adjusted_np_float[mask] = (
+                        adjusted_np_float[mask] * (1.0 - neutral_strength) + avg[mask] * neutral_strength
+                    )
 
-            blended_np = (1 - strength) * image_np_float + strength * adjusted_np_float
+            def _compute_banding_risk(rs: np.ndarray, gs: np.ndarray, bs: np.ndarray, img_float: np.ndarray) -> float:
+                def channel_risk(arr: np.ndarray, channel_vals: np.ndarray) -> float:
+                    d = np.diff(arr)
+                    flat_mask = np.concatenate([d == 0, [False]])  # mark start of flat segment
+                    flat_range_ratio = flat_mask.sum() / 256.0
+                    intensities = np.clip(channel_vals, 0, 255).astype(np.int32)
+                    flat_pixels_ratio = (flat_mask[intensities].sum() / intensities.size) if intensities.size else 0.0
+                    return flat_range_ratio * flat_pixels_ratio
+                r_channel_vals = img_float[:, :, 0]
+                g_channel_vals = img_float[:, :, 1]
+                b_channel_vals = img_float[:, :, 2]
+                return float((channel_risk(rs, r_channel_vals) + channel_risk(gs, g_channel_vals) + channel_risk(bs, b_channel_vals)) / 3.0)
+
+            banding_risk = _compute_banding_risk(r, g, b, image_np_float)
+
+            effective_strength = strength
+            if auto_limit_strength and banding_risk > banding_threshold and banding_max_reduction > 0:
+                # Scale reduction proportionally above threshold
+                excess = min(1.0, (banding_risk - banding_threshold) / max(1e-6, (1.0 - banding_threshold)))
+                reduction = banding_max_reduction * excess
+                effective_strength = strength * (1.0 - reduction)
+
+            blended_np = (1 - effective_strength) * image_np_float + effective_strength * adjusted_np_float
             blended_np = np.clip(blended_np, 0, 255).astype(np.uint8)
 
             adjusted_tensor = numpy_to_tensor(blended_np)
