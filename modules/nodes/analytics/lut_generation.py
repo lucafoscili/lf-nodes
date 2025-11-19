@@ -56,7 +56,7 @@ class LF_LUTGeneration:
                 b = node["cells"][BLUE_CHANNEL_ID]["value"]
 
                 lut_node = {
-                    "id": INTENSITY_ID,
+                    "id": str(i),
                     "cells": {
                         INTENSITY_ID: {"value": i},
                         RED_CHANNEL_ID: {"value": r, "shape": "number"},
