@@ -7,13 +7,13 @@ import {
   ImageEditorTextfieldIds,
   ImageEditorToggleIds,
 } from '../../../types/widgets/imageEditor';
+import { IMAGE_EDITOR_CONSTANTS } from '../../../helpers/imageEditor/constants';
 
 export const DIFFUSION_SETTINGS: Pick<ImageEditorFilters, 'inpaint'> = {
   //#region Inpaint
-  inpaint: {
+  [IMAGE_EDITOR_CONSTANTS.FILTERS.INPAINT]: {
     controlIds: ImageEditorInpaintIds,
     hasCanvasAction: true,
-    requiresManualApply: true,
     settings: {
       b64_canvas: '',
       cfg: 7,
@@ -127,7 +127,6 @@ export const INPAINT_ADV: ImageEditorInpaintFilter = {
   //#region Inpaint (adv.)
   controlIds: ImageEditorInpaintIds,
   hasCanvasAction: true,
-  requiresManualApply: true,
   settings: {
     ...DIFFUSION_SETTINGS.inpaint!.settings,
     use_conditioning: false,

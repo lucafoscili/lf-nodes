@@ -3,8 +3,18 @@ import torch
 from . import CATEGORY
 from ...utils.constants import FUNCTION, Input, SAMPLERS, SCHEDULERS
 from ...utils.helpers.comfy import safe_send_sync
-from ...utils.helpers.editing import EditingSession
-from ...utils.helpers.logic import normalize_conditioning, normalize_input_image, normalize_list_to_value, normalize_output_image
+from ...utils.helpers.editing import (
+    EditingSession,
+    apply_editor_config_to_dataset,
+    build_editor_config_from_dataset,
+)
+from ...utils.helpers.logic import (
+    normalize_conditioning,
+    normalize_input_image,
+    normalize_json_input,
+    normalize_list_to_value,
+    normalize_output_image,
+)
 from ...utils.helpers.temp_cache import TempFileCache
 
 # region LF_ImagesEditingBreakpoint
@@ -59,6 +69,9 @@ class LF_ImagesEditingBreakpoint:
                 "negative_conditioning": (Input.CONDITIONING, {
                     "tooltip": "Optional negative conditioning to reuse during inpaint edits."
                 }),
+                "config": (Input.JSON, {
+                    "tooltip": "Optional image editor configuration JSON (navigation/defaults/selection)."
+                }),
                 "ui_widget": (Input.LF_IMAGE_EDITOR, {
                     "default": {}
                 }),
@@ -70,15 +83,16 @@ class LF_ImagesEditingBreakpoint:
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
-    OUTPUT_IS_LIST = (False, True, False, True)
+    OUTPUT_IS_LIST = (False, True, False, True, False)
     OUTPUT_TOOLTIPS = (
         "Edited image tensor.",
         "List of edited image tensors.",
         "Original image tensor.",
-        "List of original image tensors."
+        "List of original image tensors.",
+        "Image editor configuration JSON (navigation/defaults/selection).",
     )
-    RETURN_NAMES = ("image", "image_list", "orig_image", "orig_image_list")
-    RETURN_TYPES = (Input.IMAGE, Input.IMAGE, Input.IMAGE, Input.IMAGE)
+    RETURN_NAMES = ("image", "image_list", "orig_image", "orig_image_list", "config")
+    RETURN_TYPES = (Input.IMAGE, Input.IMAGE, Input.IMAGE, Input.IMAGE, Input.JSON)
 
     def on_exec(self, **kwargs):
         self._temp_cache.cleanup()
@@ -112,9 +126,18 @@ class LF_ImagesEditingBreakpoint:
         positive_conditioning_value = normalize_conditioning(kwargs.get("positive_conditioning"))
         negative_conditioning_value = normalize_conditioning(kwargs.get("negative_conditioning"))
 
+        config_raw = kwargs.get("config")
+        try:
+            config_value = normalize_json_input(config_raw) if config_raw is not None else None
+        except TypeError:
+            config_value = None
+
         image: list[torch.Tensor] = normalize_input_image(kwargs.get("image"))
 
         dataset = session.build_dataset(image, filename_prefix="edit_breakpoint")
+
+        if isinstance(config_value, dict):
+            apply_editor_config_to_dataset(dataset, config_value)
 
         inpaint_defaults: dict[str, object] = {}
         if cfg_value is not None:
@@ -161,7 +184,9 @@ class LF_ImagesEditingBreakpoint:
         results = session.collect_results(dataset)
         edited_batch_list, edited_image_list = results.batch_list, results.image_list
 
-        return (edited_batch_list[0], edited_image_list, batch_list[0], image_list)
+        config_out = build_editor_config_from_dataset(dataset)
+
+        return (edited_batch_list[0], edited_image_list, batch_list[0], image_list, config_out)
 # endregion
 
 # region Mappings

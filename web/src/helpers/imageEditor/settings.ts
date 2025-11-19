@@ -9,6 +9,7 @@ import {
   ImageEditorCSS,
   ImageEditorDataset,
   ImageEditorFilter,
+  ImageEditorFilterSettings,
   ImageEditorFilterType,
   ImageEditorIcons,
   ImageEditorSliderConfig,
@@ -23,14 +24,97 @@ import {
 } from '../../types/widgets/imageEditor';
 import { TagName } from '../../types/widgets/widgets';
 import { getLfManager } from '../../utils/common';
-import {
-  beginManualApplyRequest,
-  hasManualApplyPendingChanges,
-  initManualApplyState,
-  registerManualApplyChange,
-} from './manualApply';
+import { IMAGE_EDITOR_CONSTANTS } from './constants';
 import { parseLabel } from './selectors';
-import { updateCb } from './update';
+
+//#region Helpers
+/**
+ * Type guard function that validates whether the provided object conforms to the ImageEditorFilter interface.
+ * It checks for the presence and correct types of required properties: `controlIds`, `configs`, and `settings`.
+ * Additionally, it validates that `configs` contains valid control types from `ImageEditorControls`, each with an array of configurations
+ * having `id`, `title`, and `defaultValue`. Optional property `hasCanvasAction` is checked for boolean type if present.
+ *
+ * @param obj - The unknown object to validate.
+ * @returns `true` if the object is a valid `ImageEditorFilter`, otherwise `false`.
+ */
+function isValidImageEditorFilter(obj: unknown): obj is ImageEditorFilter {
+  if (
+    typeof obj !== 'object' ||
+    obj === null ||
+    !('controlIds' in obj) ||
+    !('configs' in obj) ||
+    !('settings' in obj)
+  ) {
+    return false;
+  }
+
+  const filter = obj as Record<string, unknown>;
+
+  if (typeof filter.controlIds !== 'object' || filter.controlIds === null) {
+    return false;
+  }
+
+  if (typeof filter.configs !== 'object' || filter.configs === null) {
+    return false;
+  }
+
+  const configs = filter.configs as Record<string, unknown>;
+  const validControlTypes = Object.values(ImageEditorControls);
+
+  for (const [controlType, controlConfigs] of Object.entries(configs)) {
+    if (!validControlTypes.includes(controlType as ImageEditorControls)) {
+      return false;
+    }
+
+    if (!Array.isArray(controlConfigs)) {
+      return false;
+    }
+
+    for (const config of controlConfigs) {
+      if (
+        typeof config !== 'object' ||
+        config === null ||
+        !('id' in config) ||
+        !('title' in config) ||
+        !('defaultValue' in config)
+      ) {
+        return false;
+      }
+    }
+  }
+
+  if (typeof filter.settings !== 'object' || filter.settings === null) {
+    return false;
+  }
+
+  if ('hasCanvasAction' in filter && typeof filter.hasCanvasAction !== 'boolean') {
+    return false;
+  }
+
+  return true;
+}
+function assertImageEditorFilter(obj: unknown): ImageEditorFilter {
+  if (!isValidImageEditorFilter(obj)) {
+    throw new Error('Invalid ImageEditorFilter structure');
+  }
+  return obj;
+}
+function assignStoredSetting(
+  settings: ImageEditorFilter['settings'],
+  controlIds: ImageEditorFilter['controlIds'],
+  id: ImageEditorControlIds,
+  value: unknown,
+): void {
+  const controlIdValues = Object.values(controlIds);
+  if (!controlIdValues.includes(id as any)) {
+    console.warn(`Control ID '${id}' not found in filter controlIds, skipping assignment`);
+    return;
+  }
+
+  (settings as ImageEditorFilterSettings)[id] =
+    value as ImageEditorFilterSettings[ImageEditorControlIds];
+}
+//#endregion
 
 //#region createPrepSettings
 export const createPrepSettings = (deps: PrepSettingsDeps): PrepSettingsFn => {
@@ -39,12 +123,15 @@ export const createPrepSettings = (deps: PrepSettingsDeps): PrepSettingsFn => {
   return (state, node) => {
     const { syntax } = getLfManager().getManagers().lfFramework;
     state.elements.controls = {};
-    state.filter = syntax.json.unescape(node.cells.lfCode.value)
-      .parsedJSON as unknown as ImageEditorFilter;
-    const idRaw = (node.id as string) || 'brush';
-    const alias = idRaw === 'inpaint_detail' || idRaw === 'inpaint_adv' ? 'inpaint' : idRaw;
+    const parsed = syntax.json.unescape(node.cells.lfCode.value).parsedJSON;
+    state.filter = assertImageEditorFilter(parsed);
+    const idRaw = (node.id as string) || IMAGE_EDITOR_CONSTANTS.FILTERS.BRUSH;
+    const alias =
+      idRaw === IMAGE_EDITOR_CONSTANTS.FILTERS.INPAINT_DETAIL ||
+      idRaw === IMAGE_EDITOR_CONSTANTS.FILTERS.INPAINT_ADV
+        ? IMAGE_EDITOR_CONSTANTS.FILTERS.INPAINT
+        : idRaw;
     state.filterType = alias as ImageEditorFilterType;
-    state.manualApply = undefined;
 
     const dataset = state.elements.imageviewer.lfDataset as ImageEditorDataset | undefined;
     const defaults = dataset?.defaults?.[state.filterType] as
@@ -62,7 +149,7 @@ export const createPrepSettings = (deps: PrepSettingsDeps): PrepSettingsFn => {
       if (typeof storedValue === 'undefined') {
         return;
       }
-      mutableSettings[id] = storedValue as never;
+      assignStoredSetting(mutableSettings, state.filter.controlIds, id, storedValue);
     });
 
     const { elements, filter } = state;
@@ -173,7 +260,7 @@ export const createPrepSettings = (deps: PrepSettingsDeps): PrepSettingsFn => {
     resetButton.addEventListener('click', () => {
       void (async () => {
         await resetSettings(settings);
-        registerManualApplyChange(state);
+        await state.update.snapshot();
       })();
     });
     buttonsWrapper.appendChild(resetButton);
@@ -205,28 +292,6 @@ export const createPrepSettings = (deps: PrepSettingsDeps): PrepSettingsFn => {
           canvas.lfSize = brushSource.size;
         }
       });
-    }
-
-    if (filter?.requiresManualApply) {
-      const applyButton = document.createElement(TagName.LfButton);
-      applyButton.lfIcon = ImageEditorIcons.Resume;
-      applyButton.lfLabel = 'Apply';
-      applyButton.lfStretchX = true;
-      initManualApplyState(state, applyButton);
-      applyButton.addEventListener('click', () => {
-        if (!state.manualApply || state.manualApply.isProcessing) {
-          return;
-        }
-
-        const hasPending = hasManualApplyPendingChanges(state);
-        if (!hasPending) {
-          return;
-        }
-
-        beginManualApplyRequest(state);
-        void updateCb(state, true, true);
-      });
-      buttonsWrapper.appendChild(applyButton);
     }
   };
 };

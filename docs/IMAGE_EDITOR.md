@@ -7,7 +7,7 @@ This document walks through the moving parts behind the interactive image editor
 ## TL;DR
 
 - **`LF_ImagesEditingBreakpoint`** snapshots the incoming batch, caches all diffusion context (model, clip, vae, prompts, conditioning, sampler options), writes a dataset JSON to `ComfyUI/temp`, and notifies the UI through the prompt server.
-- **The UI** reads and mutates that dataset file, renders masonry previews, and posts filter requests back to the backend. Manual-apply filters (including inpaint) hold changes until the user confirms.
+- **The UI** reads and mutates that dataset file, renders masonry previews, and posts debounced filter requests back to the backend as you tweak the controls.
 - **`POST /lf-nodes/process-image`** resolves the selected asset, routes the request through `process_filter`, saves outputs/masks with deterministic names from the UI, and returns payload metadata to update the history view.
 - **`apply_inpaint_filter`** adapts the masked ROI to SDXL-friendly presets (multiples of 64px, aspect ratio <= 3:1), blends prompt vs. stored conditioning via the `conditioning_mix` slider, runs denoising without preview, re-injects original background pixels to avoid seams, and optionally applies a light unsharp mask.
 
@@ -24,7 +24,7 @@ This document walks through the moving parts behind the interactive image editor
 | Filter dispatcher | `modules/utils/filters/processors.py` | Maps `type` values to concrete filter functions such as `apply_inpaint_filter`. |
 | Inpaint core | `modules/utils/filters/inpaint.py` | Prepares ROI/masks, performs sampling, saves mask/region previews, and returns the blended image. |
 | File helpers | `modules/utils/helpers/comfy/resolve_filepath.py`, `modules/utils/helpers/api/get_resource_url.py` | Resolve safe output paths inside `temp`/`output`/`input` and build cache-busted URLs for the UI. |
-| Frontend widgets | `web/src/widgets/imageEditor.ts` + fixtures/helpers | React/StenciI widget that renders the editor, manages manual-apply state, and coordinates API calls. |
+| Frontend widgets | `web/src/widgets/imageEditor.ts` + fixtures/helpers | Custom image-editor widget that renders the editor, keeps UI state in sync with the dataset/config JSON, and coordinates API calls. |
 
 ---
 
@@ -48,9 +48,8 @@ This document walks through the moving parts behind the interactive image editor
 
 1. The widget loads the dataset JSON, renders a masonry grid, and pre-fills settings with `defaults`.
 2. Canvas interactions capture mask strokes into base64 payloads.
-3. When the user requests an inpaint, the widget submits a multipart form to `/lf-nodes/process-image` containing the base image URL, filter `type`, and `settings`.
-4. For manual-apply filters the widget defers the API call until the user presses **Apply** to avoid accidental requests.
-5. Responses update the dataset (`nodes`, history snapshots, status) so the node can resume once the user is satisfied.
+3. As the user tweaks settings or paints masks, the widget submits debounced multipart forms to `/lf-nodes/process-image` containing the base image URL, filter `type`, and `settings`.
+4. Responses update the dataset (`nodes`, history snapshots, status) so the node can resume once the user is satisfied.
 
 ### 3. `/process-image`
 
@@ -77,7 +76,7 @@ Additional behaviour:
 - **Prompts & conditioning**: When `use_conditioning` is enabled, the UI exposes a `conditioning_mix` slider (`-1` -> stored conditioning only, `0` -> balanced, `1` -> prompt only). The backend logs the resolved mix factor for visibility.
 - **Adaptive presets**: `_select_upsample_plan` chooses the largest whitelist preset (multiples of 64) that fits the ROI area and respects the <= 3:1 aspect cap. If the ROI already exceeds the chosen size, no upscale occurs. Console logs print the preset that was selected.
 - **Seamless background**: Original ROI pixels are re-blended after sampling so unmasked areas remain untouched, eliminating hard patch edges.
-- **Manual apply**: Inpaint defaults to manual-apply mode so multiple slider tweaks can be staged before triggering a backend call.
+- **Config defaults**: Slider/textfield/toggle values are mirrored into `dataset.defaults[filter_type]` so preferred settings can be rehydrated in future sessions or exported via the breakpoint node’s `config` JSON output.
 
 ---
 
@@ -117,6 +116,7 @@ Minimal dataset structure produced by the breakpoint node:
 ```
 
 The UI mutates `columns[1].title` to `completed` when the workflow should resume, and appends new nodes for each history snapshot.
+In addition, the UI keeps per-filter defaults in `defaults[filter_type]` and may attach a lightweight configuration object (navigation/defaults/selection) that the breakpoint node exposes through its `config` output.
 
 ---
 

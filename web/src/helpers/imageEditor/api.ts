@@ -6,10 +6,14 @@ import {
 } from '../../types/widgets/imageEditor';
 import { getApiRoutes, getLfManager } from '../../utils/common';
 import { ensureDatasetContext } from './dataset';
-import { resolveManualApplyRequest } from './manualApply';
+import { showError } from './status';
 
 //#region API Call
 export const apiCall = async (state: ImageEditorState, addSnapshot: boolean) => {
+  if (state.isApiProcessing) {
+    return false;
+  }
+
   const { elements, filter, filterType } = state;
   const { imageviewer } = elements;
 
@@ -18,6 +22,7 @@ export const apiCall = async (state: ImageEditorState, addSnapshot: boolean) => 
   const snapshot = await imageviewer.getCurrentSnapshot();
   if (!snapshot) {
     lfManager.log('No snapshot available for processing!', {}, LogSeverity.Warning);
+    showError(state, 'No snapshot available for processing!');
     return false;
   }
 
@@ -36,20 +41,28 @@ export const apiCall = async (state: ImageEditorState, addSnapshot: boolean) => 
       { dataset: contextDataset },
       LogSeverity.Warning,
     );
-    if (state.manualApply?.isProcessing) {
-      resolveManualApplyRequest(state, false);
-    }
+    showError(state, 'Missing editing context. Run the workflow to register an editing session.');
     return false;
   }
 
   payload.context_id = contextId;
 
+  state.isApiProcessing = true;
   requestAnimationFrame(() => imageviewer.setSpinnerStatus(true));
 
   let isSuccess = false;
 
   try {
     const response = await getApiRoutes().image.process(snapshotValue, filterType, payload);
+
+    if (response.status !== LogSeverity.Success) {
+      lfManager.log('API Error', { response }, LogSeverity.Error);
+      showError(state, response.message || 'Unknown API error');
+      requestAnimationFrame(() => imageviewer.setSpinnerStatus(false));
+      state.isApiProcessing = false;
+      return false;
+    }
+
     if (response.mask) {
       lfManager.log(
         'Saved inpaint mask preview to temp',
@@ -73,13 +86,11 @@ export const apiCall = async (state: ImageEditorState, addSnapshot: boolean) => 
     isSuccess = true;
   } catch (error) {
     lfManager.log('Error processing image!', { error }, LogSeverity.Error);
+    showError(state, 'Error processing image! Check console for details.');
   }
 
   requestAnimationFrame(() => imageviewer.setSpinnerStatus(false));
-
-  if (state.manualApply?.isProcessing) {
-    resolveManualApplyRequest(state, isSuccess);
-  }
+  state.isApiProcessing = false;
 
   return isSuccess;
 };

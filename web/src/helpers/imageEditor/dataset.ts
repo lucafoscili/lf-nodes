@@ -7,6 +7,7 @@ import {
   ImageEditorState,
 } from '../../types/widgets/imageEditor';
 import { asString, getLfManager, isString } from '../../utils/common';
+import { IMAGE_EDITOR_CONSTANTS } from './constants';
 
 //#region applySelectionColumn
 /**
@@ -21,16 +22,18 @@ export const applySelectionColumn = (
   const existingColumns = Array.isArray(dataset?.columns) ? dataset.columns : [];
 
   const [existingSelectionColumn] = lfData
-    ? lfData.column.find(existingColumns, { id: 'selected' })
+    ? lfData.column.find(existingColumns, { id: IMAGE_EDITOR_CONSTANTS.COLUMNS.SELECTED })
     : [];
 
   const updatedSelectionColumn = {
-    ...(existingSelectionColumn ?? { id: 'selected' }),
-    title: selection as unknown as string,
+    ...(existingSelectionColumn ?? { id: IMAGE_EDITOR_CONSTANTS.COLUMNS.SELECTED }),
+    title: selection as any,
   } as unknown as LfDataColumn;
 
   const nextColumns = existingSelectionColumn
-    ? existingColumns.map((col) => (col.id === 'selected' ? updatedSelectionColumn : col))
+    ? existingColumns.map((col) =>
+        col.id === IMAGE_EDITOR_CONSTANTS.COLUMNS.SELECTED ? updatedSelectionColumn : col,
+      )
     : [...existingColumns, updatedSelectionColumn];
 
   return {

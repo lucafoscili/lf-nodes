@@ -67,18 +67,9 @@ export interface ImageEditorState extends BaseWidgetState {
   directoryValue?: string;
   hasAutoDirectoryLoad?: boolean;
   isSyncingDirectory?: boolean;
+  isApiProcessing?: boolean;
   lastRequestedDirectory?: string;
   navigationManager?: NavigationManager;
-  manualApply?: {
-    button: HTMLLfButtonElement;
-    defaultLabel: string;
-    dirty: boolean;
-    isProcessing: boolean;
-    changeCounter: number;
-    latestChangeId: number;
-    latestAppliedChangeId: number;
-    activeRequestChangeId: number;
-  };
   settingsStore?: Partial<
     Record<ImageEditorFilterType, Partial<Record<ImageEditorControlIds, ImageEditorControlValue>>>
   >;
@@ -557,7 +548,6 @@ export interface ImageEditorFilterDefinition<
   controlIds: ImageEditorControlIdsEnum;
   configs: ImageEditorConfigs;
   hasCanvasAction?: boolean;
-  requiresManualApply?: boolean;
   settings: ImageEditorSettings;
 }
 export type ImageEditorBackgroundRemoverFilter = ImageEditorFilterDefinition<
@@ -754,4 +744,24 @@ export type ImageEditorFilter =
   | ImageEditorVignetteFilter;
 export type ImageEditorRequestSettings<T extends ImageEditorFilterType> =
   ImageEditorFilterSettingsMap[T] & { context_id?: string };
+export type ImageEditorSetting =
+  | ImageEditorBackgroundRemoverSettings
+  | ImageEditorBlendSettings
+  | ImageEditorBloomSettings
+  | ImageEditorBrightnessSettings
+  | ImageEditorBrushSettings
+  | ImageEditorClaritySettings
+  | ImageEditorContrastSettings
+  | ImageEditorDesaturateSettings
+  | ImageEditorFilmGrainSettings
+  | ImageEditorGaussianBlurSettings
+  | ImageEditorInpaintSettings
+  | ImageEditorLineSettings
+  | ImageEditorSaturationSettings
+  | ImageEditorSepiaSettings
+  | ImageEditorSplitToneSettings
+  | ImageEditorTiltShiftSettings
+  | ImageEditorUnsharpMaskSettings
+  | ImageEditorVibranceSettings
+  | ImageEditorVignetteSettings;
 //#endregion

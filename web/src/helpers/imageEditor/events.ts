@@ -34,6 +34,7 @@ import {
   isTree,
   LFInterruptFlags,
 } from '../../utils/common';
+import { IMAGE_EDITOR_CONSTANTS } from './constants';
 import {
   applySelectionColumn,
   buildSelectionPayload,
@@ -42,7 +43,6 @@ import {
   hasSelectionChanged,
   resolveSelectionIndex,
 } from './dataset';
-import { registerManualApplyChange } from './manualApply';
 import { setBrush } from './settings';
 import { updateCb } from './update';
 
@@ -146,7 +146,7 @@ export const createEventHandlers = ({
     button: async (state: ImageEditorState, e: CustomEvent<LfButtonEventPayload>) => {
       const { comp, eventType } = e.detail;
 
-      if (eventType === 'click') {
+      if (eventType === IMAGE_EDITOR_CONSTANTS.EVENTS.CLICK) {
         const isPatched = getComfyAPI()[LFInterruptFlags.PatchedInterrupt] === true;
 
         switch (comp.lfIcon) {
@@ -171,13 +171,13 @@ export const createEventHandlers = ({
       const { filter, filterType } = state;
 
       switch (eventType) {
-        case 'stroke':
+        case IMAGE_EDITOR_CONSTANTS.EVENTS.STROKE:
           const originalFilter = filter;
           const originalFilterType = filterType;
           const canvas = await comp.getCanvas();
           const b64Canvas = canvasToBase64(canvas);
-          if (filterType !== 'brush' && !filter?.hasCanvasAction) {
-            state.filterType = 'brush';
+          if (filterType !== IMAGE_EDITOR_CONSTANTS.FILTERS.BRUSH && !filter?.hasCanvasAction) {
+            state.filterType = IMAGE_EDITOR_CONSTANTS.FILTERS.BRUSH;
           }
 
           const brushDefaults = {
@@ -199,7 +199,7 @@ export const createEventHandlers = ({
           state.filter = temporaryFilter;
 
           try {
-            await updateCb(state, true, true);
+            await updateCb(state, true);
           } finally {
             if (originalFilter?.hasCanvasAction) {
               const existingSettings =
@@ -335,11 +335,9 @@ export const createEventHandlers = ({
 
       switch (eventType) {
         case 'change':
-          registerManualApplyChange(state);
           snapshot();
           break;
         case 'input':
-          registerManualApplyChange(state);
           const debouncedSlider = debounce(preview, 300);
           debouncedSlider();
           break;
@@ -354,11 +352,9 @@ export const createEventHandlers = ({
 
       switch (eventType) {
         case 'change':
-          registerManualApplyChange(state);
           snapshot();
           break;
         case 'input':
-          registerManualApplyChange(state);
           const debouncedTextfield = debounce(preview, 300);
           debouncedTextfield();
           break;
@@ -373,7 +369,6 @@ export const createEventHandlers = ({
 
       switch (eventType) {
         case 'change':
-          registerManualApplyChange(state);
           snapshot();
           break;
       }
