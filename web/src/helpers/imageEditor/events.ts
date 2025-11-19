@@ -199,7 +199,7 @@ export const createEventHandlers = ({
           state.filter = temporaryFilter;
 
           try {
-            await updateCb(state, true);
+            await updateCb(state, true, true);
           } finally {
             if (originalFilter?.hasCanvasAction) {
               const existingSettings =

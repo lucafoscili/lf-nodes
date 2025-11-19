@@ -76,7 +76,11 @@ export const refreshValues = async (state: ImageEditorState, addSnapshot = false
 //#endregion
 
 //#region updateCb
-export const updateCb = async (state: ImageEditorState, addSnapshot = false) => {
+export const updateCb = async (
+  state: ImageEditorState,
+  addSnapshot = false,
+  fromCanvas = false,
+) => {
   await refreshValues(state, addSnapshot);
 
   const { elements, filter } = state;
@@ -124,7 +128,7 @@ export const updateCb = async (state: ImageEditorState, addSnapshot = false) => 
   // 3. For regular filters: just need valid settings
   const shouldUpdate = validValues && (!hasCanvasAction || isCanvasAction);
   let success = false;
-  if (shouldUpdate) {
+  if (shouldUpdate && (!hasCanvasAction || fromCanvas)) {
     success = await apiCall(state, addSnapshot);
   }
 
