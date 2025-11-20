@@ -160,6 +160,9 @@ class LF_LoadAndEditImages:
         ui_dataset = normalize_json_input(kwargs.get("ui_widget", {})) or {}
         dataset = self._prepare_dataset(session, ui_dataset)
 
+        if config_value is None and isinstance(ui_dataset, dict):
+            config_value = build_editor_config_from_dataset(ui_dataset)
+
         if isinstance(config_value, dict):
             apply_editor_config_to_dataset(dataset, config_value)
 

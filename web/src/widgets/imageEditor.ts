@@ -93,7 +93,7 @@ export const imageEditorFactory: ImageEditorFactory = {
               ),
             );
 
-          void syncNavigationDirectoryControl(state, state.directoryValue);
+          syncNavigationDirectoryControl(state, state.directoryValue);
 
           const shouldAutoLoad =
             !state.hasAutoDirectoryLoad &&

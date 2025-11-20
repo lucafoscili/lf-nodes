@@ -132,6 +132,15 @@ class LF_ImagesEditingBreakpoint:
         except TypeError:
             config_value = None
 
+        ui_state_raw = kwargs.get("ui_widget")
+        try:
+            ui_state_value = normalize_json_input(ui_state_raw) if ui_state_raw is not None else None
+        except TypeError:
+            ui_state_value = None
+
+        if config_value is None and isinstance(ui_state_value, dict):
+            config_value = build_editor_config_from_dataset(ui_state_value)
+
         image: list[torch.Tensor] = normalize_input_image(kwargs.get("image"))
 
         dataset = session.build_dataset(image, filename_prefix="edit_breakpoint")

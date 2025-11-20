@@ -1,6 +1,6 @@
 # LF Image Editor Architecture
 
-This document walks through the moving parts behind the interactive image editor that is exposed by the `LF_ImagesEditingBreakpoint` node. It maps the Python helpers, HTTP endpoints, on-disk datasets, and frontend widgets so contributors can reason about the end-to-end workflow with confidence.
+This document walks through the moving parts behind the interactive image editor that is exposed by the `LF_ImagesEditingBreakpoint` and `LF_LoadAndEditImages` nodes. It maps the Python helpers, HTTP endpoints, on-disk datasets, and frontend widgets so contributors can reason about the end-to-end workflow with confidence.
 
 ---
 
@@ -17,7 +17,7 @@ This document walks through the moving parts behind the interactive image editor
 
 | Layer | File(s) | Responsibility |
 | --- | --- | --- |
-| Custom node | `modules/nodes/image/images_editing_breakpoint.py` | Starts an editing session, materialises the dataset JSON, fires prompt-server events, and returns edited tensors to the graph. |
+| Custom nodes | `modules/nodes/image/images_editing_breakpoint.py`, `modules/nodes/io/load_and_edit_images.py` | Start an editing session, materialise or adapt a dataset JSON, fire prompt-server events, and return edited tensors/metadata to the graph. |
 | Context registry | `modules/utils/helpers/editing/context.py` | In-memory store for per-session state (model, sampler, prompts, conditioning tensors). |
 | Dataset helpers | `modules/utils/helpers/editing/dataset.py` | Normalises dataset files, applies selection updates, and keeps loader nodes in sync with the UI. |
 | HTTP API | `modules/api/image.py` | `get-image` lists assets; `process-image` validates requests, dispatches filters, and persists results. |
@@ -30,7 +30,7 @@ This document walks through the moving parts behind the interactive image editor
 
 ## Request flow
 
-### 1. Node execution
+### 1. Node execution (`LF_ImagesEditingBreakpoint`)
 
 1. `LF_ImagesEditingBreakpoint.on_exec` receives the batch, optional model components, prompts, conditioning, and UI widget state.
 2. Each image is normalised and saved to `temp/edit_breakpoint_<counter>.png` via `resolve_filepath`.
@@ -44,11 +44,23 @@ This document walks through the moving parts behind the interactive image editor
 6. Execution blocks until the UI writes `status = completed` to the dataset.
 7. The node collects edited outputs from disk, converts them back to tensors, and returns them alongside original inputs for downstream comparison.
 
+### 1b. Node execution (`LF_LoadAndEditImages`)
+
+1. `LF_LoadAndEditImages.on_exec` receives optional diffusion context (model/clip/vae, sampler/scheduler, prompts/conditioning) plus the current image-editor widget state.
+2. If the incoming `ui_widget` already contains a dataset, it is normalised and reused; otherwise, a fresh empty dataset is built so the editor can still be opened as a pure browser-side tool.
+3. The node ensures `context_id`, `columns[id="path"|"status"]`, and an empty `nodes` array are present, so the dataset matches the editor’s contract.
+4. Optional inpaint defaults are seeded into `dataset.defaults.inpaint` from the node inputs.
+5. `register_editing_context` stores the same reusable inputs used by the breakpoint node.
+6. A prompt-server event (`lf-loadandeditimages`) opens the same editor UI, but pointed at an arbitrary directory instead of a fixed batch.
+7. When the user finishes, the node returns a primary edited image, list of edited images, lightweight metadata (names/indices), the selected image tensor, and the updated dataset/config JSON for reuse.
+
 ### 2. UI lifecycle
 
 1. The widget loads the dataset JSON, renders a masonry grid, and pre-fills settings with `defaults`.
 2. Canvas interactions capture mask strokes into base64 payloads.
 3. As the user tweaks settings or paints masks, the widget submits debounced multipart forms to `/lf-nodes/process-image` containing the base image URL, filter `type`, and `settings`.
+   - For **canvas filters** (`brush`, `line`, `inpaint` / `inpaint_adv`), backend calls are only triggered when an actual stroke is applied. Slider/textfield/toggle changes update the stored defaults and canvas brush parameters, but do not call the API until the user paints.
+   - For **regular filters**, debounced slider/textfield changes do trigger backend calls as soon as settings are valid.
 4. Responses update the dataset (`nodes`, history snapshots, status) so the node can resume once the user is satisfied.
 
 ### 3. `/process-image`
@@ -76,7 +88,45 @@ Additional behaviour:
 - **Prompts & conditioning**: When `use_conditioning` is enabled, the UI exposes a `conditioning_mix` slider (`-1` -> stored conditioning only, `0` -> balanced, `1` -> prompt only). The backend logs the resolved mix factor for visibility.
 - **Adaptive presets**: `_select_upsample_plan` chooses the largest whitelist preset (multiples of 64) that fits the ROI area and respects the <= 3:1 aspect cap. If the ROI already exceeds the chosen size, no upscale occurs. Console logs print the preset that was selected.
 - **Seamless background**: Original ROI pixels are re-blended after sampling so unmasked areas remain untouched, eliminating hard patch edges.
-- **Config defaults**: Slider/textfield/toggle values are mirrored into `dataset.defaults[filter_type]` so preferred settings can be rehydrated in future sessions or exported via the breakpoint node’s `config` JSON output.
+- **Config defaults**: Slider/textfield/toggle values are mirrored into `dataset.defaults[filter_type]` so preferred settings can be rehydrated in future sessions or exported via the nodes' `config` JSON outputs. Only committed changes (events that actually fire) are persisted; half-edited controls that never emit an event are not saved.
+
+---
+
+## Config JSON (navigation/defaults/selection)
+
+Both `LF_ImagesEditingBreakpoint` and `LF_LoadAndEditImages` expose a `config` JSON output and accept an optional `config` JSON input. This lightweight payload is derived from and applied to the editor dataset:
+
+- **Shape**
+  ```json
+  {
+    "navigation": {
+      "directory": {
+        "raw": "",
+        "relative": "",
+        "resolved": "C:/ComfyUI/input",
+        "is_external": false
+      }
+    },
+    "defaults": {
+      "brush": { "size": 150, "opacity": 0.2, "color": "#ccb7b7" },
+      "inpaint": { "cfg": 7, "seed": 42, "positive_prompt": "", "negative_prompt": "" }
+    },
+    "selection": {
+      "index": 1,
+      "name": "/view?filename=...",
+      "node_id": "4",
+      "url": "/view?filename=..."
+    }
+  }
+  ```
+- **Backend helpers**
+  - `apply_editor_config_to_dataset(dataset, config)` (Python): merges `navigation`, `defaults`, and `selection` into a dataset, stripping any `selection.context_id` so the current session ID stays authoritative.
+  - `build_editor_config_from_dataset(dataset)` (Python): builds the JSON above from an existing dataset.
+- **Node behaviour**
+  - If a `config` input is wired, both nodes apply it to the fresh dataset at the start of a run.
+  - If `config` is not wired but a previous `ui_widget` value exists, the nodes derive a config from that widget dataset so user preferences persist between runs without an explicit connection.
+- **UI reactivity**
+  - When the `config` input is connected to a JSON-producing node (for example via `LF_DisplayJSON` or other JSON tools), the image editor listens for connection changes and hot-swaps its internal dataset. The active filter UI is fully rebuilt against the updated `defaults`/`navigation`/`selection`, so changing upstream config updates the editor instantly without re-running the workflow.
 
 ---
 
