@@ -19,10 +19,10 @@
     "test:watch": "vitest"
   },
   "devDependencies": {
-    "@lf-widgets/assets": "1.4.0",
-    "@lf-widgets/core": "1.4.0",
-    "@lf-widgets/foundations": "1.4.0",
-    "@lf-widgets/framework": "1.4.0",
+    "@lf-widgets/assets": "1.5.0-rc.0",
+    "@lf-widgets/core": "1.5.0-rc.0",
+    "@lf-widgets/foundations": "1.5.0-rc.0",
+    "@lf-widgets/framework": "1.5.0-rc.0",
     "@types/jsdom": "^27",
     "@types/node": "^24.9.2",
     "fs-extra": "^11",

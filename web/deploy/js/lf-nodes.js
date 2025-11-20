@@ -1,6 +1,6 @@
-import { g as getLfFramework } from "./lf-widgets-framework-DcaHVr-f.js";
-import "./lf-widgets-core-DIEht-jK.js";
-import "./lf-widgets-foundations-Bbv1isuU.js";
+import { g as getLfFramework } from "./lf-widgets-framework-qjsxfoUK.js";
+import "./lf-widgets-core-lLYscYdv.js";
+import "./lf-widgets-foundations-8UtpQZAe.js";
 var APIEndpoints;
 (function(APIEndpoints2) {
   APIEndpoints2["CleanOldBackups"] = "/lf-nodes/clean-old-backups";
@@ -1293,6 +1293,207 @@ var TagName;
   TagName2["LfUpload"] = "lf-upload";
   TagName2["Textarea"] = "textarea";
 })(TagName || (TagName = {}));
+const IMAGE_EDITOR_CONSTANTS = {
+  COLUMNS: {
+    SELECTED: "selected"
+  },
+  FILTERS: {
+    BRUSH: "brush",
+    INPAINT: "inpaint",
+    INPAINT_ADV: "inpaint_adv",
+    INPAINT_DETAIL: "inpaint_detail"
+  },
+  UI: {
+    ON: "on"
+  },
+  EVENTS: {
+    CLICK: "click",
+    STROKE: "stroke"
+  },
+  TAGS: {
+    SLIDER: "LF-SLIDER",
+    TEXTFIELD: "LF-TEXTFIELD",
+    TOGGLE: "LF-TOGGLE"
+  }
+};
+const applySelectionColumn = (dataset, selection) => {
+  var _a, _b, _c;
+  const lfData = (_c = (_b = (_a = getLfManager()) == null ? void 0 : _a.getManagers()) == null ? void 0 : _b.lfFramework) == null ? void 0 : _c.data;
+  const existingColumns = Array.isArray(dataset == null ? void 0 : dataset.columns) ? dataset.columns : [];
+  const [existingSelectionColumn] = lfData ? lfData.column.find(existingColumns, { id: IMAGE_EDITOR_CONSTANTS.COLUMNS.SELECTED }) : [];
+  const updatedSelectionColumn = {
+    ...existingSelectionColumn ?? { id: IMAGE_EDITOR_CONSTANTS.COLUMNS.SELECTED },
+    title: selection
+  };
+  const nextColumns = existingSelectionColumn ? existingColumns.map((col) => col.id === IMAGE_EDITOR_CONSTANTS.COLUMNS.SELECTED ? updatedSelectionColumn : col) : [...existingColumns, updatedSelectionColumn];
+  return {
+    ...dataset,
+    columns: nextColumns,
+    selection
+  };
+};
+const buildSelectionPayload = ({ dataset, index, nodes, selectedShape, fallbackContextId }) => {
+  var _a, _b;
+  const resolvedContextId = dataset.context_id ?? ((_a = dataset.selection) == null ? void 0 : _a.context_id) ?? fallbackContextId;
+  const selection = {
+    index,
+    context_id: resolvedContextId
+  };
+  const derivedName = deriveSelectionName(selectedShape);
+  if (derivedName) {
+    selection.name = derivedName;
+  }
+  const selectedNode = Array.isArray(nodes) && index >= 0 && index < nodes.length && nodes[index] ? nodes[index] : void 0;
+  if (selectedNode && typeof selectedNode === "object") {
+    const nodeId = asString(selectedNode.id);
+    if (nodeId) {
+      selection.node_id = nodeId;
+    }
+    const imageCell = (_b = selectedNode.cells) == null ? void 0 : _b.lfImage;
+    const imageValue = asString(imageCell == null ? void 0 : imageCell.value) ?? asString(imageCell == null ? void 0 : imageCell.lfValue);
+    if (imageValue) {
+      selection.url = imageValue;
+    }
+  }
+  return { selection, contextId: resolvedContextId };
+};
+const deriveDirectoryValue = (directory) => {
+  if (!directory) {
+    return void 0;
+  }
+  if (isString(directory.raw)) {
+    return directory.raw;
+  }
+  if (isString(directory.relative)) {
+    return directory.relative;
+  }
+  if (isString(directory.resolved)) {
+    return directory.resolved;
+  }
+  return void 0;
+};
+const deriveSelectionName = (selectedShape) => {
+  if (!selectedShape) {
+    return void 0;
+  }
+  const shape = selectedShape.shape;
+  const htmlProps = (shape == null ? void 0 : shape.htmlProps) ?? {};
+  const htmlTitle = asString(htmlProps["title"]);
+  const htmlId = asString(htmlProps["id"]);
+  const shapeValue = asString(shape == null ? void 0 : shape.value);
+  const lfValue = asString(shape == null ? void 0 : shape.lfValue);
+  return htmlTitle ?? htmlId ?? shapeValue ?? lfValue ?? void 0;
+};
+const applyEditorConfigToDataset = (dataset, config) => {
+  if (!dataset || !config || typeof config !== "object") {
+    return dataset;
+  }
+  const cfg = config;
+  const next = { ...dataset };
+  if (cfg.navigation && typeof cfg.navigation === "object") {
+    next.navigation = cfg.navigation;
+  }
+  if (cfg.defaults && typeof cfg.defaults === "object") {
+    const existingDefaults = (next.defaults && typeof next.defaults === "object" ? next.defaults : {}) ?? {};
+    next.defaults = {
+      ...existingDefaults,
+      ...cfg.defaults
+    };
+  }
+  if (cfg.selection && typeof cfg.selection === "object") {
+    const selectionCopy = { ...cfg.selection };
+    delete selectionCopy.context_id;
+    next.selection = selectionCopy;
+  }
+  return next;
+};
+const ensureDatasetContext = (dataset, state) => {
+  if (!dataset) {
+    return state == null ? void 0 : state.contextId;
+  }
+  const setStateContext = (contextId) => {
+    if (contextId && state) {
+      state.contextId = contextId;
+    }
+  };
+  if (dataset.context_id) {
+    setStateContext(dataset.context_id);
+  } else if (state == null ? void 0 : state.contextId) {
+    dataset.context_id = state.contextId;
+  }
+  const selection = dataset.selection;
+  const resolvedContext = (selection == null ? void 0 : selection.context_id) ?? dataset.context_id ?? (state == null ? void 0 : state.contextId);
+  if (selection && resolvedContext) {
+    selection.context_id = selection.context_id ?? resolvedContext;
+    if (!dataset.context_id) {
+      dataset.context_id = resolvedContext;
+    }
+    setStateContext(resolvedContext);
+    return resolvedContext;
+  }
+  if (dataset.context_id) {
+    setStateContext(dataset.context_id);
+    return dataset.context_id;
+  }
+  if (state == null ? void 0 : state.contextId) {
+    dataset.context_id = state.contextId;
+    return state.contextId;
+  }
+  return void 0;
+};
+const getNavigationDirectory = (dataset) => {
+  var _a;
+  return (_a = dataset == null ? void 0 : dataset.navigation) == null ? void 0 : _a.directory;
+};
+const hasContextChanged = (previousContextId, nextContextId) => {
+  return previousContextId !== nextContextId;
+};
+const hasSelectionChanged = (previousSelection, nextSelection) => {
+  return JSON.stringify(previousSelection ?? null) !== JSON.stringify(nextSelection ?? null);
+};
+const mergeNavigationDirectory = (dataset, directory) => {
+  var _a;
+  const current = ((_a = dataset.navigation) == null ? void 0 : _a.directory) ?? {};
+  const next = {
+    ...current,
+    ...directory
+  };
+  dataset.navigation = dataset.navigation ?? {};
+  dataset.navigation.directory = next;
+  return next;
+};
+const resolveSelectionIndex = (selectedShape, nodes) => {
+  var _a;
+  if (typeof (selectedShape == null ? void 0 : selectedShape.index) === "number") {
+    return selectedShape.index;
+  }
+  if (!Array.isArray(nodes)) {
+    return void 0;
+  }
+  const shape = selectedShape == null ? void 0 : selectedShape.shape;
+  const shapeId = asString((_a = shape == null ? void 0 : shape.htmlProps) == null ? void 0 : _a["id"]);
+  const shapeValue = asString(shape == null ? void 0 : shape.value) ?? asString(shape == null ? void 0 : shape.lfValue);
+  const resolvedIndex = nodes.findIndex((node) => {
+    var _a2, _b;
+    if (!node || typeof node !== "object") {
+      return false;
+    }
+    const imageCell = (_a2 = node.cells) == null ? void 0 : _a2.lfImage;
+    if (!imageCell) {
+      return false;
+    }
+    const cellId = asString((_b = imageCell.htmlProps) == null ? void 0 : _b["id"]);
+    const cellValue = asString(imageCell.value) ?? asString(imageCell.lfValue);
+    if (shapeId && cellId === shapeId) {
+      return true;
+    }
+    if (shapeValue && cellValue === shapeValue) {
+      return true;
+    }
+    return false;
+  });
+  return resolvedIndex >= 0 ? resolvedIndex : void 0;
+};
 const NODE_WIDGET_MAP = {
   LF_BackgroundRemover: [CustomWidgetName.compare],
   LF_Blend: [CustomWidgetName.compare],
@@ -1445,6 +1646,10 @@ const onConnectionsChange = async (nodeType) => {
       case NodeName.llmMessenger:
         messengerCb(node);
         break;
+      case NodeName.imagesEditingBreakpoint:
+      case NodeName.loadAndEditImages:
+        imageEditorConfigCb(node);
+        break;
     }
     return r;
   };
@@ -1573,6 +1778,51 @@ const messengerCb = (node) => {
     getLfManager().log("Error processing messenger data", { dataset, error }, LogSeverity.Error);
   }
 };
+const imageEditorConfigCb = (node) => {
+  var _a, _b, _c, _d, _e;
+  const lfManager = getLfManager();
+  const routes = getApiRoutes().comfy;
+  const configInput = getInput(node, ComfyWidgetName.json);
+  const linkInput = routes.getLinkById((_a = configInput == null ? void 0 : configInput.link) == null ? void 0 : _a.toString());
+  const sourceNode = routes.getNodeById((_b = linkInput == null ? void 0 : linkInput.origin_id) == null ? void 0 : _b.toString());
+  if (!configInput || !linkInput || !sourceNode) {
+    lfManager.log("Missing config input or source node", { configInput, linkInput, sourceNode }, LogSeverity.Warning);
+    return;
+  }
+  const editorWidget = getCustomWidget(node, CustomWidgetName.imageEditor);
+  const configWidget = (_c = sourceNode.widgets) == null ? void 0 : _c[linkInput.origin_slot];
+  if (!((_d = editorWidget == null ? void 0 : editorWidget.options) == null ? void 0 : _d.getValue) || !editorWidget.options.setValue || !((_e = configWidget == null ? void 0 : configWidget.options) == null ? void 0 : _e.getValue)) {
+    lfManager.log("Missing editor or config widget options", { editorWidget, configWidget }, LogSeverity.Warning);
+    return;
+  }
+  const { syntax } = lfManager.getManagers().lfFramework;
+  const currentDatasetRaw = editorWidget.options.getValue();
+  const configRaw = configWidget.options.getValue();
+  let datasetJson;
+  try {
+    datasetJson = syntax.json.unescape(currentDatasetRaw).parsedJSON;
+  } catch {
+    datasetJson = { nodes: [] };
+  }
+  let configJson;
+  try {
+    configJson = syntax.json.unescape(configRaw).parsedJSON;
+  } catch (error) {
+    lfManager.log("Invalid image editor config JSON; skipping reactive update.", { error, configRaw }, LogSeverity.Warning);
+    return;
+  }
+  const nextDataset = applyEditorConfigToDataset(datasetJson, configJson);
+  if (!nextDataset) {
+    lfManager.log("Failed to apply image editor config to dataset: nextDataset is undefined.", { datasetJson, configJson }, LogSeverity.Warning);
+    return;
+  }
+  try {
+    const serialized = JSON.stringify(nextDataset);
+    editorWidget.options.setValue(serialized);
+  } catch (error) {
+    lfManager.log("Failed to apply image editor config to dataset.", { error, nextDataset }, LogSeverity.Warning);
+  }
+};
 const setCanvasSizeCb = (imageviewer) => {
   requestAnimationFrame(async () => {
     try {
@@ -1693,287 +1943,6 @@ function installLFBeforeFreeHooks(api, opts = {}) {
   const fetchPatched = installFetchFallback();
   return { freeMemoryHook: freePatched, fetchFallbackHook: fetchPatched };
 }
-const applySelectionColumn = (dataset, selection) => {
-  var _a, _b, _c;
-  const lfData = (_c = (_b = (_a = getLfManager()) == null ? void 0 : _a.getManagers()) == null ? void 0 : _b.lfFramework) == null ? void 0 : _c.data;
-  const existingColumns = Array.isArray(dataset == null ? void 0 : dataset.columns) ? dataset.columns : [];
-  const [existingSelectionColumn] = lfData ? lfData.column.find(existingColumns, { id: "selected" }) : [];
-  const updatedSelectionColumn = {
-    ...existingSelectionColumn ?? { id: "selected" },
-    title: selection
-  };
-  const nextColumns = existingSelectionColumn ? existingColumns.map((col) => col.id === "selected" ? updatedSelectionColumn : col) : [...existingColumns, updatedSelectionColumn];
-  return {
-    ...dataset,
-    columns: nextColumns,
-    selection
-  };
-};
-const buildSelectionPayload = ({ dataset, index, nodes, selectedShape, fallbackContextId }) => {
-  var _a, _b;
-  const resolvedContextId = dataset.context_id ?? ((_a = dataset.selection) == null ? void 0 : _a.context_id) ?? fallbackContextId;
-  const selection = {
-    index,
-    context_id: resolvedContextId
-  };
-  const derivedName = deriveSelectionName(selectedShape);
-  if (derivedName) {
-    selection.name = derivedName;
-  }
-  const selectedNode = Array.isArray(nodes) && index >= 0 && index < nodes.length && nodes[index] ? nodes[index] : void 0;
-  if (selectedNode && typeof selectedNode === "object") {
-    const nodeId = asString(selectedNode.id);
-    if (nodeId) {
-      selection.node_id = nodeId;
-    }
-    const imageCell = (_b = selectedNode.cells) == null ? void 0 : _b.lfImage;
-    const imageValue = asString(imageCell == null ? void 0 : imageCell.value) ?? asString(imageCell == null ? void 0 : imageCell.lfValue);
-    if (imageValue) {
-      selection.url = imageValue;
-    }
-  }
-  return { selection, contextId: resolvedContextId };
-};
-const deriveDirectoryValue = (directory) => {
-  if (!directory) {
-    return void 0;
-  }
-  if (isString(directory.raw)) {
-    return directory.raw;
-  }
-  if (isString(directory.relative)) {
-    return directory.relative;
-  }
-  if (isString(directory.resolved)) {
-    return directory.resolved;
-  }
-  return void 0;
-};
-const deriveSelectionName = (selectedShape) => {
-  if (!selectedShape) {
-    return void 0;
-  }
-  const shape = selectedShape.shape;
-  const htmlProps = (shape == null ? void 0 : shape.htmlProps) ?? {};
-  const htmlTitle = asString(htmlProps["title"]);
-  const htmlId = asString(htmlProps["id"]);
-  const shapeValue = asString(shape == null ? void 0 : shape.value);
-  const lfValue = asString(shape == null ? void 0 : shape.lfValue);
-  return htmlTitle ?? htmlId ?? shapeValue ?? lfValue ?? void 0;
-};
-const ensureDatasetContext = (dataset, state) => {
-  if (!dataset) {
-    return state == null ? void 0 : state.contextId;
-  }
-  const setStateContext = (contextId) => {
-    if (contextId && state) {
-      state.contextId = contextId;
-    }
-  };
-  if (dataset.context_id) {
-    setStateContext(dataset.context_id);
-  } else if (state == null ? void 0 : state.contextId) {
-    dataset.context_id = state.contextId;
-  }
-  const selection = dataset.selection;
-  const resolvedContext = (selection == null ? void 0 : selection.context_id) ?? dataset.context_id ?? (state == null ? void 0 : state.contextId);
-  if (selection && resolvedContext) {
-    selection.context_id = selection.context_id ?? resolvedContext;
-    if (!dataset.context_id) {
-      dataset.context_id = resolvedContext;
-    }
-    setStateContext(resolvedContext);
-    return resolvedContext;
-  }
-  if (dataset.context_id) {
-    setStateContext(dataset.context_id);
-    return dataset.context_id;
-  }
-  if (state == null ? void 0 : state.contextId) {
-    dataset.context_id = state.contextId;
-    return state.contextId;
-  }
-  return void 0;
-};
-const getNavigationDirectory = (dataset) => {
-  var _a;
-  return (_a = dataset == null ? void 0 : dataset.navigation) == null ? void 0 : _a.directory;
-};
-const hasContextChanged = (previousContextId, nextContextId) => {
-  return previousContextId !== nextContextId;
-};
-const hasSelectionChanged = (previousSelection, nextSelection) => {
-  return JSON.stringify(previousSelection ?? null) !== JSON.stringify(nextSelection ?? null);
-};
-const mergeNavigationDirectory = (dataset, directory) => {
-  var _a;
-  const current = ((_a = dataset.navigation) == null ? void 0 : _a.directory) ?? {};
-  const next = {
-    ...current,
-    ...directory
-  };
-  dataset.navigation = dataset.navigation ?? {};
-  dataset.navigation.directory = next;
-  return next;
-};
-const resolveSelectionIndex = (selectedShape, nodes) => {
-  var _a;
-  if (typeof (selectedShape == null ? void 0 : selectedShape.index) === "number") {
-    return selectedShape.index;
-  }
-  if (!Array.isArray(nodes)) {
-    return void 0;
-  }
-  const shape = selectedShape == null ? void 0 : selectedShape.shape;
-  const shapeId = asString((_a = shape == null ? void 0 : shape.htmlProps) == null ? void 0 : _a["id"]);
-  const shapeValue = asString(shape == null ? void 0 : shape.value) ?? asString(shape == null ? void 0 : shape.lfValue);
-  const resolvedIndex = nodes.findIndex((node) => {
-    var _a2, _b;
-    if (!node || typeof node !== "object") {
-      return false;
-    }
-    const imageCell = (_a2 = node.cells) == null ? void 0 : _a2.lfImage;
-    if (!imageCell) {
-      return false;
-    }
-    const cellId = asString((_b = imageCell.htmlProps) == null ? void 0 : _b["id"]);
-    const cellValue = asString(imageCell.value) ?? asString(imageCell.lfValue);
-    if (shapeId && cellId === shapeId) {
-      return true;
-    }
-    if (shapeValue && cellValue === shapeValue) {
-      return true;
-    }
-    return false;
-  });
-  return resolvedIndex >= 0 ? resolvedIndex : void 0;
-};
-const MANUAL_APPLY_PROCESSING_LABEL = "Applying…";
-const hasManualApplyPendingChanges = (state) => {
-  const manual = state.manualApply;
-  if (!manual) {
-    return false;
-  }
-  return manual.latestChangeId > manual.latestAppliedChangeId;
-};
-const updateManualApplyButton = (state) => {
-  const manual = state.manualApply;
-  if (!manual) {
-    return;
-  }
-  manual.dirty = hasManualApplyPendingChanges(state);
-  if (manual.isProcessing) {
-    manual.button.lfUiState = "disabled";
-    manual.button.lfLabel = MANUAL_APPLY_PROCESSING_LABEL;
-    return;
-  }
-  manual.button.lfLabel = manual.defaultLabel;
-  if (manual.dirty) {
-    manual.button.lfUiState = "success";
-  } else {
-    manual.button.lfUiState = "disabled";
-  }
-};
-const initManualApplyState = (state, button) => {
-  state.manualApply = {
-    button,
-    defaultLabel: button.lfLabel ?? "Apply",
-    dirty: false,
-    isProcessing: false,
-    changeCounter: 0,
-    latestChangeId: 0,
-    latestAppliedChangeId: 0,
-    activeRequestChangeId: 0
-  };
-  updateManualApplyButton(state);
-};
-const registerManualApplyChange = (state) => {
-  var _a;
-  if (!((_a = state.filter) == null ? void 0 : _a.requiresManualApply) || !state.manualApply) {
-    return;
-  }
-  const manual = state.manualApply;
-  manual.latestChangeId = ++manual.changeCounter;
-  if (!manual.isProcessing) {
-    updateManualApplyButton(state);
-  }
-};
-const beginManualApplyRequest = (state) => {
-  if (!state.manualApply) {
-    return;
-  }
-  const manual = state.manualApply;
-  manual.isProcessing = true;
-  manual.activeRequestChangeId = manual.latestChangeId;
-  updateManualApplyButton(state);
-};
-const resolveManualApplyRequest = (state, wasSuccessful) => {
-  if (!state.manualApply) {
-    return;
-  }
-  const manual = state.manualApply;
-  if (wasSuccessful) {
-    manual.latestAppliedChangeId = Math.max(manual.latestAppliedChangeId, manual.activeRequestChangeId);
-  }
-  manual.activeRequestChangeId = 0;
-  manual.isProcessing = false;
-  updateManualApplyButton(state);
-};
-const apiCall$2 = async (state, addSnapshot) => {
-  var _a, _b;
-  const { elements, filter, filterType } = state;
-  const { imageviewer } = elements;
-  const lfManager = getLfManager();
-  const snapshot = await imageviewer.getCurrentSnapshot();
-  if (!snapshot) {
-    lfManager.log("No snapshot available for processing!", {}, LogSeverity.Warning);
-    return false;
-  }
-  const snapshotValue = snapshot.value;
-  const baseSettings = filter.settings;
-  const payload = {
-    ...baseSettings
-  };
-  const contextDataset = imageviewer.lfDataset;
-  const contextId = ensureDatasetContext(contextDataset, state);
-  if (!contextId && filterType === "inpaint") {
-    lfManager.log("Missing editing context. Run the workflow to register an editing session before using inpaint.", { dataset: contextDataset }, LogSeverity.Warning);
-    if ((_a = state.manualApply) == null ? void 0 : _a.isProcessing) {
-      resolveManualApplyRequest(state, false);
-    }
-    return false;
-  }
-  payload.context_id = contextId;
-  requestAnimationFrame(() => imageviewer.setSpinnerStatus(true));
-  let isSuccess = false;
-  try {
-    const response = await getApiRoutes().image.process(snapshotValue, filterType, payload);
-    if (response.mask) {
-      lfManager.log("Saved inpaint mask preview to temp", { mask: response.mask }, LogSeverity.Info);
-    }
-    if (response.cutout) {
-      lfManager.log("Saved cutout preview to temp", { cutout: response.cutout }, LogSeverity.Info);
-    }
-    if (response.stats) {
-      lfManager.log("Filter statistics", { stats: response.stats }, LogSeverity.Info);
-    }
-    if (addSnapshot) {
-      await imageviewer.addSnapshot(response.data);
-    } else {
-      const { canvas } = (await imageviewer.getComponents()).details;
-      const image = await canvas.getImage();
-      requestAnimationFrame(() => image.lfValue = response.data);
-    }
-    isSuccess = true;
-  } catch (error) {
-    lfManager.log("Error processing image!", { error }, LogSeverity.Error);
-  }
-  requestAnimationFrame(() => imageviewer.setSpinnerStatus(false));
-  if ((_b = state.manualApply) == null ? void 0 : _b.isProcessing) {
-    resolveManualApplyRequest(state, isSuccess);
-  }
-  return isSuccess;
-};
 var ImageEditorCSS;
 (function(ImageEditorCSS2) {
   ImageEditorCSS2["Content"] = "lf-imageeditor";
@@ -2205,6 +2174,111 @@ var ImageEditorInpaintIds;
   ImageEditorInpaintIds2["Feather"] = "feather";
   ImageEditorInpaintIds2["UpsampleTarget"] = "upsample_target";
 })(ImageEditorInpaintIds || (ImageEditorInpaintIds = {}));
+const showError = (state, message) => {
+  const { settings } = state.elements;
+  const errorDiv = document.createElement("div");
+  errorDiv.style.color = "var(--error-color)";
+  errorDiv.style.padding = "8px";
+  errorDiv.style.marginBottom = "8px";
+  errorDiv.style.border = "1px solid var(--error-color)";
+  errorDiv.style.borderRadius = "4px";
+  errorDiv.style.backgroundColor = "rgba(255, 0, 0, 0.1)";
+  errorDiv.innerText = message;
+  settings.prepend(errorDiv);
+  setTimeout(() => {
+    errorDiv.remove();
+  }, 5e3);
+};
+function setGridStatus(status, grid, actionButtons) {
+  const { interrupt, resume } = actionButtons;
+  switch (status) {
+    case ImageEditorStatus.Completed:
+      requestAnimationFrame(() => {
+        if (interrupt) {
+          interrupt.lfUiState = "disabled";
+        }
+        if (resume) {
+          resume.lfUiState = "disabled";
+        }
+      });
+      grid == null ? void 0 : grid.classList.add(ImageEditorCSS.GridIsInactive);
+      break;
+    case ImageEditorStatus.Pending:
+      requestAnimationFrame(() => {
+        if (interrupt) {
+          interrupt.lfUiState = "danger";
+        }
+        if (resume) {
+          resume.lfUiState = "success";
+        }
+      });
+      grid == null ? void 0 : grid.classList.remove(ImageEditorCSS.GridIsInactive);
+      break;
+  }
+}
+const apiCall$2 = async (state, addSnapshot) => {
+  if (state.isApiProcessing) {
+    return false;
+  }
+  const { elements, filter, filterType } = state;
+  const { imageviewer } = elements;
+  const lfManager = getLfManager();
+  const snapshot = await imageviewer.getCurrentSnapshot();
+  if (!snapshot) {
+    lfManager.log("No snapshot available for processing!", {}, LogSeverity.Warning);
+    showError(state, "No snapshot available for processing!");
+    return false;
+  }
+  const snapshotValue = snapshot.value;
+  const baseSettings = filter.settings;
+  const payload = {
+    ...baseSettings
+  };
+  const contextDataset = imageviewer.lfDataset;
+  const contextId = ensureDatasetContext(contextDataset, state);
+  if (!contextId && filterType === "inpaint") {
+    lfManager.log("Missing editing context. Run the workflow to register an editing session before using inpaint.", { dataset: contextDataset }, LogSeverity.Warning);
+    showError(state, "Missing editing context. Run the workflow to register an editing session.");
+    return false;
+  }
+  payload.context_id = contextId;
+  state.isApiProcessing = true;
+  requestAnimationFrame(() => imageviewer.setSpinnerStatus(true));
+  let isSuccess = false;
+  try {
+    const response = await getApiRoutes().image.process(snapshotValue, filterType, payload);
+    if (response.status !== LogSeverity.Success) {
+      lfManager.log("API Error", { response }, LogSeverity.Error);
+      showError(state, response.message || "Unknown API error");
+      requestAnimationFrame(() => imageviewer.setSpinnerStatus(false));
+      state.isApiProcessing = false;
+      return false;
+    }
+    if (response.mask) {
+      lfManager.log("Saved inpaint mask preview to temp", { mask: response.mask }, LogSeverity.Info);
+    }
+    if (response.cutout) {
+      lfManager.log("Saved cutout preview to temp", { cutout: response.cutout }, LogSeverity.Info);
+    }
+    if (response.stats) {
+      lfManager.log("Filter statistics", { stats: response.stats }, LogSeverity.Info);
+    }
+    if (addSnapshot) {
+      await imageviewer.addSnapshot(response.data);
+    } else {
+      const { canvas } = (await imageviewer.getComponents()).details;
+      const image = await canvas.getImage();
+      requestAnimationFrame(() => image.lfValue = response.data);
+    }
+    isSuccess = true;
+  } catch (error) {
+    lfManager.log("Error processing image!", { error }, LogSeverity.Error);
+    showError(state, "Error processing image! Check console for details.");
+  }
+  requestAnimationFrame(() => imageviewer.setSpinnerStatus(false));
+  state.isApiProcessing = false;
+  return isSuccess;
+};
 const BACKGROUND_SETTINGS = {
   backgroundRemover: {
     controlIds: ImageEditorBackgroundRemoverIds,
@@ -2950,10 +3024,9 @@ const CREATIVE_EFFECT_SETTINGS = {
 };
 const DIFFUSION_SETTINGS = {
   //#region Inpaint
-  inpaint: {
+  [IMAGE_EDITOR_CONSTANTS.FILTERS.INPAINT]: {
     controlIds: ImageEditorInpaintIds,
     hasCanvasAction: true,
-    requiresManualApply: true,
     settings: {
       b64_canvas: "",
       cfg: 7,
@@ -3064,7 +3137,6 @@ const INPAINT_ADV = {
   //#region Inpaint (adv.)
   controlIds: ImageEditorInpaintIds,
   hasCanvasAction: true,
-  requiresManualApply: true,
   settings: {
     ...DIFFUSION_SETTINGS.inpaint.settings,
     use_conditioning: false,
@@ -3688,99 +3760,66 @@ function getStatusColumn(dataset) {
 function parseLabel(data) {
   return data.isMandatory ? `${data.ariaLabel}*` : data.ariaLabel;
 }
-const refreshValues = async (state, addSnapshot = false) => {
-  const { elements, filter } = state;
-  const { controls } = elements;
-  const lfManager = getLfManager();
-  state.settingsStore = state.settingsStore ?? {};
-  const storeForFilter = state.settingsStore[state.filterType] = state.settingsStore[state.filterType] ?? {};
-  for (const key in controls) {
-    if (Object.prototype.hasOwnProperty.call(controls, key)) {
-      const id = key;
-      const control = controls[id];
-      switch (control.tagName) {
-        case "LF-SLIDER": {
-          const slider = control;
-          const sliderValue = await slider.getValue();
-          const value = addSnapshot ? sliderValue.real : sliderValue.display;
-          filter.settings[id] = value;
-          storeForFilter[id] = value;
-          break;
-        }
-        case "LF-TEXTFIELD": {
-          const textfield = control;
-          const textfieldValue = await textfield.getValue();
-          filter.settings[id] = textfieldValue;
-          storeForFilter[id] = textfieldValue;
-          break;
-        }
-        case "LF-TOGGLE": {
-          const toggle = control;
-          const toggleValue = await toggle.getValue();
-          const value = toggleValue === "on" ? toggle.dataset.on : toggle.dataset.off;
-          filter.settings[id] = value;
-          storeForFilter[id] = value;
-          break;
-        }
-        default:
-          lfManager.log(`Unhandled control type: ${control.tagName}`, { control }, LogSeverity.Warning);
-          continue;
+function isValidImageEditorFilter(obj) {
+  if (typeof obj !== "object" || obj === null || !("controlIds" in obj) || !("configs" in obj) || !("settings" in obj)) {
+    return false;
+  }
+  const filter = obj;
+  if (typeof filter.controlIds !== "object" || filter.controlIds === null) {
+    return false;
+  }
+  if (typeof filter.configs !== "object" || filter.configs === null) {
+    return false;
+  }
+  const configs = filter.configs;
+  const validControlTypes = Object.values(ImageEditorControls);
+  for (const [controlType, controlConfigs] of Object.entries(configs)) {
+    if (!validControlTypes.includes(controlType)) {
+      return false;
+    }
+    if (!Array.isArray(controlConfigs)) {
+      return false;
+    }
+    for (const config of controlConfigs) {
+      if (typeof config !== "object" || config === null || !("id" in config) || !("title" in config) || !("defaultValue" in config)) {
+        return false;
       }
     }
   }
-};
-const updateCb = async (state, addSnapshot = false, force = false) => {
-  await refreshValues(state, addSnapshot);
-  const { elements, filter } = state;
-  const { imageviewer } = elements;
-  if (!filter) {
+  if (typeof filter.settings !== "object" || filter.settings === null) {
     return false;
   }
-  const { settings } = filter;
-  const validValues = isValidObject(settings);
-  const isCanvasAction = settings.points || settings.b64_canvas;
-  const hasCanvasAction = filter.hasCanvasAction;
-  if (validValues && hasCanvasAction) {
-    const canvas = (await imageviewer.getComponents()).details.canvas;
-    const brushDefaults = {
-      ...SETTINGS.brush.settings,
-      ...state.lastBrushSettings
-    };
-    const candidateSettings = settings ?? {};
-    const brushSettings = {
-      color: candidateSettings.color ?? brushDefaults.color,
-      opacity: candidateSettings.opacity ?? brushDefaults.opacity,
-      size: candidateSettings.size ?? brushDefaults.size
-    };
-    canvas.lfColor = brushSettings.color;
-    canvas.lfOpacity = brushSettings.opacity;
-    canvas.lfSize = brushSettings.size;
-    state.lastBrushSettings = {
-      ...state.lastBrushSettings,
-      color: brushSettings.color,
-      opacity: brushSettings.opacity,
-      size: brushSettings.size
-    };
+  if ("hasCanvasAction" in filter && typeof filter.hasCanvasAction !== "boolean") {
+    return false;
   }
-  const shouldUpdate = validValues && (!hasCanvasAction || isCanvasAction);
-  const requiresManualApply = !!(filter == null ? void 0 : filter.requiresManualApply);
-  let success = false;
-  if (shouldUpdate && (force || !requiresManualApply)) {
-    success = await apiCall$2(state, addSnapshot);
+  return true;
+}
+function assertImageEditorFilter(obj) {
+  if (!isValidImageEditorFilter(obj)) {
+    throw new Error("Invalid ImageEditorFilter structure");
   }
-  return success;
-};
+  return obj;
+}
+function assignStoredSetting(settings, controlIds, id, value) {
+  const controlIdValues = Object.values(controlIds);
+  if (!controlIdValues.includes(id)) {
+    console.warn(`Control ID '${id}' not found in filter controlIds, skipping assignment`);
+    return;
+  }
+  settings[id] = value;
+}
 const createPrepSettings = (deps) => {
   const { onSlider, onTextfield, onToggle } = deps;
   return (state, node) => {
     var _a;
     const { syntax } = getLfManager().getManagers().lfFramework;
     state.elements.controls = {};
-    state.filter = syntax.json.unescape(node.cells.lfCode.value).parsedJSON;
-    const idRaw = node.id || "brush";
-    const alias = idRaw === "inpaint_detail" || idRaw === "inpaint_adv" ? "inpaint" : idRaw;
+    const parsed = syntax.json.unescape(node.cells.lfCode.value).parsedJSON;
+    state.filter = assertImageEditorFilter(parsed);
+    const idRaw = node.id || IMAGE_EDITOR_CONSTANTS.FILTERS.BRUSH;
+    const alias = idRaw === IMAGE_EDITOR_CONSTANTS.FILTERS.INPAINT_DETAIL || idRaw === IMAGE_EDITOR_CONSTANTS.FILTERS.INPAINT_ADV ? IMAGE_EDITOR_CONSTANTS.FILTERS.INPAINT : idRaw;
     state.filterType = alias;
-    state.manualApply = void 0;
+    state.filterNodeId = idRaw;
     const dataset = state.elements.imageviewer.lfDataset;
     const defaults = (_a = dataset == null ? void 0 : dataset.defaults) == null ? void 0 : _a[state.filterType];
     if (defaults) {
@@ -3794,7 +3833,7 @@ const createPrepSettings = (deps) => {
       if (typeof storedValue === "undefined") {
         return;
       }
-      mutableSettings[id] = storedValue;
+      assignStoredSetting(mutableSettings, state.filter.controlIds, id, storedValue);
     });
     const { elements, filter } = state;
     const { settings } = elements;
@@ -3885,7 +3924,7 @@ const createPrepSettings = (deps) => {
     resetButton.addEventListener("click", () => {
       void (async () => {
         await resetSettings(settings);
-        registerManualApplyChange(state);
+        await state.update.snapshot();
       })();
     });
     buttonsWrapper.appendChild(resetButton);
@@ -3914,25 +3953,6 @@ const createPrepSettings = (deps) => {
           canvas.lfSize = brushSource.size;
         }
       });
-    }
-    if (filter == null ? void 0 : filter.requiresManualApply) {
-      const applyButton = document.createElement(TagName.LfButton);
-      applyButton.lfIcon = ImageEditorIcons.Resume;
-      applyButton.lfLabel = "Apply";
-      applyButton.lfStretchX = true;
-      initManualApplyState(state, applyButton);
-      applyButton.addEventListener("click", () => {
-        if (!state.manualApply || state.manualApply.isProcessing) {
-          return;
-        }
-        const hasPending = hasManualApplyPendingChanges(state);
-        if (!hasPending) {
-          return;
-        }
-        beginManualApplyRequest(state);
-        void updateCb(state, true, true);
-      });
-      buttonsWrapper.appendChild(applyButton);
     }
   };
 };
@@ -4006,6 +4026,96 @@ const applyFilterDefaults = (state, defaults) => {
     });
   });
 };
+const refreshValues = async (state, addSnapshot = false) => {
+  const { elements, filter } = state;
+  const { controls, imageviewer } = elements;
+  const lfManager = getLfManager();
+  state.settingsStore = state.settingsStore ?? {};
+  const storeForFilter = state.settingsStore[state.filterType] = state.settingsStore[state.filterType] ?? {};
+  for (const key in controls) {
+    if (Object.prototype.hasOwnProperty.call(controls, key)) {
+      const id = key;
+      const control = controls[id];
+      switch (control.tagName) {
+        case IMAGE_EDITOR_CONSTANTS.TAGS.SLIDER: {
+          const slider = control;
+          const sliderValue = await slider.getValue();
+          const value = addSnapshot ? sliderValue.real : sliderValue.display;
+          filter.settings[id] = value;
+          storeForFilter[id] = value;
+          break;
+        }
+        case IMAGE_EDITOR_CONSTANTS.TAGS.TEXTFIELD: {
+          const textfield = control;
+          const textfieldValue = await textfield.getValue();
+          filter.settings[id] = textfieldValue;
+          storeForFilter[id] = textfieldValue;
+          break;
+        }
+        case IMAGE_EDITOR_CONSTANTS.TAGS.TOGGLE: {
+          const toggle = control;
+          const toggleValue = await toggle.getValue();
+          const value = toggleValue === IMAGE_EDITOR_CONSTANTS.UI.ON ? toggle.dataset.on : toggle.dataset.off;
+          filter.settings[id] = value;
+          storeForFilter[id] = value;
+          break;
+        }
+        default:
+          lfManager.log(`Unhandled control type: ${control.tagName}`, { control }, LogSeverity.Warning);
+          continue;
+      }
+    }
+  }
+  const dataset = imageviewer.lfDataset;
+  if (dataset && state.filterType) {
+    const defaults = dataset.defaults = dataset.defaults ?? {};
+    const existing = defaults[state.filterType] ?? {};
+    defaults[state.filterType] = {
+      ...existing,
+      ...storeForFilter
+    };
+  }
+};
+const updateCb = async (state, addSnapshot = false, fromCanvas = false) => {
+  await refreshValues(state, addSnapshot);
+  const { elements, filter } = state;
+  const { imageviewer } = elements;
+  if (!filter) {
+    return false;
+  }
+  const { settings } = filter;
+  const validValues = isValidObject(settings);
+  const isCanvasAction = settings.points || settings.b64_canvas;
+  const hasCanvasAction = filter.hasCanvasAction;
+  if (validValues && hasCanvasAction) {
+    const canvas = (await imageviewer.getComponents()).details.canvas;
+    const brushDefaults = {
+      ...SETTINGS.brush.settings,
+      ...state.lastBrushSettings
+    };
+    const candidateSettings = settings ?? {};
+    const brushSettings = {
+      color: candidateSettings.color ?? brushDefaults.color,
+      opacity: candidateSettings.opacity ?? brushDefaults.opacity,
+      size: candidateSettings.size ?? brushDefaults.size
+    };
+    canvas.lfColor = brushSettings.color;
+    canvas.lfOpacity = brushSettings.opacity;
+    canvas.lfSize = brushSettings.size;
+    state.lastBrushSettings = {
+      ...state.lastBrushSettings,
+      color: brushSettings.color,
+      opacity: brushSettings.opacity,
+      size: brushSettings.size
+    };
+  }
+  const shouldUpdate = validValues && (!hasCanvasAction || isCanvasAction);
+  let success = false;
+  if (shouldUpdate && (!hasCanvasAction || fromCanvas)) {
+    success = await apiCall$2(state, addSnapshot);
+  }
+  return success;
+};
 const createEventHandlers = ({ handleInterruptForState: handleInterruptForState2, prepSettings: prepSettings2 }) => {
   const syncSelectionWithDataset = async (state, masonryEvent) => {
     const { elements } = state;
@@ -4063,7 +4173,7 @@ const createEventHandlers = ({ handleInterruptForState: handleInterruptForState2
     //#region Button
     button: async (state, e) => {
       const { comp, eventType } = e.detail;
-      if (eventType === "click") {
+      if (eventType === IMAGE_EDITOR_CONSTANTS.EVENTS.CLICK) {
         const isPatched = getComfyAPI()[LFInterruptFlags.PatchedInterrupt] === true;
         switch (comp.lfIcon) {
           case ImageEditorIcons.Interrupt:
@@ -4084,13 +4194,13 @@ const createEventHandlers = ({ handleInterruptForState: handleInterruptForState2
       const { comp, eventType, points } = e.detail;
       const { filter, filterType } = state;
       switch (eventType) {
-        case "stroke":
+        case IMAGE_EDITOR_CONSTANTS.EVENTS.STROKE:
           const originalFilter = filter;
           const originalFilterType = filterType;
           const canvas = await comp.getCanvas();
           const b64Canvas = canvasToBase64(canvas);
-          if (filterType !== "brush" && !(filter == null ? void 0 : filter.hasCanvasAction)) {
-            state.filterType = "brush";
+          if (filterType !== IMAGE_EDITOR_CONSTANTS.FILTERS.BRUSH && !(filter == null ? void 0 : filter.hasCanvasAction)) {
+            state.filterType = IMAGE_EDITOR_CONSTANTS.FILTERS.BRUSH;
           }
           const brushDefaults = {
             ...SETTINGS.brush.settings,
@@ -4221,11 +4331,9 @@ const createEventHandlers = ({ handleInterruptForState: handleInterruptForState2
       const { preview, snapshot } = update;
       switch (eventType) {
         case "change":
-          registerManualApplyChange(state);
           snapshot();
           break;
         case "input":
-          registerManualApplyChange(state);
           const debouncedSlider = debounce(preview, 300);
           debouncedSlider();
           break;
@@ -4239,11 +4347,9 @@ const createEventHandlers = ({ handleInterruptForState: handleInterruptForState2
       const { preview, snapshot } = update;
       switch (eventType) {
         case "change":
-          registerManualApplyChange(state);
           snapshot();
           break;
         case "input":
-          registerManualApplyChange(state);
           const debouncedTextfield = debounce(preview, 300);
           debouncedTextfield();
           break;
@@ -4257,7 +4363,6 @@ const createEventHandlers = ({ handleInterruptForState: handleInterruptForState2
       const { snapshot } = update;
       switch (eventType) {
         case "change":
-          registerManualApplyChange(state);
           snapshot();
           break;
       }
@@ -4266,33 +4371,6 @@ const createEventHandlers = ({ handleInterruptForState: handleInterruptForState2
   };
   return handlers;
 };
-function setGridStatus(status, grid, actionButtons) {
-  const { interrupt, resume } = actionButtons;
-  switch (status) {
-    case ImageEditorStatus.Completed:
-      requestAnimationFrame(() => {
-        if (interrupt) {
-          interrupt.lfUiState = "disabled";
-        }
-        if (resume) {
-          resume.lfUiState = "disabled";
-        }
-      });
-      grid == null ? void 0 : grid.classList.add(ImageEditorCSS.GridIsInactive);
-      break;
-    case ImageEditorStatus.Pending:
-      requestAnimationFrame(() => {
-        if (interrupt) {
-          interrupt.lfUiState = "danger";
-        }
-        if (resume) {
-          resume.lfUiState = "success";
-        }
-      });
-      grid == null ? void 0 : grid.classList.remove(ImageEditorCSS.GridIsInactive);
-      break;
-  }
-}
 const handleInterruptForState = async (state) => {
   var _a, _b;
   const lfManager = getLfManager();
@@ -4531,6 +4609,31 @@ const imageEditorFactory = {
           if (shouldAutoLoad) {
             state.hasAutoDirectoryLoad = true;
             (_b = state.refreshDirectory) == null ? void 0 : _b.call(state, normalizeDirectoryRequest(state.directoryValue));
+          }
+          if (state.filterNodeId) {
+            const findNodeById = (id) => {
+              const search = (nodes) => {
+                for (const n of nodes) {
+                  if (n && typeof n === "object") {
+                    if (n.id === id) {
+                      return n;
+                    }
+                    if (Array.isArray(n.children)) {
+                      const found = search(n.children);
+                      if (found) {
+                        return found;
+                      }
+                    }
+                  }
+                }
+                return void 0;
+              };
+              return search(TREE_DATA.nodes || []);
+            };
+            const detailsNode = findNodeById(state.filterNodeId);
+            if (detailsNode) {
+              prepSettings(state, detailsNode);
+            }
           }
         };
         normalizeValue(value, callback, CustomWidgetName.imageEditor);
@@ -8692,7 +8795,7 @@ class LFManager {
         if (widgets.includes(CustomWidgetName.countBarChart) || widgets.includes(CustomWidgetName.tabBarChart)) {
           callbacks.push(onDrawBackground);
         }
-        if (widgets.includes(CustomWidgetName.chip) || widgets.includes(CustomWidgetName.messenger)) {
+        if (widgets.includes(CustomWidgetName.chip) || widgets.includes(CustomWidgetName.imageEditor) || widgets.includes(CustomWidgetName.messenger)) {
           callbacks.push(onConnectionsChange);
         }
         callbacks.push(onNodeCreated);
