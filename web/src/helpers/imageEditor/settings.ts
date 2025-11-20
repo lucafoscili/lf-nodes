@@ -132,6 +132,7 @@ export const createPrepSettings = (deps: PrepSettingsDeps): PrepSettingsFn => {
         ? IMAGE_EDITOR_CONSTANTS.FILTERS.INPAINT
         : idRaw;
     state.filterType = alias as ImageEditorFilterType;
+    state.filterNodeId = idRaw;
 
     const dataset = state.elements.imageviewer.lfDataset as ImageEditorDataset | undefined;
     const defaults = dataset?.defaults?.[state.filterType] as

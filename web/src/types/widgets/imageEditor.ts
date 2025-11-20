@@ -61,6 +61,7 @@ export interface ImageEditorState extends BaseWidgetState {
   };
   contextId?: string;
   filter: ImageEditorFilter;
+  filterNodeId?: string;
   filterType: ImageEditorFilterType;
   lastBrushSettings: ImageEditorBrushSettings;
   directory?: ImageEditorDatasetNavigationDirectory;

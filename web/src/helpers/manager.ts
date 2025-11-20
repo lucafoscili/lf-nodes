@@ -1,7 +1,7 @@
 import { LfMessengerDataset } from '@lf-widgets/foundations';
 import { LogSeverity } from '../types/manager/manager';
 import { ChipState } from '../types/widgets/chip';
-import { ImageEditorState } from '../types/widgets/imageEditor';
+import { ImageEditorDataset, ImageEditorState } from '../types/widgets/imageEditor';
 import { MessengerCSS, MessengerState } from '../types/widgets/messenger';
 import {
   ComfyWidgetName,
@@ -17,6 +17,7 @@ import {
   getLfManager,
   refreshChart,
 } from '../utils/common';
+import { applyEditorConfigToDataset } from './imageEditor/dataset';
 
 //#region Node-Widget map
 export const NODE_WIDGET_MAP: NodeWidgetMap = {
@@ -184,6 +185,11 @@ export const onConnectionsChange = async (nodeType: NodeType) => {
       case NodeName.llmMessenger:
         messengerCb(node);
         break;
+
+      case NodeName.imagesEditingBreakpoint:
+      case NodeName.loadAndEditImages:
+        imageEditorConfigCb(node);
+        break;
     }
 
     return r;
@@ -335,6 +341,87 @@ const messengerCb = (node: NodeType) => {
     }
   } catch (error) {
     getLfManager().log('Error processing messenger data', { dataset, error }, LogSeverity.Error);
+  }
+};
+//#endregion
+
+//#region imageEditorConfigCb
+const imageEditorConfigCb = (node: NodeType) => {
+  const lfManager = getLfManager();
+  const routes = getApiRoutes().comfy;
+
+  const configInput = getInput(node, ComfyWidgetName.json);
+  const linkInput = routes.getLinkById(configInput?.link?.toString());
+  const sourceNode = routes.getNodeById(linkInput?.origin_id?.toString());
+
+  if (!configInput || !linkInput || !sourceNode) {
+    lfManager.log(
+      'Missing config input or source node',
+      { configInput, linkInput, sourceNode },
+      LogSeverity.Warning,
+    );
+    return;
+  }
+
+  const editorWidget = getCustomWidget(node, CustomWidgetName.imageEditor);
+  const configWidget = sourceNode.widgets?.[linkInput.origin_slot];
+
+  if (
+    !editorWidget?.options?.getValue ||
+    !editorWidget.options.setValue ||
+    !configWidget?.options?.getValue
+  ) {
+    lfManager.log(
+      'Missing editor or config widget options',
+      { editorWidget, configWidget },
+      LogSeverity.Warning,
+    );
+    return;
+  }
+
+  const { syntax } = lfManager.getManagers().lfFramework;
+
+  const currentDatasetRaw = editorWidget.options.getValue();
+  const configRaw = configWidget.options.getValue();
+
+  let datasetJson: ImageEditorDataset | undefined;
+  try {
+    datasetJson = syntax.json.unescape(currentDatasetRaw).parsedJSON as ImageEditorDataset;
+  } catch {
+    datasetJson = { nodes: [] } as ImageEditorDataset;
+  }
+
+  let configJson: unknown;
+  try {
+    configJson = syntax.json.unescape(configRaw).parsedJSON;
+  } catch (error) {
+    lfManager.log(
+      'Invalid image editor config JSON; skipping reactive update.',
+      { error, configRaw },
+      LogSeverity.Warning,
+    );
+    return;
+  }
+
+  const nextDataset = applyEditorConfigToDataset(datasetJson, configJson);
+  if (!nextDataset) {
+    lfManager.log(
+      'Failed to apply image editor config to dataset: nextDataset is undefined.',
+      { datasetJson, configJson },
+      LogSeverity.Warning,
+    );
+    return;
+  }
+
+  try {
+    const serialized = JSON.stringify(nextDataset);
+    editorWidget.options.setValue(serialized);
+  } catch (error) {
+    lfManager.log(
+      'Failed to apply image editor config to dataset.',
+      { error, nextDataset },
+      LogSeverity.Warning,
+    );
   }
 };
 //#endregion

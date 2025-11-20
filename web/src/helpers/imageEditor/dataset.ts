@@ -2,6 +2,7 @@ import { LfDataColumn, LfMasonryEventPayload } from '@lf-widgets/foundations';
 import {
   ImageEditorBuildSelectionPayloadParams,
   ImageEditorDataset,
+  ImageEditorDatasetDefaults,
   ImageEditorDatasetNavigationDirectory,
   ImageEditorDatasetSelection,
   ImageEditorState,
@@ -145,6 +146,48 @@ export const deriveSelectionName = (
   const lfValue = asString(shape?.lfValue);
 
   return htmlTitle ?? htmlId ?? shapeValue ?? lfValue ?? undefined;
+};
+//#endregion
+
+//#region editorConfig
+export const applyEditorConfigToDataset = (
+  dataset: ImageEditorDataset | undefined,
+  config: unknown,
+): ImageEditorDataset | undefined => {
+  if (!dataset || !config || typeof config !== 'object') {
+    return dataset;
+  }
+
+  const cfg = config as Partial<{
+    navigation: ImageEditorDataset['navigation'];
+    defaults: ImageEditorDatasetDefaults;
+    selection: ImageEditorDatasetSelection;
+  }>;
+
+  const next: ImageEditorDataset = { ...dataset };
+
+  if (cfg.navigation && typeof cfg.navigation === 'object') {
+    next.navigation = cfg.navigation;
+  }
+
+  if (cfg.defaults && typeof cfg.defaults === 'object') {
+    const existingDefaults =
+      (next.defaults && typeof next.defaults === 'object'
+        ? (next.defaults as ImageEditorDatasetDefaults)
+        : ({} as ImageEditorDatasetDefaults)) ?? {};
+    next.defaults = {
+      ...existingDefaults,
+      ...cfg.defaults,
+    };
+  }
+
+  if (cfg.selection && typeof cfg.selection === 'object') {
+    const selectionCopy: ImageEditorDatasetSelection = { ...(cfg.selection as any) };
+    delete (selectionCopy as any).context_id;
+    next.selection = selectionCopy;
+  }
+
+  return next;
 };
 //#endregion
 
