@@ -2,6 +2,7 @@ import {
   LfDataDataset,
   LfDataNode,
   LfMasonryEventPayload,
+  LfMultiInputEventPayload,
   LfSliderEventPayload,
   LfTextfieldEventPayload,
   LfToggleEventPayload,
@@ -81,6 +82,10 @@ export interface ImageEditorState extends BaseWidgetState {
   refreshDirectory?: (directory: string) => Promise<void>;
 }
 export interface PrepSettingsDeps {
+  onMultiinput: (
+    state: ImageEditorState,
+    e: CustomEvent<LfMultiInputEventPayload>,
+  ) => void | Promise<void>;
   onSlider: (state: ImageEditorState, e: CustomEvent<LfSliderEventPayload>) => void | Promise<void>;
   onTextfield: (
     state: ImageEditorState,
@@ -149,6 +154,7 @@ export enum ImageEditorIcons {
 export type ImageEditorUpdateCallback = (addSnapshot?: boolean, force?: boolean) => Promise<void>;
 export enum ImageEditorControls {
   Canvas = 'canvas',
+  Multiinput = 'multiinput',
   Slider = 'slider',
   Textfield = 'textfield',
   Toggle = 'toggle',
@@ -224,7 +230,7 @@ export type ImageEditorControlMap<ID extends ImageEditorControlIds> =
     : ID extends ImageEditorSliderIds
     ? HTMLLfSliderElement
     : ID extends ImageEditorTextfieldIds
-    ? HTMLLfTextfieldElement
+    ? HTMLLfTextfieldElement | HTMLLfMultiinputElement
     : ID extends ImageEditorToggleIds
     ? HTMLLfToggleElement
     : never;
@@ -258,6 +264,13 @@ export interface ImageEditorTextfieldConfig
   controlType: ImageEditorControls.Textfield;
   type: 'color' | 'number' | 'text';
 }
+export interface ImageEditorMultiinputConfig
+  extends ImageEditorBaseConfig<ImageEditorTextfieldIds, string> {
+  allowFreeInput?: boolean;
+  controlType: ImageEditorControls.Multiinput;
+  maxHistory?: number;
+  mode?: 'history' | 'tags';
+}
 export interface ImageEditorToggleConfig
   extends ImageEditorBaseConfig<ImageEditorToggleIds, boolean> {
   controlType: ImageEditorControls.Toggle;
@@ -266,10 +279,12 @@ export interface ImageEditorToggleConfig
 }
 export type ImageEditorControlConfig =
   | ImageEditorCanvasConfig
+  | ImageEditorMultiinputConfig
   | ImageEditorSliderConfig
   | ImageEditorTextfieldConfig
   | ImageEditorToggleConfig;
 export type ImageEditorSettingsFor = Partial<{
+  [ImageEditorControls.Multiinput]: ImageEditorMultiinputConfig[];
   [ImageEditorControls.Slider]: ImageEditorSliderConfig[];
   [ImageEditorControls.Textfield]: ImageEditorTextfieldConfig[];
   [ImageEditorControls.Toggle]: ImageEditorToggleConfig[];
@@ -697,8 +712,9 @@ export type ImageEditorInpaintFilter = ImageEditorFilterDefinition<
   typeof ImageEditorInpaintIds,
   ImageEditorInpaintSettings,
   {
+    [ImageEditorControls.Multiinput]?: ImageEditorMultiinputConfig[];
     [ImageEditorControls.Slider]: ImageEditorSliderConfig[];
-    [ImageEditorControls.Textfield]: ImageEditorTextfieldConfig[];
+    [ImageEditorControls.Textfield]?: ImageEditorTextfieldConfig[];
     [ImageEditorControls.Toggle]: ImageEditorToggleConfig[];
   }
 >;

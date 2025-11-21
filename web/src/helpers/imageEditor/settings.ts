@@ -12,6 +12,7 @@ import {
   ImageEditorFilterSettings,
   ImageEditorFilterType,
   ImageEditorIcons,
+  ImageEditorMultiinputConfig,
   ImageEditorSliderConfig,
   ImageEditorSliderIds,
   ImageEditorState,
@@ -118,7 +119,7 @@ function assignStoredSetting(
 
 //#region createPrepSettings
 export const createPrepSettings = (deps: PrepSettingsDeps): PrepSettingsFn => {
-  const { onSlider, onTextfield, onToggle } = deps;
+  const { onSlider, onTextfield, onToggle, onMultiinput } = deps;
 
   return (state, node) => {
     const { syntax } = getLfManager().getManagers().lfFramework;
@@ -220,6 +221,39 @@ export const createPrepSettings = (deps: PrepSettingsDeps): PrepSettingsFn => {
             state.elements.controls[textfieldConfig.id as ImageEditorTextfieldIds] = textfield;
             break;
           }
+          case ImageEditorControls.Multiinput: {
+            const multiConfig = config as ImageEditorMultiinputConfig;
+            const multiinput = document.createElement(
+              TagName.LfMultiinput,
+            ) as HTMLLfMultiinputElement;
+
+            multiinput.lfMode = multiConfig.mode ?? 'tags';
+            multiinput.lfAllowFreeInput = multiConfig.allowFreeInput ?? true;
+            multiinput.lfValue = String(multiConfig.defaultValue ?? '').valueOf();
+            multiinput.title = multiConfig.title;
+            multiinput.dataset.id = multiConfig.id;
+            multiinput.addEventListener(LfEventName.LfMultiinput, (event) =>
+              onMultiinput(state, event),
+            );
+
+            const storedValue = stored[multiConfig.id as ImageEditorControlIds];
+            if (typeof storedValue !== 'undefined') {
+              multiinput.lfValue = String(storedValue);
+            }
+
+            const effectiveValue = multiinput.lfValue ?? '';
+            if (effectiveValue.trim()) {
+              const tags = effectiveValue
+                .split(',')
+                .map((token) => token.trim())
+                .filter((token) => token.length > 0);
+              void multiinput.setHistory(tags);
+            }
+
+            controlsContainer.appendChild(multiinput);
+            state.elements.controls[multiConfig.id as ImageEditorTextfieldIds] = multiinput;
+            break;
+          }
           case ImageEditorControls.Toggle: {
             const toggleConfig = config as ImageEditorToggleConfig;
             const toggle = document.createElement(TagName.LfToggle);
@@ -303,6 +337,11 @@ export async function resetSettings(settings: HTMLElement) {
   const controls = Array.from(settings.querySelectorAll('[data-id]'));
   for (const control of controls) {
     switch (control.tagName) {
+      case 'LF-MULTIINPUT': {
+        const multiinput = control as HTMLLfMultiinputElement;
+        await multiinput.setValue(multiinput.lfValue);
+        break;
+      }
       case 'LF-SLIDER': {
         const slider = control as HTMLLfSliderElement;
         await slider.setValue(slider.lfValue);
@@ -359,6 +398,16 @@ export const applyFilterDefaults = (
       }
 
       switch (controlType) {
+        case ImageEditorControls.Multiinput: {
+          const multiConfig = config as ImageEditorMultiinputConfig;
+          const stringValue =
+            defaultValue === null || typeof defaultValue === 'undefined'
+              ? ''
+              : String(defaultValue);
+          multiConfig.defaultValue = stringValue;
+          mutableSettings[multiConfig.id] = stringValue;
+          break;
+        }
         case ImageEditorControls.Slider: {
           const sliderConfig = config as ImageEditorSliderConfig;
           const numericValue =

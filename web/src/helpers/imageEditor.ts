@@ -1,4 +1,5 @@
 import {
+  LfMultiInputEventPayload,
   LfSliderEventPayload,
   LfTextfieldEventPayload,
   LfToggleEventPayload,
@@ -33,6 +34,8 @@ const handlerRefs: {
 };
 
 export const prepSettings: PrepSettingsFn = createPrepSettings({
+  onMultiinput: (state: ImageEditorState, event: CustomEvent<LfMultiInputEventPayload>) =>
+    EV_HANDLERS.multiinput(state, event),
   onSlider: (state: ImageEditorState, event: CustomEvent<LfSliderEventPayload>) =>
     handlerRefs.slider(state, event),
   onTextfield: (state: ImageEditorState, event: CustomEvent<LfTextfieldEventPayload>) =>

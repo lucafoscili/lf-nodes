@@ -1,3 +1,4 @@
+import { IMAGE_EDITOR_CONSTANTS } from '../../../helpers/imageEditor/constants';
 import {
   ImageEditorControls,
   ImageEditorFilters,
@@ -7,7 +8,6 @@ import {
   ImageEditorTextfieldIds,
   ImageEditorToggleIds,
 } from '../../../types/widgets/imageEditor';
-import { IMAGE_EDITOR_CONSTANTS } from '../../../helpers/imageEditor/constants';
 
 export const DIFFUSION_SETTINGS: Pick<ImageEditorFilters, 'inpaint'> = {
   //#region Inpaint
@@ -27,24 +27,26 @@ export const DIFFUSION_SETTINGS: Pick<ImageEditorFilters, 'inpaint'> = {
       apply_unsharp_mask: true,
     },
     configs: {
-      [ImageEditorControls.Textfield]: [
+      [ImageEditorControls.Multiinput]: [
         {
           ariaLabel: 'Positive prompt',
-          controlType: ImageEditorControls.Textfield,
+          controlType: ImageEditorControls.Multiinput,
           defaultValue: '',
           id: ImageEditorTextfieldIds.PositivePrompt,
           isMandatory: false,
           title: 'Prompt applied to masked pixels.',
-          type: 'text',
+          mode: 'tags',
+          allowFreeInput: true,
         },
         {
           ariaLabel: 'Negative prompt',
-          controlType: ImageEditorControls.Textfield,
+          controlType: ImageEditorControls.Multiinput,
           defaultValue: '',
           id: ImageEditorTextfieldIds.NegativePrompt,
           isMandatory: false,
           title: 'Negative prompt applied to masked pixels.',
-          type: 'text',
+          mode: 'tags',
+          allowFreeInput: true,
         },
       ],
       [ImageEditorControls.Toggle]: [
@@ -142,25 +144,29 @@ export const INPAINT_ADV: ImageEditorInpaintFilter = {
     seed: 42,
   },
   configs: {
-    [ImageEditorControls.Textfield]: [
+    [ImageEditorControls.Multiinput]: [
       {
         ariaLabel: 'Positive prompt',
-        controlType: ImageEditorControls.Textfield,
+        controlType: ImageEditorControls.Multiinput,
         defaultValue: '',
         id: ImageEditorTextfieldIds.PositivePrompt,
         isMandatory: false,
         title: 'Prompt applied to masked pixels.',
-        type: 'text',
+        mode: 'tags',
+        allowFreeInput: true,
       },
       {
         ariaLabel: 'Negative prompt',
-        controlType: ImageEditorControls.Textfield,
+        controlType: ImageEditorControls.Multiinput,
         defaultValue: '',
         id: ImageEditorTextfieldIds.NegativePrompt,
         isMandatory: false,
         title: 'Negative prompt applied to masked pixels.',
-        type: 'text',
+        mode: 'tags',
+        allowFreeInput: true,
       },
+    ],
+    [ImageEditorControls.Textfield]: [
       {
         ariaLabel: 'Seed',
         controlType: ImageEditorControls.Textfield,

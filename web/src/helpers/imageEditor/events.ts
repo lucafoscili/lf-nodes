@@ -8,6 +8,7 @@ import {
   LfImageviewerEventPayload,
   LfMasonryEventPayload,
   LfMasonryInterface,
+  LfMultiInputEventPayload,
   LfSliderEventPayload,
   LfTextfieldEventPayload,
   LfToggleEventPayload,
@@ -324,6 +325,23 @@ export const createEventHandlers = ({
           }
           break;
         }
+      }
+    },
+    //#endregion
+    //#region Multiinput
+    multiinput: async (state: ImageEditorState, e: CustomEvent<LfMultiInputEventPayload>) => {
+      const { eventType } = e.detail;
+      const { update } = state;
+      const { preview, snapshot } = update;
+
+      switch (eventType) {
+        case 'change':
+          snapshot();
+          break;
+        case 'input':
+          const debouncedMultiinput = debounce(preview, 300);
+          debouncedMultiinput();
+          break;
       }
     },
     //#endregion

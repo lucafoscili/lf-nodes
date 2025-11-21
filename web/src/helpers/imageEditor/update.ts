@@ -28,6 +28,13 @@ export const refreshValues = async (state: ImageEditorState, addSnapshot = false
       const control = controls[id];
 
       switch (control.tagName) {
+        case IMAGE_EDITOR_CONSTANTS.TAGS.MULTIINPUT: {
+          const multiinput = control as HTMLLfMultiinputElement;
+          const multiValue = await multiinput.getValue();
+          filter.settings[id] = multiValue;
+          storeForFilter[id] = multiValue;
+          break;
+        }
         case IMAGE_EDITOR_CONSTANTS.TAGS.SLIDER: {
           const slider = control as HTMLLfSliderElement;
           const sliderValue = await slider.getValue();

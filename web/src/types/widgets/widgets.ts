@@ -194,6 +194,7 @@ export enum TagName {
   LfList = 'lf-list',
   LfMasonry = 'lf-masonry',
   LfMessenger = 'lf-messenger',
+  LfMultiinput = 'lf-multiinput',
   LfProgressbar = 'lf-progressbar',
   LfSlider = 'lf-slider',
   LfSpinner = 'lf-spinner',

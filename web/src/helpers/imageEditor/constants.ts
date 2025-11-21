@@ -19,6 +19,7 @@ export const IMAGE_EDITOR_CONSTANTS = {
     STROKE: 'stroke',
   },
   TAGS: {
+    MULTIINPUT: 'LF-MULTIINPUT',
     SLIDER: 'LF-SLIDER',
     TEXTFIELD: 'LF-TEXTFIELD',
     TOGGLE: 'LF-TOGGLE',
