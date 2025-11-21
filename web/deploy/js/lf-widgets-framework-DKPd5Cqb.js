@@ -1,4 +1,4 @@
-import { bx as LF_FRAMEWORK_SYMBOL, by as LF_FRAMEWORK_ALLOWED_ATTRS, bz as LF_FRAMEWORK_ALLOWED_PREFIXES, bA as getComponentProps, bB as markFrameworkReady, bC as LF_COLOR_CODES, C as CY_ATTRIBUTES, a as LF_ATTRIBUTES, bD as LF_EFFECTS_VARS, bE as GLOBAL_STYLES, bF as LF_THEME_ICONS_PREFIX, bG as LF_THEME_COLORS_PREFIX, bH as LF_THEME_ATTRIBUTE, bI as LF_ICONS_REGISTRY, bJ as LF_FRAMEWORK_EVENT_NAME, bK as THEME_LIST } from "./lf-widgets-foundations-8UtpQZAe.js";
+import { bA as LF_FRAMEWORK_SYMBOL, bB as LF_FRAMEWORK_ALLOWED_ATTRS, bC as LF_FRAMEWORK_ALLOWED_PREFIXES, bD as getComponentProps, bE as markFrameworkReady, bF as LF_COLOR_CODES, C as CY_ATTRIBUTES, a as LF_ATTRIBUTES, bG as LF_EFFECTS_VARS, bH as GLOBAL_STYLES, bI as LF_THEME_ICONS_PREFIX, bJ as LF_THEME_COLORS_PREFIX, bK as LF_THEME_ATTRIBUTE, bL as LF_ICONS_REGISTRY, bM as LF_FRAMEWORK_EVENT_NAME, bN as THEME_LIST } from "./lf-widgets-foundations-BKTYH9k2.js";
 function _mergeNamespaces$1(n, m) {
   m.forEach(function(e) {
     e && typeof e !== "string" && !Array.isArray(e) && Object.keys(e).forEach(function(k) {
@@ -10931,4 +10931,4 @@ const finalize = (framework) => {
 export {
   getLfFramework as g
 };
-//# sourceMappingURL=lf-widgets-framework-qjsxfoUK.js.map
+//# sourceMappingURL=lf-widgets-framework-DKPd5Cqb.js.map

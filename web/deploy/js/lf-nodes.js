@@ -1,6 +1,6 @@
-import { g as getLfFramework } from "./lf-widgets-framework-qjsxfoUK.js";
-import "./lf-widgets-core-lLYscYdv.js";
-import "./lf-widgets-foundations-8UtpQZAe.js";
+import { g as getLfFramework } from "./lf-widgets-framework-DKPd5Cqb.js";
+import "./lf-widgets-core-BwXxRfRT.js";
+import "./lf-widgets-foundations-BKTYH9k2.js";
 var APIEndpoints;
 (function(APIEndpoints2) {
   APIEndpoints2["CleanOldBackups"] = "/lf-nodes/clean-old-backups";
@@ -10,22 +10,24 @@ var APIEndpoints;
   APIEndpoints2["Free"] = "/lf-nodes/free";
   APIEndpoints2["ExploreFilesystem"] = "/lf-nodes/explore-filesystem";
   APIEndpoints2["GetAnalytics"] = "/lf-nodes/get-analytics";
+  APIEndpoints2["GetBackupStats"] = "/lf-nodes/get-backup-stats";
   APIEndpoints2["GetCpuStats"] = "/lf-nodes/get-cpu-stats";
   APIEndpoints2["GetDiskStats"] = "/lf-nodes/get-disk-stats";
   APIEndpoints2["GetGpuStats"] = "/lf-nodes/get-gpu-stats";
   APIEndpoints2["GetImage"] = "/lf-nodes/get-image";
   APIEndpoints2["GetJson"] = "/lf-nodes/get-json";
-  APIEndpoints2["GetRamStats"] = "/lf-nodes/get-ram-stats";
   APIEndpoints2["GetMetadata"] = "/lf-nodes/get-metadata";
+  APIEndpoints2["GetRamStats"] = "/lf-nodes/get-ram-stats";
   APIEndpoints2["GetPreviewStats"] = "/lf-nodes/get-preview-stats";
-  APIEndpoints2["GetBackupStats"] = "/lf-nodes/get-backup-stats";
+  APIEndpoints2["GetSamplers"] = "/lf-nodes/get-samplers";
+  APIEndpoints2["GetSchedulers"] = "/lf-nodes/get-schedulers";
   APIEndpoints2["NewBackup"] = "/lf-nodes/new-backup";
   APIEndpoints2["ProcessImage"] = "/lf-nodes/process-image";
-  APIEndpoints2["UploadImage"] = "/lf-nodes/upload";
   APIEndpoints2["RefreshNodeDefs"] = "/lf-nodes/refresh-node-defs";
   APIEndpoints2["SaveMetadata"] = "/lf-nodes/save-metadata";
   APIEndpoints2["UpdateJson"] = "/lf-nodes/update-json";
   APIEndpoints2["UpdateMetadataCover"] = "/lf-nodes/update-metadata-cover";
+  APIEndpoints2["UploadImage"] = "/lf-nodes/upload";
   APIEndpoints2["Workflows"] = "/lf-nodes/workflows";
 })(APIEndpoints || (APIEndpoints = {}));
 var LogSeverity;
@@ -817,6 +819,52 @@ const MODELS_API = {
       lfManager.log('"refresh-node-defs" endpoint failed', { error }, LogSeverity.Warning);
       return false;
     }
+  },
+  //#endregion
+  //#region sampling options
+  getSamplers: async () => {
+    const lfManager = getLfManager();
+    try {
+      const response = await getComfyAPI().fetchApi(APIEndpoints.GetSamplers, {
+        method: "POST"
+      });
+      if (response.status !== 200) {
+        const errorText = await response.text().catch(() => "");
+        lfManager.log('"get-samplers" endpoint returned non-200', { status: response.status, errorText }, LogSeverity.Warning);
+        return { columns: [], nodes: [] };
+      }
+      const payload = await response.json();
+      if ((payload == null ? void 0 : payload.status) === "success" && payload.data) {
+        return payload.data;
+      }
+      lfManager.log('"get-samplers" endpoint returned unexpected payload', { payload }, LogSeverity.Warning);
+      return { columns: [], nodes: [] };
+    } catch (error) {
+      lfManager.log('"get-samplers" endpoint failed', { error }, LogSeverity.Warning);
+      return { columns: [], nodes: [] };
+    }
+  },
+  getSchedulers: async () => {
+    const lfManager = getLfManager();
+    try {
+      const response = await getComfyAPI().fetchApi(APIEndpoints.GetSchedulers, {
+        method: "POST"
+      });
+      if (response.status !== 200) {
+        const errorText = await response.text().catch(() => "");
+        lfManager.log('"get-schedulers" endpoint returned non-200', { status: response.status, errorText }, LogSeverity.Warning);
+        return { columns: [], nodes: [] };
+      }
+      const payload = await response.json();
+      if ((payload == null ? void 0 : payload.status) === "success" && payload.data) {
+        return payload.data;
+      }
+      lfManager.log('"get-schedulers" endpoint returned unexpected payload', { payload }, LogSeverity.Warning);
+      return { columns: [], nodes: [] };
+    } catch (error) {
+      lfManager.log('"get-schedulers" endpoint failed', { error }, LogSeverity.Warning);
+      return { columns: [], nodes: [] };
+    }
   }
   //#endregion
 };
@@ -1283,7 +1331,9 @@ var TagName;
   TagName2["LfList"] = "lf-list";
   TagName2["LfMasonry"] = "lf-masonry";
   TagName2["LfMessenger"] = "lf-messenger";
+  TagName2["LfMultiinput"] = "lf-multiinput";
   TagName2["LfProgressbar"] = "lf-progressbar";
+  TagName2["LfSelect"] = "lf-select";
   TagName2["LfSlider"] = "lf-slider";
   TagName2["LfSpinner"] = "lf-spinner";
   TagName2["LfTabbar"] = "lf-tabbar";
@@ -1311,6 +1361,8 @@ const IMAGE_EDITOR_CONSTANTS = {
     STROKE: "stroke"
   },
   TAGS: {
+    MULTIINPUT: "LF-MULTIINPUT",
+    SELECT: "LF-SELECT",
     SLIDER: "LF-SLIDER",
     TEXTFIELD: "LF-TEXTFIELD",
     TOGGLE: "LF-TOGGLE"
@@ -1974,6 +2026,8 @@ var ImageEditorIcons;
 var ImageEditorControls;
 (function(ImageEditorControls2) {
   ImageEditorControls2["Canvas"] = "canvas";
+  ImageEditorControls2["Multiinput"] = "multiinput";
+  ImageEditorControls2["Select"] = "select";
   ImageEditorControls2["Slider"] = "slider";
   ImageEditorControls2["Textfield"] = "textfield";
   ImageEditorControls2["Toggle"] = "toggle";
@@ -2029,19 +2083,23 @@ var ImageEditorTextfieldIds;
 })(ImageEditorTextfieldIds || (ImageEditorTextfieldIds = {}));
 var ImageEditorToggleIds;
 (function(ImageEditorToggleIds2) {
+  ImageEditorToggleIds2["ApplyUnsharpMask"] = "apply_unsharp_mask";
   ImageEditorToggleIds2["ClipSoft"] = "clip_soft";
   ImageEditorToggleIds2["Localized"] = "localized";
   ImageEditorToggleIds2["ProtectSkin"] = "protect_skin";
+  ImageEditorToggleIds2["RoiAuto"] = "roi_auto";
+  ImageEditorToggleIds2["RoiAlignAuto"] = "roi_align_auto";
   ImageEditorToggleIds2["Shape"] = "shape";
   ImageEditorToggleIds2["Smooth"] = "smoooth";
   ImageEditorToggleIds2["SoftBlend"] = "soft_blend";
   ImageEditorToggleIds2["TransparentBackground"] = "transparent_background";
   ImageEditorToggleIds2["Vertical"] = "vertical";
-  ImageEditorToggleIds2["UseConditioning"] = "use_conditioning";
-  ImageEditorToggleIds2["RoiAuto"] = "roi_auto";
-  ImageEditorToggleIds2["RoiAlignAuto"] = "roi_align_auto";
-  ImageEditorToggleIds2["ApplyUnsharpMask"] = "apply_unsharp_mask";
 })(ImageEditorToggleIds || (ImageEditorToggleIds = {}));
+var ImageEditorSelectIds;
+(function(ImageEditorSelectIds2) {
+  ImageEditorSelectIds2["Sampler"] = "sampler";
+  ImageEditorSelectIds2["Scheduler"] = "scheduler";
+})(ImageEditorSelectIds || (ImageEditorSelectIds = {}));
 var ImageEditorBackgroundRemoverIds;
 (function(ImageEditorBackgroundRemoverIds2) {
   ImageEditorBackgroundRemoverIds2["Color"] = "color";
@@ -2155,23 +2213,24 @@ var ImageEditorVignetteIds;
 })(ImageEditorVignetteIds || (ImageEditorVignetteIds = {}));
 var ImageEditorInpaintIds;
 (function(ImageEditorInpaintIds2) {
-  ImageEditorInpaintIds2["B64Canvas"] = "b64_canvas";
   ImageEditorInpaintIds2["ApplyUnsharpMask"] = "apply_unsharp_mask";
+  ImageEditorInpaintIds2["B64Canvas"] = "b64_canvas";
   ImageEditorInpaintIds2["Cfg"] = "cfg";
   ImageEditorInpaintIds2["ConditioningMix"] = "conditioning_mix";
   ImageEditorInpaintIds2["DenoisePercentage"] = "denoise_percentage";
+  ImageEditorInpaintIds2["Dilate"] = "dilate";
+  ImageEditorInpaintIds2["Feather"] = "feather";
   ImageEditorInpaintIds2["NegativePrompt"] = "negative_prompt";
   ImageEditorInpaintIds2["PositivePrompt"] = "positive_prompt";
-  ImageEditorInpaintIds2["Seed"] = "seed";
-  ImageEditorInpaintIds2["Steps"] = "steps";
-  ImageEditorInpaintIds2["UseConditioning"] = "use_conditioning";
   ImageEditorInpaintIds2["RoiAuto"] = "roi_auto";
   ImageEditorInpaintIds2["RoiPadding"] = "roi_padding";
   ImageEditorInpaintIds2["RoiAlign"] = "roi_align";
   ImageEditorInpaintIds2["RoiAlignAuto"] = "roi_align_auto";
   ImageEditorInpaintIds2["RoiMinSize"] = "roi_min_size";
-  ImageEditorInpaintIds2["Dilate"] = "dilate";
-  ImageEditorInpaintIds2["Feather"] = "feather";
+  ImageEditorInpaintIds2["Sampler"] = "sampler";
+  ImageEditorInpaintIds2["Scheduler"] = "scheduler";
+  ImageEditorInpaintIds2["Seed"] = "seed";
+  ImageEditorInpaintIds2["Steps"] = "steps";
   ImageEditorInpaintIds2["UpsampleTarget"] = "upsample_target";
 })(ImageEditorInpaintIds || (ImageEditorInpaintIds = {}));
 const showError = (state, message) => {
@@ -3034,55 +3093,46 @@ const DIFFUSION_SETTINGS = {
       steps: 16,
       positive_prompt: "",
       negative_prompt: "",
+      sampler: "dpmpp_2m",
+      scheduler: "normal",
       upsample_target: 2048,
-      use_conditioning: true,
-      conditioning_mix: -1,
+      conditioning_mix: 0,
       apply_unsharp_mask: true
     },
     configs: {
-      [ImageEditorControls.Textfield]: [
+      [ImageEditorControls.Multiinput]: [
         {
           ariaLabel: "Positive prompt",
-          controlType: ImageEditorControls.Textfield,
+          controlType: ImageEditorControls.Multiinput,
           defaultValue: "",
           id: ImageEditorTextfieldIds.PositivePrompt,
           isMandatory: false,
           title: "Prompt applied to masked pixels.",
-          type: "text"
+          mode: "tags",
+          allowFreeInput: true
         },
         {
           ariaLabel: "Negative prompt",
-          controlType: ImageEditorControls.Textfield,
+          controlType: ImageEditorControls.Multiinput,
           defaultValue: "",
           id: ImageEditorTextfieldIds.NegativePrompt,
           isMandatory: false,
           title: "Negative prompt applied to masked pixels.",
-          type: "text"
-        }
-      ],
-      [ImageEditorControls.Toggle]: [
-        {
-          ariaLabel: "Use conditioning prompts",
-          controlType: ImageEditorControls.Toggle,
-          defaultValue: true,
-          id: ImageEditorToggleIds.UseConditioning,
-          isMandatory: false,
-          off: "false",
-          on: "true",
-          title: "If enabled, prepend the connected conditioning inputs to the prompts before sampling."
+          mode: "tags",
+          allowFreeInput: true
         }
       ],
       [ImageEditorControls.Slider]: [
         {
           ariaLabel: "Conditioning mix",
           controlType: ImageEditorControls.Slider,
-          defaultValue: -1,
+          defaultValue: 0,
           id: ImageEditorSliderIds.ConditioningMix,
           isMandatory: false,
           max: "1",
           min: "-1",
           step: "0.1",
-          title: "Blend input conditioning (-1) with inpaint prompts (1). 0 keeps both contributions balanced."
+          title: "Conditioning mode: -1=input only, 0=concat, 1=prompts only. Intermediate values blend between input and prompts."
         },
         {
           ariaLabel: "Denoise percentage",
@@ -3128,6 +3178,35 @@ const DIFFUSION_SETTINGS = {
           step: "16",
           title: "Detailer path: upscale ROI longer side to this size before inpaint (0 disables)."
         }
+      ],
+      [ImageEditorControls.Select]: [
+        {
+          ariaLabel: "Sampler",
+          controlType: ImageEditorControls.Select,
+          defaultValue: "dpmpp_2m",
+          id: ImageEditorSelectIds.Sampler,
+          isMandatory: false,
+          title: "Sampler used for inpaint diffusion steps.",
+          values: [
+            { value: "DPM++ 2M", id: "dpmpp_2m" },
+            { value: "DPM++ 2M Karras", id: "dpmpp_2m_karras" },
+            { value: "Euler", id: "euler" },
+            { value: "Euler a", id: "euler_ancestral" }
+          ]
+        },
+        {
+          ariaLabel: "Scheduler",
+          controlType: ImageEditorControls.Select,
+          defaultValue: "normal",
+          id: ImageEditorSelectIds.Scheduler,
+          isMandatory: false,
+          title: "Scheduler used for inpaint diffusion steps.",
+          values: [
+            { value: "Normal", id: "normal" },
+            { value: "Karras", id: "karras" },
+            { value: "Exponential", id: "exponential" }
+          ]
+        }
       ]
     }
   }
@@ -3139,7 +3218,6 @@ const INPAINT_ADV = {
   hasCanvasAction: true,
   settings: {
     ...DIFFUSION_SETTINGS.inpaint.settings,
-    use_conditioning: false,
     conditioning_mix: 0,
     apply_unsharp_mask: true,
     roi_auto: true,
@@ -3152,25 +3230,58 @@ const INPAINT_ADV = {
     seed: 42
   },
   configs: {
-    [ImageEditorControls.Textfield]: [
+    [ImageEditorControls.Multiinput]: [
       {
         ariaLabel: "Positive prompt",
-        controlType: ImageEditorControls.Textfield,
+        controlType: ImageEditorControls.Multiinput,
         defaultValue: "",
         id: ImageEditorTextfieldIds.PositivePrompt,
         isMandatory: false,
         title: "Prompt applied to masked pixels.",
-        type: "text"
+        mode: "tags",
+        allowFreeInput: true
       },
       {
         ariaLabel: "Negative prompt",
-        controlType: ImageEditorControls.Textfield,
+        controlType: ImageEditorControls.Multiinput,
         defaultValue: "",
         id: ImageEditorTextfieldIds.NegativePrompt,
         isMandatory: false,
         title: "Negative prompt applied to masked pixels.",
-        type: "text"
+        mode: "tags",
+        allowFreeInput: true
+      }
+    ],
+    [ImageEditorControls.Select]: [
+      {
+        ariaLabel: "Sampler",
+        controlType: ImageEditorControls.Select,
+        defaultValue: "dpmpp_2m",
+        id: ImageEditorSelectIds.Sampler,
+        isMandatory: false,
+        title: "Sampler used for inpaint diffusion steps.",
+        values: [
+          { value: "DPM++ 2M", id: "dpmpp_2m" },
+          { value: "DPM++ 2M Karras", id: "dpmpp_2m_karras" },
+          { value: "Euler", id: "euler" },
+          { value: "Euler a", id: "euler_ancestral" }
+        ]
       },
+      {
+        ariaLabel: "Scheduler",
+        controlType: ImageEditorControls.Select,
+        defaultValue: "normal",
+        id: ImageEditorSelectIds.Scheduler,
+        isMandatory: false,
+        title: "Scheduler used for inpaint diffusion steps.",
+        values: [
+          { value: "Normal", id: "normal" },
+          { value: "Karras", id: "karras" },
+          { value: "Exponential", id: "exponential" }
+        ]
+      }
+    ],
+    [ImageEditorControls.Textfield]: [
       {
         ariaLabel: "Seed",
         controlType: ImageEditorControls.Textfield,
@@ -3185,13 +3296,13 @@ const INPAINT_ADV = {
       {
         ariaLabel: "Conditioning mix",
         controlType: ImageEditorControls.Slider,
-        defaultValue: -1,
+        defaultValue: 0,
         id: ImageEditorSliderIds.ConditioningMix,
         isMandatory: false,
         max: "1",
         min: "-1",
         step: "0.1",
-        title: "Blend input conditioning (-1) with inpaint prompts (1). 0 keeps both contributions balanced."
+        title: "Conditioning mode: -1=input only, 0=concat, 1=prompts only. Intermediate values blend between input and prompts."
       },
       {
         ariaLabel: "Denoise percentage",
@@ -3294,26 +3405,6 @@ const INPAINT_ADV = {
       }
     ],
     [ImageEditorControls.Toggle]: [
-      {
-        ariaLabel: "Use conditioning prompts",
-        controlType: ImageEditorControls.Toggle,
-        defaultValue: false,
-        id: ImageEditorToggleIds.UseConditioning,
-        isMandatory: false,
-        off: "false",
-        on: "true",
-        title: "If enabled, prepend the connected conditioning inputs to the prompts before sampling."
-      },
-      {
-        ariaLabel: "Auto ROI crop",
-        controlType: ImageEditorControls.Toggle,
-        defaultValue: true,
-        id: ImageEditorToggleIds.RoiAuto,
-        isMandatory: false,
-        off: "false",
-        on: "true",
-        title: "Automatically crop to mask bounding box to speed up inpainting."
-      },
       {
         ariaLabel: "Auto-align ROI",
         controlType: ImageEditorControls.Toggle,
@@ -3739,7 +3830,9 @@ var LfEventName;
   LfEventName2["LfManager"] = "lf-manager-ready";
   LfEventName2["LfMasonry"] = "lf-masonry-event";
   LfEventName2["LfMessenger"] = "lf-messenger-event";
+  LfEventName2["LfMultiinput"] = "lf-multiinput-event";
   LfEventName2["LfProgressbar"] = "lf-progressbar-event";
+  LfEventName2["LfSelect"] = "lf-select-event";
   LfEventName2["LfSlider"] = "lf-slider-event";
   LfEventName2["LfSpinner"] = "lf-spinner-event";
   LfEventName2["LfTabbar"] = "lf-tabbar-event";
@@ -3809,7 +3902,7 @@ function assignStoredSetting(settings, controlIds, id, value) {
   settings[id] = value;
 }
 const createPrepSettings = (deps) => {
-  const { onSlider, onTextfield, onToggle } = deps;
+  const { onMultiinput, onSelect, onSlider, onTextfield, onToggle } = deps;
   return (state, node) => {
     var _a;
     const { syntax } = getLfManager().getManagers().lfFramework;
@@ -3890,6 +3983,68 @@ const createPrepSettings = (deps) => {
             state.elements.controls[textfieldConfig.id] = textfield;
             break;
           }
+          case ImageEditorControls.Multiinput: {
+            const multiConfig = config;
+            const multiinput = document.createElement(TagName.LfMultiinput);
+            multiinput.lfAllowFreeInput = multiConfig.allowFreeInput ?? true;
+            multiinput.lfMode = multiConfig.mode ?? "tags";
+            multiinput.lfTextfieldProps = { lfLabel: parseLabel(multiConfig) };
+            multiinput.lfValue = String(multiConfig.defaultValue ?? "").valueOf();
+            multiinput.title = multiConfig.title;
+            multiinput.dataset.id = multiConfig.id;
+            multiinput.addEventListener(LfEventName.LfMultiinput, (event) => onMultiinput(state, event));
+            const storedValue = stored[multiConfig.id];
+            if (typeof storedValue !== "undefined") {
+              multiinput.lfValue = String(storedValue);
+            }
+            const effectiveValue = multiinput.lfValue ?? "";
+            if (effectiveValue.trim()) {
+              const tags = effectiveValue.split(",").map((token) => token.trim()).filter((token) => token.length > 0);
+              void multiinput.setHistory(tags);
+            }
+            controlsContainer.appendChild(multiinput);
+            state.elements.controls[multiConfig.id] = multiinput;
+            break;
+          }
+          case ImageEditorControls.Select: {
+            const selectConfig = config;
+            const select = document.createElement(TagName.LfSelect);
+            select.lfTextfieldProps = { lfLabel: parseLabel(selectConfig) };
+            select.title = selectConfig.title;
+            select.dataset.id = selectConfig.id;
+            select.addEventListener(LfEventName.LfSelect, (event) => onSelect(state, event));
+            const fallbackDataset = {
+              nodes: selectConfig.values.map(({ id, value }) => ({
+                id,
+                value
+              }))
+            };
+            select.lfDataset = fallbackDataset;
+            select.lfValue = String(selectConfig.defaultValue ?? "");
+            const storedValue = stored[selectConfig.id];
+            if (typeof storedValue !== "undefined") {
+              select.lfValue = String(storedValue);
+            }
+            if (selectConfig.id === ImageEditorSelectIds.Sampler || selectConfig.id === ImageEditorSelectIds.Scheduler) {
+              (async () => {
+                try {
+                  const dataset2 = selectConfig.id === ImageEditorSelectIds.Sampler ? await MODELS_API.getSamplers() : await MODELS_API.getSchedulers();
+                  if (dataset2 && Array.isArray(dataset2.nodes) && dataset2.nodes.length > 0) {
+                    select.lfDataset = dataset2;
+                    const targetValue = stored[selectConfig.id] ?? String(selectConfig.defaultValue ?? "");
+                    if (targetValue) {
+                      await select.setValue(targetValue);
+                    }
+                  }
+                } catch (error) {
+                  getLfManager().log("Failed to load sampling options for select control.", { error, id: selectConfig.id }, LogSeverity.Warning);
+                }
+              })();
+            }
+            controlsContainer.appendChild(select);
+            state.elements.controls[selectConfig.id] = select;
+            break;
+          }
           case ImageEditorControls.Toggle: {
             const toggleConfig = config;
             const toggle = document.createElement(TagName.LfToggle);
@@ -3960,6 +4115,16 @@ async function resetSettings(settings) {
   const controls = Array.from(settings.querySelectorAll("[data-id]"));
   for (const control of controls) {
     switch (control.tagName) {
+      case "LF-MULTIINPUT": {
+        const multiinput = control;
+        await multiinput.setValue(multiinput.lfValue);
+        break;
+      }
+      case "LF-SELECT": {
+        const select = control;
+        await select.setValue(String(select.lfValue ?? ""));
+        break;
+      }
       case "LF-SLIDER": {
         const slider = control;
         await slider.setValue(slider.lfValue);
@@ -4001,6 +4166,20 @@ const applyFilterDefaults = (state, defaults) => {
         return;
       }
       switch (controlType) {
+        case ImageEditorControls.Multiinput: {
+          const multiConfig = config;
+          const stringValue = defaultValue === null || typeof defaultValue === "undefined" ? "" : String(defaultValue);
+          multiConfig.defaultValue = stringValue;
+          mutableSettings[multiConfig.id] = stringValue;
+          break;
+        }
+        case ImageEditorControls.Select: {
+          const selectConfig = config;
+          const stringValue = defaultValue === null || typeof defaultValue === "undefined" ? "" : String(defaultValue);
+          selectConfig.defaultValue = stringValue;
+          mutableSettings[selectConfig.id] = stringValue;
+          break;
+        }
         case ImageEditorControls.Slider: {
           const sliderConfig = config;
           const numericValue = typeof defaultValue === "number" ? defaultValue : Number(defaultValue);
@@ -4037,6 +4216,23 @@ const refreshValues = async (state, addSnapshot = false) => {
       const id = key;
       const control = controls[id];
       switch (control.tagName) {
+        case IMAGE_EDITOR_CONSTANTS.TAGS.MULTIINPUT: {
+          const multiinput = control;
+          const multiValue = await multiinput.getValue();
+          filter.settings[id] = multiValue;
+          storeForFilter[id] = multiValue;
+          break;
+        }
+        case IMAGE_EDITOR_CONSTANTS.TAGS.SELECT: {
+          const select = control;
+          const selectedNode = await select.getValue();
+          const value = selectedNode == null ? void 0 : selectedNode.id;
+          if (typeof value !== "undefined") {
+            filter.settings[id] = value;
+            storeForFilter[id] = value;
+          }
+          break;
+        }
         case IMAGE_EDITOR_CONSTANTS.TAGS.SLIDER: {
           const slider = control;
           const sliderValue = await slider.getValue();
@@ -4324,6 +4520,34 @@ const createEventHandlers = ({ handleInterruptForState: handleInterruptForState2
       }
     },
     //#endregion
+    //#region Multiinput
+    multiinput: async (state, e) => {
+      const { eventType } = e.detail;
+      const { update } = state;
+      const { preview, snapshot } = update;
+      switch (eventType) {
+        case "change":
+          snapshot();
+          break;
+        case "input":
+          const debouncedMultiinput = debounce(preview, 300);
+          debouncedMultiinput();
+          break;
+      }
+    },
+    //#endregion
+    //#region Select
+    select: async (state, e) => {
+      const { eventType } = e.detail;
+      const { update } = state;
+      const { snapshot } = update;
+      switch (eventType) {
+        case "change":
+          snapshot();
+          break;
+      }
+    },
+    //#endregion
     //#region Slider
     slider: async (state, e) => {
       const { eventType } = e.detail;
@@ -4407,6 +4631,9 @@ const handleInterruptForState = async (state) => {
   await resetSettings(imageviewer);
 };
 const handlerRefs = {
+  select: async () => {
+    throw new Error("Image editor select handler not initialized.");
+  },
   slider: async () => {
     throw new Error("Image editor slider handler not initialized.");
   },
@@ -4418,6 +4645,8 @@ const handlerRefs = {
   }
 };
 const prepSettings = createPrepSettings({
+  onMultiinput: (state, event) => EV_HANDLERS$a.multiinput(state, event),
+  onSelect: (state, event) => handlerRefs.select(state, event),
   onSlider: (state, event) => handlerRefs.slider(state, event),
   onTextfield: (state, event) => handlerRefs.textfield(state, event),
   onToggle: (state, event) => handlerRefs.toggle(state, event)
@@ -4426,6 +4655,7 @@ const EV_HANDLERS$a = createEventHandlers({
   handleInterruptForState,
   prepSettings
 });
+handlerRefs.select = EV_HANDLERS$a.select;
 handlerRefs.slider = EV_HANDLERS$a.slider;
 handlerRefs.textfield = EV_HANDLERS$a.textfield;
 handlerRefs.toggle = EV_HANDLERS$a.toggle;
@@ -4604,7 +4834,7 @@ const imageEditorFactory = {
               setBrush(canvas, STATE$h.get(wrapper).lastBrushSettings);
             }
           }).catch((error) => getLfManager().log("Failed to prepare image editor canvas.", { error }, LogSeverity.Warning));
-          void syncNavigationDirectoryControl(state, state.directoryValue);
+          syncNavigationDirectoryControl(state, state.directoryValue);
           const shouldAutoLoad = !state.hasAutoDirectoryLoad && (!Array.isArray(dataset == null ? void 0 : dataset.nodes) || dataset.nodes.length === 0);
           if (shouldAutoLoad) {
             state.hasAutoDirectoryLoad = true;

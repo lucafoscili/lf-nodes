@@ -1,4 +1,4 @@
-import { o as onFrameworkReady, r as registerStencilAssetProxies, L as LF_IMAGEVIEWER_BLOCKS, C as CY_ATTRIBUTES, a as LF_ATTRIBUTES, b as LF_IMAGEVIEWER_PARTS, c as LF_STYLE_ID, d as LF_WRAPPER_ID, e as LF_IMAGEVIEWER_PROPS, I as IDS, f as IMAGE_TYPE_IDS, g as LF_MESSENGER_CLEAN_UI, h as LF_MESSENGER_BLOCKS, i as LF_MESSENGER_PARTS, O as OPTION_TYPE_IDS, j as LF_MESSENGER_PROPS, k as LF_MESSENGER_IDS, l as LF_MESSENGER_FILTER, m as LF_MESSENGER_NAV, n as LF_MESSENGER_MENU, T as TIMEFRAME_COVER, S as STYLE_COVER, p as OUTFIT_COVER, q as LOCATION_COVER, A as AVATAR_COVER, s as CHILD_ROOT_MAP, t as LF_CHECKBOX_BLOCKS, u as LF_CHECKBOX_PARTS, v as LF_CHECKBOX_PROPS, w as LF_HEADER_BLOCKS, x as LF_HEADER_PARTS, y as LF_HEADER_PROPS, z as LF_HEADER_SLOT, B as LF_TABBAR_BLOCKS, D as LF_TABBAR_PARTS, E as LF_TABBAR_PROPS, F as LF_LIST_BLOCKS, G as LF_LIST_PARTS, H as LF_LIST_PROPS, J as LF_SPINNER_PROPS, K as LF_TEXTFIELD_BLOCKS, M as LF_TEXTFIELD_PARTS, N as LF_TEXTFIELD_PROPS, P as LF_DRAWER_BLOCKS, Q as LF_DRAWER_PARTS, R as LF_DRAWER_PROPS, U as LF_DRAWER_SLOT, V as LF_EFFECTS_FOCUSABLES, W as LF_PLACEHOLDER_BLOCKS, X as LF_PLACEHOLDER_PARTS, Y as LF_PLACEHOLDER_PROPS, Z as LF_TREE_BLOCKS, _ as LF_TREE_PARTS, $ as LF_TREE_PROPS, a0 as LF_TREE_CSS_VARIABLES, a1 as LF_AUTOCOMPLETE_BLOCKS, a2 as LF_AUTOCOMPLETE_PARTS, a3 as LF_AUTOCOMPLETE_PROPS, a4 as LF_THEME_ICONS, a5 as LF_SLIDER_BLOCKS, a6 as LF_SLIDER_PARTS, a7 as LF_SLIDER_CSS_VARIABLES, a8 as LF_SLIDER_PROPS, a9 as LF_COMPARE_BLOCKS, aa as LF_COMPARE_PARTS, ab as LF_COMPARE_CSS_VARS, ac as LF_COMPARE_DEFAULTS, ad as LF_COMPARE_PROPS, ae as LF_COMPARE_IDS, af as LF_SPLASH_BLOCKS, ag as LF_SPLASH_PARTS, ah as LF_SPLASH_PROPS, ai as LF_CAROUSEL_BLOCKS, aj as LF_CAROUSEL_PARTS, ak as LF_CAROUSEL_PROPS, al as LF_CAROUSEL_IDS, am as LF_ACCORDION_BLOCKS, an as LF_ACCORDION_PARTS, ao as LF_ACCORDION_PROPS, ap as LF_TOAST_BLOCKS, aq as LF_TOAST_PARTS, ar as LF_TOAST_CSS_VARIABLES, as as LF_TOAST_PROPS, at as LF_ARTICLE_BLOCKS, au as LF_ARTICLE_PARTS, av as LF_ARTICLE_PROPS, aw as LF_RADIO_BLOCKS, ax as LF_RADIO_PARTS, ay as LF_RADIO_PROPS, az as LF_MASONRY_DEFAULT_COLUMNS, aA as LF_MASONRY_BLOCKS, aB as LF_MASONRY_PARTS, aC as LF_MASONRY_CSS_VARS, aD as LF_MASONRY_PROPS, aE as LF_MASONRY_IDS, aF as LF_SELECT_BLOCKS, aG as LF_SELECT_PARTS, aH as LF_SELECT_PROPS, aI as LF_BADGE_BLOCKS, aJ as LF_BADGE_PARTS, aK as LF_BADGE_PROPS, aL as LF_BUTTON_BLOCKS, aM as LF_BUTTON_PARTS, aN as LF_BUTTON_PROPS, aO as LF_CANVAS_BLOCKS, aP as LF_CANVAS_PARTS, aQ as LF_CANVAS_PROPS, aR as LF_CARD_BLOCKS, aS as LF_CARD_PARTS, aT as LF_CARD_CSS_VARS, aU as LF_CARD_DEFAULTS, aV as LF_CARD_PROPS, aW as LF_CHART_BLOCKS, aX as LF_CHART_PARTS, aY as LF_CHART_CSS_VARS, aZ as LF_THEME_COLORS_DATA_PREFIX, a_ as LF_CHART_PROPS, a$ as LF_CHAT_BLOCKS, b0 as LF_CHAT_PARTS, b1 as LF_CHAT_PROPS, b2 as LF_CHIP_BLOCKS, b3 as LF_CHIP_PARTS, b4 as LF_CHIP_PROPS, b5 as LF_CODE_BLOCKS, b6 as LF_CODE_PARTS, b7 as LF_CODE_PROPS, b8 as LF_IMAGE_BLOCKS, b9 as LF_IMAGE_PARTS, ba as LF_IMAGE_CSS_VARS, bb as LF_IMAGE_PROPS, bc as CSS_VAR_PREFIX, bd as LF_PHOTOFRAME_BLOCKS, be as LF_PHOTOFRAME_PARTS, bf as LF_PHOTOFRAME_PROPS, bg as LF_PROGRESSBAR_BLOCKS, bh as LF_PROGRESSBAR_PARTS, bi as LF_PROGRESSBAR_CSS_VARIABLES, bj as LF_PROGRESSBAR_PROPS, bk as LF_TOGGLE_BLOCKS, bl as LF_TOGGLE_PARTS, bm as LF_TOGGLE_PROPS, bn as LF_TYPEWRITER_BLOCKS, bo as LF_TYPEWRITER_PARTS, bp as LF_TYPEWRITER_PROPS, bq as LF_UPLOAD_BLOCKS, br as LF_UPLOAD_PARTS, bs as LF_UPLOAD_PROPS, bt as LF_BADGE_CSS_VARS, bu as LF_CHIP_CSS_VARS, bv as LF_CARD_IDS, bw as LF_CHAT_IDS } from "./lf-widgets-foundations-8UtpQZAe.js";
+import { o as onFrameworkReady, r as registerStencilAssetProxies, L as LF_IMAGEVIEWER_BLOCKS, C as CY_ATTRIBUTES, a as LF_ATTRIBUTES, b as LF_IMAGEVIEWER_PARTS, c as LF_STYLE_ID, d as LF_WRAPPER_ID, e as LF_IMAGEVIEWER_PROPS, I as IDS, f as IMAGE_TYPE_IDS, g as LF_MESSENGER_CLEAN_UI, h as LF_MESSENGER_BLOCKS, i as LF_MESSENGER_PARTS, O as OPTION_TYPE_IDS, j as LF_MESSENGER_PROPS, k as LF_MESSENGER_IDS, l as LF_MESSENGER_FILTER, m as LF_MESSENGER_NAV, n as LF_MESSENGER_MENU, T as TIMEFRAME_COVER, S as STYLE_COVER, p as OUTFIT_COVER, q as LOCATION_COVER, A as AVATAR_COVER, s as CHILD_ROOT_MAP, t as LF_CHECKBOX_BLOCKS, u as LF_CHECKBOX_PARTS, v as LF_CHECKBOX_PROPS, w as LF_SPLASH_BLOCKS, x as LF_SPLASH_PARTS, y as LF_SPLASH_PROPS, z as LF_HEADER_BLOCKS, B as LF_HEADER_PARTS, D as LF_HEADER_PROPS, E as LF_HEADER_SLOT, F as LF_PLACEHOLDER_BLOCKS, G as LF_PLACEHOLDER_PARTS, H as LF_PLACEHOLDER_PROPS, J as LF_TABBAR_BLOCKS, K as LF_TABBAR_PARTS, M as LF_TABBAR_PROPS, N as LF_SELECT_BLOCKS, P as LF_SELECT_PARTS, Q as LF_SELECT_PROPS, R as LF_THEME_ICONS, U as LF_LIST_BLOCKS, V as LF_LIST_PARTS, W as LF_LIST_PROPS, X as LF_SPINNER_PROPS, Y as LF_TEXTFIELD_BLOCKS, Z as LF_TEXTFIELD_PARTS, _ as LF_TEXTFIELD_PROPS, $ as LF_TREE_BLOCKS, a0 as LF_TREE_PARTS, a1 as LF_TREE_PROPS, a2 as LF_TREE_CSS_VARIABLES, a3 as LF_SLIDER_BLOCKS, a4 as LF_SLIDER_PARTS, a5 as LF_SLIDER_CSS_VARIABLES, a6 as LF_SLIDER_PROPS, a7 as LF_DRAWER_BLOCKS, a8 as LF_DRAWER_PARTS, a9 as LF_DRAWER_PROPS, aa as LF_DRAWER_SLOT, ab as LF_EFFECTS_FOCUSABLES, ac as LF_AUTOCOMPLETE_BLOCKS, ad as LF_AUTOCOMPLETE_PARTS, ae as LF_AUTOCOMPLETE_PROPS, af as LF_BADGE_BLOCKS, ag as LF_BADGE_PARTS, ah as LF_BADGE_PROPS, ai as LF_BUTTON_BLOCKS, aj as LF_BUTTON_PARTS, ak as LF_BUTTON_PROPS, al as LF_CANVAS_BLOCKS, am as LF_CANVAS_PARTS, an as LF_CANVAS_PROPS, ao as LF_CARD_BLOCKS, ap as LF_CARD_PARTS, aq as LF_CARD_CSS_VARS, ar as LF_CARD_DEFAULTS, as as LF_CARD_PROPS, at as LF_CHART_BLOCKS, au as LF_CHART_PARTS, av as LF_CHART_CSS_VARS, aw as LF_THEME_COLORS_DATA_PREFIX, ax as LF_CHART_PROPS, ay as LF_CHAT_BLOCKS, az as LF_CHAT_PARTS, aA as LF_CHAT_PROPS, aB as LF_CHIP_BLOCKS, aC as LF_CHIP_PARTS, aD as LF_CHIP_PROPS, aE as LF_CODE_BLOCKS, aF as LF_CODE_PARTS, aG as LF_CODE_PROPS, aH as LF_IMAGE_BLOCKS, aI as LF_IMAGE_PARTS, aJ as LF_IMAGE_CSS_VARS, aK as LF_IMAGE_PROPS, aL as CSS_VAR_PREFIX, aM as LF_PHOTOFRAME_BLOCKS, aN as LF_PHOTOFRAME_PARTS, aO as LF_PHOTOFRAME_PROPS, aP as LF_PROGRESSBAR_BLOCKS, aQ as LF_PROGRESSBAR_PARTS, aR as LF_PROGRESSBAR_CSS_VARIABLES, aS as LF_PROGRESSBAR_PROPS, aT as LF_TOGGLE_BLOCKS, aU as LF_TOGGLE_PARTS, aV as LF_TOGGLE_PROPS, aW as LF_TYPEWRITER_BLOCKS, aX as LF_TYPEWRITER_PARTS, aY as LF_TYPEWRITER_PROPS, aZ as LF_UPLOAD_BLOCKS, a_ as LF_UPLOAD_PARTS, a$ as LF_UPLOAD_PROPS, b0 as LF_BADGE_CSS_VARS, b1 as LF_CHIP_CSS_VARS, b2 as LF_CARD_IDS, b3 as LF_CHAT_IDS, b4 as LF_COMPARE_BLOCKS, b5 as LF_COMPARE_PARTS, b6 as LF_COMPARE_CSS_VARS, b7 as LF_COMPARE_DEFAULTS, b8 as LF_COMPARE_PROPS, b9 as LF_COMPARE_IDS, ba as LF_CAROUSEL_BLOCKS, bb as LF_CAROUSEL_PARTS, bc as LF_CAROUSEL_PROPS, bd as LF_CAROUSEL_IDS, be as LF_ACCORDION_BLOCKS, bf as LF_ACCORDION_PARTS, bg as LF_ACCORDION_PROPS, bh as LF_ARTICLE_BLOCKS, bi as LF_ARTICLE_PARTS, bj as LF_ARTICLE_PROPS, bk as LF_RADIO_BLOCKS, bl as LF_RADIO_PARTS, bm as LF_RADIO_PROPS, bn as LF_TOAST_BLOCKS, bo as LF_TOAST_PARTS, bp as LF_TOAST_CSS_VARIABLES, bq as LF_TOAST_PROPS, br as LF_MASONRY_DEFAULT_COLUMNS, bs as LF_MASONRY_BLOCKS, bt as LF_MASONRY_PARTS, bu as LF_MASONRY_CSS_VARS, bv as LF_MASONRY_PROPS, bw as LF_MASONRY_IDS, bx as LF_MULTIINPUT_BLOCKS, by as LF_MULTIINPUT_PARTS, bz as LF_MULTIINPUT_PROPS } from "./lf-widgets-foundations-BKTYH9k2.js";
 const scriptRel = "modulepreload";
 const assetsURL = function(dep, importerUrl) {
   return new URL(dep, importerUrl).href;
@@ -119,55 +119,55 @@ var t$1 = Object.defineProperty, e = (t5, e2) => {
   if (t5.__stencil__getHostRef) return t5.__stencil__getHostRef();
 }, o$2 = (t5, n2) => {
   n2 && (t5.__stencil__getHostRef = () => n2, n2.i = t5, 512 & n2.o.u && e(t5, n2));
-}, l$1 = (t5, e2) => e2 in t5, r$2 = (t5, e2) => (0, console.error)(t5, e2), i$1 = /* @__PURE__ */ new Map(), s$1 = /* @__PURE__ */ new Map(), c$1 = "slot-fb{display:contents}slot-fb[hidden]{display:none}", u$d = "http://www.w3.org/1999/xlink", a$2 = "undefined" != typeof window ? window : {}, f$2 = { u: 0, h: "", jmp: (t5) => t5(), raf: (t5) => requestAnimationFrame(t5), ael: (t5, e2, n2, o2) => t5.addEventListener(e2, n2, o2), rel: (t5, e2, n2, o2) => t5.removeEventListener(e2, n2, o2), ce: (t5, e2) => new CustomEvent(t5, e2) }, d$2 = (t5) => Promise.resolve(t5), h$1 = (() => {
+}, l$1 = (t5, e2) => e2 in t5, r$2 = (t5, e2) => (0, console.error)(t5, e2), i$1 = /* @__PURE__ */ new Map(), s$1 = /* @__PURE__ */ new Map(), c$1 = "slot-fb{display:contents}slot-fb[hidden]{display:none}", u$d = "http://www.w3.org/1999/xlink", a$2 = "undefined" != typeof window ? window : {}, f$2 = { u: 0, h: "", jmp: (t5) => t5(), raf: (t5) => requestAnimationFrame(t5), ael: (t5, e2, n2, o2) => t5.addEventListener(e2, n2, o2), rel: (t5, e2, n2, o2) => t5.removeEventListener(e2, n2, o2), ce: (t5, e2) => new CustomEvent(t5, e2) }, d$3 = (t5) => Promise.resolve(t5), h$1 = (() => {
   try {
     return new CSSStyleSheet(), "function" == typeof new CSSStyleSheet().replaceSync;
   } catch (t5) {
   }
   return false;
-})(), p$9 = !!h$1 && (() => !!a$2.document && Object.getOwnPropertyDescriptor(a$2.document.adoptedStyleSheets, "length").writable)(), v$e = false, m$e = [], b$c = [], y$h = (t5, e2) => (n2) => {
-  t5.push(n2), v$e || (v$e = true, 4 & f$2.u ? g$f($$6) : f$2.raf($$6));
-}, w$i = (t5) => {
+})(), p$a = !!h$1 && (() => !!a$2.document && Object.getOwnPropertyDescriptor(a$2.document.adoptedStyleSheets, "length").writable)(), v$f = false, m$e = [], b$d = [], y$i = (t5, e2) => (n2) => {
+  t5.push(n2), v$f || (v$f = true, 4 & f$2.u ? g$g($$7) : f$2.raf($$7));
+}, w$j = (t5) => {
   for (let e2 = 0; e2 < t5.length; e2++) try {
     t5[e2](performance.now());
   } catch (t6) {
     r$2(t6);
   }
   t5.length = 0;
-}, $$6 = () => {
-  w$i(m$e), w$i(b$c), (v$e = m$e.length > 0) && f$2.raf($$6);
-}, g$f = (t5) => d$2().then(t5), j$d = y$h(b$c), O$7 = (t5) => "object" == (t5 = typeof t5) || "function" === t5;
-function S$b(t5) {
+}, $$7 = () => {
+  w$j(m$e), w$j(b$d), (v$f = m$e.length > 0) && f$2.raf($$7);
+}, g$g = (t5) => d$3().then(t5), j$e = y$i(b$d), O$8 = (t5) => "object" == (t5 = typeof t5) || "function" === t5;
+function S$c(t5) {
   var e2, n2, o2;
   return null != (o2 = null == (n2 = null == (e2 = t5.head) ? void 0 : e2.querySelector('meta[name="csp-nonce"]')) ? void 0 : n2.getAttribute("content")) ? o2 : void 0;
 }
 ((e2, n2) => {
   for (var o2 in n2) t$1(e2, o2, { get: n2[o2], enumerable: true });
-})({}, { err: () => E$h, map: () => x$i, ok: () => k$i, unwrap: () => M$h, unwrapErr: () => P$9 });
-var k$i = (t5) => ({ isOk: true, isErr: false, value: t5 }), E$h = (t5) => ({ isOk: false, isErr: true, value: t5 });
-function x$i(t5, e2) {
+})({}, { err: () => E$i, map: () => x$j, ok: () => k$j, unwrap: () => M$i, unwrapErr: () => P$a });
+var k$j = (t5) => ({ isOk: true, isErr: false, value: t5 }), E$i = (t5) => ({ isOk: false, isErr: true, value: t5 });
+function x$j(t5, e2) {
   if (t5.isOk) {
     const n2 = e2(t5.value);
-    return n2 instanceof Promise ? n2.then(((t6) => k$i(t6))) : k$i(n2);
+    return n2 instanceof Promise ? n2.then(((t6) => k$j(t6))) : k$j(n2);
   }
-  if (t5.isErr) return E$h(t5.value);
+  if (t5.isErr) return E$i(t5.value);
   throw "should never get here";
 }
-var C$g, M$h = (t5) => {
+var C$h, M$i = (t5) => {
   if (t5.isOk) return t5.value;
   throw t5.value;
-}, P$9 = (t5) => {
+}, P$a = (t5) => {
   if (t5.isErr) return t5.value;
   throw t5.value;
 };
-function N$4() {
+function N$5() {
   const t5 = this.attachShadow({ mode: "open" });
-  void 0 === C$g && (C$g = null), C$g && (p$9 ? t5.adoptedStyleSheets.push(C$g) : t5.adoptedStyleSheets = [...t5.adoptedStyleSheets, C$g]);
+  void 0 === C$h && (C$h = null), C$h && (p$a ? t5.adoptedStyleSheets.push(C$h) : t5.adoptedStyleSheets = [...t5.adoptedStyleSheets, C$h]);
 }
-var R$a = /* @__PURE__ */ new WeakMap(), D$d = (t5) => "sc-" + t5.p, U$5 = (t5, e2, ...n2) => {
+var R$b = /* @__PURE__ */ new WeakMap(), D$e = (t5) => "sc-" + t5.p, U$6 = (t5, e2, ...n2) => {
   let o2 = null, l2 = null, r2 = false, i2 = false;
   const s2 = [], c2 = (e3) => {
-    for (let n3 = 0; n3 < e3.length; n3++) o2 = e3[n3], Array.isArray(o2) ? c2(o2) : null != o2 && "boolean" != typeof o2 && ((r2 = "function" != typeof t5 && !O$7(o2)) && (o2 += ""), r2 && i2 ? s2[s2.length - 1].v += o2 : s2.push(r2 ? W$i(null, o2) : o2), i2 = r2);
+    for (let n3 = 0; n3 < e3.length; n3++) o2 = e3[n3], Array.isArray(o2) ? c2(o2) : null != o2 && "boolean" != typeof o2 && ((r2 = "function" != typeof t5 && !O$8(o2)) && (o2 += ""), r2 && i2 ? s2[s2.length - 1].v += o2 : s2.push(r2 ? W$j(null, o2) : o2), i2 = r2);
   };
   if (c2(n2), e2) {
     e2.key && (l2 = e2.key);
@@ -176,36 +176,36 @@ var R$a = /* @__PURE__ */ new WeakMap(), D$d = (t5) => "sc-" + t5.p, U$5 = (t5, 
       t6 && (e2.class = "object" != typeof t6 ? t6 : Object.keys(t6).filter(((e3) => t6[e3])).join(" "));
     }
   }
-  if ("function" == typeof t5) return t5(null === e2 ? {} : e2, s2, F$6);
-  const u2 = W$i(t5, null);
+  if ("function" == typeof t5) return t5(null === e2 ? {} : e2, s2, F$7);
+  const u2 = W$j(t5, null);
   return u2.m = e2, s2.length > 0 && (u2.$ = s2), u2.j = l2, u2;
-}, W$i = (t5, e2) => ({ u: 0, O: t5, v: e2, S: null, $: null, m: null, j: null }), A$9 = {}, F$6 = { forEach: (t5, e2) => t5.map(H$6).forEach(e2), map: (t5, e2) => t5.map(H$6).map(e2).map(L$a) }, H$6 = (t5) => ({ vattrs: t5.m, vchildren: t5.$, vkey: t5.j, vname: t5.k, vtag: t5.O, vtext: t5.v }), L$a = (t5) => {
+}, W$j = (t5, e2) => ({ u: 0, O: t5, v: e2, S: null, $: null, m: null, j: null }), A$a = {}, F$7 = { forEach: (t5, e2) => t5.map(H$7).forEach(e2), map: (t5, e2) => t5.map(H$7).map(e2).map(L$b) }, H$7 = (t5) => ({ vattrs: t5.m, vchildren: t5.$, vkey: t5.j, vname: t5.k, vtag: t5.O, vtext: t5.v }), L$b = (t5) => {
   if ("function" == typeof t5.vtag) {
     const e3 = { ...t5.vattrs };
-    return t5.vkey && (e3.key = t5.vkey), t5.vname && (e3.name = t5.vname), U$5(t5.vtag, e3, ...t5.vchildren || []);
+    return t5.vkey && (e3.key = t5.vkey), t5.vname && (e3.name = t5.vname), U$6(t5.vtag, e3, ...t5.vchildren || []);
   }
-  const e2 = W$i(t5.vtag, t5.vtext);
+  const e2 = W$j(t5.vtag, t5.vtext);
   return e2.m = t5.vattrs, e2.$ = t5.vchildren, e2.j = t5.vkey, e2.k = t5.vname, e2;
-}, T$e = (t5) => {
+}, T$f = (t5) => {
   const e2 = ((t6) => t6.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))(t5);
   return RegExp(`(^|[^@]|@(?!supports\\s+selector\\s*\\([^{]*?${e2}))(${e2}\\b)`, "g");
 };
-T$e("::slotted"), T$e(":host"), T$e(":host-context");
-var z$j, V$7 = (t5, e2) => null == t5 || O$7(t5) ? t5 : 4 & e2 ? "false" !== t5 && ("" === t5 || !!t5) : 2 & e2 ? "string" == typeof t5 ? parseFloat(t5) : "number" == typeof t5 ? t5 : NaN : 1 & e2 ? t5 + "" : t5, q$4 = (t5) => {
+T$f("::slotted"), T$f(":host"), T$f(":host-context");
+var z$k, V$8 = (t5, e2) => null == t5 || O$8(t5) ? t5 : 4 & e2 ? "false" !== t5 && ("" === t5 || !!t5) : 2 & e2 ? "string" == typeof t5 ? parseFloat(t5) : "number" == typeof t5 ? t5 : NaN : 1 & e2 ? t5 + "" : t5, q$5 = (t5) => {
   var e2;
   return null == (e2 = n$1(t5)) ? void 0 : e2.$hostElement$;
-}, G$3 = (t5, e2) => {
-  const n2 = q$4(t5);
-  return { emit: (t6) => I$a(n2, e2, { bubbles: true, composed: true, cancelable: false, detail: t6 }) };
-}, I$a = (t5, e2, n2) => {
+}, G$4 = (t5, e2) => {
+  const n2 = q$5(t5);
+  return { emit: (t6) => I$b(n2, e2, { bubbles: true, composed: true, cancelable: false, detail: t6 }) };
+}, I$b = (t5, e2, n2) => {
   const o2 = f$2.ce(e2, n2);
   return t5.dispatchEvent(o2), o2;
-}, Y$6 = (t5, e2, n2, o2, r2, i2) => {
+}, Y$7 = (t5, e2, n2, o2, r2, i2) => {
   if (n2 === o2) return;
   let s2 = l$1(t5, e2), c2 = e2.toLowerCase();
   if ("class" === e2) {
-    const e3 = t5.classList, l2 = B$6(n2);
-    let r3 = B$6(o2);
+    const e3 = t5.classList, l2 = B$7(n2);
+    let r3 = B$7(o2);
     e3.remove(...l2.filter(((t6) => t6 && !r3.includes(t6)))), e3.add(...r3.filter(((t6) => t6 && !l2.includes(t6))));
   } else if ("style" === e2) {
     for (const e3 in n2) o2 && null != o2[e3] || (e3.includes("-") ? t5.style.removeProperty(e3) : t5.style[e3] = "");
@@ -213,7 +213,7 @@ var z$j, V$7 = (t5, e2) => null == t5 || O$7(t5) ? t5 : 4 & e2 ? "false" !== t5 
   } else if ("key" === e2) ;
   else if ("ref" === e2) o2 && o2(t5);
   else if (s2 || "o" !== e2[0] || "n" !== e2[1]) {
-    const l2 = O$7(o2);
+    const l2 = O$8(o2);
     if ((s2 || l2 && null !== o2) && !r2) try {
       if (t5.tagName.includes("-")) t5[e2] !== o2 && (t5[e2] = o2);
       else {
@@ -225,15 +225,15 @@ var z$j, V$7 = (t5, e2) => null == t5 || O$7(t5) ? t5 : 4 & e2 ? "false" !== t5 
     let a2 = false;
     c2 !== (c2 = c2.replace(/^xlink\:?/, "")) && (e2 = c2, a2 = true), null == o2 || false === o2 ? false === o2 && "" !== t5.getAttribute(e2) || (a2 ? t5.removeAttributeNS(u$d, e2) : t5.removeAttribute(e2)) : (!s2 || 4 & i2 || r2) && !l2 && 1 === t5.nodeType && (o2 = true === o2 ? "" : o2, a2 ? t5.setAttributeNS(u$d, e2, o2) : t5.setAttribute(e2, o2));
   } else if (e2 = "-" === e2[2] ? e2.slice(3) : l$1(a$2, c2) ? c2.slice(2) : c2[2] + e2.slice(3), n2 || o2) {
-    const l2 = e2.endsWith(J$3);
-    e2 = e2.replace(K$3, ""), n2 && f$2.rel(t5, e2, n2, l2), o2 && f$2.ael(t5, e2, o2, l2);
+    const l2 = e2.endsWith(J$4);
+    e2 = e2.replace(K$4, ""), n2 && f$2.rel(t5, e2, n2, l2), o2 && f$2.ael(t5, e2, o2, l2);
   }
-}, _$d = /\s/, B$6 = (t5) => ("object" == typeof t5 && t5 && "baseVal" in t5 && (t5 = t5.baseVal), t5 && "string" == typeof t5 ? t5.split(_$d) : []), J$3 = "Capture", K$3 = RegExp(J$3 + "$"), Q$3 = (t5, e2, n2) => {
+}, _$e = /\s/, B$7 = (t5) => ("object" == typeof t5 && t5 && "baseVal" in t5 && (t5 = t5.baseVal), t5 && "string" == typeof t5 ? t5.split(_$e) : []), J$4 = "Capture", K$4 = RegExp(J$4 + "$"), Q$4 = (t5, e2, n2) => {
   const o2 = 11 === e2.S.nodeType && e2.S.host ? e2.S.host : e2.S, l2 = t5 && t5.m || {}, r2 = e2.m || {};
-  for (const t6 of X$4(Object.keys(l2))) t6 in r2 || Y$6(o2, t6, l2[t6], void 0, n2, e2.u);
-  for (const t6 of X$4(Object.keys(r2))) Y$6(o2, t6, l2[t6], r2[t6], n2, e2.u);
+  for (const t6 of X$5(Object.keys(l2))) t6 in r2 || Y$7(o2, t6, l2[t6], void 0, n2, e2.u);
+  for (const t6 of X$5(Object.keys(r2))) Y$7(o2, t6, l2[t6], r2[t6], n2, e2.u);
 };
-function X$4(t5) {
+function X$5(t5) {
   return t5.includes("ref") ? [...t5.filter(((t6) => "ref" !== t6)), "ref"] : t5;
 }
 var Z$4 = false, tt$1 = (t5, e2, n2) => {
@@ -242,13 +242,13 @@ var Z$4 = false, tt$1 = (t5, e2, n2) => {
   if (null !== o2.v) l2 = o2.S = a$2.document.createTextNode(o2.v);
   else {
     if (Z$4 || (Z$4 = "svg" === o2.O), !a$2.document) throw Error("You are trying to render a Stencil component in an environment that doesn't support the DOM. Make sure to populate the [`window`](https://developer.mozilla.org/en-US/docs/Web/API/Window/window) object before rendering a component.");
-    if (l2 = o2.S = a$2.document.createElementNS(Z$4 ? "http://www.w3.org/2000/svg" : "http://www.w3.org/1999/xhtml", o2.O), Z$4 && "foreignObject" === o2.O && (Z$4 = false), Q$3(null, o2, Z$4), o2.$) for (i2 = 0; i2 < o2.$.length; ++i2) r2 = tt$1(t5, o2, i2), r2 && l2.appendChild(r2);
+    if (l2 = o2.S = a$2.document.createElementNS(Z$4 ? "http://www.w3.org/2000/svg" : "http://www.w3.org/1999/xhtml", o2.O), Z$4 && "foreignObject" === o2.O && (Z$4 = false), Q$4(null, o2, Z$4), o2.$) for (i2 = 0; i2 < o2.$.length; ++i2) r2 = tt$1(t5, o2, i2), r2 && l2.appendChild(r2);
     "svg" === o2.O ? Z$4 = false : "foreignObject" === l2.tagName && (Z$4 = true);
   }
-  return l2["s-hn"] = z$j, l2;
+  return l2["s-hn"] = z$k, l2;
 }, et$1 = (t5, e2, n2, o2, l2, r2) => {
   let i2, s2 = t5;
-  for (s2.shadowRoot && s2.tagName === z$j && (s2 = s2.shadowRoot); l2 <= r2; ++l2) o2[l2] && (i2 = tt$1(null, n2, l2), i2 && (o2[l2].S = i2, it$1(s2, i2, e2)));
+  for (s2.shadowRoot && s2.tagName === z$k && (s2 = s2.shadowRoot); l2 <= r2; ++l2) o2[l2] && (i2 = tt$1(null, n2, l2), i2 && (o2[l2].S = i2, it$1(s2, i2, e2)));
 }, nt$1 = (t5, e2, n2) => {
   for (let o2 = e2; o2 <= n2; ++o2) {
     const e3 = t5[o2];
@@ -259,7 +259,7 @@ var Z$4 = false, tt$1 = (t5, e2, n2) => {
   }
 }, ot$1 = (t5, e2, n2 = false) => t5.O === e2.O && (n2 ? (n2 && !t5.j && e2.j && (t5.j = e2.j), true) : t5.j === e2.j), lt$1 = (t5, e2, n2 = false) => {
   const o2 = e2.S = t5.S, l2 = t5.$, r2 = e2.$, i2 = e2.O, s2 = e2.v;
-  null === s2 ? (Q$3(t5, e2, Z$4 = "svg" === i2 || "foreignObject" !== i2 && Z$4), null !== l2 && null !== r2 ? ((t6, e3, n3, o3, l3 = false) => {
+  null === s2 ? (Q$4(t5, e2, Z$4 = "svg" === i2 || "foreignObject" !== i2 && Z$4), null !== l2 && null !== r2 ? ((t6, e3, n3, o3, l3 = false) => {
     let r3, i3, s3 = 0, c2 = 0, u2 = 0, a2 = 0, f2 = e3.length - 1, d2 = e3[0], h2 = e3[f2], p2 = o3.length - 1, v2 = o3[0], m2 = o3[p2];
     for (; s3 <= f2 && c2 <= p2; ) if (null == d2) d2 = e3[++s3];
     else if (null == h2) h2 = e3[--f2];
@@ -290,7 +290,7 @@ var Z$4 = false, tt$1 = (t5, e2, n2) => {
   if (t5.u |= 16, 4 & t5.u) return void (t5.u |= 512);
   st$1(t5, t5.M);
   const n2 = () => ut$1(t5, e2);
-  if (!e2) return j$d(n2);
+  if (!e2) return j$e(n2);
   queueMicrotask((() => {
     n2();
   }));
@@ -307,20 +307,20 @@ var Z$4 = false, tt$1 = (t5, e2, n2) => {
   n2 && ((t6) => {
     const e3 = t6.o, n3 = t6.$hostElement$, o3 = e3.u, l3 = ((t7, e4) => {
       var n4;
-      const o4 = D$d(e4), l4 = s$1.get(o4);
+      const o4 = D$e(e4), l4 = s$1.get(o4);
       if (!a$2.document) return o4;
       if (t7 = 11 === t7.nodeType ? t7 : a$2.document, l4) if ("string" == typeof l4) {
-        let r3, i2 = R$a.get(t7 = t7.head || t7);
-        if (i2 || R$a.set(t7, i2 = /* @__PURE__ */ new Set()), !i2.has(o4)) {
+        let r3, i2 = R$b.get(t7 = t7.head || t7);
+        if (i2 || R$b.set(t7, i2 = /* @__PURE__ */ new Set()), !i2.has(o4)) {
           {
             r3 = a$2.document.createElement("style"), r3.innerHTML = l4;
-            const o5 = null != (n4 = f$2.R) ? n4 : S$b(a$2.document);
+            const o5 = null != (n4 = f$2.R) ? n4 : S$c(a$2.document);
             if (null != o5 && r3.setAttribute("nonce", o5), !(1 & e4.u)) if ("HEAD" === t7.nodeName) {
               const e5 = t7.querySelectorAll("link[rel=preconnect]"), n5 = e5.length > 0 ? e5[e5.length - 1].nextSibling : t7.querySelector("style");
               t7.insertBefore(r3, (null == n5 ? void 0 : n5.parentNode) === t7 ? n5 : null);
             } else if ("host" in t7) if (h$1) {
               const e5 = new CSSStyleSheet();
-              e5.replaceSync(l4), p$9 ? t7.adoptedStyleSheets.unshift(e5) : t7.adoptedStyleSheets = [e5, ...t7.adoptedStyleSheets];
+              e5.replaceSync(l4), p$a ? t7.adoptedStyleSheets.unshift(e5) : t7.adoptedStyleSheets = [e5, ...t7.adoptedStyleSheets];
             } else {
               const e5 = t7.querySelector("style");
               e5 ? e5.innerHTML = l4 + e5.innerHTML : t7.prepend(r3);
@@ -330,7 +330,7 @@ var Z$4 = false, tt$1 = (t5, e2, n2) => {
           }
           4 & e4.u && (r3.innerHTML += c$1), i2 && i2.add(o4);
         }
-      } else t7.adoptedStyleSheets.includes(l4) || (p$9 ? t7.adoptedStyleSheets.push(l4) : t7.adoptedStyleSheets = [...t7.adoptedStyleSheets, l4]);
+      } else t7.adoptedStyleSheets.includes(l4) || (p$a ? t7.adoptedStyleSheets.push(l4) : t7.adoptedStyleSheets = [...t7.adoptedStyleSheets, l4]);
       return o4;
     })(n3.shadowRoot ? n3.shadowRoot : n3.getRootNode(), e3);
     10 & o3 && (n3["s-sc"] = l3, n3.classList.add(l3 + "-h"));
@@ -343,8 +343,8 @@ var Z$4 = false, tt$1 = (t5, e2, n2) => {
 }, ht$1 = (t5, e2, n2, o2) => {
   try {
     e2 = e2.render(), t5.u &= -17, t5.u |= 2, ((t6, e3, n3 = false) => {
-      const o3 = t6.$hostElement$, l2 = t6.o, r2 = t6.D || W$i(null, null), i2 = ((t7) => t7 && t7.O === A$9)(e3) ? e3 : U$5(null, null, e3);
-      if (z$j = o3.tagName, l2.U && (i2.m = i2.m || {}, l2.U.forEach((([t7, e4]) => {
+      const o3 = t6.$hostElement$, l2 = t6.o, r2 = t6.D || W$j(null, null), i2 = ((t7) => t7 && t7.O === A$a)(e3) ? e3 : U$6(null, null, e3);
+      if (z$k = o3.tagName, l2.U && (i2.m = i2.m || {}, l2.U.forEach((([t7, e4]) => {
         i2.m[e4] = o3[t7];
       }))), n3 && i2.m) for (const t7 of Object.keys(i2.m)) o3.hasAttribute(t7) && !["key", "ref", "style", "class"].includes(t7) && (i2.m[t7] = o3[t7]);
       i2.O = null, i2.u |= 4, t6.D = i2, i2.S = r2.S = o3.shadowRoot || o3, lt$1(r2, i2, n3);
@@ -355,7 +355,7 @@ var Z$4 = false, tt$1 = (t5, e2, n2) => {
   return null;
 }, pt$2 = (t5) => {
   const e2 = t5.$hostElement$, n2 = t5.i, o2 = t5.M;
-  bt$2(n2, "componentDidRender", void 0, e2), 64 & t5.u ? bt$2(n2, "componentDidUpdate", void 0, e2) : (t5.u |= 64, yt$2(e2), bt$2(n2, "componentDidLoad", void 0, e2), t5.W(e2), o2 || mt$2()), t5.A(e2), t5.C && (t5.C(), t5.C = void 0), 512 & t5.u && g$f((() => ct$1(t5, false))), t5.u &= -517;
+  bt$2(n2, "componentDidRender", void 0, e2), 64 & t5.u ? bt$2(n2, "componentDidUpdate", void 0, e2) : (t5.u |= 64, yt$2(e2), bt$2(n2, "componentDidLoad", void 0, e2), t5.W(e2), o2 || mt$2()), t5.A(e2), t5.C && (t5.C(), t5.C = void 0), 512 & t5.u && g$g((() => ct$1(t5, false))), t5.u &= -517;
 }, vt$1 = (t5) => {
   var e2;
   {
@@ -363,7 +363,7 @@ var Z$4 = false, tt$1 = (t5, e2, n2) => {
     return l2 && 2 == (18 & o2.u) && ct$1(o2, false), l2;
   }
 }, mt$2 = () => {
-  g$f((() => I$a(a$2, "appload", { detail: { namespace: "lf-core" } })));
+  g$g((() => I$b(a$2, "appload", { detail: { namespace: "lf-core" } })));
 }, bt$2 = (t5, e2, n2, o2) => {
   if (t5 && t5[e2]) try {
     return t5[e2](n2);
@@ -375,7 +375,7 @@ var Z$4 = false, tt$1 = (t5, e2, n2) => {
   if (!i2) return;
   if (!i2) throw Error(`Couldn't find host element for "${l2.p}" as it is unknown to this Stencil runtime. This usually happens when integrating a 3rd party Stencil component with another Stencil component or application. Please reach out to the maintainers of the 3rd party Stencil component or report this on the Stencil Discord server (https://chat.stenciljs.com) or comment on this similar [GitHub issue](https://github.com/stenciljs/core/issues/5457).`);
   const s2 = i2.$hostElement$, c2 = i2.l.get(e2), u2 = i2.u, a2 = i2.i;
-  if (o2 = V$7(o2, l2.t[e2][0]), (!(8 & u2) || void 0 === c2) && o2 !== c2 && (!Number.isNaN(c2) || !Number.isNaN(o2)) && (i2.l.set(e2, o2), a2)) {
+  if (o2 = V$8(o2, l2.t[e2][0]), (!(8 & u2) || void 0 === c2) && o2 !== c2 && (!Number.isNaN(c2) || !Number.isNaN(o2)) && (i2.l.set(e2, o2), a2)) {
     if (l2.F && 128 & u2) {
       const t6 = l2.F[e2];
       t6 && t6.map(((t7) => {
@@ -410,14 +410,14 @@ var Z$4 = false, tt$1 = (t5, e2, n2) => {
         }, configurable: true, enumerable: true }), Object.defineProperty(i2, t6, { set(r4) {
           const i3 = n$1(this);
           if (i3) {
-            if (s3) return void 0 === (32 & l3 ? this[t6] : i3.$hostElement$[t6]) && i3.l.get(t6) && (r4 = i3.l.get(t6)), s3.call(this, V$7(r4, l3)), void wt$2(this, t6, r4 = 32 & l3 ? this[t6] : i3.$hostElement$[t6], e2);
+            if (s3) return void 0 === (32 & l3 ? this[t6] : i3.$hostElement$[t6]) && i3.l.get(t6) && (r4 = i3.l.get(t6)), s3.call(this, V$8(r4, l3)), void wt$2(this, t6, r4 = 32 & l3 ? this[t6] : i3.$hostElement$[t6], e2);
             {
               if (!(1 & o2 && 4096 & e2.t[t6][0])) return wt$2(this, t6, r4, e2), void (1 & o2 && !i3.i && i3.N.push((() => {
                 4096 & e2.t[t6][0] && i3.i[t6] !== i3.l.get(t6) && (i3.i[t6] = r4);
               })));
               const n2 = () => {
                 const n3 = i3.i[t6];
-                !i3.l.get(t6) && n3 && i3.l.set(t6, n3), i3.i[t6] = V$7(r4, l3), wt$2(this, t6, i3.i[t6], e2);
+                !i3.l.get(t6) && n3 && i3.l.set(t6, n3), i3.i[t6] = V$8(r4, l3), wt$2(this, t6, i3.i[t6], e2);
               };
               i3.i ? n2() : i3.N.push((() => {
                 n2();
@@ -488,7 +488,7 @@ var Z$4 = false, tt$1 = (t5, e2, n2) => {
             t8.__stencil__getHostRef = () => o4;
           })(t7 = this, p3), 1 & p3.u) if (t7.shadowRoot) {
             if ("open" !== t7.shadowRoot.mode) throw Error(`Unable to re-use existing shadow root for ${p3.p}! Mode is set to ${t7.shadowRoot.mode} but Stencil only supports open shadow roots.`);
-          } else N$4.call(t7, p3);
+          } else N$5.call(t7, p3);
         }
         connectedCallback() {
           const t7 = n$1(this);
@@ -520,7 +520,7 @@ var Z$4 = false, tt$1 = (t5, e2, n2) => {
                         const n3 = t10.p.replace(/-/g, "_"), o6 = t10.I;
                         if (!o6) return;
                         const l5 = i$1.get(o6);
-                        return l5 ? l5[n3] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-012d7434.entry.js": () => __vitePreload(() => Promise.resolve().then(() => p012d7434_entry), true ? void 0 : void 0, import.meta.url), "./p-04d20cb7.entry.js": () => __vitePreload(() => Promise.resolve().then(() => p04d20cb7_entry), true ? void 0 : void 0, import.meta.url), "./p-06ffde53.entry.js": () => __vitePreload(() => Promise.resolve().then(() => p06ffde53_entry), true ? void 0 : void 0, import.meta.url), "./p-0da2996f.entry.js": () => __vitePreload(() => Promise.resolve().then(() => p0da2996f_entry), true ? void 0 : void 0, import.meta.url), "./p-3897a69c.entry.js": () => __vitePreload(() => Promise.resolve().then(() => p3897a69c_entry), true ? void 0 : void 0, import.meta.url), "./p-460d4637.entry.js": () => __vitePreload(() => Promise.resolve().then(() => p460d4637_entry), true ? void 0 : void 0, import.meta.url), "./p-6f619be6.entry.js": () => __vitePreload(() => Promise.resolve().then(() => p6f619be6_entry), true ? void 0 : void 0, import.meta.url), "./p-77da9ac8.entry.js": () => __vitePreload(() => Promise.resolve().then(() => p77da9ac8_entry), true ? void 0 : void 0, import.meta.url), "./p-8b14d5a1.entry.js": () => __vitePreload(() => Promise.resolve().then(() => p8b14d5a1_entry), true ? void 0 : void 0, import.meta.url), "./p-8b75a972.entry.js": () => __vitePreload(() => Promise.resolve().then(() => p8b75a972_entry), true ? void 0 : void 0, import.meta.url), "./p-9de9dd33.entry.js": () => __vitePreload(() => Promise.resolve().then(() => p9de9dd33_entry), true ? void 0 : void 0, import.meta.url), "./p-a1ddf6c3.entry.js": () => __vitePreload(() => Promise.resolve().then(() => pA1ddf6c3_entry), true ? void 0 : void 0, import.meta.url), "./p-a5d3299e.entry.js": () => __vitePreload(() => Promise.resolve().then(() => pA5d3299e_entry), true ? void 0 : void 0, import.meta.url), "./p-b388f0aa.entry.js": () => __vitePreload(() => Promise.resolve().then(() => pB388f0aa_entry), true ? void 0 : void 0, import.meta.url), "./p-b3fd388a.entry.js": () => __vitePreload(() => Promise.resolve().then(() => pB3fd388a_entry), true ? void 0 : void 0, import.meta.url), "./p-b5f1d3d9.entry.js": () => __vitePreload(() => Promise.resolve().then(() => pB5f1d3d9_entry), true ? void 0 : void 0, import.meta.url), "./p-c777df98.entry.js": () => __vitePreload(() => Promise.resolve().then(() => pC777df98_entry), true ? void 0 : void 0, import.meta.url), "./p-cb747392.entry.js": () => __vitePreload(() => Promise.resolve().then(() => pCb747392_entry), true ? void 0 : void 0, import.meta.url), "./p-d28f7231.entry.js": () => __vitePreload(() => Promise.resolve().then(() => pD28f7231_entry), true ? void 0 : void 0, import.meta.url), "./p-d6ba92f7.entry.js": () => __vitePreload(() => Promise.resolve().then(() => pD6ba92f7_entry), true ? void 0 : void 0, import.meta.url), "./p-ecbcfad9.entry.js": () => __vitePreload(() => Promise.resolve().then(() => pEcbcfad9_entry), true ? void 0 : void 0, import.meta.url) }), `./${o6}.entry.js`, 2).then(((t11) => (i$1.set(o6, t11), t11[n3])), ((t11) => {
+                        return l5 ? l5[n3] : __variableDynamicImportRuntimeHelper(/* @__PURE__ */ Object.assign({ "./p-012d7434.entry.js": () => __vitePreload(() => Promise.resolve().then(() => p012d7434_entry), true ? void 0 : void 0, import.meta.url), "./p-04d20cb7.entry.js": () => __vitePreload(() => Promise.resolve().then(() => p04d20cb7_entry), true ? void 0 : void 0, import.meta.url), "./p-06ffde53.entry.js": () => __vitePreload(() => Promise.resolve().then(() => p06ffde53_entry), true ? void 0 : void 0, import.meta.url), "./p-0d17c789.entry.js": () => __vitePreload(() => Promise.resolve().then(() => p0d17c789_entry), true ? void 0 : void 0, import.meta.url), "./p-0da2996f.entry.js": () => __vitePreload(() => Promise.resolve().then(() => p0da2996f_entry), true ? void 0 : void 0, import.meta.url), "./p-1e846fdf.entry.js": () => __vitePreload(() => Promise.resolve().then(() => p1e846fdf_entry), true ? void 0 : void 0, import.meta.url), "./p-3897a69c.entry.js": () => __vitePreload(() => Promise.resolve().then(() => p3897a69c_entry), true ? void 0 : void 0, import.meta.url), "./p-3b261a82.entry.js": () => __vitePreload(() => Promise.resolve().then(() => p3b261a82_entry), true ? void 0 : void 0, import.meta.url), "./p-460d4637.entry.js": () => __vitePreload(() => Promise.resolve().then(() => p460d4637_entry), true ? void 0 : void 0, import.meta.url), "./p-62bc1582.entry.js": () => __vitePreload(() => Promise.resolve().then(() => p62bc1582_entry), true ? void 0 : void 0, import.meta.url), "./p-68c8ed64.entry.js": () => __vitePreload(() => Promise.resolve().then(() => p68c8ed64_entry), true ? void 0 : void 0, import.meta.url), "./p-6f619be6.entry.js": () => __vitePreload(() => Promise.resolve().then(() => p6f619be6_entry), true ? void 0 : void 0, import.meta.url), "./p-8b75a972.entry.js": () => __vitePreload(() => Promise.resolve().then(() => p8b75a972_entry), true ? void 0 : void 0, import.meta.url), "./p-907b39f3.entry.js": () => __vitePreload(() => Promise.resolve().then(() => p907b39f3_entry), true ? void 0 : void 0, import.meta.url), "./p-a1ddf6c3.entry.js": () => __vitePreload(() => Promise.resolve().then(() => pA1ddf6c3_entry), true ? void 0 : void 0, import.meta.url), "./p-b388f0aa.entry.js": () => __vitePreload(() => Promise.resolve().then(() => pB388f0aa_entry), true ? void 0 : void 0, import.meta.url), "./p-b3fd388a.entry.js": () => __vitePreload(() => Promise.resolve().then(() => pB3fd388a_entry), true ? void 0 : void 0, import.meta.url), "./p-c777df98.entry.js": () => __vitePreload(() => Promise.resolve().then(() => pC777df98_entry), true ? void 0 : void 0, import.meta.url), "./p-cb747392.entry.js": () => __vitePreload(() => Promise.resolve().then(() => pCb747392_entry), true ? void 0 : void 0, import.meta.url), "./p-cf78dbab.entry.js": () => __vitePreload(() => Promise.resolve().then(() => pCf78dbab_entry), true ? void 0 : void 0, import.meta.url), "./p-d28f7231.entry.js": () => __vitePreload(() => Promise.resolve().then(() => pD28f7231_entry), true ? void 0 : void 0, import.meta.url), "./p-f4fba5e8.entry.js": () => __vitePreload(() => Promise.resolve().then(() => pF4fba5e8_entry), true ? void 0 : void 0, import.meta.url) }), `./${o6}.entry.js`, 2).then(((t11) => (i$1.set(o6, t11), t11[n3])), ((t11) => {
                           r$2(t11, e6.$hostElement$);
                         }));
                         /*!__STENCIL_STATIC_IMPORT_SWITCH__*/
@@ -541,7 +541,7 @@ var Z$4 = false, tt$1 = (t5, e2, n2) => {
                     if (o5 && o5.style) {
                       let t10;
                       "string" == typeof o5.style && (t10 = o5.style);
-                      const e6 = D$d(n2);
+                      const e6 = D$e(n2);
                       if (!s$1.has(e6)) {
                         ((t11, e7, n3) => {
                           let o6 = s$1.get(t11);
@@ -563,7 +563,7 @@ var Z$4 = false, tt$1 = (t5, e2, n2) => {
               const e4 = n$1(t7);
               (null == e4 ? void 0 : e4._) && (e4._.map(((t8) => t8())), e4._ = void 0), (null == e4 ? void 0 : e4.i) ? jt$2(e4.i, t7) : (null == e4 ? void 0 : e4.G) && e4.G.then((() => jt$2(e4.i, t7)));
             }
-            R$a.has(t7) && R$a.delete(t7), t7.shadowRoot && R$a.has(t7.shadowRoot) && R$a.delete(t7.shadowRoot);
+            R$b.has(t7) && R$b.delete(t7), t7.shadowRoot && R$b.has(t7.shadowRoot) && R$b.delete(t7.shadowRoot);
           })(this))), f$2.raf((() => {
             var t7;
             const e4 = n$1(this);
@@ -581,7 +581,7 @@ var Z$4 = false, tt$1 = (t5, e2, n2) => {
     }));
   })), l2.length > 0 && ($2 && (m2.textContent += c$1), m2.textContent += l2.sort() + "{visibility:hidden}[lf-hydrated]{visibility:inherit}", m2.innerHTML.length)) {
     m2.setAttribute("data-styles", "");
-    const t6 = null != (o2 = f$2.R) ? o2 : S$b(a$2.document);
+    const t6 = null != (o2 = f$2.R) ? o2 : S$c(a$2.document);
     null != t6 && m2.setAttribute("nonce", t6), p2.insertBefore(m2, v2 ? v2.nextSibling : p2.firstChild);
   }
   w3 = false, b2.length ? b2.map(((t6) => t6.connectedCallback())) : f$2.jmp((() => y2 = setTimeout(mt$2, 30)));
@@ -602,77 +602,77 @@ const o$1 = () => {
 };
 (() => {
   const l2 = import.meta.url, f2 = {};
-  return "" !== l2 && (f2.resourcesUrl = new URL(".", l2).href), d$2(f2);
-})().then((async (e2) => (await o$1(), Ot$2(JSON.parse('[["p-012d7434",[[257,"lf-imageviewer",{"lfDataset":[1040],"lfLoadCallback":[1040],"lfNavigation":[1040],"lfStyle":[1025,"lf-style"],"lfValue":[1040],"debugInfo":[32],"currentShape":[32],"history":[32],"historyIndex":[32],"isNavigationTreeOpen":[32],"isSpinnerActive":[32],"addSnapshot":[64],"clearHistory":[64],"clearSelection":[64],"getComponents":[64],"getCurrentSnapshot":[64],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"reset":[64],"setSpinnerStatus":[64],"unmount":[64]}]]],["p-a1ddf6c3",[[257,"lf-compare",{"lfDataset":[1040],"lfShape":[1025,"lf-shape"],"lfStyle":[1025,"lf-style"],"lfView":[1025,"lf-view"],"debugInfo":[32],"isLeftPanelOpened":[32],"isRightPanelOpened":[32],"leftShape":[32],"rightShape":[32],"shapes":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["updateShapes"],"lfShape":["updateShapes"]}]]],["p-b3fd388a",[[257,"lf-accordion",{"lfDataset":[1040],"lfRipple":[1028,"lf-ripple"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"expandedNodes":[32],"selectedNodes":[32],"getDebugInfo":[64],"getProps":[64],"getSelectedNodes":[64],"refresh":[64],"toggleNode":[64],"unmount":[64]}]]],["p-c777df98",[[257,"lf-article",{"lfDataset":[1040],"lfEmpty":[1025,"lf-empty"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-b388f0aa",[[257,"lf-carousel",{"lfDataset":[1040],"lfAutoPlay":[4,"lf-auto-play"],"lfInterval":[2,"lf-interval"],"lfLightbox":[1540,"lf-lightbox"],"lfNavigation":[1028,"lf-navigation"],"lfShape":[1537,"lf-shape"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"currentIndex":[32],"shapes":[32],"getDebugInfo":[64],"getProps":[64],"goToSlide":[64],"nextSlide":[64],"prevSlide":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["updateShapes"],"lfShape":["updateShapes"]}]]],["p-04d20cb7",[[257,"lf-messenger",{"lfAutosave":[1028,"lf-autosave"],"lfDataset":[1040],"lfStyle":[1025,"lf-style"],"lfValue":[16],"debugInfo":[32],"chat":[32],"connectionStatus":[32],"covers":[32],"currentCharacter":[32],"formStatusMap":[32],"history":[32],"hoveredCustomizationOption":[32],"saveInProgress":[32],"ui":[32],"deleteOption":[64],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"reset":[64],"save":[64],"unmount":[64]}]]],["p-8b75a972",[[257,"lf-autocomplete",{"lfAllowFreeInput":[1028,"lf-allow-free-input"],"lfCache":[1028,"lf-cache"],"lfCacheTTL":[1026,"lf-cache-t-t-l"],"lfDataset":[1040],"lfDebounceMs":[1026,"lf-debounce-ms"],"lfListProps":[1040],"lfMaxCacheSize":[1026,"lf-max-cache-size"],"lfMinChars":[1026,"lf-min-chars"],"lfNavigation":[1028,"lf-navigation"],"lfSpinnerProps":[1040],"lfStyle":[1025,"lf-style"],"lfTextfieldProps":[1040],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"highlightedIndex":[32],"loading":[32],"inputValue":[32],"lastRequestedQuery":[32],"clearCache":[64],"clearInput":[64],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]},null,{"lfDataset":["onLfDatasetChange"],"loading":["onLoadingChange"]}]]],["p-d6ba92f7",[[257,"lf-select",{"lfDataset":[16],"lfListProps":[1040],"lfNavigation":[1028,"lf-navigation"],"lfStyle":[1025,"lf-style"],"lfTextfieldProps":[1040],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[8,"lf-value"],"debugInfo":[32],"focused":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"getSelectedIndex":[64],"refresh":[64],"setValue":[64],"unmount":[64]},null,{"lfDataset":["onLfDatasetChange"]}]]],["p-06ffde53",[[257,"lf-checkbox",{"lfAriaLabel":[1025,"lf-aria-label"],"lfLabel":[1025,"lf-label"],"lfLeadingLabel":[1028,"lf-leading-label"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[4,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}]]],["p-6f619be6",[[257,"lf-drawer",{"lfDisplay":[1537,"lf-display"],"lfPosition":[1537,"lf-position"],"lfResponsive":[1026,"lf-responsive"],"lfStyle":[1025,"lf-style"],"lfValue":[1540,"lf-value"],"debugInfo":[32],"close":[64],"getDebugInfo":[64],"getProps":[64],"isOpened":[64],"open":[64],"refresh":[64],"toggle":[64],"unmount":[64]},[[0,"keydown","listenKeydown"]],{"lfDisplay":["onLfDisplayChange"],"lfResponsive":["onLfResponsiveChange"]}]]],["p-0da2996f",[[257,"lf-header",{"lfStyle":[1025,"lf-style"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-77da9ac8",[[257,"lf-placeholder",{"lfIcon":[1,"lf-icon"],"lfProps":[16],"lfStyle":[1025,"lf-style"],"lfThreshold":[2,"lf-threshold"],"lfTrigger":[1,"lf-trigger"],"lfValue":[1,"lf-value"],"debugInfo":[32],"isInViewport":[32],"getComponent":[64],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-cb747392",[[257,"lf-radio",{"lfAriaLabel":[1025,"lf-aria-label"],"lfDataset":[1040],"lfOrientation":[1025,"lf-orientation"],"lfLeadingLabel":[1028,"lf-leading-label"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1,"lf-value"],"debugInfo":[32],"value":[32],"clearSelection":[64],"getAdapter":[64],"getDebugInfo":[64],"getSelectedNode":[64],"getProps":[64],"refresh":[64],"selectItem":[64],"unmount":[64]}]]],["p-9de9dd33",[[257,"lf-slider",{"lfLabel":[1025,"lf-label"],"lfLeadingLabel":[1028,"lf-leading-label"],"lfMax":[2,"lf-max"],"lfMin":[2,"lf-min"],"lfStep":[2,"lf-step"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1026,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}]]],["p-a5d3299e",[[257,"lf-splash",{"lfLabel":[1025,"lf-label"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"state":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-b5f1d3d9",[[257,"lf-toast",{"lfCloseIcon":[1025,"lf-close-icon"],"lfCloseCallback":[16],"lfIcon":[1025,"lf-icon"],"lfTimer":[2,"lf-timer"],"lfMessage":[1025,"lf-message"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-460d4637",[[257,"lf-spinner",{"lfActive":[1540,"lf-active"],"lfBarVariant":[1540,"lf-bar-variant"],"lfDimensions":[1025,"lf-dimensions"],"lfFader":[1540,"lf-fader"],"lfFaderTimeout":[1026,"lf-fader-timeout"],"lfFullScreen":[1540,"lf-full-screen"],"lfLayout":[1026,"lf-layout"],"lfStyle":[1025,"lf-style"],"lfTimeout":[1026,"lf-timeout"],"bigWait":[32],"debugInfo":[32],"progress":[32],"getDebugInfo":[64],"getProps":[64],"getProgress":[64],"refresh":[64],"unmount":[64]},null,{"lfActive":["onFaderChange"],"lfFader":["onFaderChange"],"lfFaderTimeout":["onFaderChange"],"lfBarVariant":["lfBarVariantChanged"],"lfTimeout":["lfTimeoutChanged"]}],[257,"lf-list",{"lfDataset":[1040],"lfEmpty":[1025,"lf-empty"],"lfEnableDeletions":[1028,"lf-enable-deletions"],"lfFilter":[1028,"lf-filter"],"lfNavigation":[1028,"lf-navigation"],"lfRipple":[1028,"lf-ripple"],"lfSelectable":[1028,"lf-selectable"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[2,"lf-value"],"debugInfo":[32],"filter":[32],"focused":[32],"selected":[32],"applyFilter":[64],"focusNext":[64],"focusPrevious":[64],"getDebugInfo":[64],"getProps":[64],"getSelected":[64],"refresh":[64],"selectNode":[64],"selectNodeById":[64],"setFilter":[64],"unmount":[64]},[[0,"keydown","listenKeydown"]],{"lfFilter":["handleFilterToggle"]}],[257,"lf-textfield",{"lfFormatJSON":[1040],"lfHelper":[1040],"lfHtmlAttributes":[1040],"lfIcon":[1025,"lf-icon"],"lfLabel":[1025,"lf-label"],"lfStretchX":[1540,"lf-stretch-x"],"lfStretchY":[1540,"lf-stretch-y"],"lfStyle":[1025,"lf-style"],"lfStyling":[1025,"lf-styling"],"lfTrailingIcon":[1540,"lf-trailing-icon"],"lfTrailingIconAction":[1025,"lf-trailing-icon-action"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1,"lf-value"],"debugInfo":[32],"status":[32],"value":[32],"formatJSON":[64],"getDebugInfo":[64],"getElement":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setBlur":[64],"setFocus":[64],"setValue":[64],"unmount":[64]}]]],["p-ecbcfad9",[[257,"lf-card",{"lfDataset":[1040],"lfLayout":[1025,"lf-layout"],"lfSizeX":[1025,"lf-size-x"],"lfSizeY":[1025,"lf-size-y"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"debugInfo":[32],"shapes":[32],"getDebugInfo":[64],"getProps":[64],"getShapes":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["updateShapes"]}],[257,"lf-badge",{"lfImageProps":[1040],"lfLabel":[1025,"lf-label"],"lfPosition":[1537,"lf-position"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}],[257,"lf-canvas",{"lfBrush":[1025,"lf-brush"],"lfColor":[1025,"lf-color"],"lfCursor":[1025,"lf-cursor"],"lfImageProps":[1040],"lfOpacity":[1026,"lf-opacity"],"lfPreview":[1028,"lf-preview"],"lfStrokeTolerance":[1026,"lf-stroke-tolerance"],"lfSize":[1026,"lf-size"],"lfStyle":[1025,"lf-style"],"boxing":[32],"debugInfo":[32],"isPainting":[32],"orientation":[32],"points":[32],"clearCanvas":[64],"getCanvas":[64],"getDebugInfo":[64],"getImage":[64],"getProps":[64],"refresh":[64],"resizeCanvas":[64],"setCanvasHeight":[64],"setCanvasWidth":[64],"unmount":[64]}],[257,"lf-photoframe",{"lfOverlay":[1040],"lfPlaceholder":[16],"lfStyle":[1025,"lf-style"],"lfThreshold":[2,"lf-threshold"],"lfValue":[16],"debugInfo":[32],"imageOrientation":[32],"isInViewport":[32],"isReady":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}],[257,"lf-chart",{"lfAxis":[1025,"lf-axis"],"lfColors":[1040],"lfDataset":[1040],"lfLegend":[1025,"lf-legend"],"lfSeries":[1040],"lfSizeX":[1025,"lf-size-x"],"lfSizeY":[1025,"lf-size-y"],"lfStyle":[1025,"lf-style"],"lfTypes":[1040],"lfXAxis":[1040],"lfYAxis":[1040],"debugInfo":[32],"themeValues":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"resize":[64],"unmount":[64]}],[257,"lf-toggle",{"lfAriaLabel":[1025,"lf-aria-label"],"lfLabel":[1025,"lf-label"],"lfLeadingLabel":[1028,"lf-leading-label"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[4,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}],[257,"lf-typewriter",{"lfCursor":[1025,"lf-cursor"],"lfDeleteSpeed":[1026,"lf-delete-speed"],"lfLoop":[1028,"lf-loop"],"lfPause":[1026,"lf-pause"],"lfSpeed":[1026,"lf-speed"],"lfStyle":[1025,"lf-style"],"lfTag":[1025,"lf-tag"],"lfUiSize":[1537,"lf-ui-size"],"lfUpdatable":[1028,"lf-updatable"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"displayedText":[32],"isDeleting":[32],"currentTextIndex":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfValue":["handleLfValueChange"]}],[257,"lf-upload",{"lfHtmlAttributes":[1040],"lfLabel":[1025,"lf-label"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfValue":[16],"debugInfo":[32],"selectedFiles":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"unmount":[64]}],[257,"lf-chat",{"lfAttachmentUploadTimeout":[1026,"lf-attachment-upload-timeout"],"lfConfig":[1040],"lfContextWindow":[1026,"lf-context-window"],"lfEmpty":[1025,"lf-empty"],"lfEndpointUrl":[1025,"lf-endpoint-url"],"lfTools":[1040],"lfFrequencyPenalty":[1026,"lf-frequency-penalty"],"lfLayout":[1025,"lf-layout"],"lfMaxTokens":[1026,"lf-max-tokens"],"lfPollingInterval":[1026,"lf-polling-interval"],"lfPresencePenalty":[1026,"lf-presence-penalty"],"lfSeed":[1026,"lf-seed"],"lfStyle":[1025,"lf-style"],"lfSystem":[1025,"lf-system"],"lfTemperature":[1026,"lf-temperature"],"lfTopP":[1026,"lf-top-p"],"lfUiSize":[1537,"lf-ui-size"],"lfValue":[1040],"lfUploadCallback":[1040],"currentAbortStreaming":[32],"currentAttachments":[32],"currentEditingIndex":[32],"currentPrompt":[32],"currentTokens":[32],"currentToolExecution":[32],"debugInfo":[32],"history":[32],"status":[32],"view":[32],"abortStreaming":[64],"getDebugInfo":[64],"getHistory":[64],"getLastMessage":[64],"getProps":[64],"handleImageAttachment":[64],"handleFileAttachment":[64],"removeAttachment":[64],"refresh":[64],"scrollToBottom":[64],"setHistory":[64],"exportHistory":[64],"unmount":[64]},[[0,"keydown","listenKeydown"]],{"lfPollingInterval":["updatePollingInterval"],"lfSystem":["updateTokensCount"]}],[257,"lf-code",{"lfFadeIn":[1028,"lf-fade-in"],"lfFormat":[1028,"lf-format"],"lfLanguage":[1025,"lf-language"],"lfPreserveSpaces":[1028,"lf-preserve-spaces"],"lfShowCopy":[1028,"lf-show-copy"],"lfShowHeader":[1028,"lf-show-header"],"lfStickyHeader":[1028,"lf-sticky-header"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfLanguage":["loadLanguage"]}],[257,"lf-chip",{"lfAriaLabel":[1025,"lf-aria-label"],"lfDataset":[1040],"lfFlat":[1028,"lf-flat"],"lfRipple":[1028,"lf-ripple"],"lfShowSpinner":[1028,"lf-show-spinner"],"lfStyle":[1025,"lf-style"],"lfStyling":[1025,"lf-styling"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[16],"debugInfo":[32],"expandedNodes":[32],"hiddenNodes":[32],"selectedNodes":[32],"getDebugInfo":[64],"getProps":[64],"getSelectedNodes":[64],"refresh":[64],"setSelectedNodes":[64],"unmount":[64]}],[257,"lf-progressbar",{"lfAnimated":[1540,"lf-animated"],"lfCenteredLabel":[1540,"lf-centered-label"],"lfIcon":[1537,"lf-icon"],"lfIsRadial":[1540,"lf-is-radial"],"lfLabel":[1025,"lf-label"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1026,"lf-value"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}],[257,"lf-image",{"lfHtmlAttributes":[1040],"lfMode":[1537,"lf-mode"],"lfShowSpinner":[1028,"lf-show-spinner"],"lfSizeX":[1025,"lf-size-x"],"lfSizeY":[1025,"lf-size-y"],"lfStyle":[1025,"lf-style"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"error":[32],"isLoaded":[32],"resolvedSpriteName":[32],"getDebugInfo":[64],"getImage":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfValue":["resetState"]}],[257,"lf-button",{"lfAriaLabel":[1025,"lf-aria-label"],"lfDataset":[1040],"lfIcon":[1025,"lf-icon"],"lfIconOff":[1025,"lf-icon-off"],"lfLabel":[1025,"lf-label"],"lfRipple":[1028,"lf-ripple"],"lfShowSpinner":[1540,"lf-show-spinner"],"lfStretchX":[1540,"lf-stretch-x"],"lfStretchY":[1540,"lf-stretch-y"],"lfStyle":[1025,"lf-style"],"lfStyling":[1025,"lf-styling"],"lfToggable":[1028,"lf-toggable"],"lfTrailingIcon":[1028,"lf-trailing-icon"],"lfType":[1025,"lf-type"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[4,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setMessage":[64],"setValue":[64],"unmount":[64]},null,{"lfDataset":["onDatasetChanged"]}]]],["p-d28f7231",[[257,"lf-masonry",{"lfActions":[1028,"lf-actions"],"lfCollapseColumns":[1028,"lf-collapse-columns"],"lfColumns":[1026,"lf-columns"],"lfDataset":[1040],"lfSelectable":[1540,"lf-selectable"],"lfShape":[1025,"lf-shape"],"lfStyle":[1025,"lf-style"],"lfView":[1025,"lf-view"],"debugInfo":[32],"selectedShape":[32],"shapes":[32],"viewportWidth":[32],"getDebugInfo":[64],"getProps":[64],"getSelectedShape":[64],"redecorateShapes":[64],"refresh":[64],"setSelectedShape":[64],"unmount":[64]},null,{"lfColumns":["validateColumns"],"lfDataset":["updateShapes"],"lfShape":["updateShapes"]}]]],["p-3897a69c",[[257,"lf-tabbar",{"lfAriaLabel":[1025,"lf-aria-label"],"lfDataset":[16],"lfNavigation":[4,"lf-navigation"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[8,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}]]],["p-8b14d5a1",[[257,"lf-tree",{"lfAccordionLayout":[1540,"lf-accordion-layout"],"lfDataset":[1040],"lfEmpty":[1025,"lf-empty"],"lfExpandedNodeIds":[1040],"lfFilter":[1028,"lf-filter"],"lfGrid":[1540,"lf-grid"],"lfInitialExpansionDepth":[1026,"lf-initial-expansion-depth"],"lfSelectedNodeIds":[1040],"lfRipple":[1028,"lf-ripple"],"lfSelectable":[1540,"lf-selectable"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"debugInfo":[32],"expandedNodes":[32],"hiddenNodes":[32],"selectedNode":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"getExpandedNodeIds":[64],"getSelectedNodeIds":[64],"setExpandedNodes":[64],"setSelectedNodes":[64],"selectByPredicate":[64],"unmount":[64]},null,{"lfDataset":["handleDatasetChange"],"lfExpandedNodeIds":["handleExpandedPropChange"],"lfSelectedNodeIds":["handleSelectedPropChange"],"lfInitialExpansionDepth":["handleInitialDepthChange"],"lfSelectable":["handleSelectableChange"],"lfFilter":["handleFilterToggle"]}]]]]'), e2))));
+  return "" !== l2 && (f2.resourcesUrl = new URL(".", l2).href), d$3(f2);
+})().then((async (e2) => (await o$1(), Ot$2(JSON.parse('[["p-012d7434",[[257,"lf-imageviewer",{"lfDataset":[1040],"lfLoadCallback":[1040],"lfNavigation":[1040],"lfStyle":[1025,"lf-style"],"lfValue":[1040],"debugInfo":[32],"currentShape":[32],"history":[32],"historyIndex":[32],"isNavigationTreeOpen":[32],"isSpinnerActive":[32],"addSnapshot":[64],"clearHistory":[64],"clearSelection":[64],"getComponents":[64],"getCurrentSnapshot":[64],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"reset":[64],"setSpinnerStatus":[64],"unmount":[64]}]]],["p-a1ddf6c3",[[257,"lf-compare",{"lfDataset":[1040],"lfShape":[1025,"lf-shape"],"lfStyle":[1025,"lf-style"],"lfView":[1025,"lf-view"],"debugInfo":[32],"isLeftPanelOpened":[32],"isRightPanelOpened":[32],"leftShape":[32],"rightShape":[32],"shapes":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["updateShapes"],"lfShape":["updateShapes"]}]]],["p-b3fd388a",[[257,"lf-accordion",{"lfDataset":[1040],"lfRipple":[1028,"lf-ripple"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"expandedNodes":[32],"selectedNodes":[32],"getDebugInfo":[64],"getProps":[64],"getSelectedNodes":[64],"refresh":[64],"toggleNode":[64],"unmount":[64]}]]],["p-c777df98",[[257,"lf-article",{"lfDataset":[1040],"lfEmpty":[1025,"lf-empty"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-b388f0aa",[[257,"lf-carousel",{"lfDataset":[1040],"lfAutoPlay":[4,"lf-auto-play"],"lfInterval":[2,"lf-interval"],"lfLightbox":[1540,"lf-lightbox"],"lfNavigation":[1028,"lf-navigation"],"lfShape":[1537,"lf-shape"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"currentIndex":[32],"shapes":[32],"getDebugInfo":[64],"getProps":[64],"goToSlide":[64],"nextSlide":[64],"prevSlide":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["updateShapes"],"lfShape":["updateShapes"]}]]],["p-04d20cb7",[[257,"lf-messenger",{"lfAutosave":[1028,"lf-autosave"],"lfDataset":[1040],"lfStyle":[1025,"lf-style"],"lfValue":[16],"debugInfo":[32],"chat":[32],"connectionStatus":[32],"covers":[32],"currentCharacter":[32],"formStatusMap":[32],"history":[32],"hoveredCustomizationOption":[32],"saveInProgress":[32],"ui":[32],"deleteOption":[64],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"reset":[64],"save":[64],"unmount":[64]}]]],["p-8b75a972",[[257,"lf-autocomplete",{"lfAllowFreeInput":[1028,"lf-allow-free-input"],"lfCache":[1028,"lf-cache"],"lfCacheTTL":[1026,"lf-cache-t-t-l"],"lfDataset":[1040],"lfDebounceMs":[1026,"lf-debounce-ms"],"lfListProps":[1040],"lfMaxCacheSize":[1026,"lf-max-cache-size"],"lfMinChars":[1026,"lf-min-chars"],"lfNavigation":[1028,"lf-navigation"],"lfSpinnerProps":[1040],"lfStyle":[1025,"lf-style"],"lfTextfieldProps":[1040],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"highlightedIndex":[32],"loading":[32],"inputValue":[32],"lastRequestedQuery":[32],"clearCache":[64],"clearInput":[64],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]},null,{"lfDataset":["onLfDatasetChange"],"loading":["onLoadingChange"]}]]],["p-f4fba5e8",[[257,"lf-multiinput",{"lfAllowFreeInput":[1028,"lf-allow-free-input"],"lfChipProps":[1040],"lfDataset":[1040],"lfMaxHistory":[1026,"lf-max-history"],"lfStyle":[1025,"lf-style"],"lfMode":[1025,"lf-mode"],"lfTextfieldProps":[1040],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1,"lf-value"],"debugInfo":[32],"historyNodes":[32],"value":[32],"addToHistory":[64],"getDebugInfo":[64],"getHistory":[64],"getProps":[64],"getState":[64],"getValue":[64],"refresh":[64],"setHistory":[64],"setValue":[64],"unmount":[64]},null,{"lfAllowFreeInput":["onLfAllowFreeInputChange"],"lfDataset":["onLfDatasetChange"],"lfMaxHistory":["onLfMaxHistoryChange"]}]]],["p-3b261a82",[[257,"lf-select",{"lfDataset":[16],"lfListProps":[1040],"lfNavigation":[1028,"lf-navigation"],"lfStyle":[1025,"lf-style"],"lfTextfieldProps":[1040],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[8,"lf-value"],"debugInfo":[32],"focused":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"getSelectedIndex":[64],"refresh":[64],"setValue":[64],"unmount":[64]},null,{"lfDataset":["onLfDatasetChange"]}]]],["p-06ffde53",[[257,"lf-checkbox",{"lfAriaLabel":[1025,"lf-aria-label"],"lfLabel":[1025,"lf-label"],"lfLeadingLabel":[1028,"lf-leading-label"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[4,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}]]],["p-6f619be6",[[257,"lf-drawer",{"lfDisplay":[1537,"lf-display"],"lfPosition":[1537,"lf-position"],"lfResponsive":[1026,"lf-responsive"],"lfStyle":[1025,"lf-style"],"lfValue":[1540,"lf-value"],"debugInfo":[32],"close":[64],"getDebugInfo":[64],"getProps":[64],"isOpened":[64],"open":[64],"refresh":[64],"toggle":[64],"unmount":[64]},[[0,"keydown","listenKeydown"]],{"lfDisplay":["onLfDisplayChange"],"lfResponsive":["onLfResponsiveChange"]}]]],["p-0da2996f",[[257,"lf-header",{"lfStyle":[1025,"lf-style"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-1e846fdf",[[257,"lf-placeholder",{"lfIcon":[1,"lf-icon"],"lfProps":[16],"lfStyle":[1025,"lf-style"],"lfThreshold":[2,"lf-threshold"],"lfTrigger":[1,"lf-trigger"],"lfValue":[1,"lf-value"],"debugInfo":[32],"isInViewport":[32],"getComponent":[64],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-cb747392",[[257,"lf-radio",{"lfAriaLabel":[1025,"lf-aria-label"],"lfDataset":[1040],"lfOrientation":[1025,"lf-orientation"],"lfLeadingLabel":[1028,"lf-leading-label"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1,"lf-value"],"debugInfo":[32],"value":[32],"clearSelection":[64],"getAdapter":[64],"getDebugInfo":[64],"getSelectedNode":[64],"getProps":[64],"refresh":[64],"selectItem":[64],"unmount":[64]}]]],["p-68c8ed64",[[257,"lf-slider",{"lfLabel":[1025,"lf-label"],"lfLeadingLabel":[1028,"lf-leading-label"],"lfMax":[2,"lf-max"],"lfMin":[2,"lf-min"],"lfStep":[2,"lf-step"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1026,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}]]],["p-0d17c789",[[257,"lf-splash",{"lfLabel":[1025,"lf-label"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"state":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-cf78dbab",[[257,"lf-toast",{"lfCloseIcon":[1025,"lf-close-icon"],"lfCloseCallback":[16],"lfIcon":[1025,"lf-icon"],"lfTimer":[2,"lf-timer"],"lfMessage":[1025,"lf-message"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-460d4637",[[257,"lf-spinner",{"lfActive":[1540,"lf-active"],"lfBarVariant":[1540,"lf-bar-variant"],"lfDimensions":[1025,"lf-dimensions"],"lfFader":[1540,"lf-fader"],"lfFaderTimeout":[1026,"lf-fader-timeout"],"lfFullScreen":[1540,"lf-full-screen"],"lfLayout":[1026,"lf-layout"],"lfStyle":[1025,"lf-style"],"lfTimeout":[1026,"lf-timeout"],"bigWait":[32],"debugInfo":[32],"progress":[32],"getDebugInfo":[64],"getProps":[64],"getProgress":[64],"refresh":[64],"unmount":[64]},null,{"lfActive":["onFaderChange"],"lfFader":["onFaderChange"],"lfFaderTimeout":["onFaderChange"],"lfBarVariant":["lfBarVariantChanged"],"lfTimeout":["lfTimeoutChanged"]}],[257,"lf-list",{"lfDataset":[1040],"lfEmpty":[1025,"lf-empty"],"lfEnableDeletions":[1028,"lf-enable-deletions"],"lfFilter":[1028,"lf-filter"],"lfNavigation":[1028,"lf-navigation"],"lfRipple":[1028,"lf-ripple"],"lfSelectable":[1028,"lf-selectable"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[2,"lf-value"],"debugInfo":[32],"filter":[32],"focused":[32],"selected":[32],"applyFilter":[64],"focusNext":[64],"focusPrevious":[64],"getDebugInfo":[64],"getProps":[64],"getSelected":[64],"refresh":[64],"selectNode":[64],"selectNodeById":[64],"setFilter":[64],"unmount":[64]},[[0,"keydown","listenKeydown"]],{"lfFilter":["handleFilterToggle"]}],[257,"lf-textfield",{"lfFormatJSON":[1040],"lfHelper":[1040],"lfHtmlAttributes":[1040],"lfIcon":[1025,"lf-icon"],"lfLabel":[1025,"lf-label"],"lfStretchX":[1540,"lf-stretch-x"],"lfStretchY":[1540,"lf-stretch-y"],"lfStyle":[1025,"lf-style"],"lfStyling":[1025,"lf-styling"],"lfTrailingIcon":[1540,"lf-trailing-icon"],"lfTrailingIconAction":[1025,"lf-trailing-icon-action"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1,"lf-value"],"debugInfo":[32],"status":[32],"value":[32],"formatJSON":[64],"getDebugInfo":[64],"getElement":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setBlur":[64],"setFocus":[64],"setValue":[64],"unmount":[64]}]]],["p-907b39f3",[[257,"lf-card",{"lfDataset":[1040],"lfLayout":[1025,"lf-layout"],"lfSizeX":[1025,"lf-size-x"],"lfSizeY":[1025,"lf-size-y"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"debugInfo":[32],"shapes":[32],"getDebugInfo":[64],"getProps":[64],"getShapes":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["updateShapes"]}],[257,"lf-badge",{"lfImageProps":[1040],"lfLabel":[1025,"lf-label"],"lfPosition":[1537,"lf-position"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}],[257,"lf-canvas",{"lfBrush":[1025,"lf-brush"],"lfColor":[1025,"lf-color"],"lfCursor":[1025,"lf-cursor"],"lfImageProps":[1040],"lfOpacity":[1026,"lf-opacity"],"lfPreview":[1028,"lf-preview"],"lfStrokeTolerance":[1026,"lf-stroke-tolerance"],"lfSize":[1026,"lf-size"],"lfStyle":[1025,"lf-style"],"boxing":[32],"debugInfo":[32],"isPainting":[32],"orientation":[32],"points":[32],"clearCanvas":[64],"getCanvas":[64],"getDebugInfo":[64],"getImage":[64],"getProps":[64],"refresh":[64],"resizeCanvas":[64],"setCanvasHeight":[64],"setCanvasWidth":[64],"unmount":[64]}],[257,"lf-photoframe",{"lfOverlay":[1040],"lfPlaceholder":[16],"lfStyle":[1025,"lf-style"],"lfThreshold":[2,"lf-threshold"],"lfValue":[16],"debugInfo":[32],"imageOrientation":[32],"isInViewport":[32],"isReady":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}],[257,"lf-chart",{"lfAxis":[1025,"lf-axis"],"lfColors":[1040],"lfDataset":[1040],"lfLegend":[1025,"lf-legend"],"lfSeries":[1040],"lfSizeX":[1025,"lf-size-x"],"lfSizeY":[1025,"lf-size-y"],"lfStyle":[1025,"lf-style"],"lfTypes":[1040],"lfXAxis":[1040],"lfYAxis":[1040],"debugInfo":[32],"themeValues":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"resize":[64],"unmount":[64]}],[257,"lf-toggle",{"lfAriaLabel":[1025,"lf-aria-label"],"lfLabel":[1025,"lf-label"],"lfLeadingLabel":[1028,"lf-leading-label"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[4,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}],[257,"lf-typewriter",{"lfCursor":[1025,"lf-cursor"],"lfDeleteSpeed":[1026,"lf-delete-speed"],"lfLoop":[1028,"lf-loop"],"lfPause":[1026,"lf-pause"],"lfSpeed":[1026,"lf-speed"],"lfStyle":[1025,"lf-style"],"lfTag":[1025,"lf-tag"],"lfUiSize":[1537,"lf-ui-size"],"lfUpdatable":[1028,"lf-updatable"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"displayedText":[32],"isDeleting":[32],"currentTextIndex":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfValue":["handleLfValueChange"]}],[257,"lf-upload",{"lfHtmlAttributes":[1040],"lfLabel":[1025,"lf-label"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfValue":[16],"debugInfo":[32],"selectedFiles":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"unmount":[64]}],[257,"lf-chat",{"lfAttachmentUploadTimeout":[1026,"lf-attachment-upload-timeout"],"lfConfig":[1040],"lfContextWindow":[1026,"lf-context-window"],"lfEmpty":[1025,"lf-empty"],"lfEndpointUrl":[1025,"lf-endpoint-url"],"lfTools":[1040],"lfFrequencyPenalty":[1026,"lf-frequency-penalty"],"lfLayout":[1025,"lf-layout"],"lfMaxTokens":[1026,"lf-max-tokens"],"lfPollingInterval":[1026,"lf-polling-interval"],"lfPresencePenalty":[1026,"lf-presence-penalty"],"lfSeed":[1026,"lf-seed"],"lfStyle":[1025,"lf-style"],"lfSystem":[1025,"lf-system"],"lfTemperature":[1026,"lf-temperature"],"lfTopP":[1026,"lf-top-p"],"lfUiSize":[1537,"lf-ui-size"],"lfValue":[1040],"lfUploadCallback":[1040],"currentAbortStreaming":[32],"currentAttachments":[32],"currentEditingIndex":[32],"currentPrompt":[32],"currentTokens":[32],"currentToolExecution":[32],"debugInfo":[32],"history":[32],"status":[32],"view":[32],"abortStreaming":[64],"getDebugInfo":[64],"getHistory":[64],"getLastMessage":[64],"getProps":[64],"handleImageAttachment":[64],"handleFileAttachment":[64],"removeAttachment":[64],"refresh":[64],"scrollToBottom":[64],"setHistory":[64],"exportHistory":[64],"unmount":[64]},[[0,"keydown","listenKeydown"]],{"lfPollingInterval":["updatePollingInterval"],"lfSystem":["updateTokensCount"]}],[257,"lf-code",{"lfFadeIn":[1028,"lf-fade-in"],"lfFormat":[1028,"lf-format"],"lfLanguage":[1025,"lf-language"],"lfPreserveSpaces":[1028,"lf-preserve-spaces"],"lfShowCopy":[1028,"lf-show-copy"],"lfShowHeader":[1028,"lf-show-header"],"lfStickyHeader":[1028,"lf-sticky-header"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfLanguage":["loadLanguage"]}],[257,"lf-progressbar",{"lfAnimated":[1540,"lf-animated"],"lfCenteredLabel":[1540,"lf-centered-label"],"lfIcon":[1537,"lf-icon"],"lfIsRadial":[1540,"lf-is-radial"],"lfLabel":[1025,"lf-label"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1026,"lf-value"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}],[257,"lf-chip",{"lfAriaLabel":[1025,"lf-aria-label"],"lfDataset":[1040],"lfFlat":[1028,"lf-flat"],"lfRipple":[1028,"lf-ripple"],"lfShowSpinner":[1028,"lf-show-spinner"],"lfStyle":[1025,"lf-style"],"lfStyling":[1025,"lf-styling"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[16],"debugInfo":[32],"expandedNodes":[32],"hiddenNodes":[32],"selectedNodes":[32],"getDebugInfo":[64],"getProps":[64],"getSelectedNodes":[64],"refresh":[64],"setSelectedNodes":[64],"unmount":[64]}],[257,"lf-image",{"lfHtmlAttributes":[1040],"lfMode":[1537,"lf-mode"],"lfShowSpinner":[1028,"lf-show-spinner"],"lfSizeX":[1025,"lf-size-x"],"lfSizeY":[1025,"lf-size-y"],"lfStyle":[1025,"lf-style"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"error":[32],"isLoaded":[32],"resolvedSpriteName":[32],"getDebugInfo":[64],"getImage":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfValue":["resetState"]}],[257,"lf-button",{"lfAriaLabel":[1025,"lf-aria-label"],"lfDataset":[1040],"lfIcon":[1025,"lf-icon"],"lfIconOff":[1025,"lf-icon-off"],"lfLabel":[1025,"lf-label"],"lfRipple":[1028,"lf-ripple"],"lfShowSpinner":[1540,"lf-show-spinner"],"lfStretchX":[1540,"lf-stretch-x"],"lfStretchY":[1540,"lf-stretch-y"],"lfStyle":[1025,"lf-style"],"lfStyling":[1025,"lf-styling"],"lfToggable":[1028,"lf-toggable"],"lfTrailingIcon":[1028,"lf-trailing-icon"],"lfType":[1025,"lf-type"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[4,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setMessage":[64],"setValue":[64],"unmount":[64]},null,{"lfDataset":["onDatasetChanged"]}]]],["p-d28f7231",[[257,"lf-masonry",{"lfActions":[1028,"lf-actions"],"lfCollapseColumns":[1028,"lf-collapse-columns"],"lfColumns":[1026,"lf-columns"],"lfDataset":[1040],"lfSelectable":[1540,"lf-selectable"],"lfShape":[1025,"lf-shape"],"lfStyle":[1025,"lf-style"],"lfView":[1025,"lf-view"],"debugInfo":[32],"selectedShape":[32],"shapes":[32],"viewportWidth":[32],"getDebugInfo":[64],"getProps":[64],"getSelectedShape":[64],"redecorateShapes":[64],"refresh":[64],"setSelectedShape":[64],"unmount":[64]},null,{"lfColumns":["validateColumns"],"lfDataset":["updateShapes"],"lfShape":["updateShapes"]}]]],["p-3897a69c",[[257,"lf-tabbar",{"lfAriaLabel":[1025,"lf-aria-label"],"lfDataset":[16],"lfNavigation":[4,"lf-navigation"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[8,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}]]],["p-62bc1582",[[257,"lf-tree",{"lfAccordionLayout":[1540,"lf-accordion-layout"],"lfDataset":[1040],"lfEmpty":[1025,"lf-empty"],"lfExpandedNodeIds":[1040],"lfFilter":[1028,"lf-filter"],"lfGrid":[1540,"lf-grid"],"lfInitialExpansionDepth":[1026,"lf-initial-expansion-depth"],"lfSelectedNodeIds":[1040],"lfRipple":[1028,"lf-ripple"],"lfSelectable":[1540,"lf-selectable"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"debugInfo":[32],"expandedNodes":[32],"hiddenNodes":[32],"selectedNode":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"getExpandedNodeIds":[64],"getSelectedNodeIds":[64],"setExpandedNodes":[64],"setSelectedNodes":[64],"selectByPredicate":[64],"unmount":[64]},null,{"lfDataset":["handleDatasetChange"],"lfExpandedNodeIds":["handleExpandedPropChange"],"lfSelectedNodeIds":["handleSelectedPropChange"],"lfInitialExpansionDepth":["handleInitialDepthChange"],"lfSelectable":["handleSelectableChange"],"lfFilter":["handleFilterToggle"]}]]]]'), e2))));
 var t = Object.defineProperty, n = (t5) => {
   if (t5.__stencil__getHostRef) return t5.__stencil__getHostRef();
-}, l = (t5, e2) => e2 in t5, r$1 = (t5, e2) => (0, console.error)(t5, e2), i = /* @__PURE__ */ new Map(), s = /* @__PURE__ */ new Map(), c = "slot-fb{display:contents}slot-fb[hidden]{display:none}", u$c = "http://www.w3.org/1999/xlink", a$1 = "undefined" != typeof window ? window : {}, f$1 = { u: 0, h: "", jmp: (t5) => t5(), raf: (t5) => requestAnimationFrame(t5), ael: (t5, e2, n2, o2) => t5.addEventListener(e2, n2, o2), rel: (t5, e2, n2, o2) => t5.removeEventListener(e2, n2, o2), ce: (t5, e2) => new CustomEvent(t5, e2) }, d$1 = (t5) => Promise.resolve(t5), h = (() => {
+}, l = (t5, e2) => e2 in t5, r$1 = (t5, e2) => (0, console.error)(t5, e2), i = /* @__PURE__ */ new Map(), s = /* @__PURE__ */ new Map(), c = "slot-fb{display:contents}slot-fb[hidden]{display:none}", u$c = "http://www.w3.org/1999/xlink", a$1 = "undefined" != typeof window ? window : {}, f$1 = { u: 0, h: "", jmp: (t5) => t5(), raf: (t5) => requestAnimationFrame(t5), ael: (t5, e2, n2, o2) => t5.addEventListener(e2, n2, o2), rel: (t5, e2, n2, o2) => t5.removeEventListener(e2, n2, o2), ce: (t5, e2) => new CustomEvent(t5, e2) }, d$2 = (t5) => Promise.resolve(t5), h = (() => {
   try {
     return new CSSStyleSheet(), "function" == typeof new CSSStyleSheet().replaceSync;
   } catch (t5) {
   }
   return false;
-})(), p$8 = !!h && (() => !!a$1.document && Object.getOwnPropertyDescriptor(a$1.document.adoptedStyleSheets, "length").writable)(), v$d = false, m$d = [], b$b = [], y$g = (t5, e2) => (n2) => {
-  t5.push(n2), v$d || (v$d = true, 4 & f$1.u ? g$e($$5) : f$1.raf($$5));
-}, w$h = (t5) => {
+})(), p$9 = !!h && (() => !!a$1.document && Object.getOwnPropertyDescriptor(a$1.document.adoptedStyleSheets, "length").writable)(), v$e = false, m$d = [], b$c = [], y$h = (t5, e2) => (n2) => {
+  t5.push(n2), v$e || (v$e = true, 4 & f$1.u ? g$f($$6) : f$1.raf($$6));
+}, w$i = (t5) => {
   for (let e2 = 0; e2 < t5.length; e2++) try {
     t5[e2](performance.now());
   } catch (t6) {
     r$1(t6);
   }
   t5.length = 0;
-}, $$5 = () => {
-  w$h(m$d), w$h(b$b), (v$d = m$d.length > 0) && f$1.raf($$5);
-}, g$e = (t5) => d$1().then(t5), j$c = y$g(b$b), O$6 = (t5) => "object" == (t5 = typeof t5) || "function" === t5;
-function S$a(t5) {
+}, $$6 = () => {
+  w$i(m$d), w$i(b$c), (v$e = m$d.length > 0) && f$1.raf($$6);
+}, g$f = (t5) => d$2().then(t5), j$d = y$h(b$c), O$7 = (t5) => "object" == (t5 = typeof t5) || "function" === t5;
+function S$b(t5) {
   var e2, n2, o2;
   return null != (o2 = null == (n2 = null == (e2 = t5.head) ? void 0 : e2.querySelector('meta[name="csp-nonce"]')) ? void 0 : n2.getAttribute("content")) ? o2 : void 0;
 }
 ((e2, n2) => {
   for (var o2 in n2) t(e2, o2, { get: n2[o2], enumerable: true });
-})({}, { err: () => E$g, map: () => x$h, ok: () => k$h, unwrap: () => M$g, unwrapErr: () => P$8 });
-var k$h = (t5) => ({ isOk: true, isErr: false, value: t5 }), E$g = (t5) => ({ isOk: false, isErr: true, value: t5 });
-function x$h(t5, e2) {
+})({}, { err: () => E$h, map: () => x$i, ok: () => k$i, unwrap: () => M$h, unwrapErr: () => P$9 });
+var k$i = (t5) => ({ isOk: true, isErr: false, value: t5 }), E$h = (t5) => ({ isOk: false, isErr: true, value: t5 });
+function x$i(t5, e2) {
   if (t5.isOk) {
     const n2 = e2(t5.value);
-    return n2 instanceof Promise ? n2.then(((t6) => k$h(t6))) : k$h(n2);
+    return n2 instanceof Promise ? n2.then(((t6) => k$i(t6))) : k$i(n2);
   }
-  if (t5.isErr) return E$g(t5.value);
+  if (t5.isErr) return E$h(t5.value);
   throw "should never get here";
 }
-var C$f, M$g = (t5) => {
+var C$g, M$h = (t5) => {
   if (t5.isOk) return t5.value;
   throw t5.value;
-}, P$8 = (t5) => {
+}, P$9 = (t5) => {
   if (t5.isErr) return t5.value;
   throw t5.value;
 };
-function N$3() {
+function N$4() {
   const t5 = this.attachShadow({ mode: "open" });
-  void 0 === C$f && (C$f = null), C$f && (p$8 ? t5.adoptedStyleSheets.push(C$f) : t5.adoptedStyleSheets = [...t5.adoptedStyleSheets, C$f]);
+  void 0 === C$g && (C$g = null), C$g && (p$9 ? t5.adoptedStyleSheets.push(C$g) : t5.adoptedStyleSheets = [...t5.adoptedStyleSheets, C$g]);
 }
-var R$9 = /* @__PURE__ */ new WeakMap(), D$c = (t5) => "sc-" + t5.p, U$4 = (t5, e2, ...n2) => {
+var R$a = /* @__PURE__ */ new WeakMap(), D$d = (t5) => "sc-" + t5.p, U$5 = (t5, e2, ...n2) => {
   let o2 = null, l2 = null, r2 = false, i2 = false;
   const s2 = [], c2 = (e3) => {
-    for (let n3 = 0; n3 < e3.length; n3++) o2 = e3[n3], Array.isArray(o2) ? c2(o2) : null != o2 && "boolean" != typeof o2 && ((r2 = !O$6(o2)) && (o2 += ""), r2 && i2 ? s2[s2.length - 1].v += o2 : s2.push(r2 ? W$h(null, o2) : o2), i2 = r2);
+    for (let n3 = 0; n3 < e3.length; n3++) o2 = e3[n3], Array.isArray(o2) ? c2(o2) : null != o2 && "boolean" != typeof o2 && ((r2 = !O$7(o2)) && (o2 += ""), r2 && i2 ? s2[s2.length - 1].v += o2 : s2.push(r2 ? W$i(null, o2) : o2), i2 = r2);
   };
   if (c2(n2), e2) ;
-  const u2 = W$h(t5, null);
+  const u2 = W$i(t5, null);
   return u2.m = e2, s2.length > 0 && (u2.$ = s2), u2.j = l2, u2;
-}, W$h = (t5, e2) => ({ u: 0, O: t5, v: e2, S: null, $: null, m: null, j: null }), A$8 = {}, T$d = (t5) => {
+}, W$i = (t5, e2) => ({ u: 0, O: t5, v: e2, S: null, $: null, m: null, j: null }), A$9 = {}, T$e = (t5) => {
   const e2 = ((t6) => t6.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))(t5);
   return RegExp(`(^|[^@]|@(?!supports\\s+selector\\s*\\([^{]*?${e2}))(${e2}\\b)`, "g");
 };
-T$d("::slotted"), T$d(":host"), T$d(":host-context");
-var z$i, V$6 = (t5, e2) => null == t5 || O$6(t5) ? t5 : 4 & e2 ? "false" !== t5 && ("" === t5 || !!t5) : 2 & e2 ? "string" == typeof t5 ? parseFloat(t5) : "number" == typeof t5 ? t5 : NaN : 1 & e2 ? t5 + "" : t5, I$9 = (t5, e2, n2) => {
+T$e("::slotted"), T$e(":host"), T$e(":host-context");
+var z$j, V$7 = (t5, e2) => null == t5 || O$7(t5) ? t5 : 4 & e2 ? "false" !== t5 && ("" === t5 || !!t5) : 2 & e2 ? "string" == typeof t5 ? parseFloat(t5) : "number" == typeof t5 ? t5 : NaN : 1 & e2 ? t5 + "" : t5, I$a = (t5, e2, n2) => {
   const o2 = f$1.ce(e2, n2);
   return t5.dispatchEvent(o2), o2;
-}, Y$5 = (t5, e2, n2, o2, r2, i2) => {
+}, Y$6 = (t5, e2, n2, o2, r2, i2) => {
   if (n2 === o2) return;
   let s2 = l(t5, e2), c2 = e2.toLowerCase();
   if ("class" === e2) {
-    const e3 = t5.classList, l2 = B$5(n2);
-    let r3 = B$5(o2);
+    const e3 = t5.classList, l2 = B$6(n2);
+    let r3 = B$6(o2);
     e3.remove(...l2.filter(((t6) => t6 && !r3.includes(t6)))), e3.add(...r3.filter(((t6) => t6 && !l2.includes(t6))));
   } else if ("style" === e2) {
     for (const e3 in n2) o2 && null != o2[e3] || (e3.includes("-") ? t5.style.removeProperty(e3) : t5.style[e3] = "");
@@ -680,7 +680,7 @@ var z$i, V$6 = (t5, e2) => null == t5 || O$6(t5) ? t5 : 4 & e2 ? "false" !== t5 
   } else if ("key" === e2) ;
   else if ("ref" === e2) o2 && o2(t5);
   else if (s2 || "o" !== e2[0] || "n" !== e2[1]) {
-    const l2 = O$6(o2);
+    const l2 = O$7(o2);
     if ((s2 || l2 && null !== o2) && !r2) try {
       if (t5.tagName.includes("-")) t5[e2] !== o2 && (t5[e2] = o2);
       else {
@@ -692,15 +692,15 @@ var z$i, V$6 = (t5, e2) => null == t5 || O$6(t5) ? t5 : 4 & e2 ? "false" !== t5 
     let a2 = false;
     c2 !== (c2 = c2.replace(/^xlink\:?/, "")) && (e2 = c2, a2 = true), null == o2 || false === o2 ? false === o2 && "" !== t5.getAttribute(e2) || (a2 ? t5.removeAttributeNS(u$c, e2) : t5.removeAttribute(e2)) : (!s2 || 4 & i2 || r2) && !l2 && 1 === t5.nodeType && (o2 = true === o2 ? "" : o2, a2 ? t5.setAttributeNS(u$c, e2, o2) : t5.setAttribute(e2, o2));
   } else if (e2 = "-" === e2[2] ? e2.slice(3) : l(a$1, c2) ? c2.slice(2) : c2[2] + e2.slice(3), n2 || o2) {
-    const l2 = e2.endsWith(J$2);
-    e2 = e2.replace(K$2, ""), n2 && f$1.rel(t5, e2, n2, l2), o2 && f$1.ael(t5, e2, o2, l2);
+    const l2 = e2.endsWith(J$3);
+    e2 = e2.replace(K$3, ""), n2 && f$1.rel(t5, e2, n2, l2), o2 && f$1.ael(t5, e2, o2, l2);
   }
-}, _$c = /\s/, B$5 = (t5) => ("object" == typeof t5 && t5 && "baseVal" in t5 && (t5 = t5.baseVal), t5 && "string" == typeof t5 ? t5.split(_$c) : []), J$2 = "Capture", K$2 = RegExp(J$2 + "$"), Q$2 = (t5, e2, n2) => {
+}, _$d = /\s/, B$6 = (t5) => ("object" == typeof t5 && t5 && "baseVal" in t5 && (t5 = t5.baseVal), t5 && "string" == typeof t5 ? t5.split(_$d) : []), J$3 = "Capture", K$3 = RegExp(J$3 + "$"), Q$3 = (t5, e2, n2) => {
   const o2 = 11 === e2.S.nodeType && e2.S.host ? e2.S.host : e2.S, l2 = t5 && t5.m || {}, r2 = e2.m || {};
-  for (const t6 of X$3(Object.keys(l2))) t6 in r2 || Y$5(o2, t6, l2[t6], void 0, n2, e2.u);
-  for (const t6 of X$3(Object.keys(r2))) Y$5(o2, t6, l2[t6], r2[t6], n2, e2.u);
+  for (const t6 of X$4(Object.keys(l2))) t6 in r2 || Y$6(o2, t6, l2[t6], void 0, n2, e2.u);
+  for (const t6 of X$4(Object.keys(r2))) Y$6(o2, t6, l2[t6], r2[t6], n2, e2.u);
 };
-function X$3(t5) {
+function X$4(t5) {
   return t5.includes("ref") ? [...t5.filter(((t6) => "ref" !== t6)), "ref"] : t5;
 }
 var Z$3 = false, tt = (t5, e2, n2) => {
@@ -709,13 +709,13 @@ var Z$3 = false, tt = (t5, e2, n2) => {
   if (null !== o2.v) l2 = o2.S = a$1.document.createTextNode(o2.v);
   else {
     if (Z$3 || (Z$3 = "svg" === o2.O), !a$1.document) throw Error("You are trying to render a Stencil component in an environment that doesn't support the DOM. Make sure to populate the [`window`](https://developer.mozilla.org/en-US/docs/Web/API/Window/window) object before rendering a component.");
-    if (l2 = o2.S = a$1.document.createElementNS(Z$3 ? "http://www.w3.org/2000/svg" : "http://www.w3.org/1999/xhtml", o2.O), Z$3 && "foreignObject" === o2.O && (Z$3 = false), Q$2(null, o2, Z$3), o2.$) for (i2 = 0; i2 < o2.$.length; ++i2) r2 = tt(t5, o2, i2), r2 && l2.appendChild(r2);
+    if (l2 = o2.S = a$1.document.createElementNS(Z$3 ? "http://www.w3.org/2000/svg" : "http://www.w3.org/1999/xhtml", o2.O), Z$3 && "foreignObject" === o2.O && (Z$3 = false), Q$3(null, o2, Z$3), o2.$) for (i2 = 0; i2 < o2.$.length; ++i2) r2 = tt(t5, o2, i2), r2 && l2.appendChild(r2);
     "svg" === o2.O ? Z$3 = false : "foreignObject" === l2.tagName && (Z$3 = true);
   }
-  return l2["s-hn"] = z$i, l2;
+  return l2["s-hn"] = z$j, l2;
 }, et = (t5, e2, n2, o2, l2, r2) => {
   let i2, s2 = t5;
-  for (s2.shadowRoot && s2.tagName === z$i && (s2 = s2.shadowRoot); l2 <= r2; ++l2) o2[l2] && (i2 = tt(null, n2, l2), i2 && (o2[l2].S = i2, it(s2, i2, e2)));
+  for (s2.shadowRoot && s2.tagName === z$j && (s2 = s2.shadowRoot); l2 <= r2; ++l2) o2[l2] && (i2 = tt(null, n2, l2), i2 && (o2[l2].S = i2, it(s2, i2, e2)));
 }, nt = (t5, e2, n2) => {
   for (let o2 = e2; o2 <= n2; ++o2) {
     const e3 = t5[o2];
@@ -726,7 +726,7 @@ var Z$3 = false, tt = (t5, e2, n2) => {
   }
 }, ot = (t5, e2, n2 = false) => t5.O === e2.O && (n2 ? (n2 && !t5.j && e2.j && (t5.j = e2.j), true) : t5.j === e2.j), lt = (t5, e2, n2 = false) => {
   const o2 = e2.S = t5.S, l2 = t5.$, r2 = e2.$, i2 = e2.O, s2 = e2.v;
-  null === s2 ? (Q$2(t5, e2, Z$3 = "svg" === i2 || "foreignObject" !== i2 && Z$3), null !== l2 && null !== r2 ? ((t6, e3, n3, o3, l3 = false) => {
+  null === s2 ? (Q$3(t5, e2, Z$3 = "svg" === i2 || "foreignObject" !== i2 && Z$3), null !== l2 && null !== r2 ? ((t6, e3, n3, o3, l3 = false) => {
     let r3, i3, s3 = 0, c2 = 0, u2 = 0, a2 = 0, f2 = e3.length - 1, d2 = e3[0], h2 = e3[f2], p2 = o3.length - 1, v2 = o3[0], m2 = o3[p2];
     for (; s3 <= f2 && c2 <= p2; ) if (null == d2) d2 = e3[++s3];
     else if (null == h2) h2 = e3[--f2];
@@ -757,7 +757,7 @@ var Z$3 = false, tt = (t5, e2, n2) => {
   if (t5.u |= 16, 4 & t5.u) return void (t5.u |= 512);
   st(t5, t5.M);
   const n2 = () => ut(t5, e2);
-  if (!e2) return j$c(n2);
+  if (!e2) return j$d(n2);
   queueMicrotask((() => {
     n2();
   }));
@@ -774,20 +774,20 @@ var Z$3 = false, tt = (t5, e2, n2) => {
   n2 && ((t6) => {
     const e3 = t6.o, n3 = t6.$hostElement$, o3 = e3.u, l3 = ((t7, e4) => {
       var n4;
-      const o4 = D$c(e4), l4 = s.get(o4);
+      const o4 = D$d(e4), l4 = s.get(o4);
       if (!a$1.document) return o4;
       if (t7 = 11 === t7.nodeType ? t7 : a$1.document, l4) if ("string" == typeof l4) {
-        let r3, i2 = R$9.get(t7 = t7.head || t7);
-        if (i2 || R$9.set(t7, i2 = /* @__PURE__ */ new Set()), !i2.has(o4)) {
+        let r3, i2 = R$a.get(t7 = t7.head || t7);
+        if (i2 || R$a.set(t7, i2 = /* @__PURE__ */ new Set()), !i2.has(o4)) {
           {
             r3 = a$1.document.createElement("style"), r3.innerHTML = l4;
-            const o5 = null != (n4 = f$1.R) ? n4 : S$a(a$1.document);
+            const o5 = null != (n4 = f$1.R) ? n4 : S$b(a$1.document);
             if (null != o5 && r3.setAttribute("nonce", o5), !(1 & e4.u)) if ("HEAD" === t7.nodeName) {
               const e5 = t7.querySelectorAll("link[rel=preconnect]"), n5 = e5.length > 0 ? e5[e5.length - 1].nextSibling : t7.querySelector("style");
               t7.insertBefore(r3, (null == n5 ? void 0 : n5.parentNode) === t7 ? n5 : null);
             } else if ("host" in t7) if (h) {
               const e5 = new CSSStyleSheet();
-              e5.replaceSync(l4), p$8 ? t7.adoptedStyleSheets.unshift(e5) : t7.adoptedStyleSheets = [e5, ...t7.adoptedStyleSheets];
+              e5.replaceSync(l4), p$9 ? t7.adoptedStyleSheets.unshift(e5) : t7.adoptedStyleSheets = [e5, ...t7.adoptedStyleSheets];
             } else {
               const e5 = t7.querySelector("style");
               e5 ? e5.innerHTML = l4 + e5.innerHTML : t7.prepend(r3);
@@ -797,7 +797,7 @@ var Z$3 = false, tt = (t5, e2, n2) => {
           }
           4 & e4.u && (r3.innerHTML += c), i2 && i2.add(o4);
         }
-      } else t7.adoptedStyleSheets.includes(l4) || (p$8 ? t7.adoptedStyleSheets.push(l4) : t7.adoptedStyleSheets = [...t7.adoptedStyleSheets, l4]);
+      } else t7.adoptedStyleSheets.includes(l4) || (p$9 ? t7.adoptedStyleSheets.push(l4) : t7.adoptedStyleSheets = [...t7.adoptedStyleSheets, l4]);
       return o4;
     })(n3.shadowRoot ? n3.shadowRoot : n3.getRootNode(), e3);
     10 & o3 && (n3["s-sc"] = l3, n3.classList.add(l3 + "-h"));
@@ -810,8 +810,8 @@ var Z$3 = false, tt = (t5, e2, n2) => {
 }, ht = (t5, e2, n2, o2) => {
   try {
     e2 = e2.render(), t5.u &= -17, t5.u |= 2, ((t6, e3, n3 = false) => {
-      const o3 = t6.$hostElement$, l2 = t6.o, r2 = t6.D || W$h(null, null), i2 = ((t7) => t7 && t7.O === A$8)(e3) ? e3 : U$4(null, null, e3);
-      if (z$i = o3.tagName, l2.U && (i2.m = i2.m || {}, l2.U.forEach((([t7, e4]) => {
+      const o3 = t6.$hostElement$, l2 = t6.o, r2 = t6.D || W$i(null, null), i2 = ((t7) => t7 && t7.O === A$9)(e3) ? e3 : U$5(null, null, e3);
+      if (z$j = o3.tagName, l2.U && (i2.m = i2.m || {}, l2.U.forEach((([t7, e4]) => {
         i2.m[e4] = o3[t7];
       }))), n3 && i2.m) for (const t7 of Object.keys(i2.m)) o3.hasAttribute(t7) && !["key", "ref", "style", "class"].includes(t7) && (i2.m[t7] = o3[t7]);
       i2.O = null, i2.u |= 4, t6.D = i2, i2.S = r2.S = o3.shadowRoot || o3, lt(r2, i2, n3);
@@ -822,9 +822,9 @@ var Z$3 = false, tt = (t5, e2, n2) => {
   return null;
 }, pt$1 = (t5) => {
   const e2 = t5.$hostElement$, n2 = t5.i, o2 = t5.M;
-  bt$1(n2, "componentDidRender", void 0, e2), 64 & t5.u ? bt$1(n2, "componentDidUpdate", void 0, e2) : (t5.u |= 64, yt$1(e2), bt$1(n2, "componentDidLoad", void 0, e2), t5.W(e2), o2 || mt$1()), t5.A(e2), t5.C && (t5.C(), t5.C = void 0), 512 & t5.u && g$e((() => ct(t5, false))), t5.u &= -517;
+  bt$1(n2, "componentDidRender", void 0, e2), 64 & t5.u ? bt$1(n2, "componentDidUpdate", void 0, e2) : (t5.u |= 64, yt$1(e2), bt$1(n2, "componentDidLoad", void 0, e2), t5.W(e2), o2 || mt$1()), t5.A(e2), t5.C && (t5.C(), t5.C = void 0), 512 & t5.u && g$f((() => ct(t5, false))), t5.u &= -517;
 }, mt$1 = () => {
-  g$e((() => I$9(a$1, "appload", { detail: { namespace: "lf-core" } })));
+  g$f((() => I$a(a$1, "appload", { detail: { namespace: "lf-core" } })));
 }, bt$1 = (t5, e2, n2, o2) => {
   if (t5 && t5[e2]) try {
     return t5[e2](n2);
@@ -836,7 +836,7 @@ var Z$3 = false, tt = (t5, e2, n2) => {
   if (!i2) return;
   if (!i2) throw Error(`Couldn't find host element for "${l2.p}" as it is unknown to this Stencil runtime. This usually happens when integrating a 3rd party Stencil component with another Stencil component or application. Please reach out to the maintainers of the 3rd party Stencil component or report this on the Stencil Discord server (https://chat.stenciljs.com) or comment on this similar [GitHub issue](https://github.com/stenciljs/core/issues/5457).`);
   const s2 = i2.$hostElement$, c2 = i2.l.get(e2), u2 = i2.u, a2 = i2.i;
-  if (o2 = V$6(o2, l2.t[e2][0]), (!(8 & u2) || void 0 === c2) && o2 !== c2 && (!Number.isNaN(c2) || !Number.isNaN(o2)) && (i2.l.set(e2, o2), a2)) {
+  if (o2 = V$7(o2, l2.t[e2][0]), (!(8 & u2) || void 0 === c2) && o2 !== c2 && (!Number.isNaN(c2) || !Number.isNaN(o2)) && (i2.l.set(e2, o2), a2)) {
     if (l2.F && 128 & u2) {
       const t6 = l2.F[e2];
       t6 && t6.map(((t7) => {
@@ -871,14 +871,14 @@ var Z$3 = false, tt = (t5, e2, n2) => {
         }, configurable: true, enumerable: true }), Object.defineProperty(i2, t6, { set(r4) {
           const i3 = n(this);
           if (i3) {
-            if (s3) return void 0 === (32 & l3 ? this[t6] : i3.$hostElement$[t6]) && i3.l.get(t6) && (r4 = i3.l.get(t6)), s3.call(this, V$6(r4, l3)), void wt$1(this, t6, r4 = 32 & l3 ? this[t6] : i3.$hostElement$[t6], e2);
+            if (s3) return void 0 === (32 & l3 ? this[t6] : i3.$hostElement$[t6]) && i3.l.get(t6) && (r4 = i3.l.get(t6)), s3.call(this, V$7(r4, l3)), void wt$1(this, t6, r4 = 32 & l3 ? this[t6] : i3.$hostElement$[t6], e2);
             {
               if (!(1 & o2 && 4096 & e2.t[t6][0])) return wt$1(this, t6, r4, e2), void (1 & o2 && !i3.i && i3.N.push((() => {
                 4096 & e2.t[t6][0] && i3.i[t6] !== i3.l.get(t6) && (i3.i[t6] = r4);
               })));
               const n2 = () => {
                 const n3 = i3.i[t6];
-                !i3.l.get(t6) && n3 && i3.l.set(t6, n3), i3.i[t6] = V$6(r4, l3), wt$1(this, t6, i3.i[t6], e2);
+                !i3.l.get(t6) && n3 && i3.l.set(t6, n3), i3.i[t6] = V$7(r4, l3), wt$1(this, t6, i3.i[t6], e2);
               };
               i3.i ? n2() : i3.N.push((() => {
                 n2();
@@ -949,7 +949,7 @@ var Z$3 = false, tt = (t5, e2, n2) => {
             t8.__stencil__getHostRef = () => o4;
           })(t7 = this, p3), 1 & p3.u) if (t7.shadowRoot) {
             if ("open" !== t7.shadowRoot.mode) throw Error(`Unable to re-use existing shadow root for ${p3.p}! Mode is set to ${t7.shadowRoot.mode} but Stencil only supports open shadow roots.`);
-          } else N$3.call(t7, p3);
+          } else N$4.call(t7, p3);
         }
         connectedCallback() {
           const t7 = n(this);
@@ -1002,7 +1002,7 @@ var Z$3 = false, tt = (t5, e2, n2) => {
                     if (o5 && o5.style) {
                       let t10;
                       "string" == typeof o5.style && (t10 = o5.style);
-                      const e6 = D$c(n2);
+                      const e6 = D$d(n2);
                       if (!s.has(e6)) {
                         ((t11, e7, n3) => {
                           let o6 = s.get(t11);
@@ -1024,7 +1024,7 @@ var Z$3 = false, tt = (t5, e2, n2) => {
               const e4 = n(t7);
               (null == e4 ? void 0 : e4._) && (e4._.map(((t8) => t8())), e4._ = void 0), (null == e4 ? void 0 : e4.i) ? jt$1(e4.i, t7) : (null == e4 ? void 0 : e4.G) && e4.G.then((() => jt$1(e4.i, t7)));
             }
-            R$9.has(t7) && R$9.delete(t7), t7.shadowRoot && R$9.has(t7.shadowRoot) && R$9.delete(t7.shadowRoot);
+            R$a.has(t7) && R$a.delete(t7), t7.shadowRoot && R$a.has(t7.shadowRoot) && R$a.delete(t7.shadowRoot);
           })(this))), f$1.raf((() => {
             var t7;
             const e4 = n(this);
@@ -1042,7 +1042,7 @@ var Z$3 = false, tt = (t5, e2, n2) => {
     }));
   })), l2.length > 0 && ($2 && (m2.textContent += c), m2.textContent += l2.sort() + "{visibility:hidden}[lf-hydrated]{visibility:inherit}", m2.innerHTML.length)) {
     m2.setAttribute("data-styles", "");
-    const t6 = null != (o2 = f$1.R) ? o2 : S$a(a$1.document);
+    const t6 = null != (o2 = f$1.R) ? o2 : S$b(a$1.document);
     null != t6 && m2.setAttribute("nonce", t6), p2.insertBefore(m2, v2 ? v2.nextSibling : p2.firstChild);
   }
   w3 = false, b2.length ? b2.map(((t6) => t6.connectedCallback())) : f$1.jmp((() => y2 = setTimeout(mt$1, 30)));
@@ -1063,8 +1063,8 @@ const o = () => {
 };
 (() => {
   const l2 = import.meta.url, f2 = {};
-  return "" !== l2 && (f2.resourcesUrl = new URL(".", l2).href), d$1(f2);
-})().then((async (e2) => (await o(), Ot$1(JSON.parse('[["p-012d7434",[[257,"lf-imageviewer",{"lfDataset":[1040],"lfLoadCallback":[1040],"lfNavigation":[1040],"lfStyle":[1025,"lf-style"],"lfValue":[1040],"debugInfo":[32],"currentShape":[32],"history":[32],"historyIndex":[32],"isNavigationTreeOpen":[32],"isSpinnerActive":[32],"addSnapshot":[64],"clearHistory":[64],"clearSelection":[64],"getComponents":[64],"getCurrentSnapshot":[64],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"reset":[64],"setSpinnerStatus":[64],"unmount":[64]}]]],["p-a1ddf6c3",[[257,"lf-compare",{"lfDataset":[1040],"lfShape":[1025,"lf-shape"],"lfStyle":[1025,"lf-style"],"lfView":[1025,"lf-view"],"debugInfo":[32],"isLeftPanelOpened":[32],"isRightPanelOpened":[32],"leftShape":[32],"rightShape":[32],"shapes":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["updateShapes"],"lfShape":["updateShapes"]}]]],["p-b3fd388a",[[257,"lf-accordion",{"lfDataset":[1040],"lfRipple":[1028,"lf-ripple"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"expandedNodes":[32],"selectedNodes":[32],"getDebugInfo":[64],"getProps":[64],"getSelectedNodes":[64],"refresh":[64],"toggleNode":[64],"unmount":[64]}]]],["p-c777df98",[[257,"lf-article",{"lfDataset":[1040],"lfEmpty":[1025,"lf-empty"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-b388f0aa",[[257,"lf-carousel",{"lfDataset":[1040],"lfAutoPlay":[4,"lf-auto-play"],"lfInterval":[2,"lf-interval"],"lfLightbox":[1540,"lf-lightbox"],"lfNavigation":[1028,"lf-navigation"],"lfShape":[1537,"lf-shape"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"currentIndex":[32],"shapes":[32],"getDebugInfo":[64],"getProps":[64],"goToSlide":[64],"nextSlide":[64],"prevSlide":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["updateShapes"],"lfShape":["updateShapes"]}]]],["p-04d20cb7",[[257,"lf-messenger",{"lfAutosave":[1028,"lf-autosave"],"lfDataset":[1040],"lfStyle":[1025,"lf-style"],"lfValue":[16],"debugInfo":[32],"chat":[32],"connectionStatus":[32],"covers":[32],"currentCharacter":[32],"formStatusMap":[32],"history":[32],"hoveredCustomizationOption":[32],"saveInProgress":[32],"ui":[32],"deleteOption":[64],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"reset":[64],"save":[64],"unmount":[64]}]]],["p-8b75a972",[[257,"lf-autocomplete",{"lfAllowFreeInput":[1028,"lf-allow-free-input"],"lfCache":[1028,"lf-cache"],"lfCacheTTL":[1026,"lf-cache-t-t-l"],"lfDataset":[1040],"lfDebounceMs":[1026,"lf-debounce-ms"],"lfListProps":[1040],"lfMaxCacheSize":[1026,"lf-max-cache-size"],"lfMinChars":[1026,"lf-min-chars"],"lfNavigation":[1028,"lf-navigation"],"lfSpinnerProps":[1040],"lfStyle":[1025,"lf-style"],"lfTextfieldProps":[1040],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"highlightedIndex":[32],"loading":[32],"inputValue":[32],"lastRequestedQuery":[32],"clearCache":[64],"clearInput":[64],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]},null,{"lfDataset":["onLfDatasetChange"],"loading":["onLoadingChange"]}]]],["p-d6ba92f7",[[257,"lf-select",{"lfDataset":[16],"lfListProps":[1040],"lfNavigation":[1028,"lf-navigation"],"lfStyle":[1025,"lf-style"],"lfTextfieldProps":[1040],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[8,"lf-value"],"debugInfo":[32],"focused":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"getSelectedIndex":[64],"refresh":[64],"setValue":[64],"unmount":[64]},null,{"lfDataset":["onLfDatasetChange"]}]]],["p-06ffde53",[[257,"lf-checkbox",{"lfAriaLabel":[1025,"lf-aria-label"],"lfLabel":[1025,"lf-label"],"lfLeadingLabel":[1028,"lf-leading-label"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[4,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}]]],["p-6f619be6",[[257,"lf-drawer",{"lfDisplay":[1537,"lf-display"],"lfPosition":[1537,"lf-position"],"lfResponsive":[1026,"lf-responsive"],"lfStyle":[1025,"lf-style"],"lfValue":[1540,"lf-value"],"debugInfo":[32],"close":[64],"getDebugInfo":[64],"getProps":[64],"isOpened":[64],"open":[64],"refresh":[64],"toggle":[64],"unmount":[64]},[[0,"keydown","listenKeydown"]],{"lfDisplay":["onLfDisplayChange"],"lfResponsive":["onLfResponsiveChange"]}]]],["p-0da2996f",[[257,"lf-header",{"lfStyle":[1025,"lf-style"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-77da9ac8",[[257,"lf-placeholder",{"lfIcon":[1,"lf-icon"],"lfProps":[16],"lfStyle":[1025,"lf-style"],"lfThreshold":[2,"lf-threshold"],"lfTrigger":[1,"lf-trigger"],"lfValue":[1,"lf-value"],"debugInfo":[32],"isInViewport":[32],"getComponent":[64],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-cb747392",[[257,"lf-radio",{"lfAriaLabel":[1025,"lf-aria-label"],"lfDataset":[1040],"lfOrientation":[1025,"lf-orientation"],"lfLeadingLabel":[1028,"lf-leading-label"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1,"lf-value"],"debugInfo":[32],"value":[32],"clearSelection":[64],"getAdapter":[64],"getDebugInfo":[64],"getSelectedNode":[64],"getProps":[64],"refresh":[64],"selectItem":[64],"unmount":[64]}]]],["p-9de9dd33",[[257,"lf-slider",{"lfLabel":[1025,"lf-label"],"lfLeadingLabel":[1028,"lf-leading-label"],"lfMax":[2,"lf-max"],"lfMin":[2,"lf-min"],"lfStep":[2,"lf-step"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1026,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}]]],["p-a5d3299e",[[257,"lf-splash",{"lfLabel":[1025,"lf-label"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"state":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-b5f1d3d9",[[257,"lf-toast",{"lfCloseIcon":[1025,"lf-close-icon"],"lfCloseCallback":[16],"lfIcon":[1025,"lf-icon"],"lfTimer":[2,"lf-timer"],"lfMessage":[1025,"lf-message"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-460d4637",[[257,"lf-spinner",{"lfActive":[1540,"lf-active"],"lfBarVariant":[1540,"lf-bar-variant"],"lfDimensions":[1025,"lf-dimensions"],"lfFader":[1540,"lf-fader"],"lfFaderTimeout":[1026,"lf-fader-timeout"],"lfFullScreen":[1540,"lf-full-screen"],"lfLayout":[1026,"lf-layout"],"lfStyle":[1025,"lf-style"],"lfTimeout":[1026,"lf-timeout"],"bigWait":[32],"debugInfo":[32],"progress":[32],"getDebugInfo":[64],"getProps":[64],"getProgress":[64],"refresh":[64],"unmount":[64]},null,{"lfActive":["onFaderChange"],"lfFader":["onFaderChange"],"lfFaderTimeout":["onFaderChange"],"lfBarVariant":["lfBarVariantChanged"],"lfTimeout":["lfTimeoutChanged"]}],[257,"lf-list",{"lfDataset":[1040],"lfEmpty":[1025,"lf-empty"],"lfEnableDeletions":[1028,"lf-enable-deletions"],"lfFilter":[1028,"lf-filter"],"lfNavigation":[1028,"lf-navigation"],"lfRipple":[1028,"lf-ripple"],"lfSelectable":[1028,"lf-selectable"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[2,"lf-value"],"debugInfo":[32],"filter":[32],"focused":[32],"selected":[32],"applyFilter":[64],"focusNext":[64],"focusPrevious":[64],"getDebugInfo":[64],"getProps":[64],"getSelected":[64],"refresh":[64],"selectNode":[64],"selectNodeById":[64],"setFilter":[64],"unmount":[64]},[[0,"keydown","listenKeydown"]],{"lfFilter":["handleFilterToggle"]}],[257,"lf-textfield",{"lfFormatJSON":[1040],"lfHelper":[1040],"lfHtmlAttributes":[1040],"lfIcon":[1025,"lf-icon"],"lfLabel":[1025,"lf-label"],"lfStretchX":[1540,"lf-stretch-x"],"lfStretchY":[1540,"lf-stretch-y"],"lfStyle":[1025,"lf-style"],"lfStyling":[1025,"lf-styling"],"lfTrailingIcon":[1540,"lf-trailing-icon"],"lfTrailingIconAction":[1025,"lf-trailing-icon-action"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1,"lf-value"],"debugInfo":[32],"status":[32],"value":[32],"formatJSON":[64],"getDebugInfo":[64],"getElement":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setBlur":[64],"setFocus":[64],"setValue":[64],"unmount":[64]}]]],["p-ecbcfad9",[[257,"lf-card",{"lfDataset":[1040],"lfLayout":[1025,"lf-layout"],"lfSizeX":[1025,"lf-size-x"],"lfSizeY":[1025,"lf-size-y"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"debugInfo":[32],"shapes":[32],"getDebugInfo":[64],"getProps":[64],"getShapes":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["updateShapes"]}],[257,"lf-badge",{"lfImageProps":[1040],"lfLabel":[1025,"lf-label"],"lfPosition":[1537,"lf-position"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}],[257,"lf-canvas",{"lfBrush":[1025,"lf-brush"],"lfColor":[1025,"lf-color"],"lfCursor":[1025,"lf-cursor"],"lfImageProps":[1040],"lfOpacity":[1026,"lf-opacity"],"lfPreview":[1028,"lf-preview"],"lfStrokeTolerance":[1026,"lf-stroke-tolerance"],"lfSize":[1026,"lf-size"],"lfStyle":[1025,"lf-style"],"boxing":[32],"debugInfo":[32],"isPainting":[32],"orientation":[32],"points":[32],"clearCanvas":[64],"getCanvas":[64],"getDebugInfo":[64],"getImage":[64],"getProps":[64],"refresh":[64],"resizeCanvas":[64],"setCanvasHeight":[64],"setCanvasWidth":[64],"unmount":[64]}],[257,"lf-photoframe",{"lfOverlay":[1040],"lfPlaceholder":[16],"lfStyle":[1025,"lf-style"],"lfThreshold":[2,"lf-threshold"],"lfValue":[16],"debugInfo":[32],"imageOrientation":[32],"isInViewport":[32],"isReady":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}],[257,"lf-chart",{"lfAxis":[1025,"lf-axis"],"lfColors":[1040],"lfDataset":[1040],"lfLegend":[1025,"lf-legend"],"lfSeries":[1040],"lfSizeX":[1025,"lf-size-x"],"lfSizeY":[1025,"lf-size-y"],"lfStyle":[1025,"lf-style"],"lfTypes":[1040],"lfXAxis":[1040],"lfYAxis":[1040],"debugInfo":[32],"themeValues":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"resize":[64],"unmount":[64]}],[257,"lf-toggle",{"lfAriaLabel":[1025,"lf-aria-label"],"lfLabel":[1025,"lf-label"],"lfLeadingLabel":[1028,"lf-leading-label"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[4,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}],[257,"lf-typewriter",{"lfCursor":[1025,"lf-cursor"],"lfDeleteSpeed":[1026,"lf-delete-speed"],"lfLoop":[1028,"lf-loop"],"lfPause":[1026,"lf-pause"],"lfSpeed":[1026,"lf-speed"],"lfStyle":[1025,"lf-style"],"lfTag":[1025,"lf-tag"],"lfUiSize":[1537,"lf-ui-size"],"lfUpdatable":[1028,"lf-updatable"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"displayedText":[32],"isDeleting":[32],"currentTextIndex":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfValue":["handleLfValueChange"]}],[257,"lf-upload",{"lfHtmlAttributes":[1040],"lfLabel":[1025,"lf-label"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfValue":[16],"debugInfo":[32],"selectedFiles":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"unmount":[64]}],[257,"lf-chat",{"lfAttachmentUploadTimeout":[1026,"lf-attachment-upload-timeout"],"lfConfig":[1040],"lfContextWindow":[1026,"lf-context-window"],"lfEmpty":[1025,"lf-empty"],"lfEndpointUrl":[1025,"lf-endpoint-url"],"lfTools":[1040],"lfFrequencyPenalty":[1026,"lf-frequency-penalty"],"lfLayout":[1025,"lf-layout"],"lfMaxTokens":[1026,"lf-max-tokens"],"lfPollingInterval":[1026,"lf-polling-interval"],"lfPresencePenalty":[1026,"lf-presence-penalty"],"lfSeed":[1026,"lf-seed"],"lfStyle":[1025,"lf-style"],"lfSystem":[1025,"lf-system"],"lfTemperature":[1026,"lf-temperature"],"lfTopP":[1026,"lf-top-p"],"lfUiSize":[1537,"lf-ui-size"],"lfValue":[1040],"lfUploadCallback":[1040],"currentAbortStreaming":[32],"currentAttachments":[32],"currentEditingIndex":[32],"currentPrompt":[32],"currentTokens":[32],"currentToolExecution":[32],"debugInfo":[32],"history":[32],"status":[32],"view":[32],"abortStreaming":[64],"getDebugInfo":[64],"getHistory":[64],"getLastMessage":[64],"getProps":[64],"handleImageAttachment":[64],"handleFileAttachment":[64],"removeAttachment":[64],"refresh":[64],"scrollToBottom":[64],"setHistory":[64],"exportHistory":[64],"unmount":[64]},[[0,"keydown","listenKeydown"]],{"lfPollingInterval":["updatePollingInterval"],"lfSystem":["updateTokensCount"]}],[257,"lf-code",{"lfFadeIn":[1028,"lf-fade-in"],"lfFormat":[1028,"lf-format"],"lfLanguage":[1025,"lf-language"],"lfPreserveSpaces":[1028,"lf-preserve-spaces"],"lfShowCopy":[1028,"lf-show-copy"],"lfShowHeader":[1028,"lf-show-header"],"lfStickyHeader":[1028,"lf-sticky-header"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfLanguage":["loadLanguage"]}],[257,"lf-chip",{"lfAriaLabel":[1025,"lf-aria-label"],"lfDataset":[1040],"lfFlat":[1028,"lf-flat"],"lfRipple":[1028,"lf-ripple"],"lfShowSpinner":[1028,"lf-show-spinner"],"lfStyle":[1025,"lf-style"],"lfStyling":[1025,"lf-styling"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[16],"debugInfo":[32],"expandedNodes":[32],"hiddenNodes":[32],"selectedNodes":[32],"getDebugInfo":[64],"getProps":[64],"getSelectedNodes":[64],"refresh":[64],"setSelectedNodes":[64],"unmount":[64]}],[257,"lf-progressbar",{"lfAnimated":[1540,"lf-animated"],"lfCenteredLabel":[1540,"lf-centered-label"],"lfIcon":[1537,"lf-icon"],"lfIsRadial":[1540,"lf-is-radial"],"lfLabel":[1025,"lf-label"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1026,"lf-value"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}],[257,"lf-image",{"lfHtmlAttributes":[1040],"lfMode":[1537,"lf-mode"],"lfShowSpinner":[1028,"lf-show-spinner"],"lfSizeX":[1025,"lf-size-x"],"lfSizeY":[1025,"lf-size-y"],"lfStyle":[1025,"lf-style"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"error":[32],"isLoaded":[32],"resolvedSpriteName":[32],"getDebugInfo":[64],"getImage":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfValue":["resetState"]}],[257,"lf-button",{"lfAriaLabel":[1025,"lf-aria-label"],"lfDataset":[1040],"lfIcon":[1025,"lf-icon"],"lfIconOff":[1025,"lf-icon-off"],"lfLabel":[1025,"lf-label"],"lfRipple":[1028,"lf-ripple"],"lfShowSpinner":[1540,"lf-show-spinner"],"lfStretchX":[1540,"lf-stretch-x"],"lfStretchY":[1540,"lf-stretch-y"],"lfStyle":[1025,"lf-style"],"lfStyling":[1025,"lf-styling"],"lfToggable":[1028,"lf-toggable"],"lfTrailingIcon":[1028,"lf-trailing-icon"],"lfType":[1025,"lf-type"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[4,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setMessage":[64],"setValue":[64],"unmount":[64]},null,{"lfDataset":["onDatasetChanged"]}]]],["p-d28f7231",[[257,"lf-masonry",{"lfActions":[1028,"lf-actions"],"lfCollapseColumns":[1028,"lf-collapse-columns"],"lfColumns":[1026,"lf-columns"],"lfDataset":[1040],"lfSelectable":[1540,"lf-selectable"],"lfShape":[1025,"lf-shape"],"lfStyle":[1025,"lf-style"],"lfView":[1025,"lf-view"],"debugInfo":[32],"selectedShape":[32],"shapes":[32],"viewportWidth":[32],"getDebugInfo":[64],"getProps":[64],"getSelectedShape":[64],"redecorateShapes":[64],"refresh":[64],"setSelectedShape":[64],"unmount":[64]},null,{"lfColumns":["validateColumns"],"lfDataset":["updateShapes"],"lfShape":["updateShapes"]}]]],["p-3897a69c",[[257,"lf-tabbar",{"lfAriaLabel":[1025,"lf-aria-label"],"lfDataset":[16],"lfNavigation":[4,"lf-navigation"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[8,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}]]],["p-8b14d5a1",[[257,"lf-tree",{"lfAccordionLayout":[1540,"lf-accordion-layout"],"lfDataset":[1040],"lfEmpty":[1025,"lf-empty"],"lfExpandedNodeIds":[1040],"lfFilter":[1028,"lf-filter"],"lfGrid":[1540,"lf-grid"],"lfInitialExpansionDepth":[1026,"lf-initial-expansion-depth"],"lfSelectedNodeIds":[1040],"lfRipple":[1028,"lf-ripple"],"lfSelectable":[1540,"lf-selectable"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"debugInfo":[32],"expandedNodes":[32],"hiddenNodes":[32],"selectedNode":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"getExpandedNodeIds":[64],"getSelectedNodeIds":[64],"setExpandedNodes":[64],"setSelectedNodes":[64],"selectByPredicate":[64],"unmount":[64]},null,{"lfDataset":["handleDatasetChange"],"lfExpandedNodeIds":["handleExpandedPropChange"],"lfSelectedNodeIds":["handleSelectedPropChange"],"lfInitialExpansionDepth":["handleInitialDepthChange"],"lfSelectable":["handleSelectableChange"],"lfFilter":["handleFilterToggle"]}]]]]'), e2))));
+  return "" !== l2 && (f2.resourcesUrl = new URL(".", l2).href), d$2(f2);
+})().then((async (e2) => (await o(), Ot$1(JSON.parse('[["p-012d7434",[[257,"lf-imageviewer",{"lfDataset":[1040],"lfLoadCallback":[1040],"lfNavigation":[1040],"lfStyle":[1025,"lf-style"],"lfValue":[1040],"debugInfo":[32],"currentShape":[32],"history":[32],"historyIndex":[32],"isNavigationTreeOpen":[32],"isSpinnerActive":[32],"addSnapshot":[64],"clearHistory":[64],"clearSelection":[64],"getComponents":[64],"getCurrentSnapshot":[64],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"reset":[64],"setSpinnerStatus":[64],"unmount":[64]}]]],["p-a1ddf6c3",[[257,"lf-compare",{"lfDataset":[1040],"lfShape":[1025,"lf-shape"],"lfStyle":[1025,"lf-style"],"lfView":[1025,"lf-view"],"debugInfo":[32],"isLeftPanelOpened":[32],"isRightPanelOpened":[32],"leftShape":[32],"rightShape":[32],"shapes":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["updateShapes"],"lfShape":["updateShapes"]}]]],["p-b3fd388a",[[257,"lf-accordion",{"lfDataset":[1040],"lfRipple":[1028,"lf-ripple"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"expandedNodes":[32],"selectedNodes":[32],"getDebugInfo":[64],"getProps":[64],"getSelectedNodes":[64],"refresh":[64],"toggleNode":[64],"unmount":[64]}]]],["p-c777df98",[[257,"lf-article",{"lfDataset":[1040],"lfEmpty":[1025,"lf-empty"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-b388f0aa",[[257,"lf-carousel",{"lfDataset":[1040],"lfAutoPlay":[4,"lf-auto-play"],"lfInterval":[2,"lf-interval"],"lfLightbox":[1540,"lf-lightbox"],"lfNavigation":[1028,"lf-navigation"],"lfShape":[1537,"lf-shape"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"currentIndex":[32],"shapes":[32],"getDebugInfo":[64],"getProps":[64],"goToSlide":[64],"nextSlide":[64],"prevSlide":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["updateShapes"],"lfShape":["updateShapes"]}]]],["p-04d20cb7",[[257,"lf-messenger",{"lfAutosave":[1028,"lf-autosave"],"lfDataset":[1040],"lfStyle":[1025,"lf-style"],"lfValue":[16],"debugInfo":[32],"chat":[32],"connectionStatus":[32],"covers":[32],"currentCharacter":[32],"formStatusMap":[32],"history":[32],"hoveredCustomizationOption":[32],"saveInProgress":[32],"ui":[32],"deleteOption":[64],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"reset":[64],"save":[64],"unmount":[64]}]]],["p-8b75a972",[[257,"lf-autocomplete",{"lfAllowFreeInput":[1028,"lf-allow-free-input"],"lfCache":[1028,"lf-cache"],"lfCacheTTL":[1026,"lf-cache-t-t-l"],"lfDataset":[1040],"lfDebounceMs":[1026,"lf-debounce-ms"],"lfListProps":[1040],"lfMaxCacheSize":[1026,"lf-max-cache-size"],"lfMinChars":[1026,"lf-min-chars"],"lfNavigation":[1028,"lf-navigation"],"lfSpinnerProps":[1040],"lfStyle":[1025,"lf-style"],"lfTextfieldProps":[1040],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"highlightedIndex":[32],"loading":[32],"inputValue":[32],"lastRequestedQuery":[32],"clearCache":[64],"clearInput":[64],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]},null,{"lfDataset":["onLfDatasetChange"],"loading":["onLoadingChange"]}]]],["p-f4fba5e8",[[257,"lf-multiinput",{"lfAllowFreeInput":[1028,"lf-allow-free-input"],"lfChipProps":[1040],"lfDataset":[1040],"lfMaxHistory":[1026,"lf-max-history"],"lfStyle":[1025,"lf-style"],"lfMode":[1025,"lf-mode"],"lfTextfieldProps":[1040],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1,"lf-value"],"debugInfo":[32],"historyNodes":[32],"value":[32],"addToHistory":[64],"getDebugInfo":[64],"getHistory":[64],"getProps":[64],"getState":[64],"getValue":[64],"refresh":[64],"setHistory":[64],"setValue":[64],"unmount":[64]},null,{"lfAllowFreeInput":["onLfAllowFreeInputChange"],"lfDataset":["onLfDatasetChange"],"lfMaxHistory":["onLfMaxHistoryChange"]}]]],["p-3b261a82",[[257,"lf-select",{"lfDataset":[16],"lfListProps":[1040],"lfNavigation":[1028,"lf-navigation"],"lfStyle":[1025,"lf-style"],"lfTextfieldProps":[1040],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[8,"lf-value"],"debugInfo":[32],"focused":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"getSelectedIndex":[64],"refresh":[64],"setValue":[64],"unmount":[64]},null,{"lfDataset":["onLfDatasetChange"]}]]],["p-06ffde53",[[257,"lf-checkbox",{"lfAriaLabel":[1025,"lf-aria-label"],"lfLabel":[1025,"lf-label"],"lfLeadingLabel":[1028,"lf-leading-label"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[4,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}]]],["p-6f619be6",[[257,"lf-drawer",{"lfDisplay":[1537,"lf-display"],"lfPosition":[1537,"lf-position"],"lfResponsive":[1026,"lf-responsive"],"lfStyle":[1025,"lf-style"],"lfValue":[1540,"lf-value"],"debugInfo":[32],"close":[64],"getDebugInfo":[64],"getProps":[64],"isOpened":[64],"open":[64],"refresh":[64],"toggle":[64],"unmount":[64]},[[0,"keydown","listenKeydown"]],{"lfDisplay":["onLfDisplayChange"],"lfResponsive":["onLfResponsiveChange"]}]]],["p-0da2996f",[[257,"lf-header",{"lfStyle":[1025,"lf-style"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-1e846fdf",[[257,"lf-placeholder",{"lfIcon":[1,"lf-icon"],"lfProps":[16],"lfStyle":[1025,"lf-style"],"lfThreshold":[2,"lf-threshold"],"lfTrigger":[1,"lf-trigger"],"lfValue":[1,"lf-value"],"debugInfo":[32],"isInViewport":[32],"getComponent":[64],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-cb747392",[[257,"lf-radio",{"lfAriaLabel":[1025,"lf-aria-label"],"lfDataset":[1040],"lfOrientation":[1025,"lf-orientation"],"lfLeadingLabel":[1028,"lf-leading-label"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1,"lf-value"],"debugInfo":[32],"value":[32],"clearSelection":[64],"getAdapter":[64],"getDebugInfo":[64],"getSelectedNode":[64],"getProps":[64],"refresh":[64],"selectItem":[64],"unmount":[64]}]]],["p-68c8ed64",[[257,"lf-slider",{"lfLabel":[1025,"lf-label"],"lfLeadingLabel":[1028,"lf-leading-label"],"lfMax":[2,"lf-max"],"lfMin":[2,"lf-min"],"lfStep":[2,"lf-step"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1026,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}]]],["p-0d17c789",[[257,"lf-splash",{"lfLabel":[1025,"lf-label"],"lfStyle":[1025,"lf-style"],"debugInfo":[32],"state":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-cf78dbab",[[257,"lf-toast",{"lfCloseIcon":[1025,"lf-close-icon"],"lfCloseCallback":[16],"lfIcon":[1025,"lf-icon"],"lfTimer":[2,"lf-timer"],"lfMessage":[1025,"lf-message"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}]]],["p-460d4637",[[257,"lf-spinner",{"lfActive":[1540,"lf-active"],"lfBarVariant":[1540,"lf-bar-variant"],"lfDimensions":[1025,"lf-dimensions"],"lfFader":[1540,"lf-fader"],"lfFaderTimeout":[1026,"lf-fader-timeout"],"lfFullScreen":[1540,"lf-full-screen"],"lfLayout":[1026,"lf-layout"],"lfStyle":[1025,"lf-style"],"lfTimeout":[1026,"lf-timeout"],"bigWait":[32],"debugInfo":[32],"progress":[32],"getDebugInfo":[64],"getProps":[64],"getProgress":[64],"refresh":[64],"unmount":[64]},null,{"lfActive":["onFaderChange"],"lfFader":["onFaderChange"],"lfFaderTimeout":["onFaderChange"],"lfBarVariant":["lfBarVariantChanged"],"lfTimeout":["lfTimeoutChanged"]}],[257,"lf-list",{"lfDataset":[1040],"lfEmpty":[1025,"lf-empty"],"lfEnableDeletions":[1028,"lf-enable-deletions"],"lfFilter":[1028,"lf-filter"],"lfNavigation":[1028,"lf-navigation"],"lfRipple":[1028,"lf-ripple"],"lfSelectable":[1028,"lf-selectable"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[2,"lf-value"],"debugInfo":[32],"filter":[32],"focused":[32],"selected":[32],"applyFilter":[64],"focusNext":[64],"focusPrevious":[64],"getDebugInfo":[64],"getProps":[64],"getSelected":[64],"refresh":[64],"selectNode":[64],"selectNodeById":[64],"setFilter":[64],"unmount":[64]},[[0,"keydown","listenKeydown"]],{"lfFilter":["handleFilterToggle"]}],[257,"lf-textfield",{"lfFormatJSON":[1040],"lfHelper":[1040],"lfHtmlAttributes":[1040],"lfIcon":[1025,"lf-icon"],"lfLabel":[1025,"lf-label"],"lfStretchX":[1540,"lf-stretch-x"],"lfStretchY":[1540,"lf-stretch-y"],"lfStyle":[1025,"lf-style"],"lfStyling":[1025,"lf-styling"],"lfTrailingIcon":[1540,"lf-trailing-icon"],"lfTrailingIconAction":[1025,"lf-trailing-icon-action"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1,"lf-value"],"debugInfo":[32],"status":[32],"value":[32],"formatJSON":[64],"getDebugInfo":[64],"getElement":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setBlur":[64],"setFocus":[64],"setValue":[64],"unmount":[64]}]]],["p-907b39f3",[[257,"lf-card",{"lfDataset":[1040],"lfLayout":[1025,"lf-layout"],"lfSizeX":[1025,"lf-size-x"],"lfSizeY":[1025,"lf-size-y"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"debugInfo":[32],"shapes":[32],"getDebugInfo":[64],"getProps":[64],"getShapes":[64],"refresh":[64],"unmount":[64]},null,{"lfDataset":["updateShapes"]}],[257,"lf-badge",{"lfImageProps":[1040],"lfLabel":[1025,"lf-label"],"lfPosition":[1537,"lf-position"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}],[257,"lf-canvas",{"lfBrush":[1025,"lf-brush"],"lfColor":[1025,"lf-color"],"lfCursor":[1025,"lf-cursor"],"lfImageProps":[1040],"lfOpacity":[1026,"lf-opacity"],"lfPreview":[1028,"lf-preview"],"lfStrokeTolerance":[1026,"lf-stroke-tolerance"],"lfSize":[1026,"lf-size"],"lfStyle":[1025,"lf-style"],"boxing":[32],"debugInfo":[32],"isPainting":[32],"orientation":[32],"points":[32],"clearCanvas":[64],"getCanvas":[64],"getDebugInfo":[64],"getImage":[64],"getProps":[64],"refresh":[64],"resizeCanvas":[64],"setCanvasHeight":[64],"setCanvasWidth":[64],"unmount":[64]}],[257,"lf-photoframe",{"lfOverlay":[1040],"lfPlaceholder":[16],"lfStyle":[1025,"lf-style"],"lfThreshold":[2,"lf-threshold"],"lfValue":[16],"debugInfo":[32],"imageOrientation":[32],"isInViewport":[32],"isReady":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}],[257,"lf-chart",{"lfAxis":[1025,"lf-axis"],"lfColors":[1040],"lfDataset":[1040],"lfLegend":[1025,"lf-legend"],"lfSeries":[1040],"lfSizeX":[1025,"lf-size-x"],"lfSizeY":[1025,"lf-size-y"],"lfStyle":[1025,"lf-style"],"lfTypes":[1040],"lfXAxis":[1040],"lfYAxis":[1040],"debugInfo":[32],"themeValues":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"resize":[64],"unmount":[64]}],[257,"lf-toggle",{"lfAriaLabel":[1025,"lf-aria-label"],"lfLabel":[1025,"lf-label"],"lfLeadingLabel":[1028,"lf-leading-label"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[4,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}],[257,"lf-typewriter",{"lfCursor":[1025,"lf-cursor"],"lfDeleteSpeed":[1026,"lf-delete-speed"],"lfLoop":[1028,"lf-loop"],"lfPause":[1026,"lf-pause"],"lfSpeed":[1026,"lf-speed"],"lfStyle":[1025,"lf-style"],"lfTag":[1025,"lf-tag"],"lfUiSize":[1537,"lf-ui-size"],"lfUpdatable":[1028,"lf-updatable"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"displayedText":[32],"isDeleting":[32],"currentTextIndex":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfValue":["handleLfValueChange"]}],[257,"lf-upload",{"lfHtmlAttributes":[1040],"lfLabel":[1025,"lf-label"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfValue":[16],"debugInfo":[32],"selectedFiles":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"unmount":[64]}],[257,"lf-chat",{"lfAttachmentUploadTimeout":[1026,"lf-attachment-upload-timeout"],"lfConfig":[1040],"lfContextWindow":[1026,"lf-context-window"],"lfEmpty":[1025,"lf-empty"],"lfEndpointUrl":[1025,"lf-endpoint-url"],"lfTools":[1040],"lfFrequencyPenalty":[1026,"lf-frequency-penalty"],"lfLayout":[1025,"lf-layout"],"lfMaxTokens":[1026,"lf-max-tokens"],"lfPollingInterval":[1026,"lf-polling-interval"],"lfPresencePenalty":[1026,"lf-presence-penalty"],"lfSeed":[1026,"lf-seed"],"lfStyle":[1025,"lf-style"],"lfSystem":[1025,"lf-system"],"lfTemperature":[1026,"lf-temperature"],"lfTopP":[1026,"lf-top-p"],"lfUiSize":[1537,"lf-ui-size"],"lfValue":[1040],"lfUploadCallback":[1040],"currentAbortStreaming":[32],"currentAttachments":[32],"currentEditingIndex":[32],"currentPrompt":[32],"currentTokens":[32],"currentToolExecution":[32],"debugInfo":[32],"history":[32],"status":[32],"view":[32],"abortStreaming":[64],"getDebugInfo":[64],"getHistory":[64],"getLastMessage":[64],"getProps":[64],"handleImageAttachment":[64],"handleFileAttachment":[64],"removeAttachment":[64],"refresh":[64],"scrollToBottom":[64],"setHistory":[64],"exportHistory":[64],"unmount":[64]},[[0,"keydown","listenKeydown"]],{"lfPollingInterval":["updatePollingInterval"],"lfSystem":["updateTokensCount"]}],[257,"lf-code",{"lfFadeIn":[1028,"lf-fade-in"],"lfFormat":[1028,"lf-format"],"lfLanguage":[1025,"lf-language"],"lfPreserveSpaces":[1028,"lf-preserve-spaces"],"lfShowCopy":[1028,"lf-show-copy"],"lfShowHeader":[1028,"lf-show-header"],"lfStickyHeader":[1028,"lf-sticky-header"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfLanguage":["loadLanguage"]}],[257,"lf-progressbar",{"lfAnimated":[1540,"lf-animated"],"lfCenteredLabel":[1540,"lf-centered-label"],"lfIcon":[1537,"lf-icon"],"lfIsRadial":[1540,"lf-is-radial"],"lfLabel":[1025,"lf-label"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1026,"lf-value"],"debugInfo":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"unmount":[64]}],[257,"lf-chip",{"lfAriaLabel":[1025,"lf-aria-label"],"lfDataset":[1040],"lfFlat":[1028,"lf-flat"],"lfRipple":[1028,"lf-ripple"],"lfShowSpinner":[1028,"lf-show-spinner"],"lfStyle":[1025,"lf-style"],"lfStyling":[1025,"lf-styling"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[16],"debugInfo":[32],"expandedNodes":[32],"hiddenNodes":[32],"selectedNodes":[32],"getDebugInfo":[64],"getProps":[64],"getSelectedNodes":[64],"refresh":[64],"setSelectedNodes":[64],"unmount":[64]}],[257,"lf-image",{"lfHtmlAttributes":[1040],"lfMode":[1537,"lf-mode"],"lfShowSpinner":[1028,"lf-show-spinner"],"lfSizeX":[1025,"lf-size-x"],"lfSizeY":[1025,"lf-size-y"],"lfStyle":[1025,"lf-style"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[1025,"lf-value"],"debugInfo":[32],"error":[32],"isLoaded":[32],"resolvedSpriteName":[32],"getDebugInfo":[64],"getImage":[64],"getProps":[64],"refresh":[64],"unmount":[64]},null,{"lfValue":["resetState"]}],[257,"lf-button",{"lfAriaLabel":[1025,"lf-aria-label"],"lfDataset":[1040],"lfIcon":[1025,"lf-icon"],"lfIconOff":[1025,"lf-icon-off"],"lfLabel":[1025,"lf-label"],"lfRipple":[1028,"lf-ripple"],"lfShowSpinner":[1540,"lf-show-spinner"],"lfStretchX":[1540,"lf-stretch-x"],"lfStretchY":[1540,"lf-stretch-y"],"lfStyle":[1025,"lf-style"],"lfStyling":[1025,"lf-styling"],"lfToggable":[1028,"lf-toggable"],"lfTrailingIcon":[1028,"lf-trailing-icon"],"lfType":[1025,"lf-type"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[4,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setMessage":[64],"setValue":[64],"unmount":[64]},null,{"lfDataset":["onDatasetChanged"]}]]],["p-d28f7231",[[257,"lf-masonry",{"lfActions":[1028,"lf-actions"],"lfCollapseColumns":[1028,"lf-collapse-columns"],"lfColumns":[1026,"lf-columns"],"lfDataset":[1040],"lfSelectable":[1540,"lf-selectable"],"lfShape":[1025,"lf-shape"],"lfStyle":[1025,"lf-style"],"lfView":[1025,"lf-view"],"debugInfo":[32],"selectedShape":[32],"shapes":[32],"viewportWidth":[32],"getDebugInfo":[64],"getProps":[64],"getSelectedShape":[64],"redecorateShapes":[64],"refresh":[64],"setSelectedShape":[64],"unmount":[64]},null,{"lfColumns":["validateColumns"],"lfDataset":["updateShapes"],"lfShape":["updateShapes"]}]]],["p-3897a69c",[[257,"lf-tabbar",{"lfAriaLabel":[1025,"lf-aria-label"],"lfDataset":[16],"lfNavigation":[4,"lf-navigation"],"lfRipple":[1028,"lf-ripple"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"lfUiState":[1025,"lf-ui-state"],"lfValue":[8,"lf-value"],"debugInfo":[32],"value":[32],"getDebugInfo":[64],"getProps":[64],"getValue":[64],"refresh":[64],"setValue":[64],"unmount":[64]}]]],["p-62bc1582",[[257,"lf-tree",{"lfAccordionLayout":[1540,"lf-accordion-layout"],"lfDataset":[1040],"lfEmpty":[1025,"lf-empty"],"lfExpandedNodeIds":[1040],"lfFilter":[1028,"lf-filter"],"lfGrid":[1540,"lf-grid"],"lfInitialExpansionDepth":[1026,"lf-initial-expansion-depth"],"lfSelectedNodeIds":[1040],"lfRipple":[1028,"lf-ripple"],"lfSelectable":[1540,"lf-selectable"],"lfStyle":[1025,"lf-style"],"lfUiSize":[1537,"lf-ui-size"],"debugInfo":[32],"expandedNodes":[32],"hiddenNodes":[32],"selectedNode":[32],"getDebugInfo":[64],"getProps":[64],"refresh":[64],"getExpandedNodeIds":[64],"getSelectedNodeIds":[64],"setExpandedNodes":[64],"setSelectedNodes":[64],"selectByPredicate":[64],"unmount":[64]},null,{"lfDataset":["handleDatasetChange"],"lfExpandedNodeIds":["handleExpandedPropChange"],"lfSelectedNodeIds":["handleSelectedPropChange"],"lfInitialExpansionDepth":["handleInitialDepthChange"],"lfSelectable":["handleSelectableChange"],"lfFilter":["handleFilterToggle"]}]]]]'), e2))));
 registerStencilAssetProxies("lf-core");
 const a = async (o2) => {
   const a2 = await onFrameworkReady;
@@ -1072,91 +1072,91 @@ const a = async (o2) => {
 };
 const u$b = async (e2, t5 = null) => {
   const { history: a2 } = e2.controller.set;
-  null === t5 ? (a2.pop(), b$a(e2)) : a2.pop(t5);
-}, b$a = async (e2) => {
+  null === t5 ? (a2.pop(), b$b(e2)) : a2.pop(t5);
+}, b$b = async (e2) => {
   const { controller: t5, elements: a2 } = e2, { masonry: s2 } = a2.refs.navigation, { set: i2 } = t5;
   i2.currentShape({}), i2.history.index(null), s2.setSelectedShape(null);
-}, v$c = (e2) => {
+}, v$d = (e2) => {
   const { compInstance: t5, currentShape: a2, manager: s2 } = e2.controller.get, { lfDataset: i2 } = t5, { getAll: n2 } = s2.data.cell.shapes, r2 = a2();
   return n2(i2, false).image.find(((e3) => e3.value === r2.value || e3.lfValue === r2.value));
-}, p$7 = async (e2, t5) => {
+}, p$8 = async (e2, t5) => {
   requestAnimationFrame((() => e2.lfShowSpinner = true)), await t5(), requestAnimationFrame((() => e2.lfShowSpinner = false));
-}, y$f = (e2, t5) => {
+}, y$g = (e2, t5) => {
   const a2 = e2;
   e2.value = t5, a2.lfValue && (a2.lfValue = t5);
-}, w$g = (t5) => ({ canvas: () => {
+}, w$h = (t5) => ({ canvas: () => {
   const { controller: a2, elements: s2, handlers: i2 } = t5(), { blocks: n2, history: l2, lfAttribute: o2, manager: c2 } = a2.get, { details: f2 } = s2.refs, { canvas: d2 } = i2.details, { currentSnapshot: h2 } = l2, { assignRef: g3, theme: m2 } = c2, { bemClass: u2 } = m2, b2 = h2();
-  if (b2) return U$5("lf-canvas", { class: u2(n2.detailsGrid._, n2.detailsGrid.canvas), "data-lf": o2.fadeIn, id: IDS.details.canvas, lfImageProps: { lfValue: b2.value }, "onLf-canvas-event": d2, ref: g3(f2, "canvas") });
+  if (b2) return U$6("lf-canvas", { class: u2(n2.detailsGrid._, n2.detailsGrid.canvas), "data-lf": o2.fadeIn, id: IDS.details.canvas, lfImageProps: { lfValue: b2.value }, "onLf-canvas-event": d2, ref: g3(f2, "canvas") });
 }, clearHistory: () => {
   var _a2;
   const { controller: a2, elements: s2, handlers: i2 } = t5(), { blocks: n2, cyAttributes: l2, history: o2, manager: c2 } = a2.get, { details: f2 } = s2.refs, { button: d2 } = i2.details, { current: h2 } = o2, { assignRef: g3, theme: m2 } = c2, { bemClass: u2, get: b2 } = m2, v2 = b2.icon("stackPop"), p2 = !(((_a2 = h2()) == null ? void 0 : _a2.length) > 1);
-  return U$5("lf-button", { class: u2(n2.detailsGrid._, n2.detailsGrid.clearHistory), "data-cy": l2.button, id: IDS.details.clearHistory, lfIcon: v2, lfLabel: "Clear history", lfStretchX: true, lfStyling: "flat", lfUiState: p2 ? "disabled" : "danger", "onLf-button-event": d2, ref: g3(f2, "clearHistory") });
+  return U$6("lf-button", { class: u2(n2.detailsGrid._, n2.detailsGrid.clearHistory), "data-cy": l2.button, id: IDS.details.clearHistory, lfIcon: v2, lfLabel: "Clear history", lfStretchX: true, lfStyling: "flat", lfUiState: p2 ? "disabled" : "danger", "onLf-button-event": d2, ref: g3(f2, "clearHistory") });
 }, deleteShape: () => {
   const { controller: a2, elements: s2, handlers: i2 } = t5(), { blocks: n2, cyAttributes: l2, manager: o2 } = a2.get, { details: c2 } = s2.refs, { button: f2 } = i2.details, { assignRef: d2, theme: h2 } = o2, { bemClass: g3, get: m2 } = h2, { "--lf-icon-clear": u2 } = m2.current().variables;
-  return U$5("lf-button", { class: g3(n2.detailsGrid._, n2.detailsGrid.delete), "data-cy": l2.button, id: IDS.details.deleteShape, lfIcon: u2, lfLabel: "Delete image", lfStretchX: true, lfUiState: "danger", "onLf-button-event": f2, ref: d2(c2, "deleteShape") });
+  return U$6("lf-button", { class: g3(n2.detailsGrid._, n2.detailsGrid.delete), "data-cy": l2.button, id: IDS.details.deleteShape, lfIcon: u2, lfLabel: "Delete image", lfStretchX: true, lfUiState: "danger", "onLf-button-event": f2, ref: d2(c2, "deleteShape") });
 }, redo: () => {
   const { controller: a2, elements: s2, handlers: i2 } = t5(), { blocks: n2, cyAttributes: l2, history: o2, manager: c2 } = a2.get, { current: f2, index: d2 } = o2, { details: h2 } = s2.refs, { button: g3 } = i2.details, { assignRef: m2, theme: u2 } = c2, { bemClass: b2, get: v2 } = u2, { "--lf-icon-next": p2 } = v2.current().variables, y2 = f2(), w3 = !((y2 == null ? void 0 : y2.length) && d2() < y2.length - 1);
-  return U$5("lf-button", { class: b2(n2.detailsGrid._, n2.detailsGrid.redo), "data-cy": l2.button, id: IDS.details.redo, lfIcon: p2, lfLabel: "Redo", lfStretchX: true, lfStyling: "flat", lfUiState: w3 ? "disabled" : "primary", "onLf-button-event": g3, ref: m2(h2, "redo") });
+  return U$6("lf-button", { class: b2(n2.detailsGrid._, n2.detailsGrid.redo), "data-cy": l2.button, id: IDS.details.redo, lfIcon: p2, lfLabel: "Redo", lfStretchX: true, lfStyling: "flat", lfUiState: w3 ? "disabled" : "primary", "onLf-button-event": g3, ref: m2(h2, "redo") });
 }, save: () => {
   var _a2;
   const { controller: a2, elements: s2, handlers: i2 } = t5(), { blocks: n2, cyAttributes: l2, history: o2, manager: c2 } = a2.get, { current: f2 } = o2, { details: d2 } = s2.refs, { button: h2 } = i2.details, { assignRef: g3, theme: m2 } = c2, { bemClass: u2, get: b2 } = m2, { "--lf-icon-success": v2 } = b2.current().variables, p2 = !(((_a2 = f2()) == null ? void 0 : _a2.length) > 1);
-  return U$5("lf-button", { class: u2(n2.detailsGrid._, n2.detailsGrid.commitChanges), "data-cy": l2.button, id: IDS.details.save, lfIcon: v2, lfLabel: "Save snapshot", lfStretchX: true, lfUiState: p2 ? "disabled" : "success", "onLf-button-event": h2, ref: g3(d2, "save") });
+  return U$6("lf-button", { class: u2(n2.detailsGrid._, n2.detailsGrid.commitChanges), "data-cy": l2.button, id: IDS.details.save, lfIcon: v2, lfLabel: "Save snapshot", lfStretchX: true, lfUiState: p2 ? "disabled" : "success", "onLf-button-event": h2, ref: g3(d2, "save") });
 }, spinner: () => {
   const { controller: a2, elements: s2 } = t5(), { blocks: i2, manager: n2, spinnerStatus: l2 } = a2.get, { details: o2 } = s2.refs, { assignRef: c2, theme: f2 } = n2, { bemClass: d2 } = f2;
-  return U$5("lf-spinner", { class: d2(i2.detailsGrid._, i2.detailsGrid.spinner), id: IDS.details.spinner, lfActive: l2(), lfDimensions: "16px", lfFader: true, lfFaderTimeout: 125, lfLayout: 14, ref: c2(o2, "save") });
+  return U$6("lf-spinner", { class: d2(i2.detailsGrid._, i2.detailsGrid.spinner), id: IDS.details.spinner, lfActive: l2(), lfDimensions: "16px", lfFader: true, lfFaderTimeout: 125, lfLayout: 14, ref: c2(o2, "save") });
 }, tree: () => {
   const { controller: a2, elements: s2, handlers: i2 } = t5(), { blocks: n2, compInstance: l2, cyAttributes: o2, manager: c2 } = a2.get, { details: f2 } = s2.refs, { tree: d2 } = i2.details, { assignRef: h2, theme: g3 } = c2, { bemClass: m2 } = g3;
-  return U$5("lf-tree", { class: m2(n2.detailsGrid._, n2.detailsGrid.tree), "data-cy": o2.input, id: IDS.details.tree, lfAccordionLayout: true, lfDataset: l2.lfValue, lfFilter: false, lfSelectable: true, lfUiSize: "small", "onLf-tree-event": d2, ref: h2(f2, "tree") });
+  return U$6("lf-tree", { class: m2(n2.detailsGrid._, n2.detailsGrid.tree), "data-cy": o2.input, id: IDS.details.tree, lfAccordionLayout: true, lfDataset: l2.lfValue, lfFilter: false, lfSelectable: true, lfUiSize: "small", "onLf-tree-event": d2, ref: h2(f2, "tree") });
 }, undo: () => {
   var _a2;
   const { controller: a2, elements: s2, handlers: i2 } = t5(), { blocks: n2, cyAttributes: l2, history: o2, manager: c2 } = a2.get, { current: f2, index: d2 } = o2, { details: h2 } = s2.refs, { button: g3 } = i2.details, { assignRef: m2, theme: u2 } = c2, { bemClass: b2, get: v2 } = u2, { "--lf-icon-previous": p2 } = v2.current().variables, y2 = !(((_a2 = f2()) == null ? void 0 : _a2.length) && d2() > 0);
-  return U$5("lf-button", { class: b2(n2.detailsGrid._, n2.detailsGrid.undo), "data-cy": l2.button, id: IDS.details.undo, lfIcon: p2, lfLabel: "Undo", lfStretchX: true, lfStyling: "flat", lfUiState: y2 ? "disabled" : "primary", "onLf-button-event": g3, ref: m2(h2, "undo") });
-} }), x$g = (t5) => ({ load: () => {
+  return U$6("lf-button", { class: b2(n2.detailsGrid._, n2.detailsGrid.undo), "data-cy": l2.button, id: IDS.details.undo, lfIcon: p2, lfLabel: "Undo", lfStretchX: true, lfStyling: "flat", lfUiState: y2 ? "disabled" : "primary", "onLf-button-event": g3, ref: m2(h2, "undo") });
+} }), x$h = (t5) => ({ load: () => {
   const { controller: a2, elements: s2, handlers: i2 } = t5(), { blocks: n2, cyAttributes: l2, manager: o2 } = a2.get, { navigation: c2 } = s2.refs, { button: f2 } = i2.navigation, { assignRef: d2, theme: h2 } = o2, { bemClass: g3 } = h2;
-  return U$5("lf-button", { class: g3(n2.navigationGrid._, n2.navigationGrid.button), "data-cy": l2.button, id: IDS.navigation.load, lfLabel: "Load", lfStretchX: true, "onLf-button-event": f2, ref: d2(c2, "load") }, U$5("lf-spinner", { lfActive: true, lfDimensions: "2px", lfLayout: 1, slot: "spinner" }));
+  return U$6("lf-button", { class: g3(n2.navigationGrid._, n2.navigationGrid.button), "data-cy": l2.button, id: IDS.navigation.load, lfLabel: "Load", lfStretchX: true, "onLf-button-event": f2, ref: d2(c2, "load") }, U$6("lf-spinner", { lfActive: true, lfDimensions: "2px", lfLayout: 1, slot: "spinner" }));
 }, masonry: () => {
   const { controller: a2, elements: s2, handlers: i2 } = t5(), { blocks: n2, compInstance: l2, manager: o2 } = a2.get, { navigation: c2 } = s2.refs, { masonry: f2 } = i2.navigation, { lfDataset: d2 } = l2, { assignRef: h2, theme: g3 } = o2, { bemClass: m2 } = g3;
-  return U$5("lf-masonry", { class: m2(n2.navigationGrid._, n2.navigationGrid.masonry), id: IDS.navigation.masonry, lfActions: true, lfDataset: d2, lfSelectable: true, "onLf-masonry-event": f2, ref: h2(c2, "masonry") });
+  return U$6("lf-masonry", { class: m2(n2.navigationGrid._, n2.navigationGrid.masonry), id: IDS.navigation.masonry, lfActions: true, lfDataset: d2, lfSelectable: true, "onLf-masonry-event": f2, ref: h2(c2, "masonry") });
 }, navToggle: () => {
   const { controller: a2, elements: s2, handlers: i2 } = t5(), { blocks: n2, cyAttributes: l2, manager: o2 } = a2.get, { navigation: c2 } = s2.refs, { navToggle: f2 } = i2.navigation, { assignRef: d2, theme: h2 } = o2, { bemClass: g3 } = h2, { "--lf-icon-next": m2, "--lf-icon-previous": u2 } = h2.get.current().variables, b2 = a2.get.navigation.isTreeOpen();
-  return U$5("lf-button", { class: g3(n2.navigationGrid._, n2.navigationGrid.navToggle), "data-cy": l2.button, id: IDS.navigation.navToggle, lfAriaLabel: b2 ? "Collapse navigation tree" : "Expand navigation tree", lfIcon: b2 ? u2 : m2, lfStretchY: true, "onLf-button-event": f2, ref: d2(c2, "navToggle"), title: b2 ? "Collapse" : "Expand" });
+  return U$6("lf-button", { class: g3(n2.navigationGrid._, n2.navigationGrid.navToggle), "data-cy": l2.button, id: IDS.navigation.navToggle, lfAriaLabel: b2 ? "Collapse navigation tree" : "Expand navigation tree", lfIcon: b2 ? u2 : m2, lfStretchY: true, "onLf-button-event": f2, ref: d2(c2, "navToggle"), title: b2 ? "Collapse" : "Expand" });
 }, textfield: () => {
   const { controller: a2, elements: s2, handlers: i2 } = t5(), { blocks: n2, cyAttributes: l2, manager: o2 } = a2.get, { navigation: c2 } = s2.refs, { textfield: f2 } = i2.navigation, { assignRef: d2, theme: h2 } = o2, { bemClass: g3 } = h2;
-  return U$5("lf-textfield", { class: g3(n2.navigationGrid._, n2.navigationGrid.textfield), "data-cy": l2.input, id: IDS.navigation.textfield, lfIcon: "folder", lfLabel: "Directory", lfStretchX: true, lfStyling: "flat", "onLf-textfield-event": f2, ref: d2(c2, "textfield") });
+  return U$6("lf-textfield", { class: g3(n2.navigationGrid._, n2.navigationGrid.textfield), "data-cy": l2.input, id: IDS.navigation.textfield, lfIcon: "folder", lfLabel: "Directory", lfStretchX: true, lfStyling: "flat", "onLf-textfield-event": f2, ref: d2(c2, "textfield") });
 }, tree: () => {
   const { controller: a2, elements: s2, handlers: i2 } = t5(), { blocks: n2, compInstance: l2, manager: o2 } = a2.get, { navigation: c2 } = s2.refs, { tree: f2 } = i2.navigation, { assignRef: d2, sanitizeProps: h2, theme: g3 } = o2, { bemClass: m2 } = g3, u2 = l2.lfNavigation || {};
-  return U$5("lf-tree", { class: m2(n2.navigationGrid._, n2.navigationGrid.tree), id: IDS.navigation.tree, "onLf-tree-event": f2, ref: d2(c2, "tree"), ...h2(u2.treeProps, "LfTree") });
-} }), k$g = (e2) => ({ button: async (t5) => {
+  return U$6("lf-tree", { class: m2(n2.navigationGrid._, n2.navigationGrid.tree), id: IDS.navigation.tree, "onLf-tree-event": f2, ref: d2(c2, "tree"), ...h2(u2.treeProps, "LfTree") });
+} }), k$h = (e2) => ({ button: async (t5) => {
   const { comp: a2, eventType: s2, id: i2 } = t5.detail, n2 = e2(), { compInstance: l2, currentShape: o2 } = n2.controller.get;
   if (l2.onLfEvent(t5, "lf-event"), "click" === s2) switch (i2) {
     case IDS.details.clearHistory:
       const e3 = o2().shape.index;
-      p$7(a2, (async () => u$b(n2, e3)));
+      p$8(a2, (async () => u$b(n2, e3)));
       break;
     case IDS.details.deleteShape:
-      p$7(a2, (() => (async (e4) => {
+      p$8(a2, (() => (async (e4) => {
         const { compInstance: t6, currentShape: a3, manager: s3 } = e4.controller.get, { lfDataset: i3 } = t6, { findNodeByCell: n3, pop: r2 } = s3.data.node;
         await u$b(e4, a3().shape.index);
-        const l3 = n3(i3, v$c(e4));
-        r2(i3.nodes, l3), t6.lfDataset = { ...i3 }, await b$a(e4);
+        const l3 = n3(i3, v$d(e4));
+        r2(i3.nodes, l3), t6.lfDataset = { ...i3 }, await b$b(e4);
       })(n2)));
       break;
     case IDS.details.redo:
-      p$7(a2, (() => (async (e4) => {
+      p$8(a2, (() => (async (e4) => {
         const { controller: t6 } = e4, { get: a3, set: s3 } = t6, { current: i3, index: n3 } = a3.history, r2 = i3(), l3 = n3();
         r2 && l3 < r2.length - 1 && s3.history.index(l3 + 1);
       })(n2)));
       break;
     case IDS.details.save:
-      p$7(a2, (() => (async (e4) => {
+      p$8(a2, (() => (async (e4) => {
         const { compInstance: t6, currentShape: a3, history: s3 } = e4.controller.get, { lfDataset: i3 } = t6, n3 = a3();
         if (!n3) return;
-        const r2 = n3.shape.index, l3 = n3.shape.shape, o3 = s3.currentSnapshot().value, c2 = v$c(e4);
-        c2.value = o3, c2.lfValue = o3, y$f(l3, o3), await u$b(e4, r2), t6.lfDataset = { ...i3 };
+        const r2 = n3.shape.index, l3 = n3.shape.shape, o3 = s3.currentSnapshot().value, c2 = v$d(e4);
+        c2.value = o3, c2.lfValue = o3, y$g(l3, o3), await u$b(e4, r2), t6.lfDataset = { ...i3 };
       })(n2)));
       break;
     case IDS.details.undo:
-      p$7(a2, (() => (async (e4) => {
+      p$8(a2, (() => (async (e4) => {
         const { controller: t6 } = e4, { get: a3, set: s3 } = t6, { history: i3 } = a3, { index: n3 } = i3, r2 = n3();
         r2 > 0 && s3.history.index(r2 - 1);
       })(n2)));
@@ -1167,9 +1167,9 @@ const u$b = async (e2, t5 = null) => {
 }, tree: (t5) => {
   const a2 = e2(), { compInstance: s2 } = a2.controller.get;
   s2.onLfEvent(t5, "lf-event");
-} }), S$9 = (e2) => ({ button: async (t5) => {
+} }), S$a = (e2) => ({ button: async (t5) => {
   const { comp: a2, eventType: s2 } = t5.detail, i2 = e2(), { compInstance: n2 } = i2.controller.get;
-  n2.onLfEvent(t5, "lf-event"), "click" === s2 && p$7(a2, (() => (async (e3) => {
+  n2.onLfEvent(t5, "lf-event"), "click" === s2 && p$8(a2, (() => (async (e3) => {
     const { controller: t6, elements: a3 } = e3, { textfield: s3 } = a3.refs.navigation, { compInstance: i3 } = t6.get, { lfLoadCallback: n3 } = i3;
     try {
       await n3(i3, await s3.getValue()), u$b(e3);
@@ -1182,7 +1182,7 @@ const u$b = async (e2, t5 = null) => {
   const { eventType: a2, originalEvent: s2, selectedShape: i2 } = t5.detail, n2 = e2(), { controller: r2 } = n2, { get: l2, set: o2 } = r2, { compInstance: c2, history: f2 } = l2, { current: d2 } = f2;
   if (c2.onLfEvent(t5, "lf-event"), "lf-event" === a2 && "click" === s2.detail.eventType) {
     const e3 = l2.currentShape();
-    if (((_a2 = e3 == null ? void 0 : e3.shape) == null ? void 0 : _a2.index) === i2.index) b$a(n2);
+    if (((_a2 = e3 == null ? void 0 : e3.shape) == null ? void 0 : _a2.index) === i2.index) b$b(n2);
     else {
       o2.currentShape(i2);
       const e4 = d2();
@@ -1198,27 +1198,27 @@ const u$b = async (e2, t5 = null) => {
 }, tree: (t5) => {
   const a2 = e2(), { compInstance: s2 } = a2.controller.get;
   s2.onLfEvent(t5, "lf-event");
-} }), z$h = (e2, t5) => ({ ...e2, spinnerStatus: (e3) => t5().elements.refs.details.spinner.lfActive = e3 }), L$9 = (e2) => ({ details: w$g(e2), navigation: x$g(e2) }), C$e = (e2) => ({ details: k$g(e2), navigation: S$9(e2) });
-var _$b, I$8, T$c, A$7, R$8, D$b, E$f, W$g, M$f, j$b, P$7, U$3, X$2, H$5, O$5 = function(e2, t5, a2, s2) {
+} }), z$i = (e2, t5) => ({ ...e2, spinnerStatus: (e3) => t5().elements.refs.details.spinner.lfActive = e3 }), L$a = (e2) => ({ details: w$h(e2), navigation: x$h(e2) }), C$f = (e2) => ({ details: k$h(e2), navigation: S$a(e2) });
+var _$c, I$9, T$d, A$8, R$9, D$c, E$g, W$h, M$g, j$c, P$8, U$4, X$3, H$6, O$6 = function(e2, t5, a2, s2) {
   if ("a" === a2 && !s2) throw new TypeError("Private accessor was defined without a getter");
   if ("function" == typeof t5 ? e2 !== t5 || !s2 : !t5.has(e2)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return "m" === a2 ? s2 : "a" === a2 ? s2.call(e2) : s2 ? s2.value : t5.get(e2);
-}, F$5 = function(e2, t5, a2, s2, i2) {
+}, F$6 = function(e2, t5, a2, s2, i2) {
   if ("function" == typeof t5 ? e2 !== t5 || true : !t5.has(e2)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
   return t5.set(e2, a2), a2;
 };
-const B$4 = class B {
+const B$5 = class B {
   constructor(e2) {
-    o$2(this, e2), this.lfEvent = G$3(this, "lf-imageviewer-event"), _$b.add(this), this.currentShape = {}, this.history = {}, this.historyIndex = null, this.isNavigationTreeOpen = false, this.isSpinnerActive = false, this.lfDataset = {}, this.lfLoadCallback = null, this.lfStyle = "", this.lfValue = {}, I$8.set(this, void 0), T$c.set(this, LF_IMAGEVIEWER_BLOCKS), A$7.set(this, CY_ATTRIBUTES), R$8.set(this, LF_ATTRIBUTES), D$b.set(this, LF_IMAGEVIEWER_PARTS), E$f.set(this, LF_STYLE_ID), W$g.set(this, LF_WRAPPER_ID), M$f.set(this, void 0), j$b.set(this, (() => {
+    o$2(this, e2), this.lfEvent = G$4(this, "lf-imageviewer-event"), _$c.add(this), this.currentShape = {}, this.history = {}, this.historyIndex = null, this.isNavigationTreeOpen = false, this.isSpinnerActive = false, this.lfDataset = {}, this.lfLoadCallback = null, this.lfStyle = "", this.lfValue = {}, I$9.set(this, void 0), T$d.set(this, LF_IMAGEVIEWER_BLOCKS), A$8.set(this, CY_ATTRIBUTES), R$9.set(this, LF_ATTRIBUTES), D$c.set(this, LF_IMAGEVIEWER_PARTS), E$g.set(this, LF_STYLE_ID), W$h.set(this, LF_WRAPPER_ID), M$g.set(this, void 0), j$c.set(this, (() => {
       var e3;
-      F$5(this, M$f, { controller: { get: { blocks: O$5(this, T$c, "f"), compInstance: this, currentShape: () => O$5(this, _$b, "m", P$7).call(this, this.currentShape), cyAttributes: O$5(this, A$7, "f"), history: { current: () => this.history[this.currentShape.index], currentSnapshot: () => {
+      F$6(this, M$g, { controller: { get: { blocks: O$6(this, T$d, "f"), compInstance: this, currentShape: () => O$6(this, _$c, "m", P$8).call(this, this.currentShape), cyAttributes: O$6(this, A$8, "f"), history: { current: () => this.history[this.currentShape.index], currentSnapshot: () => {
         if (null === this.historyIndex) return null;
         const e4 = this.history[this.currentShape.index][this.historyIndex];
-        return O$5(this, _$b, "m", P$7).call(this, e4);
-      }, full: () => this.history, index: () => this.historyIndex }, lfAttribute: O$5(this, R$8, "f"), manager: O$5(this, I$8, "f"), navigation: { hasNav: () => {
+        return O$6(this, _$c, "m", P$8).call(this, e4);
+      }, full: () => this.history, index: () => this.historyIndex }, lfAttribute: O$6(this, R$9, "f"), manager: O$6(this, I$9, "f"), navigation: { hasNav: () => {
         var _a2, _b2;
         return Boolean((_b2 = (_a2 = this.lfNavigation) == null ? void 0 : _a2.treeProps) == null ? void 0 : _b2.lfDataset);
-      }, isTreeOpen: () => this.isNavigationTreeOpen }, parts: O$5(this, D$b, "f"), spinnerStatus: () => this.isSpinnerActive }, set: z$h({ currentShape: (e4) => this.currentShape = e4, history: { index: (e4) => this.historyIndex = e4, new: (e4, t5 = false) => {
+      }, isTreeOpen: () => this.isNavigationTreeOpen }, parts: O$6(this, D$c, "f"), spinnerStatus: () => this.isSpinnerActive }, set: z$i({ currentShape: (e4) => this.currentShape = e4, history: { index: (e4) => this.historyIndex = e4, new: (e4, t5 = false) => {
         var _a2;
         const a2 = ((_a2 = this.history) == null ? void 0 : _a2[e4.index]) || [];
         this.historyIndex < a2.length - 1 && a2.splice(this.historyIndex + 1), !(a2 == null ? void 0 : a2.length) || t5 ? (a2.push(e4), this.history[e4.index] = a2, this.historyIndex = a2.length - 1) : a2[0] = e4;
@@ -1228,7 +1228,7 @@ const B$4 = class B {
         this.isNavigationTreeOpen = e4;
       }, toggleTree: () => {
         this.isNavigationTreeOpen = !this.isNavigationTreeOpen;
-      } } }, e3 = () => O$5(this, M$f, "f")) }, elements: { jsx: L$9(e3), refs: { details: { canvas: null, clearHistory: null, deleteShape: null, redo: null, save: null, spinner: null, undo: null, tree: null }, navigation: { load: null, masonry: null, navToggle: null, tree: null, textfield: null } } }, handlers: C$e(e3) });
+      } } }, e3 = () => O$6(this, M$g, "f")) }, elements: { jsx: L$a(e3), refs: { details: { canvas: null, clearHistory: null, deleteShape: null, redo: null, save: null, spinner: null, undo: null, tree: null }, navigation: { load: null, masonry: null, navToggle: null, tree: null, textfield: null } } }, handlers: C$f(e3) });
     }));
   }
   onLfEvent(e2, t5) {
@@ -1238,20 +1238,20 @@ const B$4 = class B {
     var _a2;
     const { currentShape: t5 } = this;
     if (!t5 || !((_a2 = Object.keys(t5)) == null ? void 0 : _a2.length)) return;
-    const { history: a2 } = O$5(this, M$f, "f").controller.set, s2 = JSON.parse(JSON.stringify(t5));
-    y$f(s2.shape, e2), a2.new(s2, true);
+    const { history: a2 } = O$6(this, M$g, "f").controller.set, s2 = JSON.parse(JSON.stringify(t5));
+    y$g(s2.shape, e2), a2.new(s2, true);
   }
   async clearHistory(e2 = null) {
-    await u$b(O$5(this, M$f, "f"), e2);
+    await u$b(O$6(this, M$g, "f"), e2);
   }
   async clearSelection() {
-    await b$a(O$5(this, M$f, "f"));
+    await b$b(O$6(this, M$g, "f"));
   }
   async getComponents() {
-    return O$5(this, M$f, "f").elements.refs;
+    return O$6(this, M$g, "f").elements.refs;
   }
   async getCurrentSnapshot() {
-    return O$5(this, M$f, "f").controller.get.history.currentSnapshot();
+    return O$6(this, M$g, "f").controller.get.history.currentSnapshot();
   }
   async getDebugInfo() {
     return this.debugInfo;
@@ -1264,7 +1264,7 @@ const B$4 = class B {
     vt$1(this);
   }
   async reset() {
-    await u$b(O$5(this, M$f, "f")), await b$a(O$5(this, M$f, "f"));
+    await u$b(O$6(this, M$g, "f")), await b$b(O$6(this, M$g, "f"));
   }
   async setSpinnerStatus(e2) {
     this.isSpinnerActive = e2;
@@ -1275,129 +1275,129 @@ const B$4 = class B {
     }), e2);
   }
   connectedCallback() {
-    O$5(this, I$8, "f") && O$5(this, I$8, "f").theme.register(this);
+    O$6(this, I$9, "f") && O$6(this, I$9, "f").theme.register(this);
   }
   async componentWillLoad() {
-    F$5(this, I$8, await a(this)), O$5(this, j$b, "f").call(this), O$5(this, M$f, "f").controller.get.navigation.hasNav() && (this.isNavigationTreeOpen = true);
+    F$6(this, I$9, await a(this)), O$6(this, j$c, "f").call(this), O$6(this, M$g, "f").controller.get.navigation.hasNav() && (this.isNavigationTreeOpen = true);
   }
   componentDidLoad() {
-    const { info: e2 } = O$5(this, I$8, "f").debug;
+    const { info: e2 } = O$6(this, I$9, "f").debug;
     this.onLfEvent(new CustomEvent("ready"), "ready"), e2.update(this, "did-load");
   }
   componentWillRender() {
-    const { info: e2 } = O$5(this, I$8, "f").debug;
+    const { info: e2 } = O$6(this, I$9, "f").debug;
     e2.update(this, "will-render");
   }
   componentDidRender() {
-    const { info: e2 } = O$5(this, I$8, "f").debug;
+    const { info: e2 } = O$6(this, I$9, "f").debug;
     e2.update(this, "did-render");
   }
   render() {
-    const { bemClass: t5, setLfStyle: a2 } = O$5(this, I$8, "f").theme, { lfStyle: s2 } = this;
-    return U$5(A$9, { key: "c185ea57efd89c2e79e25ca051146d7048b72af7" }, s2 && U$5("style", { key: "1b4be7d25918a44d16d0d56ffe7f5bad478ec332", id: O$5(this, E$f, "f") }, a2(this)), U$5("div", { key: "4cb65d24bb11a1830cf7efe76fd5e11b850d9af5", id: O$5(this, W$g, "f") }, U$5("div", { key: "368bbc7c7573d96a35be6b630cacd3dc2cdf8a02", class: t5(O$5(this, T$c, "f").imageviewer._), part: O$5(this, D$b, "f").imageviewer }, O$5(this, _$b, "m", X$2).call(this))));
+    const { bemClass: t5, setLfStyle: a2 } = O$6(this, I$9, "f").theme, { lfStyle: s2 } = this;
+    return U$6(A$a, { key: "c185ea57efd89c2e79e25ca051146d7048b72af7" }, s2 && U$6("style", { key: "1b4be7d25918a44d16d0d56ffe7f5bad478ec332", id: O$6(this, E$g, "f") }, a2(this)), U$6("div", { key: "4cb65d24bb11a1830cf7efe76fd5e11b850d9af5", id: O$6(this, W$h, "f") }, U$6("div", { key: "368bbc7c7573d96a35be6b630cacd3dc2cdf8a02", class: t5(O$6(this, T$d, "f").imageviewer._), part: O$6(this, D$c, "f").imageviewer }, O$6(this, _$c, "m", X$3).call(this))));
   }
   disconnectedCallback() {
     var _a2;
-    (_a2 = O$5(this, I$8, "f")) == null ? void 0 : _a2.theme.unregister(this);
+    (_a2 = O$6(this, I$9, "f")) == null ? void 0 : _a2.theme.unregister(this);
   }
   get rootElement() {
-    return q$4(this);
+    return q$5(this);
   }
 };
-I$8 = /* @__PURE__ */ new WeakMap(), T$c = /* @__PURE__ */ new WeakMap(), A$7 = /* @__PURE__ */ new WeakMap(), R$8 = /* @__PURE__ */ new WeakMap(), D$b = /* @__PURE__ */ new WeakMap(), E$f = /* @__PURE__ */ new WeakMap(), W$g = /* @__PURE__ */ new WeakMap(), M$f = /* @__PURE__ */ new WeakMap(), j$b = /* @__PURE__ */ new WeakMap(), _$b = /* @__PURE__ */ new WeakSet(), P$7 = function(e2) {
-  const { data: t5 } = O$5(this, I$8, "f"), { cell: a2 } = t5, { stringify: s2 } = a2;
+I$9 = /* @__PURE__ */ new WeakMap(), T$d = /* @__PURE__ */ new WeakMap(), A$8 = /* @__PURE__ */ new WeakMap(), R$9 = /* @__PURE__ */ new WeakMap(), D$c = /* @__PURE__ */ new WeakMap(), E$g = /* @__PURE__ */ new WeakMap(), W$h = /* @__PURE__ */ new WeakMap(), M$g = /* @__PURE__ */ new WeakMap(), j$c = /* @__PURE__ */ new WeakMap(), _$c = /* @__PURE__ */ new WeakSet(), P$8 = function(e2) {
+  const { data: t5 } = O$6(this, I$9, "f"), { cell: a2 } = t5, { stringify: s2 } = a2;
   return void 0 !== e2.index ? { shape: e2, value: s2(e2.shape.value || e2.shape.lfValue) } : null;
-}, U$3 = function() {
-  const { bemClass: t5 } = O$5(this, I$8, "f").theme, { detailsGrid: a2 } = O$5(this, T$c, "f"), { canvas: s2, clearHistory: i2, deleteShape: n2, redo: r2, save: l2, spinner: o2, tree: c2, undo: f2 } = O$5(this, M$f, "f").elements.jsx.details;
-  return U$5("div", { class: t5(a2._), part: O$5(this, D$b, "f").details }, U$5("div", { class: t5(a2._, a2.preview) }, s2(), o2()), U$5("div", { class: t5(a2._, a2.actions) }, n2(), i2(), f2(), r2(), l2()), c2(), U$5("div", { class: t5(a2._, a2.settings) }, U$5("slot", { name: "settings" })));
-}, X$2 = function() {
-  const { bemClass: t5 } = O$5(this, I$8, "f").theme, { currentShape: a2 } = O$5(this, M$f, "f").controller.get;
-  return U$5("div", { class: t5(O$5(this, T$c, "f").mainGrid._, null, { selected: !!a2() }) }, O$5(this, _$b, "m", H$5).call(this), O$5(this, _$b, "m", U$3).call(this));
-}, H$5 = function() {
+}, U$4 = function() {
+  const { bemClass: t5 } = O$6(this, I$9, "f").theme, { detailsGrid: a2 } = O$6(this, T$d, "f"), { canvas: s2, clearHistory: i2, deleteShape: n2, redo: r2, save: l2, spinner: o2, tree: c2, undo: f2 } = O$6(this, M$g, "f").elements.jsx.details;
+  return U$6("div", { class: t5(a2._), part: O$6(this, D$c, "f").details }, U$6("div", { class: t5(a2._, a2.preview) }, s2(), o2()), U$6("div", { class: t5(a2._, a2.actions) }, n2(), i2(), f2(), r2(), l2()), c2(), U$6("div", { class: t5(a2._, a2.settings) }, U$6("slot", { name: "settings" })));
+}, X$3 = function() {
+  const { bemClass: t5 } = O$6(this, I$9, "f").theme, { currentShape: a2 } = O$6(this, M$g, "f").controller.get;
+  return U$6("div", { class: t5(O$6(this, T$d, "f").mainGrid._, null, { selected: !!a2() }) }, O$6(this, _$c, "m", H$6).call(this), O$6(this, _$c, "m", U$4).call(this));
+}, H$6 = function() {
   var _a2, _b2, _c2, _d2;
-  const { bemClass: t5 } = O$5(this, I$8, "f").theme, { load: a2, masonry: s2, navToggle: i2, textfield: n2, tree: r2 } = O$5(this, M$f, "f").elements.jsx.navigation, l2 = O$5(this, T$c, "f").navigationGrid, o2 = Boolean((_b2 = (_a2 = this.lfNavigation) == null ? void 0 : _a2.treeProps) == null ? void 0 : _b2.lfDataset) && Boolean((_d2 = (_c2 = this.lfNavigation) == null ? void 0 : _c2.treeProps) == null ? void 0 : _d2.lfDataset), c2 = t5(l2._, void 0, { "has-drawer": o2 && this.isNavigationTreeOpen, "has-nav": o2 });
-  return U$5("div", { class: c2, part: O$5(this, D$b, "f").navigation }, r2(), i2(), n2(), a2(), s2());
-}, B$4.style = '::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=fade-in]{display:block;animation:lf-fade-in-block 0.25s ease-out forwards}@keyframes lf-fade-in-block{from{visibility:hidden;opacity:0}to{visibility:visible;opacity:1}}:host{display:block;font-family:var(--lf-imageviewer-font-family, var(--lf-font-family-primary));font-size:var(--lf-imageviewer-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-imageviewer-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-imageviewer-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-imageviewer-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-imageviewer-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-imageviewer-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-imageviewer-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-imageviewer-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{background-color:rgba(var(--lf-imageviewer-color-bg, var(--lf-color-bg)), 0.125);color:rgb(var(--lf-imageviewer-color-on-bg, var(--lf-color-on-bg)));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);width:100%;height:100%}.imageviewer{width:100%;height:100%}.main-grid{border:0;border-style:solid;border-color:rgba(var(--lf-imageviewer-border-color, var(--lf-color-border)), 1);border-width:1px;border-radius:var(--lf-imageviewer-border-radius, var(--lf-ui-border-radius));width:100%;height:100%;box-sizing:border-box;display:grid;grid-template-columns:100% 0;overflow:auto}.main-grid--selected{grid-template-columns:30% 70%}.main-grid--selected .details-grid{display:grid}.navigation-grid{width:100%;height:100%;box-sizing:border-box;display:grid;grid-template-areas:"textfield" "button" "masonry";grid-template-columns:1fr;grid-template-rows:repeat(2, auto) 1fr;overflow:hidden}.navigation-grid--has-nav{grid-template-areas:"nav-toggle textfield" "nav-toggle button" "nav-toggle masonry";grid-template-columns:auto 1fr}.navigation-grid--has-nav .navigation-grid__nav-toggle{display:block}.navigation-grid--has-drawer{grid-template-areas:"tree nav-toggle textfield" "tree nav-toggle button" "tree nav-toggle masonry";grid-template-columns:var(--lf-imageviewer-nav-width, auto) auto 1fr}.navigation-grid--has-drawer .navigation-grid__tree{display:grid}.navigation-grid__button{grid-area:button;padding-bottom:0.75em}.navigation-grid__masonry{grid-area:masonry;overflow:auto;position:relative}.navigation-grid__nav-toggle{border-right:1px solid rgba(var(--lf-color-border));box-sizing:border-box;display:none;grid-area:nav-toggle}.navigation-grid__textfield{grid-area:textfield;padding:0}.navigation-grid__tree{display:none;grid-area:tree;overflow:auto}.details-grid{width:100%;height:100%;border-left:1px solid rgba(var(--lf-color-border));box-sizing:border-box;display:none;grid-template-areas:"image image" "actions actions" "tree settings";grid-template-columns:40% 1fr;grid-template-rows:60% auto 1fr;overflow:auto}.details-grid__actions{border-left:1px solid rgba(var(--lf-color-border));box-sizing:border-box;display:flex;grid-area:actions}.details-grid__canvas{border-bottom:1px solid rgba(var(--lf-color-border));box-sizing:border-box}.details-grid__preview{align-content:center;grid-area:image;position:relative}.details-grid__spinner{width:100%;height:100%;left:0;pointer-events:none;position:absolute;top:0}.details-grid__tree{border-right:1px solid rgba(var(--lf-color-border));box-sizing:border-box;grid-area:tree;overflow:auto}.details-grid__settings{grid-area:settings;overflow:auto}';
+  const { bemClass: t5 } = O$6(this, I$9, "f").theme, { load: a2, masonry: s2, navToggle: i2, textfield: n2, tree: r2 } = O$6(this, M$g, "f").elements.jsx.navigation, l2 = O$6(this, T$d, "f").navigationGrid, o2 = Boolean((_b2 = (_a2 = this.lfNavigation) == null ? void 0 : _a2.treeProps) == null ? void 0 : _b2.lfDataset) && Boolean((_d2 = (_c2 = this.lfNavigation) == null ? void 0 : _c2.treeProps) == null ? void 0 : _d2.lfDataset), c2 = t5(l2._, void 0, { "has-drawer": o2 && this.isNavigationTreeOpen, "has-nav": o2 });
+  return U$6("div", { class: c2, part: O$6(this, D$c, "f").navigation }, r2(), i2(), n2(), a2(), s2());
+}, B$5.style = '::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=fade-in]{display:block;animation:lf-fade-in-block 0.25s ease-out forwards}@keyframes lf-fade-in-block{from{visibility:hidden;opacity:0}to{visibility:visible;opacity:1}}:host{display:block;font-family:var(--lf-imageviewer-font-family, var(--lf-font-family-primary));font-size:var(--lf-imageviewer-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-imageviewer-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-imageviewer-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-imageviewer-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-imageviewer-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-imageviewer-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-imageviewer-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-imageviewer-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{background-color:rgba(var(--lf-imageviewer-color-bg, var(--lf-color-bg)), 0.125);color:rgb(var(--lf-imageviewer-color-on-bg, var(--lf-color-on-bg)));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);width:100%;height:100%}.imageviewer{width:100%;height:100%}.main-grid{border:0;border-style:solid;border-color:rgba(var(--lf-imageviewer-border-color, var(--lf-color-border)), 1);border-width:1px;border-radius:var(--lf-imageviewer-border-radius, var(--lf-ui-border-radius));width:100%;height:100%;box-sizing:border-box;display:grid;grid-template-columns:100% 0;overflow:auto}.main-grid--selected{grid-template-columns:30% 70%}.main-grid--selected .details-grid{display:grid}.navigation-grid{width:100%;height:100%;box-sizing:border-box;display:grid;grid-template-areas:"textfield" "button" "masonry";grid-template-columns:1fr;grid-template-rows:repeat(2, auto) 1fr;overflow:hidden}.navigation-grid--has-nav{grid-template-areas:"nav-toggle textfield" "nav-toggle button" "nav-toggle masonry";grid-template-columns:auto 1fr}.navigation-grid--has-nav .navigation-grid__nav-toggle{display:block}.navigation-grid--has-drawer{grid-template-areas:"tree nav-toggle textfield" "tree nav-toggle button" "tree nav-toggle masonry";grid-template-columns:var(--lf-imageviewer-nav-width, auto) auto 1fr}.navigation-grid--has-drawer .navigation-grid__tree{display:grid}.navigation-grid__button{grid-area:button;padding-bottom:0.75em}.navigation-grid__masonry{grid-area:masonry;overflow:auto;position:relative}.navigation-grid__nav-toggle{border-right:1px solid rgba(var(--lf-color-border));box-sizing:border-box;display:none;grid-area:nav-toggle}.navigation-grid__textfield{grid-area:textfield;padding:0}.navigation-grid__tree{display:none;grid-area:tree;overflow:auto}.details-grid{width:100%;height:100%;border-left:1px solid rgba(var(--lf-color-border));box-sizing:border-box;display:none;grid-template-areas:"image image" "actions actions" "tree settings";grid-template-columns:40% 1fr;grid-template-rows:60% auto 1fr;overflow:auto}.details-grid__actions{border-left:1px solid rgba(var(--lf-color-border));box-sizing:border-box;display:flex;grid-area:actions}.details-grid__canvas{border-bottom:1px solid rgba(var(--lf-color-border));box-sizing:border-box}.details-grid__preview{align-content:center;grid-area:image;position:relative}.details-grid__spinner{width:100%;height:100%;left:0;pointer-events:none;position:absolute;top:0}.details-grid__tree{border-right:1px solid rgba(var(--lf-color-border));box-sizing:border-box;grid-area:tree;overflow:auto}.details-grid__settings{grid-area:settings;overflow:auto}';
 const p012d7434_entry = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
-  lf_imageviewer: B$4
+  lf_imageviewer: B$5
 }, Symbol.toStringTag, { value: "Module" }));
-const T$b = (e2, t5) => {
+const T$c = (e2, t5) => {
   const { currentCharacter: r2 } = e2.controller.get.compInstance;
   return t5 ?? r2;
-}, L$8 = (e2, t5) => {
+}, L$9 = (e2, t5) => {
   const { lfEndpointUrl: r2, lfMaxTokens: s2, lfPollingInterval: a2, lfSystem: o2, lfTemperature: n2 } = t5;
   e2.lfEndpointUrl = r2, e2.lfMaxTokens = s2, e2.lfPollingInterval = a2, e2.lfSystem = o2, e2.lfTemperature = n2;
-}, M$e = (e2) => {
+}, M$f = (e2) => {
   const { lfDataset: t5 } = e2.controller.get.compInstance;
   return !!((t5 == null ? void 0 : t5.nodes) || []).length;
-}, E$e = (e2) => {
+}, E$f = (e2) => {
   var _a2;
   const { lfDataset: t5 } = e2.controller.get.compInstance;
   return !!((_a2 = t5 == null ? void 0 : t5.nodes) == null ? void 0 : _a2.length);
-}, R$7 = (e2) => ({ biography: (t5) => W$f(e2, t5), byId: (t5) => {
+}, R$8 = (e2) => ({ biography: (t5) => W$g(e2, t5), byId: (t5) => {
   const { lfDataset: r2 } = e2().controller.get.compInstance;
   return r2.nodes.find(((e3) => e3.id === t5));
-}, chat: (t5) => j$a(e2, t5), current: () => {
+}, chat: (t5) => j$b(e2, t5), current: () => {
   const { currentCharacter: t5 } = e2().controller.get.compInstance;
   return t5;
-}, history: (t5) => D$a(e2, t5), list: () => {
+}, history: (t5) => D$b(e2, t5), list: () => {
   const { lfDataset: t5 } = e2().controller.get.compInstance;
   return t5.nodes || [];
-}, name: (t5) => U$2(e2, t5), next: (t5) => $$4(e2, t5, true), previous: (t5) => $$4(e2, t5) }), A$6 = (e2) => ({ chat: (t5, r2) => {
-  const s2 = e2(), { compInstance: a2 } = s2.controller.get, { id: o2 } = T$b(e2(), r2);
+}, name: (t5) => U$3(e2, t5), next: (t5) => $$5(e2, t5, true), previous: (t5) => $$5(e2, t5) }), A$7 = (e2) => ({ chat: (t5, r2) => {
+  const s2 = e2(), { compInstance: a2 } = s2.controller.get, { id: o2 } = T$c(e2(), r2);
   a2.chat[o2] = t5;
 }, current: (t5) => {
   const r2 = e2(), { compInstance: s2 } = r2.controller.get;
   s2.currentCharacter = t5;
 }, history: (t5, r2) => {
-  const s2 = e2(), { compInstance: a2 } = s2.controller.get, { id: o2 } = T$b(e2(), r2), n2 = a2;
+  const s2 = e2(), { compInstance: a2 } = s2.controller.get, { id: o2 } = T$c(e2(), r2), n2 = a2;
   n2.history[o2] !== t5 && (n2.history[o2] = t5, n2.lfAutosave && s2.controller.set.data());
 }, next: (t5) => {
   const r2 = e2();
-  if (!M$e(r2)) return;
-  const { set: s2 } = r2.controller, a2 = T$b(e2(), t5), { next: o2 } = r2.controller.get.character;
+  if (!M$f(r2)) return;
+  const { set: s2 } = r2.controller, a2 = T$c(e2(), t5), { next: o2 } = r2.controller.get.character;
   s2.character.current(o2(a2));
 }, previous: (t5) => {
   const r2 = e2();
-  if (!M$e(r2)) return;
-  const { set: s2 } = r2.controller, a2 = T$b(e2(), t5), { previous: o2 } = r2.controller.get.character;
+  if (!M$f(r2)) return;
+  const { set: s2 } = r2.controller, a2 = T$c(e2(), t5), { previous: o2 } = r2.controller.get.character;
   s2.character.current(o2(a2));
-} }), W$f = (e2, t5) => {
-  const r2 = e2(), { stringify: s2 } = r2.controller.get.manager.data.cell, a2 = T$b(e2(), t5);
+} }), W$g = (e2, t5) => {
+  const r2 = e2(), { stringify: s2 } = r2.controller.get.manager.data.cell, a2 = T$c(e2(), t5);
   try {
     const e3 = a2.children.find(((e4) => "biography" === e4.id)).value;
     return e3 ? s2(e3) : "You have no informations about this character...";
   } catch (e3) {
     return "You have no informations about this character...";
   }
-}, j$a = (e2, t5) => {
-  const r2 = e2(), { chat: s2 } = r2.controller.get.compInstance, { id: a2 } = T$b(r2, t5);
+}, j$b = (e2, t5) => {
+  const r2 = e2(), { chat: s2 } = r2.controller.get.compInstance, { id: a2 } = T$c(r2, t5);
   return s2[a2];
-}, D$a = (e2, t5) => {
-  const r2 = e2(), { history: s2 } = r2.controller.get.compInstance, { id: a2 } = T$b(e2(), t5);
+}, D$b = (e2, t5) => {
+  const r2 = e2(), { history: s2 } = r2.controller.get.compInstance, { id: a2 } = T$c(e2(), t5);
   return s2[a2];
-}, U$2 = (e2, t5) => {
-  const { description: r2, id: s2, value: a2 } = T$b(e2(), t5);
+}, U$3 = (e2, t5) => {
+  const { description: r2, id: s2, value: a2 } = T$c(e2(), t5);
   return a2 || s2 || r2 || "?";
-}, $$4 = (e2, t5, r2) => {
-  const s2 = e2(), { lfDataset: a2 } = s2.controller.get.compInstance, { id: o2 } = T$b(e2(), t5);
-  if (!M$e(s2)) return null;
+}, $$5 = (e2, t5, r2) => {
+  const s2 = e2(), { lfDataset: a2 } = s2.controller.get.compInstance, { id: o2 } = T$c(e2(), t5);
+  if (!M$f(s2)) return null;
   const n2 = a2.nodes, i2 = n2.findIndex(((e3) => e3.id === o2));
   return true === r2 ? n2[(i2 + 1) % n2.length] : n2[(i2 + n2.length - 1) % n2.length];
-}, O$4 = (e2) => ({ asCover: (t5, r2) => V$5(e2, t5, r2), byType: (t5, r2) => Y$4(e2, t5, r2), coverIndex: (t5, r2) => {
-  const s2 = e2(), { covers: a2 } = s2.controller.get.compInstance, { id: o2 } = T$b(s2, r2);
+}, O$5 = (e2) => ({ asCover: (t5, r2) => V$6(e2, t5, r2), byType: (t5, r2) => Y$5(e2, t5, r2), coverIndex: (t5, r2) => {
+  const s2 = e2(), { covers: a2 } = s2.controller.get.compInstance, { id: o2 } = T$c(s2, r2);
   return a2[o2][t5];
-}, newId: (t5) => X$1(e2, t5), root: (t5, r2) => {
-  const s2 = e2(), { children: a2 } = T$b(s2, r2);
+}, newId: (t5) => X$2(e2, t5), root: (t5, r2) => {
+  const s2 = e2(), { children: a2 } = T$c(s2, r2);
   return a2.find(((e3) => e3.id === t5));
 }, title: (e3) => {
   const t5 = (e3 == null ? void 0 : e3.value) || "", r2 = (e3 == null ? void 0 : e3.description) || "";
   return t5 && r2 ? `${t5} - ${r2}` : r2 || t5 || "";
-} }), P$6 = (e2) => ({ cover: (t5, r2, s2) => {
-  const a2 = e2(), { compInstance: o2 } = a2.controller.get, { id: n2 } = T$b(e2(), s2), i2 = o2;
+} }), P$7 = (e2) => ({ cover: (t5, r2, s2) => {
+  const a2 = e2(), { compInstance: o2 } = a2.controller.get, { id: n2 } = T$c(e2(), s2), i2 = o2;
   i2.covers[n2][t5] = r2, i2.refresh();
-} }), N$2 = (e2) => {
+} }), N$3 = (e2) => {
   switch (e2) {
     case "avatars":
       return { value: AVATAR_COVER };
@@ -1412,19 +1412,19 @@ const T$b = (e2, t5) => {
     default:
       return { value: "" };
   }
-}, V$5 = (e2, t5, r2) => {
+}, V$6 = (e2, t5, r2) => {
   var _a2, _b2;
-  const s2 = e2(), { compInstance: a2, image: o2 } = s2.controller.get, { children: n2, id: i2 } = T$b(s2, r2), { covers: l2 } = a2;
+  const s2 = e2(), { compInstance: a2, image: o2 } = s2.controller.get, { children: n2, id: i2 } = T$c(s2, r2), { covers: l2 } = a2;
   try {
     const e3 = n2.find(((e4) => e4.id === t5)), r3 = l2[i2][t5], s3 = e3.children[r3];
-    return ((_b2 = (_a2 = s3 == null ? void 0 : s3.cells) == null ? void 0 : _a2.lfImage) == null ? void 0 : _b2.value) ? { node: e3.children[r3], title: o2.title(s3), value: s3.cells.lfImage.value } : N$2(t5);
+    return ((_b2 = (_a2 = s3 == null ? void 0 : s3.cells) == null ? void 0 : _a2.lfImage) == null ? void 0 : _b2.value) ? { node: e3.children[r3], title: o2.title(s3), value: s3.cells.lfImage.value } : N$3(t5);
   } catch (e3) {
-    return N$2(t5);
+    return N$3(t5);
   }
-}, Y$4 = (e2, t5, r2) => {
-  const { children: s2 } = T$b(e2(), r2), a2 = s2.find(((e3) => e3.id === t5));
+}, Y$5 = (e2, t5, r2) => {
+  const { children: s2 } = T$c(e2(), r2), a2 = s2.find(((e3) => e3.id === t5));
   return (a2 == null ? void 0 : a2.children) ? a2.children : [];
-}, X$1 = (e2, t5) => {
+}, X$2 = (e2, t5) => {
   const { byType: r2 } = e2().controller.get.image;
   let s2, a2, o2 = 0;
   switch (t5) {
@@ -1450,10 +1450,10 @@ const T$b = (e2, t5) => {
     a2 = `${s2}${o2.toString()}`, o2++;
   } while (r2(t5).some(((e3) => e3.id === a2)));
   return a2;
-}, F$4 = (e2) => () => {
+}, F$5 = (e2) => () => {
   const { ui: t5 } = e2().controller.get.compInstance;
   return t5;
-}, J$1 = (e2) => ({ customization: (t5) => {
+}, J$2 = (e2) => ({ customization: (t5) => {
   const { compInstance: r2 } = e2().controller.get, s2 = r2;
   s2.ui.customizationView = t5, s2.refresh();
 }, filters: (t5) => {
@@ -1462,10 +1462,10 @@ const T$b = (e2, t5) => {
 }, options: (t5, r2) => {
   const { compInstance: s2 } = e2().controller.get, a2 = s2;
   a2.ui.options[r2] = t5, a2.refresh();
-}, panel: (t5, r2) => B$3(e2, t5, r2), setFormState: async (t5, r2, s2 = null) => q$3(e2, t5, r2, s2) }), q$3 = async (e2, t5, r2, s2) => {
+}, panel: (t5, r2) => B$4(e2, t5, r2), setFormState: async (t5, r2, s2 = null) => q$4(e2, t5, r2, s2) }), q$4 = async (e2, t5, r2, s2) => {
   const a2 = e2(), { controller: o2 } = a2, { compInstance: n2, image: i2 } = o2.get, { formStatusMap: l2, ui: c2 } = n2;
   c2.form[r2] = t5, l2[r2] = t5 ? (s2 == null ? void 0 : s2.id) ?? i2.newId(r2) : null, await n2.refresh();
-}, B$3 = (e2, t5, r2) => {
+}, B$4 = (e2, t5, r2) => {
   const s2 = e2(), { compInstance: a2 } = s2.controller.get, { panels: o2 } = a2.ui;
   switch (t5) {
     case "left":
@@ -1475,19 +1475,19 @@ const T$b = (e2, t5) => {
       o2.isRightCollapsed = r2 ?? !o2.isRightCollapsed;
   }
   return a2.refresh(), r2;
-}, H$4 = (t5) => ({ avatar: () => {
+}, H$5 = (t5) => ({ avatar: () => {
   const { controller: r2, elements: s2 } = t5(), { blocks: a2, cyAttributes: o2, image: n2, lfAttributes: i2, manager: l2 } = r2.get, { character: c2 } = s2.refs, { asCover: f2 } = n2, { assignRef: h2, theme: u2 } = l2, { bemClass: d2 } = u2, { title: m2, value: p2 } = f2("avatars");
-  return U$5("img", { alt: m2 || "", class: d2(a2.character._, a2.character.image), "data-cy": o2.image, "data-lf": i2.fadeIn, ref: h2(c2, "avatar"), src: p2, title: m2 || "" });
+  return U$6("img", { alt: m2 || "", class: d2(a2.character._, a2.character.image), "data-cy": o2.image, "data-lf": i2.fadeIn, ref: h2(c2, "avatar"), src: p2, title: m2 || "" });
 }, biography: () => {
   const { controller: r2, elements: s2 } = t5(), { character: a2 } = s2.refs, { biography: o2 } = r2.get.character, { assignRef: n2 } = r2.get.manager;
-  return U$5("lf-code", { lfLanguage: "markdown", lfShowHeader: false, lfValue: o2(), ref: n2(a2, "biography") });
+  return U$6("lf-code", { lfLanguage: "markdown", lfShowHeader: false, lfValue: o2(), ref: n2(a2, "biography") });
 }, save: () => {
   const { controller: r2, elements: s2, handlers: a2 } = t5(), { cyAttributes: o2, manager: n2, status: i2 } = r2.get, { character: l2 } = s2.refs, { button: c2 } = a2.character, { inProgress: f2 } = i2.save, { assignRef: h2 } = n2, d2 = f2();
-  return U$5("lf-button", { "data-cy": o2.button, lfDataset: LF_MESSENGER_MENU(n2.theme), lfLabel: "Save", lfShowSpinner: d2, lfStretchY: true, lfStyling: "flat", "onLf-button-event": c2, ref: h2(l2, "save"), title: "Update the dataset with current settings." });
+  return U$6("lf-button", { "data-cy": o2.button, lfDataset: LF_MESSENGER_MENU(n2.theme), lfLabel: "Save", lfShowSpinner: d2, lfStretchY: true, lfStyling: "flat", "onLf-button-event": c2, ref: h2(l2, "save"), title: "Update the dataset with current settings." });
 }, statusIcon: () => {
   const { controller: r2, elements: s2 } = t5(), { blocks: a2, manager: o2, status: n2 } = r2.get, { character: i2 } = s2.refs, { connection: l2 } = n2, { assignRef: c2, theme: f2 } = o2, { bemClass: h2 } = f2, { color: u2, title: d2 } = /* @__PURE__ */ ((e2) => ({ color: "ready" === e2 ? "success" : "offline" === e2 ? "danger" : "warning", title: "ready" === e2 ? "Ready to chat!" : "offline" === e2 ? "This character seems to be offline..." : "Contacting this character..." }))(l2());
-  return U$5("div", { class: h2(a2.character._, a2.character.status, { offline: "danger" === u2, online: "success" === u2 }), ref: c2(i2, "statusIcon"), title: d2 });
-} }), G$2 = (t5) => ({ chat: () => {
+  return U$6("div", { class: h2(a2.character._, a2.character.status, { offline: "danger" === u2, online: "success" === u2 }), ref: c2(i2, "statusIcon"), title: d2 });
+} }), G$3 = (t5) => ({ chat: () => {
   const r2 = t5(), { controller: s2, elements: a2, handlers: o2 } = r2, { character: n2, manager: i2 } = s2.get, { refs: l2 } = a2, { chat: c2, current: f2, history: h2 } = n2, { assignRef: u2, sanitizeProps: d2 } = i2, m2 = ((e2) => {
     const { biography: t6, location: r3, outfit: s3, timeframe: a3 } = (() => {
       const { character: t7, compInstance: r4, image: s4 } = e2.controller.get, { biography: a4 } = t7, { asCover: o3 } = s4, { options: n3 } = r4.ui, i3 = o3("locations").node, l3 = o3("outfits").node, c3 = o3("timeframes").node, f3 = (e3, t8) => e3 ? `${e3} - ${t8 || ""}` : "";
@@ -1521,52 +1521,52 @@ ${a3}
 Begin your performance...
     `;
   })(r2);
-  return U$5("lf-chat", { key: f2().id, lfLayout: "bottom", lfSystem: m2, lfValue: JSON.parse(h2()), ...d2(c2(), "LfChat"), "onLf-chat-event": o2.chat.chat, ref: u2(l2.chat, "chat") });
+  return U$6("lf-chat", { key: f2().id, lfLayout: "bottom", lfSystem: m2, lfValue: JSON.parse(h2()), ...d2(c2(), "LfChat"), "onLf-chat-event": o2.chat.chat, ref: u2(l2.chat, "chat") });
 }, leftExpander: () => {
   const { controller: r2, elements: s2, handlers: a2 } = t5(), { cyAttributes: o2, config: n2, manager: i2 } = r2.get, { refs: l2 } = s2, { button: c2 } = a2.chat, { assignRef: f2, theme: h2 } = i2, { "--lf-icon-next": u2, "--lf-icon-previous": d2 } = h2.get.current().variables, { isLeftCollapsed: p2 } = n2().ui.panels;
-  return U$5("lf-button", { "data-cy": o2.button, id: LF_MESSENGER_IDS.chat.leftExpander, lfIcon: p2 ? u2 : d2, lfStretchY: true, "onLf-button-event": c2, ref: f2(l2.chat, "leftExpander"), title: "Expand/collapse this section" });
+  return U$6("lf-button", { "data-cy": o2.button, id: LF_MESSENGER_IDS.chat.leftExpander, lfIcon: p2 ? u2 : d2, lfStretchY: true, "onLf-button-event": c2, ref: f2(l2.chat, "leftExpander"), title: "Expand/collapse this section" });
 }, rightExpander: () => {
   const { controller: r2, elements: s2, handlers: a2 } = t5(), { config: o2, cyAttributes: n2, manager: i2 } = r2.get, { refs: l2 } = s2, { button: c2 } = a2.chat, { assignRef: f2, theme: h2 } = i2, { "--lf-icon-next": u2, "--lf-icon-previous": d2 } = h2.get.current().variables, { isRightCollapsed: p2 } = o2().ui.panels;
-  return U$5("lf-button", { "data-cy": n2.button, id: LF_MESSENGER_IDS.chat.rightExpander, lfIcon: p2 ? d2 : u2, lfStretchY: true, "onLf-button-event": c2, ref: f2(l2.chat, "rightExpander"), title: "Expand/collapse this section" });
+  return U$6("lf-button", { "data-cy": n2.button, id: LF_MESSENGER_IDS.chat.rightExpander, lfIcon: p2 ? d2 : u2, lfStretchY: true, "onLf-button-event": c2, ref: f2(l2.chat, "rightExpander"), title: "Expand/collapse this section" });
 }, tabbar: () => {
   const { controller: r2, elements: s2, handlers: a2 } = t5(), { manager: o2 } = r2.get, { refs: n2 } = s2, { tabbar: i2 } = a2.chat, { assignRef: l2, theme: c2 } = o2;
-  return U$5("lf-tabbar", { lfDataset: LF_MESSENGER_NAV(c2), lfValue: null, "onLf-tabbar-event": i2, ref: l2(n2.chat, "tabbar") });
-} }), K$1 = (t5) => ({ filters: () => {
+  return U$6("lf-tabbar", { lfDataset: LF_MESSENGER_NAV(c2), lfValue: null, "onLf-tabbar-event": i2, ref: l2(n2.chat, "tabbar") });
+} }), K$2 = (t5) => ({ filters: () => {
   const { controller: r2, elements: s2, handlers: a2 } = t5(), { character: o2, manager: n2 } = r2.get, { customization: i2 } = s2.refs, { chip: l2 } = a2.customization, { assignRef: c2 } = n2;
-  return U$5("lf-chip", { key: "filter_" + o2.name(), lfDataset: LF_MESSENGER_FILTER, lfStyling: "filter", "onLf-chip-event": l2, ref: c2(i2, "filters") });
-}, form: Q$1(t5), list: { edit: (r2, s2) => {
+  return U$6("lf-chip", { key: "filter_" + o2.name(), lfDataset: LF_MESSENGER_FILTER, lfStyling: "filter", "onLf-chip-event": l2, ref: c2(i2, "filters") });
+}, form: Q$2(t5), list: { edit: (r2, s2) => {
   const { controller: a2, elements: o2, handlers: n2 } = t5(), { assignRef: i2, theme: l2 } = a2.get.manager, { customization: c2 } = o2.refs, { button: f2 } = n2.customization, { "--lf-icon-edit": h2 } = l2.get.current().variables;
-  return U$5("lf-button", { lfIcon: h2, lfStretchX: true, "onLf-button-event": (e2) => f2(e2, r2, "edit", s2), title: "Edit this option.", ref: i2(c2.list, "edit") });
+  return U$6("lf-button", { lfIcon: h2, lfStretchX: true, "onLf-button-event": (e2) => f2(e2, r2, "edit", s2), title: "Edit this option.", ref: i2(c2.list, "edit") });
 }, remove: (r2, s2) => {
   const { controller: a2, elements: o2, handlers: n2 } = t5(), { assignRef: i2, theme: l2 } = a2.get.manager, { customization: c2 } = o2.refs, { button: f2 } = n2.customization, { "--lf-icon-delete": h2 } = l2.get.current().variables;
-  return U$5("lf-button", { lfIcon: h2, lfStretchX: true, lfUiState: "danger", "onLf-button-event": (e2) => f2(e2, r2, "delete", s2), title: "Delete this option.", ref: i2(c2.list, "remove") });
-} } }), Q$1 = (t5) => IMAGE_TYPE_IDS.reduce(((r2, s2) => (r2[s2] = { add: () => {
+  return U$6("lf-button", { lfIcon: h2, lfStretchX: true, lfUiState: "danger", "onLf-button-event": (e2) => f2(e2, r2, "delete", s2), title: "Delete this option.", ref: i2(c2.list, "remove") });
+} } }), Q$2 = (t5) => IMAGE_TYPE_IDS.reduce(((r2, s2) => (r2[s2] = { add: () => {
   const r3 = t5(), { controller: a2, elements: o2, handlers: n2 } = r3, { blocks: i2, cyAttributes: l2, manager: c2 } = a2.get, { form: f2 } = o2.refs.customization, { button: h2 } = n2.customization, { assignRef: u2, theme: d2 } = c2, { bemClass: m2 } = d2, { "--lf-icon-add": p2 } = d2.get.current().variables;
-  return U$5("lf-button", { class: m2(i2.covers._, i2.covers.add), "data-cy": l2.button, lfIcon: p2, lfLabel: "New", lfStretchY: true, lfStyling: "flat", lfUiSize: "small", "onLf-button-event": (e2) => h2(e2, s2, "add", null), ref: u2(f2[s2], "add") });
+  return U$6("lf-button", { class: m2(i2.covers._, i2.covers.add), "data-cy": l2.button, lfIcon: p2, lfLabel: "New", lfStretchY: true, lfStyling: "flat", lfUiSize: "small", "onLf-button-event": (e2) => h2(e2, s2, "add", null), ref: u2(f2[s2], "add") });
 }, cancel: () => {
   const r3 = t5(), { controller: a2, elements: o2, handlers: n2 } = r3, { blocks: i2, cyAttributes: l2, manager: c2 } = a2.get, { form: f2 } = o2.refs.customization, { button: h2 } = n2.customization, { assignRef: u2, theme: d2 } = c2, { bemClass: m2 } = d2, { "--lf-icon-clear": p2 } = d2.get.current().variables;
-  return U$5("lf-button", { class: m2(i2.form._, i2.form.button), "data-cy": l2.button, lfIcon: p2, lfLabel: "Cancel", lfStyling: "flat", "onLf-button-event": (e2) => h2(e2, s2, "cancel", null), ref: u2(f2[s2], "cancel") });
+  return U$6("lf-button", { class: m2(i2.form._, i2.form.button), "data-cy": l2.button, lfIcon: p2, lfLabel: "Cancel", lfStyling: "flat", "onLf-button-event": (e2) => h2(e2, s2, "cancel", null), ref: u2(f2[s2], "cancel") });
 }, confirm: () => {
   const r3 = t5(), { controller: a2, elements: o2, handlers: n2 } = r3, { blocks: i2, cyAttributes: l2, manager: c2 } = a2.get, { form: f2 } = o2.refs.customization, { button: h2 } = n2.customization, { assignRef: u2, theme: d2 } = c2, { bemClass: m2 } = d2, { "--lf-icon-success": p2 } = d2.get.current().variables;
-  return U$5("lf-button", { class: m2(i2.form._, i2.form.button), "data-cy": l2.button, lfIcon: p2, lfLabel: "Confirm", lfStyling: "outlined", "onLf-button-event": (e2) => h2(e2, s2, "confirm", null), ref: u2(f2[s2], "confirm") });
+  return U$6("lf-button", { class: m2(i2.form._, i2.form.button), "data-cy": l2.button, lfIcon: p2, lfLabel: "Confirm", lfStyling: "outlined", "onLf-button-event": (e2) => h2(e2, s2, "confirm", null), ref: u2(f2[s2], "confirm") });
 }, description: (r3) => {
   const a2 = t5(), { controller: o2, elements: n2 } = a2, { blocks: i2, cyAttributes: l2, manager: c2 } = o2.get, { form: f2 } = n2.refs.customization, { assignRef: h2, theme: u2 } = c2, { bemClass: d2, get: m2 } = u2;
-  return U$5("lf-textfield", { class: d2(i2.form._, i2.form.field), "data-cy": l2.input, lfStretchX: true, lfIcon: m2.icon("id"), lfLabel: "Description", lfValue: r3 && r3.description, ref: h2(f2[s2], "description"), title: "A more accurate description to give extra context to the LLM." });
+  return U$6("lf-textfield", { class: d2(i2.form._, i2.form.field), "data-cy": l2.input, lfStretchX: true, lfIcon: m2.icon("id"), lfLabel: "Description", lfValue: r3 && r3.description, ref: h2(f2[s2], "description"), title: "A more accurate description to give extra context to the LLM." });
 }, id: (r3) => {
   const a2 = t5(), { controller: o2, elements: n2 } = a2, { blocks: i2, cyAttributes: l2, manager: c2 } = o2.get, { form: f2 } = n2.refs.customization, { assignRef: h2, theme: u2 } = c2, { bemClass: d2, get: m2 } = u2;
-  return U$5("lf-textfield", { class: d2(i2.form._, i2.form.field), "data-cy": l2.input, key: `id-edit-${r3}`, lfStretchX: true, lfIcon: m2.icon("key"), lfLabel: "ID", lfValue: r3, ref: h2(f2[s2], "id"), title: "The cover image displayed in the selection panel." });
+  return U$6("lf-textfield", { class: d2(i2.form._, i2.form.field), "data-cy": l2.input, key: `id-edit-${r3}`, lfStretchX: true, lfIcon: m2.icon("key"), lfLabel: "ID", lfValue: r3, ref: h2(f2[s2], "id"), title: "The cover image displayed in the selection panel." });
 }, imageUrl: (r3) => {
   const a2 = t5(), { controller: o2, elements: n2 } = a2, { blocks: i2, cyAttributes: l2, manager: c2 } = o2.get, { form: f2 } = n2.refs.customization, { assignRef: h2, theme: u2 } = c2, { bemClass: d2, get: m2 } = u2;
-  return U$5("lf-textfield", { class: d2(i2.form._, i2.form.field), "data-cy": l2.input, lfStretchX: true, lfIcon: m2.icon("photo"), lfLabel: "Image URL", lfValue: r3 && r3.cells.lfImage.value, ref: h2(f2[s2], "imageUrl"), title: "The cover image displayed in the selection panel." });
+  return U$6("lf-textfield", { class: d2(i2.form._, i2.form.field), "data-cy": l2.input, lfStretchX: true, lfIcon: m2.icon("photo"), lfLabel: "Image URL", lfValue: r3 && r3.cells.lfImage.value, ref: h2(f2[s2], "imageUrl"), title: "The cover image displayed in the selection panel." });
 }, title: (r3) => {
   const a2 = t5(), { controller: o2, elements: n2 } = a2, { blocks: i2, cyAttributes: l2, manager: c2 } = o2.get, { form: f2 } = n2.refs.customization, { assignRef: h2, theme: u2 } = c2, { bemClass: d2, get: m2 } = u2;
-  return U$5("lf-textfield", { class: d2(i2.form._, i2.form.field), "data-cy": l2.input, lfStretchX: true, lfIcon: m2.icon("forms"), lfLabel: "Title", lfValue: r3 && r3.value, ref: h2(f2[s2], "title"), title: "The overall theme of this option." });
+  return U$6("lf-textfield", { class: d2(i2.form._, i2.form.field), "data-cy": l2.input, lfStretchX: true, lfIcon: m2.icon("forms"), lfLabel: "Title", lfValue: r3 && r3.value, ref: h2(f2[s2], "title"), title: "The overall theme of this option." });
 } }, r2)), {}), Z$2 = (t5) => ({ back: () => {
   const { controller: r2, elements: s2, handlers: a2 } = t5(), { cyAttributes: o2, manager: n2 } = r2.get, { assignRef: i2, theme: l2 } = n2, { options: c2 } = s2.refs, { button: f2 } = a2.options, h2 = l2.get.icon("arrowBack");
-  return U$5("lf-button", { "data-cy": o2.button, id: LF_MESSENGER_IDS.options.back, lfIcon: h2, lfLabel: "Back", lfStretchX: true, "onLf-button-event": f2, ref: i2(c2, "back") });
+  return U$6("lf-button", { "data-cy": o2.button, id: LF_MESSENGER_IDS.options.back, lfIcon: h2, lfLabel: "Back", lfStretchX: true, "onLf-button-event": f2, ref: i2(c2, "back") });
 }, customize: () => {
   const { controller: r2, elements: s2, handlers: a2 } = t5(), { cyAttributes: o2, manager: n2 } = r2.get, { assignRef: i2, theme: l2 } = n2, { options: c2 } = s2.refs, { button: f2 } = a2.options, h2 = l2.get.icon("wand");
-  return U$5("lf-button", { "data-cy": o2.button, id: LF_MESSENGER_IDS.options.customize, lfIcon: h2, lfLabel: "Customize", lfStretchX: true, "onLf-button-event": f2, ref: i2(c2, "customize") });
+  return U$6("lf-button", { "data-cy": o2.button, id: LF_MESSENGER_IDS.options.customize, lfIcon: h2, lfLabel: "Customize", lfStretchX: true, "onLf-button-event": f2, ref: i2(c2, "customize") });
 } }), ee$2 = (e2) => ({ button: async (t5) => {
   const { eventType: r2, originalEvent: s2 } = t5.detail, { controller: a2, handlers: o2 } = e2(), { get: n2, set: i2 } = a2, { list: l2 } = o2.character, { inProgress: c2 } = n2.status.save;
   switch (r2) {
@@ -1686,7 +1686,7 @@ Begin your performance...
     case LF_MESSENGER_IDS.options.back:
       a2(false);
   }
-} }), ae$2 = (e2, t5) => ({ ...e2, character: R$7(t5), image: O$4(t5), config: () => {
+} }), ae$2 = (e2, t5) => ({ ...e2, character: R$8(t5), image: O$5(t5), config: () => {
   const { compInstance: e3 } = t5().controller.get, { currentCharacter: r2, ui: s2 } = e3;
   return { currentCharacter: r2.id, ui: s2 };
 }, data: () => {
@@ -1707,7 +1707,7 @@ Begin your performance...
 }, save: { inProgress: () => {
   const { saveInProgress: e3 } = t5().controller.get.compInstance;
   return e3;
-} } }, ui: F$4(t5) }), oe$2 = (e2) => ({ character: A$6(e2), image: P$6(e2), data: () => ((e3) => {
+} } }, ui: F$5(t5) }), oe$2 = (e2) => ({ character: A$7(e2), image: P$7(e2), data: () => ((e3) => {
   const { controller: t5 } = e3, { compInstance: r2 } = t5.get;
   r2.save();
 })(e2()), status: { connection: (t5) => {
@@ -1722,7 +1722,7 @@ Begin your performance...
 }, save: { inProgress: (t5) => {
   const { compInstance: r2 } = e2().controller.get;
   r2.saveInProgress = t5;
-} } }, ui: J$1(e2) }), ne$2 = (e2) => ({ character: H$4(e2), chat: G$2(e2), customization: K$1(e2), options: Z$2(e2) }), ie$2 = (e2) => ({ character: ee$2(e2), customization: re$2(e2), chat: te$2(e2), options: se$2(e2) });
+} } }, ui: J$2(e2) }), ne$2 = (e2) => ({ character: H$5(e2), chat: G$3(e2), customization: K$2(e2), options: Z$2(e2) }), ie$2 = (e2) => ({ character: ee$2(e2), customization: re$2(e2), chat: te$2(e2), options: se$2(e2) });
 var le$2, ce$2, fe$2, he$2, ue$2, de$2, me$2, pe$2, ge$2, be$2, ve$2, ye$2, we$2, ke$2, xe$2, _e$2, ze$2, Ce$2, Ie$2, Se$2, Te$2, Le$1 = function(e2, t5, r2, s2) {
   if ("function" == typeof t5 ? e2 !== t5 || !s2 : !t5.has(e2)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return "m" === r2 ? s2 : t5.get(e2);
@@ -1732,9 +1732,9 @@ var le$2, ce$2, fe$2, he$2, ue$2, de$2, me$2, pe$2, ge$2, be$2, ve$2, ye$2, we$2
 };
 const Ee$2 = class Ee {
   constructor(a2) {
-    o$2(this, a2), this.lfEvent = G$3(this, "lf-messenger-event"), this.chat = {}, this.connectionStatus = "offline", this.covers = {}, this.formStatusMap = IMAGE_TYPE_IDS.reduce(((e2, t5) => (e2[t5] = null, e2)), {}), this.history = {}, this.saveInProgress = false, this.ui = LF_MESSENGER_CLEAN_UI(), this.lfAutosave = true, this.lfDataset = null, this.lfStyle = "", this.lfValue = null, le$2.set(this, void 0), ce$2.set(this, LF_MESSENGER_BLOCKS), fe$2.set(this, CY_ATTRIBUTES), he$2.set(this, LF_ATTRIBUTES), ue$2.set(this, LF_MESSENGER_PARTS), de$2.set(this, LF_STYLE_ID), me$2.set(this, LF_WRAPPER_ID), pe$2.set(this, void 0), ge$2.set(this, (() => {
+    o$2(this, a2), this.lfEvent = G$4(this, "lf-messenger-event"), this.chat = {}, this.connectionStatus = "offline", this.covers = {}, this.formStatusMap = IMAGE_TYPE_IDS.reduce(((e2, t5) => (e2[t5] = null, e2)), {}), this.history = {}, this.saveInProgress = false, this.ui = LF_MESSENGER_CLEAN_UI(), this.lfAutosave = true, this.lfDataset = null, this.lfStyle = "", this.lfValue = null, le$2.set(this, void 0), ce$2.set(this, LF_MESSENGER_BLOCKS), fe$2.set(this, CY_ATTRIBUTES), he$2.set(this, LF_ATTRIBUTES), ue$2.set(this, LF_MESSENGER_PARTS), de$2.set(this, LF_STYLE_ID), me$2.set(this, LF_WRAPPER_ID), pe$2.set(this, void 0), ge$2.set(this, (() => {
       const { lfDataset: e2, lfValue: t5 } = this;
-      if (E$e(Le$1(this, pe$2, "f"))) for (let t6 = 0; t6 < e2.nodes.length; t6++) {
+      if (E$f(Le$1(this, pe$2, "f"))) for (let t6 = 0; t6 < e2.nodes.length; t6++) {
         const r2 = e2.nodes[t6];
         Le$1(this, ve$2, "f").call(this, r2);
       }
@@ -1775,7 +1775,7 @@ const Ee$2 = class Ee {
             } catch (t7) {
               i2.cells = { lfChat: { shape: "chat", value: e3 } };
             }
-            L$8(i2.cells.lfChat, l2(r3));
+            L$9(i2.cells.lfChat, l2(r3));
           }
         })(), c2();
       }
@@ -1787,30 +1787,30 @@ const Ee$2 = class Ee {
       }));
     })), ke$2.set(this, (() => {
       const { bemClass: t5 } = Le$1(this, le$2, "f").theme, { character: r2 } = Le$1(this, ce$2, "f"), { controller: s2, elements: a3 } = Le$1(this, pe$2, "f"), { name: o2 } = s2.get.character, { avatar: n2, biography: i2, save: l2, statusIcon: c2 } = a3.jsx.character, { isLeftCollapsed: f2 } = this.ui.panels;
-      return U$5("div", { class: t5(r2._, null, { collapsed: f2 }) }, U$5("div", { class: t5(r2._, r2.avatar) }, n2(), U$5("div", { class: t5(r2._, r2.nameWrapper) }, U$5("div", { class: t5(r2._, r2.name) }, c2(), U$5("div", { class: t5(r2._, r2.label) }, o2())), l2())), U$5("div", { class: t5(r2._, r2.biography) }, i2()));
+      return U$6("div", { class: t5(r2._, null, { collapsed: f2 }) }, U$6("div", { class: t5(r2._, r2.avatar) }, n2(), U$6("div", { class: t5(r2._, r2.nameWrapper) }, U$6("div", { class: t5(r2._, r2.name) }, c2(), U$6("div", { class: t5(r2._, r2.label) }, o2())), l2())), U$6("div", { class: t5(r2._, r2.biography) }, i2()));
     })), xe$2.set(this, (() => {
       const { bemClass: t5 } = Le$1(this, le$2, "f").theme, { chat: r2 } = Le$1(this, ce$2, "f"), { chat: s2, leftExpander: a3, rightExpander: o2, tabbar: n2 } = Le$1(this, pe$2, "f").elements.jsx.chat;
-      return U$5("div", { class: t5(r2._) }, U$5("div", { class: t5(r2._, r2.expander, { left: true }) }, a3()), U$5("div", { class: t5(r2._, r2.navigation) }, n2()), U$5("div", { class: t5(r2._, r2.chat) }, s2()), U$5("div", { class: t5(r2._, r2.expander, { right: true }) }, o2()));
+      return U$6("div", { class: t5(r2._) }, U$6("div", { class: t5(r2._, r2.expander, { left: true }) }, a3()), U$6("div", { class: t5(r2._, r2.navigation) }, n2()), U$6("div", { class: t5(r2._, r2.chat) }, s2()), U$6("div", { class: t5(r2._, r2.expander, { right: true }) }, o2()));
     })), _e$2.set(this, ((t5, r2) => {
       const { bemClass: a3 } = Le$1(this, le$2, "f").theme, { covers: o2 } = Le$1(this, ce$2, "f"), { add: n2 } = Le$1(this, pe$2, "f").elements.jsx.customization.form[t5];
-      return U$5(St$1, null, U$5("div", { class: a3(o2._) }, U$5("div", { class: a3(o2._, o2.title) }, U$5("div", { class: a3(o2._, o2.label) }, t5), n2()), U$5("div", { class: a3(o2._, o2.images) }, r2)));
+      return U$6(St$1, null, U$6("div", { class: a3(o2._) }, U$6("div", { class: a3(o2._, o2.title) }, U$6("div", { class: a3(o2._, o2.label) }, t5), n2()), U$6("div", { class: a3(o2._, o2.images) }, r2)));
     })), ze$2.set(this, (() => {
       const { bemClass: t5 } = Le$1(this, le$2, "f").theme, { extraContext: r2 } = Le$1(this, ce$2, "f"), { customization: a3, options: o2 } = Le$1(this, pe$2, "f").elements.jsx, { back: n2, customize: i2 } = o2, { filters: l2 } = a3, { customizationView: c2 } = this.ui, { isRightCollapsed: f2 } = this.ui.panels;
-      return U$5("div", { class: t5(r2._, null, { collapsed: f2, input: c2 }) }, c2 ? U$5(St$1, null, l2(), U$5("div", { class: t5(r2._, r2.list) }, Le$1(this, Ie$2, "f").call(this)), n2()) : U$5(St$1, null, U$5("div", { class: t5(r2._, r2.options) }, Le$1(this, Se$2, "f").call(this)), i2()));
+      return U$6("div", { class: t5(r2._, null, { collapsed: f2, input: c2 }) }, c2 ? U$6(St$1, null, l2(), U$6("div", { class: t5(r2._, r2.list) }, Le$1(this, Ie$2, "f").call(this)), n2()) : U$6(St$1, null, U$6("div", { class: t5(r2._, r2.options) }, Le$1(this, Se$2, "f").call(this)), i2()));
     })), Ce$2.set(this, ((t5) => {
       const { bemClass: r2 } = Le$1(this, le$2, "f").theme, { form: s2 } = Le$1(this, ce$2, "f"), { cancel: a3, confirm: o2, description: n2, id: i2, imageUrl: l2, title: c2 } = Le$1(this, pe$2, "f").elements.jsx.customization.form[t5], f2 = this.formStatusMap[t5], h2 = Le$1(this, pe$2, "f").controller.get.image.byType(t5).find(((e2) => e2.id === f2));
-      return U$5("div", { class: r2(s2._) }, U$5("div", { class: r2(s2._, s2.label) }, "Create ", t5), i2(f2), c2(h2), n2(h2), l2(h2), U$5("div", { class: r2(s2._, s2.confirm) }, a3(), o2()));
+      return U$6("div", { class: r2(s2._) }, U$6("div", { class: r2(s2._, s2.label) }, "Create ", t5), i2(f2), c2(h2), n2(h2), l2(h2), U$6("div", { class: r2(s2._, s2.confirm) }, a3(), o2()));
     })), Ie$2.set(this, (() => {
       const { bemClass: t5 } = Le$1(this, le$2, "f").theme, { list: r2 } = Le$1(this, ce$2, "f"), { controller: a3, elements: o2, handlers: n2 } = Le$1(this, pe$2, "f"), { byType: i2, coverIndex: l2, title: c2 } = a3.get.image, { edit: f2, remove: h2 } = o2.jsx.customization.list, { image: u2 } = n2.customization, { formStatusMap: d2, hoveredCustomizationOption: m2, ui: p2 } = this, { filters: b2 } = p2;
-      return U$5(St$1, null, IMAGE_TYPE_IDS.map(((a4) => {
+      return U$6(St$1, null, IMAGE_TYPE_IDS.map(((a4) => {
         if (b2[a4]) {
           const o3 = d2[a4], n3 = l2(a4), p3 = i2(a4).map(((s2, o4) => {
             var _a2, _b2;
-            return U$5("div", { class: t5(r2._, null, { selected: n3 === o4 }), onClick: (e2) => u2(e2, s2, o4), onPointerEnter: () => {
+            return U$6("div", { class: t5(r2._, null, { selected: n3 === o4 }), onClick: (e2) => u2(e2, s2, o4), onPointerEnter: () => {
               n3 !== o4 && (this.hoveredCustomizationOption = s2);
-            }, onPointerLeave: () => this.hoveredCustomizationOption = null }, U$5("img", { alt: c2(s2), class: t5(r2._, r2.image), "data-lf": Le$1(this, he$2, "f").fadeIn, src: (_b2 = (_a2 = s2 == null ? void 0 : s2.cells) == null ? void 0 : _a2.lfImage) == null ? void 0 : _b2.value, title: c2(s2) }), m2 === s2 && U$5("div", { class: t5(r2._, r2.actions), onClick: (e2) => e2.stopPropagation() }, f2(a4, s2), h2(a4, s2)));
+            }, onPointerLeave: () => this.hoveredCustomizationOption = null }, U$6("img", { alt: c2(s2), class: t5(r2._, r2.image), "data-lf": Le$1(this, he$2, "f").fadeIn, src: (_b2 = (_a2 = s2 == null ? void 0 : s2.cells) == null ? void 0 : _a2.lfImage) == null ? void 0 : _b2.value, title: c2(s2) }), m2 === s2 && U$6("div", { class: t5(r2._, r2.actions), onClick: (e2) => e2.stopPropagation() }, f2(a4, s2), h2(a4, s2)));
           }));
-          return U$5(St$1, null, o3 ? Le$1(this, Ce$2, "f").call(this, a4) : Le$1(this, _e$2, "f").call(this, a4, p3));
+          return U$6(St$1, null, o3 ? Le$1(this, Ce$2, "f").call(this, a4) : Le$1(this, _e$2, "f").call(this, a4, p3));
         }
         return null;
       })));
@@ -1818,18 +1818,18 @@ const Ee$2 = class Ee {
       const { bemClass: t5 } = Le$1(this, le$2, "f").theme;
       return OPTION_TYPE_IDS.map(((r2) => {
         const { options: a3 } = Le$1(this, ce$2, "f"), { image: o2 } = Le$1(this, pe$2, "f").controller.get, { asCover: n2 } = o2, { ui: i2 } = this, { value: l2, node: c2, title: f2 } = n2(r2), h2 = i2.options[r2], u2 = r2.slice(0, -1), d2 = l2, m2 = c2 ? Le$1(this, le$2, "f").theme.get.icon(h2 ? "hexagonMinus2" : "offHexagon") : d2, { style: p2 } = Le$1(this, le$2, "f").assets.get(`./assets/svg/${m2}.svg`);
-        return U$5("div", { class: t5(a3._, a3.wrapper) }, c2 ? U$5(St$1, null, U$5("img", { alt: f2, class: t5(a3._, a3.cover), "data-lf": Le$1(this, he$2, "f").fadeIn, src: l2 }), U$5("div", { class: t5(a3._, a3.blocker, { active: !h2 }), onClick: () => {
+        return U$6("div", { class: t5(a3._, a3.wrapper) }, c2 ? U$6(St$1, null, U$6("img", { alt: f2, class: t5(a3._, a3.cover), "data-lf": Le$1(this, he$2, "f").fadeIn, src: l2 }), U$6("div", { class: t5(a3._, a3.blocker, { active: !h2 }), onClick: () => {
           i2.options[r2] = !h2, this.refresh();
-        } }, U$5("div", { class: t5(a3._, a3.blockerIcon), style: p2 }), U$5("div", { class: t5(a3._, a3.blockerLabel) }, h2 ? "Click to disable" : "Click to enable"))) : U$5("div", { class: t5(a3._, a3.placeholder), title: `No ${u2} selected.` }, U$5("div", { class: t5(a3._, a3.placeholderIcon), style: p2 })), U$5("div", { class: t5(a3._, a3.name) }, U$5("div", { class: t5(a3._, a3.label), title: `Active ${u2}.` }, u2), f2 && U$5("div", { class: t5(a3._, a3.info), title: f2 })));
+        } }, U$6("div", { class: t5(a3._, a3.blockerIcon), style: p2 }), U$6("div", { class: t5(a3._, a3.blockerLabel) }, h2 ? "Click to disable" : "Click to enable"))) : U$6("div", { class: t5(a3._, a3.placeholder), title: `No ${u2} selected.` }, U$6("div", { class: t5(a3._, a3.placeholderIcon), style: p2 })), U$6("div", { class: t5(a3._, a3.name) }, U$6("div", { class: t5(a3._, a3.label), title: `Active ${u2}.` }, u2), f2 && U$6("div", { class: t5(a3._, a3.info), title: f2 })));
       }));
     })), Te$2.set(this, (() => {
       const { bemClass: t5 } = Le$1(this, le$2, "f").theme, { roster: r2 } = Le$1(this, ce$2, "f"), { get: s2, set: a3 } = Le$1(this, pe$2, "f").controller, o2 = [];
       return s2.character.list().forEach(((n2) => {
         const i2 = s2.image.asCover("avatars", n2);
-        o2.push(U$5("div", { class: t5(r2._, r2.portrait), onClick: () => {
+        o2.push(U$6("div", { class: t5(r2._, r2.portrait), onClick: () => {
           a3.character.current(n2);
-        } }, U$5("img", { class: t5(r2._, r2.image), src: i2.value, title: i2.title || "" }), U$5("div", { class: t5(r2._, r2.name) }, U$5("div", { class: t5(r2._, r2.label) }, s2.character.name(n2)))));
-      })), (o2 == null ? void 0 : o2.length) ? o2 : U$5("div", { class: t5(r2._, r2.emptyData) }, "There are no characters in your roster!");
+        } }, U$6("img", { class: t5(r2._, r2.image), src: i2.value, title: i2.title || "" }), U$6("div", { class: t5(r2._, r2.name) }, U$6("div", { class: t5(r2._, r2.label) }, s2.character.name(n2)))));
+      })), (o2 == null ? void 0 : o2.length) ? o2 : U$6("div", { class: t5(r2._, r2.emptyData) }, "There are no characters in your roster!");
     }));
   }
   onLfEvent(e2, t5) {
@@ -1881,16 +1881,16 @@ const Ee$2 = class Ee {
   }
   render() {
     const { bemClass: t5, setLfStyle: r2 } = Le$1(this, le$2, "f").theme;
-    if (!E$e(Le$1(this, pe$2, "f"))) return;
+    if (!E$f(Le$1(this, pe$2, "f"))) return;
     const { messenger: s2, roster: a2 } = Le$1(this, ce$2, "f"), { lfStyle: n2 } = this;
-    return U$5(A$9, null, n2 && U$5("style", { id: Le$1(this, de$2, "f") }, r2(this)), U$5("div", { id: Le$1(this, me$2, "f") }, this.currentCharacter ? U$5("div", { class: t5(s2._), part: Le$1(this, ue$2, "f").messenger }, Le$1(this, ke$2, "f").call(this), Le$1(this, xe$2, "f").call(this), Le$1(this, ze$2, "f").call(this)) : U$5("div", { class: t5(a2._), part: Le$1(this, ue$2, "f").roster }, Le$1(this, Te$2, "f").call(this))));
+    return U$6(A$a, null, n2 && U$6("style", { id: Le$1(this, de$2, "f") }, r2(this)), U$6("div", { id: Le$1(this, me$2, "f") }, this.currentCharacter ? U$6("div", { class: t5(s2._), part: Le$1(this, ue$2, "f").messenger }, Le$1(this, ke$2, "f").call(this), Le$1(this, xe$2, "f").call(this), Le$1(this, ze$2, "f").call(this)) : U$6("div", { class: t5(a2._), part: Le$1(this, ue$2, "f").roster }, Le$1(this, Te$2, "f").call(this))));
   }
   disconnectedCallback() {
     var _a2;
     (_a2 = Le$1(this, le$2, "f")) == null ? void 0 : _a2.theme.unregister(this);
   }
   get rootElement() {
-    return q$4(this);
+    return q$5(this);
   }
 };
 le$2 = /* @__PURE__ */ new WeakMap(), ce$2 = /* @__PURE__ */ new WeakMap(), fe$2 = /* @__PURE__ */ new WeakMap(), he$2 = /* @__PURE__ */ new WeakMap(), ue$2 = /* @__PURE__ */ new WeakMap(), de$2 = /* @__PURE__ */ new WeakMap(), me$2 = /* @__PURE__ */ new WeakMap(), pe$2 = /* @__PURE__ */ new WeakMap(), ge$2 = /* @__PURE__ */ new WeakMap(), be$2 = /* @__PURE__ */ new WeakMap(), ve$2 = /* @__PURE__ */ new WeakMap(), ye$2 = /* @__PURE__ */ new WeakMap(), we$2 = /* @__PURE__ */ new WeakMap(), ke$2 = /* @__PURE__ */ new WeakMap(), xe$2 = /* @__PURE__ */ new WeakMap(), _e$2 = /* @__PURE__ */ new WeakMap(), ze$2 = /* @__PURE__ */ new WeakMap(), Ce$2 = /* @__PURE__ */ new WeakMap(), Ie$2 = /* @__PURE__ */ new WeakMap(), Se$2 = /* @__PURE__ */ new WeakMap(), Te$2 = /* @__PURE__ */ new WeakMap(), Ee$2.style = '.character{transition:all 300ms cubic-bezier(0.4, 0, 0.2, 1);display:grid;grid-template-rows:minmax(auto, 40%) minmax(auto, 1fr);height:100%;overflow:auto;position:relative}.character--collapsed{overflow:hidden;width:0}.character__image{width:100%;height:100%;display:block;object-fit:cover}.character__name{color:rgb(var(--lf-messenger-color-on-surface, var(--lf-color-on-surface)));align-items:center;display:flex}.character__status{border-radius:50%;height:1em;margin-right:0.5em;width:1em}.character__status--offline{background-color:rgba(var(--lf-messenger-color-danger, var(--lf-color-danger)), 0.75);color:rgb(var(--lf-messenger-color-on-danger, var(--lf-color-on-danger)));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.character__status--online{background-color:rgba(var(--lf-messenger-color-success, var(--lf-color-success)), 0.75);color:rgb(var(--lf-messenger-color-on-success, var(--lf-color-on-success)));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.character__name-wrapper{background-color:rgba(var(--lf-messenger-color-surface, var(--lf-color-surface)), 0.75);color:rgb(var(--lf-messenger-color-on-surface, var(--lf-color-on-surface)));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:0.775em;letter-spacing:0.0892857143em;line-height:inherit;text-transform:uppercase;align-items:center;box-sizing:border-box;display:flex;height:var(--lf-messenger-name-height, 3em);justify-content:space-between;left:0;padding-left:var(--lf-messenger-avatar-name-padding, 0.5em);position:absolute;top:0;width:100%}.character__label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.character__biography{overflow:auto}.chat{display:grid;grid-template-areas:"nav nav nav" "expander-l chat expander-r";grid-template-columns:auto 1fr auto;grid-template-rows:auto 1fr;height:100%;overflow:auto}.chat__expander--left{grid-area:expander-l}.chat__expander--right{grid-area:expander-r}.chat__navigation{grid-area:nav}.chat__chat{grid-area:chat;overflow:auto}.covers{display:grid;grid-template-rows:auto 1fr;height:100%}.covers__title{background-color:rgba(var(--lf-messenger-color-surface, var(--lf-color-surface)), 0.75);color:rgb(var(--lf-messenger-color-on-surface, var(--lf-color-on-surface)));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;position:sticky;top:0;z-index:calc(var(--lf-ui-zindex-header) - 1);font-size:0.775em;letter-spacing:0.0892857143em;line-height:inherit;text-transform:uppercase;align-items:center;display:flex;justify-content:space-between}.covers__label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:var(--lf-messenger-customization-title-padding, 0.5em)}.covers__images{display:grid;grid-template-columns:repeat(3, 1fr);overflow:auto;width:100%}.extra-context{transition:all 300ms cubic-bezier(0.4, 0, 0.2, 1);display:grid;grid-template-rows:1fr auto;height:100%;overflow:auto}.extra-context--collapsed{overflow:hidden;width:0}.extra-context--input{grid-template-rows:auto 1fr auto}.extra-context__options{display:grid;grid-template-columns:repeat(2, 50%);grid-template-rows:repeat(2, 50%)}.extra-context__list{display:grid;overflow:auto}.form__button{margin:0 0.25em;padding:1em 0}.form__confirm{display:flex;justify-content:center}.form__field{margin:0.5em 0}.form__label{background-color:rgba(var(--lf-messenger-color-surface, var(--lf-color-surface)), 0.375);color:rgb(var(--lf-messenger-color-on-surface, var(--lf-color-on-surface)));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:0.775em;letter-spacing:0.0892857143em;line-height:inherit;text-transform:uppercase;display:flex;justify-content:center;padding:var(--lf-messenger-customization-title-padding, 0.5em)}.list{position:relative}.list:after{width:100%;height:100%;transition:all 300ms cubic-bezier(0.4, 0, 0.2, 1);box-shadow:none;content:"";left:0;position:absolute;top:0}.list:hover:not(.list--selected):after{box-shadow:inset 0 0 5px 3px rgb(var(--lf-messenger-color-primary, --lf-color-primary, white));pointer-events:none}.list--selected:after{background-color:rgba(var(--lf-messenger-color-surface, var(--lf-color-surface)), 0.875);color:rgb(var(--lf-messenger-color-on-surface, var(--lf-color-on-surface)));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:0.775em;letter-spacing:0.0892857143em;line-height:inherit;text-transform:uppercase;align-content:center;content:"Current";cursor:default;letter-spacing:0.25em;position:absolute;text-align:center}.list__actions{background-color:rgba(var(--lf-messenger-color-surface, var(--lf-color-surface)), 0.75);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);bottom:0;display:flex;left:0;overflow:hidden;position:absolute;width:100%}.list__image{width:100%;height:100%;cursor:pointer;display:block;min-height:16em;object-fit:cover}.options__wrapper{overflow:hidden;position:relative}.options__cover{width:100%;height:100%;display:block;object-fit:cover}.options__placeholder{width:100%;height:100%;box-sizing:border-box;padding:20% 20% 40% 20%}.options__placeholder-icon{background-color:rgba(var(--lf-messenger-color-on-surface, var(--lf-color-on-surface)), 0.375);height:100%;width:100%;overflow:hidden}.options__blocker{background-color:rgba(var(--lf-messenger-color-surface, var(--lf-color-surface)), 0.775);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);width:100%;height:100%;transition:opacity 200ms cubic-bezier(0.4, 0, 0.6, 1);align-content:center;box-sizing:border-box;cursor:pointer;display:grid;grid-template-rows:50% 1fr;left:0;opacity:0;padding:20% 20% 40% 20%;position:absolute;top:0}.options__blocker:hover{opacity:1}.options__blocker--active{opacity:0.875}.options__blocker-icon{background-color:rgba(var(--lf-messenger-color-on-surface, var(--lf-color-on-surface)), 0.75);height:100%;width:100%;overflow:hidden}.options__blocker-label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:0.775em;letter-spacing:0.0892857143em;line-height:inherit;text-transform:uppercase;padding-top:0.75em;text-align:center}.options__label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:0.775em;letter-spacing:0.0892857143em;line-height:inherit;text-transform:uppercase;margin-left:0.5em}.options__info{-webkit-mask:var(--lf-icon-info);mask:var(--lf-icon-info);-webkit-mask-position:center;-webkit-mask-repeat:no-repeat;-webkit-mask-size:contain;mask-position:center;mask-repeat:no-repeat;mask-size:contain;background-color:rgba(var(--lf-messenger-color-on-surface, var(--lf-color-on-surface)), 0.75);height:1em;width:1em;overflow:hidden;cursor:help;margin-left:0.275em}.options__name{align-items:center;background:var(--lf-messenger-name-background-color, rgb(var(--lf-color-surface)));bottom:0;box-sizing:border-box;display:flex;overflow:hidden;padding:var(--lf-messenger-active-options-name-padding, 0.5em);position:absolute;width:100%}.roster{display:grid;grid-template-columns:repeat(4, 1fr);height:100%;overflow:auto;width:100%}.roster__image{width:100%;height:100%;display:block;object-fit:cover}.roster__portrait{--lf-messenger-name-background-color:rgba(var(--lf-color-bg), 0.375);--lf-messenger-portrait-foredrop-color:rgba(var(--lf-color-bg), 0.275);cursor:pointer;overflow:auto;position:relative}.roster__portrait:hover{--lf-messenger-name-background-color:rgba(var(--lf-color-bg), 0.775);--lf-messenger-portrait-foredrop-color:rgba(var(--lf-color-bg), 0)}.roster__portrait:after{width:100%;height:100%;transition:all 300ms cubic-bezier(0.4, 0, 0.2, 1);background:var(--lf-messenger-portrait-foredrop-color);content:"";left:0;pointer-events:none;position:absolute;top:0}.roster__name{transition:all 200ms cubic-bezier(0.4, 0, 0.6, 1);align-items:center;backdrop-filter:blur(5px);background-color:var(--lf-messenger-name-background-color);bottom:0;display:flex;height:var(--lf-messenger-name-height, 2.5em);left:0;position:absolute;width:100%}.roster__label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:0.775em;letter-spacing:0.0892857143em;line-height:inherit;text-transform:uppercase;letter-spacing:0.225em;text-align:center;width:100%}::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=fade-in]{display:block;animation:lf-fade-in-block 0.25s ease-out forwards}@keyframes lf-fade-in-block{from{visibility:hidden;opacity:0}to{visibility:visible;opacity:1}}:host{display:block;font-family:var(--lf-messenger-font-family, var(--lf-font-family-primary));font-size:var(--lf-messenger-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-messenger-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-messenger-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-messenger-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-messenger-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-messenger-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-messenger-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-messenger-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{width:100%;height:100%;box-sizing:border-box}.messenger{width:100%;height:100%;display:grid;grid-template-columns:1fr 3fr 1fr;position:relative}.messenger:has(.character--collapsed){grid-template-columns:0 4fr 1fr}.messenger:has(.extra-context--collapsed){grid-template-columns:1fr 4fr 0}.messenger:has(.character--collapsed):has(.extra-context--collapsed){grid-template-columns:0 1fr 0}';
@@ -1898,34 +1898,34 @@ const p04d20cb7_entry = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.def
   __proto__: null,
   lf_messenger: Ee$2
 }, Symbol.toStringTag, { value: "Module" }));
-var k$f, p$6, m$c, u$a, v$b, x$f, g$d, y$e, w$f, z$g, _$a, M$d, W$e, C$d, E$d = function(e2, r2, o2, i2) {
+var k$g, p$7, m$c, u$a, v$c, x$g, g$e, y$f, w$g, z$h, _$b, M$e, W$f, C$e, E$e = function(e2, r2, o2, i2) {
   if ("function" == typeof r2 ? e2 !== r2 || !i2 : !r2.has(e2)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return "m" === o2 ? i2 : "a" === o2 ? i2.call(e2) : i2 ? i2.value : r2.get(e2);
-}, j$9 = function(e2, r2, o2, i2, a2) {
+}, j$a = function(e2, r2, o2, i2, a2) {
   if ("function" == typeof r2 ? e2 !== r2 || true : !r2.has(e2)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
   return r2.set(e2, o2), o2;
 };
-const T$a = class T {
+const T$b = class T {
   constructor(i2) {
-    o$2(this, i2), this.lfEvent = G$3(this, "lf-checkbox-event"), this.value = "off", this.lfAriaLabel = "", this.lfLabel = "", this.lfLeadingLabel = false, this.lfRipple = true, this.lfStyle = "", this.lfUiSize = "medium", this.lfUiState = "primary", this.lfValue = false, k$f.set(this, void 0), p$6.set(this, LF_CHECKBOX_BLOCKS), m$c.set(this, CY_ATTRIBUTES), u$a.set(this, LF_ATTRIBUTES), v$b.set(this, LF_CHECKBOX_PARTS), x$f.set(this, LF_STYLE_ID), g$d.set(this, LF_WRAPPER_ID), y$e.set(this, void 0), w$f.set(this, (() => "on" === this.value)), z$g.set(this, (() => "disabled" === this.lfUiState)), _$a.set(this, (() => "indeterminate" === this.value)), M$d.set(this, (() => {
-      const { bemClass: e2 } = E$d(this, k$f, "f").theme, { checkbox: r2 } = E$d(this, p$6, "f"), { background: i3, checkmark: a2, mixedmark: t5 } = E$d(this, v$b, "f");
-      return U$5("div", { class: e2(r2._, r2.background), part: i3 }, U$5("svg", { class: e2(r2._, r2.checkmark), viewBox: "0 0 24 24", part: a2 }, U$5("path", { class: e2(r2._, "checkmark-path"), fill: "none", d: "M4.1,12.7 9,17.6 20.3,6.3", stroke: "currentColor" })), U$5("div", { class: e2(r2._, r2.mixedmark), part: t5 }));
-    })), W$e.set(this, (() => {
-      const { bemClass: e2 } = E$d(this, k$f, "f").theme, { checkbox: r2 } = E$d(this, p$6, "f"), { nativeControl: i3 } = E$d(this, v$b, "f"), a2 = E$d(this, w$f, "f").call(this), t5 = E$d(this, _$a, "f").call(this), c2 = E$d(this, z$g, "f").call(this);
-      return U$5("input", { "aria-label": this.lfAriaLabel || this.lfLabel || this.rootElement.id || "checkbox", "aria-checked": t5 ? "mixed" : a2, class: e2(r2._, r2.nativeControl), checked: a2, "data-cy": E$d(this, m$c, "f").input, disabled: c2, indeterminate: t5, onFocus: (e3) => this.onLfEvent(e3, "focus"), onBlur: (e3) => this.onLfEvent(e3, "blur"), part: i3, type: "checkbox", value: t5 ? "indeterminate" : a2 ? "on" : "off" });
-    })), C$d.set(this, (() => {
-      const { bemClass: e2 } = E$d(this, k$f, "f").theme;
-      return U$5("label", { class: e2(E$d(this, p$6, "f").formField._, E$d(this, p$6, "f").formField.label), onClick: (e3) => this.onLfEvent(e3, "change"), part: E$d(this, v$b, "f").label }, this.lfLabel);
+    o$2(this, i2), this.lfEvent = G$4(this, "lf-checkbox-event"), this.value = "off", this.lfAriaLabel = "", this.lfLabel = "", this.lfLeadingLabel = false, this.lfRipple = true, this.lfStyle = "", this.lfUiSize = "medium", this.lfUiState = "primary", this.lfValue = false, k$g.set(this, void 0), p$7.set(this, LF_CHECKBOX_BLOCKS), m$c.set(this, CY_ATTRIBUTES), u$a.set(this, LF_ATTRIBUTES), v$c.set(this, LF_CHECKBOX_PARTS), x$g.set(this, LF_STYLE_ID), g$e.set(this, LF_WRAPPER_ID), y$f.set(this, void 0), w$g.set(this, (() => "on" === this.value)), z$h.set(this, (() => "disabled" === this.lfUiState)), _$b.set(this, (() => "indeterminate" === this.value)), M$e.set(this, (() => {
+      const { bemClass: e2 } = E$e(this, k$g, "f").theme, { checkbox: r2 } = E$e(this, p$7, "f"), { background: i3, checkmark: a2, mixedmark: t5 } = E$e(this, v$c, "f");
+      return U$6("div", { class: e2(r2._, r2.background), part: i3 }, U$6("svg", { class: e2(r2._, r2.checkmark), viewBox: "0 0 24 24", part: a2 }, U$6("path", { class: e2(r2._, "checkmark-path"), fill: "none", d: "M4.1,12.7 9,17.6 20.3,6.3", stroke: "currentColor" })), U$6("div", { class: e2(r2._, r2.mixedmark), part: t5 }));
+    })), W$f.set(this, (() => {
+      const { bemClass: e2 } = E$e(this, k$g, "f").theme, { checkbox: r2 } = E$e(this, p$7, "f"), { nativeControl: i3 } = E$e(this, v$c, "f"), a2 = E$e(this, w$g, "f").call(this), t5 = E$e(this, _$b, "f").call(this), c2 = E$e(this, z$h, "f").call(this);
+      return U$6("input", { "aria-label": this.lfAriaLabel || this.lfLabel || this.rootElement.id || "checkbox", "aria-checked": t5 ? "mixed" : a2, class: e2(r2._, r2.nativeControl), checked: a2, "data-cy": E$e(this, m$c, "f").input, disabled: c2, indeterminate: t5, onFocus: (e3) => this.onLfEvent(e3, "focus"), onBlur: (e3) => this.onLfEvent(e3, "blur"), part: i3, type: "checkbox", value: t5 ? "indeterminate" : a2 ? "on" : "off" });
+    })), C$e.set(this, (() => {
+      const { bemClass: e2 } = E$e(this, k$g, "f").theme;
+      return U$6("label", { class: e2(E$e(this, p$7, "f").formField._, E$e(this, p$7, "f").formField.label), onClick: (e3) => this.onLfEvent(e3, "change"), part: E$e(this, v$c, "f").label }, this.lfLabel);
     }));
   }
   onLfEvent(e2, r2) {
-    const { effects: o2 } = E$d(this, k$f, "f"), { lfRipple: i2 } = this;
+    const { effects: o2 } = E$e(this, k$g, "f"), { lfRipple: i2 } = this;
     switch (r2) {
       case "change":
-        E$d(this, z$g, "f").call(this) || (this.value = "indeterminate" === this.value || "off" === this.value ? "on" : "off");
+        E$e(this, z$h, "f").call(this) || (this.value = "indeterminate" === this.value || "off" === this.value ? "on" : "off");
         break;
       case "pointerdown":
-        i2 && o2.ripple(e2, E$d(this, y$e, "f"));
+        i2 && o2.ripple(e2, E$e(this, y$f, "f"));
     }
     this.lfEvent.emit({ comp: this, eventType: r2, id: this.rootElement.id, originalEvent: e2, value: this.value, valueAsBoolean: "on" === this.value, isIndeterminate: "indeterminate" === this.value });
   }
@@ -1953,47 +1953,113 @@ const T$a = class T {
     }));
   }
   connectedCallback() {
-    E$d(this, k$f, "f") && E$d(this, k$f, "f").theme.register(this);
+    E$e(this, k$g, "f") && E$e(this, k$g, "f").theme.register(this);
   }
   async componentWillLoad() {
-    j$9(this, k$f, await a(this)), this.value = this.lfValue ? "on" : null === this.lfValue ? "indeterminate" : "off";
+    j$a(this, k$g, await a(this)), this.value = this.lfValue ? "on" : null === this.lfValue ? "indeterminate" : "off";
   }
   componentDidLoad() {
-    const { debug: e2 } = E$d(this, k$f, "f");
+    const { debug: e2 } = E$e(this, k$g, "f");
     this.onLfEvent(new CustomEvent("ready"), "ready"), e2.info.update(this, "did-load");
   }
   componentWillRender() {
-    const { info: e2 } = E$d(this, k$f, "f").debug;
+    const { info: e2 } = E$e(this, k$g, "f").debug;
     e2.update(this, "will-render");
   }
   componentDidRender() {
-    const { info: e2 } = E$d(this, k$f, "f").debug;
+    const { info: e2 } = E$e(this, k$g, "f").debug;
     e2.update(this, "did-render");
   }
   render() {
-    const { bemClass: e2 } = E$d(this, k$f, "f").theme, { lfLabel: r2, lfLeadingLabel: i2, lfStyle: t5 } = this, { formField: c2, checkbox: n2 } = E$d(this, p$6, "f");
-    return U$5(A$9, { key: "a4f87b9e37f811582dfa17ae0bed1cc6460b79b7", id: E$d(this, g$d, "f") }, t5 && U$5("style", { key: "8bf96c88f3698de91da917e91b519daa15e56eb2", id: E$d(this, x$f, "f") }, t5), U$5("div", { key: "370e4db3bf3bb92562f668b7c25fa562c0025856", id: E$d(this, g$d, "f"), "data-lf": E$d(this, u$a, "f")[this.lfUiState] }, U$5("div", { key: "065987d4a5ac6c275f3ccfe498d1672afec92501", class: e2(c2._, null, { leading: i2 }) }, U$5("div", { key: "cc726f0af083be30c308a1b4cd48c69944d321c9", class: e2(n2._), onClick: (e3) => this.onLfEvent(e3, "change") }, U$5("div", { key: "b3075d98e469444c628205877b50cab6da01595a", class: e2(n2._, n2.surface, { checked: E$d(this, w$f, "f").call(this), indeterminate: E$d(this, _$a, "f").call(this), disabled: E$d(this, z$g, "f").call(this) }), onPointerDown: (e3) => this.onLfEvent(e3, "pointerdown"), ref: (e3) => j$9(this, y$e, e3), part: E$d(this, v$b, "f").checkbox }, E$d(this, W$e, "f").call(this), E$d(this, M$d, "f").call(this))), r2 && E$d(this, C$d, "f").call(this))));
+    const { bemClass: e2 } = E$e(this, k$g, "f").theme, { lfLabel: r2, lfLeadingLabel: i2, lfStyle: t5 } = this, { formField: c2, checkbox: n2 } = E$e(this, p$7, "f");
+    return U$6(A$a, { key: "a4f87b9e37f811582dfa17ae0bed1cc6460b79b7", id: E$e(this, g$e, "f") }, t5 && U$6("style", { key: "8bf96c88f3698de91da917e91b519daa15e56eb2", id: E$e(this, x$g, "f") }, t5), U$6("div", { key: "370e4db3bf3bb92562f668b7c25fa562c0025856", id: E$e(this, g$e, "f"), "data-lf": E$e(this, u$a, "f")[this.lfUiState] }, U$6("div", { key: "065987d4a5ac6c275f3ccfe498d1672afec92501", class: e2(c2._, null, { leading: i2 }) }, U$6("div", { key: "cc726f0af083be30c308a1b4cd48c69944d321c9", class: e2(n2._), onClick: (e3) => this.onLfEvent(e3, "change") }, U$6("div", { key: "b3075d98e469444c628205877b50cab6da01595a", class: e2(n2._, n2.surface, { checked: E$e(this, w$g, "f").call(this), indeterminate: E$e(this, _$b, "f").call(this), disabled: E$e(this, z$h, "f").call(this) }), onPointerDown: (e3) => this.onLfEvent(e3, "pointerdown"), ref: (e3) => j$a(this, y$f, e3), part: E$e(this, v$c, "f").checkbox }, E$e(this, W$f, "f").call(this), E$e(this, M$e, "f").call(this))), r2 && E$e(this, C$e, "f").call(this))));
   }
   disconnectedCallback() {
     var _a2;
-    (_a2 = E$d(this, k$f, "f")) == null ? void 0 : _a2.theme.unregister(this);
+    (_a2 = E$e(this, k$g, "f")) == null ? void 0 : _a2.theme.unregister(this);
   }
   get rootElement() {
-    return q$4(this);
+    return q$5(this);
   }
 };
-k$f = /* @__PURE__ */ new WeakMap(), p$6 = /* @__PURE__ */ new WeakMap(), m$c = /* @__PURE__ */ new WeakMap(), u$a = /* @__PURE__ */ new WeakMap(), v$b = /* @__PURE__ */ new WeakMap(), x$f = /* @__PURE__ */ new WeakMap(), g$d = /* @__PURE__ */ new WeakMap(), y$e = /* @__PURE__ */ new WeakMap(), w$f = /* @__PURE__ */ new WeakMap(), z$g = /* @__PURE__ */ new WeakMap(), _$a = /* @__PURE__ */ new WeakMap(), M$d = /* @__PURE__ */ new WeakMap(), W$e = /* @__PURE__ */ new WeakMap(), C$d = /* @__PURE__ */ new WeakMap(), T$a.style = "::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=ripple]{animation-duration:var(--lf-ui-duration-ripple, 675ms);animation-fill-mode:forwards;animation-name:lf-ripple;animation-timing-function:var(--lf-ui-timing-ripple, ease-out);background:var(--lf-ui-ripple-background, var(--lf-color-primary));border-radius:var(--lf-ui-radius-ripple, 50%);height:var(--lf-ui-ripple-height, 100%);left:var(--lf-ui-ripple-x, 50%);opacity:var(--lf-ui-opacity-ripple, 0.5);pointer-events:none;position:absolute;top:var(--lf-ui-ripple-y, 50%);transform:scale(0);width:var(--lf-ui-ripple-width, 100%)}@keyframes lf-ripple{from{transform:scale(0)}to{opacity:0;transform:scale(4)}}[data-lf=ripple-surface]{cursor:pointer;height:100%;left:0;overflow:hidden;position:absolute;top:0;width:100%}[data-lf=danger]{--lf-checkbox-color-primary:var(\n    --lf-checkbox-color-danger,\n    var(--lf-color-danger)\n  );--lf-checkbox-color-on-primary:var(\n    --lf-checkbox-color-danger,\n    var(--lf-color-on-danger)\n  )}[data-lf=disabled]{opacity:var(--lf-checkbox-ui-opacity-disabled, var(--lf-ui-opacity-disabled));pointer-events:none}[data-lf=info]{--lf-checkbox-color-primary:var(\n    --lf-checkbox-color-info,\n    var(--lf-color-info)\n  );--lf-checkbox-color-on-primary:var(\n    --lf-checkbox-color-info,\n    var(--lf-color-on-info)\n  )}[data-lf=secondary]{--lf-checkbox-color-primary:var(\n    --lf-checkbox-color-secondary,\n    var(--lf-color-secondary)\n  );--lf-checkbox-color-on-primary:var(\n    --lf-checkbox-color-secondary,\n    var(--lf-color-on-secondary)\n  )}[data-lf=success]{--lf-checkbox-color-primary:var(\n    --lf-checkbox-color-success,\n    var(--lf-color-success)\n  );--lf-checkbox-color-on-primary:var(\n    --lf-checkbox-color-success,\n    var(--lf-color-on-success)\n  )}[data-lf=warning]{--lf-checkbox-color-primary:var(\n    --lf-checkbox-color-warning,\n    var(--lf-color-warning)\n  );--lf-checkbox-color-on-primary:var(\n    --lf-checkbox-color-warning,\n    var(--lf-color-on-warning)\n  )}:host{display:block;font-family:var(--lf-checkbox-font-family, var(--lf-font-family-primary));font-size:var(--lf-checkbox-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-checkbox-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-checkbox-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-checkbox-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-checkbox-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-checkbox-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-checkbox-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-checkbox-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{width:100%;height:100%;overflow:hidden}.form-field{color:rgb(var(--lf-checkbox-color-on-bg, var(--lf-color-on-bg)));width:100%;height:100%;font-size:0.875em;font-weight:500;line-height:1.5em;letter-spacing:0.01em;align-items:center;box-sizing:border-box;display:inline-flex;justify-content:center;overflow:hidden;padding:var(--lf-checkbox-form-padding, 0.5em);vertical-align:middle}.form-field__label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;min-width:var(--lf-checkbox-label-min-width, max-content);padding-left:var(--lf-checkbox-label-padding-left, 1em)}.form-field--leading .form-field__label{margin-right:0;order:-1;padding-left:0;padding-right:var(--lf-checkbox-label-padding-right, 1em)}.checkbox{background-color:rgba(var(--lf-checkbox-color-primary, var(--lf-color-primary)), 0);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);align-items:center;border-radius:var(--lf-checkbox-surface-border-radius, 50%);cursor:pointer;display:flex;height:var(--lf-checkbox-surface-size, 3.5em);justify-content:center;overflow:hidden;position:relative;transition:background-color 90ms cubic-bezier(0.4, 0, 0.6, 1) 0ms;width:var(--lf-checkbox-surface-size, 3.5em)}.checkbox:hover{background-color:rgba(var(--lf-checkbox-color-primary, var(--lf-color-primary)), 0.24);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.checkbox:active{background-color:rgba(var(--lf-checkbox-color-primary, var(--lf-color-primary)), 0.36);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.checkbox__surface{align-items:center;display:inline-flex;height:var(--lf-checkbox-size, 1.5em);justify-content:center;outline:none;position:relative;user-select:none;width:var(--lf-checkbox-size, 1.5em)}.checkbox__surface--checked .checkbox__background,.checkbox__surface--indeterminate .checkbox__background{background-color:rgba(var(--lf-checkbox-color-primary, var(--lf-color-primary)), 1);border-color:transparent;transition:border-color var(--lf-checkbox-animation-duration, 90ms) cubic-bezier(0.4, 0, 0.6, 1) 0ms, background-color var(--lf-checkbox-animation-duration, 90ms) cubic-bezier(0.4, 0, 0.6, 1) 0ms}.checkbox__surface--checked .checkbox__checkmark-path,.checkbox__surface--indeterminate .checkbox__checkmark-path{stroke-dashoffset:0}.checkbox__surface--checked .checkbox__checkmark{opacity:1}.checkbox__surface--checked .checkbox__mixedmark{opacity:0;transform:scaleX(0) rotate(0deg)}.checkbox__surface--indeterminate .checkbox__checkmark{opacity:0}.checkbox__surface--indeterminate .checkbox__mixedmark{opacity:1;transform:scaleX(1) rotate(0deg)}.checkbox__native-control{appearance:none;cursor:pointer;height:100%;left:0;margin:0;opacity:0;position:absolute;top:0;width:100%;z-index:1}.checkbox__background{transition:all 150ms cubic-bezier(0.42, 0, 0.58, 1);color:rgb(var(--lf-checkbox-color-on-surface, var(--lf-color-on-surface)));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);align-items:center;border:2px solid;border-radius:var(--lf-checkbox-border-radius, var(--lf-ui-border-radius));box-sizing:border-box;display:inline-flex;height:100%;justify-content:center;overflow:hidden;position:relative;width:100%;z-index:1}.checkbox__checkmark{color:rgb(var(--lf-checkbox-color-on-primary, var(--lf-color-on-primary)));height:100%;left:0;opacity:0;position:absolute;top:0;width:100%;transition:opacity calc(var(--lf-checkbox-animation-duration, 90ms) * 2) cubic-bezier(0.4, 0, 0.6, 1) 0ms}.checkbox__checkmark-path{stroke-dasharray:29.78;stroke-dashoffset:29.78;stroke-width:var(--lf-checkbox-checkmark-stroke-width, 3.12px);transition:stroke-dashoffset calc(var(--lf-checkbox-animation-duration, 90ms) * 2) cubic-bezier(0.4, 0, 0.6, 1) 0ms}.checkbox__mixedmark{background-color:rgba(var(--lf-checkbox-color-on-primary, var(--lf-color-on-primary)), 1);height:2px;opacity:0;transform:scaleX(0) rotate(0deg);width:var(--lf-checkbox-mixedmark-width, 70%);transition:opacity var(--lf-checkbox-animation-duration, 90ms) cubic-bezier(0.4, 0, 0.6, 1) 0ms, transform var(--lf-checkbox-animation-duration, 90ms) cubic-bezier(0.4, 0, 0.6, 1) 0ms}";
+k$g = /* @__PURE__ */ new WeakMap(), p$7 = /* @__PURE__ */ new WeakMap(), m$c = /* @__PURE__ */ new WeakMap(), u$a = /* @__PURE__ */ new WeakMap(), v$c = /* @__PURE__ */ new WeakMap(), x$g = /* @__PURE__ */ new WeakMap(), g$e = /* @__PURE__ */ new WeakMap(), y$f = /* @__PURE__ */ new WeakMap(), w$g = /* @__PURE__ */ new WeakMap(), z$h = /* @__PURE__ */ new WeakMap(), _$b = /* @__PURE__ */ new WeakMap(), M$e = /* @__PURE__ */ new WeakMap(), W$f = /* @__PURE__ */ new WeakMap(), C$e = /* @__PURE__ */ new WeakMap(), T$b.style = "::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=ripple]{animation-duration:var(--lf-ui-duration-ripple, 675ms);animation-fill-mode:forwards;animation-name:lf-ripple;animation-timing-function:var(--lf-ui-timing-ripple, ease-out);background:var(--lf-ui-ripple-background, var(--lf-color-primary));border-radius:var(--lf-ui-radius-ripple, 50%);height:var(--lf-ui-ripple-height, 100%);left:var(--lf-ui-ripple-x, 50%);opacity:var(--lf-ui-opacity-ripple, 0.5);pointer-events:none;position:absolute;top:var(--lf-ui-ripple-y, 50%);transform:scale(0);width:var(--lf-ui-ripple-width, 100%)}@keyframes lf-ripple{from{transform:scale(0)}to{opacity:0;transform:scale(4)}}[data-lf=ripple-surface]{cursor:pointer;height:100%;left:0;overflow:hidden;position:absolute;top:0;width:100%}[data-lf=danger]{--lf-checkbox-color-primary:var(\n    --lf-checkbox-color-danger,\n    var(--lf-color-danger)\n  );--lf-checkbox-color-on-primary:var(\n    --lf-checkbox-color-danger,\n    var(--lf-color-on-danger)\n  )}[data-lf=disabled]{opacity:var(--lf-checkbox-ui-opacity-disabled, var(--lf-ui-opacity-disabled));pointer-events:none}[data-lf=info]{--lf-checkbox-color-primary:var(\n    --lf-checkbox-color-info,\n    var(--lf-color-info)\n  );--lf-checkbox-color-on-primary:var(\n    --lf-checkbox-color-info,\n    var(--lf-color-on-info)\n  )}[data-lf=secondary]{--lf-checkbox-color-primary:var(\n    --lf-checkbox-color-secondary,\n    var(--lf-color-secondary)\n  );--lf-checkbox-color-on-primary:var(\n    --lf-checkbox-color-secondary,\n    var(--lf-color-on-secondary)\n  )}[data-lf=success]{--lf-checkbox-color-primary:var(\n    --lf-checkbox-color-success,\n    var(--lf-color-success)\n  );--lf-checkbox-color-on-primary:var(\n    --lf-checkbox-color-success,\n    var(--lf-color-on-success)\n  )}[data-lf=warning]{--lf-checkbox-color-primary:var(\n    --lf-checkbox-color-warning,\n    var(--lf-color-warning)\n  );--lf-checkbox-color-on-primary:var(\n    --lf-checkbox-color-warning,\n    var(--lf-color-on-warning)\n  )}:host{display:block;font-family:var(--lf-checkbox-font-family, var(--lf-font-family-primary));font-size:var(--lf-checkbox-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-checkbox-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-checkbox-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-checkbox-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-checkbox-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-checkbox-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-checkbox-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-checkbox-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{width:100%;height:100%;overflow:hidden}.form-field{color:rgb(var(--lf-checkbox-color-on-bg, var(--lf-color-on-bg)));width:100%;height:100%;font-size:0.875em;font-weight:500;line-height:1.5em;letter-spacing:0.01em;align-items:center;box-sizing:border-box;display:inline-flex;justify-content:center;overflow:hidden;padding:var(--lf-checkbox-form-padding, 0.5em);vertical-align:middle}.form-field__label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;min-width:var(--lf-checkbox-label-min-width, max-content);padding-left:var(--lf-checkbox-label-padding-left, 1em)}.form-field--leading .form-field__label{margin-right:0;order:-1;padding-left:0;padding-right:var(--lf-checkbox-label-padding-right, 1em)}.checkbox{background-color:rgba(var(--lf-checkbox-color-primary, var(--lf-color-primary)), 0);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);align-items:center;border-radius:var(--lf-checkbox-surface-border-radius, 50%);cursor:pointer;display:flex;height:var(--lf-checkbox-surface-size, 3.5em);justify-content:center;overflow:hidden;position:relative;transition:background-color 90ms cubic-bezier(0.4, 0, 0.6, 1) 0ms;width:var(--lf-checkbox-surface-size, 3.5em)}.checkbox:hover{background-color:rgba(var(--lf-checkbox-color-primary, var(--lf-color-primary)), 0.24);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.checkbox:active{background-color:rgba(var(--lf-checkbox-color-primary, var(--lf-color-primary)), 0.36);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.checkbox__surface{align-items:center;display:inline-flex;height:var(--lf-checkbox-size, 1.5em);justify-content:center;outline:none;position:relative;user-select:none;width:var(--lf-checkbox-size, 1.5em)}.checkbox__surface--checked .checkbox__background,.checkbox__surface--indeterminate .checkbox__background{background-color:rgba(var(--lf-checkbox-color-primary, var(--lf-color-primary)), 1);border-color:transparent;transition:border-color var(--lf-checkbox-animation-duration, 90ms) cubic-bezier(0.4, 0, 0.6, 1) 0ms, background-color var(--lf-checkbox-animation-duration, 90ms) cubic-bezier(0.4, 0, 0.6, 1) 0ms}.checkbox__surface--checked .checkbox__checkmark-path,.checkbox__surface--indeterminate .checkbox__checkmark-path{stroke-dashoffset:0}.checkbox__surface--checked .checkbox__checkmark{opacity:1}.checkbox__surface--checked .checkbox__mixedmark{opacity:0;transform:scaleX(0) rotate(0deg)}.checkbox__surface--indeterminate .checkbox__checkmark{opacity:0}.checkbox__surface--indeterminate .checkbox__mixedmark{opacity:1;transform:scaleX(1) rotate(0deg)}.checkbox__native-control{appearance:none;cursor:pointer;height:100%;left:0;margin:0;opacity:0;position:absolute;top:0;width:100%;z-index:1}.checkbox__background{transition:all 150ms cubic-bezier(0.42, 0, 0.58, 1);color:rgb(var(--lf-checkbox-color-on-surface, var(--lf-color-on-surface)));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);align-items:center;border:2px solid;border-radius:var(--lf-checkbox-border-radius, var(--lf-ui-border-radius));box-sizing:border-box;display:inline-flex;height:100%;justify-content:center;overflow:hidden;position:relative;width:100%;z-index:1}.checkbox__checkmark{color:rgb(var(--lf-checkbox-color-on-primary, var(--lf-color-on-primary)));height:100%;left:0;opacity:0;position:absolute;top:0;width:100%;transition:opacity calc(var(--lf-checkbox-animation-duration, 90ms) * 2) cubic-bezier(0.4, 0, 0.6, 1) 0ms}.checkbox__checkmark-path{stroke-dasharray:29.78;stroke-dashoffset:29.78;stroke-width:var(--lf-checkbox-checkmark-stroke-width, 3.12px);transition:stroke-dashoffset calc(var(--lf-checkbox-animation-duration, 90ms) * 2) cubic-bezier(0.4, 0, 0.6, 1) 0ms}.checkbox__mixedmark{background-color:rgba(var(--lf-checkbox-color-on-primary, var(--lf-color-on-primary)), 1);height:2px;opacity:0;transform:scaleX(0) rotate(0deg);width:var(--lf-checkbox-mixedmark-width, 70%);transition:opacity var(--lf-checkbox-animation-duration, 90ms) cubic-bezier(0.4, 0, 0.6, 1) 0ms, transform var(--lf-checkbox-animation-duration, 90ms) cubic-bezier(0.4, 0, 0.6, 1) 0ms}";
 const p06ffde53_entry = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
-  lf_checkbox: T$a
+  lf_checkbox: T$b
 }, Symbol.toStringTag, { value: "Module" }));
-var b$9, u$9, p$5, v$a, m$b, z$f = function(e2, r2, i2, a2) {
+var d$1, p$6, v$b, b$a, m$b, u$9 = function(t5, s2, a2, e2) {
+  if ("function" == typeof s2 ? t5 !== s2 || true : !s2.has(t5)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+  return s2.get(t5);
+};
+const g$d = class g {
+  constructor(a2) {
+    o$2(this, a2), this.lfEvent = G$4(this, "lf-splash-event"), this.state = "initializing", this.lfLabel = "Loading...", this.lfStyle = "", d$1.set(this, void 0), p$6.set(this, LF_SPLASH_BLOCKS), v$b.set(this, LF_SPLASH_PARTS), b$a.set(this, LF_STYLE_ID), m$b.set(this, LF_WRAPPER_ID);
+  }
+  onLfEvent(t5, s2) {
+    this.lfEvent.emit({ comp: this, eventType: s2, id: this.rootElement.id, originalEvent: t5 });
+  }
+  async getDebugInfo() {
+    return this.debugInfo;
+  }
+  async getProps() {
+    const t5 = LF_SPLASH_PROPS.map(((t6) => [t6, this[t6]]));
+    return Object.fromEntries(t5);
+  }
+  async refresh() {
+    vt$1(this);
+  }
+  async unmount(t5 = 575) {
+    setTimeout((() => {
+      this.state = "unmounting", setTimeout((() => {
+        this.onLfEvent(new CustomEvent("unmount"), "unmount"), this.rootElement.remove();
+      }), 300);
+    }), t5);
+  }
+  connectedCallback() {
+    u$9(this, d$1) && u$9(this, d$1).theme.register(this);
+  }
+  async componentWillLoad() {
+    !(function(t5, s2, a2, e2, i2) {
+      if ("function" == typeof s2 ? t5 !== s2 || true : !s2.has(t5)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
+      s2.set(t5, a2);
+    })(this, d$1, await a(this));
+  }
+  componentDidLoad() {
+    const { info: t5 } = u$9(this, d$1).debug;
+    this.onLfEvent(new CustomEvent("ready"), "ready"), t5.update(this, "did-load");
+  }
+  componentWillRender() {
+    const { info: t5 } = u$9(this, d$1).debug;
+    t5.update(this, "will-render");
+  }
+  componentDidRender() {
+    const { info: t5 } = u$9(this, d$1).debug;
+    t5.update(this, "did-render");
+  }
+  render() {
+    const { bemClass: t5, setLfStyle: s2 } = u$9(this, d$1).theme, { lfLabel: a2, lfStyle: l2, state: o2 } = this, r2 = "unmounting" === o2, { splash: n2 } = u$9(this, p$6);
+    return U$6(A$a, { key: "6871367cd0fa5e1fa10e306fa0fa4210ac0b9354" }, l2 && U$6("style", { key: "bbc87f22c2d13ebbaee8e682e8b25778a80b48a1", id: u$9(this, b$a) }, s2(this)), U$6("div", { key: "26153de5587db40aafbe033cbfc90a037e28ad7f", id: u$9(this, m$b) }, U$6("div", { key: "51713cf83026358a3497a157205317db9afdf959", class: t5(n2._, null, { active: r2 }), part: u$9(this, v$b).splash }, U$6("div", { key: "1d279168bcc1eee6b2d643986052531d6c8227ed", class: t5(n2._, n2.content), part: u$9(this, v$b).content }, U$6("div", { key: "b2dd87f862abe6a454f75cfc8438be207a29620d", class: t5(n2._, n2.widget), part: u$9(this, v$b).widget }, U$6("slot", { key: "32f411253f69f8b3c40568975b8ba09ab52d605b" })), U$6("div", { key: "246a3f462eaae4a83a5a17d87a9daafbb1c57bcc", class: t5(n2._, n2.label), part: u$9(this, v$b).label }, r2 ? "Ready!" : a2)))));
+  }
+  disconnectedCallback() {
+    var _a2;
+    (_a2 = u$9(this, d$1)) == null ? void 0 : _a2.theme.unregister(this);
+  }
+  get rootElement() {
+    return q$5(this);
+  }
+};
+d$1 = /* @__PURE__ */ new WeakMap(), p$6 = /* @__PURE__ */ new WeakMap(), v$b = /* @__PURE__ */ new WeakMap(), b$a = /* @__PURE__ */ new WeakMap(), m$b = /* @__PURE__ */ new WeakMap(), g$d.style = "::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}:host{display:block;font-family:var(--lf-splash-font-family, var(--lf-font-family-primary));font-size:var(--lf-splash-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-splash-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-splash-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-splash-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-splash-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-splash-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-splash-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-splash-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{margin:0}.splash{background-color:rgba(var(--lf-splash-color-bg, var(--lf-color-bg)), 1);color:rgb(var(--lf-splash-color-on-bg, var(--lf-color-on-bg)));display:flex;height:var(--lf-splash-height, 100dvh);left:var(--lf-splash-left, 0);opacity:1;position:var(--lf-splash-position, fixed);top:var(--lf-splash-top, 0);width:var(--lf-splash-width, 100dvw);z-index:var(--lf-ui-zindex-splash, 999)}.splash--active{transition:opacity 200ms cubic-bezier(0.4, 0, 0.6, 1);opacity:0}.splash__content{margin:auto}.splash__widget{height:var(--lf-splash-widget-height, 10em);margin:var(--lf-splash-widget-margin, auto);width:var(--lf-splash-widget-width, 10em)}.splash__label{font-size:0.875em;font-weight:500;line-height:1.375em;letter-spacing:0.01em;text-align:center}";
+const p0d17c789_entry = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  lf_splash: g$d
+}, Symbol.toStringTag, { value: "Module" }));
+var b$9, u$8, p$5, v$a, m$a, z$g = function(e2, r2, i2, a2) {
   if ("function" == typeof r2 ? e2 !== r2 || true : !r2.has(e2)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return r2.get(e2);
 };
-const w$e = class w {
+const w$f = class w {
   constructor(i2) {
-    o$2(this, i2), this.lfEvent = G$3(this, "lf-header-event"), this.lfStyle = "", b$9.set(this, void 0), u$9.set(this, LF_HEADER_BLOCKS), p$5.set(this, LF_HEADER_PARTS), v$a.set(this, LF_STYLE_ID), m$b.set(this, LF_WRAPPER_ID);
+    o$2(this, i2), this.lfEvent = G$4(this, "lf-header-event"), this.lfStyle = "", b$9.set(this, void 0), u$8.set(this, LF_HEADER_BLOCKS), p$5.set(this, LF_HEADER_PARTS), v$a.set(this, LF_STYLE_ID), m$a.set(this, LF_WRAPPER_ID);
   }
   onLfEvent(e2, r2) {
     this.lfEvent.emit({ comp: this, id: this.rootElement.id, originalEvent: e2, eventType: r2 });
@@ -2014,7 +2080,7 @@ const w$e = class w {
     }), e2);
   }
   connectedCallback() {
-    z$f(this, b$9) && z$f(this, b$9).theme.register(this);
+    z$g(this, b$9) && z$g(this, b$9).theme.register(this);
   }
   async componentWillLoad() {
     !(function(e2, r2, i2, a2, t5) {
@@ -2023,33 +2089,119 @@ const w$e = class w {
     })(this, b$9, await a(this));
   }
   componentDidLoad() {
-    const { info: e2 } = z$f(this, b$9).debug;
+    const { info: e2 } = z$g(this, b$9).debug;
     this.onLfEvent(new CustomEvent("ready"), "ready"), e2.update(this, "did-load");
   }
   componentWillRender() {
-    const { info: e2 } = z$f(this, b$9).debug;
+    const { info: e2 } = z$g(this, b$9).debug;
     e2.update(this, "will-render");
   }
   componentDidRender() {
-    const { info: e2 } = z$f(this, b$9).debug;
+    const { info: e2 } = z$g(this, b$9).debug;
     e2.update(this, "did-render");
   }
   render() {
-    const { bemClass: e2, setLfStyle: r2 } = z$f(this, b$9).theme, { header: i2 } = z$f(this, u$9), { lfStyle: o2 } = this;
-    return U$5(A$9, { key: "adf883c08271319f8611e198985149d689efbe75" }, o2 && U$5("style", { key: "bae015215e0d0639e94c97ea48ba945a08d3b63a", id: z$f(this, v$a) }, r2(this)), U$5("div", { key: "8b024fa672ab93722b04c1d0bd81ad669142d259", id: z$f(this, m$b) }, U$5("header", { key: "f9d4f4c68b302e4dc09dbfcaf2415dbc9d620ec1", class: e2(i2._), part: z$f(this, p$5).header }, U$5("section", { key: "8f6b934712ea60e0302efb0857b82d884de0b43e", class: e2(i2._, i2.section), part: z$f(this, p$5).section }, U$5("slot", { key: "ff66bfd8a26118e9b742909db9553102698fbc53", name: LF_HEADER_SLOT })))));
+    const { bemClass: e2, setLfStyle: r2 } = z$g(this, b$9).theme, { header: i2 } = z$g(this, u$8), { lfStyle: o2 } = this;
+    return U$6(A$a, { key: "adf883c08271319f8611e198985149d689efbe75" }, o2 && U$6("style", { key: "bae015215e0d0639e94c97ea48ba945a08d3b63a", id: z$g(this, v$a) }, r2(this)), U$6("div", { key: "8b024fa672ab93722b04c1d0bd81ad669142d259", id: z$g(this, m$a) }, U$6("header", { key: "f9d4f4c68b302e4dc09dbfcaf2415dbc9d620ec1", class: e2(i2._), part: z$g(this, p$5).header }, U$6("section", { key: "8f6b934712ea60e0302efb0857b82d884de0b43e", class: e2(i2._, i2.section), part: z$g(this, p$5).section }, U$6("slot", { key: "ff66bfd8a26118e9b742909db9553102698fbc53", name: LF_HEADER_SLOT })))));
   }
   disconnectedCallback() {
     var _a2;
-    (_a2 = z$f(this, b$9)) == null ? void 0 : _a2.theme.unregister(this);
+    (_a2 = z$g(this, b$9)) == null ? void 0 : _a2.theme.unregister(this);
   }
   get rootElement() {
-    return q$4(this);
+    return q$5(this);
   }
 };
-b$9 = /* @__PURE__ */ new WeakMap(), u$9 = /* @__PURE__ */ new WeakMap(), p$5 = /* @__PURE__ */ new WeakMap(), v$a = /* @__PURE__ */ new WeakMap(), m$b = /* @__PURE__ */ new WeakMap(), w$e.style = "::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}:host{display:block;font-family:var(--lf-header-font-family, var(--lf-font-family-primary));font-size:var(--lf-header-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-header-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-header-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-header-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-header-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-header-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-header-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-header-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{border:0;border-style:solid;border-radius:var(--lf-header-border-radius, var(--lf-ui-border-radius));border-top-left-radius:0;border-top-right-radius:0;background-color:rgba(var(--lf-header-color-header, var(--lf-color-header)), 0.375);color:rgb(var(--lf-header-color-on-header, var(--lf-color-on-header)));backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);transition:all 300ms cubic-bezier(0.4, 0, 0.2, 1);box-shadow:0 2px 4px -1px rgba(var(--lf-color-on-header), 0.2), 0 4px 5px 0 rgba(var(--lf-color-on-header), 0.14), 0 1px 10px 0 rgba(var(--lf-color-on-header), 0.12);box-sizing:border-box;display:block;height:var(--lf-ui-height-header);left:0;top:0;width:100%;z-index:var(--lf-ui-zindex-header)}.header{width:100%;height:100%;box-sizing:border-box;display:flex;flex-direction:column;justify-content:var(--lf-header-justify, space-between);padding:var(--lf-header-padding, 0.5em 0.75em)}.header__section{width:100%;height:100%;box-sizing:border-box;display:flex;position:relative}";
+b$9 = /* @__PURE__ */ new WeakMap(), u$8 = /* @__PURE__ */ new WeakMap(), p$5 = /* @__PURE__ */ new WeakMap(), v$a = /* @__PURE__ */ new WeakMap(), m$a = /* @__PURE__ */ new WeakMap(), w$f.style = "::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}:host{display:block;font-family:var(--lf-header-font-family, var(--lf-font-family-primary));font-size:var(--lf-header-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-header-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-header-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-header-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-header-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-header-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-header-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-header-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{border:0;border-style:solid;border-radius:var(--lf-header-border-radius, var(--lf-ui-border-radius));border-top-left-radius:0;border-top-right-radius:0;background-color:rgba(var(--lf-header-color-header, var(--lf-color-header)), 0.375);color:rgb(var(--lf-header-color-on-header, var(--lf-color-on-header)));backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);transition:all 300ms cubic-bezier(0.4, 0, 0.2, 1);box-shadow:0 2px 4px -1px rgba(var(--lf-color-on-header), 0.2), 0 4px 5px 0 rgba(var(--lf-color-on-header), 0.14), 0 1px 10px 0 rgba(var(--lf-color-on-header), 0.12);box-sizing:border-box;display:block;height:var(--lf-ui-height-header);left:0;top:0;width:100%;z-index:var(--lf-ui-zindex-header)}.header{width:100%;height:100%;box-sizing:border-box;display:flex;flex-direction:column;justify-content:var(--lf-header-justify, space-between);padding:var(--lf-header-padding, 0.5em 0.75em)}.header__section{width:100%;height:100%;box-sizing:border-box;display:flex;position:relative}";
 const p0da2996f_entry = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
-  lf_header: w$e
+  lf_header: w$f
+}, Symbol.toStringTag, { value: "Module" }));
+var v$9, m$9, u$7, b$8, w$e, y$e, g$c, z$f, k$f, x$f, W$e, E$d, M$d = function(e2, t5, i2, s2) {
+  if ("a" === i2 && !s2) throw new TypeError("Private accessor was defined without a getter");
+  if ("function" == typeof t5 ? e2 !== t5 || !s2 : !t5.has(e2)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+  return "m" === i2 ? s2 : "a" === i2 ? s2.call(e2) : s2 ? s2.value : t5.get(e2);
+}, C$d = function(e2, t5, i2, s2, a2) {
+  if ("function" == typeof t5 ? e2 !== t5 || true : !t5.has(e2)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
+  return t5.set(e2, i2), i2;
+};
+const T$a = class T2 {
+  constructor(i2) {
+    o$2(this, i2), this.lfEvent = G$4(this, "lf-placeholder-event"), v$9.add(this), this.isInViewport = false, this.lfIcon = "template", this.lfProps = {}, this.lfStyle = "", this.lfThreshold = 0.25, this.lfTrigger = "both", this.lfValue = "LfCard", m$9.set(this, void 0), u$7.set(this, LF_PLACEHOLDER_BLOCKS), b$8.set(this, CY_ATTRIBUTES), w$e.set(this, LF_ATTRIBUTES), y$e.set(this, LF_PLACEHOLDER_PARTS), g$c.set(this, LF_STYLE_ID), z$f.set(this, LF_WRAPPER_ID), k$f.set(this, null), x$f.set(this, null), W$e.set(this, false);
+  }
+  onLfEvent(e2, t5) {
+    this.lfEvent.emit({ comp: this, id: this.rootElement.id, originalEvent: e2, eventType: t5 });
+  }
+  async getComponent() {
+    return M$d(this, x$f, "f");
+  }
+  async getDebugInfo() {
+    return this.debugInfo;
+  }
+  async getProps() {
+    const e2 = LF_PLACEHOLDER_PROPS.map(((e3) => [e3, this[e3]]));
+    return Object.fromEntries(e2);
+  }
+  async refresh() {
+    vt$1(this);
+  }
+  async unmount(e2 = 0) {
+    setTimeout((() => {
+      this.onLfEvent(new CustomEvent("unmount"), "unmount"), this.rootElement.remove();
+    }), e2);
+  }
+  connectedCallback() {
+    M$d(this, m$9, "f") && (M$d(this, m$9, "f").theme.register(this), M$d(this, v$9, "m", E$d).call(this));
+  }
+  async componentWillLoad() {
+    C$d(this, m$9, await a(this));
+  }
+  componentDidLoad() {
+    const { info: e2 } = M$d(this, m$9, "f").debug;
+    M$d(this, v$9, "m", E$d).call(this), M$d(this, k$f, "f").observe(this.rootElement), this.onLfEvent(new CustomEvent("ready"), "ready"), e2.update(this, "did-load");
+  }
+  componentWillRender() {
+    const { info: e2 } = M$d(this, m$9, "f").debug;
+    e2.update(this, "will-render");
+  }
+  componentDidRender() {
+    const { info: e2 } = M$d(this, m$9, "f").debug;
+    M$d(this, x$f, "f") && !M$d(this, W$e, "f") && (C$d(this, W$e, true), this.onLfEvent(new CustomEvent("load"), "load")), e2.update(this, "did-render");
+  }
+  render() {
+    const { assets: e2, sanitizeProps: t5, theme: i2 } = M$d(this, m$9, "f"), { bemClass: o2, setLfStyle: l2 } = i2, { placeholder: r2 } = M$d(this, u$7, "f"), { isInViewport: f2, lfValue: h2, lfProps: c2, lfTrigger: d2, lfIcon: p2, lfStyle: v2 } = this;
+    let k2;
+    if (Boolean("viewport" === d2 && f2 || "props" === d2 && c2 || "both" === d2 && c2 && f2)) {
+      const e3 = h2.toLowerCase().replace("lf", ""), i3 = { [`onLf-${e3}-event`]: (e4) => {
+        this.onLfEvent(e4, "lf-event");
+      } };
+      k2 = U$6("lf-" + e3, { key: "c1b2b4ed1558e94d8038f3978cd26a36addab694", ...t5(c2, h2), ...i3, "data-lf": LF_ATTRIBUTES.fadeIn, ref: (e4) => C$d(this, x$f, e4) });
+    } else if (p2) {
+      const { style: t6 } = e2.get(`./assets/svg/${p2}.svg`);
+      k2 = U$6("div", { key: "cf9819845aa041f4dd385dcdd107dd0fc6e8b867", class: o2(r2._, r2.icon), "data-cy": M$d(this, b$8, "f").maskedSvg, "data-lf": M$d(this, w$e, "f").fadeIn, part: M$d(this, y$e, "f").icon, style: t6 });
+    }
+    return U$6(A$a, { key: "3c294e22bf44f93453d73c5cab795918e7517d93" }, v2 && U$6("style", { key: "178fae625145304efd7dc28bb78ff693b20975ca", id: M$d(this, g$c, "f") }, l2(this)), U$6("div", { key: "730f0d6f1749d3b62ec00901bbd3cce6223ac065", id: M$d(this, z$f, "f") }, U$6("div", { key: "4e101ca83e7bf0c517bad198da56182242e186f6", class: o2(r2._), part: M$d(this, y$e, "f").placeholder }, k2)));
+  }
+  disconnectedCallback() {
+    var _a2, _b2;
+    (_a2 = M$d(this, m$9, "f")) == null ? void 0 : _a2.theme.unregister(this), (_b2 = M$d(this, k$f, "f")) == null ? void 0 : _b2.unobserve(this.rootElement);
+  }
+  get rootElement() {
+    return q$5(this);
+  }
+};
+m$9 = /* @__PURE__ */ new WeakMap(), u$7 = /* @__PURE__ */ new WeakMap(), b$8 = /* @__PURE__ */ new WeakMap(), w$e = /* @__PURE__ */ new WeakMap(), y$e = /* @__PURE__ */ new WeakMap(), g$c = /* @__PURE__ */ new WeakMap(), z$f = /* @__PURE__ */ new WeakMap(), k$f = /* @__PURE__ */ new WeakMap(), x$f = /* @__PURE__ */ new WeakMap(), W$e = /* @__PURE__ */ new WeakMap(), v$9 = /* @__PURE__ */ new WeakSet(), E$d = function() {
+  const { debug: e2 } = M$d(this, m$9, "f");
+  C$d(this, k$f, new IntersectionObserver(((t5) => {
+    t5.forEach(((t6) => {
+      const i2 = this.rootElement.hasAttribute("lf-hydrated");
+      t6.isIntersecting && i2 && (e2.logs.new(this, "lf-placeholder entering the viewport, rendering " + this.lfValue + "."), this.isInViewport = true, M$d(this, k$f, "f").unobserve(this.rootElement));
+    }));
+  }), { threshold: this.lfThreshold }));
+}, T$a.style = "::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=fade-in]{display:block;animation:lf-fade-in-block 0.25s ease-out forwards}@keyframes lf-fade-in-block{from{visibility:hidden;opacity:0}to{visibility:visible;opacity:1}}:host{display:block;font-family:var(--lf-placeholder-font-family, var(--lf-font-family-primary));font-size:var(--lf-placeholder-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-placeholder-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-placeholder-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-placeholder-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-placeholder-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-placeholder-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-placeholder-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-placeholder-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{width:100%;height:100%;position:relative}.placeholder{align-items:var(--lf-placeholder-ver-alignment, center);display:flex;height:var(--lf-placeholder-height, 100%);justify-content:var(--lf-placeholder-hor-alignment, center);width:var(--lf-placeholder-width, 100%)}.placeholder__icon{background-color:rgba(var(--lf-placeholder-color-on-bg, var(--lf-color-on-bg)), 1);height:1.5em;width:1.5em;overflow:hidden;width:100%;height:100%;animation:shine ease 2s infinite}@keyframes shine{0%{opacity:0.4}50%{opacity:0.8}100%{opacity:0.4}}";
+const p1e846fdf_entry = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  lf_placeholder: T$a
 }, Symbol.toStringTag, { value: "Module" }));
 const p$4 = (t5, r2) => {
   if (t5) {
@@ -2057,7 +2209,7 @@ const p$4 = (t5, r2) => {
     t5.scrollTo({ left: "left" === r2 ? a2 - 200 : a2 + 200, behavior: "smooth" });
   }
 };
-var u$8, v$9, m$a, g$c, y$d, w$d, z$e, k$e, x$e, _$9, W$d, M$c = function(t5, r2, a2, i2) {
+var u$6, v$8, m$8, g$b, y$d, w$d, z$e, k$e, x$e, _$a, W$d, M$c = function(t5, r2, a2, i2) {
   if ("function" == typeof r2 ? t5 !== r2 || !i2 : !r2.has(t5)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return "m" === a2 ? i2 : "a" === a2 ? i2.call(t5) : i2 ? i2.value : r2.get(t5);
 }, C$c = function(t5, r2, a2, i2, o2) {
@@ -2066,22 +2218,22 @@ var u$8, v$9, m$a, g$c, y$d, w$d, z$e, k$e, x$e, _$9, W$d, M$c = function(t5, r2
 };
 const E$c = class E {
   constructor(i2) {
-    o$2(this, i2), this.lfEvent = G$3(this, "lf-tabbar-event"), this.value = null, this.lfAriaLabel = "", this.lfDataset = null, this.lfNavigation = false, this.lfRipple = true, this.lfStyle = "", this.lfUiSize = "medium", this.lfUiState = "primary", this.lfValue = null, u$8.set(this, void 0), v$9.set(this, LF_TABBAR_BLOCKS), m$a.set(this, CY_ATTRIBUTES), g$c.set(this, LF_ATTRIBUTES), y$d.set(this, LF_TABBAR_PARTS), w$d.set(this, LF_STYLE_ID), z$e.set(this, LF_WRAPPER_ID), k$e.set(this, void 0), x$e.set(this, void 0), _$9.set(this, ((t5) => {
-      const { get: r2 } = M$c(this, u$8, "f").assets, { bemClass: i3 } = M$c(this, u$8, "f").theme, { tab: o2 } = M$c(this, v$9, "f"), { style: e2 } = r2(`./assets/svg/${t5.icon}.svg`);
-      return U$5("div", { class: i3(o2._, o2.icon), "data-cy": M$c(this, m$a, "f").maskedSvg, style: e2 });
+    o$2(this, i2), this.lfEvent = G$4(this, "lf-tabbar-event"), this.value = null, this.lfAriaLabel = "", this.lfDataset = null, this.lfNavigation = false, this.lfRipple = true, this.lfStyle = "", this.lfUiSize = "medium", this.lfUiState = "primary", this.lfValue = null, u$6.set(this, void 0), v$8.set(this, LF_TABBAR_BLOCKS), m$8.set(this, CY_ATTRIBUTES), g$b.set(this, LF_ATTRIBUTES), y$d.set(this, LF_TABBAR_PARTS), w$d.set(this, LF_STYLE_ID), z$e.set(this, LF_WRAPPER_ID), k$e.set(this, void 0), x$e.set(this, void 0), _$a.set(this, ((t5) => {
+      const { get: r2 } = M$c(this, u$6, "f").assets, { bemClass: i3 } = M$c(this, u$6, "f").theme, { tab: o2 } = M$c(this, v$8, "f"), { style: e2 } = r2(`./assets/svg/${t5.icon}.svg`);
+      return U$6("div", { class: i3(o2._, o2.icon), "data-cy": M$c(this, m$8, "f").maskedSvg, style: e2 });
     })), W$d.set(this, ((t5, r2) => {
-      const { theme: i3 } = M$c(this, u$8, "f"), { bemClass: o2 } = i3, { tab: e2 } = M$c(this, v$9, "f"), { lfRipple: l2, value: n2 } = this, s2 = t5 === (n2 == null ? void 0 : n2.node);
-      return U$5("button", { "aria-selected": s2, "aria-label": (this.lfAriaLabel && t5.value ? `${this.lfAriaLabel} ${t5.value}` : t5.value || this.lfAriaLabel || t5.icon || this.rootElement.id || "tab").toString().trim(), class: o2(e2._, null, { active: s2 }), "data-cy": M$c(this, m$a, "f").button, "data-lf": M$c(this, g$c, "f")[this.lfUiState], onClick: (a2) => {
+      const { theme: i3 } = M$c(this, u$6, "f"), { bemClass: o2 } = i3, { tab: e2 } = M$c(this, v$8, "f"), { lfRipple: l2, value: n2 } = this, s2 = t5 === (n2 == null ? void 0 : n2.node);
+      return U$6("button", { "aria-selected": s2, "aria-label": (this.lfAriaLabel && t5.value ? `${this.lfAriaLabel} ${t5.value}` : t5.value || this.lfAriaLabel || t5.icon || this.rootElement.id || "tab").toString().trim(), class: o2(e2._, null, { active: s2 }), "data-cy": M$c(this, m$8, "f").button, "data-lf": M$c(this, g$b, "f")[this.lfUiState], onClick: (a2) => {
         this.onLfEvent(a2, "click", r2, t5);
       }, onPointerDown: (a2) => {
         this.onLfEvent(a2, "pointerdown", r2, t5);
-      }, part: M$c(this, y$d, "f").tab, role: "tab", tabIndex: r2, title: (t5 == null ? void 0 : t5.description) || "" }, U$5("div", { "data-cy": M$c(this, m$a, "f").rippleSurface, "data-lf": M$c(this, g$c, "f").rippleSurface, ref: (t6) => {
+      }, part: M$c(this, y$d, "f").tab, role: "tab", tabIndex: r2, title: (t5 == null ? void 0 : t5.description) || "" }, U$6("div", { "data-cy": M$c(this, m$8, "f").rippleSurface, "data-lf": M$c(this, g$b, "f").rippleSurface, ref: (t6) => {
         t6 && l2 && M$c(this, k$e, "f").push(t6);
-      } }), U$5("span", { class: o2(e2._, e2.content), "data-cy": M$c(this, m$a, "f").node }, t5.icon && M$c(this, _$9, "f").call(this, t5), t5.value && U$5("span", { class: o2(e2._, e2.label) }, t5.value)), U$5("span", { class: o2(e2._, e2.indicator, { active: s2 }) }, U$5("span", { class: o2(e2._, e2.indicatorContent, { active: true }) })));
+      } }), U$6("span", { class: o2(e2._, e2.content), "data-cy": M$c(this, m$8, "f").node }, t5.icon && M$c(this, _$a, "f").call(this, t5), t5.value && U$6("span", { class: o2(e2._, e2.label) }, t5.value)), U$6("span", { class: o2(e2._, e2.indicator, { active: s2 }) }, U$6("span", { class: o2(e2._, e2.indicatorContent, { active: true }) })));
     }));
   }
   onLfEvent(t5, r2, a2 = 0, i2) {
-    const { effects: o2 } = M$c(this, u$8, "f");
+    const { effects: o2 } = M$c(this, u$6, "f");
     switch (r2) {
       case "click":
         this.value = { index: a2, node: i2 };
@@ -2114,11 +2266,11 @@ const E$c = class E {
     }), t5);
   }
   connectedCallback() {
-    M$c(this, u$8, "f") && M$c(this, u$8, "f").theme.register(this);
+    M$c(this, u$6, "f") && M$c(this, u$6, "f").theme.register(this);
   }
   async componentWillLoad() {
-    C$c(this, u$8, await a(this));
-    const { debug: t5 } = M$c(this, u$8, "f"), { lfDataset: r2, lfValue: a$12 } = this;
+    C$c(this, u$6, await a(this));
+    const { debug: t5 } = M$c(this, u$6, "f"), { lfDataset: r2, lfValue: a$12 } = this;
     try {
       if (null !== a$12 && ("number" == typeof a$12 && (this.value = { index: a$12, node: r2.nodes[a$12] }), "string" == typeof a$12)) {
         const t6 = r2.nodes.find(((t7) => t7.id === a$12));
@@ -2129,60 +2281,225 @@ const E$c = class E {
     }
   }
   componentDidLoad() {
-    const { debug: t5, drag: r2 } = M$c(this, u$8, "f");
+    const { debug: t5, drag: r2 } = M$c(this, u$6, "f");
     M$c(this, x$e, "f") && r2.register.dragToScroll(M$c(this, x$e, "f")), this.onLfEvent(new CustomEvent("ready"), "ready"), t5.info.update(this, "did-load");
   }
   componentWillRender() {
-    const { debug: t5 } = M$c(this, u$8, "f");
+    const { debug: t5 } = M$c(this, u$6, "f");
     t5.info.update(this, "will-render");
   }
   componentDidRender() {
-    const { info: t5 } = M$c(this, u$8, "f").debug;
+    const { info: t5 } = M$c(this, u$6, "f").debug;
     t5.update(this, "did-render");
   }
   render() {
-    const { data: t5, theme: r2 } = M$c(this, u$8, "f"), { bemClass: i2, get: e2, setLfStyle: l2 } = r2, { "--lf-icon-next": n2, "--lf-icon-previous": s2 } = e2.current().variables, { tabbar: f2 } = M$c(this, v$9, "f"), { lfDataset: c2, lfStyle: b2 } = this;
+    const { data: t5, theme: r2 } = M$c(this, u$6, "f"), { bemClass: i2, get: e2, setLfStyle: l2 } = r2, { "--lf-icon-next": n2, "--lf-icon-previous": s2 } = e2.current().variables, { tabbar: f2 } = M$c(this, v$8, "f"), { lfDataset: c2, lfStyle: b2 } = this;
     if (!t5.node.exists(c2)) return;
     C$c(this, k$e, []);
     const d2 = c2.nodes;
-    return U$5(A$9, null, b2 && U$5("style", { id: M$c(this, w$d, "f") }, l2(this)), U$5("div", { id: M$c(this, z$e, "f") }, U$5("div", { class: i2(f2._), part: M$c(this, y$d, "f").tabbbar, role: "tablist" }, this.lfNavigation && U$5("lf-button", { lfIcon: s2, lfStretchY: true, lfStyling: "flat", lfUiSize: this.lfUiSize, "onLf-button-event": () => p$4(M$c(this, x$e, "f"), "left") }), U$5("div", { class: i2(f2._, f2.scroll), ref: (t6) => {
+    return U$6(A$a, null, b2 && U$6("style", { id: M$c(this, w$d, "f") }, l2(this)), U$6("div", { id: M$c(this, z$e, "f") }, U$6("div", { class: i2(f2._), part: M$c(this, y$d, "f").tabbbar, role: "tablist" }, this.lfNavigation && U$6("lf-button", { lfIcon: s2, lfStretchY: true, lfStyling: "flat", lfUiSize: this.lfUiSize, "onLf-button-event": () => p$4(M$c(this, x$e, "f"), "left") }), U$6("div", { class: i2(f2._, f2.scroll), ref: (t6) => {
       t6 && C$c(this, x$e, t6);
-    } }, d2.map(((t6, r3) => M$c(this, W$d, "f").call(this, t6, r3)))), this.lfNavigation && U$5("lf-button", { lfIcon: n2, lfStretchY: true, lfStyling: "flat", lfUiSize: this.lfUiSize, "onLf-button-event": () => p$4(M$c(this, x$e, "f"), "right") }))));
+    } }, d2.map(((t6, r3) => M$c(this, W$d, "f").call(this, t6, r3)))), this.lfNavigation && U$6("lf-button", { lfIcon: n2, lfStretchY: true, lfStyling: "flat", lfUiSize: this.lfUiSize, "onLf-button-event": () => p$4(M$c(this, x$e, "f"), "right") }))));
   }
   disconnectedCallback() {
     var _a2, _b2, _c2;
-    ((_a2 = M$c(this, u$8, "f")) == null ? void 0 : _a2.drag.getActiveSession(M$c(this, x$e, "f"))) && ((_b2 = M$c(this, u$8, "f")) == null ? void 0 : _b2.drag.unregister.dragToScroll(M$c(this, x$e, "f"))), (_c2 = M$c(this, u$8, "f")) == null ? void 0 : _c2.theme.unregister(this);
+    ((_a2 = M$c(this, u$6, "f")) == null ? void 0 : _a2.drag.getActiveSession(M$c(this, x$e, "f"))) && ((_b2 = M$c(this, u$6, "f")) == null ? void 0 : _b2.drag.unregister.dragToScroll(M$c(this, x$e, "f"))), (_c2 = M$c(this, u$6, "f")) == null ? void 0 : _c2.theme.unregister(this);
   }
   get rootElement() {
-    return q$4(this);
+    return q$5(this);
   }
 };
-u$8 = /* @__PURE__ */ new WeakMap(), v$9 = /* @__PURE__ */ new WeakMap(), m$a = /* @__PURE__ */ new WeakMap(), g$c = /* @__PURE__ */ new WeakMap(), y$d = /* @__PURE__ */ new WeakMap(), w$d = /* @__PURE__ */ new WeakMap(), z$e = /* @__PURE__ */ new WeakMap(), k$e = /* @__PURE__ */ new WeakMap(), x$e = /* @__PURE__ */ new WeakMap(), _$9 = /* @__PURE__ */ new WeakMap(), W$d = /* @__PURE__ */ new WeakMap(), E$c.style = "::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=ripple]{animation-duration:var(--lf-ui-duration-ripple, 675ms);animation-fill-mode:forwards;animation-name:lf-ripple;animation-timing-function:var(--lf-ui-timing-ripple, ease-out);background:var(--lf-ui-ripple-background, var(--lf-color-primary));border-radius:var(--lf-ui-radius-ripple, 50%);height:var(--lf-ui-ripple-height, 100%);left:var(--lf-ui-ripple-x, 50%);opacity:var(--lf-ui-opacity-ripple, 0.5);pointer-events:none;position:absolute;top:var(--lf-ui-ripple-y, 50%);transform:scale(0);width:var(--lf-ui-ripple-width, 100%)}@keyframes lf-ripple{from{transform:scale(0)}to{opacity:0;transform:scale(4)}}[data-lf=ripple-surface]{cursor:pointer;height:100%;left:0;overflow:hidden;position:absolute;top:0;width:100%}[data-lf=danger]{--lf-tabbar-color-primary:var(\n    --lf-tabbar-color-danger,\n    var(--lf-color-danger)\n  );--lf-tabbar-color-on-primary:var(\n    --lf-tabbar-color-danger,\n    var(--lf-color-on-danger)\n  )}[data-lf=disabled]{opacity:var(--lf-tabbar-ui-opacity-disabled, var(--lf-ui-opacity-disabled));pointer-events:none}[data-lf=info]{--lf-tabbar-color-primary:var(\n    --lf-tabbar-color-info,\n    var(--lf-color-info)\n  );--lf-tabbar-color-on-primary:var(\n    --lf-tabbar-color-info,\n    var(--lf-color-on-info)\n  )}[data-lf=secondary]{--lf-tabbar-color-primary:var(\n    --lf-tabbar-color-secondary,\n    var(--lf-color-secondary)\n  );--lf-tabbar-color-on-primary:var(\n    --lf-tabbar-color-secondary,\n    var(--lf-color-on-secondary)\n  )}[data-lf=success]{--lf-tabbar-color-primary:var(\n    --lf-tabbar-color-success,\n    var(--lf-color-success)\n  );--lf-tabbar-color-on-primary:var(\n    --lf-tabbar-color-success,\n    var(--lf-color-on-success)\n  )}[data-lf=warning]{--lf-tabbar-color-primary:var(\n    --lf-tabbar-color-warning,\n    var(--lf-color-warning)\n  );--lf-tabbar-color-on-primary:var(\n    --lf-tabbar-color-warning,\n    var(--lf-color-on-warning)\n  )}:host{display:block;font-family:var(--lf-tabbar-font-family, var(--lf-font-family-primary));font-size:var(--lf-tabbar-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-tabbar-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-tabbar-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-tabbar-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-tabbar-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-tabbar-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-tabbar-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-tabbar-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{width:100%}.tabbar{display:flex;height:var(--lf-tabbar-height, 2.25em);width:100%}.tabbar__scroll{display:flex;overflow:hidden;width:100%}.tab{font-family:var(--lf-tabbar-font-family, var(--lf-font-family-primary));background-color:rgba(var(--lf-tabbar-color-bg, var(--lf-color-bg)), 0.375);color:rgb(var(--lf-tabbar-color-on-bg, var(--lf-color-on-bg)));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:all 300ms cubic-bezier(0.4, 0, 0.2, 1);appearance:none;border:none;box-sizing:border-box;cursor:pointer;display:flex;flex:1 0 auto;height:100%;justify-content:center;margin:0;min-width:var(--lf-tabbar-min-width, 5em);outline:none;padding:var(--lf-tabbar-tab-padding, 0 1.25em);position:relative;text-align:center}.tab:first-child{border:0;border-style:solid;border-radius:var(--lf-tabbar-border-radius, var(--lf-ui-border-radius));border-bottom-left-radius:0;border-bottom-right-radius:0;border-top-right-radius:0}.tab:last-child{border:0;border-style:solid;border-radius:var(--lf-tabbar-border-radius, var(--lf-ui-border-radius));border-bottom-left-radius:0;border-bottom-right-radius:0;border-top-left-radius:0}.tab:hover{background-color:rgba(var(--lf-tabbar-color-primary, var(--lf-color-primary)), 0.125);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.tab--active{background-color:rgba(var(--lf-tabbar-color-primary, var(--lf-color-primary)), 0.225);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.tab--active:hover{background-color:rgba(var(--lf-tabbar-color-primary, var(--lf-color-primary)), 0.325);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.tab--active .tab__icon{background-color:rgba(var(--lf-tabbar-color-primary, var(--lf-color-primary)), 1)}.tab--active .tab__label{color:rgb(var(--lf-tabbar-color-primary, var(--lf-color-primary)));font-weight:600;opacity:1}.tab__icon{background-color:rgba(var(--lf-tabbar-color-on-bg, var(--lf-color-on-bg)), 1);height:1.5em;width:1.5em;overflow:hidden;transition:all 300ms cubic-bezier(0.4, 0, 0.2, 1)}.tab__content{align-items:center;display:flex;height:inherit;justify-content:center;pointer-events:none;position:relative}.tab__label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:0.775em;letter-spacing:0.0892857143em;line-height:inherit;text-transform:uppercase;opacity:0.75}.tab__icon+.tab__label{padding-left:0.5em;padding-right:0}.tab__indicator{width:100%;height:100%;transition:all 300ms cubic-bezier(0.4, 0, 0.2, 1);display:flex;justify-content:center;left:0;pointer-events:none;position:absolute;top:0}.tab__indicator--active .tab__indicator-content{opacity:1}.tab__indicator-content{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);opacity:0;transform-origin:left center}.tab__indicator-content--active{align-self:flex-end;border-color:rgb(var(--lf-tabbar-color-indicator, var(--lf-tabbar-color-primary)));border-top-style:solid;border-top-width:2px;box-sizing:border-box;width:100%}";
+u$6 = /* @__PURE__ */ new WeakMap(), v$8 = /* @__PURE__ */ new WeakMap(), m$8 = /* @__PURE__ */ new WeakMap(), g$b = /* @__PURE__ */ new WeakMap(), y$d = /* @__PURE__ */ new WeakMap(), w$d = /* @__PURE__ */ new WeakMap(), z$e = /* @__PURE__ */ new WeakMap(), k$e = /* @__PURE__ */ new WeakMap(), x$e = /* @__PURE__ */ new WeakMap(), _$a = /* @__PURE__ */ new WeakMap(), W$d = /* @__PURE__ */ new WeakMap(), E$c.style = "::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=ripple]{animation-duration:var(--lf-ui-duration-ripple, 675ms);animation-fill-mode:forwards;animation-name:lf-ripple;animation-timing-function:var(--lf-ui-timing-ripple, ease-out);background:var(--lf-ui-ripple-background, var(--lf-color-primary));border-radius:var(--lf-ui-radius-ripple, 50%);height:var(--lf-ui-ripple-height, 100%);left:var(--lf-ui-ripple-x, 50%);opacity:var(--lf-ui-opacity-ripple, 0.5);pointer-events:none;position:absolute;top:var(--lf-ui-ripple-y, 50%);transform:scale(0);width:var(--lf-ui-ripple-width, 100%)}@keyframes lf-ripple{from{transform:scale(0)}to{opacity:0;transform:scale(4)}}[data-lf=ripple-surface]{cursor:pointer;height:100%;left:0;overflow:hidden;position:absolute;top:0;width:100%}[data-lf=danger]{--lf-tabbar-color-primary:var(\n    --lf-tabbar-color-danger,\n    var(--lf-color-danger)\n  );--lf-tabbar-color-on-primary:var(\n    --lf-tabbar-color-danger,\n    var(--lf-color-on-danger)\n  )}[data-lf=disabled]{opacity:var(--lf-tabbar-ui-opacity-disabled, var(--lf-ui-opacity-disabled));pointer-events:none}[data-lf=info]{--lf-tabbar-color-primary:var(\n    --lf-tabbar-color-info,\n    var(--lf-color-info)\n  );--lf-tabbar-color-on-primary:var(\n    --lf-tabbar-color-info,\n    var(--lf-color-on-info)\n  )}[data-lf=secondary]{--lf-tabbar-color-primary:var(\n    --lf-tabbar-color-secondary,\n    var(--lf-color-secondary)\n  );--lf-tabbar-color-on-primary:var(\n    --lf-tabbar-color-secondary,\n    var(--lf-color-on-secondary)\n  )}[data-lf=success]{--lf-tabbar-color-primary:var(\n    --lf-tabbar-color-success,\n    var(--lf-color-success)\n  );--lf-tabbar-color-on-primary:var(\n    --lf-tabbar-color-success,\n    var(--lf-color-on-success)\n  )}[data-lf=warning]{--lf-tabbar-color-primary:var(\n    --lf-tabbar-color-warning,\n    var(--lf-color-warning)\n  );--lf-tabbar-color-on-primary:var(\n    --lf-tabbar-color-warning,\n    var(--lf-color-on-warning)\n  )}:host{display:block;font-family:var(--lf-tabbar-font-family, var(--lf-font-family-primary));font-size:var(--lf-tabbar-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-tabbar-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-tabbar-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-tabbar-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-tabbar-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-tabbar-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-tabbar-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-tabbar-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{width:100%}.tabbar{display:flex;height:var(--lf-tabbar-height, 2.25em);width:100%}.tabbar__scroll{display:flex;overflow:hidden;width:100%}.tab{font-family:var(--lf-tabbar-font-family, var(--lf-font-family-primary));background-color:rgba(var(--lf-tabbar-color-bg, var(--lf-color-bg)), 0.375);color:rgb(var(--lf-tabbar-color-on-bg, var(--lf-color-on-bg)));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:all 300ms cubic-bezier(0.4, 0, 0.2, 1);appearance:none;border:none;box-sizing:border-box;cursor:pointer;display:flex;flex:1 0 auto;height:100%;justify-content:center;margin:0;min-width:var(--lf-tabbar-min-width, 5em);outline:none;padding:var(--lf-tabbar-tab-padding, 0 1.25em);position:relative;text-align:center}.tab:first-child{border:0;border-style:solid;border-radius:var(--lf-tabbar-border-radius, var(--lf-ui-border-radius));border-bottom-left-radius:0;border-bottom-right-radius:0;border-top-right-radius:0}.tab:last-child{border:0;border-style:solid;border-radius:var(--lf-tabbar-border-radius, var(--lf-ui-border-radius));border-bottom-left-radius:0;border-bottom-right-radius:0;border-top-left-radius:0}.tab:hover{background-color:rgba(var(--lf-tabbar-color-primary, var(--lf-color-primary)), 0.125);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.tab--active{background-color:rgba(var(--lf-tabbar-color-primary, var(--lf-color-primary)), 0.225);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.tab--active:hover{background-color:rgba(var(--lf-tabbar-color-primary, var(--lf-color-primary)), 0.325);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.tab--active .tab__icon{background-color:rgba(var(--lf-tabbar-color-primary, var(--lf-color-primary)), 1)}.tab--active .tab__label{color:rgb(var(--lf-tabbar-color-primary, var(--lf-color-primary)));font-weight:600;opacity:1}.tab__icon{background-color:rgba(var(--lf-tabbar-color-on-bg, var(--lf-color-on-bg)), 1);height:1.5em;width:1.5em;overflow:hidden;transition:all 300ms cubic-bezier(0.4, 0, 0.2, 1)}.tab__content{align-items:center;display:flex;height:inherit;justify-content:center;pointer-events:none;position:relative}.tab__label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:0.775em;letter-spacing:0.0892857143em;line-height:inherit;text-transform:uppercase;opacity:0.75}.tab__icon+.tab__label{padding-left:0.5em;padding-right:0}.tab__indicator{width:100%;height:100%;transition:all 300ms cubic-bezier(0.4, 0, 0.2, 1);display:flex;justify-content:center;left:0;pointer-events:none;position:absolute;top:0}.tab__indicator--active .tab__indicator-content{opacity:1}.tab__indicator-content{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);opacity:0;transform-origin:left center}.tab__indicator-content--active{align-self:flex-end;border-color:rgb(var(--lf-tabbar-color-indicator, var(--lf-tabbar-color-primary)));border-top-style:solid;border-top-width:2px;box-sizing:border-box;width:100%}";
 const p3897a69c_entry = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   lf_tabbar: E$c
 }, Symbol.toStringTag, { value: "Module" }));
-const g$b = (i2) => ({ deleteIcon: (t5) => {
+const m$7 = (t5) => ({ list: () => {
+  const { controller: s2, elements: i2, handlers: l2 } = t5(), { refs: a2 } = i2, { blocks: r2, compInstance: o2, cyAttributes: n2, indexById: c2, lfAttributes: f2, manager: d2, parts: h2, selectedNode: p2 } = s2.get, { assignRef: u2, sanitizeProps: m2, theme: v2 } = d2, { bemClass: b2 } = v2, { list: y2 } = l2, { lfDataset: w3 } = o2, g3 = p2(), k2 = g3 ? c2(g3.id) : -1;
+  return U$6("lf-list", { lfUiSize: o2.lfUiSize, lfUiState: o2.lfUiState, ...m2(o2.lfListProps, "LfList"), class: b2(r2.select._, r2.select.list), "data-cy": n2.dropdownMenu, "data-lf": f2.portal, lfDataset: w3, lfSelectable: true, lfValue: -1 !== k2 ? k2 : null, "onLf-list-event": y2, part: h2.list, ref: u2(a2, "list") });
+}, textfield: () => {
+  var _a2, _b2;
+  const { controller: s2, elements: i2, handlers: l2 } = t5(), { refs: a2 } = i2, { blocks: o2, compInstance: n2, manager: c2, parts: f2, selectedNode: d2 } = s2.get, { assignRef: h2, sanitizeProps: p2, theme: u2 } = c2, { bemClass: m2 } = u2, { textfield: v2 } = l2, b2 = ((_a2 = n2.lfTextfieldProps) == null ? void 0 : _a2.lfHtmlAttributes) || {};
+  b2.autocomplete = "off", b2.readonly = true, b2.role = "combobox";
+  const y2 = p2(b2);
+  return U$6("lf-textfield", { lfUiSize: n2.lfUiSize, lfUiState: n2.lfUiState, ...p2(n2.lfTextfieldProps, "LfTextfield"), class: m2(o2.select._, o2.select.textfield), lfHtmlAttributes: y2, lfTrailingIconAction: LF_THEME_ICONS.dropdown, lfValue: String(((_b2 = d2()) == null ? void 0 : _b2.value) || ""), "onLf-textfield-event": v2, part: f2.textfield, ref: h2(a2, "textfield") });
+} }), v$7 = (e2) => ({ list: async (t5) => {
+  const { eventType: s2, node: i2 } = t5.detail, { controller: l2, elements: a2 } = e2(), { compInstance: r2 } = l2.get, { refs: o2 } = a2, n2 = r2;
+  "click" === s2 && (l2.set.value(i2.id), l2.set.list("close"), o2.textfield.setFocus()), n2.onLfEvent(t5, "lf-event", i2);
+}, textfield: async (t5) => {
+  const { eventType: s2 } = t5.detail || {}, { controller: i2 } = e2(), { compInstance: l2 } = i2.get, a2 = l2;
+  switch (s2) {
+    case "click":
+      i2.set.list();
+      break;
+    case "keydown": {
+      const e3 = t5.detail.originalEvent;
+      await b$7(e3, i2);
+      break;
+    }
+  }
+  a2.onLfEvent(t5, "lf-event");
+} }), b$7 = async (e2, t5) => {
+  var _a2;
+  const { compInstance: s2, lfDataset: i2 } = t5.get, l2 = s2;
+  if (!l2.lfNavigation) return;
+  const a2 = i2();
+  if (!((_a2 = a2 == null ? void 0 : a2.nodes) == null ? void 0 : _a2.length)) return;
+  const r2 = await l2.getSelectedIndex();
+  let o2 = r2;
+  switch (e2.key) {
+    case "ArrowDown":
+      e2.preventDefault(), o2 = -1 === r2 ? 0 : (r2 + 1) % a2.nodes.length;
+      break;
+    case "ArrowUp":
+      e2.preventDefault(), o2 = -1 === r2 || 0 === r2 ? a2.nodes.length - 1 : r2 - 1;
+      break;
+    case "Escape":
+      e2.preventDefault(), t5.set.list("close");
+      break;
+    case "Enter":
+      e2.preventDefault(), t5.set.list();
+  }
+  if (o2 !== r2) {
+    const s3 = a2.nodes[o2];
+    t5.set.value(s3.id), l2.onLfEvent(e2, "lf-event", s3);
+  }
+}, y$c = (e2, t5) => !(!(e2 == null ? void 0 : e2.nodes) || !t5) && e2.nodes.some(((e3) => (e3 == null ? void 0 : e3.id) === t5));
+var w$c, g$a, k$d, z$d, x$d, D$a, E$b, C$b, I$8, L$8, S$9 = function(e2, t5, s2, i2) {
+  if ("a" === s2 && !i2) throw new TypeError("Private accessor was defined without a getter");
+  if ("function" == typeof t5 ? e2 !== t5 || !i2 : !t5.has(e2)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+  return "m" === s2 ? i2 : "a" === s2 ? i2.call(e2) : i2 ? i2.value : t5.get(e2);
+}, T$9 = function(e2, t5, s2, i2, l2) {
+  if ("function" == typeof t5 ? e2 !== t5 || true : !t5.has(e2)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
+  return t5.set(e2, s2), s2;
+};
+const W$c = class W {
+  constructor(e2) {
+    o$2(this, e2), this.lfEvent = G$4(this, "lf-select-event"), w$c.add(this), this.focused = false, this.value = null, this.lfDataset = null, this.lfListProps = null, this.lfNavigation = true, this.lfStyle = null, this.lfTextfieldProps = null, this.lfUiSize = "medium", this.lfUiState = "primary", this.lfValue = null, g$a.set(this, void 0), k$d.set(this, void 0), z$d.set(this, LF_SELECT_BLOCKS), x$d.set(this, CY_ATTRIBUTES), D$a.set(this, LF_ATTRIBUTES), E$b.set(this, LF_SELECT_PARTS), C$b.set(this, LF_STYLE_ID), I$8.set(this, LF_WRAPPER_ID);
+  }
+  onLfEvent(e2, t5, s2, i2) {
+    this.lfEvent.emit({ comp: this, eventType: t5, id: this.rootElement.id, originalEvent: e2, node: s2, value: i2 });
+  }
+  onLfDatasetChange() {
+    (!this.lfDataset || this.value && !y$c(this.lfDataset, this.value)) && (this.value = null);
+  }
+  async getDebugInfo() {
+    return this.debugInfo;
+  }
+  async getProps() {
+    const e2 = LF_SELECT_PROPS.map(((e3) => [e3, this[e3]]));
+    return Object.fromEntries(e2);
+  }
+  async getValue() {
+    return S$9(this, k$d, "f").controller.get.selectedNode();
+  }
+  async getSelectedIndex() {
+    const e2 = S$9(this, k$d, "f").controller.get.selectedNode();
+    return e2 ? S$9(this, k$d, "f").controller.get.indexById(e2.id) : -1;
+  }
+  async refresh() {
+    vt$1(this);
+  }
+  async setValue(e2) {
+    S$9(this, k$d, "f").controller.set.value(e2);
+  }
+  async unmount(e2 = 0) {
+    setTimeout((() => {
+      this.onLfEvent(new CustomEvent("unmount"), "unmount"), this.rootElement.remove();
+    }), e2);
+  }
+  connectedCallback() {
+    S$9(this, g$a, "f") && S$9(this, g$a, "f").theme.register(this);
+  }
+  async componentWillLoad() {
+    var _a2;
+    T$9(this, g$a, await a(this)), "number" == typeof this.lfValue ? this.value = ((_a2 = this.lfDataset.nodes[this.lfValue]) == null ? void 0 : _a2.id) || null : "string" == typeof this.lfValue && "" !== this.lfValue && (this.value = this.lfValue), S$9(this, w$c, "m", L$8).call(this);
+  }
+  async componentDidLoad() {
+    const { info: e2 } = S$9(this, g$a, "f").debug;
+    this.onLfEvent(new CustomEvent("ready"), "ready"), await e2.update(this, "did-load");
+  }
+  componentWillRender() {
+    const { info: e2 } = S$9(this, g$a, "f").debug;
+    e2.update(this, "will-render");
+  }
+  componentDidRender() {
+    const { info: e2 } = S$9(this, g$a, "f").debug;
+    e2.update(this, "did-render");
+  }
+  render() {
+    const { bemClass: t5, setLfStyle: s2 } = S$9(this, g$a, "f").theme, { lfStyle: i2 } = this;
+    return U$6(A$a, { key: "dbad4e4523423a4c24f057f7b2c5c2946c365034" }, i2 && U$6("style", { key: "a1e5b0e034f9ce0ed198dbaded0a4a63fab02503", id: S$9(this, C$b, "f") }, s2(this)), U$6("div", { key: "6af805d6d5c31ddca6ab49ef3cbb7a01c426d9b6", id: S$9(this, I$8, "f") }, U$6("div", { key: "966a3c61e6a77b0f5824561a5122d4047a47f922", class: t5(S$9(this, z$d, "f").select._), "data-lf": S$9(this, D$a, "f")[this.lfUiState], part: S$9(this, E$b, "f").select }, S$9(this, k$d, "f").elements.jsx.textfield(), S$9(this, k$d, "f").elements.jsx.list())));
+  }
+  disconnectedCallback() {
+    var _a2, _b2;
+    if (S$9(this, k$d, "f")) {
+      const { list: e2 } = S$9(this, k$d, "f").elements.refs;
+      (_a2 = S$9(this, g$a, "f")) == null ? void 0 : _a2.portal.close(e2);
+    }
+    (_b2 = S$9(this, g$a, "f")) == null ? void 0 : _b2.theme.unregister(this);
+  }
+  get rootElement() {
+    return q$5(this);
+  }
+  static get watchers() {
+    return { lfDataset: ["onLfDatasetChange"] };
+  }
+};
+g$a = /* @__PURE__ */ new WeakMap(), k$d = /* @__PURE__ */ new WeakMap(), z$d = /* @__PURE__ */ new WeakMap(), x$d = /* @__PURE__ */ new WeakMap(), D$a = /* @__PURE__ */ new WeakMap(), E$b = /* @__PURE__ */ new WeakMap(), C$b = /* @__PURE__ */ new WeakMap(), I$8 = /* @__PURE__ */ new WeakMap(), w$c = /* @__PURE__ */ new WeakSet(), L$8 = function() {
+  var e2, t5, s2;
+  T$9(this, k$d, (e2 = { blocks: S$9(this, z$d, "f"), compInstance: this, cyAttributes: S$9(this, x$d, "f"), indexById: (e3) => {
+    var _a2, _b2;
+    return (_b2 = (_a2 = this.lfDataset) == null ? void 0 : _a2.nodes) == null ? void 0 : _b2.findIndex(((t6) => t6.id === e3));
+  }, isDisabled: () => "disabled" === this.lfUiState, lfAttributes: S$9(this, D$a, "f"), lfDataset: () => this.lfDataset, manager: S$9(this, g$a, "f"), parts: S$9(this, E$b, "f"), selectedNode: () => {
+    return e3 = this.lfDataset, t6 = this.value, (e3 == null ? void 0 : e3.nodes) && t6 && e3.nodes.find(((e4) => (e4 == null ? void 0 : e4.id) === t6)) || null;
+    var e3, t6;
+  } }, t5 = { value: async (e3) => {
+    const { refs: t6 } = S$9(this, k$d, "f").elements, s3 = t6.textfield || null, i2 = t6.list || null, l2 = async (e4) => {
+      this.value = e4;
+      const t7 = S$9(this, k$d, "f").controller.get.selectedNode();
+      i2 && await i2.selectNodeById((t7 == null ? void 0 : t7.id) || null), s3 && await s3.setValue(String((t7 == null ? void 0 : t7.value) || "")), this.onLfEvent(new CustomEvent("change"), "change", t7, e4);
+    };
+    e3 && this.lfDataset && !y$c(this.lfDataset, e3) ? await l2(null) : await l2(e3);
+  } }, s2 = () => S$9(this, k$d, "f"), { controller: { get: e2, set: { ...t5, list: (e3 = "toggle") => {
+    const t6 = s2(), { controller: i2, elements: l2 } = t6, { manager: a2 } = i2.get, { list: r2, textfield: o2 } = l2.refs, { close: n2, isInPortal: c2, open: f2 } = a2.portal;
+    switch (e3) {
+      case "close":
+        n2(r2);
+        break;
+      case "open":
+        f2(r2, o2);
+        break;
+      default:
+        c2(r2) ? n2(r2) : f2(r2, o2);
+    }
+  } } }, elements: { jsx: m$7(s2), refs: { list: null, textfield: null } }, handlers: v$7(s2) }));
+}, W$c.style = "::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=ripple]{animation-duration:var(--lf-ui-duration-ripple, 675ms);animation-fill-mode:forwards;animation-name:lf-ripple;animation-timing-function:var(--lf-ui-timing-ripple, ease-out);background:var(--lf-ui-ripple-background, var(--lf-color-primary));border-radius:var(--lf-ui-radius-ripple, 50%);height:var(--lf-ui-ripple-height, 100%);left:var(--lf-ui-ripple-x, 50%);opacity:var(--lf-ui-opacity-ripple, 0.5);pointer-events:none;position:absolute;top:var(--lf-ui-ripple-y, 50%);transform:scale(0);width:var(--lf-ui-ripple-width, 100%)}@keyframes lf-ripple{from{transform:scale(0)}to{opacity:0;transform:scale(4)}}[data-lf=ripple-surface]{cursor:pointer;height:100%;left:0;overflow:hidden;position:absolute;top:0;width:100%}[data-lf=danger]{--lf-select-color-primary:var(\n    --lf-select-color-danger,\n    var(--lf-color-danger)\n  );--lf-select-color-on-primary:var(\n    --lf-select-color-danger,\n    var(--lf-color-on-danger)\n  )}[data-lf=disabled]{opacity:var(--lf-select-ui-opacity-disabled, var(--lf-ui-opacity-disabled));pointer-events:none}[data-lf=info]{--lf-select-color-primary:var(\n    --lf-select-color-info,\n    var(--lf-color-info)\n  );--lf-select-color-on-primary:var(\n    --lf-select-color-info,\n    var(--lf-color-on-info)\n  )}[data-lf=secondary]{--lf-select-color-primary:var(\n    --lf-select-color-secondary,\n    var(--lf-color-secondary)\n  );--lf-select-color-on-primary:var(\n    --lf-select-color-secondary,\n    var(--lf-color-on-secondary)\n  )}[data-lf=success]{--lf-select-color-primary:var(\n    --lf-select-color-success,\n    var(--lf-color-success)\n  );--lf-select-color-on-primary:var(\n    --lf-select-color-success,\n    var(--lf-color-on-success)\n  )}[data-lf=warning]{--lf-select-color-primary:var(\n    --lf-select-color-warning,\n    var(--lf-color-warning)\n  );--lf-select-color-on-primary:var(\n    --lf-select-color-warning,\n    var(--lf-color-on-warning)\n  )}[data-lf=fade-in]{display:block;animation:lf-fade-in-block 0.25s ease-out forwards}@keyframes lf-fade-in-block{from{visibility:hidden;opacity:0}to{visibility:visible;opacity:1}}[data-lf=portal]{display:none}:host{display:block;font-family:var(--lf-select-font-family, var(--lf-font-family-primary));font-size:var(--lf-select-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-select-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-select-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-select-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-select-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-select-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-select-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-select-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}.select{width:100%;height:100%}.select__textfield{--lf-textfield-input-cursor:pointer;background-color:rgba(var(--lf-select-color-primary, var(--lf-color-primary)), 0);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);width:100%;height:100%;cursor:var(--lf-textfield-input-cursor, pointer);transition:background-color 0.2s ease-in-out}.select__textfield:hover{background-color:rgba(var(--lf-select-color-primary, var(--lf-color-primary)), 0.12);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}";
+const p3b261a82_entry = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  lf_select: W$c
+}, Symbol.toStringTag, { value: "Module" }));
+const g$9 = (i2) => ({ deleteIcon: (t5) => {
   const { controller: r2, elements: n2, handlers: s2 } = i2(), { blocks: o2, cyAttributes: a2, lfAttributes: l2, manager: f2, parts: c2 } = r2.get, { refs: d2 } = n2, { deleteIcon: h2 } = s2, { assignRef: m2, theme: p2 } = f2, { bemClass: v2 } = p2;
-  return U$5("div", { class: v2(o2.deleteIcon._), "data-cy": a2.button, "data-lf": l2.icon, onClick: (e2) => h2(e2, t5), part: c2.deleteIcon, ref: m2(d2, "deleteIcon") }, U$5("div", { class: v2(o2.deleteIcon._, o2.deleteIcon.icon), key: t5.id + "_delete" }));
+  return U$6("div", { class: v2(o2.deleteIcon._), "data-cy": a2.button, "data-lf": l2.icon, onClick: (e2) => h2(e2, t5), part: c2.deleteIcon, ref: m2(d2, "deleteIcon") }, U$6("div", { class: v2(o2.deleteIcon._, o2.deleteIcon.icon), key: t5.id + "_delete" }));
 }, filter: () => {
   const { controller: t5, elements: r2, handlers: n2 } = i2(), { blocks: s2, compInstance: o2, lfAttributes: a2, manager: l2, parts: f2 } = t5.get, { refs: c2 } = r2, { filter: d2 } = n2, { lfUiSize: h2, lfUiState: m2 } = o2, { assignRef: p2, theme: v2 } = l2, { bemClass: b2 } = v2, u2 = v2.get.current().variables["--lf-icon-search"];
-  return U$5("lf-textfield", { class: b2(s2.list._, s2.list.filter), "data-lf": a2[m2], lfIcon: u2, lfLabel: "Search...", lfStretchX: true, lfStyling: "flat", lfUiSize: h2, lfUiState: m2, "onLf-textfield-event": d2, part: f2.filter, ref: p2(c2, "filter") });
+  return U$6("lf-textfield", { class: b2(s2.list._, s2.list.filter), "data-lf": a2[m2], lfIcon: u2, lfLabel: "Search...", lfStretchX: true, lfStyling: "flat", lfUiSize: h2, lfUiState: m2, "onLf-textfield-event": d2, part: f2.filter, ref: p2(c2, "filter") });
 }, icon(t5) {
   const { controller: r2, elements: n2 } = i2(), { blocks: s2, cyAttributes: o2, manager: a2, parts: l2 } = r2.get, { assets: f2, assignRef: c2 } = a2, { bemClass: d2 } = a2.theme, { refs: h2 } = n2, { style: m2 } = f2.get(`./assets/svg/${t5.icon}.svg`);
-  return U$5("div", { class: d2(s2.node._, s2.node.icon), "data-cy": o2.maskedSvg, part: l2.icon, ref: c2(h2, "icon"), style: m2 });
+  return U$6("div", { class: d2(s2.node._, s2.node.icon), "data-cy": o2.maskedSvg, part: l2.icon, ref: c2(h2, "icon"), style: m2 });
 }, node: (t5, r2, n2) => {
   const { controller: s2, elements: o2, handlers: a2 } = i2(), { blocks: l2, cyAttributes: f2, lfAttributes: c2, manager: d2, parts: h2 } = s2.get, { jsx: m2, refs: p2 } = o2, { assignRef: v2, data: b2, theme: u2 } = d2, { stringify: g3 } = b2.cell, { bemClass: k2 } = u2, y2 = String(t5.value).valueOf().trim().length > 0, w3 = s2.get.focused() === r2;
-  return U$5("div", { "aria-checked": n2, "aria-selected": n2, class: k2(l2.node._), "data-cy": f2.node, "data-index": r2.toString(), onBlur: (e2) => a2.node.blur(e2, t5, r2), onClick: (e2) => a2.node.click(e2, t5, r2), onFocus: (e2) => a2.node.focus(e2, t5, r2), onPointerDown: (e2) => a2.node.pointerdown(e2, t5, r2), part: h2.node, ref: v2(p2, "node"), role: "option", tabindex: n2 || w3 ? "0" : "-1", title: g3(t5.value) || g3(t5.description) }, U$5("div", { "data-cy": f2.rippleSurface, "data-lf": c2.rippleSurface, ref: (e2) => {
+  return U$6("div", { "aria-checked": n2, "aria-selected": n2, class: k2(l2.node._), "data-cy": f2.node, "data-index": r2.toString(), onBlur: (e2) => a2.node.blur(e2, t5, r2), onClick: (e2) => a2.node.click(e2, t5, r2), onFocus: (e2) => a2.node.focus(e2, t5, r2), onPointerDown: (e2) => a2.node.pointerdown(e2, t5, r2), part: h2.node, ref: v2(p2, "node"), role: "option", tabindex: n2 || w3 ? "0" : "-1", title: g3(t5.value) || g3(t5.description) }, U$6("div", { "data-cy": f2.rippleSurface, "data-lf": c2.rippleSurface, ref: (e2) => {
     e2 && p2.ripples.set(t5.id, e2);
-  } }), t5.icon && m2.icon(t5), U$5("span", { class: k2(l2.node._, l2.node.text) }, y2 && m2.title(t5), t5.description && m2.subtitle(t5)));
+  } }), t5.icon && m2.icon(t5), U$6("span", { class: k2(l2.node._, l2.node.text) }, y2 && m2.title(t5), t5.description && m2.subtitle(t5)));
 }, subtitle: (t5) => {
   const { controller: r2, elements: n2 } = i2(), { blocks: s2, manager: o2, parts: a2 } = r2.get, { refs: l2 } = n2, { assignRef: f2, theme: c2 } = o2, { bemClass: d2 } = c2;
-  return U$5("div", { class: d2(s2.node._, s2.node.subtitle), part: a2.subtitle, ref: f2(l2, "subtitle") }, t5.description);
+  return U$6("div", { class: d2(s2.node._, s2.node.subtitle), part: a2.subtitle, ref: f2(l2, "subtitle") }, t5.description);
 }, title: (t5) => {
   const { controller: r2, elements: n2 } = i2(), { blocks: s2, manager: o2, parts: a2 } = r2.get, { refs: l2 } = n2, { assignRef: f2, theme: c2 } = o2, { bemClass: d2 } = c2;
-  return U$5("div", { class: d2(s2.node._, s2.node.title), part: a2.title, ref: f2(l2, "title") }, String(t5.value).valueOf());
-} }), k$d = (e2) => ({ deleteIcon: async (i2, t5) => {
+  return U$6("div", { class: d2(s2.node._, s2.node.title), part: a2.title, ref: f2(l2, "title") }, String(t5.value).valueOf());
+} }), k$c = (e2) => ({ deleteIcon: async (i2, t5) => {
   var _a2, _b2;
   const { controller: r2 } = e2(), { compInstance: n2 } = r2.get, s2 = n2, o2 = (_b2 = (_a2 = s2.lfDataset) == null ? void 0 : _a2.nodes) == null ? void 0 : _b2.indexOf(t5);
   s2.onLfEvent(i2, "delete", t5, o2);
@@ -2202,37 +2519,37 @@ const g$b = (i2) => ({ deleteIcon: (t5) => {
   const { controller: n2 } = e2(), { compInstance: s2 } = n2.get;
   s2.onLfEvent(i2, "pointerdown", t5, r2);
 } } });
-var y$c, w$c, x$d, z$d, _$8, W$c, C$b, M$b, T$9, E$b, S$8, F$3, I$7, D$9, N$1, A$5, B$2, j$8, P$5, L$7, R$6, Y$3, V$4 = function(e2, i2, t5, r2) {
+var y$b, w$b, x$c, z$c, _$9, W$b, C$a, M$b, T$8, E$a, S$8, F$4, I$7, D$9, N$2, A$6, B$3, j$9, P$6, L$7, R$7, Y$4, V$5 = function(e2, i2, t5, r2) {
   if ("a" === t5 && !r2) throw new TypeError("Private accessor was defined without a getter");
   if ("function" == typeof i2 ? e2 !== i2 || !r2 : !i2.has(e2)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return "m" === t5 ? r2 : "a" === t5 ? r2.call(e2) : r2 ? r2.value : i2.get(e2);
-}, $$3 = function(e2, i2, t5, r2, n2) {
+}, $$4 = function(e2, i2, t5, r2, n2) {
   if ("function" == typeof i2 ? e2 !== i2 || true : !i2.has(e2)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
   return i2.set(e2, t5), t5;
 };
-const X = class {
+const X$1 = class X {
   constructor(e2) {
-    o$2(this, e2), this.lfEvent = G$3(this, "lf-list-event"), y$c.add(this), this.lfDataset = null, this.lfEmpty = "Empty data.", this.lfEnableDeletions = false, this.lfFilter = false, this.lfNavigation = true, this.lfRipple = true, this.lfSelectable = true, this.lfStyle = "", this.lfUiSize = "medium", this.lfUiState = "primary", this.lfValue = null, w$c.set(this, void 0), x$d.set(this, void 0), z$d.set(this, LF_LIST_BLOCKS), _$8.set(this, CY_ATTRIBUTES), W$c.set(this, LF_ATTRIBUTES), C$b.set(this, LF_LIST_PARTS), M$b.set(this, LF_STYLE_ID), T$9.set(this, LF_WRAPPER_ID), E$b.set(this, null), S$8.set(this, /* @__PURE__ */ new Set()), F$3.set(this, []), Y$3.set(this, (() => {
+    o$2(this, e2), this.lfEvent = G$4(this, "lf-list-event"), y$b.add(this), this.lfDataset = null, this.lfEmpty = "Empty data.", this.lfEnableDeletions = false, this.lfFilter = false, this.lfNavigation = true, this.lfRipple = true, this.lfSelectable = true, this.lfStyle = "", this.lfUiSize = "medium", this.lfUiState = "primary", this.lfValue = null, w$b.set(this, void 0), x$c.set(this, void 0), z$c.set(this, LF_LIST_BLOCKS), _$9.set(this, CY_ATTRIBUTES), W$b.set(this, LF_ATTRIBUTES), C$a.set(this, LF_LIST_PARTS), M$b.set(this, LF_STYLE_ID), T$8.set(this, LF_WRAPPER_ID), E$a.set(this, null), S$8.set(this, /* @__PURE__ */ new Set()), F$4.set(this, []), Y$4.set(this, (() => {
       var e3;
-      $$3(this, w$c, { controller: { get: { blocks: V$4(this, z$d, "f"), compInstance: this, cyAttributes: V$4(this, _$8, "f"), filterValue: () => this.filter, focused: () => this.focused, hiddenNodes: () => V$4(this, S$8, "f"), indexById: (e4) => {
+      $$4(this, w$b, { controller: { get: { blocks: V$5(this, z$c, "f"), compInstance: this, cyAttributes: V$5(this, _$9, "f"), filterValue: () => this.filter, focused: () => this.focused, hiddenNodes: () => V$5(this, S$8, "f"), indexById: (e4) => {
         var _a2, _b2;
         return (_b2 = (_a2 = this.lfDataset) == null ? void 0 : _a2.nodes) == null ? void 0 : _b2.findIndex(((i2) => i2.id === e4));
-      }, isDisabled: () => "disabled" === this.lfUiState, lfAttributes: V$4(this, W$c, "f"), manager: V$4(this, x$d, "f"), nodeById: (e4) => {
+      }, isDisabled: () => "disabled" === this.lfUiState, lfAttributes: V$5(this, W$b, "f"), manager: V$5(this, x$c, "f"), nodeById: (e4) => {
         var _a2, _b2;
         return (_b2 = (_a2 = this.lfDataset) == null ? void 0 : _a2.nodes) == null ? void 0 : _b2.find(((i2) => i2.id === e4));
-      }, parts: V$4(this, C$b, "f"), selected: () => this.selected }, set: { filter: { debounce: (e4) => V$4(this, y$c, "m", D$9).call(this, e4), setValue: (e4) => V$4(this, y$c, "m", I$7).call(this, e4) } } }, elements: { jsx: g$b(e3 = () => V$4(this, w$c, "f")), refs: { deleteIcon: null, filter: null, icon: null, node: null, ripples: /* @__PURE__ */ new Map(), subtitle: null, title: null } }, handlers: k$d(e3) });
+      }, parts: V$5(this, C$a, "f"), selected: () => this.selected }, set: { filter: { debounce: (e4) => V$5(this, y$b, "m", D$9).call(this, e4), setValue: (e4) => V$5(this, y$b, "m", I$7).call(this, e4) } } }, elements: { jsx: g$9(e3 = () => V$5(this, w$b, "f")), refs: { deleteIcon: null, filter: null, icon: null, node: null, ripples: /* @__PURE__ */ new Map(), subtitle: null, title: null } }, handlers: k$c(e3) });
     }));
   }
   onLfEvent(e2, i2, t5, r2 = 0) {
-    const { effects: n2 } = V$4(this, x$d, "f"), { ripples: s2 } = V$4(this, w$c, "f").elements.refs;
+    const { effects: n2 } = V$5(this, x$c, "f"), { ripples: s2 } = V$5(this, w$b, "f").elements.refs;
     switch (i2) {
       case "blur":
         this.focused = null;
         break;
       case "click":
         this.focused = r2;
-        const i3 = V$4(this, y$c, "m", A$5).call(this, r2);
-        V$4(this, y$c, "m", B$2).call(this, i3);
+        const i3 = V$5(this, y$b, "m", A$6).call(this, r2);
+        V$5(this, y$b, "m", B$3).call(this, i3);
         break;
       case "delete":
         r2 > -1 && (this.lfDataset.nodes.splice(r2, 1), this.refresh());
@@ -2246,7 +2563,7 @@ const X = class {
     this.lfEvent.emit({ comp: this, eventType: i2, id: this.rootElement.id, originalEvent: e2, node: t5 });
   }
   handleFilterToggle(e2) {
-    e2 || (V$4(this, E$b, "f") && (clearTimeout(V$4(this, E$b, "f")), $$3(this, E$b, null)), this.filter = "", $$3(this, S$8, /* @__PURE__ */ new Set()));
+    e2 || (V$5(this, E$a, "f") && (clearTimeout(V$5(this, E$a, "f")), $$4(this, E$a, null)), this.filter = "", $$4(this, S$8, /* @__PURE__ */ new Set()));
   }
   listenKeydown(e2) {
     const { focused: i2, lfNavigation: t5 } = this;
@@ -2258,19 +2575,19 @@ const X = class {
         e2.preventDefault(), e2.stopPropagation(), this.focusPrevious();
         break;
       case "Enter":
-        e2.preventDefault(), e2.stopPropagation(), V$4(this, y$c, "m", B$2).call(this, i2);
+        e2.preventDefault(), e2.stopPropagation(), V$5(this, y$b, "m", B$3).call(this, i2);
     }
   }
   async applyFilter(e2) {
-    V$4(this, y$c, "m", I$7).call(this, e2);
+    V$5(this, y$b, "m", I$7).call(this, e2);
   }
   async focusNext() {
-    const e2 = V$4(this, y$c, "m", L$7).call(this);
-    V$4(this, y$c, "m", R$6).call(this) ? this.focused = V$4(this, y$c, "m", P$5).call(this, e2) : this.focused++, this.focused > e2.length - 1 && (this.focused = 0), V$4(this, y$c, "m", j$8).call(this, this.focused);
+    const e2 = V$5(this, y$b, "m", L$7).call(this);
+    V$5(this, y$b, "m", R$7).call(this) ? this.focused = V$5(this, y$b, "m", P$6).call(this, e2) : this.focused++, this.focused > e2.length - 1 && (this.focused = 0), V$5(this, y$b, "m", j$9).call(this, this.focused);
   }
   async focusPrevious() {
-    const e2 = V$4(this, y$c, "m", L$7).call(this);
-    V$4(this, y$c, "m", R$6).call(this) ? this.focused = V$4(this, y$c, "m", P$5).call(this, e2, e2.length - 1) : this.focused--, this.focused < 0 && (this.focused = e2.length - 1), V$4(this, y$c, "m", j$8).call(this, this.focused);
+    const e2 = V$5(this, y$b, "m", L$7).call(this);
+    V$5(this, y$b, "m", R$7).call(this) ? this.focused = V$5(this, y$b, "m", P$6).call(this, e2, e2.length - 1) : this.focused--, this.focused < 0 && (this.focused = e2.length - 1), V$5(this, y$b, "m", j$9).call(this, this.focused);
   }
   async getDebugInfo() {
     return this.debugInfo;
@@ -2286,17 +2603,17 @@ const X = class {
     vt$1(this);
   }
   async selectNode(e2) {
-    void 0 === e2 && (e2 = this.focused), V$4(this, y$c, "m", B$2).call(this, e2);
+    void 0 === e2 && (e2 = this.focused), V$5(this, y$b, "m", B$3).call(this, e2);
   }
   async selectNodeById(e2) {
     var _a2;
     if (!((_a2 = this.lfDataset) == null ? void 0 : _a2.nodes)) return;
     const i2 = this.lfDataset.nodes.findIndex(((i3) => i3.id === e2));
-    V$4(this, y$c, "m", B$2).call(this, i2);
+    V$5(this, y$b, "m", B$3).call(this, i2);
   }
   async setFilter(e2) {
-    const { refs: i2 } = V$4(this, w$c, "f").elements;
-    V$4(this, y$c, "m", I$7).call(this, e2), await i2.filter.setValue(e2);
+    const { refs: i2 } = V$5(this, w$b, "f").elements;
+    V$5(this, y$b, "m", I$7).call(this, e2), await i2.filter.setValue(e2);
   }
   async unmount(e2 = 0) {
     setTimeout((() => {
@@ -2304,80 +2621,80 @@ const X = class {
     }), e2);
   }
   connectedCallback() {
-    V$4(this, x$d, "f") && V$4(this, x$d, "f").theme.register(this);
+    V$5(this, x$c, "f") && V$5(this, x$c, "f").theme.register(this);
   }
   async componentWillLoad() {
-    $$3(this, x$d, await a(this)), V$4(this, Y$3, "f").call(this), this.lfValue && "number" == typeof this.lfValue && (this.selected = this.lfValue);
+    $$4(this, x$c, await a(this)), V$5(this, Y$4, "f").call(this), this.lfValue && "number" == typeof this.lfValue && (this.selected = this.lfValue);
   }
   componentDidLoad() {
-    const { debug: e2 } = V$4(this, x$d, "f");
+    const { debug: e2 } = V$5(this, x$c, "f");
     this.onLfEvent(new CustomEvent("ready"), "ready"), e2.info.update(this, "did-load");
   }
   componentWillRender() {
-    const { info: e2 } = V$4(this, x$d, "f").debug;
+    const { info: e2 } = V$5(this, x$c, "f").debug;
     e2.update(this, "will-render");
   }
   componentDidRender() {
-    const { info: e2 } = V$4(this, x$d, "f").debug;
+    const { info: e2 } = V$5(this, x$c, "f").debug;
     e2.update(this, "did-render");
   }
   render() {
     var _a2, _b2;
-    const { bemClass: i2, setLfStyle: t5 } = V$4(this, x$d, "f").theme, { controller: r2, elements: s2 } = V$4(this, w$c, "f"), { get: o2 } = r2, { jsx: a2 } = s2, { emptyData: l2, list: f2 } = V$4(this, z$d, "f"), { lfDataset: c2, lfEmpty: d2, lfFilter: h2, lfSelectable: m2, lfStyle: p2 } = this;
-    $$3(this, F$3, []);
-    const v2 = ((_a2 = c2 == null ? void 0 : c2.nodes) == null ? void 0 : _a2.filter(((e2) => !V$4(this, S$8, "f").has(e2)))) || [], b2 = !((_b2 = c2 == null ? void 0 : c2.nodes) == null ? void 0 : _b2.length), u2 = !b2 && 0 === v2.length;
-    return U$5(A$9, { key: "8f47b06ba3eacbce97ff4f5eb638cbc061edcb0a" }, p2 && U$5("style", { key: "d8cbd09a948e3b6cc655b825f5616be969f5ae5f", id: V$4(this, M$b, "f") }, t5(this)), U$5("div", { key: "fdb3c5ab47ea68563a00c211bf48dc9ee291ebc0", id: V$4(this, T$9, "f") }, h2 && a2.filter(), b2 || u2 ? U$5("div", { class: i2(l2._), part: V$4(this, C$b, "f").emptyData }, U$5("div", { class: i2(l2._, l2.text) }, u2 ? "No items match your filter." : d2)) : U$5("ul", { "aria-multiselectable": "false", class: i2(f2._, null, { empty: b2, selectable: m2 }), part: V$4(this, C$b, "f").list, role: "listbox" }, v2.map(((t6, r3) => {
+    const { bemClass: i2, setLfStyle: t5 } = V$5(this, x$c, "f").theme, { controller: r2, elements: s2 } = V$5(this, w$b, "f"), { get: o2 } = r2, { jsx: a2 } = s2, { emptyData: l2, list: f2 } = V$5(this, z$c, "f"), { lfDataset: c2, lfEmpty: d2, lfFilter: h2, lfSelectable: m2, lfStyle: p2 } = this;
+    $$4(this, F$4, []);
+    const v2 = ((_a2 = c2 == null ? void 0 : c2.nodes) == null ? void 0 : _a2.filter(((e2) => !V$5(this, S$8, "f").has(e2)))) || [], b2 = !((_b2 = c2 == null ? void 0 : c2.nodes) == null ? void 0 : _b2.length), u2 = !b2 && 0 === v2.length;
+    return U$6(A$a, { key: "8f47b06ba3eacbce97ff4f5eb638cbc061edcb0a" }, p2 && U$6("style", { key: "d8cbd09a948e3b6cc655b825f5616be969f5ae5f", id: V$5(this, M$b, "f") }, t5(this)), U$6("div", { key: "fdb3c5ab47ea68563a00c211bf48dc9ee291ebc0", id: V$5(this, T$8, "f") }, h2 && a2.filter(), b2 || u2 ? U$6("div", { class: i2(l2._), part: V$5(this, C$a, "f").emptyData }, U$6("div", { class: i2(l2._, l2.text) }, u2 ? "No items match your filter." : d2)) : U$6("ul", { "aria-multiselectable": "false", class: i2(f2._, null, { empty: b2, selectable: m2 }), part: V$5(this, C$a, "f").list, role: "listbox" }, v2.map(((t6, r3) => {
       const n2 = o2.indexById(t6.id) === this.selected;
-      return U$5("li", { class: i2(f2._, f2.item, { focused: r3 === this.focused, "has-description": !!t6.description, selected: n2 }), "data-lf": V$4(this, W$c, "f")[this.lfUiState], key: t6.id, ref: (e2) => {
-        e2 && !V$4(this, F$3, "f").includes(e2) && V$4(this, F$3, "f").push(e2);
+      return U$6("li", { class: i2(f2._, f2.item, { focused: r3 === this.focused, "has-description": !!t6.description, selected: n2 }), "data-lf": V$5(this, W$b, "f")[this.lfUiState], key: t6.id, ref: (e2) => {
+        e2 && !V$5(this, F$4, "f").includes(e2) && V$5(this, F$4, "f").push(e2);
       } }, this.lfEnableDeletions && a2.deleteIcon(t6), a2.node(t6, r3, n2));
     })))));
   }
   disconnectedCallback() {
-    V$4(this, E$b, "f") && (clearTimeout(V$4(this, E$b, "f")), $$3(this, E$b, null)), V$4(this, x$d, "f").theme.unregister(this);
+    V$5(this, E$a, "f") && (clearTimeout(V$5(this, E$a, "f")), $$4(this, E$a, null)), V$5(this, x$c, "f").theme.unregister(this);
   }
   get rootElement() {
-    return q$4(this);
+    return q$5(this);
   }
   static get watchers() {
     return { lfFilter: ["handleFilterToggle"] };
   }
 };
-w$c = /* @__PURE__ */ new WeakMap(), x$d = /* @__PURE__ */ new WeakMap(), z$d = /* @__PURE__ */ new WeakMap(), _$8 = /* @__PURE__ */ new WeakMap(), W$c = /* @__PURE__ */ new WeakMap(), C$b = /* @__PURE__ */ new WeakMap(), M$b = /* @__PURE__ */ new WeakMap(), T$9 = /* @__PURE__ */ new WeakMap(), E$b = /* @__PURE__ */ new WeakMap(), S$8 = /* @__PURE__ */ new WeakMap(), F$3 = /* @__PURE__ */ new WeakMap(), Y$3 = /* @__PURE__ */ new WeakMap(), y$c = /* @__PURE__ */ new WeakSet(), I$7 = function(e2) {
+w$b = /* @__PURE__ */ new WeakMap(), x$c = /* @__PURE__ */ new WeakMap(), z$c = /* @__PURE__ */ new WeakMap(), _$9 = /* @__PURE__ */ new WeakMap(), W$b = /* @__PURE__ */ new WeakMap(), C$a = /* @__PURE__ */ new WeakMap(), M$b = /* @__PURE__ */ new WeakMap(), T$8 = /* @__PURE__ */ new WeakMap(), E$a = /* @__PURE__ */ new WeakMap(), S$8 = /* @__PURE__ */ new WeakMap(), F$4 = /* @__PURE__ */ new WeakMap(), Y$4 = /* @__PURE__ */ new WeakMap(), y$b = /* @__PURE__ */ new WeakSet(), I$7 = function(e2) {
   var _a2;
-  this.filter = e2, $$3(this, S$8, /* @__PURE__ */ new Set());
+  this.filter = e2, $$4(this, S$8, /* @__PURE__ */ new Set());
   const i2 = ((_a2 = this.lfDataset) == null ? void 0 : _a2.nodes) || [];
-  if (e2.trim() && i2) for (const t5 of i2) V$4(this, y$c, "m", N$1).call(this, t5).toLowerCase().includes(e2.toLowerCase()) || V$4(this, S$8, "f").add(t5);
+  if (e2.trim() && i2) for (const t5 of i2) V$5(this, y$b, "m", N$2).call(this, t5).toLowerCase().includes(e2.toLowerCase()) || V$5(this, S$8, "f").add(t5);
 }, D$9 = function(e2) {
-  V$4(this, E$b, "f") && clearTimeout(V$4(this, E$b, "f")), $$3(this, E$b, setTimeout((() => V$4(this, y$c, "m", I$7).call(this, e2)), 300));
-}, N$1 = function(e2) {
-  const { stringify: i2 } = V$4(this, x$d, "f").data.cell;
+  V$5(this, E$a, "f") && clearTimeout(V$5(this, E$a, "f")), $$4(this, E$a, setTimeout((() => V$5(this, y$b, "m", I$7).call(this, e2)), 300));
+}, N$2 = function(e2) {
+  const { stringify: i2 } = V$5(this, x$c, "f").data.cell;
   return `${i2(e2.value)} ${i2(e2.description)}`.trim();
-}, A$5 = function(e2) {
+}, A$6 = function(e2) {
   var _a2, _b2;
-  const i2 = V$4(this, y$c, "m", L$7).call(this)[e2];
+  const i2 = V$5(this, y$b, "m", L$7).call(this)[e2];
   return i2 ? ((_b2 = (_a2 = this.lfDataset) == null ? void 0 : _a2.nodes) == null ? void 0 : _b2.findIndex(((e3) => e3.id === i2.id))) ?? -1 : -1;
-}, B$2 = function(e2) {
+}, B$3 = function(e2) {
   this.lfSelectable && null != e2 && !isNaN(e2) && (this.selected = e2);
-}, j$8 = function(e2) {
+}, j$9 = function(e2) {
   var _a2;
   const i2 = (_a2 = this.rootElement.shadowRoot) == null ? void 0 : _a2.querySelector(`[data-index="${e2}"]`);
   i2 && i2.focus();
-}, P$5 = function(e2, i2 = 0) {
+}, P$6 = function(e2, i2 = 0) {
   var _a2, _b2;
   if (null != this.selected) {
     const i3 = (_b2 = (_a2 = this.lfDataset) == null ? void 0 : _a2.nodes) == null ? void 0 : _b2[this.selected];
-    if (i3 && !V$4(this, S$8, "f").has(i3)) return e2.findIndex(((e3) => e3.id === i3.id));
+    if (i3 && !V$5(this, S$8, "f").has(i3)) return e2.findIndex(((e3) => e3.id === i3.id));
   }
   return i2;
 }, L$7 = function() {
   var _a2, _b2;
-  return ((_b2 = (_a2 = this.lfDataset) == null ? void 0 : _a2.nodes) == null ? void 0 : _b2.filter(((e2) => !V$4(this, S$8, "f").has(e2)))) || [];
-}, R$6 = function() {
+  return ((_b2 = (_a2 = this.lfDataset) == null ? void 0 : _a2.nodes) == null ? void 0 : _b2.filter(((e2) => !V$5(this, S$8, "f").has(e2)))) || [];
+}, R$7 = function() {
   return isNaN(this.focused) || null == this.focused;
-}, X.style = '::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=ripple]{animation-duration:var(--lf-ui-duration-ripple, 675ms);animation-fill-mode:forwards;animation-name:lf-ripple;animation-timing-function:var(--lf-ui-timing-ripple, ease-out);background:var(--lf-ui-ripple-background, var(--lf-color-primary));border-radius:var(--lf-ui-radius-ripple, 50%);height:var(--lf-ui-ripple-height, 100%);left:var(--lf-ui-ripple-x, 50%);opacity:var(--lf-ui-opacity-ripple, 0.5);pointer-events:none;position:absolute;top:var(--lf-ui-ripple-y, 50%);transform:scale(0);width:var(--lf-ui-ripple-width, 100%)}@keyframes lf-ripple{from{transform:scale(0)}to{opacity:0;transform:scale(4)}}[data-lf=ripple-surface]{cursor:pointer;height:100%;left:0;overflow:hidden;position:absolute;top:0;width:100%}[data-lf=danger]{--lf-list-color-primary:var(\n    --lf-list-color-danger,\n    var(--lf-color-danger)\n  );--lf-list-color-on-primary:var(\n    --lf-list-color-danger,\n    var(--lf-color-on-danger)\n  )}[data-lf=disabled]{opacity:var(--lf-list-ui-opacity-disabled, var(--lf-ui-opacity-disabled));pointer-events:none}[data-lf=info]{--lf-list-color-primary:var(\n    --lf-list-color-info,\n    var(--lf-color-info)\n  );--lf-list-color-on-primary:var(\n    --lf-list-color-info,\n    var(--lf-color-on-info)\n  )}[data-lf=secondary]{--lf-list-color-primary:var(\n    --lf-list-color-secondary,\n    var(--lf-color-secondary)\n  );--lf-list-color-on-primary:var(\n    --lf-list-color-secondary,\n    var(--lf-color-on-secondary)\n  )}[data-lf=success]{--lf-list-color-primary:var(\n    --lf-list-color-success,\n    var(--lf-color-success)\n  );--lf-list-color-on-primary:var(\n    --lf-list-color-success,\n    var(--lf-color-on-success)\n  )}[data-lf=warning]{--lf-list-color-primary:var(\n    --lf-list-color-warning,\n    var(--lf-color-warning)\n  );--lf-list-color-on-primary:var(\n    --lf-list-color-warning,\n    var(--lf-color-on-warning)\n  )}:host{display:block;font-family:var(--lf-list-font-family, var(--lf-font-family-primary));font-size:var(--lf-list-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-list-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-list-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-list-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-list-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-list-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-list-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-list-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{width:100%;height:100%;outline:none}.list{border:0;border-style:solid;border-color:rgba(var(--lf-list-border-color, var(--lf-color-border)), 1);border-width:1px;border-radius:var(--lf-list-border-radius, var(--lf-ui-border-radius));background-color:rgba(var(--lf-list-color-bg, var(--lf-color-bg)), 0.275);color:rgb(var(--lf-list-color-on-bg, var(--lf-color-on-bg)));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);width:100%;height:100%;box-sizing:border-box;list-style-type:none;margin:0;overflow:auto;padding:0.5em 0}.list--empty{padding:0}.list--selectable .list__item{cursor:pointer;user-select:none}.list:not(.list.list--selectable) .list__item{cursor:default;pointer-events:none}.list__filter{background-color:rgba(var(--lf-list-color-surface, var(--lf-color-surface)), 0.875);color:rgb(var(--lf-list-color-on-surface, var(--lf-color-on-surface)));backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px);position:sticky;top:0;z-index:1}.list__item{transition:all 150ms cubic-bezier(0.42, 0, 0.58, 1);display:flex;height:var(--lf-list-item-height, 2.5em);width:100%}.list__item:hover{background-color:rgba(var(--lf-list-color-on-bg, var(--lf-color-on-bg)), 0.125);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.list__item:hover .delete{width:1.5em}.list__item--has-description{height:var(--lf-list-item-with-description-height, 3.6em)}.list__item--focused{background-color:rgba(var(--lf-list-color-primary, var(--lf-color-primary)), 0.225);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.list__item--selected{background-color:rgba(var(--lf-list-color-primary, var(--lf-color-primary)), 0.325);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.list__item--selected:hover{background-color:rgba(var(--lf-list-color-primary, var(--lf-color-primary)), 0.475);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.delete{background-color:rgba(var(--lf-list-color-danger, var(--lf-color-danger)), 0.575);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:all 150ms cubic-bezier(0.42, 0, 0.58, 1);align-content:center;box-sizing:border-box;opacity:0.75;overflow:hidden;width:0}.delete:hover{opacity:1}.delete__icon{-webkit-mask:var(--lf-icon-clear);mask:var(--lf-icon-clear);-webkit-mask-position:center;-webkit-mask-repeat:no-repeat;-webkit-mask-size:contain;mask-position:center;mask-repeat:no-repeat;mask-size:contain;background-color:rgba(var(--lf-list-color-on-danger, var(--lf-color-on-danger)), 1);height:1.5em;width:1.5em;overflow:hidden;margin:0}.node{transition:all 150ms cubic-bezier(0.42, 0, 0.58, 1);align-items:center;box-sizing:border-box;display:flex;justify-content:flex-start;padding:var(--lf-list-item-padding, 0 0.75em);position:relative;outline:none;overflow:hidden;width:100%}.node__title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:1em;font-weight:400;line-height:1.6em;letter-spacing:0em;margin-bottom:0.5em;margin-left:1.5em;display:block;margin-bottom:-1.5em;margin-left:0;margin-top:0}.node__title:before{content:"";display:inline-block;height:1.5em;vertical-align:0;width:0}.node__title:after{content:"";display:inline-block;width:0;height:2em;vertical-align:-2em}.node__subtitle{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:0.875em;font-weight:500;line-height:1.375em;letter-spacing:0.01em;display:block;margin-top:0;opacity:0.75;padding-bottom:0.5em}.node__icon{background-color:rgba(var(--lf-list-color-on-bg, var(--lf-color-on-bg)), 1);height:1.5em;width:1.5em;overflow:hidden;margin:0 0.75em 0 0}.node__text{overflow:hidden;width:100%}.empty-data{border:0;border-style:solid;border-color:rgba(var(--lf-list-border-color, var(--lf-color-border)), 1);border-width:1px;border-radius:var(--lf-list-border-radius, var(--lf-ui-border-radius));background-color:rgba(var(--lf-list-color-bg, var(--lf-color-bg)), 0.275);color:rgb(var(--lf-list-color-on-bg, var(--lf-color-on-bg)));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);width:100%;height:100%;font-size:1em;font-weight:400;line-height:1.6em;letter-spacing:0em;margin-bottom:1em;align-items:center;box-sizing:border-box;display:flex;justify-content:center}';
-const Z$1 = { 1: { className: "spinner-bar-v1", elements: () => [] }, 2: { className: "spinner-bar-v2", elements: () => [] }, 3: { className: "spinner-bar-v3", elements: (i2) => [U$5("div", { class: "progress-bar", style: { width: `${i2}%` } })] } }, O$3 = { 7: { className: "spinner-v7", elements: () => Array(6).fill(0).map((() => U$5("div", { class: "sk-spinner-v7-dot" }))) }, 9: { className: "spinner-v9", elements: () => [U$5("div", { class: "sk-spinner-v9-bounce1" }), U$5("div", { class: "sk-spinner-v9-bounce2" })] }, 10: { className: "spinner-v10", elements: () => [U$5("div", { class: "sk-spinner-v10-cube1" }), U$5("div", { class: "sk-spinner-v10-cube2" })] }, 12: { className: "spinner-v12", elements: () => [U$5("div", { class: "sk-spinner-v12-dot1" }), U$5("div", { class: "sk-spinner-v12-dot2" })] }, 13: { className: "spinner-v13", elements: () => Array(9).fill(0).map(((i2, t5) => U$5("div", { class: `sk-spinner-v13-cube sk-spinner-v13-cube${t5 + 1}` }))) }, 14: { className: "spinner-v14", elements: () => Array(12).fill(0).map(((i2, t5) => U$5("div", { class: `sk-spinner-v14-circle${t5 + 1} sk-spinner-v14-circle` }))) } };
-var U$1, J, K, q$2, H$3, G$1, Q, ee$1, ie$1 = function(e2, i2, t5, r2) {
+}, X$1.style = '::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=ripple]{animation-duration:var(--lf-ui-duration-ripple, 675ms);animation-fill-mode:forwards;animation-name:lf-ripple;animation-timing-function:var(--lf-ui-timing-ripple, ease-out);background:var(--lf-ui-ripple-background, var(--lf-color-primary));border-radius:var(--lf-ui-radius-ripple, 50%);height:var(--lf-ui-ripple-height, 100%);left:var(--lf-ui-ripple-x, 50%);opacity:var(--lf-ui-opacity-ripple, 0.5);pointer-events:none;position:absolute;top:var(--lf-ui-ripple-y, 50%);transform:scale(0);width:var(--lf-ui-ripple-width, 100%)}@keyframes lf-ripple{from{transform:scale(0)}to{opacity:0;transform:scale(4)}}[data-lf=ripple-surface]{cursor:pointer;height:100%;left:0;overflow:hidden;position:absolute;top:0;width:100%}[data-lf=danger]{--lf-list-color-primary:var(\n    --lf-list-color-danger,\n    var(--lf-color-danger)\n  );--lf-list-color-on-primary:var(\n    --lf-list-color-danger,\n    var(--lf-color-on-danger)\n  )}[data-lf=disabled]{opacity:var(--lf-list-ui-opacity-disabled, var(--lf-ui-opacity-disabled));pointer-events:none}[data-lf=info]{--lf-list-color-primary:var(\n    --lf-list-color-info,\n    var(--lf-color-info)\n  );--lf-list-color-on-primary:var(\n    --lf-list-color-info,\n    var(--lf-color-on-info)\n  )}[data-lf=secondary]{--lf-list-color-primary:var(\n    --lf-list-color-secondary,\n    var(--lf-color-secondary)\n  );--lf-list-color-on-primary:var(\n    --lf-list-color-secondary,\n    var(--lf-color-on-secondary)\n  )}[data-lf=success]{--lf-list-color-primary:var(\n    --lf-list-color-success,\n    var(--lf-color-success)\n  );--lf-list-color-on-primary:var(\n    --lf-list-color-success,\n    var(--lf-color-on-success)\n  )}[data-lf=warning]{--lf-list-color-primary:var(\n    --lf-list-color-warning,\n    var(--lf-color-warning)\n  );--lf-list-color-on-primary:var(\n    --lf-list-color-warning,\n    var(--lf-color-on-warning)\n  )}:host{display:block;font-family:var(--lf-list-font-family, var(--lf-font-family-primary));font-size:var(--lf-list-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-list-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-list-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-list-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-list-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-list-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-list-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-list-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{width:100%;height:100%;outline:none}.list{border:0;border-style:solid;border-color:rgba(var(--lf-list-border-color, var(--lf-color-border)), 1);border-width:1px;border-radius:var(--lf-list-border-radius, var(--lf-ui-border-radius));background-color:rgba(var(--lf-list-color-bg, var(--lf-color-bg)), 0.275);color:rgb(var(--lf-list-color-on-bg, var(--lf-color-on-bg)));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);width:100%;height:100%;box-sizing:border-box;list-style-type:none;margin:0;overflow:auto;padding:0.5em 0}.list--empty{padding:0}.list--selectable .list__item{cursor:pointer;user-select:none}.list:not(.list.list--selectable) .list__item{cursor:default;pointer-events:none}.list__filter{background-color:rgba(var(--lf-list-color-surface, var(--lf-color-surface)), 0.875);color:rgb(var(--lf-list-color-on-surface, var(--lf-color-on-surface)));backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px);position:sticky;top:0;z-index:1}.list__item{transition:all 150ms cubic-bezier(0.42, 0, 0.58, 1);display:flex;height:var(--lf-list-item-height, 2.5em);width:100%}.list__item:hover{background-color:rgba(var(--lf-list-color-on-bg, var(--lf-color-on-bg)), 0.125);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.list__item:hover .delete{width:1.5em}.list__item--has-description{height:var(--lf-list-item-with-description-height, 3.6em)}.list__item--focused{background-color:rgba(var(--lf-list-color-primary, var(--lf-color-primary)), 0.225);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.list__item--selected{background-color:rgba(var(--lf-list-color-primary, var(--lf-color-primary)), 0.325);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.list__item--selected:hover{background-color:rgba(var(--lf-list-color-primary, var(--lf-color-primary)), 0.475);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.delete{background-color:rgba(var(--lf-list-color-danger, var(--lf-color-danger)), 0.575);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:all 150ms cubic-bezier(0.42, 0, 0.58, 1);align-content:center;box-sizing:border-box;opacity:0.75;overflow:hidden;width:0}.delete:hover{opacity:1}.delete__icon{-webkit-mask:var(--lf-icon-clear);mask:var(--lf-icon-clear);-webkit-mask-position:center;-webkit-mask-repeat:no-repeat;-webkit-mask-size:contain;mask-position:center;mask-repeat:no-repeat;mask-size:contain;background-color:rgba(var(--lf-list-color-on-danger, var(--lf-color-on-danger)), 1);height:1.5em;width:1.5em;overflow:hidden;margin:0}.node{transition:all 150ms cubic-bezier(0.42, 0, 0.58, 1);align-items:center;box-sizing:border-box;display:flex;justify-content:flex-start;padding:var(--lf-list-item-padding, 0 0.75em);position:relative;outline:none;overflow:hidden;width:100%}.node__title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:1em;font-weight:400;line-height:1.6em;letter-spacing:0em;margin-bottom:0.5em;margin-left:1.5em;display:block;margin-bottom:-1.5em;margin-left:0;margin-top:0}.node__title:before{content:"";display:inline-block;height:1.5em;vertical-align:0;width:0}.node__title:after{content:"";display:inline-block;width:0;height:2em;vertical-align:-2em}.node__subtitle{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:0.875em;font-weight:500;line-height:1.375em;letter-spacing:0.01em;display:block;margin-top:0;opacity:0.75;padding-bottom:0.5em}.node__icon{background-color:rgba(var(--lf-list-color-on-bg, var(--lf-color-on-bg)), 1);height:1.5em;width:1.5em;overflow:hidden;margin:0 0.75em 0 0}.node__text{overflow:hidden;width:100%}.empty-data{border:0;border-style:solid;border-color:rgba(var(--lf-list-border-color, var(--lf-color-border)), 1);border-width:1px;border-radius:var(--lf-list-border-radius, var(--lf-ui-border-radius));background-color:rgba(var(--lf-list-color-bg, var(--lf-color-bg)), 0.275);color:rgb(var(--lf-list-color-on-bg, var(--lf-color-on-bg)));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);width:100%;height:100%;font-size:1em;font-weight:400;line-height:1.6em;letter-spacing:0em;margin-bottom:1em;align-items:center;box-sizing:border-box;display:flex;justify-content:center}';
+const Z$1 = { 1: { className: "spinner-bar-v1", elements: () => [] }, 2: { className: "spinner-bar-v2", elements: () => [] }, 3: { className: "spinner-bar-v3", elements: (i2) => [U$6("div", { class: "progress-bar", style: { width: `${i2}%` } })] } }, O$4 = { 7: { className: "spinner-v7", elements: () => Array(6).fill(0).map((() => U$6("div", { class: "sk-spinner-v7-dot" }))) }, 9: { className: "spinner-v9", elements: () => [U$6("div", { class: "sk-spinner-v9-bounce1" }), U$6("div", { class: "sk-spinner-v9-bounce2" })] }, 10: { className: "spinner-v10", elements: () => [U$6("div", { class: "sk-spinner-v10-cube1" }), U$6("div", { class: "sk-spinner-v10-cube2" })] }, 12: { className: "spinner-v12", elements: () => [U$6("div", { class: "sk-spinner-v12-dot1" }), U$6("div", { class: "sk-spinner-v12-dot2" })] }, 13: { className: "spinner-v13", elements: () => Array(9).fill(0).map(((i2, t5) => U$6("div", { class: `sk-spinner-v13-cube sk-spinner-v13-cube${t5 + 1}` }))) }, 14: { className: "spinner-v14", elements: () => Array(12).fill(0).map(((i2, t5) => U$6("div", { class: `sk-spinner-v14-circle${t5 + 1} sk-spinner-v14-circle` }))) } };
+var U$2, J$1, K$1, q$3, H$4, G$2, Q$1, ee$1, ie$1 = function(e2, i2, t5, r2) {
   if ("a" === t5 && !r2) throw new TypeError("Private accessor was defined without a getter");
   if ("function" == typeof i2 ? e2 !== i2 || !r2 : !i2.has(e2)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return "m" === t5 ? r2 : "a" === t5 ? r2.call(e2) : r2 ? r2.value : i2.get(e2);
@@ -2387,16 +2704,16 @@ var U$1, J, K, q$2, H$3, G$1, Q, ee$1, ie$1 = function(e2, i2, t5, r2) {
 };
 const re$1 = class re {
   constructor(e2) {
-    o$2(this, e2), this.lfEvent = G$3(this, "lf-spinner-event"), U$1.add(this), this.bigWait = false, this.progress = 0, this.lfActive = false, this.lfBarVariant = false, this.lfDimensions = "", this.lfFader = false, this.lfFaderTimeout = 3500, this.lfFullScreen = false, this.lfLayout = 1, this.lfStyle = "", this.lfTimeout = 0, J.set(this, void 0), K.set(this, LF_STYLE_ID), q$2.set(this, LF_WRAPPER_ID), H$3.set(this, void 0), G$1.set(this, void 0);
+    o$2(this, e2), this.lfEvent = G$4(this, "lf-spinner-event"), U$2.add(this), this.bigWait = false, this.progress = 0, this.lfActive = false, this.lfBarVariant = false, this.lfDimensions = "", this.lfFader = false, this.lfFaderTimeout = 3500, this.lfFullScreen = false, this.lfLayout = 1, this.lfStyle = "", this.lfTimeout = 0, J$1.set(this, void 0), K$1.set(this, LF_STYLE_ID), q$3.set(this, LF_WRAPPER_ID), H$4.set(this, void 0), G$2.set(this, void 0);
   }
   onFaderChange() {
-    ie$1(this, U$1, "m", ee$1).call(this);
+    ie$1(this, U$2, "m", ee$1).call(this);
   }
   lfBarVariantChanged(e2) {
-    ie$1(this, J, "f") && (e2 && this.lfTimeout ? ie$1(this, U$1, "m", Q).call(this) : (this.progress = 0, cancelAnimationFrame(ie$1(this, H$3, "f"))));
+    ie$1(this, J$1, "f") && (e2 && this.lfTimeout ? ie$1(this, U$2, "m", Q$1).call(this) : (this.progress = 0, cancelAnimationFrame(ie$1(this, H$4, "f"))));
   }
   lfTimeoutChanged(e2, i2) {
-    ie$1(this, J, "f") && e2 !== i2 && this.lfBarVariant && ie$1(this, U$1, "m", Q).call(this);
+    ie$1(this, J$1, "f") && e2 !== i2 && this.lfBarVariant && ie$1(this, U$2, "m", Q$1).call(this);
   }
   onLfEvent(e2, i2) {
     this.lfEvent.emit({ comp: this, id: this.rootElement.id, originalEvent: e2, eventType: i2 });
@@ -2420,47 +2737,47 @@ const re$1 = class re {
     }), e2);
   }
   connectedCallback() {
-    ie$1(this, J, "f") && ie$1(this, J, "f").theme.register(this);
+    ie$1(this, J$1, "f") && ie$1(this, J$1, "f").theme.register(this);
   }
   async componentWillLoad() {
-    te$1(this, J, await a(this));
+    te$1(this, J$1, await a(this));
   }
   componentDidLoad() {
-    const { info: e2 } = ie$1(this, J, "f").debug, { lfBarVariant: i2, lfTimeout: t5 } = this;
-    this.onLfEvent(new CustomEvent("ready"), "ready"), e2.update(this, "did-load"), i2 && t5 && ie$1(this, U$1, "m", Q).call(this);
+    const { info: e2 } = ie$1(this, J$1, "f").debug, { lfBarVariant: i2, lfTimeout: t5 } = this;
+    this.onLfEvent(new CustomEvent("ready"), "ready"), e2.update(this, "did-load"), i2 && t5 && ie$1(this, U$2, "m", Q$1).call(this);
   }
   componentWillRender() {
-    const { info: e2 } = ie$1(this, J, "f").debug;
+    const { info: e2 } = ie$1(this, J$1, "f").debug;
     e2.update(this, "will-render");
   }
   componentDidRender() {
-    const { info: e2 } = ie$1(this, J, "f").debug;
+    const { info: e2 } = ie$1(this, J$1, "f").debug;
     e2.update(this, "did-render");
   }
   render() {
-    const { setLfStyle: i2 } = ie$1(this, J, "f").theme, { bigWait: t5, lfBarVariant: r2, lfDimensions: s2, lfFullScreen: o2, lfLayout: a2, lfStyle: l2, progress: f2 } = this, c2 = { height: o2 ? void 0 : "100%", width: o2 ? void 0 : "100%", fontSize: s2 || (r2 ? "0.25em" : ".875em") }, d2 = r2 ? Z$1[a2] : O$3[a2], h2 = r2 ? "loading-wrapper-master-bar" : "loading-wrapper-master-spinner", m2 = { "spinner-version": !r2, "loading-wrapper-big-wait": t5 }, p2 = (d2 == null ? void 0 : d2.className) || `spinner-${r2 ? "bar-v" : "v"}${a2}`, v2 = (d2 == null ? void 0 : d2.elements(f2)) || [];
-    return U$5(A$9, { key: "3a60405d60c07106ce8aa8d72a6e4e1077bbfa19", style: c2 }, l2 && U$5("style", { key: "35c40e3784b1458064b22120b28e0a6210220fd7", id: ie$1(this, K, "f") }, i2(this)), U$5("div", { key: "f8acd5159da788802cbe09b1d7cfdb41924a8e0a", id: ie$1(this, q$2, "f"), style: c2 }, U$5("div", { key: "7c03d1a8a6963f797c7a3dd5329f032b9aa6ccae", id: "loading-wrapper-master", class: { ...m2 }, style: c2 }, U$5("div", { key: "671d774553a292803925752917ee6cf7fdbee5ab", id: h2, style: c2 }, U$5("div", { key: "b9fca8a2bcc89b3804b073fa59b0d4ae279b050f", class: p2 }, v2)))));
+    const { setLfStyle: i2 } = ie$1(this, J$1, "f").theme, { bigWait: t5, lfBarVariant: r2, lfDimensions: s2, lfFullScreen: o2, lfLayout: a2, lfStyle: l2, progress: f2 } = this, c2 = { height: o2 ? void 0 : "100%", width: o2 ? void 0 : "100%", fontSize: s2 || (r2 ? "0.25em" : ".875em") }, d2 = r2 ? Z$1[a2] : O$4[a2], h2 = r2 ? "loading-wrapper-master-bar" : "loading-wrapper-master-spinner", m2 = { "spinner-version": !r2, "loading-wrapper-big-wait": t5 }, p2 = (d2 == null ? void 0 : d2.className) || `spinner-${r2 ? "bar-v" : "v"}${a2}`, v2 = (d2 == null ? void 0 : d2.elements(f2)) || [];
+    return U$6(A$a, { key: "3a60405d60c07106ce8aa8d72a6e4e1077bbfa19", style: c2 }, l2 && U$6("style", { key: "35c40e3784b1458064b22120b28e0a6210220fd7", id: ie$1(this, K$1, "f") }, i2(this)), U$6("div", { key: "f8acd5159da788802cbe09b1d7cfdb41924a8e0a", id: ie$1(this, q$3, "f"), style: c2 }, U$6("div", { key: "7c03d1a8a6963f797c7a3dd5329f032b9aa6ccae", id: "loading-wrapper-master", class: { ...m2 }, style: c2 }, U$6("div", { key: "671d774553a292803925752917ee6cf7fdbee5ab", id: h2, style: c2 }, U$6("div", { key: "b9fca8a2bcc89b3804b073fa59b0d4ae279b050f", class: p2 }, v2)))));
   }
   disconnectedCallback() {
     var _a2;
-    (_a2 = ie$1(this, J, "f")) == null ? void 0 : _a2.theme.unregister(this), cancelAnimationFrame(ie$1(this, H$3, "f")), ie$1(this, G$1, "f") && clearTimeout(ie$1(this, G$1, "f"));
+    (_a2 = ie$1(this, J$1, "f")) == null ? void 0 : _a2.theme.unregister(this), cancelAnimationFrame(ie$1(this, H$4, "f")), ie$1(this, G$2, "f") && clearTimeout(ie$1(this, G$2, "f"));
   }
   get rootElement() {
-    return q$4(this);
+    return q$5(this);
   }
   static get watchers() {
     return { lfActive: ["onFaderChange"], lfFader: ["onFaderChange"], lfFaderTimeout: ["onFaderChange"], lfBarVariant: ["lfBarVariantChanged"], lfTimeout: ["lfTimeoutChanged"] };
   }
 };
-J = /* @__PURE__ */ new WeakMap(), K = /* @__PURE__ */ new WeakMap(), q$2 = /* @__PURE__ */ new WeakMap(), H$3 = /* @__PURE__ */ new WeakMap(), G$1 = /* @__PURE__ */ new WeakMap(), U$1 = /* @__PURE__ */ new WeakSet(), Q = function() {
+J$1 = /* @__PURE__ */ new WeakMap(), K$1 = /* @__PURE__ */ new WeakMap(), q$3 = /* @__PURE__ */ new WeakMap(), H$4 = /* @__PURE__ */ new WeakMap(), G$2 = /* @__PURE__ */ new WeakMap(), U$2 = /* @__PURE__ */ new WeakSet(), Q$1 = function() {
   this.progress = 0;
   const e2 = Date.now(), i2 = this.lfTimeout, t5 = () => {
     const r2 = Date.now() - e2;
-    this.progress = Math.min(r2 / i2 * 100, 100), this.progress < 100 ? te$1(this, H$3, requestAnimationFrame(t5)) : cancelAnimationFrame(ie$1(this, H$3, "f"));
+    this.progress = Math.min(r2 / i2 * 100, 100), this.progress < 100 ? te$1(this, H$4, requestAnimationFrame(t5)) : cancelAnimationFrame(ie$1(this, H$4, "f"));
   };
-  te$1(this, H$3, requestAnimationFrame(t5));
+  te$1(this, H$4, requestAnimationFrame(t5));
 }, ee$1 = function() {
-  ie$1(this, G$1, "f") && (clearTimeout(ie$1(this, G$1, "f")), te$1(this, G$1, void 0)), this.bigWait = false, this.lfFader && this.lfActive && te$1(this, G$1, window.setTimeout((() => {
+  ie$1(this, G$2, "f") && (clearTimeout(ie$1(this, G$2, "f")), te$1(this, G$2, void 0)), this.bigWait = false, this.lfFader && this.lfActive && te$1(this, G$2, window.setTimeout((() => {
     this.bigWait = true;
   }), this.lfFaderTimeout));
 }, re$1.style = '.spinner-bar-v1{position:absolute;overflow:hidden;transform:translateZ(0);width:100%;height:1em}.spinner-bar-v1:before{content:"";position:absolute;width:25%;height:1em;animation:sk-spinner-bar-v1 5s linear infinite;transform:translateZ(0)}.spinner-bar-v2{position:absolute;overflow:hidden;transform:translateZ(0);box-shadow:-1px 0px 2px 2px rgb(var(--lf-color-on-spinner));height:calc(1em - 2px);width:100%;animation:sk-spinner-bar-v2 5s forwards;animation-timing-function:cubic-bezier(0.19, 0.78, 0.19, 0.78)}.spinner-bar-v3{background-color:rgb(var(--lf-color-spinner));height:calc(1.5em - 2px);position:absolute;overflow:hidden;width:100%}.spinner-bar-v3 .progress-bar{animation:sk-spinner-bar-v3 1s infinite ease-in-out;background-color:rgb(var(--lf-color-on-spinner));height:100%;transition:width 0.1s linear}@keyframes sk-spinner-bar-v1{from{left:-25%;background:linear-gradient(to left, rgb(var(--lf-color-on-spinner)) 0, transparent 100%)}50%{left:100%}to{left:-25%;background:linear-gradient(to right, rgb(var(--lf-color-on-spinner)) 0, transparent 100%)}}@keyframes sk-spinner-bar-v2{from{left:-100%}to{left:-1%}}@keyframes sk-spinner-bar-v3{0%{opacity:1}50%{opacity:0.6}100%{opacity:1}}.spinner-v1{width:7em;height:7em;border-radius:50%;border-top:1em solid rgb(var(--lf-color-spinner));border-right:1em solid rgb(var(--lf-color-spinner));border-bottom:1em solid rgb(var(--lf-color-spinner));border-left:1em solid rgb(var(--lf-color-on-spinner));transform:translateZ(0);animation:sk-spinner-v1 1.1s infinite linear}.spinner-v2,.spinner-v2:before,.spinner-v2:after{border-radius:50%;width:2em;height:2em;animation-fill-mode:both;animation:sk-spinner-v2 1.4s infinite ease-in-out;transform:translateZ(0)}.spinner-v2{backface-visibility:hidden;color:rgb(var(--lf-color-on-spinner));font-size:1em;transform:translateY(-2.5em);animation-delay:-0.16s}.spinner-v2:before,.spinner-v2:after{content:"";position:absolute;top:0}.spinner-v2:before{left:-4em;animation-delay:-0.32s}.spinner-v2:after{left:4em}.spinner-v3{color:rgb(var(--lf-color-on-spinner));font-size:6em;width:1em;height:1em;border-radius:50%;transform:translateZ(0);animation:sk-spinner-v3 1.7s infinite ease, sk-spinner-v3-1 1.7s infinite ease}.spinner-v4{color:rgb(var(--lf-color-on-spinner));width:1em;height:1em;border-radius:50%;transform:translateZ(0);animation:sk-spinner-v4 1.3s infinite linear}.spinner-v5{width:9em;height:9em;margin-top:-0.8em;border-radius:50%;background:linear-gradient(to right, rgb(var(--lf-color-on-spinner)) 10%, rgba(255, 255, 255, 0) 42%);transform:translateZ(0);animation:sk-spinner-v5 1.4s infinite linear}.spinner-v5::before{content:"";width:50%;height:50%;background:rgb(var(--lf-color-on-spinner));border-radius:100% 0 0 0;position:absolute;top:0;left:0}.spinner-v5::after{content:"";width:75%;height:75%;background:rgb(var(--lf-color-spinner));border-radius:50%;position:absolute;margin:auto;top:0;right:0;bottom:0;left:0}.spinner-v6,.spinner-v6:before,.spinner-v6:after{background:rgb(var(--lf-color-on-spinner));animation:sk-spinner-v6 1s infinite ease-in-out;width:1em;height:4em}.spinner-v6{color:rgb(var(--lf-color-on-spinner));margin-top:2em;transform:translateZ(0);animation-delay:-0.16s}.spinner-v6:before,.spinner-v6:after{content:"";position:absolute;top:0}.spinner-v6:before{left:-1.5em;animation-delay:-0.32s}.spinner-v6:after{left:1.5em}.spinner-v7{width:6em;height:6em;position:relative;animation:sk-spinner-v7 2.5s infinite linear both}.sk-spinner-v7-dot{width:100%;height:100%;position:absolute;left:0;top:0;animation:sk-spinner-v7-dot 2s infinite ease-in-out both}.sk-spinner-v7-dot:before{content:"";display:block;width:25%;height:25%;background-color:rgb(var(--lf-color-on-spinner));border-radius:100%;animation:sk-spinner-v7-dot-before 2s infinite ease-in-out both}.sk-spinner-v7-dot:nth-child(1){animation-delay:-1.1s}.sk-spinner-v7-dot:nth-child(1):before{animation-delay:-1.1s}.sk-spinner-v7-dot:nth-child(2){animation-delay:-1s}.sk-spinner-v7-dot:nth-child(2):before{animation-delay:-1s}.sk-spinner-v7-dot:nth-child(3){animation-delay:-0.9s}.sk-spinner-v7-dot:nth-child(3):before{animation-delay:-0.9s}.sk-spinner-v7-dot:nth-child(4){animation-delay:-0.8s}.sk-spinner-v7-dot:nth-child(4):before{animation-delay:-0.8s}.sk-spinner-v7-dot:nth-child(5){animation-delay:-0.7s}.sk-spinner-v7-dot:nth-child(5):before{animation-delay:-0.7s}.sk-spinner-v7-dot:nth-child(6){animation-delay:-0.6s}.sk-spinner-v7-dot:nth-child(6):before{animation-delay:-0.6s}.spinner-v8{width:8em;height:8em;background-color:rgb(var(--lf-color-on-spinner));animation:sk-spinner-v8 1.2s infinite ease-in-out;transform:perspective(120px) rotateX(0deg) rotateY(0deg)}.spinner-v9{width:8em;height:8em;position:relative}.sk-spinner-v9-bounce1,.sk-spinner-v9-bounce2{width:100%;height:100%;background-color:rgb(var(--lf-color-on-spinner));border-radius:50%;opacity:0.6;position:absolute;top:0;left:0;animation:sk-spinner-v9 2s infinite ease-in-out}.sk-spinner-v9-bounce2{animation-delay:-1s}.spinner-v10{width:8em;height:8em;position:relative}.sk-spinner-v10-cube1,.sk-spinner-v10-cube2{backface-visibility:hidden;background-color:rgb(var(--lf-color-on-spinner));width:2em;height:2em;position:absolute;top:0;left:0;animation:sk-spinner-v10 1.8s infinite ease-in-out}.sk-spinner-v10-cube2{animation-delay:-0.9s}.spinner-v11{width:8em;height:8em;background-color:rgb(var(--lf-color-on-spinner));border-radius:100%;animation:sk-spinner-v11 1s infinite ease-in-out}.spinner-v12{width:8em;height:8em;position:relative;text-align:center;animation:sk-spinner-v12 2s infinite linear}.sk-spinner-v12-dot1,.sk-spinner-v12-dot2{width:60%;height:60%;display:inline-block;position:absolute;background-color:rgb(var(--lf-color-on-spinner));border-radius:100%;animation:sk-spinner-v12-1 2s infinite ease-in-out}.sk-spinner-v12-dot2{bottom:0 !important;animation-delay:-1s}.spinner-v13{width:7em;height:7em}.spinner-v13 .sk-spinner-v13-cube{backface-visibility:hidden;background-color:rgb(var(--lf-color-on-spinner));float:left;width:33%;height:33%;position:relative !important;animation:sk-spinner-v13 1.3s infinite ease-in-out;outline:1px solid transparent}.spinner-v13 .sk-spinner-v13-cube.sk-spinner-v13-cube1{animation-delay:0.2s}.spinner-v13 .sk-spinner-v13-cube.sk-spinner-v13-cube2{animation-delay:0.3s}.spinner-v13 .sk-spinner-v13-cube.sk-spinner-v13-cube3{animation-delay:0.4s}.spinner-v13 .sk-spinner-v13-cube.sk-spinner-v13-cube4{animation-delay:0.1s}.spinner-v13 .sk-spinner-v13-cube.sk-spinner-v13-cube5{animation-delay:0.2s}.spinner-v13 .sk-spinner-v13-cube.sk-spinner-v13-cube6{animation-delay:0.3s}.spinner-v13 .sk-spinner-v13-cube.sk-spinner-v13-cube7{animation-delay:0s}.spinner-v13 .sk-spinner-v13-cube.sk-spinner-v13-cube8{animation-delay:0.1s}.spinner-v13 .sk-spinner-v13-cube.sk-spinner-v13-cube9{animation-delay:0.2s}.spinner-v14{width:8em;height:8em;position:relative}.spinner-v14 .sk-spinner-v14-circle{width:100%;height:100%;position:absolute;left:0;top:0}.spinner-v14 .sk-spinner-v14-circle:before{content:"";display:block;margin:0 auto;width:15%;height:15%;background-color:rgb(var(--lf-color-on-spinner));border-radius:100%;animation:sk-spinner-v14-circleFadeDelay 1.2s infinite ease-in-out both}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle2{transform:rotate(30deg)}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle2:before{animation-delay:-1.1s}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle3{transform:rotate(60deg)}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle3:before{animation-delay:-1s}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle4{transform:rotate(90deg)}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle4:before{animation-delay:-0.9s}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle5{transform:rotate(120deg)}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle5:before{animation-delay:-0.8s}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle6{transform:rotate(150deg)}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle6:before{animation-delay:-0.7s}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle7{transform:rotate(180deg)}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle7:before{animation-delay:-0.6s}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle8{transform:rotate(210deg)}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle8:before{animation-delay:-0.5s}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle9{transform:rotate(240deg)}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle9:before{animation-delay:-0.4s}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle10{transform:rotate(270deg)}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle10:before{animation-delay:-0.3s}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle11{transform:rotate(300deg)}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle11:before{animation-delay:-0.2s}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle12{transform:rotate(330deg)}.spinner-v14 .sk-spinner-v14-circle.sk-spinner-v14-circle12:before{animation-delay:-0.1s}@keyframes sk-spinner-v1{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}@keyframes sk-spinner-v2{0%,80%,100%{box-shadow:0 2.5em 0 -1.3em}40%{box-shadow:0 2.5em 0 0}}@keyframes sk-spinner-v3{0%{box-shadow:0 -0.83em 0 -0.4em, 0 -0.83em 0 -0.42em, 0 -0.83em 0 -0.44em, 0 -0.83em 0 -0.46em, 0 -0.83em 0 -0.477em}5%,95%{box-shadow:0 -0.83em 0 -0.4em, 0 -0.83em 0 -0.42em, 0 -0.83em 0 -0.44em, 0 -0.83em 0 -0.46em, 0 -0.83em 0 -0.477em}10%,59%{box-shadow:0 -0.83em 0 -0.4em, -0.087em -0.825em 0 -0.42em, -0.173em -0.812em 0 -0.44em, -0.256em -0.789em 0 -0.46em, -0.297em -0.775em 0 -0.477em}20%{box-shadow:0 -0.83em 0 -0.4em, -0.338em -0.758em 0 -0.42em, -0.555em -0.617em 0 -0.44em, -0.671em -0.488em 0 -0.46em, -0.749em -0.34em 0 -0.477em}38%{box-shadow:0 -0.83em 0 -0.4em, -0.377em -0.74em 0 -0.42em, -0.645em -0.522em 0 -0.44em, -0.775em -0.297em 0 -0.46em, -0.82em -0.09em 0 -0.477em}100%{box-shadow:0 -0.83em 0 -0.4em, 0 -0.83em 0 -0.42em, 0 -0.83em 0 -0.44em, 0 -0.83em 0 -0.46em, 0 -0.83em 0 -0.477em}}@keyframes sk-spinner-v3-1{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}@keyframes sk-spinner-v4{0%,100%{box-shadow:0 -3em 0 0.2em, 2em -2em 0 0em, 3em 0 0 -1em, 2em 2em 0 -1em, 0 3em 0 -1em, -2em 2em 0 -1em, -3em 0 0 -1em, -2em -2em 0 0}12.5%{box-shadow:0 -3em 0 0, 2em -2em 0 0.2em, 3em 0 0 0, 2em 2em 0 -1em, 0 3em 0 -1em, -2em 2em 0 -1em, -3em 0 0 -1em, -2em -2em 0 -1em}25%{box-shadow:0 -3em 0 -0.5em, 2em -2em 0 0, 3em 0 0 0.2em, 2em 2em 0 0, 0 3em 0 -1em, -2em 2em 0 -1em, -3em 0 0 -1em, -2em -2em 0 -1em}37.5%{box-shadow:0 -3em 0 -1em, 2em -2em 0 -1em, 3em 0em 0 0, 2em 2em 0 0.2em, 0 3em 0 0em, -2em 2em 0 -1em, -3em 0em 0 -1em, -2em -2em 0 -1em}50%{box-shadow:0 -3em 0 -1em, 2em -2em 0 -1em, 3em 0 0 -1em, 2em 2em 0 0em, 0 3em 0 0.2em, -2em 2em 0 0, -3em 0em 0 -1em, -2em -2em 0 -1em}62.5%{box-shadow:0 -3em 0 -1em, 2em -2em 0 -1em, 3em 0 0 -1em, 2em 2em 0 -1em, 0 3em 0 0, -2em 2em 0 0.2em, -3em 0 0 0, -2em -2em 0 -1em}75%{box-shadow:0em -3em 0 -1em, 2em -2em 0 -1em, 3em 0em 0 -1em, 2em 2em 0 -1em, 0 3em 0 -1em, -2em 2em 0 0, -3em 0em 0 0.2em, -2em -2em 0 0}87.5%{box-shadow:0em -3em 0 0, 2em -2em 0 -1em, 3em 0 0 -1em, 2em 2em 0 -1em, 0 3em 0 -1em, -2em 2em 0 0, -3em 0em 0 0, -2em -2em 0 0.2em}}@keyframes sk-spinner-v5{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}@keyframes sk-spinner-v6{0%,80%,100%{box-shadow:0 0;height:4em}40%{box-shadow:0 -2em;height:5em}}@keyframes sk-spinner-v7{100%{transform:rotate(360deg)}}@keyframes sk-spinner-v7-dot{80%,100%{transform:rotate(360deg)}}@keyframes sk-spinner-v7-dot-before{0%,100%{transform:scale(1)}50%{transform:scale(0.4)}}@keyframes sk-spinner-v8{0%{transform:perspective(120px) rotateX(0deg) rotateY(0deg)}50%{transform:perspective(120px) rotateX(-180.1deg) rotateY(0deg)}100%{transform:perspective(120px) rotateX(-180deg) rotateY(-179.9deg)}}@keyframes sk-spinner-v9{0%,100%{transform:scale(0)}50%{transform:scale(1)}}@keyframes sk-spinner-v10{25%{transform:translateX(5em) rotate(-90deg) scale(0.5)}50%{transform:translateX(5em) translateY(5em) rotate(-179deg)}50.1%{transform:translateX(5em) translateY(5em) rotate(-180deg)}75%{transform:translateX(0) translateY(5em) rotate(-270deg) scale(0.5)}100%{transform:rotate(-360deg)}}@keyframes sk-spinner-v11{0%{transform:scale(0)}100%{transform:scale(1);opacity:0}}@keyframes sk-spinner-v12{100%{transform:rotate(360deg)}}@keyframes sk-spinner-v12-1{0%,100%{transform:scale(0)}50%{transform:scale(1)}}@keyframes sk-spinner-v13{0%,70%,100%{transform:scale3D(1, 1, 1)}35%{transform:scale3D(0, 0, 1)}}@keyframes sk-spinner-v14-circleFadeDelay{0%,39%,100%{opacity:0}40%{opacity:1}}::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=ripple]{animation-duration:var(--lf-ui-duration-ripple, 675ms);animation-fill-mode:forwards;animation-name:lf-ripple;animation-timing-function:var(--lf-ui-timing-ripple, ease-out);background:var(--lf-ui-ripple-background, var(--lf-color-primary));border-radius:var(--lf-ui-radius-ripple, 50%);height:var(--lf-ui-ripple-height, 100%);left:var(--lf-ui-ripple-x, 50%);opacity:var(--lf-ui-opacity-ripple, 0.5);pointer-events:none;position:absolute;top:var(--lf-ui-ripple-y, 50%);transform:scale(0);width:var(--lf-ui-ripple-width, 100%)}@keyframes lf-ripple{from{transform:scale(0)}to{opacity:0;transform:scale(4)}}[data-lf=ripple-surface]{cursor:pointer;height:100%;left:0;overflow:hidden;position:absolute;top:0;width:100%}[data-lf=danger]{--lf-spinner-color-primary:var(\n    --lf-spinner-color-danger,\n    var(--lf-color-danger)\n  );--lf-spinner-color-on-primary:var(\n    --lf-spinner-color-danger,\n    var(--lf-color-on-danger)\n  )}[data-lf=disabled]{opacity:var(--lf-spinner-ui-opacity-disabled, var(--lf-ui-opacity-disabled));pointer-events:none}[data-lf=info]{--lf-spinner-color-primary:var(\n    --lf-spinner-color-info,\n    var(--lf-color-info)\n  );--lf-spinner-color-on-primary:var(\n    --lf-spinner-color-info,\n    var(--lf-color-on-info)\n  )}[data-lf=secondary]{--lf-spinner-color-primary:var(\n    --lf-spinner-color-secondary,\n    var(--lf-color-secondary)\n  );--lf-spinner-color-on-primary:var(\n    --lf-spinner-color-secondary,\n    var(--lf-color-on-secondary)\n  )}[data-lf=success]{--lf-spinner-color-primary:var(\n    --lf-spinner-color-success,\n    var(--lf-color-success)\n  );--lf-spinner-color-on-primary:var(\n    --lf-spinner-color-success,\n    var(--lf-color-on-success)\n  )}[data-lf=warning]{--lf-spinner-color-primary:var(\n    --lf-spinner-color-warning,\n    var(--lf-color-warning)\n  );--lf-spinner-color-on-primary:var(\n    --lf-spinner-color-warning,\n    var(--lf-color-on-warning)\n  )}:host{display:block;font-family:var(--lf-spinner-font-family, var(--lf-font-family-primary));font-size:var(--lf-spinner-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-spinner-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-spinner-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-spinner-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-spinner-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-spinner-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-spinner-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-spinner-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{width:100%;height:100%}#loading-wrapper-master{transition:all 200ms cubic-bezier(0.4, 0, 0.6, 1);background:transparent;min-height:var(--lf-spinner-min-height, 0);opacity:0;overflow:hidden;transform:translateZ(0)}#loading-wrapper-master.spinner-version>#loading-wrapper-master-spinner{width:100%;height:100%;position:relative}#loading-wrapper-master.spinner-version>#loading-wrapper-master-spinner div{position:absolute;top:0;right:0;bottom:0;left:0;margin:auto}:host([lf-active]) #loading-wrapper-master{opacity:1}:host([lf-active]) #loading-wrapper-master.spinner-version>#loading-wrapper-master-spinner{opacity:1;overflow:hidden}:host([lf-active]) #loading-wrapper-master[lf-bar-variant]>#loading-wrapper-master-bar{opacity:1}:host([lf-active]) #loading-wrapper-master[lf-bar-variant]>#loading-wrapper-master-bar div.spinner-bar-v2{animation:sk-spinner-bar-v2 20s;background-color:rgb(var(--lf-color-on-spinner));left:-1%}:host([lf-active]) #loading-wrapper-master.loading-wrapper-big-wait{background:rgba(var(--lf-comp-color-bg, var(--lf-color-bg)), 0.25)}:host([lf-active]) #loading-wrapper-master.loading-wrapper-big-wait>#loading-wrapper-master-spinner{font-size:10px}:host([lf-full-screen]) #loading-wrapper-master{position:fixed;top:0;left:0;right:0;bottom:0;pointer-events:none;width:100%;z-index:9999}:host([lf-full-screen]) #loading-wrapper-master div,:host([lf-full-screen]) #loading-wrapper-master.spinner-version #loading-wrapper-master-spinner{position:fixed;transition:opacity 1.25s ease-in, background-color 1s ease-in, top 0.5s ease-in}:host([lf-active][lf-fader]) #loading-wrapper-master{pointer-events:all;cursor:not-allowed}';
@@ -2473,21 +2790,21 @@ var ne$1, se$1, oe$1, ae$1, le$1, fe$1, ce$1, de$1, he$1, me$1, pe$1, ve$1, be$1
 };
 const Ie$1 = class Ie {
   constructor(r2) {
-    o$2(this, r2), this.lfEvent = G$3(this, "lf-textfield-event"), this.status = /* @__PURE__ */ new Set(), this.value = "", this.lfFormatJSON = null, this.lfHelper = null, this.lfIcon = "", this.lfLabel = "", this.lfStretchX = false, this.lfStretchY = false, this.lfStyle = "", this.lfStyling = "raised", this.lfTrailingIcon = false, this.lfTrailingIconAction = null, this.lfUiSize = "medium", this.lfUiState = "primary", this.lfValue = "", ne$1.set(this, void 0), se$1.set(this, LF_TEXTFIELD_BLOCKS), oe$1.set(this, CY_ATTRIBUTES), ae$1.set(this, LF_ATTRIBUTES), le$1.set(this, LF_TEXTFIELD_PARTS), fe$1.set(this, LF_STYLE_ID), ce$1.set(this, LF_WRAPPER_ID), de$1.set(this, void 0), he$1.set(this, void 0), me$1.set(this, void 0), pe$1.set(this, void 0), ve$1.set(this, void 0), be$1.set(this, void 0), ue$1.set(this, (() => "disabled" === this.lfUiState)), ge$1.set(this, (() => "outlined" === this.lfStyling || "textarea" === this.lfStyling)), ke$1.set(this, (() => "textarea" === this.lfStyling)), ye$1.set(this, ((e2, i2 = new CustomEvent("change")) => {
+    o$2(this, r2), this.lfEvent = G$4(this, "lf-textfield-event"), this.status = /* @__PURE__ */ new Set(), this.value = "", this.lfFormatJSON = null, this.lfHelper = null, this.lfIcon = "", this.lfLabel = "", this.lfStretchX = false, this.lfStretchY = false, this.lfStyle = "", this.lfStyling = "raised", this.lfTrailingIcon = false, this.lfTrailingIconAction = null, this.lfUiSize = "medium", this.lfUiState = "primary", this.lfValue = "", ne$1.set(this, void 0), se$1.set(this, LF_TEXTFIELD_BLOCKS), oe$1.set(this, CY_ATTRIBUTES), ae$1.set(this, LF_ATTRIBUTES), le$1.set(this, LF_TEXTFIELD_PARTS), fe$1.set(this, LF_STYLE_ID), ce$1.set(this, LF_WRAPPER_ID), de$1.set(this, void 0), he$1.set(this, void 0), me$1.set(this, void 0), pe$1.set(this, void 0), ve$1.set(this, void 0), be$1.set(this, void 0), ue$1.set(this, (() => "disabled" === this.lfUiState)), ge$1.set(this, (() => "outlined" === this.lfStyling || "textarea" === this.lfStyling)), ke$1.set(this, (() => "textarea" === this.lfStyling)), ye$1.set(this, ((e2, i2 = new CustomEvent("change")) => {
       Se$1(this, ue$1, "f").call(this) || (this.value = e2, this.onLfEvent(i2, "change"));
     })), we$1.set(this, (() => {
       if (!Se$1(this, be$1, "f")) return null;
       const { bemClass: i2 } = Se$1(this, ne$1, "f").theme, { textfield: t5 } = Se$1(this, se$1, "f");
-      return U$5("div", { class: i2(t5._, t5.counter), part: Se$1(this, le$1, "f").counter }, "'0 / ' + ", Se$1(this, be$1, "f").toString());
+      return U$6("div", { class: i2(t5._, t5.counter), part: Se$1(this, le$1, "f").counter }, "'0 / ' + ", Se$1(this, be$1, "f").toString());
     })), xe$1.set(this, (() => {
       var _a2;
       if (!((_a2 = this.lfHelper) == null ? void 0 : _a2.value)) return null;
       const { bemClass: i2 } = Se$1(this, ne$1, "f").theme, { textfield: t5 } = Se$1(this, se$1, "f"), r3 = this.lfHelper.showWhenFocused && this.status.has("focused") || !this.lfHelper.showWhenFocused;
-      return U$5("div", { class: i2(t5._, t5.helperLine) }, U$5("div", { class: i2(t5._, t5.helperText, { active: r3 }) }, this.lfHelper.value), !Se$1(this, ke$1, "f").call(this) && Se$1(this, we$1, "f").call(this));
+      return U$6("div", { class: i2(t5._, t5.helperLine) }, U$6("div", { class: i2(t5._, t5.helperText, { active: r3 }) }, this.lfHelper.value), !Se$1(this, ke$1, "f").call(this) && Se$1(this, we$1, "f").call(this));
     })), ze$1.set(this, (() => {
       if (!this.lfIcon) return null;
       const { get: i2 } = Se$1(this, ne$1, "f").assets, { bemClass: t5 } = Se$1(this, ne$1, "f").theme, { textfield: r3 } = Se$1(this, se$1, "f"), { style: n2 } = i2(`./assets/svg/${this.lfIcon}.svg`);
-      return U$5("div", { class: t5(r3._, r3.icon, { trailing: this.lfTrailingIcon }), "data-cy": Se$1(this, oe$1, "f").maskedSvg, onClick: (e2) => {
+      return U$6("div", { class: t5(r3._, r3.icon, { trailing: this.lfTrailingIcon }), "data-cy": Se$1(this, oe$1, "f").maskedSvg, onClick: (e2) => {
         this.onLfEvent(e2, "click", true, "regular");
       }, part: Se$1(this, le$1, "f").icon, ref: (e2) => {
         e2 && Fe$1(this, pe$1, e2);
@@ -2495,12 +2812,12 @@ const Ie$1 = class Ie {
     })), _e$1.set(this, (() => {
       if (!this.lfTrailingIconAction) return null;
       const { bemClass: i2 } = Se$1(this, ne$1, "f").theme, { textfield: t5 } = Se$1(this, se$1, "f");
-      return U$5("div", { class: i2(t5._, t5.iconAction, { trailing: true }), "data-cy": Se$1(this, oe$1, "f").maskedSvg, onClick: (e2) => {
+      return U$6("div", { class: i2(t5._, t5.iconAction, { trailing: true }), "data-cy": Se$1(this, oe$1, "f").maskedSvg, onClick: (e2) => {
         this.onLfEvent(e2, "click", true, "action");
       }, part: Se$1(this, le$1, "f").iconAction, style: { mask: `var(${this.lfTrailingIconAction})`, webkitMask: `var(${this.lfTrailingIconAction})` }, tabIndex: 0 });
     })), We$1.set(this, (() => {
       const { sanitizeProps: i2, theme: t5 } = Se$1(this, ne$1, "f"), { bemClass: r3 } = t5, { textfield: n2 } = Se$1(this, se$1, "f");
-      return U$5("input", { ...i2(this.lfHtmlAttributes), class: r3(n2._, n2.input), "data-cy": Se$1(this, oe$1, "f").input, disabled: Se$1(this, ue$1, "f").call(this), onBlur: (e2) => {
+      return U$6("input", { ...i2(this.lfHtmlAttributes), class: r3(n2._, n2.input), "data-cy": Se$1(this, oe$1, "f").input, disabled: Se$1(this, ue$1, "f").call(this), onBlur: (e2) => {
         this.onLfEvent(e2, "blur");
       }, onChange: (e2) => {
         Se$1(this, ye$1, "f").call(this, e2.currentTarget.value);
@@ -2518,13 +2835,13 @@ const Ie$1 = class Ie {
     })), Ce$1.set(this, (() => {
       if (Se$1(this, ge$1, "f").call(this) || !this.lfLabel) return null;
       const { bemClass: i2 } = Se$1(this, ne$1, "f").theme, { textfield: t5 } = Se$1(this, se$1, "f");
-      return U$5("label", { class: i2(t5._, t5.label), htmlFor: "input", part: Se$1(this, le$1, "f").label }, this.lfLabel);
+      return U$6("label", { class: i2(t5._, t5.label), htmlFor: "input", part: Se$1(this, le$1, "f").label }, this.lfLabel);
     })), Me$1.set(this, (() => {
       const { bemClass: i2 } = Se$1(this, ne$1, "f").theme, { textfield: t5 } = Se$1(this, se$1, "f");
-      return !Se$1(this, me$1, "f") && U$5("span", { class: i2(t5._, t5.rippleSurface), "data-cy": Se$1(this, oe$1, "f").rippleSurface, "data-lf": Se$1(this, ae$1, "f").rippleSurface });
+      return !Se$1(this, me$1, "f") && U$6("span", { class: i2(t5._, t5.rippleSurface), "data-cy": Se$1(this, oe$1, "f").rippleSurface, "data-lf": Se$1(this, ae$1, "f").rippleSurface });
     })), Te$1.set(this, (() => {
       const { sanitizeProps: i2, theme: t5 } = Se$1(this, ne$1, "f"), { bemClass: r3 } = t5, { textfield: n2 } = Se$1(this, se$1, "f"), { displayBorderOnError: s2, displayErrorAsTitle: o2, onBlur: a2, onInput: l2 } = this.lfFormatJSON || {}, f2 = Boolean(Se$1(this, he$1, "f")), c2 = null !== this.lfFormatJSON;
-      return U$5("span", { class: r3(n2._, n2.resizer) }, U$5("textarea", { ...i2(this.lfHtmlAttributes), class: r3(n2._, n2.input, { error: c2 && f2 && s2 }), "data-cy": Se$1(this, oe$1, "f").input, id: "input", onBlur: (e2) => {
+      return U$6("span", { class: r3(n2._, n2.resizer) }, U$6("textarea", { ...i2(this.lfHtmlAttributes), class: r3(n2._, n2.input, { error: c2 && f2 && s2 }), "data-cy": Se$1(this, oe$1, "f").input, id: "input", onBlur: (e2) => {
         this.onLfEvent(e2, "blur");
       }, onChange: (e2) => {
         Se$1(this, ye$1, "f").call(this, e2.currentTarget.value), c2 && a2 && this.formatJSON();
@@ -2624,7 +2941,7 @@ const Ie$1 = class Ie {
     const { bemClass: i2, setLfStyle: t5 } = Se$1(this, ne$1, "f").theme, { lfStyle: r2, lfStyling: s2, status: o2 } = this, a2 = "textarea" === s2, l2 = { [s2]: true };
     return o2.forEach(((e2) => {
       l2[e2] = true;
-    })), this.lfTrailingIconAction && (l2["has-actions"] = true), U$5(A$9, { key: "38884538ac75427c3496d0a1bc21e8fbd738656e" }, r2 && U$5("style", { key: "976b7ca051b062ac673ea1e613325a091a1f85c3", id: Se$1(this, fe$1, "f") }, t5(this)), U$5("div", { key: "c900fe565783fc4854910ad5a546aff5f4394bdf", id: Se$1(this, ce$1, "f") }, U$5("div", { key: "876342238c3dfdf2923bcec09c0c08db651af19a", class: i2(Se$1(this, se$1, "f").textfield._, null, l2), "data-lf": Se$1(this, ae$1, "f")[this.lfUiState], part: Se$1(this, le$1, "f").textfield }, a2 ? [Se$1(this, we$1, "f").call(this), Se$1(this, ze$1, "f").call(this), Se$1(this, Te$1, "f").call(this), Se$1(this, _e$1, "f").call(this)] : [Se$1(this, ze$1, "f").call(this), Se$1(this, We$1, "f").call(this), Se$1(this, _e$1, "f").call(this), Se$1(this, Ce$1, "f").call(this), Se$1(this, Me$1, "f").call(this)]), Se$1(this, xe$1, "f").call(this)));
+    })), this.lfTrailingIconAction && (l2["has-actions"] = true), U$6(A$a, { key: "38884538ac75427c3496d0a1bc21e8fbd738656e" }, r2 && U$6("style", { key: "976b7ca051b062ac673ea1e613325a091a1f85c3", id: Se$1(this, fe$1, "f") }, t5(this)), U$6("div", { key: "c900fe565783fc4854910ad5a546aff5f4394bdf", id: Se$1(this, ce$1, "f") }, U$6("div", { key: "876342238c3dfdf2923bcec09c0c08db651af19a", class: i2(Se$1(this, se$1, "f").textfield._, null, l2), "data-lf": Se$1(this, ae$1, "f")[this.lfUiState], part: Se$1(this, le$1, "f").textfield }, a2 ? [Se$1(this, we$1, "f").call(this), Se$1(this, ze$1, "f").call(this), Se$1(this, Te$1, "f").call(this), Se$1(this, _e$1, "f").call(this)] : [Se$1(this, ze$1, "f").call(this), Se$1(this, We$1, "f").call(this), Se$1(this, _e$1, "f").call(this), Se$1(this, Ce$1, "f").call(this), Se$1(this, Me$1, "f").call(this)]), Se$1(this, xe$1, "f").call(this)));
   }
   disconnectedCallback() {
     var _a2;
@@ -2635,229 +2952,15 @@ const Ie$1 = class Ie {
     (_a2 = Se$1(this, ne$1, "f")) == null ? void 0 : _a2.theme.unregister(this);
   }
   get rootElement() {
-    return q$4(this);
+    return q$5(this);
   }
 };
 ne$1 = /* @__PURE__ */ new WeakMap(), se$1 = /* @__PURE__ */ new WeakMap(), oe$1 = /* @__PURE__ */ new WeakMap(), ae$1 = /* @__PURE__ */ new WeakMap(), le$1 = /* @__PURE__ */ new WeakMap(), fe$1 = /* @__PURE__ */ new WeakMap(), ce$1 = /* @__PURE__ */ new WeakMap(), de$1 = /* @__PURE__ */ new WeakMap(), he$1 = /* @__PURE__ */ new WeakMap(), me$1 = /* @__PURE__ */ new WeakMap(), pe$1 = /* @__PURE__ */ new WeakMap(), ve$1 = /* @__PURE__ */ new WeakMap(), be$1 = /* @__PURE__ */ new WeakMap(), ue$1 = /* @__PURE__ */ new WeakMap(), ge$1 = /* @__PURE__ */ new WeakMap(), ke$1 = /* @__PURE__ */ new WeakMap(), ye$1 = /* @__PURE__ */ new WeakMap(), we$1 = /* @__PURE__ */ new WeakMap(), xe$1 = /* @__PURE__ */ new WeakMap(), ze$1 = /* @__PURE__ */ new WeakMap(), _e$1 = /* @__PURE__ */ new WeakMap(), We$1 = /* @__PURE__ */ new WeakMap(), Ce$1 = /* @__PURE__ */ new WeakMap(), Me$1 = /* @__PURE__ */ new WeakMap(), Te$1 = /* @__PURE__ */ new WeakMap(), Ee$1 = /* @__PURE__ */ new WeakMap(), Ie$1.style = '::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=danger]{--lf-textfield-color-primary:var(\n    --lf-textfield-color-danger,\n    var(--lf-color-danger)\n  );--lf-textfield-color-on-primary:var(\n    --lf-textfield-color-danger,\n    var(--lf-color-on-danger)\n  )}[data-lf=disabled]{opacity:var(--lf-textfield-ui-opacity-disabled, var(--lf-ui-opacity-disabled));pointer-events:none}[data-lf=info]{--lf-textfield-color-primary:var(\n    --lf-textfield-color-info,\n    var(--lf-color-info)\n  );--lf-textfield-color-on-primary:var(\n    --lf-textfield-color-info,\n    var(--lf-color-on-info)\n  )}[data-lf=secondary]{--lf-textfield-color-primary:var(\n    --lf-textfield-color-secondary,\n    var(--lf-color-secondary)\n  );--lf-textfield-color-on-primary:var(\n    --lf-textfield-color-secondary,\n    var(--lf-color-on-secondary)\n  )}[data-lf=success]{--lf-textfield-color-primary:var(\n    --lf-textfield-color-success,\n    var(--lf-color-success)\n  );--lf-textfield-color-on-primary:var(\n    --lf-textfield-color-success,\n    var(--lf-color-on-success)\n  )}[data-lf=warning]{--lf-textfield-color-primary:var(\n    --lf-textfield-color-warning,\n    var(--lf-color-warning)\n  );--lf-textfield-color-on-primary:var(\n    --lf-textfield-color-warning,\n    var(--lf-color-on-warning)\n  )}:host{display:block;font-family:var(--lf-textfield-font-family, var(--lf-font-family-primary));font-size:var(--lf-textfield-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-textfield-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-textfield-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-textfield-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-textfield-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-textfield-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-textfield-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-textfield-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{width:100%}:host([lf-stretch-y]),:host([lf-stretch-y]) #lf-component,:host([lf-stretch-y]) .textfield{height:100%}:host([lf-trailing-icon]) #lf-component .textfield{flex-direction:row-reverse}:host([lf-trailing-icon]) #lf-component .textfield__icon{padding-left:0.5em}:host([lf-trailing-icon]) #lf-component .textfield__label{left:1em}.textfield{border:0;border-style:solid;border-radius:var(--lf-textfield-border-radius, var(--lf-ui-border-radius));transition:all 300ms cubic-bezier(0.4, 0, 0.2, 1);align-items:baseline;box-sizing:border-box;display:inline-flex;height:var(--lf-textfield-height, 3.5em);position:relative;width:100%}.textfield--has-icon .textfield__label{left:1.25em}.textfield--filled .textfield__icon,.textfield--focused .textfield__icon{background-color:rgba(var(--lf-textfield-color-primary, var(--lf-color-primary)), 1)}.textfield--filled .textfield__label,.textfield--focused .textfield__label{color:rgb(var(--lf-textfield-color-primary, var(--lf-color-primary)))}.textfield--filled .textfield__ripple-surface:after,.textfield--focused .textfield__ripple-surface:after{width:100%}.textfield--flat.textfield--filled .textfield__label,.textfield--flat.textfield--focused .textfield__label,.textfield--raised.textfield--filled .textfield__label,.textfield--raised.textfield--focused .textfield__label{transform:translateY(-130%) scale(0.75)}.textfield--flat.textfield--has-icon .textfield__label,.textfield--raised.textfield--has-icon .textfield__label{left:3.5em}.textfield--flat .textfield__label,.textfield--raised .textfield__label{left:1.25em;right:initial}.textfield--raised{background-color:rgba(var(--lf-textfield-color-surface, var(--lf-color-surface)), 0.125);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.textfield--raised:hover{background-color:rgba(var(--lf-textfield-color-surface, var(--lf-color-surface)), 0.275);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.textfield--raised.textfield--focused{background-color:rgba(var(--lf-textfield-color-surface, var(--lf-color-surface)), 0.525);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.textfield--outlined,.textfield--textarea{border:0;border-style:solid;border-color:rgba(var(--lf-textfield-border-color, var(--lf-color-border)), 1);border-width:1px;padding-top:0}.textfield--outlined:hover,.textfield--textarea:hover{background-color:rgba(var(--lf-textfield-color-surface, var(--lf-color-surface)), 0.075);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-color:rgba(var(--lf-textfield-color-primary, var(--lf-color-primary)), 0.775)}.textfield--outlined.textfield--focused,.textfield--textarea.textfield--focused{border-color:rgb(var(--lf-textfield-color-primary, var(--lf-color-primary)));box-shadow:inset 0 0 0 0.15em rgb(var(--lf-textfield-color-primary, var(--lf-color-primary)))}.textfield--outlined.textfield--filled,.textfield--textarea.textfield--filled{background-color:rgba(var(--lf-textfield-color-surface, var(--lf-color-surface)), 0.175);backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px)}.textfield--textarea{align-items:center;flex-direction:column;height:auto;overflow:visible;padding:0;transition:none}.textfield--textarea .textfield__input{box-shadow:inset 0px 0px 0px 0px rgba(var(--lf-color-border), 0);box-sizing:border-box;flex-grow:1;height:auto;overflow-x:hidden;overflow-y:auto;padding:1em;resize:none;transition:box-shadow 0.2s ease-in-out}.textfield--textarea .textfield__input--error{box-shadow:inset 0px 0px 4px 1px rgba(var(--lf-color-danger), 0.775)}.textfield--textarea .textfield__label{left:0.25em;position:relative;top:2.75em}.textfield__input,.textfield__label{box-sizing:border-box}.textfield__icon,.textfield__icon-action{background-color:rgba(var(--lf-textfield-color-on-bg, var(--lf-color-on-bg)), 1);height:1.5em;width:1.5em;overflow:hidden;transition:all 250ms cubic-bezier(0.34, 1.56, 0.64, 1);align-self:center;cursor:pointer;outline:none;padding:var(--lf-textfield-icon-padding, 0 0.75em)}.textfield__icon:hover,.textfield__icon-action:hover{opacity:0.75}.textfield__icon:focus,.textfield__icon-action:focus{box-shadow:0 0 0 0.15em rgb(var(--lf-textfield-color-primary, var(--lf-color-primary)))}.textfield__input{color:rgb(var(--lf-textfield-color-on-bg, var(--lf-color-on-bg)));font-family:var(--lf-textfield-font-family, var(--lf-font-family-primary));width:100%;height:100%;font-size:1em;font-weight:400;line-height:1.5em;letter-spacing:0em;transition:all 300ms cubic-bezier(0.4, 0, 0.2, 1);appearance:none;-webkit-appearance:none;background:none;border:none;border-radius:0;box-sizing:border-box;caret-color:rgba(var(--lf-textfield-color-primary, var(--lf-color-primary)), 0.75);cursor:var(--lf-textfield-input-cursor, text);-webkit-font-smoothing:antialiased;margin:0;min-width:0;outline:none;padding:var(--lf-textfield-padding, 0 1em);text-decoration:inherit;text-transform:inherit}.textfield__input:placeholder{color:rgb(var(--lf-textfield-color-on-bg, var(--lf-color-on-bg)))}.textfield__label{color:rgb(var(--lf-textfield-color-on-bg, var(--lf-color-on-bg)));overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:0.875em;font-weight:500;line-height:1.5em;letter-spacing:0.01em;transition:all 250ms cubic-bezier(0.34, 1.56, 0.64, 1);cursor:text;left:0.25em;overflow:hidden;pointer-events:none;position:absolute;right:initial;text-align:left;top:50%;transform:translateY(-50%);transform-origin:left top}.textfield__ripple-surface{max-width:100%;overflow:hidden}.textfield__ripple-surface:before,.textfield__ripple-surface:after{border-radius:2px;bottom:0;content:"";height:2px;left:0;position:absolute}.textfield__ripple-surface:before{background-color:rgba(var(--lf-textfield-color-on-bg, var(--lf-color-on-bg)), 0.225);width:100%}.textfield__ripple-surface:after{background-color:rgba(var(--lf-textfield-color-primary, var(--lf-color-primary)), 0.775);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:width 300ms cubic-bezier(0.4, 0, 0.2, 1);width:0}.textfield__resizer{align-self:stretch;display:inline-flex;flex-direction:column;flex-grow:1;max-height:100%;max-width:100%;min-height:var(--lf-textfield-height, 3em);min-width:fit-content;min-width:-moz-available;min-width:-webkit-fill-available;overflow:hidden;resize:both;transform:translateX(-1px) translateY(-1px)}.textfield__helper-text{color:rgb(var(--lf-textfield-color-primary, var(--lf-color-primary)));font-size:0.875em;font-weight:500;line-height:1.375em;letter-spacing:0.01em;transition:all 200ms cubic-bezier(0.4, 0, 0.6, 1);line-height:normal;margin:0;opacity:0;text-decoration:inherit;text-transform:inherit;will-change:opacity}.textfield__helper-text--active{opacity:1;transition:none;will-change:initial}.textfield__helper-line{border-top:1px solid rgba(var(--lf-color-border), 0.775);box-sizing:border-box;display:flex;justify-content:space-between;padding-right:1em;padding-left:1em}';
 const p460d4637_entry = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
-  lf_list: X,
+  lf_list: X$1,
   lf_spinner: re$1,
   lf_textfield: Ie$1
-}, Symbol.toStringTag, { value: "Module" }));
-var u$7, p$3, v$8, m$9, y$b, g$a, z$c, x$c, k$c, C$a, E$a, W$b, M$a, T$8, L$6, D$8 = function(i2, t5, e2, r2) {
-  if ("a" === e2 && !r2) throw new TypeError("Private accessor was defined without a getter");
-  if ("function" == typeof t5 ? i2 !== t5 || !r2 : !t5.has(i2)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
-  return "m" === e2 ? r2 : "a" === e2 ? r2.call(i2) : r2 ? r2.value : t5.get(i2);
-}, R$5 = function(i2, t5, e2, r2, s2) {
-  if ("function" == typeof t5 ? i2 !== t5 || true : !t5.has(i2)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
-  return t5.set(i2, e2), e2;
-};
-const j$7 = class j {
-  constructor(e2) {
-    o$2(this, e2), this.lfEvent = G$3(this, "lf-drawer-event"), u$7.add(this), this.lfDisplay = "slide", this.lfPosition = "left", this.lfResponsive = 0, this.lfStyle = "", this.lfValue = false, p$3.set(this, void 0), v$8.set(this, LF_DRAWER_BLOCKS), m$9.set(this, LF_ATTRIBUTES), y$b.set(this, LF_DRAWER_PARTS), g$a.set(this, LF_STYLE_ID), z$c.set(this, LF_WRAPPER_ID), x$c.set(this, void 0), k$c.set(this, null), C$a.set(this, void 0), E$a.set(this, void 0);
-  }
-  onLfEvent(i2, t5) {
-    this.lfEvent.emit({ comp: this, eventType: t5, id: this.rootElement.id, originalEvent: i2 });
-  }
-  listenKeydown(i2) {
-    if (this.lfValue) switch (i2.key) {
-      case "Escape":
-        i2.preventDefault(), this.close();
-        break;
-      case "Tab":
-        D$8(this, u$7, "m", L$6).call(this, i2);
-    }
-  }
-  onLfDisplayChange(i2, t5) {
-    D$8(this, p$3, "f") && D$8(this, u$7, "m", M$a).call(this, t5, i2);
-  }
-  onLfResponsiveChange() {
-    D$8(this, p$3, "f") && (this.lfResponsive > 0 ? (D$8(this, u$7, "m", W$b).call(this), D$8(this, C$a, "f") || (R$5(this, C$a, (async () => {
-      D$8(this, E$a, "f") && clearTimeout(D$8(this, E$a, "f")), R$5(this, E$a, window.setTimeout((() => {
-        D$8(this, u$7, "m", W$b).call(this), R$5(this, E$a, null, "f");
-      }), 200), "f");
-    })), window.addEventListener("resize", D$8(this, C$a, "f")))) : D$8(this, C$a, "f") && (window.removeEventListener("resize", D$8(this, C$a, "f")), R$5(this, C$a, null)));
-  }
-  async close() {
-    this.lfValue && requestAnimationFrame((() => {
-      this.lfValue = false, this.onLfEvent(new CustomEvent("close"), "close"), D$8(this, p$3, "f").effects.backdrop.hide(), D$8(this, k$c, "f") && (D$8(this, k$c, "f").focus(), R$5(this, k$c, null));
-    }));
-  }
-  async getDebugInfo() {
-    return this.debugInfo;
-  }
-  async getProps() {
-    const i2 = LF_DRAWER_PROPS.map(((i3) => [i3, this[i3]]));
-    return Object.fromEntries(i2);
-  }
-  async isOpened() {
-    return this.lfValue;
-  }
-  async open() {
-    this.lfValue || (R$5(this, k$c, document.activeElement), requestAnimationFrame((() => {
-      this.lfValue = true, this.onLfEvent(new CustomEvent("open"), "open"), "slide" === this.lfDisplay && D$8(this, p$3, "f").effects.backdrop.show((() => this.close())), requestAnimationFrame((() => {
-        D$8(this, u$7, "m", T$8).call(this);
-      }));
-    })));
-  }
-  async refresh() {
-    vt$1(this);
-  }
-  async toggle() {
-    this.lfValue ? this.close() : this.open();
-  }
-  async unmount(i2 = 0) {
-    setTimeout((() => {
-      D$8(this, p$3, "f").effects.backdrop.hide(), this.onLfEvent(new CustomEvent("unmount"), "unmount"), this.rootElement.remove();
-    }), i2);
-  }
-  connectedCallback() {
-    D$8(this, p$3, "f") && D$8(this, p$3, "f").theme.register(this);
-  }
-  async componentWillLoad() {
-    R$5(this, p$3, await a(this)), this.lfResponsive > 0 && (D$8(this, u$7, "m", W$b).call(this), R$5(this, C$a, (async () => {
-      D$8(this, E$a, "f") && clearTimeout(D$8(this, E$a, "f")), R$5(this, E$a, window.setTimeout((() => {
-        D$8(this, u$7, "m", W$b).call(this), R$5(this, E$a, null, "f");
-      }), 200), "f");
-    })), window.addEventListener("resize", D$8(this, C$a, "f")));
-  }
-  componentDidLoad() {
-    const { info: i2 } = D$8(this, p$3, "f").debug;
-    this.onLfEvent(new CustomEvent("ready"), "ready"), i2.update(this, "did-load");
-  }
-  componentWillRender() {
-    const { info: i2 } = D$8(this, p$3, "f").debug;
-    i2.update(this, "will-render");
-  }
-  componentDidRender() {
-    const { info: i2 } = D$8(this, p$3, "f").debug;
-    i2.update(this, "did-render");
-  }
-  render() {
-    const { bemClass: i2, setLfStyle: t5 } = D$8(this, p$3, "f").theme, { drawer: e2 } = D$8(this, v$8, "f"), { lfStyle: o2 } = this, a2 = "slide" === this.lfDisplay && this.lfValue;
-    return U$5(A$9, { key: "d483f7fa5123a750aa1985efb185837b7d024157" }, o2 && U$5("style", { key: "b100be8982791c0286b806278abe7f2c1772dcf7", id: D$8(this, g$a, "f") }, t5(this)), U$5("div", { key: "74139330312b1b5195fadcd07e7fdd15634082f2", "aria-modal": a2, id: D$8(this, z$c, "f"), ref: (i3) => {
-      i3 && R$5(this, x$c, i3);
-    }, role: "dialog" }, U$5("div", { key: "ad753c13fecb887fbcd561187aeba5664451e153", class: i2(e2._), part: D$8(this, y$b, "f").drawer }, U$5("div", { key: "7081411fb14f82badb2ffe6f32f1fd4dbb0c0663", class: i2(e2._, e2.content), "lf-data": D$8(this, m$9, "f").fadeIn, part: D$8(this, y$b, "f").content }, U$5("slot", { key: "568fba427cf5f81a26bb743ac6e718b072bcd527", name: LF_DRAWER_SLOT })))));
-  }
-  disconnectedCallback() {
-    var _a2, _b2;
-    D$8(this, C$a, "f") && window.removeEventListener("resize", D$8(this, C$a, "f")), (_a2 = D$8(this, p$3, "f")) == null ? void 0 : _a2.effects.backdrop.hide(), (_b2 = D$8(this, p$3, "f")) == null ? void 0 : _b2.theme.unregister(this);
-  }
-  get rootElement() {
-    return q$4(this);
-  }
-  static get watchers() {
-    return { lfDisplay: ["onLfDisplayChange"], lfResponsive: ["onLfResponsiveChange"] };
-  }
-};
-p$3 = /* @__PURE__ */ new WeakMap(), v$8 = /* @__PURE__ */ new WeakMap(), m$9 = /* @__PURE__ */ new WeakMap(), y$b = /* @__PURE__ */ new WeakMap(), g$a = /* @__PURE__ */ new WeakMap(), z$c = /* @__PURE__ */ new WeakMap(), x$c = /* @__PURE__ */ new WeakMap(), k$c = /* @__PURE__ */ new WeakMap(), C$a = /* @__PURE__ */ new WeakMap(), E$a = /* @__PURE__ */ new WeakMap(), u$7 = /* @__PURE__ */ new WeakSet(), W$b = function() {
-  if (this.lfResponsive <= 0) return;
-  const i2 = this.lfDisplay, t5 = window.innerWidth >= this.lfResponsive ? "dock" : "slide";
-  t5 !== i2 && (this.lfDisplay = t5, D$8(this, u$7, "m", M$a).call(this, i2, t5));
-}, M$a = function(i2, t5) {
-  this.lfValue && ("slide" === i2 && "dock" === t5 ? D$8(this, p$3, "f").effects.backdrop.hide() : "dock" === i2 && "slide" === t5 && D$8(this, p$3, "f").effects.backdrop.show((() => this.close())));
-}, T$8 = function() {
-  if (!this.lfValue) return;
-  if (!D$8(this, x$c, "f")) return;
-  const i2 = D$8(this, x$c, "f").querySelector(LF_EFFECTS_FOCUSABLES.join(","));
-  i2 ? i2.focus() : D$8(this, x$c, "f").focus();
-}, L$6 = function(i2) {
-  if (!this.lfValue || !D$8(this, x$c, "f")) return;
-  const t5 = Array.from(D$8(this, x$c, "f").querySelectorAll(LF_EFFECTS_FOCUSABLES.join(","))).filter(((i3) => i3.offsetWidth > 0 || i3.offsetHeight > 0 || i3 === document.activeElement));
-  if (0 === t5.length) return void i2.preventDefault();
-  const e2 = t5[0], r2 = t5[t5.length - 1];
-  i2.shiftKey && document.activeElement === e2 ? (i2.preventDefault(), r2.focus()) : i2.shiftKey || document.activeElement !== r2 || (i2.preventDefault(), e2.focus());
-}, j$7.style = "::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=fade-in]{display:block;animation:lf-fade-in-block 0.25s ease-out forwards}@keyframes lf-fade-in-block{from{visibility:hidden;opacity:0}to{visibility:visible;opacity:1}}:host{display:block;font-family:var(--lf-drawer-font-family, var(--lf-font-family-primary));font-size:var(--lf-drawer-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-drawer-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-drawer-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-drawer-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-drawer-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-drawer-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-drawer-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-drawer-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{border:0;border-style:solid;border-radius:var(--lf-drawer-border-radius, var(--lf-ui-border-radius));background-color:rgba(var(--lf-drawer-color-drawer, var(--lf-color-drawer)), 0.375);color:rgb(var(--lf-drawer-color-on-drawer, var(--lf-color-on-drawer)));backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-sizing:border-box;display:block;height:100dvh;left:calc(var(--lf-ui-width-drawer) * -1);position:absolute;top:0;width:var(--lf-ui-width-drawer);z-index:var(--lf-ui-zindex-drawer)}:host([lf-position=left]){transition:left 300ms cubic-bezier(0.4, 0, 0.2, 1);border-bottom-left-radius:0;border-top-left-radius:0;border-right:var(--lf-drawer-border, 1px solid rgba(var(--lf-color-border), 0.75));left:calc(var(--lf-ui-width-drawer) * -1);right:auto}:host([lf-position=right]){transition:right 300ms cubic-bezier(0.4, 0, 0.2, 1);border-bottom-right-radius:0;border-top-right-radius:0;border-left:var(--lf-drawer-border, 1px solid rgba(var(--lf-color-border), 0.75));left:auto;right:calc(var(--lf-ui-width-drawer) * -1)}:host([lf-display=dock]){box-shadow:none}:host([lf-display=dock])[lf-position=left]{left:0}:host([lf-display=dock])[lf-position=right]{right:0}:host([lf-value]){left:0}:host([lf-value][lf-position=left][lf-display=slide]){box-shadow:var(--lf-drawer-left-box-shadow, 4px 0 10px -2px rgba(var(--lf-color-on-drawer), 0.2), 8px 0 16px 2px rgba(var(--lf-color-on-drawer), 0.14), 2px 0 20px 5px rgba(var(--lf-color-on-drawer), 0.14))}:host([lf-value][lf-position=right][lf-display=slide]){box-shadow:var(--lf-drawer-right-box-shadow, -4px 0 10px -2px rgba(var(--lf-color-on-drawer), 0.2), -8px 0 16px 2px rgba(var(--lf-color-on-drawer), 0.14), -2px 0 20px 5px rgba(var(--lf-color-on-drawer), 0.14))}.drawer,.drawer__content{width:100%;height:100%}";
-const p6f619be6_entry = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
-  __proto__: null,
-  lf_drawer: j$7
-}, Symbol.toStringTag, { value: "Module" }));
-var v$7, m$8, b$8, u$6, w$b, y$a, g$9, z$b, k$b, x$b, W$a, E$9, M$9 = function(e2, t5, i2, s2) {
-  if ("a" === i2 && !s2) throw new TypeError("Private accessor was defined without a getter");
-  if ("function" == typeof t5 ? e2 !== t5 || !s2 : !t5.has(e2)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
-  return "m" === i2 ? s2 : "a" === i2 ? s2.call(e2) : s2 ? s2.value : t5.get(e2);
-}, C$9 = function(e2, t5, i2, s2, a2) {
-  if ("function" == typeof t5 ? e2 !== t5 || true : !t5.has(e2)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
-  return t5.set(e2, i2), i2;
-};
-const T$7 = class T2 {
-  constructor(i2) {
-    o$2(this, i2), this.lfEvent = G$3(this, "lf-placeholder-event"), v$7.add(this), this.isInViewport = false, this.lfIcon = "template", this.lfProps = {}, this.lfStyle = "", this.lfThreshold = 0.25, this.lfTrigger = "both", this.lfValue = "LfCard", m$8.set(this, void 0), b$8.set(this, LF_PLACEHOLDER_BLOCKS), u$6.set(this, CY_ATTRIBUTES), w$b.set(this, LF_ATTRIBUTES), y$a.set(this, LF_PLACEHOLDER_PARTS), g$9.set(this, LF_STYLE_ID), z$b.set(this, LF_WRAPPER_ID), k$b.set(this, null), x$b.set(this, null), W$a.set(this, false);
-  }
-  onLfEvent(e2, t5) {
-    this.lfEvent.emit({ comp: this, id: this.rootElement.id, originalEvent: e2, eventType: t5 });
-  }
-  async getComponent() {
-    return M$9(this, x$b, "f");
-  }
-  async getDebugInfo() {
-    return this.debugInfo;
-  }
-  async getProps() {
-    const e2 = LF_PLACEHOLDER_PROPS.map(((e3) => [e3, this[e3]]));
-    return Object.fromEntries(e2);
-  }
-  async refresh() {
-    vt$1(this);
-  }
-  async unmount(e2 = 0) {
-    setTimeout((() => {
-      this.onLfEvent(new CustomEvent("unmount"), "unmount"), this.rootElement.remove();
-    }), e2);
-  }
-  connectedCallback() {
-    M$9(this, m$8, "f") && (M$9(this, m$8, "f").theme.register(this), M$9(this, v$7, "m", E$9).call(this));
-  }
-  async componentWillLoad() {
-    C$9(this, m$8, await a(this));
-  }
-  componentDidLoad() {
-    const { info: e2 } = M$9(this, m$8, "f").debug;
-    M$9(this, v$7, "m", E$9).call(this), M$9(this, k$b, "f").observe(this.rootElement), this.onLfEvent(new CustomEvent("ready"), "ready"), e2.update(this, "did-load");
-  }
-  componentWillRender() {
-    const { info: e2 } = M$9(this, m$8, "f").debug;
-    e2.update(this, "will-render");
-  }
-  componentDidRender() {
-    const { info: e2 } = M$9(this, m$8, "f").debug;
-    M$9(this, x$b, "f") && !M$9(this, W$a, "f") && (C$9(this, W$a, true), this.onLfEvent(new CustomEvent("load"), "load")), e2.update(this, "did-render");
-  }
-  render() {
-    const { assets: e2, sanitizeProps: t5, theme: i2 } = M$9(this, m$8, "f"), { bemClass: o2, setLfStyle: l2 } = i2, { placeholder: r2 } = M$9(this, b$8, "f"), { isInViewport: f2, lfValue: h2, lfProps: c2, lfTrigger: d2, lfIcon: p2, lfStyle: v2 } = this;
-    let k2;
-    if (Boolean("viewport" === d2 && f2 || "props" === d2 && c2 || "both" === d2 && c2 && f2)) {
-      const e3 = h2.toLowerCase().replace("lf", ""), i3 = { [`onLf-${e3}-event`]: (e4) => {
-        this.onLfEvent(e4, "lf-event");
-      } };
-      k2 = U$5("lf-" + e3, { key: "80ec58016534f253141faff338abfec102395126", ...t5(c2, h2), ...i3, "data-lf": LF_ATTRIBUTES.fadeIn, ref: (e4) => C$9(this, x$b, e4) });
-    } else if (p2) {
-      const { style: t6 } = e2.get(`./assets/svg/${p2}.svg`);
-      k2 = U$5("div", { key: "807e2b9d23fce4abd6a282a207b0d377876ed42e", class: o2(r2._, r2.icon), "data-cy": M$9(this, u$6, "f").maskedSvg, "data-lf": M$9(this, w$b, "f").fadeIn, part: M$9(this, y$a, "f").icon, style: t6 });
-    }
-    return U$5(A$9, { key: "c83cb9b8c1f4e05e677dc885b5a4bebe2b950b76" }, v2 && U$5("style", { key: "4bee8005de8feee3cdc3e25fd18e5447bb099f8c", id: M$9(this, g$9, "f") }, l2(this)), U$5("div", { key: "42f58c333ddc29e2c7d57dbb5358de68ecf008e5", id: M$9(this, z$b, "f") }, U$5("div", { key: "6737acd9350721db7198db50877a74c59b17c322", class: o2(r2._), part: M$9(this, y$a, "f").placeholder }, k2)));
-  }
-  disconnectedCallback() {
-    var _a2, _b2;
-    (_a2 = M$9(this, m$8, "f")) == null ? void 0 : _a2.theme.unregister(this), (_b2 = M$9(this, k$b, "f")) == null ? void 0 : _b2.unobserve(this.rootElement);
-  }
-  get rootElement() {
-    return q$4(this);
-  }
-};
-m$8 = /* @__PURE__ */ new WeakMap(), b$8 = /* @__PURE__ */ new WeakMap(), u$6 = /* @__PURE__ */ new WeakMap(), w$b = /* @__PURE__ */ new WeakMap(), y$a = /* @__PURE__ */ new WeakMap(), g$9 = /* @__PURE__ */ new WeakMap(), z$b = /* @__PURE__ */ new WeakMap(), k$b = /* @__PURE__ */ new WeakMap(), x$b = /* @__PURE__ */ new WeakMap(), W$a = /* @__PURE__ */ new WeakMap(), v$7 = /* @__PURE__ */ new WeakSet(), E$9 = function() {
-  const { debug: e2 } = M$9(this, m$8, "f");
-  C$9(this, k$b, new IntersectionObserver(((t5) => {
-    t5.forEach(((t6) => {
-      const i2 = this.rootElement.hasAttribute("lf-hydrated");
-      t6.isIntersecting && i2 && (e2.logs.new(this, "lf-placeholder entering the viewport, rendering " + this.lfValue + "."), this.isInViewport = true, M$9(this, k$b, "f").unobserve(this.rootElement));
-    }));
-  }), { threshold: this.lfThreshold }));
-}, T$7.style = "::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=fade-in]{display:block;animation:lf-fade-in-block 0.25s ease-out forwards}@keyframes lf-fade-in-block{from{visibility:hidden;opacity:0}to{visibility:visible;opacity:1}}:host{display:block;font-family:var(--lf-placeholder-font-family, var(--lf-font-family-primary));font-size:var(--lf-placeholder-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-placeholder-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-placeholder-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-placeholder-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-placeholder-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-placeholder-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-placeholder-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-placeholder-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{width:100%;height:100%;position:relative}.placeholder{align-items:var(--lf-placeholder-ver-alignment, center);display:flex;height:var(--lf-placeholder-height, 100%);justify-content:var(--lf-placeholder-hor-alignment, center);width:var(--lf-placeholder-width, 100%)}.placeholder__icon{background-color:rgba(var(--lf-placeholder-color-on-bg, var(--lf-color-on-bg)), 1);height:1.5em;width:1.5em;overflow:hidden;width:100%;height:100%;animation:shine ease 2s infinite}@keyframes shine{0%{opacity:0.4}50%{opacity:0.8}100%{opacity:0.4}}";
-const p77da9ac8_entry = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
-  __proto__: null,
-  lf_placeholder: T$7
 }, Symbol.toStringTag, { value: "Module" }));
 const r = ({ framework: e2, shape: r2, index: a2, cell: n2, eventDispatcher: o2, defaultCb: s2, refCallback: c2 }) => {
   const { data: L2, sanitizeProps: l2 } = e2, { stringify: d2 } = L2.cell, i2 = (e3) => {
@@ -2865,37 +2968,37 @@ const r = ({ framework: e2, shape: r2, index: a2, cell: n2, eventDispatcher: o2,
   };
   switch (r2) {
     case "badge":
-      return U$5("lf-badge", { ...l2(f("LfBadge", r2, n2, a2), "LfBadge"), "onLf-badge-event": i2, ref: c2 });
+      return U$6("lf-badge", { ...l2(f("LfBadge", r2, n2, a2), "LfBadge"), "onLf-badge-event": i2, ref: c2 });
     case "button":
-      return U$5("lf-button", { ...l2(f("LfButton", r2, n2, a2), "LfButton"), "onLf-button-event": i2, ref: c2 });
+      return U$6("lf-button", { ...l2(f("LfButton", r2, n2, a2), "LfButton"), "onLf-button-event": i2, ref: c2 });
     case "canvas":
-      return U$5("lf-canvas", { ...l2(f("LfCanvas", r2, n2, a2), "LfCanvas"), "onLf-canvas-event": i2, ref: c2 });
+      return U$6("lf-canvas", { ...l2(f("LfCanvas", r2, n2, a2), "LfCanvas"), "onLf-canvas-event": i2, ref: c2 });
     case "card":
-      return U$5("lf-card", { ...l2(f("LfCard", r2, n2, a2), "LfCard"), "onLf-card-event": i2, ref: c2 });
+      return U$6("lf-card", { ...l2(f("LfCard", r2, n2, a2), "LfCard"), "onLf-card-event": i2, ref: c2 });
     case "chart":
-      return U$5("lf-chart", { ...l2(f("LfChart", r2, n2, a2), "LfChart"), "onLf-chart-event": i2, ref: c2 });
+      return U$6("lf-chart", { ...l2(f("LfChart", r2, n2, a2), "LfChart"), "onLf-chart-event": i2, ref: c2 });
     case "chat":
-      return U$5("lf-chat", { ...l2(f("LfChat", r2, n2, a2), "LfChat"), "onLf-chat-event": i2, ref: c2 });
+      return U$6("lf-chat", { ...l2(f("LfChat", r2, n2, a2), "LfChat"), "onLf-chat-event": i2, ref: c2 });
     case "chip":
-      return U$5("lf-chip", { ...l2(f("LfChip", r2, n2, a2), "LfChip"), "onLf-chip-event": i2, ref: c2 });
+      return U$6("lf-chip", { ...l2(f("LfChip", r2, n2, a2), "LfChip"), "onLf-chip-event": i2, ref: c2 });
     case "code":
-      return U$5("lf-code", { ...l2(f("LfCode", r2, n2, a2), "LfCode"), "onLf-code-event": i2, ref: c2 });
+      return U$6("lf-code", { ...l2(f("LfCode", r2, n2, a2), "LfCode"), "onLf-code-event": i2, ref: c2 });
     case "image":
-      return U$5("lf-image", { ...l2(f("LfImage", r2, n2, a2), "LfImage"), "onLf-image-event": i2, ref: c2 });
+      return U$6("lf-image", { ...l2(f("LfImage", r2, n2, a2), "LfImage"), "onLf-image-event": i2, ref: c2 });
     case "photoframe":
-      return U$5("lf-photoframe", { ...l2(f("LfPhotoframe", r2, n2, a2), "LfPhotoframe"), "onLf-photoframe-event": i2, ref: c2 });
+      return U$6("lf-photoframe", { ...l2(f("LfPhotoframe", r2, n2, a2), "LfPhotoframe"), "onLf-photoframe-event": i2, ref: c2 });
     case "progressbar":
-      return U$5("lf-progressbar", { ...l2(f("LfProgressbar", r2, n2, a2), "LfProgressbar"), "onLf-progressbar-event": i2, ref: c2 });
+      return U$6("lf-progressbar", { ...l2(f("LfProgressbar", r2, n2, a2), "LfProgressbar"), "onLf-progressbar-event": i2, ref: c2 });
     case "textfield":
-      return U$5("lf-textfield", { ...l2(f("LfTextfield", r2, n2, a2), "LfTextfield"), "onLf-textfield-event": i2, ref: c2 });
+      return U$6("lf-textfield", { ...l2(f("LfTextfield", r2, n2, a2), "LfTextfield"), "onLf-textfield-event": i2, ref: c2 });
     case "toggle":
-      return U$5("lf-toggle", { ...l2(f("LfToggle", r2, n2, a2), "LfToggle"), "onLf-toggle-event": i2, ref: c2 });
+      return U$6("lf-toggle", { ...l2(f("LfToggle", r2, n2, a2), "LfToggle"), "onLf-toggle-event": i2, ref: c2 });
     case "typewriter":
-      return U$5("lf-typewriter", { ...l2(f("LfTypewriter", r2, n2, a2), "LfTypewriter"), "onLf-typewriter-event": i2, ref: c2 });
+      return U$6("lf-typewriter", { ...l2(f("LfTypewriter", r2, n2, a2), "LfTypewriter"), "onLf-typewriter-event": i2, ref: c2 });
     case "upload":
-      return U$5("lf-upload", { ...l2(f("LfUpload", r2, n2, a2), "LfUpload"), "onLf-upload-event": i2, ref: c2 });
+      return U$6("lf-upload", { ...l2(f("LfUpload", r2, n2, a2), "LfUpload"), "onLf-upload-event": i2, ref: c2 });
   }
-  return "slot" === r2 ? U$5("slot", { key: `${r2}${a2}`, name: d2(n2.value), ...l2(f(null, r2, n2, a2)) }) : U$5("div", { id: `${r2}${a2}`, key: `${r2}${a2}`, ...l2(f(null, r2, n2, a2)) }, n2.value);
+  return "slot" === r2 ? U$6("slot", { key: `${r2}${a2}`, name: d2(n2.value), ...l2(f(null, r2, n2, a2)) }) : U$6("div", { id: `${r2}${a2}`, key: `${r2}${a2}`, ...l2(f(null, r2, n2, a2)) }, n2.value);
 }, f = (t5, r2, f2, a2) => {
   var _a2;
   const n2 = {};
@@ -2907,64 +3010,64 @@ const r = ({ framework: e2, shape: r2, index: a2, cell: n2, eventDispatcher: o2,
   const o2 = ((_a2 = n2 == null ? void 0 : n2.htmlProps) == null ? void 0 : _a2.id) || `${r2}${a2}`;
   return n2.value && !n2.lfValue && (n2.lfValue = n2.value), delete n2.htmlProps, delete n2.shape, delete n2.value, { "data-component": t5 || r2, "data-cy": CY_ATTRIBUTES.shape, "data-index": a2, id: o2, key: `${r2}${a2}`, ...n2 };
 };
-const m$7 = ({ depth: t5, expanded: r2 = false, manager: i2, node: o2, onClickExpand: n2, type: d2 }) => {
+const m$6 = ({ depth: t5, expanded: r2 = false, manager: i2, node: o2, onClickExpand: n2, type: d2 }) => {
   const { get: c2 } = i2.assets, { bemClass: f2 } = i2.theme;
   switch (d2) {
     case "dropdown":
-      return U$5("div", { class: f2(LF_TREE_BLOCKS.node._, LF_TREE_BLOCKS.node.dropdown, { expanded: r2 }), "data-cy": CY_ATTRIBUTES.maskedSvg });
+      return U$6("div", { class: f2(LF_TREE_BLOCKS.node._, LF_TREE_BLOCKS.node.dropdown, { expanded: r2 }), "data-cy": CY_ATTRIBUTES.maskedSvg });
     case "expand":
-      return U$5("div", { class: f2(LF_TREE_BLOCKS.node._, LF_TREE_BLOCKS.node.expand, { expanded: r2 }), "data-cy": CY_ATTRIBUTES.maskedSvg, onClick: n2 });
+      return U$6("div", { class: f2(LF_TREE_BLOCKS.node._, LF_TREE_BLOCKS.node.expand, { expanded: r2 }), "data-cy": CY_ATTRIBUTES.maskedSvg, onClick: n2 });
     case "icon":
       const { style: i3 } = c2(`./assets/svg/${o2.icon}.svg`);
-      return U$5("div", { class: f2(LF_TREE_BLOCKS.node._, LF_TREE_BLOCKS.node.icon), "data-cy": CY_ATTRIBUTES.maskedSvg, style: i3 });
+      return U$6("div", { class: f2(LF_TREE_BLOCKS.node._, LF_TREE_BLOCKS.node.icon), "data-cy": CY_ATTRIBUTES.maskedSvg, style: i3 });
     case "padding":
-      return U$5("div", { class: f2(LF_TREE_BLOCKS.node._, LF_TREE_BLOCKS.node.padding), style: { [LF_TREE_CSS_VARIABLES.multiplier]: t5.toString() } });
+      return U$6("div", { class: f2(LF_TREE_BLOCKS.node._, LF_TREE_BLOCKS.node.padding), style: { [LF_TREE_CSS_VARIABLES.multiplier]: t5.toString() } });
     default:
-      return U$5("div", { class: f2(LF_TREE_BLOCKS.node._, LF_TREE_BLOCKS.node.expand, { hidden: true }) });
+      return U$6("div", { class: f2(LF_TREE_BLOCKS.node._, LF_TREE_BLOCKS.node.expand, { hidden: true }) });
   }
-}, b$7 = (t5) => {
+}, b$6 = (t5) => {
   var _a2, _b2;
-  const { manager: r2 } = t5, { bemClass: i2 } = r2.theme, { accordionLayout: o2, depth: n2, elements: s2, events: c2, expanded: f2, node: h2, selected: p2 } = t5 || {}, u2 = U$5(m$7, h2.icon ? { manager: r2, node: h2, type: "icon" } : { manager: r2, type: "placeholder" });
-  return o2 ? U$5("div", { class: i2(LF_TREE_BLOCKS.node._, null, { expanded: f2, selected: p2 }), "data-cy": CY_ATTRIBUTES.node, "data-depth": n2.toString(), key: h2.id, onClick: c2.onClickExpand, onPointerDown: c2.onPointerDown, part: LF_TREE_PARTS.node, title: h2.description }, U$5("div", { class: i2(LF_TREE_BLOCKS.node._, LF_TREE_BLOCKS.node.content) }, s2.ripple, u2, s2.value, U$5(m$7, ((_a2 = h2.children) == null ? void 0 : _a2.length) ? { expanded: f2, manager: r2, node: h2, type: "dropdown" } : { manager: r2, type: "placeholder" }))) : U$5("div", { class: i2(LF_TREE_BLOCKS.node._, null, { expanded: f2, selected: p2 }), "data-cy": CY_ATTRIBUTES.node, "data-depth": n2.toString(), key: h2.id, onClick: c2.onClick, onPointerDown: c2.onPointerDown, title: h2.description }, U$5("div", { class: "node__content" }, s2.ripple, U$5(m$7, { depth: n2, manager: r2, type: "padding" }), U$5(m$7, ((_b2 = h2.children) == null ? void 0 : _b2.length) ? { expanded: f2, manager: r2, node: h2, onClickExpand: c2.onClickExpand, type: "expand" } : { manager: r2, type: "placeholder" }), u2, s2.value));
+  const { manager: r2 } = t5, { bemClass: i2 } = r2.theme, { accordionLayout: o2, depth: n2, elements: s2, events: c2, expanded: f2, node: h2, selected: p2 } = t5 || {}, u2 = U$6(m$6, h2.icon ? { manager: r2, node: h2, type: "icon" } : { manager: r2, type: "placeholder" });
+  return o2 ? U$6("div", { class: i2(LF_TREE_BLOCKS.node._, null, { expanded: f2, selected: p2 }), "data-cy": CY_ATTRIBUTES.node, "data-depth": n2.toString(), key: h2.id, onClick: c2.onClickExpand, onPointerDown: c2.onPointerDown, part: LF_TREE_PARTS.node, title: h2.description }, U$6("div", { class: i2(LF_TREE_BLOCKS.node._, LF_TREE_BLOCKS.node.content) }, s2.ripple, u2, s2.value, U$6(m$6, ((_a2 = h2.children) == null ? void 0 : _a2.length) ? { expanded: f2, manager: r2, node: h2, type: "dropdown" } : { manager: r2, type: "placeholder" }))) : U$6("div", { class: i2(LF_TREE_BLOCKS.node._, null, { expanded: f2, selected: p2 }), "data-cy": CY_ATTRIBUTES.node, "data-depth": n2.toString(), key: h2.id, onClick: c2.onClick, onPointerDown: c2.onPointerDown, title: h2.description }, U$6("div", { class: "node__content" }, s2.ripple, U$6(m$6, { depth: n2, manager: r2, type: "padding" }), U$6(m$6, ((_b2 = h2.children) == null ? void 0 : _b2.length) ? { expanded: f2, manager: r2, node: h2, onClickExpand: c2.onClickExpand, type: "expand" } : { manager: r2, type: "placeholder" }), u2, s2.value));
 }, v$6 = (t5) => ({ filter: () => {
   const { controller: r2, handlers: i2 } = t5(), { compInstance: o2, manager: n2 } = r2.get, { theme: a2 } = n2, { bemClass: s2, get: l2 } = a2, d2 = r2.get.blocks.tree;
-  return o2.lfFilter ? U$5("lf-textfield", { class: s2(d2._, d2.filter), lfStretchX: true, lfIcon: l2.current().variables["--lf-icon-search"], lfLabel: "Search...", lfStyling: "flat", "onLf-textfield-event": (e2) => i2.filter.input(e2), ref: (e2) => t5().elements.refs.filterField = e2 }) : null;
+  return o2.lfFilter ? U$6("lf-textfield", { class: s2(d2._, d2.filter), lfStretchX: true, lfIcon: l2.current().variables["--lf-icon-search"], lfLabel: "Search...", lfStyling: "flat", "onLf-textfield-event": (e2) => i2.filter.input(e2), ref: (e2) => t5().elements.refs.filterField = e2 }) : null;
 }, header: () => {
   const { controller: r2 } = t5(), i2 = r2.get.columns(), { blocks: o2, isGrid: n2, manager: a2, parts: s2 } = r2.get;
   if (!(n2() && i2.length > 0)) return null;
   const { bemClass: l2 } = a2.theme, d2 = o2.header;
-  return U$5("div", { class: l2(d2._), part: s2.header }, U$5("div", { class: l2(d2._, d2.row) }, i2.map(((t6, r3) => U$5("div", { class: l2(d2._, d2.cell), part: 0 === r3 ? s2.headerRow : void 0, "data-column": t6.id, "data-index": r3.toString(), key: t6.id }, t6.title)))));
+  return U$6("div", { class: l2(d2._), part: s2.header }, U$6("div", { class: l2(d2._, d2.row) }, i2.map(((t6, r3) => U$6("div", { class: l2(d2._, d2.cell), part: 0 === r3 ? s2.headerRow : void 0, "data-column": t6.id, "data-index": r3.toString(), key: t6.id }, t6.title)))));
 }, nodes: () => {
   const r$12 = t5(), { controller: i2, elements: o2, handlers: n2 } = r$12, { get: a2 } = i2, { blocks: s2, manager: l2, parts: d2 } = a2, { bemClass: c2 } = l2.theme, { tree: f2 } = s2, h2 = l2.data.cell.stringify, p2 = a2.filterValue() || "", u2 = a2.columns(), m2 = a2.isGrid(), v2 = a2.dataset(), w3 = a2.manager.data.node.traverseVisible(v2 == null ? void 0 : v2.nodes, { isExpanded: a2.isExpanded, isHidden: a2.isHidden, isSelected: a2.isSelected, forceExpand: !!p2 }), k2 = w3.length > 0, y2 = w3.map((({ node: t6, depth: r$13, expanded: i3, selected: f3 }) => {
     const p3 = s2.node, v3 = ((t7) => {
       if (!m2 || !u2.length) return null;
       const r$14 = s2.node;
-      return U$5("div", { class: c2(r$14._, r$14.grid), part: d2.node + "-grid" }, u2.map(((r$15, i4) => ((t8, r$16, i5) => {
+      return U$6("div", { class: c2(r$14._, r$14.grid), part: d2.node + "-grid" }, u2.map(((r$15, i4) => ((t8, r$16, i5) => {
         var _a2;
         const o3 = s2.node, n3 = (_a2 = t8.cells) == null ? void 0 : _a2[r$16.id];
         if (!n3) {
           const n4 = c2(o3._, o3.gridCell);
-          return U$5("div", { class: i5 ? n4 + " value" : n4, "data-column": r$16.id }, i5 ? h2(t8.value) : "");
+          return U$6("div", { class: i5 ? n4 + " value" : n4, "data-column": r$16.id }, i5 ? h2(t8.value) : "");
         }
         const d3 = n3.shape || "text", f4 = "text" === d3 || "number" === d3 || "slot" === d3, p4 = l2.data.cell.shapes.get(n3);
         Object.prototype.hasOwnProperty.call(p4, "lfValue") || (p4.lfValue = n3.value);
         const u3 = p4.lfValue ?? n3.value;
-        return U$5("div", { class: c2(o3._, o3.gridCell), "data-column": r$16.id }, f4 ? h2(u3) : U$5(r, { framework: l2, shape: d3, index: 0, cell: p4, eventDispatcher: async (e2) => a2.compInstance.onLfEvent(e2, "lf-event", { node: t8 }) }));
+        return U$6("div", { class: c2(o3._, o3.gridCell), "data-column": r$16.id }, f4 ? h2(u3) : U$6(r, { framework: l2, shape: d3, index: 0, cell: p4, eventDispatcher: async (e2) => a2.compInstance.onLfEvent(e2, "lf-event", { node: t8 }) }));
       })(t7, r$15, 0 === i4))));
-    })(t6), w4 = a2.compInstance.lfGrid && v3 ? U$5("div", { class: c2(p3._, p3.value, { grid: true }) }, v3) : U$5("div", { class: c2(p3._, p3.value) }, h2(t6.value));
-    return U$5(b$7, { accordionLayout: a2.compInstance.lfAccordionLayout && 0 === r$13, depth: r$13, elements: { ripple: U$5("div", { "data-cy": a2.cyAttributes.rippleSurface, "data-lf": a2.lfAttributes.rippleSurface, ref: (e2) => {
+    })(t6), w4 = a2.compInstance.lfGrid && v3 ? U$6("div", { class: c2(p3._, p3.value, { grid: true }) }, v3) : U$6("div", { class: c2(p3._, p3.value) }, h2(t6.value));
+    return U$6(b$6, { accordionLayout: a2.compInstance.lfAccordionLayout && 0 === r$13, depth: r$13, elements: { ripple: U$6("div", { "data-cy": a2.cyAttributes.rippleSurface, "data-lf": a2.lfAttributes.rippleSurface, ref: (e2) => {
       e2 && a2.compInstance.lfRipple && (o2.refs.rippleSurfaces[t6.id] = e2);
     } }), value: w4 }, events: { onClick: (e2) => n2.node.click(e2, t6), onClickExpand: (e2) => n2.node.expand(e2, t6), onPointerDown: (e2) => n2.node.pointerDown(e2, t6) }, expanded: i3, manager: l2, node: t6, selected: f3 });
   }));
-  if (k2) return U$5("div", { class: c2(f2._, f2.nodesWrapper) }, y2);
+  if (k2) return U$6("div", { class: c2(f2._, f2.nodesWrapper) }, y2);
   if (p2) {
     const { noMatches: t6 } = s2;
-    return U$5("div", { class: c2(t6._) }, U$5("div", { class: c2(t6._, t6.icon) }), U$5("div", { class: c2(t6._, t6.text) }, 'No matches found for "', U$5("strong", { class: c2(t6._, t6.filter) }, p2), '".'));
+    return U$6("div", { class: c2(t6._) }, U$6("div", { class: c2(t6._, t6.icon) }), U$6("div", { class: c2(t6._, t6.text) }, 'No matches found for "', U$6("strong", { class: c2(t6._, t6.filter) }, p2), '".'));
   }
-  return U$5("div", { class: c2(f2._, f2.nodesWrapper) });
+  return U$6("div", { class: c2(f2._, f2.nodesWrapper) });
 }, empty: () => {
   const { controller: r2 } = t5(), { compInstance: i2, manager: o2 } = r2.get, { theme: n2 } = o2, { bemClass: a2 } = n2, s2 = r2.get.blocks, { emptyData: l2 } = s2, d2 = r2.get.parts;
-  return U$5("div", { class: a2(l2._), part: d2.emptyData }, U$5("div", { class: a2(l2._, l2.text) }, i2.lfEmpty));
+  return U$6("div", { class: a2(l2._), part: d2.emptyData }, U$6("div", { class: a2(l2._, l2.text) }, i2.lfEmpty));
 } }), w$a = (e2) => ({ filter: { input: (t5) => {
   var _a2, _b2;
   const r2 = e2(), { controller: i2 } = r2, o2 = i2.get.compInstance, n2 = ((_a2 = t5.detail.inputValue) == null ? void 0 : _a2.toLowerCase()) || "";
@@ -2983,16 +3086,16 @@ const m$7 = ({ depth: t5, expanded: r2 = false, manager: i2, node: o2, onClickEx
   var _a2;
   const i2 = e2(), { controller: o2 } = i2, n2 = o2.get.compInstance;
   (_a2 = n2.onLfEvent) == null ? void 0 : _a2.call(n2, t5, "pointerdown", { node: r2 });
-} } }), k$a = /* @__PURE__ */ new WeakMap();
-let y$9 = 0;
-const x$a = (e2) => {
+} } }), k$b = /* @__PURE__ */ new WeakMap();
+let y$a = 0;
+const x$b = (e2) => {
   if (null == e2) return [];
   if (Array.isArray(e2)) return e2.map(((e3) => "string" == typeof e3 || "number" == typeof e3 ? String(e3) : null)).filter(((e3) => !!e3));
   if (e2 instanceof Set) return Array.from(e2).map(((e3) => "string" == typeof e3 || "number" == typeof e3 ? String(e3) : null)).filter(((e3) => !!e3));
   if ("string" == typeof e2) {
     try {
       const t5 = JSON.parse(e2);
-      if (Array.isArray(t5)) return x$a(t5);
+      if (Array.isArray(t5)) return x$b(t5);
     } catch (t5) {
       const r2 = e2.split(/[\,\s]+/).map(((e3) => e3.trim())).filter(Boolean);
       if (r2.length) return r2;
@@ -3000,48 +3103,48 @@ const x$a = (e2) => {
     return e2 ? [e2] : [];
   }
   return [];
-}, _$7 = (e2) => null == e2 ? [] : Array.isArray(e2) ? e2 : [e2], z$a = (e2) => {
+}, _$8 = (e2) => null == e2 ? [] : Array.isArray(e2) ? e2 : [e2], z$b = (e2) => {
   if (!e2) return null;
   const t5 = e2.id;
   if (null != t5) {
     const r3 = String(t5).trim();
-    if (r3) return k$a.delete(e2), r3;
+    if (r3) return k$b.delete(e2), r3;
   }
-  const r2 = k$a.get(e2);
+  const r2 = k$b.get(e2);
   if (r2) return e2.id = r2, r2;
   var i2;
-  const o2 = `${("string" == typeof (i2 = e2.value) && i2.trim() ? i2.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 32) || null : "number" != typeof i2 || Number.isNaN(i2) ? null : String(i2)) ?? "node"}-${(++y$9).toString(36)}`;
-  return k$a.set(e2, o2), e2.id = o2, o2;
+  const o2 = `${("string" == typeof (i2 = e2.value) && i2.trim() ? i2.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 32) || null : "number" != typeof i2 || Number.isNaN(i2) ? null : String(i2)) ?? "node"}-${(++y$a).toString(36)}`;
+  return k$b.set(e2, o2), e2.id = o2, o2;
 }, S$7 = (e2) => {
   const t5 = [];
   for (const r2 of e2) if ("string" == typeof r2 || "number" == typeof r2) {
     const e3 = String(r2);
     e3 && t5.push(e3);
   } else {
-    const e3 = z$a(r2);
+    const e3 = z$b(r2);
     e3 && t5.push(e3);
   }
   return t5;
-}, P$4 = (e2, t5) => {
+}, P$5 = (e2, t5) => {
   let r2, i2 = false;
   const o2 = (e3) => {
     var r3, o3;
-    (r3 = x$a(t5.getProp())).length === (o3 = e3).length && r3.every(((e4, t6) => e4 === o3[t6])) || (i2 = true, t5.setProp([...e3]), i2 = false);
+    (r3 = x$b(t5.getProp())).length === (o3 = e3).length && r3.every(((e4, t6) => e4 === o3[t6])) || (i2 = true, t5.setProp([...e3]), i2 = false);
   };
   return { syncProp: o2, applyIdsWithSanitization: (e3, i3, o3) => {
-    const n2 = x$a(e3), a2 = t5.getManager();
+    const n2 = x$b(e3), a2 = t5.getManager();
     if (!a2) return r2 = [...n2], o3(n2, i3), n2;
     const { ids: s2 } = a2.data.node.sanitizeIds(t5.getDataset(), n2);
     return r2 = void 0, o3(s2, i3), s2;
   }, handlePropChange: (e3, t6) => {
     if (i2) return;
-    const r3 = t6(x$a(e3), { emit: false, updateProp: false });
+    const r3 = t6(x$b(e3), { emit: false, updateProp: false });
     o2(r3);
   }, initialisePersistentState: (e3, t6, i3) => {
-    const o3 = x$a(e3);
+    const o3 = x$b(e3);
     return o3.length ? (t6(o3, { emit: false, updateProp: true }), void (r2 = void 0)) : r2 && r2.length ? (t6(r2, { emit: false, updateProp: true }), void (r2 = void 0)) : void (i3 && i3());
   }, reconcileAfterDatasetChange: (e3, r3, i3) => {
-    const n2 = x$a(t5.getProp());
+    const n2 = x$b(t5.getProp());
     if (n2.length) {
       const e4 = r3(n2, { emit: false, updateProp: false });
       o2(e4);
@@ -3056,46 +3159,46 @@ const x$a = (e2) => {
     r2 = void 0;
   } };
 };
-var C$8, D$7, E$8, I$6, A$4, M$8, N, W$9, T$6, j$6, L$5, F$2, R$4, V$3 = function(e2, t5, r2, i2) {
+var C$9, D$8, E$9, I$6, A$5, M$a, N$1, W$a, T$7, j$8, L$6, F$3, R$6, V$4 = function(e2, t5, r2, i2) {
   if ("a" === r2 && !i2) throw new TypeError("Private accessor was defined without a getter");
   if ("function" == typeof t5 ? e2 !== t5 || !i2 : !t5.has(e2)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return "m" === r2 ? i2 : "a" === r2 ? i2.call(e2) : i2 ? i2.value : t5.get(e2);
-}, $$2 = function(e2, t5, r2, i2, o2) {
+}, $$3 = function(e2, t5, r2, i2, o2) {
   if ("function" == typeof t5 ? e2 !== t5 || true : !t5.has(e2)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
   return t5.set(e2, r2), r2;
 };
-const G = class {
+const G$1 = class G {
   constructor(e2) {
-    o$2(this, e2), this.lfEvent = G$3(this, "lf-tree-event"), C$8.add(this), this.expandedNodes = /* @__PURE__ */ new Set(), this.hiddenNodes = /* @__PURE__ */ new Set(), this.selectedNode = null, this.lfAccordionLayout = true, this.lfDataset = null, this.lfEmpty = "Empty data.", this.lfFilter = true, this.lfGrid = false, this.lfRipple = true, this.lfSelectable = true, this.lfStyle = "", this.lfUiSize = "medium", D$7.set(this, void 0), E$8.set(this, LF_TREE_BLOCKS), I$6.set(this, LF_TREE_PARTS), A$4.set(this, CY_ATTRIBUTES), M$8.set(this, LF_ATTRIBUTES), N.set(this, LF_STYLE_ID), W$9.set(this, LF_WRAPPER_ID), this._filterValue = "", T$6.set(this, void 0), j$6.set(this, void 0), L$5.set(this, void 0);
+    o$2(this, e2), this.lfEvent = G$4(this, "lf-tree-event"), C$9.add(this), this.expandedNodes = /* @__PURE__ */ new Set(), this.hiddenNodes = /* @__PURE__ */ new Set(), this.selectedNode = null, this.lfAccordionLayout = true, this.lfDataset = null, this.lfEmpty = "Empty data.", this.lfFilter = true, this.lfGrid = false, this.lfRipple = true, this.lfSelectable = true, this.lfStyle = "", this.lfUiSize = "medium", D$8.set(this, void 0), E$9.set(this, LF_TREE_BLOCKS), I$6.set(this, LF_TREE_PARTS), A$5.set(this, CY_ATTRIBUTES), M$a.set(this, LF_ATTRIBUTES), N$1.set(this, LF_STYLE_ID), W$a.set(this, LF_WRAPPER_ID), this._filterValue = "", T$7.set(this, void 0), j$8.set(this, void 0), L$6.set(this, void 0);
   }
   handleDatasetChange() {
-    if (!V$3(this, D$7, "f") || !V$3(this, j$6, "f") || !V$3(this, L$5, "f")) return;
-    const e2 = new Set(this.expandedNodes), t5 = z$a(this.selectedNode);
-    V$3(this, j$6, "f").reconcileAfterDatasetChange(e2), V$3(this, L$5, "f").reconcileAfterDatasetChange(t5), this.hiddenNodes = /* @__PURE__ */ new Set();
+    if (!V$4(this, D$8, "f") || !V$4(this, j$8, "f") || !V$4(this, L$6, "f")) return;
+    const e2 = new Set(this.expandedNodes), t5 = z$b(this.selectedNode);
+    V$4(this, j$8, "f").reconcileAfterDatasetChange(e2), V$4(this, L$6, "f").reconcileAfterDatasetChange(t5), this.hiddenNodes = /* @__PURE__ */ new Set();
   }
   handleExpandedPropChange(e2) {
-    V$3(this, j$6, "f") && V$3(this, j$6, "f").handlePropChange(e2);
+    V$4(this, j$8, "f") && V$4(this, j$8, "f").handlePropChange(e2);
   }
   handleSelectedPropChange(e2) {
-    V$3(this, L$5, "f") && V$3(this, L$5, "f").handlePropChange(e2);
+    V$4(this, L$6, "f") && V$4(this, L$6, "f").handlePropChange(e2);
   }
   handleInitialDepthChange() {
-    V$3(this, j$6, "f") && V$3(this, j$6, "f").handleInitialDepthChange(new Set(this.expandedNodes));
+    V$4(this, j$8, "f") && V$4(this, j$8, "f").handleInitialDepthChange(new Set(this.expandedNodes));
   }
   handleSelectableChange(e2) {
-    V$3(this, L$5, "f") && V$3(this, L$5, "f").handleSelectableChange(!!e2);
+    V$4(this, L$6, "f") && V$4(this, L$6, "f").handleSelectableChange(!!e2);
   }
   handleFilterToggle(e2) {
     e2 || (this._filterValue = "", this.hiddenNodes = /* @__PURE__ */ new Set());
   }
   onLfEvent(e2, t5, r2 = {}) {
     var _a2, _b2;
-    const i2 = V$3(this, D$7, "f"), o2 = r2.node ?? null;
+    const i2 = V$4(this, D$8, "f"), o2 = r2.node ?? null;
     if (i2 && "pointerdown" === t5 && this.lfRipple) {
-      const t6 = z$a(o2), r3 = t6 ? (_a2 = V$3(this, T$6, "f")) == null ? void 0 : _a2.elements.refs.rippleSurfaces[t6] : void 0;
+      const t6 = z$b(o2), r3 = t6 ? (_a2 = V$4(this, T$7, "f")) == null ? void 0 : _a2.elements.refs.rippleSurfaces[t6] : void 0;
       r3 && i2.effects.ripple(e2, r3);
     }
-    const n2 = { comp: this, eventType: t5, id: (_b2 = this.rootElement) == null ? void 0 : _b2.id, originalEvent: e2, node: o2 ?? void 0, expandedNodeIds: r2.expandedNodeIds ?? (V$3(this, j$6, "f") ? V$3(this, j$6, "f").getIds() : []), selectedNodeIds: r2.selectedNodeIds ?? (V$3(this, L$5, "f") ? V$3(this, L$5, "f").getIds() : []) };
+    const n2 = { comp: this, eventType: t5, id: (_b2 = this.rootElement) == null ? void 0 : _b2.id, originalEvent: e2, node: o2 ?? void 0, expandedNodeIds: r2.expandedNodeIds ?? (V$4(this, j$8, "f") ? V$4(this, j$8, "f").getIds() : []), selectedNodeIds: r2.selectedNodeIds ?? (V$4(this, L$6, "f") ? V$4(this, L$6, "f").getIds() : []) };
     this.lfEvent.emit(n2);
   }
   async getDebugInfo() {
@@ -3109,23 +3212,23 @@ const G = class {
     vt$1(this);
   }
   async getExpandedNodeIds() {
-    return V$3(this, j$6, "f") ? V$3(this, j$6, "f").getIds() : [];
+    return V$4(this, j$8, "f") ? V$4(this, j$8, "f").getIds() : [];
   }
   async getSelectedNodeIds() {
-    return V$3(this, L$5, "f") ? V$3(this, L$5, "f").getIds() : [];
+    return V$4(this, L$6, "f") ? V$4(this, L$6, "f").getIds() : [];
   }
   async setExpandedNodes(e2) {
-    if (!V$3(this, j$6, "f")) return;
-    if (null == e2) return void V$3(this, j$6, "f").applyIds([], { emit: true, updateProp: true });
-    const t5 = _$7(e2), r2 = S$7(t5);
-    V$3(this, j$6, "f").applyIds(r2, { emit: true, updateProp: true });
+    if (!V$4(this, j$8, "f")) return;
+    if (null == e2) return void V$4(this, j$8, "f").applyIds([], { emit: true, updateProp: true });
+    const t5 = _$8(e2), r2 = S$7(t5);
+    V$4(this, j$8, "f").applyIds(r2, { emit: true, updateProp: true });
   }
   async setSelectedNodes(e2) {
-    V$3(this, L$5, "f") && (null != e2 ? V$3(this, L$5, "f").applyTargets(e2, { emit: true, updateProp: true }) : V$3(this, L$5, "f").applyIds([], { emit: true, updateProp: true }));
+    V$4(this, L$6, "f") && (null != e2 ? V$4(this, L$6, "f").applyTargets(e2, { emit: true, updateProp: true }) : V$4(this, L$6, "f").applyIds([], { emit: true, updateProp: true }));
   }
   async selectByPredicate(e2) {
-    if (!V$3(this, D$7, "f") || !this.lfDataset) return;
-    const t5 = V$3(this, D$7, "f").data.node.find(this.lfDataset, e2);
+    if (!V$4(this, D$8, "f") || !this.lfDataset) return;
+    const t5 = V$4(this, D$8, "f").data.node.find(this.lfDataset, e2);
     if (t5) return await this.setSelectedNodes(t5), t5;
     await this.setSelectedNodes(null);
   }
@@ -3135,60 +3238,60 @@ const G = class {
     }), e2);
   }
   connectedCallback() {
-    V$3(this, D$7, "f") && V$3(this, D$7, "f").theme.register(this);
+    V$4(this, D$8, "f") && V$4(this, D$8, "f").theme.register(this);
   }
   async componentWillLoad() {
     var e2;
-    $$2(this, D$7, await a(this)), $$2(this, T$6, { controller: { get: { blocks: V$3(this, E$8, "f"), columns: () => {
+    $$3(this, D$8, await a(this)), $$3(this, T$7, { controller: { get: { blocks: V$4(this, E$9, "f"), columns: () => {
       var _a2;
       return ((_a2 = this.lfDataset) == null ? void 0 : _a2.columns) || [];
-    }, compInstance: this, cyAttributes: V$3(this, A$4, "f"), dataset: () => this.lfDataset, filterValue: () => this._filterValue, isExpanded: (e3) => {
-      const t5 = z$a(e3);
+    }, compInstance: this, cyAttributes: V$4(this, A$5, "f"), dataset: () => this.lfDataset, filterValue: () => this._filterValue, isExpanded: (e3) => {
+      const t5 = z$b(e3);
       return !!t5 && this.expandedNodes.has(t5);
     }, isGrid: () => {
       var _a2, _b2;
       return !(!this.lfGrid || !((_b2 = (_a2 = this.lfDataset) == null ? void 0 : _a2.columns) == null ? void 0 : _b2.length));
-    }, isHidden: (e3) => this.hiddenNodes.has(e3), isSelected: (e3) => this.selectedNode === e3, lfAttributes: V$3(this, M$8, "f"), manager: V$3(this, D$7, "f"), parts: V$3(this, I$6, "f"), state: { expansion: { ids: () => {
+    }, isHidden: (e3) => this.hiddenNodes.has(e3), isSelected: (e3) => this.selectedNode === e3, lfAttributes: V$4(this, M$a, "f"), manager: V$4(this, D$8, "f"), parts: V$4(this, I$6, "f"), state: { expansion: { ids: () => {
       var _a2;
-      return ((_a2 = V$3(this, j$6, "f")) == null ? void 0 : _a2.getIds()) ?? Array.from(this.expandedNodes);
+      return ((_a2 = V$4(this, j$8, "f")) == null ? void 0 : _a2.getIds()) ?? Array.from(this.expandedNodes);
     }, nodes: () => this.expandedNodes }, selection: { ids: () => {
-      if (V$3(this, L$5, "f")) return V$3(this, L$5, "f").getIds();
-      const e3 = z$a(this.selectedNode);
+      if (V$4(this, L$6, "f")) return V$4(this, L$6, "f").getIds();
+      const e3 = z$b(this.selectedNode);
       return e3 ? [e3] : [];
-    }, node: () => this.selectedNode } }, expandedProp: () => this.lfExpandedNodeIds, selectedProp: () => this.lfSelectedNodeIds, initialExpansionDepth: () => this.lfInitialExpansionDepth, selectable: () => this.lfSelectable, allowsMultiSelect: () => V$3(this, C$8, "m", F$2).call(this), canSelectNode: (e3) => V$3(this, C$8, "m", R$4).call(this, e3) }, set: { filter: { apply: (e3) => {
-      if (!V$3(this, D$7, "f") || !this.lfDataset) return void (this.hiddenNodes = /* @__PURE__ */ new Set());
+    }, node: () => this.selectedNode } }, expandedProp: () => this.lfExpandedNodeIds, selectedProp: () => this.lfSelectedNodeIds, initialExpansionDepth: () => this.lfInitialExpansionDepth, selectable: () => this.lfSelectable, allowsMultiSelect: () => V$4(this, C$9, "m", F$3).call(this), canSelectNode: (e3) => V$4(this, C$9, "m", R$6).call(this, e3) }, set: { filter: { apply: (e3) => {
+      if (!V$4(this, D$8, "f") || !this.lfDataset) return void (this.hiddenNodes = /* @__PURE__ */ new Set());
       if (!e3) return void (this.hiddenNodes = /* @__PURE__ */ new Set());
-      const { filter: t5 } = V$3(this, D$7, "f").data.node, { ancestorNodes: r2, remainingNodes: i2 } = t5(this.lfDataset, { value: e3 }, true), o2 = new Set(i2);
+      const { filter: t5 } = V$4(this, D$8, "f").data.node, { ancestorNodes: r2, remainingNodes: i2 } = t5(this.lfDataset, { value: e3 }, true), o2 = new Set(i2);
       r2 && r2.forEach(((e4) => o2.delete(e4))), this.hiddenNodes = o2;
     }, setValue: (e3) => {
       this._filterValue = e3;
     } }, state: { expansion: { apply: () => {
       var _a2, _b2;
-      const e3 = (_a2 = V$3(this, j$6, "f")) == null ? void 0 : _a2.getIds();
-      void 0 !== e3 && ((_b2 = V$3(this, j$6, "f")) == null ? void 0 : _b2.applyIds(e3, { emit: false, updateProp: true }));
+      const e3 = (_a2 = V$4(this, j$8, "f")) == null ? void 0 : _a2.getIds();
+      void 0 !== e3 && ((_b2 = V$4(this, j$8, "f")) == null ? void 0 : _b2.applyIds(e3, { emit: false, updateProp: true }));
     }, toggle: (e3) => {
       var _a2;
-      return (_a2 = V$3(this, j$6, "f")) == null ? void 0 : _a2.toggle(e3);
+      return (_a2 = V$4(this, j$8, "f")) == null ? void 0 : _a2.toggle(e3);
     }, setNodes: (e3) => {
       this.expandedNodes = new Set(e3);
     }, setProp: (e3) => {
       this.lfExpandedNodeIds = e3;
     } }, selection: { apply: () => {
       var _a2, _b2;
-      const e3 = (_a2 = V$3(this, L$5, "f")) == null ? void 0 : _a2.getIds();
-      void 0 !== e3 && ((_b2 = V$3(this, L$5, "f")) == null ? void 0 : _b2.applyIds(e3, { emit: false, updateProp: true }));
+      const e3 = (_a2 = V$4(this, L$6, "f")) == null ? void 0 : _a2.getIds();
+      void 0 !== e3 && ((_b2 = V$4(this, L$6, "f")) == null ? void 0 : _b2.applyIds(e3, { emit: false, updateProp: true }));
     }, set: (e3) => {
       var _a2;
-      return (_a2 = V$3(this, L$5, "f")) == null ? void 0 : _a2.applyTargets(e3, { emit: true, updateProp: true, node: e3 });
+      return (_a2 = V$4(this, L$6, "f")) == null ? void 0 : _a2.applyTargets(e3, { emit: true, updateProp: true, node: e3 });
     }, clear: () => {
       var _a2;
-      (_a2 = V$3(this, L$5, "f")) == null ? void 0 : _a2.clearSelection({ emit: true, updateProp: true });
+      (_a2 = V$4(this, L$6, "f")) == null ? void 0 : _a2.clearSelection({ emit: true, updateProp: true });
     }, setNode: (e3) => {
       this.selectedNode = e3 ?? null;
     }, setProp: (e3) => {
       this.lfSelectedNodeIds = e3;
-    } } } } }, elements: { jsx: v$6(e2 = () => V$3(this, T$6, "f")), refs: { rippleSurfaces: {}, filterField: null } }, handlers: w$a(e2) }), $$2(this, j$6, ((e3) => {
-      const { controller: t5 } = e3(), r2 = P$4(0, { getProp: () => t5.get.expandedProp(), setProp: (e4) => t5.set.state.expansion.setProp(e4), getDataset: () => t5.get.dataset(), getManager: () => t5.get.manager }), i2 = () => {
+    } } } } }, elements: { jsx: v$6(e2 = () => V$4(this, T$7, "f")), refs: { rippleSurfaces: {}, filterField: null } }, handlers: w$a(e2) }), $$3(this, j$8, ((e3) => {
+      const { controller: t5 } = e3(), r2 = P$5(0, { getProp: () => t5.get.expandedProp(), setProp: (e4) => t5.set.state.expansion.setProp(e4), getDataset: () => t5.get.dataset(), getManager: () => t5.get.manager }), i2 = () => {
         const e4 = t5.get.state.expansion.nodes();
         return Array.from(e4 ?? /* @__PURE__ */ new Set());
       }, o2 = (e4, i3 = {}) => {
@@ -3198,7 +3301,7 @@ const G = class {
       })), a2 = (e4) => {
         const r3 = t5.get.initialExpansionDepth(), i3 = t5.get.dataset(), n3 = (i3 == null ? void 0 : i3.nodes) ?? [], a3 = e4 ? new Set(e4) : /* @__PURE__ */ new Set(), s2 = /* @__PURE__ */ new Set(), l2 = (e5, t6) => {
           for (const i4 of e5) {
-            const e6 = z$a(i4);
+            const e6 = z$b(i4);
             e6 && (null == r3 || t6 < r3 || a3.has(e6)) && s2.add(e6), Array.isArray(i4.children) && i4.children.length > 0 && l2(i4.children, t6 + 1);
           }
         };
@@ -3214,7 +3317,7 @@ const G = class {
       }, handleInitialDepthChange(e4) {
         a2(e4);
       }, toggle: (e4) => {
-        const t6 = z$a(e4);
+        const t6 = z$b(e4);
         if (!t6) return;
         const r3 = new Set(i2());
         r3.has(t6) ? r3.delete(t6) : r3.add(t6), n2(Array.from(r3), { emit: true, updateProp: true, node: e4 });
@@ -3223,8 +3326,8 @@ const G = class {
           a2(new Set(i2()));
         }));
       } };
-    })((() => V$3(this, T$6, "f")))), $$2(this, L$5, ((e3) => {
-      const { controller: t5 } = e3(), r2 = P$4(0, { getProp: () => t5.get.selectedProp(), setProp: (e4) => t5.set.state.selection.setProp(e4), getDataset: () => t5.get.dataset(), getManager: () => t5.get.manager });
+    })((() => V$4(this, T$7, "f")))), $$3(this, L$6, ((e3) => {
+      const { controller: t5 } = e3(), r2 = P$5(0, { getProp: () => t5.get.selectedProp(), setProp: (e4) => t5.set.state.selection.setProp(e4), getDataset: () => t5.get.dataset(), getManager: () => t5.get.manager });
       let i2 = [];
       const o2 = (e4, o3, n3 = {}) => {
         const a3 = t5.get.allowsMultiSelect() ? e4 : e4.slice(0, 1);
@@ -3245,7 +3348,7 @@ const G = class {
       };
       return { applyIds: a2, applyTargets: (e4, t6 = {}) => {
         if (null == e4) return a2([], t6);
-        const r3 = _$7(e4), i3 = S$7(r3);
+        const r3 = _$8(e4), i3 = S$7(r3);
         return a2(i3, t6);
       }, handlePropChange: (e4) => {
         r2.handlePropChange(e4, a2);
@@ -3260,287 +3363,67 @@ const G = class {
       }, handleSelectableChange: (e4) => {
         e4 || n2({ updateProp: true });
       }, getIds: () => [...i2], clearSelection: n2 };
-    })((() => V$3(this, T$6, "f")))), V$3(this, j$6, "f").initialisePersistentState(this.lfExpandedNodeIds), V$3(this, L$5, "f").initialisePersistentState(this.lfSelectedNodeIds), V$3(this, L$5, "f").handleSelectableChange(this.lfSelectable), this.handleDatasetChange();
+    })((() => V$4(this, T$7, "f")))), V$4(this, j$8, "f").initialisePersistentState(this.lfExpandedNodeIds), V$4(this, L$6, "f").initialisePersistentState(this.lfSelectedNodeIds), V$4(this, L$6, "f").handleSelectableChange(this.lfSelectable), this.handleDatasetChange();
   }
   componentDidLoad() {
-    const { info: e2 } = V$3(this, D$7, "f").debug;
+    const { info: e2 } = V$4(this, D$8, "f").debug;
     this.onLfEvent(new CustomEvent("ready"), "ready"), e2.update(this, "did-load");
   }
   componentWillRender() {
-    const { info: e2 } = V$3(this, D$7, "f").debug;
+    const { info: e2 } = V$4(this, D$8, "f").debug;
     e2.update(this, "will-render");
   }
   componentDidRender() {
-    const { debug: e2 } = V$3(this, D$7, "f");
+    const { debug: e2 } = V$4(this, D$8, "f");
     e2.info.update(this, "did-render");
   }
   render() {
     var _a2, _b2;
-    const { bemClass: t5, setLfStyle: r2 } = V$3(this, D$7, "f").theme, { tree: i2 } = V$3(this, E$8, "f"), { lfDataset: n2, lfStyle: a2, lfGrid: s2 } = this, l2 = (_a2 = V$3(this, T$6, "f")) == null ? void 0 : _a2.elements.jsx, d2 = !((_b2 = n2 == null ? void 0 : n2.nodes) == null ? void 0 : _b2.length);
-    return U$5(A$9, { key: "a66a168c8ea935d465b81e5fe80e755461934a3a" }, a2 && U$5("style", { key: "4213d1792922a35486c77075b80800ec59edf0d3", id: V$3(this, N, "f") }, r2(this)), U$5("div", { key: "4e5a884b093d78d0f1ccce636751dded3f954f41", id: V$3(this, W$9, "f") }, U$5("div", { key: "df3e5216d0d5e2112fad6526d2484910d7077b22", class: t5(i2._) + (s2 ? " tree--grid" : ""), part: V$3(this, I$6, "f").tree }, l2 == null ? void 0 : l2.filter(), l2 == null ? void 0 : l2.header(), d2 ? l2 == null ? void 0 : l2.empty() : l2 == null ? void 0 : l2.nodes())));
+    const { bemClass: t5, setLfStyle: r2 } = V$4(this, D$8, "f").theme, { tree: i2 } = V$4(this, E$9, "f"), { lfDataset: n2, lfStyle: a2, lfGrid: s2 } = this, l2 = (_a2 = V$4(this, T$7, "f")) == null ? void 0 : _a2.elements.jsx, d2 = !((_b2 = n2 == null ? void 0 : n2.nodes) == null ? void 0 : _b2.length);
+    return U$6(A$a, { key: "abee09c18c27893644ee7111a6f6404269707d3b" }, a2 && U$6("style", { key: "c3cb5b9b8ce1513fa2a5a312a3593f2c3b3c9a3b", id: V$4(this, N$1, "f") }, r2(this)), U$6("div", { key: "db405f809f90e210e06123d0a0889874170e2bc3", id: V$4(this, W$a, "f") }, U$6("div", { key: "04c11088b7d4c125bebef68744181c987282be01", class: t5(i2._) + (s2 ? " tree--grid" : ""), part: V$4(this, I$6, "f").tree }, l2 == null ? void 0 : l2.filter(), l2 == null ? void 0 : l2.header(), d2 ? l2 == null ? void 0 : l2.empty() : l2 == null ? void 0 : l2.nodes())));
   }
   disconnectedCallback() {
     var _a2;
-    (_a2 = V$3(this, D$7, "f")) == null ? void 0 : _a2.theme.unregister(this);
+    (_a2 = V$4(this, D$8, "f")) == null ? void 0 : _a2.theme.unregister(this);
   }
   get rootElement() {
-    return q$4(this);
+    return q$5(this);
   }
   static get watchers() {
     return { lfDataset: ["handleDatasetChange"], lfExpandedNodeIds: ["handleExpandedPropChange"], lfSelectedNodeIds: ["handleSelectedPropChange"], lfInitialExpansionDepth: ["handleInitialDepthChange"], lfSelectable: ["handleSelectableChange"], lfFilter: ["handleFilterToggle"] };
   }
 };
-D$7 = /* @__PURE__ */ new WeakMap(), E$8 = /* @__PURE__ */ new WeakMap(), I$6 = /* @__PURE__ */ new WeakMap(), A$4 = /* @__PURE__ */ new WeakMap(), M$8 = /* @__PURE__ */ new WeakMap(), N = /* @__PURE__ */ new WeakMap(), W$9 = /* @__PURE__ */ new WeakMap(), T$6 = /* @__PURE__ */ new WeakMap(), j$6 = /* @__PURE__ */ new WeakMap(), L$5 = /* @__PURE__ */ new WeakMap(), C$8 = /* @__PURE__ */ new WeakSet(), F$2 = function() {
+D$8 = /* @__PURE__ */ new WeakMap(), E$9 = /* @__PURE__ */ new WeakMap(), I$6 = /* @__PURE__ */ new WeakMap(), A$5 = /* @__PURE__ */ new WeakMap(), M$a = /* @__PURE__ */ new WeakMap(), N$1 = /* @__PURE__ */ new WeakMap(), W$a = /* @__PURE__ */ new WeakMap(), T$7 = /* @__PURE__ */ new WeakMap(), j$8 = /* @__PURE__ */ new WeakMap(), L$6 = /* @__PURE__ */ new WeakMap(), C$9 = /* @__PURE__ */ new WeakSet(), F$3 = function() {
   return false;
-}, R$4 = function(e2) {
+}, R$6 = function(e2) {
   return !!e2 && !!this.lfSelectable && true !== e2.isDisabled;
-}, G.style = '::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=ripple]{animation-duration:var(--lf-ui-duration-ripple, 675ms);animation-fill-mode:forwards;animation-name:lf-ripple;animation-timing-function:var(--lf-ui-timing-ripple, ease-out);background:var(--lf-ui-ripple-background, var(--lf-color-primary));border-radius:var(--lf-ui-radius-ripple, 50%);height:var(--lf-ui-ripple-height, 100%);left:var(--lf-ui-ripple-x, 50%);opacity:var(--lf-ui-opacity-ripple, 0.5);pointer-events:none;position:absolute;top:var(--lf-ui-ripple-y, 50%);transform:scale(0);width:var(--lf-ui-ripple-width, 100%)}@keyframes lf-ripple{from{transform:scale(0)}to{opacity:0;transform:scale(4)}}[data-lf=ripple-surface]{cursor:pointer;height:100%;left:0;overflow:hidden;position:absolute;top:0;width:100%}:host{display:block;font-family:var(--lf-tree-font-family, var(--lf-font-family-primary));font-size:var(--lf-tree-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-tree-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-tree-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-tree-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-tree-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-tree-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-tree-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-tree-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{width:100%;height:100%}:host([lf-accordion-layout]) .node[data-depth="0"]{border:0;border-style:solid;border-radius:var(--lf-tree-border-radius, var(--lf-ui-border-radius));background-color:rgba(var(--lf-tree-color-surface, var(--lf-color-surface)), 0.375);color:rgb(var(--lf-tree-color-on-surface, var(--lf-color-on-surface)));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);font-size:1em;height:var(--lf-tree-accordion-node-height, 4em)}:host([lf-accordion-layout]) .node[data-depth="0"] .node__value{font-size:0.775em;letter-spacing:0.0892857143em;line-height:inherit;text-transform:uppercase;font-size:1em}:host([lf-selectable]) .node:hover{background-color:rgba(var(--lf-tree-color-on-bg, var(--lf-color-on-bg)), 0.075);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}:host([lf-selectable]) .node--selected{background-color:rgba(var(--lf-tree-color-on-bg, var(--lf-color-on-bg)), 0.175);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}:host([lf-selectable]) .node--selected:hover{background-color:rgba(var(--lf-tree-color-on-bg, var(--lf-color-on-bg)), 0.225);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.tree{border:0;border-style:solid;border-radius:var(--lf-tree-border-radius, var(--lf-ui-border-radius));background-color:rgba(var(--lf-tree-color-bg, var(--lf-color-bg)), 0.275);color:rgb(var(--lf-tree-color-on-bg, var(--lf-color-on-bg)));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:var(--lf-tree-padding, 0)}.tree__filter{border:0;border-style:solid;border-radius:var(--lf-tree-border-radius, var(--lf-ui-border-radius));border-bottom-left-radius:0;border-bottom-right-radius:0;background-color:rgba(var(--lf-tree-color-surface, var(--lf-color-surface)), 0.875);color:rgb(var(--lf-tree-color-on-surface, var(--lf-color-on-surface)));backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px);position:sticky;top:0;z-index:1}.tree--grid{align-content:start;display:grid;height:100%;overflow:auto;width:100%}.tree--grid .header{position:sticky;top:0;z-index:2;background:var(--lf-tree-color-bg, rgba(0, 0, 0, 0.3));backdrop-filter:blur(10px);font-size:0.85em;line-height:1.2}.tree--grid .header__row{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(120px, auto);column-gap:0.5em;padding:0.5em 1em 0.25em 3.25em;box-sizing:border-box}.tree--grid .header__cell{font-size:0.875em;font-weight:400;line-height:1.25em;letter-spacing:0.2em;font-weight:600;text-transform:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.node{color:rgb(var(--lf-tree-color-on-bg, var(--lf-color-on-bg)));transition:all 200ms cubic-bezier(0.4, 0, 0.6, 1);box-sizing:border-box;height:var(--lf-tree-node-height, 2em);padding:var(--lftree-node-padding, 0 1em);position:relative}.node__content{width:100%;height:100%;align-items:center;display:flex}.node__dropdown,.node__expand,.node__icon{cursor:pointer;margin:0}.node__dropdown,.node__expand{transition:all 200ms cubic-bezier(0.4, 0, 0.6, 1);overflow:hidden}.node__dropdown:hover,.node__expand:hover{opacity:0.75}.node__dropdown{-webkit-mask:var(--lf-icon-dropdown);mask:var(--lf-icon-dropdown);-webkit-mask-position:center;-webkit-mask-repeat:no-repeat;-webkit-mask-size:contain;mask-position:center;mask-repeat:no-repeat;mask-size:contain;background-color:rgba(var(--lf-tree-color-on-bg, var(--lf-color-on-bg)), 1);height:1.5em;width:1.5em;overflow:hidden}.node__dropdown--expanded{transform:rotate(180deg)}.node__dropdown--expanded:hover{opacity:0.75}.node__dropdown--hidden{visibility:hidden}.node__expand{-webkit-mask:var(--lf-icon-collapsed);mask:var(--lf-icon-collapsed);-webkit-mask-position:center;-webkit-mask-repeat:no-repeat;-webkit-mask-size:contain;mask-position:center;mask-repeat:no-repeat;mask-size:contain;background-color:rgba(var(--lf-tree-color-on-bg, var(--lf-color-on-bg)), 1);height:1.5em;width:1.5em;overflow:hidden}.node__expand--expanded{-webkit-mask:var(--lf-icon-expanded);mask:var(--lf-icon-expanded);-webkit-mask-position:center;-webkit-mask-repeat:no-repeat;-webkit-mask-size:contain;mask-position:center;mask-repeat:no-repeat;mask-size:contain;background-color:rgba(var(--lf-tree-color-on-bg, var(--lf-color-on-bg)), 1);height:1.5em;width:1.5em;overflow:hidden}.node__expand--hidden{visibility:hidden}.node__icon{background-color:rgba(var(--lf-tree-color-on-bg, var(--lf-color-on-bg)), 1);height:1.5em;width:1.5em;overflow:hidden}.node__padding{height:100%;width:calc(1.75em * var(--lf_tree_padding_multiplier))}.node__value{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:0.875em;font-weight:500;line-height:1.5em;letter-spacing:0.01em;margin:0 0 0 0.5em;width:100%}.node__value--grid .node__grid{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(120px, auto);column-gap:0.5em;align-items:center;padding:0 1em 0 0;box-sizing:border-box;min-height:100%}.node__value--grid .node__grid-cell{font-size:0.875em;font-weight:500;line-height:1.5em;letter-spacing:0.01em;display:flex;align-items:center;min-height:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.node__value--grid .node__grid-cell--value{font-weight:500}.no-matches{color:rgb(var(--lf-tree-color-on-bg, var(--lf-color-on-bg)));align-items:center;box-sizing:border-box;display:flex;justify-content:center;margin:auto;padding:1em;width:100%}.no-matches__icon{-webkit-mask:var(--lf-icon-warning);mask:var(--lf-icon-warning);-webkit-mask-position:center;-webkit-mask-repeat:no-repeat;-webkit-mask-size:contain;mask-position:center;mask-repeat:no-repeat;mask-size:contain;background-color:rgba(var(--lf-tree-color-on-bg, var(--lf-color-on-bg)), 1);height:1.5em;width:1.5em;overflow:hidden;margin-right:0.375em}.no-matches__text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:0.875em;font-weight:400;line-height:1.25em;letter-spacing:0.2em}.no-matches__filter{color:var(--lf-primary-color)}.empty-data{width:100%;height:100%;font-size:1em;font-weight:400;line-height:1.6em;letter-spacing:0em;margin-bottom:1em;align-items:center;display:flex;justify-content:center;margin:1em 0}';
-const p8b14d5a1_entry = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+}, G$1.style = '::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=ripple]{animation-duration:var(--lf-ui-duration-ripple, 675ms);animation-fill-mode:forwards;animation-name:lf-ripple;animation-timing-function:var(--lf-ui-timing-ripple, ease-out);background:var(--lf-ui-ripple-background, var(--lf-color-primary));border-radius:var(--lf-ui-radius-ripple, 50%);height:var(--lf-ui-ripple-height, 100%);left:var(--lf-ui-ripple-x, 50%);opacity:var(--lf-ui-opacity-ripple, 0.5);pointer-events:none;position:absolute;top:var(--lf-ui-ripple-y, 50%);transform:scale(0);width:var(--lf-ui-ripple-width, 100%)}@keyframes lf-ripple{from{transform:scale(0)}to{opacity:0;transform:scale(4)}}[data-lf=ripple-surface]{cursor:pointer;height:100%;left:0;overflow:hidden;position:absolute;top:0;width:100%}:host{display:block;font-family:var(--lf-tree-font-family, var(--lf-font-family-primary));font-size:var(--lf-tree-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-tree-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-tree-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-tree-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-tree-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-tree-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-tree-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-tree-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{width:100%;height:100%}:host([lf-accordion-layout]) .node[data-depth="0"]{border:0;border-style:solid;border-radius:var(--lf-tree-border-radius, var(--lf-ui-border-radius));background-color:rgba(var(--lf-tree-color-surface, var(--lf-color-surface)), 0.375);color:rgb(var(--lf-tree-color-on-surface, var(--lf-color-on-surface)));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);font-size:1em;height:var(--lf-tree-accordion-node-height, 4em)}:host([lf-accordion-layout]) .node[data-depth="0"] .node__value{font-size:0.775em;letter-spacing:0.0892857143em;line-height:inherit;text-transform:uppercase;font-size:1em}:host([lf-selectable]) .node:hover{background-color:rgba(var(--lf-tree-color-on-bg, var(--lf-color-on-bg)), 0.075);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}:host([lf-selectable]) .node--selected{background-color:rgba(var(--lf-tree-color-on-bg, var(--lf-color-on-bg)), 0.175);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}:host([lf-selectable]) .node--selected:hover{background-color:rgba(var(--lf-tree-color-on-bg, var(--lf-color-on-bg)), 0.225);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.tree{border:0;border-style:solid;border-radius:var(--lf-tree-border-radius, var(--lf-ui-border-radius));background-color:rgba(var(--lf-tree-color-bg, var(--lf-color-bg)), 0.275);color:rgb(var(--lf-tree-color-on-bg, var(--lf-color-on-bg)));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:var(--lf-tree-padding, 0)}.tree__filter{border:0;border-style:solid;border-radius:var(--lf-tree-border-radius, var(--lf-ui-border-radius));border-bottom-left-radius:0;border-bottom-right-radius:0;background-color:rgba(var(--lf-tree-color-surface, var(--lf-color-surface)), 0.875);color:rgb(var(--lf-tree-color-on-surface, var(--lf-color-on-surface)));backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px);position:sticky;top:0;z-index:1}.tree--grid{align-content:start;display:grid;height:100%;overflow:auto;width:100%}.tree--grid .header{position:sticky;top:0;z-index:2;background:var(--lf-tree-color-bg, rgba(0, 0, 0, 0.3));backdrop-filter:blur(10px);font-size:0.85em;line-height:1.2}.tree--grid .header__row{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(120px, auto);column-gap:0.5em;padding:0.5em 1em 0.25em 3.25em;box-sizing:border-box}.tree--grid .header__cell{font-size:0.875em;font-weight:400;line-height:1.25em;letter-spacing:0.2em;font-weight:600;text-transform:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.node{color:rgb(var(--lf-tree-color-on-bg, var(--lf-color-on-bg)));transition:all 200ms cubic-bezier(0.4, 0, 0.6, 1);box-sizing:border-box;height:var(--lf-tree-node-height, 2em);padding:var(--lftree-node-padding, 0 1em);position:relative}.node__content{width:100%;height:100%;align-items:center;display:flex}.node__dropdown,.node__expand,.node__icon{cursor:pointer;margin:0}.node__dropdown,.node__expand{transition:all 200ms cubic-bezier(0.4, 0, 0.6, 1);overflow:hidden}.node__dropdown:hover,.node__expand:hover{opacity:0.75}.node__dropdown{-webkit-mask:var(--lf-icon-dropdown);mask:var(--lf-icon-dropdown);-webkit-mask-position:center;-webkit-mask-repeat:no-repeat;-webkit-mask-size:contain;mask-position:center;mask-repeat:no-repeat;mask-size:contain;background-color:rgba(var(--lf-tree-color-on-bg, var(--lf-color-on-bg)), 1);height:1.5em;width:1.5em;overflow:hidden}.node__dropdown--expanded{transform:rotate(180deg)}.node__dropdown--expanded:hover{opacity:0.75}.node__dropdown--hidden{visibility:hidden}.node__expand{-webkit-mask:var(--lf-icon-collapsed);mask:var(--lf-icon-collapsed);-webkit-mask-position:center;-webkit-mask-repeat:no-repeat;-webkit-mask-size:contain;mask-position:center;mask-repeat:no-repeat;mask-size:contain;background-color:rgba(var(--lf-tree-color-on-bg, var(--lf-color-on-bg)), 1);height:1.5em;width:1.5em;overflow:hidden}.node__expand--expanded{-webkit-mask:var(--lf-icon-expanded);mask:var(--lf-icon-expanded);-webkit-mask-position:center;-webkit-mask-repeat:no-repeat;-webkit-mask-size:contain;mask-position:center;mask-repeat:no-repeat;mask-size:contain;background-color:rgba(var(--lf-tree-color-on-bg, var(--lf-color-on-bg)), 1);height:1.5em;width:1.5em;overflow:hidden}.node__expand--hidden{visibility:hidden}.node__icon{background-color:rgba(var(--lf-tree-color-on-bg, var(--lf-color-on-bg)), 1);height:1.5em;width:1.5em;overflow:hidden}.node__padding{height:100%;width:calc(1.75em * var(--lf_tree_padding_multiplier))}.node__value{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:0.875em;font-weight:500;line-height:1.5em;letter-spacing:0.01em;margin:0 0 0 0.5em;width:100%}.node__value--grid .node__grid{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(120px, auto);column-gap:0.5em;align-items:center;padding:0 1em 0 0;box-sizing:border-box;min-height:100%}.node__value--grid .node__grid-cell{font-size:0.875em;font-weight:500;line-height:1.5em;letter-spacing:0.01em;display:flex;align-items:center;min-height:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.node__value--grid .node__grid-cell--value{font-weight:500}.no-matches{color:rgb(var(--lf-tree-color-on-bg, var(--lf-color-on-bg)));align-items:center;box-sizing:border-box;display:flex;justify-content:center;margin:auto;padding:1em;width:100%}.no-matches__icon{-webkit-mask:var(--lf-icon-warning);mask:var(--lf-icon-warning);-webkit-mask-position:center;-webkit-mask-repeat:no-repeat;-webkit-mask-size:contain;mask-position:center;mask-repeat:no-repeat;mask-size:contain;background-color:rgba(var(--lf-tree-color-on-bg, var(--lf-color-on-bg)), 1);height:1.5em;width:1.5em;overflow:hidden;margin-right:0.375em}.no-matches__text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:0.875em;font-weight:400;line-height:1.25em;letter-spacing:0.2em}.no-matches__filter{color:var(--lf-primary-color)}.empty-data{width:100%;height:100%;font-size:1em;font-weight:400;line-height:1.6em;letter-spacing:0em;margin-bottom:1em;align-items:center;display:flex;justify-content:center;margin:1em 0}';
+const p62bc1582_entry = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
-  lf_tree: G
+  lf_tree: G$1
 }, Symbol.toStringTag, { value: "Module" }));
-const m$6 = (e2) => ({ dropdown: () => {
-  var _a2, _b2;
-  const { controller: i2, elements: a2, handlers: s2 } = e2(), { refs: o2 } = a2, { blocks: l2, cyAttributes: n2, isLoading: r2, lfAttributes: f2, manager: c2, parts: h2, highlightedIndex: d2 } = i2.get, { assignRef: u2, sanitizeProps: p2, theme: m2 } = c2, { bemClass: v2 } = m2, { list: w3 } = s2, y2 = i2.get.compInstance, b2 = i2.get.lfDataset(), g3 = y2.lfListProps || {}, k2 = `${((_a2 = y2.rootElement) == null ? void 0 : _a2.id) || "autocomplete"}-dropdown`, z2 = i2.get.inputValue().length >= y2.lfMinChars, x2 = !!((_b2 = b2 == null ? void 0 : b2.nodes) == null ? void 0 : _b2.length), C3 = !r2() && z2 && !x2 && null !== b2, T4 = null !== b2;
-  return U$5("div", { class: v2(l2.dropdown._), "data-cy": n2.dropdownMenu, "data-lf": f2.portal, id: k2, part: h2.dropdown, ref: u2(o2, "dropdown"), role: "listbox" }, U$5("lf-spinner", { lfBarVariant: true, lfDimensions: "1em", lfStyle: ":host { --lf-spinner-min-height: 0.25em; }", ...p2(y2.lfSpinnerProps || {}, "LfSpinner"), class: v2(l2.dropdown._, l2.dropdown.spinner), "data-cy": n2.spinner, "data-lf": f2.fadeIn, lfActive: r2(), part: h2.spinner, ref: u2(o2, "spinner") }), T4 && U$5("lf-list", { lfEmpty: C3 ? "Your search returned no results." : "", lfUiSize: y2.lfUiSize, lfUiState: y2.lfUiState, ...p2(g3, "LfList"), class: v2(l2.dropdown._, l2.dropdown.list), lfDataset: b2, lfSelectable: true, lfValue: d2(), "onLf-list-event": w3, part: h2.list, ref: u2(o2, "list") }));
-}, textfield: () => {
-  var _a2;
-  const { controller: i2, elements: a2, handlers: s2 } = e2(), { refs: o2 } = a2, { blocks: n2, hasCache: r2, highlightedIndex: f2, manager: c2, parts: h2 } = i2.get, { assignRef: d2, sanitizeProps: u2, theme: p2 } = c2, { bemClass: m2 } = p2, { textfield: v2 } = s2, w3 = i2.get.compInstance, y2 = w3.lfTextfieldProps || {}, b2 = (y2 == null ? void 0 : y2.lfHtmlAttributes) || {}, g3 = `${((_a2 = w3.rootElement) == null ? void 0 : _a2.id) || "autocomplete"}-dropdown`, k2 = f2(), z2 = u2({ ...b2, ...{ "aria-autocomplete": "list", "aria-controls": g3, ...k2 >= 0 && { "aria-activedescendant": `${g3}-item-${k2}` } } });
-  return U$5("lf-textfield", { lfUiSize: w3.lfUiSize, lfUiState: w3.lfUiState, ...u2(y2, "LfTextfield"), class: m2(n2.autocomplete._, n2.autocomplete.textfield), lfHtmlAttributes: z2, lfTrailingIconAction: r2() ? LF_THEME_ICONS.dropdown : null, lfValue: w3.lfValue, "onLf-textfield-event": v2, part: h2.textfield, ref: d2(o2, "textfield") });
-} }), v$5 = (t5) => ({ list: async (e2) => {
-  const { eventType: i2, node: a2 } = e2.detail, { controller: s2 } = t5(), o2 = s2.get.compInstance;
-  "click" === i2 ? (s2.set.blurTimeout.clear(), a2 && (s2.set.highlight(-1), await s2.set.select(a2))) : o2.onLfEvent(e2, "lf-event", { node: a2 });
-}, textfield: async (e2) => {
-  const { eventType: i2, inputValue: a2, originalEvent: s2 } = e2.detail || {}, { controller: o2, elements: l2 } = t5(), n2 = o2.get.compInstance;
-  switch (i2) {
-    case "input":
-      await o2.set.input(a2), n2.onLfEvent(e2, "input", { query: a2 });
-      break;
-    case "keydown": {
-      const t6 = s2;
-      await w$9(t6, o2, l2.refs), n2.onLfEvent(e2, "lf-event");
-      break;
-    }
-    case "blur":
-      o2.set.blurTimeout.new((() => {
-        o2.get.isLoading() || (o2.set.list("close"), o2.set.highlight(-1));
-      })), n2.onLfEvent(e2, "lf-event");
-      break;
-    case "click":
-      o2.set.list(), n2.onLfEvent(e2, "lf-event");
-      break;
-    default:
-      n2.onLfEvent(e2, "lf-event");
-  }
-} }), w$9 = async (t5, e2, i2) => {
-  var _a2;
-  const { lfDataset: a2, highlightedIndex: s2 } = e2.get;
-  if (!e2.get.compInstance.lfNavigation) return;
-  const o2 = a2();
-  if (!((_a2 = o2 == null ? void 0 : o2.nodes) == null ? void 0 : _a2.length)) return;
-  let l2 = s2();
-  switch (t5.key) {
-    case "ArrowDown":
-      t5.preventDefault(), l2 = l2 < o2.nodes.length - 1 ? l2 + 1 : 0, e2.set.highlight(l2), l2 >= 0 && i2.list && await i2.list.selectNode(l2);
-      break;
-    case "ArrowUp":
-      t5.preventDefault(), l2 = l2 > 0 ? l2 - 1 : o2.nodes.length - 1, e2.set.highlight(l2), l2 >= 0 && i2.list && await i2.list.selectNode(l2);
-      break;
-    case "Escape":
-      t5.preventDefault(), e2.set.list("close"), e2.set.highlight(-1);
-      break;
-    case "Tab":
-      e2.set.list("close"), e2.set.highlight(-1);
-      break;
-    case "Enter":
-      t5.preventDefault(), e2.set.list();
-  }
-};
-var y$8, b$6, g$8, k$9, z$9, x$9, C$7, T$5, E$7, L$4, D$6, W$8, M$7, S$6, A$3, I$5, V$2, P$3, $$1, j$5 = function(t5, e2, i2, a2) {
-  if ("a" === i2 && !a2) throw new TypeError("Private accessor was defined without a getter");
-  if ("function" == typeof e2 ? t5 !== e2 || !a2 : !e2.has(t5)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
-  return "m" === i2 ? a2 : "a" === i2 ? a2.call(t5) : a2 ? a2.value : e2.get(t5);
-}, q$1 = function(t5, e2, i2, a2, s2) {
-  if ("function" == typeof e2 ? t5 !== e2 || true : !e2.has(t5)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
-  return e2.set(t5, i2), i2;
-};
-const R$3 = class R {
-  constructor(t5) {
-    o$2(this, t5), this.lfEvent = G$3(this, "lf-autocomplete-event"), y$8.add(this), this.highlightedIndex = -1, this.loading = false, this.inputValue = "", this.lastRequestedQuery = "", this.lfAllowFreeInput = true, this.lfCache = false, this.lfCacheTTL = 3e5, this.lfDataset = null, this.lfDebounceMs = 300, this.lfListProps = null, this.lfMaxCacheSize = 100, this.lfMinChars = 3, this.lfNavigation = true, this.lfSpinnerProps = null, this.lfStyle = null, this.lfTextfieldProps = null, this.lfUiSize = "medium", this.lfUiState = "primary", this.lfValue = "", g$8.set(this, void 0), k$9.set(this, null), z$9.set(this, /* @__PURE__ */ new Map()), x$9.set(this, null), C$7.set(this, void 0), T$5.set(this, LF_AUTOCOMPLETE_BLOCKS), E$7.set(this, CY_ATTRIBUTES), L$4.set(this, LF_ATTRIBUTES), D$6.set(this, LF_AUTOCOMPLETE_PARTS), W$8.set(this, LF_STYLE_ID), M$7.set(this, LF_WRAPPER_ID);
-  }
-  async onLfDatasetChange() {
-    j$5(this, g$8, "f").controller.set.dataset(this.lfDataset);
-  }
-  onLoadingChange(t5) {
-    if (t5 && j$5(this, g$8, "f")) {
-      const { dropdown: t6 } = j$5(this, g$8, "f").elements.refs;
-      t6 && !j$5(this, C$7, "f").portal.isInPortal(t6) && j$5(this, g$8, "f").controller.set.list("open");
-    }
-  }
-  onLfEvent(t5, e2, i2) {
-    var _a2;
-    this.lfEvent.emit({ comp: this, eventType: e2, id: ((_a2 = this.rootElement) == null ? void 0 : _a2.id) || "", originalEvent: t5, node: i2 == null ? void 0 : i2.node, query: i2 == null ? void 0 : i2.query });
-  }
-  async clearCache() {
-    j$5(this, z$9, "f").clear();
-  }
-  async clearInput() {
-    await j$5(this, g$8, "f").controller.set.input("");
-  }
-  async getDebugInfo() {
-    return this.debugInfo;
-  }
-  async getProps() {
-    const t5 = {};
-    return LF_AUTOCOMPLETE_PROPS.forEach(((e2) => t5[e2] = this[e2])), t5;
-  }
-  async getValue() {
-    return this.inputValue;
-  }
-  async refresh() {
-    vt$1(this);
-  }
-  async setValue(t5) {
-    await j$5(this, g$8, "f").controller.set.input(t5);
-  }
-  async unmount() {
-    this.onLfEvent(new CustomEvent("unmount"), "unmount");
-  }
-  connectedCallback() {
-    j$5(this, C$7, "f") && j$5(this, C$7, "f").theme.register(this);
-  }
-  async componentWillLoad() {
-    q$1(this, C$7, await a(this)), this.inputValue = this.lfValue || "", j$5(this, y$8, "m", $$1).call(this);
-  }
-  componentWillRender() {
-    const { info: t5 } = j$5(this, C$7, "f").debug;
-    t5.update(this, "will-render");
-  }
-  componentDidRender() {
-    const { info: t5 } = j$5(this, C$7, "f").debug;
-    t5.update(this, "did-render");
-  }
-  componentDidLoad() {
-    const { debug: t5 } = j$5(this, C$7, "f");
-    this.onLfEvent(new CustomEvent("ready"), "ready"), t5.info.update(this, "did-load");
-  }
-  render() {
-    const { bemClass: e2, setLfStyle: i2 } = j$5(this, C$7, "f").theme, { lfStyle: a2 } = this, o2 = j$5(this, g$8, "f") && j$5(this, C$7, "f").portal.isInPortal(j$5(this, g$8, "f").elements.refs.dropdown), l2 = `${this.rootElement.id || "autocomplete"}-dropdown`;
-    return U$5(A$9, { key: "32287af5493ab11a7d13750c96ae5bc0ddb02674" }, a2 && U$5("style", { key: "9c799edc7f711e66f6c079f1b5adfb63ae1bc478", id: j$5(this, W$8, "f") }, i2(this)), U$5("div", { key: "95dfdae551430a81c9d800675153308b4dc5d397", id: j$5(this, M$7, "f") }, U$5("div", { key: "99f48e21026f669fd11e6543a3dcb1a0a93ab18e", class: e2(j$5(this, T$5, "f").autocomplete._), "data-lf": j$5(this, L$4, "f")[this.lfUiState], part: j$5(this, D$6, "f").autocomplete, role: "combobox", "aria-expanded": o2 ? "true" : "false", "aria-haspopup": "listbox", "aria-owns": l2 }, j$5(this, g$8, "f").elements.jsx.textfield(), j$5(this, g$8, "f").elements.jsx.dropdown())));
-  }
-  disconnectedCallback() {
-    var _a2, _b2;
-    if (j$5(this, x$9, "f") && clearTimeout(j$5(this, x$9, "f")), j$5(this, y$8, "m", S$6).call(this), j$5(this, g$8, "f")) {
-      const { dropdown: t5 } = j$5(this, g$8, "f").elements.refs;
-      (_a2 = j$5(this, C$7, "f")) == null ? void 0 : _a2.portal.close(t5);
-    }
-    (_b2 = j$5(this, C$7, "f")) == null ? void 0 : _b2.theme.unregister(this);
-  }
-  get rootElement() {
-    return q$4(this);
-  }
-  static get watchers() {
-    return { lfDataset: ["onLfDatasetChange"], loading: ["onLoadingChange"] };
-  }
-};
-b$6 = R$3, g$8 = /* @__PURE__ */ new WeakMap(), k$9 = /* @__PURE__ */ new WeakMap(), z$9 = /* @__PURE__ */ new WeakMap(), x$9 = /* @__PURE__ */ new WeakMap(), C$7 = /* @__PURE__ */ new WeakMap(), T$5 = /* @__PURE__ */ new WeakMap(), E$7 = /* @__PURE__ */ new WeakMap(), L$4 = /* @__PURE__ */ new WeakMap(), D$6 = /* @__PURE__ */ new WeakMap(), W$8 = /* @__PURE__ */ new WeakMap(), M$7 = /* @__PURE__ */ new WeakMap(), y$8 = /* @__PURE__ */ new WeakSet(), S$6 = function() {
-  j$5(this, k$9, "f") && (clearTimeout(j$5(this, k$9, "f")), q$1(this, k$9, null));
-}, A$3 = function() {
-  if (j$5(this, z$9, "f").size > this.lfMaxCacheSize) {
-    const t5 = j$5(this, z$9, "f").keys().next().value;
-    j$5(this, z$9, "f").delete(t5);
-  }
-}, I$5 = function(t5) {
-  return t5.trim().toLowerCase();
-}, V$2 = function(t5) {
-  this.loading = t5;
-}, P$3 = function(t5, e2 = b$6.BLUR_DELAY_MS) {
-  j$5(this, y$8, "m", S$6).call(this), q$1(this, k$9, setTimeout(t5, e2));
-}, $$1 = function() {
-  var t5, e2, i2;
-  q$1(this, g$8, (t5 = { blocks: j$5(this, T$5, "f"), cache: () => j$5(this, z$9, "f"), compInstance: this, cyAttributes: j$5(this, E$7, "f"), hasCache: () => this.lfCache && j$5(this, z$9, "f").size > 0, highlightedIndex: () => this.highlightedIndex, indexById: (t6) => {
-    var _a2, _b2;
-    return ((_b2 = (_a2 = this.lfDataset) == null ? void 0 : _a2.nodes) == null ? void 0 : _b2.findIndex(((e3) => e3.id === t6))) ?? -1;
-  }, inputValue: () => this.inputValue, isDisabled: () => "disabled" === this.lfUiState, isLoading: () => this.loading, lfAllowFreeInput: () => this.lfAllowFreeInput, lfAttributes: j$5(this, L$4, "f"), lfDataset: () => this.lfDataset, manager: j$5(this, C$7, "f"), parts: j$5(this, D$6, "f"), selectedNode: () => null }, e2 = { blurTimeout: { clear: () => {
-    j$5(this, y$8, "m", S$6).call(this);
-  }, new: (t6, e3) => {
-    j$5(this, y$8, "m", P$3).call(this, t6, e3);
-  } }, dataset: async (t6) => {
-    const { refs: e3 } = j$5(this, g$8, "f").elements;
-    if (e3.list && t6 && await e3.list.refresh(), this.lfCache && this.lastRequestedQuery && t6) {
-      const e4 = j$5(this, y$8, "m", I$5).call(this, this.lastRequestedQuery);
-      j$5(this, z$9, "f").set(e4, { dataset: t6, timestamp: Date.now() }), j$5(this, y$8, "m", A$3).call(this), this.lastRequestedQuery = "";
-    }
-    if (t6) return this.lfListProps = { ...this.lfListProps, lfFilter: false }, void j$5(this, y$8, "m", V$2).call(this, false);
-    j$5(this, g$8, "f").controller.set.list("open");
-  }, input: async (t6) => {
-    this.inputValue = t6;
-    const { refs: e3 } = j$5(this, g$8, "f").elements;
-    if (e3.textfield && await e3.textfield.setValue(t6), j$5(this, x$9, "f") && clearTimeout(j$5(this, x$9, "f")), t6.length < this.lfMinChars) return j$5(this, g$8, "f").controller.set.list("close"), void j$5(this, y$8, "m", V$2).call(this, false);
-    j$5(this, g$8, "f").controller.set.list("open"), j$5(this, g$8, "f").controller.set.highlight(-1);
-    const i3 = j$5(this, y$8, "m", I$5).call(this, t6);
-    if (this.lfCache && j$5(this, z$9, "f").has(i3)) {
-      const t7 = j$5(this, z$9, "f").get(i3);
-      if (!(Date.now() - t7.timestamp > this.lfCacheTTL)) return this.lfDataset = t7.dataset, this.lfListProps = { ...this.lfListProps, lfFilter: false }, void j$5(this, y$8, "m", V$2).call(this, false);
-      j$5(this, z$9, "f").delete(i3);
-    }
-    this.lfDataset = null, j$5(this, y$8, "m", V$2).call(this, true), q$1(this, x$9, setTimeout((() => {
-      this.lastRequestedQuery = t6, this.onLfEvent(new CustomEvent("request"), "request", { query: t6 });
-    }), this.lfDebounceMs), "f");
-  }, select: async (t6) => {
-    var _a2;
-    this.inputValue = String(t6.value || "");
-    const { refs: e3 } = j$5(this, g$8, "f").elements;
-    e3.textfield && await e3.textfield.setValue(this.inputValue), j$5(this, g$8, "f").controller.set.list("close"), (_a2 = e3.textfield) == null ? void 0 : _a2.setFocus(), this.onLfEvent(new CustomEvent("change"), "change", { node: t6 });
-  }, highlight: (t6) => {
-    this.highlightedIndex = t6;
-  } }, i2 = () => j$5(this, g$8, "f"), { controller: { get: t5, set: { ...e2, list: (t6 = "toggle") => {
-    const e3 = i2(), { controller: a2, elements: s2 } = e3, { manager: o2 } = a2.get, { dropdown: l2, textfield: n2 } = s2.refs, { close: r2, getState: f2, isInPortal: c2, open: h2 } = o2.portal, d2 = () => {
-      const t7 = l2 && f2(l2);
-      return (t7 == null ? void 0 : t7.parent) ? t7.parent : (l2 == null ? void 0 : l2.parentElement) || n2;
-    }, u2 = () => {
-      if (!l2 || !n2) return;
-      const { width: t7 } = n2.getBoundingClientRect();
-      t7 > 0 && (l2.style.minWidth = `${t7}px`);
-    };
-    switch (t6) {
-      case "close":
-        r2(l2);
-        break;
-      case "open":
-        h2(l2, d2(), n2), u2();
-        break;
-      default:
-        c2(l2) ? r2(l2) : (h2(l2, d2(), n2), u2());
-    }
-  } } }, elements: { jsx: m$6(i2), refs: { dropdown: null, list: null, spinner: null, textfield: null } }, handlers: v$5(i2) }));
-}, R$3.BLUR_DELAY_MS = 200, R$3.style = "::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=ripple]{animation-duration:var(--lf-ui-duration-ripple, 675ms);animation-fill-mode:forwards;animation-name:lf-ripple;animation-timing-function:var(--lf-ui-timing-ripple, ease-out);background:var(--lf-ui-ripple-background, var(--lf-color-primary));border-radius:var(--lf-ui-radius-ripple, 50%);height:var(--lf-ui-ripple-height, 100%);left:var(--lf-ui-ripple-x, 50%);opacity:var(--lf-ui-opacity-ripple, 0.5);pointer-events:none;position:absolute;top:var(--lf-ui-ripple-y, 50%);transform:scale(0);width:var(--lf-ui-ripple-width, 100%)}@keyframes lf-ripple{from{transform:scale(0)}to{opacity:0;transform:scale(4)}}[data-lf=ripple-surface]{cursor:pointer;height:100%;left:0;overflow:hidden;position:absolute;top:0;width:100%}[data-lf=danger]{--lf-autocomplete-color-primary:var(\n    --lf-autocomplete-color-danger,\n    var(--lf-color-danger)\n  );--lf-autocomplete-color-on-primary:var(\n    --lf-autocomplete-color-danger,\n    var(--lf-color-on-danger)\n  )}[data-lf=disabled]{opacity:var(--lf-autocomplete-ui-opacity-disabled, var(--lf-ui-opacity-disabled));pointer-events:none}[data-lf=info]{--lf-autocomplete-color-primary:var(\n    --lf-autocomplete-color-info,\n    var(--lf-color-info)\n  );--lf-autocomplete-color-on-primary:var(\n    --lf-autocomplete-color-info,\n    var(--lf-color-on-info)\n  )}[data-lf=secondary]{--lf-autocomplete-color-primary:var(\n    --lf-autocomplete-color-secondary,\n    var(--lf-color-secondary)\n  );--lf-autocomplete-color-on-primary:var(\n    --lf-autocomplete-color-secondary,\n    var(--lf-color-on-secondary)\n  )}[data-lf=success]{--lf-autocomplete-color-primary:var(\n    --lf-autocomplete-color-success,\n    var(--lf-color-success)\n  );--lf-autocomplete-color-on-primary:var(\n    --lf-autocomplete-color-success,\n    var(--lf-color-on-success)\n  )}[data-lf=warning]{--lf-autocomplete-color-primary:var(\n    --lf-autocomplete-color-warning,\n    var(--lf-color-warning)\n  );--lf-autocomplete-color-on-primary:var(\n    --lf-autocomplete-color-warning,\n    var(--lf-color-on-warning)\n  )}[data-lf=fade-in]{display:block;animation:lf-fade-in-block 0.25s ease-out forwards}@keyframes lf-fade-in-block{from{visibility:hidden;opacity:0}to{visibility:visible;opacity:1}}[data-lf=portal]{display:none}:host{display:block;font-family:var(--lf-autocomplete-font-family, var(--lf-font-family-primary));font-size:var(--lf-autocomplete-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-autocomplete-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-autocomplete-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-autocomplete-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-autocomplete-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-autocomplete-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-autocomplete-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-autocomplete-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}.autocomplete{width:100%;height:100%}.dropdown__spinner{min-height:0.25em}.dropdown__list{margin-top:0.25em}";
-const p8b75a972_entry = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
-  __proto__: null,
-  lf_autocomplete: R$3
-}, Symbol.toStringTag, { value: "Module" }));
-var u$5, m$5, v$4, g$7, y$7, w$8, k$8, z$8, x$8, _$6, M$6, W$7 = function(r2, e2, i2, a2) {
+var u$5, m$5, v$5, g$8, y$9, w$9, k$a, z$a, x$a, _$7, M$9, W$9 = function(r2, e2, i2, a2) {
   if ("function" == typeof e2 ? r2 !== e2 || true : !e2.has(r2)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return e2.get(r2);
-}, E$6 = function(r2, e2, i2, a2, l2) {
+}, E$8 = function(r2, e2, i2, a2, l2) {
   if ("function" == typeof e2 ? r2 !== e2 || true : !e2.has(r2)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
   return e2.set(r2, i2), i2;
 };
-const C$6 = class C {
+const C$8 = class C {
   constructor(i2) {
-    o$2(this, i2), this.lfEvent = G$3(this, "lf-slider-event"), this.value = { display: 0, real: 0 }, this.lfLabel = "", this.lfLeadingLabel = false, this.lfMax = 100, this.lfMin = 0, this.lfStep = 1, this.lfRipple = true, this.lfStyle = "", this.lfUiSize = "medium", this.lfUiState = "primary", this.lfValue = 50, u$5.set(this, void 0), m$5.set(this, LF_SLIDER_BLOCKS), v$4.set(this, CY_ATTRIBUTES), g$7.set(this, LF_ATTRIBUTES), y$7.set(this, LF_SLIDER_PARTS), w$8.set(this, LF_STYLE_ID), k$8.set(this, LF_SLIDER_CSS_VARIABLES), z$8.set(this, LF_WRAPPER_ID), x$8.set(this, void 0), _$6.set(this, void 0), M$6.set(this, (() => "disabled" === this.lfUiState));
+    o$2(this, i2), this.lfEvent = G$4(this, "lf-slider-event"), this.value = { display: 0, real: 0 }, this.lfLabel = "", this.lfLeadingLabel = false, this.lfMax = 100, this.lfMin = 0, this.lfStep = 1, this.lfRipple = true, this.lfStyle = "", this.lfUiSize = "medium", this.lfUiState = "primary", this.lfValue = 50, u$5.set(this, void 0), m$5.set(this, LF_SLIDER_BLOCKS), v$5.set(this, CY_ATTRIBUTES), g$8.set(this, LF_ATTRIBUTES), y$9.set(this, LF_SLIDER_PARTS), w$9.set(this, LF_STYLE_ID), k$a.set(this, LF_SLIDER_CSS_VARIABLES), z$a.set(this, LF_WRAPPER_ID), x$a.set(this, void 0), _$7.set(this, void 0), M$9.set(this, (() => "disabled" === this.lfUiState));
   }
   onLfEvent(r2, e2) {
-    const { effects: i2 } = W$7(this, u$5);
+    const { effects: i2 } = W$9(this, u$5);
     switch (e2) {
       case "change":
-        this.setValue(+W$7(this, x$8).value), this.refresh();
+        this.setValue(+W$9(this, x$a).value), this.refresh();
         break;
       case "input":
-        this.value.display = +W$7(this, x$8).value, this.refresh();
+        this.value.display = +W$9(this, x$a).value, this.refresh();
         break;
       case "pointerdown":
-        this.lfRipple && i2.ripple(r2, W$7(this, _$6));
+        this.lfRipple && i2.ripple(r2, W$9(this, _$7));
     }
     this.lfEvent.emit({ comp: this, eventType: e2, id: this.rootElement.id, originalEvent: r2, value: this.value });
   }
@@ -3566,32 +3449,32 @@ const C$6 = class C {
     }), r2);
   }
   connectedCallback() {
-    W$7(this, u$5) && W$7(this, u$5).theme.register(this);
+    W$9(this, u$5) && W$9(this, u$5).theme.register(this);
   }
   async componentWillLoad() {
-    E$6(this, u$5, await a(this));
+    E$8(this, u$5, await a(this));
     const { lfValue: r2 } = this;
     r2 && this.setValue(r2);
   }
   componentDidLoad() {
-    const { debug: r2 } = W$7(this, u$5);
+    const { debug: r2 } = W$9(this, u$5);
     this.onLfEvent(new CustomEvent("ready"), "ready"), r2.info.update(this, "did-load");
   }
   componentWillRender() {
-    const { info: r2 } = W$7(this, u$5).debug;
+    const { info: r2 } = W$9(this, u$5).debug;
     r2.update(this, "will-render");
   }
   componentDidRender() {
-    const { info: r2 } = W$7(this, u$5).debug;
+    const { info: r2 } = W$9(this, u$5).debug;
     r2.update(this, "did-render");
   }
   render() {
-    const { bemClass: r2, setLfStyle: e2 } = W$7(this, u$5).theme, { formField: i2, slider: t5 } = W$7(this, m$5), { lfLabel: o2, lfLeadingLabel: s2, lfMax: n2, lfMin: f2, lfRipple: d2, lfStep: c2, lfStyle: h2, value: p2 } = this;
-    return U$5(A$9, { key: "3a6c1efae081262ac49f41cb62f0223a494b95d0" }, U$5("style", { key: "c60563d0bca7a4d7069a8aa86f53795ed8b50a02", id: W$7(this, w$8) }, `
+    const { bemClass: r2, setLfStyle: e2 } = W$9(this, u$5).theme, { formField: i2, slider: t5 } = W$9(this, m$5), { lfLabel: o2, lfLeadingLabel: s2, lfMax: n2, lfMin: f2, lfRipple: d2, lfStep: c2, lfStyle: h2, value: p2 } = this;
+    return U$6(A$a, { key: "81d49b71d72abdceb42334a0c496cae59d50ec5a" }, U$6("style", { key: "7aa18c5958432daaf546e531f420074ee8640765", id: W$9(this, w$9) }, `
             :host {
-              ${W$7(this, k$8).value}: ${(p2.display - f2) / (n2 - f2) * 100}%;
+              ${W$9(this, k$a).value}: ${(p2.display - f2) / (n2 - f2) * 100}%;
             }
-          ${h2 && e2(this) || ""}`), U$5("div", { key: "08b3825748711a1b49a10d5e4a62ffc773fa60d8", id: W$7(this, z$8) }, U$5("div", { key: "ba3e2ced40b72851082c61e8d9b5eec779f61ef4", class: r2(i2._, null, { leading: s2 }), part: W$7(this, y$7).formField }, U$5("div", { key: "a3c2ab0265511855780efb719b47c5519097e1e3", class: r2(t5._, null, { "has-value": p2.display > f2, disabled: W$7(this, M$6).call(this) }), "data-lf": W$7(this, g$7)[this.lfUiState], part: W$7(this, y$7).slider }, U$5("input", { key: "f4a45195bbfea1b359e1f97f812fdf88896e7109", type: "range", class: r2(t5._, t5.nativeControl), "data-cy": W$7(this, v$4).input, disabled: W$7(this, M$6).call(this), max: n2, min: f2, onBlur: (r3) => {
+          ${h2 && e2(this) || ""}`), U$6("div", { key: "b93d4d756235f479e00e2a383b661540692bfd81", id: W$9(this, z$a) }, U$6("div", { key: "7d805830241a147d23082f6b876c80bdc9aff3e1", class: r2(i2._, null, { leading: s2 }), part: W$9(this, y$9).formField }, U$6("div", { key: "84f001c5952e2b76d0e71af85caa6bb945fe55d6", class: r2(t5._, null, { "has-value": p2.display > f2, disabled: W$9(this, M$9).call(this) }), "data-lf": W$9(this, g$8)[this.lfUiState], part: W$9(this, y$9).slider }, U$6("input", { key: "9ec5c45ca33a0b19c6001825cc3fc2ab6999a57a", type: "range", class: r2(t5._, t5.nativeControl), "data-cy": W$9(this, v$5).input, disabled: W$9(this, M$9).call(this), max: n2, min: f2, onBlur: (r3) => {
       this.onLfEvent(r3, "blur");
     }, onChange: (r3) => {
       this.onLfEvent(r3, "change");
@@ -3601,1226 +3484,372 @@ const C$6 = class C {
       this.onLfEvent(r3, "input");
     }, onPointerDown: (r3) => {
       this.onLfEvent(r3, "pointerdown");
-    }, part: W$7(this, y$7).nativeControl, ref: (r3) => {
-      r3 && E$6(this, x$8, r3);
-    }, step: c2, value: p2.real }), U$5("div", { key: "4fa7d704e5412635d0978e73e0cfd4499fb247af", class: r2(t5._, t5.track) }, U$5("div", { key: "dc2a9af7c43ccdbf599afacbf095b8a80823f5ab", class: r2(t5._, t5.thumbUnderlay) }, U$5("div", { key: "7efe60a1180604fe06b9dad1af9f81cd9ecc75e5", class: r2(t5._, t5.thumb), "data-cy": W$7(this, v$4).rippleSurface, "data-lf": W$7(this, g$7).rippleSurface, part: W$7(this, y$7).thumb, ref: (r3) => {
-      d2 && E$6(this, _$6, r3);
-    } }))), U$5("span", { key: "d5a498c7f43da9088e8441b64a422c390cc7156b", class: r2(t5._, t5.value), part: W$7(this, y$7).value }, p2.display)), U$5("label", { key: "e9276462134bdf595de3af900af68ada06ef41cc", class: r2(i2._, i2.label), part: W$7(this, y$7).label }, o2))));
+    }, part: W$9(this, y$9).nativeControl, ref: (r3) => {
+      r3 && E$8(this, x$a, r3);
+    }, step: c2, value: p2.real }), U$6("div", { key: "f3c2a10a5a44d3fefc3172f59135907c65b93f18", class: r2(t5._, t5.track) }, U$6("div", { key: "b2cc0fcc34e02c61f2db110fbc803c8f15f07a51", class: r2(t5._, t5.thumbUnderlay) }, U$6("div", { key: "bbb664761667512d68c43662336c40a2c1b6b42e", class: r2(t5._, t5.thumb), "data-cy": W$9(this, v$5).rippleSurface, "data-lf": W$9(this, g$8).rippleSurface, part: W$9(this, y$9).thumb, ref: (r3) => {
+      d2 && E$8(this, _$7, r3);
+    } }))), U$6("span", { key: "400aeef496f008ef0a36b8a2f3f77ab1030a385f", class: r2(t5._, t5.value), part: W$9(this, y$9).value }, p2.display)), U$6("label", { key: "2672acc4744fbd5b3f0027fbb0e8bb8de3e05acf", class: r2(i2._, i2.label), part: W$9(this, y$9).label }, o2))));
   }
   disconnectedCallback() {
     var _a2;
-    (_a2 = W$7(this, u$5)) == null ? void 0 : _a2.theme.unregister(this);
+    (_a2 = W$9(this, u$5)) == null ? void 0 : _a2.theme.unregister(this);
   }
   get rootElement() {
-    return q$4(this);
+    return q$5(this);
   }
 };
-u$5 = /* @__PURE__ */ new WeakMap(), m$5 = /* @__PURE__ */ new WeakMap(), v$4 = /* @__PURE__ */ new WeakMap(), g$7 = /* @__PURE__ */ new WeakMap(), y$7 = /* @__PURE__ */ new WeakMap(), w$8 = /* @__PURE__ */ new WeakMap(), k$8 = /* @__PURE__ */ new WeakMap(), z$8 = /* @__PURE__ */ new WeakMap(), x$8 = /* @__PURE__ */ new WeakMap(), _$6 = /* @__PURE__ */ new WeakMap(), M$6 = /* @__PURE__ */ new WeakMap(), C$6.style = '::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=ripple]{animation-duration:var(--lf-ui-duration-ripple, 675ms);animation-fill-mode:forwards;animation-name:lf-ripple;animation-timing-function:var(--lf-ui-timing-ripple, ease-out);background:var(--lf-ui-ripple-background, var(--lf-color-primary));border-radius:var(--lf-ui-radius-ripple, 50%);height:var(--lf-ui-ripple-height, 100%);left:var(--lf-ui-ripple-x, 50%);opacity:var(--lf-ui-opacity-ripple, 0.5);pointer-events:none;position:absolute;top:var(--lf-ui-ripple-y, 50%);transform:scale(0);width:var(--lf-ui-ripple-width, 100%)}@keyframes lf-ripple{from{transform:scale(0)}to{opacity:0;transform:scale(4)}}[data-lf=ripple-surface]{cursor:pointer;height:100%;left:0;overflow:hidden;position:absolute;top:0;width:100%}[data-lf=danger]{--lf-slider-color-primary:var(\n    --lf-slider-color-danger,\n    var(--lf-color-danger)\n  );--lf-slider-color-on-primary:var(\n    --lf-slider-color-danger,\n    var(--lf-color-on-danger)\n  )}[data-lf=disabled]{opacity:var(--lf-slider-ui-opacity-disabled, var(--lf-ui-opacity-disabled));pointer-events:none}[data-lf=info]{--lf-slider-color-primary:var(\n    --lf-slider-color-info,\n    var(--lf-color-info)\n  );--lf-slider-color-on-primary:var(\n    --lf-slider-color-info,\n    var(--lf-color-on-info)\n  )}[data-lf=secondary]{--lf-slider-color-primary:var(\n    --lf-slider-color-secondary,\n    var(--lf-color-secondary)\n  );--lf-slider-color-on-primary:var(\n    --lf-slider-color-secondary,\n    var(--lf-color-on-secondary)\n  )}[data-lf=success]{--lf-slider-color-primary:var(\n    --lf-slider-color-success,\n    var(--lf-color-success)\n  );--lf-slider-color-on-primary:var(\n    --lf-slider-color-success,\n    var(--lf-color-on-success)\n  )}[data-lf=warning]{--lf-slider-color-primary:var(\n    --lf-slider-color-warning,\n    var(--lf-color-warning)\n  );--lf-slider-color-on-primary:var(\n    --lf-slider-color-warning,\n    var(--lf-color-on-warning)\n  )}:host{display:block;font-family:var(--lf-slider-font-family, var(--lf-font-family-primary));font-size:var(--lf-slider-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-slider-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-slider-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-slider-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-slider-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-slider-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-slider-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-slider-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{width:100%;height:100%}.form-field{color:rgb(var(--lf-slider-color-on-bg, var(--lf-color-on-bg)));width:100%;height:100%;font-size:0.875em;font-weight:500;line-height:1.5em;letter-spacing:0.01em;align-items:center;box-sizing:border-box;display:inline-flex;padding:var(--lf-slider-padding, 2em 0.5em);vertical-align:middle}.form-field__label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:var(--lf-slider-label-min-width, max-content);padding-left:var(--lf-slider-label-padding-left, 1.5em)}.form-field--leading .form-field__label{margin-left:auto;margin-right:0;order:-1;padding-left:0;padding-right:var(--lf-slider-label-padding-right, 1.5em)}.slider{display:block;position:relative;outline:none;margin:var(--lf-slider-margin, 0 0.75em);min-width:var(--lf-slider-min-width, 7em);user-select:none;width:100%}.slider--has-value .slider__track:after{border:0;border-style:solid;border-radius:var(--lf-slider-border-radius, var(--lf-ui-border-radius));background-color:rgba(var(--lf-slider-color-primary, var(--lf-color-primary)), 0.75);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:all 300ms cubic-bezier(0.5, 1.7, 0.2, 1);position:absolute;content:"";height:100%;left:0;top:0;width:var(--lf_slider_value)}.slider__label{cursor:pointer;margin-left:0;margin-right:auto;padding-left:var(--lf-slider-label-padding-left, 0.5em);padding-right:0;user-select:none}.slider__value{color:rgb(var(--lf-slider-color-on-bg, var(--lf-color-on-bg)));font-size:0.775em;letter-spacing:0.0892857143em;line-height:inherit;text-transform:uppercase;bottom:var(--lf-slider-value-bottom-position, -3em);left:50%;position:absolute;transform:translateX(-50%);white-space:nowrap}.slider__track{border:0;border-style:solid;border-radius:var(--lf-slider-border-radius, var(--lf-ui-border-radius));background-color:rgba(var(--lf-slider-color-primary, var(--lf-color-primary)), 0.25);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:all 300ms cubic-bezier(0.5, 1.7, 0.2, 1);box-shadow:var(--lf-slider-box-shadow, 0 0.25em 0.5em rgba(var(--lf-comp-color-on-bg, var(--lf-color-on-bg)), 0.2));box-sizing:border-box;height:var(--lf-slider-track-height, 0.5em);width:100%}.slider__thumb-underlay{transition:all 300ms cubic-bezier(0.5, 1.7, 0.2, 1);align-items:center;border-radius:50%;display:flex;height:var(--lf-slider-thumb-height, 1.25em);justify-content:center;left:var(--lf_slider_value);pointer-events:none;position:absolute;top:var(--lf-slider-thumb-underlay-top, -0.6em);transform:translateX(-50%);width:var(--lf-slider-thumb-width, 1.25em)}.slider__thumb{background-color:rgba(var(--lf-slider-color-primary, var(--lf-color-primary)), 0.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:all 300ms cubic-bezier(0.5, 1.7, 0.2, 1);border-radius:50%;box-shadow:var(--lf-slider-thumb-box-shadow, 0 0.25em 0.5em rgba(var(--lf-comp-color-on-bg, var(--lf-color-on-bg)), 0.2));cursor:pointer;height:var(--lf-slider-thumb-height, 1.5em);width:var(--lf-slider-thumb-width, 1.5em)}.slider__thumb:hover{background-color:rgba(var(--lf-slider-color-primary, var(--lf-color-primary)), 0.8);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transform:scale(var(--lf-slider-thumb-hover-scale, 1.1))}.slider__native-control{cursor:pointer;height:var(--lf-slider-input-height, 3em);left:0;opacity:0;position:absolute;top:calc(var(--lf-slider-input-height, 3em) / -2);width:100%;z-index:2}';
-const p9de9dd33_entry = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+u$5 = /* @__PURE__ */ new WeakMap(), m$5 = /* @__PURE__ */ new WeakMap(), v$5 = /* @__PURE__ */ new WeakMap(), g$8 = /* @__PURE__ */ new WeakMap(), y$9 = /* @__PURE__ */ new WeakMap(), w$9 = /* @__PURE__ */ new WeakMap(), k$a = /* @__PURE__ */ new WeakMap(), z$a = /* @__PURE__ */ new WeakMap(), x$a = /* @__PURE__ */ new WeakMap(), _$7 = /* @__PURE__ */ new WeakMap(), M$9 = /* @__PURE__ */ new WeakMap(), C$8.style = '::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=ripple]{animation-duration:var(--lf-ui-duration-ripple, 675ms);animation-fill-mode:forwards;animation-name:lf-ripple;animation-timing-function:var(--lf-ui-timing-ripple, ease-out);background:var(--lf-ui-ripple-background, var(--lf-color-primary));border-radius:var(--lf-ui-radius-ripple, 50%);height:var(--lf-ui-ripple-height, 100%);left:var(--lf-ui-ripple-x, 50%);opacity:var(--lf-ui-opacity-ripple, 0.5);pointer-events:none;position:absolute;top:var(--lf-ui-ripple-y, 50%);transform:scale(0);width:var(--lf-ui-ripple-width, 100%)}@keyframes lf-ripple{from{transform:scale(0)}to{opacity:0;transform:scale(4)}}[data-lf=ripple-surface]{cursor:pointer;height:100%;left:0;overflow:hidden;position:absolute;top:0;width:100%}[data-lf=danger]{--lf-slider-color-primary:var(\n    --lf-slider-color-danger,\n    var(--lf-color-danger)\n  );--lf-slider-color-on-primary:var(\n    --lf-slider-color-danger,\n    var(--lf-color-on-danger)\n  )}[data-lf=disabled]{opacity:var(--lf-slider-ui-opacity-disabled, var(--lf-ui-opacity-disabled));pointer-events:none}[data-lf=info]{--lf-slider-color-primary:var(\n    --lf-slider-color-info,\n    var(--lf-color-info)\n  );--lf-slider-color-on-primary:var(\n    --lf-slider-color-info,\n    var(--lf-color-on-info)\n  )}[data-lf=secondary]{--lf-slider-color-primary:var(\n    --lf-slider-color-secondary,\n    var(--lf-color-secondary)\n  );--lf-slider-color-on-primary:var(\n    --lf-slider-color-secondary,\n    var(--lf-color-on-secondary)\n  )}[data-lf=success]{--lf-slider-color-primary:var(\n    --lf-slider-color-success,\n    var(--lf-color-success)\n  );--lf-slider-color-on-primary:var(\n    --lf-slider-color-success,\n    var(--lf-color-on-success)\n  )}[data-lf=warning]{--lf-slider-color-primary:var(\n    --lf-slider-color-warning,\n    var(--lf-color-warning)\n  );--lf-slider-color-on-primary:var(\n    --lf-slider-color-warning,\n    var(--lf-color-on-warning)\n  )}:host{display:block;font-family:var(--lf-slider-font-family, var(--lf-font-family-primary));font-size:var(--lf-slider-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-slider-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-slider-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-slider-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-slider-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-slider-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-slider-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-slider-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{width:100%;height:100%}.form-field{color:rgb(var(--lf-slider-color-on-bg, var(--lf-color-on-bg)));width:100%;height:100%;font-size:0.875em;font-weight:500;line-height:1.5em;letter-spacing:0.01em;align-items:center;box-sizing:border-box;display:inline-flex;padding:var(--lf-slider-padding, 2em 0.5em);vertical-align:middle}.form-field__label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:var(--lf-slider-label-min-width, max-content);padding-left:var(--lf-slider-label-padding-left, 1.5em)}.form-field--leading .form-field__label{margin-left:auto;margin-right:0;order:-1;padding-left:0;padding-right:var(--lf-slider-label-padding-right, 1.5em)}.slider{display:block;position:relative;outline:none;margin:var(--lf-slider-margin, 0 0.75em);min-width:var(--lf-slider-min-width, 7em);user-select:none;width:100%}.slider--has-value .slider__track:after{border:0;border-style:solid;border-radius:var(--lf-slider-border-radius, var(--lf-ui-border-radius));background-color:rgba(var(--lf-slider-color-primary, var(--lf-color-primary)), 0.75);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:all 300ms cubic-bezier(0.5, 1.7, 0.2, 1);position:absolute;content:"";height:100%;left:0;top:0;width:var(--lf_slider_value)}.slider__label{cursor:pointer;margin-left:0;margin-right:auto;padding-left:var(--lf-slider-label-padding-left, 0.5em);padding-right:0;user-select:none}.slider__value{color:rgb(var(--lf-slider-color-on-bg, var(--lf-color-on-bg)));font-size:0.775em;letter-spacing:0.0892857143em;line-height:inherit;text-transform:uppercase;bottom:var(--lf-slider-value-bottom-position, -3em);left:50%;position:absolute;transform:translateX(-50%);white-space:nowrap}.slider__track{border:0;border-style:solid;border-radius:var(--lf-slider-border-radius, var(--lf-ui-border-radius));background-color:rgba(var(--lf-slider-color-primary, var(--lf-color-primary)), 0.25);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:all 300ms cubic-bezier(0.5, 1.7, 0.2, 1);box-shadow:var(--lf-slider-box-shadow, 0 0.25em 0.5em rgba(var(--lf-comp-color-on-bg, var(--lf-color-on-bg)), 0.2));box-sizing:border-box;height:var(--lf-slider-track-height, 0.5em);width:100%}.slider__thumb-underlay{transition:all 300ms cubic-bezier(0.5, 1.7, 0.2, 1);align-items:center;border-radius:50%;display:flex;height:var(--lf-slider-thumb-height, 1.25em);justify-content:center;left:var(--lf_slider_value);pointer-events:none;position:absolute;top:var(--lf-slider-thumb-underlay-top, -0.6em);transform:translateX(-50%);width:var(--lf-slider-thumb-width, 1.25em)}.slider__thumb{background-color:rgba(var(--lf-slider-color-primary, var(--lf-color-primary)), 0.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:all 300ms cubic-bezier(0.5, 1.7, 0.2, 1);border-radius:50%;box-shadow:var(--lf-slider-thumb-box-shadow, 0 0.25em 0.5em rgba(var(--lf-comp-color-on-bg, var(--lf-color-on-bg)), 0.2));cursor:pointer;height:var(--lf-slider-thumb-height, 1.5em);width:var(--lf-slider-thumb-width, 1.5em)}.slider__thumb:hover{background-color:rgba(var(--lf-slider-color-primary, var(--lf-color-primary)), 0.8);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transform:scale(var(--lf-slider-thumb-hover-scale, 1.1))}.slider__native-control{cursor:pointer;height:var(--lf-slider-input-height, 3em);left:0;opacity:0;position:absolute;top:calc(var(--lf-slider-input-height, 3em) / -2);width:100%;z-index:2}';
+const p68c8ed64_entry = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
-  lf_slider: C$6
+  lf_slider: C$8
 }, Symbol.toStringTag, { value: "Module" }));
-const w$7 = (e2, t5, r2) => {
-  const i2 = { nodes: [] };
-  for (let a2 = 0; a2 < r2.length; a2++) {
-    const s2 = r2[a2], o2 = String(a2).valueOf(), l2 = "string" == typeof s2.value && s2.value.trim().length > 0;
-    i2.nodes.push({ icon: e2 === s2 && t5, id: o2, value: l2 ? s2.value : `#${o2}` });
+var u$4, p$3, v$4, m$4, y$8, g$7, z$9, x$9, k$9, C$7, E$7, W$8, M$8, T$6, L$5, D$7 = function(i2, t5, e2, r2) {
+  if ("a" === e2 && !r2) throw new TypeError("Private accessor was defined without a getter");
+  if ("function" == typeof t5 ? i2 !== t5 || !r2 : !t5.has(i2)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+  return "m" === e2 ? r2 : "a" === e2 ? r2.call(i2) : r2 ? r2.value : t5.get(i2);
+}, R$5 = function(i2, t5, e2, r2, s2) {
+  if ("function" == typeof t5 ? i2 !== t5 || true : !t5.has(i2)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
+  return t5.set(i2, e2), e2;
+};
+const j$7 = class j {
+  constructor(e2) {
+    o$2(this, e2), this.lfEvent = G$4(this, "lf-drawer-event"), u$4.add(this), this.lfDisplay = "slide", this.lfPosition = "left", this.lfResponsive = 0, this.lfStyle = "", this.lfValue = false, p$3.set(this, void 0), v$4.set(this, LF_DRAWER_BLOCKS), m$4.set(this, LF_ATTRIBUTES), y$8.set(this, LF_DRAWER_PARTS), g$7.set(this, LF_STYLE_ID), z$9.set(this, LF_WRAPPER_ID), x$9.set(this, void 0), k$9.set(this, null), C$7.set(this, void 0), E$7.set(this, void 0);
   }
-  return i2;
-}, k$7 = (e2) => ({ ...e2, defaults: LF_COMPARE_DEFAULTS() }), y$6 = (t5) => /* @__PURE__ */ ((t6) => ({ changeView: () => {
-  const { controller: r2, elements: i2, handlers: a2 } = t6(), { cyAttributes: s2, isOverlay: o2, manager: n2, parts: f2 } = r2.get, { refs: c2 } = i2, { button: h2 } = a2, { assignRef: p2, theme: d2 } = n2, { columns2: u2, squareToggle: b2 } = d2.get.icons();
-  return U$5("lf-button", { "data-cy": s2.button, id: LF_COMPARE_IDS.changeView, lfIcon: b2, lfIconOff: u2, lfStyling: "icon", lfToggable: true, lfValue: !o2(), "onLf-button-event": h2, part: f2.changeView, ref: p2(c2, "changeView"), title: o2() ? "Click for split screen comparison." : "Click for overlay comparison" });
-}, leftButton: () => {
-  const { controller: r2, elements: i2, handlers: a2 } = t6(), { cyAttributes: s2, isOverlay: o2, manager: n2, parts: f2 } = r2.get, { refs: c2 } = i2, { button: h2 } = a2, { assignRef: p2, theme: d2 } = n2, u2 = d2.get.icon("imageInPicture"), { "--lf-icon-clear": b2 } = d2.get.current().variables;
-  return U$5("lf-button", { "data-cy": s2.button, id: LF_COMPARE_IDS.leftButton, lfIcon: b2, lfIconOff: u2, lfStyling: "icon", lfToggable: true, "onLf-button-event": h2, part: f2.leftButton, ref: p2(c2, "leftButton"), title: o2() ? "Click to open the left panel." : "Click to close the left panel." });
-}, leftTree: () => {
-  const { controller: r2, elements: i2, handlers: a2 } = t6(), { blocks: s2, compInstance: o2, lfAttributes: n2, manager: f2, parts: c2, shapes: h2 } = r2.get, { refs: p2 } = i2, { tree: d2 } = a2, { assignRef: u2, theme: b2 } = f2, { bemClass: m2, get: g3 } = b2, { "--lf-icon-success": v2 } = g3.current().variables, k2 = o2;
-  return U$5("lf-tree", { class: m2(s2.toolbar._, s2.toolbar.panel, { left: true }), "data-lf": n2.fadeIn, id: LF_COMPARE_IDS.leftTree, lfDataset: w$7(k2.leftShape, v2, h2()), lfFilter: false, "onLf-tree-event": d2, part: c2.leftTree, ref: u2(p2, "leftTree") });
-}, rightButton: () => {
-  const { controller: r2, elements: i2, handlers: a2 } = t6(), { cyAttributes: s2, isOverlay: o2, manager: n2, parts: f2 } = r2.get, { refs: c2 } = i2, { button: h2 } = a2, { assignRef: p2, theme: d2 } = n2, u2 = d2.get.icon("imageInPicture"), { "--lf-icon-clear": b2 } = d2.get.current().variables;
-  return U$5("lf-button", { "data-cy": s2.button, id: LF_COMPARE_IDS.rightButton, lfIcon: b2, lfIconOff: u2, lfStyling: "icon", lfToggable: true, "onLf-button-event": h2, part: f2.rightButton, ref: p2(c2, "rightButton"), title: o2() ? "Click to open the right panel." : "Click to close the right panel." });
-}, rightTree: () => {
-  const { controller: r2, elements: i2, handlers: a2 } = t6(), { blocks: s2, compInstance: o2, lfAttributes: n2, manager: f2, parts: c2, shapes: h2 } = r2.get, { refs: p2 } = i2, { tree: d2 } = a2, { assignRef: u2, theme: b2 } = f2, { bemClass: m2, get: g3 } = b2, { "--lf-icon-success": v2 } = g3.current().variables, k2 = o2;
-  return U$5("lf-tree", { class: m2(s2.toolbar._, s2.toolbar.panel, { right: true }), "data-lf": n2.fadeIn, id: LF_COMPARE_IDS.rightTree, lfDataset: w$7(k2.rightShape, v2, h2()), lfFilter: false, "onLf-tree-event": d2, part: c2.rightTree, ref: u2(p2, "rightTree") });
-} }))(t5), z$7 = (e2) => /* @__PURE__ */ ((e3) => ({ button: (t5) => {
-  const { eventType: r2, id: i2, valueAsBoolean: a2 } = t5.detail, { set: s2 } = e3().controller, { leftButton: o2, changeView: n2, rightButton: f2 } = LF_COMPARE_IDS;
-  if ("click" === r2) switch (i2) {
-    case o2:
-      s2.leftPanelOpened(a2);
-      break;
-    case n2:
-      s2.splitView(a2);
-      break;
-    case f2:
-      s2.rightPanelOpened(a2);
+  onLfEvent(i2, t5) {
+    this.lfEvent.emit({ comp: this, eventType: t5, id: this.rootElement.id, originalEvent: i2 });
   }
-}, tree: (t5) => {
-  const { eventType: r2, id: i2, node: a2 } = t5.detail, { get: s2, set: o2 } = e3().controller, { shapes: n2 } = s2, { leftTree: f2, rightTree: c2 } = LF_COMPARE_IDS;
-  if ("click" === r2) {
-    const e4 = n2()[parseInt(a2.id)];
-    switch (i2) {
-      case f2:
-        o2.leftShape(e4);
+  listenKeydown(i2) {
+    if (this.lfValue) switch (i2.key) {
+      case "Escape":
+        i2.preventDefault(), this.close();
         break;
-      case c2:
-        o2.rightShape(e4);
+      case "Tab":
+        D$7(this, u$4, "m", L$5).call(this, i2);
     }
   }
-} }))(e2);
-var x$7, T$4, _$5, C$5, I$4, S$5, O$2, W$6, M$5, E$5, L$3, j$4, B$1, P$2, D$5, R$2, A$2, V$1, F$1 = function(e2, t5, r2, i2) {
-  if ("a" === r2 && !i2) throw new TypeError("Private accessor was defined without a getter");
-  if ("function" == typeof t5 ? e2 !== t5 || !i2 : !t5.has(e2)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
-  return "m" === r2 ? i2 : "a" === r2 ? i2.call(e2) : i2 ? i2.value : t5.get(e2);
-}, H$2 = function(e2, t5, r2, i2, a2) {
-  if ("function" == typeof t5 ? e2 !== t5 || true : !t5.has(e2)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
-  return t5.set(e2, r2), r2;
-};
-const Y$2 = class Y {
-  constructor(e2) {
-    o$2(this, e2), this.lfEvent = G$3(this, "lf-compare-event"), x$7.add(this), this.isLeftPanelOpened = false, this.isRightPanelOpened = false, this.shapes = {}, this.lfDataset = null, this.lfShape = "image", this.lfStyle = "", this.lfView = "main", T$4.set(this, void 0), _$5.set(this, LF_COMPARE_BLOCKS), C$5.set(this, CY_ATTRIBUTES), I$4.set(this, LF_ATTRIBUTES), S$5.set(this, LF_COMPARE_PARTS), O$2.set(this, LF_STYLE_ID), W$6.set(this, LF_COMPARE_CSS_VARS), M$5.set(this, LF_WRAPPER_ID), E$5.set(this, void 0), L$3.set(this, (() => {
-      var e3, t5, r2;
-      H$2(this, E$5, (e3 = { blocks: F$1(this, _$5, "f"), compInstance: this, cyAttributes: F$1(this, C$5, "f"), isOverlay: () => F$1(this, x$7, "m", P$2).call(this), lfAttributes: F$1(this, I$4, "f"), manager: F$1(this, T$4, "f"), parts: F$1(this, S$5, "f"), shapes: () => F$1(this, x$7, "m", j$4).call(this) }, t5 = { leftPanelOpened: (e4) => {
-        this.isLeftPanelOpened = void 0 === e4 ? !this.isLeftPanelOpened : e4;
-      }, leftShape: (e4) => this.leftShape = e4, rightPanelOpened: (e4) => {
-        this.isRightPanelOpened = void 0 === e4 ? !this.isRightPanelOpened : e4;
-      }, rightShape: (e4) => this.rightShape = e4, splitView: (e4) => {
-        this.lfView = e4 ? "split" : "main";
-      } }, r2 = () => F$1(this, E$5, "f"), { controller: { get: k$7(e3), set: t5 }, elements: { jsx: y$6(r2), refs: { changeView: null, leftButton: null, leftTree: null, rightButton: null, rightTree: null, slider: null } }, handlers: z$7(r2) }));
-    })), V$1.set(this, ((e3) => {
-      const { target: t5 } = e3;
-      if (t5 instanceof HTMLInputElement) {
-        const e4 = 100 - parseInt(t5.value);
-        this.rootElement.style.setProperty(F$1(this, W$6, "f").overlayWidth, `${e4}%`);
-      }
+  onLfDisplayChange(i2, t5) {
+    D$7(this, p$3, "f") && D$7(this, u$4, "m", M$8).call(this, t5, i2);
+  }
+  onLfResponsiveChange() {
+    D$7(this, p$3, "f") && (this.lfResponsive > 0 ? (D$7(this, u$4, "m", W$8).call(this), D$7(this, C$7, "f") || (R$5(this, C$7, (async () => {
+      D$7(this, E$7, "f") && clearTimeout(D$7(this, E$7, "f")), R$5(this, E$7, window.setTimeout((() => {
+        D$7(this, u$4, "m", W$8).call(this), R$5(this, E$7, null, "f");
+      }), 200), "f");
+    })), window.addEventListener("resize", D$7(this, C$7, "f")))) : D$7(this, C$7, "f") && (window.removeEventListener("resize", D$7(this, C$7, "f")), R$5(this, C$7, null)));
+  }
+  async close() {
+    this.lfValue && requestAnimationFrame((() => {
+      this.lfValue = false, this.onLfEvent(new CustomEvent("close"), "close"), D$7(this, p$3, "f").effects.backdrop.hide(), D$7(this, k$9, "f") && (D$7(this, k$9, "f").focus(), R$5(this, k$9, null));
     }));
   }
-  onLfEvent(e2, t5) {
-    this.lfEvent.emit({ comp: this, eventType: t5, id: this.rootElement.id, originalEvent: e2 });
-  }
-  async updateShapes() {
-    if (!F$1(this, T$4, "f")) return;
-    const { data: e2, debug: t5 } = F$1(this, T$4, "f");
-    try {
-      this.shapes = e2.cell.shapes.getAll(this.lfDataset);
-      const t6 = F$1(this, x$7, "m", j$4).call(this);
-      this.leftShape = t6[0], this.rightShape = t6[1];
-    } catch (e3) {
-      t5.logs.new(this, "Error updating shapes: " + e3, "error");
-    }
-  }
   async getDebugInfo() {
     return this.debugInfo;
   }
   async getProps() {
-    const e2 = LF_COMPARE_PROPS.map(((e3) => [e3, this[e3]]));
-    return Object.fromEntries(e2);
+    const i2 = LF_DRAWER_PROPS.map(((i3) => [i3, this[i3]]));
+    return Object.fromEntries(i2);
+  }
+  async isOpened() {
+    return this.lfValue;
+  }
+  async open() {
+    this.lfValue || (R$5(this, k$9, document.activeElement), requestAnimationFrame((() => {
+      this.lfValue = true, this.onLfEvent(new CustomEvent("open"), "open"), "slide" === this.lfDisplay && D$7(this, p$3, "f").effects.backdrop.show((() => this.close())), requestAnimationFrame((() => {
+        D$7(this, u$4, "m", T$6).call(this);
+      }));
+    })));
   }
   async refresh() {
     vt$1(this);
   }
-  async unmount(e2 = 0) {
+  async toggle() {
+    this.lfValue ? this.close() : this.open();
+  }
+  async unmount(i2 = 0) {
     setTimeout((() => {
-      this.onLfEvent(new CustomEvent("unmount"), "unmount"), this.rootElement.remove();
-    }), e2);
+      D$7(this, p$3, "f").effects.backdrop.hide(), this.onLfEvent(new CustomEvent("unmount"), "unmount"), this.rootElement.remove();
+    }), i2);
   }
   connectedCallback() {
-    F$1(this, T$4, "f") && F$1(this, T$4, "f").theme.register(this);
+    D$7(this, p$3, "f") && D$7(this, p$3, "f").theme.register(this);
   }
   async componentWillLoad() {
-    H$2(this, T$4, await a(this)), F$1(this, L$3, "f").call(this), this.updateShapes();
+    R$5(this, p$3, await a(this)), this.lfResponsive > 0 && (D$7(this, u$4, "m", W$8).call(this), R$5(this, C$7, (async () => {
+      D$7(this, E$7, "f") && clearTimeout(D$7(this, E$7, "f")), R$5(this, E$7, window.setTimeout((() => {
+        D$7(this, u$4, "m", W$8).call(this), R$5(this, E$7, null, "f");
+      }), 200), "f");
+    })), window.addEventListener("resize", D$7(this, C$7, "f")));
   }
   componentDidLoad() {
-    const { info: e2 } = F$1(this, T$4, "f").debug;
-    this.onLfEvent(new CustomEvent("ready"), "ready"), e2.update(this, "did-load");
+    const { info: i2 } = D$7(this, p$3, "f").debug;
+    this.onLfEvent(new CustomEvent("ready"), "ready"), i2.update(this, "did-load");
   }
   componentWillRender() {
-    const { info: e2 } = F$1(this, T$4, "f").debug;
-    e2.update(this, "will-render");
+    const { info: i2 } = D$7(this, p$3, "f").debug;
+    i2.update(this, "will-render");
   }
   componentDidRender() {
-    const { info: e2 } = F$1(this, T$4, "f").debug;
-    e2.update(this, "did-render");
+    const { info: i2 } = D$7(this, p$3, "f").debug;
+    i2.update(this, "did-render");
   }
   render() {
-    const { bemClass: t5, setLfStyle: r2 } = F$1(this, T$4, "f").theme, { compare: i2 } = F$1(this, _$5, "f"), { lfStyle: s2 } = this;
-    return U$5(A$9, { key: "4855550a84bd0aa5db2f3bf64273d4d63432a758" }, s2 && U$5("style", { key: "961f11045db1dde62a72c1104b583c30352736ef", id: F$1(this, O$2, "f") }, r2(this)), U$5("div", { key: "c8e632247e7a498d419764cad95f70be1b4a8dc2", id: F$1(this, M$5, "f") }, U$5("div", { key: "9644d07b8ed5b6b4cf6ff0feb132135978f667e1", class: t5(i2._), part: F$1(this, S$5, "f").compare }, F$1(this, x$7, "m", D$5).call(this))));
-  }
-  disconnectedCallback() {
-    var _a2;
-    (_a2 = F$1(this, T$4, "f")) == null ? void 0 : _a2.theme.unregister(this);
-  }
-  get rootElement() {
-    return q$4(this);
-  }
-  static get watchers() {
-    return { lfDataset: ["updateShapes"], lfShape: ["updateShapes"] };
-  }
-};
-T$4 = /* @__PURE__ */ new WeakMap(), _$5 = /* @__PURE__ */ new WeakMap(), C$5 = /* @__PURE__ */ new WeakMap(), I$4 = /* @__PURE__ */ new WeakMap(), S$5 = /* @__PURE__ */ new WeakMap(), O$2 = /* @__PURE__ */ new WeakMap(), W$6 = /* @__PURE__ */ new WeakMap(), M$5 = /* @__PURE__ */ new WeakMap(), E$5 = /* @__PURE__ */ new WeakMap(), L$3 = /* @__PURE__ */ new WeakMap(), V$1 = /* @__PURE__ */ new WeakMap(), x$7 = /* @__PURE__ */ new WeakSet(), j$4 = function() {
-  var _a2;
-  return ((_a2 = this.shapes) == null ? void 0 : _a2[this.lfShape]) || [];
-}, B$1 = function() {
-  var _a2;
-  return !!((_a2 = this.shapes) == null ? void 0 : _a2[this.lfShape]);
-}, P$2 = function() {
-  return !("main" !== this.lfView);
-}, D$5 = function() {
-  const { bemClass: t5 } = F$1(this, T$4, "f").theme, { compare: r2 } = F$1(this, _$5, "f");
-  if (F$1(this, x$7, "m", B$1).call(this)) {
-    const i2 = this.shapes[this.lfShape];
-    if ((i2 == null ? void 0 : i2.length) > 1) return U$5("div", { class: t5(r2._, r2.grid) }, F$1(this, x$7, "m", A$2).call(this), F$1(this, x$7, "m", R$2).call(this));
-  }
-  return null;
-}, R$2 = function() {
-  const { bemClass: t5 } = F$1(this, T$4, "f").theme, { toolbar: r2 } = F$1(this, _$5, "f"), { changeView: i2, leftButton: a2, rightButton: s2 } = F$1(this, E$5, "f").elements.jsx;
-  return U$5("div", { class: t5(r2._) }, a2(), i2(), s2());
-}, A$2 = function() {
-  var _a2, _b2;
-  const { sanitizeProps: t5, theme: r$12 } = F$1(this, T$4, "f"), { bemClass: i2 } = r$12, { view: a2 } = F$1(this, _$5, "f"), { left: s2, right: l2 } = F$1(this, E$5, "f").controller.get.defaults, { leftTree: n2, rightTree: f2 } = F$1(this, E$5, "f").elements.jsx, { isLeftPanelOpened: c2, isRightPanelOpened: h2, lfShape: p2, lfView: d2, leftShape: u2, rightShape: b2 } = this, m2 = ((_a2 = s2 == null ? void 0 : s2[p2]) == null ? void 0 : _a2.call(s2)) || [], g3 = [];
-  for (let e2 = 0; e2 < m2.length; e2++) g3.push(t5(m2[e2]));
-  const w3 = ((_b2 = l2 == null ? void 0 : l2[p2]) == null ? void 0 : _b2.call(l2)) || [], k2 = [];
-  for (let e2 = 0; e2 < w3.length; e2++) k2.push(t5(w3[e2]));
-  return U$5(St$1, null, U$5("div", { class: i2(a2._, null, { [d2]: true }) }, U$5("div", { class: i2(a2._, a2.left) }, U$5(r, { cell: Object.assign(g3, u2), index: 0, shape: p2, eventDispatcher: async (e2) => this.onLfEvent(e2, "lf-event"), framework: F$1(this, T$4, "f") })), c2 && n2(), h2 && f2(), F$1(this, x$7, "m", P$2).call(this) && U$5("div", { class: i2(a2._, a2.slider), onChange: F$1(this, V$1, "f"), onInput: F$1(this, V$1, "f") }, U$5("input", { class: i2(a2._, a2.input), "data-cy": F$1(this, C$5, "f").input, min: "0", max: "100", type: "range", value: "50" })), U$5("div", { class: i2(a2._, a2.right) }, U$5(r, { cell: Object.assign(k2, b2), index: 1, shape: p2, eventDispatcher: async (e2) => this.onLfEvent(e2, "lf-event"), framework: F$1(this, T$4, "f") }))));
-}, Y$2.style = '::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=fade-in]{display:block;animation:lf-fade-in-block 0.25s ease-out forwards}@keyframes lf-fade-in-block{from{visibility:hidden;opacity:0}to{visibility:visible;opacity:1}}:host{display:block;font-family:var(--lf-compare-font-family, var(--lf-font-family-primary));font-size:var(--lf-compare-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-compare-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-compare-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-compare-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-compare-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-compare-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-compare-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-compare-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{width:100%;height:100%}.compare{width:100%;height:100%}.compare__grid{width:100%;height:100%;display:grid;grid-template-rows:var(--lf-comp-grid-template, 1fr auto);position:relative;user-select:none}.toolbar{border:0;border-style:solid;border-radius:var(--lf-compare-border-radius, var(--lf-ui-border-radius));border-top-left-radius:0;border-top-right-radius:0;background-color:rgba(var(--lf-compare-color-surface, var(--lf-color-surface)), 0.375);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-sizing:border-box;display:flex;justify-content:var(--lf-compare-toolbar-justify, space-between);padding:var(--lf-compare-toolbar-padding, 0.5em);width:var(--lf-compare-toolbar-width, 100%)}.toolbar__panel{border:0;border-style:solid;border-color:rgba(var(--lf-compare-border-color, var(--lf-color-border)), 1);border-width:1px;border-radius:var(--lf-compare-border-radius, var(--lf-ui-border-radius));background-color:rgba(var(--lf-compare-color-surface, var(--lf-color-surface)), 0.375);color:rgb(var(--lf-compare-color-on-surface, var(--lf-color-on-surface)));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);bottom:0;height:var(--lf-compare-panel-height, auto);max-height:var(--lf-compare-panel-max-height, 50%);overflow:auto;position:absolute;width:var(--lf-compare-panel-width, 50%);z-index:var(--lf-compare-panel-z-index, var(--lf-ui-zindex-portal))}.toolbar__panel--left{left:0}.toolbar__panel--right{right:0}.view{width:100%;height:100%;position:relative}.view--main>:first-child{width:100%;height:100%;position:relative}.view--main>:last-child{width:100%;height:100%;clip-path:inset(0 var(--lf_compare_overlay_width, 50%) 0 0);left:0;overflow:hidden;position:absolute;top:0}.view--main>:last-child:after{background-color:rgba(var(--lf-compare-color-surface, var(--lf-color-surface)), 0.5);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);content:"";height:100%;pointer-events:none;position:absolute;right:var(--lf_compare_overlay_width, 50%);top:0;width:var(--lf-compare-slider-thickness, 3px)}.view--split{display:grid;grid-template-columns:50% 50%;overflow:hidden}.view__slider{width:100%;height:100%;left:0;position:absolute;top:0;touch-action:pan-y;z-index:2}.view__input{width:100%;height:100%;appearance:none;background:transparent;cursor:grab;margin:0;pointer-events:all;z-index:1}.view__input::-webkit-slider-thumb{background-color:rgba(var(--lf-compare-color-surface, var(--lf-color-surface)), 0.375);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);appearance:none;cursor:ew-resize;height:100%;margin:0;width:10px}.view__input::-moz-slider-thumb{background-color:rgba(var(--lf-compare-color-surface, var(--lf-color-surface)), 0.375);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);appearance:none;cursor:ew-resize;height:100%;margin:0;width:10px}';
-const pA1ddf6c3_entry = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
-  __proto__: null,
-  lf_compare: Y$2
-}, Symbol.toStringTag, { value: "Module" }));
-var d, p$2, v$3, m$4, u$4, b$5 = function(t5, s2, e2, i2) {
-  if ("function" == typeof s2 ? t5 !== s2 || true : !s2.has(t5)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
-  return s2.get(t5);
-};
-const g$6 = class g {
-  constructor(e2) {
-    o$2(this, e2), this.lfEvent = G$3(this, "lf-splash-event"), this.state = "initializing", this.lfLabel = "Loading...", this.lfStyle = "", d.set(this, void 0), p$2.set(this, LF_SPLASH_BLOCKS), v$3.set(this, LF_SPLASH_PARTS), m$4.set(this, LF_STYLE_ID), u$4.set(this, LF_WRAPPER_ID);
-  }
-  onLfEvent(t5, s2) {
-    this.lfEvent.emit({ comp: this, eventType: s2, id: this.rootElement.id, originalEvent: t5 });
-  }
-  async getDebugInfo() {
-    return this.debugInfo;
-  }
-  async getProps() {
-    const t5 = LF_SPLASH_PROPS.map(((t6) => [t6, this[t6]]));
-    return Object.fromEntries(t5);
-  }
-  async refresh() {
-    vt$1(this);
-  }
-  async unmount(t5 = 575) {
-    setTimeout((() => {
-      this.state = "unmounting", setTimeout((() => {
-        this.onLfEvent(new CustomEvent("unmount"), "unmount"), this.rootElement.remove();
-      }), 300);
-    }), t5);
-  }
-  connectedCallback() {
-    b$5(this, d) && b$5(this, d).theme.register(this);
-  }
-  async componentWillLoad() {
-    !(function(t5, s2, e2, i2, a2) {
-      if ("function" == typeof s2 ? t5 !== s2 || true : !s2.has(t5)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
-      s2.set(t5, e2);
-    })(this, d, await a(this));
-  }
-  componentDidLoad() {
-    const { info: t5 } = b$5(this, d).debug;
-    this.onLfEvent(new CustomEvent("ready"), "ready"), t5.update(this, "did-load");
-  }
-  componentWillRender() {
-    const { info: t5 } = b$5(this, d).debug;
-    t5.update(this, "will-render");
-  }
-  componentDidRender() {
-    const { info: t5 } = b$5(this, d).debug;
-    t5.update(this, "did-render");
-  }
-  render() {
-    const { bemClass: t5, setLfStyle: s2 } = b$5(this, d).theme, { lfLabel: e2, lfStyle: l2, state: o2 } = this, r2 = "unmounting" === o2, { splash: f2 } = b$5(this, p$2);
-    return U$5(A$9, { key: "a6ecaa75f689fce5e56867b343e890573bc962d6" }, l2 && U$5("style", { key: "3ceff8dc59e99d1f5a37522deb9d6c553385366f", id: b$5(this, m$4) }, s2(this)), U$5("div", { key: "3b66310c238cda3f400c1b8c141e3b823c118cbc", id: b$5(this, u$4) }, U$5("div", { key: "12c412902dbd4daf304632f2200a5a0b5c91dee9", class: t5(f2._, null, { active: r2 }), part: b$5(this, v$3).splash }, U$5("div", { key: "64a172082fd3b6bff478ff8140265e163815ee9a", class: t5(f2._, f2.content), part: b$5(this, v$3).content }, U$5("div", { key: "a99ce86219f43a7e647266b70a29021a75db33d9", class: t5(f2._, f2.widget), part: b$5(this, v$3).widget }, U$5("slot", { key: "b29c483a7d42805bf0009efa21afc295dd7d2379" })), U$5("div", { key: "d99a90e29fd82986bfcb8f258911da1c631601ae", class: t5(f2._, f2.label), part: b$5(this, v$3).label }, r2 ? "Ready!" : e2)))));
-  }
-  disconnectedCallback() {
-    var _a2;
-    (_a2 = b$5(this, d)) == null ? void 0 : _a2.theme.unregister(this);
-  }
-  get rootElement() {
-    return q$4(this);
-  }
-};
-d = /* @__PURE__ */ new WeakMap(), p$2 = /* @__PURE__ */ new WeakMap(), v$3 = /* @__PURE__ */ new WeakMap(), m$4 = /* @__PURE__ */ new WeakMap(), u$4 = /* @__PURE__ */ new WeakMap(), g$6.style = "::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}:host{display:block;font-family:var(--lf-splash-font-family, var(--lf-font-family-primary));font-size:var(--lf-splash-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-splash-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-splash-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-splash-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-splash-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-splash-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-splash-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-splash-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{margin:0}.splash{background-color:rgba(var(--lf-splash-color-bg, var(--lf-color-bg)), 1);color:rgb(var(--lf-splash-color-on-bg, var(--lf-color-on-bg)));display:flex;height:var(--lf-splash-height, 100dvh);left:var(--lf-splash-left, 0);opacity:1;position:var(--lf-splash-position, fixed);top:var(--lf-splash-top, 0);width:var(--lf-splash-width, 100dvw);z-index:var(--lf-ui-zindex-splash, 999)}.splash--active{transition:opacity 200ms cubic-bezier(0.4, 0, 0.6, 1);opacity:0}.splash__content{margin:auto}.splash__widget{height:var(--lf-splash-widget-height, 10em);margin:var(--lf-splash-widget-margin, auto);width:var(--lf-splash-widget-width, 10em)}.splash__label{font-size:0.875em;font-weight:500;line-height:1.375em;letter-spacing:0.01em;text-align:center}";
-const pA5d3299e_entry = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
-  __proto__: null,
-  lf_splash: g$6
-}, Symbol.toStringTag, { value: "Module" }));
-const m$3 = { start: (t5) => {
-  const { controller: e2 } = t5, { get: s2, set: i2 } = e2, { compInstance: r2 } = s2, { lfAutoPlay: a2, lfInterval: o2 } = r2;
-  a2 && o2 > 0 && i2.interval(setInterval((() => {
-    i2.index.next();
-  }), o2));
-}, stop: (t5) => {
-  const { controller: e2 } = t5, { get: s2, set: i2 } = e2, { interval: r2 } = s2;
-  r2() && (clearInterval(r2()), i2.interval(null));
-} }, g$5 = (t5, e2) => {
-  const { start: s2, stop: i2 } = m$3;
-  return { ...t5, autoplay: { start: () => s2(e2()), stop: () => i2(e2()) } };
-}, y$5 = (e2) => /* @__PURE__ */ ((e3) => ({ back: () => {
-  const { controller: s2, elements: i2, handlers: r2 } = e3(), { blocks: a2, cyAttributes: o2, manager: n2, parts: c2 } = s2.get, { assignRef: f2, theme: h2 } = n2, { refs: u2 } = i2, { button: d2 } = r2, { "--lf-icon-previous": b2 } = h2.get.current().variables;
-  return U$5("lf-button", { class: h2.bemClass(a2.carousel._, a2.carousel.back), "data-cy": o2.button, id: LF_CAROUSEL_IDS.back, lfIcon: b2, lfStyling: "icon", lfUiSize: "large", "onLf-button-event": d2, part: c2.back, ref: f2(u2, "back"), title: "Previous slide." });
-}, forward: () => {
-  const { controller: s2, elements: i2, handlers: r2 } = e3(), { blocks: a2, cyAttributes: o2, manager: n2, parts: c2 } = s2.get, { assignRef: f2, theme: h2 } = n2, { refs: u2 } = i2, { button: d2 } = r2, { "--lf-icon-next": b2 } = h2.get.current().variables;
-  return U$5("lf-button", { class: h2.bemClass(a2.carousel._, a2.carousel.forward), "data-cy": o2.button, id: LF_CAROUSEL_IDS.forward, lfIcon: b2, lfStyling: "icon", lfUiSize: "large", "onLf-button-event": d2, part: c2.forward, ref: f2(u2, "forward"), title: "Next slide." });
-} }))(e2), w$6 = (t5) => /* @__PURE__ */ ((t6) => ({ button: (e2) => {
-  const { eventType: s2, id: i2 } = e2.detail, { next: r2, previous: a2 } = t6().controller.set.index;
-  if ("click" === s2) switch (i2) {
-    case LF_CAROUSEL_IDS.back:
-      a2();
-      break;
-    case LF_CAROUSEL_IDS.forward:
-      r2();
-  }
-} }))(t5);
-var k$6, z$6, x$6, _$4, S$4, E$4, W$5, M$4, j$3, C$4, T$3, I$3, L$2, D$4, P$1, R$1, A$1, Y$1 = function(t5, e2, s2, i2) {
-  if ("a" === s2 && !i2) throw new TypeError("Private accessor was defined without a getter");
-  if ("function" == typeof e2 ? t5 !== e2 || !i2 : !e2.has(t5)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
-  return "m" === s2 ? i2 : "a" === s2 ? i2.call(t5) : i2 ? i2.value : e2.get(t5);
-}, H$1 = function(t5, e2, s2, i2, r2) {
-  if ("function" == typeof e2 ? t5 !== e2 || true : !e2.has(t5)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
-  return e2.set(t5, s2), s2;
-};
-const O$1 = class O {
-  constructor(t5) {
-    o$2(this, t5), this.lfEvent = G$3(this, "lf-carousel-event"), k$6.add(this), this.currentIndex = 0, this.shapes = {}, this.lfDataset = null, this.lfAutoPlay = false, this.lfInterval = 3e3, this.lfLightbox = false, this.lfNavigation = false, this.lfShape = "image", this.lfStyle = "", z$6.set(this, void 0), x$6.set(this, LF_CAROUSEL_BLOCKS), _$4.set(this, CY_ATTRIBUTES), S$4.set(this, LF_ATTRIBUTES), E$4.set(this, LF_CAROUSEL_PARTS), W$5.set(this, LF_STYLE_ID), M$4.set(this, LF_WRAPPER_ID), j$3.set(this, void 0), C$4.set(this, void 0), T$3.set(this, void 0), I$3.set(this, (() => {
-      var t6;
-      H$1(this, T$3, { controller: { get: { blocks: Y$1(this, x$6, "f"), compInstance: this, cyAttributes: CY_ATTRIBUTES, index: { current: () => this.currentIndex }, interval: () => Y$1(this, C$4, "f"), manager: Y$1(this, z$6, "f"), parts: LF_CAROUSEL_PARTS, totalSlides: () => Y$1(this, k$6, "m", L$2).call(this) }, set: g$5({ index: { current: (t7) => this.currentIndex = t7, next: () => {
-        var t7, e2;
-        this.currentIndex = (t7 = this.currentIndex, e2 = Y$1(this, k$6, "m", L$2).call(this), (t7 + 1) % e2);
-      }, previous: () => {
-        var t7, e2;
-        this.currentIndex = (t7 = this.currentIndex, e2 = Y$1(this, k$6, "m", L$2).call(this), (t7 - 1 + e2) % e2);
-      } }, interval: (t7) => H$1(this, C$4, t7, "f") }, t6 = () => Y$1(this, T$3, "f")) }, elements: { jsx: y$5(t6), refs: { back: null, forward: null } }, handlers: w$6(t6) });
-    }));
-  }
-  onLfEvent(t5, e2) {
-    const { lightbox: s2 } = Y$1(this, z$6, "f").effects;
-    if ("lf-event" === e2 && this.lfLightbox) {
-      const { comp: e3, eventType: i2 } = t5.detail;
-      if ("click" === i2) {
-        const { rootElement: t6 } = e3;
-        t6 instanceof HTMLElement && s2.show(t6);
-      }
-    }
-    this.lfEvent.emit({ comp: this, eventType: e2, id: this.rootElement.id, originalEvent: t5 });
-  }
-  async updateShapes() {
-    if (!Y$1(this, z$6, "f")) return;
-    const { data: t5, debug: e2 } = Y$1(this, z$6, "f");
-    try {
-      this.shapes = t5.cell.shapes.getAll(this.lfDataset);
-    } catch (t6) {
-      e2.logs.new(this, "Error updating shapes: " + t6, "error");
-    }
-  }
-  async getDebugInfo() {
-    return this.debugInfo;
-  }
-  async getProps() {
-    const t5 = LF_CAROUSEL_PROPS.map(((t6) => [t6, this[t6]]));
-    return Object.fromEntries(t5);
-  }
-  async goToSlide(t5) {
-    const { current: e2 } = Y$1(this, T$3, "f").controller.set.index;
-    e2(t5);
-  }
-  async nextSlide() {
-    const { next: t5 } = Y$1(this, T$3, "f").controller.set.index;
-    t5();
-  }
-  async prevSlide() {
-    const { previous: t5 } = Y$1(this, T$3, "f").controller.set.index;
-    t5();
-  }
-  async refresh() {
-    vt$1(this);
-  }
-  async unmount(t5 = 0) {
-    setTimeout((() => {
-      this.onLfEvent(new CustomEvent("unmount"), "unmount"), this.rootElement.remove();
-    }), t5);
-  }
-  connectedCallback() {
-    Y$1(this, z$6, "f") && Y$1(this, z$6, "f").theme.register(this);
-  }
-  async componentWillLoad() {
-    H$1(this, z$6, await a(this)), Y$1(this, I$3, "f").call(this), this.updateShapes(), this.lfAutoPlay && m$3.start(Y$1(this, T$3, "f"));
-  }
-  componentDidLoad() {
-    const { info: t5 } = Y$1(this, z$6, "f").debug, { register: e2 } = Y$1(this, z$6, "f").drag, { next: s2, previous: i2 } = Y$1(this, T$3, "f").controller.set.index;
-    e2.swipe(Y$1(this, j$3, "f"), { onEnd: (t6, e3) => {
-      var _a2;
-      if ((_a2 = e3.swipeData) == null ? void 0 : _a2.direction) {
-        const { direction: t7 } = e3.swipeData;
-        "left" === t7 ? s2() : "right" === t7 && i2();
-      }
-    } }), this.onLfEvent(new CustomEvent("ready"), "ready"), t5.update(this, "did-load");
-  }
-  componentWillRender() {
-    const { info: t5 } = Y$1(this, z$6, "f").debug;
-    t5.update(this, "will-render");
-  }
-  componentDidRender() {
-    const { info: t5 } = Y$1(this, z$6, "f").debug;
-    t5.update(this, "did-render");
-  }
-  render() {
-    const { bemClass: e2, setLfStyle: s2 } = Y$1(this, z$6, "f").theme, { lfStyle: i2 } = this, { carousel: a2 } = Y$1(this, x$6, "f");
-    return U$5(A$9, { key: "a43ab4851e6c9c3382faf86f962c9702a6dbfa44" }, i2 && U$5("style", { key: "ecf1185e4666850c5941b0f11b515166415a2a7a", id: Y$1(this, W$5, "f") }, s2(this)), U$5("div", { key: "8998d5ffc3ca9f005f2db1b83fb8eb926b2834e2", id: Y$1(this, M$4, "f") }, U$5("div", { key: "7654a672b371fed52d74750524399b6fb529ff4f", class: e2(a2._), part: Y$1(this, E$4, "f").carousel, ref: (t5) => {
-      t5 && H$1(this, j$3, t5);
-    }, role: "region" }, Y$1(this, k$6, "m", P$1).call(this))));
+    const { bemClass: i2, setLfStyle: t5 } = D$7(this, p$3, "f").theme, { drawer: e2 } = D$7(this, v$4, "f"), { lfStyle: o2 } = this, a2 = "slide" === this.lfDisplay && this.lfValue;
+    return U$6(A$a, { key: "d483f7fa5123a750aa1985efb185837b7d024157" }, o2 && U$6("style", { key: "b100be8982791c0286b806278abe7f2c1772dcf7", id: D$7(this, g$7, "f") }, t5(this)), U$6("div", { key: "74139330312b1b5195fadcd07e7fdd15634082f2", "aria-modal": a2, id: D$7(this, z$9, "f"), ref: (i3) => {
+      i3 && R$5(this, x$9, i3);
+    }, role: "dialog" }, U$6("div", { key: "ad753c13fecb887fbcd561187aeba5664451e153", class: i2(e2._), part: D$7(this, y$8, "f").drawer }, U$6("div", { key: "7081411fb14f82badb2ffe6f32f1fd4dbb0c0663", class: i2(e2._, e2.content), "lf-data": D$7(this, m$4, "f").fadeIn, part: D$7(this, y$8, "f").content }, U$6("slot", { key: "568fba427cf5f81a26bb743ac6e718b072bcd527", name: LF_DRAWER_SLOT })))));
   }
   disconnectedCallback() {
     var _a2, _b2;
-    (_a2 = Y$1(this, z$6, "f")) == null ? void 0 : _a2.drag.unregister.swipe(Y$1(this, j$3, "f")), (_b2 = Y$1(this, z$6, "f")) == null ? void 0 : _b2.theme.unregister(this), m$3.stop(Y$1(this, T$3, "f"));
+    D$7(this, C$7, "f") && window.removeEventListener("resize", D$7(this, C$7, "f")), (_a2 = D$7(this, p$3, "f")) == null ? void 0 : _a2.effects.backdrop.hide(), (_b2 = D$7(this, p$3, "f")) == null ? void 0 : _b2.theme.unregister(this);
   }
   get rootElement() {
-    return q$4(this);
+    return q$5(this);
   }
   static get watchers() {
-    return { lfDataset: ["updateShapes"], lfShape: ["updateShapes"] };
+    return { lfDisplay: ["onLfDisplayChange"], lfResponsive: ["onLfResponsiveChange"] };
   }
 };
-z$6 = /* @__PURE__ */ new WeakMap(), x$6 = /* @__PURE__ */ new WeakMap(), _$4 = /* @__PURE__ */ new WeakMap(), S$4 = /* @__PURE__ */ new WeakMap(), E$4 = /* @__PURE__ */ new WeakMap(), W$5 = /* @__PURE__ */ new WeakMap(), M$4 = /* @__PURE__ */ new WeakMap(), j$3 = /* @__PURE__ */ new WeakMap(), C$4 = /* @__PURE__ */ new WeakMap(), T$3 = /* @__PURE__ */ new WeakMap(), I$3 = /* @__PURE__ */ new WeakMap(), k$6 = /* @__PURE__ */ new WeakSet(), L$2 = function() {
+p$3 = /* @__PURE__ */ new WeakMap(), v$4 = /* @__PURE__ */ new WeakMap(), m$4 = /* @__PURE__ */ new WeakMap(), y$8 = /* @__PURE__ */ new WeakMap(), g$7 = /* @__PURE__ */ new WeakMap(), z$9 = /* @__PURE__ */ new WeakMap(), x$9 = /* @__PURE__ */ new WeakMap(), k$9 = /* @__PURE__ */ new WeakMap(), C$7 = /* @__PURE__ */ new WeakMap(), E$7 = /* @__PURE__ */ new WeakMap(), u$4 = /* @__PURE__ */ new WeakSet(), W$8 = function() {
+  if (this.lfResponsive <= 0) return;
+  const i2 = this.lfDisplay, t5 = window.innerWidth >= this.lfResponsive ? "dock" : "slide";
+  t5 !== i2 && (this.lfDisplay = t5, D$7(this, u$4, "m", M$8).call(this, i2, t5));
+}, M$8 = function(i2, t5) {
+  this.lfValue && ("slide" === i2 && "dock" === t5 ? D$7(this, p$3, "f").effects.backdrop.hide() : "dock" === i2 && "slide" === t5 && D$7(this, p$3, "f").effects.backdrop.show((() => this.close())));
+}, T$6 = function() {
+  if (!this.lfValue) return;
+  if (!D$7(this, x$9, "f")) return;
+  const i2 = D$7(this, x$9, "f").querySelector(LF_EFFECTS_FOCUSABLES.join(","));
+  i2 ? i2.focus() : D$7(this, x$9, "f").focus();
+}, L$5 = function(i2) {
+  if (!this.lfValue || !D$7(this, x$9, "f")) return;
+  const t5 = Array.from(D$7(this, x$9, "f").querySelectorAll(LF_EFFECTS_FOCUSABLES.join(","))).filter(((i3) => i3.offsetWidth > 0 || i3.offsetHeight > 0 || i3 === document.activeElement));
+  if (0 === t5.length) return void i2.preventDefault();
+  const e2 = t5[0], r2 = t5[t5.length - 1];
+  i2.shiftKey && document.activeElement === e2 ? (i2.preventDefault(), r2.focus()) : i2.shiftKey || document.activeElement !== r2 || (i2.preventDefault(), e2.focus());
+}, j$7.style = "::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=fade-in]{display:block;animation:lf-fade-in-block 0.25s ease-out forwards}@keyframes lf-fade-in-block{from{visibility:hidden;opacity:0}to{visibility:visible;opacity:1}}:host{display:block;font-family:var(--lf-drawer-font-family, var(--lf-font-family-primary));font-size:var(--lf-drawer-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-drawer-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-drawer-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-drawer-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-drawer-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-drawer-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-drawer-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-drawer-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{border:0;border-style:solid;border-radius:var(--lf-drawer-border-radius, var(--lf-ui-border-radius));background-color:rgba(var(--lf-drawer-color-drawer, var(--lf-color-drawer)), 0.375);color:rgb(var(--lf-drawer-color-on-drawer, var(--lf-color-on-drawer)));backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-sizing:border-box;display:block;height:100dvh;left:calc(var(--lf-ui-width-drawer) * -1);position:absolute;top:0;width:var(--lf-ui-width-drawer);z-index:var(--lf-ui-zindex-drawer)}:host([lf-position=left]){transition:left 300ms cubic-bezier(0.4, 0, 0.2, 1);border-bottom-left-radius:0;border-top-left-radius:0;border-right:var(--lf-drawer-border, 1px solid rgba(var(--lf-color-border), 0.75));left:calc(var(--lf-ui-width-drawer) * -1);right:auto}:host([lf-position=right]){transition:right 300ms cubic-bezier(0.4, 0, 0.2, 1);border-bottom-right-radius:0;border-top-right-radius:0;border-left:var(--lf-drawer-border, 1px solid rgba(var(--lf-color-border), 0.75));left:auto;right:calc(var(--lf-ui-width-drawer) * -1)}:host([lf-display=dock]){box-shadow:none}:host([lf-display=dock])[lf-position=left]{left:0}:host([lf-display=dock])[lf-position=right]{right:0}:host([lf-value]){left:0}:host([lf-value][lf-position=left][lf-display=slide]){box-shadow:var(--lf-drawer-left-box-shadow, 4px 0 10px -2px rgba(var(--lf-color-on-drawer), 0.2), 8px 0 16px 2px rgba(var(--lf-color-on-drawer), 0.14), 2px 0 20px 5px rgba(var(--lf-color-on-drawer), 0.14))}:host([lf-value][lf-position=right][lf-display=slide]){box-shadow:var(--lf-drawer-right-box-shadow, -4px 0 10px -2px rgba(var(--lf-color-on-drawer), 0.2), -8px 0 16px 2px rgba(var(--lf-color-on-drawer), 0.14), -2px 0 20px 5px rgba(var(--lf-color-on-drawer), 0.14))}.drawer,.drawer__content{width:100%;height:100%}";
+const p6f619be6_entry = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  lf_drawer: j$7
+}, Symbol.toStringTag, { value: "Module" }));
+const m$3 = (e2) => ({ dropdown: () => {
   var _a2, _b2;
-  return ((_b2 = (_a2 = this.shapes) == null ? void 0 : _a2[this.lfShape]) == null ? void 0 : _b2.length) || 0;
-}, D$4 = function() {
+  const { controller: i2, elements: a2, handlers: s2 } = e2(), { refs: o2 } = a2, { blocks: l2, cyAttributes: n2, isLoading: r2, lfAttributes: f2, manager: c2, parts: h2, highlightedIndex: d2 } = i2.get, { assignRef: u2, sanitizeProps: p2, theme: m2 } = c2, { bemClass: v2 } = m2, { list: w3 } = s2, y2 = i2.get.compInstance, b2 = i2.get.lfDataset(), g3 = y2.lfListProps || {}, k2 = `${((_a2 = y2.rootElement) == null ? void 0 : _a2.id) || "autocomplete"}-dropdown`, z2 = i2.get.inputValue().length >= y2.lfMinChars, x2 = !!((_b2 = b2 == null ? void 0 : b2.nodes) == null ? void 0 : _b2.length), C3 = !r2() && z2 && !x2 && null !== b2, T4 = null !== b2;
+  return U$6("div", { class: v2(l2.dropdown._), "data-cy": n2.dropdownMenu, "data-lf": f2.portal, id: k2, part: h2.dropdown, ref: u2(o2, "dropdown"), role: "listbox" }, U$6("lf-spinner", { lfBarVariant: true, lfDimensions: "1em", lfStyle: ":host { --lf-spinner-min-height: 0.25em; }", ...p2(y2.lfSpinnerProps || {}, "LfSpinner"), class: v2(l2.dropdown._, l2.dropdown.spinner), "data-cy": n2.spinner, "data-lf": f2.fadeIn, lfActive: r2(), part: h2.spinner, ref: u2(o2, "spinner") }), T4 && U$6("lf-list", { lfEmpty: C3 ? "Your search returned no results." : "", lfUiSize: y2.lfUiSize, lfUiState: y2.lfUiState, ...p2(g3, "LfList"), class: v2(l2.dropdown._, l2.dropdown.list), lfDataset: b2, lfSelectable: true, lfValue: d2(), "onLf-list-event": w3, part: h2.list, ref: u2(o2, "list") }));
+}, textfield: () => {
   var _a2;
-  return !!((_a2 = this.shapes) == null ? void 0 : _a2[this.lfShape]);
-}, P$1 = function() {
-  const { bemClass: e2 } = Y$1(this, z$6, "f").theme, { carousel: s2 } = Y$1(this, x$6, "f"), { elements: i2 } = Y$1(this, T$3, "f"), { jsx: r2 } = i2, { back: a2, forward: l2 } = r2;
-  if (Y$1(this, k$6, "m", D$4).call(this)) {
-    const i3 = this.shapes[this.lfShape];
-    if (i3 == null ? void 0 : i3.length) return U$5(St$1, null, U$5("div", { "aria-live": "polite", class: e2(s2._, s2.track), part: Y$1(this, E$4, "f").track, role: "region" }, Y$1(this, k$6, "m", A$1).call(this), this.lfNavigation && a2(), this.lfNavigation && l2()), Y$1(this, k$6, "m", R$1).call(this));
-  }
-  return null;
-}, R$1 = function() {
-  const { bemClass: e2 } = Y$1(this, z$6, "f").theme, { slideBar: s2 } = Y$1(this, x$6, "f"), i2 = Y$1(this, k$6, "m", L$2).call(this), r2 = [];
-  for (let a2 = 0; a2 < i2; a2++) {
-    const i3 = `Jump to slide ${a2 + 1}`;
-    r2.push(U$5("div", { "aria-label": i3, class: e2(s2._, s2.segment, { active: a2 === this.currentIndex }), "data-cy": Y$1(this, _$4, "f").button, "data-index": a2, onClick: async () => this.goToSlide(a2), part: Y$1(this, E$4, "f").segment, role: "button", tabIndex: 0, title: i3 }));
-  }
-  return U$5("div", { class: e2(s2._), part: Y$1(this, E$4, "f").slideBar }, r2);
-}, A$1 = function() {
-  const { bemClass: e2 } = Y$1(this, z$6, "f").theme, { currentIndex: s2, lfShape: i2 } = this, { carousel: r$12 } = Y$1(this, x$6, "f"), a2 = this.shapes[i2].map((() => ({ htmlProps: { dataset: { lf: Y$1(this, S$4, "f").fadeIn } } }))), o2 = this.shapes[i2][s2], l2 = a2[s2];
-  return U$5("div", { class: e2(r$12._, r$12.slide), "data-index": s2 }, U$5(r, { cell: Object.assign(l2, o2), index: s2, shape: i2, eventDispatcher: async (t5) => this.onLfEvent(t5, "lf-event"), framework: Y$1(this, z$6, "f") }));
-}, O$1.style = "::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=fade-in]{display:block;animation:lf-fade-in-block 0.25s ease-out forwards}@keyframes lf-fade-in-block{from{visibility:hidden;opacity:0}to{visibility:visible;opacity:1}}:host{display:block;font-family:var(--lf-carousel-font-family, var(--lf-font-family-primary));font-size:var(--lf-carousel-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-carousel-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-carousel-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-carousel-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-carousel-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-carousel-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-carousel-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-carousel-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{width:100%;height:100%;margin:auto;overflow:hidden;position:relative}:host([lf-lightbox]) [data-lf=fade-in]{cursor:pointer}.carousel{border:0;border-style:solid;border-radius:var(--lf-carousel-border-radius, var(--lf-ui-border-radius));width:100%;height:100%;display:flex;justify-content:center;overflow:hidden;position:relative}.carousel:hover .slide-bar{opacity:1}.carousel:hover .carousel__back,.carousel:hover .carousel__forward{opacity:1}.carousel:hover .carousel__back{left:0.5em}.carousel:hover .carousel__forward{right:0.5em}.carousel__back,.carousel__forward{transition:all 250ms cubic-bezier(0.34, 1.56, 0.64, 1);opacity:0;position:absolute;top:50%;transform:translateY(-50%)}.carousel__back{left:0}.carousel__forward{right:0}.carousel__track{width:100%;height:100%;transition:all 250ms cubic-bezier(0.34, 1.56, 0.64, 1);display:flex;will-change:transform}.carousel__slide{width:100%;height:100%;align-items:center;flex-shrink:0;justify-content:center}.slide-bar{background-color:rgba(var(--lf-carousel-color-surface, var(--lf-color-surface)), 0.75);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:all 300ms cubic-bezier(0.4, 0, 0.2, 1);align-items:center;bottom:0;box-sizing:border-box;display:flex;flex-wrap:nowrap;height:var(--lf-carousel-slide-bar-height, 0.75em);left:0;opacity:var(--lf-carousel-slide-bar-opacity, 0.75);position:absolute;width:100%}.slide-bar:hover{opacity:var(--lf-carousel-slide-bar-opacity-hover, 1)}.slide-bar__segment{background-color:rgba(var(--lf-carousel-color-surface, var(--lf-color-surface)), 1);width:100%;height:100%;transition:all 300ms cubic-bezier(0.4, 0, 0.2, 1);cursor:pointer}.slide-bar__segment:not(.slide-bar__segment--active):hover{background-color:rgba(var(--lf-carousel-color-on-surface, var(--lf-color-on-surface)), 0.5)}.slide-bar__segment--active{background-color:rgba(var(--lf-carousel-color-on-surface, var(--lf-color-on-surface)), 1)}";
-const pB388f0aa_entry = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
-  __proto__: null,
-  lf_carousel: O$1
-}, Symbol.toStringTag, { value: "Module" }));
-var v$2, m$2, u$3, g$4, y$4, w$5, k$5, x$5, z$5, _$3, E$3, W$4, C$3, M$3, j$2, D$3 = function(r2, o2, i2, a2) {
-  if ("a" === i2 && !a2) throw new TypeError("Private accessor was defined without a getter");
-  if ("function" == typeof o2 ? r2 !== o2 || !a2 : !o2.has(r2)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
-  return "m" === i2 ? a2 : "a" === i2 ? a2.call(r2) : a2 ? a2.value : o2.get(r2);
-}, T$2 = function(r2, o2, i2, a2, e2) {
-  if ("function" == typeof o2 ? r2 !== o2 || true : !o2.has(r2)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
-  return o2.set(r2, i2), i2;
-};
-const S$3 = class S {
-  constructor(a2) {
-    o$2(this, a2), this.lfEvent = G$3(this, "lf-accordion-event"), v$2.add(this), this.expandedNodes = /* @__PURE__ */ new Set(), this.selectedNodes = /* @__PURE__ */ new Set(), this.lfDataset = null, this.lfRipple = true, this.lfUiSize = "medium", this.lfUiState = "primary", this.lfStyle = "", m$2.set(this, void 0), u$3.set(this, LF_ACCORDION_BLOCKS), g$4.set(this, CY_ATTRIBUTES), y$4.set(this, LF_ATTRIBUTES), w$5.set(this, LF_ACCORDION_PARTS), k$5.set(this, LF_STYLE_ID), x$5.set(this, LF_WRAPPER_ID), z$5.set(this, {}), j$2.set(this, ((r$12) => {
-      const { cells: o2 } = r$12, a3 = o2 && Object.keys(o2)[0], e2 = o2 == null ? void 0 : o2[a3];
-      return U$5(r, { cell: e2, index: 0, shape: e2.shape, eventDispatcher: async (r2) => this.onLfEvent(r2, "lf-event"), framework: D$3(this, m$2, "f") });
-    }));
-  }
-  onLfEvent(r2, o2, i2) {
-    const { effects: a2 } = D$3(this, m$2, "f"), { lfRipple: e2, rootElement: t5 } = this;
-    "pointerdown" === o2 && e2 && a2.ripple(r2, D$3(this, z$5, "f")[i2.id]), this.lfEvent.emit({ comp: this, eventType: o2, id: t5.id, originalEvent: r2 });
-  }
-  async getDebugInfo() {
-    return this.debugInfo;
-  }
-  async getProps() {
-    const r2 = LF_ACCORDION_PROPS.map(((r3) => [r3, this[r3]]));
-    return Object.fromEntries(r2);
-  }
-  async getSelectedNodes() {
-    return this.selectedNodes;
-  }
-  async refresh() {
-    vt$1(this);
-  }
-  async toggleNode(r2, o2) {
-    const i2 = this.lfDataset.nodes.find(((o3) => o3.id === r2));
-    i2 && (D$3(this, v$2, "m", E$3).call(this, i2) ? D$3(this, v$2, "m", _$3).call(this, i2) ? this.expandedNodes.delete(i2) : this.expandedNodes.add(i2) : D$3(this, v$2, "m", W$4).call(this, i2) ? this.selectedNodes.delete(i2) : this.selectedNodes.add(i2), D$3(this, v$2, "m", E$3).call(this, i2) || this.onLfEvent(o2 || new CustomEvent("click"), "click"), this.refresh());
-  }
-  async unmount(r2 = 0) {
-    setTimeout((() => {
-      this.onLfEvent(new CustomEvent("unmount"), "unmount"), this.rootElement.remove();
-    }), r2);
-  }
-  connectedCallback() {
-    D$3(this, m$2, "f") && D$3(this, m$2, "f").theme.register(this);
-  }
-  async componentWillLoad() {
-    T$2(this, m$2, await a(this));
-  }
-  componentDidLoad() {
-    const { info: r2 } = D$3(this, m$2, "f").debug;
-    this.onLfEvent(new CustomEvent("ready"), "ready"), r2.update(this, "did-load");
-  }
-  componentWillRender() {
-    const { info: r2 } = D$3(this, m$2, "f").debug;
-    r2.update(this, "will-render");
-  }
-  componentDidRender() {
-    const { debug: r2 } = D$3(this, m$2, "f");
-    r2.info.update(this, "did-render");
-  }
-  render() {
-    const { bemClass: r2, setLfStyle: o2 } = D$3(this, m$2, "f").theme, { lfStyle: a2 } = this;
-    T$2(this, z$5, {});
-    const { accordion: t5 } = D$3(this, u$3, "f");
-    return U$5(A$9, { key: "421702407cd773c87f118271733250ba6b0c9123" }, a2 && U$5("style", { key: "0065f7001156178429d967ccf119200a198ec42a", id: D$3(this, k$5, "f") }, o2(this)), U$5("div", { key: "b126869c4ec5471bf4a41ab7290b4043210af4da", id: D$3(this, x$5, "f") }, U$5("div", { key: "1afbdb206bb98b4465c94774053dda7f9e0095ae", class: r2(t5._), part: D$3(this, w$5, "f").accordion }, D$3(this, v$2, "m", M$3).call(this))));
-  }
-  disconnectedCallback() {
-    var _a2;
-    (_a2 = D$3(this, m$2, "f")) == null ? void 0 : _a2.theme.unregister(this);
-  }
-  get rootElement() {
-    return q$4(this);
-  }
-};
-m$2 = /* @__PURE__ */ new WeakMap(), u$3 = /* @__PURE__ */ new WeakMap(), g$4 = /* @__PURE__ */ new WeakMap(), y$4 = /* @__PURE__ */ new WeakMap(), w$5 = /* @__PURE__ */ new WeakMap(), k$5 = /* @__PURE__ */ new WeakMap(), x$5 = /* @__PURE__ */ new WeakMap(), z$5 = /* @__PURE__ */ new WeakMap(), j$2 = /* @__PURE__ */ new WeakMap(), v$2 = /* @__PURE__ */ new WeakSet(), _$3 = function(r2) {
-  return this.expandedNodes.has(r2);
-}, E$3 = function(r2) {
-  return r2.cells && Object.keys(r2.cells).length > 0;
-}, W$4 = function(r2) {
-  return this.selectedNodes.has(r2);
-}, C$3 = function(r2) {
-  const { assets: o2, theme: a2 } = D$3(this, m$2, "f"), { style: e2 } = o2.get(`./assets/svg/${r2}.svg`), { node: t5 } = D$3(this, u$3, "f");
-  return U$5("div", { class: a2.bemClass(t5._, t5.icon), "data-cy": D$3(this, g$4, "f").maskedSvg, part: D$3(this, w$5, "f").icon, style: e2 });
-}, M$3 = function() {
-  const { bemClass: r2 } = D$3(this, m$2, "f").theme, { lfDataset: o2 } = this;
-  if (!o2 || !o2.nodes) return [];
-  const a2 = [];
-  for (let e2 = 0; e2 < o2.nodes.length; e2++) {
-    const t5 = o2.nodes[e2], n2 = D$3(this, v$2, "m", _$3).call(this, t5), l2 = D$3(this, v$2, "m", E$3).call(this, t5), s2 = D$3(this, v$2, "m", W$4).call(this, t5);
-    a2.push(U$5("div", { class: r2(D$3(this, u$3, "f").node._), "data-cy": D$3(this, g$4, "f").node, "data-lf": D$3(this, y$4, "f")[this.lfUiState] }, U$5("div", { class: r2(D$3(this, u$3, "f").node._, D$3(this, u$3, "f").node.header, { expanded: l2 && n2, selected: !l2 && s2 }), "data-cy": !l2 && D$3(this, g$4, "f").button, onClick: (r3) => this.toggleNode(t5.id, r3), onPointerDown: (r3) => {
-      this.onLfEvent(r3, "pointerdown", t5);
-    }, part: D$3(this, w$5, "f").header, tabindex: "1", title: t5.description }, U$5("div", { "data-cy": D$3(this, g$4, "f").rippleSurface, "data-lf": D$3(this, y$4, "f").rippleSurface, part: D$3(this, w$5, "f").rippleSurface, ref: (r3) => {
-      r3 && this.lfRipple && (D$3(this, z$5, "f")[t5.id] = r3);
-    } }), t5.icon ? D$3(this, v$2, "m", C$3).call(this, t5.icon) : null, U$5("span", { class: r2(D$3(this, u$3, "f").node._, D$3(this, u$3, "f").node.text), part: D$3(this, w$5, "f").text }, t5.value), l2 && U$5("div", { class: r2(D$3(this, u$3, "f").node._, D$3(this, u$3, "f").node.expand, { expanded: n2 }), "data-cy": D$3(this, g$4, "f").dropdownButton, "data-lf": D$3(this, y$4, "f").icon, part: D$3(this, w$5, "f").icon })), n2 && U$5("div", { class: r2(D$3(this, u$3, "f").node._, D$3(this, u$3, "f").node.content, { selected: s2 }), "data-lf": D$3(this, y$4, "f").fadeIn, part: D$3(this, w$5, "f").content }, D$3(this, j$2, "f").call(this, t5))));
-  }
-  return a2;
-}, S$3.style = ".node{border:0;border-style:solid;border-color:rgba(var(--lf-accordion-border-color, var(--lf-color-border)), 1);border-width:1px;border-radius:var(--lf-accordion-border-radius, var(--lf-ui-border-radius));background-color:rgba(var(--lf-accordion-color-bg, var(--lf-color-bg)), 0.375);color:rgb(var(--lf-accordion-color-on-bg, var(--lf-color-on-bg)));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:0;border-top:0;box-sizing:border-box;width:100%}.node:not(:first-of-type){border:0;border-style:solid;border-color:rgba(var(--lf-accordion-border-color, var(--lf-color-border)), 1);border-width:1px;margin-bottom:0;margin-left:0;margin-right:0}.node__content,.node__content ::slotted(*){border:0;border-style:solid;border-radius:var(--lf-accordion-border-radius, var(--lf-ui-border-radius));border-top-left-radius:0;border-top-right-radius:0}.node__header{border:0;border-style:solid;border-radius:var(--lf-accordion-border-radius, var(--lf-ui-border-radius));color:rgb(var(--lf-accordion-color-on-bg, var(--lf-color-on-bg)));transition:all 150ms cubic-bezier(0.42, 0, 0.58, 1);align-items:center;border:none;box-sizing:border-box;cursor:var(--lf-accordion-cursor, pointer);display:flex;line-height:var(--lf-accordion-line-height, 1.75em);outline:none;padding:var(--lf-accordion-padding, 1em);position:relative;text-align:var(--lf-accordion-text-align, left);width:100%}.node__header:hover{background-color:rgba(var(--lf-accordion-color-primary, var(--lf-color-primary)), 0.175)}.node__header--expanded{border-bottom-left-radius:0;border-bottom-right-radius:0}.node__header--selected{background-color:rgba(var(--lf-accordion-color-primary, var(--lf-color-primary)), 0.375)}.node__header--selected:hover{background-color:rgba(var(--lf-accordion-color-primary, var(--lf-color-primary)), 0.475)}.node__text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:1.25em;font-weight:500;line-height:1.4em;letter-spacing:0em;margin:var(--lf-accordion-text-margin, 0 0.5em 0 0)}.node__text--highlighted{background-color:rgba(var(--lf-accordion-color-primary, var(--lf-color-primary)), 1);color:rgb(var(--lf-accordion-color-on-primary, var(--lf-color-on-primary)))}.node__expand,.node__icon{margin:0}.node__icon{background-color:rgba(var(--lf-accordion-color-on-bg, var(--lf-color-on-bg)), 1);height:1.5em;width:1.5em;overflow:hidden;margin:var(--lf-accordion-icon-margin, 0 0.5em 0 0)}.node__expand{-webkit-mask:var(--lf-icon-dropdown);mask:var(--lf-icon-dropdown);-webkit-mask-position:center;-webkit-mask-repeat:no-repeat;-webkit-mask-size:contain;mask-position:center;mask-repeat:no-repeat;mask-size:contain;background-color:rgba(var(--lf-accordion-color-on-bg, var(--lf-color-on-bg)), 1);height:1.5em;width:1.5em;overflow:hidden;transition:all 150ms cubic-bezier(0.42, 0, 0.58, 1);margin:var(--lf-accordion-expand-margin, 0 0 0 auto)}.node__expand--expanded{transform:rotate(-180deg)}.node__expand--placeholder{visibility:hidden}::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=ripple]{animation-duration:var(--lf-ui-duration-ripple, 675ms);animation-fill-mode:forwards;animation-name:lf-ripple;animation-timing-function:var(--lf-ui-timing-ripple, ease-out);background:var(--lf-ui-ripple-background, var(--lf-color-primary));border-radius:var(--lf-ui-radius-ripple, 50%);height:var(--lf-ui-ripple-height, 100%);left:var(--lf-ui-ripple-x, 50%);opacity:var(--lf-ui-opacity-ripple, 0.5);pointer-events:none;position:absolute;top:var(--lf-ui-ripple-y, 50%);transform:scale(0);width:var(--lf-ui-ripple-width, 100%)}@keyframes lf-ripple{from{transform:scale(0)}to{opacity:0;transform:scale(4)}}[data-lf=ripple-surface]{cursor:pointer;height:100%;left:0;overflow:hidden;position:absolute;top:0;width:100%}[data-lf=danger]{--lf-accordion-color-primary:var(\n    --lf-accordion-color-danger,\n    var(--lf-color-danger)\n  );--lf-accordion-color-on-primary:var(\n    --lf-accordion-color-danger,\n    var(--lf-color-on-danger)\n  )}[data-lf=disabled]{opacity:var(--lf-accordion-ui-opacity-disabled, var(--lf-ui-opacity-disabled));pointer-events:none}[data-lf=info]{--lf-accordion-color-primary:var(\n    --lf-accordion-color-info,\n    var(--lf-color-info)\n  );--lf-accordion-color-on-primary:var(\n    --lf-accordion-color-info,\n    var(--lf-color-on-info)\n  )}[data-lf=secondary]{--lf-accordion-color-primary:var(\n    --lf-accordion-color-secondary,\n    var(--lf-color-secondary)\n  );--lf-accordion-color-on-primary:var(\n    --lf-accordion-color-secondary,\n    var(--lf-color-on-secondary)\n  )}[data-lf=success]{--lf-accordion-color-primary:var(\n    --lf-accordion-color-success,\n    var(--lf-color-success)\n  );--lf-accordion-color-on-primary:var(\n    --lf-accordion-color-success,\n    var(--lf-color-on-success)\n  )}[data-lf=warning]{--lf-accordion-color-primary:var(\n    --lf-accordion-color-warning,\n    var(--lf-color-warning)\n  );--lf-accordion-color-on-primary:var(\n    --lf-accordion-color-warning,\n    var(--lf-color-on-warning)\n  )}[data-lf=fade-in]{display:block;animation:lf-fade-in-block 0.25s ease-out forwards}@keyframes lf-fade-in-block{from{visibility:hidden;opacity:0}to{visibility:visible;opacity:1}}:host{display:block;font-family:var(--lf-accordion-font-family, var(--lf-font-family-primary));font-size:var(--lf-accordion-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-accordion-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-accordion-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-accordion-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-accordion-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-accordion-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-accordion-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-accordion-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}.accordion{border:0;border-style:solid;border-color:rgba(var(--lf-accordion-border-color, var(--lf-color-border)), 1);border-width:1px;border-radius:var(--lf-accordion-border-radius, var(--lf-ui-border-radius));border-left:0;border-right:0;width:100%;height:100%;box-sizing:border-box;display:flex;flex-direction:var(--lf-accordion-flex-direction, column);flex-wrap:var(--lf-accordion-flex-wrap, nowrap);width:100%}";
-const pB3fd388a_entry = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
-  __proto__: null,
-  lf_accordion: S$3
-}, Symbol.toStringTag, { value: "Module" }));
-var p$1, u$2, b$4, g$3, y$3, w$4, k$4, z$4, x$4, _$2 = function(t5, a2, o2, e2) {
-  if ("function" == typeof a2 ? t5 !== a2 || true : !a2.has(t5)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
-  return a2.get(t5);
-};
-const W$3 = class W {
-  constructor(e2) {
-    o$2(this, e2), this.lfEvent = G$3(this, "lf-toast-event"), this.lfCloseIcon = "", this.lfCloseCallback = () => {
-      this.unmount();
-    }, this.lfTimer = null, this.lfMessage = "", this.lfStyle = "", this.lfUiSize = "medium", this.lfUiState = "primary", p$1.set(this, void 0), u$2.set(this, LF_TOAST_BLOCKS), b$4.set(this, CY_ATTRIBUTES), g$3.set(this, LF_ATTRIBUTES), y$3.set(this, LF_TOAST_PARTS), w$4.set(this, LF_STYLE_ID), k$4.set(this, LF_TOAST_CSS_VARIABLES), z$4.set(this, LF_WRAPPER_ID), x$4.set(this, ((t5 = false) => {
-      const { assets: a2, theme: e3 } = _$2(this, p$1), { get: s2 } = a2, { bemClass: r2 } = e3, { toast: i2 } = _$2(this, u$2), { style: l2 } = s2(`./assets/svg/${t5 ? this.lfCloseIcon : this.lfIcon}.svg`);
-      return U$5("div", { class: r2(i2._, i2.icon, { "has-actions": t5 }), "data-cy": _$2(this, b$4).maskedSvg, onPointerDown: t5 ? (t6) => this.lfCloseCallback(this, t6) : null, part: _$2(this, y$3).icon, style: l2, tabIndex: t5 && 0 });
-    }));
-  }
-  onLfEvent(t5, a2) {
-    this.lfEvent.emit({ comp: this, eventType: a2, id: this.rootElement.id, originalEvent: t5 });
-  }
-  async getDebugInfo() {
-    return this.debugInfo;
-  }
-  async getProps() {
-    const t5 = LF_TOAST_PROPS.map(((t6) => [t6, this[t6]]));
-    return Object.fromEntries(t5);
-  }
-  async refresh() {
-    vt$1(this);
-  }
-  async unmount(t5 = 0) {
-    setTimeout((() => {
-      this.onLfEvent(new CustomEvent("unmount"), "unmount"), this.rootElement.remove();
-    }), t5);
-  }
-  connectedCallback() {
-    _$2(this, p$1) && _$2(this, p$1).theme.register(this);
-  }
-  async componentWillLoad() {
-    if ((function(t5, a2, o2, e2, s2) {
-      if ("function" == typeof a2 ? t5 !== a2 || true : !a2.has(t5)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
-      a2.set(t5, o2);
-    })(this, p$1, await a(this)), "" === this.lfCloseIcon) {
-      const { "--lf-icon-delete": t5 } = _$2(this, p$1).theme.get.current().variables;
-      this.lfCloseIcon = t5;
+  const { controller: i2, elements: a2, handlers: s2 } = e2(), { refs: o2 } = a2, { blocks: n2, hasCache: r2, highlightedIndex: f2, manager: c2, parts: h2 } = i2.get, { assignRef: d2, sanitizeProps: u2, theme: p2 } = c2, { bemClass: m2 } = p2, { textfield: v2 } = s2, w3 = i2.get.compInstance, y2 = w3.lfTextfieldProps || {}, b2 = (y2 == null ? void 0 : y2.lfHtmlAttributes) || {}, g3 = `${((_a2 = w3.rootElement) == null ? void 0 : _a2.id) || "autocomplete"}-dropdown`, k2 = f2(), z2 = u2({ ...b2, ...{ "aria-autocomplete": "list", "aria-controls": g3, ...k2 >= 0 && { "aria-activedescendant": `${g3}-item-${k2}` } } });
+  return U$6("lf-textfield", { lfUiSize: w3.lfUiSize, lfUiState: w3.lfUiState, ...u2(y2, "LfTextfield"), class: m2(n2.autocomplete._, n2.autocomplete.textfield), lfHtmlAttributes: z2, lfTrailingIconAction: r2() ? LF_THEME_ICONS.dropdown : null, lfValue: w3.lfValue, "onLf-textfield-event": v2, part: h2.textfield, ref: d2(o2, "textfield") });
+} }), v$3 = (t5) => ({ list: async (e2) => {
+  const { eventType: i2, node: a2 } = e2.detail, { controller: s2 } = t5(), o2 = s2.get.compInstance;
+  "click" === i2 ? (s2.set.blurTimeout.clear(), a2 && (s2.set.highlight(-1), await s2.set.select(a2))) : o2.onLfEvent(e2, "lf-event", { node: a2 });
+}, textfield: async (e2) => {
+  const { eventType: i2, inputValue: a2, originalEvent: s2 } = e2.detail || {}, { controller: o2, elements: l2 } = t5(), n2 = o2.get.compInstance;
+  switch (i2) {
+    case "input":
+      await o2.set.input(a2), n2.onLfEvent(e2, "input", { query: a2 });
+      break;
+    case "keydown": {
+      const t6 = s2;
+      await w$8(t6, o2, l2.refs), n2.onLfEvent(e2, "lf-event");
+      break;
     }
+    case "blur":
+      o2.set.blurTimeout.new((() => {
+        o2.get.isLoading() || (o2.set.list("close"), o2.set.highlight(-1));
+      })), n2.onLfEvent(e2, "lf-event");
+      break;
+    case "click":
+      o2.set.list(), n2.onLfEvent(e2, "lf-event");
+      break;
+    default:
+      n2.onLfEvent(e2, "lf-event");
   }
-  componentDidLoad() {
-    const { info: t5 } = _$2(this, p$1).debug;
-    this.onLfEvent(new CustomEvent("ready"), "ready"), t5.update(this, "did-load");
-  }
-  componentWillRender() {
-    const { info: t5 } = _$2(this, p$1).debug;
-    t5.update(this, "will-render");
-  }
-  componentDidRender() {
-    const { info: t5 } = _$2(this, p$1).debug, { lfTimer: a2 } = this;
-    a2 && setTimeout((() => {
-      this.lfCloseCallback ? this.lfCloseCallback(this, null) : this.unmount();
-    }), a2), t5.update(this, "did-render");
-  }
-  render() {
-    const { theme: t5 } = _$2(this, p$1), { bemClass: a2, setLfStyle: e2 } = t5, { toast: r2 } = _$2(this, u$2), { lfCloseIcon: i2, lfIcon: l2, lfMessage: n2, lfStyle: f2, lfTimer: c2 } = this;
-    return U$5(A$9, { key: "ca2b2193bd386acf5e25cdab40e16b30193c300e" }, U$5("style", { key: "eb4defb478a780fb2ec4adc90c2e7b7c43bcc290", id: _$2(this, w$4) }, `
-          :host {
-            ${c2 ? `${_$2(this, k$4).timer}: ${c2}ms;` : ""}
-          }
-        ${f2 && e2(this) || ""}`), U$5("div", { key: "ae20260ef37405834cafdde1c62210f07e0f3fc5", id: _$2(this, z$4), "data-lf": _$2(this, g$3).fadeIn }, U$5("div", { key: "58a628584c5680a8958683bf34d6246d3fae751e", class: a2(r2._), "data-lf": _$2(this, g$3)[this.lfUiState] }, U$5("div", { key: "c397383a124bc403a02f4962737613fba9f80e46", class: a2(r2._, r2.accent, { temporary: !!c2 }) }), U$5("div", { key: "9f6f3c76ed1227d2c89e7f775d393026b4f3f064", class: a2(r2._, r2.messageWrapper, { full: Boolean(l2) && Boolean(i2), "has-actions": Boolean(i2), "has-icon": Boolean(l2) }) }, l2 && _$2(this, x$4).call(this), n2 && U$5("div", { key: "b6be0d328e9924630e8f4532639df9fd42997759", class: a2(r2._, r2.message) }, n2), i2 && _$2(this, x$4).call(this, true)))));
-  }
-  disconnectedCallback() {
-    var _a2;
-    (_a2 = _$2(this, p$1)) == null ? void 0 : _a2.theme.unregister(this);
-  }
-  get rootElement() {
-    return q$4(this);
+} }), w$8 = async (t5, e2, i2) => {
+  var _a2;
+  const { lfDataset: a2, highlightedIndex: s2 } = e2.get;
+  if (!e2.get.compInstance.lfNavigation) return;
+  const o2 = a2();
+  if (!((_a2 = o2 == null ? void 0 : o2.nodes) == null ? void 0 : _a2.length)) return;
+  let l2 = s2();
+  switch (t5.key) {
+    case "ArrowDown":
+      t5.preventDefault(), l2 = l2 < o2.nodes.length - 1 ? l2 + 1 : 0, e2.set.highlight(l2), l2 >= 0 && i2.list && await i2.list.selectNode(l2);
+      break;
+    case "ArrowUp":
+      t5.preventDefault(), l2 = l2 > 0 ? l2 - 1 : o2.nodes.length - 1, e2.set.highlight(l2), l2 >= 0 && i2.list && await i2.list.selectNode(l2);
+      break;
+    case "Escape":
+      t5.preventDefault(), e2.set.list("close"), e2.set.highlight(-1);
+      break;
+    case "Tab":
+      e2.set.list("close"), e2.set.highlight(-1);
+      break;
+    case "Enter":
+      t5.preventDefault(), e2.set.list();
   }
 };
-p$1 = /* @__PURE__ */ new WeakMap(), u$2 = /* @__PURE__ */ new WeakMap(), b$4 = /* @__PURE__ */ new WeakMap(), g$3 = /* @__PURE__ */ new WeakMap(), y$3 = /* @__PURE__ */ new WeakMap(), w$4 = /* @__PURE__ */ new WeakMap(), k$4 = /* @__PURE__ */ new WeakMap(), z$4 = /* @__PURE__ */ new WeakMap(), x$4 = /* @__PURE__ */ new WeakMap(), W$3.style = "::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=danger]{--lf-toast-color-primary:var(\n    --lf-toast-color-danger,\n    var(--lf-color-danger)\n  );--lf-toast-color-on-primary:var(\n    --lf-toast-color-danger,\n    var(--lf-color-on-danger)\n  )}[data-lf=disabled]{opacity:var(--lf-toast-ui-opacity-disabled, var(--lf-ui-opacity-disabled));pointer-events:none}[data-lf=info]{--lf-toast-color-primary:var(\n    --lf-toast-color-info,\n    var(--lf-color-info)\n  );--lf-toast-color-on-primary:var(\n    --lf-toast-color-info,\n    var(--lf-color-on-info)\n  )}[data-lf=secondary]{--lf-toast-color-primary:var(\n    --lf-toast-color-secondary,\n    var(--lf-color-secondary)\n  );--lf-toast-color-on-primary:var(\n    --lf-toast-color-secondary,\n    var(--lf-color-on-secondary)\n  )}[data-lf=success]{--lf-toast-color-primary:var(\n    --lf-toast-color-success,\n    var(--lf-color-success)\n  );--lf-toast-color-on-primary:var(\n    --lf-toast-color-success,\n    var(--lf-color-on-success)\n  )}[data-lf=warning]{--lf-toast-color-primary:var(\n    --lf-toast-color-warning,\n    var(--lf-color-warning)\n  );--lf-toast-color-on-primary:var(\n    --lf-toast-color-warning,\n    var(--lf-color-on-warning)\n  )}[data-lf=fade-in]{display:block;animation:lf-fade-in-block 0.25s ease-out forwards}@keyframes lf-fade-in-block{from{visibility:hidden;opacity:0}to{visibility:visible;opacity:1}}:host{display:block;font-family:var(--lf-toast-font-family, var(--lf-font-family-primary));font-size:var(--lf-toast-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-toast-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-toast-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-toast-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-toast-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-toast-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-toast-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-toast-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{width:100%;height:100%;animation:slideIn 250ms ease-out;box-sizing:border-box;z-index:var(--lf-ui-zindex-toast, 998)}.toast{border:0;border-style:solid;border-radius:var(--lf-toast-border-radius, var(--lf-ui-border-radius));background-color:rgba(var(--lf-toast-color-surface, var(--lf-color-surface)), 0.675);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);width:100%;height:100%;box-shadow:var(--lf-ui-box-shadow-modal);display:grid;grid-template-rows:auto 1fr;overflow:hidden}.toast__accent{background-color:rgba(var(--lf-toast-color-primary, var(--lf-color-primary)), 0.75);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);height:var(--lf-toast-accent-height, 0.25em);width:100%}.toast__accent--temporary{animation:reduceWidthToZero linear var(--lf_toast_timer, 5000ms) forwards}.toast__message-wrapper{align-content:var(--lf-toast-message-align-content, center);box-sizing:border-box;display:grid;gap:1em;grid-template-columns:1fr;height:100%;overflow:auto;padding:var(--lf-toast-padding, 0.75em)}.toast__message-wrapper--has-icon{grid-template-columns:auto 1fr}.toast__message-wrapper--has-actions{grid-template-columns:1fr auto}.toast__message-wrapper--full{grid-template-columns:auto 1fr auto}.toast__icon{background-color:rgba(var(--lf-comp-color-on-bg, var(--lf-color-on-bg)), 1);height:1.5em;width:1.5em;overflow:hidden;margin:var(--lf-toast-icon-margin, auto 0.5em);opacity:var(--lf-toast-icon-opacity, 1)}.toast__icon--has-actions{-webkit-mask:var(--lf-icon-clear);mask:var(--lf-icon-clear);-webkit-mask-position:center;-webkit-mask-repeat:no-repeat;-webkit-mask-size:contain;mask-position:center;mask-repeat:no-repeat;mask-size:contain;background-color:rgba(var(--lf-toast-color-on-bg, var(--lf-color-on-bg)), 1);height:1.5em;width:1.5em;overflow:hidden;transition:all 300ms cubic-bezier(0.4, 0, 0.2, 1);cursor:pointer;margin:auto 0.5em auto auto;position:relative}.toast__icon--has-actions:hover{opacity:0.75}.toast__message{color:rgb(var(--lf-toast-color-on-bg, var(--lf-color-on-bg)));overflow:auto;padding:var(--lf-toast-message-padding, 0.75em 0.75em 0.75em 0)}@media only screen and (max-width: 600px){:host{animation:slideUp 250ms ease-out}}@keyframes reduceWidthToZero{0%{width:100%}100%{width:0}}@keyframes slideIn{0%{transform:var(--lf-toast-slidein-from, translateX(100%))}100%{transform:var(--lf-toast-slidein-to, translateX(0))}}@keyframes slideUp{0%{transform:var(--lf-toast-slideup-from, translateY(100%))}100%{transform:var(--lf-toast-slideup-to, translateY(0))}}";
-const pB5f1d3d9_entry = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
-  __proto__: null,
-  lf_toast: W$3
-}, Symbol.toStringTag, { value: "Module" }));
-var g$2, u$1, p, b$3, y$2, z$3, w$3, k$3, x$3, C$2, E$2, W$2, j$1, D$2, S$2 = function(t5, e2, i2, a2) {
+var y$7, b$5, g$6, k$8, z$8, x$8, C$6, T$5, E$6, L$4, D$6, W$7, M$7, S$6, A$4, I$5, V$3, P$4, $$2, j$6 = function(t5, e2, i2, a2) {
   if ("a" === i2 && !a2) throw new TypeError("Private accessor was defined without a getter");
   if ("function" == typeof e2 ? t5 !== e2 || !a2 : !e2.has(t5)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return "m" === i2 ? a2 : "a" === i2 ? a2.call(t5) : a2 ? a2.value : e2.get(t5);
+}, q$2 = function(t5, e2, i2, a2, s2) {
+  if ("function" == typeof e2 ? t5 !== e2 || true : !e2.has(t5)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
+  return e2.set(t5, i2), i2;
 };
-const M$2 = class M {
-  constructor(i2) {
-    o$2(this, i2), this.lfEvent = G$3(this, "lf-article-event"), g$2.add(this), this.lfDataset = null, this.lfEmpty = "Empty data.", this.lfStyle = "", this.lfUiSize = "medium", u$1.set(this, void 0), p.set(this, LF_ARTICLE_BLOCKS), b$3.set(this, CY_ATTRIBUTES), y$2.set(this, LF_ARTICLE_PARTS), z$3.set(this, LF_STYLE_ID), w$3.set(this, LF_WRAPPER_ID);
+const R$4 = class R {
+  constructor(t5) {
+    o$2(this, t5), this.lfEvent = G$4(this, "lf-autocomplete-event"), y$7.add(this), this.highlightedIndex = -1, this.loading = false, this.inputValue = "", this.lastRequestedQuery = "", this.lfAllowFreeInput = true, this.lfCache = false, this.lfCacheTTL = 3e5, this.lfDataset = null, this.lfDebounceMs = 300, this.lfListProps = null, this.lfMaxCacheSize = 100, this.lfMinChars = 3, this.lfNavigation = true, this.lfSpinnerProps = null, this.lfStyle = null, this.lfTextfieldProps = null, this.lfUiSize = "medium", this.lfUiState = "primary", this.lfValue = "", g$6.set(this, void 0), k$8.set(this, null), z$8.set(this, /* @__PURE__ */ new Map()), x$8.set(this, null), C$6.set(this, void 0), T$5.set(this, LF_AUTOCOMPLETE_BLOCKS), E$6.set(this, CY_ATTRIBUTES), L$4.set(this, LF_ATTRIBUTES), D$6.set(this, LF_AUTOCOMPLETE_PARTS), W$7.set(this, LF_STYLE_ID), M$7.set(this, LF_WRAPPER_ID);
   }
-  onLfEvent(t5, e2) {
-    this.lfEvent.emit({ comp: this, eventType: e2, id: this.rootElement.id, originalEvent: t5 });
+  async onLfDatasetChange() {
+    j$6(this, g$6, "f").controller.set.dataset(this.lfDataset);
+  }
+  onLoadingChange(t5) {
+    if (t5 && j$6(this, g$6, "f")) {
+      const { dropdown: t6 } = j$6(this, g$6, "f").elements.refs;
+      t6 && !j$6(this, C$6, "f").portal.isInPortal(t6) && j$6(this, g$6, "f").controller.set.list("open");
+    }
+  }
+  onLfEvent(t5, e2, i2) {
+    var _a2;
+    this.lfEvent.emit({ comp: this, eventType: e2, id: ((_a2 = this.rootElement) == null ? void 0 : _a2.id) || "", originalEvent: t5, node: i2 == null ? void 0 : i2.node, query: i2 == null ? void 0 : i2.query });
+  }
+  async clearCache() {
+    j$6(this, z$8, "f").clear();
+  }
+  async clearInput() {
+    await j$6(this, g$6, "f").controller.set.input("");
   }
   async getDebugInfo() {
     return this.debugInfo;
   }
   async getProps() {
-    const t5 = LF_ARTICLE_PROPS.map(((t6) => [t6, this[t6]]));
-    return Object.fromEntries(t5);
+    const t5 = {};
+    return LF_AUTOCOMPLETE_PROPS.forEach(((e2) => t5[e2] = this[e2])), t5;
+  }
+  async getValue() {
+    return this.inputValue;
   }
   async refresh() {
     vt$1(this);
   }
-  async unmount(t5 = 0) {
-    setTimeout((() => {
-      this.onLfEvent(new CustomEvent("unmount"), "unmount"), this.rootElement.remove();
-    }), t5);
+  async setValue(t5) {
+    await j$6(this, g$6, "f").controller.set.input(t5);
+  }
+  async unmount() {
+    this.onLfEvent(new CustomEvent("unmount"), "unmount");
   }
   connectedCallback() {
-    S$2(this, u$1, "f") && S$2(this, u$1, "f").theme.register(this);
+    j$6(this, C$6, "f") && j$6(this, C$6, "f").theme.register(this);
   }
   async componentWillLoad() {
-    !(function(t5, e2, i2, a2, r2) {
-      if ("function" == typeof e2 ? t5 !== e2 || true : !e2.has(t5)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
-      e2.set(t5, i2);
-    })(this, u$1, await a(this));
-  }
-  componentDidLoad() {
-    const { info: t5 } = S$2(this, u$1, "f").debug;
-    this.onLfEvent(new CustomEvent("ready"), "ready"), t5.update(this, "did-load");
+    q$2(this, C$6, await a(this)), this.inputValue = this.lfValue || "", j$6(this, y$7, "m", $$2).call(this);
   }
   componentWillRender() {
-    const { info: t5 } = S$2(this, u$1, "f").debug;
+    const { info: t5 } = j$6(this, C$6, "f").debug;
     t5.update(this, "will-render");
   }
   componentDidRender() {
-    const { info: t5 } = S$2(this, u$1, "f").debug;
+    const { info: t5 } = j$6(this, C$6, "f").debug;
     t5.update(this, "did-render");
   }
-  render() {
-    var _a2;
-    const { theme: t5 } = S$2(this, u$1, "f"), { bemClass: e2, setLfStyle: i2 } = t5, { lfDataset: l2, lfEmpty: o2, lfStyle: s2 } = this, { emptyData: n2 } = S$2(this, p, "f");
-    return U$5(A$9, { key: "facc45a56c7f608d4ea63431396e1a044bf952cc" }, s2 && U$5("style", { key: "32ff6a90169431aa5dba003da5e168715cbeb1f5", id: S$2(this, z$3, "f") }, i2(this)), U$5("div", { key: "c5549c09dd1786060182280c0586fee4d7c45985", id: S$2(this, w$3, "f") }, ((_a2 = l2 == null ? void 0 : l2.nodes) == null ? void 0 : _a2.length) ? S$2(this, g$2, "m", x$3).call(this) : U$5("div", { class: e2(n2._), part: S$2(this, y$2, "f").emptyData }, U$5("div", { class: e2(n2._, n2.text) }, o2))));
-  }
-  disconnectedCallback() {
-    var _a2;
-    (_a2 = S$2(this, u$1, "f")) == null ? void 0 : _a2.theme.unregister(this);
-  }
-  get rootElement() {
-    return q$4(this);
-  }
-};
-u$1 = /* @__PURE__ */ new WeakMap(), p = /* @__PURE__ */ new WeakMap(), b$3 = /* @__PURE__ */ new WeakMap(), y$2 = /* @__PURE__ */ new WeakMap(), z$3 = /* @__PURE__ */ new WeakMap(), w$3 = /* @__PURE__ */ new WeakMap(), g$2 = /* @__PURE__ */ new WeakSet(), k$3 = function(t5, e2) {
-  var _a2;
-  switch (e2) {
-    case 0:
-      return S$2(this, g$2, "m", C$2).call(this, t5, e2);
-    case 1:
-      return S$2(this, g$2, "m", E$2).call(this, t5, e2);
-    case 2:
-      return S$2(this, g$2, "m", j$1).call(this, t5, e2);
-    default:
-      return ((_a2 = t5.children) == null ? void 0 : _a2.length) ? S$2(this, g$2, "m", W$2).call(this, t5, e2) : S$2(this, g$2, "m", D$2).call(this, t5, e2);
-  }
-}, x$3 = function() {
-  const t5 = [], { nodes: e2 } = this.lfDataset;
-  for (let i2 = 0; i2 < e2.length; i2++) {
-    const a2 = e2[i2];
-    t5.push(S$2(this, g$2, "m", k$3).call(this, a2, 0));
-  }
-  return U$5(St$1, null, t5);
-}, C$2 = function(t5, e2) {
-  const { bemClass: i2 } = S$2(this, u$1, "f").theme, { children: r2, cssStyle: l2, value: s2 } = t5;
-  return U$5(St$1, null, U$5("article", { class: i2(S$2(this, p, "f").article._), "data-cy": S$2(this, b$3, "f").node, "data-depth": e2.toString(), part: S$2(this, y$2, "f").article, style: l2 }, s2 && U$5("h1", null, s2), r2 && t5.children.map(((t6) => S$2(this, g$2, "m", k$3).call(this, t6, e2 + 1)))));
-}, E$2 = function(t5, e2) {
-  const { bemClass: i2 } = S$2(this, u$1, "f").theme, { children: r2, cssStyle: l2, value: s2 } = t5;
-  return U$5(St$1, null, U$5("section", { class: i2(S$2(this, p, "f").section._), "data-cy": S$2(this, b$3, "f").node, "data-depth": e2.toString(), part: S$2(this, y$2, "f").section, style: l2 }, s2 && U$5("h2", null, s2), r2 && r2.map(((t6) => S$2(this, g$2, "m", k$3).call(this, t6, e2 + 1)))));
-}, W$2 = function(t5, e2) {
-  const { bemClass: i2 } = S$2(this, u$1, "f").theme, { children: r2, cssStyle: l2, tagName: s2, value: n2 } = t5, f2 = (r2 == null ? void 0 : r2.some(((t6) => "li" === t6.tagName))) ? "ul" : s2 || "div";
-  return U$5(St$1, null, n2 && U$5("div", null, n2), U$5(f2, { class: i2(S$2(this, p, "f").content._), "data-cy": S$2(this, b$3, "f").node, "data-depth": e2.toString(), part: S$2(this, y$2, "f").content, style: l2 }, r2 && r2.map(((t6) => S$2(this, g$2, "m", k$3).call(this, t6, e2 + 1)))));
-}, j$1 = function(t5, e2) {
-  const { bemClass: i2 } = S$2(this, u$1, "f").theme, { children: r2, cssStyle: l2, value: s2 } = t5;
-  return U$5(St$1, null, U$5("p", { class: i2(S$2(this, p, "f").paragraph._), "data-cy": S$2(this, b$3, "f").node, "data-depth": e2.toString(), part: S$2(this, y$2, "f").paragraph, style: l2 }, s2 && U$5("h3", null, s2), r2 && r2.map(((t6) => S$2(this, g$2, "m", k$3).call(this, t6, e2 + 1)))));
-}, D$2 = function(t5, e2) {
-  const { theme: i2 } = S$2(this, u$1, "f"), { cells: r$12, cssStyle: l2, tagName: o2, value: s2 } = t5, n2 = r$12 && Object.keys(r$12)[0], f2 = r$12 == null ? void 0 : r$12[n2], { content: c2 } = S$2(this, p, "f");
-  if (f2) return U$5(r, { cell: f2, index: 0, shape: f2.shape, eventDispatcher: async (t6) => this.onLfEvent(t6, "lf-event"), framework: S$2(this, u$1, "f") });
-  {
-    const t6 = o2 || "span";
-    return U$5(t6, { class: i2.bemClass(c2._, c2.body, { [t6]: Boolean(t6) }), "data-depth": e2.toString(), part: S$2(this, y$2, "f").content, style: l2 }, s2);
-  }
-}, M$2.style = "h1{font-size:2em;font-weight:600;line-height:1.2em;letter-spacing:0em;margin-bottom:0.5em;color:rgb(var(--lf-article-color-h1, var(--lf-color-on-bg)));font-family:var(--lf-article-font-family-h1, var(--lf-font-family-primary));font-size:var(--lf-article-font-size-h1, 2em);margin-top:0;margin-bottom:1em;word-break:break-word}h2{font-size:1.75em;font-weight:500;line-height:1.3em;letter-spacing:0em;margin-bottom:0.5em;color:rgb(var(--lf-article-color-h2, var(--lf-color-on-bg)));font-family:var(--lf-article-font-family-h2, var(--lf-font-family-primary));font-size:var(--lf-article-font-size-h2, 1.75em);margin:1.5em 0 0.5em}h3{font-size:1.5em;font-weight:500;line-height:1.4em;letter-spacing:0em;margin-bottom:0.5em;color:rgb(var(--lf-article-color-h3, var(--lf-color-on-bg)));font-family:var(--lf-article-font-family-h3, var(--lf-font-family-primary));font-size:var(--lf-article-font-size-h3, 1.5em);margin:1em 0 0.5em}h4{font-size:1.25em;font-weight:500;line-height:1.5em;letter-spacing:0em;margin-bottom:0.5em;color:rgb(var(--lf-article-color-h4, var(--lf-color-on-bg)));font-family:var(--lf-article-font-family-h4, var(--lf-font-family-primary));font-size:var(--lf-article-font-size-h4, 1.25em);margin:1em 0 0.5em}h5{font-size:1.125em;font-weight:500;line-height:1.6em;letter-spacing:0em;margin-bottom:0.5em;color:rgb(var(--lf-article-color-h5, var(--lf-color-on-bg)));font-family:var(--lf-article-font-family-h5, var(--lf-font-family-primary));font-size:var(--lf-article-font-size-h5, 1.125em);margin:1em 0 0.5em}h6{font-size:1em;font-weight:500;line-height:1.5em;letter-spacing:0em;margin-bottom:0.5em;color:rgb(var(--lf-article-color-h6, var(--lf-color-on-bg)));font-family:var(--lf-article-font-family-h6, var(--lf-font-family-primary));font-size:var(--lf-article-font-size-h6, 1em);margin:1em 0 0.5em}ul,ol{font-size:1em;font-weight:400;line-height:1.6em;letter-spacing:0em;margin-bottom:0.5em;margin-left:1.5em;margin:1em 0;padding-inline-start:var(--lf-article-padding-ul, 1.25em)}::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}:host{display:block;font-family:var(--lf-article-font-family, var(--lf-font-family-primary));font-size:var(--lf-article-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-article-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-article-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-article-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-article-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-article-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-article-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-article-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{border:0;border-style:solid;border-radius:var(--lf-article-border-radius, var(--lf-ui-border-radius));color:rgb(var(--lf-article-color-on-bg, var(--lf-color-on-bg)))}.article{background-color:rgba(var(--lf-article-color-bg, var(--lf-color-bg)), 0.375);color:rgb(var(--lf-article-color-on-bg, var(--lf-color-on-bg)));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);margin:var(--lf-article-margin, auto);max-width:var(--lf-article-max-width, 1200px);padding:var(--lf-article-padding, 2.5em)}.content__body{font-size:1em;font-weight:400;line-height:1.6em;letter-spacing:0em;margin-bottom:1em;font-family:var(--lf-article-font-family-body, var(--lf-font-family-primary));font-size:var(--lf-article-font-size-body, var(--lf-font-size))}.empty-data{width:100%;height:100%;align-items:center;display:flex;justify-content:center}[data-component=LfCode]{max-width:max-content;margin:auto;padding:1.75em 0}";
-const pC777df98_entry = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
-  __proto__: null,
-  lf_article: M$2
-}, Symbol.toStringTag, { value: "Module" }));
-const m$1 = (r2) => ({ blur: async (o2, e2) => {
-  const i2 = r2(), { compInstance: t5 } = i2.controller.get, a2 = i2.controller.get.data.nodeById(o2);
-  a2 && t5.onLfEvent(e2, "blur", void 0, a2);
-}, click: async (o2, e2) => {
-  const i2 = r2(), { compInstance: t5 } = i2.controller.get, a2 = i2.controller.get.data.nodeById(o2);
-  a2 && t5.onLfEvent(e2, "click", void 0, a2);
-}, change: async (o2, e2) => {
-  const i2 = r2(), { compInstance: t5, data: a2 } = i2.controller.get, l2 = a2.nodeById(o2);
-  l2 && t5.onLfEvent(e2, "change", void 0, l2);
-}, focus: async (o2, e2) => {
-  const i2 = r2(), { compInstance: t5, data: a2 } = i2.controller.get, l2 = a2.nodeById(o2);
-  l2 && t5.onLfEvent(e2, "focus", void 0, l2);
-}, keyDown: async (o2) => {
-  const e2 = r2(), i2 = e2.controller.get.data.nodes(), t5 = e2.controller.get.state.selectedId();
-  if (!i2 || 0 === i2.length) return;
-  const a2 = t5 ? i2.findIndex(((r3) => r3.id === t5)) : -1;
-  let l2 = -1;
-  switch (o2.key) {
-    case "ArrowDown":
-    case "ArrowRight":
-      o2.preventDefault(), l2 = -1 === a2 ? 0 : (a2 + 1) % i2.length;
-      break;
-    case "ArrowUp":
-    case "ArrowLeft":
-      o2.preventDefault(), l2 = -1 === a2 ? i2.length - 1 : (a2 - 1 + i2.length) % i2.length;
-      break;
-    case " ":
-    case "Enter":
-      if (o2.target instanceof HTMLInputElement) {
-        const r3 = o2.target.value;
-        await e2.controller.set.selection.select(r3);
-      }
-      return void o2.preventDefault();
-    default:
-      return;
-  }
-  if (-1 !== l2) {
-    const r3 = i2[l2];
-    await e2.controller.set.selection.select(r3.id);
-    const o3 = e2.elements.refs.inputs.get(r3.id);
-    o3 && o3.focus();
-  }
-}, pointerDown: async (o2, e2) => {
-  const i2 = r2(), { compInstance: t5 } = i2.controller.get;
-  t5.onLfEvent(e2, "pointerdown", void 0, o2);
-} }), u = (o2) => /* @__PURE__ */ ((o3) => ({ control: (e2) => {
-  const i2 = o3(), { controller: t5, elements: a2, handlers: l2 } = i2, { blocks: s2, compInstance: n2, cyAttributes: c2, manager: d2, parts: f2, state: h2, ui: p2 } = t5.get, { blur: m2, change: u2, focus: v2 } = l2, { theme: b2 } = d2, { bemClass: g3 } = b2, w3 = h2.isSelected(e2.id), y2 = p2.hasRipple(), z2 = `${n2.rootElement.id || "lf-radio"}-group`;
-  return U$5("div", { class: g3(s2.control._) }, U$5("input", { checked: w3, class: g3(s2.control._, s2.control.input), "data-cy": c2.input, disabled: e2.isDisabled, id: e2.id, name: z2, onBlur: (r2) => m2(e2.id, r2), onChange: (r2) => {
-    u2(e2.id, r2);
-  }, onFocus: (r2) => {
-    v2(e2.id, r2);
-  }, part: f2.input, ref: (r2) => {
-    r2 && a2.refs.inputs.set(e2.id, r2);
-  }, title: e2.description, type: "radio", value: e2.value }), U$5("div", { class: g3(s2.control._, s2.control.circle), part: f2.circle }, y2 && U$5("div", { class: g3(s2.control._, s2.control.ripple), "data-cy": c2.rippleSurface, part: f2.ripple, ref: (r2) => {
-    r2 && a2.refs.ripples.set(e2.id, r2);
-  } }), U$5("div", { class: g3(s2.control._, s2.control.dot), part: f2.dot })));
-}, item: (e2) => {
-  const { controller: i2, elements: t5, handlers: a2 } = o3(), { get: l2 } = i2, { control: s2 } = t5.jsx, { blocks: n2, manager: c2, parts: d2, state: f2, ui: h2 } = l2, { click: p2 } = a2, { theme: m2 } = c2, { bemClass: u2 } = m2, v2 = f2.isSelected(e2.id), b2 = h2.isLeadingLabel(), g3 = e2.isDisabled, w3 = c2.data.cell.stringify(e2.value) || e2.id;
-  return U$5("div", { class: u2(n2.item._, void 0, { leading: b2, selected: v2, disabled: g3 }), onClick: (r2) => p2(e2.id, r2), onPointerDown: (r2) => a2.pointerDown(e2, r2), part: d2.item, ref: (r2) => {
-    r2 && t5.refs.items.set(e2.id, r2);
-  } }, s2(e2), U$5("label", { class: u2(n2.item._, n2.item.label), htmlFor: `${l2.compInstance.rootElement.id || "lf-radio"}-group-${e2.id}` }, w3));
-}, label: (e2) => {
-  const { blocks: i2, manager: t5, parts: a2 } = o3().controller.get, { theme: l2 } = t5, { bemClass: s2 } = l2, n2 = t5.data.cell.stringify(e2.value) || e2.id;
-  return U$5("label", { class: s2(i2.item._, i2.item.label), part: a2.label }, n2);
-}, radio: (e2) => {
-  const { controller: i2, elements: t5, handlers: a2 } = o3(), { blocks: l2, compInstance: s2, lfAttributes: n2, manager: c2, parts: d2, ui: f2 } = i2.get, { item: h2 } = t5.jsx, { bemClass: p2 } = c2.theme, m2 = f2.orientation();
-  return U$5("div", { class: p2(l2._, void 0, { horizontal: "horizontal" === m2 }), "data-lf": n2[s2.lfUiState], onKeyDown: a2.keyDown, part: d2.radio }, e2.map(((r2, o4) => h2(r2, o4))));
-} }))(o2);
-var v$1, b$2, g$1, w$2, y$1, z$2, k$2, x$2, _$1 = function(r2, o2, e2, i2) {
-  if ("function" == typeof o2 ? r2 !== o2 || !i2 : !o2.has(r2)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
-  return "m" === e2 ? i2 : "a" === e2 ? i2.call(r2) : i2 ? i2.value : o2.get(r2);
-}, I$2 = function(r2, o2, e2, i2, t5) {
-  if ("function" == typeof o2 ? r2 !== o2 || true : !o2.has(r2)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
-  return o2.set(r2, e2), e2;
-};
-const M$1 = class M2 {
-  constructor(r2) {
-    o$2(this, r2), this.lfEvent = G$3(this, "lf-radio-event"), this.lfDataset = {}, this.lfOrientation = "vertical", this.lfLeadingLabel = false, this.lfRipple = true, this.lfUiSize = "medium", this.lfUiState = "primary", v$1.set(this, void 0), b$2.set(this, LF_RADIO_BLOCKS), g$1.set(this, CY_ATTRIBUTES), w$2.set(this, void 0), y$1.set(this, LF_ATTRIBUTES), z$2.set(this, LF_RADIO_PARTS), k$2.set(this, LF_STYLE_ID), x$2.set(this, LF_WRAPPER_ID);
-  }
-  async onLfEvent(r2, o2, e2, i2) {
-    var _a2;
-    const { effects: t5 } = _$1(this, w$2, "f"), { lfRipple: a2 } = this, l2 = this.value;
-    switch (o2) {
-      case "change":
-      case "click":
-        await _$1(this, v$1, "f").controller.set.selection.select(i2 == null ? void 0 : i2.id);
-        break;
-      case "pointerdown":
-        if (a2) {
-          const o3 = (i2 == null ? void 0 : i2.id) ? (_a2 = _$1(this, v$1, "f")) == null ? void 0 : _a2.elements.refs.ripples.get(i2.id) : void 0;
-          o3 && t5.ripple(r2, o3);
-        }
-    }
-    this.lfEvent.emit({ comp: this, eventType: o2, id: this.rootElement.id, originalEvent: r2, node: i2 || null, previousValue: l2 || null, value: this.value || null });
-  }
-  async clearSelection() {
-    const { controller: r2 } = _$1(this, v$1, "f");
-    await r2.set.selection.clear();
-  }
-  async getAdapter() {
-    return _$1(this, v$1, "f");
-  }
-  async getDebugInfo() {
-    return this.debugInfo;
-  }
-  async getSelectedNode() {
-    var _a2;
-    if (this.value && ((_a2 = this.lfDataset) == null ? void 0 : _a2.nodes)) return this.lfDataset.nodes.find(((r2) => r2.id === this.value));
-  }
-  async getProps() {
-    const r2 = LF_RADIO_PROPS.map(((r3) => [r3, this[r3]]));
-    return Object.fromEntries(r2);
-  }
-  async refresh() {
-    vt$1(this);
-  }
-  async selectItem(r2) {
-    const { controller: o2 } = _$1(this, v$1, "f");
-    await o2.set.selection.select(r2);
-  }
-  async unmount(r2 = 0) {
-    setTimeout((() => {
-      this.onLfEvent(new CustomEvent("unmount"), "unmount"), this.rootElement.remove();
-    }), r2);
-  }
-  connectedCallback() {
-    _$1(this, w$2, "f") && _$1(this, w$2, "f").theme.register(this);
-  }
-  async componentWillLoad() {
-    var r2;
-    I$2(this, w$2, await a(this)), this.lfValue && (this.value = this.lfValue), I$2(this, v$1, { controller: { get: { blocks: _$1(this, b$2, "f"), compInstance: this, cyAttributes: _$1(this, g$1, "f"), lfAttributes: _$1(this, y$1, "f"), manager: _$1(this, w$2, "f"), parts: _$1(this, z$2, "f"), data: { dataset: () => this.lfDataset, nodes: () => {
-      var _a2;
-      return ((_a2 = this.lfDataset) == null ? void 0 : _a2.nodes) || [];
-    }, nodeById: (r3) => {
-      var _a2, _b2;
-      return (_b2 = (_a2 = this.lfDataset) == null ? void 0 : _a2.nodes) == null ? void 0 : _b2.find(((o2) => o2.id === r3));
-    }, selectedNode: () => {
-      var _a2;
-      const r3 = this.value;
-      if (r3 && ((_a2 = this.lfDataset) == null ? void 0 : _a2.nodes)) return this.lfDataset.nodes.find(((o2) => o2.id === r3));
-    } }, state: { selectedId: () => this.value, isSelected: (r3) => this.value === r3 }, ui: { orientation: () => this.lfOrientation, isLeadingLabel: () => this.lfLeadingLabel, hasRipple: () => this.lfRipple } }, set: { selection: { select: async (r3) => {
-      var _a2;
-      _$1(this, v$1, "f"), (r3 ? (_a2 = _$1(this, v$1, "f").controller.get.data.nodeById(r3)) == null ? void 0 : _a2.isDisabled : "disabled" === this.lfUiState) || (this.value = r3);
-    }, clear: async () => {
-      await _$1(this, v$1, "f").controller.set.selection.select(void 0);
-    } }, data: { updateDataset: async (r3) => {
-      var _a2;
-      const o2 = _$1(this, v$1, "f").controller.get.state.selectedId();
-      if (this.lfDataset = r3, o2) {
-        const e2 = (_a2 = r3 == null ? void 0 : r3.nodes) == null ? void 0 : _a2.some(((r4) => r4.id === o2));
-        e2 || await _$1(this, v$1, "f").controller.set.selection.clear();
-      }
-    } } } }, elements: { jsx: u(r2 = () => _$1(this, v$1, "f")), refs: { items: /* @__PURE__ */ new Map(), ripples: /* @__PURE__ */ new Map(), inputs: /* @__PURE__ */ new Map() } }, handlers: m$1(r2) });
-  }
   componentDidLoad() {
-    const { info: r2 } = _$1(this, w$2, "f").debug;
-    this.onLfEvent(new CustomEvent("ready"), "ready"), r2.update(this, "did-load");
-  }
-  componentWillRender() {
-    const { info: r2 } = _$1(this, w$2, "f").debug;
-    r2.update(this, "will-render");
-  }
-  componentDidRender() {
-    const { info: r2 } = _$1(this, w$2, "f").debug;
-    r2.update(this, "did-render");
+    const { debug: t5 } = j$6(this, C$6, "f");
+    this.onLfEvent(new CustomEvent("ready"), "ready"), t5.info.update(this, "did-load");
   }
   render() {
-    var _a2;
-    const { setLfStyle: o2 } = _$1(this, w$2, "f").theme, { jsx: e2 } = _$1(this, v$1, "f").elements, { lfStyle: i2 } = this, a2 = ((_a2 = this.lfDataset) == null ? void 0 : _a2.nodes) || [];
-    if (a2 && 0 !== a2.length) return U$5(A$9, null, i2 && U$5("style", { id: _$1(this, k$2, "f") }, o2(this)), U$5("div", { id: _$1(this, x$2, "f") }, e2.radio(a2)));
+    const { bemClass: e2, setLfStyle: i2 } = j$6(this, C$6, "f").theme, { lfStyle: a2 } = this, o2 = j$6(this, g$6, "f") && j$6(this, C$6, "f").portal.isInPortal(j$6(this, g$6, "f").elements.refs.dropdown), l2 = `${this.rootElement.id || "autocomplete"}-dropdown`;
+    return U$6(A$a, { key: "32287af5493ab11a7d13750c96ae5bc0ddb02674" }, a2 && U$6("style", { key: "9c799edc7f711e66f6c079f1b5adfb63ae1bc478", id: j$6(this, W$7, "f") }, i2(this)), U$6("div", { key: "95dfdae551430a81c9d800675153308b4dc5d397", id: j$6(this, M$7, "f") }, U$6("div", { key: "99f48e21026f669fd11e6543a3dcb1a0a93ab18e", class: e2(j$6(this, T$5, "f").autocomplete._), "data-lf": j$6(this, L$4, "f")[this.lfUiState], part: j$6(this, D$6, "f").autocomplete, role: "combobox", "aria-expanded": o2 ? "true" : "false", "aria-haspopup": "listbox", "aria-owns": l2 }, j$6(this, g$6, "f").elements.jsx.textfield(), j$6(this, g$6, "f").elements.jsx.dropdown())));
   }
   disconnectedCallback() {
-    _$1(this, w$2, "f").theme.unregister(this);
-  }
-  get rootElement() {
-    return q$4(this);
-  }
-};
-v$1 = /* @__PURE__ */ new WeakMap(), b$2 = /* @__PURE__ */ new WeakMap(), g$1 = /* @__PURE__ */ new WeakMap(), w$2 = /* @__PURE__ */ new WeakMap(), y$1 = /* @__PURE__ */ new WeakMap(), z$2 = /* @__PURE__ */ new WeakMap(), k$2 = /* @__PURE__ */ new WeakMap(), x$2 = /* @__PURE__ */ new WeakMap(), M$1.style = "::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=ripple]{animation-duration:var(--lf-ui-duration-ripple, 675ms);animation-fill-mode:forwards;animation-name:lf-ripple;animation-timing-function:var(--lf-ui-timing-ripple, ease-out);background:var(--lf-ui-ripple-background, var(--lf-color-primary));border-radius:var(--lf-ui-radius-ripple, 50%);height:var(--lf-ui-ripple-height, 100%);left:var(--lf-ui-ripple-x, 50%);opacity:var(--lf-ui-opacity-ripple, 0.5);pointer-events:none;position:absolute;top:var(--lf-ui-ripple-y, 50%);transform:scale(0);width:var(--lf-ui-ripple-width, 100%)}@keyframes lf-ripple{from{transform:scale(0)}to{opacity:0;transform:scale(4)}}[data-lf=ripple-surface]{cursor:pointer;height:100%;left:0;overflow:hidden;position:absolute;top:0;width:100%}[data-lf=danger]{--lf-radio-color-primary:var(\n    --lf-radio-color-danger,\n    var(--lf-color-danger)\n  );--lf-radio-color-on-primary:var(\n    --lf-radio-color-danger,\n    var(--lf-color-on-danger)\n  )}[data-lf=disabled]{opacity:var(--lf-radio-ui-opacity-disabled, var(--lf-ui-opacity-disabled));pointer-events:none}[data-lf=info]{--lf-radio-color-primary:var(\n    --lf-radio-color-info,\n    var(--lf-color-info)\n  );--lf-radio-color-on-primary:var(\n    --lf-radio-color-info,\n    var(--lf-color-on-info)\n  )}[data-lf=secondary]{--lf-radio-color-primary:var(\n    --lf-radio-color-secondary,\n    var(--lf-color-secondary)\n  );--lf-radio-color-on-primary:var(\n    --lf-radio-color-secondary,\n    var(--lf-color-on-secondary)\n  )}[data-lf=success]{--lf-radio-color-primary:var(\n    --lf-radio-color-success,\n    var(--lf-color-success)\n  );--lf-radio-color-on-primary:var(\n    --lf-radio-color-success,\n    var(--lf-color-on-success)\n  )}[data-lf=warning]{--lf-radio-color-primary:var(\n    --lf-radio-color-warning,\n    var(--lf-color-warning)\n  );--lf-radio-color-on-primary:var(\n    --lf-radio-color-warning,\n    var(--lf-color-on-warning)\n  )}:host{display:block;font-family:var(--lf-radio-font-family, var(--lf-font-family-primary));font-size:var(--lf-radio-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-radio-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-radio-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-radio-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-radio-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-radio-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-radio-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-radio-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{display:block}.radio{display:flex;flex-direction:column;gap:var(--lf-radio-group-gap, 1em)}.radio--horizontal{flex-direction:row;flex-wrap:wrap;gap:var(--lf-radio-group-horizontal-gap, 1.25em)}.item{align-items:center;cursor:pointer;display:flex;gap:var(--lf-radio-item-gap, var(--lf-space-03));position:relative}.item--leading{flex-direction:row-reverse;justify-content:flex-end}.item--selected{color:var(--lf-radio-item-selected-color, rgba(var(--lf-radio-color-primary), 1))}.item__label{color:var(--lf-radio-label-color, rgba(var(--lf-radio-color-on-bg), 0.87));cursor:pointer;font-size:var(--lf-radio-label-font-size, 1em);font-weight:var(--lf-radio-label-font-weight, 500);line-height:var(--lf-radio-label-line-height, 1.5);padding-left:var(--lf-radio-label-padding, 0.75em);transition:color 150ms cubic-bezier(0.4, 0, 0.2, 1);user-select:none}.item--leading .item__label{padding-left:0;padding-right:var(--lf-radio-label-padding-leading, 0.75em)}.item--selected .item__label{color:var(--lf-radio-label-selected-color, rgba(var(--lf-radio-color-primary), 1));font-weight:var(--lf-radio-label-selected-font-weight, 600)}.control{border:1px solid transparent;border-radius:50%;box-sizing:content-box;cursor:pointer;display:inline-block;flex:0 0 auto;height:var(--lf-radio-control-size, 1.25em);overflow:visible;position:relative;transition:border-color 120ms cubic-bezier(0, 0, 0.2, 1);width:var(--lf-radio-control-size, 1.25em)}.control__circle{border:var(--lf-radio-circle-border-width, 2px) solid var(--lf-radio-circle-border-color, rgba(var(--lf-color-on-bg), 0.6));border-radius:50%;box-sizing:border-box;height:100%;left:0;overflow:hidden;position:absolute;top:0;transition:border-color 200ms cubic-bezier(0.4, 0, 0.2, 1), border-width 200ms cubic-bezier(0.4, 0, 0.2, 1);width:100%}.item:hover .control__circle{border-color:var(--lf-radio-circle-hover-border-color, rgba(var(--lf-radio-color-primary), 0.875))}.item--selected .control__circle{border-color:var(--lf-radio-circle-selected-border-color, rgba(var(--lf-radio-color-primary), 1))}.control__dot{border-color:var(--lf-radio-dot-background-color, rgba(var(--lf-radio-color-primary), 1));border-radius:50%;border-style:solid;border-width:0;box-sizing:border-box;height:100%;left:0;position:absolute;top:0;transform:scale(0);transition:transform 120ms cubic-bezier(0, 0, 0.2, 1), border-color 120ms cubic-bezier(0, 0, 0.2, 1);width:100%}.item:hover .control__dot,.item--selected .control__dot,.item--selected:hover .control__dot{border-width:var(--lf-radio-dot-border-width, 0.5em)}.item:hover .control__dot{transform:scale(0.25)}.item--selected .control__dot{transform:scale(0.5)}.item--selected:hover .control__dot{transform:scale(0.75)}.control__input{cursor:inherit;left:0;height:100%;margin:0;opacity:0;padding:0;position:absolute;top:0;width:100%;z-index:1}.control__input:focus{outline:none}.control__input:disabled{cursor:not-allowed}.control__ripple{border-radius:50%;height:var(--lf-radio-ripple-size, 2.5em);left:50%;pointer-events:none;position:absolute;top:50%;transform:translate(-50%, -50%);width:var(--lf-radio-ripple-size, 2.5em)}.item:hover .control{border-color:var(--lf-radio-hover-border-color, rgba(var(--lf-radio-color-primary), 0.5))}";
-const pCb747392_entry = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
-  __proto__: null,
-  lf_radio: M$1
-}, Symbol.toStringTag, { value: "Module" }));
-const b$1 = (e2) => /* @__PURE__ */ ((e3) => ({ addColumn: () => {
-  const { controller: s2, elements: i2, handlers: a2 } = e3(), { refs: r2 } = i2, { button: n2 } = a2, { blocks: l2, cyAttributes: f2, lfAttributes: h2, manager: c2, parts: d2 } = s2.get, { assignRef: m2, theme: u2 } = c2, { bemClass: p2, get: g3 } = u2, { "--lf-icon-plus": y2 } = g3.current().variables;
-  return U$5("lf-button", { class: p2(l2.grid._, l2.grid.addColumn), "data-cy": f2.button, "data-lf": h2.fadeIn, id: LF_MASONRY_IDS.addColumn, key: LF_MASONRY_IDS.addColumn, lfIcon: y2, lfStyling: "floating", lfUiSize: "xxsmall", "onLf-button-event": n2, part: d2.addColumn, ref: m2(r2, "addColumn"), title: "Click to add a column to the masonry." });
-}, removeColumn: () => {
-  const { controller: s2, elements: i2, handlers: a2 } = e3(), { refs: r2 } = i2, { button: n2 } = a2, { blocks: l2, cyAttributes: f2, lfAttributes: h2, manager: c2, parts: d2 } = s2.get, { assignRef: m2, theme: u2 } = c2, { bemClass: p2, get: g3 } = u2, { "--lf-icon-minus": y2 } = g3.current().variables;
-  return U$5("lf-button", { class: p2(l2.grid._, l2.grid.removeColumn), "data-cy": f2.button, "data-lf": h2.fadeIn, id: LF_MASONRY_IDS.removeColumn, key: LF_MASONRY_IDS.removeColumn, lfIcon: y2, lfStyling: "floating", lfUiSize: "xxsmall", "onLf-button-event": n2, part: d2.removeColumn, ref: m2(r2, "removeColumn"), title: "Click to remove a column from the masonry." });
-}, changeView: () => {
-  const { controller: s2, elements: i2, handlers: a2 } = e3(), { refs: r2 } = i2, { blocks: n2, cyAttributes: l2, isMasonry: f2, isVertical: h2, manager: c2, parts: d2 } = s2.get, { button: m2 } = a2, { assignRef: u2, theme: p2 } = c2, { bemClass: g3, get: y2 } = p2, { layoutBoardSplit: v2, viewportTall: b2, viewportWide: w3 } = y2.icons();
-  return U$5("lf-button", { class: g3(n2.grid._, n2.grid.changeViewe), "data-cy": l2.button, id: LF_MASONRY_IDS.masonry, key: LF_MASONRY_IDS.masonry, lfIcon: f2() ? b2 : h2() ? w3 : v2, lfStyling: "floating", lfUiSize: "xsmall", "onLf-button-event": m2, part: d2.changeView, ref: u2(r2, "changeView"), title: f2() ? "Click to view the images arranged vertically." : h2() ? "Click to view the images arranged horizontally." : "Click to view the images arranged in a masonry." });
-} }))(e2), w$1 = (t5) => /* @__PURE__ */ ((t6) => ({ button: (e2) => {
-  const { eventType: s2, id: i2 } = e2.detail;
-  if ("click" === s2) switch (i2) {
-    case LF_MASONRY_IDS.masonry:
-      (async (t7) => {
-        const { compInstance: e3, isMasonry: s3, isVertical: i3 } = t7.controller.get;
-        e3.lfView = s3() ? "vertical" : i3() ? "horizontal" : "main";
-      })(t6());
-      break;
-    case LF_MASONRY_IDS.removeColumn:
-      (async (t7) => {
-        const { get: e3 } = t7.controller, { compInstance: s3, currentColumns: i3 } = e3, a2 = s3, r2 = i3();
-        r2 > 1 && (a2.lfColumns = r2 - 1);
-      })(t6());
-      break;
-    case LF_MASONRY_IDS.addColumn:
-      (async (t7) => {
-        const { get: e3 } = t7.controller, { compInstance: s3, currentColumns: i3 } = e3, a2 = i3();
-        s3.lfColumns = a2 + 1;
-      })(t6());
-  }
-} }))(t5);
-var k$1, z$1, x$1, C$1, M3, S$1, W$1, _, A, T$1, E$1, I$1, j2, V, L$1, D$1, R2, P, U, O2, Y2, B2, F, H, Z = function(t5, e2, s2, i2) {
-  if ("a" === s2 && !i2) throw new TypeError("Private accessor was defined without a getter");
-  if ("function" == typeof e2 ? t5 !== e2 || !i2 : !e2.has(t5)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
-  return "m" === s2 ? i2 : "a" === s2 ? i2.call(t5) : i2 ? i2.value : e2.get(t5);
-}, $ = function(t5, e2, s2, i2, a2) {
-  if ("function" == typeof e2 ? t5 !== e2 || true : !e2.has(t5)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
-  return e2.set(t5, s2), s2;
-};
-const q = class {
-  constructor(a2) {
-    o$2(this, a2), this.lfEvent = G$3(this, "lf-masonry-event"), k$1.add(this), this.selectedShape = {}, this.shapes = {}, this.lfActions = false, this.lfCollapseColumns = true, this.lfColumns = Array.from(LF_MASONRY_DEFAULT_COLUMNS), this.lfDataset = null, this.lfSelectable = false, this.lfShape = "image", this.lfStyle = "", this.lfView = "main", z$1.set(this, void 0), x$1.set(this, LF_MASONRY_BLOCKS), C$1.set(this, CY_ATTRIBUTES), M3.set(this, LF_ATTRIBUTES), S$1.set(this, LF_MASONRY_PARTS), W$1.set(this, LF_STYLE_ID), _.set(this, LF_MASONRY_CSS_VARS), A.set(this, LF_WRAPPER_ID), T$1.set(this, void 0), E$1.set(this, void 0), I$1.set(this, void 0), j2.set(this, (() => {
-      var t5;
-      $(this, I$1, { controller: { get: { blocks: Z(this, x$1, "f"), compInstance: this, currentColumns: () => Z(this, T$1, "f"), cyAttributes: Z(this, C$1, "f"), isMasonry: () => Z(this, L$1, "f").call(this), isVertical: () => Z(this, D$1, "f").call(this), lfAttributes: Z(this, M3, "f"), manager: Z(this, z$1, "f"), parts: Z(this, S$1, "f"), shapes: () => this.shapes } }, elements: { jsx: b$1(t5 = () => Z(this, I$1, "f")), refs: { addColumn: null, removeColumn: null, changeView: null } }, handlers: w$1(t5) });
-    })), V.set(this, (() => {
-      var _a2;
-      return !!((_a2 = this.shapes) == null ? void 0 : _a2[this.lfShape]);
-    })), L$1.set(this, (() => "main" === this.lfView)), D$1.set(this, (() => "vertical" === this.lfView)), R2.set(this, ((t5, e2) => () => {
-      clearTimeout(Z(this, E$1, "f")), $(this, E$1, setTimeout(t5, e2));
-    })), P.set(this, ((t5) => t5.every(((t6, e2, s2) => 0 === e2 || s2[e2 - 1] < t6)))), O2.set(this, (() => {
-      const { lfShape: e2, selectedShape: s2, shapes: i2 } = this, a3 = i2[this.lfShape].map((() => ({ htmlProps: { dataset: { lf: Z(this, M3, "f").fadeIn, selected: "" } } })));
-      void 0 !== s2.index && (a3[s2.index] = { htmlProps: { dataset: { lf: Z(this, M3, "f").fadeIn, selected: "true" } } });
-      const r$12 = Array.from({ length: Z(this, T$1, "f") }, (() => []), []);
-      for (let s3 = 0; s3 < i2[e2].length; s3++) {
-        const n2 = i2[e2][s3], o2 = a3[s3];
-        r$12[s3 % Z(this, T$1, "f")].push(U$5(r, { cell: Object.assign(o2, n2), index: s3, shape: e2, eventDispatcher: async (t5) => this.onLfEvent(t5, "lf-event"), framework: Z(this, z$1, "f") }));
-      }
-      return r$12;
-    })), Y2.set(this, Z(this, R2, "f").call(this, (() => {
-      this.viewportWidth = window.innerWidth;
-    }), 200)), B2.set(this, (() => {
-      const { bemClass: e2 } = Z(this, z$1, "f").theme, { grid: s2 } = Z(this, x$1, "f"), { addColumn: i2, changeView: a3, removeColumn: r2 } = Z(this, I$1, "f").elements.jsx;
-      return U$5("div", { class: e2(s2._, s2.actions), "data-lf": Z(this, M3, "f").fadeIn }, Z(this, L$1, "f").call(this) && U$5("div", { class: e2(s2._, s2.sub) }, i2(), r2()), a3());
-    })), F.set(this, (() => {
-      const { bemClass: e2 } = Z(this, z$1, "f").theme, { grid: s2 } = Z(this, x$1, "f");
-      return Z(this, O2, "f").call(this).map(((a3, r2) => U$5("div", { key: r2, class: e2(s2._, s2.column) }, a3.map(((e3) => U$5(St$1, null, e3))))));
-    })), H.set(this, (() => {
-      var _a2;
-      const { bemClass: e2 } = Z(this, z$1, "f").theme, { grid: s2 } = Z(this, x$1, "f"), { lfActions: a3, lfShape: r2, lfView: n2, shapes: o2 } = this;
-      return Z(this, V, "f").call(this) && ((_a2 = o2[r2]) == null ? void 0 : _a2.length) ? U$5(St$1, null, U$5("div", { class: e2(s2._, null, { [n2]: true }) }, Z(this, F, "f").call(this)), a3 && Z(this, B2, "f").call(this)) : null;
-    }));
-  }
-  onLfEvent(t5, e2) {
-    const { lfSelectable: s2, lfShape: i2, selectedShape: a2, shapes: r2 } = this;
-    let n2 = false;
-    const o2 = {};
-    if ("lf-event" === e2) {
-      const { comp: e3, eventType: l2 } = t5.detail;
-      if ("click" === l2 && s2) {
-        const t6 = parseInt(e3.rootElement.dataset.index);
-        a2.index !== t6 && (o2.index = t6, o2.shape = r2[i2][t6]), n2 = true;
-      }
-    }
-    n2 && (this.selectedShape = o2), this.lfEvent.emit({ comp: this, eventType: e2, id: this.rootElement.id, originalEvent: t5, selectedShape: this.selectedShape });
-  }
-  validateColumns() {
-    if (!Z(this, z$1, "f")) return;
-    const { debug: t5 } = Z(this, z$1, "f");
-    Array.isArray(this.lfColumns) && !Z(this, P, "f").call(this, this.lfColumns) && (t5.logs.new(this, "Invalid breakpoints in lfColumns: must be sorted in ascending order.", "warning"), this.lfColumns = [...LF_MASONRY_DEFAULT_COLUMNS]);
-  }
-  async updateShapes() {
-    if (!Z(this, z$1, "f")) return;
-    const { data: t5, debug: e2 } = Z(this, z$1, "f");
-    try {
-      this.shapes = t5.cell.shapes.getAll(this.lfDataset);
-    } catch (t6) {
-      e2.logs.new(this, "Error updating shapes: " + t6, "error");
-    }
-  }
-  async getDebugInfo() {
-    return this.debugInfo;
-  }
-  async getProps() {
-    const t5 = LF_MASONRY_PROPS.map(((t6) => [t6, this[t6]]));
-    return Object.fromEntries(t5);
-  }
-  async getSelectedShape() {
-    return this.selectedShape;
-  }
-  async redecorateShapes() {
-    this.updateShapes();
-  }
-  async refresh() {
-    vt$1(this);
-  }
-  async setSelectedShape(t5) {
     var _a2, _b2;
-    const { debug: e2 } = Z(this, z$1, "f"), s2 = (_b2 = (_a2 = this.shapes) == null ? void 0 : _a2[this.lfShape]) == null ? void 0 : _b2[t5];
-    s2 ? this.selectedShape = { index: t5, shape: s2 } : (this.selectedShape = {}, e2.logs.new(this, `Couldn't set shape with index: ${t5}`)), this.updateShapes();
-  }
-  async unmount(t5 = 0) {
-    setTimeout((() => {
-      this.onLfEvent(new CustomEvent("unmount"), "unmount"), this.rootElement.remove();
-    }), t5);
-  }
-  connectedCallback() {
-    Z(this, z$1, "f") && Z(this, z$1, "f").theme.register(this);
-  }
-  async componentWillLoad() {
-    $(this, z$1, await a(this)), Z(this, j2, "f").call(this), this.updateShapes();
-  }
-  componentDidLoad() {
-    window.addEventListener("resize", Z(this, Y2, "f")), this.viewportWidth = window.innerWidth;
-    const { info: t5 } = Z(this, z$1, "f").debug;
-    this.onLfEvent(new CustomEvent("ready"), "ready"), t5.update(this, "did-load");
-  }
-  componentWillRender() {
-    const { info: t5 } = Z(this, z$1, "f").debug;
-    $(this, T$1, Z(this, L$1, "f").call(this) ? Z(this, k$1, "m", U).call(this) : 1), t5.update(this, "will-render");
-  }
-  componentDidRender() {
-    const { info: t5 } = Z(this, z$1, "f").debug;
-    t5.update(this, "did-render");
-  }
-  render() {
-    const { bemClass: e2, setLfStyle: s2 } = Z(this, z$1, "f").theme, { masonry: i2 } = Z(this, x$1, "f"), { lfStyle: a2 } = this, n2 = { [Z(this, _, "f").columns]: String(Z(this, T$1, "f")) };
-    return U$5(A$9, { key: "3e59d788932c4902e5562fac62755892de85b552", style: n2 }, a2 && U$5("style", { key: "ada1d4d4fc4a8b1f8d392486879791344e0beb4a", id: Z(this, W$1, "f") }, s2(this)), U$5("div", { key: "20ff7fe386c3c1e1b19575312e94cee45aaa8bad", id: Z(this, A, "f") }, U$5("div", { key: "8153a2e89b38077f4c231360e99b3f36b7201dca", class: e2(i2._) }, Z(this, H, "f").call(this))));
-  }
-  disconnectedCallback() {
-    var _a2;
-    (_a2 = Z(this, z$1, "f")) == null ? void 0 : _a2.theme.unregister(this), window.removeEventListener("resize", Z(this, Y2, "f"));
+    if (j$6(this, x$8, "f") && clearTimeout(j$6(this, x$8, "f")), j$6(this, y$7, "m", S$6).call(this), j$6(this, g$6, "f")) {
+      const { dropdown: t5 } = j$6(this, g$6, "f").elements.refs;
+      (_a2 = j$6(this, C$6, "f")) == null ? void 0 : _a2.portal.close(t5);
+    }
+    (_b2 = j$6(this, C$6, "f")) == null ? void 0 : _b2.theme.unregister(this);
   }
   get rootElement() {
-    return q$4(this);
+    return q$5(this);
   }
   static get watchers() {
-    return { lfColumns: ["validateColumns"], lfDataset: ["updateShapes"], lfShape: ["updateShapes"] };
+    return { lfDataset: ["onLfDatasetChange"], loading: ["onLoadingChange"] };
   }
 };
-z$1 = /* @__PURE__ */ new WeakMap(), x$1 = /* @__PURE__ */ new WeakMap(), C$1 = /* @__PURE__ */ new WeakMap(), M3 = /* @__PURE__ */ new WeakMap(), S$1 = /* @__PURE__ */ new WeakMap(), W$1 = /* @__PURE__ */ new WeakMap(), _ = /* @__PURE__ */ new WeakMap(), A = /* @__PURE__ */ new WeakMap(), T$1 = /* @__PURE__ */ new WeakMap(), E$1 = /* @__PURE__ */ new WeakMap(), I$1 = /* @__PURE__ */ new WeakMap(), j2 = /* @__PURE__ */ new WeakMap(), V = /* @__PURE__ */ new WeakMap(), L$1 = /* @__PURE__ */ new WeakMap(), D$1 = /* @__PURE__ */ new WeakMap(), R2 = /* @__PURE__ */ new WeakMap(), P = /* @__PURE__ */ new WeakMap(), O2 = /* @__PURE__ */ new WeakMap(), Y2 = /* @__PURE__ */ new WeakMap(), B2 = /* @__PURE__ */ new WeakMap(), F = /* @__PURE__ */ new WeakMap(), H = /* @__PURE__ */ new WeakMap(), k$1 = /* @__PURE__ */ new WeakSet(), U = function() {
-  var _a2, _b2;
-  const { lfColumns: t5, viewportWidth: e2, shapes: s2, lfShape: i2 } = this;
-  if (!Z(this, V, "f").call(this)) return 1;
-  if ("number" == typeof t5) return this.lfCollapseColumns ? Math.min(t5, ((_a2 = s2[i2]) == null ? void 0 : _a2.length) || 0) : t5;
-  if (Array.isArray(t5)) {
-    const a2 = t5;
-    let r2 = 1;
-    for (let t6 = 0; t6 < a2.length && e2 >= a2[t6]; t6++) r2 = t6 + 1;
-    return this.lfCollapseColumns ? Math.min(r2, ((_b2 = s2 == null ? void 0 : s2[i2]) == null ? void 0 : _b2.length) || 0) : r2;
+b$5 = R$4, g$6 = /* @__PURE__ */ new WeakMap(), k$8 = /* @__PURE__ */ new WeakMap(), z$8 = /* @__PURE__ */ new WeakMap(), x$8 = /* @__PURE__ */ new WeakMap(), C$6 = /* @__PURE__ */ new WeakMap(), T$5 = /* @__PURE__ */ new WeakMap(), E$6 = /* @__PURE__ */ new WeakMap(), L$4 = /* @__PURE__ */ new WeakMap(), D$6 = /* @__PURE__ */ new WeakMap(), W$7 = /* @__PURE__ */ new WeakMap(), M$7 = /* @__PURE__ */ new WeakMap(), y$7 = /* @__PURE__ */ new WeakSet(), S$6 = function() {
+  j$6(this, k$8, "f") && (clearTimeout(j$6(this, k$8, "f")), q$2(this, k$8, null));
+}, A$4 = function() {
+  if (j$6(this, z$8, "f").size > this.lfMaxCacheSize) {
+    const t5 = j$6(this, z$8, "f").keys().next().value;
+    j$6(this, z$8, "f").delete(t5);
   }
-  return 1;
-}, q.style = "::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=fade-in]{display:block;animation:lf-fade-in-block 0.25s ease-out forwards}@keyframes lf-fade-in-block{from{visibility:hidden;opacity:0}to{visibility:visible;opacity:1}}:host{display:block;font-family:var(--lf-masonry-font-family, var(--lf-font-family-primary));font-size:var(--lf-masonry-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-masonry-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-masonry-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-masonry-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-masonry-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-masonry-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-masonry-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-masonry-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{width:100%;height:100%}:host([lf-selectable]) lf-image{transition:all 200ms cubic-bezier(0.4, 0, 0.6, 1);box-sizing:border-box;cursor:pointer;overflow:hidden}:host([lf-selectable]) lf-image:hover,:host([lf-selectable]) lf-image[data-selected=true]{filter:var(--lf-comp-selected-filter, brightness(110%) drop-shadow(0 0 0.5em rgb(var(--lf-color-secondary))))}:host([lf-selectable]) lf-image[data-selected=true]{border:var(--lf-masonry-selected-border, 1px solid rgba(var(--lf-color-secondary, 0.875)))}.masonry{width:100%;height:100%;box-sizing:border-box;display:flex;gap:var(--lf-masonry-grid-gap, 0.5em);overflow:auto;padding:var(--lf-masonry-padding, 0.75em);position:relative}.masonry:not(:hover) .grid__actions{display:none}.grid{width:100%;height:100%;align-items:var(--lf-masonry-grid-items-alignment, start);column-gap:var(--lf-masonry-grid-gap, 0.5em);display:grid}.grid--horizontal{grid-template-rows:1fr;overflow-x:auto;overflow-y:hidden}.grid--horizontal .grid__column{flex-direction:row;height:100%;min-height:max-content;width:auto}.grid--main{grid-template-columns:repeat(var(--lf_masonry_columns), var(--lf-masonry-column-size, minmax(0px, 1fr)))}.grid--main .grid__column{flex-direction:column}.grid--vertical{grid-template-columns:1fr}.grid--vertical .grid__column{flex-direction:column}.grid__column{display:flex;flex:1;gap:var(--lf-masonry-grid-gap, 0.5em);width:100%}.grid__actions{backdrop-filter:var(--lf-masonry-actions-backdrop, blur(10px));background-color:var(--lf-masonry-actions-background, rgba(var(--lf-color-surface), 0.75));border-radius:var(--lf-masonry-actions-border-radius, 50px);bottom:var(--lf-masonry-button-bottom, 1em);display:grid;grid-auto-flow:row;grid-gap:var(--lf-masonry-grid-gap-actions, 0.5em);justify-items:center;margin:var(--lf-masonry-actions-margin, 0 0.5em 0.5em 0);padding:var(--lf-masonry-actions-padding, 0.75em);position:absolute;right:var(--lf-masonry-button-right, 1em);z-index:var(--lf-masonry-actions-z-index, 2)}.grid__sub{display:grid;grid-gap:var(--lf-masonry-grid-gap-actions-sub, 0.25em)}";
-const pD28f7231_entry = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
-  __proto__: null,
-  lf_masonry: q
-}, Symbol.toStringTag, { value: "Module" }));
-const m = (t5) => ({ list: () => {
-  const { controller: s2, elements: i2, handlers: l2 } = t5(), { refs: a2 } = i2, { blocks: r2, compInstance: o2, cyAttributes: n2, indexById: f2, lfAttributes: c2, manager: d2, parts: h2, selectedNode: p2 } = s2.get, { assignRef: u2, sanitizeProps: m2, theme: v2 } = d2, { bemClass: b2 } = v2, { list: y2 } = l2, { lfDataset: w3 } = o2, g3 = p2(), k2 = g3 ? f2(g3.id) : -1;
-  return U$5("lf-list", { lfUiSize: o2.lfUiSize, lfUiState: o2.lfUiState, ...m2(o2.lfListProps, "LfList"), class: b2(r2.select._, r2.select.list), "data-cy": n2.dropdownMenu, "data-lf": c2.portal, lfDataset: w3, lfSelectable: true, lfValue: -1 !== k2 ? k2 : null, "onLf-list-event": y2, part: h2.list, ref: u2(a2, "list") });
-}, textfield: () => {
-  var _a2, _b2;
-  const { controller: s2, elements: i2, handlers: l2 } = t5(), { refs: a2 } = i2, { blocks: o2, compInstance: n2, manager: f2, parts: c2, selectedNode: d2 } = s2.get, { assignRef: h2, sanitizeProps: p2, theme: u2 } = f2, { bemClass: m2 } = u2, { textfield: v2 } = l2, b2 = ((_a2 = n2.lfTextfieldProps) == null ? void 0 : _a2.lfHtmlAttributes) || {};
-  b2.autocomplete = "off", b2.readonly = true, b2.role = "combobox";
-  const y2 = p2(b2);
-  return U$5("lf-textfield", { lfUiSize: n2.lfUiSize, lfUiState: n2.lfUiState, ...p2(n2.lfTextfieldProps, "LfTextfield"), class: m2(o2.select._, o2.select.textfield), lfHtmlAttributes: y2, lfTrailingIconAction: LF_THEME_ICONS.dropdown, lfValue: String(((_b2 = d2()) == null ? void 0 : _b2.value) || ""), "onLf-textfield-event": v2, part: c2.textfield, ref: h2(a2, "textfield") });
-} }), v = (e2) => ({ list: async (t5) => {
-  const { eventType: s2, node: i2 } = t5.detail, { controller: l2, elements: a2 } = e2(), { compInstance: r2 } = l2.get, { refs: o2 } = a2, n2 = r2;
-  "click" === s2 && (l2.set.value(i2.id), l2.set.list("close"), o2.textfield.setFocus()), n2.onLfEvent(t5, "lf-event", i2);
-}, textfield: async (t5) => {
-  const { eventType: s2 } = t5.detail || {}, { controller: i2 } = e2(), { compInstance: l2 } = i2.get, a2 = l2;
-  switch (s2) {
-    case "click":
-      i2.set.list();
-      break;
-    case "keydown": {
-      const e3 = t5.detail.originalEvent;
-      await b(e3, i2);
-      break;
+}, I$5 = function(t5) {
+  return t5.trim().toLowerCase();
+}, V$3 = function(t5) {
+  this.loading = t5;
+}, P$4 = function(t5, e2 = b$5.BLUR_DELAY_MS) {
+  j$6(this, y$7, "m", S$6).call(this), q$2(this, k$8, setTimeout(t5, e2));
+}, $$2 = function() {
+  var t5, e2, i2;
+  q$2(this, g$6, (t5 = { blocks: j$6(this, T$5, "f"), cache: () => j$6(this, z$8, "f"), compInstance: this, cyAttributes: j$6(this, E$6, "f"), hasCache: () => this.lfCache && j$6(this, z$8, "f").size > 0, highlightedIndex: () => this.highlightedIndex, indexById: (t6) => {
+    var _a2, _b2;
+    return ((_b2 = (_a2 = this.lfDataset) == null ? void 0 : _a2.nodes) == null ? void 0 : _b2.findIndex(((e3) => e3.id === t6))) ?? -1;
+  }, inputValue: () => this.inputValue, isDisabled: () => "disabled" === this.lfUiState, isLoading: () => this.loading, lfAllowFreeInput: () => this.lfAllowFreeInput, lfAttributes: j$6(this, L$4, "f"), lfDataset: () => this.lfDataset, manager: j$6(this, C$6, "f"), parts: j$6(this, D$6, "f"), selectedNode: () => null }, e2 = { blurTimeout: { clear: () => {
+    j$6(this, y$7, "m", S$6).call(this);
+  }, new: (t6, e3) => {
+    j$6(this, y$7, "m", P$4).call(this, t6, e3);
+  } }, dataset: async (t6) => {
+    const { refs: e3 } = j$6(this, g$6, "f").elements;
+    if (e3.list && t6 && await e3.list.refresh(), this.lfCache && this.lastRequestedQuery && t6) {
+      const e4 = j$6(this, y$7, "m", I$5).call(this, this.lastRequestedQuery);
+      j$6(this, z$8, "f").set(e4, { dataset: t6, timestamp: Date.now() }), j$6(this, y$7, "m", A$4).call(this), this.lastRequestedQuery = "";
     }
-  }
-  a2.onLfEvent(t5, "lf-event");
-} }), b = async (e2, t5) => {
-  var _a2;
-  const { compInstance: s2, lfDataset: i2 } = t5.get, l2 = s2;
-  if (!l2.lfNavigation) return;
-  const a2 = i2();
-  if (!((_a2 = a2 == null ? void 0 : a2.nodes) == null ? void 0 : _a2.length)) return;
-  const r2 = await l2.getSelectedIndex();
-  let o2 = r2;
-  switch (e2.key) {
-    case "ArrowDown":
-      e2.preventDefault(), o2 = -1 === r2 ? 0 : (r2 + 1) % a2.nodes.length;
-      break;
-    case "ArrowUp":
-      e2.preventDefault(), o2 = -1 === r2 || 0 === r2 ? a2.nodes.length - 1 : r2 - 1;
-      break;
-    case "Escape":
-      e2.preventDefault(), t5.set.list("close");
-      break;
-    case "Enter":
-      e2.preventDefault(), t5.set.list();
-  }
-  if (o2 !== r2) {
-    const s3 = a2.nodes[o2];
-    t5.set.value(s3.id), l2.onLfEvent(e2, "lf-event", s3);
-  }
-}, y = (e2, t5) => !(!(e2 == null ? void 0 : e2.nodes) || !t5) && e2.nodes.some(((e3) => (e3 == null ? void 0 : e3.id) === t5));
-var w2, g2, k, z, x, D, E2, C2, I, L, S2 = function(e2, t5, s2, i2) {
-  if ("a" === s2 && !i2) throw new TypeError("Private accessor was defined without a getter");
-  if ("function" == typeof t5 ? e2 !== t5 || !i2 : !t5.has(e2)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
-  return "m" === s2 ? i2 : "a" === s2 ? i2.call(e2) : i2 ? i2.value : t5.get(e2);
-}, T3 = function(e2, t5, s2, i2, l2) {
-  if ("function" == typeof t5 ? e2 !== t5 || true : !t5.has(e2)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
-  return t5.set(e2, s2), s2;
-};
-const W2 = class {
-  constructor(e2) {
-    o$2(this, e2), this.lfEvent = G$3(this, "lf-select-event"), w2.add(this), this.focused = false, this.value = null, this.lfDataset = null, this.lfListProps = null, this.lfNavigation = true, this.lfStyle = null, this.lfTextfieldProps = null, this.lfUiSize = "medium", this.lfUiState = "primary", this.lfValue = null, g2.set(this, void 0), k.set(this, void 0), z.set(this, LF_SELECT_BLOCKS), x.set(this, CY_ATTRIBUTES), D.set(this, LF_ATTRIBUTES), E2.set(this, LF_SELECT_PARTS), C2.set(this, LF_STYLE_ID), I.set(this, LF_WRAPPER_ID);
-  }
-  onLfEvent(e2, t5, s2, i2) {
-    this.lfEvent.emit({ comp: this, eventType: t5, id: this.rootElement.id, originalEvent: e2, node: s2, value: i2 });
-  }
-  onLfDatasetChange() {
-    (!this.lfDataset || this.value && !y(this.lfDataset, this.value)) && (this.value = null);
-  }
-  async getDebugInfo() {
-    return this.debugInfo;
-  }
-  async getProps() {
-    const e2 = LF_SELECT_PROPS.map(((e3) => [e3, this[e3]]));
-    return Object.fromEntries(e2);
-  }
-  async getValue() {
-    return S2(this, k, "f").controller.get.selectedNode();
-  }
-  async getSelectedIndex() {
-    const e2 = S2(this, k, "f").controller.get.selectedNode();
-    return e2 ? S2(this, k, "f").controller.get.indexById(e2.id) : -1;
-  }
-  async refresh() {
-    vt$1(this);
-  }
-  async setValue(e2) {
-    S2(this, k, "f").controller.set.value(e2);
-  }
-  async unmount(e2 = 0) {
-    setTimeout((() => {
-      this.onLfEvent(new CustomEvent("unmount"), "unmount"), this.rootElement.remove();
-    }), e2);
-  }
-  connectedCallback() {
-    S2(this, g2, "f") && S2(this, g2, "f").theme.register(this);
-  }
-  async componentWillLoad() {
+    if (t6) return this.lfListProps = { ...this.lfListProps, lfFilter: false }, void j$6(this, y$7, "m", V$3).call(this, false);
+    j$6(this, g$6, "f").controller.set.list("open");
+  }, input: async (t6) => {
+    this.inputValue = t6;
+    const { refs: e3 } = j$6(this, g$6, "f").elements;
+    if (e3.textfield && await e3.textfield.setValue(t6), j$6(this, x$8, "f") && clearTimeout(j$6(this, x$8, "f")), t6.length < this.lfMinChars) return j$6(this, g$6, "f").controller.set.list("close"), void j$6(this, y$7, "m", V$3).call(this, false);
+    j$6(this, g$6, "f").controller.set.list("open"), j$6(this, g$6, "f").controller.set.highlight(-1);
+    const i3 = j$6(this, y$7, "m", I$5).call(this, t6);
+    if (this.lfCache && j$6(this, z$8, "f").has(i3)) {
+      const t7 = j$6(this, z$8, "f").get(i3);
+      if (!(Date.now() - t7.timestamp > this.lfCacheTTL)) return this.lfDataset = t7.dataset, this.lfListProps = { ...this.lfListProps, lfFilter: false }, void j$6(this, y$7, "m", V$3).call(this, false);
+      j$6(this, z$8, "f").delete(i3);
+    }
+    this.lfDataset = null, j$6(this, y$7, "m", V$3).call(this, true), q$2(this, x$8, setTimeout((() => {
+      this.lastRequestedQuery = t6, this.onLfEvent(new CustomEvent("request"), "request", { query: t6 });
+    }), this.lfDebounceMs), "f");
+  }, select: async (t6) => {
     var _a2;
-    T3(this, g2, await a(this)), "number" == typeof this.lfValue ? this.value = ((_a2 = this.lfDataset.nodes[this.lfValue]) == null ? void 0 : _a2.id) || null : "string" == typeof this.lfValue && "" !== this.lfValue && (this.value = this.lfValue), S2(this, w2, "m", L).call(this);
-  }
-  async componentDidLoad() {
-    const { info: e2 } = S2(this, g2, "f").debug;
-    this.onLfEvent(new CustomEvent("ready"), "ready"), await e2.update(this, "did-load");
-  }
-  componentWillRender() {
-    const { info: e2 } = S2(this, g2, "f").debug;
-    e2.update(this, "will-render");
-  }
-  componentDidRender() {
-    const { info: e2 } = S2(this, g2, "f").debug;
-    e2.update(this, "did-render");
-  }
-  render() {
-    const { bemClass: t5, setLfStyle: s2 } = S2(this, g2, "f").theme, { lfStyle: i2 } = this;
-    return U$5(A$9, { key: "dea86f878add09f238c50cbc3be8d0fa2fcf8fcd" }, i2 && U$5("style", { key: "dbdf122ee644fa48aa0a570166b11ad818294bf5", id: S2(this, C2, "f") }, s2(this)), U$5("div", { key: "6e16df3fd09a826031eb61995f01d1c7448e888a", id: S2(this, I, "f") }, U$5("div", { key: "f5d39da3532295b6917fb93ec682f8047e7b753a", class: t5(S2(this, z, "f").select._), "data-lf": S2(this, D, "f")[this.lfUiState], part: S2(this, E2, "f").select }, S2(this, k, "f").elements.jsx.textfield(), S2(this, k, "f").elements.jsx.list())));
-  }
-  disconnectedCallback() {
-    var _a2, _b2;
-    if (S2(this, k, "f")) {
-      const { list: e2 } = S2(this, k, "f").elements.refs;
-      (_a2 = S2(this, g2, "f")) == null ? void 0 : _a2.portal.close(e2);
-    }
-    (_b2 = S2(this, g2, "f")) == null ? void 0 : _b2.theme.unregister(this);
-  }
-  get rootElement() {
-    return q$4(this);
-  }
-  static get watchers() {
-    return { lfDataset: ["onLfDatasetChange"] };
-  }
-};
-g2 = /* @__PURE__ */ new WeakMap(), k = /* @__PURE__ */ new WeakMap(), z = /* @__PURE__ */ new WeakMap(), x = /* @__PURE__ */ new WeakMap(), D = /* @__PURE__ */ new WeakMap(), E2 = /* @__PURE__ */ new WeakMap(), C2 = /* @__PURE__ */ new WeakMap(), I = /* @__PURE__ */ new WeakMap(), w2 = /* @__PURE__ */ new WeakSet(), L = function() {
-  var e2, t5, s2;
-  T3(this, k, (e2 = { blocks: S2(this, z, "f"), compInstance: this, cyAttributes: S2(this, x, "f"), indexById: (e3) => {
-    var _a2, _b2;
-    return (_b2 = (_a2 = this.lfDataset) == null ? void 0 : _a2.nodes) == null ? void 0 : _b2.findIndex(((t6) => t6.id === e3));
-  }, isDisabled: () => "disabled" === this.lfUiState, lfAttributes: S2(this, D, "f"), lfDataset: () => this.lfDataset, manager: S2(this, g2, "f"), parts: S2(this, E2, "f"), selectedNode: () => {
-    return e3 = this.lfDataset, t6 = this.value, (e3 == null ? void 0 : e3.nodes) && t6 && e3.nodes.find(((e4) => (e4 == null ? void 0 : e4.id) === t6)) || null;
-    var e3, t6;
-  } }, t5 = { value: async (e3) => {
-    const { refs: t6 } = S2(this, k, "f").elements, s3 = t6.textfield || null, i2 = t6.list || null, l2 = async (e4) => {
-      this.value = e4;
-      const t7 = S2(this, k, "f").controller.get.selectedNode();
-      i2 && await i2.selectNodeById((t7 == null ? void 0 : t7.id) || null), s3 && await s3.setValue(String((t7 == null ? void 0 : t7.value) || "")), this.onLfEvent(new CustomEvent("change"), "change", t7, e4);
+    this.inputValue = String(t6.value || "");
+    const { refs: e3 } = j$6(this, g$6, "f").elements;
+    e3.textfield && await e3.textfield.setValue(this.inputValue), j$6(this, g$6, "f").controller.set.list("close"), (_a2 = e3.textfield) == null ? void 0 : _a2.setFocus(), this.onLfEvent(new CustomEvent("change"), "change", { node: t6 });
+  }, highlight: (t6) => {
+    this.highlightedIndex = t6;
+  } }, i2 = () => j$6(this, g$6, "f"), { controller: { get: t5, set: { ...e2, list: (t6 = "toggle") => {
+    const e3 = i2(), { controller: a2, elements: s2 } = e3, { manager: o2 } = a2.get, { dropdown: l2, textfield: n2 } = s2.refs, { close: r2, getState: f2, isInPortal: c2, open: h2 } = o2.portal, d2 = () => {
+      const t7 = l2 && f2(l2);
+      return (t7 == null ? void 0 : t7.parent) ? t7.parent : (l2 == null ? void 0 : l2.parentElement) || n2;
+    }, u2 = () => {
+      if (!l2 || !n2) return;
+      const { width: t7 } = n2.getBoundingClientRect();
+      t7 > 0 && (l2.style.minWidth = `${t7}px`);
     };
-    e3 && this.lfDataset && !y(this.lfDataset, e3) ? await l2(null) : await l2(e3);
-  } }, s2 = () => S2(this, k, "f"), { controller: { get: e2, set: { ...t5, list: (e3 = "toggle") => {
-    const t6 = s2(), { controller: i2, elements: l2 } = t6, { manager: a2 } = i2.get, { list: r2, textfield: o2 } = l2.refs, { close: n2, isInPortal: f2, open: c2 } = a2.portal;
-    switch (e3) {
+    switch (t6) {
       case "close":
-        n2(r2);
+        r2(l2);
         break;
       case "open":
-        c2(r2, o2);
+        h2(l2, d2(), n2), u2();
         break;
       default:
-        f2(r2) ? n2(r2) : c2(r2, o2);
+        c2(l2) ? r2(l2) : (h2(l2, d2(), n2), u2());
     }
-  } } }, elements: { jsx: m(s2), refs: { list: null, textfield: null } }, handlers: v(s2) }));
-}, W2.style = "::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=ripple]{animation-duration:var(--lf-ui-duration-ripple, 675ms);animation-fill-mode:forwards;animation-name:lf-ripple;animation-timing-function:var(--lf-ui-timing-ripple, ease-out);background:var(--lf-ui-ripple-background, var(--lf-color-primary));border-radius:var(--lf-ui-radius-ripple, 50%);height:var(--lf-ui-ripple-height, 100%);left:var(--lf-ui-ripple-x, 50%);opacity:var(--lf-ui-opacity-ripple, 0.5);pointer-events:none;position:absolute;top:var(--lf-ui-ripple-y, 50%);transform:scale(0);width:var(--lf-ui-ripple-width, 100%)}@keyframes lf-ripple{from{transform:scale(0)}to{opacity:0;transform:scale(4)}}[data-lf=ripple-surface]{cursor:pointer;height:100%;left:0;overflow:hidden;position:absolute;top:0;width:100%}[data-lf=danger]{--lf-select-color-primary:var(\n    --lf-select-color-danger,\n    var(--lf-color-danger)\n  );--lf-select-color-on-primary:var(\n    --lf-select-color-danger,\n    var(--lf-color-on-danger)\n  )}[data-lf=disabled]{opacity:var(--lf-select-ui-opacity-disabled, var(--lf-ui-opacity-disabled));pointer-events:none}[data-lf=info]{--lf-select-color-primary:var(\n    --lf-select-color-info,\n    var(--lf-color-info)\n  );--lf-select-color-on-primary:var(\n    --lf-select-color-info,\n    var(--lf-color-on-info)\n  )}[data-lf=secondary]{--lf-select-color-primary:var(\n    --lf-select-color-secondary,\n    var(--lf-color-secondary)\n  );--lf-select-color-on-primary:var(\n    --lf-select-color-secondary,\n    var(--lf-color-on-secondary)\n  )}[data-lf=success]{--lf-select-color-primary:var(\n    --lf-select-color-success,\n    var(--lf-color-success)\n  );--lf-select-color-on-primary:var(\n    --lf-select-color-success,\n    var(--lf-color-on-success)\n  )}[data-lf=warning]{--lf-select-color-primary:var(\n    --lf-select-color-warning,\n    var(--lf-color-warning)\n  );--lf-select-color-on-primary:var(\n    --lf-select-color-warning,\n    var(--lf-color-on-warning)\n  )}[data-lf=fade-in]{display:block;animation:lf-fade-in-block 0.25s ease-out forwards}@keyframes lf-fade-in-block{from{visibility:hidden;opacity:0}to{visibility:visible;opacity:1}}[data-lf=portal]{display:none}:host{display:block;font-family:var(--lf-select-font-family, var(--lf-font-family-primary));font-size:var(--lf-select-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-select-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-select-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-select-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-select-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-select-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-select-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-select-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}.select{width:100%;height:100%}.select__textfield{--lf-textfield-input-cursor:pointer;background-color:rgba(var(--lf-select-color-primary, var(--lf-color-primary)), 0);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);width:100%;height:100%;cursor:var(--lf-textfield-input-cursor, pointer);transition:background-color 0.2s ease-in-out}.select__textfield:hover{background-color:rgba(var(--lf-select-color-primary, var(--lf-color-primary)), 0.12);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}";
-const pD6ba92f7_entry = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  } } }, elements: { jsx: m$3(i2), refs: { dropdown: null, list: null, spinner: null, textfield: null } }, handlers: v$3(i2) }));
+}, R$4.BLUR_DELAY_MS = 200, R$4.style = "::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=ripple]{animation-duration:var(--lf-ui-duration-ripple, 675ms);animation-fill-mode:forwards;animation-name:lf-ripple;animation-timing-function:var(--lf-ui-timing-ripple, ease-out);background:var(--lf-ui-ripple-background, var(--lf-color-primary));border-radius:var(--lf-ui-radius-ripple, 50%);height:var(--lf-ui-ripple-height, 100%);left:var(--lf-ui-ripple-x, 50%);opacity:var(--lf-ui-opacity-ripple, 0.5);pointer-events:none;position:absolute;top:var(--lf-ui-ripple-y, 50%);transform:scale(0);width:var(--lf-ui-ripple-width, 100%)}@keyframes lf-ripple{from{transform:scale(0)}to{opacity:0;transform:scale(4)}}[data-lf=ripple-surface]{cursor:pointer;height:100%;left:0;overflow:hidden;position:absolute;top:0;width:100%}[data-lf=danger]{--lf-autocomplete-color-primary:var(\n    --lf-autocomplete-color-danger,\n    var(--lf-color-danger)\n  );--lf-autocomplete-color-on-primary:var(\n    --lf-autocomplete-color-danger,\n    var(--lf-color-on-danger)\n  )}[data-lf=disabled]{opacity:var(--lf-autocomplete-ui-opacity-disabled, var(--lf-ui-opacity-disabled));pointer-events:none}[data-lf=info]{--lf-autocomplete-color-primary:var(\n    --lf-autocomplete-color-info,\n    var(--lf-color-info)\n  );--lf-autocomplete-color-on-primary:var(\n    --lf-autocomplete-color-info,\n    var(--lf-color-on-info)\n  )}[data-lf=secondary]{--lf-autocomplete-color-primary:var(\n    --lf-autocomplete-color-secondary,\n    var(--lf-color-secondary)\n  );--lf-autocomplete-color-on-primary:var(\n    --lf-autocomplete-color-secondary,\n    var(--lf-color-on-secondary)\n  )}[data-lf=success]{--lf-autocomplete-color-primary:var(\n    --lf-autocomplete-color-success,\n    var(--lf-color-success)\n  );--lf-autocomplete-color-on-primary:var(\n    --lf-autocomplete-color-success,\n    var(--lf-color-on-success)\n  )}[data-lf=warning]{--lf-autocomplete-color-primary:var(\n    --lf-autocomplete-color-warning,\n    var(--lf-color-warning)\n  );--lf-autocomplete-color-on-primary:var(\n    --lf-autocomplete-color-warning,\n    var(--lf-color-on-warning)\n  )}[data-lf=fade-in]{display:block;animation:lf-fade-in-block 0.25s ease-out forwards}@keyframes lf-fade-in-block{from{visibility:hidden;opacity:0}to{visibility:visible;opacity:1}}[data-lf=portal]{display:none}:host{display:block;font-family:var(--lf-autocomplete-font-family, var(--lf-font-family-primary));font-size:var(--lf-autocomplete-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-autocomplete-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-autocomplete-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-autocomplete-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-autocomplete-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-autocomplete-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-autocomplete-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-autocomplete-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}.autocomplete{width:100%;height:100%}.dropdown__spinner{min-height:0.25em}.dropdown__list{margin-top:0.25em}";
+const p8b75a972_entry = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
-  lf_select: W2
+  lf_autocomplete: R$4
 }, Symbol.toStringTag, { value: "Module" }));
 var vt, dt, pt, mt, gt, bt, yt = function(t5, n2, i2, r2) {
   if ("function" == typeof n2 ? t5 !== n2 || true : !n2.has(t5)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
@@ -4828,7 +3857,7 @@ var vt, dt, pt, mt, gt, bt, yt = function(t5, n2, i2, r2) {
 };
 const wt = class {
   constructor(i2) {
-    o$2(this, i2), this.lfEvent = G$3(this, "lf-badge-event"), this.lfImageProps = null, this.lfLabel = "", this.lfPosition = "top-left", this.lfStyle = "", this.lfUiSize = "medium", this.lfUiState = "primary", vt.set(this, void 0), dt.set(this, LF_BADGE_BLOCKS), pt.set(this, LF_ATTRIBUTES), mt.set(this, LF_BADGE_PARTS), gt.set(this, LF_STYLE_ID), bt.set(this, LF_WRAPPER_ID);
+    o$2(this, i2), this.lfEvent = G$4(this, "lf-badge-event"), this.lfImageProps = null, this.lfLabel = "", this.lfPosition = "top-left", this.lfStyle = "", this.lfUiSize = "medium", this.lfUiState = "primary", vt.set(this, void 0), dt.set(this, LF_BADGE_BLOCKS), pt.set(this, LF_ATTRIBUTES), mt.set(this, LF_BADGE_PARTS), gt.set(this, LF_STYLE_ID), bt.set(this, LF_WRAPPER_ID);
   }
   onLfEvent(t5, n2) {
     this.lfEvent.emit({ comp: this, eventType: n2, id: this.rootElement.id, originalEvent: t5 });
@@ -4871,18 +3900,18 @@ const wt = class {
   }
   render() {
     const { sanitizeProps: t5, theme: n2 } = yt(this, vt), { bemClass: i2, setLfStyle: a2 } = n2, { lfImageProps: o2, lfLabel: s2, lfStyle: l2 } = this, u2 = "inline" === this.lfPosition, [f2, c2] = u2 ? [null, null] : this.lfPosition.split("-"), h2 = "bottom" === f2 ? "bottom" : "top", d2 = "right" === c2 ? "right" : "left", p2 = "right" === c2 ? "50%" : "-50%", m2 = "bottom" === f2 ? "50%" : "-50%", { badge: g3 } = yt(this, dt);
-    return U$5(A$9, null, U$5("style", { id: yt(this, gt) }, (() => {
+    return U$6(A$a, null, U$6("style", { id: yt(this, gt) }, (() => {
       const t6 = {}, { transform: n3 } = LF_BADGE_CSS_VARS;
       return u2 ? t6[n3] = "none" : (t6[h2] = "0", t6[d2] = "0", t6[n3] = `translate(${p2}, ${m2})`), `:host { ${Object.entries(t6).map((([t7, n4]) => `${t7}: ${n4}`)).join("; ")} }
 ${l2 && a2(this) || ""}`;
-    })()), U$5("div", { id: yt(this, bt) }, U$5("div", { class: i2(g3._, void 0, { [this.lfPosition]: true }), "data-lf": yt(this, pt)[this.lfUiState], onClick: (t6) => this.onLfEvent(t6, "click"), part: yt(this, mt).badge }, s2 ? U$5("span", { class: i2(g3._, g3.label), part: yt(this, mt).label }, s2) : o2 ? U$5("lf-image", { class: i2(g3._, g3.image), part: yt(this, mt).image, ...t5(o2, "LfImage") }) : null)));
+    })()), U$6("div", { id: yt(this, bt) }, U$6("div", { class: i2(g3._, void 0, { [this.lfPosition]: true }), "data-lf": yt(this, pt)[this.lfUiState], onClick: (t6) => this.onLfEvent(t6, "click"), part: yt(this, mt).badge }, s2 ? U$6("span", { class: i2(g3._, g3.label), part: yt(this, mt).label }, s2) : o2 ? U$6("lf-image", { class: i2(g3._, g3.image), part: yt(this, mt).image, ...t5(o2, "LfImage") }) : null)));
   }
   disconnectedCallback() {
     var _a2;
     (_a2 = yt(this, vt)) == null ? void 0 : _a2.theme.unregister(this);
   }
   get rootElement() {
-    return q$4(this);
+    return q$5(this);
   }
 };
 vt = /* @__PURE__ */ new WeakMap(), dt = /* @__PURE__ */ new WeakMap(), pt = /* @__PURE__ */ new WeakMap(), mt = /* @__PURE__ */ new WeakMap(), gt = /* @__PURE__ */ new WeakMap(), bt = /* @__PURE__ */ new WeakMap(), wt.style = "::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=danger]{--lf-badge-color-primary:var(\n    --lf-badge-color-danger,\n    var(--lf-color-danger)\n  );--lf-badge-color-on-primary:var(\n    --lf-badge-color-danger,\n    var(--lf-color-on-danger)\n  )}[data-lf=disabled]{opacity:var(--lf-badge-ui-opacity-disabled, var(--lf-ui-opacity-disabled));pointer-events:none}[data-lf=info]{--lf-badge-color-primary:var(\n    --lf-badge-color-info,\n    var(--lf-color-info)\n  );--lf-badge-color-on-primary:var(\n    --lf-badge-color-info,\n    var(--lf-color-on-info)\n  )}[data-lf=secondary]{--lf-badge-color-primary:var(\n    --lf-badge-color-secondary,\n    var(--lf-color-secondary)\n  );--lf-badge-color-on-primary:var(\n    --lf-badge-color-secondary,\n    var(--lf-color-on-secondary)\n  )}[data-lf=success]{--lf-badge-color-primary:var(\n    --lf-badge-color-success,\n    var(--lf-color-success)\n  );--lf-badge-color-on-primary:var(\n    --lf-badge-color-success,\n    var(--lf-color-on-success)\n  )}[data-lf=warning]{--lf-badge-color-primary:var(\n    --lf-badge-color-warning,\n    var(--lf-color-warning)\n  );--lf-badge-color-on-primary:var(\n    --lf-badge-color-warning,\n    var(--lf-color-on-warning)\n  )}:host{display:block;font-family:var(--lf-badge-font-family, var(--lf-font-family-primary));font-size:var(--lf-badge-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-badge-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-badge-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-badge-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-badge-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-badge-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-badge-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-badge-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{position:absolute;transform:var(--lf_badge_transform, translate(-50%, -50%))}:host([lf-position=inline]){display:inline-flex;position:static;transform:var(--lf_badge_transform, none)}.badge{background-color:rgba(var(--lf-badge-color-primary, var(--lf-color-primary)), 1);color:rgb(var(--lf-badge-color-on-primary, var(--lf-color-on-primary)));overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:0.775em;letter-spacing:0.0892857143em;line-height:inherit;text-transform:uppercase;border-radius:var(--lf-badge-border-radius, 50%);height:var(--lf-badge-height, 1.5em);padding:var(--lf-badge-padding, 0.25em);place-content:var(--lf-comp-place-content, center);text-align:center;width:var(--lf-badge-width, 1.5em)}.badge__image{--lf-image-color-primary:var(\n    --lf-badge-color-on-primary,\n    var(--lf-color-on-primary)\n  );left:50%;position:absolute;top:50%;transform:translate(-50%, -50%)}";
@@ -4895,18 +3924,18 @@ const xt = (t5, n2 = false) => {
     b2 = h2 && !s2() ? t6 : f2;
   }
   const { style: y2 } = v2.get(`./assets/svg/${b2}.svg`);
-  return U$5("div", { class: m2(e2.button._, e2.button.icon), "data-cy": o2.maskedSvg, part: u2.icon, style: y2 });
+  return U$6("div", { class: m2(e2.button._, e2.button.icon), "data-cy": o2.maskedSvg, part: u2.icon, style: y2 });
 }, kt = (t5) => {
   const { controller: n2 } = t5, { blocks: i2, compInstance: e2, isDisabled: a2, manager: o2, parts: s2 } = n2.get, { lfLabel: l2, lfShowSpinner: u2 } = e2, { bemClass: f2 } = o2.theme;
-  return U$5("span", { class: f2(i2.button._, i2.button.label, { hidden: u2 && !a2() }), part: s2.label }, l2);
+  return U$6("span", { class: f2(i2.button._, i2.button.label, { hidden: u2 && !a2() }), part: s2.label }, l2);
 }, Mt = (t5, n2 = false) => {
   const { controller: i2, elements: e2 } = t5, { compInstance: a2, cyAttributes: o2, lfAttributes: s2, parts: l2 } = i2.get, { refs: u2 } = e2, { lfRipple: f2 } = a2;
-  return f2 && U$5("div", { "data-cy": o2.rippleSurface, "data-lf": s2.rippleSurface, part: n2 ? l2.dropdownRipple : l2.rippleSurface, ref: (t6) => {
+  return f2 && U$6("div", { "data-cy": o2.rippleSurface, "data-lf": s2.rippleSurface, part: n2 ? l2.dropdownRipple : l2.rippleSurface, ref: (t6) => {
     t6 && f2 && (n2 ? u2.dropdownRipple = t6 : u2.ripple = t6);
   } });
 }, St = (t5) => {
   const { controller: n2 } = t5, { blocks: i2, compInstance: e2, manager: a2, parts: o2 } = n2.get, { lfShowSpinner: s2 } = e2, { bemClass: l2 } = a2.theme;
-  return s2 && U$5("lf-spinner", { class: l2(i2.button._, i2.button.spinner), lfActive: s2, lfDimensions: ".625em", part: o2.spinner });
+  return s2 && U$6("lf-spinner", { class: l2(i2.button._, i2.button.spinner), lfActive: s2, lfDimensions: ".625em", part: o2.spinner });
 }, zt = (t5) => ({ list: (n2 = "toggle") => {
   const i2 = t5(), { controller: r2, elements: e2 } = i2, { manager: a2 } = r2.get, { dropdown: o2, list: s2 } = e2.refs, { close: l2, isInPortal: u2, open: f2 } = a2.portal;
   switch (n2) {
@@ -4921,13 +3950,13 @@ const xt = (t5, n2 = false) => {
   }
 } }), Ct = (t5) => /* @__PURE__ */ ((t6) => ({ button: () => {
   const n2 = t6(), { controller: i2, elements: e2 } = n2, { blocks: a2, compInstance: o2, cyAttributes: s2, isDisabled: l2, lfAttributes: u2, manager: f2, parts: c2, styling: h2 } = i2.get, { lfAriaLabel: v2, lfIcon: d2, lfLabel: p2, lfShowSpinner: m2, lfTrailingIcon: g3, lfType: b2, lfUiState: y2, rootElement: w3 } = o2, { assignRef: x2, theme: k2 } = f2, { bemClass: M4 } = k2, { refs: S3 } = e2, z2 = o2, C3 = (v2 || p2 || d2 || w3.id || "button").trim();
-  return U$5("button", { "aria-label": C3, class: M4(a2.button._, null, { [h2()]: true, disabled: l2(), "has-spinner": m2, "no-label": !p2 || " " === p2 }), "data-cy": s2.button, "data-lf": u2[y2], disabled: l2(), onBlur: (t7) => z2.onLfEvent(t7, "blur"), onClick: (t7) => z2.onLfEvent(t7, "click"), onFocus: (t7) => z2.onLfEvent(t7, "focus"), onPointerDown: (t7) => z2.onLfEvent(t7, "pointerdown"), part: c2.button, ref: x2(S3, "button"), type: b2 ?? "button" }, Mt(n2), g3 ? [kt(n2), d2 && xt(n2)] : [d2 && xt(n2), kt(n2)], St(n2));
+  return U$6("button", { "aria-label": C3, class: M4(a2.button._, null, { [h2()]: true, disabled: l2(), "has-spinner": m2, "no-label": !p2 || " " === p2 }), "data-cy": s2.button, "data-lf": u2[y2], disabled: l2(), onBlur: (t7) => z2.onLfEvent(t7, "blur"), onClick: (t7) => z2.onLfEvent(t7, "click"), onFocus: (t7) => z2.onLfEvent(t7, "focus"), onPointerDown: (t7) => z2.onLfEvent(t7, "pointerdown"), part: c2.button, ref: x2(S3, "button"), type: b2 ?? "button" }, Mt(n2), g3 ? [kt(n2), d2 && xt(n2)] : [d2 && xt(n2), kt(n2)], St(n2));
 }, dropdown: () => {
   const n2 = t6(), { controller: i2, elements: e2, handlers: a2 } = n2, { blocks: s2, compInstance: l2, cyAttributes: u2, isDisabled: f2, lfAttributes: c2, manager: h2, parts: v2, styling: d2 } = i2.get, { list: p2 } = i2.set, { lfDataset: m2, lfUiState: g3 } = l2, { assignRef: b2, theme: y2 } = h2, { bemClass: w3 } = y2, { refs: x2 } = e2, k2 = l2;
-  return U$5(St$1, null, U$5("button", { class: w3(s2.button._, null, { disabled: f2(), dropdown: true, [d2()]: true }), "data-cy": u2.dropdownButton, "data-lf": c2[g3], disabled: f2(), onClick: () => p2(), onPointerDown: (t7) => k2.onLfEvent(t7, "pointerdown", true), part: v2.dropdown, ref: b2(x2, "dropdown") }, Mt(n2, true), xt(n2, true)), U$5("lf-list", { class: w3(s2.button._, s2.button.list), "data-cy": u2.dropdownMenu, "data-lf": c2.portal, lfDataset: { nodes: m2.nodes[0].children }, "onLf-list-event": a2.list, part: v2.list, ref: b2(x2, "list") }));
+  return U$6(St$1, null, U$6("button", { class: w3(s2.button._, null, { disabled: f2(), dropdown: true, [d2()]: true }), "data-cy": u2.dropdownButton, "data-lf": c2[g3], disabled: f2(), onClick: () => p2(), onPointerDown: (t7) => k2.onLfEvent(t7, "pointerdown", true), part: v2.dropdown, ref: b2(x2, "dropdown") }, Mt(n2, true), xt(n2, true)), U$6("lf-list", { class: w3(s2.button._, s2.button.list), "data-cy": u2.dropdownMenu, "data-lf": c2.portal, lfDataset: { nodes: m2.nodes[0].children }, "onLf-list-event": a2.list, part: v2.list, ref: b2(x2, "list") }));
 }, icon: () => {
   const n2 = t6(), { controller: i2, elements: e2 } = n2, { blocks: a2, compInstance: o2, cyAttributes: s2, isDisabled: l2, lfAttributes: u2, manager: f2, isOn: c2, parts: h2 } = i2.get, { lfAriaLabel: v2, lfShowSpinner: d2, lfToggable: p2, lfType: m2, lfUiState: g3, rootElement: b2 } = o2, { assignRef: y2, theme: w3 } = f2, { bemClass: x2 } = w3, { refs: k2 } = e2, M4 = o2, S3 = (v2 || o2.lfLabel || o2.lfIcon || b2.id || "button").trim();
-  return U$5("button", { "aria-label": S3, class: x2(a2.button._, null, { active: p2 && c2(), disabled: l2(), "has-spinner": d2, icon: true, toggable: p2 }), "data-cy": s2.button, "data-lf": u2[g3], disabled: l2(), onBlur: (t7) => M4.onLfEvent(t7, "blur"), onClick: (t7) => M4.onLfEvent(t7, "click"), onFocus: (t7) => M4.onLfEvent(t7, "focus"), onPointerDown: (t7) => M4.onLfEvent(t7, "pointerdown"), part: h2.button, ref: y2(k2, "button"), value: M4.value, type: m2 || "button" }, Mt(n2), xt(n2), St(n2));
+  return U$6("button", { "aria-label": S3, class: x2(a2.button._, null, { active: p2 && c2(), disabled: l2(), "has-spinner": d2, icon: true, toggable: p2 }), "data-cy": s2.button, "data-lf": u2[g3], disabled: l2(), onBlur: (t7) => M4.onLfEvent(t7, "blur"), onClick: (t7) => M4.onLfEvent(t7, "click"), onFocus: (t7) => M4.onLfEvent(t7, "focus"), onPointerDown: (t7) => M4.onLfEvent(t7, "pointerdown"), part: h2.button, ref: y2(k2, "button"), value: M4.value, type: m2 || "button" }, Mt(n2), xt(n2), St(n2));
 } }))(t5), At = (t5) => /* @__PURE__ */ ((t6) => ({ list: (n2) => {
   const { eventType: i2 } = n2.detail, { controller: r2 } = t6(), { get: e2, set: a2 } = r2;
   "click" === i2 && (e2.compInstance.onLfEvent(n2, "lf-event"), a2.list("close"));
@@ -4942,7 +3971,7 @@ var Tt, Nt, _t, It, Lt, Dt, Wt, Et, Ot, Rt, Pt, Ft, Bt, Vt, Ht, jt, Yt = functio
 };
 const $t = class {
   constructor(i2) {
-    o$2(this, i2), this.lfEvent = G$3(this, "lf-button-event"), Tt.add(this), this.value = "off", this.lfAriaLabel = "", this.lfDataset = null, this.lfIcon = "", this.lfIconOff = "", this.lfLabel = "", this.lfRipple = true, this.lfShowSpinner = false, this.lfStretchX = false, this.lfStretchY = false, this.lfStyle = "", this.lfStyling = "raised", this.lfToggable = false, this.lfTrailingIcon = false, this.lfType = "button", this.lfUiSize = "medium", this.lfUiState = "primary", this.lfValue = false, Nt.set(this, void 0), _t.set(this, LF_BUTTON_BLOCKS), It.set(this, LF_BUTTON_PARTS), Lt.set(this, CY_ATTRIBUTES), Dt.set(this, LF_ATTRIBUTES), Wt.set(this, LF_STYLE_ID), Et.set(this, LF_WRAPPER_ID), Ot.set(this, void 0), Rt.set(this, void 0), Pt.set(this, (() => {
+    o$2(this, i2), this.lfEvent = G$4(this, "lf-button-event"), Tt.add(this), this.value = "off", this.lfAriaLabel = "", this.lfDataset = null, this.lfIcon = "", this.lfIconOff = "", this.lfLabel = "", this.lfRipple = true, this.lfShowSpinner = false, this.lfStretchX = false, this.lfStretchY = false, this.lfStyle = "", this.lfStyling = "raised", this.lfToggable = false, this.lfTrailingIcon = false, this.lfType = "button", this.lfUiSize = "medium", this.lfUiState = "primary", this.lfValue = false, Nt.set(this, void 0), _t.set(this, LF_BUTTON_BLOCKS), It.set(this, LF_BUTTON_PARTS), Lt.set(this, CY_ATTRIBUTES), Dt.set(this, LF_ATTRIBUTES), Wt.set(this, LF_STYLE_ID), Et.set(this, LF_WRAPPER_ID), Ot.set(this, void 0), Rt.set(this, void 0), Pt.set(this, (() => {
       var t5;
       Ut(this, Rt, { controller: { get: { blocks: Yt(this, _t, "f"), compInstance: this, cyAttributes: Yt(this, Lt, "f"), isDisabled: () => Yt(this, Ft, "f").call(this), isDropdown: () => Yt(this, Bt, "f").call(this), isOn: () => Yt(this, Tt, "m", Vt).call(this), lfAttributes: Yt(this, Dt, "f"), manager: Yt(this, Nt, "f"), parts: Yt(this, It, "f"), styling: () => Yt(this, Tt, "m", Ht).call(this) }, set: zt(t5 = () => Yt(this, Rt, "f")) }, elements: { jsx: Ct(t5), refs: { button: null, dropdown: null, dropdownRipple: null, icon: null, list: null, ripple: null } }, handlers: At(t5) });
     })), Ft.set(this, (() => "disabled" === this.lfUiState)), Bt.set(this, (() => {
@@ -5022,7 +4051,7 @@ const $t = class {
   }
   render() {
     const { debug: t5, theme: n2 } = Yt(this, Nt, "f"), { lfDataset: i2, lfIcon: a2, lfLabel: o2, lfStyle: s2 } = this, { button: l2, dropdown: u2, icon: f2 } = Yt(this, Rt, "f").elements.jsx, c2 = Yt(this, Tt, "m", Ht).call(this), h2 = !!("icon" === c2 || "raised" === c2 && a2 && null == o2);
-    if (o2 || a2 || i2) return U$5(A$9, null, s2 && U$5("style", { id: Yt(this, Wt, "f") }, n2.setLfStyle(this)), U$5("div", { id: Yt(this, Et, "f") }, h2 ? f2() : l2(), Yt(this, Bt, "f").call(this) && u2()));
+    if (o2 || a2 || i2) return U$6(A$a, null, s2 && U$6("style", { id: Yt(this, Wt, "f") }, n2.setLfStyle(this)), U$6("div", { id: Yt(this, Et, "f") }, h2 ? f2() : l2(), Yt(this, Bt, "f").call(this) && u2()));
     t5.logs.new(this, "Empty button.", "informational");
   }
   disconnectedCallback() {
@@ -5034,7 +4063,7 @@ const $t = class {
     (_c2 = Yt(this, Nt, "f")) == null ? void 0 : _c2.theme.unregister(this);
   }
   get rootElement() {
-    return q$4(this);
+    return q$5(this);
   }
   static get watchers() {
     return { lfDataset: ["onDatasetChanged"] };
@@ -5145,16 +4174,16 @@ const Xt = (t5) => {
   e2 ? u2.fill() : u2.stroke();
 } }), Kt = (t5) => /* @__PURE__ */ ((t6) => ({ board: () => {
   const { controller: n2, elements: i2, handlers: e2 } = t6(), { refs: a2 } = i2, { blocks: o2, cyAttributes: s2, manager: l2, parts: u2 } = n2.get, { assignRef: f2, theme: c2 } = l2, { bemClass: h2 } = c2, { onPointerDown: v2, onPointerMove: d2, onPointerOut: p2, onPointerUp: m2 } = e2.board;
-  return U$5("canvas", { class: h2(o2.canvas._, o2.canvas.board), "data-cy": s2.canvas, onPointerDown: v2, onPointerMove: d2, onPointerOut: p2, onPointerUp: m2, part: u2.board, ref: f2(a2, "board") });
+  return U$6("canvas", { class: h2(o2.canvas._, o2.canvas.board), "data-cy": s2.canvas, onPointerDown: v2, onPointerMove: d2, onPointerOut: p2, onPointerUp: m2, part: u2.board, ref: f2(a2, "board") });
 }, image: () => {
   const { controller: n2, elements: i2, handlers: e2 } = t6(), { blocks: a2, compInstance: o2, cyAttributes: s2, manager: l2, parts: u2 } = n2.get, { refs: f2 } = i2, { onLoad: c2 } = e2.image, { assignRef: h2, sanitizeProps: v2, theme: d2 } = l2, { bemClass: p2 } = d2;
-  return U$5("lf-image", { ...v2(o2.lfImageProps, "LfImage"), class: p2(a2.canvas._, a2.canvas.image), "data-cy": s2.image, "onLf-image-event": (t7) => {
+  return U$6("lf-image", { ...v2(o2.lfImageProps, "LfImage"), class: p2(a2.canvas._, a2.canvas.image), "data-cy": s2.image, "onLf-image-event": (t7) => {
     const { eventType: n3 } = t7.detail;
     "load" === n3 && c2(t7);
   }, part: u2.image, ref: h2(f2, "image") });
 }, preview: () => {
   const { controller: n2, elements: i2 } = t6(), { blocks: e2, cyAttributes: a2, manager: o2, parts: s2 } = n2.get, { assignRef: l2, theme: u2 } = o2, { refs: f2 } = i2, { bemClass: c2 } = u2;
-  return U$5("canvas", { class: c2(e2.canvas._, e2.canvas.preview), "data-cy": a2.canvas, part: s2.preview, ref: l2(f2, "preview") });
+  return U$6("canvas", { class: c2(e2.canvas._, e2.canvas.preview), "data-cy": a2.canvas, part: s2.preview, ref: l2(f2, "preview") });
 } }))(t5), Qt = (t5) => /* @__PURE__ */ ((t6) => ({ board: { endCapture: (n2) => {
   n2.preventDefault();
   const { controller: i2, elements: r2, toolkit: e2 } = t6(), { get: a2, set: o2 } = i2, { compInstance: s2, isCursorPreview: l2, points: u2 } = a2, { board: f2 } = r2.refs, { lfPreview: c2 } = s2, h2 = s2;
@@ -5209,7 +4238,7 @@ var nn, rn, en, an, on, sn, ln, un, fn, cn, hn, vn, dn, pn, mn = function(t5, n2
 };
 const bn = class {
   constructor(i2) {
-    o$2(this, i2), this.lfEvent = G$3(this, "lf-canvas-event"), nn.add(this), this.boxing = null, this.isPainting = false, this.orientation = null, this.points = [], this.lfBrush = "round", this.lfColor = "#ff0000", this.lfCursor = "preview", this.lfImageProps = null, this.lfOpacity = 1, this.lfPreview = true, this.lfStrokeTolerance = null, this.lfSize = 10, this.lfStyle = "", rn.set(this, void 0), en.set(this, LF_CANVAS_BLOCKS), an.set(this, CY_ATTRIBUTES), on.set(this, LF_CANVAS_PARTS), sn.set(this, LF_STYLE_ID), ln.set(this, LF_WRAPPER_ID), un.set(this, void 0), fn.set(this, void 0), cn.set(this, void 0), hn.set(this, void 0), vn.set(this, (() => {
+    o$2(this, i2), this.lfEvent = G$4(this, "lf-canvas-event"), nn.add(this), this.boxing = null, this.isPainting = false, this.orientation = null, this.points = [], this.lfBrush = "round", this.lfColor = "#ff0000", this.lfCursor = "preview", this.lfImageProps = null, this.lfOpacity = 1, this.lfPreview = true, this.lfStrokeTolerance = null, this.lfSize = 10, this.lfStyle = "", rn.set(this, void 0), en.set(this, LF_CANVAS_BLOCKS), an.set(this, CY_ATTRIBUTES), on.set(this, LF_CANVAS_PARTS), sn.set(this, LF_STYLE_ID), ln.set(this, LF_WRAPPER_ID), un.set(this, void 0), fn.set(this, void 0), cn.set(this, void 0), hn.set(this, void 0), vn.set(this, (() => {
       var t5;
       gn(this, un, { controller: { get: { blocks: mn(this, en, "f"), boxing: () => this.boxing, compInstance: this, cyAttributes: mn(this, an, "f"), isCursorPreview: () => mn(this, nn, "m", pn).call(this), isPainting: () => this.isPainting, manager: mn(this, rn, "f"), orientation: () => this.orientation, parts: mn(this, on, "f"), points: () => this.points }, set: { boxing: (t6) => this.boxing = t6, isPainting: (t6) => this.isPainting = t6, orientation: (t6) => this.orientation = t6, points: (t6) => this.points = t6 } }, elements: { jsx: Kt(t5 = () => mn(this, un, "f")), refs: { board: null, image: null, preview: null } }, handlers: Qt(t5), toolkit: tn(t5) });
     })), dn.set(this, (() => {
@@ -5300,7 +4329,7 @@ const bn = class {
   }
   render() {
     const { bemClass: t5, setLfStyle: n2 } = mn(this, rn, "f").theme, { board: i2, image: a2, preview: o2 } = mn(this, un, "f").elements.jsx, { lfStyle: s2 } = this, l2 = mn(this, nn, "m", pn).call(this) || this.lfPreview, { canvas: u2 } = mn(this, en, "f");
-    return U$5(A$9, { key: "1b7b1c1bb375d4374b13600ad25348c7219e507e", "data-orientation": this.orientation, "data-boxing": this.boxing }, s2 && U$5("style", { key: "330e9ae5a3ef4d08a8552557929c288c122f532e", id: mn(this, sn, "f") }, n2(this)), U$5("div", { key: "52bcac2f93cbce2b8ac3047fdc48dd8c418e6d08", id: mn(this, ln, "f") }, U$5("div", { key: "137d20d65eb33bdf9299bae5b383c50260b86767", class: t5(u2._, null, { hidden: mn(this, nn, "m", pn).call(this) }), part: mn(this, on, "f").canvas, ref: (t6) => {
+    return U$6(A$a, { key: "1b7b1c1bb375d4374b13600ad25348c7219e507e", "data-orientation": this.orientation, "data-boxing": this.boxing }, s2 && U$6("style", { key: "330e9ae5a3ef4d08a8552557929c288c122f532e", id: mn(this, sn, "f") }, n2(this)), U$6("div", { key: "52bcac2f93cbce2b8ac3047fdc48dd8c418e6d08", id: mn(this, ln, "f") }, U$6("div", { key: "137d20d65eb33bdf9299bae5b383c50260b86767", class: t5(u2._, null, { hidden: mn(this, nn, "m", pn).call(this) }), part: mn(this, on, "f").canvas, ref: (t6) => {
       t6 && gn(this, fn, t6);
     } }, a2(), i2(), l2 && o2())));
   }
@@ -5309,7 +4338,7 @@ const bn = class {
     (_a2 = mn(this, rn, "f")) == null ? void 0 : _a2.theme.unregister(this), mn(this, cn, "f") && mn(this, cn, "f").disconnect();
   }
   get rootElement() {
-    return q$4(this);
+    return q$5(this);
   }
 };
 rn = /* @__PURE__ */ new WeakMap(), en = /* @__PURE__ */ new WeakMap(), an = /* @__PURE__ */ new WeakMap(), on = /* @__PURE__ */ new WeakMap(), sn = /* @__PURE__ */ new WeakMap(), ln = /* @__PURE__ */ new WeakMap(), un = /* @__PURE__ */ new WeakMap(), fn = /* @__PURE__ */ new WeakMap(), cn = /* @__PURE__ */ new WeakMap(), hn = /* @__PURE__ */ new WeakMap(), vn = /* @__PURE__ */ new WeakMap(), dn = /* @__PURE__ */ new WeakMap(), nn = /* @__PURE__ */ new WeakSet(), pn = function() {
@@ -5365,47 +4394,47 @@ const yn = (t5) => ({ button: (n2) => {
   }
 } }), xn = (t5, n2) => ({ ...t5, defaults: LF_CARD_DEFAULTS(n2) }), kn = (t5) => ({ debug: () => ((t6) => {
   const { controller: n2, elements: i2, handlers: e2 } = t6(), { refs: a2 } = i2, { layouts: o2 } = e2, { blocks: s2, compInstance: l2, defaults: u2, manager: f2, parts: c2, shapes: h2 } = n2.get, { debug: v2 } = u2, { theme: d2 } = f2, { bemClass: p2 } = d2, { debugLayout: m2 } = s2, { button: g3, code: b2, toggle: y2 } = h2(), w3 = l2, x2 = [], k2 = v2.button();
-  for (let t7 = 0; t7 < g3.length; t7++) x2.push(U$5(r, { shape: "button", cell: k2[t7] ? Object.assign(k2[t7], g3[t7]) : g3[t7], index: t7, eventDispatcher: async (t8) => w3.onLfEvent(t8, "lf-event"), framework: f2, defaultCb: o2.debug.button, refCallback: (t8) => a2.layouts.debug.button = t8 }));
+  for (let t7 = 0; t7 < g3.length; t7++) x2.push(U$6(r, { shape: "button", cell: k2[t7] ? Object.assign(k2[t7], g3[t7]) : g3[t7], index: t7, eventDispatcher: async (t8) => w3.onLfEvent(t8, "lf-event"), framework: f2, defaultCb: o2.debug.button, refCallback: (t8) => a2.layouts.debug.button = t8 }));
   const M4 = Boolean(x2 == null ? void 0 : x2.length), S3 = Boolean((x2 == null ? void 0 : x2.length) > 1), z2 = [], C3 = v2.code();
-  for (let t7 = 0; t7 < b2.length; t7++) z2.push(U$5(r, { shape: "code", cell: C3[t7] ? Object.assign(C3[t7], b2[t7]) : b2[t7], index: t7, eventDispatcher: async (t8) => w3.onLfEvent(t8, "lf-event"), framework: f2, defaultCb: o2.debug.code, refCallback: (t8) => a2.layouts.debug.code = t8 }));
+  for (let t7 = 0; t7 < b2.length; t7++) z2.push(U$6(r, { shape: "code", cell: C3[t7] ? Object.assign(C3[t7], b2[t7]) : b2[t7], index: t7, eventDispatcher: async (t8) => w3.onLfEvent(t8, "lf-event"), framework: f2, defaultCb: o2.debug.code, refCallback: (t8) => a2.layouts.debug.code = t8 }));
   const A2 = Boolean(z2 == null ? void 0 : z2.length), T4 = [], N2 = v2.toggle();
-  for (let t7 = 0; t7 < y2.length; t7++) T4.push(U$5(r, { shape: "toggle", cell: N2[t7] ? Object.assign(N2[t7], y2[t7]) : y2[t7], index: t7, eventDispatcher: async (t8) => w3.onLfEvent(t8, "lf-event"), framework: f2, defaultCb: o2.debug.toggle, refCallback: (t8) => a2.layouts.debug.toggle = t8 }));
+  for (let t7 = 0; t7 < y2.length; t7++) T4.push(U$6(r, { shape: "toggle", cell: N2[t7] ? Object.assign(N2[t7], y2[t7]) : y2[t7], index: t7, eventDispatcher: async (t8) => w3.onLfEvent(t8, "lf-event"), framework: f2, defaultCb: o2.debug.toggle, refCallback: (t8) => a2.layouts.debug.toggle = t8 }));
   const _2 = Boolean(T4 == null ? void 0 : T4.length);
-  return U$5("div", { class: p2(m2._), part: c2.debugLayout }, _2 && U$5("div", { class: p2(m2._, m2.section1) }, T4[0]), A2 && U$5("div", { class: p2(m2._, m2.section2) }, z2[0]), M4 && U$5("div", { class: p2(m2._, m2.section3) }, x2[0]), S3 && U$5("div", { class: p2(m2._, m2.section4) }, x2[1]));
+  return U$6("div", { class: p2(m2._), part: c2.debugLayout }, _2 && U$6("div", { class: p2(m2._, m2.section1) }, T4[0]), A2 && U$6("div", { class: p2(m2._, m2.section2) }, z2[0]), M4 && U$6("div", { class: p2(m2._, m2.section3) }, x2[0]), S3 && U$6("div", { class: p2(m2._, m2.section4) }, x2[1]));
 })(t5), keywords: () => ((t6) => {
   const { controller: n2, elements: i2, handlers: e2 } = t6(), { refs: a2 } = i2, { layouts: o2 } = e2, { blocks: s2, compInstance: l2, defaults: u2, manager: f2, parts: c2, shapes: h2 } = n2.get, { keywords: v2 } = u2, { theme: d2 } = f2, { bemClass: p2 } = d2, { keywordsLayout: m2 } = s2, { button: g3, chart: b2, chip: y2 } = h2(), w3 = l2, x2 = [], k2 = v2.button();
-  for (let t7 = 0; t7 < g3.length; t7++) x2.push(U$5(r, { shape: "button", cell: k2[t7] ? Object.assign(k2[t7], g3[t7]) : g3[t7], index: t7, eventDispatcher: async (t8) => w3.onLfEvent(t8, "lf-event"), framework: f2, defaultCb: o2.keywords.button, refCallback: (t8) => a2.layouts.keywords.button = t8 }));
+  for (let t7 = 0; t7 < g3.length; t7++) x2.push(U$6(r, { shape: "button", cell: k2[t7] ? Object.assign(k2[t7], g3[t7]) : g3[t7], index: t7, eventDispatcher: async (t8) => w3.onLfEvent(t8, "lf-event"), framework: f2, defaultCb: o2.keywords.button, refCallback: (t8) => a2.layouts.keywords.button = t8 }));
   const M4 = Boolean(x2 == null ? void 0 : x2.length), S3 = [], z2 = v2.chart();
-  for (let t7 = 0; t7 < b2.length; t7++) S3.push(U$5(r, { shape: "chart", cell: z2[t7] ? Object.assign(z2[t7], b2[t7]) : b2[t7], index: t7, eventDispatcher: async (t8) => w3.onLfEvent(t8, "lf-event"), framework: f2 }));
+  for (let t7 = 0; t7 < b2.length; t7++) S3.push(U$6(r, { shape: "chart", cell: z2[t7] ? Object.assign(z2[t7], b2[t7]) : b2[t7], index: t7, eventDispatcher: async (t8) => w3.onLfEvent(t8, "lf-event"), framework: f2 }));
   const C3 = Boolean(S3 == null ? void 0 : S3.length), A2 = [], T4 = v2.chip();
-  for (let t7 = 0; t7 < b2.length; t7++) A2.push(U$5(r, { shape: "chip", cell: T4[t7] ? Object.assign(T4[t7], y2[t7]) : y2[t7], index: t7, eventDispatcher: async (t8) => w3.onLfEvent(t8, "lf-event"), framework: f2, refCallback: (t8) => a2.layouts.keywords.chip = t8 }));
+  for (let t7 = 0; t7 < b2.length; t7++) A2.push(U$6(r, { shape: "chip", cell: T4[t7] ? Object.assign(T4[t7], y2[t7]) : y2[t7], index: t7, eventDispatcher: async (t8) => w3.onLfEvent(t8, "lf-event"), framework: f2, refCallback: (t8) => a2.layouts.keywords.chip = t8 }));
   const N2 = Boolean(S3 == null ? void 0 : S3.length);
-  return U$5("div", { class: p2(m2._), part: c2.keywordsLayout }, C3 && U$5("div", { class: p2(m2._, m2.section1) }, S3[0]), N2 && U$5("div", { class: p2(m2._, m2.section2) }, A2[0]), M4 && U$5("div", { class: p2(m2._, m2.section3) }, x2[0]));
+  return U$6("div", { class: p2(m2._), part: c2.keywordsLayout }, C3 && U$6("div", { class: p2(m2._, m2.section1) }, S3[0]), N2 && U$6("div", { class: p2(m2._, m2.section2) }, A2[0]), M4 && U$6("div", { class: p2(m2._, m2.section3) }, x2[0]));
 })(t5), material: () => ((t6) => {
   var _a2, _b2, _c2;
   const { blocks: n2, compInstance: i2, cyAttributes: e2, defaults: a2, lfAttributes: o2, manager: s2, parts: l2, shapes: u2 } = t6().controller.get, { material: f2 } = a2, { effects: c2, theme: h2 } = s2, { bemClass: v2 } = h2, { materialLayout: d2, textContent: p2 } = n2, { button: m2, image: g3, text: b2 } = u2(), y2 = i2, w3 = [];
-  for (let t7 = 0; t7 < m2.length; t7++) w3.push(U$5(r, { shape: "button", cell: m2[t7], index: t7, eventDispatcher: async (t8) => y2.onLfEvent(t8, "lf-event"), framework: s2 }));
+  for (let t7 = 0; t7 < m2.length; t7++) w3.push(U$6(r, { shape: "button", cell: m2[t7], index: t7, eventDispatcher: async (t8) => y2.onLfEvent(t8, "lf-event"), framework: s2 }));
   const x2 = Boolean(w3 == null ? void 0 : w3.length), k2 = [], M4 = f2.image();
-  for (let t7 = 0; t7 < g3.length; t7++) k2.push(U$5(r, { shape: "image", cell: M4[t7] ? Object.assign(M4[t7], g3[t7]) : g3[t7], index: t7, eventDispatcher: async (t8) => y2.onLfEvent(t8, "lf-event"), framework: s2 }));
+  for (let t7 = 0; t7 < g3.length; t7++) k2.push(U$6(r, { shape: "image", cell: M4[t7] ? Object.assign(M4[t7], g3[t7]) : g3[t7], index: t7, eventDispatcher: async (t8) => y2.onLfEvent(t8, "lf-event"), framework: s2 }));
   const S3 = Boolean(k2 == null ? void 0 : k2.length), z2 = [];
-  for (let t7 = 0; t7 < b2.length; t7++) z2.push(U$5(r, { shape: "text", cell: b2[t7], index: t7, eventDispatcher: async (t8) => y2.onLfEvent(t8, "lf-event"), framework: s2 }));
+  for (let t7 = 0; t7 < b2.length; t7++) z2.push(U$6(r, { shape: "text", cell: b2[t7], index: t7, eventDispatcher: async (t8) => y2.onLfEvent(t8, "lf-event"), framework: s2 }));
   const C3 = Boolean(z2 == null ? void 0 : z2.length), A2 = C3 && ((_a2 = b2 == null ? void 0 : b2[0]) == null ? void 0 : _a2.value) || null, T4 = C3 && ((_b2 = b2 == null ? void 0 : b2[1]) == null ? void 0 : _b2.value) || null, N2 = C3 && ((_c2 = b2 == null ? void 0 : b2[2]) == null ? void 0 : _c2.value) || null;
   let _2;
-  return U$5("div", { class: v2(d2._, null, { "has-actions": x2 }), "data-lf": o2[y2.lfUiState], onPointerDown: (t7) => {
+  return U$6("div", { class: v2(d2._, null, { "has-actions": x2 }), "data-lf": o2[y2.lfUiState], onPointerDown: (t7) => {
     c2.ripple(t7, _2);
-  }, part: l2.materialLayout }, S3 && U$5("div", { class: v2(d2._, d2.coverSection) }, k2[0]), U$5("div", { class: v2(d2._, d2.textSection) }, A2 && U$5("div", { class: v2(p2._, p2.title) }, A2), T4 && U$5("div", { class: v2(p2._, p2.subtitle) }, T4), N2 && U$5("div", { class: v2(p2._, p2.description) }, N2)), U$5("div", { "data-cy": e2.rippleSurface, "data-lf": o2.rippleSurface, ref: (t7) => _2 = t7 }), x2 && U$5("div", { class: v2(d2._, d2.actionsSection) }, w3));
+  }, part: l2.materialLayout }, S3 && U$6("div", { class: v2(d2._, d2.coverSection) }, k2[0]), U$6("div", { class: v2(d2._, d2.textSection) }, A2 && U$6("div", { class: v2(p2._, p2.title) }, A2), T4 && U$6("div", { class: v2(p2._, p2.subtitle) }, T4), N2 && U$6("div", { class: v2(p2._, p2.description) }, N2)), U$6("div", { "data-cy": e2.rippleSurface, "data-lf": o2.rippleSurface, ref: (t7) => _2 = t7 }), x2 && U$6("div", { class: v2(d2._, d2.actionsSection) }, w3));
 })(t5), upload: () => ((t6) => {
   const { blocks: n2, compInstance: i2, defaults: e2, manager: a2, parts: o2, shapes: s2 } = t6().controller.get, { theme: l2 } = a2, { bemClass: u2 } = l2, { uploadLayout: f2 } = n2, { button: c2, upload: h2 } = s2(), v2 = i2, d2 = [], p2 = e2.upload.button();
-  for (let t7 = 0; t7 < c2.length; t7++) d2.push(U$5(r, { shape: "button", cell: p2[t7] ? Object.assign(p2[t7], c2[t7]) : c2[t7], index: t7, eventDispatcher: async (t8) => v2.onLfEvent(t8, "lf-event"), framework: a2 }));
+  for (let t7 = 0; t7 < c2.length; t7++) d2.push(U$6(r, { shape: "button", cell: p2[t7] ? Object.assign(p2[t7], c2[t7]) : c2[t7], index: t7, eventDispatcher: async (t8) => v2.onLfEvent(t8, "lf-event"), framework: a2 }));
   const m2 = Boolean(d2 == null ? void 0 : d2.length), g3 = [];
-  for (let t7 = 0; t7 < h2.length; t7++) g3.push(U$5(r, { shape: "upload", cell: h2[t7], index: t7, eventDispatcher: async (t8) => v2.onLfEvent(t8, "lf-event"), framework: a2 }));
+  for (let t7 = 0; t7 < h2.length; t7++) g3.push(U$6(r, { shape: "upload", cell: h2[t7], index: t7, eventDispatcher: async (t8) => v2.onLfEvent(t8, "lf-event"), framework: a2 }));
   const b2 = Boolean(g3 == null ? void 0 : g3.length);
-  return U$5("div", { class: u2(f2._), part: o2.uploadLayout }, b2 && U$5("div", { class: u2(f2._, f2.section1) }, g3[0]), m2 && U$5("div", { class: u2(f2._, f2.section2) }, d2[0]));
+  return U$6("div", { class: u2(f2._), part: o2.uploadLayout }, b2 && U$6("div", { class: u2(f2._, f2.section1) }, g3[0]), m2 && U$6("div", { class: u2(f2._, f2.section2) }, d2[0]));
 })(t5), weather: () => ((t6) => {
   var _a2, _b2, _c2, _d2, _e2, _f2, _g2, _h2, _i2, _j2;
   const { blocks: n2, compInstance: i2, lfAttributes: e2, manager: a2, shapes: o2 } = t6().controller.get, { theme: s2 } = a2, { bemClass: l2 } = s2, { weatherLayout: u2, textContent: f2 } = n2, { image: c2, text: h2 } = o2(), v2 = i2, d2 = ((_a2 = h2[0]) == null ? void 0 : _a2.value) || "Unknown Location", p2 = ((_b2 = h2[1]) == null ? void 0 : _b2.value) || "—", m2 = ((_c2 = h2[2]) == null ? void 0 : _c2.value) || "—", g3 = ((_d2 = h2[3]) == null ? void 0 : _d2.value) || "—", b2 = ((_e2 = h2[4]) == null ? void 0 : _e2.value) || "—", y2 = ((_f2 = h2[5]) == null ? void 0 : _f2.value) || "—", w3 = ((_g2 = h2[6]) == null ? void 0 : _g2.value) || "—", x2 = ((_h2 = h2[7]) == null ? void 0 : _h2.value) || "—", k2 = ((_i2 = h2[8]) == null ? void 0 : _i2.value) || "—", M4 = ((_j2 = c2[0]) == null ? void 0 : _j2.value) || "", S3 = g3.toLowerCase();
   let z2 = "default";
-  return S3.includes("clear") || S3.includes("sunny") ? z2 = "sunny" : S3.includes("partly") ? z2 = "partly-cloudy" : S3.includes("cloud") || S3.includes("overcast") ? z2 = "cloudy" : S3.includes("rain") || S3.includes("drizzle") ? z2 = "rainy" : S3.includes("storm") || S3.includes("thunder") ? z2 = "stormy" : S3.includes("snow") ? z2 = "snowy" : (S3.includes("fog") || S3.includes("mist")) && (z2 = "foggy"), U$5("div", { class: l2(u2._), "data-lf": e2[v2.lfUiState], "data-weather-condition": z2, "data-has-background": M4 ? "true" : "false", style: M4 ? { "--weather-bg-image": `url(${M4})` } : {} }, U$5("div", { class: l2(u2._, u2.header) }, U$5("div", { class: l2(u2._, u2.location) }, "📍 ", d2)), U$5("div", { class: l2(u2._, u2.mainSection) }, U$5("div", { class: l2(u2._, u2.icon) }, g3.includes("☀") || g3.toLowerCase().includes("clear") ? "☀️" : g3.includes("⛅") || g3.toLowerCase().includes("partly") ? "⛅" : g3.includes("☁") || g3.toLowerCase().includes("cloud") ? "☁️" : g3.includes("🌧") || g3.toLowerCase().includes("rain") ? "🌧️" : g3.includes("⛈") || g3.toLowerCase().includes("storm") ? "⛈️" : g3.includes("❄") || g3.toLowerCase().includes("snow") ? "❄️" : g3.includes("🌫") || g3.toLowerCase().includes("fog") || g3.toLowerCase().includes("mist") ? "🌫️" : "🌤️"), U$5("div", { class: l2(u2._, u2.temperature) }, U$5("div", { class: l2(f2._, f2.title) }, p2, "°C"), U$5("div", { class: l2(f2._, f2.subtitle) }, m2, "°F"))), U$5("div", { class: l2(u2._, u2.detailsGrid) }, U$5("div", { class: l2(u2._, u2.detailItem) }, U$5("div", { class: l2(u2._, u2.detailLabel) }, "🌤️ Conditions"), U$5("div", { class: l2(u2._, u2.detailValue) }, g3)), U$5("div", { class: l2(u2._, u2.detailItem) }, U$5("div", { class: l2(u2._, u2.detailLabel) }, "🤔 Feels like"), U$5("div", { class: l2(u2._, u2.detailValue) }, b2, "°C (", y2, "°F)")), U$5("div", { class: l2(u2._, u2.detailItem) }, U$5("div", { class: l2(u2._, u2.detailLabel) }, "💧 Humidity"), U$5("div", { class: l2(u2._, u2.detailValue) }, w3, "%")), U$5("div", { class: l2(u2._, u2.detailItem) }, U$5("div", { class: l2(u2._, u2.detailLabel) }, "🌬️ Wind"), U$5("div", { class: l2(u2._, u2.detailValue) }, x2, " km/h ", k2))));
+  return S3.includes("clear") || S3.includes("sunny") ? z2 = "sunny" : S3.includes("partly") ? z2 = "partly-cloudy" : S3.includes("cloud") || S3.includes("overcast") ? z2 = "cloudy" : S3.includes("rain") || S3.includes("drizzle") ? z2 = "rainy" : S3.includes("storm") || S3.includes("thunder") ? z2 = "stormy" : S3.includes("snow") ? z2 = "snowy" : (S3.includes("fog") || S3.includes("mist")) && (z2 = "foggy"), U$6("div", { class: l2(u2._), "data-lf": e2[v2.lfUiState], "data-weather-condition": z2, "data-has-background": M4 ? "true" : "false", style: M4 ? { "--weather-bg-image": `url(${M4})` } : {} }, U$6("div", { class: l2(u2._, u2.header) }, U$6("div", { class: l2(u2._, u2.location) }, "📍 ", d2)), U$6("div", { class: l2(u2._, u2.mainSection) }, U$6("div", { class: l2(u2._, u2.icon) }, g3.includes("☀") || g3.toLowerCase().includes("clear") ? "☀️" : g3.includes("⛅") || g3.toLowerCase().includes("partly") ? "⛅" : g3.includes("☁") || g3.toLowerCase().includes("cloud") ? "☁️" : g3.includes("🌧") || g3.toLowerCase().includes("rain") ? "🌧️" : g3.includes("⛈") || g3.toLowerCase().includes("storm") ? "⛈️" : g3.includes("❄") || g3.toLowerCase().includes("snow") ? "❄️" : g3.includes("🌫") || g3.toLowerCase().includes("fog") || g3.toLowerCase().includes("mist") ? "🌫️" : "🌤️"), U$6("div", { class: l2(u2._, u2.temperature) }, U$6("div", { class: l2(f2._, f2.title) }, p2, "°C"), U$6("div", { class: l2(f2._, f2.subtitle) }, m2, "°F"))), U$6("div", { class: l2(u2._, u2.detailsGrid) }, U$6("div", { class: l2(u2._, u2.detailItem) }, U$6("div", { class: l2(u2._, u2.detailLabel) }, "🌤️ Conditions"), U$6("div", { class: l2(u2._, u2.detailValue) }, g3)), U$6("div", { class: l2(u2._, u2.detailItem) }, U$6("div", { class: l2(u2._, u2.detailLabel) }, "🤔 Feels like"), U$6("div", { class: l2(u2._, u2.detailValue) }, b2, "°C (", y2, "°F)")), U$6("div", { class: l2(u2._, u2.detailItem) }, U$6("div", { class: l2(u2._, u2.detailLabel) }, "💧 Humidity"), U$6("div", { class: l2(u2._, u2.detailValue) }, w3, "%")), U$6("div", { class: l2(u2._, u2.detailItem) }, U$6("div", { class: l2(u2._, u2.detailLabel) }, "🌬️ Wind"), U$6("div", { class: l2(u2._, u2.detailValue) }, x2, " km/h ", k2))));
 })(t5) }), Mn = (t5) => ({ debug: yn(t5), keywords: wn(t5) });
 var Sn, zn, Cn, An, Tn, Nn, _n, In, Ln, Dn, Wn = function(t5, n2, i2, r2) {
   if ("function" == typeof n2 ? t5 !== n2 || !r2 : !n2.has(t5)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
@@ -5416,7 +4445,7 @@ var Sn, zn, Cn, An, Tn, Nn, _n, In, Ln, Dn, Wn = function(t5, n2, i2, r2) {
 };
 const On = class {
   constructor(i2) {
-    o$2(this, i2), this.lfEvent = G$3(this, "lf-card-event"), this.lfDataset = null, this.lfLayout = "material", this.lfSizeX = "100%", this.lfSizeY = "100%", this.lfStyle = "", this.lfUiSize = "medium", this.lfUiState = "primary", Sn.set(this, void 0), zn.set(this, LF_CARD_BLOCKS), Cn.set(this, CY_ATTRIBUTES), An.set(this, LF_ATTRIBUTES), Tn.set(this, LF_CARD_PARTS), Nn.set(this, LF_STYLE_ID), _n.set(this, LF_CARD_CSS_VARS), In.set(this, LF_WRAPPER_ID), Ln.set(this, void 0), Dn.set(this, (() => {
+    o$2(this, i2), this.lfEvent = G$4(this, "lf-card-event"), this.lfDataset = null, this.lfLayout = "material", this.lfSizeX = "100%", this.lfSizeY = "100%", this.lfStyle = "", this.lfUiSize = "medium", this.lfUiState = "primary", Sn.set(this, void 0), zn.set(this, LF_CARD_BLOCKS), Cn.set(this, CY_ATTRIBUTES), An.set(this, LF_ATTRIBUTES), Tn.set(this, LF_CARD_PARTS), Nn.set(this, LF_STYLE_ID), _n.set(this, LF_CARD_CSS_VARS), In.set(this, LF_WRAPPER_ID), Ln.set(this, void 0), Dn.set(this, (() => {
       var t5, n2;
       En(this, Ln, (t5 = { blocks: Wn(this, zn, "f"), compInstance: this, cyAttributes: Wn(this, Cn, "f"), lfAttributes: Wn(this, An, "f"), manager: Wn(this, Sn, "f"), parts: Wn(this, Tn, "f"), shapes: () => this.shapes }, { controller: { get: xn(t5, n2 = () => Wn(this, Ln, "f")) }, elements: { jsx: { layouts: kn(n2) }, refs: { layouts: { debug: { button: null, code: null, toggle: null }, keywords: { button: null, chip: null } } } }, handlers: { layouts: Mn(n2) } }));
     }));
@@ -5473,19 +4502,19 @@ const On = class {
     const { setLfStyle: t5 } = Wn(this, Sn, "f").theme, { lfDataset: n2, lfLayout: i2, lfSizeX: a2, lfSizeY: o2, lfStyle: s2, rootElement: l2 } = this;
     if (!n2 && l2.children.length < 1) return;
     const { layouts: u2 } = Wn(this, Ln, "f").elements.jsx, f2 = u2[i2.toLowerCase()];
-    return U$5(A$9, null, U$5("style", { id: Wn(this, Nn, "f") }, `
+    return U$6(A$a, null, U$6("style", { id: Wn(this, Nn, "f") }, `
         :host {
          ${Wn(this, _n, "f").height}: ${o2 || "100%"};
          ${Wn(this, _n, "f").width}: ${a2 || "100%"};
         }
-        ${s2 && t5(this) || ""}`), U$5("div", { id: Wn(this, In, "f"), "data-lf": Wn(this, An, "f").fadeIn, onClick: (t6) => this.onLfEvent(t6, "click"), onContextMenu: (t6) => this.onLfEvent(t6, "contextmenu"), onPointerDown: (t6) => this.onLfEvent(t6, "pointerdown"), part: Wn(this, Tn, "f").card }, f2()));
+        ${s2 && t5(this) || ""}`), U$6("div", { id: Wn(this, In, "f"), "data-lf": Wn(this, An, "f").fadeIn, onClick: (t6) => this.onLfEvent(t6, "click"), onContextMenu: (t6) => this.onLfEvent(t6, "contextmenu"), onPointerDown: (t6) => this.onLfEvent(t6, "pointerdown"), part: Wn(this, Tn, "f").card }, f2()));
   }
   disconnectedCallback() {
     var _a2;
     (_a2 = Wn(this, Sn, "f")) == null ? void 0 : _a2.theme.unregister(this);
   }
   get rootElement() {
-    return q$4(this);
+    return q$5(this);
   }
   static get watchers() {
     return { lfDataset: ["updateShapes"] };
@@ -9048,11 +8077,11 @@ var fu = (function() {
           var M4 = ru(o2 - e2), S3 = ru(s2 - a2);
           if (M4 > v2 || S3 > d2) {
             if (m2) {
-              if (g3 + (X2 = l2[b2++]) > u2) {
-                t6.lineTo(e2 * (1 - (G2 = (u2 - g3) / X2)) + o2 * G2, a2 * (1 - G2) + s2 * G2);
+              if (g3 + (X3 = l2[b2++]) > u2) {
+                t6.lineTo(e2 * (1 - (G3 = (u2 - g3) / X3)) + o2 * G3, a2 * (1 - G3) + s2 * G3);
                 break t;
               }
-              g3 += X2;
+              g3 += X3;
             }
             t6.lineTo(o2, s2), e2 = o2, a2 = s2, y2 = 0;
           } else {
@@ -9063,51 +8092,51 @@ var fu = (function() {
         case $l.C:
           var C3 = h2[w3++], A2 = h2[w3++], T4 = h2[w3++], N2 = h2[w3++], _2 = h2[w3++], I2 = h2[w3++];
           if (m2) {
-            if (g3 + (X2 = l2[b2++]) > u2) {
-              Be(e2, C3, T4, _2, G2 = (u2 - g3) / X2, Xl), Be(a2, A2, N2, I2, G2, Gl), t6.bezierCurveTo(Xl[1], Gl[1], Xl[2], Gl[2], Xl[3], Gl[3]);
+            if (g3 + (X3 = l2[b2++]) > u2) {
+              Be(e2, C3, T4, _2, G3 = (u2 - g3) / X3, Xl), Be(a2, A2, N2, I2, G3, Gl), t6.bezierCurveTo(Xl[1], Gl[1], Xl[2], Gl[2], Xl[3], Gl[3]);
               break t;
             }
-            g3 += X2;
+            g3 += X3;
           }
           t6.bezierCurveTo(C3, A2, T4, N2, _2, I2), e2 = _2, a2 = I2;
           break;
         case $l.Q:
           if (C3 = h2[w3++], A2 = h2[w3++], T4 = h2[w3++], N2 = h2[w3++], m2) {
-            if (g3 + (X2 = l2[b2++]) > u2) {
-              $e(e2, C3, T4, G2 = (u2 - g3) / X2, Xl), $e(a2, A2, N2, G2, Gl), t6.quadraticCurveTo(Xl[1], Gl[1], Xl[2], Gl[2]);
+            if (g3 + (X3 = l2[b2++]) > u2) {
+              $e(e2, C3, T4, G3 = (u2 - g3) / X3, Xl), $e(a2, A2, N2, G3, Gl), t6.quadraticCurveTo(Xl[1], Gl[1], Xl[2], Gl[2]);
               break t;
             }
-            g3 += X2;
+            g3 += X3;
           }
           t6.quadraticCurveTo(C3, A2, T4, N2), e2 = T4, a2 = N2;
           break;
         case $l.A:
-          var L2 = h2[w3++], D2 = h2[w3++], W3 = h2[w3++], E3 = h2[w3++], O3 = h2[w3++], R3 = h2[w3++], P2 = h2[w3++], F2 = !h2[w3++], B3 = W3 > E3 ? W3 : E3, V2 = ru(W3 - E3) > 1e-3, H2 = O3 + R3, j3 = false;
-          if (m2 && (g3 + (X2 = l2[b2++]) > u2 && (H2 = O3 + R3 * (u2 - g3) / X2, j3 = true), g3 += X2), V2 && t6.ellipse ? t6.ellipse(L2, D2, W3, E3, P2, O3, H2, F2) : t6.arc(L2, D2, B3, O3, H2, F2), j3) break t;
-          k2 && (i2 = nu(O3) * W3 + L2, r2 = iu(O3) * E3 + D2), e2 = nu(H2) * W3 + L2, a2 = iu(H2) * E3 + D2;
+          var L2 = h2[w3++], D2 = h2[w3++], W4 = h2[w3++], E3 = h2[w3++], O3 = h2[w3++], R3 = h2[w3++], P2 = h2[w3++], F2 = !h2[w3++], B3 = W4 > E3 ? W4 : E3, V2 = ru(W4 - E3) > 1e-3, H2 = O3 + R3, j3 = false;
+          if (m2 && (g3 + (X3 = l2[b2++]) > u2 && (H2 = O3 + R3 * (u2 - g3) / X3, j3 = true), g3 += X3), V2 && t6.ellipse ? t6.ellipse(L2, D2, W4, E3, P2, O3, H2, F2) : t6.arc(L2, D2, B3, O3, H2, F2), j3) break t;
+          k2 && (i2 = nu(O3) * W4 + L2, r2 = iu(O3) * E3 + D2), e2 = nu(H2) * W4 + L2, a2 = iu(H2) * E3 + D2;
           break;
         case $l.R:
           i2 = e2 = h2[w3], r2 = a2 = h2[w3 + 1], o2 = h2[w3++], s2 = h2[w3++];
           var Y3 = h2[w3++], U2 = h2[w3++];
           if (m2) {
-            if (g3 + (X2 = l2[b2++]) > u2) {
+            if (g3 + (X3 = l2[b2++]) > u2) {
               var $2 = u2 - g3;
               t6.moveTo(o2, s2), t6.lineTo(o2 + Ql($2, Y3), s2), ($2 -= Y3) > 0 && t6.lineTo(o2 + Y3, s2 + Ql($2, U2)), ($2 -= U2) > 0 && t6.lineTo(o2 + tu(Y3 - $2, 0), s2 + U2), ($2 -= Y3) > 0 && t6.lineTo(o2, s2 + tu(U2 - $2, 0));
               break t;
             }
-            g3 += X2;
+            g3 += X3;
           }
           t6.rect(o2, s2, Y3, U2);
           break;
         case $l.Z:
           if (m2) {
-            var X2;
-            if (g3 + (X2 = l2[b2++]) > u2) {
-              var G2;
-              t6.lineTo(e2 * (1 - (G2 = (u2 - g3) / X2)) + i2 * G2, a2 * (1 - G2) + r2 * G2);
+            var X3;
+            if (g3 + (X3 = l2[b2++]) > u2) {
+              var G3;
+              t6.lineTo(e2 * (1 - (G3 = (u2 - g3) / X3)) + i2 * G3, a2 * (1 - G3) + r2 * G3);
               break t;
             }
-            g3 += X2;
+            g3 += X3;
           }
           t6.closePath(), e2 = i2, a2 = r2;
       }
@@ -9636,31 +8665,31 @@ var ju = { fill: "#000" }, Yu = { style: ci({ fill: true, stroke: true, fillOpac
       }
       t: for (var b3 = 0; b3 < i3.lines.length; b3++) {
         for (var y3 = i3.lines[b3], w4 = 0, x3 = 0, k3 = 0; k3 < y3.tokens.length; k3++) {
-          var M5 = (W3 = y3.tokens[k3]).styleName && n4.rich[W3.styleName] || {}, S4 = W3.textPadding = M5.padding, z3 = S4 ? S4[1] + S4[3] : 0, C4 = W3.font = M5.font || n4.font;
-          W3.contentHeight = Ro(C4);
-          var A3 = Wi(M5.height, W3.contentHeight);
-          if (W3.innerHeight = A3, S4 && (A3 += S4[0] + S4[2]), W3.height = A3, W3.lineHeight = Ei(M5.lineHeight, n4.lineHeight, A3), W3.align = M5 && M5.align || n4.align, W3.verticalAlign = M5 && M5.verticalAlign || "middle", p3 && null != a3 && c3 + W3.lineHeight > a3) {
+          var M5 = (W4 = y3.tokens[k3]).styleName && n4.rich[W4.styleName] || {}, S4 = W4.textPadding = M5.padding, z3 = S4 ? S4[1] + S4[3] : 0, C4 = W4.font = M5.font || n4.font;
+          W4.contentHeight = Ro(C4);
+          var A3 = Wi(M5.height, W4.contentHeight);
+          if (W4.innerHeight = A3, S4 && (A3 += S4[0] + S4[2]), W4.height = A3, W4.lineHeight = Ei(M5.lineHeight, n4.lineHeight, A3), W4.align = M5 && M5.align || n4.align, W4.verticalAlign = M5 && M5.verticalAlign || "middle", p3 && null != a3 && c3 + W4.lineHeight > a3) {
             var T4 = i3.lines.length;
             k3 > 0 ? (y3.tokens = y3.tokens.slice(0, k3), g4(y3, x3, w4), i3.lines = i3.lines.slice(0, b3 + 1)) : i3.lines = i3.lines.slice(0, b3), i3.isTruncated = i3.isTruncated || i3.lines.length < T4;
             break t;
           }
           var N2 = M5.width, _2 = null == N2 || "auto" === N2;
-          if ("string" == typeof N2 && "%" === N2.charAt(N2.length - 1)) W3.percentWidth = N2, f3.push(W3), W3.contentWidth = Lo(W3.text, C4);
+          if ("string" == typeof N2 && "%" === N2.charAt(N2.length - 1)) W4.percentWidth = N2, f3.push(W4), W4.contentWidth = Lo(W4.text, C4);
           else {
             if (_2) {
               var I2 = M5.backgroundColor, L2 = I2 && I2.image;
-              L2 && fl(L2 = sl(L2)) && (W3.width = Math.max(W3.width, L2.width * A3 / L2.height));
+              L2 && fl(L2 = sl(L2)) && (W4.width = Math.max(W4.width, L2.width * A3 / L2.height));
             }
             var D2 = d3 && null != e3 ? e3 - x3 : null;
-            null != D2 && D2 < W3.width ? !_2 || D2 < z3 ? (W3.text = "", W3.width = W3.contentWidth = 0) : (hl(m3, W3.text, D2 - z3, C4, n4.ellipsis, { minChar: n4.truncateMinChar }), W3.text = m3.text, i3.isTruncated = i3.isTruncated || m3.isTruncated, W3.width = W3.contentWidth = Lo(W3.text, C4)) : W3.contentWidth = Lo(W3.text, C4);
+            null != D2 && D2 < W4.width ? !_2 || D2 < z3 ? (W4.text = "", W4.width = W4.contentWidth = 0) : (hl(m3, W4.text, D2 - z3, C4, n4.ellipsis, { minChar: n4.truncateMinChar }), W4.text = m3.text, i3.isTruncated = i3.isTruncated || m3.isTruncated, W4.width = W4.contentWidth = Lo(W4.text, C4)) : W4.contentWidth = Lo(W4.text, C4);
           }
-          W3.width += z3, x3 += W3.width, M5 && (w4 = Math.max(w4, W3.lineHeight));
+          W4.width += z3, x3 += W4.width, M5 && (w4 = Math.max(w4, W4.lineHeight));
         }
         g4(y3, x3, w4);
       }
       for (i3.outerWidth = i3.width = Wi(e3, h3), i3.outerHeight = i3.height = Wi(a3, c3), i3.contentHeight = c3, i3.contentWidth = h3, v3 && (i3.outerWidth += v3[1] + v3[3], i3.outerHeight += v3[0] + v3[2]), b3 = 0; b3 < f3.length; b3++) {
-        var W3;
-        (W3 = f3[b3]).width = parseInt(W3.percentWidth, 10) / 100 * i3.width;
+        var W4;
+        (W4 = f3[b3]).width = parseInt(W4.percentWidth, 10) / 100 * i3.width;
       }
       return i3;
     })(rf(t6), t6), i2 = n3.width, r2 = n3.outerWidth, e2 = n3.outerHeight, a2 = t6.padding, o2 = t6.x || 0, s2 = t6.y || 0, l2 = this._defaultStyle, u2 = t6.align || l2.align, f2 = t6.verticalAlign || l2.verticalAlign;
@@ -10199,8 +9228,8 @@ var Pc = function() {
           var u2 = n4.cx, f2 = n4.cy, c2 = !!n4.clockwise, h2 = Lc(l2 - s2), v2 = h2 > Ac && h2 % Ac;
           if (v2 > Oc && (h2 = v2), r2 > Oc) if (h2 > Ac - Oc) t7.moveTo(u2 + r2 * Nc(s2), f2 + r2 * Tc(s2)), t7.arc(u2, f2, r2, s2, l2, !c2), e2 > Oc && (t7.moveTo(u2 + e2 * Nc(l2), f2 + e2 * Tc(l2)), t7.arc(u2, f2, e2, l2, s2, c2));
           else {
-            var d2 = void 0, p2 = void 0, m2 = void 0, g3 = void 0, b2 = void 0, y2 = void 0, w3 = void 0, x2 = void 0, k2 = void 0, M4 = void 0, S3 = void 0, z2 = void 0, C3 = void 0, A2 = void 0, T4 = void 0, N2 = void 0, _2 = r2 * Nc(s2), I2 = r2 * Tc(s2), L2 = e2 * Nc(l2), D2 = e2 * Tc(l2), W3 = h2 > Oc;
-            if (W3) {
+            var d2 = void 0, p2 = void 0, m2 = void 0, g3 = void 0, b2 = void 0, y2 = void 0, w3 = void 0, x2 = void 0, k2 = void 0, M4 = void 0, S3 = void 0, z2 = void 0, C3 = void 0, A2 = void 0, T4 = void 0, N2 = void 0, _2 = r2 * Nc(s2), I2 = r2 * Tc(s2), L2 = e2 * Nc(l2), D2 = e2 * Tc(l2), W4 = h2 > Oc;
+            if (W4) {
               var E3 = n4.cornerRadius;
               E3 && (i2 = (function(t8) {
                 var n5;
@@ -10223,12 +9252,12 @@ var Pc = function() {
                 }
               }
             }
-            if (W3) if (S3 > Oc) {
-              var Y3 = Ec(m2, S3), U2 = Ec(g3, S3), $2 = Rc(T4, N2, _2, I2, r2, Y3, c2), X2 = Rc(C3, A2, L2, D2, r2, U2, c2);
-              t7.moveTo(u2 + $2.cx + $2.x0, f2 + $2.cy + $2.y0), S3 < k2 && Y3 === U2 ? t7.arc(u2 + $2.cx, f2 + $2.cy, S3, Ic($2.y0, $2.x0), Ic(X2.y0, X2.x0), !c2) : (Y3 > 0 && t7.arc(u2 + $2.cx, f2 + $2.cy, Y3, Ic($2.y0, $2.x0), Ic($2.y1, $2.x1), !c2), t7.arc(u2, f2, r2, Ic($2.cy + $2.y1, $2.cx + $2.x1), Ic(X2.cy + X2.y1, X2.cx + X2.x1), !c2), U2 > 0 && t7.arc(u2 + X2.cx, f2 + X2.cy, U2, Ic(X2.y1, X2.x1), Ic(X2.y0, X2.x0), !c2));
+            if (W4) if (S3 > Oc) {
+              var Y3 = Ec(m2, S3), U2 = Ec(g3, S3), $2 = Rc(T4, N2, _2, I2, r2, Y3, c2), X3 = Rc(C3, A2, L2, D2, r2, U2, c2);
+              t7.moveTo(u2 + $2.cx + $2.x0, f2 + $2.cy + $2.y0), S3 < k2 && Y3 === U2 ? t7.arc(u2 + $2.cx, f2 + $2.cy, S3, Ic($2.y0, $2.x0), Ic(X3.y0, X3.x0), !c2) : (Y3 > 0 && t7.arc(u2 + $2.cx, f2 + $2.cy, Y3, Ic($2.y0, $2.x0), Ic($2.y1, $2.x1), !c2), t7.arc(u2, f2, r2, Ic($2.cy + $2.y1, $2.cx + $2.x1), Ic(X3.cy + X3.y1, X3.cx + X3.x1), !c2), U2 > 0 && t7.arc(u2 + X3.cx, f2 + X3.cy, U2, Ic(X3.y1, X3.x1), Ic(X3.y0, X3.x0), !c2));
             } else t7.moveTo(u2 + _2, f2 + I2), t7.arc(u2, f2, r2, s2, l2, !c2);
             else t7.moveTo(u2 + _2, f2 + I2);
-            e2 > Oc && W3 ? z2 > Oc ? (Y3 = Ec(d2, z2), $2 = Rc(L2, D2, C3, A2, e2, -(U2 = Ec(p2, z2)), c2), X2 = Rc(_2, I2, T4, N2, e2, -Y3, c2), t7.lineTo(u2 + $2.cx + $2.x0, f2 + $2.cy + $2.y0), z2 < M4 && Y3 === U2 ? t7.arc(u2 + $2.cx, f2 + $2.cy, z2, Ic($2.y0, $2.x0), Ic(X2.y0, X2.x0), !c2) : (U2 > 0 && t7.arc(u2 + $2.cx, f2 + $2.cy, U2, Ic($2.y0, $2.x0), Ic($2.y1, $2.x1), !c2), t7.arc(u2, f2, e2, Ic($2.cy + $2.y1, $2.cx + $2.x1), Ic(X2.cy + X2.y1, X2.cx + X2.x1), c2), Y3 > 0 && t7.arc(u2 + X2.cx, f2 + X2.cy, Y3, Ic(X2.y1, X2.x1), Ic(X2.y0, X2.x0), !c2))) : (t7.lineTo(u2 + L2, f2 + D2), t7.arc(u2, f2, e2, l2, s2, c2)) : t7.lineTo(u2 + L2, f2 + D2);
+            e2 > Oc && W4 ? z2 > Oc ? (Y3 = Ec(d2, z2), $2 = Rc(L2, D2, C3, A2, e2, -(U2 = Ec(p2, z2)), c2), X3 = Rc(_2, I2, T4, N2, e2, -Y3, c2), t7.lineTo(u2 + $2.cx + $2.x0, f2 + $2.cy + $2.y0), z2 < M4 && Y3 === U2 ? t7.arc(u2 + $2.cx, f2 + $2.cy, z2, Ic($2.y0, $2.x0), Ic(X3.y0, X3.x0), !c2) : (U2 > 0 && t7.arc(u2 + $2.cx, f2 + $2.cy, U2, Ic($2.y0, $2.x0), Ic($2.y1, $2.x1), !c2), t7.arc(u2, f2, e2, Ic($2.cy + $2.y1, $2.cx + $2.x1), Ic(X3.cy + X3.y1, X3.cx + X3.x1), c2), Y3 > 0 && t7.arc(u2 + X3.cx, f2 + X3.cy, Y3, Ic(X3.y1, X3.x1), Ic(X3.y0, X3.x0), !c2))) : (t7.lineTo(u2 + L2, f2 + D2), t7.arc(u2, f2, e2, l2, s2, c2)) : t7.lineTo(u2 + L2, f2 + D2);
           }
           else t7.moveTo(u2, f2);
           t7.closePath();
@@ -17845,14 +16874,14 @@ function BS(t5, n2, i2, r2, e2, a2, o2, s2, l2) {
         if (S3 >= r2 || FS(k2, M4)) v2 = g3, d2 = b2;
         else {
           C3 = k2 - u2, A2 = M4 - f2;
-          var _2 = g3 - u2, I2 = k2 - g3, L2 = b2 - f2, D2 = M4 - b2, W3 = void 0, E3 = void 0;
+          var _2 = g3 - u2, I2 = k2 - g3, L2 = b2 - f2, D2 = M4 - b2, W4 = void 0, E3 = void 0;
           if ("x" === s2) {
             var O3 = C3 > 0 ? 1 : -1;
-            v2 = g3 - O3 * (W3 = Math.abs(_2)) * o2, d2 = b2, T4 = g3 + O3 * (E3 = Math.abs(I2)) * o2, N2 = b2;
+            v2 = g3 - O3 * (W4 = Math.abs(_2)) * o2, d2 = b2, T4 = g3 + O3 * (E3 = Math.abs(I2)) * o2, N2 = b2;
           } else if ("y" === s2) {
             var R3 = A2 > 0 ? 1 : -1;
-            v2 = g3, d2 = b2 - R3 * (W3 = Math.abs(L2)) * o2, T4 = g3, N2 = b2 + R3 * (E3 = Math.abs(D2)) * o2;
-          } else W3 = Math.sqrt(_2 * _2 + L2 * L2), v2 = g3 - C3 * o2 * (1 - (z2 = (E3 = Math.sqrt(I2 * I2 + D2 * D2)) / (E3 + W3))), d2 = b2 - A2 * o2 * (1 - z2), N2 = b2 + A2 * o2 * z2, T4 = RS(T4 = g3 + C3 * o2 * z2, PS(k2, g3)), N2 = RS(N2, PS(M4, b2)), T4 = PS(T4, RS(k2, g3)), d2 = b2 - (A2 = (N2 = PS(N2, RS(M4, b2))) - b2) * W3 / E3, v2 = RS(v2 = g3 - (C3 = T4 - g3) * W3 / E3, PS(u2, g3)), d2 = RS(d2, PS(f2, b2)), T4 = g3 + (C3 = g3 - (v2 = PS(v2, RS(u2, g3)))) * E3 / W3, N2 = b2 + (A2 = b2 - (d2 = PS(d2, RS(f2, b2)))) * E3 / W3;
+            v2 = g3, d2 = b2 - R3 * (W4 = Math.abs(L2)) * o2, T4 = g3, N2 = b2 + R3 * (E3 = Math.abs(D2)) * o2;
+          } else W4 = Math.sqrt(_2 * _2 + L2 * L2), v2 = g3 - C3 * o2 * (1 - (z2 = (E3 = Math.sqrt(I2 * I2 + D2 * D2)) / (E3 + W4))), d2 = b2 - A2 * o2 * (1 - z2), N2 = b2 + A2 * o2 * z2, T4 = RS(T4 = g3 + C3 * o2 * z2, PS(k2, g3)), N2 = RS(N2, PS(M4, b2)), T4 = PS(T4, RS(k2, g3)), d2 = b2 - (A2 = (N2 = PS(N2, RS(M4, b2))) - b2) * W4 / E3, v2 = RS(v2 = g3 - (C3 = T4 - g3) * W4 / E3, PS(u2, g3)), d2 = RS(d2, PS(f2, b2)), T4 = g3 + (C3 = g3 - (v2 = PS(v2, RS(u2, g3)))) * E3 / W4, N2 = b2 + (A2 = b2 - (d2 = PS(d2, RS(f2, b2)))) * E3 / W4;
         }
         t5.bezierCurveTo(c2, h2, v2, d2, g3, b2), c2 = T4, h2 = N2;
       } else t5.lineTo(g3, b2);
@@ -18122,8 +17151,8 @@ var rz = (function(t5) {
     h2.useStyle(ci(o2.getLineStyle(), { fill: "none", stroke: C3, lineJoin: "bevel" })), Jf(h2, t6, "lineStyle"), h2.style.lineWidth > 0 && "bolder" === t6.get(["emphasis", "lineStyle", "width"]) && (h2.getState("emphasis").style.lineWidth = +h2.style.lineWidth + 1), af(h2).seriesIndex = t6.seriesIndex, Xf(h2, N2, _2, I2);
     var L2 = KS(t6.get("smooth")), D2 = t6.get("smoothMonotone");
     if (h2.setShape({ smooth: L2, smoothMonotone: D2, connectNulls: x2 }), v2) {
-      var W3 = a2.getCalculationInfo("stackedOnSeries"), E3 = 0;
-      v2.useStyle(ci(s2.getAreaStyle(), { fill: C3, opacity: 0.7, lineJoin: "bevel", decal: a2.getVisual("style").decal })), W3 && (E3 = KS(W3.get("smooth"))), v2.setShape({ smooth: L2, stackedOnSmooth: E3, smoothMonotone: D2, connectNulls: x2 }), Jf(v2, t6, "areaStyle"), af(v2).seriesIndex = t6.seriesIndex, Xf(v2, N2, _2, I2);
+      var W4 = a2.getCalculationInfo("stackedOnSeries"), E3 = 0;
+      v2.useStyle(ci(s2.getAreaStyle(), { fill: C3, opacity: 0.7, lineJoin: "bevel", decal: a2.getVisual("style").decal })), W4 && (E3 = KS(W4.get("smooth"))), v2.setShape({ smooth: L2, stackedOnSmooth: E3, smoothMonotone: D2, connectNulls: x2 }), Jf(v2, t6, "areaStyle"), af(v2).seriesIndex = t6.seriesIndex, Xf(v2, N2, _2, I2);
     }
     var O3 = this._changePolyState;
     a2.eachItemGraphicEl((function(t7) {
@@ -18264,12 +17293,12 @@ var rz = (function(t5) {
       v3.sort((function(t8, n5) {
         return d3[t8] - d3[n5];
       }));
-      var I2 = l3.length, L2 = cx(I2), D2 = cx(I2), W3 = cx(I2), E3 = cx(I2), O3 = [];
+      var I2 = l3.length, L2 = cx(I2), D2 = cx(I2), W4 = cx(I2), E3 = cx(I2), O3 = [];
       for (b3 = 0; b3 < v3.length; b3++) {
         var R3 = v3[b3], P2 = 2 * b3, F2 = 2 * R3;
-        L2[P2] = l3[F2], L2[P2 + 1] = l3[F2 + 1], D2[P2] = u3[F2], D2[P2 + 1] = u3[F2 + 1], W3[P2] = f3[F2], W3[P2 + 1] = f3[F2 + 1], E3[P2] = c3[F2], E3[P2 + 1] = c3[F2 + 1], O3[b3] = h3[R3];
+        L2[P2] = l3[F2], L2[P2 + 1] = l3[F2 + 1], D2[P2] = u3[F2], D2[P2 + 1] = u3[F2 + 1], W4[P2] = f3[F2], W4[P2 + 1] = f3[F2 + 1], E3[P2] = c3[F2], E3[P2 + 1] = c3[F2 + 1], O3[b3] = h3[R3];
       }
-      return { current: L2, next: D2, stackedOnCurrent: W3, stackedOnNext: E3, status: O3 };
+      return { current: L2, next: D2, stackedOnCurrent: W4, stackedOnNext: E3, status: O3 };
     })(this._data, t6, this._stackedOnPoints, n3, this._coordSys, 0, this._valueOrigin), c2 = f2.current, h2 = f2.stackedOnCurrent, v2 = f2.next, d2 = f2.stackedOnNext;
     if (e2 && (h2 = QS(f2.stackedOnCurrent, f2.current, i2, e2, o2), c2 = QS(f2.current, null, i2, e2, o2), d2 = QS(f2.stackedOnNext, f2.next, i2, e2, o2), v2 = QS(f2.next, null, i2, e2, o2)), JS(c2, v2) > 3e3 || l2 && JS(h2, d2) > 3e3) return s2.stopAnimation(), s2.setShape({ points: v2 }), void (l2 && (l2.stopAnimation(), l2.setShape({ points: v2, stackedOnPoints: d2 })));
     s2.shape.__points = f2.current, s2.shape.points = c2;
@@ -18969,10 +17998,10 @@ var Yz = (function(t5) {
           var L2 = "inside" === g4 || "inner" === g4;
           if ("center" === g4) z2 = c3.cx, C3 = c3.cy, T4 = "center";
           else {
-            var D2 = (L2 ? (c3.r + c3.r0) / 2 * _2 : c3.r * _2) + n4, W3 = (L2 ? (c3.r + c3.r0) / 2 * I2 : c3.r * I2) + i3;
-            if (z2 = D2 + 3 * _2, C3 = W3 + 3 * I2, !L2) {
-              var E3 = D2 + _2 * (M4 + l3 - c3.r), O3 = W3 + I2 * (M4 + l3 - c3.r), R3 = E3 + (_2 < 0 ? -1 : 1) * S3;
-              z2 = "edge" === y3 ? _2 < 0 ? f3 + w4 : f3 + u3 - w4 : R3 + (_2 < 0 ? -b3 : b3), C3 = O3, A2 = [[D2, W3], [E3, O3], [R3, O3]];
+            var D2 = (L2 ? (c3.r + c3.r0) / 2 * _2 : c3.r * _2) + n4, W4 = (L2 ? (c3.r + c3.r0) / 2 * I2 : c3.r * I2) + i3;
+            if (z2 = D2 + 3 * _2, C3 = W4 + 3 * I2, !L2) {
+              var E3 = D2 + _2 * (M4 + l3 - c3.r), O3 = W4 + I2 * (M4 + l3 - c3.r), R3 = E3 + (_2 < 0 ? -1 : 1) * S3;
+              z2 = "edge" === y3 ? _2 < 0 ? f3 + w4 : f3 + u3 - w4 : R3 + (_2 < 0 ? -b3 : b3), C3 = O3, A2 = [[D2, W4], [E3, O3], [R3, O3]];
             }
             T4 = L2 ? "center" : "edge" === y3 ? _2 > 0 ? "right" : "left" : _2 > 0 ? "left" : "right";
           }
@@ -21927,8 +20956,8 @@ var CN = (function() {
               var N2 = h3.getModel("emphasis"), _2 = N2.get("focus"), I2 = N2.get("blurScope"), L2 = N2.get("disabled"), D2 = "ancestor" === _2 ? o3.getAncestorsIndices() : "descendant" === _2 ? o3.getDescendantIndices() : _2;
               if (x2) Qf(A2) && Kf(A2, false), T4 && (Kf(T4, !L2), c3.setItemGraphicEl(o3.dataIndex, T4), Gf(T4, D2, I2));
               else {
-                var W3 = F2("content", TN, u4, 30);
-                W3 && (function(n5, i4) {
+                var W4 = F2("content", TN, u4, 30);
+                W4 && (function(n5, i4) {
                   var r5 = af(i4);
                   r5.dataIndex = o3.dataIndex, r5.seriesIndex = t8.seriesIndex;
                   var e5 = Math.max(v2 - 2 * p2, 0), a4 = Math.max(d2 - 2 * p2, 0);
@@ -21941,9 +20970,9 @@ var CN = (function() {
                     R3(i4, l4, s4.opacity, null), i4.setStyle(u5), i4.ensureState("emphasis").style = f4, i4.ensureState("blur").style = c4, i4.ensureState("select").style = h4, _f(i4);
                   }
                   n5.add(i4);
-                })(A2, W3), T4.disableMorphing = true, T4 && Qf(T4) && Kf(T4, false), Kf(A2, !L2), c3.setItemGraphicEl(o3.dataIndex, A2);
+                })(A2, W4), T4.disableMorphing = true, T4 && Qf(T4) && Kf(T4, false), Kf(A2, !L2), c3.setItemGraphicEl(o3.dataIndex, A2);
                 var E3 = h3.getShallow("cursor");
-                E3 && W3.attr("cursor", E3), Gf(A2, D2, I2);
+                E3 && W4.attr("cursor", E3), Gf(A2, D2, I2);
               }
               return A2;
             }
@@ -23439,8 +22468,8 @@ var MI = (function(t5) {
         "auto" === A2.stroke && I2.setStyle({ stroke: r2(_2 / w3) }), c2.add(I2);
       }
       if (y2.get("show")) {
-        var L2 = y2.get("distance") + N2, D2 = kI(rs(_2 / w3 * (m2 - p2) + p2), y2.get("formatter")), W3 = r2(_2 / w3), E3 = u2 * (d2 - k2 - L2) + h2, O3 = f2 * (d2 - k2 - L2) + v2, R3 = y2.get("rotate"), P2 = 0;
-        "radial" === R3 ? (P2 = -S3 + 2 * Math.PI) > Math.PI / 2 && (P2 += Math.PI) : "tangential" === R3 ? P2 = -S3 - Math.PI / 2 : Ci(R3) && (P2 = R3 * Math.PI / 180), c2.add(new Uu(0 === P2 ? { style: tv(y2, { text: D2, x: E3, y: O3, verticalAlign: f2 < -0.8 ? "top" : f2 > 0.8 ? "bottom" : "middle", align: u2 < -0.4 ? "left" : u2 > 0.4 ? "right" : "center" }, { inheritColor: W3 }), silent: true } : { style: tv(y2, { text: D2, x: E3, y: O3, verticalAlign: "middle", align: "center" }, { inheritColor: W3 }), silent: true, originX: E3, originY: O3, rotation: P2 }));
+        var L2 = y2.get("distance") + N2, D2 = kI(rs(_2 / w3 * (m2 - p2) + p2), y2.get("formatter")), W4 = r2(_2 / w3), E3 = u2 * (d2 - k2 - L2) + h2, O3 = f2 * (d2 - k2 - L2) + v2, R3 = y2.get("rotate"), P2 = 0;
+        "radial" === R3 ? (P2 = -S3 + 2 * Math.PI) > Math.PI / 2 && (P2 += Math.PI) : "tangential" === R3 ? P2 = -S3 - Math.PI / 2 : Ci(R3) && (P2 = R3 * Math.PI / 180), c2.add(new Uu(0 === P2 ? { style: tv(y2, { text: D2, x: E3, y: O3, verticalAlign: f2 < -0.8 ? "top" : f2 > 0.8 ? "bottom" : "middle", align: u2 < -0.4 ? "left" : u2 > 0.4 ? "right" : "center" }, { inheritColor: W4 }), silent: true } : { style: tv(y2, { text: D2, x: E3, y: O3, verticalAlign: "middle", align: "center" }, { inheritColor: W4 }), silent: true, originX: E3, originY: O3, rotation: P2 }));
       }
       if (b2.get("show") && _2 !== w3) {
         L2 = (L2 = b2.get("distance")) ? L2 + l2 : l2;
@@ -25557,8 +24586,8 @@ var xW = (function(t5) {
         p2 = L2.getModel("itemStyle").getItemStyle(), m2 = I2.getModel(["blur", "itemStyle"]).getItemStyle(), g3 = I2.getModel(["select", "itemStyle"]).getItemStyle(), b2 = I2.get(["itemStyle", "borderRadius"]), x2 = L2.get("focus"), k2 = L2.get("blurScope"), M4 = L2.get("disabled"), y2 = Qh(I2);
       }
       C3.shape.r = b2;
-      var D2 = t6.getRawValue(z2), W3 = "-";
-      D2 && null != D2[2] && (W3 = D2[2] + ""), Kh(C3, y2, { labelFetcher: t6, labelDataIndex: z2, defaultOpacity: A2.opacity, defaultText: W3 }), C3.ensureState("emphasis").style = p2, C3.ensureState("blur").style = m2, C3.ensureState("select").style = g3, Xf(C3, x2, k2, M4), C3.incremental = e2, e2 && (C3.states.emphasis.hoverLayer = true), v2.add(C3), d2.setItemGraphicEl(z2, C3), this._progressiveEls && this._progressiveEls.push(C3);
+      var D2 = t6.getRawValue(z2), W4 = "-";
+      D2 && null != D2[2] && (W4 = D2[2] + ""), Kh(C3, y2, { labelFetcher: t6, labelDataIndex: z2, defaultOpacity: A2.opacity, defaultText: W4 }), C3.ensureState("emphasis").style = p2, C3.ensureState("blur").style = m2, C3.ensureState("select").style = g3, Xf(C3, x2, k2, M4), C3.incremental = e2, e2 && (C3.states.emphasis.hoverLayer = true), v2.add(C3), d2.setItemGraphicEl(z2, C3), this._progressiveEls && this._progressiveEls.push(C3);
     }
   }, n2.prototype._renderOnGeo = function(t6, n3, i2, r2) {
     var e2 = i2.targetVisuals.inRange, a2 = i2.targetVisuals.outOfRange, o2 = n3.getData(), s2 = this._hmLayer || this._hmLayer || new yW();
@@ -27519,8 +26548,8 @@ function SR(t5, n2) {
           var L2 = c2.dataToCoord(S3) - x2, D2 = a2.dataToCoord(z2);
           Math.abs(L2) < d2 && (L2 = (L2 < 0 ? -1 : 1) * d2), T4 = A2, N2 = A2 + L2, I2 = (_2 = D2 - u2) - f2, b2 && (i2[s2][z2][C3] = N2);
         } else {
-          var W3 = c2.dataToCoord(S3, y2) - x2, E3 = a2.dataToCoord(z2);
-          Math.abs(W3) < p2 && (W3 = (W3 < 0 ? -1 : 1) * p2), N2 = (T4 = E3 + u2) + f2, _2 = A2, I2 = A2 + W3, b2 && (i2[s2][z2][C3] = I2);
+          var W4 = c2.dataToCoord(S3, y2) - x2, E3 = a2.dataToCoord(z2);
+          Math.abs(W4) < p2 && (W4 = (W4 < 0 ? -1 : 1) * p2), N2 = (T4 = E3 + u2) + f2, _2 = A2, I2 = A2 + W4, b2 && (i2[s2][z2][C3] = I2);
         }
         n3.setItemLayout(k2, { cx: h2, cy: v2, r0: T4, r: N2, startAngle: -_2 * Math.PI / 180, endAngle: -I2 * Math.PI / 180, clockwise: _2 >= I2 });
       }
@@ -32236,7 +31265,7 @@ function uj(t5, n2) {
         }
         if (z2 < d2) {
           d2 = z2, v2 = k2;
-          for (var W3 = 0; W3 < p2.length; W3++) h2[W3] = p2[W3];
+          for (var W4 = 0; W4 < p2.length; W4++) h2[W4] = p2[W4];
         }
       }
       a3.push({ from: c2, to: h2, fromCp: u3, toCp: f3, rotation: -v2 });
@@ -33044,7 +32073,7 @@ var Oj, Rj, Pj, Fj, Bj, Vj, Hj, jj, Yj, Uj, $j, Xj, Gj, qj, Zj, Jj, Kj, Qj, tY, 
 };
 const sY = class {
   constructor(i2) {
-    o$2(this, i2), this.lfEvent = G$3(this, "lf-chart-event"), Oj.add(this), this.themeValues = { background: null, border: null, danger: null, font: null, success: null, text: null }, this.lfAxis = [], this.lfColors = [], this.lfDataset = null, this.lfLegend = "bottom", this.lfSeries = [], this.lfSizeX = "100%", this.lfSizeY = "100%", this.lfStyle = "", this.lfTypes = ["line"], this.lfXAxis = null, this.lfYAxis = null, Rj.set(this, void 0), Pj.set(this, LF_CHART_BLOCKS), Fj.set(this, LF_CHART_PARTS), Bj.set(this, LF_STYLE_ID), Vj.set(this, LF_CHART_CSS_VARS), Hj.set(this, LF_WRAPPER_ID), jj.set(this, void 0), Yj.set(this, void 0), Uj.set(this, void 0), $j.set(this, void 0), Xj.set(this, []), Gj.set(this, []), qj.set(this, void 0), Jj.set(this, (() => {
+    o$2(this, i2), this.lfEvent = G$4(this, "lf-chart-event"), Oj.add(this), this.themeValues = { background: null, border: null, danger: null, font: null, success: null, text: null }, this.lfAxis = [], this.lfColors = [], this.lfDataset = null, this.lfLegend = "bottom", this.lfSeries = [], this.lfSizeX = "100%", this.lfSizeY = "100%", this.lfStyle = "", this.lfTypes = ["line"], this.lfXAxis = null, this.lfYAxis = null, Rj.set(this, void 0), Pj.set(this, LF_CHART_BLOCKS), Fj.set(this, LF_CHART_PARTS), Bj.set(this, LF_STYLE_ID), Vj.set(this, LF_CHART_CSS_VARS), Hj.set(this, LF_WRAPPER_ID), jj.set(this, void 0), Yj.set(this, void 0), Uj.set(this, void 0), $j.set(this, void 0), Xj.set(this, []), Gj.set(this, []), qj.set(this, void 0), Jj.set(this, (() => {
       var t5, n2, i3;
       oY(this, qj, (t5 = { compInstance: this, columnById: (t6) => aY(this, Rj, "f").data.column.find(this.lfDataset, { id: t6 })[0], manager: aY(this, Rj, "f"), mappedType: (t6) => {
         switch (t6) {
@@ -33132,20 +32161,20 @@ const sY = class {
   }
   render() {
     const { bemClass: t5, setLfStyle: n2 } = aY(this, Rj, "f").theme, { lfSizeX: i2, lfSizeY: a2, lfStyle: o2 } = this;
-    return U$5(A$9, { key: "0df18c5d54d02c2edb8287b4ffeda2ecb15778dd" }, U$5("style", { key: "11e84062613fa04ca338fa0c4f0e0de0a40d8096", id: aY(this, Bj, "f") }, `
+    return U$6(A$a, { key: "0df18c5d54d02c2edb8287b4ffeda2ecb15778dd" }, U$6("style", { key: "11e84062613fa04ca338fa0c4f0e0de0a40d8096", id: aY(this, Bj, "f") }, `
             :host {
                ${aY(this, Vj, "f").height}: ${a2 || "100%"};
                ${aY(this, Vj, "f").width}: ${i2 || "100%"};
             }
             ${o2 && n2(this) || ""}
-          `), U$5("div", { key: "b494208b15c7eb8df9561ee178d348cd15265b70", id: aY(this, Hj, "f") }, U$5("div", { key: "df48cacb595ecc5e13de774b6b3fc0009ea975fa", class: t5(aY(this, Pj, "f").chart._), part: aY(this, Fj, "f").chart, ref: (t6) => oY(this, jj, t6) })));
+          `), U$6("div", { key: "b494208b15c7eb8df9561ee178d348cd15265b70", id: aY(this, Hj, "f") }, U$6("div", { key: "df48cacb595ecc5e13de774b6b3fc0009ea975fa", class: t5(aY(this, Pj, "f").chart._), part: aY(this, Fj, "f").chart, ref: (t6) => oY(this, jj, t6) })));
   }
   disconnectedCallback() {
     var _a2;
     aY(this, Yj, "f") && aY(this, Yj, "f").disconnect(), tw(aY(this, jj, "f")), (_a2 = aY(this, Rj, "f")) == null ? void 0 : _a2.theme.unregister(this);
   }
   get rootElement() {
-    return q$4(this);
+    return q$5(this);
   }
 };
 Rj = /* @__PURE__ */ new WeakMap(), Pj = /* @__PURE__ */ new WeakMap(), Fj = /* @__PURE__ */ new WeakMap(), Bj = /* @__PURE__ */ new WeakMap(), Vj = /* @__PURE__ */ new WeakMap(), Hj = /* @__PURE__ */ new WeakMap(), jj = /* @__PURE__ */ new WeakMap(), Yj = /* @__PURE__ */ new WeakMap(), Uj = /* @__PURE__ */ new WeakMap(), $j = /* @__PURE__ */ new WeakMap(), Xj = /* @__PURE__ */ new WeakMap(), Gj = /* @__PURE__ */ new WeakMap(), qj = /* @__PURE__ */ new WeakMap(), Jj = /* @__PURE__ */ new WeakMap(), Oj = /* @__PURE__ */ new WeakSet(), Zj = function() {
@@ -33530,145 +32559,145 @@ const mY = async (t5) => {
   return f2;
 }, kY = (t5) => ({ attachImage: () => {
   const { controller: n2, elements: i2, handlers: e2 } = t5(), { blocks: a2, currentAttachments: o2, currentPrompt: s2, manager: l2, parts: u2 } = n2.get, { chat: f2 } = i2.refs, { button: c2 } = e2.chat, { assignRef: h2, theme: v2 } = l2, { bemClass: d2, get: p2 } = v2, m2 = p2.current().variables["--lf-icon-image"], g3 = o2().length > 0, b2 = g3 ? o2().map(((t6) => t6.name)).join(", ") : "Attach an image (ensure the model supports image inputs).";
-  return U$5("lf-button", { class: d2(a2.chat._, a2.chat.attachImage), id: LF_CHAT_IDS.chat.attachImage, lfIcon: m2, lfStretchY: true, lfStyling: g3 ? "raised" : "flat", lfUiState: s2() ? "disabled" : "primary", "onLf-button-event": c2, part: u2.attachImage, ref: h2(f2, "attachImage"), title: b2 });
+  return U$6("lf-button", { class: d2(a2.chat._, a2.chat.attachImage), id: LF_CHAT_IDS.chat.attachImage, lfIcon: m2, lfStretchY: true, lfStyling: g3 ? "raised" : "flat", lfUiState: s2() ? "disabled" : "primary", "onLf-button-event": c2, part: u2.attachImage, ref: h2(f2, "attachImage"), title: b2 });
 }, attachFile: () => {
   const { controller: n2, elements: i2, handlers: e2 } = t5(), { blocks: a2, currentAttachments: o2, currentPrompt: s2, manager: l2, parts: u2 } = n2.get, { chat: f2 } = i2.refs, { button: c2 } = e2.chat, { assignRef: h2, theme: v2 } = l2, { bemClass: d2, get: p2 } = v2, m2 = p2.current().variables["--lf-icon-attachment"], g3 = o2().length > 0, b2 = g3 ? o2().map(((t6) => t6.name)).join(", ") : "Attach a file (ensure the model supports file inputs).";
-  return U$5("lf-button", { class: d2(a2.chat._, a2.chat.attachFile), id: LF_CHAT_IDS.chat.attachFile, lfIcon: m2, lfStretchY: true, lfStyling: g3 ? "raised" : "flat", lfUiState: s2() ? "disabled" : "primary", "onLf-button-event": c2, part: u2.attachFile, ref: h2(f2, "attachFile"), title: b2 });
+  return U$6("lf-button", { class: d2(a2.chat._, a2.chat.attachFile), id: LF_CHAT_IDS.chat.attachFile, lfIcon: m2, lfStretchY: true, lfStyling: g3 ? "raised" : "flat", lfUiState: s2() ? "disabled" : "primary", "onLf-button-event": c2, part: u2.attachFile, ref: h2(f2, "attachFile"), title: b2 });
 }, attachments: () => {
   const { controller: n2, elements: i2, handlers: e2 } = t5(), { blocks: a2, manager: o2 } = n2.get, { chat: s2 } = i2.refs, { chip: l2 } = e2.chat, { assignRef: u2, theme: f2 } = o2, { bemClass: c2 } = f2, h2 = n2.get.currentAttachments();
-  return U$5("lf-chip", { class: c2(a2.chat._, a2.chat.attachments), id: LF_CHAT_IDS.chat.attachments, lfDataset: { nodes: h2.map(((t6) => ({ description: t6.name, icon: "image_url" === t6.type ? f2.get.current().variables["--lf-icon-image"] : f2.get.current().variables["--lf-icon-attachment"], id: t6.id, type: t6.type, value: t6.name }))) }, lfStyling: "input", "onLf-chip-event": l2, part: a2.chat.attachments, ref: u2(s2, "attachments") });
+  return U$6("lf-chip", { class: c2(a2.chat._, a2.chat.attachments), id: LF_CHAT_IDS.chat.attachments, lfDataset: { nodes: h2.map(((t6) => ({ description: t6.name, icon: "image_url" === t6.type ? f2.get.current().variables["--lf-icon-image"] : f2.get.current().variables["--lf-icon-attachment"], id: t6.id, type: t6.type, value: t6.name }))) }, lfStyling: "input", "onLf-chip-event": l2, part: a2.chat.attachments, ref: u2(s2, "attachments") });
 }, clear: () => {
   const { controller: n2, elements: i2, handlers: e2 } = t5(), { blocks: a2, currentPrompt: o2, cyAttributes: s2, manager: l2, parts: u2 } = n2.get, { button: f2 } = e2.chat, { chat: c2 } = i2.refs, { assignRef: h2, theme: v2 } = l2, { bemClass: d2, get: p2 } = v2, { "--lf-icon-clear": m2 } = p2.current().variables;
-  return U$5("lf-button", { class: d2(a2.chat._, a2.chat.clear), "data-cy": s2.button, id: LF_CHAT_IDS.chat.clear, lfIcon: m2, lfLabel: "Clear", lfStyling: "flat", lfUiState: o2() ? "disabled" : "danger", "onLf-button-event": f2, part: u2.clear, ref: h2(c2, "clear"), title: "Clear the textarea." });
+  return U$6("lf-button", { class: d2(a2.chat._, a2.chat.clear), "data-cy": s2.button, id: LF_CHAT_IDS.chat.clear, lfIcon: m2, lfLabel: "Clear", lfStyling: "flat", lfUiState: o2() ? "disabled" : "danger", "onLf-button-event": f2, part: u2.clear, ref: h2(c2, "clear"), title: "Clear the textarea." });
 }, configuration: () => {
   const { controller: n2, elements: i2, handlers: e2 } = t5(), { blocks: a2, cyAttributes: o2, manager: s2, parts: l2 } = n2.get, { chat: u2 } = i2.refs, { button: f2 } = e2.chat, { assignRef: c2, theme: h2 } = s2, { bemClass: v2, get: d2 } = h2;
-  return U$5("lf-button", { class: v2(a2.chat._, a2.chat.configuration), "data-cy": o2.button, id: LF_CHAT_IDS.chat.configuration, key: LF_CHAT_IDS.chat.configuration, lfIcon: d2.current().variables["--lf-icon-settings"], lfLabel: "Configuration", lfStyling: "outlined", "onLf-button-event": f2, part: l2.configuration, ref: c2(u2, "configuration") });
+  return U$6("lf-button", { class: v2(a2.chat._, a2.chat.configuration), "data-cy": o2.button, id: LF_CHAT_IDS.chat.configuration, key: LF_CHAT_IDS.chat.configuration, lfIcon: d2.current().variables["--lf-icon-settings"], lfLabel: "Configuration", lfStyling: "outlined", "onLf-button-event": f2, part: l2.configuration, ref: c2(u2, "configuration") });
 }, editableMessage: (n2) => {
   const { controller: i2, elements: e2, handlers: a2 } = t5(), { blocks: o2, manager: s2, parts: l2 } = i2.get, { chat: u2 } = e2.refs, { assignRef: f2, theme: c2 } = s2, { bemClass: h2 } = c2;
-  return U$5("div", { class: h2(o2.chat._, o2.chat.editContainer) }, U$5("lf-textfield", { class: h2(o2.chat._, o2.chat.editTextarea), lfStretchX: true, lfStyling: "textarea", lfUiState: "primary", lfValue: n2.content, ref: f2(u2, "editTextarea") }), U$5("div", { class: h2(o2.chat._, o2.chat.editButtons) }, U$5("lf-button", { id: LF_CHAT_IDS.chat.editCancel, lfLabel: "Cancel", lfStretchX: true, lfStyling: "flat", lfUiState: "danger", "onLf-button-event": a2.chat.button, part: l2.editCancel, ref: f2(u2, "editCancel") }), U$5("lf-button", { id: LF_CHAT_IDS.chat.editConfirm, lfLabel: "Confirm", lfStretchX: true, lfStyling: "flat", lfUiState: "success", "onLf-button-event": a2.chat.button, part: l2.editConfirm, ref: f2(u2, "editConfirm") })));
+  return U$6("div", { class: h2(o2.chat._, o2.chat.editContainer) }, U$6("lf-textfield", { class: h2(o2.chat._, o2.chat.editTextarea), lfStretchX: true, lfStyling: "textarea", lfUiState: "primary", lfValue: n2.content, ref: f2(u2, "editTextarea") }), U$6("div", { class: h2(o2.chat._, o2.chat.editButtons) }, U$6("lf-button", { id: LF_CHAT_IDS.chat.editCancel, lfLabel: "Cancel", lfStretchX: true, lfStyling: "flat", lfUiState: "danger", "onLf-button-event": a2.chat.button, part: l2.editCancel, ref: f2(u2, "editCancel") }), U$6("lf-button", { id: LF_CHAT_IDS.chat.editConfirm, lfLabel: "Confirm", lfStretchX: true, lfStyling: "flat", lfUiState: "success", "onLf-button-event": a2.chat.button, part: l2.editConfirm, ref: f2(u2, "editConfirm") })));
 }, messageBlock: (n2) => {
   const { controller: i2 } = t5(), { blocks: e2, manager: a2 } = i2.get, { theme: o2 } = a2, { bemClass: s2 } = o2, l2 = s2(e2.messages._, e2.messages.paragraph);
-  return U$5("div", { class: l2 }, n2);
+  return U$6("div", { class: l2 }, n2);
 }, progressbar: () => {
   const { controller: n2, elements: i2 } = t5(), { chat: e2 } = i2.refs, { blocks: a2, compInstance: o2, currentTokens: s2, manager: l2 } = n2.get, { lfContextWindow: u2 } = o2, { assignRef: f2, theme: c2 } = l2, { bemClass: h2, get: v2 } = c2, { current: d2, percentage: p2 } = s2(), m2 = `Estimated tokens used: ${d2}/${u2}`;
-  return U$5("lf-progressbar", { class: h2(a2.input._, a2.input.progressbar), lfCenteredLabel: true, lfIcon: v2.icon("percentage60"), lfLabel: "Context window", lfUiSize: "xsmall", lfValue: p2, ref: f2(e2, "progressbar"), title: m2 });
+  return U$6("lf-progressbar", { class: h2(a2.input._, a2.input.progressbar), lfCenteredLabel: true, lfIcon: v2.icon("percentage60"), lfLabel: "Context window", lfUiSize: "xsmall", lfValue: p2, ref: f2(e2, "progressbar"), title: m2 });
 }, send: () => {
   const { controller: n2, elements: i2, handlers: e2 } = t5(), { blocks: a2, currentAbortStreaming: o2, currentPrompt: s2, cyAttributes: l2, manager: u2, parts: f2 } = n2.get, { chat: c2 } = i2.refs, { button: h2 } = e2.chat, { assignRef: v2, theme: d2 } = u2, { bemClass: p2 } = d2, m2 = Boolean(o2()), g3 = Boolean(s2() && !m2), b2 = d2.get.icon(m2 ? "offSend" : "send"), y2 = m2 ? "Stop" : "Send", w3 = m2 ? "danger" : "primary";
-  return U$5("lf-button", { class: p2(a2.chat._, a2.chat.send), "data-cy": l2.button, id: LF_CHAT_IDS.chat.send, lfIcon: b2, lfLabel: y2, lfShowSpinner: g3, lfUiState: w3, "onLf-button-event": h2, part: f2.send, ref: v2(c2, "send"), title: "Send your prompt (CTRL + Enter)." });
+  return U$6("lf-button", { class: p2(a2.chat._, a2.chat.send), "data-cy": l2.button, id: LF_CHAT_IDS.chat.send, lfIcon: b2, lfLabel: y2, lfShowSpinner: g3, lfUiState: w3, "onLf-button-event": h2, part: f2.send, ref: v2(c2, "send"), title: "Send your prompt (CTRL + Enter)." });
 }, settings: () => {
   const { controller: n2, elements: i2, handlers: e2 } = t5(), { blocks: a2, cyAttributes: o2, manager: s2 } = n2.get, { chat: l2 } = i2.refs, { button: u2 } = e2.chat, { assignRef: f2, theme: c2 } = s2, { bemClass: h2 } = c2;
-  return U$5("lf-button", { class: h2(a2.input._, a2.input.button), "data-cy": o2.button, id: LF_CHAT_IDS.chat.settings, lfIcon: "settings", lfStretchY: true, lfStyling: "flat", "onLf-button-event": u2, ref: f2(l2, "settings") });
+  return U$6("lf-button", { class: h2(a2.input._, a2.input.button), "data-cy": o2.button, id: LF_CHAT_IDS.chat.settings, lfIcon: "settings", lfStretchY: true, lfStyling: "flat", "onLf-button-event": u2, ref: f2(l2, "settings") });
 }, spinner: () => {
   const { controller: n2, elements: i2 } = t5(), { currentPrompt: e2, manager: a2 } = n2.get, { chat: o2 } = i2.refs, { assignRef: s2 } = a2, l2 = Boolean(e2());
-  return U$5("lf-spinner", { lfActive: l2, lfBarVariant: true, lfDimensions: "3px", ref: s2(o2, "spinner") });
+  return U$6("lf-spinner", { lfActive: l2, lfBarVariant: true, lfDimensions: "3px", ref: s2(o2, "spinner") });
 }, stt: () => {
   const { controller: n2, elements: i2, handlers: e2 } = t5(), { blocks: a2, cyAttributes: o2, manager: s2, parts: l2 } = n2.get, { chat: u2 } = i2.refs, { button: f2 } = e2.chat, { assignRef: c2, theme: h2 } = s2, { bemClass: v2, get: d2 } = h2, p2 = d2.icon("microphone");
-  return U$5("lf-button", { class: v2(a2.commands._, a2.commands.stt), "data-cy": o2.button, id: LF_CHAT_IDS.chat.stt, lfIcon: p2, lfStyling: "icon", "onLf-button-event": f2, part: l2.stt, ref: c2(u2, "stt"), title: "Activate Speech To Text with your browser's API (if supported)." });
+  return U$6("lf-button", { class: v2(a2.commands._, a2.commands.stt), "data-cy": o2.button, id: LF_CHAT_IDS.chat.stt, lfIcon: p2, lfStyling: "icon", "onLf-button-event": f2, part: l2.stt, ref: c2(u2, "stt"), title: "Activate Speech To Text with your browser's API (if supported)." });
 }, textarea: () => {
   const { controller: n2, elements: i2 } = t5(), { blocks: e2, currentPrompt: a2, cyAttributes: o2, manager: s2, parts: l2 } = n2.get, { chat: u2 } = i2.refs, { assignRef: f2, theme: c2 } = s2, { bemClass: h2 } = c2;
-  return U$5("lf-textfield", { class: h2(e2.input._, e2.input.textarea), "data-cy": o2.input, id: LF_CHAT_IDS.chat.prompt, lfStretchX: true, lfLabel: "What's on your mind?", lfStyling: "textarea", lfUiState: a2() ? "disabled" : "primary", part: l2.prompt, ref: f2(u2, "textarea") });
+  return U$6("lf-textfield", { class: h2(e2.input._, e2.input.textarea), "data-cy": o2.input, id: LF_CHAT_IDS.chat.prompt, lfStretchX: true, lfLabel: "What's on your mind?", lfStyling: "textarea", lfUiState: a2() ? "disabled" : "primary", part: l2.prompt, ref: f2(u2, "textarea") });
 }, toolExecutionChip: () => {
   const { controller: n2, elements: i2 } = t5(), { blocks: e2, compInstance: a2, currentToolExecution: o2, manager: s2 } = n2.get, { chat: l2 } = i2.refs, { assignRef: u2, theme: f2 } = s2, { bemClass: c2 } = f2, h2 = o2();
-  return h2 ? U$5("div", { class: c2(e2.messages._, e2.messages.container) }, U$5("lf-chip", { lfDataset: h2, lfUiSize: a2.lfUiSize, ref: u2(l2, "toolExecutionChip") })) : null;
+  return h2 ? U$6("div", { class: c2(e2.messages._, e2.messages.container) }, U$6("lf-chip", { lfDataset: h2, lfUiSize: a2.lfUiSize, ref: u2(l2, "toolExecutionChip") })) : null;
 } }), MY = (t5) => ({ blockquote: (n2) => {
   const { controller: i2 } = t5(), { blocks: e2, manager: a2 } = i2.get, { theme: o2 } = a2, { bemClass: s2 } = o2, { messages: l2 } = e2;
-  return U$5("blockquote", { class: s2(l2._, l2.blockquote) }, n2);
+  return U$6("blockquote", { class: s2(l2._, l2.blockquote) }, n2);
 }, image: (n2, i2) => {
   const { controller: e2 } = t5(), { blocks: a2, manager: o2 } = e2.get, { theme: s2 } = o2, { bemClass: l2 } = s2, { messages: u2 } = a2;
-  return U$5("img", { src: n2, alt: i2 || "Image from assistant", class: l2(u2._, u2.content), loading: "lazy" });
+  return U$6("img", { src: n2, alt: i2 || "Image from assistant", class: l2(u2._, u2.content), loading: "lazy" });
 }, bold: (n2) => {
   const { controller: i2 } = t5(), { blocks: e2, manager: a2 } = i2.get, { theme: o2 } = a2, { bemClass: s2 } = o2, { messages: l2 } = e2;
-  return U$5("strong", { class: s2(l2._, l2.bold) }, n2);
+  return U$6("strong", { class: s2(l2._, l2.bold) }, n2);
 }, bulletList: (n2) => {
   const { controller: i2 } = t5(), { blocks: e2, manager: a2 } = i2.get, { theme: o2 } = a2, { bemClass: s2 } = o2, { messages: l2 } = e2;
-  return U$5("ul", { class: s2(l2._, l2.list) }, n2);
+  return U$6("ul", { class: s2(l2._, l2.list) }, n2);
 }, codeFence: (n2, i2) => {
   const { controller: e2 } = t5(), { blocks: a2, manager: o2 } = e2.get, { theme: s2 } = o2, { bemClass: l2 } = s2, { messages: u2 } = a2;
-  return U$5("lf-code", { class: l2(u2._, u2.code), lfFadeIn: false, lfLanguage: n2, lfValue: i2 });
+  return U$6("lf-code", { class: l2(u2._, u2.code), lfFadeIn: false, lfLanguage: n2, lfValue: i2 });
 }, heading: (n2, i2) => {
   const { controller: e2 } = t5(), { blocks: a2, manager: o2 } = e2.get, { theme: s2 } = o2, { bemClass: l2 } = s2, { messages: u2 } = a2, f2 = l2(u2._, u2.heading);
-  return U$5(`h${n2}`, { class: f2 }, i2);
+  return U$6(`h${n2}`, { class: f2 }, i2);
 }, horizontalRule: () => {
   const { controller: n2 } = t5(), { blocks: i2, manager: e2 } = n2.get, { theme: a2 } = e2, { bemClass: o2 } = a2, { messages: s2 } = i2;
-  return U$5("hr", { class: o2(s2._, s2.hr) });
+  return U$6("hr", { class: o2(s2._, s2.hr) });
 }, inlineCode: (n2) => {
   const { controller: i2 } = t5(), { blocks: e2, manager: a2 } = i2.get, { theme: o2 } = a2, { bemClass: s2 } = o2, { messages: l2 } = e2;
-  return U$5("code", { class: s2(l2._, l2.inlineCode) }, n2);
+  return U$6("code", { class: s2(l2._, l2.inlineCode) }, n2);
 }, inlineContainer: (n2) => {
   const { controller: i2 } = t5(), { blocks: e2, manager: a2 } = i2.get, { theme: o2 } = a2, { bemClass: s2 } = o2, { messages: l2 } = e2;
-  return U$5("div", { class: s2(l2._, l2.inlineContainer) }, n2);
+  return U$6("div", { class: s2(l2._, l2.inlineContainer) }, n2);
 }, italic: (n2) => {
   const { controller: i2 } = t5(), { blocks: e2, manager: a2 } = i2.get, { theme: o2 } = a2, { bemClass: s2 } = o2, { messages: l2 } = e2;
-  return U$5("em", { class: s2(l2._, l2.italic) }, n2);
+  return U$6("em", { class: s2(l2._, l2.italic) }, n2);
 }, lineBreak: () => {
   const { controller: n2 } = t5(), { blocks: i2, manager: e2 } = n2.get, { theme: a2 } = e2, { bemClass: o2 } = a2, { messages: s2 } = i2;
-  return U$5("br", { class: o2(s2._, s2.lineBreak) });
+  return U$6("br", { class: o2(s2._, s2.lineBreak) });
 }, link: (n2, i2) => {
   const { controller: e2 } = t5(), { blocks: a2, manager: o2 } = e2.get, { theme: s2 } = o2, { bemClass: l2 } = s2, { messages: u2 } = a2;
-  return U$5("a", { class: l2(u2._, u2.link), href: n2, target: "_blank", rel: "noopener noreferrer" }, i2);
+  return U$6("a", { class: l2(u2._, u2.link), href: n2, target: "_blank", rel: "noopener noreferrer" }, i2);
 }, listItem: (n2) => {
   const { controller: i2 } = t5(), { blocks: e2, manager: a2 } = i2.get, { theme: o2 } = a2, { bemClass: s2 } = o2, { messages: l2 } = e2;
-  return U$5("li", { class: s2(l2._, l2.listItem) }, n2);
+  return U$6("li", { class: s2(l2._, l2.listItem) }, n2);
 }, orderedList: (n2) => {
   const { controller: i2 } = t5(), { blocks: e2, manager: a2 } = i2.get, { theme: o2 } = a2, { bemClass: s2 } = o2, { messages: l2 } = e2;
-  return U$5("ol", { class: s2(l2._, l2.list) }, n2);
+  return U$6("ol", { class: s2(l2._, l2.list) }, n2);
 }, paragraph: (n2) => {
   const { controller: i2 } = t5(), { blocks: e2, manager: a2 } = i2.get, { theme: o2 } = a2, { bemClass: s2 } = o2, { messages: l2 } = e2;
-  return U$5("div", { class: s2(l2._, l2.paragraph) }, n2);
+  return U$6("div", { class: s2(l2._, l2.paragraph) }, n2);
 } }), SY = (t5) => ({ back: () => {
   const { controller: n2, elements: i2, handlers: e2 } = t5(), { blocks: a2, cyAttributes: o2, manager: s2, parts: l2 } = n2.get, { settings: u2 } = i2.refs, { button: f2 } = e2.settings, { assignRef: c2, theme: h2 } = s2, { bemClass: v2, get: d2 } = h2, p2 = d2.current().variables["--lf-icon-previous"];
-  return U$5("lf-button", { class: v2(a2.settings._, a2.settings.back), "data-cy": o2.button, id: LF_CHAT_IDS.options.back, lfIcon: p2, lfLabel: "Back", lfStretchX: true, "onLf-button-event": f2, part: l2.back, ref: c2(u2, "back") });
+  return U$6("lf-button", { class: v2(a2.settings._, a2.settings.back), "data-cy": o2.button, id: LF_CHAT_IDS.options.back, lfIcon: p2, lfLabel: "Back", lfStretchX: true, "onLf-button-event": f2, part: l2.back, ref: c2(u2, "back") });
 }, contextWindow: () => {
   const { controller: n2, elements: i2, handlers: e2 } = t5(), { blocks: a2, compInstance: o2, cyAttributes: s2, manager: l2, parts: u2 } = n2.get, { settings: f2 } = i2.refs, { textfield: c2 } = e2.settings, { assignRef: h2, data: v2, theme: d2 } = l2, { stringify: p2 } = v2.cell, { bemClass: m2, get: g3 } = d2;
-  return U$5("lf-textfield", { class: m2(a2.settings._, a2.settings.textfield), "data-cy": s2.input, id: LF_CHAT_IDS.options.contextWindow, lfHtmlAttributes: { min: 1024, type: "number" }, lfIcon: g3.icon("arrowAutofitContent"), lfLabel: "Context Window Size", lfValue: p2(o2.lfContextWindow), "onLf-textfield-event": c2, part: u2.contextWindow, ref: h2(f2, "contextWindow") });
+  return U$6("lf-textfield", { class: m2(a2.settings._, a2.settings.textfield), "data-cy": s2.input, id: LF_CHAT_IDS.options.contextWindow, lfHtmlAttributes: { min: 1024, type: "number" }, lfIcon: g3.icon("arrowAutofitContent"), lfLabel: "Context Window Size", lfValue: p2(o2.lfContextWindow), "onLf-textfield-event": c2, part: u2.contextWindow, ref: h2(f2, "contextWindow") });
 }, endpoint: () => {
   const { controller: n2, elements: i2, handlers: e2 } = t5(), { blocks: a2, compInstance: o2, cyAttributes: s2, manager: l2, parts: u2 } = n2.get, { settings: f2 } = i2.refs, { textfield: c2 } = e2.settings, { assignRef: h2, theme: v2 } = l2, { bemClass: d2, get: p2 } = v2;
-  return U$5("lf-textfield", { class: d2(a2.settings._, a2.settings.textfield), "data-cy": s2.input, id: LF_CHAT_IDS.options.endpointUrl, lfIcon: p2.icon("network"), lfLabel: "Endpoint URL", lfValue: o2.lfEndpointUrl, "onLf-textfield-event": c2, part: u2.endpointUrl, ref: h2(f2, "endpoint") });
+  return U$6("lf-textfield", { class: d2(a2.settings._, a2.settings.textfield), "data-cy": s2.input, id: LF_CHAT_IDS.options.endpointUrl, lfIcon: p2.icon("network"), lfLabel: "Endpoint URL", lfValue: o2.lfEndpointUrl, "onLf-textfield-event": c2, part: u2.endpointUrl, ref: h2(f2, "endpoint") });
 }, exportHistory: () => {
   const { controller: n2, elements: i2, handlers: e2 } = t5(), { blocks: a2, cyAttributes: o2, manager: s2, parts: l2 } = n2.get, { settings: u2 } = i2.refs, { button: f2 } = e2.settings, { assignRef: c2, theme: h2 } = s2, { bemClass: v2, get: d2 } = h2;
-  return U$5("lf-button", { class: v2(a2.settings._, a2.settings.exportHistory), "data-cy": o2.button, id: LF_CHAT_IDS.options.exportHistory, lfIcon: d2.icon("download"), lfLabel: "Export history", lfStretchX: true, "onLf-button-event": f2, part: l2.exportHistory, ref: c2(u2, "exportHistory") });
+  return U$6("lf-button", { class: v2(a2.settings._, a2.settings.exportHistory), "data-cy": o2.button, id: LF_CHAT_IDS.options.exportHistory, lfIcon: d2.icon("download"), lfLabel: "Export history", lfStretchX: true, "onLf-button-event": f2, part: l2.exportHistory, ref: c2(u2, "exportHistory") });
 }, frequencyPenalty: () => {
   const { controller: n2, elements: i2, handlers: e2 } = t5(), { blocks: a2, compInstance: o2, cyAttributes: s2, manager: l2, parts: u2 } = n2.get, { settings: f2 } = i2.refs, { textfield: c2 } = e2.settings, { assignRef: h2, data: v2, theme: d2 } = l2, { stringify: p2 } = v2.cell, { bemClass: m2, get: g3 } = d2;
-  return U$5("lf-textfield", { class: m2(a2.settings._, a2.settings.textfield), "data-cy": s2.input, id: LF_CHAT_IDS.options.frequencyPenalty, lfHtmlAttributes: { min: 0, type: "number" }, lfIcon: g3.icon("codeCircle2"), lfLabel: "Frequency Penalty", lfValue: p2(o2.lfFrequencyPenalty), "onLf-textfield-event": c2, part: u2.frequencyPenalty, ref: h2(f2, "frequencyPenalty") });
+  return U$6("lf-textfield", { class: m2(a2.settings._, a2.settings.textfield), "data-cy": s2.input, id: LF_CHAT_IDS.options.frequencyPenalty, lfHtmlAttributes: { min: 0, type: "number" }, lfIcon: g3.icon("codeCircle2"), lfLabel: "Frequency Penalty", lfValue: p2(o2.lfFrequencyPenalty), "onLf-textfield-event": c2, part: u2.frequencyPenalty, ref: h2(f2, "frequencyPenalty") });
 }, importHistory: () => {
   const { controller: n2, elements: i2, handlers: e2 } = t5(), { blocks: a2, cyAttributes: o2, manager: s2, parts: l2 } = n2.get, { settings: u2 } = i2.refs, { button: f2 } = e2.settings, { assignRef: c2, theme: h2 } = s2, { bemClass: v2, get: d2 } = h2;
-  return U$5("lf-button", { class: v2(a2.settings._, a2.settings.importHistory), "data-cy": o2.button, id: LF_CHAT_IDS.options.importHistory, lfIcon: d2.icon("upload"), lfLabel: "Import history", lfStretchX: true, "onLf-button-event": f2, part: l2.importHistory, ref: c2(u2, "importHistory") });
+  return U$6("lf-button", { class: v2(a2.settings._, a2.settings.importHistory), "data-cy": o2.button, id: LF_CHAT_IDS.options.importHistory, lfIcon: d2.icon("upload"), lfLabel: "Import history", lfStretchX: true, "onLf-button-event": f2, part: l2.importHistory, ref: c2(u2, "importHistory") });
 }, maxTokens: () => {
   const { controller: n2, elements: i2, handlers: e2 } = t5(), { blocks: a2, compInstance: o2, cyAttributes: s2, manager: l2, parts: u2 } = n2.get, { settings: f2 } = i2.refs, { textfield: c2 } = e2.settings, { assignRef: h2, data: v2, theme: d2 } = l2, { stringify: p2 } = v2.cell, { bemClass: m2, get: g3 } = d2;
-  return U$5("lf-textfield", { class: m2(a2.settings._, a2.settings.textfield), "data-cy": s2.input, id: LF_CHAT_IDS.options.maxTokens, lfHtmlAttributes: { min: 10, type: "number" }, lfIcon: g3.icon("numbers"), lfLabel: "Max tokens count", lfValue: p2(o2.lfMaxTokens), "onLf-textfield-event": c2, part: u2.maxTokens, ref: h2(f2, "maxTokens") });
+  return U$6("lf-textfield", { class: m2(a2.settings._, a2.settings.textfield), "data-cy": s2.input, id: LF_CHAT_IDS.options.maxTokens, lfHtmlAttributes: { min: 10, type: "number" }, lfIcon: g3.icon("numbers"), lfLabel: "Max tokens count", lfValue: p2(o2.lfMaxTokens), "onLf-textfield-event": c2, part: u2.maxTokens, ref: h2(f2, "maxTokens") });
 }, polling: () => {
   const { controller: n2, elements: i2, handlers: e2 } = t5(), { blocks: a2, compInstance: o2, cyAttributes: s2, manager: l2, parts: u2 } = n2.get, { settings: f2 } = i2.refs, { textfield: c2 } = e2.settings, { assignRef: h2, data: v2, theme: d2 } = l2, { stringify: p2 } = v2.cell, { bemClass: m2, get: g3 } = d2;
-  return U$5("lf-textfield", { class: m2(a2.settings._, a2.settings.textfield), "data-cy": s2.input, id: LF_CHAT_IDS.options.polling, lfHtmlAttributes: { min: 10, type: "number" }, lfIcon: g3.icon("hourglassLow"), lfLabel: "Polling interval", lfValue: p2(o2.lfPollingInterval), "onLf-textfield-event": c2, part: u2.polling, ref: h2(f2, "polling") });
+  return U$6("lf-textfield", { class: m2(a2.settings._, a2.settings.textfield), "data-cy": s2.input, id: LF_CHAT_IDS.options.polling, lfHtmlAttributes: { min: 10, type: "number" }, lfIcon: g3.icon("hourglassLow"), lfLabel: "Polling interval", lfValue: p2(o2.lfPollingInterval), "onLf-textfield-event": c2, part: u2.polling, ref: h2(f2, "polling") });
 }, presencePenalty: () => {
   const { controller: n2, elements: i2, handlers: e2 } = t5(), { blocks: a2, compInstance: o2, cyAttributes: s2, manager: l2, parts: u2 } = n2.get, { settings: f2 } = i2.refs, { textfield: c2 } = e2.settings, { assignRef: h2, data: v2, theme: d2 } = l2, { stringify: p2 } = v2.cell, { bemClass: m2, get: g3 } = d2;
-  return U$5("lf-textfield", { class: m2(a2.settings._, a2.settings.textfield), "data-cy": s2.input, id: LF_CHAT_IDS.options.presencePenalty, lfHtmlAttributes: { min: -2, type: "number" }, lfIcon: g3.icon("schema"), lfLabel: "Presence penalty", lfValue: p2(o2.lfPresencePenalty), "onLf-textfield-event": c2, part: u2.presencePenalty, ref: h2(f2, "presencePenalty") });
+  return U$6("lf-textfield", { class: m2(a2.settings._, a2.settings.textfield), "data-cy": s2.input, id: LF_CHAT_IDS.options.presencePenalty, lfHtmlAttributes: { min: -2, type: "number" }, lfIcon: g3.icon("schema"), lfLabel: "Presence penalty", lfValue: p2(o2.lfPresencePenalty), "onLf-textfield-event": c2, part: u2.presencePenalty, ref: h2(f2, "presencePenalty") });
 }, seed: () => {
   const { controller: n2, elements: i2, handlers: e2 } = t5(), { blocks: a2, compInstance: o2, cyAttributes: s2, manager: l2, parts: u2 } = n2.get, { settings: f2 } = i2.refs, { textfield: c2 } = e2.settings, { assignRef: h2, data: v2, theme: d2 } = l2, { stringify: p2 } = v2.cell, { bemClass: m2, get: g3 } = d2;
-  return U$5("lf-textfield", { class: m2(a2.settings._, a2.settings.textfield), "data-cy": s2.input, id: LF_CHAT_IDS.options.seed, lfHtmlAttributes: { type: "number" }, lfIcon: g3.icon("ikosaedr"), lfLabel: "Random Seed (-1 for random)", lfValue: p2(o2.lfSeed), "onLf-textfield-event": c2, part: u2.seed, ref: h2(f2, "seed") });
+  return U$6("lf-textfield", { class: m2(a2.settings._, a2.settings.textfield), "data-cy": s2.input, id: LF_CHAT_IDS.options.seed, lfHtmlAttributes: { type: "number" }, lfIcon: g3.icon("ikosaedr"), lfLabel: "Random Seed (-1 for random)", lfValue: p2(o2.lfSeed), "onLf-textfield-event": c2, part: u2.seed, ref: h2(f2, "seed") });
 }, system: () => {
   const { controller: n2, elements: i2, handlers: e2 } = t5(), { blocks: a2, compInstance: o2, cyAttributes: s2, manager: l2, parts: u2 } = n2.get, { settings: f2 } = i2.refs, { textfield: c2 } = e2.settings, { assignRef: h2, theme: v2 } = l2, { bemClass: d2 } = v2;
-  return U$5("lf-textfield", { class: d2(a2.settings._, a2.settings.textarea), "data-cy": s2.input, id: LF_CHAT_IDS.options.system, lfLabel: "System prompt", lfStyling: "textarea", lfValue: o2.lfSystem, "onLf-textfield-event": c2, part: u2.system, ref: h2(f2, "system"), title: "The system prompt is used to generate the first response in the conversation." });
+  return U$6("lf-textfield", { class: d2(a2.settings._, a2.settings.textarea), "data-cy": s2.input, id: LF_CHAT_IDS.options.system, lfLabel: "System prompt", lfStyling: "textarea", lfValue: o2.lfSystem, "onLf-textfield-event": c2, part: u2.system, ref: h2(f2, "system"), title: "The system prompt is used to generate the first response in the conversation." });
 }, temperature: () => {
   const { controller: n2, elements: i2, handlers: e2 } = t5(), { blocks: a2, compInstance: o2, cyAttributes: s2, manager: l2, parts: u2 } = n2.get, { settings: f2 } = i2.refs, { textfield: c2 } = e2.settings, { assignRef: h2, data: v2, theme: d2 } = l2, { stringify: p2 } = v2.cell, { bemClass: m2, get: g3 } = d2;
-  return U$5("lf-textfield", { class: m2(a2.settings._, a2.settings.textfield), "data-cy": s2.input, id: LF_CHAT_IDS.options.temperature, lfHtmlAttributes: { max: 1, min: 0.1, type: "number" }, lfIcon: g3.icon("temperature"), lfLabel: "Temperature", lfValue: p2(o2.lfTemperature), "onLf-textfield-event": c2, part: u2.temperature, ref: h2(f2, "temperature") });
+  return U$6("lf-textfield", { class: m2(a2.settings._, a2.settings.textfield), "data-cy": s2.input, id: LF_CHAT_IDS.options.temperature, lfHtmlAttributes: { max: 1, min: 0.1, type: "number" }, lfIcon: g3.icon("temperature"), lfLabel: "Temperature", lfValue: p2(o2.lfTemperature), "onLf-textfield-event": c2, part: u2.temperature, ref: h2(f2, "temperature") });
 }, topP: () => {
   const { controller: n2, elements: i2, handlers: e2 } = t5(), { blocks: a2, compInstance: o2, cyAttributes: s2, manager: l2, parts: u2 } = n2.get, { settings: f2 } = i2.refs, { textfield: c2 } = e2.settings, { assignRef: h2, data: v2, theme: d2 } = l2, { stringify: p2 } = v2.cell, { bemClass: m2, get: g3 } = d2;
-  return U$5("lf-textfield", { class: m2(a2.settings._, a2.settings.textfield), "data-cy": s2.input, id: LF_CHAT_IDS.options.topP, lfHtmlAttributes: { max: 1, min: 0, step: 0.1, type: "number" }, lfIcon: g3.icon("template"), lfLabel: "Top P", lfValue: p2(o2.lfTopP), "onLf-textfield-event": c2, part: u2.topP, ref: h2(f2, "topP") });
+  return U$6("lf-textfield", { class: m2(a2.settings._, a2.settings.textfield), "data-cy": s2.input, id: LF_CHAT_IDS.options.topP, lfHtmlAttributes: { max: 1, min: 0, step: 0.1, type: "number" }, lfIcon: g3.icon("template"), lfLabel: "Top P", lfValue: p2(o2.lfTopP), "onLf-textfield-event": c2, part: u2.topP, ref: h2(f2, "topP") });
 } }), zY = (t5) => ({ copyContent: (n2) => {
   const { controller: i2, elements: e2, handlers: a2 } = t5(), { blocks: o2, currentPrompt: s2, manager: l2, parts: u2 } = i2.get, { toolbar: f2 } = e2.refs, { button: c2 } = a2.toolbar, { assignRef: h2, theme: v2 } = l2, { bemClass: d2, get: p2 } = v2, m2 = Boolean(s2());
-  return U$5("lf-button", { class: d2(o2.toolbar._, o2.toolbar.button), id: LF_CHAT_IDS.toolbar.copyContent, lfIcon: p2.current().variables["--lf-icon-copy"], lfStyling: "flat", lfUiState: m2 ? "disabled" : "primary", "onLf-button-event": (t6) => c2(t6, n2), part: u2.copyContent, ref: h2(f2, "copyContent"), title: "Copy text to clipboard." });
+  return U$6("lf-button", { class: d2(o2.toolbar._, o2.toolbar.button), id: LF_CHAT_IDS.toolbar.copyContent, lfIcon: p2.current().variables["--lf-icon-copy"], lfStyling: "flat", lfUiState: m2 ? "disabled" : "primary", "onLf-button-event": (t6) => c2(t6, n2), part: u2.copyContent, ref: h2(f2, "copyContent"), title: "Copy text to clipboard." });
 }, editMessage: (n2) => {
   const { controller: i2, elements: e2, handlers: a2 } = t5(), { blocks: o2, currentPrompt: s2, manager: l2, parts: u2 } = i2.get, { toolbar: f2 } = e2.refs, { button: c2 } = a2.toolbar, { assignRef: h2, theme: v2 } = l2, { bemClass: d2, get: p2 } = v2, m2 = Boolean(s2());
-  return U$5("lf-button", { class: d2(o2.toolbar._, o2.toolbar.button), id: LF_CHAT_IDS.toolbar.editMessage, lfIcon: p2.current().variables["--lf-icon-edit"], lfStyling: "flat", lfUiState: m2 ? "disabled" : "primary", "onLf-button-event": (t6) => c2(t6, n2), part: u2.regenerate, ref: h2(f2, "editMessage"), title: "Edit this message" });
+  return U$6("lf-button", { class: d2(o2.toolbar._, o2.toolbar.button), id: LF_CHAT_IDS.toolbar.editMessage, lfIcon: p2.current().variables["--lf-icon-edit"], lfStyling: "flat", lfUiState: m2 ? "disabled" : "primary", "onLf-button-event": (t6) => c2(t6, n2), part: u2.regenerate, ref: h2(f2, "editMessage"), title: "Edit this message" });
 }, deleteMessage: (n2) => {
   const { controller: i2, elements: e2, handlers: a2 } = t5(), { blocks: o2, currentPrompt: s2, manager: l2, parts: u2 } = i2.get, { toolbar: f2 } = e2.refs, { button: c2 } = a2.toolbar, { assignRef: h2, theme: v2 } = l2, { bemClass: d2, get: p2 } = v2, m2 = Boolean(s2());
-  return U$5("lf-button", { class: d2(o2.toolbar._, o2.toolbar.button), id: LF_CHAT_IDS.toolbar.deleteMessage, lfIcon: p2.current().variables["--lf-icon-delete"], lfStyling: "flat", lfUiState: m2 ? "disabled" : "danger", "onLf-button-event": (t6) => c2(t6, n2), part: u2.deleteMessage, ref: h2(f2, "deleteMessage"), title: "Delete this message from the chat history." });
+  return U$6("lf-button", { class: d2(o2.toolbar._, o2.toolbar.button), id: LF_CHAT_IDS.toolbar.deleteMessage, lfIcon: p2.current().variables["--lf-icon-delete"], lfStyling: "flat", lfUiState: m2 ? "disabled" : "danger", "onLf-button-event": (t6) => c2(t6, n2), part: u2.deleteMessage, ref: h2(f2, "deleteMessage"), title: "Delete this message from the chat history." });
 }, regenerate: (n2) => {
   const { controller: i2, elements: e2, handlers: a2 } = t5(), { blocks: o2, currentPrompt: s2, manager: l2, parts: u2 } = i2.get, { toolbar: f2 } = e2.refs, { button: c2 } = a2.toolbar, { assignRef: h2, theme: v2 } = l2, { bemClass: d2, get: p2 } = v2, m2 = Boolean(s2());
-  return U$5("lf-button", { class: d2(o2.toolbar._, o2.toolbar.button), id: LF_CHAT_IDS.toolbar.regenerate, lfIcon: p2.current().variables["--lf-icon-refresh"], lfStyling: "flat", lfUiState: m2 ? "disabled" : "primary", "onLf-button-event": (t6) => c2(t6, n2), part: u2.regenerate, ref: h2(f2, "regenerate"), title: "Regenerate the response to this request." });
+  return U$6("lf-button", { class: d2(o2.toolbar._, o2.toolbar.button), id: LF_CHAT_IDS.toolbar.regenerate, lfIcon: p2.current().variables["--lf-icon-refresh"], lfStyling: "flat", lfUiState: m2 ? "disabled" : "primary", "onLf-button-event": (t6) => c2(t6, n2), part: u2.regenerate, ref: h2(f2, "regenerate"), title: "Regenerate the response to this request." });
 }, toolExecution: (n2) => {
   const { controller: i2, elements: e2 } = t5(), { blocks: a2, manager: o2 } = i2.get, { toolbar: s2 } = e2.refs, { assignRef: l2, theme: u2 } = o2, { bemClass: f2 } = u2;
-  return n2.toolExecution ? U$5("div", { class: f2(a2.toolbar._, a2.toolbar.toolExecution) }, U$5("lf-chip", { lfDataset: n2.toolExecution, lfFlat: true, lfUiSize: "xsmall", ref: l2(s2, "toolExecution") })) : null;
+  return n2.toolExecution ? U$6("div", { class: f2(a2.toolbar._, a2.toolbar.toolExecution) }, U$6("lf-chip", { lfDataset: n2.toolExecution, lfFlat: true, lfUiSize: "xsmall", ref: l2(s2, "toolExecution") })) : null;
 } }), CY = (t5) => ({ button: async (n2) => {
   var _a2;
   const { eventType: i2, id: r2 } = n2.detail, e2 = t5(), { controller: a2, elements: o2 } = e2, { get: s2, set: l2 } = a2, { refs: u2 } = o2, { stt: f2, textarea: c2 } = u2.chat, { llm: h2 } = s2.manager, v2 = s2.compInstance;
@@ -33798,31 +32827,31 @@ var LY, DY, WY, EY, OY, RY, PY, FY, BY, VY, HY, jY, YY, UY, $Y, XY, GY, qY, ZY, 
 };
 const tU = class {
   constructor(i2) {
-    o$2(this, i2), this.lfEvent = G$3(this, "lf-chat-event"), LY.add(this), this.currentAbortStreaming = null, this.currentAttachments = [], this.currentEditingIndex = null, this.currentTokens = { current: 0, percentage: 0 }, this.currentToolExecution = null, this.history = [], this.status = "connecting", this.view = "main", this.lfAttachmentUploadTimeout = 6e4, this.lfContextWindow = 8192, this.lfEmpty = "Your chat history is empty!", this.lfEndpointUrl = "http://localhost:5001", this.lfTools = [], this.lfFrequencyPenalty = 0, this.lfLayout = "top", this.lfMaxTokens = 2048, this.lfPollingInterval = 1e4, this.lfPresencePenalty = 0, this.lfSeed = -1, this.lfStyle = "", this.lfSystem = "You are a helpful and cheerful assistant eager to help the user out with his tasks.", this.lfTemperature = 0.7, this.lfTopP = 0.9, this.lfUiSize = "medium", this.lfValue = [], DY.set(this, void 0), WY.set(this, LF_CHAT_BLOCKS), EY.set(this, CY_ATTRIBUTES), OY.set(this, LF_ATTRIBUTES), RY.set(this, LF_CHAT_PARTS), PY.set(this, LF_STYLE_ID), FY.set(this, LF_WRAPPER_ID), BY.set(this, void 0), VY.set(this, null), HY.set(this, null), jY.set(this, void 0), YY.set(this, (() => {
+    o$2(this, i2), this.lfEvent = G$4(this, "lf-chat-event"), LY.add(this), this.currentAbortStreaming = null, this.currentAttachments = [], this.currentEditingIndex = null, this.currentTokens = { current: 0, percentage: 0 }, this.currentToolExecution = null, this.history = [], this.status = "connecting", this.view = "main", this.lfAttachmentUploadTimeout = 6e4, this.lfContextWindow = 8192, this.lfEmpty = "Your chat history is empty!", this.lfEndpointUrl = "http://localhost:5001", this.lfTools = [], this.lfFrequencyPenalty = 0, this.lfLayout = "top", this.lfMaxTokens = 2048, this.lfPollingInterval = 1e4, this.lfPresencePenalty = 0, this.lfSeed = -1, this.lfStyle = "", this.lfSystem = "You are a helpful and cheerful assistant eager to help the user out with his tasks.", this.lfTemperature = 0.7, this.lfTopP = 0.9, this.lfUiSize = "medium", this.lfValue = [], DY.set(this, void 0), WY.set(this, LF_CHAT_BLOCKS), EY.set(this, CY_ATTRIBUTES), OY.set(this, LF_ATTRIBUTES), RY.set(this, LF_CHAT_PARTS), PY.set(this, LF_STYLE_ID), FY.set(this, LF_WRAPPER_ID), BY.set(this, void 0), VY.set(this, null), HY.set(this, null), jY.set(this, void 0), YY.set(this, (() => {
       var t5, n2, i3;
       QY(this, jY, (t5 = { blocks: KY(this, WY, "f"), compInstance: this, currentAbortStreaming: () => this.currentAbortStreaming, currentAttachments: () => this.currentAttachments, currentEditingIndex: () => this.currentEditingIndex, currentPrompt: () => this.currentPrompt, currentTokens: () => this.currentTokens, currentToolExecution: () => this.currentToolExecution, cyAttributes: KY(this, EY, "f"), history: () => this.history, lastMessage: (t6 = "user") => this.history.slice().reverse().find(((n3) => n3.role === t6)), lfAttributes: KY(this, OY, "f"), manager: KY(this, DY, "f"), parts: KY(this, RY, "f"), status: () => this.status, view: () => this.view }, n2 = { currentAbortStreaming: (t6) => this.currentAbortStreaming = t6, currentAttachments: (t6) => this.currentAttachments = t6, currentEditingIndex: (t6) => this.currentEditingIndex = t6, currentPrompt: (t6) => this.currentPrompt = t6, currentTokens: (t6) => this.currentTokens = t6, currentToolExecution: (t6) => this.currentToolExecution = t6, history: async (t6) => {
         t6(), this.currentTokens = await mY(KY(this, jY, "f")), this.onLfEvent(new CustomEvent("update"), "update");
       }, status: (t6) => this.status = t6, view: (t6) => this.view = t6 }, { controller: { get: NY(t5, i3 = () => KY(this, jY, "f")), set: n2 }, elements: { jsx: _Y(i3), refs: { chat: { attachFile: null, attachImage: null, attachments: null, clear: null, configuration: null, editCancel: null, editConfirm: null, editTextarea: null, fileInput: null, imageInput: null, progressbar: null, send: null, settings: null, spinner: null, stt: null, textarea: null, toolExecutionChip: null }, settings: { back: null, contextWindow: null, endpoint: null, exportHistory: null, frequencyPenalty: null, historyInput: null, importHistory: null, maxTokens: null, polling: null, presencePenalty: null, seed: null, system: null, temperature: null, topP: null }, toolbar: { copyContent: null, deleteMessage: null, editMessage: null, regenerate: null, toolExecution: null } } }, handlers: IY(i3) }));
     })), $Y.set(this, (() => {
       const { bemClass: t5 } = KY(this, DY, "f").theme, { chat: n2, commands: i3, input: e2, messages: a2, request: s2 } = KY(this, WY, "f"), { attachFile: l2, attachImage: u2, attachments: f2, clear: c2, editableMessage: h2, progressbar: v2, send: d2, settings: p2, spinner: m2, stt: g3, textarea: b2 } = KY(this, jY, "f").elements.jsx.chat, { history: y2, lfEmpty: w3 } = this;
-      return U$5(St$1, null, U$5("div", { class: t5(s2._) }, f2(), U$5("div", { class: t5(e2._) }, u2(), l2(), p2(), b2(), v2()), U$5("div", { class: t5(i3._) }, c2(), g3(), d2())), U$5("div", { class: t5(a2._), ref: (t6) => QY(this, HY, t6) }, (y2 == null ? void 0 : y2.length) ? y2.filter(((t6) => "tool" !== t6.role)).map(((n3, i4) => {
+      return U$6(St$1, null, U$6("div", { class: t5(s2._) }, f2(), U$6("div", { class: t5(e2._) }, u2(), l2(), p2(), b2(), v2()), U$6("div", { class: t5(i3._) }, c2(), g3(), d2())), U$6("div", { class: t5(a2._), ref: (t6) => QY(this, HY, t6) }, (y2 == null ? void 0 : y2.length) ? y2.filter(((t6) => "tool" !== t6.role)).map(((n3, i4) => {
         const e3 = this.currentEditingIndex === i4;
-        return U$5("div", { class: t5(a2._, a2.container, { [n3.role]: true }), key: i4, ref: (t6) => {
+        return U$6("div", { class: t5(a2._, a2.container, { [n3.role]: true }), key: i4, ref: (t6) => {
           t6 && i4 === y2.length - 1 && QY(this, VY, t6);
-        } }, U$5("div", { class: t5(a2._, a2.content, { [n3.role]: true }) }, e3 ? h2(n3) : KY(this, GY, "f").call(this, n3)), KY(this, JY, "f").call(this, n3));
-      })) : U$5("div", { class: t5(a2._, a2.empty) }, w3)), U$5("div", { class: t5(n2._, n2.spinnerBar) }, m2()));
+        } }, U$6("div", { class: t5(a2._, a2.content, { [n3.role]: true }) }, e3 ? h2(n3) : KY(this, GY, "f").call(this, n3)), KY(this, JY, "f").call(this, n3));
+      })) : U$6("div", { class: t5(a2._, a2.empty) }, w3)), U$6("div", { class: t5(n2._, n2.spinnerBar) }, m2()));
     })), XY.set(this, (() => {
       const { bemClass: t5 } = KY(this, DY, "f").theme, { chat: n2 } = KY(this, WY, "f");
-      return U$5(St$1, null, U$5("div", { class: t5(n2._, n2.spinner) }, U$5("lf-spinner", { lfActive: true, lfDimensions: "7px", lfLayout: 6 })), U$5("div", { class: t5(n2._, n2.title) }, "Just a moment."), U$5("div", { class: t5(n2._, n2.text) }, "Contacting the LLM endpoint..."));
+      return U$6(St$1, null, U$6("div", { class: t5(n2._, n2.spinner) }, U$6("lf-spinner", { lfActive: true, lfDimensions: "7px", lfLayout: 6 })), U$6("div", { class: t5(n2._, n2.title) }, "Just a moment."), U$6("div", { class: t5(n2._, n2.text) }, "Contacting the LLM endpoint..."));
     })), GY.set(this, ((t5) => xY(KY(this, jY, "f"), t5.content, t5.role))), qY.set(this, (() => {
       const { bemClass: t5, get: n2 } = KY(this, DY, "f").theme, { chat: i3 } = KY(this, WY, "f"), { configuration: e2 } = KY(this, jY, "f").elements.jsx.chat, a2 = n2.icon("door"), { style: s2 } = KY(this, DY, "f").assets.get(`./assets/svg/${a2}.svg`);
-      return U$5(St$1, null, U$5("div", { class: t5(i3._, i3.error) }, U$5("div", { class: t5(i3._, i3.icon), style: s2 }), U$5("div", { class: t5(i3._, i3.title) }, "Zzz..."), U$5("div", { class: t5(i3._, i3.text) }, "The LLM endpoint is currently offline.")), e2());
+      return U$6(St$1, null, U$6("div", { class: t5(i3._, i3.error) }, U$6("div", { class: t5(i3._, i3.icon), style: s2 }), U$6("div", { class: t5(i3._, i3.title) }, "Zzz..."), U$6("div", { class: t5(i3._, i3.text) }, "The LLM endpoint is currently offline.")), e2());
     })), ZY.set(this, (() => {
       const { bemClass: t5 } = KY(this, DY, "f").theme, { settings: n2 } = KY(this, WY, "f"), { back: i3, contextWindow: e2, endpoint: a2, exportHistory: s2, frequencyPenalty: l2, importHistory: u2, maxTokens: f2, polling: c2, presencePenalty: h2, system: v2, seed: d2, temperature: p2, topP: m2 } = KY(this, jY, "f").elements.jsx.settings;
-      return U$5(St$1, null, U$5("div", { class: t5(n2._, n2.header) }, i3(), u2(), s2()), U$5("div", { class: t5(n2._, n2.configuration), part: KY(this, RY, "f").settings }, v2(), a2(), p2(), f2(), m2(), l2(), h2(), U$5("div", { class: t5(n2._, "divider") }), e2(), d2(), c2(), U$5("div", { class: t5(n2._, "divider") })));
+      return U$6(St$1, null, U$6("div", { class: t5(n2._, n2.header) }, i3(), u2(), s2()), U$6("div", { class: t5(n2._, n2.configuration), part: KY(this, RY, "f").settings }, v2(), a2(), p2(), f2(), m2(), l2(), h2(), U$6("div", { class: t5(n2._, "divider") }), e2(), d2(), c2(), U$6("div", { class: t5(n2._, "divider") })));
     })), JY.set(this, ((t5) => {
       const { bemClass: n2 } = KY(this, DY, "f").theme, { toolbar: i3 } = KY(this, WY, "f"), { copyContent: e2, deleteMessage: a2, regenerate: o2, editMessage: s2, toolExecution: l2 } = KY(this, jY, "f").elements.jsx.toolbar;
-      return U$5("div", { class: n2(i3._), part: KY(this, RY, "f").toolbar }, U$5("div", { class: n2(i3._, i3.buttons) }, a2(t5), e2(t5), s2(t5), "user" === t5.role && o2(t5)), l2(t5));
+      return U$6("div", { class: n2(i3._), part: KY(this, RY, "f").toolbar }, U$6("div", { class: n2(i3._, i3.buttons) }, a2(t5), e2(t5), s2(t5), "user" === t5.role && o2(t5)), l2(t5));
     }));
   }
   onLfEvent(t5, n2) {
@@ -34009,14 +33038,14 @@ const tU = class {
   }
   render() {
     const { bemClass: t5, setLfStyle: n2 } = KY(this, DY, "f").theme, { chat: i2 } = KY(this, WY, "f"), { lfLayout: a2, lfStyle: o2, status: s2, view: l2 } = this;
-    return U$5(A$9, { key: "390599b8a24ab34164739baff456c8b5be5719e4" }, o2 && U$5("style", { key: "9132b2bd8b61477c1185303b8a6981653f183b32", id: KY(this, PY, "f") }, n2(this)), U$5("div", { key: "2e2aac322f85c535b2badb8e8c00f92400eea1f2", id: KY(this, FY, "f") }, U$5("div", { key: "6e48ce9e47de30d3955d326cf0e39edb9e62dc98", class: t5(i2._, null, { [l2]: true, [a2]: true, [s2]: true }), part: KY(this, RY, "f").chat }, "settings" === this.view ? KY(this, ZY, "f").call(this) : "ready" === this.status ? KY(this, $Y, "f").call(this) : "connecting" === this.status ? KY(this, XY, "f").call(this) : KY(this, qY, "f").call(this))));
+    return U$6(A$a, { key: "390599b8a24ab34164739baff456c8b5be5719e4" }, o2 && U$6("style", { key: "9132b2bd8b61477c1185303b8a6981653f183b32", id: KY(this, PY, "f") }, n2(this)), U$6("div", { key: "2e2aac322f85c535b2badb8e8c00f92400eea1f2", id: KY(this, FY, "f") }, U$6("div", { key: "6e48ce9e47de30d3955d326cf0e39edb9e62dc98", class: t5(i2._, null, { [l2]: true, [a2]: true, [s2]: true }), part: KY(this, RY, "f").chat }, "settings" === this.view ? KY(this, ZY, "f").call(this) : "ready" === this.status ? KY(this, $Y, "f").call(this) : "connecting" === this.status ? KY(this, XY, "f").call(this) : KY(this, qY, "f").call(this))));
   }
   disconnectedCallback() {
     var _a2;
     clearInterval(KY(this, BY, "f")), (_a2 = KY(this, DY, "f")) == null ? void 0 : _a2.theme.unregister(this);
   }
   get rootElement() {
-    return q$4(this);
+    return q$5(this);
   }
   static get watchers() {
     return { lfPollingInterval: ["updatePollingInterval"], lfSystem: ["updateTokensCount"] };
@@ -34044,7 +33073,7 @@ var nU, iU, rU, eU, aU, oU, sU, lU, uU, fU, cU, hU, vU, dU, pU, mU, gU, bU, yU, 
 };
 const TU = class {
   constructor(i2) {
-    o$2(this, i2), this.lfEvent = G$3(this, "lf-chip-event"), nU.add(this), this.expandedNodes = /* @__PURE__ */ new Set(), this.hiddenNodes = /* @__PURE__ */ new Set(), this.selectedNodes = /* @__PURE__ */ new Set(), this.lfAriaLabel = "", this.lfDataset = null, this.lfFlat = false, this.lfRipple = true, this.lfShowSpinner = false, this.lfStyle = "", this.lfStyling = "standard", this.lfUiSize = "medium", this.lfUiState = "primary", this.lfValue = null, iU.set(this, void 0), rU.set(this, LF_CHIP_BLOCKS), eU.set(this, CY_ATTRIBUTES), aU.set(this, LF_ATTRIBUTES), oU.set(this, LF_CHIP_PARTS), sU.set(this, LF_STYLE_ID), lU.set(this, LF_WRAPPER_ID), uU.set(this, {}), fU.set(this, []);
+    o$2(this, i2), this.lfEvent = G$4(this, "lf-chip-event"), nU.add(this), this.expandedNodes = /* @__PURE__ */ new Set(), this.hiddenNodes = /* @__PURE__ */ new Set(), this.selectedNodes = /* @__PURE__ */ new Set(), this.lfAriaLabel = "", this.lfDataset = null, this.lfFlat = false, this.lfRipple = true, this.lfShowSpinner = false, this.lfStyle = "", this.lfStyling = "standard", this.lfUiSize = "medium", this.lfUiState = "primary", this.lfValue = null, iU.set(this, void 0), rU.set(this, LF_CHIP_BLOCKS), eU.set(this, CY_ATTRIBUTES), aU.set(this, LF_ATTRIBUTES), oU.set(this, LF_CHIP_PARTS), sU.set(this, LF_STYLE_ID), lU.set(this, LF_WRAPPER_ID), uU.set(this, {}), fU.set(this, []);
   }
   onLfEvent(t5, n2, i2) {
     var _a2;
@@ -34108,14 +33137,14 @@ const TU = class {
   }
   render() {
     const { bemClass: t5, setLfStyle: n2 } = CU(this, iU, "f").theme, { lfStyle: i2 } = this;
-    return AU(this, fU, []), U$5(A$9, { key: "0e8da684e8020a5d09a371fb5184d47e54c21e54" }, i2 && U$5("style", { key: "234772a37cd33dcb433dd5b43ce446c410d14163", id: CU(this, sU, "f") }, n2(this)), U$5("div", { key: "0c960fc5d303ac6908c750daa31b78557d8c1998", id: CU(this, lU, "f") }, U$5("div", { key: "3cdcc8eefd70b51e6fea28ad263df6ecb711aa4a", class: t5(CU(this, rU, "f").chip._, null, { choice: CU(this, nU, "m", vU).call(this), filter: CU(this, nU, "m", mU).call(this), flat: this.lfFlat, input: CU(this, nU, "m", gU).call(this) }), part: CU(this, oU, "f").chip, role: "grid" }, CU(this, nU, "m", kU).call(this))));
+    return AU(this, fU, []), U$6(A$a, { key: "0e8da684e8020a5d09a371fb5184d47e54c21e54" }, i2 && U$6("style", { key: "234772a37cd33dcb433dd5b43ce446c410d14163", id: CU(this, sU, "f") }, n2(this)), U$6("div", { key: "0c960fc5d303ac6908c750daa31b78557d8c1998", id: CU(this, lU, "f") }, U$6("div", { key: "3cdcc8eefd70b51e6fea28ad263df6ecb711aa4a", class: t5(CU(this, rU, "f").chip._, null, { choice: CU(this, nU, "m", vU).call(this), filter: CU(this, nU, "m", mU).call(this), flat: this.lfFlat, input: CU(this, nU, "m", gU).call(this) }), part: CU(this, oU, "f").chip, role: "grid" }, CU(this, nU, "m", kU).call(this))));
   }
   disconnectedCallback() {
     var _a2;
     (_a2 = CU(this, iU, "f")) == null ? void 0 : _a2.theme.unregister(this);
   }
   get rootElement() {
-    return q$4(this);
+    return q$5(this);
   }
 };
 iU = /* @__PURE__ */ new WeakMap(), rU = /* @__PURE__ */ new WeakMap(), eU = /* @__PURE__ */ new WeakMap(), aU = /* @__PURE__ */ new WeakMap(), oU = /* @__PURE__ */ new WeakMap(), sU = /* @__PURE__ */ new WeakMap(), lU = /* @__PURE__ */ new WeakMap(), uU = /* @__PURE__ */ new WeakMap(), fU = /* @__PURE__ */ new WeakMap(), nU = /* @__PURE__ */ new WeakSet(), cU = function(t5) {
@@ -34136,42 +33165,42 @@ iU = /* @__PURE__ */ new WeakMap(), rU = /* @__PURE__ */ new WeakMap(), eU = /* 
   return this.selectedNodes.has(t5);
 }, yU = function(t5) {
   const { bemClass: n2 } = CU(this, iU, "f").theme, { item: i2 } = CU(this, rU, "f");
-  return U$5("div", { class: n2(i2._, i2.icon, { "has-actions": true, trailing: true }), "data-cy": CU(this, eU, "f").button, "data-lf": CU(this, aU, "f").icon, key: t5.id + "_delete", onClick: (n3) => {
+  return U$6("div", { class: n2(i2._, i2.icon, { "has-actions": true, trailing: true }), "data-cy": CU(this, eU, "f").button, "data-lf": CU(this, aU, "f").icon, key: t5.id + "_delete", onClick: (n3) => {
     this.onLfEvent(n3, "delete", { node: t5 });
   } });
 }, wU = function(t5) {
   const { get: n2 } = CU(this, iU, "f").assets, { bemClass: i2 } = CU(this, iU, "f").theme, { item: e2 } = CU(this, rU, "f"), a2 = [];
-  if (this.lfShowSpinner) a2.push(U$5("div", { class: i2(e2._, e2.spinnerContainer) }, U$5("div", { class: i2(e2._, e2.spinner) })));
+  if (this.lfShowSpinner) a2.push(U$6("div", { class: i2(e2._, e2.spinnerContainer) }, U$6("div", { class: i2(e2._, e2.spinner) })));
   else if (t5.icon) {
     const { style: o2 } = n2(`./assets/svg/${t5.icon}.svg`);
-    a2.push(U$5("div", { class: i2(e2._, e2.icon, { leading: true, hidden: "filter" === this.lfStyling && CU(this, nU, "m", bU).call(this, t5) }), "data-cy": CU(this, eU, "f").maskedSvg, style: o2 }));
+    a2.push(U$6("div", { class: i2(e2._, e2.icon, { leading: true, hidden: "filter" === this.lfStyling && CU(this, nU, "m", bU).call(this, t5) }), "data-cy": CU(this, eU, "f").maskedSvg, style: o2 }));
   }
-  return CU(this, nU, "m", mU).call(this) && a2.push(U$5("span", { class: i2(e2._, e2.checkmark) }, U$5("svg", { class: i2(e2._, e2.checkmarkSvg), viewBox: "-2 -3 30 30" }, U$5("path", { class: i2(e2._, e2.checkmarkPath), d: "M1.73,12.91 8.1,19.28 22.79,4.59", fill: "none", stroke: "currentColor" })))), a2;
+  return CU(this, nU, "m", mU).call(this) && a2.push(U$6("span", { class: i2(e2._, e2.checkmark) }, U$6("svg", { class: i2(e2._, e2.checkmarkSvg), viewBox: "-2 -3 30 30" }, U$6("path", { class: i2(e2._, e2.checkmarkPath), d: "M1.73,12.91 8.1,19.28 22.79,4.59", fill: "none", stroke: "currentColor" })))), a2;
 }, xU = function(t5, n2) {
   const { bemClass: i2 } = CU(this, iU, "f").theme, { item: e2 } = CU(this, rU, "f");
-  return U$5("div", { class: i2(e2._, null, { "no-label": CU(this, nU, "m", hU).call(this, t5), selected: CU(this, nU, "m", bU).call(this, t5) }), "data-cy": CU(this, eU, "f").node, "data-lf": CU(this, aU, "f")[this.lfUiState], "data-value": t5.id, onClick: (n3) => {
+  return U$6("div", { class: i2(e2._, null, { "no-label": CU(this, nU, "m", hU).call(this, t5), selected: CU(this, nU, "m", bU).call(this, t5) }), "data-cy": CU(this, eU, "f").node, "data-lf": CU(this, aU, "f")[this.lfUiState], "data-value": t5.id, onClick: (n3) => {
     this.onLfEvent(n3, "click", { node: t5 });
-  }, part: CU(this, oU, "f").item, role: "row", title: t5.description ?? "" }, CU(this, nU, "m", SU).call(this, t5), U$5("span", { class: i2(e2._, e2.indent) }), CU(this, nU, "m", wU).call(this, t5), U$5("span", { class: i2(e2._, e2.primaryAction), "data-cy": CU(this, eU, "f").input, onBlur: (n3) => {
+  }, part: CU(this, oU, "f").item, role: "row", title: t5.description ?? "" }, CU(this, nU, "m", SU).call(this, t5), U$6("span", { class: i2(e2._, e2.indent) }), CU(this, nU, "m", wU).call(this, t5), U$6("span", { class: i2(e2._, e2.primaryAction), "data-cy": CU(this, eU, "f").input, onBlur: (n3) => {
     this.onLfEvent(n3, "blur", { node: t5 });
   }, onFocus: (n3) => {
     this.onLfEvent(n3, "focus", { node: t5 });
-  }, role: "button", tabindex: n2, "aria-label": ((CU(this, nU, "m", hU).call(this, t5) ? this.lfAriaLabel : "") || ("string" == typeof t5.value ? t5.value : "") || t5.icon || this.rootElement.id || "chip item").toString().trim() }, U$5("span", { class: i2(e2._, e2.text) }, t5.value)), CU(this, nU, "m", gU).call(this) && CU(this, nU, "m", yU).call(this, t5));
+  }, role: "button", tabindex: n2, "aria-label": ((CU(this, nU, "m", hU).call(this, t5) ? this.lfAriaLabel : "") || ("string" == typeof t5.value ? t5.value : "") || t5.icon || this.rootElement.id || "chip item").toString().trim() }, U$6("span", { class: i2(e2._, e2.text) }, t5.value)), CU(this, nU, "m", gU).call(this) && CU(this, nU, "m", yU).call(this, t5));
 }, kU = function() {
   var _a2, _b2;
   const { bemClass: t5 } = CU(this, iU, "f").theme, { chip: n2 } = CU(this, rU, "f"), i2 = [], e2 = (_b2 = (_a2 = this.lfDataset) == null ? void 0 : _a2.nodes) == null ? void 0 : _b2.length;
   for (let a2 = 0; e2 && a2 < e2; a2++) {
     AU(this, fU, []);
     const e3 = this.lfDataset.nodes[a2];
-    CU(this, nU, "m", MU).call(this, e3, 0), i2.push(U$5("div", { class: t5(n2._, n2.node) }, CU(this, fU, "f")));
+    CU(this, nU, "m", MU).call(this, e3, 0), i2.push(U$6("div", { class: t5(n2._, n2.node) }, CU(this, fU, "f")));
   }
   return i2;
 }, MU = function t2(n2, i2) {
   const { bemClass: e2 } = CU(this, iU, "f").theme, { wrapper: a2 } = CU(this, rU, "f"), o2 = CU(this, nU, "m", cU).call(this, n2), s2 = CU(this, nU, "m", pU).call(this, n2), l2 = { [LF_CHIP_CSS_VARS.indentOffset]: i2.toString() }, u2 = e2(a2._, a2.node, { expanded: s2, hidden: Boolean(!o2 && i2) });
-  if (CU(this, fU, "f").push(U$5("div", { class: e2(a2._, null, { hidden: CU(this, nU, "m", cU).call(this, n2) && !CU(this, nU, "m", zU).call(this, n2) }) }, U$5("div", { class: e2(a2._, a2.indent), part: CU(this, oU, "f").indent, style: l2 }), o2 ? U$5("div", { class: u2, onClick: (t5) => {
+  if (CU(this, fU, "f").push(U$6("div", { class: e2(a2._, null, { hidden: CU(this, nU, "m", cU).call(this, n2) && !CU(this, nU, "m", zU).call(this, n2) }) }, U$6("div", { class: e2(a2._, a2.indent), part: CU(this, oU, "f").indent, style: l2 }), o2 ? U$6("div", { class: u2, onClick: (t5) => {
     this.onLfEvent(t5, "click", { expansion: true, node: n2 });
-  } }) : i2 ? U$5("div", { class: u2 }) : null, CU(this, nU, "m", xU).call(this, n2, i2))), CU(this, nU, "m", zU).call(this, n2)) for (let r2 = 0; r2 < n2.children.length; r2++) n2.children[r2] && CU(this, nU, "m", t2).call(this, n2.children[r2], i2 + 1);
+  } }) : i2 ? U$6("div", { class: u2 }) : null, CU(this, nU, "m", xU).call(this, n2, i2))), CU(this, nU, "m", zU).call(this, n2)) for (let r2 = 0; r2 < n2.children.length; r2++) n2.children[r2] && CU(this, nU, "m", t2).call(this, n2.children[r2], i2 + 1);
 }, SU = function(t5) {
-  if (this.lfRipple && CU(this, nU, "m", dU).call(this)) return U$5("div", { "data-cy": CU(this, eU, "f").rippleSurface, "data-lf": CU(this, aU, "f").rippleSurface, onPointerDown: (n2) => this.onLfEvent(n2, "pointerdown", { node: t5 }), ref: (n2) => {
+  if (this.lfRipple && CU(this, nU, "m", dU).call(this)) return U$6("div", { "data-cy": CU(this, eU, "f").rippleSurface, "data-lf": CU(this, aU, "f").rippleSurface, onPointerDown: (n2) => this.onLfEvent(n2, "pointerdown", { node: t5 }), ref: (n2) => {
     n2 && this.lfRipple && (CU(this, uU, "f")[t5.id] = n2);
   } });
 }, zU = function(t5) {
@@ -34187,7 +33216,7 @@ var NU, _U, IU, LU, DU, WU, EU, OU, RU, PU, FU, BU, VU, HU, jU, YU = function(t5
 };
 const $U = class {
   constructor(i2) {
-    o$2(this, i2), this.lfEvent = G$3(this, "lf-code-event"), NU.add(this), this.value = "", this.lfFadeIn = true, this.lfFormat = true, this.lfLanguage = "javascript", this.lfShowCopy = true, this.lfShowHeader = true, this.lfStickyHeader = true, this.lfStyle = "", this.lfUiSize = "medium", this.lfUiState = "primary", this.lfValue = "", _U.set(this, void 0), IU.set(this, LF_CODE_BLOCKS), LU.set(this, CY_ATTRIBUTES), DU.set(this, LF_ATTRIBUTES), WU.set(this, LF_CODE_PARTS), EU.set(this, LF_STYLE_ID), OU.set(this, LF_WRAPPER_ID), RU.set(this, void 0);
+    o$2(this, i2), this.lfEvent = G$4(this, "lf-code-event"), NU.add(this), this.value = "", this.lfFadeIn = true, this.lfFormat = true, this.lfLanguage = "javascript", this.lfShowCopy = true, this.lfShowHeader = true, this.lfStickyHeader = true, this.lfStyle = "", this.lfUiSize = "medium", this.lfUiState = "primary", this.lfValue = "", _U.set(this, void 0), IU.set(this, LF_CODE_BLOCKS), LU.set(this, CY_ATTRIBUTES), DU.set(this, LF_ATTRIBUTES), WU.set(this, LF_CODE_PARTS), EU.set(this, LF_STYLE_ID), OU.set(this, LF_WRAPPER_ID), RU.set(this, void 0);
   }
   onLfEvent(t5, n2) {
     this.lfEvent.emit({ comp: this, eventType: n2, id: this.rootElement.id, originalEvent: t5 });
@@ -34236,16 +33265,16 @@ const $U = class {
   }
   render() {
     const { bemClass: t5, setLfStyle: n2 } = YU(this, _U, "f").theme, { code: i2 } = YU(this, IU, "f"), { lfLanguage: a2, lfPreserveSpaces: o2, lfStyle: s2 } = this, l2 = !(true === o2 || false === o2), u2 = a2.toLowerCase(), f2 = o2 || l2 && !("css" === u2 || "doc" === u2 || "markdown" === u2 || "plaintext" === u2 || "text" === u2 || "" === u2), c2 = f2 ? "pre" : "div";
-    return U$5(A$9, { key: "f69884e437f0650056c5160207f3e34b5baffde9" }, s2 && U$5("style", { key: "77b6861c6c2b1908aa9121f9020659d2291deb45", id: YU(this, EU, "f") }, n2(this)), U$5("div", { key: "3fab987133c1e0597d5e1710996638f13c4920cc", id: YU(this, OU, "f") }, U$5("div", { key: "a9a4c97e386f5d2cf6cb0196ca77cf9b11fa41df", class: t5(i2._, null, { "has-header": this.lfShowHeader }), part: YU(this, WU, "f").code }, this.lfShowHeader && YU(this, NU, "m", jU).call(this), U$5(c2, { class: `language-${a2} ${f2 ? "" : "body"}`, "data-lf": this.lfFadeIn && YU(this, DU, "f").fadeIn, key: this.value, part: YU(this, WU, "f").prism, ref: (t6) => {
+    return U$6(A$a, { key: "f69884e437f0650056c5160207f3e34b5baffde9" }, s2 && U$6("style", { key: "77b6861c6c2b1908aa9121f9020659d2291deb45", id: YU(this, EU, "f") }, n2(this)), U$6("div", { key: "3fab987133c1e0597d5e1710996638f13c4920cc", id: YU(this, OU, "f") }, U$6("div", { key: "a9a4c97e386f5d2cf6cb0196ca77cf9b11fa41df", class: t5(i2._, null, { "has-header": this.lfShowHeader }), part: YU(this, WU, "f").code }, this.lfShowHeader && YU(this, NU, "m", jU).call(this), U$6(c2, { class: `language-${a2} ${f2 ? "" : "body"}`, "data-lf": this.lfFadeIn && YU(this, DU, "f").fadeIn, key: this.value, part: YU(this, WU, "f").prism, ref: (t6) => {
       t6 && UU(this, RU, t6);
-    } }, f2 ? U$5("code", null, this.value) : this.value))));
+    } }, f2 ? U$6("code", null, this.value) : this.value))));
   }
   disconnectedCallback() {
     var _a2;
     (_a2 = YU(this, _U, "f")) == null ? void 0 : _a2.theme.unregister(this);
   }
   get rootElement() {
-    return q$4(this);
+    return q$5(this);
   }
   static get watchers() {
     return { lfLanguage: ["loadLanguage"] };
@@ -34271,7 +33300,7 @@ _U = /* @__PURE__ */ new WeakMap(), IU = /* @__PURE__ */ new WeakMap(), LU = /* 
   this.value = t5 ? YU(this, NU, "m", PU).call(this, n2) : n2;
 }, jU = function() {
   const { bemClass: t5, get: n2 } = YU(this, _U, "f").theme, { "--lf-icon-copy": i2, "--lf-icon-copy-ok": e2, "--lf-icon-warning": a2 } = n2.current().variables, { code: o2 } = YU(this, IU, "f"), { lfLanguage: s2, lfShowCopy: l2, lfValue: u2 } = this;
-  return U$5("div", { class: t5(o2._, o2.header, { sticky: this.lfStickyHeader }), "data-lf": YU(this, DU, "f")[this.lfUiState], part: YU(this, WU, "f").header }, U$5("span", { class: t5(o2._, o2.title), part: YU(this, WU, "f").title }, s2), l2 && U$5("lf-button", { "data-cy": YU(this, LU, "f").button, lfIcon: i2, lfLabel: "Copy", lfStretchY: true, lfStyling: "flat", lfUiSize: this.lfUiSize, lfUiState: this.lfUiState, "onLf-button-event": (t6) => {
+  return U$6("div", { class: t5(o2._, o2.header, { sticky: this.lfStickyHeader }), "data-lf": YU(this, DU, "f")[this.lfUiState], part: YU(this, WU, "f").header }, U$6("span", { class: t5(o2._, o2.title), part: YU(this, WU, "f").title }, s2), l2 && U$6("lf-button", { "data-cy": YU(this, LU, "f").button, lfIcon: i2, lfLabel: "Copy", lfStretchY: true, lfStyling: "flat", lfUiSize: this.lfUiSize, lfUiState: this.lfUiState, "onLf-button-event": (t6) => {
     const { comp: n3, eventType: i3 } = t6.detail;
     if ("click" === i3) try {
       navigator.clipboard.writeText(u2), n3.setMessage("Copied!", e2);
@@ -34290,7 +33319,7 @@ var XU, GU, qU, ZU, JU, KU, QU, t$, n$, i$, r$, e$, a$, o$, s$, l$, u$, f$, c$ =
 };
 const v$ = class {
   constructor(i2) {
-    o$2(this, i2), this.lfEvent = G$3(this, "lf-image-event"), XU.add(this), this.error = false, this.isLoaded = false, this.lfHtmlAttributes = {}, this.lfMode = "sprite", this.lfShowSpinner = false, this.lfSizeX = "100%", this.lfSizeY = "100%", this.lfStyle = "", this.lfUiState = "primary", this.lfValue = "", GU.set(this, void 0), qU.set(this, LF_IMAGE_BLOCKS), ZU.set(this, CY_ATTRIBUTES), JU.set(this, LF_ATTRIBUTES), KU.set(this, LF_IMAGE_PARTS), QU.set(this, LF_STYLE_ID), t$.set(this, LF_IMAGE_CSS_VARS), n$.set(this, LF_WRAPPER_ID), i$.set(this, null), r$.set(this, void 0), e$.set(this, void 0), f$.set(this, ((t5) => {
+    o$2(this, i2), this.lfEvent = G$4(this, "lf-image-event"), XU.add(this), this.error = false, this.isLoaded = false, this.lfHtmlAttributes = {}, this.lfMode = "sprite", this.lfShowSpinner = false, this.lfSizeX = "100%", this.lfSizeY = "100%", this.lfStyle = "", this.lfUiState = "primary", this.lfValue = "", GU.set(this, void 0), qU.set(this, LF_IMAGE_BLOCKS), ZU.set(this, CY_ATTRIBUTES), JU.set(this, LF_ATTRIBUTES), KU.set(this, LF_IMAGE_PARTS), QU.set(this, LF_STYLE_ID), t$.set(this, LF_IMAGE_CSS_VARS), n$.set(this, LF_WRAPPER_ID), i$.set(this, null), r$.set(this, void 0), e$.set(this, void 0), f$.set(this, ((t5) => {
       const { assets: n2 } = c$(this, GU, "f"), { mask: i3 } = n2.get(`./assets/svg/${t5}.svg`).style;
       h$(this, r$, i3);
     }));
@@ -34375,13 +33404,13 @@ const v$ = class {
         c$(this, f$, "f").call(this, t6);
       }
     }
-    return U$5(A$9, null, U$5("style", { id: c$(this, QU, "f") }, `
+    return U$6(A$a, null, U$6("style", { id: c$(this, QU, "f") }, `
           :host {
             ${c$(this, t$, "f").mask}: ${"mask" === this.lfMode && c$(this, r$, "f") ? c$(this, r$, "f") : "none"};
             ${c$(this, t$, "f").height}: ${c2 || "100%"};
             ${c$(this, t$, "f").width}: ${f2 || "100%"};
           }
-          ${h2 && n2.setLfStyle(this) || ""}`), U$5("div", { id: c$(this, n$, "f") }, U$5("div", { class: i2(s2._, null), "data-lf": c$(this, JU, "f").fadeIn, onClick: (t6) => {
+          ${h2 && n2.setLfStyle(this) || ""}`), U$6("div", { id: c$(this, n$, "f") }, U$6("div", { class: i2(s2._, null), "data-lf": c$(this, JU, "f").fadeIn, onClick: (t6) => {
       this.onLfEvent(t6, "click");
     }, part: c$(this, KU, "f").image }, (() => l2 ? "mask" === this.lfMode ? c$(this, XU, "m", a$).call(this) : c$(this, XU, "m", u$).call(this) : d2 ? c$(this, XU, "m", o$).call(this) : p2 && u2 ? c$(this, XU, "m", u$).call(this, v2) : "mask" === this.lfMode && u2 ? c$(this, XU, "m", a$).call(this) : null)())));
   }
@@ -34390,7 +33419,7 @@ const v$ = class {
     (_a2 = c$(this, GU, "f")) == null ? void 0 : _a2.theme.unregister(this);
   }
   get rootElement() {
-    return q$4(this);
+    return q$5(this);
   }
   static get watchers() {
     return { lfValue: ["resetState"] };
@@ -34398,10 +33427,10 @@ const v$ = class {
 };
 GU = /* @__PURE__ */ new WeakMap(), qU = /* @__PURE__ */ new WeakMap(), ZU = /* @__PURE__ */ new WeakMap(), JU = /* @__PURE__ */ new WeakMap(), KU = /* @__PURE__ */ new WeakMap(), QU = /* @__PURE__ */ new WeakMap(), t$ = /* @__PURE__ */ new WeakMap(), n$ = /* @__PURE__ */ new WeakMap(), i$ = /* @__PURE__ */ new WeakMap(), r$ = /* @__PURE__ */ new WeakMap(), e$ = /* @__PURE__ */ new WeakMap(), f$ = /* @__PURE__ */ new WeakMap(), XU = /* @__PURE__ */ new WeakSet(), a$ = function() {
   const { sanitizeProps: t5, theme: n2 } = c$(this, GU, "f"), { bemClass: i2 } = n2, { image: e2 } = c$(this, qU, "f");
-  return U$5("div", { ...t5(this.lfHtmlAttributes), class: i2(e2._, e2.icon), "data-cy": c$(this, ZU, "f").maskedSvg, "data-lf": this.lfUiState, part: c$(this, KU, "f").icon });
+  return U$6("div", { ...t5(this.lfHtmlAttributes), class: i2(e2._, e2.icon), "data-cy": c$(this, ZU, "f").maskedSvg, "data-lf": this.lfUiState, part: c$(this, KU, "f").icon });
 }, o$ = function() {
   const { sanitizeProps: t5, theme: n2 } = c$(this, GU, "f"), { bemClass: i2 } = n2, { image: e2 } = c$(this, qU, "f");
-  return U$5("img", { ...t5(this.lfHtmlAttributes), class: i2(e2._, e2.img), "data-cy": c$(this, ZU, "f").image, onError: (t6) => {
+  return U$6("img", { ...t5(this.lfHtmlAttributes), class: i2(e2._, e2.img), "data-cy": c$(this, ZU, "f").image, onError: (t6) => {
     this.error = true, this.isLoaded = false, this.onLfEvent(t6, "error");
   }, onLoad: (t6) => {
     this.error = false, this.isLoaded = true, this.onLfEvent(t6, "load");
@@ -34422,9 +33451,9 @@ GU = /* @__PURE__ */ new WeakMap(), qU = /* @__PURE__ */ new WeakMap(), ZU = /* 
     c$(this, e$, "f") === s2 && (this.resolvedSpriteName = t6 ? s2 : o2["--lf-icon-broken-image"]);
   })));
   const l2 = this.resolvedSpriteName ?? s2, u2 = `${n2.get.sprite.path()}#${l2}`;
-  return U$5("svg", { ...i2(this.lfHtmlAttributes), "aria-hidden": "true", class: e2(a2._, a2.icon), "data-cy": c$(this, ZU, "f").maskedSvg, "data-lf": this.lfUiState, part: c$(this, KU, "f").icon, ref: (t6) => {
+  return U$6("svg", { ...i2(this.lfHtmlAttributes), "aria-hidden": "true", class: e2(a2._, a2.icon), "data-cy": c$(this, ZU, "f").maskedSvg, "data-lf": this.lfUiState, part: c$(this, KU, "f").icon, ref: (t6) => {
     t6 && h$(this, i$, t6);
-  }, viewBox: "0 0 24 24" }, U$5("use", { href: u2 }));
+  }, viewBox: "0 0 24 24" }, U$6("use", { href: u2 }));
 }, v$.style = "::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=danger]{--lf-image-color-primary:var(\n    --lf-image-color-danger,\n    var(--lf-color-danger)\n  );--lf-image-color-on-primary:var(\n    --lf-image-color-danger,\n    var(--lf-color-on-danger)\n  )}[data-lf=disabled]{opacity:var(--lf-image-ui-opacity-disabled, var(--lf-ui-opacity-disabled));pointer-events:none}[data-lf=info]{--lf-image-color-primary:var(\n    --lf-image-color-info,\n    var(--lf-color-info)\n  );--lf-image-color-on-primary:var(\n    --lf-image-color-info,\n    var(--lf-color-on-info)\n  )}[data-lf=secondary]{--lf-image-color-primary:var(\n    --lf-image-color-secondary,\n    var(--lf-color-secondary)\n  );--lf-image-color-on-primary:var(\n    --lf-image-color-secondary,\n    var(--lf-color-on-secondary)\n  )}[data-lf=success]{--lf-image-color-primary:var(\n    --lf-image-color-success,\n    var(--lf-color-success)\n  );--lf-image-color-on-primary:var(\n    --lf-image-color-success,\n    var(--lf-color-on-success)\n  )}[data-lf=warning]{--lf-image-color-primary:var(\n    --lf-image-color-warning,\n    var(--lf-color-warning)\n  );--lf-image-color-on-primary:var(\n    --lf-image-color-warning,\n    var(--lf-color-on-warning)\n  )}[data-lf=fade-in]{display:block;animation:lf-fade-in-block 0.25s ease-out forwards}@keyframes lf-fade-in-block{from{visibility:hidden;opacity:0}to{visibility:visible;opacity:1}}:host{display:block;font-family:var(--lf-image-font-family, var(--lf-font-family-primary));font-size:var(--lf-image-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-image-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-image-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-image-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-image-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-image-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-image-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-image-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host,#lf-component,.image{height:var(--lf_image_height, 0);position:relative;width:var(--lf_image_width, 0)}.image__icon,.image__img{display:block;height:var(--lf_image_height, 0);margin:var(--lf-image-margin, auto);width:var(--lf_image_width, 0)}.image__icon{transition:all 150ms cubic-bezier(0.42, 0, 0.58, 1);aspect-ratio:var(--lf-comp-aspect-ratio, 1);mask:var(--lf_image_mask);-webkit-mask:var(--lf_image_mask)}.image__img{object-fit:var(--lf-image-object-fit, cover)}:host([lf-mode=mask]) .image__icon{background-color:rgba(var(--lf-image-color-primary, var(--lf-color-primary)), 0.775);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}:host([lf-mode=sprite]) .image__icon{color:rgb(var(--lf-image-color-primary, var(--lf-color-primary)));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}";
 var d$, p$, m$, g$, b$, y$, w$, x$, k$, M$, S$, z$, C$, A$, T$ = function(t5, n2, i2, r2) {
   if ("a" === i2 && !r2) throw new TypeError("Private accessor was defined without a getter");
@@ -34436,13 +33465,13 @@ var d$, p$, m$, g$, b$, y$, w$, x$, k$, M$, S$, z$, C$, A$, T$ = function(t5, n2
 };
 const _$ = class {
   constructor(i2) {
-    o$2(this, i2), this.lfEvent = G$3(this, "lf-photoframe-event"), d$.add(this), this.imageOrientation = "", this.isInViewport = false, this.isReady = false, this.lfOverlay = null, this.lfPlaceholder = null, this.lfStyle = "", this.lfThreshold = 0.25, this.lfValue = null, p$.set(this, void 0), m$.set(this, LF_PHOTOFRAME_BLOCKS), g$.set(this, CY_ATTRIBUTES), b$.set(this, LF_PHOTOFRAME_PARTS), y$.set(this, LF_STYLE_ID), w$.set(this, LF_WRAPPER_ID), x$.set(this, void 0), k$.set(this, void 0), S$.set(this, (() => {
+    o$2(this, i2), this.lfEvent = G$4(this, "lf-photoframe-event"), d$.add(this), this.imageOrientation = "", this.isInViewport = false, this.isReady = false, this.lfOverlay = null, this.lfPlaceholder = null, this.lfStyle = "", this.lfThreshold = 0.25, this.lfValue = null, p$.set(this, void 0), m$.set(this, LF_PHOTOFRAME_BLOCKS), g$.set(this, CY_ATTRIBUTES), b$.set(this, LF_PHOTOFRAME_PARTS), y$.set(this, LF_STYLE_ID), w$.set(this, LF_WRAPPER_ID), x$.set(this, void 0), k$.set(this, void 0), S$.set(this, (() => {
       const { lfOverlay: t5 } = this;
       if (!t5 || "object" != typeof t5) return null;
       const { bemClass: n2 } = T$(this, p$, "f").theme, { overlay: i3 } = T$(this, m$, "f"), { description: e2, hideOnClick: a2, icon: o2, title: s2 } = t5;
-      return U$5("div", { class: n2(i3._, null, { "has-actions": a2 }), onClick: a2 ? (t6) => {
+      return U$6("div", { class: n2(i3._, null, { "has-actions": a2 }), onClick: a2 ? (t6) => {
         this.onLfEvent(t6, "overlay"), this.lfOverlay = null;
-      } : void 0, part: T$(this, b$, "f").overlay }, U$5("div", { class: n2(i3._, i3.content) }, o2 && U$5("lf-image", { class: n2(i3._, i3.icon), lfSizeX: "3em", lfSizeY: "3em", lfValue: o2, part: T$(this, b$, "f").icon }), s2 && U$5("div", { class: n2(i3._, i3.title), part: T$(this, b$, "f").title }, s2), e2 && U$5("div", { class: n2(i3._, i3.description), part: T$(this, b$, "f").description }, e2)));
+      } : void 0, part: T$(this, b$, "f").overlay }, U$6("div", { class: n2(i3._, i3.content) }, o2 && U$6("lf-image", { class: n2(i3._, i3.icon), lfSizeX: "3em", lfSizeY: "3em", lfValue: o2, part: T$(this, b$, "f").icon }), s2 && U$6("div", { class: n2(i3._, i3.title), part: T$(this, b$, "f").title }, s2), e2 && U$6("div", { class: n2(i3._, i3.description), part: T$(this, b$, "f").description }, e2)));
     }));
   }
   onLfEvent(t5, n2, i2 = false) {
@@ -34484,11 +33513,11 @@ const _$ = class {
   }
   render() {
     const { sanitizeProps: t5, theme: n2 } = T$(this, p$, "f"), { bemClass: i2, setLfStyle: a2 } = n2, { photoframe: o2 } = T$(this, m$, "f"), { isInViewport: s2, isReady: l2, lfPlaceholder: u2, lfStyle: f2, lfValue: c2 } = this, h2 = Boolean(s2 && l2);
-    return U$5(A$9, { key: "c6b37a51fef5e5277b4ee2d66d2c837d5bf690cd" }, f2 && U$5("style", { key: "071eb62e1ab07d590562de144df9e502bab2bf79", id: T$(this, y$, "f") }, a2(this)), U$5("div", { key: "24df2338cfbfd168b8d1d80c48a96fb76ae60d01", class: i2(o2._, null, { [this.imageOrientation]: this.imageOrientation && true }), id: T$(this, w$, "f") }, T$(this, S$, "f").call(this), U$5("img", { key: "6235ff90affdc62e5f1699df46a761dc9c11508d", class: i2(o2._, o2.placeholder, { loaded: Boolean(this.imageOrientation), hidden: h2 }), "data-cy": T$(this, g$, "f").image, onLoad: (t6) => {
+    return U$6(A$a, { key: "efbef9fa4e25fc2857211abbb0fa95bca0b61dac" }, f2 && U$6("style", { key: "c7dc325c48a715672ddd4f33910586243512e100", id: T$(this, y$, "f") }, a2(this)), U$6("div", { key: "5622f0b92473f9644660a3ec386139d24d8b8e7e", class: i2(o2._, null, { [this.imageOrientation]: this.imageOrientation && true }), id: T$(this, w$, "f") }, T$(this, S$, "f").call(this), U$6("img", { key: "19c44d202553ab604536693a673d37f26c4828b8", class: i2(o2._, o2.placeholder, { loaded: Boolean(this.imageOrientation), hidden: h2 }), "data-cy": T$(this, g$, "f").image, onLoad: (t6) => {
       T$(this, d$, "m", A$).call(this, t6, true);
     }, part: T$(this, b$, "f").placeholder, ref: (t6) => {
       t6 && N$(this, k$, t6);
-    }, ...t5(u2) }), s2 && U$5("img", { key: "bf36746ca9a4e5bf92f92839a25ab95f20b1a1ca", class: i2(o2._, o2.image, { active: h2 }), "data-cy": T$(this, g$, "f").image, onLoad: (t6) => {
+    }, ...t5(u2) }), s2 && U$6("img", { key: "54257eda1e3c6d5ae3994eb3a94162bfd12cd01e", class: i2(o2._, o2.image, { active: h2 }), "data-cy": T$(this, g$, "f").image, onLoad: (t6) => {
       T$(this, d$, "m", A$).call(this, t6, false);
     }, part: T$(this, b$, "f").image, ...t5(c2) })));
   }
@@ -34497,7 +33526,7 @@ const _$ = class {
     (_a2 = T$(this, p$, "f")) == null ? void 0 : _a2.theme.unregister(this), (_b2 = T$(this, x$, "f")) == null ? void 0 : _b2.unobserve(this.rootElement);
   }
   get rootElement() {
-    return q$4(this);
+    return q$5(this);
   }
 };
 p$ = /* @__PURE__ */ new WeakMap(), m$ = /* @__PURE__ */ new WeakMap(), g$ = /* @__PURE__ */ new WeakMap(), b$ = /* @__PURE__ */ new WeakMap(), y$ = /* @__PURE__ */ new WeakMap(), w$ = /* @__PURE__ */ new WeakMap(), x$ = /* @__PURE__ */ new WeakMap(), k$ = /* @__PURE__ */ new WeakMap(), S$ = /* @__PURE__ */ new WeakMap(), d$ = /* @__PURE__ */ new WeakSet(), M$ = function(t5) {
@@ -34535,7 +33564,7 @@ var I$, L$, D$, W$, E$, O$, R$, P$, F$, B$, V$, H$, j$, Y$, U$ = function(t5, n2
 };
 const $$ = class {
   constructor(i2) {
-    o$2(this, i2), this.lfEvent = G$3(this, "lf-progressbar-event"), I$.add(this), this.lfAnimated = false, this.lfCenteredLabel = false, this.lfIcon = "", this.lfIsRadial = false, this.lfLabel = "", this.lfStyle = "", this.lfUiSize = "medium", this.lfUiState = "primary", this.lfValue = 0, L$.set(this, void 0), D$.set(this, LF_PROGRESSBAR_BLOCKS), W$.set(this, CY_ATTRIBUTES), E$.set(this, LF_ATTRIBUTES), O$.set(this, LF_PROGRESSBAR_PARTS), R$.set(this, LF_STYLE_ID), P$.set(this, LF_PROGRESSBAR_CSS_VARIABLES), F$.set(this, LF_WRAPPER_ID);
+    o$2(this, i2), this.lfEvent = G$4(this, "lf-progressbar-event"), I$.add(this), this.lfAnimated = false, this.lfCenteredLabel = false, this.lfIcon = "", this.lfIsRadial = false, this.lfLabel = "", this.lfStyle = "", this.lfUiSize = "medium", this.lfUiState = "primary", this.lfValue = 0, L$.set(this, void 0), D$.set(this, LF_PROGRESSBAR_BLOCKS), W$.set(this, CY_ATTRIBUTES), E$.set(this, LF_ATTRIBUTES), O$.set(this, LF_PROGRESSBAR_PARTS), R$.set(this, LF_STYLE_ID), P$.set(this, LF_PROGRESSBAR_CSS_VARIABLES), F$.set(this, LF_WRAPPER_ID);
   }
   onLfEvent(t5, n2) {
     this.lfEvent.emit({ comp: this, eventType: n2, id: this.rootElement.id, originalEvent: t5 });
@@ -34578,35 +33607,35 @@ const $$ = class {
   }
   render() {
     const { theme: t5 } = U$(this, L$, "f"), { lfIsRadial: n2, lfStyle: i2, lfValue: a2 } = this;
-    return U$5(A$9, { key: "587a8fb400f378106423479b493e8b45057da183" }, U$5("style", { key: "b8c6f5c1b02836516c4155371ca82875af11ba70", id: U$(this, R$, "f") }, `
+    return U$6(A$a, { key: "f835af222ddfda027da14fd69a90f9b1445ec7b8" }, U$6("style", { key: "75fdec7b9dde91a154941bea3a3149851c44d2cf", id: U$(this, R$, "f") }, `
                 :host {
                   ${U$(this, P$, "f").transform}: rotate(${3.6 * a2}deg);
                   ${U$(this, P$, "f").width}: ${a2}%;
                 }
-                ${i2 && t5.setLfStyle(this) || ""}`), U$5("div", { key: "bd208f55997bcaa420a335ae178077a18d908980", id: U$(this, F$, "f") }, n2 ? U$(this, I$, "m", Y$).call(this) : U$(this, I$, "m", j$).call(this)));
+                ${i2 && t5.setLfStyle(this) || ""}`), U$6("div", { key: "9638590cfcff4d62f2ebfeaea2a2b7c97eb88cfe", id: U$(this, F$, "f") }, n2 ? U$(this, I$, "m", Y$).call(this) : U$(this, I$, "m", j$).call(this)));
   }
   disconnectedCallback() {
     var _a2;
     (_a2 = U$(this, L$, "f")) == null ? void 0 : _a2.theme.unregister(this);
   }
   get rootElement() {
-    return q$4(this);
+    return q$5(this);
   }
 };
 L$ = /* @__PURE__ */ new WeakMap(), D$ = /* @__PURE__ */ new WeakMap(), W$ = /* @__PURE__ */ new WeakMap(), E$ = /* @__PURE__ */ new WeakMap(), O$ = /* @__PURE__ */ new WeakMap(), R$ = /* @__PURE__ */ new WeakMap(), P$ = /* @__PURE__ */ new WeakMap(), F$ = /* @__PURE__ */ new WeakMap(), I$ = /* @__PURE__ */ new WeakSet(), B$ = function(t5) {
   return "number" != typeof t5 || Number.isNaN(t5) || !Number.isFinite(t5) || t5 <= 0 ? 0 : t5 >= 100 ? 100 : t5;
 }, V$ = function() {
   const { get: t5 } = U$(this, L$, "f").assets, { bemClass: n2 } = U$(this, L$, "f").theme, { progressbar: i2 } = U$(this, D$, "f"), { lfIcon: e2 } = this, { style: a2 } = t5(`./assets/svg/${e2}.svg`);
-  return U$5("div", { class: n2(i2._, i2.icon), "data-cy": U$(this, W$, "f").maskedSvg, part: U$(this, O$, "f").icon, style: a2 });
+  return U$6("div", { class: n2(i2._, i2.icon), "data-cy": U$(this, W$, "f").maskedSvg, part: U$(this, O$, "f").icon, style: a2 });
 }, H$ = function() {
-  const { bemClass: t5 } = U$(this, L$, "f").theme, { progressbar: n2 } = U$(this, D$, "f"), { lfIcon: i2, lfLabel: e2, lfValue: a2 } = this, o2 = e2 ? [U$5("div", { class: t5(n2._, n2.text), part: U$(this, O$, "f").text }, e2)] : [U$5("div", { class: t5(n2._, n2.text), part: U$(this, O$, "f").text }, a2), U$5("div", { class: t5(n2._, n2.mu), part: U$(this, O$, "f").mu }, "%")];
-  return U$5("div", { class: t5(n2._, n2.label) }, i2 && U$(this, I$, "m", V$).call(this), o2);
+  const { bemClass: t5 } = U$(this, L$, "f").theme, { progressbar: n2 } = U$(this, D$, "f"), { lfIcon: i2, lfLabel: e2, lfValue: a2 } = this, o2 = e2 ? [U$6("div", { class: t5(n2._, n2.text), part: U$(this, O$, "f").text }, e2)] : [U$6("div", { class: t5(n2._, n2.text), part: U$(this, O$, "f").text }, a2), U$6("div", { class: t5(n2._, n2.mu), part: U$(this, O$, "f").mu }, "%")];
+  return U$6("div", { class: t5(n2._, n2.label) }, i2 && U$(this, I$, "m", V$).call(this), o2);
 }, j$ = function() {
   const { bemClass: t5 } = U$(this, L$, "f").theme, { progressbar: n2 } = U$(this, D$, "f");
-  return U$5("div", { class: t5(n2._), "data-lf": U$(this, E$, "f")[this.lfUiState], part: U$(this, O$, "f").progressbar }, U$5("div", { class: t5(n2._, n2.percentage), part: U$(this, O$, "f").percentage }, !this.lfCenteredLabel && U$(this, I$, "m", H$).call(this)), this.lfCenteredLabel && U$(this, I$, "m", H$).call(this));
+  return U$6("div", { class: t5(n2._), "data-lf": U$(this, E$, "f")[this.lfUiState], part: U$(this, O$, "f").progressbar }, U$6("div", { class: t5(n2._, n2.percentage), part: U$(this, O$, "f").percentage }, !this.lfCenteredLabel && U$(this, I$, "m", H$).call(this)), this.lfCenteredLabel && U$(this, I$, "m", H$).call(this));
 }, Y$ = function() {
   const { bemClass: t5 } = U$(this, L$, "f").theme, { pie: n2, progressbar: i2 } = U$(this, D$, "f");
-  return U$5("div", { class: t5(i2._), "data-lf": U$(this, E$, "f")[this.lfUiState], part: U$(this, O$, "f").progressbar }, U$(this, I$, "m", H$).call(this), U$5("div", { class: t5(n2._, null, { empty: this.lfValue <= 50, full: this.lfValue > 50, "has-value": Boolean(this.lfValue) }) }, U$5("div", { class: t5(n2._, n2.halfCircle, { left: true }) }), U$5("div", { class: t5(n2._, n2.halfCircle, { right: true }) })), U$5("div", { class: t5(n2._, n2.track), part: U$(this, O$, "f").track }));
+  return U$6("div", { class: t5(i2._), "data-lf": U$(this, E$, "f")[this.lfUiState], part: U$(this, O$, "f").progressbar }, U$(this, I$, "m", H$).call(this), U$6("div", { class: t5(n2._, null, { empty: this.lfValue <= 50, full: this.lfValue > 50, "has-value": Boolean(this.lfValue) }) }, U$6("div", { class: t5(n2._, n2.halfCircle, { left: true }) }), U$6("div", { class: t5(n2._, n2.halfCircle, { right: true }) })), U$6("div", { class: t5(n2._, n2.track), part: U$(this, O$, "f").track }));
 }, $$.style = "::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=danger]{--lf-progressbar-color-primary:var(\n    --lf-progressbar-color-danger,\n    var(--lf-color-danger)\n  );--lf-progressbar-color-on-primary:var(\n    --lf-progressbar-color-danger,\n    var(--lf-color-on-danger)\n  )}[data-lf=disabled]{opacity:var(--lf-progressbar-ui-opacity-disabled, var(--lf-ui-opacity-disabled));pointer-events:none}[data-lf=info]{--lf-progressbar-color-primary:var(\n    --lf-progressbar-color-info,\n    var(--lf-color-info)\n  );--lf-progressbar-color-on-primary:var(\n    --lf-progressbar-color-info,\n    var(--lf-color-on-info)\n  )}[data-lf=secondary]{--lf-progressbar-color-primary:var(\n    --lf-progressbar-color-secondary,\n    var(--lf-color-secondary)\n  );--lf-progressbar-color-on-primary:var(\n    --lf-progressbar-color-secondary,\n    var(--lf-color-on-secondary)\n  )}[data-lf=success]{--lf-progressbar-color-primary:var(\n    --lf-progressbar-color-success,\n    var(--lf-color-success)\n  );--lf-progressbar-color-on-primary:var(\n    --lf-progressbar-color-success,\n    var(--lf-color-on-success)\n  )}[data-lf=warning]{--lf-progressbar-color-primary:var(\n    --lf-progressbar-color-warning,\n    var(--lf-color-warning)\n  );--lf-progressbar-color-on-primary:var(\n    --lf-progressbar-color-warning,\n    var(--lf-color-on-warning)\n  )}:host{display:block;font-family:var(--lf-progressbar-font-family, var(--lf-font-family-primary));font-size:var(--lf-progressbar-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-progressbar-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-progressbar-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-progressbar-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-progressbar-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-progressbar-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-progressbar-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-progressbar-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{width:100%;height:100%}#lf-component{background-color:rgba(var(--lf-progressbar-color-surface, var(--lf-color-surface)), 0.225);color:rgb(var(--lf-progressbar-color-on-surface, var(--lf-color-on-surface)));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.progressbar{border:0;border-style:solid;border-color:rgba(var(--lf-progressbar-border-color, var(--lf-color-border)), 1);border-width:1px;border-radius:var(--lf-progressbar-border-radius, var(--lf-ui-border-radius));box-sizing:border-box;height:var(--lf-progressbar-height, 100%);overflow:hidden;width:var(--lf-progressbar-width, 100%)}.progressbar__icon{background-color:rgba(var(--lf-progressbar-color-on-primary, var(--lf-color-on-primary)), 1);height:1.5em;width:1.5em;overflow:hidden;margin:0 0.75em}.progressbar__label{color:rgb(var(--lf-progressbar-color-on-primary, var(--lf-color-on-primary)));width:100%;height:100%;font-size:0.775em;letter-spacing:0.0892857143em;line-height:inherit;text-transform:uppercase;align-items:center;display:flex;justify-content:center;left:0;min-width:max-content;position:absolute;top:0}.progressbar__mu{font-size:0.875em;font-weight:500;line-height:1.375em;letter-spacing:0.01em;font-size:0.5em}.progressbar__percentage{border:0;border-style:solid;border-radius:var(--lf-progressbar-border-radius, var(--lf-ui-border-radius));background-color:rgba(var(--lf-progressbar-color-primary, var(--lf-color-primary)), 0.775);color:rgb(var(--lf-progressbar-color-on-primary, var(--lf-color-on-primary)));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:all 250ms cubic-bezier(0.34, 1.56, 0.64, 1);box-sizing:border-box;height:var(--lf-progressbar-height, 100%);padding:var(--lf-progressbar-padding, 1em 0);position:relative;text-align:center;width:var(--lf_progressbar_percentage_width)}:host([lf-centered-label]) .progressbar{position:relative}:host([lf-centered-label]) .progressbar__percentage{position:static}:host([lf-is-radial]){box-sizing:border-box;margin:auto}:host([lf-is-radial]) #lf-component{display:flex;font-size:10em;margin:auto;padding:0.1em 0}:host([lf-is-radial]) .progressbar{background:none;border:none;height:1em;margin:auto;overflow:visible;position:relative;width:1em}:host([lf-is-radial]) .progressbar:nth-child(3n+1){clear:both}:host([lf-is-radial]) .progressbar__icon{background-color:rgba(var(--lf-progressbar-color-on-bg, var(--lf-color-on-bg)), 1);height:0.75em;width:0.75em;overflow:hidden;margin:0 0.15em}:host([lf-is-radial]) .progressbar__label{color:rgb(var(--lf-progressbar-color-on-bg, var(--lf-color-on-bg)));cursor:default;display:flex;font-size:0.15em}:host([lf-is-radial]) .progressbar__um{color:rgb(var(--lf-progressbar-color-on-bg, var(--lf-color-on-bg)));font-size:0.5em;padding-bottom:0.75em}:host([lf-is-radial]) *,:host([lf-is-radial]) *:before,:host([lf-is-radial]) *:after{box-sizing:border-box}:host([lf-animated]) .progressbar__percentage{animation:running-stripes 2s linear infinite;background-image:linear-gradient(-45deg, rgba(var(--lf-color-surface), 0.125) 25%, transparent 25%, transparent 50%, rgba(var(--lf-color-surface), 0.125) 50%, rgba(var(--lf-color-surface), 0.125) 75%, transparent 75%, transparent);background-size:3em 3em}.pie{clip:rect(0, 1em, 1em, 0.5em);height:1em;left:0;position:absolute;top:0;width:1em}.pie--empty__half-circle--right{display:none}.pie--full{clip:rect(auto, auto, auto, auto)}.pie--full .pie__half-circle--right{transform:rotate(180deg)}.pie--has-value .pie__half-circle{border-color:rgb(var(--lf-progressbar-color-primary, rgb(var(--lf-color-primary))))}.pie--has-value .pie__half-circle--left{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);transform:var(--lf_progressbar_transform)}.pie__half-circle{height:1em;width:1em;border:0.1em solid rgba(var(--lf-color-surface), 0.375);border-radius:50%;clip:rect(0, 0.5em, 1em, 0);left:0;position:absolute;top:0}.pie__track{height:1em;width:1em;border:0.1em solid rgba(var(--lf-color-surface), 0.375);border-radius:50%}@keyframes running-stripes{0%{background-position:0 0}100%{background-position:3em 3em}}";
 var X$, G$, q$, Z$, J$, K$, Q$, tX, nX, iX, rX, eX, aX = function(t5, n2, i2, r2) {
   if ("function" == typeof n2 ? t5 !== n2 || !r2 : !n2.has(t5)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
@@ -34617,7 +33646,7 @@ var X$, G$, q$, Z$, J$, K$, Q$, tX, nX, iX, rX, eX, aX = function(t5, n2, i2, r2
 };
 const sX = class {
   constructor(i2) {
-    o$2(this, i2), this.lfEvent = G$3(this, "lf-toggle-event"), this.value = "off", this.lfAriaLabel = "", this.lfLabel = "", this.lfLeadingLabel = false, this.lfRipple = true, this.lfStyle = "", this.lfUiSize = "medium", this.lfUiState = "primary", this.lfValue = false, X$.set(this, void 0), G$.set(this, LF_TOGGLE_BLOCKS), q$.set(this, CY_ATTRIBUTES), Z$.set(this, LF_ATTRIBUTES), J$.set(this, LF_TOGGLE_PARTS), K$.set(this, LF_STYLE_ID), Q$.set(this, LF_WRAPPER_ID), tX.set(this, void 0), nX.set(this, (() => "disabled" === this.lfUiState)), iX.set(this, (() => "on" === this.value)), rX.set(this, ((t5) => "off" === t5 || "on" === t5)), eX.set(this, ((t5, n2 = new CustomEvent("change")) => {
+    o$2(this, i2), this.lfEvent = G$4(this, "lf-toggle-event"), this.value = "off", this.lfAriaLabel = "", this.lfLabel = "", this.lfLeadingLabel = false, this.lfRipple = true, this.lfStyle = "", this.lfUiSize = "medium", this.lfUiState = "primary", this.lfValue = false, X$.set(this, void 0), G$.set(this, LF_TOGGLE_BLOCKS), q$.set(this, CY_ATTRIBUTES), Z$.set(this, LF_ATTRIBUTES), J$.set(this, LF_TOGGLE_PARTS), K$.set(this, LF_STYLE_ID), Q$.set(this, LF_WRAPPER_ID), tX.set(this, void 0), nX.set(this, (() => "disabled" === this.lfUiState)), iX.set(this, (() => "on" === this.value)), rX.set(this, ((t5) => "off" === t5 || "on" === t5)), eX.set(this, ((t5, n2 = new CustomEvent("change")) => {
       "boolean" == typeof t5 && (t5 = t5 ? "on" : "off"), !aX(this, nX, "f").call(this) && aX(this, rX, "f").call(this, t5) && (this.value = t5, this.onLfEvent(n2, "change"));
     }));
   }
@@ -34666,9 +33695,9 @@ const sX = class {
   }
   render() {
     const { bemClass: t5, setLfStyle: n2 } = aX(this, X$, "f").theme, { formField: i2, toggle: a2 } = aX(this, G$, "f"), { lfAriaLabel: o2, lfLabel: s2, lfLeadingLabel: l2, lfRipple: u2, lfStyle: f2, value: c2 } = this, h2 = (o2 || s2 || this.rootElement.id || "toggle").trim();
-    return U$5(A$9, { key: "3f220a6161a7ac869bc3d8c972dbcfbefe45ee25" }, f2 && U$5("style", { key: "cf7d3505aa034f3de608a16a605f9d340cf13320", id: aX(this, K$, "f") }, n2(this)), U$5("div", { key: "2335e1e1323fb3a41477df54474ed043aff89942", id: aX(this, Q$, "f") }, U$5("div", { key: "f4677e9f3d52bfafe4a37cc85865859350aaa3be", class: t5(i2._, null, { leading: l2 }) }, U$5("div", { key: "cba321598fbd22a880dfa1f0062e22e6f5939754", class: t5(a2._, null, { active: aX(this, iX, "f").call(this) }), "data-lf": aX(this, Z$, "f")[this.lfUiState], part: aX(this, J$, "f").toggle }, U$5("div", { key: "50dc5351c8c884e304a5ba03059d3c88f03ec4b6", class: t5(a2._, a2.track), part: aX(this, J$, "f").track }), U$5("div", { key: "b48583e68dce2dcf4945267747e34be26d357dc9", class: t5(a2._, a2.thumbUnderlay) }, U$5("div", { key: "f9922a2bf583e1ba5d8b12d3942180f94a43a0e3", class: t5(a2._, a2.thumb) }, U$5("div", { key: "432c564be419aa0b26079c5a77531f6c2fc72210", "data-cy": aX(this, q$, "f").rippleSurface, "data-lf": aX(this, Z$, "f").rippleSurface, ref: (t6) => {
+    return U$6(A$a, { key: "808cd4a85ce64eb942aead05ea0df7041f643e69" }, f2 && U$6("style", { key: "db172635fc0255aaa9f14fe4c9d90ddc99267e31", id: aX(this, K$, "f") }, n2(this)), U$6("div", { key: "6d4c59653edae313a4345b18a2fad6f68fe0f00a", id: aX(this, Q$, "f") }, U$6("div", { key: "9fd490c5f5a62c376a073acd97cdd979a855a9e2", class: t5(i2._, null, { leading: l2 }) }, U$6("div", { key: "aaa50a78f53d923267ad9c92ddd6bb32c74c5193", class: t5(a2._, null, { active: aX(this, iX, "f").call(this) }), "data-lf": aX(this, Z$, "f")[this.lfUiState], part: aX(this, J$, "f").toggle }, U$6("div", { key: "528707e5e8f50ce5988118ca64c28fc72b8e8add", class: t5(a2._, a2.track), part: aX(this, J$, "f").track }), U$6("div", { key: "68d8fcb5d829cb3ae33a173c794d92c25f50aae1", class: t5(a2._, a2.thumbUnderlay) }, U$6("div", { key: "70dfac27a10a592159262e7d72ce46f110726b80", class: t5(a2._, a2.thumb) }, U$6("div", { key: "af9d24a07e7e4fdea0a3bb9ede47ea1bb7a92d7b", "data-cy": aX(this, q$, "f").rippleSurface, "data-lf": aX(this, Z$, "f").rippleSurface, ref: (t6) => {
       t6 && u2 && oX(this, tX, t6);
-    } })), U$5("input", { key: "249782203357c052f19d373e2fe02c2616b20995", class: t5(a2._, a2.nativeControl), checked: aX(this, iX, "f").call(this), "data-cy": aX(this, q$, "f").input, disabled: aX(this, nX, "f").call(this), "aria-label": h2, onBlur: (t6) => {
+    } })), U$6("input", { key: "318c31cc9a64e59ca0a4bbf35baf00d1f3eb27ca", class: t5(a2._, a2.nativeControl), checked: aX(this, iX, "f").call(this), "data-cy": aX(this, q$, "f").input, disabled: aX(this, nX, "f").call(this), "aria-label": h2, onBlur: (t6) => {
       this.onLfEvent(t6, "blur");
     }, onChange: (t6) => {
       aX(this, eX, "f").call(this, aX(this, iX, "f").call(this) ? "off" : "on", t6);
@@ -34676,7 +33705,7 @@ const sX = class {
       this.onLfEvent(t6, "focus");
     }, onPointerDown: (t6) => {
       this.onLfEvent(t6, "pointerdown");
-    }, part: aX(this, J$, "f").nativeControl, role: "toggle", type: "checkbox", value: c2 ? "on" : "off" }))), U$5("label", { key: "fe8e221ce369e6513e82ff9d2ea67941f3165cdf", class: t5(i2._, i2.label), onClick: (t6) => {
+    }, part: aX(this, J$, "f").nativeControl, role: "toggle", type: "checkbox", value: c2 ? "on" : "off" }))), U$6("label", { key: "58ed058f6514dd4440a2b4e802942d5308c2e558", class: t5(i2._, i2.label), onClick: (t6) => {
       this.onLfEvent(t6, "change");
     }, part: aX(this, J$, "f").label }, s2))));
   }
@@ -34685,7 +33714,7 @@ const sX = class {
     (_a2 = aX(this, X$, "f")) == null ? void 0 : _a2.theme.unregister(this);
   }
   get rootElement() {
-    return q$4(this);
+    return q$5(this);
   }
 };
 X$ = /* @__PURE__ */ new WeakMap(), G$ = /* @__PURE__ */ new WeakMap(), q$ = /* @__PURE__ */ new WeakMap(), Z$ = /* @__PURE__ */ new WeakMap(), J$ = /* @__PURE__ */ new WeakMap(), K$ = /* @__PURE__ */ new WeakMap(), Q$ = /* @__PURE__ */ new WeakMap(), tX = /* @__PURE__ */ new WeakMap(), nX = /* @__PURE__ */ new WeakMap(), iX = /* @__PURE__ */ new WeakMap(), rX = /* @__PURE__ */ new WeakMap(), eX = /* @__PURE__ */ new WeakMap(), sX.style = '::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=ripple]{animation-duration:var(--lf-ui-duration-ripple, 675ms);animation-fill-mode:forwards;animation-name:lf-ripple;animation-timing-function:var(--lf-ui-timing-ripple, ease-out);background:var(--lf-ui-ripple-background, var(--lf-color-primary));border-radius:var(--lf-ui-radius-ripple, 50%);height:var(--lf-ui-ripple-height, 100%);left:var(--lf-ui-ripple-x, 50%);opacity:var(--lf-ui-opacity-ripple, 0.5);pointer-events:none;position:absolute;top:var(--lf-ui-ripple-y, 50%);transform:scale(0);width:var(--lf-ui-ripple-width, 100%)}@keyframes lf-ripple{from{transform:scale(0)}to{opacity:0;transform:scale(4)}}[data-lf=ripple-surface]{cursor:pointer;height:100%;left:0;overflow:hidden;position:absolute;top:0;width:100%}[data-lf=danger]{--lf-toggle-color-primary:var(\n    --lf-toggle-color-danger,\n    var(--lf-color-danger)\n  );--lf-toggle-color-on-primary:var(\n    --lf-toggle-color-danger,\n    var(--lf-color-on-danger)\n  )}[data-lf=disabled]{opacity:var(--lf-toggle-ui-opacity-disabled, var(--lf-ui-opacity-disabled));pointer-events:none}[data-lf=info]{--lf-toggle-color-primary:var(\n    --lf-toggle-color-info,\n    var(--lf-color-info)\n  );--lf-toggle-color-on-primary:var(\n    --lf-toggle-color-info,\n    var(--lf-color-on-info)\n  )}[data-lf=secondary]{--lf-toggle-color-primary:var(\n    --lf-toggle-color-secondary,\n    var(--lf-color-secondary)\n  );--lf-toggle-color-on-primary:var(\n    --lf-toggle-color-secondary,\n    var(--lf-color-on-secondary)\n  )}[data-lf=success]{--lf-toggle-color-primary:var(\n    --lf-toggle-color-success,\n    var(--lf-color-success)\n  );--lf-toggle-color-on-primary:var(\n    --lf-toggle-color-success,\n    var(--lf-color-on-success)\n  )}[data-lf=warning]{--lf-toggle-color-primary:var(\n    --lf-toggle-color-warning,\n    var(--lf-color-warning)\n  );--lf-toggle-color-on-primary:var(\n    --lf-toggle-color-warning,\n    var(--lf-color-on-warning)\n  )}:host{display:block;font-family:var(--lf-toggle-font-family, var(--lf-font-family-primary));font-size:var(--lf-toggle-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-toggle-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-toggle-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-toggle-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-toggle-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-toggle-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-toggle-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-toggle-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{width:100%;height:100%}.form-field{color:rgb(var(--lf-toggle-color-on-bg, var(--lf-color-on-bg)));width:100%;height:100%;font-size:0.875em;font-weight:500;line-height:1.5em;letter-spacing:0.01em;align-items:center;box-sizing:border-box;display:inline-flex;justify-content:center;padding:var(--lf-toggle-form-padding, 0.5em);vertical-align:middle}.form-field__label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:var(--lf-toggle-label-min-width, max-content);padding-left:var(--lf-toggle-label-padding-left, 1em)}.form-field--leading .form-field__label{margin-right:0;order:-1;padding-left:0;padding-right:var(--lf-toggle-label-padding-right, 1em)}.toggle{align-items:center;display:inline-flex;margin:var(--lf-toggle-margin, 1em 0.5em);min-width:var(--lf-toggle-min-width, 4em);outline:none;position:relative;user-select:none}.toggle:hover:before{background-color:rgba(var(--lf-toggle-color-on-surface, var(--lf-color-on-surface)), 0.125);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);transition:all 200ms cubic-bezier(0.4, 0, 0.6, 1);border-radius:50%;content:"";height:2.5em;left:calc(50% - 0.5em);padding:0.5em;position:absolute;top:50%;transform:translate(-50%, -50%);width:2.5em}.toggle--active .toggle__track{background-color:rgba(var(--lf-toggle-color-primary, var(--lf-color-primary)), 0.675);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.toggle--active .toggle__thumb{transform:translateX(100%) translateY(-50%);background-color:rgba(var(--lf-toggle-color-primary, var(--lf-color-primary)), 0.775);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.toggle__track{border:0;border-style:solid;border-radius:var(--lf-toggle-border-radius, var(--lf-ui-border-radius));background-color:rgba(var(--lf-toggle-color-on-surface, var(--lf-color-on-surface)), 0.275);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:all 300ms cubic-bezier(0.5, 1.7, 0.2, 1);border-radius:var(--lf-ui-border-radius, 1em);box-sizing:border-box;height:var(--lf-toggle-track-height, 0.5em);position:relative;width:var(--lf-toggle-track-width, 3em)}.toggle__thumb{background-color:rgba(var(--lf-toggle-color-on-surface, var(--lf-color-on-surface)), 0.375);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);transition:all 300ms cubic-bezier(0.5, 1.7, 0.2, 1);border-radius:50%;cursor:pointer;height:var(--lf-toggle-thumb-size, 1.5em);left:0;overflow:hidden;position:absolute;top:50%;transform:translateY(-50%);width:var(--lf-toggle-thumb-size, 1.5em)}.toggle__thumb:hover{background-color:rgba(var(--lf-toggle-color-surface, var(--lf-color-surface)), 0.8);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.toggle__native-control{cursor:pointer;height:var(--lf-toggle-input-height, 3em);left:-0.5em;opacity:0;position:absolute;top:-1.25em;width:4em;z-index:1}';
@@ -34699,7 +33728,7 @@ var lX, uX, fX, cX, hX, vX, dX, pX, mX, gX, bX, yX, wX, xX, kX = function(t5, n2
 };
 const SX = class {
   constructor(i2) {
-    o$2(this, i2), this.lfEvent = G$3(this, "lf-typewriter-event"), lX.add(this), this.displayedText = "", this.isDeleting = false, this.currentTextIndex = 0, this.lfCursor = "auto", this.lfDeleteSpeed = 50, this.lfLoop = false, this.lfPause = 500, this.lfSpeed = 50, this.lfStyle = "", this.lfTag = "p", this.lfUiSize = "medium", this.lfUpdatable = true, this.lfValue = "", uX.set(this, void 0), fX.set(this, LF_TYPEWRITER_BLOCKS), cX.set(this, LF_TYPEWRITER_PARTS), hX.set(this, LF_STYLE_ID), vX.set(this, LF_WRAPPER_ID), dX.set(this, void 0), pX.set(this, []);
+    o$2(this, i2), this.lfEvent = G$4(this, "lf-typewriter-event"), lX.add(this), this.displayedText = "", this.isDeleting = false, this.currentTextIndex = 0, this.lfCursor = "auto", this.lfDeleteSpeed = 50, this.lfLoop = false, this.lfPause = 500, this.lfSpeed = 50, this.lfStyle = "", this.lfTag = "p", this.lfUiSize = "medium", this.lfUpdatable = true, this.lfValue = "", uX.set(this, void 0), fX.set(this, LF_TYPEWRITER_BLOCKS), cX.set(this, LF_TYPEWRITER_PARTS), hX.set(this, LF_STYLE_ID), vX.set(this, LF_WRAPPER_ID), dX.set(this, void 0), pX.set(this, []);
   }
   onLfEvent(t5, n2) {
     this.lfEvent.emit({ comp: this, id: this.rootElement.id, originalEvent: t5, eventType: n2 });
@@ -34742,14 +33771,14 @@ const SX = class {
   }
   render() {
     const { theme: t5 } = kX(this, uX, "f"), { lfStyle: n2 } = this;
-    return U$5(A$9, { key: "fd4b01e4950982c3d90407ac715b3298f484b6da" }, n2 && U$5("style", { key: "d76443ab904ce738723ced28e2cae597cd07c015", id: kX(this, hX, "f") }, t5.setLfStyle(this)), U$5("div", { key: "e42da972012cd9e247e669d01e545e8136ddd4bd", id: kX(this, vX, "f") }, kX(this, lX, "m", xX).call(this)));
+    return U$6(A$a, { key: "0fdb3d3951b53eebe770ab8126f07706bede07e4" }, n2 && U$6("style", { key: "dbadec30a3bd2da98f9739ac1f92e7af71858347", id: kX(this, hX, "f") }, t5.setLfStyle(this)), U$6("div", { key: "d0f4fc20594a9eecfa26b548a28bc7bea16890db", id: kX(this, vX, "f") }, kX(this, lX, "m", xX).call(this)));
   }
   disconnectedCallback() {
     var _a2;
     (_a2 = kX(this, uX, "f")) == null ? void 0 : _a2.theme.unregister(this), clearTimeout(kX(this, dX, "f"));
   }
   get rootElement() {
-    return q$4(this);
+    return q$5(this);
   }
   static get watchers() {
     return { lfValue: ["handleLfValueChange"] };
@@ -34775,7 +33804,7 @@ uX = /* @__PURE__ */ new WeakMap(), fX = /* @__PURE__ */ new WeakMap(), cX = /* 
   this.isDeleting = false, this.currentTextIndex = 0, kX(this, lX, "m", gX).call(this);
 }, xX = function() {
   const { bemClass: t5 } = kX(this, uX, "f").theme, { typewriter: n2 } = kX(this, fX, "f"), { currentTextIndex: i2, displayedText: e2, isDeleting: a2, lfCursor: o2, lfTag: s2 } = this, l2 = "enabled" === o2 || "auto" === o2 && !a2 && e2 !== kX(this, pX, "f")[i2], u2 = s2 || "div";
-  return U$5("div", { class: t5(n2._), part: kX(this, cX, "f").typewriter }, U$5(u2, { class: t5(n2._, n2.text), part: kX(this, cX, "f").text }, U$5("span", null, e2 || " "), l2 && U$5("span", { class: t5(n2._, n2.cursor), part: kX(this, cX, "f").cursor })));
+  return U$6("div", { class: t5(n2._), part: kX(this, cX, "f").typewriter }, U$6(u2, { class: t5(n2._, n2.text), part: kX(this, cX, "f").text }, U$6("span", null, e2 || " "), l2 && U$6("span", { class: t5(n2._, n2.cursor), part: kX(this, cX, "f").cursor })));
 }, SX.style = "::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}:host{display:block;font-family:var(--lf-typewriter-font-family, var(--lf-font-family-primary));font-size:var(--lf-typewriter-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-typewriter-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-typewriter-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-typewriter-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-typewriter-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-typewriter-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-typewriter-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-typewriter-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{width:100%;height:100%}.typewriter{background-color:rgba(var(--lf-typewriter-color-bg, var(--lf-color-bg)), 0.125);color:rgb(var(--lf-typewriter-color-on-bg, var(--lf-color-on-bg)));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);width:100%;height:100%;box-sizing:border-box;padding:var(--lf-typewriter-padding, 1em)}.typewriter__text{width:100%;height:100%;display:inline-block;margin:var(--lf-typewriter-margin, 0)}.typewriter__cursor{background-color:rgba(var(--lf-typewriter-color-on-bg, var(--lf-color-on-bg)), 0.575);color:rgb(var(--lf-typewriter-color-bg, var(--lf-color-bg)));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);animation:blink var(--lf-typewriter-cursor-height, 800ms) infinite;display:inline-block;height:var(--lf-typewriter-cursor-height, 1.25em);margin-left:var(--lf-typewriter-cursor-margin-left, 0.15em);vertical-align:var(--lf-typewriter-cursor-vertical-align, top);width:var(--lf-typewriter-cursor-width, 0.125em)}@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}";
 var zX, CX, AX, TX, NX, _X, IX, LX, DX, WX, EX, OX, RX, PX, FX = function(t5, n2, i2, r2) {
   if ("a" === i2 && !r2) throw new TypeError("Private accessor was defined without a getter");
@@ -34787,9 +33816,9 @@ var zX, CX, AX, TX, NX, _X, IX, LX, DX, WX, EX, OX, RX, PX, FX = function(t5, n2
 };
 const VX = class {
   constructor(i2) {
-    o$2(this, i2), this.lfEvent = G$3(this, "lf-upload-event"), zX.add(this), this.selectedFiles = [], this.lfLabel = "Upload files...", this.lfRipple = true, this.lfStyle = "", this.lfValue = null, CX.set(this, void 0), AX.set(this, LF_UPLOAD_BLOCKS), TX.set(this, CY_ATTRIBUTES), NX.set(this, LF_ATTRIBUTES), _X.set(this, LF_UPLOAD_PARTS), IX.set(this, LF_STYLE_ID), LX.set(this, LF_WRAPPER_ID), DX.set(this, void 0), WX.set(this, void 0), PX.set(this, ((t5, n2 = false) => {
+    o$2(this, i2), this.lfEvent = G$4(this, "lf-upload-event"), zX.add(this), this.selectedFiles = [], this.lfLabel = "Upload files...", this.lfRipple = true, this.lfStyle = "", this.lfValue = null, CX.set(this, void 0), AX.set(this, LF_UPLOAD_BLOCKS), TX.set(this, CY_ATTRIBUTES), NX.set(this, LF_ATTRIBUTES), _X.set(this, LF_UPLOAD_PARTS), IX.set(this, LF_STYLE_ID), LX.set(this, LF_WRAPPER_ID), DX.set(this, void 0), WX.set(this, void 0), PX.set(this, ((t5, n2 = false) => {
       const { assets: i3, theme: e2 } = FX(this, CX, "f"), { get: a2 } = i3, { bemClass: o2 } = e2, { file: s2, movie: l2, music: u2, pdf: f2, photo: c2, zip: h2 } = FX(this, CX, "f").theme.get.icons(), { "--lf-icon-clear": v2 } = FX(this, CX, "f").theme.get.current().variables, { fileInfo: d2 } = FX(this, AX, "f"), p2 = t5.type.includes("image") || t5.type.includes("jpg") || t5.type.includes("png") || t5.type.includes("jpeg") || t5.type.includes("gif"), m2 = t5.type.includes("audio") || t5.type.includes("mp3") || t5.type.includes("wav") || t5.type.includes("ogg"), g3 = t5.type.includes("video") || t5.type.includes("mp4") || t5.type.includes("avi") || t5.type.includes("mov"), b2 = t5.type.includes("7z") || t5.type.includes("zip") || t5.type.includes("application/zip") || t5.type.includes("application/x-zip-compressed"), y2 = t5.type.includes("pdf"), w3 = n2 ? v2 : p2 ? c2 : m2 ? u2 : g3 ? l2 : y2 ? f2 : b2 ? h2 : s2, { style: x2 } = a2(`./assets/svg/${w3}.svg`);
-      return U$5("div", { class: o2(d2._, d2.icon, { "has-actions": n2 }), "data-cy": FX(this, TX, "f").maskedSvg, onClick: n2 ? (n3) => this.onLfEvent(n3, "delete", t5) : null, part: FX(this, _X, "f").icon, style: x2, tabIndex: n2 && 0, title: n2 ? "Remove file" : t5.type });
+      return U$6("div", { class: o2(d2._, d2.icon, { "has-actions": n2 }), "data-cy": FX(this, TX, "f").maskedSvg, onClick: n2 ? (n3) => this.onLfEvent(n3, "delete", t5) : null, part: FX(this, _X, "f").icon, style: x2, tabIndex: n2 && 0, title: n2 ? "Remove file" : t5.type });
     }));
   }
   onLfEvent(t5, n2, i2) {
@@ -34841,18 +33870,18 @@ const VX = class {
   }
   render() {
     const { sanitizeProps: t5, theme: n2 } = FX(this, CX, "f"), { bemClass: i2, setLfStyle: a2 } = n2, { fileInfo: o2, fileUpload: s2, upload: l2 } = FX(this, AX, "f"), { lfLabel: u2, lfRipple: f2, lfStyle: c2, selectedFiles: h2 } = this, v2 = !!(h2 == null ? void 0 : h2.length);
-    return U$5(A$9, { key: "930678802c5f707fa03c3f457e5293c814a31501" }, c2 && U$5("style", { key: "293799d4d44df757fe460799eb3a3ead1047d655", id: FX(this, IX, "f") }, a2(this)), U$5("div", { key: "4e4a6269e338da2dc0e48bb8add786e10d0cceb7", id: FX(this, LX, "f") }, U$5("div", { key: "19bde6ac645b73dcc1d7ce48d998a1ee2ab5f292", class: i2(l2._, null, { "has-description": Boolean(h2 == null ? void 0 : h2.length) }) }, U$5("div", { key: "0a1c005e1e888f13171088facc5739281a0fc572", class: i2(s2._), onPointerDown: (t6) => this.onLfEvent(t6, "pointerdown") }, U$5("input", { key: "ddc9c8b3d60fbece606fc1a33f9f6ddaff0a29fd", ...t5(this.lfHtmlAttributes), class: i2(s2._, s2.input), "data-cy": FX(this, TX, "f").input, id: "upload-input", multiple: true, onChange: () => FX(this, zX, "m", OX).call(this), ref: (t6) => {
+    return U$6(A$a, { key: "c21ef9c8ebe8e6df635e41cad8b26cbaddbbcf53" }, c2 && U$6("style", { key: "86dfaacec705af10b3d244c562c34ec34ea2ae78", id: FX(this, IX, "f") }, a2(this)), U$6("div", { key: "f33e9772dba10dfa4556b99664c18cd292cfb91a", id: FX(this, LX, "f") }, U$6("div", { key: "1c62886d663a6284fae41ae847494717d8698149", class: i2(l2._, null, { "has-description": Boolean(h2 == null ? void 0 : h2.length) }) }, U$6("div", { key: "dd14fefe4ff576e1a775e9219b7086e9707ee3bc", class: i2(s2._), onPointerDown: (t6) => this.onLfEvent(t6, "pointerdown") }, U$6("input", { key: "ca6e825cd0d70d5a6f971bcac800f0810873a452", ...t5(this.lfHtmlAttributes), class: i2(s2._, s2.input), "data-cy": FX(this, TX, "f").input, id: "upload-input", multiple: true, onChange: () => FX(this, zX, "m", OX).call(this), ref: (t6) => {
       t6 && BX(this, WX, t6);
-    }, type: "file" }), U$5("label", { key: "addeae92056aa1fd58f23de53660dfa6a82b19b7", class: i2(s2._, s2.label), "data-cy": FX(this, TX, "f").rippleSurface, "data-lf": FX(this, NX, "f").rippleSurface, htmlFor: "upload-input", ref: (t6) => {
+    }, type: "file" }), U$6("label", { key: "719a26dbecade3ea266449bce713aa62128cb45b", class: i2(s2._, s2.label), "data-cy": FX(this, TX, "f").rippleSurface, "data-lf": FX(this, NX, "f").rippleSurface, htmlFor: "upload-input", ref: (t6) => {
       f2 && BX(this, DX, t6);
-    } }, U$5("div", { key: "10fe6115bfbbc35dd83c6dd6bf464125c3b4c1fb", class: i2(s2._, s2.text) }, u2))), U$5("div", { key: "2e31ae11cc2913a186f41cb2f21f218dcc1e00f0", class: i2(o2._) }, v2 && FX(this, zX, "m", RX).call(this)))));
+    } }, U$6("div", { key: "c48d68b7af1bd9ac005563da7741931142bdf3ef", class: i2(s2._, s2.text) }, u2))), U$6("div", { key: "c604ff96b6f7fd28164a3f918cebac39e13ccf4e", class: i2(o2._) }, v2 && FX(this, zX, "m", RX).call(this)))));
   }
   disconnectedCallback() {
     var _a2;
     (_a2 = FX(this, CX, "f")) == null ? void 0 : _a2.theme.unregister(this);
   }
   get rootElement() {
-    return q$4(this);
+    return q$5(this);
   }
 };
 CX = /* @__PURE__ */ new WeakMap(), AX = /* @__PURE__ */ new WeakMap(), TX = /* @__PURE__ */ new WeakMap(), NX = /* @__PURE__ */ new WeakMap(), _X = /* @__PURE__ */ new WeakMap(), IX = /* @__PURE__ */ new WeakMap(), LX = /* @__PURE__ */ new WeakMap(), DX = /* @__PURE__ */ new WeakMap(), WX = /* @__PURE__ */ new WeakMap(), PX = /* @__PURE__ */ new WeakMap(), zX = /* @__PURE__ */ new WeakSet(), EX = function(t5) {
@@ -34865,9 +33894,9 @@ CX = /* @__PURE__ */ new WeakMap(), AX = /* @__PURE__ */ new WeakMap(), TX = /* 
   this.selectedFiles = FX(this, WX, "f").files ? Array.from(FX(this, WX, "f").files) : [], this.onLfEvent(new CustomEvent("upload"), "upload");
 }, RX = function() {
   const { bemClass: t5 } = FX(this, CX, "f").theme, { fileInfo: n2 } = FX(this, AX, "f");
-  return this.selectedFiles.map(((i2, e2) => U$5("div", { class: t5(n2._, n2.item), "data-lf": FX(this, NX, "f").fadeIn, key: e2 }, FX(this, PX, "f").call(this, i2), U$5("span", { class: t5(n2._, n2.name), title: i2.name }, i2.name), U$5("span", { class: t5(n2._, n2.size), title: i2.size.toString() }, FX(this, zX, "m", EX).call(this, i2.size)), FX(this, PX, "f").call(this, i2, true))));
+  return this.selectedFiles.map(((i2, e2) => U$6("div", { class: t5(n2._, n2.item), "data-lf": FX(this, NX, "f").fadeIn, key: e2 }, FX(this, PX, "f").call(this, i2), U$6("span", { class: t5(n2._, n2.name), title: i2.name }, i2.name), U$6("span", { class: t5(n2._, n2.size), title: i2.size.toString() }, FX(this, zX, "m", EX).call(this, i2.size)), FX(this, PX, "f").call(this, i2, true))));
 }, VX.style = "::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=ripple]{animation-duration:var(--lf-ui-duration-ripple, 675ms);animation-fill-mode:forwards;animation-name:lf-ripple;animation-timing-function:var(--lf-ui-timing-ripple, ease-out);background:var(--lf-ui-ripple-background, var(--lf-color-primary));border-radius:var(--lf-ui-radius-ripple, 50%);height:var(--lf-ui-ripple-height, 100%);left:var(--lf-ui-ripple-x, 50%);opacity:var(--lf-ui-opacity-ripple, 0.5);pointer-events:none;position:absolute;top:var(--lf-ui-ripple-y, 50%);transform:scale(0);width:var(--lf-ui-ripple-width, 100%)}@keyframes lf-ripple{from{transform:scale(0)}to{opacity:0;transform:scale(4)}}[data-lf=ripple-surface]{cursor:pointer;height:100%;left:0;overflow:hidden;position:absolute;top:0;width:100%}[data-lf=fade-in]{display:block;animation:lf-fade-in-block 0.25s ease-out forwards}@keyframes lf-fade-in-block{from{visibility:hidden;opacity:0}to{visibility:visible;opacity:1}}:host{display:block;font-family:var(--lf-upload-font-family, var(--lf-font-family-primary));font-size:var(--lf-upload-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-upload-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-upload-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-upload-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-upload-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-upload-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-upload-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-upload-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{width:100%;height:100%}.upload{border:0;border-style:solid;border-color:rgba(var(--lf-upload-border-color, var(--lf-color-border)), 1);border-width:1px;border-radius:var(--lf-upload-border-radius, var(--lf-ui-border-radius));background-color:rgba(var(--lf-upload-color-surface, var(--lf-color-surface)), 0.175);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);width:100%;height:100%;box-sizing:border-box;display:grid;grid-template-rows:1fr;min-height:var(--lf-upload-min-height, 8em);padding:var(--lf-upload-padding, 1em)}.upload--has-description{grid-gap:var(--lf-upload-grid-gap, 1.25em);grid-template-rows:var(--lf-upload-button-height, 2.75em) var(--lf-upload-info-height, minmax(auto, 25vh))}.upload--has-description .file-info{padding:var(--lf-upload-item-padding, 0.75em)}.file-upload{border:0;border-style:solid;border-color:rgba(var(--lf-upload-border-color, var(--lf-color-border)), 1);border-width:1px;border-radius:var(--lf-upload-border-radius, var(--lf-ui-border-radius));background-color:rgba(var(--lf-upload-color-surface, var(--lf-color-surface)), 0.175);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:all 300ms cubic-bezier(0.4, 0, 0.2, 1);display:flex}.file-upload__input{display:none}.file-upload__label{width:100%;height:100%;font-size:0.775em;letter-spacing:0.0892857143em;line-height:inherit;text-transform:uppercase;align-content:center;cursor:pointer;display:block;margin:auto;text-align:center}.file-upload:hover{box-shadow:0 5px 5px -3px rgba(var(--lf-color-on-bg), 0.25), 0 8px 10px 1px rgba(var(--lf-color-on-bg), 0.18), 0 3px 14px 2px rgba(var(--lf-color-on-bg), 0.15)}.file-info{transition:all 300ms cubic-bezier(0.4, 0, 0.2, 1);max-height:25dvh;overflow:auto}.file-info__icon{background-color:rgba(var(--lf-upload-color-on-bg, var(--lf-color-on-bg)), 1);height:1.5em;width:1.5em;overflow:hidden}.file-info__icon--has-actions{transition:all 300ms cubic-bezier(0.4, 0, 0.2, 1);cursor:pointer}.file-info__icon--has-actions:hover{opacity:0.75}.file-info__item{align-items:center;display:flex;justify-content:center}.file-info__name,.file-info__size{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:0.875em;font-weight:400;line-height:1.25em;letter-spacing:0.2em;flex-grow:1}.file-info__name{padding:0 0.5em;width:100%}.file-info__size{min-width:max-content;padding:0 0.5em}";
-const pEcbcfad9_entry = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const p907b39f3_entry = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   lf_badge: wt,
   lf_button: $t,
@@ -34884,4 +33913,1225 @@ const pEcbcfad9_entry = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.def
   lf_typewriter: SX,
   lf_upload: VX
 }, Symbol.toStringTag, { value: "Module" }));
-//# sourceMappingURL=lf-widgets-core-lLYscYdv.js.map
+const w$7 = (e2, t5, r2) => {
+  const i2 = { nodes: [] };
+  for (let a2 = 0; a2 < r2.length; a2++) {
+    const s2 = r2[a2], o2 = String(a2).valueOf(), l2 = "string" == typeof s2.value && s2.value.trim().length > 0;
+    i2.nodes.push({ icon: e2 === s2 && t5, id: o2, value: l2 ? s2.value : `#${o2}` });
+  }
+  return i2;
+}, k$7 = (e2) => ({ ...e2, defaults: LF_COMPARE_DEFAULTS() }), y$6 = (t5) => /* @__PURE__ */ ((t6) => ({ changeView: () => {
+  const { controller: r2, elements: i2, handlers: a2 } = t6(), { cyAttributes: s2, isOverlay: o2, manager: n2, parts: f2 } = r2.get, { refs: c2 } = i2, { button: h2 } = a2, { assignRef: p2, theme: d2 } = n2, { columns2: u2, squareToggle: b2 } = d2.get.icons();
+  return U$6("lf-button", { "data-cy": s2.button, id: LF_COMPARE_IDS.changeView, lfIcon: b2, lfIconOff: u2, lfStyling: "icon", lfToggable: true, lfValue: !o2(), "onLf-button-event": h2, part: f2.changeView, ref: p2(c2, "changeView"), title: o2() ? "Click for split screen comparison." : "Click for overlay comparison" });
+}, leftButton: () => {
+  const { controller: r2, elements: i2, handlers: a2 } = t6(), { cyAttributes: s2, isOverlay: o2, manager: n2, parts: f2 } = r2.get, { refs: c2 } = i2, { button: h2 } = a2, { assignRef: p2, theme: d2 } = n2, u2 = d2.get.icon("imageInPicture"), { "--lf-icon-clear": b2 } = d2.get.current().variables;
+  return U$6("lf-button", { "data-cy": s2.button, id: LF_COMPARE_IDS.leftButton, lfIcon: b2, lfIconOff: u2, lfStyling: "icon", lfToggable: true, "onLf-button-event": h2, part: f2.leftButton, ref: p2(c2, "leftButton"), title: o2() ? "Click to open the left panel." : "Click to close the left panel." });
+}, leftTree: () => {
+  const { controller: r2, elements: i2, handlers: a2 } = t6(), { blocks: s2, compInstance: o2, lfAttributes: n2, manager: f2, parts: c2, shapes: h2 } = r2.get, { refs: p2 } = i2, { tree: d2 } = a2, { assignRef: u2, theme: b2 } = f2, { bemClass: m2, get: g3 } = b2, { "--lf-icon-success": v2 } = g3.current().variables, k2 = o2;
+  return U$6("lf-tree", { class: m2(s2.toolbar._, s2.toolbar.panel, { left: true }), "data-lf": n2.fadeIn, id: LF_COMPARE_IDS.leftTree, lfDataset: w$7(k2.leftShape, v2, h2()), lfFilter: false, "onLf-tree-event": d2, part: c2.leftTree, ref: u2(p2, "leftTree") });
+}, rightButton: () => {
+  const { controller: r2, elements: i2, handlers: a2 } = t6(), { cyAttributes: s2, isOverlay: o2, manager: n2, parts: f2 } = r2.get, { refs: c2 } = i2, { button: h2 } = a2, { assignRef: p2, theme: d2 } = n2, u2 = d2.get.icon("imageInPicture"), { "--lf-icon-clear": b2 } = d2.get.current().variables;
+  return U$6("lf-button", { "data-cy": s2.button, id: LF_COMPARE_IDS.rightButton, lfIcon: b2, lfIconOff: u2, lfStyling: "icon", lfToggable: true, "onLf-button-event": h2, part: f2.rightButton, ref: p2(c2, "rightButton"), title: o2() ? "Click to open the right panel." : "Click to close the right panel." });
+}, rightTree: () => {
+  const { controller: r2, elements: i2, handlers: a2 } = t6(), { blocks: s2, compInstance: o2, lfAttributes: n2, manager: f2, parts: c2, shapes: h2 } = r2.get, { refs: p2 } = i2, { tree: d2 } = a2, { assignRef: u2, theme: b2 } = f2, { bemClass: m2, get: g3 } = b2, { "--lf-icon-success": v2 } = g3.current().variables, k2 = o2;
+  return U$6("lf-tree", { class: m2(s2.toolbar._, s2.toolbar.panel, { right: true }), "data-lf": n2.fadeIn, id: LF_COMPARE_IDS.rightTree, lfDataset: w$7(k2.rightShape, v2, h2()), lfFilter: false, "onLf-tree-event": d2, part: c2.rightTree, ref: u2(p2, "rightTree") });
+} }))(t5), z$7 = (e2) => /* @__PURE__ */ ((e3) => ({ button: (t5) => {
+  const { eventType: r2, id: i2, valueAsBoolean: a2 } = t5.detail, { set: s2 } = e3().controller, { leftButton: o2, changeView: n2, rightButton: f2 } = LF_COMPARE_IDS;
+  if ("click" === r2) switch (i2) {
+    case o2:
+      s2.leftPanelOpened(a2);
+      break;
+    case n2:
+      s2.splitView(a2);
+      break;
+    case f2:
+      s2.rightPanelOpened(a2);
+  }
+}, tree: (t5) => {
+  const { eventType: r2, id: i2, node: a2 } = t5.detail, { get: s2, set: o2 } = e3().controller, { shapes: n2 } = s2, { leftTree: f2, rightTree: c2 } = LF_COMPARE_IDS;
+  if ("click" === r2) {
+    const e4 = n2()[parseInt(a2.id)];
+    switch (i2) {
+      case f2:
+        o2.leftShape(e4);
+        break;
+      case c2:
+        o2.rightShape(e4);
+    }
+  }
+} }))(e2);
+var x$7, T$4, _$6, C$5, I$4, S$5, O$3, W$6, M$6, E$5, L$3, j$5, B$2, P$3, D$5, R$3, A$3, V$2, F$2 = function(e2, t5, r2, i2) {
+  if ("a" === r2 && !i2) throw new TypeError("Private accessor was defined without a getter");
+  if ("function" == typeof t5 ? e2 !== t5 || !i2 : !t5.has(e2)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+  return "m" === r2 ? i2 : "a" === r2 ? i2.call(e2) : i2 ? i2.value : t5.get(e2);
+}, H$3 = function(e2, t5, r2, i2, a2) {
+  if ("function" == typeof t5 ? e2 !== t5 || true : !t5.has(e2)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
+  return t5.set(e2, r2), r2;
+};
+const Y$3 = class Y {
+  constructor(e2) {
+    o$2(this, e2), this.lfEvent = G$4(this, "lf-compare-event"), x$7.add(this), this.isLeftPanelOpened = false, this.isRightPanelOpened = false, this.shapes = {}, this.lfDataset = null, this.lfShape = "image", this.lfStyle = "", this.lfView = "main", T$4.set(this, void 0), _$6.set(this, LF_COMPARE_BLOCKS), C$5.set(this, CY_ATTRIBUTES), I$4.set(this, LF_ATTRIBUTES), S$5.set(this, LF_COMPARE_PARTS), O$3.set(this, LF_STYLE_ID), W$6.set(this, LF_COMPARE_CSS_VARS), M$6.set(this, LF_WRAPPER_ID), E$5.set(this, void 0), L$3.set(this, (() => {
+      var e3, t5, r2;
+      H$3(this, E$5, (e3 = { blocks: F$2(this, _$6, "f"), compInstance: this, cyAttributes: F$2(this, C$5, "f"), isOverlay: () => F$2(this, x$7, "m", P$3).call(this), lfAttributes: F$2(this, I$4, "f"), manager: F$2(this, T$4, "f"), parts: F$2(this, S$5, "f"), shapes: () => F$2(this, x$7, "m", j$5).call(this) }, t5 = { leftPanelOpened: (e4) => {
+        this.isLeftPanelOpened = void 0 === e4 ? !this.isLeftPanelOpened : e4;
+      }, leftShape: (e4) => this.leftShape = e4, rightPanelOpened: (e4) => {
+        this.isRightPanelOpened = void 0 === e4 ? !this.isRightPanelOpened : e4;
+      }, rightShape: (e4) => this.rightShape = e4, splitView: (e4) => {
+        this.lfView = e4 ? "split" : "main";
+      } }, r2 = () => F$2(this, E$5, "f"), { controller: { get: k$7(e3), set: t5 }, elements: { jsx: y$6(r2), refs: { changeView: null, leftButton: null, leftTree: null, rightButton: null, rightTree: null, slider: null } }, handlers: z$7(r2) }));
+    })), V$2.set(this, ((e3) => {
+      const { target: t5 } = e3;
+      if (t5 instanceof HTMLInputElement) {
+        const e4 = 100 - parseInt(t5.value);
+        this.rootElement.style.setProperty(F$2(this, W$6, "f").overlayWidth, `${e4}%`);
+      }
+    }));
+  }
+  onLfEvent(e2, t5) {
+    this.lfEvent.emit({ comp: this, eventType: t5, id: this.rootElement.id, originalEvent: e2 });
+  }
+  async updateShapes() {
+    if (!F$2(this, T$4, "f")) return;
+    const { data: e2, debug: t5 } = F$2(this, T$4, "f");
+    try {
+      this.shapes = e2.cell.shapes.getAll(this.lfDataset);
+      const t6 = F$2(this, x$7, "m", j$5).call(this);
+      this.leftShape = t6[0], this.rightShape = t6[1];
+    } catch (e3) {
+      t5.logs.new(this, "Error updating shapes: " + e3, "error");
+    }
+  }
+  async getDebugInfo() {
+    return this.debugInfo;
+  }
+  async getProps() {
+    const e2 = LF_COMPARE_PROPS.map(((e3) => [e3, this[e3]]));
+    return Object.fromEntries(e2);
+  }
+  async refresh() {
+    vt$1(this);
+  }
+  async unmount(e2 = 0) {
+    setTimeout((() => {
+      this.onLfEvent(new CustomEvent("unmount"), "unmount"), this.rootElement.remove();
+    }), e2);
+  }
+  connectedCallback() {
+    F$2(this, T$4, "f") && F$2(this, T$4, "f").theme.register(this);
+  }
+  async componentWillLoad() {
+    H$3(this, T$4, await a(this)), F$2(this, L$3, "f").call(this), this.updateShapes();
+  }
+  componentDidLoad() {
+    const { info: e2 } = F$2(this, T$4, "f").debug;
+    this.onLfEvent(new CustomEvent("ready"), "ready"), e2.update(this, "did-load");
+  }
+  componentWillRender() {
+    const { info: e2 } = F$2(this, T$4, "f").debug;
+    e2.update(this, "will-render");
+  }
+  componentDidRender() {
+    const { info: e2 } = F$2(this, T$4, "f").debug;
+    e2.update(this, "did-render");
+  }
+  render() {
+    const { bemClass: t5, setLfStyle: r2 } = F$2(this, T$4, "f").theme, { compare: i2 } = F$2(this, _$6, "f"), { lfStyle: s2 } = this;
+    return U$6(A$a, { key: "4855550a84bd0aa5db2f3bf64273d4d63432a758" }, s2 && U$6("style", { key: "961f11045db1dde62a72c1104b583c30352736ef", id: F$2(this, O$3, "f") }, r2(this)), U$6("div", { key: "c8e632247e7a498d419764cad95f70be1b4a8dc2", id: F$2(this, M$6, "f") }, U$6("div", { key: "9644d07b8ed5b6b4cf6ff0feb132135978f667e1", class: t5(i2._), part: F$2(this, S$5, "f").compare }, F$2(this, x$7, "m", D$5).call(this))));
+  }
+  disconnectedCallback() {
+    var _a2;
+    (_a2 = F$2(this, T$4, "f")) == null ? void 0 : _a2.theme.unregister(this);
+  }
+  get rootElement() {
+    return q$5(this);
+  }
+  static get watchers() {
+    return { lfDataset: ["updateShapes"], lfShape: ["updateShapes"] };
+  }
+};
+T$4 = /* @__PURE__ */ new WeakMap(), _$6 = /* @__PURE__ */ new WeakMap(), C$5 = /* @__PURE__ */ new WeakMap(), I$4 = /* @__PURE__ */ new WeakMap(), S$5 = /* @__PURE__ */ new WeakMap(), O$3 = /* @__PURE__ */ new WeakMap(), W$6 = /* @__PURE__ */ new WeakMap(), M$6 = /* @__PURE__ */ new WeakMap(), E$5 = /* @__PURE__ */ new WeakMap(), L$3 = /* @__PURE__ */ new WeakMap(), V$2 = /* @__PURE__ */ new WeakMap(), x$7 = /* @__PURE__ */ new WeakSet(), j$5 = function() {
+  var _a2;
+  return ((_a2 = this.shapes) == null ? void 0 : _a2[this.lfShape]) || [];
+}, B$2 = function() {
+  var _a2;
+  return !!((_a2 = this.shapes) == null ? void 0 : _a2[this.lfShape]);
+}, P$3 = function() {
+  return !("main" !== this.lfView);
+}, D$5 = function() {
+  const { bemClass: t5 } = F$2(this, T$4, "f").theme, { compare: r2 } = F$2(this, _$6, "f");
+  if (F$2(this, x$7, "m", B$2).call(this)) {
+    const i2 = this.shapes[this.lfShape];
+    if ((i2 == null ? void 0 : i2.length) > 1) return U$6("div", { class: t5(r2._, r2.grid) }, F$2(this, x$7, "m", A$3).call(this), F$2(this, x$7, "m", R$3).call(this));
+  }
+  return null;
+}, R$3 = function() {
+  const { bemClass: t5 } = F$2(this, T$4, "f").theme, { toolbar: r2 } = F$2(this, _$6, "f"), { changeView: i2, leftButton: a2, rightButton: s2 } = F$2(this, E$5, "f").elements.jsx;
+  return U$6("div", { class: t5(r2._) }, a2(), i2(), s2());
+}, A$3 = function() {
+  var _a2, _b2;
+  const { sanitizeProps: t5, theme: r$12 } = F$2(this, T$4, "f"), { bemClass: i2 } = r$12, { view: a2 } = F$2(this, _$6, "f"), { left: s2, right: l2 } = F$2(this, E$5, "f").controller.get.defaults, { leftTree: n2, rightTree: f2 } = F$2(this, E$5, "f").elements.jsx, { isLeftPanelOpened: c2, isRightPanelOpened: h2, lfShape: p2, lfView: d2, leftShape: u2, rightShape: b2 } = this, m2 = ((_a2 = s2 == null ? void 0 : s2[p2]) == null ? void 0 : _a2.call(s2)) || [], g3 = [];
+  for (let e2 = 0; e2 < m2.length; e2++) g3.push(t5(m2[e2]));
+  const w3 = ((_b2 = l2 == null ? void 0 : l2[p2]) == null ? void 0 : _b2.call(l2)) || [], k2 = [];
+  for (let e2 = 0; e2 < w3.length; e2++) k2.push(t5(w3[e2]));
+  return U$6(St$1, null, U$6("div", { class: i2(a2._, null, { [d2]: true }) }, U$6("div", { class: i2(a2._, a2.left) }, U$6(r, { cell: Object.assign(g3, u2), index: 0, shape: p2, eventDispatcher: async (e2) => this.onLfEvent(e2, "lf-event"), framework: F$2(this, T$4, "f") })), c2 && n2(), h2 && f2(), F$2(this, x$7, "m", P$3).call(this) && U$6("div", { class: i2(a2._, a2.slider), onChange: F$2(this, V$2, "f"), onInput: F$2(this, V$2, "f") }, U$6("input", { class: i2(a2._, a2.input), "data-cy": F$2(this, C$5, "f").input, min: "0", max: "100", type: "range", value: "50" })), U$6("div", { class: i2(a2._, a2.right) }, U$6(r, { cell: Object.assign(k2, b2), index: 1, shape: p2, eventDispatcher: async (e2) => this.onLfEvent(e2, "lf-event"), framework: F$2(this, T$4, "f") }))));
+}, Y$3.style = '::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=fade-in]{display:block;animation:lf-fade-in-block 0.25s ease-out forwards}@keyframes lf-fade-in-block{from{visibility:hidden;opacity:0}to{visibility:visible;opacity:1}}:host{display:block;font-family:var(--lf-compare-font-family, var(--lf-font-family-primary));font-size:var(--lf-compare-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-compare-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-compare-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-compare-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-compare-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-compare-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-compare-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-compare-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{width:100%;height:100%}.compare{width:100%;height:100%}.compare__grid{width:100%;height:100%;display:grid;grid-template-rows:var(--lf-comp-grid-template, 1fr auto);position:relative;user-select:none}.toolbar{border:0;border-style:solid;border-radius:var(--lf-compare-border-radius, var(--lf-ui-border-radius));border-top-left-radius:0;border-top-right-radius:0;background-color:rgba(var(--lf-compare-color-surface, var(--lf-color-surface)), 0.375);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-sizing:border-box;display:flex;justify-content:var(--lf-compare-toolbar-justify, space-between);padding:var(--lf-compare-toolbar-padding, 0.5em);width:var(--lf-compare-toolbar-width, 100%)}.toolbar__panel{border:0;border-style:solid;border-color:rgba(var(--lf-compare-border-color, var(--lf-color-border)), 1);border-width:1px;border-radius:var(--lf-compare-border-radius, var(--lf-ui-border-radius));background-color:rgba(var(--lf-compare-color-surface, var(--lf-color-surface)), 0.375);color:rgb(var(--lf-compare-color-on-surface, var(--lf-color-on-surface)));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);bottom:0;height:var(--lf-compare-panel-height, auto);max-height:var(--lf-compare-panel-max-height, 50%);overflow:auto;position:absolute;width:var(--lf-compare-panel-width, 50%);z-index:var(--lf-compare-panel-z-index, var(--lf-ui-zindex-portal))}.toolbar__panel--left{left:0}.toolbar__panel--right{right:0}.view{width:100%;height:100%;position:relative}.view--main>:first-child{width:100%;height:100%;position:relative}.view--main>:last-child{width:100%;height:100%;clip-path:inset(0 var(--lf_compare_overlay_width, 50%) 0 0);left:0;overflow:hidden;position:absolute;top:0}.view--main>:last-child:after{background-color:rgba(var(--lf-compare-color-surface, var(--lf-color-surface)), 0.5);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);content:"";height:100%;pointer-events:none;position:absolute;right:var(--lf_compare_overlay_width, 50%);top:0;width:var(--lf-compare-slider-thickness, 3px)}.view--split{display:grid;grid-template-columns:50% 50%;overflow:hidden}.view__slider{width:100%;height:100%;left:0;position:absolute;top:0;touch-action:pan-y;z-index:2}.view__input{width:100%;height:100%;appearance:none;background:transparent;cursor:grab;margin:0;pointer-events:all;z-index:1}.view__input::-webkit-slider-thumb{background-color:rgba(var(--lf-compare-color-surface, var(--lf-color-surface)), 0.375);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);appearance:none;cursor:ew-resize;height:100%;margin:0;width:10px}.view__input::-moz-slider-thumb{background-color:rgba(var(--lf-compare-color-surface, var(--lf-color-surface)), 0.375);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);appearance:none;cursor:ew-resize;height:100%;margin:0;width:10px}';
+const pA1ddf6c3_entry = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  lf_compare: Y$3
+}, Symbol.toStringTag, { value: "Module" }));
+const m$2 = { start: (t5) => {
+  const { controller: e2 } = t5, { get: s2, set: i2 } = e2, { compInstance: r2 } = s2, { lfAutoPlay: a2, lfInterval: o2 } = r2;
+  a2 && o2 > 0 && i2.interval(setInterval((() => {
+    i2.index.next();
+  }), o2));
+}, stop: (t5) => {
+  const { controller: e2 } = t5, { get: s2, set: i2 } = e2, { interval: r2 } = s2;
+  r2() && (clearInterval(r2()), i2.interval(null));
+} }, g$5 = (t5, e2) => {
+  const { start: s2, stop: i2 } = m$2;
+  return { ...t5, autoplay: { start: () => s2(e2()), stop: () => i2(e2()) } };
+}, y$5 = (e2) => /* @__PURE__ */ ((e3) => ({ back: () => {
+  const { controller: s2, elements: i2, handlers: r2 } = e3(), { blocks: a2, cyAttributes: o2, manager: n2, parts: c2 } = s2.get, { assignRef: f2, theme: h2 } = n2, { refs: u2 } = i2, { button: d2 } = r2, { "--lf-icon-previous": b2 } = h2.get.current().variables;
+  return U$6("lf-button", { class: h2.bemClass(a2.carousel._, a2.carousel.back), "data-cy": o2.button, id: LF_CAROUSEL_IDS.back, lfIcon: b2, lfStyling: "icon", lfUiSize: "large", "onLf-button-event": d2, part: c2.back, ref: f2(u2, "back"), title: "Previous slide." });
+}, forward: () => {
+  const { controller: s2, elements: i2, handlers: r2 } = e3(), { blocks: a2, cyAttributes: o2, manager: n2, parts: c2 } = s2.get, { assignRef: f2, theme: h2 } = n2, { refs: u2 } = i2, { button: d2 } = r2, { "--lf-icon-next": b2 } = h2.get.current().variables;
+  return U$6("lf-button", { class: h2.bemClass(a2.carousel._, a2.carousel.forward), "data-cy": o2.button, id: LF_CAROUSEL_IDS.forward, lfIcon: b2, lfStyling: "icon", lfUiSize: "large", "onLf-button-event": d2, part: c2.forward, ref: f2(u2, "forward"), title: "Next slide." });
+} }))(e2), w$6 = (t5) => /* @__PURE__ */ ((t6) => ({ button: (e2) => {
+  const { eventType: s2, id: i2 } = e2.detail, { next: r2, previous: a2 } = t6().controller.set.index;
+  if ("click" === s2) switch (i2) {
+    case LF_CAROUSEL_IDS.back:
+      a2();
+      break;
+    case LF_CAROUSEL_IDS.forward:
+      r2();
+  }
+} }))(t5);
+var k$6, z$6, x$6, _$5, S$4, E$4, W$5, M$5, j$4, C$4, T$3, I$3, L$2, D$4, P$2, R$2, A$2, Y$2 = function(t5, e2, s2, i2) {
+  if ("a" === s2 && !i2) throw new TypeError("Private accessor was defined without a getter");
+  if ("function" == typeof e2 ? t5 !== e2 || !i2 : !e2.has(t5)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+  return "m" === s2 ? i2 : "a" === s2 ? i2.call(t5) : i2 ? i2.value : e2.get(t5);
+}, H$2 = function(t5, e2, s2, i2, r2) {
+  if ("function" == typeof e2 ? t5 !== e2 || true : !e2.has(t5)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
+  return e2.set(t5, s2), s2;
+};
+const O$2 = class O {
+  constructor(t5) {
+    o$2(this, t5), this.lfEvent = G$4(this, "lf-carousel-event"), k$6.add(this), this.currentIndex = 0, this.shapes = {}, this.lfDataset = null, this.lfAutoPlay = false, this.lfInterval = 3e3, this.lfLightbox = false, this.lfNavigation = false, this.lfShape = "image", this.lfStyle = "", z$6.set(this, void 0), x$6.set(this, LF_CAROUSEL_BLOCKS), _$5.set(this, CY_ATTRIBUTES), S$4.set(this, LF_ATTRIBUTES), E$4.set(this, LF_CAROUSEL_PARTS), W$5.set(this, LF_STYLE_ID), M$5.set(this, LF_WRAPPER_ID), j$4.set(this, void 0), C$4.set(this, void 0), T$3.set(this, void 0), I$3.set(this, (() => {
+      var t6;
+      H$2(this, T$3, { controller: { get: { blocks: Y$2(this, x$6, "f"), compInstance: this, cyAttributes: CY_ATTRIBUTES, index: { current: () => this.currentIndex }, interval: () => Y$2(this, C$4, "f"), manager: Y$2(this, z$6, "f"), parts: LF_CAROUSEL_PARTS, totalSlides: () => Y$2(this, k$6, "m", L$2).call(this) }, set: g$5({ index: { current: (t7) => this.currentIndex = t7, next: () => {
+        var t7, e2;
+        this.currentIndex = (t7 = this.currentIndex, e2 = Y$2(this, k$6, "m", L$2).call(this), (t7 + 1) % e2);
+      }, previous: () => {
+        var t7, e2;
+        this.currentIndex = (t7 = this.currentIndex, e2 = Y$2(this, k$6, "m", L$2).call(this), (t7 - 1 + e2) % e2);
+      } }, interval: (t7) => H$2(this, C$4, t7, "f") }, t6 = () => Y$2(this, T$3, "f")) }, elements: { jsx: y$5(t6), refs: { back: null, forward: null } }, handlers: w$6(t6) });
+    }));
+  }
+  onLfEvent(t5, e2) {
+    const { lightbox: s2 } = Y$2(this, z$6, "f").effects;
+    if ("lf-event" === e2 && this.lfLightbox) {
+      const { comp: e3, eventType: i2 } = t5.detail;
+      if ("click" === i2) {
+        const { rootElement: t6 } = e3;
+        t6 instanceof HTMLElement && s2.show(t6);
+      }
+    }
+    this.lfEvent.emit({ comp: this, eventType: e2, id: this.rootElement.id, originalEvent: t5 });
+  }
+  async updateShapes() {
+    if (!Y$2(this, z$6, "f")) return;
+    const { data: t5, debug: e2 } = Y$2(this, z$6, "f");
+    try {
+      this.shapes = t5.cell.shapes.getAll(this.lfDataset);
+    } catch (t6) {
+      e2.logs.new(this, "Error updating shapes: " + t6, "error");
+    }
+  }
+  async getDebugInfo() {
+    return this.debugInfo;
+  }
+  async getProps() {
+    const t5 = LF_CAROUSEL_PROPS.map(((t6) => [t6, this[t6]]));
+    return Object.fromEntries(t5);
+  }
+  async goToSlide(t5) {
+    const { current: e2 } = Y$2(this, T$3, "f").controller.set.index;
+    e2(t5);
+  }
+  async nextSlide() {
+    const { next: t5 } = Y$2(this, T$3, "f").controller.set.index;
+    t5();
+  }
+  async prevSlide() {
+    const { previous: t5 } = Y$2(this, T$3, "f").controller.set.index;
+    t5();
+  }
+  async refresh() {
+    vt$1(this);
+  }
+  async unmount(t5 = 0) {
+    setTimeout((() => {
+      this.onLfEvent(new CustomEvent("unmount"), "unmount"), this.rootElement.remove();
+    }), t5);
+  }
+  connectedCallback() {
+    Y$2(this, z$6, "f") && Y$2(this, z$6, "f").theme.register(this);
+  }
+  async componentWillLoad() {
+    H$2(this, z$6, await a(this)), Y$2(this, I$3, "f").call(this), this.updateShapes(), this.lfAutoPlay && m$2.start(Y$2(this, T$3, "f"));
+  }
+  componentDidLoad() {
+    const { info: t5 } = Y$2(this, z$6, "f").debug, { register: e2 } = Y$2(this, z$6, "f").drag, { next: s2, previous: i2 } = Y$2(this, T$3, "f").controller.set.index;
+    e2.swipe(Y$2(this, j$4, "f"), { onEnd: (t6, e3) => {
+      var _a2;
+      if ((_a2 = e3.swipeData) == null ? void 0 : _a2.direction) {
+        const { direction: t7 } = e3.swipeData;
+        "left" === t7 ? s2() : "right" === t7 && i2();
+      }
+    } }), this.onLfEvent(new CustomEvent("ready"), "ready"), t5.update(this, "did-load");
+  }
+  componentWillRender() {
+    const { info: t5 } = Y$2(this, z$6, "f").debug;
+    t5.update(this, "will-render");
+  }
+  componentDidRender() {
+    const { info: t5 } = Y$2(this, z$6, "f").debug;
+    t5.update(this, "did-render");
+  }
+  render() {
+    const { bemClass: e2, setLfStyle: s2 } = Y$2(this, z$6, "f").theme, { lfStyle: i2 } = this, { carousel: a2 } = Y$2(this, x$6, "f");
+    return U$6(A$a, { key: "a43ab4851e6c9c3382faf86f962c9702a6dbfa44" }, i2 && U$6("style", { key: "ecf1185e4666850c5941b0f11b515166415a2a7a", id: Y$2(this, W$5, "f") }, s2(this)), U$6("div", { key: "8998d5ffc3ca9f005f2db1b83fb8eb926b2834e2", id: Y$2(this, M$5, "f") }, U$6("div", { key: "7654a672b371fed52d74750524399b6fb529ff4f", class: e2(a2._), part: Y$2(this, E$4, "f").carousel, ref: (t5) => {
+      t5 && H$2(this, j$4, t5);
+    }, role: "region" }, Y$2(this, k$6, "m", P$2).call(this))));
+  }
+  disconnectedCallback() {
+    var _a2, _b2;
+    (_a2 = Y$2(this, z$6, "f")) == null ? void 0 : _a2.drag.unregister.swipe(Y$2(this, j$4, "f")), (_b2 = Y$2(this, z$6, "f")) == null ? void 0 : _b2.theme.unregister(this), m$2.stop(Y$2(this, T$3, "f"));
+  }
+  get rootElement() {
+    return q$5(this);
+  }
+  static get watchers() {
+    return { lfDataset: ["updateShapes"], lfShape: ["updateShapes"] };
+  }
+};
+z$6 = /* @__PURE__ */ new WeakMap(), x$6 = /* @__PURE__ */ new WeakMap(), _$5 = /* @__PURE__ */ new WeakMap(), S$4 = /* @__PURE__ */ new WeakMap(), E$4 = /* @__PURE__ */ new WeakMap(), W$5 = /* @__PURE__ */ new WeakMap(), M$5 = /* @__PURE__ */ new WeakMap(), j$4 = /* @__PURE__ */ new WeakMap(), C$4 = /* @__PURE__ */ new WeakMap(), T$3 = /* @__PURE__ */ new WeakMap(), I$3 = /* @__PURE__ */ new WeakMap(), k$6 = /* @__PURE__ */ new WeakSet(), L$2 = function() {
+  var _a2, _b2;
+  return ((_b2 = (_a2 = this.shapes) == null ? void 0 : _a2[this.lfShape]) == null ? void 0 : _b2.length) || 0;
+}, D$4 = function() {
+  var _a2;
+  return !!((_a2 = this.shapes) == null ? void 0 : _a2[this.lfShape]);
+}, P$2 = function() {
+  const { bemClass: e2 } = Y$2(this, z$6, "f").theme, { carousel: s2 } = Y$2(this, x$6, "f"), { elements: i2 } = Y$2(this, T$3, "f"), { jsx: r2 } = i2, { back: a2, forward: l2 } = r2;
+  if (Y$2(this, k$6, "m", D$4).call(this)) {
+    const i3 = this.shapes[this.lfShape];
+    if (i3 == null ? void 0 : i3.length) return U$6(St$1, null, U$6("div", { "aria-live": "polite", class: e2(s2._, s2.track), part: Y$2(this, E$4, "f").track, role: "region" }, Y$2(this, k$6, "m", A$2).call(this), this.lfNavigation && a2(), this.lfNavigation && l2()), Y$2(this, k$6, "m", R$2).call(this));
+  }
+  return null;
+}, R$2 = function() {
+  const { bemClass: e2 } = Y$2(this, z$6, "f").theme, { slideBar: s2 } = Y$2(this, x$6, "f"), i2 = Y$2(this, k$6, "m", L$2).call(this), r2 = [];
+  for (let a2 = 0; a2 < i2; a2++) {
+    const i3 = `Jump to slide ${a2 + 1}`;
+    r2.push(U$6("div", { "aria-label": i3, class: e2(s2._, s2.segment, { active: a2 === this.currentIndex }), "data-cy": Y$2(this, _$5, "f").button, "data-index": a2, onClick: async () => this.goToSlide(a2), part: Y$2(this, E$4, "f").segment, role: "button", tabIndex: 0, title: i3 }));
+  }
+  return U$6("div", { class: e2(s2._), part: Y$2(this, E$4, "f").slideBar }, r2);
+}, A$2 = function() {
+  const { bemClass: e2 } = Y$2(this, z$6, "f").theme, { currentIndex: s2, lfShape: i2 } = this, { carousel: r$12 } = Y$2(this, x$6, "f"), a2 = this.shapes[i2].map((() => ({ htmlProps: { dataset: { lf: Y$2(this, S$4, "f").fadeIn } } }))), o2 = this.shapes[i2][s2], l2 = a2[s2];
+  return U$6("div", { class: e2(r$12._, r$12.slide), "data-index": s2 }, U$6(r, { cell: Object.assign(l2, o2), index: s2, shape: i2, eventDispatcher: async (t5) => this.onLfEvent(t5, "lf-event"), framework: Y$2(this, z$6, "f") }));
+}, O$2.style = "::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=fade-in]{display:block;animation:lf-fade-in-block 0.25s ease-out forwards}@keyframes lf-fade-in-block{from{visibility:hidden;opacity:0}to{visibility:visible;opacity:1}}:host{display:block;font-family:var(--lf-carousel-font-family, var(--lf-font-family-primary));font-size:var(--lf-carousel-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-carousel-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-carousel-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-carousel-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-carousel-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-carousel-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-carousel-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-carousel-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{width:100%;height:100%;margin:auto;overflow:hidden;position:relative}:host([lf-lightbox]) [data-lf=fade-in]{cursor:pointer}.carousel{border:0;border-style:solid;border-radius:var(--lf-carousel-border-radius, var(--lf-ui-border-radius));width:100%;height:100%;display:flex;justify-content:center;overflow:hidden;position:relative}.carousel:hover .slide-bar{opacity:1}.carousel:hover .carousel__back,.carousel:hover .carousel__forward{opacity:1}.carousel:hover .carousel__back{left:0.5em}.carousel:hover .carousel__forward{right:0.5em}.carousel__back,.carousel__forward{transition:all 250ms cubic-bezier(0.34, 1.56, 0.64, 1);opacity:0;position:absolute;top:50%;transform:translateY(-50%)}.carousel__back{left:0}.carousel__forward{right:0}.carousel__track{width:100%;height:100%;transition:all 250ms cubic-bezier(0.34, 1.56, 0.64, 1);display:flex;will-change:transform}.carousel__slide{width:100%;height:100%;align-items:center;flex-shrink:0;justify-content:center}.slide-bar{background-color:rgba(var(--lf-carousel-color-surface, var(--lf-color-surface)), 0.75);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:all 300ms cubic-bezier(0.4, 0, 0.2, 1);align-items:center;bottom:0;box-sizing:border-box;display:flex;flex-wrap:nowrap;height:var(--lf-carousel-slide-bar-height, 0.75em);left:0;opacity:var(--lf-carousel-slide-bar-opacity, 0.75);position:absolute;width:100%}.slide-bar:hover{opacity:var(--lf-carousel-slide-bar-opacity-hover, 1)}.slide-bar__segment{background-color:rgba(var(--lf-carousel-color-surface, var(--lf-color-surface)), 1);width:100%;height:100%;transition:all 300ms cubic-bezier(0.4, 0, 0.2, 1);cursor:pointer}.slide-bar__segment:not(.slide-bar__segment--active):hover{background-color:rgba(var(--lf-carousel-color-on-surface, var(--lf-color-on-surface)), 0.5)}.slide-bar__segment--active{background-color:rgba(var(--lf-carousel-color-on-surface, var(--lf-color-on-surface)), 1)}";
+const pB388f0aa_entry = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  lf_carousel: O$2
+}, Symbol.toStringTag, { value: "Module" }));
+var v$2, m$1, u$3, g$4, y$4, w$5, k$5, x$5, z$5, _$4, E$3, W$4, C$3, M$4, j$3, D$3 = function(r2, o2, i2, a2) {
+  if ("a" === i2 && !a2) throw new TypeError("Private accessor was defined without a getter");
+  if ("function" == typeof o2 ? r2 !== o2 || !a2 : !o2.has(r2)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+  return "m" === i2 ? a2 : "a" === i2 ? a2.call(r2) : a2 ? a2.value : o2.get(r2);
+}, T$2 = function(r2, o2, i2, a2, e2) {
+  if ("function" == typeof o2 ? r2 !== o2 || true : !o2.has(r2)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
+  return o2.set(r2, i2), i2;
+};
+const S$3 = class S {
+  constructor(a2) {
+    o$2(this, a2), this.lfEvent = G$4(this, "lf-accordion-event"), v$2.add(this), this.expandedNodes = /* @__PURE__ */ new Set(), this.selectedNodes = /* @__PURE__ */ new Set(), this.lfDataset = null, this.lfRipple = true, this.lfUiSize = "medium", this.lfUiState = "primary", this.lfStyle = "", m$1.set(this, void 0), u$3.set(this, LF_ACCORDION_BLOCKS), g$4.set(this, CY_ATTRIBUTES), y$4.set(this, LF_ATTRIBUTES), w$5.set(this, LF_ACCORDION_PARTS), k$5.set(this, LF_STYLE_ID), x$5.set(this, LF_WRAPPER_ID), z$5.set(this, {}), j$3.set(this, ((r$12) => {
+      const { cells: o2 } = r$12, a3 = o2 && Object.keys(o2)[0], e2 = o2 == null ? void 0 : o2[a3];
+      return U$6(r, { cell: e2, index: 0, shape: e2.shape, eventDispatcher: async (r2) => this.onLfEvent(r2, "lf-event"), framework: D$3(this, m$1, "f") });
+    }));
+  }
+  onLfEvent(r2, o2, i2) {
+    const { effects: a2 } = D$3(this, m$1, "f"), { lfRipple: e2, rootElement: t5 } = this;
+    "pointerdown" === o2 && e2 && a2.ripple(r2, D$3(this, z$5, "f")[i2.id]), this.lfEvent.emit({ comp: this, eventType: o2, id: t5.id, originalEvent: r2 });
+  }
+  async getDebugInfo() {
+    return this.debugInfo;
+  }
+  async getProps() {
+    const r2 = LF_ACCORDION_PROPS.map(((r3) => [r3, this[r3]]));
+    return Object.fromEntries(r2);
+  }
+  async getSelectedNodes() {
+    return this.selectedNodes;
+  }
+  async refresh() {
+    vt$1(this);
+  }
+  async toggleNode(r2, o2) {
+    const i2 = this.lfDataset.nodes.find(((o3) => o3.id === r2));
+    i2 && (D$3(this, v$2, "m", E$3).call(this, i2) ? D$3(this, v$2, "m", _$4).call(this, i2) ? this.expandedNodes.delete(i2) : this.expandedNodes.add(i2) : D$3(this, v$2, "m", W$4).call(this, i2) ? this.selectedNodes.delete(i2) : this.selectedNodes.add(i2), D$3(this, v$2, "m", E$3).call(this, i2) || this.onLfEvent(o2 || new CustomEvent("click"), "click"), this.refresh());
+  }
+  async unmount(r2 = 0) {
+    setTimeout((() => {
+      this.onLfEvent(new CustomEvent("unmount"), "unmount"), this.rootElement.remove();
+    }), r2);
+  }
+  connectedCallback() {
+    D$3(this, m$1, "f") && D$3(this, m$1, "f").theme.register(this);
+  }
+  async componentWillLoad() {
+    T$2(this, m$1, await a(this));
+  }
+  componentDidLoad() {
+    const { info: r2 } = D$3(this, m$1, "f").debug;
+    this.onLfEvent(new CustomEvent("ready"), "ready"), r2.update(this, "did-load");
+  }
+  componentWillRender() {
+    const { info: r2 } = D$3(this, m$1, "f").debug;
+    r2.update(this, "will-render");
+  }
+  componentDidRender() {
+    const { debug: r2 } = D$3(this, m$1, "f");
+    r2.info.update(this, "did-render");
+  }
+  render() {
+    const { bemClass: r2, setLfStyle: o2 } = D$3(this, m$1, "f").theme, { lfStyle: a2 } = this;
+    T$2(this, z$5, {});
+    const { accordion: t5 } = D$3(this, u$3, "f");
+    return U$6(A$a, { key: "421702407cd773c87f118271733250ba6b0c9123" }, a2 && U$6("style", { key: "0065f7001156178429d967ccf119200a198ec42a", id: D$3(this, k$5, "f") }, o2(this)), U$6("div", { key: "b126869c4ec5471bf4a41ab7290b4043210af4da", id: D$3(this, x$5, "f") }, U$6("div", { key: "1afbdb206bb98b4465c94774053dda7f9e0095ae", class: r2(t5._), part: D$3(this, w$5, "f").accordion }, D$3(this, v$2, "m", M$4).call(this))));
+  }
+  disconnectedCallback() {
+    var _a2;
+    (_a2 = D$3(this, m$1, "f")) == null ? void 0 : _a2.theme.unregister(this);
+  }
+  get rootElement() {
+    return q$5(this);
+  }
+};
+m$1 = /* @__PURE__ */ new WeakMap(), u$3 = /* @__PURE__ */ new WeakMap(), g$4 = /* @__PURE__ */ new WeakMap(), y$4 = /* @__PURE__ */ new WeakMap(), w$5 = /* @__PURE__ */ new WeakMap(), k$5 = /* @__PURE__ */ new WeakMap(), x$5 = /* @__PURE__ */ new WeakMap(), z$5 = /* @__PURE__ */ new WeakMap(), j$3 = /* @__PURE__ */ new WeakMap(), v$2 = /* @__PURE__ */ new WeakSet(), _$4 = function(r2) {
+  return this.expandedNodes.has(r2);
+}, E$3 = function(r2) {
+  return r2.cells && Object.keys(r2.cells).length > 0;
+}, W$4 = function(r2) {
+  return this.selectedNodes.has(r2);
+}, C$3 = function(r2) {
+  const { assets: o2, theme: a2 } = D$3(this, m$1, "f"), { style: e2 } = o2.get(`./assets/svg/${r2}.svg`), { node: t5 } = D$3(this, u$3, "f");
+  return U$6("div", { class: a2.bemClass(t5._, t5.icon), "data-cy": D$3(this, g$4, "f").maskedSvg, part: D$3(this, w$5, "f").icon, style: e2 });
+}, M$4 = function() {
+  const { bemClass: r2 } = D$3(this, m$1, "f").theme, { lfDataset: o2 } = this;
+  if (!o2 || !o2.nodes) return [];
+  const a2 = [];
+  for (let e2 = 0; e2 < o2.nodes.length; e2++) {
+    const t5 = o2.nodes[e2], n2 = D$3(this, v$2, "m", _$4).call(this, t5), l2 = D$3(this, v$2, "m", E$3).call(this, t5), s2 = D$3(this, v$2, "m", W$4).call(this, t5);
+    a2.push(U$6("div", { class: r2(D$3(this, u$3, "f").node._), "data-cy": D$3(this, g$4, "f").node, "data-lf": D$3(this, y$4, "f")[this.lfUiState] }, U$6("div", { class: r2(D$3(this, u$3, "f").node._, D$3(this, u$3, "f").node.header, { expanded: l2 && n2, selected: !l2 && s2 }), "data-cy": !l2 && D$3(this, g$4, "f").button, onClick: (r3) => this.toggleNode(t5.id, r3), onPointerDown: (r3) => {
+      this.onLfEvent(r3, "pointerdown", t5);
+    }, part: D$3(this, w$5, "f").header, tabindex: "1", title: t5.description }, U$6("div", { "data-cy": D$3(this, g$4, "f").rippleSurface, "data-lf": D$3(this, y$4, "f").rippleSurface, part: D$3(this, w$5, "f").rippleSurface, ref: (r3) => {
+      r3 && this.lfRipple && (D$3(this, z$5, "f")[t5.id] = r3);
+    } }), t5.icon ? D$3(this, v$2, "m", C$3).call(this, t5.icon) : null, U$6("span", { class: r2(D$3(this, u$3, "f").node._, D$3(this, u$3, "f").node.text), part: D$3(this, w$5, "f").text }, t5.value), l2 && U$6("div", { class: r2(D$3(this, u$3, "f").node._, D$3(this, u$3, "f").node.expand, { expanded: n2 }), "data-cy": D$3(this, g$4, "f").dropdownButton, "data-lf": D$3(this, y$4, "f").icon, part: D$3(this, w$5, "f").icon })), n2 && U$6("div", { class: r2(D$3(this, u$3, "f").node._, D$3(this, u$3, "f").node.content, { selected: s2 }), "data-lf": D$3(this, y$4, "f").fadeIn, part: D$3(this, w$5, "f").content }, D$3(this, j$3, "f").call(this, t5))));
+  }
+  return a2;
+}, S$3.style = ".node{border:0;border-style:solid;border-color:rgba(var(--lf-accordion-border-color, var(--lf-color-border)), 1);border-width:1px;border-radius:var(--lf-accordion-border-radius, var(--lf-ui-border-radius));background-color:rgba(var(--lf-accordion-color-bg, var(--lf-color-bg)), 0.375);color:rgb(var(--lf-accordion-color-on-bg, var(--lf-color-on-bg)));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:0;border-top:0;box-sizing:border-box;width:100%}.node:not(:first-of-type){border:0;border-style:solid;border-color:rgba(var(--lf-accordion-border-color, var(--lf-color-border)), 1);border-width:1px;margin-bottom:0;margin-left:0;margin-right:0}.node__content,.node__content ::slotted(*){border:0;border-style:solid;border-radius:var(--lf-accordion-border-radius, var(--lf-ui-border-radius));border-top-left-radius:0;border-top-right-radius:0}.node__header{border:0;border-style:solid;border-radius:var(--lf-accordion-border-radius, var(--lf-ui-border-radius));color:rgb(var(--lf-accordion-color-on-bg, var(--lf-color-on-bg)));transition:all 150ms cubic-bezier(0.42, 0, 0.58, 1);align-items:center;border:none;box-sizing:border-box;cursor:var(--lf-accordion-cursor, pointer);display:flex;line-height:var(--lf-accordion-line-height, 1.75em);outline:none;padding:var(--lf-accordion-padding, 1em);position:relative;text-align:var(--lf-accordion-text-align, left);width:100%}.node__header:hover{background-color:rgba(var(--lf-accordion-color-primary, var(--lf-color-primary)), 0.175)}.node__header--expanded{border-bottom-left-radius:0;border-bottom-right-radius:0}.node__header--selected{background-color:rgba(var(--lf-accordion-color-primary, var(--lf-color-primary)), 0.375)}.node__header--selected:hover{background-color:rgba(var(--lf-accordion-color-primary, var(--lf-color-primary)), 0.475)}.node__text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:1.25em;font-weight:500;line-height:1.4em;letter-spacing:0em;margin:var(--lf-accordion-text-margin, 0 0.5em 0 0)}.node__text--highlighted{background-color:rgba(var(--lf-accordion-color-primary, var(--lf-color-primary)), 1);color:rgb(var(--lf-accordion-color-on-primary, var(--lf-color-on-primary)))}.node__expand,.node__icon{margin:0}.node__icon{background-color:rgba(var(--lf-accordion-color-on-bg, var(--lf-color-on-bg)), 1);height:1.5em;width:1.5em;overflow:hidden;margin:var(--lf-accordion-icon-margin, 0 0.5em 0 0)}.node__expand{-webkit-mask:var(--lf-icon-dropdown);mask:var(--lf-icon-dropdown);-webkit-mask-position:center;-webkit-mask-repeat:no-repeat;-webkit-mask-size:contain;mask-position:center;mask-repeat:no-repeat;mask-size:contain;background-color:rgba(var(--lf-accordion-color-on-bg, var(--lf-color-on-bg)), 1);height:1.5em;width:1.5em;overflow:hidden;transition:all 150ms cubic-bezier(0.42, 0, 0.58, 1);margin:var(--lf-accordion-expand-margin, 0 0 0 auto)}.node__expand--expanded{transform:rotate(-180deg)}.node__expand--placeholder{visibility:hidden}::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=ripple]{animation-duration:var(--lf-ui-duration-ripple, 675ms);animation-fill-mode:forwards;animation-name:lf-ripple;animation-timing-function:var(--lf-ui-timing-ripple, ease-out);background:var(--lf-ui-ripple-background, var(--lf-color-primary));border-radius:var(--lf-ui-radius-ripple, 50%);height:var(--lf-ui-ripple-height, 100%);left:var(--lf-ui-ripple-x, 50%);opacity:var(--lf-ui-opacity-ripple, 0.5);pointer-events:none;position:absolute;top:var(--lf-ui-ripple-y, 50%);transform:scale(0);width:var(--lf-ui-ripple-width, 100%)}@keyframes lf-ripple{from{transform:scale(0)}to{opacity:0;transform:scale(4)}}[data-lf=ripple-surface]{cursor:pointer;height:100%;left:0;overflow:hidden;position:absolute;top:0;width:100%}[data-lf=danger]{--lf-accordion-color-primary:var(\n    --lf-accordion-color-danger,\n    var(--lf-color-danger)\n  );--lf-accordion-color-on-primary:var(\n    --lf-accordion-color-danger,\n    var(--lf-color-on-danger)\n  )}[data-lf=disabled]{opacity:var(--lf-accordion-ui-opacity-disabled, var(--lf-ui-opacity-disabled));pointer-events:none}[data-lf=info]{--lf-accordion-color-primary:var(\n    --lf-accordion-color-info,\n    var(--lf-color-info)\n  );--lf-accordion-color-on-primary:var(\n    --lf-accordion-color-info,\n    var(--lf-color-on-info)\n  )}[data-lf=secondary]{--lf-accordion-color-primary:var(\n    --lf-accordion-color-secondary,\n    var(--lf-color-secondary)\n  );--lf-accordion-color-on-primary:var(\n    --lf-accordion-color-secondary,\n    var(--lf-color-on-secondary)\n  )}[data-lf=success]{--lf-accordion-color-primary:var(\n    --lf-accordion-color-success,\n    var(--lf-color-success)\n  );--lf-accordion-color-on-primary:var(\n    --lf-accordion-color-success,\n    var(--lf-color-on-success)\n  )}[data-lf=warning]{--lf-accordion-color-primary:var(\n    --lf-accordion-color-warning,\n    var(--lf-color-warning)\n  );--lf-accordion-color-on-primary:var(\n    --lf-accordion-color-warning,\n    var(--lf-color-on-warning)\n  )}[data-lf=fade-in]{display:block;animation:lf-fade-in-block 0.25s ease-out forwards}@keyframes lf-fade-in-block{from{visibility:hidden;opacity:0}to{visibility:visible;opacity:1}}:host{display:block;font-family:var(--lf-accordion-font-family, var(--lf-font-family-primary));font-size:var(--lf-accordion-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-accordion-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-accordion-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-accordion-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-accordion-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-accordion-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-accordion-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-accordion-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}.accordion{border:0;border-style:solid;border-color:rgba(var(--lf-accordion-border-color, var(--lf-color-border)), 1);border-width:1px;border-radius:var(--lf-accordion-border-radius, var(--lf-ui-border-radius));border-left:0;border-right:0;width:100%;height:100%;box-sizing:border-box;display:flex;flex-direction:var(--lf-accordion-flex-direction, column);flex-wrap:var(--lf-accordion-flex-wrap, nowrap);width:100%}";
+const pB3fd388a_entry = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  lf_accordion: S$3
+}, Symbol.toStringTag, { value: "Module" }));
+var g$3, u$2, p$2, b$4, y$3, z$4, w$4, k$4, x$4, C$2, E$2, W$3, j$2, D$2, S$2 = function(t5, e2, i2, a2) {
+  if ("a" === i2 && !a2) throw new TypeError("Private accessor was defined without a getter");
+  if ("function" == typeof e2 ? t5 !== e2 || !a2 : !e2.has(t5)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+  return "m" === i2 ? a2 : "a" === i2 ? a2.call(t5) : a2 ? a2.value : e2.get(t5);
+};
+const M$3 = class M {
+  constructor(i2) {
+    o$2(this, i2), this.lfEvent = G$4(this, "lf-article-event"), g$3.add(this), this.lfDataset = null, this.lfEmpty = "Empty data.", this.lfStyle = "", this.lfUiSize = "medium", u$2.set(this, void 0), p$2.set(this, LF_ARTICLE_BLOCKS), b$4.set(this, CY_ATTRIBUTES), y$3.set(this, LF_ARTICLE_PARTS), z$4.set(this, LF_STYLE_ID), w$4.set(this, LF_WRAPPER_ID);
+  }
+  onLfEvent(t5, e2) {
+    this.lfEvent.emit({ comp: this, eventType: e2, id: this.rootElement.id, originalEvent: t5 });
+  }
+  async getDebugInfo() {
+    return this.debugInfo;
+  }
+  async getProps() {
+    const t5 = LF_ARTICLE_PROPS.map(((t6) => [t6, this[t6]]));
+    return Object.fromEntries(t5);
+  }
+  async refresh() {
+    vt$1(this);
+  }
+  async unmount(t5 = 0) {
+    setTimeout((() => {
+      this.onLfEvent(new CustomEvent("unmount"), "unmount"), this.rootElement.remove();
+    }), t5);
+  }
+  connectedCallback() {
+    S$2(this, u$2, "f") && S$2(this, u$2, "f").theme.register(this);
+  }
+  async componentWillLoad() {
+    !(function(t5, e2, i2, a2, r2) {
+      if ("function" == typeof e2 ? t5 !== e2 || true : !e2.has(t5)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
+      e2.set(t5, i2);
+    })(this, u$2, await a(this));
+  }
+  componentDidLoad() {
+    const { info: t5 } = S$2(this, u$2, "f").debug;
+    this.onLfEvent(new CustomEvent("ready"), "ready"), t5.update(this, "did-load");
+  }
+  componentWillRender() {
+    const { info: t5 } = S$2(this, u$2, "f").debug;
+    t5.update(this, "will-render");
+  }
+  componentDidRender() {
+    const { info: t5 } = S$2(this, u$2, "f").debug;
+    t5.update(this, "did-render");
+  }
+  render() {
+    var _a2;
+    const { theme: t5 } = S$2(this, u$2, "f"), { bemClass: e2, setLfStyle: i2 } = t5, { lfDataset: l2, lfEmpty: o2, lfStyle: s2 } = this, { emptyData: n2 } = S$2(this, p$2, "f");
+    return U$6(A$a, { key: "facc45a56c7f608d4ea63431396e1a044bf952cc" }, s2 && U$6("style", { key: "32ff6a90169431aa5dba003da5e168715cbeb1f5", id: S$2(this, z$4, "f") }, i2(this)), U$6("div", { key: "c5549c09dd1786060182280c0586fee4d7c45985", id: S$2(this, w$4, "f") }, ((_a2 = l2 == null ? void 0 : l2.nodes) == null ? void 0 : _a2.length) ? S$2(this, g$3, "m", x$4).call(this) : U$6("div", { class: e2(n2._), part: S$2(this, y$3, "f").emptyData }, U$6("div", { class: e2(n2._, n2.text) }, o2))));
+  }
+  disconnectedCallback() {
+    var _a2;
+    (_a2 = S$2(this, u$2, "f")) == null ? void 0 : _a2.theme.unregister(this);
+  }
+  get rootElement() {
+    return q$5(this);
+  }
+};
+u$2 = /* @__PURE__ */ new WeakMap(), p$2 = /* @__PURE__ */ new WeakMap(), b$4 = /* @__PURE__ */ new WeakMap(), y$3 = /* @__PURE__ */ new WeakMap(), z$4 = /* @__PURE__ */ new WeakMap(), w$4 = /* @__PURE__ */ new WeakMap(), g$3 = /* @__PURE__ */ new WeakSet(), k$4 = function(t5, e2) {
+  var _a2;
+  switch (e2) {
+    case 0:
+      return S$2(this, g$3, "m", C$2).call(this, t5, e2);
+    case 1:
+      return S$2(this, g$3, "m", E$2).call(this, t5, e2);
+    case 2:
+      return S$2(this, g$3, "m", j$2).call(this, t5, e2);
+    default:
+      return ((_a2 = t5.children) == null ? void 0 : _a2.length) ? S$2(this, g$3, "m", W$3).call(this, t5, e2) : S$2(this, g$3, "m", D$2).call(this, t5, e2);
+  }
+}, x$4 = function() {
+  const t5 = [], { nodes: e2 } = this.lfDataset;
+  for (let i2 = 0; i2 < e2.length; i2++) {
+    const a2 = e2[i2];
+    t5.push(S$2(this, g$3, "m", k$4).call(this, a2, 0));
+  }
+  return U$6(St$1, null, t5);
+}, C$2 = function(t5, e2) {
+  const { bemClass: i2 } = S$2(this, u$2, "f").theme, { children: r2, cssStyle: l2, value: s2 } = t5;
+  return U$6(St$1, null, U$6("article", { class: i2(S$2(this, p$2, "f").article._), "data-cy": S$2(this, b$4, "f").node, "data-depth": e2.toString(), part: S$2(this, y$3, "f").article, style: l2 }, s2 && U$6("h1", null, s2), r2 && t5.children.map(((t6) => S$2(this, g$3, "m", k$4).call(this, t6, e2 + 1)))));
+}, E$2 = function(t5, e2) {
+  const { bemClass: i2 } = S$2(this, u$2, "f").theme, { children: r2, cssStyle: l2, value: s2 } = t5;
+  return U$6(St$1, null, U$6("section", { class: i2(S$2(this, p$2, "f").section._), "data-cy": S$2(this, b$4, "f").node, "data-depth": e2.toString(), part: S$2(this, y$3, "f").section, style: l2 }, s2 && U$6("h2", null, s2), r2 && r2.map(((t6) => S$2(this, g$3, "m", k$4).call(this, t6, e2 + 1)))));
+}, W$3 = function(t5, e2) {
+  const { bemClass: i2 } = S$2(this, u$2, "f").theme, { children: r2, cssStyle: l2, tagName: s2, value: n2 } = t5, f2 = (r2 == null ? void 0 : r2.some(((t6) => "li" === t6.tagName))) ? "ul" : s2 || "div";
+  return U$6(St$1, null, n2 && U$6("div", null, n2), U$6(f2, { class: i2(S$2(this, p$2, "f").content._), "data-cy": S$2(this, b$4, "f").node, "data-depth": e2.toString(), part: S$2(this, y$3, "f").content, style: l2 }, r2 && r2.map(((t6) => S$2(this, g$3, "m", k$4).call(this, t6, e2 + 1)))));
+}, j$2 = function(t5, e2) {
+  const { bemClass: i2 } = S$2(this, u$2, "f").theme, { children: r2, cssStyle: l2, value: s2 } = t5;
+  return U$6(St$1, null, U$6("p", { class: i2(S$2(this, p$2, "f").paragraph._), "data-cy": S$2(this, b$4, "f").node, "data-depth": e2.toString(), part: S$2(this, y$3, "f").paragraph, style: l2 }, s2 && U$6("h3", null, s2), r2 && r2.map(((t6) => S$2(this, g$3, "m", k$4).call(this, t6, e2 + 1)))));
+}, D$2 = function(t5, e2) {
+  const { theme: i2 } = S$2(this, u$2, "f"), { cells: r$12, cssStyle: l2, tagName: o2, value: s2 } = t5, n2 = r$12 && Object.keys(r$12)[0], f2 = r$12 == null ? void 0 : r$12[n2], { content: c2 } = S$2(this, p$2, "f");
+  if (f2) return U$6(r, { cell: f2, index: 0, shape: f2.shape, eventDispatcher: async (t6) => this.onLfEvent(t6, "lf-event"), framework: S$2(this, u$2, "f") });
+  {
+    const t6 = o2 || "span";
+    return U$6(t6, { class: i2.bemClass(c2._, c2.body, { [t6]: Boolean(t6) }), "data-depth": e2.toString(), part: S$2(this, y$3, "f").content, style: l2 }, s2);
+  }
+}, M$3.style = "h1{font-size:2em;font-weight:600;line-height:1.2em;letter-spacing:0em;margin-bottom:0.5em;color:rgb(var(--lf-article-color-h1, var(--lf-color-on-bg)));font-family:var(--lf-article-font-family-h1, var(--lf-font-family-primary));font-size:var(--lf-article-font-size-h1, 2em);margin-top:0;margin-bottom:1em;word-break:break-word}h2{font-size:1.75em;font-weight:500;line-height:1.3em;letter-spacing:0em;margin-bottom:0.5em;color:rgb(var(--lf-article-color-h2, var(--lf-color-on-bg)));font-family:var(--lf-article-font-family-h2, var(--lf-font-family-primary));font-size:var(--lf-article-font-size-h2, 1.75em);margin:1.5em 0 0.5em}h3{font-size:1.5em;font-weight:500;line-height:1.4em;letter-spacing:0em;margin-bottom:0.5em;color:rgb(var(--lf-article-color-h3, var(--lf-color-on-bg)));font-family:var(--lf-article-font-family-h3, var(--lf-font-family-primary));font-size:var(--lf-article-font-size-h3, 1.5em);margin:1em 0 0.5em}h4{font-size:1.25em;font-weight:500;line-height:1.5em;letter-spacing:0em;margin-bottom:0.5em;color:rgb(var(--lf-article-color-h4, var(--lf-color-on-bg)));font-family:var(--lf-article-font-family-h4, var(--lf-font-family-primary));font-size:var(--lf-article-font-size-h4, 1.25em);margin:1em 0 0.5em}h5{font-size:1.125em;font-weight:500;line-height:1.6em;letter-spacing:0em;margin-bottom:0.5em;color:rgb(var(--lf-article-color-h5, var(--lf-color-on-bg)));font-family:var(--lf-article-font-family-h5, var(--lf-font-family-primary));font-size:var(--lf-article-font-size-h5, 1.125em);margin:1em 0 0.5em}h6{font-size:1em;font-weight:500;line-height:1.5em;letter-spacing:0em;margin-bottom:0.5em;color:rgb(var(--lf-article-color-h6, var(--lf-color-on-bg)));font-family:var(--lf-article-font-family-h6, var(--lf-font-family-primary));font-size:var(--lf-article-font-size-h6, 1em);margin:1em 0 0.5em}ul,ol{font-size:1em;font-weight:400;line-height:1.6em;letter-spacing:0em;margin-bottom:0.5em;margin-left:1.5em;margin:1em 0;padding-inline-start:var(--lf-article-padding-ul, 1.25em)}::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}:host{display:block;font-family:var(--lf-article-font-family, var(--lf-font-family-primary));font-size:var(--lf-article-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-article-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-article-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-article-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-article-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-article-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-article-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-article-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{border:0;border-style:solid;border-radius:var(--lf-article-border-radius, var(--lf-ui-border-radius));color:rgb(var(--lf-article-color-on-bg, var(--lf-color-on-bg)))}.article{background-color:rgba(var(--lf-article-color-bg, var(--lf-color-bg)), 0.375);color:rgb(var(--lf-article-color-on-bg, var(--lf-color-on-bg)));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);margin:var(--lf-article-margin, auto);max-width:var(--lf-article-max-width, 1200px);padding:var(--lf-article-padding, 2.5em)}.content__body{font-size:1em;font-weight:400;line-height:1.6em;letter-spacing:0em;margin-bottom:1em;font-family:var(--lf-article-font-family-body, var(--lf-font-family-primary));font-size:var(--lf-article-font-size-body, var(--lf-font-size))}.empty-data{width:100%;height:100%;align-items:center;display:flex;justify-content:center}[data-component=LfCode]{max-width:max-content;margin:auto;padding:1.75em 0}";
+const pC777df98_entry = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  lf_article: M$3
+}, Symbol.toStringTag, { value: "Module" }));
+const m = (r2) => ({ blur: async (o2, e2) => {
+  const i2 = r2(), { compInstance: t5 } = i2.controller.get, a2 = i2.controller.get.data.nodeById(o2);
+  a2 && t5.onLfEvent(e2, "blur", void 0, a2);
+}, click: async (o2, e2) => {
+  const i2 = r2(), { compInstance: t5 } = i2.controller.get, a2 = i2.controller.get.data.nodeById(o2);
+  a2 && t5.onLfEvent(e2, "click", void 0, a2);
+}, change: async (o2, e2) => {
+  const i2 = r2(), { compInstance: t5, data: a2 } = i2.controller.get, l2 = a2.nodeById(o2);
+  l2 && t5.onLfEvent(e2, "change", void 0, l2);
+}, focus: async (o2, e2) => {
+  const i2 = r2(), { compInstance: t5, data: a2 } = i2.controller.get, l2 = a2.nodeById(o2);
+  l2 && t5.onLfEvent(e2, "focus", void 0, l2);
+}, keyDown: async (o2) => {
+  const e2 = r2(), i2 = e2.controller.get.data.nodes(), t5 = e2.controller.get.state.selectedId();
+  if (!i2 || 0 === i2.length) return;
+  const a2 = t5 ? i2.findIndex(((r3) => r3.id === t5)) : -1;
+  let l2 = -1;
+  switch (o2.key) {
+    case "ArrowDown":
+    case "ArrowRight":
+      o2.preventDefault(), l2 = -1 === a2 ? 0 : (a2 + 1) % i2.length;
+      break;
+    case "ArrowUp":
+    case "ArrowLeft":
+      o2.preventDefault(), l2 = -1 === a2 ? i2.length - 1 : (a2 - 1 + i2.length) % i2.length;
+      break;
+    case " ":
+    case "Enter":
+      if (o2.target instanceof HTMLInputElement) {
+        const r3 = o2.target.value;
+        await e2.controller.set.selection.select(r3);
+      }
+      return void o2.preventDefault();
+    default:
+      return;
+  }
+  if (-1 !== l2) {
+    const r3 = i2[l2];
+    await e2.controller.set.selection.select(r3.id);
+    const o3 = e2.elements.refs.inputs.get(r3.id);
+    o3 && o3.focus();
+  }
+}, pointerDown: async (o2, e2) => {
+  const i2 = r2(), { compInstance: t5 } = i2.controller.get;
+  t5.onLfEvent(e2, "pointerdown", void 0, o2);
+} }), u$1 = (o2) => /* @__PURE__ */ ((o3) => ({ control: (e2) => {
+  const i2 = o3(), { controller: t5, elements: a2, handlers: l2 } = i2, { blocks: s2, compInstance: n2, cyAttributes: c2, manager: d2, parts: f2, state: h2, ui: p2 } = t5.get, { blur: m2, change: u2, focus: v2 } = l2, { theme: b2 } = d2, { bemClass: g3 } = b2, w3 = h2.isSelected(e2.id), y2 = p2.hasRipple(), z2 = `${n2.rootElement.id || "lf-radio"}-group`;
+  return U$6("div", { class: g3(s2.control._) }, U$6("input", { checked: w3, class: g3(s2.control._, s2.control.input), "data-cy": c2.input, disabled: e2.isDisabled, id: e2.id, name: z2, onBlur: (r2) => m2(e2.id, r2), onChange: (r2) => {
+    u2(e2.id, r2);
+  }, onFocus: (r2) => {
+    v2(e2.id, r2);
+  }, part: f2.input, ref: (r2) => {
+    r2 && a2.refs.inputs.set(e2.id, r2);
+  }, title: e2.description, type: "radio", value: e2.value }), U$6("div", { class: g3(s2.control._, s2.control.circle), part: f2.circle }, y2 && U$6("div", { class: g3(s2.control._, s2.control.ripple), "data-cy": c2.rippleSurface, part: f2.ripple, ref: (r2) => {
+    r2 && a2.refs.ripples.set(e2.id, r2);
+  } }), U$6("div", { class: g3(s2.control._, s2.control.dot), part: f2.dot })));
+}, item: (e2) => {
+  const { controller: i2, elements: t5, handlers: a2 } = o3(), { get: l2 } = i2, { control: s2 } = t5.jsx, { blocks: n2, manager: c2, parts: d2, state: f2, ui: h2 } = l2, { click: p2 } = a2, { theme: m2 } = c2, { bemClass: u2 } = m2, v2 = f2.isSelected(e2.id), b2 = h2.isLeadingLabel(), g3 = e2.isDisabled, w3 = c2.data.cell.stringify(e2.value) || e2.id;
+  return U$6("div", { class: u2(n2.item._, void 0, { leading: b2, selected: v2, disabled: g3 }), onClick: (r2) => p2(e2.id, r2), onPointerDown: (r2) => a2.pointerDown(e2, r2), part: d2.item, ref: (r2) => {
+    r2 && t5.refs.items.set(e2.id, r2);
+  } }, s2(e2), U$6("label", { class: u2(n2.item._, n2.item.label), htmlFor: `${l2.compInstance.rootElement.id || "lf-radio"}-group-${e2.id}` }, w3));
+}, label: (e2) => {
+  const { blocks: i2, manager: t5, parts: a2 } = o3().controller.get, { theme: l2 } = t5, { bemClass: s2 } = l2, n2 = t5.data.cell.stringify(e2.value) || e2.id;
+  return U$6("label", { class: s2(i2.item._, i2.item.label), part: a2.label }, n2);
+}, radio: (e2) => {
+  const { controller: i2, elements: t5, handlers: a2 } = o3(), { blocks: l2, compInstance: s2, lfAttributes: n2, manager: c2, parts: d2, ui: f2 } = i2.get, { item: h2 } = t5.jsx, { bemClass: p2 } = c2.theme, m2 = f2.orientation();
+  return U$6("div", { class: p2(l2._, void 0, { horizontal: "horizontal" === m2 }), "data-lf": n2[s2.lfUiState], onKeyDown: a2.keyDown, part: d2.radio }, e2.map(((r2, o4) => h2(r2, o4))));
+} }))(o2);
+var v$1, b$3, g$2, w$3, y$2, z$3, k$3, x$3, _$3 = function(r2, o2, e2, i2) {
+  if ("function" == typeof o2 ? r2 !== o2 || !i2 : !o2.has(r2)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+  return "m" === e2 ? i2 : "a" === e2 ? i2.call(r2) : i2 ? i2.value : o2.get(r2);
+}, I$2 = function(r2, o2, e2, i2, t5) {
+  if ("function" == typeof o2 ? r2 !== o2 || true : !o2.has(r2)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
+  return o2.set(r2, e2), e2;
+};
+const M$2 = class M2 {
+  constructor(r2) {
+    o$2(this, r2), this.lfEvent = G$4(this, "lf-radio-event"), this.lfDataset = {}, this.lfOrientation = "vertical", this.lfLeadingLabel = false, this.lfRipple = true, this.lfUiSize = "medium", this.lfUiState = "primary", v$1.set(this, void 0), b$3.set(this, LF_RADIO_BLOCKS), g$2.set(this, CY_ATTRIBUTES), w$3.set(this, void 0), y$2.set(this, LF_ATTRIBUTES), z$3.set(this, LF_RADIO_PARTS), k$3.set(this, LF_STYLE_ID), x$3.set(this, LF_WRAPPER_ID);
+  }
+  async onLfEvent(r2, o2, e2, i2) {
+    var _a2;
+    const { effects: t5 } = _$3(this, w$3, "f"), { lfRipple: a2 } = this, l2 = this.value;
+    switch (o2) {
+      case "change":
+      case "click":
+        await _$3(this, v$1, "f").controller.set.selection.select(i2 == null ? void 0 : i2.id);
+        break;
+      case "pointerdown":
+        if (a2) {
+          const o3 = (i2 == null ? void 0 : i2.id) ? (_a2 = _$3(this, v$1, "f")) == null ? void 0 : _a2.elements.refs.ripples.get(i2.id) : void 0;
+          o3 && t5.ripple(r2, o3);
+        }
+    }
+    this.lfEvent.emit({ comp: this, eventType: o2, id: this.rootElement.id, originalEvent: r2, node: i2 || null, previousValue: l2 || null, value: this.value || null });
+  }
+  async clearSelection() {
+    const { controller: r2 } = _$3(this, v$1, "f");
+    await r2.set.selection.clear();
+  }
+  async getAdapter() {
+    return _$3(this, v$1, "f");
+  }
+  async getDebugInfo() {
+    return this.debugInfo;
+  }
+  async getSelectedNode() {
+    var _a2;
+    if (this.value && ((_a2 = this.lfDataset) == null ? void 0 : _a2.nodes)) return this.lfDataset.nodes.find(((r2) => r2.id === this.value));
+  }
+  async getProps() {
+    const r2 = LF_RADIO_PROPS.map(((r3) => [r3, this[r3]]));
+    return Object.fromEntries(r2);
+  }
+  async refresh() {
+    vt$1(this);
+  }
+  async selectItem(r2) {
+    const { controller: o2 } = _$3(this, v$1, "f");
+    await o2.set.selection.select(r2);
+  }
+  async unmount(r2 = 0) {
+    setTimeout((() => {
+      this.onLfEvent(new CustomEvent("unmount"), "unmount"), this.rootElement.remove();
+    }), r2);
+  }
+  connectedCallback() {
+    _$3(this, w$3, "f") && _$3(this, w$3, "f").theme.register(this);
+  }
+  async componentWillLoad() {
+    var r2;
+    I$2(this, w$3, await a(this)), this.lfValue && (this.value = this.lfValue), I$2(this, v$1, { controller: { get: { blocks: _$3(this, b$3, "f"), compInstance: this, cyAttributes: _$3(this, g$2, "f"), lfAttributes: _$3(this, y$2, "f"), manager: _$3(this, w$3, "f"), parts: _$3(this, z$3, "f"), data: { dataset: () => this.lfDataset, nodes: () => {
+      var _a2;
+      return ((_a2 = this.lfDataset) == null ? void 0 : _a2.nodes) || [];
+    }, nodeById: (r3) => {
+      var _a2, _b2;
+      return (_b2 = (_a2 = this.lfDataset) == null ? void 0 : _a2.nodes) == null ? void 0 : _b2.find(((o2) => o2.id === r3));
+    }, selectedNode: () => {
+      var _a2;
+      const r3 = this.value;
+      if (r3 && ((_a2 = this.lfDataset) == null ? void 0 : _a2.nodes)) return this.lfDataset.nodes.find(((o2) => o2.id === r3));
+    } }, state: { selectedId: () => this.value, isSelected: (r3) => this.value === r3 }, ui: { orientation: () => this.lfOrientation, isLeadingLabel: () => this.lfLeadingLabel, hasRipple: () => this.lfRipple } }, set: { selection: { select: async (r3) => {
+      var _a2;
+      _$3(this, v$1, "f"), (r3 ? (_a2 = _$3(this, v$1, "f").controller.get.data.nodeById(r3)) == null ? void 0 : _a2.isDisabled : "disabled" === this.lfUiState) || (this.value = r3);
+    }, clear: async () => {
+      await _$3(this, v$1, "f").controller.set.selection.select(void 0);
+    } }, data: { updateDataset: async (r3) => {
+      var _a2;
+      const o2 = _$3(this, v$1, "f").controller.get.state.selectedId();
+      if (this.lfDataset = r3, o2) {
+        const e2 = (_a2 = r3 == null ? void 0 : r3.nodes) == null ? void 0 : _a2.some(((r4) => r4.id === o2));
+        e2 || await _$3(this, v$1, "f").controller.set.selection.clear();
+      }
+    } } } }, elements: { jsx: u$1(r2 = () => _$3(this, v$1, "f")), refs: { items: /* @__PURE__ */ new Map(), ripples: /* @__PURE__ */ new Map(), inputs: /* @__PURE__ */ new Map() } }, handlers: m(r2) });
+  }
+  componentDidLoad() {
+    const { info: r2 } = _$3(this, w$3, "f").debug;
+    this.onLfEvent(new CustomEvent("ready"), "ready"), r2.update(this, "did-load");
+  }
+  componentWillRender() {
+    const { info: r2 } = _$3(this, w$3, "f").debug;
+    r2.update(this, "will-render");
+  }
+  componentDidRender() {
+    const { info: r2 } = _$3(this, w$3, "f").debug;
+    r2.update(this, "did-render");
+  }
+  render() {
+    var _a2;
+    const { setLfStyle: o2 } = _$3(this, w$3, "f").theme, { jsx: e2 } = _$3(this, v$1, "f").elements, { lfStyle: i2 } = this, a2 = ((_a2 = this.lfDataset) == null ? void 0 : _a2.nodes) || [];
+    if (a2 && 0 !== a2.length) return U$6(A$a, null, i2 && U$6("style", { id: _$3(this, k$3, "f") }, o2(this)), U$6("div", { id: _$3(this, x$3, "f") }, e2.radio(a2)));
+  }
+  disconnectedCallback() {
+    _$3(this, w$3, "f").theme.unregister(this);
+  }
+  get rootElement() {
+    return q$5(this);
+  }
+};
+v$1 = /* @__PURE__ */ new WeakMap(), b$3 = /* @__PURE__ */ new WeakMap(), g$2 = /* @__PURE__ */ new WeakMap(), w$3 = /* @__PURE__ */ new WeakMap(), y$2 = /* @__PURE__ */ new WeakMap(), z$3 = /* @__PURE__ */ new WeakMap(), k$3 = /* @__PURE__ */ new WeakMap(), x$3 = /* @__PURE__ */ new WeakMap(), M$2.style = "::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=ripple]{animation-duration:var(--lf-ui-duration-ripple, 675ms);animation-fill-mode:forwards;animation-name:lf-ripple;animation-timing-function:var(--lf-ui-timing-ripple, ease-out);background:var(--lf-ui-ripple-background, var(--lf-color-primary));border-radius:var(--lf-ui-radius-ripple, 50%);height:var(--lf-ui-ripple-height, 100%);left:var(--lf-ui-ripple-x, 50%);opacity:var(--lf-ui-opacity-ripple, 0.5);pointer-events:none;position:absolute;top:var(--lf-ui-ripple-y, 50%);transform:scale(0);width:var(--lf-ui-ripple-width, 100%)}@keyframes lf-ripple{from{transform:scale(0)}to{opacity:0;transform:scale(4)}}[data-lf=ripple-surface]{cursor:pointer;height:100%;left:0;overflow:hidden;position:absolute;top:0;width:100%}[data-lf=danger]{--lf-radio-color-primary:var(\n    --lf-radio-color-danger,\n    var(--lf-color-danger)\n  );--lf-radio-color-on-primary:var(\n    --lf-radio-color-danger,\n    var(--lf-color-on-danger)\n  )}[data-lf=disabled]{opacity:var(--lf-radio-ui-opacity-disabled, var(--lf-ui-opacity-disabled));pointer-events:none}[data-lf=info]{--lf-radio-color-primary:var(\n    --lf-radio-color-info,\n    var(--lf-color-info)\n  );--lf-radio-color-on-primary:var(\n    --lf-radio-color-info,\n    var(--lf-color-on-info)\n  )}[data-lf=secondary]{--lf-radio-color-primary:var(\n    --lf-radio-color-secondary,\n    var(--lf-color-secondary)\n  );--lf-radio-color-on-primary:var(\n    --lf-radio-color-secondary,\n    var(--lf-color-on-secondary)\n  )}[data-lf=success]{--lf-radio-color-primary:var(\n    --lf-radio-color-success,\n    var(--lf-color-success)\n  );--lf-radio-color-on-primary:var(\n    --lf-radio-color-success,\n    var(--lf-color-on-success)\n  )}[data-lf=warning]{--lf-radio-color-primary:var(\n    --lf-radio-color-warning,\n    var(--lf-color-warning)\n  );--lf-radio-color-on-primary:var(\n    --lf-radio-color-warning,\n    var(--lf-color-on-warning)\n  )}:host{display:block;font-family:var(--lf-radio-font-family, var(--lf-font-family-primary));font-size:var(--lf-radio-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-radio-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-radio-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-radio-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-radio-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-radio-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-radio-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-radio-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{display:block}.radio{display:flex;flex-direction:column;gap:var(--lf-radio-group-gap, 1em)}.radio--horizontal{flex-direction:row;flex-wrap:wrap;gap:var(--lf-radio-group-horizontal-gap, 1.25em)}.item{align-items:center;cursor:pointer;display:flex;gap:var(--lf-radio-item-gap, var(--lf-space-03));position:relative}.item--leading{flex-direction:row-reverse;justify-content:flex-end}.item--selected{color:var(--lf-radio-item-selected-color, rgba(var(--lf-radio-color-primary), 1))}.item__label{color:var(--lf-radio-label-color, rgba(var(--lf-radio-color-on-bg), 0.87));cursor:pointer;font-size:var(--lf-radio-label-font-size, 1em);font-weight:var(--lf-radio-label-font-weight, 500);line-height:var(--lf-radio-label-line-height, 1.5);padding-left:var(--lf-radio-label-padding, 0.75em);transition:color 150ms cubic-bezier(0.4, 0, 0.2, 1);user-select:none}.item--leading .item__label{padding-left:0;padding-right:var(--lf-radio-label-padding-leading, 0.75em)}.item--selected .item__label{color:var(--lf-radio-label-selected-color, rgba(var(--lf-radio-color-primary), 1));font-weight:var(--lf-radio-label-selected-font-weight, 600)}.control{border:1px solid transparent;border-radius:50%;box-sizing:content-box;cursor:pointer;display:inline-block;flex:0 0 auto;height:var(--lf-radio-control-size, 1.25em);overflow:visible;position:relative;transition:border-color 120ms cubic-bezier(0, 0, 0.2, 1);width:var(--lf-radio-control-size, 1.25em)}.control__circle{border:var(--lf-radio-circle-border-width, 2px) solid var(--lf-radio-circle-border-color, rgba(var(--lf-color-on-bg), 0.6));border-radius:50%;box-sizing:border-box;height:100%;left:0;overflow:hidden;position:absolute;top:0;transition:border-color 200ms cubic-bezier(0.4, 0, 0.2, 1), border-width 200ms cubic-bezier(0.4, 0, 0.2, 1);width:100%}.item:hover .control__circle{border-color:var(--lf-radio-circle-hover-border-color, rgba(var(--lf-radio-color-primary), 0.875))}.item--selected .control__circle{border-color:var(--lf-radio-circle-selected-border-color, rgba(var(--lf-radio-color-primary), 1))}.control__dot{border-color:var(--lf-radio-dot-background-color, rgba(var(--lf-radio-color-primary), 1));border-radius:50%;border-style:solid;border-width:0;box-sizing:border-box;height:100%;left:0;position:absolute;top:0;transform:scale(0);transition:transform 120ms cubic-bezier(0, 0, 0.2, 1), border-color 120ms cubic-bezier(0, 0, 0.2, 1);width:100%}.item:hover .control__dot,.item--selected .control__dot,.item--selected:hover .control__dot{border-width:var(--lf-radio-dot-border-width, 0.5em)}.item:hover .control__dot{transform:scale(0.25)}.item--selected .control__dot{transform:scale(0.5)}.item--selected:hover .control__dot{transform:scale(0.75)}.control__input{cursor:inherit;left:0;height:100%;margin:0;opacity:0;padding:0;position:absolute;top:0;width:100%;z-index:1}.control__input:focus{outline:none}.control__input:disabled{cursor:not-allowed}.control__ripple{border-radius:50%;height:var(--lf-radio-ripple-size, 2.5em);left:50%;pointer-events:none;position:absolute;top:50%;transform:translate(-50%, -50%);width:var(--lf-radio-ripple-size, 2.5em)}.item:hover .control{border-color:var(--lf-radio-hover-border-color, rgba(var(--lf-radio-color-primary), 0.5))}";
+const pCb747392_entry = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  lf_radio: M$2
+}, Symbol.toStringTag, { value: "Module" }));
+var p$1, b$2, u, g$1, y$1, w$2, k$2, z$2, x$2, _$2 = function(t5, a2, o2, e2) {
+  if ("function" == typeof a2 ? t5 !== a2 || true : !a2.has(t5)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+  return a2.get(t5);
+};
+const W$2 = class W2 {
+  constructor(e2) {
+    o$2(this, e2), this.lfEvent = G$4(this, "lf-toast-event"), this.lfCloseIcon = "", this.lfCloseCallback = () => {
+      this.unmount();
+    }, this.lfTimer = null, this.lfMessage = "", this.lfStyle = "", this.lfUiSize = "medium", this.lfUiState = "primary", p$1.set(this, void 0), b$2.set(this, LF_TOAST_BLOCKS), u.set(this, CY_ATTRIBUTES), g$1.set(this, LF_ATTRIBUTES), y$1.set(this, LF_TOAST_PARTS), w$2.set(this, LF_STYLE_ID), k$2.set(this, LF_TOAST_CSS_VARIABLES), z$2.set(this, LF_WRAPPER_ID), x$2.set(this, ((t5 = false) => {
+      const { assets: a2, theme: e3 } = _$2(this, p$1), { get: s2 } = a2, { bemClass: r2 } = e3, { toast: i2 } = _$2(this, b$2), { style: l2 } = s2(`./assets/svg/${t5 ? this.lfCloseIcon : this.lfIcon}.svg`);
+      return U$6("div", { class: r2(i2._, i2.icon, { "has-actions": t5 }), "data-cy": _$2(this, u).maskedSvg, onPointerDown: t5 ? (t6) => this.lfCloseCallback(this, t6) : null, part: _$2(this, y$1).icon, style: l2, tabIndex: t5 && 0 });
+    }));
+  }
+  onLfEvent(t5, a2) {
+    this.lfEvent.emit({ comp: this, eventType: a2, id: this.rootElement.id, originalEvent: t5 });
+  }
+  async getDebugInfo() {
+    return this.debugInfo;
+  }
+  async getProps() {
+    const t5 = LF_TOAST_PROPS.map(((t6) => [t6, this[t6]]));
+    return Object.fromEntries(t5);
+  }
+  async refresh() {
+    vt$1(this);
+  }
+  async unmount(t5 = 0) {
+    setTimeout((() => {
+      this.onLfEvent(new CustomEvent("unmount"), "unmount"), this.rootElement.remove();
+    }), t5);
+  }
+  connectedCallback() {
+    _$2(this, p$1) && _$2(this, p$1).theme.register(this);
+  }
+  async componentWillLoad() {
+    if ((function(t5, a2, o2, e2, s2) {
+      if ("function" == typeof a2 ? t5 !== a2 || true : !a2.has(t5)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
+      a2.set(t5, o2);
+    })(this, p$1, await a(this)), "" === this.lfCloseIcon) {
+      const { "--lf-icon-delete": t5 } = _$2(this, p$1).theme.get.current().variables;
+      this.lfCloseIcon = t5;
+    }
+  }
+  componentDidLoad() {
+    const { info: t5 } = _$2(this, p$1).debug;
+    this.onLfEvent(new CustomEvent("ready"), "ready"), t5.update(this, "did-load");
+  }
+  componentWillRender() {
+    const { info: t5 } = _$2(this, p$1).debug;
+    t5.update(this, "will-render");
+  }
+  componentDidRender() {
+    const { info: t5 } = _$2(this, p$1).debug, { lfTimer: a2 } = this;
+    a2 && setTimeout((() => {
+      this.lfCloseCallback ? this.lfCloseCallback(this, null) : this.unmount();
+    }), a2), t5.update(this, "did-render");
+  }
+  render() {
+    const { theme: t5 } = _$2(this, p$1), { bemClass: a2, setLfStyle: e2 } = t5, { toast: r2 } = _$2(this, b$2), { lfCloseIcon: i2, lfIcon: l2, lfMessage: n2, lfStyle: f2, lfTimer: c2 } = this;
+    return U$6(A$a, { key: "8f107a6d21b78091971ebaeb5af59d0ce2ce0935" }, U$6("style", { key: "9de22ac425f295d3bd97e960b96dbc13b43be932", id: _$2(this, w$2) }, `
+          :host {
+            ${c2 ? `${_$2(this, k$2).timer}: ${c2}ms;` : ""}
+          }
+        ${f2 && e2(this) || ""}`), U$6("div", { key: "d2d26aea10710dad1d2b2d4abf53a4a4ddca2832", id: _$2(this, z$2), "data-lf": _$2(this, g$1).fadeIn }, U$6("div", { key: "72dccce852d6fd886812aa5fc1a7d5bf22dd8749", class: a2(r2._), "data-lf": _$2(this, g$1)[this.lfUiState] }, U$6("div", { key: "e566e88f2b10433e4b2401f2c2d6387e556a0943", class: a2(r2._, r2.accent, { temporary: !!c2 }) }), U$6("div", { key: "2543b127eff2a14b383a5f8a64358b9ee22590bf", class: a2(r2._, r2.messageWrapper, { full: Boolean(l2) && Boolean(i2), "has-actions": Boolean(i2), "has-icon": Boolean(l2) }) }, l2 && _$2(this, x$2).call(this), n2 && U$6("div", { key: "cf488a339dcf67ded2f7b8378738af8442a1c235", class: a2(r2._, r2.message) }, n2), i2 && _$2(this, x$2).call(this, true)))));
+  }
+  disconnectedCallback() {
+    var _a2;
+    (_a2 = _$2(this, p$1)) == null ? void 0 : _a2.theme.unregister(this);
+  }
+  get rootElement() {
+    return q$5(this);
+  }
+};
+p$1 = /* @__PURE__ */ new WeakMap(), b$2 = /* @__PURE__ */ new WeakMap(), u = /* @__PURE__ */ new WeakMap(), g$1 = /* @__PURE__ */ new WeakMap(), y$1 = /* @__PURE__ */ new WeakMap(), w$2 = /* @__PURE__ */ new WeakMap(), k$2 = /* @__PURE__ */ new WeakMap(), z$2 = /* @__PURE__ */ new WeakMap(), x$2 = /* @__PURE__ */ new WeakMap(), W$2.style = "::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=danger]{--lf-toast-color-primary:var(\n    --lf-toast-color-danger,\n    var(--lf-color-danger)\n  );--lf-toast-color-on-primary:var(\n    --lf-toast-color-danger,\n    var(--lf-color-on-danger)\n  )}[data-lf=disabled]{opacity:var(--lf-toast-ui-opacity-disabled, var(--lf-ui-opacity-disabled));pointer-events:none}[data-lf=info]{--lf-toast-color-primary:var(\n    --lf-toast-color-info,\n    var(--lf-color-info)\n  );--lf-toast-color-on-primary:var(\n    --lf-toast-color-info,\n    var(--lf-color-on-info)\n  )}[data-lf=secondary]{--lf-toast-color-primary:var(\n    --lf-toast-color-secondary,\n    var(--lf-color-secondary)\n  );--lf-toast-color-on-primary:var(\n    --lf-toast-color-secondary,\n    var(--lf-color-on-secondary)\n  )}[data-lf=success]{--lf-toast-color-primary:var(\n    --lf-toast-color-success,\n    var(--lf-color-success)\n  );--lf-toast-color-on-primary:var(\n    --lf-toast-color-success,\n    var(--lf-color-on-success)\n  )}[data-lf=warning]{--lf-toast-color-primary:var(\n    --lf-toast-color-warning,\n    var(--lf-color-warning)\n  );--lf-toast-color-on-primary:var(\n    --lf-toast-color-warning,\n    var(--lf-color-on-warning)\n  )}[data-lf=fade-in]{display:block;animation:lf-fade-in-block 0.25s ease-out forwards}@keyframes lf-fade-in-block{from{visibility:hidden;opacity:0}to{visibility:visible;opacity:1}}:host{display:block;font-family:var(--lf-toast-font-family, var(--lf-font-family-primary));font-size:var(--lf-toast-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-toast-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-toast-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-toast-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-toast-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-toast-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-toast-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-toast-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{width:100%;height:100%;animation:slideIn 250ms ease-out;box-sizing:border-box;z-index:var(--lf-ui-zindex-toast, 998)}.toast{border:0;border-style:solid;border-radius:var(--lf-toast-border-radius, var(--lf-ui-border-radius));background-color:rgba(var(--lf-toast-color-surface, var(--lf-color-surface)), 0.675);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);width:100%;height:100%;box-shadow:var(--lf-ui-box-shadow-modal);display:grid;grid-template-rows:auto 1fr;overflow:hidden}.toast__accent{background-color:rgba(var(--lf-toast-color-primary, var(--lf-color-primary)), 0.75);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);height:var(--lf-toast-accent-height, 0.25em);width:100%}.toast__accent--temporary{animation:reduceWidthToZero linear var(--lf_toast_timer, 5000ms) forwards}.toast__message-wrapper{align-content:var(--lf-toast-message-align-content, center);box-sizing:border-box;display:grid;gap:1em;grid-template-columns:1fr;height:100%;overflow:auto;padding:var(--lf-toast-padding, 0.75em)}.toast__message-wrapper--has-icon{grid-template-columns:auto 1fr}.toast__message-wrapper--has-actions{grid-template-columns:1fr auto}.toast__message-wrapper--full{grid-template-columns:auto 1fr auto}.toast__icon{background-color:rgba(var(--lf-comp-color-on-bg, var(--lf-color-on-bg)), 1);height:1.5em;width:1.5em;overflow:hidden;margin:var(--lf-toast-icon-margin, auto 0.5em);opacity:var(--lf-toast-icon-opacity, 1)}.toast__icon--has-actions{-webkit-mask:var(--lf-icon-clear);mask:var(--lf-icon-clear);-webkit-mask-position:center;-webkit-mask-repeat:no-repeat;-webkit-mask-size:contain;mask-position:center;mask-repeat:no-repeat;mask-size:contain;background-color:rgba(var(--lf-toast-color-on-bg, var(--lf-color-on-bg)), 1);height:1.5em;width:1.5em;overflow:hidden;transition:all 300ms cubic-bezier(0.4, 0, 0.2, 1);cursor:pointer;margin:auto 0.5em auto auto;position:relative}.toast__icon--has-actions:hover{opacity:0.75}.toast__message{color:rgb(var(--lf-toast-color-on-bg, var(--lf-color-on-bg)));overflow:auto;padding:var(--lf-toast-message-padding, 0.75em 0.75em 0.75em 0)}@media only screen and (max-width: 600px){:host{animation:slideUp 250ms ease-out}}@keyframes reduceWidthToZero{0%{width:100%}100%{width:0}}@keyframes slideIn{0%{transform:var(--lf-toast-slidein-from, translateX(100%))}100%{transform:var(--lf-toast-slidein-to, translateX(0))}}@keyframes slideUp{0%{transform:var(--lf-toast-slideup-from, translateY(100%))}100%{transform:var(--lf-toast-slideup-to, translateY(0))}}";
+const pCf78dbab_entry = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  lf_toast: W$2
+}, Symbol.toStringTag, { value: "Module" }));
+const b$1 = (e2) => /* @__PURE__ */ ((e3) => ({ addColumn: () => {
+  const { controller: s2, elements: i2, handlers: a2 } = e3(), { refs: r2 } = i2, { button: n2 } = a2, { blocks: l2, cyAttributes: f2, lfAttributes: h2, manager: c2, parts: d2 } = s2.get, { assignRef: m2, theme: u2 } = c2, { bemClass: p2, get: g3 } = u2, { "--lf-icon-plus": y2 } = g3.current().variables;
+  return U$6("lf-button", { class: p2(l2.grid._, l2.grid.addColumn), "data-cy": f2.button, "data-lf": h2.fadeIn, id: LF_MASONRY_IDS.addColumn, key: LF_MASONRY_IDS.addColumn, lfIcon: y2, lfStyling: "floating", lfUiSize: "xxsmall", "onLf-button-event": n2, part: d2.addColumn, ref: m2(r2, "addColumn"), title: "Click to add a column to the masonry." });
+}, removeColumn: () => {
+  const { controller: s2, elements: i2, handlers: a2 } = e3(), { refs: r2 } = i2, { button: n2 } = a2, { blocks: l2, cyAttributes: f2, lfAttributes: h2, manager: c2, parts: d2 } = s2.get, { assignRef: m2, theme: u2 } = c2, { bemClass: p2, get: g3 } = u2, { "--lf-icon-minus": y2 } = g3.current().variables;
+  return U$6("lf-button", { class: p2(l2.grid._, l2.grid.removeColumn), "data-cy": f2.button, "data-lf": h2.fadeIn, id: LF_MASONRY_IDS.removeColumn, key: LF_MASONRY_IDS.removeColumn, lfIcon: y2, lfStyling: "floating", lfUiSize: "xxsmall", "onLf-button-event": n2, part: d2.removeColumn, ref: m2(r2, "removeColumn"), title: "Click to remove a column from the masonry." });
+}, changeView: () => {
+  const { controller: s2, elements: i2, handlers: a2 } = e3(), { refs: r2 } = i2, { blocks: n2, cyAttributes: l2, isMasonry: f2, isVertical: h2, manager: c2, parts: d2 } = s2.get, { button: m2 } = a2, { assignRef: u2, theme: p2 } = c2, { bemClass: g3, get: y2 } = p2, { layoutBoardSplit: v2, viewportTall: b2, viewportWide: w3 } = y2.icons();
+  return U$6("lf-button", { class: g3(n2.grid._, n2.grid.changeViewe), "data-cy": l2.button, id: LF_MASONRY_IDS.masonry, key: LF_MASONRY_IDS.masonry, lfIcon: f2() ? b2 : h2() ? w3 : v2, lfStyling: "floating", lfUiSize: "xsmall", "onLf-button-event": m2, part: d2.changeView, ref: u2(r2, "changeView"), title: f2() ? "Click to view the images arranged vertically." : h2() ? "Click to view the images arranged horizontally." : "Click to view the images arranged in a masonry." });
+} }))(e2), w$1 = (t5) => /* @__PURE__ */ ((t6) => ({ button: (e2) => {
+  const { eventType: s2, id: i2 } = e2.detail;
+  if ("click" === s2) switch (i2) {
+    case LF_MASONRY_IDS.masonry:
+      (async (t7) => {
+        const { compInstance: e3, isMasonry: s3, isVertical: i3 } = t7.controller.get;
+        e3.lfView = s3() ? "vertical" : i3() ? "horizontal" : "main";
+      })(t6());
+      break;
+    case LF_MASONRY_IDS.removeColumn:
+      (async (t7) => {
+        const { get: e3 } = t7.controller, { compInstance: s3, currentColumns: i3 } = e3, a2 = s3, r2 = i3();
+        r2 > 1 && (a2.lfColumns = r2 - 1);
+      })(t6());
+      break;
+    case LF_MASONRY_IDS.addColumn:
+      (async (t7) => {
+        const { get: e3 } = t7.controller, { compInstance: s3, currentColumns: i3 } = e3, a2 = i3();
+        s3.lfColumns = a2 + 1;
+      })(t6());
+  }
+} }))(t5);
+var k$1, z$1, x$1, C$1, M$1, S$1, W$1, _$1, A$1, T$1, E$1, I$1, j$1, V$1, L$1, D$1, R$1, P$1, U$1, O$1, Y$1, B$1, F$1, H$1, Z = function(t5, e2, s2, i2) {
+  if ("a" === s2 && !i2) throw new TypeError("Private accessor was defined without a getter");
+  if ("function" == typeof e2 ? t5 !== e2 || !i2 : !e2.has(t5)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+  return "m" === s2 ? i2 : "a" === s2 ? i2.call(t5) : i2 ? i2.value : e2.get(t5);
+}, $$1 = function(t5, e2, s2, i2, a2) {
+  if ("function" == typeof e2 ? t5 !== e2 || true : !e2.has(t5)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
+  return e2.set(t5, s2), s2;
+};
+const q$1 = class q {
+  constructor(a2) {
+    o$2(this, a2), this.lfEvent = G$4(this, "lf-masonry-event"), k$1.add(this), this.selectedShape = {}, this.shapes = {}, this.lfActions = false, this.lfCollapseColumns = true, this.lfColumns = Array.from(LF_MASONRY_DEFAULT_COLUMNS), this.lfDataset = null, this.lfSelectable = false, this.lfShape = "image", this.lfStyle = "", this.lfView = "main", z$1.set(this, void 0), x$1.set(this, LF_MASONRY_BLOCKS), C$1.set(this, CY_ATTRIBUTES), M$1.set(this, LF_ATTRIBUTES), S$1.set(this, LF_MASONRY_PARTS), W$1.set(this, LF_STYLE_ID), _$1.set(this, LF_MASONRY_CSS_VARS), A$1.set(this, LF_WRAPPER_ID), T$1.set(this, void 0), E$1.set(this, void 0), I$1.set(this, void 0), j$1.set(this, (() => {
+      var t5;
+      $$1(this, I$1, { controller: { get: { blocks: Z(this, x$1, "f"), compInstance: this, currentColumns: () => Z(this, T$1, "f"), cyAttributes: Z(this, C$1, "f"), isMasonry: () => Z(this, L$1, "f").call(this), isVertical: () => Z(this, D$1, "f").call(this), lfAttributes: Z(this, M$1, "f"), manager: Z(this, z$1, "f"), parts: Z(this, S$1, "f"), shapes: () => this.shapes } }, elements: { jsx: b$1(t5 = () => Z(this, I$1, "f")), refs: { addColumn: null, removeColumn: null, changeView: null } }, handlers: w$1(t5) });
+    })), V$1.set(this, (() => {
+      var _a2;
+      return !!((_a2 = this.shapes) == null ? void 0 : _a2[this.lfShape]);
+    })), L$1.set(this, (() => "main" === this.lfView)), D$1.set(this, (() => "vertical" === this.lfView)), R$1.set(this, ((t5, e2) => () => {
+      clearTimeout(Z(this, E$1, "f")), $$1(this, E$1, setTimeout(t5, e2));
+    })), P$1.set(this, ((t5) => t5.every(((t6, e2, s2) => 0 === e2 || s2[e2 - 1] < t6)))), O$1.set(this, (() => {
+      const { lfShape: e2, selectedShape: s2, shapes: i2 } = this, a3 = i2[this.lfShape].map((() => ({ htmlProps: { dataset: { lf: Z(this, M$1, "f").fadeIn, selected: "" } } })));
+      void 0 !== s2.index && (a3[s2.index] = { htmlProps: { dataset: { lf: Z(this, M$1, "f").fadeIn, selected: "true" } } });
+      const r$12 = Array.from({ length: Z(this, T$1, "f") }, (() => []), []);
+      for (let s3 = 0; s3 < i2[e2].length; s3++) {
+        const n2 = i2[e2][s3], o2 = a3[s3];
+        r$12[s3 % Z(this, T$1, "f")].push(U$6(r, { cell: Object.assign(o2, n2), index: s3, shape: e2, eventDispatcher: async (t5) => this.onLfEvent(t5, "lf-event"), framework: Z(this, z$1, "f") }));
+      }
+      return r$12;
+    })), Y$1.set(this, Z(this, R$1, "f").call(this, (() => {
+      this.viewportWidth = window.innerWidth;
+    }), 200)), B$1.set(this, (() => {
+      const { bemClass: e2 } = Z(this, z$1, "f").theme, { grid: s2 } = Z(this, x$1, "f"), { addColumn: i2, changeView: a3, removeColumn: r2 } = Z(this, I$1, "f").elements.jsx;
+      return U$6("div", { class: e2(s2._, s2.actions), "data-lf": Z(this, M$1, "f").fadeIn }, Z(this, L$1, "f").call(this) && U$6("div", { class: e2(s2._, s2.sub) }, i2(), r2()), a3());
+    })), F$1.set(this, (() => {
+      const { bemClass: e2 } = Z(this, z$1, "f").theme, { grid: s2 } = Z(this, x$1, "f");
+      return Z(this, O$1, "f").call(this).map(((a3, r2) => U$6("div", { key: r2, class: e2(s2._, s2.column) }, a3.map(((e3) => U$6(St$1, null, e3))))));
+    })), H$1.set(this, (() => {
+      var _a2;
+      const { bemClass: e2 } = Z(this, z$1, "f").theme, { grid: s2 } = Z(this, x$1, "f"), { lfActions: a3, lfShape: r2, lfView: n2, shapes: o2 } = this;
+      return Z(this, V$1, "f").call(this) && ((_a2 = o2[r2]) == null ? void 0 : _a2.length) ? U$6(St$1, null, U$6("div", { class: e2(s2._, null, { [n2]: true }) }, Z(this, F$1, "f").call(this)), a3 && Z(this, B$1, "f").call(this)) : null;
+    }));
+  }
+  onLfEvent(t5, e2) {
+    const { lfSelectable: s2, lfShape: i2, selectedShape: a2, shapes: r2 } = this;
+    let n2 = false;
+    const o2 = {};
+    if ("lf-event" === e2) {
+      const { comp: e3, eventType: l2 } = t5.detail;
+      if ("click" === l2 && s2) {
+        const t6 = parseInt(e3.rootElement.dataset.index);
+        a2.index !== t6 && (o2.index = t6, o2.shape = r2[i2][t6]), n2 = true;
+      }
+    }
+    n2 && (this.selectedShape = o2), this.lfEvent.emit({ comp: this, eventType: e2, id: this.rootElement.id, originalEvent: t5, selectedShape: this.selectedShape });
+  }
+  validateColumns() {
+    if (!Z(this, z$1, "f")) return;
+    const { debug: t5 } = Z(this, z$1, "f");
+    Array.isArray(this.lfColumns) && !Z(this, P$1, "f").call(this, this.lfColumns) && (t5.logs.new(this, "Invalid breakpoints in lfColumns: must be sorted in ascending order.", "warning"), this.lfColumns = [...LF_MASONRY_DEFAULT_COLUMNS]);
+  }
+  async updateShapes() {
+    if (!Z(this, z$1, "f")) return;
+    const { data: t5, debug: e2 } = Z(this, z$1, "f");
+    try {
+      this.shapes = t5.cell.shapes.getAll(this.lfDataset);
+    } catch (t6) {
+      e2.logs.new(this, "Error updating shapes: " + t6, "error");
+    }
+  }
+  async getDebugInfo() {
+    return this.debugInfo;
+  }
+  async getProps() {
+    const t5 = LF_MASONRY_PROPS.map(((t6) => [t6, this[t6]]));
+    return Object.fromEntries(t5);
+  }
+  async getSelectedShape() {
+    return this.selectedShape;
+  }
+  async redecorateShapes() {
+    this.updateShapes();
+  }
+  async refresh() {
+    vt$1(this);
+  }
+  async setSelectedShape(t5) {
+    var _a2, _b2;
+    const { debug: e2 } = Z(this, z$1, "f"), s2 = (_b2 = (_a2 = this.shapes) == null ? void 0 : _a2[this.lfShape]) == null ? void 0 : _b2[t5];
+    s2 ? this.selectedShape = { index: t5, shape: s2 } : (this.selectedShape = {}, e2.logs.new(this, `Couldn't set shape with index: ${t5}`)), this.updateShapes();
+  }
+  async unmount(t5 = 0) {
+    setTimeout((() => {
+      this.onLfEvent(new CustomEvent("unmount"), "unmount"), this.rootElement.remove();
+    }), t5);
+  }
+  connectedCallback() {
+    Z(this, z$1, "f") && Z(this, z$1, "f").theme.register(this);
+  }
+  async componentWillLoad() {
+    $$1(this, z$1, await a(this)), Z(this, j$1, "f").call(this), this.updateShapes();
+  }
+  componentDidLoad() {
+    window.addEventListener("resize", Z(this, Y$1, "f")), this.viewportWidth = window.innerWidth;
+    const { info: t5 } = Z(this, z$1, "f").debug;
+    this.onLfEvent(new CustomEvent("ready"), "ready"), t5.update(this, "did-load");
+  }
+  componentWillRender() {
+    const { info: t5 } = Z(this, z$1, "f").debug;
+    $$1(this, T$1, Z(this, L$1, "f").call(this) ? Z(this, k$1, "m", U$1).call(this) : 1), t5.update(this, "will-render");
+  }
+  componentDidRender() {
+    const { info: t5 } = Z(this, z$1, "f").debug;
+    t5.update(this, "did-render");
+  }
+  render() {
+    const { bemClass: e2, setLfStyle: s2 } = Z(this, z$1, "f").theme, { masonry: i2 } = Z(this, x$1, "f"), { lfStyle: a2 } = this, n2 = { [Z(this, _$1, "f").columns]: String(Z(this, T$1, "f")) };
+    return U$6(A$a, { key: "3e59d788932c4902e5562fac62755892de85b552", style: n2 }, a2 && U$6("style", { key: "ada1d4d4fc4a8b1f8d392486879791344e0beb4a", id: Z(this, W$1, "f") }, s2(this)), U$6("div", { key: "20ff7fe386c3c1e1b19575312e94cee45aaa8bad", id: Z(this, A$1, "f") }, U$6("div", { key: "8153a2e89b38077f4c231360e99b3f36b7201dca", class: e2(i2._) }, Z(this, H$1, "f").call(this))));
+  }
+  disconnectedCallback() {
+    var _a2;
+    (_a2 = Z(this, z$1, "f")) == null ? void 0 : _a2.theme.unregister(this), window.removeEventListener("resize", Z(this, Y$1, "f"));
+  }
+  get rootElement() {
+    return q$5(this);
+  }
+  static get watchers() {
+    return { lfColumns: ["validateColumns"], lfDataset: ["updateShapes"], lfShape: ["updateShapes"] };
+  }
+};
+z$1 = /* @__PURE__ */ new WeakMap(), x$1 = /* @__PURE__ */ new WeakMap(), C$1 = /* @__PURE__ */ new WeakMap(), M$1 = /* @__PURE__ */ new WeakMap(), S$1 = /* @__PURE__ */ new WeakMap(), W$1 = /* @__PURE__ */ new WeakMap(), _$1 = /* @__PURE__ */ new WeakMap(), A$1 = /* @__PURE__ */ new WeakMap(), T$1 = /* @__PURE__ */ new WeakMap(), E$1 = /* @__PURE__ */ new WeakMap(), I$1 = /* @__PURE__ */ new WeakMap(), j$1 = /* @__PURE__ */ new WeakMap(), V$1 = /* @__PURE__ */ new WeakMap(), L$1 = /* @__PURE__ */ new WeakMap(), D$1 = /* @__PURE__ */ new WeakMap(), R$1 = /* @__PURE__ */ new WeakMap(), P$1 = /* @__PURE__ */ new WeakMap(), O$1 = /* @__PURE__ */ new WeakMap(), Y$1 = /* @__PURE__ */ new WeakMap(), B$1 = /* @__PURE__ */ new WeakMap(), F$1 = /* @__PURE__ */ new WeakMap(), H$1 = /* @__PURE__ */ new WeakMap(), k$1 = /* @__PURE__ */ new WeakSet(), U$1 = function() {
+  var _a2, _b2;
+  const { lfColumns: t5, viewportWidth: e2, shapes: s2, lfShape: i2 } = this;
+  if (!Z(this, V$1, "f").call(this)) return 1;
+  if ("number" == typeof t5) return this.lfCollapseColumns ? Math.min(t5, ((_a2 = s2[i2]) == null ? void 0 : _a2.length) || 0) : t5;
+  if (Array.isArray(t5)) {
+    const a2 = t5;
+    let r2 = 1;
+    for (let t6 = 0; t6 < a2.length && e2 >= a2[t6]; t6++) r2 = t6 + 1;
+    return this.lfCollapseColumns ? Math.min(r2, ((_b2 = s2 == null ? void 0 : s2[i2]) == null ? void 0 : _b2.length) || 0) : r2;
+  }
+  return 1;
+}, q$1.style = "::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=fade-in]{display:block;animation:lf-fade-in-block 0.25s ease-out forwards}@keyframes lf-fade-in-block{from{visibility:hidden;opacity:0}to{visibility:visible;opacity:1}}:host{display:block;font-family:var(--lf-masonry-font-family, var(--lf-font-family-primary));font-size:var(--lf-masonry-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-masonry-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-masonry-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-masonry-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-masonry-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-masonry-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-masonry-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-masonry-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}:host{width:100%;height:100%}:host([lf-selectable]) lf-image{transition:all 200ms cubic-bezier(0.4, 0, 0.6, 1);box-sizing:border-box;cursor:pointer;overflow:hidden}:host([lf-selectable]) lf-image:hover,:host([lf-selectable]) lf-image[data-selected=true]{filter:var(--lf-comp-selected-filter, brightness(110%) drop-shadow(0 0 0.5em rgb(var(--lf-color-secondary))))}:host([lf-selectable]) lf-image[data-selected=true]{border:var(--lf-masonry-selected-border, 1px solid rgba(var(--lf-color-secondary, 0.875)))}.masonry{width:100%;height:100%;box-sizing:border-box;display:flex;gap:var(--lf-masonry-grid-gap, 0.5em);overflow:auto;padding:var(--lf-masonry-padding, 0.75em);position:relative}.masonry:not(:hover) .grid__actions{display:none}.grid{width:100%;height:100%;align-items:var(--lf-masonry-grid-items-alignment, start);column-gap:var(--lf-masonry-grid-gap, 0.5em);display:grid}.grid--horizontal{grid-template-rows:1fr;overflow-x:auto;overflow-y:hidden}.grid--horizontal .grid__column{flex-direction:row;height:100%;min-height:max-content;width:auto}.grid--main{grid-template-columns:repeat(var(--lf_masonry_columns), var(--lf-masonry-column-size, minmax(0px, 1fr)))}.grid--main .grid__column{flex-direction:column}.grid--vertical{grid-template-columns:1fr}.grid--vertical .grid__column{flex-direction:column}.grid__column{display:flex;flex:1;gap:var(--lf-masonry-grid-gap, 0.5em);width:100%}.grid__actions{backdrop-filter:var(--lf-masonry-actions-backdrop, blur(10px));background-color:var(--lf-masonry-actions-background, rgba(var(--lf-color-surface), 0.75));border-radius:var(--lf-masonry-actions-border-radius, 50px);bottom:var(--lf-masonry-button-bottom, 1em);display:grid;grid-auto-flow:row;grid-gap:var(--lf-masonry-grid-gap-actions, 0.5em);justify-items:center;margin:var(--lf-masonry-actions-margin, 0 0.5em 0.5em 0);padding:var(--lf-masonry-actions-padding, 0.75em);position:absolute;right:var(--lf-masonry-button-right, 1em);z-index:var(--lf-masonry-actions-z-index, 2)}.grid__sub{display:grid;grid-gap:var(--lf-masonry-grid-gap-actions-sub, 0.25em)}";
+const pD28f7231_entry = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  lf_masonry: q$1
+}, Symbol.toStringTag, { value: "Module" }));
+const p = (t5) => (t5 || []).map(((t6) => null != (t6 == null ? void 0 : t6.value) ? String(t6.value) : "")), d = (t5, i2) => {
+  if (!i2) return [];
+  const s2 = /* @__PURE__ */ new Set(), e2 = [];
+  for (const a2 of t5 || []) {
+    const t6 = null != a2 ? String(a2) : a2 ?? "";
+    if (!s2.has(t6) && (s2.add(t6), e2.push(t6), e2.length >= i2)) break;
+  }
+  return e2;
+}, v = (t5, i2, s2) => {
+  if (!i2) return [];
+  const e2 = /* @__PURE__ */ new Set(), a2 = [];
+  for (const n2 of t5 || []) {
+    if (!n2) continue;
+    const t6 = null != n2.value ? String(n2.value) : "";
+    if (!e2.has(t6) && (e2.add(t6), a2.push({ ...n2, id: n2.id || s2(t6, a2.length), value: t6 }), a2.length >= i2)) break;
+  }
+  return a2;
+}, y = (t5) => t5 ? t5.split(",").map(((t6) => t6.trim())).filter(((t6) => t6.length > 0)) : [], w2 = (t5) => {
+  const i2 = /* @__PURE__ */ new Set(), s2 = [];
+  for (const e2 of t5 || []) {
+    const t6 = (e2 ?? "").trim();
+    t6 && !i2.has(t6) && (i2.add(t6), s2.push(t6));
+  }
+  return s2;
+}, b = (i2) => ({ chips: () => {
+  const { controller: s2, elements: e2, handlers: a2 } = i2(), { refs: n2 } = e2, { blocks: r2, cyAttributes: l2, historyNodes: o2, manager: h2, parts: f2 } = s2.get, { assignRef: c2, sanitizeProps: u2, theme: m2 } = h2, { bemClass: p2 } = m2, d2 = s2.get.compInstance, v2 = o2();
+  return v2.length ? U$6("lf-chip", { lfDataset: { nodes: v2 }, lfStyling: "filter", lfUiSize: d2.lfUiSize, lfUiState: d2.lfUiState, ...u2(d2.lfChipProps, "LfChip"), class: p2(r2.multiinput._, r2.multiinput.chips), "data-cy": l2.node, "onLf-chip-event": a2.chips, part: f2.chips, ref: c2(n2, "chips") }) : null;
+}, textfield: () => {
+  const { controller: s2, elements: e2, handlers: a2 } = i2(), { refs: n2 } = e2, { blocks: r2, manager: l2, parts: o2 } = s2.get, { assignRef: h2, sanitizeProps: f2, theme: c2 } = l2, { bemClass: u2 } = c2, { textfield: m2 } = a2, p2 = s2.get.compInstance;
+  return U$6("lf-textfield", { class: u2(r2.multiinput._, r2.multiinput.textfield), lfUiSize: p2.lfUiSize, lfUiState: p2.lfUiState, ...f2(p2.lfTextfieldProps, "LfTextfield"), lfTrailingIconAction: "--lf-icon-clear", lfValue: p2.lfValue, "onLf-textfield-event": m2, part: o2.textfield, ref: h2(n2, "textfield") });
+} }), g2 = (t5) => ({ chips: async (i2) => {
+  const { eventType: s2, node: e2 } = i2.detail || {}, { controller: a2 } = t5(), n2 = a2.get.compInstance;
+  a2.get.isDisabled() ? n2.onLfEvent(i2, "lf-event", { node: e2 }) : "click" === s2 ? e2 && n2.onLfEvent(i2, "select-history", { node: e2 }) : n2.onLfEvent(i2, "lf-event", { node: e2 });
+}, textfield: async (i2) => {
+  var _a2;
+  const { eventType: s2, iconType: e2, inputValue: a2 } = i2.detail || {}, { controller: n2 } = t5(), r2 = n2.get.compInstance;
+  if (n2.get.isDisabled()) r2.onLfEvent(i2, "lf-event");
+  else switch (s2) {
+    case "click":
+      "action" === e2 && r2.onLfEvent(i2, "clear-history", { value: a2 || "" });
+      break;
+    case "input":
+      r2.onLfEvent(i2, "input", { value: a2 || "" });
+      break;
+    case "keydown":
+      const t6 = (_a2 = i2.detail) == null ? void 0 : _a2.originalEvent;
+      "Enter" === t6.key && r2.onLfEvent(i2, "change", { value: a2 || "" });
+      break;
+    default:
+      r2.onLfEvent(i2, "lf-event");
+  }
+} });
+var k, z, x, S2, C2, T3, M3, L, W3, E2, D, H, A, _, j2, I, P, V, R2, U, $, F, N, Y2, O2, q2, B2, G2, J, K = function(t5, i2, s2, e2) {
+  if ("a" === s2 && !e2) throw new TypeError("Private accessor was defined without a getter");
+  if ("function" == typeof i2 ? t5 !== i2 || !e2 : !i2.has(t5)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+  return "m" === s2 ? e2 : "a" === s2 ? e2.call(t5) : e2 ? e2.value : i2.get(t5);
+}, Q = function(t5, i2, s2, e2, a2) {
+  if ("function" == typeof i2 ? t5 !== i2 || true : !i2.has(t5)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
+  return i2.set(t5, s2), s2;
+};
+const X2 = class {
+  constructor(t5) {
+    o$2(this, t5), this.lfEvent = G$4(this, "lf-multiinput-event"), k.add(this), this.historyNodes = [], this.value = "", this.lfAllowFreeInput = true, this.lfChipProps = null, this.lfDataset = null, this.lfMaxHistory = 10, this.lfStyle = null, this.lfMode = "history", this.lfTextfieldProps = null, this.lfUiSize = "medium", this.lfUiState = "primary", this.lfValue = "", z.set(this, void 0), x.set(this, void 0), S2.set(this, false), C2.set(this, ""), T3.set(this, LF_MULTIINPUT_BLOCKS), M3.set(this, CY_ATTRIBUTES), L.set(this, LF_ATTRIBUTES), W3.set(this, LF_MULTIINPUT_PARTS), E2.set(this, LF_STYLE_ID), D.set(this, LF_WRAPPER_ID);
+  }
+  async onLfEvent(t5, i2, s2) {
+    var _a2;
+    const { node: e2, value: a2 } = s2 || {};
+    switch (i2) {
+      case "change":
+        K(this, k, "m", N).call(this) ? await K(this, k, "m", A).call(this, a2 ?? "") : await K(this, k, "m", H).call(this, a2 ?? "", { clearTextfield: true, addToHistory: true });
+        break;
+      case "clear-history":
+        await K(this, k, "m", _).call(this);
+        break;
+      case "input":
+        await K(this, k, "m", J).call(this, a2 ?? "", { validate: false, syncTextfield: false });
+        break;
+      case "select-history":
+        if (e2) {
+          const t6 = String(e2.value ?? "");
+          K(this, k, "m", N).call(this) ? await K(this, k, "m", A).call(this, t6, e2) : await K(this, k, "m", H).call(this, t6, { addToHistory: false }), await K(this, k, "m", B2).call(this, this.value);
+        }
+    }
+    this.lfEvent.emit({ comp: this, eventType: i2, id: ((_a2 = this.rootElement) == null ? void 0 : _a2.id) || "", originalEvent: t5, node: e2, value: this.value });
+  }
+  async onLfAllowFreeInputChange() {
+    await K(this, k, "m", P).call(this);
+  }
+  async onLfDatasetChange(t5) {
+    if (K(this, S2, "f")) return;
+    const i2 = v((t5 == null ? void 0 : t5.nodes) || [], K(this, k, "m", O2).call(this), ((t6, i3) => K(this, k, "m", j2).call(this, t6, i3))), s2 = (a2 = this.historyNodes, !(!(e2 = i2) && !a2) && (!e2 || !a2 || e2.length !== a2.length || e2.some(((t6, i3) => {
+      const s3 = a2[i3];
+      return !s3 || String((t6 == null ? void 0 : t6.value) ?? "") !== String((s3 == null ? void 0 : s3.value) ?? "") || ((t6 == null ? void 0 : t6.id) || "") !== ((s3 == null ? void 0 : s3.id) || "");
+    }))));
+    var e2, a2;
+    this.historyNodes = i2, s2 ? await K(this, k, "m", q2).call(this, i2, { preserveColumns: true }) : await K(this, k, "m", G2).call(this), await K(this, k, "m", P).call(this);
+  }
+  async onLfMaxHistoryChange() {
+    const t5 = v(this.historyNodes, K(this, k, "m", O2).call(this), ((t6, i2) => K(this, k, "m", j2).call(this, t6, i2)));
+    await K(this, k, "m", q2).call(this, t5, { preserveColumns: true });
+  }
+  async addToHistory(t5) {
+    if (K(this, k, "m", F).call(this) || !t5) return;
+    const i2 = p(this.historyNodes), s2 = [t5, ...i2.filter(((i3) => i3 !== t5))], e2 = d(s2, K(this, k, "m", O2).call(this)), a2 = K(this, k, "m", I).call(this, e2);
+    await K(this, k, "m", q2).call(this, a2, { preserveColumns: true });
+  }
+  async getDebugInfo() {
+    return this.debugInfo;
+  }
+  async getHistory() {
+    return p(this.historyNodes);
+  }
+  async getProps() {
+    const t5 = LF_MULTIINPUT_PROPS.map(((t6) => [t6, this[t6]]));
+    return Object.fromEntries(t5);
+  }
+  async getState() {
+    return { value: await this.getValue(), history: await this.getHistory() };
+  }
+  async getValue() {
+    return this.value || "";
+  }
+  async refresh() {
+    vt$1(this);
+  }
+  async setHistory(t5) {
+    const i2 = d(t5 || [], K(this, k, "m", O2).call(this)), s2 = K(this, k, "m", I).call(this, i2);
+    await K(this, k, "m", q2).call(this, s2, { preserveColumns: true }), await K(this, k, "m", P).call(this);
+  }
+  async setValue(t5) {
+    await K(this, k, "m", J).call(this, t5 || "", { validate: true });
+  }
+  async unmount(t5 = 0) {
+    setTimeout((() => {
+      this.onLfEvent(new CustomEvent("unmount"), "unmount", { value: this.value }), this.rootElement.remove();
+    }), t5);
+  }
+  connectedCallback() {
+    K(this, x, "f") && K(this, x, "f").theme.register(this);
+  }
+  async componentWillLoad() {
+    var _a2;
+    Q(this, x, await a(this));
+    const t5 = v(((_a2 = this.lfDataset) == null ? void 0 : _a2.nodes) || [], K(this, k, "m", O2).call(this), ((t6, i2) => K(this, k, "m", j2).call(this, t6, i2)));
+    await K(this, k, "m", q2).call(this, t5, { preserveColumns: true }), await K(this, k, "m", J).call(this, this.lfValue || "", { validate: true }), K(this, k, "m", $).call(this);
+  }
+  componentWillRender() {
+    const { info: t5 } = K(this, x, "f").debug;
+    t5.update(this, "will-render");
+  }
+  componentDidRender() {
+    const { info: t5 } = K(this, x, "f").debug;
+    t5.update(this, "did-render");
+  }
+  componentDidLoad() {
+    const { debug: t5 } = K(this, x, "f");
+    this.onLfEvent(new CustomEvent("ready"), "ready"), t5.info.update(this, "did-load");
+  }
+  render() {
+    const { bemClass: i2, setLfStyle: s2 } = K(this, x, "f").theme, { lfStyle: e2 } = this;
+    return U$6(A$a, { key: "a6e8275ee316f4f5b24e41a0f0c02485662645a0" }, e2 && U$6("style", { key: "0a75879da6cbc55b290f5e44c3bfa7ec6d3f2b4c", id: K(this, E2, "f") }, s2(this)), U$6("div", { key: "f5a292bd2e0c9b659d98ddbd1a0c74425c4b1545", id: K(this, D, "f") }, U$6("div", { key: "4e60128663a846d087c4612cac2042ba8a65be72", class: i2(K(this, T3, "f").multiinput._), "data-lf": K(this, L, "f")[this.lfUiState], part: K(this, W3, "f").multiinput }, K(this, z, "f").elements.jsx.textfield(), U$6("div", { key: "49b1559b2d0671f6db122227dbe716e1edaa31c0", class: i2(K(this, T3, "f").multiinput._, K(this, T3, "f").multiinput.history), part: K(this, W3, "f").history }, K(this, z, "f").elements.jsx.chips()))));
+  }
+  disconnectedCallback() {
+    K(this, x, "f").theme.unregister(this);
+  }
+  get rootElement() {
+    return q$5(this);
+  }
+  static get watchers() {
+    return { lfAllowFreeInput: ["onLfAllowFreeInputChange"], lfDataset: ["onLfDatasetChange"], lfMaxHistory: ["onLfMaxHistoryChange"] };
+  }
+};
+z = /* @__PURE__ */ new WeakMap(), x = /* @__PURE__ */ new WeakMap(), S2 = /* @__PURE__ */ new WeakMap(), C2 = /* @__PURE__ */ new WeakMap(), T3 = /* @__PURE__ */ new WeakMap(), M3 = /* @__PURE__ */ new WeakMap(), L = /* @__PURE__ */ new WeakMap(), W3 = /* @__PURE__ */ new WeakMap(), E2 = /* @__PURE__ */ new WeakMap(), D = /* @__PURE__ */ new WeakMap(), k = /* @__PURE__ */ new WeakSet(), H = async function(t5, i2) {
+  const s2 = true === (i2 == null ? void 0 : i2.clearTextfield), e2 = false !== (i2 == null ? void 0 : i2.addToHistory);
+  await K(this, k, "m", J).call(this, t5 || "", { validate: true, syncTextfield: !s2 }) && (e2 && this.value && await this.addToHistory(this.value), s2 && await K(this, k, "m", B2).call(this, ""));
+}, A = async function(t5, i2) {
+  let s2;
+  if (i2) {
+    const i3 = K(this, k, "m", R2).call(this), e3 = (t5 ?? "").trim();
+    s2 = e3 ? i3.includes(e3) ? i3.filter(((t6) => t6 !== e3)) : [...i3, e3] : i3;
+  } else s2 = y(t5 ?? "");
+  s2 = w2(s2), this.lfAllowFreeInput || (s2 = K(this, k, "m", V).call(this, s2));
+  const e2 = ((t6) => (t6 || []).join(", "))(s2);
+  await K(this, k, "m", J).call(this, e2, { validate: false, syncTextfield: false }), this.lfAllowFreeInput && s2.length && await K(this, k, "m", U).call(this, s2);
+}, _ = async function() {
+  K(this, k, "m", F).call(this) || (await this.setHistory([]), K(this, k, "m", N).call(this) && await K(this, k, "m", J).call(this, "", { validate: false }));
+}, j2 = function(t5, i2) {
+  var _a2;
+  return `${((_a2 = this.rootElement) == null ? void 0 : _a2.id) || "multiinput"}-${i2}-${Math.random().toString(36).slice(2, 8)}-${t5.length}`;
+}, I = function(t5) {
+  var _a2, _b2;
+  const i2 = ((_b2 = (_a2 = this.lfDataset) == null ? void 0 : _a2.nodes) == null ? void 0 : _b2.reduce(((t6, i3) => t6.set(String((i3 == null ? void 0 : i3.value) ?? ""), i3)), /* @__PURE__ */ new Map())) || /* @__PURE__ */ new Map();
+  return t5.map(((t6, s2) => {
+    const e2 = i2.get(t6);
+    return { ...e2, id: (e2 == null ? void 0 : e2.id) || K(this, k, "m", j2).call(this, t6, s2), value: t6 };
+  }));
+}, P = async function() {
+  K(this, k, "m", Y2).call(this, this.value) || await K(this, k, "m", J).call(this, K(this, C2, "f") || "", { validate: false });
+}, V = function(t5) {
+  const i2 = new Set(p(this.historyNodes));
+  return t5.filter(((t6) => i2.has(t6)));
+}, R2 = function() {
+  return w2(y(this.value));
+}, U = async function(t5) {
+  const i2 = p(this.historyNodes), s2 = new Set(i2), e2 = (t5 || []).filter(((t6) => !s2.has(t6)));
+  if (!e2.length) return;
+  const a2 = d([...e2, ...i2], K(this, k, "m", O2).call(this));
+  await this.setHistory(a2);
+}, $ = function() {
+  var t5;
+  Q(this, z, { controller: { get: { blocks: K(this, T3, "f"), compInstance: this, cyAttributes: K(this, M3, "f"), historyNodes: () => this.historyNodes, historyValues: () => p(this.historyNodes), isDisabled: () => K(this, k, "m", F).call(this), lfAttributes: K(this, L, "f"), lfDataset: () => this.lfDataset, manager: K(this, x, "f"), parts: K(this, W3, "f"), value: () => this.value }, set: { history: async (t6) => {
+    await K(this, k, "m", q2).call(this, t6, { preserveColumns: true });
+  }, value: async (t6) => {
+    await K(this, k, "m", J).call(this, t6, { validate: false, syncTextfield: false });
+  } } }, elements: { jsx: b(t5 = () => K(this, z, "f")), refs: { chips: null, textfield: null } }, handlers: g2(t5) });
+}, F = function() {
+  return "disabled" === this.lfUiState;
+}, N = function() {
+  return "tags" === this.lfMode;
+}, Y2 = function(t5) {
+  return !!K(this, k, "m", N).call(this) || !!this.lfAllowFreeInput || !t5 || p(this.historyNodes).includes(t5);
+}, O2 = function() {
+  return "number" == typeof this.lfMaxHistory && this.lfMaxHistory >= 0 ? this.lfMaxHistory : 10;
+}, q2 = async function(t5, i2) {
+  var _a2;
+  this.historyNodes = [...t5];
+  const s2 = (i2 == null ? void 0 : i2.preserveColumns) ? (_a2 = this.lfDataset) == null ? void 0 : _a2.columns : null;
+  Q(this, S2, true), this.lfDataset = { ...s2 ? { columns: [...s2] } : {}, nodes: [...t5] }, Q(this, S2, false), await K(this, k, "m", G2).call(this);
+}, B2 = async function(t5) {
+  var _a2;
+  const i2 = (_a2 = K(this, z, "f")) == null ? void 0 : _a2.elements.refs.textfield;
+  i2 && await i2.setValue(t5 ?? "");
+}, G2 = async function() {
+  var _a2;
+  const t5 = (_a2 = K(this, z, "f")) == null ? void 0 : _a2.elements.refs.chips;
+  if (!t5) return;
+  if (K(this, k, "m", N).call(this)) {
+    const i3 = K(this, k, "m", R2).call(this), s2 = this.historyNodes.filter(((t6) => i3.includes(String((t6 == null ? void 0 : t6.value) ?? "")))).map(((t6) => t6.id));
+    return void await t5.setSelectedNodes(s2);
+  }
+  const i2 = this.historyNodes.filter(((t6) => String((t6 == null ? void 0 : t6.value) ?? "") === this.value)).map(((t6) => t6.id));
+  (i2 == null ? void 0 : i2.length) ? await t5.setSelectedNodes(i2) : await t5.setSelectedNodes([]);
+}, J = async function(t5, i2 = {}) {
+  const s2 = t5 ?? "";
+  return i2.validate && !K(this, k, "m", Y2).call(this, s2) ? (await K(this, k, "m", B2).call(this, K(this, C2, "f")), this.value = K(this, C2, "f"), await K(this, k, "m", G2).call(this), false) : (this.value = s2, i2.validate && K(this, k, "m", Y2).call(this, s2) && Q(this, C2, s2), false !== i2.syncTextfield && await K(this, k, "m", B2).call(this, s2), await K(this, k, "m", G2).call(this), true);
+}, X2.style = "::-webkit-scrollbar{width:9px}::-webkit-scrollbar-thumb{transition:all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4);background-color:rgb(var(--lf-color-primary))}::-webkit-scrollbar-track{background-color:rgb(var(--lf-color-bg))}[data-lf=ripple]{animation-duration:var(--lf-ui-duration-ripple, 675ms);animation-fill-mode:forwards;animation-name:lf-ripple;animation-timing-function:var(--lf-ui-timing-ripple, ease-out);background:var(--lf-ui-ripple-background, var(--lf-color-primary));border-radius:var(--lf-ui-radius-ripple, 50%);height:var(--lf-ui-ripple-height, 100%);left:var(--lf-ui-ripple-x, 50%);opacity:var(--lf-ui-opacity-ripple, 0.5);pointer-events:none;position:absolute;top:var(--lf-ui-ripple-y, 50%);transform:scale(0);width:var(--lf-ui-ripple-width, 100%)}@keyframes lf-ripple{from{transform:scale(0)}to{opacity:0;transform:scale(4)}}[data-lf=ripple-surface]{cursor:pointer;height:100%;left:0;overflow:hidden;position:absolute;top:0;width:100%}[data-lf=danger]{--lf-multiinput-color-primary:var(\n    --lf-multiinput-color-danger,\n    var(--lf-color-danger)\n  );--lf-multiinput-color-on-primary:var(\n    --lf-multiinput-color-danger,\n    var(--lf-color-on-danger)\n  )}[data-lf=disabled]{opacity:var(--lf-multiinput-ui-opacity-disabled, var(--lf-ui-opacity-disabled));pointer-events:none}[data-lf=info]{--lf-multiinput-color-primary:var(\n    --lf-multiinput-color-info,\n    var(--lf-color-info)\n  );--lf-multiinput-color-on-primary:var(\n    --lf-multiinput-color-info,\n    var(--lf-color-on-info)\n  )}[data-lf=secondary]{--lf-multiinput-color-primary:var(\n    --lf-multiinput-color-secondary,\n    var(--lf-color-secondary)\n  );--lf-multiinput-color-on-primary:var(\n    --lf-multiinput-color-secondary,\n    var(--lf-color-on-secondary)\n  )}[data-lf=success]{--lf-multiinput-color-primary:var(\n    --lf-multiinput-color-success,\n    var(--lf-color-success)\n  );--lf-multiinput-color-on-primary:var(\n    --lf-multiinput-color-success,\n    var(--lf-color-on-success)\n  )}[data-lf=warning]{--lf-multiinput-color-primary:var(\n    --lf-multiinput-color-warning,\n    var(--lf-color-warning)\n  );--lf-multiinput-color-on-primary:var(\n    --lf-multiinput-color-warning,\n    var(--lf-color-on-warning)\n  )}[data-lf=fade-in]{display:block;animation:lf-fade-in-block 0.25s ease-out forwards}@keyframes lf-fade-in-block{from{visibility:hidden;opacity:0}to{visibility:visible;opacity:1}}[data-lf=portal]{display:none}:host{display:block;font-family:var(--lf-multiinput-font-family, var(--lf-font-family-primary));font-size:var(--lf-multiinput-font-size, var(--lf-font-size))}:host([lf-ui-size=large]){font-size:calc(var(--lf-multiinput-font-size, var(--lf-font-size)) * var(--lf-ui-size-large))}:host([lf-ui-size=medium]){font-size:calc(var(--lf-multiinput-font-size, var(--lf-font-size)) * var(--lf-ui-size-medium))}:host([lf-ui-size=small]){font-size:calc(var(--lf-multiinput-font-size, var(--lf-font-size)) * var(--lf-ui-size-small))}:host([lf-ui-size=xlarge]){font-size:calc(var(--lf-multiinput-font-size, var(--lf-font-size)) * var(--lf-ui-size-xlarge))}:host([lf-ui-size=xsmall]){font-size:calc(var(--lf-multiinput-font-size, var(--lf-font-size)) * var(--lf-ui-size-xsmall))}:host([lf-ui-size=xxlarge]){font-size:calc(var(--lf-multiinput-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxlarge))}:host([lf-ui-size=xxsmall]){font-size:calc(var(--lf-multiinput-font-size, var(--lf-font-size)) * var(--lf-ui-size-xxsmall))}#lf-component{width:100%;height:100%}.multiinput{width:100%;height:100%;display:flex;flex-direction:column;gap:0.5em}.multiinput__chips{flex:1 1 auto;min-width:0}.multiinput__history{display:flex;flex-wrap:wrap;align-items:center;gap:0.5em}.multiinput__textfield{width:100%;height:100%}";
+const pF4fba5e8_entry = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  lf_multiinput: X2
+}, Symbol.toStringTag, { value: "Module" }));
+//# sourceMappingURL=lf-widgets-core-BwXxRfRT.js.map
