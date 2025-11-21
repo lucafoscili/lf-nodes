@@ -79,13 +79,17 @@ This document walks through the moving parts behind the interactive image editor
 | Context lookup | `get_editing_context` | Validates the session and retrieves stored model components + prompts + conditioning. |
 | Mask decoding | `base64_to_tensor`, thresholding | Converts the brush strokes into a binary mask, resized to the base image resolution. |
 | ROI prep | `_prepare_inpaint_region` | Auto-crops around the mask (padding + alignment), optionally upscales to an SDXL preset, dilates/feathers edges, and caches the original ROI to prevent seam artefacts. |
-| Sampling | `perform_inpaint` | Encodes prompts, mixes conditioning via `ConditioningAverage`, encodes latents through `InpaintModelConditioning`, and samples without preview. |
+| Sampling | `perform_inpaint` | Encodes prompts, mixes conditioning according to the editor's `conditioning_mix` slider (context only / concat / prompts only / blend), encodes latents through `InpaintModelConditioning`, and samples without preview. |
 | Downscale + blending | `_finalize_inpaint_output` | Downscales with bicubic + antialias, optionally applies unsharp mask, restores original pixels outside the mask, pastes results, clamps to `[0, 1]`, and moves to CPU. |
 | Previews | `_save_tensor_preview` | Optional debug saves for mask, region pre/post downscale, and stitched output. |
 
 Additional behaviour:
 
-- **Prompts & conditioning**: When `use_conditioning` is enabled, the UI exposes a `conditioning_mix` slider (`-1` -> stored conditioning only, `0` -> balanced, `1` -> prompt only). The backend logs the resolved mix factor for visibility.
+- **Prompts & conditioning**: The inpaint editor exposes a `Conditioning mix` slider that controls how stored conditioning and prompts interact:
+  - `-1` ⇒ context conditioning only
+  - `0` ⇒ concatenate context + prompts (`ConditioningConcat`)
+  - `1` ⇒ prompts only
+  - values in between blend the two via `ConditioningAverage`. The filter route follows the same rules as the node path.
 - **Adaptive presets**: `_select_upsample_plan` chooses the largest whitelist preset (multiples of 64) that fits the ROI area and respects the <= 3:1 aspect cap. If the ROI already exceeds the chosen size, no upscale occurs. Console logs print the preset that was selected.
 - **Seamless background**: Original ROI pixels are re-blended after sampling so unmasked areas remain untouched, eliminating hard patch edges.
 - **Config defaults**: Slider/textfield/toggle values are mirrored into `dataset.defaults[filter_type]` so preferred settings can be rehydrated in future sessions or exported via the nodes' `config` JSON outputs. Only committed changes (events that actually fire) are persisted; half-edited controls that never emit an event are not saved.

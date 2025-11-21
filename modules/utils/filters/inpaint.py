@@ -342,7 +342,6 @@ def perform_inpaint(
     disable_preview: bool = True,
     positive_conditioning=None,
     negative_conditioning=None,
-    use_conditioning: bool = False,
     conditioning_mix: float = 0.0,
     conditioning_mode: str | None = None,
 ) -> torch.Tensor:
@@ -366,7 +365,6 @@ def perform_inpaint(
         disable_preview (bool, optional): If True, disables preview sampling for efficiency. Defaults to True.
         positive_conditioning: Optional additional conditioning for the positive prompt.
         negative_conditioning: Optional additional conditioning for the negative prompt.
-        use_conditioning (bool, optional): If True, combines additional conditioning with prompts. Defaults to False.
         conditioning_mix (float, optional): Blend factor between -1 (context conditioning only) and 1 (prompt only).
         conditioning_mode (str, optional): Optional high-level mode override. When provided:
             - "context_only": use only context conditioning when available.
@@ -382,14 +380,15 @@ def perform_inpaint(
         positive = clip_encoder.encode(clip, positive_prompt)[0]
         negative = clip_encoder.encode(clip, negative_prompt)[0]
 
-        if use_conditioning:
+        has_context = positive_conditioning is not None or negative_conditioning is not None
+        mode = conditioning_mode or ""
+
+        if has_context and mode != "prompts_only":
             mix_value = float(conditioning_mix if conditioning_mix is not None else 0.0)
             if mix_value > 1.0:
                 mix_value = 1.0
             if mix_value < -1.0:
                 mix_value = -1.0
-
-            mode = conditioning_mode or ""
 
             if mode == "context_only":
                 if positive_conditioning is not None:
@@ -1283,11 +1282,6 @@ def apply_inpaint_filter(image: torch.Tensor, settings: dict) -> FilterResult:
     negative_prompt = str(settings.get("negative_prompt") or context_negative_prompt)
 
     conditioning_mix = _normalize_conditioning_mix(settings.get("conditioning_mix"))
-
-    use_conditioning_raw = settings.get("use_conditioning", "false")
-    use_conditioning = convert_to_boolean(use_conditioning_raw)
-    if use_conditioning is None:
-        use_conditioning = False
     apply_unsharp_mask = convert_to_boolean(settings.get("apply_unsharp_mask", True))
     if apply_unsharp_mask is None:
         apply_unsharp_mask = True
@@ -1305,7 +1299,6 @@ def apply_inpaint_filter(image: torch.Tensor, settings: dict) -> FilterResult:
             "seed": seed,
             "positive_prompt": positive_prompt,
             "negative_prompt": negative_prompt,
-            "use_conditioning": use_conditioning,
             "conditioning_mix": conditioning_mix,
             "positive_conditioning": context_positive_conditioning,
             "negative_conditioning": context_negative_conditioning,
@@ -1331,7 +1324,7 @@ def apply_inpaint_filter(image: torch.Tensor, settings: dict) -> FilterResult:
     print(
         "[LF Inpaint] sampling "
         f"steps={steps}, denoise={denoise_value:.3f}, cfg={cfg:.2f}, seed={seed}, "
-        f"use_conditioning={use_conditioning}, conditioning_mix={conditioning_mix:.2f}"
+        f"conditioning_mix={conditioning_mix:.2f}"
     )
 
     return processed, info_with_mask
@@ -1435,14 +1428,8 @@ def apply_inpaint_filter_tensor(
     negative_conditioning = settings.get("negative_conditioning")
     has_context = positive_conditioning is not None or negative_conditioning is not None
 
-    use_conditioning_flag = settings.get("use_conditioning")
-    if use_conditioning_flag is None:
-        use_conditioning = has_context
-    else:
-        use_conditioning = bool(convert_to_boolean(use_conditioning_flag))
-
     eps = 1e-3
-    if not use_conditioning or not has_context:
+    if not has_context:
         conditioning_mode = "prompts_only"
     else:
         if conditioning_mix <= -1.0 + eps:
@@ -1480,10 +1467,9 @@ def apply_inpaint_filter_tensor(
         cfg=_normalize_cfg(settings.get("cfg")),
         seed=_normalize_seed(settings.get("seed")),
         disable_preview=True,
-        positive_conditioning=positive_conditioning if use_conditioning else None,
-        negative_conditioning=negative_conditioning if use_conditioning else None,
-        use_conditioning=use_conditioning,
-        conditioning_mix=conditioning_mix if use_conditioning else 1.0,
+        positive_conditioning=positive_conditioning,
+        negative_conditioning=negative_conditioning,
+        conditioning_mix=conditioning_mix,
         conditioning_mode=conditioning_mode,
     )
 
