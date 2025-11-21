@@ -336,45 +336,45 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@lf-widgets/assets@npm:1.5.0-rc.0":
-  version: 1.5.0-rc.0
-  resolution: "@lf-widgets/assets@npm:1.5.0-rc.0"
-  checksum: 10c0/316be40961d989eb381cab0dbea474d7ba3aed418fcb4e7772b8b19c8e112417767c6a9807ca391348d599bc22e13f8b99b821f6fa70fe37c92866b52ab12d87
+"@lf-widgets/assets@npm:1.5.0-rc.1":
+  version: 1.5.0-rc.1
+  resolution: "@lf-widgets/assets@npm:1.5.0-rc.1"
+  checksum: 10c0/539ac9c497a4f0eef009688c268df4afd6c6fd80bba738a21d39bf66667cf3ec4a3e5b68025aab40248c698a83f22888d9cb81f21d977faaecc06f56670757b4
   languageName: node
   linkType: hard
 
-"@lf-widgets/core@npm:1.5.0-rc.0":
-  version: 1.5.0-rc.0
-  resolution: "@lf-widgets/core@npm:1.5.0-rc.0"
+"@lf-widgets/core@npm:1.5.0-rc.1":
+  version: 1.5.0-rc.1
+  resolution: "@lf-widgets/core@npm:1.5.0-rc.1"
   dependencies:
-    "@lf-widgets/assets": "npm:1.5.0-rc.0"
+    "@lf-widgets/assets": "npm:1.5.0-rc.1"
     echarts: "npm:^5"
   peerDependencies:
-    "@lf-widgets/foundations": 1.5.0-rc.0
-    "@lf-widgets/framework": 1.5.0-rc.0
+    "@lf-widgets/foundations": 1.5.0-rc.1
+    "@lf-widgets/framework": 1.5.0-rc.1
   dependenciesMeta:
     "@lf-widgets/assets":
       optional: true
-  checksum: 10c0/5e1608d213d2653c46b7d03161f67bcb8b3841eedc56a5ea601b6fa9af666990f93391336488b0bedcd08d18e687061bce1f15e25f7a79ef313d46a552a69d48
+  checksum: 10c0/14a5b4635653be8d6a2c58982a030d7e9eecdf1310d1a2eaf8a3eb397a7aecf6bc582708b0a78b06edf39a2f9644a926474b68a3118ecc3c8ff775d288dbec7e
   languageName: node
   linkType: hard
 
-"@lf-widgets/foundations@npm:1.5.0-rc.0":
-  version: 1.5.0-rc.0
-  resolution: "@lf-widgets/foundations@npm:1.5.0-rc.0"
-  checksum: 10c0/64fe93c42fbc491159fe5ee6538cf9951fba7870d591a2005bfc3e9d2623f1a99e34dcf085722711d79db64829246834b082288e7ebe9c8935d897bb69f701ff
+"@lf-widgets/foundations@npm:1.5.0-rc.1":
+  version: 1.5.0-rc.1
+  resolution: "@lf-widgets/foundations@npm:1.5.0-rc.1"
+  checksum: 10c0/1221f31cf797914a88eab0e722f6c05c3bf413189682380d20152bb11d6d99c193991ce95d1f644a851b21f7a92dc48bcbef7132d3ad1fe6b1599cfe198e6ecb
   languageName: node
   linkType: hard
 
-"@lf-widgets/framework@npm:1.5.0-rc.0":
-  version: 1.5.0-rc.0
-  resolution: "@lf-widgets/framework@npm:1.5.0-rc.0"
+"@lf-widgets/framework@npm:1.5.0-rc.1":
+  version: 1.5.0-rc.1
+  resolution: "@lf-widgets/framework@npm:1.5.0-rc.1"
   dependencies:
     markdown-it: "npm:^14"
     prismjs: "npm:^1"
   peerDependencies:
-    "@lf-widgets/foundations": 1.5.0-rc.0
-  checksum: 10c0/e91cd53577b744e1be78496385f5c0ad92198799d6b84b49c4dcd5fadead12c95ae72013ba7189d79c3f1d93c72952c1e28f2c070231b430070d579a2019b7e6
+    "@lf-widgets/foundations": 1.5.0-rc.1
+  checksum: 10c0/a918ae56af027d23d00d159e986a3d6d4283ffd516d56c3320feedcff7f389ce373c8368f757335bffdf21bbb899364425bcb407d73165ce92fde25395751e9a
   languageName: node
   linkType: hard
 
@@ -1650,10 +1650,10 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "lf-nodes@workspace:."
   dependencies:
-    "@lf-widgets/assets": "npm:1.5.0-rc.0"
-    "@lf-widgets/core": "npm:1.5.0-rc.0"
-    "@lf-widgets/foundations": "npm:1.5.0-rc.0"
-    "@lf-widgets/framework": "npm:1.5.0-rc.0"
+    "@lf-widgets/assets": "npm:1.5.0-rc.1"
+    "@lf-widgets/core": "npm:1.5.0-rc.1"
+    "@lf-widgets/foundations": "npm:1.5.0-rc.1"
+    "@lf-widgets/framework": "npm:1.5.0-rc.1"
     "@types/jsdom": "npm:^27"
     "@types/node": "npm:^24.9.2"
     fs-extra: "npm:^11"
