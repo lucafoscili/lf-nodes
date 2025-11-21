@@ -231,8 +231,9 @@ export const createPrepSettings = (deps: PrepSettingsDeps): PrepSettingsFn => {
               TagName.LfMultiinput,
             ) as HTMLLfMultiinputElement;
 
-            multiinput.lfMode = multiConfig.mode ?? 'tags';
             multiinput.lfAllowFreeInput = multiConfig.allowFreeInput ?? true;
+            multiinput.lfMode = multiConfig.mode ?? 'tags';
+            multiinput.lfTextfieldProps = { lfLabel: parseLabel(multiConfig) };
             multiinput.lfValue = String(multiConfig.defaultValue ?? '').valueOf();
             multiinput.title = multiConfig.title;
             multiinput.dataset.id = multiConfig.id;

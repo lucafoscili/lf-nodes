@@ -344,6 +344,7 @@ def perform_inpaint(
     negative_conditioning=None,
     use_conditioning: bool = False,
     conditioning_mix: float = 0.0,
+    conditioning_mode: str | None = None,
 ) -> torch.Tensor:
     """
     Performs inpainting on the given image using the specified model, mask, and prompts.
@@ -367,6 +368,11 @@ def perform_inpaint(
         negative_conditioning: Optional additional conditioning for the negative prompt.
         use_conditioning (bool, optional): If True, combines additional conditioning with prompts. Defaults to False.
         conditioning_mix (float, optional): Blend factor between -1 (context conditioning only) and 1 (prompt only).
+        conditioning_mode (str, optional): Optional high-level mode override. When provided:
+            - "context_only": use only context conditioning when available.
+            - "concat": concatenate context + prompt conditioning.
+            - "prompts_only": ignore context conditioning and rely on prompts.
+            - "blend": blend according to conditioning_mix.
 
     Returns:
         torch.Tensor: The inpainted image tensor, blended with the original image according to the mask.
@@ -382,42 +388,58 @@ def perform_inpaint(
                 mix_value = 1.0
             if mix_value < -1.0:
                 mix_value = -1.0
-            prompt_weight = 0.5 * (mix_value + 1.0)
-            context_weight = 1.0 - prompt_weight
-            average_node = nodes.ConditioningAverage()
 
-            if positive_conditioning is not None:
-                if context_weight >= 1.0 and prompt_weight <= 0.0:
+            mode = conditioning_mode or ""
+
+            if mode == "context_only":
+                if positive_conditioning is not None:
                     positive = positive_conditioning
-                elif prompt_weight >= 1.0 and context_weight <= 0.0:
-                    pass
-                elif context_weight <= 0.0:
-                    pass
-                else:
-                    positive = average_node.addWeighted(
-                        positive,
-                        positive_conditioning,
-                        float(prompt_weight),
-                    )[0]
-            elif context_weight >= 1.0 and prompt_weight <= 0.0:
-                # No prompt weight but context conditioning missing; fallback to prompts.
-                pass
-
-            if negative_conditioning is not None:
-                if context_weight >= 1.0 and prompt_weight <= 0.0:
+                if negative_conditioning is not None:
                     negative = negative_conditioning
-                elif prompt_weight >= 1.0 and context_weight <= 0.0:
+            elif mode == "concat":
+                concat_node = nodes.ConditioningConcat()
+                if positive_conditioning is not None:
+                    positive = concat_node.concat(positive_conditioning, positive)[0]
+                if negative_conditioning is not None:
+                    negative = concat_node.concat(negative_conditioning, negative)[0]
+            else:
+                # Default and "blend" mode: fall back to weighted average behaviour.
+                prompt_weight = 0.5 * (mix_value + 1.0)
+                context_weight = 1.0 - prompt_weight
+                average_node = nodes.ConditioningAverage()
+
+                if positive_conditioning is not None:
+                    if context_weight >= 1.0 and prompt_weight <= 0.0:
+                        positive = positive_conditioning
+                    elif prompt_weight >= 1.0 and context_weight <= 0.0:
+                        pass
+                    elif context_weight <= 0.0:
+                        pass
+                    else:
+                        positive = average_node.addWeighted(
+                            positive,
+                            positive_conditioning,
+                            float(prompt_weight),
+                        )[0]
+                elif context_weight >= 1.0 and prompt_weight <= 0.0:
+                    # No prompt weight but context conditioning missing; fallback to prompts.
                     pass
-                elif context_weight <= 0.0:
+
+                if negative_conditioning is not None:
+                    if context_weight >= 1.0 and prompt_weight <= 0.0:
+                        negative = negative_conditioning
+                    elif prompt_weight >= 1.0 and context_weight <= 0.0:
+                        pass
+                    elif context_weight <= 0.0:
+                        pass
+                    else:
+                        negative = average_node.addWeighted(
+                            negative,
+                            negative_conditioning,
+                            float(prompt_weight),
+                        )[0]
+                elif context_weight >= 1.0 and prompt_weight <= 0.0:
                     pass
-                else:
-                    negative = average_node.addWeighted(
-                        negative,
-                        negative_conditioning,
-                        float(prompt_weight),
-                    )[0]
-            elif context_weight >= 1.0 and prompt_weight <= 0.0:
-                pass
 
         conditioning_node = nodes.InpaintModelConditioning()
         pos_cond, neg_cond, latent = conditioning_node.encode(
@@ -1260,12 +1282,12 @@ def apply_inpaint_filter(image: torch.Tensor, settings: dict) -> FilterResult:
     positive_prompt = str(settings.get("positive_prompt") or context_positive_prompt)
     negative_prompt = str(settings.get("negative_prompt") or context_negative_prompt)
 
+    conditioning_mix = _normalize_conditioning_mix(settings.get("conditioning_mix"))
+
     use_conditioning_raw = settings.get("use_conditioning", "false")
     use_conditioning = convert_to_boolean(use_conditioning_raw)
     if use_conditioning is None:
         use_conditioning = False
-
-    conditioning_mix = _normalize_conditioning_mix(settings.get("conditioning_mix"))
     apply_unsharp_mask = convert_to_boolean(settings.get("apply_unsharp_mask", True))
     if apply_unsharp_mask is None:
         apply_unsharp_mask = True
@@ -1407,8 +1429,30 @@ def apply_inpaint_filter_tensor(
     # Updated working size after optional padding.
     h, w = int(base_image.shape[1]), int(base_image.shape[2])
 
-    use_conditioning = convert_to_boolean(settings.get("use_conditioning", False)) or False
     conditioning_mix = _normalize_conditioning_mix(settings.get("conditioning_mix"))
+
+    positive_conditioning = settings.get("positive_conditioning")
+    negative_conditioning = settings.get("negative_conditioning")
+    has_context = positive_conditioning is not None or negative_conditioning is not None
+
+    use_conditioning_flag = settings.get("use_conditioning")
+    if use_conditioning_flag is None:
+        use_conditioning = has_context
+    else:
+        use_conditioning = bool(convert_to_boolean(use_conditioning_flag))
+
+    eps = 1e-3
+    if not use_conditioning or not has_context:
+        conditioning_mode = "prompts_only"
+    else:
+        if conditioning_mix <= -1.0 + eps:
+            conditioning_mode = "context_only"
+        elif conditioning_mix >= 1.0 - eps:
+            conditioning_mode = "prompts_only"
+        elif abs(conditioning_mix) < eps:
+            conditioning_mode = "concat"
+        else:
+            conditioning_mode = "blend"
     apply_unsharp_mask = convert_to_boolean(settings.get("apply_unsharp_mask", True))
     if apply_unsharp_mask is None:
         apply_unsharp_mask = True
@@ -1436,10 +1480,11 @@ def apply_inpaint_filter_tensor(
         cfg=_normalize_cfg(settings.get("cfg")),
         seed=_normalize_seed(settings.get("seed")),
         disable_preview=True,
-        positive_conditioning=settings.get("positive_conditioning") if use_conditioning else None,
-        negative_conditioning=settings.get("negative_conditioning") if use_conditioning else None,
+        positive_conditioning=positive_conditioning if use_conditioning else None,
+        negative_conditioning=negative_conditioning if use_conditioning else None,
         use_conditioning=use_conditioning,
         conditioning_mix=conditioning_mix if use_conditioning else 1.0,
+        conditioning_mode=conditioning_mode,
     )
 
     _ = _save_tensor_preview(processed_region, "inpaint_region", str(settings.get("resource_type") or settings.get("output_type") or "temp"))

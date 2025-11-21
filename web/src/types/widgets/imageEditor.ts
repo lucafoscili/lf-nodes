@@ -209,18 +209,17 @@ export enum ImageEditorTextfieldIds {
   Tint = 'tint',
 }
 export enum ImageEditorToggleIds {
+  ApplyUnsharpMask = 'apply_unsharp_mask',
   ClipSoft = 'clip_soft',
   Localized = 'localized',
   ProtectSkin = 'protect_skin',
+  RoiAuto = 'roi_auto',
+  RoiAlignAuto = 'roi_align_auto',
   Shape = 'shape',
   Smooth = 'smoooth',
   SoftBlend = 'soft_blend',
   TransparentBackground = 'transparent_background',
   Vertical = 'vertical',
-  UseConditioning = 'use_conditioning',
-  RoiAuto = 'roi_auto',
-  RoiAlignAuto = 'roi_align_auto',
-  ApplyUnsharpMask = 'apply_unsharp_mask',
 }
 export enum ImageEditorSelectIds {
   Sampler = 'sampler',
@@ -443,7 +442,6 @@ export interface ImageEditorInpaintSettings extends ImageEditorFilterSettings {
   seed?: number;
   steps: number;
   upsample_target: number;
-  use_conditioning: boolean;
 }
 export enum ImageEditorBackgroundRemoverIds {
   Color = 'color',
@@ -558,7 +556,6 @@ export enum ImageEditorInpaintIds {
   Seed = 'seed',
   Steps = 'steps',
   UpsampleTarget = 'upsample_target',
-  UseConditioning = 'use_conditioning',
 }
 export type ImageEditorFilterType = keyof ImageEditorFilterSettingsMap;
 export type ImageEditorDatasetDefaults = Partial<
@@ -737,7 +734,7 @@ export type ImageEditorInpaintFilter = ImageEditorFilterDefinition<
     [ImageEditorControls.Select]?: ImageEditorSelectConfig[];
     [ImageEditorControls.Slider]: ImageEditorSliderConfig[];
     [ImageEditorControls.Textfield]?: ImageEditorTextfieldConfig[];
-    [ImageEditorControls.Toggle]: ImageEditorToggleConfig[];
+    [ImageEditorControls.Toggle]?: ImageEditorToggleConfig[];
   }
 >;
 export type ImageEditorFilters = {

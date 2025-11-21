@@ -62,10 +62,6 @@ class LF_Inpaint:
                     "default": "",
                     "tooltip": "The prompt to discourage certain elements in the inpainting process."
                 }),
-                "use_conditioning": (Input.BOOLEAN, {
-                    "default": False,
-                    "tooltip": "Whether to use conditioning inputs."
-                }),
                 "positive_conditioning": (Input.CONDITIONING, {
                     "tooltip": "Conditioning inputs to guide the inpainting process."
                 }),
@@ -131,7 +127,6 @@ class LF_Inpaint:
             "scheduler": normalize_list_to_value(kwargs.get("scheduler")) if kwargs.get("scheduler") is not None else "karras",
             "positive_prompt": normalize_list_to_value(kwargs.get("positive_prompt") or ""),
             "negative_prompt": normalize_list_to_value(kwargs.get("negative_prompt") or ""),
-            "use_conditioning": bool(normalize_list_to_value(kwargs.get("use_conditioning") or False)),
             "positive_conditioning": kwargs.get("positive_conditioning"),
             "negative_conditioning": kwargs.get("negative_conditioning"),
             "upsample_target": int(
