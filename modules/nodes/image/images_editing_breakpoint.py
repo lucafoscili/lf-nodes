@@ -159,7 +159,17 @@ class LF_ImagesEditingBreakpoint:
             inpaint_defaults["negative_prompt"] = negative_prompt_value
 
         if inpaint_defaults:
-            dataset.setdefault("defaults", {})["inpaint"] = inpaint_defaults
+            defaults = dataset.setdefault("defaults", {})
+            existing_inpaint = defaults.get("inpaint")
+
+            if isinstance(existing_inpaint, dict):
+                merged: dict[str, object] = dict(existing_inpaint)
+                for key, value in inpaint_defaults.items():
+                    if key not in merged:
+                        merged[key] = value
+                defaults["inpaint"] = merged
+            else:
+                defaults["inpaint"] = inpaint_defaults
 
         session.register_context(
             dataset,
