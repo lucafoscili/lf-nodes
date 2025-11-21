@@ -46,6 +46,72 @@ export const MODELS_API: ModelsAPIs = {
     }
   },
   //#endregion
+
+  //#region sampling options
+  getSamplers: async () => {
+    const lfManager = getLfManager();
+    try {
+      const response = await getComfyAPI().fetchApi(APIEndpoints.GetSamplers, {
+        method: 'POST',
+      });
+
+      if (response.status !== 200) {
+        const errorText = await response.text().catch(() => '');
+        lfManager.log(
+          '"get-samplers" endpoint returned non-200',
+          { status: response.status, errorText },
+          LogSeverity.Warning,
+        );
+        return { columns: [], nodes: [] };
+      }
+
+      const payload = await response.json();
+      if (payload?.status === 'success' && payload.data) {
+        return payload.data;
+      }
+
+      lfManager.log('"get-samplers" endpoint returned unexpected payload', { payload }, LogSeverity.Warning);
+      return { columns: [], nodes: [] };
+    } catch (error) {
+      lfManager.log('"get-samplers" endpoint failed', { error }, LogSeverity.Warning);
+      return { columns: [], nodes: [] };
+    }
+  },
+
+  getSchedulers: async () => {
+    const lfManager = getLfManager();
+    try {
+      const response = await getComfyAPI().fetchApi(APIEndpoints.GetSchedulers, {
+        method: 'POST',
+      });
+
+      if (response.status !== 200) {
+        const errorText = await response.text().catch(() => '');
+        lfManager.log(
+          '"get-schedulers" endpoint returned non-200',
+          { status: response.status, errorText },
+          LogSeverity.Warning,
+        );
+        return { columns: [], nodes: [] };
+      }
+
+      const payload = await response.json();
+      if (payload?.status === 'success' && payload.data) {
+        return payload.data;
+      }
+
+      lfManager.log(
+        '"get-schedulers" endpoint returned unexpected payload',
+        { payload },
+        LogSeverity.Warning,
+      );
+      return { columns: [], nodes: [] };
+    } catch (error) {
+      lfManager.log('"get-schedulers" endpoint failed', { error }, LogSeverity.Warning);
+      return { columns: [], nodes: [] };
+    }
+  },
+  //#endregion
 };
 
 export const beforeFree = async (options?: any) => {

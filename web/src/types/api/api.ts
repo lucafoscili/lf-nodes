@@ -57,6 +57,8 @@ export interface GitHubAPIs {
 }
 export interface ModelsAPIs {
   free: () => Promise<boolean>;
+  getSamplers: () => Promise<LfDataDataset>;
+  getSchedulers: () => Promise<LfDataDataset>;
   refresh: () => Promise<boolean>;
 }
 export interface ImageAPIs {
@@ -219,22 +221,24 @@ export enum APIEndpoints {
   Free = `/lf-nodes/free`,
   ExploreFilesystem = `/lf-nodes/explore-filesystem`,
   GetAnalytics = `/lf-nodes/get-analytics`,
+  GetBackupStats = `/lf-nodes/get-backup-stats`,
   GetCpuStats = '/lf-nodes/get-cpu-stats',
   GetDiskStats = '/lf-nodes/get-disk-stats',
   GetGpuStats = '/lf-nodes/get-gpu-stats',
   GetImage = `/lf-nodes/get-image`,
   GetJson = `/lf-nodes/get-json`,
-  GetRamStats = '/lf-nodes/get-ram-stats',
   GetMetadata = `/lf-nodes/get-metadata`,
+  GetRamStats = '/lf-nodes/get-ram-stats',
   GetPreviewStats = `/lf-nodes/get-preview-stats`,
-  GetBackupStats = `/lf-nodes/get-backup-stats`,
+  GetSamplers = `/lf-nodes/get-samplers`,
+  GetSchedulers = `/lf-nodes/get-schedulers`,
   NewBackup = `/lf-nodes/new-backup`,
   ProcessImage = `/lf-nodes/process-image`,
-  UploadImage = `/lf-nodes/upload`,
   RefreshNodeDefs = `/lf-nodes/refresh-node-defs`,
   SaveMetadata = '/lf-nodes/save-metadata',
   UpdateJson = `/lf-nodes/update-json`,
   UpdateMetadataCover = '/lf-nodes/update-metadata-cover',
+  UploadImage = `/lf-nodes/upload`,
   Workflows = `/lf-nodes/workflows`,
 }
 //#endregion
