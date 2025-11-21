@@ -9,6 +9,7 @@ import {
   LfMasonryEventPayload,
   LfMasonryInterface,
   LfMultiInputEventPayload,
+  LfSelectEventPayload,
   LfSliderEventPayload,
   LfTextfieldEventPayload,
   LfToggleEventPayload,
@@ -341,6 +342,19 @@ export const createEventHandlers = ({
         case 'input':
           const debouncedMultiinput = debounce(preview, 300);
           debouncedMultiinput();
+          break;
+      }
+    },
+    //#endregion
+    //#region Select
+    select: async (state: ImageEditorState, e: CustomEvent<LfSelectEventPayload>) => {
+      const { eventType } = e.detail;
+      const { update } = state;
+      const { snapshot } = update;
+
+      switch (eventType) {
+        case 'change':
+          snapshot();
           break;
       }
     },

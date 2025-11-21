@@ -3,6 +3,7 @@ import {
   LfDataNode,
   LfMasonryEventPayload,
   LfMultiInputEventPayload,
+  LfSelectEventPayload,
   LfSliderEventPayload,
   LfTextfieldEventPayload,
   LfToggleEventPayload,
@@ -86,6 +87,7 @@ export interface PrepSettingsDeps {
     state: ImageEditorState,
     e: CustomEvent<LfMultiInputEventPayload>,
   ) => void | Promise<void>;
+  onSelect: (state: ImageEditorState, e: CustomEvent<LfSelectEventPayload>) => void | Promise<void>;
   onSlider: (state: ImageEditorState, e: CustomEvent<LfSliderEventPayload>) => void | Promise<void>;
   onTextfield: (
     state: ImageEditorState,
@@ -155,6 +157,7 @@ export type ImageEditorUpdateCallback = (addSnapshot?: boolean, force?: boolean)
 export enum ImageEditorControls {
   Canvas = 'canvas',
   Multiinput = 'multiinput',
+  Select = 'select',
   Slider = 'slider',
   Textfield = 'textfield',
   Toggle = 'toggle',
@@ -219,18 +222,25 @@ export enum ImageEditorToggleIds {
   RoiAlignAuto = 'roi_align_auto',
   ApplyUnsharpMask = 'apply_unsharp_mask',
 }
+export enum ImageEditorSelectIds {
+  Sampler = 'sampler',
+  Scheduler = 'scheduler',
+}
 export type ImageEditorControlIds =
   | ImageEditorCanvasIds
+  | ImageEditorSelectIds
   | ImageEditorSliderIds
   | ImageEditorTextfieldIds
   | ImageEditorToggleIds;
 export type ImageEditorControlMap<ID extends ImageEditorControlIds> =
   ID extends ImageEditorCanvasIds
     ? HTMLLfCanvasElement
+    : ID extends ImageEditorSelectIds
+    ? HTMLLfSelectElement
     : ID extends ImageEditorSliderIds
     ? HTMLLfSliderElement
     : ID extends ImageEditorTextfieldIds
-    ? HTMLLfTextfieldElement | HTMLLfMultiinputElement
+    ? HTMLLfMultiinputElement | HTMLLfTextfieldElement
     : ID extends ImageEditorToggleIds
     ? HTMLLfToggleElement
     : never;
@@ -252,6 +262,18 @@ export interface ImageEditorCanvasConfig
   extends ImageEditorBaseConfig<ImageEditorSliderIds, number> {
   points: Array<{ x: number; y: number }>;
 }
+export interface ImageEditorMultiinputConfig
+  extends ImageEditorBaseConfig<ImageEditorTextfieldIds, string> {
+  allowFreeInput?: boolean;
+  controlType: ImageEditorControls.Multiinput;
+  maxHistory?: number;
+  mode?: 'history' | 'tags';
+}
+export interface ImageEditorSelectConfig
+  extends ImageEditorBaseConfig<ImageEditorSelectIds, string> {
+  controlType: ImageEditorControls.Select;
+  values: LfDataNode[];
+}
 export interface ImageEditorSliderConfig
   extends ImageEditorBaseConfig<ImageEditorSliderIds, number> {
   controlType: ImageEditorControls.Slider;
@@ -264,13 +286,6 @@ export interface ImageEditorTextfieldConfig
   controlType: ImageEditorControls.Textfield;
   type: 'color' | 'number' | 'text';
 }
-export interface ImageEditorMultiinputConfig
-  extends ImageEditorBaseConfig<ImageEditorTextfieldIds, string> {
-  allowFreeInput?: boolean;
-  controlType: ImageEditorControls.Multiinput;
-  maxHistory?: number;
-  mode?: 'history' | 'tags';
-}
 export interface ImageEditorToggleConfig
   extends ImageEditorBaseConfig<ImageEditorToggleIds, boolean> {
   controlType: ImageEditorControls.Toggle;
@@ -280,11 +295,13 @@ export interface ImageEditorToggleConfig
 export type ImageEditorControlConfig =
   | ImageEditorCanvasConfig
   | ImageEditorMultiinputConfig
+  | ImageEditorSelectConfig
   | ImageEditorSliderConfig
   | ImageEditorTextfieldConfig
   | ImageEditorToggleConfig;
 export type ImageEditorSettingsFor = Partial<{
   [ImageEditorControls.Multiinput]: ImageEditorMultiinputConfig[];
+  [ImageEditorControls.Select]: ImageEditorSelectConfig[];
   [ImageEditorControls.Slider]: ImageEditorSliderConfig[];
   [ImageEditorControls.Textfield]: ImageEditorTextfieldConfig[];
   [ImageEditorControls.Toggle]: ImageEditorToggleConfig[];
@@ -421,6 +438,8 @@ export interface ImageEditorInpaintSettings extends ImageEditorFilterSettings {
   roi_auto?: boolean;
   roi_min_size?: number;
   roi_padding?: number;
+  sampler?: string;
+  scheduler?: string;
   seed?: number;
   steps: number;
   upsample_target: number;
@@ -520,24 +539,26 @@ export enum ImageEditorVignetteIds {
   Shape = 'shape',
 }
 export enum ImageEditorInpaintIds {
-  B64Canvas = 'b64_canvas',
   ApplyUnsharpMask = 'apply_unsharp_mask',
+  B64Canvas = 'b64_canvas',
   Cfg = 'cfg',
   ConditioningMix = 'conditioning_mix',
   DenoisePercentage = 'denoise_percentage',
+  Dilate = 'dilate',
+  Feather = 'feather',
   NegativePrompt = 'negative_prompt',
   PositivePrompt = 'positive_prompt',
-  Seed = 'seed',
-  Steps = 'steps',
-  UseConditioning = 'use_conditioning',
   RoiAuto = 'roi_auto',
   RoiPadding = 'roi_padding',
   RoiAlign = 'roi_align',
   RoiAlignAuto = 'roi_align_auto',
   RoiMinSize = 'roi_min_size',
-  Dilate = 'dilate',
-  Feather = 'feather',
+  Sampler = 'sampler',
+  Scheduler = 'scheduler',
+  Seed = 'seed',
+  Steps = 'steps',
   UpsampleTarget = 'upsample_target',
+  UseConditioning = 'use_conditioning',
 }
 export type ImageEditorFilterType = keyof ImageEditorFilterSettingsMap;
 export type ImageEditorDatasetDefaults = Partial<
@@ -713,6 +734,7 @@ export type ImageEditorInpaintFilter = ImageEditorFilterDefinition<
   ImageEditorInpaintSettings,
   {
     [ImageEditorControls.Multiinput]?: ImageEditorMultiinputConfig[];
+    [ImageEditorControls.Select]?: ImageEditorSelectConfig[];
     [ImageEditorControls.Slider]: ImageEditorSliderConfig[];
     [ImageEditorControls.Textfield]?: ImageEditorTextfieldConfig[];
     [ImageEditorControls.Toggle]: ImageEditorToggleConfig[];

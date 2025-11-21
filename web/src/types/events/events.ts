@@ -68,6 +68,7 @@ export enum LfEventName {
   LfMessenger = 'lf-messenger-event',
   LfMultiinput = 'lf-multiinput-event',
   LfProgressbar = 'lf-progressbar-event',
+  LfSelect = 'lf-select-event',
   LfSlider = 'lf-slider-event',
   LfSpinner = 'lf-spinner-event',
   LfTabbar = 'lf-tabbar-event',
