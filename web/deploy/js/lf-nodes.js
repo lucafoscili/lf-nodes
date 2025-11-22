@@ -1,6 +1,6 @@
-import { g as getLfFramework } from "./lf-widgets-framework-BeY91T9m.js";
-import "./lf-widgets-core-D4eISQ1u.js";
-import "./lf-widgets-foundations-C0mOm286.js";
+import { g as getLfFramework } from "./lf-widgets-framework-DKPd5Cqb.js";
+import "./lf-widgets-core-BwXxRfRT.js";
+import "./lf-widgets-foundations-BKTYH9k2.js";
 var APIEndpoints;
 (function(APIEndpoints2) {
   APIEndpoints2["CleanOldBackups"] = "/lf-nodes/clean-old-backups";
@@ -3893,14 +3893,6 @@ function assertImageEditorFilter(obj) {
   }
   return obj;
 }
-function assignStoredSetting(settings, controlIds, id, value) {
-  const controlIdValues = Object.values(controlIds);
-  if (!controlIdValues.includes(id)) {
-    console.warn(`Control ID '${id}' not found in filter controlIds, skipping assignment`);
-    return;
-  }
-  settings[id] = value;
-}
 const createPrepSettings = (deps) => {
   const { onMultiinput, onSelect, onSlider, onTextfield, onToggle } = deps;
   return (state, node) => {
@@ -3918,16 +3910,6 @@ const createPrepSettings = (deps) => {
     if (defaults) {
       applyFilterDefaults(state, defaults);
     }
-    state.settingsStore = state.settingsStore ?? {};
-    const stored = state.settingsStore[state.filterType] ?? {};
-    const mutableSettings = state.filter.settings;
-    Object.keys(stored).forEach((id) => {
-      const storedValue = stored[id];
-      if (typeof storedValue === "undefined") {
-        return;
-      }
-      assignStoredSetting(mutableSettings, state.filter.controlIds, id, storedValue);
-    });
     const { elements, filter } = state;
     const { settings } = elements;
     if (!(filter == null ? void 0 : filter.configs)) {
@@ -3958,10 +3940,6 @@ const createPrepSettings = (deps) => {
             slider.title = sliderConfig.title;
             slider.dataset.id = sliderConfig.id;
             slider.addEventListener(LfEventName.LfSlider, (event) => onSlider(state, event));
-            const storedValue = stored[sliderConfig.id];
-            if (typeof storedValue !== "undefined") {
-              slider.lfValue = Number(storedValue);
-            }
             controlsContainer.appendChild(slider);
             state.elements.controls[sliderConfig.id] = slider;
             break;
@@ -3975,10 +3953,6 @@ const createPrepSettings = (deps) => {
             textfield.title = textfieldConfig.title;
             textfield.dataset.id = textfieldConfig.id;
             textfield.addEventListener(LfEventName.LfTextfield, (event) => onTextfield(state, event));
-            const storedValue = stored[textfieldConfig.id];
-            if (typeof storedValue !== "undefined") {
-              textfield.lfValue = String(storedValue);
-            }
             controlsContainer.appendChild(textfield);
             state.elements.controls[textfieldConfig.id] = textfield;
             break;
@@ -3993,10 +3967,6 @@ const createPrepSettings = (deps) => {
             multiinput.title = multiConfig.title;
             multiinput.dataset.id = multiConfig.id;
             multiinput.addEventListener(LfEventName.LfMultiinput, (event) => onMultiinput(state, event));
-            const storedValue = stored[multiConfig.id];
-            if (typeof storedValue !== "undefined") {
-              multiinput.lfValue = String(storedValue);
-            }
             const effectiveValue = multiinput.lfValue ?? "";
             if (effectiveValue.trim()) {
               const tags = effectiveValue.split(",").map((token) => token.trim()).filter((token) => token.length > 0);
@@ -4021,17 +3991,13 @@ const createPrepSettings = (deps) => {
             };
             select.lfDataset = fallbackDataset;
             select.lfValue = String(selectConfig.defaultValue ?? "");
-            const storedValue = stored[selectConfig.id];
-            if (typeof storedValue !== "undefined") {
-              select.lfValue = String(storedValue);
-            }
             if (selectConfig.id === ImageEditorSelectIds.Sampler || selectConfig.id === ImageEditorSelectIds.Scheduler) {
               (async () => {
                 try {
                   const dataset2 = selectConfig.id === ImageEditorSelectIds.Sampler ? await MODELS_API.getSamplers() : await MODELS_API.getSchedulers();
                   if (dataset2 && Array.isArray(dataset2.nodes) && dataset2.nodes.length > 0) {
                     select.lfDataset = dataset2;
-                    const targetValue = stored[selectConfig.id] ?? String(selectConfig.defaultValue ?? "");
+                    const targetValue = String(selectConfig.defaultValue ?? "");
                     if (targetValue) {
                       await select.setValue(targetValue);
                     }
@@ -4055,11 +4021,6 @@ const createPrepSettings = (deps) => {
             toggle.title = toggleConfig.title;
             toggle.dataset.id = toggleConfig.id;
             toggle.addEventListener(LfEventName.LfToggle, (event) => onToggle(state, event));
-            const storedValue = stored[toggleConfig.id];
-            if (typeof storedValue !== "undefined") {
-              const boolValue = storedValue === true || typeof storedValue === "string" && storedValue.toLowerCase() === "true";
-              toggle.lfValue = boolValue;
-            }
             controlsContainer.appendChild(toggle);
             state.elements.controls[toggleConfig.id] = toggle;
             break;
@@ -4209,8 +4170,7 @@ const refreshValues = async (state, addSnapshot = false) => {
   const { elements, filter } = state;
   const { controls, imageviewer } = elements;
   const lfManager = getLfManager();
-  state.settingsStore = state.settingsStore ?? {};
-  const storeForFilter = state.settingsStore[state.filterType] = state.settingsStore[state.filterType] ?? {};
+  const storeForFilter = {};
   for (const key in controls) {
     if (Object.prototype.hasOwnProperty.call(controls, key)) {
       const id = key;
