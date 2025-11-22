@@ -1,6 +1,6 @@
-import { g as getLfFramework } from "./lf-widgets-framework-DKPd5Cqb.js";
-import "./lf-widgets-core-BwXxRfRT.js";
-import "./lf-widgets-foundations-BKTYH9k2.js";
+import { g as getLfFramework } from "./lf-widgets-framework-BeY91T9m.js";
+import "./lf-widgets-core-D4eISQ1u.js";
+import "./lf-widgets-foundations-C0mOm286.js";
 var APIEndpoints;
 (function(APIEndpoints2) {
   APIEndpoints2["CleanOldBackups"] = "/lf-nodes/clean-old-backups";
@@ -3961,6 +3961,7 @@ const createPrepSettings = (deps) => {
             const multiConfig = config;
             const multiinput = document.createElement(TagName.LfMultiinput);
             multiinput.lfAllowFreeInput = multiConfig.allowFreeInput ?? true;
+            multiinput.lfMaxHistory = 100;
             multiinput.lfMode = multiConfig.mode ?? "tags";
             multiinput.lfTextfieldProps = { lfLabel: parseLabel(multiConfig) };
             multiinput.lfValue = String(multiConfig.defaultValue ?? "").valueOf();
