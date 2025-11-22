@@ -1,4 +1,6 @@
 import {
+  LfMultiInputEventPayload,
+  LfSelectEventPayload,
   LfSliderEventPayload,
   LfTextfieldEventPayload,
   LfToggleEventPayload,
@@ -14,6 +16,7 @@ import { refreshValues, updateCb } from './imageEditor/update';
 
 //#region Event Handlers
 const handlerRefs: {
+  select: (state: ImageEditorState, e: CustomEvent<LfSelectEventPayload>) => void | Promise<void>;
   slider: (state: ImageEditorState, e: CustomEvent<LfSliderEventPayload>) => void | Promise<void>;
   textfield: (
     state: ImageEditorState,
@@ -21,6 +24,9 @@ const handlerRefs: {
   ) => void | Promise<void>;
   toggle: (state: ImageEditorState, e: CustomEvent<LfToggleEventPayload>) => void | Promise<void>;
 } = {
+  select: async () => {
+    throw new Error('Image editor select handler not initialized.');
+  },
   slider: async () => {
     throw new Error('Image editor slider handler not initialized.');
   },
@@ -33,6 +39,10 @@ const handlerRefs: {
 };
 
 export const prepSettings: PrepSettingsFn = createPrepSettings({
+  onMultiinput: (state: ImageEditorState, event: CustomEvent<LfMultiInputEventPayload>) =>
+    EV_HANDLERS.multiinput(state, event),
+  onSelect: (state: ImageEditorState, event: CustomEvent<LfSelectEventPayload>) =>
+    handlerRefs.select(state, event),
   onSlider: (state: ImageEditorState, event: CustomEvent<LfSliderEventPayload>) =>
     handlerRefs.slider(state, event),
   onTextfield: (state: ImageEditorState, event: CustomEvent<LfTextfieldEventPayload>) =>
@@ -46,6 +56,7 @@ export const EV_HANDLERS = createEventHandlers({
   prepSettings,
 });
 
+handlerRefs.select = EV_HANDLERS.select;
 handlerRefs.slider = EV_HANDLERS.slider;
 handlerRefs.textfield = EV_HANDLERS.textfield;
 handlerRefs.toggle = EV_HANDLERS.toggle;

@@ -5,6 +5,7 @@ import { ImageEditorState, NavigationMetadata } from '../../types/widgets/imageE
 import { getLfData, getLfManager, normalizeDirectoryRequest } from '../../utils/common';
 import { deriveDirectoryValue } from './dataset';
 
+//#region extractMetadata
 const extractMetadata = (node: LfDataNode): NavigationMetadata | null => {
   const lfData = getLfData();
 
@@ -44,7 +45,9 @@ const extractMetadata = (node: LfDataNode): NavigationMetadata | null => {
 
   return metadata ?? null;
 };
+//#endregion
 
+//#region createNavigationTreeManager
 export const createNavigationTreeManager = (
   imageviewer: HTMLLfImageviewerElement,
   editorState: ImageEditorState,
@@ -129,7 +132,9 @@ export const createNavigationTreeManager = (
       getLfManager().log('Failed to expand node.', { error, nodeId, path }, LogSeverity.Warning);
     }
   };
+  //#endregion
 
+  //#region handleTreeClick
   const handleTreeClick = async (node: LfDataNode) => {
     const metadata = extractMetadata(node);
     if (!metadata) {
@@ -147,6 +152,7 @@ export const createNavigationTreeManager = (
 
     await editorState.refreshDirectory?.(targetPath);
   };
+  //#endregion
 
   return {
     loadRoots,

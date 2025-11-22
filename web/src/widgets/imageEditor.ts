@@ -1,7 +1,13 @@
-import { LfTreeInterface } from '@lf-widgets/foundations';
+import { LfDataNode } from '@lf-widgets/foundations/dist';
 import { IMAGE_API } from '../api/image';
 import { SETTINGS, TREE_DATA } from '../fixtures/imageEditor';
-import { EV_HANDLERS, getStatusColumn, setGridStatus, updateCb } from '../helpers/imageEditor';
+import {
+  EV_HANDLERS,
+  getStatusColumn,
+  prepSettings,
+  setGridStatus,
+  updateCb,
+} from '../helpers/imageEditor';
 import {
   deriveDirectoryValue,
   ensureDatasetContext,
@@ -87,7 +93,7 @@ export const imageEditorFactory: ImageEditorFactory = {
               ),
             );
 
-          void syncNavigationDirectoryControl(state, state.directoryValue);
+          syncNavigationDirectoryControl(state, state.directoryValue);
 
           const shouldAutoLoad =
             !state.hasAutoDirectoryLoad &&
@@ -96,6 +102,33 @@ export const imageEditorFactory: ImageEditorFactory = {
           if (shouldAutoLoad) {
             state.hasAutoDirectoryLoad = true;
             state.refreshDirectory?.(normalizeDirectoryRequest(state.directoryValue));
+          }
+
+          if (state.filterNodeId) {
+            const findNodeById = (id: string) => {
+              const search = (nodes: LfDataNode[]): LfDataNode | undefined => {
+                for (const n of nodes) {
+                  if (n && typeof n === 'object') {
+                    if ((n.id as string) === id) {
+                      return n;
+                    }
+                    if (Array.isArray(n.children)) {
+                      const found = search(n.children);
+                      if (found) {
+                        return found;
+                      }
+                    }
+                  }
+                }
+                return undefined;
+              };
+              return search(TREE_DATA.nodes || []);
+            };
+
+            const detailsNode = findNodeById(state.filterNodeId);
+            if (detailsNode) {
+              prepSettings(state, detailsNode);
+            }
           }
         };
 

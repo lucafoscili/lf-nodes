@@ -1,8 +1,10 @@
+import { IMAGE_EDITOR_CONSTANTS } from '../../../helpers/imageEditor/constants';
 import {
   ImageEditorControls,
   ImageEditorFilters,
   ImageEditorInpaintFilter,
   ImageEditorInpaintIds,
+  ImageEditorSelectIds,
   ImageEditorSliderIds,
   ImageEditorTextfieldIds,
   ImageEditorToggleIds,
@@ -10,10 +12,9 @@ import {
 
 export const DIFFUSION_SETTINGS: Pick<ImageEditorFilters, 'inpaint'> = {
   //#region Inpaint
-  inpaint: {
+  [IMAGE_EDITOR_CONSTANTS.FILTERS.INPAINT]: {
     controlIds: ImageEditorInpaintIds,
     hasCanvasAction: true,
-    requiresManualApply: true,
     settings: {
       b64_canvas: '',
       cfg: 7,
@@ -21,57 +22,47 @@ export const DIFFUSION_SETTINGS: Pick<ImageEditorFilters, 'inpaint'> = {
       steps: 16,
       positive_prompt: '',
       negative_prompt: '',
+      sampler: 'dpmpp_2m',
+      scheduler: 'beta',
       upsample_target: 2048,
-      use_conditioning: true,
-      conditioning_mix: -1,
+      conditioning_mix: 0,
       apply_unsharp_mask: true,
     },
     configs: {
-      [ImageEditorControls.Textfield]: [
+      [ImageEditorControls.Multiinput]: [
         {
           ariaLabel: 'Positive prompt',
-          controlType: ImageEditorControls.Textfield,
+          controlType: ImageEditorControls.Multiinput,
           defaultValue: '',
           id: ImageEditorTextfieldIds.PositivePrompt,
           isMandatory: false,
           title: 'Prompt applied to masked pixels.',
-          type: 'text',
+          mode: 'tags',
+          allowFreeInput: true,
         },
         {
           ariaLabel: 'Negative prompt',
-          controlType: ImageEditorControls.Textfield,
+          controlType: ImageEditorControls.Multiinput,
           defaultValue: '',
           id: ImageEditorTextfieldIds.NegativePrompt,
           isMandatory: false,
           title: 'Negative prompt applied to masked pixels.',
-          type: 'text',
-        },
-      ],
-      [ImageEditorControls.Toggle]: [
-        {
-          ariaLabel: 'Use conditioning prompts',
-          controlType: ImageEditorControls.Toggle,
-          defaultValue: true,
-          id: ImageEditorToggleIds.UseConditioning,
-          isMandatory: false,
-          off: 'false',
-          on: 'true',
-          title:
-            'If enabled, prepend the connected conditioning inputs to the prompts before sampling.',
+          mode: 'tags',
+          allowFreeInput: true,
         },
       ],
       [ImageEditorControls.Slider]: [
         {
           ariaLabel: 'Conditioning mix',
           controlType: ImageEditorControls.Slider,
-          defaultValue: -1,
+          defaultValue: 0,
           id: ImageEditorSliderIds.ConditioningMix,
           isMandatory: false,
           max: '1',
           min: '-1',
           step: '0.1',
           title:
-            'Blend input conditioning (-1) with inpaint prompts (1). 0 keeps both contributions balanced.',
+            'Conditioning mode: -1=input only, 0=concat, 1=prompts only. Intermediate values blend between input and prompts.',
         },
         {
           ariaLabel: 'Denoise percentage',
@@ -118,6 +109,35 @@ export const DIFFUSION_SETTINGS: Pick<ImageEditorFilters, 'inpaint'> = {
           title: 'Detailer path: upscale ROI longer side to this size before inpaint (0 disables).',
         },
       ],
+      [ImageEditorControls.Select]: [
+        {
+          ariaLabel: 'Sampler',
+          controlType: ImageEditorControls.Select,
+          defaultValue: 'dpmpp_2m',
+          id: ImageEditorSelectIds.Sampler,
+          isMandatory: false,
+          title: 'Sampler used for inpaint diffusion steps.',
+          values: [
+            { value: 'DPM++ 2M', id: 'dpmpp_2m' },
+            { value: 'DPM++ 2M Karras', id: 'dpmpp_2m_karras' },
+            { value: 'Euler', id: 'euler' },
+            { value: 'Euler a', id: 'euler_ancestral' },
+          ],
+        },
+        {
+          ariaLabel: 'Scheduler',
+          controlType: ImageEditorControls.Select,
+          defaultValue: 'normal',
+          id: ImageEditorSelectIds.Scheduler,
+          isMandatory: false,
+          title: 'Scheduler used for inpaint diffusion steps.',
+          values: [
+            { value: 'Normal', id: 'normal' },
+            { value: 'Karras', id: 'karras' },
+            { value: 'Exponential', id: 'exponential' },
+          ],
+        },
+      ],
     },
   },
   //#endregion
@@ -127,10 +147,8 @@ export const INPAINT_ADV: ImageEditorInpaintFilter = {
   //#region Inpaint (adv.)
   controlIds: ImageEditorInpaintIds,
   hasCanvasAction: true,
-  requiresManualApply: true,
   settings: {
     ...DIFFUSION_SETTINGS.inpaint!.settings,
-    use_conditioning: false,
     conditioning_mix: 0,
     apply_unsharp_mask: true,
     roi_auto: true,
@@ -143,25 +161,58 @@ export const INPAINT_ADV: ImageEditorInpaintFilter = {
     seed: 42,
   },
   configs: {
-    [ImageEditorControls.Textfield]: [
+    [ImageEditorControls.Multiinput]: [
       {
         ariaLabel: 'Positive prompt',
-        controlType: ImageEditorControls.Textfield,
+        controlType: ImageEditorControls.Multiinput,
         defaultValue: '',
         id: ImageEditorTextfieldIds.PositivePrompt,
         isMandatory: false,
         title: 'Prompt applied to masked pixels.',
-        type: 'text',
+        mode: 'tags',
+        allowFreeInput: true,
       },
       {
         ariaLabel: 'Negative prompt',
-        controlType: ImageEditorControls.Textfield,
+        controlType: ImageEditorControls.Multiinput,
         defaultValue: '',
         id: ImageEditorTextfieldIds.NegativePrompt,
         isMandatory: false,
         title: 'Negative prompt applied to masked pixels.',
-        type: 'text',
+        mode: 'tags',
+        allowFreeInput: true,
       },
+    ],
+    [ImageEditorControls.Select]: [
+      {
+        ariaLabel: 'Sampler',
+        controlType: ImageEditorControls.Select,
+        defaultValue: 'dpmpp_2m',
+        id: ImageEditorSelectIds.Sampler,
+        isMandatory: false,
+        title: 'Sampler used for inpaint diffusion steps.',
+        values: [
+          { value: 'DPM++ 2M', id: 'dpmpp_2m' },
+          { value: 'DPM++ 2M Karras', id: 'dpmpp_2m_karras' },
+          { value: 'Euler', id: 'euler' },
+          { value: 'Euler a', id: 'euler_ancestral' },
+        ],
+      },
+      {
+        ariaLabel: 'Scheduler',
+        controlType: ImageEditorControls.Select,
+        defaultValue: 'normal',
+        id: ImageEditorSelectIds.Scheduler,
+        isMandatory: false,
+        title: 'Scheduler used for inpaint diffusion steps.',
+        values: [
+          { value: 'Normal', id: 'normal' },
+          { value: 'Karras', id: 'karras' },
+          { value: 'Exponential', id: 'exponential' },
+        ],
+      },
+    ],
+    [ImageEditorControls.Textfield]: [
       {
         ariaLabel: 'Seed',
         controlType: ImageEditorControls.Textfield,
@@ -176,14 +227,14 @@ export const INPAINT_ADV: ImageEditorInpaintFilter = {
       {
         ariaLabel: 'Conditioning mix',
         controlType: ImageEditorControls.Slider,
-        defaultValue: -1,
+        defaultValue: 0,
         id: ImageEditorSliderIds.ConditioningMix,
         isMandatory: false,
         max: '1',
         min: '-1',
         step: '0.1',
         title:
-          'Blend input conditioning (-1) with inpaint prompts (1). 0 keeps both contributions balanced.',
+          'Conditioning mode: -1=input only, 0=concat, 1=prompts only. Intermediate values blend between input and prompts.',
       },
       {
         ariaLabel: 'Denoise percentage',
@@ -287,27 +338,6 @@ export const INPAINT_ADV: ImageEditorInpaintFilter = {
       },
     ],
     [ImageEditorControls.Toggle]: [
-      {
-        ariaLabel: 'Use conditioning prompts',
-        controlType: ImageEditorControls.Toggle,
-        defaultValue: false,
-        id: ImageEditorToggleIds.UseConditioning,
-        isMandatory: false,
-        off: 'false',
-        on: 'true',
-        title:
-          'If enabled, prepend the connected conditioning inputs to the prompts before sampling.',
-      },
-      {
-        ariaLabel: 'Auto ROI crop',
-        controlType: ImageEditorControls.Toggle,
-        defaultValue: true,
-        id: ImageEditorToggleIds.RoiAuto,
-        isMandatory: false,
-        off: 'false',
-        on: 'true',
-        title: 'Automatically crop to mask bounding box to speed up inpainting.',
-      },
       {
         ariaLabel: 'Auto-align ROI',
         controlType: ImageEditorControls.Toggle,

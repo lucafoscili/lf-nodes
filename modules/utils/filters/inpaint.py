@@ -342,8 +342,8 @@ def perform_inpaint(
     disable_preview: bool = True,
     positive_conditioning=None,
     negative_conditioning=None,
-    use_conditioning: bool = False,
     conditioning_mix: float = 0.0,
+    conditioning_mode: str | None = None,
 ) -> torch.Tensor:
     """
     Performs inpainting on the given image using the specified model, mask, and prompts.
@@ -365,8 +365,12 @@ def perform_inpaint(
         disable_preview (bool, optional): If True, disables preview sampling for efficiency. Defaults to True.
         positive_conditioning: Optional additional conditioning for the positive prompt.
         negative_conditioning: Optional additional conditioning for the negative prompt.
-        use_conditioning (bool, optional): If True, combines additional conditioning with prompts. Defaults to False.
         conditioning_mix (float, optional): Blend factor between -1 (context conditioning only) and 1 (prompt only).
+        conditioning_mode (str, optional): Optional high-level mode override. When provided:
+            - "context_only": use only context conditioning when available.
+            - "concat": concatenate context + prompt conditioning.
+            - "prompts_only": ignore context conditioning and rely on prompts.
+            - "blend": blend according to conditioning_mix.
 
     Returns:
         torch.Tensor: The inpainted image tensor, blended with the original image according to the mask.
@@ -376,48 +380,65 @@ def perform_inpaint(
         positive = clip_encoder.encode(clip, positive_prompt)[0]
         negative = clip_encoder.encode(clip, negative_prompt)[0]
 
-        if use_conditioning:
+        has_context = positive_conditioning is not None or negative_conditioning is not None
+        mode = conditioning_mode or ""
+
+        if has_context and mode != "prompts_only":
             mix_value = float(conditioning_mix if conditioning_mix is not None else 0.0)
             if mix_value > 1.0:
                 mix_value = 1.0
             if mix_value < -1.0:
                 mix_value = -1.0
-            prompt_weight = 0.5 * (mix_value + 1.0)
-            context_weight = 1.0 - prompt_weight
-            average_node = nodes.ConditioningAverage()
 
-            if positive_conditioning is not None:
-                if context_weight >= 1.0 and prompt_weight <= 0.0:
+            if mode == "context_only":
+                if positive_conditioning is not None:
                     positive = positive_conditioning
-                elif prompt_weight >= 1.0 and context_weight <= 0.0:
-                    pass
-                elif context_weight <= 0.0:
-                    pass
-                else:
-                    positive = average_node.addWeighted(
-                        positive,
-                        positive_conditioning,
-                        float(prompt_weight),
-                    )[0]
-            elif context_weight >= 1.0 and prompt_weight <= 0.0:
-                # No prompt weight but context conditioning missing; fallback to prompts.
-                pass
-
-            if negative_conditioning is not None:
-                if context_weight >= 1.0 and prompt_weight <= 0.0:
+                if negative_conditioning is not None:
                     negative = negative_conditioning
-                elif prompt_weight >= 1.0 and context_weight <= 0.0:
+            elif mode == "concat":
+                concat_node = nodes.ConditioningConcat()
+                if positive_conditioning is not None:
+                    positive = concat_node.concat(positive_conditioning, positive)[0]
+                if negative_conditioning is not None:
+                    negative = concat_node.concat(negative_conditioning, negative)[0]
+            else:
+                # Default and "blend" mode: fall back to weighted average behaviour.
+                prompt_weight = 0.5 * (mix_value + 1.0)
+                context_weight = 1.0 - prompt_weight
+                average_node = nodes.ConditioningAverage()
+
+                if positive_conditioning is not None:
+                    if context_weight >= 1.0 and prompt_weight <= 0.0:
+                        positive = positive_conditioning
+                    elif prompt_weight >= 1.0 and context_weight <= 0.0:
+                        pass
+                    elif context_weight <= 0.0:
+                        pass
+                    else:
+                        positive = average_node.addWeighted(
+                            positive,
+                            positive_conditioning,
+                            float(prompt_weight),
+                        )[0]
+                elif context_weight >= 1.0 and prompt_weight <= 0.0:
+                    # No prompt weight but context conditioning missing; fallback to prompts.
                     pass
-                elif context_weight <= 0.0:
+
+                if negative_conditioning is not None:
+                    if context_weight >= 1.0 and prompt_weight <= 0.0:
+                        negative = negative_conditioning
+                    elif prompt_weight >= 1.0 and context_weight <= 0.0:
+                        pass
+                    elif context_weight <= 0.0:
+                        pass
+                    else:
+                        negative = average_node.addWeighted(
+                            negative,
+                            negative_conditioning,
+                            float(prompt_weight),
+                        )[0]
+                elif context_weight >= 1.0 and prompt_weight <= 0.0:
                     pass
-                else:
-                    negative = average_node.addWeighted(
-                        negative,
-                        negative_conditioning,
-                        float(prompt_weight),
-                    )[0]
-            elif context_weight >= 1.0 and prompt_weight <= 0.0:
-                pass
 
         conditioning_node = nodes.InpaintModelConditioning()
         pos_cond, neg_cond, latent = conditioning_node.encode(
@@ -601,6 +622,13 @@ def _prepare_inpaint_region(
             work_image = base_image[:, y0:y1, x0:x1, :]
             work_mask = mask_tensor[:, y0:y1, x0:x1]
 
+    # Track whether the user brush actually touches an image edge so we can avoid
+    # introducing a soft falloff along the border (which can look like a white halo).
+    mask_touches_top = paste_roi[0] == 0 and bool((work_mask[:, 0:1, :] > 0.5).any())
+    mask_touches_bottom = paste_roi[2] == h and bool((work_mask[:, -1:, :] > 0.5).any())
+    mask_touches_left = paste_roi[1] == 0 and bool((work_mask[:, :, 0:1] > 0.5).any())
+    mask_touches_right = paste_roi[3] == w and bool((work_mask[:, :, -1:] > 0.5).any())
+
     # Preserve explicit 0 values from settings. Only fall back to defaults when
     # the setting is missing or convert_to_int returns None.
     raw_dilate = settings.get("dilate", None)
@@ -637,6 +665,52 @@ def _prepare_inpaint_region(
         )
         work_mask_soft = wm.squeeze(1)
     work_mask_soft = work_mask_soft.clamp(0.0, 1.0)
+
+    # Track whether the softened mask touches the cropped ROI edges (not just image edges).
+    roi_edge_touch = {
+        "top": bool((work_mask_soft[:, 0:1, :] > 0).any()),
+        "bottom": bool((work_mask_soft[:, -1:, :] > 0).any()),
+        "left": bool((work_mask_soft[:, :, 0:1] > 0).any()),
+        "right": bool((work_mask_soft[:, :, -1:] > 0).any()),
+    }
+
+    # If the mask touches an image border, keep the corresponding band fully opaque
+    # to avoid partially transparent edges when the brush is dragged out of bounds.
+    edge_band = max(dilate_px + feather_px, 1)
+    if mask_touches_top:
+        band = min(edge_band, work_mask_soft.shape[1])
+        top_cols = (work_mask[:, 0:1, :] > 0.5).expand(-1, band, -1)
+        work_mask_soft[:, :band, :] = torch.where(
+            top_cols,
+            torch.ones_like(work_mask_soft[:, :band, :]),
+            work_mask_soft[:, :band, :],
+        )
+    if mask_touches_bottom:
+        band = min(edge_band, work_mask_soft.shape[1])
+        bottom_cols = (work_mask[:, -1:, :] > 0.5).expand(-1, band, -1)
+        work_mask_soft[:, -band:, :] = torch.where(
+            bottom_cols,
+            torch.ones_like(work_mask_soft[:, -band:, :]),
+            work_mask_soft[:, -band:, :],
+        )
+    if mask_touches_left:
+        band = min(edge_band, work_mask_soft.shape[2])
+        left_rows = (work_mask[:, :, 0:1] > 0.5).expand(-1, -1, band)
+        work_mask_soft[:, :, :band] = torch.where(
+            left_rows,
+            torch.ones_like(work_mask_soft[:, :, :band]),
+            work_mask_soft[:, :, :band],
+        )
+    if mask_touches_right:
+        band = min(edge_band, work_mask_soft.shape[2])
+        right_rows = (work_mask[:, :, -1:] > 0.5).expand(-1, -1, band)
+        work_mask_soft[:, :, -band:] = torch.where(
+            right_rows,
+            torch.ones_like(work_mask_soft[:, :, -band:]),
+            work_mask_soft[:, :, -band:],
+        )
+    work_mask_soft = work_mask_soft.clamp(0.0, 1.0)
+
     upsample_applied = False
     upsample_info: dict | None = None
     if upsample_target and upsample_target > 0:
@@ -680,11 +754,19 @@ def _prepare_inpaint_region(
     meta = {
         "dilate_px": dilate_px,
         "feather_px": feather_px,
+        "edge_touch": {
+            "top": mask_touches_top,
+            "bottom": mask_touches_bottom,
+            "left": mask_touches_left,
+            "right": mask_touches_right,
+        },
+        "roi_edge_touch": roi_edge_touch,
         "upsample_applied": upsample_applied,
         "upsample_info": upsample_info,
         "image_shape": (h, w),
         "base_roi": base_roi_original,
         "mask_roi": mask_roi_original,
+        "mask_for_paste": work_mask_soft.detach(),
     }
 
     return work_image, work_mask_soft, paste_roi, meta
@@ -799,6 +881,103 @@ def _finalize_inpaint_output(
         processed = processed_region
 
     processed = processed.detach().clamp(0.0, 1.0).to(torch.float32).cpu().contiguous()
+
+    # Optionally re-composite with the processed mask so any residual changes outside the mask are removed.
+    mask_for_paste = meta.pop("mask_for_paste", None)
+    if mask_for_paste is not None:
+        mask_for_paste = mask_for_paste.to(dtype=processed.dtype, device=processed.device)
+        if mask_for_paste.dim() == 3:
+            mask_for_paste = mask_for_paste.unsqueeze(-1)
+        # If the mask was upsampled earlier, downscale to match the processed_region before stitching.
+        if mask_for_paste.shape[1] != processed_region.shape[1] or mask_for_paste.shape[2] != processed_region.shape[2]:
+            mf = mask_for_paste.permute(0, 3, 1, 2)
+            mf = F.interpolate(mf, size=(processed_region.shape[1], processed_region.shape[2]), mode="nearest")
+            mask_for_paste = mf.permute(0, 2, 3, 1)
+
+        mask_for_paste = mask_for_paste.clamp(0.0, 1.0)
+        mask_for_paste_bin = (mask_for_paste > 0.5).to(dtype=processed.dtype, device=processed.device)
+
+        if paste_roi != (0, 0, h, w):
+            y0, x0, y1, x1 = paste_roi
+            full_mask = torch.zeros_like(processed)
+            full_mask[:, y0:y1, x0:x1, :] = mask_for_paste_bin
+            processed = processed * full_mask + base_image.cpu().to(dtype=processed.dtype) * (1.0 - full_mask)
+        else:
+            processed = processed * mask_for_paste_bin + base_image.cpu().to(dtype=processed.dtype) * (1.0 - mask_for_paste_bin)
+
+    # Seam detection + conditional “darker/lighter” edge merge.
+    # This only activates near edges where the mask/ROI actually touched,
+    # and only when a visible step between edge and interior is detected.
+    edge_touch = meta.get("edge_touch", {}) or {}
+    roi_edge_touch = meta.get("roi_edge_touch", {}) or {}
+    if any(edge_touch.values()) or any(roi_edge_touch.values()):
+        base_full = base_image.cpu().to(dtype=processed.dtype)
+        band = 1
+        thresh = 0.03
+
+        def _analyze_edge(edge_slice, inner_slice, base_slice, label: str):
+            # Convert to approximate luminance
+            edge_l = edge_slice.mean(dim=-1)
+            inner_l = inner_slice.mean(dim=-1)
+            base_l = base_slice.mean(dim=-1)
+
+            edge_mean = float(edge_l.mean().item())
+            inner_mean = float(inner_l.mean().item())
+            base_mean = float(base_l.mean().item())
+
+            if max(abs(edge_mean - inner_mean), abs(edge_mean - base_mean)) < thresh:
+                return None  # no visible seam
+
+            # Decide whether the seam band is brighter or darker than both neighbors.
+            if edge_mean > inner_mean and edge_mean > base_mean:
+                return "brighter"
+            if edge_mean < inner_mean and edge_mean < base_mean:
+                return "darker"
+            return None
+
+        # Top edge
+        if (edge_touch.get("top") or roi_edge_touch.get("top")) and processed.shape[1] > band + 1:
+            edge = processed[:, :band, :, :]
+            inner = processed[:, band : band + 1, :, :]
+            base_edge = base_full[:, :band, :, :]
+            mode = _analyze_edge(edge, inner, base_edge, "top")
+            if mode == "brighter":
+                processed[:, :band, :, :] = torch.minimum(inner, base_edge)
+            elif mode == "darker":
+                processed[:, :band, :, :] = torch.maximum(inner, base_edge)
+
+        # Bottom edge
+        if (edge_touch.get("bottom") or roi_edge_touch.get("bottom")) and processed.shape[1] > band + 1:
+            edge = processed[:, -band:, :, :]
+            inner = processed[:, -band - 1 : -band, :, :]
+            base_edge = base_full[:, -band:, :, :]
+            mode = _analyze_edge(edge, inner, base_edge, "bottom")
+            if mode == "brighter":
+                processed[:, -band:, :, :] = torch.minimum(inner, base_edge)
+            elif mode == "darker":
+                processed[:, -band:, :, :] = torch.maximum(inner, base_edge)
+
+        # Left edge
+        if (edge_touch.get("left") or roi_edge_touch.get("left")) and processed.shape[2] > band + 1:
+            edge = processed[:, :, :band, :]
+            inner = processed[:, :, band : band + 1, :]
+            base_edge = base_full[:, :, :band, :]
+            mode = _analyze_edge(edge, inner, base_edge, "left")
+            if mode == "brighter":
+                processed[:, :, :band, :] = torch.minimum(inner, base_edge)
+            elif mode == "darker":
+                processed[:, :, :band, :] = torch.maximum(inner, base_edge)
+
+        # Right edge
+        if (edge_touch.get("right") or roi_edge_touch.get("right")) and processed.shape[2] > band + 1:
+            edge = processed[:, :, -band:, :]
+            inner = processed[:, :, -band - 1 : -band, :]
+            base_edge = base_full[:, :, -band:, :]
+            mode = _analyze_edge(edge, inner, base_edge, "right")
+            if mode == "brighter":
+                processed[:, :, -band:, :] = torch.minimum(inner, base_edge)
+            elif mode == "darker":
+                processed[:, :, -band:, :] = torch.maximum(inner, base_edge)
 
     info: Dict[str, str] = {}
     # merge any debug file URLs collected earlier
@@ -1102,65 +1281,50 @@ def apply_inpaint_filter(image: torch.Tensor, settings: dict) -> FilterResult:
     positive_prompt = str(settings.get("positive_prompt") or context_positive_prompt)
     negative_prompt = str(settings.get("negative_prompt") or context_negative_prompt)
 
-    use_conditioning_raw = settings.get("use_conditioning", "false")
-    use_conditioning = convert_to_boolean(use_conditioning_raw)
-    if use_conditioning is None:
-        use_conditioning = False
-
     conditioning_mix = _normalize_conditioning_mix(settings.get("conditioning_mix"))
     apply_unsharp_mask = convert_to_boolean(settings.get("apply_unsharp_mask", True))
     if apply_unsharp_mask is None:
         apply_unsharp_mask = True
 
-    work_image, work_mask_soft, paste_roi, region_meta = _prepare_inpaint_region(
-        base_image=base_image,
-        mask_tensor=mask_tensor,
-        vae=vae,
-        settings=settings,
+    # Reuse the tensor-based inpaint path so outpainting / safe-border logic
+    # stays consistent between the editor filter and the node.
+    tensor_settings = dict(settings)
+    tensor_settings.update(
+        {
+            "steps": steps,
+            "denoise": denoise_value,
+            "cfg": cfg,
+            "sampler": sampler_name,
+            "scheduler": scheduler_name,
+            "seed": seed,
+            "positive_prompt": positive_prompt,
+            "negative_prompt": negative_prompt,
+            "conditioning_mix": conditioning_mix,
+            "positive_conditioning": context_positive_conditioning,
+            "negative_conditioning": context_negative_conditioning,
+            "apply_unsharp_mask": apply_unsharp_mask,
+        }
     )
-    region_meta["apply_unsharp_mask"] = apply_unsharp_mask
 
-    processed_region = perform_inpaint(
+    processed, info = apply_inpaint_filter_tensor(
+        image=base_image,
+        mask=mask_tensor,
         model=model,
         clip=clip,
         vae=vae,
-        image=work_image,
-        mask=work_mask_soft,
-        positive_prompt=positive_prompt,
-        negative_prompt=negative_prompt,
-        sampler_name=sampler_name,
-        scheduler_name=scheduler_name,
-        steps=steps,
-        denoise=denoise_value,
-        cfg=cfg,
-        seed=seed,
-        disable_preview=True,
-        positive_conditioning=context_positive_conditioning if use_conditioning else None,
-        negative_conditioning=context_negative_conditioning if use_conditioning else None,
-        use_conditioning=use_conditioning,
-        conditioning_mix=conditioning_mix if use_conditioning else 1.0,
-    )
-    # Save the raw processed region (before final downscale/stitch) to temp so user
-    # can preview the area as generated. This mirrors how the mask preview is saved.
-    region_url = _save_tensor_preview(processed_region, "inpaint_region", str(settings.get("resource_type") or settings.get("output_type") or "temp"))
-
-    processed, info = _finalize_inpaint_output(
-        processed_region=processed_region,
-        base_image=base_image,
-        paste_roi=paste_roi,
-        meta=region_meta,
+        settings=tensor_settings,
     )
 
+    # Attach mask URL for UI/debug parity with the original filter path.
     info_with_mask = {"mask": mask_url}
     info_with_mask.update(info)
-    if region_url:
-        info_with_mask["region"] = region_url
     if not apply_unsharp_mask:
         info_with_mask["unsharp_mask"] = "disabled"
+
     print(
         "[LF Inpaint] sampling "
         f"steps={steps}, denoise={denoise_value:.3f}, cfg={cfg:.2f}, seed={seed}, "
-        f"use_conditioning={use_conditioning}, conditioning_mix={conditioning_mix:.2f}"
+        f"conditioning_mix={conditioning_mix:.2f}"
     )
 
     return processed, info_with_mask
@@ -1211,15 +1375,71 @@ def apply_inpaint_filter_tensor(
     else:
         raise ValueError("Unsupported MASK tensor shape.")
 
-    h, w = int(base_image.shape[1]), int(base_image.shape[2])
+    # Original image size before any padding (used for final crop)
+    orig_h, orig_w = int(base_image.shape[1]), int(base_image.shape[2])
+
+    h, w = orig_h, orig_w
     m = m.to(device=base_image.device, dtype=torch.float32)
     if m.shape[-2] != h or m.shape[-1] != w:
         m = F.interpolate(m.unsqueeze(1), size=(h, w), mode="nearest").squeeze(1)
     m = m.clamp(0.0, 1.0)
+    # Use a binary version for ROI/conditioning; a processed soft mask is captured later for final compositing.
     m = (m > 0.5).float()
 
-    use_conditioning = convert_to_boolean(settings.get("use_conditioning", False)) or False
+    # If the brush comes close to image edges, pad the image/mask outward so any
+    # model boundary artifacts fall outside the original frame (cheap outpainting).
+    # Use a small band instead of a single pixel so near-edge strokes also trigger.
+    edge_band = 4
+    touches_top = bool((m[:, :edge_band, :] > 0.5).any())
+    touches_bottom = bool((m[:, -edge_band:, :] > 0.5).any())
+    touches_left = bool((m[:, :, :edge_band] > 0.5).any())
+    touches_right = bool((m[:, :, -edge_band:] > 0.5).any())
+
+    pad_margin = 32  # outpainting margin in pixels
+    pad_top = pad_margin if touches_top else 0
+    pad_bottom = pad_margin if touches_bottom else 0
+    pad_left = pad_margin if touches_left else 0
+    pad_right = pad_margin if touches_right else 0
+
+    if pad_top or pad_bottom or pad_left or pad_right:
+        # Pad image by replicating edge pixels outward.
+        # base_image: (B, H, W, C) -> pad H and W, keep channels unchanged.
+        base_image = F.pad(
+            base_image,
+            (0, 0, pad_left, pad_right, pad_top, pad_bottom),
+            mode="replicate",
+        )
+        # Pad mask with ones so the inpaint region extends into the outpaint margin.
+        # This lets the model hallucinate beyond the original frame; the final
+        # crop and safe-border logic will decide what remains visible.
+        m = F.pad(
+            m.unsqueeze(1),
+            (pad_left, pad_right, pad_top, pad_bottom),
+            mode="constant",
+            value=1.0,
+        ).squeeze(1)
+
+    # Updated working size after optional padding.
+    h, w = int(base_image.shape[1]), int(base_image.shape[2])
+
     conditioning_mix = _normalize_conditioning_mix(settings.get("conditioning_mix"))
+
+    positive_conditioning = settings.get("positive_conditioning")
+    negative_conditioning = settings.get("negative_conditioning")
+    has_context = positive_conditioning is not None or negative_conditioning is not None
+
+    eps = 1e-3
+    if not has_context:
+        conditioning_mode = "prompts_only"
+    else:
+        if conditioning_mix <= -1.0 + eps:
+            conditioning_mode = "context_only"
+        elif conditioning_mix >= 1.0 - eps:
+            conditioning_mode = "prompts_only"
+        elif abs(conditioning_mix) < eps:
+            conditioning_mode = "concat"
+        else:
+            conditioning_mode = "blend"
     apply_unsharp_mask = convert_to_boolean(settings.get("apply_unsharp_mask", True))
     if apply_unsharp_mask is None:
         apply_unsharp_mask = True
@@ -1247,10 +1467,10 @@ def apply_inpaint_filter_tensor(
         cfg=_normalize_cfg(settings.get("cfg")),
         seed=_normalize_seed(settings.get("seed")),
         disable_preview=True,
-        positive_conditioning=settings.get("positive_conditioning") if use_conditioning else None,
-        negative_conditioning=settings.get("negative_conditioning") if use_conditioning else None,
-        use_conditioning=use_conditioning,
-        conditioning_mix=conditioning_mix if use_conditioning else 1.0,
+        positive_conditioning=positive_conditioning,
+        negative_conditioning=negative_conditioning,
+        conditioning_mix=conditioning_mix,
+        conditioning_mode=conditioning_mode,
     )
 
     _ = _save_tensor_preview(processed_region, "inpaint_region", str(settings.get("resource_type") or settings.get("output_type") or "temp"))
@@ -1262,6 +1482,15 @@ def apply_inpaint_filter_tensor(
         meta=region_meta,
     )
 
+    # If we padded for outpainting, crop back to the original frame.
+    if pad_top or pad_bottom or pad_left or pad_right:
+        crop_y0 = pad_top
+        crop_y1 = pad_top + orig_h
+        crop_x0 = pad_left
+        crop_x1 = pad_left + orig_w
+        processed = processed[:, crop_y0:crop_y1, crop_x0:crop_x1, :]
+    else:
+        processed = processed[:, :orig_h, :orig_w, :]
     if not apply_unsharp_mask:
         info["unsharp_mask"] = "disabled"
 

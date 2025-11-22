@@ -3,21 +3,22 @@ import { LogSeverity } from '../../types/manager/manager';
 import {
   ImageEditorBrushSettings,
   ImageEditorControlIds,
+  ImageEditorDataset,
+  ImageEditorSetting,
   ImageEditorState,
 } from '../../types/widgets/imageEditor';
 import { getLfManager, isValidObject } from '../../utils/common';
 import { apiCall } from './api';
+import { IMAGE_EDITOR_CONSTANTS } from './constants';
 
 //#region refreshValues
 export const refreshValues = async (state: ImageEditorState, addSnapshot = false) => {
   const { elements, filter } = state;
-  const { controls } = elements;
+  const { controls, imageviewer } = elements;
 
   const lfManager = getLfManager();
 
-  state.settingsStore = state.settingsStore ?? {};
-  const storeForFilter = (state.settingsStore[state.filterType] =
-    state.settingsStore[state.filterType] ?? {});
+  const storeForFilter: Partial<Record<ImageEditorControlIds, unknown>> = {};
 
   for (const key in controls) {
     if (Object.prototype.hasOwnProperty.call(controls, key)) {
@@ -25,7 +26,24 @@ export const refreshValues = async (state: ImageEditorState, addSnapshot = false
       const control = controls[id];
 
       switch (control.tagName) {
-        case 'LF-SLIDER': {
+        case IMAGE_EDITOR_CONSTANTS.TAGS.MULTIINPUT: {
+          const multiinput = control as HTMLLfMultiinputElement;
+          const multiValue = await multiinput.getValue();
+          filter.settings[id] = multiValue;
+          storeForFilter[id] = multiValue;
+          break;
+        }
+        case IMAGE_EDITOR_CONSTANTS.TAGS.SELECT: {
+          const select = control as HTMLLfSelectElement;
+          const selectedNode = await select.getValue();
+          const value = selectedNode?.id;
+          if (typeof value !== 'undefined') {
+            filter.settings[id] = value;
+            storeForFilter[id] = value;
+          }
+          break;
+        }
+        case IMAGE_EDITOR_CONSTANTS.TAGS.SLIDER: {
           const slider = control as HTMLLfSliderElement;
           const sliderValue = await slider.getValue();
           const value = addSnapshot ? sliderValue.real : sliderValue.display;
@@ -33,17 +51,18 @@ export const refreshValues = async (state: ImageEditorState, addSnapshot = false
           storeForFilter[id] = value;
           break;
         }
-        case 'LF-TEXTFIELD': {
+        case IMAGE_EDITOR_CONSTANTS.TAGS.TEXTFIELD: {
           const textfield = control as HTMLLfTextfieldElement;
           const textfieldValue = await textfield.getValue();
           filter.settings[id] = textfieldValue;
           storeForFilter[id] = textfieldValue;
           break;
         }
-        case 'LF-TOGGLE': {
+        case IMAGE_EDITOR_CONSTANTS.TAGS.TOGGLE: {
           const toggle = control as HTMLLfToggleElement;
           const toggleValue = await toggle.getValue();
-          const value = toggleValue === 'on' ? toggle.dataset.on : toggle.dataset.off;
+          const value =
+            toggleValue === IMAGE_EDITOR_CONSTANTS.UI.ON ? toggle.dataset.on : toggle.dataset.off;
           filter.settings[id] = value;
           storeForFilter[id] = value;
           break;
@@ -58,17 +77,30 @@ export const refreshValues = async (state: ImageEditorState, addSnapshot = false
       }
     }
   }
+
+  const dataset = imageviewer.lfDataset as ImageEditorDataset | undefined;
+  if (dataset && state.filterType) {
+    const defaults = (dataset.defaults = dataset.defaults ?? {});
+    const existing = defaults[state.filterType] ?? {};
+    defaults[state.filterType] = {
+      ...existing,
+      ...storeForFilter,
+    } as ImageEditorSetting;
+  }
 };
 //#endregion
 
 //#region updateCb
-export const updateCb = async (state: ImageEditorState, addSnapshot = false, force = false) => {
+export const updateCb = async (
+  state: ImageEditorState,
+  addSnapshot = false,
+  fromCanvas = false,
+) => {
   await refreshValues(state, addSnapshot);
 
   const { elements, filter } = state;
   const { imageviewer } = elements;
 
-  // If no filter selected yet, bail out
   if (!filter) {
     return false;
   }
@@ -110,10 +142,8 @@ export const updateCb = async (state: ImageEditorState, addSnapshot = false, for
   // 2. For canvas-based filters: must have actual canvas data (points or b64_canvas)
   // 3. For regular filters: just need valid settings
   const shouldUpdate = validValues && (!hasCanvasAction || isCanvasAction);
-  const requiresManualApply = !!filter?.requiresManualApply;
-
   let success = false;
-  if (shouldUpdate && (force || !requiresManualApply)) {
+  if (shouldUpdate && (!hasCanvasAction || fromCanvas)) {
     success = await apiCall(state, addSnapshot);
   }
 

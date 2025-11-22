@@ -1,4 +1,6 @@
 from PIL import Image
+import numpy as np
+import torch
 
 from . import CATEGORY
 from ...utils.constants import FUNCTION, Input
@@ -11,16 +13,19 @@ class LF_LoadMetadata:
     @classmethod
     def INPUT_TYPES(self):
         return {
-            "required": {
-                "file_names": (Input.LF_UPLOAD, {
-                    "tooltip": "List of file names separated by semicolons (e.g., file1.jpg;file2.png;file3.jpg)."
-                }),
-            },
+            "required": {},
             "optional": {
+                "file_names": (Input.LF_UPLOAD, {
+                    "default": "",
+                    "tooltip": "List of file names separated by semicolons (e.g., file1.jpg;file2.png;file3.jpg). Leave empty if using image input."
+                }),
                 "upload_dir": (Input.COMBO, {
                     "default": "temp",
                     "tooltip": "Directory where the files are uploaded.",
                     "options": ["input", "output", "temp"],
+                }),
+                "image": (Input.IMAGE, {
+                    "tooltip": "Input image to extract metadata from. If connected, upload is ignored."
                 }),
             },
             "hidden": {
@@ -40,48 +45,54 @@ class LF_LoadMetadata:
     RETURN_TYPES = (Input.JSON, Input.JSON)
 
     def on_exec(self, **kwargs: dict):
-        file_names: str = normalize_list_to_value(kwargs.get("file_names"))
-        upload_dir: str = normalize_list_to_value(kwargs.get("upload_dir"))
+        metadata_list = []
 
-        if upload_dir == "output":
-            directory = get_comfy_dir("output")
-        elif upload_dir == "input":
-            directory = get_comfy_dir("input")
-        else:
-            directory = get_comfy_dir("temp")
-
-        metadata_list: list[str] = []
-        metadata = ""
-
-        if file_names:
-            file_names_list = file_names.split(';')
-
-            for file_name in file_names_list:
-                file_name = file_name.strip()
-                if not file_name:
-                    continue
-
-                file_path, actual_name = resolve_uploaded_filepath(directory, file_name)
-
+        if "image" in kwargs:
+            image_tensor = kwargs["image"]
+            # Assume image_tensor is torch tensor, shape (N, H, W, C), float 0-1
+            for i in range(image_tensor.shape[0]):
+                img_array = (image_tensor[i] * 255).clamp(0, 255).byte().cpu().numpy()
+                pil_image = Image.fromarray(img_array)
+                # Try to extract as JPEG first, since most images have EXIF
                 try:
-                    pil_image = Image.open(file_path)
-
-                    if pil_image.format == "JPEG":
-                        # pass the original requested name for metadata context, but
-                        # store the actual filename used for the returned entry
-                        metadata = extract_jpeg_metadata(pil_image, file_name)
-                    elif pil_image.format == "PNG":
+                    metadata = extract_jpeg_metadata(pil_image, f"input_image_{i}")
+                except:
+                    try:
                         metadata = extract_png_metadata(pil_image)
-                    else:
-                        metadata = {"error": f"Unsupported image format for {file_name}"}
+                    except:
+                        metadata = {"error": "Failed to extract metadata from image tensor"}
+                metadata_list.append({"file": f"input_image_{i}", "metadata": metadata})
+            safe_send_sync("loadmetadata", {"value": "input_image"}, kwargs.get("node_id"))
+        else:
+            file_names: str = normalize_list_to_value(kwargs.get("file_names", ""))
+            upload_dir: str = normalize_list_to_value(kwargs.get("upload_dir", "temp"))
 
-                    metadata_list.append({"file": actual_name, "metadata": metadata})
-                except Exception as e:
-                    metadata_list.append({"file": file_name, "error": str(e)})
+            if upload_dir == "output":
+                directory = get_comfy_dir("output")
+            elif upload_dir == "input":
+                directory = get_comfy_dir("input")
+            else:
+                directory = get_comfy_dir("temp")
 
-        safe_send_sync("loadmetadata", {
-            "value": file_names,
-        }, kwargs.get("node_id"))
+            if file_names.strip():
+                file_names_list = file_names.split(';')
+                for file_name in file_names_list:
+                    file_name = file_name.strip()
+                    if not file_name:
+                        continue
+                    file_path, actual_name = resolve_uploaded_filepath(directory, file_name)
+                    try:
+                        pil_image = Image.open(file_path)
+                        if pil_image.format == "JPEG":
+                            metadata = extract_jpeg_metadata(pil_image, file_name)
+                        elif pil_image.format == "PNG":
+                            metadata = extract_png_metadata(pil_image)
+                        else:
+                            metadata = {"error": f"Unsupported image format for {file_name}"}
+                        metadata_list.append({"file": actual_name, "metadata": metadata})
+                    except Exception as e:
+                        metadata_list.append({"file": file_name, "error": str(e)})
+            safe_send_sync("loadmetadata", {"value": file_names}, kwargs.get("node_id"))
 
         return {
             "ui": {

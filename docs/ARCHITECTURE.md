@@ -84,7 +84,8 @@ custom_nodes/lf-nodes/
 3. The filter entrypoint (`modules/utils/filters/inpaint.py`):
    - Reads the context via `get_editing_context`.
    - Normalizes/validates inputs (image, mask, prompts, params).
-   - If `use_conditioning` is true, preprends stored CONDITIONING via `ConditioningCombine`.
+   - Derives a conditioning mode from the editor's `conditioning_mix` slider and the presence of stored CONDITIONING:
+     - `-1` → context only, `0` → concat context + prompts, `1` → prompts only, intermediate values blend via `ConditioningAverage`.
    - Invokes `InpaintModelConditioning.encode` to inject `concat_latent_image` and `concat_mask`.
    - Samples without preview (or via a sampler node) and blends the decoded result with the original image using the mask.
 

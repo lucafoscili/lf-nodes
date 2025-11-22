@@ -44,6 +44,41 @@ const LF_ARTICLE_PROPS = [
   "lfEmpty",
   "lfStyle"
 ];
+const LF_AUTOCOMPLETE_BLOCKS = {
+  autocomplete: {
+    _: "autocomplete",
+    textfield: "textfield"
+  },
+  dropdown: {
+    _: "dropdown",
+    list: "list",
+    spinner: "spinner"
+  }
+};
+const LF_AUTOCOMPLETE_PARTS = {
+  autocomplete: "autocomplete",
+  dropdown: "dropdown",
+  list: "list",
+  spinner: "spinner",
+  textfield: "textfield"
+};
+const LF_AUTOCOMPLETE_PROPS = [
+  "lfAllowFreeInput",
+  "lfCache",
+  "lfCacheTTL",
+  "lfDataset",
+  "lfDebounceMs",
+  "lfListProps",
+  "lfMaxCacheSize",
+  "lfMinChars",
+  "lfNavigation",
+  "lfSpinnerProps",
+  "lfStyle",
+  "lfTextfieldProps",
+  "lfUiSize",
+  "lfUiState",
+  "lfValue"
+];
 const LF_BADGE_CSS_VARS = {
   transform: "--lf_badge_transform"
 };
@@ -354,7 +389,8 @@ const LF_CHECKBOX_BLOCKS = {
     nativeControl: "native-control",
     background: "background",
     checkmark: "checkmark",
-    mixedmark: "mixedmark"
+    mixedmark: "mixedmark",
+    surface: "surface"
   }
 };
 const LF_CHECKBOX_PARTS = {
@@ -617,9 +653,9 @@ const LF_IMAGEVIEWER_PROPS = [
   "lfValue"
 ];
 const LF_LIST_BLOCKS = {
-  delete: { _: "delete", icon: "icon" },
+  deleteIcon: { _: "delete", icon: "icon" },
   emptyData: { _: "empty-data", text: "text" },
-  list: { _: "list", item: "item" },
+  list: { _: "list", filter: "filter", item: "item" },
   node: {
     _: "node",
     icon: "icon",
@@ -629,15 +665,20 @@ const LF_LIST_BLOCKS = {
   }
 };
 const LF_LIST_PARTS = {
-  delete: "delete",
+  deleteIcon: "delete-icon",
   emptyData: "empty-data",
+  filter: "filter",
+  icon: "icon",
   list: "list",
-  node: "node"
+  node: "node",
+  subtitle: "subtitle",
+  title: "title"
 };
 const LF_LIST_PROPS = [
   "lfDataset",
   "lfEmpty",
   "lfEnableDeletions",
+  "lfFilter",
   "lfNavigation",
   "lfRipple",
   "lfSelectable",
@@ -897,6 +938,32 @@ const LF_MESSENGER_NAV = (theme) => {
     ]
   };
 };
+const LF_MULTIINPUT_BLOCKS = {
+  multiinput: {
+    _: "multiinput",
+    chips: "chips",
+    history: "history",
+    textfield: "textfield"
+  }
+};
+const LF_MULTIINPUT_PARTS = {
+  chips: "chips",
+  history: "history",
+  multiinput: "multiinput",
+  textfield: "textfield"
+};
+const LF_MULTIINPUT_PROPS = [
+  "lfAllowFreeInput",
+  "lfChipProps",
+  "lfDataset",
+  "lfMaxHistory",
+  "lfMode",
+  "lfStyle",
+  "lfTextfieldProps",
+  "lfUiSize",
+  "lfUiState",
+  "lfValue"
+];
 const LF_PHOTOFRAME_BLOCKS = {
   overlay: {
     _: "overlay",
@@ -973,6 +1040,63 @@ const LF_PROGRESSBAR_PROPS = [
   "lfIsRadial",
   "lfLabel",
   "lfStyle",
+  "lfUiSize",
+  "lfUiState",
+  "lfValue"
+];
+const LF_RADIO_BLOCKS = {
+  _: "radio",
+  control: {
+    _: "control",
+    circle: "circle",
+    dot: "dot",
+    input: "input",
+    ripple: "ripple"
+  },
+  item: {
+    _: "item",
+    label: "label"
+  }
+};
+const LF_RADIO_PARTS = {
+  circle: "circle",
+  control: "control",
+  dot: "dot",
+  input: "input",
+  item: "item",
+  label: "label",
+  radio: "radio",
+  ripple: "ripple"
+};
+const LF_RADIO_PROPS = [
+  "lfAriaLabel",
+  "lfDataset",
+  "lfLeadingLabel",
+  "lfOrientation",
+  "lfRipple",
+  "lfStyle",
+  "lfUiSize",
+  "lfUiState",
+  "lfValue"
+];
+const LF_SELECT_BLOCKS = {
+  select: {
+    _: "select",
+    list: "list",
+    textfield: "textfield"
+  }
+};
+const LF_SELECT_PARTS = {
+  list: "list",
+  select: "select",
+  textfield: "textfield"
+};
+const LF_SELECT_PROPS = [
+  "lfDataset",
+  "lfListProps",
+  "lfNavigation",
+  "lfStyle",
+  "lfTextfieldProps",
   "lfUiSize",
   "lfUiState",
   "lfValue"
@@ -1086,6 +1210,7 @@ const LF_TEXTFIELD_BLOCKS = {
     helperLine: "helper-line",
     helperText: "helper-text",
     icon: "icon",
+    iconAction: "icon-action",
     input: "input",
     label: "label",
     resizer: "resizer",
@@ -1095,6 +1220,7 @@ const LF_TEXTFIELD_BLOCKS = {
 const LF_TEXTFIELD_PARTS = {
   counter: "counter",
   icon: "icon",
+  iconAction: "icon-action",
   input: "input",
   label: "label",
   textfield: "textfield"
@@ -1109,6 +1235,7 @@ const LF_TEXTFIELD_PROPS = [
   "lfStyle",
   "lfStyling",
   "lfTrailingIcon",
+  "lfTrailingIconAction",
   "lfUiSize",
   "lfUiState",
   "lfValue"
@@ -1285,7 +1412,8 @@ const CY_ATTRIBUTES = {
   rippleSurface: "ripple-surface",
   shape: "shape",
   showcaseExample: "showcase-example",
-  showcaseGridWrapper: "showcase-grid-wrapper"
+  showcaseGridWrapper: "showcase-grid-wrapper",
+  spinner: "spinner"
 };
 const LF_ATTRIBUTES = {
   backdrop: "backdrop",
@@ -1311,6 +1439,7 @@ const getComponentProps = () => {
   return {
     LfAccordion: LF_ACCORDION_PROPS,
     LfArticle: LF_ARTICLE_PROPS,
+    LfAutocomplete: LF_AUTOCOMPLETE_PROPS,
     LfBadge: LF_BADGE_PROPS,
     LfButton: LF_BUTTON_PROPS,
     LfCanvas: LF_CANVAS_PROPS,
@@ -1329,9 +1458,12 @@ const getComponentProps = () => {
     LfList: LF_LIST_PROPS,
     LfMasonry: LF_MASONRY_PROPS,
     LfMessenger: LF_MESSENGER_PROPS,
+    LfMultiInput: LF_MULTIINPUT_PROPS,
     LfPhotoframe: LF_PHOTOFRAME_PROPS,
     LfPlaceholder: LF_PLACEHOLDER_PROPS,
     LfProgressbar: LF_PROGRESSBAR_PROPS,
+    LfRadio: LF_RADIO_PROPS,
+    LfSelect: LF_SELECT_PROPS,
     LfSlider: LF_SLIDER_PROPS,
     LfSpinner: LF_SPINNER_PROPS,
     LfSplash: LF_SPLASH_PROPS,
@@ -1815,6 +1947,91 @@ const registerStencilAssetProxies = (module) => {
     });
   }).catch(() => {
   });
+};
+const GLOBAL_STYLES = {
+  "::-webkit-scrollbar": {
+    "width": "9px"
+  },
+  "::-webkit-scrollbar-thumb": {
+    "transition": "all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4)",
+    "background-color": "rgb(var(--lf-color-primary))"
+  },
+  "::-webkit-scrollbar-track": {
+    "background-color": "rgb(var(--lf-color-bg))"
+  },
+  ".lf-effects [data-lf=backdrop]": {
+    "transition": "all 200ms cubic-bezier(0.4, 0, 0.6, 1)",
+    "background": "rgba(0, 0, 0, 0.375)",
+    "height": "100vh",
+    "left": "0",
+    "opacity": "0",
+    "position": "fixed",
+    "top": "0",
+    "width": "100vw",
+    "z-index": "var(--lf-ui-zindex-backdrop, 899)"
+  },
+  "@keyframes lf-fade-in": [
+    {
+      "from": {
+        "visibility": "hidden",
+        "opacity": "0"
+      }
+    },
+    {
+      "to": {
+        "visibility": "visible",
+        "opacity": "1"
+      }
+    }
+  ],
+  ".lf-effects [data-lf=lightbox]": {
+    "transition": "all 200ms cubic-bezier(0.4, 0, 0.6, 1)",
+    "height": "90dvh",
+    "left": "5dvw",
+    "position": "fixed",
+    "top": "5dvh",
+    "width": "90dvw",
+    "z-index": "var(--lf-ui-zindex-lightbox, 900)"
+  },
+  ".lf-effects [data-lf=lightbox-content]": {
+    "width": "100%",
+    "height": "100%",
+    "border": "1px solid rgba(var(--lf-color-border), 0.375)",
+    "border-radius": "var(--lf-ui-border-radius)",
+    "box-sizing": "border-box",
+    "outline": "none",
+    "z-index": "calc(var(--lf-ui-zindex-lightbox, 900) + 1)"
+  },
+  "@keyframes lf-pop": [
+    {
+      "from": {
+        "opacity": "0",
+        "transform": "translate(-50%, -50%) scale(0.8)"
+      }
+    },
+    {
+      "to": {
+        "opacity": "1",
+        "transform": "translate(-50%, -50%) scale(1)"
+      }
+    }
+  ],
+  ".lf-portal [data-lf=portal]": {
+    "display": "block",
+    "height": "max-content",
+    "max-height": "45dvh",
+    "max-width": "45dvw",
+    "overflow": "auto",
+    "position": "fixed",
+    "width": "auto",
+    "z-index": "var(--lf-ui-zindex-portal)"
+  },
+  "@media (max-width: 600px)": {
+    ".lf-portal [data-lf=portal]": {
+      "max-height": "80dvh",
+      "max-width": "90dvw"
+    }
+  }
 };
 const LF_THEME_COLORS_PREFIX = "--lf-color-";
 const LF_THEME_COLORS_DATA_PREFIX = `${LF_THEME_COLORS_PREFIX}data-`;
@@ -2342,6 +2559,8 @@ const LF_ICONS_REGISTRY = {
   brush: "brush",
   bug: "bug",
   calendarClock: "calendar-clock",
+  camera: "camera",
+  cameraAi: "camera-ai",
   caretDown: "caret-down",
   caretLeft: "caret-left",
   caretRight: "caret-right",
@@ -2389,21 +2608,28 @@ const LF_ICONS_REGISTRY = {
   edit: "edit",
   exclamationCircle: "exclamation-circle",
   file: "file",
+  filterSearch: "filter-search",
   folder: "folder",
+  folderOpen: "folder-open",
   forms: "forms",
   help: "help",
   hexagonAlert: "hexagon-alert",
   hexagonInfo: "hexagon-info",
   hexagonMinus: "hexagon-minus",
   hexagonMinus2: "hexagon-minus-2",
+  hexagonPhoto: "hexagon-photo",
   hexagonPlus: "hexagon-plus",
   hexagonPlus2: "hexagon-plus-2",
   highlight: "highlight",
+  history: "history",
+  home: "home",
+  hourglass: "hourglass",
   hourglassLow: "hourglass-low",
   id: "id",
   ikosaedr: "ikosaedr",
   imageInPicture: "image-in-picture",
   innerShadowBottom: "inner-shadow-bottom",
+  inputSearch: "input-search",
   json: "json",
   key: "key",
   layoutBoardSplit: "layout-board-split",
@@ -2449,11 +2675,18 @@ const LF_ICONS_REGISTRY = {
   photo: "photo",
   photoSearch: "photo-search",
   photoX: "photo-x",
+  playerRecord: "player-record",
+  playerStop: "player-stop",
+  playstationCircle: "playstation-circle",
+  playstationSquare: "playstation-square",
+  playstationTriangle: "playstation-triangle",
+  playstationX: "playstation-x",
   progress: "progress",
   refresh: "refresh",
   replace: "replace",
   robot: "robot",
   schema: "schema",
+  select: "select",
   search: "search",
   send: "send",
   settings: "settings",
@@ -2464,9 +2697,12 @@ const LF_ICONS_REGISTRY = {
   squareX: "square-x",
   stackPop: "stack-pop",
   stackPush: "stack-push",
+  stopWatch: "stopwatch",
   sunset2: "sunset-2",
   temperature: "temperature",
   template: "template",
+  terminal2: "terminal-2",
+  timeDuration30: "time-duration-30",
   toggleRight: "toggle-right",
   upload: "upload",
   viewportTall: "viewport-tall",
@@ -2476,219 +2712,151 @@ const LF_ICONS_REGISTRY = {
   x: "x",
   zip: "zip"
 };
-const GLOBAL_STYLES = {
-  "::-webkit-scrollbar": {
-    width: "9px"
-  },
-  "::-webkit-scrollbar-thumb": {
-    transition: "all 400ms cubic-bezier(0.8, -0.5, 0.2, 1.4)",
-    "background-color": "rgb(var(--lf-color-primary))"
-  },
-  "::-webkit-scrollbar-track": {
-    "background-color": "rgb(var(--lf-color-bg))"
-  },
-  '.lf-effects [data-lf="backdrop"]': {
-    transition: "all 200ms cubic-bezier(0.4, 0, 0.6, 1)",
-    background: "rgba(0, 0, 0, 0.375)",
-    height: "100vh",
-    left: "0",
-    opacity: "0",
-    position: "fixed",
-    top: "0",
-    width: "100vw",
-    "z-index": "var(--lf-ui-zindex-backdrop, 899)"
-  },
-  "@keyframes lf-fade-in": [
-    {
-      from: {
-        visibility: "hidden",
-        opacity: "0"
-      }
-    },
-    {
-      to: {
-        visibility: "visible",
-        opacity: "1"
-      }
-    }
-  ],
-  '.lf-effects [data-lf="lightbox"]': {
-    transition: "all 200ms cubic-bezier(0.4, 0, 0.6, 1)",
-    height: "90dvh",
-    left: "5dvw",
-    position: "fixed",
-    top: "5dvh",
-    width: "90dvw",
-    "z-index": "var(--lf-ui-zindex-lightbox, 900)"
-  },
-  '.lf-effects [data-lf="lightbox-content"]': {
-    width: "100%",
-    height: "100%",
-    border: "1px solid rgba(var(--lf-color-border), 0.375)",
-    "border-radius": "var(--lf-ui-border-radius)",
-    "box-sizing": "border-box",
-    outline: "none",
-    "z-index": "calc(var(--lf-ui-zindex-lightbox, 900) + 1)"
-  },
-  "@keyframes lf-pop": [
-    {
-      from: {
-        opacity: "0",
-        transform: "translate(-50%, -50%) scale(0.8)"
-      }
-    },
-    {
-      to: {
-        opacity: "1",
-        transform: "translate(-50%, -50%) scale(1)"
-      }
-    }
-  ],
-  '.lf-portal [data-lf="portal"]': {
-    display: "block",
-    height: "auto",
-    "max-height": "45dvh",
-    "max-width": "45dvw",
-    "min-height": "max-content",
-    "min-width": "max-content",
-    position: "fixed",
-    width: "auto",
-    "z-index": "var(--lf-ui-zindex-portal)"
-  }
-};
 export {
-  LF_CHAT_BLOCKS as $,
+  LF_SLIDER_BLOCKS as $,
   AVATAR_COVER as A,
-  LF_TABBAR_PROPS as B,
+  LF_PLACEHOLDER_PARTS as B,
   CY_ATTRIBUTES as C,
-  LF_BADGE_BLOCKS as D,
-  LF_BADGE_PARTS as E,
-  LF_BADGE_PROPS as F,
-  LF_BUTTON_BLOCKS as G,
-  LF_BUTTON_PARTS as H,
+  LF_PLACEHOLDER_PROPS as D,
+  LF_TABBAR_BLOCKS as E,
+  LF_TABBAR_PARTS as F,
+  LF_TABBAR_PROPS as G,
+  LF_SELECT_BLOCKS as H,
   IMAGE_TYPE_IDS as I,
-  LF_BUTTON_PROPS as J,
-  LF_CANVAS_BLOCKS as K,
+  LF_SELECT_PARTS as J,
+  LF_SELECT_PROPS as K,
   LF_MESSENGER_CLEAN_UI as L,
-  LF_CANVAS_PARTS as M,
-  LF_CANVAS_PROPS as N,
+  LF_THEME_ICONS as M,
+  LF_LIST_BLOCKS as N,
   OPTION_TYPE_IDS as O,
-  LF_CARD_BLOCKS as P,
-  LF_CARD_PARTS as Q,
-  LF_CARD_CSS_VARS as R,
+  LF_LIST_PARTS as P,
+  LF_LIST_PROPS as Q,
+  LF_SPINNER_PROPS as R,
   STYLE_COVER as S,
   TIMEFRAME_COVER as T,
-  LF_CARD_DEFAULTS as U,
-  LF_CARD_PROPS as V,
-  LF_CHART_BLOCKS as W,
-  LF_CHART_PARTS as X,
-  LF_CHART_CSS_VARS as Y,
-  LF_THEME_COLORS_DATA_PREFIX as Z,
-  LF_CHART_PROPS as _,
+  LF_TEXTFIELD_BLOCKS as U,
+  LF_TEXTFIELD_PARTS as V,
+  LF_TEXTFIELD_PROPS as W,
+  LF_TREE_BLOCKS as X,
+  LF_TREE_PARTS as Y,
+  LF_TREE_PROPS as Z,
+  LF_TREE_CSS_VARIABLES as _,
   LF_MESSENGER_BLOCKS as a,
-  LF_COMPARE_CSS_VARS as a$,
-  LF_CHAT_PARTS as a0,
-  LF_CHAT_PROPS as a1,
-  LF_CHIP_BLOCKS as a2,
-  LF_CHIP_PARTS as a3,
-  LF_CHIP_PROPS as a4,
-  LF_CODE_BLOCKS as a5,
-  LF_CODE_PARTS as a6,
-  LF_CODE_PROPS as a7,
-  LF_IMAGE_BLOCKS as a8,
-  LF_IMAGE_PARTS as a9,
-  LF_BADGE_CSS_VARS as aA,
-  LF_CHIP_CSS_VARS as aB,
-  LF_CARD_IDS as aC,
-  LF_CHAT_IDS as aD,
-  LF_THEME_ICONS as aE,
-  LF_MASONRY_DEFAULT_COLUMNS as aF,
-  LF_MASONRY_BLOCKS as aG,
-  LF_MASONRY_PARTS as aH,
-  LF_MASONRY_CSS_VARS as aI,
-  LF_MASONRY_PROPS as aJ,
-  LF_MASONRY_IDS as aK,
-  LF_IMAGEVIEWER_BLOCKS as aL,
-  LF_IMAGEVIEWER_PARTS as aM,
-  LF_IMAGEVIEWER_PROPS as aN,
-  IDS as aO,
-  LF_ACCORDION_BLOCKS as aP,
-  LF_ACCORDION_PARTS as aQ,
-  LF_ACCORDION_PROPS as aR,
-  LF_CAROUSEL_BLOCKS as aS,
-  LF_CAROUSEL_PARTS as aT,
-  LF_CAROUSEL_PROPS as aU,
-  LF_CAROUSEL_IDS as aV,
-  LF_PLACEHOLDER_BLOCKS as aW,
-  LF_PLACEHOLDER_PARTS as aX,
-  LF_PLACEHOLDER_PROPS as aY,
-  LF_COMPARE_BLOCKS as aZ,
-  LF_COMPARE_PARTS as a_,
-  LF_IMAGE_CSS_VARS as aa,
-  LF_IMAGE_PROPS as ab,
-  CSS_VAR_PREFIX as ac,
-  LF_LIST_BLOCKS as ad,
-  LF_LIST_PARTS as ae,
-  LF_LIST_PROPS as af,
-  LF_PHOTOFRAME_BLOCKS as ag,
-  LF_PHOTOFRAME_PARTS as ah,
-  LF_PHOTOFRAME_PROPS as ai,
-  LF_PROGRESSBAR_BLOCKS as aj,
-  LF_PROGRESSBAR_PARTS as ak,
-  LF_PROGRESSBAR_CSS_VARIABLES as al,
-  LF_PROGRESSBAR_PROPS as am,
-  LF_SPINNER_PROPS as an,
-  LF_TEXTFIELD_BLOCKS as ao,
-  LF_TEXTFIELD_PARTS as ap,
-  LF_TEXTFIELD_PROPS as aq,
-  LF_TOGGLE_BLOCKS as ar,
-  LF_TOGGLE_PARTS as as,
-  LF_TOGGLE_PROPS as at,
-  LF_TYPEWRITER_BLOCKS as au,
-  LF_TYPEWRITER_PARTS as av,
-  LF_TYPEWRITER_PROPS as aw,
-  LF_UPLOAD_BLOCKS as ax,
-  LF_UPLOAD_PARTS as ay,
-  LF_UPLOAD_PROPS as az,
+  LF_CHIP_BLOCKS as a$,
+  LF_SLIDER_PARTS as a0,
+  LF_SLIDER_CSS_VARIABLES as a1,
+  LF_SLIDER_PROPS as a2,
+  LF_DRAWER_BLOCKS as a3,
+  LF_DRAWER_PARTS as a4,
+  LF_DRAWER_PROPS as a5,
+  LF_DRAWER_SLOT as a6,
+  LF_EFFECTS_FOCUSABLES as a7,
+  LF_MULTIINPUT_BLOCKS as a8,
+  LF_MULTIINPUT_PARTS as a9,
+  LF_RADIO_PROPS as aA,
+  LF_TOAST_BLOCKS as aB,
+  LF_TOAST_PARTS as aC,
+  LF_TOAST_CSS_VARIABLES as aD,
+  LF_TOAST_PROPS as aE,
+  LF_BADGE_BLOCKS as aF,
+  LF_BADGE_PARTS as aG,
+  LF_BADGE_PROPS as aH,
+  LF_BUTTON_BLOCKS as aI,
+  LF_BUTTON_PARTS as aJ,
+  LF_BUTTON_PROPS as aK,
+  LF_CANVAS_BLOCKS as aL,
+  LF_CANVAS_PARTS as aM,
+  LF_CANVAS_PROPS as aN,
+  LF_CARD_BLOCKS as aO,
+  LF_CARD_PARTS as aP,
+  LF_CARD_CSS_VARS as aQ,
+  LF_CARD_DEFAULTS as aR,
+  LF_CARD_PROPS as aS,
+  LF_CHART_BLOCKS as aT,
+  LF_CHART_PARTS as aU,
+  LF_CHART_CSS_VARS as aV,
+  LF_THEME_COLORS_DATA_PREFIX as aW,
+  LF_CHART_PROPS as aX,
+  LF_CHAT_BLOCKS as aY,
+  LF_CHAT_PARTS as aZ,
+  LF_CHAT_PROPS as a_,
+  LF_MULTIINPUT_PROPS as aa,
+  LF_IMAGEVIEWER_BLOCKS as ab,
+  LF_IMAGEVIEWER_PARTS as ac,
+  LF_IMAGEVIEWER_PROPS as ad,
+  IDS as ae,
+  LF_AUTOCOMPLETE_BLOCKS as af,
+  LF_AUTOCOMPLETE_PARTS as ag,
+  LF_AUTOCOMPLETE_PROPS as ah,
+  LF_COMPARE_BLOCKS as ai,
+  LF_COMPARE_PARTS as aj,
+  LF_COMPARE_CSS_VARS as ak,
+  LF_COMPARE_DEFAULTS as al,
+  LF_COMPARE_PROPS as am,
+  LF_COMPARE_IDS as an,
+  LF_CAROUSEL_BLOCKS as ao,
+  LF_CAROUSEL_PARTS as ap,
+  LF_CAROUSEL_PROPS as aq,
+  LF_CAROUSEL_IDS as ar,
+  LF_ACCORDION_BLOCKS as as,
+  LF_ACCORDION_PARTS as at,
+  LF_ACCORDION_PROPS as au,
+  LF_ARTICLE_BLOCKS as av,
+  LF_ARTICLE_PARTS as aw,
+  LF_ARTICLE_PROPS as ax,
+  LF_RADIO_BLOCKS as ay,
+  LF_RADIO_PARTS as az,
   LF_ATTRIBUTES as b,
-  LF_COMPARE_DEFAULTS as b0,
-  LF_COMPARE_PROPS as b1,
-  LF_COMPARE_IDS as b2,
-  LF_HEADER_BLOCKS as b3,
-  LF_HEADER_PARTS as b4,
-  LF_HEADER_PROPS as b5,
-  LF_HEADER_SLOT as b6,
-  LF_ARTICLE_BLOCKS as b7,
-  LF_ARTICLE_PARTS as b8,
-  LF_ARTICLE_PROPS as b9,
-  LF_FRAMEWORK_EVENT_NAME as bA,
-  THEME_LIST as bB,
-  LF_CHECKBOX_BLOCKS as ba,
-  LF_CHECKBOX_PARTS as bb,
-  LF_CHECKBOX_PROPS as bc,
-  LF_TOAST_BLOCKS as bd,
-  LF_TOAST_PARTS as be,
-  LF_TOAST_CSS_VARIABLES as bf,
-  LF_TOAST_PROPS as bg,
-  LF_TREE_BLOCKS as bh,
-  LF_TREE_PARTS as bi,
-  LF_TREE_PROPS as bj,
-  LF_TREE_CSS_VARIABLES as bk,
-  LF_SPLASH_BLOCKS as bl,
-  LF_SPLASH_PARTS as bm,
-  LF_SPLASH_PROPS as bn,
-  LF_FRAMEWORK_SYMBOL as bo,
-  LF_FRAMEWORK_ALLOWED_ATTRS as bp,
-  LF_FRAMEWORK_ALLOWED_PREFIXES as bq,
-  getComponentProps as br,
-  markFrameworkReady as bs,
-  LF_COLOR_CODES as bt,
-  LF_EFFECTS_VARS as bu,
-  GLOBAL_STYLES as bv,
-  LF_THEME_ICONS_PREFIX as bw,
-  LF_THEME_COLORS_PREFIX as bx,
-  LF_THEME_ATTRIBUTE as by,
-  LF_ICONS_REGISTRY as bz,
+  LF_CHIP_PARTS as b0,
+  LF_CHIP_PROPS as b1,
+  LF_CODE_BLOCKS as b2,
+  LF_CODE_PARTS as b3,
+  LF_CODE_PROPS as b4,
+  LF_IMAGE_BLOCKS as b5,
+  LF_IMAGE_PARTS as b6,
+  LF_IMAGE_CSS_VARS as b7,
+  LF_IMAGE_PROPS as b8,
+  CSS_VAR_PREFIX as b9,
+  LF_FRAMEWORK_SYMBOL as bA,
+  LF_FRAMEWORK_ALLOWED_ATTRS as bB,
+  LF_FRAMEWORK_ALLOWED_PREFIXES as bC,
+  getComponentProps as bD,
+  markFrameworkReady as bE,
+  LF_COLOR_CODES as bF,
+  LF_EFFECTS_VARS as bG,
+  GLOBAL_STYLES as bH,
+  LF_THEME_ICONS_PREFIX as bI,
+  LF_THEME_COLORS_PREFIX as bJ,
+  LF_THEME_ATTRIBUTE as bK,
+  LF_ICONS_REGISTRY as bL,
+  LF_FRAMEWORK_EVENT_NAME as bM,
+  THEME_LIST as bN,
+  LF_PHOTOFRAME_BLOCKS as ba,
+  LF_PHOTOFRAME_PARTS as bb,
+  LF_PHOTOFRAME_PROPS as bc,
+  LF_PROGRESSBAR_BLOCKS as bd,
+  LF_PROGRESSBAR_PARTS as be,
+  LF_PROGRESSBAR_CSS_VARIABLES as bf,
+  LF_PROGRESSBAR_PROPS as bg,
+  LF_TOGGLE_BLOCKS as bh,
+  LF_TOGGLE_PARTS as bi,
+  LF_TOGGLE_PROPS as bj,
+  LF_TYPEWRITER_BLOCKS as bk,
+  LF_TYPEWRITER_PARTS as bl,
+  LF_TYPEWRITER_PROPS as bm,
+  LF_UPLOAD_BLOCKS as bn,
+  LF_UPLOAD_PARTS as bo,
+  LF_UPLOAD_PROPS as bp,
+  LF_BADGE_CSS_VARS as bq,
+  LF_CHIP_CSS_VARS as br,
+  LF_CARD_IDS as bs,
+  LF_CHAT_IDS as bt,
+  LF_MASONRY_DEFAULT_COLUMNS as bu,
+  LF_MASONRY_BLOCKS as bv,
+  LF_MASONRY_PARTS as bw,
+  LF_MASONRY_CSS_VARS as bx,
+  LF_MASONRY_PROPS as by,
+  LF_MASONRY_IDS as bz,
   LF_MESSENGER_PARTS as c,
   LF_STYLE_ID as d,
   LF_WRAPPER_ID as e,
@@ -2700,18 +2868,18 @@ export {
   OUTFIT_COVER as k,
   LOCATION_COVER as l,
   CHILD_ROOT_MAP as m,
-  LF_SLIDER_BLOCKS as n,
+  LF_CHECKBOX_BLOCKS as n,
   onFrameworkReady as o,
-  LF_SLIDER_PARTS as p,
-  LF_SLIDER_CSS_VARIABLES as q,
+  LF_CHECKBOX_PARTS as p,
+  LF_CHECKBOX_PROPS as q,
   registerStencilAssetProxies as r,
-  LF_SLIDER_PROPS as s,
-  LF_DRAWER_BLOCKS as t,
-  LF_DRAWER_PARTS as u,
-  LF_DRAWER_PROPS as v,
-  LF_DRAWER_SLOT as w,
-  LF_EFFECTS_FOCUSABLES as x,
-  LF_TABBAR_BLOCKS as y,
-  LF_TABBAR_PARTS as z
+  LF_SPLASH_BLOCKS as s,
+  LF_SPLASH_PARTS as t,
+  LF_SPLASH_PROPS as u,
+  LF_HEADER_BLOCKS as v,
+  LF_HEADER_PARTS as w,
+  LF_HEADER_PROPS as x,
+  LF_HEADER_SLOT as y,
+  LF_PLACEHOLDER_BLOCKS as z
 };
-//# sourceMappingURL=lf-widgets-foundations-Bbv1isuU.js.map
+//# sourceMappingURL=lf-widgets-foundations-C0mOm286.js.map

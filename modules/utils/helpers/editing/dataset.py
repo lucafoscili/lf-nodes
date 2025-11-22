@@ -173,6 +173,74 @@ def extract_dataset_entries(
     return names, urls, node_ids, metadata
 # endregion
 
+# region editor_config_helpers
+def apply_editor_config_to_dataset(
+    dataset: Optional[Dataset],
+    config: Optional[Dataset],
+) -> None:
+    """
+    Apply a lightweight image-editor configuration object to a dataset.
+
+    The config object may contain:
+      - "navigation": copied directly to dataset["navigation"] if present.
+      - "defaults": shallow-merged into dataset["defaults"].
+      - "selection": copied to dataset["selection"] with any 'context_id' removed.
+    """
+    if not isinstance(dataset, dict) or not isinstance(config, dict):
+        return
+
+    navigation = config.get("navigation")
+    if isinstance(navigation, dict):
+        dataset["navigation"] = navigation
+
+    defaults = config.get("defaults")
+    if isinstance(defaults, dict):
+        existing_defaults = dataset.get("defaults")
+        merged_defaults: Dict[str, Any] = {}
+        if isinstance(existing_defaults, dict):
+            merged_defaults.update(existing_defaults)
+        merged_defaults.update(defaults)
+        dataset["defaults"] = merged_defaults
+
+    selection = config.get("selection")
+    if isinstance(selection, dict):
+        selection_copy = dict(selection)
+        selection_copy.pop("context_id", None)
+        dataset["selection"] = selection_copy
+
+
+def build_editor_config_from_dataset(dataset: Optional[Dataset]) -> Dict[str, Any]:
+    """
+    Build a lightweight configuration JSON from a dataset suitable for
+    piping into nodes or UI widgets.
+
+    The returned dict may contain:
+      - "navigation": copied from dataset["navigation"]
+      - "defaults": copied from dataset["defaults"]
+      - "selection": copied from dataset["selection"] with 'context_id' removed
+    """
+    if not isinstance(dataset, dict):
+        return {}
+
+    config: Dict[str, Any] = {}
+
+    navigation = dataset.get("navigation")
+    if isinstance(navigation, dict):
+        config["navigation"] = navigation
+
+    defaults = dataset.get("defaults")
+    if isinstance(defaults, dict):
+        config["defaults"] = defaults
+
+    selection = dataset.get("selection")
+    if isinstance(selection, dict):
+        selection_copy = dict(selection)
+        selection_copy.pop("context_id", None)
+        config["selection"] = selection_copy
+
+    return config
+# endregion
+
 # region resolve_image_selection
 def resolve_image_selection(
     image_list: Sequence[Any],

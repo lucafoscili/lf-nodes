@@ -2,10 +2,12 @@ import copy
 import torch
 
 from . import CATEGORY
-from ...utils.constants import FUNCTION, Input, SAMPLERS, SCHEDULERS
+from ...utils.constants import FUNCTION, Input
 from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.editing import (
     EditingSession,
+    apply_editor_config_to_dataset,
+    build_editor_config_from_dataset,
     ensure_dataset_context,
     extract_dataset_entries,
     resolve_image_selection,
@@ -33,34 +35,14 @@ class LF_LoadAndEditImages:
                 "vae": (Input.VAE, {
                     "tooltip": "Optional VAE reused by inpaint edits."
                 }),
-                "sampler": (SAMPLERS, {
-                    "tooltip": "Optional sampler reused by inpaint edits.",
-                    "default": "dpmpp_2m"
-                }),
-                "scheduler": (SCHEDULERS, {
-                    "tooltip": "Optional scheduler reused by inpaint edits.",
-                    "default": "normal"
-                }),
-                "cfg": (Input.FLOAT, {
-                    "default": 7.0,
-                    "min": 0.0,
-                    "max": 30.0,
-                    "step": 0.1,
-                    "tooltip": "CFG scale used as the starting value for inpaint edits."
-                }),
-                "positive_prompt": (Input.STRING, {
-                    "default": "",
-                    "tooltip": "Optional positive prompt used to pre-fill the inpaint editor."
-                }),
-                "negative_prompt": (Input.STRING, {
-                    "default": "",
-                    "tooltip": "Optional negative prompt used to pre-fill the inpaint editor."
-                }),
                 "positive_conditioning": (Input.CONDITIONING, {
                     "tooltip": "Optional positive conditioning to reuse during inpaint edits."
                 }),
                 "negative_conditioning": (Input.CONDITIONING, {
                     "tooltip": "Optional negative conditioning to reuse during inpaint edits."
+                }),
+                "config": (Input.JSON, {
+                    "tooltip": "Optional image editor configuration JSON (navigation/defaults/selection)."
                 }),
                 "ui_widget": (Input.LF_IMAGE_EDITOR, {
                     "default": {}
@@ -73,7 +55,7 @@ class LF_LoadAndEditImages:
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
-    OUTPUT_IS_LIST = (False, True, True, True, False, False, False, False, False, False)
+    OUTPUT_IS_LIST = (False, True, True, True, False, False, False, False, False, False, False)
     OUTPUT_TOOLTIPS = (
         "Edited image tensor.",
         "List of edited image tensors.",
@@ -97,6 +79,7 @@ class LF_LoadAndEditImages:
         "selected_name",
         "metadata",
         "dataset",
+        "config",
     )
     RETURN_TYPES = (
         Input.IMAGE,
@@ -107,6 +90,7 @@ class LF_LoadAndEditImages:
         Input.IMAGE,
         Input.INTEGER,
         Input.STRING,
+        Input.JSON,
         Input.JSON,
         Input.JSON,
     )
@@ -120,57 +104,32 @@ class LF_LoadAndEditImages:
         model_value = normalize_list_to_value(kwargs.get("model"))
         clip_value = normalize_list_to_value(kwargs.get("clip"))
         vae_value = normalize_list_to_value(kwargs.get("vae"))
-        sampler_value = normalize_list_to_value(kwargs.get("sampler"))
-        scheduler_value = normalize_list_to_value(kwargs.get("scheduler"))
-
-        cfg_raw = normalize_list_to_value(kwargs.get("cfg"))
-        try:
-            cfg_value = float(cfg_raw) if cfg_raw is not None else None
-        except (TypeError, ValueError):
-            cfg_value = None
-
-        seed_raw = normalize_list_to_value(kwargs.get("seed"))
-        try:
-            seed_value = int(seed_raw) if seed_raw not in (None, "") else None
-        except (TypeError, ValueError):
-            seed_value = None
-
-        positive_prompt_raw = normalize_list_to_value(kwargs.get("positive_prompt"))
-        positive_prompt_value = str(positive_prompt_raw) if positive_prompt_raw not in (None, "") else ""
-
-        negative_prompt_raw = normalize_list_to_value(kwargs.get("negative_prompt"))
-        negative_prompt_value = str(negative_prompt_raw) if negative_prompt_raw not in (None, "") else ""
+        seed_value = None
 
         positive_conditioning_value = normalize_conditioning(kwargs.get("positive_conditioning"))
         negative_conditioning_value = normalize_conditioning(kwargs.get("negative_conditioning"))
 
+        config_raw = kwargs.get("config")
+        try:
+            config_value = normalize_json_input(config_raw) if config_raw is not None else None
+        except TypeError:
+            config_value = None
+
         ui_dataset = normalize_json_input(kwargs.get("ui_widget", {})) or {}
         dataset = self._prepare_dataset(session, ui_dataset)
 
-        inpaint_defaults: dict[str, object] = {}
-        if cfg_value is not None:
-            inpaint_defaults["cfg"] = cfg_value
-        if seed_value is not None and seed_value >= 0:
-            inpaint_defaults["seed"] = seed_value
-        if positive_prompt_value:
-            inpaint_defaults["positive_prompt"] = positive_prompt_value
-        if negative_prompt_value:
-            inpaint_defaults["negative_prompt"] = negative_prompt_value
+        if config_value is None and isinstance(ui_dataset, dict):
+            config_value = build_editor_config_from_dataset(ui_dataset)
 
-        if inpaint_defaults:
-            dataset.setdefault("defaults", {})["inpaint"] = inpaint_defaults
+        if isinstance(config_value, dict):
+            apply_editor_config_to_dataset(dataset, config_value)
 
         session.register_context(
             dataset,
             model=model_value,
             clip=clip_value,
             vae=vae_value,
-            sampler=sampler_value,
-            scheduler=scheduler_value,
-            cfg=cfg_value,
             seed=seed_value,
-            positive_prompt=positive_prompt_value or None,
-            negative_prompt=negative_prompt_value or None,
             positive_conditioning=positive_conditioning_value,
             negative_conditioning=negative_conditioning_value,
         )
@@ -255,6 +214,7 @@ class LF_LoadAndEditImages:
 
         ensure_dataset_context(dataset, context_id)
         dataset_output = copy.deepcopy(dataset)
+        config_output = build_editor_config_from_dataset(dataset_output)
 
         return (
             primary_image,
@@ -267,6 +227,7 @@ class LF_LoadAndEditImages:
             selected_name,
             metadata_list,
             dataset_output,
+            config_output,
         )
 
     def _prepare_dataset(self, session: EditingSession, ui_dataset: dict) -> dict:

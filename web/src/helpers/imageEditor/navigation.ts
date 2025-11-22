@@ -2,6 +2,7 @@ import { LogSeverity } from '../../types/manager/manager';
 import { ImageEditorState } from '../../types/widgets/imageEditor';
 import { getLfManager, normalizeDirectoryRequest } from '../../utils/common';
 
+//#region syncNavigationDirectoryControl
 /**
  * Synchronizes the navigation directory textfield of the image viewer to the provided directory value.
  *
@@ -41,3 +42,4 @@ export const syncNavigationDirectoryControl = async (
     state.isSyncingDirectory = false;
   }
 };
+//#endregion

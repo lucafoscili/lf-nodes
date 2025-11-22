@@ -131,6 +131,7 @@ export class LFManager {
 
         if (
           widgets.includes(CustomWidgetName.chip) ||
+          widgets.includes(CustomWidgetName.imageEditor) ||
           widgets.includes(CustomWidgetName.messenger)
         ) {
           callbacks.push(onConnectionsChange);

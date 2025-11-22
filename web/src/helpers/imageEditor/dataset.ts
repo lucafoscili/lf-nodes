@@ -2,11 +2,13 @@ import { LfDataColumn, LfMasonryEventPayload } from '@lf-widgets/foundations';
 import {
   ImageEditorBuildSelectionPayloadParams,
   ImageEditorDataset,
+  ImageEditorDatasetDefaults,
   ImageEditorDatasetNavigationDirectory,
   ImageEditorDatasetSelection,
   ImageEditorState,
 } from '../../types/widgets/imageEditor';
 import { asString, getLfManager, isString } from '../../utils/common';
+import { IMAGE_EDITOR_CONSTANTS } from './constants';
 
 //#region applySelectionColumn
 /**
@@ -21,16 +23,18 @@ export const applySelectionColumn = (
   const existingColumns = Array.isArray(dataset?.columns) ? dataset.columns : [];
 
   const [existingSelectionColumn] = lfData
-    ? lfData.column.find(existingColumns, { id: 'selected' })
+    ? lfData.column.find(existingColumns, { id: IMAGE_EDITOR_CONSTANTS.COLUMNS.SELECTED })
     : [];
 
   const updatedSelectionColumn = {
-    ...(existingSelectionColumn ?? { id: 'selected' }),
-    title: selection as unknown as string,
+    ...(existingSelectionColumn ?? { id: IMAGE_EDITOR_CONSTANTS.COLUMNS.SELECTED }),
+    title: selection as any,
   } as unknown as LfDataColumn;
 
   const nextColumns = existingSelectionColumn
-    ? existingColumns.map((col) => (col.id === 'selected' ? updatedSelectionColumn : col))
+    ? existingColumns.map((col) =>
+        col.id === IMAGE_EDITOR_CONSTANTS.COLUMNS.SELECTED ? updatedSelectionColumn : col,
+      )
     : [...existingColumns, updatedSelectionColumn];
 
   return {
@@ -142,6 +146,48 @@ export const deriveSelectionName = (
   const lfValue = asString(shape?.lfValue);
 
   return htmlTitle ?? htmlId ?? shapeValue ?? lfValue ?? undefined;
+};
+//#endregion
+
+//#region editorConfig
+export const applyEditorConfigToDataset = (
+  dataset: ImageEditorDataset | undefined,
+  config: unknown,
+): ImageEditorDataset | undefined => {
+  if (!dataset || !config || typeof config !== 'object') {
+    return dataset;
+  }
+
+  const cfg = config as Partial<{
+    navigation: ImageEditorDataset['navigation'];
+    defaults: ImageEditorDatasetDefaults;
+    selection: ImageEditorDatasetSelection;
+  }>;
+
+  const next: ImageEditorDataset = { ...dataset };
+
+  if (cfg.navigation && typeof cfg.navigation === 'object') {
+    next.navigation = cfg.navigation;
+  }
+
+  if (cfg.defaults && typeof cfg.defaults === 'object') {
+    const existingDefaults =
+      (next.defaults && typeof next.defaults === 'object'
+        ? (next.defaults as ImageEditorDatasetDefaults)
+        : ({} as ImageEditorDatasetDefaults)) ?? {};
+    next.defaults = {
+      ...existingDefaults,
+      ...cfg.defaults,
+    };
+  }
+
+  if (cfg.selection && typeof cfg.selection === 'object') {
+    const selectionCopy: ImageEditorDatasetSelection = { ...(cfg.selection as any) };
+    delete (selectionCopy as any).context_id;
+    next.selection = selectionCopy;
+  }
+
+  return next;
 };
 //#endregion
 

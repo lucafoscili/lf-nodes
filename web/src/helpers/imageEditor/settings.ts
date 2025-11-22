@@ -1,6 +1,8 @@
-import { LfCanvasElement } from '@lf-widgets/foundations/dist';
+import { LfCanvasElement, LfDataDataset } from '@lf-widgets/foundations/dist';
+import { MODELS_API } from '../../api/models';
 import { SETTINGS } from '../../fixtures/imageEditor';
 import { LfEventName } from '../../types/events/events';
+import { LogSeverity } from '../../types/manager/manager';
 import {
   ImageEditorBrushSettings,
   ImageEditorControlConfig,
@@ -11,6 +13,9 @@ import {
   ImageEditorFilter,
   ImageEditorFilterType,
   ImageEditorIcons,
+  ImageEditorMultiinputConfig,
+  ImageEditorSelectConfig,
+  ImageEditorSelectIds,
   ImageEditorSliderConfig,
   ImageEditorSliderIds,
   ImageEditorState,
@@ -23,28 +28,100 @@ import {
 } from '../../types/widgets/imageEditor';
 import { TagName } from '../../types/widgets/widgets';
 import { getLfManager } from '../../utils/common';
-import {
-  beginManualApplyRequest,
-  hasManualApplyPendingChanges,
-  initManualApplyState,
-  registerManualApplyChange,
-} from './manualApply';
+import { IMAGE_EDITOR_CONSTANTS } from './constants';
 import { parseLabel } from './selectors';
-import { updateCb } from './update';
+
+//#region Helpers
+/**
+ * Type guard function that validates whether the provided object conforms to the ImageEditorFilter interface.
+ * It checks for the presence and correct types of required properties: `controlIds`, `configs`, and `settings`.
+ * Additionally, it validates that `configs` contains valid control types from `ImageEditorControls`, each with an array of configurations
+ * having `id`, `title`, and `defaultValue`. Optional property `hasCanvasAction` is checked for boolean type if present.
+ *
+ * @param obj - The unknown object to validate.
+ * @returns `true` if the object is a valid `ImageEditorFilter`, otherwise `false`.
+ */
+function isValidImageEditorFilter(obj: unknown): obj is ImageEditorFilter {
+  if (
+    typeof obj !== 'object' ||
+    obj === null ||
+    !('controlIds' in obj) ||
+    !('configs' in obj) ||
+    !('settings' in obj)
+  ) {
+    return false;
+  }
+
+  const filter = obj as Record<string, unknown>;
+
+  if (typeof filter.controlIds !== 'object' || filter.controlIds === null) {
+    return false;
+  }
+
+  if (typeof filter.configs !== 'object' || filter.configs === null) {
+    return false;
+  }
+
+  const configs = filter.configs as Record<string, unknown>;
+  const validControlTypes = Object.values(ImageEditorControls);
+
+  for (const [controlType, controlConfigs] of Object.entries(configs)) {
+    if (!validControlTypes.includes(controlType as ImageEditorControls)) {
+      return false;
+    }
+
+    if (!Array.isArray(controlConfigs)) {
+      return false;
+    }
+
+    for (const config of controlConfigs) {
+      if (
+        typeof config !== 'object' ||
+        config === null ||
+        !('id' in config) ||
+        !('title' in config) ||
+        !('defaultValue' in config)
+      ) {
+        return false;
+      }
+    }
+  }
+
+  if (typeof filter.settings !== 'object' || filter.settings === null) {
+    return false;
+  }
+
+  if ('hasCanvasAction' in filter && typeof filter.hasCanvasAction !== 'boolean') {
+    return false;
+  }
+
+  return true;
+}
+function assertImageEditorFilter(obj: unknown): ImageEditorFilter {
+  if (!isValidImageEditorFilter(obj)) {
+    throw new Error('Invalid ImageEditorFilter structure');
+  }
+  return obj;
+}
+//#endregion
 
 //#region createPrepSettings
 export const createPrepSettings = (deps: PrepSettingsDeps): PrepSettingsFn => {
-  const { onSlider, onTextfield, onToggle } = deps;
+  const { onMultiinput, onSelect, onSlider, onTextfield, onToggle } = deps;
 
   return (state, node) => {
     const { syntax } = getLfManager().getManagers().lfFramework;
     state.elements.controls = {};
-    state.filter = syntax.json.unescape(node.cells.lfCode.value)
-      .parsedJSON as unknown as ImageEditorFilter;
-    const idRaw = (node.id as string) || 'brush';
-    const alias = idRaw === 'inpaint_detail' || idRaw === 'inpaint_adv' ? 'inpaint' : idRaw;
+    const parsed = syntax.json.unescape(node.cells.lfCode.value).parsedJSON;
+    state.filter = assertImageEditorFilter(parsed);
+    const idRaw = (node.id as string) || IMAGE_EDITOR_CONSTANTS.FILTERS.BRUSH;
+    const alias =
+      idRaw === IMAGE_EDITOR_CONSTANTS.FILTERS.INPAINT_DETAIL ||
+      idRaw === IMAGE_EDITOR_CONSTANTS.FILTERS.INPAINT_ADV
+        ? IMAGE_EDITOR_CONSTANTS.FILTERS.INPAINT
+        : idRaw;
     state.filterType = alias as ImageEditorFilterType;
-    state.manualApply = undefined;
+    state.filterNodeId = idRaw;
 
     const dataset = state.elements.imageviewer.lfDataset as ImageEditorDataset | undefined;
     const defaults = dataset?.defaults?.[state.filterType] as
@@ -53,17 +130,6 @@ export const createPrepSettings = (deps: PrepSettingsDeps): PrepSettingsFn => {
     if (defaults) {
       applyFilterDefaults(state, defaults);
     }
-
-    state.settingsStore = state.settingsStore ?? {};
-    const stored = state.settingsStore[state.filterType] ?? {};
-    const mutableSettings = state.filter.settings;
-    (Object.keys(stored) as ImageEditorControlIds[]).forEach((id) => {
-      const storedValue = stored[id];
-      if (typeof storedValue === 'undefined') {
-        return;
-      }
-      mutableSettings[id] = storedValue as never;
-    });
 
     const { elements, filter } = state;
     const { settings } = elements;
@@ -101,11 +167,6 @@ export const createPrepSettings = (deps: PrepSettingsDeps): PrepSettingsFn => {
             slider.dataset.id = sliderConfig.id;
             slider.addEventListener(LfEventName.LfSlider, (event) => onSlider(state, event));
 
-            const storedValue = stored[sliderConfig.id as ImageEditorControlIds];
-            if (typeof storedValue !== 'undefined') {
-              slider.lfValue = Number(storedValue);
-            }
-
             controlsContainer.appendChild(slider);
             state.elements.controls[sliderConfig.id as ImageEditorSliderIds] = slider;
             break;
@@ -123,13 +184,90 @@ export const createPrepSettings = (deps: PrepSettingsDeps): PrepSettingsFn => {
               onTextfield(state, event),
             );
 
-            const storedValue = stored[textfieldConfig.id as ImageEditorControlIds];
-            if (typeof storedValue !== 'undefined') {
-              textfield.lfValue = String(storedValue);
-            }
-
             controlsContainer.appendChild(textfield);
             state.elements.controls[textfieldConfig.id as ImageEditorTextfieldIds] = textfield;
+            break;
+          }
+          case ImageEditorControls.Multiinput: {
+            const multiConfig = config as ImageEditorMultiinputConfig;
+            const multiinput = document.createElement(
+              TagName.LfMultiinput,
+            ) as HTMLLfMultiinputElement;
+
+            multiinput.lfAllowFreeInput = multiConfig.allowFreeInput ?? true;
+            multiinput.lfMaxHistory = 100;
+            multiinput.lfMode = multiConfig.mode ?? 'tags';
+            multiinput.lfTextfieldProps = { lfLabel: parseLabel(multiConfig) };
+            multiinput.lfValue = String(multiConfig.defaultValue ?? '').valueOf();
+            multiinput.title = multiConfig.title;
+            multiinput.dataset.id = multiConfig.id;
+            multiinput.addEventListener(LfEventName.LfMultiinput, (event) =>
+              onMultiinput(state, event),
+            );
+
+            const effectiveValue = multiinput.lfValue ?? '';
+            if (effectiveValue.trim()) {
+              const tags = effectiveValue
+                .split(',')
+                .map((token) => token.trim())
+                .filter((token) => token.length > 0);
+              void multiinput.setHistory(tags);
+            }
+
+            controlsContainer.appendChild(multiinput);
+            state.elements.controls[multiConfig.id as ImageEditorTextfieldIds] = multiinput;
+            break;
+          }
+          case ImageEditorControls.Select: {
+            const selectConfig = config as ImageEditorSelectConfig;
+            const select = document.createElement(TagName.LfSelect) as HTMLLfSelectElement;
+
+            select.lfTextfieldProps = { lfLabel: parseLabel(selectConfig) };
+            select.title = selectConfig.title;
+            select.dataset.id = selectConfig.id;
+            select.addEventListener(LfEventName.LfSelect, (event) => onSelect(state, event));
+
+            const fallbackDataset: LfDataDataset = {
+              nodes: selectConfig.values.map(({ id, value }) => ({
+                id,
+                value,
+              })),
+            };
+
+            select.lfDataset = fallbackDataset;
+            select.lfValue = String(selectConfig.defaultValue ?? '');
+
+            if (
+              selectConfig.id === ImageEditorSelectIds.Sampler ||
+              selectConfig.id === ImageEditorSelectIds.Scheduler
+            ) {
+              (async () => {
+                try {
+                  const dataset =
+                    selectConfig.id === ImageEditorSelectIds.Sampler
+                      ? await MODELS_API.getSamplers()
+                      : await MODELS_API.getSchedulers();
+
+                  if (dataset && Array.isArray(dataset.nodes) && dataset.nodes.length > 0) {
+                    select.lfDataset = dataset as LfDataDataset;
+
+                    const targetValue = String(selectConfig.defaultValue ?? '');
+                    if (targetValue) {
+                      await select.setValue(targetValue);
+                    }
+                  }
+                } catch (error) {
+                  getLfManager().log(
+                    'Failed to load sampling options for select control.',
+                    { error, id: selectConfig.id },
+                    LogSeverity.Warning,
+                  );
+                }
+              })();
+            }
+
+            controlsContainer.appendChild(select);
+            state.elements.controls[selectConfig.id as ImageEditorSelectIds] = select;
             break;
           }
           case ImageEditorControls.Toggle: {
@@ -143,14 +281,6 @@ export const createPrepSettings = (deps: PrepSettingsDeps): PrepSettingsFn => {
             toggle.title = toggleConfig.title;
             toggle.dataset.id = toggleConfig.id;
             toggle.addEventListener(LfEventName.LfToggle, (event) => onToggle(state, event));
-
-            const storedValue = stored[toggleConfig.id as ImageEditorControlIds];
-            if (typeof storedValue !== 'undefined') {
-              const boolValue =
-                storedValue === true ||
-                (typeof storedValue === 'string' && storedValue.toLowerCase() === 'true');
-              toggle.lfValue = boolValue;
-            }
 
             controlsContainer.appendChild(toggle);
             state.elements.controls[toggleConfig.id as ImageEditorToggleIds] = toggle;
@@ -173,7 +303,7 @@ export const createPrepSettings = (deps: PrepSettingsDeps): PrepSettingsFn => {
     resetButton.addEventListener('click', () => {
       void (async () => {
         await resetSettings(settings);
-        registerManualApplyChange(state);
+        await state.update.snapshot();
       })();
     });
     buttonsWrapper.appendChild(resetButton);
@@ -206,28 +336,6 @@ export const createPrepSettings = (deps: PrepSettingsDeps): PrepSettingsFn => {
         }
       });
     }
-
-    if (filter?.requiresManualApply) {
-      const applyButton = document.createElement(TagName.LfButton);
-      applyButton.lfIcon = ImageEditorIcons.Resume;
-      applyButton.lfLabel = 'Apply';
-      applyButton.lfStretchX = true;
-      initManualApplyState(state, applyButton);
-      applyButton.addEventListener('click', () => {
-        if (!state.manualApply || state.manualApply.isProcessing) {
-          return;
-        }
-
-        const hasPending = hasManualApplyPendingChanges(state);
-        if (!hasPending) {
-          return;
-        }
-
-        beginManualApplyRequest(state);
-        void updateCb(state, true, true);
-      });
-      buttonsWrapper.appendChild(applyButton);
-    }
   };
 };
 //#endregion
@@ -237,6 +345,16 @@ export async function resetSettings(settings: HTMLElement) {
   const controls = Array.from(settings.querySelectorAll('[data-id]'));
   for (const control of controls) {
     switch (control.tagName) {
+      case 'LF-MULTIINPUT': {
+        const multiinput = control as HTMLLfMultiinputElement;
+        await multiinput.setValue(multiinput.lfValue);
+        break;
+      }
+      case 'LF-SELECT': {
+        const select = control as HTMLLfSelectElement;
+        await select.setValue(String(select.lfValue ?? ''));
+        break;
+      }
       case 'LF-SLIDER': {
         const slider = control as HTMLLfSliderElement;
         await slider.setValue(slider.lfValue);
@@ -293,6 +411,26 @@ export const applyFilterDefaults = (
       }
 
       switch (controlType) {
+        case ImageEditorControls.Multiinput: {
+          const multiConfig = config as ImageEditorMultiinputConfig;
+          const stringValue =
+            defaultValue === null || typeof defaultValue === 'undefined'
+              ? ''
+              : String(defaultValue);
+          multiConfig.defaultValue = stringValue;
+          mutableSettings[multiConfig.id] = stringValue;
+          break;
+        }
+        case ImageEditorControls.Select: {
+          const selectConfig = config as ImageEditorSelectConfig;
+          const stringValue =
+            defaultValue === null || typeof defaultValue === 'undefined'
+              ? ''
+              : String(defaultValue);
+          selectConfig.defaultValue = stringValue;
+          mutableSettings[selectConfig.id] = stringValue;
+          break;
+        }
         case ImageEditorControls.Slider: {
           const sliderConfig = config as ImageEditorSliderConfig;
           const numericValue =

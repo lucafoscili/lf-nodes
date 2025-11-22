@@ -1,4 +1,4 @@
-import { bo as LF_FRAMEWORK_SYMBOL, bp as LF_FRAMEWORK_ALLOWED_ATTRS, bq as LF_FRAMEWORK_ALLOWED_PREFIXES, br as getComponentProps, bs as markFrameworkReady, bt as LF_COLOR_CODES, C as CY_ATTRIBUTES, b as LF_ATTRIBUTES, bu as LF_EFFECTS_VARS, bv as GLOBAL_STYLES, bw as LF_THEME_ICONS_PREFIX, bx as LF_THEME_COLORS_PREFIX, by as LF_THEME_ATTRIBUTE, bz as LF_ICONS_REGISTRY, bA as LF_FRAMEWORK_EVENT_NAME, bB as THEME_LIST } from "./lf-widgets-foundations-Bbv1isuU.js";
+import { bA as LF_FRAMEWORK_SYMBOL, bB as LF_FRAMEWORK_ALLOWED_ATTRS, bC as LF_FRAMEWORK_ALLOWED_PREFIXES, bD as getComponentProps, bE as markFrameworkReady, bF as LF_COLOR_CODES, C as CY_ATTRIBUTES, b as LF_ATTRIBUTES, bG as LF_EFFECTS_VARS, bH as GLOBAL_STYLES, bI as LF_THEME_ICONS_PREFIX, bJ as LF_THEME_COLORS_PREFIX, bK as LF_THEME_ATTRIBUTE, bL as LF_ICONS_REGISTRY, bM as LF_FRAMEWORK_EVENT_NAME, bN as THEME_LIST } from "./lf-widgets-foundations-C0mOm286.js";
 function _mergeNamespaces$1(n, m) {
   m.forEach(function(e) {
     e && typeof e !== "string" && !Array.isArray(e) && Object.keys(e).forEach(function(k) {
@@ -2129,10 +2129,12 @@ class LfPortal {
       }
       let finalVertical = verticalPart;
       if (verticalPart === "auto") {
-        if (spaceBelow >= offsetHeight || spaceBelow >= spaceAbove) {
+        if (spaceBelow >= offsetHeight) {
           finalVertical = "b";
-        } else {
+        } else if (spaceAbove >= offsetHeight) {
           finalVertical = "t";
+        } else {
+          finalVertical = "b";
         }
       } else if (verticalPart === "b") {
         if (spaceBelow < offsetHeight && spaceAbove > offsetHeight) {
@@ -2145,7 +2147,9 @@ class LfPortal {
       }
       let finalHorizontal = horizontalPart;
       if (horizontalPart === "auto") {
-        if (spaceOnRight >= offsetWidth || spaceOnRight >= spaceOnLeft) {
+        if (spaceOnRight >= offsetWidth) {
+          finalHorizontal = "l";
+        } else if (spaceOnLeft >= offsetWidth) {
           finalHorizontal = "r";
         } else {
           finalHorizontal = "l";
@@ -10927,4 +10931,4 @@ const finalize = (framework) => {
 export {
   getLfFramework as g
 };
-//# sourceMappingURL=lf-widgets-framework-DcaHVr-f.js.map
+//# sourceMappingURL=lf-widgets-framework-BeY91T9m.js.map
