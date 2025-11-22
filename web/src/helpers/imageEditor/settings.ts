@@ -147,16 +147,7 @@ export const createPrepSettings = (deps: PrepSettingsDeps): PrepSettingsFn => {
       applyFilterDefaults(state, defaults);
     }
 
-    state.settingsStore = state.settingsStore ?? {};
-    const stored = state.settingsStore[state.filterType] ?? {};
     const mutableSettings = state.filter.settings;
-    (Object.keys(stored) as ImageEditorControlIds[]).forEach((id) => {
-      const storedValue = stored[id];
-      if (typeof storedValue === 'undefined') {
-        return;
-      }
-      assignStoredSetting(mutableSettings, state.filter.controlIds, id, storedValue);
-    });
 
     const { elements, filter } = state;
     const { settings } = elements;
@@ -194,11 +185,6 @@ export const createPrepSettings = (deps: PrepSettingsDeps): PrepSettingsFn => {
             slider.dataset.id = sliderConfig.id;
             slider.addEventListener(LfEventName.LfSlider, (event) => onSlider(state, event));
 
-            const storedValue = stored[sliderConfig.id as ImageEditorControlIds];
-            if (typeof storedValue !== 'undefined') {
-              slider.lfValue = Number(storedValue);
-            }
-
             controlsContainer.appendChild(slider);
             state.elements.controls[sliderConfig.id as ImageEditorSliderIds] = slider;
             break;
@@ -215,11 +201,6 @@ export const createPrepSettings = (deps: PrepSettingsDeps): PrepSettingsFn => {
             textfield.addEventListener(LfEventName.LfTextfield, (event) =>
               onTextfield(state, event),
             );
-
-            const storedValue = stored[textfieldConfig.id as ImageEditorControlIds];
-            if (typeof storedValue !== 'undefined') {
-              textfield.lfValue = String(storedValue);
-            }
 
             controlsContainer.appendChild(textfield);
             state.elements.controls[textfieldConfig.id as ImageEditorTextfieldIds] = textfield;
@@ -240,11 +221,6 @@ export const createPrepSettings = (deps: PrepSettingsDeps): PrepSettingsFn => {
             multiinput.addEventListener(LfEventName.LfMultiinput, (event) =>
               onMultiinput(state, event),
             );
-
-            const storedValue = stored[multiConfig.id as ImageEditorControlIds];
-            if (typeof storedValue !== 'undefined') {
-              multiinput.lfValue = String(storedValue);
-            }
 
             const effectiveValue = multiinput.lfValue ?? '';
             if (effectiveValue.trim()) {

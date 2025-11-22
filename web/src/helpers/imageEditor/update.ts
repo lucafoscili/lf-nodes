@@ -18,9 +18,7 @@ export const refreshValues = async (state: ImageEditorState, addSnapshot = false
 
   const lfManager = getLfManager();
 
-  state.settingsStore = state.settingsStore ?? {};
-  const storeForFilter = (state.settingsStore[state.filterType] =
-    state.settingsStore[state.filterType] ?? {});
+  const storeForFilter: Partial<Record<ImageEditorControlIds, unknown>> = {};
 
   for (const key in controls) {
     if (Object.prototype.hasOwnProperty.call(controls, key)) {

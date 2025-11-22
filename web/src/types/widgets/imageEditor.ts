@@ -73,9 +73,6 @@ export interface ImageEditorState extends BaseWidgetState {
   isApiProcessing?: boolean;
   lastRequestedDirectory?: string;
   navigationManager?: NavigationManager;
-  settingsStore?: Partial<
-    Record<ImageEditorFilterType, Partial<Record<ImageEditorControlIds, ImageEditorControlValue>>>
-  >;
   update: {
     preview: () => Promise<void>;
     snapshot: () => Promise<void>;
