@@ -1246,11 +1246,12 @@ var NodeName;
   NodeName2["llmMessenger"] = "LF_LLMMessenger";
   NodeName2["loadAndEditImages"] = "LF_LoadAndEditImages";
   NodeName2["loadClipSegModel"] = "LF_LoadCLIPSegModel";
-  NodeName2["loadWd14Model"] = "LF_LoadWD14Model";
   NodeName2["loadFileOnce"] = "LF_LoadFileOnce";
   NodeName2["loadImages"] = "LF_LoadImages";
+  NodeName2["loadLocalJSON"] = "LF_LoadLocalJSON";
   NodeName2["loadLoraTags"] = "LF_LoadLoraTags";
   NodeName2["loadMetadata"] = "LF_LoadMetadata";
+  NodeName2["loadWd14Model"] = "LF_LoadWD14Model";
   NodeName2["loraAndEmbeddingSelector"] = "LF_LoraAndEmbeddingSelector";
   NodeName2["loraSelector"] = "LF_LoraSelector";
   NodeName2["lutApplication"] = "LF_LUTApplication";
@@ -1602,12 +1603,13 @@ const NODE_WIDGET_MAP = {
   LF_LLMChat: [CustomWidgetName.chat],
   LF_LLMMessenger: [CustomWidgetName.messenger],
   LF_LoadAndEditImages: [CustomWidgetName.imageEditor],
-  LF_LoadFileOnce: [CustomWidgetName.history],
   LF_LoadCLIPSegModel: [CustomWidgetName.code],
-  LF_LoadWD14Model: [CustomWidgetName.code],
+  LF_LoadFileOnce: [CustomWidgetName.history],
   LF_LoadImages: [CustomWidgetName.masonry],
+  LF_LoadLocalJSON: [CustomWidgetName.tree],
   LF_LoadLoraTags: [CustomWidgetName.cardsWithChip],
   LF_LoadMetadata: [CustomWidgetName.upload],
+  LF_LoadWD14Model: [CustomWidgetName.code],
   LF_LoraAndEmbeddingSelector: [CustomWidgetName.card],
   LF_LoraSelector: [CustomWidgetName.card],
   LF_LUTApplication: [CustomWidgetName.compare],
