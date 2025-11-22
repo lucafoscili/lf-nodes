@@ -11,7 +11,6 @@ import {
   ImageEditorCSS,
   ImageEditorDataset,
   ImageEditorFilter,
-  ImageEditorFilterSettings,
   ImageEditorFilterType,
   ImageEditorIcons,
   ImageEditorMultiinputConfig,
@@ -104,21 +103,6 @@ function assertImageEditorFilter(obj: unknown): ImageEditorFilter {
   }
   return obj;
 }
-function assignStoredSetting(
-  settings: ImageEditorFilter['settings'],
-  controlIds: ImageEditorFilter['controlIds'],
-  id: ImageEditorControlIds,
-  value: unknown,
-): void {
-  const controlIdValues = Object.values(controlIds);
-  if (!controlIdValues.includes(id as any)) {
-    console.warn(`Control ID '${id}' not found in filter controlIds, skipping assignment`);
-    return;
-  }
-
-  (settings as ImageEditorFilterSettings)[id] =
-    value as ImageEditorFilterSettings[ImageEditorControlIds];
-}
 //#endregion
 
 //#region createPrepSettings
@@ -146,8 +130,6 @@ export const createPrepSettings = (deps: PrepSettingsDeps): PrepSettingsFn => {
     if (defaults) {
       applyFilterDefaults(state, defaults);
     }
-
-    const mutableSettings = state.filter.settings;
 
     const { elements, filter } = state;
     const { settings } = elements;
@@ -254,11 +236,6 @@ export const createPrepSettings = (deps: PrepSettingsDeps): PrepSettingsFn => {
             select.lfDataset = fallbackDataset;
             select.lfValue = String(selectConfig.defaultValue ?? '');
 
-            const storedValue = stored[selectConfig.id as ImageEditorControlIds];
-            if (typeof storedValue !== 'undefined') {
-              select.lfValue = String(storedValue);
-            }
-
             if (
               selectConfig.id === ImageEditorSelectIds.Sampler ||
               selectConfig.id === ImageEditorSelectIds.Scheduler
@@ -273,9 +250,7 @@ export const createPrepSettings = (deps: PrepSettingsDeps): PrepSettingsFn => {
                   if (dataset && Array.isArray(dataset.nodes) && dataset.nodes.length > 0) {
                     select.lfDataset = dataset as LfDataDataset;
 
-                    const targetValue =
-                      (stored[selectConfig.id as ImageEditorControlIds] as string | undefined) ??
-                      String(selectConfig.defaultValue ?? '');
+                    const targetValue = String(selectConfig.defaultValue ?? '');
                     if (targetValue) {
                       await select.setValue(targetValue);
                     }
@@ -305,14 +280,6 @@ export const createPrepSettings = (deps: PrepSettingsDeps): PrepSettingsFn => {
             toggle.title = toggleConfig.title;
             toggle.dataset.id = toggleConfig.id;
             toggle.addEventListener(LfEventName.LfToggle, (event) => onToggle(state, event));
-
-            const storedValue = stored[toggleConfig.id as ImageEditorControlIds];
-            if (typeof storedValue !== 'undefined') {
-              const boolValue =
-                storedValue === true ||
-                (typeof storedValue === 'string' && storedValue.toLowerCase() === 'true');
-              toggle.lfValue = boolValue;
-            }
 
             controlsContainer.appendChild(toggle);
             state.elements.controls[toggleConfig.id as ImageEditorToggleIds] = toggle;
