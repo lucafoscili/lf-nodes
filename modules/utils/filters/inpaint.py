@@ -15,9 +15,10 @@ from ...utils.helpers.api import get_resource_url
 from ...utils.helpers.comfy import get_comfy_dir, resolve_filepath
 from ...utils.helpers.conversion import base64_to_tensor, convert_to_boolean, convert_to_float, convert_to_int, tensor_to_pil
 from ...utils.helpers.editing import get_editing_context
+from ...utils.helpers.tagging import apply_wd14_tagging_to_prompt
 
 # region Debug Preview Save
-DEBUG_PREVIEW_SAVES = False # Toggle debug preview saves. Hardwired to False for normal runs; set True when debugging.
+DEBUG_PREVIEW_SAVES = True # Toggle debug preview saves. Hardwired to False for normal runs; set True when debugging.
 
 FilterResult = Tuple[torch.Tensor, Dict[str, str]]
 
@@ -1174,6 +1175,9 @@ def apply_inpaint_filter(image: torch.Tensor, settings: dict) -> FilterResult:
     context_positive_conditioning = context.get("positive_conditioning")
     context_negative_conditioning = context.get("negative_conditioning")
 
+    wd14_model = context.get("wd14_model")
+    wd14_processor = context.get("wd14_processor")
+
     mask_b64 = settings.get("b64_canvas") or settings.get("mask_canvas") or settings.get("mask")
     if not mask_b64:
         raise ValueError("Missing brush mask for inpaint filter.")
@@ -1303,6 +1307,8 @@ def apply_inpaint_filter(image: torch.Tensor, settings: dict) -> FilterResult:
             "positive_conditioning": context_positive_conditioning,
             "negative_conditioning": context_negative_conditioning,
             "apply_unsharp_mask": apply_unsharp_mask,
+            "wd14_model": wd14_model,
+            "wd14_processor": wd14_processor,
         }
     )
 
@@ -1358,6 +1364,9 @@ def apply_inpaint_filter_tensor(
         ValueError: If the mask tensor has an unsupported shape.
     """
     device = getattr(getattr(vae, "first_stage_model", None), "device", None) or image.device
+
+    positive_prompt = str(settings.get("positive_prompt") or "")
+    negative_prompt = str(settings.get("negative_prompt") or "")
 
     base_image = image.to(device=device, dtype=torch.float32)
     m = mask
@@ -1452,14 +1461,30 @@ def apply_inpaint_filter_tensor(
     )
     region_meta["apply_unsharp_mask"] = apply_unsharp_mask
 
+    wd14_tagging = convert_to_boolean(settings.get("wd14_tagging"))
+    if wd14_tagging:
+        wd14_model = settings.get("wd14_model")
+        wd14_processor = settings.get("wd14_processor")
+
+        _save_tensor_preview(work_image, "wd14", "temp")
+
+        positive_prompt = apply_wd14_tagging_to_prompt(
+            positive_prompt,
+            work_image,
+            wd14_model,
+            wd14_processor,
+            threshold=0.70,
+            top_k=10,
+        )
+
     processed_region = perform_inpaint(
         model=model,
         clip=clip,
         vae=vae,
         image=work_image,
         mask=work_mask_soft,
-        positive_prompt=str(settings.get("positive_prompt") or ""),
-        negative_prompt=str(settings.get("negative_prompt") or ""),
+        positive_prompt=positive_prompt,
+        negative_prompt=negative_prompt,
         sampler_name=str(settings.get("sampler") or "dpmpp_2m"),
         scheduler_name=str(settings.get("scheduler") or "karras"),
         steps=_normalize_steps(settings.get("steps")),

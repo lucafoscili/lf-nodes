@@ -217,6 +217,7 @@ export enum ImageEditorToggleIds {
   SoftBlend = 'soft_blend',
   TransparentBackground = 'transparent_background',
   Vertical = 'vertical',
+  Wd14Tagging = 'wd14_tagging',
 }
 export enum ImageEditorSelectIds {
   Sampler = 'sampler',
@@ -296,6 +297,7 @@ export type ImageEditorControlConfig =
   | ImageEditorTextfieldConfig
   | ImageEditorToggleConfig;
 export type ImageEditorSettingsFor = Partial<{
+  [ImageEditorControls.Canvas]: ImageEditorCanvasConfig[];
   [ImageEditorControls.Multiinput]: ImageEditorMultiinputConfig[];
   [ImageEditorControls.Select]: ImageEditorSelectConfig[];
   [ImageEditorControls.Slider]: ImageEditorSliderConfig[];
@@ -439,6 +441,7 @@ export interface ImageEditorInpaintSettings extends ImageEditorFilterSettings {
   seed?: number;
   steps: number;
   upsample_target: number;
+  wd14_tagging?: boolean;
 }
 export enum ImageEditorBackgroundRemoverIds {
   Color = 'color',
