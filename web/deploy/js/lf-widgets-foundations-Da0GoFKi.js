@@ -2018,7 +2018,7 @@ const GLOBAL_STYLES = {
   ],
   ".lf-portal [data-lf=portal]": {
     "display": "block",
-    "height": "max-content",
+    "height": "auto",
     "max-height": "45dvh",
     "max-width": "45dvw",
     "overflow": "auto",
@@ -2038,7 +2038,10 @@ const LF_THEME_COLORS_DATA_PREFIX = `${LF_THEME_COLORS_PREFIX}data-`;
 const LF_THEME_FONTS_FONTFACE = {
   bebasNeue: "BebasNeue",
   cinzel: "Cinzel",
+  cormorantGaramond: "CormorantGaramond",
+  ebGaramond: "EBGaramond",
   IMFellEnglishSC: "IMFellEnglishSC",
+  jetBrainsMono: "JetBrainsMono",
   lato: "Lato",
   merriweather: "Merriweather",
   montserrat: "Montserrat",
@@ -2260,6 +2263,54 @@ const ABYSS = {
     "--lf-font-family-monospace": "Montserrat, sans-serif"
   }
 };
+const BLOODMOON = {
+  font: [
+    LF_THEME_FONTS_FONTFACE.cormorantGaramond,
+    LF_THEME_FONTS_FONTFACE.jetBrainsMono
+  ],
+  isDark: true,
+  variables: {
+    ...DARK.variables,
+    "--lf-color-bg": "#070001",
+    "--lf-color-surface": "#150003",
+    "--lf-color-drawer": "#150003",
+    "--lf-color-header": "#150003",
+    "--lf-color-border": "#3a0a14",
+    "--lf-color-primary": "#ff002e",
+    // Blood nova
+    "--lf-color-on-primary": "#050000",
+    "--lf-color-secondary": "#d8307a",
+    // Magenta-crimson
+    "--lf-color-on-secondary": "#fff0f6",
+    "--lf-color-on-bg": "#e8c7c7",
+    "--lf-color-on-surface": "#ffd6d6",
+    "--lf-color-on-border": "#b58a8a",
+    "--lf-color-link": "#ff4066",
+    "--lf-color-on-link": "#050000",
+    "--lf-color-danger": "#ff1a3c",
+    "--lf-color-on-danger": "#ffe5ea",
+    "--lf-color-warning": "#ff7700",
+    "--lf-color-on-warning": "#1a0b00",
+    "--lf-color-success": "#d4ff4d",
+    "--lf-color-on-success": "#1c2600",
+    "--lf-color-info": "#d933ff",
+    "--lf-color-on-info": "#f6e4ff",
+    "--lf-color-data-1": "#ff557a",
+    "--lf-color-data-2": "#ff0033",
+    "--lf-color-data-3": "#b30059",
+    "--lf-color-data-4": "#ff7700",
+    "--lf-color-data-5": "#ffd200",
+    "--lf-color-data-6": "#d933ff",
+    "--lf-color-data-7": "#ff5e00",
+    "--lf-color-spinner": "#ff5500",
+    "--lf-color-on-spinner": "#ffe6d9",
+    "--lf-ui-border-radius": "0.5em",
+    "--lf-ui-radius-ripple": "50%",
+    "--lf-font-family-primary": "Cormorant Garamond, serif",
+    "--lf-font-family-monospace": "Jet Brains Mono, monospace",
+    "--lf-font-size": "15px"
+  }
+};
 const ERIS = {
   font: [LF_THEME_FONTS_FONTFACE.oswald, LF_THEME_FONTS_FONTFACE.xanhMono],
   isDark: true,
@@ -2427,6 +2478,72 @@ const SAKURA = {
     "--lf-font-family-monospace": "Raleway, sans-serif"
   }
 };
+const SEPULCHRE = {
+  font: [
+    LF_THEME_FONTS_FONTFACE.ebGaramond,
+    LF_THEME_FONTS_FONTFACE.jetBrainsMono
+  ],
+  isDark: false,
+  variables: {
+    ...LIGHT.variables,
+    "--lf-color-bg": "#f5eee1",
+    // warm parchment
+    "--lf-color-surface": "#f0e4d2",
+    // slightly darker parchment
+    "--lf-color-drawer": "#efe1cc",
+    "--lf-color-header": "#efe1cc",
+    "--lf-color-border": "#c5b39a",
+    // aged bronze
+    "--lf-color-on-bg": "#2b2117",
+    // soot brown
+    "--lf-color-on-surface": "#261c13",
+    "--lf-color-on-border": "#715e47",
+    "--lf-color-link": "#8a5c2b",
+    // inked sepia
+    "--lf-color-on-link": "#fdf5e8",
+    "--lf-color-primary": "#d09c3f",
+    // candle flame gold
+    "--lf-color-on-primary": "#1b1408",
+    "--lf-color-secondary": "#a56a4a",
+    // terracotta / clay
+    "--lf-color-on-secondary": "#fff7ee",
+    "--lf-color-danger": "#b84a4a",
+    // dried blood
+    "--lf-color-on-danger": "#fff5f5",
+    "--lf-color-warning": "#d59c3b",
+    // warm amber
+    "--lf-color-on-warning": "#221408",
+    "--lf-color-success": "#6e9b4d",
+    // olive green
+    "--lf-color-on-success": "#0f180a",
+    "--lf-color-info": "#6683a6",
+    // dusty chapel blue
+    "--lf-color-on-info": "#f7fbff",
+    "--lf-color-data-1": "#c7894a",
+    // warm ochre
+    "--lf-color-data-2": "#b45b5b",
+    // muted red
+    "--lf-color-data-3": "#7a8d5a",
+    // moss
+    "--lf-color-data-4": "#8b7260",
+    // incense smoke
+    "--lf-color-data-5": "#c7a86a",
+    // aged gold
+    "--lf-color-data-6": "#7b8fa8",
+    // dusty blue-grey
+    "--lf-color-data-7": "#9b6b4c",
+    // burnt umber
+    "--lf-color-spinner": "#b38b4e",
+    // brass
+    "--lf-color-on-spinner": "#fdf6e9",
+    "--lf-font-family-primary": "'E B Garamond', serif",
+    "--lf-font-family-monospace": "'JetBrains Mono', monospace",
+    "--lf-font-size": "16px",
+    "--lf-ui-border-radius": "0.35rem",
+    "--lf-ui-radius-ripple": "50%",
+    "--lf-ui-box-shadow-modal": "0 18px 45px rgba(80, 55, 20, 0.45)"
+  }
+};
 const STEAMPUNK = {
   font: [
     LF_THEME_FONTS_FONTFACE.IMFellEnglishSC,
@@ -2494,6 +2611,48 @@ const URBAN = {
     "--lf-ui-radius-ripple": "50%"
   }
 };
+const VOIDFORGE = {
+  font: [LF_THEME_FONTS_FONTFACE.oswald, LF_THEME_FONTS_FONTFACE.xanhMono],
+  isDark: true,
+  variables: {
+    ...DARK.variables,
+    "--lf-color-bg": "#020308",
+    "--lf-color-surface": "#050818",
+    "--lf-color-drawer": "#050818",
+    "--lf-color-header": "#050818",
+    "--lf-color-border": "#151824",
+    "--lf-color-primary": "#27f3ff",
+    // cyan-teal glow
+    "--lf-color-on-primary": "#020309",
+    "--lf-color-secondary": "#a855ff",
+    // magenta-violet glow
+    "--lf-color-on-secondary": "#05010b",
+    "--lf-color-on-bg": "#e4ecff",
+    "--lf-color-on-surface": "#d5d9ff",
+    "--lf-color-on-border": "#8b93c4",
+    "--lf-color-link": "#53b7ff",
+    "--lf-color-on-link": "#010308",
+    "--lf-color-data-1": "#26ffe0",
+    // teal
+    "--lf-color-data-2": "#ff6bcb",
+    // pink
+    "--lf-color-data-3": "#9b6bff",
+    // violet
+    "--lf-color-data-4": "#4bff9b",
+    // mint
+    "--lf-color-data-5": "#ffe45e",
+    // yellow
+    "--lf-color-data-6": "#ff9b4b",
+    // orange
+    "--lf-color-data-7": "#4bc7ff",
+    // cyan
+    "--lf-color-spinner": "#262a3c",
+    "--lf-color-on-spinner": "#cfe5ff",
+    "--lf-ui-border-radius": "0.75em",
+    "--lf-ui-radius-ripple": "50%",
+    "--lf-font-size": "15px"
+  }
+};
 const WIZARDRY = {
   font: [LF_THEME_FONTS_FONTFACE.uncialAntiqua, LF_THEME_FONTS_FONTFACE.cinzel],
   isDark: true,
@@ -2529,6 +2688,7 @@ const WIZARDRY = {
 };
 const THEME_LIST = {
   abyss: ABYSS,
+  bloodmoon: BLOODMOON,
   dark: DARK,
   eris: ERIS,
   light: LIGHT,
@@ -2536,8 +2696,10 @@ const THEME_LIST = {
   night: NIGHT,
   pastel: PASTEL,
   sakura: SAKURA,
+  sepulchre: SEPULCHRE,
   steampunk: STEAMPUNK,
   urban: URBAN,
+  voidforge: VOIDFORGE,
   wizardry: WIZARDRY
 };
 const LF_ICONS_REGISTRY = {
@@ -2713,7 +2875,7 @@ const LF_ICONS_REGISTRY = {
   zip: "zip"
 };
 export {
-  LF_SLIDER_BLOCKS as $,
+  LF_TREE_PARTS as $,
   AVATAR_COVER as A,
   LF_PLACEHOLDER_PARTS as B,
   CY_ATTRIBUTES as C,
@@ -2737,22 +2899,22 @@ export {
   LF_TEXTFIELD_BLOCKS as U,
   LF_TEXTFIELD_PARTS as V,
   LF_TEXTFIELD_PROPS as W,
-  LF_TREE_BLOCKS as X,
-  LF_TREE_PARTS as Y,
-  LF_TREE_PROPS as Z,
-  LF_TREE_CSS_VARIABLES as _,
+  LF_AUTOCOMPLETE_BLOCKS as X,
+  LF_AUTOCOMPLETE_PARTS as Y,
+  LF_AUTOCOMPLETE_PROPS as Z,
+  LF_TREE_BLOCKS as _,
   LF_MESSENGER_BLOCKS as a,
   LF_CHIP_BLOCKS as a$,
-  LF_SLIDER_PARTS as a0,
-  LF_SLIDER_CSS_VARIABLES as a1,
-  LF_SLIDER_PROPS as a2,
-  LF_DRAWER_BLOCKS as a3,
-  LF_DRAWER_PARTS as a4,
-  LF_DRAWER_PROPS as a5,
-  LF_DRAWER_SLOT as a6,
-  LF_EFFECTS_FOCUSABLES as a7,
-  LF_MULTIINPUT_BLOCKS as a8,
-  LF_MULTIINPUT_PARTS as a9,
+  LF_TREE_PROPS as a0,
+  LF_TREE_CSS_VARIABLES as a1,
+  LF_SLIDER_BLOCKS as a2,
+  LF_SLIDER_PARTS as a3,
+  LF_SLIDER_CSS_VARIABLES as a4,
+  LF_SLIDER_PROPS as a5,
+  LF_DRAWER_BLOCKS as a6,
+  LF_DRAWER_PARTS as a7,
+  LF_DRAWER_PROPS as a8,
+  LF_DRAWER_SLOT as a9,
   LF_RADIO_PROPS as aA,
   LF_TOAST_BLOCKS as aB,
   LF_TOAST_PARTS as aC,
@@ -2780,14 +2942,14 @@ export {
   LF_CHAT_BLOCKS as aY,
   LF_CHAT_PARTS as aZ,
   LF_CHAT_PROPS as a_,
-  LF_MULTIINPUT_PROPS as aa,
-  LF_IMAGEVIEWER_BLOCKS as ab,
-  LF_IMAGEVIEWER_PARTS as ac,
-  LF_IMAGEVIEWER_PROPS as ad,
-  IDS as ae,
-  LF_AUTOCOMPLETE_BLOCKS as af,
-  LF_AUTOCOMPLETE_PARTS as ag,
-  LF_AUTOCOMPLETE_PROPS as ah,
+  LF_EFFECTS_FOCUSABLES as aa,
+  LF_MULTIINPUT_BLOCKS as ab,
+  LF_MULTIINPUT_PARTS as ac,
+  LF_MULTIINPUT_PROPS as ad,
+  LF_IMAGEVIEWER_BLOCKS as ae,
+  LF_IMAGEVIEWER_PARTS as af,
+  LF_IMAGEVIEWER_PROPS as ag,
+  IDS as ah,
   LF_COMPARE_BLOCKS as ai,
   LF_COMPARE_PARTS as aj,
   LF_COMPARE_CSS_VARS as ak,
@@ -2882,4 +3044,4 @@ export {
   LF_HEADER_SLOT as y,
   LF_PLACEHOLDER_BLOCKS as z
 };
-//# sourceMappingURL=lf-widgets-foundations-C0mOm286.js.map
+//# sourceMappingURL=lf-widgets-foundations-Da0GoFKi.js.map
