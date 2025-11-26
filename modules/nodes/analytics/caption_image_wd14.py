@@ -5,7 +5,7 @@ from ...utils.constants import FUNCTION, Input
 from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.conversion import tensor_to_pil
 from ...utils.helpers.logic import normalize_input_image, normalize_list_to_value
-from ...utils.helpers.tagging import build_id2label
+from ...utils.helpers.tagging import tag_image
 
 #region LF_CaptionImageWD14
 class LF_CaptionImageWD14:
@@ -106,54 +106,16 @@ class LF_CaptionImageWD14:
             if b.strip()
         ]
 
-        id2lab = build_id2label(model)
-
         for idx, img_tensor in enumerate(images):
-            pil_img = tensor_to_pil(img_tensor)
-            try:
-                inputs = processor(images=pil_img, return_tensors="pt") # HF‐style API
-            except TypeError:
-                try:
-                    inputs = processor(pil_img, return_tensors="pt") # positional + return_tensors
-                except TypeError:
-                    raw = processor(pil_img)  # pure transform
-                    if isinstance(raw, torch.Tensor):
-                        inputs = {"pixel_values": raw.unsqueeze(0)}
-                    elif isinstance(raw, dict):
-                        inputs = raw
-                    else:
-                        raise RuntimeError(f"Unsupported processor output: {type(raw)}")
-
-            with torch.no_grad():
-                try:
-                    outputs = model(**inputs)
-                except TypeError:
-                    if isinstance(inputs, dict) and "pixel_values" in inputs:
-                        x = inputs["pixel_values"]
-                    else:
-                        x = next(v for v in inputs.values() if torch.is_tensor(v))
-                    outputs = model(x)
-                logits = outputs.logits if hasattr(outputs, "logits") else outputs
-
-            probs = logits.sigmoid().cpu().numpy()[0]
-
-            candidates = []
-            for i, p in enumerate(probs):
-                if p < thr:
-                    continue
-                tag = id2lab[i]
-                if remove_underscore:
-                    tag = tag.replace("_", " ")
-                candidates.append((tag, float(p)))
-
-            filtered = [
-                (tag, conf)
-                for tag, conf in candidates
-                if tag.lower() not in raw_blacklist
-            ]
-
-            filtered.sort(key=lambda x: x[1], reverse=True)
-            pairs = filtered[:k]
+            pairs = tag_image(
+                processor=processor,
+                model=model,
+                image_tensor=img_tensor,
+                threshold=thr,
+                top_k=k,
+                remove_underscore=remove_underscore,
+                blacklist=raw_blacklist,
+            )
 
             tags, _ = zip(*pairs) if len(pairs) > 0 else ([], [])
             for tag in tags:

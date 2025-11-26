@@ -5,7 +5,7 @@
     "name": "Luca Foscili",
     "url": "https://www.lucafoscili.com"
   },
-  "version": "2.3.0",
+  "version": "2.4.0",
   "type": "module",
   "scripts": {
     "clean": "node ./web/src/scripts/clean.js",
@@ -19,10 +19,10 @@
     "test:watch": "vitest"
   },
   "devDependencies": {
-    "@lf-widgets/assets": "2.0.0",
-    "@lf-widgets/core": "2.0.0",
-    "@lf-widgets/foundations": "2.0.0",
-    "@lf-widgets/framework": "2.0.0",
+    "@lf-widgets/assets": "2.0.1",
+    "@lf-widgets/core": "2.0.1",
+    "@lf-widgets/foundations": "2.0.1",
+    "@lf-widgets/framework": "2.0.1",
     "@types/jsdom": "^27",
     "@types/node": "^24.9.2",
     "fs-extra": "^11",

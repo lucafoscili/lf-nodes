@@ -15,6 +15,7 @@ from ...utils.helpers.api import get_resource_url
 from ...utils.helpers.comfy import get_comfy_dir, resolve_filepath
 from ...utils.helpers.conversion import base64_to_tensor, convert_to_boolean, convert_to_float, convert_to_int, tensor_to_pil
 from ...utils.helpers.editing import get_editing_context
+from ...utils.helpers.tagging import apply_wd14_tagging_to_prompt
 
 # region Debug Preview Save
 DEBUG_PREVIEW_SAVES = False # Toggle debug preview saves. Hardwired to False for normal runs; set True when debugging.
@@ -1174,6 +1175,9 @@ def apply_inpaint_filter(image: torch.Tensor, settings: dict) -> FilterResult:
     context_positive_conditioning = context.get("positive_conditioning")
     context_negative_conditioning = context.get("negative_conditioning")
 
+    wd14_model = context.get("wd14_model")
+    wd14_processor = context.get("wd14_processor")
+
     mask_b64 = settings.get("b64_canvas") or settings.get("mask_canvas") or settings.get("mask")
     if not mask_b64:
         raise ValueError("Missing brush mask for inpaint filter.")
@@ -1303,6 +1307,8 @@ def apply_inpaint_filter(image: torch.Tensor, settings: dict) -> FilterResult:
             "positive_conditioning": context_positive_conditioning,
             "negative_conditioning": context_negative_conditioning,
             "apply_unsharp_mask": apply_unsharp_mask,
+            "wd14_model": wd14_model,
+            "wd14_processor": wd14_processor,
         }
     )
 
@@ -1359,6 +1365,9 @@ def apply_inpaint_filter_tensor(
     """
     device = getattr(getattr(vae, "first_stage_model", None), "device", None) or image.device
 
+    positive_prompt = str(settings.get("positive_prompt") or "")
+    negative_prompt = str(settings.get("negative_prompt") or "")
+
     base_image = image.to(device=device, dtype=torch.float32)
     m = mask
     if isinstance(m, (list, tuple)):
@@ -1375,7 +1384,6 @@ def apply_inpaint_filter_tensor(
     else:
         raise ValueError("Unsupported MASK tensor shape.")
 
-    # Original image size before any padding (used for final crop)
     orig_h, orig_w = int(base_image.shape[1]), int(base_image.shape[2])
 
     h, w = orig_h, orig_w
@@ -1386,41 +1394,32 @@ def apply_inpaint_filter_tensor(
     # Use a binary version for ROI/conditioning; a processed soft mask is captured later for final compositing.
     m = (m > 0.5).float()
 
-    # If the brush comes close to image edges, pad the image/mask outward so any
-    # model boundary artifacts fall outside the original frame (cheap outpainting).
-    # Use a small band instead of a single pixel so near-edge strokes also trigger.
     edge_band = 4
     touches_top = bool((m[:, :edge_band, :] > 0.5).any())
     touches_bottom = bool((m[:, -edge_band:, :] > 0.5).any())
     touches_left = bool((m[:, :, :edge_band] > 0.5).any())
     touches_right = bool((m[:, :, -edge_band:] > 0.5).any())
 
-    pad_margin = 32  # outpainting margin in pixels
-    pad_top = pad_margin if touches_top else 0
-    pad_bottom = pad_margin if touches_bottom else 0
-    pad_left = pad_margin if touches_left else 0
-    pad_right = pad_margin if touches_right else 0
-
-    if pad_top or pad_bottom or pad_left or pad_right:
-        # Pad image by replicating edge pixels outward.
-        # base_image: (B, H, W, C) -> pad H and W, keep channels unchanged.
-        base_image = F.pad(
-            base_image,
-            (0, 0, pad_left, pad_right, pad_top, pad_bottom),
-            mode="replicate",
-        )
-        # Pad mask with ones so the inpaint region extends into the outpaint margin.
-        # This lets the model hallucinate beyond the original frame; the final
-        # crop and safe-border logic will decide what remains visible.
-        m = F.pad(
-            m.unsqueeze(1),
-            (pad_left, pad_right, pad_top, pad_bottom),
-            mode="constant",
-            value=1.0,
-        ).squeeze(1)
-
-    # Updated working size after optional padding.
-    h, w = int(base_image.shape[1]), int(base_image.shape[2])
+    wd14_tagging = convert_to_boolean(settings.get("wd14_tagging"))
+    if wd14_tagging:
+        wd14_model = settings.get("wd14_model")
+        wd14_processor = settings.get("wd14_processor")
+        if wd14_model and wd14_processor:
+            wd14_image, _, _, _ = _prepare_inpaint_region(
+                base_image=base_image,
+                mask_tensor=m,
+                vae=vae,
+                settings=settings,
+            )
+            _save_tensor_preview(wd14_image, "wd14", "temp")
+            positive_prompt = apply_wd14_tagging_to_prompt(
+                positive_prompt,
+                wd14_image,
+                wd14_model,
+                wd14_processor,
+                threshold=0.70,
+                top_k=10,
+            )
 
     conditioning_mix = _normalize_conditioning_mix(settings.get("conditioning_mix"))
 
@@ -1452,14 +1451,46 @@ def apply_inpaint_filter_tensor(
     )
     region_meta["apply_unsharp_mask"] = apply_unsharp_mask
 
+    inner_h = int(work_image.shape[1])
+    inner_w = int(work_image.shape[2])
+    outpaint_margin = 32
+
+    pad_top_patch = outpaint_margin if touches_top else 0
+    pad_bottom_patch = outpaint_margin if touches_bottom else 0
+    pad_left_patch = outpaint_margin if touches_left else 0
+    pad_right_patch = outpaint_margin if touches_right else 0
+
+    if pad_top_patch or pad_bottom_patch or pad_left_patch or pad_right_patch:
+        work_image = F.pad(
+            work_image,
+            (0, 0, pad_left_patch, pad_right_patch, pad_top_patch, pad_bottom_patch),
+            mode="replicate",
+        )
+        wm = work_mask_soft.unsqueeze(1)
+        wm = F.pad(
+            wm,
+            (pad_left_patch, pad_right_patch, pad_top_patch, pad_bottom_patch),
+            mode="constant",
+            value=1.0,
+        )
+        work_mask_soft = wm.squeeze(1) # 3-channel visualization of the mask (B, H, W, 3)
+        _save_tensor_preview(
+            work_mask_soft.unsqueeze(-1).repeat(1, 1, 1, 3),
+            "inpaint_region_mask_padded",
+            "temp",
+        )
+        _save_tensor_preview(work_image, "inpaint_region_padded", "temp")
+    else:
+        pad_top_patch = pad_bottom_patch = pad_left_patch = pad_right_patch = 0
+
     processed_region = perform_inpaint(
         model=model,
         clip=clip,
         vae=vae,
         image=work_image,
         mask=work_mask_soft,
-        positive_prompt=str(settings.get("positive_prompt") or ""),
-        negative_prompt=str(settings.get("negative_prompt") or ""),
+        positive_prompt=positive_prompt,
+        negative_prompt=negative_prompt,
         sampler_name=str(settings.get("sampler") or "dpmpp_2m"),
         scheduler_name=str(settings.get("scheduler") or "karras"),
         steps=_normalize_steps(settings.get("steps")),
@@ -1473,7 +1504,24 @@ def apply_inpaint_filter_tensor(
         conditioning_mode=conditioning_mode,
     )
 
-    _ = _save_tensor_preview(processed_region, "inpaint_region", str(settings.get("resource_type") or settings.get("output_type") or "temp"))
+    if pad_top_patch or pad_bottom_patch or pad_left_patch or pad_right_patch:
+        _ = _save_tensor_preview(
+            processed_region,
+            "inpaint_region_padded_after",
+            str(settings.get("resource_type") or settings.get("output_type") or "temp"),
+        )
+        processed_region = processed_region[
+            :,
+            pad_top_patch : pad_top_patch + inner_h,
+            pad_left_patch : pad_left_patch + inner_w,
+            :,
+        ]
+
+    _ = _save_tensor_preview(
+        processed_region,
+        "inpaint_region",
+        str(settings.get("resource_type") or settings.get("output_type") or "temp"),
+    )
 
     processed, info = _finalize_inpaint_output(
         processed_region=processed_region,
@@ -1482,15 +1530,7 @@ def apply_inpaint_filter_tensor(
         meta=region_meta,
     )
 
-    # If we padded for outpainting, crop back to the original frame.
-    if pad_top or pad_bottom or pad_left or pad_right:
-        crop_y0 = pad_top
-        crop_y1 = pad_top + orig_h
-        crop_x0 = pad_left
-        crop_x1 = pad_left + orig_w
-        processed = processed[:, crop_y0:crop_y1, crop_x0:crop_x1, :]
-    else:
-        processed = processed[:, :orig_h, :orig_w, :]
+    processed = processed[:, :orig_h, :orig_w, :]
     if not apply_unsharp_mask:
         info["unsharp_mask"] = "disabled"
 

@@ -1,5 +1,5 @@
-import { g as getLfFramework } from "../../js/lf-widgets-framework-BeY91T9m.js";
-import "../../js/lf-widgets-foundations-C0mOm286.js";
+import { g as getLfFramework } from "../../js/lf-widgets-framework-DQgbVzd-.js";
+import "../../js/lf-widgets-foundations-Da0GoFKi.js";
 (function initLoginBootstrap() {
   const hasComfyApp = typeof comfyAPI !== "undefined" && (comfyAPI == null ? void 0 : comfyAPI.api) && (comfyAPI == null ? void 0 : comfyAPI.app);
   if (hasComfyApp) {

@@ -41,6 +41,12 @@ class LF_LoadAndEditImages:
                 "negative_conditioning": (Input.CONDITIONING, {
                     "tooltip": "Optional negative conditioning to reuse during inpaint edits."
                 }),
+                "wd14_processor": (Input.CLIP_PROCESSOR, {
+                    "tooltip": "Optional WD14 processor for tagging inpaint patches."
+                }),
+                "wd14_model": (Input.CLIP_MODEL, {
+                    "tooltip": "Optional WD14 model for tagging inpaint patches."
+                }),
                 "config": (Input.JSON, {
                     "tooltip": "Optional image editor configuration JSON (navigation/defaults/selection)."
                 }),
@@ -109,6 +115,9 @@ class LF_LoadAndEditImages:
         positive_conditioning_value = normalize_conditioning(kwargs.get("positive_conditioning"))
         negative_conditioning_value = normalize_conditioning(kwargs.get("negative_conditioning"))
 
+        wd14_processor_value = normalize_list_to_value(kwargs.get("wd14_processor"))
+        wd14_model_value = normalize_list_to_value(kwargs.get("wd14_model"))
+
         config_raw = kwargs.get("config")
         try:
             config_value = normalize_json_input(config_raw) if config_raw is not None else None
@@ -132,6 +141,8 @@ class LF_LoadAndEditImages:
             seed=seed_value,
             positive_conditioning=positive_conditioning_value,
             negative_conditioning=negative_conditioning_value,
+            wd14_processor=wd14_processor_value,
+            wd14_model=wd14_model_value,
         )
 
         safe_send_sync(

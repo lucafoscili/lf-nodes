@@ -16,17 +16,18 @@ export const DIFFUSION_SETTINGS: Pick<ImageEditorFilters, 'inpaint'> = {
     controlIds: ImageEditorInpaintIds,
     hasCanvasAction: true,
     settings: {
+      apply_unsharp_mask: true,
       b64_canvas: '',
       cfg: 7,
+      conditioning_mix: 0,
       denoise_percentage: 40,
-      steps: 16,
-      positive_prompt: '',
       negative_prompt: '',
+      positive_prompt: '',
       sampler: 'dpmpp_2m',
       scheduler: 'beta',
+      steps: 16,
       upsample_target: 2048,
-      conditioning_mix: 0,
-      apply_unsharp_mask: true,
+      wd14_tagging: false,
     },
     configs: {
       [ImageEditorControls.Multiinput]: [
@@ -49,6 +50,19 @@ export const DIFFUSION_SETTINGS: Pick<ImageEditorFilters, 'inpaint'> = {
           title: 'Negative prompt applied to masked pixels.',
           mode: 'tags',
           allowFreeInput: true,
+        },
+      ],
+      [ImageEditorControls.Toggle]: [
+        {
+          ariaLabel: 'WD14 tagging',
+          controlType: ImageEditorControls.Toggle,
+          defaultValue: false,
+          id: ImageEditorToggleIds.Wd14Tagging,
+          isMandatory: false,
+          off: 'false',
+          on: 'true',
+          title:
+            'Automatically tag the inpaint patch with WD14 and add tags to conditioning. Threshold: 0.70, Top K: 10.',
         },
       ],
       [ImageEditorControls.Slider]: [
@@ -149,15 +163,15 @@ export const INPAINT_ADV: ImageEditorInpaintFilter = {
   hasCanvasAction: true,
   settings: {
     ...DIFFUSION_SETTINGS.inpaint!.settings,
-    conditioning_mix: 0,
     apply_unsharp_mask: true,
-    roi_auto: true,
-    roi_padding: 32,
-    roi_align: 8,
-    roi_align_auto: false,
-    roi_min_size: 64,
+    conditioning_mix: 0,
     dilate: 0,
     feather: 0,
+    roi_align: 8,
+    roi_align_auto: false,
+    roi_auto: true,
+    roi_min_size: 64,
+    roi_padding: 32,
     seed: 42,
   },
   configs: {
@@ -338,6 +352,17 @@ export const INPAINT_ADV: ImageEditorInpaintFilter = {
       },
     ],
     [ImageEditorControls.Toggle]: [
+      {
+        ariaLabel: 'Enable WD14 tagging',
+        controlType: ImageEditorControls.Toggle,
+        defaultValue: false,
+        id: ImageEditorToggleIds.Wd14Tagging,
+        isMandatory: false,
+        off: 'false',
+        on: 'true',
+        title:
+          'Automatically tag the inpaint patch with WD14 and add tags to conditioning. Threshold: 0.70, Top K: 10.',
+      },
       {
         ariaLabel: 'Auto-align ROI',
         controlType: ImageEditorControls.Toggle,
