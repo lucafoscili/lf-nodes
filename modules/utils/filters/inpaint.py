@@ -1473,7 +1473,7 @@ def apply_inpaint_filter_tensor(
             mode="constant",
             value=1.0,
         )
-        work_mask_soft = wm.squeeze(1) # 3‑channel visualization of the mask (B, H, W, 3)
+        work_mask_soft = wm.squeeze(1) # 3-channel visualization of the mask (B, H, W, 3)
         _save_tensor_preview(
             work_mask_soft.unsqueeze(-1).repeat(1, 1, 1, 3),
             "inpaint_region_mask_padded",
