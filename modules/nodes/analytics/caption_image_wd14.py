@@ -3,7 +3,6 @@ import torch
 from . import CATEGORY
 from ...utils.constants import FUNCTION, Input
 from ...utils.helpers.comfy import safe_send_sync
-from ...utils.helpers.conversion import tensor_to_pil
 from ...utils.helpers.logic import normalize_input_image, normalize_list_to_value
 from ...utils.helpers.tagging import tag_image
 
