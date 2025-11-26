@@ -18,7 +18,7 @@ from ...utils.helpers.editing import get_editing_context
 from ...utils.helpers.tagging import apply_wd14_tagging_to_prompt
 
 # region Debug Preview Save
-DEBUG_PREVIEW_SAVES = True # Toggle debug preview saves. Hardwired to False for normal runs; set True when debugging.
+DEBUG_PREVIEW_SAVES = False # Toggle debug preview saves. Hardwired to False for normal runs; set True when debugging.
 
 FilterResult = Tuple[torch.Tensor, Dict[str, str]]
 
