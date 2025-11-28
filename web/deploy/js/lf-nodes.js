@@ -1252,6 +1252,7 @@ var NodeName;
   NodeName2["loadLoraTags"] = "LF_LoadLoraTags";
   NodeName2["loadMetadata"] = "LF_LoadMetadata";
   NodeName2["loadWd14Model"] = "LF_LoadWD14Model";
+  NodeName2["loadWd14Onnx"] = "LF_LoadWD14Onnx";
   NodeName2["loraAndEmbeddingSelector"] = "LF_LoraAndEmbeddingSelector";
   NodeName2["loraSelector"] = "LF_LoraSelector";
   NodeName2["lutApplication"] = "LF_LUTApplication";
@@ -1610,6 +1611,7 @@ const NODE_WIDGET_MAP = {
   LF_LoadLoraTags: [CustomWidgetName.cardsWithChip],
   LF_LoadMetadata: [CustomWidgetName.upload],
   LF_LoadWD14Model: [CustomWidgetName.code],
+  LF_LoadWD14Onnx: [CustomWidgetName.code],
   LF_LoraAndEmbeddingSelector: [CustomWidgetName.card],
   LF_LoraSelector: [CustomWidgetName.card],
   LF_LUTApplication: [CustomWidgetName.compare],

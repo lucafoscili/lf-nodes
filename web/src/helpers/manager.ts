@@ -83,6 +83,7 @@ export const NODE_WIDGET_MAP: NodeWidgetMap = {
   LF_LoadLoraTags: [CustomWidgetName.cardsWithChip],
   LF_LoadMetadata: [CustomWidgetName.upload],
   LF_LoadWD14Model: [CustomWidgetName.code],
+  LF_LoadWD14Onnx: [CustomWidgetName.code],
   LF_LoraAndEmbeddingSelector: [CustomWidgetName.card],
   LF_LoraSelector: [CustomWidgetName.card],
   LF_LUTApplication: [CustomWidgetName.compare],

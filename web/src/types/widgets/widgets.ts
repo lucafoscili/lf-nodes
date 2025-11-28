@@ -116,6 +116,7 @@ export enum NodeName {
   loadLoraTags = 'LF_LoadLoraTags',
   loadMetadata = 'LF_LoadMetadata',
   loadWd14Model = 'LF_LoadWD14Model',
+  loadWd14Onnx = 'LF_LoadWD14Onnx',
   loraAndEmbeddingSelector = 'LF_LoraAndEmbeddingSelector',
   loraSelector = 'LF_LoraSelector',
   lutApplication = 'LF_LUTApplication',

@@ -59,6 +59,7 @@ class Input:
     STRING = "STRING"
     SVG = "SVG"
     REGION_META = "REGION_META"
+    TAGGER = "TAGGER"
     UPSCALE_MODEL = "UPSCALE_MODEL"
     VAE = "VAE"
 
