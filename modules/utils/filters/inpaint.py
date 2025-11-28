@@ -1175,6 +1175,7 @@ def apply_inpaint_filter(image: torch.Tensor, settings: dict) -> FilterResult:
     context_positive_conditioning = context.get("positive_conditioning")
     context_negative_conditioning = context.get("negative_conditioning")
 
+    wd14_tagger = context.get("wd14_tagger")
     wd14_model = context.get("wd14_model")
     wd14_processor = context.get("wd14_processor")
 
@@ -1307,6 +1308,7 @@ def apply_inpaint_filter(image: torch.Tensor, settings: dict) -> FilterResult:
             "positive_conditioning": context_positive_conditioning,
             "negative_conditioning": context_negative_conditioning,
             "apply_unsharp_mask": apply_unsharp_mask,
+            "wd14_tagger": wd14_tagger,
             "wd14_model": wd14_model,
             "wd14_processor": wd14_processor,
         }
@@ -1402,24 +1404,41 @@ def apply_inpaint_filter_tensor(
 
     wd14_tagging = convert_to_boolean(settings.get("wd14_tagging"))
     if wd14_tagging:
+        wd14_tagger = settings.get("wd14_tagger")
         wd14_model = settings.get("wd14_model")
         wd14_processor = settings.get("wd14_processor")
-        if wd14_model and wd14_processor:
-            wd14_image, _, _, _ = _prepare_inpaint_region(
+        if wd14_tagger or (wd14_model and wd14_processor):
+            wd14_image, wd14_mask_soft, _, _ = _prepare_inpaint_region(
                 base_image=base_image,
                 mask_tensor=m,
                 vae=vae,
                 settings=settings,
             )
-            _save_tensor_preview(wd14_image, "wd14", "temp")
-            positive_prompt = apply_wd14_tagging_to_prompt(
-                positive_prompt,
-                wd14_image,
-                wd14_model,
-                wd14_processor,
-                threshold=0.70,
-                top_k=10,
-            )
+            mask_4d = wd14_mask_soft.unsqueeze(-1).clamp(0.0, 1.0)
+            white_bg = torch.ones_like(wd14_image)
+            wd14_input = wd14_image * mask_4d + white_bg * (1.0 - mask_4d)
+            _save_tensor_preview(wd14_input, "wd14", "temp")
+
+            if wd14_tagger and hasattr(wd14_tagger, "tag"):
+                try:
+                    pairs = wd14_tagger.tag(wd14_input)
+                except Exception:
+                    pairs = []
+                if pairs:
+                    tag_strings = [tag for tag, _ in pairs]
+                    if positive_prompt:
+                        positive_prompt = positive_prompt + ", " + ", ".join(tag_strings)
+                    else:
+                        positive_prompt = ", ".join(tag_strings)
+            elif wd14_model and wd14_processor:
+                positive_prompt = apply_wd14_tagging_to_prompt(
+                    positive_prompt,
+                    wd14_input,
+                    wd14_model,
+                    wd14_processor,
+                    threshold=0.70,
+                    top_k=10,
+                )
 
     conditioning_mix = _normalize_conditioning_mix(settings.get("conditioning_mix"))
 

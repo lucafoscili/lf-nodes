@@ -4,61 +4,58 @@ from . import CATEGORY
 from ...utils.constants import FUNCTION, Input
 from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.logic import normalize_input_image, normalize_list_to_value
-from ...utils.helpers.tagging import tag_image
 
-#region LF_CaptionImageWD14
+# region LF_CaptionImageWD14
 class LF_CaptionImageWD14:
     @classmethod
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "processor": (Input.CLIP_PROCESSOR, {
-                    "tooltip": "Processor returned by LF_LoadWD14Model.",
-                }),
-                "model": (Input.CLIP_MODEL, {
-                    "tooltip": "Model returned by LF_LoadWD14Model.",
-                }),
-                "image": (Input.IMAGE, {
-                    "tooltip": "Image tensor to caption."
-                }),
-                "threshold": (Input.FLOAT, {
-                    "default": 0.25,
-                    "min": 0.0,
-                    "max": 1.0,
-                    "step": 0.01,
-                    "tooltip": "Minimum confidence to keep a tag."
-                }),
-                "top_k": (Input.INTEGER, {
-                    "default": 20,
-                    "min": 1,
-                    "step": 1,
-                    "tooltip": "Maximum number of tags to output."
-                }),
-                "remove_underscore": (Input.BOOLEAN, {
-                    "default": True,
-                    "tooltip": "Remove underscores from tags."
-                })
+                "tagger": (
+                    Input.TAGGER,
+                    {
+                        "tooltip": "WD14 TAGGER object (ONNX or HF/timm).",
+                    },
+                ),
+                "image": (
+                    Input.IMAGE,
+                    {
+                        "tooltip": "Image tensor to caption.",
+                    },
+                ),
             },
             "optional": {
-                "blacklist": (Input.STRING, {
-                    "default": "",
-                    "tooltip": "Comma-separated list of tags to ignore."
-                }),
-                "prefix": (Input.STRING, {
-                    "default": "",
-                    "tooltip": "Prefix to add to each caption."
-                }),
-                "suffix": (Input.STRING, {
-                    "default": "",
-                    "tooltip": "Suffix to add to each caption."
-                }),
-                "ui_widget": (Input.LF_COUNT_BAR_CHART, {
-                    "default": {}
-                })
+                "show_probabilities": (
+                    Input.BOOLEAN,
+                    {
+                        "default": False,
+                        "tooltip": "If true, include probabilities next to tags in the console-style caption.",
+                    },
+                ),
+                "prefix": (
+                    Input.STRING,
+                    {
+                        "default": "",
+                        "tooltip": "Prefix to add to each caption.",
+                    },
+                ),
+                "suffix": (
+                    Input.STRING,
+                    {
+                        "default": "",
+                        "tooltip": "Suffix to add to each caption.",
+                    },
+                ),
+                "ui_widget": (
+                    Input.LF_COUNT_BAR_CHART,
+                    {
+                        "default": {},
+                    },
+                ),
             },
             "hidden": {
-                "node_id": "UNIQUE_ID"
-            }
+                "node_id": "UNIQUE_ID",
+            },
         }
 
     CATEGORY = CATEGORY
@@ -70,66 +67,69 @@ class LF_CaptionImageWD14:
         "JSON object with additional metadata.",
         "List of JSON objects with additional metadata.",
         "Chart dataset for visualization.",
-        "Chip dataset for visualization."
+        "Chip dataset for visualization.",
     )
-    RETURN_NAMES = ("string", "string_list", "json", "json_list", "chart_dataset", "chip_dataset")
-    RETURN_TYPES = (Input.STRING, Input.STRING, Input.JSON, Input.JSON, Input.JSON, Input.JSON)
+    RETURN_NAMES = (
+        "string",
+        "string_list",
+        "json",
+        "json_list",
+        "chart_dataset",
+        "chip_dataset",
+    )
+    RETURN_TYPES = (
+        Input.STRING,
+        Input.STRING,
+        Input.JSON,
+        Input.JSON,
+        Input.JSON,
+        Input.JSON,
+    )
 
     def on_exec(self, **kwargs: dict):
         images = normalize_input_image(kwargs["image"])
-        processor = normalize_list_to_value(kwargs["processor"])
-        model = normalize_list_to_value(kwargs["model"])
-        thr = normalize_list_to_value(kwargs["threshold"])
-        k = normalize_list_to_value(kwargs["top_k"])
-        remove_underscore = normalize_list_to_value(kwargs.get("remove_underscore", True))
-        blacklist = normalize_list_to_value(kwargs.get("blacklist", ""))
+        tagger = normalize_list_to_value(kwargs["tagger"])
+        show_probabilities = bool(normalize_list_to_value(kwargs.get("show_probabilities", False)))
         prefix = normalize_list_to_value(kwargs.get("prefix", ""))
         suffix = normalize_list_to_value(kwargs.get("suffix", ""))
 
+        if tagger is None or not hasattr(tagger, "tag"):
+            raise ValueError("Provided TAGGER input is not a valid WD14 tagger.")
+
         string_list: list[str] = []
-        pairs_list: list[dict] = []
+        pairs_list: list[list[tuple[str, float]]] = []
         chart_nodes: list[dict] = []
         chip_nodes: list[dict] = []
         chart_dataset: dict = {
             "columns": [
                 {"id": "Axis_0", "title": "Tag"},
             ],
-            "nodes": chart_nodes
+            "nodes": chart_nodes,
         }
         chip_dataset: dict = {
-            "nodes": chip_nodes
+            "nodes": chip_nodes,
         }
-        raw_blacklist = [
-            b.strip().lower().replace("_", " ")
-            for b in blacklist.split(",")
-            if b.strip()
-        ]
 
         for idx, img_tensor in enumerate(images):
-            pairs = tag_image(
-                processor=processor,
-                model=model,
-                image_tensor=img_tensor,
-                threshold=thr,
-                top_k=k,
-                remove_underscore=remove_underscore,
-                blacklist=raw_blacklist,
-            )
+            if isinstance(img_tensor, torch.Tensor):
+                pairs = tagger.tag(img_tensor)
+            else:
+                pairs = tagger.tag(img_tensor)
 
-            tags, _ = zip(*pairs) if len(pairs) > 0 else ([], [])
-            for tag in tags:
-                conf = pairs[tags.index(tag)][1]
-                conf = round(conf, 3)
+            tags = [tag for tag, _ in pairs]
+
+            for tag, conf in pairs:
+                conf_rounded = round(float(conf), 3)
                 chart_node = {
                     "cells": {
                         "Axis_0": {"value": tag},
-                        "Series_0": { "value": conf },
+                        "Series_0": {"value": conf_rounded},
                     },
-                    "id": tag
+                    "id": tag,
                 }
                 chip_node = {
                     "id": tag,
-                    "title": "Confidence: {:.2f}".format(conf),
+                    "title": "Confidence: {:.2f}".format(conf_rounded),
                     "value": tag,
                 }
 
@@ -138,23 +138,37 @@ class LF_CaptionImageWD14:
 
             pairs_list.append(pairs)
 
-            complete_string = f"{prefix + ', ' if prefix else ''}{', '.join(tags)}{', ' + suffix if suffix else ''}"
-            string_list.append(complete_string)
+            caption_body = ", ".join(tags)
+            if show_probabilities and pairs:
+                caption_body = ", ".join(
+                    f"{tag} ({conf:.2f})" for tag, conf in pairs
+                )
 
-        safe_send_sync("captionimagewd14", {
-            "datasets": {
-                "chart": chart_dataset,
-                "chip": chip_dataset,
-            }
-        }, kwargs.get("node_id"))
+            if prefix:
+                caption_body = f"{prefix}, {caption_body}" if caption_body else prefix
+            if suffix:
+                caption_body = f"{caption_body}, {suffix}" if caption_body else suffix
+
+            string_list.append(caption_body)
+
+        safe_send_sync(
+            "captionimagewd14onnx",
+            {
+                "datasets": {
+                    "chart": chart_dataset,
+                    "chip": chip_dataset,
+                }
+            },
+            kwargs.get("node_id"),
+        )
 
         string_o = string_list[0] if len(string_list) == 1 else string_list
         pairs_o = pairs_list[0] if len(pairs_list) == 1 else pairs_list
 
         if len(string_list) > 1:
-            tag_counts = {}
+            tag_counts: dict[str, int] = {}
             for pairs in pairs_list:
-                for tag, conf in pairs:
+                for tag, _ in pairs:
                     tag_counts[tag] = tag_counts.get(tag, 0) + 1
 
             chart_nodes = []
@@ -165,7 +179,7 @@ class LF_CaptionImageWD14:
                         "Axis_0": {"value": tag},
                         "Series_0": {"value": count},
                     },
-                    "id": tag
+                    "id": tag,
                 }
                 chart_nodes.append(chart_node)
 
@@ -176,30 +190,34 @@ class LF_CaptionImageWD14:
                 }
                 chip_nodes.append(chip_node)
 
-            chart_dataset["columns"].append({
-                "id": "Series_0",
-                "shape": "number",
-                "title": "Count"
-            })
+            chart_dataset["columns"].append(
+                {
+                    "id": "Series_0",
+                    "shape": "number",
+                    "title": "Count",
+                }
+            )
             chart_dataset["nodes"] = chart_nodes
             chip_dataset["nodes"] = chip_nodes
 
         else:
-            chart_dataset["columns"].append({
-                "id": "Series_0",
-                "shape": "number",
-                "title": "Confidence"
-            })
+            chart_dataset["columns"].append(
+                {
+                    "id": "Series_0",
+                    "shape": "number",
+                    "title": "Confidence",
+                }
+            )
 
         return (string_o, string_list, pairs_o, pairs_list, chart_dataset, chip_dataset)
 # endregion
 
 # region Mappings
 NODE_CLASS_MAPPINGS = {
-    "LF_CaptionImageWD14": LF_CaptionImageWD14,
+    "LF_CaptionImageWD14Onnx": LF_CaptionImageWD14,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "LF_CaptionImageWD14": "Caption Image (WD14)",
+    "LF_CaptionImageWD14Onnx": "Caption Image (WD14, TAGGER)",
 }
 # endregion
