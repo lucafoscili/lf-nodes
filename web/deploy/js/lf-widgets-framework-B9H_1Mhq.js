@@ -1,4 +1,4 @@
-import { bA as LF_FRAMEWORK_SYMBOL, bB as LF_FRAMEWORK_ALLOWED_ATTRS, bC as LF_FRAMEWORK_ALLOWED_PREFIXES, bD as getComponentProps, bE as markFrameworkReady, bF as LF_COLOR_CODES, C as CY_ATTRIBUTES, b as LF_ATTRIBUTES, bG as LF_EFFECTS_VARS, bH as GLOBAL_STYLES, bI as LF_THEME_ICONS_PREFIX, bJ as LF_THEME_COLORS_PREFIX, bK as LF_THEME_ATTRIBUTE, bL as LF_ICONS_REGISTRY, bM as LF_FRAMEWORK_EVENT_NAME, bN as THEME_LIST } from "./lf-widgets-foundations-Da0GoFKi.js";
+import { bH as LF_FRAMEWORK_SYMBOL, bI as LF_FRAMEWORK_ALLOWED_ATTRS, bJ as LF_FRAMEWORK_ALLOWED_PREFIXES, bK as getComponentProps, bL as markFrameworkReady, bM as LF_COLOR_CODES, C as CY_ATTRIBUTES, b as LF_ATTRIBUTES, bN as LF_EFFECTS_VARS, bO as GLOBAL_STYLES, bP as LF_THEME_ICONS_PREFIX, bQ as LF_THEME_COLORS_PREFIX, bR as LF_THEME_ATTRIBUTE, bS as LF_ICONS_REGISTRY, bT as LF_FRAMEWORK_EVENT_NAME, bU as THEME_LIST } from "./lf-widgets-foundations-BHCEI3uH.js";
 function _mergeNamespaces$1(n, m) {
   m.forEach(function(e) {
     e && typeof e !== "string" && !Array.isArray(e) && Object.keys(e).forEach(function(k) {
@@ -15,12 +15,12 @@ function _mergeNamespaces$1(n, m) {
   });
   return Object.freeze(n);
 }
-var __classPrivateFieldSet$8 = function(receiver, state, value, kind, f) {
+var __classPrivateFieldSet$9 = function(receiver, state, value, kind, f) {
   if (typeof state === "function" ? receiver !== state || true : !state.has(receiver))
     throw new TypeError("Cannot write private member to an object whose class did not declare it");
   return state.set(receiver, value), value;
 };
-var __classPrivateFieldGet$8 = function(receiver, state, kind, f) {
+var __classPrivateFieldGet$9 = function(receiver, state, kind, f) {
   if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
     throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
@@ -30,8 +30,8 @@ class LfColor {
   constructor(lfFramework2) {
     _LfColor_LF_MANAGER.set(this, void 0);
     _LfColor_handleEdgeCases.set(this, (color) => {
-      const { logs } = __classPrivateFieldGet$8(this, _LfColor_LF_MANAGER, "f").debug;
-      const { variables } = __classPrivateFieldGet$8(this, _LfColor_LF_MANAGER, "f").theme.get.current();
+      const { logs } = __classPrivateFieldGet$9(this, _LfColor_LF_MANAGER, "f").debug;
+      const { variables } = __classPrivateFieldGet$9(this, _LfColor_LF_MANAGER, "f").theme.get.current();
       if (color === "transparent") {
         color = variables["--lf-color-bg"];
         logs.new(this, "Received TRANSPARENT color, converted to " + color + " (theme background).");
@@ -51,8 +51,8 @@ class LfColor {
       return brightness > 125 ? "#000000" : "#ffffff";
     };
     this.compute = (color) => {
-      const { logs } = __classPrivateFieldGet$8(this, _LfColor_LF_MANAGER, "f").debug;
-      color = __classPrivateFieldGet$8(this, _LfColor_handleEdgeCases, "f").call(this, color);
+      const { logs } = __classPrivateFieldGet$9(this, _LfColor_LF_MANAGER, "f").debug;
+      color = __classPrivateFieldGet$9(this, _LfColor_handleEdgeCases, "f").call(this, color);
       const lowerColor = color.toLowerCase();
       let isHex = lowerColor.startsWith("#");
       const isHslOrHsla = lowerColor.startsWith("hsl(") || lowerColor.startsWith("hsla(");
@@ -249,7 +249,7 @@ class LfColor {
       //#endregion
       //#region codeToHex
       codeToHex: (color) => {
-        const { logs } = __classPrivateFieldGet$8(this, _LfColor_LF_MANAGER, "f").debug;
+        const { logs } = __classPrivateFieldGet$9(this, _LfColor_LF_MANAGER, "f").debug;
         const code2 = color.toLowerCase();
         if (LF_COLOR_CODES[code2]) {
           return LF_COLOR_CODES[code2];
@@ -269,10 +269,331 @@ class LfColor {
       }
       return `#${randomChannel(brightness) + randomChannel(brightness) + randomChannel(brightness)}`;
     };
-    __classPrivateFieldSet$8(this, _LfColor_LF_MANAGER, lfFramework2);
+    __classPrivateFieldSet$9(this, _LfColor_LF_MANAGER, lfFramework2);
   }
 }
 _LfColor_LF_MANAGER = /* @__PURE__ */ new WeakMap(), _LfColor_handleEdgeCases = /* @__PURE__ */ new WeakMap();
+const createArticle = (nodes = [], partial) => ({
+  ...partial,
+  nodes
+});
+const section = (options) => {
+  const { id, title, children = [], cssStyle } = options;
+  const resolvedChildren = title ? [
+    {
+      id: `${id}-title`,
+      tagName: "h3",
+      value: title
+    },
+    ...children
+  ] : children;
+  return {
+    id,
+    value: "",
+    cssStyle,
+    children: resolvedChildren
+  };
+};
+const paragraph$1 = (options) => {
+  const { id, text: text2, children = [], cssStyle } = options;
+  return {
+    id,
+    tagName: "p",
+    value: text2 ?? "",
+    cssStyle,
+    children
+  };
+};
+const separator = (options) => ({
+  id: options.id,
+  tagName: "hr",
+  value: "",
+  cssStyle: options.cssStyle
+});
+const progressRow = (options) => ({
+  id: options.id,
+  value: "",
+  cells: {
+    lfProgressbar: {
+      lfIcon: options.icon,
+      lfLabel: options.label,
+      lfUiState: options.uiState,
+      shape: "progressbar",
+      value: options.value
+    }
+  }
+});
+const buttonRow = (options) => ({
+  id: options.id,
+  value: "",
+  cells: {
+    lfButton: {
+      lfIcon: options.icon,
+      lfLabel: options.label,
+      lfStyling: options.styling,
+      lfUiState: options.uiState,
+      lfStyle: options.style,
+      shape: "button",
+      value: ""
+    }
+  }
+});
+const codeBlock = (options) => ({
+  id: options.id,
+  value: "",
+  cssStyle: options.cssStyle,
+  cells: {
+    lfCode: {
+      shape: "code",
+      value: options.code,
+      lfLanguage: options.language
+    }
+  }
+});
+const textfieldRow = (options) => ({
+  id: options.id,
+  value: "",
+  cells: {
+    lfTextfield: {
+      shape: "textfield",
+      value: "",
+      lfLabel: options.label,
+      lfValue: options.value ?? "",
+      lfStyle: options.style,
+      lfHtmlAttributes: options.type ? { type: options.type } : void 0,
+      lfHelper: options.helperText ? { value: options.helperText, showWhenFocused: false } : void 0
+    }
+  }
+});
+const card = (options) => ({
+  id: options.id,
+  value: "",
+  cells: {
+    lfCard: {
+      shape: "card",
+      value: "",
+      lfDataset: options.dataset,
+      lfLayout: options.layout,
+      lfUiSize: options.uiSize,
+      lfUiState: options.uiState,
+      lfStyle: options.style
+    }
+  }
+});
+const chart = (options) => ({
+  id: options.id,
+  value: "",
+  cells: {
+    lfChart: {
+      shape: "chart",
+      value: "",
+      lfDataset: options.dataset,
+      lfTypes: options.types,
+      lfAxis: options.axis,
+      lfLegend: options.legend,
+      lfSizeX: options.sizeX,
+      lfSizeY: options.sizeY,
+      lfStyle: options.style
+    }
+  }
+});
+var __classPrivateFieldSet$8 = function(receiver, state, value, kind, f) {
+  if (typeof state === "function" ? receiver !== state || true : !state.has(receiver))
+    throw new TypeError("Cannot write private member to an object whose class did not declare it");
+  return state.set(receiver, value), value;
+};
+var __classPrivateFieldGet$8 = function(receiver, state, kind, f) {
+  if (kind === "a" && !f)
+    throw new TypeError("Private accessor was defined without a getter");
+  if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
+    throw new TypeError("Cannot read private member from an object whose class did not declare it");
+  return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
+};
+var _ArticleBuilder_instances, _ArticleBuilder_dataset, _ArticleBuilder_root, _ArticleBuilder_sections, _ArticleBuilder_paragraphs, _ArticleBuilder_counter, _ArticleBuilder_defaultLayout, _ArticleBuilder_applyLayout, _ArticleBuilder_nextId;
+const ARTICLE_LAYOUT_STYLES = {
+  stack: {},
+  row: {
+    display: "flex",
+    flexDirection: "row",
+    gap: "1.5em",
+    alignItems: "flex-start"
+  },
+  "two-columns": {
+    display: "grid",
+    gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr)",
+    gap: "1.5em"
+  },
+  "hero-top": {
+    display: "flex",
+    flexDirection: "column",
+    gap: "1.5em"
+  },
+  "hero-side": {
+    display: "grid",
+    gridTemplateColumns: "minmax(0, 1.2fr) minmax(0, 1.8fr)",
+    gap: "2em",
+    alignItems: "center"
+  },
+  "cards-grid": {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+    gap: "1.5em"
+  }
+};
+class ArticleBuilder {
+  constructor(options) {
+    _ArticleBuilder_instances.add(this);
+    _ArticleBuilder_dataset.set(this, void 0);
+    _ArticleBuilder_root.set(this, void 0);
+    _ArticleBuilder_sections.set(this, /* @__PURE__ */ new Map());
+    _ArticleBuilder_paragraphs.set(this, /* @__PURE__ */ new Map());
+    _ArticleBuilder_counter.set(this, 0);
+    _ArticleBuilder_defaultLayout.set(this, void 0);
+    this.section = {
+      get: (id2) => this.getSection(id2),
+      add: {
+        empty: (options2) => this.addSection(options2),
+        withText: (options2) => this.addSectionWithText(options2),
+        withLeaf: (options2) => this.addSectionWithLeaf(options2)
+      }
+    };
+    const id = (options == null ? void 0 : options.id) ?? "article-root";
+    __classPrivateFieldSet$8(this, _ArticleBuilder_defaultLayout, options == null ? void 0 : options.layout);
+    __classPrivateFieldSet$8(this, _ArticleBuilder_root, {
+      id,
+      value: (options == null ? void 0 : options.title) ?? "",
+      cssStyle: __classPrivateFieldGet$8(this, _ArticleBuilder_instances, "m", _ArticleBuilder_applyLayout).call(this, __classPrivateFieldGet$8(this, _ArticleBuilder_defaultLayout, "f"), options == null ? void 0 : options.cssStyle),
+      children: []
+    });
+    const datasetProps = (options == null ? void 0 : options.dataset) ?? {};
+    __classPrivateFieldSet$8(this, _ArticleBuilder_dataset, {
+      ...datasetProps,
+      nodes: [__classPrivateFieldGet$8(this, _ArticleBuilder_root, "f")]
+    });
+  }
+  addSection(options) {
+    const id = options.id ?? __classPrivateFieldGet$8(this, _ArticleBuilder_instances, "m", _ArticleBuilder_nextId).call(this, "section");
+    const layout = options.layout ?? __classPrivateFieldGet$8(this, _ArticleBuilder_defaultLayout, "f");
+    const section2 = {
+      id,
+      value: options.title ?? "",
+      cssStyle: __classPrivateFieldGet$8(this, _ArticleBuilder_instances, "m", _ArticleBuilder_applyLayout).call(this, layout, options.cssStyle),
+      children: []
+    };
+    if (!__classPrivateFieldGet$8(this, _ArticleBuilder_root, "f").children) {
+      __classPrivateFieldGet$8(this, _ArticleBuilder_root, "f").children = [];
+    }
+    __classPrivateFieldGet$8(this, _ArticleBuilder_root, "f").children.push(section2);
+    __classPrivateFieldGet$8(this, _ArticleBuilder_sections, "f").set(section2.id, section2);
+    return section2;
+  }
+  getDataset() {
+    return __classPrivateFieldGet$8(this, _ArticleBuilder_dataset, "f");
+  }
+  getSection(id) {
+    return __classPrivateFieldGet$8(this, _ArticleBuilder_sections, "f").get(id);
+  }
+  toDataset() {
+    return this.getDataset();
+  }
+  addParagraph(sectionId, options) {
+    const existingSection = __classPrivateFieldGet$8(this, _ArticleBuilder_sections, "f").get(sectionId);
+    const section2 = existingSection ?? this.addSection({ id: sectionId });
+    const id = (options == null ? void 0 : options.id) ?? __classPrivateFieldGet$8(this, _ArticleBuilder_instances, "m", _ArticleBuilder_nextId).call(this, "paragraph");
+    const paragraph2 = {
+      id,
+      value: (options == null ? void 0 : options.title) ?? "",
+      cssStyle: options == null ? void 0 : options.cssStyle,
+      children: []
+    };
+    if (!section2.children) {
+      section2.children = [];
+    }
+    section2.children.push(paragraph2);
+    __classPrivateFieldGet$8(this, _ArticleBuilder_paragraphs, "f").set(paragraph2.id, paragraph2);
+    if ((options == null ? void 0 : options.text) && options.text.trim().length > 0) {
+      paragraph2.children.push({
+        id: `${paragraph2.id}-text`,
+        value: options.text
+      });
+    }
+    return paragraph2;
+  }
+  getParagraph(id) {
+    return __classPrivateFieldGet$8(this, _ArticleBuilder_paragraphs, "f").get(id);
+  }
+  addLeaf(options) {
+    const { sectionId, paragraphId, node } = options;
+    let section2 = __classPrivateFieldGet$8(this, _ArticleBuilder_sections, "f").get(sectionId);
+    if (!section2) {
+      section2 = this.addSection({ id: sectionId });
+    }
+    let paragraph2;
+    if (paragraphId) {
+      paragraph2 = __classPrivateFieldGet$8(this, _ArticleBuilder_paragraphs, "f").get(paragraphId);
+    }
+    if (!paragraph2) {
+      paragraph2 = this.addParagraph(section2.id, {
+        id: paragraphId
+      });
+    }
+    if (!paragraph2.children) {
+      paragraph2.children = [];
+    }
+    paragraph2.children.push(node);
+    return node;
+  }
+  addSectionWithText(options) {
+    const section2 = this.addSection({
+      id: options.sectionId,
+      title: options.sectionTitle,
+      cssStyle: options.sectionCssStyle,
+      layout: options.layout
+    });
+    const paragraph2 = this.addParagraph(section2.id, {
+      id: options.paragraphId,
+      title: options.paragraphTitle,
+      text: options.text,
+      cssStyle: __classPrivateFieldGet$8(this, _ArticleBuilder_instances, "m", _ArticleBuilder_applyLayout).call(this, options.layout, options.paragraphCssStyle)
+    });
+    return { section: section2, paragraph: paragraph2 };
+  }
+  addSectionWithLeaf(options) {
+    const { section: section2, paragraph: paragraph2 } = this.addSectionWithText({
+      sectionId: options.sectionId,
+      sectionTitle: options.sectionTitle,
+      text: options.text ?? "",
+      paragraphId: options.paragraphId,
+      paragraphTitle: options.paragraphTitle,
+      sectionCssStyle: options.sectionCssStyle,
+      paragraphCssStyle: options.paragraphCssStyle,
+      layout: options.layout
+    });
+    this.addLeaf({
+      sectionId: section2.id,
+      paragraphId: paragraph2.id,
+      node: options.leaf
+    });
+    return { section: section2, paragraph: paragraph2, leaf: options.leaf };
+  }
+}
+_ArticleBuilder_dataset = /* @__PURE__ */ new WeakMap(), _ArticleBuilder_root = /* @__PURE__ */ new WeakMap(), _ArticleBuilder_sections = /* @__PURE__ */ new WeakMap(), _ArticleBuilder_paragraphs = /* @__PURE__ */ new WeakMap(), _ArticleBuilder_counter = /* @__PURE__ */ new WeakMap(), _ArticleBuilder_defaultLayout = /* @__PURE__ */ new WeakMap(), _ArticleBuilder_instances = /* @__PURE__ */ new WeakSet(), _ArticleBuilder_applyLayout = function _ArticleBuilder_applyLayout2(layout, cssStyle) {
+  if (!layout || layout === "stack") {
+    return cssStyle;
+  }
+  const layoutStyle = ARTICLE_LAYOUT_STYLES[layout];
+  if (!layoutStyle) {
+    return cssStyle;
+  }
+  return {
+    ...layoutStyle,
+    ...cssStyle ?? {}
+  };
+}, _ArticleBuilder_nextId = function _ArticleBuilder_nextId2(prefix) {
+  __classPrivateFieldSet$8(this, _ArticleBuilder_counter, __classPrivateFieldGet$8(this, _ArticleBuilder_counter, "f") + 1);
+  return `${prefix}-${__classPrivateFieldGet$8(this, _ArticleBuilder_counter, "f")}`;
+};
+const createArticleBuilder = (options) => new ArticleBuilder(options);
 const buildNodeLookup = (dataset) => {
   var _a;
   const lookup = /* @__PURE__ */ new Map();
@@ -804,6 +1125,25 @@ class LfData {
       resolveTargets: (dataset, target) => nodeResolveTargets(dataset, target),
       sanitizeIds: (dataset, candidates, options) => nodeSanitizeIds(dataset, candidates, options),
       extractCellMetadata: (node, cellId, schema) => extractCellMetadata(node, cellId, schema)
+    };
+    this.article = {
+      core: {
+        create: createArticle,
+        section,
+        paragraph: paragraph$1,
+        separator
+      },
+      shapes: {
+        progressRow,
+        buttonRow,
+        codeBlock,
+        textfieldRow,
+        card,
+        chart
+      },
+      builder: {
+        create: (options) => createArticleBuilder(options)
+      }
     };
   }
 }
@@ -1749,6 +2089,268 @@ class LfEffects {
   }
 }
 _LfEffects_BACKDROP = /* @__PURE__ */ new WeakMap(), _LfEffects_COMPONENTS = /* @__PURE__ */ new WeakMap(), _LfEffects_EFFECTS = /* @__PURE__ */ new WeakMap(), _LfEffects_INTENSITY = /* @__PURE__ */ new WeakMap(), _LfEffects_LIGHTBOX = /* @__PURE__ */ new WeakMap(), _LfEffects_MANAGER = /* @__PURE__ */ new WeakMap(), _LfEffects_TIMEOUT = /* @__PURE__ */ new WeakMap(), _LfEffects_appendToWrapper = /* @__PURE__ */ new WeakMap(), _LfEffects_getParentStyle = /* @__PURE__ */ new WeakMap();
+const createComponentDocsTool = (framework) => {
+  const buildArticleFromReadme = async (componentName) => {
+    const normalizedTag = componentName.startsWith("lf-") ? componentName : `lf-${componentName.replace(/^lf-/, "")}`;
+    const path = `packages/core/src/components/${normalizedTag}/readme.md`;
+    const url = `https://raw.githubusercontent.com/lucafoscili/lf-widgets/main/${path}`;
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        return {
+          type: "text",
+          content: `Documentation for "${normalizedTag}" is not available from GitHub README (status: ${response.status}).`
+        };
+      }
+      const markdown = await response.text();
+      const content = `Here is the official README.md for the ${normalizedTag} component.
+
+${markdown}`;
+      const article = framework.data.article;
+      const builder = article.builder.create({
+        id: "docs-article",
+        title: normalizedTag
+      });
+      builder.section.add.withLeaf({
+        sectionId: "docs-readme",
+        sectionTitle: "README.md",
+        text: "",
+        layout: "stack",
+        leaf: article.shapes.codeBlock({
+          id: "docs-readme",
+          language: "markdown",
+          code: markdown
+        })
+      });
+      const dataset = builder.getDataset();
+      return {
+        type: "article",
+        content,
+        dataset
+      };
+    } catch (error2) {
+      const message = error2 instanceof Error ? error2.message : String(error2 ?? "Unknown");
+      return {
+        type: "text",
+        content: `Error fetching GitHub README for "${normalizedTag}": ${message}`
+      };
+    }
+  };
+  const execute = async (args) => {
+    const rawComponent = args.component;
+    const componentName = typeof rawComponent === "string" ? rawComponent.trim() : "";
+    try {
+      if (!componentName) {
+        return {
+          type: "text",
+          content: "Please provide a specific lf-widgets component tag (e.g. 'lf-button', 'lf-chat'). I will load its README.md from GitHub and base the answer strictly on that content."
+        };
+      }
+      return await buildArticleFromReadme(componentName);
+    } catch (error2) {
+      const message = error2 instanceof Error ? error2.message : String(error2 ?? "Unknown");
+      return {
+        type: "text",
+        content: `Error fetching documentation: ${message}`
+      };
+    }
+  };
+  return {
+    type: "function",
+    function: {
+      name: "get_component_docs",
+      description: [
+        "Retrieve authoritative documentation for an lf-widgets web component.",
+        "Always use this tool whenever the user asks about lf-widgets components.",
+        "If documentation cannot be fetched, clearly say that docs are unavailable instead of fabricating details."
+      ].join(" "),
+      parameters: {
+        type: "object",
+        properties: {
+          component: {
+            type: "string",
+            description: "Component tag to query (e.g. 'lf-button', 'lf-chat'). Leave empty for a high-level framework overview."
+          }
+        }
+      },
+      execute
+    }
+  };
+};
+const createWeatherTool = (framework) => {
+  const execute = async (args) => {
+    var _a, _b, _c, _d, _e, _f, _g, _h;
+    const rawLocation = args.location;
+    const location = typeof rawLocation === "string" && rawLocation.trim().length > 0 ? rawLocation.trim() : "London";
+    try {
+      const response = await fetch(`https://wttr.in/${encodeURIComponent(location)}?format=j1`);
+      if (!response.ok) {
+        return {
+          type: "text",
+          content: `Unable to fetch weather for "${location}". Please check the location name and try again.`
+        };
+      }
+      const data = await response.json();
+      const current = (_a = data == null ? void 0 : data.current_condition) == null ? void 0 : _a[0];
+      const area = (_b = data == null ? void 0 : data.nearest_area) == null ? void 0 : _b[0];
+      if (!current) {
+        return {
+          type: "text",
+          content: `Weather data unavailable for "${location}".`
+        };
+      }
+      const locationName = ((_d = (_c = area == null ? void 0 : area.areaName) == null ? void 0 : _c[0]) == null ? void 0 : _d.value) && typeof area.areaName[0].value === "string" ? area.areaName[0].value : location;
+      const country = ((_f = (_e = area == null ? void 0 : area.country) == null ? void 0 : _e[0]) == null ? void 0 : _f.value) && typeof area.country[0].value === "string" ? area.country[0].value : "";
+      const fullLocation = country && !locationName.includes(country) ? `${locationName}, ${country}` : locationName;
+      const tempC = String(current.temp_C ?? "");
+      const tempF = String(current.temp_F ?? "");
+      const feelsLikeC = String(current.FeelsLikeC ?? "");
+      const feelsLikeF = String(current.FeelsLikeF ?? "");
+      const humidity = String(current.humidity ?? "");
+      const windSpeed = String(current.windspeedKmph ?? "");
+      const windDir = String(current.winddir16Point ?? "");
+      const conditionText = ((_h = (_g = current.weatherDesc) == null ? void 0 : _g[0]) == null ? void 0 : _h.value) ?? current.weatherDesc ?? "Unknown";
+      const summaryLines = [
+        `Weather for ${fullLocation}:`,
+        `- Temperature: ${tempC}°C (${tempF}°F)`,
+        `- Conditions: ${conditionText}`,
+        `- Feels like: ${feelsLikeC}°C (${feelsLikeF}°F)`,
+        `- Humidity: ${humidity}%`,
+        `- Wind: ${windSpeed} km/h ${windDir}`
+      ];
+      const summary = summaryLines.join("\n");
+      const weatherDataset = {
+        nodes: [
+          {
+            id: "weather-location",
+            cells: {
+              text: {
+                value: fullLocation,
+                shape: "text"
+              }
+            }
+          },
+          {
+            id: "weather-temp-c",
+            cells: {
+              text: {
+                value: tempC,
+                shape: "text"
+              }
+            }
+          },
+          {
+            id: "weather-temp-f",
+            cells: {
+              text: {
+                value: tempF,
+                shape: "text"
+              }
+            }
+          },
+          {
+            id: "weather-condition",
+            cells: {
+              text: {
+                value: String(conditionText),
+                shape: "text"
+              }
+            }
+          },
+          {
+            id: "weather-feels-c",
+            cells: {
+              text: {
+                value: feelsLikeC,
+                shape: "text"
+              }
+            }
+          },
+          {
+            id: "weather-feels-f",
+            cells: {
+              text: {
+                value: feelsLikeF,
+                shape: "text"
+              }
+            }
+          },
+          {
+            id: "weather-humidity",
+            cells: {
+              text: {
+                value: humidity,
+                shape: "text"
+              }
+            }
+          },
+          {
+            id: "weather-wind-speed",
+            cells: {
+              text: {
+                value: windSpeed,
+                shape: "text"
+              }
+            }
+          },
+          {
+            id: "weather-wind-dir",
+            cells: {
+              text: {
+                value: windDir,
+                shape: "text"
+              }
+            }
+          }
+        ]
+      };
+      const article = framework.data.article;
+      const builder = article.builder.create({
+        id: "weather-article"
+      });
+      builder.section.add.withLeaf({
+        sectionId: "weather-section",
+        sectionTitle: "",
+        layout: "hero-top",
+        leaf: article.shapes.card({
+          id: "weather-card",
+          dataset: weatherDataset,
+          layout: "weather"
+        })
+      });
+      const articleDataset = builder.getDataset();
+      return {
+        type: "article",
+        content: summary,
+        dataset: articleDataset
+      };
+    } catch (error2) {
+      const message = error2 instanceof Error ? error2.message : String(error2 ?? "Unknown");
+      return {
+        type: "text",
+        content: `Error fetching weather data: ${message}. Please try again.`
+      };
+    }
+  };
+  return {
+    type: "function",
+    function: {
+      name: "get_weather",
+      description: "Get real-time weather information for a city or location. Returns temperature, conditions, humidity, and wind speed.",
+      parameters: {
+        type: "object",
+        properties: {
+          location: {
+            type: "string",
+            description: "City name or generic location (e.g. 'London', 'New York', 'Tokyo')."
+          }
+        },
+        required: ["location"]
+      },
+      execute
+    }
+  };
+};
 var __classPrivateFieldSet$4 = function(receiver, state, value, kind, f) {
   if (typeof state === "function" ? receiver !== state || true : !state.has(receiver))
     throw new TypeError("Cannot write private member to an object whose class did not declare it");
@@ -1757,14 +2359,15 @@ var __classPrivateFieldSet$4 = function(receiver, state, value, kind, f) {
 var __classPrivateFieldGet$4 = function(receiver, state, kind, f) {
   if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
     throw new TypeError("Cannot read private member from an object whose class did not declare it");
-  return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
+  return kind === "m" ? f : state.get(receiver);
 };
-var _LfLLM_DONE_RESPONSE, _LfLLM_IS_ABORT_ERROR, _LfLLM_LF_MANAGER;
+var _LfLLM_DONE_RESPONSE, _LfLLM_IS_ABORT_ERROR, _LfLLM_LF_MANAGER, _LfLLM_BUILTIN_TOOLS, _LfLLM_createBuiltinToolsRegistry;
 class LfLLM {
   constructor(lfFramework2) {
     _LfLLM_DONE_RESPONSE.set(this, "data: [DONE]");
     _LfLLM_IS_ABORT_ERROR.set(this, (e) => e instanceof DOMException && e.name === "AbortError");
     _LfLLM_LF_MANAGER.set(this, void 0);
+    _LfLLM_BUILTIN_TOOLS.set(this, void 0);
     this.utils = {
       hash: (request) => {
         const prune = (obj) => {
@@ -1810,6 +2413,18 @@ class LfLLM {
         return Math.ceil(chars / 4);
       }
     };
+    _LfLLM_createBuiltinToolsRegistry.set(this, () => {
+      const general = {
+        get_weather: createWeatherTool(__classPrivateFieldGet$4(this, _LfLLM_LF_MANAGER, "f"))
+      };
+      const lfw = {
+        get_component_docs: createComponentDocsTool(__classPrivateFieldGet$4(this, _LfLLM_LF_MANAGER, "f"))
+      };
+      return {
+        general,
+        lfw
+      };
+    });
     this.fetch = async (request, url) => {
       try {
         const response = await fetch(`${url}/v1/chat/completions`, {
@@ -1828,6 +2443,19 @@ class LfLLM {
         console.error("Error calling LLM:", error2);
         throw error2;
       }
+    };
+    this.getBuiltinToolsByCategory = () => {
+      return __classPrivateFieldGet$4(this, _LfLLM_BUILTIN_TOOLS, "f");
+    };
+    this.getBuiltinTools = () => {
+      const tools = [];
+      const registry = this.getBuiltinToolsByCategory();
+      Object.values(registry).forEach((group) => {
+        Object.values(group).forEach((tool) => {
+          tools.push(tool);
+        });
+      });
+      return tools;
     };
     this.poll = async (url) => {
       return fetch(url);
@@ -2018,9 +2646,10 @@ class LfLLM {
       throw lastError;
     };
     __classPrivateFieldSet$4(this, _LfLLM_LF_MANAGER, lfFramework2);
+    __classPrivateFieldSet$4(this, _LfLLM_BUILTIN_TOOLS, __classPrivateFieldGet$4(this, _LfLLM_createBuiltinToolsRegistry, "f").call(this));
   }
 }
-_LfLLM_DONE_RESPONSE = /* @__PURE__ */ new WeakMap(), _LfLLM_IS_ABORT_ERROR = /* @__PURE__ */ new WeakMap(), _LfLLM_LF_MANAGER = /* @__PURE__ */ new WeakMap();
+_LfLLM_DONE_RESPONSE = /* @__PURE__ */ new WeakMap(), _LfLLM_IS_ABORT_ERROR = /* @__PURE__ */ new WeakMap(), _LfLLM_LF_MANAGER = /* @__PURE__ */ new WeakMap(), _LfLLM_BUILTIN_TOOLS = /* @__PURE__ */ new WeakMap(), _LfLLM_createBuiltinToolsRegistry = /* @__PURE__ */ new WeakMap();
 var __classPrivateFieldSet$3 = function(receiver, state, value, kind, f) {
   if (typeof state === "function" ? receiver !== state || true : !state.has(receiver))
     throw new TypeError("Cannot write private member to an object whose class did not declare it");
@@ -10931,4 +11560,4 @@ const finalize = (framework) => {
 export {
   getLfFramework as g
 };
-//# sourceMappingURL=lf-widgets-framework-DQgbVzd-.js.map
+//# sourceMappingURL=lf-widgets-framework-B9H_1Mhq.js.map

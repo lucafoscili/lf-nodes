@@ -97,6 +97,45 @@ const LF_BADGE_PROPS = [
   "lfStyle",
   "lfUiState"
 ];
+const LF_BREADCRUMBS_BLOCKS = {
+  breadcrumbs: {
+    _: "breadcrumbs",
+    dot: "dot",
+    empty: "empty",
+    icon: "icon",
+    item: "item",
+    label: "label",
+    list: "list",
+    ripple: "ripple",
+    separator: "separator",
+    truncation: "truncation"
+  }
+};
+const LF_BREADCRUMBS_PARTS = {
+  breadcrumbs: "breadcrumbs",
+  current: "current",
+  empty: "empty",
+  icon: "icon",
+  item: "item",
+  label: "label",
+  list: "list",
+  ripple: "ripple",
+  separator: "separator",
+  truncation: "truncation"
+};
+const LF_BREADCRUMBS_PROPS = [
+  "lfDataset",
+  "lfEmpty",
+  "lfInteractive",
+  "lfMaxItems",
+  "lfRipple",
+  "lfSeparator",
+  "lfShowRoot",
+  "lfStyle",
+  "lfUiSize",
+  "lfUiState",
+  "lfValue"
+];
 const LF_BUTTON_BLOCKS = {
   button: {
     _: "button",
@@ -242,6 +281,7 @@ const LF_CHAT_BLOCKS = {
   },
   commands: {
     _: "commands",
+    clear: "clear",
     stt: "stt"
   },
   input: {
@@ -575,7 +615,6 @@ const LF_HEADER_SLOT = "content";
 const LF_IMAGE_CSS_VARS = {
   brokenImage: "--lf_broken_image",
   height: "--lf_image_height",
-  mask: "--lf_image_mask",
   width: "--lf_image_width"
 };
 const LF_IMAGE_BLOCKS = {
@@ -588,12 +627,12 @@ const LF_IMAGE_PARTS = {
 };
 const LF_IMAGE_PROPS = [
   "lfHtmlAttributes",
+  "lfShowSpinner",
   "lfSizeX",
   "lfSizeY",
   "lfStyle",
   "lfUiState",
-  "lfValue",
-  "lfMode"
+  "lfValue"
 ];
 const LF_IMAGEVIEWER_BLOCKS = {
   detailsGrid: {
@@ -731,6 +770,7 @@ const LF_MESSENGER_BLOCKS = {
     label: "label",
     name: "name",
     nameWrapper: "name-wrapper",
+    saveButton: "save-button",
     status: "status"
   },
   chat: {
@@ -1140,6 +1180,38 @@ const LF_SLIDER_PROPS = [
   "lfUiState",
   "lfValue"
 ];
+const LF_SNACKBAR_CSS_VARIABLES = {
+  duration: "--lf_snackbar_duration"
+};
+const LF_SNACKBAR_BLOCKS = {
+  snackbar: {
+    _: "snackbar",
+    actionButton: "action-button",
+    actions: "actions",
+    closeButton: "close-button",
+    content: "content",
+    icon: "icon",
+    message: "message"
+  }
+};
+const LF_SNACKBAR_PARTS = {
+  actionButton: "action-button",
+  closeButton: "close-button",
+  icon: "icon",
+  message: "message"
+};
+const LF_SNACKBAR_PROPS = [
+  "lfAction",
+  "lfActionCallback",
+  "lfCloseIcon",
+  "lfDuration",
+  "lfIcon",
+  "lfMessage",
+  "lfPosition",
+  "lfStyle",
+  "lfUiSize",
+  "lfUiState"
+];
 const LF_SPINNER_PROPS = [
   "lfActive",
   "lfBarVariant",
@@ -1403,10 +1475,10 @@ const CY_ATTRIBUTES = {
   dropdownButton: "dropdown-button",
   dropdownMenu: "dropdown-menu",
   effects: "effects",
+  fIcon: "f-icon",
   icon: "icon",
   image: "image",
   input: "input",
-  maskedSvg: "masked-svg",
   node: "node",
   portal: "portal",
   rippleSurface: "ripple-surface",
@@ -1441,6 +1513,7 @@ const getComponentProps = () => {
     LfArticle: LF_ARTICLE_PROPS,
     LfAutocomplete: LF_AUTOCOMPLETE_PROPS,
     LfBadge: LF_BADGE_PROPS,
+    LfBreadcrumbs: LF_BREADCRUMBS_PROPS,
     LfButton: LF_BUTTON_PROPS,
     LfCanvas: LF_CANVAS_PROPS,
     LfCard: LF_CARD_PROPS,
@@ -1465,6 +1538,7 @@ const getComponentProps = () => {
     LfRadio: LF_RADIO_PROPS,
     LfSelect: LF_SELECT_PROPS,
     LfSlider: LF_SLIDER_PROPS,
+    LfSnackbar: LF_SNACKBAR_PROPS,
     LfSpinner: LF_SPINNER_PROPS,
     LfSplash: LF_SPLASH_PROPS,
     LfTabbar: LF_TABBAR_PROPS,
@@ -1949,6 +2023,16 @@ const registerStencilAssetProxies = (module) => {
   });
 };
 const GLOBAL_STYLES = {
+  ".f-icon": {
+    "height": "100%",
+    "width": "100%"
+  },
+  ".f-icon > svg": {
+    "display": "block",
+    "fill": "currentColor",
+    "height": "100%",
+    "width": "100%"
+  },
   "::-webkit-scrollbar": {
     "width": "9px"
   },
@@ -2074,7 +2158,12 @@ const LF_THEME_UI_SIZES = [
 });
 const LF_THEME_ICONS_PREFIX = "--lf-icon-";
 const LF_THEME_ICONS = {
-  dropdown: `${LF_THEME_ICONS_PREFIX}dropdown`
+  clear: `${LF_THEME_ICONS_PREFIX}clear`,
+  collapsed: `${LF_THEME_ICONS_PREFIX}collapsed`,
+  dropdown: `${LF_THEME_ICONS_PREFIX}dropdown`,
+  expanded: `${LF_THEME_ICONS_PREFIX}expanded`,
+  info: `${LF_THEME_ICONS_PREFIX}info`,
+  warning: `${LF_THEME_ICONS_PREFIX}warning`
 };
 const LF_THEME_ATTRIBUTE = {
   dark: "lf-dark-theme",
@@ -2124,6 +2213,10 @@ const LF_THEME_BASE_VARS = {
   "--lf-icon-upload": `upload`,
   "--lf-icon-warning": `alert-triangle`,
   "--lf-ui-border-radius": "0",
+  "--lf-ui-alpha-glass-hint": 0.125,
+  "--lf-ui-alpha-glass": 0.375,
+  "--lf-ui-alpha-glass-heavy": 0.75,
+  "--lf-ui-alpha-glass-solid": 0.875,
   "--lf-ui-box-shadow-modal": "0px 0px 7.5px 0px rgba(128, 128, 128, 0.5)",
   "--lf-ui-duration-ripple": "750ms",
   "--lf-ui-height-header": "80px",
@@ -2230,6 +2323,7 @@ const LIGHT = {
 const ABYSS = {
   font: [
     LF_THEME_FONTS_FONTFACE.staatliches,
+    LF_THEME_FONTS_FONTFACE.oswald,
     LF_THEME_FONTS_FONTFACE.montserrat
   ],
   isDark: true,
@@ -2260,13 +2354,15 @@ const ABYSS = {
     "--lf-ui-radius-ripple": "50%",
     "--lf-font-size": "15px",
     "--lf-font-family-primary": "Staatliches, sans-serif",
+    "--lf-font-family-secondary": "Oswald, sans-serif",
     "--lf-font-family-monospace": "Montserrat, sans-serif"
   }
 };
 const BLOODMOON = {
   font: [
     LF_THEME_FONTS_FONTFACE.cormorantGaramond,
-    LF_THEME_FONTS_FONTFACE.jetBrainsMono
+    LF_THEME_FONTS_FONTFACE.jetBrainsMono,
+    LF_THEME_FONTS_FONTFACE.cinzel
   ],
   isDark: true,
   variables: {
@@ -2308,7 +2404,8 @@ const BLOODMOON = {
     "--lf-ui-radius-ripple": "50%",
     "--lf-font-family-primary": "Cormorant Garamond, serif",
     "--lf-font-family-monospace": "Jet Brains Mono, monospace",
-    "--lf-font-size": "15px"
+    "--lf-font-family-secondary": "Cinzel, serif",
+    "--lf-font-size": "16px"
   }
 };
 const ERIS = {
@@ -2340,7 +2437,11 @@ const ERIS = {
   }
 };
 const NEON = {
-  font: [LF_THEME_FONTS_FONTFACE.orbitron, LF_THEME_FONTS_FONTFACE.vt323],
+  font: [
+    LF_THEME_FONTS_FONTFACE.orbitron,
+    LF_THEME_FONTS_FONTFACE.lato,
+    LF_THEME_FONTS_FONTFACE.vt323
+  ],
   isDark: true,
   variables: {
     ...DARK.variables,
@@ -2367,6 +2468,7 @@ const NEON = {
     "--lf-color-on-spinner": "#00ff9e",
     "--lf-font-family-monospace": "VT323, monospace",
     "--lf-font-family-primary": "Orbitron, sans-serif",
+    "--lf-font-family-secondary": "Lato, sans-serif",
     "--lf-font-size": "14px",
     "--lf-ui-border-radius": "0.5em",
     "--lf-ui-radius-ripple": "50%"
@@ -2375,7 +2477,8 @@ const NEON = {
 const NIGHT = {
   font: [
     LF_THEME_FONTS_FONTFACE.bebasNeue,
-    LF_THEME_FONTS_FONTFACE.shareTechMono
+    LF_THEME_FONTS_FONTFACE.shareTechMono,
+    LF_THEME_FONTS_FONTFACE.oswald
   ],
   isDark: true,
   variables: {
@@ -2410,7 +2513,8 @@ const NIGHT = {
 const PASTEL = {
   font: [
     LF_THEME_FONTS_FONTFACE.raleway,
-    LF_THEME_FONTS_FONTFACE.sourceCodePro
+    LF_THEME_FONTS_FONTFACE.sourceCodePro,
+    LF_THEME_FONTS_FONTFACE.oswald
   ],
   isDark: false,
   variables: {
@@ -2445,7 +2549,8 @@ const PASTEL = {
 const SAKURA = {
   font: [
     LF_THEME_FONTS_FONTFACE.sawarabiMincho,
-    LF_THEME_FONTS_FONTFACE.raleway
+    LF_THEME_FONTS_FONTFACE.raleway,
+    LF_THEME_FONTS_FONTFACE.lato
   ],
   isDark: false,
   variables: {
@@ -2475,13 +2580,15 @@ const SAKURA = {
     "--lf-ui-radius-ripple": "50%",
     "--lf-font-size": "17px",
     "--lf-font-family-primary": "Sawarabi Mincho, serif",
-    "--lf-font-family-monospace": "Raleway, sans-serif"
+    "--lf-font-family-monospace": "Raleway, sans-serif",
+    "--lf-font-family-secondary": "Lato, sans-serif"
   }
 };
 const SEPULCHRE = {
   font: [
     LF_THEME_FONTS_FONTFACE.ebGaramond,
-    LF_THEME_FONTS_FONTFACE.jetBrainsMono
+    LF_THEME_FONTS_FONTFACE.jetBrainsMono,
+    LF_THEME_FONTS_FONTFACE.cormorantGaramond
   ],
   isDark: false,
   variables: {
@@ -2538,6 +2645,7 @@ const SEPULCHRE = {
     "--lf-color-on-spinner": "#fdf6e9",
     "--lf-font-family-primary": "'E B Garamond', serif",
     "--lf-font-family-monospace": "'JetBrains Mono', monospace",
+    "--lf-font-family-secondary": "'Cormorant Garamond', serif",
     "--lf-font-size": "16px",
     "--lf-ui-border-radius": "0.35rem",
     "--lf-ui-radius-ripple": "50%",
@@ -2547,7 +2655,8 @@ const SEPULCHRE = {
 const STEAMPUNK = {
   font: [
     LF_THEME_FONTS_FONTFACE.IMFellEnglishSC,
-    LF_THEME_FONTS_FONTFACE.shareTechMono
+    LF_THEME_FONTS_FONTFACE.shareTechMono,
+    LF_THEME_FONTS_FONTFACE.ebGaramond
   ],
   isDark: true,
   variables: {
@@ -2577,11 +2686,16 @@ const STEAMPUNK = {
     "--lf-ui-radius-ripple": "30%",
     "--lf-font-size": "16px",
     "--lf-font-family-primary": "IM Fell English SC, serif",
-    "--lf-font-family-monospace": "Share Tech Mono, monospace"
+    "--lf-font-family-monospace": "Share Tech Mono, monospace",
+    "--lf-font-family-secondary": "E B Garamond, serif"
   }
 };
 const URBAN = {
-  font: [LF_THEME_FONTS_FONTFACE.lato, LF_THEME_FONTS_FONTFACE.merriweather],
+  font: [
+    LF_THEME_FONTS_FONTFACE.lato,
+    LF_THEME_FONTS_FONTFACE.merriweather,
+    LF_THEME_FONTS_FONTFACE.oswald
+  ],
   isDark: false,
   variables: {
     ...LIGHT.variables,
@@ -2654,7 +2768,11 @@ const VOIDFORGE = {
   }
 };
 const WIZARDRY = {
-  font: [LF_THEME_FONTS_FONTFACE.uncialAntiqua, LF_THEME_FONTS_FONTFACE.cinzel],
+  font: [
+    LF_THEME_FONTS_FONTFACE.uncialAntiqua,
+    LF_THEME_FONTS_FONTFACE.cinzel,
+    LF_THEME_FONTS_FONTFACE.ebGaramond
+  ],
   isDark: true,
   variables: {
     ...DARK.variables,
@@ -2683,7 +2801,8 @@ const WIZARDRY = {
     "--lf-ui-radius-ripple": "50%",
     "--lf-font-size": "15px",
     "--lf-font-family-primary": "Uncial Antiqua, serif",
-    "--lf-font-family-monospace": "Cinzel, serif"
+    "--lf-font-family-monospace": "Cinzel, serif",
+    "--lf-font-family-secondary": "EB Garamond, serif"
   }
 };
 const THEME_LIST = {
@@ -2837,6 +2956,7 @@ const LF_ICONS_REGISTRY = {
   photo: "photo",
   photoSearch: "photo-search",
   photoX: "photo-x",
+  pictureInPictureTop: "picture-in-picture-top",
   playerRecord: "player-record",
   playerStop: "player-stop",
   playstationCircle: "playstation-circle",
@@ -2847,6 +2967,7 @@ const LF_ICONS_REGISTRY = {
   refresh: "refresh",
   replace: "replace",
   robot: "robot",
+  route2: "route-2",
   schema: "schema",
   select: "select",
   search: "search",
@@ -2875,173 +2996,180 @@ const LF_ICONS_REGISTRY = {
   zip: "zip"
 };
 export {
-  LF_TREE_PARTS as $,
-  AVATAR_COVER as A,
-  LF_PLACEHOLDER_PARTS as B,
+  LF_PROGRESSBAR_BLOCKS as $,
+  LF_CARD_PROPS as A,
+  LF_CHART_BLOCKS as B,
   CY_ATTRIBUTES as C,
-  LF_PLACEHOLDER_PROPS as D,
-  LF_TABBAR_BLOCKS as E,
-  LF_TABBAR_PARTS as F,
-  LF_TABBAR_PROPS as G,
-  LF_SELECT_BLOCKS as H,
-  IMAGE_TYPE_IDS as I,
-  LF_SELECT_PARTS as J,
-  LF_SELECT_PROPS as K,
-  LF_MESSENGER_CLEAN_UI as L,
-  LF_THEME_ICONS as M,
-  LF_LIST_BLOCKS as N,
-  OPTION_TYPE_IDS as O,
-  LF_LIST_PARTS as P,
-  LF_LIST_PROPS as Q,
-  LF_SPINNER_PROPS as R,
-  STYLE_COVER as S,
-  TIMEFRAME_COVER as T,
-  LF_TEXTFIELD_BLOCKS as U,
-  LF_TEXTFIELD_PARTS as V,
-  LF_TEXTFIELD_PROPS as W,
-  LF_AUTOCOMPLETE_BLOCKS as X,
-  LF_AUTOCOMPLETE_PARTS as Y,
-  LF_AUTOCOMPLETE_PROPS as Z,
-  LF_TREE_BLOCKS as _,
-  LF_MESSENGER_BLOCKS as a,
-  LF_CHIP_BLOCKS as a$,
-  LF_TREE_PROPS as a0,
-  LF_TREE_CSS_VARIABLES as a1,
-  LF_SLIDER_BLOCKS as a2,
-  LF_SLIDER_PARTS as a3,
-  LF_SLIDER_CSS_VARIABLES as a4,
-  LF_SLIDER_PROPS as a5,
-  LF_DRAWER_BLOCKS as a6,
-  LF_DRAWER_PARTS as a7,
-  LF_DRAWER_PROPS as a8,
-  LF_DRAWER_SLOT as a9,
-  LF_RADIO_PROPS as aA,
-  LF_TOAST_BLOCKS as aB,
-  LF_TOAST_PARTS as aC,
-  LF_TOAST_CSS_VARIABLES as aD,
-  LF_TOAST_PROPS as aE,
-  LF_BADGE_BLOCKS as aF,
-  LF_BADGE_PARTS as aG,
-  LF_BADGE_PROPS as aH,
-  LF_BUTTON_BLOCKS as aI,
-  LF_BUTTON_PARTS as aJ,
-  LF_BUTTON_PROPS as aK,
-  LF_CANVAS_BLOCKS as aL,
-  LF_CANVAS_PARTS as aM,
-  LF_CANVAS_PROPS as aN,
-  LF_CARD_BLOCKS as aO,
-  LF_CARD_PARTS as aP,
-  LF_CARD_CSS_VARS as aQ,
-  LF_CARD_DEFAULTS as aR,
-  LF_CARD_PROPS as aS,
-  LF_CHART_BLOCKS as aT,
-  LF_CHART_PARTS as aU,
-  LF_CHART_CSS_VARS as aV,
-  LF_THEME_COLORS_DATA_PREFIX as aW,
-  LF_CHART_PROPS as aX,
-  LF_CHAT_BLOCKS as aY,
-  LF_CHAT_PARTS as aZ,
-  LF_CHAT_PROPS as a_,
-  LF_EFFECTS_FOCUSABLES as aa,
-  LF_MULTIINPUT_BLOCKS as ab,
-  LF_MULTIINPUT_PARTS as ac,
-  LF_MULTIINPUT_PROPS as ad,
-  LF_IMAGEVIEWER_BLOCKS as ae,
-  LF_IMAGEVIEWER_PARTS as af,
-  LF_IMAGEVIEWER_PROPS as ag,
-  IDS as ah,
-  LF_COMPARE_BLOCKS as ai,
-  LF_COMPARE_PARTS as aj,
-  LF_COMPARE_CSS_VARS as ak,
-  LF_COMPARE_DEFAULTS as al,
-  LF_COMPARE_PROPS as am,
-  LF_COMPARE_IDS as an,
-  LF_CAROUSEL_BLOCKS as ao,
-  LF_CAROUSEL_PARTS as ap,
-  LF_CAROUSEL_PROPS as aq,
-  LF_CAROUSEL_IDS as ar,
-  LF_ACCORDION_BLOCKS as as,
-  LF_ACCORDION_PARTS as at,
-  LF_ACCORDION_PROPS as au,
-  LF_ARTICLE_BLOCKS as av,
-  LF_ARTICLE_PARTS as aw,
-  LF_ARTICLE_PROPS as ax,
-  LF_RADIO_BLOCKS as ay,
-  LF_RADIO_PARTS as az,
+  LF_CHART_PARTS as D,
+  LF_CHART_CSS_VARS as E,
+  LF_THEME_COLORS_DATA_PREFIX as F,
+  LF_CHART_PROPS as G,
+  LF_CHAT_BLOCKS as H,
+  LF_CHAT_PARTS as I,
+  LF_CHAT_PROPS as J,
+  LF_CHIP_BLOCKS as K,
+  LF_MASONRY_DEFAULT_COLUMNS as L,
+  LF_CHIP_PARTS as M,
+  LF_CHIP_PROPS as N,
+  LF_CODE_BLOCKS as O,
+  LF_CODE_PARTS as P,
+  LF_CODE_PROPS as Q,
+  LF_IMAGE_BLOCKS as R,
+  LF_IMAGE_PARTS as S,
+  LF_IMAGE_CSS_VARS as T,
+  LF_IMAGE_PROPS as U,
+  LF_LIST_BLOCKS as V,
+  LF_LIST_PARTS as W,
+  LF_LIST_PROPS as X,
+  LF_PHOTOFRAME_BLOCKS as Y,
+  LF_PHOTOFRAME_PARTS as Z,
+  LF_PHOTOFRAME_PROPS as _,
+  LF_MASONRY_BLOCKS as a,
+  LF_MESSENGER_CLEAN_UI as a$,
+  LF_PROGRESSBAR_PARTS as a0,
+  LF_PROGRESSBAR_CSS_VARIABLES as a1,
+  LF_PROGRESSBAR_PROPS as a2,
+  LF_SPINNER_PROPS as a3,
+  LF_TOGGLE_BLOCKS as a4,
+  LF_TOGGLE_PARTS as a5,
+  LF_TOGGLE_PROPS as a6,
+  LF_TYPEWRITER_BLOCKS as a7,
+  LF_TYPEWRITER_PARTS as a8,
+  LF_TYPEWRITER_PROPS as a9,
+  LF_CAROUSEL_PARTS as aA,
+  LF_CAROUSEL_PROPS as aB,
+  LF_CAROUSEL_IDS as aC,
+  LF_TREE_BLOCKS as aD,
+  LF_TREE_PARTS as aE,
+  LF_TREE_PROPS as aF,
+  LF_TREE_CSS_VARIABLES as aG,
+  LF_DRAWER_BLOCKS as aH,
+  LF_DRAWER_PARTS as aI,
+  LF_DRAWER_PROPS as aJ,
+  LF_DRAWER_SLOT as aK,
+  LF_EFFECTS_FOCUSABLES as aL,
+  LF_MULTIINPUT_BLOCKS as aM,
+  LF_MULTIINPUT_PARTS as aN,
+  LF_MULTIINPUT_PROPS as aO,
+  LF_SPLASH_BLOCKS as aP,
+  LF_SPLASH_PARTS as aQ,
+  LF_SPLASH_PROPS as aR,
+  LF_TOAST_BLOCKS as aS,
+  LF_TOAST_PARTS as aT,
+  LF_TOAST_CSS_VARIABLES as aU,
+  LF_TOAST_PROPS as aV,
+  LF_IMAGEVIEWER_BLOCKS as aW,
+  LF_IMAGEVIEWER_PARTS as aX,
+  LF_IMAGEVIEWER_PROPS as aY,
+  IDS as aZ,
+  IMAGE_TYPE_IDS as a_,
+  LF_UPLOAD_BLOCKS as aa,
+  LF_UPLOAD_PARTS as ab,
+  LF_UPLOAD_PROPS as ac,
+  LF_BADGE_CSS_VARS as ad,
+  LF_CHIP_CSS_VARS as ae,
+  CSS_VAR_PREFIX as af,
+  LF_CARD_IDS as ag,
+  LF_CHAT_IDS as ah,
+  LF_THEME_ICONS as ai,
+  LF_PLACEHOLDER_BLOCKS as aj,
+  LF_PLACEHOLDER_PARTS as ak,
+  LF_PLACEHOLDER_PROPS as al,
+  LF_AUTOCOMPLETE_BLOCKS as am,
+  LF_AUTOCOMPLETE_PARTS as an,
+  LF_AUTOCOMPLETE_PROPS as ao,
+  LF_SNACKBAR_BLOCKS as ap,
+  LF_SNACKBAR_PARTS as aq,
+  LF_SNACKBAR_CSS_VARIABLES as ar,
+  LF_SNACKBAR_PROPS as as,
+  LF_TEXTFIELD_BLOCKS as at,
+  LF_TEXTFIELD_PARTS as au,
+  LF_TEXTFIELD_PROPS as av,
+  LF_RADIO_BLOCKS as aw,
+  LF_RADIO_PARTS as ax,
+  LF_RADIO_PROPS as ay,
+  LF_CAROUSEL_BLOCKS as az,
   LF_ATTRIBUTES as b,
-  LF_CHIP_PARTS as b0,
-  LF_CHIP_PROPS as b1,
-  LF_CODE_BLOCKS as b2,
-  LF_CODE_PARTS as b3,
-  LF_CODE_PROPS as b4,
-  LF_IMAGE_BLOCKS as b5,
-  LF_IMAGE_PARTS as b6,
-  LF_IMAGE_CSS_VARS as b7,
-  LF_IMAGE_PROPS as b8,
-  CSS_VAR_PREFIX as b9,
-  LF_FRAMEWORK_SYMBOL as bA,
-  LF_FRAMEWORK_ALLOWED_ATTRS as bB,
-  LF_FRAMEWORK_ALLOWED_PREFIXES as bC,
-  getComponentProps as bD,
-  markFrameworkReady as bE,
-  LF_COLOR_CODES as bF,
-  LF_EFFECTS_VARS as bG,
-  GLOBAL_STYLES as bH,
-  LF_THEME_ICONS_PREFIX as bI,
-  LF_THEME_COLORS_PREFIX as bJ,
-  LF_THEME_ATTRIBUTE as bK,
-  LF_ICONS_REGISTRY as bL,
-  LF_FRAMEWORK_EVENT_NAME as bM,
-  THEME_LIST as bN,
-  LF_PHOTOFRAME_BLOCKS as ba,
-  LF_PHOTOFRAME_PARTS as bb,
-  LF_PHOTOFRAME_PROPS as bc,
-  LF_PROGRESSBAR_BLOCKS as bd,
-  LF_PROGRESSBAR_PARTS as be,
-  LF_PROGRESSBAR_CSS_VARIABLES as bf,
-  LF_PROGRESSBAR_PROPS as bg,
-  LF_TOGGLE_BLOCKS as bh,
-  LF_TOGGLE_PARTS as bi,
-  LF_TOGGLE_PROPS as bj,
-  LF_TYPEWRITER_BLOCKS as bk,
-  LF_TYPEWRITER_PARTS as bl,
-  LF_TYPEWRITER_PROPS as bm,
-  LF_UPLOAD_BLOCKS as bn,
-  LF_UPLOAD_PARTS as bo,
-  LF_UPLOAD_PROPS as bp,
-  LF_BADGE_CSS_VARS as bq,
-  LF_CHIP_CSS_VARS as br,
-  LF_CARD_IDS as bs,
-  LF_CHAT_IDS as bt,
-  LF_MASONRY_DEFAULT_COLUMNS as bu,
-  LF_MASONRY_BLOCKS as bv,
-  LF_MASONRY_PARTS as bw,
-  LF_MASONRY_CSS_VARS as bx,
-  LF_MASONRY_PROPS as by,
-  LF_MASONRY_IDS as bz,
-  LF_MESSENGER_PARTS as c,
+  LF_MESSENGER_BLOCKS as b0,
+  LF_MESSENGER_PARTS as b1,
+  OPTION_TYPE_IDS as b2,
+  LF_MESSENGER_PROPS as b3,
+  LF_MESSENGER_IDS as b4,
+  LF_MESSENGER_FILTER as b5,
+  LF_MESSENGER_NAV as b6,
+  LF_MESSENGER_MENU as b7,
+  TIMEFRAME_COVER as b8,
+  STYLE_COVER as b9,
+  LF_COMPARE_CSS_VARS as bA,
+  LF_COMPARE_DEFAULTS as bB,
+  LF_COMPARE_PROPS as bC,
+  LF_COMPARE_IDS as bD,
+  LF_TABBAR_BLOCKS as bE,
+  LF_TABBAR_PARTS as bF,
+  LF_TABBAR_PROPS as bG,
+  LF_FRAMEWORK_SYMBOL as bH,
+  LF_FRAMEWORK_ALLOWED_ATTRS as bI,
+  LF_FRAMEWORK_ALLOWED_PREFIXES as bJ,
+  getComponentProps as bK,
+  markFrameworkReady as bL,
+  LF_COLOR_CODES as bM,
+  LF_EFFECTS_VARS as bN,
+  GLOBAL_STYLES as bO,
+  LF_THEME_ICONS_PREFIX as bP,
+  LF_THEME_COLORS_PREFIX as bQ,
+  LF_THEME_ATTRIBUTE as bR,
+  LF_ICONS_REGISTRY as bS,
+  LF_FRAMEWORK_EVENT_NAME as bT,
+  THEME_LIST as bU,
+  OUTFIT_COVER as ba,
+  LOCATION_COVER as bb,
+  AVATAR_COVER as bc,
+  CHILD_ROOT_MAP as bd,
+  LF_SLIDER_BLOCKS as be,
+  LF_SLIDER_PARTS as bf,
+  LF_SLIDER_CSS_VARIABLES as bg,
+  LF_SLIDER_PROPS as bh,
+  LF_BREADCRUMBS_BLOCKS as bi,
+  LF_BREADCRUMBS_PARTS as bj,
+  LF_BREADCRUMBS_PROPS as bk,
+  LF_CHECKBOX_BLOCKS as bl,
+  LF_CHECKBOX_PARTS as bm,
+  LF_CHECKBOX_PROPS as bn,
+  LF_SELECT_BLOCKS as bo,
+  LF_SELECT_PARTS as bp,
+  LF_SELECT_PROPS as bq,
+  LF_ACCORDION_BLOCKS as br,
+  LF_ACCORDION_PARTS as bs,
+  LF_ACCORDION_PROPS as bt,
+  LF_HEADER_BLOCKS as bu,
+  LF_HEADER_PARTS as bv,
+  LF_HEADER_PROPS as bw,
+  LF_HEADER_SLOT as bx,
+  LF_COMPARE_BLOCKS as by,
+  LF_COMPARE_PARTS as bz,
+  LF_MASONRY_PARTS as c,
   LF_STYLE_ID as d,
-  LF_WRAPPER_ID as e,
-  LF_MESSENGER_PROPS as f,
-  LF_MESSENGER_IDS as g,
-  LF_MESSENGER_FILTER as h,
-  LF_MESSENGER_NAV as i,
-  LF_MESSENGER_MENU as j,
-  OUTFIT_COVER as k,
-  LOCATION_COVER as l,
-  CHILD_ROOT_MAP as m,
-  LF_CHECKBOX_BLOCKS as n,
+  LF_MASONRY_CSS_VARS as e,
+  LF_WRAPPER_ID as f,
+  LF_MASONRY_PROPS as g,
+  LF_MASONRY_IDS as h,
+  LF_ARTICLE_BLOCKS as i,
+  LF_ARTICLE_PARTS as j,
+  LF_ARTICLE_PROPS as k,
+  LF_BADGE_BLOCKS as l,
+  LF_BADGE_PARTS as m,
+  LF_BADGE_PROPS as n,
   onFrameworkReady as o,
-  LF_CHECKBOX_PARTS as p,
-  LF_CHECKBOX_PROPS as q,
+  LF_BUTTON_BLOCKS as p,
+  LF_BUTTON_PARTS as q,
   registerStencilAssetProxies as r,
-  LF_SPLASH_BLOCKS as s,
-  LF_SPLASH_PARTS as t,
-  LF_SPLASH_PROPS as u,
-  LF_HEADER_BLOCKS as v,
-  LF_HEADER_PARTS as w,
-  LF_HEADER_PROPS as x,
-  LF_HEADER_SLOT as y,
-  LF_PLACEHOLDER_BLOCKS as z
+  LF_BUTTON_PROPS as s,
+  LF_CANVAS_BLOCKS as t,
+  LF_CANVAS_PARTS as u,
+  LF_CANVAS_PROPS as v,
+  LF_CARD_BLOCKS as w,
+  LF_CARD_PARTS as x,
+  LF_CARD_CSS_VARS as y,
+  LF_CARD_DEFAULTS as z
 };
-//# sourceMappingURL=lf-widgets-foundations-Da0GoFKi.js.map
+//# sourceMappingURL=lf-widgets-foundations-BHCEI3uH.js.map

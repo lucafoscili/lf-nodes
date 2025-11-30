@@ -2,6 +2,7 @@
   LfDataCell,
   LfDataCellContainer,
   LfDataDataset,
+  LfIconType,
   LfThemeUIState,
 } from '@lf-widgets/foundations/dist';
 import { getLfFramework } from '@lf-widgets/framework';
@@ -174,7 +175,7 @@ const _getFirstOutputImageUrl = (outputs: WorkflowNodeResults | null) => {
 
   return fallbackImage ?? '';
 };
-const _getLfIcon = (status: WorkflowRunStatus): string => {
+const _getLfIcon = (status: WorkflowRunStatus): LfIconType => {
   const { alertTriangle, check, wand, hourglassLow, x } = theme.get.icons();
 
   switch (status) {

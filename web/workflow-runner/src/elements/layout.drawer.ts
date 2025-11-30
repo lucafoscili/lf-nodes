@@ -1,4 +1,4 @@
-import { LfDataDataset } from '@lf-widgets/foundations/dist';
+import { LfDataDataset, LfIconType } from '@lf-widgets/foundations/dist';
 import { getLfFramework } from '@lf-widgets/framework';
 import { buttonHandler } from '../handlers/button';
 import { treeHandler } from '../handlers/tree';
@@ -64,7 +64,7 @@ const _getIcon = (category: string) => {
 
   return category_icons[category] || alertTriangle;
 };
-const _button = (store: WorkflowStore, icon: string, label: string, className: string) => {
+const _button = (store: WorkflowStore, icon: LfIconType, label: string, className: string) => {
   const button = document.createElement('lf-button');
   button.className = className;
   button.lfAriaLabel = label;

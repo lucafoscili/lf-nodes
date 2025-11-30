@@ -91,7 +91,7 @@ export const createComponent = {
   button: (props: Partial<LfButtonInterface>) => {
     const comp = document.createElement('lf-button');
 
-    _setProps('LfButton', comp, props);
+    _setProps('LfButton', comp as any, props); // FIXME: TypeScript issue with next release
     return comp;
   },
   chat: (props: Partial<LfChatInterface>) => {
