@@ -182,7 +182,7 @@ const onResponse = async (
       node.description = '';
       node.value = '';
       node.cells.lfButton = {
-        lfIcon: 'warning',
+        lfIcon: '--lf-icon-warning',
         lfLabel: 'Not found on CivitAI!',
         lfStyling: 'flat',
         lfUiState: 'disabled',

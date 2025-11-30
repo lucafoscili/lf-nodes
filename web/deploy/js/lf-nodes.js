@@ -1,6 +1,6 @@
-import { g as getLfFramework } from "./lf-widgets-framework-DQgbVzd-.js";
-import "./lf-widgets-core-BNZGorQ6.js";
-import "./lf-widgets-foundations-Da0GoFKi.js";
+import { g as getLfFramework } from "./lf-widgets-framework-B9H_1Mhq.js";
+import "./lf-widgets-core-C1ol8nV-.js";
+import "./lf-widgets-foundations-BHCEI3uH.js";
 var APIEndpoints;
 (function(APIEndpoints2) {
   APIEndpoints2["CleanOldBackups"] = "/lf-nodes/clean-old-backups";
@@ -5860,7 +5860,7 @@ const onResponse = async (dataset, path, forcedSave, payload) => {
       node.description = "";
       node.value = "";
       node.cells.lfButton = {
-        lfIcon: "warning",
+        lfIcon: "--lf-icon-warning",
         lfLabel: "Not found on CivitAI!",
         lfStyling: "flat",
         lfUiState: "disabled",
