@@ -37,6 +37,8 @@ export class LFTooltip {
 
     content.classList.add(this.#CSS_CLASSES.content);
 
+    upload.lfHtmlAttributes = { accept: 'image/*', multiple: 'false' };
+
     button.lfIcon = 'upload';
     button.lfLabel = 'Update cover';
     button.lfStretchX = true;
