@@ -6,7 +6,7 @@ import {
 } from '../../types/widgets/imageEditor';
 import { getApiRoutes, getLfManager } from '../../utils/common';
 import { ensureDatasetContext } from './dataset';
-import { showBanner } from './status';
+import { setProgress, showBanner } from './status';
 
 //#region API Call
 export const apiCall = async (state: ImageEditorState, addSnapshot: boolean) => {
@@ -35,18 +35,20 @@ export const apiCall = async (state: ImageEditorState, addSnapshot: boolean) => 
   const contextDataset = imageviewer.lfDataset as ImageEditorDataset | undefined;
   const contextId = ensureDatasetContext(contextDataset, state);
 
-  if (!contextId && filterType === 'inpaint') {
-    lfManager.log(
-      'Missing editing context. Run the workflow to register an editing session before using inpaint.',
-      { dataset: contextDataset },
-      LogSeverity.Warning,
-    );
-    showBanner(
-      state,
-      'Missing editing context. Run the workflow to register an editing session.',
-      'danger',
-    );
-    return false;
+  if (filterType === 'inpaint') {
+    if (!contextId) {
+      lfManager.log(
+        'Missing editing context. Run the workflow to register an editing session before using inpaint.',
+        { dataset: contextDataset },
+        LogSeverity.Warning,
+      );
+      showBanner(
+        state,
+        'Missing editing context. Run the workflow to register an editing session.',
+        'danger',
+      );
+      return false;
+    }
   }
 
   payload.context_id = contextId;

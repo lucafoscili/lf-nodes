@@ -25,9 +25,12 @@ export enum ImageEditorCSS {
   Grid = `${BASE_CSS_CLASS}__grid`,
   GridHasActions = `${BASE_CSS_CLASS}__grid--has-actions`,
   GridIsInactive = `${BASE_CSS_CLASS}__grid--is-inactive`,
+  ProgressBar = `${BASE_CSS_CLASS}__progressbar`,
+  ProgressBarHidden = `${BASE_CSS_CLASS}__progressbar--hidden`,
   Settings = `${BASE_CSS_CLASS}__settings`,
   SettingsControls = `${BASE_CSS_CLASS}__settings__controls`,
   SettingsButtons = `${BASE_CSS_CLASS}__settings__buttons`,
+  Snackbar = `${BASE_CSS_CLASS}__snackbar`,
 }
 //#endregion
 
@@ -52,6 +55,9 @@ export type ImageEditorDeserializedValue = LfDataDataset;
 
 //#region State
 export interface ImageEditorState extends BaseWidgetState {
+  contextId?: string;
+  directory?: ImageEditorDatasetNavigationDirectory;
+  directoryValue?: string;
   elements: {
     actionButtons: ImageEditorActionButtons;
     controls: Partial<{
@@ -61,19 +67,17 @@ export interface ImageEditorState extends BaseWidgetState {
     imageviewer: HTMLLfImageviewerElement;
     settings: HTMLDivElement;
   };
-  contextId?: string;
   filter: ImageEditorFilter;
   filterNodeId?: string;
   filterType: ImageEditorFilterType;
-  infoSnackbar?: HTMLLfSnackbarElement | null;
   lastBrushSettings: ImageEditorBrushSettings;
-  directory?: ImageEditorDatasetNavigationDirectory;
-  directoryValue?: string;
   hasAutoDirectoryLoad?: boolean;
+  infoSnackbar?: HTMLLfSnackbarElement | null;
   isSyncingDirectory?: boolean;
   isApiProcessing?: boolean;
   lastRequestedDirectory?: string;
   navigationManager?: NavigationManager;
+  progressbar?: HTMLLfProgressbarElement | null;
   update: {
     preview: () => Promise<void>;
     snapshot: () => Promise<void>;

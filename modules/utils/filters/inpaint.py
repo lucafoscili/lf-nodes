@@ -12,7 +12,7 @@ import nodes
 from .unsharp_mask import unsharp_mask_effect
 from ..constants import SAMPLERS, SCHEDULERS
 from ...utils.helpers.api import get_resource_url
-from ...utils.helpers.comfy import get_comfy_dir, resolve_filepath
+from ...utils.helpers.comfy import get_comfy_dir, resolve_filepath, safe_send_sync
 from ...utils.helpers.conversion import base64_to_tensor, convert_to_boolean, convert_to_float, convert_to_int, tensor_to_pil
 from ...utils.helpers.editing import get_editing_context
 from ...utils.helpers.tagging import apply_wd14_tagging_to_prompt
@@ -1158,6 +1158,9 @@ def apply_inpaint_filter(image: torch.Tensor, settings: dict) -> FilterResult:
     if not context:
         raise ValueError(f"No active editing session for '{context_id}'.")
 
+    node_id = context.get("node_id")
+    node_event = context.get("node_event") or "loadandeditimages"
+
     model = context.get("model")
     clip = context.get("clip")
     vae = context.get("vae") or getattr(model, "vae", None)
@@ -1334,6 +1337,26 @@ def apply_inpaint_filter(image: torch.Tensor, settings: dict) -> FilterResult:
         f"steps={steps}, denoise={denoise_value:.3f}, cfg={cfg:.2f}, seed={seed}, "
         f"conditioning_mix={conditioning_mix:.2f}"
     )
+
+    try:
+        if node_id:
+            safe_send_sync(
+                node_event,
+                {
+                    "context_id": context_id,
+                    "progress": 100,
+                    "stats": {
+                        "steps": steps,
+                        "denoise": denoise_value,
+                        "cfg": cfg,
+                        "sampler": sampler_name,
+                        "scheduler": scheduler_name,
+                    },
+                },
+                node_id,
+            )
+    except Exception:
+        pass
 
     return processed, info_with_mask
 # endregion

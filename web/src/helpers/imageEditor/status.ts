@@ -13,6 +13,7 @@ export const showBanner = (state: ImageEditorState, message: string, uiState: Lf
 
   if (!snackbar || !settings.contains(snackbar)) {
     snackbar = document.createElement('lf-snackbar');
+    snackbar.classList.add(ImageEditorCSS.Snackbar);
     snackbar.lfPosition = 'inline';
 
     settings.prepend(snackbar);
@@ -22,6 +23,35 @@ export const showBanner = (state: ImageEditorState, message: string, uiState: Lf
 
   snackbar.lfMessage = message;
   snackbar.lfUiState = uiState;
+};
+//#endregion
+
+//#region progress bar
+export const setProgress = (state: ImageEditorState, value: number | null) => {
+  const { settings } = state.elements;
+  let bar = state.progressbar;
+
+  if (!bar || !settings.contains(bar)) {
+    bar = document.createElement('lf-progressbar');
+    bar.classList.add(ImageEditorCSS.ProgressBar);
+    bar.classList.add(ImageEditorCSS.ProgressBarHidden);
+    bar.lfAnimated = true;
+    bar.lfUiSize = 'xsmall';
+    bar.lfUiState = 'info';
+
+    settings.prepend(bar);
+
+    state.progressbar = bar;
+  }
+
+  if (!value) {
+    bar.lfValue = 0;
+    bar.classList.add(ImageEditorCSS.ProgressBarHidden);
+  } else {
+    const clamped = Math.max(0, Math.min(100, value));
+    bar.lfValue = clamped;
+    bar.classList.remove(ImageEditorCSS.ProgressBarHidden);
+  }
 };
 //#endregion
 

@@ -207,12 +207,25 @@
   position: absolute;
   top: 0;
 }
+.lf-imageeditor__progressbar {
+  height: 1em;
+  left: 0;
+  opacity: 1;
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  transition: opacity 0.3s ease;
+}
+.lf-imageeditor__progressbar--hidden {
+  opacity: 0;
+}
 .lf-imageeditor__settings {
   width: 100%;
   height: 100%;
   align-items: center;
   display: grid;
   grid-template-rows: 1fr auto;
+  position: relative;
 }
 .lf-imageeditor__settings__controls {
   width: 100%;
@@ -229,13 +242,13 @@
   justify-content: flex-end;
   padding: 8px 16px;
 }
+.lf-imageeditor__snackbar {
+  border-bottom: 1px solid var(--lf-color-border);
+}
 .lf-imageeditor__widget {
   width: 100%;
   height: 100%;
   overflow: auto;
-}
-.lf-imageeditor lf-snackbar {
-  border-bottom: 1px solid var(--lf-color-border);
 }
 .lf-imageeditor lf-toggle {
   justify-items: center;

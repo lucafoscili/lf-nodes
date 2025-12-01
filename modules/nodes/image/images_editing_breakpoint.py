@@ -77,7 +77,8 @@ class LF_ImagesEditingBreakpoint:
     def on_exec(self, **kwargs):
         self._temp_cache.cleanup()
 
-        session = EditingSession(node_id=kwargs.get("node_id"), temp_cache=self._temp_cache)
+        node_id = kwargs.get("node_id")
+        session = EditingSession(node_id=node_id, temp_cache=self._temp_cache)
 
         model_value = normalize_list_to_value(kwargs.get("model"))
         clip_value = normalize_list_to_value(kwargs.get("clip"))
@@ -118,6 +119,7 @@ class LF_ImagesEditingBreakpoint:
             positive_conditioning=positive_conditioning_value,
             negative_conditioning=negative_conditioning_value,
             wd14_tagger=wd14_tagger_value,
+            node_event="imageseditingbreakpoint",
         )
 
         try:
@@ -126,7 +128,7 @@ class LF_ImagesEditingBreakpoint:
                 {
                     "value": dataset.get("context_id"),
                 },
-                kwargs.get("node_id"),
+                node_id,
             )
             dataset = session.wait_for_completion(dataset)
         except Exception:
