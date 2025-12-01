@@ -488,16 +488,21 @@ const IMAGE_API = {
       });
       const code = response.status;
       switch (code) {
-        case 200:
+        case 200: {
           const p = await response.json();
           if (p.status === "success") {
             payload.data = p.data;
             payload.mask = p.mask;
+            payload.cutout = p.cutout;
+            payload.stats = p.stats;
+            payload.wd14_backend = p.wd14_backend;
+            payload.wd14_tags = Array.isArray(p.wd14_tags) ? [...p.wd14_tags] : void 0;
             payload.message = "Image processed successfully.";
             payload.status = LogSeverity.Success;
             lfManager.log(payload.message, { payload }, payload.status);
           }
           break;
+        }
         default:
           {
             const errorText = await response.text().catch(() => "");
@@ -2238,20 +2243,17 @@ var ImageEditorInpaintIds;
   ImageEditorInpaintIds2["Steps"] = "steps";
   ImageEditorInpaintIds2["UpsampleTarget"] = "upsample_target";
 })(ImageEditorInpaintIds || (ImageEditorInpaintIds = {}));
-const showError = (state, message) => {
+const showBanner = (state, message, uiState) => {
   const { settings } = state.elements;
-  const errorDiv = document.createElement("div");
-  errorDiv.style.color = "var(--error-color)";
-  errorDiv.style.padding = "8px";
-  errorDiv.style.marginBottom = "8px";
-  errorDiv.style.border = "1px solid var(--error-color)";
-  errorDiv.style.borderRadius = "4px";
-  errorDiv.style.backgroundColor = "rgba(255, 0, 0, 0.1)";
-  errorDiv.innerText = message;
-  settings.prepend(errorDiv);
-  setTimeout(() => {
-    errorDiv.remove();
-  }, 5e3);
+  let snackbar = state.infoSnackbar;
+  if (!snackbar || !settings.contains(snackbar)) {
+    snackbar = document.createElement("lf-snackbar");
+    snackbar.lfPosition = "inline";
+    settings.prepend(snackbar);
+    state.infoSnackbar = snackbar;
+  }
+  snackbar.lfMessage = message;
+  snackbar.lfUiState = uiState;
 };
 function setGridStatus(status, grid, actionButtons) {
   const { interrupt, resume } = actionButtons;
@@ -2290,7 +2292,7 @@ const apiCall$2 = async (state, addSnapshot) => {
   const snapshot = await imageviewer.getCurrentSnapshot();
   if (!snapshot) {
     lfManager.log("No snapshot available for processing!", {}, LogSeverity.Warning);
-    showError(state, "No snapshot available for processing!");
+    showBanner(state, "No snapshot available for processing!", "danger");
     return false;
   }
   const snapshotValue = snapshot.value;
@@ -2302,7 +2304,7 @@ const apiCall$2 = async (state, addSnapshot) => {
   const contextId = ensureDatasetContext(contextDataset, state);
   if (!contextId && filterType === "inpaint") {
     lfManager.log("Missing editing context. Run the workflow to register an editing session before using inpaint.", { dataset: contextDataset }, LogSeverity.Warning);
-    showError(state, "Missing editing context. Run the workflow to register an editing session.");
+    showBanner(state, "Missing editing context. Run the workflow to register an editing session.", "danger");
     return false;
   }
   payload.context_id = contextId;
@@ -2313,7 +2315,7 @@ const apiCall$2 = async (state, addSnapshot) => {
     const response = await getApiRoutes().image.process(snapshotValue, filterType, payload);
     if (response.status !== LogSeverity.Success) {
       lfManager.log("API Error", { response }, LogSeverity.Error);
-      showError(state, response.message || "Unknown API error");
+      showBanner(state, response.message || "Unknown API error", "danger");
       requestAnimationFrame(() => imageviewer.setSpinnerStatus(false));
       state.isApiProcessing = false;
       return false;
@@ -2327,6 +2329,12 @@ const apiCall$2 = async (state, addSnapshot) => {
     if (response.stats) {
       lfManager.log("Filter statistics", { stats: response.stats }, LogSeverity.Info);
     }
+    if (Array.isArray(response.wd14_tags) && response.wd14_tags.length > 0) {
+      const tags = response.wd14_tags;
+      const backend = response.wd14_backend;
+      const backendLabel = backend ? ` (${backend})` : "";
+      showBanner(state, `WD14 tags${backendLabel}: ${tags.join(", ")}`, "info");
+    }
     if (addSnapshot) {
       await imageviewer.addSnapshot(response.data);
     } else {
@@ -2337,7 +2345,7 @@ const apiCall$2 = async (state, addSnapshot) => {
     isSuccess = true;
   } catch (error) {
     lfManager.log("Error processing image!", { error }, LogSeverity.Error);
-    showError(state, "Error processing image! Check console for details.");
+    showBanner(state, "Error processing image! Check console for details.", "danger");
   }
   requestAnimationFrame(() => imageviewer.setSpinnerStatus(false));
   state.isApiProcessing = false;

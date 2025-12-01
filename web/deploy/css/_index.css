@@ -234,6 +234,9 @@
   height: 100%;
   overflow: auto;
 }
+.lf-imageeditor lf-snackbar {
+  border-bottom: 1px solid var(--lf-color-border);
+}
 .lf-imageeditor lf-toggle {
   justify-items: center;
 }
