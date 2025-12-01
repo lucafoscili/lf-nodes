@@ -7,7 +7,7 @@ def get_comfy_list(folder: str):
 
     This function is a wrapper around `get_filename_list` from the `folder_paths` module.
     It retrieves and returns a list of filenames for different types of folders used in the ComfyUI project.
-    
+
     For VAEs we try to reuse Comfy's own VAELoader list (which includes virtual
     entries such as "pixel_space" and "taesd" family) to avoid mismatches
     between nodes that use different sources for the VAE list.
@@ -37,9 +37,9 @@ def get_comfy_list(folder: str):
     if folder == "vae":
         try:
             import nodes
-            return nodes.VAELoader.vae_list()
+            return nodes.VAELoader.vae_list(nodes.VAELoader)
         except Exception:
-            return get_filename_list(folder)    
-    
+            return get_filename_list(folder)
+
     return get_filename_list(folder)
 # endregion

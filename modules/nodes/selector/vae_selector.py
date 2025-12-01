@@ -5,7 +5,7 @@ import random
 import torch
 
 from . import CATEGORY
-from ...utils.constants import FUNCTION, Input, INT_MAX
+from ...utils.constants import FUNCTION, HAS_V3, Input, INT_MAX
 from ...utils.helpers.comfy import get_comfy_list, safe_send_sync
 from ...utils.helpers.logic import (
     build_is_changed_tuple,
@@ -67,7 +67,10 @@ class LF_VAESelector:
         "Loaded VAE model.",
     )
     RETURN_NAMES = ("combo", "string", "vae")
-    RETURN_TYPES = (initial_list, Input.STRING, Input.VAE)
+    if HAS_V3:
+        RETURN_TYPES = (Input.COMBO, Input.STRING, Input.VAE)
+    else:
+        RETURN_TYPES = (initial_list, Input.STRING, Input.VAE)
 
     def on_exec(self, **kwargs: dict):
         vae: str = normalize_list_to_value(kwargs.get("vae"))
