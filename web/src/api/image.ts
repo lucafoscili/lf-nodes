@@ -151,16 +151,21 @@ export const IMAGE_API: ImageAPIs = {
       const code = response.status;
 
       switch (code) {
-        case 200:
-          const p: ProcessImageAPIPayload = await response.json();
+        case 200: {
+          const p = (await response.json()) as ProcessImageAPIPayload;
           if (p.status === 'success') {
             payload.data = p.data;
             payload.mask = p.mask;
+            payload.cutout = p.cutout;
+            payload.stats = p.stats;
+            payload.wd14_backend = p.wd14_backend;
+            payload.wd14_tags = Array.isArray(p.wd14_tags) ? [...p.wd14_tags] : undefined;
             payload.message = 'Image processed successfully.';
             payload.status = LogSeverity.Success;
             lfManager.log(payload.message, { payload }, payload.status);
           }
           break;
+        }
         default:
           {
             const errorText = await response.text().catch(() => '');

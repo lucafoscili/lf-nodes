@@ -1396,6 +1396,9 @@ def apply_inpaint_filter_tensor(
     # Use a binary version for ROI/conditioning; a processed soft mask is captured later for final compositing.
     m = (m > 0.5).float()
 
+    wd14_tags: list[str] | None = None
+    wd14_backend: str | None = None
+
     edge_band = 4
     touches_top = bool((m[:, :edge_band, :] > 0.5).any())
     touches_bottom = bool((m[:, -edge_band:, :] > 0.5).any())
@@ -1426,6 +1429,8 @@ def apply_inpaint_filter_tensor(
                     pairs = []
                 if pairs:
                     tag_strings = [tag for tag, _ in pairs]
+                    wd14_tags = tag_strings
+                    wd14_backend = getattr(wd14_tagger, "backend", None)
                     if positive_prompt:
                         positive_prompt = positive_prompt + ", " + ", ".join(tag_strings)
                     else:
@@ -1550,6 +1555,10 @@ def apply_inpaint_filter_tensor(
     )
 
     processed = processed[:, :orig_h, :orig_w, :]
+    if wd14_tags:
+        info["wd14_tags"] = wd14_tags
+        if wd14_backend:
+            info["wd14_backend"] = wd14_backend
     if not apply_unsharp_mask:
         info["unsharp_mask"] = "disabled"
 

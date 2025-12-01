@@ -6,7 +6,7 @@ import {
 } from '../../types/widgets/imageEditor';
 import { getApiRoutes, getLfManager } from '../../utils/common';
 import { ensureDatasetContext } from './dataset';
-import { showError } from './status';
+import { showBanner } from './status';
 
 //#region API Call
 export const apiCall = async (state: ImageEditorState, addSnapshot: boolean) => {
@@ -22,7 +22,7 @@ export const apiCall = async (state: ImageEditorState, addSnapshot: boolean) => 
   const snapshot = await imageviewer.getCurrentSnapshot();
   if (!snapshot) {
     lfManager.log('No snapshot available for processing!', {}, LogSeverity.Warning);
-    showError(state, 'No snapshot available for processing!');
+    showBanner(state, 'No snapshot available for processing!', 'danger');
     return false;
   }
 
@@ -41,7 +41,11 @@ export const apiCall = async (state: ImageEditorState, addSnapshot: boolean) => 
       { dataset: contextDataset },
       LogSeverity.Warning,
     );
-    showError(state, 'Missing editing context. Run the workflow to register an editing session.');
+    showBanner(
+      state,
+      'Missing editing context. Run the workflow to register an editing session.',
+      'danger',
+    );
     return false;
   }
 
@@ -57,7 +61,7 @@ export const apiCall = async (state: ImageEditorState, addSnapshot: boolean) => 
 
     if (response.status !== LogSeverity.Success) {
       lfManager.log('API Error', { response }, LogSeverity.Error);
-      showError(state, response.message || 'Unknown API error');
+      showBanner(state, response.message || 'Unknown API error', 'danger');
       requestAnimationFrame(() => imageviewer.setSpinnerStatus(false));
       state.isApiProcessing = false;
       return false;
@@ -76,6 +80,12 @@ export const apiCall = async (state: ImageEditorState, addSnapshot: boolean) => 
     if (response.stats) {
       lfManager.log('Filter statistics', { stats: response.stats }, LogSeverity.Info);
     }
+    if (Array.isArray(response.wd14_tags) && response.wd14_tags.length > 0) {
+      const tags = response.wd14_tags;
+      const backend = response.wd14_backend;
+      const backendLabel = backend ? ` (${backend})` : '';
+      showBanner(state, `WD14 tags${backendLabel}: ${tags.join(', ')}`, 'info');
+    }
     if (addSnapshot) {
       await imageviewer.addSnapshot(response.data);
     } else {
@@ -86,7 +96,7 @@ export const apiCall = async (state: ImageEditorState, addSnapshot: boolean) => 
     isSuccess = true;
   } catch (error) {
     lfManager.log('Error processing image!', { error }, LogSeverity.Error);
-    showError(state, 'Error processing image! Check console for details.');
+    showBanner(state, 'Error processing image! Check console for details.', 'danger');
   }
 
   requestAnimationFrame(() => imageviewer.setSpinnerStatus(false));
