@@ -65,6 +65,7 @@ export interface ImageEditorState extends BaseWidgetState {
   filter: ImageEditorFilter;
   filterNodeId?: string;
   filterType: ImageEditorFilterType;
+  infoSnackbar?: HTMLLfSnackbarElement | null;
   lastBrushSettings: ImageEditorBrushSettings;
   directory?: ImageEditorDatasetNavigationDirectory;
   directoryValue?: string;

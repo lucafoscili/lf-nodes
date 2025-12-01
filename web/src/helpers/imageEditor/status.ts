@@ -6,16 +6,22 @@ import {
   ImageEditorStatus,
 } from '../../types/widgets/imageEditor';
 
-//#region banner
+//#region snackbar
 export const showBanner = (state: ImageEditorState, message: string, uiState: LfThemeUIState) => {
   const { settings } = state.elements;
-  const snackbar = document.createElement('lf-snackbar');
-  snackbar.lfMessage = message;
-  snackbar.lfPosition = 'inline';
-  snackbar.lfUiState = uiState;
-  settings.appendChild(snackbar);
+  let snackbar = state.infoSnackbar;
 
-  settings.prepend(snackbar);
+  if (!snackbar || !settings.contains(snackbar)) {
+    snackbar = document.createElement('lf-snackbar');
+    snackbar.lfPosition = 'inline';
+
+    settings.prepend(snackbar);
+
+    state.infoSnackbar = snackbar;
+  }
+
+  snackbar.lfMessage = message;
+  snackbar.lfUiState = uiState;
 };
 //#endregion
 
