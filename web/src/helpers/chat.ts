@@ -6,9 +6,12 @@ import { getLfManager } from '../utils/common';
 export const EV_HANDLERS = {
   //#region Chat handler
   chat: (state: ChatState, e: CustomEvent<LfChatEventPayload>) => {
-    const { eventType, history, status } = e.detail;
+    const { comp, eventType, history, status } = e.detail;
 
     switch (eventType) {
+      case 'config':
+        state.config = comp.lfConfig;
+        break;
       case 'polling':
         const severity =
           status === 'ready'
@@ -19,7 +22,7 @@ export const EV_HANDLERS = {
         getLfManager().log('Chat widget, polling status: ' + status, { chat: e.detail }, severity);
         break;
       case 'update':
-        state.history = history;
+        state.history = JSON.parse(history);
         break;
     }
   },

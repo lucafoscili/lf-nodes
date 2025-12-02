@@ -1,6 +1,12 @@
 import { EV_HANDLERS } from '../helpers/chat';
 import { LfEventName } from '../types/events/events';
-import { ChatCSS, ChatFactory, ChatNormalizeCallback, ChatState } from '../types/widgets/chat';
+import {
+  ChatCSS,
+  ChatDeserializedValue,
+  ChatFactory,
+  ChatNormalizeCallback,
+  ChatState,
+} from '../types/widgets/chat';
 import { CustomWidgetName, TagName } from '../types/widgets/widgets';
 import { createDOMWidget, normalizeValue } from '../utils/common';
 
@@ -13,19 +19,28 @@ export const chatFactory: ChatFactory = {
       hideOnZoom: false,
       getState: () => STATE.get(wrapper),
       getValue() {
-        const { history } = STATE.get(wrapper);
+        const { config, history } = STATE.get(wrapper);
 
-        return history || '';
+        return { config, history };
       },
       setValue(value) {
         const state = STATE.get(wrapper);
 
-        const callback: ChatNormalizeCallback = (v) => {
-          state.history = v || '';
-          if (v && state.chat.lfValue) {
-            state.chat.lfValue = JSON.parse(v);
+        const callback: ChatNormalizeCallback = (_, u) => {
+          const { config, history } = u.parsedJSON as unknown as ChatDeserializedValue;
+
+          state.config = config || {};
+          state.history = history || [];
+
+          if (config && Object.keys(config).length > 0) {
+            state.chat.lfConfig = config;
           }
-          state.chat.setHistory(v);
+
+          if (history && state.chat.lfValue) {
+            state.chat.lfValue = history;
+          } else {
+            state.chat.setHistory(JSON.stringify(history));
+          }
         };
 
         normalizeValue(value, callback, CustomWidgetName.chat);
@@ -50,7 +65,7 @@ export const chatFactory: ChatFactory = {
 
     const options = chatFactory.options(wrapper);
 
-    STATE.set(wrapper, { chat, history: '', node, wrapper });
+    STATE.set(wrapper, { chat, config: {}, history: [], node, wrapper });
 
     return { widget: createDOMWidget(CustomWidgetName.chat, wrapper, node, options) };
   },
