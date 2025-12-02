@@ -179,7 +179,7 @@ async def process_image(request):
         img_tensor = _load_image_tensor(images_dir)
 
         try:
-            # Offload so  event loop remains responsive for WebSocket progress events.
+            # Offload so event loop remains responsive for WebSocket progress events.
             processed_tensor, extra_payload = await asyncio.to_thread(
                 process_filter,
                 filter_type,
