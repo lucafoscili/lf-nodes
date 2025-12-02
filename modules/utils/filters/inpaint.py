@@ -1,4 +1,4 @@
-from typing import Dict, Tuple
+from typing import Dict, Tuple, Callable
 
 import math
 import os
@@ -270,7 +270,8 @@ def sample_without_preview(
     sampler_name,
     scheduler_name,
     denoise_value,
-):
+    callback=None,
+) -> dict:
     """
     Generates a new latent sample using the provided model and parameters, without generating a preview image.
 
@@ -285,6 +286,7 @@ def sample_without_preview(
         sampler_name (str): Name of the sampler to use.
         scheduler_name (str): Name of the scheduler to use.
         denoise_value (float): Denoising strength for the sampling process.
+        callback: Optional sampling callback invoked as ``callback(step, x0, x, total_steps)``.
 
     Returns:
         dict: A copy of the input latent dictionary with the "samples" key updated to the newly generated latent samples.
@@ -313,7 +315,7 @@ def sample_without_preview(
         last_step=None,
         force_full_denoise=False,
         noise_mask=noise_mask,
-        callback=None,
+        callback=callback,
         disable_pbar=True,
         seed=seed,
     )
@@ -345,6 +347,7 @@ def perform_inpaint(
     negative_conditioning=None,
     conditioning_mix: float = 0.0,
     conditioning_mode: str | None = None,
+    progress_callback: Callable[[float], None] | None = None,
 ) -> torch.Tensor:
     """
     Performs inpainting on the given image using the specified model, mask, and prompts.
@@ -372,6 +375,7 @@ def perform_inpaint(
             - "concat": concatenate context + prompt conditioning.
             - "prompts_only": ignore context conditioning and rely on prompts.
             - "blend": blend according to conditioning_mix.
+        progress_callback: Optional function receiving a float percentage (0–100) as sampling progresses.
 
     Returns:
         torch.Tensor: The inpainted image tensor, blended with the original image according to the mask.
@@ -452,6 +456,22 @@ def perform_inpaint(
         )
 
         if disable_preview:
+            sampling_callback = None
+            if progress_callback is not None:
+                def sampling_callback(step, _x0, _x, total_steps):
+                    try:
+                        total = float(total_steps) if total_steps is not None else 0.0
+                        if total <= 0.0:
+                            pct = 100.0
+                        else:
+                            # Map internal sampler steps to a 40–100% range for the editor.
+                            frac = max(0.0, min(1.0, float(step + 1) / total))
+                            pct = 40.0 + frac * 60.0
+                        progress_callback(pct)
+                    except Exception:
+                        # Nodes should not fail due to callback issues.
+                        pass
+
             latent_result = sample_without_preview(
                 model=model,
                 positive=pos_cond,
@@ -463,6 +483,7 @@ def perform_inpaint(
                 sampler_name=sampler_name,
                 scheduler_name=scheduler_name,
                 denoise_value=denoise,
+                callback=sampling_callback,
             )
         else:
             sampler = nodes.KSampler()
@@ -1314,6 +1335,8 @@ def apply_inpaint_filter(image: torch.Tensor, settings: dict) -> FilterResult:
             "wd14_tagger": wd14_tagger,
             "wd14_model": wd14_model,
             "wd14_processor": wd14_processor,
+            "lf_progress_node_id": node_id,
+            "lf_progress_node_event": node_event,
         }
     )
 
@@ -1331,32 +1354,6 @@ def apply_inpaint_filter(image: torch.Tensor, settings: dict) -> FilterResult:
     info_with_mask.update(info)
     if not apply_unsharp_mask:
         info_with_mask["unsharp_mask"] = "disabled"
-
-    print(
-        "[LF Inpaint] sampling "
-        f"steps={steps}, denoise={denoise_value:.3f}, cfg={cfg:.2f}, seed={seed}, "
-        f"conditioning_mix={conditioning_mix:.2f}"
-    )
-
-    try:
-        if node_id:
-            safe_send_sync(
-                node_event,
-                {
-                    "context_id": context_id,
-                    "progress": 100,
-                    "stats": {
-                        "steps": steps,
-                        "denoise": denoise_value,
-                        "cfg": cfg,
-                        "sampler": sampler_name,
-                        "scheduler": scheduler_name,
-                    },
-                },
-                node_id,
-            )
-    except Exception:
-        pass
 
     return processed, info_with_mask
 # endregion
@@ -1390,6 +1387,26 @@ def apply_inpaint_filter_tensor(
     """
     device = getattr(getattr(vae, "first_stage_model", None), "device", None) or image.device
 
+    progress_node_id = settings.get("lf_progress_node_id")
+    progress_node_event = settings.get("lf_progress_node_event")
+    context_id = settings.get("context_id")
+
+    def _emit_progress(pct: float) -> None:
+        if not progress_node_id or not progress_node_event:
+            return
+        try:
+            safe_send_sync(
+                str(progress_node_event),
+                {
+                    "context_id": context_id,
+                    "progress": int(max(0.0, min(100.0, pct))),
+                },
+                str(progress_node_id),
+            )
+        except Exception:
+            # Progress is best-effort; never break inpaint.
+            pass
+
     positive_prompt = str(settings.get("positive_prompt") or "")
     negative_prompt = str(settings.get("negative_prompt") or "")
 
@@ -1418,6 +1435,8 @@ def apply_inpaint_filter_tensor(
     m = m.clamp(0.0, 1.0)
     # Use a binary version for ROI/conditioning; a processed soft mask is captured later for final compositing.
     m = (m > 0.5).float()
+
+    _emit_progress(10.0)
 
     wd14_tags: list[str] | None = None
     wd14_backend: str | None = None
@@ -1452,6 +1471,7 @@ def apply_inpaint_filter_tensor(
                     pairs = []
                 if pairs:
                     tag_strings = [tag for tag, _ in pairs]
+                    _emit_progress(30.0)
                     wd14_tags = tag_strings
                     wd14_backend = getattr(wd14_tagger, "backend", None)
                     if positive_prompt:
@@ -1467,6 +1487,7 @@ def apply_inpaint_filter_tensor(
                     threshold=0.70,
                     top_k=10,
                 )
+                _emit_progress(30.0)
 
     conditioning_mix = _normalize_conditioning_mix(settings.get("conditioning_mix"))
 
@@ -1496,6 +1517,7 @@ def apply_inpaint_filter_tensor(
         vae=vae,
         settings=settings,
     )
+    _emit_progress(40.0)
     region_meta["apply_unsharp_mask"] = apply_unsharp_mask
 
     inner_h = int(work_image.shape[1])
@@ -1549,6 +1571,7 @@ def apply_inpaint_filter_tensor(
         negative_conditioning=negative_conditioning,
         conditioning_mix=conditioning_mix,
         conditioning_mode=conditioning_mode,
+        progress_callback=_emit_progress,
     )
 
     if pad_top_patch or pad_bottom_patch or pad_left_patch or pad_right_patch:
@@ -1584,6 +1607,8 @@ def apply_inpaint_filter_tensor(
             info["wd14_backend"] = wd14_backend
     if not apply_unsharp_mask:
         info["unsharp_mask"] = "disabled"
+
+    _emit_progress(100.0)
 
     return processed, info
 # endregion

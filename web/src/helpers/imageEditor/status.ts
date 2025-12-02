@@ -44,11 +44,13 @@ export const setProgress = (state: ImageEditorState, value: number | null) => {
     state.progressbar = bar;
   }
 
-  if (!value) {
-    bar.lfValue = 0;
+  const numeric = typeof value === 'number' ? value : 0;
+  const clamped = Math.max(0, Math.min(100, numeric));
+
+  if (clamped <= 0 || clamped >= 100) {
+    bar.lfValue = clamped;
     bar.classList.add(ImageEditorCSS.ProgressBarHidden);
   } else {
-    const clamped = Math.max(0, Math.min(100, value));
     bar.lfValue = clamped;
     bar.classList.remove(ImageEditorCSS.ProgressBarHidden);
   }
