@@ -139,7 +139,43 @@ async def update_metadata_cover(request):
         info_file_path = file_no_ext + ".info"
 
         if not os.path.exists(info_file_path):
-            metadata_json = {"nodes": [{}]}
+            sha_file_path = file_no_ext + ".sha256"
+            if os.path.exists(sha_file_path):
+                with open(sha_file_path, "r") as sha_file:
+                    model_hash = sha_file.read().strip()
+            else:
+                model_hash = "unknown"
+
+            metadata_json = {
+                "nodes": [
+                    {
+                        "cells": {
+                            "lfCode": {
+                                "shape": "code",
+                                "value": {
+                                    'hash': f'{model_hash}',
+                                    'path': f'{model_path}'
+                                },
+                            },
+                            "lfImage": {
+                                "shape": "image",
+                                "value": ""
+                            },
+                            "text1": {
+                                "value": os.path.basename(model_path).rsplit('.', 1)[0]
+                            },
+                            "text2": {
+                                "value": "Version unknown"
+                            },
+                            "text3": {
+                                "value": "No info available"
+                            }
+                        },
+                        "id": "node_1",
+                        "value": ""
+                    }
+                ]
+            }
             with open(info_file_path, "w") as info_file:
                 json.dump(metadata_json, info_file, indent=4)
 
@@ -152,8 +188,21 @@ async def update_metadata_cover(request):
         if "cells" not in metadata_json["nodes"][0]:
             metadata_json["nodes"][0]["cells"] = {}
 
+        try:
+            img_data = base64.b64decode(base64_image.split(",")[-1])
+            with Image.open(BytesIO(img_data)) as img:
+                img = img.convert("RGB")
+                img.thumbnail((1024, 1024), Image.LANCZOS)
+
+                buf = BytesIO()
+                img.save(buf, format="JPEG", quality=85)
+                b64 = base64.b64encode(buf.getvalue()).decode("utf-8")
+                base64_image = f"{BASE64_PNG_PREFIX}{b64}"
+        except (UnidentifiedImageError, OSError) as processing_error:
+            return web.Response(status=400, text=f"Invalid image data: {processing_error}")
+
         lf_image_cell = metadata_json["nodes"][0]["cells"].get("lfImage", {})
-        lf_image_cell["value"] = f"data:image/png;base64,{base64_image}"
+        lf_image_cell["value"] = f"{base64_image}"
         metadata_json["nodes"][0]["cells"]["lfImage"] = lf_image_cell
 
         with open(info_file_path, "w") as info_file:

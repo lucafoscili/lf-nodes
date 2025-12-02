@@ -117,8 +117,18 @@ export class LFTooltip {
         break;
     }
 
+    const closeCb = () => this.destroy();
+    lfFramework.addClickCallback(
+      {
+        cb: () => {
+          closeCb();
+          lfFramework.removeClickCallback({ cb: closeCb });
+        },
+        element: layoutElement,
+      },
+      true,
+    );
     lfFramework.portal.open(layoutElement, this.#TOOLTIP_ELEMENT, anchor, 0, 'auto');
-    lfFramework.addClickCallback({ cb: () => this.destroy(), element: layoutElement });
 
     requestAnimationFrame(() => parent.appendChild(this.#TOOLTIP_ELEMENT));
   }
