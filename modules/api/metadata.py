@@ -197,7 +197,7 @@ async def update_metadata_cover(request):
                 buf = BytesIO()
                 img.save(buf, format="JPEG", quality=85)
                 b64 = base64.b64encode(buf.getvalue()).decode("utf-8")
-                base64_image = f"{BASE64_PNG_PREFIX}{b64}"
+                base64_image = f"data:image/jpeg;base64,{b64}"
         except (UnidentifiedImageError, OSError) as processing_error:
             return web.Response(status=400, text=f"Invalid image data: {processing_error}")
 
