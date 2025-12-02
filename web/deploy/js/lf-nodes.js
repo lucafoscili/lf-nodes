@@ -2012,9 +2012,12 @@ var ImageEditorCSS;
   ImageEditorCSS2["Grid"] = "lf-imageeditor__grid";
   ImageEditorCSS2["GridHasActions"] = "lf-imageeditor__grid--has-actions";
   ImageEditorCSS2["GridIsInactive"] = "lf-imageeditor__grid--is-inactive";
+  ImageEditorCSS2["ProgressBar"] = "lf-imageeditor__progressbar";
+  ImageEditorCSS2["ProgressBarHidden"] = "lf-imageeditor__progressbar--hidden";
   ImageEditorCSS2["Settings"] = "lf-imageeditor__settings";
   ImageEditorCSS2["SettingsControls"] = "lf-imageeditor__settings__controls";
   ImageEditorCSS2["SettingsButtons"] = "lf-imageeditor__settings__buttons";
+  ImageEditorCSS2["Snackbar"] = "lf-imageeditor__snackbar";
 })(ImageEditorCSS || (ImageEditorCSS = {}));
 var ImageEditorStatus;
 (function(ImageEditorStatus2) {
@@ -2248,12 +2251,36 @@ const showBanner = (state, message, uiState) => {
   let snackbar = state.infoSnackbar;
   if (!snackbar || !settings.contains(snackbar)) {
     snackbar = document.createElement("lf-snackbar");
+    snackbar.classList.add(ImageEditorCSS.Snackbar);
     snackbar.lfPosition = "inline";
     settings.prepend(snackbar);
     state.infoSnackbar = snackbar;
   }
   snackbar.lfMessage = message;
   snackbar.lfUiState = uiState;
+};
+const setProgress = (state, value) => {
+  const { settings } = state.elements;
+  let bar = state.progressbar;
+  if (!bar || !settings.contains(bar)) {
+    bar = document.createElement("lf-progressbar");
+    bar.classList.add(ImageEditorCSS.ProgressBar);
+    bar.classList.add(ImageEditorCSS.ProgressBarHidden);
+    bar.lfAnimated = true;
+    bar.lfUiSize = "xsmall";
+    bar.lfUiState = "info";
+    settings.prepend(bar);
+    state.progressbar = bar;
+  }
+  const numeric = typeof value === "number" ? value : 0;
+  const clamped = Math.max(0, Math.min(100, numeric));
+  if (clamped <= 0 || clamped >= 100) {
+    bar.lfValue = clamped;
+    bar.classList.add(ImageEditorCSS.ProgressBarHidden);
+  } else {
+    bar.lfValue = clamped;
+    bar.classList.remove(ImageEditorCSS.ProgressBarHidden);
+  }
 };
 function setGridStatus(status, grid, actionButtons) {
   const { interrupt, resume } = actionButtons;
@@ -2302,10 +2329,12 @@ const apiCall$2 = async (state, addSnapshot) => {
   };
   const contextDataset = imageviewer.lfDataset;
   const contextId = ensureDatasetContext(contextDataset, state);
-  if (!contextId && filterType === "inpaint") {
-    lfManager.log("Missing editing context. Run the workflow to register an editing session before using inpaint.", { dataset: contextDataset }, LogSeverity.Warning);
-    showBanner(state, "Missing editing context. Run the workflow to register an editing session.", "danger");
-    return false;
+  if (filterType === "inpaint") {
+    if (!contextId) {
+      lfManager.log("Missing editing context. Run the workflow to register an editing session before using inpaint.", { dataset: contextDataset }, LogSeverity.Warning);
+      showBanner(state, "Missing editing context. Run the workflow to register an editing session.", "danger");
+      return false;
+    }
   }
   payload.context_id = contextId;
   state.isApiProcessing = true;
@@ -5693,8 +5722,15 @@ class LFTooltip {
         __classPrivateFieldGet$2(this, _LFTooltip_TOOLTIP_ELEMENT, "f").appendChild(layoutElement);
         break;
     }
+    const closeCb = () => this.destroy();
+    lfFramework.addClickCallback({
+      cb: () => {
+        closeCb();
+        lfFramework.removeClickCallback({ cb: closeCb });
+      },
+      element: layoutElement
+    }, true);
     lfFramework.portal.open(layoutElement, __classPrivateFieldGet$2(this, _LFTooltip_TOOLTIP_ELEMENT, "f"), anchor, 0, "auto");
-    lfFramework.addClickCallback({ cb: () => this.destroy(), element: layoutElement });
     requestAnimationFrame(() => parent.appendChild(__classPrivateFieldGet$2(this, _LFTooltip_TOOLTIP_ELEMENT, "f")));
   }
   //#endregion
@@ -5714,6 +5750,7 @@ _LFTooltip_CB = /* @__PURE__ */ new WeakMap(), _LFTooltip_CSS_CLASSES = /* @__PU
   const upload = document.createElement(TagName.LfUpload);
   const button = document.createElement(TagName.LfButton);
   content.classList.add(__classPrivateFieldGet$2(this, _LFTooltip_CSS_CLASSES, "f").content);
+  upload.lfHtmlAttributes = { accept: "image/*", multiple: "false" };
   button.lfIcon = "upload";
   button.lfLabel = "Update cover";
   button.lfStretchX = true;
@@ -6162,14 +6199,17 @@ const carouselFactory = {
 const EV_HANDLERS$8 = {
   //#region Chat handler
   chat: (state, e) => {
-    const { eventType, history, status } = e.detail;
+    const { comp, eventType, history, status } = e.detail;
     switch (eventType) {
+      case "config":
+        state.config = comp.lfConfig;
+        break;
       case "polling":
         const severity = status === "ready" ? LogSeverity.Info : status === "offline" ? LogSeverity.Error : LogSeverity.Warning;
         getLfManager().log("Chat widget, polling status: " + status, { chat: e.detail }, severity);
         break;
       case "update":
-        state.history = history;
+        state.history = JSON.parse(history);
         break;
     }
   }
@@ -6188,17 +6228,23 @@ const chatFactory = {
       hideOnZoom: false,
       getState: () => STATE$d.get(wrapper),
       getValue() {
-        const { history } = STATE$d.get(wrapper);
-        return history || "";
+        const { config, history } = STATE$d.get(wrapper);
+        return { config, history };
       },
       setValue(value) {
         const state = STATE$d.get(wrapper);
-        const callback = (v) => {
-          state.history = v || "";
-          if (v && state.chat.lfValue) {
-            state.chat.lfValue = JSON.parse(v);
+        const callback = (_, u) => {
+          const { config, history } = u.parsedJSON;
+          state.config = config || {};
+          state.history = history || [];
+          if (config && Object.keys(config).length > 0) {
+            state.chat.lfConfig = config;
           }
-          state.chat.setHistory(v);
+          if (history && state.chat.lfValue) {
+            state.chat.lfValue = history;
+          } else {
+            state.chat.setHistory(JSON.stringify(history));
+          }
         };
         normalizeValue(value, callback, CustomWidgetName.chat);
       }
@@ -6216,7 +6262,7 @@ const chatFactory = {
     content.appendChild(chat);
     wrapper.appendChild(content);
     const options = chatFactory.options(wrapper);
-    STATE$d.set(wrapper, { chat, history: "", node, wrapper });
+    STATE$d.set(wrapper, { chat, config: {}, history: [], node, wrapper });
     return { widget: createDOMWidget(CustomWidgetName.chat, wrapper, node, options) };
   },
   //#endregion
@@ -8796,6 +8842,7 @@ class LFWidgets {
       }
     };
     this.onEvent = (name, event, widgets) => {
+      var _a, _b;
       const lfManager = getLfManager();
       const payload = event.detail;
       const id = resolveNodeId(payload);
@@ -8817,24 +8864,27 @@ class LFWidgets {
           const widgetName = widgets[index];
           const widget = getCustomWidget(node, widgetName);
           switch (widgetName) {
-            case CustomWidgetName.imageEditor:
+            case CustomWidgetName.imageEditor: {
+              const state = (_b = (_a = widget == null ? void 0 : widget.options) == null ? void 0 : _a.getState) == null ? void 0 : _b.call(_a);
               switch (name) {
                 case NodeName.imagesEditingBreakpoint:
-                  if (widget && "value" in payload) {
+                case NodeName.loadAndEditImages:
+                  if ("value" in payload && widget) {
                     const { value } = payload;
-                    lfManager.log(`Initiating JSON data fetch for editing breakpoint from path: ${value}`, { widget, value });
+                    lfManager.log(`Initiating JSON data fetch from path: ${value}`, {
+                      widget,
+                      value
+                    });
                     getApiRoutes().json.get(value).then((r) => {
                       if (r.status === LogSeverity.Success) {
-                        lfManager.log("JSON data fetched successfully for image editing breakpoint.", { data: r.data }, LogSeverity.Success);
+                        lfManager.log("JSON data fetched successfully.", { data: r.data }, LogSeverity.Success);
                         widget.options.setValue(JSON.stringify(r.data));
                       } else {
                         lfManager.log(`Failed to fetch JSON data: ${r.message}`, { response: r }, LogSeverity.Error);
                       }
                     }).catch((error) => {
-                      lfManager.log(`Error during JSON fetch for editing breakpoint: ${error.toString()}`, { error }, LogSeverity.Error);
+                      lfManager.log(`Error during JSON fetch from path: ${error.toString()}`, { error }, LogSeverity.Error);
                     });
-                  } else {
-                    lfManager.log(`Image editor widget handling failed: missing 'widget' or 'value' in payload.`, { widget, payload }, LogSeverity.Warning);
                   }
                   break;
                 default:
@@ -8844,7 +8894,11 @@ class LFWidgets {
                   }
                   break;
               }
+              if (state && "progress" in payload && typeof payload.progress === "number") {
+                setProgress(state, payload.progress);
+              }
               break;
+            }
             case CustomWidgetName.card:
             case CustomWidgetName.cardsWithChip:
               if (widget && "apiFlags" in payload) {
