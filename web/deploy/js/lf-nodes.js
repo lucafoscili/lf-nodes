@@ -1331,6 +1331,7 @@ var TagName;
   TagName2["LfCarousel"] = "lf-carousel";
   TagName2["LfChat"] = "lf-chat";
   TagName2["LfChart"] = "lf-chart";
+  TagName2["LfCheckbox"] = "lf-checkbox";
   TagName2["LfChip"] = "lf-chip";
   TagName2["LfCode"] = "lf-code";
   TagName2["LfCompare"] = "lf-compare";
@@ -1342,6 +1343,7 @@ var TagName;
   TagName2["LfProgressbar"] = "lf-progressbar";
   TagName2["LfSelect"] = "lf-select";
   TagName2["LfSlider"] = "lf-slider";
+  TagName2["LfSnackbar"] = "lf-snackbar";
   TagName2["LfSpinner"] = "lf-spinner";
   TagName2["LfTabbar"] = "lf-tabbar";
   TagName2["LfTextfield"] = "lf-textfield";
@@ -1358,7 +1360,8 @@ const IMAGE_EDITOR_CONSTANTS = {
     BRUSH: "brush",
     INPAINT: "inpaint",
     INPAINT_ADV: "inpaint_adv",
-    INPAINT_DETAIL: "inpaint_detail"
+    INPAINT_DETAIL: "inpaint_detail",
+    OUTPAINT: "outpaint"
   },
   UI: {
     ON: "on"
@@ -1372,7 +1375,8 @@ const IMAGE_EDITOR_CONSTANTS = {
     SELECT: "LF-SELECT",
     SLIDER: "LF-SLIDER",
     TEXTFIELD: "LF-TEXTFIELD",
-    TOGGLE: "LF-TOGGLE"
+    TOGGLE: "LF-TOGGLE",
+    CHECKBOX: "LF-CHECKBOX"
   }
 };
 const applySelectionColumn = (dataset, selection) => {
@@ -2043,6 +2047,7 @@ var ImageEditorControls;
   ImageEditorControls2["Slider"] = "slider";
   ImageEditorControls2["Textfield"] = "textfield";
   ImageEditorControls2["Toggle"] = "toggle";
+  ImageEditorControls2["Checkbox"] = "checkbox";
 })(ImageEditorControls || (ImageEditorControls = {}));
 var ImageEditorCanvasIds;
 (function(ImageEditorCanvasIds2) {
@@ -2068,6 +2073,7 @@ var ImageEditorSliderIds;
   ImageEditorSliderIds2["Intensity"] = "intensity";
   ImageEditorSliderIds2["Midpoint"] = "midpoint";
   ImageEditorSliderIds2["Opacity"] = "opacity";
+  ImageEditorSliderIds2["OutpaintAmount"] = "outpaint_amount";
   ImageEditorSliderIds2["RoiAlign"] = "roi_align";
   ImageEditorSliderIds2["RoiMinSize"] = "roi_min_size";
   ImageEditorSliderIds2["RoiPadding"] = "roi_padding";
@@ -2234,6 +2240,7 @@ var ImageEditorInpaintIds;
   ImageEditorInpaintIds2["Dilate"] = "dilate";
   ImageEditorInpaintIds2["Feather"] = "feather";
   ImageEditorInpaintIds2["NegativePrompt"] = "negative_prompt";
+  ImageEditorInpaintIds2["OutpaintAmount"] = "outpaint_amount";
   ImageEditorInpaintIds2["PositivePrompt"] = "positive_prompt";
   ImageEditorInpaintIds2["RoiAuto"] = "roi_auto";
   ImageEditorInpaintIds2["RoiPadding"] = "roi_padding";
@@ -2250,7 +2257,7 @@ const showBanner = (state, message, uiState) => {
   const { settings } = state.elements;
   let snackbar = state.infoSnackbar;
   if (!snackbar || !settings.contains(snackbar)) {
-    snackbar = document.createElement("lf-snackbar");
+    snackbar = document.createElement(TagName.LfSnackbar);
     snackbar.classList.add(ImageEditorCSS.Snackbar);
     snackbar.lfPosition = "inline";
     settings.prepend(snackbar);
@@ -2263,10 +2270,11 @@ const setProgress = (state, value) => {
   const { settings } = state.elements;
   let bar = state.progressbar;
   if (!bar || !settings.contains(bar)) {
-    bar = document.createElement("lf-progressbar");
+    bar = document.createElement(TagName.LfProgressbar);
     bar.classList.add(ImageEditorCSS.ProgressBar);
     bar.classList.add(ImageEditorCSS.ProgressBarHidden);
     bar.lfAnimated = true;
+    bar.lfLabel = " ";
     bar.lfUiSize = "xsmall";
     bar.lfUiState = "info";
     settings.prepend(bar);
@@ -2329,7 +2337,7 @@ const apiCall$2 = async (state, addSnapshot) => {
   };
   const contextDataset = imageviewer.lfDataset;
   const contextId = ensureDatasetContext(contextDataset, state);
-  if (filterType === "inpaint") {
+  if (filterType === "inpaint" || filterType === "outpaint") {
     if (!contextId) {
       lfManager.log("Missing editing context. Run the workflow to register an editing session before using inpaint.", { dataset: contextDataset }, LogSeverity.Warning);
       showBanner(state, "Missing editing context. Run the workflow to register an editing session.", "danger");
@@ -3174,7 +3182,7 @@ const DIFFUSION_SETTINGS = {
           isMandatory: false,
           off: "false",
           on: "true",
-          title: "Automatically tag the inpaint patch with WD14 and add tags to conditioning. Threshold: 0.70, Top K: 10."
+          title: "Automatically tag the inpaint patch with WD14 and add tags to conditioning."
         }
       ],
       [ImageEditorControls.Slider]: [
@@ -3256,6 +3264,161 @@ const DIFFUSION_SETTINGS = {
           id: ImageEditorSelectIds.Scheduler,
           isMandatory: false,
           title: "Scheduler used for inpaint diffusion steps.",
+          values: [
+            { value: "Normal", id: "normal" },
+            { value: "Karras", id: "karras" },
+            { value: "Exponential", id: "exponential" }
+          ]
+        }
+      ]
+    }
+  },
+  //#endregion
+  //#region Outpaint
+  [IMAGE_EDITOR_CONSTANTS.FILTERS.OUTPAINT]: {
+    controlIds: ImageEditorInpaintIds,
+    hasCanvasAction: true,
+    settings: {
+      apply_unsharp_mask: true,
+      b64_canvas: "",
+      cfg: 7,
+      conditioning_mix: 0,
+      denoise_percentage: 60,
+      feather: 12,
+      negative_prompt: "",
+      positive_prompt: "",
+      sampler: "dpmpp_2m",
+      scheduler: "beta",
+      steps: 24,
+      upsample_target: 0,
+      wd14_tagging: false,
+      outpaint_amount: 256
+    },
+    configs: {
+      [ImageEditorControls.Multiinput]: [
+        {
+          ariaLabel: "Positive prompt",
+          controlType: ImageEditorControls.Multiinput,
+          defaultValue: "",
+          id: ImageEditorTextfieldIds.PositivePrompt,
+          isMandatory: false,
+          title: "Prompt applied to the outpainted regions.",
+          mode: "tags",
+          allowFreeInput: true
+        },
+        {
+          ariaLabel: "Negative prompt",
+          controlType: ImageEditorControls.Multiinput,
+          defaultValue: "",
+          id: ImageEditorTextfieldIds.NegativePrompt,
+          isMandatory: false,
+          title: "Negative prompt applied to the outpainted regions.",
+          mode: "tags",
+          allowFreeInput: true
+        }
+      ],
+      [ImageEditorControls.Toggle]: [
+        {
+          ariaLabel: "WD14 tagging",
+          controlType: ImageEditorControls.Toggle,
+          defaultValue: false,
+          id: ImageEditorToggleIds.Wd14Tagging,
+          isMandatory: false,
+          off: "false",
+          on: "true",
+          title: "Automatically tag the outpaint patch with WD14 and add tags to conditioning."
+        }
+      ],
+      [ImageEditorControls.Slider]: [
+        {
+          ariaLabel: "Denoise percentage",
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 60,
+          id: ImageEditorSliderIds.DenoisePercentage,
+          isMandatory: true,
+          max: "100",
+          min: "0",
+          step: "1",
+          title: "Noise applied during outpaint. 0 keeps original pixels, 100 fully regenerates the band."
+        },
+        {
+          ariaLabel: "Outpaint amount (px)",
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 256,
+          id: ImageEditorSliderIds.OutpaintAmount,
+          isMandatory: true,
+          max: "1024",
+          min: "8",
+          step: "8",
+          title: "Expand canvas by this many pixels on edges touched by the brush."
+        },
+        {
+          ariaLabel: "Feather mask (px)",
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 12,
+          id: ImageEditorSliderIds.Feather,
+          isMandatory: false,
+          max: "64",
+          min: "0",
+          step: "1",
+          title: "Soften mask edges to blend the inpainted region."
+        },
+        {
+          ariaLabel: "Conditioning mix",
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 0,
+          id: ImageEditorSliderIds.ConditioningMix,
+          isMandatory: false,
+          max: "1",
+          min: "-1",
+          step: "0.1",
+          title: "Conditioning mode: -1=input only, 0=concat, 1=prompts only. Intermediate values blend between input and prompts."
+        },
+        {
+          ariaLabel: "CFG scale",
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 7,
+          id: ImageEditorSliderIds.Cfg,
+          isMandatory: true,
+          max: "30",
+          min: "1",
+          step: "0.5",
+          title: "Classifier-free guidance applied during the outpaint pass."
+        },
+        {
+          ariaLabel: "Steps",
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 24,
+          id: ImageEditorSliderIds.Steps,
+          isMandatory: true,
+          max: "50",
+          min: "1",
+          step: "1",
+          title: "Diffusion steps used when outpainting."
+        }
+      ],
+      [ImageEditorControls.Select]: [
+        {
+          ariaLabel: "Sampler",
+          controlType: ImageEditorControls.Select,
+          defaultValue: "dpmpp_2m",
+          id: ImageEditorSelectIds.Sampler,
+          isMandatory: false,
+          title: "Sampler used for outpaint diffusion steps.",
+          values: [
+            { value: "DPM++ 2M", id: "dpmpp_2m" },
+            { value: "DPM++ 2M Karras", id: "dpmpp_2m_karras" },
+            { value: "Euler", id: "euler" },
+            { value: "Euler a", id: "euler_ancestral" }
+          ]
+        },
+        {
+          ariaLabel: "Scheduler",
+          controlType: ImageEditorControls.Select,
+          defaultValue: "normal",
+          id: ImageEditorSelectIds.Scheduler,
+          isMandatory: false,
+          title: "Scheduler used for outpaint diffusion steps.",
           values: [
             { value: "Normal", id: "normal" },
             { value: "Karras", id: "karras" },
@@ -3468,7 +3631,7 @@ const INPAINT_ADV = {
         isMandatory: false,
         off: "false",
         on: "true",
-        title: "Automatically tag the inpaint patch with WD14 and add tags to conditioning. Threshold: 0.70, Top K: 10."
+        title: "Automatically tag the inpaint patch with WD14 and add tags to conditioning."
       },
       {
         ariaLabel: "Auto-align ROI",
@@ -3654,6 +3817,17 @@ const TREE_DATA = {
           },
           id: "inpaint_adv",
           value: "Inpaint (adv.)"
+        },
+        {
+          description: "Outpaint beyond the current canvas. Brush along edges to choose which sides expand.",
+          cells: {
+            lfCode: {
+              shape: "code",
+              value: JSON.stringify(SETTINGS.outpaint)
+            }
+          },
+          id: "outpaint",
+          value: "Outpaint"
         }
       ]
     },
@@ -3887,6 +4061,7 @@ var LfEventName;
   LfEventName2["LfCarousel"] = "lf-carousel-event";
   LfEventName2["LfChat"] = "lf-chat-event";
   LfEventName2["LfChart"] = "lf-chart-event";
+  LfEventName2["LfCheckbox"] = "lf-checkbox-event";
   LfEventName2["LfChip"] = "lf-chip-event";
   LfEventName2["LfCode"] = "lf-code-event";
   LfEventName2["LfCompare"] = "lf-compare-event";
@@ -3959,7 +4134,7 @@ function assertImageEditorFilter(obj) {
   return obj;
 }
 const createPrepSettings = (deps) => {
-  const { onMultiinput, onSelect, onSlider, onTextfield, onToggle } = deps;
+  const { onMultiinput, onSelect, onSlider, onTextfield, onToggle, onCheckbox } = deps;
   return (state, node) => {
     var _a;
     const { syntax } = getLfManager().getManagers().lfFramework;
@@ -3992,6 +4167,17 @@ const createPrepSettings = (deps) => {
       }
       configs.forEach((config) => {
         switch (controlType) {
+          case ImageEditorControls.Checkbox: {
+            const checkboxConfig = config;
+            const checkbox = document.createElement(TagName.LfCheckbox);
+            checkbox.lfLabel = parseLabel(checkboxConfig);
+            checkbox.lfValue = checkboxConfig.defaultValue ?? false;
+            checkbox.title = checkboxConfig.title;
+            checkbox.addEventListener(LfEventName.LfCheckbox, (event) => onCheckbox(state, event));
+            controlsContainer.appendChild(checkbox);
+            state.elements.controls[checkboxConfig.id] = checkbox;
+            break;
+          }
           case ImageEditorControls.Slider: {
             const sliderConfig = config;
             const slider = document.createElement(TagName.LfSlider);
@@ -4168,6 +4354,11 @@ async function resetSettings(settings) {
         toggle.setValue(toggle.lfValue ? "on" : "off");
         break;
       }
+      case "LF-CHECKBOX": {
+        const checkbox = control;
+        void checkbox.setValue(checkbox.lfValue ?? false);
+        break;
+      }
     }
   }
 }
@@ -4228,6 +4419,13 @@ const applyFilterDefaults = (state, defaults) => {
           mutableSettings[toggleConfig.id] = boolValue ? toggleConfig.on : toggleConfig.off;
           break;
         }
+        case ImageEditorControls.Checkbox: {
+          const checkboxConfig = config;
+          const boolValue = defaultValue === true || typeof defaultValue === "string" && defaultValue.toLowerCase() === "true";
+          checkboxConfig.defaultValue = boolValue;
+          mutableSettings[checkboxConfig.id] = boolValue;
+          break;
+        }
       }
     });
   });
@@ -4242,6 +4440,14 @@ const refreshValues = async (state, addSnapshot = false) => {
       const id = key;
       const control = controls[id];
       switch (control.tagName) {
+        case IMAGE_EDITOR_CONSTANTS.TAGS.CHECKBOX: {
+          const checkbox = control;
+          const checkboxState = await checkbox.getValue();
+          const value = checkboxState === "on";
+          filter.settings[id] = value;
+          storeForFilter[id] = value;
+          break;
+        }
         case IMAGE_EDITOR_CONSTANTS.TAGS.MULTIINPUT: {
           const multiinput = control;
           const multiValue = await multiinput.getValue();
@@ -4458,6 +4664,18 @@ const createEventHandlers = ({ handleInterruptForState: handleInterruptForState2
       }
     },
     //#endregion
+    //#region Checkbox
+    checkbox: async (state, e) => {
+      const { eventType } = e.detail;
+      const { update } = state;
+      const { snapshot } = update;
+      switch (eventType) {
+        case "change":
+          snapshot();
+          break;
+      }
+    },
+    //#endregion
     //#region Imageviewer
     imageviewer: async (state, e) => {
       var _a;
@@ -4668,6 +4886,9 @@ const handlerRefs = {
   },
   toggle: async () => {
     throw new Error("Image editor toggle handler not initialized.");
+  },
+  checkbox: async () => {
+    throw new Error("Image editor checkbox handler not initialized.");
   }
 };
 const prepSettings = createPrepSettings({
@@ -4675,7 +4896,8 @@ const prepSettings = createPrepSettings({
   onSelect: (state, event) => handlerRefs.select(state, event),
   onSlider: (state, event) => handlerRefs.slider(state, event),
   onTextfield: (state, event) => handlerRefs.textfield(state, event),
-  onToggle: (state, event) => handlerRefs.toggle(state, event)
+  onToggle: (state, event) => handlerRefs.toggle(state, event),
+  onCheckbox: (state, event) => handlerRefs.checkbox(state, event)
 });
 const EV_HANDLERS$a = createEventHandlers({
   handleInterruptForState,
@@ -4685,6 +4907,7 @@ handlerRefs.select = EV_HANDLERS$a.select;
 handlerRefs.slider = EV_HANDLERS$a.slider;
 handlerRefs.textfield = EV_HANDLERS$a.textfield;
 handlerRefs.toggle = EV_HANDLERS$a.toggle;
+handlerRefs.checkbox = EV_HANDLERS$a.checkbox;
 const syncNavigationDirectoryControl = async (state, directoryValue) => {
   const { imageviewer } = state.elements;
   const { navigation } = await imageviewer.getComponents();

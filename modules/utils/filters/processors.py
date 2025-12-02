@@ -13,7 +13,7 @@ from .contrast import contrast_effect
 from .desaturate import desaturate_effect
 from .film_grain import film_grain_effect
 from .gaussian_blur import gaussian_blur_effect
-from .inpaint import apply_inpaint_filter
+from .inpaint import apply_inpaint_filter, apply_outpaint_filter
 from .line import line_effect
 from .unsharp_mask import unsharp_mask_effect
 from .saturation import saturation_effect
@@ -505,6 +505,7 @@ FILTER_PROCESSORS: Dict[str, FilterProcessor] = {
     "film_grain": apply_film_grain_filter,
     "gaussian_blur": apply_gaussian_blur_filter,
     "inpaint": apply_inpaint_filter,
+    "outpaint": apply_outpaint_filter,
     "line": apply_line_filter,
     "saturation": apply_saturation_filter,
     "sepia": apply_sepia_filter,

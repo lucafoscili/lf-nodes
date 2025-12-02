@@ -1,4 +1,5 @@
 import {
+  LfCheckboxEventPayload,
   LfMultiInputEventPayload,
   LfSelectEventPayload,
   LfSliderEventPayload,
@@ -23,7 +24,14 @@ const handlerRefs: {
     e: CustomEvent<LfTextfieldEventPayload>,
   ) => void | Promise<void>;
   toggle: (state: ImageEditorState, e: CustomEvent<LfToggleEventPayload>) => void | Promise<void>;
+  checkbox: (
+    state: ImageEditorState,
+    e: CustomEvent<LfCheckboxEventPayload>,
+  ) => void | Promise<void>;
 } = {
+  checkbox: async () => {
+    throw new Error('Image editor checkbox handler not initialized.');
+  },
   select: async () => {
     throw new Error('Image editor select handler not initialized.');
   },
@@ -39,6 +47,8 @@ const handlerRefs: {
 };
 
 export const prepSettings: PrepSettingsFn = createPrepSettings({
+  onCheckbox: (state: ImageEditorState, event: CustomEvent<LfCheckboxEventPayload>) =>
+    handlerRefs.checkbox(state, event),
   onMultiinput: (state: ImageEditorState, event: CustomEvent<LfMultiInputEventPayload>) =>
     EV_HANDLERS.multiinput(state, event),
   onSelect: (state: ImageEditorState, event: CustomEvent<LfSelectEventPayload>) =>
@@ -56,6 +66,7 @@ export const EV_HANDLERS = createEventHandlers({
   prepSettings,
 });
 
+handlerRefs.checkbox = EV_HANDLERS.checkbox;
 handlerRefs.select = EV_HANDLERS.select;
 handlerRefs.slider = EV_HANDLERS.slider;
 handlerRefs.textfield = EV_HANDLERS.textfield;

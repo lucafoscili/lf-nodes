@@ -1,4 +1,5 @@
 import {
+  LfCheckboxEventPayload,
   LfDataDataset,
   LfDataNode,
   LfMasonryEventPayload,
@@ -85,6 +86,10 @@ export interface ImageEditorState extends BaseWidgetState {
   refreshDirectory?: (directory: string) => Promise<void>;
 }
 export interface PrepSettingsDeps {
+  onCheckbox: (
+    state: ImageEditorState,
+    e: CustomEvent<LfCheckboxEventPayload>,
+  ) => void | Promise<void>;
   onMultiinput: (
     state: ImageEditorState,
     e: CustomEvent<LfMultiInputEventPayload>,
@@ -163,6 +168,7 @@ export enum ImageEditorControls {
   Slider = 'slider',
   Textfield = 'textfield',
   Toggle = 'toggle',
+  Checkbox = 'checkbox',
 }
 export enum ImageEditorCanvasIds {
   B64Canvas = 'b64_canvas',
@@ -186,6 +192,7 @@ export enum ImageEditorSliderIds {
   Intensity = 'intensity',
   Midpoint = 'midpoint',
   Opacity = 'opacity',
+  OutpaintAmount = 'outpaint_amount',
   RoiAlign = 'roi_align',
   RoiMinSize = 'roi_min_size',
   RoiPadding = 'roi_padding',
@@ -201,6 +208,7 @@ export enum ImageEditorSliderIds {
   UpsampleTarget = 'upsample_target',
   Feather = 'feather',
 }
+export enum ImageEditorCheckboxIds {}
 export enum ImageEditorTextfieldIds {
   Color = 'color',
   Highlights = 'highlights',
@@ -233,10 +241,13 @@ export type ImageEditorControlIds =
   | ImageEditorSelectIds
   | ImageEditorSliderIds
   | ImageEditorTextfieldIds
-  | ImageEditorToggleIds;
+  | ImageEditorToggleIds
+  | ImageEditorCheckboxIds;
 export type ImageEditorControlMap<ID extends ImageEditorControlIds> =
   ID extends ImageEditorCanvasIds
     ? HTMLLfCanvasElement
+    : ID extends ImageEditorCheckboxIds
+    ? HTMLLfCheckboxElement
     : ID extends ImageEditorSelectIds
     ? HTMLLfSelectElement
     : ID extends ImageEditorSliderIds
@@ -294,8 +305,13 @@ export interface ImageEditorToggleConfig
   off: string;
   on: string;
 }
+export interface ImageEditorCheckboxConfig
+  extends ImageEditorBaseConfig<ImageEditorCheckboxIds, boolean> {
+  controlType: ImageEditorControls.Checkbox;
+}
 export type ImageEditorControlConfig =
   | ImageEditorCanvasConfig
+  | ImageEditorCheckboxConfig
   | ImageEditorMultiinputConfig
   | ImageEditorSelectConfig
   | ImageEditorSliderConfig
@@ -303,6 +319,7 @@ export type ImageEditorControlConfig =
   | ImageEditorToggleConfig;
 export type ImageEditorSettingsFor = Partial<{
   [ImageEditorControls.Canvas]: ImageEditorCanvasConfig[];
+  [ImageEditorControls.Checkbox]: ImageEditorCheckboxConfig[];
   [ImageEditorControls.Multiinput]: ImageEditorMultiinputConfig[];
   [ImageEditorControls.Select]: ImageEditorSelectConfig[];
   [ImageEditorControls.Slider]: ImageEditorSliderConfig[];
@@ -324,6 +341,7 @@ export interface ImageEditorFilterSettingsMap {
   filmGrain: ImageEditorFilmGrainSettings;
   gaussianBlur: ImageEditorGaussianBlurSettings;
   inpaint: ImageEditorInpaintSettings;
+  outpaint: ImageEditorInpaintSettings;
   line: ImageEditorLineSettings;
   saturation: ImageEditorSaturationSettings;
   sepia: ImageEditorSepiaSettings;
@@ -435,6 +453,7 @@ export interface ImageEditorInpaintSettings extends ImageEditorFilterSettings {
   dilate?: number;
   feather?: number;
   negative_prompt: string;
+  outpaint_amount?: number;
   positive_prompt: string;
   roi_align?: number;
   roi_align_auto?: boolean;
@@ -550,6 +569,7 @@ export enum ImageEditorInpaintIds {
   Dilate = 'dilate',
   Feather = 'feather',
   NegativePrompt = 'negative_prompt',
+  OutpaintAmount = 'outpaint_amount',
   PositivePrompt = 'positive_prompt',
   RoiAuto = 'roi_auto',
   RoiPadding = 'roi_padding',
@@ -735,6 +755,7 @@ export type ImageEditorInpaintFilter = ImageEditorFilterDefinition<
   typeof ImageEditorInpaintIds,
   ImageEditorInpaintSettings,
   {
+    [ImageEditorControls.Checkbox]?: ImageEditorCheckboxConfig[];
     [ImageEditorControls.Multiinput]?: ImageEditorMultiinputConfig[];
     [ImageEditorControls.Select]?: ImageEditorSelectConfig[];
     [ImageEditorControls.Slider]: ImageEditorSliderConfig[];
@@ -754,6 +775,7 @@ export type ImageEditorFilters = {
   filmGrain: ImageEditorFilmGrainFilter;
   gaussianBlur: ImageEditorGaussianBlurFilter;
   inpaint: ImageEditorInpaintFilter;
+  outpaint: ImageEditorInpaintFilter;
   line: ImageEditorLineFilter;
   saturation: ImageEditorSaturationFilter;
   sepia: ImageEditorSepiaFilter;

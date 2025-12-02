@@ -10,7 +10,7 @@ import {
   ImageEditorToggleIds,
 } from '../../../types/widgets/imageEditor';
 
-export const DIFFUSION_SETTINGS: Pick<ImageEditorFilters, 'inpaint'> = {
+export const DIFFUSION_SETTINGS: Pick<ImageEditorFilters, 'inpaint' | 'outpaint'> = {
   //#region Inpaint
   [IMAGE_EDITOR_CONSTANTS.FILTERS.INPAINT]: {
     controlIds: ImageEditorInpaintIds,
@@ -61,8 +61,7 @@ export const DIFFUSION_SETTINGS: Pick<ImageEditorFilters, 'inpaint'> = {
           isMandatory: false,
           off: 'false',
           on: 'true',
-          title:
-            'Automatically tag the inpaint patch with WD14 and add tags to conditioning. Threshold: 0.70, Top K: 10.',
+          title: 'Automatically tag the inpaint patch with WD14 and add tags to conditioning.',
         },
       ],
       [ImageEditorControls.Slider]: [
@@ -145,6 +144,164 @@ export const DIFFUSION_SETTINGS: Pick<ImageEditorFilters, 'inpaint'> = {
           id: ImageEditorSelectIds.Scheduler,
           isMandatory: false,
           title: 'Scheduler used for inpaint diffusion steps.',
+          values: [
+            { value: 'Normal', id: 'normal' },
+            { value: 'Karras', id: 'karras' },
+            { value: 'Exponential', id: 'exponential' },
+          ],
+        },
+      ],
+    },
+  },
+  //#endregion
+
+  //#region Outpaint
+  [IMAGE_EDITOR_CONSTANTS.FILTERS.OUTPAINT]: {
+    controlIds: ImageEditorInpaintIds,
+    hasCanvasAction: true,
+    settings: {
+      apply_unsharp_mask: true,
+      b64_canvas: '',
+      cfg: 7,
+      conditioning_mix: 0,
+      denoise_percentage: 60,
+      feather: 12,
+      negative_prompt: '',
+      positive_prompt: '',
+      sampler: 'dpmpp_2m',
+      scheduler: 'beta',
+      steps: 24,
+      upsample_target: 0,
+      wd14_tagging: false,
+      outpaint_amount: 256,
+    },
+    configs: {
+      [ImageEditorControls.Multiinput]: [
+        {
+          ariaLabel: 'Positive prompt',
+          controlType: ImageEditorControls.Multiinput,
+          defaultValue: '',
+          id: ImageEditorTextfieldIds.PositivePrompt,
+          isMandatory: false,
+          title: 'Prompt applied to the outpainted regions.',
+          mode: 'tags',
+          allowFreeInput: true,
+        },
+        {
+          ariaLabel: 'Negative prompt',
+          controlType: ImageEditorControls.Multiinput,
+          defaultValue: '',
+          id: ImageEditorTextfieldIds.NegativePrompt,
+          isMandatory: false,
+          title: 'Negative prompt applied to the outpainted regions.',
+          mode: 'tags',
+          allowFreeInput: true,
+        },
+      ],
+      [ImageEditorControls.Toggle]: [
+        {
+          ariaLabel: 'WD14 tagging',
+          controlType: ImageEditorControls.Toggle,
+          defaultValue: false,
+          id: ImageEditorToggleIds.Wd14Tagging,
+          isMandatory: false,
+          off: 'false',
+          on: 'true',
+          title: 'Automatically tag the outpaint patch with WD14 and add tags to conditioning.',
+        },
+      ],
+      [ImageEditorControls.Slider]: [
+        {
+          ariaLabel: 'Denoise percentage',
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 60,
+          id: ImageEditorSliderIds.DenoisePercentage,
+          isMandatory: true,
+          max: '100',
+          min: '0',
+          step: '1',
+          title:
+            'Noise applied during outpaint. 0 keeps original pixels, 100 fully regenerates the band.',
+        },
+        {
+          ariaLabel: 'Outpaint amount (px)',
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 256,
+          id: ImageEditorSliderIds.OutpaintAmount,
+          isMandatory: true,
+          max: '1024',
+          min: '8',
+          step: '8',
+          title: 'Expand canvas by this many pixels on edges touched by the brush.',
+        },
+        {
+          ariaLabel: 'Feather mask (px)',
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 12,
+          id: ImageEditorSliderIds.Feather,
+          isMandatory: false,
+          max: '64',
+          min: '0',
+          step: '1',
+          title: 'Soften mask edges to blend the inpainted region.',
+        },
+        {
+          ariaLabel: 'Conditioning mix',
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 0,
+          id: ImageEditorSliderIds.ConditioningMix,
+          isMandatory: false,
+          max: '1',
+          min: '-1',
+          step: '0.1',
+          title:
+            'Conditioning mode: -1=input only, 0=concat, 1=prompts only. Intermediate values blend between input and prompts.',
+        },
+        {
+          ariaLabel: 'CFG scale',
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 7,
+          id: ImageEditorSliderIds.Cfg,
+          isMandatory: true,
+          max: '30',
+          min: '1',
+          step: '0.5',
+          title: 'Classifier-free guidance applied during the outpaint pass.',
+        },
+        {
+          ariaLabel: 'Steps',
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 24,
+          id: ImageEditorSliderIds.Steps,
+          isMandatory: true,
+          max: '50',
+          min: '1',
+          step: '1',
+          title: 'Diffusion steps used when outpainting.',
+        },
+      ],
+      [ImageEditorControls.Select]: [
+        {
+          ariaLabel: 'Sampler',
+          controlType: ImageEditorControls.Select,
+          defaultValue: 'dpmpp_2m',
+          id: ImageEditorSelectIds.Sampler,
+          isMandatory: false,
+          title: 'Sampler used for outpaint diffusion steps.',
+          values: [
+            { value: 'DPM++ 2M', id: 'dpmpp_2m' },
+            { value: 'DPM++ 2M Karras', id: 'dpmpp_2m_karras' },
+            { value: 'Euler', id: 'euler' },
+            { value: 'Euler a', id: 'euler_ancestral' },
+          ],
+        },
+        {
+          ariaLabel: 'Scheduler',
+          controlType: ImageEditorControls.Select,
+          defaultValue: 'normal',
+          id: ImageEditorSelectIds.Scheduler,
+          isMandatory: false,
+          title: 'Scheduler used for outpaint diffusion steps.',
           values: [
             { value: 'Normal', id: 'normal' },
             { value: 'Karras', id: 'karras' },
@@ -360,8 +517,7 @@ export const INPAINT_ADV: ImageEditorInpaintFilter = {
         isMandatory: false,
         off: 'false',
         on: 'true',
-        title:
-          'Automatically tag the inpaint patch with WD14 and add tags to conditioning. Threshold: 0.70, Top K: 10.',
+        title: 'Automatically tag the inpaint patch with WD14 and add tags to conditioning.',
       },
       {
         ariaLabel: 'Auto-align ROI',

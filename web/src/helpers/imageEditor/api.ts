@@ -35,7 +35,7 @@ export const apiCall = async (state: ImageEditorState, addSnapshot: boolean) => 
   const contextDataset = imageviewer.lfDataset as ImageEditorDataset | undefined;
   const contextId = ensureDatasetContext(contextDataset, state);
 
-  if (filterType === 'inpaint') {
+  if (filterType === 'inpaint' || filterType === 'outpaint') {
     if (!contextId) {
       lfManager.log(
         'Missing editing context. Run the workflow to register an editing session before using inpaint.',

@@ -5,6 +5,7 @@ import {
   ImageEditorState,
   ImageEditorStatus,
 } from '../../types/widgets/imageEditor';
+import { TagName } from '../../types/widgets/widgets';
 
 //#region snackbar
 export const showBanner = (state: ImageEditorState, message: string, uiState: LfThemeUIState) => {
@@ -12,7 +13,7 @@ export const showBanner = (state: ImageEditorState, message: string, uiState: Lf
   let snackbar = state.infoSnackbar;
 
   if (!snackbar || !settings.contains(snackbar)) {
-    snackbar = document.createElement('lf-snackbar');
+    snackbar = document.createElement(TagName.LfSnackbar);
     snackbar.classList.add(ImageEditorCSS.Snackbar);
     snackbar.lfPosition = 'inline';
 
@@ -32,10 +33,11 @@ export const setProgress = (state: ImageEditorState, value: number | null) => {
   let bar = state.progressbar;
 
   if (!bar || !settings.contains(bar)) {
-    bar = document.createElement('lf-progressbar');
+    bar = document.createElement(TagName.LfProgressbar);
     bar.classList.add(ImageEditorCSS.ProgressBar);
     bar.classList.add(ImageEditorCSS.ProgressBarHidden);
     bar.lfAnimated = true;
+    bar.lfLabel = ' ';
     bar.lfUiSize = 'xsmall';
     bar.lfUiState = 'info';
 
