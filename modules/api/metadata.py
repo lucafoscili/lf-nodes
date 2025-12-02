@@ -153,8 +153,8 @@ async def update_metadata_cover(request):
                             "lfCode": {
                                 "shape": "code",
                                 "value": {
-                                    'hash': f'{model_hash}',
-                                    'path': f'{model_path}'
+                                    "hash": f"{model_hash}",
+                                    "path": f"{model_path}"
                                 },
                             },
                             "lfImage": {
