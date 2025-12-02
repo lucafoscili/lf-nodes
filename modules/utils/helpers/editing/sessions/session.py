@@ -61,7 +61,7 @@ class EditingSession:
         return dataset
 
     def register_context(self, dataset: Dict[str, Any], **context: Any) -> None:
-        register_editing_context(dataset["context_id"], **context)
+        register_editing_context(dataset["context_id"], node_id=self.node_id, **context)
         self._write_dataset(dataset)
 
     def wait_for_completion(self, dataset: Dict[str, Any], *, poll_interval: float = 0.5) -> Dict[str, Any]:

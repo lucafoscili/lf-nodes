@@ -1,3 +1,4 @@
+import asyncio
 import folder_paths
 import hashlib
 import json
@@ -178,7 +179,13 @@ async def process_image(request):
         img_tensor = _load_image_tensor(images_dir)
 
         try:
-            processed_tensor, extra_payload = process_filter(filter_type, img_tensor, settings)
+            # Offload so event loop remains responsive for WebSocket progress events.
+            processed_tensor, extra_payload = await asyncio.to_thread(
+                process_filter,
+                filter_type,
+                img_tensor,
+                settings,
+            )
         except UnknownFilterError as exc:
             return web.Response(status=400, text=str(exc))
 

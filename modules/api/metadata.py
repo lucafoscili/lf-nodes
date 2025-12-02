@@ -22,19 +22,19 @@ async def clear_model_info(_):
             ("embeddings", get_comfy_list("embeddings")),
             ("loras", get_comfy_list("loras"))
         ]
-        
+
         deleted_files: list = []
-        
+
         for folder_name, directory in directories:
             for model_file in directory:
                 model_full_path = get_full_path(folder_name, model_file)
-                
+
                 if model_full_path is None:
                     continue
-                
+
                 file_no_ext = os.path.splitext(model_full_path)[0]
                 info_file_path = file_no_ext + ".info"
-                
+
                 if os.path.exists(info_file_path):
                     try:
                         os.remove(info_file_path)
@@ -43,7 +43,7 @@ async def clear_model_info(_):
                         return web.Response(status=500, text=f"Failed to delete {info_file_path}: {str(e)}")
 
         return web.json_response({
-            "status": "success", 
+            "status": "success",
             "message": f"Deleted {len(deleted_files)} .info files.",
             "deleted_files": deleted_files
         }, status=200)
@@ -57,7 +57,7 @@ async def clear_model_info(_):
 async def save_model_info(request):
     try:
         r: dict = await request.post()
-        
+
         metadata = r.get("metadata")
         model_path = r.get("model_path")
         forced_save = r.get("forced_save")
@@ -128,10 +128,10 @@ async def save_model_info(request):
 async def update_metadata_cover(request):
     try:
         r: dict = await request.post()
-        
+
         model_path = r.get("model_path")
         base64_image = r.get("base64_image")
-        
+
         if not model_path or not base64_image:
             return web.Response(status=400, text="Missing 'model_path' or 'base64_image'.")
 
@@ -139,19 +139,70 @@ async def update_metadata_cover(request):
         info_file_path = file_no_ext + ".info"
 
         if not os.path.exists(info_file_path):
-            return web.Response(status=404, text="Metadata file not found.")
+            sha_file_path = file_no_ext + ".sha256"
+            if os.path.exists(sha_file_path):
+                with open(sha_file_path, "r") as sha_file:
+                    model_hash = sha_file.read().strip()
+            else:
+                model_hash = "unknown"
+
+            metadata_json = {
+                "nodes": [
+                    {
+                        "cells": {
+                            "lfCode": {
+                                "shape": "code",
+                                "value": {
+                                    "hash": f"{model_hash}",
+                                    "path": f"{model_path}"
+                                },
+                            },
+                            "lfImage": {
+                                "shape": "image",
+                                "value": ""
+                            },
+                            "text1": {
+                                "value": os.path.basename(model_path).rsplit('.', 1)[0]
+                            },
+                            "text2": {
+                                "value": "Version unknown"
+                            },
+                            "text3": {
+                                "value": "No info available"
+                            }
+                        },
+                        "id": "node_1",
+                        "value": ""
+                    }
+                ]
+            }
+            with open(info_file_path, "w") as info_file:
+                json.dump(metadata_json, info_file, indent=4)
 
         with open(info_file_path, "r") as info_file:
             metadata_json = json.load(info_file)
-        
+
         if "nodes" not in metadata_json or not metadata_json["nodes"]:
             metadata_json["nodes"] = [{}]
-        
+
         if "cells" not in metadata_json["nodes"][0]:
             metadata_json["nodes"][0]["cells"] = {}
-        
+
+        try:
+            img_data = base64.b64decode(base64_image.split(",")[-1])
+            with Image.open(BytesIO(img_data)) as img:
+                img = img.convert("RGB")
+                img.thumbnail((1024, 1024), Image.LANCZOS)
+
+                buf = BytesIO()
+                img.save(buf, format="JPEG", quality=85)
+                b64 = base64.b64encode(buf.getvalue()).decode("utf-8")
+                base64_image = f"data:image/jpeg;base64,{b64}"
+        except (UnidentifiedImageError, OSError) as processing_error:
+            return web.Response(status=400, text=f"Invalid image data: {processing_error}")
+
         lf_image_cell = metadata_json["nodes"][0]["cells"].get("lfImage", {})
-        lf_image_cell["value"] = f"data:image/png;base64,{base64_image}"
+        lf_image_cell["value"] = f"{base64_image}"
         metadata_json["nodes"][0]["cells"]["lfImage"] = lf_image_cell
 
         with open(info_file_path, "w") as info_file:

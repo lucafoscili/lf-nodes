@@ -1,9 +1,11 @@
 import { apiCall, cardPlaceholders } from '../helpers/card';
+import { setProgress } from '../helpers/imageEditor/status';
 import { APIMetadataEntry } from '../types/api/api';
 import { CardPayload, NotifyPayload, WidgetPayloadMap } from '../types/events/events';
 import { LogSeverity } from '../types/manager/manager';
 import { Card } from '../types/widgets/card';
 import { CardsWithChip, CardsWithChipDeserializedValue } from '../types/widgets/cardsWithChip';
+import { ImageEditorState } from '../types/widgets/imageEditor';
 import { CustomWidgetName, NodeName, WidgetFactory } from '../types/widgets/widgets';
 import { getApiRoutes, getCustomWidget, getLfManager, resolveNodeId } from '../utils/common';
 import { cardFactory } from '../widgets/card';
@@ -132,23 +134,26 @@ export class LFWidgets {
         const widget = getCustomWidget(node, widgetName);
 
         switch (widgetName) {
-          case CustomWidgetName.imageEditor:
+          case CustomWidgetName.imageEditor: {
+            const state = widget?.options?.getState?.() as ImageEditorState | undefined;
+
             switch (name) {
               case NodeName.imagesEditingBreakpoint:
-                if (widget && 'value' in payload) {
+              case NodeName.loadAndEditImages:
+                if ('value' in payload && widget) {
                   const { value } = payload;
 
-                  lfManager.log(
-                    `Initiating JSON data fetch for editing breakpoint from path: ${value}`,
-                    { widget, value },
-                  );
+                  lfManager.log(`Initiating JSON data fetch from path: ${value}`, {
+                    widget,
+                    value,
+                  });
 
                   getApiRoutes()
                     .json.get(value)
                     .then((r) => {
                       if (r.status === LogSeverity.Success) {
                         lfManager.log(
-                          'JSON data fetched successfully for image editing breakpoint.',
+                          'JSON data fetched successfully.',
                           { data: r.data },
                           LogSeverity.Success,
                         );
@@ -164,17 +169,11 @@ export class LFWidgets {
                     })
                     .catch((error) => {
                       lfManager.log(
-                        `Error during JSON fetch for editing breakpoint: ${error.toString()}`,
+                        `Error during JSON fetch from path: ${error.toString()}`,
                         { error },
                         LogSeverity.Error,
                       );
                     });
-                } else {
-                  lfManager.log(
-                    `Image editor widget handling failed: missing 'widget' or 'value' in payload.`,
-                    { widget, payload },
-                    LogSeverity.Warning,
-                  );
                 }
                 break;
               default:
@@ -184,7 +183,12 @@ export class LFWidgets {
                 }
                 break;
             }
+
+            if (state && 'progress' in payload && typeof payload.progress === 'number') {
+              setProgress(state, payload.progress);
+            }
             break;
+          }
           case CustomWidgetName.card:
           case CustomWidgetName.cardsWithChip:
             if (widget && 'apiFlags' in payload) {

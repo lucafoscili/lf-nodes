@@ -7,6 +7,7 @@ export const IMAGE_EDITOR_CONSTANTS = {
     INPAINT: 'inpaint',
     INPAINT_ADV: 'inpaint_adv',
     INPAINT_DETAIL: 'inpaint_detail',
+    OUTPAINT: 'outpaint',
   },
   UI: {
     APPLY: 'Apply',
@@ -19,6 +20,7 @@ export const IMAGE_EDITOR_CONSTANTS = {
     STROKE: 'stroke',
   },
   TAGS: {
+    CHECKBOX: 'LF-CHECKBOX',
     MULTIINPUT: 'LF-MULTIINPUT',
     SELECT: 'LF-SELECT',
     SLIDER: 'LF-SLIDER',

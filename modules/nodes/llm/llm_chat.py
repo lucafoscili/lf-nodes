@@ -9,7 +9,7 @@ class LF_LLMChat:
         return {
             "required": {
                 "ui_widget": (Input.LF_CHAT, {
-                    "default": ""
+                    "default": {}
                 }),
             },
         }
@@ -29,11 +29,12 @@ class LF_LLMChat:
 
     def on_exec(self, **kwargs: dict):
         ui_widget: dict = normalize_json_input(kwargs.get("ui_widget", {}))
+        history: list = normalize_json_input(ui_widget.get("history", []))
 
-        all_messages = [message.get("content") for message in ui_widget]
+        all_messages = [message.get("content") for message in history]
         last_message = all_messages[-1]
-        last_user_message = next((message.get("content") for message in reversed(ui_widget) if message["role"] == "user"), "")
-        last_llm_message = next((message.get("content") for message in reversed(ui_widget) if message["role"] == "assistant"), "")
+        last_user_message = next((message.get("content") for message in reversed(history) if message["role"] == "user"), "")
+        last_llm_message = next((message.get("content") for message in reversed(history) if message["role"] == "assistant"), "")
 
         return (ui_widget, last_message, last_user_message, last_llm_message, all_messages)
 # endregion

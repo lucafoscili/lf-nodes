@@ -1,27 +1,61 @@
+import { LfThemeUIState } from '@lf-widgets/foundations/dist';
 import {
   ImageEditorActionButtons,
   ImageEditorCSS,
   ImageEditorState,
   ImageEditorStatus,
 } from '../../types/widgets/imageEditor';
+import { TagName } from '../../types/widgets/widgets';
 
-//#region showError
-export const showError = (state: ImageEditorState, message: string) => {
+//#region snackbar
+export const showBanner = (state: ImageEditorState, message: string, uiState: LfThemeUIState) => {
   const { settings } = state.elements;
-  const errorDiv = document.createElement('div');
-  errorDiv.style.color = 'var(--error-color)';
-  errorDiv.style.padding = '8px';
-  errorDiv.style.marginBottom = '8px';
-  errorDiv.style.border = '1px solid var(--error-color)';
-  errorDiv.style.borderRadius = '4px';
-  errorDiv.style.backgroundColor = 'rgba(255, 0, 0, 0.1)';
-  errorDiv.innerText = message;
+  let snackbar = state.infoSnackbar;
 
-  settings.prepend(errorDiv);
+  if (!snackbar || !settings.contains(snackbar)) {
+    snackbar = document.createElement(TagName.LfSnackbar);
+    snackbar.classList.add(ImageEditorCSS.Snackbar);
+    snackbar.lfPosition = 'inline';
 
-  setTimeout(() => {
-    errorDiv.remove();
-  }, 5000);
+    settings.prepend(snackbar);
+
+    state.infoSnackbar = snackbar;
+  }
+
+  snackbar.lfMessage = message;
+  snackbar.lfUiState = uiState;
+};
+//#endregion
+
+//#region progress bar
+export const setProgress = (state: ImageEditorState, value: number | null) => {
+  const { settings } = state.elements;
+  let bar = state.progressbar;
+
+  if (!bar || !settings.contains(bar)) {
+    bar = document.createElement(TagName.LfProgressbar);
+    bar.classList.add(ImageEditorCSS.ProgressBar);
+    bar.classList.add(ImageEditorCSS.ProgressBarHidden);
+    bar.lfAnimated = true;
+    bar.lfLabel = ' ';
+    bar.lfUiSize = 'xsmall';
+    bar.lfUiState = 'info';
+
+    settings.prepend(bar);
+
+    state.progressbar = bar;
+  }
+
+  const numeric = typeof value === 'number' ? value : 0;
+  const clamped = Math.max(0, Math.min(100, numeric));
+
+  if (clamped <= 0 || clamped >= 100) {
+    bar.lfValue = clamped;
+    bar.classList.add(ImageEditorCSS.ProgressBarHidden);
+  } else {
+    bar.lfValue = clamped;
+    bar.classList.remove(ImageEditorCSS.ProgressBarHidden);
+  }
 };
 //#endregion
 

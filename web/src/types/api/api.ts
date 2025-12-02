@@ -203,6 +203,8 @@ export interface ProcessImageAPIPayload extends BaseAPIPayload {
   mask?: string;
   cutout?: string;
   stats?: Record<string, unknown>;
+  wd14_backend?: string;
+  wd14_tags?: string[];
 }
 export interface UploadImageAPIPayload extends BaseAPIPayload {
   payload: {

@@ -26,6 +26,14 @@ export const refreshValues = async (state: ImageEditorState, addSnapshot = false
       const control = controls[id];
 
       switch (control.tagName) {
+        case IMAGE_EDITOR_CONSTANTS.TAGS.CHECKBOX: {
+          const checkbox = control as HTMLLfCheckboxElement;
+          const checkboxState = await checkbox.getValue();
+          const value = checkboxState === 'on';
+          filter.settings[id] = value;
+          storeForFilter[id] = value;
+          break;
+        }
         case IMAGE_EDITOR_CONSTANTS.TAGS.MULTIINPUT: {
           const multiinput = control as HTMLLfMultiinputElement;
           const multiValue = await multiinput.getValue();

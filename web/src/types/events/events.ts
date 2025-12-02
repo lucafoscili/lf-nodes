@@ -58,6 +58,7 @@ export enum LfEventName {
   LfCarousel = 'lf-carousel-event',
   LfChat = 'lf-chat-event',
   LfChart = 'lf-chart-event',
+  LfCheckbox = 'lf-checkbox-event',
   LfChip = 'lf-chip-event',
   LfCode = 'lf-code-event',
   LfCompare = 'lf-compare-event',

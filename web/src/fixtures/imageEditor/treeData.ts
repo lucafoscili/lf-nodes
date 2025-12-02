@@ -54,6 +54,18 @@ export const TREE_DATA: LfDataDataset = {
           id: 'inpaint_adv',
           value: 'Inpaint (adv.)',
         },
+        {
+          description:
+            'Outpaint beyond the current canvas. Brush along edges to choose which sides expand.',
+          cells: {
+            lfCode: {
+              shape: 'code',
+              value: JSON.stringify(SETTINGS.outpaint),
+            },
+          },
+          id: 'outpaint',
+          value: 'Outpaint',
+        },
       ],
     },
     //#endregion

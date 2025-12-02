@@ -3,6 +3,7 @@ import {
   LfCanvasElement,
   LfCanvasEventPayload,
   LfCanvasInterface,
+  LfCheckboxEventPayload,
   LfEvent,
   LfImageEventPayload,
   LfImageviewerEventPayload,
@@ -215,6 +216,19 @@ export const createEventHandlers = ({
             state.filterType = originalFilterType;
             await comp.clearCanvas();
           }
+          break;
+      }
+    },
+    //#endregion
+    //#region Checkbox
+    checkbox: async (state: ImageEditorState, e: CustomEvent<LfCheckboxEventPayload>) => {
+      const { eventType } = e.detail;
+      const { update } = state;
+      const { snapshot } = update;
+
+      switch (eventType) {
+        case 'change':
+          snapshot();
           break;
       }
     },

@@ -43,12 +43,29 @@
     }
   }
 
+  &__progressbar {
+    & {
+      height: 1em;
+      left: 0;
+      opacity: 1;
+      pointer-events: none;
+      position: absolute;
+      top: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    &--hidden {
+      opacity: 0;
+    }
+  }
+
   &__settings {
     & {
       @include mixins.lf-el-stretch;
       align-items: center;
       display: grid;
       grid-template-rows: 1fr auto;
+      position: relative;
     }
 
     &__controls {
@@ -66,6 +83,10 @@
       justify-content: flex-end;
       padding: 8px 16px;
     }
+  }
+
+  &__snackbar {
+    border-bottom: 1px solid var(--lf-color-border);
   }
 
   &__widget {

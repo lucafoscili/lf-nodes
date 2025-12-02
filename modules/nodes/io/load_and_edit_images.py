@@ -138,6 +138,7 @@ class LF_LoadAndEditImages:
             positive_conditioning=positive_conditioning_value,
             negative_conditioning=negative_conditioning_value,
             wd14_tagger=wd14_tagger_value,
+            node_event="loadandeditimages",
         )
 
         safe_send_sync(

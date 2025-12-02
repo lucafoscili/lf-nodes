@@ -5,6 +5,8 @@ import { LfEventName } from '../../types/events/events';
 import { LogSeverity } from '../../types/manager/manager';
 import {
   ImageEditorBrushSettings,
+  ImageEditorCheckboxConfig,
+  ImageEditorCheckboxIds,
   ImageEditorControlConfig,
   ImageEditorControlIds,
   ImageEditorControls,
@@ -107,7 +109,7 @@ function assertImageEditorFilter(obj: unknown): ImageEditorFilter {
 
 //#region createPrepSettings
 export const createPrepSettings = (deps: PrepSettingsDeps): PrepSettingsFn => {
-  const { onMultiinput, onSelect, onSlider, onTextfield, onToggle } = deps;
+  const { onMultiinput, onSelect, onSlider, onTextfield, onToggle, onCheckbox } = deps;
 
   return (state, node) => {
     const { syntax } = getLfManager().getManagers().lfFramework;
@@ -152,6 +154,20 @@ export const createPrepSettings = (deps: PrepSettingsDeps): PrepSettingsFn => {
 
       configs.forEach((config: ImageEditorControlConfig) => {
         switch (controlType) {
+          case ImageEditorControls.Checkbox: {
+            const checkboxConfig = config as ImageEditorCheckboxConfig;
+            const checkbox = document.createElement(TagName.LfCheckbox);
+
+            checkbox.lfLabel = parseLabel(checkboxConfig);
+            checkbox.lfValue = checkboxConfig.defaultValue ?? false;
+            checkbox.title = checkboxConfig.title;
+            //checkbox.dataset.id = checkboxConfig.id; No checkboxes yet
+            checkbox.addEventListener(LfEventName.LfCheckbox, (event) => onCheckbox(state, event));
+
+            controlsContainer.appendChild(checkbox);
+            state.elements.controls[checkboxConfig.id as ImageEditorCheckboxIds] = checkbox;
+            break;
+          }
           case ImageEditorControls.Slider: {
             const sliderConfig = config as ImageEditorSliderConfig;
             const slider = document.createElement(TagName.LfSlider);
@@ -371,6 +387,11 @@ export async function resetSettings(settings: HTMLElement) {
         toggle.setValue(toggle.lfValue ? 'on' : 'off');
         break;
       }
+      case 'LF-CHECKBOX': {
+        const checkbox = control as HTMLLfCheckboxElement;
+        void checkbox.setValue(checkbox.lfValue ?? false);
+        break;
+      }
     }
   }
 }
@@ -456,6 +477,15 @@ export const applyFilterDefaults = (
             (typeof defaultValue === 'string' && defaultValue.toLowerCase() === 'true');
           toggleConfig.defaultValue = boolValue;
           mutableSettings[toggleConfig.id] = boolValue ? toggleConfig.on : toggleConfig.off;
+          break;
+        }
+        case ImageEditorControls.Checkbox: {
+          const checkboxConfig = config as ImageEditorCheckboxConfig;
+          const boolValue =
+            defaultValue === true ||
+            (typeof defaultValue === 'string' && defaultValue.toLowerCase() === 'true');
+          checkboxConfig.defaultValue = boolValue;
+          mutableSettings[checkboxConfig.id] = boolValue;
           break;
         }
       }

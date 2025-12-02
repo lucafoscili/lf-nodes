@@ -1,3 +1,4 @@
+import { LfChatConfig, LfChatHistory } from '@lf-widgets/foundations/dist';
 import {
   BaseWidgetState,
   CustomWidgetName,
@@ -20,12 +21,16 @@ export type ChatNormalizeCallback = NormalizeValueCallback<ChatDeserializedValue
 //#endregion
 
 //#region Value
-export type ChatDeserializedValue = string;
+export type ChatDeserializedValue = {
+  config: LfChatConfig;
+  history: LfChatHistory;
+};
 //#endregion
 
 //#region State
 export interface ChatState extends BaseWidgetState {
   chat: HTMLLfChatElement;
-  history: string;
+  config: LfChatConfig;
+  history: LfChatHistory;
 }
 //#endregion

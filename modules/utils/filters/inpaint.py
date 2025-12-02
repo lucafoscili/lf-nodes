@@ -1,4 +1,4 @@
-from typing import Dict, Tuple
+from typing import Dict, Tuple, Callable
 
 import math
 import os
@@ -12,7 +12,7 @@ import nodes
 from .unsharp_mask import unsharp_mask_effect
 from ..constants import SAMPLERS, SCHEDULERS
 from ...utils.helpers.api import get_resource_url
-from ...utils.helpers.comfy import get_comfy_dir, resolve_filepath
+from ...utils.helpers.comfy import get_comfy_dir, resolve_filepath, safe_send_sync
 from ...utils.helpers.conversion import base64_to_tensor, convert_to_boolean, convert_to_float, convert_to_int, tensor_to_pil
 from ...utils.helpers.editing import get_editing_context
 from ...utils.helpers.tagging import apply_wd14_tagging_to_prompt
@@ -82,6 +82,28 @@ def _save_tensor_preview(tensor: torch.Tensor, filename_prefix: str, save_type: 
     except Exception:
         return None
 # endregion
+
+
+def _infer_vae_device(vae, fallback_device: torch.device) -> torch.device:
+    """
+    Resolve the most appropriate device to run VAE-bound operations on.
+
+    Preference order:
+    1. ``vae.first_stage_model.device`` when present.
+    2. ``vae.device`` when present.
+    3. ``fallback_device`` (typically the image tensor device).
+    """
+    device = getattr(getattr(vae, "first_stage_model", None), "device", None)
+    if isinstance(device, str):
+        device = torch.device(device)
+    if device is None:
+        raw_device = getattr(vae, "device", None)
+        if isinstance(raw_device, str):
+            device = torch.device(raw_device)
+        else:
+            device = raw_device
+    return device or fallback_device
+
 
 # region Upsample Planning
 def _align_up(value: int, alignment: int) -> int:
@@ -270,7 +292,8 @@ def sample_without_preview(
     sampler_name,
     scheduler_name,
     denoise_value,
-):
+    callback=None,
+) -> dict:
     """
     Generates a new latent sample using the provided model and parameters, without generating a preview image.
 
@@ -285,6 +308,7 @@ def sample_without_preview(
         sampler_name (str): Name of the sampler to use.
         scheduler_name (str): Name of the scheduler to use.
         denoise_value (float): Denoising strength for the sampling process.
+        callback: Optional sampling callback invoked as ``callback(step, x0, x, total_steps)``.
 
     Returns:
         dict: A copy of the input latent dictionary with the "samples" key updated to the newly generated latent samples.
@@ -313,7 +337,7 @@ def sample_without_preview(
         last_step=None,
         force_full_denoise=False,
         noise_mask=noise_mask,
-        callback=None,
+        callback=callback,
         disable_pbar=True,
         seed=seed,
     )
@@ -345,6 +369,7 @@ def perform_inpaint(
     negative_conditioning=None,
     conditioning_mix: float = 0.0,
     conditioning_mode: str | None = None,
+    progress_callback: Callable[[float], None] | None = None,
 ) -> torch.Tensor:
     """
     Performs inpainting on the given image using the specified model, mask, and prompts.
@@ -372,6 +397,7 @@ def perform_inpaint(
             - "concat": concatenate context + prompt conditioning.
             - "prompts_only": ignore context conditioning and rely on prompts.
             - "blend": blend according to conditioning_mix.
+        progress_callback: Optional function receiving a float percentage (0–100) as sampling progresses.
 
     Returns:
         torch.Tensor: The inpainted image tensor, blended with the original image according to the mask.
@@ -452,6 +478,22 @@ def perform_inpaint(
         )
 
         if disable_preview:
+            sampling_callback = None
+            if progress_callback is not None:
+                def sampling_callback(step, _x0, _x, total_steps):
+                    try:
+                        total = float(total_steps) if total_steps is not None else 0.0
+                        if total <= 0.0:
+                            pct = 100.0
+                        else:
+                            # Map internal sampler steps to a 40–100% range for the editor.
+                            frac = max(0.0, min(1.0, float(step + 1) / total))
+                            pct = 40.0 + frac * 60.0
+                        progress_callback(pct)
+                    except Exception:
+                        # Nodes should not fail due to callback issues.
+                        pass
+
             latent_result = sample_without_preview(
                 model=model,
                 positive=pos_cond,
@@ -463,6 +505,7 @@ def perform_inpaint(
                 sampler_name=sampler_name,
                 scheduler_name=scheduler_name,
                 denoise_value=denoise,
+                callback=sampling_callback,
             )
         else:
             sampler = nodes.KSampler()
@@ -1158,6 +1201,9 @@ def apply_inpaint_filter(image: torch.Tensor, settings: dict) -> FilterResult:
     if not context:
         raise ValueError(f"No active editing session for '{context_id}'.")
 
+    node_id = context.get("node_id")
+    node_event = context.get("node_event") or "loadandeditimages"
+
     model = context.get("model")
     clip = context.get("clip")
     vae = context.get("vae") or getattr(model, "vae", None)
@@ -1200,17 +1246,7 @@ def apply_inpaint_filter(image: torch.Tensor, settings: dict) -> FilterResult:
         raise ValueError("Inpaint mask strokes are empty.")
     mask = mask.clamp(0.0, 1.0)
 
-    device = getattr(getattr(vae, "first_stage_model", None), "device", None)
-    if isinstance(device, str):
-        device = torch.device(device)
-    if device is None:
-        raw_device = getattr(vae, "device", None)
-        if isinstance(raw_device, str):
-            device = torch.device(raw_device)
-        else:
-            device = raw_device
-    if device is None:
-        device = image.device
+    device = _infer_vae_device(vae, image.device)
 
     base_image = image.to(device=device, dtype=torch.float32)
     mask_tensor = mask.to(device=device, dtype=torch.float32)
@@ -1311,6 +1347,8 @@ def apply_inpaint_filter(image: torch.Tensor, settings: dict) -> FilterResult:
             "wd14_tagger": wd14_tagger,
             "wd14_model": wd14_model,
             "wd14_processor": wd14_processor,
+            "lf_progress_node_id": node_id,
+            "lf_progress_node_event": node_event,
         }
     )
 
@@ -1329,14 +1367,43 @@ def apply_inpaint_filter(image: torch.Tensor, settings: dict) -> FilterResult:
     if not apply_unsharp_mask:
         info_with_mask["unsharp_mask"] = "disabled"
 
-    print(
-        "[LF Inpaint] sampling "
-        f"steps={steps}, denoise={denoise_value:.3f}, cfg={cfg:.2f}, seed={seed}, "
-        f"conditioning_mix={conditioning_mix:.2f}"
-    )
-
     return processed, info_with_mask
 # endregion
+
+
+def apply_outpaint_filter(image: torch.Tensor, settings: dict) -> FilterResult:
+    """
+    Outpainting variant of the editor inpaint filter.
+
+    This reuses ``apply_inpaint_filter`` but enforces semantics that better match an
+    "outpaint tool":
+    - Forces 100% denoise in the masked/outpainted region.
+    - Uses brush-touched edges to decide which sides to expand; explicit
+      ``outpaint_*`` flags from the payload are ignored.
+    """
+    adjusted = dict(settings)
+    # Prefer percentage-style denoise from the UI and ignore any raw
+    # 0-1 denoise value if present to avoid double scaling.
+    adjusted.pop("denoise", None)
+
+    # Ensure outpaint direction is driven purely by brush edges.
+    adjusted.pop("outpaint_top", None)
+    adjusted.pop("outpaint_bottom", None)
+    adjusted.pop("outpaint_left", None)
+    adjusted.pop("outpaint_right", None)
+
+    # For outpainting, keep the full canvas as ROI so the model
+    # can see as much surrounding context as possible.
+    adjusted["roi_auto"] = False
+    # Keep the mask tight to the new border by default; dilation tends to
+    # pull regeneration into the interior for outpaint.
+    adjusted.setdefault("dilate", 0)
+
+    # Hint to the tensor path that only the newly created bands should be
+    # written back; sampling inside the original canvas is context only.
+    adjusted["_lf_outpaint_band_only"] = True
+
+    return apply_inpaint_filter(image, adjusted)
 
 # region Apply Inpaint Filter (Tensor Mask)
 def apply_inpaint_filter_tensor(
@@ -1365,7 +1432,27 @@ def apply_inpaint_filter_tensor(
     Raises:
         ValueError: If the mask tensor has an unsupported shape.
     """
-    device = getattr(getattr(vae, "first_stage_model", None), "device", None) or image.device
+    device = _infer_vae_device(vae, image.device)
+
+    progress_node_id = settings.get("lf_progress_node_id")
+    progress_node_event = settings.get("lf_progress_node_event")
+    context_id = settings.get("context_id")
+
+    def _emit_progress(pct: float) -> None:
+        if not progress_node_id or not progress_node_event:
+            return
+        try:
+            safe_send_sync(
+                str(progress_node_event),
+                {
+                    "context_id": context_id,
+                    "progress": int(max(0.0, min(100.0, pct))),
+                },
+                str(progress_node_id),
+            )
+        except Exception:
+            # Progress is best-effort; never break inpaint.
+            pass
 
     positive_prompt = str(settings.get("positive_prompt") or "")
     negative_prompt = str(settings.get("negative_prompt") or "")
@@ -1387,6 +1474,7 @@ def apply_inpaint_filter_tensor(
         raise ValueError("Unsupported MASK tensor shape.")
 
     orig_h, orig_w = int(base_image.shape[1]), int(base_image.shape[2])
+    canvas_h, canvas_w = orig_h, orig_w
 
     h, w = orig_h, orig_w
     m = m.to(device=base_image.device, dtype=torch.float32)
@@ -1396,11 +1484,78 @@ def apply_inpaint_filter_tensor(
     # Use a binary version for ROI/conditioning; a processed soft mask is captured later for final compositing.
     m = (m > 0.5).float()
 
-    edge_band = 4
-    touches_top = bool((m[:, :edge_band, :] > 0.5).any())
-    touches_bottom = bool((m[:, -edge_band:, :] > 0.5).any())
-    touches_left = bool((m[:, :, :edge_band] > 0.5).any())
-    touches_right = bool((m[:, :, -edge_band:] > 0.5).any())
+    _emit_progress(10.0)
+
+    # Detect which image edges the original brush actually touches,
+    # before any outpaint padding is applied.
+    edge_band_outpaint = 4
+    out_touches_top = bool((m[:, :edge_band_outpaint, :] > 0.5).any())
+    out_touches_bottom = bool((m[:, -edge_band_outpaint:, :] > 0.5).any())
+    out_touches_left = bool((m[:, :, :edge_band_outpaint] > 0.5).any())
+    out_touches_right = bool((m[:, :, -edge_band_outpaint:] > 0.5).any())
+
+    # Optional outpaint: expand the canvas by padding and mark the new border
+    # regions as part of the inpaint mask.
+    out_amount = _normalize_int_setting(settings.get("outpaint_amount", None), 0, min_value=0)
+    out_band_only = bool(settings.get("_lf_outpaint_band_only"))
+
+    # If any explicit outpaint_* flag is provided, respect them (advanced mode).
+    # Otherwise, for the simple inpaint filter, automatically outpaint only the
+    # edges touched by the brush when amount > 0.
+    raw_top = settings.get("outpaint_top")
+    raw_bottom = settings.get("outpaint_bottom")
+    raw_left = settings.get("outpaint_left")
+    raw_right = settings.get("outpaint_right")
+
+    if raw_top is None and raw_bottom is None and raw_left is None and raw_right is None:
+        out_top = out_amount if out_touches_top else 0
+        out_bottom = out_amount if out_touches_bottom else 0
+        out_left = out_amount if out_touches_left else 0
+        out_right = out_amount if out_touches_right else 0
+    else:
+        out_top = out_amount if convert_to_boolean(raw_top) else 0
+        out_bottom = out_amount if convert_to_boolean(raw_bottom) else 0
+        out_left = out_amount if convert_to_boolean(raw_left) else 0
+        out_right = out_amount if convert_to_boolean(raw_right) else 0
+
+    if out_top or out_bottom or out_left or out_right:
+        # Pad image (BHWC) by going through BCHW for well-defined padding semantics.
+        base_bchw = base_image.permute(0, 3, 1, 2)
+        base_bchw = F.pad(
+            base_bchw,
+            (out_left, out_right, out_top, out_bottom),
+            mode="replicate",
+        )
+        base_image = base_bchw.permute(0, 2, 3, 1)
+
+        # Pad mask with zeros, then mark the border region of the newly created canvas.
+        m = F.pad(m, (out_left, out_right, out_top, out_bottom), mode="constant", value=0.0)
+
+        canvas_h = orig_h + out_top + out_bottom
+        canvas_w = orig_w + out_left + out_right
+
+        border = torch.zeros_like(m)
+        if out_top:
+            border[:, :out_top, :] = 1.0
+        if out_bottom:
+            border[:, canvas_h - out_bottom :, :] = 1.0
+        if out_left:
+            border[:, :, :out_left] = 1.0
+        if out_right:
+            border[:, :, canvas_w - out_right :] = 1.0
+
+        # For the dedicated Outpainting tool, treat the newly
+        # created bands as the only editable area. The brush is
+        # used to pick which edges expand; sampling inside the
+        # original canvas is used purely as context and later
+        # discarded during compositing.
+        if out_band_only:
+            m = border
+        else:
+            m = torch.clamp(m + border, 0.0, 1.0)
+
+    wd14_tags: list[str] | None = None
+    wd14_backend: str | None = None
 
     wd14_tagging = convert_to_boolean(settings.get("wd14_tagging"))
     if wd14_tagging:
@@ -1426,6 +1581,9 @@ def apply_inpaint_filter_tensor(
                     pairs = []
                 if pairs:
                     tag_strings = [tag for tag, _ in pairs]
+                    _emit_progress(30.0)
+                    wd14_tags = tag_strings
+                    wd14_backend = getattr(wd14_tagger, "backend", None)
                     if positive_prompt:
                         positive_prompt = positive_prompt + ", " + ", ".join(tag_strings)
                     else:
@@ -1439,6 +1597,7 @@ def apply_inpaint_filter_tensor(
                     threshold=0.70,
                     top_k=10,
                 )
+                _emit_progress(30.0)
 
     conditioning_mix = _normalize_conditioning_mix(settings.get("conditioning_mix"))
 
@@ -1468,16 +1627,17 @@ def apply_inpaint_filter_tensor(
         vae=vae,
         settings=settings,
     )
+    _emit_progress(40.0)
     region_meta["apply_unsharp_mask"] = apply_unsharp_mask
 
     inner_h = int(work_image.shape[1])
     inner_w = int(work_image.shape[2])
     outpaint_margin = 32
 
-    pad_top_patch = outpaint_margin if touches_top else 0
-    pad_bottom_patch = outpaint_margin if touches_bottom else 0
-    pad_left_patch = outpaint_margin if touches_left else 0
-    pad_right_patch = outpaint_margin if touches_right else 0
+    pad_top_patch = outpaint_margin if out_touches_top else 0
+    pad_bottom_patch = outpaint_margin if out_touches_bottom else 0
+    pad_left_patch = outpaint_margin if out_touches_left else 0
+    pad_right_patch = outpaint_margin if out_touches_right else 0
 
     if pad_top_patch or pad_bottom_patch or pad_left_patch or pad_right_patch:
         work_image = F.pad(
@@ -1521,6 +1681,7 @@ def apply_inpaint_filter_tensor(
         negative_conditioning=negative_conditioning,
         conditioning_mix=conditioning_mix,
         conditioning_mode=conditioning_mode,
+        progress_callback=_emit_progress,
     )
 
     if pad_top_patch or pad_bottom_patch or pad_left_patch or pad_right_patch:
@@ -1549,9 +1710,15 @@ def apply_inpaint_filter_tensor(
         meta=region_meta,
     )
 
-    processed = processed[:, :orig_h, :orig_w, :]
+    processed = processed[:, :canvas_h, :canvas_w, :]
+    if wd14_tags:
+        info["wd14_tags"] = wd14_tags
+        if wd14_backend:
+            info["wd14_backend"] = wd14_backend
     if not apply_unsharp_mask:
         info["unsharp_mask"] = "disabled"
+
+    _emit_progress(100.0)
 
     return processed, info
 # endregion
