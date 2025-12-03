@@ -24,7 +24,6 @@ class EditingSessionResult:
     image_list: List
     selected_entry: Optional[Dict[str, Any]] = None
 
-
 @dataclass
 class EditingSession:
     node_id: str
@@ -38,7 +37,10 @@ class EditingSession:
         temp_type: str = "temp",
     ) -> Dict[str, Any]:
         nodes: list[dict] = []
-        dataset: dict[str, Any] = {"nodes": nodes}
+        dataset: dict[str, Any] = {
+            "nodes": nodes,
+            "lf_node_id": str(self.node_id),
+        }
 
         for index, img in enumerate(images):
             pil_image = tensor_to_pil(img)
@@ -67,8 +69,11 @@ class EditingSession:
     def wait_for_completion(self, dataset: Dict[str, Any], *, poll_interval: float = 0.5) -> Dict[str, Any]:
         json_file_path = dataset["context_id"]
         while True:
-            with open(json_file_path, "r", encoding="utf-8") as json_file:
-                latest = json.load(json_file)
+            try:
+                with open(json_file_path, "r", encoding="utf-8") as json_file:
+                    latest = json.load(json_file)
+            except FileNotFoundError:
+                return dataset
 
             status_column = next((col for col in latest.get("columns", []) if col.get("id") == "status"), None)
             if status_column and status_column.get("title") == "completed":
@@ -77,7 +82,18 @@ class EditingSession:
             time.sleep(poll_interval)
 
     def cleanup(self, dataset: Dict[str, Any]) -> None:
-        clear_editing_context(dataset.get("context_id"))
+        context_id = dataset.get("context_id")
+        clear_editing_context(context_id)
+
+        if context_id:
+            try:
+                os.remove(context_id)
+            except FileNotFoundError:
+                # Already cleaned up or never created; nothing to do.
+                pass
+            except OSError:
+                # Best-effort cleanup; ignore filesystem errors.
+                pass
 
     def collect_results(self, dataset: Dict[str, Any]) -> EditingSessionResult:
         edited_images = []

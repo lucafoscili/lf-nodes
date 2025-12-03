@@ -76,6 +76,7 @@ export interface ImageAPIs {
 }
 export interface JSONAPIs {
   get: (path: string) => Promise<GetJSONAPIPayload>;
+  recoverEditDataset: (nodeId: string) => Promise<GetJSONAPIPayload>;
   update: (path: string, dataset: LfDataDataset) => Promise<BaseAPIPayload>;
 }
 export interface APIMetadataEntry {
@@ -236,6 +237,7 @@ export enum APIEndpoints {
   GetSchedulers = `/lf-nodes/get-schedulers`,
   NewBackup = `/lf-nodes/new-backup`,
   ProcessImage = `/lf-nodes/process-image`,
+  RecoverEditDataset = `/lf-nodes/recover-edit-dataset`,
   RefreshNodeDefs = `/lf-nodes/refresh-node-defs`,
   SaveMetadata = '/lf-nodes/save-metadata',
   UpdateJson = `/lf-nodes/update-json`,

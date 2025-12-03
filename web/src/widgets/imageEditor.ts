@@ -1,5 +1,6 @@
 import { LfDataNode } from '@lf-widgets/foundations/dist';
 import { IMAGE_API } from '../api/image';
+import { JSON_API } from '../api/json';
 import { SETTINGS, TREE_DATA } from '../fixtures/imageEditor';
 import {
   EV_HANDLERS,
@@ -17,6 +18,7 @@ import {
 import { syncNavigationDirectoryControl } from '../helpers/imageEditor/navigation';
 import { createNavigationTreeManager } from '../helpers/imageEditor/navigationTree';
 import { setBrush } from '../helpers/imageEditor/settings';
+import type { GetFilesystemAPIPayload, GetImageAPIPayload } from '../types/api/api';
 import { LfEventName } from '../types/events/events';
 import { LogSeverity } from '../types/manager/manager';
 import {
@@ -55,6 +57,36 @@ export const imageEditorFactory: ImageEditorFactory = {
       setValue: (value) => {
         const state = STATE.get(wrapper);
         const { actionButtons, grid, imageviewer } = state.elements;
+        const { status } = state;
+
+        const isInitializing = status === 'initializing';
+
+        const reconcileSession = async () => {
+          if (!isInitializing) {
+            return Promise.reject('Already initialized');
+          }
+
+          state.status = 'reconciling';
+
+          try {
+            const nodeId = String(state.node.id ?? '');
+            const resp = await JSON_API.recoverEditDataset(nodeId);
+            if (resp.status !== LogSeverity.Success || !resp.data) {
+              return null;
+            }
+
+            const dataset = resp.data as ImageEditorDataset;
+            return dataset;
+          } catch (error) {
+            getLfManager().log(
+              'Failed to recover pending editing dataset for image editor.',
+              { error, nodeId: state.node.id },
+              LogSeverity.Warning,
+            );
+          }
+
+          return null;
+        };
 
         const callback: ImageEditorNormalizeCallback = (_, u) => {
           const parsedValue = u.parsedJSON as ImageEditorDeserializedValue;
@@ -132,7 +164,20 @@ export const imageEditorFactory: ImageEditorFactory = {
           }
         };
 
-        normalizeValue(value, callback, CustomWidgetName.imageEditor);
+        switch (status) {
+          case 'initializing':
+            reconcileSession().then((reconciled) => {
+              const dataset = reconciled || (value as ImageEditorDataset);
+              normalizeValue(dataset, callback, CustomWidgetName.imageEditor);
+              state.status = 'ready';
+            });
+            break;
+          case 'reconciling':
+            break; // no-op, wait for reconciling to finish
+          case 'ready':
+            normalizeValue(value, callback, CustomWidgetName.imageEditor);
+            break;
+        }
       },
     };
   },
@@ -161,30 +206,49 @@ export const imageEditorFactory: ImageEditorFactory = {
       state.lastRequestedDirectory = normalizedDirectory;
 
       try {
-        const response = navigationTreeEnabled
-          ? await IMAGE_API.explore(normalizedDirectory, { scope: 'dataset' })
-          : await IMAGE_API.get(normalizedDirectory);
+        if (navigationTreeEnabled) {
+          const response = await IMAGE_API.explore(normalizedDirectory, { scope: 'dataset' });
 
-        if (response.status !== LogSeverity.Success) {
-          getLfManager().log('Images not found.', { response }, LogSeverity.Info);
-          return;
+          if (response.status !== LogSeverity.Success) {
+            getLfManager().log('Images not found.', { response }, LogSeverity.Info);
+            return;
+          }
+
+          const fsData = response.data as GetFilesystemAPIPayload['data'];
+          const dataset: ImageEditorDataset =
+            (fsData?.dataset as ImageEditorDataset) ?? ({ nodes: [] } as ImageEditorDataset);
+
+          const mergedDirectory = mergeNavigationDirectory(dataset, { raw: normalizedDirectory });
+
+          state.directory = { ...mergedDirectory };
+          const derivedDirectoryValue = deriveDirectoryValue(mergedDirectory);
+          state.directoryValue = derivedDirectoryValue ?? normalizedDirectory;
+          state.lastRequestedDirectory = state.directoryValue;
+
+          ensureDatasetContext(dataset, state);
+          imageviewer.lfDataset = dataset;
+        } else {
+          const response = await IMAGE_API.get(normalizedDirectory);
+
+          if (response.status !== LogSeverity.Success) {
+            getLfManager().log('Images not found.', { response }, LogSeverity.Info);
+            return;
+          }
+
+          const imageData = response.data as GetImageAPIPayload['data'];
+          const dataset: ImageEditorDataset =
+            (imageData as ImageEditorDataset) ?? ({ nodes: [] } as ImageEditorDataset);
+
+          const mergedDirectory = mergeNavigationDirectory(dataset, { raw: normalizedDirectory });
+
+          state.directory = { ...mergedDirectory };
+          const derivedDirectoryValue = deriveDirectoryValue(mergedDirectory);
+          state.directoryValue = derivedDirectoryValue ?? normalizedDirectory;
+          state.lastRequestedDirectory = state.directoryValue;
+
+          ensureDatasetContext(dataset, state);
+          imageviewer.lfDataset = dataset;
         }
-
-        const rawData: any = response.data;
-        const dataset =
-          (navigationTreeEnabled ? rawData?.dataset : rawData) ??
-          ({ nodes: [] } as ImageEditorDataset);
-
-        const mergedDirectory = mergeNavigationDirectory(dataset, { raw: normalizedDirectory });
-
-        state.directory = { ...mergedDirectory };
-        const derivedDirectoryValue = deriveDirectoryValue(mergedDirectory);
-        state.directoryValue = derivedDirectoryValue ?? normalizedDirectory;
-        state.lastRequestedDirectory = state.directoryValue;
-
-        ensureDatasetContext(dataset, state);
-
-        imageviewer.lfDataset = dataset;
 
         await syncNavigationDirectoryControl(state, state.directoryValue);
       } catch (error) {
@@ -203,6 +267,10 @@ export const imageEditorFactory: ImageEditorFactory = {
     imageviewer.lfLoadCallback = async (_, value) => {
       const state = STATE.get(wrapper);
       if (!state || state.isSyncingDirectory) {
+        return;
+      }
+
+      if (!navigationTreeEnabled) {
         return;
       }
 
@@ -239,6 +307,7 @@ export const imageEditorFactory: ImageEditorFactory = {
       lastRequestedDirectory: undefined,
       node,
       refreshDirectory: refresh,
+      status: 'initializing',
       update: {
         apply: () => updateCb(STATE.get(wrapper), true, false, true).then(() => {}),
         preview: () => updateCb(STATE.get(wrapper)).then(() => {}),
@@ -306,6 +375,10 @@ export const imageEditorFactory: ImageEditorFactory = {
     }
 
     void Promise.resolve().then(async () => {
+      if (!navigationTreeEnabled) {
+        return;
+      }
+
       const currentState = STATE.get(wrapper);
       if (!currentState) {
         return;

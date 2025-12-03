@@ -71,20 +71,21 @@ export interface ImageEditorState extends BaseWidgetState {
   filter: ImageEditorFilter;
   filterNodeId?: string;
   filterType: ImageEditorFilterType;
-  lastBrushSettings: ImageEditorBrushSettings;
   hasAutoDirectoryLoad?: boolean;
+  lastBrushSettings: ImageEditorBrushSettings;
   infoSnackbar?: HTMLLfSnackbarElement | null;
   isSyncingDirectory?: boolean;
   isApiProcessing?: boolean;
   lastRequestedDirectory?: string;
   navigationManager?: NavigationManager;
   progressbar?: HTMLLfProgressbarElement | null;
+  refreshDirectory?: (directory: string) => Promise<void>;
+  status?: 'initializing' | 'reconciling' | 'ready';
   update: {
     apply: () => Promise<void>;
     preview: () => Promise<void>;
     snapshot: () => Promise<void>;
   };
-  refreshDirectory?: (directory: string) => Promise<void>;
 }
 export interface PrepSettingsDeps {
   onCheckbox: (
@@ -630,6 +631,7 @@ export interface ImageEditorDatasetSelection {
 export type ImageEditorDataset = ImageEditorDeserializedValue & {
   context_id?: string;
   defaults?: ImageEditorDatasetDefaults;
+  lf_node_id?: string;
   selection?: ImageEditorDatasetSelection;
   navigation?: ImageEditorDatasetNavigation;
 };

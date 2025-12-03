@@ -243,6 +243,8 @@ class LF_LoadAndEditImages:
         else:
             dataset = session.build_dataset([], filename_prefix="load_and_edit")
 
+        dataset["lf_node_id"] = str(session.node_id)
+
         context_id = dataset.get("context_id")
         if not context_id:
             context_id = session._build_context_path()
