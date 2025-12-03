@@ -240,6 +240,7 @@ export const imageEditorFactory: ImageEditorFactory = {
       node,
       refreshDirectory: refresh,
       update: {
+        apply: () => updateCb(STATE.get(wrapper), true, false, true).then(() => {}),
         preview: () => updateCb(STATE.get(wrapper)).then(() => {}),
         snapshot: () => updateCb(STATE.get(wrapper), true).then(() => {}),
       },

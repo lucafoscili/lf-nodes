@@ -46,7 +46,7 @@ import {
   hasSelectionChanged,
   resolveSelectionIndex,
 } from './dataset';
-import { setBrush } from './settings';
+import { setBrush, updateResizeHelperText } from './settings';
 import { updateCb } from './update';
 
 export const createEventHandlers = ({
@@ -298,6 +298,14 @@ export const createEventHandlers = ({
                             return;
                           }
                           await syncSelectionWithDataset(state, masonryEvent);
+                          break;
+                        case 'load':
+                          if (
+                            state.filterType === 'resizeEdge' ||
+                            state.filterType === 'resizeFree'
+                          ) {
+                            updateResizeHelperText(state);
+                          }
                           break;
                       }
                     }

@@ -80,6 +80,7 @@ export interface ImageEditorState extends BaseWidgetState {
   navigationManager?: NavigationManager;
   progressbar?: HTMLLfProgressbarElement | null;
   update: {
+    apply: () => Promise<void>;
     preview: () => Promise<void>;
     snapshot: () => Promise<void>;
   };
@@ -213,7 +214,11 @@ export enum ImageEditorTextfieldIds {
   Color = 'color',
   Highlights = 'highlights',
   NegativePrompt = 'negative_prompt',
+  PadColor = 'pad_color',
   PositivePrompt = 'positive_prompt',
+  ResizeHeight = 'height',
+  ResizeSizePx = 'size_px',
+  ResizeWidth = 'width',
   Seed = 'seed',
   Shadows = 'shadows',
   Tint = 'tint',
@@ -222,6 +227,7 @@ export enum ImageEditorToggleIds {
   ApplyUnsharpMask = 'apply_unsharp_mask',
   ClipSoft = 'clip_soft',
   Localized = 'localized',
+  LongestEdge = 'longest_edge',
   ProtectSkin = 'protect_skin',
   RoiAuto = 'roi_auto',
   RoiAlignAuto = 'roi_align_auto',
@@ -233,6 +239,8 @@ export enum ImageEditorToggleIds {
   Wd14Tagging = 'wd14_tagging',
 }
 export enum ImageEditorSelectIds {
+  ResizeMethod = 'resize_method',
+  ResizeMode = 'resize_mode',
   Sampler = 'sampler',
   Scheduler = 'scheduler',
 }
@@ -343,6 +351,8 @@ export interface ImageEditorFilterSettingsMap {
   inpaint: ImageEditorInpaintSettings;
   outpaint: ImageEditorInpaintSettings;
   line: ImageEditorLineSettings;
+  resizeEdge: ImageEditorResizeEdgeSettings;
+  resizeFree: ImageEditorResizeFreeSettings;
   saturation: ImageEditorSaturationSettings;
   sepia: ImageEditorSepiaSettings;
   splitTone: ImageEditorSplitToneSettings;
@@ -401,49 +411,6 @@ export interface ImageEditorGaussianBlurSettings extends ImageEditorFilterSettin
   blur_kernel_size: number;
   blur_sigma: number;
 }
-export interface ImageEditorLineSettings extends ImageEditorFilterSettings {
-  color: string;
-  opacity: number;
-  points: Array<{ x: number; y: number }>;
-  size: number;
-  smooth: boolean;
-}
-export interface ImageEditorSaturationSettings extends ImageEditorFilterSettings {
-  intensity: number;
-}
-export interface ImageEditorSepiaSettings extends ImageEditorFilterSettings {
-  intensity: number;
-}
-export interface ImageEditorSplitToneSettings extends ImageEditorFilterSettings {
-  balance: number;
-  highlights: string;
-  intensity: number;
-  shadows: string;
-  softness: number;
-}
-export interface ImageEditorTiltShiftSettings extends ImageEditorFilterSettings {
-  focus_position: number;
-  focus_size: number;
-  radius: number;
-  smooth: boolean;
-  vertical: boolean;
-}
-export interface ImageEditorUnsharpMaskSettings extends ImageEditorFilterSettings {
-  amount: number;
-  radius: number;
-  sigma: number;
-  threshold: number;
-}
-export interface ImageEditorVibranceSettings extends ImageEditorFilterSettings {
-  intensity: number;
-  clip_soft: boolean;
-  protect_skin: boolean;
-}
-export interface ImageEditorVignetteSettings extends ImageEditorFilterSettings {
-  intensity: number;
-  radius: number;
-  shape: boolean;
-}
 export interface ImageEditorInpaintSettings extends ImageEditorFilterSettings {
   apply_unsharp_mask?: boolean;
   b64_canvas: string;
@@ -466,6 +433,61 @@ export interface ImageEditorInpaintSettings extends ImageEditorFilterSettings {
   steps: number;
   upsample_target: number;
   wd14_tagging?: boolean;
+}
+export interface ImageEditorLineSettings extends ImageEditorFilterSettings {
+  color: string;
+  opacity: number;
+  points: Array<{ x: number; y: number }>;
+  size: number;
+  smooth: boolean;
+}
+export interface ImageEditorResizeEdgeSettings extends ImageEditorFilterSettings {
+  longest_edge: boolean;
+  resize_method: string;
+  size_px: number;
+}
+export interface ImageEditorResizeFreeSettings extends ImageEditorFilterSettings {
+  height: number;
+  pad_color: string;
+  resize_method: string;
+  resize_mode: string;
+  width: number;
+}
+export interface ImageEditorSaturationSettings extends ImageEditorFilterSettings {
+  intensity: number;
+}
+export interface ImageEditorSepiaSettings extends ImageEditorFilterSettings {
+  intensity: number;
+}
+export interface ImageEditorSplitToneSettings extends ImageEditorFilterSettings {
+  balance: number;
+  highlights: string;
+  intensity: number;
+  shadows: string;
+  softness: number;
+}
+export interface ImageEditorUnsharpMaskSettings extends ImageEditorFilterSettings {
+  amount: number;
+  radius: number;
+  sigma: number;
+  threshold: number;
+}
+export interface ImageEditorTiltShiftSettings extends ImageEditorFilterSettings {
+  focus_position: number;
+  focus_size: number;
+  radius: number;
+  smooth: boolean;
+  vertical: boolean;
+}
+export interface ImageEditorVibranceSettings extends ImageEditorFilterSettings {
+  intensity: number;
+  clip_soft: boolean;
+  protect_skin: boolean;
+}
+export interface ImageEditorVignetteSettings extends ImageEditorFilterSettings {
+  intensity: number;
+  radius: number;
+  shape: boolean;
 }
 export enum ImageEditorBackgroundRemoverIds {
   Color = 'color',
@@ -582,6 +604,18 @@ export enum ImageEditorInpaintIds {
   Steps = 'steps',
   UpsampleTarget = 'upsample_target',
 }
+export enum ImageEditorResizeEdgeIds {
+  LongestEdge = 'longest_edge',
+  ResizeMethod = 'resize_method',
+  SizePx = 'size_px',
+}
+export enum ImageEditorResizeFreeIds {
+  Height = 'height',
+  PadColor = 'pad_color',
+  ResizeMethod = 'resize_method',
+  ResizeMode = 'resize_mode',
+  Width = 'width',
+}
 export type ImageEditorFilterType = keyof ImageEditorFilterSettingsMap;
 export type ImageEditorDatasetDefaults = Partial<
   Record<ImageEditorFilterType, Partial<ImageEditorFilterSettingsMap[ImageEditorFilterType]>>
@@ -607,6 +641,7 @@ export interface ImageEditorFilterDefinition<
   controlIds: ImageEditorControlIdsEnum;
   configs: ImageEditorConfigs;
   hasCanvasAction?: boolean;
+  manualApply?: boolean;
   settings: ImageEditorSettings;
 }
 export type ImageEditorBackgroundRemoverFilter = ImageEditorFilterDefinition<
@@ -687,6 +722,18 @@ export type ImageEditorGaussianBlurFilter = ImageEditorFilterDefinition<
     [ImageEditorControls.Slider]: ImageEditorSliderConfig[];
   }
 >;
+export type ImageEditorInpaintFilter = ImageEditorFilterDefinition<
+  typeof ImageEditorInpaintIds,
+  ImageEditorInpaintSettings,
+  {
+    [ImageEditorControls.Checkbox]?: ImageEditorCheckboxConfig[];
+    [ImageEditorControls.Multiinput]?: ImageEditorMultiinputConfig[];
+    [ImageEditorControls.Select]?: ImageEditorSelectConfig[];
+    [ImageEditorControls.Slider]: ImageEditorSliderConfig[];
+    [ImageEditorControls.Textfield]?: ImageEditorTextfieldConfig[];
+    [ImageEditorControls.Toggle]?: ImageEditorToggleConfig[];
+  }
+>;
 export type ImageEditorLineFilter = ImageEditorFilterDefinition<
   typeof ImageEditorLineIds,
   ImageEditorLineSettings,
@@ -695,6 +742,23 @@ export type ImageEditorLineFilter = ImageEditorFilterDefinition<
     [ImageEditorControls.Slider]: ImageEditorSliderConfig[];
     [ImageEditorControls.Textfield]: ImageEditorTextfieldConfig[];
     [ImageEditorControls.Toggle]: ImageEditorToggleConfig[];
+  }
+>;
+export type ImageEditorResizeEdgeFilter = ImageEditorFilterDefinition<
+  typeof ImageEditorResizeEdgeIds,
+  ImageEditorResizeEdgeSettings,
+  {
+    [ImageEditorControls.Textfield]: ImageEditorTextfieldConfig[];
+    [ImageEditorControls.Select]: ImageEditorSelectConfig[];
+    [ImageEditorControls.Toggle]: ImageEditorToggleConfig[];
+  }
+>;
+export type ImageEditorResizeFreeFilter = ImageEditorFilterDefinition<
+  typeof ImageEditorResizeFreeIds,
+  ImageEditorResizeFreeSettings,
+  {
+    [ImageEditorControls.Textfield]: ImageEditorTextfieldConfig[];
+    [ImageEditorControls.Select]: ImageEditorSelectConfig[];
   }
 >;
 export type ImageEditorSaturationFilter = ImageEditorFilterDefinition<
@@ -751,18 +815,6 @@ export type ImageEditorVignetteFilter = ImageEditorFilterDefinition<
     [ImageEditorControls.Toggle]: ImageEditorToggleConfig[];
   }
 >;
-export type ImageEditorInpaintFilter = ImageEditorFilterDefinition<
-  typeof ImageEditorInpaintIds,
-  ImageEditorInpaintSettings,
-  {
-    [ImageEditorControls.Checkbox]?: ImageEditorCheckboxConfig[];
-    [ImageEditorControls.Multiinput]?: ImageEditorMultiinputConfig[];
-    [ImageEditorControls.Select]?: ImageEditorSelectConfig[];
-    [ImageEditorControls.Slider]: ImageEditorSliderConfig[];
-    [ImageEditorControls.Textfield]?: ImageEditorTextfieldConfig[];
-    [ImageEditorControls.Toggle]?: ImageEditorToggleConfig[];
-  }
->;
 export type ImageEditorFilters = {
   backgroundRemover: ImageEditorBackgroundRemoverFilter;
   blend: ImageEditorBlendFilter;
@@ -777,6 +829,8 @@ export type ImageEditorFilters = {
   inpaint: ImageEditorInpaintFilter;
   outpaint: ImageEditorInpaintFilter;
   line: ImageEditorLineFilter;
+  resizeEdge: ImageEditorResizeEdgeFilter;
+  resizeFree: ImageEditorResizeFreeFilter;
   saturation: ImageEditorSaturationFilter;
   sepia: ImageEditorSepiaFilter;
   splitTone: ImageEditorSplitToneFilter;
@@ -798,6 +852,8 @@ export type ImageEditorFilter =
   | ImageEditorGaussianBlurFilter
   | ImageEditorInpaintFilter
   | ImageEditorLineFilter
+  | ImageEditorResizeEdgeFilter
+  | ImageEditorResizeFreeFilter
   | ImageEditorSaturationFilter
   | ImageEditorSepiaFilter
   | ImageEditorSplitToneFilter
@@ -820,6 +876,8 @@ export type ImageEditorSetting =
   | ImageEditorGaussianBlurSettings
   | ImageEditorInpaintSettings
   | ImageEditorLineSettings
+  | ImageEditorResizeEdgeSettings
+  | ImageEditorResizeFreeSettings
   | ImageEditorSaturationSettings
   | ImageEditorSepiaSettings
   | ImageEditorSplitToneSettings

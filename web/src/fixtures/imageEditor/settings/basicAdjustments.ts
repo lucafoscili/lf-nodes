@@ -5,15 +5,26 @@ import {
   ImageEditorControls,
   ImageEditorDesaturateIds,
   ImageEditorFilters,
+  ImageEditorResizeEdgeIds,
+  ImageEditorResizeFreeIds,
   ImageEditorSaturationIds,
+  ImageEditorSelectIds,
   ImageEditorSliderIds,
+  ImageEditorTextfieldIds,
   ImageEditorToggleIds,
   ImageEditorUnsharpMaskIds,
 } from '../../../types/widgets/imageEditor';
 
 export const BASIC_ADJUSTMENT_SETTINGS: Pick<
   ImageEditorFilters,
-  'brightness' | 'clarity' | 'contrast' | 'desaturate' | 'saturation' | 'unsharpMask'
+  | 'brightness'
+  | 'clarity'
+  | 'contrast'
+  | 'desaturate'
+  | 'resizeEdge'
+  | 'resizeFree'
+  | 'saturation'
+  | 'unsharpMask'
 > = {
   //#region Brightness
   brightness: {
@@ -199,6 +210,133 @@ export const BASIC_ADJUSTMENT_SETTINGS: Pick<
           step: '0.05',
           title:
             'Controls the intensity of the blue channel desaturation relative to the total strength of the filter.',
+        },
+      ],
+    },
+  },
+  //#endregion
+  //#region Resize (by edge)
+  resizeEdge: {
+    controlIds: ImageEditorResizeEdgeIds,
+    manualApply: true,
+    settings: {
+      longest_edge: true,
+      size_px: 2048,
+      resize_method: 'bicubic',
+    },
+    configs: {
+      [ImageEditorControls.Textfield]: [
+        {
+          ariaLabel: 'Target size (px)',
+          controlType: ImageEditorControls.Textfield,
+          defaultValue: '2048',
+          id: ImageEditorTextfieldIds.ResizeSizePx,
+          isMandatory: true,
+          title: 'Pixel size to apply to the selected edge.',
+          type: 'number',
+        },
+      ],
+      [ImageEditorControls.Select]: [
+        {
+          ariaLabel: 'Resample method',
+          controlType: ImageEditorControls.Select,
+          defaultValue: 'bicubic',
+          id: ImageEditorSelectIds.ResizeMethod,
+          isMandatory: true,
+          title: 'Interpolation method used when resizing.',
+          values: [
+            { id: 'bicubic', value: 'Bicubic' },
+            { id: 'bilinear', value: 'Bilinear' },
+            { id: 'linear', value: 'Linear' },
+            { id: 'nearest', value: 'Nearest' },
+            { id: 'nearest exact', value: 'Nearest (exact)' },
+          ],
+        },
+      ],
+      [ImageEditorControls.Toggle]: [
+        {
+          ariaLabel: 'Fit longest edge',
+          controlType: ImageEditorControls.Toggle,
+          defaultValue: true,
+          id: ImageEditorToggleIds.LongestEdge,
+          isMandatory: false,
+          off: 'false',
+          on: 'true',
+          title:
+            'When enabled, the longest image edge is resized to the target size; otherwise the shortest edge is used.',
+        },
+      ],
+    },
+  },
+  //#endregion
+  //#region Resize (free)
+  resizeFree: {
+    controlIds: ImageEditorResizeFreeIds,
+    manualApply: true,
+    settings: {
+      height: 1216,
+      width: 832,
+      resize_method: 'bicubic',
+      resize_mode: 'crop',
+      pad_color: '000000',
+    },
+    configs: {
+      [ImageEditorControls.Textfield]: [
+        {
+          ariaLabel: 'Height (px)',
+          controlType: ImageEditorControls.Textfield,
+          defaultValue: '1216',
+          id: ImageEditorTextfieldIds.ResizeHeight,
+          isMandatory: true,
+          title: 'Target image height in pixels.',
+          type: 'number',
+        },
+        {
+          ariaLabel: 'Width (px)',
+          controlType: ImageEditorControls.Textfield,
+          defaultValue: '832',
+          id: ImageEditorTextfieldIds.ResizeWidth,
+          isMandatory: true,
+          title: 'Target image width in pixels.',
+          type: 'number',
+        },
+        {
+          ariaLabel: 'Padding color',
+          controlType: ImageEditorControls.Textfield,
+          defaultValue: '#000000',
+          id: ImageEditorTextfieldIds.PadColor,
+          isMandatory: false,
+          title: 'Hex color used when padding (only when mode is set to pad).',
+          type: 'color',
+        },
+      ],
+      [ImageEditorControls.Select]: [
+        {
+          ariaLabel: 'Resample method',
+          controlType: ImageEditorControls.Select,
+          defaultValue: 'bicubic',
+          id: ImageEditorSelectIds.ResizeMethod,
+          isMandatory: true,
+          title: 'Interpolation method used when resizing.',
+          values: [
+            { id: 'bicubic', value: 'Bicubic' },
+            { id: 'bilinear', value: 'Bilinear' },
+            { id: 'linear', value: 'Linear' },
+            { id: 'nearest', value: 'Nearest' },
+            { id: 'nearest exact', value: 'Nearest (exact)' },
+          ],
+        },
+        {
+          ariaLabel: 'Resize mode',
+          controlType: ImageEditorControls.Select,
+          defaultValue: 'crop',
+          id: ImageEditorSelectIds.ResizeMode,
+          isMandatory: true,
+          title: 'Choose whether to crop or pad when matching the target dimensions.',
+          values: [
+            { id: 'crop', value: 'Crop' },
+            { id: 'pad', value: 'Pad' },
+          ],
         },
       ],
     },

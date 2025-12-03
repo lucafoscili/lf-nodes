@@ -153,6 +153,29 @@ export const TREE_DATA: LfDataDataset = {
           value: 'Desaturate',
         },
         {
+          description:
+            'Resize the image by fitting one edge to a target size while preserving aspect ratio.',
+          cells: {
+            lfCode: {
+              shape: 'code',
+              value: JSON.stringify(SETTINGS.resizeEdge),
+            },
+          },
+          id: 'resizeEdge',
+          value: 'Resize (by edge)',
+        },
+        {
+          description: 'Resize the image to explicit width/height with optional crop or padding.',
+          cells: {
+            lfCode: {
+              shape: 'code',
+              value: JSON.stringify(SETTINGS.resizeFree),
+            },
+          },
+          id: 'resizeFree',
+          value: 'Resize (free)',
+        },
+        {
           description: 'Adjusts the saturation.',
           cells: {
             lfCode: {

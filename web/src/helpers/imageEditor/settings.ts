@@ -34,15 +34,6 @@ import { IMAGE_EDITOR_CONSTANTS } from './constants';
 import { parseLabel } from './selectors';
 
 //#region Helpers
-/**
- * Type guard function that validates whether the provided object conforms to the ImageEditorFilter interface.
- * It checks for the presence and correct types of required properties: `controlIds`, `configs`, and `settings`.
- * Additionally, it validates that `configs` contains valid control types from `ImageEditorControls`, each with an array of configurations
- * having `id`, `title`, and `defaultValue`. Optional property `hasCanvasAction` is checked for boolean type if present.
- *
- * @param obj - The unknown object to validate.
- * @returns `true` if the object is a valid `ImageEditorFilter`, otherwise `false`.
- */
 function isValidImageEditorFilter(obj: unknown): obj is ImageEditorFilter {
   if (
     typeof obj !== 'object' ||
@@ -99,12 +90,60 @@ function isValidImageEditorFilter(obj: unknown): obj is ImageEditorFilter {
 
   return true;
 }
+
 function assertImageEditorFilter(obj: unknown): ImageEditorFilter {
   if (!isValidImageEditorFilter(obj)) {
     throw new Error('Invalid ImageEditorFilter structure');
   }
   return obj;
 }
+
+export const updateResizeHelperText = async (state: ImageEditorState) => {
+  try {
+    const { canvas } = (await state.elements.imageviewer.getComponents()).details;
+    const lfImage = await canvas.getImage();
+    const domImg = (await lfImage.getImage()) as HTMLImageElement | null;
+    const width = domImg?.naturalWidth || domImg?.width || 0;
+    const height = domImg?.naturalHeight || domImg?.height || 0;
+
+    const helperText = width && height ? `Current: ${width}x${height}px` : 'Current: unknown';
+
+    if (state.filterType === 'resizeEdge') {
+      const control = state.elements.controls[
+        ImageEditorTextfieldIds.ResizeSizePx
+      ] as HTMLLfTextfieldElement;
+
+      if (control && control.tagName === 'LF-TEXTFIELD') {
+        control.lfHelper = {
+          value: helperText,
+          showWhenFocused: false,
+        };
+      }
+      return;
+    }
+
+    const assignHelper = (
+      controlId: ImageEditorTextfieldIds.ResizeHeight | ImageEditorTextfieldIds.ResizeWidth,
+    ) => {
+      const control = state.elements.controls[controlId] as
+        | HTMLLfTextfieldElement
+        | HTMLLfMultiinputElement
+        | undefined;
+
+      if (control && control.tagName === 'LF-TEXTFIELD') {
+        (control as HTMLLfTextfieldElement).lfHelper = {
+          value: helperText,
+          showWhenFocused: false,
+        };
+      }
+    };
+
+    assignHelper(ImageEditorTextfieldIds.ResizeHeight);
+    assignHelper(ImageEditorTextfieldIds.ResizeWidth);
+  } catch (error) {
+    getLfManager().log('Failed to update resize helper text.', { error }, LogSeverity.Warning);
+  }
+};
 //#endregion
 
 //#region createPrepSettings
@@ -146,6 +185,7 @@ export const createPrepSettings = (deps: PrepSettingsDeps): PrepSettingsFn => {
     controlsContainer.classList.add(ImageEditorCSS.SettingsControls);
     settings.appendChild(controlsContainer);
     const controlGroups = Object.keys(filter.configs) as ImageEditorControls[];
+
     controlGroups.forEach((controlType) => {
       const configs = filter.configs[controlType];
       if (!configs) {
@@ -161,7 +201,6 @@ export const createPrepSettings = (deps: PrepSettingsDeps): PrepSettingsFn => {
             checkbox.lfLabel = parseLabel(checkboxConfig);
             checkbox.lfValue = checkboxConfig.defaultValue ?? false;
             checkbox.title = checkboxConfig.title;
-            //checkbox.dataset.id = checkboxConfig.id; No checkboxes yet
             checkbox.addEventListener(LfEventName.LfCheckbox, (event) => onCheckbox(state, event));
 
             controlsContainer.appendChild(checkbox);
@@ -308,6 +347,10 @@ export const createPrepSettings = (deps: PrepSettingsDeps): PrepSettingsFn => {
       });
     });
 
+    if (state.filterType === 'resizeEdge' || state.filterType === 'resizeFree') {
+      updateResizeHelperText(state);
+    }
+
     const buttonsWrapper = document.createElement(TagName.Div);
     buttonsWrapper.classList.add(ImageEditorCSS.SettingsButtons);
     settings.appendChild(buttonsWrapper);
@@ -323,6 +366,22 @@ export const createPrepSettings = (deps: PrepSettingsDeps): PrepSettingsFn => {
       })();
     });
     buttonsWrapper.appendChild(resetButton);
+
+    const requiresApply = filter?.manualApply === true;
+    if (requiresApply) {
+      const applyButton = document.createElement(TagName.LfButton);
+      applyButton.lfIcon = '--lf-icon-success';
+      applyButton.lfLabel = 'Apply';
+      applyButton.lfStretchX = true;
+      applyButton.addEventListener('click', () => {
+        if (state.update.apply) {
+          void state.update.apply();
+        } else {
+          void state.update.snapshot();
+        }
+      });
+      buttonsWrapper.appendChild(applyButton);
+    }
 
     if (state.filterType === 'brush') {
       const brushSettings = (state.filter.settings ?? {}) as ImageEditorBrushSettings;
@@ -361,6 +420,11 @@ export async function resetSettings(settings: HTMLElement) {
   const controls = Array.from(settings.querySelectorAll('[data-id]'));
   for (const control of controls) {
     switch (control.tagName) {
+      case 'LF-CHECKBOX': {
+        const checkbox = control as HTMLLfCheckboxElement;
+        void checkbox.setValue(checkbox.lfValue ?? false);
+        break;
+      }
       case 'LF-MULTIINPUT': {
         const multiinput = control as HTMLLfMultiinputElement;
         await multiinput.setValue(multiinput.lfValue);
@@ -385,11 +449,6 @@ export async function resetSettings(settings: HTMLElement) {
       case 'LF-TOGGLE': {
         const toggle = control as HTMLLfToggleElement;
         toggle.setValue(toggle.lfValue ? 'on' : 'off');
-        break;
-      }
-      case 'LF-CHECKBOX': {
-        const checkbox = control as HTMLLfCheckboxElement;
-        void checkbox.setValue(checkbox.lfValue ?? false);
         break;
       }
     }
@@ -432,6 +491,15 @@ export const applyFilterDefaults = (
       }
 
       switch (controlType) {
+        case ImageEditorControls.Checkbox: {
+          const checkboxConfig = config as ImageEditorCheckboxConfig;
+          const boolValue =
+            defaultValue === true ||
+            (typeof defaultValue === 'string' && defaultValue.toLowerCase() === 'true');
+          checkboxConfig.defaultValue = boolValue;
+          mutableSettings[checkboxConfig.id] = boolValue;
+          break;
+        }
         case ImageEditorControls.Multiinput: {
           const multiConfig = config as ImageEditorMultiinputConfig;
           const stringValue =
@@ -477,15 +545,6 @@ export const applyFilterDefaults = (
             (typeof defaultValue === 'string' && defaultValue.toLowerCase() === 'true');
           toggleConfig.defaultValue = boolValue;
           mutableSettings[toggleConfig.id] = boolValue ? toggleConfig.on : toggleConfig.off;
-          break;
-        }
-        case ImageEditorControls.Checkbox: {
-          const checkboxConfig = config as ImageEditorCheckboxConfig;
-          const boolValue =
-            defaultValue === true ||
-            (typeof defaultValue === 'string' && defaultValue.toLowerCase() === 'true');
-          checkboxConfig.defaultValue = boolValue;
-          mutableSettings[checkboxConfig.id] = boolValue;
           break;
         }
       }
