@@ -21,6 +21,7 @@ var APIEndpoints;
   APIEndpoints2["GetPreviewStats"] = "/lf-nodes/get-preview-stats";
   APIEndpoints2["GetSamplers"] = "/lf-nodes/get-samplers";
   APIEndpoints2["GetSchedulers"] = "/lf-nodes/get-schedulers";
+  APIEndpoints2["RecoverEditDataset"] = "/lf-nodes/recover-edit-dataset";
   APIEndpoints2["NewBackup"] = "/lf-nodes/new-backup";
   APIEndpoints2["ProcessImage"] = "/lf-nodes/process-image";
   APIEndpoints2["RefreshNodeDefs"] = "/lf-nodes/refresh-node-defs";
@@ -641,6 +642,48 @@ const JSON_API = {
       payload.status = LogSeverity.Error;
     }
     lfManager.log(payload.message, { payload }, payload.status);
+    return payload;
+  },
+  //#endregion
+  //#region recoverEditDataset
+  recoverEditDataset: async (nodeId) => {
+    const lfManager = getLfManager();
+    const payload = {
+      data: {},
+      message: "",
+      status: LogSeverity.Info
+    };
+    try {
+      const body = new FormData();
+      body.append("node_id", nodeId);
+      const response = await getComfyAPI().fetchApi(APIEndpoints.RecoverEditDataset, {
+        body,
+        method: "POST"
+      });
+      const code = response.status;
+      switch (code) {
+        case 200: {
+          const p = await response.json();
+          if (p.status === "success") {
+            payload.data = p.data ?? {};
+            payload.message = p.data ? "Recovered pending editing dataset successfully." : "No pending editing dataset found.";
+            payload.status = p.data ? LogSeverity.Success : LogSeverity.Info;
+          } else {
+            payload.message = p.message ?? "Failed to recover editing dataset.";
+            payload.status = LogSeverity.Error;
+          }
+          break;
+        }
+        default:
+          payload.message = `Unexpected response from the recover-edit-dataset API: ${await response.text().catch(() => "")}`;
+          payload.status = LogSeverity.Error;
+          break;
+      }
+    } catch (error) {
+      payload.message = error.toString();
+      payload.status = LogSeverity.Error;
+    }
+    lfManager.log(payload.message, { nodeId, payload }, payload.status);
     return payload;
   }
   //#endregion
@@ -1371,12 +1414,12 @@ const IMAGE_EDITOR_CONSTANTS = {
     STROKE: "stroke"
   },
   TAGS: {
+    CHECKBOX: "LF-CHECKBOX",
     MULTIINPUT: "LF-MULTIINPUT",
     SELECT: "LF-SELECT",
     SLIDER: "LF-SLIDER",
     TEXTFIELD: "LF-TEXTFIELD",
-    TOGGLE: "LF-TOGGLE",
-    CHECKBOX: "LF-CHECKBOX"
+    TOGGLE: "LF-TOGGLE"
   }
 };
 const applySelectionColumn = (dataset, selection) => {
@@ -1865,7 +1908,13 @@ const imageEditorConfigCb = (node) => {
   const configRaw = configWidget.options.getValue();
   let datasetJson;
   try {
-    datasetJson = syntax.json.unescape(currentDatasetRaw).parsedJSON;
+    if (typeof currentDatasetRaw === "string") {
+      datasetJson = syntax.json.unescape(currentDatasetRaw).parsedJSON;
+    } else if (currentDatasetRaw && typeof currentDatasetRaw === "object") {
+      datasetJson = currentDatasetRaw;
+    } else {
+      datasetJson = { nodes: [] };
+    }
   } catch {
     datasetJson = { nodes: [] };
   }
@@ -2094,7 +2143,11 @@ var ImageEditorTextfieldIds;
   ImageEditorTextfieldIds2["Color"] = "color";
   ImageEditorTextfieldIds2["Highlights"] = "highlights";
   ImageEditorTextfieldIds2["NegativePrompt"] = "negative_prompt";
+  ImageEditorTextfieldIds2["PadColor"] = "pad_color";
   ImageEditorTextfieldIds2["PositivePrompt"] = "positive_prompt";
+  ImageEditorTextfieldIds2["ResizeHeight"] = "height";
+  ImageEditorTextfieldIds2["ResizeSizePx"] = "size_px";
+  ImageEditorTextfieldIds2["ResizeWidth"] = "width";
   ImageEditorTextfieldIds2["Seed"] = "seed";
   ImageEditorTextfieldIds2["Shadows"] = "shadows";
   ImageEditorTextfieldIds2["Tint"] = "tint";
@@ -2104,6 +2157,7 @@ var ImageEditorToggleIds;
   ImageEditorToggleIds2["ApplyUnsharpMask"] = "apply_unsharp_mask";
   ImageEditorToggleIds2["ClipSoft"] = "clip_soft";
   ImageEditorToggleIds2["Localized"] = "localized";
+  ImageEditorToggleIds2["LongestEdge"] = "longest_edge";
   ImageEditorToggleIds2["ProtectSkin"] = "protect_skin";
   ImageEditorToggleIds2["RoiAuto"] = "roi_auto";
   ImageEditorToggleIds2["RoiAlignAuto"] = "roi_align_auto";
@@ -2116,6 +2170,8 @@ var ImageEditorToggleIds;
 })(ImageEditorToggleIds || (ImageEditorToggleIds = {}));
 var ImageEditorSelectIds;
 (function(ImageEditorSelectIds2) {
+  ImageEditorSelectIds2["ResizeMethod"] = "resize_method";
+  ImageEditorSelectIds2["ResizeMode"] = "resize_mode";
   ImageEditorSelectIds2["Sampler"] = "sampler";
   ImageEditorSelectIds2["Scheduler"] = "scheduler";
 })(ImageEditorSelectIds || (ImageEditorSelectIds = {}));
@@ -2253,6 +2309,20 @@ var ImageEditorInpaintIds;
   ImageEditorInpaintIds2["Steps"] = "steps";
   ImageEditorInpaintIds2["UpsampleTarget"] = "upsample_target";
 })(ImageEditorInpaintIds || (ImageEditorInpaintIds = {}));
+var ImageEditorResizeEdgeIds;
+(function(ImageEditorResizeEdgeIds2) {
+  ImageEditorResizeEdgeIds2["LongestEdge"] = "longest_edge";
+  ImageEditorResizeEdgeIds2["ResizeMethod"] = "resize_method";
+  ImageEditorResizeEdgeIds2["SizePx"] = "size_px";
+})(ImageEditorResizeEdgeIds || (ImageEditorResizeEdgeIds = {}));
+var ImageEditorResizeFreeIds;
+(function(ImageEditorResizeFreeIds2) {
+  ImageEditorResizeFreeIds2["Height"] = "height";
+  ImageEditorResizeFreeIds2["PadColor"] = "pad_color";
+  ImageEditorResizeFreeIds2["ResizeMethod"] = "resize_method";
+  ImageEditorResizeFreeIds2["ResizeMode"] = "resize_mode";
+  ImageEditorResizeFreeIds2["Width"] = "width";
+})(ImageEditorResizeFreeIds || (ImageEditorResizeFreeIds = {}));
 const showBanner = (state, message, uiState) => {
   const { settings } = state.elements;
   let snackbar = state.infoSnackbar;
@@ -2599,6 +2669,132 @@ const BASIC_ADJUSTMENT_SETTINGS = {
           min: "0",
           step: "0.05",
           title: "Controls the intensity of the blue channel desaturation relative to the total strength of the filter."
+        }
+      ]
+    }
+  },
+  //#endregion
+  //#region Resize (by edge)
+  resizeEdge: {
+    controlIds: ImageEditorResizeEdgeIds,
+    manualApply: true,
+    settings: {
+      longest_edge: true,
+      size_px: 2048,
+      resize_method: "bicubic"
+    },
+    configs: {
+      [ImageEditorControls.Textfield]: [
+        {
+          ariaLabel: "Target size (px)",
+          controlType: ImageEditorControls.Textfield,
+          defaultValue: "2048",
+          id: ImageEditorTextfieldIds.ResizeSizePx,
+          isMandatory: true,
+          title: "Pixel size to apply to the selected edge.",
+          type: "number"
+        }
+      ],
+      [ImageEditorControls.Select]: [
+        {
+          ariaLabel: "Resample method",
+          controlType: ImageEditorControls.Select,
+          defaultValue: "bicubic",
+          id: ImageEditorSelectIds.ResizeMethod,
+          isMandatory: true,
+          title: "Interpolation method used when resizing.",
+          values: [
+            { id: "bicubic", value: "Bicubic" },
+            { id: "bilinear", value: "Bilinear" },
+            { id: "linear", value: "Linear" },
+            { id: "nearest", value: "Nearest" },
+            { id: "nearest exact", value: "Nearest (exact)" }
+          ]
+        }
+      ],
+      [ImageEditorControls.Toggle]: [
+        {
+          ariaLabel: "Fit longest edge",
+          controlType: ImageEditorControls.Toggle,
+          defaultValue: true,
+          id: ImageEditorToggleIds.LongestEdge,
+          isMandatory: false,
+          off: "false",
+          on: "true",
+          title: "When enabled, the longest image edge is resized to the target size; otherwise the shortest edge is used."
+        }
+      ]
+    }
+  },
+  //#endregion
+  //#region Resize (free)
+  resizeFree: {
+    controlIds: ImageEditorResizeFreeIds,
+    manualApply: true,
+    settings: {
+      height: 1216,
+      width: 832,
+      resize_method: "bicubic",
+      resize_mode: "crop",
+      pad_color: "000000"
+    },
+    configs: {
+      [ImageEditorControls.Textfield]: [
+        {
+          ariaLabel: "Height (px)",
+          controlType: ImageEditorControls.Textfield,
+          defaultValue: "1216",
+          id: ImageEditorTextfieldIds.ResizeHeight,
+          isMandatory: true,
+          title: "Target image height in pixels.",
+          type: "number"
+        },
+        {
+          ariaLabel: "Width (px)",
+          controlType: ImageEditorControls.Textfield,
+          defaultValue: "832",
+          id: ImageEditorTextfieldIds.ResizeWidth,
+          isMandatory: true,
+          title: "Target image width in pixels.",
+          type: "number"
+        },
+        {
+          ariaLabel: "Padding color",
+          controlType: ImageEditorControls.Textfield,
+          defaultValue: "#000000",
+          id: ImageEditorTextfieldIds.PadColor,
+          isMandatory: false,
+          title: "Hex color used when padding (only when mode is set to pad).",
+          type: "color"
+        }
+      ],
+      [ImageEditorControls.Select]: [
+        {
+          ariaLabel: "Resample method",
+          controlType: ImageEditorControls.Select,
+          defaultValue: "bicubic",
+          id: ImageEditorSelectIds.ResizeMethod,
+          isMandatory: true,
+          title: "Interpolation method used when resizing.",
+          values: [
+            { id: "bicubic", value: "Bicubic" },
+            { id: "bilinear", value: "Bilinear" },
+            { id: "linear", value: "Linear" },
+            { id: "nearest", value: "Nearest" },
+            { id: "nearest exact", value: "Nearest (exact)" }
+          ]
+        },
+        {
+          ariaLabel: "Resize mode",
+          controlType: ImageEditorControls.Select,
+          defaultValue: "crop",
+          id: ImageEditorSelectIds.ResizeMode,
+          isMandatory: true,
+          title: "Choose whether to crop or pad when matching the target dimensions.",
+          values: [
+            { id: "crop", value: "Crop" },
+            { id: "pad", value: "Pad" }
+          ]
         }
       ]
     }
@@ -3916,6 +4112,28 @@ const TREE_DATA = {
           value: "Desaturate"
         },
         {
+          description: "Resize the image by fitting one edge to a target size while preserving aspect ratio.",
+          cells: {
+            lfCode: {
+              shape: "code",
+              value: JSON.stringify(SETTINGS.resizeEdge)
+            }
+          },
+          id: "resizeEdge",
+          value: "Resize (by edge)"
+        },
+        {
+          description: "Resize the image to explicit width/height with optional crop or padding.",
+          cells: {
+            lfCode: {
+              shape: "code",
+              value: JSON.stringify(SETTINGS.resizeFree)
+            }
+          },
+          id: "resizeFree",
+          value: "Resize (free)"
+        },
+        {
           description: "Adjusts the saturation.",
           cells: {
             lfCode: {
@@ -4133,6 +4351,39 @@ function assertImageEditorFilter(obj) {
   }
   return obj;
 }
+const updateResizeHelperText = async (state) => {
+  try {
+    const { canvas } = (await state.elements.imageviewer.getComponents()).details;
+    const lfImage = await canvas.getImage();
+    const domImg = await lfImage.getImage();
+    const width = (domImg == null ? void 0 : domImg.naturalWidth) || (domImg == null ? void 0 : domImg.width) || 0;
+    const height = (domImg == null ? void 0 : domImg.naturalHeight) || (domImg == null ? void 0 : domImg.height) || 0;
+    const helperText = width && height ? `Current: ${width}x${height}px` : "Current: unknown";
+    if (state.filterType === "resizeEdge") {
+      const control = state.elements.controls[ImageEditorTextfieldIds.ResizeSizePx];
+      if (control && control.tagName === "LF-TEXTFIELD") {
+        control.lfHelper = {
+          value: helperText,
+          showWhenFocused: false
+        };
+      }
+      return;
+    }
+    const assignHelper = (controlId) => {
+      const control = state.elements.controls[controlId];
+      if (control && control.tagName === "LF-TEXTFIELD") {
+        control.lfHelper = {
+          value: helperText,
+          showWhenFocused: false
+        };
+      }
+    };
+    assignHelper(ImageEditorTextfieldIds.ResizeHeight);
+    assignHelper(ImageEditorTextfieldIds.ResizeWidth);
+  } catch (error) {
+    getLfManager().log("Failed to update resize helper text.", { error }, LogSeverity.Warning);
+  }
+};
 const createPrepSettings = (deps) => {
   const { onMultiinput, onSelect, onSlider, onTextfield, onToggle, onCheckbox } = deps;
   return (state, node) => {
@@ -4282,6 +4533,9 @@ const createPrepSettings = (deps) => {
         }
       });
     });
+    if (state.filterType === "resizeEdge" || state.filterType === "resizeFree") {
+      updateResizeHelperText(state);
+    }
     const buttonsWrapper = document.createElement(TagName.Div);
     buttonsWrapper.classList.add(ImageEditorCSS.SettingsButtons);
     settings.appendChild(buttonsWrapper);
@@ -4296,6 +4550,21 @@ const createPrepSettings = (deps) => {
       })();
     });
     buttonsWrapper.appendChild(resetButton);
+    const requiresApply = (filter == null ? void 0 : filter.manualApply) === true;
+    if (requiresApply) {
+      const applyButton = document.createElement(TagName.LfButton);
+      applyButton.lfIcon = "--lf-icon-success";
+      applyButton.lfLabel = "Apply";
+      applyButton.lfStretchX = true;
+      applyButton.addEventListener("click", () => {
+        if (state.update.apply) {
+          void state.update.apply();
+        } else {
+          void state.update.snapshot();
+        }
+      });
+      buttonsWrapper.appendChild(applyButton);
+    }
     if (state.filterType === "brush") {
       const brushSettings = state.filter.settings ?? {};
       state.lastBrushSettings = {
@@ -4328,6 +4597,11 @@ async function resetSettings(settings) {
   const controls = Array.from(settings.querySelectorAll("[data-id]"));
   for (const control of controls) {
     switch (control.tagName) {
+      case "LF-CHECKBOX": {
+        const checkbox = control;
+        void checkbox.setValue(checkbox.lfValue ?? false);
+        break;
+      }
       case "LF-MULTIINPUT": {
         const multiinput = control;
         await multiinput.setValue(multiinput.lfValue);
@@ -4352,11 +4626,6 @@ async function resetSettings(settings) {
       case "LF-TOGGLE": {
         const toggle = control;
         toggle.setValue(toggle.lfValue ? "on" : "off");
-        break;
-      }
-      case "LF-CHECKBOX": {
-        const checkbox = control;
-        void checkbox.setValue(checkbox.lfValue ?? false);
         break;
       }
     }
@@ -4384,6 +4653,13 @@ const applyFilterDefaults = (state, defaults) => {
         return;
       }
       switch (controlType) {
+        case ImageEditorControls.Checkbox: {
+          const checkboxConfig = config;
+          const boolValue = defaultValue === true || typeof defaultValue === "string" && defaultValue.toLowerCase() === "true";
+          checkboxConfig.defaultValue = boolValue;
+          mutableSettings[checkboxConfig.id] = boolValue;
+          break;
+        }
         case ImageEditorControls.Multiinput: {
           const multiConfig = config;
           const stringValue = defaultValue === null || typeof defaultValue === "undefined" ? "" : String(defaultValue);
@@ -4417,13 +4693,6 @@ const applyFilterDefaults = (state, defaults) => {
           const boolValue = defaultValue === true || typeof defaultValue === "string" && defaultValue.toLowerCase() === "true";
           toggleConfig.defaultValue = boolValue;
           mutableSettings[toggleConfig.id] = boolValue ? toggleConfig.on : toggleConfig.off;
-          break;
-        }
-        case ImageEditorControls.Checkbox: {
-          const checkboxConfig = config;
-          const boolValue = defaultValue === true || typeof defaultValue === "string" && defaultValue.toLowerCase() === "true";
-          checkboxConfig.defaultValue = boolValue;
-          mutableSettings[checkboxConfig.id] = boolValue;
           break;
         }
       }
@@ -4504,7 +4773,7 @@ const refreshValues = async (state, addSnapshot = false) => {
     };
   }
 };
-const updateCb = async (state, addSnapshot = false, fromCanvas = false) => {
+const updateCb = async (state, addSnapshot = false, fromCanvas = false, force = false) => {
   await refreshValues(state, addSnapshot);
   const { elements, filter } = state;
   const { imageviewer } = elements;
@@ -4539,8 +4808,14 @@ const updateCb = async (state, addSnapshot = false, fromCanvas = false) => {
   }
   const shouldUpdate = validValues && (!hasCanvasAction || isCanvasAction);
   let success = false;
-  if (shouldUpdate && (!hasCanvasAction || fromCanvas)) {
+  const manualApply = (filter == null ? void 0 : filter.manualApply) === true;
+  if ((force || !manualApply) && shouldUpdate && (!hasCanvasAction || fromCanvas)) {
     success = await apiCall$2(state, addSnapshot);
+    if (success && (state.filterType === "resizeEdge" || state.filterType === "resizeFree")) {
+      window.setTimeout(() => {
+        updateResizeHelperText(state);
+      }, 50);
+    }
   }
   return success;
 };
@@ -4724,6 +4999,11 @@ const createEventHandlers = ({ handleInterruptForState: handleInterruptForState2
                           }
                           await syncSelectionWithDataset(state, masonryEvent);
                           break;
+                        case "load":
+                          if (state.filterType === "resizeEdge" || state.filterType === "resizeFree") {
+                            updateResizeHelperText(state);
+                          }
+                          break;
                       }
                     }
                 }
@@ -4875,6 +5155,9 @@ const handleInterruptForState = async (state) => {
   await resetSettings(imageviewer);
 };
 const handlerRefs = {
+  checkbox: async () => {
+    throw new Error("Image editor checkbox handler not initialized.");
+  },
   select: async () => {
     throw new Error("Image editor select handler not initialized.");
   },
@@ -4886,28 +5169,25 @@ const handlerRefs = {
   },
   toggle: async () => {
     throw new Error("Image editor toggle handler not initialized.");
-  },
-  checkbox: async () => {
-    throw new Error("Image editor checkbox handler not initialized.");
   }
 };
 const prepSettings = createPrepSettings({
+  onCheckbox: (state, event) => handlerRefs.checkbox(state, event),
   onMultiinput: (state, event) => EV_HANDLERS$a.multiinput(state, event),
   onSelect: (state, event) => handlerRefs.select(state, event),
   onSlider: (state, event) => handlerRefs.slider(state, event),
   onTextfield: (state, event) => handlerRefs.textfield(state, event),
-  onToggle: (state, event) => handlerRefs.toggle(state, event),
-  onCheckbox: (state, event) => handlerRefs.checkbox(state, event)
+  onToggle: (state, event) => handlerRefs.toggle(state, event)
 });
 const EV_HANDLERS$a = createEventHandlers({
   handleInterruptForState,
   prepSettings
 });
+handlerRefs.checkbox = EV_HANDLERS$a.checkbox;
 handlerRefs.select = EV_HANDLERS$a.select;
 handlerRefs.slider = EV_HANDLERS$a.slider;
 handlerRefs.textfield = EV_HANDLERS$a.textfield;
 handlerRefs.toggle = EV_HANDLERS$a.toggle;
-handlerRefs.checkbox = EV_HANDLERS$a.checkbox;
 const syncNavigationDirectoryControl = async (state, directoryValue) => {
   const { imageviewer } = state.elements;
   const { navigation } = await imageviewer.getComponents();
@@ -5059,6 +5339,26 @@ const imageEditorFactory = {
       setValue: (value) => {
         const state = STATE$h.get(wrapper);
         const { actionButtons, grid, imageviewer } = state.elements;
+        const { status } = state;
+        const isInitializing = status === "initializing";
+        const reconcileSession = async () => {
+          if (!isInitializing) {
+            return Promise.reject("Already initialized");
+          }
+          state.status = "reconciling";
+          try {
+            const nodeId = String(state.node.id ?? "");
+            const resp = await JSON_API.recoverEditDataset(nodeId);
+            if (resp.status !== LogSeverity.Success || !resp.data) {
+              return null;
+            }
+            const dataset = resp.data;
+            return dataset;
+          } catch (error) {
+            getLfManager().log("Failed to recover pending editing dataset for image editor.", { error, nodeId: state.node.id }, LogSeverity.Warning);
+          }
+          return null;
+        };
         const callback = (_, u) => {
           var _a, _b;
           const parsedValue = u.parsedJSON;
@@ -5115,7 +5415,21 @@ const imageEditorFactory = {
             }
           }
         };
-        normalizeValue(value, callback, CustomWidgetName.imageEditor);
+        switch (status) {
+          case "initializing":
+            reconcileSession().then((reconciled) => {
+              const dataset = reconciled || value;
+              normalizeValue(dataset, callback, CustomWidgetName.imageEditor);
+              state.status = "ready";
+            });
+            break;
+          case "reconciling":
+            break;
+          // no-op, wait for reconciling to finish
+          case "ready":
+            normalizeValue(value, callback, CustomWidgetName.imageEditor);
+            break;
+        }
       }
     };
   },
@@ -5138,20 +5452,37 @@ const imageEditorFactory = {
       state2.hasAutoDirectoryLoad = true;
       state2.lastRequestedDirectory = normalizedDirectory;
       try {
-        const response = navigationTreeEnabled ? await IMAGE_API.explore(normalizedDirectory, { scope: "dataset" }) : await IMAGE_API.get(normalizedDirectory);
-        if (response.status !== LogSeverity.Success) {
-          getLfManager().log("Images not found.", { response }, LogSeverity.Info);
-          return;
+        if (navigationTreeEnabled) {
+          const response = await IMAGE_API.explore(normalizedDirectory, { scope: "dataset" });
+          if (response.status !== LogSeverity.Success) {
+            getLfManager().log("Images not found.", { response }, LogSeverity.Info);
+            return;
+          }
+          const fsData = response.data;
+          const dataset = (fsData == null ? void 0 : fsData.dataset) ?? { nodes: [] };
+          const mergedDirectory = mergeNavigationDirectory(dataset, { raw: normalizedDirectory });
+          state2.directory = { ...mergedDirectory };
+          const derivedDirectoryValue = deriveDirectoryValue(mergedDirectory);
+          state2.directoryValue = derivedDirectoryValue ?? normalizedDirectory;
+          state2.lastRequestedDirectory = state2.directoryValue;
+          ensureDatasetContext(dataset, state2);
+          imageviewer.lfDataset = dataset;
+        } else {
+          const response = await IMAGE_API.get(normalizedDirectory);
+          if (response.status !== LogSeverity.Success) {
+            getLfManager().log("Images not found.", { response }, LogSeverity.Info);
+            return;
+          }
+          const imageData = response.data;
+          const dataset = imageData ?? { nodes: [] };
+          const mergedDirectory = mergeNavigationDirectory(dataset, { raw: normalizedDirectory });
+          state2.directory = { ...mergedDirectory };
+          const derivedDirectoryValue = deriveDirectoryValue(mergedDirectory);
+          state2.directoryValue = derivedDirectoryValue ?? normalizedDirectory;
+          state2.lastRequestedDirectory = state2.directoryValue;
+          ensureDatasetContext(dataset, state2);
+          imageviewer.lfDataset = dataset;
         }
-        const rawData = response.data;
-        const dataset = (navigationTreeEnabled ? rawData == null ? void 0 : rawData.dataset : rawData) ?? { nodes: [] };
-        const mergedDirectory = mergeNavigationDirectory(dataset, { raw: normalizedDirectory });
-        state2.directory = { ...mergedDirectory };
-        const derivedDirectoryValue = deriveDirectoryValue(mergedDirectory);
-        state2.directoryValue = derivedDirectoryValue ?? normalizedDirectory;
-        state2.lastRequestedDirectory = state2.directoryValue;
-        ensureDatasetContext(dataset, state2);
-        imageviewer.lfDataset = dataset;
         await syncNavigationDirectoryControl(state2, state2.directoryValue);
       } catch (error) {
         getLfManager().log("Failed to refresh image directory.", { error, directory: normalizedDirectory }, LogSeverity.Warning);
@@ -5163,6 +5494,9 @@ const imageEditorFactory = {
     imageviewer.lfLoadCallback = async (_, value) => {
       const state2 = STATE$h.get(wrapper);
       if (!state2 || state2.isSyncingDirectory) {
+        return;
+      }
+      if (!navigationTreeEnabled) {
         return;
       }
       const directoryValue = normalizeDirectoryRequest(value);
@@ -5189,7 +5523,10 @@ const imageEditorFactory = {
       lastRequestedDirectory: void 0,
       node,
       refreshDirectory: refresh,
+      status: "initializing",
       update: {
+        apply: () => updateCb(STATE$h.get(wrapper), true, false, true).then(() => {
+        }),
         preview: () => updateCb(STATE$h.get(wrapper)).then(() => {
         }),
         snapshot: () => updateCb(STATE$h.get(wrapper), true).then(() => {
@@ -5239,6 +5576,9 @@ const imageEditorFactory = {
     }
     void Promise.resolve().then(async () => {
       var _a, _b;
+      if (!navigationTreeEnabled) {
+        return;
+      }
       const currentState = STATE$h.get(wrapper);
       if (!currentState) {
         return;
