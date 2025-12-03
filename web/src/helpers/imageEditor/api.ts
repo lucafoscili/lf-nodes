@@ -6,7 +6,7 @@ import {
 } from '../../types/widgets/imageEditor';
 import { getApiRoutes, getLfManager } from '../../utils/common';
 import { ensureDatasetContext } from './dataset';
-import { setProgress, showBanner } from './status';
+import { showBanner } from './status';
 
 //#region API Call
 export const apiCall = async (state: ImageEditorState, addSnapshot: boolean) => {

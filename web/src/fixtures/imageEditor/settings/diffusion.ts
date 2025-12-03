@@ -169,7 +169,7 @@ export const DIFFUSION_SETTINGS: Pick<ImageEditorFilters, 'inpaint' | 'outpaint'
       negative_prompt: '',
       positive_prompt: '',
       sampler: 'dpmpp_2m',
-      scheduler: 'beta',
+      scheduler: 'normal',
       steps: 24,
       upsample_target: 0,
       wd14_tagging: false,
