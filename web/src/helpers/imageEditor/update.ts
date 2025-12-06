@@ -1,4 +1,4 @@
-import { SETTINGS } from '../../fixtures/imageEditor';
+import { SETTINGS } from '../../fixtures/imageEditor/settings';
 import { LogSeverity } from '../../types/manager/manager';
 import {
   ImageEditorBrushSettings,
@@ -6,6 +6,7 @@ import {
   ImageEditorDataset,
   ImageEditorSetting,
   ImageEditorState,
+  ImageEditorTextfieldIds,
 } from '../../types/widgets/imageEditor';
 import { getLfManager, isValidObject } from '../../utils/common';
 import { apiCall } from './api';
@@ -63,8 +64,15 @@ export const refreshValues = async (state: ImageEditorState, addSnapshot = false
         case IMAGE_EDITOR_CONSTANTS.TAGS.TEXTFIELD: {
           const textfield = control as HTMLLfTextfieldElement;
           const textfieldValue = await textfield.getValue();
-          filter.settings[id] = textfieldValue;
-          storeForFilter[id] = textfieldValue;
+          if (id === ImageEditorTextfieldIds.Seed) {
+            const normalized =
+              textfieldValue === null || textfieldValue === '' ? -1 : Number(textfieldValue);
+            filter.settings[id] = normalized;
+            storeForFilter[id] = normalized;
+          } else {
+            filter.settings[id] = textfieldValue;
+            storeForFilter[id] = textfieldValue;
+          }
           break;
         }
         case IMAGE_EDITOR_CONSTANTS.TAGS.TOGGLE: {

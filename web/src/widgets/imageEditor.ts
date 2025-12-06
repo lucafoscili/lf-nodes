@@ -1,7 +1,8 @@
 import { LfDataNode } from '@lf-widgets/foundations/dist';
 import { IMAGE_API } from '../api/image';
 import { JSON_API } from '../api/json';
-import { SETTINGS, TREE_DATA } from '../fixtures/imageEditor';
+import { SETTINGS } from '../fixtures/imageEditor/settings';
+import { TREE_DATA } from '../fixtures/imageEditor/treeData';
 import {
   EV_HANDLERS,
   getStatusColumn,

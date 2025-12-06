@@ -52,6 +52,7 @@
       position: absolute;
       top: 0;
       transition: opacity 0.3s ease;
+      z-index: 1;
     }
 
     &--hidden {
@@ -75,6 +76,10 @@
       grid-gap: 16px;
       overflow: auto;
       padding: 12px 24px;
+
+      lf-accordion {
+        width: 100%;
+      }
     }
 
     &__buttons {

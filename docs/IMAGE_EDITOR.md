@@ -59,7 +59,7 @@ This document walks through the moving parts behind the interactive image editor
 1. The widget loads the dataset JSON, renders a masonry grid, and pre-fills settings with `defaults`.
 2. Canvas interactions capture mask strokes into base64 payloads.
 3. As the user tweaks settings or paints masks, the widget submits debounced multipart forms to `/lf-nodes/process-image` containing the base image URL, filter `type`, and `settings`.
-   - For **canvas filters** (`brush`, `line`, `inpaint` / `inpaint_adv`), backend calls are only triggered when an actual stroke is applied. Slider/textfield/toggle changes update the stored defaults and canvas brush parameters, but do not call the API until the user paints.
+   - For **canvas filters** (`brush`, `line`, `inpaint`), backend calls are only triggered when an actual stroke is applied. Slider/textfield/toggle changes (including the inpaint advanced accordion) update the stored defaults and canvas brush parameters, but do not call the API until the user paints.
    - For **regular filters**, debounced slider/textfield changes do trigger backend calls as soon as settings are valid.
 4. Responses update the dataset (`nodes`, history snapshots, status) so the node can resume once the user is satisfied.
 

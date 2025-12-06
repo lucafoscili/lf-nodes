@@ -16,7 +16,7 @@ import {
   LfToggleEventPayload,
   LfTreeEventPayload,
 } from '@lf-widgets/foundations';
-import { SETTINGS } from '../../fixtures/imageEditor';
+import { SETTINGS } from '../../fixtures/imageEditor/settings';
 import { LogSeverity } from '../../types/manager/manager';
 import {
   EventHandlerDeps,

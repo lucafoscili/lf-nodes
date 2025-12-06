@@ -128,6 +128,16 @@ export interface NavigationMetadata {
 }
 //#endregion
 
+//#region Layout
+export type ImageEditorLayoutGroup = {
+  id: string;
+  node?: LfDataNode;
+  children: ImageEditorLayout;
+};
+export type ImageEditorLayoutItem = ImageEditorControlIds | ImageEditorLayoutGroup;
+export type ImageEditorLayout = ImageEditorLayoutItem[];
+//#endregion
+
 //#region Dataset
 export enum ImageEditorStatus {
   Completed = 'completed',
@@ -642,6 +652,7 @@ export interface ImageEditorFilterDefinition<
 > {
   controlIds: ImageEditorControlIdsEnum;
   configs: ImageEditorConfigs;
+  layout?: ImageEditorLayout;
   hasCanvasAction?: boolean;
   manualApply?: boolean;
   settings: ImageEditorSettings;

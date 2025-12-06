@@ -1,6 +1,5 @@
 import { LfDataDataset } from '@lf-widgets/foundations';
 import { SETTINGS } from './settings';
-import { INPAINT_ADV } from './settings/diffusion';
 
 export const TREE_DATA: LfDataDataset = {
   nodes: [
@@ -33,7 +32,8 @@ export const TREE_DATA: LfDataDataset = {
       icon: 'wand',
       children: [
         {
-          description: 'Inpaint masked areas using the connected diffusion model.',
+          description:
+            'Inpaint masked areas using the connected diffusion model. Advanced controls are available inside the inpaint panel.',
           cells: {
             lfCode: {
               shape: 'code',
@@ -42,17 +42,6 @@ export const TREE_DATA: LfDataDataset = {
           },
           id: 'inpaint',
           value: 'Inpaint',
-        },
-        {
-          description: 'Inpaint with advanced ROI controls.',
-          cells: {
-            lfCode: {
-              shape: 'code',
-              value: JSON.stringify(INPAINT_ADV),
-            },
-          },
-          id: 'inpaint_adv',
-          value: 'Inpaint (adv.)',
         },
         {
           description:
