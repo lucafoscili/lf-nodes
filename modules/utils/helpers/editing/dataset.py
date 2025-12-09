@@ -107,7 +107,7 @@ def extract_dataset_entries(
 
     Returns:
         Tuple[List[str], List[str], List[Optional[str]], List[Dict[str, Any]]]:
-            - names: List of image names (as strings).
+            - names: List of image names without extensions (as strings).
             - urls: List of image URLs (as strings).
             - node_ids: List of node IDs (as strings or None).
             - metadata: List of dictionaries containing metadata for each entry, including index, name, url, node_id, and optionally context_id.
@@ -140,7 +140,7 @@ def extract_dataset_entries(
             or html_props.get("id")
             or (node.get("value") if isinstance(node.get("value"), str) else None)
             or f"{index + 1}"
-        )
+        ).rsplit(".", 1)[0]
 
         url = image_cell.get("lfValue") or image_cell.get("value")
         node_id = node.get("id") if isinstance(node.get("id"), str) else None
