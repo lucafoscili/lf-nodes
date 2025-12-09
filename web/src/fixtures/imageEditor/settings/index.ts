@@ -2,7 +2,7 @@ import { ImageEditorFilters } from '../../../types/widgets/imageEditor';
 import { BACKGROUND_SETTINGS } from './background';
 import { BASIC_ADJUSTMENT_SETTINGS } from './basicAdjustments';
 import { CREATIVE_EFFECT_SETTINGS } from './creativeEffects';
-import { DIFFUSION_SETTINGS, INPAINT_ADV } from './diffusion';
+import { DIFFUSION_SETTINGS } from './diffusion';
 import { DRAWING_SETTINGS } from './drawing';
 
 export const SETTINGS: ImageEditorFilters = {
@@ -12,5 +12,3 @@ export const SETTINGS: ImageEditorFilters = {
   ...DRAWING_SETTINGS,
   ...DIFFUSION_SETTINGS,
 };
-
-export { INPAINT_ADV };

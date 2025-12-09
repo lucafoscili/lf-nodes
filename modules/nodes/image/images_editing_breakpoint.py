@@ -141,6 +141,8 @@ class LF_ImagesEditingBreakpoint:
 
         config_out = build_editor_config_from_dataset(dataset)
 
+        session.cleanup(dataset)
+
         return (edited_batch_list[0], edited_image_list, batch_list[0], image_list, config_out)
 # endregion
 

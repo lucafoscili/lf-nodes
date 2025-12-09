@@ -152,7 +152,7 @@ class LF_CaptionImageWD14:
             string_list.append(caption_body)
 
         safe_send_sync(
-            "captionimagewd14onnx",
+            "captionimagewd14",
             {
                 "datasets": {
                     "chart": chart_dataset,
@@ -214,10 +214,10 @@ class LF_CaptionImageWD14:
 
 # region Mappings
 NODE_CLASS_MAPPINGS = {
-    "LF_CaptionImageWD14Onnx": LF_CaptionImageWD14,
+    "LF_CaptionImageWD14": LF_CaptionImageWD14,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "LF_CaptionImageWD14Onnx": "Caption Image (WD14, TAGGER)",
+    "LF_CaptionImageWD14": "Caption Image (WD14, TAGGER)",
 }
 # endregion

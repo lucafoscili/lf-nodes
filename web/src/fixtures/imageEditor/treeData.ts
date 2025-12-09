@@ -1,6 +1,5 @@
 import { LfDataDataset } from '@lf-widgets/foundations';
 import { SETTINGS } from './settings';
-import { INPAINT_ADV } from './settings/diffusion';
 
 export const TREE_DATA: LfDataDataset = {
   nodes: [
@@ -33,7 +32,8 @@ export const TREE_DATA: LfDataDataset = {
       icon: 'wand',
       children: [
         {
-          description: 'Inpaint masked areas using the connected diffusion model.',
+          description:
+            'Inpaint masked areas using the connected diffusion model. Advanced controls are available inside the inpaint panel.',
           cells: {
             lfCode: {
               shape: 'code',
@@ -42,17 +42,6 @@ export const TREE_DATA: LfDataDataset = {
           },
           id: 'inpaint',
           value: 'Inpaint',
-        },
-        {
-          description: 'Inpaint with advanced ROI controls.',
-          cells: {
-            lfCode: {
-              shape: 'code',
-              value: JSON.stringify(INPAINT_ADV),
-            },
-          },
-          id: 'inpaint_adv',
-          value: 'Inpaint (adv.)',
         },
         {
           description:
@@ -151,6 +140,29 @@ export const TREE_DATA: LfDataDataset = {
           },
           id: 'desaturate',
           value: 'Desaturate',
+        },
+        {
+          description:
+            'Resize the image by fitting one edge to a target size while preserving aspect ratio.',
+          cells: {
+            lfCode: {
+              shape: 'code',
+              value: JSON.stringify(SETTINGS.resizeEdge),
+            },
+          },
+          id: 'resizeEdge',
+          value: 'Resize (by edge)',
+        },
+        {
+          description: 'Resize the image to explicit width/height with optional crop or padding.',
+          cells: {
+            lfCode: {
+              shape: 'code',
+              value: JSON.stringify(SETTINGS.resizeFree),
+            },
+          },
+          id: 'resizeFree',
+          value: 'Resize (free)',
         },
         {
           description: 'Adjusts the saturation.',

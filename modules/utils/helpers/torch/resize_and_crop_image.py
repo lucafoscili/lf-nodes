@@ -42,6 +42,9 @@ def resize_and_crop_image(image_tensor: torch.Tensor, resize_method: str, target
             new_h = target_height
             new_w = round(new_h * aspect_ratio)
 
+    new_h = max(int(new_h), 1)
+    new_w = max(int(new_w), 1)
+
     image_tensor = image_tensor.permute(0, 3, 1, 2)
     resized_image = functional.resize(image_tensor, (new_h, new_w), interpolation=interpolation_mode)
 

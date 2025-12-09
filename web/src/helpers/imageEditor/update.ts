@@ -1,4 +1,4 @@
-import { SETTINGS } from '../../fixtures/imageEditor';
+import { SETTINGS } from '../../fixtures/imageEditor/settings';
 import { LogSeverity } from '../../types/manager/manager';
 import {
   ImageEditorBrushSettings,
@@ -6,10 +6,12 @@ import {
   ImageEditorDataset,
   ImageEditorSetting,
   ImageEditorState,
+  ImageEditorTextfieldIds,
 } from '../../types/widgets/imageEditor';
 import { getLfManager, isValidObject } from '../../utils/common';
 import { apiCall } from './api';
 import { IMAGE_EDITOR_CONSTANTS } from './constants';
+import { updateResizeHelperText } from './settings';
 
 //#region refreshValues
 export const refreshValues = async (state: ImageEditorState, addSnapshot = false) => {
@@ -62,8 +64,15 @@ export const refreshValues = async (state: ImageEditorState, addSnapshot = false
         case IMAGE_EDITOR_CONSTANTS.TAGS.TEXTFIELD: {
           const textfield = control as HTMLLfTextfieldElement;
           const textfieldValue = await textfield.getValue();
-          filter.settings[id] = textfieldValue;
-          storeForFilter[id] = textfieldValue;
+          if (id === ImageEditorTextfieldIds.Seed) {
+            const normalized =
+              textfieldValue === null || textfieldValue === '' ? -1 : Number(textfieldValue);
+            filter.settings[id] = normalized;
+            storeForFilter[id] = normalized;
+          } else {
+            filter.settings[id] = textfieldValue;
+            storeForFilter[id] = textfieldValue;
+          }
           break;
         }
         case IMAGE_EDITOR_CONSTANTS.TAGS.TOGGLE: {
@@ -103,6 +112,7 @@ export const updateCb = async (
   state: ImageEditorState,
   addSnapshot = false,
   fromCanvas = false,
+  force = false,
 ) => {
   await refreshValues(state, addSnapshot);
 
@@ -151,8 +161,15 @@ export const updateCb = async (
   // 3. For regular filters: just need valid settings
   const shouldUpdate = validValues && (!hasCanvasAction || isCanvasAction);
   let success = false;
-  if (shouldUpdate && (!hasCanvasAction || fromCanvas)) {
+  const manualApply = (filter as any)?.manualApply === true;
+  if ((force || !manualApply) && shouldUpdate && (!hasCanvasAction || fromCanvas)) {
     success = await apiCall(state, addSnapshot);
+
+    if (success && (state.filterType === 'resizeEdge' || state.filterType === 'resizeFree')) {
+      window.setTimeout(() => {
+        updateResizeHelperText(state);
+      }, 50);
+    }
   }
 
   return success;

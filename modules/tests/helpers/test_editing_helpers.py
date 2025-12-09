@@ -246,7 +246,10 @@ class EditingSession:
     def build_dataset(self, images, *, filename_prefix, temp_type="temp"):
         """Builds a dataset from images."""
         nodes = []
-        dataset = {"nodes": nodes}
+        dataset = {
+            "nodes": nodes,
+            "lf_node_id": str(self.node_id),
+        }
 
         for index, img in enumerate(images):
             pil_image = tensor_to_pil(img)

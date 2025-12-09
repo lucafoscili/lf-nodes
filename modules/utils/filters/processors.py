@@ -14,6 +14,7 @@ from .desaturate import desaturate_effect
 from .film_grain import film_grain_effect
 from .gaussian_blur import gaussian_blur_effect
 from .inpaint import apply_inpaint_filter, apply_outpaint_filter
+from .resize import resize_edge_effect, resize_free_effect
 from .line import line_effect
 from .unsharp_mask import unsharp_mask_effect
 from .saturation import saturation_effect
@@ -467,6 +468,29 @@ def apply_vignette_filter(image: torch.Tensor, settings: dict) -> FilterResult:
     return _as_result(vignette_effect(image, intensity, radius, shape, color))
 # endregion
 
+# region Resize (by edge)
+def apply_resize_edge_filter(image: torch.Tensor, settings: dict) -> FilterResult:
+    """
+    Resize the image based on one edge while preserving aspect ratio.
+
+    This is a thin wrapper around ``resize_edge_effect`` so it fits the filter
+    processor contract.
+    """
+    resized = resize_edge_effect(image, settings)
+    return _as_result(resized)
+# endregion
+
+# region Resize (free)
+def apply_resize_free_filter(image: torch.Tensor, settings: dict) -> FilterResult:
+    """
+    Resize the image to explicit width/height with optional crop/pad.
+
+    Delegates to ``resize_free_effect`` and wraps the result into a FilterResult.
+    """
+    resized = resize_free_effect(image, settings)
+    return _as_result(resized)
+# endregion
+
 # region Unsharp Mask
 def apply_unsharp_mask_filter(image: torch.Tensor, settings: dict) -> FilterResult:
     """
@@ -506,6 +530,8 @@ FILTER_PROCESSORS: Dict[str, FilterProcessor] = {
     "gaussian_blur": apply_gaussian_blur_filter,
     "inpaint": apply_inpaint_filter,
     "outpaint": apply_outpaint_filter,
+    "resizeEdge": apply_resize_edge_filter,
+    "resizeFree": apply_resize_free_filter,
     "line": apply_line_filter,
     "saturation": apply_saturation_filter,
     "sepia": apply_sepia_filter,
