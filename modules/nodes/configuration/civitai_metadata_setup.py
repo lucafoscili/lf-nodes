@@ -1,7 +1,7 @@
 from folder_paths import get_full_path
 
 from . import CATEGORY
-from ...utils.constants import FUNCTION, Input, INT_MAX, SAMPLERS, SCHEDULERS, UNET_DIFFUSION_COMBO
+from ...utils.constants import FUNCTION, HAS_V3, Input, INT_MAX, SAMPLERS, SCHEDULERS, UNET_DIFFUSION_COMBO
 from ...utils.helpers.api import get_embedding_hashes, get_sha256, get_lora_hashes
 from ...utils.helpers.comfy import get_comfy_list, safe_send_sync
 from ...utils.helpers.logic import normalize_list_to_value
@@ -136,7 +136,14 @@ class LF_CivitAIMetadataSetup:
         "Hires upscale factor used for the image.",
         "Analytics dataset for the image."
     )
-    RETURN_TYPES = (Input.STRING, get_comfy_list("checkpoints"), get_comfy_list("unet"), get_comfy_list("vae"),
+    if HAS_V3:
+        RETURN_TYPES = (Input.STRING, Input.COMBO, Input.COMBO, Input.COMBO,
+                    SAMPLERS, SCHEDULERS, Input.STRING, Input.STRING,
+                    Input.STRING, Input.STRING, Input.INTEGER, Input.FLOAT, Input.INTEGER, Input.FLOAT, Input.INTEGER,
+                    Input.INTEGER, Input.INTEGER, Input.COMBO, Input.FLOAT, Input.JSON)
+
+    else:
+        RETURN_TYPES = (Input.STRING, get_comfy_list("checkpoints"), get_comfy_list("unet"), get_comfy_list("vae"),
                     SAMPLERS, SCHEDULERS, Input.STRING, Input.STRING,
                     Input.STRING, Input.STRING, Input.INTEGER, Input.FLOAT, Input.INTEGER, Input.FLOAT, Input.INTEGER,
                     Input.INTEGER, Input.INTEGER, get_comfy_list("upscale_models"), Input.FLOAT, Input.JSON)
