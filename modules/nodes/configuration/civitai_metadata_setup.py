@@ -136,17 +136,10 @@ class LF_CivitAIMetadataSetup:
         "Hires upscale factor used for the image.",
         "Analytics dataset for the image."
     )
-    if HAS_V3:
-        RETURN_TYPES = (Input.STRING, Input.COMBO, Input.COMBO, Input.COMBO,
+    RETURN_TYPES = (Input.STRING, get_comfy_list("checkpoints"), get_comfy_list("unet"), get_comfy_list("vae"),
                     SAMPLERS, SCHEDULERS, Input.STRING, Input.STRING,
                     Input.STRING, Input.STRING, Input.INTEGER, Input.FLOAT, Input.INTEGER, Input.FLOAT, Input.INTEGER,
-                    Input.INTEGER, Input.INTEGER, Input.COMBO, Input.FLOAT, Input.JSON)
-
-    else:
-        RETURN_TYPES = (Input.STRING, get_comfy_list("checkpoints"), get_comfy_list("unet"), get_comfy_list("vae"),
-                    SAMPLERS, SCHEDULERS, Input.STRING, Input.STRING,
-                    Input.STRING, Input.STRING, Input.INTEGER, Input.FLOAT, Input.INTEGER, Input.FLOAT, Input.INTEGER,
-                    Input.INTEGER, Input.INTEGER, get_comfy_list("upscale_models"), Input.FLOAT, Input.JSON)
+                    Input.INTEGER, Input.INTEGER, Input.COMBO if HAS_V3 else get_comfy_list("upscale_models"), Input.FLOAT, Input.JSON)
 
     def on_exec(self, **kwargs:dict):
         def add_metadata_node(category, item):
