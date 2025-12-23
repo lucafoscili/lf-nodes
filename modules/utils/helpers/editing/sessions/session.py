@@ -40,6 +40,7 @@ class EditingSession:
         dataset: dict[str, Any] = {
             "nodes": nodes,
             "lf_node_id": str(self.node_id),
+            "prefix": filename_prefix,
         }
 
         for index, img in enumerate(images):

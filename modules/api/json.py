@@ -111,8 +111,9 @@ async def recover_edit_dataset(request):
             (col for col in columns if isinstance(col, dict) and col.get("id") == "status"),
             None,
         )
+        filename_prefix = dataset.get("filename_prefix", "")
         if status_column and status_column.get("title") != "pending":
-            return web.json_response({"status": "success", "data": None}, status=200)
+            return web.json_response({"status": "success", "data": None if filename_prefix == "edit_breakpoint" else dataset}, status=200)
 
         return web.json_response({"status": "success", "data": dataset}, status=200)
 
