@@ -26,6 +26,8 @@ import {
   NormalizeValueCallback,
   WidgetOptions,
 } from '../types/widgets/widgets';
+import { protectDOMWidgetWidth } from './domWidget';
+import { hookDOMWidgetSerialization } from './serialization';
 
 declare global {
   interface Window {
@@ -249,14 +251,22 @@ export const createDOMWidget = (
       }
     }
 
-    return node.addDOMWidget(name, type, element, options);
+    const widget = hookDOMWidgetSerialization(
+      node,
+      node.addDOMWidget(name, type, element, options),
+    );
+    return protectDOMWidgetWidth(widget as Widget<any> & { width?: number });
   } catch (error) {
     getLfManager().log(
       `Couldn't find a widget of type ${type}`,
       { error, node },
       LogSeverity.Warning,
     );
-    return node.addDOMWidget(DEFAULT_WIDGET_NAME, type, element, options);
+    const widget = hookDOMWidgetSerialization(
+      node,
+      node.addDOMWidget(DEFAULT_WIDGET_NAME, type, element, options),
+    );
+    return protectDOMWidgetWidth(widget as Widget<any> & { width?: number });
   }
 };
 export const debounce = <T extends (...args: any[]) => void>(func: T, delay: number) => {

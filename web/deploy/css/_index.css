@@ -215,6 +215,7 @@
   position: absolute;
   top: 0;
   transition: opacity 0.3s ease;
+  z-index: 1;
 }
 .lf-imageeditor__progressbar--hidden {
   opacity: 0;
@@ -235,6 +236,9 @@
   grid-gap: 16px;
   overflow: auto;
   padding: 12px 24px;
+}
+.lf-imageeditor__settings__controls lf-accordion {
+  width: 100%;
 }
 .lf-imageeditor__settings__buttons {
   display: flex;

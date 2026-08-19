@@ -21,9 +21,9 @@ var APIEndpoints;
   APIEndpoints2["GetPreviewStats"] = "/lf-nodes/get-preview-stats";
   APIEndpoints2["GetSamplers"] = "/lf-nodes/get-samplers";
   APIEndpoints2["GetSchedulers"] = "/lf-nodes/get-schedulers";
-  APIEndpoints2["RecoverEditDataset"] = "/lf-nodes/recover-edit-dataset";
   APIEndpoints2["NewBackup"] = "/lf-nodes/new-backup";
   APIEndpoints2["ProcessImage"] = "/lf-nodes/process-image";
+  APIEndpoints2["RecoverEditDataset"] = "/lf-nodes/recover-edit-dataset";
   APIEndpoints2["RefreshNodeDefs"] = "/lf-nodes/refresh-node-defs";
   APIEndpoints2["SaveMetadata"] = "/lf-nodes/save-metadata";
   APIEndpoints2["UpdateJson"] = "/lf-nodes/update-json";
@@ -1920,13 +1920,7 @@ const imageEditorConfigCb = (node) => {
   const configRaw = configWidget.options.getValue();
   let datasetJson;
   try {
-    if (typeof currentDatasetRaw === "string") {
-      datasetJson = syntax.json.unescape(currentDatasetRaw).parsedJSON;
-    } else if (currentDatasetRaw && typeof currentDatasetRaw === "object") {
-      datasetJson = currentDatasetRaw;
-    } else {
-      datasetJson = { nodes: [] };
-    }
+    datasetJson = syntax.json.unescape(currentDatasetRaw).parsedJSON;
   } catch {
     datasetJson = { nodes: [] };
   }
@@ -3350,10 +3344,18 @@ const DIFFUSION_SETTINGS = {
       cfg: 7,
       conditioning_mix: 0,
       denoise_percentage: 40,
+      dilate: 0,
+      feather: 0,
       negative_prompt: "",
       positive_prompt: "",
+      roi_align: 8,
+      roi_align_auto: false,
+      roi_auto: true,
+      roi_min_size: 64,
+      roi_padding: 32,
       sampler: "dpmpp_2m",
-      scheduler: "beta",
+      scheduler: "karras",
+      seed: -1,
       steps: 16,
       upsample_target: 2048,
       wd14_tagging: false
@@ -3381,16 +3383,33 @@ const DIFFUSION_SETTINGS = {
           allowFreeInput: true
         }
       ],
-      [ImageEditorControls.Toggle]: [
+      [ImageEditorControls.Select]: [
         {
-          ariaLabel: "WD14 tagging",
-          controlType: ImageEditorControls.Toggle,
-          defaultValue: false,
-          id: ImageEditorToggleIds.Wd14Tagging,
+          ariaLabel: "Sampler",
+          controlType: ImageEditorControls.Select,
+          defaultValue: "dpmpp_2m",
+          id: ImageEditorSelectIds.Sampler,
           isMandatory: false,
-          off: "false",
-          on: "true",
-          title: "Automatically tag the inpaint patch with WD14 and add tags to conditioning."
+          title: "Sampler used for inpaint diffusion steps.",
+          values: [
+            { value: "DPM++ 2M", id: "dpmpp_2m" },
+            { value: "DPM++ 2M Karras", id: "dpmpp_2m_karras" },
+            { value: "Euler", id: "euler" },
+            { value: "Euler a", id: "euler_ancestral" }
+          ]
+        },
+        {
+          ariaLabel: "Scheduler",
+          controlType: ImageEditorControls.Select,
+          defaultValue: "normal",
+          id: ImageEditorSelectIds.Scheduler,
+          isMandatory: false,
+          title: "Scheduler used for inpaint diffusion steps.",
+          values: [
+            { value: "Normal", id: "normal" },
+            { value: "Karras", id: "karras" },
+            { value: "Exponential", id: "exponential" }
+          ]
         }
       ],
       [ImageEditorControls.Slider]: [
@@ -3448,38 +3467,178 @@ const DIFFUSION_SETTINGS = {
           min: "0",
           step: "16",
           title: "Detailer path: upscale ROI longer side to this size before inpaint (0 disables)."
-        }
-      ],
-      [ImageEditorControls.Select]: [
-        {
-          ariaLabel: "Sampler",
-          controlType: ImageEditorControls.Select,
-          defaultValue: "dpmpp_2m",
-          id: ImageEditorSelectIds.Sampler,
-          isMandatory: false,
-          title: "Sampler used for inpaint diffusion steps.",
-          values: [
-            { value: "DPM++ 2M", id: "dpmpp_2m" },
-            { value: "DPM++ 2M Karras", id: "dpmpp_2m_karras" },
-            { value: "Euler", id: "euler" },
-            { value: "Euler a", id: "euler_ancestral" }
-          ]
         },
         {
-          ariaLabel: "Scheduler",
-          controlType: ImageEditorControls.Select,
-          defaultValue: "normal",
-          id: ImageEditorSelectIds.Scheduler,
+          ariaLabel: "ROI padding (px)",
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 32,
+          id: ImageEditorSliderIds.RoiPadding,
           isMandatory: false,
-          title: "Scheduler used for inpaint diffusion steps.",
-          values: [
-            { value: "Normal", id: "normal" },
-            { value: "Karras", id: "karras" },
-            { value: "Exponential", id: "exponential" }
-          ]
+          max: "256",
+          min: "0",
+          step: "1",
+          title: "Pixels of padding around the mask bounding box when cropping the ROI."
+        },
+        {
+          ariaLabel: "ROI align multiple",
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 8,
+          id: ImageEditorSliderIds.RoiAlign,
+          isMandatory: false,
+          max: "64",
+          min: "1",
+          step: "1",
+          title: "Align ROI size/position to this multiple. Keeps latent-friendly dims. Disable auto-align to use."
+        },
+        {
+          ariaLabel: "ROI minimum size (px)",
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 64,
+          id: ImageEditorSliderIds.RoiMinSize,
+          isMandatory: false,
+          max: "1024",
+          min: "1",
+          step: "1",
+          title: "Enforce a minimum width/height for the cropped ROI."
+        },
+        {
+          ariaLabel: "Dilate mask (px)",
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 0,
+          id: ImageEditorSliderIds.Dilate,
+          isMandatory: false,
+          max: "64",
+          min: "0",
+          step: "1",
+          title: "Expand mask edges before inpaint to avoid seams."
+        },
+        {
+          ariaLabel: "Feather mask (px)",
+          controlType: ImageEditorControls.Slider,
+          defaultValue: 0,
+          id: ImageEditorSliderIds.Feather,
+          isMandatory: false,
+          max: "64",
+          min: "0",
+          step: "1",
+          title: "Soften mask edges to blend the inpainted region."
+        }
+      ],
+      [ImageEditorControls.Textfield]: [
+        {
+          ariaLabel: "Seed",
+          controlType: ImageEditorControls.Textfield,
+          defaultValue: "-1",
+          id: ImageEditorTextfieldIds.Seed,
+          isMandatory: false,
+          title: "Optional seed override. Leave at -1 for a random seed.",
+          type: "number"
+        }
+      ],
+      [ImageEditorControls.Toggle]: [
+        {
+          ariaLabel: "WD14 tagging",
+          controlType: ImageEditorControls.Toggle,
+          defaultValue: false,
+          id: ImageEditorToggleIds.Wd14Tagging,
+          isMandatory: false,
+          off: "false",
+          on: "true",
+          title: "Automatically tag the inpaint patch with WD14 and add tags to conditioning."
+        },
+        {
+          ariaLabel: "Auto-align ROI",
+          controlType: ImageEditorControls.Toggle,
+          defaultValue: false,
+          id: ImageEditorToggleIds.RoiAlignAuto,
+          isMandatory: false,
+          off: "false",
+          on: "true",
+          title: "Infer alignment multiple from VAE/model. Disable to set a manual multiple (see slider)."
+        },
+        {
+          ariaLabel: "Apply unsharp mask",
+          controlType: ImageEditorControls.Toggle,
+          defaultValue: true,
+          id: ImageEditorToggleIds.ApplyUnsharpMask,
+          isMandatory: false,
+          off: "false",
+          on: "true",
+          title: "Apply a gentle unsharp mask after downscaling the inpainted region."
         }
       ]
-    }
+    },
+    layout: [
+      {
+        id: "inpaint-conditioning",
+        node: {
+          id: "inpaint-conditioning",
+          value: "Conditioning settings",
+          description: "Settings for conditioning (prompt).",
+          icon: "robot",
+          cells: {
+            lfSlot: {
+              shape: "slot",
+              value: "inpaint-conditioning"
+            }
+          }
+        },
+        children: [
+          ImageEditorTextfieldIds.PositivePrompt,
+          ImageEditorTextfieldIds.NegativePrompt,
+          ImageEditorSliderIds.ConditioningMix,
+          ImageEditorToggleIds.Wd14Tagging
+        ]
+      },
+      {
+        id: "inpaint-sampling",
+        node: {
+          id: "inpaint-sampling",
+          value: "Sampling settings",
+          description: "Settings for sampling (Sampler, Scheduler, Steps,etc.).",
+          icon: "wand",
+          cells: {
+            lfSlot: {
+              shape: "slot",
+              value: "inpaint-sampling"
+            }
+          }
+        },
+        children: [
+          ImageEditorSliderIds.DenoisePercentage,
+          ImageEditorSelectIds.Sampler,
+          ImageEditorSelectIds.Scheduler,
+          ImageEditorSliderIds.Cfg,
+          ImageEditorSliderIds.Steps,
+          ImageEditorTextfieldIds.Seed
+        ]
+      },
+      {
+        id: "inpaint-roi",
+        node: {
+          id: "inpaint-roi",
+          value: "ROI settings",
+          description: "Settings for region of interest (ROI).",
+          icon: "image-in-picture",
+          cells: {
+            lfSlot: {
+              shape: "slot",
+              value: "inpaint-roi"
+            }
+          }
+        },
+        children: [
+          ImageEditorSliderIds.UpsampleTarget,
+          ImageEditorToggleIds.ApplyUnsharpMask,
+          ImageEditorSliderIds.Dilate,
+          ImageEditorSliderIds.Feather,
+          ImageEditorSliderIds.RoiPadding,
+          ImageEditorSliderIds.RoiAlign,
+          ImageEditorToggleIds.RoiAlignAuto,
+          ImageEditorSliderIds.RoiMinSize
+        ]
+      }
+    ]
   },
   //#endregion
   //#region Outpaint
@@ -3496,7 +3655,7 @@ const DIFFUSION_SETTINGS = {
       negative_prompt: "",
       positive_prompt: "",
       sampler: "dpmpp_2m",
-      scheduler: "beta",
+      scheduler: "normal",
       steps: 24,
       upsample_target: 0,
       wd14_tagging: false,
@@ -3634,232 +3793,66 @@ const DIFFUSION_SETTINGS = {
           ]
         }
       ]
-    }
-  }
-  //#endregion
-};
-const INPAINT_ADV = {
-  //#region Inpaint (adv.)
-  controlIds: ImageEditorInpaintIds,
-  hasCanvasAction: true,
-  settings: {
-    ...DIFFUSION_SETTINGS.inpaint.settings,
-    apply_unsharp_mask: true,
-    conditioning_mix: 0,
-    dilate: 0,
-    feather: 0,
-    roi_align: 8,
-    roi_align_auto: false,
-    roi_auto: true,
-    roi_min_size: 64,
-    roi_padding: 32,
-    seed: 42
-  },
-  configs: {
-    [ImageEditorControls.Multiinput]: [
+    },
+    layout: [
       {
-        ariaLabel: "Positive prompt",
-        controlType: ImageEditorControls.Multiinput,
-        defaultValue: "",
-        id: ImageEditorTextfieldIds.PositivePrompt,
-        isMandatory: false,
-        title: "Prompt applied to masked pixels.",
-        mode: "tags",
-        allowFreeInput: true
-      },
-      {
-        ariaLabel: "Negative prompt",
-        controlType: ImageEditorControls.Multiinput,
-        defaultValue: "",
-        id: ImageEditorTextfieldIds.NegativePrompt,
-        isMandatory: false,
-        title: "Negative prompt applied to masked pixels.",
-        mode: "tags",
-        allowFreeInput: true
-      }
-    ],
-    [ImageEditorControls.Select]: [
-      {
-        ariaLabel: "Sampler",
-        controlType: ImageEditorControls.Select,
-        defaultValue: "dpmpp_2m",
-        id: ImageEditorSelectIds.Sampler,
-        isMandatory: false,
-        title: "Sampler used for inpaint diffusion steps.",
-        values: [
-          { value: "DPM++ 2M", id: "dpmpp_2m" },
-          { value: "DPM++ 2M Karras", id: "dpmpp_2m_karras" },
-          { value: "Euler", id: "euler" },
-          { value: "Euler a", id: "euler_ancestral" }
+        id: "outpaint-conditioning",
+        node: {
+          id: "outpaint-conditioning",
+          value: "Conditioning settings",
+          description: "Prompts and conditioning mix.",
+          icon: "robot",
+          cells: {
+            lfSlot: {
+              shape: "slot",
+              value: "outpaint-conditioning"
+            }
+          }
+        },
+        children: [
+          ImageEditorTextfieldIds.PositivePrompt,
+          ImageEditorTextfieldIds.NegativePrompt,
+          ImageEditorSliderIds.ConditioningMix,
+          ImageEditorToggleIds.Wd14Tagging
         ]
       },
       {
-        ariaLabel: "Scheduler",
-        controlType: ImageEditorControls.Select,
-        defaultValue: "normal",
-        id: ImageEditorSelectIds.Scheduler,
-        isMandatory: false,
-        title: "Scheduler used for inpaint diffusion steps.",
-        values: [
-          { value: "Normal", id: "normal" },
-          { value: "Karras", id: "karras" },
-          { value: "Exponential", id: "exponential" }
+        id: "outpaint-sampling",
+        node: {
+          id: "outpaint-sampling",
+          value: "Sampling settings",
+          description: "Sampler, scheduler, steps, denoise, CFG.",
+          icon: "wand",
+          cells: {
+            lfSlot: {
+              shape: "slot",
+              value: "outpaint-sampling"
+            }
+          }
+        },
+        children: [
+          ImageEditorSliderIds.DenoisePercentage,
+          ImageEditorSelectIds.Sampler,
+          ImageEditorSelectIds.Scheduler,
+          ImageEditorSliderIds.Cfg,
+          ImageEditorSliderIds.Steps
         ]
-      }
-    ],
-    [ImageEditorControls.Textfield]: [
-      {
-        ariaLabel: "Seed",
-        controlType: ImageEditorControls.Textfield,
-        defaultValue: "",
-        id: ImageEditorTextfieldIds.Seed,
-        isMandatory: false,
-        title: "Optional seed override. Leave blank for a random seed.",
-        type: "number"
-      }
-    ],
-    [ImageEditorControls.Slider]: [
-      {
-        ariaLabel: "Conditioning mix",
-        controlType: ImageEditorControls.Slider,
-        defaultValue: 0,
-        id: ImageEditorSliderIds.ConditioningMix,
-        isMandatory: false,
-        max: "1",
-        min: "-1",
-        step: "0.1",
-        title: "Conditioning mode: -1=input only, 0=concat, 1=prompts only. Intermediate values blend between input and prompts."
       },
       {
-        ariaLabel: "Denoise percentage",
-        controlType: ImageEditorControls.Slider,
-        defaultValue: 40,
-        id: ImageEditorSliderIds.DenoisePercentage,
-        isMandatory: true,
-        max: "100",
-        min: "0",
-        step: "1",
-        title: "Noise applied during inpaint. 0 keeps original pixels, 100 fully regenerates."
-      },
-      {
-        ariaLabel: "CFG scale",
-        controlType: ImageEditorControls.Slider,
-        defaultValue: 7,
-        id: ImageEditorSliderIds.Cfg,
-        isMandatory: true,
-        max: "30",
-        min: "1",
-        step: "0.5",
-        title: "Classifier-free guidance applied during the inpaint pass."
-      },
-      {
-        ariaLabel: "Steps",
-        controlType: ImageEditorControls.Slider,
-        defaultValue: 16,
-        id: ImageEditorSliderIds.Steps,
-        isMandatory: true,
-        max: "30",
-        min: "1",
-        step: "1",
-        title: "Diffusion steps used for the inpaint sampler."
-      },
-      {
-        ariaLabel: "Upsample target (px)",
-        controlType: ImageEditorControls.Slider,
-        defaultValue: 2048,
-        id: ImageEditorSliderIds.UpsampleTarget,
-        isMandatory: false,
-        max: "2048",
-        min: "0",
-        step: "16",
-        title: "Detailer path: upscale ROI longer side to this size before inpaint (0 disables)."
-      },
-      {
-        ariaLabel: "ROI padding (px)",
-        controlType: ImageEditorControls.Slider,
-        defaultValue: 32,
-        id: ImageEditorSliderIds.RoiPadding,
-        isMandatory: false,
-        max: "256",
-        min: "0",
-        step: "1",
-        title: "Pixels of padding around the mask bounding box when cropping the ROI."
-      },
-      {
-        ariaLabel: "ROI align multiple",
-        controlType: ImageEditorControls.Slider,
-        defaultValue: 8,
-        id: ImageEditorSliderIds.RoiAlign,
-        isMandatory: false,
-        max: "64",
-        min: "1",
-        step: "1",
-        title: "Align ROI size/position to this multiple. Keeps latent-friendly dims. Disable auto-align to use."
-      },
-      {
-        ariaLabel: "ROI minimum size (px)",
-        controlType: ImageEditorControls.Slider,
-        defaultValue: 64,
-        id: ImageEditorSliderIds.RoiMinSize,
-        isMandatory: false,
-        max: "1024",
-        min: "1",
-        step: "1",
-        title: "Enforce a minimum width/height for the cropped ROI."
-      },
-      {
-        ariaLabel: "Dilate mask (px)",
-        controlType: ImageEditorControls.Slider,
-        defaultValue: 0,
-        id: ImageEditorSliderIds.Dilate,
-        isMandatory: false,
-        max: "64",
-        min: "0",
-        step: "1",
-        title: "Expand mask edges before inpaint to avoid seams."
-      },
-      {
-        ariaLabel: "Feather mask (px)",
-        controlType: ImageEditorControls.Slider,
-        defaultValue: 0,
-        id: ImageEditorSliderIds.Feather,
-        isMandatory: false,
-        max: "64",
-        min: "0",
-        step: "1",
-        title: "Soften mask edges to blend the inpainted region."
-      }
-    ],
-    [ImageEditorControls.Toggle]: [
-      {
-        ariaLabel: "Enable WD14 tagging",
-        controlType: ImageEditorControls.Toggle,
-        defaultValue: false,
-        id: ImageEditorToggleIds.Wd14Tagging,
-        isMandatory: false,
-        off: "false",
-        on: "true",
-        title: "Automatically tag the inpaint patch with WD14 and add tags to conditioning."
-      },
-      {
-        ariaLabel: "Auto-align ROI",
-        controlType: ImageEditorControls.Toggle,
-        defaultValue: false,
-        id: ImageEditorToggleIds.RoiAlignAuto,
-        isMandatory: false,
-        off: "false",
-        on: "true",
-        title: "Infer alignment multiple from VAE/model. Disable to set a manual multiple (see slider)."
-      },
-      {
-        ariaLabel: "Apply unsharp mask",
-        controlType: ImageEditorControls.Toggle,
-        defaultValue: true,
-        id: ImageEditorToggleIds.ApplyUnsharpMask,
-        isMandatory: false,
-        off: "false",
-        on: "true",
-        title: "Apply a gentle unsharp mask after downscaling the inpainted region."
+        id: "outpaint-region",
+        node: {
+          id: "outpaint-region",
+          value: "Region settings",
+          description: "How much to expand and edge softness.",
+          icon: "arrow-autofit-content",
+          cells: {
+            lfSlot: {
+              shape: "slot",
+              value: "outpaint-region"
+            }
+          }
+        },
+        children: [ImageEditorSliderIds.OutpaintAmount, ImageEditorSliderIds.Feather]
       }
     ]
   }
@@ -3974,313 +3967,6 @@ const SETTINGS = {
   ...DRAWING_SETTINGS,
   ...DIFFUSION_SETTINGS
 };
-const TREE_DATA = {
-  nodes: [
-    //#region Settings
-    {
-      description: "Tool configuration.",
-      id: "settings",
-      icon: "brush",
-      value: "Settings",
-      children: [
-        {
-          description: "Brush configuration.",
-          cells: {
-            lfCode: {
-              shape: "code",
-              value: JSON.stringify(SETTINGS.brush)
-            }
-          },
-          id: "brush",
-          value: "Brush"
-        }
-      ]
-    },
-    //#endregion
-    //#region Diffusion Tools
-    {
-      description: "Diffusion-based retouching tools.",
-      id: "diffusion_tools",
-      value: "Diffusion Tools",
-      icon: "wand",
-      children: [
-        {
-          description: "Inpaint masked areas using the connected diffusion model.",
-          cells: {
-            lfCode: {
-              shape: "code",
-              value: JSON.stringify(SETTINGS.inpaint)
-            }
-          },
-          id: "inpaint",
-          value: "Inpaint"
-        },
-        {
-          description: "Inpaint with advanced ROI controls.",
-          cells: {
-            lfCode: {
-              shape: "code",
-              value: JSON.stringify(INPAINT_ADV)
-            }
-          },
-          id: "inpaint_adv",
-          value: "Inpaint (adv.)"
-        },
-        {
-          description: "Outpaint beyond the current canvas. Brush along edges to choose which sides expand.",
-          cells: {
-            lfCode: {
-              shape: "code",
-              value: JSON.stringify(SETTINGS.outpaint)
-            }
-          },
-          id: "outpaint",
-          value: "Outpaint"
-        }
-      ]
-    },
-    //#endregion
-    //#region Cutouts
-    {
-      description: "Background removal and matting tools.",
-      id: "cutouts",
-      value: "Cutouts",
-      icon: "replace",
-      children: [
-        {
-          description: "Remove the background using rembg with optional solid fill.",
-          cells: {
-            lfCode: {
-              shape: "code",
-              value: JSON.stringify(SETTINGS.backgroundRemover)
-            }
-          },
-          id: "background_remover",
-          value: "Background remover"
-        }
-      ]
-    },
-    //#endregion
-    //#region Basic Adjustments
-    {
-      description: "Basic adjustments such as sharpening and color tuning.",
-      id: "basic_adjustments",
-      value: "Basic Adjustments",
-      icon: "settings",
-      children: [
-        {
-          description: "Adjusts the brightness.",
-          cells: {
-            lfCode: {
-              shape: "code",
-              value: JSON.stringify(SETTINGS.brightness)
-            }
-          },
-          id: "brightness",
-          value: "Brightness"
-        },
-        {
-          description: "Simulates the Lightroom clarity effect.",
-          cells: {
-            lfCode: {
-              shape: "code",
-              value: JSON.stringify(SETTINGS.clarity)
-            }
-          },
-          id: "clarity",
-          value: "Clarity"
-        },
-        {
-          description: "Sharpens edges using a classic unsharp mask pipeline.",
-          cells: {
-            lfCode: {
-              shape: "code",
-              value: JSON.stringify(SETTINGS.unsharpMask)
-            }
-          },
-          id: "unsharp_mask",
-          value: "Unsharp Mask"
-        },
-        {
-          description: "Adjusts the contrast.",
-          cells: {
-            lfCode: {
-              shape: "code",
-              value: JSON.stringify(SETTINGS.contrast)
-            }
-          },
-          id: "contrast",
-          value: "Contrast"
-        },
-        {
-          description: "Reduces the saturation.",
-          cells: {
-            lfCode: {
-              shape: "code",
-              value: JSON.stringify(SETTINGS.desaturate)
-            }
-          },
-          id: "desaturate",
-          value: "Desaturate"
-        },
-        {
-          description: "Resize the image by fitting one edge to a target size while preserving aspect ratio.",
-          cells: {
-            lfCode: {
-              shape: "code",
-              value: JSON.stringify(SETTINGS.resizeEdge)
-            }
-          },
-          id: "resizeEdge",
-          value: "Resize (by edge)"
-        },
-        {
-          description: "Resize the image to explicit width/height with optional crop or padding.",
-          cells: {
-            lfCode: {
-              shape: "code",
-              value: JSON.stringify(SETTINGS.resizeFree)
-            }
-          },
-          id: "resizeFree",
-          value: "Resize (free)"
-        },
-        {
-          description: "Adjusts the saturation.",
-          cells: {
-            lfCode: {
-              shape: "code",
-              value: JSON.stringify(SETTINGS.saturation)
-            }
-          },
-          id: "saturation",
-          value: "Saturation"
-        }
-      ]
-    },
-    //#endregion
-    //#region Creative Effects
-    {
-      description: "Artistic filters, such as vignette effect and gaussian blur.",
-      id: "creative_effects",
-      icon: "palette",
-      value: "Creative Effects",
-      children: [
-        {
-          cells: {
-            lfCode: {
-              shape: "code",
-              value: JSON.stringify(SETTINGS.blend)
-            }
-          },
-          description: "Blends a color layer onto the image.",
-          id: "blend",
-          value: "Blend"
-        },
-        {
-          description: "Applies a bloom effect.",
-          cells: {
-            lfCode: {
-              shape: "code",
-              value: JSON.stringify(SETTINGS.bloom)
-            }
-          },
-          id: "bloom",
-          value: "Bloom"
-        },
-        {
-          description: "Applies a film grain effect.",
-          cells: {
-            lfCode: {
-              shape: "code",
-              value: JSON.stringify(SETTINGS.filmGrain)
-            }
-          },
-          id: "film_grain",
-          value: "Film grain"
-        },
-        {
-          description: "Blurs the image.",
-          cells: {
-            lfCode: {
-              shape: "code",
-              value: JSON.stringify(SETTINGS.gaussianBlur)
-            }
-          },
-          id: "gaussian_blur",
-          value: "Gaussian blur"
-        },
-        {
-          description: "Draws a line.",
-          cells: {
-            lfCode: {
-              shape: "code",
-              value: JSON.stringify(SETTINGS.line)
-            }
-          },
-          id: "line",
-          value: "Line"
-        },
-        {
-          cells: {
-            lfCode: {
-              shape: "code",
-              value: JSON.stringify(SETTINGS.sepia)
-            }
-          },
-          description: "Applies a sepia effect to the image.",
-          id: "sepia",
-          value: "Sepia"
-        },
-        {
-          cells: {
-            lfCode: {
-              shape: "code",
-              value: JSON.stringify(SETTINGS.splitTone)
-            }
-          },
-          description: "Applies a split tone effect to the image.",
-          id: "split_tone",
-          value: "Split tone"
-        },
-        {
-          cells: {
-            lfCode: {
-              shape: "code",
-              value: JSON.stringify(SETTINGS.tiltShift)
-            }
-          },
-          description: "Applies a tilt-shift effect to the image.",
-          id: "tilt_shift",
-          value: "Tilt-shift"
-        },
-        {
-          cells: {
-            lfCode: {
-              shape: "code",
-              value: JSON.stringify(SETTINGS.vibrance)
-            }
-          },
-          description: "Applies a vibrance effect to the image.",
-          id: "vibrance",
-          value: "Vibrance"
-        },
-        {
-          cells: {
-            lfCode: {
-              shape: "code",
-              value: JSON.stringify(SETTINGS.vignette)
-            }
-          },
-          description: "Applies a vignetting effect to the image.",
-          id: "vignette",
-          value: "Vignette"
-        }
-      ]
-    }
-    //#endregion
-  ]
-};
 var LfEventName;
 (function(LfEventName2) {
   LfEventName2["LfAccordion"] = "lf-accordion-event";
@@ -4323,6 +4009,7 @@ function getStatusColumn(dataset) {
 function parseLabel(data) {
   return data.isMandatory ? `${data.ariaLabel}*` : data.ariaLabel;
 }
+const layoutWarningFilters = /* @__PURE__ */ new Set();
 function isValidImageEditorFilter(obj) {
   if (typeof obj !== "object" || obj === null || !("controlIds" in obj) || !("configs" in obj) || !("settings" in obj)) {
     return false;
@@ -4408,6 +4095,29 @@ const createPrepSettings = (deps) => {
     const alias = idRaw === IMAGE_EDITOR_CONSTANTS.FILTERS.INPAINT_DETAIL || idRaw === IMAGE_EDITOR_CONSTANTS.FILTERS.INPAINT_ADV ? IMAGE_EDITOR_CONSTANTS.FILTERS.INPAINT : idRaw;
     state.filterType = alias;
     state.filterNodeId = idRaw;
+    const controlIndex = /* @__PURE__ */ new Map();
+    Object.keys(state.filter.configs ?? {}).forEach((controlType) => {
+      var _a2;
+      const configs = (_a2 = state.filter.configs) == null ? void 0 : _a2[controlType];
+      configs == null ? void 0 : configs.forEach((config) => {
+        controlIndex.set(config.id, { controlType, config });
+      });
+    });
+    const defaultLayout = () => {
+      const layout2 = [];
+      Object.keys(state.filter.configs ?? {}).forEach((controlType) => {
+        var _a2;
+        const configs = (_a2 = state.filter.configs) == null ? void 0 : _a2[controlType];
+        configs == null ? void 0 : configs.forEach((config) => layout2.push(config.id));
+      });
+      return layout2;
+    };
+    const layout = state.filter.layout;
+    const layoutToRender = layout ?? defaultLayout();
+    if (!layout && !layoutWarningFilters.has(state.filterType)) {
+      layoutWarningFilters.add(state.filterType);
+      getLfManager().log("Filter missing layout definition; falling back to config order.", { filterType: state.filterType }, LogSeverity.Warning);
+    }
     const dataset = state.elements.imageviewer.lfDataset;
     const defaults = (_a = dataset == null ? void 0 : dataset.defaults) == null ? void 0 : _a[state.filterType];
     if (defaults) {
@@ -4422,129 +4132,176 @@ const createPrepSettings = (deps) => {
     const controlsContainer = document.createElement(TagName.Div);
     controlsContainer.classList.add(ImageEditorCSS.SettingsControls);
     settings.appendChild(controlsContainer);
-    const controlGroups = Object.keys(filter.configs);
-    controlGroups.forEach((controlType) => {
-      const configs = filter.configs[controlType];
-      if (!configs) {
+    const renderedControls = /* @__PURE__ */ new Set();
+    const renderControl = (controlId, target) => {
+      if (renderedControls.has(controlId)) {
         return;
       }
-      configs.forEach((config) => {
-        switch (controlType) {
-          case ImageEditorControls.Checkbox: {
-            const checkboxConfig = config;
-            const checkbox = document.createElement(TagName.LfCheckbox);
-            checkbox.lfLabel = parseLabel(checkboxConfig);
-            checkbox.lfValue = checkboxConfig.defaultValue ?? false;
-            checkbox.title = checkboxConfig.title;
-            checkbox.addEventListener(LfEventName.LfCheckbox, (event) => onCheckbox(state, event));
-            controlsContainer.appendChild(checkbox);
-            state.elements.controls[checkboxConfig.id] = checkbox;
-            break;
-          }
-          case ImageEditorControls.Slider: {
-            const sliderConfig = config;
-            const slider = document.createElement(TagName.LfSlider);
-            slider.lfLabel = parseLabel(sliderConfig);
-            slider.lfLeadingLabel = true;
-            slider.lfMax = Number(sliderConfig.max);
-            slider.lfMin = Number(sliderConfig.min);
-            slider.lfStep = Number(sliderConfig.step);
-            slider.lfStyle = ".form-field { width: 100%; }";
-            slider.lfValue = Number(sliderConfig.defaultValue);
-            slider.title = sliderConfig.title;
-            slider.dataset.id = sliderConfig.id;
-            slider.addEventListener(LfEventName.LfSlider, (event) => onSlider(state, event));
-            controlsContainer.appendChild(slider);
-            state.elements.controls[sliderConfig.id] = slider;
-            break;
-          }
-          case ImageEditorControls.Textfield: {
-            const textfieldConfig = config;
-            const textfield = document.createElement(TagName.LfTextfield);
-            textfield.lfLabel = parseLabel(textfieldConfig);
-            textfield.lfHtmlAttributes = { type: textfieldConfig.type };
-            textfield.lfValue = String(textfieldConfig.defaultValue).valueOf();
-            textfield.title = textfieldConfig.title;
-            textfield.dataset.id = textfieldConfig.id;
-            textfield.addEventListener(LfEventName.LfTextfield, (event) => onTextfield(state, event));
-            controlsContainer.appendChild(textfield);
-            state.elements.controls[textfieldConfig.id] = textfield;
-            break;
-          }
-          case ImageEditorControls.Multiinput: {
-            const multiConfig = config;
-            const multiinput = document.createElement(TagName.LfMultiinput);
-            multiinput.lfAllowFreeInput = multiConfig.allowFreeInput ?? true;
-            multiinput.lfMaxHistory = 100;
-            multiinput.lfMode = multiConfig.mode ?? "tags";
-            multiinput.lfTextfieldProps = { lfLabel: parseLabel(multiConfig) };
-            multiinput.lfValue = String(multiConfig.defaultValue ?? "").valueOf();
-            multiinput.title = multiConfig.title;
-            multiinput.dataset.id = multiConfig.id;
-            multiinput.addEventListener(LfEventName.LfMultiinput, (event) => onMultiinput(state, event));
-            const effectiveValue = multiinput.lfValue ?? "";
-            if (effectiveValue.trim()) {
-              const tags = effectiveValue.split(",").map((token) => token.trim()).filter((token) => token.length > 0);
-              void multiinput.setHistory(tags);
-            }
-            controlsContainer.appendChild(multiinput);
-            state.elements.controls[multiConfig.id] = multiinput;
-            break;
-          }
-          case ImageEditorControls.Select: {
-            const selectConfig = config;
-            const select = document.createElement(TagName.LfSelect);
-            select.lfTextfieldProps = { lfLabel: parseLabel(selectConfig) };
-            select.title = selectConfig.title;
-            select.dataset.id = selectConfig.id;
-            select.addEventListener(LfEventName.LfSelect, (event) => onSelect(state, event));
-            const fallbackDataset = {
-              nodes: selectConfig.values.map(({ id, value }) => ({
-                id,
-                value
-              }))
-            };
-            select.lfDataset = fallbackDataset;
-            select.lfValue = String(selectConfig.defaultValue ?? "");
-            if (selectConfig.id === ImageEditorSelectIds.Sampler || selectConfig.id === ImageEditorSelectIds.Scheduler) {
-              (async () => {
-                try {
-                  const dataset2 = selectConfig.id === ImageEditorSelectIds.Sampler ? await MODELS_API.getSamplers() : await MODELS_API.getSchedulers();
-                  if (dataset2 && Array.isArray(dataset2.nodes) && dataset2.nodes.length > 0) {
-                    select.lfDataset = dataset2;
-                    const targetValue = String(selectConfig.defaultValue ?? "");
-                    if (targetValue) {
-                      await select.setValue(targetValue);
-                    }
-                  }
-                } catch (error) {
-                  getLfManager().log("Failed to load sampling options for select control.", { error, id: selectConfig.id }, LogSeverity.Warning);
-                }
-              })();
-            }
-            controlsContainer.appendChild(select);
-            state.elements.controls[selectConfig.id] = select;
-            break;
-          }
-          case ImageEditorControls.Toggle: {
-            const toggleConfig = config;
-            const toggle = document.createElement(TagName.LfToggle);
-            toggle.dataset.off = toggleConfig.off;
-            toggle.dataset.on = toggleConfig.on;
-            toggle.lfLabel = parseLabel(toggleConfig);
-            toggle.lfValue = toggleConfig.defaultValue ?? false;
-            toggle.title = toggleConfig.title;
-            toggle.dataset.id = toggleConfig.id;
-            toggle.addEventListener(LfEventName.LfToggle, (event) => onToggle(state, event));
-            controlsContainer.appendChild(toggle);
-            state.elements.controls[toggleConfig.id] = toggle;
-            break;
-          }
-          default:
-            throw new Error(`Unknown control type: ${controlType}`);
+      const entry = controlIndex.get(controlId);
+      if (!entry) {
+        getLfManager().log("Layout references unknown control id.", { controlId, filterType: state.filterType }, LogSeverity.Warning);
+        return;
+      }
+      const { controlType, config } = entry;
+      const settingsRecord = state.filter.settings;
+      if (typeof settingsRecord[controlId] === "undefined") {
+        settingsRecord[controlId] = config.defaultValue;
+      }
+      switch (controlType) {
+        case ImageEditorControls.Checkbox: {
+          const checkboxConfig = config;
+          const checkbox = document.createElement(TagName.LfCheckbox);
+          checkbox.lfLabel = parseLabel(checkboxConfig);
+          checkbox.lfValue = checkboxConfig.defaultValue ?? false;
+          checkbox.title = checkboxConfig.title;
+          checkbox.addEventListener(LfEventName.LfCheckbox, (event) => onCheckbox(state, event));
+          target.appendChild(checkbox);
+          state.elements.controls[checkboxConfig.id] = checkbox;
+          renderedControls.add(controlId);
+          break;
         }
+        case ImageEditorControls.Slider: {
+          const sliderConfig = config;
+          const slider = document.createElement(TagName.LfSlider);
+          slider.lfLabel = parseLabel(sliderConfig);
+          slider.lfLeadingLabel = true;
+          slider.lfMax = Number(sliderConfig.max);
+          slider.lfMin = Number(sliderConfig.min);
+          slider.lfStep = Number(sliderConfig.step);
+          slider.lfStyle = ".form-field { width: 100%; }";
+          slider.lfValue = Number(sliderConfig.defaultValue);
+          slider.title = sliderConfig.title;
+          slider.dataset.id = sliderConfig.id;
+          slider.addEventListener(LfEventName.LfSlider, (event) => onSlider(state, event));
+          target.appendChild(slider);
+          state.elements.controls[sliderConfig.id] = slider;
+          renderedControls.add(controlId);
+          break;
+        }
+        case ImageEditorControls.Textfield: {
+          const textfieldConfig = config;
+          const textfield = document.createElement(TagName.LfTextfield);
+          textfield.lfLabel = parseLabel(textfieldConfig);
+          textfield.lfHtmlAttributes = { type: textfieldConfig.type };
+          textfield.lfValue = String(textfieldConfig.defaultValue).valueOf();
+          textfield.title = textfieldConfig.title;
+          textfield.dataset.id = textfieldConfig.id;
+          textfield.addEventListener(LfEventName.LfTextfield, (event) => onTextfield(state, event));
+          target.appendChild(textfield);
+          state.elements.controls[textfieldConfig.id] = textfield;
+          renderedControls.add(controlId);
+          break;
+        }
+        case ImageEditorControls.Multiinput: {
+          const multiConfig = config;
+          const multiinput = document.createElement(TagName.LfMultiinput);
+          multiinput.lfAllowFreeInput = multiConfig.allowFreeInput ?? true;
+          multiinput.lfMaxHistory = 100;
+          multiinput.lfMode = multiConfig.mode ?? "tags";
+          multiinput.lfTextfieldProps = { lfLabel: parseLabel(multiConfig) };
+          multiinput.lfValue = String(multiConfig.defaultValue ?? "").valueOf();
+          multiinput.title = multiConfig.title;
+          multiinput.dataset.id = multiConfig.id;
+          multiinput.addEventListener(LfEventName.LfMultiinput, (event) => onMultiinput(state, event));
+          const effectiveValue = multiinput.lfValue ?? "";
+          if (effectiveValue.trim()) {
+            const tags = effectiveValue.split(",").map((token) => token.trim()).filter((token) => token.length > 0);
+            void multiinput.setHistory(tags);
+          }
+          target.appendChild(multiinput);
+          state.elements.controls[multiConfig.id] = multiinput;
+          renderedControls.add(controlId);
+          break;
+        }
+        case ImageEditorControls.Select: {
+          const selectConfig = config;
+          const select = document.createElement(TagName.LfSelect);
+          select.lfTextfieldProps = { lfLabel: parseLabel(selectConfig) };
+          select.title = selectConfig.title;
+          select.dataset.id = selectConfig.id;
+          select.addEventListener(LfEventName.LfSelect, (event) => onSelect(state, event));
+          const fallbackDataset = {
+            nodes: selectConfig.values.map(({ id, value }) => ({
+              id,
+              value
+            }))
+          };
+          select.lfDataset = fallbackDataset;
+          select.lfValue = String(selectConfig.defaultValue ?? "");
+          if (selectConfig.id === ImageEditorSelectIds.Sampler || selectConfig.id === ImageEditorSelectIds.Scheduler) {
+            (async () => {
+              try {
+                const dataset2 = selectConfig.id === ImageEditorSelectIds.Sampler ? await MODELS_API.getSamplers() : await MODELS_API.getSchedulers();
+                if (dataset2 && Array.isArray(dataset2.nodes) && dataset2.nodes.length > 0) {
+                  select.lfDataset = dataset2;
+                  const targetValue = String(selectConfig.defaultValue ?? "");
+                  if (targetValue) {
+                    await select.setValue(targetValue);
+                  }
+                }
+              } catch (error) {
+                getLfManager().log("Failed to load sampling options for select control.", { error, id: selectConfig.id }, LogSeverity.Warning);
+              }
+            })();
+          }
+          target.appendChild(select);
+          state.elements.controls[selectConfig.id] = select;
+          renderedControls.add(controlId);
+          break;
+        }
+        case ImageEditorControls.Toggle: {
+          const toggleConfig = config;
+          const toggle = document.createElement(TagName.LfToggle);
+          toggle.dataset.off = toggleConfig.off;
+          toggle.dataset.on = toggleConfig.on;
+          toggle.lfLabel = parseLabel(toggleConfig);
+          toggle.lfValue = toggleConfig.defaultValue ?? false;
+          toggle.title = toggleConfig.title;
+          toggle.dataset.id = toggleConfig.id;
+          toggle.addEventListener(LfEventName.LfToggle, (event) => onToggle(state, event));
+          target.appendChild(toggle);
+          state.elements.controls[toggleConfig.id] = toggle;
+          renderedControls.add(controlId);
+          break;
+        }
+        default:
+          throw new Error(`Unknown control type: ${controlType}`);
+      }
+    };
+    const renderLayout = (items, target) => {
+      items.forEach((item) => {
+        if (typeof item === "object" && "children" in item) {
+          const group = item;
+          if (!group.children || group.children.length === 0) {
+            return;
+          }
+          const slotId = group.id;
+          const accordion = document.createElement(TagName.LfAccordion);
+          const slotCell = { shape: "slot", value: slotId };
+          const baseNode = group.node ?? {
+            id: slotId,
+            value: group.id
+          };
+          const withSlot = {
+            ...baseNode,
+            cells: {
+              ...baseNode.cells ?? {},
+              lfSlot: slotCell
+            }
+          };
+          accordion.lfDataset = { nodes: [withSlot] };
+          const groupContainer = document.createElement(TagName.Div);
+          groupContainer.classList.add(ImageEditorCSS.SettingsControls);
+          groupContainer.slot = slotId;
+          renderLayout(group.children, groupContainer);
+          accordion.appendChild(groupContainer);
+          target.appendChild(accordion);
+          return;
+        }
+        renderControl(item, target);
       });
-    });
+    };
+    renderLayout(layoutToRender, controlsContainer);
     if (state.filterType === "resizeEdge" || state.filterType === "resizeFree") {
       updateResizeHelperText(state);
     }
@@ -4657,8 +4414,9 @@ const applyFilterDefaults = (state, defaults) => {
     return;
   }
   const mutableSettings = filter.settings;
-  Object.keys(filter.configs).forEach((controlType) => {
-    const configs = filter.configs[controlType];
+  const configsByType = filter.configs ?? {};
+  Object.keys(configsByType).forEach((controlType) => {
+    const configs = configsByType[controlType];
     configs == null ? void 0 : configs.forEach((config) => {
       const defaultValue = defaults[config.id];
       if (typeof defaultValue === "undefined") {
@@ -4695,6 +4453,12 @@ const applyFilterDefaults = (state, defaults) => {
         }
         case ImageEditorControls.Textfield: {
           const textfieldConfig = config;
+          if (textfieldConfig.id === ImageEditorTextfieldIds.Seed) {
+            const numericValue = defaultValue === null || defaultValue === "" ? -1 : typeof defaultValue === "number" ? defaultValue : Number(defaultValue);
+            textfieldConfig.defaultValue = numericValue.toString();
+            mutableSettings[textfieldConfig.id] = numericValue;
+            break;
+          }
           const stringValue = defaultValue === null || typeof defaultValue === "undefined" ? "" : String(defaultValue);
           textfieldConfig.defaultValue = stringValue;
           mutableSettings[textfieldConfig.id] = stringValue;
@@ -4757,8 +4521,14 @@ const refreshValues = async (state, addSnapshot = false) => {
         case IMAGE_EDITOR_CONSTANTS.TAGS.TEXTFIELD: {
           const textfield = control;
           const textfieldValue = await textfield.getValue();
-          filter.settings[id] = textfieldValue;
-          storeForFilter[id] = textfieldValue;
+          if (id === ImageEditorTextfieldIds.Seed) {
+            const normalized = textfieldValue === null || textfieldValue === "" ? -1 : Number(textfieldValue);
+            filter.settings[id] = normalized;
+            storeForFilter[id] = normalized;
+          } else {
+            filter.settings[id] = textfieldValue;
+            storeForFilter[id] = textfieldValue;
+          }
           break;
         }
         case IMAGE_EDITOR_CONSTANTS.TAGS.TOGGLE: {
@@ -5200,6 +4970,302 @@ handlerRefs.select = EV_HANDLERS$a.select;
 handlerRefs.slider = EV_HANDLERS$a.slider;
 handlerRefs.textfield = EV_HANDLERS$a.textfield;
 handlerRefs.toggle = EV_HANDLERS$a.toggle;
+const TREE_DATA = {
+  nodes: [
+    //#region Settings
+    {
+      description: "Tool configuration.",
+      id: "settings",
+      icon: "brush",
+      value: "Settings",
+      children: [
+        {
+          description: "Brush configuration.",
+          cells: {
+            lfCode: {
+              shape: "code",
+              value: JSON.stringify(SETTINGS.brush)
+            }
+          },
+          id: "brush",
+          value: "Brush"
+        }
+      ]
+    },
+    //#endregion
+    //#region Diffusion Tools
+    {
+      description: "Diffusion-based retouching tools.",
+      id: "diffusion_tools",
+      value: "Diffusion Tools",
+      icon: "wand",
+      children: [
+        {
+          description: "Inpaint masked areas using the connected diffusion model. Advanced controls are available inside the inpaint panel.",
+          cells: {
+            lfCode: {
+              shape: "code",
+              value: JSON.stringify(SETTINGS.inpaint)
+            }
+          },
+          id: "inpaint",
+          value: "Inpaint"
+        },
+        {
+          description: "Outpaint beyond the current canvas. Brush along edges to choose which sides expand.",
+          cells: {
+            lfCode: {
+              shape: "code",
+              value: JSON.stringify(SETTINGS.outpaint)
+            }
+          },
+          id: "outpaint",
+          value: "Outpaint"
+        }
+      ]
+    },
+    //#endregion
+    //#region Cutouts
+    {
+      description: "Background removal and matting tools.",
+      id: "cutouts",
+      value: "Cutouts",
+      icon: "replace",
+      children: [
+        {
+          description: "Remove the background using rembg with optional solid fill.",
+          cells: {
+            lfCode: {
+              shape: "code",
+              value: JSON.stringify(SETTINGS.backgroundRemover)
+            }
+          },
+          id: "background_remover",
+          value: "Background remover"
+        }
+      ]
+    },
+    //#endregion
+    //#region Basic Adjustments
+    {
+      description: "Basic adjustments such as sharpening and color tuning.",
+      id: "basic_adjustments",
+      value: "Basic Adjustments",
+      icon: "settings",
+      children: [
+        {
+          description: "Adjusts the brightness.",
+          cells: {
+            lfCode: {
+              shape: "code",
+              value: JSON.stringify(SETTINGS.brightness)
+            }
+          },
+          id: "brightness",
+          value: "Brightness"
+        },
+        {
+          description: "Simulates the Lightroom clarity effect.",
+          cells: {
+            lfCode: {
+              shape: "code",
+              value: JSON.stringify(SETTINGS.clarity)
+            }
+          },
+          id: "clarity",
+          value: "Clarity"
+        },
+        {
+          description: "Sharpens edges using a classic unsharp mask pipeline.",
+          cells: {
+            lfCode: {
+              shape: "code",
+              value: JSON.stringify(SETTINGS.unsharpMask)
+            }
+          },
+          id: "unsharp_mask",
+          value: "Unsharp Mask"
+        },
+        {
+          description: "Adjusts the contrast.",
+          cells: {
+            lfCode: {
+              shape: "code",
+              value: JSON.stringify(SETTINGS.contrast)
+            }
+          },
+          id: "contrast",
+          value: "Contrast"
+        },
+        {
+          description: "Reduces the saturation.",
+          cells: {
+            lfCode: {
+              shape: "code",
+              value: JSON.stringify(SETTINGS.desaturate)
+            }
+          },
+          id: "desaturate",
+          value: "Desaturate"
+        },
+        {
+          description: "Resize the image by fitting one edge to a target size while preserving aspect ratio.",
+          cells: {
+            lfCode: {
+              shape: "code",
+              value: JSON.stringify(SETTINGS.resizeEdge)
+            }
+          },
+          id: "resizeEdge",
+          value: "Resize (by edge)"
+        },
+        {
+          description: "Resize the image to explicit width/height with optional crop or padding.",
+          cells: {
+            lfCode: {
+              shape: "code",
+              value: JSON.stringify(SETTINGS.resizeFree)
+            }
+          },
+          id: "resizeFree",
+          value: "Resize (free)"
+        },
+        {
+          description: "Adjusts the saturation.",
+          cells: {
+            lfCode: {
+              shape: "code",
+              value: JSON.stringify(SETTINGS.saturation)
+            }
+          },
+          id: "saturation",
+          value: "Saturation"
+        }
+      ]
+    },
+    //#endregion
+    //#region Creative Effects
+    {
+      description: "Artistic filters, such as vignette effect and gaussian blur.",
+      id: "creative_effects",
+      icon: "palette",
+      value: "Creative Effects",
+      children: [
+        {
+          cells: {
+            lfCode: {
+              shape: "code",
+              value: JSON.stringify(SETTINGS.blend)
+            }
+          },
+          description: "Blends a color layer onto the image.",
+          id: "blend",
+          value: "Blend"
+        },
+        {
+          description: "Applies a bloom effect.",
+          cells: {
+            lfCode: {
+              shape: "code",
+              value: JSON.stringify(SETTINGS.bloom)
+            }
+          },
+          id: "bloom",
+          value: "Bloom"
+        },
+        {
+          description: "Applies a film grain effect.",
+          cells: {
+            lfCode: {
+              shape: "code",
+              value: JSON.stringify(SETTINGS.filmGrain)
+            }
+          },
+          id: "film_grain",
+          value: "Film grain"
+        },
+        {
+          description: "Blurs the image.",
+          cells: {
+            lfCode: {
+              shape: "code",
+              value: JSON.stringify(SETTINGS.gaussianBlur)
+            }
+          },
+          id: "gaussian_blur",
+          value: "Gaussian blur"
+        },
+        {
+          description: "Draws a line.",
+          cells: {
+            lfCode: {
+              shape: "code",
+              value: JSON.stringify(SETTINGS.line)
+            }
+          },
+          id: "line",
+          value: "Line"
+        },
+        {
+          cells: {
+            lfCode: {
+              shape: "code",
+              value: JSON.stringify(SETTINGS.sepia)
+            }
+          },
+          description: "Applies a sepia effect to the image.",
+          id: "sepia",
+          value: "Sepia"
+        },
+        {
+          cells: {
+            lfCode: {
+              shape: "code",
+              value: JSON.stringify(SETTINGS.splitTone)
+            }
+          },
+          description: "Applies a split tone effect to the image.",
+          id: "split_tone",
+          value: "Split tone"
+        },
+        {
+          cells: {
+            lfCode: {
+              shape: "code",
+              value: JSON.stringify(SETTINGS.tiltShift)
+            }
+          },
+          description: "Applies a tilt-shift effect to the image.",
+          id: "tilt_shift",
+          value: "Tilt-shift"
+        },
+        {
+          cells: {
+            lfCode: {
+              shape: "code",
+              value: JSON.stringify(SETTINGS.vibrance)
+            }
+          },
+          description: "Applies a vibrance effect to the image.",
+          id: "vibrance",
+          value: "Vibrance"
+        },
+        {
+          cells: {
+            lfCode: {
+              shape: "code",
+              value: JSON.stringify(SETTINGS.vignette)
+            }
+          },
+          description: "Applies a vignetting effect to the image.",
+          id: "vignette",
+          value: "Vignette"
+        }
+      ]
+    }
+    //#endregion
+  ]
+};
 const syncNavigationDirectoryControl = async (state, directoryValue) => {
   const { imageviewer } = state.elements;
   const { navigation } = await imageviewer.getComponents();
@@ -9792,6 +9858,137 @@ class LFManager {
   }
 }
 _LFManager_APIS = /* @__PURE__ */ new WeakMap(), _LFManager_AUTOMATIC_BACKUP = /* @__PURE__ */ new WeakMap(), _LFManager_BACKUP_RETENTION = /* @__PURE__ */ new WeakMap(), _LFManager_CACHED_DATASETS = /* @__PURE__ */ new WeakMap(), _LFManager_DEBUG = /* @__PURE__ */ new WeakMap(), _LFManager_DEBUG_ARTICLE = /* @__PURE__ */ new WeakMap(), _LFManager_DEBUG_DATASET = /* @__PURE__ */ new WeakMap(), _LFManager_INITIALIZED = /* @__PURE__ */ new WeakMap(), _LFManager_LATEST_RELEASE = /* @__PURE__ */ new WeakMap(), _LFManager_MANAGERS = /* @__PURE__ */ new WeakMap(), _LFManager_SYSTEM_TIMEOUT = /* @__PURE__ */ new WeakMap();
+const protectDOMWidgetWidth = (widget) => {
+  try {
+    const descriptor = Object.getOwnPropertyDescriptor(widget, "width");
+    if (descriptor && !descriptor.configurable) {
+      return widget;
+    }
+    Object.defineProperty(widget, "width", {
+      configurable: true,
+      enumerable: (descriptor == null ? void 0 : descriptor.enumerable) ?? false,
+      get: () => void 0,
+      set: () => void 0
+    });
+  } catch {
+  }
+  return widget;
+};
+const INLINE_IMAGE_DATA_URL = /^data:image\/[^,]*;base64,/i;
+const isInlineImageDataUrl = (value) => INLINE_IMAGE_DATA_URL.test(value);
+const isPlainObject = (value) => {
+  const prototype = Object.getPrototypeOf(value);
+  return prototype === Object.prototype || prototype === null;
+};
+const sanitizeSerializedValue = (value) => {
+  const seen = /* @__PURE__ */ new WeakMap();
+  const clone = (current) => {
+    if (typeof current === "string") {
+      return isInlineImageDataUrl(current) ? "" : current;
+    }
+    if (current === null || typeof current !== "object") {
+      return current;
+    }
+    const existing = seen.get(current);
+    if (existing !== void 0) {
+      return existing;
+    }
+    if (!Array.isArray(current) && !isPlainObject(current)) {
+      return current;
+    }
+    const copy = Array.isArray(current) ? new Array(current.length) : Object.create(Object.getPrototypeOf(current));
+    seen.set(current, copy);
+    for (const key of Object.keys(current)) {
+      Object.defineProperty(copy, key, {
+        configurable: true,
+        enumerable: true,
+        value: clone(current[key]),
+        writable: true
+      });
+    }
+    return copy;
+  };
+  try {
+    return clone(value);
+  } catch {
+    return value;
+  }
+};
+const SERIALIZATION_STATES = /* @__PURE__ */ new WeakMap();
+const sanitizeSerializedResult = (value) => {
+  if (value !== null && (typeof value === "object" || typeof value === "function")) {
+    try {
+      if (typeof value.then === "function") {
+        return Promise.resolve(value).then((resolved) => sanitizeSerializedValue(resolved));
+      }
+    } catch {
+      return value;
+    }
+  }
+  return sanitizeSerializedValue(value);
+};
+const rewriteWidgetSerialization = (node, data, widget) => {
+  var _a;
+  try {
+    if (!data || typeof data !== "object")
+      return;
+    const serialized = data;
+    const index = ((_a = node.widgets) == null ? void 0 : _a.indexOf(widget)) ?? -1;
+    if (index < 0)
+      return;
+    if (Array.isArray(serialized.widgets_values) && Object.prototype.hasOwnProperty.call(serialized.widgets_values, index)) {
+      serialized.widgets_values[index] = sanitizeSerializedValue(serialized.widgets_values[index]);
+    }
+    const name = widget.name;
+    const named = serialized.widgets_values_named;
+    if (name && named && typeof named === "object" && Object.prototype.hasOwnProperty.call(named, name)) {
+      named[name] = sanitizeSerializedValue(named[name]);
+    }
+  } catch {
+  }
+};
+const hookDOMWidgetSerialization = (node, widget) => {
+  try {
+    const originalSerializeValue = widget.serializeValue;
+    widget.serializeValue = function(...args) {
+      const value = originalSerializeValue ? originalSerializeValue.apply(this, args) : this.value;
+      return sanitizeSerializedResult(value);
+    };
+    const state = SERIALIZATION_STATES.get(node);
+    if (state) {
+      state.widgets.add(widget);
+      if (node.onSerialize !== state.wrapper) {
+        const previous2 = node.onSerialize;
+        const onSerialize2 = function(data, ...args) {
+          if (previous2) {
+            previous2.apply(this, [data, ...args]);
+          }
+          for (const customWidget of state.widgets) {
+            rewriteWidgetSerialization(node, data, customWidget);
+          }
+        };
+        state.wrapper = onSerialize2;
+        node.onSerialize = state.wrapper;
+      }
+      return widget;
+    }
+    const previous = node.onSerialize;
+    const nextState = { widgets: /* @__PURE__ */ new Set([widget]) };
+    const onSerialize = function(data, ...args) {
+      if (previous) {
+        previous.apply(this, [data, ...args]);
+      }
+      for (const customWidget of nextState.widgets) {
+        rewriteWidgetSerialization(node, data, customWidget);
+      }
+    };
+    SERIALIZATION_STATES.set(node, nextState);
+    nextState.wrapper = onSerialize;
+    node.onSerialize = nextState.wrapper;
+  } catch {
+  }
+  return widget;
+};
 var LFFreeFlags;
 (function(LFFreeFlags2) {
   LFFreeFlags2["PatchedFree"] = "_lf_patched_freeMemory";
@@ -9938,10 +10135,12 @@ const createDOMWidget = (type, element, node, options) => {
         }
       }
     }
-    return node.addDOMWidget(name, type, element, options);
+    const widget = hookDOMWidgetSerialization(node, node.addDOMWidget(name, type, element, options));
+    return protectDOMWidgetWidth(widget);
   } catch (error) {
     getLfManager().log(`Couldn't find a widget of type ${type}`, { error, node }, LogSeverity.Warning);
-    return node.addDOMWidget(DEFAULT_WIDGET_NAME, type, element, options);
+    const widget = hookDOMWidgetSerialization(node, node.addDOMWidget(DEFAULT_WIDGET_NAME, type, element, options));
+    return protectDOMWidgetWidth(widget);
   }
 };
 const debounce = (func, delay) => {
