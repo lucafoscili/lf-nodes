@@ -2182,7 +2182,7 @@ const _collectInputs = async (store) => {
       }
       case "lf-select": {
         const selected = await cell.getValue();
-        inputs[id] = (selected == null ? void 0 : selected.value) ?? (selected == null ? void 0 : selected.id) ?? null;
+        inputs[id] = (selected == null ? void 0 : selected.workflowValue) ?? (selected == null ? void 0 : selected.value) ?? (selected == null ? void 0 : selected.id) ?? null;
         break;
       }
       case "lf-toggle": {

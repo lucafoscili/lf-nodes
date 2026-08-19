@@ -33,8 +33,12 @@ const _collectInputs = async (store: WorkflowStore): Promise<Record<string, unkn
         break;
       }
       case 'lf-select': {
-        const selected = await (cell as HTMLLfSelectElement).getValue();
-        inputs[id] = selected?.value ?? selected?.id ?? null;
+        const selected = (await (cell as HTMLLfSelectElement).getValue()) as {
+          id?: string;
+          value?: string | number;
+          workflowValue?: string | number;
+        } | null;
+        inputs[id] = selected?.workflowValue ?? selected?.value ?? selected?.id ?? null;
         break;
       }
       case 'lf-toggle': {

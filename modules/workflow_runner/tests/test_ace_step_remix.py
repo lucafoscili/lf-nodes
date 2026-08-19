@@ -146,6 +146,16 @@ def test_disabled_by_default_and_workflow_is_packaged(monkeypatch):
         ("reference", "youtube_url", "textfield"),
         ("remix", "mode", "select"),
     ]
+    assert WORKFLOW.inputs[1].props == {
+        "lfDataset": {
+            "nodes": [
+                {"id": "cover", "value": "Cover", "workflowValue": "cover"},
+                {"id": "repaint", "value": "Repaint", "workflowValue": "repaint"},
+            ],
+        },
+        "lfTextfieldProps": {"lfLabel": "Mode"},
+        "lfValue": "cover",
+    }
     prompt = WORKFLOW.load_prompt()
     WORKFLOW.configure_prompt(prompt, {
         "youtube_url": "https://youtu.be/ETPjddfrk_w",

@@ -34,10 +34,16 @@ def test_declaration_exposes_only_url_and_media_profile() -> None:
         ("video_id", "video_id", "code"),
         ("manifest", "receipt", "code"),
     ]
-    assert WORKFLOW.inputs[1].props["lfOptions"] == [
-        {"label": "Audio (M4A)", "value": "audio_m4a"},
-        {"label": "Video (MP4)", "value": "video_mp4"},
-    ]
+    assert WORKFLOW.inputs[1].props == {
+        "lfDataset": {
+            "nodes": [
+                {"id": "audio_m4a", "value": "Audio (M4A)", "workflowValue": "audio_m4a"},
+                {"id": "video_mp4", "value": "Video (MP4)", "workflowValue": "video_mp4"},
+            ],
+        },
+        "lfTextfieldProps": {"lfLabel": "Media profile"},
+        "lfValue": "audio_m4a",
+    }
     assert WORKFLOW.outputs[2].props["lfLanguage"] == "json"
 
 

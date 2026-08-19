@@ -70,11 +70,13 @@ input_media_profile = WorkflowCell(
     shape="select",
     description="Audio is the light reference path; video preserves the source picture when a later graph needs it.",
     props={
-        "lfLabel": "Media profile",
-        "lfOptions": [
-            {"label": "Audio (M4A)", "value": "audio_m4a"},
-            {"label": "Video (MP4)", "value": "video_mp4"},
-        ],
+        "lfDataset": {
+            "nodes": [
+                {"id": "audio_m4a", "value": "Audio (M4A)", "workflowValue": "audio_m4a"},
+                {"id": "video_mp4", "value": "Video (MP4)", "workflowValue": "video_mp4"},
+            ],
+        },
+        "lfTextfieldProps": {"lfLabel": "Media profile"},
         "lfValue": "audio_m4a",
     },
 )

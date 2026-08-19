@@ -29,7 +29,11 @@ vi.mock('../utils/debug', () => ({
   debugLog: vi.fn(),
 }));
 
-const createStore = (selected: { id: string; value?: string | number }) => {
+const createStore = (selected: {
+  id: string;
+  value?: string | number;
+  workflowValue?: string | number;
+}) => {
   const select = document.createElement('lf-select') as HTMLLfSelectElement;
   select.id = 'sampler';
   select.getValue = vi.fn(async () => selected);
@@ -62,6 +66,7 @@ describe('workflowDispatcher select inputs', () => {
   });
 
   it.each([
+    ['uses an explicit workflow value behind a friendly label', { id: 'cover', value: 'Cover', workflowValue: 'cover' }, 'cover'],
     ['uses the selected semantic value', { id: 'sampler-euler', value: 'euler' }, 'euler'],
     ['preserves a numeric zero value', { id: 'first-option', value: 0 }, 0],
     ['falls back to the selected node id', { id: 'sampler-euler' }, 'sampler-euler'],

@@ -119,15 +119,6 @@ _youtube_reference = WorkflowCell(
         },
     },
 )
-_mode = WorkflowCell(
-    node_id="remix", id="mode", shape="select", value="Mode",
-    props={"lfLabel": "Mode", "lfOptions": [
-        {"label": "Cover", "value": "cover"},
-        {"label": "Repaint", "value": "repaint"},
-    ], "lfValue": "cover"},
-)
-
-
 def _text_cell(cell_id: str, label: str, helper: str, required: bool = False) -> WorkflowCell:
     return WorkflowCell(
         node_id="remix", id=cell_id, shape="textfield", required=required,
@@ -146,6 +137,25 @@ def _number_cell(cell_id: str, label: str, default, minimum, maximum, step, help
     return WorkflowCell(node_id="remix", id=cell_id, shape="textfield", props=props)
 
 
+def _select_cell(cell_id: str, label: str, options, default: str) -> WorkflowCell:
+    return WorkflowCell(
+        node_id="remix",
+        id=cell_id,
+        shape="select",
+        value=label,
+        props={
+            "lfDataset": {
+                "nodes": [
+                    {"id": value, "value": option_label, "workflowValue": value}
+                    for option_label, value in options
+                ],
+            },
+            "lfTextfieldProps": {"lfLabel": label},
+            "lfValue": default,
+        },
+    )
+
+
 id = "ace_step_remix"
 node = WorkflowNode(
     id=id,
@@ -154,7 +164,7 @@ node = WorkflowNode(
     category="Audio",
     inputs=[
         _youtube_reference,
-        _mode,
+        _select_cell("mode", "Mode", (("Cover", "cover"), ("Repaint", "repaint")), "cover"),
         _text_cell("style_prompt", "Style prompt", "Optional genre, mood, instrumentation, and production direction."),
         _text_cell("lyrics", "Lyrics", "Optional lyrics. The Instrumental toggle overrides this field."),
         WorkflowCell(node_id="remix", id="instrumental", shape="toggle", props={"lfLabel": "Instrumental", "lfValue": False}, required=False),
@@ -171,14 +181,9 @@ node = WorkflowNode(
         _number_cell("seed", "Seed", -1, -1, 0x7FFFFFFFFFFFFFFF, 1),
         _number_cell("inference_steps", "Steps", 8, 1, 200, 1),
         _number_cell("guidance_scale", "Guidance", 7.0, 0.0, 100.0, 0.1),
-        WorkflowCell(node_id="remix", id="infer_method", shape="select", value="Sampler", props={"lfLabel": "Sampler", "lfOptions": [
-            {"label": "ODE", "value": "ode"},
-            {"label": "SDE", "value": "sde"},
-        ], "lfValue": "ode"}),
+        _select_cell("infer_method", "Sampler", (("ODE", "ode"), ("SDE", "sde")), "ode"),
         _number_cell("shift", "Timestep shift", 3.0, 1.0, 5.0, 0.1),
-        WorkflowCell(node_id="remix", id="output_format", shape="select", value="Output format", props={"lfLabel": "Output format", "lfOptions": [
-            {"label": value.upper(), "value": value} for value in _FORMATS
-        ], "lfValue": "mp3"}),
+        _select_cell("output_format", "Output format", tuple((value.upper(), value) for value in _FORMATS), "mp3"),
     ],
     outputs=[
         WorkflowCell(node_id="remix", id="audio", shape="masonry", description="Generated audio."),
