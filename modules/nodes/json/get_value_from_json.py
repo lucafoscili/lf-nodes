@@ -3,6 +3,32 @@ from ...utils.constants import FUNCTION, Input
 from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.logic import normalize_list_to_value, normalize_json_input
 
+
+def _parse_list_index(key):
+    if isinstance(key, int):
+        return key
+
+    if isinstance(key, str):
+        stripped = key.strip()
+        if stripped != "":
+            try:
+                return int(stripped)
+            except ValueError:
+                return None
+
+    return None
+
+
+def _get_list_item(items, item_index):
+    if not isinstance(items, list) or len(items) == 0:
+        return None
+
+    try:
+        return items[item_index]
+    except IndexError:
+        return items[-1]
+
+
 # region LF_GetValueFromJSON
 class LF_GetValueFromJSON:
     @classmethod
@@ -10,15 +36,15 @@ class LF_GetValueFromJSON:
         return {
             "required": {
                 "json_input": (Input.JSON, {
-                    "tooltip": "JSON Object."
+                    "tooltip": "JSON object or list."
                 }),
                 "key": (Input.STRING, {
                     "default": "",
-                    "tooltip": "Key to select."
+                    "tooltip": "Object key to select, or an integer index when the input is a JSON list."
                 }),
                 "index": (Input.INTEGER, {
                     "default": 0,
-                    "tooltip": "When the input is a list of JSON objects, it sets the index of the occurrence from which the value is extracted."
+                    "tooltip": "When the input is a list of JSON objects, selects the occurrence used for object-key lookup."
                 })
             },
             "optional": {
@@ -47,13 +73,25 @@ class LF_GetValueFromJSON:
     def on_exec(self, **kwargs: dict):
         key: str = normalize_list_to_value(kwargs.get("key"))
         index: int = normalize_list_to_value(kwargs.get("index"))
-        json_input: dict = normalize_json_input(kwargs.get("json_input", {}))
+        json_input = normalize_json_input(kwargs.get("json_input", {}))
 
-        if isinstance(json_input, list):
-            length = len(json_input)
-            json_input = json_input[index] if index < length else json_input[length - 1]
+        if isinstance(json_input, dict):
+            value = json_input.get(key, None)
+        elif isinstance(json_input, list):
+            selected_item = _get_list_item(json_input, index)
+            list_key_index = _parse_list_index(key)
 
-        value = json_input.get(key, None)
+            if isinstance(selected_item, dict) and key in selected_item:
+                value = selected_item.get(key, None)
+            elif list_key_index is not None:
+                value = _get_list_item(json_input, list_key_index)
+            else:
+                if isinstance(selected_item, dict):
+                    value = selected_item.get(key, None)
+                else:
+                    value = selected_item if key == "" else None
+        else:
+            value = None
 
         json_output = None
         string_output = None
