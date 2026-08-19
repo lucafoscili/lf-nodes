@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Any, Dict
 
 from ..services.registry import InputValidationError, WorkflowCell, WorkflowNode
+from ...utils.youtube_url import parse_youtube_video_url
 
 
 _MODES = ("cover", "repaint")
@@ -11,11 +12,16 @@ _FORMATS = ("mp3", "wav", "flac")
 _INFER_METHODS = ("ode", "sde")
 
 
-def _required_text(inputs: Dict[str, Any], name: str) -> str:
-    value = inputs.get(name)
-    if not isinstance(value, str) or not value.strip():
-        raise InputValidationError(name)
-    return value.strip()
+def _youtube_url(value: Any) -> str:
+    if not isinstance(value, str):
+        raise InputValidationError("youtube_url")
+    try:
+        _video_id, canonical_url = parse_youtube_video_url(value)
+    except ValueError as error:
+        raise InputValidationError("youtube_url") from error
+    if not canonical_url:
+        raise InputValidationError("youtube_url")
+    return canonical_url
 
 
 def _number(inputs: Dict[str, Any], name: str, default, minimum, maximum, integer=False):
@@ -32,7 +38,7 @@ def _number(inputs: Dict[str, Any], name: str, default, minimum, maximum, intege
 
 
 def _configure(prompt: Dict[str, Any], inputs: Dict[str, Any]) -> None:
-    source_audio = _required_text(inputs, "source_audio")
+    youtube_url = _youtube_url(inputs.get("youtube_url"))
     mode = inputs.get("mode", "cover")
     if mode not in _MODES:
         raise InputValidationError("mode")
@@ -60,6 +66,17 @@ def _configure(prompt: Dict[str, Any], inputs: Dict[str, Any]) -> None:
     if output_format not in _FORMATS:
         raise InputValidationError("output_format")
 
+    reference = prompt.get("reference")
+    if not isinstance(reference, dict) or reference.get("class_type") != "LF_YouTubeReference":
+        raise ValueError("ACE-Step remix workflow is missing its YouTube reference node")
+    reference_inputs = reference.get("inputs")
+    if not isinstance(reference_inputs, dict):
+        raise ValueError("ACE-Step remix workflow has invalid YouTube reference inputs")
+    reference_inputs.update({
+        "youtube_url": youtube_url,
+        "media_kind": "audio_m4a",
+    })
+
     remix = prompt.get("remix")
     if not isinstance(remix, dict) or remix.get("class_type") != "LF_ACEStepRemix":
         raise ValueError("ACE-Step remix workflow is missing its remix node")
@@ -68,7 +85,7 @@ def _configure(prompt: Dict[str, Any], inputs: Dict[str, Any]) -> None:
         raise ValueError("ACE-Step remix workflow has invalid remix inputs")
 
     remix_inputs.update({
-        "source_audio": source_audio,
+        "source_audio": ["reference", 0],
         "mode": mode,
         "style_prompt": style_prompt,
         "lyrics": lyrics,
@@ -86,13 +103,20 @@ def _configure(prompt: Dict[str, Any], inputs: Dict[str, Any]) -> None:
     })
 
 
-_source_audio = WorkflowCell(
-    node_id="remix",
-    id="source_audio",
-    shape="upload",
+_youtube_reference = WorkflowCell(
+    node_id="reference",
+    id="youtube_url",
+    value="YouTube URL",
+    shape="textfield",
+    description="A YouTube watch or short-link URL. The audio is downloaded once into the verified Comfy input cache.",
     props={
-        "lfLabel": "Source audio",
-        "lfHtmlAttributes": {"accept": "audio/*", "multiple": False},
+        "lfLabel": "YouTube URL",
+        "lfHtmlAttributes": {
+            "autocomplete": "url",
+            "name": "youtube_url",
+            "placeholder": "https://youtu.be/VIDEO_ID",
+            "type": "url",
+        },
     },
 )
 _mode = WorkflowCell(
@@ -111,30 +135,37 @@ def _text_cell(cell_id: str, label: str, helper: str, required: bool = False) ->
     )
 
 
-def _number_cell(cell_id: str, label: str, default, minimum, maximum, step) -> WorkflowCell:
-    return WorkflowCell(
-        node_id="remix", id=cell_id, shape="textfield", props={
-            "lfLabel": label,
-            "lfHtmlAttributes": {"name": cell_id, "type": "number", "min": minimum, "max": maximum, "step": step},
-            "lfValue": str(default),
-        },
-    )
+def _number_cell(cell_id: str, label: str, default, minimum, maximum, step, helper: str = "") -> WorkflowCell:
+    props = {
+        "lfLabel": label,
+        "lfHtmlAttributes": {"name": cell_id, "type": "number", "min": minimum, "max": maximum, "step": step},
+        "lfValue": str(default),
+    }
+    if helper:
+        props["lfHelper"] = {"showWhenFocused": False, "value": helper}
+    return WorkflowCell(node_id="remix", id=cell_id, shape="textfield", props=props)
 
 
 id = "ace_step_remix"
 node = WorkflowNode(
     id=id,
-    value="ACE-Step Audio Remix",
-    description="Cover or repaint a ComfyUI audio upload through a configured ACE-Step API.",
+    value="YouTube ACE-Step Remix",
+    description="Download and cache YouTube audio, then cover or repaint it through a configured ACE-Step API.",
     category="Audio",
     inputs=[
-        _source_audio,
+        _youtube_reference,
         _mode,
         _text_cell("style_prompt", "Style prompt", "Optional genre, mood, instrumentation, and production direction."),
         _text_cell("lyrics", "Lyrics", "Optional lyrics. The Instrumental toggle overrides this field."),
         WorkflowCell(node_id="remix", id="instrumental", shape="toggle", props={"lfLabel": "Instrumental", "lfValue": False}, required=False),
-        _number_cell("audio_cover_strength", "Structure strength", 1.0, 0.0, 1.0, 0.01),
-        _number_cell("cover_noise_strength", "Melody retention", 0.2, 0.0, 1.0, 0.01),
+        _number_cell(
+            "audio_cover_strength", "Structure adherence", 1.0, 0.0, 1.0, 0.01,
+            "Higher values follow the source composition and arrangement more closely.",
+        ),
+        _number_cell(
+            "cover_noise_strength", "Source fidelity", 0.2, 0.0, 1.0, 0.01,
+            "Higher values begin closer to the source audio, preserving voice and timbre at the cost of remix freedom.",
+        ),
         _number_cell("repaint_start", "Repaint start (seconds)", 0.0, 0.0, 86400.0, 0.1),
         _number_cell("repaint_end", "Repaint end (seconds)", -1.0, -1.0, 86400.0, 0.1),
         _number_cell("seed", "Seed", -1, -1, 0x7FFFFFFFFFFFFFFF, 1),

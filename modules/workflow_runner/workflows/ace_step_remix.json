@@ -1,7 +1,15 @@
 {
+  "reference": {
+    "inputs": {
+      "youtube_url": "",
+      "media_kind": "audio_m4a"
+    },
+    "class_type": "LF_YouTubeReference",
+    "_meta": {"title": "YouTube audio reference (cached input)"}
+  },
   "remix": {
     "inputs": {
-      "source_audio": "",
+      "source_audio": ["reference", 0],
       "mode": "cover",
       "style_prompt": "",
       "lyrics": "",

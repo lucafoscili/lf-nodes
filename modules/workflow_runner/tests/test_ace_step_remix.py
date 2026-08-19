@@ -25,6 +25,7 @@ sys.modules.setdefault("modules.utils.helpers", helpers_module)
 sys.modules.setdefault("modules.utils.helpers.conversion", conversion_module)
 
 from modules.nodes.io import ace_step_remix as remix
+from modules.workflow_runner.services.registry import InputValidationError
 from modules.workflow_runner.workflows.ace_step_remix import WORKFLOW
 from modules.workflow_runner.workflows import _WORKFLOW_MODULES
 
@@ -141,10 +142,23 @@ def test_disabled_by_default_and_workflow_is_packaged(monkeypatch):
     with pytest.raises(RuntimeError, match="disabled"):
         remix.LF_ACEStepRemix().on_exec(**_defaults("missing.wav"))
     assert "ace_step_remix" in _WORKFLOW_MODULES
+    assert [(cell.node_id, cell.id, cell.shape) for cell in WORKFLOW.inputs[:2]] == [
+        ("reference", "youtube_url", "textfield"),
+        ("remix", "mode", "select"),
+    ]
     prompt = WORKFLOW.load_prompt()
-    WORKFLOW.configure_prompt(prompt, {"source_audio": "reference.m4a [input]", "mode": "repaint", "repaint_start": 1, "repaint_end": 8})
+    WORKFLOW.configure_prompt(prompt, {
+        "youtube_url": "https://youtu.be/ETPjddfrk_w",
+        "mode": "repaint",
+        "repaint_start": 1,
+        "repaint_end": 8,
+    })
+    assert prompt["reference"]["inputs"] == {
+        "youtube_url": "https://www.youtube.com/watch?v=ETPjddfrk_w",
+        "media_kind": "audio_m4a",
+    }
     assert prompt["remix"]["inputs"]["mode"] == "repaint"
-    assert prompt["remix"]["inputs"]["source_audio"] == "reference.m4a [input]"
+    assert prompt["remix"]["inputs"]["source_audio"] == ["reference", 0]
     assert prompt["remix"]["inputs"]["infer_method"] == "ode"
     assert prompt["remix"]["inputs"]["shift"] == 3.0
 
@@ -161,6 +175,22 @@ def test_disabled_by_default_and_workflow_is_packaged(monkeypatch):
         "ui_widget": "",
         "json_input": ["remix", 1],
     }
+
+
+@pytest.mark.parametrize(
+    "youtube_url",
+    [
+        "",
+        "https://youtu.be/ETPjddfrk_w?t=30",
+        "https://www.youtube.com/shorts/ETPjddfrk_w",
+        42,
+    ],
+)
+def test_packaged_workflow_rejects_invalid_youtube_sources(youtube_url):
+    with pytest.raises(InputValidationError) as exc:
+        WORKFLOW.configure_prompt(WORKFLOW.load_prompt(), {"youtube_url": youtube_url})
+
+    assert exc.value.input_name == "youtube_url"
 
 
 def test_timeout_is_configurable_and_bounded(monkeypatch):

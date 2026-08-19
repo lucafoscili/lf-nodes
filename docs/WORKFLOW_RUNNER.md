@@ -280,7 +280,8 @@ tests/
 
 **Optional Media Integrations:**
 
-- `LF_ACESTEP_ENABLED`: Enable the packaged ACE-Step Audio Remix workflow. Default: `false`
+- `LF_YOUTUBE_INGEST_ENABLED`: Enable verified, cache-aware YouTube reference intake. Default: `false`
+- `LF_ACESTEP_ENABLED`: Enable the packaged YouTube ACE-Step Remix workflow. The workflow composes YouTube intake with ACE-Step and requires both integrations to be enabled. Default: `false`
 - `LF_ACESTEP_API_URL`: Base URL of an ACE-Step API server. Default: `http://127.0.0.1:8001`
 - `LF_ACESTEP_API_TOKEN`: Optional bearer token for the ACE-Step API. Default: empty
 - `LF_ACESTEP_TIMEOUT_SECONDS`: Maximum wait for one ACE-Step job, from `1` to `86400` seconds. Default: `3600`
