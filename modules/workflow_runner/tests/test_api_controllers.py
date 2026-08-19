@@ -392,6 +392,8 @@ class TestApiControllers:
         mock_response = MagicMock()
         mock_response.status = 404
         mock_session.get.return_value.__aenter__.return_value = mock_response
+        mock_session.__aenter__.return_value = mock_session
+        mock_session.__aexit__.return_value = None
         
         with patch.object(api_controllers, 'get_job_status', side_effect=mock_get_job_status), \
              patch('aiohttp.ClientSession', return_value=mock_session):
@@ -399,7 +401,7 @@ class TestApiControllers:
 
         assert response.status == 404
         response_data = json.loads(response.text)
-        assert response_data["detail"] == "Headless run not found"
+        assert response_data["detail"] == "run_not_found"
 
     @pytest.mark.asyncio
     async def test_get_workflow_status_controller_missing_run_id(self, api_controllers):
@@ -549,6 +551,8 @@ class TestApiControllers:
         # Mock aiohttp session to raise exception
         mock_session = MagicMock()
         mock_session.get.side_effect = Exception("Connection failed")
+        mock_session.__aenter__.return_value = mock_session
+        mock_session.__aexit__.return_value = None
 
         with patch.object(api_controllers, 'get_job_status', side_effect=mock_get_job_status), \
              patch('aiohttp.ClientSession', return_value=mock_session):

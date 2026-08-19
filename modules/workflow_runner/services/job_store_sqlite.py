@@ -43,19 +43,11 @@ class JobRecord:
 
 # region Connection
 def _build_event(rec: JobRecord) -> dict:
-    # SSE resume-friendly id: "<run_id>:<seq>"
-    return {
-        "id": f"{rec.run_id}:{rec.seq}",
-        "run_id": rec.run_id,
-        "workflow_id": getattr(rec, "workflow_id", None),
-        "status": rec.status,
-        "created_at": rec.created_at,
-        "updated_at": rec.updated_at,
-        "error": rec.error,
-        "result": rec.result if rec.status in ("succeeded", "failed", "cancelled") else None,
-        "seq": rec.seq,
-        "owner_id": rec.owner_id,
-    }
+    # Preserve the historical SSE contract.  Bounded summary projection is an
+    # explicit HTTP/SSE caller choice, not a storage-layer default.
+    from ..utils.serialize import serialize_job
+
+    return serialize_job(rec, include_result_for_terminal=True)
 
 async def _ensure_conn():
     global _conn

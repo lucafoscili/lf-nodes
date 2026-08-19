@@ -19,11 +19,12 @@ from ..services import job_store
 from ..services.run_service import run_workflow
 from ..services.workflow_service import list_workflows as svc_list_workflows, get_workflow_content
 from ..config import get_settings
-
 from ._helpers import (
+    build_output_preview,
     parse_json_body,
     get_owner_from_request,
     serialize_job,
+    serialize_run_summary,
     write_sse_event,
     create_and_set_session_cookie,
     extract_base64_data_from_result,
@@ -45,7 +46,23 @@ async def _update_job_status_from_history(run_id: str, entry: dict):
         result = {"http_status": 200, "body": _make_run_payload(history=entry)}
         await job_store.set_job_status(run_id, job_store.JobStatus.SUCCEEDED, result=result)
 
-async def _send_initial_snapshot(resp: web.Response, subscriber_owner: str | None = None, last_event: tuple[str, int] | None = None) -> None:
+def _summary_requested(request: web.Request) -> bool:
+    """Return whether a caller explicitly opted into bounded run cards."""
+
+    return str(request.query.get("summary", "")).lower() in {
+        "1",
+        "true",
+        "yes",
+    }
+
+
+async def _send_initial_snapshot(
+    resp: web.Response,
+    subscriber_owner: str | None = None,
+    last_event: tuple[str, int] | None = None,
+    *,
+    summary_only: bool = False,
+) -> None:
         """
         Send an initial snapshot of active (pending or running) jobs to the SSE client.
 
@@ -79,9 +96,14 @@ async def _send_initial_snapshot(resp: web.Response, subscriber_owner: str | Non
                         except Exception:
                             pass
 
-                    # Use centralized serialization and SSE-writing helper to avoid duplication
+                    # Preserve the legacy full-result event by default.  The
+                    # bounded card shape is an explicit SSE opt-in.
                     try:
-                        event = serialize_job(job)
+                        event = (
+                            serialize_run_summary(job)
+                            if summary_only
+                            else serialize_job(job, include_result_for_terminal=True)
+                        )
                         LOG.debug(f"[_send_initial_snapshot] Sending event for run {event.get('run_id')}, status={event.get('status')}")
                         ok = await write_sse_event(resp, event)
                         if not ok:
@@ -124,23 +146,17 @@ async def start_workflow_controller(request: web.Request) -> web.Response:
     if err:
         return err
 
-    user_agent = request.headers.get('User-Agent', '').lower()
-    origin = request.headers.get('Origin')
-    referer = request.headers.get('Referer', '')
-    is_headless = (
-        'curl' in user_agent or
-        'python' in user_agent or
-        'wget' in user_agent or
-        (not origin and not referer) or
-        'postman' in user_agent.lower()
-    )
-
     try:
-        result = await run_workflow(payload, owner_id=owner_id, is_api_call=is_headless)
+        # Browser and headless callers share the same supervised lifecycle.
+        result = await run_workflow(payload, owner_id=owner_id)
         return web.json_response(result, status=202)
     except WorkflowPreparationError as exc:
         return web.json_response(exc.response_body, status=exc.status)
     except Exception as exc:
+        detail = getattr(exc, "detail", None)
+        if isinstance(detail, str):
+            status = 409 if detail.endswith("_conflict") else 400
+            return web.json_response({"detail": detail, "error": str(exc)}, status=status)
         return web.json_response({"detail": "service_error", "error": str(exc)}, status=500)
 # endregion
 
@@ -191,11 +207,16 @@ async def stream_runs_controller(request: web.Request) -> web.Response:
     Each connected client receives events of shape matching the job status
     payloads produced by `job_store`. The client should open an EventSource to this endpoint.
     """
+    subscriber_owner = None
+    summary_only = _summary_requested(request)
     # Optional auth for SSE — re-use existing auth flow if enabled.
     if _ENABLE_GOOGLE_OAUTH:
         auth_resp = await _require_auth(request)
         if isinstance(auth_resp, web.Response):
             return auth_resp
+        subscriber_owner = await get_owner_from_request(request)
+        if not isinstance(subscriber_owner, str) or not subscriber_owner:
+            return web.json_response({"detail": "owner_not_found"}, status=403)
 
     resp = web.StreamResponse(status=200, reason='OK')
     resp.content_type = 'text/event-stream'
@@ -215,16 +236,6 @@ async def stream_runs_controller(request: web.Request) -> web.Response:
     await resp.prepare(request)
 
     q = job_store.subscribe_events()
-
-    # Determine subscriber owner if auth is enabled so snapshot can be filtered
-    subscriber_owner = None
-    if _ENABLE_GOOGLE_OAUTH:
-        try:
-            # reuse centralized helper; it's defensive and avoids importing auth_service here
-            subscriber_owner = await get_owner_from_request(request)
-            LOG.debug(f"[stream_runs_controller] Derived subscriber_owner: {subscriber_owner}")
-        except Exception:
-            subscriber_owner = None
 
     try:
         await resp.write(b": connected\n\n")
@@ -248,7 +259,12 @@ async def stream_runs_controller(request: web.Request) -> web.Response:
             # keep SSE path robust; if background helper is unavailable just continue
             LOG.debug("Could not fetch/send initial queue status snapshot")
 
-        await _send_initial_snapshot(resp, subscriber_owner, last_event)
+        await _send_initial_snapshot(
+            resp,
+            subscriber_owner,
+            last_event,
+            summary_only=summary_only,
+        )
 
         while True:
             try:
@@ -259,6 +275,9 @@ async def stream_runs_controller(request: web.Request) -> web.Response:
             if event is None:
                 # sentinel to close
                 break
+
+            if subscriber_owner is not None and event.get("owner_id") != subscriber_owner:
+                continue
 
             # If the client supplied Last-Event-ID, avoid resending events that
             # are for the same run and have seq <= last_seq. This is a best-effort
@@ -277,6 +296,8 @@ async def stream_runs_controller(request: web.Request) -> web.Response:
                     pass
 
             try:
+                if summary_only and event.get("run_id") is not None:
+                    event = serialize_run_summary(event)
                 ok = await write_sse_event(resp, event)
                 if not ok:
                     break
@@ -314,7 +335,11 @@ async def list_runs_controller(request: web.Request) -> web.Response:
     """GET /workflow-runner/runs?status=pending,running&owner=me&limit=100
 
     Returns a JSON payload:
-      { runs: [ { run_id, status, seq, owner_id?, created_at, updated_at, result?, error? }, ... ] }
+      { runs: [ { run_id, workflow_id, status, seq, owner_id?,
+                  created_at, updated_at, result?, error? }, ... ] }
+
+    The historical response remains the default.  Callers may pass
+    ``summary=1`` for the bounded history-card contract.
     """
     
     LOG.debug(f"[list_runs_controller] Called with query: {dict(request.query)}")
@@ -336,6 +361,7 @@ async def list_runs_controller(request: web.Request) -> web.Response:
         limit = int(limit_q) if limit_q else 100
     except Exception:
         limit = 100
+    limit = max(1, min(limit, 200))
 
     statuses = None
     if status_q:
@@ -344,19 +370,32 @@ async def list_runs_controller(request: web.Request) -> web.Response:
         statuses = [s.strip() for s in status_q.split(",") if s.strip()]
 
     owner_id = None
-    if owner_q == "me" and _ENABLE_GOOGLE_OAUTH:
-        try:
-            subj = request.get('google_oauth_email', None)
-            LOG.debug(f"[list_runs_controller] Extracted email for owner filtering: {subj}")
-            from ..services.auth_service import derive_owner_id
-            owner_id = derive_owner_id(subj or "")
-            LOG.debug(f"[list_runs_controller] Derived owner_id for filtering: {owner_id}")
-        except Exception:
-            owner_id = None
+    if _ENABLE_GOOGLE_OAUTH:
+        owner_id = await get_owner_from_request(request)
+        if not isinstance(owner_id, str) or not owner_id:
+            return web.json_response({"detail": "owner_not_found"}, status=403)
     elif owner_q and owner_q != "me":
         owner_id = owner_q
 
+    summary_only = _summary_requested(request)
     runs_out = []
+
+    def append_run(job) -> None:
+        if summary_only:
+            runs_out.append(serialize_run_summary(job))
+            return
+        serialized = serialize_job(job, include_result_for_terminal=True)
+        runs_out.append({
+            "run_id": serialized.get("run_id"),
+            "workflow_id": serialized.get("workflow_id"),
+            "status": serialized.get("status"),
+            "seq": serialized.get("seq"),
+            "owner_id": serialized.get("owner_id"),
+            "created_at": serialized.get("created_at"),
+            "updated_at": serialized.get("updated_at"),
+            "result": serialized.get("result"),
+            "error": serialized.get("error"),
+        })
     # If multiple statuses requested, call list_jobs once per status and merge (bounded)
     if statuses:
         seen = set()
@@ -367,19 +406,7 @@ async def list_runs_controller(request: web.Request) -> web.Response:
                     continue
                 seen.add(k)
 
-                # Use centralized serializer to maintain a single representation
-                s = serialize_job(job, include_result_for_terminal=True)
-                runs_out.append({
-                    "run_id": s.get("run_id"),
-                    "workflow_id": s.get("workflow_id"),
-                    "status": s.get("status"),
-                    "seq": s.get("seq"),
-                    "owner_id": s.get("owner_id"),
-                    "created_at": s.get("created_at"),
-                    "updated_at": s.get("updated_at"),
-                    "result": s.get("result"),
-                    "error": s.get("error"),
-                })
+                append_run(job)
                 if len(runs_out) >= limit:
                     break
             if len(runs_out) >= limit:
@@ -387,18 +414,7 @@ async def list_runs_controller(request: web.Request) -> web.Response:
     else:
         recs = await job_store.list_jobs(owner_id=owner_id, status=None)
         for k, job in recs.items():
-            s = serialize_job(job, include_result_for_terminal=True)
-            runs_out.append({
-                "run_id": s.get("run_id"),
-                "workflow_id": s.get("workflow_id"),
-                "status": s.get("status"),
-                "seq": s.get("seq"),
-                "owner_id": s.get("owner_id"),
-                "created_at": s.get("created_at"),
-                "updated_at": s.get("updated_at"),
-                "result": s.get("result"),
-                "error": s.get("error"),
-            })
+            append_run(job)
             if len(runs_out) >= limit:
                 break
 
@@ -416,14 +432,28 @@ async def get_workflow_status_controller(request: web.Request) -> web.Response:
     run_id = request.match_info.get('run_id')
     if not run_id:
         return web.json_response({"detail": "missing_run_id"}, status=400)
+    include_detail = str(request.query.get("detail", "1")).lower() not in {
+        "0",
+        "false",
+        "no",
+        "summary",
+    }
 
+    request_owner_id = None
     if _ENABLE_GOOGLE_OAUTH:
         auth_resp = await _require_auth(request)
         if isinstance(auth_resp, web.Response):
             return auth_resp
+        request_owner_id = await get_owner_from_request(request)
+        if not isinstance(request_owner_id, str) or not request_owner_id:
+            return web.json_response({"detail": "owner_not_found"}, status=403)
 
     job_status = await get_job_status(run_id)
     if not job_status:
+        # ComfyUI history carries no LF owner identity.  Under authentication,
+        # an unregistered prompt cannot be exposed safely.
+        if request_owner_id is not None:
+            return web.json_response({"detail": "run_not_found"}, status=404)
         # Not found in DB, try fetching from ComfyUI history (for headless runs)
         settings = get_settings()
         comfy_url = settings.COMFY_BACKEND_URL
@@ -434,8 +464,6 @@ async def get_workflow_status_controller(request: web.Request) -> web.Response:
                         entry : dict [str, dict | list] = await resp.json()
                         outputs = entry.get(run_id).get("outputs") if entry.get(run_id) else entry.get("outputs")
                         if outputs:
-                            # Add base64 data for successful runs
-                            # Create the expected result structure for extract_base64_data_from_result
                             mock_result = {
                                 "http_status": 200,
                                 "body": {
@@ -446,6 +474,16 @@ async def get_workflow_status_controller(request: web.Request) -> web.Response:
                                     }
                                 }
                             }
+                            if not include_detail:
+                                return web.json_response({
+                                    "run_id": run_id,
+                                    "status": "succeeded",
+                                    "seq": 0,
+                                    "outputs": build_output_preview(mock_result),
+                                })
+
+                            # Detail requests retain the historical base64
+                            # compatibility field for output inspection.
                             data_tuple = extract_base64_data_from_result(mock_result)
                             if data_tuple:
                                 mime_type, base64_data = data_tuple
@@ -458,6 +496,8 @@ async def get_workflow_status_controller(request: web.Request) -> web.Response:
             LOG.warning("Failed to fetch history for %s: %s", run_id, e)
             return web.json_response({"detail": "Headless run not found"}, status=404)
     else:
+        if request_owner_id is not None and job_status.get("owner_id") != request_owner_id:
+            return web.json_response({"detail": "run_not_found"}, status=404)
         # For stored jobs, check if pending and update from history
         if job_status.get("status") == "pending":
             settings = get_settings()
@@ -472,7 +512,28 @@ async def get_workflow_status_controller(request: web.Request) -> web.Response:
             except Exception as e:
                 LOG.warning("Failed to check history for stored job %s: %s", run_id, e)
         
-        response_data = serialize_job(job_status)
+        # job_service already returns the public JSON shape.  Copy it rather
+        # than passing the mapping through the dataclass serializer.
+        response_data = dict(job_status)
+
+        if not include_detail:
+            return web.json_response(serialize_run_summary(response_data))
+
+        try:
+            from ..services.lifecycle import get_submission_by_prompt
+
+            lifecycle = await get_submission_by_prompt(run_id, include_events=False)
+            if lifecycle is not None:
+                response_data.update({
+                    "submission_id": lifecycle.get("submission_id"),
+                    "lifecycle_status": lifecycle.get("status"),
+                    "event_count": lifecycle.get("event_count"),
+                    "latest_event": lifecycle.get("latest_event"),
+                    "output_manifest": lifecycle.get("output_manifest"),
+                    "links": lifecycle.get("links"),
+                })
+        except Exception:
+            LOG.debug("Could not enrich run %s with submission lifecycle", run_id, exc_info=True)
 
         if response_data.get("status") == "succeeded" and response_data.get("result"):
             data_tuple = extract_base64_data_from_result(response_data["result"])
@@ -482,6 +543,102 @@ async def get_workflow_status_controller(request: web.Request) -> web.Response:
                 return web.json_response(response_data, content_type=mime_type)
 
         return web.json_response(response_data)
+# endregion
+
+
+# region Stable submission lifecycle
+async def _require_submission_owner(
+    request: web.Request,
+    snapshot: dict,
+) -> web.Response | None:
+    """Hide submissions belonging to a different authenticated owner."""
+
+    if not _ENABLE_GOOGLE_OAUTH:
+        return None
+    owner_id = await get_owner_from_request(request)
+    if not isinstance(owner_id, str) or snapshot.get("owner_id") != owner_id:
+        return web.json_response({"detail": "submission_not_found"}, status=404)
+    return None
+
+
+async def get_submission_controller(request: web.Request) -> web.Response:
+    submission_id = request.match_info.get("submission_id")
+    if not submission_id:
+        return web.json_response({"detail": "missing_submission_id"}, status=400)
+
+    if _ENABLE_GOOGLE_OAUTH:
+        auth_resp = await _require_auth(request)
+        if isinstance(auth_resp, web.Response):
+            return auth_resp
+
+    from ..services.lifecycle import get_submission
+
+    snapshot = await get_submission(submission_id, include_events=False)
+    if snapshot is None:
+        return web.json_response({"detail": "submission_not_found"}, status=404)
+    owner_error = await _require_submission_owner(request, snapshot)
+    if owner_error is not None:
+        return owner_error
+    return web.json_response(snapshot)
+
+
+async def get_submission_events_controller(request: web.Request) -> web.Response:
+    submission_id = request.match_info.get("submission_id")
+    if not submission_id:
+        return web.json_response({"detail": "missing_submission_id"}, status=400)
+
+    if _ENABLE_GOOGLE_OAUTH:
+        auth_resp = await _require_auth(request)
+        if isinstance(auth_resp, web.Response):
+            return auth_resp
+
+    from ..services.lifecycle import get_submission
+
+    snapshot = await get_submission(submission_id, include_events=True)
+    if snapshot is None:
+        return web.json_response({"detail": "submission_not_found"}, status=404)
+    owner_error = await _require_submission_owner(request, snapshot)
+    if owner_error is not None:
+        return owner_error
+    return web.json_response({
+        "schema": "lf.workflow-events.v1",
+        "submission_id": submission_id,
+        "events": snapshot.get("events", []),
+    })
+
+
+async def cancel_submission_controller(request: web.Request) -> web.Response:
+    submission_id = request.match_info.get("submission_id")
+    if not submission_id:
+        return web.json_response({"detail": "missing_submission_id"}, status=400)
+
+    if _ENABLE_GOOGLE_OAUTH:
+        auth_resp = await _require_auth(request)
+        if isinstance(auth_resp, web.Response):
+            return auth_resp
+
+    from ..services.lifecycle import get_submission
+
+    snapshot = await get_submission(submission_id, include_events=False)
+    if snapshot is None:
+        return web.json_response({"detail": "submission_not_found"}, status=404)
+    owner_error = await _require_submission_owner(request, snapshot)
+    if owner_error is not None:
+        return owner_error
+
+    from ..services.run_service import (
+        WorkflowCancellationError,
+        cancel_workflow_submission,
+    )
+
+    try:
+        snapshot = await cancel_workflow_submission(submission_id)
+    except WorkflowCancellationError as exc:
+        return web.json_response(
+            {"detail": exc.detail, "error": str(exc)},
+            status=exc.status,
+        )
+    return web.json_response(snapshot, status=202)
 # endregion
 
 # region Admin debug UI (debug-only)

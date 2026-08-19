@@ -1,8 +1,10 @@
 import pytest
+import json
 import sys
 
 from pathlib import Path
-from unittest.mock import patch
+from types import SimpleNamespace
+from unittest.mock import AsyncMock, patch
 
 # make package imports work
 pkg_root = Path(__file__).resolve().parents[3]
@@ -58,3 +60,71 @@ async def test_send_initial_snapshot_includes_workflow_id_and_updated_at():
     # Expect workflow_id and updated_at present in the JSON payload
     assert '"workflow_id": "remove_bg"' in combined
     assert '"updated_at":' in combined
+
+
+async def test_history_and_sse_preserve_terminal_results_by_default_and_bound_on_opt_in():
+    job = job_store.Job(
+        id="terminal-compat",
+        workflow_id="portrait",
+        status=job_store.JobStatus.SUCCEEDED,
+        result={
+            "http_status": 200,
+            "body": {
+                "payload": {
+                    "history": {
+                        "outputs": {
+                            "save": {
+                                "images": [
+                                    {
+                                        "filename": "portrait.png",
+                                        "subfolder": "",
+                                        "type": "output",
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                }
+            },
+        },
+    )
+
+    async def fake_list_jobs(owner_id=None, status=None):
+        return {job.id: job}
+
+    with patch.object(job_store, "list_jobs", side_effect=fake_list_jobs):
+        legacy_response = await api_controllers.list_runs_controller(
+            SimpleNamespace(query={})
+        )
+        summary_response = await api_controllers.list_runs_controller(
+            SimpleNamespace(query={"summary": "1"})
+        )
+
+    legacy_run = json.loads(legacy_response.text)["runs"][0]
+    summary_run = json.loads(summary_response.text)["runs"][0]
+    assert legacy_run["result"] == job.result
+    assert "result" not in summary_run
+    assert summary_run["outputs"]["save"]["images"][0]["filename"] == "portrait.png"
+
+    legacy_sse = FakeResponse()
+    summary_sse = FakeResponse()
+    with patch.object(job_store, "list_jobs", side_effect=fake_list_jobs):
+        await api_controllers._send_initial_snapshot(
+            legacy_sse,
+            summary_only=False,
+        )
+        await api_controllers._send_initial_snapshot(
+            summary_sse,
+            summary_only=True,
+        )
+
+    def first_event(response: FakeResponse) -> dict:
+        data_line = next(
+            line
+            for line in b"".join(response.written).decode("utf-8").splitlines()
+            if line.startswith("data: ")
+        )
+        return json.loads(data_line.removeprefix("data: "))
+
+    assert first_event(legacy_sse)["result"] == job.result
+    assert "result" not in first_event(summary_sse)

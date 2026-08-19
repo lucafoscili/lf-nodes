@@ -55,6 +55,23 @@ else:
         return await api_controllers.stream_runs_controller(request)
     # endregion
 
+    # region Stable Submission Lifecycle
+    @PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/submissions/{{submission_id}}")
+    async def route_submission_status(request: web.Request) -> web.Response:
+        api_controllers = _get_api_controllers()
+        return await api_controllers.get_submission_controller(request)
+
+    @PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/submissions/{{submission_id}}/events")
+    async def route_submission_events(request: web.Request) -> web.Response:
+        api_controllers = _get_api_controllers()
+        return await api_controllers.get_submission_events_controller(request)
+
+    @PromptServer.instance.routes.post(f"{API_ROUTE_PREFIX}/submissions/{{submission_id}}/cancel")
+    async def route_submission_cancel(request: web.Request) -> web.Response:
+        api_controllers = _get_api_controllers()
+        return await api_controllers.cancel_submission_controller(request)
+    # endregion
+
     # region Icon models
     @PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/icon-models")
     async def route_list_models(request: web.Request) -> web.Response:

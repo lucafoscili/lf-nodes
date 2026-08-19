@@ -87,6 +87,7 @@ class LF_SaveImageForCivitAI:
             civitai_metadata = ""
 
         file_names: list[str] = []
+        saved_images: list[dict[str, str]] = []
 
         nodes: list[dict] = []
         dataset: dict = { "nodes": nodes }
@@ -138,6 +139,11 @@ class LF_SaveImageForCivitAI:
 
             nodes.append(create_masonry_node(filename, url, index))
             file_names.append(filename)
+            saved_images.append({
+                "filename": filename,
+                "subfolder": subfolder,
+                "type": "output",
+            })
 
         safe_send_sync("saveimageforcivitai", {
             "dataset": dataset,
@@ -145,6 +151,7 @@ class LF_SaveImageForCivitAI:
 
         return {
             "ui": {
+                "images": saved_images,
                 "lf_output": [{
                     "civitai_metadata": civitai_metadata,
                     "dataset": dataset,

@@ -9,10 +9,24 @@ import uuid
 import os
 import sys
 
-from typing import Any, Dict, Tuple
+from typing import Any, Dict, Mapping, Tuple
 
+from .admission import (
+    WorkflowAdmissionOutcome,
+    WorkflowPromptContext,
+    WorkflowSubmissionRejectedBeforeQueue,
+    WorkflowSubmissionRequest,
+    acquire_default_workflow_admission,
+    acquire_workflow_admission,
+    retain_workflow_admission,
+)
 from .job_store import JobStatus, set_job_status
-from .registry import InputValidationError, WorkflowNode, get_workflow
+from .registry import (
+    InputValidationError,
+    WorkflowNode,
+    get_workflow,
+    get_workflow_submission_policy,
+)
 from ..config import CONFIG as RUNNER_CONFIG, get_settings
 from ...utils.helpers.conversion import json_safe
 
@@ -26,6 +40,8 @@ class WorkflowPreparationError(Exception):
         super().__init__(response_body.get("detail") or "Workflow preparation failed.")
         self.response_body = response_body
         self.status = status
+
+
 # endregion
 
 # region Helpers
@@ -95,12 +111,30 @@ def _sanitize_history(entry: Dict[str, Any]) -> Dict[str, Any]:
         "prompt": json_safe(entry.get("prompt")),
     }
 
+
+def _queue_proves_prompt_absent(queue: Mapping[str, Any], prompt_id: str) -> bool:
+    """Return true only when both authoritative queue lists prove absence."""
+
+    for queue_name in ("queue_running", "queue_pending"):
+        items = queue.get(queue_name)
+        if not isinstance(items, (list, tuple)):
+            return False
+        for item in items:
+            # A malformed row is not evidence that the prompt is absent.
+            if not isinstance(item, (list, tuple)) or len(item) < 2:
+                return False
+            if item[1] == prompt_id:
+                return False
+    return True
+
 async def _wait_for_completion(prompt_id: str, timeout_seconds: float | None = None, comfy_url: str = "http://127.0.0.1:8188", session: aiohttp.ClientSession | None = None) -> Dict[str, Any]:
     """
     Asynchronously waits for the completion of a prompt execution identified by the given prompt_id.
     This function polls ComfyUI's history API at regular intervals until the prompt is either
-    completed successfully, encounters an error, or produces outputs. If a timeout is specified,
-    it will raise a TimeoutError if the prompt does not finish within the allotted time.
+    completed successfully or encounters an error.  Terminal proof requires an
+    explicit history status *and* absence from both running and pending queues.
+    If a timeout is specified, it raises TimeoutError when the prompt does not
+    finish within the allotted time.
 
     Args:
         prompt_id (str): The unique identifier of the prompt to wait for.
@@ -144,10 +178,17 @@ async def _wait_for_completion(prompt_id: str, timeout_seconds: float | None = N
                 if prompt_id in history:
                     entry = history[prompt_id]
                     status = entry.get("status") or {}
-                    if status.get("completed") is True or status.get("status_str") == "error":
-                        return entry
-                    if entry.get("outputs"):
-                        return entry
+                    status_str = status.get("status_str")
+                    explicit_terminal = (
+                        status.get("completed") is True
+                        or status_str in {"success", "error"}
+                    )
+                    if explicit_terminal:
+                        async with session_to_use.get(f"{comfy_url}/queue") as queue_resp:
+                            queue_resp.raise_for_status()
+                            queue = await queue_resp.json()
+                        if _queue_proves_prompt_absent(queue, prompt_id):
+                            return entry
 
                 if deadline is not None and time.perf_counter() >= deadline:
                     raise TimeoutError(f"Prompt {prompt_id} did not finish within {timeout_seconds} seconds.")
@@ -176,6 +217,27 @@ async def _wait_for_completion(prompt_id: str, timeout_seconds: float | None = N
     finally:
         if should_close_session and session_to_use:
             await session_to_use.close()
+
+
+async def drain_workflow(
+    prompt_id: str,
+    comfy_url: str = "http://127.0.0.1:8188",
+    session: aiohttp.ClientSession | None = None,
+) -> Dict[str, Any]:
+    """Wait read-only for one exact prompt to reach a terminal history state.
+
+    Draining deliberately has no execution timeout.  It is used after a caller
+    budget expires (or while unwinding an admitted lifecycle) so external
+    admission authority is not released while the prompt can still consume the
+    shared resource.
+    """
+
+    return await _wait_for_completion(
+        prompt_id,
+        timeout_seconds=None,
+        comfy_url=comfy_url,
+        session=session,
+    )
 
 async def _monitor_until_running(
     prompt_id: str,
@@ -210,6 +272,10 @@ async def _monitor_until_running(
                                 if isinstance(item, list) and len(item) >= 2 and item[1] == prompt_id:
                                     with contextlib.suppress(Exception):
                                         await set_job_status(prompt_id, JobStatus.RUNNING)
+                                    with contextlib.suppress(Exception):
+                                        from .lifecycle import record_running
+
+                                        await record_running(prompt_id)
                                     return
                             if not any(isinstance(it, list) and len(it) >= 2 and it[1] == prompt_id for it in pending):
                                 # not found anywhere; stop monitoring
@@ -232,23 +298,54 @@ async def _monitor_until_running(
 # endregion
 
 # region Execution
-async def submit_workflow(
-    payload: Dict[str, Any], prepared: Tuple[WorkflowNode, Dict[str, Any]] | None = None
-) -> Tuple[str, str, str, Dict[str, Any], Tuple[Any, ...], str]:
-    """Prepare, validate and submit a workflow returning lightweight context.
+async def interrupt_workflow(
+    prompt_id: str,
+    *,
+    comfy_url: str = "http://127.0.0.1:8188",
+    session: aiohttp.ClientSession | None = None,
+) -> bool:
+    """Request cancellation of one exact ComfyUI prompt.
 
-    Returns:
-        (prompt_id, client_id, comfy_url, prompt_dict, validation_tuple, workflow_id)
-
-    Raises:
-        WorkflowPreparationError for preparation failures.
+    The prompt id is always included.  LF never falls back to ComfyUI's global
+    interrupt endpoint, so one caller cannot accidentally stop another job.
     """
+
+    if not isinstance(prompt_id, str) or not prompt_id:
+        raise ValueError("prompt_id must be non-empty")
+
+    session_to_use = session
+    should_close_session = session_to_use is None
+    if session_to_use is None:
+        session_to_use = aiohttp.ClientSession()
+    try:
+        async with session_to_use.post(
+            f"{comfy_url}/interrupt",
+            headers={"Content-Type": "application/json"},
+            data=json.dumps({"prompt_id": prompt_id}),
+        ) as response:
+            return response.status < 400
+    finally:
+        if should_close_session and session_to_use:
+            await session_to_use.close()
+
+
+async def prepare_workflow_submission(
+    payload: Dict[str, Any],
+    prepared: Tuple[WorkflowNode, Dict[str, Any]] | None = None,
+    *,
+    owner_id: str | None = None,
+) -> WorkflowSubmissionRequest:
+    """Prepare and validate the exact queue envelope without submitting it."""
+
     settings = get_settings()
     comfy_url = settings.COMFY_BACKEND_URL
 
     definition, prompt = prepared or _prepare_workflow_execution(payload)
-    workflow_id = payload.get("workflowId")
-    client_id = payload.get("clientId") or uuid.uuid4().hex
+    raw_workflow_id = payload.get("workflowId")
+    workflow_id = raw_workflow_id if isinstance(raw_workflow_id, str) else None
+    # Queue identity is server authority.  A caller-supplied clientId could
+    # collide with another lifecycle and therefore is intentionally ignored.
+    client_id = uuid.uuid4().hex
 
     # Local validation (non-fatal if it crashes)
     try:
@@ -260,24 +357,147 @@ async def submit_workflow(
         response = _make_run_payload(detail=validation[1], error_message="validation_failed", history={"outputs": {}, "node_errors": json_safe(validation[3])})
         raise WorkflowPreparationError(response, 400)
 
-    extra_data = {"lf_nodes": {"workflow_id": workflow_id}}
-    extra_data.update(payload.get("extraData", {}))
-    body = {"prompt": prompt, "client_id": client_id, "extra_data": extra_data}
+    # A prepared definition has already crossed the trusted registry boundary.
+    # Read its policy directly so legacy blocking callers do not trigger a
+    # second, registry-wide import during submission.
+    policy = (
+        getattr(definition, "submission_policy", None)
+        if prepared is not None
+        else get_workflow_submission_policy(workflow_id or "")
+    )
+    admission_metadata: Dict[str, Any] = {}
+    required_provider_id = None
+    if policy is not None:
+        admission_metadata = {
+            "provider_id": policy.provider_id,
+            "expected_vram_mb": policy.expected_vram_mb,
+            "max_duration_seconds": policy.max_duration_seconds,
+            "required": policy.required,
+        }
+        if policy.required:
+            required_provider_id = policy.provider_id
+
+    raw_extra_data = payload.get("extraData", {})
+    if raw_extra_data is None:
+        raw_extra_data = {}
+    if not isinstance(raw_extra_data, Mapping):
+        response = _make_run_payload(
+            detail="extraData must be a JSON object",
+            error_message="invalid_extra_data",
+        )
+        raise WorkflowPreparationError(response, 400)
+    if required_provider_id is not None and raw_extra_data:
+        # The guarded provider deliberately owns a narrower prompt+client_id
+        # transport.  Reject caller extras before admission rather than
+        # silently dropping them or retaining a lease for a known pre-queue
+        # incompatibility.
+        response = _make_run_payload(
+            detail="guarded workflows do not accept caller-provided extraData",
+            error_message="invalid_extra_data",
+        )
+        raise WorkflowPreparationError(response, 400)
+
+    if required_provider_id is not None:
+        # The guarded transport seals and posts this exact narrow envelope.
+        # Workflow identity remains trusted server-side request metadata; it is
+        # intentionally not placed in a field the guarded client would omit.
+        body = {"prompt": prompt, "client_id": client_id}
+    else:
+        # Caller metadata remains available for ordinary workflows, but trusted
+        # LF provenance is written last so it cannot be replaced by the request.
+        extra_data = dict(raw_extra_data)
+        extra_data["lf_nodes"] = {"workflow_id": workflow_id}
+        body = {"prompt": prompt, "client_id": client_id, "extra_data": extra_data}
+
+    # Serialize once.  Admission providers see this exact envelope and the
+    # default LF transport submits these same bytes, preserving extra_data.
+    body_json = json.dumps(body)
+    return WorkflowSubmissionRequest(
+        workflow_id=workflow_id,
+        owner_id=owner_id,
+        client_id=client_id,
+        comfy_url=comfy_url,
+        prompt=prompt,
+        validation=tuple(validation),
+        queue_body=body,
+        queue_body_json=body_json,
+        required_provider_id=required_provider_id,
+        admission_metadata=admission_metadata,
+    )
+
+
+async def post_workflow_submission(
+    request: WorkflowSubmissionRequest,
+) -> WorkflowPromptContext:
+    """Default LF transport for one already-admitted exact queue envelope."""
+
     async with aiohttp.ClientSession() as session:
         try:
             async with session.post(
-                f"{comfy_url}/prompt",
+                f"{request.comfy_url}/prompt",
                 headers={"Content-Type": "application/json"},
-                data=json.dumps(body)
+                data=request.queue_body_json,
             ) as resp:
                 resp.raise_for_status()
                 prompt_data = await resp.json()
                 prompt_id = prompt_data["prompt_id"]
+        except aiohttp.ClientResponseError as exc:
+            logging.exception("ComfyUI rejected prompt submission: %s", exc)
+            response = _make_run_payload(
+                detail=f"Failed to queue prompt: {exc}",
+                error_message="queue_failed",
+            )
+            # LF crossed the POST boundary before receiving this response.
+            # Even a 4xx is not provider-level proof that no prompt was
+            # accepted, so orchestration treats it as ambiguous.
+            status = exc.status if 400 <= exc.status < 500 else 502
+            raise WorkflowPreparationError(response, status) from exc
         except Exception as exc:
             logging.exception("Failed to submit prompt to ComfyUI API: %s", exc)
             response = _make_run_payload(detail=f"Failed to queue prompt: {exc}", error_message="queue_failed")
-            raise WorkflowPreparationError(response, 500)
-    return prompt_id, client_id, comfy_url, prompt, validation, workflow_id
+            raise WorkflowPreparationError(response, 502) from exc
+
+    if not isinstance(prompt_id, str) or not prompt_id:
+        response = _make_run_payload(
+            detail="ComfyUI returned an invalid prompt_id",
+            error_message="queue_failed",
+        )
+        raise WorkflowPreparationError(response, 500)
+    return WorkflowPromptContext(
+        prompt_id=prompt_id,
+        client_id=request.client_id,
+        comfy_url=request.comfy_url,
+        prompt=request.prompt,
+        validation=request.validation,
+        workflow_id=request.workflow_id,
+    )
+
+
+async def submit_workflow(
+    payload: Dict[str, Any], prepared: Tuple[WorkflowNode, Dict[str, Any]] | None = None
+) -> Tuple[str, str, str, Mapping[str, Any], Tuple[Any, ...], str | None]:
+    """Compatibility helper using LF's default direct submission transport.
+
+    Full Workflow Runner API executions use the admission-owned queue boundary
+    in :mod:`run_service`.  This helper remains for legacy blocking callers and
+    tests which explicitly request the default transport.
+    """
+
+    request = await prepare_workflow_submission(payload, prepared)
+    admission = await acquire_default_workflow_admission(request)
+    try:
+        context = await admission.submit(post_workflow_submission)
+    except BaseException as exc:
+        await admission.release(
+            WorkflowAdmissionOutcome(
+                None,
+                "submission_failed",
+                error=str(exc) or type(exc).__name__,
+            )
+        )
+        raise
+    await admission.release(WorkflowAdmissionOutcome(context.prompt_id, "submitted"))
+    return context.as_legacy_tuple()
 
 async def finalize_workflow(
     prompt_id: str,
@@ -314,27 +534,25 @@ async def finalize_workflow(
                 prompt_id, RUNNER_CONFIG.prompt_timeout_seconds, comfy_url, session
             )
         except TimeoutError as exc:
-            # Try to interrupt the run cleanly
+            # ComfyUI treats an interrupt without prompt_id as global.  Always
+            # target this exact prompt, then retain lifecycle authority until
+            # its exact history entry proves terminal.
             try:
-                async with session.post(
-                    f"{comfy_url}/interrupt",
-                    headers={"Content-Type": "application/json"},
-                    data=json.dumps({"client_id": client_id})
-                ) as interrupt_resp:
-                    if interrupt_resp.status < 400:
-                        logging.info("Successfully interrupted prompt %s", prompt_id)
+                if await interrupt_workflow(
+                    prompt_id,
+                    comfy_url=comfy_url,
+                    session=session,
+                ):
+                    logging.info("Requested targeted interrupt for prompt %s", prompt_id)
             except Exception as interrupt_exc:
                 logging.warning("Failed to interrupt prompt %s: %s", prompt_id, interrupt_exc)
+
+            await drain_workflow(prompt_id, comfy_url=comfy_url, session=session)
             response = _make_run_payload(detail=str(exc), error_message="timeout")
-            # stop monitor
-            stop_event.set()
-            with contextlib.suppress(Exception):
-                monitor_task.cancel()
-                await monitor_task
             return JobStatus.FAILED, response, 504
         finally:
             stop_event.set()
-            with contextlib.suppress(Exception):
+            with contextlib.suppress(asyncio.CancelledError, Exception):
                 monitor_task.cancel()
                 await monitor_task
 
@@ -373,42 +591,76 @@ async def finalize_workflow(
 async def execute_workflow(
     payload: Dict[str, Any], prepared: Tuple[WorkflowNode, Dict[str, Any]] | None = None
 ) -> Tuple[str, JobStatus, Dict[str, Any], int]:
-    """
-    Execute a workflow by submitting it and finalizing the execution.
-    This is a blocking convenience wrapper that preserves the old interface. It first submits the workflow using `submit_workflow`, and if successful, finalizes it using `finalize_workflow`. The function returns a 4-tuple containing the prompt ID, job status, response data, and HTTP status code.
+    """Blocking admitted execution wrapper preserving the legacy return tuple."""
 
-    Args:
-        payload (Dict[str, Any]): The payload data required to execute the workflow.
-        prepared (Tuple[WorkflowNode, Dict[str, Any]] | None, optional): Pre-prepared workflow node and associated data. Defaults to None.
-
-    Returns:
-        Tuple[str, JobStatus, Dict[str, Any], int]: A tuple containing:
-            - prompt_id (str): The unique identifier for the submitted prompt.
-            - status (JobStatus): The final status of the job (e.g., SUCCESS, FAILED).
-            - response (Dict[str, Any]): The response data from the workflow execution.
-            - http_status (int): The HTTP status code from the finalization step.
-
-    Raises:
-        WorkflowPreparationError: If the workflow submission fails, this exception is caught and the function returns a failure tuple instead of propagating the error.
-    """
     try:
-        prompt_id, client_id, comfy_url, prompt, validation, _ = await submit_workflow(payload, prepared)
+        request = await prepare_workflow_submission(payload, prepared)
     except WorkflowPreparationError as exc:
         return "", JobStatus.FAILED, exc.response_body, exc.status
-    
-    status, response, http_status = await finalize_workflow(prompt_id, client_id, comfy_url, validation)
 
-    return prompt_id, status, response, http_status
+    admission = await acquire_workflow_admission(request)
+    try:
+        context = await admission.submit(post_workflow_submission)
+    except WorkflowSubmissionRejectedBeforeQueue as exc:
+        await admission.release(
+            WorkflowAdmissionOutcome(None, "submission_rejected", error=str(exc))
+        )
+        if isinstance(exc, WorkflowPreparationError):
+            return "", JobStatus.FAILED, exc.response_body, exc.status
+        raise
+    except WorkflowPreparationError as exc:
+        retain_workflow_admission(admission, exc)
+        return "", JobStatus.FAILED, exc.response_body, exc.status
+    except BaseException as exc:
+        retain_workflow_admission(admission, exc)
+        raise
+
+    try:
+        status, response, http_status = await finalize_workflow(
+            context.prompt_id,
+            context.client_id,
+            context.comfy_url,
+            context.validation,
+        )
+    except BaseException as exc:
+        try:
+            await drain_workflow(context.prompt_id, comfy_url=context.comfy_url)
+        except BaseException as drain_exc:
+            retain_workflow_admission(admission, drain_exc)
+            logging.critical(
+                "Admission retained for prompt %s because terminal state was not proven",
+                context.prompt_id,
+                exc_info=True,
+            )
+            raise
+        await admission.release(
+            WorkflowAdmissionOutcome(
+                context.prompt_id,
+                JobStatus.FAILED.value,
+                error=str(exc) or type(exc).__name__,
+            )
+        )
+        raise
+
+    await admission.release(
+        WorkflowAdmissionOutcome(context.prompt_id, status.value)
+    )
+
+    return context.prompt_id, status, response, http_status
 # endregion
 
 __all__ = [
     "execute_workflow",
     "submit_workflow",
+    "prepare_workflow_submission",
+    "post_workflow_submission",
     "finalize_workflow",
     "_make_run_payload",
     "_prepare_workflow_execution",
     "_sanitize_history",
     "_wait_for_completion",
+    "drain_workflow",
     "_monitor_until_running",
+    "interrupt_workflow",
     "WorkflowPreparationError",
 ]

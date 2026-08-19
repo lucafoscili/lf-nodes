@@ -39,4 +39,7 @@ async def test_set_job_status_publishes_event_preserving_workflow_id():
         # workflow_id should still be present
         assert ev.get('workflow_id') == 'resize'
         assert ev.get('status') == job_store.JobStatus.SUCCEEDED.value
+        # The published default SSE event remains backward compatible: a
+        # terminal result is present unless the HTTP caller opts into summary=1.
+        assert ev.get('result') == {'ok': True}
         job_store.unsubscribe_events(q)

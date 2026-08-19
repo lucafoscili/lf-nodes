@@ -25,7 +25,7 @@ def _load_impl() -> Any:
 
 def __getattr__(name: str) -> Any:  # pragma: no cover - trivial forwarding
     if name == "routes":
-        return importlib.import_module("modules.workflow_runner.controllers.routes")
+        return importlib.import_module("modules.workflow_runner.controllers.api_routes")
 
     if name in __all__:
         impl = _load_impl()

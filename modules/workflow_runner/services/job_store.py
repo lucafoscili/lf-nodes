@@ -126,8 +126,11 @@ async def create_job(job_id: str, workflow_id: str, owner_id: Optional[str] = No
         _jobs[job_id] = job
         updated = job
 
-    from ..utils.serialize import serialize_job as _serialize_job
-    event = _serialize_job(updated)
+    # The historical event contract includes terminal results.  Consumers that
+    # need the bounded card shape opt in at the HTTP/SSE boundary and project
+    # the event through ``serialize_run_summary`` there.
+    from ..utils.serialize import serialize_job
+    event = serialize_job(updated, include_result_for_terminal=True)
     for q in list(_subscribers):
         try:
             q.put_nowait(event)
@@ -208,8 +211,10 @@ async def set_job_status(
 
     # Notify subscribers outside of the lock to avoid blocking other callers.
     # Use shared serializer to build the event dict
-    from ..utils.serialize import serialize_job as _serialize_job
-    event = _serialize_job(updated)
+    # Preserve the published SSE payload by default; summary callers project
+    # this event explicitly in the controller.
+    from ..utils.serialize import serialize_job
+    event = serialize_job(updated, include_result_for_terminal=True)
     for q in list(_subscribers):
         try:
             q.put_nowait(event)

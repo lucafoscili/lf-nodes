@@ -95,6 +95,10 @@ class TestRunServicePropagation:
     async def test_run_workflow_passes_owner_id_to_create_job(self):
         """run_workflow should pass owner_id to create_job"""
         from modules.workflow_runner.services.run_service import run_workflow
+        from modules.workflow_runner.services.admission import (
+            WorkflowPromptContext,
+            WorkflowSubmissionRequest,
+        )
         
         payload = {
             "workflowId": "test-workflow",
@@ -122,7 +126,8 @@ class TestRunServicePropagation:
         # Mock the entire execution flow to avoid side effects
         with patch('modules.workflow_runner.services.run_service.create_job', side_effect=mock_create_job), \
              patch('modules.workflow_runner.services.run_service._prepare_workflow_execution') as mock_prep, \
-             patch('modules.workflow_runner.services.run_service.submit_workflow') as mock_submit, \
+             patch('modules.workflow_runner.services.run_service.prepare_workflow_submission') as mock_prepare_submission, \
+             patch('modules.workflow_runner.services.run_service.post_workflow_submission') as mock_submit, \
              patch('modules.workflow_runner.services.run_service._emit_run_progress'), \
              patch('modules.workflow_runner.services.run_service.PromptServer') as mock_server:
             
@@ -131,16 +136,36 @@ class TestRunServicePropagation:
             mock_prompt = {"mock": "prompt"}
             mock_prep.return_value = (mock_definition, mock_prompt)
             
-            # Mock submit_workflow to return (prompt_id, client_id, comfy_url, prompt, validation, workflow_id)
             mock_prompt_id = "mock-prompt-123"
             mock_client_id = "mock-client-456"
             mock_comfy_url = "http://mock:8188"
             mock_validation = (True, "", [], [])  # Valid
             mock_workflow_id = "test-workflow"
-            mock_submit.return_value = (mock_prompt_id, mock_client_id, mock_comfy_url, mock_prompt, mock_validation, mock_workflow_id)
+            submission = WorkflowSubmissionRequest(
+                workflow_id=mock_workflow_id,
+                owner_id=owner_id,
+                client_id=mock_client_id,
+                comfy_url=mock_comfy_url,
+                prompt=mock_prompt,
+                validation=mock_validation,
+                queue_body={"prompt": mock_prompt, "client_id": mock_client_id, "extra_data": {}},
+                queue_body_json="{}",
+            )
+            mock_prepare_submission.return_value = submission
+            mock_submit.return_value = WorkflowPromptContext(
+                mock_prompt_id,
+                mock_client_id,
+                mock_comfy_url,
+                submission.prompt,
+                submission.validation,
+                mock_workflow_id,
+            )
             
             mock_loop = Mock()
-            mock_loop.create_task = Mock()
+            def close_worker(coro):
+                coro.close()
+                return Mock()
+            mock_loop.create_task = Mock(side_effect=close_worker)
             mock_server.instance.loop = mock_loop
             
             result = await run_workflow(payload, owner_id=owner_id)
@@ -155,6 +180,10 @@ class TestRunServicePropagation:
     async def test_run_workflow_without_owner_id(self):
         """run_workflow should pass None owner_id when not provided"""
         from modules.workflow_runner.services.run_service import run_workflow
+        from modules.workflow_runner.services.admission import (
+            WorkflowPromptContext,
+            WorkflowSubmissionRequest,
+        )
         
         payload = {
             "workflowId": "test-workflow",
@@ -178,7 +207,8 @@ class TestRunServicePropagation:
         
         with patch('modules.workflow_runner.services.run_service.create_job', side_effect=mock_create_job), \
              patch('modules.workflow_runner.services.run_service._prepare_workflow_execution') as mock_prep, \
-             patch('modules.workflow_runner.services.run_service.submit_workflow') as mock_submit, \
+             patch('modules.workflow_runner.services.run_service.prepare_workflow_submission') as mock_prepare_submission, \
+             patch('modules.workflow_runner.services.run_service.post_workflow_submission') as mock_submit, \
              patch('modules.workflow_runner.services.run_service._emit_run_progress'), \
              patch('modules.workflow_runner.services.run_service.PromptServer') as mock_server:
             
@@ -187,16 +217,36 @@ class TestRunServicePropagation:
             mock_prompt = {"mock": "prompt"}
             mock_prep.return_value = (mock_definition, mock_prompt)
             
-            # Mock submit_workflow to return (prompt_id, client_id, comfy_url, prompt, validation, workflow_id)
             mock_prompt_id = "mock-prompt-123"
             mock_client_id = "mock-client-456"
             mock_comfy_url = "http://mock:8188"
             mock_validation = (True, "", [], [])  # Valid
             mock_workflow_id = "test-workflow"
-            mock_submit.return_value = (mock_prompt_id, mock_client_id, mock_comfy_url, mock_prompt, mock_validation, mock_workflow_id)
+            submission = WorkflowSubmissionRequest(
+                workflow_id=mock_workflow_id,
+                owner_id=None,
+                client_id=mock_client_id,
+                comfy_url=mock_comfy_url,
+                prompt=mock_prompt,
+                validation=mock_validation,
+                queue_body={"prompt": mock_prompt, "client_id": mock_client_id, "extra_data": {}},
+                queue_body_json="{}",
+            )
+            mock_prepare_submission.return_value = submission
+            mock_submit.return_value = WorkflowPromptContext(
+                mock_prompt_id,
+                mock_client_id,
+                mock_comfy_url,
+                submission.prompt,
+                submission.validation,
+                mock_workflow_id,
+            )
             
             mock_loop = Mock()
-            mock_loop.create_task = Mock()
+            def close_worker(coro):
+                coro.close()
+                return Mock()
+            mock_loop.create_task = Mock(side_effect=close_worker)
             mock_server.instance.loop = mock_loop
             
             result = await run_workflow(payload, owner_id=None)
@@ -250,6 +300,86 @@ class TestControllerOwnerIdExtraction:
             # Verify it's the hash of the email
             expected_owner_id = derive_owner_id("user@example.com")
             assert call["owner_id"] == expected_owner_id, f"Expected owner_id={expected_owner_id}, got {call['owner_id']}"
+
+    async def test_submission_status_hides_another_owner(self):
+        from aiohttp import web
+        from modules.workflow_runner.controllers import api_controllers
+
+        request = Mock(spec=web.Request)
+        request.match_info = {"submission_id": "submission-1"}
+        snapshot = {"submission_id": "submission-1", "owner_id": "owner-a"}
+
+        with patch.object(api_controllers, "_ENABLE_GOOGLE_OAUTH", True), \
+             patch.object(api_controllers, "_require_auth", new=AsyncMock(return_value=None)), \
+             patch.object(api_controllers, "get_owner_from_request", new=AsyncMock(return_value="owner-b")), \
+             patch(
+                 "modules.workflow_runner.services.lifecycle.get_submission",
+                 new=AsyncMock(return_value=snapshot),
+             ):
+            response = await api_controllers.get_submission_controller(request)
+
+        assert response.status == 404
+
+    async def test_submission_cancel_never_reaches_another_owner(self):
+        from aiohttp import web
+        from modules.workflow_runner.controllers import api_controllers
+        from modules.workflow_runner.services import run_service
+
+        request = Mock(spec=web.Request)
+        request.match_info = {"submission_id": "submission-1"}
+        snapshot = {"submission_id": "submission-1", "owner_id": "owner-a"}
+        cancel = AsyncMock()
+
+        with patch.object(api_controllers, "_ENABLE_GOOGLE_OAUTH", True), \
+             patch.object(api_controllers, "_require_auth", new=AsyncMock(return_value=None)), \
+             patch.object(api_controllers, "get_owner_from_request", new=AsyncMock(return_value="owner-b")), \
+             patch(
+                 "modules.workflow_runner.services.lifecycle.get_submission",
+                 new=AsyncMock(return_value=snapshot),
+             ), patch.object(run_service, "cancel_workflow_submission", new=cancel):
+            response = await api_controllers.cancel_submission_controller(request)
+
+        assert response.status == 404
+        cancel.assert_not_awaited()
+
+    async def test_authenticated_run_list_always_filters_to_request_owner(self):
+        from aiohttp import web
+        from modules.workflow_runner.controllers import api_controllers
+
+        request = Mock(spec=web.Request)
+        request.query = {}
+        list_jobs = AsyncMock(return_value={})
+
+        with patch.object(api_controllers, "_ENABLE_GOOGLE_OAUTH", True), \
+             patch.object(api_controllers, "_require_auth", new=AsyncMock(return_value=None)), \
+             patch.object(api_controllers, "get_owner_from_request", new=AsyncMock(return_value="owner-a")), \
+             patch.object(api_controllers.job_store, "list_jobs", new=list_jobs):
+            response = await api_controllers.list_runs_controller(request)
+
+        assert response.status == 200
+        list_jobs.assert_awaited_once_with(owner_id="owner-a", status=None)
+
+    async def test_run_detail_hides_another_owner(self):
+        from aiohttp import web
+        from modules.workflow_runner.controllers import api_controllers
+
+        request = Mock(spec=web.Request)
+        request.match_info = {"run_id": "run-1"}
+        request.query = {}
+        job_status = {
+            "run_id": "run-1",
+            "owner_id": "owner-a",
+            "status": "succeeded",
+            "result": None,
+        }
+
+        with patch.object(api_controllers, "_ENABLE_GOOGLE_OAUTH", True), \
+             patch.object(api_controllers, "_require_auth", new=AsyncMock(return_value=None)), \
+             patch.object(api_controllers, "get_owner_from_request", new=AsyncMock(return_value="owner-b")), \
+             patch.object(api_controllers, "get_job_status", new=AsyncMock(return_value=job_status)):
+            response = await api_controllers.get_workflow_status_controller(request)
+
+        assert response.status == 404
 
 
 class TestAdapterParameterOrder:
