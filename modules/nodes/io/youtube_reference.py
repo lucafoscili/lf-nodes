@@ -19,6 +19,7 @@ from ...utils.youtube_url import parse_youtube_video_url
 
 
 _PROFILE = {
+    "audio_flac": "reference.flac",
     "audio_m4a": "reference.m4a",
     "video_mp4": "reference.mp4",
 }
@@ -293,13 +294,68 @@ def _remux_aac_to_m4a(source_path, target_path):
         raise RuntimeError("lossless M4A remux validation failed") from error
 
 
+def _transcode_aac_to_flac(source_path, target_path):
+    """Decode progressive MP4 AAC into a broadly readable FLAC cache profile.
+
+    M4A is the light, packet-preserving profile.  FLAC is the interoperability
+    profile for consumers such as local audio-model APIs whose libsndfile path
+    cannot decode AAC and whose optional FFmpeg fallback may be unavailable.
+    """
+    try:
+        import av
+    except ImportError as error:
+        raise RuntimeError("PyAV is required; install requirements-youtube-ingest.txt") from error
+
+    try:
+        with av.open(str(source_path), mode="r") as source:
+            audio_streams = [stream for stream in source.streams if stream.type == "audio"]
+            video_streams = [stream for stream in source.streams if stream.type == "video"]
+            if len(audio_streams) != 1 or not video_streams:
+                raise ValueError("progressive MP4 must contain one audio stream and a video stream")
+            source_audio = audio_streams[0]
+            if source_audio.codec_context.name != "aac":
+                raise ValueError("progressive MP4 audio stream must be AAC")
+
+            sample_rate = source_audio.codec_context.sample_rate or 48000
+            layout = source_audio.codec_context.layout.name or "stereo"
+            resampler = av.AudioResampler(format="s16", layout=layout, rate=sample_rate)
+            with av.open(str(target_path), mode="w", format="flac") as target:
+                target_audio = target.add_stream("flac", rate=sample_rate)
+                target_audio.layout = layout
+                for frame in source.decode(source_audio):
+                    for converted in resampler.resample(frame):
+                        for packet in target_audio.encode(converted):
+                            target.mux(packet)
+                for converted in resampler.resample(None):
+                    for packet in target_audio.encode(converted):
+                        target.mux(packet)
+                for packet in target_audio.encode(None):
+                    target.mux(packet)
+    except (OSError, ValueError) as error:
+        raise RuntimeError("could not transcode progressive MP4 AAC audio to FLAC") from error
+
+    if not target_path.is_file() or target_path.is_symlink() or target_path.stat().st_size <= 0:
+        raise RuntimeError("PyAV did not produce a FLAC file")
+    with target_path.open("rb") as handle:
+        if handle.read(4) != b"fLaC":
+            raise RuntimeError("PyAV did not produce a FLAC container")
+    try:
+        with av.open(str(target_path), mode="r") as target:
+            audio_streams = [stream for stream in target.streams if stream.type == "audio"]
+            video_streams = [stream for stream in target.streams if stream.type == "video"]
+            if len(audio_streams) != 1 or video_streams or audio_streams[0].codec_context.name != "flac":
+                raise ValueError("FLAC output must contain exactly one FLAC audio stream and no video")
+    except (OSError, ValueError) as error:
+        raise RuntimeError("FLAC transcode validation failed") from error
+
+
 class LF_YouTubeReference:
     @classmethod
     def INPUT_TYPES(cls):
         return {
             "required": {
                 "youtube_url": (Input.STRING, {"default": "", "multiline": False}),
-                "media_kind": (["audio_m4a", "video_mp4"], {"default": "audio_m4a"}),
+                "media_kind": (["audio_m4a", "audio_flac", "video_mp4"], {"default": "audio_m4a"}),
             },
             "optional": {
                 "ui_widget": (Input.LF_CODE, {
@@ -358,6 +414,10 @@ class LF_YouTubeReference:
                     if media_kind == "audio_m4a":
                         media_path = stage_dir / media_name
                         _remux_aac_to_m4a(source_path, media_path)
+                        source_path.unlink()
+                    elif media_kind == "audio_flac":
+                        media_path = stage_dir / media_name
+                        _transcode_aac_to_flac(source_path, media_path)
                         source_path.unlink()
                     else:
                         media_path = source_path

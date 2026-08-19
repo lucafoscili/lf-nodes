@@ -62,7 +62,7 @@ def _configure(prompt: Dict[str, Any], inputs: Dict[str, Any]) -> None:
     if infer_method not in _INFER_METHODS:
         raise InputValidationError("infer_method")
     shift = _number(inputs, "shift", 3.0, 1.0, 5.0)
-    output_format = inputs.get("output_format", "mp3")
+    output_format = inputs.get("output_format", "flac")
     if output_format not in _FORMATS:
         raise InputValidationError("output_format")
 
@@ -74,7 +74,7 @@ def _configure(prompt: Dict[str, Any], inputs: Dict[str, Any]) -> None:
         raise ValueError("ACE-Step remix workflow has invalid YouTube reference inputs")
     reference_inputs.update({
         "youtube_url": youtube_url,
-        "media_kind": "audio_m4a",
+        "media_kind": "audio_flac",
     })
 
     remix = prompt.get("remix")
@@ -183,7 +183,7 @@ node = WorkflowNode(
         _number_cell("guidance_scale", "Guidance", 7.0, 0.0, 100.0, 0.1),
         _select_cell("infer_method", "Sampler", (("ODE", "ode"), ("SDE", "sde")), "ode"),
         _number_cell("shift", "Timestep shift", 3.0, 1.0, 5.0, 0.1),
-        _select_cell("output_format", "Output format", tuple((value.upper(), value) for value in _FORMATS), "mp3"),
+        _select_cell("output_format", "Output format", tuple((value.upper(), value) for value in _FORMATS), "flac"),
     ],
     outputs=[
         WorkflowCell(node_id="remix", id="audio", shape="masonry", description="Generated audio."),

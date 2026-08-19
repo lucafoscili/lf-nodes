@@ -38,6 +38,7 @@ def test_declaration_exposes_only_url_and_media_profile() -> None:
         "lfDataset": {
             "nodes": [
                 {"id": "audio_m4a", "value": "Audio (M4A)", "workflowValue": "audio_m4a"},
+                {"id": "audio_flac", "value": "Audio (FLAC)", "workflowValue": "audio_flac"},
                 {"id": "video_mp4", "value": "Video (MP4)", "workflowValue": "video_mp4"},
             ],
         },

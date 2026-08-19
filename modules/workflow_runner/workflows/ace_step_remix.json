@@ -2,7 +2,7 @@
   "reference": {
     "inputs": {
       "youtube_url": "",
-      "media_kind": "audio_m4a"
+      "media_kind": "audio_flac"
     },
     "class_type": "LF_YouTubeReference",
     "_meta": {"title": "YouTube audio reference (cached input)"}
@@ -23,7 +23,7 @@
       "guidance_scale": 7.0,
       "infer_method": "ode",
       "shift": 3.0,
-      "output_format": "mp3"
+      "output_format": "flac"
     },
     "class_type": "LF_ACEStepRemix",
     "_meta": {"title": "ACE-Step audio remix"}

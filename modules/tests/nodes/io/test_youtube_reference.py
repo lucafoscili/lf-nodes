@@ -163,6 +163,12 @@ class TestYouTubeReference(unittest.TestCase):
         self.yt_patch.start()
         self.remux_patch = patch.object(youtube_reference, "_remux_aac_to_m4a", side_effect=self._fake_remux)
         self.remux_patch.start()
+        self.transcode_patch = patch.object(
+            youtube_reference,
+            "_transcode_aac_to_flac",
+            side_effect=self._fake_transcode,
+        )
+        self.transcode_mock = self.transcode_patch.start()
         self.input_patch = patch.object(youtube_reference.folder_paths, "get_input_directory", return_value=str(self.input_dir))
         self.input_patch.start()
         self.env_patch = patch.dict(os.environ, {"LF_YOUTUBE_INGEST_ENABLED": "1"})
@@ -177,11 +183,17 @@ class TestYouTubeReference(unittest.TestCase):
         self.yt_patch.stop()
         if self.remux_patch is not None:
             self.remux_patch.stop()
+        if self.transcode_patch is not None:
+            self.transcode_patch.stop()
         self.temp.cleanup()
 
     @staticmethod
     def _fake_remux(source_path, target_path):
         target_path.write_bytes(b"mock m4a")
+
+    @staticmethod
+    def _fake_transcode(source_path, target_path):
+        target_path.write_bytes(b"fLaCmock audio")
 
     def test_gate_is_disabled_by_default(self):
         with patch.dict(os.environ, {}, clear=True):
@@ -223,6 +235,16 @@ class TestYouTubeReference(unittest.TestCase):
         self.assertEqual(first[1], VIDEO_ID)
         self.assertEqual(first[2]["schema"], "lf.youtube-reference.v1")
 
+    def test_flac_profile_is_cached_for_broad_audio_decoder_compatibility(self):
+        first = self.node.on_exec(URL, "audio_flac")
+        second = self.node.on_exec(f"https://youtu.be/{VIDEO_ID}", "audio_flac")
+
+        self.assertEqual(first, second)
+        self.assertEqual(FakeYoutubeDL.calls, 1)
+        self.assertEqual(first[0], f"lf-workflow-runner/youtube/{VIDEO_ID}/audio_flac/reference.flac")
+        self.assertEqual(first[2]["media_kind"], "audio_flac")
+        self.assertEqual(self.transcode_mock.call_count, 1)
+
     def test_success_updates_the_receipt_widget(self):
         with patch.object(youtube_reference, "safe_send_sync") as send:
             result = self.node.on_exec(URL, "audio_m4a", node_id="youtube-node")
@@ -237,6 +259,7 @@ class TestYouTubeReference(unittest.TestCase):
     def test_input_contract_exposes_the_lf_receipt_widget(self):
         inputs = self.node.INPUT_TYPES()
 
+        self.assertEqual(inputs["required"]["media_kind"][0], ["audio_m4a", "audio_flac", "video_mp4"])
         self.assertEqual(inputs["optional"]["ui_widget"][0], "LF_CODE")
         self.assertEqual(inputs["hidden"]["node_id"], "UNIQUE_ID")
 
@@ -370,6 +393,46 @@ class TestYouTubeReference(unittest.TestCase):
         with av.open(str(target_path), mode="r") as target:
             self.assertEqual([(stream.type, stream.codec_context.name) for stream in target.streams], [("audio", "aac")])
         self.assertEqual(audio_packets(target_path), source_packets)
+
+    def test_pyav_transcodes_aac_to_audio_only_flac(self):
+        self.transcode_patch.stop()
+        self.transcode_patch = None
+        import av
+
+        source_path = self.input_dir / "source.mp4"
+        target_path = self.input_dir / "target.flac"
+        with av.open(str(source_path), mode="w") as output:
+            video_stream = output.add_stream("mpeg4", rate=24)
+            video_stream.width = 16
+            video_stream.height = 16
+            video_stream.pix_fmt = "yuv420p"
+            audio_stream = output.add_stream("aac", rate=44100)
+            audio_stream.layout = "mono"
+
+            video_frame = av.VideoFrame(16, 16, "yuv420p")
+            for plane in video_frame.planes:
+                plane.update(bytes(plane.buffer_size))
+            for packet in video_stream.encode(video_frame):
+                output.mux(packet)
+
+            audio_frame = av.AudioFrame(format="fltp", layout="mono", samples=1024)
+            audio_frame.sample_rate = 44100
+            audio_frame.planes[0].update(bytes(audio_frame.planes[0].buffer_size))
+            for packet in audio_stream.encode(audio_frame):
+                output.mux(packet)
+            for packet in video_stream.encode():
+                output.mux(packet)
+            for packet in audio_stream.encode():
+                output.mux(packet)
+
+        youtube_reference._transcode_aac_to_flac(source_path, target_path)
+
+        self.assertEqual(target_path.read_bytes()[:4], b"fLaC")
+        with av.open(str(target_path), mode="r") as target:
+            self.assertEqual(
+                [(stream.type, stream.codec_context.name) for stream in target.streams],
+                [("audio", "flac")],
+            )
 
     def test_containment_guard_rejects_a_path_outside_input(self):
         with self.assertRaisesRegex(ValueError, "escapes"):

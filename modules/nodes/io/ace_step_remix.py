@@ -363,7 +363,9 @@ class LF_ACEStepRemix:
                 "guidance_scale": (Input.FLOAT, {"default": 7.0, "min": 0.0, "max": 100.0, "step": 0.1}),
                 "infer_method": (list(_INFER_METHODS), {"default": "ode"}),
                 "shift": (Input.FLOAT, {"default": 3.0, "min": 1.0, "max": 5.0, "step": 0.1}),
-                "output_format": (list(_OUTPUT_FORMATS), {"default": "mp3"}),
+                # FLAC is lossless and uses ACE-Step's built-in soundfile path.
+                # MP3 remains available but requires ffmpeg in the API runtime.
+                "output_format": (list(_OUTPUT_FORMATS), {"default": "flac"}),
             },
             "hidden": {"node_id": "UNIQUE_ID"},
         }

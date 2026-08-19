@@ -165,12 +165,14 @@ def test_disabled_by_default_and_workflow_is_packaged(monkeypatch):
     })
     assert prompt["reference"]["inputs"] == {
         "youtube_url": "https://www.youtube.com/watch?v=ETPjddfrk_w",
-        "media_kind": "audio_m4a",
+        "media_kind": "audio_flac",
     }
     assert prompt["remix"]["inputs"]["mode"] == "repaint"
     assert prompt["remix"]["inputs"]["source_audio"] == ["reference", 0]
     assert prompt["remix"]["inputs"]["infer_method"] == "ode"
     assert prompt["remix"]["inputs"]["shift"] == 3.0
+    assert prompt["remix"]["inputs"]["output_format"] == "flac"
+    assert remix.LF_ACEStepRemix.INPUT_TYPES()["required"]["output_format"][1]["default"] == "flac"
 
     assert [(cell.node_id, cell.id, cell.shape) for cell in WORKFLOW.outputs] == [
         ("remix", "audio", "masonry"),

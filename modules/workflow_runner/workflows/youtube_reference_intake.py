@@ -8,7 +8,7 @@ from typing import Any, Dict
 from ..services.registry import InputValidationError, WorkflowCell, WorkflowNode
 from ...utils.youtube_url import parse_youtube_video_url
 
-_MEDIA_PROFILES = frozenset({"audio_m4a", "video_mp4"})
+_MEDIA_PROFILES = frozenset({"audio_m4a", "audio_flac", "video_mp4"})
 
 
 def _youtube_url(value: Any) -> str:
@@ -73,6 +73,7 @@ input_media_profile = WorkflowCell(
         "lfDataset": {
             "nodes": [
                 {"id": "audio_m4a", "value": "Audio (M4A)", "workflowValue": "audio_m4a"},
+                {"id": "audio_flac", "value": "Audio (FLAC)", "workflowValue": "audio_flac"},
                 {"id": "video_mp4", "value": "Video (MP4)", "workflowValue": "video_mp4"},
             ],
         },
