@@ -6,13 +6,14 @@ import {
   LfComponentPropsFor,
   LfComponentRootElement,
   LfMasonryInterface,
+  LfSelectInterface,
   LfTextfieldInterface,
   LfToggleInterface,
   LfUploadInterface,
 } from '@lf-widgets/foundations/dist';
 import { getLfFramework } from '@lf-widgets/framework';
 import { CHAT_ENDPOINT } from '../config';
-import { WorkflowCellInput, WorkflowCellOutput } from '../types/api';
+import { ComfyFileArtifact, WorkflowCellInput, WorkflowCellOutput } from '../types/api';
 
 //#region Helpers
 const _setProps = <T extends LfComponentName>(
@@ -115,6 +116,12 @@ export const createComponent = {
     _setProps('LfMasonry', comp, props, slot_map);
     return comp;
   },
+  select: (props: Partial<LfSelectInterface>) => {
+    const comp = document.createElement('lf-select');
+
+    _setProps('LfSelect', comp, props);
+    return comp;
+  },
   textfield: (props: Partial<LfTextfieldInterface>) => {
     const comp = document.createElement('lf-textfield');
 
@@ -146,6 +153,11 @@ export const createInputCell = (cell: WorkflowCellInput) => {
       const p = (props || {}) as Partial<LfChatInterface>;
       return createComponent.chat(sanitizeProps(p, 'LfChat'));
     }
+    case 'choice':
+    case 'select': {
+      const p = (props || {}) as Partial<LfSelectInterface>;
+      return createComponent.select(sanitizeProps(p, 'LfSelect'));
+    }
     case 'toggle': {
       const p = (props || {}) as Partial<LfToggleInterface>;
       return createComponent.toggle(sanitizeProps(p, 'LfToggle'));
@@ -164,12 +176,74 @@ export const createInputCell = (cell: WorkflowCellInput) => {
 //#endregion
 
 //#region Outputs
+const _artifactUrl = (artifact: ComfyFileArtifact) => {
+  if (artifact.url && artifact.url.startsWith('/')) {
+    return artifact.url;
+  }
+  const params = new URLSearchParams({
+    filename: artifact.filename,
+    subfolder: artifact.subfolder || '',
+    type: artifact.type || 'output',
+  });
+  return `/view?${params.toString()}`;
+};
+
+const _mediaOutput = (artifacts: ComfyFileArtifact[] | undefined) => {
+  if (!Array.isArray(artifacts) || artifacts.length === 0) {
+    return null;
+  }
+
+  const media = document.createElement('div');
+  media.className = 'workflow-output-media';
+
+  for (const artifact of artifacts) {
+    if (!artifact?.filename) {
+      continue;
+    }
+
+    const item = document.createElement('figure');
+    item.className = 'workflow-output-media__item';
+
+    const src = _artifactUrl(artifact);
+    const isVideo = /\.(?:mp4|webm)$/i.test(artifact.filename);
+    if (isVideo) {
+      const video = document.createElement('video');
+      video.className = 'workflow-output-media__preview';
+      video.controls = true;
+      video.playsInline = true;
+      video.preload = 'metadata';
+      video.src = src;
+      item.appendChild(video);
+    } else {
+      const image = document.createElement('img');
+      image.alt = artifact.filename;
+      image.className = 'workflow-output-media__preview';
+      image.loading = 'lazy';
+      image.src = src;
+      item.appendChild(image);
+    }
+
+    const link = document.createElement('a');
+    link.className = 'workflow-output-media__link';
+    link.href = src;
+    link.rel = 'noopener';
+    link.target = '_blank';
+    link.textContent = artifact.filename;
+    item.appendChild(link);
+
+    media.appendChild(item);
+  }
+
+  return media.childElementCount > 0 ? media : null;
+};
+
 export const createOutputComponent = (descriptor: WorkflowCellOutput) => {
   const { syntax } = getLfFramework();
   const {
     civitai_metadata,
     dataset,
     file_names,
+    images,
     json,
     metadata,
     props,
@@ -179,6 +253,25 @@ export const createOutputComponent = (descriptor: WorkflowCellOutput) => {
     svg,
   } = descriptor;
   const el = document.createElement('div');
+  const media = _mediaOutput(images);
+  if (media) {
+    el.appendChild(media);
+    const hasLegacyPayload =
+      shape === 'masonry'
+        ? dataset !== undefined && dataset !== null
+        : Boolean(
+            string ||
+              svg ||
+              civitai_metadata ||
+              file_names?.length ||
+              json ||
+              metadata ||
+              dataset,
+          );
+    if (!hasLegacyPayload) {
+      return el;
+    }
+  }
 
   switch (shape) {
     case 'code': {

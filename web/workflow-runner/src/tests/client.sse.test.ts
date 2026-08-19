@@ -25,6 +25,7 @@ describe('workflowRunnerClient - SSE and snapshot processing', () => {
     // There should be one TestEventSource instance created by the global mock
     const es = TestEventSource.instances[TestEventSource.instances.length - 1];
     expect(es).toBeDefined();
+    expect(es.url).toBe('/api/lf-nodes/workflow-runner/events?summary=1');
 
     // Simulate server sending an initial snapshot as generic messages
     const msg1 = { run_id: 'sse1', status: 'succeeded', seq: 1, updated_at: 1111 };

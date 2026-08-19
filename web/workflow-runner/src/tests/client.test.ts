@@ -14,6 +14,7 @@ import { createWorkflowRunnerStore } from '../app/store';
 import { RunRecord } from '../types/client';
 
 const store = createWorkflowRunnerStore(initState());
+const urlPath = (url: string) => url.split('?')[0];
 
 describe('workflowRunnerClient (compat tests)', () => {
   it('triggers reconcile on gap detection', async () => {
@@ -33,7 +34,7 @@ describe('workflowRunnerClient (compat tests)', () => {
   it('reconcileRun updates state', async () => {
     const client = new WorkflowRunnerClient(store);
     makeFetchMock(async (url: string) => {
-      if (url.endsWith('/run/r3/status') || url.includes('/run/r3/status')) {
+      if (urlPath(url).endsWith('/run/r3/status')) {
         return {
           ok: true,
           json: async () => ({ run_id: 'r3', status: 'succeeded', seq: 5, result: { ok: true } }),
@@ -158,6 +159,7 @@ describe('workflowRunnerClient (compat tests)', () => {
     expect(calledUrl).toContain('/workflow-runner/runs');
     expect(calledUrl).toContain('status=pending,running,succeeded,failed,cancelled,timeout');
     expect(calledUrl).toContain('owner=me');
+    expect(calledUrl).toContain('summary=1');
   });
 
   it('ignores runs missing mandatory fields (run_id, status) from coldLoadRuns', async () => {
@@ -259,7 +261,7 @@ describe('workflowRunnerClient (compat tests)', () => {
       if (url.includes('/workflow-runner/runs')) {
         return { ok: true, json: async () => ({ runs: mockRuns }) };
       }
-      if (url.endsWith(`/run/${encodeURIComponent(runId)}/status`)) {
+      if (urlPath(url).endsWith(`/run/${encodeURIComponent(runId)}/status`)) {
         return {
           ok: true,
           json: async () => ({
@@ -301,7 +303,7 @@ describe('workflowRunnerClient (compat tests)', () => {
         if (url.includes('/workflow-runner/runs')) {
           return { ok: true, json: async () => ({ runs: [] }) };
         }
-        if (url.endsWith('/run/runA/status')) {
+        if (urlPath(url).endsWith('/run/runA/status')) {
           return { status: 404, ok: false };
         }
         return { ok: false };
@@ -359,10 +361,10 @@ describe('workflowRunnerClient (compat tests)', () => {
             }),
           };
         }
-        if (url.endsWith('/run/runA/status')) {
+        if (urlPath(url).endsWith('/run/runA/status')) {
           return { status: 404, ok: false };
         }
-        if (url.endsWith('/run/runB/status')) {
+        if (urlPath(url).endsWith('/run/runB/status')) {
           return {
             ok: true,
             json: async () => ({ run_id: 'runB', status: 'succeeded', seq: 2 }),
@@ -391,7 +393,7 @@ describe('workflowRunnerClient (compat tests)', () => {
       let fetchCount = 0;
 
       makeFetchMock(async (url: string) => {
-        if (url.endsWith('/run/runX/status')) {
+        if (urlPath(url).endsWith('/run/runX/status')) {
           fetchCount++;
           return { status: 404, ok: false };
         }
@@ -446,16 +448,16 @@ describe('workflowRunnerClient (compat tests)', () => {
             }),
           };
         }
-        if (url.endsWith('/run/run1/status')) {
+        if (urlPath(url).endsWith('/run/run1/status')) {
           return { status: 404, ok: false };
         }
-        if (url.endsWith('/run/run2/status')) {
+        if (urlPath(url).endsWith('/run/run2/status')) {
           return {
             ok: true,
             json: async () => ({ run_id: 'run2', status: 'succeeded', seq: 2 }),
           };
         }
-        if (url.endsWith('/run/run3/status')) {
+        if (urlPath(url).endsWith('/run/run3/status')) {
           return {
             ok: true,
             json: async () => ({ run_id: 'run3', status: 'succeeded', seq: 3 }),
@@ -501,10 +503,10 @@ describe('workflowRunnerClient (compat tests)', () => {
             }),
           };
         }
-        if (url.endsWith('/run/runA/status')) {
+        if (urlPath(url).endsWith('/run/runA/status')) {
           return { status: 404, ok: false };
         }
-        if (url.endsWith('/run/runB/status')) {
+        if (urlPath(url).endsWith('/run/runB/status')) {
           return {
             ok: true,
             json: async () => ({ run_id: 'runB', status: 'succeeded', seq: 2 }),
@@ -537,7 +539,7 @@ describe('workflowRunnerClient (compat tests)', () => {
       let fetchCount = 0;
 
       makeFetchMock(async (url: string) => {
-        if (url.endsWith('/run/runX/status')) {
+        if (urlPath(url).endsWith('/run/runX/status')) {
           fetchCount++;
           return {
             ok: true,
@@ -843,7 +845,7 @@ describe('workflowRunnerClient (compat tests)', () => {
     getClientInternalsWithMethods(client).applyEvent(initialRun);
 
     makeFetchMock(async (url: string) => {
-      if (url.endsWith('/run/reconcile-wf-1/status')) {
+      if (urlPath(url).endsWith('/run/reconcile-wf-1/status')) {
         return {
           ok: true,
           json: async () => ({
@@ -1115,6 +1117,7 @@ describe('workflowRunnerClient (compat tests)', () => {
     expect(calledUrl).toContain('/workflow-runner/runs');
     expect(calledUrl).toContain('status=pending,running,succeeded,failed,cancelled,timeout');
     expect(calledUrl).toContain('owner=me');
+    expect(calledUrl).toContain('summary=1');
   });
 
   it('ignores runs missing mandatory fields (run_id, status) from coldLoadRuns', async () => {
@@ -1216,7 +1219,7 @@ describe('workflowRunnerClient (compat tests)', () => {
       if (url.includes('/workflow-runner/runs')) {
         return { ok: true, json: async () => ({ runs: mockRuns }) };
       }
-      if (url.endsWith(`/run/${encodeURIComponent(runId)}/status`)) {
+      if (urlPath(url).endsWith(`/run/${encodeURIComponent(runId)}/status`)) {
         return {
           ok: true,
           json: async () => ({
@@ -1259,7 +1262,7 @@ describe('workflowRunnerClient (compat tests)', () => {
         if (url.includes('/workflow-runner/runs')) {
           return { ok: true, json: async () => ({ runs: [] }) };
         }
-        if (url.endsWith('/run/runA/status')) {
+        if (urlPath(url).endsWith('/run/runA/status')) {
           return { status: 404, ok: false };
         }
         return { ok: false };
@@ -1318,10 +1321,10 @@ describe('workflowRunnerClient (compat tests)', () => {
             }),
           };
         }
-        if (url.endsWith('/run/runA/status')) {
+        if (urlPath(url).endsWith('/run/runA/status')) {
           return { status: 404, ok: false };
         }
-        if (url.endsWith('/run/runB/status')) {
+        if (urlPath(url).endsWith('/run/runB/status')) {
           return {
             ok: true,
             json: async () => ({ run_id: 'runB', status: 'succeeded', seq: 2 }),
@@ -1351,7 +1354,7 @@ describe('workflowRunnerClient (compat tests)', () => {
       let fetchCount = 0;
 
       makeFetchMock(async (url: string) => {
-        if (url.endsWith('/run/runX/status')) {
+        if (urlPath(url).endsWith('/run/runX/status')) {
           fetchCount++;
           return { status: 404, ok: false };
         }
@@ -1408,16 +1411,16 @@ describe('workflowRunnerClient (compat tests)', () => {
             }),
           };
         }
-        if (url.endsWith('/run/run1/status')) {
+        if (urlPath(url).endsWith('/run/run1/status')) {
           return { status: 404, ok: false };
         }
-        if (url.endsWith('/run/run2/status')) {
+        if (urlPath(url).endsWith('/run/run2/status')) {
           return {
             ok: true,
             json: async () => ({ run_id: 'run2', status: 'succeeded', seq: 2 }),
           };
         }
-        if (url.endsWith('/run/run3/status')) {
+        if (urlPath(url).endsWith('/run/run3/status')) {
           return {
             ok: true,
             json: async () => ({ run_id: 'run3', status: 'succeeded', seq: 3 }),
@@ -1464,10 +1467,10 @@ describe('workflowRunnerClient (compat tests)', () => {
             }),
           };
         }
-        if (url.endsWith('/run/runA/status')) {
+        if (urlPath(url).endsWith('/run/runA/status')) {
           return { status: 404, ok: false };
         }
-        if (url.endsWith('/run/runB/status')) {
+        if (urlPath(url).endsWith('/run/runB/status')) {
           return {
             ok: true,
             json: async () => ({ run_id: 'runB', status: 'succeeded', seq: 2 }),
@@ -1500,7 +1503,7 @@ describe('workflowRunnerClient (compat tests)', () => {
       let fetchCount = 0;
 
       makeFetchMock(async (url: string) => {
-        if (url.endsWith('/run/runX/status')) {
+        if (urlPath(url).endsWith('/run/runX/status')) {
           fetchCount++;
           return {
             ok: true,

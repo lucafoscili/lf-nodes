@@ -226,7 +226,14 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
       }
       if (state.selectedRunId !== lastSelectedRunId) {
         needs.main = true;
+        const previousRunId = lastSelectedRunId;
         lastSelectedRunId = state.selectedRunId;
+        if (previousRunId) {
+          this.#CLIENT.releaseRunDetail(previousRunId);
+        }
+        if (state.selectedRunId) {
+          void this.#CLIENT.loadRunDetail(state.selectedRunId);
+        }
       }
       if (state.view !== lastView) {
         needs.main = true;
@@ -344,7 +351,7 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
         }
         changeView(this.#STORE, 'run', {
           runId,
-          clearResults: false,
+          clearResults: true,
         });
         return;
       }

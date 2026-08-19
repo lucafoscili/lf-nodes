@@ -46,6 +46,7 @@ export interface WorkflowAPIDataset {
 export interface WorkflowCellBase {
   id: string;
   nodeId: string;
+  required?: boolean;
   title?: string;
   value?: string;
 }
@@ -57,10 +58,17 @@ export type WorkflowCellType = WorkflowCellInputId | WorkflowCellOutputId;
 export interface WorkflowCellInput extends WorkflowCellBase {
   props?: Partial<
     LfComponentPropsFor<
-      'LfButton' | 'LfChat' | 'LfCode' | 'LfMasonry' | 'LfTextfield' | 'LfToggle' | 'LfUpload'
+      | 'LfButton'
+      | 'LfChat'
+      | 'LfCode'
+      | 'LfMasonry'
+      | 'LfSelect'
+      | 'LfTextfield'
+      | 'LfToggle'
+      | 'LfUpload'
     >
   >;
-  shape?: 'chat' | 'textfield' | 'toggle' | 'upload';
+  shape?: 'chat' | 'choice' | 'select' | 'textfield' | 'toggle' | 'upload';
 }
 export interface WorkflowCellsInputContainer {
   [index: string]: WorkflowCellInput;
@@ -96,7 +104,18 @@ export interface WorkflowNodeOutputs
     DisplayStringNodeOutputs,
     LoadMetadataNodeOutputs,
     SaveSVGNodeOutputs,
-    SaveImageForCivitAINodeOutputs {}
+    SaveImageForCivitAINodeOutputs,
+    StandardComfyNodeOutputs {}
+export interface ComfyFileArtifact {
+  filename: string;
+  subfolder?: string;
+  type?: string;
+  url?: string;
+}
+export interface StandardComfyNodeOutputs {
+  animated?: boolean[];
+  images?: ComfyFileArtifact[];
+}
 export interface DisplayJSONNodeOutputs {
   json: Record<string, unknown>;
 }

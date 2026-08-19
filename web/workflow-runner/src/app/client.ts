@@ -52,6 +52,9 @@ export class WorkflowRunnerClient {
 
   // Async operation deduplication
   #INFLIGHT_RECONCILES = new Map<string, Promise<void>>();
+  #INFLIGHT_DETAILS = new Map<string, Promise<void>>();
+  #LOADED_DETAILS = new Set<string>();
+  #OPEN_DETAIL_RUN_ID: string | null = null;
 
   constructor(store: WorkflowStore) {
     this.#STORE = store;
@@ -106,7 +109,7 @@ export class WorkflowRunnerClient {
       return;
     }
 
-    const promise = this._reconcileRunOnce(run_id)
+    const promise = this._fetchRun(run_id, false)
       .catch(() => {
         // ignore transient errors
       })
@@ -117,9 +120,10 @@ export class WorkflowRunnerClient {
     this.#INFLIGHT_RECONCILES.set(run_id, promise);
   }
 
-  private async _reconcileRunOnce(run_id: string): Promise<void> {
+  private async _fetchRun(run_id: string, includeDetail: boolean): Promise<void> {
     try {
-      const resp = await fetch(`${API_ROOT}/run/${encodeURIComponent(run_id)}/status`, {
+      const detailQuery = includeDetail ? '' : '?detail=0';
+      const resp = await fetch(`${API_ROOT}/run/${encodeURIComponent(run_id)}/status${detailQuery}`, {
         credentials: 'include',
       });
 
@@ -133,6 +137,11 @@ export class WorkflowRunnerClient {
         return;
       }
       const data = await resp.json();
+      // A slow detail response must not resurrect a payload after the user
+      // has already left that card or opened another one.
+      if (includeDetail && this.#OPEN_DETAIL_RUN_ID !== run_id) {
+        return;
+      }
       const rec: RunRecord = {
         run_id: data.run_id,
         workflow_id: data.workflow_id,
@@ -141,13 +150,65 @@ export class WorkflowRunnerClient {
         owner_id: data.owner_id,
         created_at: data.created_at,
         updated_at: data.updated_at,
+        outputs: data.outputs,
         result: data.result,
         error: data.error,
       };
       this.upsertRun(rec);
+      if (includeDetail) {
+        this.#LOADED_DETAILS.add(run_id);
+      }
     } catch (e) {
       debugLog('reconcileRun error', 'warning', e);
       throw e;
+    }
+  }
+
+  /** Fetch a terminal result only when its output detail is actually opened. */
+  async loadRunDetail(run_id: string): Promise<void> {
+    if (!run_id) {
+      return;
+    }
+
+    if (this.#OPEN_DETAIL_RUN_ID && this.#OPEN_DETAIL_RUN_ID !== run_id) {
+      this.releaseRunDetail(this.#OPEN_DETAIL_RUN_ID);
+    }
+    this.#OPEN_DETAIL_RUN_ID = run_id;
+
+    if (this.#LOADED_DETAILS.has(run_id)) {
+      return;
+    }
+
+    const pending = this.#INFLIGHT_DETAILS.get(run_id);
+    if (pending) {
+      return pending;
+    }
+
+    const promise = this._fetchRun(run_id, true).finally(() => {
+      this.#INFLIGHT_DETAILS.delete(run_id);
+    });
+    this.#INFLIGHT_DETAILS.set(run_id, promise);
+    return promise;
+  }
+
+  /** Release the heavyweight payload while retaining the run's summary preview. */
+  releaseRunDetail(run_id?: string): void {
+    const target = run_id || this.#OPEN_DETAIL_RUN_ID;
+    if (!target) {
+      return;
+    }
+
+    const existing = this.#RUNS.get(target);
+    const hadResult = existing?.result !== undefined && existing.result !== null;
+    if (existing && hadResult) {
+      this.#RUNS.set(target, { ...existing, result: null });
+    }
+    this.#LOADED_DETAILS.delete(target);
+    if (this.#OPEN_DETAIL_RUN_ID === target) {
+      this.#OPEN_DETAIL_RUN_ID = null;
+    }
+    if (hadResult) {
+      this.emitUpdate();
     }
   }
 
@@ -172,7 +233,43 @@ export class WorkflowRunnerClient {
   // Upsert with seq monotonicity guard and workflow name fetch
   private upsertRun(rec: RunRecord) {
     const last = this.#LAST_SEQ.get(rec.run_id) ?? -1;
-    if (rec.seq <= last) return; // duplicate or older - don't regress seq
+    if (rec.seq < last) return; // older - don't regress seq
+
+    const existing = this.#RUNS.get(rec.run_id);
+    if (rec.seq === last && existing) {
+      const supplements = {
+        ...(rec.workflow_id !== undefined ? { workflow_id: rec.workflow_id } : {}),
+        ...(rec.owner_id !== undefined ? { owner_id: rec.owner_id } : {}),
+        ...(rec.created_at !== undefined ? { created_at: rec.created_at } : {}),
+        ...(rec.updated_at !== undefined ? { updated_at: rec.updated_at } : {}),
+        ...(rec.outputs !== undefined ? { outputs: rec.outputs } : {}),
+        ...(rec.result !== undefined ? { result: rec.result } : {}),
+        ...(rec.error !== undefined ? { error: rec.error } : {}),
+      };
+      const hasNewSupplement = Object.entries(supplements).some(
+        ([key, value]) => existing[key as keyof RunRecord] !== value,
+      );
+      if (!hasNewSupplement) {
+        return;
+      }
+
+      const merged: RunRecord = {
+        ...existing,
+        ...supplements,
+      };
+      this.#RUNS.set(rec.run_id, merged);
+      this.emitUpdate();
+      return;
+    }
+
+    const refreshOpenTerminalDetail =
+      !!existing &&
+      rec.seq > last &&
+      this.#OPEN_DETAIL_RUN_ID === rec.run_id &&
+      ['succeeded', 'failed', 'cancelled'].includes(rec.status);
+    if (existing && rec.seq > last) {
+      this.#LOADED_DETAILS.delete(rec.run_id);
+    }
 
     // Accept record
     this.#LAST_SEQ.set(rec.run_id, rec.seq);
@@ -184,12 +281,19 @@ export class WorkflowRunnerClient {
     }
 
     this.emitUpdate();
+    if (refreshOpenTerminalDetail) {
+      void this.loadRunDetail(rec.run_id);
+    }
   }
 
   // Remove a run completely from state and cache (used when server returns 404)
   private removeRun(runId: string) {
     this.#RUNS.delete(runId);
     this.#LAST_SEQ.delete(runId);
+    this.#LOADED_DETAILS.delete(runId);
+    if (this.#OPEN_DETAIL_RUN_ID === runId) {
+      this.#OPEN_DETAIL_RUN_ID = null;
+    }
     this.emitUpdate(); // triggers push to UI and saveCache
   }
 
@@ -393,7 +497,7 @@ export class WorkflowRunnerClient {
   private async coldLoadRuns(): Promise<void> {
     try {
       const resp = await fetch(
-        `${API_ROOT}/workflow-runner/runs?status=pending,running,succeeded,failed,cancelled,timeout&owner=me&limit=${
+        `${API_ROOT}/workflow-runner/runs?status=pending,running,succeeded,failed,cancelled,timeout&owner=me&summary=1&limit=${
           this.#RUNS_QUERY_LIMIT
         }`,
         { credentials: 'include' },
@@ -410,9 +514,12 @@ export class WorkflowRunnerClient {
 
       for (const localId of Array.from(this.#RUNS.keys())) {
         if (!serverIds.has(localId)) {
-          this.reconcileRun(localId);
+          this.#RUNS.delete(localId);
+          this.#LAST_SEQ.delete(localId);
+          this.#LOADED_DETAILS.delete(localId);
         }
       }
+      this.emitUpdate();
     } catch (e) {
       debugLog('coldLoadRuns error', 'warning', e);
     }
@@ -435,25 +542,13 @@ export class WorkflowRunnerClient {
     // 2) Cold-load authoritative runs
     await this.coldLoadRuns();
 
-    // 3) Hydrate IDs that server didn't list
-    const serverIds = new Set(
-      Array.from(this.#RUNS.keys()).filter((id) => {
-        const run = this.#RUNS.get(id);
-        return run && run.seq >= 0; // anything we've actually hydrated
-      }),
-    );
-    for (const id of cachedIds) {
-      if (!serverIds.has(id)) {
-        this.reconcileRun(id); // 404 => removeRun
-      }
-    }
-
-    // 4) Open SSE
+    // 3) Open SSE. The bounded server list is authoritative for history;
+    // cached ids outside it are deliberately not hydrated one-by-one.
     this.openSse();
   }
 
   private openSse() {
-    const url = `${API_ROOT}/workflow-runner/events`;
+    const url = `${API_ROOT}/workflow-runner/events?summary=1`;
 
     try {
       this.#ES = new EventSource(url);
@@ -474,6 +569,7 @@ export class WorkflowRunnerClient {
               owner_id: payload.owner_id,
               created_at: payload.created_at,
               updated_at: payload.updated_at,
+              outputs: payload.outputs,
               result: payload.result,
               error: payload.error,
             });
@@ -538,6 +634,7 @@ export class WorkflowRunnerClient {
           owner_id: payload.owner_id,
           created_at: payload.created_at,
           updated_at: payload.updated_at,
+          outputs: payload.outputs,
           result: payload.result,
           error: payload.error,
         });
@@ -582,6 +679,7 @@ export class WorkflowRunnerClient {
           owner_id: payload.owner_id,
           created_at: payload.created_at,
           updated_at: payload.updated_at,
+          outputs: payload.outputs,
           result: payload.result,
           error: payload.error,
         });
@@ -604,6 +702,7 @@ export class WorkflowRunnerClient {
               owner_id: payload.owner_id,
               created_at: payload.created_at,
               updated_at: payload.updated_at,
+              outputs: payload.outputs,
               result: payload.result,
               error: payload.error,
             });
@@ -642,6 +741,9 @@ export class WorkflowRunnerClient {
     }
 
     this.#INFLIGHT_RECONCILES.clear();
+    this.#INFLIGHT_DETAILS.clear();
+    this.#LOADED_DETAILS.clear();
+    this.#OPEN_DETAIL_RUN_ID = null;
   }
 
   getRuns(): Map<string, RunRecord> {
@@ -663,6 +765,8 @@ export class WorkflowRunnerClient {
     self.applyEvent = this.applyEvent.bind(this);
     self.upsertRun = this.upsertRun.bind(this);
     self.reconcileRun = this.reconcileRun.bind(this);
+    self.loadRunDetail = this.loadRunDetail.bind(this);
+    self.releaseRunDetail = this.releaseRunDetail.bind(this);
     self.pollActiveRuns = this.pollActiveRuns.bind(this);
     self.coldLoadRuns = this.coldLoadRuns.bind(this);
     self.processSnapshotArray = this.processSnapshotArray.bind(this);
@@ -677,6 +781,7 @@ export class WorkflowRunnerClient {
     self.lastSeq = this.#LAST_SEQ;
     self.runs = this.#RUNS;
     self.inflightReconciles = this.#INFLIGHT_RECONCILES;
+    self.inflightDetails = this.#INFLIGHT_DETAILS;
     self.processingSnapshot = this.#STATE.processingSnapshot;
     self.cacheKey = this.#CACHE_KEY;
     self.workflowNames = this.#WORKFLOW_CACHE;
@@ -707,7 +812,7 @@ export class WorkflowRunnerClient {
       this.#POLLING.abortController = ac;
 
       const resp = await fetch(
-        `${API_ROOT}/workflow-runner/runs?status=pending,running&owner=me&limit=${
+        `${API_ROOT}/workflow-runner/runs?status=pending,running&owner=me&summary=1&limit=${
           this.#RUNS_QUERY_LIMIT
         }`,
         { signal: ac.signal, credentials: 'include' },

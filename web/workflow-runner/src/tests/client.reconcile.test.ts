@@ -7,6 +7,7 @@ import { createWorkflowRunnerStore } from '../app/store';
 import { RunRecord } from '../types/client';
 
 const store = createWorkflowRunnerStore(initState());
+const urlPath = (url: string) => url.split('?')[0];
 
 describe('workflowRunnerClient - reconcile', () => {
   it('triggers reconcile on gap detection', async () => {
@@ -26,7 +27,7 @@ describe('workflowRunnerClient - reconcile', () => {
   it('reconcileRun updates state', async () => {
     const client = new WorkflowRunnerClient(store);
     makeFetchMock(async (url: string) => {
-      if (url.endsWith('/run/r3/status') || url.includes('/run/r3/status')) {
+      if (urlPath(url).endsWith('/run/r3/status')) {
         return {
           ok: true,
           json: async () => ({ run_id: 'r3', status: 'succeeded', seq: 5, result: { ok: true } }),
@@ -56,7 +57,7 @@ describe('workflowRunnerClient - reconcile', () => {
     getClientInternalsWithMethods(client).applyEvent(initialRun);
 
     makeFetchMock(async (url: string) => {
-      if (url.endsWith('/run/reconcile-wf-1/status')) {
+      if (urlPath(url).endsWith('/run/reconcile-wf-1/status')) {
         return {
           ok: true,
           json: async () => ({

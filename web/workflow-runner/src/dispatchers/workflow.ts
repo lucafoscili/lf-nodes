@@ -32,6 +32,11 @@ const _collectInputs = async (store: WorkflowStore): Promise<Record<string, unkn
         inputs[id] = value;
         break;
       }
+      case 'lf-select': {
+        const selected = await (cell as HTMLLfSelectElement).getValue();
+        inputs[id] = selected?.value ?? selected?.id ?? null;
+        break;
+      }
       case 'lf-toggle': {
         const value = await (cell as HTMLLfToggleElement).getValue();
         inputs[id] = value === 'off' ? false : true;
@@ -40,7 +45,14 @@ const _collectInputs = async (store: WorkflowStore): Promise<Record<string, unkn
       case 'lf-upload': {
         try {
           const value = await (cell as HTMLLfUploadElement).getValue();
-          inputs[id] = await _handleUploadCell(store, value);
+          const uploaded = await _handleUploadCell(
+            store,
+            value,
+            cell.dataset.required !== 'false',
+          );
+          if (uploaded !== undefined) {
+            inputs[id] = uploaded;
+          }
         } catch (error) {
           _setCellStatus(store, id, 'error');
           throw error;
@@ -56,11 +68,18 @@ const _collectInputs = async (store: WorkflowStore): Promise<Record<string, unkn
 
   return inputs;
 };
-const _handleUploadCell = async (store: WorkflowStore, rawValue: unknown) => {
+const _handleUploadCell = async (
+  store: WorkflowStore,
+  rawValue: unknown,
+  required: boolean,
+) => {
   const { ERROR_UPLOADING_FILE, RUNNING_UPLOADING_FILE } = STATUS_MESSAGES;
 
   const files = Array.isArray(rawValue) ? rawValue : (rawValue as File[] | undefined);
   if (!files || files.length === 0) {
+    if (!required) {
+      return undefined;
+    }
     throw new Error('No files selected for upload.');
   }
 

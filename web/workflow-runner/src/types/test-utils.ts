@@ -34,6 +34,7 @@ export interface ClientInternals {
   lastSeq: Map<string, number>;
   runs: Map<string, RunRecord>;
   inflightReconciles: Map<string, Promise<void>>;
+  inflightDetails: Map<string, Promise<void>>;
   processingSnapshot: boolean;
   cacheKey: string;
   workflowNames?: Map<string, string>;
@@ -43,6 +44,8 @@ export interface ClientInternalsMethods {
   applyEvent: (ev: RunRecord) => void;
   upsertRun: (rec: RunRecord) => void;
   reconcileRun: (runId: string) => void;
+  loadRunDetail: (runId: string) => Promise<void>;
+  releaseRunDetail: (runId?: string) => void;
   pollActiveRuns: () => Promise<void>;
   coldLoadRuns: () => Promise<void>;
   processSnapshotArray: (arr: RunRecord[]) => void;

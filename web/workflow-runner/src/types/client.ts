@@ -1,4 +1,4 @@
-import { WorkflowRunResultPayload, WorkflowRunStatus } from './api';
+import { WorkflowNodeResults, WorkflowRunResultPayload, WorkflowRunStatus } from './api';
 
 //#region Run record
 export type RunRecord = {
@@ -9,6 +9,7 @@ export type RunRecord = {
   owner_id?: string | null;
   created_at?: number | null;
   updated_at?: number | null;
+  outputs?: WorkflowNodeResults | null;
   result?: WorkflowRunResultPayload | null;
   error?: string | null;
 };
@@ -28,6 +29,7 @@ export type QueuePayload = {
   owner_id?: string;
   created_at?: number;
   updated_at?: number;
+  outputs?: WorkflowNodeResults;
   result?: WorkflowRunResultPayload;
   error?: string;
 };

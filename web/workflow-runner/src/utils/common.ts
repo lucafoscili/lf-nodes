@@ -24,7 +24,7 @@ export const deepMerge = (defs: WorkflowCellsOutputContainer, outs: WorkflowNode
   for (const id in defs) {
     const cell = defs[id];
     const { nodeId } = cell;
-    const result = outs?.[nodeId]?.lf_output[0] || outs?.[nodeId]?.[0] || outs?.[nodeId];
+    const result = outs?.[nodeId]?.lf_output?.[0] || outs?.[nodeId]?.[0] || outs?.[nodeId];
 
     const item: WorkflowCellOutputItem = {
       ...JSON.parse(JSON.stringify(cell)),
@@ -125,6 +125,9 @@ export const formatTimestamp = (timestamp: number) => {
 };
 export const recordToUI = (rec: RunRecord, wfs: Record<string, string> = {}) => {
   const { created_at, error, result, run_id, status, updated_at, workflow_id } = rec;
+  const hasResult = rec.result !== undefined;
+  const resultOutputs = result?.body?.payload?.history?.outputs || null;
+  const outputs = rec.outputs !== undefined ? rec.outputs : hasResult ? resultOutputs : undefined;
 
   const now = Date.now();
   const map: WorkflowRunEntryUpdate = {
@@ -135,9 +138,9 @@ export const recordToUI = (rec: RunRecord, wfs: Record<string, string> = {}) => 
     workflowId: workflow_id ?? null,
     workflowName: (workflow_id && wfs[workflow_id]) || 'Unknown workflow',
     error: error ?? null,
-    httpStatus: result?.http_status ?? null,
-    resultPayload: result ?? null,
-    outputs: result?.body?.payload?.history?.outputs || null,
+    httpStatus: hasResult ? result?.http_status ?? null : undefined,
+    resultPayload: hasResult ? result ?? null : undefined,
+    outputs,
     inputs: {}, // TODO: populate if available in rec
   };
 

@@ -490,6 +490,11 @@ const createComponent = {
     _setProps("LfMasonry", comp, props, slot_map);
     return comp;
   },
+  select: (props) => {
+    const comp = document.createElement("lf-select");
+    _setProps("LfSelect", comp, props);
+    return comp;
+  },
   textfield: (props) => {
     const comp = document.createElement("lf-textfield");
     _setProps("LfTextfield", comp, props);
@@ -514,6 +519,11 @@ const createInputCell = (cell) => {
       const p = props || {};
       return createComponent.chat(sanitizeProps(p, "LfChat"));
     }
+    case "choice":
+    case "select": {
+      const p = props || {};
+      return createComponent.select(sanitizeProps(p, "LfSelect"));
+    }
     case "toggle": {
       const p = props || {};
       return createComponent.toggle(sanitizeProps(p, "LfToggle"));
@@ -529,10 +539,70 @@ const createInputCell = (cell) => {
     }
   }
 };
+const _artifactUrl = (artifact) => {
+  if (artifact.url && artifact.url.startsWith("/")) {
+    return artifact.url;
+  }
+  const params = new URLSearchParams({
+    filename: artifact.filename,
+    subfolder: artifact.subfolder || "",
+    type: artifact.type || "output"
+  });
+  return `/view?${params.toString()}`;
+};
+const _mediaOutput = (artifacts) => {
+  if (!Array.isArray(artifacts) || artifacts.length === 0) {
+    return null;
+  }
+  const media = document.createElement("div");
+  media.className = "workflow-output-media";
+  for (const artifact of artifacts) {
+    if (!(artifact == null ? void 0 : artifact.filename)) {
+      continue;
+    }
+    const item = document.createElement("figure");
+    item.className = "workflow-output-media__item";
+    const src = _artifactUrl(artifact);
+    const isVideo = /\.(?:mp4|webm)$/i.test(artifact.filename);
+    if (isVideo) {
+      const video = document.createElement("video");
+      video.className = "workflow-output-media__preview";
+      video.controls = true;
+      video.playsInline = true;
+      video.preload = "metadata";
+      video.src = src;
+      item.appendChild(video);
+    } else {
+      const image = document.createElement("img");
+      image.alt = artifact.filename;
+      image.className = "workflow-output-media__preview";
+      image.loading = "lazy";
+      image.src = src;
+      item.appendChild(image);
+    }
+    const link = document.createElement("a");
+    link.className = "workflow-output-media__link";
+    link.href = src;
+    link.rel = "noopener";
+    link.target = "_blank";
+    link.textContent = artifact.filename;
+    item.appendChild(link);
+    media.appendChild(item);
+  }
+  return media.childElementCount > 0 ? media : null;
+};
 const createOutputComponent = (descriptor) => {
   const { syntax } = getLfFramework();
-  const { civitai_metadata, dataset, file_names, json, metadata, props, shape, slot_map, string, svg } = descriptor;
+  const { civitai_metadata, dataset, file_names, images, json, metadata, props, shape, slot_map, string, svg } = descriptor;
   const el = document.createElement("div");
+  const media = _mediaOutput(images);
+  if (media) {
+    el.appendChild(media);
+    const hasLegacyPayload = shape === "masonry" ? dataset !== void 0 && dataset !== null : Boolean(string || svg || civitai_metadata || (file_names == null ? void 0 : file_names.length) || json || metadata || dataset);
+    if (!hasLegacyPayload) {
+      return el;
+    }
+  }
   switch (shape) {
     case "code": {
       const p = props || {};
@@ -839,12 +909,12 @@ const _tryParseJson = (value) => {
   }
 };
 const deepMerge = (defs, outs) => {
-  var _a, _b;
+  var _a, _b, _c;
   const prep = [];
   for (const id in defs) {
     const cell = defs[id];
     const { nodeId } = cell;
-    const result = ((_a = outs == null ? void 0 : outs[nodeId]) == null ? void 0 : _a.lf_output[0]) || ((_b = outs == null ? void 0 : outs[nodeId]) == null ? void 0 : _b[0]) || (outs == null ? void 0 : outs[nodeId]);
+    const result = ((_b = (_a = outs == null ? void 0 : outs[nodeId]) == null ? void 0 : _a.lf_output) == null ? void 0 : _b[0]) || ((_c = outs == null ? void 0 : outs[nodeId]) == null ? void 0 : _c[0]) || (outs == null ? void 0 : outs[nodeId]);
     const item = {
       ...JSON.parse(JSON.stringify(cell)),
       ...JSON.parse(JSON.stringify(result || {}))
@@ -909,6 +979,9 @@ const formatTimestamp = (timestamp) => {
 const recordToUI = (rec, wfs = {}) => {
   var _a, _b, _c;
   const { created_at, error, result, run_id, status, updated_at, workflow_id } = rec;
+  const hasResult = rec.result !== void 0;
+  const resultOutputs = ((_c = (_b = (_a = result == null ? void 0 : result.body) == null ? void 0 : _a.payload) == null ? void 0 : _b.history) == null ? void 0 : _c.outputs) || null;
+  const outputs = rec.outputs !== void 0 ? rec.outputs : hasResult ? resultOutputs : void 0;
   const now = Date.now();
   const map = {
     runId: run_id,
@@ -918,9 +991,9 @@ const recordToUI = (rec, wfs = {}) => {
     workflowId: workflow_id ?? null,
     workflowName: workflow_id && wfs[workflow_id] || "Unknown workflow",
     error: error ?? null,
-    httpStatus: (result == null ? void 0 : result.http_status) ?? null,
-    resultPayload: result ?? null,
-    outputs: ((_c = (_b = (_a = result == null ? void 0 : result.body) == null ? void 0 : _a.payload) == null ? void 0 : _b.history) == null ? void 0 : _c.outputs) || null,
+    httpStatus: hasResult ? (result == null ? void 0 : result.http_status) ?? null : void 0,
+    resultPayload: hasResult ? result ?? null : void 0,
+    outputs,
     inputs: {}
     // TODO: populate if available in rec
   };
@@ -1405,9 +1478,6 @@ const masonryHandler = (e, store) => {
         if (isValidCard) {
           const { id } = node;
           manager.runs.select(id, "run");
-          const selected = manager.runs.get(id);
-          const selectedOutputs = JSON.parse(JSON.stringify(selected.outputs)) || null;
-          store.getState().mutate.results(selectedOutputs);
         }
         break;
       default:
@@ -1495,7 +1565,7 @@ const _extractImageFromDataset = (dataset) => {
   }
   return null;
 };
-const _getFirstOutputImageUrl = (outputs) => {
+const getFirstOutputMediaUrl = (outputs) => {
   if (!outputs) {
     return "";
   }
@@ -1506,6 +1576,23 @@ const _getFirstOutputImageUrl = (outputs) => {
     const { code: codeIcon, forms: stringIcon, json: jsonIcon, photoX: fallback } = theme$3.get.icons();
     let foundImage = null;
     let fallbackCandidate = null;
+    const artifacts = payload.images;
+    if (Array.isArray(artifacts)) {
+      const artifact = artifacts.find((item) => item && (item.url || item.filename));
+      if (artifact) {
+        if (typeof artifact.url === "string" && artifact.url.startsWith("/")) {
+          return { image: artifact.url, fallback: null };
+        }
+        if (typeof artifact.filename === "string" && artifact.filename) {
+          const params = new URLSearchParams({
+            filename: artifact.filename,
+            subfolder: artifact.subfolder || "",
+            type: artifact.type || "output"
+          });
+          return { image: `/view?${params.toString()}`, fallback: null };
+        }
+      }
+    }
     if (Array.isArray(payload.lf_output)) {
       for (const entry of payload.lf_output) {
         const { dataset: dataset2, file_names, json, metadata, string, svg } = entry;
@@ -1624,7 +1711,7 @@ const _itemCardCell = (run) => {
     },
     lfImage: {
       shape: "image",
-      value: _getFirstOutputImageUrl(run.outputs)
+      value: getFirstOutputMediaUrl(run.outputs)
     }
   };
   const lfCard = {
@@ -1884,6 +1971,9 @@ const createInputsSection = (store) => {
         wrapper.dataset.shape = cell.shape || "";
         const component = createInputCell(cell);
         component.id = id;
+        if (cell.required === false) {
+          component.dataset.required = "false";
+        }
         cellElements.push(component);
         wrapper.appendChild(component);
         options.appendChild(wrapper);
@@ -2076,6 +2166,11 @@ const _collectInputs = async (store) => {
         inputs[id] = value;
         break;
       }
+      case "lf-select": {
+        const selected = await cell.getValue();
+        inputs[id] = (selected == null ? void 0 : selected.value) ?? (selected == null ? void 0 : selected.id) ?? null;
+        break;
+      }
       case "lf-toggle": {
         const value = await cell.getValue();
         inputs[id] = value === "off" ? false : true;
@@ -2084,7 +2179,10 @@ const _collectInputs = async (store) => {
       case "lf-upload": {
         try {
           const value = await cell.getValue();
-          inputs[id] = await _handleUploadCell(store, value);
+          const uploaded = await _handleUploadCell(store, value, cell.dataset.required !== "false");
+          if (uploaded !== void 0) {
+            inputs[id] = uploaded;
+          }
         } catch (error) {
           _setCellStatus(store, id, "error");
           throw error;
@@ -2099,11 +2197,14 @@ const _collectInputs = async (store) => {
   }
   return inputs;
 };
-const _handleUploadCell = async (store, rawValue) => {
+const _handleUploadCell = async (store, rawValue, required) => {
   var _a;
   const { ERROR_UPLOADING_FILE, RUNNING_UPLOADING_FILE } = STATUS_MESSAGES;
   const files = Array.isArray(rawValue) ? rawValue : rawValue;
   if (!files || files.length === 0) {
+    if (!required) {
+      return void 0;
+    }
     throw new Error("No files selected for upload.");
   }
   try {
@@ -2399,7 +2500,7 @@ var __classPrivateFieldGet$1 = function(receiver, state, kind, f) {
   if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 };
-var _WorkflowRunnerClient_ES, _WorkflowRunnerClient_STORE, _WorkflowRunnerClient_WORKFLOW_NAMES, _WorkflowRunnerClient_CACHE_KEY, _WorkflowRunnerClient_CACHE_EXPIRY_MS, _WorkflowRunnerClient_INITIAL_BACKOFF_MS, _WorkflowRunnerClient_MAX_BACKOFF_MS, _WorkflowRunnerClient_POLLING_INTERVAL_MS, _WorkflowRunnerClient_RUNS_QUERY_LIMIT, _WorkflowRunnerClient_EVENT_RUN, _WorkflowRunnerClient_EVENT_QUEUE, _WorkflowRunnerClient_LAST_SEQ, _WorkflowRunnerClient_RUNS, _WorkflowRunnerClient_WORKFLOW_CACHE, _WorkflowRunnerClient_STATE, _WorkflowRunnerClient_POLLING, _WorkflowRunnerClient_BACKOFF_MS, _WorkflowRunnerClient_INFLIGHT_RECONCILES;
+var _WorkflowRunnerClient_ES, _WorkflowRunnerClient_STORE, _WorkflowRunnerClient_WORKFLOW_NAMES, _WorkflowRunnerClient_CACHE_KEY, _WorkflowRunnerClient_CACHE_EXPIRY_MS, _WorkflowRunnerClient_INITIAL_BACKOFF_MS, _WorkflowRunnerClient_MAX_BACKOFF_MS, _WorkflowRunnerClient_POLLING_INTERVAL_MS, _WorkflowRunnerClient_RUNS_QUERY_LIMIT, _WorkflowRunnerClient_EVENT_RUN, _WorkflowRunnerClient_EVENT_QUEUE, _WorkflowRunnerClient_LAST_SEQ, _WorkflowRunnerClient_RUNS, _WorkflowRunnerClient_WORKFLOW_CACHE, _WorkflowRunnerClient_STATE, _WorkflowRunnerClient_POLLING, _WorkflowRunnerClient_BACKOFF_MS, _WorkflowRunnerClient_INFLIGHT_RECONCILES, _WorkflowRunnerClient_INFLIGHT_DETAILS, _WorkflowRunnerClient_LOADED_DETAILS, _WorkflowRunnerClient_OPEN_DETAIL_RUN_ID;
 class WorkflowRunnerClient {
   constructor(store) {
     _WorkflowRunnerClient_ES.set(this, null);
@@ -2426,6 +2527,9 @@ class WorkflowRunnerClient {
     });
     _WorkflowRunnerClient_BACKOFF_MS.set(this, 1e3);
     _WorkflowRunnerClient_INFLIGHT_RECONCILES.set(this, /* @__PURE__ */ new Map());
+    _WorkflowRunnerClient_INFLIGHT_DETAILS.set(this, /* @__PURE__ */ new Map());
+    _WorkflowRunnerClient_LOADED_DETAILS.set(this, /* @__PURE__ */ new Set());
+    _WorkflowRunnerClient_OPEN_DETAIL_RUN_ID.set(this, null);
     this.onUpdate = (runs) => {
       var _a;
       if (Object.keys(__classPrivateFieldGet$1(this, _WorkflowRunnerClient_WORKFLOW_NAMES, "f")).length === 0) {
@@ -2469,15 +2573,16 @@ class WorkflowRunnerClient {
     if (__classPrivateFieldGet$1(this, _WorkflowRunnerClient_INFLIGHT_RECONCILES, "f").has(run_id)) {
       return;
     }
-    const promise = this._reconcileRunOnce(run_id).catch(() => {
+    const promise = this._fetchRun(run_id, false).catch(() => {
     }).finally(() => {
       __classPrivateFieldGet$1(this, _WorkflowRunnerClient_INFLIGHT_RECONCILES, "f").delete(run_id);
     });
     __classPrivateFieldGet$1(this, _WorkflowRunnerClient_INFLIGHT_RECONCILES, "f").set(run_id, promise);
   }
-  async _reconcileRunOnce(run_id) {
+  async _fetchRun(run_id, includeDetail) {
     try {
-      const resp = await fetch(`${API_ROOT}/run/${encodeURIComponent(run_id)}/status`, {
+      const detailQuery = includeDetail ? "" : "?detail=0";
+      const resp = await fetch(`${API_ROOT}/run/${encodeURIComponent(run_id)}/status${detailQuery}`, {
         credentials: "include"
       });
       if (resp.status === 404) {
@@ -2489,6 +2594,9 @@ class WorkflowRunnerClient {
         return;
       }
       const data = await resp.json();
+      if (includeDetail && __classPrivateFieldGet$1(this, _WorkflowRunnerClient_OPEN_DETAIL_RUN_ID, "f") !== run_id) {
+        return;
+      }
       const rec = {
         run_id: data.run_id,
         workflow_id: data.workflow_id,
@@ -2497,13 +2605,58 @@ class WorkflowRunnerClient {
         owner_id: data.owner_id,
         created_at: data.created_at,
         updated_at: data.updated_at,
+        outputs: data.outputs,
         result: data.result,
         error: data.error
       };
       this.upsertRun(rec);
+      if (includeDetail) {
+        __classPrivateFieldGet$1(this, _WorkflowRunnerClient_LOADED_DETAILS, "f").add(run_id);
+      }
     } catch (e) {
       debugLog("reconcileRun error", "warning", e);
       throw e;
+    }
+  }
+  /** Fetch a terminal result only when its output detail is actually opened. */
+  async loadRunDetail(run_id) {
+    if (!run_id) {
+      return;
+    }
+    if (__classPrivateFieldGet$1(this, _WorkflowRunnerClient_OPEN_DETAIL_RUN_ID, "f") && __classPrivateFieldGet$1(this, _WorkflowRunnerClient_OPEN_DETAIL_RUN_ID, "f") !== run_id) {
+      this.releaseRunDetail(__classPrivateFieldGet$1(this, _WorkflowRunnerClient_OPEN_DETAIL_RUN_ID, "f"));
+    }
+    __classPrivateFieldSet$1(this, _WorkflowRunnerClient_OPEN_DETAIL_RUN_ID, run_id, "f");
+    if (__classPrivateFieldGet$1(this, _WorkflowRunnerClient_LOADED_DETAILS, "f").has(run_id)) {
+      return;
+    }
+    const pending = __classPrivateFieldGet$1(this, _WorkflowRunnerClient_INFLIGHT_DETAILS, "f").get(run_id);
+    if (pending) {
+      return pending;
+    }
+    const promise = this._fetchRun(run_id, true).finally(() => {
+      __classPrivateFieldGet$1(this, _WorkflowRunnerClient_INFLIGHT_DETAILS, "f").delete(run_id);
+    });
+    __classPrivateFieldGet$1(this, _WorkflowRunnerClient_INFLIGHT_DETAILS, "f").set(run_id, promise);
+    return promise;
+  }
+  /** Release the heavyweight payload while retaining the run's summary preview. */
+  releaseRunDetail(run_id) {
+    const target = run_id || __classPrivateFieldGet$1(this, _WorkflowRunnerClient_OPEN_DETAIL_RUN_ID, "f");
+    if (!target) {
+      return;
+    }
+    const existing = __classPrivateFieldGet$1(this, _WorkflowRunnerClient_RUNS, "f").get(target);
+    const hadResult = (existing == null ? void 0 : existing.result) !== void 0 && existing.result !== null;
+    if (existing && hadResult) {
+      __classPrivateFieldGet$1(this, _WorkflowRunnerClient_RUNS, "f").set(target, { ...existing, result: null });
+    }
+    __classPrivateFieldGet$1(this, _WorkflowRunnerClient_LOADED_DETAILS, "f").delete(target);
+    if (__classPrivateFieldGet$1(this, _WorkflowRunnerClient_OPEN_DETAIL_RUN_ID, "f") === target) {
+      __classPrivateFieldSet$1(this, _WorkflowRunnerClient_OPEN_DETAIL_RUN_ID, null, "f");
+    }
+    if (hadResult) {
+      this.emitUpdate();
     }
   }
   applyEvent(ev) {
@@ -2520,19 +2673,53 @@ class WorkflowRunnerClient {
   // Upsert with seq monotonicity guard and workflow name fetch
   upsertRun(rec) {
     const last = __classPrivateFieldGet$1(this, _WorkflowRunnerClient_LAST_SEQ, "f").get(rec.run_id) ?? -1;
-    if (rec.seq <= last)
+    if (rec.seq < last)
       return;
+    const existing = __classPrivateFieldGet$1(this, _WorkflowRunnerClient_RUNS, "f").get(rec.run_id);
+    if (rec.seq === last && existing) {
+      const supplements = {
+        ...rec.workflow_id !== void 0 ? { workflow_id: rec.workflow_id } : {},
+        ...rec.owner_id !== void 0 ? { owner_id: rec.owner_id } : {},
+        ...rec.created_at !== void 0 ? { created_at: rec.created_at } : {},
+        ...rec.updated_at !== void 0 ? { updated_at: rec.updated_at } : {},
+        ...rec.outputs !== void 0 ? { outputs: rec.outputs } : {},
+        ...rec.result !== void 0 ? { result: rec.result } : {},
+        ...rec.error !== void 0 ? { error: rec.error } : {}
+      };
+      const hasNewSupplement = Object.entries(supplements).some(([key, value]) => existing[key] !== value);
+      if (!hasNewSupplement) {
+        return;
+      }
+      const merged = {
+        ...existing,
+        ...supplements
+      };
+      __classPrivateFieldGet$1(this, _WorkflowRunnerClient_RUNS, "f").set(rec.run_id, merged);
+      this.emitUpdate();
+      return;
+    }
+    const refreshOpenTerminalDetail = !!existing && rec.seq > last && __classPrivateFieldGet$1(this, _WorkflowRunnerClient_OPEN_DETAIL_RUN_ID, "f") === rec.run_id && ["succeeded", "failed", "cancelled"].includes(rec.status);
+    if (existing && rec.seq > last) {
+      __classPrivateFieldGet$1(this, _WorkflowRunnerClient_LOADED_DETAILS, "f").delete(rec.run_id);
+    }
     __classPrivateFieldGet$1(this, _WorkflowRunnerClient_LAST_SEQ, "f").set(rec.run_id, rec.seq);
     __classPrivateFieldGet$1(this, _WorkflowRunnerClient_RUNS, "f").set(rec.run_id, rec);
     if (rec.workflow_id && !__classPrivateFieldGet$1(this, _WorkflowRunnerClient_WORKFLOW_CACHE, "f").has(rec.workflow_id)) {
       this.fetchWorkflowNames([rec.workflow_id]);
     }
     this.emitUpdate();
+    if (refreshOpenTerminalDetail) {
+      void this.loadRunDetail(rec.run_id);
+    }
   }
   // Remove a run completely from state and cache (used when server returns 404)
   removeRun(runId) {
     __classPrivateFieldGet$1(this, _WorkflowRunnerClient_RUNS, "f").delete(runId);
     __classPrivateFieldGet$1(this, _WorkflowRunnerClient_LAST_SEQ, "f").delete(runId);
+    __classPrivateFieldGet$1(this, _WorkflowRunnerClient_LOADED_DETAILS, "f").delete(runId);
+    if (__classPrivateFieldGet$1(this, _WorkflowRunnerClient_OPEN_DETAIL_RUN_ID, "f") === runId) {
+      __classPrivateFieldSet$1(this, _WorkflowRunnerClient_OPEN_DETAIL_RUN_ID, null, "f");
+    }
     this.emitUpdate();
   }
   processSnapshotArray(arr) {
@@ -2706,7 +2893,7 @@ class WorkflowRunnerClient {
   // Cold-load runs from server before SSE connection (restores state after refresh)
   async coldLoadRuns() {
     try {
-      const resp = await fetch(`${API_ROOT}/workflow-runner/runs?status=pending,running,succeeded,failed,cancelled,timeout&owner=me&limit=${__classPrivateFieldGet$1(this, _WorkflowRunnerClient_RUNS_QUERY_LIMIT, "f")}`, { credentials: "include" });
+      const resp = await fetch(`${API_ROOT}/workflow-runner/runs?status=pending,running,succeeded,failed,cancelled,timeout&owner=me&summary=1&limit=${__classPrivateFieldGet$1(this, _WorkflowRunnerClient_RUNS_QUERY_LIMIT, "f")}`, { credentials: "include" });
       if (!resp || !resp.ok) {
         debugLog("coldLoadRuns: fetch failed", "informational", resp == null ? void 0 : resp.status);
         return;
@@ -2717,9 +2904,12 @@ class WorkflowRunnerClient {
       this.processSnapshotArray(arr);
       for (const localId of Array.from(__classPrivateFieldGet$1(this, _WorkflowRunnerClient_RUNS, "f").keys())) {
         if (!serverIds.has(localId)) {
-          this.reconcileRun(localId);
+          __classPrivateFieldGet$1(this, _WorkflowRunnerClient_RUNS, "f").delete(localId);
+          __classPrivateFieldGet$1(this, _WorkflowRunnerClient_LAST_SEQ, "f").delete(localId);
+          __classPrivateFieldGet$1(this, _WorkflowRunnerClient_LOADED_DETAILS, "f").delete(localId);
         }
       }
+      this.emitUpdate();
     } catch (e) {
       debugLog("coldLoadRuns error", "warning", e);
     }
@@ -2735,19 +2925,10 @@ class WorkflowRunnerClient {
       this.seedPlaceholders(cachedIds);
     }
     await this.coldLoadRuns();
-    const serverIds = new Set(Array.from(__classPrivateFieldGet$1(this, _WorkflowRunnerClient_RUNS, "f").keys()).filter((id) => {
-      const run = __classPrivateFieldGet$1(this, _WorkflowRunnerClient_RUNS, "f").get(id);
-      return run && run.seq >= 0;
-    }));
-    for (const id of cachedIds) {
-      if (!serverIds.has(id)) {
-        this.reconcileRun(id);
-      }
-    }
     this.openSse();
   }
   openSse() {
-    const url = `${API_ROOT}/workflow-runner/events`;
+    const url = `${API_ROOT}/workflow-runner/events?summary=1`;
     try {
       __classPrivateFieldSet$1(this, _WorkflowRunnerClient_ES, new EventSource(url), "f");
     } catch (err) {
@@ -2766,6 +2947,7 @@ class WorkflowRunnerClient {
               owner_id: payload.owner_id,
               created_at: payload.created_at,
               updated_at: payload.updated_at,
+              outputs: payload.outputs,
               result: payload.result,
               error: payload.error
             });
@@ -2819,6 +3001,7 @@ class WorkflowRunnerClient {
           owner_id: payload.owner_id,
           created_at: payload.created_at,
           updated_at: payload.updated_at,
+          outputs: payload.outputs,
           result: payload.result,
           error: payload.error
         });
@@ -2858,6 +3041,7 @@ class WorkflowRunnerClient {
           owner_id: payload.owner_id,
           created_at: payload.created_at,
           updated_at: payload.updated_at,
+          outputs: payload.outputs,
           result: payload.result,
           error: payload.error
         });
@@ -2878,6 +3062,7 @@ class WorkflowRunnerClient {
               owner_id: payload2.owner_id,
               created_at: payload2.created_at,
               updated_at: payload2.updated_at,
+              outputs: payload2.outputs,
               result: payload2.result,
               error: payload2.error
             });
@@ -2912,6 +3097,9 @@ class WorkflowRunnerClient {
       __classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").abortController = null;
     }
     __classPrivateFieldGet$1(this, _WorkflowRunnerClient_INFLIGHT_RECONCILES, "f").clear();
+    __classPrivateFieldGet$1(this, _WorkflowRunnerClient_INFLIGHT_DETAILS, "f").clear();
+    __classPrivateFieldGet$1(this, _WorkflowRunnerClient_LOADED_DETAILS, "f").clear();
+    __classPrivateFieldSet$1(this, _WorkflowRunnerClient_OPEN_DETAIL_RUN_ID, null, "f");
   }
   getRuns() {
     return __classPrivateFieldGet$1(this, _WorkflowRunnerClient_RUNS, "f");
@@ -2930,6 +3118,8 @@ class WorkflowRunnerClient {
     self.applyEvent = this.applyEvent.bind(this);
     self.upsertRun = this.upsertRun.bind(this);
     self.reconcileRun = this.reconcileRun.bind(this);
+    self.loadRunDetail = this.loadRunDetail.bind(this);
+    self.releaseRunDetail = this.releaseRunDetail.bind(this);
     self.pollActiveRuns = this.pollActiveRuns.bind(this);
     self.coldLoadRuns = this.coldLoadRuns.bind(this);
     self.processSnapshotArray = this.processSnapshotArray.bind(this);
@@ -2943,6 +3133,7 @@ class WorkflowRunnerClient {
     self.lastSeq = __classPrivateFieldGet$1(this, _WorkflowRunnerClient_LAST_SEQ, "f");
     self.runs = __classPrivateFieldGet$1(this, _WorkflowRunnerClient_RUNS, "f");
     self.inflightReconciles = __classPrivateFieldGet$1(this, _WorkflowRunnerClient_INFLIGHT_RECONCILES, "f");
+    self.inflightDetails = __classPrivateFieldGet$1(this, _WorkflowRunnerClient_INFLIGHT_DETAILS, "f");
     self.processingSnapshot = __classPrivateFieldGet$1(this, _WorkflowRunnerClient_STATE, "f").processingSnapshot;
     self.cacheKey = __classPrivateFieldGet$1(this, _WorkflowRunnerClient_CACHE_KEY, "f");
     self.workflowNames = __classPrivateFieldGet$1(this, _WorkflowRunnerClient_WORKFLOW_CACHE, "f");
@@ -2967,7 +3158,7 @@ class WorkflowRunnerClient {
       }
       const ac = new AbortController();
       __classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").abortController = ac;
-      const resp = await fetch(`${API_ROOT}/workflow-runner/runs?status=pending,running&owner=me&limit=${__classPrivateFieldGet$1(this, _WorkflowRunnerClient_RUNS_QUERY_LIMIT, "f")}`, { signal: ac.signal, credentials: "include" });
+      const resp = await fetch(`${API_ROOT}/workflow-runner/runs?status=pending,running&owner=me&summary=1&limit=${__classPrivateFieldGet$1(this, _WorkflowRunnerClient_RUNS_QUERY_LIMIT, "f")}`, { signal: ac.signal, credentials: "include" });
       if (!resp.ok) {
         return;
       }
@@ -2990,7 +3181,7 @@ class WorkflowRunnerClient {
     return Math.floor(base * jitterFactor);
   }
 }
-_WorkflowRunnerClient_ES = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_STORE = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_WORKFLOW_NAMES = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_CACHE_KEY = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_CACHE_EXPIRY_MS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_INITIAL_BACKOFF_MS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_MAX_BACKOFF_MS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_POLLING_INTERVAL_MS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_RUNS_QUERY_LIMIT = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_EVENT_RUN = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_EVENT_QUEUE = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_LAST_SEQ = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_RUNS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_WORKFLOW_CACHE = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_STATE = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_POLLING = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_BACKOFF_MS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_INFLIGHT_RECONCILES = /* @__PURE__ */ new WeakMap();
+_WorkflowRunnerClient_ES = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_STORE = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_WORKFLOW_NAMES = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_CACHE_KEY = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_CACHE_EXPIRY_MS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_INITIAL_BACKOFF_MS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_MAX_BACKOFF_MS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_POLLING_INTERVAL_MS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_RUNS_QUERY_LIMIT = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_EVENT_RUN = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_EVENT_QUEUE = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_LAST_SEQ = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_RUNS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_WORKFLOW_CACHE = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_STATE = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_POLLING = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_BACKOFF_MS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_INFLIGHT_RECONCILES = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_INFLIGHT_DETAILS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_LOADED_DETAILS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_OPEN_DETAIL_RUN_ID = /* @__PURE__ */ new WeakMap();
 const RUN_PARAM = "runId";
 const VIEW_PARAM = "view";
 const WORKFLOW_PARAM = "workflowId";
@@ -3495,7 +3686,7 @@ class LfWorkflowRunnerManager {
           }
           changeView(__classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f"), "run", {
             runId,
-            clearResults: false
+            clearResults: true
           });
           return;
         }
@@ -3724,7 +3915,14 @@ _LfWorkflowRunnerManager_FRAMEWORK = /* @__PURE__ */ new WeakMap(), _LfWorkflowR
     }
     if (state.selectedRunId !== lastSelectedRunId) {
       needs.main = true;
+      const previousRunId = lastSelectedRunId;
       lastSelectedRunId = state.selectedRunId;
+      if (previousRunId) {
+        __classPrivateFieldGet(this, _LfWorkflowRunnerManager_CLIENT, "f").releaseRunDetail(previousRunId);
+      }
+      if (state.selectedRunId) {
+        void __classPrivateFieldGet(this, _LfWorkflowRunnerManager_CLIENT, "f").loadRunDetail(state.selectedRunId);
+      }
     }
     if (state.view !== lastView) {
       needs.main = true;

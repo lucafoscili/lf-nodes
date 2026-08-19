@@ -122,6 +122,9 @@ export const createInputsSection = (store: WorkflowStore): WorkflowSectionContro
 
         const component = createInputCell(cell);
         component.id = id;
+        if (cell.required === false) {
+          component.dataset.required = 'false';
+        }
 
         cellElements.push(component);
         wrapper.appendChild(component);

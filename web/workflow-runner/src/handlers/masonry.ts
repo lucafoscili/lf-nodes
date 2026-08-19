@@ -21,9 +21,6 @@ export const masonryHandler = (e: CustomEvent<LfMasonryEventPayload>, store: Wor
         if (isValidCard) {
           const { id } = node;
           manager.runs.select(id, 'run');
-          const selected = manager.runs.get(id);
-          const selectedOutputs = JSON.parse(JSON.stringify(selected.outputs)) || null;
-          store.getState().mutate.results(selectedOutputs);
         }
 
         break;

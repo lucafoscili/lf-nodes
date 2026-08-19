@@ -87,7 +87,7 @@ const _extractImageFromDataset = (dataset: LfDataDataset | undefined): string | 
 
   return null;
 };
-const _getFirstOutputImageUrl = (outputs: WorkflowNodeResults | null) => {
+export const getFirstOutputMediaUrl = (outputs: WorkflowNodeResults | null) => {
   if (!outputs) {
     return '';
   }
@@ -107,6 +107,24 @@ const _getFirstOutputImageUrl = (outputs: WorkflowNodeResults | null) => {
 
     let foundImage: string | null = null;
     let fallbackCandidate: string | null = null;
+
+    const artifacts = (payload as { images?: Array<{ filename?: string; subfolder?: string; type?: string; url?: string }> }).images;
+    if (Array.isArray(artifacts)) {
+      const artifact = artifacts.find((item) => item && (item.url || item.filename));
+      if (artifact) {
+        if (typeof artifact.url === 'string' && artifact.url.startsWith('/')) {
+          return { image: artifact.url, fallback: null };
+        }
+        if (typeof artifact.filename === 'string' && artifact.filename) {
+          const params = new URLSearchParams({
+            filename: artifact.filename,
+            subfolder: artifact.subfolder || '',
+            type: artifact.type || 'output',
+          });
+          return { image: `/view?${params.toString()}`, fallback: null };
+        }
+      }
+    }
 
     if (Array.isArray(payload.lf_output)) {
       for (const entry of payload.lf_output) {
@@ -239,7 +257,7 @@ const _itemCardCell = (run: WorkflowRunEntry) => {
     },
     lfImage: {
       shape: 'image',
-      value: _getFirstOutputImageUrl(run.outputs),
+      value: getFirstOutputMediaUrl(run.outputs),
     },
   };
 

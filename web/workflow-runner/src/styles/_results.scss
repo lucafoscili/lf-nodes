@@ -65,3 +65,28 @@
     z-index: calc(var(--lf-ui-zindex-backdrop) - 1);
   }
 }
+
+.workflow-output-media {
+  display: grid;
+  gap: 1em;
+
+  &__item {
+    display: grid;
+    gap: 0.5em;
+    margin: 0;
+  }
+
+  &__preview {
+    background: black;
+    border-radius: var(--lf-ui-border-radius);
+    display: block;
+    max-height: 70vh;
+    object-fit: contain;
+    width: 100%;
+  }
+
+  &__link {
+    color: rgb(var(--lf-color-primary));
+    overflow-wrap: anywhere;
+  }
+}

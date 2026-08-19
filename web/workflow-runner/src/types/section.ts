@@ -5,6 +5,7 @@ export type WorkflowMainSections = 'home' | 'inputs' | 'outputs' | 'results';
 export type WorkflowUICell =
   | HTMLLfButtonElement
   | HTMLLfChatElement
+  | HTMLLfSelectElement
   | HTMLLfTextfieldElement
   | HTMLLfToggleElement
   | HTMLLfUploadElement;
