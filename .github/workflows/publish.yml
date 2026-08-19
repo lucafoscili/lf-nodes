@@ -35,17 +35,6 @@ jobs:
           # Always fetch all branches and tags to ensure history and tags exist
           # for later steps that compute tags/commits.
           git fetch --all --tags
-      - name: Get Previous Tag
-        id: previous_tag
-        run: |
-          # Resolve the most recent tag that precedes the commit we are about to release.
-          PREVIOUS_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
-          echo "previous_tag=$PREVIOUS_TAG" >> $GITHUB_OUTPUT
-      - name: Publish Custom Node
-        uses: Comfy-Org/publish-node-action@v1
-        with:
-          ## Add your own personal access token to your Github Repository secrets and reference it here.
-          personal_access_token: ${{ secrets.REGISTRY_ACCESS_TOKEN }}
       - name: Install TOML Parser
         run: pip install tomli
       - name: Extract Version from pyproject.toml
@@ -53,6 +42,9 @@ jobs:
         run: |
           VERSION=$(python3 -c "import tomli; data = tomli.load(open('pyproject.toml', 'rb')); print(data['project']['version'])")
           echo "version=$VERSION" >> $GITHUB_OUTPUT
+      - name: Capture Release Commit
+        id: release_commit
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
       - name: Check if Tag Exists
         id: check_tag
         run: |
@@ -62,40 +54,25 @@ jobs:
           else
             echo "tag_exists=false" >> $GITHUB_OUTPUT
           fi
-      - name: Generate Release Notes from Commits
+      - name: Generate Release Notes
         if: steps.check_tag.outputs.tag_exists == 'false'
-        id: generate_notes
         run: |
-          PREV_TAG='${{ steps.previous_tag.outputs.previous_tag }}'
-
-          if [ -n "$PREV_TAG" ] && git rev-parse --verify "$PREV_TAG" >/dev/null 2>&1; then
-            REV_RANGE="$PREV_TAG..HEAD"
-          else
-            REV_RANGE="HEAD"
-          fi
-
-          COMMITS_RAW=$(git rev-list --no-merges $REV_RANGE)
-
-          if [ -z "$COMMITS_RAW" ]; then
-            RANGE_LABEL=$([ -n "$PREV_TAG" ] && echo "$PREV_TAG and HEAD" || echo "repository start and HEAD")
-            COMMITS="- (no commits detected between $RANGE_LABEL)"
-          else
-            COMMITS=""
-            while read -r commit_sha; do
-              [ -z "$commit_sha" ] && continue
-              entry=$(git show -s --format="%h %s" "$commit_sha")
-              COMMITS="$COMMITS- $entry"$'\n'
-            done <<< "$COMMITS_RAW"
-            COMMITS="${COMMITS%"$'\n'"}"
-          fi
-          echo "commits<<EOF" >> $GITHUB_OUTPUT
-          echo "$COMMITS" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          python3 scripts/generate_release_notes.py \
+            --repo . \
+            --release-head '${{ steps.release_commit.outputs.sha }}' \
+            --current-tag 'v${{ steps.extract_version.outputs.version }}' \
+            --version '${{ steps.extract_version.outputs.version }}' \
+            --output .github-release-notes.md
+      - name: Publish Custom Node
+        uses: Comfy-Org/publish-node-action@v1
+        with:
+          ## Add your own personal access token to your Github Repository secrets and reference it here.
+          personal_access_token: ${{ secrets.REGISTRY_ACCESS_TOKEN }}
       - name: Create and Push Tag
         if: steps.check_tag.outputs.tag_exists == 'false'
         run: |
           TAG_NAME="v${{ steps.extract_version.outputs.version }}"
-          git tag "$TAG_NAME"
+          git tag "$TAG_NAME" '${{ steps.release_commit.outputs.sha }}'
           git push origin "$TAG_NAME"
       - name: Create GitHub Release
         if: steps.check_tag.outputs.tag_exists == 'false'
@@ -103,15 +80,6 @@ jobs:
         with:
           tag_name: v${{ steps.extract_version.outputs.version }}
           name: v${{ steps.extract_version.outputs.version }}
-          body: |
-            Version: `${{ steps.extract_version.outputs.version }}`
-
-            ## Commits
-
-            ${{ steps.generate_notes.outputs.commits }}
-
-            ## Install
-
-            Install from the Comfy registry.
+          body_path: .github-release-notes.md
           prerelease: false
           generate_release_notes: false
