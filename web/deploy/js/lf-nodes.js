@@ -1771,6 +1771,18 @@ const onDrawBackground = async (nodeType) => {
     return r;
   };
 };
+const normalizeTextWidgetValue = (value) => {
+  if (value === null || value === void 0) {
+    return "";
+  }
+  if (typeof value === "string") {
+    return value;
+  }
+  if (typeof value === "number" || typeof value === "boolean" || typeof value === "bigint") {
+    return String(value);
+  }
+  return "";
+};
 const onNodeCreated = async (nodeType) => {
   const onNodeCreated2 = nodeType.prototype.onNodeCreated;
   nodeType.prototype.onNodeCreated = function() {
@@ -1797,7 +1809,7 @@ const onNodeCreated = async (nodeType) => {
         case ComfyWidgetName.text:
           w.serializeValue = () => {
             const comfy = getApiRoutes().comfy.comfyUi();
-            return comfy.utils.applyTextReplacements(comfy.app.app, w.value);
+            return comfy.utils.applyTextReplacements(comfy.app.app, normalizeTextWidgetValue(w.value));
           };
           break;
       }

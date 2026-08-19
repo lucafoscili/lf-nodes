@@ -214,6 +214,25 @@ export const onDrawBackground = async (nodeType: NodeType) => {
 //#endregion
 
 //#region onNodeCreated
+/**
+ * Comfy's text replacement utility expects a string, but older workflow
+ * snapshots can hydrate text-like widgets with numbers, null, or structured
+ * values. Normalize at the LF boundary so queue serialization remains
+ * compatible with both old and current workflows.
+ */
+export const normalizeTextWidgetValue = (value: unknown): string => {
+  if (value === null || value === undefined) {
+    return '';
+  }
+  if (typeof value === 'string') {
+    return value;
+  }
+  if (typeof value === 'number' || typeof value === 'boolean' || typeof value === 'bigint') {
+    return String(value);
+  }
+  return '';
+};
+
 export const onNodeCreated = async (nodeType: NodeType) => {
   const onNodeCreated = nodeType.prototype.onNodeCreated;
 
@@ -243,7 +262,10 @@ export const onNodeCreated = async (nodeType: NodeType) => {
         case ComfyWidgetName.text:
           w.serializeValue = () => {
             const comfy = getApiRoutes().comfy.comfyUi();
-            return comfy.utils.applyTextReplacements(comfy.app.app, w.value);
+            return comfy.utils.applyTextReplacements(
+              comfy.app.app,
+              normalizeTextWidgetValue(w.value),
+            );
           };
           break;
       }
