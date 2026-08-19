@@ -111,10 +111,13 @@ export interface ComfyFileArtifact {
   subfolder?: string;
   type?: string;
   url?: string;
+  media_type?: string;
 }
 export interface StandardComfyNodeOutputs {
   animated?: boolean[];
   images?: ComfyFileArtifact[];
+  audio?: ComfyFileArtifact[];
+  audios?: ComfyFileArtifact[];
 }
 export interface DisplayJSONNodeOutputs {
   json: Record<string, unknown>;

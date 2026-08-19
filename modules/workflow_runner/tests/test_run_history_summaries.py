@@ -34,6 +34,30 @@ def _large_result(index: int) -> dict:
     }
 
 
+def test_output_preview_keeps_audio_distinct_from_images() -> None:
+    result = {
+        "body": {
+            "payload": {
+                "history": {
+                    "outputs": {
+                        "save": {
+                            "images": [
+                                {"filename": "portrait.png", "subfolder": "", "type": "output"},
+                                {"filename": "mix.wav", "subfolder": "", "type": "output"},
+                            ]
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    preview = build_output_preview(result)
+
+    assert [item["filename"] for item in preview["save"]["images"]] == ["portrait.png"]
+    assert [item["filename"] for item in preview["save"]["audios"]] == ["mix.wav"]
+
+
 def test_output_preview_keeps_only_view_artifacts() -> None:
     preview = build_output_preview(_large_result(7))
 

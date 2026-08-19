@@ -551,6 +551,7 @@ const _artifactUrl = (artifact) => {
   return `/view?${params.toString()}`;
 };
 const _mediaOutput = (artifacts) => {
+  var _a;
   if (!Array.isArray(artifacts) || artifacts.length === 0) {
     return null;
   }
@@ -563,8 +564,17 @@ const _mediaOutput = (artifacts) => {
     const item = document.createElement("figure");
     item.className = "workflow-output-media__item";
     const src = _artifactUrl(artifact);
-    const isVideo = /\.(?:mp4|webm)$/i.test(artifact.filename);
-    if (isVideo) {
+    const mediaType = ((_a = artifact.media_type) == null ? void 0 : _a.toLowerCase()) || "";
+    const isAudio = mediaType.startsWith("audio/") || /\.(?:wav|mp3|m4a|flac|ogg|opus)$/i.test(artifact.filename);
+    const isVideo = mediaType.startsWith("video/") || /\.(?:mp4|webm)$/i.test(artifact.filename);
+    if (isAudio) {
+      const audio = document.createElement("audio");
+      audio.className = "workflow-output-media__preview";
+      audio.controls = true;
+      audio.preload = "metadata";
+      audio.src = src;
+      item.appendChild(audio);
+    } else if (isVideo) {
       const video = document.createElement("video");
       video.className = "workflow-output-media__preview";
       video.controls = true;
@@ -593,9 +603,9 @@ const _mediaOutput = (artifacts) => {
 };
 const createOutputComponent = (descriptor) => {
   const { syntax } = getLfFramework();
-  const { civitai_metadata, dataset, file_names, images, json, metadata, props, shape, slot_map, string, svg } = descriptor;
+  const { civitai_metadata, dataset, audio, file_names, audios, images, json, metadata, props, shape, slot_map, string, svg } = descriptor;
   const el = document.createElement("div");
-  const media = _mediaOutput(images);
+  const media = _mediaOutput([...images || [], ...audio || [], ...audios || []]);
   if (media) {
     el.appendChild(media);
     const hasLegacyPayload = shape === "masonry" ? dataset !== void 0 && dataset !== null : Boolean(string || svg || civitai_metadata || (file_names == null ? void 0 : file_names.length) || json || metadata || dataset);
@@ -1576,8 +1586,12 @@ const getFirstOutputMediaUrl = (outputs) => {
     const { code: codeIcon, forms: stringIcon, json: jsonIcon, photoX: fallback } = theme$3.get.icons();
     let foundImage = null;
     let fallbackCandidate = null;
-    const artifacts = payload.images;
-    if (Array.isArray(artifacts)) {
+    const artifacts = [
+      ...payload.images || [],
+      ...payload.audio || [],
+      ...payload.audios || []
+    ];
+    if (artifacts.length) {
       const artifact = artifacts.find((item) => item && (item.url || item.filename));
       if (artifact) {
         if (typeof artifact.url === "string" && artifact.url.startsWith("/")) {

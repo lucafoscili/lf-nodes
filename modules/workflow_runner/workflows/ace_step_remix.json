@@ -1,0 +1,33 @@
+{
+  "remix": {
+    "inputs": {
+      "source_audio": "",
+      "mode": "cover",
+      "style_prompt": "",
+      "lyrics": "",
+      "instrumental": false,
+      "audio_cover_strength": 1.0,
+      "cover_noise_strength": 0.2,
+      "repaint_start": 0.0,
+      "repaint_end": -1.0,
+      "seed": -1,
+      "inference_steps": 8,
+      "guidance_scale": 7.0,
+      "infer_method": "ode",
+      "shift": 3.0,
+      "output_format": "mp3"
+    },
+    "class_type": "LF_ACEStepRemix",
+    "_meta": {"title": "ACE-Step audio remix"}
+  },
+  "output_reference": {
+    "inputs": {"ui_widget": "", "string": ["remix", 0]},
+    "class_type": "LF_DisplayString",
+    "_meta": {"title": "Portable output reference"}
+  },
+  "receipt": {
+    "inputs": {"ui_widget": "", "json_input": ["remix", 1]},
+    "class_type": "LF_DisplayJSON",
+    "_meta": {"title": "Remix receipt"}
+  }
+}

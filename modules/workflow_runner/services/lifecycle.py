@@ -263,6 +263,10 @@ def _media_type(filename: str) -> Optional[str]:
         "webm": "video/webm",
         "wav": "audio/wav",
         "mp3": "audio/mpeg",
+        "m4a": "audio/mp4",
+        "flac": "audio/flac",
+        "ogg": "audio/ogg",
+        "opus": "audio/opus",
         "json": "application/json",
         "txt": "text/plain",
     }.get(extension)

@@ -76,7 +76,9 @@ def build_output_preview(result: Any, max_artifacts: int = 24) -> dict:
             "type": storage_type,
             "url": f"/view?{urlencode({'filename': filename, 'subfolder': subfolder, 'type': storage_type})}",
         }
-        preview.setdefault(node_id, {"images": []})["images"].append(descriptor)
+        extension = filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
+        bucket = "audios" if extension in {"wav", "mp3", "m4a", "flac", "ogg", "opus"} else "images"
+        preview.setdefault(node_id, {}).setdefault(bucket, []).append(descriptor)
         remaining -= 1
 
     def add_view_url(node_id: str, value: Any) -> None:

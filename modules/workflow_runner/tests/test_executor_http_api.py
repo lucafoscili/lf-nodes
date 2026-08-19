@@ -256,7 +256,12 @@ async def execute_workflow(
         if preferred_output is None:
             for output_name, output_value in (history_entry.get("outputs") or {}).items():
                 try:
-                    if isinstance(output_value, dict) and (output_value.get("images") or output_value.get("lf_images")):
+                    if isinstance(output_value, dict) and (
+                        output_value.get("images")
+                        or output_value.get("lf_images")
+                        or output_value.get("audio")
+                        or output_value.get("audios")
+                    ):
                         preferred_output = output_name
                         break
                 except Exception:
@@ -405,6 +410,33 @@ async def test_successful_prompt_submission(mock_aiohttp_session):
     # Verify HTTP calls
     assert mock_aiohttp_session.post_call_count == 1
     assert mock_aiohttp_session.get_call_count == 2  # One for monitor, one for wait
+
+
+@pytest.mark.asyncio
+async def test_preferred_output_accepts_raw_audio_artifacts(mock_aiohttp_session):
+    """Raw Comfy SaveAudio-style outputs remain eligible as the preferred output."""
+    prompt_response = MockResponse(200, {"prompt_id": "test-prompt-audio"})
+    history_response = MockResponse(200, {
+        "test-prompt-audio": {
+            "status": {"status_str": "success", "completed": True},
+            "outputs": {
+                "save_audio": {
+                    "audio": [{"filename": "mix.m4a", "type": "output"}],
+                }
+            },
+        }
+    })
+
+    mock_aiohttp_session.post_responses = [prompt_response]
+    mock_aiohttp_session.get_responses = [history_response, history_response]
+
+    status, response, http_code = await execute_workflow(
+        {"workflowId": "audio-workflow", "inputs": {}}, "test-run-audio"
+    )
+
+    assert status == JobStatus.SUCCEEDED
+    assert http_code == 200
+    assert response["payload"]["preferred_output"] == "save_audio"
 
 # Test 2: Configurable backend URL
 @pytest.mark.asyncio

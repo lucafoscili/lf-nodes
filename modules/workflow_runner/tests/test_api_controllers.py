@@ -481,6 +481,63 @@ class TestApiControllers:
         assert response_data["data"] == base64.b64encode(b'mock_png_data').decode('utf-8')
 
     @pytest.mark.asyncio
+    async def test_get_workflow_status_controller_headless_audio_detail_returns_preview(self, api_controllers):
+        """Audio-only headless detail responses expose bounded descriptors, not audio bytes."""
+        mock_request = MagicMock()
+        mock_request.match_info = {"run_id": "headless-audio-123"}
+
+        async def mock_get_job_status(run_id):
+            return None
+
+        from unittest.mock import AsyncMock
+        mock_session = MagicMock()
+        mock_response = MagicMock()
+        mock_response.status = 200
+        mock_response.json = AsyncMock(return_value={
+            "headless-audio-123": {
+                "status": {"completed": True},
+                "outputs": {
+                    "remix": {
+                        "audio": [
+                            {
+                                "filename": "remix.wav",
+                                "subfolder": "",
+                                "type": "output",
+                            }
+                        ]
+                    }
+                }
+            }
+        })
+        mock_session.get.return_value.__aenter__.return_value = mock_response
+        mock_session.get.return_value.__aexit__.return_value = None
+        mock_session.__aenter__.return_value = mock_session
+        mock_session.__aexit__.return_value = None
+
+        with patch.object(api_controllers, 'get_job_status', side_effect=mock_get_job_status), \
+             patch('aiohttp.ClientSession', return_value=mock_session), \
+             patch.object(api_controllers, 'extract_base64_data_from_result', return_value=None), \
+             patch.object(api_controllers, 'build_output_preview', return_value={
+                 "remix": {
+                     "audios": [{
+                         "filename": "remix.wav",
+                         "subfolder": "",
+                         "type": "output",
+                         "url": "/view?filename=remix.wav&type=output",
+                     }]
+                 }
+             }):
+            response = await api_controllers.get_workflow_status_controller(mock_request)
+
+        assert response.status == 200
+        response_data = json.loads(response.text)
+        assert response_data["run_id"] == "headless-audio-123"
+        assert response_data["status"] == "succeeded"
+        assert "data" not in response_data
+        assert response_data["outputs"]["remix"]["audios"][0]["filename"] == "remix.wav"
+        assert "remix.wav" in response.text
+
+    @pytest.mark.asyncio
     async def test_get_workflow_status_controller_headless_run_no_outputs(self, api_controllers):
         """Test status controller handles headless runs found in ComfyUI history with no outputs."""
         # Mock request

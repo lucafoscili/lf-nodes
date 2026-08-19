@@ -205,8 +205,17 @@ const _mediaOutput = (artifacts: ComfyFileArtifact[] | undefined) => {
     item.className = 'workflow-output-media__item';
 
     const src = _artifactUrl(artifact);
-    const isVideo = /\.(?:mp4|webm)$/i.test(artifact.filename);
-    if (isVideo) {
+    const mediaType = artifact.media_type?.toLowerCase() || '';
+    const isAudio = mediaType.startsWith('audio/') || /\.(?:wav|mp3|m4a|flac|ogg|opus)$/i.test(artifact.filename);
+    const isVideo = mediaType.startsWith('video/') || /\.(?:mp4|webm)$/i.test(artifact.filename);
+    if (isAudio) {
+      const audio = document.createElement('audio');
+      audio.className = 'workflow-output-media__preview';
+      audio.controls = true;
+      audio.preload = 'metadata';
+      audio.src = src;
+      item.appendChild(audio);
+    } else if (isVideo) {
       const video = document.createElement('video');
       video.className = 'workflow-output-media__preview';
       video.controls = true;
@@ -242,7 +251,9 @@ export const createOutputComponent = (descriptor: WorkflowCellOutput) => {
   const {
     civitai_metadata,
     dataset,
+    audio,
     file_names,
+    audios,
     images,
     json,
     metadata,
@@ -253,7 +264,7 @@ export const createOutputComponent = (descriptor: WorkflowCellOutput) => {
     svg,
   } = descriptor;
   const el = document.createElement('div');
-  const media = _mediaOutput(images);
+  const media = _mediaOutput([...(images || []), ...(audio || []), ...(audios || [])]);
   if (media) {
     el.appendChild(media);
     const hasLegacyPayload =

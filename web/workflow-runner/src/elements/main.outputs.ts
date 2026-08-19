@@ -108,8 +108,12 @@ export const getFirstOutputMediaUrl = (outputs: WorkflowNodeResults | null) => {
     let foundImage: string | null = null;
     let fallbackCandidate: string | null = null;
 
-    const artifacts = (payload as { images?: Array<{ filename?: string; subfolder?: string; type?: string; url?: string }> }).images;
-    if (Array.isArray(artifacts)) {
+    const artifacts = [
+      ...(((payload as { images?: Array<{ filename?: string; subfolder?: string; type?: string; url?: string }> }).images) || []),
+      ...(((payload as { audio?: Array<{ filename?: string; subfolder?: string; type?: string; url?: string }> }).audio) || []),
+      ...(((payload as { audios?: Array<{ filename?: string; subfolder?: string; type?: string; url?: string }> }).audios) || []),
+    ];
+    if (artifacts.length) {
       const artifact = artifacts.find((item) => item && (item.url || item.filename));
       if (artifact) {
         if (typeof artifact.url === 'string' && artifact.url.startsWith('/')) {

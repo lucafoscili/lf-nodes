@@ -29,6 +29,18 @@ describe('history summary/detail boundary', () => {
     );
   });
 
+  it('finds a raw Comfy singular audio preview URL', () => {
+    expect(getFirstOutputMediaUrl({
+      save: {
+        audio: [{
+          filename: 'raw-output.m4a',
+          subfolder: 'audio',
+          type: 'output',
+        }],
+      },
+    })).toBe('/view?filename=raw-output.m4a&subfolder=audio&type=output');
+  });
+
   it('fetches one full result only when one run detail is requested', async () => {
     const store = createWorkflowRunnerStore(initState());
     const client = new WorkflowRunnerClient(store);

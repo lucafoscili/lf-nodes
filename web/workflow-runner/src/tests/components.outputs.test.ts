@@ -48,6 +48,41 @@ describe('createOutputComponent standard Comfy artifacts', () => {
     );
   });
 
+  it.each(['wav', 'mp3', 'm4a', 'flac', 'ogg', 'opus'])('renders %s artifacts as native audio', (extension) => {
+    const component = createOutputComponent({
+      id: 'audio',
+      nodeId: 'save',
+      shape: 'masonry',
+      audios: [{ filename: `mix.${extension}`, subfolder: '', type: 'output' }],
+    } as WorkflowCellOutput);
+
+    const audio = component.querySelector('audio');
+    expect(audio instanceof HTMLAudioElement).toBe(true);
+    expect(audio?.controls).toBe(true);
+    expect(audio?.preload).toBe('metadata');
+    expect(audio?.getAttribute('src')).toBe(
+      `/view?filename=mix.${extension}&subfolder=&type=output`,
+    );
+    expect(component.querySelector('img')).toBeNull();
+  });
+
+  it('renders raw Comfy singular audio output and does not fall back to an image', () => {
+    const component = createOutputComponent({
+      id: 'audio',
+      nodeId: 'save',
+      shape: 'masonry',
+      audio: [{ filename: 'raw-output.m4a', subfolder: 'audio', type: 'output' }],
+    } as WorkflowCellOutput);
+
+    const audio = component.querySelector('audio');
+    expect(audio instanceof HTMLAudioElement).toBe(true);
+    expect(audio?.controls).toBe(true);
+    expect(audio?.getAttribute('src')).toBe(
+      '/view?filename=raw-output.m4a&subfolder=audio&type=output',
+    );
+    expect(component.querySelector('img')).toBeNull();
+  });
+
   it('preserves legacy structured output when standard media is also present', () => {
     const dataset = { nodes: [{ id: 'metadata', value: 'seed-42' }] };
     const component = createOutputComponent({

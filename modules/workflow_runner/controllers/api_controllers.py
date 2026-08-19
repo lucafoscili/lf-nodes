@@ -488,6 +488,22 @@ async def get_workflow_status_controller(request: web.Request) -> web.Response:
                             if data_tuple:
                                 mime_type, base64_data = data_tuple
                                 return web.json_response({"data": base64_data}, content_type=mime_type)
+
+                            # Audio-only histories have no bounded legacy ``data``
+                            # representation. Return the same descriptor preview
+                            # as summary requests so callers can render/download
+                            # the audio without echoing its bytes in JSON.
+                            output_preview = build_output_preview(mock_result)
+                            if any(
+                                isinstance(node_output, dict) and node_output.get("audios")
+                                for node_output in output_preview.values()
+                            ):
+                                return web.json_response({
+                                    "run_id": run_id,
+                                    "status": "succeeded",
+                                    "seq": 0,
+                                    "outputs": output_preview,
+                                })
                         
                         return web.json_response({"status": "completed"})
                     else:

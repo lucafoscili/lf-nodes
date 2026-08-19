@@ -571,7 +571,12 @@ async def finalize_workflow(
         if preferred_output is None:
             for output_name, output_value in (history_entry.get("outputs") or {}).items():
                 try:
-                    if isinstance(output_value, dict) and (output_value.get("images") or output_value.get("lf_images")):
+                    if isinstance(output_value, dict) and (
+                        output_value.get("images")
+                        or output_value.get("lf_images")
+                        or output_value.get("audio")
+                        or output_value.get("audios")
+                    ):
                         preferred_output = output_name
                         break
                 except Exception:

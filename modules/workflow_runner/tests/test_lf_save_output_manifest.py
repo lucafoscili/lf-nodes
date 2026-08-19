@@ -157,3 +157,27 @@ def test_rejects_unsafe_standard_artifact_paths() -> None:
     )
 
     assert manifest["artifacts"] == []
+
+
+def test_classifies_common_audio_artifacts_with_media_types() -> None:
+    manifest = manifest_for(
+        {
+            "images": [
+                {"filename": "mix.wav", "subfolder": "", "type": "output"},
+                {"filename": "mix.mp3", "subfolder": "", "type": "output"},
+                {"filename": "mix.m4a", "subfolder": "", "type": "output"},
+                {"filename": "mix.flac", "subfolder": "", "type": "output"},
+                {"filename": "mix.ogg", "subfolder": "", "type": "output"},
+                {"filename": "mix.opus", "subfolder": "", "type": "output"},
+            ]
+        }
+    )
+
+    assert [artifact["media_type"] for artifact in manifest["artifacts"]] == [
+        "audio/wav",
+        "audio/mpeg",
+        "audio/mp4",
+        "audio/flac",
+        "audio/ogg",
+        "audio/opus",
+    ]
