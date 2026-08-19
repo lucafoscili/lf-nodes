@@ -1,0 +1,85 @@
+{
+  "1": {
+    "inputs": {
+      "ckpt_name": "Genesis v0.10.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": { "title": "Load Checkpoint" }
+  },
+  "2": {
+    "inputs": {
+      "stop_at_clip_layer": -2,
+      "clip": ["1", 1]
+    },
+    "class_type": "CLIPSetLastLayer",
+    "_meta": { "title": "CLIP Set Last Layer" }
+  },
+  "3": {
+    "inputs": {
+      "text": "masterpiece, best quality, 1girl, solo",
+      "clip": ["2", 0]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": { "title": "CLIP Text Encode (Prompt)" }
+  },
+  "4": {
+    "inputs": {
+      "text": "text, watermark, signature, username, bad quality, worst quality, lowres, jpeg artifacts, nsfw, bad anatomy, bad hands, extra digits, fewer digits, multiple views",
+      "clip": ["2", 0]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": { "title": "CLIP Text Encode (Negative)" }
+  },
+  "5": {
+    "inputs": {
+      "width": 832,
+      "height": 1216,
+      "batch_size": 1
+    },
+    "class_type": "EmptyLatentImage",
+    "_meta": { "title": "Empty Latent Image" }
+  },
+  "6": {
+    "inputs": {
+      "seed": 42,
+      "steps": 28,
+      "cfg": 5,
+      "sampler_name": "euler_ancestral",
+      "scheduler": "normal",
+      "denoise": 1,
+      "model": ["1", 0],
+      "positive": ["3", 0],
+      "negative": ["4", 0],
+      "latent_image": ["5", 0]
+    },
+    "class_type": "KSampler",
+    "_meta": { "title": "KSampler" }
+  },
+  "8": {
+    "inputs": {
+      "samples": ["6", 0],
+      "vae": ["1", 2]
+    },
+    "class_type": "VAEDecode",
+    "_meta": { "title": "VAE Decode" }
+  },
+  "7": {
+    "inputs": {
+      "filename_prefix": "lf-workflow-runner/illustrious-xl",
+      "add_timestamp": true,
+      "embed_workflow": true,
+      "extension": "png",
+      "quality": 100,
+      "ui_widget": {
+        "columns": 3,
+        "dataset": {},
+        "index": null,
+        "name": "",
+        "view": "main"
+      },
+      "image": ["8", 0]
+    },
+    "class_type": "LF_SaveImageForCivitAI",
+    "_meta": { "title": "Save image with CivitAI-compatible metadata" }
+  }
+}
