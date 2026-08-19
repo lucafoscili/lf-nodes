@@ -24,6 +24,9 @@ async def get_job_status(run_id: str) -> Optional[Dict[str, Any]]:
         return None
 
     is_terminal = job.status in {JobStatus.SUCCEEDED, JobStatus.FAILED, JobStatus.CANCELLED}
+    inputs = getattr(job, "inputs", {})
+    if not isinstance(inputs, dict):
+        inputs = {}
     payload = {
         "run_id": job.id,
         "workflow_id": job.workflow_id,
@@ -33,6 +36,9 @@ async def get_job_status(run_id: str) -> Optional[Dict[str, Any]]:
         "result": job.result if is_terminal else None,
         "seq": getattr(job, "seq", 0),
         "owner_id": job.owner_id,
+        # Detail/status callers may use this bounded snapshot to replay/remix
+        # a run.  List/SSE serializers intentionally do not read this field.
+        "inputs": inputs,
         "updated_at": getattr(job, "updated_at", None),
     }
     return payload

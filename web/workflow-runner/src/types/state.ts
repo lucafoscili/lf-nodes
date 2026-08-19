@@ -23,6 +23,7 @@ export interface WorkflowState {
   isDebug: boolean;
   manager: WorkflowManager | null;
   inputStatuses: Record<string, WorkflowCellStatus>;
+  inputPrefillRunId: string | null;
   mutate: WorkflowStateMutators;
   notifications: WorkflowStateNotification[];
   queuedJobs: number;
@@ -42,6 +43,7 @@ export interface WorkflowStateMutators {
   isDebug: (isDebug: boolean) => void;
   manager: (manager: WorkflowManager) => void;
   inputStatus: (cellId: string, status: WorkflowCellStatus) => void;
+  inputPrefillRun: (runId: string | null) => void;
   notifications: {
     add: (notification: WorkflowStateNotification) => void;
     removeById: (id: string) => void;

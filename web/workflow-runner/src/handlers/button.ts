@@ -59,6 +59,11 @@ export const buttonHandler = (e: CustomEvent<LfButtonEventPayload>, store: Workf
         case RESULTS_CLASSES.back:
           manager.runs.select(null, 'workflow');
           break;
+        case RESULTS_CLASSES.remix:
+          if (manager.runs.selected() && manager.runs.remix) {
+            manager.runs.remix(manager.runs.selected().runId);
+          }
+          break;
         default:
           return;
       }

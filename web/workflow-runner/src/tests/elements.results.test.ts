@@ -4,6 +4,7 @@ import { createResultsSection } from '../elements/main.results';
 import { RESULTS_CLASSES } from '../elements/main.results';
 import { MAIN_CLASSES } from '../elements/layout.main';
 import { WorkflowRunEntry } from '../types/state';
+import { clearChildren } from '../utils/common';
 
 // Mock the LF framework
 vi.mock('@lf-widgets/framework', () => ({
@@ -379,6 +380,31 @@ describe('createResultsSection', () => {
       const results = mockElements[RESULTS_CLASSES.results] as HTMLElement;
       // Should have h4 + grid for each output
       expect(results.children.length).toBeGreaterThan(2);
+    });
+
+    it('keeps an unchanged result body mounted across background renders', () => {
+      const outputs = {
+        node1: { id: 'audio', nodeId: 'node1', title: 'Generated audio' },
+      };
+      const state = {
+        ...mockStore.getState(),
+        results: outputs,
+      };
+      mockStore.getState.mockReturnValue(state);
+
+      const controller = createResultsSection(mockStore);
+      controller.render();
+      controller.render();
+
+      expect(clearChildren).toHaveBeenCalledTimes(1);
+
+      mockStore.getState.mockReturnValue({
+        ...state,
+        results: { ...outputs },
+      });
+      controller.render();
+
+      expect(clearChildren).toHaveBeenCalledTimes(2);
     });
 
     it('should clear children before rendering', () => {

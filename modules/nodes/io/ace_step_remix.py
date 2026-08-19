@@ -1,4 +1,4 @@
-"""Opt-in HTTP bridge for ACE-Step audio cover and repaint jobs.
+"""HTTP bridge for ACE-Step audio cover and repaint jobs.
 
 The node deliberately keeps the model server outside ComfyUI.  The only
 filesystem input accepted is a file inside one of ComfyUI's managed media
@@ -22,7 +22,6 @@ import requests
 
 from . import CATEGORY
 from ...utils.constants import FUNCTION, Input
-from ...utils.env import bool_env
 
 
 _DEFAULT_API_URL = "http://127.0.0.1:8001"
@@ -384,8 +383,6 @@ class LF_ACEStepRemix:
                 audio_cover_strength, cover_noise_strength, repaint_start,
                 repaint_end, seed, inference_steps, guidance_scale,
                 infer_method, shift, output_format, **kwargs):
-        if not bool_env("LF_ACESTEP_ENABLED", False):
-            raise RuntimeError("ACE-Step remix is disabled; set LF_ACESTEP_ENABLED=1 to enable it")
         source_path, source_root, source_reference = _resolve_source_path(source_audio)
         controls = _controls(mode, style_prompt, lyrics, instrumental, audio_cover_strength,
                              cover_noise_strength, repaint_start, repaint_end, seed,

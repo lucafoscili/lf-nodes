@@ -124,10 +124,14 @@ export const formatTimestamp = (timestamp: number) => {
   return date.toLocaleString();
 };
 export const recordToUI = (rec: RunRecord, wfs: Record<string, string> = {}) => {
-  const { created_at, error, result, run_id, status, updated_at, workflow_id } = rec;
+  const { created_at, error, inputs, result, run_id, status, updated_at, workflow_id } = rec;
   const hasResult = rec.result !== undefined;
   const resultOutputs = result?.body?.payload?.history?.outputs || null;
-  const outputs = rec.outputs !== undefined ? rec.outputs : hasResult ? resultOutputs : undefined;
+  // Summary records carry a bounded media preview in `outputs`, while a loaded
+  // detail carries the complete Comfy output map in `result`. Prefer that map
+  // only while detail is present so non-media cells (receipts, references, and
+  // other lf_output values) render without making run lists heavyweight.
+  const outputs = resultOutputs ?? (rec.outputs !== undefined ? rec.outputs : hasResult ? null : undefined);
 
   const now = Date.now();
   const map: WorkflowRunEntryUpdate = {
@@ -141,7 +145,10 @@ export const recordToUI = (rec: RunRecord, wfs: Record<string, string> = {}) => 
     httpStatus: hasResult ? result?.http_status ?? null : undefined,
     resultPayload: hasResult ? result ?? null : undefined,
     outputs,
-    inputs: {}, // TODO: populate if available in rec
+    // Summary/SSE records intentionally omit input snapshots. Keep the
+    // browser's just-submitted values until an explicit detail response
+    // supplies the durable snapshot.
+    inputs: inputs === undefined ? undefined : inputs ?? {},
   };
 
   return map;

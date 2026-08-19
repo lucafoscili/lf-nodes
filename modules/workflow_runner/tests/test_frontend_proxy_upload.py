@@ -85,3 +85,38 @@ async def test_proxy_rejects_over_cap_body_without_calling_upstream(monkeypatch)
     finally:
         await client.close()
         await upstream.close()
+
+
+@pytest.mark.asyncio
+async def test_proxy_normalizes_flac_view_mime_for_strict_browsers(monkeypatch):
+    proxy = load_frontend_proxy_module()
+
+    async def view(_request):
+        return web.Response(
+            body=b"fLaC",
+            headers={
+                "Content-Type": "audio/x-flac",
+                "X-Content-Type-Options": "nosniff",
+                "Accept-Ranges": "bytes",
+            },
+            status=206,
+        )
+
+    upstream = TestServer(web.Application())
+    upstream.app.router.add_get("/view", view)
+    await upstream.start_server()
+    monkeypatch.setattr(proxy, "DEFAULT_BACKEND", str(upstream.make_url("/")).rstrip("/"))
+
+    client = TestClient(TestServer(proxy.create_app()))
+    await client.start_server()
+    try:
+        response = await client.get("/view?filename=mix.flac&type=output")
+
+        assert response.status == 206
+        assert response.headers["Content-Type"] == "audio/flac"
+        assert response.headers["X-Content-Type-Options"] == "nosniff"
+        assert response.headers["Accept-Ranges"] == "bytes"
+        assert await response.read() == b"fLaC"
+    finally:
+        await client.close()
+        await upstream.close()

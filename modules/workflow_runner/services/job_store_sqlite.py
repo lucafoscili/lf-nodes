@@ -8,6 +8,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, Optional
 
+from .input_snapshot import sanitize_input_snapshot
+
 LOG = logging.getLogger(__name__)
 
 # Path to sqlite DB file (set via configure).
@@ -40,6 +42,7 @@ class JobRecord:
     error: Optional[str] = None
     seq: int = 0
     owner_id: Optional[str] = None
+    inputs: Dict[str, Any] = field(default_factory=dict)
 
 # region Connection
 def _build_event(rec: JobRecord) -> dict:
@@ -78,9 +81,17 @@ async def _ensure_conn():
                 result TEXT,
                 error TEXT,
                 seq INTEGER NOT NULL DEFAULT 0,
-                owner_id TEXT
+                owner_id TEXT,
+                inputs TEXT
             )
         """)
+
+        # Existing installations predate durable remix inputs.  Migrate in
+        # place without rewriting or invalidating any historical rows.
+        columns_cur = await _conn.execute("PRAGMA table_info(runs)")
+        columns = {row[1] for row in await columns_cur.fetchall()}
+        if "inputs" not in columns:
+            await _conn.execute("ALTER TABLE runs ADD COLUMN inputs TEXT")
 
         # Indexes to support owner filters + active lookups
         await _conn.execute("""
@@ -111,7 +122,13 @@ async def close() -> None:
 # endregion
 
 # region Create
-async def create_job(run_id: str, workflow_id: str, owner_id: Optional[str] = None) -> JobRecord:
+async def create_job(
+    run_id: str,
+    workflow_id: str,
+    owner_id: Optional[str] = None,
+    *,
+    inputs: Optional[Dict[str, Any]] = None,
+) -> JobRecord:
     conn = await _ensure_conn()
     now = time.time()
     # Upsert logic: if the row already exists (likely created by a prior status update before
@@ -119,21 +136,30 @@ async def create_job(run_id: str, workflow_id: str, owner_id: Optional[str] = No
     # Preserve existing status/created_at/seq/result/error fields.
     await conn.execute(
         """
-        INSERT INTO runs (run_id, workflow_id, status, created_at, updated_at, result, error, seq, owner_id)
-        VALUES (?, ?, 'pending', ?, ?, NULL, NULL, 0, ?)
+        INSERT INTO runs (run_id, workflow_id, status, created_at, updated_at, result, error, seq, owner_id, inputs)
+        VALUES (?, ?, 'pending', ?, ?, NULL, NULL, 0, ?, ?)
         ON CONFLICT(run_id) DO UPDATE SET
           workflow_id = COALESCE(runs.workflow_id, excluded.workflow_id),
-          owner_id    = COALESCE(runs.owner_id,    excluded.owner_id)
+          owner_id    = COALESCE(runs.owner_id,    excluded.owner_id),
+          inputs      = COALESCE(runs.inputs,      excluded.inputs)
         """,
-        (run_id, workflow_id, now, now, owner_id),
+        (run_id, workflow_id, now, now, owner_id, json.dumps(sanitize_input_snapshot(inputs), ensure_ascii=False, separators=(",", ":"))),
     )
     await conn.commit()
 
     # Read back the row (may have pre-existed)
     rec = await get_job(run_id)
     if rec is None:
-        rec = JobRecord(run_id=run_id, workflow_id=workflow_id, created_at=now, updated_at=now,
-                        status="pending", seq=0, owner_id=owner_id)
+        rec = JobRecord(
+            run_id=run_id,
+            workflow_id=workflow_id,
+            created_at=now,
+            updated_at=now,
+            status="pending",
+            seq=0,
+            owner_id=owner_id,
+            inputs=sanitize_input_snapshot(inputs),
+        )
     event = _build_event(rec)
     for q in list(_subscribers):
         try:
@@ -146,7 +172,7 @@ async def create_job(run_id: str, workflow_id: str, owner_id: Optional[str] = No
 # region Read
 async def get_job(run_id: str) -> Optional[JobRecord]:
     conn = await _ensure_conn()
-    cur = await conn.execute("SELECT run_id, workflow_id, status, created_at, updated_at, result, error, seq, owner_id FROM runs WHERE run_id = ?", (run_id,))
+    cur = await conn.execute("SELECT run_id, workflow_id, status, created_at, updated_at, result, error, seq, owner_id, inputs FROM runs WHERE run_id = ?", (run_id,))
     row = await cur.fetchone()
     if not row:
         return None
@@ -157,7 +183,12 @@ async def get_job(run_id: str) -> Optional[JobRecord]:
     except Exception:
         result = row[5]
 
-    return JobRecord(run_id=row[0], workflow_id=row[1], status=row[2], created_at=row[3], updated_at=row[4], result=result, error=row[6], seq=row[7] or 0, owner_id=row[8])
+    inputs = {}
+    try:
+        inputs = json.loads(row[9]) if row[9] else {}
+    except Exception:
+        inputs = {}
+    return JobRecord(run_id=row[0], workflow_id=row[1], status=row[2], created_at=row[3], updated_at=row[4], result=result, error=row[6], seq=row[7] or 0, owner_id=row[8], inputs=inputs if isinstance(inputs, dict) else {})
 # endregion
 
 # region Update
@@ -176,8 +207,8 @@ async def set_job_status(run_id: str, status: str, *, result: Optional[Any] = No
     # Single atomic statement; no explicit BEGIN
     await conn.execute(
         """
-        INSERT INTO runs (run_id, workflow_id, status, created_at, updated_at, result, error, seq, owner_id)
-        VALUES (?, NULL, ?, ?, ?, ?, ?, 1, NULL)
+        INSERT INTO runs (run_id, workflow_id, status, created_at, updated_at, result, error, seq, owner_id, inputs)
+        VALUES (?, NULL, ?, ?, ?, ?, ?, 1, NULL, NULL)
         ON CONFLICT(run_id) DO UPDATE SET
           status      = excluded.status,
           updated_at  = excluded.updated_at,
@@ -211,7 +242,7 @@ async def list_jobs(owner_id: Optional[str] = None, status: Optional[str] = None
     """
     conn = await _ensure_conn()
     out: Dict[str, JobRecord] = {}
-    q = "SELECT run_id, workflow_id, status, created_at, updated_at, result, error, seq, owner_id FROM runs"
+    q = "SELECT run_id, workflow_id, status, created_at, updated_at, result, error, seq, owner_id, inputs FROM runs"
     params: list = []
     clauses: list = []
     if owner_id is not None:
@@ -231,7 +262,12 @@ async def list_jobs(owner_id: Optional[str] = None, status: Optional[str] = None
             result = json.loads(row[5]) if row[5] else None
         except Exception:
             result = row[5]
-        out[row[0]] = JobRecord(run_id=row[0], workflow_id=row[1], status=row[2], created_at=row[3], updated_at=row[4], result=result, error=row[6], seq=row[7] or 0, owner_id=row[8])
+        inputs = {}
+        try:
+            inputs = json.loads(row[9]) if row[9] else {}
+        except Exception:
+            inputs = {}
+        out[row[0]] = JobRecord(run_id=row[0], workflow_id=row[1], status=row[2], created_at=row[3], updated_at=row[4], result=result, error=row[6], seq=row[7] or 0, owner_id=row[8], inputs=inputs if isinstance(inputs, dict) else {})
     return out
 # endregion
 

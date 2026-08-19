@@ -31,6 +31,7 @@ export interface WorkflowManager {
   runs: {
     all: () => WorkflowRunEntry[];
     get: (runId: string) => WorkflowRunEntry | null;
+    remix?: (runId: string) => void;
     select: (runId: string | null, view?: WorkflowView) => void;
     selected: () => WorkflowRunEntry | null;
   };

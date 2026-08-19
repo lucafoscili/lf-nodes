@@ -81,6 +81,15 @@ logging.basicConfig(level=logging.DEBUG if PROXY_DEBUG else logging.INFO, format
 # endregion
 
 # region Main handler
+def _normalize_response_header(path: str, name: str, value: str) -> str:
+    """Normalize media types that strict browsers will not sniff for us."""
+    if path == "/view" and name.lower() == "content-type":
+        media_type, separator, parameters = value.partition(";")
+        if media_type.strip().lower() == "audio/x-flac":
+            return "audio/flac" + (separator + parameters if separator else "")
+    return value
+
+
 async def handle(request: web.Request) -> web.Response:
     path = request.rel_url.path
     if path == "/favicon.ico":
@@ -181,6 +190,7 @@ async def proxy_request(request: web.Request) -> web.Response:
                             lname = name.lower()
                             if lname in ("connection", "keep-alive", "proxy-authenticate", "proxy-authorization", "te", "trailers", "transfer-encoding", "upgrade"):
                                 continue
+                            value = _normalize_response_header(req_path, name, value)
                             try:
                                 sresp.headers.add(name, value)
                             except Exception:
@@ -211,6 +221,7 @@ async def proxy_request(request: web.Request) -> web.Response:
                     lname = name.lower()
                     if lname in ("connection", "keep-alive", "proxy-authenticate", "proxy-authorization", "te", "trailers", "transfer-encoding", "upgrade"):
                         continue
+                    value = _normalize_response_header(req_path, name, value)
                     try:
                         response.headers.add(name, value)
                     except Exception:

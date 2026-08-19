@@ -337,6 +337,24 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
       const { runs } = this.#STORE.getState();
       return runs.find((run) => run.runId === runId) || null;
     },
+    remix: (runId: string) => {
+      const run = this.runs.get(runId);
+      const state = this.#STORE.getState();
+      if (!run?.workflowId || !run.inputs || Object.keys(run.inputs).length === 0) {
+        return;
+      }
+
+      const workflowExists = state.workflows.nodes.some((node) => node.id === run.workflowId);
+      if (!workflowExists) {
+        return;
+      }
+
+      if (state.current.id !== run.workflowId) {
+        state.mutate.workflow(run.workflowId);
+      }
+      state.mutate.inputPrefillRun(run.runId);
+      changeView(this.#STORE, 'workflow', { clearResults: true });
+    },
     select: (runId: string | null, nextView?: WorkflowView) => {
       if (!nextView) {
         selectRun(this.#STORE, runId);

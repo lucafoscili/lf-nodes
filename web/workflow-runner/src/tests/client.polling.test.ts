@@ -1,9 +1,10 @@
 import './setup';
 import { makeFetchMock, getClientInternalsWithMethods } from './_utils';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { WorkflowRunnerClient } from '../app/client';
 import { initState } from '../app/state';
 import { createWorkflowRunnerStore } from '../app/store';
+import { RunRecord } from '../types/client';
 
 const store = createWorkflowRunnerStore(initState());
 
@@ -17,5 +18,20 @@ describe('workflowRunnerClient - polling', () => {
     await getClientInternalsWithMethods(client).pollActiveRuns();
     expect(getClientInternalsWithMethods(client).runs.get('r4').status).toBe('pending');
     expect(getClientInternalsWithMethods(client).lastSeq.get('r4')).toBe(2);
+  });
+
+  it('does not publish an unchanged same-sequence polling snapshot', () => {
+    const localStore = createWorkflowRunnerStore(initState());
+    const client = new WorkflowRunnerClient(localStore);
+    const internals = getClientInternalsWithMethods(client);
+    const snapshot: RunRecord[] = [{ run_id: 'stable', status: 'succeeded', seq: 4 }];
+
+    internals.processSnapshotArray(snapshot);
+    const subscriber = vi.fn();
+    localStore.subscribe(subscriber);
+
+    internals.processSnapshotArray(snapshot);
+
+    expect(subscriber).toHaveBeenCalledTimes(0);
   });
 });

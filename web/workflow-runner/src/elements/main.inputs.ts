@@ -6,6 +6,7 @@ import { DEBUG_MESSAGES } from '../utils/constants';
 import { debugLog } from '../utils/debug';
 import { createInputCell } from './components';
 import { MAIN_CLASSES } from './layout.main';
+import { applyInputPrefill as applyStoredInputPrefill } from '../utils/input-prefill';
 
 //#region CSS Classes
 const { theme } = getLfFramework();
@@ -169,6 +170,17 @@ export const createInputsSection = (store: WorkflowStore): WorkflowSectionContro
     h3.textContent = manager.workflow.title();
 
     const statuses = state.inputStatuses || {};
+
+    const pendingRunId = state.inputPrefillRunId;
+    if (pendingRunId) {
+      const run = manager.runs.get(pendingRunId);
+      // Consume the one-shot marker even when the workflow or inputs have
+      // disappeared since the run was recorded.
+      state.mutate.inputPrefillRun(null);
+      if (run?.workflowId === state.current.id && run.inputs) {
+        void applyStoredInputPrefill(cells, run.inputs);
+      }
+    }
 
     cells?.forEach((cell) => {
       const id = cell.id;

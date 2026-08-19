@@ -27,6 +27,7 @@ export const RESULTS_CLASSES = {
   grid: theme.bemClass(ROOT_CLASS, 'grid'),
   h3: theme.bemClass(ROOT_CLASS, 'title-h3'),
   history: theme.bemClass(ROOT_CLASS, 'history'),
+  remix: theme.bemClass(ROOT_CLASS, 'remix'),
   item: theme.bemClass(ROOT_CLASS, 'item'),
   results: theme.bemClass(ROOT_CLASS, 'results'),
   subtitle: theme.bemClass(ROOT_CLASS, 'subtitle'),
@@ -58,7 +59,7 @@ const _results = () => {
   return cellWrapper;
 };
 const _title = (store: WorkflowStore) => {
-  const { arrowBack, folder } = theme.get.icons();
+  const { arrowBack, folder, refresh } = theme.get.icons();
   const { manager } = store.getState();
 
   const title = document.createElement('div');
@@ -88,12 +89,22 @@ const _title = (store: WorkflowStore) => {
   historyButton.lfUiState = manager.runs.all().length === 0 ? 'disabled' : 'primary';
   historyButton.addEventListener('lf-button-event', (e) => buttonHandler(e, store));
 
+  const remixButton = document.createElement('lf-button');
+  remixButton.className = RESULTS_CLASSES.remix;
+  remixButton.lfIcon = refresh;
+  remixButton.lfLabel = 'Remix';
+  remixButton.lfStyling = 'flat';
+  remixButton.lfUiSize = 'small';
+  remixButton.lfUiState = 'disabled';
+  remixButton.addEventListener('lf-button-event', (e) => buttonHandler(e, store));
+
   title.appendChild(h3);
   title.appendChild(actions);
   actions.appendChild(backButton);
+  actions.appendChild(remixButton);
   actions.appendChild(historyButton);
 
-  return { actions, backButton, h3, historyButton, title };
+  return { actions, backButton, h3, historyButton, remixButton, title };
 };
 //#endregion
 
@@ -101,6 +112,13 @@ export const createResultsSection = (store: WorkflowStore): WorkflowSectionContr
   //#region Local variables
   const { WORKFLOW_RESULTS_DESTROYED, WORKFLOW_RESULTS_MOUNTED, WORKFLOW_RESULTS_UPDATED } =
     DEBUG_MESSAGES;
+  let renderedContent: {
+    element: HTMLElement;
+    error: unknown;
+    outputs: unknown;
+    resultPayload: unknown;
+    runId: string | null;
+  } | null = null;
   //#endregion
 
   //#region Destroy
@@ -112,6 +130,7 @@ export const createResultsSection = (store: WorkflowStore): WorkflowSectionContr
       const element = RESULTS_CLASSES[cls];
       uiRegistry.remove(element);
     }
+    renderedContent = null;
 
     debugLog(WORKFLOW_RESULTS_DESTROYED);
   };
@@ -132,7 +151,7 @@ export const createResultsSection = (store: WorkflowStore): WorkflowSectionContr
 
     const results = _results();
     const description = _description();
-    const { actions, backButton, h3, historyButton, title } = _title(store);
+    const { actions, backButton, h3, historyButton, remixButton, title } = _title(store);
 
     _root.appendChild(title);
     _root.appendChild(description);
@@ -146,6 +165,7 @@ export const createResultsSection = (store: WorkflowStore): WorkflowSectionContr
     uiRegistry.set(RESULTS_CLASSES.description, description);
     uiRegistry.set(RESULTS_CLASSES.h3, h3);
     uiRegistry.set(RESULTS_CLASSES.history, historyButton);
+    uiRegistry.set(RESULTS_CLASSES.remix, remixButton);
     uiRegistry.set(RESULTS_CLASSES.results, results);
     uiRegistry.set(RESULTS_CLASSES.title, title);
 
@@ -173,13 +193,43 @@ export const createResultsSection = (store: WorkflowStore): WorkflowSectionContr
     const h3 = elements[RESULTS_CLASSES.h3] as HTMLElement;
     const backButton = elements[RESULTS_CLASSES.back] as HTMLLfButtonElement | undefined;
     const historyButton = elements[RESULTS_CLASSES.history] as HTMLLfButtonElement | undefined;
+    const remixButton = elements[RESULTS_CLASSES.remix] as HTMLLfButtonElement | undefined;
 
     descr.textContent = _formatDescription(selectedRun, manager.workflow.description());
     h3.textContent = selectedRun?.workflowName || manager.workflow.title();
     backButton.lfUiState = selectedRun ? 'primary' : 'disabled';
     historyButton.lfUiState = runs.length > 0 ? 'primary' : 'disabled';
+    const workflowAvailable = Boolean(
+      selectedRun?.workflowId &&
+        state.workflows?.nodes?.some((node) => node.id === selectedRun.workflowId),
+    );
+    if (remixButton) {
+      remixButton.lfUiState =
+        selectedRun && workflowAvailable && Object.keys(selectedRun.inputs || {}).length > 0
+          ? 'primary'
+          : 'disabled';
+    }
 
     const outputs = state.results ?? selectedRun?.outputs ?? null;
+    const nextContent = {
+      element,
+      error: selectedRun?.error ?? null,
+      outputs,
+      resultPayload: selectedRun?.resultPayload ?? null,
+      runId: selectedRun?.runId ?? null,
+    };
+    if (
+      renderedContent?.element === nextContent.element &&
+      renderedContent.error === nextContent.error &&
+      renderedContent.outputs === nextContent.outputs &&
+      renderedContent.resultPayload === nextContent.resultPayload &&
+      renderedContent.runId === nextContent.runId
+    ) {
+      // Queue/SSE/header state can change while a terminal result is open.
+      // Keep its media DOM intact so native audio/video playback is not reset.
+      return;
+    }
+    renderedContent = nextContent;
     clearChildren(element);
 
     const nodeIds = outputs ? Object.keys(outputs) : [];

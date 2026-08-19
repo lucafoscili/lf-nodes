@@ -150,6 +150,7 @@ export class WorkflowRunnerClient {
         owner_id: data.owner_id,
         created_at: data.created_at,
         updated_at: data.updated_at,
+        inputs: data.inputs,
         outputs: data.outputs,
         result: data.result,
         error: data.error,
@@ -242,6 +243,7 @@ export class WorkflowRunnerClient {
         ...(rec.owner_id !== undefined ? { owner_id: rec.owner_id } : {}),
         ...(rec.created_at !== undefined ? { created_at: rec.created_at } : {}),
         ...(rec.updated_at !== undefined ? { updated_at: rec.updated_at } : {}),
+        ...(rec.inputs !== undefined ? { inputs: rec.inputs } : {}),
         ...(rec.outputs !== undefined ? { outputs: rec.outputs } : {}),
         ...(rec.result !== undefined ? { result: rec.result } : {}),
         ...(rec.error !== undefined ? { error: rec.error } : {}),
@@ -302,6 +304,7 @@ export class WorkflowRunnerClient {
     const activeSet = new Set<string>();
     const missingWorkflowIds = new Set<string>();
     const runsMissingWorkflowId: string[] = [];
+    let changed = false;
     for (const s of arr) {
       // validate snapshot entry
       if (!s || !s.run_id || typeof s.status === 'undefined' || s.status === null) {
@@ -313,6 +316,7 @@ export class WorkflowRunnerClient {
       if (s.seq <= last) continue;
       this.#LAST_SEQ.set(s.run_id, s.seq);
       this.#RUNS.set(s.run_id, s);
+      changed = true;
       if (s.workflow_id && !this.#WORKFLOW_CACHE.has(s.workflow_id)) {
         missingWorkflowIds.add(s.workflow_id);
       }
@@ -321,7 +325,9 @@ export class WorkflowRunnerClient {
         runsMissingWorkflowId.push(s.run_id);
       }
     }
-    this.emitUpdate();
+    if (changed) {
+      this.emitUpdate();
+    }
 
     // Reconciliation pass: any locally-known run that is marked 'running' but
     // not present in the snapshot likely finished while the client was
@@ -569,6 +575,7 @@ export class WorkflowRunnerClient {
               owner_id: payload.owner_id,
               created_at: payload.created_at,
               updated_at: payload.updated_at,
+              inputs: payload.inputs,
               outputs: payload.outputs,
               result: payload.result,
               error: payload.error,
@@ -634,6 +641,7 @@ export class WorkflowRunnerClient {
           owner_id: payload.owner_id,
           created_at: payload.created_at,
           updated_at: payload.updated_at,
+          inputs: payload.inputs,
           outputs: payload.outputs,
           result: payload.result,
           error: payload.error,
@@ -679,6 +687,7 @@ export class WorkflowRunnerClient {
           owner_id: payload.owner_id,
           created_at: payload.created_at,
           updated_at: payload.updated_at,
+          inputs: payload.inputs,
           outputs: payload.outputs,
           result: payload.result,
           error: payload.error,
@@ -702,6 +711,7 @@ export class WorkflowRunnerClient {
               owner_id: payload.owner_id,
               created_at: payload.created_at,
               updated_at: payload.updated_at,
+              inputs: payload.inputs,
               outputs: payload.outputs,
               result: payload.result,
               error: payload.error,

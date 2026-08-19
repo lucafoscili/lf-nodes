@@ -1,4 +1,5 @@
 import asyncio
+import inspect
 import logging
 import time
 
@@ -7,6 +8,7 @@ from enum import Enum
 from typing import Any, Dict, Optional
 
 from ..config import get_settings
+from .input_snapshot import sanitize_input_snapshot
 
 #region Definitions
 _settings = get_settings()
@@ -32,6 +34,10 @@ class Job:
     seq: int = 0
     # updated_at tracks last status/result change; defaults to created_at
     updated_at: Optional[float] = None
+    # Small, durable replay/remix input snapshot.  This is intentionally kept
+    # out of generic serializers and event payloads; detail/status is the only
+    # API surface that exposes it.
+    inputs: Dict[str, Any] = field(default_factory=dict)
 
 _jobs: Dict[str, Job] = {}
 _lock = asyncio.Lock()
@@ -58,10 +64,42 @@ async def _get_adapter():
     return _adapter
 
 LOG = logging.getLogger(__name__)
+
+
+def _coerce_inputs(value: Any) -> Dict[str, Any]:
+    """Accept records from pre-snapshot adapters without leaking mocks/objects."""
+
+    return value if isinstance(value, dict) else {}
+
+
+def _adapter_accepts_input_snapshots(create_job_callable: Any) -> bool:
+    """Return whether a persistence adapter supports the additive ``inputs`` kwarg.
+
+    Third-party adapters predate durable remix snapshots, so keep their
+    published three-argument ``create_job`` contract working.  Signature
+    inspection avoids retrying after an adapter has performed side effects.
+    """
+
+    try:
+        parameters = inspect.signature(create_job_callable).parameters.values()
+    except (TypeError, ValueError):
+        # Opaque callables are treated as modern; Python callables and mocks
+        # expose enough signature information for the compatibility path.
+        return True
+    return any(
+        parameter.name == "inputs" or parameter.kind is inspect.Parameter.VAR_KEYWORD
+        for parameter in parameters
+    )
 #endregion
 
 # region create
-async def create_job(job_id: str, workflow_id: str, owner_id: Optional[str] = None) -> Job:
+async def create_job(
+    job_id: str,
+    workflow_id: str,
+    owner_id: Optional[str] = None,
+    *,
+    inputs: Optional[Dict[str, Any]] = None,
+) -> Job:
     """Create a new job with the given ID (ComfyUI's prompt_id).
     
     Args:
@@ -77,7 +115,10 @@ async def create_job(job_id: str, workflow_id: str, owner_id: Optional[str] = No
         if adapter is not None:
             if _WF_DEBUG:
                 LOG.info(f"[DEBUG] create_job: calling adapter.create_job with workflow_id={workflow_id}, owner_id={owner_id}")
-            rec = await adapter.create_job(job_id, workflow_id=workflow_id, owner_id=owner_id)
+            adapter_kwargs = {"workflow_id": workflow_id, "owner_id": owner_id}
+            if inputs is not None and _adapter_accepts_input_snapshots(adapter.create_job):
+                adapter_kwargs["inputs"] = sanitize_input_snapshot(inputs)
+            rec = await adapter.create_job(job_id, **adapter_kwargs)
             # Normalize adapter record to in-memory Job dataclass for API consistency
             def _coerce_status(val: Any) -> JobStatus:
                 try:
@@ -102,6 +143,7 @@ async def create_job(job_id: str, workflow_id: str, owner_id: Optional[str] = No
                     result=getattr(rec, "result", None),
                     error=getattr(rec, "error", None),
                     owner_id=getattr(rec, "owner_id", None),
+                    inputs=_coerce_inputs(getattr(rec, "inputs", {})),
                     seq=getattr(rec, "seq", 0),
                     updated_at=getattr(rec, "updated_at", None),
                 )
@@ -116,13 +158,20 @@ async def create_job(job_id: str, workflow_id: str, owner_id: Optional[str] = No
                     result=getattr(rec, "result", None),
                     error=getattr(rec, "error", None),
                     owner_id=getattr(rec, "owner_id", owner_id),
+                    inputs=_coerce_inputs(getattr(rec, "inputs", {})),
                     seq=getattr(rec, "seq", 0),
                     updated_at=getattr(rec, "updated_at", None),
                 )
             return job
 
     async with _lock:
-        job = Job(id=job_id, workflow_id=workflow_id, owner_id=owner_id, seq=0)
+        job = Job(
+            id=job_id,
+            workflow_id=workflow_id,
+            owner_id=owner_id,
+            inputs=sanitize_input_snapshot(inputs),
+            seq=0,
+        )
         _jobs[job_id] = job
         updated = job
 
@@ -157,6 +206,7 @@ async def get_job(job_id: str) -> Optional[Job]:
                 result=rec.result,
                 error=rec.error,
                 owner_id=getattr(rec, "owner_id", None),
+                inputs=_coerce_inputs(getattr(rec, "inputs", {})),
                 seq=getattr(rec, "seq", 0),
                 updated_at=getattr(rec, "updated_at", rec.created_at),
             )
@@ -185,6 +235,7 @@ async def set_job_status(
                 result=rec.result,
                 error=rec.error,
                 owner_id=getattr(rec, "owner_id", None),
+                inputs=_coerce_inputs(getattr(rec, "inputs", {})),
                 seq=getattr(rec, "seq", 0),
                 updated_at=getattr(rec, "updated_at", rec.created_at),
             )
@@ -244,6 +295,7 @@ async def list_jobs(owner_id: Optional[str] = None, status: Optional[str] = None
                     result=r.result,
                     error=r.error,
                     owner_id=getattr(r, "owner_id", None),
+                    inputs=_coerce_inputs(getattr(r, "inputs", {})),
                     seq=getattr(r, "seq", 0),
                     updated_at=getattr(r, "updated_at", r.created_at),
                 )

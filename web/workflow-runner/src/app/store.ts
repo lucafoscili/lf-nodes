@@ -105,6 +105,10 @@ export const createWorkflowRunnerStore = (initialState: WorkflowState): Workflow
           draft.inputStatuses = rest;
         }
       }),
+    inputPrefillRun: (runId: string | null) =>
+      applyMutation((draft) => {
+        draft.inputPrefillRunId = runId;
+      }),
     notifications: {
       add: (notification: WorkflowStateNotification) =>
         applyMutation((draft) => {
@@ -119,10 +123,14 @@ export const createWorkflowRunnerStore = (initialState: WorkflowState): Workflow
           draft.notifications.splice(index, 1);
         }),
     },
-    queuedJobs: (count: number) =>
+    queuedJobs: (count: number) => {
+      if (state.queuedJobs === count) {
+        return;
+      }
       applyMutation((draft) => {
         draft.queuedJobs = count;
-      }),
+      });
+    },
     results: (results: WorkflowNodeResults | null) =>
       applyMutation((draft) => {
         draft.results = results;

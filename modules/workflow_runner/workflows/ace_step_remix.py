@@ -10,6 +10,10 @@ from ...utils.youtube_url import parse_youtube_video_url
 _MODES = ("cover", "repaint")
 _FORMATS = ("mp3", "wav", "flac")
 _INFER_METHODS = ("ode", "sde")
+_DEFAULT_STYLE_PROMPT = (
+    "Atmospheric cinematic folk with warm strings, soft percussion, subtle synth pads, "
+    "a somber nocturnal mood, moderate tempo, and clear expressive lead vocals."
+)
 
 
 def _youtube_url(value: Any) -> str:
@@ -42,7 +46,7 @@ def _configure(prompt: Dict[str, Any], inputs: Dict[str, Any]) -> None:
     mode = inputs.get("mode", "cover")
     if mode not in _MODES:
         raise InputValidationError("mode")
-    style_prompt = inputs.get("style_prompt", "")
+    style_prompt = inputs.get("style_prompt", _DEFAULT_STYLE_PROMPT)
     lyrics = inputs.get("lyrics", "")
     if not isinstance(style_prompt, str) or not isinstance(lyrics, str):
         raise InputValidationError("style_prompt" if not isinstance(style_prompt, str) else "lyrics")
@@ -119,10 +123,21 @@ _youtube_reference = WorkflowCell(
         },
     },
 )
-def _text_cell(cell_id: str, label: str, helper: str, required: bool = False) -> WorkflowCell:
+def _text_cell(
+    cell_id: str,
+    label: str,
+    helper: str,
+    required: bool = False,
+    default: str = "",
+) -> WorkflowCell:
     return WorkflowCell(
         node_id="remix", id=cell_id, shape="textfield", required=required,
-        props={"lfLabel": label, "lfHelper": {"showWhenFocused": False, "value": helper}, "lfStyling": "textarea"},
+        props={
+            "lfLabel": label,
+            "lfHelper": {"showWhenFocused": False, "value": helper},
+            "lfStyling": "textarea",
+            "lfValue": default,
+        },
     )
 
 
@@ -165,7 +180,12 @@ node = WorkflowNode(
     inputs=[
         _youtube_reference,
         _select_cell("mode", "Mode", (("Cover", "cover"), ("Repaint", "repaint")), "cover"),
-        _text_cell("style_prompt", "Style prompt", "Optional genre, mood, instrumentation, and production direction."),
+        _text_cell(
+            "style_prompt",
+            "Style prompt",
+            "Describe the target genre, instruments, mood, vocal style, and tempo. The example is fully editable.",
+            default=_DEFAULT_STYLE_PROMPT,
+        ),
         _text_cell("lyrics", "Lyrics", "Optional lyrics. The Instrumental toggle overrides this field."),
         WorkflowCell(node_id="remix", id="instrumental", shape="toggle", props={"lfLabel": "Instrumental", "lfValue": False}, required=False),
         _number_cell(

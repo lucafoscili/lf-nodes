@@ -988,10 +988,10 @@ const formatTimestamp = (timestamp) => {
 };
 const recordToUI = (rec, wfs = {}) => {
   var _a, _b, _c;
-  const { created_at, error, result, run_id, status, updated_at, workflow_id } = rec;
+  const { created_at, error, inputs, result, run_id, status, updated_at, workflow_id } = rec;
   const hasResult = rec.result !== void 0;
   const resultOutputs = ((_c = (_b = (_a = result == null ? void 0 : result.body) == null ? void 0 : _a.payload) == null ? void 0 : _b.history) == null ? void 0 : _c.outputs) || null;
-  const outputs = rec.outputs !== void 0 ? rec.outputs : hasResult ? resultOutputs : void 0;
+  const outputs = resultOutputs ?? (rec.outputs !== void 0 ? rec.outputs : hasResult ? null : void 0);
   const now = Date.now();
   const map = {
     runId: run_id,
@@ -1004,8 +1004,10 @@ const recordToUI = (rec, wfs = {}) => {
     httpStatus: hasResult ? (result == null ? void 0 : result.http_status) ?? null : void 0,
     resultPayload: hasResult ? result ?? null : void 0,
     outputs,
-    inputs: {}
-    // TODO: populate if available in rec
+    // Summary/SSE records intentionally omit input snapshots. Keep the
+    // browser's just-submitted values until an explicit detail response
+    // supplies the durable snapshot.
+    inputs: inputs === void 0 ? void 0 : inputs ?? {}
   };
   return map;
 };
@@ -1094,6 +1096,7 @@ const RESULTS_CLASSES = {
   grid: theme$6.bemClass(ROOT_CLASS$6, "grid"),
   h3: theme$6.bemClass(ROOT_CLASS$6, "title-h3"),
   history: theme$6.bemClass(ROOT_CLASS$6, "history"),
+  remix: theme$6.bemClass(ROOT_CLASS$6, "remix"),
   item: theme$6.bemClass(ROOT_CLASS$6, "item"),
   results: theme$6.bemClass(ROOT_CLASS$6, "results"),
   subtitle: theme$6.bemClass(ROOT_CLASS$6, "subtitle"),
@@ -1117,7 +1120,7 @@ const _results = () => {
   return cellWrapper;
 };
 const _title$3 = (store) => {
-  const { arrowBack, folder } = theme$6.get.icons();
+  const { arrowBack, folder, refresh } = theme$6.get.icons();
   const { manager } = store.getState();
   const title = document.createElement("div");
   title.className = RESULTS_CLASSES.title;
@@ -1141,14 +1144,24 @@ const _title$3 = (store) => {
   historyButton.lfUiSize = "small";
   historyButton.lfUiState = manager.runs.all().length === 0 ? "disabled" : "primary";
   historyButton.addEventListener("lf-button-event", (e) => buttonHandler(e, store));
+  const remixButton = document.createElement("lf-button");
+  remixButton.className = RESULTS_CLASSES.remix;
+  remixButton.lfIcon = refresh;
+  remixButton.lfLabel = "Remix";
+  remixButton.lfStyling = "flat";
+  remixButton.lfUiSize = "small";
+  remixButton.lfUiState = "disabled";
+  remixButton.addEventListener("lf-button-event", (e) => buttonHandler(e, store));
   title.appendChild(h3);
   title.appendChild(actions);
   actions.appendChild(backButton);
+  actions.appendChild(remixButton);
   actions.appendChild(historyButton);
-  return { actions, backButton, h3, historyButton, title };
+  return { actions, backButton, h3, historyButton, remixButton, title };
 };
 const createResultsSection = (store) => {
   const { WORKFLOW_RESULTS_DESTROYED, WORKFLOW_RESULTS_MOUNTED, WORKFLOW_RESULTS_UPDATED } = DEBUG_MESSAGES;
+  let renderedContent = null;
   const destroy = () => {
     const { manager } = store.getState();
     const { uiRegistry } = manager;
@@ -1156,6 +1169,7 @@ const createResultsSection = (store) => {
       const element = RESULTS_CLASSES[cls];
       uiRegistry.remove(element);
     }
+    renderedContent = null;
     debugLog(WORKFLOW_RESULTS_DESTROYED);
   };
   const mount = () => {
@@ -1169,7 +1183,7 @@ const createResultsSection = (store) => {
     _root.className = RESULTS_CLASSES._;
     const results = _results();
     const description = _description$2();
-    const { actions, backButton, h3, historyButton, title } = _title$3(store);
+    const { actions, backButton, h3, historyButton, remixButton, title } = _title$3(store);
     _root.appendChild(title);
     _root.appendChild(description);
     _root.appendChild(results);
@@ -1180,12 +1194,13 @@ const createResultsSection = (store) => {
     uiRegistry.set(RESULTS_CLASSES.description, description);
     uiRegistry.set(RESULTS_CLASSES.h3, h3);
     uiRegistry.set(RESULTS_CLASSES.history, historyButton);
+    uiRegistry.set(RESULTS_CLASSES.remix, remixButton);
     uiRegistry.set(RESULTS_CLASSES.results, results);
     uiRegistry.set(RESULTS_CLASSES.title, title);
     debugLog(WORKFLOW_RESULTS_MOUNTED);
   };
   const render = () => {
-    var _a;
+    var _a, _b, _c;
     const { syntax } = getLfFramework();
     const state = store.getState();
     const { manager } = state;
@@ -1201,11 +1216,27 @@ const createResultsSection = (store) => {
     const h3 = elements[RESULTS_CLASSES.h3];
     const backButton = elements[RESULTS_CLASSES.back];
     const historyButton = elements[RESULTS_CLASSES.history];
+    const remixButton = elements[RESULTS_CLASSES.remix];
     descr.textContent = _formatDescription(selectedRun, manager.workflow.description());
     h3.textContent = (selectedRun == null ? void 0 : selectedRun.workflowName) || manager.workflow.title();
     backButton.lfUiState = selectedRun ? "primary" : "disabled";
     historyButton.lfUiState = runs.length > 0 ? "primary" : "disabled";
+    const workflowAvailable = Boolean((selectedRun == null ? void 0 : selectedRun.workflowId) && ((_b = (_a = state.workflows) == null ? void 0 : _a.nodes) == null ? void 0 : _b.some((node) => node.id === selectedRun.workflowId)));
+    if (remixButton) {
+      remixButton.lfUiState = selectedRun && workflowAvailable && Object.keys(selectedRun.inputs || {}).length > 0 ? "primary" : "disabled";
+    }
     const outputs = state.results ?? (selectedRun == null ? void 0 : selectedRun.outputs) ?? null;
+    const nextContent = {
+      element,
+      error: (selectedRun == null ? void 0 : selectedRun.error) ?? null,
+      outputs,
+      resultPayload: (selectedRun == null ? void 0 : selectedRun.resultPayload) ?? null,
+      runId: (selectedRun == null ? void 0 : selectedRun.runId) ?? null
+    };
+    if ((renderedContent == null ? void 0 : renderedContent.element) === nextContent.element && renderedContent.error === nextContent.error && renderedContent.outputs === nextContent.outputs && renderedContent.resultPayload === nextContent.resultPayload && renderedContent.runId === nextContent.runId) {
+      return;
+    }
+    renderedContent = nextContent;
     clearChildren(element);
     const nodeIds = outputs ? Object.keys(outputs) : [];
     if (nodeIds.length === 0) {
@@ -1238,7 +1269,7 @@ const createResultsSection = (store) => {
         element.appendChild(wrapper);
       };
       appendCodeBlock("Error detail", stringifyDetail((selectedRun == null ? void 0 : selectedRun.error) ?? null));
-      appendCodeBlock("Run payload", stringifyDetail(((_a = selectedRun == null ? void 0 : selectedRun.resultPayload) == null ? void 0 : _a.body) ?? (selectedRun == null ? void 0 : selectedRun.resultPayload) ?? null));
+      appendCodeBlock("Run payload", stringifyDetail(((_c = selectedRun == null ? void 0 : selectedRun.resultPayload) == null ? void 0 : _c.body) ?? (selectedRun == null ? void 0 : selectedRun.resultPayload) ?? null));
       return;
     }
     const workflow = manager.workflow.current();
@@ -1895,12 +1926,86 @@ const buttonHandler = (e, store) => {
         case RESULTS_CLASSES.back:
           manager.runs.select(null, "workflow");
           break;
+        case RESULTS_CLASSES.remix:
+          if (manager.runs.selected() && manager.runs.remix) {
+            manager.runs.remix(manager.runs.selected().runId);
+          }
+          break;
         default:
           return;
       }
       break;
     default:
       return;
+  }
+};
+const findSelectNodeId = (nodes, workflowValue) => {
+  let displayFallback;
+  const visit = (items) => {
+    for (const node of items || []) {
+      if (node.workflowValue === workflowValue) {
+        return node.id;
+      }
+      if (displayFallback === void 0 && (node.value === workflowValue || node.id === String(workflowValue))) {
+        displayFallback = node.id;
+      }
+      const childMatch = visit(node.children);
+      if (childMatch) {
+        return childMatch;
+      }
+    }
+    return void 0;
+  };
+  return visit(nodes) ?? displayFallback;
+};
+const applyInputPrefill = async (cells, inputs) => {
+  var _a;
+  for (const cell of cells) {
+    const id = cell.id;
+    if (!id || !Object.prototype.hasOwnProperty.call(inputs, id)) {
+      continue;
+    }
+    const value = inputs[id];
+    try {
+      switch (cell.tagName.toLowerCase()) {
+        case "lf-upload":
+          continue;
+        case "lf-chat": {
+          const history = typeof value === "string" ? value : JSON.stringify(value ?? []);
+          if (typeof cell.setHistory === "function") {
+            await cell.setHistory(history);
+          }
+          break;
+        }
+        case "lf-select": {
+          const selectedId = findSelectNodeId((_a = cell.lfDataset) == null ? void 0 : _a.nodes, value) ?? String(value ?? "");
+          if (typeof cell.setValue === "function") {
+            await cell.setValue(selectedId);
+          } else {
+            cell.lfValue = selectedId;
+          }
+          break;
+        }
+        case "lf-toggle": {
+          const enabled = value === true || value === "on" || value === 1;
+          if (typeof cell.setValue === "function") {
+            await cell.setValue(enabled ? "on" : "off");
+          } else {
+            cell.lfValue = enabled;
+          }
+          break;
+        }
+        default: {
+          const text = value === null || value === void 0 ? "" : String(value);
+          if (typeof cell.setValue === "function") {
+            await cell.setValue(text);
+          } else {
+            cell.lfValue = text;
+          }
+        }
+      }
+    } catch {
+    }
   }
 };
 const { theme: theme$2 } = getLfFramework();
@@ -2020,6 +2125,14 @@ const createInputsSection = (store) => {
     descr.textContent = manager.workflow.description();
     h3.textContent = manager.workflow.title();
     const statuses = state.inputStatuses || {};
+    const pendingRunId = state.inputPrefillRunId;
+    if (pendingRunId) {
+      const run = manager.runs.get(pendingRunId);
+      state.mutate.inputPrefillRun(null);
+      if ((run == null ? void 0 : run.workflowId) === state.current.id && run.inputs) {
+        void applyInputPrefill(cells, run.inputs);
+      }
+    }
     cells == null ? void 0 : cells.forEach((cell) => {
       const id = cell.id;
       const parent = cell == null ? void 0 : cell.parentElement;
@@ -2619,6 +2732,7 @@ class WorkflowRunnerClient {
         owner_id: data.owner_id,
         created_at: data.created_at,
         updated_at: data.updated_at,
+        inputs: data.inputs,
         outputs: data.outputs,
         result: data.result,
         error: data.error
@@ -2696,6 +2810,7 @@ class WorkflowRunnerClient {
         ...rec.owner_id !== void 0 ? { owner_id: rec.owner_id } : {},
         ...rec.created_at !== void 0 ? { created_at: rec.created_at } : {},
         ...rec.updated_at !== void 0 ? { updated_at: rec.updated_at } : {},
+        ...rec.inputs !== void 0 ? { inputs: rec.inputs } : {},
         ...rec.outputs !== void 0 ? { outputs: rec.outputs } : {},
         ...rec.result !== void 0 ? { result: rec.result } : {},
         ...rec.error !== void 0 ? { error: rec.error } : {}
@@ -2740,6 +2855,7 @@ class WorkflowRunnerClient {
     const activeSet = /* @__PURE__ */ new Set();
     const missingWorkflowIds = /* @__PURE__ */ new Set();
     const runsMissingWorkflowId = [];
+    let changed = false;
     for (const s of arr) {
       if (!s || !s.run_id || typeof s.status === "undefined" || s.status === null) {
         console.warn("processSnapshotArray: ignoring invalid snapshot entry", s);
@@ -2751,6 +2867,7 @@ class WorkflowRunnerClient {
         continue;
       __classPrivateFieldGet$1(this, _WorkflowRunnerClient_LAST_SEQ, "f").set(s.run_id, s.seq);
       __classPrivateFieldGet$1(this, _WorkflowRunnerClient_RUNS, "f").set(s.run_id, s);
+      changed = true;
       if (s.workflow_id && !__classPrivateFieldGet$1(this, _WorkflowRunnerClient_WORKFLOW_CACHE, "f").has(s.workflow_id)) {
         missingWorkflowIds.add(s.workflow_id);
       }
@@ -2758,7 +2875,9 @@ class WorkflowRunnerClient {
         runsMissingWorkflowId.push(s.run_id);
       }
     }
-    this.emitUpdate();
+    if (changed) {
+      this.emitUpdate();
+    }
     (async () => {
       try {
         const toReconcile = [];
@@ -2961,6 +3080,7 @@ class WorkflowRunnerClient {
               owner_id: payload.owner_id,
               created_at: payload.created_at,
               updated_at: payload.updated_at,
+              inputs: payload.inputs,
               outputs: payload.outputs,
               result: payload.result,
               error: payload.error
@@ -3015,6 +3135,7 @@ class WorkflowRunnerClient {
           owner_id: payload.owner_id,
           created_at: payload.created_at,
           updated_at: payload.updated_at,
+          inputs: payload.inputs,
           outputs: payload.outputs,
           result: payload.result,
           error: payload.error
@@ -3055,6 +3176,7 @@ class WorkflowRunnerClient {
           owner_id: payload.owner_id,
           created_at: payload.created_at,
           updated_at: payload.updated_at,
+          inputs: payload.inputs,
           outputs: payload.outputs,
           result: payload.result,
           error: payload.error
@@ -3076,6 +3198,7 @@ class WorkflowRunnerClient {
               owner_id: payload2.owner_id,
               created_at: payload2.created_at,
               updated_at: payload2.updated_at,
+              inputs: payload2.inputs,
               outputs: payload2.outputs,
               result: payload2.result,
               error: payload2.error
@@ -3415,12 +3538,14 @@ const initState = () => ({
   current: { status: "idle", message: "", id: null },
   currentRunId: null,
   inputStatuses: {},
+  inputPrefillRunId: null,
   isDebug: false,
   manager: null,
   mutate: {
     isDebug: INIT_CB,
     manager: INIT_CB,
     inputStatus: INIT_CB,
+    inputPrefillRun: INIT_CB,
     queuedJobs: INIT_CB,
     notifications: {
       add: INIT_CB,
@@ -3524,6 +3649,9 @@ const createWorkflowRunnerStore = (initialState) => {
         draft.inputStatuses = rest;
       }
     }),
+    inputPrefillRun: (runId) => applyMutation((draft) => {
+      draft.inputPrefillRunId = runId;
+    }),
     notifications: {
       add: (notification) => applyMutation((draft) => {
         draft.notifications.push(notification);
@@ -3535,9 +3663,14 @@ const createWorkflowRunnerStore = (initialState) => {
         draft.notifications.splice(index, 1);
       })
     },
-    queuedJobs: (count) => applyMutation((draft) => {
-      draft.queuedJobs = count;
-    }),
+    queuedJobs: (count) => {
+      if (state.queuedJobs === count) {
+        return;
+      }
+      applyMutation((draft) => {
+        draft.queuedJobs = count;
+      });
+    },
     results: (results) => applyMutation((draft) => {
       draft.results = results;
     }),
@@ -3686,6 +3819,22 @@ class LfWorkflowRunnerManager {
       get: (runId) => {
         const { runs } = __classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f").getState();
         return runs.find((run) => run.runId === runId) || null;
+      },
+      remix: (runId) => {
+        const run = this.runs.get(runId);
+        const state2 = __classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f").getState();
+        if (!(run == null ? void 0 : run.workflowId) || !run.inputs || Object.keys(run.inputs).length === 0) {
+          return;
+        }
+        const workflowExists = state2.workflows.nodes.some((node) => node.id === run.workflowId);
+        if (!workflowExists) {
+          return;
+        }
+        if (state2.current.id !== run.workflowId) {
+          state2.mutate.workflow(run.workflowId);
+        }
+        state2.mutate.inputPrefillRun(run.runId);
+        changeView(__classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f"), "workflow", { clearResults: true });
       },
       select: (runId, nextView) => {
         if (!nextView) {

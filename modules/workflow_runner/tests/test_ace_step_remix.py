@@ -90,7 +90,6 @@ def _defaults(source):
 def test_cover_submission_is_multipart_and_returns_audio_ui_and_receipt(managed_roots, monkeypatch):
     roots, source = managed_roots
     http = _HTTP()
-    monkeypatch.setenv("LF_ACESTEP_ENABLED", "1")
     monkeypatch.setenv("LF_ACESTEP_API_TOKEN", "secret")
     monkeypatch.setenv("LF_ACESTEP_API_URL", "http://127.0.0.1:8001")
     monkeypatch.setattr(remix, "_HTTP", http)
@@ -120,7 +119,6 @@ def test_cover_submission_is_multipart_and_returns_audio_ui_and_receipt(managed_
 def test_repaint_controls_are_sent_and_source_path_escape_is_rejected(managed_roots, monkeypatch, tmp_path):
     roots, source = managed_roots
     http = _HTTP()
-    monkeypatch.setenv("LF_ACESTEP_ENABLED", "1")
     monkeypatch.setattr(remix, "_HTTP", http)
     monkeypatch.setattr(remix, "_SLEEP", lambda _: None)
     controls = _defaults(source)
@@ -137,10 +135,7 @@ def test_repaint_controls_are_sent_and_source_path_escape_is_rejected(managed_ro
         remix.LF_ACEStepRemix().on_exec(**controls)
 
 
-def test_disabled_by_default_and_workflow_is_packaged(monkeypatch):
-    monkeypatch.delenv("LF_ACESTEP_ENABLED", raising=False)
-    with pytest.raises(RuntimeError, match="disabled"):
-        remix.LF_ACEStepRemix().on_exec(**_defaults("missing.wav"))
+def test_workflow_is_packaged_with_sensible_defaults():
     assert "ace_step_remix" in _WORKFLOW_MODULES
     assert [(cell.node_id, cell.id, cell.shape) for cell in WORKFLOW.inputs[:2]] == [
         ("reference", "youtube_url", "textfield"),
@@ -156,6 +151,10 @@ def test_disabled_by_default_and_workflow_is_packaged(monkeypatch):
         "lfTextfieldProps": {"lfLabel": "Mode"},
         "lfValue": "cover",
     }
+    assert WORKFLOW.inputs[2].props["lfValue"] == (
+        "Atmospheric cinematic folk with warm strings, soft percussion, subtle synth pads, "
+        "a somber nocturnal mood, moderate tempo, and clear expressive lead vocals."
+    )
     prompt = WORKFLOW.load_prompt()
     WORKFLOW.configure_prompt(prompt, {
         "youtube_url": "https://youtu.be/ETPjddfrk_w",
@@ -168,6 +167,7 @@ def test_disabled_by_default_and_workflow_is_packaged(monkeypatch):
         "media_kind": "audio_flac",
     }
     assert prompt["remix"]["inputs"]["mode"] == "repaint"
+    assert prompt["remix"]["inputs"]["style_prompt"] == WORKFLOW.inputs[2].props["lfValue"]
     assert prompt["remix"]["inputs"]["source_audio"] == ["reference", 0]
     assert prompt["remix"]["inputs"]["infer_method"] == "ode"
     assert prompt["remix"]["inputs"]["shift"] == 3.0
@@ -221,7 +221,6 @@ def test_timeout_is_configurable_and_bounded(monkeypatch):
 def test_random_seed_mode_is_explicit(managed_roots, monkeypatch):
     _, source = managed_roots
     http = _HTTP()
-    monkeypatch.setenv("LF_ACESTEP_ENABLED", "1")
     monkeypatch.setattr(remix, "_HTTP", http)
     monkeypatch.setattr(remix, "_SLEEP", lambda _: None)
     controls = _defaults(source)

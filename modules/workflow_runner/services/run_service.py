@@ -358,7 +358,12 @@ async def run_workflow(
     LOG.info("Received prompt_id %s from ComfyUI for workflow %s", prompt_id, workflow_id)
 
     try:
-        await create_job(prompt_id, workflow_id, owner_id=owner_id)
+        create_job_kwargs = {"owner_id": owner_id}
+        # Keep the call compatible with lightweight third-party/job-store
+        # adapters that predate durable input snapshots.
+        if "inputs" in payload:
+            create_job_kwargs["inputs"] = payload.get("inputs")
+        await create_job(prompt_id, workflow_id, **create_job_kwargs)
     except BaseException:
         # The prompt is already queued.  Even if LF cannot persist its job, keep
         # supervising the exact prompt so admission is not released early.
