@@ -20,6 +20,18 @@ spec.loader.exec_module(test_utils)
 
 find_workflow_runner_base = test_utils.find_workflow_runner_base
 
+
+class _AsyncContext:
+    def __init__(self, value):
+        self.value = value
+
+    async def __aenter__(self):
+        return self.value
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        return False
+
+
 def load_model_service_module():
     """Dynamically load the services.model_service module for tests."""
     import sys
@@ -120,16 +132,25 @@ class TestModelService:
 
     @pytest.fixture
     def model_service(self):
-        return load_model_service_module()
+        import sys
+
+        previous_folder_paths = sys.modules.get("folder_paths")
+        module = load_model_service_module()
+        try:
+            yield module
+        finally:
+            if previous_folder_paths is None:
+                sys.modules.pop("folder_paths", None)
+            else:
+                sys.modules["folder_paths"] = previous_folder_paths
 
     @pytest.mark.asyncio
-    @patch('lf_nodes.modules.workflow_runner.services.model_service._read_secret')
-    async def test_get_gemini_models_success(self, mock_read_secret, model_service):
+    async def test_get_gemini_models_success(self, model_service):
         """Test successful retrieval of Gemini models."""
-        mock_read_secret.return_value = 'test_key'
-        
-        # Mock the entire aiohttp session
-        with patch('aiohttp.ClientSession') as mock_session_class:
+        # Mock the loaded module directly; its synthetic package alias is an
+        # implementation detail of this isolated test fixture.
+        with patch.object(model_service, '_read_secret', return_value='test_key'), \
+             patch('aiohttp.ClientSession') as mock_session_class:
             mock_response = AsyncMock()
             mock_response.status = 200
             mock_response.json = AsyncMock(return_value={
@@ -139,32 +160,9 @@ class TestModelService:
                 ]
             })
             
-            # Create an async context manager for the session
-            class MockSessionContext:
-                def __init__(self, session):
-                    self.session = session
-                
-                async def __aenter__(self):
-                    return self.session
-                
-                async def __aexit__(self, exc_type, exc_val, exc_tb):
-                    pass
-            
-            # Create an async context manager for the response
-            class MockResponseContext:
-                def __init__(self, response):
-                    self.response = response
-                
-                async def __aenter__(self):
-                    return self.response
-                
-                async def __aexit__(self, exc_type, exc_val, exc_tb):
-                    pass
-            
             mock_session = MagicMock()
-            # Override the get method to return the context manager directly
-            mock_session.get = MagicMock(return_value=MockResponseContext(mock_response))
-            mock_session_class.return_value = MockSessionContext(mock_session)
+            mock_session.get = MagicMock(return_value=_AsyncContext(mock_response))
+            mock_session_class.return_value = _AsyncContext(mock_session)
 
             result = await model_service.get_gemini_models()
         assert "gemini-1.5-pro" in result
@@ -180,48 +178,44 @@ class TestModelService:
         assert result == []
 
     @pytest.mark.asyncio
-    @patch('aiohttp.ClientSession')
-    async def test_get_gemini_models_http_error(self, mock_session_class, model_service):
+    async def test_get_gemini_models_http_error(self, model_service):
         """Test Gemini models retrieval when HTTP request fails."""
         mock_response = AsyncMock()
         mock_response.status = 401
+        mock_response.text = AsyncMock(return_value="unauthorized")
 
-        mock_session = AsyncMock()
-        mock_session.get.return_value.__aenter__.return_value = mock_response
-        mock_session_class.return_value.__aenter__.return_value = mock_session
+        mock_session = MagicMock()
+        mock_session.get.return_value = _AsyncContext(mock_response)
 
-        with patch.dict('os.environ', {'GEMINI_API_KEY': 'invalid_key'}):
+        with patch.object(model_service, '_read_secret', return_value='invalid_key'), \
+             patch('aiohttp.ClientSession', return_value=_AsyncContext(mock_session)):
             result = await model_service.get_gemini_models()
 
         assert result == []
 
     @pytest.mark.asyncio
-    @patch('aiohttp.ClientSession')
-    async def test_get_gemini_models_json_error(self, mock_session_class, model_service):
+    async def test_get_gemini_models_json_error(self, model_service):
         """Test Gemini models retrieval when JSON parsing fails."""
         mock_response = AsyncMock()
         mock_response.status = 200
         mock_response.json.side_effect = json.JSONDecodeError("Invalid JSON", "", 0)
 
-        mock_session = AsyncMock()
-        mock_session.get.return_value.__aenter__.return_value = mock_response
-        mock_session_class.return_value.__aenter__.return_value = mock_session
+        mock_session = MagicMock()
+        mock_session.get.return_value = _AsyncContext(mock_response)
 
-        with patch.dict('os.environ', {'GEMINI_API_KEY': 'test_key'}):
+        with patch.object(model_service, '_read_secret', return_value='test_key'), \
+             patch('aiohttp.ClientSession', return_value=_AsyncContext(mock_session)):
             result = await model_service.get_gemini_models()
 
         assert result == []
 
-    @patch('folder_paths.get_folder_paths')
-    def test_get_comfy_models(self, mock_get_folder_paths, model_service):
+    @patch('folder_paths.get_filename_list')
+    def test_get_comfy_models(self, mock_get_filename_list, model_service):
         """Test retrieval of ComfyUI models."""
-        # Mock folder_paths response
-        mock_get_folder_paths.return_value = [
-            "/models/checkpoints/model1.safetensors",
-            "/models/checkpoints/model2.ckpt",
-            "/models/loras/lora1.safetensors",
-            "/models/vae/vae1.safetensors"
-        ]
+        mock_get_filename_list.side_effect = lambda folder: {
+            "checkpoints": ["model1.safetensors", "model2.ckpt"],
+            "diffusion_models": ["model3.safetensors"],
+        }.get(folder, [])
 
         result = model_service.get_comfy_models()
 
@@ -243,96 +237,43 @@ class TestModelService:
     @patch('folder_paths.get_filename_list')
     def test_get_comfy_models_invalid_paths(self, mock_get_filename_list, model_service):
         """Test ComfyUI models retrieval with invalid paths."""
-        mock_get_filename_list.return_value = []
+        mock_get_filename_list.side_effect = OSError("model directory unavailable")
 
         result = model_service.get_comfy_models()
 
         assert result == []
 
     @pytest.mark.asyncio
-    @patch('folder_paths.get_folder_paths')
-    async def test_get_all_models(self, mock_get_folder_paths, model_service):
-        """Test retrieval of all models (Gemini + ComfyUI)."""
-        # Mock ComfyUI models
-        mock_get_folder_paths.return_value = [
-            "/models/checkpoints/model1.safetensors"
-        ]
+    async def test_get_all_models(self, model_service):
+        """Select the model engine requested by the caller."""
+        with patch.object(
+            model_service,
+            'get_gemini_models',
+            new=AsyncMock(return_value=['gemini-1.5-pro']),
+        ), patch.object(
+            model_service,
+            'get_comfy_models',
+            return_value=['model1.safetensors'],
+        ):
+            text_result = await model_service.get_all_models()
+            image_result = await model_service.get_all_models(is_image_models=True)
 
-        # Mock Gemini API
-        with patch('aiohttp.ClientSession') as mock_session_class:
-            mock_response = AsyncMock()
-            mock_response.status = 200
-            mock_response.json = AsyncMock(return_value={
-                "models": [
-                    {"name": "models/gemini-1.5-pro", "displayName": "Gemini 1.5 Pro"}
-                ]
-            })
-
-            # Create an async context manager for the session
-            class MockSessionContext:
-                def __init__(self, session):
-                    self.session = session
-                
-                async def __aenter__(self):
-                    return self.session
-                
-                async def __aexit__(self, exc_type, exc_val, exc_tb):
-                    pass
-            
-            # Create an async context manager for the response
-            class MockResponseContext:
-                def __init__(self, response):
-                    self.response = response
-                
-                async def __aenter__(self):
-                    return self.response
-                
-                async def __aexit__(self, exc_type, exc_val, exc_tb):
-                    pass
-
-            mock_session = MagicMock()
-            # Override the get method to return the context manager directly
-            mock_session.get = MagicMock(return_value=MockResponseContext(mock_response))
-            mock_session_class.return_value = MockSessionContext(mock_session)
-
-            with patch.dict('os.environ', {'GEMINI_API_KEY': 'test_key'}):
-                result = await model_service.get_all_models()
-
-        # Should contain engines dict
-        assert "engines" in result
-        assert len(result["engines"]) == 2
-
-        # Check Gemini engine
-        gemini_engine = result["engines"][0]
-        assert gemini_engine["name"] == "Gemini (Google)"
-        assert len(gemini_engine["models"]) == 1
-        assert gemini_engine["models"][0] == "gemini-1.5-pro"
-
-        # Check ComfyUI engine
-        comfy_engine = result["engines"][1]
-        assert comfy_engine["name"] == "Diffusion (Comfy)"
-        assert "model1.safetensors" in comfy_engine["models"]
+        assert text_result == {
+            "engines": [{"name": "Gemini (Google)", "models": ["gemini-1.5-pro"]}]
+        }
+        assert image_result == {
+            "engines": [{"name": "Diffusion (Comfy)", "models": ["model1.safetensors"]}]
+        }
 
     @pytest.mark.asyncio
-    async def test_get_all_models_no_duplicates(self, model_service):
-        """Test that get_all_models doesn't return duplicates."""
-        # Mock empty ComfyUI models
-        with patch('folder_paths.get_filename_list', return_value=[]):
-            # Mock Gemini API with empty response
-            with patch('aiohttp.ClientSession') as mock_session_class:
-                mock_response = AsyncMock()
-                mock_response.status = 200
-                mock_response.json.return_value = {"models": []}
+    async def test_get_all_models_empty_results(self, model_service):
+        with patch.object(
+            model_service,
+            'get_gemini_models',
+            new=AsyncMock(return_value=[]),
+        ), patch.object(model_service, 'get_comfy_models', return_value=[]):
+            text_result = await model_service.get_all_models()
+            image_result = await model_service.get_all_models(is_image_models=True)
 
-                mock_session = AsyncMock()
-                mock_session.get.return_value.__aenter__.return_value = mock_response
-                mock_session_class.return_value.__aenter__.return_value = mock_session
-
-                with patch.dict('os.environ', {}, clear=True):
-                    result = await model_service.get_all_models()
-
-        # Should return engines dict with empty models
-        assert "engines" in result
-        assert len(result["engines"]) == 2
-        assert result["engines"][0]["models"] == []
-        assert result["engines"][1]["models"] == []
+        assert text_result["engines"][0]["models"] == []
+        assert image_result["engines"][0]["models"] == []

@@ -11,12 +11,18 @@ if str(pkg_root) not in sys.path:
 
 pytestmark = pytest.mark.anyio
 
-def test_prepare_workflow_unknown_id():
-    from modules.workflow_runner.services.executor import _prepare_workflow_execution, WorkflowPreparationError
+def test_prepare_workflow_unknown_id(monkeypatch):
+    comfy_root = pkg_root.parents[1]
+    if str(comfy_root) not in sys.path:
+        sys.path.insert(0, str(comfy_root))
+
+    from modules.workflow_runner.services import executor
+
+    monkeypatch.setattr(executor, "get_workflow", lambda _workflow_id: None)
 
     payload = {"workflowId": "does-not-exist", "inputs": {}}
-    with pytest.raises(WorkflowPreparationError) as exc:
-        _prepare_workflow_execution(payload)
+    with pytest.raises(executor.WorkflowPreparationError) as exc:
+        executor._prepare_workflow_execution(payload)
 
     err = exc.value
     assert getattr(err, "status", None) == 404

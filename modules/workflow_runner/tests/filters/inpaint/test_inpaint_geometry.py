@@ -1,5 +1,6 @@
 import importlib.util
 import sys
+import types
 from pathlib import Path
 
 import torch
@@ -7,25 +8,49 @@ import torch
 
 def _load_inpaint_module():
     """
-    Load the lf_nodes inpaint module in a way that matches how ComfyUI
-    loads the custom node package, so relative imports continue to work.
+    Load inpaint under an isolated package alias.
+
+    Several Workflow Runner unit suites intentionally install narrow ``modules``
+    stubs during collection.  A separate alias prevents those fixtures from
+    shadowing LF's real helper packages while keeping relative imports intact.
     """
-    if "lf_nodes" not in sys.modules:
-        lf_root = Path(__file__).resolve().parents[5]
-        init_path = lf_root / "__init__.py"
-        spec = importlib.util.spec_from_file_location("lf_nodes", init_path)
-        module = importlib.util.module_from_spec(spec)
-        sys.modules["lf_nodes"] = module
-        assert spec.loader is not None
-        spec.loader.exec_module(module)
+    lf_root = Path(__file__).resolve().parents[5]
+    comfy_root = lf_root.parents[1]
+    if str(comfy_root) not in sys.path:
+        sys.path.insert(0, str(comfy_root))
 
-    from lf_nodes.modules.utils.filters import inpaint as inpaint_module  # type: ignore[import]
+    package_root = "_lf_nodes_inpaint_test"
+    module_name = f"{package_root}.modules.utils.filters.inpaint"
+    existing = sys.modules.get(module_name)
+    if existing is not None:
+        return existing
 
-    # Disable debug preview saves during tests to avoid file I/O noise.
+    package_paths = {
+        package_root: lf_root,
+        f"{package_root}.modules": lf_root / "modules",
+        f"{package_root}.modules.utils": lf_root / "modules" / "utils",
+        f"{package_root}.modules.utils.filters": lf_root / "modules" / "utils" / "filters",
+    }
+    for package_name, package_path in package_paths.items():
+        package = types.ModuleType(package_name)
+        package.__package__ = package_name
+        package.__path__ = [str(package_path)]  # type: ignore[attr-defined]
+        sys.modules[package_name] = package
+
+    spec = importlib.util.spec_from_file_location(
+        module_name,
+        lf_root / "modules" / "utils" / "filters" / "inpaint.py",
+    )
+    assert spec is not None and spec.loader is not None
+    inpaint_module = importlib.util.module_from_spec(spec)
+    sys.modules[module_name] = inpaint_module
     try:
-        inpaint_module.DEBUG_PREVIEW_SAVES = False
-    except AttributeError:
-        pass
+        spec.loader.exec_module(inpaint_module)
+    except Exception:
+        sys.modules.pop(module_name, None)
+        raise
+
+    inpaint_module.DEBUG_PREVIEW_SAVES = False
 
     return inpaint_module
 

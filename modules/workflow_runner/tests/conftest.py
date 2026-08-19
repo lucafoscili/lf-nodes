@@ -14,17 +14,24 @@ from typing import Any, Dict
 from pathlib import Path
 
 # Add package root to path for imports
-pkg_root = Path(__file__).resolve().parents[2]
-if str(pkg_root) not in sys.path:
-    sys.path.insert(0, str(pkg_root))
+pkg_root = Path(__file__).resolve().parents[3]
+comfy_root = pkg_root.parents[1]
+for import_root in (comfy_root, pkg_root):
+    if str(import_root) not in sys.path:
+        sys.path.insert(0, str(import_root))
 
 
 @pytest.fixture(autouse=True)
 def fast_mode_env(monkeypatch):
 	"""Enable fast-mode for executor polling to keep tests snappy/deterministic."""
 	monkeypatch.setenv("LF_RUNNER_TEST_FAST", "1")
+	# Unit tests install synthetic providers explicitly when they exercise the
+	# admission ABI. Never make the host's production provider selection (or an
+	# installed private wheel) a prerequisite for the generic test suite.
+	monkeypatch.setenv("WORKFLOW_RUNNER_SUBMISSION_PROVIDER", "lf-default")
 	yield
 	monkeypatch.delenv("LF_RUNNER_TEST_FAST", raising=False)
+	monkeypatch.delenv("WORKFLOW_RUNNER_SUBMISSION_PROVIDER", raising=False)
 
 
 @pytest.fixture(autouse=True)
@@ -39,12 +46,17 @@ def reset_job_store_state():
 		job_store._subscribers.clear()  # type: ignore[attr-defined]
 		# Reset adapter to force lazy re-init logic each test
 		job_store._adapter = None  # type: ignore[attr-defined]
+		from modules.workflow_runner.services import lifecycle
+		lifecycle._records.clear()  # type: ignore[attr-defined]
+		lifecycle._prompt_index.clear()  # type: ignore[attr-defined]
 		yield
 		# Post-test cleanup (idempotent)
 		job_store._USE_PERSISTENCE = False  # type: ignore[attr-defined]
 		job_store._jobs.clear()  # type: ignore[attr-defined]
 		job_store._subscribers.clear()  # type: ignore[attr-defined]
 		job_store._adapter = None  # type: ignore[attr-defined]
+		lifecycle._records.clear()  # type: ignore[attr-defined]
+		lifecycle._prompt_index.clear()  # type: ignore[attr-defined]
 	except ImportError:
 		# If modules can't be imported, skip the fixture
 		yield
@@ -70,9 +82,9 @@ class _MockAiohttpResponse:
 	def raise_for_status(self):
 		if self.status >= 400:
 			raise Exception(f"HTTP {self.status}")
-	def __aenter__(self):
+	async def __aenter__(self):
 		return self
-	def __aexit__(self, exc_type, exc, tb):
+	async def __aexit__(self, exc_type, exc, tb):
 		return False
 
 
