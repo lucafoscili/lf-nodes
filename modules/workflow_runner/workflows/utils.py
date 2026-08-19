@@ -1,11 +1,18 @@
 from __future__ import annotations
 
+import hashlib
+import os
+import re
+import tempfile
 from pathlib import Path
-from typing import Any, Iterator, List
+from typing import Any, Iterator, List, Sequence, Tuple
 
 from ..services.registry import InputValidationError
 
 _CANDIDATE_KEYS = ("path", "file", "name", "value")
+_STAGED_IMAGE_DIRECTORY = Path("lf-workflow-runner") / "staged-images"
+_SAFE_SUFFIX = re.compile(r"^\.[a-z0-9]{1,16}$")
+_COPY_BUFFER_BYTES = 1024 * 1024
 
 # region Helpers
 def _flatten_upload_value(value: Any) -> Iterator[Any]:
@@ -97,4 +104,132 @@ def resolve_upload_paths(
     raise InputValidationError(name)
 
   return resolved
+# endregion
+
+
+# region Comfy LoadImage references
+def _comfy_image_directories() -> Sequence[Tuple[str, Path]]:
+  """Return the filesystem roots understood by Comfy's path annotations.
+
+  ``folder_paths`` belongs to the Comfy host, so importing it lazily keeps the
+  workflow declaration layer importable in offline tooling and contract tests.
+  """
+  import folder_paths
+
+  return (
+    ("input", Path(folder_paths.get_input_directory())),
+    ("temp", Path(folder_paths.get_temp_directory())),
+    ("output", Path(folder_paths.get_output_directory())),
+  )
+
+
+def _contained_relative_path(path: Path, root: Path) -> Path | None:
+  """Return a real, relative path when ``path`` is contained by ``root``."""
+  try:
+    return path.relative_to(root)
+  except ValueError:
+    return None
+
+
+def _annotated_reference(relative_path: Path, storage_type: str) -> str:
+  # Forward slashes are accepted by Comfy on every host and make graph payloads
+  # portable and deterministic.
+  return f"{relative_path.as_posix()} [{storage_type}]"
+
+
+def _hash_file(path: Path) -> str:
+  digest = hashlib.sha256()
+  with path.open("rb") as source:
+    while chunk := source.read(_COPY_BUFFER_BYTES):
+      digest.update(chunk)
+  return digest.hexdigest()
+
+
+def _stage_content_addressed_image(source_path: Path, input_root: Path) -> Path:
+  """Atomically stage external bytes below Comfy input and return a relative path."""
+  stage_root = input_root / _STAGED_IMAGE_DIRECTORY
+  stage_root.mkdir(parents=True, exist_ok=True)
+  resolved_stage_root = stage_root.resolve(strict=True)
+  if _contained_relative_path(resolved_stage_root, input_root) is None:
+    raise ValueError("The LF staging directory escapes Comfy's input directory.")
+
+  suffix = source_path.suffix.lower()
+  if not _SAFE_SUFFIX.fullmatch(suffix):
+    suffix = ".image"
+
+  temporary_path: Path | None = None
+  descriptor, temporary_name = tempfile.mkstemp(
+    dir=resolved_stage_root,
+    prefix=".staging-",
+    suffix=".tmp",
+  )
+  temporary_path = Path(temporary_name)
+  digest = hashlib.sha256()
+  try:
+    with source_path.open("rb") as source, os.fdopen(descriptor, "wb") as target:
+      descriptor = -1
+      while chunk := source.read(_COPY_BUFFER_BYTES):
+        digest.update(chunk)
+        target.write(chunk)
+      target.flush()
+      os.fsync(target.fileno())
+
+    target_path = resolved_stage_root / f"sha256-{digest.hexdigest()}{suffix}"
+    if target_path.exists() and _hash_file(target_path) == digest.hexdigest():
+      temporary_path.unlink()
+      temporary_path = None
+    else:
+      # The temporary file lives on the same filesystem, so replace is atomic.
+      # Concurrent runners may replace the same content address with identical
+      # bytes, which is harmless and still leaves no partially written target.
+      os.replace(temporary_path, target_path)
+      temporary_path = None
+
+    return target_path.relative_to(input_root)
+  finally:
+    if descriptor != -1:
+      os.close(descriptor)
+    if temporary_path is not None:
+      temporary_path.unlink(missing_ok=True)
+
+
+def resolve_load_image_reference(
+  inputs: dict[str, Any],
+  name: str,
+) -> str:
+  """Resolve one upload/local image to a secure core ``LoadImage`` reference.
+
+  Core Comfy nodes do not accept arbitrary absolute paths: they accept a path
+  relative to the input directory, optionally annotated as ``[input]``,
+  ``[temp]``, or ``[output]``. Existing files already contained by one of those
+  roots are reused. An external absolute file is copied once into a
+  content-addressed LF namespace under Comfy input using an atomic rename.
+
+  Resolving real paths before containment checks prevents a symlink inside a
+  Comfy directory from being used to smuggle an outside path into the graph.
+  """
+  raw_path = Path(
+    resolve_upload_paths(inputs, name, allow_multiple=False, must_exist=True)[0]
+  ).expanduser()
+  if not raw_path.is_absolute():
+    raise InputValidationError(name)
+
+  source_path = raw_path.resolve(strict=True)
+  if not source_path.is_file():
+    raise ValueError(f"Input path is not a file: {source_path}")
+
+  directories = tuple(
+    (storage_type, root.expanduser().resolve(strict=False))
+    for storage_type, root in _comfy_image_directories()
+  )
+  for storage_type, root in directories:
+    relative_path = _contained_relative_path(source_path, root)
+    if relative_path is not None:
+      return _annotated_reference(relative_path, storage_type)
+
+  input_root = next(
+    root for storage_type, root in directories if storage_type == "input"
+  )
+  staged_relative_path = _stage_content_addressed_image(source_path, input_root)
+  return _annotated_reference(staged_relative_path, "input")
 # endregion
