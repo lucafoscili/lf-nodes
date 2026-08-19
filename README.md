@@ -144,6 +144,18 @@ code during Workflow Runner startup. Point the setting only at directories you
 control, use unique module filenames and workflow IDs, and restart ComfyUI after
 changing the configured roots or their contents.
 
+### Preflighting Workflow JSON
+
+Before queueing a large workflow, run the queue-free structural preflight from
+the LF Nodes repository root:
+
+`python -m modules.workflow_runner.scripts.workflow_preflight <workflow.json>`
+
+The command validates node/link integrity, verifies that every referenced LF
+node type still exists, and exercises the same workflow-to-prompt conversion as
+the runner. Add `--require-all-lf-nodes` when the file is intended to cover every
+currently shipped LF node; missing coverage then becomes a failing exit status.
+
 ## Image editor
 
 The image editor node (`LF_LoadAndEditImages`) allows users to load images from disk and perform editing operations such as inpainting, adjusting saturations, brightness, contrast, and more, all through an interactive interface.
