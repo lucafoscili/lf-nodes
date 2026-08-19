@@ -45,6 +45,58 @@ class WorkflowPreparationError(Exception):
 # endregion
 
 # region Helpers
+_MAX_EXECUTION_ERROR_MESSAGE_BYTES = 4096
+
+
+def _bounded_user_message(value: Any) -> str | None:
+    """Return a small, text-only message suitable for a user-facing payload."""
+
+    if not isinstance(value, str):
+        return None
+    message = value.replace("\x00", "").strip()
+    if not message:
+        return None
+    # Avoid allocating a byte string proportional to an untrusted provider
+    # message before applying the response bound.  The byte-level pass below
+    # still handles multi-byte Unicode correctly.
+    message = message[:_MAX_EXECUTION_ERROR_MESSAGE_BYTES]
+    encoded = message.encode("utf-8", "replace")
+    if len(encoded) <= _MAX_EXECUTION_ERROR_MESSAGE_BYTES:
+        return message
+    # Truncate by bytes without splitting a UTF-8 code point.  Keep the
+    # suffix within the same bound so this remains safe for response budgets.
+    suffix = "..."
+    prefix = encoded[: _MAX_EXECUTION_ERROR_MESSAGE_BYTES - len(suffix)]
+    return prefix.decode("utf-8", "ignore") + suffix
+
+
+def _extract_execution_error_message(history_entry: Mapping[str, Any]) -> str | None:
+    """Extract ComfyUI's bounded user-facing message for ``execution_error``.
+
+    ComfyUI stores execution failures as messages shaped like
+    ``["execution_error", {"exception_message": "...", ...}]``.  Tracebacks,
+    inputs, and other provider diagnostics are deliberately not exposed here.
+    """
+
+    if not isinstance(history_entry, Mapping):
+        return None
+    status = history_entry.get("status")
+    if not isinstance(status, Mapping):
+        return None
+    messages = status.get("messages")
+    if not isinstance(messages, (list, tuple)):
+        return None
+    for message in messages:
+        if not isinstance(message, (list, tuple)) or len(message) < 2:
+            continue
+        if message[0] != "execution_error" or not isinstance(message[1], Mapping):
+            continue
+        extracted = _bounded_user_message(message[1].get("exception_message"))
+        if extracted is not None:
+            return extracted
+    return None
+
+
 def _make_run_payload(
     *,
     detail: str = "",
@@ -590,7 +642,13 @@ async def finalize_workflow(
         response = _make_run_payload(detail="success", history={"outputs": history_outputs}, preferred_output=preferred_output)
         return JobStatus.SUCCEEDED, response, http_status
 
-    response = _make_run_payload(detail=status_str or "error", error_message="execution_failed", history={"outputs": history_outputs}, preferred_output=preferred_output)
+    execution_error = _extract_execution_error_message(history_entry)
+    response = _make_run_payload(
+        detail=execution_error or status_str or "error",
+        error_message="execution_failed",
+        history={"outputs": history_outputs},
+        preferred_output=preferred_output,
+    )
     return JobStatus.FAILED, response, http_status
 
 async def execute_workflow(
@@ -663,6 +721,7 @@ __all__ = [
     "_make_run_payload",
     "_prepare_workflow_execution",
     "_sanitize_history",
+    "_extract_execution_error_message",
     "_wait_for_completion",
     "drain_workflow",
     "_monitor_until_running",

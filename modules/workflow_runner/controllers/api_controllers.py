@@ -13,7 +13,13 @@ from ..services.auth_service import (
     _ENABLE_GOOGLE_OAUTH,
     _WF_DEBUG,
 )
-from ..services.executor import WorkflowPreparationError, execute_workflow, _make_run_payload
+from ..services.executor import (
+    WorkflowPreparationError,
+    execute_workflow,
+    _extract_execution_error_message,
+    _make_run_payload,
+    _sanitize_history,
+)
 from ..services.job_service import get_job_status
 from ..services import job_store
 from ..services.run_service import run_workflow
@@ -35,15 +41,29 @@ LOG = logging.getLogger(__name__)
 # region Helpers
 async def _update_job_status_from_history(run_id: str, entry: dict):
     """Update stored job status from ComfyUI history entry."""
-    status = entry.get("status") or {}
-    if status.get("completed") is True:
-        result = {"http_status": 200, "body": _make_run_payload(history=entry)}
+    # ``GET /history/{prompt_id}`` normally returns ``{prompt_id: entry}``,
+    # while a few Comfy-compatible backends return the entry directly.
+    history_entry = entry.get(run_id) if isinstance(entry, dict) else None
+    if not isinstance(history_entry, dict):
+        history_entry = entry
+    status = history_entry.get("status") or {}
+    history = _sanitize_history(history_entry)
+    if status.get("status_str") == "error":
+        detail = _extract_execution_error_message(history_entry) or "error"
+        result = {
+            "http_status": 500,
+            "body": _make_run_payload(
+                detail=detail,
+                history={"outputs": history.get("outputs", {})},
+                error_message="execution_failed",
+            ),
+        }
+        await job_store.set_job_status(run_id, job_store.JobStatus.FAILED, result=result, error="execution_failed")
+    elif status.get("completed") is True:
+        result = {"http_status": 200, "body": _make_run_payload(history=history)}
         await job_store.set_job_status(run_id, job_store.JobStatus.SUCCEEDED, result=result)
-    elif status.get("status_str") == "error":
-        result = {"http_status": 500, "body": _make_run_payload(history=entry, error_message="execution_error")}
-        await job_store.set_job_status(run_id, job_store.JobStatus.FAILED, result=result, error="execution_error")
-    elif entry.get("outputs"):
-        result = {"http_status": 200, "body": _make_run_payload(history=entry)}
+    elif history_entry.get("outputs"):
+        result = {"http_status": 200, "body": _make_run_payload(history=history)}
         await job_store.set_job_status(run_id, job_store.JobStatus.SUCCEEDED, result=result)
 
 def _summary_requested(request: web.Request) -> bool:

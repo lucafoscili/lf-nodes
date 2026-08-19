@@ -13,6 +13,7 @@ async def test_finalize_workflow_fast_success(monkeypatch, comfy_api_mock):
     import types
     mock_install_util = types.ModuleType('utils.install_util')
     mock_install_util.get_missing_requirements_message = lambda: ""
+    mock_install_util.get_required_packages_versions = lambda: {}
     mock_install_util.requirements_path = Path("/tmp/requirements.txt")
     monkeypatch.setitem(sys.modules, 'utils.install_util', mock_install_util)
 
@@ -72,3 +73,62 @@ async def test_finalize_workflow_fast_success(monkeypatch, comfy_api_mock):
     assert status == JobStatus.SUCCEEDED
     assert http_status == 200
     assert response["payload"]["preferred_output"] == "1"
+
+
+@pytest.mark.asyncio
+async def test_finalize_workflow_preserves_bounded_comfy_execution_error(
+    monkeypatch, comfy_api_mock
+):
+    """Expose Comfy's exception message without returning unbounded diagnostics."""
+    import types
+
+    mock_install_util = types.ModuleType("utils.install_util")
+    mock_install_util.get_missing_requirements_message = lambda: ""
+    mock_install_util.get_required_packages_versions = lambda: {}
+    mock_install_util.requirements_path = Path("/tmp/requirements.txt")
+    monkeypatch.setitem(sys.modules, "utils.install_util", mock_install_util)
+
+    mock_json_util = types.ModuleType("utils.json_util")
+    mock_json_util.merge_json_recursive = lambda *args: {}
+    monkeypatch.setitem(sys.modules, "utils.json_util", mock_json_util)
+    monkeypatch.setenv("LF_RUNNER_TEST_FAST", "1")
+
+    from modules.workflow_runner.services import executor
+    from modules.workflow_runner.services.job_store import JobStatus
+
+    prompt_id = "prompt-error-1"
+    exception_message = "Node failed: " + ("x" * 5000)
+    history = {
+        prompt_id: {
+            "status": {
+                "status_str": "error",
+                "completed": True,
+                "messages": [
+                    [
+                        "execution_error",
+                        {
+                            "exception_message": exception_message,
+                            "traceback": ["private diagnostic details"],
+                        },
+                    ]
+                ],
+            },
+            "outputs": {},
+        }
+    }
+    monkeypatch.setattr(
+        "aiohttp.ClientSession",
+        lambda: comfy_api_mock([history], [{"queue_running": [], "queue_pending": []}]),
+    )
+
+    status, response, http_status = await executor.finalize_workflow(
+        prompt_id, "client-error-1", "http://127.0.0.1:8188", (True, "", [], []),
+    )
+
+    detail = response["payload"]["detail"]
+    assert status == JobStatus.FAILED
+    assert http_status == 500
+    assert detail.startswith("Node failed: ")
+    assert len(detail.encode("utf-8")) <= 4096
+    assert response["payload"]["error"]["message"] == "execution_failed"
+    assert "private diagnostic details" not in detail

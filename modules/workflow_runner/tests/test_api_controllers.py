@@ -4,7 +4,7 @@ Tests for API controller enhancements
 """
 import base64
 import json
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, MagicMock, AsyncMock
 
 import pytest
 from aiohttp import web
@@ -599,6 +599,51 @@ class TestApiControllers:
         assert response_data["run_id"] == "pending-run-789"
         assert response_data["status"] == "pending"
         assert "data" not in response_data
+
+    @pytest.mark.asyncio
+    async def test_history_reconciliation_preserves_comfy_execution_error(self, api_controllers):
+        """A wrapped Comfy history error remains failed with a user-safe detail."""
+        from types import SimpleNamespace
+
+        make_payload = lambda *, detail="", error_message=None, history=None, **_: {
+            "payload": {
+                "detail": detail,
+                "error": {"message": error_message} if error_message else None,
+                "history": history or {"outputs": {}},
+            }
+        }
+        api_controllers._make_run_payload = make_payload
+        api_controllers._sanitize_history = lambda value: {
+            "outputs": value.get("outputs", {}),
+        }
+        api_controllers._extract_execution_error_message = lambda value: (
+            "Sampler failed: out of memory"
+        )
+        api_controllers.job_store.JobStatus = SimpleNamespace(
+            FAILED="failed", SUCCEEDED="succeeded"
+        )
+        api_controllers.job_store.set_job_status = AsyncMock()
+
+        await api_controllers._update_job_status_from_history(
+            "error-run-123",
+            {
+                "error-run-123": {
+                    "status": {
+                        "status_str": "error",
+                        "completed": True,
+                        "messages": [["execution_error", {"exception_message": "ignored"}]],
+                    },
+                    "outputs": {},
+                }
+            },
+        )
+
+        call = api_controllers.job_store.set_job_status.await_args
+        assert call.args[:2] == ("error-run-123", "failed")
+        assert call.kwargs["error"] == "execution_failed"
+        assert call.kwargs["result"]["body"]["payload"]["detail"] == (
+            "Sampler failed: out of memory"
+        )
 
     @pytest.mark.asyncio
     async def test_get_workflow_status_controller_history_fetch_error(self, api_controllers):
