@@ -1,10 +1,14 @@
 import json
+import logging
+import re
 
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable, Dict, Iterable, List
 
 from ...utils.helpers.conversion import json_safe
+
+_LOG = logging.getLogger(__name__)
 
 # region Exceptions
 class InputValidationError(ValueError):
@@ -93,6 +97,48 @@ def _workflow_to_prompt(workflow: Dict[str, Any]) -> Dict[str, Any]:
 # endregion
 
 # region Dataset
+_PROVIDER_ID_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$")
+
+
+@dataclass(frozen=True, slots=True)
+class WorkflowSubmissionPolicy:
+    """Trusted resource policy for one workflow's queue submission.
+
+    Policies live on server-registered workflow definitions. They are not
+    serialized into the browser-facing workflow catalogue, so request inputs
+    cannot alter admission authority or resource estimates.
+    """
+
+    provider_id: str
+    expected_vram_mb: int
+    max_duration_seconds: int
+    required: bool = True
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.provider_id, str) or not _PROVIDER_ID_PATTERN.fullmatch(
+            self.provider_id
+        ):
+            raise ValueError(
+                "provider_id must be a non-empty identifier of at most 128 "
+                "ASCII letters, digits, dots, underscores, or hyphens"
+            )
+        if type(self.expected_vram_mb) is not int or self.expected_vram_mb <= 0:
+            raise ValueError("expected_vram_mb must be a positive integer")
+        if (
+            type(self.max_duration_seconds) is not int
+            or self.max_duration_seconds <= 0
+        ):
+            raise ValueError("max_duration_seconds must be a positive integer")
+        if type(self.required) is not bool:
+            raise TypeError("required must be a boolean")
+
+    @property
+    def fail_closed(self) -> bool:
+        """Whether provider failure must prevent direct queue submission."""
+
+        return self.required
+
+
 @dataclass
 class WorkflowCell:
     id: str
@@ -101,6 +147,7 @@ class WorkflowCell:
     value: str = ""
     description: str = ""
     props: Dict[str, Any] = field(default_factory=dict)
+    required: bool = True
 
     def to_dict(self) -> Dict[str, Any]:
         data = {
@@ -114,6 +161,8 @@ class WorkflowCell:
             data["value"] = self.value
         if self.description:
             data["title"] = self.description
+        if not self.required:
+            data["required"] = False
 
         return json_safe(data)
 
@@ -127,6 +176,16 @@ class WorkflowNode:
     configure_prompt: Callable[[Dict[str, Any], Dict[str, Any]], None]
     workflow_path: Path
     category: str
+    submission_policy: WorkflowSubmissionPolicy | None = None
+
+    def __post_init__(self) -> None:
+        if self.submission_policy is not None and not isinstance(
+            self.submission_policy,
+            WorkflowSubmissionPolicy,
+        ):
+            raise TypeError(
+                "submission_policy must be a WorkflowSubmissionPolicy or None"
+            )
 
     def load_prompt(self) -> Dict[str, Any]:
         with self.workflow_path.open("r", encoding="utf-8") as workflow_file:
@@ -148,6 +207,12 @@ class WorkflowRegistry:
         self._definitions: Dict[str, WorkflowNode] = {}
 
     def register(self, definition: WorkflowNode) -> None:
+        previous = self._definitions.get(definition.id)
+        if previous is not None and previous is not definition:
+            _LOG.warning(
+                "Workflow definition %r replaces an existing registration",
+                definition.id,
+            )
         self._definitions[definition.id] = definition
 
     def list(self) -> Dict[str, List[Dict[str, Any]]]:
@@ -180,6 +245,18 @@ class WorkflowRegistry:
     
     def get(self, id: str) -> WorkflowNode | None:
         return self._definitions.get(id)
+
+    def get_submission_policy(self, id: str) -> WorkflowSubmissionPolicy | None:
+        definition = self.get(id)
+        if definition is None:
+            return None
+
+        policy = getattr(definition, "submission_policy", None)
+        if policy is not None and not isinstance(policy, WorkflowSubmissionPolicy):
+            raise TypeError(
+                f"Workflow definition '{id}' has an invalid submission policy."
+            )
+        return policy
 
 REGISTRY = WorkflowRegistry()
 
@@ -230,4 +307,10 @@ def list_workflows() -> List[Dict[str, Any]]:
 def get_workflow(id: str) -> WorkflowNode | None:
     _ensure_registered()
     return REGISTRY.get(id)
+
+def get_workflow_submission_policy(id: str) -> WorkflowSubmissionPolicy | None:
+    """Return trusted admission metadata for a registered workflow, if any."""
+
+    _ensure_registered()
+    return REGISTRY.get_submission_policy(id)
 # endregion

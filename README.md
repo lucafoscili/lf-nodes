@@ -102,7 +102,8 @@ If you do enable it, ensure authentication/allowed-users are configured (see `do
 
 ### Adding New Workflows
 
-To add a new workflow to the Workflow Runner, follow these steps:
+Reusable, project-agnostic workflows can ship with LF Nodes. To add one to the
+Workflow Runner, follow these steps:
 
 1. **Create the workflow JSON file**  
    Export your ComfyUI workflow and save it as `modules/workflow_runner/workflows/<workflow_name>.json`
@@ -129,6 +130,19 @@ To add a new workflow to the Workflow Runner, follow these steps:
    - Return structured data via `ui.lf_output` for frontend consumption
 
 **Example commit:** See commit `2fbb49e` which adds the `caption_image_vision` workflow, demonstrating all these steps including updating `LF_DisplayString` to support string outputs and frontend components to render them.
+
+Project-owned workflows do not need to be copied into this published package.
+Store each workflow's `.py` definition and `.json` graph together in an external
+directory, then set `WORKFLOW_RUNNER_EXTRA_WORKFLOW_ROOTS` in the repository-level
+`.env`. The setting accepts comma- or semicolon-separated absolute directories.
+External definitions use the same `workflows.custom` import contract as local
+custom workflows, so their existing relative imports and workflow IDs can remain
+stable.
+
+External roots are trusted Python source: every discovered `.py` module can run
+code during Workflow Runner startup. Point the setting only at directories you
+control, use unique module filenames and workflow IDs, and restart ComfyUI after
+changing the configured roots or their contents.
 
 ## Image editor
 

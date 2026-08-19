@@ -243,6 +243,7 @@ tests/
 **Core Settings:**
 
 - `WORKFLOW_RUNNER_ENABLED`: When set to a truthy value (e.g., `1` or `true`), the Workflow Runner will register its HTTP routes and static frontend at startup. Default: `false`
+- `WORKFLOW_RUNNER_EXTRA_WORKFLOW_ROOTS`: Optional comma- or semicolon-separated list of absolute directories containing project-owned `.py` workflow definitions and their `.json` graphs. Default: empty
 - `WORKFLOW_RUNNER_DEBUG`: Enable debug logging. Default: `false`
 - `DEV_ENV`: Enable development environment features. Default: `false`
 
@@ -281,6 +282,8 @@ tests/
 
 - The runner is shipped inside the `lf-nodes` package but is opt-in by default. If `WORKFLOW_RUNNER_ENABLED` is not set or is false, route registration is skipped and the runner will not expose its APIs or UI.
 - Configuration is read from the repository-level `.env` (project root).
+- Extra workflow roots are trusted Python source directories. Their modules are discovered at first registry access, so configure them before startup and restart ComfyUI after changing the setting or files.
+- External modules share the `modules.workflow_runner.workflows.custom` import namespace. Use unique filenames: the bundled custom directory and then the configured roots are searched in order, and the first module with a given filename wins with a warning for later duplicates. Duplicate workflow IDs retain the existing last-registration-wins behavior and emit a warning.
 - If you enable the runner, please also configure authentication/allowed-users to avoid exposing the endpoints unintentionally.
 - For persistence, set `WORKFLOW_RUNNER_USE_PERSISTENCE=true` to enable SQLite storage for job history.
 

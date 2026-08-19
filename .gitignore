@@ -50,4 +50,5 @@ web/deploy/assets/messenger/**/*.*
 !web/deploy/assets/messenger/**/*.gitkeep
 modules/workflow_runner/workflows/custom/**/*
 !modules/workflow_runner/workflows/custom/**/.gitkeep
+!modules/workflow_runner/workflows/custom/__init__.py
 workflow_runner_history.db*
