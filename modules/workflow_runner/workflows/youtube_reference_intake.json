@@ -1,0 +1,42 @@
+{
+  "reference": {
+    "inputs": {
+      "youtube_url": "",
+      "media_kind": "audio_m4a"
+    },
+    "class_type": "LF_YouTubeReference",
+    "_meta": {
+      "title": "YouTube reference (cached input)"
+    }
+  },
+  "input_reference": {
+    "inputs": {
+      "ui_widget": "",
+      "string": ["reference", 0]
+    },
+    "class_type": "LF_DisplayString",
+    "_meta": {
+      "title": "Portable Comfy input reference"
+    }
+  },
+  "video_id": {
+    "inputs": {
+      "ui_widget": "",
+      "string": ["reference", 1]
+    },
+    "class_type": "LF_DisplayString",
+    "_meta": {
+      "title": "Canonical YouTube video ID"
+    }
+  },
+  "manifest": {
+    "inputs": {
+      "ui_widget": "",
+      "json_input": ["reference", 2]
+    },
+    "class_type": "LF_DisplayJSON",
+    "_meta": {
+      "title": "Portable reference receipt"
+    }
+  }
+}

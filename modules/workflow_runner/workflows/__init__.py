@@ -17,6 +17,7 @@ _WORKFLOW_MODULES: Sequence[str] = (
     "sort_json_keys",
     "svg_generation_gemini",
     "t2i_15_lcm",
+    "youtube_reference_intake",
 )
 
 # region Workflow Imports
