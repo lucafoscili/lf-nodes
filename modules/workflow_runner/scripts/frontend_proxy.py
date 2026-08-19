@@ -9,6 +9,7 @@ Usage:
 Configuration (env):
   PROXY_FRONTEND_PORT - port to bind (default 9188)
   COMFY_BACKEND_URL - backend Comfy base URL (default http://127.0.0.1:8188)
+  PROXY_MAX_REQUEST_SIZE_MB - maximum proxied request body size in MiB (default 100)
   PROXY_ALLOWED_PREFIXES - comma-separated allowed path prefixes (optional)
 
 This proxy forwards only configured prefixes and returns 403 for everything else.
@@ -64,6 +65,8 @@ maybe_load_dotenv(repo_root / ".env")
 
 DEFAULT_BACKEND = str_env("COMFY_BACKEND_URL", "http://127.0.0.1:8188")
 FRONTEND_PORT = int_env("PROXY_FRONTEND_PORT", 9188)
+PROXY_MAX_REQUEST_SIZE_MB = max(1, int_env("PROXY_MAX_REQUEST_SIZE_MB", 100))
+PROXY_MAX_REQUEST_SIZE_BYTES = PROXY_MAX_REQUEST_SIZE_MB * 1024 * 1024
 _allowed = list_env("PROXY_ALLOWED_PREFIXES")
 if _allowed:
     ALLOWED_PREFIXES = [p.strip() for p in _allowed if p.strip()]
@@ -121,11 +124,20 @@ async def proxy_request(request: web.Request) -> web.Response:
                 headers['X-Forwarded-Proto'] = request.scheme
 
     data = None
-    try:
-        if method in ("POST", "PUT", "PATCH"):
+    if method in ("POST", "PUT", "PATCH"):
+        try:
             data = await request.read()
-    except Exception:
-        data = None
+        except web.HTTPRequestEntityTooLarge:
+            logging.warning(
+                "Rejected request body exceeding %s MiB from %s for %s",
+                PROXY_MAX_REQUEST_SIZE_MB,
+                request.remote,
+                request.rel_url,
+            )
+            return web.json_response({"detail": "request_too_large"}, status=413)
+        except Exception:
+            logging.exception("Failed to read request body from %s for %s", request.remote, request.rel_url)
+            return web.json_response({"detail": "invalid_request_body"}, status=400)
 
     async with ClientSession() as sess:
         try:
@@ -216,13 +228,19 @@ async def proxy_request(request: web.Request) -> web.Response:
 # endregion
 
 # region App startup
-async def start_app() -> None:
-    app = web.Application()
+def create_app() -> web.Application:
+    """Create the proxy application with a configurable 100 MiB default body cap."""
+    app = web.Application(client_max_size=PROXY_MAX_REQUEST_SIZE_BYTES)
     app.router.add_route("GET", "/{path:.*}", handle)
     app.router.add_route("POST", "/{path:.*}", handle)
     app.router.add_route("PUT", "/{path:.*}", handle)
     app.router.add_route("PATCH", "/{path:.*}", handle)
     app.router.add_route("DELETE", "/{path:.*}", handle)
+    return app
+
+
+async def start_app() -> None:
+    app = create_app()
 
     runner = web.AppRunner(app)
     await runner.setup()
