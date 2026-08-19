@@ -94,7 +94,7 @@ async def test_run_replay_with_stable_id_does_not_submit_twice(run_service_modul
 
     payload = {
         "workflowId": "remove_bg",
-        "submissionId": "velora:remove-bg:asset-001",
+        "submissionId": "example:remove-bg:asset-001",
         "inputs": {"image": "asset-001.png"},
     }
 
@@ -120,7 +120,7 @@ async def test_run_replay_with_stable_id_does_not_submit_twice(run_service_modul
         replay = await run_service.run_workflow(payload)
 
     assert first["run_id"] == "prompt-1"
-    assert first["submission_id"] == "velora:remove-bg:asset-001"
+    assert first["submission_id"] == "example:remove-bg:asset-001"
     assert first["idempotent_replay"] is False
     assert replay["run_id"] == "prompt-1"
     assert replay["idempotent_replay"] is True
@@ -144,7 +144,7 @@ async def test_run_replay_does_not_depend_on_mutable_workflow_preparation(
     admission = SimpleNamespace(submit=AsyncMock(return_value=context))
     payload = {
         "workflowId": "remove_bg",
-        "submissionId": "velora:remove-bg:mutable-001",
+        "submissionId": "example:remove-bg:mutable-001",
         "inputs": {"image": "asset-001.png"},
     }
 
@@ -238,12 +238,12 @@ async def test_targeted_cancel_uses_exact_running_prompt_and_is_idempotent(run_s
     run_service = run_service_module
     payload = {
         "workflowId": "remove_bg",
-        "submissionId": "velora:cancel:001",
+        "submissionId": "example:cancel:001",
         "inputs": {},
     }
     await lifecycle.reserve_submission(payload, "remove_bg")
     await lifecycle.bind_prompt(
-        "velora:cancel:001",
+        "example:cancel:001",
         "prompt-cancel-001",
         "http://comfy:8188",
     )
@@ -253,8 +253,8 @@ async def test_targeted_cancel_uses_exact_running_prompt_and_is_idempotent(run_s
 
     interrupt = AsyncMock(return_value=True)
     with patch.object(run_service, "interrupt_workflow", new=interrupt):
-        first = await run_service.cancel_workflow_submission("velora:cancel:001")
-        replay = await run_service.cancel_workflow_submission("velora:cancel:001")
+        first = await run_service.cancel_workflow_submission("example:cancel:001")
+        replay = await run_service.cancel_workflow_submission("example:cancel:001")
 
     interrupt.assert_awaited_once_with(
         "prompt-cancel-001",
@@ -268,12 +268,12 @@ async def test_targeted_cancel_rejects_pending_prompt_without_interrupting(run_s
     run_service = run_service_module
     payload = {
         "workflowId": "remove_bg",
-        "submissionId": "velora:pending:001",
+        "submissionId": "example:pending:001",
         "inputs": {},
     }
     await lifecycle.reserve_submission(payload, "remove_bg")
     await lifecycle.bind_prompt(
-        "velora:pending:001",
+        "example:pending:001",
         "prompt-pending-001",
         "http://comfy:8188",
     )
@@ -282,7 +282,7 @@ async def test_targeted_cancel_rejects_pending_prompt_without_interrupting(run_s
     interrupt = AsyncMock(return_value=True)
     with patch.object(run_service, "interrupt_workflow", new=interrupt):
         with pytest.raises(run_service.WorkflowCancellationError) as error:
-            await run_service.cancel_workflow_submission("velora:pending:001")
+            await run_service.cancel_workflow_submission("example:pending:001")
 
     assert error.value.detail == "submission_not_running"
     assert error.value.status == 409
@@ -293,17 +293,17 @@ async def test_cancel_request_does_not_relabel_proven_failure(run_service_module
     run_service = run_service_module
     payload = {
         "workflowId": "remove_bg",
-        "submissionId": "velora:cancel-race:001",
+        "submissionId": "example:cancel-race:001",
         "inputs": {},
     }
     await lifecycle.reserve_submission(payload, "remove_bg")
     await lifecycle.bind_prompt(
-        "velora:cancel-race:001",
+        "example:cancel-race:001",
         "prompt-cancel-race",
         "http://comfy:8188",
     )
     await lifecycle.record_running("prompt-cancel-race")
-    await lifecycle.record_cancel_requested("velora:cancel-race:001")
+    await lifecycle.record_cancel_requested("example:cancel-race:001")
 
     admission = SimpleNamespace(release=AsyncMock())
     with patch.object(
@@ -330,13 +330,13 @@ async def test_cancel_request_does_not_relabel_proven_failure(run_service_module
             comfy_url="http://comfy:8188",
             validation=(True, "", [], []),
             admission=admission,
-            submission_id="velora:cancel-race:001",
+            submission_id="example:cancel-race:001",
         )
 
     set_status.assert_awaited_once()
     assert set_status.await_args.args[1] == job_store.JobStatus.FAILED
     snapshot = await lifecycle.get_submission(
-        "velora:cancel-race:001",
+        "example:cancel-race:001",
         include_events=False,
     )
     assert snapshot is not None

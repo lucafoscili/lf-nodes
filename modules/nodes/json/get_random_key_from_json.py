@@ -30,7 +30,7 @@ def select_weighted_key(seed: int, target: dict) -> str:
 
     ``domain || NUL || decimal seed || NUL || (u32 key bytes || key || u64 weight)*``
 
-    Entries are ordered by their UTF-8 key bytes.  Velora constrains seeds to
+    Entries are ordered by their UTF-8 key bytes. Callers constrain seeds to
     JavaScript's exact integer range because Comfy prompt graphs pass through
     browser JSON before Python receives them.
     """

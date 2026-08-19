@@ -16,7 +16,7 @@ describe('deepMerge output payloads', () => {
         images: [
           {
             filename: 'seed-42.mp4',
-            subfolder: 'velora/minimax_h3_i2v',
+            subfolder: 'workflow-runner/minimax_h3_i2v',
             type: 'output',
           },
         ],

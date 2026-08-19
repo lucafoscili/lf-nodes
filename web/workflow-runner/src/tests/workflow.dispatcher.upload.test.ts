@@ -39,12 +39,12 @@ const createStore = (sceneRequired: boolean) => {
   identity.getValue = vi.fn(async () => [new File(['identity'], 'identity.png')]);
 
   const state = {
-    current: { id: 'velora_krea2_identity_edit', message: null, status: 'idle' },
+    current: { id: 'image_identity_edit', message: null, status: 'idle' },
     manager: {
       uiRegistry: {
         get: vi.fn(() => ({ [INPUTS_CLASSES.cells]: [scene, identity] })),
       },
-      workflow: { title: vi.fn(() => 'Velora Krea 2 Identity Edit') },
+      workflow: { title: vi.fn(() => 'Image Identity Edit') },
     },
     mutate: { inputStatus: vi.fn() },
   };
@@ -62,7 +62,7 @@ describe('workflowDispatcher upload requiredness', () => {
 
     expect(uploadWorkflowFiles).toHaveBeenCalledTimes(1);
     expect(runWorkflow).toHaveBeenCalledWith({
-      workflowId: 'velora_krea2_identity_edit',
+      workflowId: 'image_identity_edit',
       inputs: { identity_image: 'identity.png' },
     });
     expect(addNotification).toHaveBeenCalledTimes(0);

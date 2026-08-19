@@ -61,11 +61,8 @@ def test_prompt_is_required() -> None:
         WORKFLOW.configure_prompt(WORKFLOW.load_prompt(), {})
 
 
-def test_graph_contains_no_project_vocabulary() -> None:
+def test_graph_uses_the_generic_output_namespace() -> None:
     graph_text = WORKFLOW.workflow_path.read_text(encoding="utf-8")
-    lowered = graph_text.lower()
-    assert "warden" not in lowered
-    assert "velora" not in lowered
     graph = json.loads(graph_text)
     assert graph["7"]["inputs"]["filename_prefix"] == "lf-workflow-runner/illustrious-xl"
 

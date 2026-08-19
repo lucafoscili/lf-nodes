@@ -61,9 +61,8 @@ def test_unknown_family_and_profile_fail_closed() -> None:
         resolve_h3_execution_profile("missing", family="fl2va")
 
 
-def test_descriptions_cover_requested_profiles_without_project_vocabulary() -> None:
+def test_descriptions_cover_requested_profiles() -> None:
     text = h3_profile_descriptions(("native_quality", "kitchen_quality"))
 
     assert "native_quality:" in text
     assert "kitchen_quality:" in text
-    assert "velora" not in text.lower()

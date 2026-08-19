@@ -585,7 +585,7 @@ async def test_prepare_rejects_caller_extra_data_for_guarded_workflow(monkeypatc
     monkeypatch.setattr(executor.execution, "validate_prompt", validate)
     definition = SimpleNamespace(
         submission_policy=SimpleNamespace(
-            provider_id="velora_guarded_v1",
+            provider_id="example_guarded_v1",
             expected_vram_mb=18_400,
             max_duration_seconds=90.0,
             required=True,
@@ -620,7 +620,7 @@ async def test_prepare_uses_exact_narrow_envelope_for_guarded_workflow(monkeypat
     monkeypatch.setattr(executor.execution, "validate_prompt", validate)
     definition = SimpleNamespace(
         submission_policy=SimpleNamespace(
-            provider_id="velora_guarded_v1",
+            provider_id="example_guarded_v1",
             expected_vram_mb=18_400,
             max_duration_seconds=90,
             required=True,

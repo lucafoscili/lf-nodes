@@ -21,7 +21,7 @@ describe('normalizeTextWidgetValue', () => {
   });
 });
 
-describe('Velora intake widget contracts', () => {
+describe('External intake widget contracts', () => {
   it('renders the YouTube reference receipt with the LF code widget', () => {
     expect(NODE_WIDGET_MAP[NodeName.youtubeReference]).toEqual([CustomWidgetName.code]);
   });

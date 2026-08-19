@@ -19,7 +19,7 @@ def _large_result(index: int) -> dict:
                             "images": [
                                 {
                                     "filename": f"portrait-{index}.png",
-                                    "subfolder": "velora/history",
+                                    "subfolder": "workflow-runner/history",
                                     "type": "output",
                                 }
                             ]
@@ -42,9 +42,9 @@ def test_output_preview_keeps_only_view_artifacts() -> None:
             "images": [
                 {
                     "filename": "portrait-7.png",
-                    "subfolder": "velora/history",
+                    "subfolder": "workflow-runner/history",
                     "type": "output",
-                    "url": "/view?filename=portrait-7.png&subfolder=velora%2Fhistory&type=output",
+                    "url": "/view?filename=portrait-7.png&subfolder=workflow-runner%2Fhistory&type=output",
                 }
             ]
         }
@@ -68,7 +68,7 @@ def test_output_preview_extracts_lf_dataset_view_url() -> None:
                                                     "lfImage": {
                                                         "shape": "image",
                                                         "lfValue": (
-                                                            "/view?filename=warden.png&type=output"
+                                                            "/view?filename=sample.png&type=output"
                                                             "&subfolder=portraits&nonce=ignored"
                                                         ),
                                                     }
@@ -92,10 +92,10 @@ def test_output_preview_extracts_lf_dataset_view_url() -> None:
         "7": {
             "images": [
                 {
-                    "filename": "warden.png",
+                    "filename": "sample.png",
                     "subfolder": "portraits",
                     "type": "output",
-                    "url": "/view?filename=warden.png&subfolder=portraits&type=output",
+                    "url": "/view?filename=sample.png&subfolder=portraits&type=output",
                 }
             ]
         }
@@ -188,7 +188,7 @@ def test_history_payload_budget_for_200_runs() -> None:
                                 "images": [
                                     {
                                         "filename": f"portrait-{index}.png",
-                                        "subfolder": "velora/history",
+                                        "subfolder": "workflow-runner/history",
                                         "type": "output",
                                     }
                                 ]

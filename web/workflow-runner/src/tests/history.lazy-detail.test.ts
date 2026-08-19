@@ -12,10 +12,10 @@ const previewOutputs = {
   save: {
     images: [
       {
-        filename: 'maeva.png',
-        subfolder: 'velora/history',
+        filename: 'sample.png',
+        subfolder: 'workflow-runner/history',
         type: 'output',
-        url: '/view?filename=maeva.png&subfolder=velora%2Fhistory&type=output',
+        url: '/view?filename=sample.png&subfolder=workflow-runner%2Fhistory&type=output',
       },
     ],
   },
@@ -25,7 +25,7 @@ const previewOutputs = {
 describe('history summary/detail boundary', () => {
   it('renders a history preview from the summary artifact URL', () => {
     expect(getFirstOutputMediaUrl(previewOutputs)).toBe(
-      '/view?filename=maeva.png&subfolder=velora%2Fhistory&type=output',
+      '/view?filename=sample.png&subfolder=workflow-runner%2Fhistory&type=output',
     );
   });
 
@@ -33,7 +33,7 @@ describe('history summary/detail boundary', () => {
     const store = createWorkflowRunnerStore(initState());
     const client = new WorkflowRunnerClient(store);
     const summary: RunRecord = {
-      run_id: 'run-maeva',
+      run_id: 'run-sample',
       workflow_id: 'portrait',
       status: 'succeeded',
       seq: 3,
@@ -43,7 +43,7 @@ describe('history summary/detail boundary', () => {
 
     let detailFetches = 0;
     makeFetchMock(async (url: string) => {
-      if (url.endsWith('/run/run-maeva/status')) {
+      if (url.endsWith('/run/run-sample/status')) {
         detailFetches += 1;
         return {
           ok: true,
@@ -59,8 +59,8 @@ describe('history summary/detail boundary', () => {
                       save: {
                         images: [
                           {
-                            filename: 'maeva.png',
-                            subfolder: 'velora/history',
+                            filename: 'sample.png',
+                            subfolder: 'workflow-runner/history',
                             type: 'output',
                           },
                         ],
@@ -77,13 +77,13 @@ describe('history summary/detail boundary', () => {
       return { ok: false, status: 404 };
     });
 
-    const first = client.loadRunDetail('run-maeva');
-    const second = client.loadRunDetail('run-maeva');
+    const first = client.loadRunDetail('run-sample');
+    const second = client.loadRunDetail('run-sample');
     await Promise.all([first, second]);
-    await client.loadRunDetail('run-maeva');
+    await client.loadRunDetail('run-sample');
 
     expect(detailFetches).toBe(1);
-    expect(client.getRuns().get('run-maeva')?.result?.http_status).toBe(200);
+    expect(client.getRuns().get('run-sample')?.result?.http_status).toBe(200);
     expect(store.getState().runs[0].resultPayload?.http_status).toBe(200);
   });
 

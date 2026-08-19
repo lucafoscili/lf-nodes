@@ -20,7 +20,7 @@ async def reset_lifecycle():
 async def test_stable_submission_id_is_an_idempotent_request_handle():
     payload = {
         "workflowId": "remove_bg",
-        "submissionId": "velora:portrait:maeva:front:v1",
+        "submissionId": "example:portrait:subject-001:front:v1",
         "inputs": {"image": "same-input"},
     }
 
@@ -29,7 +29,7 @@ async def test_stable_submission_id_is_an_idempotent_request_handle():
 
     assert created is True
     assert replay_created is False
-    assert first["submission_id"] == "velora:portrait:maeva:front:v1"
+    assert first["submission_id"] == "example:portrait:subject-001:front:v1"
     assert replay["submission_id"] == first["submission_id"]
     assert replay["event_count"] == 1
 
@@ -37,7 +37,7 @@ async def test_stable_submission_id_is_an_idempotent_request_handle():
 async def test_stable_submission_id_rejects_a_different_request():
     base = {
         "workflowId": "remove_bg",
-        "submissionId": "velora:portrait:maeva:front:v1",
+        "submissionId": "example:portrait:subject-001:front:v1",
         "inputs": {"image": "first"},
     }
     await lifecycle.reserve_submission(base, "remove_bg")
@@ -87,12 +87,12 @@ async def test_events_and_output_manifest_cover_the_useful_lifecycle():
                             "9": {
                                 "images": [
                                     {
-                                        "filename": "maeva.png",
-                                        "subfolder": "velora",
+                                        "filename": "subject.png",
+                                        "subfolder": "workflow-runner",
                                         "type": "output",
                                     }
                                 ],
-                                "caption": ["Maeva"],
+                                "caption": ["Subject"],
                             }
                         }
                     },
@@ -116,7 +116,7 @@ async def test_events_and_output_manifest_cover_the_useful_lifecycle():
     manifest = snapshot["output_manifest"]
     assert manifest["schema"] == lifecycle.MANIFEST_SCHEMA_VERSION
     assert manifest["preferred_output"] == "9"
-    assert manifest["outputs"]["9"]["caption"] == ["Maeva"]
+    assert manifest["outputs"]["9"]["caption"] == ["Subject"]
     assert manifest["outputs_truncated"] is False
     assert manifest["artifacts_truncated"] is False
     assert manifest["output_nodes_truncated"] is False
@@ -127,8 +127,8 @@ async def test_events_and_output_manifest_cover_the_useful_lifecycle():
         {
             "node_id": "9",
             "path": "images[0]",
-            "filename": "maeva.png",
-            "subfolder": "velora",
+            "filename": "subject.png",
+            "subfolder": "workflow-runner",
             "storage_type": "output",
             "media_type": "image/png",
         }
@@ -144,8 +144,8 @@ def test_output_manifest_bounds_large_metadata_without_losing_descriptors():
                         "9": {
                             "images": [
                                 {
-                                    "filename": "maeva.png",
-                                    "subfolder": "velora",
+                                    "filename": "subject.png",
+                                    "subfolder": "workflow-runner",
                                     "type": "output",
                                 }
                             ],
@@ -162,7 +162,7 @@ def test_output_manifest_bounds_large_metadata_without_losing_descriptors():
     assert manifest["outputs_truncated"] is True
     assert manifest["manifest_truncated"] is True
     assert manifest["outputs"]["_truncated"] is True
-    assert manifest["artifacts"][0]["filename"] == "maeva.png"
+    assert manifest["artifacts"][0]["filename"] == "subject.png"
     assert len(json.dumps(manifest).encode("utf-8")) < 300_000
 
 
@@ -178,7 +178,7 @@ def test_output_manifest_bounds_large_artifact_collections_and_identifiers():
                             "images": [
                                 {
                                     "filename": f"candidate-{index}.png",
-                                    "subfolder": "velora/candidates",
+                                    "subfolder": "workflow-runner/candidates",
                                     "type": "output",
                                 }
                                 for index in range(descriptor_count)

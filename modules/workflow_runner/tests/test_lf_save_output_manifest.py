@@ -30,13 +30,13 @@ def test_normalizes_exact_lf_save_image_history_shape() -> None:
                                 "cells": {
                                     "lfSlot": {
                                         "shape": "slot",
-                                        "value": "/view?filename=warden.png&type=output&subfolder=",
+                                        "value": "/view?filename=sample.png&type=output&subfolder=",
                                     }
                                 }
                             }
                         ]
                     },
-                    "file_names": ["warden.png"],
+                    "file_names": ["sample.png"],
                 }
             ]
         }
@@ -46,7 +46,7 @@ def test_normalizes_exact_lf_save_image_history_shape() -> None:
         {
             "node_id": "7",
             "path": "lf_output[0].file_names[0]",
-            "filename": "warden.png",
+            "filename": "sample.png",
             "subfolder": "",
             "storage_type": "output",
             "media_type": "image/png",
@@ -117,12 +117,12 @@ def test_deduplicates_standard_and_legacy_descriptors() -> None:
         {
             "images": [
                 {
-                    "filename": "warden.png",
+                    "filename": "sample.png",
                     "subfolder": "",
                     "type": "output",
                 }
             ],
-            "lf_output": [{"file_names": ["warden.png"]}],
+            "lf_output": [{"file_names": ["sample.png"]}],
         }
     )
 
@@ -130,7 +130,7 @@ def test_deduplicates_standard_and_legacy_descriptors() -> None:
         {
             "node_id": "7",
             "path": "images[0]",
-            "filename": "warden.png",
+            "filename": "sample.png",
             "subfolder": "",
             "storage_type": "output",
             "media_type": "image/png",

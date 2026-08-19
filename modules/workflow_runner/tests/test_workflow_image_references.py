@@ -61,7 +61,7 @@ def test_external_image_is_content_addressed_and_atomically_staged_once(
     tmp_path, comfy_image_directories
 ) -> None:
     payload = b"stable source image bytes"
-    source = tmp_path / "outside" / "Maeva.PNG"
+    source = tmp_path / "outside" / "Source.PNG"
     source.parent.mkdir()
     source.write_bytes(payload)
     digest = hashlib.sha256(payload).hexdigest()

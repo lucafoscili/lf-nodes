@@ -48,25 +48,25 @@ class TestGetValueFromJSONNode(unittest.TestCase):
     @patch("modules.nodes.json.get_value_from_json.safe_send_sync")
     def test_on_exec_preserves_literal_strings_in_json_list(self, mock_safe_send_sync):
         result = self.node.on_exec(
-            json_input=["Sentinel", "Druid", "Priestess"],
+            json_input=["Alpha", "Beta", "Gamma"],
             key="1",
             index=0,
             node_id="test-node",
         )
 
-        self.assertEqual(result, ({"value": "Druid"}, "Druid", None, None, None, None))
+        self.assertEqual(result, ({"value": "Beta"}, "Beta", None, None, None, None))
         mock_safe_send_sync.assert_called_once()
 
     @patch("modules.nodes.json.get_value_from_json.safe_send_sync")
     def test_on_exec_preserves_single_literal_string_in_json_list(self, mock_safe_send_sync):
         result = self.node.on_exec(
-            json_input=["Sentinel"],
+            json_input=["Alpha"],
             key="0",
             index=0,
             node_id="test-node",
         )
 
-        self.assertEqual(result, ({"value": "Sentinel"}, "Sentinel", None, None, None, None))
+        self.assertEqual(result, ({"value": "Alpha"}, "Alpha", None, None, None, None))
         mock_safe_send_sync.assert_called_once()
 
     @patch("modules.nodes.json.get_value_from_json.safe_send_sync")

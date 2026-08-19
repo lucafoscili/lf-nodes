@@ -41,7 +41,7 @@ def _workflow(
 
 def test_submission_policy_is_validated_and_immutable() -> None:
     policy = WorkflowSubmissionPolicy(
-        provider_id="velora_guarded_v1",
+        provider_id="example_guarded_v1",
         expected_vram_mb=18_400,
         max_duration_seconds=90,
         required=True,
@@ -86,7 +86,7 @@ def test_submission_policy_rejects_invalid_metadata(
     error_type: type[Exception],
 ) -> None:
     kwargs = {
-        "provider_id": "velora_guarded_v1",
+        "provider_id": "example_guarded_v1",
         "expected_vram_mb": 18_400,
         "max_duration_seconds": 90,
         "required": True,
@@ -99,7 +99,7 @@ def test_submission_policy_rejects_invalid_metadata(
 
 def test_registry_keeps_submission_policy_server_side() -> None:
     policy = WorkflowSubmissionPolicy(
-        provider_id="velora_guarded_v1",
+        provider_id="example_guarded_v1",
         expected_vram_mb=18_400,
         max_duration_seconds=90,
     )

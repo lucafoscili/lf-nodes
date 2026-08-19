@@ -17,7 +17,7 @@ describe('createOutputComponent standard Comfy artifacts', () => {
       images: [
         {
           filename: 'seed-42-f124_00001_.mp4',
-          subfolder: 'velora/minimax_h3_i2v',
+          subfolder: 'workflow-runner/minimax_h3_i2v',
           type: 'output',
         },
       ],
@@ -29,7 +29,7 @@ describe('createOutputComponent standard Comfy artifacts', () => {
     expect(video?.playsInline).toBe(true);
     expect(video?.preload).toBe('metadata');
     expect(video?.getAttribute('src')).toBe(
-      '/view?filename=seed-42-f124_00001_.mp4&subfolder=velora%2Fminimax_h3_i2v&type=output',
+      '/view?filename=seed-42-f124_00001_.mp4&subfolder=workflow-runner%2Fminimax_h3_i2v&type=output',
     );
   });
 

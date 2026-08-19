@@ -13,7 +13,7 @@ from modules.workflow_runner.prompts.minimax_h3 import (
 def test_base_prompt_uses_official_order_and_omits_empty_sections() -> None:
     prompt = compose_base_prompt(
         instruction="  Use <Picture 1> as the first frame.  ",
-        integrated_multimodal_description="  [Shot 1] Maeva greets Luca.  ",
+        integrated_multimodal_description="  [Shot 1] The subject greets the viewer.  ",
         overall_soundscape="  Water and distant birds.  ",
         non_diegetic_music="   ",
     )
@@ -21,7 +21,7 @@ def test_base_prompt_uses_official_order_and_omits_empty_sections() -> None:
     assert prompt == (
         "Use <Picture 1> as the first frame.\n\n"
         "integrated_multimodal_description:\n"
-        "[Shot 1] Maeva greets Luca.\n\n"
+        "[Shot 1] The subject greets the viewer.\n\n"
         "overall_soundscape:\n"
         "Water and distant birds."
     )
@@ -38,7 +38,7 @@ def test_base_prompt_can_contain_only_the_required_visual_description() -> None:
 
 def test_full_reference_prompt_uses_official_order() -> None:
     prompt = compose_full_reference_prompt(
-        subject_definitions="<Subject 1> is Maeva from <Picture 1>.",
+        subject_definitions="<Subject 1> is the person from <Picture 1>.",
         summary="The target is an identity-preserving greeting.",
         retention_analysis="<Subject 1>: fully_preserved",
         detailed_description="[Shot 1] <Subject 1> turns and waves.",
@@ -48,7 +48,7 @@ def test_full_reference_prompt_uses_official_order() -> None:
 
     assert prompt == (
         "subject_definitions:\n"
-        "<Subject 1> is Maeva from <Picture 1>.\n\n"
+        "<Subject 1> is the person from <Picture 1>.\n\n"
         "summary:\n"
         "The target is an identity-preserving greeting.\n\n"
         "retention_analysis:\n"
