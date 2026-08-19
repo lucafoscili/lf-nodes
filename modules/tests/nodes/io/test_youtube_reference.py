@@ -13,6 +13,10 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
+server = types.ModuleType("server")
+server.PromptServer = types.SimpleNamespace(instance=None)
+sys.modules.setdefault("server", server)
+
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
 if str(REPO_ROOT) not in sys.path:
@@ -21,6 +25,31 @@ if str(REPO_ROOT) not in sys.path:
 folder_paths = sys.modules.setdefault("folder_paths", types.ModuleType("folder_paths"))
 folder_paths.models_dir = "."
 folder_paths.get_input_directory = lambda: "."
+folder_paths.get_output_directory = lambda: "."
+folder_paths.get_temp_directory = lambda: "."
+folder_paths.get_user_directory = lambda: "."
+folder_paths.get_filename_list = lambda _folder_type: []
+folder_paths.get_save_image_path = lambda *args, **kwargs: (".", "output", 0, "", None)
+
+# This node only needs the lightweight sync-event helper.  Keep direct pytest
+# collection independent from Comfy's model/native stack, just like the
+# subprocess custody probe below.
+helpers = types.ModuleType("modules.utils.helpers")
+helpers.__path__ = [str(REPO_ROOT / "modules" / "utils" / "helpers")]
+sys.modules.setdefault("modules.utils.helpers", helpers)
+comfy_helpers = types.ModuleType("modules.utils.helpers.comfy")
+comfy_helpers.safe_send_sync = lambda *args, **kwargs: None
+sys.modules.setdefault("modules.utils.helpers.comfy", comfy_helpers)
+
+constants = types.ModuleType("modules.utils.constants")
+constants.FUNCTION = "on_exec"
+constants.Input = types.SimpleNamespace(STRING="STRING", LF_CODE="LF_CODE", JSON="JSON")
+sys.modules.setdefault("modules.utils.constants", constants)
+
+io_package = types.ModuleType("modules.nodes.io")
+io_package.__path__ = [str(REPO_ROOT / "modules" / "nodes" / "io")]
+io_package.CATEGORY = "LF Nodes/IO Operations"
+sys.modules.setdefault("modules.nodes.io", io_package)
 
 from modules.nodes.io import youtube_reference
 
@@ -38,9 +67,34 @@ import types
 from pathlib import Path
 
 input_dir, call_log = sys.argv[1:]
+server = types.ModuleType("server")
+server.PromptServer = types.SimpleNamespace(instance=None)
+sys.modules["server"] = server
+# The subprocess only exercises youtube cache custody.  Provide the one
+# helper it needs so importing the node does not pull every optional LF
+# helper (SVG, detection, Comfy filters, and their native dependencies).
+helpers = types.ModuleType("modules.utils.helpers")
+helpers.__path__ = [str(Path.cwd() / "modules" / "utils" / "helpers")]
+sys.modules["modules.utils.helpers"] = helpers
+comfy_helpers = types.ModuleType("modules.utils.helpers.comfy")
+comfy_helpers.safe_send_sync = lambda *args, **kwargs: None
+sys.modules["modules.utils.helpers.comfy"] = comfy_helpers
+constants = types.ModuleType("modules.utils.constants")
+constants.FUNCTION = "on_exec"
+constants.Input = types.SimpleNamespace(STRING="STRING", LF_CODE="LF_CODE", JSON="JSON")
+sys.modules["modules.utils.constants"] = constants
+io_package = types.ModuleType("modules.nodes.io")
+io_package.__path__ = [str(Path.cwd() / "modules" / "nodes" / "io")]
+io_package.CATEGORY = "LF Nodes/IO Operations"
+sys.modules["modules.nodes.io"] = io_package
 folder_paths = types.ModuleType("folder_paths")
 folder_paths.models_dir = "."
 folder_paths.get_input_directory = lambda: input_dir
+folder_paths.get_output_directory = lambda: input_dir
+folder_paths.get_temp_directory = lambda: input_dir
+folder_paths.get_user_directory = lambda: input_dir
+folder_paths.get_filename_list = lambda _folder_type: []
+folder_paths.get_save_image_path = lambda *args, **kwargs: (input_dir, "output", 0, "", None)
 sys.modules["folder_paths"] = folder_paths
 
 from modules.nodes.io import youtube_reference
@@ -168,6 +222,23 @@ class TestYouTubeReference(unittest.TestCase):
         self.assertEqual(first[0], f"lf-workflow-runner/youtube/{VIDEO_ID}/audio_m4a/reference.m4a")
         self.assertEqual(first[1], VIDEO_ID)
         self.assertEqual(first[2]["schema"], "lf.youtube-reference.v1")
+
+    def test_success_updates_the_receipt_widget(self):
+        with patch.object(youtube_reference, "safe_send_sync") as send:
+            result = self.node.on_exec(URL, "audio_m4a", node_id="youtube-node")
+
+        send.assert_called_once()
+        event, payload, node_id = send.call_args.args
+        self.assertEqual(event, "youtubereference")
+        self.assertEqual(node_id, "youtube-node")
+        self.assertIn("downloaded and verified", payload["value"])
+        self.assertIn(result[2]["sha256"], payload["value"])
+
+    def test_input_contract_exposes_the_lf_receipt_widget(self):
+        inputs = self.node.INPUT_TYPES()
+
+        self.assertEqual(inputs["optional"]["ui_widget"][0], "LF_CODE")
+        self.assertEqual(inputs["hidden"]["node_id"], "UNIQUE_ID")
 
     def test_concurrent_requests_share_one_download(self):
         FakeYoutubeDL.delay = 0.08

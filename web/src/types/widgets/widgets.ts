@@ -179,6 +179,7 @@ export enum NodeName {
   vignette = 'LF_Vignette',
   wallOfText = 'LF_WallOfText',
   writeJson = 'LF_WriteJSON',
+  youtubeReference = 'LF_YouTubeReference',
 }
 export enum TagName {
   Div = 'div',

@@ -14,6 +14,7 @@ import folder_paths
 from . import CATEGORY
 from ...utils.constants import FUNCTION, Input
 from ...utils.env import bool_env
+from ...utils.helpers.comfy import safe_send_sync
 from ...utils.youtube_url import parse_youtube_video_url
 
 
@@ -155,6 +156,28 @@ def _receipt(video_id, canonical_url, media_kind, relative_path, media_path):
     return payload
 
 
+def _widget_summary(receipt, cache_status):
+    return "\n".join((
+        "## YouTube reference ready",
+        f"**Status:** {cache_status}",
+        f"**Video:** {receipt['video_id']}",
+        f"**Profile:** {receipt['media_kind']}",
+        f"**Input path:** `{receipt['relative_input_path']}`",
+        f"**Bytes:** {receipt['bytes']}",
+        f"**SHA-256:** `{receipt['sha256']}`",
+        f"**Receipt:** `{receipt['receipt_sha256']}`",
+    ))
+
+
+def _return_reference(relative_path, video_id, receipt, node_id, cache_status):
+    safe_send_sync(
+        "youtubereference",
+        {"value": _widget_summary(receipt, cache_status)},
+        node_id,
+    )
+    return (relative_path, video_id, receipt)
+
+
 def _load_cached(root, profile_dir, media_name, video_id, canonical_url, media_kind):
     media_path = profile_dir / media_name
     receipt_path = profile_dir / "receipt.json"
@@ -277,7 +300,15 @@ class LF_YouTubeReference:
             "required": {
                 "youtube_url": (Input.STRING, {"default": "", "multiline": False}),
                 "media_kind": (["audio_m4a", "video_mp4"], {"default": "audio_m4a"}),
-            }
+            },
+            "optional": {
+                "ui_widget": (Input.LF_CODE, {
+                    "default": "## YouTube Reference\nEnable external intake, then run to populate the verified cache receipt."
+                }),
+            },
+            "hidden": {
+                "node_id": "UNIQUE_ID",
+            },
         }
 
     CATEGORY = CATEGORY
@@ -290,7 +321,7 @@ class LF_YouTubeReference:
         "Cache receipt containing the verified media SHA-256.",
     )
 
-    def on_exec(self, youtube_url, media_kind):
+    def on_exec(self, youtube_url, media_kind, **kwargs):
         if not bool_env("LF_YOUTUBE_INGEST_ENABLED", False):
             raise RuntimeError("YouTube ingress is disabled; set LF_YOUTUBE_INGEST_ENABLED=1 to enable it")
         if media_kind not in _PROFILE:
@@ -311,7 +342,13 @@ class LF_YouTubeReference:
             with _cross_process_lock(root, video_dir, media_kind):
                 cached = _load_cached(root, profile_dir, media_name, video_id, canonical_url, media_kind)
                 if cached is not None:
-                    return (relative_path, video_id, cached)
+                    return _return_reference(
+                        relative_path,
+                        video_id,
+                        cached,
+                        kwargs.get("node_id"),
+                        "verified cache hit",
+                    )
 
                 stage_dir = video_dir / f".{media_kind}.{uuid.uuid4().hex}.staging"
                 _contained(root, stage_dir)
@@ -329,7 +366,13 @@ class LF_YouTubeReference:
                     receipt_path.write_text(_canonical_json(receipt), encoding="utf-8")
                     _load_cached(root, stage_dir, media_name, video_id, canonical_url, media_kind)
                     os.replace(stage_dir, profile_dir)
-                    return (relative_path, video_id, receipt)
+                    return _return_reference(
+                        relative_path,
+                        video_id,
+                        receipt,
+                        kwargs.get("node_id"),
+                        "downloaded and verified",
+                    )
                 except Exception:
                     shutil.rmtree(stage_dir, ignore_errors=True)
                     raise

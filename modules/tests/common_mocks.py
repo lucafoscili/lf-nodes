@@ -5,6 +5,7 @@ Provides centralized mocking setup to avoid code duplication across test files.
 """
 
 import sys
+import types
 from unittest.mock import MagicMock
 
 
@@ -19,7 +20,7 @@ def setup_common_mocks(torch_enabled=False):
                       If False, mock torch to avoid CUDA and import issues.
     """
     # Conditionally mock torch based on torch_enabled parameter
-    if not torch_enabled:
+    if not torch_enabled and 'torch' not in sys.modules:
         # Mock torch.cuda to avoid CUDA initialization
         torch_mock = MagicMock()
         torch_cuda_mock = MagicMock()
@@ -40,7 +41,10 @@ def setup_common_mocks(torch_enabled=False):
         torch_device_mock = MagicMock()
         torch_mock.device = torch_device_mock
 
-        # Apply torch mocks
+        # Apply torch mocks only when the test process has not already loaded
+        # the real package.  unittest discovery imports every test module
+        # before executing any of them; replacing a real torch module here
+        # corrupts torchvision's references for unrelated helper tests.
         sys.modules['torch'] = torch_mock
         sys.modules['torch.cuda'] = torch_cuda_mock
         sys.modules['torch.nn'] = torch_nn_mock
@@ -48,7 +52,11 @@ def setup_common_mocks(torch_enabled=False):
         sys.modules['torch.hub'] = torch_hub_mock
         sys.modules['torch.device'] = torch_device_mock
 
-        # Mock torchvision to avoid complex import chains
+    # Do not replace torchvision after a helper test has imported it.  Its
+    # functional implementation retains a reference to the original torch
+    # module and fails with opaque isinstance errors if that reference is
+    # replaced during discovery.
+    if 'torchvision' not in sys.modules:
         sys.modules['torchvision'] = MagicMock()
         sys.modules['torchvision.transforms'] = MagicMock()
         sys.modules['torchvision.transforms.functional'] = MagicMock()
@@ -59,12 +67,56 @@ def setup_common_mocks(torch_enabled=False):
 
     # Mock the entire helpers module to avoid deep import chains
     sys.modules['modules.utils.helpers'] = MagicMock()
-    sys.modules['modules.utils.helpers.api'] = MagicMock()
+    api_mock = MagicMock()
+
+    def build_openai_multimodal_content(image, text):
+        content = []
+        if image is not None and (not isinstance(image, list) or image):
+            content.append({"type": "image_url", "image_url": {"url": "data:image/png;charset=utf-8;base64,mock"}})
+        if text:
+            content.append({"type": "text", "text": text})
+        return content
+
+    api_mock.build_openai_multimodal_content = build_openai_multimodal_content
+    api_mock.parse_gemini_image = lambda _data: None
+    sys.modules['modules.utils.helpers.api'] = api_mock
     sys.modules['modules.utils.helpers.comfy'] = MagicMock()
-    sys.modules['modules.utils.helpers.conversion'] = MagicMock()
+    # Keep conversion importable as a package: Gemini imports the concrete
+    # tensor_to_base64 submodule.  The node tests do not need its heavy image
+    # implementation, so expose a harmless mock function while preserving
+    # normal package semantics.
+    conversion_mock = types.ModuleType('modules.utils.helpers.conversion')
+    conversion_mock.__path__ = []
+    conversion_mock.tensor_to_numpy = MagicMock()
+    conversion_mock.tensor_to_base64 = MagicMock()
+    sys.modules['modules.utils.helpers.conversion'] = conversion_mock
+    tensor_to_base64_module = types.ModuleType('modules.utils.helpers.conversion.tensor_to_base64')
+    tensor_to_base64_module.tensor_to_base64 = MagicMock()
+    sys.modules['modules.utils.helpers.conversion.tensor_to_base64'] = tensor_to_base64_module
     sys.modules['modules.utils.helpers.detection'] = MagicMock()
     sys.modules['modules.utils.helpers.editing'] = MagicMock()
-    sys.modules['modules.utils.helpers.logic'] = MagicMock()
+    logic_mock = MagicMock()
+
+    def normalize_list_to_value(value):
+        return value[0] if isinstance(value, list) and value else value
+
+    def normalize_json_input(value):
+        import json
+        if value is None or isinstance(value, (dict, list)):
+            return value
+        if isinstance(value, str):
+            try:
+                return json.loads(value)
+            except (TypeError, ValueError):
+                return {}
+        return value
+
+    # JSON nodes are exercised alongside mocked node modules.  Preserve the
+    # two normalization contracts they rely on instead of returning a fresh
+    # MagicMock, which makes valid dict/list inputs look invalid.
+    logic_mock.normalize_list_to_value = normalize_list_to_value
+    logic_mock.normalize_json_input = normalize_json_input
+    sys.modules['modules.utils.helpers.logic'] = logic_mock
     sys.modules['modules.utils.helpers.torch'] = MagicMock()
     sys.modules['modules.utils.helpers.ui'] = MagicMock()
     sys.modules['modules.utils.helpers.tagging'] = MagicMock()

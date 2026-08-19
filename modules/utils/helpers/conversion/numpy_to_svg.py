@@ -1,6 +1,11 @@
 import cv2
 import numpy as np
-import svgwrite
+try:
+    import svgwrite
+    _SVGWRITE_AVAILABLE = True
+except ImportError:  # pragma: no cover - dependency guard
+    svgwrite = None
+    _SVGWRITE_AVAILABLE = False
 import torch
 import uuid
 import xml.etree.ElementTree as ET
@@ -563,6 +568,9 @@ def numpy_to_svg(arr: np.ndarray, config: Any = None, mask: Any = None) -> tuple
     Convert an RGB numpy image into SVG markup using contour tracing guided by the
     provided configuration. Returns (svg_string, preview_image, palette_hex_list).
     """
+    if not _SVGWRITE_AVAILABLE:
+        raise RuntimeError("numpy_to_svg requires the 'svgwrite' dependency")
+
     cfg = _coerce_config(config)
 
     h, w = arr.shape[:2]

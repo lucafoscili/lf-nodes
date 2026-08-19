@@ -147,6 +147,7 @@ export const NODE_WIDGET_MAP: NodeWidgetMap = {
   LF_Vignette: [CustomWidgetName.compare],
   LF_WallOfText: [CustomWidgetName.code],
   LF_WriteJSON: [CustomWidgetName.textarea],
+  LF_YouTubeReference: [CustomWidgetName.code],
 };
 //#endregion
 

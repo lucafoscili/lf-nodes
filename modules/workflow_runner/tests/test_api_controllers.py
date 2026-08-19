@@ -21,6 +21,7 @@ test_utils = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(test_utils)
 
 find_workflow_runner_base = test_utils.find_workflow_runner_base
+link_synthetic_package = test_utils.link_synthetic_package
 
 
 def load_api_controllers_module():
@@ -41,6 +42,7 @@ def load_api_controllers_module():
     for p in pkg_parts:
         if p not in sys.modules:
             sys.modules[p] = types.ModuleType(p)
+    link_synthetic_package(pkg_parts)
 
     # Set up controllers as a package
     controllers_mod = types.ModuleType("lf_nodes.modules.workflow_runner.controllers")
@@ -152,6 +154,10 @@ def load_api_controllers_module():
             elif mod_key == "config":
                 mock_mod.get_settings = MagicMock(return_value=MagicMock(COMFY_BACKEND_URL="http://127.0.0.1:8188"))
             sys.modules[f"{pkg_prefix}.{mod_key}.{mod_name}"] = mock_mod
+
+    link_synthetic_package(pkg_parts + [
+        "lf_nodes.modules.workflow_runner.controllers._helpers",
+    ])
 
     # Load the api_controllers module
     controllers_path = base / "controllers" / "api_controllers.py"

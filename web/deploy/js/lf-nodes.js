@@ -1363,6 +1363,7 @@ var NodeName;
   NodeName2["vignette"] = "LF_Vignette";
   NodeName2["wallOfText"] = "LF_WallOfText";
   NodeName2["writeJson"] = "LF_WriteJSON";
+  NodeName2["youtubeReference"] = "LF_YouTubeReference";
 })(NodeName || (NodeName = {}));
 var TagName;
 (function(TagName2) {
@@ -1726,7 +1727,8 @@ const NODE_WIDGET_MAP = {
   LF_ViewSVGs: [CustomWidgetName.masonry],
   LF_Vignette: [CustomWidgetName.compare],
   LF_WallOfText: [CustomWidgetName.code],
-  LF_WriteJSON: [CustomWidgetName.textarea]
+  LF_WriteJSON: [CustomWidgetName.textarea],
+  LF_YouTubeReference: [CustomWidgetName.code]
 };
 const onAfterGraphConfigured = async (ctor, cb) => {
   const proto = ctor.prototype;

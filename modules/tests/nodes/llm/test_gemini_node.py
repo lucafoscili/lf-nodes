@@ -46,7 +46,7 @@ class TestGeminiNode(unittest.TestCase):
         # Check optional inputs
         self.assertIn("optional", inputs)
         self.assertIn("model", inputs["optional"])
-        self.assertEqual(inputs["optional"]["model"][1]["default"], "gemini-2.0-flash")
+        self.assertEqual(inputs["optional"]["model"][1]["default"], "gemini-2.5-image")
         self.assertIn("timeout", inputs["optional"])
         self.assertIn("ui_widget", inputs["optional"])
 
@@ -70,9 +70,9 @@ class TestGeminiNode(unittest.TestCase):
         """Test class attributes are properly set."""
         self.assertEqual(LF_GeminiAPI.CATEGORY, "✨ LF Nodes/LLM")
         self.assertEqual(LF_GeminiAPI.FUNCTION, "on_exec")
-        self.assertEqual(len(LF_GeminiAPI.OUTPUT_TOOLTIPS), 4)
-        self.assertEqual(LF_GeminiAPI.RETURN_NAMES, ("text", "clean", "raw_json", "json"))
-        self.assertEqual(LF_GeminiAPI.RETURN_TYPES, (Input.STRING, Input.STRING, Input.JSON, Input.JSON))
+        self.assertEqual(len(LF_GeminiAPI.OUTPUT_TOOLTIPS), 5)
+        self.assertEqual(LF_GeminiAPI.RETURN_NAMES, ("text", "clean", "raw_json", "json", "image"))
+        self.assertEqual(LF_GeminiAPI.RETURN_TYPES, (Input.STRING, Input.STRING, Input.JSON, Input.JSON, Input.IMAGE))
 
     def test_node_mappings(self):
         """Test node class and display name mappings."""
@@ -148,7 +148,7 @@ class TestGeminiNode(unittest.TestCase):
             ))
 
         # Verify result structure
-        self.assertEqual(len(result), 4)
+        self.assertEqual(len(result), 5)
         self.assertIn("Hello from Gemini!", result[0])  # extracted text
         self.assertIn("Hello from Gemini!", result[1])  # clean text
         self.assertIsInstance(result[2], str)  # raw_json
@@ -261,7 +261,7 @@ class TestGeminiNode(unittest.TestCase):
         # Verify default values
         call_args = mock_session.post.call_args
         payload = call_args[1]['json']
-        self.assertEqual(payload["model"], "gemini-2.0-flash")
+        self.assertEqual(payload["model"], "gemini-2.5-flash-image")
 
     @patch('aiohttp.ClientSession')
     @patch('modules.nodes.llm.gemini_api.create_ui_logger')

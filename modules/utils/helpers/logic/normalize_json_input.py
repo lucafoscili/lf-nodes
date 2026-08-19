@@ -14,8 +14,8 @@ def normalize_json_input(input):
     - **String:** If the input is a JSON-formatted string, it is parsed into a JSON object (dict or list).
     - **Single-Item List:** If the input is a list with one item that is a JSON string, that item is parsed 
       into a JSON object and returned directly.
-    - **List of JSON Strings:** If the input is a list of JSON-formatted strings, each string is parsed individually 
-      into a JSON object, and the result is returned as a list of dictionaries.
+    - **List of Strings:** Serialized JSON documents are parsed individually, while literal string values are
+      preserved so already-parsed JSON arrays retain their contents.
     - **List of Dictionaries:** If the input is a list of dictionaries, it is returned as-is, assuming it is already 
       in a valid JSON format.
     
@@ -71,18 +71,21 @@ def normalize_json_input(input):
         elif len(input) == 1 and isinstance(input[0], str):
             candidate = input[0].strip()
             if candidate == "":
-                return {}
+                return input
             try:
                 return json.loads(candidate)
             except json.JSONDecodeError:
-                return json.loads(convert_python_to_json(candidate))
+                try:
+                    return json.loads(convert_python_to_json(candidate))
+                except json.JSONDecodeError:
+                    return input
         else:
             normalized_list = []
             for item in input:
                 if isinstance(item, str):
                     candidate = item.strip()
                     if candidate == "":
-                        normalized_list.append({})
+                        normalized_list.append(item)
                         continue
                     try:
                         normalized_list.append(json.loads(candidate))
@@ -90,7 +93,10 @@ def normalize_json_input(input):
                         try:
                             normalized_list.append(json.loads(convert_python_to_json(candidate)))
                         except json.JSONDecodeError:
-                            normalized_list.append({})
+                            # A parsed JSON array may legitimately contain
+                            # literal strings.  Preserve them when they are
+                            # not themselves serialized JSON documents.
+                            normalized_list.append(item)
                 else:
                     normalized_list.append(item)
             return normalized_list

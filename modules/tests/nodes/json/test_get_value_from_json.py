@@ -46,6 +46,30 @@ class TestGetValueFromJSONNode(unittest.TestCase):
         mock_safe_send_sync.assert_called_once()
 
     @patch("modules.nodes.json.get_value_from_json.safe_send_sync")
+    def test_on_exec_preserves_literal_strings_in_json_list(self, mock_safe_send_sync):
+        result = self.node.on_exec(
+            json_input=["Sentinel", "Druid", "Priestess"],
+            key="1",
+            index=0,
+            node_id="test-node",
+        )
+
+        self.assertEqual(result, ({"value": "Druid"}, "Druid", None, None, None, None))
+        mock_safe_send_sync.assert_called_once()
+
+    @patch("modules.nodes.json.get_value_from_json.safe_send_sync")
+    def test_on_exec_preserves_single_literal_string_in_json_list(self, mock_safe_send_sync):
+        result = self.node.on_exec(
+            json_input=["Sentinel"],
+            key="0",
+            index=0,
+            node_id="test-node",
+        )
+
+        self.assertEqual(result, ({"value": "Sentinel"}, "Sentinel", None, None, None, None))
+        mock_safe_send_sync.assert_called_once()
+
+    @patch("modules.nodes.json.get_value_from_json.safe_send_sync")
     def test_on_exec_supports_nested_json_list_output(self, mock_safe_send_sync):
         first_result = self.node.on_exec(
             json_input={"items": [{"name": "alpha"}, {"name": "beta"}]},

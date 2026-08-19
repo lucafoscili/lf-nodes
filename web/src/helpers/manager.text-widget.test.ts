@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { normalizeTextWidgetValue } from './manager';
+import { CustomWidgetName, NodeName } from '../types/widgets/widgets';
+import { NODE_WIDGET_MAP, normalizeTextWidgetValue } from './manager';
 
 describe('normalizeTextWidgetValue', () => {
   it('keeps strings unchanged for Comfy text replacement', () => {
@@ -17,5 +18,11 @@ describe('normalizeTextWidgetValue', () => {
   it('drops structured spillover from legacy widget hydration', () => {
     expect(normalizeTextWidgetValue(['a', 'b'])).toBe('');
     expect(normalizeTextWidgetValue({ props: [{ lfDataset: {} }] })).toBe('');
+  });
+});
+
+describe('Velora intake widget contracts', () => {
+  it('renders the YouTube reference receipt with the LF code widget', () => {
+    expect(NODE_WIDGET_MAP[NodeName.youtubeReference]).toEqual([CustomWidgetName.code]);
   });
 });

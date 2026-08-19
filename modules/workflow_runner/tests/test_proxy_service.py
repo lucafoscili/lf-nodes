@@ -21,6 +21,7 @@ test_utils = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(test_utils)
 
 find_workflow_runner_base = test_utils.find_workflow_runner_base
+link_synthetic_package = test_utils.link_synthetic_package
 
 
 def load_proxy_service_module():
@@ -39,6 +40,7 @@ def load_proxy_service_module():
     for p in pkg_parts:
         if p not in sys.modules:
             sys.modules[p] = types.ModuleType(p)
+    link_synthetic_package(pkg_parts)
 
     # Set up services as a package
     services_mod = types.ModuleType("lf_nodes.modules.workflow_runner.services")
@@ -52,6 +54,9 @@ def load_proxy_service_module():
     proxy_service = importlib.util.module_from_spec(spec)
     sys.modules["lf_nodes.modules.workflow_runner.services.proxy_service"] = proxy_service
     spec.loader.exec_module(proxy_service)
+    link_synthetic_package(pkg_parts + [
+        "lf_nodes.modules.workflow_runner.services.proxy_service",
+    ])
 
     return proxy_service
 

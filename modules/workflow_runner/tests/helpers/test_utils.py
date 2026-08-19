@@ -10,6 +10,26 @@ def find_workflow_runner_base(start: Path | str = None) -> Path:
         raise RuntimeError("could not locate workflow_runner ancestor")
     return base
 
+
+def link_synthetic_package(package_names: list[str]) -> None:
+    """Expose synthetic package children as attributes for unittest.mock.
+
+    Isolated loaders register package names directly in ``sys.modules``.
+    Imports work that way, but ``patch("a.b.c")`` resolves each component
+    through its parent object's attributes first. Wiring those links keeps the
+    harness faithful to normal Python package behavior without importing LF.
+    """
+    import sys
+
+    for child_name in package_names:
+        if "." not in child_name:
+            continue
+        parent_name, attribute_name = child_name.rsplit(".", 1)
+        parent = sys.modules.get(parent_name)
+        child = sys.modules.get(child_name)
+        if parent is not None and child is not None:
+            setattr(parent, attribute_name, child)
+
 def load_helpers_module() -> Any:
     """Dynamically load the controllers._helpers module for tests."""
     base = find_workflow_runner_base(__file__)
@@ -28,6 +48,7 @@ def load_helpers_module() -> Any:
     for p in pkg_parts:
         if p not in sys.modules:
             sys.modules[p] = types.ModuleType(p)
+    link_synthetic_package(pkg_parts)
 
     # Load utils.serialize into sys.modules under the package-qualified name
     utils_path = base / "utils" / "serialize.py"

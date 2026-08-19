@@ -183,13 +183,9 @@ class TestColorAnalysisNode(unittest.TestCase):
                 node_id=self.test_node_id
             )
 
-    @patch('modules.nodes.analytics.color_analysis.PromptServer')
-    def test_on_exec_with_ui_widget(self, mock_prompt_server_class):
+    @patch('modules.nodes.analytics.color_analysis.safe_send_sync')
+    def test_on_exec_with_ui_widget(self, mock_safe_send_sync):
         """Test on_exec with ui_widget parameter."""
-        # Setup mock PromptServer
-        mock_prompt_server_instance = MagicMock()
-        mock_prompt_server_class.instance = mock_prompt_server_instance
-
         # Create test images
         source_image = torch.tensor([[[[255, 0, 0], [0, 255, 0]],
                                       [[0, 0, 255], [255, 255, 255]]]], dtype=torch.float32)
