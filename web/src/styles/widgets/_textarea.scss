@@ -3,6 +3,9 @@
 .lf-textarea {
   & {
     @include mixins.lf-root();
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
   }
 
   &__widget {
@@ -27,5 +30,41 @@
     &--error {
       box-shadow: inset 0px 0px 4px 1px rgba(var(--lf-color-danger), 0.775);
     }
+  }
+
+  &__references {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 0 6px 6px;
+
+    &[hidden] {
+      display: none;
+    }
+  }
+
+  &__reference {
+    align-items: center;
+    display: grid;
+    gap: 6px;
+    grid-template-columns: minmax(72px, 0.8fr) minmax(120px, 1.2fr);
+  }
+
+  &__reference-label {
+    color: rgb(var(--lf-color-on-bg));
+    font-size: 0.78em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__reference-select {
+    background: rgb(var(--lf-color-bg));
+    border: 1px solid rgba(var(--lf-color-on-bg), 0.2);
+    border-radius: 4px;
+    color: rgb(var(--lf-color-on-bg));
+    font-family: var(--lf-font-family-monospace);
+    min-width: 0;
+    padding: 4px 6px;
   }
 }

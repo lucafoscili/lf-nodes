@@ -1226,10 +1226,12 @@ var CustomWidgetName;
   CustomWidgetName2["controlPanel"] = "LF_CONTROL_PANEL";
   CustomWidgetName2["countBarChart"] = "LF_COUNT_BAR_CHART";
   CustomWidgetName2["history"] = "LF_HISTORY";
+  CustomWidgetName2["id"] = "LF_ID";
   CustomWidgetName2["imageEditor"] = "LF_IMAGE_EDITOR";
   CustomWidgetName2["masonry"] = "LF_MASONRY";
   CustomWidgetName2["messenger"] = "LF_MESSENGER";
   CustomWidgetName2["progressbar"] = "LF_PROGRESSBAR";
+  CustomWidgetName2["ref"] = "LF_REF";
   CustomWidgetName2["tabBarChart"] = "LF_TAB_BAR_CHART";
   CustomWidgetName2["textarea"] = "LF_TEXTAREA";
   CustomWidgetName2["tree"] = "LF_TREE";
@@ -1357,6 +1359,10 @@ var NodeName;
   NodeName2["vaeDecode"] = "LF_VAEDecode";
   NodeName2["vaeEncode"] = "LF_VAEEncode";
   NodeName2["vaeSelector"] = "LF_VAESelector";
+  NodeName2["vnCompile"] = "LF_VNCompile";
+  NodeName2["vnSceneSpec"] = "LF_SceneSpec";
+  NodeName2["vnState"] = "LF_VNState";
+  NodeName2["vnSwitch"] = "LF_VNSwitch";
   NodeName2["viewImages"] = "LF_ViewImages";
   NodeName2["viewSVGs"] = "LF_ViewSVGs";
   NodeName2["vibrance"] = "LF_Vibrance";
@@ -1722,6 +1728,10 @@ const NODE_WIDGET_MAP = {
   LF_VAEDecode: [CustomWidgetName.code],
   LF_VAEEncode: [CustomWidgetName.code],
   LF_VAESelector: [CustomWidgetName.history],
+  LF_VNCompile: [CustomWidgetName.id, CustomWidgetName.ref, CustomWidgetName.code],
+  LF_SceneSpec: [CustomWidgetName.id, CustomWidgetName.textarea],
+  LF_VNState: [CustomWidgetName.id, CustomWidgetName.textarea, CustomWidgetName.ref],
+  LF_VNSwitch: [CustomWidgetName.id, CustomWidgetName.textarea],
   LF_Vibrance: [CustomWidgetName.compare],
   LF_ViewImages: [CustomWidgetName.masonry],
   LF_ViewSVGs: [CustomWidgetName.masonry],
@@ -1963,6 +1973,452 @@ const getLogStyle = () => {
     padding: "4px 8px",
     textOverflow: "ellipsis"
   };
+};
+const parseStrictJson = (text) => {
+  const parsed = JSON.parse(text);
+  let index = 0;
+  const syntaxError = (message) => {
+    throw new SyntaxError(`${message} at position ${index}`);
+  };
+  const skipWhitespace = () => {
+    while (index < text.length && /\s/.test(text[index]))
+      index += 1;
+  };
+  const parseString = () => {
+    if (text[index] !== '"')
+      syntaxError("Expected a JSON string");
+    const start = index;
+    index += 1;
+    while (index < text.length) {
+      const character = text[index];
+      if (character === "\\") {
+        index += 2;
+        continue;
+      }
+      index += 1;
+      if (character === '"') {
+        return JSON.parse(text.slice(start, index));
+      }
+    }
+    return syntaxError("Unterminated JSON string");
+  };
+  const parseValue = () => {
+    skipWhitespace();
+    const character = text[index];
+    if (character === "{") {
+      parseObject();
+      return;
+    }
+    if (character === "[") {
+      parseArray();
+      return;
+    }
+    if (character === '"') {
+      parseString();
+      return;
+    }
+    while (index < text.length && !/\s/.test(text[index]) && !",]}".includes(text[index])) {
+      index += 1;
+    }
+  };
+  const parseObject = () => {
+    index += 1;
+    skipWhitespace();
+    const keys = /* @__PURE__ */ new Set();
+    if (text[index] === "}") {
+      index += 1;
+      return;
+    }
+    while (index < text.length) {
+      skipWhitespace();
+      const key = parseString();
+      if (keys.has(key))
+        syntaxError(`Duplicate JSON key ${JSON.stringify(key)}`);
+      keys.add(key);
+      skipWhitespace();
+      if (text[index] !== ":")
+        syntaxError("Expected : after JSON object key");
+      index += 1;
+      parseValue();
+      skipWhitespace();
+      if (text[index] === "}") {
+        index += 1;
+        return;
+      }
+      if (text[index] !== ",")
+        syntaxError("Expected , or } in JSON object");
+      index += 1;
+    }
+    syntaxError("Unterminated JSON object");
+  };
+  const parseArray = () => {
+    index += 1;
+    skipWhitespace();
+    if (text[index] === "]") {
+      index += 1;
+      return;
+    }
+    while (index < text.length) {
+      parseValue();
+      skipWhitespace();
+      if (text[index] === "]") {
+        index += 1;
+        return;
+      }
+      if (text[index] !== ",")
+        syntaxError("Expected , or ] in JSON array");
+      index += 1;
+    }
+    syntaxError("Unterminated JSON array");
+  };
+  parseValue();
+  skipWhitespace();
+  if (index !== text.length)
+    syntaxError("Unexpected JSON content");
+  return parsed;
+};
+const VN_NODE_FIELDS = {
+  LF_VNState: {
+    id: ["fixture_id", 0],
+    body: ["state_body", 1]
+  },
+  LF_SceneSpec: {
+    id: ["scene_id", 0],
+    body: ["scene_body", 2]
+  },
+  LF_VNSwitch: {
+    id: ["switch_id", 0],
+    body: ["switch_body", 1]
+  },
+  LF_VNCompile: {
+    id: ["workflow_id", 0]
+  }
+};
+const SCENE_BODY_ID_PATHS = [
+  { path: "/beats/*", kind: "beat" },
+  { path: "/choices/*", kind: "choice", label: "label" },
+  { path: "/choices/*/effects/*", kind: "effect" },
+  { path: "/artRequests/*", kind: "art-request" }
+];
+const SWITCH_BODY_ID_PATHS = [
+  { path: "/cases/*", kind: "switch-case" },
+  { path: "/fallback", kind: "switch-fallback" }
+];
+const SCENE_BODY_REF_PATHS = ["/choices/*/nextSceneId"];
+const SWITCH_BODY_REF_PATHS = [
+  "/cases/*/targetSceneId",
+  "/fallback/targetSceneId"
+];
+const DEFAULT_GENERATOR = (kind) => {
+  var _a;
+  const uuid = typeof ((_a = globalThis.crypto) == null ? void 0 : _a.randomUUID) === "function" ? globalThis.crypto.randomUUID() : `${Date.now().toString(16)}-${Math.random().toString(16).slice(2)}`;
+  return `lf:${kind}:${uuid}`;
+};
+const createLfOwnedId = (kind) => DEFAULT_GENERATOR(kind);
+const isRecord$1 = (value) => typeof value === "object" && value !== null && !Array.isArray(value);
+const clone = (value) => {
+  if (typeof structuredClone === "function")
+    return structuredClone(value);
+  return JSON.parse(JSON.stringify(value));
+};
+const decodePointerSegment$1 = (segment) => segment.replace(/~1/g, "/").replace(/~0/g, "~");
+const encodePointerSegment$1 = (segment) => segment.replace(/~/g, "~0").replace(/\//g, "~1");
+const pointerSegments = (path) => {
+  if (path === "")
+    return [];
+  if (!path.startsWith("/"))
+    throw new Error(`JSON pointer must start with '/': ${path}`);
+  return path.slice(1).split("/").map(decodePointerSegment$1);
+};
+const childEntries = (value) => {
+  if (Array.isArray(value))
+    return value.map((child, index) => [String(index), child]);
+  if (isRecord$1(value))
+    return Object.entries(value);
+  return [];
+};
+const walkPattern = (value, segments, visit, path = "") => {
+  if (segments.length === 0) {
+    if (isRecord$1(value))
+      visit(value, path || "/");
+    return;
+  }
+  const [segment, ...rest] = segments;
+  if (segment === "*") {
+    for (const [key, child] of childEntries(value)) {
+      walkPattern(child, rest, visit, `${path}/${encodePointerSegment$1(key)}`);
+    }
+    return;
+  }
+  if (Array.isArray(value) && /^\d+$/.test(segment)) {
+    walkPattern(value[Number(segment)], rest, visit, `${path}/${segment}`);
+  } else if (isRecord$1(value) && Object.prototype.hasOwnProperty.call(value, segment)) {
+    walkPattern(value[segment], rest, visit, `${path}/${encodePointerSegment$1(segment)}`);
+  }
+};
+function materializeMissingIds(value, patterns, generateId = DEFAULT_GENERATOR) {
+  const result = clone(value);
+  for (const pattern of patterns) {
+    walkPattern(result, pointerSegments(pattern.path), (target) => {
+      if (typeof target.id !== "string" || target.id.length === 0) {
+        target.id = generateId(pattern.kind);
+      }
+    });
+  }
+  return result;
+}
+function enumerateIdentities(value, patterns) {
+  const identities = [];
+  for (const pattern of patterns) {
+    walkPattern(value, pointerSegments(pattern.path), (target, path) => {
+      if (typeof target.id !== "string" || target.id.length === 0)
+        return;
+      const label = pattern.label ? target[pattern.label] : target.label ?? target.title;
+      identities.push({
+        id: target.id,
+        kind: pattern.kind,
+        path,
+        ...typeof label === "string" && label.length > 0 ? { label } : {}
+      });
+    });
+  }
+  return identities;
+}
+const lookup = (idMap, value) => {
+  if (typeof value !== "string")
+    return value;
+  return idMap instanceof Map ? idMap.get(value) ?? value : idMap[value] ?? value;
+};
+const rewriteAtPointer = (value, segments, idMap) => {
+  if (segments.length === 0)
+    return;
+  const [segment, ...rest] = segments;
+  if (segment === "*") {
+    for (const [, child] of childEntries(value))
+      rewriteAtPointer(child, rest, idMap);
+    return;
+  }
+  if (rest.length === 0) {
+    if (Array.isArray(value) && /^\d+$/.test(segment)) {
+      const index = Number(segment);
+      if (index < value.length)
+        value[index] = lookup(idMap, value[index]);
+    } else if (isRecord$1(value) && Object.prototype.hasOwnProperty.call(value, segment)) {
+      value[segment] = lookup(idMap, value[segment]);
+    }
+    return;
+  }
+  if (Array.isArray(value) && /^\d+$/.test(segment)) {
+    rewriteAtPointer(value[Number(segment)], rest, idMap);
+  } else if (isRecord$1(value) && Object.prototype.hasOwnProperty.call(value, segment)) {
+    rewriteAtPointer(value[segment], rest, idMap);
+  }
+};
+function rewriteReferencesAtPaths(value, idMap, paths) {
+  const result = clone(value);
+  for (const path of paths)
+    rewriteAtPointer(result, pointerSegments(path), idMap);
+  return result;
+}
+const parseBody = (value) => {
+  if (typeof value !== "string")
+    return value;
+  try {
+    return parseStrictJson(value);
+  } catch {
+    return value;
+  }
+};
+const writeBody = (original, body) => typeof original === "string" && body !== original ? JSON.stringify(body) : body;
+const widgetValue$1 = (node, name, index) => {
+  if (isRecord$1(node.widgets_values_named) && name in node.widgets_values_named) {
+    return node.widgets_values_named[name];
+  }
+  return Array.isArray(node.widgets_values) ? node.widgets_values[index] : void 0;
+};
+const setWidgetValue = (node, name, index, value) => {
+  if (isRecord$1(node.widgets_values_named))
+    node.widgets_values_named[name] = value;
+  if (Array.isArray(node.widgets_values) && index < node.widgets_values.length) {
+    node.widgets_values[index] = value;
+  }
+};
+const allNodes = (payload) => {
+  var _a;
+  const result = [];
+  const visitSubgraph = (subgraph) => {
+    var _a2;
+    result.push(...subgraph.nodes ?? []);
+    (_a2 = subgraph.subgraphs) == null ? void 0 : _a2.forEach(visitSubgraph);
+  };
+  result.push(...payload.nodes ?? []);
+  (_a = payload.subgraphs) == null ? void 0 : _a.forEach(visitSubgraph);
+  return result;
+};
+const nodePending = (node) => {
+  const type = node.type;
+  const fields = VN_NODE_FIELDS[type];
+  if (!fields)
+    return void 0;
+  const idName = fields.id[0];
+  const idIndex = fields.id[1];
+  const bodyField = "body" in fields ? fields.body : void 0;
+  const bodyName = bodyField == null ? void 0 : bodyField[0];
+  const bodyIndex = bodyField == null ? void 0 : bodyField[1];
+  const bodyOriginal = bodyName ? widgetValue$1(node, bodyName, bodyIndex) : void 0;
+  const parsedBody = parseBody(bodyOriginal);
+  return {
+    node,
+    type,
+    id: typeof widgetValue$1(node, idName, idIndex) === "string" ? widgetValue$1(node, idName, idIndex) : void 0,
+    ...bodyName ? {
+      body: parsedBody,
+      bodyOriginal,
+      existingBodyIds: new Map(enumerateIdentities(parsedBody, type === "LF_SceneSpec" ? SCENE_BODY_ID_PATHS : SWITCH_BODY_ID_PATHS).map((identity) => [identity.path, identity.id]))
+    } : {}
+  };
+};
+const idKindForNode = (type) => {
+  switch (type) {
+    case "LF_VNState":
+      return "fixture";
+    case "LF_SceneSpec":
+      return "scene";
+    case "LF_VNSwitch":
+      return "switch";
+    case "LF_VNCompile":
+      return "workflow";
+  }
+};
+const rewriteWithKind = (value, maps, kind, paths) => {
+  const map = maps.get(kind);
+  return map ? rewriteReferencesAtPaths(value, map, paths) : value;
+};
+function transformVnClipboard(payload, options = {}) {
+  var _a;
+  const result = clone(payload);
+  const generateId = options.generateId ?? DEFAULT_GENERATOR;
+  const pending = allNodes(result).map(nodePending).filter((item) => item !== void 0);
+  const maps = /* @__PURE__ */ new Map();
+  const mappedFreshId = (kind, oldId, freshId) => {
+    if (!oldId)
+      return freshId;
+    let map = maps.get(kind);
+    if (!map) {
+      map = /* @__PURE__ */ new Map();
+      maps.set(kind, map);
+    }
+    const existing = map.get(oldId);
+    if (existing)
+      return existing;
+    map.set(oldId, freshId);
+    return freshId;
+  };
+  for (const item of pending) {
+    const fields = VN_NODE_FIELDS[item.type];
+    const [idName, idIndex] = fields.id;
+    const freshId = mappedFreshId(idKindForNode(item.type), item.id, generateId(idKindForNode(item.type)));
+    setWidgetValue(item.node, idName, idIndex, freshId);
+  }
+  for (const item of pending) {
+    if (item.body !== void 0 && item.bodyOriginal !== void 0) {
+      const fields = VN_NODE_FIELDS[item.type];
+      const bodyPatterns = item.type === "LF_SceneSpec" ? SCENE_BODY_ID_PATHS : SWITCH_BODY_ID_PATHS;
+      const materialized = materializeMissingIds(item.body, bodyPatterns, generateId);
+      item.body = materialized;
+      const bodyField = "body" in fields ? fields.body : void 0;
+      if (bodyField)
+        setWidgetValue(item.node, bodyField[0], bodyField[1], writeBody(item.bodyOriginal, materialized));
+    }
+  }
+  for (const item of pending) {
+    if (item.body === void 0 || item.bodyOriginal === void 0)
+      continue;
+    const patterns = item.type === "LF_SceneSpec" ? SCENE_BODY_ID_PATHS : SWITCH_BODY_ID_PATHS;
+    const identities = enumerateIdentities(item.body, patterns);
+    for (const identity of identities) {
+      const oldId = (_a = item.existingBodyIds) == null ? void 0 : _a.get(identity.path);
+      if (!oldId)
+        continue;
+      const freshId = mappedFreshId(identity.kind, oldId, generateId(identity.kind));
+      walkPattern(item.body, pointerSegments(identity.path), (target) => {
+        target.id = freshId;
+      });
+    }
+  }
+  for (const item of pending) {
+    if (item.body === void 0 || item.bodyOriginal === void 0)
+      continue;
+    const referencePaths = item.type === "LF_SceneSpec" ? SCENE_BODY_REF_PATHS : item.type === "LF_VNSwitch" ? SWITCH_BODY_REF_PATHS : [];
+    const body = rewriteWithKind(item.body, maps, "scene", referencePaths);
+    const itemFields = VN_NODE_FIELDS[item.type];
+    const bodyField = "body" in itemFields ? itemFields.body : void 0;
+    if (bodyField)
+      setWidgetValue(item.node, bodyField[0], bodyField[1], writeBody(item.bodyOriginal, body));
+  }
+  for (const item of pending) {
+    const type = item.type;
+    if (type === "LF_VNCompile") {
+      const fields = VN_NODE_FIELDS[type];
+      const workflow = lookup(maps.get("workflow") ?? /* @__PURE__ */ new Map(), widgetValue$1(item.node, "workflow_id", fields.id[1]));
+      setWidgetValue(item.node, "workflow_id", fields.id[1], workflow);
+      setWidgetValue(item.node, "entry_scene_id", 1, lookup(maps.get("scene") ?? /* @__PURE__ */ new Map(), widgetValue$1(item.node, "entry_scene_id", 1)));
+      setWidgetValue(item.node, "selected_choice_id", 2, lookup(maps.get("choice") ?? /* @__PURE__ */ new Map(), widgetValue$1(item.node, "selected_choice_id", 2)));
+    }
+    let widgetIndex = 0;
+    for (const input of item.node.inputs ?? []) {
+      if (!isRecord$1(input) || !isRecord$1(input.widget))
+        continue;
+      const name = typeof input.name === "string" ? input.name : void 0;
+      const inputType = input.type;
+      const widget = input.widget;
+      const kind = typeof widget.lf_ref_kind === "string" ? widget.lf_ref_kind : typeof input.lf_ref_kind === "string" ? input.lf_ref_kind : name === "entry_scene_id" ? "scene" : name === "selected_choice_id" ? "choice" : void 0;
+      if (typeof inputType === "string" && inputType === "LF_REF" && kind && name) {
+        const value = widgetValue$1(item.node, name, widgetIndex);
+        setWidgetValue(item.node, name, widgetIndex, lookup(maps.get(kind) ?? /* @__PURE__ */ new Map(), value));
+      }
+      widgetIndex += 1;
+    }
+  }
+  return result;
+}
+const PATCH_FLAG = Symbol.for("lf.vn.clipboard-remap.v1");
+const installVnClipboardIdentityRemap = (canvas, logger) => {
+  if (!canvas || typeof canvas !== "object") {
+    const message = "VN identity remapping unavailable: Comfy canvas was not initialized.";
+    logger == null ? void 0 : logger(message);
+    console.error(message);
+    return false;
+  }
+  const instance = canvas;
+  const prototype = Object.getPrototypeOf(instance);
+  const owner = prototype && typeof prototype._deserializeItems === "function" ? prototype : instance;
+  if (owner[PATCH_FLAG])
+    return true;
+  const original = owner._deserializeItems;
+  if (typeof original !== "function") {
+    const message = "VN identity remapping unavailable: this Comfy frontend has no compatible paste transaction.";
+    logger == null ? void 0 : logger(message, { canvas });
+    console.error(message, canvas);
+    return false;
+  }
+  owner._deserializeItems = function(parsed, options) {
+    try {
+      const remapped = transformVnClipboard(parsed);
+      return original.call(this, remapped, options);
+    } catch (error) {
+      const message = "VN paste blocked because semantic identities could not be remapped safely.";
+      logger == null ? void 0 : logger(message, { error });
+      console.error(message, error);
+      throw error;
+    }
+  };
+  Object.defineProperty(owner, PATCH_FLAG, {
+    configurable: false,
+    enumerable: false,
+    value: true
+  });
+  return true;
 };
 function installLFBeforeFreeHooks(api, opts = {}) {
   const attempts = opts.attempts ?? 20;
@@ -4957,21 +5413,21 @@ const handlerRefs = {
 };
 const prepSettings = createPrepSettings({
   onCheckbox: (state, event) => handlerRefs.checkbox(state, event),
-  onMultiinput: (state, event) => EV_HANDLERS$a.multiinput(state, event),
+  onMultiinput: (state, event) => EV_HANDLERS$9.multiinput(state, event),
   onSelect: (state, event) => handlerRefs.select(state, event),
   onSlider: (state, event) => handlerRefs.slider(state, event),
   onTextfield: (state, event) => handlerRefs.textfield(state, event),
   onToggle: (state, event) => handlerRefs.toggle(state, event)
 });
-const EV_HANDLERS$a = createEventHandlers({
+const EV_HANDLERS$9 = createEventHandlers({
   handleInterruptForState,
   prepSettings
 });
-handlerRefs.checkbox = EV_HANDLERS$a.checkbox;
-handlerRefs.select = EV_HANDLERS$a.select;
-handlerRefs.slider = EV_HANDLERS$a.slider;
-handlerRefs.textfield = EV_HANDLERS$a.textfield;
-handlerRefs.toggle = EV_HANDLERS$a.toggle;
+handlerRefs.checkbox = EV_HANDLERS$9.checkbox;
+handlerRefs.select = EV_HANDLERS$9.select;
+handlerRefs.slider = EV_HANDLERS$9.slider;
+handlerRefs.textfield = EV_HANDLERS$9.textfield;
+handlerRefs.toggle = EV_HANDLERS$9.toggle;
 const TREE_DATA = {
   nodes: [
     //#region Settings
@@ -5587,7 +6043,7 @@ const imageEditorFactory = {
       await refresh(directoryValue);
     };
     imageviewer.lfValue = TREE_DATA;
-    imageviewer.addEventListener(LfEventName.LfImageviewer, (e) => EV_HANDLERS$a.imageviewer(STATE$h.get(wrapper), e));
+    imageviewer.addEventListener(LfEventName.LfImageviewer, (e) => EV_HANDLERS$9.imageviewer(STATE$h.get(wrapper), e));
     imageviewer.appendChild(settings);
     const actionButtons = {};
     const state = {
@@ -5624,14 +6080,14 @@ const imageEditorFactory = {
         interrupt.lfStretchX = true;
         interrupt.lfUiState = "danger";
         interrupt.title = "Click to interrupt the workflow.";
-        interrupt.addEventListener(LfEventName.LfButton, (e) => EV_HANDLERS$a.button(STATE$h.get(wrapper), e));
+        interrupt.addEventListener(LfEventName.LfButton, (e) => EV_HANDLERS$9.button(STATE$h.get(wrapper), e));
         resume.lfIcon = ImageEditorIcons.Resume;
         resume.lfLabel = "Resume workflow";
         resume.lfStretchX = true;
         resume.lfStyling = "flat";
         resume.lfUiState = "success";
         resume.title = "Click to resume the workflow. Remember to save your snapshots after editing the images!";
-        resume.addEventListener(LfEventName.LfButton, (e) => EV_HANDLERS$a.button(STATE$h.get(wrapper), e));
+        resume.addEventListener(LfEventName.LfButton, (e) => EV_HANDLERS$9.button(STATE$h.get(wrapper), e));
         actions.classList.add(ImageEditorCSS.Actions);
         actions.appendChild(interrupt);
         actions.appendChild(resume);
@@ -6417,7 +6873,7 @@ const DOWNLOAD_PLACEHOLDERS = {
   }
 };
 const CARD_PROPS_TO_SERIALIZE = ["lfDataset"];
-const EV_HANDLERS$9 = {
+const EV_HANDLERS$8 = {
   //#region Button handler
   button: (state, e) => {
     const { comp, eventType } = e.detail;
@@ -6620,7 +7076,7 @@ const getCardProps = (container) => {
 };
 const createCard = () => {
   const card = document.createElement(TagName.LfCard);
-  card.addEventListener(LfEventName.LfCard, EV_HANDLERS$9.card);
+  card.addEventListener(LfEventName.LfCard, EV_HANDLERS$8.card);
   return card;
 };
 const prepareValidDataset = (r, code) => {
@@ -6715,7 +7171,7 @@ const cardFactory = {
         button.lfLabel = "Refresh";
         button.lfStretchX = true;
         button.title = "Attempts to manually ownload fresh metadata from CivitAI";
-        button.addEventListener(LfEventName.LfButton, (e) => EV_HANDLERS$9.button(STATE$g.get(wrapper), e));
+        button.addEventListener(LfEventName.LfButton, (e) => EV_HANDLERS$8.button(STATE$g.get(wrapper), e));
         content.appendChild(button);
         break;
     }
@@ -6839,7 +7295,7 @@ const carouselFactory = {
   state: STATE$e
   //#endregion
 };
-const EV_HANDLERS$8 = {
+const EV_HANDLERS$7 = {
   //#region Chat handler
   chat: (state, e) => {
     const { comp, eventType, history, status } = e.detail;
@@ -6901,7 +7357,7 @@ const chatFactory = {
     const chat = document.createElement(TagName.LfChat);
     content.classList.add(ChatCSS.Content);
     chat.classList.add(ChatCSS.Widget);
-    chat.addEventListener(LfEventName.LfChat, (e) => EV_HANDLERS$8.chat(STATE$d.get(wrapper), e));
+    chat.addEventListener(LfEventName.LfChat, (e) => EV_HANDLERS$7.chat(STATE$d.get(wrapper), e));
     content.appendChild(chat);
     wrapper.appendChild(content);
     const options = chatFactory.options(wrapper);
@@ -6913,7 +7369,7 @@ const chatFactory = {
   state: STATE$d
   //#endregion
 };
-const EV_HANDLERS$7 = {
+const EV_HANDLERS$6 = {
   //#region Chip handler
   chip: async (state, e) => {
     const { comp, eventType } = e.detail;
@@ -6963,7 +7419,7 @@ const chipFactory = {
     const chip = document.createElement(TagName.LfChip);
     content.classList.add(ChipCSS.Content);
     chip.classList.add(ChipCSS.Widget);
-    chip.addEventListener(LfEventName.LfChip, (e) => EV_HANDLERS$7.chip(STATE$c.get(wrapper), e));
+    chip.addEventListener(LfEventName.LfChip, (e) => EV_HANDLERS$6.chip(STATE$c.get(wrapper), e));
     switch (node.comfyClass) {
       case NodeName.keywordToggleFromJson:
         chip.lfStyling = "filter";
@@ -8273,7 +8729,7 @@ const handleButtonClick = (comp, slot) => {
       break;
   }
 };
-const EV_HANDLERS$6 = {
+const EV_HANDLERS$5 = {
   article: (e) => {
     const { comp, eventType, originalEvent } = e.detail;
     if (eventType === "lf-event") {
@@ -8288,7 +8744,7 @@ const EV_HANDLERS$6 = {
         break;
       case "lf-event": {
         const ogEv = originalEvent;
-        EV_HANDLERS$6.list(ogEv);
+        EV_HANDLERS$5.list(ogEv);
         break;
       }
     }
@@ -8354,15 +8810,15 @@ const handleLfEvent = (e, slot) => {
   const { comp } = e.detail;
   if (isButton(comp)) {
     const ogEv = e;
-    EV_HANDLERS$6.button(ogEv, slot);
+    EV_HANDLERS$5.button(ogEv, slot);
   }
   if (isTextfield(comp)) {
     const ogEv = e;
-    EV_HANDLERS$6.textfield(ogEv);
+    EV_HANDLERS$5.textfield(ogEv);
   }
   if (isToggle(comp)) {
     const ogEv = e;
-    EV_HANDLERS$6.toggle(ogEv);
+    EV_HANDLERS$5.toggle(ogEv);
   }
 };
 const INTRO_SECTION_ID = INTRO_SECTION;
@@ -8370,7 +8826,7 @@ const prepArticle = (key, node) => {
   const article = document.createElement(TagName.LfArticle);
   setArticleDataset(article, node);
   article.slot = key;
-  article.addEventListener(LfEventName.LfArticle, EV_HANDLERS$6.article);
+  article.addEventListener(LfEventName.LfArticle, EV_HANDLERS$5.article);
   return article;
 };
 const buildSection = (id) => {
@@ -8635,7 +9091,7 @@ const countBarChartFactory = {
   state: STATE$8
   //#endregion
 };
-const EV_HANDLERS$5 = {
+const EV_HANDLERS$4 = {
   //#region List handler
   list: (state, e) => {
     const { eventType, node } = e.detail;
@@ -8738,7 +9194,7 @@ const historyFactory = {
         list.lfSelectable = true;
         break;
     }
-    list.addEventListener(LfEventName.LfList, (e) => EV_HANDLERS$5.list(STATE$7.get(wrapper), e));
+    list.addEventListener(LfEventName.LfList, (e) => EV_HANDLERS$4.list(STATE$7.get(wrapper), e));
     content.classList.add(HistoryCSS.Content);
     content.appendChild(list);
     wrapper.appendChild(content);
@@ -8751,7 +9207,371 @@ const historyFactory = {
   state: STATE$7
   //#endregion
 };
-const EV_HANDLERS$4 = {
+const widgetValue = (widget) => {
+  var _a;
+  return ((_a = widget.options) == null ? void 0 : _a.getValue) ? widget.options.getValue() : widget.value;
+};
+const candidateLabel = (state, node, id) => {
+  var _a, _b;
+  const explicit = (_a = state == null ? void 0 : state.getLabel) == null ? void 0 : _a.call(state).trim();
+  if (explicit)
+    return explicit;
+  const title = (_b = node.title) == null ? void 0 : _b.trim();
+  return title || node.comfyClass || id;
+};
+const collectIdentityCandidates = (origin, kind) => {
+  var _a, _b, _c, _d, _e, _f;
+  const nodes = ((_a = origin.graph) == null ? void 0 : _a._nodes) ?? [origin];
+  const candidates = /* @__PURE__ */ new Map();
+  for (const node of nodes) {
+    for (const widget of node.widgets ?? []) {
+      const type = String(widget.type ?? "").toUpperCase();
+      if (type === "LF_ID") {
+        const state2 = (_c = (_b = widget.options) == null ? void 0 : _b.getState) == null ? void 0 : _c.call(_b);
+        const id = widgetValue(widget);
+        if ((state2 == null ? void 0 : state2.kind) === kind && typeof id === "string" && id) {
+          candidates.set(id, {
+            id,
+            kind,
+            label: candidateLabel(state2, node, id)
+          });
+        }
+        continue;
+      }
+      if (type !== "LF_TEXTAREA")
+        continue;
+      const state = (_e = (_d = widget.options) == null ? void 0 : _d.getState) == null ? void 0 : _e.call(_d);
+      if (!((_f = state == null ? void 0 : state.idPaths) == null ? void 0 : _f.length))
+        continue;
+      const value = widgetValue(widget);
+      try {
+        const parsed = typeof value === "string" ? parseStrictJson(value) : value;
+        for (const identity of enumerateIdentities(parsed, state.idPaths)) {
+          if (identity.kind !== kind)
+            continue;
+          candidates.set(identity.id, {
+            id: identity.id,
+            kind,
+            label: identity.label || identity.id
+          });
+        }
+      } catch {
+      }
+    }
+  }
+  return [...candidates.values()].sort((left, right) => left.label.localeCompare(right.label) || left.id.localeCompare(right.id));
+};
+var TextareaCSS;
+(function(TextareaCSS2) {
+  TextareaCSS2["Content"] = "lf-textarea";
+  TextareaCSS2["References"] = "lf-textarea__references";
+  TextareaCSS2["Reference"] = "lf-textarea__reference";
+  TextareaCSS2["ReferenceLabel"] = "lf-textarea__reference-label";
+  TextareaCSS2["ReferenceSelect"] = "lf-textarea__reference-select";
+  TextareaCSS2["Widget"] = "lf-textarea__widget";
+  TextareaCSS2["WidgetError"] = "lf-textarea__widget--error";
+})(TextareaCSS || (TextareaCSS = {}));
+const VALIDATION_TIMEOUTS = /* @__PURE__ */ new WeakMap();
+const reportInvalidJson = (textarea, error) => {
+  var _a, _b;
+  textarea.classList.add(TextareaCSS.WidgetError);
+  textarea.title = error instanceof Error ? error.message : String(error);
+  (_b = (_a = getLfManager()) == null ? void 0 : _a.log) == null ? void 0 : _b.call(_a, "Error parsing JSON", { error }, LogSeverity.Warning);
+};
+const validateAndFormatTextarea = (textarea, normalize, onValid) => {
+  try {
+    const parsed = parseStrictJson(textarea.value);
+    const normalized = normalize ? normalize(parsed) : parsed;
+    const formatted = JSON.stringify(normalized, null, 2);
+    textarea.value = formatted === void 0 ? "null" : formatted;
+    textarea.title = "";
+    textarea.classList.remove(TextareaCSS.WidgetError);
+    onValid == null ? void 0 : onValid(normalized);
+    return true;
+  } catch (error) {
+    reportInvalidJson(textarea, error);
+    return false;
+  }
+};
+const scheduleTextareaValidation = (textarea, normalize, onValid, delay = 650) => {
+  const pending = VALIDATION_TIMEOUTS.get(textarea);
+  if (pending)
+    clearTimeout(pending);
+  const timeout = setTimeout(() => {
+    VALIDATION_TIMEOUTS.delete(textarea);
+    validateAndFormatTextarea(textarea, normalize, onValid);
+  }, delay);
+  VALIDATION_TIMEOUTS.set(textarea, timeout);
+};
+const cancelTextareaValidation = (textarea) => {
+  const pending = VALIDATION_TIMEOUTS.get(textarea);
+  if (pending)
+    clearTimeout(pending);
+  VALIDATION_TIMEOUTS.delete(textarea);
+};
+var IdentityCSS;
+(function(IdentityCSS2) {
+  IdentityCSS2["Content"] = "lf-identity";
+  IdentityCSS2["Chip"] = "lf-identity__chip";
+  IdentityCSS2["Value"] = "lf-identity__value";
+  IdentityCSS2["Label"] = "lf-identity__label";
+  IdentityCSS2["Actions"] = "lf-identity__actions";
+  IdentityCSS2["Regenerate"] = "lf-identity__regenerate";
+  IdentityCSS2["Copy"] = "lf-identity__copy";
+  IdentityCSS2["Select"] = "lf-identity__select";
+  IdentityCSS2["Empty"] = "lf-identity__empty";
+})(IdentityCSS || (IdentityCSS = {}));
+const ID_STATE = /* @__PURE__ */ new WeakMap();
+const REF_STATE = /* @__PURE__ */ new WeakMap();
+const optionsOf = (inputData) => {
+  if (Array.isArray(inputData))
+    return inputData[1] ?? {};
+  return inputData ?? {};
+};
+const generateLfId = (kind) => createLfOwnedId(kind || "id");
+const labelFor = (state) => {
+  var _a, _b, _c;
+  if (!state.labelWidget)
+    return void 0;
+  const widget = (_a = state.node.widgets) == null ? void 0 : _a.find((candidate) => candidate.name === state.labelWidget);
+  const value = ((_c = (_b = widget == null ? void 0 : widget.options) == null ? void 0 : _b.getValue) == null ? void 0 : _c.call(_b)) ?? (widget == null ? void 0 : widget.value);
+  return typeof value === "string" && value.trim() ? value.trim() : void 0;
+};
+const updateChip = (state) => {
+  if (!state.chip)
+    return;
+  const label = labelFor(state);
+  state.chip.textContent = label ? `${label} · ${state.value}` : state.value || "Unassigned";
+  state.chip.title = state.value ? `Copy ${state.value}` : "No identity assigned";
+  state.chip.disabled = !state.value;
+};
+const refreshAfterHydration = (refresh) => {
+  globalThis.setTimeout(refresh, 0);
+};
+const copyValue = async (value) => {
+  var _a, _b;
+  if (!value)
+    return;
+  try {
+    await ((_b = (_a = globalThis.navigator) == null ? void 0 : _a.clipboard) == null ? void 0 : _b.writeText(value));
+  } catch {
+  }
+};
+const readValue = (value) => typeof value === "string" ? value : "";
+const idOptions = (wrapper) => ({
+  hideOnZoom: true,
+  getState: () => ID_STATE.get(wrapper),
+  getValue: () => {
+    var _a;
+    return ((_a = ID_STATE.get(wrapper)) == null ? void 0 : _a.value) || "";
+  },
+  setValue(value) {
+    const state = ID_STATE.get(wrapper);
+    if (!state)
+      return;
+    const next = readValue(value);
+    if (next)
+      state.value = next;
+    updateChip(state);
+    refreshAfterHydration(() => updateChip(state));
+  }
+});
+const refOptions = (wrapper) => ({
+  hideOnZoom: true,
+  getState: () => REF_STATE.get(wrapper),
+  getValue: () => {
+    const state = REF_STATE.get(wrapper);
+    return (state == null ? void 0 : state.selected) || "";
+  },
+  setValue(value) {
+    var _a;
+    const state = REF_STATE.get(wrapper);
+    if (!state)
+      return;
+    state.selected = readValue(value);
+    (_a = state.refresh) == null ? void 0 : _a.call(state);
+    refreshAfterHydration(() => {
+      var _a2;
+      return (_a2 = state.refresh) == null ? void 0 : _a2.call(state);
+    });
+  }
+});
+const identityContent = (className) => {
+  const wrapper = document.createElement(TagName.Div);
+  const content = document.createElement(TagName.Div);
+  wrapper.classList.add(IdentityCSS.Content, className);
+  content.classList.add(IdentityCSS.Chip);
+  wrapper.appendChild(content);
+  return [wrapper, content];
+};
+const graphNodes = (node) => {
+  var _a;
+  const nodes = ((_a = node.graph) == null ? void 0 : _a._nodes) ?? [];
+  return nodes.includes(node) ? nodes : [node, ...nodes];
+};
+const markGraphChanged = (node) => {
+  var _a, _b;
+  (_b = (_a = node.graph) == null ? void 0 : _a.setDirtyCanvas) == null ? void 0 : _b.call(_a, true, true);
+};
+const remapLiveReferences = (node, kind, previous, next) => {
+  var _a, _b, _c, _d, _e, _f;
+  for (const graphNode of graphNodes(node)) {
+    for (const widget of graphNode.widgets ?? []) {
+      if (String(widget.type ?? "").toUpperCase() === CustomWidgetName.ref) {
+        const state = (_b = (_a = widget.options) == null ? void 0 : _a.getState) == null ? void 0 : _b.call(_a);
+        if ((state == null ? void 0 : state.refKind) === kind && (state.selected === previous || state.value === previous)) {
+          state.selected = next;
+          state.value = next;
+          (_c = state.refresh) == null ? void 0 : _c.call(state);
+        }
+        continue;
+      }
+      if (String(widget.type ?? "").toUpperCase() !== CustomWidgetName.textarea)
+        continue;
+      const textareaState = (_e = (_d = widget.options) == null ? void 0 : _d.getState) == null ? void 0 : _e.call(_d);
+      if (!(textareaState == null ? void 0 : textareaState.textarea))
+        continue;
+      const referencePaths = (textareaState.refPaths ?? []).filter((pattern) => pattern.kind === kind).map((pattern) => pattern.path);
+      if (!referencePaths.length)
+        continue;
+      try {
+        const parsed = parseStrictJson(textareaState.textarea.value || "{}");
+        const rewritten = rewriteReferencesAtPaths(parsed, /* @__PURE__ */ new Map([[previous, next]]), referencePaths);
+        if (JSON.stringify(rewritten) !== JSON.stringify(parsed)) {
+          const serialized = JSON.stringify(rewritten, null, 2);
+          if ((_f = widget.options) == null ? void 0 : _f.setValue)
+            widget.options.setValue(serialized);
+          else
+            textareaState.textarea.value = serialized;
+        }
+      } catch {
+      }
+    }
+  }
+};
+const idFactory = {
+  options: idOptions,
+  render(node, inputName, inputData) {
+    const metadata = optionsOf(inputData);
+    const [wrapper, content] = identityContent("lf-id");
+    const chip = document.createElement("button");
+    const copy = document.createElement("button");
+    const regenerate = document.createElement("button");
+    const kind = metadata.lf_id_kind || "id";
+    const initial = readValue(metadata.default) || generateLfId(kind);
+    chip.type = "button";
+    chip.classList.add(IdentityCSS.Value, IdentityCSS.Copy);
+    copy.type = "button";
+    copy.classList.add(IdentityCSS.Copy);
+    copy.textContent = "Copy";
+    regenerate.type = "button";
+    regenerate.classList.add(IdentityCSS.Regenerate);
+    regenerate.textContent = "Regenerate";
+    const state = {
+      node,
+      wrapper,
+      chip,
+      inputName: inputName || "",
+      kind,
+      labelWidget: metadata.lf_label_widget,
+      getLabel: () => labelFor(state) || "",
+      selected: initial,
+      value: initial
+    };
+    const regenerateValue = () => {
+      var _a;
+      let allowed = false;
+      try {
+        allowed = ((_a = globalThis.confirm) == null ? void 0 : _a.call(globalThis, "Regenerate this identity and remap matching references in the current graph?")) ?? false;
+      } catch {
+        allowed = false;
+      }
+      if (allowed) {
+        const previous = state.value;
+        state.value = generateLfId(state.kind);
+        remapLiveReferences(state.node, state.kind, previous, state.value);
+        updateChip(state);
+        markGraphChanged(state.node);
+      }
+    };
+    chip.addEventListener("click", () => {
+      updateChip(state);
+      copyValue(state.value);
+    });
+    chip.addEventListener("focus", () => updateChip(state));
+    chip.addEventListener("pointerenter", () => updateChip(state));
+    copy.addEventListener("click", () => copyValue(state.value));
+    regenerate.addEventListener("click", regenerateValue);
+    updateChip(state);
+    content.append(chip, copy, regenerate);
+    ID_STATE.set(wrapper, state);
+    return { widget: createDOMWidget(CustomWidgetName.id, wrapper, node, idOptions(wrapper), inputName) };
+  },
+  state: ID_STATE
+};
+const refFactory = {
+  options: refOptions,
+  render(node, inputName, inputData) {
+    const metadata = optionsOf(inputData);
+    const [wrapper, content] = identityContent("lf-ref");
+    const select = document.createElement("select");
+    const kind = metadata.lf_ref_kind || "id";
+    const state = {
+      node,
+      wrapper,
+      select,
+      inputName: inputName || "",
+      kind,
+      refKind: kind,
+      labelWidget: metadata.lf_label_widget,
+      selected: readValue(metadata.default),
+      value: readValue(metadata.default)
+    };
+    select.classList.add(IdentityCSS.Select);
+    select.addEventListener("focus", () => {
+      var _a;
+      return (_a = state.refresh) == null ? void 0 : _a.call(state);
+    });
+    select.addEventListener("click", () => {
+      var _a;
+      return (_a = state.refresh) == null ? void 0 : _a.call(state);
+    });
+    select.addEventListener("change", () => {
+      state.selected = select.value;
+      state.value = select.value;
+      markGraphChanged(state.node);
+    });
+    state.refresh = () => {
+      const selected = state.selected;
+      const candidates = collectIdentityCandidates(node, kind);
+      select.replaceChildren();
+      const empty = document.createElement("option");
+      empty.value = "";
+      empty.textContent = `Select ${kind}`;
+      select.appendChild(empty);
+      for (const candidate of candidates) {
+        const option = document.createElement("option");
+        option.value = candidate.id;
+        option.textContent = candidate.label ? `${candidate.label} · ${candidate.id}` : candidate.id;
+        select.appendChild(option);
+      }
+      if (selected && !candidates.some((candidate) => candidate.id === selected)) {
+        const unavailable = document.createElement("option");
+        unavailable.value = selected;
+        unavailable.textContent = `Unavailable · ${selected}`;
+        select.appendChild(unavailable);
+      }
+      select.value = selected;
+      state.value = select.value;
+    };
+    content.appendChild(select);
+    REF_STATE.set(wrapper, state);
+    state.refresh();
+    return { widget: createDOMWidget(CustomWidgetName.ref, wrapper, node, refOptions(wrapper), inputName) };
+  },
+  state: REF_STATE
+};
+const EV_HANDLERS$3 = {
   //#region Masonry handler
   masonry: (state, e) => {
     var _a, _b;
@@ -8844,7 +9664,7 @@ const masonryFactory = {
     const content = document.createElement(TagName.Div);
     const masonry = document.createElement(TagName.LfMasonry);
     masonry.classList.add(MasonryCSS.Widget);
-    masonry.addEventListener(LfEventName.LfMasonry, (e) => EV_HANDLERS$4.masonry(STATE$6.get(wrapper), e));
+    masonry.addEventListener(LfEventName.LfMasonry, (e) => EV_HANDLERS$3.masonry(STATE$6.get(wrapper), e));
     masonry.lfActions = true;
     masonry.lfColumns = 3;
     switch (node.comfyClass) {
@@ -8867,7 +9687,7 @@ const masonryFactory = {
 const PLACEHOLDER_MESSAGE = `The setup of this node must be done client-side. Use either <strong>LF_WriteJSON</strong> or <strong>LF_DisplayJSON</strong>
 to connect as input a valid JSON dataset. Check the repository's workflows to see a 
 <a target="_blank" href="https://github.com/lucafoscili/lucafoscili/blob/7cd0e072cb790ff2e921d6db0b16027d1dea0545/lf-nodes/workflows/Flux%20%2B%20LLM%20Character%20manager.json">working example here.</a>.`;
-const EV_HANDLERS$3 = {
+const EV_HANDLERS$2 = {
   //#region Messenger handler
   messenger: (state, e) => {
     const { eventType, config } = e.detail;
@@ -8927,7 +9747,7 @@ const messengerFactory = {
     messenger.classList.add(MessengerCSS.Widget);
     placeholder.classList.add(MessengerCSS.Placeholder);
     placeholder.innerHTML = PLACEHOLDER_MESSAGE;
-    messenger.addEventListener(LfEventName.LfMessenger, (e) => EV_HANDLERS$3.messenger(STATE$5.get(wrapper), e));
+    messenger.addEventListener(LfEventName.LfMessenger, (e) => EV_HANDLERS$2.messenger(STATE$5.get(wrapper), e));
     content.appendChild(placeholder);
     content.appendChild(messenger);
     wrapper.appendChild(content);
@@ -9025,7 +9845,7 @@ const progressbarFactory = {
   state: STATE$4
   //#endregion
 };
-const EV_HANDLERS$2 = {
+const EV_HANDLERS$1 = {
   //#region Tabbar handler
   tabbar: (state, e) => {
     const { eventType, node } = e.detail;
@@ -9195,12 +10015,12 @@ const tabBarChartFactory = {
     }
     tabbar.classList.add(TabBarChartCSS.Tabbar);
     tabbar.lfValue = null;
-    tabbar.addEventListener(LfEventName.LfTabbar, (e) => EV_HANDLERS$2.tabbar(STATE$3.get(wrapper), e));
+    tabbar.addEventListener(LfEventName.LfTabbar, (e) => EV_HANDLERS$1.tabbar(STATE$3.get(wrapper), e));
     textfield.classList.add(TabBarChartCSS.Directory);
     textfield.lfIcon = "folder";
     textfield.lfLabel = "Directory";
     textfield.lfStyling = "flat";
-    textfield.addEventListener(LfEventName.LfTextfield, (e) => EV_HANDLERS$2.textfield(STATE$3.get(wrapper), e));
+    textfield.addEventListener(LfEventName.LfTextfield, (e) => EV_HANDLERS$1.textfield(STATE$3.get(wrapper), e));
     grid.classList.add(TabBarChartCSS.Grid);
     grid.appendChild(textfield);
     grid.appendChild(tabbar);
@@ -9224,41 +10044,167 @@ const tabBarChartFactory = {
   state: STATE$3
   //#endregion
 };
-var TextareaCSS;
-(function(TextareaCSS2) {
-  TextareaCSS2["Content"] = "lf-textarea";
-  TextareaCSS2["Widget"] = "lf-textarea__widget";
-  TextareaCSS2["WidgetError"] = "lf-textarea__widget--error";
-})(TextareaCSS || (TextareaCSS = {}));
-let VALIDATION_TIMEOUT;
-const EV_HANDLERS$1 = {
-  //#region Input handler
-  input: (e) => {
-    const textarea = e.currentTarget;
-    const startValidationTimer = () => {
-      const validateAndFormatJSON = async () => {
-        try {
-          const jsonObject = JSON.parse(textarea.value);
-          const formattedJson = JSON.stringify(jsonObject, null, 2);
-          if (formattedJson !== "{}") {
-            textarea.title = "";
-            textarea.value = formattedJson;
-            textarea.classList.remove(TextareaCSS.WidgetError);
-          }
-        } catch (error) {
-          getLfManager().log("Error parsing JSON", { error }, LogSeverity.Warning);
-          textarea.classList.add(TextareaCSS.WidgetError);
-          textarea.title = error;
-        }
-      };
-      VALIDATION_TIMEOUT = setTimeout(validateAndFormatJSON, 2500);
-    };
-    clearTimeout(VALIDATION_TIMEOUT);
-    startValidationTimer();
-  }
-  //#endregion
-};
 const STATE$2 = /* @__PURE__ */ new WeakMap();
+const isRecord = (value) => typeof value === "object" && value !== null && !Array.isArray(value);
+const readInputOptions = (inputData) => {
+  const candidate = Array.isArray(inputData) ? inputData[1] : inputData;
+  return isRecord(candidate) ? candidate : {};
+};
+const readIdPaths = (options) => {
+  if (!Array.isArray(options.lf_id_paths))
+    return [];
+  return options.lf_id_paths.flatMap((value) => {
+    if (!isRecord(value) || typeof value.path !== "string" || typeof value.kind !== "string") {
+      return [];
+    }
+    return [{
+      path: value.path,
+      kind: value.kind,
+      ...typeof value.label === "string" ? { label: value.label } : {}
+    }];
+  });
+};
+const readRefPaths = (options) => {
+  if (!Array.isArray(options.lf_ref_paths))
+    return [];
+  return options.lf_ref_paths.flatMap((value) => {
+    if (!isRecord(value) || typeof value.path !== "string" || typeof value.kind !== "string") {
+      return [];
+    }
+    return [{ path: value.path, kind: value.kind }];
+  });
+};
+const decodePointerSegment = (segment) => segment.replace(/~1/g, "/").replace(/~0/g, "~");
+const encodePointerSegment = (segment) => segment.replace(/~/g, "~0").replace(/\//g, "~1");
+const referenceLocations = (value, pointer) => {
+  if (!pointer.startsWith("/"))
+    return [];
+  const segments = pointer.slice(1).split("/").map(decodePointerSegment);
+  const result = [];
+  const visit = (current, index, path) => {
+    if (index >= segments.length)
+      return;
+    const segment = segments[index];
+    const isLast = index === segments.length - 1;
+    if (segment === "*") {
+      const entries = Array.isArray(current) ? current.map((child, childIndex) => [String(childIndex), child]) : isRecord(current) ? Object.entries(current) : [];
+      for (const [key, child] of entries) {
+        visit(child, index + 1, `${path}/${encodePointerSegment(key)}`);
+      }
+      return;
+    }
+    if (isLast) {
+      if (!isRecord(current) || !Object.prototype.hasOwnProperty.call(current, segment))
+        return;
+      const authored = current[segment];
+      const context = [current.label, current.title, current.text, current.id].find((item) => typeof item === "string" && item.trim());
+      result.push({
+        current: typeof authored === "string" ? authored : "",
+        key: segment,
+        label: context || `${path || "/"}${path ? "/" : ""}${segment}`,
+        parent: current,
+        path: `${path}/${encodePointerSegment(segment)}`
+      });
+      return;
+    }
+    if (Array.isArray(current) && /^\d+$/.test(segment)) {
+      visit(current[Number(segment)], index + 1, `${path}/${segment}`);
+    } else if (isRecord(current) && Object.prototype.hasOwnProperty.call(current, segment)) {
+      visit(current[segment], index + 1, `${path}/${encodePointerSegment(segment)}`);
+    }
+  };
+  visit(value, 0, "");
+  return result;
+};
+const compactId = (id) => {
+  const parts = id.split(":");
+  const tail = parts.at(-1) || id;
+  return tail.length > 10 ? `${tail.slice(0, 8)}…` : tail;
+};
+const populateReferenceSelect = (state, select, kind, current) => {
+  const placeholder = document.createElement("option");
+  placeholder.value = "";
+  placeholder.textContent = `Choose ${kind.replaceAll("-", " ")}…`;
+  select.replaceChildren(placeholder);
+  let resolved = false;
+  for (const candidate of collectIdentityCandidates(state.node, kind)) {
+    const option = document.createElement("option");
+    option.value = candidate.id;
+    option.textContent = `${candidate.label} · ${compactId(candidate.id)}`;
+    option.title = candidate.id;
+    select.appendChild(option);
+    if (candidate.id === current)
+      resolved = true;
+  }
+  if (current && !resolved) {
+    const unresolved = document.createElement("option");
+    unresolved.value = current;
+    unresolved.textContent = `Unresolved · ${compactId(current)}`;
+    unresolved.title = current;
+    select.appendChild(unresolved);
+  }
+  select.value = current;
+};
+const normalizeDocument = (state, value) => state.idPaths.length ? materializeMissingIds(value, state.idPaths) : value;
+const renderReferenceControls = (state, value) => {
+  state.references.replaceChildren();
+  state.references.hidden = state.refPaths.length === 0;
+  if (!state.refPaths.length)
+    return;
+  for (const pattern of state.refPaths) {
+    for (const location of referenceLocations(value, pattern.path)) {
+      const row = document.createElement("label");
+      const label = document.createElement("span");
+      const select = document.createElement("select");
+      row.classList.add(TextareaCSS.Reference);
+      label.classList.add(TextareaCSS.ReferenceLabel);
+      select.classList.add(TextareaCSS.ReferenceSelect);
+      label.textContent = location.label;
+      label.title = location.path;
+      const refresh = () => {
+        let current = location.current;
+        try {
+          const latest = parseStrictJson(state.textarea.value);
+          const match = referenceLocations(latest, pattern.path).find((item) => item.path === location.path);
+          if (match)
+            current = match.current;
+        } catch {
+        }
+        populateReferenceSelect(state, select, pattern.kind, current);
+      };
+      refresh();
+      select.addEventListener("pointerdown", refresh);
+      select.addEventListener("focus", refresh);
+      select.addEventListener("change", () => {
+        var _a, _b;
+        try {
+          const parsed = parseStrictJson(state.textarea.value);
+          const target = referenceLocations(parsed, pattern.path).find((item) => item.path === location.path);
+          if (!target)
+            return;
+          target.parent[target.key] = select.value;
+          state.textarea.value = JSON.stringify(parsed);
+          validateAndFormatTextarea(state.textarea, (next) => normalizeDocument(state, next), (next) => renderReferenceControls(state, next));
+          (_b = (_a = state.node.graph) == null ? void 0 : _a.setDirtyCanvas) == null ? void 0 : _b.call(_a, true, true);
+        } catch {
+        }
+      });
+      row.append(label, select);
+      state.references.appendChild(row);
+    }
+  }
+};
+const refreshReferencesAfterHydration = (state) => {
+  if (!state.refPaths.length)
+    return;
+  globalThis.setTimeout(() => {
+    try {
+      renderReferenceControls(state, parseStrictJson(state.textarea.value));
+    } catch {
+    }
+  }, 0);
+};
+const validateState = (state) => validateAndFormatTextarea(state.textarea, (value) => normalizeDocument(state, value), (value) => renderReferenceControls(state, value));
 const textareaFactory = {
   //#region Options
   options: (wrapper) => {
@@ -9267,36 +10213,52 @@ const textareaFactory = {
       getState: () => STATE$2.get(wrapper),
       getValue() {
         const { textarea } = STATE$2.get(wrapper);
-        try {
-          return (textarea == null ? void 0 : textarea.value) || "{}";
-        } catch (error) {
-          return error;
-        }
+        return (textarea == null ? void 0 : textarea.value) ?? "{}";
       },
       setValue(value) {
-        const { textarea } = STATE$2.get(wrapper);
-        const callback = (_, u) => {
-          const parsedJson = u.parsedJSON;
-          textarea.value = JSON.stringify(parsedJson, null, 2) || "{}";
-        };
-        normalizeValue(value, callback, CustomWidgetName.textarea);
+        const state = STATE$2.get(wrapper);
+        const hydrated = value;
+        state.textarea.value = typeof hydrated === "string" ? hydrated : JSON.stringify(hydrated);
+        validateState(state);
+        refreshReferencesAfterHydration(state);
       }
     };
   },
   //#endregion
   //#region Render
-  render: (node) => {
+  render: (node, inputName = "ui_widget", inputData) => {
     const wrapper = document.createElement(TagName.Div);
     const content = document.createElement(TagName.Div);
     const textarea = document.createElement(TagName.Textarea);
+    const references = document.createElement(TagName.Div);
+    const inputOptions = readInputOptions(inputData);
     content.classList.add(TextareaCSS.Content);
-    content.appendChild(textarea);
+    references.classList.add(TextareaCSS.References);
+    references.hidden = true;
+    content.append(textarea, references);
     textarea.classList.add(TextareaCSS.Widget);
-    textarea.addEventListener("input", EV_HANDLERS$1.input);
     wrapper.appendChild(content);
     const options = textareaFactory.options(wrapper);
-    STATE$2.set(wrapper, { node, textarea, wrapper });
-    return { widget: createDOMWidget(CustomWidgetName.textarea, wrapper, node, options) };
+    const state = {
+      idPaths: readIdPaths(inputOptions),
+      inputName,
+      node,
+      references,
+      refPaths: readRefPaths(inputOptions),
+      textarea,
+      wrapper
+    };
+    STATE$2.set(wrapper, state);
+    textarea.addEventListener("input", () => {
+      scheduleTextareaValidation(textarea, (value) => normalizeDocument(state, value), (value) => renderReferenceControls(state, value));
+    });
+    textarea.addEventListener("blur", () => {
+      cancelTextareaValidation(textarea);
+      validateState(state);
+    });
+    return {
+      widget: createDOMWidget(CustomWidgetName.textarea, wrapper, node, options, inputName)
+    };
   },
   //#endregion
   //#region State
@@ -9441,10 +10403,12 @@ class LFWidgets {
       [CustomWidgetName.controlPanel]: controlPanelFactory,
       [CustomWidgetName.countBarChart]: countBarChartFactory,
       [CustomWidgetName.history]: historyFactory,
+      [CustomWidgetName.id]: idFactory,
       [CustomWidgetName.imageEditor]: imageEditorFactory,
       [CustomWidgetName.masonry]: masonryFactory,
       [CustomWidgetName.messenger]: messengerFactory,
       [CustomWidgetName.progressbar]: progressbarFactory,
+      [CustomWidgetName.ref]: refFactory,
       [CustomWidgetName.tabBarChart]: tabBarChartFactory,
       [CustomWidgetName.textarea]: textareaFactory,
       [CustomWidgetName.tree]: treeFactory,
@@ -9709,6 +10673,12 @@ class LFManager {
       this.log("Attempt to initialize LFManager when already ready!", { LFManager: this }, LogSeverity.Warning);
       return;
     }
+    __classPrivateFieldGet(this, _LFManager_APIS, "f").comfy.register({
+      name: "LFExt_VisualNovelIdentity",
+      setup: () => {
+        installVnClipboardIdentityRemap(getComfyAPP().canvas, (message, details) => this.log(message, details, LogSeverity.Error));
+      }
+    });
     for (const key in NodeName) {
       if (Object.prototype.hasOwnProperty.call(NodeName, key)) {
         const name = NodeName[key];
@@ -9733,7 +10703,7 @@ class LFManager {
           getCustomWidgets: () => widgets.reduce((acc, widget) => {
             return {
               ...acc,
-              [widget]: __classPrivateFieldGet(this, _LFManager_MANAGERS, "f").widgets.render(widget)
+              [widget]: (node, inputName, inputData, app2, widgetName) => __classPrivateFieldGet(this, _LFManager_MANAGERS, "f").widgets.render(widget)(node, inputName, inputData, app2, widgetName)
             };
           }, customWidgets)
         };
@@ -9884,7 +10854,7 @@ const isPlainObject = (value) => {
 };
 const sanitizeSerializedValue = (value) => {
   const seen = /* @__PURE__ */ new WeakMap();
-  const clone = (current) => {
+  const clone2 = (current) => {
     if (typeof current === "string") {
       return isInlineImageDataUrl(current) ? "" : current;
     }
@@ -9904,14 +10874,14 @@ const sanitizeSerializedValue = (value) => {
       Object.defineProperty(copy, key, {
         configurable: true,
         enumerable: true,
-        value: clone(current[key]),
+        value: clone2(current[key]),
         writable: true
       });
     }
     return copy;
   };
   try {
-    return clone(value);
+    return clone2(value);
   } catch {
     return value;
   }
@@ -10115,24 +11085,20 @@ const percentLabel = (value) => `${clampPercent(value).toFixed(1)}%`;
 const canvasToBase64 = (canvas) => {
   return canvas.toDataURL("image/png");
 };
-const createDOMWidget = (type, element, node, options) => {
+const createDOMWidget = (type, element, node, options, inputName) => {
   getLfManager().log(`Creating '${type}'`, { element });
   try {
-    const { nodeData } = Object.getPrototypeOf(node).constructor;
-    let name = DEFAULT_WIDGET_NAME;
-    for (const key in nodeData.input) {
-      if (Object.prototype.hasOwnProperty.call(nodeData.input, key)) {
-        const input = nodeData.input[key];
-        for (const key2 in input) {
-          if (Object.prototype.hasOwnProperty.call(input, key2)) {
-            const element2 = Array.from(input[key2]);
-            if (element2[0] === type) {
-              name = key2;
-              break;
-            }
+    let name = inputName || DEFAULT_WIDGET_NAME;
+    if (!inputName) {
+      const { nodeData } = Object.getPrototypeOf(node).constructor;
+      for (const inputGroup of Object.values((nodeData == null ? void 0 : nodeData.input) ?? {})) {
+        for (const [candidateName, candidateSpec] of Object.entries(inputGroup ?? {})) {
+          if (Array.isArray(candidateSpec) && candidateSpec[0] === type) {
+            name = candidateName;
+            break;
           }
         }
-        if (name) {
+        if (name !== DEFAULT_WIDGET_NAME) {
           break;
         }
       }

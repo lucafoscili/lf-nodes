@@ -226,26 +226,23 @@ export const createDOMWidget = (
   element: HTMLDivElement,
   node: NodeType,
   options: WidgetOptions,
+  inputName?: string,
 ) => {
   getLfManager().log(`Creating '${type}'`, { element });
   try {
-    const { nodeData } = Object.getPrototypeOf(node).constructor as NodeType;
-    let name = DEFAULT_WIDGET_NAME;
+    let name = inputName || DEFAULT_WIDGET_NAME;
 
-    for (const key in nodeData.input) {
-      if (Object.prototype.hasOwnProperty.call(nodeData.input, key)) {
-        const input = nodeData.input[key as keyof Input];
+    if (!inputName) {
+      const { nodeData } = Object.getPrototypeOf(node).constructor as NodeType;
 
-        for (const key in input) {
-          if (Object.prototype.hasOwnProperty.call(input, key)) {
-            const element = Array.from(input[key]);
-            if (element[0] === type) {
-              name = key;
-              break;
-            }
+      for (const inputGroup of Object.values(nodeData?.input ?? {})) {
+        for (const [candidateName, candidateSpec] of Object.entries(inputGroup ?? {})) {
+          if (Array.isArray(candidateSpec) && candidateSpec[0] === type) {
+            name = candidateName;
+            break;
           }
         }
-        if (name) {
+        if (name !== DEFAULT_WIDGET_NAME) {
           break;
         }
       }

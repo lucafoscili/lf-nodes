@@ -10,6 +10,7 @@ import { ControlPanel, ControlPanelDeserializedValue } from './controlPanel';
 import { CountBarChart, CountBarChartDeserializedValue } from './countBarChart';
 import { History, HistoryDeserializedValue } from './history';
 import { ImageEditor, ImageEditorDeserializedValue } from './imageEditor';
+import { Id, IdentityDeserializedValue, Ref } from './identity';
 import { Masonry, MasonryDeserializedValue } from './masonry';
 import { Messenger, MessengerDeserializedValue } from './messenger';
 import { Progressbar, ProgressbarDeserializedValue } from './progressbar';
@@ -43,10 +44,12 @@ export enum CustomWidgetName {
   controlPanel = 'LF_CONTROL_PANEL',
   countBarChart = 'LF_COUNT_BAR_CHART',
   history = 'LF_HISTORY',
+  id = 'LF_ID',
   imageEditor = 'LF_IMAGE_EDITOR',
   masonry = 'LF_MASONRY',
   messenger = 'LF_MESSENGER',
   progressbar = 'LF_PROGRESSBAR',
+  ref = 'LF_REF',
   tabBarChart = 'LF_TAB_BAR_CHART',
   textarea = 'LF_TEXTAREA',
   tree = 'LF_TREE',
@@ -173,6 +176,10 @@ export enum NodeName {
   vaeDecode = 'LF_VAEDecode',
   vaeEncode = 'LF_VAEEncode',
   vaeSelector = 'LF_VAESelector',
+  vnCompile = 'LF_VNCompile',
+  vnSceneSpec = 'LF_SceneSpec',
+  vnState = 'LF_VNState',
+  vnSwitch = 'LF_VNSwitch',
   viewImages = 'LF_ViewImages',
   viewSVGs = 'LF_ViewSVGs',
   vibrance = 'LF_Vibrance',
@@ -238,10 +245,12 @@ export type CustomWidgetMap = {
   [CustomWidgetName.controlPanel]: ControlPanel;
   [CustomWidgetName.countBarChart]: CountBarChart;
   [CustomWidgetName.history]: History;
+  [CustomWidgetName.id]: Id;
   [CustomWidgetName.imageEditor]: ImageEditor;
   [CustomWidgetName.masonry]: Masonry;
   [CustomWidgetName.messenger]: Messenger;
   [CustomWidgetName.progressbar]: Progressbar;
+  [CustomWidgetName.ref]: Ref;
   [CustomWidgetName.tabBarChart]: TabBarChart;
   [CustomWidgetName.textarea]: Textarea;
   [CustomWidgetName.tree]: Tree;
@@ -258,10 +267,12 @@ export type CustomWidgetDeserializedValuesMap<Name extends CustomWidgetName> = {
   [CustomWidgetName.controlPanel]: ControlPanelDeserializedValue;
   [CustomWidgetName.countBarChart]: CountBarChartDeserializedValue;
   [CustomWidgetName.history]: HistoryDeserializedValue;
+  [CustomWidgetName.id]: IdentityDeserializedValue;
   [CustomWidgetName.imageEditor]: ImageEditorDeserializedValue;
   [CustomWidgetName.masonry]: MasonryDeserializedValue;
   [CustomWidgetName.messenger]: MessengerDeserializedValue;
   [CustomWidgetName.progressbar]: ProgressbarDeserializedValue;
+  [CustomWidgetName.ref]: IdentityDeserializedValue;
   [CustomWidgetName.tabBarChart]: TabBarChartDeserializedValue;
   [CustomWidgetName.textarea]: TextareaDeserializedValue;
   [CustomWidgetName.tree]: TreeDeserializedValue;
@@ -281,6 +292,13 @@ export type NormalizeValueCallback<
   S extends BaseWidgetState = BaseWidgetState,
 > = (origValue: V, unescaped: LfSyntaxUnescapeJSONPayload, state?: S) => void;
 export type GenericWidgetCallback = ComfyWidgetCallback | CustomWidgetCallback;
+export type CustomWidgetConstructor = (
+  node: NodeType,
+  inputName?: string,
+  inputData?: unknown,
+  app?: unknown,
+  widgetName?: string,
+) => { widget: GenericWidget };
 export type CustomWidgetCallback = <T extends CustomWidgetName>(
   node: NodeType,
   name: T,
@@ -294,7 +312,7 @@ export interface WidgetFactory<
   S extends BaseWidgetState = BaseWidgetState,
 > {
   options: (wrapper: HTMLDivElement) => WidgetOptions<V, S>;
-  render: (node: NodeType) => { widget: GenericWidget };
+  render: CustomWidgetConstructor;
   state: WeakMap<HTMLDivElement, S>;
 }
 export interface WidgetOptions<

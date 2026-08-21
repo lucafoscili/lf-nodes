@@ -1,0 +1,53 @@
+@use '../mixins/mixins' as mixins;
+
+.lf-identity {
+  @include mixins.lf-root();
+  display: flex;
+  min-width: 0;
+
+  &__chip {
+    align-items: center;
+    display: flex;
+    gap: 4px;
+    min-width: 0;
+    width: 100%;
+  }
+
+  &__value,
+  &__copy,
+  &__regenerate {
+    background: rgba(var(--lf-color-bg), 0.8);
+    border: 1px solid rgba(var(--lf-color-on-bg), 0.2);
+    border-radius: 999px;
+    color: rgb(var(--lf-color-on-bg));
+    cursor: pointer;
+    font: inherit;
+    min-width: 0;
+    overflow: hidden;
+    padding: 3px 8px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__value {
+    flex: 1;
+    text-align: left;
+  }
+
+  &__copy,
+  &__regenerate {
+    flex: 0 0 auto;
+    font-size: 0.85em;
+  }
+
+  &__select {
+    @include mixins.lf-el-stretch;
+    background: rgb(var(--lf-color-bg));
+    border: 1px solid rgba(var(--lf-color-on-bg), 0.2);
+    border-radius: 4px;
+    color: rgb(var(--lf-color-on-bg));
+    font: inherit;
+    min-width: 0;
+    padding: 4px 8px;
+  }
+}

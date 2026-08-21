@@ -19,6 +19,7 @@ import { controlPanelFactory } from '../widgets/controlPanel';
 import { countBarChartFactory } from '../widgets/countBarChart';
 import { historyFactory } from '../widgets/history';
 import { imageEditorFactory } from '../widgets/imageEditor';
+import { idFactory, refFactory } from '../widgets/identity';
 import { masonryFactory } from '../widgets/masonry';
 import { messengerFactory } from '../widgets/messenger';
 import { progressbarFactory } from '../widgets/progressbar';
@@ -39,10 +40,12 @@ export class LFWidgets {
     [CustomWidgetName.controlPanel]: controlPanelFactory,
     [CustomWidgetName.countBarChart]: countBarChartFactory,
     [CustomWidgetName.history]: historyFactory,
+    [CustomWidgetName.id]: idFactory,
     [CustomWidgetName.imageEditor]: imageEditorFactory,
     [CustomWidgetName.masonry]: masonryFactory,
     [CustomWidgetName.messenger]: messengerFactory,
     [CustomWidgetName.progressbar]: progressbarFactory,
+    [CustomWidgetName.ref]: refFactory,
     [CustomWidgetName.tabBarChart]: tabBarChartFactory,
     [CustomWidgetName.textarea]: textareaFactory,
     [CustomWidgetName.tree]: treeFactory,

@@ -258,6 +258,56 @@
   justify-items: center;
 }
 
+.lf-identity {
+  width: 100%;
+  height: 100%;
+  background: rgb(var(--lf-color-bg));
+  max-height: 100%;
+  max-width: 100%;
+  overflow: auto;
+  display: flex;
+  min-width: 0;
+}
+.lf-identity__chip {
+  align-items: center;
+  display: flex;
+  gap: 4px;
+  min-width: 0;
+  width: 100%;
+}
+.lf-identity__value, .lf-identity__copy, .lf-identity__regenerate {
+  background: rgba(var(--lf-color-bg), 0.8);
+  border: 1px solid rgba(var(--lf-color-on-bg), 0.2);
+  border-radius: 999px;
+  color: rgb(var(--lf-color-on-bg));
+  cursor: pointer;
+  font: inherit;
+  min-width: 0;
+  overflow: hidden;
+  padding: 3px 8px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.lf-identity__value {
+  flex: 1;
+  text-align: left;
+}
+.lf-identity__copy, .lf-identity__regenerate {
+  flex: 0 0 auto;
+  font-size: 0.85em;
+}
+.lf-identity__select {
+  width: 100%;
+  height: 100%;
+  background: rgb(var(--lf-color-bg));
+  border: 1px solid rgba(var(--lf-color-on-bg), 0.2);
+  border-radius: 4px;
+  color: rgb(var(--lf-color-on-bg));
+  font: inherit;
+  min-width: 0;
+  padding: 4px 8px;
+}
+
 .lf-masonry {
   width: 100%;
   height: 100%;
@@ -344,6 +394,9 @@
   max-height: 100%;
   max-width: 100%;
   overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 .lf-textarea__widget {
   width: 100%;
@@ -364,6 +417,37 @@
 }
 .lf-textarea__widget--error {
   box-shadow: inset 0px 0px 4px 1px rgba(var(--lf-color-danger), 0.775);
+}
+.lf-textarea__references {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 6px 6px;
+}
+.lf-textarea__references[hidden] {
+  display: none;
+}
+.lf-textarea__reference {
+  align-items: center;
+  display: grid;
+  gap: 6px;
+  grid-template-columns: minmax(72px, 0.8fr) minmax(120px, 1.2fr);
+}
+.lf-textarea__reference-label {
+  color: rgb(var(--lf-color-on-bg));
+  font-size: 0.78em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.lf-textarea__reference-select {
+  background: rgb(var(--lf-color-bg));
+  border: 1px solid rgba(var(--lf-color-on-bg), 0.2);
+  border-radius: 4px;
+  color: rgb(var(--lf-color-on-bg));
+  font-family: var(--lf-font-family-monospace);
+  min-width: 0;
+  padding: 4px 6px;
 }
 
 .lf-tree {

@@ -17,6 +17,7 @@ import {
   onDrawBackground,
   onNodeCreated,
 } from '../helpers/manager';
+import { installVnClipboardIdentityRemap } from '../helpers/visualNovelClipboard';
 import { installLFBeforeFreeHooks } from '../hooks/free';
 import { installLFInterruptHook } from '../hooks/interrupt';
 import { installLFRefreshNodeHook } from '../hooks/refresh';
@@ -114,6 +115,15 @@ export class LFManager {
       return;
     }
 
+    this.#APIS.comfy.register({
+      name: 'LFExt_VisualNovelIdentity',
+      setup: () => {
+        installVnClipboardIdentityRemap(getComfyAPP().canvas, (message, details) =>
+          this.log(message, details, LogSeverity.Error),
+        );
+      },
+    });
+
     for (const key in NodeName) {
       if (Object.prototype.hasOwnProperty.call(NodeName, key)) {
         const name: NodeName = NodeName[key as keyof typeof NodeName];
@@ -150,7 +160,14 @@ export class LFManager {
             widgets.reduce((acc, widget) => {
               return {
                 ...acc,
-                [widget]: this.#MANAGERS.widgets.render(widget),
+                [widget]: (node, inputName, inputData, app, widgetName) =>
+                  this.#MANAGERS.widgets.render(widget)(
+                    node,
+                    inputName,
+                    inputData,
+                    app,
+                    widgetName,
+                  ),
               };
             }, customWidgets),
         };

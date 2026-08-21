@@ -42,8 +42,9 @@ The nodes span quite a few categories:
 - **Region nodes**: Image region selection and editing tools.
 - **Seed generation nodes**: Generate seeds for complex workflows.
 - **Selector nodes**: Resource selection widgets with metadata display for models.
+- **Visual novel nodes**: Author, validate, and preview deterministic target-neutral narrative graphs.
 
-To see some example workflow you can check the [example_workflows folder](example_workflows).
+To see example workflows, check the [example_workflows folder](example_workflows). For the current visual-novel node inputs and identity contract, see [Visual Novel Nodes](docs/VISUAL_NOVEL.md).
 
 ## Table of Contents
 
@@ -201,6 +202,7 @@ For an overview of how this nodes suite is structured and how it integrates with
 - [Image Editor](docs/IMAGE_EDITOR.md)
 - [Node Template](docs/NODE_TEMPLATE.md)
 - [Proxy](docs/PROXY.md)
+- [Visual Novel Nodes](docs/VISUAL_NOVEL.md)
 - [Workflow Runner](docs/WORKFLOW_RUNNER.md)
 
 ![Simple pipeline](https://github.com/lucafoscili/lucafoscili/blob/e988f5c1df6299e96f2bf6b164c3b99e6df841f7/lf-nodes/screenshots/Screenshot%202025-02-18%20094817.png "Simple pipeline")

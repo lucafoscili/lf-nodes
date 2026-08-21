@@ -1,0 +1,530 @@
+{
+  "id": "00000000-0000-0000-0000-000000000000",
+  "revision": 0,
+  "last_node_id": 5,
+  "last_link_id": 5,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "LF_VNState",
+      "pos": [
+        -600,
+        -300
+      ],
+      "size": [
+        360,
+        300
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "fixture_id",
+          "name": "fixture_id",
+          "type": "LF_ID",
+          "widget": {
+            "name": "fixture_id"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "state_body",
+          "name": "state_body",
+          "type": "LF_TEXTAREA",
+          "widget": {
+            "name": "state_body"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "profile_ref",
+          "name": "profile_ref",
+          "shape": 7,
+          "type": "LF_REF",
+          "widget": {
+            "name": "profile_ref"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "state",
+          "name": "state",
+          "type": "LF_VN_STATE",
+          "links": [
+            2,
+            5
+          ]
+        },
+        {
+          "localized_name": "state_object",
+          "name": "state_object",
+          "type": "JSON",
+          "links": null
+        },
+        {
+          "localized_name": "canonical_json",
+          "name": "canonical_json",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LF_VNState"
+      },
+      "widgets_values": [
+        "lf:fixture:a7857d7b-9b67-45b5-a427-e3ab5cf518c6",
+        "{\n  \"trust\": 52,\n  \"markers\": []\n}",
+        ""
+      ],
+      "widgets_values_named": {
+        "fixture_id": "lf:fixture:a7857d7b-9b67-45b5-a427-e3ab5cf518c6",
+        "state_body": "{\n  \"trust\": 52,\n  \"markers\": []\n}",
+        "profile_ref": ""
+      }
+    },
+    {
+      "id": 2,
+      "type": "LF_SceneSpec",
+      "pos": [
+        -600,
+        80
+      ],
+      "size": [
+        420,
+        650
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "graph",
+          "name": "graph",
+          "shape": 7,
+          "type": "LF_VN_GRAPH",
+          "link": null
+        },
+        {
+          "localized_name": "scene_id",
+          "name": "scene_id",
+          "type": "LF_ID",
+          "widget": {
+            "name": "scene_id"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "title",
+          "name": "title",
+          "type": "STRING",
+          "widget": {
+            "name": "title"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "scene_body",
+          "name": "scene_body",
+          "type": "LF_TEXTAREA",
+          "widget": {
+            "name": "scene_body"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "graph",
+          "name": "graph",
+          "type": "LF_VN_GRAPH",
+          "links": [
+            1
+          ]
+        },
+        {
+          "localized_name": "scene",
+          "name": "scene",
+          "type": "JSON",
+          "links": null
+        },
+        {
+          "localized_name": "scene_ref",
+          "name": "scene_ref",
+          "type": "LF_REF",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LF_SceneSpec"
+      },
+      "widgets_values": [
+        "lf:scene:6232a0c1-b1d2-4c62-82b0-7fc9c073c137",
+        "Signal at Dusk",
+        "{\n  \"participants\": [\n    \"actor.guide\"\n  ],\n  \"entryPredicate\": {},\n  \"beats\": [\n    {\n      \"speaker\": \"actor.guide\",\n      \"text\": \"A signal flickers beyond the ridge.\",\n      \"id\": \"lf:beat:494d9fa2-fdf1-411a-ad5c-81a85235bba9\"\n    }\n  ],\n  \"choices\": [\n    {\n      \"label\": \"Answer the signal\",\n      \"availabilityPredicate\": {\n        \"gte\": {\n          \"path\": \"/trust\",\n          \"value\": 40\n        }\n      },\n      \"effects\": [\n        {\n          \"type\": \"lf.marker.set\",\n          \"payload\": {\n            \"id\": \"signal.answered\"\n          },\n          \"id\": \"lf:effect:ce2b0324-9492-443f-9874-456d47243441\"\n        }\n      ],\n      \"nextSceneId\": \"lf:scene:090bc846-280f-4110-9c9b-d47dac6af3bc\",\n      \"id\": \"lf:choice:75486c79-5429-495f-ae73-6165d19794be\"\n    },\n    {\n      \"label\": \"Wait and observe\",\n      \"effects\": [],\n      \"id\": \"lf:choice:776dcc86-12d2-4ee4-ac7c-232b8773ea4d\"\n    }\n  ],\n  \"artRequests\": [\n    {\n      \"slots\": {\n        \"background\": \"location.ridge\",\n        \"left\": \"actor.guide\"\n      },\n      \"direction\": \"A quiet ridge at dusk with a distant signal light.\",\n      \"id\": \"lf:art-request:5cbb4f4a-8923-4318-9d1a-494a9e575bed\"\n    }\n  ]\n}"
+      ],
+      "widgets_values_named": {
+        "scene_id": "lf:scene:6232a0c1-b1d2-4c62-82b0-7fc9c073c137",
+        "title": "Signal at Dusk",
+        "scene_body": "{\n  \"participants\": [\n    \"actor.guide\"\n  ],\n  \"entryPredicate\": {},\n  \"beats\": [\n    {\n      \"speaker\": \"actor.guide\",\n      \"text\": \"A signal flickers beyond the ridge.\",\n      \"id\": \"lf:beat:494d9fa2-fdf1-411a-ad5c-81a85235bba9\"\n    }\n  ],\n  \"choices\": [\n    {\n      \"label\": \"Answer the signal\",\n      \"availabilityPredicate\": {\n        \"gte\": {\n          \"path\": \"/trust\",\n          \"value\": 40\n        }\n      },\n      \"effects\": [\n        {\n          \"type\": \"lf.marker.set\",\n          \"payload\": {\n            \"id\": \"signal.answered\"\n          },\n          \"id\": \"lf:effect:ce2b0324-9492-443f-9874-456d47243441\"\n        }\n      ],\n      \"nextSceneId\": \"lf:scene:090bc846-280f-4110-9c9b-d47dac6af3bc\",\n      \"id\": \"lf:choice:75486c79-5429-495f-ae73-6165d19794be\"\n    },\n    {\n      \"label\": \"Wait and observe\",\n      \"effects\": [],\n      \"id\": \"lf:choice:776dcc86-12d2-4ee4-ac7c-232b8773ea4d\"\n    }\n  ],\n  \"artRequests\": [\n    {\n      \"slots\": {\n        \"background\": \"location.ridge\",\n        \"left\": \"actor.guide\"\n      },\n      \"direction\": \"A quiet ridge at dusk with a distant signal light.\",\n      \"id\": \"lf:art-request:5cbb4f4a-8923-4318-9d1a-494a9e575bed\"\n    }\n  ]\n}"
+      }
+    },
+    {
+      "id": 3,
+      "type": "LF_SceneSpec",
+      "pos": [
+        -130,
+        80
+      ],
+      "size": [
+        420,
+        650
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "graph",
+          "name": "graph",
+          "shape": 7,
+          "type": "LF_VN_GRAPH",
+          "link": 1
+        },
+        {
+          "localized_name": "scene_id",
+          "name": "scene_id",
+          "type": "LF_ID",
+          "widget": {
+            "name": "scene_id"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "title",
+          "name": "title",
+          "type": "STRING",
+          "widget": {
+            "name": "title"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "scene_body",
+          "name": "scene_body",
+          "type": "LF_TEXTAREA",
+          "widget": {
+            "name": "scene_body"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "graph",
+          "name": "graph",
+          "type": "LF_VN_GRAPH",
+          "links": [
+            3
+          ]
+        },
+        {
+          "localized_name": "scene",
+          "name": "scene",
+          "type": "JSON",
+          "links": null
+        },
+        {
+          "localized_name": "scene_ref",
+          "name": "scene_ref",
+          "type": "LF_REF",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LF_SceneSpec"
+      },
+      "widgets_values": [
+        "lf:scene:090bc846-280f-4110-9c9b-d47dac6af3bc",
+        "The Reply",
+        "{\n  \"participants\": [\n    \"actor.guide\"\n  ],\n  \"entryPredicate\": {\n    \"has-marker\": \"signal.answered\"\n  },\n  \"beats\": [\n    {\n      \"speaker\": \"actor.guide\",\n      \"text\": \"The distant light answers in a steady rhythm.\",\n      \"id\": \"lf:beat:cc5c41c6-38a1-4f4b-a163-e366d7b24a5f\"\n    }\n  ],\n  \"choices\": [],\n  \"artRequests\": []\n}"
+      ],
+      "widgets_values_named": {
+        "scene_id": "lf:scene:090bc846-280f-4110-9c9b-d47dac6af3bc",
+        "title": "The Reply",
+        "scene_body": "{\n  \"participants\": [\n    \"actor.guide\"\n  ],\n  \"entryPredicate\": {\n    \"has-marker\": \"signal.answered\"\n  },\n  \"beats\": [\n    {\n      \"speaker\": \"actor.guide\",\n      \"text\": \"The distant light answers in a steady rhythm.\",\n      \"id\": \"lf:beat:cc5c41c6-38a1-4f4b-a163-e366d7b24a5f\"\n    }\n  ],\n  \"choices\": [],\n  \"artRequests\": []\n}"
+      }
+    },
+    {
+      "id": 4,
+      "type": "LF_VNSwitch",
+      "pos": [
+        340,
+        80
+      ],
+      "size": [
+        420,
+        600
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "state",
+          "name": "state",
+          "type": "LF_VN_STATE",
+          "link": 2
+        },
+        {
+          "localized_name": "graph",
+          "name": "graph",
+          "shape": 7,
+          "type": "LF_VN_GRAPH",
+          "link": 3
+        },
+        {
+          "localized_name": "switch_id",
+          "name": "switch_id",
+          "type": "LF_ID",
+          "widget": {
+            "name": "switch_id"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "switch_body",
+          "name": "switch_body",
+          "type": "LF_TEXTAREA",
+          "widget": {
+            "name": "switch_body"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "graph",
+          "name": "graph",
+          "type": "LF_VN_GRAPH",
+          "links": [
+            4
+          ]
+        },
+        {
+          "localized_name": "selected_case",
+          "name": "selected_case",
+          "type": "JSON",
+          "links": null
+        },
+        {
+          "localized_name": "target_scene_id",
+          "name": "target_scene_id",
+          "type": "LF_REF",
+          "links": null
+        },
+        {
+          "localized_name": "preview_report",
+          "name": "preview_report",
+          "type": "JSON",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LF_VNSwitch"
+      },
+      "widgets_values": [
+        "lf:switch:528d99e6-233c-4dc4-8dff-3a460b18611f",
+        "{\n  \"cases\": [\n    {\n      \"when\": {\n        \"has-marker\": \"signal.answered\"\n      },\n      \"targetSceneId\": \"lf:scene:090bc846-280f-4110-9c9b-d47dac6af3bc\",\n      \"id\": \"lf:switch-case:773c2750-eedd-4069-9c39-c96c432e0db7\"\n    },\n    {\n      \"when\": {\n        \"gte\": {\n          \"path\": \"/trust\",\n          \"value\": 40\n        }\n      },\n      \"targetSceneId\": \"lf:scene:6232a0c1-b1d2-4c62-82b0-7fc9c073c137\",\n      \"id\": \"lf:switch-case:7310874d-bc55-4a1f-bb1b-6d934b3e40f5\"\n    }\n  ],\n  \"fallback\": {\n    \"targetSceneId\": \"lf:scene:6232a0c1-b1d2-4c62-82b0-7fc9c073c137\",\n    \"id\": \"lf:switch-fallback:c8e1acad-c126-4936-bd3a-0a1cef817c34\"\n  }\n}"
+      ],
+      "widgets_values_named": {
+        "switch_id": "lf:switch:528d99e6-233c-4dc4-8dff-3a460b18611f",
+        "switch_body": "{\n  \"cases\": [\n    {\n      \"when\": {\n        \"has-marker\": \"signal.answered\"\n      },\n      \"targetSceneId\": \"lf:scene:090bc846-280f-4110-9c9b-d47dac6af3bc\",\n      \"id\": \"lf:switch-case:773c2750-eedd-4069-9c39-c96c432e0db7\"\n    },\n    {\n      \"when\": {\n        \"gte\": {\n          \"path\": \"/trust\",\n          \"value\": 40\n        }\n      },\n      \"targetSceneId\": \"lf:scene:6232a0c1-b1d2-4c62-82b0-7fc9c073c137\",\n      \"id\": \"lf:switch-case:7310874d-bc55-4a1f-bb1b-6d934b3e40f5\"\n    }\n  ],\n  \"fallback\": {\n    \"targetSceneId\": \"lf:scene:6232a0c1-b1d2-4c62-82b0-7fc9c073c137\",\n    \"id\": \"lf:switch-fallback:c8e1acad-c126-4936-bd3a-0a1cef817c34\"\n  }\n}"
+      }
+    },
+    {
+      "id": 5,
+      "type": "LF_VNCompile",
+      "pos": [
+        810,
+        -200
+      ],
+      "size": [
+        460,
+        700
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "graph",
+          "name": "graph",
+          "type": "LF_VN_GRAPH",
+          "link": 4
+        },
+        {
+          "localized_name": "state",
+          "name": "state",
+          "type": "LF_VN_STATE",
+          "link": 5
+        },
+        {
+          "localized_name": "workflow_id",
+          "name": "workflow_id",
+          "type": "LF_ID",
+          "widget": {
+            "name": "workflow_id"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "entry_scene_id",
+          "name": "entry_scene_id",
+          "type": "LF_REF",
+          "widget": {
+            "name": "entry_scene_id"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "selected_choice_id",
+          "name": "selected_choice_id",
+          "type": "LF_REF",
+          "widget": {
+            "name": "selected_choice_id"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "ui_widget",
+          "name": "ui_widget",
+          "shape": 7,
+          "type": "LF_CODE",
+          "widget": {
+            "name": "ui_widget"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "bundle",
+          "name": "bundle",
+          "type": "LF_VN_BUNDLE",
+          "links": null
+        },
+        {
+          "localized_name": "preview",
+          "name": "preview",
+          "type": "JSON",
+          "links": null
+        },
+        {
+          "localized_name": "validation",
+          "name": "validation",
+          "type": "JSON",
+          "links": null
+        },
+        {
+          "localized_name": "derived_state",
+          "name": "derived_state",
+          "type": "LF_VN_STATE",
+          "links": null
+        },
+        {
+          "localized_name": "canonical_bundle",
+          "name": "canonical_bundle",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LF_VNCompile"
+      },
+      "widgets_values": [
+        "lf:workflow:2b546a2b-a059-4301-b457-229c455f8914",
+        "lf:scene:6232a0c1-b1d2-4c62-82b0-7fc9c073c137",
+        "lf:choice:75486c79-5429-495f-ae73-6165d19794be",
+        "## ✅ Visual Novel Compile\n\n- Status: **complete**\n- Scenes: **2**\n- Switches: **1**\n- Receipt: `sha256:8ee58efebeb7253be752347bef0a4ac50eaeb34f255e6b17c5476c6e08425472`\n\n### Fixture preview\n- Fixture: `lf:fixture:a7857d7b-9b67-45b5-a427-e3ab5cf518c6`\n- Active scene: `lf:scene:090bc846-280f-4110-9c9b-d47dac6af3bc`\n- Available choices: none\n- Applied effects: **1**\n- Deferred effects: **0**"
+      ],
+      "widgets_values_named": {
+        "workflow_id": "lf:workflow:2b546a2b-a059-4301-b457-229c455f8914",
+        "entry_scene_id": "lf:scene:6232a0c1-b1d2-4c62-82b0-7fc9c073c137",
+        "selected_choice_id": "lf:choice:75486c79-5429-495f-ae73-6165d19794be",
+        "ui_widget": "## ✅ Visual Novel Compile\n\n- Status: **complete**\n- Scenes: **2**\n- Switches: **1**\n- Receipt: `sha256:8ee58efebeb7253be752347bef0a4ac50eaeb34f255e6b17c5476c6e08425472`\n\n### Fixture preview\n- Fixture: `lf:fixture:a7857d7b-9b67-45b5-a427-e3ab5cf518c6`\n- Active scene: `lf:scene:090bc846-280f-4110-9c9b-d47dac6af3bc`\n- Available choices: none\n- Applied effects: **1**\n- Deferred effects: **0**"
+      }
+    }
+  ],
+  "links": [
+    [
+      1,
+      2,
+      0,
+      3,
+      0,
+      "LF_VN_GRAPH"
+    ],
+    [
+      2,
+      1,
+      0,
+      4,
+      0,
+      "LF_VN_STATE"
+    ],
+    [
+      3,
+      3,
+      0,
+      4,
+      1,
+      "LF_VN_GRAPH"
+    ],
+    [
+      4,
+      4,
+      0,
+      5,
+      0,
+      "LF_VN_GRAPH"
+    ],
+    [
+      5,
+      1,
+      0,
+      5,
+      1,
+      "LF_VN_STATE"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "Visual Novel",
+      "bounding": [
+        -670,
+        -450,
+        2070,
+        1500
+      ],
+      "color": "#a1309b",
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "lfExample": "visual-novel-signal-at-dusk",
+    "ds": {
+      "scale": 0.71,
+      "offset": [
+        927,
+        550
+      ]
+    },
+    "frontendVersion": "1.49.6"
+  },
+  "version": 0.4
+}
