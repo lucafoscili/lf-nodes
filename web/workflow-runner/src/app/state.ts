@@ -9,17 +9,21 @@ const INIT_CB = () => {
 
 //#region Public API
 export const initState = (): WorkflowState => ({
+  cancelInFlightRunId: null,
   current: { status: 'idle', message: '', id: null },
   currentRunId: null,
   inputStatuses: {},
   inputPrefillRunId: null,
+  submissionInFlightId: null,
   isDebug: false,
   manager: null,
   mutate: {
+    cancelInFlightRun: INIT_CB,
     isDebug: INIT_CB,
     manager: INIT_CB,
     inputStatus: INIT_CB,
     inputPrefillRun: INIT_CB,
+    submissionInFlight: INIT_CB,
     queuedJobs: INIT_CB,
     notifications: {
       add: INIT_CB,
@@ -29,6 +33,7 @@ export const initState = (): WorkflowState => ({
     results: INIT_CB,
     runs: {
       clear: INIT_CB,
+      removeMany: INIT_CB,
       upsert: INIT_CB,
     },
     runId: INIT_CB,

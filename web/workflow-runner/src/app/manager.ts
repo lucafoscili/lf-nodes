@@ -1,6 +1,9 @@
 import { getLfFramework } from '@lf-widgets/framework';
 import { buildAssetsUrl, DEFAULT_THEME } from '../config';
-import { workflowDispatcher } from '../dispatchers/workflow';
+import {
+  workflowCancellationDispatcher,
+  workflowDispatcher,
+} from '../dispatchers/workflow';
 import { createActionButtonSection } from '../elements/layout.action-button';
 import { createDevSection } from '../elements/layout.dev';
 import { createDrawerSection } from '../elements/layout.drawer';
@@ -27,6 +30,7 @@ import {
 import { WorkflowSectionController } from '../types/section';
 import { WorkflowRunEntry, WorkflowStore, WorkflowView } from '../types/state';
 import { NOTIFICATION_MESSAGES, STATUS_MESSAGES, UI_CONSTANTS } from '../utils/constants';
+import { clearWorkflowSessionDraft } from '../utils/session-drafts';
 import { WorkflowRunnerClient } from './client';
 import { createRoutingController } from './routing';
 import { changeView, resolveMainSections } from './sections';
@@ -80,6 +84,7 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
     this.#CLIENT = new WorkflowRunnerClient(this.#STORE);
 
     this.#DISPATCHERS = {
+      cancelWorkflow: () => workflowCancellationDispatcher(this.#STORE),
       runWorkflow: () => workflowDispatcher(this.#STORE),
     };
     this.#SECTIONS = {
@@ -113,10 +118,10 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
         });
         setStatus(this.#STORE, 'error', ERROR_FETCHING_WORKFLOWS);
       })
-      .then(() => {
+      .then(async () => {
         setStatus(this.#STORE, 'idle', IDLE_WORKFLOWS_LOADED);
-        this.#ROUTING.updateRouteFromState();
-        this.#CLIENT.start();
+        await this.#CLIENT.start();
+        this.#ROUTING.applyPendingRouteIfNeeded();
       });
   }
   //#endregion
@@ -173,7 +178,11 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
       state.mutate.workflow(firstWorkflow.id);
     }
 
-    this.#ROUTING.applyPendingRouteIfNeeded();
+    // Run routes need the authoritative cold-load before missing IDs can be
+    // normalized safely. Every other view can render as soon as workflows do.
+    if (route?.view !== 'run') {
+      this.#ROUTING.applyPendingRouteIfNeeded();
+    }
   };
   #subscribeToState() {
     const st = this.#STORE.getState();
@@ -188,6 +197,8 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
     let lastResults = st.results;
     let lastRunId = st.currentRunId;
     let lastRunsRef = st.runs;
+    let lastCancelInFlightRunId = st.cancelInFlightRunId;
+    let lastSubmissionInFlightId = st.submissionInFlightId;
     let lastSelectedRunId = st.selectedRunId;
     let lastView = st.view;
     let lastWorkflowsCount = st.workflows?.nodes?.length ?? 0;
@@ -209,6 +220,8 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
 
       if (state.currentRunId !== lastRunId) {
         // Run polling removed - SSE handles status updates
+        needs.actionButton = true;
+        needs.header = true;
         lastRunId = state.currentRunId;
       }
 
@@ -221,8 +234,18 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
         lastResults = state.results;
       }
       if (state.runs !== lastRunsRef) {
+        needs.actionButton = true;
+        needs.header = true;
         needs.main = true;
         lastRunsRef = state.runs;
+      }
+      if (
+        state.cancelInFlightRunId !== lastCancelInFlightRunId ||
+        state.submissionInFlightId !== lastSubmissionInFlightId
+      ) {
+        needs.actionButton = true;
+        lastCancelInFlightRunId = state.cancelInFlightRunId;
+        lastSubmissionInFlightId = state.submissionInFlightId;
       }
       if (state.selectedRunId !== lastSelectedRunId) {
         needs.main = true;
@@ -333,10 +356,19 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
     all: (): WorkflowRunEntry[] => {
       return [...this.#STORE.getState().runs];
     },
+    cancel: async (runId: string) => {
+      const run = this.runs.get(runId);
+      if (!run?.submissionId || !['pending', 'running'].includes(run.status)) {
+        return;
+      }
+      await this.#CLIENT.cancelSubmission(run.submissionId, run.runId);
+    },
     get: (runId: string): WorkflowRunEntry | null => {
       const { runs } = this.#STORE.getState();
       return runs.find((run) => run.runId === runId) || null;
     },
+    pruneMissingArtifacts: (dryRun: boolean, candidateRunIds?: readonly string[]) =>
+      this.#CLIENT.pruneMissingArtifacts(dryRun, candidateRunIds),
     remix: (runId: string) => {
       const run = this.runs.get(runId);
       const state = this.#STORE.getState();
@@ -349,6 +381,9 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
         return;
       }
 
+      // Remix is an explicit request to replace this workflow's ordinary
+      // in-session draft with the selected run's captured inputs.
+      clearWorkflowSessionDraft(this.#STORE, run.workflowId);
       if (state.current.id !== run.workflowId) {
         state.mutate.workflow(run.workflowId);
       }

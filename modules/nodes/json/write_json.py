@@ -21,8 +21,7 @@ class LF_WriteJSON:
     FUNCTION = FUNCTION
     OUTPUT_NODE = True
     OUTPUT_TOOLTIPS = (
-        "Written JSON object.",
-        "List of written JSON objects."
+        "Parsed JSON value authored in the textarea.",
     )
     RETURN_NAMES = ("json",)
     RETURN_TYPES = (Input.JSON,)

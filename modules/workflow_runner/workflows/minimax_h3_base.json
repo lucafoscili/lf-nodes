@@ -1,0 +1,170 @@
+{
+  "unet": {
+    "inputs": {
+      "unet_name": "minimax_h3_fl2va_pruned_int8_convrot.safetensors",
+      "weight_dtype": "default"
+    },
+    "class_type": "UNETLoader",
+    "_meta": { "title": "Load MiniMax H3 base model" }
+  },
+  "model_device": {
+    "inputs": {
+      "model": ["unet", 0],
+      "device": "default"
+    },
+    "class_type": "SelectModelDevice",
+    "_meta": { "title": "Place MiniMax H3 diffusion model" }
+  },
+  "attention_backend": {
+    "inputs": {
+      "model": ["model_device", 0],
+      "attention": "comfy kitchen attention"
+    },
+    "class_type": "ModelAttentionBackend",
+    "_meta": { "title": "Use Comfy Kitchen attention" }
+  },
+  "clip": {
+    "inputs": {
+      "clip_name": "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors",
+      "type": "minimax",
+      "device": "default"
+    },
+    "class_type": "CLIPLoader",
+    "_meta": { "title": "Load MiniMax H3 text encoder" }
+  },
+  "clip_device": {
+    "inputs": {
+      "clip": ["clip", 0],
+      "device": "default"
+    },
+    "class_type": "SelectCLIPDevice",
+    "_meta": { "title": "Place MiniMax H3 text encoder" }
+  },
+  "video_vae": {
+    "inputs": {
+      "vae_name": "minimax_h3_video_vae_fp16.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": { "title": "Load MiniMax H3 video VAE" }
+  },
+  "video_vae_device": {
+    "inputs": {
+      "vae": ["video_vae", 0],
+      "device": "default"
+    },
+    "class_type": "SelectVAEDevice",
+    "_meta": { "title": "Place MiniMax H3 video VAE" }
+  },
+  "audio_vae": {
+    "inputs": {
+      "vae_name": "minimax_h3_audio_vae_fp32.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": { "title": "Load MiniMax H3 audio VAE" }
+  },
+  "audio_vae_device": {
+    "inputs": {
+      "vae": ["audio_vae", 0],
+      "device": "default"
+    },
+    "class_type": "SelectVAEDevice",
+    "_meta": { "title": "Place MiniMax H3 audio VAE" }
+  },
+  "source_first": {
+    "inputs": { "image": "" },
+    "class_type": "LoadImage",
+    "_meta": { "title": "Optional opening frame" }
+  },
+  "source_last": {
+    "inputs": { "image": "" },
+    "class_type": "LoadImage",
+    "_meta": { "title": "Optional ending frame" }
+  },
+  "h3": {
+    "inputs": {
+      "clip": ["clip_device", 0],
+      "vae": ["video_vae_device", 0],
+      "prompt": "integrated_multimodal_description:\nA single coherent shot with clear subject motion and stable visual continuity.\n\noverall_soundscape:\nNatural ambience appropriate to the scene.\n\nnon_diegetic_music:\nN/A",
+      "width": 1344,
+      "height": 768,
+      "length": 124
+    },
+    "class_type": "MiniMaxH3ImageToVideo",
+    "_meta": { "title": "Prepare MiniMax H3 video and audio conditioning" }
+  },
+  "noise": {
+    "inputs": { "noise_seed": 42 },
+    "class_type": "RandomNoise",
+    "_meta": { "title": "Generation seed" }
+  },
+  "guider": {
+    "inputs": {
+      "model": ["attention_backend", 0],
+      "conditioning": ["h3", 0]
+    },
+    "class_type": "BasicGuider",
+    "_meta": { "title": "MiniMax H3 guider" }
+  },
+  "sampler_select": {
+    "inputs": { "sampler_name": "res_multistep" },
+    "class_type": "KSamplerSelect",
+    "_meta": { "title": "Profile-owned sampler" }
+  },
+  "scheduler": {
+    "inputs": {
+      "model": ["attention_backend", 0],
+      "scheduler": "simple",
+      "steps": 20,
+      "denoise": 1.0
+    },
+    "class_type": "BasicScheduler",
+    "_meta": { "title": "Profile-owned schedule" }
+  },
+  "sample": {
+    "inputs": {
+      "noise": ["noise", 0],
+      "guider": ["guider", 0],
+      "sampler": ["sampler_select", 0],
+      "sigmas": ["scheduler", 0],
+      "latent_image": ["h3", 1]
+    },
+    "class_type": "SamplerCustomAdvanced",
+    "_meta": { "title": "Sample MiniMax H3 video and audio latent" }
+  },
+  "decode_video": {
+    "inputs": {
+      "samples": ["sample", 0],
+      "vae": ["video_vae_device", 0]
+    },
+    "class_type": "VAEDecode",
+    "_meta": { "title": "Decode MiniMax H3 video" }
+  },
+  "decode_audio": {
+    "inputs": {
+      "samples": ["sample", 0],
+      "vae": ["audio_vae_device", 0]
+    },
+    "class_type": "VAEDecodeAudio",
+    "_meta": { "title": "Decode MiniMax H3 stereo audio" }
+  },
+  "create_video": {
+    "inputs": {
+      "images": ["decode_video", 0],
+      "fps": 24.0,
+      "audio": ["decode_audio", 0],
+      "bit_depth": 8
+    },
+    "class_type": "CreateVideo",
+    "_meta": { "title": "Mux video and stereo audio at 24 fps" }
+  },
+  "save": {
+    "inputs": {
+      "video": ["create_video", 0],
+      "filename_prefix": "LF_Nodes/MiniMaxH3/Base/seed-42-f124",
+      "format": "mp4",
+      "codec": "auto"
+    },
+    "class_type": "SaveVideo",
+    "_meta": { "title": "Save MiniMax H3 video" }
+  }
+}

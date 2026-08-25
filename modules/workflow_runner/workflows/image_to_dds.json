@@ -1,0 +1,56 @@
+{
+  "load_image": {
+    "inputs": {
+      "image": "example.png"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "1. Load the source image"
+    }
+  },
+  "restore_alpha": {
+    "inputs": {
+      "image": [
+        "load_image",
+        0
+      ],
+      "alpha": [
+        "load_image",
+        1
+      ]
+    },
+    "class_type": "JoinImageWithAlpha",
+    "_meta": {
+      "title": "Preserve source transparency"
+    }
+  },
+  "save_dds": {
+    "inputs": {
+      "image": [
+        "restore_alpha",
+        0
+      ],
+      "filename_prefix": "LF_Nodes/DDS",
+      "pixel_format": "RGBA32",
+      "mip_policy": "none",
+      "ui_widget": {}
+    },
+    "class_type": "LF_SaveDDS",
+    "_meta": {
+      "title": "2. Convert and verify DDS"
+    }
+  },
+  "display_receipt": {
+    "inputs": {
+      "json_input": [
+        "save_dds",
+        1
+      ],
+      "ui_widget": ""
+    },
+    "class_type": "LF_DisplayJSON",
+    "_meta": {
+      "title": "3. Show the verification receipt"
+    }
+  }
+}

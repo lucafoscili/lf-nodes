@@ -104,6 +104,7 @@ export function createMockManager(appRoot: HTMLDivElement): MockManager {
     runs: {
       all: vi.fn(() => []),
       get: vi.fn(() => null),
+      pruneMissingArtifacts: vi.fn(),
       select: vi.fn(),
       selected: vi.fn(() => null),
     },

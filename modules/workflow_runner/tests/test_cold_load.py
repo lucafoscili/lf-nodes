@@ -16,7 +16,7 @@ if str(pkg_root) not in sys.path:
 sys.modules['server'] = Mock()
 sys.modules['server'].PromptServer = Mock()
 
-from modules.workflow_runner.services import job_store
+from modules.workflow_runner.services import job_store, lifecycle
 from modules.workflow_runner.services.job_store import JobStatus, Job
 
 pytestmark = pytest.mark.anyio
@@ -102,7 +102,7 @@ class TestListRunsAPIEndpoint:
             assert owner_id != "", "owner_id should not be empty string"
             assert len(owner_id) == 64, f"owner_id should be 64-char hex, got length {len(owner_id)}"
             
-            print(f"✓ Successfully extracted owner_id: {owner_id[:16]}...")
+            print(f"PASS: Successfully extracted owner_id: {owner_id[:16]}...")
     
     async def test_list_runs_returns_json_with_runs_array(self):
         """Endpoint should return {runs: [...]} structure"""
@@ -143,6 +143,151 @@ class TestListRunsAPIEndpoint:
             assert run["run_id"] == "test-123"
             assert run["owner_id"] == "owner123"
             assert run["updated_at"] == 12345.0
+
+    async def test_list_runs_restores_stable_submission_control_handle(self):
+        """A browser refresh must retain exact Stop authority for active runs."""
+        from aiohttp import web
+        import json
+
+        mock_request = Mock(spec=web.Request)
+        mock_request.query = {"summary": "1"}
+        test_job = Job(
+            id="run-restored-control",
+            workflow_id="test-wf",
+            status=JobStatus.RUNNING,
+            seq=2,
+        )
+        payload = {
+            "workflowId": "test-wf",
+            "submissionId": "lf-web:restored-control",
+            "inputs": {},
+        }
+        await lifecycle.reserve_submission(payload, "test-wf")
+        await lifecycle.bind_prompt(
+            "lf-web:restored-control",
+            "run-restored-control",
+            "http://comfy:8188",
+        )
+        await lifecycle.record_cancel_requested("lf-web:restored-control")
+
+        with patch(
+            "modules.workflow_runner.controllers.api_controllers._ENABLE_GOOGLE_OAUTH",
+            False,
+        ), patch.object(
+            job_store,
+            "list_jobs",
+            return_value={"run-restored-control": test_job},
+        ):
+            from modules.workflow_runner.controllers.api_controllers import (
+                list_runs_controller,
+            )
+
+            response = await list_runs_controller(mock_request)
+            run = json.loads(response.text)["runs"][0]
+
+        assert run["submission_id"] == "lf-web:restored-control"
+        assert run["cancel_requested"] is True
+
+    async def test_list_runs_orders_mixed_statuses_by_created_at_descending(self):
+        """History pagination must not inherit status/store insertion order."""
+        from aiohttp import web
+        import json
+
+        mock_request = Mock(spec=web.Request)
+        mock_request.query = {
+            "status": "failed,succeeded",
+            "summary": "1",
+            "limit": "2",
+        }
+        jobs = {
+            "legacy": Job(
+                id="legacy",
+                workflow_id="wf",
+                status=JobStatus.FAILED,
+                # Legacy JavaScript milliseconds: numerically larger than
+                # the newer second timestamps until the API canonicalizes it.
+                created_at=1_763_168_015_000.0,
+                updated_at=1_763_168_073_000.0,
+            ),
+            "newest": Job(
+                id="newest",
+                workflow_id="wf",
+                status=JobStatus.SUCCEEDED,
+                created_at=1_786_848_000.0,
+                updated_at=1_786_848_001.0,
+            ),
+            "middle": Job(
+                id="middle",
+                workflow_id="wf",
+                status=JobStatus.SUCCEEDED,
+                created_at=1_786_840_000.0,
+                updated_at=1_786_847_000.0,
+            ),
+        }
+
+        async def mock_list_jobs(owner_id=None, status=None):
+            return {key: job for key, job in jobs.items() if status is None or job.status.value == status}
+
+        with patch('modules.workflow_runner.controllers.api_controllers._ENABLE_GOOGLE_OAUTH', False), \
+             patch.object(job_store, 'list_jobs', side_effect=mock_list_jobs):
+            from modules.workflow_runner.controllers.api_controllers import list_runs_controller
+
+            response = await list_runs_controller(mock_request)
+            data = json.loads(response.text)
+
+        assert [run["run_id"] for run in data["runs"]] == ["newest", "middle"]
+
+    async def test_list_runs_normalizes_invalid_and_millisecond_timestamps(self):
+        from aiohttp import web
+        import json
+
+        mock_request = Mock(spec=web.Request)
+        mock_request.query = {"summary": "1", "limit": "10"}
+        jobs = {
+            "legacy-ms": Job(
+                id="legacy-ms",
+                workflow_id="wf",
+                status=JobStatus.FAILED,
+                created_at=1_763_168_015_000.0,
+                updated_at=float("inf"),
+            ),
+            "new-seconds": Job(
+                id="new-seconds",
+                workflow_id="wf",
+                status=JobStatus.SUCCEEDED,
+                created_at=1_786_848_000.0,
+                updated_at=1_786_848_001.0,
+            ),
+            "invalid": Job(
+                id="invalid",
+                workflow_id="wf",
+                status=JobStatus.FAILED,
+                created_at=float("nan"),
+                updated_at=float("nan"),
+            ),
+        }
+
+        with patch(
+            "modules.workflow_runner.controllers.api_controllers._ENABLE_GOOGLE_OAUTH",
+            False,
+        ), patch.object(job_store, "list_jobs", return_value=jobs):
+            from modules.workflow_runner.controllers.api_controllers import (
+                list_runs_controller,
+            )
+
+            response = await list_runs_controller(mock_request)
+            data = json.loads(response.text)
+
+        assert [run["run_id"] for run in data["runs"]] == [
+            "new-seconds",
+            "legacy-ms",
+            "invalid",
+        ]
+        by_id = {run["run_id"]: run for run in data["runs"]}
+        assert by_id["legacy-ms"]["created_at"] == 1_763_168_015.0
+        assert by_id["legacy-ms"]["updated_at"] == 1_763_168_015.0
+        assert by_id["invalid"]["created_at"] == 0.0
+        assert by_id["invalid"]["updated_at"] == 0.0
 
 class TestOwnerIdDerivationConsistency:
     """Test that owner_id derivation is consistent across endpoints."""

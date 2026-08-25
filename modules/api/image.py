@@ -269,12 +269,12 @@ async def process_image(request):
 # region Upload
 @PromptServer.instance.routes.post(f"{API_ROUTE_PREFIX}/upload")
 async def lf_nodes_upload(request: web.Request) -> web.Response:
-    """Accept a multipart file upload and save to Comfy temp directory.
+    """Accept a multipart file upload and save to a selected Comfy directory.
 
     Returns a run-style WorkflowAPIResponse wrapped by _make_run_payload.
-    The returned path is the absolute file path which can be passed to nodes
-    that expect an image path. Files are written with their original filename
-    into the temp directory.
+    Temp/output uploads retain the legacy absolute-path response. Explicit
+    input uploads return Comfy's portable ``name [input]`` reference so a
+    browser never needs to receive the host's input-directory path.
     """
     try:
         reader = await request.multipart()
@@ -288,6 +288,7 @@ async def lf_nodes_upload(request: web.Request) -> web.Response:
 
     paths = []
     temp_dir = folder_paths.get_temp_directory()
+    storage_type = 'temp'
     os.makedirs(temp_dir, exist_ok=True)
 
     try:
@@ -319,6 +320,7 @@ async def lf_nodes_upload(request: web.Request) -> web.Response:
                         }, status=400)
 
                     temp_dir = chosen_dir
+                    storage_type = dir_value
                     os.makedirs(temp_dir, exist_ok=True)
 
                 continue
@@ -333,19 +335,36 @@ async def lf_nodes_upload(request: web.Request) -> web.Response:
 
             dest_path = os.path.join(temp_dir, sanitized)
             base, ext = os.path.splitext(dest_path)
-            counter = 1
-            while os.path.exists(dest_path):
-                dest_path = f"{base}_{counter}{ext}"
-                counter += 1
+            counter = 0
+            while True:
+                candidate = dest_path if counter == 0 else f"{base}_{counter}{ext}"
+                try:
+                    output = open(candidate, 'xb')
+                    dest_path = candidate
+                    break
+                except FileExistsError:
+                    counter += 1
 
-            with open(dest_path, 'wb') as f:
-                while True:
-                    chunk = await part.read_chunk()
-                    if not chunk:
-                        break
-                    f.write(chunk)
+            try:
+                with output as f:
+                    while True:
+                        chunk = await part.read_chunk()
+                        if not chunk:
+                            break
+                        f.write(chunk)
+            except BaseException:
+                # A disconnected multipart upload must not leave an orphaned
+                # partial file in durable input storage.
+                try:
+                    os.remove(dest_path)
+                except OSError:
+                    pass
+                raise
 
-            paths.append(dest_path)
+            if storage_type == 'input':
+                paths.append(f"{os.path.basename(dest_path)} [input]")
+            else:
+                paths.append(dest_path)
     except Exception as exc:
         logging.exception('Failed while saving uploaded files: %s', exc)
         return web.json_response({

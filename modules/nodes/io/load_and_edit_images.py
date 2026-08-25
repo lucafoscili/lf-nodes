@@ -69,7 +69,8 @@ class LF_LoadAndEditImages:
         "Index of the selected image.",
         "Name of the selected image.",
         "Metadata of the images.",
-        "Dataset for visualization."
+        "Dataset for visualization.",
+        "Reusable image editor configuration derived from the dataset.",
     )
     RETURN_NAMES = (
         "image",

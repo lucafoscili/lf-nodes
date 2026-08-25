@@ -4,6 +4,7 @@ import {
   WorkflowCellsInputContainer,
   WorkflowCellsOutputContainer,
   WorkflowCellType,
+  WorkflowRunPruneResponse,
   WorkflowRunStatusResponse,
 } from './api';
 import { WorkflowCellStatus } from './section';
@@ -12,6 +13,7 @@ import { WorkflowRoute, WorkflowRunEntry, WorkflowStore, WorkflowView } from './
 //#region Dispatchers
 export type WorkflowDispatcher = () => Promise<void>;
 export interface WorkflowDispatchers {
+  cancelWorkflow?: WorkflowDispatcher;
   runWorkflow: WorkflowDispatcher;
 }
 //#endregion
@@ -30,7 +32,12 @@ export interface WorkflowManager {
   };
   runs: {
     all: () => WorkflowRunEntry[];
+    cancel?: (runId: string) => Promise<void>;
     get: (runId: string) => WorkflowRunEntry | null;
+    pruneMissingArtifacts: (
+      dryRun: boolean,
+      candidateRunIds?: readonly string[],
+    ) => Promise<WorkflowRunPruneResponse>;
     remix?: (runId: string) => void;
     select: (runId: string | null, view?: WorkflowView) => void;
     selected: () => WorkflowRunEntry | null;

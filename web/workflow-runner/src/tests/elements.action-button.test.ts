@@ -9,6 +9,7 @@ vi.mock('@lf-widgets/framework', () => ({
   getLfFramework: vi.fn(() => ({
     theme: {
       bemClass: vi.fn((...args: string[]) => args.join('-')),
+      get: { icon: vi.fn((name: string) => name) },
     },
   })),
 }));
@@ -131,6 +132,89 @@ describe('Action Button Element', () => {
 
       // Should not throw when no elements exist
       section.render();
+    });
+
+    it('becomes an elapsed Stop control for the owned active run', () => {
+      const registry: Record<string, HTMLElement> = {};
+      mockManager.uiRegistry.get.mockImplementation(() => registry);
+      mockManager.uiRegistry.set.mockImplementation((key: string, value: HTMLElement) => {
+        registry[key] = value;
+      });
+      mockManager.uiRegistry.remove.mockImplementation((key: string) => delete registry[key]);
+      const section = createActionButtonSection(store);
+      section.mount();
+      const startedAt = Date.now() - 5_000;
+      store.getState().mutate.runs.upsert({
+        createdAt: startedAt,
+        runId: 'run-owned',
+        status: 'running',
+        submissionId: 'lf-web:submission-owned',
+      });
+      store.getState().mutate.runId('run-owned');
+
+      section.render();
+
+      const button = registry['action-button-section'] as HTMLLfButtonElement;
+      expect(button.dataset.mode).toBe('stop');
+      expect(button.lfLabel).toMatch(/^Stop · [45]s$/);
+      expect(button.lfUiState).toBe('danger');
+      expect(button.lfShowSpinner).toBe(true);
+      expect(button.getAttribute('aria-busy')).toBe('true');
+      section.destroy();
+    });
+
+    it('disables repeated cancellation while Stop is pending', () => {
+      const registry: Record<string, HTMLElement> = {};
+      mockManager.uiRegistry.get.mockImplementation(() => registry);
+      mockManager.uiRegistry.set.mockImplementation((key: string, value: HTMLElement) => {
+        registry[key] = value;
+      });
+      mockManager.uiRegistry.remove.mockImplementation((key: string) => delete registry[key]);
+      const section = createActionButtonSection(store);
+      section.mount();
+      store.getState().mutate.runs.upsert({
+        cancelRequested: true,
+        runId: 'run-stopping',
+        status: 'running',
+        submissionId: 'lf-web:submission-stopping',
+      });
+      store.getState().mutate.runId('run-stopping');
+
+      section.render();
+
+      const button = registry['action-button-section'] as HTMLLfButtonElement;
+      expect(button.dataset.mode).toBe('stopping');
+      expect(button.lfLabel).toMatch(/^Stopping · \d+s$/);
+      expect(button.lfUiState).toBe('disabled');
+      section.destroy();
+    });
+
+    it('blocks a proven setup-required workflow without hiding its reason', () => {
+      const registry: Record<string, HTMLElement> = {};
+      mockManager.uiRegistry.get.mockImplementation(() => registry);
+      mockManager.uiRegistry.set.mockImplementation((key: string, value: HTMLElement) => {
+        registry[key] = value;
+      });
+      mockManager.workflow = {
+        current: vi.fn(() => ({
+          readiness: {
+            status: 'setup_required',
+            issues: [{ code: 'model_missing', message: 'Install model.safetensors.' }],
+          },
+        })),
+      };
+      const section = createActionButtonSection(store);
+      section.mount();
+      store.getState().mutate.workflow('blocked-workflow');
+
+      section.render();
+
+      const button = registry['action-button-section'] as HTMLLfButtonElement;
+      expect(button.dataset.mode).toBe('setup-required');
+      expect(button.lfLabel).toBe('Setup required');
+      expect(button.lfUiState).toBe('disabled');
+      expect(button.title).toBe('Install model.safetensors.');
+      section.destroy();
     });
   });
 });

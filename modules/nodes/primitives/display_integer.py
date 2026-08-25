@@ -30,7 +30,6 @@ class LF_DisplayInteger:
     OUTPUT_NODE = True
     OUTPUT_TOOLTIPS = (
         "Pass-through integer value.",
-        "Pass-through integer value as a list."
     )
     RETURN_NAMES = ("integer",)
     RETURN_TYPES = (Input.INTEGER,)

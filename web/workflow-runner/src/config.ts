@@ -6,6 +6,18 @@ export const API_BASE = runnerConfig.apiBase;
 export const API_ROUTE_PREFIX = runnerConfig.apiRoutePrefix;
 export const API_ROOT = `${API_BASE}${API_ROUTE_PREFIX}`;
 
+// These are the local runtime defaults shared by the standalone frontend proxy
+// and ComfyUI. Environment overrides still belong to the proxy/backend process;
+// the browser uses these defaults only to turn a local proxy origin into the
+// corresponding ComfyUI origin for the drawer link.
+export const DEFAULT_COMFY_UI_PROTOCOL = String(
+  runnerConfig.runtime?.comfyUiProtocol ?? 'http:',
+);
+export const DEFAULT_COMFY_UI_PORT = String(runnerConfig.runtime?.comfyUiPort ?? 8188);
+export const DEFAULT_FRONTEND_PROXY_PORT = String(
+  runnerConfig.runtime?.frontendProxyPort ?? 9188,
+);
+
 type ChatConfig = {
   useProxy?: boolean;
   provider?: 'openai' | 'gemini' | 'kobold' | string;

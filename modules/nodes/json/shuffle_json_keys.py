@@ -39,8 +39,7 @@ class LF_ShuffleJSONKeys:
     FUNCTION = FUNCTION
     OUTPUT_NODE = True
     OUTPUT_TOOLTIPS = (
-        "Shuffled JSON object.",
-        "List of shuffled JSON objects."
+        "JSON value with object keys shuffled.",
     )
     RETURN_NAMES = ("json",)
     RETURN_TYPES = (Input.JSON,)

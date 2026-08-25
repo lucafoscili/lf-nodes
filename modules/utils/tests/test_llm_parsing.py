@@ -235,10 +235,10 @@ class TestLLMResponseParsing:
         assert result == "{\"key\": \"value\"}"
 
     def test_clean_code_fences_multiple(self):
-        """Test multiple code fences in text."""
+        """Test an embedded code fence without flattening its line break."""
         input_text = "Before ```code\nmiddle\n``` after"
         result = clean_code_fences(input_text)
-        assert result == "Before middle after"
+        assert result == "Before middle\n after"
 
     def test_clean_code_fences_no_fences(self):
         """Test text without code fences."""
@@ -440,10 +440,10 @@ class TestLLMResponseParsing:
         assert result == "{\"key\": \"value\"}"
 
     def test_clean_code_fences_multiple(self):
-        """Test multiple code fences in text."""
+        """Test an embedded code fence without flattening its line break."""
         input_text = "Before ```code\nmiddle\n``` after"
         result = clean_code_fences(input_text)
-        assert result == "Before middle after"
+        assert result == "Before middle\n after"
 
     def test_clean_code_fences_no_fences(self):
         """Test text without code fences."""

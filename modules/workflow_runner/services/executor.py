@@ -8,6 +8,7 @@ import time
 import uuid
 import os
 import sys
+from urllib.parse import quote
 
 from typing import Any, Dict, Mapping, Tuple
 
@@ -28,7 +29,7 @@ from .registry import (
     get_workflow_submission_policy,
 )
 from ..config import CONFIG as RUNNER_CONFIG, get_settings
-from ...utils.helpers.conversion import json_safe
+from ...utils.json_safe import json_safe
 
 # region Exceptions
 class WorkflowPreparationError(Exception):
@@ -46,6 +47,12 @@ class WorkflowPreparationError(Exception):
 
 # region Helpers
 _MAX_EXECUTION_ERROR_MESSAGE_BYTES = 4096
+
+CANCEL_OUTCOME_PENDING = "pending_cancelled"
+CANCEL_OUTCOME_RUNNING = "running_cancel_requested"
+CANCEL_OUTCOME_TERMINAL = "terminal"
+CANCEL_OUTCOME_NOOP = "noop"
+CANCEL_OUTCOME_UNSUPPORTED = "unsupported"
 
 
 def _bounded_user_message(value: Any) -> str | None:
@@ -97,6 +104,31 @@ def _extract_execution_error_message(history_entry: Mapping[str, Any]) -> str | 
     return None
 
 
+def _history_was_interrupted(history_entry: Mapping[str, Any]) -> bool:
+    """Identify ComfyUI's explicit cancellation marker without guessing.
+
+    A cancelled execution uses an error-like terminal history status, but its
+    message stream contains ``execution_interrupted`` rather than
+    ``execution_error``. Keeping that distinction prevents user cancellation
+    from being reported as workflow failure while preserving genuine races.
+    """
+
+    if not isinstance(history_entry, Mapping):
+        return False
+    status = history_entry.get("status")
+    if not isinstance(status, Mapping):
+        return False
+    messages = status.get("messages")
+    if not isinstance(messages, (list, tuple)):
+        return False
+    return any(
+        isinstance(message, (list, tuple))
+        and len(message) >= 1
+        and message[0] == "execution_interrupted"
+        for message in messages
+    )
+
+
 def _make_run_payload(
     *,
     detail: str = "",
@@ -122,6 +154,23 @@ def _prepare_workflow_execution(payload: Dict[str, Any]) -> Tuple[WorkflowNode, 
     if not isinstance(inputs, dict):
         response = _make_run_payload(detail="inputs must be an object", error_message="invalid_inputs")
         raise WorkflowPreparationError(response, 400)
+
+    # Owner-bound upload references are materialized asynchronously by the
+    # supervised run service. Legacy/direct executor callers have no owner
+    # context and must never attempt to interpret them as filesystem paths.
+    from .remix_inputs import UPLOAD_PREFILL_SCHEMA, UPLOAD_REFERENCE_SCHEMA
+
+    for input_name, value in inputs.items():
+        if (
+            isinstance(value, dict)
+            and value.get("schema") in {UPLOAD_REFERENCE_SCHEMA, UPLOAD_PREFILL_SCHEMA}
+        ):
+            response = _make_run_payload(
+                detail="Retained uploads require the supervised Workflow Runner endpoint.",
+                error_message="invalid_upload_reference",
+                error_input=str(input_name),
+            )
+            raise WorkflowPreparationError(response, 400)
 
     workflow_id = payload.get("workflowId")
     definition = get_workflow(workflow_id or "")
@@ -381,6 +430,149 @@ async def interrupt_workflow(
             await session_to_use.close()
 
 
+def _queue_location(queue: Mapping[str, Any], prompt_id: str) -> str | None:
+    """Return an exact queue location, or ``unknown`` for malformed data."""
+
+    found = None
+    for queue_name, location in (
+        ("queue_running", "running"),
+        ("queue_pending", "pending"),
+    ):
+        items = queue.get(queue_name)
+        if not isinstance(items, (list, tuple)):
+            return "unknown"
+        for item in items:
+            if not isinstance(item, (list, tuple)) or len(item) < 2:
+                return "unknown"
+            if item[1] == prompt_id:
+                found = location
+    return found
+
+
+async def _cancel_result_location(
+    session: aiohttp.ClientSession,
+    comfy_url: str,
+    prompt_id: str,
+) -> str:
+    if await _has_terminal_history(session, comfy_url, prompt_id):
+        return CANCEL_OUTCOME_TERMINAL
+
+    async with session.get(f"{comfy_url}/queue") as queue_resp:
+        queue_resp.raise_for_status()
+        queue = await queue_resp.json()
+    location = _queue_location(queue, prompt_id) if isinstance(queue, Mapping) else "unknown"
+    if location == "running":
+        return CANCEL_OUTCOME_RUNNING
+    if location == "pending":
+        return CANCEL_OUTCOME_NOOP
+    if location is None:
+        # History and queue are separate HTTP snapshots. A running prompt may
+        # finish between the first history read and this queue read; Comfy adds
+        # history atomically when it removes the running entry, so one final
+        # exact history read closes that TOCTOU before we classify a dequeue.
+        if await _has_terminal_history(session, comfy_url, prompt_id):
+            return CANCEL_OUTCOME_TERMINAL
+        # The Core endpoint reported that it acted, both queue lists prove
+        # absence, and exact history was absent on both sides of that snapshot.
+        # This is terminal proof for a dequeued pending prompt.
+        return CANCEL_OUTCOME_PENDING
+    return CANCEL_OUTCOME_RUNNING
+
+
+async def _has_terminal_history(
+    session: aiohttp.ClientSession,
+    comfy_url: str,
+    prompt_id: str,
+) -> bool:
+    """Return whether Comfy history proves this exact prompt is terminal."""
+
+    async with session.get(f"{comfy_url}/history/{quote(prompt_id, safe='')}") as history_resp:
+        history_resp.raise_for_status()
+        history = await history_resp.json()
+    return isinstance(history, Mapping) and isinstance(history.get(prompt_id), Mapping)
+
+
+async def cancel_workflow(
+    prompt_id: str,
+    *,
+    comfy_url: str = "http://127.0.0.1:8188",
+    session: aiohttp.ClientSession | None = None,
+) -> str:
+    """Cancel exactly one current ComfyUI job, pending or running.
+
+    Current ComfyUI exposes the state-agnostic Core jobs endpoint. Older
+    backends get only the compatibility operation that remains demonstrably
+    exact: deleting an observed pending prompt by id. LF never falls back to a
+    global interrupt or to an endpoint whose target semantics cannot be
+    established.
+    """
+
+    if not isinstance(prompt_id, str) or not prompt_id:
+        raise ValueError("prompt_id must be non-empty")
+
+    session_to_use = session
+    should_close_session = session_to_use is None
+    if session_to_use is None:
+        session_to_use = aiohttp.ClientSession()
+    try:
+        core_available = True
+        async with session_to_use.post(
+            f"{comfy_url}/api/jobs/{quote(prompt_id, safe='')}/cancel"
+        ) as response:
+            if response.status in {404, 405}:
+                core_available = False
+            else:
+                response.raise_for_status()
+                body = await response.json()
+                if not isinstance(body, Mapping) or type(body.get("cancelled")) is not bool:
+                    raise RuntimeError("ComfyUI returned an invalid job cancellation response")
+                if body["cancelled"] is False:
+                    # The exact endpoint is deliberately idempotent. A false
+                    # result can mean the worker reached history just before
+                    # this request; preserve that terminal race rather than
+                    # surfacing a misleading cancellation rejection.
+                    if await _has_terminal_history(
+                        session_to_use,
+                        comfy_url,
+                        prompt_id,
+                    ):
+                        return CANCEL_OUTCOME_TERMINAL
+                    return CANCEL_OUTCOME_NOOP
+
+        if core_available:
+            return await _cancel_result_location(
+                session_to_use,
+                comfy_url,
+                prompt_id,
+            )
+
+        async with session_to_use.get(f"{comfy_url}/queue") as queue_resp:
+            queue_resp.raise_for_status()
+            before_queue = await queue_resp.json()
+        before = (
+            _queue_location(before_queue, prompt_id)
+            if isinstance(before_queue, Mapping)
+            else "unknown"
+        )
+        if before != "pending":
+            return CANCEL_OUTCOME_UNSUPPORTED if before == "running" else CANCEL_OUTCOME_NOOP
+
+        async with session_to_use.post(
+            f"{comfy_url}/queue",
+            headers={"Content-Type": "application/json"},
+            data=json.dumps({"delete": [prompt_id]}),
+        ) as delete_response:
+            delete_response.raise_for_status()
+
+        outcome = await _cancel_result_location(session_to_use, comfy_url, prompt_id)
+        # A pending->running race cannot use legacy /interrupt safely because
+        # old servers may interpret it globally. Fail closed for that case.
+        return CANCEL_OUTCOME_UNSUPPORTED if outcome == CANCEL_OUTCOME_RUNNING else outcome
+    finally:
+        if should_close_session and session_to_use:
+            await session_to_use.close()
+
+
 async def prepare_workflow_submission(
     payload: Dict[str, Any],
     prepared: Tuple[WorkflowNode, Dict[str, Any]] | None = None,
@@ -614,30 +806,50 @@ async def finalize_workflow(
 
     preferred_output = None
     try:
-        outputs_in_history = set((history_entry.get("outputs") or {}).keys())
+        history_output_map = history_entry.get("outputs") or {}
+        outputs_in_history = set(history_output_map.keys())
         validated_outputs = (validation[2] if isinstance(validation, (list, tuple)) and len(validation) > 2 else [])
+
+        def has_media_artifact(output_value: Any) -> bool:
+            return isinstance(output_value, dict) and any(
+                output_value.get(bucket)
+                for bucket in ("images", "lf_images", "audio", "audios")
+            )
+
+        # Validation order can put observational LF output nodes before the
+        # durable saver that consumes them. Prefer a real media artifact so
+        # history cards and legacy consumers do not select an expiring temp
+        # dataset preview or a JSON diagnostic as the workflow's main output.
         for output_name in validated_outputs:
-            if output_name in outputs_in_history:
+            if output_name in outputs_in_history and has_media_artifact(
+                history_output_map.get(output_name)
+            ):
                 preferred_output = output_name
                 break
         if preferred_output is None:
-            for output_name, output_value in (history_entry.get("outputs") or {}).items():
+            for output_name, output_value in history_output_map.items():
                 try:
-                    if isinstance(output_value, dict) and (
-                        output_value.get("images")
-                        or output_value.get("lf_images")
-                        or output_value.get("audio")
-                        or output_value.get("audios")
-                    ):
+                    if has_media_artifact(output_value):
                         preferred_output = output_name
                         break
                 except Exception:
                     continue
+        if preferred_output is None:
+            for output_name in validated_outputs:
+                if output_name in outputs_in_history:
+                    preferred_output = output_name
+                    break
     except Exception:
         preferred_output = None
 
     sanitized = _sanitize_history(history_entry)
     history_outputs = sanitized.get("outputs", {}) if isinstance(sanitized, dict) else {}
+    if _history_was_interrupted(history_entry):
+        response = _make_run_payload(
+            detail="cancelled",
+            history={"outputs": history_outputs},
+        )
+        return JobStatus.CANCELLED, response, 200
     if status_str == "success":
         response = _make_run_payload(detail="success", history={"outputs": history_outputs}, preferred_output=preferred_output)
         return JobStatus.SUCCEEDED, response, http_status

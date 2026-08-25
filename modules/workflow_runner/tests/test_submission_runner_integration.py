@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import importlib.util
 import sys
 
@@ -28,8 +29,18 @@ def run_service_module():
     module_path = Path(__file__).resolve().parents[1] / "services" / "run_service.py"
 
     executor_stub = ModuleType("modules.workflow_runner.services.executor")
+    class WorkflowPreparationError(RuntimeError):
+        pass
+
+    executor_stub.WorkflowPreparationError = WorkflowPreparationError
+    executor_stub.CANCEL_OUTCOME_NOOP = "noop"
+    executor_stub.CANCEL_OUTCOME_PENDING = "pending_cancelled"
+    executor_stub.CANCEL_OUTCOME_RUNNING = "running_cancel_requested"
+    executor_stub.CANCEL_OUTCOME_TERMINAL = "terminal"
+    executor_stub.CANCEL_OUTCOME_UNSUPPORTED = "unsupported"
     executor_stub._make_run_payload = Mock(return_value={})
     executor_stub._prepare_workflow_execution = Mock()
+    executor_stub.cancel_workflow = AsyncMock()
     executor_stub.drain_workflow = AsyncMock()
     executor_stub.finalize_workflow = AsyncMock()
     executor_stub.interrupt_workflow = AsyncMock()
@@ -115,7 +126,11 @@ async def test_run_replay_with_stable_id_does_not_submit_twice(run_service_modul
         run_service,
         "create_job",
         new=AsyncMock(return_value=SimpleNamespace(id="prompt-1")),
-    ), patch.object(run_service, "_schedule_worker", side_effect=close_worker):
+    ) as create_job, patch.object(
+        run_service,
+        "_schedule_worker",
+        side_effect=close_worker,
+    ):
         first = await run_service.run_workflow(payload)
         replay = await run_service.run_workflow(payload)
 
@@ -126,6 +141,11 @@ async def test_run_replay_with_stable_id_does_not_submit_twice(run_service_modul
     assert replay["idempotent_replay"] is True
     prepare.assert_called_once_with(payload)
     admission.submit.assert_awaited_once()
+    assert create_job.await_args.kwargs["submission_id"] == payload["submissionId"]
+    assert create_job.await_args.kwargs["request_fingerprint"] == (
+        lifecycle._fingerprint_payload(payload)
+    )
+    assert create_job.await_args.kwargs["comfy_url"] == request.comfy_url
 
 
 async def test_run_replay_does_not_depend_on_mutable_workflow_preparation(
@@ -178,6 +198,75 @@ async def test_run_replay_does_not_depend_on_mutable_workflow_preparation(
     assert replay["run_id"] == "prompt-replay"
     assert replay["idempotent_replay"] is True
     prepare.assert_called_once_with(payload)
+    admission.submit.assert_awaited_once()
+
+
+async def test_stable_replay_does_not_revalidate_an_expired_upload_reference(
+    run_service_module,
+):
+    run_service = run_service_module
+    request = _submission()
+    context = WorkflowPromptContext(
+        prompt_id="prompt-upload-replay",
+        client_id=request.client_id,
+        comfy_url=request.comfy_url,
+        prompt=request.prompt,
+        validation=request.validation,
+        workflow_id=request.workflow_id,
+    )
+    admission = SimpleNamespace(submit=AsyncMock(return_value=context))
+    payload = {
+        "workflowId": "remove_bg",
+        "submissionId": "example:remove-bg:upload-001",
+        "inputs": {
+            "image": {
+                "schema": "lf.workflow-upload-ref.v1",
+                "sourceRunId": "source-run",
+                "inputId": "image",
+            }
+        },
+    }
+    effective_payload = {
+        **payload,
+        "inputs": {"image": "C:/ComfyUI/temp/reference.png"},
+    }
+
+    def close_worker(worker, _prompt_id):
+        worker.close()
+        return True
+
+    materialize = AsyncMock(return_value=effective_payload)
+    prepare = Mock(return_value=(SimpleNamespace(), request.prompt))
+    with patch.object(
+        run_service,
+        "materialize_upload_references",
+        new=materialize,
+    ), patch.object(
+        run_service,
+        "_prepare_workflow_execution",
+        new=prepare,
+    ), patch.object(
+        run_service,
+        "prepare_workflow_submission",
+        new=AsyncMock(return_value=request),
+    ), patch.object(
+        run_service,
+        "acquire_workflow_admission",
+        new=AsyncMock(return_value=admission),
+    ), patch.object(
+        run_service,
+        "create_job",
+        new=AsyncMock(return_value=SimpleNamespace(id="prompt-upload-replay")),
+    ), patch.object(run_service, "_schedule_worker", side_effect=close_worker):
+        first = await run_service.run_workflow(payload)
+        materialize.side_effect = RuntimeError("source upload expired")
+        replay = await run_service.run_workflow(payload)
+
+    assert first["run_id"] == "prompt-upload-replay"
+    assert replay["run_id"] == "prompt-upload-replay"
+    assert replay["idempotent_replay"] is True
+    materialize.assert_awaited_once_with(payload, None)
+    prepare.assert_called_once_with(effective_payload)
     admission.submit.assert_awaited_once()
 
 
@@ -251,12 +340,12 @@ async def test_targeted_cancel_uses_exact_running_prompt_and_is_idempotent(run_s
     await job_store.create_job("prompt-cancel-001", "remove_bg")
     await job_store.set_job_status("prompt-cancel-001", job_store.JobStatus.RUNNING)
 
-    interrupt = AsyncMock(return_value=True)
-    with patch.object(run_service, "interrupt_workflow", new=interrupt):
+    cancel = AsyncMock(return_value=run_service.CANCEL_OUTCOME_RUNNING)
+    with patch.object(run_service, "cancel_workflow", new=cancel):
         first = await run_service.cancel_workflow_submission("example:cancel:001")
         replay = await run_service.cancel_workflow_submission("example:cancel:001")
 
-    interrupt.assert_awaited_once_with(
+    cancel.assert_awaited_once_with(
         "prompt-cancel-001",
         comfy_url="http://comfy:8188",
     )
@@ -264,7 +353,57 @@ async def test_targeted_cancel_uses_exact_running_prompt_and_is_idempotent(run_s
     assert replay["event_count"] == first["event_count"]
 
 
-async def test_targeted_cancel_rejects_pending_prompt_without_interrupting(run_service_module):
+@pytest.mark.parametrize("anyio_backend", ["asyncio"])
+async def test_concurrent_cancel_requests_share_one_exact_core_operation(
+    run_service_module,
+    anyio_backend,
+):
+    run_service = run_service_module
+    payload = {
+        "workflowId": "remove_bg",
+        "submissionId": "example:cancel-concurrent:001",
+        "inputs": {},
+    }
+    await lifecycle.reserve_submission(payload, "remove_bg")
+    await lifecycle.bind_prompt(
+        "example:cancel-concurrent:001",
+        "prompt-cancel-concurrent",
+        "http://comfy:8188",
+    )
+    await lifecycle.record_running("prompt-cancel-concurrent")
+    await job_store.create_job("prompt-cancel-concurrent", "remove_bg")
+    await job_store.set_job_status(
+        "prompt-cancel-concurrent",
+        job_store.JobStatus.RUNNING,
+    )
+
+    release = asyncio.Event()
+
+    async def cancel_once(*_args, **_kwargs):
+        await release.wait()
+        return run_service.CANCEL_OUTCOME_RUNNING
+
+    cancel = AsyncMock(side_effect=cancel_once)
+    with patch.object(run_service, "cancel_workflow", new=cancel):
+        first = asyncio.create_task(
+            run_service.cancel_workflow_submission("example:cancel-concurrent:001")
+        )
+        second = asyncio.create_task(
+            run_service.cancel_workflow_submission("example:cancel-concurrent:001")
+        )
+        await asyncio.sleep(0)
+        release.set()
+        first_result, second_result = await asyncio.gather(first, second)
+
+    cancel.assert_awaited_once_with(
+        "prompt-cancel-concurrent",
+        comfy_url="http://comfy:8188",
+    )
+    assert first_result == second_result
+    assert first_result["cancel_requested"] is True
+
+
+async def test_targeted_cancel_marks_exactly_dequeued_pending_prompt_cancelled(run_service_module):
     run_service = run_service_module
     payload = {
         "workflowId": "remove_bg",
@@ -279,14 +418,221 @@ async def test_targeted_cancel_rejects_pending_prompt_without_interrupting(run_s
     )
     await job_store.create_job("prompt-pending-001", "remove_bg")
 
-    interrupt = AsyncMock(return_value=True)
-    with patch.object(run_service, "interrupt_workflow", new=interrupt):
-        with pytest.raises(run_service.WorkflowCancellationError) as error:
-            await run_service.cancel_workflow_submission("example:pending:001")
+    cancel = AsyncMock(return_value=run_service.CANCEL_OUTCOME_PENDING)
+    with patch.object(run_service, "cancel_workflow", new=cancel):
+        snapshot = await run_service.cancel_workflow_submission("example:pending:001")
+        replay = await run_service.cancel_workflow_submission("example:pending:001")
 
-    assert error.value.detail == "submission_not_running"
-    assert error.value.status == 409
-    interrupt.assert_not_awaited()
+    cancel.assert_awaited_once_with(
+        "prompt-pending-001",
+        comfy_url="http://comfy:8188",
+    )
+    assert snapshot["status"] == "cancelled"
+    assert snapshot["cancel_requested"] is True
+    assert replay["status"] == "cancelled"
+    job = await job_store.get_job("prompt-pending-001")
+    assert job is not None
+    assert job.status == job_store.JobStatus.CANCELLED
+
+
+async def test_pending_dequeue_corrects_only_reconciler_state_loss(run_service_module):
+    run_service = run_service_module
+    submission_id = "example:pending-reconcile-race:001"
+    prompt_id = "prompt-pending-reconcile-race"
+    payload = {
+        "workflowId": "remove_bg",
+        "submissionId": submission_id,
+        "inputs": {},
+    }
+    await lifecycle.reserve_submission(payload, "remove_bg")
+    await lifecycle.bind_prompt(
+        submission_id,
+        prompt_id,
+        "http://comfy:8188",
+    )
+    await job_store.create_job(prompt_id, "remove_bg")
+
+    async def dequeue_after_synthetic_failure(*_args, **_kwargs):
+        await job_store.set_job_status(
+            prompt_id,
+            job_store.JobStatus.FAILED,
+            error="execution_state_lost",
+        )
+        await lifecycle.record_terminal(
+            prompt_id,
+            "failed",
+            error="execution_state_lost",
+        )
+        return run_service.CANCEL_OUTCOME_PENDING
+
+    with patch.object(
+        run_service,
+        "cancel_workflow",
+        new=AsyncMock(side_effect=dequeue_after_synthetic_failure),
+    ):
+        snapshot = await run_service.cancel_workflow_submission(submission_id)
+
+    assert snapshot["status"] == "cancelled"
+    assert snapshot["cancel_requested"] is True
+    assert snapshot["error"] is None
+    job = await job_store.get_job(prompt_id)
+    assert job is not None
+    assert job.status == job_store.JobStatus.CANCELLED
+    assert job.error is None
+    with_events = await lifecycle.get_submission(submission_id)
+    assert with_events is not None
+    assert with_events["events"][-1]["type"] == "execution_state_lost_corrected"
+    assert with_events["events"][-1]["details"]["previous_error"] == "execution_state_lost"
+    assert prompt_id not in run_service._PROVEN_PENDING_CANCELLATIONS
+
+
+async def test_pending_dequeue_never_relabels_a_genuine_failure(run_service_module):
+    run_service = run_service_module
+    submission_id = "example:pending-real-failure-race:001"
+    prompt_id = "prompt-pending-real-failure-race"
+    payload = {
+        "workflowId": "remove_bg",
+        "submissionId": submission_id,
+        "inputs": {},
+    }
+    await lifecycle.reserve_submission(payload, "remove_bg")
+    await lifecycle.bind_prompt(submission_id, prompt_id, "http://comfy:8188")
+    await job_store.create_job(prompt_id, "remove_bg")
+
+    async def contradictory_terminal(*_args, **_kwargs):
+        await job_store.set_job_status(
+            prompt_id,
+            job_store.JobStatus.FAILED,
+            error="execution_failed",
+        )
+        await lifecycle.record_terminal(
+            prompt_id,
+            "failed",
+            error="execution_failed",
+        )
+        return run_service.CANCEL_OUTCOME_PENDING
+
+    with patch.object(
+        run_service,
+        "cancel_workflow",
+        new=AsyncMock(side_effect=contradictory_terminal),
+    ):
+        snapshot = await run_service.cancel_workflow_submission(submission_id)
+
+    assert snapshot["status"] == "failed"
+    assert snapshot["cancel_requested"] is False
+    assert snapshot["error"] == "execution_failed"
+    job = await job_store.get_job(prompt_id)
+    assert job is not None
+    assert job.status == job_store.JobStatus.FAILED
+    assert job.error == "execution_failed"
+
+
+@pytest.mark.parametrize("anyio_backend", ["asyncio"])
+async def test_pending_cancel_wakes_supervisor_when_status_publish_fails(
+    run_service_module,
+    anyio_backend,
+):
+    run_service = run_service_module
+    payload = {
+        "workflowId": "remove_bg",
+        "submissionId": "example:pending-write-failure:001",
+        "inputs": {},
+    }
+    prompt_id = "prompt-pending-write-failure"
+    await lifecycle.reserve_submission(payload, "remove_bg")
+    await lifecycle.bind_prompt(
+        "example:pending-write-failure:001",
+        prompt_id,
+        "http://comfy:8188",
+    )
+    await job_store.create_job(prompt_id, "remove_bg")
+
+    started = asyncio.Event()
+
+    async def wait_for_history(*_args, **_kwargs):
+        started.set()
+        await asyncio.Event().wait()
+
+    admission = SimpleNamespace(release=AsyncMock())
+    real_cas_status = run_service.set_job_status_if_unchanged
+    publish_calls = 0
+
+    async def fail_first_publish(*args, **kwargs):
+        nonlocal publish_calls
+        publish_calls += 1
+        if publish_calls == 1:
+            raise RuntimeError("store unavailable")
+        return await real_cas_status(*args, **kwargs)
+
+    with patch.object(
+        run_service,
+        "cancel_workflow",
+        new=AsyncMock(return_value=run_service.CANCEL_OUTCOME_PENDING),
+    ), patch.object(
+        run_service,
+        "finalize_workflow",
+        new=AsyncMock(side_effect=wait_for_history),
+    ), patch.object(
+        run_service,
+        "set_job_status_if_unchanged",
+        new=AsyncMock(side_effect=fail_first_publish),
+    ):
+        supervisor = asyncio.create_task(
+            run_service._finalize_admitted_workflow(
+                prompt_id=prompt_id,
+                client_id="client-1",
+                comfy_url="http://comfy:8188",
+                validation=(True, "", [], []),
+                admission=admission,
+                submission_id="example:pending-write-failure:001",
+            )
+        )
+        run_service._WORKERS_BY_PROMPT[prompt_id] = supervisor
+        await started.wait()
+
+        with pytest.raises(RuntimeError, match="store unavailable"):
+            await run_service.cancel_workflow_submission(
+                "example:pending-write-failure:001"
+            )
+
+        await supervisor
+
+    snapshot = await lifecycle.get_submission(
+        "example:pending-write-failure:001",
+        include_events=False,
+    )
+    job = await job_store.get_job(prompt_id)
+    assert snapshot is not None and snapshot["status"] == "cancelled"
+    assert job is not None and job.status == job_store.JobStatus.CANCELLED
+    assert admission.release.await_args.args[0].status == "cancelled"
+
+
+async def test_terminal_cancel_race_is_idempotent_without_relabelling_intent(run_service_module):
+    run_service = run_service_module
+    payload = {
+        "workflowId": "remove_bg",
+        "submissionId": "example:terminal-race:001",
+        "inputs": {},
+    }
+    await lifecycle.reserve_submission(payload, "remove_bg")
+    await lifecycle.bind_prompt(
+        "example:terminal-race:001",
+        "prompt-terminal-race",
+        "http://comfy:8188",
+    )
+    await lifecycle.record_running("prompt-terminal-race")
+    await job_store.create_job("prompt-terminal-race", "remove_bg")
+    await job_store.set_job_status("prompt-terminal-race", job_store.JobStatus.RUNNING)
+
+    cancel = AsyncMock(return_value=run_service.CANCEL_OUTCOME_TERMINAL)
+    with patch.object(run_service, "cancel_workflow", new=cancel):
+        snapshot = await run_service.cancel_workflow_submission(
+            "example:terminal-race:001"
+        )
+
+    assert snapshot["status"] == "running"
+    assert snapshot["cancel_requested"] is False
 
 
 async def test_cancel_request_does_not_relabel_proven_failure(run_service_module):

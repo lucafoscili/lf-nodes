@@ -1,6 +1,11 @@
 {
   "apiBase": "/api",
   "apiRoutePrefix": "/lf-nodes",
+  "runtime": {
+    "comfyUiProtocol": "http:",
+    "comfyUiPort": 8188,
+    "frontendProxyPort": 9188
+  },
   "chat": {
     "provider": "kobold",
     "useProxy": true

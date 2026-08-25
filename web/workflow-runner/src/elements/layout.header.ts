@@ -144,7 +144,7 @@ export const createHeaderSection = (store: WorkflowStore): WorkflowSectionContro
   //#region Render
   const render = () => {
     const { alertTriangle, check, hourglassLow } = theme.get.icons();
-    const { current, manager, queuedJobs, currentRunId } = store.getState();
+    const { current, manager, queuedJobs, currentRunId, runs } = store.getState();
     const { message, status } = current;
     const { uiRegistry } = manager;
 
@@ -197,9 +197,15 @@ export const createHeaderSection = (store: WorkflowStore): WorkflowSectionContro
 
       let displayMessage = message || '';
       if (currentRunId) {
-        const parts = currentRunId.split('-');
-        const prefix = parts[0] || currentRunId.slice(0, 8);
-        displayMessage = `Processing ${prefix}`;
+        const run = runs.find((entry) => entry.runId === currentRunId);
+        const prefix = currentRunId.slice(0, 8);
+        const submission = run?.submissionId ? ` · ${run.submissionId.slice(0, 16)}` : '';
+        const activity = run?.cancelRequested
+          ? 'Stopping'
+          : run?.status === 'pending'
+            ? 'Queued'
+            : 'Running';
+        displayMessage = `${activity} ${prefix}${submission}`;
       }
 
       appMessage.innerText = displayMessage;

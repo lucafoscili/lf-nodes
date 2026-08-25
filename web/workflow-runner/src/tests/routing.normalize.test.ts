@@ -23,6 +23,7 @@ describe('routing.normalize', () => {
       runs: [
         {
           runId: 'run-1',
+          artifacts: [],
           createdAt: 0,
           updatedAt: 1,
           status: 'running',

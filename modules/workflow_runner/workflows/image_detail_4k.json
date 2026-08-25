@@ -1,0 +1,74 @@
+{
+  "load_image": {
+    "inputs": {"image": ""},
+    "class_type": "LoadImage",
+    "_meta": {"title": "Load image to reconstruct at 4K"}
+  },
+  "join_alpha": {
+    "inputs": {
+      "image": ["load_image", 0],
+      "alpha": ["load_image", 1]
+    },
+    "class_type": "JoinImageWithAlpha",
+    "_meta": {"title": "Preserve source transparency"}
+  },
+  "dit": {
+    "inputs": {
+      "model": "seedvr2_ema_3b_fp8_e4m3fn.safetensors",
+      "device": "cuda:0",
+      "blocks_to_swap": 16,
+      "swap_io_components": false,
+      "offload_device": "cpu",
+      "cache_model": false,
+      "attention_mode": "sdpa"
+    },
+    "class_type": "SeedVR2LoadDiTModel",
+    "_meta": {"title": "Load conservative SeedVR2 3B FP8 detail model"}
+  },
+  "vae": {
+    "inputs": {
+      "model": "ema_vae_fp16.safetensors",
+      "device": "cuda:0",
+      "encode_tiled": true,
+      "encode_tile_size": 1024,
+      "encode_tile_overlap": 128,
+      "decode_tiled": true,
+      "decode_tile_size": 1024,
+      "decode_tile_overlap": 128,
+      "tile_debug": "false",
+      "offload_device": "cpu",
+      "cache_model": false
+    },
+    "class_type": "SeedVR2LoadVAEModel",
+    "_meta": {"title": "Load tiled SeedVR2 VAE"}
+  },
+  "detail_4k": {
+    "inputs": {
+      "image": ["join_alpha", 0],
+      "dit": ["dit", 0],
+      "vae": ["vae", 0],
+      "seed": 42,
+      "resolution": 3840,
+      "max_resolution": 3840,
+      "batch_size": 1,
+      "uniform_batch_size": false,
+      "color_correction": "lab",
+      "temporal_overlap": 0,
+      "prepend_frames": 0,
+      "input_noise_scale": 0.0,
+      "latent_noise_scale": 0.0,
+      "offload_device": "cpu",
+      "enable_debug": false
+    },
+    "class_type": "SeedVR2VideoUpscaler",
+    "_meta": {"title": "Diffusion-reconstruct image at a 4K long edge"}
+  },
+  "save": {
+    "inputs": {
+      "filename_prefix": "LF_Nodes/4KDetail/UHD-3840/seed-42",
+      "images": ["detail_4k", 0]
+    },
+    "class_type": "SaveImage",
+    "_meta": {"title": "Save 4K detail result"}
+  }
+}

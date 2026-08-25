@@ -200,6 +200,102 @@ describe('LfWorkflowRunnerManager - Client Integration', () => {
     expect(run?.status).toBe('succeeded');
   });
 
+  it('preserves a run deep link until cold-loaded runs are available', async () => {
+    const replaceState = vi.mocked(mockWindow.history.replaceState);
+    replaceState.mockClear();
+    vi.stubGlobal('window', {
+      ...mockWindow,
+      location: {
+        ...mockWindow.location,
+        search: '?workflowId=wf-1&runId=run-1&view=run',
+      },
+    });
+
+    const runResponse = {
+      ok: true,
+      json: () =>
+        Promise.resolve({
+          runs: [
+            {
+              run_id: 'run-1',
+              workflow_id: 'wf-1',
+              status: 'succeeded',
+              seq: 5,
+              created_at: 1,
+              updated_at: 2,
+            },
+          ],
+        }),
+    };
+    let resolveRuns!: (response: typeof runResponse) => void;
+    let markRunsRequested!: () => void;
+    const runsRequested = new Promise<void>((resolve) => {
+      markRunsRequested = resolve;
+    });
+    const delayedRuns = new Promise<typeof runResponse>((resolve) => {
+      resolveRuns = resolve;
+    });
+
+    makeFetchMock((url) => {
+      if (url.includes('/workflows')) {
+        return Promise.resolve({
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              workflows: {
+                nodes: [{ id: 'wf-1', name: 'Test Workflow 1' }],
+              },
+            }),
+        });
+      }
+      if (url.includes('/workflow-runner/runs')) {
+        markRunsRequested();
+        return delayedRuns;
+      }
+      if (url.includes('/run/run-1/status')) {
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: () =>
+            Promise.resolve({
+              run_id: 'run-1',
+              workflow_id: 'wf-1',
+              status: 'succeeded',
+              seq: 5,
+              created_at: 1,
+              updated_at: 2,
+            }),
+        });
+      }
+      return Promise.resolve({ ok: false, status: 404, json: () => Promise.resolve({}) });
+    });
+
+    const manager = new LfWorkflowRunnerManager();
+    try {
+      await runsRequested;
+
+      expect(replaceState).toHaveBeenCalledTimes(0);
+
+      resolveRuns(runResponse);
+      await vi.waitFor(() => {
+        expect(manager.getStore().getState().view).toBe('run');
+      });
+
+      const state = manager.getStore().getState();
+      expect(state.current.id).toBe('wf-1');
+      expect(state.selectedRunId).toBe('run-1');
+
+      const routeUrl = String(replaceState.mock.calls.at(-1)?.[2] ?? '');
+      const routeParams = new URL(routeUrl, 'http://localhost').searchParams;
+      expect(routeParams.get('workflowId')).toBe('wf-1');
+      expect(routeParams.get('runId')).toBe('run-1');
+      expect(routeParams.get('view')).toBe('run');
+    } finally {
+      resolveRuns(runResponse);
+      manager.uiRegistry.delete();
+    }
+  });
+
   it('should preload workflow names into client', async () => {
     const manager = new LfWorkflowRunnerManager();
 

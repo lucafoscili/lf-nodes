@@ -78,6 +78,7 @@ describe('workflowDispatcher select inputs', () => {
     expect(runWorkflow).toHaveBeenCalledWith({
       workflowId: 'qwen-edit',
       inputs: { sampler: expected },
+      submissionId: expect.stringMatching(/^lf-web:/),
     });
     expect(inputStatus).toHaveBeenCalledWith('sampler', '');
   });

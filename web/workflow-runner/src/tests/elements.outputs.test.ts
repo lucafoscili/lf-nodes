@@ -39,6 +39,7 @@ vi.mock('../handlers/button', () => ({
   buttonHandler: vi.fn(),
 }));
 vi.mock('../handlers/masonry', () => ({
+  masonryClickFallback: vi.fn(),
   masonryHandler: vi.fn(),
 }));
 
@@ -200,6 +201,10 @@ describe('createOutputsSection', () => {
         OUTPUTS_CLASSES.toggle,
         expect.any(HTMLElement),
       );
+      expect(mockUIRegistry.set).toHaveBeenCalledWith(
+        OUTPUTS_CLASSES.cleanup,
+        expect.any(HTMLElement),
+      );
     });
 
     it('should create masonry element', () => {
@@ -235,6 +240,7 @@ describe('createOutputsSection', () => {
 
     beforeEach(() => {
       mockElements = {
+        [OUTPUTS_CLASSES.cleanup]: document.createElement('lf-button'),
         [OUTPUTS_CLASSES.h4]: document.createElement('h4'),
         [OUTPUTS_CLASSES.masonry]: document.createElement('lf-masonry'),
         [OUTPUTS_CLASSES.toggle]: document.createElement('lf-button'),
@@ -370,6 +376,24 @@ describe('createOutputsSection', () => {
       expect(toggle.lfIcon).toBe('arrow-back');
       expect(toggle.lfLabel).toBe('Back');
       expect(toggle.lfUiState).toBe('primary');
+    });
+
+    it('shows the cleanup control only in history view', () => {
+      const controller = createOutputsSection(mockStore);
+      controller.render();
+
+      const cleanup = mockElements[OUTPUTS_CLASSES.cleanup] as any;
+      expect(cleanup.hidden).toBe(true);
+      expect(cleanup.lfUiState).toBe('disabled');
+
+      mockStore.getState.mockReturnValue({
+        ...mockStore.getState(),
+        view: 'history',
+      });
+      controller.render();
+
+      expect(cleanup.hidden).toBe(false);
+      expect(cleanup.lfUiState).toBe('danger');
     });
 
     it('should enable toggle button when runs exist', () => {

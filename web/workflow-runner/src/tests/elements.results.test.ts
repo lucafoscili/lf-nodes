@@ -252,6 +252,10 @@ describe('createResultsSection', () => {
         [RESULTS_CLASSES.h3]: document.createElement('h3'),
         [RESULTS_CLASSES.back]: document.createElement('lf-button'),
         [RESULTS_CLASSES.history]: document.createElement('lf-button'),
+        [RESULTS_CLASSES.handoff]: document.createElement('section'),
+        [RESULTS_CLASSES.handoffArtifact]: document.createElement('select'),
+        [RESULTS_CLASSES.remix]: document.createElement('lf-button'),
+        [RESULTS_CLASSES.useOutput]: document.createElement('lf-button'),
       };
 
       mockUIRegistry.get.mockReturnValue(mockElements);
@@ -334,6 +338,68 @@ describe('createResultsSection', () => {
 
       const historyButton = mockElements[RESULTS_CLASSES.history] as any;
       expect(historyButton.lfUiState).toBe('primary');
+    });
+
+    it('offers an available output only to compatible ready workflow inputs', () => {
+      const selectedRun = {
+        runId: 'run-source',
+        artifacts: [
+          {
+            schema: 'lf.workflow-artifact.v1',
+            reference: {
+              schema: 'lf.workflow-artifact-ref.v1',
+              sourceRunId: 'run-source',
+              artifactId: 'a'.repeat(64),
+              filename: 'candidate.png',
+            },
+            filename: 'candidate.png',
+            nodeId: 'save',
+            mediaType: 'image/png',
+            available: true,
+          },
+        ],
+        status: 'succeeded',
+        inputs: {},
+        outputs: null,
+        error: null,
+      } as unknown as WorkflowRunEntry;
+      mockRunsManager.selected.mockReturnValue(selectedRun);
+      mockStore.getState.mockReturnValue({
+        ...mockStore.getState(),
+        workflows: {
+          nodes: [
+            {
+              id: 'compare',
+              value: 'Compare images',
+              category: 'Image Processing',
+              readiness: { status: 'ready', issues: [] },
+              children: [
+                {
+                  id: 'compare:inputs',
+                  value: 'Inputs',
+                  cells: {
+                    image_a: {
+                      id: 'image_a',
+                      nodeId: 'load',
+                      value: 'Image A',
+                      shape: 'upload',
+                      props: { lfHtmlAttributes: { accept: 'image/*' } },
+                    },
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      });
+
+      createResultsSection(mockStore).render();
+
+      const button = mockElements[RESULTS_CLASSES.useOutput] as HTMLLfButtonElement;
+      const select = mockElements[RESULTS_CLASSES.handoffArtifact] as HTMLSelectElement;
+      expect(button.hidden).toBe(false);
+      expect(button.lfUiState).toBe('primary');
+      expect(select.options[0].textContent).toBe('candidate.png');
     });
 
     it('should show empty message when no outputs', () => {

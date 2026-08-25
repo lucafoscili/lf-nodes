@@ -328,7 +328,7 @@ describe('Header Element', () => {
       const elements = mockManager.uiRegistry.get();
       const appMessage = elements['header-section-app-message'];
 
-      expect(appMessage.innerText).toBe('Processing abc123');
+      expect(appMessage.innerText).toBe('Running abc123-d');
       expect(appMessage.dataset.status).toBe('running');
       expect(appMessage.dataset.visible).toBe('true');
     });

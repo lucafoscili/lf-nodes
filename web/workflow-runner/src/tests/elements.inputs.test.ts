@@ -4,6 +4,15 @@ import { createInputsSection } from '../elements/main.inputs';
 import { INPUTS_CLASSES } from '../elements/main.inputs';
 import { MAIN_CLASSES } from '../elements/layout.main';
 import { WorkflowCellInput } from '../types/api';
+import { createInputCell } from '../elements/components';
+import {
+  getRetainedUploadPrefill,
+  setRetainedUploadPrefill,
+} from '../utils/input-prefill';
+import {
+  getWorkflowSessionDraft,
+  replaceWorkflowSessionDraft,
+} from '../utils/session-drafts';
 
 // Mock the LF framework
 vi.mock('@lf-widgets/framework', () => ({
@@ -182,6 +191,57 @@ describe('createInputsSection', () => {
         INPUTS_CLASSES.openButton,
         expect.any(HTMLElement),
       );
+      expect(mockUIRegistry.set).toHaveBeenCalledWith(
+        INPUTS_CLASSES.resetButton,
+        expect.any(HTMLElement),
+      );
+    });
+
+    it('Reset remounts declaration defaults and clears only this workflow draft', () => {
+      const registry: Record<string, HTMLElement | HTMLElement[]> = {
+        [MAIN_CLASSES._]: mockMainElement,
+      };
+      mockUIRegistry.get.mockImplementation(() => registry);
+      mockUIRegistry.set.mockImplementation((key: string, value: HTMLElement | HTMLElement[]) => {
+        registry[key] = value;
+      });
+      mockUIRegistry.remove.mockImplementation((key: string) => {
+        const value = registry[key];
+        if (value && !Array.isArray(value)) {
+          value.remove();
+        }
+        delete registry[key];
+      });
+      mockWorkflowManager.cells.mockReturnValue({
+        prompt: { shape: 'textfield', props: { lfValue: 'declaration default' } },
+      });
+      const inputPrefillRun = vi.fn();
+      mockStore.getState.mockReturnValue({
+        current: { id: 'test-workflow' },
+        inputPrefillRunId: null,
+        inputStatuses: {},
+        manager: {
+          runs: { get: vi.fn() },
+          workflow: mockWorkflowManager,
+          uiRegistry: mockUIRegistry,
+        },
+        mutate: { inputPrefillRun },
+      });
+      replaceWorkflowSessionDraft(mockStore, 'test-workflow', { prompt: 'unfinished edit' });
+
+      const controller = createInputsSection(mockStore);
+      controller.mount();
+      const reset = registry[INPUTS_CLASSES.resetButton] as HTMLElement;
+      reset.dispatchEvent(
+        new CustomEvent('lf-button-event', { detail: { eventType: 'click' } }),
+      );
+
+      expect(getWorkflowSessionDraft(mockStore, 'test-workflow')).toBeUndefined();
+      expect(inputPrefillRun).toHaveBeenCalledWith(null);
+      expect(vi.mocked(createInputCell)).toHaveBeenCalledTimes(2);
+      expect(vi.mocked(createInputCell)).toHaveBeenLastCalledWith(
+        expect.objectContaining({ props: { lfValue: 'declaration default' } }),
+      );
     });
 
     it('should create input cells for workflow inputs', () => {
@@ -208,6 +268,197 @@ describe('createInputsSection', () => {
         const expectedId = index === 0 ? 'input1' : 'input2';
         expect(cell.id).toBe(expectedId);
       });
+    });
+
+    it('shows serialized input titles as novice help below the component', () => {
+      mockWorkflowManager.cells.mockReturnValue({
+        image: {
+          id: 'image',
+          nodeId: 'load',
+          shape: 'upload',
+          title: 'Choose a source image. PNG and JPEG are easiest to start with.',
+        } as WorkflowCellInput,
+      });
+
+      const controller = createInputsSection(mockStore);
+      controller.mount();
+
+      const section = mockUIRegistry.set.mock.calls.find(
+        (call) => call[0] === INPUTS_CLASSES._,
+      )?.[1] as HTMLElement;
+      const help = section.querySelector(`.${INPUTS_CLASSES.help}`);
+      expect(help?.tagName).toBe('P');
+      expect(help?.textContent).toBe(
+        'Choose a source image. PNG and JPEG are easiest to start with.',
+      );
+      expect(help?.previousElementSibling?.id).toBe('image');
+    });
+
+    it('does not duplicate a native component helper below the field', () => {
+      mockWorkflowManager.cells.mockReturnValue({
+        prompt: {
+          id: 'prompt',
+          nodeId: 'positive',
+          shape: 'textfield',
+          title: 'Describe the complete result.',
+          props: {
+            lfHelper: { showWhenFocused: false, value: 'Describe the complete result.' },
+          },
+        } as WorkflowCellInput,
+      });
+
+      const controller = createInputsSection(mockStore);
+      controller.mount();
+
+      const section = mockUIRegistry.set.mock.calls.find(
+        (call) => call[0] === INPUTS_CLASSES._,
+      )?.[1] as HTMLElement;
+      expect(section.querySelector(`.${INPUTS_CLASSES.help}`)).toBeNull();
+    });
+
+    it('keeps upload guidance external because upload has no native helper', () => {
+      mockWorkflowManager.cells.mockReturnValue({
+        image: {
+          id: 'image',
+          nodeId: 'reference',
+          shape: 'upload',
+          title: 'Upload one authorized reference image.',
+          props: {
+            lfHelper: { showWhenFocused: false, value: 'This prop is not supported by upload.' },
+          },
+        } as WorkflowCellInput,
+      });
+
+      const controller = createInputsSection(mockStore);
+      controller.mount();
+
+      const section = mockUIRegistry.set.mock.calls.find(
+        (call) => call[0] === INPUTS_CLASSES._,
+      )?.[1] as HTMLElement;
+      expect(section.querySelector(`.${INPUTS_CLASSES.help}`)?.textContent).toBe(
+        'Upload one authorized reference image.',
+      );
+    });
+
+    it('shows a clearable retained-upload notice when remix restores a server file', () => {
+      mockWorkflowManager.cells.mockReturnValue({
+        image: {
+          id: 'image',
+          nodeId: 'reference',
+          shape: 'upload',
+          title: 'Upload one authorized reference image.',
+        } as WorkflowCellInput,
+      });
+
+      const controller = createInputsSection(mockStore);
+      controller.mount();
+      const cells = mockUIRegistry.set.mock.calls.find(
+        (call: unknown[]) => call[0] === INPUTS_CLASSES.cells,
+      )?.[1] as HTMLElement[];
+      const upload = cells[0];
+
+      setRetainedUploadPrefill(upload, {
+        schema: 'lf.workflow-upload-prefill.v1',
+        reference: {
+          schema: 'lf.workflow-upload-ref.v1',
+          sourceRunId: 'run-source',
+          inputId: 'image',
+        },
+        names: ['reference.png'],
+        available: true,
+      });
+
+      const notice = upload.parentElement?.querySelector(
+        `.${INPUTS_CLASSES.retainedUpload}`,
+      ) as HTMLElement;
+      expect(notice.hidden).toBe(false);
+      expect(notice.textContent).toContain('Reusing reference.png');
+
+      (notice.querySelector(`.${INPUTS_CLASSES.retainedUploadClear}`) as HTMLButtonElement).click();
+      expect(notice.hidden).toBe(true);
+      expect(getRetainedUploadPrefill(upload)).toBeUndefined();
+    });
+
+    it('explains when a retained upload must be selected again', () => {
+      mockWorkflowManager.cells.mockReturnValue({
+        image: {
+          id: 'image',
+          nodeId: 'reference',
+          shape: 'upload',
+          title: 'Upload one authorized reference image.',
+        } as WorkflowCellInput,
+      });
+
+      const controller = createInputsSection(mockStore);
+      controller.mount();
+      const cells = mockUIRegistry.set.mock.calls.find(
+        (call: unknown[]) => call[0] === INPUTS_CLASSES.cells,
+      )?.[1] as HTMLElement[];
+      const upload = cells[0];
+      setRetainedUploadPrefill(upload, {
+        schema: 'lf.workflow-upload-prefill.v1',
+        reference: {
+          schema: 'lf.workflow-upload-ref.v1',
+          sourceRunId: 'run-source',
+          inputId: 'image',
+        },
+        names: ['expired.png'],
+        available: false,
+      });
+
+      const notice = upload.parentElement?.querySelector(
+        `.${INPUTS_CLASSES.retainedUpload}`,
+      ) as HTMLElement;
+      expect(notice.hidden).toBe(false);
+      expect(notice.textContent).toContain('expired.png is no longer available');
+    });
+
+    it('does not duplicate a select helper rendered by its nested textfield', () => {
+      mockWorkflowManager.cells.mockReturnValue({
+        model: {
+          id: 'model',
+          nodeId: 'unet',
+          shape: 'select',
+          title: 'Choose the local checkpoint.',
+          props: {
+            lfTextfieldProps: {
+              lfHelper: { showWhenFocused: false, value: 'Choose the local checkpoint.' },
+            },
+          },
+        } as WorkflowCellInput,
+      });
+
+      const controller = createInputsSection(mockStore);
+      controller.mount();
+
+      const section = mockUIRegistry.set.mock.calls.find(
+        (call) => call[0] === INPUTS_CLASSES._,
+      )?.[1] as HTMLElement;
+      expect(section.querySelector(`.${INPUTS_CLASSES.help}`)).toBeNull();
+    });
+
+    it('keeps serialized guidance when a nominal native helper has no text', () => {
+      mockWorkflowManager.cells.mockReturnValue({
+        prompt: {
+          id: 'prompt',
+          nodeId: 'positive',
+          shape: 'textfield',
+          title: 'Describe the complete result.',
+          props: {
+            lfHelper: { showWhenFocused: false, value: '   ' },
+          },
+        } as WorkflowCellInput,
+      });
+
+      const controller = createInputsSection(mockStore);
+      controller.mount();
+
+      const section = mockUIRegistry.set.mock.calls.find(
+        (call) => call[0] === INPUTS_CLASSES._,
+      )?.[1] as HTMLElement;
+      expect(section.querySelector(`.${INPUTS_CLASSES.help}`)?.textContent).toBe(
+        'Describe the complete result.',
+      );
     });
 
     it('should handle empty workflow inputs', () => {
@@ -244,6 +495,7 @@ describe('createInputsSection', () => {
         ],
         [INPUTS_CLASSES.description]: document.createElement('p'),
         [INPUTS_CLASSES.h3]: document.createElement('h3'),
+        [INPUTS_CLASSES.readiness]: document.createElement('aside'),
       };
 
       mockUIRegistry.get.mockReturnValue(mockElements);
@@ -271,6 +523,23 @@ describe('createInputsSection', () => {
 
       expect(h3.textContent).toBe('Test Workflow');
       expect(desc.textContent).toBe('Test Description');
+    });
+
+    it('shows the first actionable readiness issue', () => {
+      mockWorkflowManager.current.mockReturnValue({
+        id: 'test-workflow',
+        readiness: {
+          status: 'setup_required',
+          issues: [{ code: 'node_missing', message: 'Install the missing node pack.' }],
+        },
+      });
+
+      createInputsSection(mockStore).render();
+
+      const notice = mockElements[INPUTS_CLASSES.readiness] as HTMLElement;
+      expect(notice.hidden).toBe(false);
+      expect(notice.dataset.status).toBe('setup_required');
+      expect(notice.textContent).toBe('Setup required: Install the missing node pack.');
     });
 
     it('should update cell status from inputStatuses', () => {

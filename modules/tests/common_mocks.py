@@ -6,7 +6,94 @@ Provides centralized mocking setup to avoid code duplication across test files.
 
 import sys
 import types
+from contextlib import contextmanager
 from unittest.mock import MagicMock
+
+
+_COMMON_MOCK_MODULE_NAMES = (
+    'torch',
+    'torch.cuda',
+    'torch.nn',
+    'torch.nn.functional',
+    'torch.hub',
+    'torch.device',
+    'torchvision',
+    'torchvision.transforms',
+    'torchvision.transforms.functional',
+    'transformers',
+    'modules.utils.helpers',
+    'modules.utils.helpers.api',
+    'modules.utils.helpers.comfy',
+    'modules.utils.helpers.conversion',
+    'modules.utils.helpers.conversion.base64_to_tensor',
+    'modules.utils.helpers.conversion.tensor_to_base64',
+    'modules.utils.helpers.detection',
+    'modules.utils.helpers.editing',
+    'modules.utils.helpers.logic',
+    'modules.utils.helpers.torch',
+    'modules.utils.helpers.ui',
+    'modules.utils.helpers.tagging',
+    'modules.utils.filters',
+    'modules.utils.filters._common',
+    'modules.utils.filters.inpaint',
+    'modules.utils.filters.processors',
+    'comfy',
+    'comfy.model_management',
+    'comfy.samplers',
+    'comfy.lora',
+    'comfy.hooks',
+    'comfy.model_patcher',
+    'comfy.k_diffusion',
+    'comfy.k_diffusion.sampling',
+    'comfy.sample',
+    'folder_paths',
+    'server',
+)
+_TORCH_MOCK_MODULE_NAMES = frozenset(
+    {
+        'torch',
+        'torch.cuda',
+        'torch.nn',
+        'torch.nn.functional',
+        'torch.hub',
+        'torch.device',
+        'torchvision',
+        'torchvision.transforms',
+        'torchvision.transforms.functional',
+    }
+)
+_MISSING_MODULE = object()
+
+
+@contextmanager
+def scoped_common_mocks(torch_enabled=False):
+    """Install the legacy import mocks without leaking them to other tests.
+
+    Several older node tests need lightweight stand-ins while importing their
+    module under test.  Pytest imports every test module during collection, so
+    leaving those stand-ins in ``sys.modules`` makes unrelated tests observe a
+    partial helpers package.  In particular, image nodes then cannot import the
+    real conversion helpers.  Keep the mocks for the import that needs them and
+    restore the process-wide module registry immediately afterwards.
+    """
+    tracked_names = (
+        name
+        for name in _COMMON_MOCK_MODULE_NAMES
+        if not torch_enabled or name not in _TORCH_MOCK_MODULE_NAMES
+    )
+    previous_modules = {
+        name: sys.modules.get(name, _MISSING_MODULE)
+        for name in tracked_names
+    }
+    setup_common_mocks(torch_enabled=torch_enabled)
+    try:
+        yield
+    finally:
+        for name, previous in previous_modules.items():
+            if previous is _MISSING_MODULE:
+                sys.modules.pop(name, None)
+            else:
+                sys.modules[name] = previous
 
 
 def setup_common_mocks(torch_enabled=False):
@@ -56,7 +143,7 @@ def setup_common_mocks(torch_enabled=False):
     # functional implementation retains a reference to the original torch
     # module and fails with opaque isinstance errors if that reference is
     # replaced during discovery.
-    if 'torchvision' not in sys.modules:
+    if not torch_enabled and 'torchvision' not in sys.modules:
         sys.modules['torchvision'] = MagicMock()
         sys.modules['torchvision.transforms'] = MagicMock()
         sys.modules['torchvision.transforms.functional'] = MagicMock()

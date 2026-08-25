@@ -4,6 +4,31 @@ import { RunRecord } from '../types/client';
 import { deepMerge, recordToUI } from '../utils/common';
 
 describe('deepMerge output payloads', () => {
+  it('hydrates a comparison dataset from the LF history envelope', () => {
+    const dataset = {
+      nodes: [{ id: 'image_1', value: 'Comparison 1' }],
+    };
+    const definitions = {
+      comparison: {
+        id: 'comparison',
+        nodeId: 'display_comparison',
+        shape: 'compare',
+      },
+    } as unknown as WorkflowCellsOutputContainer;
+    const outputs = {
+      display_comparison: {
+        lf_output: [{ json: dataset }],
+      },
+    } as unknown as WorkflowNodeResults;
+
+    expect(deepMerge(definitions, outputs)[0]).toMatchObject({
+      id: 'comparison',
+      nodeId: 'display_comparison',
+      shape: 'compare',
+      json: dataset,
+    });
+  });
+
   it('preserves standard Comfy artifacts when lf_output is absent', () => {
     const definitions = {
       video: {
@@ -79,5 +104,45 @@ describe('recordToUI output detail', () => {
     } as RunRecord;
 
     expect(recordToUI(run).inputs).toBeUndefined();
+  });
+
+  it('normalizes legacy milliseconds and current seconds to one browser unit', () => {
+    const legacy = recordToUI({
+      run_id: 'legacy',
+      status: 'failed',
+      created_at: 1_763_168_015_000,
+      updated_at: 1_763_168_073_000,
+    } as RunRecord);
+    const current = recordToUI({
+      run_id: 'current',
+      status: 'succeeded',
+      created_at: 1_786_848_000,
+      updated_at: 1_786_848_001,
+    } as RunRecord);
+
+    expect(legacy.createdAt).toBe(1_763_168_015_000);
+    expect(current.createdAt).toBe(1_786_848_000_000);
+    expect(current.createdAt).toBeGreaterThan(legacy.createdAt);
+  });
+
+  it('keeps invalid or missing creation times at the end of history', () => {
+    const mapped = recordToUI({
+      run_id: 'invalid-time',
+      status: 'failed',
+      created_at: Number.NaN,
+      updated_at: Number.POSITIVE_INFINITY,
+    } as RunRecord);
+
+    expect(mapped.createdAt).toBe(0);
+    expect(mapped.updatedAt).toBe(0);
+
+    const negative = recordToUI({
+      run_id: 'negative-time',
+      status: 'failed',
+      created_at: -1,
+      updated_at: -1,
+    } as RunRecord);
+    expect(negative.createdAt).toBe(0);
+    expect(negative.updatedAt).toBe(0);
   });
 });

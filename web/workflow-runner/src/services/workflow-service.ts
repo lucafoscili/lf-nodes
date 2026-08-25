@@ -8,7 +8,9 @@ import {
   WorkflowAPIUploadPayload,
   WorkflowAPIUploadResponse,
   WorkflowRunRequestPayload,
+  WorkflowRunResponse,
   WorkflowRunStatusResponse,
+  WorkflowSubmissionSnapshot,
 } from '../types/api';
 import { isWorkflowAPIUploadPayload, isWorkflowAPIUploadResponse } from '../utils/common';
 import { ERROR_MESSAGES } from '../utils/constants';
@@ -75,13 +77,14 @@ export const fetchWorkflowJSON = async (workflowId: string) => {
 //#endregion
 
 //#region Run Workflow
-export const runWorkflow = async (payload: WorkflowRunRequestPayload): Promise<string> => {
+export const runWorkflow = async (payload: WorkflowRunRequestPayload): Promise<WorkflowRunResponse> => {
   const { RUN_GENERIC } = ERROR_MESSAGES;
 
   const { syntax } = getLfFramework();
 
   const response = await fetch(buildApiUrl('/run'), {
     method: 'POST',
+    credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   });
@@ -93,10 +96,25 @@ export const runWorkflow = async (payload: WorkflowRunRequestPayload): Promise<s
     throw new WorkflowApiError('Unauthorized', { status: 401 });
   }
 
-  const data = (await syntax.json.parse(response)) as
+  let data:
     | WorkflowAPIResponse
-    | { run_id?: string }
+    | {
+        idempotent_replay?: boolean;
+        run_id?: string;
+        status?: WorkflowSubmissionSnapshot['status'];
+        submission_id?: string;
+      }
     | null;
+  try {
+    data = (await syntax.json.parse(response)) as typeof data;
+  } catch {
+    // The POST may already have crossed the queue boundary. Preserve the HTTP
+    // status so callers can distinguish an explicit 4xx rejection from an
+    // unreadable success/5xx response whose outcome is ambiguous.
+    throw new WorkflowApiError(`${RUN_GENERIC} (invalid response)`, {
+      status: response.status,
+    });
+  }
 
   if (!response.ok || !data) {
     const payloadData =
@@ -109,14 +127,130 @@ export const runWorkflow = async (payload: WorkflowRunRequestPayload): Promise<s
     });
   }
 
-  const runId = (data as { run_id?: string }).run_id;
-  if (!runId) {
+  const raw = data as {
+    idempotent_replay?: boolean;
+    run_id?: string;
+    status?: WorkflowSubmissionSnapshot['status'];
+    submission_id?: string;
+  };
+  const validStatuses = new Set<WorkflowSubmissionSnapshot['status']>([
+    'accepted',
+    'cancelled',
+    'failed',
+    'pending',
+    'reconciling',
+    'running',
+    'succeeded',
+    'timeout',
+  ]);
+  if (
+    typeof raw.run_id !== 'string' ||
+    !raw.run_id ||
+    typeof raw.submission_id !== 'string' ||
+    !raw.submission_id ||
+    (payload.submissionId !== undefined && raw.submission_id !== payload.submissionId) ||
+    (raw.status !== undefined && !validStatuses.has(raw.status)) ||
+    (raw.idempotent_replay !== undefined && typeof raw.idempotent_replay !== 'boolean')
+  ) {
     throw new WorkflowApiError(`${RUN_GENERIC} (invalid response)`, {
       status: response.status,
     });
   }
 
-  return runId;
+  return {
+    idempotentReplay: raw.idempotent_replay === true,
+    runId: raw.run_id,
+    status: raw.status ?? 'pending',
+    submissionId: raw.submission_id,
+  };
+};
+
+export const getWorkflowSubmission = async (
+  submissionId: string,
+): Promise<WorkflowSubmissionSnapshot | null> => {
+  const { syntax } = getLfFramework();
+  const response = await fetch(
+    buildApiUrl(`/submissions/${encodeURIComponent(submissionId)}`),
+    {
+      credentials: 'include',
+      method: 'GET',
+    },
+  );
+  if (response.status === 404) {
+    return null;
+  }
+  if (response.status === 401) {
+    try {
+      window.location.href = `${window.location.origin}${API_BASE}/workflow-runner`;
+    } catch (err) {}
+    throw new WorkflowApiError('Unauthorized', { status: 401 });
+  }
+
+  let data: unknown;
+  try {
+    data = await syntax.json.parse(response);
+  } catch {
+    throw new WorkflowApiError('Invalid submission response.', { status: response.status });
+  }
+  if (!response.ok) {
+    const detail =
+      data && typeof data === 'object' && typeof (data as { detail?: unknown }).detail === 'string'
+        ? (data as { detail: string }).detail
+        : response.statusText;
+    throw new WorkflowApiError(`Unable to reconcile submission (${detail || response.status}).`, {
+      payload: data,
+      status: response.status,
+    });
+  }
+
+  const snapshot = data as Partial<WorkflowSubmissionSnapshot> | null;
+  const validStatuses = new Set<WorkflowSubmissionSnapshot['status']>([
+    'accepted',
+    'cancelled',
+    'failed',
+    'pending',
+    'reconciling',
+    'running',
+    'succeeded',
+    'timeout',
+  ]);
+  if (
+    !snapshot ||
+    snapshot.submission_id !== submissionId ||
+    (snapshot.run_id !== null && typeof snapshot.run_id !== 'string') ||
+    typeof snapshot.workflow_id !== 'string' ||
+    !snapshot.status ||
+    !validStatuses.has(snapshot.status)
+  ) {
+    throw new WorkflowApiError('Invalid submission response.', { status: response.status });
+  }
+  return snapshot as WorkflowSubmissionSnapshot;
+};
+
+export const cancelWorkflowSubmission = async (
+  submissionId: string,
+): Promise<WorkflowSubmissionSnapshot> => {
+  const response = await fetch(
+    buildApiUrl(`/submissions/${encodeURIComponent(submissionId)}/cancel`),
+    {
+      credentials: 'include',
+      method: 'POST',
+    },
+  );
+  const data = (await response.json().catch(() => null)) as
+    | WorkflowSubmissionSnapshot
+    | { detail?: string; error?: string }
+    | null;
+
+  if (!response.ok || !data || !('submission_id' in data)) {
+    const detail = data && 'detail' in data ? data.detail || data.error : response.statusText;
+    throw new WorkflowApiError(`Unable to stop workflow (${detail || response.status}).`, {
+      payload: data ?? undefined,
+      status: response.status,
+    });
+  }
+
+  return data;
 };
 
 export const getRunStatus = async (runId: string): Promise<WorkflowRunStatusResponse> => {
@@ -164,6 +298,11 @@ export const uploadWorkflowFiles = async (files: File[]): Promise<WorkflowAPIUpl
   }
 
   const formData = new FormData();
+  // Runner uploads are reusable workflow inputs, not disposable previews.
+  // Select Comfy's durable input storage explicitly and put the selector
+  // before the streamed file parts so the upload endpoint applies it to every
+  // file in this request.
+  formData.append('directory', 'input');
   files.forEach((file) => formData.append('file', file));
 
   const response = await fetch(buildApiUrl('/upload'), {

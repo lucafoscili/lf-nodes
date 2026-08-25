@@ -20,7 +20,7 @@ sys.modules.setdefault("modules.utils.helpers.conversion", conversion_module)
 
 from modules.workflow_runner.services.registry import InputValidationError
 from modules.workflow_runner.workflows import utils as workflow_utils
-from modules.workflow_runner.workflows.utils import resolve_load_image_reference
+from modules.workflow_runner.workflows.utils import resolve_load_image_reference, resolve_upload_paths
 
 
 @pytest.fixture
@@ -55,6 +55,34 @@ def test_existing_comfy_file_is_reused_with_an_annotated_relative_reference(
         / "lf-workflow-runner"
         / "staged-images"
     ).exists()
+
+
+def test_portable_input_upload_reference_resolves_only_inside_comfy_input(
+    comfy_image_directories,
+) -> None:
+    source = comfy_image_directories["input"] / "portrait.png"
+    source.write_bytes(b"portrait")
+
+    resolved = resolve_upload_paths(
+        {"source_path": "portrait.png [input]"},
+        "source_path",
+    )
+
+    assert resolved == [str(source.resolve())]
+
+
+def test_portable_input_upload_reference_rejects_parent_traversal(
+    tmp_path,
+    comfy_image_directories,
+) -> None:
+    outside = tmp_path / "outside.png"
+    outside.write_bytes(b"outside")
+
+    with pytest.raises(InputValidationError):
+        resolve_upload_paths(
+            {"source_path": "../../outside.png [input]"},
+            "source_path",
+        )
 
 
 def test_external_image_is_content_addressed_and_atomically_staged_once(
@@ -150,3 +178,18 @@ def test_directory_source_is_rejected(tmp_path, comfy_image_directories) -> None
 
     with pytest.raises(ValueError, match="not a file"):
         resolve_load_image_reference({"source_path": str(source)}, "source_path")
+
+
+def test_multiple_sources_are_rejected_instead_of_using_only_the_first(
+    tmp_path, comfy_image_directories
+) -> None:
+    first = tmp_path / "first.png"
+    second = tmp_path / "second.png"
+    first.write_bytes(b"first")
+    second.write_bytes(b"second")
+
+    with pytest.raises(InputValidationError):
+        resolve_load_image_reference(
+            {"source_path": [str(first), str(second)]},
+            "source_path",
+        )

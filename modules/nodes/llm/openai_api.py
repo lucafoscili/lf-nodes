@@ -56,7 +56,10 @@ class LF_OpenAIAPI:
                 }),
                 "image": (Input.IMAGE, {
                     "tooltip": "Optional reference image for multimodal models."
-                })
+                }),
+                "ui_widget": (Input.LF_CODE, {
+                    "default": "",
+                }),
             },
             "hidden": {
                 "node_id": "UNIQUE_ID"

@@ -5,15 +5,19 @@ import os
 from pathlib import Path
 
 # Ensure lf-nodes root and tests common_mocks are importable
-LF_ROOT = Path(__file__).resolve().parents[3]
+LF_ROOT = Path(__file__).resolve().parents[4]
 if str(LF_ROOT) not in sys.path:
     sys.path.insert(0, str(LF_ROOT))
 TESTS_ROOT = Path(__file__).resolve().parents[2]
 if str(TESTS_ROOT) not in sys.path:
     sys.path.insert(0, str(TESTS_ROOT))
 
-from modules.tests.common_mocks import setup_common_mocks  # type: ignore
-setup_common_mocks()
+from modules.tests.common_mocks import scoped_common_mocks  # type: ignore
+
+with scoped_common_mocks(torch_enabled=True):
+    # Import the implementation while its optional Comfy dependencies are
+    # mocked, then restore sys.modules before pytest collects another module.
+    from modules.nodes.analytics.color_analysis import LF_ColorAnalysis, NODE_CLASS_MAPPINGS, NODE_DISPLAY_NAME_MAPPINGS
 
 import json
 import unittest
@@ -21,8 +25,6 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import torch
 
-# Import the actual node implementation
-from modules.nodes.analytics.color_analysis import LF_ColorAnalysis, NODE_CLASS_MAPPINGS, NODE_DISPLAY_NAME_MAPPINGS
 from modules.utils.constants import Input
 from modules.tests.common_mocks import mock_prompt_server  # type: ignore
 

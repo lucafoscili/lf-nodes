@@ -44,7 +44,10 @@ The nodes span quite a few categories:
 - **Selector nodes**: Resource selection widgets with metadata display for models.
 - **Visual novel nodes**: Author, validate, and preview deterministic target-neutral narrative graphs.
 
-To see example workflows, check the [example_workflows folder](example_workflows). For the current visual-novel node inputs and identity contract, see [Visual Novel Nodes](docs/VISUAL_NOVEL.md).
+To see example workflows, check the [example_workflows folder](example_workflows).
+For generic texture serialization, see [DDS Output](docs/DDS_OUTPUT.md). For the
+current visual-novel node inputs and identity contract, see
+[Visual Novel Nodes](docs/VISUAL_NOVEL.md).
 
 ## Table of Contents
 
@@ -136,6 +139,10 @@ Project-owned workflows do not need to be copied into this published package.
 Store each workflow's `.py` definition and `.json` graph together in an external
 directory, then set `WORKFLOW_RUNNER_EXTRA_WORKFLOW_ROOTS` in the repository-level
 `.env`. The setting accepts comma- or semicolon-separated absolute directories.
+Set `WORKFLOW_RUNNER_EXTRA_WORKFLOW_GROUPS` to a matching ordered list of safe
+display labels when the drawer should group each registered root separately.
+Packaged LF Nodes workflows remain grouped by their domain; external definitions
+are shown only under their custom registration group.
 External definitions use the same `workflows.custom` import contract as local
 custom workflows, so their existing relative imports and workflow IDs can remain
 stable.
@@ -198,6 +205,7 @@ MIT License
 For an overview of how this nodes suite is structured and how it integrates with the UI, see:
 
 - [Architecture](docs/ARCHITECTURE.md)
+- [DDS Output](docs/DDS_OUTPUT.md)
 - [Frontend Proxy](docs/FRONTEND_PROXY.md)
 - [Image Editor](docs/IMAGE_EDITOR.md)
 - [Node Template](docs/NODE_TEMPLATE.md)

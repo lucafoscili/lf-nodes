@@ -2,6 +2,7 @@ import {
   LfButtonInterface,
   LfChatInterface,
   LfCodeInterface,
+  LfCompareInterface,
   LfComponentName,
   LfComponentPropsFor,
   LfComponentRootElement,
@@ -116,6 +117,13 @@ export const createComponent = {
     _setProps('LfMasonry', comp, props, slot_map);
     return comp;
   },
+  compare: (props: Partial<LfCompareInterface>) => {
+    const comp = document.createElement('lf-compare');
+
+    comp.className = 'workflow-output-compare';
+    _setProps('LfCompare', comp, props);
+    return comp;
+  },
   select: (props: Partial<LfSelectInterface>) => {
     const comp = document.createElement('lf-select');
 
@@ -182,11 +190,47 @@ const _artifactUrl = (artifact: ComfyFileArtifact) => {
   }
   const params = new URLSearchParams({
     filename: artifact.filename,
-    subfolder: artifact.subfolder || '',
+    subfolder: (artifact.subfolder || '').replaceAll('\\', '/'),
     type: artifact.type || 'output',
   });
   return `/view?${params.toString()}`;
 };
+
+const _outputRelativeArtifact = (value: unknown): ComfyFileArtifact | null => {
+  if (typeof value !== 'string' || !value || value.includes('\\')) {
+    return null;
+  }
+
+  const parts = value.split('/');
+  if (
+    parts.some((part) => !part || part === '.' || part === '..') ||
+    !parts.every((part) => /^[^\\/?#%:\x00-\x1F\x7F]+$/.test(part))
+  ) {
+    return null;
+  }
+
+  const filename = parts.pop();
+  if (!filename) {
+    return null;
+  }
+
+  return {
+    filename,
+    subfolder: parts.join('/'),
+    type: 'output',
+  };
+};
+
+const _fileNameArtifacts = (fileNames: string[] | undefined) =>
+  Array.isArray(fileNames)
+    ? fileNames
+        .map(_outputRelativeArtifact)
+        .filter((artifact): artifact is ComfyFileArtifact => artifact !== null)
+    : [];
+
+const _isBrowserImage = (artifact: ComfyFileArtifact, mediaType: string) =>
+  /^(?:image\/(?:png|jpe?g|gif|webp|avif|apng|svg\+xml))$/.test(mediaType) ||
+  /\.(?:png|jpe?g|gif|webp|avif|apng|svg)$/i.test(artifact.filename);
 
 const _mediaOutput = (artifacts: ComfyFileArtifact[] | undefined) => {
   if (!Array.isArray(artifacts) || artifacts.length === 0) {
@@ -208,6 +252,7 @@ const _mediaOutput = (artifacts: ComfyFileArtifact[] | undefined) => {
     const mediaType = artifact.media_type?.toLowerCase() || '';
     const isAudio = mediaType.startsWith('audio/') || /\.(?:wav|mp3|m4a|flac|ogg|opus)$/i.test(artifact.filename);
     const isVideo = mediaType.startsWith('video/') || /\.(?:mp4|webm)$/i.test(artifact.filename);
+    const isBrowserImage = _isBrowserImage(artifact, mediaType);
     if (isAudio) {
       const audio = document.createElement('audio');
       audio.className = 'workflow-output-media__preview';
@@ -223,21 +268,32 @@ const _mediaOutput = (artifacts: ComfyFileArtifact[] | undefined) => {
       video.preload = 'metadata';
       video.src = src;
       item.appendChild(video);
-    } else {
+    } else if (isBrowserImage) {
       const image = document.createElement('img');
       image.alt = artifact.filename;
       image.className = 'workflow-output-media__preview';
       image.loading = 'lazy';
       image.src = src;
       item.appendChild(image);
+    } else {
+      const note = document.createElement('span');
+      note.className = 'workflow-output-media__note';
+      note.textContent = 'Preview is not available in the browser.';
+      item.appendChild(note);
     }
 
     const link = document.createElement('a');
     link.className = 'workflow-output-media__link';
     link.href = src;
+    if (!isAudio && !isVideo && !isBrowserImage) {
+      link.download = artifact.filename;
+    }
     link.rel = 'noopener';
     link.target = '_blank';
-    link.textContent = artifact.filename;
+    link.textContent =
+      !isAudio && !isVideo && !isBrowserImage
+        ? `Download ${artifact.filename}`
+        : artifact.filename;
     item.appendChild(link);
 
     media.appendChild(item);
@@ -264,7 +320,10 @@ export const createOutputComponent = (descriptor: WorkflowCellOutput) => {
     svg,
   } = descriptor;
   const el = document.createElement('div');
-  const media = _mediaOutput([...(images || []), ...(audio || []), ...(audios || [])]);
+  const standardArtifacts = [...(images || []), ...(audio || []), ...(audios || [])];
+  const media = _mediaOutput(
+    standardArtifacts.length > 0 ? standardArtifacts : _fileNameArtifacts(file_names),
+  );
   if (media) {
     el.appendChild(media);
     const hasLegacyPayload =
@@ -285,6 +344,14 @@ export const createOutputComponent = (descriptor: WorkflowCellOutput) => {
   }
 
   switch (shape) {
+    case 'compare': {
+      const p = (props || {}) as Partial<LfCompareInterface>;
+      p.lfDataset = (dataset || json || { nodes: [] }) as LfCompareInterface['lfDataset'];
+      p.lfShape ||= 'image';
+      const compare = createComponent.compare(p);
+      el.appendChild(compare);
+      break;
+    }
     case 'code': {
       const p = (props || {}) as Partial<LfCodeInterface>;
       p.lfValue =

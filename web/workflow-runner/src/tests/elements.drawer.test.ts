@@ -12,9 +12,11 @@ vi.mock('@lf-widgets/framework', () => ({
       get: {
         icon: vi.fn((iconName: string) => {
           const iconMap: Record<string, string> = {
+            alertTriangle: 'alert-triangle',
             imageInPicture: 'image-in-picture',
             bug: 'bug',
             brandGithub: 'brand-github',
+            hexagonInfo: 'hexagon-info',
           };
           return iconMap[iconName] || 'test-icon';
         }),
@@ -22,7 +24,13 @@ vi.mock('@lf-widgets/framework', () => ({
           article: 'article',
           listTree: 'list-tree',
           alertTriangle: 'alert-triangle',
+          hexagonInfo: 'hexagon-info',
+          ai: 'ai',
           codeCircle2: 'code-circle-2',
+          folder: 'folder',
+          folderOpen: 'folder-open',
+          lfSignature: 'lf-signature',
+          music: 'music',
           photo: 'photo',
           json: 'json',
           robot: 'robot',
@@ -308,18 +316,35 @@ describe('Drawer Element', () => {
             id: 'wf1',
             value: 'Image Workflow',
             category: 'Image Processing',
+            origin: 'shipped' as const,
             children: [undefined, undefined] as [undefined, undefined],
           },
           {
             id: 'wf2',
             value: 'Text Workflow',
             category: 'LLM',
+            origin: 'shipped' as const,
             children: [undefined, undefined] as [undefined, undefined],
           },
           {
             id: 'wf3',
             value: 'JSON Workflow',
             category: 'JSON',
+            origin: 'shipped' as const,
+            children: [undefined, undefined] as [undefined, undefined],
+          },
+          {
+            id: 'krea2-generate',
+            value: 'Generate Image',
+            category: 'Krea 2',
+            origin: 'shipped' as const,
+            children: [undefined, undefined] as [undefined, undefined],
+          },
+          {
+            id: 'minimax-h3-generate',
+            value: 'Generate Video',
+            category: 'MiniMax H3',
+            origin: 'shipped' as const,
             children: [undefined, undefined] as [undefined, undefined],
           },
         ],
@@ -337,11 +362,145 @@ describe('Drawer Element', () => {
       const tree = elements['drawer-section-tree'];
       const workflowsNode = tree.lfDataset.nodes[1]; // Workflows node
 
-      expect(workflowsNode.children).toHaveLength(3); // Three categories
-      const categories = workflowsNode.children.map((cat: any) => cat.value);
+      expect(workflowsNode.children).toHaveLength(1); // LF Nodes collection
+      expect(workflowsNode.children[0].value).toBe('LF Nodes');
+      const categories = workflowsNode.children[0].children.map((cat: any) => cat.value);
       expect(categories).toContain('Image Processing');
       expect(categories).toContain('LLM');
       expect(categories).toContain('JSON');
+      expect(categories).toContain('Krea 2');
+      expect(categories).toContain('MiniMax H3');
+      const kreaCategory = workflowsNode.children[0].children.find(
+        (category: any) => category.value === 'Krea 2',
+      );
+      expect(kreaCategory.icon).toBe('ai');
+      const h3Category = workflowsNode.children[0].children.find(
+        (category: any) => category.value === 'MiniMax H3',
+      );
+      expect(h3Category.icon).toBe('ai');
+    });
+
+    it('separates custom registrations by their trusted collection', () => {
+      const section = createDrawerSection(store);
+      vi.spyOn(store, 'getState').mockReturnValue({
+        ...initState(),
+        manager: mockManager,
+        workflows: {
+          nodes: [
+            {
+              id: 'lf-image',
+              value: 'Shipped image workflow',
+              category: 'Image Processing',
+              origin: 'shipped' as const,
+              collection: 'LF Nodes',
+              children: [undefined, undefined],
+            },
+            {
+              id: 'velora-vn',
+              value: 'Custom story workflow',
+              category: 'Visual Novel Authoring',
+              origin: 'custom',
+              collection: 'Velora',
+              children: [undefined, undefined],
+            },
+            {
+              id: 'garage-image',
+              value: 'Custom image workflow',
+              category: 'Text to Image',
+              origin: 'custom',
+              collection: 'Garage',
+              children: [undefined, undefined],
+            },
+          ],
+        } as any,
+      });
+
+      section.render();
+
+      const tree = mockManager.uiRegistry.get()['drawer-section-tree'];
+      const roots = tree.lfDataset.nodes[1].children;
+      expect(roots.map((node: any) => node.value)).toEqual(['LF Nodes', 'Custom']);
+      expect(roots[1].children.map((node: any) => node.value)).toEqual([
+        'Garage',
+        'Velora',
+      ]);
+      expect(roots[1].children[1].children[0].id).toBe('velora-vn');
+      expect(roots[1].children.every((node: any) => node.icon !== 'alert-triangle')).toBe(
+        true,
+      );
+    });
+
+    it('keeps unmarked workflows out of the shipped LF Nodes collection', () => {
+      const section = createDrawerSection(store);
+      vi.spyOn(store, 'getState').mockReturnValue({
+        ...initState(),
+        manager: mockManager,
+        workflows: {
+          nodes: [
+            {
+              id: 'legacy-unmarked',
+              value: 'Legacy unmarked workflow',
+              category: 'Image Processing',
+              children: [undefined, undefined],
+            },
+          ],
+        } as any,
+      });
+
+      section.render();
+
+      const tree = mockManager.uiRegistry.get()['drawer-section-tree'];
+      const roots = tree.lfDataset.nodes[1].children;
+      expect(roots.map((node: any) => node.value)).toEqual(['Custom']);
+      expect(roots[0].children[0].value).toBe('Custom');
+      expect(roots[0].children[0].children[0].id).toBe('legacy-unmarked');
+    });
+
+    it('marks proven blockers and uncertain setup without blocking catalogue browsing', () => {
+      const section = createDrawerSection(store);
+      vi.spyOn(store, 'getState').mockReturnValue({
+        ...initState(),
+        manager: mockManager,
+        workflows: {
+          nodes: [
+            {
+              id: 'blocked',
+              value: 'Blocked workflow',
+              category: 'Image Processing',
+              origin: 'shipped',
+              readiness: {
+                status: 'setup_required',
+                issues: [{ code: 'model_missing', message: 'Install model.safetensors.' }],
+              },
+              children: [undefined, undefined],
+            },
+            {
+              id: 'uncertain',
+              value: 'Uncertain workflow',
+              category: 'Image Processing',
+              origin: 'shipped',
+              readiness: {
+                status: 'warning',
+                issues: [{ code: 'node_scanner_unavailable', message: 'Could not check nodes.' }],
+              },
+              children: [undefined, undefined],
+            },
+          ],
+        } as any,
+      });
+
+      section.render();
+
+      const leaves = mockManager.uiRegistry.get()['drawer-section-tree'].lfDataset.nodes[1]
+        .children[0].children[0].children;
+      expect(leaves.find((node: any) => node.id === 'blocked').icon).toBe('alert-triangle');
+      expect(leaves.find((node: any) => node.id === 'blocked').description).toContain(
+        'Setup required: Install model.safetensors.',
+      );
+      expect(leaves.find((node: any) => node.id === 'uncertain').description).toContain(
+        'Check setup: Could not check nodes.',
+      );
+      expect(leaves.find((node: any) => node.id === 'uncertain').icon).toBe('hexagon-info');
     });
 
     it('does nothing if elements are not registered', () => {

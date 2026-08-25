@@ -51,4 +51,4 @@ async def test_controller_extracts_email_from_request_dict_access():
         except ValueError:
             pytest.fail(f"owner_id should be valid hex, got: {owner_id}")
         
-        print(f"✓ Successfully extracted and derived owner_id: {owner_id[:16]}...")
+        print(f"PASS: Successfully extracted and derived owner_id: {owner_id[:16]}...")

@@ -6,22 +6,9 @@ from pathlib import Path
 from typing import Any, Dict
 
 from ..services.registry import InputValidationError, WorkflowCell, WorkflowNode
-from ...utils.youtube_url import parse_youtube_video_url
+from .utils import canonical_youtube_url
 
 _MEDIA_PROFILES = frozenset({"audio_m4a", "audio_flac", "video_mp4"})
-
-
-def _youtube_url(value: Any) -> str:
-    if not isinstance(value, str):
-        raise InputValidationError("youtube_url")
-
-    try:
-        _video_id, canonical_url = parse_youtube_video_url(value)
-    except ValueError as error:
-        raise InputValidationError("youtube_url") from error
-    if not canonical_url:
-        raise InputValidationError("youtube_url")
-    return canonical_url
 
 
 def _media_profile(value: Any) -> str:
@@ -33,7 +20,7 @@ def _media_profile(value: Any) -> str:
 def _configure(prompt: Dict[str, Any], inputs: Dict[str, Any]) -> None:
     """Map the narrow runner input contract onto the downloader node exactly."""
 
-    youtube_url = _youtube_url(inputs.get("youtube_url"))
+    youtube_url = canonical_youtube_url(inputs.get("youtube_url"))
     media_profile = _media_profile(inputs.get("media_profile"))
 
     reference = prompt.get("reference")

@@ -45,8 +45,7 @@ class LF_DisplayPrimitiveAsJSON:
     FUNCTION = FUNCTION
     OUTPUT_NODE = True
     OUTPUT_TOOLTIPS = (
-        "Pass-through JSON value.",
-        "Pass-through JSON value as a list."
+        "Dataset containing the supplied primitive values grouped by type.",
     )
     RETURN_NAMES = ("json",)
     RETURN_TYPES = (Input.JSON,)

@@ -1,0 +1,137 @@
+{
+  "unet": {
+    "inputs": {
+      "unet_name": "KR2/krea2_turbo_int8_convrot.safetensors",
+      "weight_dtype": "default"
+    },
+    "class_type": "UNETLoader",
+    "_meta": {"title": "Load Krea 2 model"}
+  },
+  "clip": {
+    "inputs": {
+      "clip_name": "qwen3vl_4b_bf16.safetensors",
+      "type": "krea2"
+    },
+    "class_type": "CLIPLoader",
+    "_meta": {"title": "Load Krea 2 Qwen3-VL encoder"}
+  },
+  "vae": {
+    "inputs": {"vae_name": "qwen_image_vae.safetensors"},
+    "class_type": "VAELoader",
+    "_meta": {"title": "Load Krea 2 VAE"}
+  },
+  "lora": {
+    "inputs": {
+      "lora_name": "KR2/krea2_identity_edit_v1_2.safetensors",
+      "strength_model": 1.0,
+      "model": ["unet", 0]
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {"title": "Apply community Identity Edit v1.2 LoRA"}
+  },
+  "scene": {
+    "inputs": {"image": ""},
+    "class_type": "LoadImage",
+    "_meta": {"title": "Optional scene reference"}
+  },
+  "identity": {
+    "inputs": {"image": ""},
+    "class_type": "LoadImage",
+    "_meta": {"title": "Identity reference"}
+  },
+  "scene_latent": {
+    "inputs": {"pixels": ["scene", 0], "vae": ["vae", 0]},
+    "class_type": "VAEEncode",
+    "_meta": {"title": "Encode scene reference"}
+  },
+  "identity_latent": {
+    "inputs": {"pixels": ["identity", 0], "vae": ["vae", 0]},
+    "class_type": "VAEEncode",
+    "_meta": {"title": "Encode identity reference"}
+  },
+  "resolution": {
+    "inputs": {
+      "aspect_ratio": "2:3 (Portrait Photo)",
+      "megapixels": 1.9,
+      "multiple": 16
+    },
+    "class_type": "ResolutionSelector",
+    "_meta": {"title": "Choose largest safe Krea 2 canvas"}
+  },
+  "latent": {
+    "inputs": {
+      "width": ["resolution", 0],
+      "height": ["resolution", 1],
+      "batch_size": 1
+    },
+    "class_type": "EmptySD3LatentImage",
+    "_meta": {"title": "Target canvas"}
+  },
+  "patch": {
+    "inputs": {
+      "model": ["lora", 0],
+      "source_latent": ["scene_latent", 0],
+      "source_latent_b": ["identity_latent", 0],
+      "ref_boost": 4.0,
+      "ref_boost_a": 1.0,
+      "fit_mode": "fit",
+      "vae": ["vae", 0],
+      "source_image": ["scene", 0],
+      "source_image_b": ["identity", 0],
+      "target_latent": ["latent", 0]
+    },
+    "class_type": "Krea2EditModelPatch",
+    "_meta": {"title": "Patch scene and identity references"}
+  },
+  "positive": {
+    "inputs": {
+      "clip": ["clip", 0],
+      "prompt": "Create a polished waist-up image of this person seated beside a large window at dusk, turned slightly toward the camera with a relaxed posture. Preserve the exact facial identity, hair, skin tone, body proportions, and defining features. Dress them in a tailored charcoal jacket, with soft cool window light, a warm interior rim light, natural anatomy, coherent fabric and skin texture, and a softly layered background. If a scene reference is supplied, follow its pose, framing, clothing, lighting, and environment instead while retaining the same identity.",
+      "image": ["scene", 0],
+      "image_b": ["identity", 0],
+      "grounding_px": 1024
+    },
+    "class_type": "Krea2EditGroundedEncode",
+    "_meta": {"title": "Grounded edit instruction"}
+  },
+  "negative": {
+    "inputs": {
+      "clip": ["clip", 0],
+      "prompt": "",
+      "image": ["scene", 0],
+      "image_b": ["identity", 0],
+      "grounding_px": 1024
+    },
+    "class_type": "Krea2EditGroundedEncode",
+    "_meta": {"title": "Grounded unconditional conditioning"}
+  },
+  "sampler": {
+    "inputs": {
+      "seed": 42,
+      "steps": 10,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "beta",
+      "denoise": 1.0,
+      "model": ["patch", 0],
+      "positive": ["positive", 0],
+      "negative": ["negative", 0],
+      "latent_image": ["latent", 0]
+    },
+    "class_type": "KSampler",
+    "_meta": {"title": "Identity Edit sampler"}
+  },
+  "decode": {
+    "inputs": {"samples": ["sampler", 0], "vae": ["vae", 0]},
+    "class_type": "VAEDecode",
+    "_meta": {"title": "Decode identity edit"}
+  },
+  "save": {
+    "inputs": {
+      "filename_prefix": "LF_Nodes/Krea2/IdentityEdit/seed-42",
+      "images": ["decode", 0]
+    },
+    "class_type": "SaveImage",
+    "_meta": {"title": "Save identity edit"}
+  }
+}

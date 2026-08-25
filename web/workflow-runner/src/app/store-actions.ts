@@ -67,7 +67,12 @@ const ACTIVE_STATUSES = new Set<WorkflowRunEntry['status']>(['pending', 'running
 
 export const ensureActiveRun = (store: WorkflowStore, preferredRunId?: string) => {
   const state = store.getState();
-  const activeRuns = state.runs.filter((run) => ACTIVE_STATUSES.has(run.status));
+  // A persisted legacy row can say "running" after its process-local control
+  // handle is gone. Keep it visible in History, but do not let an unbound row
+  // monopolize the global Run/Stop control or block new submissions.
+  const activeRuns = state.runs.filter(
+    (run) => ACTIVE_STATUSES.has(run.status) && Boolean(run.submissionId),
+  );
   const currentRunId = state.currentRunId;
 
   if (currentRunId && activeRuns.some((run) => run.runId === currentRunId)) {

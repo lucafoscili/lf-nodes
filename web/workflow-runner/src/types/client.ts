@@ -1,8 +1,15 @@
-import { WorkflowNodeResults, WorkflowRunResultPayload, WorkflowRunStatus } from './api';
+import {
+  WorkflowNodeResults,
+  WorkflowOutputArtifact,
+  WorkflowRunResultPayload,
+  WorkflowRunStatus,
+} from './api';
 
 //#region Run record
 export type RunRecord = {
   run_id: string;
+  submission_id?: string | null;
+  cancel_requested?: boolean;
   workflow_id?: string | null;
   status: WorkflowRunStatus;
   seq: number;
@@ -11,6 +18,7 @@ export type RunRecord = {
   updated_at?: number | null;
   inputs?: Record<string, unknown> | null;
   outputs?: WorkflowNodeResults | null;
+  artifacts?: WorkflowOutputArtifact[];
   result?: WorkflowRunResultPayload | null;
   error?: string | null;
 };
@@ -24,6 +32,8 @@ export type QueuePayload = {
   pending?: number;
   running?: number;
   run_id?: string;
+  submission_id?: string | null;
+  cancel_requested?: boolean;
   workflow_id?: string;
   status?: WorkflowRunStatus;
   seq?: number;

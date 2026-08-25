@@ -2,6 +2,7 @@ import aiohttp
 import asyncio
 import json
 import logging
+import math
 import time
 
 from aiohttp import web
@@ -17,6 +18,7 @@ from ..services.executor import (
     WorkflowPreparationError,
     execute_workflow,
     _extract_execution_error_message,
+    _history_was_interrupted,
     _make_run_payload,
     _sanitize_history,
 )
@@ -38,6 +40,9 @@ from ._helpers import (
 
 LOG = logging.getLogger(__name__)
 
+SSE_HEARTBEAT_INTERVAL_SECONDS = 15.0
+_SSE_CLIENT_DISCONNECTED = object()
+
 # region Helpers
 async def _update_job_status_from_history(run_id: str, entry: dict):
     """Update stored job status from ComfyUI history entry."""
@@ -48,7 +53,20 @@ async def _update_job_status_from_history(run_id: str, entry: dict):
         history_entry = entry
     status = history_entry.get("status") or {}
     history = _sanitize_history(history_entry)
-    if status.get("status_str") == "error":
+    if _history_was_interrupted(history_entry) is True:
+        result = {
+            "http_status": 200,
+            "body": _make_run_payload(
+                detail="cancelled",
+                history={"outputs": history.get("outputs", {})},
+            ),
+        }
+        await job_store.set_job_status(
+            run_id,
+            job_store.JobStatus.CANCELLED,
+            result=result,
+        )
+    elif status.get("status_str") == "error":
         detail = _extract_execution_error_message(history_entry) or "error"
         result = {
             "http_status": 500,
@@ -74,6 +92,56 @@ def _summary_requested(request: web.Request) -> bool:
         "true",
         "yes",
     }
+
+
+def _history_timestamp_seconds(value, fallback: float = 0.0) -> float:
+    """Canonicalize legacy seconds/milliseconds timestamps for history APIs."""
+
+    try:
+        timestamp = float(value)
+    except (TypeError, ValueError):
+        return fallback
+    if not math.isfinite(timestamp) or timestamp < 0:
+        return fallback
+    # Current stores use Unix seconds. Older/custom stores may have persisted
+    # JavaScript milliseconds, which must not outrank newer second values.
+    return timestamp / 1000.0 if timestamp >= 1e12 else timestamp
+
+
+def _normalize_run_history_record(run: dict) -> dict:
+    """Return one JSON-safe history record with canonical second timestamps."""
+
+    normalized = dict(run)
+    created_at = _history_timestamp_seconds(normalized.get("created_at"))
+    normalized["created_at"] = created_at
+    normalized["updated_at"] = _history_timestamp_seconds(
+        normalized.get("updated_at"),
+        created_at,
+    )
+    return normalized
+
+
+def _run_history_sort_key(run: dict) -> tuple[float, str]:
+    """Sort history cards newest-first by creation time and stable run id."""
+
+    created_at = _history_timestamp_seconds(run.get("created_at"))
+    return (-created_at, str(run.get("run_id") or ""))
+
+
+async def _enrich_submission_handles(runs: list[dict]) -> None:
+    """Attach stable lifecycle control fields without expanding result data."""
+
+    from ..services.lifecycle import get_submissions_by_prompts
+
+    by_prompt = await get_submissions_by_prompts(
+        [str(run.get("run_id") or "") for run in runs]
+    )
+    for run in runs:
+        lifecycle = by_prompt.get(str(run.get("run_id") or ""))
+        if lifecycle is None:
+            continue
+        run["submission_id"] = lifecycle.get("submission_id")
+        run["cancel_requested"] = lifecycle.get("cancel_requested", False)
 
 
 async def _send_initial_snapshot(
@@ -103,34 +171,45 @@ async def _send_initial_snapshot(
 
             LOG.debug(f"[_send_initial_snapshot] Total jobs for owner: {len(jobs)}")
 
+            events = []
             for job in jobs.values():
-                    owner = getattr(job, "owner_id", None)
-                    if subscriber_owner and owner and owner != subscriber_owner:
-                        continue
-                    if last_event is not None:
-                        try:
-                            last_run_id, last_seq = last_event
-                            jid = getattr(job, "id", getattr(job, "run_id", None))
-                            if jid == last_run_id and (getattr(job, "seq", 0) or 0) <= last_seq:
-                                continue
-                        except Exception:
-                            pass
-
-                    # Preserve the legacy full-result event by default.  The
-                    # bounded card shape is an explicit SSE opt-in.
+                owner = getattr(job, "owner_id", None)
+                if subscriber_owner and owner and owner != subscriber_owner:
+                    continue
+                if last_event is not None:
                     try:
-                        event = (
-                            serialize_run_summary(job)
-                            if summary_only
-                            else serialize_job(job, include_result_for_terminal=True)
-                        )
-                        LOG.debug(f"[_send_initial_snapshot] Sending event for run {event.get('run_id')}, status={event.get('status')}")
-                        ok = await write_sse_event(resp, event)
-                        if not ok:
-                            # client disconnected while sending snapshot
-                            break
+                        last_run_id, last_seq = last_event
+                        jid = getattr(job, "id", getattr(job, "run_id", None))
+                        if jid == last_run_id and (getattr(job, "seq", 0) or 0) <= last_seq:
+                            continue
                     except Exception:
-                        LOG.exception("Failed to send snapshot event to SSE client")
+                        pass
+
+                # Preserve the legacy full-result event by default. The
+                # bounded card shape is an explicit SSE opt-in.
+                try:
+                    events.append(
+                        serialize_run_summary(job)
+                        if summary_only
+                        else serialize_job(job, include_result_for_terminal=True)
+                    )
+                except Exception:
+                    LOG.exception("Failed to serialize snapshot event")
+
+            try:
+                await _enrich_submission_handles(events)
+            except Exception:
+                LOG.exception("Failed to enrich SSE snapshot control handles")
+
+            for event in events:
+                try:
+                    LOG.debug(f"[_send_initial_snapshot] Sending event for run {event.get('run_id')}, status={event.get('status')}")
+                    ok = await write_sse_event(resp, event)
+                    if not ok:
+                        # client disconnected while sending snapshot
+                        break
+                except Exception:
+                    LOG.exception("Failed to send snapshot event to SSE client")
         except Exception:
             LOG.exception("Failed to build/send run snapshot for SSE client")
 # endregion
@@ -220,6 +299,26 @@ async def get_workflow_status_controller(request: web.Request) -> web.Response:
 # endregion
 
 # region Events (SSE)
+async def _wait_for_sse_event(queue, resp: web.StreamResponse):
+    """Wait for a queue event while keeping idle SSE connections alive."""
+    while True:
+        try:
+            return await asyncio.wait_for(
+                queue.get(),
+                timeout=SSE_HEARTBEAT_INTERVAL_SECONDS,
+            )
+        except asyncio.TimeoutError:
+            try:
+                # SSE comments are ignored by EventSource but count as bytes on
+                # the wire for reverse proxies and other idle-connection guards.
+                await resp.write(b": heartbeat\n\n")
+            except (ConnectionResetError, asyncio.CancelledError):
+                return _SSE_CLIENT_DISCONNECTED
+            except Exception:
+                LOG.exception("Failed to write SSE heartbeat")
+                return _SSE_CLIENT_DISCONNECTED
+
+
 async def stream_runs_controller(request: web.Request) -> web.Response:
     """
     Server-Sent Events endpoint streaming job status updates.
@@ -288,11 +387,11 @@ async def stream_runs_controller(request: web.Request) -> web.Response:
 
         while True:
             try:
-                event = await q.get()
+                event = await _wait_for_sse_event(q, resp)
             except asyncio.CancelledError:
                 break
 
-            if event is None:
+            if event is None or event is _SSE_CLIENT_DISCONNECTED:
                 # sentinel to close
                 break
 
@@ -318,13 +417,21 @@ async def stream_runs_controller(request: web.Request) -> web.Response:
             try:
                 if summary_only and event.get("run_id") is not None:
                     event = serialize_run_summary(event)
+                else:
+                    # Subscriber queues share event dictionaries; lifecycle
+                    # enrichment is connection-specific and must not mutate the
+                    # shared object.
+                    event = dict(event)
+                if event.get("run_id") is not None:
+                    try:
+                        await _enrich_submission_handles([event])
+                    except Exception:
+                        LOG.exception("Failed to enrich live SSE control handle")
                 ok = await write_sse_event(resp, event)
                 if not ok:
                     break
             except (ConnectionResetError, asyncio.CancelledError):
                 break
-
-            # periodic keepalive handled by the event loop if needed
     finally:
         job_store.unsubscribe_events(q)
 
@@ -402,20 +509,25 @@ async def list_runs_controller(request: web.Request) -> web.Response:
 
     def append_run(job) -> None:
         if summary_only:
-            runs_out.append(serialize_run_summary(job))
+            runs_out.append(_normalize_run_history_record(serialize_run_summary(job)))
             return
         serialized = serialize_job(job, include_result_for_terminal=True)
-        runs_out.append({
-            "run_id": serialized.get("run_id"),
-            "workflow_id": serialized.get("workflow_id"),
-            "status": serialized.get("status"),
-            "seq": serialized.get("seq"),
-            "owner_id": serialized.get("owner_id"),
-            "created_at": serialized.get("created_at"),
-            "updated_at": serialized.get("updated_at"),
-            "result": serialized.get("result"),
-            "error": serialized.get("error"),
-        })
+        runs_out.append(
+            _normalize_run_history_record(
+                {
+                    "run_id": serialized.get("run_id"),
+                    "workflow_id": serialized.get("workflow_id"),
+                    "status": serialized.get("status"),
+                    "seq": serialized.get("seq"),
+                    "owner_id": serialized.get("owner_id"),
+                    "submission_id": serialized.get("submission_id"),
+                    "created_at": serialized.get("created_at"),
+                    "updated_at": serialized.get("updated_at"),
+                    "result": serialized.get("result"),
+                    "error": serialized.get("error"),
+                }
+            )
+        )
     # If multiple statuses requested, call list_jobs once per status and merge (bounded)
     if statuses:
         seen = set()
@@ -425,21 +537,66 @@ async def list_runs_controller(request: web.Request) -> web.Response:
                 if k in seen:
                     continue
                 seen.add(k)
-
                 append_run(job)
-                if len(runs_out) >= limit:
-                    break
-            if len(runs_out) >= limit:
-                break
+        runs_out.sort(key=_run_history_sort_key)
+        runs_out = runs_out[:limit]
     else:
         recs = await job_store.list_jobs(owner_id=owner_id, status=None)
         for k, job in recs.items():
             append_run(job)
-            if len(runs_out) >= limit:
-                break
+        runs_out.sort(key=_run_history_sort_key)
+        runs_out = runs_out[:limit]
+
+    await _enrich_submission_handles(runs_out)
 
     return web.json_response({"runs": runs_out})
 # endregion
+
+
+async def prune_missing_artifacts_controller(request: web.Request) -> web.Response:
+    """Remove failed runs and successful history whose recorded files are gone."""
+
+    if _ENABLE_GOOGLE_OAUTH:
+        auth_resp = await _require_auth(request)
+        if isinstance(auth_resp, web.Response):
+            return auth_resp
+
+    payload, err = await parse_json_body(request, expected_type=dict)
+    if err is not None:
+        return err
+    dry_run = payload.get("dry_run")
+    if type(dry_run) is not bool:
+        return web.json_response({"detail": "invalid_payload"}, status=400)
+
+    candidate_run_ids = payload.get("candidate_run_ids")
+    if dry_run:
+        if set(payload) != {"dry_run"}:
+            return web.json_response({"detail": "invalid_payload"}, status=400)
+        candidate_run_ids = None
+    elif (
+        set(payload) != {"dry_run", "candidate_run_ids"}
+        or type(candidate_run_ids) is not list
+        or any(type(run_id) is not str or not run_id for run_id in candidate_run_ids)
+        or len(candidate_run_ids) != len(set(candidate_run_ids))
+    ):
+        return web.json_response({"detail": "invalid_payload"}, status=400)
+
+    owner_id = None
+    if _ENABLE_GOOGLE_OAUTH:
+        owner_id = await get_owner_from_request(request)
+        if not isinstance(owner_id, str) or not owner_id:
+            return web.json_response({"detail": "owner_not_found"}, status=403)
+
+    # Keep cleanup-specific filesystem/storage imports off the general Runner
+    # controller import path (and out of lightweight controller tests).
+    from ..services.history_cleanup import prune_missing_artifacts
+
+    result = await prune_missing_artifacts(
+        owner_id=owner_id,
+        dry_run=dry_run,
+        candidate_run_ids=candidate_run_ids,
+    )
+    return web.json_response(result)
 
 # region Get Workflow Status
 async def get_workflow_status_controller(request: web.Request) -> web.Response:
@@ -553,7 +710,9 @@ async def get_workflow_status_controller(request: web.Request) -> web.Response:
         response_data = dict(job_status)
 
         if not include_detail:
-            return web.json_response(serialize_run_summary(response_data))
+            summary = serialize_run_summary(response_data)
+            await _enrich_submission_handles([summary])
+            return web.json_response(summary)
 
         try:
             from ..services.lifecycle import get_submission_by_prompt
@@ -562,6 +721,7 @@ async def get_workflow_status_controller(request: web.Request) -> web.Response:
             if lifecycle is not None:
                 response_data.update({
                     "submission_id": lifecycle.get("submission_id"),
+                    "cancel_requested": lifecycle.get("cancel_requested", False),
                     "lifecycle_status": lifecycle.get("status"),
                     "event_count": lifecycle.get("event_count"),
                     "latest_event": lifecycle.get("latest_event"),
@@ -570,6 +730,24 @@ async def get_workflow_status_controller(request: web.Request) -> web.Response:
                 })
         except Exception:
             LOG.debug("Could not enrich run %s with submission lifecycle", run_id, exc_info=True)
+
+        if response_data.get("status") == "succeeded" and response_data.get("result"):
+            try:
+                from ..services.remix_inputs import project_public_output_artifacts
+
+                response_data["artifacts"] = project_public_output_artifacts(
+                    run_id,
+                    response_data["result"],
+                )
+            except Exception:
+                # Artifact handoff is additive. A malformed historical result
+                # must not make the ordinary run-detail page unavailable.
+                LOG.debug(
+                    "Could not project output artifacts for run %s",
+                    run_id,
+                    exc_info=True,
+                )
+                response_data["artifacts"] = []
 
         if response_data.get("status") == "succeeded" and response_data.get("result"):
             data_tuple = extract_base64_data_from_result(response_data["result"])
@@ -776,17 +954,23 @@ async def admin_runs_api(request: web.Request) -> web.Response:
     out = []
     for k, job in recs.items():
         s = serialize_job(job, include_result_for_terminal=True)
-        out.append({
-            "run_id": s.get("run_id"),
-            "workflow_id": s.get("workflow_id"),
-            "status": s.get("status"),
-            "seq": s.get("seq"),
-            "owner_id": s.get("owner_id"),
-            "created_at": s.get("created_at"),
-            "updated_at": s.get("updated_at"),
-            "result": s.get("result"),
-            "error": s.get("error"),
-        })
+        out.append(
+            _normalize_run_history_record(
+                {
+                    "run_id": s.get("run_id"),
+                    "workflow_id": s.get("workflow_id"),
+                    "status": s.get("status"),
+                    "seq": s.get("seq"),
+                    "owner_id": s.get("owner_id"),
+                    "submission_id": s.get("submission_id"),
+                    "created_at": s.get("created_at"),
+                    "updated_at": s.get("updated_at"),
+                    "result": s.get("result"),
+                    "error": s.get("error"),
+                }
+            )
+        )
+    out.sort(key=_run_history_sort_key)
     return web.json_response({"runs": out})
 # endregion
 

@@ -60,6 +60,16 @@ def test_valid_graph_reports_coverage_without_queueing() -> None:
     assert report["uncovered_lf_types"] == ["LF_Unused"]
 
 
+def test_default_converter_remains_independent_of_comfy_runtime() -> None:
+    report = preflight_workflow_data(
+        _workflow(),
+        lf_node_types={"LF_Source", "LF_Target"},
+    )
+
+    assert report["status"] == "complete"
+    assert report["counts"]["prompt_nodes"] == 2
+
+
 def test_require_all_nodes_turns_coverage_gap_into_blocker() -> None:
     report = preflight_workflow_data(
         _workflow(),

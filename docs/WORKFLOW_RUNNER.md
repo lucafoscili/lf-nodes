@@ -4,6 +4,94 @@
 
 The Workflow Runner is a miniapp within LF Nodes that provides a web-based interface for executing ComfyUI workflows. It allows users to select, configure, and run workflows through a modern web UI, with real-time progress tracking and result visualization.
 
+### MiniMax H3 workflows
+
+The shipped `MiniMax H3` category contains eight focused local-weight cards:
+Generate Video, Animate Image, First & Last Frame, Reference Restage, Character
+Swap, Outfit Transfer, Sprite Motion, and the experimental Scene Sheet workflow.
+They use current ComfyUI Core H3 nodes, fixed 24 fps output, native 20-step
+`res_multistep`/`simple` sampling, curated native canvases, and exact 5–15 second
+frame presets. FL2VA and REF2VA cards remain bound to their respective model
+families; the transfer cards are honest reference-guided prompt presets, not
+masking or pixel-replacement tools.
+
+The model weights are not distributed by LF Nodes. MiniMax H3 weights and
+outputs remain governed by the [MiniMax H3 Community License and Acceptable Use
+Policy](https://huggingface.co/MiniMaxAI/MiniMax-H3/blob/main/LICENSE), not this
+repository's MIT license. The Community License's Applicable Territory excludes
+the European Union, United Kingdom, United States, and Republic of Korea. Every
+H3 card therefore requires an explicit, no-default access basis before upload
+staging; this is an accidental-use guard and does not grant permission. Operators
+remain responsible for authorization covering the run and display of outputs,
+rights and consent for referenced material and likenesses, and prominent
+AI-generated disclosure for public output.
+
+The generic `Compose Image Sheet` card arranges four uploads into a labeled 2×2
+PNG using `LF_ImageList` and `LF_ImageGrid`. The list seam preserves every
+source tensor at its original dimensions so the grid alone owns aspect-preserving
+contain-fit and letterboxing. Its populated LfDataDataset and deterministic
+layout receipt are also retained in Runner history. The Scene Sheet H3 card can
+consume that composite as one experimental dense reference.
+
+### Catalogue readiness
+
+Each workflow catalogue entry includes a `readiness` object with a `status`
+(`ready`, `warning`, or `setup_required`) and a bounded list of machine-readable
+`issues` (`{code, message}`). The check is intentionally lightweight: it reads
+the card's default prompt, compares its node types with ComfyUI's loaded
+`NODE_CLASS_MAPPINGS`, and verifies literal file choices only for known Core
+model-loader inputs. It does not load models, download files, contact a remote
+service, or try to predict whether every optional model choice is installed.
+
+`setup_required` means a concrete, immutable dependency is absent (the workflow
+file, a node type, or a known loader file that the form cannot replace).
+A missing default on a loader directly exposed by the form is a `warning`, so
+the user can choose an installed alternative. Scanner/import uncertainty is
+also only a warning; it is never treated as proof that a workflow cannot run.
+Runner disables Run only for `setup_required` and shows the first actionable
+reason in the workflow form; warning cards remain runnable.
+
+### Run control and output handoff
+
+Each Run click owns a stable client-generated submission ID. The floating Run
+button locks while admission is ambiguous, then becomes an elapsed Stop control
+for that exact pending or running job. Cancellation is owner-bound and targets
+only the corresponding Comfy prompt; terminal races retain their real outcome.
+
+Durable replay and Stop authority begin once the accepted Comfy prompt is bound
+to its SQLite job row. One narrow host-crash window remains: if the Runner
+process dies after Core accepts the prompt but before that row commits, a retry
+after restart cannot recover the original stable ID and may submit the work
+again. Closing that window requires a pre-queue durable reservation plus a
+preassigned Core prompt UUID across every admission provider; the current
+provider ABI deliberately does not claim that guarantee.
+
+A succeeded Runner-owned run may expose bounded `lf.workflow-artifact.v1`
+descriptors in its detail response. **Use in…** offers available artifacts only
+to compatible upload inputs on workflows that are not `setup_required`. The
+browser passes an opaque `lf.workflow-artifact-ref.v1` identity; the server
+recomputes the source manifest, rechecks ownership, media compatibility, root
+containment, symlinks, and file existence at queue time. Absolute host paths are
+never returned. This handoff prefills the destination but never auto-runs it.
+
+New files selected in Runner are stored explicitly in ComfyUI's input directory,
+using collision-safe filenames, rather than its disposable temp directory. The
+upload response contains only a portable Comfy input reference; the server keeps
+the resolved host path private in the run snapshot and later remixes reuse it
+through the same owner-bound opaque upload reference. Legacy temp uploads that
+have already disappeared remain unavailable and require reselection.
+
+### In-session workflow drafts
+
+Runner keeps one unfinished form draft per workflow while the current browser
+page remains open. Moving between Home, History, and workflow cards restores
+text, chat, selections, toggles, retained opaque upload references, and any
+still-live selected `File` objects. Drafts are intentionally memory-only: they
+are not presets, do not use local storage, and disappear on page reload. **Reset**
+clears only the current workflow's draft and remounts its declaration defaults.
+An explicit **Remix** replaces the ordinary draft with the selected run's inputs;
+neither draft navigation nor Reset starts, cancels, or mutates a submission.
+
 ## Architecture Principles
 
 ### Separation of Concerns (SoC)
@@ -59,6 +147,9 @@ modules/workflow_runner/
 │   ├── executor.py          # Core execution logic
 │   ├── background.py        # Background task management
 │   ├── google_oauth.py      # OAuth token verification
+│   ├── history_cleanup.py   # Conservative missing-artifact history pruning
+│   ├── readiness.py         # Non-executing catalogue readiness checks
+│   ├── remix_inputs.py      # Owner-bound upload and output-artifact reuse
 │   ├── job_store.py         # In-memory job storage
 │   ├── job_store_sqlite.py  # SQLite-based persistent job storage
 │   ├── proxy_service.py     # API proxy logic
@@ -161,6 +252,24 @@ Dual implementation for different deployment scenarios:
 
 The active storage backend is determined by configuration in `job_service.py`.
 
+### History Cleanup
+
+The History view exposes **Remove missing** for pruning stale Runner records.
+It removes terminal failures and successful runs only when every safely
+recorded local artifact is definitively absent. Active runs, successful
+fileless outputs, malformed or ambiguous legacy records, and runs with any
+remaining artifact are preserved. Cleanup removes Runner history and its remix
+input snapshot; it never deletes ComfyUI history or files.
+
+The UI previews the candidate count before confirmation through
+`POST /api/lf-nodes/workflow-runner/runs/prune-missing-artifacts` with
+`{"dry_run": true}`. Confirmed cleanup repeats the scan with `dry_run: false`
+and hard-deletes each unchanged record using owner, status, sequence, and
+update-time matching. At the destructive boundary, Runner also verifies a
+well-formed ComfyUI queue snapshot and preserves every pending or running
+prompt. If the queue cannot be verified, cleanup fails safe and removes
+nothing.
+
 ## Data Flow
 
 ### Workflow Execution Flow
@@ -244,6 +353,7 @@ tests/
 
 - `WORKFLOW_RUNNER_ENABLED`: When set to a truthy value (e.g., `1` or `true`), the Workflow Runner will register its HTTP routes and static frontend at startup. Default: `false`
 - `WORKFLOW_RUNNER_EXTRA_WORKFLOW_ROOTS`: Optional comma- or semicolon-separated list of absolute directories containing project-owned `.py` workflow definitions and their `.json` graphs. Default: empty
+- `WORKFLOW_RUNNER_EXTRA_WORKFLOW_GROUPS`: Optional ordered display labels matching `WORKFLOW_RUNNER_EXTRA_WORKFLOW_ROOTS`. These trusted labels keep each project's workflows together under the drawer's Custom branch without exposing filesystem paths. Missing labels fall back to `Custom`. Default: empty
 - `WORKFLOW_RUNNER_DEBUG`: Enable debug logging. Default: `false`
 - `DEV_ENV`: Enable development environment features. Default: `false`
 
@@ -263,7 +373,12 @@ tests/
 
 - `WORKFLOW_RUNNER_USE_PERSISTENCE`: Use SQLite for persistent storage instead of in-memory. Default: `false`
 - `WORKFLOW_RUNNER_DB_PATH`: Path to SQLite database file (uses default location if not set)
-- `JOB_TTL_SECONDS`: How long to keep completed jobs in storage. Default: `300`
+- `JOB_TTL_SECONDS`: Optional automatic terminal-history retention after the
+  last terminal update. Default: `0` (disabled), so Runner history remains
+  durable until the explicit **Remove missing** action is used. A positive
+  value enables operator-managed retention; it never makes active work
+  terminal and removes an expired row only after a validated ComfyUI queue
+  snapshot proves its prompt is neither pending nor running.
 - `JOB_PRUNE_INTERVAL_SECONDS`: How often to clean up old jobs. Default: `60`
 
 **Proxy Settings:**

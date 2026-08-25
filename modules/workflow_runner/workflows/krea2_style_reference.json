@@ -1,0 +1,104 @@
+{
+  "unet": {
+    "inputs": {
+      "unet_name": "KR2/krea2_turbo_int8_convrot.safetensors",
+      "weight_dtype": "default"
+    },
+    "class_type": "UNETLoader",
+    "_meta": {"title": "Load Krea 2 model"}
+  },
+  "clip": {
+    "inputs": {
+      "clip_name": "qwen3vl_4b_bf16.safetensors",
+      "type": "krea2"
+    },
+    "class_type": "CLIPLoader",
+    "_meta": {"title": "Load Krea 2 Qwen3-VL encoder"}
+  },
+  "vae": {
+    "inputs": {"vae_name": "qwen_image_vae.safetensors"},
+    "class_type": "VAELoader",
+    "_meta": {"title": "Load Krea 2 VAE"}
+  },
+  "lora": {
+    "inputs": {
+      "lora_name": "KR2/krea2_style_reference.safetensors",
+      "strength_model": 1.0,
+      "model": ["unet", 0]
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {"title": "Apply community style-reference LoRA"}
+  },
+  "patch": {
+    "inputs": {"model": ["lora", 0], "kv_cache": false},
+    "class_type": "Krea2OstrisEditModelPatch",
+    "_meta": {"title": "Enable Krea 2 reference conditioning"}
+  },
+  "style": {
+    "inputs": {"image": ""},
+    "class_type": "LoadImage",
+    "_meta": {"title": "Style reference"}
+  },
+  "positive": {
+    "inputs": {
+      "clip": ["clip", 0],
+      "prompt": "A young traveler waiting beneath a glass railway canopy during a summer rain, holding a folded map and looking toward an arriving train. Use a three-quarter full-body composition, a clear silhouette, natural posture and hands, wet stone reflections, a textured coat and leather bag, cool overcast daylight balanced by warm platform lights, and layered foreground, platform, and distant architecture.",
+      "vae": ["vae", 0],
+      "image1": ["style", 0]
+    },
+    "class_type": "TextEncodeKrea2OstrisEdit",
+    "_meta": {"title": "Prompt plus style reference"}
+  },
+  "negative": {
+    "inputs": {"conditioning": ["positive", 0]},
+    "class_type": "ConditioningZeroOut",
+    "_meta": {"title": "Zero unconditional conditioning"}
+  },
+  "resolution": {
+    "inputs": {
+      "aspect_ratio": "1:1 (Square)",
+      "megapixels": 1.9,
+      "multiple": 16
+    },
+    "class_type": "ResolutionSelector",
+    "_meta": {"title": "Choose largest safe Krea 2 canvas"}
+  },
+  "latent": {
+    "inputs": {
+      "width": ["resolution", 0],
+      "height": ["resolution", 1],
+      "batch_size": 1
+    },
+    "class_type": "EmptySD3LatentImage",
+    "_meta": {"title": "Target canvas"}
+  },
+  "sampler": {
+    "inputs": {
+      "seed": 42,
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "beta",
+      "denoise": 1.0,
+      "model": ["patch", 0],
+      "positive": ["positive", 0],
+      "negative": ["negative", 0],
+      "latent_image": ["latent", 0]
+    },
+    "class_type": "KSampler",
+    "_meta": {"title": "Style-reference sampler"}
+  },
+  "decode": {
+    "inputs": {"samples": ["sampler", 0], "vae": ["vae", 0]},
+    "class_type": "VAEDecode",
+    "_meta": {"title": "Decode style-guided image"}
+  },
+  "save": {
+    "inputs": {
+      "filename_prefix": "LF_Nodes/Krea2/StyleReference/seed-42",
+      "images": ["decode", 0]
+    },
+    "class_type": "SaveImage",
+    "_meta": {"title": "Save style-guided image"}
+  }
+}

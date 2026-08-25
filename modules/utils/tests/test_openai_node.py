@@ -11,8 +11,7 @@ TESTS_ROOT = Path(__file__).resolve().parents[2]
 if str(TESTS_ROOT) not in sys.path:
     sys.path.insert(0, str(TESTS_ROOT))
 
-from modules.tests.common_mocks import setup_common_mocks  # type: ignore
-setup_common_mocks(torch_enabled=False)
+from modules.tests.common_mocks import scoped_common_mocks  # type: ignore
 
 import asyncio
 import json
@@ -20,8 +19,10 @@ import os
 import unittest
 from unittest.mock import AsyncMock, MagicMock, patch
 
-# Import the actual node implementation
-from modules.nodes.llm.openai_api import LF_OpenAIAPI, NODE_CLASS_MAPPINGS, NODE_DISPLAY_NAME_MAPPINGS
+# Import the actual node implementation with optional Comfy dependencies
+# mocked, then restore sys.modules before collecting unrelated helper tests.
+with scoped_common_mocks(torch_enabled=True):
+    from modules.nodes.llm.openai_api import LF_OpenAIAPI, NODE_CLASS_MAPPINGS, NODE_DISPLAY_NAME_MAPPINGS
 from modules.utils.constants import Input
 from modules.tests.common_mocks import mock_async_response, mock_openai_response, mock_prompt_server  # type: ignore
 
@@ -77,9 +78,9 @@ class TestOpenAINode(unittest.TestCase):
         """Test class attributes are properly set."""
         self.assertEqual(LF_OpenAIAPI.CATEGORY, "✨ LF Nodes/LLM")
         self.assertEqual(LF_OpenAIAPI.FUNCTION, "on_exec")
-        self.assertEqual(len(LF_OpenAIAPI.OUTPUT_TOOLTIPS), 4)
-        self.assertEqual(LF_OpenAIAPI.RETURN_NAMES, ("text", "clean", "raw_json", "json"))
-        self.assertEqual(LF_OpenAIAPI.RETURN_TYPES, (Input.STRING, Input.STRING, Input.JSON, Input.JSON))
+        self.assertEqual(len(LF_OpenAIAPI.OUTPUT_TOOLTIPS), 5)
+        self.assertEqual(LF_OpenAIAPI.RETURN_NAMES, ("text", "clean", "raw_json", "json", "image"))
+        self.assertEqual(LF_OpenAIAPI.RETURN_TYPES, (Input.STRING, Input.STRING, Input.JSON, Input.JSON, Input.IMAGE))
 
     def test_node_mappings(self):
         """Test node class and display name mappings."""
@@ -158,11 +159,12 @@ class TestOpenAINode(unittest.TestCase):
             ))
 
         # Verify result structure
-        self.assertEqual(len(result), 4)
+        self.assertEqual(len(result), 5)
         self.assertIn("Hello from GPT!", result[0])  # extracted text
         self.assertIn("Hello from GPT!", result[1])  # clean text
         self.assertIsInstance(result[2], str)  # raw_json
         self.assertIsInstance(result[3], str)  # json_text
+        self.assertIsNone(result[4])  # no input image supplied
 
         # Verify request payload
         call_args = mock_session.post.call_args
@@ -174,7 +176,7 @@ class TestOpenAINode(unittest.TestCase):
         self.assertEqual(payload["messages"][0]["role"], "system")
         self.assertEqual(payload["messages"][0]["content"], "You are helpful")
         self.assertEqual(payload["messages"][1]["role"], "user")
-        self.assertEqual(payload["messages"][1]["content"], "Hello")
+        self.assertEqual(payload["messages"][1]["content"], [{"type": "text", "text": "Hello"}])
 
         # Verify logging
         mock_logger_instance.log.assert_any_call("Sending request...")

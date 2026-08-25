@@ -12,6 +12,12 @@ import {
 } from '../utils/common';
 import { DEBUG_MESSAGES } from '../utils/constants';
 import { debugLog } from '../utils/debug';
+import {
+  listCompatibleArtifactTargets,
+  queueArtifactHandoff,
+  WorkflowArtifactTarget,
+  WorkflowOutputArtifact,
+} from '../utils/artifact-handoff';
 import { createComponent, createOutputComponent } from './components';
 import { MAIN_CLASSES } from './layout.main';
 
@@ -27,11 +33,17 @@ export const RESULTS_CLASSES = {
   grid: theme.bemClass(ROOT_CLASS, 'grid'),
   h3: theme.bemClass(ROOT_CLASS, 'title-h3'),
   history: theme.bemClass(ROOT_CLASS, 'history'),
+  handoff: theme.bemClass(ROOT_CLASS, 'handoff'),
+  handoffArtifact: theme.bemClass(ROOT_CLASS, 'handoff-artifact'),
+  handoffCancel: theme.bemClass(ROOT_CLASS, 'handoff-cancel'),
+  handoffDestination: theme.bemClass(ROOT_CLASS, 'handoff-destination'),
+  handoffSubmit: theme.bemClass(ROOT_CLASS, 'handoff-submit'),
   remix: theme.bemClass(ROOT_CLASS, 'remix'),
   item: theme.bemClass(ROOT_CLASS, 'item'),
   results: theme.bemClass(ROOT_CLASS, 'results'),
   subtitle: theme.bemClass(ROOT_CLASS, 'subtitle'),
   title: theme.bemClass(ROOT_CLASS, 'title'),
+  useOutput: theme.bemClass(ROOT_CLASS, 'use-output'),
 } as const;
 //#endregion
 
@@ -42,9 +54,12 @@ const _formatDescription = (selectedRun: WorkflowRunEntry | null, description: s
   }
 
   const timestamp = selectedRun.updatedAt || selectedRun.createdAt;
-  return `Run ${selectedRun.runId.slice(0, 8)} - ${formatStatus(
+  const submission = selectedRun.submissionId
+    ? ` · Submission ${selectedRun.submissionId}`
+    : '';
+  return `Run ${selectedRun.runId.slice(0, 8)}${submission} · ${formatStatus(
     selectedRun.status,
-  )} - ${formatTimestamp(timestamp)}`;
+  )} · ${formatTimestamp(timestamp)}`;
 };
 const _description = () => {
   const p = document.createElement('p');
@@ -98,13 +113,76 @@ const _title = (store: WorkflowStore) => {
   remixButton.lfUiState = 'disabled';
   remixButton.addEventListener('lf-button-event', (e) => buttonHandler(e, store));
 
+  const useOutputButton = document.createElement('lf-button');
+  useOutputButton.className = RESULTS_CLASSES.useOutput;
+  useOutputButton.lfIcon = refresh;
+  useOutputButton.lfLabel = 'Use in…';
+  useOutputButton.lfStyling = 'flat';
+  useOutputButton.lfUiSize = 'small';
+  useOutputButton.lfUiState = 'disabled';
+
   title.appendChild(h3);
   title.appendChild(actions);
   actions.appendChild(backButton);
   actions.appendChild(remixButton);
+  actions.appendChild(useOutputButton);
   actions.appendChild(historyButton);
 
-  return { actions, backButton, h3, historyButton, remixButton, title };
+  return {
+    actions,
+    backButton,
+    h3,
+    historyButton,
+    remixButton,
+    title,
+    useOutputButton,
+  };
+};
+
+const _handoff = () => {
+  const root = document.createElement('section');
+  root.className = RESULTS_CLASSES.handoff;
+  root.hidden = true;
+
+  const heading = document.createElement('h4');
+  heading.textContent = 'Use a saved output as an input';
+  const description = document.createElement('p');
+  description.textContent =
+    'Choose an output and destination. Runner keeps an opaque link to the saved artifact; no re-upload is needed.';
+
+  const artifactLabel = document.createElement('label');
+  artifactLabel.textContent = 'Output';
+  const artifact = document.createElement('select');
+  artifact.className = RESULTS_CLASSES.handoffArtifact;
+  artifactLabel.appendChild(artifact);
+
+  const destinationLabel = document.createElement('label');
+  destinationLabel.textContent = 'Destination';
+  const destination = document.createElement('select');
+  destination.className = RESULTS_CLASSES.handoffDestination;
+  destinationLabel.appendChild(destination);
+
+  const controls = document.createElement('div');
+  const submit = document.createElement('lf-button');
+  submit.className = RESULTS_CLASSES.handoffSubmit;
+  submit.lfLabel = 'Continue';
+  submit.lfUiState = 'primary';
+  submit.lfUiSize = 'small';
+  const cancel = document.createElement('lf-button');
+  cancel.className = RESULTS_CLASSES.handoffCancel;
+  cancel.lfLabel = 'Cancel';
+  cancel.lfStyling = 'flat';
+  cancel.lfUiSize = 'small';
+  controls.appendChild(submit);
+  controls.appendChild(cancel);
+
+  root.appendChild(heading);
+  root.appendChild(description);
+  root.appendChild(artifactLabel);
+  root.appendChild(destinationLabel);
+  root.appendChild(controls);
+
+  return { artifact, cancel, destination, root, submit };
 };
 //#endregion
 
@@ -119,6 +197,8 @@ export const createResultsSection = (store: WorkflowStore): WorkflowSectionContr
     resultPayload: unknown;
     runId: string | null;
   } | null = null;
+  let handoffArtifacts: WorkflowOutputArtifact[] = [];
+  let handoffTargets: WorkflowArtifactTarget[] = [];
   //#endregion
 
   //#region Destroy
@@ -151,10 +231,73 @@ export const createResultsSection = (store: WorkflowStore): WorkflowSectionContr
 
     const results = _results();
     const description = _description();
-    const { actions, backButton, h3, historyButton, remixButton, title } = _title(store);
+    const {
+      actions,
+      backButton,
+      h3,
+      historyButton,
+      remixButton,
+      title,
+      useOutputButton,
+    } = _title(store);
+    const handoff = _handoff();
+
+    const updateDestinations = () => {
+      const previousTarget = handoffTargets[Number(handoff.destination.value) || 0];
+      const artifact = handoffArtifacts[Number(handoff.artifact.value) || 0];
+      handoffTargets = artifact
+        ? listCompatibleArtifactTargets(store.getState().workflows, artifact)
+        : [];
+      handoff.destination.replaceChildren(
+        ...handoffTargets.map((target, index) => {
+          const option = document.createElement('option');
+          option.value = String(index);
+          option.textContent = `${target.workflowName} — ${target.inputName}`;
+          return option;
+        }),
+      );
+      const preservedTarget = previousTarget
+        ? handoffTargets.findIndex(
+            (target) =>
+              target.workflowId === previousTarget.workflowId &&
+              target.inputId === previousTarget.inputId,
+          )
+        : -1;
+      handoff.destination.value = String(Math.max(0, preservedTarget));
+      handoff.submit.lfUiState = handoffTargets.length ? 'primary' : 'disabled';
+    };
+
+    handoff.artifact.addEventListener('change', updateDestinations);
+    useOutputButton.addEventListener('lf-button-event', (event) => {
+      if ((event as CustomEvent<{ eventType?: string }>).detail?.eventType !== 'click') {
+        return;
+      }
+      handoff.root.hidden = !handoff.root.hidden;
+      if (!handoff.root.hidden) {
+        updateDestinations();
+        handoff.artifact.focus();
+      }
+    });
+    handoff.cancel.addEventListener('lf-button-event', (event) => {
+      if ((event as CustomEvent<{ eventType?: string }>).detail?.eventType === 'click') {
+        handoff.root.hidden = true;
+        useOutputButton.focus();
+      }
+    });
+    handoff.submit.addEventListener('lf-button-event', (event) => {
+      if ((event as CustomEvent<{ eventType?: string }>).detail?.eventType !== 'click') {
+        return;
+      }
+      const artifact = handoffArtifacts[Number(handoff.artifact.value) || 0];
+      const target = handoffTargets[Number(handoff.destination.value) || 0];
+      if (artifact && target) {
+        queueArtifactHandoff(store, artifact, target);
+      }
+    });
 
     _root.appendChild(title);
     _root.appendChild(description);
+    _root.appendChild(handoff.root);
     _root.appendChild(results);
 
     elements[MAIN_CLASSES._].prepend(_root);
@@ -165,9 +308,15 @@ export const createResultsSection = (store: WorkflowStore): WorkflowSectionContr
     uiRegistry.set(RESULTS_CLASSES.description, description);
     uiRegistry.set(RESULTS_CLASSES.h3, h3);
     uiRegistry.set(RESULTS_CLASSES.history, historyButton);
+    uiRegistry.set(RESULTS_CLASSES.handoff, handoff.root);
+    uiRegistry.set(RESULTS_CLASSES.handoffArtifact, handoff.artifact);
+    uiRegistry.set(RESULTS_CLASSES.handoffCancel, handoff.cancel);
+    uiRegistry.set(RESULTS_CLASSES.handoffDestination, handoff.destination);
+    uiRegistry.set(RESULTS_CLASSES.handoffSubmit, handoff.submit);
     uiRegistry.set(RESULTS_CLASSES.remix, remixButton);
     uiRegistry.set(RESULTS_CLASSES.results, results);
     uiRegistry.set(RESULTS_CLASSES.title, title);
+    uiRegistry.set(RESULTS_CLASSES.useOutput, useOutputButton);
 
     debugLog(WORKFLOW_RESULTS_MOUNTED);
   };
@@ -193,7 +342,14 @@ export const createResultsSection = (store: WorkflowStore): WorkflowSectionContr
     const h3 = elements[RESULTS_CLASSES.h3] as HTMLElement;
     const backButton = elements[RESULTS_CLASSES.back] as HTMLLfButtonElement | undefined;
     const historyButton = elements[RESULTS_CLASSES.history] as HTMLLfButtonElement | undefined;
+    const handoff = elements[RESULTS_CLASSES.handoff] as HTMLElement | undefined;
+    const handoffArtifact = elements[
+      RESULTS_CLASSES.handoffArtifact
+    ] as HTMLSelectElement | undefined;
     const remixButton = elements[RESULTS_CLASSES.remix] as HTMLLfButtonElement | undefined;
+    const useOutputButton = elements[
+      RESULTS_CLASSES.useOutput
+    ] as HTMLLfButtonElement | undefined;
 
     descr.textContent = _formatDescription(selectedRun, manager.workflow.description());
     h3.textContent = selectedRun?.workflowName || manager.workflow.title();
@@ -208,6 +364,76 @@ export const createResultsSection = (store: WorkflowStore): WorkflowSectionContr
         selectedRun && workflowAvailable && Object.keys(selectedRun.inputs || {}).length > 0
           ? 'primary'
           : 'disabled';
+    }
+
+    const artifacts = (selectedRun?.artifacts || [])
+      .filter(
+        (artifact): artifact is WorkflowOutputArtifact =>
+          Boolean(
+            artifact &&
+              artifact.schema === 'lf.workflow-artifact.v1' &&
+              artifact.reference?.schema === 'lf.workflow-artifact-ref.v1' &&
+              artifact.filename,
+          ),
+      )
+      .sort((a, b) => Number(b.available) - Number(a.available));
+    const hasUsableArtifact = artifacts.some(
+      (artifact) =>
+        artifact.available &&
+        listCompatibleArtifactTargets(state.workflows, artifact).length > 0,
+    );
+    if (useOutputButton) {
+      useOutputButton.lfUiState = hasUsableArtifact ? 'primary' : 'disabled';
+      useOutputButton.hidden = selectedRun?.status !== 'succeeded' || artifacts.length === 0;
+      useOutputButton.title = hasUsableArtifact
+        ? 'Use a saved output in another workflow'
+        : artifacts.some((artifact) => artifact.available)
+          ? 'No ready workflow accepts this output type'
+          : 'Saved outputs are no longer available on disk';
+    }
+    if (handoff && handoffArtifact) {
+      if (renderedContent?.runId !== selectedRun?.runId || !hasUsableArtifact) {
+        handoff.hidden = true;
+      }
+      const previousArtifactId = handoffArtifacts[Number(handoffArtifact.value) || 0]?.reference
+        .artifactId;
+      handoffArtifacts = artifacts;
+      const nameCounts = artifacts.reduce((counts, artifact) => {
+        counts.set(artifact.filename, (counts.get(artifact.filename) || 0) + 1);
+        return counts;
+      }, new Map<string, number>());
+      handoffArtifact.replaceChildren(
+        ...artifacts.map((artifact, index) => {
+          const option = document.createElement('option');
+          option.value = String(index);
+          option.disabled =
+            !artifact.available ||
+            listCompatibleArtifactTargets(state.workflows, artifact).length === 0;
+          const source = (nameCounts.get(artifact.filename) || 0) > 1
+            ? ` · node ${artifact.nodeId || 'unknown'}`
+            : '';
+          const unavailable = artifact.available ? '' : ' · file no longer on disk';
+          option.textContent = `${artifact.filename}${source}${unavailable}`;
+          return option;
+        }),
+      );
+      const firstUsable = artifacts.findIndex(
+        (artifact) =>
+          artifact.available &&
+          listCompatibleArtifactTargets(state.workflows, artifact).length > 0,
+      );
+      const preservedArtifact = previousArtifactId
+        ? artifacts.findIndex(
+            (artifact) =>
+              artifact.reference.artifactId === previousArtifactId &&
+              artifact.available &&
+              listCompatibleArtifactTargets(state.workflows, artifact).length > 0,
+          )
+        : -1;
+      handoffArtifact.value = String(
+        Math.max(0, preservedArtifact >= 0 ? preservedArtifact : firstUsable),
+      );
+      handoffArtifact.dispatchEvent(new Event('change'));
     }
 
     const outputs = state.results ?? selectedRun?.outputs ?? null;

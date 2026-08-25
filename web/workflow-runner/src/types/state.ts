@@ -2,6 +2,7 @@ import { LfThemeUIState } from '@lf-widgets/foundations/dist';
 import {
   WorkflowAPIDataset,
   WorkflowNodeResults,
+  WorkflowOutputArtifact,
   WorkflowRunResultPayload,
   WorkflowRunStatus,
 } from './api';
@@ -18,12 +19,14 @@ export interface WorkflowStore {
 
 //#region State
 export interface WorkflowState {
+  cancelInFlightRunId: string | null;
   current: WorkflowStateCurrent;
   currentRunId: string | null;
   isDebug: boolean;
   manager: WorkflowManager | null;
   inputStatuses: Record<string, WorkflowCellStatus>;
   inputPrefillRunId: string | null;
+  submissionInFlightId: string | null;
   mutate: WorkflowStateMutators;
   notifications: WorkflowStateNotification[];
   queuedJobs: number;
@@ -40,10 +43,12 @@ export interface WorkflowStateCurrent {
 }
 export type WorkflowStateListener = (state: WorkflowState) => void;
 export interface WorkflowStateMutators {
+  cancelInFlightRun: (runId: string | null) => void;
   isDebug: (isDebug: boolean) => void;
   manager: (manager: WorkflowManager) => void;
   inputStatus: (cellId: string, status: WorkflowCellStatus) => void;
   inputPrefillRun: (runId: string | null) => void;
+  submissionInFlight: (submissionId: string | null) => void;
   notifications: {
     add: (notification: WorkflowStateNotification) => void;
     removeById: (id: string) => void;
@@ -66,6 +71,9 @@ export interface WorkflowStateNotification {
 }
 export interface WorkflowRunEntry {
   runId: string;
+  artifacts: WorkflowOutputArtifact[];
+  submissionId?: string | null;
+  cancelRequested?: boolean;
   createdAt: number;
   updatedAt: number;
   status: WorkflowRunStatus;
@@ -87,6 +95,7 @@ export interface WorkflowRoute {
 }
 export interface WorkflowStateRunMutators {
   clear: () => void;
+  removeMany: (runIds: string[]) => void;
   upsert: (entry: WorkflowRunEntryUpdate) => void;
 }
 export type WorkflowStateUpdater = (state: WorkflowState) => WorkflowState;

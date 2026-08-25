@@ -13,14 +13,13 @@ from typing import Any, Callable, Iterable
 
 
 _REPO_ROOT = Path(__file__).resolve().parents[3]
-_COMFYUI_ROOT = _REPO_ROOT.parents[1]
 _LF_NODES_ROOT = _REPO_ROOT / "modules" / "nodes"
 
 
 def discover_lf_node_types(nodes_root: Path = _LF_NODES_ROOT) -> frozenset[str]:
     """Read LF mapping keys from source without importing ComfyUI or model code."""
 
-    discovered: set[str] = set()
+    discovered: dict[str, Path] = {}
     for source_path in sorted(nodes_root.rglob("*.py")):
         try:
             tree = ast.parse(source_path.read_text(encoding="utf-8-sig"), filename=str(source_path))
@@ -42,19 +41,23 @@ def discover_lf_node_types(nodes_root: Path = _LF_NODES_ROOT) -> frozenset[str]:
                 value = statement.value
 
             if isinstance(value, ast.Dict):
-                discovered.update(
-                    key.value
-                    for key in value.keys
-                    if isinstance(key, ast.Constant) and isinstance(key.value, str)
-                )
+                for key in value.keys:
+                    if not (isinstance(key, ast.Constant) and isinstance(key.value, str)):
+                        continue
+                    existing = discovered.get(key.value)
+                    if existing is not None:
+                        raise ValueError(
+                            f"Duplicate published node mapping {key.value!r}: "
+                            f"{existing} and {source_path}"
+                        )
+                    discovered[key.value] = source_path
     return frozenset(discovered)
 
 
 def _workflow_to_prompt(workflow: dict[str, Any]) -> dict[str, Any]:
-    for import_root in (_COMFYUI_ROOT, _REPO_ROOT):
-        if str(import_root) not in sys.path:
-            sys.path.insert(0, str(import_root))
-    from modules.workflow_runner.services.registry import _workflow_to_prompt as convert
+    if str(_REPO_ROOT) not in sys.path:
+        sys.path.insert(0, str(_REPO_ROOT))
+    from modules.workflow_runner.utils.prompt import workflow_to_prompt as convert
 
     return convert(copy.deepcopy(workflow))
 

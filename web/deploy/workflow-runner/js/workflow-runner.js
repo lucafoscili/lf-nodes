@@ -1,14 +1,17 @@
+var _a, _b, _c;
 import "../../js/lf-widgets-core-C1ol8nV-.js";
 import { g as getLfFramework } from "../../js/lf-widgets-framework-B9H_1Mhq.js";
 import "../../js/lf-widgets-foundations-BHCEI3uH.js";
 const apiBase = "/api";
 const apiRoutePrefix = "/lf-nodes";
+const runtime = { "comfyUiProtocol": "http:", "comfyUiPort": 8188, "frontendProxyPort": 9188 };
 const chat = { "provider": "kobold" };
 const staticPaths = { "assets": "/lf-nodes/static/assets/" };
 const theme$a = "dark";
 const runnerConfig = {
   apiBase,
   apiRoutePrefix,
+  runtime,
   chat,
   staticPaths,
   theme: theme$a
@@ -16,6 +19,9 @@ const runnerConfig = {
 const API_BASE = runnerConfig.apiBase;
 const API_ROUTE_PREFIX = runnerConfig.apiRoutePrefix;
 const API_ROOT = `${API_BASE}${API_ROUTE_PREFIX}`;
+const DEFAULT_COMFY_UI_PROTOCOL = String((_a = runnerConfig.runtime) == null ? void 0 : _a.comfyUiProtocol);
+const DEFAULT_COMFY_UI_PORT = String((_b = runnerConfig.runtime) == null ? void 0 : _b.comfyUiPort);
+const DEFAULT_FRONTEND_PROXY_PORT = String((_c = runnerConfig.runtime) == null ? void 0 : _c.frontendProxyPort);
 const CHAT_CFG = runnerConfig.chat;
 const ensureLeadingSlash = (p) => p ? p.startsWith("/") ? p : `/${p}` : void 0;
 const CHAT_ENDPOINT = `${API_ROOT}${ensureLeadingSlash(CHAT_CFG.path ?? `/proxy/${CHAT_CFG.provider}`)}`;
@@ -64,7 +70,7 @@ const upsertRun = (store, entry) => {
 const ACTIVE_STATUSES = /* @__PURE__ */ new Set(["pending", "running"]);
 const ensureActiveRun = (store, preferredRunId) => {
   const state = store.getState();
-  const activeRuns = state.runs.filter((run) => ACTIVE_STATUSES.has(run.status));
+  const activeRuns = state.runs.filter((run) => ACTIVE_STATUSES.has(run.status) && Boolean(run.submissionId));
   const currentRunId = state.currentRunId;
   if (currentRunId && activeRuns.some((run) => run.runId === currentRunId)) {
     return;
@@ -191,7 +197,15 @@ const ACTION_BUTTON_CLASSES = {
 };
 const createActionButtonSection = (store) => {
   const { ACTION_BUTTON_DESTROYED, ACTION_BUTTON_MOUNTED, ACTION_BUTTON_UPDATED } = DEBUG_MESSAGES;
+  let elapsedTimer = null;
+  const stopElapsedTimer = () => {
+    if (elapsedTimer !== null) {
+      clearTimeout(elapsedTimer);
+      elapsedTimer = null;
+    }
+  };
   const destroy = () => {
+    stopElapsedTimer();
     const { manager } = store.getState();
     const { uiRegistry } = manager;
     for (const cls in ACTION_BUTTON_CLASSES) {
@@ -210,6 +224,7 @@ const createActionButtonSection = (store) => {
     const _root = document.createElement("lf-button");
     _root.className = theme$9.bemClass(ACTION_BUTTON_CLASSES._);
     _root.lfIcon = "send";
+    _root.lfLabel = "Run";
     _root.lfStyling = "floating";
     _root.title = "Run current workflow";
     _root.addEventListener("lf-button-event", (e) => buttonHandler(e, store));
@@ -218,7 +233,9 @@ const createActionButtonSection = (store) => {
     debugLog(ACTION_BUTTON_MOUNTED);
   };
   const render = () => {
-    const { manager } = store.getState();
+    var _a2, _b2, _c2, _d, _e, _f;
+    const state = store.getState();
+    const { manager } = state;
     const { uiRegistry } = manager;
     const elements = uiRegistry.get();
     if (!elements) {
@@ -227,6 +244,49 @@ const createActionButtonSection = (store) => {
     const _root = elements[ACTION_BUTTON_CLASSES._];
     if (!_root) {
       return;
+    }
+    const activeRun = state.runs.find((run) => run.runId === state.currentRunId && ["pending", "running"].includes(run.status));
+    const submissionBusy = Boolean(state.submissionInFlightId && !activeRun);
+    const cancellationBusy = Boolean(activeRun && (state.cancelInFlightRunId === activeRun.runId || activeRun.cancelRequested));
+    stopElapsedTimer();
+    if (activeRun) {
+      const elapsedSeconds = Math.max(0, Math.floor((Date.now() - activeRun.createdAt) / 1e3));
+      _root.dataset.mode = cancellationBusy ? "stopping" : "stop";
+      _root.lfAriaLabel = cancellationBusy ? "Stopping current workflow run" : "Stop current workflow run";
+      _root.lfIcon = "x";
+      _root.lfLabel = cancellationBusy ? `Stopping · ${elapsedSeconds}s` : `Stop · ${elapsedSeconds}s`;
+      _root.lfShowSpinner = true;
+      _root.lfUiState = cancellationBusy || !activeRun.submissionId ? "disabled" : "danger";
+      _root.title = cancellationBusy ? `Cancellation requested for ${activeRun.runId}` : `Stop ${activeRun.status} run ${activeRun.runId}`;
+      if (typeof _root.setAttribute === "function") {
+        _root.setAttribute("aria-busy", "true");
+      }
+      elapsedTimer = setTimeout(render, 1e3);
+    } else if (submissionBusy) {
+      _root.dataset.mode = "starting";
+      _root.lfAriaLabel = "Starting workflow run";
+      _root.lfIcon = "send";
+      _root.lfLabel = "Starting…";
+      _root.lfShowSpinner = true;
+      _root.lfUiState = "disabled";
+      _root.title = `Submitting ${state.submissionInFlightId}`;
+      if (typeof _root.setAttribute === "function") {
+        _root.setAttribute("aria-busy", "true");
+      }
+    } else {
+      const workflow = (_b2 = (_a2 = manager.workflow) == null ? void 0 : _a2.current) == null ? void 0 : _b2.call(_a2);
+      const setupRequired = ((_c2 = workflow == null ? void 0 : workflow.readiness) == null ? void 0 : _c2.status) === "setup_required";
+      const setupMessage = (_f = (_e = (_d = workflow == null ? void 0 : workflow.readiness) == null ? void 0 : _d.issues) == null ? void 0 : _e[0]) == null ? void 0 : _f.message;
+      _root.dataset.mode = setupRequired ? "setup-required" : "run";
+      _root.lfAriaLabel = setupRequired ? "Workflow setup required" : "Run current workflow";
+      _root.lfIcon = setupRequired ? theme$9.get.icon("alertTriangle") : "send";
+      _root.lfLabel = setupRequired ? "Setup required" : "Run";
+      _root.lfShowSpinner = false;
+      _root.lfUiState = state.current.id && !setupRequired ? "primary" : "disabled";
+      _root.title = setupRequired ? setupMessage || "Install the required workflow dependencies before running." : "Run current workflow";
+      if (typeof _root.removeAttribute === "function") {
+        _root.removeAttribute("aria-busy");
+      }
     }
     debugLog(ACTION_BUTTON_UPDATED);
   };
@@ -278,38 +338,82 @@ const DRAWER_CLASSES = {
   tree: theme$8.bemClass(ROOT_CLASS$8, "tree")
 };
 const _createDataset$2 = (workflows) => {
-  var _a;
-  const { article, listTree } = getLfFramework().theme.get.icons();
-  const categories = [];
-  const home = { icon: article, id: "home", value: "Home" };
-  const wfs = { icon: listTree, id: "workflows", value: "Workflows", children: categories };
+  var _a2;
+  const { article, folderOpen, lfSignature, listTree } = getLfFramework().theme.get.icons();
+  const fallback = folderOpen || article || listTree || lfSignature;
+  const shippedCategories = [];
+  const customCollections = [];
+  const home = { icon: article || fallback, id: "home", value: "Home" };
+  const shipped = {
+    icon: lfSignature || fallback,
+    id: "workflows:shipped",
+    value: "LF Nodes",
+    children: shippedCategories
+  };
+  const custom = {
+    icon: folderOpen || fallback,
+    id: "workflows:custom",
+    value: "Custom",
+    children: customCollections
+  };
+  const roots = [];
+  const wfs = { icon: listTree || fallback, id: "workflows", value: "Workflows", children: roots };
   const clone = JSON.parse(JSON.stringify(workflows));
-  (_a = clone.nodes) == null ? void 0 : _a.forEach((node) => {
+  (_a2 = clone.nodes) == null ? void 0 : _a2.forEach((node) => {
+    var _a3, _b2, _c2, _d, _e;
     node.children = void 0;
-    const name = (node == null ? void 0 : node.category) || "Uncategorized";
-    let category = categories.find((cat) => cat.value === name);
-    if (!category) {
-      category = { icon: _getIcon(name), id: name, value: name, children: [] };
-      categories.push(category);
+    const issue = (_c2 = (_b2 = (_a3 = node.readiness) == null ? void 0 : _a3.issues) == null ? void 0 : _b2[0]) == null ? void 0 : _c2.message;
+    if (((_d = node.readiness) == null ? void 0 : _d.status) === "setup_required") {
+      node.icon = getLfFramework().theme.get.icon("alertTriangle");
+      node.description = `Setup required${issue ? `: ${issue}` : "."}`;
+    } else if (((_e = node.readiness) == null ? void 0 : _e.status) === "warning") {
+      node.icon = getLfFramework().theme.get.icon("hexagonInfo");
+      node.description = `Check setup${issue ? `: ${issue}` : "."}`;
     }
-    category.children.push(node);
+    const isCustom = node.origin !== "shipped";
+    const name = isCustom ? node.collection || "Custom" : node.category || "Uncategorized";
+    const groups = isCustom ? customCollections : shippedCategories;
+    let group = groups.find((item) => item.value === name);
+    if (!group) {
+      group = {
+        icon: isCustom ? _getIcon("Custom") : _getIcon(name),
+        id: `${isCustom ? "custom" : "shipped"}:${name}`,
+        value: name,
+        children: []
+      };
+      groups.push(group);
+    }
+    group.children.push(node);
   });
+  shippedCategories.sort((a, b) => String(a.value).localeCompare(String(b.value)));
+  customCollections.sort((a, b) => String(a.value).localeCompare(String(b.value)));
+  if (shippedCategories.length) {
+    roots.push(shipped);
+  }
+  if (customCollections.length) {
+    roots.push(custom);
+  }
   const dataset = {
     nodes: [home, wfs]
   };
-  categories.sort((a, b) => String(a.value).localeCompare(String(b.value)));
   return dataset;
 };
 const _getIcon = (category) => {
-  const { alertTriangle, codeCircle2, photo, json, robot, wand } = getLfFramework().theme.get.icons();
+  const { ai, codeCircle2, folder, folderOpen, json, music, photo, robot, wand } = getLfFramework().theme.get.icons();
+  const fallback = folder || folderOpen || photo;
   const category_icons = {
+    Audio: music,
+    Custom: folderOpen,
     "Image Processing": wand,
     JSON: json,
+    "Krea 2": ai,
+    "MiniMax H3": ai,
     LLM: robot,
+    "Media Intake": folderOpen,
     SVG: codeCircle2,
     "Text to Image": photo
   };
-  return category_icons[category] || alertTriangle;
+  return category_icons[category] || fallback;
 };
 const _button = (store, icon, label, className) => {
   const button = document.createElement("lf-button");
@@ -490,6 +594,12 @@ const createComponent = {
     _setProps("LfMasonry", comp, props, slot_map);
     return comp;
   },
+  compare: (props) => {
+    const comp = document.createElement("lf-compare");
+    comp.className = "workflow-output-compare";
+    _setProps("LfCompare", comp, props);
+    return comp;
+  },
   select: (props) => {
     const comp = document.createElement("lf-select");
     _setProps("LfSelect", comp, props);
@@ -545,13 +655,33 @@ const _artifactUrl = (artifact) => {
   }
   const params = new URLSearchParams({
     filename: artifact.filename,
-    subfolder: artifact.subfolder || "",
+    subfolder: (artifact.subfolder || "").replaceAll("\\", "/"),
     type: artifact.type || "output"
   });
   return `/view?${params.toString()}`;
 };
+const _outputRelativeArtifact = (value) => {
+  if (typeof value !== "string" || !value || value.includes("\\")) {
+    return null;
+  }
+  const parts = value.split("/");
+  if (parts.some((part) => !part || part === "." || part === "..") || !parts.every((part) => /^[^\\/?#%:\x00-\x1F\x7F]+$/.test(part))) {
+    return null;
+  }
+  const filename = parts.pop();
+  if (!filename) {
+    return null;
+  }
+  return {
+    filename,
+    subfolder: parts.join("/"),
+    type: "output"
+  };
+};
+const _fileNameArtifacts = (fileNames) => Array.isArray(fileNames) ? fileNames.map(_outputRelativeArtifact).filter((artifact) => artifact !== null) : [];
+const _isBrowserImage = (artifact, mediaType) => /^(?:image\/(?:png|jpe?g|gif|webp|avif|apng|svg\+xml))$/.test(mediaType) || /\.(?:png|jpe?g|gif|webp|avif|apng|svg)$/i.test(artifact.filename);
 const _mediaOutput = (artifacts) => {
-  var _a;
+  var _a2;
   if (!Array.isArray(artifacts) || artifacts.length === 0) {
     return null;
   }
@@ -564,9 +694,10 @@ const _mediaOutput = (artifacts) => {
     const item = document.createElement("figure");
     item.className = "workflow-output-media__item";
     const src = _artifactUrl(artifact);
-    const mediaType = ((_a = artifact.media_type) == null ? void 0 : _a.toLowerCase()) || "";
+    const mediaType = ((_a2 = artifact.media_type) == null ? void 0 : _a2.toLowerCase()) || "";
     const isAudio = mediaType.startsWith("audio/") || /\.(?:wav|mp3|m4a|flac|ogg|opus)$/i.test(artifact.filename);
     const isVideo = mediaType.startsWith("video/") || /\.(?:mp4|webm)$/i.test(artifact.filename);
+    const isBrowserImage = _isBrowserImage(artifact, mediaType);
     if (isAudio) {
       const audio = document.createElement("audio");
       audio.className = "workflow-output-media__preview";
@@ -582,20 +713,28 @@ const _mediaOutput = (artifacts) => {
       video.preload = "metadata";
       video.src = src;
       item.appendChild(video);
-    } else {
+    } else if (isBrowserImage) {
       const image = document.createElement("img");
       image.alt = artifact.filename;
       image.className = "workflow-output-media__preview";
       image.loading = "lazy";
       image.src = src;
       item.appendChild(image);
+    } else {
+      const note = document.createElement("span");
+      note.className = "workflow-output-media__note";
+      note.textContent = "Preview is not available in the browser.";
+      item.appendChild(note);
     }
     const link = document.createElement("a");
     link.className = "workflow-output-media__link";
     link.href = src;
+    if (!isAudio && !isVideo && !isBrowserImage) {
+      link.download = artifact.filename;
+    }
     link.rel = "noopener";
     link.target = "_blank";
-    link.textContent = artifact.filename;
+    link.textContent = !isAudio && !isVideo && !isBrowserImage ? `Download ${artifact.filename}` : artifact.filename;
     item.appendChild(link);
     media.appendChild(item);
   }
@@ -605,7 +744,8 @@ const createOutputComponent = (descriptor) => {
   const { syntax } = getLfFramework();
   const { civitai_metadata, dataset, audio, file_names, audios, images, json, metadata, props, shape, slot_map, string, svg } = descriptor;
   const el = document.createElement("div");
-  const media = _mediaOutput([...images || [], ...audio || [], ...audios || []]);
+  const standardArtifacts = [...images || [], ...audio || [], ...audios || []];
+  const media = _mediaOutput(standardArtifacts.length > 0 ? standardArtifacts : _fileNameArtifacts(file_names));
   if (media) {
     el.appendChild(media);
     const hasLegacyPayload = shape === "masonry" ? dataset !== void 0 && dataset !== null : Boolean(string || svg || civitai_metadata || (file_names == null ? void 0 : file_names.length) || json || metadata || dataset);
@@ -614,6 +754,14 @@ const createOutputComponent = (descriptor) => {
     }
   }
   switch (shape) {
+    case "compare": {
+      const p = props || {};
+      p.lfDataset = dataset || json || { nodes: [] };
+      p.lfShape || (p.lfShape = "image");
+      const compare = createComponent.compare(p);
+      el.appendChild(compare);
+      break;
+    }
     case "code": {
       const p = props || {};
       p.lfValue = string || svg || civitai_metadata || (file_names == null ? void 0 : file_names.join("\n")) || syntax.json.unescape(json || metadata || dataset || { message: "No output available." }).unescapedString;
@@ -738,7 +886,7 @@ const createHeaderSection = (store) => {
   };
   const render = () => {
     const { alertTriangle, check, hourglassLow } = theme$7.get.icons();
-    const { current, manager, queuedJobs, currentRunId } = store.getState();
+    const { current, manager, queuedJobs, currentRunId, runs } = store.getState();
     const { message, status } = current;
     const { uiRegistry } = manager;
     const elements = uiRegistry.get();
@@ -778,9 +926,11 @@ const createHeaderSection = (store) => {
       }
       let displayMessage = message || "";
       if (currentRunId) {
-        const parts = currentRunId.split("-");
-        const prefix = parts[0] || currentRunId.slice(0, 8);
-        displayMessage = `Processing ${prefix}`;
+        const run = runs.find((entry) => entry.runId === currentRunId);
+        const prefix = currentRunId.slice(0, 8);
+        const submission = (run == null ? void 0 : run.submissionId) ? ` · ${run.submissionId.slice(0, 16)}` : "";
+        const activity = (run == null ? void 0 : run.cancelRequested) ? "Stopping" : (run == null ? void 0 : run.status) === "pending" ? "Queued" : "Running";
+        displayMessage = `${activity} ${prefix}${submission}`;
       }
       appMessage.innerText = displayMessage;
       appMessage.dataset.status = status || "";
@@ -919,12 +1069,12 @@ const _tryParseJson = (value) => {
   }
 };
 const deepMerge = (defs, outs) => {
-  var _a, _b, _c;
+  var _a2, _b2, _c2;
   const prep = [];
   for (const id in defs) {
     const cell = defs[id];
     const { nodeId } = cell;
-    const result = ((_b = (_a = outs == null ? void 0 : outs[nodeId]) == null ? void 0 : _a.lf_output) == null ? void 0 : _b[0]) || ((_c = outs == null ? void 0 : outs[nodeId]) == null ? void 0 : _c[0]) || (outs == null ? void 0 : outs[nodeId]);
+    const result = ((_b2 = (_a2 = outs == null ? void 0 : outs[nodeId]) == null ? void 0 : _a2.lf_output) == null ? void 0 : _b2[0]) || ((_c2 = outs == null ? void 0 : outs[nodeId]) == null ? void 0 : _c2[0]) || (outs == null ? void 0 : outs[nodeId]);
     const item = {
       ...JSON.parse(JSON.stringify(cell)),
       ...JSON.parse(JSON.stringify(result || {}))
@@ -973,7 +1123,7 @@ const normalizeTimestamp = (v, fallback) => {
     return fallback;
   }
   const n = typeof v === "string" ? Number(v) : v;
-  if (!Number.isFinite(n) || Number.isNaN(n)) {
+  if (!Number.isFinite(n) || Number.isNaN(n) || n < 0) {
     return fallback;
   }
   return n < 1e12 ? Math.floor(n * 1e3) : Math.floor(n);
@@ -987,17 +1137,21 @@ const formatTimestamp = (timestamp) => {
   return date.toLocaleString();
 };
 const recordToUI = (rec, wfs = {}) => {
-  var _a, _b, _c;
-  const { created_at, error, inputs, result, run_id, status, updated_at, workflow_id } = rec;
+  var _a2, _b2, _c2;
+  const { artifacts, cancel_requested, created_at, error, inputs, result, run_id, status, submission_id, updated_at, workflow_id } = rec;
   const hasResult = rec.result !== void 0;
-  const resultOutputs = ((_c = (_b = (_a = result == null ? void 0 : result.body) == null ? void 0 : _a.payload) == null ? void 0 : _b.history) == null ? void 0 : _c.outputs) || null;
+  const resultOutputs = ((_c2 = (_b2 = (_a2 = result == null ? void 0 : result.body) == null ? void 0 : _a2.payload) == null ? void 0 : _b2.history) == null ? void 0 : _c2.outputs) || null;
   const outputs = resultOutputs ?? (rec.outputs !== void 0 ? rec.outputs : hasResult ? null : void 0);
-  const now = Date.now();
+  const createdAt = normalizeTimestamp(created_at, 0);
+  const updatedAt = normalizeTimestamp(updated_at, createdAt);
   const map = {
     runId: run_id,
+    ...artifacts !== void 0 ? { artifacts } : {},
+    ...submission_id !== void 0 ? { submissionId: submission_id } : {},
+    ...cancel_requested !== void 0 ? { cancelRequested: cancel_requested } : {},
     status,
-    createdAt: normalizeTimestamp(created_at, now),
-    updatedAt: normalizeTimestamp(updated_at, now),
+    createdAt,
+    updatedAt,
     workflowId: workflow_id ?? null,
     workflowName: workflow_id && wfs[workflow_id] || "Unknown workflow",
     error: error ?? null,
@@ -1085,6 +1239,88 @@ const clearChildren = (element) => {
     element.removeChild(element.firstChild);
   }
 };
+const pendingHandoffs = /* @__PURE__ */ new WeakMap();
+const acceptsArtifact = (cell, artifact) => {
+  var _a2;
+  const html = (_a2 = cell.props) == null ? void 0 : _a2.lfHtmlAttributes;
+  const accept = typeof (html == null ? void 0 : html.accept) === "string" ? html.accept.trim().toLowerCase() : "";
+  if (!accept) {
+    return true;
+  }
+  const filename = artifact.filename.toLowerCase();
+  const mediaType = (artifact.mediaType || "").toLowerCase();
+  return accept.split(",").some((rawRule) => {
+    const rule = rawRule.trim();
+    if (!rule) {
+      return false;
+    }
+    if (rule.startsWith(".")) {
+      return filename.endsWith(rule);
+    }
+    if (rule.endsWith("/*")) {
+      return mediaType.startsWith(rule.slice(0, -1));
+    }
+    return Boolean(mediaType) && mediaType === rule;
+  });
+};
+const listCompatibleArtifactTargets = (workflows, artifact) => {
+  var _a2, _b2;
+  if (!artifact.available) {
+    return [];
+  }
+  const targets = [];
+  for (const workflow of workflows.nodes || []) {
+    if (((_a2 = workflow.readiness) == null ? void 0 : _a2.status) === "setup_required") {
+      continue;
+    }
+    const inputGroup = (_b2 = workflow.children) == null ? void 0 : _b2.find((child) => child == null ? void 0 : child.id.endsWith(":inputs"));
+    const cells = (inputGroup == null ? void 0 : inputGroup.cells) || {};
+    for (const inputId of Object.keys(cells)) {
+      const cell = cells[inputId];
+      if (!cell || cell.shape !== "upload" || !acceptsArtifact(cell, artifact)) {
+        continue;
+      }
+      targets.push({
+        workflowId: workflow.id,
+        workflowName: String(workflow.value || workflow.id),
+        inputId,
+        inputName: String(cell.value || cell.title || inputId)
+      });
+    }
+  }
+  return targets.sort((a, b) => {
+    const workflowOrder = a.workflowName.localeCompare(b.workflowName);
+    return workflowOrder || a.inputName.localeCompare(b.inputName);
+  });
+};
+const buildArtifactPrefill = (artifact) => ({
+  schema: "lf.workflow-upload-prefill.v1",
+  reference: { ...artifact.reference },
+  names: [artifact.filename],
+  available: artifact.available
+});
+const queueArtifactHandoff = (store, artifact, target) => {
+  if (!artifact.available || !target.workflowId || !target.inputId) {
+    return;
+  }
+  pendingHandoffs.set(store, {
+    workflowId: target.workflowId,
+    inputs: { [target.inputId]: buildArtifactPrefill(artifact) }
+  });
+  const state = store.getState();
+  if (state.current.id !== target.workflowId) {
+    state.mutate.workflow(target.workflowId);
+  }
+  changeView(store, "workflow", { clearResults: true });
+};
+const consumeArtifactHandoff = (store, workflowId) => {
+  const pending = pendingHandoffs.get(store);
+  if (!pending || !workflowId || pending.workflowId !== workflowId) {
+    return null;
+  }
+  pendingHandoffs.delete(store);
+  return pending.inputs;
+};
 const { theme: theme$6 } = getLfFramework();
 const ROOT_CLASS$6 = "results-section";
 const RESULTS_CLASSES = {
@@ -1096,18 +1332,25 @@ const RESULTS_CLASSES = {
   grid: theme$6.bemClass(ROOT_CLASS$6, "grid"),
   h3: theme$6.bemClass(ROOT_CLASS$6, "title-h3"),
   history: theme$6.bemClass(ROOT_CLASS$6, "history"),
+  handoff: theme$6.bemClass(ROOT_CLASS$6, "handoff"),
+  handoffArtifact: theme$6.bemClass(ROOT_CLASS$6, "handoff-artifact"),
+  handoffCancel: theme$6.bemClass(ROOT_CLASS$6, "handoff-cancel"),
+  handoffDestination: theme$6.bemClass(ROOT_CLASS$6, "handoff-destination"),
+  handoffSubmit: theme$6.bemClass(ROOT_CLASS$6, "handoff-submit"),
   remix: theme$6.bemClass(ROOT_CLASS$6, "remix"),
   item: theme$6.bemClass(ROOT_CLASS$6, "item"),
   results: theme$6.bemClass(ROOT_CLASS$6, "results"),
   subtitle: theme$6.bemClass(ROOT_CLASS$6, "subtitle"),
-  title: theme$6.bemClass(ROOT_CLASS$6, "title")
+  title: theme$6.bemClass(ROOT_CLASS$6, "title"),
+  useOutput: theme$6.bemClass(ROOT_CLASS$6, "use-output")
 };
 const _formatDescription = (selectedRun, description) => {
   if (!selectedRun) {
     return description;
   }
   const timestamp = selectedRun.updatedAt || selectedRun.createdAt;
-  return `Run ${selectedRun.runId.slice(0, 8)} - ${formatStatus(selectedRun.status)} - ${formatTimestamp(timestamp)}`;
+  const submission = selectedRun.submissionId ? ` · Submission ${selectedRun.submissionId}` : "";
+  return `Run ${selectedRun.runId.slice(0, 8)}${submission} · ${formatStatus(selectedRun.status)} · ${formatTimestamp(timestamp)}`;
 };
 const _description$2 = () => {
   const p = document.createElement("p");
@@ -1152,16 +1395,72 @@ const _title$3 = (store) => {
   remixButton.lfUiSize = "small";
   remixButton.lfUiState = "disabled";
   remixButton.addEventListener("lf-button-event", (e) => buttonHandler(e, store));
+  const useOutputButton = document.createElement("lf-button");
+  useOutputButton.className = RESULTS_CLASSES.useOutput;
+  useOutputButton.lfIcon = refresh;
+  useOutputButton.lfLabel = "Use in…";
+  useOutputButton.lfStyling = "flat";
+  useOutputButton.lfUiSize = "small";
+  useOutputButton.lfUiState = "disabled";
   title.appendChild(h3);
   title.appendChild(actions);
   actions.appendChild(backButton);
   actions.appendChild(remixButton);
+  actions.appendChild(useOutputButton);
   actions.appendChild(historyButton);
-  return { actions, backButton, h3, historyButton, remixButton, title };
+  return {
+    actions,
+    backButton,
+    h3,
+    historyButton,
+    remixButton,
+    title,
+    useOutputButton
+  };
+};
+const _handoff = () => {
+  const root = document.createElement("section");
+  root.className = RESULTS_CLASSES.handoff;
+  root.hidden = true;
+  const heading = document.createElement("h4");
+  heading.textContent = "Use a saved output as an input";
+  const description = document.createElement("p");
+  description.textContent = "Choose an output and destination. Runner keeps an opaque link to the saved artifact; no re-upload is needed.";
+  const artifactLabel = document.createElement("label");
+  artifactLabel.textContent = "Output";
+  const artifact = document.createElement("select");
+  artifact.className = RESULTS_CLASSES.handoffArtifact;
+  artifactLabel.appendChild(artifact);
+  const destinationLabel = document.createElement("label");
+  destinationLabel.textContent = "Destination";
+  const destination = document.createElement("select");
+  destination.className = RESULTS_CLASSES.handoffDestination;
+  destinationLabel.appendChild(destination);
+  const controls = document.createElement("div");
+  const submit = document.createElement("lf-button");
+  submit.className = RESULTS_CLASSES.handoffSubmit;
+  submit.lfLabel = "Continue";
+  submit.lfUiState = "primary";
+  submit.lfUiSize = "small";
+  const cancel = document.createElement("lf-button");
+  cancel.className = RESULTS_CLASSES.handoffCancel;
+  cancel.lfLabel = "Cancel";
+  cancel.lfStyling = "flat";
+  cancel.lfUiSize = "small";
+  controls.appendChild(submit);
+  controls.appendChild(cancel);
+  root.appendChild(heading);
+  root.appendChild(description);
+  root.appendChild(artifactLabel);
+  root.appendChild(destinationLabel);
+  root.appendChild(controls);
+  return { artifact, cancel, destination, root, submit };
 };
 const createResultsSection = (store) => {
   const { WORKFLOW_RESULTS_DESTROYED, WORKFLOW_RESULTS_MOUNTED, WORKFLOW_RESULTS_UPDATED } = DEBUG_MESSAGES;
   let renderedContent = null;
+  let handoffArtifacts = [];
+  let handoffTargets = [];
   const destroy = () => {
     const { manager } = store.getState();
     const { uiRegistry } = manager;
@@ -1183,9 +1482,55 @@ const createResultsSection = (store) => {
     _root.className = RESULTS_CLASSES._;
     const results = _results();
     const description = _description$2();
-    const { actions, backButton, h3, historyButton, remixButton, title } = _title$3(store);
+    const { actions, backButton, h3, historyButton, remixButton, title, useOutputButton } = _title$3(store);
+    const handoff = _handoff();
+    const updateDestinations = () => {
+      const previousTarget = handoffTargets[Number(handoff.destination.value) || 0];
+      const artifact = handoffArtifacts[Number(handoff.artifact.value) || 0];
+      handoffTargets = artifact ? listCompatibleArtifactTargets(store.getState().workflows, artifact) : [];
+      handoff.destination.replaceChildren(...handoffTargets.map((target, index) => {
+        const option = document.createElement("option");
+        option.value = String(index);
+        option.textContent = `${target.workflowName} — ${target.inputName}`;
+        return option;
+      }));
+      const preservedTarget = previousTarget ? handoffTargets.findIndex((target) => target.workflowId === previousTarget.workflowId && target.inputId === previousTarget.inputId) : -1;
+      handoff.destination.value = String(Math.max(0, preservedTarget));
+      handoff.submit.lfUiState = handoffTargets.length ? "primary" : "disabled";
+    };
+    handoff.artifact.addEventListener("change", updateDestinations);
+    useOutputButton.addEventListener("lf-button-event", (event) => {
+      var _a2;
+      if (((_a2 = event.detail) == null ? void 0 : _a2.eventType) !== "click") {
+        return;
+      }
+      handoff.root.hidden = !handoff.root.hidden;
+      if (!handoff.root.hidden) {
+        updateDestinations();
+        handoff.artifact.focus();
+      }
+    });
+    handoff.cancel.addEventListener("lf-button-event", (event) => {
+      var _a2;
+      if (((_a2 = event.detail) == null ? void 0 : _a2.eventType) === "click") {
+        handoff.root.hidden = true;
+        useOutputButton.focus();
+      }
+    });
+    handoff.submit.addEventListener("lf-button-event", (event) => {
+      var _a2;
+      if (((_a2 = event.detail) == null ? void 0 : _a2.eventType) !== "click") {
+        return;
+      }
+      const artifact = handoffArtifacts[Number(handoff.artifact.value) || 0];
+      const target = handoffTargets[Number(handoff.destination.value) || 0];
+      if (artifact && target) {
+        queueArtifactHandoff(store, artifact, target);
+      }
+    });
     _root.appendChild(title);
     _root.appendChild(description);
+    _root.appendChild(handoff.root);
     _root.appendChild(results);
     elements[MAIN_CLASSES._].prepend(_root);
     uiRegistry.set(RESULTS_CLASSES._, _root);
@@ -1194,13 +1539,19 @@ const createResultsSection = (store) => {
     uiRegistry.set(RESULTS_CLASSES.description, description);
     uiRegistry.set(RESULTS_CLASSES.h3, h3);
     uiRegistry.set(RESULTS_CLASSES.history, historyButton);
+    uiRegistry.set(RESULTS_CLASSES.handoff, handoff.root);
+    uiRegistry.set(RESULTS_CLASSES.handoffArtifact, handoff.artifact);
+    uiRegistry.set(RESULTS_CLASSES.handoffCancel, handoff.cancel);
+    uiRegistry.set(RESULTS_CLASSES.handoffDestination, handoff.destination);
+    uiRegistry.set(RESULTS_CLASSES.handoffSubmit, handoff.submit);
     uiRegistry.set(RESULTS_CLASSES.remix, remixButton);
     uiRegistry.set(RESULTS_CLASSES.results, results);
     uiRegistry.set(RESULTS_CLASSES.title, title);
+    uiRegistry.set(RESULTS_CLASSES.useOutput, useOutputButton);
     debugLog(WORKFLOW_RESULTS_MOUNTED);
   };
   const render = () => {
-    var _a, _b, _c;
+    var _a2, _b2, _c2, _d;
     const { syntax } = getLfFramework();
     const state = store.getState();
     const { manager } = state;
@@ -1216,14 +1567,51 @@ const createResultsSection = (store) => {
     const h3 = elements[RESULTS_CLASSES.h3];
     const backButton = elements[RESULTS_CLASSES.back];
     const historyButton = elements[RESULTS_CLASSES.history];
+    const handoff = elements[RESULTS_CLASSES.handoff];
+    const handoffArtifact = elements[RESULTS_CLASSES.handoffArtifact];
     const remixButton = elements[RESULTS_CLASSES.remix];
+    const useOutputButton = elements[RESULTS_CLASSES.useOutput];
     descr.textContent = _formatDescription(selectedRun, manager.workflow.description());
     h3.textContent = (selectedRun == null ? void 0 : selectedRun.workflowName) || manager.workflow.title();
     backButton.lfUiState = selectedRun ? "primary" : "disabled";
     historyButton.lfUiState = runs.length > 0 ? "primary" : "disabled";
-    const workflowAvailable = Boolean((selectedRun == null ? void 0 : selectedRun.workflowId) && ((_b = (_a = state.workflows) == null ? void 0 : _a.nodes) == null ? void 0 : _b.some((node) => node.id === selectedRun.workflowId)));
+    const workflowAvailable = Boolean((selectedRun == null ? void 0 : selectedRun.workflowId) && ((_b2 = (_a2 = state.workflows) == null ? void 0 : _a2.nodes) == null ? void 0 : _b2.some((node) => node.id === selectedRun.workflowId)));
     if (remixButton) {
       remixButton.lfUiState = selectedRun && workflowAvailable && Object.keys(selectedRun.inputs || {}).length > 0 ? "primary" : "disabled";
+    }
+    const artifacts = ((selectedRun == null ? void 0 : selectedRun.artifacts) || []).filter((artifact) => {
+      var _a3;
+      return Boolean(artifact && artifact.schema === "lf.workflow-artifact.v1" && ((_a3 = artifact.reference) == null ? void 0 : _a3.schema) === "lf.workflow-artifact-ref.v1" && artifact.filename);
+    }).sort((a, b) => Number(b.available) - Number(a.available));
+    const hasUsableArtifact = artifacts.some((artifact) => artifact.available && listCompatibleArtifactTargets(state.workflows, artifact).length > 0);
+    if (useOutputButton) {
+      useOutputButton.lfUiState = hasUsableArtifact ? "primary" : "disabled";
+      useOutputButton.hidden = (selectedRun == null ? void 0 : selectedRun.status) !== "succeeded" || artifacts.length === 0;
+      useOutputButton.title = hasUsableArtifact ? "Use a saved output in another workflow" : artifacts.some((artifact) => artifact.available) ? "No ready workflow accepts this output type" : "Saved outputs are no longer available on disk";
+    }
+    if (handoff && handoffArtifact) {
+      if ((renderedContent == null ? void 0 : renderedContent.runId) !== (selectedRun == null ? void 0 : selectedRun.runId) || !hasUsableArtifact) {
+        handoff.hidden = true;
+      }
+      const previousArtifactId = (_c2 = handoffArtifacts[Number(handoffArtifact.value) || 0]) == null ? void 0 : _c2.reference.artifactId;
+      handoffArtifacts = artifacts;
+      const nameCounts = artifacts.reduce((counts, artifact) => {
+        counts.set(artifact.filename, (counts.get(artifact.filename) || 0) + 1);
+        return counts;
+      }, /* @__PURE__ */ new Map());
+      handoffArtifact.replaceChildren(...artifacts.map((artifact, index) => {
+        const option = document.createElement("option");
+        option.value = String(index);
+        option.disabled = !artifact.available || listCompatibleArtifactTargets(state.workflows, artifact).length === 0;
+        const source = (nameCounts.get(artifact.filename) || 0) > 1 ? ` · node ${artifact.nodeId || "unknown"}` : "";
+        const unavailable = artifact.available ? "" : " · file no longer on disk";
+        option.textContent = `${artifact.filename}${source}${unavailable}`;
+        return option;
+      }));
+      const firstUsable = artifacts.findIndex((artifact) => artifact.available && listCompatibleArtifactTargets(state.workflows, artifact).length > 0);
+      const preservedArtifact = previousArtifactId ? artifacts.findIndex((artifact) => artifact.reference.artifactId === previousArtifactId && artifact.available && listCompatibleArtifactTargets(state.workflows, artifact).length > 0) : -1;
+      handoffArtifact.value = String(Math.max(0, preservedArtifact >= 0 ? preservedArtifact : firstUsable));
+      handoffArtifact.dispatchEvent(new Event("change"));
     }
     const outputs = state.results ?? (selectedRun == null ? void 0 : selectedRun.outputs) ?? null;
     const nextContent = {
@@ -1269,7 +1657,7 @@ const createResultsSection = (store) => {
         element.appendChild(wrapper);
       };
       appendCodeBlock("Error detail", stringifyDetail((selectedRun == null ? void 0 : selectedRun.error) ?? null));
-      appendCodeBlock("Run payload", stringifyDetail(((_c = selectedRun == null ? void 0 : selectedRun.resultPayload) == null ? void 0 : _c.body) ?? (selectedRun == null ? void 0 : selectedRun.resultPayload) ?? null));
+      appendCodeBlock("Run payload", stringifyDetail(((_d = selectedRun == null ? void 0 : selectedRun.resultPayload) == null ? void 0 : _d.body) ?? (selectedRun == null ? void 0 : selectedRun.resultPayload) ?? null));
       return;
     }
     const workflow = manager.workflow.current();
@@ -1396,11 +1784,11 @@ const HOME_CLASSES = {
   title: theme$4.bemClass(ROOT_CLASS$4, "title")
 };
 const _createDataset$1 = (store) => {
-  var _a;
+  var _a2;
   const { workflows } = store.getState();
   const clone = JSON.parse(JSON.stringify(workflows));
   const root = { cells: {}, id: "root", value: "Workflows" };
-  (_a = clone.nodes) == null ? void 0 : _a.forEach((node) => {
+  (_a2 = clone.nodes) == null ? void 0 : _a2.forEach((node) => {
     const id = node.id;
     root.cells[id] = {
       lfDataset: {
@@ -1506,19 +1894,21 @@ const createHomeSection = (store) => {
   };
 };
 const masonryHandler = (e, store) => {
-  var _a, _b, _c, _d, _e, _f;
+  var _a2, _b2, _c2, _d, _e, _f, _g;
   const { comp, originalEvent } = e.detail;
   const ogEvent = originalEvent;
   const { manager, mutate } = store.getState();
   if (comp.rootElement.className === OUTPUTS_CLASSES.masonry) {
-    switch ((_a = ogEvent == null ? void 0 : ogEvent.detail) == null ? void 0 : _a.eventType) {
+    switch ((_a2 = ogEvent == null ? void 0 : ogEvent.detail) == null ? void 0 : _a2.eventType) {
       case "click":
         const card = ogEvent.detail.comp;
-        const node = (_c = (_b = card.lfDataset) == null ? void 0 : _b.nodes) == null ? void 0 : _c[0];
+        const node = (_c2 = (_b2 = card.lfDataset) == null ? void 0 : _b2.nodes) == null ? void 0 : _c2[0];
         const isValidCard = (node == null ? void 0 : node.id) && card.rootElement.tagName.toLowerCase() === "lf-card";
         if (isValidCard) {
           const { id } = node;
-          manager.runs.select(id, "run");
+          if (manager.runs.get(id) && ((_d = manager.runs.selected()) == null ? void 0 : _d.runId) !== id) {
+            manager.runs.select(id, "run");
+          }
         }
         break;
       default:
@@ -1526,10 +1916,10 @@ const masonryHandler = (e, store) => {
     }
   }
   if (comp.rootElement.className === HOME_CLASSES.masonry) {
-    switch ((_d = ogEvent == null ? void 0 : ogEvent.detail) == null ? void 0 : _d.eventType) {
+    switch ((_e = ogEvent == null ? void 0 : ogEvent.detail) == null ? void 0 : _e.eventType) {
       case "click":
         const card = ogEvent.detail.comp;
-        const node = (_f = (_e = card.lfDataset) == null ? void 0 : _e.nodes) == null ? void 0 : _f[0];
+        const node = (_g = (_f = card.lfDataset) == null ? void 0 : _f.nodes) == null ? void 0 : _g[0];
         const isValidCard = (node == null ? void 0 : node.id) && card.rootElement.tagName.toLowerCase() === "lf-card";
         if (isValidCard) {
           const { id } = node;
@@ -1542,10 +1932,24 @@ const masonryHandler = (e, store) => {
     }
   }
 };
+const masonryClickFallback = (e, store) => {
+  var _a2, _b2, _c2;
+  const card = e.composedPath().find((entry) => entry instanceof Element && entry.tagName.toLowerCase() === "lf-card");
+  const node = (_b2 = (_a2 = card == null ? void 0 : card.lfDataset) == null ? void 0 : _a2.nodes) == null ? void 0 : _b2[0];
+  const runId = typeof (node == null ? void 0 : node.id) === "string" ? node.id : "";
+  if (!runId) {
+    return;
+  }
+  const { manager } = store.getState();
+  if (manager.runs.get(runId) && ((_c2 = manager.runs.selected()) == null ? void 0 : _c2.runId) !== runId) {
+    manager.runs.select(runId, "run");
+  }
+};
 const { theme: theme$3 } = getLfFramework();
 const ROOT_CLASS$3 = "outputs-section";
 const OUTPUTS_CLASSES = {
   _: theme$3.bemClass(ROOT_CLASS$3),
+  cleanup: theme$3.bemClass(ROOT_CLASS$3, "cleanup"),
   empty: theme$3.bemClass(ROOT_CLASS$3, "empty"),
   h4: theme$3.bemClass(ROOT_CLASS$3, "title-h4"),
   controls: theme$3.bemClass(ROOT_CLASS$3, "controls"),
@@ -1598,7 +2002,7 @@ const _extractImageFromDataset = (dataset) => {
         continue;
       }
       const shape = cell.shape;
-      const value = cell.value ?? cell.lfValue;
+      const value = cell.value || cell.lfValue;
       if (shape === "image" && typeof value === "string" && value) {
         return value;
       }
@@ -1606,11 +2010,25 @@ const _extractImageFromDataset = (dataset) => {
   }
   return null;
 };
+const _isBrowserPreviewPath = (value) => /\.(?:png|jpe?g|gif|webp|avif|apng|svg)(?:$|[?#])/i.test(value);
+const _isTemporaryMedia = (value, explicitType) => {
+  if (explicitType === "temp") {
+    return true;
+  }
+  if (!value.startsWith("/view?")) {
+    return false;
+  }
+  try {
+    return new URLSearchParams(value.slice(value.indexOf("?") + 1)).get("type") === "temp";
+  } catch {
+    return false;
+  }
+};
 const getFirstOutputMediaUrl = (outputs) => {
   if (!outputs) {
     return "";
   }
-  const tryPayload = (payload) => {
+  const tryPayload = (payload, allowTemporary) => {
     if (!payload || typeof payload !== "object") {
       return { image: null, fallback: null };
     }
@@ -1623,7 +2041,13 @@ const getFirstOutputMediaUrl = (outputs) => {
       ...payload.audios || []
     ];
     if (artifacts.length) {
-      const artifact = artifacts.find((item) => item && (item.url || item.filename));
+      const artifact = artifacts.find((item) => {
+        if (!item || !item.url && !item.filename) {
+          return false;
+        }
+        const value = typeof item.url === "string" ? item.url : item.filename || "";
+        return allowTemporary || !_isTemporaryMedia(value, item.type);
+      });
       if (artifact) {
         if (typeof artifact.url === "string" && artifact.url.startsWith("/")) {
           return { image: artifact.url, fallback: null };
@@ -1631,7 +2055,7 @@ const getFirstOutputMediaUrl = (outputs) => {
         if (typeof artifact.filename === "string" && artifact.filename) {
           const params = new URLSearchParams({
             filename: artifact.filename,
-            subfolder: artifact.subfolder || "",
+            subfolder: (artifact.subfolder || "").replaceAll("\\", "/"),
             type: artifact.type || "output"
           });
           return { image: `/view?${params.toString()}`, fallback: null };
@@ -1641,8 +2065,8 @@ const getFirstOutputMediaUrl = (outputs) => {
     if (Array.isArray(payload.lf_output)) {
       for (const entry of payload.lf_output) {
         const { dataset: dataset2, file_names, json, metadata, string, svg } = entry;
-        const image2 = _extractImageFromDataset(dataset2) ?? (file_names == null ? void 0 : file_names.find((name) => typeof name === "string" && name)) ?? null;
-        if (image2) {
+        const image2 = _extractImageFromDataset(dataset2) ?? _extractImageFromDataset(json) ?? (file_names == null ? void 0 : file_names.find((name) => typeof name === "string" && name && _isBrowserPreviewPath(name))) ?? null;
+        if (image2 && (allowTemporary || !_isTemporaryMedia(image2))) {
           foundImage = image2;
           break;
         }
@@ -1662,34 +2086,36 @@ const getFirstOutputMediaUrl = (outputs) => {
     }
     const dataset = payload.dataset;
     const fromDataset = _extractImageFromDataset(dataset);
-    if (fromDataset) {
+    if (fromDataset && (allowTemporary || !_isTemporaryMedia(fromDataset))) {
       return { image: fromDataset, fallback: null };
     }
     const fileNames = payload.file_names;
     if (Array.isArray(fileNames)) {
-      const fileName = fileNames.find((name) => typeof name === "string" && name);
-      if (fileName) {
+      const fileName = fileNames.find((name) => typeof name === "string" && name && _isBrowserPreviewPath(name));
+      if (fileName && (allowTemporary || !_isTemporaryMedia(fileName))) {
         return { image: fileName, fallback: null };
       }
     }
     const image = payload.image;
-    if (typeof image === "string" && image) {
+    if (typeof image === "string" && image && (allowTemporary || !_isTemporaryMedia(image))) {
       return { image, fallback: null };
     }
     return { image: null, fallback: fallbackCandidate ?? fallback };
   };
   let fallbackImage = null;
-  for (const nodeId in outputs) {
-    if (!Object.prototype.hasOwnProperty.call(outputs, nodeId)) {
-      continue;
-    }
-    const payload = outputs[nodeId];
-    const { image, fallback: candidate } = tryPayload(payload);
-    if (image) {
-      return image;
-    }
-    if (!fallbackImage && candidate) {
-      fallbackImage = candidate;
+  for (const allowTemporary of [false, true]) {
+    for (const nodeId in outputs) {
+      if (!Object.prototype.hasOwnProperty.call(outputs, nodeId)) {
+        continue;
+      }
+      const payload = outputs[nodeId];
+      const { image, fallback: candidate } = tryPayload(payload, allowTemporary);
+      if (image) {
+        return image;
+      }
+      if (!fallbackImage && candidate) {
+        fallbackImage = candidate;
+      }
     }
   }
   return fallbackImage ?? "";
@@ -1700,6 +2126,7 @@ const _getLfIcon = (status) => {
     case "cancelled":
       return x;
     case "failed":
+    case "timeout":
       return alertTriangle;
     case "pending":
       return hourglassLow;
@@ -1714,6 +2141,7 @@ const _getUiState = (status) => {
     case "cancelled":
       return "disabled";
     case "failed":
+    case "timeout":
       return "danger";
     case "pending":
       return "primary";
@@ -1782,6 +2210,7 @@ const _masonry = (store) => {
   masonry.lfShape = "card";
   masonry.lfStyle = UI_CONSTANTS.MASONRY_STYLE;
   masonry.addEventListener("lf-masonry-event", (e) => masonryHandler(e, store));
+  masonry.addEventListener("click", (e) => masonryClickFallback(e, store));
   return masonry;
 };
 const _title$1 = (store) => {
@@ -1796,10 +2225,18 @@ const _title$1 = (store) => {
   toggle.lfStyling = "flat";
   toggle.lfUiSize = "small";
   toggle.addEventListener("lf-button-event", (e) => buttonHandler(e, store));
+  const cleanup = document.createElement("lf-button");
+  cleanup.className = OUTPUTS_CLASSES.cleanup;
+  cleanup.lfAriaLabel = "Remove stale Runner history entries";
+  cleanup.lfLabel = "Remove missing";
+  cleanup.lfStyling = "flat";
+  cleanup.lfUiSize = "small";
+  cleanup.addEventListener("lf-button-event", (e) => buttonHandler(e, store));
   title.appendChild(h4);
   title.appendChild(controls);
+  controls.appendChild(cleanup);
   controls.appendChild(toggle);
-  return { h4, title, controls, toggle };
+  return { cleanup, h4, title, controls, toggle };
 };
 const createOutputsSection = (store) => {
   const { WORKFLOW_OUTPUTS_DESTROYED, WORKFLOW_OUTPUTS_MOUNTED, WORKFLOW_OUTPUTS_UPDATED } = DEBUG_MESSAGES;
@@ -1821,12 +2258,13 @@ const createOutputsSection = (store) => {
     }
     const _root = document.createElement("section");
     _root.className = OUTPUTS_CLASSES._;
-    const { controls, h4, title, toggle } = _title$1(store);
+    const { cleanup, controls, h4, title, toggle } = _title$1(store);
     const masonry = _masonry(store);
     _root.appendChild(title);
     _root.appendChild(masonry);
     elements[MAIN_CLASSES._].appendChild(_root);
     uiRegistry.set(OUTPUTS_CLASSES._, _root);
+    uiRegistry.set(OUTPUTS_CLASSES.cleanup, cleanup);
     uiRegistry.set(OUTPUTS_CLASSES.controls, controls);
     uiRegistry.set(OUTPUTS_CLASSES.h4, h4);
     uiRegistry.set(OUTPUTS_CLASSES.masonry, masonry);
@@ -1844,9 +2282,10 @@ const createOutputsSection = (store) => {
       return;
     }
     const h4 = elements[OUTPUTS_CLASSES.h4];
+    const cleanup = elements[OUTPUTS_CLASSES.cleanup];
     const masonry = elements[OUTPUTS_CLASSES.masonry];
     const toggle = elements[OUTPUTS_CLASSES.toggle];
-    if (!h4 || !masonry || !toggle) {
+    if (!cleanup || !h4 || !masonry || !toggle) {
       return;
     }
     const activeWorkflowId = state.current.id;
@@ -1859,6 +2298,9 @@ const createOutputsSection = (store) => {
     toggle.lfIcon = isHistoryView ? arrowBack : folder;
     toggle.lfLabel = isHistoryView ? "Back" : "History";
     toggle.lfUiState = hasAnyRuns || isHistoryView ? "primary" : "disabled";
+    const cleanupBusy = cleanup.getAttribute("aria-busy") === "true";
+    cleanup.hidden = !isHistoryView;
+    cleanup.lfUiState = isHistoryView && !cleanupBusy ? "danger" : "disabled";
     const dataset = { nodes: [] };
     if (!runs.length) {
       dataset.nodes.push({ cells: { lfCard: _emptyCardCell() }, id: "" });
@@ -1880,6 +2322,77 @@ const createOutputsSection = (store) => {
     render
   };
 };
+const WORKFLOW_RUNNER_PATH = `${API_ROOT}/workflow-runner`;
+const resolveComfyUrl = (href = window.location.href, proxyPort = DEFAULT_FRONTEND_PROXY_PORT, comfyPort = DEFAULT_COMFY_UI_PORT, comfyProtocol = DEFAULT_COMFY_UI_PROTOCOL) => {
+  const current = new URL(href);
+  if (current.port === proxyPort) {
+    current.protocol = comfyProtocol;
+    current.port = comfyPort;
+  }
+  const runnerIndex = current.pathname.indexOf(WORKFLOW_RUNNER_PATH);
+  const runnerEnd = runnerIndex + WORKFLOW_RUNNER_PATH.length;
+  if (runnerIndex >= 0 && (runnerEnd === current.pathname.length || current.pathname[runnerEnd] === "/")) {
+    const deploymentPrefix = current.pathname.slice(0, runnerIndex);
+    current.pathname = deploymentPrefix || "/";
+  } else {
+    current.pathname = "/";
+  }
+  current.search = "";
+  current.hash = "";
+  return current.toString();
+};
+const HISTORY_CLEANUP_IN_FLIGHT = /* @__PURE__ */ new WeakSet();
+const _historyCleanupNotification = (store, message, status) => {
+  store.getState().mutate.notifications.add({
+    id: `${performance.now()}-${Math.random()}`,
+    message,
+    status
+  });
+};
+const removeMissingHistory = async (button, store) => {
+  if (HISTORY_CLEANUP_IN_FLIGHT.has(button) || store.getState().view !== "history") {
+    return;
+  }
+  HISTORY_CLEANUP_IN_FLIGHT.add(button);
+  button.lfAriaLabel = "Checking Runner history for missing outputs";
+  button.lfLabel = "Checking…";
+  button.lfShowSpinner = true;
+  button.lfUiState = "disabled";
+  button.setAttribute("aria-busy", "true");
+  try {
+    const { manager } = store.getState();
+    const preview = await manager.runs.pruneMissingArtifacts(true);
+    if (preview.candidate_count === 0) {
+      const preserved2 = preview.skipped_unknown ? ` ${preview.skipped_unknown} ambiguous or fileless successful run${preview.skipped_unknown === 1 ? " was" : "s were"} preserved.` : "";
+      _historyCleanupNotification(store, `No missing-output or failed runs to remove.${preserved2}`, "info");
+      return;
+    }
+    const count = preview.candidate_count;
+    const confirmed = window.confirm(`Remove ${count} run${count === 1 ? "" : "s"} from Runner history?
+
+This removes Runner history and saved remix inputs for successful runs whose outputs are missing, plus failed, cancelled, and timed-out runs. It never deletes files and preserves ambiguous or fileless successful runs.`);
+    if (!confirmed) {
+      return;
+    }
+    button.lfAriaLabel = "Removing stale Runner history";
+    button.lfLabel = "Removing…";
+    const result = await manager.runs.pruneMissingArtifacts(false, preview.candidate_run_ids);
+    const removed = result.removed_count;
+    const preserved = result.skipped_unknown ? ` ${result.skipped_unknown} ambiguous or fileless successful run${result.skipped_unknown === 1 ? " was" : "s were"} preserved.` : "";
+    const changed = result.skipped_changed ? ` ${result.skipped_changed} run${result.skipped_changed === 1 ? " changed" : "s changed"} during cleanup and ${result.skipped_changed === 1 ? "was" : "were"} left untouched.` : "";
+    _historyCleanupNotification(store, `Removed ${removed} stale run${removed === 1 ? "" : "s"} from Runner history. No files were deleted.${preserved}${changed}`, "info");
+  } catch (error) {
+    const detail = error instanceof Error && error.message ? ` ${error.message}` : "";
+    _historyCleanupNotification(store, `Unable to clean Runner history.${detail}`, "danger");
+  } finally {
+    HISTORY_CLEANUP_IN_FLIGHT.delete(button);
+    button.removeAttribute("aria-busy");
+    button.lfAriaLabel = "Remove stale Runner history entries";
+    button.lfLabel = "Remove missing";
+    button.lfShowSpinner = false;
+    button.lfUiState = store.getState().view === "history" ? "danger" : "disabled";
+  }
+};
 const buttonHandler = (e, store) => {
   const { comp, eventType } = e.detail;
   const { manager, view } = store.getState();
@@ -1887,13 +2400,19 @@ const buttonHandler = (e, store) => {
     case "click":
       switch (comp.rootElement.className) {
         // Action Button
-        case ACTION_BUTTON_CLASSES._:
-          manager.getDispatchers().runWorkflow();
+        case ACTION_BUTTON_CLASSES._: {
+          const state = store.getState();
+          const activeRun = state.runs.find((run) => run.runId === state.currentRunId && ["pending", "running"].includes(run.status));
+          if (activeRun && manager.getDispatchers().cancelWorkflow) {
+            void manager.getDispatchers().cancelWorkflow();
+          } else if (!state.submissionInFlightId) {
+            void manager.getDispatchers().runWorkflow();
+          }
           break;
+        }
         // Drawer
         case DRAWER_CLASSES.buttonComfyUi:
-          const port = window.location.port || "8188";
-          window.open(`http://localhost:${port}`, "_blank");
+          window.open(resolveComfyUrl(), "_blank", "noopener,noreferrer");
           break;
         case DRAWER_CLASSES.buttonDebug:
           store.getState().mutate.isDebug(!store.getState().isDebug);
@@ -1931,6 +2450,9 @@ const buttonHandler = (e, store) => {
             manager.runs.remix(manager.runs.selected().runId);
           }
           break;
+        case OUTPUTS_CLASSES.cleanup:
+          void removeMissingHistory(comp.rootElement, store);
+          break;
         default:
           return;
       }
@@ -1939,6 +2461,8 @@ const buttonHandler = (e, store) => {
       return;
   }
 };
+const RETAINED_UPLOAD_EVENT = "lf-workflow-retained-upload-change";
+const retainedUploads = /* @__PURE__ */ new WeakMap();
 const findSelectNodeId = (nodes, workflowValue) => {
   let displayFallback;
   const visit = (items) => {
@@ -1958,8 +2482,66 @@ const findSelectNodeId = (nodes, workflowValue) => {
   };
   return visit(nodes) ?? displayFallback;
 };
+const normalizeRetainedUpload = (cell, value) => {
+  if (!value || typeof value !== "object" || Array.isArray(value) || value.schema !== "lf.workflow-upload-prefill.v1") {
+    return void 0;
+  }
+  const candidate = value;
+  const reference = candidate.reference;
+  const names = candidate.names;
+  if (!reference || typeof reference !== "object" || typeof reference.sourceRunId !== "string" || !reference.sourceRunId || reference.sourceRunId.length > 256 || !Array.isArray(names) || names.length === 0 || names.length > 64 || names.some((name) => typeof name !== "string" || !name.trim() || name.length > 255) || typeof candidate.available !== "boolean") {
+    return void 0;
+  }
+  const normalizedReference = reference.schema === "lf.workflow-upload-ref.v1" && typeof reference.inputId === "string" && reference.inputId === cell.id ? {
+    schema: "lf.workflow-upload-ref.v1",
+    sourceRunId: reference.sourceRunId,
+    inputId: reference.inputId
+  } : reference.schema === "lf.workflow-artifact-ref.v1" && typeof reference.artifactId === "string" && /^[0-9a-f]{64}$/.test(reference.artifactId) && typeof reference.filename === "string" && Boolean(reference.filename) && reference.filename.length <= 255 && !/[\\/\0]/.test(reference.filename) ? {
+    schema: "lf.workflow-artifact-ref.v1",
+    sourceRunId: reference.sourceRunId,
+    artifactId: reference.artifactId,
+    filename: reference.filename
+  } : void 0;
+  if (!normalizedReference) {
+    return void 0;
+  }
+  return {
+    schema: "lf.workflow-upload-prefill.v1",
+    reference: normalizedReference,
+    names: names.map((name) => name.trim()),
+    available: candidate.available
+  };
+};
+const emitRetainedUploadChange = (cell, detail) => {
+  cell.dispatchEvent(new CustomEvent(RETAINED_UPLOAD_EVENT, { detail }));
+};
+const setRetainedUploadPrefill = (cell, value) => {
+  const normalized = normalizeRetainedUpload(cell, value);
+  if (normalized === void 0) {
+    return false;
+  }
+  retainedUploads.set(cell, normalized);
+  emitRetainedUploadChange(cell, {
+    available: normalized.available,
+    names: [...normalized.names],
+    retained: true
+  });
+  return true;
+};
+const clearRetainedUploadPrefill = (cell) => {
+  retainedUploads.delete(cell);
+  emitRetainedUploadChange(cell, { available: false, names: [], retained: false });
+};
+const getRetainedUploadPrefill = (cell) => {
+  const retained = retainedUploads.get(cell);
+  return retained ? {
+    ...retained,
+    reference: { ...retained.reference },
+    names: [...retained.names]
+  } : void 0;
+};
 const applyInputPrefill = async (cells, inputs) => {
-  var _a;
+  var _a2;
   for (const cell of cells) {
     const id = cell.id;
     if (!id || !Object.prototype.hasOwnProperty.call(inputs, id)) {
@@ -1968,8 +2550,10 @@ const applyInputPrefill = async (cells, inputs) => {
     const value = inputs[id];
     try {
       switch (cell.tagName.toLowerCase()) {
-        case "lf-upload":
+        case "lf-upload": {
+          setRetainedUploadPrefill(cell, value);
           continue;
+        }
         case "lf-chat": {
           const history = typeof value === "string" ? value : JSON.stringify(value ?? []);
           if (typeof cell.setHistory === "function") {
@@ -1978,7 +2562,7 @@ const applyInputPrefill = async (cells, inputs) => {
           break;
         }
         case "lf-select": {
-          const selectedId = findSelectNodeId((_a = cell.lfDataset) == null ? void 0 : _a.nodes, value) ?? String(value ?? "");
+          const selectedId = findSelectNodeId((_a2 = cell.lfDataset) == null ? void 0 : _a2.nodes, value) ?? String(value ?? "");
           if (typeof cell.setValue === "function") {
             await cell.setValue(selectedId);
           } else {
@@ -2008,6 +2592,152 @@ const applyInputPrefill = async (cells, inputs) => {
     }
   }
 };
+const stores = /* @__PURE__ */ new WeakMap();
+const getStore = (store) => {
+  let draftStore = stores.get(store);
+  if (!draftStore) {
+    draftStore = { captureSequences: /* @__PURE__ */ new Map(), drafts: /* @__PURE__ */ new Map(), revisions: /* @__PURE__ */ new Map() };
+    stores.set(store, draftStore);
+  }
+  return draftStore;
+};
+const cloneDraft = (draft) => {
+  const clone = {};
+  for (const [id, value] of Object.entries(draft)) {
+    clone[id] = Array.isArray(value) ? value.slice() : value;
+  }
+  return clone;
+};
+const revision = (draftStore, workflowId) => draftStore.revisions.get(workflowId) ?? 0;
+const isFileArray = (value) => Array.isArray(value) && value.every((item) => typeof File !== "undefined" && item instanceof File);
+const readCell = async (cell) => {
+  switch (cell.tagName.toLowerCase()) {
+    case "lf-chat":
+      return typeof cell.getHistory === "function" ? cell.getHistory() : cell.lfValue;
+    case "lf-select": {
+      const selected = typeof cell.getValue === "function" ? await cell.getValue() : cell.lfValue;
+      if (selected && typeof selected === "object" && !Array.isArray(selected)) {
+        const node = selected;
+        return node.workflowValue ?? node.value ?? node.id ?? null;
+      }
+      return selected ?? null;
+    }
+    case "lf-toggle": {
+      const value = typeof cell.getValue === "function" ? await cell.getValue() : cell.lfValue;
+      return value === true || value === "on" || value === 1;
+    }
+    case "lf-upload": {
+      const value = typeof cell.getValue === "function" ? await cell.getValue() : cell.lfValue;
+      const files = isFileArray(value) ? value : [];
+      if (files.length > 0) {
+        return files.slice();
+      }
+      return getRetainedUploadPrefill(cell) ?? [];
+    }
+    default:
+      return typeof cell.getValue === "function" ? cell.getValue() : cell.lfValue;
+  }
+};
+const getWorkflowSessionDraft = (store, workflowId) => {
+  const draft = getStore(store).drafts.get(workflowId);
+  return draft ? cloneDraft(draft) : void 0;
+};
+const replaceWorkflowSessionDraft = (store, workflowId, draft) => {
+  const draftStore = getStore(store);
+  draftStore.revisions.set(workflowId, revision(draftStore, workflowId) + 1);
+  draftStore.drafts.set(workflowId, cloneDraft(draft));
+};
+const clearWorkflowSessionDraft = (store, workflowId) => {
+  const draftStore = getStore(store);
+  draftStore.revisions.set(workflowId, revision(draftStore, workflowId) + 1);
+  draftStore.drafts.delete(workflowId);
+};
+const captureWorkflowSessionDraft = async (store, workflowId, cells) => {
+  if (!workflowId) {
+    return;
+  }
+  const draftStore = getStore(store);
+  const startedAtRevision = revision(draftStore, workflowId);
+  const captureSequence = (draftStore.captureSequences.get(workflowId) ?? 0) + 1;
+  draftStore.captureSequences.set(workflowId, captureSequence);
+  const captured = {};
+  for (const cell of cells || []) {
+    if (!(cell == null ? void 0 : cell.id)) {
+      continue;
+    }
+    try {
+      captured[cell.id] = await readCell(cell);
+    } catch {
+    }
+  }
+  if (revision(draftStore, workflowId) !== startedAtRevision || draftStore.captureSequences.get(workflowId) !== captureSequence) {
+    return;
+  }
+  draftStore.drafts.set(workflowId, {
+    ...draftStore.drafts.get(workflowId) || {},
+    ...captured
+  });
+};
+const applyWorkflowSessionDraft = async (cells, draft) => {
+  const ordinary = { ...draft };
+  for (const cell of cells || []) {
+    if (cell.tagName.toLowerCase() !== "lf-upload" || !cell.id) {
+      continue;
+    }
+    const value = draft[cell.id];
+    if (!isFileArray(value)) {
+      continue;
+    }
+    clearRetainedUploadPrefill(cell);
+    cell.lfValue = value.slice();
+    delete ordinary[cell.id];
+  }
+  await applyInputPrefill(cells, ordinary);
+};
+const EVENTS_BY_TAG = {
+  "lf-chat": ["lf-chat-event"],
+  "lf-select": ["lf-select-event"],
+  "lf-textfield": ["lf-textfield-event"],
+  "lf-toggle": ["lf-toggle-event"],
+  "lf-upload": ["lf-upload-event", RETAINED_UPLOAD_EVENT]
+};
+const watchWorkflowSessionDraft = (store, workflowId, cells, shouldCapture = () => true) => {
+  let queued = false;
+  let disposed = false;
+  const requestCapture = () => {
+    if (disposed || !shouldCapture() || queued) {
+      return;
+    }
+    queued = true;
+    queueMicrotask(() => {
+      queued = false;
+      if (!disposed && shouldCapture()) {
+        void captureWorkflowSessionDraft(store, workflowId, cells);
+      }
+    });
+  };
+  const listeners = [];
+  for (const cell of cells || []) {
+    for (const eventName of EVENTS_BY_TAG[cell.tagName.toLowerCase()] || []) {
+      const listener = (event) => {
+        var _a2;
+        const eventType = (_a2 = event.detail) == null ? void 0 : _a2.eventType;
+        if (eventName !== RETAINED_UPLOAD_EVENT && !["change", "delete", "input", "update", "upload"].includes(eventType || "")) {
+          return;
+        }
+        requestCapture();
+      };
+      cell.addEventListener(eventName, listener);
+      listeners.push([cell, eventName, listener]);
+    }
+  }
+  return () => {
+    disposed = true;
+    for (const [cell, eventName, listener] of listeners) {
+      cell.removeEventListener(eventName, listener);
+    }
+  };
+};
 const { theme: theme$2 } = getLfFramework();
 const ROOT_CLASS$2 = "inputs-section";
 const INPUTS_CLASSES = {
@@ -2015,9 +2745,15 @@ const INPUTS_CLASSES = {
   cell: theme$2.bemClass(ROOT_CLASS$2, "cell"),
   cells: theme$2.bemClass(ROOT_CLASS$2, "cells"),
   description: theme$2.bemClass(ROOT_CLASS$2, "description"),
+  help: theme$2.bemClass(ROOT_CLASS$2, "help"),
   h3: theme$2.bemClass(ROOT_CLASS$2, "title-h3"),
   openButton: theme$2.bemClass(ROOT_CLASS$2, "title-open-button"),
+  resetButton: theme$2.bemClass(ROOT_CLASS$2, "title-reset-button"),
   options: theme$2.bemClass(ROOT_CLASS$2, "options"),
+  readiness: theme$2.bemClass(ROOT_CLASS$2, "readiness"),
+  retainedUpload: theme$2.bemClass(ROOT_CLASS$2, "retained-upload"),
+  retainedUploadClear: theme$2.bemClass(ROOT_CLASS$2, "retained-upload-clear"),
+  retainedUploadText: theme$2.bemClass(ROOT_CLASS$2, "retained-upload-text"),
   title: theme$2.bemClass(ROOT_CLASS$2, "title")
 };
 const _cells = () => {
@@ -2035,49 +2771,168 @@ const _options = () => {
   optionsWrapper.className = INPUTS_CLASSES.options;
   return optionsWrapper;
 };
-const _title = (store) => {
-  const lfIcon = theme$2.get.icon("download");
+const _title = (store, onReset) => {
+  const download = theme$2.get.icon("download");
+  const refresh = theme$2.get.icon("refresh");
   const title = document.createElement("div");
   const h3 = document.createElement("h3");
+  const resetButton = document.createElement("lf-button");
   const openButton = document.createElement("lf-button");
   title.className = INPUTS_CLASSES.title;
   h3.className = INPUTS_CLASSES.h3;
+  resetButton.className = INPUTS_CLASSES.resetButton;
+  resetButton.lfAriaLabel = "Reset this workflow form to its defaults";
+  resetButton.lfIcon = refresh;
+  resetButton.lfLabel = "Reset";
+  resetButton.lfStyling = "flat";
+  resetButton.lfUiSize = "xsmall";
+  resetButton.addEventListener("lf-button-event", (event) => {
+    var _a2;
+    if (((_a2 = event.detail) == null ? void 0 : _a2.eventType) === "click") {
+      onReset();
+    }
+  });
   const label = "Download Workflow JSON";
   openButton.className = INPUTS_CLASSES.openButton;
   openButton.lfAriaLabel = label;
-  openButton.lfIcon = lfIcon;
+  openButton.lfIcon = download;
   openButton.lfStyling = "icon";
   openButton.lfUiSize = "xsmall";
   openButton.title = label;
   openButton.addEventListener("lf-button-event", (e) => buttonHandler(e, store));
   title.appendChild(h3);
+  title.appendChild(resetButton);
   title.appendChild(openButton);
-  return { h3, openButton, title };
+  return { h3, openButton, resetButton, title };
+};
+const _help = (value) => {
+  if (!value) {
+    return null;
+  }
+  const p = document.createElement("p");
+  p.className = INPUTS_CLASSES.help;
+  p.textContent = value;
+  return p;
+};
+const _readiness = () => {
+  const notice = document.createElement("aside");
+  notice.className = INPUTS_CLASSES.readiness;
+  notice.hidden = true;
+  notice.setAttribute("role", "status");
+  return notice;
+};
+const _helperHasValue = (helper) => {
+  if (typeof helper === "string") {
+    return Boolean(helper.trim());
+  }
+  if (!helper || typeof helper !== "object") {
+    return false;
+  }
+  const value = helper.value;
+  return typeof value === "string" && Boolean(value.trim());
+};
+const _hasNativeHelper = (cell) => {
+  const props = cell.props;
+  if (!props) {
+    return false;
+  }
+  if (!cell.shape || cell.shape === "textfield") {
+    return _helperHasValue(props.lfHelper);
+  }
+  if (cell.shape === "choice" || cell.shape === "select") {
+    const textfieldProps = props.lfTextfieldProps;
+    return Boolean(textfieldProps && typeof textfieldProps === "object" && _helperHasValue(textfieldProps.lfHelper));
+  }
+  return false;
+};
+const _retainedUpload = (component) => {
+  const retained = document.createElement("div");
+  const text = document.createElement("span");
+  const clear = document.createElement("button");
+  retained.className = INPUTS_CLASSES.retainedUpload;
+  retained.hidden = true;
+  text.className = INPUTS_CLASSES.retainedUploadText;
+  clear.className = INPUTS_CLASSES.retainedUploadClear;
+  clear.type = "button";
+  clear.textContent = "Clear";
+  clear.setAttribute("aria-label", "Stop reusing the previous upload");
+  component.addEventListener(RETAINED_UPLOAD_EVENT, (event) => {
+    const detail = event.detail;
+    const names = Array.isArray(detail == null ? void 0 : detail.names) ? detail.names : [];
+    retained.hidden = !(detail == null ? void 0 : detail.retained);
+    text.textContent = (detail == null ? void 0 : detail.retained) ? detail.available ? `Reusing ${names.length > 1 ? `${names.length} previous uploads` : names[0] || "previous upload"}. Choose a new file to replace it.` : `${names.length > 1 ? `${names.length} previous uploads are` : `${names[0] || "The previous upload"} is`} no longer available. Choose the file${names.length > 1 ? "s" : ""} again.` : "";
+  });
+  component.addEventListener("lf-upload-event", (event) => {
+    var _a2;
+    const detail = event.detail;
+    if ((detail == null ? void 0 : detail.eventType) === "upload" && ((_a2 = detail.selectedFiles) == null ? void 0 : _a2.length)) {
+      clearRetainedUploadPrefill(component);
+    }
+  });
+  clear.addEventListener("click", () => clearRetainedUploadPrefill(component));
+  retained.append(text, clear);
+  return retained;
 };
 const createInputsSection = (store) => {
   const { WORKFLOW_INPUTS_DESTROYED, WORKFLOW_INPUTS_MOUNTED, WORKFLOW_INPUTS_UPDATED } = DEBUG_MESSAGES;
+  let activeHydration = null;
+  let mountGeneration = 0;
+  let mountedCells = [];
+  let mountedWorkflowId = null;
+  let skipDestroyCapture = false;
+  let stopWatchingDraft = null;
   const destroy = () => {
     const { manager } = store.getState();
     const { uiRegistry } = manager;
+    const wasHydrating = activeHydration !== null;
+    mountGeneration += 1;
+    activeHydration = null;
+    stopWatchingDraft == null ? void 0 : stopWatchingDraft();
+    stopWatchingDraft = null;
+    if (!skipDestroyCapture && !wasHydrating && mountedWorkflowId && mountedCells.length > 0) {
+      void captureWorkflowSessionDraft(store, mountedWorkflowId, mountedCells);
+    }
     for (const cls in INPUTS_CLASSES) {
       const element = INPUTS_CLASSES[cls];
       uiRegistry.remove(element);
     }
+    mountedCells = [];
+    mountedWorkflowId = null;
     debugLog(WORKFLOW_INPUTS_DESTROYED);
   };
   const mount = () => {
-    const { manager } = store.getState();
+    var _a2;
+    const state = store.getState();
+    const { manager } = state;
     const { uiRegistry } = manager;
     const elements = uiRegistry.get();
     if (elements && elements[INPUTS_CLASSES._]) {
       return;
     }
     const workflow = manager.workflow.current();
+    const workflowId = (workflow == null ? void 0 : workflow.id) || ((_a2 = state.current) == null ? void 0 : _a2.id) || null;
+    const generation = ++mountGeneration;
     const _root = document.createElement("section");
     _root.className = INPUTS_CLASSES._;
     const description = _description();
+    const readiness = _readiness();
     const options = _options();
-    const { h3, openButton, title } = _title(store);
+    const reset = () => {
+      if (!mountedWorkflowId) {
+        return;
+      }
+      clearWorkflowSessionDraft(store, mountedWorkflowId);
+      store.getState().mutate.inputPrefillRun(null);
+      skipDestroyCapture = true;
+      try {
+        destroy();
+      } finally {
+        skipDestroyCapture = false;
+      }
+      mount();
+      render();
+    };
+    const { h3, openButton, resetButton, title } = _title(store, reset);
     const cellElements = [];
     if (workflow) {
       const inputCells = manager.workflow.cells("input");
@@ -2095,23 +2950,64 @@ const createInputsSection = (store) => {
         }
         cellElements.push(component);
         wrapper.appendChild(component);
+        const help = _hasNativeHelper(cell) ? null : _help(cell.title);
+        if (help) {
+          wrapper.appendChild(help);
+        }
+        if (cell.shape === "upload") {
+          wrapper.appendChild(_retainedUpload(component));
+        }
         options.appendChild(wrapper);
       }
     }
     uiRegistry.set(INPUTS_CLASSES.cells, cellElements);
     _root.appendChild(title);
     _root.appendChild(description);
+    _root.appendChild(readiness);
     _root.appendChild(options);
     elements[MAIN_CLASSES._].prepend(_root);
     uiRegistry.set(INPUTS_CLASSES._, _root);
     uiRegistry.set(INPUTS_CLASSES.description, description);
     uiRegistry.set(INPUTS_CLASSES.h3, h3);
     uiRegistry.set(INPUTS_CLASSES.openButton, openButton);
+    uiRegistry.set(INPUTS_CLASSES.resetButton, resetButton);
     uiRegistry.set(INPUTS_CLASSES.options, options);
+    uiRegistry.set(INPUTS_CLASSES.readiness, readiness);
     uiRegistry.set(INPUTS_CLASSES.title, title);
+    mountedCells = cellElements;
+    mountedWorkflowId = workflowId;
+    if (workflowId) {
+      const currentState = store.getState();
+      const artifactPrefill = consumeArtifactHandoff(store, workflowId);
+      let prefill = artifactPrefill;
+      let isIntentionalOverride = Boolean(artifactPrefill);
+      if (!prefill && currentState.inputPrefillRunId) {
+        const pendingRunId = currentState.inputPrefillRunId;
+        const run = manager.runs.get(pendingRunId);
+        currentState.mutate.inputPrefillRun(null);
+        if ((run == null ? void 0 : run.workflowId) === workflowId && run.inputs) {
+          prefill = run.inputs;
+          isIntentionalOverride = true;
+        }
+      }
+      const values = prefill || getWorkflowSessionDraft(store, workflowId);
+      if (values) {
+        if (isIntentionalOverride) {
+          replaceWorkflowSessionDraft(store, workflowId, values);
+        }
+        activeHydration = generation;
+        void applyWorkflowSessionDraft(cellElements, values).finally(() => {
+          if (activeHydration === generation) {
+            activeHydration = null;
+          }
+        });
+      }
+      stopWatchingDraft = watchWorkflowSessionDraft(store, workflowId, cellElements, () => activeHydration !== generation);
+    }
     debugLog(WORKFLOW_INPUTS_MOUNTED);
   };
   const render = () => {
+    var _a2, _b2, _c2;
     const state = store.getState();
     const { manager } = state;
     const { uiRegistry } = manager;
@@ -2122,17 +3018,24 @@ const createInputsSection = (store) => {
     const cells = elements[INPUTS_CLASSES.cells];
     const descr = elements[INPUTS_CLASSES.description];
     const h3 = elements[INPUTS_CLASSES.h3];
+    const readiness = elements[INPUTS_CLASSES.readiness];
+    const workflow = manager.workflow.current();
     descr.textContent = manager.workflow.description();
     h3.textContent = manager.workflow.title();
-    const statuses = state.inputStatuses || {};
-    const pendingRunId = state.inputPrefillRunId;
-    if (pendingRunId) {
-      const run = manager.runs.get(pendingRunId);
-      state.mutate.inputPrefillRun(null);
-      if ((run == null ? void 0 : run.workflowId) === state.current.id && run.inputs) {
-        void applyInputPrefill(cells, run.inputs);
+    if (readiness) {
+      const status = (_a2 = workflow == null ? void 0 : workflow.readiness) == null ? void 0 : _a2.status;
+      const issues = ((_b2 = workflow == null ? void 0 : workflow.readiness) == null ? void 0 : _b2.issues) || [];
+      readiness.hidden = !status || status === "ready";
+      if (status && status !== "ready") {
+        readiness.dataset.status = status;
+        const prefix = status === "setup_required" ? "Setup required" : "Setup check";
+        readiness.textContent = `${prefix}: ${((_c2 = issues[0]) == null ? void 0 : _c2.message) || "Review this workflow before running."}`;
+      } else {
+        readiness.textContent = "";
+        delete readiness.dataset.status;
       }
     }
+    const statuses = state.inputStatuses || {};
     cells == null ? void 0 : cells.forEach((cell) => {
       const id = cell.id;
       const parent = cell == null ? void 0 : cell.parentElement;
@@ -2203,6 +3106,7 @@ const runWorkflow = async (payload) => {
   const { syntax } = getLfFramework();
   const response = await fetch(buildApiUrl("/run"), {
     method: "POST",
+    credentials: "include",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
   });
@@ -2213,7 +3117,14 @@ const runWorkflow = async (payload) => {
     }
     throw new WorkflowApiError("Unauthorized", { status: 401 });
   }
-  const data = await syntax.json.parse(response);
+  let data;
+  try {
+    data = await syntax.json.parse(response);
+  } catch {
+    throw new WorkflowApiError(`${RUN_GENERIC} (invalid response)`, {
+      status: response.status
+    });
+  }
   if (!response.ok || !data) {
     const payloadData = (data == null ? void 0 : data.payload) || { detail: response.statusText };
     const detail = (payloadData == null ? void 0 : payloadData.detail) || response.statusText;
@@ -2222,16 +3133,91 @@ const runWorkflow = async (payload) => {
       status: response.status
     });
   }
-  const runId = data.run_id;
-  if (!runId) {
+  const raw = data;
+  const validStatuses = /* @__PURE__ */ new Set([
+    "accepted",
+    "cancelled",
+    "failed",
+    "pending",
+    "reconciling",
+    "running",
+    "succeeded",
+    "timeout"
+  ]);
+  if (typeof raw.run_id !== "string" || !raw.run_id || typeof raw.submission_id !== "string" || !raw.submission_id || payload.submissionId !== void 0 && raw.submission_id !== payload.submissionId || raw.status !== void 0 && !validStatuses.has(raw.status) || raw.idempotent_replay !== void 0 && typeof raw.idempotent_replay !== "boolean") {
     throw new WorkflowApiError(`${RUN_GENERIC} (invalid response)`, {
       status: response.status
     });
   }
-  return runId;
+  return {
+    idempotentReplay: raw.idempotent_replay === true,
+    runId: raw.run_id,
+    status: raw.status ?? "pending",
+    submissionId: raw.submission_id
+  };
+};
+const getWorkflowSubmission = async (submissionId) => {
+  const { syntax } = getLfFramework();
+  const response = await fetch(buildApiUrl(`/submissions/${encodeURIComponent(submissionId)}`), {
+    credentials: "include",
+    method: "GET"
+  });
+  if (response.status === 404) {
+    return null;
+  }
+  if (response.status === 401) {
+    try {
+      window.location.href = `${window.location.origin}${API_BASE}/workflow-runner`;
+    } catch (err) {
+    }
+    throw new WorkflowApiError("Unauthorized", { status: 401 });
+  }
+  let data;
+  try {
+    data = await syntax.json.parse(response);
+  } catch {
+    throw new WorkflowApiError("Invalid submission response.", { status: response.status });
+  }
+  if (!response.ok) {
+    const detail = data && typeof data === "object" && typeof data.detail === "string" ? data.detail : response.statusText;
+    throw new WorkflowApiError(`Unable to reconcile submission (${detail || response.status}).`, {
+      payload: data,
+      status: response.status
+    });
+  }
+  const snapshot = data;
+  const validStatuses = /* @__PURE__ */ new Set([
+    "accepted",
+    "cancelled",
+    "failed",
+    "pending",
+    "reconciling",
+    "running",
+    "succeeded",
+    "timeout"
+  ]);
+  if (!snapshot || snapshot.submission_id !== submissionId || snapshot.run_id !== null && typeof snapshot.run_id !== "string" || typeof snapshot.workflow_id !== "string" || !snapshot.status || !validStatuses.has(snapshot.status)) {
+    throw new WorkflowApiError("Invalid submission response.", { status: response.status });
+  }
+  return snapshot;
+};
+const cancelWorkflowSubmission = async (submissionId) => {
+  const response = await fetch(buildApiUrl(`/submissions/${encodeURIComponent(submissionId)}/cancel`), {
+    credentials: "include",
+    method: "POST"
+  });
+  const data = await response.json().catch(() => null);
+  if (!response.ok || !data || !("submission_id" in data)) {
+    const detail = data && "detail" in data ? data.detail || data.error : response.statusText;
+    throw new WorkflowApiError(`Unable to stop workflow (${detail || response.status}).`, {
+      payload: data ?? void 0,
+      status: response.status
+    });
+  }
+  return data;
 };
 const uploadWorkflowFiles = async (files) => {
-  var _a, _b;
+  var _a2, _b2;
   const { UPLOAD_GENERIC, UPLOAD_INVALID_RESPONSE, UPLOAD_MISSING_FILE } = ERROR_MESSAGES;
   const { syntax } = getLfFramework();
   if (!files || files.length === 0) {
@@ -2240,6 +3226,7 @@ const uploadWorkflowFiles = async (files) => {
     });
   }
   const formData = new FormData();
+  formData.append("directory", "input");
   files.forEach((file) => formData.append("file", file));
   const response = await fetch(buildApiUrl("/upload"), {
     method: "POST",
@@ -2256,7 +3243,7 @@ const uploadWorkflowFiles = async (files) => {
   if (isWorkflowAPIUploadResponse(data)) {
     if (!response.ok) {
       const { payload } = data;
-      const detail = ((_a = payload == null ? void 0 : payload.error) == null ? void 0 : _a.message) || response.statusText;
+      const detail = ((_a2 = payload == null ? void 0 : payload.error) == null ? void 0 : _a2.message) || response.statusText;
       throw new WorkflowApiError(`${UPLOAD_GENERIC} (${detail})`, {
         payload
       });
@@ -2265,7 +3252,7 @@ const uploadWorkflowFiles = async (files) => {
   }
   if (isWorkflowAPIUploadPayload(data)) {
     if (!response.ok) {
-      const detail = ((_b = data.error) == null ? void 0 : _b.message) || response.statusText;
+      const detail = ((_b2 = data.error) == null ? void 0 : _b2.message) || response.statusText;
       throw new WorkflowApiError(`${UPLOAD_GENERIC} (${detail})`, {
         payload: data
       });
@@ -2278,57 +3265,195 @@ const uploadWorkflowFiles = async (files) => {
     status: response.status
   });
 };
-const _collectInputs = async (store) => {
+const SUBMISSIONS_IN_FLIGHT = /* @__PURE__ */ new WeakSet();
+const RETRYABLE_SUBMISSIONS = /* @__PURE__ */ new WeakMap();
+let fallbackSubmissionCounter = 0;
+const createWorkflowSubmissionId = () => {
+  const browserCrypto = globalThis.crypto;
+  if (typeof (browserCrypto == null ? void 0 : browserCrypto.randomUUID) === "function") {
+    return `lf-web:${browserCrypto.randomUUID()}`;
+  }
+  if (typeof (browserCrypto == null ? void 0 : browserCrypto.getRandomValues) === "function") {
+    const bytes = new Uint8Array(16);
+    browserCrypto.getRandomValues(bytes);
+    const entropy = Array.from(bytes, (value) => value.toString(16).padStart(2, "0")).join("");
+    return `lf-web:${entropy}`;
+  }
+  fallbackSubmissionCounter += 1;
+  return `lf-web:${Date.now().toString(36)}:${fallbackSubmissionCounter.toString(36)}:${Math.random().toString(36).slice(2)}`;
+};
+const _readInputIntent = async (store) => {
   const state = store.getState();
   const { uiRegistry } = state.manager;
   const elements = uiRegistry.get();
   const cells = (elements == null ? void 0 : elements[INPUTS_CLASSES.cells]) || [];
-  const inputs = {};
+  const intent = [];
   for (const cell of cells) {
     const id = cell.id || "";
     _setCellStatus(store, id);
-    switch (cell.tagName.toLowerCase()) {
-      case "lf-chat": {
-        const value = await cell.getHistory();
-        inputs[id] = value;
-        break;
-      }
-      case "lf-select": {
-        const selected = await cell.getValue();
-        inputs[id] = (selected == null ? void 0 : selected.workflowValue) ?? (selected == null ? void 0 : selected.value) ?? (selected == null ? void 0 : selected.id) ?? null;
-        break;
-      }
-      case "lf-toggle": {
-        const value = await cell.getValue();
-        inputs[id] = value === "off" ? false : true;
-        break;
-      }
-      case "lf-upload": {
-        try {
-          const value = await cell.getValue();
-          const uploaded = await _handleUploadCell(store, value, cell.dataset.required !== "false");
-          if (uploaded !== void 0) {
-            inputs[id] = uploaded;
-          }
-        } catch (error) {
-          _setCellStatus(store, id, "error");
-          throw error;
+    const tagName = cell.tagName.toLowerCase();
+    try {
+      switch (tagName) {
+        case "lf-chat": {
+          const value = await cell.getHistory();
+          intent.push({ id, kind: "value", tagName, value });
+          break;
         }
-        break;
+        case "lf-select": {
+          const selected = await cell.getValue();
+          intent.push({
+            id,
+            kind: "value",
+            tagName,
+            value: (selected == null ? void 0 : selected.workflowValue) ?? (selected == null ? void 0 : selected.value) ?? (selected == null ? void 0 : selected.id) ?? null
+          });
+          break;
+        }
+        case "lf-toggle": {
+          const value = await cell.getValue();
+          intent.push({ id, kind: "value", tagName, value: value !== "off" });
+          break;
+        }
+        case "lf-upload": {
+          const value = await cell.getValue();
+          intent.push({
+            files: Array.isArray(value) ? value : value || [],
+            id,
+            kind: "upload",
+            required: cell.dataset.required !== "false",
+            retained: getRetainedUploadPrefill(cell)
+          });
+          break;
+        }
+        default: {
+          const value = await cell.getValue();
+          intent.push({ id, kind: "value", tagName, value });
+        }
       }
-      default: {
-        const value = await cell.getValue();
-        inputs[id] = value;
+    } catch (error) {
+      if (tagName === "lf-upload") {
+        _setCellStatus(store, id, "error");
       }
+      throw error;
+    }
+  }
+  return intent;
+};
+const _canonicalizeIntentValue = (value, ancestors = /* @__PURE__ */ new WeakSet()) => {
+  if (value === null || typeof value === "string" || typeof value === "boolean") {
+    return value;
+  }
+  if (typeof value === "number") {
+    if (Number.isNaN(value))
+      return { $number: "NaN" };
+    if (value === Infinity)
+      return { $number: "Infinity" };
+    if (value === -Infinity)
+      return { $number: "-Infinity" };
+    if (Object.is(value, -0))
+      return { $number: "-0" };
+    return value;
+  }
+  if (typeof value === "undefined")
+    return { $type: "undefined" };
+  if (typeof value === "bigint")
+    return { $bigint: value.toString() };
+  if (typeof value === "symbol")
+    return { $symbol: value.description ?? "" };
+  if (typeof value === "function")
+    return { $function: value.name || "" };
+  if (typeof value !== "object")
+    return { $type: typeof value };
+  if (ancestors.has(value)) {
+    throw new Error("An input contains a circular value and cannot be submitted.");
+  }
+  ancestors.add(value);
+  try {
+    if (Array.isArray(value)) {
+      return value.map((item) => _canonicalizeIntentValue(item, ancestors));
+    }
+    if (value instanceof Date) {
+      return { $date: value.toISOString() };
+    }
+    const normalized = {};
+    for (const key of Object.keys(value).sort()) {
+      normalized[key] = _canonicalizeIntentValue(value[key], ancestors);
+    }
+    return normalized;
+  } finally {
+    ancestors.delete(value);
+  }
+};
+const _intentFingerprint = (workflowId, intent) => JSON.stringify({
+  workflowId,
+  inputs: intent.map((entry) => {
+    if (entry.kind === "value") {
+      return {
+        id: entry.id,
+        kind: entry.kind,
+        tagName: entry.tagName,
+        value: _canonicalizeIntentValue(entry.value)
+      };
+    }
+    if (entry.files.length > 0) {
+      return {
+        files: entry.files.map((file) => ({
+          lastModified: file.lastModified,
+          name: file.name,
+          relativePath: file.webkitRelativePath || "",
+          size: file.size,
+          type: file.type
+        })),
+        id: entry.id,
+        kind: entry.kind,
+        required: entry.required
+      };
+    }
+    return {
+      id: entry.id,
+      kind: entry.kind,
+      required: entry.required,
+      retainedReference: entry.retained ? _canonicalizeIntentValue(entry.retained.reference) : null
+    };
+  })
+});
+const _materializeInputs = async (store, intent) => {
+  const inputs = {};
+  for (const entry of intent) {
+    if (entry.kind === "value") {
+      inputs[entry.id] = entry.value;
+      continue;
+    }
+    try {
+      const uploaded = await _handleUploadCell(store, entry.files, entry.required, entry.retained);
+      if (uploaded !== void 0) {
+        inputs[entry.id] = uploaded;
+      }
+    } catch (error) {
+      _setCellStatus(store, entry.id, "error");
+      throw error;
     }
   }
   return inputs;
 };
-const _handleUploadCell = async (store, rawValue, required) => {
-  var _a;
+const _createEnvelope = (workflowId, inputs, submissionId) => {
+  const serialized = JSON.stringify({ workflowId, inputs, submissionId });
+  if (!serialized) {
+    throw new Error("Workflow inputs could not be serialized.");
+  }
+  return JSON.parse(serialized);
+};
+const _handleUploadCell = async (store, rawValue, required, retainedValue) => {
+  var _a2;
   const { ERROR_UPLOADING_FILE, RUNNING_UPLOADING_FILE } = STATUS_MESSAGES;
   const files = Array.isArray(rawValue) ? rawValue : rawValue;
   if (!files || files.length === 0) {
+    if (retainedValue == null ? void 0 : retainedValue.available) {
+      return { ...retainedValue.reference };
+    }
+    if (retainedValue && !retainedValue.available) {
+      throw new Error("The previous upload is no longer available. Choose the file again.");
+    }
     if (!required) {
       return void 0;
     }
@@ -2344,7 +3469,7 @@ const _handleUploadCell = async (store, rawValue, required) => {
     if (error instanceof WorkflowApiError) {
       addNotification(store, {
         id: performance.now().toString(),
-        message: `Upload failed: ${((_a = error.payload) == null ? void 0 : _a.detail) || error.message}`,
+        message: `Upload failed: ${((_a2 = error.payload) == null ? void 0 : _a2.detail) || error.message}`,
         status: "danger"
       });
     }
@@ -2376,14 +3501,89 @@ const _setCellStatus = (store, id, status = "") => {
     });
   }
 };
+const _toRunStatus = (status) => status === "accepted" || status === "reconciling" ? "pending" : status;
+const _normalizeRunResponse = (response, submissionId) => {
+  if (typeof response === "string") {
+    return {
+      idempotentReplay: false,
+      runId: response,
+      status: "pending",
+      submissionId
+    };
+  }
+  if (!response.runId || response.submissionId !== submissionId) {
+    throw new WorkflowApiError("Workflow run failed. (invalid response)", { status: 200 });
+  }
+  return response;
+};
+const _recordRun = (store, response, workflowId, workflowName, startedAt) => {
+  const timestamp = Date.now();
+  upsertRun(store, {
+    cancelRequested: false,
+    createdAt: startedAt,
+    error: null,
+    httpStatus: null,
+    // Upload responses contain host paths for the immediate local request.
+    // Do not copy them into browser state: the run-detail endpoint will
+    // hydrate authoritative, opaque remix references after registration.
+    inputs: {},
+    outputs: null,
+    resultPayload: null,
+    runId: response.runId,
+    submissionId: response.submissionId,
+    status: _toRunStatus(response.status),
+    updatedAt: timestamp,
+    workflowId,
+    workflowName
+  });
+  ensureActiveRun(store, response.runId);
+};
+const _errorDetail = (error, fallback) => {
+  if (error instanceof WorkflowApiError) {
+    const payload = error.payload;
+    return (payload == null ? void 0 : payload.detail) || error.message;
+  }
+  return error instanceof Error ? error.message || fallback : fallback;
+};
+const _isAuthoritativeRejection = (error) => error instanceof WorkflowApiError && typeof error.status === "number" && error.status >= 400 && error.status < 500;
+const _reconcileSubmission = async (submissionId) => {
+  try {
+    const snapshot = await getWorkflowSubmission(submissionId);
+    if (!snapshot) {
+      return { kind: "unknown" };
+    }
+    if (snapshot.run_id) {
+      return {
+        kind: "recovered",
+        response: {
+          idempotentReplay: true,
+          runId: snapshot.run_id,
+          status: snapshot.status,
+          submissionId: snapshot.submission_id
+        }
+      };
+    }
+    if (snapshot.status === "failed" || snapshot.status === "cancelled") {
+      return {
+        detail: snapshot.error || `Submission ${snapshot.status}.`,
+        kind: "rejected"
+      };
+    }
+  } catch {
+  }
+  return { kind: "unknown" };
+};
 const workflowDispatcher = async (store) => {
-  var _a, _b, _c, _d, _e;
+  var _a2, _b2, _c2, _d, _e, _f, _g, _h, _i, _j;
   const { INPUTS_COLLECTED } = DEBUG_MESSAGES;
   const { NO_WORKFLOW_SELECTED } = NOTIFICATION_MESSAGES;
   const { ERROR_RUNNING_WORKFLOW, RUNNING_DISPATCHING_WORKFLOW, RUNNING_SUBMITTING_WORKFLOW } = STATUS_MESSAGES;
   const state = store.getState();
   const { current } = state;
   const id = current.id;
+  if (SUBMISSIONS_IN_FLIGHT.has(store) || state.submissionInFlightId) {
+    return;
+  }
   if (!id) {
     addNotification(store, {
       id: performance.now().toString(),
@@ -2392,58 +3592,136 @@ const workflowDispatcher = async (store) => {
     });
     return;
   }
-  setStatus$1(store, "running", RUNNING_SUBMITTING_WORKFLOW);
-  let inputs;
+  const cached = RETRYABLE_SUBMISSIONS.get(store);
+  const provisionalSubmissionId = (cached == null ? void 0 : cached.outcome) === "ambiguous" ? String(cached.envelope.submissionId) : createWorkflowSubmissionId();
+  SUBMISSIONS_IN_FLIGHT.add(store);
+  (_b2 = (_a2 = state.mutate).submissionInFlight) == null ? void 0 : _b2.call(_a2, provisionalSubmissionId);
   try {
-    inputs = await _collectInputs(store);
-    debugLog(INPUTS_COLLECTED, "informational", {
-      id,
-      inputKeys: Object.keys(inputs)
-    });
-  } catch (error) {
-    const detail = error instanceof WorkflowApiError ? ((_a = error.payload) == null ? void 0 : _a.detail) || error.message : (error == null ? void 0 : error.message) || "Failed to collect inputs.";
-    setStatus$1(store, "error", ERROR_RUNNING_WORKFLOW);
-    addNotification(store, {
-      id: performance.now().toString(),
-      message: `Failed to collect inputs: ${detail}`,
-      status: "danger"
-    });
-    return;
-  }
-  try {
+    setStatus$1(store, "running", RUNNING_SUBMITTING_WORKFLOW);
+    let attempt;
+    try {
+      const intent = await _readInputIntent(store);
+      const intentFingerprint = _intentFingerprint(id, intent);
+      if ((cached == null ? void 0 : cached.intentFingerprint) === intentFingerprint) {
+        if (cached.outcome === "ambiguous") {
+          attempt = cached;
+        } else {
+          attempt = {
+            envelope: _createEnvelope(id, cached.envelope.inputs, provisionalSubmissionId),
+            intentFingerprint,
+            outcome: "ambiguous",
+            startedAt: Date.now()
+          };
+        }
+      } else {
+        RETRYABLE_SUBMISSIONS.delete(store);
+        const submissionId = (cached == null ? void 0 : cached.outcome) === "ambiguous" ? createWorkflowSubmissionId() : provisionalSubmissionId;
+        (_d = (_c2 = state.mutate).submissionInFlight) == null ? void 0 : _d.call(_c2, submissionId);
+        const inputs = await _materializeInputs(store, intent);
+        attempt = {
+          envelope: _createEnvelope(id, inputs, submissionId),
+          intentFingerprint,
+          outcome: "ambiguous",
+          startedAt: Date.now()
+        };
+      }
+      (_f = (_e = state.mutate).submissionInFlight) == null ? void 0 : _f.call(_e, String(attempt.envelope.submissionId));
+      debugLog(INPUTS_COLLECTED, "informational", {
+        id,
+        inputKeys: Object.keys(attempt.envelope.inputs)
+      });
+    } catch (error) {
+      const detail = _errorDetail(error, "Failed to collect inputs.");
+      setStatus$1(store, "error", ERROR_RUNNING_WORKFLOW);
+      addNotification(store, {
+        id: performance.now().toString(),
+        message: `Failed to collect inputs: ${detail}`,
+        status: "danger"
+      });
+      return;
+    }
     setStatus$1(store, "running", RUNNING_DISPATCHING_WORKFLOW);
     clearResults(store);
-    const runId = await runWorkflow({ workflowId: id, inputs });
-    const workflowName = ((_b = state.manager) == null ? void 0 : _b.workflow.title()) ?? id;
-    const timestamp = Date.now();
-    const clonedInputs = JSON.parse(JSON.stringify(inputs));
-    upsertRun(store, {
-      createdAt: timestamp,
-      error: null,
-      httpStatus: null,
-      inputs: clonedInputs,
-      outputs: null,
-      resultPayload: null,
-      runId,
-      status: "pending",
-      updatedAt: timestamp,
-      workflowId: id,
-      workflowName
-    });
-    ensureActiveRun(store, runId);
-  } catch (error) {
-    setStatus$1(store, "error", ERROR_RUNNING_WORKFLOW);
-    if (error instanceof WorkflowApiError) {
-      const inputName = (_d = (_c = error.payload) == null ? void 0 : _c.error) == null ? void 0 : _d.input;
+    const workflowName = ((_g = state.manager) == null ? void 0 : _g.workflow.title()) ?? id;
+    RETRYABLE_SUBMISSIONS.set(store, attempt);
+    try {
+      const response = _normalizeRunResponse(await runWorkflow(attempt.envelope), String(attempt.envelope.submissionId));
+      RETRYABLE_SUBMISSIONS.delete(store);
+      _recordRun(store, response, id, workflowName, attempt.startedAt);
+    } catch (error) {
+      setStatus$1(store, "error", ERROR_RUNNING_WORKFLOW);
+      const payload = error instanceof WorkflowApiError ? error.payload : void 0;
+      const inputName = (_h = payload == null ? void 0 : payload.error) == null ? void 0 : _h.input;
       if (inputName) {
         _setCellStatus(store, inputName, "error");
       }
+      if (_isAuthoritativeRejection(error)) {
+        attempt.outcome = "authoritative-rejection";
+        RETRYABLE_SUBMISSIONS.set(store, attempt);
+        addNotification(store, {
+          id: performance.now().toString(),
+          message: `Workflow run failed: ${(payload == null ? void 0 : payload.detail) || error.message}`,
+          status: "danger"
+        });
+        return;
+      }
+      attempt.outcome = "ambiguous";
+      RETRYABLE_SUBMISSIONS.set(store, attempt);
+      const reconciliation = await _reconcileSubmission(String(attempt.envelope.submissionId));
+      if (reconciliation.kind === "recovered") {
+        RETRYABLE_SUBMISSIONS.delete(store);
+        _recordRun(store, reconciliation.response, id, workflowName, attempt.startedAt);
+        addNotification(store, {
+          id: performance.now().toString(),
+          message: "Workflow submission recovered after the response was interrupted.",
+          status: "info"
+        });
+        return;
+      }
+      if (reconciliation.kind === "rejected") {
+        attempt.outcome = "authoritative-rejection";
+        RETRYABLE_SUBMISSIONS.set(store, attempt);
+        addNotification(store, {
+          id: performance.now().toString(),
+          message: `Workflow run failed: ${reconciliation.detail}`,
+          status: "danger"
+        });
+        return;
+      }
       addNotification(store, {
         id: performance.now().toString(),
-        message: `Workflow run failed: ${((_e = error.payload) == null ? void 0 : _e.detail) || error.message}`,
-        status: "danger"
+        message: "Workflow outcome is unknown. Retry is safe: unchanged inputs will reuse the same submission and uploaded files.",
+        status: "warning"
       });
     }
+  } finally {
+    SUBMISSIONS_IN_FLIGHT.delete(store);
+    (_j = (_i = store.getState().mutate).submissionInFlight) == null ? void 0 : _j.call(_i, null);
+  }
+};
+const workflowCancellationDispatcher = async (store) => {
+  const state = store.getState();
+  const run = state.runs.find((entry) => entry.runId === state.currentRunId);
+  if (!run || !run.submissionId || !["pending", "running"].includes(run.status) || run.cancelRequested || state.cancelInFlightRunId === run.runId) {
+    return;
+  }
+  state.mutate.cancelInFlightRun(run.runId);
+  setStatus$1(store, "running", "Stopping workflow...");
+  try {
+    if (!state.manager.runs.cancel) {
+      throw new Error("Workflow cancellation is unavailable.");
+    }
+    await state.manager.runs.cancel(run.runId);
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : "Unable to stop workflow.";
+    addNotification(store, {
+      id: performance.now().toString(),
+      message: detail,
+      status: "danger"
+    });
+    setStatus$1(store, "error", detail);
+  } finally {
+    store.getState().mutate.cancelInFlightRun(null);
   }
 };
 const { theme: theme$1 } = getLfFramework();
@@ -2491,7 +3769,7 @@ const createDevSection = (store) => {
     debugLog(DEV_SECTION_DESTROYED);
   };
   const mount = () => {
-    var _a, _b;
+    var _a2, _b2;
     const state = store.getState();
     const { manager } = state;
     const { uiRegistry } = manager;
@@ -2505,7 +3783,7 @@ const createDevSection = (store) => {
     card.className = DEV_CLASSES.card;
     card.lfLayout = "debug";
     card.lfDataset = _createDataset();
-    const body = ((_b = (_a = manager.getAppRoot()) == null ? void 0 : _a.ownerDocument) == null ? void 0 : _b.body) ?? document.body;
+    const body = ((_b2 = (_a2 = manager.getAppRoot()) == null ? void 0 : _a2.ownerDocument) == null ? void 0 : _b2.body) ?? document.body;
     _root.appendChild(card);
     body.appendChild(_root);
     uiRegistry.set(DEV_CLASSES._, _root);
@@ -2627,7 +3905,7 @@ var __classPrivateFieldGet$1 = function(receiver, state, kind, f) {
   if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
   return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 };
-var _WorkflowRunnerClient_ES, _WorkflowRunnerClient_STORE, _WorkflowRunnerClient_WORKFLOW_NAMES, _WorkflowRunnerClient_CACHE_KEY, _WorkflowRunnerClient_CACHE_EXPIRY_MS, _WorkflowRunnerClient_INITIAL_BACKOFF_MS, _WorkflowRunnerClient_MAX_BACKOFF_MS, _WorkflowRunnerClient_POLLING_INTERVAL_MS, _WorkflowRunnerClient_RUNS_QUERY_LIMIT, _WorkflowRunnerClient_EVENT_RUN, _WorkflowRunnerClient_EVENT_QUEUE, _WorkflowRunnerClient_LAST_SEQ, _WorkflowRunnerClient_RUNS, _WorkflowRunnerClient_WORKFLOW_CACHE, _WorkflowRunnerClient_STATE, _WorkflowRunnerClient_POLLING, _WorkflowRunnerClient_BACKOFF_MS, _WorkflowRunnerClient_INFLIGHT_RECONCILES, _WorkflowRunnerClient_INFLIGHT_DETAILS, _WorkflowRunnerClient_LOADED_DETAILS, _WorkflowRunnerClient_OPEN_DETAIL_RUN_ID;
+var _WorkflowRunnerClient_ES, _WorkflowRunnerClient_STORE, _WorkflowRunnerClient_WORKFLOW_NAMES, _WorkflowRunnerClient_CACHE_KEY, _WorkflowRunnerClient_CACHE_EXPIRY_MS, _WorkflowRunnerClient_INITIAL_BACKOFF_MS, _WorkflowRunnerClient_MAX_BACKOFF_MS, _WorkflowRunnerClient_POLLING_INTERVAL_MS, _WorkflowRunnerClient_RUNS_QUERY_LIMIT, _WorkflowRunnerClient_EVENT_RUN, _WorkflowRunnerClient_EVENT_QUEUE, _WorkflowRunnerClient_LAST_SEQ, _WorkflowRunnerClient_RUNS, _WorkflowRunnerClient_WORKFLOW_CACHE, _WorkflowRunnerClient_STATE, _WorkflowRunnerClient_POLLING, _WorkflowRunnerClient_BACKOFF_MS, _WorkflowRunnerClient_RECONNECT_TIMER, _WorkflowRunnerClient_STOPPED, _WorkflowRunnerClient_INFLIGHT_RECONCILES, _WorkflowRunnerClient_INFLIGHT_DETAILS, _WorkflowRunnerClient_LOADED_DETAILS, _WorkflowRunnerClient_OPEN_DETAIL_RUN_ID, _WorkflowRunnerClient_REMOVED_RUN_IDS;
 class WorkflowRunnerClient {
   constructor(store) {
     _WorkflowRunnerClient_ES.set(this, null);
@@ -2653,14 +3931,17 @@ class WorkflowRunnerClient {
       abortController: null
     });
     _WorkflowRunnerClient_BACKOFF_MS.set(this, 1e3);
+    _WorkflowRunnerClient_RECONNECT_TIMER.set(this, null);
+    _WorkflowRunnerClient_STOPPED.set(this, true);
     _WorkflowRunnerClient_INFLIGHT_RECONCILES.set(this, /* @__PURE__ */ new Map());
     _WorkflowRunnerClient_INFLIGHT_DETAILS.set(this, /* @__PURE__ */ new Map());
     _WorkflowRunnerClient_LOADED_DETAILS.set(this, /* @__PURE__ */ new Set());
     _WorkflowRunnerClient_OPEN_DETAIL_RUN_ID.set(this, null);
+    _WorkflowRunnerClient_REMOVED_RUN_IDS.set(this, /* @__PURE__ */ new Set());
     this.onUpdate = (runs) => {
-      var _a;
+      var _a2;
       if (Object.keys(__classPrivateFieldGet$1(this, _WorkflowRunnerClient_WORKFLOW_NAMES, "f")).length === 0) {
-        const workflows = ((_a = __classPrivateFieldGet$1(this, _WorkflowRunnerClient_STORE, "f").getState().workflows) == null ? void 0 : _a.nodes) || [];
+        const workflows = ((_a2 = __classPrivateFieldGet$1(this, _WorkflowRunnerClient_STORE, "f").getState().workflows) == null ? void 0 : _a2.nodes) || [];
         for (let i = 0; i < workflows.length; i++) {
           const w = workflows[i];
           __classPrivateFieldGet$1(this, _WorkflowRunnerClient_WORKFLOW_NAMES, "f")[w.id] = String(w.value);
@@ -2707,6 +3988,9 @@ class WorkflowRunnerClient {
     __classPrivateFieldGet$1(this, _WorkflowRunnerClient_INFLIGHT_RECONCILES, "f").set(run_id, promise);
   }
   async _fetchRun(run_id, includeDetail) {
+    if (__classPrivateFieldGet$1(this, _WorkflowRunnerClient_REMOVED_RUN_IDS, "f").has(run_id)) {
+      return;
+    }
     try {
       const detailQuery = includeDetail ? "" : "?detail=0";
       const resp = await fetch(`${API_ROOT}/run/${encodeURIComponent(run_id)}/status${detailQuery}`, {
@@ -2721,11 +4005,17 @@ class WorkflowRunnerClient {
         return;
       }
       const data = await resp.json();
+      if (__classPrivateFieldGet$1(this, _WorkflowRunnerClient_REMOVED_RUN_IDS, "f").has(run_id)) {
+        return;
+      }
       if (includeDetail && __classPrivateFieldGet$1(this, _WorkflowRunnerClient_OPEN_DETAIL_RUN_ID, "f") !== run_id) {
         return;
       }
       const rec = {
         run_id: data.run_id,
+        artifacts: Array.isArray(data.artifacts) ? data.artifacts : void 0,
+        submission_id: data.submission_id,
+        cancel_requested: data.cancel_requested,
         workflow_id: data.workflow_id,
         status: data.status,
         seq: data.seq || 0,
@@ -2748,7 +4038,7 @@ class WorkflowRunnerClient {
   }
   /** Fetch a terminal result only when its output detail is actually opened. */
   async loadRunDetail(run_id) {
-    if (!run_id) {
+    if (!run_id || __classPrivateFieldGet$1(this, _WorkflowRunnerClient_REMOVED_RUN_IDS, "f").has(run_id)) {
       return;
     }
     if (__classPrivateFieldGet$1(this, _WorkflowRunnerClient_OPEN_DETAIL_RUN_ID, "f") && __classPrivateFieldGet$1(this, _WorkflowRunnerClient_OPEN_DETAIL_RUN_ID, "f") !== run_id) {
@@ -2776,20 +4066,24 @@ class WorkflowRunnerClient {
     }
     const existing = __classPrivateFieldGet$1(this, _WorkflowRunnerClient_RUNS, "f").get(target);
     const hadResult = (existing == null ? void 0 : existing.result) !== void 0 && existing.result !== null;
-    if (existing && hadResult) {
-      __classPrivateFieldGet$1(this, _WorkflowRunnerClient_RUNS, "f").set(target, { ...existing, result: null });
+    const hadArtifacts = (existing == null ? void 0 : existing.artifacts) !== void 0;
+    if (existing && (hadResult || hadArtifacts)) {
+      __classPrivateFieldGet$1(this, _WorkflowRunnerClient_RUNS, "f").set(target, { ...existing, artifacts: [], result: null });
     }
     __classPrivateFieldGet$1(this, _WorkflowRunnerClient_LOADED_DETAILS, "f").delete(target);
     if (__classPrivateFieldGet$1(this, _WorkflowRunnerClient_OPEN_DETAIL_RUN_ID, "f") === target) {
       __classPrivateFieldSet$1(this, _WorkflowRunnerClient_OPEN_DETAIL_RUN_ID, null, "f");
     }
-    if (hadResult) {
+    if (hadResult || hadArtifacts) {
       this.emitUpdate();
     }
   }
   applyEvent(ev) {
     if (!ev || !ev.run_id || typeof ev.status === "undefined" || ev.status === null) {
       debugLog("applyEvent: invalid run record (missing run_id or status)", "warning", ev);
+      return;
+    }
+    if (__classPrivateFieldGet$1(this, _WorkflowRunnerClient_REMOVED_RUN_IDS, "f").has(ev.run_id)) {
       return;
     }
     const last = __classPrivateFieldGet$1(this, _WorkflowRunnerClient_LAST_SEQ, "f").get(ev.run_id) ?? -1;
@@ -2800,12 +4094,18 @@ class WorkflowRunnerClient {
   }
   // Upsert with seq monotonicity guard and workflow name fetch
   upsertRun(rec) {
+    if (__classPrivateFieldGet$1(this, _WorkflowRunnerClient_REMOVED_RUN_IDS, "f").has(rec.run_id)) {
+      return;
+    }
     const last = __classPrivateFieldGet$1(this, _WorkflowRunnerClient_LAST_SEQ, "f").get(rec.run_id) ?? -1;
     if (rec.seq < last)
       return;
     const existing = __classPrivateFieldGet$1(this, _WorkflowRunnerClient_RUNS, "f").get(rec.run_id);
     if (rec.seq === last && existing) {
       const supplements = {
+        ...rec.artifacts !== void 0 ? { artifacts: rec.artifacts } : {},
+        ...rec.submission_id !== void 0 ? { submission_id: rec.submission_id } : {},
+        ...rec.cancel_requested !== void 0 ? { cancel_requested: rec.cancel_requested } : {},
         ...rec.workflow_id !== void 0 ? { workflow_id: rec.workflow_id } : {},
         ...rec.owner_id !== void 0 ? { owner_id: rec.owner_id } : {},
         ...rec.created_at !== void 0 ? { created_at: rec.created_at } : {},
@@ -2827,7 +4127,7 @@ class WorkflowRunnerClient {
       this.emitUpdate();
       return;
     }
-    const refreshOpenTerminalDetail = !!existing && rec.seq > last && __classPrivateFieldGet$1(this, _WorkflowRunnerClient_OPEN_DETAIL_RUN_ID, "f") === rec.run_id && ["succeeded", "failed", "cancelled"].includes(rec.status);
+    const refreshOpenTerminalDetail = !!existing && rec.seq > last && __classPrivateFieldGet$1(this, _WorkflowRunnerClient_OPEN_DETAIL_RUN_ID, "f") === rec.run_id && ["succeeded", "failed", "cancelled", "timeout"].includes(rec.status);
     if (existing && rec.seq > last) {
       __classPrivateFieldGet$1(this, _WorkflowRunnerClient_LOADED_DETAILS, "f").delete(rec.run_id);
     }
@@ -2841,15 +4141,88 @@ class WorkflowRunnerClient {
       void this.loadRunDetail(rec.run_id);
     }
   }
+  removeRuns(runIds) {
+    const uniqueIds = [...new Set(runIds.filter(Boolean))];
+    if (uniqueIds.length === 0) {
+      return;
+    }
+    for (const runId of uniqueIds) {
+      __classPrivateFieldGet$1(this, _WorkflowRunnerClient_REMOVED_RUN_IDS, "f").add(runId);
+      __classPrivateFieldGet$1(this, _WorkflowRunnerClient_RUNS, "f").delete(runId);
+      __classPrivateFieldGet$1(this, _WorkflowRunnerClient_LAST_SEQ, "f").delete(runId);
+      __classPrivateFieldGet$1(this, _WorkflowRunnerClient_LOADED_DETAILS, "f").delete(runId);
+      __classPrivateFieldGet$1(this, _WorkflowRunnerClient_INFLIGHT_RECONCILES, "f").delete(runId);
+      __classPrivateFieldGet$1(this, _WorkflowRunnerClient_INFLIGHT_DETAILS, "f").delete(runId);
+      if (__classPrivateFieldGet$1(this, _WorkflowRunnerClient_OPEN_DETAIL_RUN_ID, "f") === runId) {
+        __classPrivateFieldSet$1(this, _WorkflowRunnerClient_OPEN_DETAIL_RUN_ID, null, "f");
+      }
+    }
+    __classPrivateFieldGet$1(this, _WorkflowRunnerClient_STORE, "f").getState().mutate.runs.removeMany(uniqueIds);
+    ensureActiveRun(__classPrivateFieldGet$1(this, _WorkflowRunnerClient_STORE, "f"));
+    this.saveCache();
+  }
   // Remove a run completely from state and cache (used when server returns 404)
   removeRun(runId) {
-    __classPrivateFieldGet$1(this, _WorkflowRunnerClient_RUNS, "f").delete(runId);
-    __classPrivateFieldGet$1(this, _WorkflowRunnerClient_LAST_SEQ, "f").delete(runId);
-    __classPrivateFieldGet$1(this, _WorkflowRunnerClient_LOADED_DETAILS, "f").delete(runId);
-    if (__classPrivateFieldGet$1(this, _WorkflowRunnerClient_OPEN_DETAIL_RUN_ID, "f") === runId) {
-      __classPrivateFieldSet$1(this, _WorkflowRunnerClient_OPEN_DETAIL_RUN_ID, null, "f");
+    this.removeRuns([runId]);
+  }
+  async pruneMissingArtifacts(dryRun, candidateRunIds) {
+    if (!dryRun && !candidateRunIds) {
+      throw new Error("History cleanup requires the candidate IDs from a dry-run preview.");
     }
+    const requestBody = dryRun ? { dry_run: true } : { candidate_run_ids: candidateRunIds, dry_run: false };
+    const resp = await fetch(`${API_ROOT}/workflow-runner/runs/prune-missing-artifacts`, {
+      body: JSON.stringify(requestBody),
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      method: "POST"
+    });
+    let data = {};
+    try {
+      data = await resp.json();
+    } catch {
+    }
+    if (!resp.ok) {
+      const detail = typeof data.detail === "string" ? ` ${data.detail}` : "";
+      throw new Error(`History cleanup failed (${resp.status}).${detail}`);
+    }
+    const candidateRunIdsResponse = Array.isArray(data.candidate_run_ids) ? data.candidate_run_ids.filter((runId) => typeof runId === "string") : [];
+    const candidateCount = Number(data.candidate_count) || 0;
+    if (dryRun && (candidateRunIdsResponse.length !== candidateCount || new Set(candidateRunIdsResponse).size !== candidateRunIdsResponse.length)) {
+      throw new Error("History cleanup preview did not identify its candidates safely.");
+    }
+    const response = {
+      candidate_count: candidateCount,
+      candidate_run_ids: candidateRunIdsResponse,
+      dry_run: Boolean(data.dry_run),
+      removed_count: Number(data.removed_count) || 0,
+      removed_run_ids: Array.isArray(data.removed_run_ids) ? data.removed_run_ids.filter((runId) => typeof runId === "string") : [],
+      skipped_changed: Number(data.skipped_changed) || 0,
+      skipped_unknown: Number(data.skipped_unknown) || 0
+    };
+    if (!dryRun && response.removed_run_ids.length > 0) {
+      this.removeRuns(response.removed_run_ids);
+    }
+    return response;
+  }
+  async cancelSubmission(submissionId, runId) {
+    const snapshot = await cancelWorkflowSubmission(submissionId);
+    if (snapshot.run_id && snapshot.run_id !== runId) {
+      throw new Error("The submission is bound to a different workflow run.");
+    }
+    const existing = __classPrivateFieldGet$1(this, _WorkflowRunnerClient_RUNS, "f").get(runId);
+    const status = ["pending", "running", "succeeded", "failed", "cancelled", "timeout"].includes(snapshot.status) ? snapshot.status : (existing == null ? void 0 : existing.status) ?? "pending";
+    const updated = {
+      ...existing ?? { run_id: runId, seq: 0 },
+      cancel_requested: snapshot.cancel_requested,
+      run_id: runId,
+      status,
+      submission_id: snapshot.submission_id,
+      updated_at: snapshot.updated_at
+    };
+    __classPrivateFieldGet$1(this, _WorkflowRunnerClient_RUNS, "f").set(runId, updated);
     this.emitUpdate();
+    ensureActiveRun(__classPrivateFieldGet$1(this, _WorkflowRunnerClient_STORE, "f"));
+    return snapshot;
   }
   processSnapshotArray(arr) {
     const activeSet = /* @__PURE__ */ new Set();
@@ -2861,10 +4234,17 @@ class WorkflowRunnerClient {
         console.warn("processSnapshotArray: ignoring invalid snapshot entry", s);
         continue;
       }
+      if (__classPrivateFieldGet$1(this, _WorkflowRunnerClient_REMOVED_RUN_IDS, "f").has(s.run_id)) {
+        continue;
+      }
       activeSet.add(s.run_id);
       const last = __classPrivateFieldGet$1(this, _WorkflowRunnerClient_LAST_SEQ, "f").get(s.run_id) ?? -1;
-      if (s.seq <= last)
+      if (s.seq < last)
         continue;
+      if (s.seq === last && __classPrivateFieldGet$1(this, _WorkflowRunnerClient_RUNS, "f").has(s.run_id)) {
+        this.upsertRun(s);
+        continue;
+      }
       __classPrivateFieldGet$1(this, _WorkflowRunnerClient_LAST_SEQ, "f").set(s.run_id, s.seq);
       __classPrivateFieldGet$1(this, _WorkflowRunnerClient_RUNS, "f").set(s.run_id, s);
       changed = true;
@@ -2882,7 +4262,7 @@ class WorkflowRunnerClient {
       try {
         const toReconcile = [];
         for (const [id, rec] of __classPrivateFieldGet$1(this, _WorkflowRunnerClient_RUNS, "f").entries()) {
-          if (rec.status === "running" && !activeSet.has(id)) {
+          if (["pending", "running"].includes(rec.status) && !activeSet.has(id)) {
             toReconcile.push(id);
           }
         }
@@ -3049,6 +4429,7 @@ class WorkflowRunnerClient {
   }
   //#region SSE Connection
   async start() {
+    __classPrivateFieldSet$1(this, _WorkflowRunnerClient_STOPPED, false, "f");
     if (__classPrivateFieldGet$1(this, _WorkflowRunnerClient_ES, "f") || __classPrivateFieldGet$1(this, _WorkflowRunnerClient_STATE, "f").connecting) {
       return;
     }
@@ -3058,6 +4439,10 @@ class WorkflowRunnerClient {
       this.seedPlaceholders(cachedIds);
     }
     await this.coldLoadRuns();
+    if (__classPrivateFieldGet$1(this, _WorkflowRunnerClient_STOPPED, "f")) {
+      __classPrivateFieldGet$1(this, _WorkflowRunnerClient_STATE, "f").connecting = false;
+      return;
+    }
     this.openSse();
   }
   openSse() {
@@ -3074,6 +4459,8 @@ class WorkflowRunnerClient {
             const payload = JSON.parse(e.data);
             this.applyEvent({
               run_id: payload.run_id,
+              submission_id: payload.submission_id,
+              cancel_requested: payload.cancel_requested,
               workflow_id: payload.workflow_id,
               status: payload.status,
               seq: payload.seq ?? 0,
@@ -3098,18 +4485,18 @@ class WorkflowRunnerClient {
     }
     __classPrivateFieldGet$1(this, _WorkflowRunnerClient_STATE, "f").processingSnapshot = true;
     __classPrivateFieldGet$1(this, _WorkflowRunnerClient_ES, "f").onopen = () => {
-      __classPrivateFieldSet$1(this, _WorkflowRunnerClient_BACKOFF_MS, __classPrivateFieldGet$1(this, _WorkflowRunnerClient_INITIAL_BACKOFF_MS, "f"), "f");
-      if (__classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").timer) {
-        clearInterval(__classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").timer);
-        __classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").timer = null;
-        if (__classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").abortController) {
-          try {
-            __classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").abortController.abort();
-          } catch {
-          }
-          __classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").abortController = null;
-        }
+      var _a2;
+      if (__classPrivateFieldGet$1(this, _WorkflowRunnerClient_STOPPED, "f")) {
+        (_a2 = __classPrivateFieldGet$1(this, _WorkflowRunnerClient_ES, "f")) == null ? void 0 : _a2.close();
+        __classPrivateFieldSet$1(this, _WorkflowRunnerClient_ES, null, "f");
+        return;
       }
+      __classPrivateFieldSet$1(this, _WorkflowRunnerClient_BACKOFF_MS, __classPrivateFieldGet$1(this, _WorkflowRunnerClient_INITIAL_BACKOFF_MS, "f"), "f");
+      if (__classPrivateFieldGet$1(this, _WorkflowRunnerClient_RECONNECT_TIMER, "f")) {
+        clearTimeout(__classPrivateFieldGet$1(this, _WorkflowRunnerClient_RECONNECT_TIMER, "f"));
+        __classPrivateFieldSet$1(this, _WorkflowRunnerClient_RECONNECT_TIMER, null, "f");
+      }
+      this.stopPollingFallback();
     };
     __classPrivateFieldGet$1(this, _WorkflowRunnerClient_ES, "f").onerror = () => {
       if (__classPrivateFieldGet$1(this, _WorkflowRunnerClient_ES, "f")) {
@@ -3120,15 +4507,27 @@ class WorkflowRunnerClient {
         }
         __classPrivateFieldSet$1(this, _WorkflowRunnerClient_ES, null, "f");
       }
+      if (__classPrivateFieldGet$1(this, _WorkflowRunnerClient_STOPPED, "f")) {
+        return;
+      }
       this.startPollingFallback();
-      const delay = this.backoffWithJitter();
-      setTimeout(() => this.start(), delay);
+      if (!__classPrivateFieldGet$1(this, _WorkflowRunnerClient_RECONNECT_TIMER, "f")) {
+        const delay = this.backoffWithJitter();
+        __classPrivateFieldSet$1(this, _WorkflowRunnerClient_RECONNECT_TIMER, setTimeout(() => {
+          __classPrivateFieldSet$1(this, _WorkflowRunnerClient_RECONNECT_TIMER, null, "f");
+          if (!__classPrivateFieldGet$1(this, _WorkflowRunnerClient_STOPPED, "f")) {
+            void this.start();
+          }
+        }, delay), "f");
+      }
     };
     __classPrivateFieldGet$1(this, _WorkflowRunnerClient_ES, "f").addEventListener(__classPrivateFieldGet$1(this, _WorkflowRunnerClient_EVENT_RUN, "f"), (e) => {
       try {
         const payload = JSON.parse(e.data);
         this.applyEvent({
           run_id: payload.run_id,
+          submission_id: payload.submission_id,
+          cancel_requested: payload.cancel_requested,
           workflow_id: payload.workflow_id,
           status: payload.status,
           seq: payload.seq ?? 0,
@@ -3170,6 +4569,8 @@ class WorkflowRunnerClient {
       if (payload && (payload.run_id || payload.status || payload.seq !== void 0)) {
         this.applyEvent({
           run_id: payload.run_id,
+          submission_id: payload.submission_id,
+          cancel_requested: payload.cancel_requested,
           workflow_id: payload.workflow_id,
           status: payload.status,
           seq: payload.seq ?? 0,
@@ -3192,6 +4593,8 @@ class WorkflowRunnerClient {
             const payload2 = JSON.parse(e.data);
             this.applyEvent({
               run_id: payload2.run_id,
+              submission_id: payload2.submission_id,
+              cancel_requested: payload2.cancel_requested,
               workflow_id: payload2.workflow_id,
               status: payload2.status,
               seq: payload2.seq ?? 0,
@@ -3215,6 +4618,8 @@ class WorkflowRunnerClient {
     }
   }
   stop() {
+    __classPrivateFieldSet$1(this, _WorkflowRunnerClient_STOPPED, true, "f");
+    __classPrivateFieldGet$1(this, _WorkflowRunnerClient_STATE, "f").connecting = false;
     if (__classPrivateFieldGet$1(this, _WorkflowRunnerClient_ES, "f")) {
       try {
         __classPrivateFieldGet$1(this, _WorkflowRunnerClient_ES, "f").close();
@@ -3222,8 +4627,19 @@ class WorkflowRunnerClient {
       }
       __classPrivateFieldSet$1(this, _WorkflowRunnerClient_ES, null, "f");
     }
+    if (__classPrivateFieldGet$1(this, _WorkflowRunnerClient_RECONNECT_TIMER, "f")) {
+      clearTimeout(__classPrivateFieldGet$1(this, _WorkflowRunnerClient_RECONNECT_TIMER, "f"));
+      __classPrivateFieldSet$1(this, _WorkflowRunnerClient_RECONNECT_TIMER, null, "f");
+    }
+    this.stopPollingFallback();
+    __classPrivateFieldGet$1(this, _WorkflowRunnerClient_INFLIGHT_RECONCILES, "f").clear();
+    __classPrivateFieldGet$1(this, _WorkflowRunnerClient_INFLIGHT_DETAILS, "f").clear();
+    __classPrivateFieldGet$1(this, _WorkflowRunnerClient_LOADED_DETAILS, "f").clear();
+    __classPrivateFieldSet$1(this, _WorkflowRunnerClient_OPEN_DETAIL_RUN_ID, null, "f");
+  }
+  stopPollingFallback() {
     if (__classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").timer) {
-      clearInterval(__classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").timer);
+      clearTimeout(__classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").timer);
       __classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").timer = null;
     }
     if (__classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").abortController) {
@@ -3233,10 +4649,6 @@ class WorkflowRunnerClient {
       }
       __classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").abortController = null;
     }
-    __classPrivateFieldGet$1(this, _WorkflowRunnerClient_INFLIGHT_RECONCILES, "f").clear();
-    __classPrivateFieldGet$1(this, _WorkflowRunnerClient_INFLIGHT_DETAILS, "f").clear();
-    __classPrivateFieldGet$1(this, _WorkflowRunnerClient_LOADED_DETAILS, "f").clear();
-    __classPrivateFieldSet$1(this, _WorkflowRunnerClient_OPEN_DETAIL_RUN_ID, null, "f");
   }
   getRuns() {
     return __classPrivateFieldGet$1(this, _WorkflowRunnerClient_RUNS, "f");
@@ -3265,6 +4677,8 @@ class WorkflowRunnerClient {
     self.seedPlaceholders = this.seedPlaceholders.bind(this);
     self.start = this.start.bind(this);
     self.stop = this.stop.bind(this);
+    self.startPollingFallback = this.startPollingFallback.bind(this);
+    self.backoffWithJitter = this.backoffWithJitter.bind(this);
     self.fetchWorkflowNames = this.fetchWorkflowNames.bind(this);
     self.setWorkflowNames = this.setWorkflowNames.bind(this);
     self.lastSeq = __classPrivateFieldGet$1(this, _WorkflowRunnerClient_LAST_SEQ, "f");
@@ -3278,22 +4692,26 @@ class WorkflowRunnerClient {
     return this;
   }
   startPollingFallback() {
-    if (__classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").timer) {
+    if (__classPrivateFieldGet$1(this, _WorkflowRunnerClient_STOPPED, "f") || __classPrivateFieldGet$1(this, _WorkflowRunnerClient_ES, "f") || __classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").timer || __classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").abortController) {
       return;
     }
-    __classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").timer = setInterval(() => this.pollActiveRuns(), __classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING_INTERVAL_MS, "f"));
-    this.pollActiveRuns();
+    void this.pollActiveRuns().finally(() => {
+      if (__classPrivateFieldGet$1(this, _WorkflowRunnerClient_STOPPED, "f") || __classPrivateFieldGet$1(this, _WorkflowRunnerClient_ES, "f") || __classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").timer) {
+        return;
+      }
+      __classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").timer = setTimeout(() => {
+        __classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").timer = null;
+        this.startPollingFallback();
+      }, __classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING_INTERVAL_MS, "f"));
+    });
   }
   async pollActiveRuns() {
+    let ac = null;
     try {
       if (__classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").abortController) {
-        try {
-          __classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").abortController.abort();
-        } catch {
-        }
-        __classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").abortController = null;
+        return;
       }
-      const ac = new AbortController();
+      ac = new AbortController();
       __classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").abortController = ac;
       const resp = await fetch(`${API_ROOT}/workflow-runner/runs?status=pending,running&owner=me&summary=1&limit=${__classPrivateFieldGet$1(this, _WorkflowRunnerClient_RUNS_QUERY_LIMIT, "f")}`, { signal: ac.signal, credentials: "include" });
       if (!resp.ok) {
@@ -3302,23 +4720,25 @@ class WorkflowRunnerClient {
       const data = await resp.json();
       const arr = data.runs || [];
       this.processSnapshotArray(arr);
-      if (__classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").abortController === ac) {
-        __classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").abortController = null;
-      }
     } catch (e) {
       if (e && (e.name === "AbortError" || e.code === "ABORT_ERR") || e instanceof DOMException && e.name === "AbortError") ;
       else {
         debugLog("pollActiveRuns error", "warning", e);
+      }
+    } finally {
+      if (ac && __classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").abortController === ac) {
+        __classPrivateFieldGet$1(this, _WorkflowRunnerClient_POLLING, "f").abortController = null;
       }
     }
   }
   backoffWithJitter() {
     const base = __classPrivateFieldGet$1(this, _WorkflowRunnerClient_BACKOFF_MS, "f");
     const jitterFactor = 0.5 + Math.random() * 0.5;
+    __classPrivateFieldSet$1(this, _WorkflowRunnerClient_BACKOFF_MS, Math.min(__classPrivateFieldGet$1(this, _WorkflowRunnerClient_MAX_BACKOFF_MS, "f"), Math.max(__classPrivateFieldGet$1(this, _WorkflowRunnerClient_INITIAL_BACKOFF_MS, "f"), base * 2)), "f");
     return Math.floor(base * jitterFactor);
   }
 }
-_WorkflowRunnerClient_ES = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_STORE = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_WORKFLOW_NAMES = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_CACHE_KEY = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_CACHE_EXPIRY_MS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_INITIAL_BACKOFF_MS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_MAX_BACKOFF_MS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_POLLING_INTERVAL_MS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_RUNS_QUERY_LIMIT = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_EVENT_RUN = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_EVENT_QUEUE = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_LAST_SEQ = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_RUNS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_WORKFLOW_CACHE = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_STATE = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_POLLING = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_BACKOFF_MS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_INFLIGHT_RECONCILES = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_INFLIGHT_DETAILS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_LOADED_DETAILS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_OPEN_DETAIL_RUN_ID = /* @__PURE__ */ new WeakMap();
+_WorkflowRunnerClient_ES = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_STORE = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_WORKFLOW_NAMES = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_CACHE_KEY = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_CACHE_EXPIRY_MS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_INITIAL_BACKOFF_MS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_MAX_BACKOFF_MS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_POLLING_INTERVAL_MS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_RUNS_QUERY_LIMIT = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_EVENT_RUN = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_EVENT_QUEUE = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_LAST_SEQ = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_RUNS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_WORKFLOW_CACHE = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_STATE = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_POLLING = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_BACKOFF_MS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_RECONNECT_TIMER = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_STOPPED = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_INFLIGHT_RECONCILES = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_INFLIGHT_DETAILS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_LOADED_DETAILS = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_OPEN_DETAIL_RUN_ID = /* @__PURE__ */ new WeakMap(), _WorkflowRunnerClient_REMOVED_RUN_IDS = /* @__PURE__ */ new WeakMap();
 const RUN_PARAM = "runId";
 const VIEW_PARAM = "view";
 const WORKFLOW_PARAM = "workflowId";
@@ -3407,12 +4827,12 @@ const createRoutingController = ({ store }) => {
     return Array.isArray(workflows == null ? void 0 : workflows.nodes) && workflows.nodes.length > 0;
   };
   const workflowExists = (workflowId) => {
-    var _a;
+    var _a2;
     const { workflows } = store.getState();
-    return Boolean((_a = workflows == null ? void 0 : workflows.nodes) == null ? void 0 : _a.some((node) => node.id === workflowId));
+    return Boolean((_a2 = workflows == null ? void 0 : workflows.nodes) == null ? void 0 : _a2.some((node) => node.id === workflowId));
   };
   const updateRouteFromState = (precomputed) => {
-    if (isApplyingRoute) {
+    if (isApplyingRoute || pendingRoute) {
       return;
     }
     const state = store.getState();
@@ -3535,17 +4955,21 @@ const INIT_CB = () => {
   throw new Error(INIT_ERROR);
 };
 const initState = () => ({
+  cancelInFlightRunId: null,
   current: { status: "idle", message: "", id: null },
   currentRunId: null,
   inputStatuses: {},
   inputPrefillRunId: null,
+  submissionInFlightId: null,
   isDebug: false,
   manager: null,
   mutate: {
+    cancelInFlightRun: INIT_CB,
     isDebug: INIT_CB,
     manager: INIT_CB,
     inputStatus: INIT_CB,
     inputPrefillRun: INIT_CB,
+    submissionInFlight: INIT_CB,
     queuedJobs: INIT_CB,
     notifications: {
       add: INIT_CB,
@@ -3555,6 +4979,7 @@ const initState = () => ({
     results: INIT_CB,
     runs: {
       clear: INIT_CB,
+      removeMany: INIT_CB,
       upsert: INIT_CB
     },
     runId: INIT_CB,
@@ -3574,6 +4999,12 @@ const initState = () => ({
     nodes: []
   }
 });
+const compareWorkflowRuns = (a, b) => {
+  if (a.createdAt !== b.createdAt) {
+    return b.createdAt - a.createdAt;
+  }
+  return a.runId < b.runId ? -1 : a.runId > b.runId ? 1 : 0;
+};
 const createWorkflowRunnerStore = (initialState) => {
   let state = initialState;
   const listeners = /* @__PURE__ */ new Set();
@@ -3632,6 +5063,9 @@ const createWorkflowRunnerStore = (initialState) => {
     }));
   };
   const mutate = {
+    cancelInFlightRun: (runId) => applyMutation((draft) => {
+      draft.cancelInFlightRunId = runId;
+    }),
     isDebug: (isDebug) => applyMutation((draft) => {
       draft.isDebug = isDebug;
     }),
@@ -3651,6 +5085,9 @@ const createWorkflowRunnerStore = (initialState) => {
     }),
     inputPrefillRun: (runId) => applyMutation((draft) => {
       draft.inputPrefillRunId = runId;
+    }),
+    submissionInFlight: (submissionId) => applyMutation((draft) => {
+      draft.submissionInFlightId = submissionId;
     }),
     notifications: {
       add: (notification) => applyMutation((draft) => {
@@ -3681,6 +5118,27 @@ const createWorkflowRunnerStore = (initialState) => {
       clear: () => applyMutation((draft) => {
         draft.runs = [];
       }),
+      removeMany: (runIds) => {
+        if (runIds.length === 0) {
+          return;
+        }
+        const removed = new Set(runIds);
+        applyMutation((draft) => {
+          draft.runs = draft.runs.filter((run) => !removed.has(run.runId));
+          if (draft.currentRunId && removed.has(draft.currentRunId)) {
+            draft.currentRunId = null;
+          }
+          if (draft.cancelInFlightRunId && removed.has(draft.cancelInFlightRunId)) {
+            draft.cancelInFlightRunId = null;
+          }
+          if (draft.selectedRunId && removed.has(draft.selectedRunId)) {
+            draft.selectedRunId = null;
+          }
+          if (draft.inputPrefillRunId && removed.has(draft.inputPrefillRunId)) {
+            draft.inputPrefillRunId = null;
+          }
+        });
+      },
       upsert: (entry) => applyMutation((draft) => {
         const now = entry.updatedAt ?? Date.now();
         const existingIndex = draft.runs.findIndex((run) => run.runId === entry.runId);
@@ -3691,9 +5149,12 @@ const createWorkflowRunnerStore = (initialState) => {
           nextRuns[existingIndex] = {
             ...current,
             ...entry,
+            artifacts: entry.artifacts !== void 0 ? entry.artifacts : current.artifacts,
             createdAt,
             updatedAt: now,
             status: entry.status ?? current.status,
+            submissionId: entry.submissionId !== void 0 ? entry.submissionId : current.submissionId,
+            cancelRequested: entry.cancelRequested !== void 0 ? entry.cancelRequested : current.cancelRequested,
             workflowId: entry.workflowId ?? current.workflowId,
             workflowName: entry.workflowName ?? current.workflowName,
             inputs: entry.inputs ?? current.inputs,
@@ -3702,13 +5163,16 @@ const createWorkflowRunnerStore = (initialState) => {
             httpStatus: entry.httpStatus !== void 0 ? entry.httpStatus : current.httpStatus,
             resultPayload: entry.resultPayload !== void 0 ? entry.resultPayload : current.resultPayload
           };
-          draft.runs = nextRuns;
+          draft.runs = nextRuns.sort(compareWorkflowRuns);
         } else {
           const createdAt = entry.createdAt ?? now;
           const nextRuns = draft.runs.filter((run) => run.runId !== entry.runId);
           draft.runs = [
             {
               runId: entry.runId,
+              artifacts: entry.artifacts ?? [],
+              submissionId: entry.submissionId ?? null,
+              cancelRequested: entry.cancelRequested ?? false,
               createdAt,
               updatedAt: now,
               status: entry.status ?? "pending",
@@ -3721,7 +5185,7 @@ const createWorkflowRunnerStore = (initialState) => {
               resultPayload: entry.resultPayload === void 0 ? null : entry.resultPayload ?? null
             },
             ...nextRuns
-          ];
+          ].sort(compareWorkflowRuns);
         }
       })
     },
@@ -3762,7 +5226,9 @@ const setWorkflow = (id, setState) => {
       ...state.current,
       id
     },
-    currentRunId: null,
+    // Workflow navigation must not surrender control of an owned active
+    // run; the floating action remains Stop until that run is terminal.
+    currentRunId: state.currentRunId,
     results: null,
     selectedRunId: null,
     view: "workflow"
@@ -3792,7 +5258,7 @@ class LfWorkflowRunnerManager {
     _LfWorkflowRunnerManager_DISPATCHERS.set(this, void 0);
     _LfWorkflowRunnerManager_ROUTING.set(this, void 0);
     _LfWorkflowRunnerManager_loadWorkflows.set(this, async () => {
-      var _a;
+      var _a2;
       const { NO_WORKFLOWS_AVAILABLE } = NOTIFICATION_MESSAGES;
       const state2 = __classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f").getState();
       const workflows = await fetchWorkflowDefinitions();
@@ -3804,22 +5270,32 @@ class LfWorkflowRunnerManager {
         });
       }
       state2.mutate.workflows(workflows);
-      const firstWorkflow = (_a = workflows.nodes) == null ? void 0 : _a[0];
+      const firstWorkflow = (_a2 = workflows.nodes) == null ? void 0 : _a2[0];
       const route = __classPrivateFieldGet(this, _LfWorkflowRunnerManager_ROUTING, "f").getPendingRoute();
       const shouldSelectDefault = !route || !route.workflowId && (route.view === "workflow" || route.view === "history") || route.view === "run" && !route.workflowId;
       if (shouldSelectDefault && (firstWorkflow == null ? void 0 : firstWorkflow.id)) {
         state2.mutate.workflow(firstWorkflow.id);
       }
-      __classPrivateFieldGet(this, _LfWorkflowRunnerManager_ROUTING, "f").applyPendingRouteIfNeeded();
+      if ((route == null ? void 0 : route.view) !== "run") {
+        __classPrivateFieldGet(this, _LfWorkflowRunnerManager_ROUTING, "f").applyPendingRouteIfNeeded();
+      }
     });
     this.runs = {
       all: () => {
         return [...__classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f").getState().runs];
       },
+      cancel: async (runId) => {
+        const run = this.runs.get(runId);
+        if (!(run == null ? void 0 : run.submissionId) || !["pending", "running"].includes(run.status)) {
+          return;
+        }
+        await __classPrivateFieldGet(this, _LfWorkflowRunnerManager_CLIENT, "f").cancelSubmission(run.submissionId, run.runId);
+      },
       get: (runId) => {
         const { runs } = __classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f").getState();
         return runs.find((run) => run.runId === runId) || null;
       },
+      pruneMissingArtifacts: (dryRun, candidateRunIds) => __classPrivateFieldGet(this, _LfWorkflowRunnerManager_CLIENT, "f").pruneMissingArtifacts(dryRun, candidateRunIds),
       remix: (runId) => {
         const run = this.runs.get(runId);
         const state2 = __classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f").getState();
@@ -3830,6 +5306,7 @@ class LfWorkflowRunnerManager {
         if (!workflowExists) {
           return;
         }
+        clearWorkflowSessionDraft(__classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f"), run.workflowId);
         if (state2.current.id !== run.workflowId) {
           state2.mutate.workflow(run.workflowId);
         }
@@ -3902,15 +5379,15 @@ class LfWorkflowRunnerManager {
     };
     this.workflow = {
       cells: (type) => {
-        var _a;
+        var _a2;
         const workflow = this.workflow.current();
-        const section = (_a = workflow == null ? void 0 : workflow.children) == null ? void 0 : _a.find((child) => child.id.endsWith(`:${type}s`));
+        const section = (_a2 = workflow == null ? void 0 : workflow.children) == null ? void 0 : _a2.find((child) => child.id.endsWith(`:${type}s`));
         return (section == null ? void 0 : section.cells) || {};
       },
       current: () => {
-        var _a;
+        var _a2;
         const { current, workflows } = __classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f").getState();
-        return ((_a = workflows == null ? void 0 : workflows.nodes) == null ? void 0 : _a.find((node) => node.id === current.id)) || null;
+        return ((_a2 = workflows == null ? void 0 : workflows.nodes) == null ? void 0 : _a2.find((node) => node.id === current.id)) || null;
       },
       download: async (id) => {
         const { ERROR_FETCHING_WORKFLOWS: ERROR_FETCHING_WORKFLOWS2 } = STATUS_MESSAGES;
@@ -3965,6 +5442,7 @@ class LfWorkflowRunnerManager {
     __classPrivateFieldSet(this, _LfWorkflowRunnerManager_STORE, createWorkflowRunnerStore(initState()), "f");
     __classPrivateFieldSet(this, _LfWorkflowRunnerManager_CLIENT, new WorkflowRunnerClient(__classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f")), "f");
     __classPrivateFieldSet(this, _LfWorkflowRunnerManager_DISPATCHERS, {
+      cancelWorkflow: () => workflowCancellationDispatcher(__classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f")),
       runWorkflow: () => workflowDispatcher(__classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f"))
     }, "f");
     __classPrivateFieldSet(this, _LfWorkflowRunnerManager_SECTIONS, {
@@ -3991,10 +5469,10 @@ class LfWorkflowRunnerManager {
         status: "danger"
       });
       setStatus$1(__classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f"), "error", ERROR_FETCHING_WORKFLOWS);
-    }).then(() => {
+    }).then(async () => {
       setStatus$1(__classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f"), "idle", IDLE_WORKFLOWS_LOADED);
-      __classPrivateFieldGet(this, _LfWorkflowRunnerManager_ROUTING, "f").updateRouteFromState();
-      __classPrivateFieldGet(this, _LfWorkflowRunnerManager_CLIENT, "f").start();
+      await __classPrivateFieldGet(this, _LfWorkflowRunnerManager_CLIENT, "f").start();
+      __classPrivateFieldGet(this, _LfWorkflowRunnerManager_ROUTING, "f").applyPendingRouteIfNeeded();
     });
   }
   //#endregion
@@ -4031,7 +5509,7 @@ _LfWorkflowRunnerManager_FRAMEWORK = /* @__PURE__ */ new WeakMap(), _LfWorkflowR
     __classPrivateFieldGet(this, _LfWorkflowRunnerManager_SECTIONS, "f").dev.render();
   }
 }, _LfWorkflowRunnerManager_subscribeToState = function _LfWorkflowRunnerManager_subscribeToState2() {
-  var _a, _b, _c;
+  var _a2, _b2, _c2;
   const st = __classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f").getState();
   let latestState = st;
   let lastCurrentMessage = st.current.message;
@@ -4039,14 +5517,16 @@ _LfWorkflowRunnerManager_FRAMEWORK = /* @__PURE__ */ new WeakMap(), _LfWorkflowR
   let lastDebug = st.isDebug;
   let lastId = st.current.id;
   let lastInputStatuses = st.inputStatuses;
-  let lastNotificationsCount = ((_a = st.notifications) == null ? void 0 : _a.length) ?? 0;
+  let lastNotificationsCount = ((_a2 = st.notifications) == null ? void 0 : _a2.length) ?? 0;
   let lastQueued = st.queuedJobs ?? -1;
   let lastResults = st.results;
   let lastRunId = st.currentRunId;
   let lastRunsRef = st.runs;
+  let lastCancelInFlightRunId = st.cancelInFlightRunId;
+  let lastSubmissionInFlightId = st.submissionInFlightId;
   let lastSelectedRunId = st.selectedRunId;
   let lastView = st.view;
-  let lastWorkflowsCount = ((_c = (_b = st.workflows) == null ? void 0 : _b.nodes) == null ? void 0 : _c.length) ?? 0;
+  let lastWorkflowsCount = ((_c2 = (_b2 = st.workflows) == null ? void 0 : _b2.nodes) == null ? void 0 : _c2.length) ?? 0;
   let scheduled = false;
   const needs = {
     header: false,
@@ -4057,11 +5537,13 @@ _LfWorkflowRunnerManager_FRAMEWORK = /* @__PURE__ */ new WeakMap(), _LfWorkflowR
     notifications: false
   };
   __classPrivateFieldGet(this, _LfWorkflowRunnerManager_STORE, "f").subscribe((state) => {
-    var _a2, _b2;
+    var _a3, _b3;
     latestState = state;
     const { current, isDebug, queuedJobs, workflows } = state;
     const { message, status } = current;
     if (state.currentRunId !== lastRunId) {
+      needs.actionButton = true;
+      needs.header = true;
       lastRunId = state.currentRunId;
     }
     if (current.id !== lastId) {
@@ -4073,8 +5555,15 @@ _LfWorkflowRunnerManager_FRAMEWORK = /* @__PURE__ */ new WeakMap(), _LfWorkflowR
       lastResults = state.results;
     }
     if (state.runs !== lastRunsRef) {
+      needs.actionButton = true;
+      needs.header = true;
       needs.main = true;
       lastRunsRef = state.runs;
+    }
+    if (state.cancelInFlightRunId !== lastCancelInFlightRunId || state.submissionInFlightId !== lastSubmissionInFlightId) {
+      needs.actionButton = true;
+      lastCancelInFlightRunId = state.cancelInFlightRunId;
+      lastSubmissionInFlightId = state.submissionInFlightId;
     }
     if (state.selectedRunId !== lastSelectedRunId) {
       needs.main = true;
@@ -4109,9 +5598,9 @@ _LfWorkflowRunnerManager_FRAMEWORK = /* @__PURE__ */ new WeakMap(), _LfWorkflowR
       needs.header = true;
       lastQueued = queuedJobs;
     }
-    if (((_a2 = workflows == null ? void 0 : workflows.nodes) == null ? void 0 : _a2.length) !== lastWorkflowsCount) {
+    if (((_a3 = workflows == null ? void 0 : workflows.nodes) == null ? void 0 : _a3.length) !== lastWorkflowsCount) {
       needs.drawer = true;
-      lastWorkflowsCount = ((_b2 = workflows == null ? void 0 : workflows.nodes) == null ? void 0 : _b2.length) ?? 0;
+      lastWorkflowsCount = ((_b3 = workflows == null ? void 0 : workflows.nodes) == null ? void 0 : _b3.length) ?? 0;
     }
     if (isDebug !== lastDebug) {
       needs.dev = true;

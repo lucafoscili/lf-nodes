@@ -54,6 +54,8 @@ export interface ClientInternalsMethods {
   seedPlaceholders: (ids: string[]) => void;
   start: () => Promise<void>;
   stop: () => void;
+  startPollingFallback: () => void;
+  backoffWithJitter: () => number;
   fetchWorkflowNames?: (ids: string[]) => Promise<void>;
   setWorkflowNames?: (names: Map<string, string>) => void;
 }

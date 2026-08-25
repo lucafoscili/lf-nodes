@@ -20,7 +20,9 @@ export const masonryHandler = (e: CustomEvent<LfMasonryEventPayload>, store: Wor
         const isValidCard = node?.id && card.rootElement.tagName.toLowerCase() === 'lf-card';
         if (isValidCard) {
           const { id } = node;
-          manager.runs.select(id, 'run');
+          if (manager.runs.get(id) && manager.runs.selected()?.runId !== id) {
+            manager.runs.select(id, 'run');
+          }
         }
 
         break;
@@ -46,6 +48,34 @@ export const masonryHandler = (e: CustomEvent<LfMasonryEventPayload>, store: Wor
       default:
         return;
     }
+  }
+};
+
+/**
+ * Native-click fallback for result cards.
+ *
+ * LFW normally forwards a card click through `lf-masonry-event`. Some browser /
+ * custom-element upgrade paths do not forward that event even though the
+ * composed native click still reaches the masonry host. Keep the result detail
+ * reachable without replacing the normal LFW path, and de-duplicate when both
+ * paths fire.
+ */
+export const masonryClickFallback = (e: MouseEvent, store: WorkflowStore) => {
+  const card = e
+    .composedPath()
+    .find(
+      (entry): entry is HTMLLfCardElement =>
+        entry instanceof Element && entry.tagName.toLowerCase() === 'lf-card',
+    );
+  const node = card?.lfDataset?.nodes?.[0];
+  const runId = typeof node?.id === 'string' ? node.id : '';
+  if (!runId) {
+    return;
+  }
+
+  const { manager } = store.getState();
+  if (manager.runs.get(runId) && manager.runs.selected()?.runId !== runId) {
+    manager.runs.select(runId, 'run');
   }
 };
 //#endregion

@@ -1239,6 +1239,7 @@ var CustomWidgetName;
 })(CustomWidgetName || (CustomWidgetName = {}));
 var NodeName;
 (function(NodeName2) {
+  NodeName2["aceStepRemix"] = "LF_ACEStepRemix";
   NodeName2["backgroundRemover"] = "LF_BackgroundRemover";
   NodeName2["blend"] = "LF_Blend";
   NodeName2["blobToImage"] = "LF_BlobToImage";
@@ -1246,7 +1247,6 @@ var NodeName;
   NodeName2["blurImages"] = "LF_BlurImages";
   NodeName2["boolean"] = "LF_Boolean";
   NodeName2["brightness"] = "LF_Brightness";
-  NodeName2["brush"] = "LF_Brush";
   NodeName2["captionImageWD14"] = "LF_CaptionImageWD14";
   NodeName2["characterImpersonator"] = "LF_CharacterImpersonator";
   NodeName2["checkpointSelector"] = "LF_CheckpointSelector";
@@ -1271,7 +1271,6 @@ var NodeName;
   NodeName2["float"] = "LF_Float";
   NodeName2["embeddingSelector"] = "LF_EmbeddingSelector";
   NodeName2["emptyImage"] = "LF_EmptyImage";
-  NodeName2["extractFaceEmbedding"] = "LF_ExtractFaceEmbedding";
   NodeName2["extractPromptFromLoraTag"] = "LF_ExtractPromptFromLoraTag";
   NodeName2["extractString"] = "LF_ExtractString";
   NodeName2["gaussianBlur"] = "LF_GaussianBlur";
@@ -1279,6 +1278,8 @@ var NodeName;
   NodeName2["getValueFromJson"] = "LF_GetValueFromJSON";
   NodeName2["getRandomKeyFromJson"] = "LF_GetRandomKeyFromJSON";
   NodeName2["imageClassifier"] = "LF_ImageClassifier";
+  NodeName2["imageGrid"] = "LF_ImageGrid";
+  NodeName2["imageList"] = "LF_ImageList";
   NodeName2["imageListFromJSON"] = "LF_ImageListFromJSON";
   NodeName2["imageHistogram"] = "LF_ImageHistogram";
   NodeName2["imagesEditingBreakpoint"] = "LF_ImagesEditingBreakpoint";
@@ -1324,12 +1325,14 @@ var NodeName;
   NodeName2["samplerSelector"] = "LF_SamplerSelector";
   NodeName2["saturation"] = "LF_Saturation";
   NodeName2["saveImageForCivitai"] = "LF_SaveImageForCivitAI";
+  NodeName2["saveDds"] = "LF_SaveDDS";
   NodeName2["saveJson"] = "LF_SaveJSON";
   NodeName2["saveMarkdown"] = "LF_SaveMarkdown";
   NodeName2["saveSvg"] = "LF_SaveSVG";
   NodeName2["saveText"] = "LF_SaveText";
   NodeName2["schedulerSelector"] = "LF_SchedulerSelector";
   NodeName2["sepia"] = "LF_Sepia";
+  NodeName2["sideBySide"] = "LF_SideBySide";
   NodeName2["sequentialSeedsGenerator"] = "LF_SequentialSeedsGenerator";
   NodeName2["setValueInJson"] = "LF_SetValueInJSON";
   NodeName2["shuffleJsonKeys"] = "LF_ShuffleJSONKeys";
@@ -1351,6 +1354,7 @@ var NodeName;
   NodeName2["switchString"] = "LF_SwitchString";
   NodeName2["tiledSuperRes"] = "LF_TiledSuperRes";
   NodeName2["tiltShift"] = "LF_TiltShift";
+  NodeName2["unsharpMask"] = "LF_UnsharpMask";
   NodeName2["updateUsageStatistics"] = "LF_UpdateUsageStatistics";
   NodeName2["uploadImages"] = "LF_UploadImages";
   NodeName2["upscaleModelSelector"] = "LF_UpscaleModelSelector";
@@ -1608,6 +1612,7 @@ const resolveSelectionIndex = (selectedShape, nodes) => {
   return resolvedIndex >= 0 ? resolvedIndex : void 0;
 };
 const NODE_WIDGET_MAP = {
+  LF_ACEStepRemix: [],
   LF_BackgroundRemover: [CustomWidgetName.compare],
   LF_Blend: [CustomWidgetName.compare],
   LF_BlobToImage: [CustomWidgetName.code],
@@ -1615,7 +1620,6 @@ const NODE_WIDGET_MAP = {
   LF_BlurImages: [CustomWidgetName.masonry],
   LF_Boolean: [CustomWidgetName.history],
   LF_Brightness: [CustomWidgetName.compare],
-  LF_Brush: [CustomWidgetName.compare],
   LF_CaptionImageWD14: [CustomWidgetName.countBarChart],
   LF_CharacterImpersonator: [CustomWidgetName.code],
   LF_CheckpointSelector: [CustomWidgetName.card],
@@ -1637,7 +1641,6 @@ const NODE_WIDGET_MAP = {
   LF_DisplayString: [CustomWidgetName.code],
   LF_EmbeddingSelector: [CustomWidgetName.card],
   LF_EmptyImage: [CustomWidgetName.masonry],
-  LF_ExtractFaceEmbedding: [CustomWidgetName.code],
   LF_ExtractPromptFromLoraTag: [CustomWidgetName.code],
   LF_ExtractString: [CustomWidgetName.code],
   LF_FilmGrain: [CustomWidgetName.compare],
@@ -1647,7 +1650,9 @@ const NODE_WIDGET_MAP = {
   LF_GetRandomKeyFromJSON: [CustomWidgetName.code],
   LF_GetValueFromJSON: [CustomWidgetName.code],
   LF_ImageClassifier: [CustomWidgetName.code],
+  LF_ImageGrid: [CustomWidgetName.masonry],
   LF_ImageHistogram: [CustomWidgetName.tabBarChart],
+  LF_ImageList: [CustomWidgetName.masonry],
   LF_ImageListFromJSON: [CustomWidgetName.masonry],
   LF_ImagesEditingBreakpoint: [CustomWidgetName.imageEditor],
   LF_ImagesSlideshow: [CustomWidgetName.carousel],
@@ -1684,7 +1689,7 @@ const NODE_WIDGET_MAP = {
   LF_ParsePromptWithLoraTags: [CustomWidgetName.code],
   LF_RandomBoolean: [CustomWidgetName.progressbar],
   LF_RegexReplace: [CustomWidgetName.code],
-  LF_RegionExtractor: [CustomWidgetName.code],
+  LF_RegionExtractor: [CustomWidgetName.history],
   LF_RegionMask: [CustomWidgetName.compare],
   LF_ResizeImageByEdge: [CustomWidgetName.tree],
   LF_ResizeImageToDimension: [CustomWidgetName.tree],
@@ -1692,6 +1697,7 @@ const NODE_WIDGET_MAP = {
   LF_ResolutionSwitcher: [CustomWidgetName.progressbar],
   LF_SamplerSelector: [CustomWidgetName.history],
   LF_Saturation: [CustomWidgetName.compare],
+  LF_SaveDDS: [CustomWidgetName.tree],
   LF_SaveImageForCivitAI: [CustomWidgetName.masonry],
   LF_SaveJSON: [CustomWidgetName.tree],
   LF_SaveMarkdown: [CustomWidgetName.tree],
@@ -1699,6 +1705,7 @@ const NODE_WIDGET_MAP = {
   LF_SaveText: [CustomWidgetName.tree],
   LF_SchedulerSelector: [CustomWidgetName.history],
   LF_Sepia: [CustomWidgetName.compare],
+  LF_SideBySide: [CustomWidgetName.masonry],
   LF_SequentialSeedsGenerator: [CustomWidgetName.history],
   LF_SetValueInJSON: [CustomWidgetName.code],
   LF_ShuffleJSONKeys: [CustomWidgetName.code],
@@ -1720,6 +1727,7 @@ const NODE_WIDGET_MAP = {
   LF_SwitchString: [CustomWidgetName.progressbar],
   LF_TiledSuperRes: [CustomWidgetName.compare],
   LF_TiltShift: [CustomWidgetName.compare],
+  LF_UnsharpMask: [CustomWidgetName.compare],
   LF_UpdateUsageStatistics: [CustomWidgetName.code],
   LF_UploadImages: [CustomWidgetName.upload],
   LF_UpscaleModelSelector: [CustomWidgetName.history],

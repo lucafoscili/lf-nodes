@@ -44,24 +44,29 @@ def build_output_preview(result: Any, max_artifacts: int = 24) -> dict:
         if (
             not filename
             or len(filename) > 1024
-            or "\x00" in filename
+            or any(ord(character) < 32 for character in filename)
+            or ":" in filename
             or "/" in filename
             or "\\" in filename
             or filename in {".", ".."}
         ):
             return
 
-        subfolder = str(subfolder or "")[:1024]
-        storage_type = str(storage_type or "output")[:32]
+        # Comfy emits native separators in history descriptors. Normalize the
+        # Windows form before applying the same relative-path checks used for
+        # browser-facing ``/view`` URLs.
+        subfolder = str(subfolder or "").replace("\\", "/")
+        storage_type = str(storage_type or "output")
         subfolder_parts = subfolder.split("/") if subfolder else []
         if (
-            "\x00" in subfolder
-            or "\\" in subfolder
+            len(subfolder) > 1024
+            or any(ord(character) < 32 for character in subfolder)
             or subfolder.startswith("/")
             or any(
                 part in {"", ".", ".."} or ":" in part
                 for part in subfolder_parts
             )
+            or len(storage_type) > 32
             or storage_type not in {"input", "output", "temp"}
         ):
             return
@@ -159,11 +164,12 @@ def serialize_job(
         error = read("error")
         result = read("result")
         owner_id = read("owner_id")
+        submission_id = read("submission_id")
         seq = read("seq", 0) or 0
 
         output_preview = build_output_preview(result) if include_output_preview else None
 
-        terminal_statuses = {"succeeded", "failed", "cancelled"}
+        terminal_statuses = {"succeeded", "failed", "cancelled", "timeout"}
         if not include_result_for_terminal and (status not in terminal_statuses):
             result = None
         if summary_only:
@@ -182,6 +188,7 @@ def serialize_job(
             "error": error,
             "result": result,
             "owner_id": owner_id,
+            "submission_id": submission_id,
             "seq": seq,
         }
         if include_output_preview:
@@ -211,6 +218,7 @@ def serialize_run_summary(job: Any) -> dict:
         "status": summary.get("status"),
         "seq": summary.get("seq"),
         "owner_id": summary.get("owner_id"),
+        "submission_id": summary.get("submission_id"),
         "created_at": summary.get("created_at"),
         "updated_at": summary.get("updated_at"),
         "outputs": summary.get("outputs") or {},

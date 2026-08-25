@@ -4,6 +4,7 @@ import { WorkflowManager } from '../types/manager';
 import { WorkflowCellStatus } from '../types/section';
 import {
   WorkflowRunEntryUpdate,
+  WorkflowRunEntry,
   WorkflowState,
   WorkflowStateListener,
   WorkflowStateNotification,
@@ -12,6 +13,18 @@ import {
   WorkflowStore,
   WorkflowView,
 } from '../types/state';
+
+/** Keep history ordering independent of server/map insertion order. */
+export const compareWorkflowRuns = (
+  a: Pick<WorkflowRunEntry, 'runId' | 'createdAt'>,
+  b: Pick<WorkflowRunEntry, 'runId' | 'createdAt'>,
+) => {
+  if (a.createdAt !== b.createdAt) {
+    return b.createdAt - a.createdAt;
+  }
+  // Avoid locale-dependent ordering in a persisted/history contract.
+  return a.runId < b.runId ? -1 : a.runId > b.runId ? 1 : 0;
+};
 
 //#region Factory
 export const createWorkflowRunnerStore = (initialState: WorkflowState): WorkflowStore => {
@@ -85,6 +98,10 @@ export const createWorkflowRunnerStore = (initialState: WorkflowState): Workflow
   };
 
   const mutate = {
+    cancelInFlightRun: (runId: string | null) =>
+      applyMutation((draft) => {
+        draft.cancelInFlightRunId = runId;
+      }),
     isDebug: (isDebug: boolean) =>
       applyMutation((draft) => {
         draft.isDebug = isDebug;
@@ -108,6 +125,10 @@ export const createWorkflowRunnerStore = (initialState: WorkflowState): Workflow
     inputPrefillRun: (runId: string | null) =>
       applyMutation((draft) => {
         draft.inputPrefillRunId = runId;
+      }),
+    submissionInFlight: (submissionId: string | null) =>
+      applyMutation((draft) => {
+        draft.submissionInFlightId = submissionId;
       }),
     notifications: {
       add: (notification: WorkflowStateNotification) =>
@@ -144,6 +165,27 @@ export const createWorkflowRunnerStore = (initialState: WorkflowState): Workflow
         applyMutation((draft) => {
           draft.runs = [];
         }),
+      removeMany: (runIds: string[]) => {
+        if (runIds.length === 0) {
+          return;
+        }
+        const removed = new Set(runIds);
+        applyMutation((draft) => {
+          draft.runs = draft.runs.filter((run) => !removed.has(run.runId));
+          if (draft.currentRunId && removed.has(draft.currentRunId)) {
+            draft.currentRunId = null;
+          }
+          if (draft.cancelInFlightRunId && removed.has(draft.cancelInFlightRunId)) {
+            draft.cancelInFlightRunId = null;
+          }
+          if (draft.selectedRunId && removed.has(draft.selectedRunId)) {
+            draft.selectedRunId = null;
+          }
+          if (draft.inputPrefillRunId && removed.has(draft.inputPrefillRunId)) {
+            draft.inputPrefillRunId = null;
+          }
+        });
+      },
       upsert: (entry: WorkflowRunEntryUpdate) =>
         applyMutation((draft) => {
           const now = entry.updatedAt ?? Date.now();
@@ -156,9 +198,16 @@ export const createWorkflowRunnerStore = (initialState: WorkflowState): Workflow
             nextRuns[existingIndex] = {
               ...current,
               ...entry,
+              artifacts: entry.artifacts !== undefined ? entry.artifacts : current.artifacts,
               createdAt,
               updatedAt: now,
               status: entry.status ?? current.status,
+              submissionId:
+                entry.submissionId !== undefined ? entry.submissionId : current.submissionId,
+              cancelRequested:
+                entry.cancelRequested !== undefined
+                  ? entry.cancelRequested
+                  : current.cancelRequested,
               workflowId: entry.workflowId ?? current.workflowId,
               workflowName: entry.workflowName ?? current.workflowName,
               inputs: entry.inputs ?? current.inputs,
@@ -168,13 +217,16 @@ export const createWorkflowRunnerStore = (initialState: WorkflowState): Workflow
               resultPayload:
                 entry.resultPayload !== undefined ? entry.resultPayload : current.resultPayload,
             };
-            draft.runs = nextRuns;
+            draft.runs = nextRuns.sort(compareWorkflowRuns);
           } else {
             const createdAt = entry.createdAt ?? now;
             const nextRuns = draft.runs.filter((run) => run.runId !== entry.runId);
             draft.runs = [
               {
                 runId: entry.runId,
+                artifacts: entry.artifacts ?? [],
+                submissionId: entry.submissionId ?? null,
+                cancelRequested: entry.cancelRequested ?? false,
                 createdAt,
                 updatedAt: now,
                 status: (entry.status ?? 'pending') as WorkflowRunStatus,
@@ -188,7 +240,7 @@ export const createWorkflowRunnerStore = (initialState: WorkflowState): Workflow
                   entry.resultPayload === undefined ? null : entry.resultPayload ?? null,
               },
               ...nextRuns,
-            ];
+            ].sort(compareWorkflowRuns);
           }
         }),
     },
@@ -246,7 +298,9 @@ const setWorkflow = (id: string, setState: (updater: WorkflowStateUpdater) => vo
           ...state.current,
           id,
         },
-        currentRunId: null,
+        // Workflow navigation must not surrender control of an owned active
+        // run; the floating action remains Stop until that run is terminal.
+        currentRunId: state.currentRunId,
         results: null,
         selectedRunId: null,
         view: 'workflow',

@@ -55,10 +55,6 @@ class LF_LUTApplication:
     OUTPUT_TOOLTIPS = (
         "Adjusted image tensor.",
         "List of adjusted image tensors.",
-        "Original image tensor.",
-        "List of original image tensors.",
-        "LUT applied to the image.",
-        "List of LUTs applied to the images."
     )
     RETURN_NAMES = ("image", "image_list")
     RETURN_TYPES = (Input.IMAGE, Input.IMAGE)

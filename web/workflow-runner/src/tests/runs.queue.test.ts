@@ -12,6 +12,7 @@ const createRun = (runId: string, status: WorkflowRunStatus, createdAt = Date.no
   outputs: null,
   resultPayload: null,
   runId,
+  submissionId: `lf-web:${runId}`,
   status,
   updatedAt: createdAt,
   workflowId: 'wf',
@@ -70,5 +71,44 @@ describe('runs.queue', () => {
     expect(store.getState().runs.find((run) => run.runId === fallbackRunId)?.status).toBe(
       'pending',
     );
+  });
+
+  it('does not let an unbound legacy active row monopolize Run control', () => {
+    const store = createWorkflowRunnerStore(initState());
+    upsertRun(store, {
+      createdAt: 1,
+      runId: 'legacy-running',
+      status: 'running',
+      submissionId: null,
+      updatedAt: 1,
+    });
+
+    ensureActiveRun(store);
+
+    expect(store.getState().currentRunId).toBeNull();
+    expect(store.getState().runs.some((run) => run.runId === 'legacy-running')).toBe(true);
+  });
+
+  it('prefers a controlled active run while retaining an unbound legacy row', () => {
+    const store = createWorkflowRunnerStore(initState());
+    upsertRun(store, {
+      createdAt: 1,
+      runId: 'legacy-running',
+      status: 'running',
+      submissionId: null,
+      updatedAt: 1,
+    });
+    upsertRun(store, {
+      createdAt: 2,
+      runId: 'controlled-pending',
+      status: 'pending',
+      submissionId: 'lf-web:controlled',
+      updatedAt: 2,
+    });
+
+    ensureActiveRun(store);
+
+    expect(store.getState().currentRunId).toBe('controlled-pending');
+    expect(store.getState().runs).toHaveLength(2);
   });
 });

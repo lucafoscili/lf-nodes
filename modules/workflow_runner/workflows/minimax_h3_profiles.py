@@ -14,7 +14,10 @@ from __future__ import annotations
 from typing import NamedTuple
 
 
-NATIVE_MAX_EDGE = 1344
+# Core constrains the native canvas by a 768x1344 pixel-area budget, not by a
+# universal 1344-pixel edge. Ultra-wide ratios can therefore reach 1536x672
+# while staying inside the same trained-area envelope.
+NATIVE_MAX_EDGE = 1536
 NATIVE_MAX_PIXELS = 1344 * 768
 EXPERIMENTAL_MAX_EDGE = 1920
 EXPERIMENTAL_MAX_PIXELS = 1920 * 1088
@@ -129,6 +132,7 @@ FL2VA_PROFILE_IDS = (
 )
 REF2VA_PROFILE_IDS = (
     "native_quality",
+    "kitchen_quality",
     "spectrum_preview",
     "experimental_2mp",
     "manual_advanced",
@@ -153,7 +157,7 @@ def resolve_h3_execution_profile(
         if profile_id == "turbo_preview" and family == "ref2va":
             raise ValueError(
                 "turbo_preview is not validated for MiniMax H3 REF2VA; use "
-                "spectrum_preview or native_quality."
+                "kitchen_quality, spectrum_preview, or native_quality."
             )
         raise ValueError(
             f"Unknown MiniMax H3 {family} execution profile: {profile_id!r}."

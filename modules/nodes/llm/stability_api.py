@@ -74,7 +74,10 @@ class LF_StabilityAPI:
                 "timeout": (Input.INTEGER, {
                     "default": 120,
                     "tooltip": "Request timeout in seconds."
-                })
+                }),
+                "ui_widget": (Input.LF_CODE, {
+                    "default": "",
+                }),
             },
             "hidden": {
                 "node_id": "UNIQUE_ID"

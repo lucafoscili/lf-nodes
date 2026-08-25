@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Any, Dict
 
 from ..services.registry import InputValidationError, WorkflowCell, WorkflowNode
-from ...utils.youtube_url import parse_youtube_video_url
+from .utils import canonical_youtube_url
 
 
 _MODES = ("cover", "repaint")
@@ -14,18 +14,6 @@ _DEFAULT_STYLE_PROMPT = (
     "Atmospheric cinematic folk with warm strings, soft percussion, subtle synth pads, "
     "a somber nocturnal mood, moderate tempo, and clear expressive lead vocals."
 )
-
-
-def _youtube_url(value: Any) -> str:
-    if not isinstance(value, str):
-        raise InputValidationError("youtube_url")
-    try:
-        _video_id, canonical_url = parse_youtube_video_url(value)
-    except ValueError as error:
-        raise InputValidationError("youtube_url") from error
-    if not canonical_url:
-        raise InputValidationError("youtube_url")
-    return canonical_url
 
 
 def _number(inputs: Dict[str, Any], name: str, default, minimum, maximum, integer=False):
@@ -42,7 +30,7 @@ def _number(inputs: Dict[str, Any], name: str, default, minimum, maximum, intege
 
 
 def _configure(prompt: Dict[str, Any], inputs: Dict[str, Any]) -> None:
-    youtube_url = _youtube_url(inputs.get("youtube_url"))
+    youtube_url = canonical_youtube_url(inputs.get("youtube_url"))
     mode = inputs.get("mode", "cover")
     if mode not in _MODES:
         raise InputValidationError("mode")

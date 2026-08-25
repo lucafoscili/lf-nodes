@@ -30,7 +30,6 @@ class LF_DisplayBoolean:
     OUTPUT_NODE = True
     OUTPUT_TOOLTIPS = (
         "Pass-through boolean value.",
-        "Pass-through boolean value as a list."
     )
     RETURN_NAMES = ("boolean",)
     RETURN_TYPES = (Input.BOOLEAN,)

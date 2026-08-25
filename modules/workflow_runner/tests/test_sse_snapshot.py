@@ -90,7 +90,7 @@ class TestSSESnapshot:
             assert "run-running" in written_text, "RUNNING run should be in snapshot"
             assert "run-succeeded" in written_text, "SUCCEEDED run should be in snapshot (FIX)"
             
-            print(f"  ✓ All 3 runs present in snapshot!")
+            print("  PASS: All 3 runs present in snapshot!")
     
     async def test_send_initial_snapshot_filters_by_owner(self):
         """Snapshot should only send runs for the authenticated user."""
@@ -134,7 +134,7 @@ class TestSSESnapshot:
             # User2's run should NOT be visible
             assert "user2-run1" not in written_text, "User2's run should NOT be visible to user1"
             
-            print(f"  ✓ Owner filtering works correctly!")
+            print("  PASS: Owner filtering works correctly!")
     
     async def test_stream_runs_controller_calls_snapshot(self):
         """The stream_runs_controller should call _send_initial_snapshot when SSE connects."""
@@ -170,7 +170,7 @@ class TestSSESnapshot:
             assert "test-run" in all_jobs
             assert all_jobs["test-run"].status == job_store.JobStatus.SUCCEEDED
             
-            print(f"  ✓ list_jobs returns succeeded runs")
+            print("  PASS: list_jobs returns succeeded runs")
     
     async def test_snapshot_output_format(self):
         """Verify the SSE event format is correct."""
@@ -218,8 +218,8 @@ class TestSSESnapshot:
                 assert data['status'] == 'succeeded'
                 assert data['owner_id'] == 'owner123'
                 
-                print(f"  ✓ SSE event format is valid!")
-                print(f"  ✓ Parsed data: {data}")
+                print("  PASS: SSE event format is valid!")
+                print(f"  PASS: Parsed data: {data}")
 
 class TestUIEventProcessing:
     """Test how the UI should process SSE events."""

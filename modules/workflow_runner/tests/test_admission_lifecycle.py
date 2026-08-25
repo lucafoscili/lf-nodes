@@ -811,6 +811,193 @@ class _RecordingSession:
         return _InterruptResponse()
 
 
+class _CancelResponse:
+    def __init__(self, status, body):
+        self.status = status
+        self.body = body
+
+    async def json(self):
+        return self.body
+
+    def raise_for_status(self):
+        if self.status >= 400:
+            raise RuntimeError(f"HTTP {self.status}")
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, exc_type, exc, traceback):
+        return False
+
+
+class _CancelSession:
+    def __init__(
+        self,
+        *,
+        core_cancelled=None,
+        core_status=200,
+        queues=None,
+        histories=None,
+    ):
+        self.core_cancelled = core_status == 200 if core_cancelled is None else core_cancelled
+        self.core_status = core_status
+        self.queues = list(queues or [])
+        self.histories = list(histories or [])
+        self.posts = []
+
+    def post(self, url, **kwargs):
+        self.posts.append((url, kwargs))
+        if "/api/jobs/" in url:
+            return _CancelResponse(
+                self.core_status,
+                {"cancelled": self.core_cancelled},
+            )
+        return _CancelResponse(200, {})
+
+    def get(self, url, **kwargs):
+        if "/history/" in url:
+            return _CancelResponse(200, self.histories.pop(0))
+        if url.endswith("/queue"):
+            return _CancelResponse(200, self.queues.pop(0))
+        return _CancelResponse(404, {})
+
+
+async def test_core_cancel_targets_running_job_by_exact_id():
+    from modules.workflow_runner.services import executor
+
+    prompt_id = "aaaaaaaa-aaaa-4aaa-aaaa-aaaaaaaaaaaa"
+    session = _CancelSession(
+        histories=[{}],
+        queues=[{"queue_running": [[0, prompt_id]], "queue_pending": []}],
+    )
+
+    outcome = await executor.cancel_workflow(
+        prompt_id,
+        comfy_url="http://comfy:8188",
+        session=session,
+    )
+
+    assert outcome == executor.CANCEL_OUTCOME_RUNNING
+    assert session.posts == [
+        (f"http://comfy:8188/api/jobs/{prompt_id}/cancel", {})
+    ]
+
+
+async def test_core_cancel_proves_pending_dequeue_without_history():
+    from modules.workflow_runner.services import executor
+
+    prompt_id = "bbbbbbbb-bbbb-4bbb-bbbb-bbbbbbbbbbbb"
+    session = _CancelSession(
+        histories=[{}, {}],
+        queues=[{"queue_running": [], "queue_pending": []}],
+    )
+
+    outcome = await executor.cancel_workflow(prompt_id, session=session)
+
+    assert outcome == executor.CANCEL_OUTCOME_PENDING
+
+
+async def test_core_cancel_preserves_terminal_race_between_history_and_queue():
+    from modules.workflow_runner.services import executor
+
+    prompt_id = "ffffffff-ffff-4fff-ffff-ffffffffffff"
+    terminal = {prompt_id: {"status": {"status_str": "success"}}}
+    session = _CancelSession(
+        histories=[{}, terminal],
+        queues=[{"queue_running": [], "queue_pending": []}],
+    )
+
+    outcome = await executor.cancel_workflow(prompt_id, session=session)
+
+    assert outcome == executor.CANCEL_OUTCOME_TERMINAL
+
+
+async def test_core_cancel_false_is_idempotent_when_exact_history_is_terminal():
+    from modules.workflow_runner.services import executor
+
+    prompt_id = "eeeeeeee-eeee-4eee-eeee-eeeeeeeeeeee"
+    session = _CancelSession(
+        core_cancelled=False,
+        histories=[{prompt_id: {"status": {"status_str": "success"}}}],
+    )
+
+    outcome = await executor.cancel_workflow(prompt_id, session=session)
+
+    assert outcome == executor.CANCEL_OUTCOME_TERMINAL
+    assert session.posts == [
+        (f"http://127.0.0.1:8188/api/jobs/{prompt_id}/cancel", {})
+    ]
+
+
+async def test_legacy_fallback_deletes_only_exact_pending_id():
+    from modules.workflow_runner.services import executor
+
+    prompt_id = "cccccccc-cccc-4ccc-cccc-cccccccccccc"
+    session = _CancelSession(
+        core_status=404,
+        histories=[{}, {}],
+        queues=[
+            {"queue_running": [], "queue_pending": [[0, prompt_id]]},
+            {"queue_running": [], "queue_pending": []},
+        ],
+    )
+
+    outcome = await executor.cancel_workflow(prompt_id, session=session)
+
+    assert outcome == executor.CANCEL_OUTCOME_PENDING
+    assert all(not url.endswith("/interrupt") for url, _ in session.posts)
+    delete_url, delete_kwargs = session.posts[1]
+    assert delete_url.endswith("/queue")
+    assert json.loads(delete_kwargs["data"]) == {"delete": [prompt_id]}
+
+
+async def test_legacy_fallback_refuses_global_risk_for_running_job():
+    from modules.workflow_runner.services import executor
+
+    prompt_id = "dddddddd-dddd-4ddd-dddd-dddddddddddd"
+    session = _CancelSession(
+        core_status=404,
+        queues=[{"queue_running": [[0, prompt_id]], "queue_pending": []}],
+    )
+
+    outcome = await executor.cancel_workflow(prompt_id, session=session)
+
+    assert outcome == executor.CANCEL_OUTCOME_UNSUPPORTED
+    assert all(not url.endswith("/interrupt") for url, _ in session.posts)
+
+
+async def test_interrupted_history_is_cancelled_not_failed(monkeypatch):
+    from modules.workflow_runner.services import executor
+    from modules.workflow_runner.services.job_store import JobStatus
+
+    history = {
+        "status": {
+            "status_str": "error",
+            "completed": False,
+            "messages": [["execution_interrupted", {"prompt_id": "prompt-cancelled"}]],
+        },
+        "outputs": {},
+    }
+
+    async def monitor(prompt_id, stop_event, **kwargs):
+        return None
+
+    monkeypatch.setattr(executor, "_wait_for_completion", AsyncMock(return_value=history))
+    monkeypatch.setattr(executor, "_monitor_until_running", monitor)
+    monkeypatch.setattr(executor.aiohttp, "ClientSession", lambda: _RecordingSession())
+
+    status, response, http_status = await executor.finalize_workflow(
+        "prompt-cancelled",
+        "client-1",
+        "http://comfy:8188",
+        (True, "", [], []),
+    )
+
+    assert status == JobStatus.CANCELLED
+    assert http_status == 200
+    assert response["payload"]["detail"] == "cancelled"
+
+
 async def test_timeout_interrupt_is_targeted_and_drained(monkeypatch):
     from modules.workflow_runner.services import executor
     from modules.workflow_runner.services.job_store import JobStatus

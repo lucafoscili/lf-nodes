@@ -41,7 +41,7 @@ class TestColdLoadWithAuth:
         
         # Check that routes module loaded
         assert routes is not None
-        print("✓ Routes module loaded")
+        print("PASS: Routes module loaded")
     
     async def test_list_runs_with_authenticated_request(self):
         """Simulate what happens when browser calls GET /runs?owner=me with cookie."""
@@ -65,19 +65,19 @@ class TestColdLoadWithAuth:
             # Verify job was created
             all_jobs = await job_store.list_jobs()
             assert test_job_id in all_jobs
-            print(f"  ✓ Created test job: {test_job_id}")
+            print(f"  PASS: Created test job: {test_job_id}")
             
             # Test filtering by owner_id
             filtered_jobs = await job_store.list_jobs(owner_id=expected_owner_id)
             assert test_job_id in filtered_jobs
             assert len(filtered_jobs) == 1
-            print(f"  ✓ Filtering by owner_id returns the job")
+            print("  PASS: Filtering by owner_id returns the job")
             
             # Test filtering by different owner (should be empty)
             other_owner = "x" * 64
             other_jobs = await job_store.list_jobs(owner_id=other_owner)
             assert test_job_id not in other_jobs
-            print(f"  ✓ Filtering by different owner_id returns empty")
+            print("  PASS: Filtering by different owner_id returns empty")
     
     async def test_list_runs_controller_with_owner_me(self):
         """Test the actual controller with owner=me parameter."""
@@ -128,7 +128,7 @@ class TestColdLoadWithAuth:
                 
                 # THIS IS THE KEY TEST
                 assert test_job_id in run_ids, f"Expected job {test_job_id} not in response!"
-                print(f"  ✓ Cold-load returned the authenticated user's job!")
+                print("  PASS: Cold-load returned the authenticated user's job!")
     
     async def test_ui_cold_load_simulation(self):
         """Simulate the exact sequence the UI does on page refresh."""
@@ -184,8 +184,8 @@ class TestColdLoadWithAuth:
                 # Verify other user's job is NOT present
                 assert "ui-test-other" not in run_ids, "Other user's job leaked!"
                 
-                print(f"  ✓ UI cold-load correctly filters by owner_id!")
-                print(f"  ✓ User sees only their 2 jobs, not other user's job")
+                print("  PASS: UI cold-load correctly filters by owner_id!")
+                print("  PASS: User sees only their 2 jobs, not other user's job")
 
 class TestColdLoadFailureModes:
     """Test what happens when cold-load fails."""
@@ -255,7 +255,7 @@ class TestColdLoadFailureModes:
                 # Should return ALL jobs
                 runs = data.get('runs', [])
                 assert len(runs) >= 1
-                print(f"    ✓ Returns all jobs (owner=me ignored)")
+                print("    PASS: Returns all jobs (owner=me ignored)")
 
 if __name__ == "__main__":
     import sys

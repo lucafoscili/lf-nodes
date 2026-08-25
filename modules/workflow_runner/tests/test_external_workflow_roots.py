@@ -45,7 +45,8 @@ def test_extra_roots_are_read_from_runner_settings(monkeypatch, tmp_path) -> Non
         config,
         "get_settings",
         lambda: SimpleNamespace(
-            WORKFLOW_RUNNER_EXTRA_WORKFLOW_ROOTS=[str(tmp_path), str(tmp_path / "second")]
+            WORKFLOW_RUNNER_EXTRA_WORKFLOW_ROOTS=[str(tmp_path), str(tmp_path / "second")],
+            WORKFLOW_RUNNER_EXTRA_WORKFLOW_GROUPS=["Project One", "Project Two"],
         ),
     )
 
@@ -53,6 +54,40 @@ def test_extra_roots_are_read_from_runner_settings(monkeypatch, tmp_path) -> Non
         str(tmp_path),
         str(tmp_path / "second"),
     )
+    assert workflows._extra_workflow_groups_from_settings() == (
+        "Project One",
+        "Project Two",
+    )
+
+
+def test_root_groups_stay_aligned_when_an_earlier_root_is_invalid(tmp_path) -> None:
+    valid_root = tmp_path / "valid"
+    valid_root.mkdir()
+
+    roots, groups = workflows._resolved_root_groups(
+        [tmp_path / "missing", valid_root],
+        ["Missing", "Valid Project"],
+    )
+
+    assert roots == (valid_root.resolve(),)
+    assert groups == ("Valid Project",)
+
+
+def test_nested_module_uses_the_most_specific_configured_collection(tmp_path) -> None:
+    parent = tmp_path / "workflows"
+    nested = parent / "velora"
+    nested.mkdir(parents=True)
+    module_file = nested / "portrait.py"
+    module_file.write_text("WORKFLOW = None\n", encoding="utf-8")
+    module = SimpleNamespace(__file__=str(module_file))
+
+    collection = workflows._module_collection(
+        module,  # type: ignore[arg-type]
+        (parent.resolve(), nested.resolve()),
+        ("Garage", "Velora"),
+    )
+
+    assert collection == "Velora"
 
 
 def test_external_module_uses_existing_custom_package_contract(tmp_path) -> None:
@@ -136,12 +171,42 @@ def test_external_definition_can_be_registered(monkeypatch, tmp_path) -> None:
     try:
         definition = next(
             item
-            for item in workflows.iter_workflow_definitions([tmp_path])
+            for item in workflows.iter_workflow_definitions(
+                [tmp_path], ["Fixture Project"]
+            )
             if getattr(item, "id", None) == "external-definition"
         )
+        assert definition.origin == "custom"
+        assert definition.collection == "Fixture Project"
         registry = WorkflowRegistry()
         registry.register(definition)  # type: ignore[arg-type]
         assert registry.get("external-definition") is definition
+    finally:
+        _forget_external_modules(module_name)
+
+
+def test_immutable_external_definition_keeps_custom_provenance(monkeypatch, tmp_path) -> None:
+    module_name = "lf_external_immutable_fixture"
+    (tmp_path / f"{module_name}.py").write_text(
+        "from dataclasses import dataclass\n"
+        "@dataclass(frozen=True, slots=True)\n"
+        "class Definition:\n"
+        "    id: str = 'immutable-external'\n"
+        "WORKFLOW = Definition()\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(workflows, "_WORKFLOW_MODULES", ())
+
+    try:
+        definition = next(
+            item
+            for item in workflows.iter_workflow_definitions(
+                [tmp_path], ["Immutable Project"]
+            )
+            if getattr(item, "id", None) == "immutable-external"
+        )
+        assert definition.origin == "custom"
+        assert definition.collection == "Immutable Project"
     finally:
         _forget_external_modules(module_name)
 

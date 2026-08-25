@@ -252,6 +252,30 @@ async def test_cancel_request_is_additive_and_idempotent():
     assert events["events"][-1]["type"] == "cancel_requested"
 
 
+async def test_timeout_is_terminal_for_lifecycle_control():
+    payload = {
+        "workflowId": "portrait",
+        "submissionId": "portrait-timeout",
+        "inputs": {},
+    }
+    await lifecycle.reserve_submission(payload, "portrait")
+    await lifecycle.bind_prompt(
+        "portrait-timeout",
+        "prompt-timeout",
+        "http://comfy:8188",
+    )
+    terminal = await lifecycle.record_terminal(
+        "prompt-timeout",
+        "timeout",
+        error="deadline_exceeded",
+    )
+
+    assert terminal is not None
+    assert terminal["status"] == "timeout"
+    with pytest.raises(lifecycle.SubmissionConflictError):
+        await lifecycle.record_cancel_requested("portrait-timeout")
+
+
 async def test_invalid_or_conflicting_submission_id_shapes_are_rejected():
     with pytest.raises(lifecycle.SubmissionLifecycleError) as invalid:
         await lifecycle.reserve_submission(

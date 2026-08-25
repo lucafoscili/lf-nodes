@@ -35,7 +35,7 @@ export const createRoutingController = ({
 
   //#region Update Route
   const updateRouteFromState = (precomputed?: WorkflowRoute) => {
-    if (isApplyingRoute) {
+    if (isApplyingRoute || pendingRoute) {
       return;
     }
     const state = store.getState();

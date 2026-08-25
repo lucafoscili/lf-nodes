@@ -132,3 +132,59 @@ async def test_finalize_workflow_preserves_bounded_comfy_execution_error(
     assert len(detail.encode("utf-8")) <= 4096
     assert response["payload"]["error"]["message"] == "execution_failed"
     assert "private diagnostic details" not in detail
+
+
+@pytest.mark.asyncio
+async def test_finalize_workflow_prefers_durable_media_over_observational_output(
+    monkeypatch, comfy_api_mock
+):
+    """A grid's temp LF dataset must not outrank its downstream saved sheet."""
+    import types
+
+    mock_install_util = types.ModuleType("utils.install_util")
+    mock_install_util.get_missing_requirements_message = lambda: ""
+    mock_install_util.get_required_packages_versions = lambda: {}
+    mock_install_util.requirements_path = Path("/tmp/requirements.txt")
+    monkeypatch.setitem(sys.modules, "utils.install_util", mock_install_util)
+
+    mock_json_util = types.ModuleType("utils.json_util")
+    mock_json_util.merge_json_recursive = lambda *args: {}
+    monkeypatch.setitem(sys.modules, "utils.json_util", mock_json_util)
+
+    from modules.workflow_runner.services import executor
+    from modules.workflow_runner.services.job_store import JobStatus
+
+    prompt_id = "prompt-sheet-1"
+    history = {
+        prompt_id: {
+            "status": {"status_str": "success", "completed": True},
+            "outputs": {
+                "grid": {"lf_output": [{"dataset": {"nodes": []}}]},
+                "save": {
+                    "images": [
+                        {
+                            "filename": "sheet.png",
+                            "subfolder": "LF_Nodes/ImageSheet",
+                            "type": "output",
+                        }
+                    ]
+                },
+                "receipt": {"lf_output": [{"json": {"schema": "receipt"}}]},
+            },
+        }
+    }
+    monkeypatch.setattr(
+        "aiohttp.ClientSession",
+        lambda: comfy_api_mock([history], [{"queue_running": [], "queue_pending": []}]),
+    )
+
+    status, response, http_status = await executor.finalize_workflow(
+        prompt_id,
+        "client-sheet-1",
+        "http://127.0.0.1:8188",
+        (True, "", ["grid", "save", "receipt"], []),
+    )
+
+    assert status == JobStatus.SUCCEEDED
+    assert http_status == 200
+    assert response["payload"]["preferred_output"] == "save"

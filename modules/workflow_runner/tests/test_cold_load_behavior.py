@@ -96,7 +96,7 @@ async def test_cold_load():
     print("=" * 60)
     
     if not settings.ENABLE_GOOGLE_OAUTH:
-        print("⚠️  OAuth is DISABLED")
+        print("WARNING: OAuth is DISABLED")
         print("   This means the endpoint doesn't require authentication")
         print("   BUT owner=me won't work because there's no email to derive owner_id from")
         print()
@@ -108,7 +108,7 @@ async def test_cold_load():
         print()
         print("   SOLUTION: Either enable OAuth OR UI shouldn't use owner=me")
     else:
-        print("✓ OAuth is ENABLED")
+        print("PASS: OAuth is ENABLED")
         print("  The endpoint requires authentication")
         print("  If you're getting 403, it means the cookie is missing or invalid")
     

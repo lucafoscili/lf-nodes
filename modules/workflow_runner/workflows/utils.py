@@ -4,15 +4,92 @@ import hashlib
 import os
 import re
 import tempfile
-from pathlib import Path
-from typing import Any, Iterator, List, Sequence, Tuple
+from pathlib import Path, PureWindowsPath
+from typing import Any, Iterable, Iterator, List, Sequence, Tuple
 
 from ..services.registry import InputValidationError
+from ...utils.youtube_url import parse_youtube_video_url
 
 _CANDIDATE_KEYS = ("path", "file", "name", "value")
 _STAGED_IMAGE_DIRECTORY = Path("lf-workflow-runner") / "staged-images"
 _SAFE_SUFFIX = re.compile(r"^\.[a-z0-9]{1,16}$")
+_COMFY_PATH_ANNOTATION = re.compile(
+  r"^(?P<path>.+?)\s+\[(?P<storage>input|temp|output)\]\s*$"
+)
 _COPY_BUFFER_BYTES = 1024 * 1024
+
+
+def canonical_youtube_url(value: Any, *, field: str = "youtube_url") -> str:
+  """Validate one YouTube URL and return its canonical watch URL."""
+  if not isinstance(value, str):
+    raise InputValidationError(field)
+  try:
+    _video_id, canonical_url = parse_youtube_video_url(value)
+  except ValueError as error:
+    raise InputValidationError(field) from error
+  if not canonical_url:
+    raise InputValidationError(field)
+  return canonical_url
+
+
+def has_input_value(inputs: dict[str, Any], name: str) -> bool:
+  """Return whether a Runner input contains a non-empty scalar or collection."""
+  value = inputs.get(name)
+  return not (
+    value is None
+    or (isinstance(value, str) and not value.strip())
+    or (isinstance(value, (list, tuple)) and not value)
+  )
+
+
+def require_input_value(inputs: dict[str, Any], name: str) -> None:
+  """Require a non-empty Runner input without constraining its transport shape."""
+  if not has_input_value(inputs, name):
+    raise InputValidationError(name)
+
+
+def required_text(inputs: dict[str, Any], name: str) -> str:
+  """Return one required, trimmed text input."""
+  value = inputs.get(name)
+  if not isinstance(value, str) or not value.strip():
+    raise InputValidationError(name)
+  return value.strip()
+
+
+def choice(
+  inputs: dict[str, Any],
+  name: str,
+  default: str,
+  choices: Iterable[str],
+) -> str:
+  """Return a string constrained to the declared workflow choices."""
+  value = inputs.get(name, default)
+  if not isinstance(value, str) or value not in tuple(choices):
+    raise InputValidationError(name)
+  return value
+
+
+def integer(
+  inputs: dict[str, Any],
+  name: str,
+  default: int,
+  *,
+  minimum: int,
+  maximum: int,
+) -> int:
+  """Parse one bounded integer using the Runner's stable error contract."""
+  value = inputs.get(name, default)
+  if value in (None, ""):
+    value = default
+  if isinstance(value, bool):
+    raise InputValidationError(name)
+  try:
+    parsed = int(str(value).strip())
+  except (TypeError, ValueError) as error:
+    raise InputValidationError(name) from error
+  if parsed < minimum or parsed > maximum:
+    raise ValueError(f"{name} must be between {minimum} and {maximum}.")
+  return parsed
 
 # region Helpers
 def _flatten_upload_value(value: Any) -> Iterator[Any]:
@@ -63,6 +140,8 @@ def resolve_upload_paths(
 
   This function extracts and validates paths from the 'inputs' dictionary under the specified 'name' key.
   It flattens the raw value, filters out None and empty strings, and resolves each candidate path.
+  Portable Comfy references such as ``portrait.png [input]`` are resolved
+  beneath their named storage root with traversal and symlink containment.
   If 'must_exist' is True, it checks that each path exists on the filesystem.
   If 'allow_multiple' is False, only the first valid path is returned.
 
@@ -92,7 +171,30 @@ def resolve_upload_paths(
     if not isinstance(candidate, (str, Path)):
       raise InputValidationError(name)
 
-    resolved_path = Path(candidate).expanduser()
+    candidate_value = str(candidate).strip()
+    annotated = _COMFY_PATH_ANNOTATION.fullmatch(candidate_value)
+    if annotated is not None:
+      relative_value = annotated.group("path").strip().replace("\\", "/")
+      relative_path = Path(relative_value)
+      if (
+        not relative_value
+        or relative_path.is_absolute()
+        or PureWindowsPath(relative_value).is_absolute()
+      ):
+        raise InputValidationError(name)
+
+      storage_type = annotated.group("storage")
+      roots = dict(_comfy_image_directories())
+      root = roots.get(storage_type)
+      if root is None:
+        raise InputValidationError(name)
+      resolved_root = root.expanduser().resolve(strict=False)
+      resolved_path = (resolved_root / relative_path).resolve(strict=False)
+      if _contained_relative_path(resolved_path, resolved_root) is None:
+        raise InputValidationError(name)
+    else:
+      resolved_path = Path(candidate).expanduser()
+
     if must_exist and not resolved_path.exists():
       raise FileNotFoundError(f"Input path does not exist: {resolved_path}")
 
@@ -208,9 +310,19 @@ def resolve_load_image_reference(
   Resolving real paths before containment checks prevents a symlink inside a
   Comfy directory from being used to smuggle an outside path into the graph.
   """
-  raw_path = Path(
-    resolve_upload_paths(inputs, name, allow_multiple=False, must_exist=True)[0]
-  ).expanduser()
+  resolved_paths = resolve_upload_paths(
+    inputs,
+    name,
+    allow_multiple=True,
+    must_exist=True,
+  )
+  if len(resolved_paths) != 1:
+    # LF Upload currently permits multi-selection at the widget level. These
+    # LoadImage seams are deliberately singular, so reject ambiguity instead
+    # of uploading everything and silently consuming only the first file.
+    raise InputValidationError(name)
+
+  raw_path = Path(resolved_paths[0]).expanduser()
   if not raw_path.is_absolute():
     raise InputValidationError(name)
 

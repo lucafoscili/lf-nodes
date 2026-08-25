@@ -1,13 +1,15 @@
-"""Process-local lifecycle registry for Workflow Runner submissions.
+"""Lifecycle registry for Workflow Runner submissions.
 
 The ComfyUI ``prompt_id`` remains LF's canonical run id for backwards
 compatibility.  This registry adds a caller-stable submission id around it so
 automation can safely retry a request, inspect its event trail, discover
 outputs, and target cancellation without learning ComfyUI internals.
 
-This is intentionally a feature-oriented, process-local layer.  It is not a
-durable distributed scheduler; callers that need persistence can mirror the
-returned snapshots in their own project store.
+The rich event trail remains process-local.  Once ComfyUI accepts a prompt,
+the stable id, request fingerprint, owner, prompt id, and Core URL are also
+stored with the canonical job record.  That small durable authority lets a
+restarted Runner recover idempotent retries and exact cancellation without
+pretending to be a distributed scheduler.
 """
 
 from __future__ import annotations
@@ -30,7 +32,7 @@ EVENT_SCHEMA_VERSION = "lf.workflow-event.v1"
 MANIFEST_SCHEMA_VERSION = "lf.workflow-output-manifest.v1"
 
 _SUBMISSION_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$")
-_TERMINAL_STATES = {"succeeded", "failed", "cancelled"}
+_TERMINAL_STATES = {"succeeded", "failed", "cancelled", "timeout"}
 _OUTPUTS_JSON_BUDGET_BYTES = 256 * 1024
 _ARTIFACTS_JSON_BUDGET_BYTES = 128 * 1024
 _OUTPUT_NODES_JSON_BUDGET_BYTES = 32 * 1024
@@ -173,6 +175,103 @@ def _snapshot(record: SubmissionRecord, *, include_events: bool = True) -> Dict[
     return snapshot
 
 
+def _job_value(job: Any, name: str, default: Any = None) -> Any:
+    if isinstance(job, Mapping):
+        return job.get(name, default)
+    return getattr(job, name, default)
+
+
+def _job_status(job: Any) -> str:
+    value = _job_value(job, "status", "pending")
+    return str(getattr(value, "value", value) or "pending")
+
+
+async def _hydrate_durable_job(job: Any) -> Optional[SubmissionRecord]:
+    """Restore the control-plane identity carried by one canonical job row."""
+
+    submission_id = _job_value(job, "submission_id")
+    prompt_id = _job_value(job, "id") or _job_value(job, "run_id")
+    fingerprint = _job_value(job, "request_fingerprint")
+    comfy_url = _job_value(job, "comfy_url")
+    if not isinstance(submission_id, str) or not submission_id:
+        return None
+    if (
+        not isinstance(prompt_id, str)
+        or not prompt_id
+        or not isinstance(fingerprint, str)
+        or not fingerprint
+        or not isinstance(comfy_url, str)
+        or not comfy_url
+    ):
+        # A partial identity cannot safely authorize a replay or cancellation.
+        raise SubmissionLifecycleError(
+            "submission_identity_unavailable",
+            "stored submission identity is incomplete",
+        )
+
+    created_at = _job_value(job, "created_at", time.time())
+    updated_at = _job_value(job, "updated_at", created_at)
+    try:
+        created_at = float(created_at)
+    except (TypeError, ValueError):
+        created_at = time.time()
+    try:
+        updated_at = float(updated_at)
+    except (TypeError, ValueError):
+        updated_at = created_at
+    status = _job_status(job)
+    result = _job_value(job, "result")
+    output_manifest = None
+    if result is not None and status == "succeeded":
+        output_manifest = build_output_manifest(submission_id, prompt_id, result)
+
+    hydrated = SubmissionRecord(
+        submission_id=submission_id,
+        workflow_id=str(_job_value(job, "workflow_id", "") or ""),
+        request_fingerprint=fingerprint,
+        owner_id=_job_value(job, "owner_id"),
+        created_at=created_at,
+        updated_at=updated_at,
+        status=status,
+        prompt_id=prompt_id,
+        comfy_url=comfy_url,
+        error=_job_value(job, "error"),
+        output_manifest=output_manifest,
+    )
+
+    async with _lock:
+        existing = _records.get(submission_id)
+        if existing is not None:
+            if (
+                existing.prompt_id != prompt_id
+                or existing.request_fingerprint != fingerprint
+                or existing.owner_id != hydrated.owner_id
+            ):
+                raise SubmissionConflictError(
+                    "submission_identity_conflict",
+                    "stored submission identity conflicts with process state",
+                )
+            return existing
+        indexed_submission = _prompt_index.get(prompt_id)
+        if indexed_submission is not None and indexed_submission != submission_id:
+            raise SubmissionConflictError(
+                "prompt_submission_conflict",
+                "ComfyUI prompt is already bound to another submission",
+            )
+        _records[submission_id] = hydrated
+        _prompt_index[prompt_id] = submission_id
+        return hydrated
+
+
+async def _load_durable_submission(submission_id: str) -> Optional[SubmissionRecord]:
+    # Runtime import avoids a lifecycle -> store -> serializer -> lifecycle
+    # import cycle during service startup.
+    from .job_store import get_job_by_submission_id
+
+    job = await get_job_by_submission_id(submission_id)
+    return await _hydrate_durable_job(job) if job is not None else None
+
+
 async def reserve_submission(
     payload: Mapping[str, Any],
     workflow_id: str,
@@ -188,7 +287,38 @@ async def reserve_submission(
     submission_id = requested or f"lf-{uuid.uuid4().hex}"
     fingerprint = _fingerprint_payload(payload)
 
+    if requested is not None:
+        async with _lock:
+            existing = _records.get(submission_id)
+            if existing is not None:
+                if (
+                    existing.request_fingerprint != fingerprint
+                    or existing.owner_id != owner_id
+                ):
+                    raise SubmissionConflictError(
+                        "submission_id_conflict",
+                        f"submission id '{submission_id}' already belongs to another request",
+                    )
+                return _snapshot(existing, include_events=False), False
+
+        # A verified storage miss is the only safe basis for accepting an
+        # explicit id after process restart. Storage errors deliberately
+        # propagate so a retry cannot duplicate an already accepted prompt.
+        durable = await _load_durable_submission(submission_id)
+        if durable is not None:
+            if (
+                durable.request_fingerprint != fingerprint
+                or durable.owner_id != owner_id
+            ):
+                raise SubmissionConflictError(
+                    "submission_id_conflict",
+                    f"submission id '{submission_id}' already belongs to another request",
+                )
+            return _snapshot(durable, include_events=False), False
+
     async with _lock:
+        # Recheck after the storage read so concurrent in-process reservations
+        # for the same explicit id remain single-writer.
         existing = _records.get(submission_id)
         if existing is not None:
             if (
@@ -259,6 +389,7 @@ def _media_type(filename: str) -> Optional[str]:
         "webp": "image/webp",
         "gif": "image/gif",
         "svg": "image/svg+xml",
+        "dds": "image/vnd-ms.dds",
         "mp4": "video/mp4",
         "webm": "video/webm",
         "wav": "audio/wav",
@@ -384,17 +515,21 @@ def build_output_manifest(
         nonlocal artifact_bytes, artifacts_truncated
         if artifacts_truncated:
             return
+        # Standard Comfy history descriptors use OS-native separators. Keep
+        # legacy LF ``file_names`` strict, but normalize this structured
+        # subfolder field before validating and publishing the manifest.
+        subfolder = subfolder.replace("\\", "/")
         subfolder_parts = subfolder.split("/") if subfolder else []
         if (
             not filename
             or len(filename) > 1024
-            or "\x00" in filename
+            or any(ord(character) < 32 for character in filename)
+            or ":" in filename
             or "/" in filename
             or "\\" in filename
             or filename in {".", ".."}
             or len(subfolder) > 1024
-            or "\x00" in subfolder
-            or "\\" in subfolder
+            or any(ord(character) < 32 for character in subfolder)
             or subfolder.startswith("/")
             or any(
                 part in {"", ".", ".."} or ":" in part
@@ -651,6 +786,58 @@ async def record_cancel_requested(submission_id: str) -> Dict[str, Any]:
         return _snapshot(record, include_events=False)
 
 
+async def record_proven_pending_cancellation(
+    prompt_id: str,
+    *,
+    result: Any = None,
+) -> Optional[Dict[str, Any]]:
+    """Publish cancellation backed by an exact Core pending dequeue.
+
+    The background reconciler can infer ``execution_state_lost`` in the small
+    interval between Core dequeuing a prompt and this process publishing the
+    cancellation.  Exact dequeue proof is stronger than that synthetic
+    negative-state inference, so this transition may correct only that one
+    failure.  Real execution failures and all other terminal outcomes remain
+    immutable.
+    """
+
+    async with _lock:
+        submission_id = _prompt_index.get(prompt_id)
+        record = _records.get(submission_id) if submission_id else None
+        if record is None:
+            return None
+
+        if record.status == "cancelled":
+            record.cancel_requested = True
+            return _snapshot(record, include_events=False)
+        if record.status in {"succeeded", "timeout"}:
+            return _snapshot(record, include_events=False)
+        if record.status == "failed" and record.error != "execution_state_lost":
+            return _snapshot(record, include_events=False)
+
+        corrected_state_loss = (
+            record.status == "failed" and record.error == "execution_state_lost"
+        )
+        previous_error = record.error
+        record.cancel_requested = True
+        record.error = None
+        record.output_manifest = None
+        _append_event(
+            record,
+            "execution_state_lost_corrected"
+            if corrected_state_loss
+            else "cancelled",
+            "cancelled",
+            reason="exact_pending_dequeue",
+            **(
+                {"previous_error": previous_error}
+                if corrected_state_loss
+                else {}
+            ),
+        )
+        return _snapshot(record, include_events=False)
+
+
 async def get_submission(
     submission_id: str,
     *,
@@ -658,7 +845,10 @@ async def get_submission(
 ) -> Optional[Dict[str, Any]]:
     async with _lock:
         record = _records.get(submission_id)
-        return _snapshot(record, include_events=include_events) if record else None
+        if record is not None:
+            return _snapshot(record, include_events=include_events)
+    record = await _load_durable_submission(submission_id)
+    return _snapshot(record, include_events=include_events) if record else None
 
 
 async def get_submission_by_prompt(
@@ -669,10 +859,34 @@ async def get_submission_by_prompt(
     async with _lock:
         submission_id = _prompt_index.get(prompt_id)
         record = _records.get(submission_id) if submission_id else None
-        return _snapshot(record, include_events=include_events) if record else None
+        if record is not None:
+            return _snapshot(record, include_events=include_events)
+
+    from .job_store import get_job
+
+    job = await get_job(prompt_id)
+    record = await _hydrate_durable_job(job) if job is not None else None
+    return _snapshot(record, include_events=include_events) if record else None
+
+
+async def get_submissions_by_prompts(
+    prompt_ids: list[str],
+) -> Dict[str, Dict[str, Any]]:
+    """Snapshot stable lifecycle handles for a bounded run-list response."""
+
+    requested = {prompt_id for prompt_id in prompt_ids if prompt_id}
+    async with _lock:
+        snapshots: Dict[str, Dict[str, Any]] = {}
+        for prompt_id in requested:
+            submission_id = _prompt_index.get(prompt_id)
+            record = _records.get(submission_id) if submission_id else None
+            if record is not None:
+                snapshots[prompt_id] = _snapshot(record, include_events=False)
+        return snapshots
 
 
 async def get_cancel_target(submission_id: str) -> Optional[Dict[str, Any]]:
+    await get_submission(submission_id, include_events=False)
     async with _lock:
         record = _records.get(submission_id)
         if record is None:
@@ -683,6 +897,27 @@ async def get_cancel_target(submission_id: str) -> Optional[Dict[str, Any]]:
             "comfy_url": record.comfy_url,
             "status": record.status,
             "cancel_requested": record.cancel_requested,
+        }
+
+
+async def get_submission_persistence_fields(
+    submission_id: str,
+) -> Optional[Dict[str, str]]:
+    """Return private identity fields for the canonical post-queue job row."""
+
+    async with _lock:
+        record = _records.get(submission_id)
+        if (
+            record is None
+            or not record.prompt_id
+            or not record.comfy_url
+            or not record.request_fingerprint
+        ):
+            return None
+        return {
+            "submission_id": record.submission_id,
+            "request_fingerprint": record.request_fingerprint,
+            "comfy_url": record.comfy_url,
         }
 
 
@@ -705,7 +940,10 @@ __all__ = [
     "get_cancel_target",
     "get_submission",
     "get_submission_by_prompt",
+    "get_submission_persistence_fields",
+    "get_submissions_by_prompts",
     "record_cancel_requested",
+    "record_proven_pending_cancellation",
     "record_prequeue_failure",
     "record_running",
     "record_terminal",

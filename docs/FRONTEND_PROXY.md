@@ -18,7 +18,8 @@ This document describes the lightweight frontend proxy used to expose a very sma
 - Accepts incoming HTTP requests and only allows requests whose path starts with an allowed prefix (configured in `PROXY_ALLOWED_PREFIXES`).
 - Forwards the request to the configured backend URL (`COMFY_BACKEND_URL`), copying headers and preserving Host and X-Forwarded-* headers.
 - Returns the upstream response body, status code and relevant headers (e.g., Set-Cookie) to the client.
-- Optional debug mode (`WORKFLOW_RUNNER_DEBUG`) returns upstream traceback text in 502 responses to help troubleshooting locally (do NOT enable in public production).
+- Serves `GET /health` locally. A `200 {"status":"ok"}` response means the proxy event loop is responsive; it does not assert that ComfyUI is available.
+- Bounds upstream connection, socket-read, and total request time. Long-lived SSE and `/view` streams have no total lifetime cap, but retain bounded idle-read deadlines (45 seconds for heartbeat-backed SSE and 120 seconds for media). Connection failures and timeouts return the stable JSON response `502 {"detail":"upstream_error"}`; diagnostic detail remains in the proxy logs.
 
 ## Configuration (env vars / config values)
 
@@ -27,7 +28,10 @@ Key values read by the proxy / routes module (see the code for defaults):
 - `PROXY_FRONTEND_PORT` — port the proxy listens on (e.g., 9188).
 - `COMFY_BACKEND_URL` — full URL of the local Comfy backend, e.g. `http://127.0.0.1:8188`.
 - `PROXY_ALLOWED_PREFIXES` — list/tuple of path prefixes that are permitted (deny-by-default). Examples added for workflow-runner: `/api/lf-nodes/workflow-runner`, `/queue`, `/api/lf-nodes/workflows`, `/api/lf-nodes/run`, `/view`, `/favicon.ico`.
-- `WORKFLOW_RUNNER_DEBUG` — boolean flag, when enabled returns more upstream details for debugging.
+- `PROXY_CONNECT_TIMEOUT_SECONDS` — maximum time to establish or acquire an upstream connection (default `5`).
+- `PROXY_READ_TIMEOUT_SECONDS` — maximum time between reads from the upstream response (default `30`).
+- `PROXY_TOTAL_TIMEOUT_SECONDS` — maximum total lifetime of an upstream request (default `60`). The shortest applicable timeout wins.
+- `WORKFLOW_RUNNER_DEBUG` — boolean flag that enables more verbose proxy logging. Public 502 response bodies remain stable and do not expose upstream exception text.
 
 The exact variable names and defaults live in `frontend_proxy.py` and `routes.py` — check those files when changing behavior.
 
@@ -36,9 +40,9 @@ The exact variable names and defaults live in `frontend_proxy.py` and `routes.py
 From the repository root (recommended), run the proxy in the `custom_nodes/lf-nodes` working directory so relative imports work:
 
 ```powershell
-cd C:\Users\luca.foscili_smeup\Documents\GitHub\ComfyUI\custom_nodes\lf-nodes
+cd C:\path\to\ComfyUI\custom_nodes\lf-nodes
 # Run with the repo's Python environment
-& "C:\Users\luca.foscili_smeup\Documents\GitHub\ComfyUI\.venv\Scripts\python.exe" .\modules\workflow_runner\scripts\frontend_proxy.py
+& "C:\path\to\ComfyUI\.venv\Scripts\python.exe" .\modules\workflow_runner\scripts\frontend_proxy.py
 ```
 
 If you set environment variables before running in PowerShell, use `setx` (persist) or `$env:VAR = 'value'` for the session:
@@ -47,7 +51,7 @@ If you set environment variables before running in PowerShell, use `setx` (persi
 $env:COMFY_BACKEND_URL = 'http://127.0.0.1:8188'
 $env:PROXY_FRONTEND_PORT = '9188'
 $env:WORKFLOW_RUNNER_DEBUG = '1'
-& "C:\Users\luca.foscili_smeup\Documents\GitHub\ComfyUI\.venv\Scripts\python.exe" .\modules\workflow_runner\frontend_proxy.py
+& "C:\path\to\ComfyUI\.venv\Scripts\python.exe" .\modules\workflow_runner\scripts\frontend_proxy.py
 ```
 
 Note: when using VS Code devtunnels (or other tunnels) make sure the tunnel terminates TLS and forwards plain HTTP to the proxy (or that the proxy handles TLS). If you see `502` and a log entry showing "UNKNOWN / HTTP/1.0" with TLS ClientHello bytes, the tunnel is doing passthrough — switch the tunnel port to HTTP termination.

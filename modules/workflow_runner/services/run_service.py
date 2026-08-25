@@ -12,15 +12,32 @@ from .admission import (
     acquire_workflow_admission,
     retain_workflow_admission,
 )
-from .job_store import JobStatus, create_job, get_job, set_job_status
+from .job_store import (
+    JobStatus,
+    create_job,
+    get_job,
+    set_job_status,
+    set_job_status_if_unchanged,
+)
 from .executor import (
+    CANCEL_OUTCOME_NOOP,
+    CANCEL_OUTCOME_PENDING,
+    CANCEL_OUTCOME_RUNNING,
+    CANCEL_OUTCOME_TERMINAL,
+    CANCEL_OUTCOME_UNSUPPORTED,
+    WorkflowPreparationError,
     _make_run_payload,
     _prepare_workflow_execution,
+    cancel_workflow,
     drain_workflow,
     finalize_workflow,
-    interrupt_workflow,
     post_workflow_submission,
     prepare_workflow_submission,
+)
+from .remix_inputs import (
+    UploadRemixReferenceError,
+    build_durable_input_snapshot,
+    materialize_upload_references,
 )
 from .lifecycle import (
     SubmissionConflictError,
@@ -28,8 +45,10 @@ from .lifecycle import (
     bind_prompt,
     get_cancel_target,
     get_submission,
+    get_submission_persistence_fields,
     record_cancel_requested,
     record_prequeue_failure,
+    record_proven_pending_cancellation,
     record_terminal,
     reserve_submission,
 )
@@ -38,6 +57,9 @@ from ...utils.helpers.comfy import safe_send_sync
 
 LOG = logging.getLogger(__name__)
 _WORKER_TASKS: set[asyncio.Future[Any]] = set()
+_WORKERS_BY_PROMPT: dict[str, asyncio.Future[Any]] = {}
+_PROVEN_PENDING_CANCELLATIONS: set[str] = set()
+_CANCELLATIONS_IN_FLIGHT: dict[str, asyncio.Future[Dict[str, Any]]] = {}
 
 
 class WorkflowCancellationError(RuntimeError):
@@ -73,6 +95,78 @@ async def _release_admission(
         )
 
 
+async def _publish_proven_pending_cancellation(prompt_id: str) -> Dict[str, Any] | None:
+    """Idempotently publish terminal state after an exact pending dequeue."""
+
+    job_result = {
+        "http_status": 200,
+        "body": _make_run_payload(detail="cancelled"),
+    }
+    job_error: BaseException | None = None
+    lifecycle_error: BaseException | None = None
+    terminal = None
+    try:
+        # Correct only the active row observed by this exact pending-dequeue
+        # operation, or the reconciler's one synthetic state-loss failure.
+        # Compare-and-swap prevents this proof from overwriting a genuine
+        # execution terminal that arrived concurrently.
+        for _attempt in range(2):
+            current_job = await get_job(prompt_id)
+            if current_job is None or current_job.status == JobStatus.CANCELLED:
+                break
+            may_cancel = current_job.status == JobStatus.PENDING or (
+                current_job.status == JobStatus.FAILED
+                and current_job.error == "execution_state_lost"
+            )
+            if not may_cancel:
+                break
+            updated = await set_job_status_if_unchanged(
+                prompt_id,
+                JobStatus.CANCELLED,
+                owner_id=current_job.owner_id,
+                expected_status=current_job.status.value,
+                seq=current_job.seq,
+                updated_at=current_job.updated_at,
+                result=job_result,
+                clear_error=(
+                    current_job.status == JobStatus.FAILED
+                    and current_job.error == "execution_state_lost"
+                ),
+            )
+            if updated is not None:
+                break
+        final_job = await get_job(prompt_id)
+        if final_job is not None and (
+            final_job.status == JobStatus.PENDING
+            or (
+                final_job.status == JobStatus.FAILED
+                and final_job.error == "execution_state_lost"
+            )
+        ):
+            raise RuntimeError(
+                "job store could not publish proven pending cancellation atomically"
+            )
+    except BaseException as exc:
+        job_error = exc
+
+    # These stores are independent. Even if one is temporarily unavailable,
+    # publish to the other so a refresh/retry never depends on nonexistent
+    # Comfy history to learn this proven terminal outcome.
+    try:
+        terminal = await record_proven_pending_cancellation(
+            prompt_id,
+            result=job_result,
+        )
+    except BaseException as exc:
+        lifecycle_error = exc
+
+    if job_error is not None:
+        raise job_error
+    if lifecycle_error is not None:
+        raise lifecycle_error
+    return terminal
+
+
 def _track_worker(task: Any) -> None:
     if not isinstance(task, asyncio.Future):
         return
@@ -89,11 +183,37 @@ def _schedule_worker(worker: Coroutine[Any, Any, None], prompt_id: str) -> bool:
             loop = asyncio.get_running_loop()
         task = loop.create_task(worker)
         _track_worker(task)
+        _WORKERS_BY_PROMPT[prompt_id] = task
+
+        def forget_worker(completed: asyncio.Future[Any]) -> None:
+            if _WORKERS_BY_PROMPT.get(prompt_id) is completed:
+                _WORKERS_BY_PROMPT.pop(prompt_id, None)
+
+        task.add_done_callback(forget_worker)
         LOG.debug("Scheduled lifecycle worker for prompt %s", prompt_id)
         return True
     except Exception:
         LOG.exception("Failed to schedule lifecycle worker for prompt %s", prompt_id)
         return False
+
+
+async def _await_worker_inline(
+    worker: Coroutine[Any, Any, None],
+    prompt_id: str,
+) -> None:
+    """Expose a scheduler-fallback worker to exact pending cancellation."""
+
+    try:
+        current = asyncio.current_task()
+    except RuntimeError:
+        current = None
+    if current is not None:
+        _WORKERS_BY_PROMPT[prompt_id] = current
+    try:
+        await worker
+    finally:
+        if current is not None and _WORKERS_BY_PROMPT.get(prompt_id) is current:
+            _WORKERS_BY_PROMPT.pop(prompt_id, None)
 
 
 def _submission_response(snapshot: Dict[str, Any], *, replayed: bool) -> Dict[str, Any]:
@@ -133,14 +253,15 @@ async def _finalize_admitted_workflow(
         # finalize_workflow returns only after exact terminal history, including
         # its targeted-interrupt timeout drain.
         terminal_proven = True
-        # A recorded cancellation request proves caller intent, not that
-        # ComfyUI actually interrupted this prompt.  Its legacy /interrupt
-        # endpoint can acknowledge a request after the prompt has already
-        # failed, so preserve the terminal status proven by exact history.
+        # A recorded cancellation request proves caller intent, while the
+        # final status still comes from exact Core cancellation proof or exact
+        # terminal history. Preserve a genuine failure/success race.
         outcome = WorkflowAdmissionOutcome(prompt_id, final_status.value)
         job_result = {"http_status": http_status, "body": response_body}
         if persist_job:
-            await set_job_status(prompt_id, final_status, result=job_result)
+            current_job = await get_job(prompt_id)
+            if current_job is None or current_job.status != final_status:
+                await set_job_status(prompt_id, final_status, result=job_result)
         await record_terminal(
             prompt_id,
             final_status.value,
@@ -148,10 +269,36 @@ async def _finalize_admitted_workflow(
         )
         _emit_run_progress(
             prompt_id,
-            "workflow_completed",
+            "workflow_cancelled"
+            if final_status == JobStatus.CANCELLED
+            else "workflow_completed",
             status=final_status.value,
         )
     except asyncio.CancelledError as exc:
+        if prompt_id in _PROVEN_PENDING_CANCELLATIONS:
+            # The exact Core/fallback operation already proved this pending
+            # prompt was dequeued and published its cancelled job/lifecycle
+            # state. Cancellation only wakes this supervisor so it can release
+            # admission authority; no history entry exists for a dequeue.
+            terminal_proven = True
+            outcome = WorkflowAdmissionOutcome(prompt_id, JobStatus.CANCELLED.value)
+            try:
+                # The endpoint normally publishes first, but the exact dequeue
+                # is already terminal authority. Retry both stores here so a
+                # transient publish failure cannot leave a forever-active run
+                # with no Comfy history available for later reconciliation.
+                await _publish_proven_pending_cancellation(prompt_id)
+            except BaseException:
+                LOG.exception(
+                    "Failed to republish proven pending cancellation for %s",
+                    prompt_id,
+                )
+            _emit_run_progress(
+                prompt_id,
+                "workflow_cancelled",
+                status=JobStatus.CANCELLED.value,
+            )
+            return
         # Cancellation of LF bookkeeping is not proof that ComfyUI stopped.
         # Drain this exact prompt before releasing external admission authority.
         try:
@@ -212,6 +359,7 @@ async def _finalize_admitted_workflow(
             )
         _emit_run_progress(prompt_id, "workflow_failed", error=str(exc))
     finally:
+        _PROVEN_PENDING_CANCELLATIONS.discard(prompt_id)
         if terminal_proven:
             await _release_admission(admission, outcome)
         else:
@@ -288,9 +436,18 @@ async def run_workflow(
         # Stable-id replays are resolved before preparation.  Preparation can
         # load project-owned code and inspect mutable workflow/model state; a
         # retry must return its stored snapshot even when that state changed.
-        prepared = _prepare_workflow_execution(payload)
+        try:
+            effective_payload = await materialize_upload_references(payload, owner_id)
+        except UploadRemixReferenceError as exc:
+            response = _make_run_payload(
+                detail=str(exc),
+                error_message=exc.error_code,
+                error_input=exc.input_name,
+            )
+            raise WorkflowPreparationError(response, 400) from exc
+        prepared = _prepare_workflow_execution(effective_payload)
         submission = await prepare_workflow_submission(
-            payload,
+            effective_payload,
             prepared,
             owner_id=owner_id,
         )
@@ -352,17 +509,27 @@ async def run_workflow(
             admission=admission,
         )
         if not _schedule_worker(worker, prompt_id):
-            await worker
+            await _await_worker_inline(worker, prompt_id)
         raise
 
     LOG.info("Received prompt_id %s from ComfyUI for workflow %s", prompt_id, workflow_id)
 
     try:
         create_job_kwargs = {"owner_id": owner_id}
+        submission_identity = await get_submission_persistence_fields(submission_id)
+        if submission_identity is None:
+            raise SubmissionLifecycleError(
+                "submission_identity_unavailable",
+                "submission identity could not be persisted",
+            )
+        create_job_kwargs.update(submission_identity)
         # Keep the call compatible with lightweight third-party/job-store
         # adapters that predate durable input snapshots.
-        if "inputs" in payload:
-            create_job_kwargs["inputs"] = payload.get("inputs")
+        if "inputs" in effective_payload:
+            create_job_kwargs["inputs"] = build_durable_input_snapshot(
+                payload,
+                effective_payload,
+            )
         await create_job(prompt_id, workflow_id, **create_job_kwargs)
     except BaseException:
         # The prompt is already queued.  Even if LF cannot persist its job, keep
@@ -376,7 +543,7 @@ async def run_workflow(
             submission_id=submission_id,
         )
         if not _schedule_worker(worker, prompt_id):
-            await worker
+            await _await_worker_inline(worker, prompt_id)
         raise
 
     LOG.debug("Created job %s and published pending event", prompt_id)
@@ -393,7 +560,7 @@ async def run_workflow(
     if not _schedule_worker(worker, prompt_id):
         # A scheduler failure must not strand the prompt or release its lease.
         # The HTTP request may block, but lifecycle integrity wins here.
-        await worker
+        await _await_worker_inline(worker, prompt_id)
 
     lifecycle_snapshot = await get_submission(submission_id, include_events=False)
     if lifecycle_snapshot is None or not caller_supplied_submission_id:
@@ -401,13 +568,8 @@ async def run_workflow(
     return _submission_response(lifecycle_snapshot, replayed=False)
 
 
-async def cancel_workflow_submission(submission_id: str) -> Dict[str, Any]:
-    """Target cancellation at one proven-running ComfyUI prompt.
-
-    Pending prompts are intentionally rejected for now: ComfyUI's interrupt API
-    is authoritative for a running prompt, while deleting a queued prompt does
-    not always produce terminal history for LF's lifecycle worker to reconcile.
-    """
+async def _cancel_workflow_submission(submission_id: str) -> Dict[str, Any]:
+    """Cancel one owner-checked stable submission without global side effects."""
 
     target = await get_cancel_target(submission_id)
     if target is None:
@@ -416,12 +578,10 @@ async def cancel_workflow_submission(submission_id: str) -> Dict[str, Any]:
             "unknown submission",
             404,
         )
-    if target.get("status") in {"succeeded", "failed", "cancelled"}:
-        raise WorkflowCancellationError(
-            "submission_already_terminal",
-            "terminal submissions cannot be cancelled",
-            409,
-        )
+    if target.get("status") in {"succeeded", "failed", "cancelled", "timeout"}:
+        snapshot = await get_submission(submission_id, include_events=False)
+        assert snapshot is not None
+        return snapshot
     if target.get("cancel_requested") is True:
         snapshot = await get_submission(submission_id, include_events=False)
         assert snapshot is not None
@@ -437,28 +597,109 @@ async def cancel_workflow_submission(submission_id: str) -> Dict[str, Any]:
         )
 
     job = await get_job(prompt_id)
-    if job is None or job.status != JobStatus.RUNNING:
+    if job is None or job.status not in {JobStatus.PENDING, JobStatus.RUNNING}:
         raise WorkflowCancellationError(
-            "submission_not_running",
-            "targeted cancellation is available once the prompt is running",
+            "submission_not_cancellable",
+            "submission is not pending or running",
             409,
         )
 
     try:
-        accepted = await interrupt_workflow(prompt_id, comfy_url=comfy_url)
+        outcome = await cancel_workflow(prompt_id, comfy_url=comfy_url)
     except Exception as exc:
         raise WorkflowCancellationError(
             "cancel_transport_failed",
             str(exc) or "targeted interrupt failed",
             502,
         ) from exc
-    if not accepted:
+    if outcome == CANCEL_OUTCOME_UNSUPPORTED:
+        raise WorkflowCancellationError(
+            "exact_cancel_unavailable",
+            "this ComfyUI backend cannot guarantee exact cancellation for the running job",
+            501,
+        )
+    if outcome == CANCEL_OUTCOME_NOOP:
         raise WorkflowCancellationError(
             "cancel_rejected",
-            "ComfyUI rejected the targeted interrupt",
+            "ComfyUI did not cancel the exact job",
+            409,
+        )
+    if outcome == CANCEL_OUTCOME_TERMINAL:
+        # The exact Core endpoint is idempotent and can report that this prompt
+        # reached history immediately before cancellation. Do not manufacture
+        # cancellation intent or relabel the history-backed terminal result;
+        # the supervisor/status reconciler will publish its actual outcome.
+        snapshot = await get_submission(submission_id, include_events=False)
+        assert snapshot is not None
+        return snapshot
+
+    if outcome == CANCEL_OUTCOME_PENDING:
+        # Core has irreversibly dequeued this exact pending prompt, so establish
+        # the proof before any fallible persistence write. The supervisor must
+        # be woken even if publishing the cancelled state raises; otherwise it
+        # would wait forever for history Comfy will never create.
+        _PROVEN_PENDING_CANCELLATIONS.add(prompt_id)
+        worker = _WORKERS_BY_PROMPT.get(prompt_id)
+        try:
+            terminal = await _publish_proven_pending_cancellation(prompt_id)
+            if terminal is not None:
+                return terminal
+            snapshot = await get_submission(submission_id, include_events=False)
+            if snapshot is None:
+                raise SubmissionLifecycleError(
+                    "submission_not_found",
+                    "submission disappeared while publishing cancellation",
+                )
+            return snapshot
+        finally:
+            if worker is not None and not worker.done():
+                worker.cancel()
+            else:
+                _PROVEN_PENDING_CANCELLATIONS.discard(prompt_id)
+
+    try:
+        snapshot = await record_cancel_requested(submission_id)
+    except SubmissionConflictError:
+        snapshot = await get_submission(submission_id, include_events=False)
+        if snapshot is None:
+            raise
+        return snapshot
+
+    if outcome != CANCEL_OUTCOME_RUNNING:
+        raise WorkflowCancellationError(
+            "cancel_rejected",
+            "ComfyUI returned an unknown cancellation outcome",
             502,
         )
-    return await record_cancel_requested(submission_id)
+    return snapshot
+
+
+async def cancel_workflow_submission(submission_id: str) -> Dict[str, Any]:
+    """Coalesce concurrent cancellation requests for one stable submission."""
+
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        # The production aiohttp service is asyncio-based. Keeping the pure
+        # coroutine path also supports alternate test/embedding runtimes that
+        # do not expose an asyncio task loop.
+        return await _cancel_workflow_submission(submission_id)
+
+    existing = _CANCELLATIONS_IN_FLIGHT.get(submission_id)
+    if existing is None:
+        task = loop.create_task(_cancel_workflow_submission(submission_id))
+        _CANCELLATIONS_IN_FLIGHT[submission_id] = task
+
+        def forget(completed: asyncio.Future[Dict[str, Any]]) -> None:
+            if _CANCELLATIONS_IN_FLIGHT.get(submission_id) is completed:
+                _CANCELLATIONS_IN_FLIGHT.pop(submission_id, None)
+
+        task.add_done_callback(forget)
+        existing = task
+
+    # A disconnected duplicate HTTP request must not cancel the shared exact
+    # Core operation on behalf of every other waiter.
+    return await asyncio.shield(existing)
 
 
 # endregion

@@ -14,7 +14,7 @@ except ImportError:
     def bool_env(*args, **kwargs):
         return False
 
-VERSION = "2.8.0"
+VERSION = "2.9.0"
 
 NODE_CLASS_MAPPINGS = {}
 NODE_DISPLAY_NAME_MAPPINGS = {}
@@ -53,14 +53,14 @@ for dirpath, _, filenames in os.walk(MODULES_DIR):
                 NODE_CLASS_MAPPINGS.update(getattr(module, "NODE_CLASS_MAPPINGS", {}))
                 NODE_DISPLAY_NAME_MAPPINGS.update(getattr(module, "NODE_DISPLAY_NAME_MAPPINGS", {}))
         except Exception as e:
-            LOG.error(f"❌ Failed to import {full_module_name}: {e}")
+            LOG.error(f"Failed to import {full_module_name}: {e}")
 
 WEB_DIRECTORY = "./web/deploy"
 
 __all__ = ["NODE_CLASS_MAPPINGS", "NODE_DISPLAY_NAME_MAPPINGS", "WEB_DIRECTORY"]
 
 LOG.info("\033[34m*-----------------------------------------------------------*\033[0m")
-LOG.info(f"\033[34m*             ✨ LF Nodes initialized - v{VERSION}              *\033[0m")
+LOG.info(f"\033[34m*               LF Nodes initialized - v{VERSION}                *\033[0m")
 if _WF_ENABLED:
     try:
         import comfy.cli_args as _cli

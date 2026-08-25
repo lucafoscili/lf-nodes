@@ -107,6 +107,15 @@ else:
         return await api_controllers.list_runs_controller(request)
     # endregion
 
+    # region Workflow Runner - Prune Missing Artifacts
+    @PromptServer.instance.routes.post(
+        f"{API_ROUTE_PREFIX}/workflow-runner/runs/prune-missing-artifacts"
+    )
+    async def route_prune_missing_artifacts(request: web.Request) -> web.Response:
+        api_controllers = _get_api_controllers()
+        return await api_controllers.prune_missing_artifacts_controller(request)
+    # endregion
+
     # region Workflow Runner - Events (SSE)
     @PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/workflow-runner/events")
     async def route_workflow_runner_events(request: web.Request) -> web.Response:

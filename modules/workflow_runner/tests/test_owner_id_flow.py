@@ -110,7 +110,7 @@ class TestRunServicePropagation:
         # Mock create_job to capture arguments
         create_job_calls = []
         
-        async def mock_create_job(job_id, workflow_id, owner_id=None):
+        async def mock_create_job(job_id, workflow_id, owner_id=None, **_kwargs):
             create_job_calls.append({
                 "job_id": job_id,
                 "workflow_id": workflow_id,
@@ -193,7 +193,7 @@ class TestRunServicePropagation:
         
         create_job_calls = []
         
-        async def mock_create_job(job_id, workflow_id, owner_id=None):
+        async def mock_create_job(job_id, workflow_id, owner_id=None, **_kwargs):
             create_job_calls.append({
                 "job_id": job_id,
                 "workflow_id": workflow_id,

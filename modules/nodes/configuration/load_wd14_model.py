@@ -1,9 +1,5 @@
-import timm
-
 from huggingface_hub import snapshot_download
 from tqdm.auto import tqdm
-from timm.data import create_transform, resolve_data_config
-from torchvision import transforms
 from transformers import AutoImageProcessor, AutoModelForImageClassification
 
 from . import CATEGORY
@@ -206,6 +202,9 @@ class LF_LoadWD14Model:
         except Exception as e:
             log_lines.append(f"- �s���? Transformers load failed: {e}\n\n")
             try:
+                import timm
+                from torchvision import transforms
+
                 model = timm.create_model(arch, pretrained=False, num_classes=num_classes)
                 state_dict = timm.models.load_state_dict_from_hf(model_id)
                 state_dict = {k.replace("model.", ""): v for k, v in state_dict.items()}
@@ -225,6 +224,9 @@ class LF_LoadWD14Model:
             except Exception as e2:
                 log_lines.append(f"- �s���? Standard timm load failed: {e2}\n\n")
                 try:
+                    import timm
+                    from timm.data import create_transform, resolve_data_config
+
                     # Secondary fallback: let timm pull both architecture & weights from HF Hub
                     model = timm.create_model(f"hf_hub:{model_id}", pretrained=True, num_classes=num_classes)
                     model.eval()

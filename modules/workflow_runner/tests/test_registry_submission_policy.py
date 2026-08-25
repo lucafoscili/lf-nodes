@@ -104,7 +104,11 @@ def test_registry_keeps_submission_policy_server_side() -> None:
         max_duration_seconds=90,
     )
     registry = WorkflowRegistry()
-    registry.register(_workflow(policy))
+    registry.register(
+        _workflow(policy),
+        origin="shipped",
+        collection="LF Nodes",
+    )
 
     assert registry.get_submission_policy("guarded_workflow") is policy
     listed = registry.list()["nodes"][0]
@@ -113,10 +117,61 @@ def test_registry_keeps_submission_policy_server_side() -> None:
         "value",
         "description",
         "category",
+        "origin",
+        "collection",
+        "readiness",
         "children",
     }
+    assert listed["origin"] == "shipped"
+    assert listed["collection"] == "LF Nodes"
+    assert listed["readiness"]["status"] == "setup_required"
+    assert listed["readiness"]["issues"][0]["code"] == "workflow_file_missing"
     assert "submissionPolicy" not in listed
     assert "submission_policy" not in listed
+
+
+def test_legacy_positional_submission_policy_keeps_its_original_slot() -> None:
+    policy = WorkflowSubmissionPolicy("legacy_guard_v1", 4_096, 30)
+    workflow = WorkflowNode(
+        "legacy_workflow",
+        "Legacy workflow",
+        "Exercises positional compatibility.",
+        [],
+        [],
+        lambda _prompt, _inputs: None,
+        Path("unused.json"),
+        "Tests",
+        policy,
+    )
+
+    assert workflow.submission_policy is policy
+    assert workflow.origin == "custom"
+    assert workflow.collection == "Custom"
+
+
+def test_unmarked_duck_typed_registration_fails_closed_to_custom() -> None:
+    definition = types.SimpleNamespace(
+        id="unmarked_workflow",
+        value="Unmarked workflow",
+        description="No trusted packaged provenance.",
+        category="Tests",
+        cells_as_dict=lambda _direction: {},
+    )
+    registry = WorkflowRegistry()
+    registry.register(definition)  # type: ignore[arg-type]
+
+    listed = registry.list()["nodes"][0]
+    assert listed["origin"] == "custom"
+    assert listed["collection"] == "Custom"
+
+
+def test_direct_workflow_node_registration_cannot_claim_shipped_defaults() -> None:
+    registry = WorkflowRegistry()
+    registry.register(_workflow())
+
+    listed = registry.list()["nodes"][0]
+    assert listed["origin"] == "custom"
+    assert listed["collection"] == "Custom"
 
 
 def test_legacy_workflow_has_no_submission_policy() -> None:

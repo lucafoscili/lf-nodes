@@ -1,0 +1,82 @@
+{
+  "load_before": {
+    "inputs": {
+      "image": "before.png"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "1. Load the original image"
+    }
+  },
+  "restore_before_alpha": {
+    "inputs": {
+      "image": [
+        "load_before",
+        0
+      ],
+      "alpha": [
+        "load_before",
+        1
+      ]
+    },
+    "class_type": "JoinImageWithAlpha",
+    "_meta": {
+      "title": "Preserve original transparency"
+    }
+  },
+  "load_after": {
+    "inputs": {
+      "image": "after.png"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "2. Load the changed image"
+    }
+  },
+  "restore_after_alpha": {
+    "inputs": {
+      "image": [
+        "load_after",
+        0
+      ],
+      "alpha": [
+        "load_after",
+        1
+      ]
+    },
+    "class_type": "JoinImageWithAlpha",
+    "_meta": {
+      "title": "Preserve changed transparency"
+    }
+  },
+  "compare": {
+    "inputs": {
+      "image_after": [
+        "restore_after_alpha",
+        0
+      ],
+      "image_before": [
+        "restore_before_alpha",
+        0
+      ],
+      "ui_widget": {}
+    },
+    "class_type": "LF_CompareImages",
+    "_meta": {
+      "title": "3. Compare the images"
+    }
+  },
+  "display_comparison": {
+    "inputs": {
+      "json_input": [
+        "compare",
+        3
+      ],
+      "ui_widget": ""
+    },
+    "class_type": "LF_DisplayJSON",
+    "_meta": {
+      "title": "Publish the comparison to Runner history"
+    }
+  }
+}

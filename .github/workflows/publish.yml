@@ -49,13 +49,30 @@ jobs:
         id: check_tag
         run: |
           TAG_NAME="v${{ steps.extract_version.outputs.version }}"
-          if git rev-parse --verify "$TAG_NAME" >/dev/null 2>&1; then
+          if git show-ref --verify --quiet "refs/tags/$TAG_NAME"; then
+            TAG_SHA=$(git rev-list -n 1 "$TAG_NAME")
+            RELEASE_SHA='${{ steps.release_commit.outputs.sha }}'
+            if [ "$TAG_SHA" != "$RELEASE_SHA" ]; then
+              echo "Tag $TAG_NAME points to $TAG_SHA, expected $RELEASE_SHA" >&2
+              exit 1
+            fi
             echo "tag_exists=true" >> $GITHUB_OUTPUT
           else
             echo "tag_exists=false" >> $GITHUB_OUTPUT
           fi
+      - name: Check if GitHub Release Exists
+        id: check_release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG_NAME: v${{ steps.extract_version.outputs.version }}
+        run: |
+          if gh release view "$TAG_NAME" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "release_exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "release_exists=false" >> "$GITHUB_OUTPUT"
+          fi
       - name: Generate Release Notes
-        if: steps.check_tag.outputs.tag_exists == 'false'
+        if: steps.check_release.outputs.release_exists == 'false'
         run: |
           python3 scripts/generate_release_notes.py \
             --repo . \
@@ -64,6 +81,7 @@ jobs:
             --version '${{ steps.extract_version.outputs.version }}' \
             --output .github-release-notes.md
       - name: Publish Custom Node
+        if: steps.check_tag.outputs.tag_exists == 'false'
         uses: Comfy-Org/publish-node-action@v1
         with:
           ## Add your own personal access token to your Github Repository secrets and reference it here.
@@ -75,7 +93,7 @@ jobs:
           git tag "$TAG_NAME" '${{ steps.release_commit.outputs.sha }}'
           git push origin "$TAG_NAME"
       - name: Create GitHub Release
-        if: steps.check_tag.outputs.tag_exists == 'false'
+        if: steps.check_release.outputs.release_exists == 'false'
         uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ steps.extract_version.outputs.version }}

@@ -30,8 +30,7 @@ class LF_StringToJSON:
     INPUT_IS_LIST = (True,)
     OUTPUT_NODE = True
     OUTPUT_TOOLTIPS = (
-        "Parsed JSON object.",
-        "List of parsed JSON objects."
+        "Parsed JSON value.",
     )
     RETURN_NAMES = ("json",)
     RETURN_TYPES = (Input.JSON,)

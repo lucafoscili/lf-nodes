@@ -6,7 +6,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable, Dict, Iterable, List
 
-from ...utils.helpers.conversion import json_safe
+from .readiness import WorkflowReadinessScanner, evaluate_workflow_readiness
+from ..utils.prompt import json_safe, workflow_to_prompt as _workflow_to_prompt
 
 _LOG = logging.getLogger(__name__)
 
@@ -15,85 +16,6 @@ class InputValidationError(ValueError):
     def __init__(self, input_name: str | None = None):
         super().__init__(f"Missing required input {input_name}.")
         self.input_name = input_name
-# endregion
-
-# region Helpers
-def _workflow_to_prompt(workflow: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Convert a workflow graph (the format saved under user/default/workflows)
-    into the prompt dictionary expected by ComfyUI's execution queue.
-    """
-    nodes_list = None
-    if isinstance(workflow, dict) and "nodes" in workflow and isinstance(workflow.get("nodes"), list):
-        nodes_list = workflow.get("nodes", [])
-    else:
-        if isinstance(workflow, dict):
-            maybe_nodes = []
-            for k, v in workflow.items():
-                if not isinstance(v, dict):
-                    continue
-                if "class_type" in v or "type" in v:
-                    node = {**v}
-                    node.setdefault("id", k)
-                    maybe_nodes.append(node)
-            if len(maybe_nodes) > 0:
-                nodes_list = maybe_nodes
-
-    links: Dict[int, tuple[str, int]] = {}
-    for link in (workflow.get("links", []) if isinstance(workflow, dict) else []):
-        if len(link) < 5:
-            continue
-        link_id, source_node, source_slot, *_ = link
-        links[int(link_id)] = (str(source_node), int(source_slot))
-
-    prompt: Dict[str, Dict[str, Any]] = {}
-    if not nodes_list:
-        return prompt
-
-    for node in nodes_list:
-        node_id = str(node.get("id"))
-        class_type = node.get("class_type") or node.get("type")
-        raw_inputs = node.get("inputs", {})
-        if isinstance(raw_inputs, dict):
-            prompt[node_id] = {
-                "class_type": class_type,
-                "inputs": json_safe(raw_inputs),
-            }
-            continue
-
-        prompt_inputs: Dict[str, Any] = {}
-        widgets: List[Any] = list(node.get("widgets_values") or [])
-        widget_index = 0
-
-        for input_def in node.get("inputs", []):
-            if not isinstance(input_def, dict):
-                continue
-            input_name = input_def.get("name")
-            link_id = input_def.get("link")
-
-            widget_value = None
-            if input_def.get("widget") is not None:
-                if widget_index < len(widgets):
-                    widget_value = widgets[widget_index]
-                widget_index += 1
-
-            if link_id is not None:
-                source = links.get(int(link_id))
-                if source is None:
-                    continue
-                prompt_inputs[input_name] = [source[0], source[1]]
-            elif input_def.get("widget") is not None:
-                prompt_inputs[input_name] = json_safe(widget_value)
-            else:
-                if input_def.get("value") is not None:
-                    prompt_inputs[input_name] = json_safe(input_def.get("value"))
-
-        prompt[node_id] = {
-            "class_type": class_type,
-            "inputs": prompt_inputs,
-        }
-
-    return prompt
 # endregion
 
 # region Dataset
@@ -177,6 +99,9 @@ class WorkflowNode:
     workflow_path: Path
     category: str
     submission_policy: WorkflowSubmissionPolicy | None = None
+    origin: str = "custom"
+    collection: str = "Custom"
+    configure_download: Callable[[Dict[str, Any], Dict[str, Any]], None] | None = None
 
     def __post_init__(self) -> None:
         if self.submission_policy is not None and not isinstance(
@@ -205,24 +130,66 @@ class WorkflowNode:
 class WorkflowRegistry:
     def __init__(self) -> None:
         self._definitions: Dict[str, WorkflowNode] = {}
+        self._provenance: Dict[str, tuple[str, str]] = {}
 
-    def register(self, definition: WorkflowNode) -> None:
+    def register(
+        self,
+        definition: WorkflowNode,
+        *,
+        origin: str | None = None,
+        collection: str | None = None,
+    ) -> None:
         previous = self._definitions.get(definition.id)
         if previous is not None and previous is not definition:
             _LOG.warning(
                 "Workflow definition %r replaces an existing registration",
                 definition.id,
             )
+        # Registering an object is not proof that it belongs to LF's packaged
+        # catalogue. Only the trusted module loader passes shipped provenance
+        # explicitly; every direct/legacy registration fails closed to Custom.
+        resolved_origin = origin
+        if resolved_origin not in {"shipped", "custom"}:
+            # Unmarked duck-typed registrations are not part of LF's packaged
+            # catalogue. Keep them visible, but fail closed into Custom.
+            resolved_origin = "custom"
+
+        resolved_collection = collection
+        if not isinstance(resolved_collection, str):
+            resolved_collection = ""
+        resolved_collection = " ".join(resolved_collection.split())
+        if (
+            not resolved_collection
+            or len(resolved_collection) > 80
+            or any(ord(char) < 32 for char in resolved_collection)
+        ):
+            resolved_collection = "LF Nodes" if resolved_origin == "shipped" else "Custom"
+
         self._definitions[definition.id] = definition
+        self._provenance[definition.id] = (
+            resolved_origin,
+            resolved_collection,
+        )
 
     def list(self) -> Dict[str, List[Dict[str, Any]]]:
         nodes: List[Dict[str, Any]] = []
+        readiness_scanner = WorkflowReadinessScanner()
         for definition in self._definitions.values():
+            origin, collection = self._provenance.get(
+                definition.id,
+                ("custom", "Custom"),
+            )
             workflow_node = {
                 "id": definition.id,
                 "value": definition.value,
                 "description": definition.description,
                 "category": definition.category,
+                "origin": origin,
+                "collection": collection,
+                "readiness": evaluate_workflow_readiness(
+                    definition,
+                    scanner=readiness_scanner,
+                ),
                 "children": [{
                     "id": f"{definition.id}:inputs",
                     "value": "Inputs",
@@ -290,7 +257,11 @@ def _register_packaged_workflows() -> None:
             raise TypeError(
                 f"Workflow definition '{definition!r}' is not compatible with WorkflowNode."
             )
-        REGISTRY.register(definition)  # type: ignore[arg-type]
+        REGISTRY.register(  # type: ignore[arg-type]
+            definition,
+            origin=getattr(definition, "origin", "custom"),
+            collection=getattr(definition, "collection", "Custom"),
+        )
 
 _registered = False
 

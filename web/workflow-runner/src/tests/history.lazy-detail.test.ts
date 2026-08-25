@@ -29,6 +29,57 @@ describe('history summary/detail boundary', () => {
     );
   });
 
+  it('prefers a durable composed output over an earlier temporary cell preview', () => {
+    expect(getFirstOutputMediaUrl({
+      grid: {
+        lf_output: [{
+          dataset: {
+            nodes: [{
+              cells: {
+                source: {
+                  shape: 'image',
+                  value: '/view?filename=source-cell.png&type=temp',
+                },
+              },
+              id: 'row-1',
+            }],
+          },
+        }],
+      },
+      save: {
+        images: [{
+          filename: 'composed-sheet.png',
+          subfolder: 'LF_Nodes/ImageSheet',
+          type: 'output',
+        }],
+      },
+    } as any)).toBe(
+      '/view?filename=composed-sheet.png&subfolder=LF_Nodes%2FImageSheet&type=output',
+    );
+  });
+
+  it('uses a comparison lfValue when Display JSON keeps the ordinary value empty', () => {
+    expect(getFirstOutputMediaUrl({
+      display_comparison: {
+        lf_output: [{
+          json: {
+            nodes: [{
+              cells: {
+                lfImage: {
+                  shape: 'image',
+                  value: '',
+                  lfValue: '/view?filename=compare-before.png&type=temp',
+                },
+              },
+              id: 'image_1',
+              value: 'Comparison 1',
+            }],
+          },
+        }],
+      },
+    } as any)).toBe('/view?filename=compare-before.png&type=temp');
+  });
+
   it('finds a raw Comfy singular audio preview URL', () => {
     expect(getFirstOutputMediaUrl({
       save: {
@@ -39,6 +90,15 @@ describe('history summary/detail boundary', () => {
         }],
       },
     })).toBe('/view?filename=raw-output.m4a&subfolder=audio&type=output');
+  });
+
+  it('does not use DDS file_names as a broken history image preview', () => {
+    const preview = getFirstOutputMediaUrl({
+      save: {
+        lf_output: [{ file_names: ['LF_Nodes/converted.dds'] }],
+      },
+    } as any);
+    expect(preview.includes('converted.dds')).toBe(false);
   });
 
   it('fetches one full result only when one run detail is requested', async () => {
@@ -62,6 +122,21 @@ describe('history summary/detail boundary', () => {
           status: 200,
           json: async () => ({
             ...summary,
+            artifacts: [
+              {
+                schema: 'lf.workflow-artifact.v1',
+                reference: {
+                  schema: 'lf.workflow-artifact-ref.v1',
+                  sourceRunId: 'run-sample',
+                  artifactId: 'a'.repeat(64),
+                  filename: 'sample.png',
+                },
+                filename: 'sample.png',
+                nodeId: 'save',
+                mediaType: 'image/png',
+                available: true,
+              },
+            ],
             result: {
               http_status: 200,
               body: {
@@ -97,6 +172,12 @@ describe('history summary/detail boundary', () => {
     expect(detailFetches).toBe(1);
     expect(client.getRuns().get('run-sample')?.result?.http_status).toBe(200);
     expect(store.getState().runs[0].resultPayload?.http_status).toBe(200);
+    expect(store.getState().runs[0].artifacts[0].filename).toBe('sample.png');
+
+    client.releaseRunDetail('run-sample');
+    expect(store.getState().runs[0].artifacts).toEqual([]);
+    await client.loadRunDetail('run-sample');
+    expect(detailFetches).toBe(2);
   });
 
   it('retains only the currently open heavyweight detail payload', async () => {

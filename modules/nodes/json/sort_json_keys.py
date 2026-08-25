@@ -35,8 +35,7 @@ class LF_SortJSONKeys:
     FUNCTION = FUNCTION
     OUTPUT_NODE = True
     OUTPUT_TOOLTIPS = (
-        "Sorted JSON object.",
-        "List of sorted JSON objects."
+        "JSON value with object keys sorted.",
     )
     RETURN_NAMES = ("json",)
     RETURN_TYPES = (Input.JSON,)

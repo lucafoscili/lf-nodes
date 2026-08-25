@@ -7,7 +7,7 @@
 } from '@lf-widgets/foundations/dist';
 import { getLfFramework } from '@lf-widgets/framework';
 import { buttonHandler } from '../handlers/button';
-import { masonryHandler } from '../handlers/masonry';
+import { masonryClickFallback, masonryHandler } from '../handlers/masonry';
 import { WorkflowNodeResultPayload, WorkflowNodeResults, WorkflowRunStatus } from '../types/api';
 import { WorkflowSectionController } from '../types/section';
 import { WorkflowRunEntry, WorkflowStore } from '../types/state';
@@ -21,6 +21,7 @@ const { theme } = getLfFramework();
 const ROOT_CLASS = 'outputs-section';
 export const OUTPUTS_CLASSES = {
   _: theme.bemClass(ROOT_CLASS),
+  cleanup: theme.bemClass(ROOT_CLASS, 'cleanup'),
   empty: theme.bemClass(ROOT_CLASS, 'empty'),
   h4: theme.bemClass(ROOT_CLASS, 'title-h4'),
   controls: theme.bemClass(ROOT_CLASS, 'controls'),
@@ -78,7 +79,7 @@ const _extractImageFromDataset = (dataset: LfDataDataset | undefined): string | 
         continue;
       }
       const shape = (cell as { shape?: string }).shape;
-      const value = (cell as { value?: unknown }).value ?? (cell as { lfValue?: unknown }).lfValue;
+      const value = (cell as { value?: unknown }).value || (cell as { lfValue?: unknown }).lfValue;
       if (shape === 'image' && typeof value === 'string' && value) {
         return value;
       }
@@ -87,6 +88,21 @@ const _extractImageFromDataset = (dataset: LfDataDataset | undefined): string | 
 
   return null;
 };
+const _isBrowserPreviewPath = (value: string) =>
+  /\.(?:png|jpe?g|gif|webp|avif|apng|svg)(?:$|[?#])/i.test(value);
+const _isTemporaryMedia = (value: string, explicitType?: string) => {
+  if (explicitType === 'temp') {
+    return true;
+  }
+  if (!value.startsWith('/view?')) {
+    return false;
+  }
+  try {
+    return new URLSearchParams(value.slice(value.indexOf('?') + 1)).get('type') === 'temp';
+  } catch {
+    return false;
+  }
+};
 export const getFirstOutputMediaUrl = (outputs: WorkflowNodeResults | null) => {
   if (!outputs) {
     return '';
@@ -94,6 +110,7 @@ export const getFirstOutputMediaUrl = (outputs: WorkflowNodeResults | null) => {
 
   const tryPayload = (
     payload: WorkflowNodeResultPayload | undefined,
+    allowTemporary: boolean,
   ): { image: string | null; fallback: string | null } => {
     if (!payload || typeof payload !== 'object') {
       return { image: null, fallback: null };
@@ -114,7 +131,13 @@ export const getFirstOutputMediaUrl = (outputs: WorkflowNodeResults | null) => {
       ...(((payload as { audios?: Array<{ filename?: string; subfolder?: string; type?: string; url?: string }> }).audios) || []),
     ];
     if (artifacts.length) {
-      const artifact = artifacts.find((item) => item && (item.url || item.filename));
+      const artifact = artifacts.find((item) => {
+        if (!item || (!item.url && !item.filename)) {
+          return false;
+        }
+        const value = typeof item.url === 'string' ? item.url : item.filename || '';
+        return allowTemporary || !_isTemporaryMedia(value, item.type);
+      });
       if (artifact) {
         if (typeof artifact.url === 'string' && artifact.url.startsWith('/')) {
           return { image: artifact.url, fallback: null };
@@ -122,7 +145,7 @@ export const getFirstOutputMediaUrl = (outputs: WorkflowNodeResults | null) => {
         if (typeof artifact.filename === 'string' && artifact.filename) {
           const params = new URLSearchParams({
             filename: artifact.filename,
-            subfolder: artifact.subfolder || '',
+            subfolder: (artifact.subfolder || '').replaceAll('\\', '/'),
             type: artifact.type || 'output',
           });
           return { image: `/view?${params.toString()}`, fallback: null };
@@ -135,9 +158,12 @@ export const getFirstOutputMediaUrl = (outputs: WorkflowNodeResults | null) => {
         const { dataset, file_names, json, metadata, string, svg } = entry;
         const image =
           _extractImageFromDataset(dataset) ??
-          file_names?.find((name) => typeof name === 'string' && name) ??
+          _extractImageFromDataset(json as LfDataDataset) ??
+          file_names?.find(
+            (name) => typeof name === 'string' && name && _isBrowserPreviewPath(name),
+          ) ??
           null;
-        if (image) {
+        if (image && (allowTemporary || !_isTemporaryMedia(image))) {
           foundImage = image;
           break;
         }
@@ -159,20 +185,26 @@ export const getFirstOutputMediaUrl = (outputs: WorkflowNodeResults | null) => {
 
     const dataset = (payload as { dataset?: LfDataDataset }).dataset;
     const fromDataset = _extractImageFromDataset(dataset);
-    if (fromDataset) {
+    if (fromDataset && (allowTemporary || !_isTemporaryMedia(fromDataset))) {
       return { image: fromDataset, fallback: null };
     }
 
     const fileNames = (payload as { file_names?: string[] }).file_names;
     if (Array.isArray(fileNames)) {
-      const fileName = fileNames.find((name) => typeof name === 'string' && name);
-      if (fileName) {
+      const fileName = fileNames.find(
+        (name) => typeof name === 'string' && name && _isBrowserPreviewPath(name),
+      );
+      if (fileName && (allowTemporary || !_isTemporaryMedia(fileName))) {
         return { image: fileName, fallback: null };
       }
     }
 
     const image = (payload as { image?: string }).image;
-    if (typeof image === 'string' && image) {
+    if (
+      typeof image === 'string' &&
+      image &&
+      (allowTemporary || !_isTemporaryMedia(image))
+    ) {
       return { image, fallback: null };
     }
 
@@ -181,17 +213,22 @@ export const getFirstOutputMediaUrl = (outputs: WorkflowNodeResults | null) => {
 
   let fallbackImage: string | null = null;
 
-  for (const nodeId in outputs) {
-    if (!Object.prototype.hasOwnProperty.call(outputs, nodeId)) {
-      continue;
-    }
-    const payload = outputs[nodeId];
-    const { image, fallback: candidate } = tryPayload(payload);
-    if (image) {
-      return image;
-    }
-    if (!fallbackImage && candidate) {
-      fallbackImage = candidate;
+  // Durable output/input artifacts beat observational temp previews even when
+  // Comfy executed the intermediate node first. Temp remains a useful fallback
+  // for workflows whose only visual output is intentionally ephemeral.
+  for (const allowTemporary of [false, true]) {
+    for (const nodeId in outputs) {
+      if (!Object.prototype.hasOwnProperty.call(outputs, nodeId)) {
+        continue;
+      }
+      const payload = outputs[nodeId];
+      const { image, fallback: candidate } = tryPayload(payload, allowTemporary);
+      if (image) {
+        return image;
+      }
+      if (!fallbackImage && candidate) {
+        fallbackImage = candidate;
+      }
     }
   }
 
@@ -204,6 +241,7 @@ const _getLfIcon = (status: WorkflowRunStatus): LfIconType => {
     case 'cancelled':
       return x;
     case 'failed':
+    case 'timeout':
       return alertTriangle;
     case 'pending':
       return hourglassLow;
@@ -218,6 +256,7 @@ const _getUiState = (status: WorkflowRunStatus): LfThemeUIState => {
     case 'cancelled':
       return 'disabled';
     case 'failed':
+    case 'timeout':
       return 'danger';
     case 'pending':
       return 'primary';
@@ -289,6 +328,7 @@ const _masonry = (store: WorkflowStore) => {
   masonry.lfShape = 'card';
   masonry.lfStyle = UI_CONSTANTS.MASONRY_STYLE;
   masonry.addEventListener('lf-masonry-event', (e) => masonryHandler(e, store));
+  masonry.addEventListener('click', (e) => masonryClickFallback(e, store));
 
   return masonry;
 };
@@ -308,11 +348,20 @@ const _title = (store: WorkflowStore) => {
   toggle.lfUiSize = 'small';
   toggle.addEventListener('lf-button-event', (e) => buttonHandler(e, store));
 
+  const cleanup = document.createElement('lf-button');
+  cleanup.className = OUTPUTS_CLASSES.cleanup;
+  cleanup.lfAriaLabel = 'Remove stale Runner history entries';
+  cleanup.lfLabel = 'Remove missing';
+  cleanup.lfStyling = 'flat';
+  cleanup.lfUiSize = 'small';
+  cleanup.addEventListener('lf-button-event', (e) => buttonHandler(e, store));
+
   title.appendChild(h4);
   title.appendChild(controls);
+  controls.appendChild(cleanup);
   controls.appendChild(toggle);
 
-  return { h4, title, controls, toggle };
+  return { cleanup, h4, title, controls, toggle };
 };
 //#endregion
 
@@ -349,7 +398,7 @@ export const createOutputsSection = (store: WorkflowStore): WorkflowSectionContr
     const _root = document.createElement('section');
     _root.className = OUTPUTS_CLASSES._;
 
-    const { controls, h4, title, toggle } = _title(store);
+    const { cleanup, controls, h4, title, toggle } = _title(store);
     const masonry = _masonry(store);
 
     _root.appendChild(title);
@@ -358,6 +407,7 @@ export const createOutputsSection = (store: WorkflowStore): WorkflowSectionContr
     elements[MAIN_CLASSES._].appendChild(_root);
 
     uiRegistry.set(OUTPUTS_CLASSES._, _root);
+    uiRegistry.set(OUTPUTS_CLASSES.cleanup, cleanup);
     uiRegistry.set(OUTPUTS_CLASSES.controls, controls);
     uiRegistry.set(OUTPUTS_CLASSES.h4, h4);
     uiRegistry.set(OUTPUTS_CLASSES.masonry, masonry);
@@ -382,10 +432,11 @@ export const createOutputsSection = (store: WorkflowStore): WorkflowSectionContr
     }
 
     const h4 = elements[OUTPUTS_CLASSES.h4] as HTMLElement;
+    const cleanup = elements[OUTPUTS_CLASSES.cleanup] as HTMLLfButtonElement;
     const masonry = elements[OUTPUTS_CLASSES.masonry] as HTMLLfMasonryElement;
     const toggle = elements[OUTPUTS_CLASSES.toggle] as HTMLLfButtonElement;
 
-    if (!h4 || !masonry || !toggle) {
+    if (!cleanup || !h4 || !masonry || !toggle) {
       return;
     }
 
@@ -403,6 +454,9 @@ export const createOutputsSection = (store: WorkflowStore): WorkflowSectionContr
     toggle.lfIcon = isHistoryView ? arrowBack : folder;
     toggle.lfLabel = isHistoryView ? 'Back' : 'History';
     toggle.lfUiState = hasAnyRuns || isHistoryView ? 'primary' : 'disabled';
+    const cleanupBusy = cleanup.getAttribute('aria-busy') === 'true';
+    cleanup.hidden = !isHistoryView;
+    cleanup.lfUiState = isHistoryView && !cleanupBusy ? 'danger' : 'disabled';
 
     const dataset: LfDataDataset = { nodes: [] };
 

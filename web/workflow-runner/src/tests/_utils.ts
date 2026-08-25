@@ -144,6 +144,7 @@ export function seedStoreRuns(store: WorkflowStore, runs: SeedRunInput[]): void 
         runs: [
           {
             runId: r.runId || r.run_id || '',
+            artifacts: [],
             workflowId: r.workflowId || r.workflow_id || null,
             workflowName: r.workflowName || '',
             status: r.status,
@@ -236,10 +237,16 @@ export function createMinimalDocumentMock(): Document {
         addEventListener() {
           /* noop */
         },
+        dispatchEvent() {
+          return true;
+        },
         removeEventListener() {
           /* noop */
         },
         appendChild() {
+          /* noop */
+        },
+        replaceChildren() {
           /* noop */
         },
         prepend() {

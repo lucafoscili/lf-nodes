@@ -6,7 +6,7 @@ opencv-python
 onnxruntime
 pandas
 piexif
-Pillow
+Pillow==12.2.0
 psutil
 rembg
 requests

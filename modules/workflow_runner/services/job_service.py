@@ -2,6 +2,7 @@ from typing import Any, Dict, Optional
 
 from . import job_store
 from .job_store import JobStatus
+from .remix_inputs import project_public_remix_inputs
 
 # region Job service functions
 async def create_job(run_id: str, workflow_id: str, owner_id: str | None = None) -> None:
@@ -24,9 +25,11 @@ async def get_job_status(run_id: str) -> Optional[Dict[str, Any]]:
         return None
 
     is_terminal = job.status in {JobStatus.SUCCEEDED, JobStatus.FAILED, JobStatus.CANCELLED}
-    inputs = getattr(job, "inputs", {})
-    if not isinstance(inputs, dict):
-        inputs = {}
+    inputs = project_public_remix_inputs(
+        str(job.id),
+        str(job.workflow_id),
+        getattr(job, "inputs", {}),
+    )
     payload = {
         "run_id": job.id,
         "workflow_id": job.workflow_id,

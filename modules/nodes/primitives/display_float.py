@@ -30,7 +30,6 @@ class LF_DisplayFloat:
     OUTPUT_NODE = True
     OUTPUT_TOOLTIPS = (
         "Pass-through float value.",
-        "Pass-through float value as a list."
     )
     RETURN_NAMES = ("float",)
     RETURN_TYPES = (Input.FLOAT,)

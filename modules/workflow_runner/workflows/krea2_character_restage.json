@@ -1,0 +1,136 @@
+{
+  "unet": {
+    "inputs": {
+      "unet_name": "KR2/krea2_turbo_int8_convrot.safetensors",
+      "weight_dtype": "default"
+    },
+    "class_type": "UNETLoader",
+    "_meta": {"title": "Load official Krea 2 Turbo INT8 model"}
+  },
+  "clip": {
+    "inputs": {
+      "clip_name": "qwen3vl_4b_bf16.safetensors",
+      "type": "krea2",
+      "device": "default"
+    },
+    "class_type": "CLIPLoader",
+    "_meta": {"title": "Load Krea 2 Qwen3-VL encoder"}
+  },
+  "vae": {
+    "inputs": {"vae_name": "qwen_image_vae.safetensors"},
+    "class_type": "VAELoader",
+    "_meta": {"title": "Load official Qwen Image VAE"}
+  },
+  "lora": {
+    "inputs": {
+      "lora_name": "KR2/krea2_reid_rank32.safetensors",
+      "strength_model": 1.0,
+      "model": ["unet", 0]
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {"title": "Apply community Krea 2 ReID adapter"}
+  },
+  "patch": {
+    "inputs": {"model": ["lora", 0], "kv_cache": true},
+    "class_type": "Krea2OstrisEditModelPatch",
+    "_meta": {"title": "Enable cached ReID reference conditioning"}
+  },
+  "reference": {
+    "inputs": {"image": ""},
+    "class_type": "LoadImage",
+    "_meta": {"title": "Prepared character reference"}
+  },
+  "reference_scale": {
+    "inputs": {
+      "image": ["reference", 0],
+      "upscale_method": "area",
+      "megapixels": 0.140625,
+      "resolution_steps": 16
+    },
+    "class_type": "ImageScaleToTotalPixels",
+    "_meta": {"title": "Scale reference to tested 384 x 384 pixel budget"}
+  },
+  "positive_encode": {
+    "inputs": {
+      "clip": ["clip", 0],
+      "prompt": "A polished narrative illustration of the same character seated naturally at a small wooden table in a warmly lit public interior, lifting a glass in one hand while the other rests comfortably on the table. Use a three-quarter full-body composition, eye-level camera, natural anatomy and hands, warm practical light balanced by cool window fill, readable wood, glass, fabric, and metal textures, and a softly layered background. Preserve the recognizable face, hair, proportions, colors, and defining identity features.",
+      "vae": ["vae", 0],
+      "image1": ["reference_scale", 0]
+    },
+    "class_type": "TextEncodeKrea2OstrisEdit",
+    "_meta": {"title": "Encode character reference and instruction"}
+  },
+  "negative_encode": {
+    "inputs": {
+      "clip": ["clip", 0],
+      "prompt": "",
+      "vae": ["vae", 0],
+      "image1": ["reference_scale", 0]
+    },
+    "class_type": "TextEncodeKrea2OstrisEdit",
+    "_meta": {"title": "Encode reference-aware blank conditioning"}
+  },
+  "positive": {
+    "inputs": {
+      "conditioning": ["positive_encode", 0],
+      "reference_latents_method": "index_timestep_zero"
+    },
+    "class_type": "FluxKontextMultiReferenceLatentMethod",
+    "_meta": {"title": "Apply tested positive reference-latent method"}
+  },
+  "negative": {
+    "inputs": {
+      "conditioning": ["negative_encode", 0],
+      "reference_latents_method": "index_timestep_zero"
+    },
+    "class_type": "FluxKontextMultiReferenceLatentMethod",
+    "_meta": {"title": "Apply tested negative reference-latent method"}
+  },
+  "resolution": {
+    "inputs": {
+      "aspect_ratio": "2:3 (Portrait Photo)",
+      "megapixels": 1.9,
+      "multiple": 16
+    },
+    "class_type": "ResolutionSelector",
+    "_meta": {"title": "Choose largest safe Krea 2 canvas"}
+  },
+  "latent": {
+    "inputs": {
+      "width": ["resolution", 0],
+      "height": ["resolution", 1],
+      "batch_size": 1
+    },
+    "class_type": "EmptyLatentImage",
+    "_meta": {"title": "Independent target canvas"}
+  },
+  "sampler": {
+    "inputs": {
+      "seed": 42,
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1.0,
+      "model": ["patch", 0],
+      "positive": ["positive", 0],
+      "negative": ["negative", 0],
+      "latent_image": ["latent", 0]
+    },
+    "class_type": "KSampler",
+    "_meta": {"title": "Official Krea 2 ReID sampling path"}
+  },
+  "decode": {
+    "inputs": {"samples": ["sampler", 0], "vae": ["vae", 0]},
+    "class_type": "VAEDecode",
+    "_meta": {"title": "Decode restaged character"}
+  },
+  "save": {
+    "inputs": {
+      "filename_prefix": "LF_Nodes/Krea2/CharacterRestage/seed-42",
+      "images": ["decode", 0]
+    },
+    "class_type": "SaveImage",
+    "_meta": {"title": "Save restaged character"}
+  }
+}

@@ -29,6 +29,9 @@ def test_every_declared_profile_resolves_for_its_family() -> None:
 def test_native_and_kitchen_quality_share_the_same_quality_envelope() -> None:
     native = resolve_h3_execution_profile("native_quality", family="fl2va")
     kitchen = resolve_h3_execution_profile("kitchen_quality", family="fl2va")
+    reference_kitchen = resolve_h3_execution_profile(
+        "kitchen_quality", family="ref2va"
+    )
 
     assert (native.steps, native.max_edge, native.max_pixels) == (
         20,
@@ -40,6 +43,7 @@ def test_native_and_kitchen_quality_share_the_same_quality_envelope() -> None:
         NATIVE_MAX_EDGE,
         NATIVE_MAX_PIXELS,
     )
+    assert reference_kitchen == kitchen
 
 
 def test_kitchen_turbo_is_exact_and_not_admitted_for_reference_video() -> None:

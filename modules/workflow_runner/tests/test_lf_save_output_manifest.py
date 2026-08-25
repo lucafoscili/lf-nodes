@@ -159,6 +159,50 @@ def test_rejects_unsafe_standard_artifact_paths() -> None:
     assert manifest["artifacts"] == []
 
 
+def test_rejects_windows_ads_control_and_overlong_standard_paths() -> None:
+    manifest = manifest_for(
+        {
+            "images": [
+                {"filename": "portrait:preview.png", "type": "output"},
+                {"filename": "portrait\t.png", "type": "output"},
+                {
+                    "filename": "portrait.png",
+                    "subfolder": "a" * 1025,
+                    "type": "output",
+                },
+                {
+                    "filename": "safe.png",
+                    "subfolder": "LF_Nodes\\Krea2",
+                    "type": "output",
+                },
+            ]
+        }
+    )
+
+    assert [artifact["filename"] for artifact in manifest["artifacts"]] == [
+        "safe.png"
+    ]
+    assert manifest["artifacts"][0]["subfolder"] == "LF_Nodes/Krea2"
+
+
+def test_normalizes_windows_standard_artifact_subfolder() -> None:
+    manifest = manifest_for(
+        {
+            "images": [
+                {
+                    "filename": "portrait.png",
+                    "subfolder": "LF_Nodes\\Krea2\\CharacterRestage",
+                    "type": "output",
+                }
+            ]
+        }
+    )
+
+    assert manifest["artifacts"][0]["subfolder"] == (
+        "LF_Nodes/Krea2/CharacterRestage"
+    )
+
+
 def test_classifies_common_audio_artifacts_with_media_types() -> None:
     manifest = manifest_for(
         {
@@ -180,4 +224,28 @@ def test_classifies_common_audio_artifacts_with_media_types() -> None:
         "audio/flac",
         "audio/ogg",
         "audio/opus",
+    ]
+
+
+def test_classifies_dds_receipt_files_with_vendor_media_type() -> None:
+    manifest = manifest_for(
+        {
+            "lf_output": [
+                {
+                    "file_names": ["textures/generic_00001.dds"],
+                    "receipt": {"schema": "lf.dds.receipt.v1"},
+                }
+            ]
+        }
+    )
+
+    assert manifest["artifacts"] == [
+        {
+            "node_id": "7",
+            "path": "lf_output[0].file_names[0]",
+            "filename": "generic_00001.dds",
+            "subfolder": "textures",
+            "storage_type": "output",
+            "media_type": "image/vnd-ms.dds",
+        }
     ]

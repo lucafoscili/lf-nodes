@@ -23,9 +23,21 @@ export interface WorkflowAPIResponse {
 
 //#region Dataset
 export type WorkflowLFNode = Omit<LfDataNode, 'children' | 'cells'>;
+export type WorkflowReadinessStatus = 'ready' | 'warning' | 'setup_required';
+export interface WorkflowReadinessIssue {
+  code: string;
+  message: string;
+}
+export interface WorkflowReadiness {
+  status: WorkflowReadinessStatus;
+  issues: WorkflowReadinessIssue[];
+}
 export interface WorkflowAPIItem extends WorkflowLFNode {
   children: [WorkflowAPIInputs?, WorkflowAPIOutputs?];
   category: string;
+  collection?: string;
+  origin?: 'shipped' | 'custom';
+  readiness?: WorkflowReadiness;
 }
 export interface WorkflowAPIInputs extends WorkflowLFNode {
   cells: WorkflowCellsInputContainer;
@@ -76,12 +88,13 @@ export interface WorkflowCellsInputContainer {
 
 // Outputs
 export interface WorkflowCellOutput extends WorkflowNodeOutputs, WorkflowCellBase {
-  props?: Partial<LfComponentPropsFor<'LfCode' | 'LfMasonry'>>;
-  shape?: 'code' | 'masonry';
+  props?: Partial<LfComponentPropsFor<'LfCode' | 'LfCompare' | 'LfMasonry'>>;
+  shape?: 'code' | 'compare' | 'masonry';
 }
 export type ShapeToComponentNameMap = {
   button: 'LfButton';
   code: 'LfCode';
+  compare: 'LfCompare';
   masonry: 'LfMasonry';
   textfield: 'LfTextfield';
   toggle: 'LfToggle';
@@ -149,6 +162,20 @@ export type WorkflowNodeResults = Record<string, WorkflowNodeResultPayload>;
 //#endregion
 
 //#region Run
+export interface WorkflowArtifactReference {
+  schema: 'lf.workflow-artifact-ref.v1';
+  sourceRunId: string;
+  artifactId: string;
+  filename: string;
+}
+export interface WorkflowOutputArtifact {
+  schema: 'lf.workflow-artifact.v1';
+  reference: WorkflowArtifactReference;
+  filename: string;
+  nodeId: string;
+  mediaType?: string;
+  available: boolean;
+}
 export interface WorkflowAPIRunPayload {
   detail: string;
   error?: {
@@ -163,20 +190,59 @@ export interface WorkflowAPIRunPayload {
 export interface WorkflowRunRequestPayload {
   workflowId: string;
   inputs: Record<string, unknown>;
+  submissionId?: string;
   promptId?: string;
   extraData?: Record<string, unknown>;
+}
+export interface WorkflowRunResponse {
+  idempotentReplay: boolean;
+  runId: string;
+  status: WorkflowSubmissionStatus;
+  submissionId: string;
 }
 export interface WorkflowRunResultPayload {
   body: WorkflowAPIResponse;
   http_status: number;
 }
-export type WorkflowRunStatus = 'pending' | 'running' | 'succeeded' | 'failed' | 'cancelled';
+export type WorkflowRunStatus =
+  | 'pending'
+  | 'running'
+  | 'succeeded'
+  | 'failed'
+  | 'cancelled'
+  | 'timeout';
+export type WorkflowSubmissionStatus =
+  | WorkflowRunStatus
+  | 'accepted'
+  | 'reconciling';
+export interface WorkflowSubmissionSnapshot {
+  cancel_requested: boolean;
+  created_at: number;
+  error?: string | null;
+  owner_id?: string | null;
+  run_id: string | null;
+  status: WorkflowSubmissionStatus;
+  submission_id: string;
+  updated_at: number;
+  workflow_id: string;
+}
 export interface WorkflowRunStatusResponse {
   created_at: number;
   error?: string | null;
   result: WorkflowRunResultPayload | null;
   run_id: string;
   status: WorkflowRunStatus;
+  submission_id?: string | null;
+  cancel_requested?: boolean;
+}
+export interface WorkflowRunPruneResponse {
+  candidate_count: number;
+  candidate_run_ids: string[];
+  dry_run: boolean;
+  removed_count: number;
+  removed_run_ids: string[];
+  skipped_changed: number;
+  skipped_unknown: number;
 }
 //#endregion
 

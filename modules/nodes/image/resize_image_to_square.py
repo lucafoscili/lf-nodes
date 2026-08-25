@@ -58,7 +58,7 @@ class LF_ResizeImageToSquare:
         crop_position: str = normalize_list_to_value(kwargs.get("crop_position"))
 
         nodes: list[dict] = []
-        root: dict = { "children": nodes, "icon":"info-hexagon", "id": "", "value": "" }
+        root: dict = { "children": nodes, "icon":"hexagon-info", "id": "", "value": "" }
         dataset: dict = { "nodes": [root] }
 
         original_heights: list[int] = []

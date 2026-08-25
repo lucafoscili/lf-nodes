@@ -2,6 +2,7 @@
 """
 Tests for API controller enhancements
 """
+import asyncio
 import base64
 import json
 from unittest.mock import patch, MagicMock, AsyncMock
@@ -176,6 +177,33 @@ class TestApiControllers:
     @pytest.fixture
     def api_controllers(self):
         return load_api_controllers_module()
+
+    @pytest.mark.asyncio
+    async def test_idle_sse_writes_heartbeat_then_keeps_waiting(
+        self,
+        api_controllers,
+    ):
+        """An elapsed heartbeat interval is simulated without a real sleep."""
+        expected_event = {"run_id": "run-after-idle", "seq": 1}
+        queue = MagicMock()
+        queue.get.side_effect = [object(), object()]
+        response = MagicMock()
+        response.write = AsyncMock()
+        wait_for = AsyncMock(
+            side_effect=[asyncio.TimeoutError(), expected_event]
+        )
+
+        with patch.object(api_controllers.asyncio, "wait_for", wait_for):
+            event = await api_controllers._wait_for_sse_event(queue, response)
+
+        assert event == expected_event
+        response.write.assert_awaited_once_with(b": heartbeat\n\n")
+        assert wait_for.await_count == 2
+        assert all(
+            call.kwargs["timeout"]
+            == api_controllers.SSE_HEARTBEAT_INTERVAL_SECONDS
+            for call in wait_for.await_args_list
+        )
 
     @pytest.mark.asyncio
     async def test_get_workflow_status_controller_success_with_data(self, api_controllers):
@@ -536,6 +564,53 @@ class TestApiControllers:
         assert "data" not in response_data
         assert response_data["outputs"]["remix"]["audios"][0]["filename"] == "remix.wav"
         assert "remix.wav" in response.text
+
+    @pytest.mark.asyncio
+    async def test_run_detail_adds_opaque_artifacts_without_host_paths(self, api_controllers):
+        import sys
+        import types
+
+        request = MagicMock()
+        request.match_info = {"run_id": "source-run"}
+        result = {
+            "http_status": 200,
+            "body": {"payload": {"history": {"outputs": {"42": {"value": "ok"}}}}},
+        }
+
+        async def mock_get_job_status(_run_id):
+            return {"run_id": "source-run", "status": "succeeded", "result": result}
+
+        artifact_module = types.ModuleType(
+            "lf_nodes.modules.workflow_runner.services.remix_inputs"
+        )
+        artifact_module.project_public_output_artifacts = MagicMock(
+            return_value=[
+                {
+                    "schema": "lf.workflow-artifact.v1",
+                    "reference": {
+                        "schema": "lf.workflow-artifact-ref.v1",
+                        "sourceRunId": "source-run",
+                        "artifactId": "a" * 64,
+                        "filename": "candidate.png",
+                    },
+                    "filename": "candidate.png",
+                    "nodeId": "42",
+                    "mediaType": "image/png",
+                    "available": True,
+                }
+            ]
+        )
+        module_name = "lf_nodes.modules.workflow_runner.services.remix_inputs"
+        with patch.object(api_controllers, "get_job_status", side_effect=mock_get_job_status), patch.dict(
+            sys.modules,
+            {module_name: artifact_module},
+        ):
+            response = await api_controllers.get_workflow_status_controller(request)
+
+        body = json.loads(response.text)
+        assert body["artifacts"][0]["reference"]["artifactId"] == "a" * 64
+        assert "C:\\" not in response.text
+        assert "/home/" not in response.text
 
     @pytest.mark.asyncio
     async def test_get_workflow_status_controller_headless_run_no_outputs(self, api_controllers):

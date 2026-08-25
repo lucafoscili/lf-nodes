@@ -4,6 +4,7 @@ Tests cover endpoint validation, response handling, URL resolution, hashing, and
 """
 import hashlib
 import os
+import sys
 import tempfile
 import unittest
 import urllib.parse
@@ -547,7 +548,7 @@ function test() {
 
     def test_get_resource_url_basic(self):
         """Test get_resource_url with basic parameters."""
-        with patch('test_api_helpers.get_random_parameter') as mock_random:
+        with patch.object(sys.modules[__name__], 'get_random_parameter') as mock_random:
             mock_random.return_value = "nonce=abc123"
 
             result = get_resource_url("images", "test.png", "output")
@@ -556,7 +557,7 @@ function test() {
 
     def test_get_resource_url_special_characters(self):
         """Test get_resource_url with special characters in filename."""
-        with patch('test_api_helpers.get_random_parameter') as mock_random:
+        with patch.object(sys.modules[__name__], 'get_random_parameter') as mock_random:
             mock_random.return_value = "nonce=test"
 
             result = get_resource_url("my folder", "test file.png", "temp")
@@ -566,7 +567,7 @@ function test() {
 
     def test_get_resource_url_default_type(self):
         """Test get_resource_url with default resource type."""
-        with patch('test_api_helpers.get_random_parameter') as mock_random:
+        with patch.object(sys.modules[__name__], 'get_random_parameter') as mock_random:
             mock_random.return_value = "nonce=xyz789"
 
             result = get_resource_url("data", "model.json")

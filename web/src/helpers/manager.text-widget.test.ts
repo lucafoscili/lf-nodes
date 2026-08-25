@@ -27,6 +27,45 @@ describe('External intake widget contracts', () => {
   });
 });
 
+describe('Generic output widget contracts', () => {
+  it('uses native Comfy audio UI for ACE-Step Remix', () => {
+    expect(NODE_WIDGET_MAP[NodeName.aceStepRemix]).toEqual([]);
+  });
+
+  it('renders DDS save receipts with the LF tree widget', () => {
+    expect(NODE_WIDGET_MAP[NodeName.saveDds]).toEqual([CustomWidgetName.tree]);
+  });
+
+  it('renders comparison grids with the LF masonry widget', () => {
+    expect(NODE_WIDGET_MAP[NodeName.imageGrid]).toEqual([CustomWidgetName.masonry]);
+  });
+
+  it('renders ordered image lists with the LF masonry widget', () => {
+    expect(NODE_WIDGET_MAP[NodeName.imageList]).toEqual([CustomWidgetName.masonry]);
+  });
+
+  it('renders side-by-side composites with the LF masonry widget', () => {
+    expect(NODE_WIDGET_MAP[NodeName.sideBySide]).toEqual([CustomWidgetName.masonry]);
+  });
+
+  it('renders unsharp-mask comparisons with the LF compare widget', () => {
+    expect(NODE_WIDGET_MAP[NodeName.unsharpMask]).toEqual([CustomWidgetName.compare]);
+  });
+
+  it('renders region extraction history with the LF history widget', () => {
+    expect(NODE_WIDGET_MAP[NodeName.regionExtractor]).toEqual([CustomWidgetName.history]);
+  });
+
+  it('does not retain mappings for nodes that no longer exist', () => {
+    expect(Object.values(NodeName).includes('LF_Brush' as NodeName)).toBe(false);
+    expect(Object.values(NodeName).includes('LF_ExtractFaceEmbedding' as NodeName)).toBe(false);
+    expect(Object.prototype.hasOwnProperty.call(NODE_WIDGET_MAP, 'LF_Brush')).toBe(false);
+    expect(Object.prototype.hasOwnProperty.call(NODE_WIDGET_MAP, 'LF_ExtractFaceEmbedding')).toBe(
+      false,
+    );
+  });
+});
+
 describe('Visual novel widget contracts', () => {
   it('keeps LF_CODE exclusively on compile diagnostics', () => {
     expect(NODE_WIDGET_MAP[NodeName.vnCompile]).toEqual([

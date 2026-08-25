@@ -97,7 +97,14 @@ class LF_CompareImages:
             "compareimages", {"dataset": dataset}, kwargs.get("node_id")
         )
 
-        return (image_batch[0], image_list, all_images, dataset)
+        return {
+            "ui": {
+                "lf_output": [{
+                    "dataset": dataset,
+                }],
+            },
+            "result": (image_batch[0], image_list, all_images, dataset),
+        }
 # endregion
 
 # region Mappings

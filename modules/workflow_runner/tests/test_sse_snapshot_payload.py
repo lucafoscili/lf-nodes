@@ -22,7 +22,7 @@ sys.modules['server'].PromptServer = Mock()
 # tests gracefully so the CI/dev run stays stable on CPU-only environments.
 try:
     from modules.workflow_runner.controllers import api_controllers
-    from modules.workflow_runner.services import job_store
+    from modules.workflow_runner.services import job_store, lifecycle
 except AssertionError as e:
     pytest.skip(f"Skipping SSE snapshot payload tests due to import error: {e}", allow_module_level=True)
 
@@ -60,6 +60,38 @@ async def test_send_initial_snapshot_includes_workflow_id_and_updated_at():
     # Expect workflow_id and updated_at present in the JSON payload
     assert '"workflow_id": "remove_bg"' in combined
     assert '"updated_at":' in combined
+
+
+async def test_sse_snapshot_restores_stable_submission_control_handle():
+    job = job_store.Job(
+        id="run-sse-control",
+        workflow_id="remove_bg",
+        status=job_store.JobStatus.RUNNING,
+    )
+    payload = {
+        "workflowId": "remove_bg",
+        "submissionId": "lf-web:sse-control",
+        "inputs": {},
+    }
+    await lifecycle.reserve_submission(payload, "remove_bg")
+    await lifecycle.bind_prompt(
+        "lf-web:sse-control",
+        "run-sse-control",
+        "http://comfy:8188",
+    )
+
+    resp = FakeResponse()
+    with patch.object(job_store, "list_jobs", return_value={job.id: job}):
+        await api_controllers._send_initial_snapshot(resp, summary_only=True)
+
+    data_line = next(
+        line
+        for line in b"".join(resp.written).decode("utf-8").splitlines()
+        if line.startswith("data: ")
+    )
+    event = json.loads(data_line.removeprefix("data: "))
+    assert event["submission_id"] == "lf-web:sse-control"
+    assert event["cancel_requested"] is False
 
 
 async def test_history_and_sse_preserve_terminal_results_by_default_and_bound_on_opt_in():

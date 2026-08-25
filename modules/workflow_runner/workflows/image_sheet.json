@@ -1,0 +1,112 @@
+{
+  "load_top_left": {
+    "inputs": {"image": "top-left.png"},
+    "class_type": "LoadImage",
+    "_meta": {"title": "1. Load top-left image"}
+  },
+  "alpha_top_left": {
+    "inputs": {
+      "image": ["load_top_left", 0],
+      "alpha": ["load_top_left", 1]
+    },
+    "class_type": "JoinImageWithAlpha",
+    "_meta": {"title": "Preserve top-left transparency"}
+  },
+  "load_top_right": {
+    "inputs": {"image": "top-right.png"},
+    "class_type": "LoadImage",
+    "_meta": {"title": "2. Load top-right image"}
+  },
+  "alpha_top_right": {
+    "inputs": {
+      "image": ["load_top_right", 0],
+      "alpha": ["load_top_right", 1]
+    },
+    "class_type": "JoinImageWithAlpha",
+    "_meta": {"title": "Preserve top-right transparency"}
+  },
+  "load_bottom_left": {
+    "inputs": {"image": "bottom-left.png"},
+    "class_type": "LoadImage",
+    "_meta": {"title": "3. Load bottom-left image"}
+  },
+  "alpha_bottom_left": {
+    "inputs": {
+      "image": ["load_bottom_left", 0],
+      "alpha": ["load_bottom_left", 1]
+    },
+    "class_type": "JoinImageWithAlpha",
+    "_meta": {"title": "Preserve bottom-left transparency"}
+  },
+  "load_bottom_right": {
+    "inputs": {"image": "bottom-right.png"},
+    "class_type": "LoadImage",
+    "_meta": {"title": "4. Load bottom-right image"}
+  },
+  "alpha_bottom_right": {
+    "inputs": {
+      "image": ["load_bottom_right", 0],
+      "alpha": ["load_bottom_right", 1]
+    },
+    "class_type": "JoinImageWithAlpha",
+    "_meta": {"title": "Preserve bottom-right transparency"}
+  },
+  "image_list": {
+    "inputs": {
+      "image_1": ["alpha_top_left", 0],
+      "image_2": ["alpha_top_right", 0],
+      "image_3": ["alpha_bottom_left", 0],
+      "image_4": ["alpha_bottom_right", 0]
+    },
+    "class_type": "LF_ImageList",
+    "_meta": {"title": "Collect four original images in row-major order"}
+  },
+  "grid": {
+    "inputs": {
+      "image": ["image_list", 0],
+      "cell_width": 512,
+      "cell_height": 512,
+      "gap_px": 8,
+      "background": "transparent",
+      "show_headers": true,
+      "title": "Image Sheet",
+      "dataset": {
+        "columns": [
+          {"id": "column_1", "title": "Column 1"},
+          {"id": "column_2", "title": "Column 2"}
+        ],
+        "nodes": [
+          {"id": "row_1", "value": "Row 1"},
+          {"id": "row_2", "value": "Row 2"}
+        ]
+      },
+      "ui_widget": {}
+    },
+    "class_type": "LF_ImageGrid",
+    "_meta": {"title": "Compose labeled 2x2 image sheet"}
+  },
+  "save": {
+    "inputs": {
+      "filename_prefix": "LF_Nodes/ImageSheet/2x2",
+      "images": ["grid", 0]
+    },
+    "class_type": "SaveImage",
+    "_meta": {"title": "Save durable image sheet PNG"}
+  },
+  "display_dataset": {
+    "inputs": {
+      "json_input": ["grid", 1],
+      "ui_widget": ""
+    },
+    "class_type": "LF_DisplayJSON",
+    "_meta": {"title": "Publish populated image-sheet dataset"}
+  },
+  "display_receipt": {
+    "inputs": {
+      "json_input": ["grid", 2],
+      "ui_widget": ""
+    },
+    "class_type": "LF_DisplayJSON",
+    "_meta": {"title": "Publish image-sheet layout receipt"}
+  }
+}

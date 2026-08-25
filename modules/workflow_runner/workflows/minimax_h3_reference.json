@@ -1,0 +1,269 @@
+{
+  "unet": {
+    "inputs": {
+      "unet_name": "minimax_h3_ref2va_pruned_int8_convrot.safetensors",
+      "weight_dtype": "default"
+    },
+    "class_type": "UNETLoader",
+    "_meta": { "title": "Load MiniMax H3 reference model" }
+  },
+  "model_device": {
+    "inputs": {
+      "model": ["unet", 0],
+      "device": "default"
+    },
+    "class_type": "SelectModelDevice",
+    "_meta": { "title": "Place MiniMax H3 diffusion model" }
+  },
+  "attention_backend": {
+    "inputs": {
+      "model": ["model_device", 0],
+      "attention": "comfy kitchen attention"
+    },
+    "class_type": "ModelAttentionBackend",
+    "_meta": { "title": "Use Comfy Kitchen attention" }
+  },
+  "clip": {
+    "inputs": {
+      "clip_name": "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors",
+      "type": "minimax",
+      "device": "default"
+    },
+    "class_type": "CLIPLoader",
+    "_meta": { "title": "Load MiniMax H3 text encoder" }
+  },
+  "clip_device": {
+    "inputs": {
+      "clip": ["clip", 0],
+      "device": "default"
+    },
+    "class_type": "SelectCLIPDevice",
+    "_meta": { "title": "Place MiniMax H3 text encoder" }
+  },
+  "video_vae": {
+    "inputs": { "vae_name": "minimax_h3_video_vae_fp16.safetensors" },
+    "class_type": "VAELoader",
+    "_meta": { "title": "Load MiniMax H3 video VAE" }
+  },
+  "video_vae_device": {
+    "inputs": {
+      "vae": ["video_vae", 0],
+      "device": "default"
+    },
+    "class_type": "SelectVAEDevice",
+    "_meta": { "title": "Place MiniMax H3 video VAE" }
+  },
+  "audio_vae": {
+    "inputs": { "vae_name": "minimax_h3_audio_vae_fp32.safetensors" },
+    "class_type": "VAELoader",
+    "_meta": { "title": "Load MiniMax H3 audio VAE" }
+  },
+  "audio_vae_device": {
+    "inputs": {
+      "vae": ["audio_vae", 0],
+      "device": "default"
+    },
+    "class_type": "SelectVAEDevice",
+    "_meta": { "title": "Place MiniMax H3 audio VAE" }
+  },
+  "source_1": {
+    "inputs": { "image": "" },
+    "class_type": "LoadImage",
+    "_meta": { "title": "Reference image 1" }
+  },
+  "source_2": {
+    "inputs": { "image": "" },
+    "class_type": "LoadImage",
+    "_meta": { "title": "Reference image 2" }
+  },
+  "source_3": {
+    "inputs": { "image": "" },
+    "class_type": "LoadImage",
+    "_meta": { "title": "Reference image 3" }
+  },
+  "source_4": {
+    "inputs": { "image": "" },
+    "class_type": "LoadImage",
+    "_meta": { "title": "Reference image 4" }
+  },
+  "source_5": {
+    "inputs": { "image": "" },
+    "class_type": "LoadImage",
+    "_meta": { "title": "Reference image 5" }
+  },
+  "source_6": {
+    "inputs": { "image": "" },
+    "class_type": "LoadImage",
+    "_meta": { "title": "Reference image 6" }
+  },
+  "source_7": {
+    "inputs": { "image": "" },
+    "class_type": "LoadImage",
+    "_meta": { "title": "Reference image 7" }
+  },
+  "source_8": {
+    "inputs": { "image": "" },
+    "class_type": "LoadImage",
+    "_meta": { "title": "Reference image 8" }
+  },
+  "source_9": {
+    "inputs": { "image": "" },
+    "class_type": "LoadImage",
+    "_meta": { "title": "Reference image 9" }
+  },
+  "prompt_subject_definitions": {
+    "inputs": {
+      "value": "subject_definitions:\n<Subject 1> is the subject shown in <Picture 1>."
+    },
+    "class_type": "PrimitiveStringMultiline",
+    "_meta": { "title": "Subject definitions" }
+  },
+  "prompt_summary": {
+    "inputs": { "value": "summary:\n[reference generation] Create one coherent reference-guided shot." },
+    "class_type": "PrimitiveStringMultiline",
+    "_meta": { "title": "Summary" }
+  },
+  "prompt_retention_analysis": {
+    "inputs": {
+      "value": "retention_analysis:\n<Subject 1> (appears in [Shot 1]): fully_preserved - defining appearance from <Picture 1> remains stable."
+    },
+    "class_type": "PrimitiveStringMultiline",
+    "_meta": { "title": "Retention analysis" }
+  },
+  "prompt_detailed_description": {
+    "inputs": {
+      "value": "detailed_description:\n[Shot 1] Create a coherent reference-guided performance with stable subject and scene continuity."
+    },
+    "class_type": "PrimitiveStringMultiline",
+    "_meta": { "title": "Detailed description" }
+  },
+  "prompt_overall_soundscape": {
+    "inputs": { "value": "overall_soundscape:\nNatural ambience appropriate to the scene." },
+    "class_type": "PrimitiveStringMultiline",
+    "_meta": { "title": "Overall soundscape" }
+  },
+  "prompt_non_diegetic_music": {
+    "inputs": { "value": "non_diegetic_music:\nN/A" },
+    "class_type": "PrimitiveStringMultiline",
+    "_meta": { "title": "Non-diegetic music" }
+  },
+  "prompt_raw": {
+    "inputs": { "value": "" },
+    "class_type": "PrimitiveStringMultiline",
+    "_meta": { "title": "Raw prompt fallback" }
+  },
+  "prompt_join": {
+    "inputs": {
+      "separator": "\n\n",
+      "text_1": ["prompt_subject_definitions", 0],
+      "text_2": ["prompt_summary", 0],
+      "text_3": ["prompt_retention_analysis", 0],
+      "text_4": ["prompt_detailed_description", 0],
+      "text_5": ["prompt_overall_soundscape", 0],
+      "text_6": ["prompt_non_diegetic_music", 0],
+      "text_7": ["prompt_raw", 0],
+      "shuffle_inputs": false,
+      "seed": 42
+    },
+    "class_type": "LF_WallOfText",
+    "_meta": { "title": "Assemble MiniMax H3 reference prompt" }
+  },
+  "h3": {
+    "inputs": {
+      "clip": ["clip_device", 0],
+      "vae": ["video_vae_device", 0],
+      "audio_vae": ["audio_vae_device", 0],
+      "prompt": ["prompt_join", 0],
+      "width": 1344,
+      "height": 768,
+      "length": 124,
+      "ref_image_size": "max",
+      "ref_images.ref_image_0": ["source_1", 0],
+      "ref_images.ref_image_1": ["source_2", 0],
+      "ref_images.ref_image_2": ["source_3", 0],
+      "ref_images.ref_image_3": ["source_4", 0],
+      "ref_images.ref_image_4": ["source_5", 0],
+      "ref_images.ref_image_5": ["source_6", 0],
+      "ref_images.ref_image_6": ["source_7", 0],
+      "ref_images.ref_image_7": ["source_8", 0],
+      "ref_images.ref_image_8": ["source_9", 0]
+    },
+    "class_type": "MiniMaxH3ReferenceToVideo",
+    "_meta": { "title": "Prepare MiniMax H3 reference conditioning" }
+  },
+  "noise": {
+    "inputs": { "noise_seed": 42 },
+    "class_type": "RandomNoise",
+    "_meta": { "title": "Generation seed" }
+  },
+  "guider": {
+    "inputs": {
+      "model": ["attention_backend", 0],
+      "conditioning": ["h3", 0]
+    },
+    "class_type": "BasicGuider",
+    "_meta": { "title": "MiniMax H3 guider" }
+  },
+  "sampler_select": {
+    "inputs": { "sampler_name": "res_multistep" },
+    "class_type": "KSamplerSelect",
+    "_meta": { "title": "Profile-owned sampler" }
+  },
+  "scheduler": {
+    "inputs": {
+      "model": ["attention_backend", 0],
+      "scheduler": "simple",
+      "steps": 20,
+      "denoise": 1.0
+    },
+    "class_type": "BasicScheduler",
+    "_meta": { "title": "Profile-owned schedule" }
+  },
+  "sample": {
+    "inputs": {
+      "noise": ["noise", 0],
+      "guider": ["guider", 0],
+      "sampler": ["sampler_select", 0],
+      "sigmas": ["scheduler", 0],
+      "latent_image": ["h3", 1]
+    },
+    "class_type": "SamplerCustomAdvanced",
+    "_meta": { "title": "Sample MiniMax H3 video and audio latent" }
+  },
+  "decode_video": {
+    "inputs": {
+      "samples": ["sample", 0],
+      "vae": ["video_vae_device", 0]
+    },
+    "class_type": "VAEDecode",
+    "_meta": { "title": "Decode MiniMax H3 video" }
+  },
+  "decode_audio": {
+    "inputs": {
+      "samples": ["sample", 0],
+      "vae": ["audio_vae_device", 0]
+    },
+    "class_type": "VAEDecodeAudio",
+    "_meta": { "title": "Decode MiniMax H3 stereo audio" }
+  },
+  "create_video": {
+    "inputs": {
+      "images": ["decode_video", 0],
+      "fps": 24.0,
+      "audio": ["decode_audio", 0],
+      "bit_depth": 8
+    },
+    "class_type": "CreateVideo",
+    "_meta": { "title": "Mux video and stereo audio at 24 fps" }
+  },
+  "save": {
+    "inputs": {
+      "video": ["create_video", 0],
+      "filename_prefix": "LF_Nodes/MiniMaxH3/Reference/seed-42-refs1-f124",
+      "format": "mp4",
+      "codec": "auto"
+    },
+    "class_type": "SaveVideo",
+    "_meta": { "title": "Save MiniMax H3 reference video" }
+  }
+}

@@ -4,15 +4,14 @@ import sys
 import os
 from pathlib import Path
 
-LF_ROOT = Path(__file__).resolve().parents[3]
+LF_ROOT = Path(__file__).resolve().parents[4]
 if str(LF_ROOT) not in sys.path:
     sys.path.insert(0, str(LF_ROOT))
 TESTS_ROOT = Path(__file__).resolve().parents[2]
 if str(TESTS_ROOT) not in sys.path:
     sys.path.insert(0, str(TESTS_ROOT))
 
-from modules.tests.common_mocks import setup_common_mocks  # type: ignore
-setup_common_mocks()
+from modules.tests.common_mocks import scoped_common_mocks  # type: ignore
 
 import asyncio
 import json
@@ -20,8 +19,10 @@ import os
 import unittest
 from unittest.mock import AsyncMock, MagicMock, patch
 
-# Import the actual node implementation
-from modules.nodes.llm.gemini_api import LF_GeminiAPI, NODE_CLASS_MAPPINGS, NODE_DISPLAY_NAME_MAPPINGS
+# Import the actual node implementation with its optional Comfy dependencies
+# mocked, then restore sys.modules before pytest collects another module.
+with scoped_common_mocks(torch_enabled=True):
+    from modules.nodes.llm.gemini_api import LF_GeminiAPI, NODE_CLASS_MAPPINGS, NODE_DISPLAY_NAME_MAPPINGS
 from modules.utils.constants import Input
 from modules.tests.common_mocks import mock_async_response, mock_gemini_response, mock_prompt_server  # type: ignore
 

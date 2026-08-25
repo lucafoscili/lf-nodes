@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any, Dict, Optional
 
 from .input_snapshot import sanitize_input_snapshot
+from .job_contracts import validate_submission_identity as _validate_submission_identity
 
 LOG = logging.getLogger(__name__)
 
@@ -43,6 +44,44 @@ class JobRecord:
     seq: int = 0
     owner_id: Optional[str] = None
     inputs: Dict[str, Any] = field(default_factory=dict)
+    submission_id: Optional[str] = None
+    request_fingerprint: Optional[str] = None
+    comfy_url: Optional[str] = None
+
+
+_SELECT_COLUMNS = (
+    "run_id, workflow_id, status, created_at, updated_at, result, error, seq, "
+    "owner_id, inputs, submission_id, request_fingerprint, comfy_url"
+)
+
+
+def _record_from_row(row: Any) -> JobRecord:
+    result = None
+    try:
+        result = json.loads(row[5]) if row[5] else None
+    except Exception:
+        result = row[5]
+    inputs = {}
+    try:
+        inputs = json.loads(row[9]) if row[9] else {}
+    except Exception:
+        inputs = {}
+    return JobRecord(
+        run_id=row[0],
+        workflow_id=row[1],
+        status=row[2],
+        created_at=row[3],
+        updated_at=row[4],
+        result=result,
+        error=row[6],
+        seq=row[7] or 0,
+        owner_id=row[8],
+        inputs=inputs if isinstance(inputs, dict) else {},
+        submission_id=row[10] if len(row) > 10 else None,
+        request_fingerprint=row[11] if len(row) > 11 else None,
+        comfy_url=row[12] if len(row) > 12 else None,
+    )
+
 
 # region Connection
 def _build_event(rec: JobRecord) -> dict:
@@ -64,47 +103,68 @@ async def _ensure_conn():
         if not db_path:
             db_path = str(Path(__file__).resolve().parent / "workflow_runner_history.db")
         LOG.info("Opening workflow-runner sqlite DB at %s", db_path)
-        _conn = await aiosqlite.connect(db_path, timeout=30.0)  # longer busy timeout
-        # Pragmas for durability + fewer locks in WAL mode
-        await _conn.execute("PRAGMA journal_mode=WAL;")
-        await _conn.execute("PRAGMA synchronous=NORMAL;")
-        await _conn.execute("PRAGMA busy_timeout=30000;")  # 30s
+        conn = await aiosqlite.connect(db_path, timeout=30.0)  # longer busy timeout
+        try:
+            # Keep the connection private until its schema is ready. Startup
+            # readers may otherwise select newly-added columns while a legacy
+            # database is still between ALTER TABLE statements.
+            await conn.execute("PRAGMA journal_mode=WAL;")
+            await conn.execute("PRAGMA synchronous=NORMAL;")
+            await conn.execute("PRAGMA busy_timeout=30000;")  # 30s
 
-        # Schema (note: your code uses 'runs' as the table name)
-        await _conn.execute("""
-            CREATE TABLE IF NOT EXISTS runs (
-                run_id TEXT PRIMARY KEY,
-                workflow_id TEXT,
-                status TEXT,
-                created_at REAL,
-                updated_at REAL,
-                result TEXT,
-                error TEXT,
-                seq INTEGER NOT NULL DEFAULT 0,
-                owner_id TEXT,
-                inputs TEXT
-            )
-        """)
+            # Schema (note: your code uses 'runs' as the table name)
+            await conn.execute("""
+                CREATE TABLE IF NOT EXISTS runs (
+                    run_id TEXT PRIMARY KEY,
+                    workflow_id TEXT,
+                    status TEXT,
+                    created_at REAL,
+                    updated_at REAL,
+                    result TEXT,
+                    error TEXT,
+                    seq INTEGER NOT NULL DEFAULT 0,
+                    owner_id TEXT,
+                    inputs TEXT,
+                    submission_id TEXT,
+                    request_fingerprint TEXT,
+                    comfy_url TEXT
+                )
+            """)
 
-        # Existing installations predate durable remix inputs.  Migrate in
-        # place without rewriting or invalidating any historical rows.
-        columns_cur = await _conn.execute("PRAGMA table_info(runs)")
-        columns = {row[1] for row in await columns_cur.fetchall()}
-        if "inputs" not in columns:
-            await _conn.execute("ALTER TABLE runs ADD COLUMN inputs TEXT")
+            # Existing installations predate durable remix inputs.  Migrate in
+            # place without rewriting or invalidating any historical rows.
+            columns_cur = await conn.execute("PRAGMA table_info(runs)")
+            columns = {row[1] for row in await columns_cur.fetchall()}
+            if "inputs" not in columns:
+                await conn.execute("ALTER TABLE runs ADD COLUMN inputs TEXT")
+            if "submission_id" not in columns:
+                await conn.execute("ALTER TABLE runs ADD COLUMN submission_id TEXT")
+            if "request_fingerprint" not in columns:
+                await conn.execute("ALTER TABLE runs ADD COLUMN request_fingerprint TEXT")
+            if "comfy_url" not in columns:
+                await conn.execute("ALTER TABLE runs ADD COLUMN comfy_url TEXT")
 
-        # Indexes to support owner filters + active lookups
-        await _conn.execute("""
-            CREATE INDEX IF NOT EXISTS idx_runs_owner_status
-            ON runs(owner_id, status)
-        """)
-        await _conn.execute("""
-            CREATE INDEX IF NOT EXISTS idx_runs_active
-            ON runs(status, updated_at DESC)
-        """)
+            # Indexes to support owner filters + active lookups
+            await conn.execute("""
+                CREATE INDEX IF NOT EXISTS idx_runs_owner_status
+                ON runs(owner_id, status)
+            """)
+            await conn.execute("""
+                CREATE INDEX IF NOT EXISTS idx_runs_active
+                ON runs(status, updated_at DESC)
+            """)
+            await conn.execute("""
+                CREATE UNIQUE INDEX IF NOT EXISTS idx_runs_submission_id
+                ON runs(submission_id)
+                WHERE submission_id IS NOT NULL
+            """)
 
-        await _conn.commit()
-    return _conn
+            await conn.commit()
+        except BaseException:
+            await conn.close()
+            raise
+        _conn = conn
+        return conn
 
 async def close() -> None:
     """Close the adapter connection if open. Safe to call on shutdown.
@@ -128,24 +188,66 @@ async def create_job(
     owner_id: Optional[str] = None,
     *,
     inputs: Optional[Dict[str, Any]] = None,
+    submission_id: Optional[str] = None,
+    request_fingerprint: Optional[str] = None,
+    comfy_url: Optional[str] = None,
 ) -> JobRecord:
+    _validate_submission_identity(submission_id, request_fingerprint, comfy_url)
     conn = await _ensure_conn()
     now = time.time()
-    # Upsert logic: if the row already exists (likely created by a prior status update before
-    # we had workflow_id/owner_id), update those columns ONLY if they are currently NULL.
-    # Preserve existing status/created_at/seq/result/error fields.
-    await conn.execute(
-        """
-        INSERT INTO runs (run_id, workflow_id, status, created_at, updated_at, result, error, seq, owner_id, inputs)
-        VALUES (?, ?, 'pending', ?, ?, NULL, NULL, 0, ?, ?)
-        ON CONFLICT(run_id) DO UPDATE SET
-          workflow_id = COALESCE(runs.workflow_id, excluded.workflow_id),
-          owner_id    = COALESCE(runs.owner_id,    excluded.owner_id),
-          inputs      = COALESCE(runs.inputs,      excluded.inputs)
-        """,
-        (run_id, workflow_id, now, now, owner_id, json.dumps(sanitize_input_snapshot(inputs), ensure_ascii=False, separators=(",", ":"))),
-    )
-    await conn.commit()
+    try:
+        values = (
+            run_id,
+            workflow_id,
+            now,
+            now,
+            owner_id,
+            json.dumps(
+                sanitize_input_snapshot(inputs),
+                ensure_ascii=False,
+                separators=(",", ":"),
+            ),
+            submission_id,
+            request_fingerprint,
+            comfy_url,
+        )
+        if submission_id is not None:
+            # A stable prompt identity is an owner-bound authority.  Never
+            # enrich or adopt an existing run row: an exact idempotent match is
+            # accepted only after readback, while every other collision leaves
+            # the original row byte-for-byte authoritative.
+            await conn.execute(
+                """
+                INSERT INTO runs (
+                  run_id, workflow_id, status, created_at, updated_at, result, error,
+                  seq, owner_id, inputs, submission_id, request_fingerprint, comfy_url
+                )
+                VALUES (?, ?, 'pending', ?, ?, NULL, NULL, 0, ?, ?, ?, ?, ?)
+                ON CONFLICT(run_id) DO NOTHING
+                """,
+                values,
+            )
+        else:
+            # Legacy rows can predate workflow/owner registration because the
+            # historical status API could create a placeholder first.
+            await conn.execute(
+                """
+                INSERT INTO runs (
+                  run_id, workflow_id, status, created_at, updated_at, result, error,
+                  seq, owner_id, inputs, submission_id, request_fingerprint, comfy_url
+                )
+                VALUES (?, ?, 'pending', ?, ?, NULL, NULL, 0, ?, ?, ?, ?, ?)
+                ON CONFLICT(run_id) DO UPDATE SET
+                  workflow_id = COALESCE(runs.workflow_id, excluded.workflow_id),
+                  owner_id    = COALESCE(runs.owner_id,    excluded.owner_id),
+                  inputs      = COALESCE(runs.inputs,      excluded.inputs)
+                """,
+                values,
+            )
+        await conn.commit()
+    except BaseException:
+        await conn.rollback()
+        raise
 
     # Read back the row (may have pre-existed)
     rec = await get_job(run_id)
@@ -159,7 +261,18 @@ async def create_job(
             seq=0,
             owner_id=owner_id,
             inputs=sanitize_input_snapshot(inputs),
+            submission_id=submission_id,
+            request_fingerprint=request_fingerprint,
+            comfy_url=comfy_url,
         )
+    if submission_id is not None and (
+        rec.workflow_id != workflow_id
+        or rec.owner_id != owner_id
+        or rec.submission_id != submission_id
+        or rec.request_fingerprint != request_fingerprint
+        or rec.comfy_url != comfy_url
+    ):
+        raise ValueError("run is already bound to another submission identity")
     event = _build_event(rec)
     for q in list(_subscribers):
         try:
@@ -172,23 +285,24 @@ async def create_job(
 # region Read
 async def get_job(run_id: str) -> Optional[JobRecord]:
     conn = await _ensure_conn()
-    cur = await conn.execute("SELECT run_id, workflow_id, status, created_at, updated_at, result, error, seq, owner_id, inputs FROM runs WHERE run_id = ?", (run_id,))
+    cur = await conn.execute(
+        f"SELECT {_SELECT_COLUMNS} FROM runs WHERE run_id = ?",
+        (run_id,),
+    )
     row = await cur.fetchone()
     if not row:
         return None
-    result = None
-    try:
-        # result column is at index 5
-        result = json.loads(row[5]) if row[5] else None
-    except Exception:
-        result = row[5]
+    return _record_from_row(row)
 
-    inputs = {}
-    try:
-        inputs = json.loads(row[9]) if row[9] else {}
-    except Exception:
-        inputs = {}
-    return JobRecord(run_id=row[0], workflow_id=row[1], status=row[2], created_at=row[3], updated_at=row[4], result=result, error=row[6], seq=row[7] or 0, owner_id=row[8], inputs=inputs if isinstance(inputs, dict) else {})
+
+async def get_job_by_submission_id(submission_id: str) -> Optional[JobRecord]:
+    conn = await _ensure_conn()
+    cur = await conn.execute(
+        f"SELECT {_SELECT_COLUMNS} FROM runs WHERE submission_id = ?",
+        (submission_id,),
+    )
+    row = await cur.fetchone()
+    return _record_from_row(row) if row else None
 # endregion
 
 # region Update
@@ -232,6 +346,82 @@ async def set_job_status(run_id: str, status: str, *, result: Optional[Any] = No
         except Exception:
             pass
     return rec
+
+
+async def set_job_status_if_unchanged(
+    run_id: str,
+    new_status: str,
+    *,
+    owner_id: Optional[str],
+    expected_status: str,
+    seq: int,
+    updated_at: Optional[float],
+    result: Optional[Any] = None,
+    error: Optional[str] = None,
+    clear_error: bool = False,
+) -> Optional[JobRecord]:
+    """Atomically update and return one exact previously-scanned row."""
+
+    conn = await _ensure_conn()
+    now = time.time()
+    result_supplied = result is not None
+    if result_supplied:
+        try:
+            result_json = json.dumps(result)
+        except Exception:
+            result_json = json.dumps({"_repr": str(result)})
+    else:
+        result_json = None
+
+    cur = await conn.execute(
+        """
+        UPDATE runs
+        SET status = ?,
+            updated_at = ?,
+            result = CASE WHEN ? THEN ? ELSE result END,
+            error = CASE
+                      WHEN ? THEN NULL
+                      WHEN ? THEN ?
+                      ELSE error
+                    END,
+            seq = COALESCE(seq, 0) + 1
+        WHERE run_id = ?
+          AND status = ?
+          AND COALESCE(seq, 0) = ?
+          AND owner_id IS ?
+          AND updated_at IS ?
+        RETURNING run_id, workflow_id, status, created_at, updated_at,
+                  result, error, seq, owner_id, inputs, submission_id,
+                  request_fingerprint, comfy_url
+        """,
+        (
+            new_status,
+            now,
+            int(result_supplied),
+            result_json,
+            int(clear_error),
+            int(error is not None),
+            error,
+            run_id,
+            expected_status,
+            int(seq),
+            owner_id,
+            updated_at,
+        ),
+    )
+    row = await cur.fetchone()
+    await conn.commit()
+    if row is None:
+        return None
+
+    rec = _record_from_row(row)
+    event = _build_event(rec)
+    for q in list(_subscribers):
+        try:
+            q.put_nowait(event)
+        except Exception:
+            pass
+    return rec
 # endregion
 
 # region List
@@ -242,7 +432,7 @@ async def list_jobs(owner_id: Optional[str] = None, status: Optional[str] = None
     """
     conn = await _ensure_conn()
     out: Dict[str, JobRecord] = {}
-    q = "SELECT run_id, workflow_id, status, created_at, updated_at, result, error, seq, owner_id, inputs FROM runs"
+    q = f"SELECT {_SELECT_COLUMNS} FROM runs"
     params: list = []
     clauses: list = []
     if owner_id is not None:
@@ -256,18 +446,7 @@ async def list_jobs(owner_id: Optional[str] = None, status: Optional[str] = None
     cur = await conn.execute(q, params)
     rows = await cur.fetchall()
     for row in rows:
-        result = None
-        try:
-            # result column is at index 5
-            result = json.loads(row[5]) if row[5] else None
-        except Exception:
-            result = row[5]
-        inputs = {}
-        try:
-            inputs = json.loads(row[9]) if row[9] else {}
-        except Exception:
-            inputs = {}
-        out[row[0]] = JobRecord(run_id=row[0], workflow_id=row[1], status=row[2], created_at=row[3], updated_at=row[4], result=result, error=row[6], seq=row[7] or 0, owner_id=row[8], inputs=inputs if isinstance(inputs, dict) else {})
+        out[row[0]] = _record_from_row(row)
     return out
 # endregion
 
@@ -276,6 +455,32 @@ async def remove_job(run_id: str) -> Optional[JobRecord]:
     # Soft delete: mark deleted + bump seq
     rec = await set_job_status(run_id, "deleted")
     return rec
+
+
+async def hard_delete_job_if_unchanged(
+    run_id: str,
+    *,
+    owner_id: Optional[str],
+    status: str,
+    seq: int,
+    updated_at: Optional[float],
+) -> bool:
+    """Hard-delete one row only when its scanned snapshot is still current."""
+
+    conn = await _ensure_conn()
+    cur = await conn.execute(
+        """
+        DELETE FROM runs
+        WHERE run_id = ?
+          AND status = ?
+          AND COALESCE(seq, 0) = ?
+          AND ((owner_id IS NULL AND ? IS NULL) OR owner_id = ?)
+          AND ((updated_at IS NULL AND ? IS NULL) OR updated_at = ?)
+        """,
+        (run_id, status, int(seq), owner_id, owner_id, updated_at, updated_at),
+    )
+    await conn.commit()
+    return cur.rowcount == 1
 # endregion
 
 # region PubSub
@@ -301,9 +506,12 @@ def publish_event(event: Dict[str, Any]) -> None:
 __all__ = [
     "create_job",
     "get_job",
+    "get_job_by_submission_id",
     "set_job_status",
+    "set_job_status_if_unchanged",
     "list_jobs",
     "remove_job",
+    "hard_delete_job_if_unchanged",
     "subscribe_events",
     "unsubscribe_events",
     "publish_event",

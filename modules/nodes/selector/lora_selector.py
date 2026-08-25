@@ -68,12 +68,11 @@ class LF_LoraSelector:
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
     OUTPUT_TOOLTIPS = (
-        "Combo list of the LoRAs.",
         "Selected LoRA item as a combo.",
-        "Selected LoRA item as a string.",
+        "Prompt-ready LoRA tag with its weight and optional stacked tags.",
+        "Selected LoRA model name.",
         "File path of the LoRA.",
         "Image of the LoRA (when available).",
-        "LoRA model.",
     )
     RETURN_NAMES = ("lora", "lora_tag", "lora_name", "model_path", "model_cover")
     RETURN_TYPES = (initial_list, Input.STRING, Input.STRING, Input.STRING, Input.IMAGE)

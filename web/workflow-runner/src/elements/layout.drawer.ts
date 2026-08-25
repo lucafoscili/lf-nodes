@@ -24,45 +24,90 @@ export const DRAWER_CLASSES = {
 
 //#region Helpers
 const _createDataset = (workflows: WorkflowAPIDataset) => {
-  const { article, listTree } = getLfFramework().theme.get.icons();
+  const { article, folderOpen, lfSignature, listTree } = getLfFramework().theme.get.icons();
+  const fallback = folderOpen || article || listTree || lfSignature;
 
-  const categories: Array<WorkflowLFNode & { children: WorkflowLFNode[] }> = [];
-  const home = { icon: article, id: 'home', value: 'Home' };
-  const wfs = { icon: listTree, id: 'workflows', value: 'Workflows', children: categories };
+  const shippedCategories: Array<WorkflowLFNode & { children: WorkflowLFNode[] }> = [];
+  const customCollections: Array<WorkflowLFNode & { children: WorkflowLFNode[] }> = [];
+  const home = { icon: article || fallback, id: 'home', value: 'Home' };
+  const shipped = {
+    icon: lfSignature || fallback,
+    id: 'workflows:shipped',
+    value: 'LF Nodes',
+    children: shippedCategories,
+  };
+  const custom = {
+    icon: folderOpen || fallback,
+    id: 'workflows:custom',
+    value: 'Custom',
+    children: customCollections,
+  };
+  const roots: Array<WorkflowLFNode & { children: WorkflowLFNode[] }> = [];
+  const wfs = { icon: listTree || fallback, id: 'workflows', value: 'Workflows', children: roots };
 
   const clone: WorkflowAPIDataset = JSON.parse(JSON.stringify(workflows));
 
   clone.nodes?.forEach((node) => {
     node.children = undefined;
-    const name = node?.category || 'Uncategorized';
-    let category = categories.find((cat) => cat.value === name);
-    if (!category) {
-      category = { icon: _getIcon(name), id: name, value: name, children: [] };
-      categories.push(category);
+    const issue = node.readiness?.issues?.[0]?.message;
+    if (node.readiness?.status === 'setup_required') {
+      node.icon = getLfFramework().theme.get.icon('alertTriangle');
+      node.description = `Setup required${issue ? `: ${issue}` : '.'}`;
+    } else if (node.readiness?.status === 'warning') {
+      node.icon = getLfFramework().theme.get.icon('hexagonInfo');
+      node.description = `Check setup${issue ? `: ${issue}` : '.'}`;
     }
-    category.children.push(node);
+    // Only explicitly packaged records enter LF Nodes. Missing or malformed
+    // provenance fails closed into Custom instead of borrowing LF's identity.
+    const isCustom = node.origin !== 'shipped';
+    const name = isCustom ? node.collection || 'Custom' : node.category || 'Uncategorized';
+    const groups = isCustom ? customCollections : shippedCategories;
+    let group = groups.find((item) => item.value === name);
+    if (!group) {
+      group = {
+        icon: isCustom ? _getIcon('Custom') : _getIcon(name),
+        id: `${isCustom ? 'custom' : 'shipped'}:${name}`,
+        value: name,
+        children: [],
+      };
+      groups.push(group);
+    }
+    group.children.push(node);
   });
+
+  shippedCategories.sort((a, b) => String(a.value).localeCompare(String(b.value)));
+  customCollections.sort((a, b) => String(a.value).localeCompare(String(b.value)));
+  if (shippedCategories.length) {
+    roots.push(shipped);
+  }
+  if (customCollections.length) {
+    roots.push(custom);
+  }
 
   const dataset: LfDataDataset = {
     nodes: [home, wfs],
   };
 
-  categories.sort((a, b) => String(a.value).localeCompare(String(b.value)));
-
   return dataset;
 };
 const _getIcon = (category: string) => {
-  const { alertTriangle, codeCircle2, photo, json, robot, wand } =
+  const { ai, codeCircle2, folder, folderOpen, json, music, photo, robot, wand } =
     getLfFramework().theme.get.icons();
+  const fallback = folder || folderOpen || photo;
   const category_icons = {
+    Audio: music,
+    Custom: folderOpen,
     'Image Processing': wand,
     JSON: json,
+    'Krea 2': ai,
+    'MiniMax H3': ai,
     LLM: robot,
+    'Media Intake': folderOpen,
     SVG: codeCircle2,
     'Text to Image': photo,
   };
 
-  return category_icons[category] || alertTriangle;
+  return category_icons[category] || fallback;
 };
 const _button = (store: WorkflowStore, icon: LfIconType, label: string, className: string) => {
   const button = document.createElement('lf-button');

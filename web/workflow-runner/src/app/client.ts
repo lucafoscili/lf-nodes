@@ -1,4 +1,7 @@
 import { API_ROOT } from '../config';
+import type { WorkflowRunPruneResponse } from '../types/api';
+import type { WorkflowSubmissionSnapshot } from '../types/api';
+import { cancelWorkflowSubmission } from '../services/workflow-service';
 import {
   EventPayload,
   QueuePayload,
@@ -42,19 +45,25 @@ export class WorkflowRunnerClient {
   };
 
   // Polling configuration and state
-  #POLLING = {
+  #POLLING: {
+    timer: ReturnType<typeof setTimeout> | null;
+    abortController: AbortController | null;
+  } = {
     timer: null,
     abortController: null as AbortController | null,
   };
 
   // Backoff state
   #BACKOFF_MS = 1000;
+  #RECONNECT_TIMER: ReturnType<typeof setTimeout> | null = null;
+  #STOPPED = true;
 
   // Async operation deduplication
   #INFLIGHT_RECONCILES = new Map<string, Promise<void>>();
   #INFLIGHT_DETAILS = new Map<string, Promise<void>>();
   #LOADED_DETAILS = new Set<string>();
   #OPEN_DETAIL_RUN_ID: string | null = null;
+  #REMOVED_RUN_IDS = new Set<string>();
 
   constructor(store: WorkflowStore) {
     this.#STORE = store;
@@ -121,6 +130,9 @@ export class WorkflowRunnerClient {
   }
 
   private async _fetchRun(run_id: string, includeDetail: boolean): Promise<void> {
+    if (this.#REMOVED_RUN_IDS.has(run_id)) {
+      return;
+    }
     try {
       const detailQuery = includeDetail ? '' : '?detail=0';
       const resp = await fetch(`${API_ROOT}/run/${encodeURIComponent(run_id)}/status${detailQuery}`, {
@@ -137,6 +149,9 @@ export class WorkflowRunnerClient {
         return;
       }
       const data = await resp.json();
+      if (this.#REMOVED_RUN_IDS.has(run_id)) {
+        return;
+      }
       // A slow detail response must not resurrect a payload after the user
       // has already left that card or opened another one.
       if (includeDetail && this.#OPEN_DETAIL_RUN_ID !== run_id) {
@@ -144,6 +159,9 @@ export class WorkflowRunnerClient {
       }
       const rec: RunRecord = {
         run_id: data.run_id,
+        artifacts: Array.isArray(data.artifacts) ? data.artifacts : undefined,
+        submission_id: data.submission_id,
+        cancel_requested: data.cancel_requested,
         workflow_id: data.workflow_id,
         status: data.status,
         seq: data.seq || 0,
@@ -167,7 +185,7 @@ export class WorkflowRunnerClient {
 
   /** Fetch a terminal result only when its output detail is actually opened. */
   async loadRunDetail(run_id: string): Promise<void> {
-    if (!run_id) {
+    if (!run_id || this.#REMOVED_RUN_IDS.has(run_id)) {
       return;
     }
 
@@ -201,14 +219,15 @@ export class WorkflowRunnerClient {
 
     const existing = this.#RUNS.get(target);
     const hadResult = existing?.result !== undefined && existing.result !== null;
-    if (existing && hadResult) {
-      this.#RUNS.set(target, { ...existing, result: null });
+    const hadArtifacts = existing?.artifacts !== undefined;
+    if (existing && (hadResult || hadArtifacts)) {
+      this.#RUNS.set(target, { ...existing, artifacts: [], result: null });
     }
     this.#LOADED_DETAILS.delete(target);
     if (this.#OPEN_DETAIL_RUN_ID === target) {
       this.#OPEN_DETAIL_RUN_ID = null;
     }
-    if (hadResult) {
+    if (hadResult || hadArtifacts) {
       this.emitUpdate();
     }
   }
@@ -217,6 +236,9 @@ export class WorkflowRunnerClient {
     // Validate mandatory fields
     if (!ev || !ev.run_id || typeof ev.status === 'undefined' || ev.status === null) {
       debugLog('applyEvent: invalid run record (missing run_id or status)', 'warning', ev);
+      return;
+    }
+    if (this.#REMOVED_RUN_IDS.has(ev.run_id)) {
       return;
     }
 
@@ -233,12 +255,18 @@ export class WorkflowRunnerClient {
 
   // Upsert with seq monotonicity guard and workflow name fetch
   private upsertRun(rec: RunRecord) {
+    if (this.#REMOVED_RUN_IDS.has(rec.run_id)) {
+      return;
+    }
     const last = this.#LAST_SEQ.get(rec.run_id) ?? -1;
     if (rec.seq < last) return; // older - don't regress seq
 
     const existing = this.#RUNS.get(rec.run_id);
     if (rec.seq === last && existing) {
       const supplements = {
+        ...(rec.artifacts !== undefined ? { artifacts: rec.artifacts } : {}),
+        ...(rec.submission_id !== undefined ? { submission_id: rec.submission_id } : {}),
+        ...(rec.cancel_requested !== undefined ? { cancel_requested: rec.cancel_requested } : {}),
         ...(rec.workflow_id !== undefined ? { workflow_id: rec.workflow_id } : {}),
         ...(rec.owner_id !== undefined ? { owner_id: rec.owner_id } : {}),
         ...(rec.created_at !== undefined ? { created_at: rec.created_at } : {}),
@@ -268,7 +296,7 @@ export class WorkflowRunnerClient {
       !!existing &&
       rec.seq > last &&
       this.#OPEN_DETAIL_RUN_ID === rec.run_id &&
-      ['succeeded', 'failed', 'cancelled'].includes(rec.status);
+      ['succeeded', 'failed', 'cancelled', 'timeout'].includes(rec.status);
     if (existing && rec.seq > last) {
       this.#LOADED_DETAILS.delete(rec.run_id);
     }
@@ -288,15 +316,121 @@ export class WorkflowRunnerClient {
     }
   }
 
+  private removeRuns(runIds: string[]) {
+    const uniqueIds = [...new Set(runIds.filter(Boolean))];
+    if (uniqueIds.length === 0) {
+      return;
+    }
+
+    for (const runId of uniqueIds) {
+      this.#REMOVED_RUN_IDS.add(runId);
+      this.#RUNS.delete(runId);
+      this.#LAST_SEQ.delete(runId);
+      this.#LOADED_DETAILS.delete(runId);
+      this.#INFLIGHT_RECONCILES.delete(runId);
+      this.#INFLIGHT_DETAILS.delete(runId);
+      if (this.#OPEN_DETAIL_RUN_ID === runId) {
+        this.#OPEN_DETAIL_RUN_ID = null;
+      }
+    }
+
+    this.#STORE.getState().mutate.runs.removeMany(uniqueIds);
+    ensureActiveRun(this.#STORE);
+    this.saveCache();
+  }
+
   // Remove a run completely from state and cache (used when server returns 404)
   private removeRun(runId: string) {
-    this.#RUNS.delete(runId);
-    this.#LAST_SEQ.delete(runId);
-    this.#LOADED_DETAILS.delete(runId);
-    if (this.#OPEN_DETAIL_RUN_ID === runId) {
-      this.#OPEN_DETAIL_RUN_ID = null;
+    this.removeRuns([runId]);
+  }
+
+  async pruneMissingArtifacts(
+    dryRun: boolean,
+    candidateRunIds?: readonly string[],
+  ): Promise<WorkflowRunPruneResponse> {
+    if (!dryRun && !candidateRunIds) {
+      throw new Error('History cleanup requires the candidate IDs from a dry-run preview.');
     }
-    this.emitUpdate(); // triggers push to UI and saveCache
+    const requestBody = dryRun
+      ? { dry_run: true }
+      : { candidate_run_ids: candidateRunIds, dry_run: false };
+    const resp = await fetch(`${API_ROOT}/workflow-runner/runs/prune-missing-artifacts`, {
+      body: JSON.stringify(requestBody),
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      method: 'POST',
+    });
+
+    let data: Partial<WorkflowRunPruneResponse> & { detail?: unknown } = {};
+    try {
+      data = await resp.json();
+    } catch {
+      // A non-JSON error is still reported through the generic status below.
+    }
+
+    if (!resp.ok) {
+      const detail = typeof data.detail === 'string' ? ` ${data.detail}` : '';
+      throw new Error(`History cleanup failed (${resp.status}).${detail}`);
+    }
+
+    const candidateRunIdsResponse = Array.isArray(data.candidate_run_ids)
+      ? data.candidate_run_ids.filter((runId): runId is string => typeof runId === 'string')
+      : [];
+    const candidateCount = Number(data.candidate_count) || 0;
+    if (
+      dryRun &&
+      (candidateRunIdsResponse.length !== candidateCount ||
+        new Set(candidateRunIdsResponse).size !== candidateRunIdsResponse.length)
+    ) {
+      throw new Error('History cleanup preview did not identify its candidates safely.');
+    }
+
+    const response: WorkflowRunPruneResponse = {
+      candidate_count: candidateCount,
+      candidate_run_ids: candidateRunIdsResponse,
+      dry_run: Boolean(data.dry_run),
+      removed_count: Number(data.removed_count) || 0,
+      removed_run_ids: Array.isArray(data.removed_run_ids)
+        ? data.removed_run_ids.filter((runId): runId is string => typeof runId === 'string')
+        : [],
+      skipped_changed: Number(data.skipped_changed) || 0,
+      skipped_unknown: Number(data.skipped_unknown) || 0,
+    };
+
+    if (!dryRun && response.removed_run_ids.length > 0) {
+      this.removeRuns(response.removed_run_ids);
+    }
+
+    return response;
+  }
+
+  async cancelSubmission(
+    submissionId: string,
+    runId: string,
+  ): Promise<WorkflowSubmissionSnapshot> {
+    const snapshot = await cancelWorkflowSubmission(submissionId);
+    if (snapshot.run_id && snapshot.run_id !== runId) {
+      throw new Error('The submission is bound to a different workflow run.');
+    }
+
+    const existing = this.#RUNS.get(runId);
+    const status = ['pending', 'running', 'succeeded', 'failed', 'cancelled', 'timeout'].includes(
+      snapshot.status,
+    )
+      ? (snapshot.status as RunRecord['status'])
+      : existing?.status ?? 'pending';
+    const updated: RunRecord = {
+      ...(existing ?? { run_id: runId, seq: 0 }),
+      cancel_requested: snapshot.cancel_requested,
+      run_id: runId,
+      status,
+      submission_id: snapshot.submission_id,
+      updated_at: snapshot.updated_at,
+    };
+    this.#RUNS.set(runId, updated);
+    this.emitUpdate();
+    ensureActiveRun(this.#STORE);
+    return snapshot;
   }
 
   private processSnapshotArray(arr: RunRecord[]) {
@@ -311,9 +445,20 @@ export class WorkflowRunnerClient {
         console.warn('processSnapshotArray: ignoring invalid snapshot entry', s);
         continue;
       }
+      if (this.#REMOVED_RUN_IDS.has(s.run_id)) {
+        continue;
+      }
       activeSet.add(s.run_id);
       const last = this.#LAST_SEQ.get(s.run_id) ?? -1;
-      if (s.seq <= last) continue;
+      if (s.seq < last) continue;
+      if (s.seq === last && this.#RUNS.has(s.run_id)) {
+        // Job-store sequence tracks status/result changes, while lifecycle
+        // control metadata can change independently. Let equal-sequence REST
+        // snapshots repair a handle omitted by SSE or learn a cancel request
+        // made in another tab without regressing the canonical job state.
+        this.upsertRun(s);
+        continue;
+      }
       this.#LAST_SEQ.set(s.run_id, s.seq);
       this.#RUNS.set(s.run_id, s);
       changed = true;
@@ -329,14 +474,15 @@ export class WorkflowRunnerClient {
       this.emitUpdate();
     }
 
-    // Reconciliation pass: any locally-known run that is marked 'running' but
-    // not present in the snapshot likely finished while the client was
-    // disconnected — fetch authoritative state once per snapshot/reconnect.
+    // Reconciliation pass: any locally-known active run omitted from the
+    // authoritative active snapshot likely finished between polls/reconnects.
+    // Pending matters too: a queued cancellation or fast terminal transition
+    // may never produce a locally observed running state.
     (async () => {
       try {
         const toReconcile: string[] = [];
         for (const [id, rec] of this.#RUNS.entries()) {
-          if (rec.status === 'running' && !activeSet.has(id)) {
+          if (['pending', 'running'].includes(rec.status) && !activeSet.has(id)) {
             toReconcile.push(id);
           }
         }
@@ -533,6 +679,7 @@ export class WorkflowRunnerClient {
 
   //#region SSE Connection
   async start() {
+    this.#STOPPED = false;
     if (this.#ES || this.#STATE.connecting) {
       return;
     }
@@ -547,6 +694,10 @@ export class WorkflowRunnerClient {
 
     // 2) Cold-load authoritative runs
     await this.coldLoadRuns();
+    if (this.#STOPPED) {
+      this.#STATE.connecting = false;
+      return;
+    }
 
     // 3) Open SSE. The bounded server list is authoritative for history;
     // cached ids outside it are deliberately not hydrated one-by-one.
@@ -569,6 +720,8 @@ export class WorkflowRunnerClient {
             const payload = JSON.parse(e.data) as EventPayload;
             this.applyEvent({
               run_id: payload.run_id,
+              submission_id: payload.submission_id,
+              cancel_requested: payload.cancel_requested,
               workflow_id: payload.workflow_id,
               status: payload.status,
               seq: payload.seq ?? 0,
@@ -596,21 +749,17 @@ export class WorkflowRunnerClient {
     this.#STATE.processingSnapshot = true;
 
     this.#ES.onopen = () => {
-      this.#BACKOFF_MS = this.#INITIAL_BACKOFF_MS;
-
-      if (this.#POLLING.timer) {
-        clearInterval(this.#POLLING.timer);
-        this.#POLLING.timer = null;
-
-        if (this.#POLLING.abortController) {
-          try {
-            this.#POLLING.abortController.abort();
-          } catch {
-            // ignore
-          }
-          this.#POLLING.abortController = null;
-        }
+      if (this.#STOPPED) {
+        this.#ES?.close();
+        this.#ES = null;
+        return;
       }
+      this.#BACKOFF_MS = this.#INITIAL_BACKOFF_MS;
+      if (this.#RECONNECT_TIMER) {
+        clearTimeout(this.#RECONNECT_TIMER);
+        this.#RECONNECT_TIMER = null;
+      }
+      this.stopPollingFallback();
     };
 
     this.#ES.onerror = () => {
@@ -622,11 +771,20 @@ export class WorkflowRunnerClient {
         }
         this.#ES = null;
       }
+      if (this.#STOPPED) {
+        return;
+      }
       this.startPollingFallback();
 
-      const delay = this.backoffWithJitter();
-      setTimeout(() => this.start(), delay);
-      // Note: backoff is increased in backoffWithJitter()
+      if (!this.#RECONNECT_TIMER) {
+        const delay = this.backoffWithJitter();
+        this.#RECONNECT_TIMER = setTimeout(() => {
+          this.#RECONNECT_TIMER = null;
+          if (!this.#STOPPED) {
+            void this.start();
+          }
+        }, delay);
+      }
     };
 
     this.#ES.addEventListener(this.#EVENT_RUN, (e: MessageEvent) => {
@@ -635,6 +793,8 @@ export class WorkflowRunnerClient {
         // payload contains seq and run_id
         this.applyEvent({
           run_id: payload.run_id,
+          submission_id: payload.submission_id,
+          cancel_requested: payload.cancel_requested,
           workflow_id: payload.workflow_id,
           status: payload.status,
           seq: payload.seq ?? 0,
@@ -681,6 +841,8 @@ export class WorkflowRunnerClient {
       if (payload && (payload.run_id || payload.status || payload.seq !== undefined)) {
         this.applyEvent({
           run_id: payload.run_id,
+          submission_id: payload.submission_id,
+          cancel_requested: payload.cancel_requested,
           workflow_id: payload.workflow_id,
           status: payload.status,
           seq: payload.seq ?? 0,
@@ -705,6 +867,8 @@ export class WorkflowRunnerClient {
 
             this.applyEvent({
               run_id: payload.run_id,
+              submission_id: payload.submission_id,
+              cancel_requested: payload.cancel_requested,
               workflow_id: payload.workflow_id,
               status: payload.status,
               seq: payload.seq ?? 0,
@@ -731,6 +895,8 @@ export class WorkflowRunnerClient {
   }
 
   stop() {
+    this.#STOPPED = true;
+    this.#STATE.connecting = false;
     if (this.#ES) {
       try {
         this.#ES.close();
@@ -738,8 +904,22 @@ export class WorkflowRunnerClient {
       this.#ES = null;
     }
 
+    if (this.#RECONNECT_TIMER) {
+      clearTimeout(this.#RECONNECT_TIMER);
+      this.#RECONNECT_TIMER = null;
+    }
+
+    this.stopPollingFallback();
+
+    this.#INFLIGHT_RECONCILES.clear();
+    this.#INFLIGHT_DETAILS.clear();
+    this.#LOADED_DETAILS.clear();
+    this.#OPEN_DETAIL_RUN_ID = null;
+  }
+
+  private stopPollingFallback() {
     if (this.#POLLING.timer) {
-      clearInterval(this.#POLLING.timer);
+      clearTimeout(this.#POLLING.timer);
       this.#POLLING.timer = null;
     }
 
@@ -749,11 +929,6 @@ export class WorkflowRunnerClient {
       } catch {}
       this.#POLLING.abortController = null;
     }
-
-    this.#INFLIGHT_RECONCILES.clear();
-    this.#INFLIGHT_DETAILS.clear();
-    this.#LOADED_DETAILS.clear();
-    this.#OPEN_DETAIL_RUN_ID = null;
   }
 
   getRuns(): Map<string, RunRecord> {
@@ -785,6 +960,8 @@ export class WorkflowRunnerClient {
     self.seedPlaceholders = this.seedPlaceholders.bind(this);
     self.start = this.start.bind(this);
     self.stop = this.stop.bind(this);
+    self.startPollingFallback = this.startPollingFallback.bind(this);
+    self.backoffWithJitter = this.backoffWithJitter.bind(this);
     self.fetchWorkflowNames = this.fetchWorkflowNames.bind(this);
     self.setWorkflowNames = this.setWorkflowNames.bind(this);
 
@@ -801,24 +978,34 @@ export class WorkflowRunnerClient {
   }
 
   private startPollingFallback() {
-    if (this.#POLLING.timer) {
+    if (
+      this.#STOPPED ||
+      this.#ES ||
+      this.#POLLING.timer ||
+      this.#POLLING.abortController
+    ) {
       return;
     }
 
-    this.#POLLING.timer = setInterval(() => this.pollActiveRuns(), this.#POLLING_INTERVAL_MS);
-    this.pollActiveRuns();
+    void this.pollActiveRuns().finally(() => {
+      if (this.#STOPPED || this.#ES || this.#POLLING.timer) {
+        return;
+      }
+      this.#POLLING.timer = setTimeout(() => {
+        this.#POLLING.timer = null;
+        this.startPollingFallback();
+      }, this.#POLLING_INTERVAL_MS);
+    });
   }
 
   private async pollActiveRuns() {
+    let ac: AbortController | null = null;
     try {
       if (this.#POLLING.abortController) {
-        try {
-          this.#POLLING.abortController.abort();
-        } catch {}
-        this.#POLLING.abortController = null;
+        return;
       }
 
-      const ac = new AbortController();
+      ac = new AbortController();
       this.#POLLING.abortController = ac;
 
       const resp = await fetch(
@@ -834,9 +1021,6 @@ export class WorkflowRunnerClient {
       const data = await resp.json();
       const arr: RunRecord[] = (data.runs || []) as RunRecord[];
       this.processSnapshotArray(arr);
-      if (this.#POLLING.abortController === ac) {
-        this.#POLLING.abortController = null;
-      }
     } catch (e) {
       if (
         (e && (e.name === 'AbortError' || e.code === 'ABORT_ERR')) ||
@@ -846,12 +1030,20 @@ export class WorkflowRunnerClient {
       } else {
         debugLog('pollActiveRuns error', 'warning', e);
       }
+    } finally {
+      if (ac && this.#POLLING.abortController === ac) {
+        this.#POLLING.abortController = null;
+      }
     }
   }
 
   private backoffWithJitter() {
     const base = this.#BACKOFF_MS;
     const jitterFactor = 0.5 + Math.random() * 0.5; // 0.5 .. 1.0
+    this.#BACKOFF_MS = Math.min(
+      this.#MAX_BACKOFF_MS,
+      Math.max(this.#INITIAL_BACKOFF_MS, base * 2),
+    );
 
     return Math.floor(base * jitterFactor);
   }

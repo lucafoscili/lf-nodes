@@ -57,8 +57,8 @@ class LF_EmptyImage:
         "Generated empty image tensor.",
         "List of generated empty image tensors."
     )
-    RETURN_NAMES = ("image",)
-    RETURN_TYPES = (Input.IMAGE,)
+    RETURN_NAMES = ("image", "image_list")
+    RETURN_TYPES = (Input.IMAGE, Input.IMAGE)
 
     def on_exec(self, **kwargs: dict):
         self._temp_cache.cleanup()

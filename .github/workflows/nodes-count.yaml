@@ -20,42 +20,44 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Count Node Python Files
+      - name: Count Published LF Nodes
         id: count
         run: |
           set -e
-          # Count every Python file under modules/nodes (recursively) excluding __init__.py and tests directories/files
-          COUNT=$(find modules/nodes -type f -name '*.py' \
-            ! -name '__init__.py' \
-            ! -path '*/tests/*' \
-            ! -path '*/test_*' | wc -l)
+          COUNT=$(python - <<'PY'
+          from modules.workflow_runner.scripts.workflow_preflight import discover_lf_node_types
+          print(len(discover_lf_node_types()))
+          PY
+          )
 
-          echo "Discovered $COUNT node files"
+          echo "Discovered $COUNT published LF node mappings"
           echo "nodes=$COUNT" >> $GITHUB_OUTPUT
           echo "{ \"nodes\": $COUNT }" > count.json
 
       - name: (Optional) Verify Count with Python
         run: |
           python - <<'PY'
-          import json, pathlib
-          root = pathlib.Path('modules/nodes')
-          files = [p for p in root.rglob('*.py') if p.name != '__init__.py' and 'tests' not in p.parts and not p.name.startswith('test_')]
-          print(f"Python verification count: {len(files)}")
-          # Ensure consistency with existing count.json
+          import json
+          from modules.workflow_runner.scripts.workflow_preflight import discover_lf_node_types
+
+          mappings = discover_lf_node_types()
+          print(f"Published LF node mapping count: {len(mappings)}")
           with open('count.json') as f:
               current = json.load(f).get('nodes')
-          if current != len(files):
-              raise SystemExit(f"Mismatch between shell count ({current}) and python count ({len(files)})")
+          if current != len(mappings):
+              raise SystemExit(
+                  f"Mismatch between recorded count ({current}) and mapping count ({len(mappings)})"
+              )
           PY
 
       - name: Create Pull Request with Node Count Update
         if: github.event_name == 'push'
         uses: peter-evans/create-pull-request@v5
         with:
-          commit-message: '🤖 Auto-update node count: ${{ steps.count.outputs.nodes }} files'
+          commit-message: '🤖 Auto-update node count: ${{ steps.count.outputs.nodes }} nodes'
           title: '🔢 Update node count to ${{ steps.count.outputs.nodes }}'
           body: |
-            This PR automatically updates the node count based on the number of Python node files (excluding __init__.py and tests) in modules/nodes.
+            This PR automatically updates the count of published LF node mappings.
           branch: 'update-node-count/${{ github.run_id }}-${{ github.sha }}'
           # Labels are intentionally omitted to avoid potential permission issues.
           author: 'github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>'
@@ -66,5 +68,5 @@ jobs:
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           message: |
-            🔢 Node file count: **${{ steps.count.outputs.nodes }}**
-            (Excludes __init__.py and tests)
+            🔢 Published LF node count: **${{ steps.count.outputs.nodes }}**
+            (Counts unique published `NODE_CLASS_MAPPINGS` keys)

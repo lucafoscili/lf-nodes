@@ -1,0 +1,83 @@
+{
+  "unet": {
+    "inputs": {
+      "unet_name": "KR2/darkBeast30BF16INT8_darkBeastKREA2FP8.safetensors",
+      "weight_dtype": "default"
+    },
+    "class_type": "UNETLoader",
+    "_meta": {"title": "Load Krea 2 model"}
+  },
+  "clip": {
+    "inputs": {
+      "clip_name": "qwen3vl_4b_bf16.safetensors",
+      "type": "krea2"
+    },
+    "class_type": "CLIPLoader",
+    "_meta": {"title": "Load Krea 2 Qwen3-VL encoder"}
+  },
+  "vae": {
+    "inputs": {"vae_name": "krea2RealVae_v10.safetensors"},
+    "class_type": "VAELoader",
+    "_meta": {"title": "Load Krea 2 VAE"}
+  },
+  "positive": {
+    "inputs": {
+      "clip": ["clip", 0],
+      "text": "A cinematic waist-up portrait of an original traveler beside a rain-streaked train window at blue hour, looking calmly toward the camera. They wear a weathered charcoal coat over a textured linen shirt. Use balanced asymmetrical framing, natural anatomy, a 50 mm lens with shallow depth of field, soft cool window light balanced by a warm practical rim light, restrained teal-and-amber color, coherent skin, fabric, glass, and metal textures, and a layered station interior fading softly into the background."
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {"title": "Prompt"}
+  },
+  "negative": {
+    "inputs": {"conditioning": ["positive", 0]},
+    "class_type": "ConditioningZeroOut",
+    "_meta": {"title": "Zero unconditional conditioning"}
+  },
+  "resolution": {
+    "inputs": {
+      "aspect_ratio": "1:1 (Square)",
+      "megapixels": 1.9,
+      "multiple": 16
+    },
+    "class_type": "ResolutionSelector",
+    "_meta": {"title": "Choose largest safe Krea 2 canvas"}
+  },
+  "latent": {
+    "inputs": {
+      "width": ["resolution", 0],
+      "height": ["resolution", 1],
+      "batch_size": 1
+    },
+    "class_type": "EmptySD3LatentImage",
+    "_meta": {"title": "Target canvas"}
+  },
+  "sampler": {
+    "inputs": {
+      "seed": 42,
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "beta",
+      "denoise": 1.0,
+      "model": ["unet", 0],
+      "positive": ["positive", 0],
+      "negative": ["negative", 0],
+      "latent_image": ["latent", 0]
+    },
+    "class_type": "KSampler",
+    "_meta": {"title": "Krea 2 sampler"}
+  },
+  "decode": {
+    "inputs": {"samples": ["sampler", 0], "vae": ["vae", 0]},
+    "class_type": "VAEDecode",
+    "_meta": {"title": "Decode image"}
+  },
+  "save": {
+    "inputs": {
+      "filename_prefix": "LF_Nodes/Krea2/Generate/seed-42",
+      "images": ["decode", 0]
+    },
+    "class_type": "SaveImage",
+    "_meta": {"title": "Save generated image"}
+  }
+}

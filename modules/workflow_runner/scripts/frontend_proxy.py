@@ -11,6 +11,9 @@ Configuration (env):
   COMFY_BACKEND_URL - backend Comfy base URL (default http://127.0.0.1:8188)
   PROXY_MAX_REQUEST_SIZE_MB - maximum proxied request body size in MiB (default 100)
   PROXY_ALLOWED_PREFIXES - comma-separated allowed path prefixes (optional)
+  PROXY_CONNECT_TIMEOUT_SECONDS - upstream connection timeout (default 5)
+  PROXY_READ_TIMEOUT_SECONDS - upstream socket-read timeout (default 30)
+  PROXY_TOTAL_TIMEOUT_SECONDS - whole upstream request timeout (default 60)
 
 This proxy forwards only configured prefixes and returns 403 for everything else.
 It forwards headers, cookies and body and preserves response status and content-type.
@@ -19,7 +22,7 @@ import asyncio
 import logging
 import ssl
 
-from aiohttp import web, ClientSession
+from aiohttp import ClientSession, ClientTimeout, web
 from pathlib import Path
 import importlib.util
 
@@ -53,6 +56,7 @@ DEFAULT_PREFIXES = [
     "/api/lf-nodes/run",
     "/api/lf-nodes/static",
     "/api/lf-nodes/static-workflow-runner",
+    "/api/lf-nodes/submissions",
     "/api/lf-nodes/upload",
     "/api/lf-nodes/workflow-runner",
     "/api/lf-nodes/workflow-runner/verify",
@@ -77,7 +81,23 @@ PROXY_SSL_CERT =  str_env("PROXY_SSL_CERT")
 PROXY_SSL_KEY =  str_env("PROXY_SSL_KEY")
 PROXY_SSL_KEY_PASSWORD = str_env("PROXY_SSL_KEY_PASSWORD")
 PROXY_STREAMING_ONLY_PROXY = bool_env("PROXY_STREAMING_ONLY_PROXY", True)
+PROXY_CONNECT_TIMEOUT_SECONDS = max(1, int_env("PROXY_CONNECT_TIMEOUT_SECONDS", 5))
+PROXY_READ_TIMEOUT_SECONDS = max(1, int_env("PROXY_READ_TIMEOUT_SECONDS", 30))
+PROXY_TOTAL_TIMEOUT_SECONDS = max(1, int_env("PROXY_TOTAL_TIMEOUT_SECONDS", 60))
 logging.basicConfig(level=logging.DEBUG if PROXY_DEBUG else logging.INFO, format="[frontend-proxy] %(levelname)s: %(message)s")
+
+RUNNER_SSE_PATHS = frozenset(
+    {
+        "/api/lf-nodes/run/events",
+        "/api/lf-nodes/workflow-runner/events",
+    }
+)
+_STREAMING_ROUTE_ROOTS = (
+    "/api/lf-nodes/proxy",
+    "/api/lf-nodes/run",
+    "/api/lf-nodes/queue",
+)
+_STREAM_CHUNK_SIZE_BYTES = 64 * 1024
 # endregion
 
 # region Main handler
@@ -90,14 +110,17 @@ def _normalize_response_header(path: str, name: str, value: str) -> str:
     return value
 
 
+async def health(_request: web.Request) -> web.Response:
+    """Report proxy liveness without contacting the Comfy backend."""
+    return web.json_response({"status": "ok"}, status=200)
+
+
 async def handle(request: web.Request) -> web.Response:
     path = request.rel_url.path
     if path == "/favicon.ico":
         return web.Response(status=204)
-    if path == "/health":
-        return web.json_response({"status": "ok"}, status=200)
     for prefix in ALLOWED_PREFIXES:
-        if path.startswith(prefix):
+        if _path_is_within(path, prefix):
             return await proxy_request(request)
 
     logging.warning("Blocked request to disallowed path %s from %s", path, request.remote)
@@ -105,9 +128,64 @@ async def handle(request: web.Request) -> web.Response:
 # endregion
 
 # region Proxy logic
+def _is_unbounded_stream_request(method: str, path: str) -> bool:
+    """Return whether an exact GET route may legitimately stay idle indefinitely."""
+    return method.upper() == "GET" and (path == "/view" or path in RUNNER_SSE_PATHS)
+
+
+def _path_is_within(path: str, root: str) -> bool:
+    """Match a route root without also matching lookalike path prefixes."""
+    return path == root or path.startswith(f"{root}/")
+
+
+def _path_allows_streaming(path: str) -> bool:
+    """Apply the opt-in streaming gate to known endpoint boundaries only."""
+    return (
+        path == "/view"
+        or path in RUNNER_SSE_PATHS
+        or any(_path_is_within(path, root) for root in _STREAMING_ROUTE_ROOTS)
+    )
+
+
+def _stream_idle_timeout(path: str) -> float:
+    """Bound silence on long-lived routes without imposing a total lifetime.
+
+    Runner SSE emits a heartbeat every 15 seconds, so 45 seconds tolerates two
+    missed beats before treating the upstream as wedged. Media reads get a
+    wider two-minute silence window because a large file can pause between
+    chunks on a busy disk.
+    """
+
+    minimum = 120 if path == "/view" else 45
+    return float(max(PROXY_READ_TIMEOUT_SECONDS, minimum))
+
+
+def _upstream_timeout(*, stream_path: str | None = None) -> ClientTimeout:
+    """Build an explicit timeout for each independent upstream request."""
+
+    streaming = stream_path is not None
+    return ClientTimeout(
+        total=None if streaming else PROXY_TOTAL_TIMEOUT_SECONDS,
+        connect=PROXY_CONNECT_TIMEOUT_SECONDS,
+        sock_connect=PROXY_CONNECT_TIMEOUT_SECONDS,
+        sock_read=(
+            _stream_idle_timeout(stream_path)
+            if streaming
+            else PROXY_READ_TIMEOUT_SECONDS
+        ),
+    )
+
+
+def _upstream_error_response() -> web.Response:
+    """Return a stable public error contract; details stay in server logs."""
+    return web.json_response({"detail": "upstream_error"}, status=502)
+
+
 async def proxy_request(request: web.Request) -> web.Response:
     upstream = f"{DEFAULT_BACKEND}{request.rel_url}"
     method = request.method
+    req_path = request.rel_url.path
+    unbounded_stream = _is_unbounded_stream_request(method, req_path)
     headers = dict(request.headers)
     for h in ("Host", "Content-Length", "Transfer-Encoding", "Connection"):
         headers.pop(h, None)
@@ -148,35 +226,31 @@ async def proxy_request(request: web.Request) -> web.Response:
             logging.exception("Failed to read request body from %s for %s", request.remote, request.rel_url)
             return web.json_response({"detail": "invalid_request_body"}, status=400)
 
-    async with ClientSession() as sess:
+    # A session per inbound request keeps connection state isolated: a stalled
+    # backend exchange cannot occupy a shared connector slot or poison later
+    # requests when the backend comes back.
+    async with ClientSession(
+        timeout=_upstream_timeout(stream_path=req_path if unbounded_stream else None)
+    ) as sess:
         try:
             async with sess.request(method, upstream, data=data, headers=headers, allow_redirects=False) as resp:
                 # Determine if we should stream the response instead of buffering it.
                 content_type = resp.headers.get("Content-Type", "")
                 transfer_enc = resp.headers.get("Transfer-Encoding", "")
-                should_stream = False
+                # Exact SSE and /view requests must stream even when the
+                # upstream supplies Content-Length instead of chunked framing.
+                should_stream = unbounded_stream
                 try:
                     if content_type.lower().startswith("text/event-stream"):
                         should_stream = True
                     elif transfer_enc.lower() == "chunked":
                         should_stream = True
                 except Exception:
-                    should_stream = False
-
-                try:
-                    req_path = request.rel_url.path
-                except Exception:
-                    req_path = ""
+                    # Header parsing must not undo route-required streaming.
+                    should_stream = unbounded_stream
 
                 if PROXY_STREAMING_ONLY_PROXY:
-                    # Allow streaming for proxy endpoints, runs and queue —
-                    # and also explicitly allow workflow-runner SSE endpoint.
-                    allowed_by_path = (
-                        req_path.startswith("/api/lf-nodes/proxy")
-                        or req_path.startswith("/api/lf-nodes/run")
-                        or req_path.startswith("/api/lf-nodes/queue")
-                        or req_path.startswith("/api/lf-nodes/workflow-runner/events")
-                    )
+                    allowed_by_path = _path_allows_streaming(req_path)
                 else:
                     allowed_by_path = True
 
@@ -198,7 +272,7 @@ async def proxy_request(request: web.Request) -> web.Response:
 
                         await sresp.prepare(request)
                         try:
-                            async for chunk in resp.content.iter_chunked(1024):
+                            async for chunk in resp.content.iter_chunked(_STREAM_CHUNK_SIZE_BYTES):
                                 if not chunk:
                                     continue
                                 try:
@@ -231,17 +305,21 @@ async def proxy_request(request: web.Request) -> web.Response:
                     logging.warning("Upstream returned %s for %s -> %s", resp.status, request.remote, upstream)
 
                 return response
-        except Exception as e:
-            logging.exception("Upstream request to %s failed: %s", upstream, e)
-            if PROXY_DEBUG:
-                return web.json_response({"detail": "upstream_error", "error": str(e)}, status=502)
-            return web.json_response({"detail": "upstream_error"}, status=502)
+        except asyncio.TimeoutError as exc:
+            logging.warning("Upstream request to %s timed out: %s", upstream, exc)
+            return _upstream_error_response()
+        except Exception as exc:
+            logging.exception("Upstream request to %s failed: %s", upstream, exc)
+            return _upstream_error_response()
 # endregion
 
 # region App startup
 def create_app() -> web.Application:
     """Create the proxy application with a configurable 100 MiB default body cap."""
     app = web.Application(client_max_size=PROXY_MAX_REQUEST_SIZE_BYTES)
+    # Register liveness before the catch-all proxy routes so it never depends
+    # on backend availability or timeout state.
+    app.router.add_get("/health", health)
     app.router.add_route("GET", "/{path:.*}", handle)
     app.router.add_route("POST", "/{path:.*}", handle)
     app.router.add_route("PUT", "/{path:.*}", handle)

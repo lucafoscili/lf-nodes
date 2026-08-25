@@ -94,7 +94,7 @@ export const normalizeTimestamp = (v: unknown, fallback: number) => {
     return fallback;
   }
   const n = typeof v === 'string' ? Number(v) : (v as number);
-  if (!Number.isFinite(n) || Number.isNaN(n)) {
+  if (!Number.isFinite(n) || Number.isNaN(n) || n < 0) {
     return fallback;
   }
   return n < 1e12 ? Math.floor(n * 1000) : Math.floor(n);
@@ -124,7 +124,19 @@ export const formatTimestamp = (timestamp: number) => {
   return date.toLocaleString();
 };
 export const recordToUI = (rec: RunRecord, wfs: Record<string, string> = {}) => {
-  const { created_at, error, inputs, result, run_id, status, updated_at, workflow_id } = rec;
+  const {
+    artifacts,
+    cancel_requested,
+    created_at,
+    error,
+    inputs,
+    result,
+    run_id,
+    status,
+    submission_id,
+    updated_at,
+    workflow_id,
+  } = rec;
   const hasResult = rec.result !== undefined;
   const resultOutputs = result?.body?.payload?.history?.outputs || null;
   // Summary records carry a bounded media preview in `outputs`, while a loaded
@@ -133,12 +145,19 @@ export const recordToUI = (rec: RunRecord, wfs: Record<string, string> = {}) => 
   // other lf_output values) render without making run lists heavyweight.
   const outputs = resultOutputs ?? (rec.outputs !== undefined ? rec.outputs : hasResult ? null : undefined);
 
-  const now = Date.now();
+  // Unknown creation times belong at the end of history, not at "now". The
+  // backend emits canonical seconds, while this keeps legacy millisecond/SSE
+  // records compatible at the browser boundary.
+  const createdAt = normalizeTimestamp(created_at, 0);
+  const updatedAt = normalizeTimestamp(updated_at, createdAt);
   const map: WorkflowRunEntryUpdate = {
     runId: run_id,
+    ...(artifacts !== undefined ? { artifacts } : {}),
+    ...(submission_id !== undefined ? { submissionId: submission_id } : {}),
+    ...(cancel_requested !== undefined ? { cancelRequested: cancel_requested } : {}),
     status: status as WorkflowRunStatus,
-    createdAt: normalizeTimestamp(created_at, now),
-    updatedAt: normalizeTimestamp(updated_at, now),
+    createdAt,
+    updatedAt,
     workflowId: workflow_id ?? null,
     workflowName: (workflow_id && wfs[workflow_id]) || 'Unknown workflow',
     error: error ?? null,

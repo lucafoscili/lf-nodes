@@ -76,6 +76,26 @@ def test_output_preview_keeps_only_view_artifacts() -> None:
     assert "base64-sentinel" not in json.dumps(preview)
 
 
+def test_output_preview_normalizes_windows_comfy_subfolders() -> None:
+    result = _large_result(9)
+    descriptor = result["body"]["payload"]["history"]["outputs"]["save"]["images"][0]
+    descriptor["subfolder"] = "LF_Nodes\\Krea2\\CharacterRestage"
+
+    preview = build_output_preview(result)
+
+    assert preview["save"]["images"] == [
+        {
+            "filename": "portrait-9.png",
+            "subfolder": "LF_Nodes/Krea2/CharacterRestage",
+            "type": "output",
+            "url": (
+                "/view?filename=portrait-9.png&"
+                "subfolder=LF_Nodes%2FKrea2%2FCharacterRestage&type=output"
+            ),
+        }
+    ]
+
+
 def test_output_preview_extracts_lf_dataset_view_url() -> None:
     result = {
         "body": {
@@ -158,6 +178,41 @@ def test_output_preview_rejects_unsafe_view_paths() -> None:
     }
 
     assert build_output_preview(result) == {}
+
+
+def test_output_preview_rejects_windows_ads_control_and_overlong_paths() -> None:
+    overlong_subfolder = "a" * 1025
+    result = {
+        "body": {
+            "payload": {
+                "history": {
+                    "outputs": {
+                        "7": {
+                            "images": [
+                                {"filename": "portrait:preview.png", "type": "output"},
+                                {"filename": "portrait\n.png", "type": "output"},
+                                {
+                                    "filename": "portrait.png",
+                                    "subfolder": overlong_subfolder,
+                                    "type": "output",
+                                },
+                                {
+                                    "filename": "safe.png",
+                                    "subfolder": "LF_Nodes\\Krea2",
+                                    "type": "output",
+                                },
+                            ]
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    preview = build_output_preview(result)
+
+    assert [item["filename"] for item in preview["7"]["images"]] == ["safe.png"]
+    assert preview["7"]["images"][0]["subfolder"] == "LF_Nodes/Krea2"
 
 
 def test_summary_serialization_does_not_publish_terminal_result() -> None:

@@ -2,7 +2,9 @@
   &__actions {
     align-items: center;
     display: flex;
+    flex-wrap: wrap;
     gap: 0.5em;
+    justify-content: flex-end;
   }
 
   &__description {
@@ -64,6 +66,56 @@
     top: -0.5em;
     z-index: calc(var(--lf-ui-zindex-backdrop) - 1);
   }
+
+  &__handoff {
+    background: rgba(var(--lf-color-surface), 0.72);
+    border: 1px solid rgba(var(--lf-color-on-surface), 0.18);
+    border-radius: var(--lf-ui-border-radius);
+    display: grid;
+    gap: 0.85em;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+    margin: 0 1em 1em;
+    padding: 1em;
+
+    &[hidden] {
+      display: none;
+    }
+
+    h4,
+    p,
+    > div {
+      grid-column: 1 / -1;
+      margin: 0;
+    }
+
+    p {
+      opacity: 0.75;
+    }
+
+    label {
+      display: grid;
+      font-size: 0.9em;
+      gap: 0.35em;
+      min-width: 0;
+    }
+
+    select {
+      background: rgb(var(--lf-color-bg));
+      border: 1px solid rgba(var(--lf-color-on-surface), 0.25);
+      border-radius: var(--lf-ui-border-radius);
+      color: rgb(var(--lf-color-on-bg));
+      font: inherit;
+      min-width: 0;
+      padding: 0.65em;
+      width: 100%;
+    }
+
+    > div {
+      display: flex;
+      gap: 0.5em;
+      justify-content: flex-end;
+    }
+  }
 }
 
 .workflow-output-media {
@@ -88,5 +140,39 @@
   &__link {
     color: rgb(var(--lf-color-primary));
     overflow-wrap: anywhere;
+  }
+
+  &__note {
+    color: rgba(var(--lf-color-on-surface), 0.72);
+    font-size: 0.9em;
+  }
+}
+
+.workflow-output-compare {
+  display: block;
+  height: min(70vh, 720px);
+  min-height: 320px;
+  width: 100%;
+}
+
+@media (max-width: 640px) {
+  .results-section {
+    &__handoff {
+      grid-template-columns: minmax(0, 1fr);
+
+      > * {
+        grid-column: 1;
+      }
+    }
+
+    &__title {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+  }
+
+  .workflow-output-compare {
+    height: min(58vh, 520px);
+    min-height: 260px;
   }
 }
