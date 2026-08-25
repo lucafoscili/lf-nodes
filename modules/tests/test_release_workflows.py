@@ -20,6 +20,9 @@ def test_publish_workflow_recovers_a_missing_release_from_an_existing_tag():
     assert workflow.index("- name: Generate Release Notes") < workflow.index(
         "- name: Create GitHub Release"
     )
+    assert '--output "$RUNNER_TEMP/github-release-notes.md"' in workflow
+    assert "body_path: ${{ runner.temp }}/github-release-notes.md" in workflow
+    assert workflow.count("github-release-notes.md") == 2
 
 
 def test_recorded_node_count_matches_unique_published_mappings():

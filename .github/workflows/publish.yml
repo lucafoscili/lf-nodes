@@ -79,7 +79,7 @@ jobs:
             --release-head '${{ steps.release_commit.outputs.sha }}' \
             --current-tag 'v${{ steps.extract_version.outputs.version }}' \
             --version '${{ steps.extract_version.outputs.version }}' \
-            --output .github-release-notes.md
+            --output "$RUNNER_TEMP/github-release-notes.md"
       - name: Publish Custom Node
         if: steps.check_tag.outputs.tag_exists == 'false'
         uses: Comfy-Org/publish-node-action@v1
@@ -98,6 +98,6 @@ jobs:
         with:
           tag_name: v${{ steps.extract_version.outputs.version }}
           name: v${{ steps.extract_version.outputs.version }}
-          body_path: .github-release-notes.md
+          body_path: ${{ runner.temp }}/github-release-notes.md
           prerelease: false
           generate_release_notes: false
