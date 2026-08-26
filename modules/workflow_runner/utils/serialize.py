@@ -4,6 +4,8 @@ from collections.abc import Mapping, Sequence
 from typing import Any
 from urllib.parse import parse_qs, urlencode, urlsplit
 
+from .media import media_type_for_filename
+
 LOG = logging.getLogger(__name__)
 
 # region Serialize job
@@ -81,10 +83,55 @@ def build_output_preview(result: Any, max_artifacts: int = 24) -> dict:
             "type": storage_type,
             "url": f"/view?{urlencode({'filename': filename, 'subfolder': subfolder, 'type': storage_type})}",
         }
-        extension = filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
-        bucket = "audios" if extension in {"wav", "mp3", "m4a", "flac", "ogg", "opus"} else "images"
+        media_type = media_type_for_filename(filename) or ""
+        if media_type.startswith("audio/"):
+            bucket = "audios"
+        elif media_type.startswith("model/") or filename.lower().endswith(
+            (".ply", ".splat", ".spz", ".ksplat")
+        ):
+            bucket = "3d"
+        else:
+            # Comfy video savers historically publish their descriptors in the
+            # image bucket, and the browser renderer already distinguishes the
+            # concrete media type or extension.
+            bucket = "images"
         preview.setdefault(node_id, {}).setdefault(bucket, []).append(descriptor)
         remaining -= 1
+
+    def add_lf_file_names(node_id: str, value: Mapping[str, Any]) -> None:
+        """Project LF's portable output-relative paths into Comfy descriptors."""
+
+        lf_output = value.get("lf_output")
+        if not isinstance(lf_output, Sequence) or isinstance(
+            lf_output, (str, bytes, bytearray)
+        ):
+            return
+        for output in lf_output:
+            if remaining <= 0:
+                return
+            if not isinstance(output, Mapping):
+                continue
+            file_names = output.get("file_names")
+            if not isinstance(file_names, Sequence) or isinstance(
+                file_names, (str, bytes, bytearray)
+            ):
+                continue
+            for relative_name in file_names:
+                if remaining <= 0:
+                    return
+                if (
+                    not isinstance(relative_name, str)
+                    or not relative_name
+                    or len(relative_name) > 1024
+                    or "\\" in relative_name
+                    or relative_name.startswith("/")
+                    or any(ord(character) < 32 for character in relative_name)
+                ):
+                    continue
+                parts = relative_name.split("/")
+                if any(part in {"", ".", ".."} or ":" in part for part in parts):
+                    continue
+                add(node_id, parts[-1], "/".join(parts[:-1]), "output")
 
     def add_view_url(node_id: str, value: Any) -> None:
         if not isinstance(value, str) or len(value) > 4096 or not value.startswith("/view?"):
@@ -107,6 +154,7 @@ def build_output_preview(result: Any, max_artifacts: int = 24) -> dict:
         if remaining <= 0:
             return
         if isinstance(value, Mapping):
+            add_lf_file_names(node_id, value)
             if isinstance(value.get("filename"), str):
                 add(
                     node_id,

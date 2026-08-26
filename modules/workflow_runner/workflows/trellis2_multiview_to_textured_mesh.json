@@ -1,0 +1,455 @@
+{
+  "load_front": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "example-front.png"
+    },
+    "_meta": {
+      "title": "Load the front view"
+    }
+  },
+  "load_back": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "example-back.png"
+    },
+    "_meta": {
+      "title": "Load the optional back view"
+    }
+  },
+  "load_left": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "example-left.png"
+    },
+    "_meta": {
+      "title": "Load the optional left view"
+    }
+  },
+  "load_right": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "example-right.png"
+    },
+    "_meta": {
+      "title": "Load the optional right view"
+    }
+  },
+  "background_model": {
+    "class_type": "LoadBackgroundRemovalModel",
+    "inputs": {
+      "bg_removal_name": "birefnet.safetensors"
+    },
+    "_meta": {
+      "title": "Load the foreground extraction model"
+    }
+  },
+  "remove_front": {
+    "class_type": "RemoveBackground",
+    "inputs": {
+      "bg_removal_model": [
+        "background_model",
+        0
+      ],
+      "image": [
+        "load_front",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Extract the front-view foreground"
+    }
+  },
+  "invert_front": {
+    "class_type": "InvertMask",
+    "inputs": {
+      "mask": [
+        "remove_front",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Convert the front mask to Comfy alpha convention"
+    }
+  },
+  "alpha_front": {
+    "class_type": "JoinImageWithAlpha",
+    "inputs": {
+      "image": [
+        "load_front",
+        0
+      ],
+      "alpha": [
+        "invert_front",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Apply the front-view alpha"
+    }
+  },
+  "preprocess_front": {
+    "class_type": "Trellis2PreProcessImage",
+    "inputs": {
+      "image": [
+        "alpha_front",
+        0
+      ],
+      "padding": 0,
+      "remove_background": false,
+      "max_size": 2048
+    },
+    "_meta": {
+      "title": "Prepare the isolated front view"
+    }
+  },
+  "remove_back": {
+    "class_type": "RemoveBackground",
+    "inputs": {
+      "bg_removal_model": [
+        "background_model",
+        0
+      ],
+      "image": [
+        "load_back",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Extract the back-view foreground"
+    }
+  },
+  "invert_back": {
+    "class_type": "InvertMask",
+    "inputs": {
+      "mask": [
+        "remove_back",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Convert the back mask to Comfy alpha convention"
+    }
+  },
+  "alpha_back": {
+    "class_type": "JoinImageWithAlpha",
+    "inputs": {
+      "image": [
+        "load_back",
+        0
+      ],
+      "alpha": [
+        "invert_back",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Apply the back-view alpha"
+    }
+  },
+  "preprocess_back": {
+    "class_type": "Trellis2PreProcessImage",
+    "inputs": {
+      "image": [
+        "alpha_back",
+        0
+      ],
+      "padding": 0,
+      "remove_background": false,
+      "max_size": 2048
+    },
+    "_meta": {
+      "title": "Prepare the isolated back view"
+    }
+  },
+  "remove_left": {
+    "class_type": "RemoveBackground",
+    "inputs": {
+      "bg_removal_model": [
+        "background_model",
+        0
+      ],
+      "image": [
+        "load_left",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Extract the left-view foreground"
+    }
+  },
+  "invert_left": {
+    "class_type": "InvertMask",
+    "inputs": {
+      "mask": [
+        "remove_left",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Convert the left mask to Comfy alpha convention"
+    }
+  },
+  "alpha_left": {
+    "class_type": "JoinImageWithAlpha",
+    "inputs": {
+      "image": [
+        "load_left",
+        0
+      ],
+      "alpha": [
+        "invert_left",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Apply the left-view alpha"
+    }
+  },
+  "preprocess_left": {
+    "class_type": "Trellis2PreProcessImage",
+    "inputs": {
+      "image": [
+        "alpha_left",
+        0
+      ],
+      "padding": 0,
+      "remove_background": false,
+      "max_size": 2048
+    },
+    "_meta": {
+      "title": "Prepare the isolated left view"
+    }
+  },
+  "remove_right": {
+    "class_type": "RemoveBackground",
+    "inputs": {
+      "bg_removal_model": [
+        "background_model",
+        0
+      ],
+      "image": [
+        "load_right",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Extract the right-view foreground"
+    }
+  },
+  "invert_right": {
+    "class_type": "InvertMask",
+    "inputs": {
+      "mask": [
+        "remove_right",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Convert the right mask to Comfy alpha convention"
+    }
+  },
+  "alpha_right": {
+    "class_type": "JoinImageWithAlpha",
+    "inputs": {
+      "image": [
+        "load_right",
+        0
+      ],
+      "alpha": [
+        "invert_right",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Apply the right-view alpha"
+    }
+  },
+  "preprocess_right": {
+    "class_type": "Trellis2PreProcessImage",
+    "inputs": {
+      "image": [
+        "alpha_right",
+        0
+      ],
+      "padding": 0,
+      "remove_background": false,
+      "max_size": 2048
+    },
+    "_meta": {
+      "title": "Prepare the isolated right view"
+    }
+  },
+  "load_model": {
+    "class_type": "Trellis2LoadModel",
+    "inputs": {
+      "modelname": "microsoft/TRELLIS.2-4B",
+      "backend": "sdpa",
+      "device": "cuda",
+      "low_vram": true,
+      "keep_models_loaded": false,
+      "conv_backend": "flex_gemm",
+      "sparse_backend": "xformers",
+      "use_reconviagen": false
+    },
+    "_meta": {
+      "title": "Load the official TRELLIS.2 4B model"
+    }
+  },
+  "generate": {
+    "class_type": "Trellis2MeshWithVoxelMultiViewGenerator",
+    "inputs": {
+      "pipeline": [
+        "load_model",
+        0
+      ],
+      "front_image": [
+        "preprocess_front",
+        0
+      ],
+      "back_image": [
+        "preprocess_back",
+        0
+      ],
+      "left_image": [
+        "preprocess_left",
+        0
+      ],
+      "right_image": [
+        "preprocess_right",
+        0
+      ],
+      "seed": 42,
+      "pipeline_type": "1024_cascade",
+      "sparse_structure_steps": 12,
+      "sparse_structure_guidance_strength": 6.5,
+      "sparse_structure_guidance_rescale": 0.05,
+      "sparse_structure_rescale_t": 4.0,
+      "shape_steps": 12,
+      "shape_guidance_strength": 6.5,
+      "shape_guidance_rescale": 0.05,
+      "shape_rescale_t": 4.0,
+      "texture_steps": 12,
+      "texture_guidance_strength": 3.0,
+      "texture_guidance_rescale": 0.2,
+      "texture_rescale_t": 3.0,
+      "max_num_tokens": 49152,
+      "sparse_structure_resolution": 32,
+      "generate_texture_slat": true,
+      "sparse_structure_guidance_interval_start": 0.1,
+      "sparse_structure_guidance_interval_end": 1.0,
+      "shape_guidance_interval_start": 0.1,
+      "shape_guidance_interval_end": 1.0,
+      "texture_guidance_interval_start": 0.0,
+      "texture_guidance_interval_end": 0.9,
+      "use_tiled_decoder": true,
+      "front_axis": "z",
+      "blend_temperature": 1.0,
+      "sampler": "euler",
+      "fill_holes": true,
+      "hole_iterations": 1,
+      "verbose": false,
+      "dino_lock": 0.0,
+      "dino_substeps": 4,
+      "hole_fill_algorithm": "flood_fill",
+      "dino_foundation_cap": 1.0,
+      "keep_only_shell": true
+    },
+    "_meta": {
+      "title": "Reconstruct the multi-view textured voxel mesh"
+    }
+  },
+  "postprocess": {
+    "class_type": "Trellis2PostProcessAndUnWrapAndRasterizer",
+    "inputs": {
+      "mesh": [
+        "generate",
+        0
+      ],
+      "bvh": [
+        "generate",
+        1
+      ],
+      "mesh_cluster_threshold_cone_half_angle_rad": 60.0,
+      "mesh_cluster_refine_iterations": 0,
+      "mesh_cluster_global_iterations": 1,
+      "mesh_cluster_smooth_strength": 1,
+      "texture_size": 4096,
+      "remesh": true,
+      "remesh_band": 1.0,
+      "remesh_project": 0.0,
+      "target_face_num": 200000,
+      "simplify_method": "Cumesh",
+      "fill_holes": true,
+      "texture_alpha_mode": "OPAQUE",
+      "dual_contouring_resolution": "1024",
+      "double_side_material": false,
+      "remove_floaters": true,
+      "bake_on_vertices": false,
+      "use_custom_normals": false,
+      "remove_inner_faces": true,
+      "inpainting": "telea",
+      "reorient_vertices": "90 degrees"
+    },
+    "_meta": {
+      "title": "Build and texture the presentation mesh"
+    }
+  },
+  "export": {
+    "class_type": "Trellis2ExportMesh",
+    "inputs": {
+      "trimesh": [
+        "postprocess",
+        0
+      ],
+      "filename_prefix": "LF_Nodes/TRELLIS2/MultiViewToTexturedMesh/seed-42-balanced",
+      "file_format": "glb"
+    },
+    "_meta": {
+      "title": "Export the textured GLB"
+    }
+  },
+  "register_output": {
+    "class_type": "LF_RegisterOutputFile",
+    "inputs": {
+      "relative_path": [
+        "export",
+        1
+      ],
+      "ui_widget": {}
+    },
+    "_meta": {
+      "title": "Register the GLB in durable history"
+    }
+  },
+  "render_preview": {
+    "class_type": "Trellis2RenderMultiViewNvdiffrast",
+    "inputs": {
+      "trimesh": [
+        "postprocess",
+        0
+      ],
+      "render_size": 512,
+      "ortho_scale": 1.2,
+      "azimuths": "0",
+      "elevations": "0",
+      "add_shading": true
+    },
+    "_meta": {
+      "title": "Render a deterministic front preview"
+    }
+  },
+  "save_preview": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "images": [
+        "render_preview",
+        0
+      ],
+      "filename_prefix": "LF_Nodes/TRELLIS2/MultiViewToTexturedMesh/seed-42-balanced-preview"
+    },
+    "_meta": {
+      "title": "Save the Runner preview"
+    }
+  }
+}

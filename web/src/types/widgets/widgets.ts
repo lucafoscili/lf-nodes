@@ -132,6 +132,7 @@ export enum NodeName {
   openAIAPI = 'LF_OpenAIAPI',
   parsePromptWithLoraTags = 'LF_ParsePromptWithLoraTags',
   randomBoolean = 'LF_RandomBoolean',
+  registerOutputFile = 'LF_RegisterOutputFile',
   regexReplace = 'LF_RegexReplace',
   regionExtractor = 'LF_RegionExtractor',
   regionMask = 'LF_RegionMask',

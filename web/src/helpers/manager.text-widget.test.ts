@@ -36,6 +36,10 @@ describe('Generic output widget contracts', () => {
     expect(NODE_WIDGET_MAP[NodeName.saveDds]).toEqual([CustomWidgetName.tree]);
   });
 
+  it('renders registered output receipts with the LF tree widget', () => {
+    expect(NODE_WIDGET_MAP[NodeName.registerOutputFile]).toEqual([CustomWidgetName.tree]);
+  });
+
   it('renders comparison grids with the LF masonry widget', () => {
     expect(NODE_WIDGET_MAP[NodeName.imageGrid]).toEqual([CustomWidgetName.masonry]);
   });

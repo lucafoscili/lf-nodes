@@ -12,6 +12,7 @@ import { WorkflowNodeResultPayload, WorkflowNodeResults, WorkflowRunStatus } fro
 import { WorkflowSectionController } from '../types/section';
 import { WorkflowRunEntry, WorkflowStore } from '../types/state';
 import { formatStatus, formatTimestamp, summarizeDetail } from '../utils/common';
+import { artifactViewUrl } from '../utils/artifacts';
 import { DEBUG_MESSAGES, UI_CONSTANTS } from '../utils/constants';
 import { debugLog } from '../utils/debug';
 import { MAIN_CLASSES } from './layout.main';
@@ -129,26 +130,34 @@ export const getFirstOutputMediaUrl = (outputs: WorkflowNodeResults | null) => {
       ...(((payload as { images?: Array<{ filename?: string; subfolder?: string; type?: string; url?: string }> }).images) || []),
       ...(((payload as { audio?: Array<{ filename?: string; subfolder?: string; type?: string; url?: string }> }).audio) || []),
       ...(((payload as { audios?: Array<{ filename?: string; subfolder?: string; type?: string; url?: string }> }).audios) || []),
+      ...(((payload as { '3d'?: Array<{ filename?: string; subfolder?: string; type?: string; url?: string }> })['3d']) || []),
     ];
     if (artifacts.length) {
       const artifact = artifacts.find((item) => {
         if (!item || (!item.url && !item.filename)) {
           return false;
         }
+        const previewPath =
+          typeof item.filename === 'string' && item.filename
+            ? item.filename
+            : item.url || '';
+        if (!_isBrowserPreviewPath(previewPath)) {
+          return false;
+        }
         const value = typeof item.url === 'string' ? item.url : item.filename || '';
         return allowTemporary || !_isTemporaryMedia(value, item.type);
       });
       if (artifact) {
-        if (typeof artifact.url === 'string' && artifact.url.startsWith('/')) {
-          return { image: artifact.url, fallback: null };
-        }
         if (typeof artifact.filename === 'string' && artifact.filename) {
-          const params = new URLSearchParams({
-            filename: artifact.filename,
-            subfolder: (artifact.subfolder || '').replaceAll('\\', '/'),
-            type: artifact.type || 'output',
-          });
-          return { image: `/view?${params.toString()}`, fallback: null };
+          return {
+            image: artifactViewUrl({
+              filename: artifact.filename,
+              subfolder: artifact.subfolder,
+              type: artifact.type,
+              url: artifact.url,
+            }),
+            fallback: null,
+          };
         }
       }
     }

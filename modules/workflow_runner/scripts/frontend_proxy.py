@@ -228,9 +228,13 @@ async def proxy_request(request: web.Request) -> web.Response:
 
     # A session per inbound request keeps connection state isolated: a stalled
     # backend exchange cannot occupy a shared connector slot or poison later
-    # requests when the backend comes back.
+    # requests when the backend comes back. Preserve upstream content codings
+    # byte-for-byte: forwarding Content-Encoding after aiohttp transparently
+    # decoded the body would give the downstream client invalid framing.
     async with ClientSession(
-        timeout=_upstream_timeout(stream_path=req_path if unbounded_stream else None)
+        timeout=_upstream_timeout(stream_path=req_path if unbounded_stream else None),
+        auto_decompress=False,
+        skip_auto_headers={"Accept-Encoding"},
     ) as sess:
         try:
             async with sess.request(method, upstream, data=data, headers=headers, allow_redirects=False) as resp:
@@ -277,7 +281,6 @@ async def proxy_request(request: web.Request) -> web.Response:
                                     continue
                                 try:
                                     await sresp.write(chunk)
-                                    await sresp.drain()
                                 except (ConnectionResetError, asyncio.CancelledError):
                                     break
                                 except Exception:

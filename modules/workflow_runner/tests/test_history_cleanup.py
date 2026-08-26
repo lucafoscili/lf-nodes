@@ -145,6 +145,22 @@ def test_legacy_lf_file_names_are_resolved_under_output_root(tmp_path: Path) -> 
     assert history_cleanup.classify_succeeded_result("legacy", result, roots=roots) == "resolvable"
 
 
+def test_standard_3d_bucket_resolves_core_file_descriptors(tmp_path: Path) -> None:
+    roots = _roots(tmp_path)
+    model = roots["output"] / "model.glb"
+    model.write_bytes(b"glb")
+    result = _result({"3d": [{"filename": "model.glb"}]})
+
+    assert history_cleanup.classify_succeeded_result(
+        "model", result, roots=roots
+    ) == "resolvable"
+
+    model.unlink()
+    assert history_cleanup.classify_succeeded_result(
+        "model", result, roots=roots
+    ) == "missing"
+
+
 @pytest.mark.parametrize(
     "result",
     [

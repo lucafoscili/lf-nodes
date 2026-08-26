@@ -15,6 +15,7 @@ import {
 import { getLfFramework } from '@lf-widgets/framework';
 import { CHAT_ENDPOINT } from '../config';
 import { ComfyFileArtifact, WorkflowCellInput, WorkflowCellOutput } from '../types/api';
+import { artifactViewUrl } from '../utils/artifacts';
 
 //#region Helpers
 const _setProps = <T extends LfComponentName>(
@@ -184,18 +185,6 @@ export const createInputCell = (cell: WorkflowCellInput) => {
 //#endregion
 
 //#region Outputs
-const _artifactUrl = (artifact: ComfyFileArtifact) => {
-  if (artifact.url && artifact.url.startsWith('/')) {
-    return artifact.url;
-  }
-  const params = new URLSearchParams({
-    filename: artifact.filename,
-    subfolder: (artifact.subfolder || '').replaceAll('\\', '/'),
-    type: artifact.type || 'output',
-  });
-  return `/view?${params.toString()}`;
-};
-
 const _outputRelativeArtifact = (value: unknown): ComfyFileArtifact | null => {
   if (typeof value !== 'string' || !value || value.includes('\\')) {
     return null;
@@ -204,7 +193,7 @@ const _outputRelativeArtifact = (value: unknown): ComfyFileArtifact | null => {
   const parts = value.split('/');
   if (
     parts.some((part) => !part || part === '.' || part === '..') ||
-    !parts.every((part) => /^[^\\/?#%:\x00-\x1F\x7F]+$/.test(part))
+    !parts.every((part) => /^[^\\/:\x00-\x1F\x7F]+$/.test(part))
   ) {
     return null;
   }
@@ -248,7 +237,7 @@ const _mediaOutput = (artifacts: ComfyFileArtifact[] | undefined) => {
     const item = document.createElement('figure');
     item.className = 'workflow-output-media__item';
 
-    const src = _artifactUrl(artifact);
+    const src = artifactViewUrl(artifact);
     const mediaType = artifact.media_type?.toLowerCase() || '';
     const isAudio = mediaType.startsWith('audio/') || /\.(?:wav|mp3|m4a|flac|ogg|opus)$/i.test(artifact.filename);
     const isVideo = mediaType.startsWith('video/') || /\.(?:mp4|webm)$/i.test(artifact.filename);
@@ -304,6 +293,7 @@ const _mediaOutput = (artifacts: ComfyFileArtifact[] | undefined) => {
 
 export const createOutputComponent = (descriptor: WorkflowCellOutput) => {
   const { syntax } = getLfFramework();
+  const modelArtifacts = descriptor['3d'];
   const {
     civitai_metadata,
     dataset,
@@ -320,7 +310,12 @@ export const createOutputComponent = (descriptor: WorkflowCellOutput) => {
     svg,
   } = descriptor;
   const el = document.createElement('div');
-  const standardArtifacts = [...(images || []), ...(audio || []), ...(audios || [])];
+  const standardArtifacts = [
+    ...(images || []),
+    ...(audio || []),
+    ...(audios || []),
+    ...(modelArtifacts || []),
+  ];
   const media = _mediaOutput(
     standardArtifacts.length > 0 ? standardArtifacts : _fileNameArtifacts(file_names),
   );

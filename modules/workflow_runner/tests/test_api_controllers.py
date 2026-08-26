@@ -566,6 +566,166 @@ class TestApiControllers:
         assert "remix.wav" in response.text
 
     @pytest.mark.asyncio
+    @pytest.mark.parametrize(
+        ("run_id", "preview"),
+        (
+            (
+                "headless-video-123",
+                {
+                    "save": {
+                        "images": [
+                            {
+                                "filename": "orbit.mp4",
+                                "subfolder": "renders",
+                                "type": "output",
+                                "url": "/view?filename=orbit.mp4&subfolder=renders&type=output",
+                            }
+                        ]
+                    }
+                },
+            ),
+            (
+                "headless-model-123",
+                {
+                    "save": {
+                        "3d": [
+                            {
+                                "filename": "asset.glb",
+                                "subfolder": "models",
+                                "type": "output",
+                                "url": "/view?filename=asset.glb&subfolder=models&type=output",
+                            }
+                        ]
+                    }
+                },
+            ),
+        ),
+    )
+    async def test_get_workflow_status_controller_headless_binary_detail_returns_preview(
+        self,
+        api_controllers,
+        run_id,
+        preview,
+    ):
+        mock_request = MagicMock()
+        mock_request.match_info = {"run_id": run_id}
+
+        async def mock_get_job_status(_run_id):
+            return None
+
+        from unittest.mock import AsyncMock
+
+        mock_session = MagicMock()
+        mock_response = MagicMock()
+        mock_response.status = 200
+        mock_response.json = AsyncMock(
+            return_value={
+                run_id: {
+                    "status": {"completed": True},
+                    "outputs": {"save": {"value": "binary artifact"}},
+                }
+            }
+        )
+        mock_session.get.return_value.__aenter__.return_value = mock_response
+        mock_session.get.return_value.__aexit__.return_value = None
+        mock_session.__aenter__.return_value = mock_session
+        mock_session.__aexit__.return_value = None
+
+        with patch.object(api_controllers, 'get_job_status', side_effect=mock_get_job_status), \
+             patch('aiohttp.ClientSession', return_value=mock_session), \
+             patch.object(api_controllers, 'extract_base64_data_from_result', return_value=None), \
+             patch.object(api_controllers, 'build_output_preview', return_value=preview):
+            response = await api_controllers.get_workflow_status_controller(mock_request)
+
+        assert response.status == 200
+        response_data = json.loads(response.text)
+        assert response_data["run_id"] == run_id
+        assert response_data["status"] == "succeeded"
+        assert response_data["outputs"] == preview
+        assert "data" not in response_data
+
+    @pytest.mark.asyncio
+    async def test_headless_registered_glb_detail_uses_real_bounded_preview(
+        self,
+        api_controllers,
+    ):
+        from modules.workflow_runner.utils.serialize import build_output_preview
+
+        run_id = "headless-registered-glb"
+        mock_request = MagicMock()
+        mock_request.match_info = {"run_id": run_id}
+
+        async def mock_get_job_status(_run_id):
+            return None
+
+        mock_session = MagicMock()
+        mock_response = MagicMock()
+        mock_response.status = 200
+        mock_response.json = AsyncMock(
+            return_value={
+                run_id: {
+                    "status": {"completed": True},
+                    "outputs": {
+                        "register": {
+                            "lf_output": [
+                                {
+                                    "file_names": [
+                                        "LF_Nodes/TRELLIS2/seed-42.glb"
+                                    ]
+                                }
+                            ]
+                        }
+                    },
+                }
+            }
+        )
+        mock_session.get.return_value.__aenter__.return_value = mock_response
+        mock_session.get.return_value.__aexit__.return_value = None
+        mock_session.__aenter__.return_value = mock_session
+        mock_session.__aexit__.return_value = None
+
+        with patch.object(
+            api_controllers,
+            'get_job_status',
+            side_effect=mock_get_job_status,
+        ), patch(
+            'aiohttp.ClientSession',
+            return_value=mock_session,
+        ), patch.object(
+            api_controllers,
+            'extract_base64_data_from_result',
+            return_value=None,
+        ), patch.object(
+            api_controllers,
+            'build_output_preview',
+            side_effect=build_output_preview,
+        ):
+            response = await api_controllers.get_workflow_status_controller(mock_request)
+
+        assert response.status == 200
+        response_data = json.loads(response.text)
+        assert response_data == {
+            "run_id": run_id,
+            "status": "succeeded",
+            "seq": 0,
+            "outputs": {
+                "register": {
+                    "3d": [
+                        {
+                            "filename": "seed-42.glb",
+                            "subfolder": "LF_Nodes/TRELLIS2",
+                            "type": "output",
+                            "url": (
+                                "/view?filename=seed-42.glb&"
+                                "subfolder=LF_Nodes%2FTRELLIS2&type=output"
+                            ),
+                        }
+                    ]
+                }
+            },
+        }
+
+    @pytest.mark.asyncio
     async def test_run_detail_adds_opaque_artifacts_without_host_paths(self, api_controllers):
         import sys
         import types

@@ -28,6 +28,7 @@ from .registry import (
     get_workflow,
     get_workflow_submission_policy,
 )
+from .readiness import evaluate_declared_model_assets
 from ..config import CONFIG as RUNNER_CONFIG, get_settings
 from ...utils.json_safe import json_safe
 
@@ -177,6 +178,21 @@ def _prepare_workflow_execution(payload: Dict[str, Any]) -> Tuple[WorkflowNode, 
     if definition is None:
         response = _make_run_payload(detail=f"No workflow found for id '{workflow_id}'.", error_message="unknown_workflow")
         raise WorkflowPreparationError(response, 404)
+
+    model_assets = evaluate_declared_model_assets(definition)
+    if model_assets.get("status") == "setup_required":
+        raw_issues = model_assets.get("issues")
+        issues = raw_issues if isinstance(raw_issues, list) else []
+        first_issue = issues[0] if issues and isinstance(issues[0], Mapping) else {}
+        detail = str(
+            first_issue.get("message")
+            or "Required local model assets are not ready."
+        )
+        response = _make_run_payload(
+            detail=detail,
+            error_message="workflow_setup_required",
+        )
+        raise WorkflowPreparationError(response, 409)
 
     try:
         prompt = definition.load_prompt()

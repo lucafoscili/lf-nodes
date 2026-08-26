@@ -227,6 +227,50 @@ def test_classifies_common_audio_artifacts_with_media_types() -> None:
     ]
 
 
+def test_classifies_common_video_artifacts_with_media_types() -> None:
+    manifest = manifest_for(
+        {
+            # Comfy video savers retain the historical ``images`` key.
+            "images": [
+                {"filename": "clip.mp4", "subfolder": "", "type": "output"},
+                {"filename": "clip.webm", "subfolder": "", "type": "output"},
+            ]
+        }
+    )
+
+    assert [artifact["media_type"] for artifact in manifest["artifacts"]] == [
+        "video/mp4",
+        "video/webm",
+    ]
+
+
+def test_classifies_standard_3d_artifacts_with_stable_media_types() -> None:
+    manifest = manifest_for(
+        {
+            "3d": [
+                {"filename": "mesh.glb", "subfolder": "models", "type": "output"},
+                {"filename": "scene.gltf", "subfolder": "models", "type": "output"},
+                {"filename": "cloud.ply", "subfolder": "splats", "type": "output"},
+                {"filename": "cloud.splat", "subfolder": "splats", "type": "output"},
+                {"filename": "cloud.spz", "subfolder": "splats", "type": "output"},
+                {"filename": "cloud.ksplat", "subfolder": "splats", "type": "output"},
+            ]
+        }
+    )
+
+    assert [artifact["path"] for artifact in manifest["artifacts"]] == [
+        f"3d[{index}]" for index in range(6)
+    ]
+    assert [artifact["media_type"] for artifact in manifest["artifacts"]] == [
+        "model/gltf-binary",
+        "model/gltf+json",
+        "application/octet-stream",
+        "application/octet-stream",
+        "application/octet-stream",
+        "application/octet-stream",
+    ]
+
+
 def test_classifies_dds_receipt_files_with_vendor_media_type() -> None:
     manifest = manifest_for(
         {

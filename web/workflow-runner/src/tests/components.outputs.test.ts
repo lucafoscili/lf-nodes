@@ -83,6 +83,26 @@ describe('createOutputComponent standard Comfy artifacts', () => {
     expect(image?.parentElement?.querySelector('a')?.hasAttribute('download')).toBe(false);
   });
 
+  it.each([
+    '//example.invalid/steal.png',
+    '/untrusted/artifact.png',
+    '/view?filename=other.png&subfolder=input&type=input',
+  ])(
+    'derives the artifact URL from its descriptor instead of trusting: %s',
+    (url) => {
+      const component = createOutputComponent({
+        id: 'image',
+        nodeId: 'save',
+        shape: 'masonry',
+        images: [{ filename: 'safe.png', subfolder: 'renders', type: 'output', url }],
+      } as WorkflowCellOutput);
+
+      expect(component.querySelector('img')?.getAttribute('src')).toBe(
+        '/view?filename=safe.png&subfolder=renders&type=output',
+      );
+    },
+  );
+
   it('renders DDS file_names as safe downloads without creating a broken image preview', () => {
     const component = createOutputComponent({
       id: 'dds',
@@ -101,6 +121,35 @@ describe('createOutputComponent standard Comfy artifacts', () => {
     );
   });
 
+  it.each(['glb', 'gltf', 'ply', 'splat', 'spz', 'ksplat'])(
+    'renders standard 3d %s artifacts as safe downloads without a broken preview',
+    (extension) => {
+      const component = createOutputComponent({
+        id: 'model',
+        nodeId: 'save',
+        shape: 'masonry',
+        '3d': [
+          {
+            filename: `asset.${extension}`,
+            subfolder: 'workflow-runner/3d',
+            type: 'output',
+          },
+        ],
+      } as WorkflowCellOutput);
+
+      expect(component.querySelector('img')).toBeNull();
+      expect(component.querySelector('audio')).toBeNull();
+      expect(component.querySelector('video')).toBeNull();
+      expect(component.textContent).toContain('Preview is not available in the browser.');
+      const link = component.querySelector('a');
+      expect(link?.textContent).toBe(`Download asset.${extension}`);
+      expect(link?.download).toBe(`asset.${extension}`);
+      expect(link?.getAttribute('href')).toBe(
+        `/view?filename=asset.${extension}&subfolder=workflow-runner%2F3d&type=output`,
+      );
+    },
+  );
+
   it('does not turn unsafe file_names into links', () => {
     const component = createOutputComponent({
       id: 'files',
@@ -113,6 +162,21 @@ describe('createOutputComponent standard Comfy artifacts', () => {
     expect(link?.textContent).toBe('Download safe.dds');
     expect(link?.getAttribute('href')).toBe('/view?filename=safe.dds&subfolder=&type=output');
     expect(component.querySelectorAll('a')).toHaveLength(1);
+  });
+
+  it('encodes URI-significant characters in a registered output-relative filename', () => {
+    const component = createOutputComponent({
+      id: 'model',
+      nodeId: 'register',
+      shape: 'code',
+      file_names: ['LF_Nodes/100% #1?.glb'],
+    } as WorkflowCellOutput);
+
+    const link = component.querySelector('a');
+    expect(link?.textContent).toBe('Download 100% #1?.glb');
+    expect(link?.getAttribute('href')).toBe(
+      '/view?filename=100%25+%231%3F.glb&subfolder=LF_Nodes&type=output',
+    );
   });
 
   it.each(['wav', 'mp3', 'm4a', 'flac', 'ogg', 'opus'])('renders %s artifacts as native audio', (extension) => {

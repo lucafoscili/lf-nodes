@@ -1,0 +1,219 @@
+{
+  "load_image": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "example.png"
+    },
+    "_meta": {
+      "title": "Load the source image"
+    }
+  },
+  "background_model": {
+    "class_type": "LoadBackgroundRemovalModel",
+    "inputs": {
+      "bg_removal_name": "birefnet.safetensors"
+    },
+    "_meta": {
+      "title": "Load the foreground extraction model"
+    }
+  },
+  "remove_background": {
+    "class_type": "RemoveBackground",
+    "inputs": {
+      "bg_removal_model": [
+        "background_model",
+        0
+      ],
+      "image": [
+        "load_image",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Extract the foreground"
+    }
+  },
+  "invert_mask": {
+    "class_type": "InvertMask",
+    "inputs": {
+      "mask": [
+        "remove_background",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Convert foreground to Comfy alpha convention"
+    }
+  },
+  "join_alpha": {
+    "class_type": "JoinImageWithAlpha",
+    "inputs": {
+      "image": [
+        "load_image",
+        0
+      ],
+      "alpha": [
+        "invert_mask",
+        0
+      ]
+    },
+    "_meta": {
+      "title": "Apply the foreground alpha"
+    }
+  },
+  "preprocess": {
+    "class_type": "Trellis2PreProcessImage",
+    "inputs": {
+      "image": [
+        "join_alpha",
+        0
+      ],
+      "padding": 0,
+      "remove_background": false,
+      "max_size": 2048
+    },
+    "_meta": {
+      "title": "Prepare the isolated subject for TRELLIS.2"
+    }
+  },
+  "load_model": {
+    "class_type": "Trellis2LoadModel",
+    "inputs": {
+      "modelname": "microsoft/TRELLIS.2-4B",
+      "backend": "sdpa",
+      "device": "cuda",
+      "low_vram": true,
+      "keep_models_loaded": false,
+      "conv_backend": "flex_gemm",
+      "sparse_backend": "xformers",
+      "use_reconviagen": false
+    },
+    "_meta": {
+      "title": "Load the official TRELLIS.2 4B model"
+    }
+  },
+  "generate": {
+    "class_type": "Trellis2MeshWithVoxelGenerator",
+    "inputs": {
+      "pipeline": [
+        "load_model",
+        0
+      ],
+      "image": [
+        "preprocess",
+        0
+      ],
+      "seed": 42,
+      "pipeline_type": "1024_cascade",
+      "sparse_structure_steps": 12,
+      "shape_steps": 12,
+      "texture_steps": 12,
+      "max_num_tokens": 49152,
+      "max_views": 1,
+      "sparse_structure_resolution": 32,
+      "generate_texture_slat": true,
+      "use_tiled_decoder": true,
+      "sampler": "euler",
+      "fill_holes": true,
+      "hole_iterations": 1,
+      "hole_fill_algorithm": "flood_fill",
+      "keep_only_shell": true
+    },
+    "_meta": {
+      "title": "Reconstruct the textured voxel mesh"
+    }
+  },
+  "postprocess": {
+    "class_type": "Trellis2PostProcessAndUnWrapAndRasterizer",
+    "inputs": {
+      "mesh": [
+        "generate",
+        0
+      ],
+      "bvh": [
+        "generate",
+        1
+      ],
+      "mesh_cluster_threshold_cone_half_angle_rad": 60.0,
+      "mesh_cluster_refine_iterations": 0,
+      "mesh_cluster_global_iterations": 1,
+      "mesh_cluster_smooth_strength": 1,
+      "texture_size": 4096,
+      "remesh": true,
+      "remesh_band": 1.0,
+      "remesh_project": 0.0,
+      "target_face_num": 200000,
+      "simplify_method": "Cumesh",
+      "fill_holes": true,
+      "texture_alpha_mode": "OPAQUE",
+      "dual_contouring_resolution": "1024",
+      "double_side_material": false,
+      "remove_floaters": true,
+      "bake_on_vertices": false,
+      "use_custom_normals": false,
+      "remove_inner_faces": true,
+      "inpainting": "telea",
+      "reorient_vertices": "90 degrees"
+    },
+    "_meta": {
+      "title": "Build and texture the presentation mesh"
+    }
+  },
+  "export": {
+    "class_type": "Trellis2ExportMesh",
+    "inputs": {
+      "trimesh": [
+        "postprocess",
+        0
+      ],
+      "filename_prefix": "LF_Nodes/TRELLIS2/ImageToTexturedMesh/seed-42-balanced",
+      "file_format": "glb"
+    },
+    "_meta": {
+      "title": "Export the textured GLB"
+    }
+  },
+  "register_output": {
+    "class_type": "LF_RegisterOutputFile",
+    "inputs": {
+      "relative_path": [
+        "export",
+        1
+      ],
+      "ui_widget": {}
+    },
+    "_meta": {
+      "title": "Register the GLB in durable history"
+    }
+  },
+  "render_preview": {
+    "class_type": "Trellis2RenderMultiViewNvdiffrast",
+    "inputs": {
+      "trimesh": [
+        "postprocess",
+        0
+      ],
+      "render_size": 512,
+      "ortho_scale": 1.2,
+      "azimuths": "0",
+      "elevations": "0",
+      "add_shading": true
+    },
+    "_meta": {
+      "title": "Render a deterministic front preview"
+    }
+  },
+  "save_preview": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "images": [
+        "render_preview",
+        0
+      ],
+      "filename_prefix": "LF_Nodes/TRELLIS2/ImageToTexturedMesh/seed-42-balanced-preview"
+    },
+    "_meta": {
+      "title": "Save the Runner preview"
+    }
+  }
+}

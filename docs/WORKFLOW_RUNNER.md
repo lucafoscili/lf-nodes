@@ -33,6 +33,90 @@ contain-fit and letterboxing. Its populated LfDataDataset and deterministic
 layout receipt are also retained in Runner history. The Scene Sheet H3 card can
 consume that composite as one experimental dense reference.
 
+### TripoSplat workflows
+
+The shipped `TripoSplat` category contains one focused card,
+`Image to Gaussian Splat`. It reconstructs a clearly visible, isolated subject
+from one uploaded image. The form exposes automatic background removal,
+foreground-edge cleanup, Gaussian density, export format, and seed. Density is
+bounded to 262k (Full), 131k (Balanced), 64k (Light), or 32k (Draft) Gaussians;
+increasing that count above the native 262k result would not add model detail.
+Edge cleanup can be Gentle (one-pixel erosion), Off, or Strong (two-pixel
+erosion). Export can be compact base-color SPZ, full-spherical-harmonics PLY,
+or uncompressed base-color KSPLAT.
+
+The reconstruction recipe remains fixed at 1024px preprocessing and a 20-step
+local sample. Each successful run saves three complementary artifacts: a still
+PNG preview, a 1024px three-second MP4 orbit at 25 fps, and the selected splat
+file. Runner uses the PNG for the visual result card, exposes the orbit as a
+video/download in run detail, and exposes SPZ, PLY, or KSPLAT as a direct
+download. It does not claim an interactive browser splat viewer.
+
+LF Nodes does not distribute the required weights. The default graph expects a
+TripoSplat diffusion model and decoder, a DINOv3 vision encoder, a Flux2 image
+VAE, and the Core BiRefNet background-removal model. In the shipped recipe those
+literal files are `triposplat_fp16.safetensors`,
+`triposplat_vae_decoder_fp16.safetensors`, `dino_v3_vit_h.safetensors`,
+`flux2-vae.safetensors`, and `birefnet.safetensors`. The corresponding current
+ComfyUI Core node types must also be loaded. Catalogue readiness reports a
+missing known file or node as `setup_required`; it never downloads a model.
+
+Those weights retain their upstream terms; the repository's MIT license does
+not relicense them. In particular, the official DINOv3 checkpoint is gated and
+uses Meta's [DINOv3 License](https://github.com/facebookresearch/dinov3/blob/main/LICENSE.md).
+Users must obtain it from an authorized source, accept its terms, and evaluate
+the remaining model and dependency licenses for their intended use. LF Nodes
+distributes none of these weights.
+
+A Gaussian splat is a viewable radiance representation, not polygonal geometry.
+This card therefore does not promise a watertight, manifold, rig-ready, or
+game-ready mesh. Hidden surfaces are inferred, and input isolation and silhouette
+quality materially affect the reconstruction.
+
+### TRELLIS.2 workflows
+
+The shipped `TRELLIS.2` category contains two local textured-mesh cards.
+`Image to Textured Mesh` accepts one source image. `Multi-view to Textured Mesh`
+requires a front view and optionally accepts matching rear, left, and right
+views. Extra views constrain hidden surfaces only when they show the same subject
+state, scale, lighting, and framing. Both cards expose a seed and two bounded
+quality profiles:
+
+- **Balanced 1024 cascade** (default): 12 structure, shape, and texture steps,
+  a 200k-face target, and embedded 4K textures. This is the established 24 GB
+  starting profile.
+- **Draft 512**: the same 12-step schedule with a 100k-face target and embedded
+  2K textures for lighter iteration.
+
+Each run exports a PBR-textured GLB, saves a deterministic 512px front render,
+and registers the GLB's relative output path with `LF_RegisterOutputFile`.
+Runner therefore gets a durable visual history card plus a direct mesh download
+without exposing an absolute host path. Textures are embedded in the GLB;
+transparency may still need to be enabled in the destination material. The
+current Runner intentionally does not embed a WebGL mesh viewer.
+
+These cards require the local TRELLIS.2 wrapper, its matching native CUDA
+extensions, the official `microsoft/TRELLIS.2-4B` model, DINOv3 weights, the
+Core BiRefNet model, and the LF output-registration node. The third-party
+wrapper can otherwise fetch several gigabytes of model data during execution.
+LF Nodes does not initiate those downloads: these shipped cards explicitly
+declare their local multi-file model assets and remain **Setup required** until
+every declared file is present. Readiness also checks that the workflow's node
+types are registered and that known Core loader files are present. It cannot
+prove that a compiled CUDA extension matches the active Python, PyTorch, and
+CUDA ABI.
+
+The preview-render path also uses NVlabs
+[`nvdiffrast`](https://github.com/NVlabs/nvdiffrast/blob/main/LICENSE.txt).
+For non-NVIDIA users, its license limits use to non-commercial research or
+evaluation and excludes direct or indirect monetary gain. LF Nodes' MIT
+license does not broaden that dependency license; review all wrapper, native
+extension, and model terms before using or redistributing the TRELLIS.2 stack.
+
+TRELLIS.2 output is a presentation-oriented textured mesh. Multi-view input can
+improve unseen geometry, but neither card guarantees watertightness, manifold
+topology, a production UV layout, a skeleton, or game-ready optimization.
+
 ### Catalogue readiness
 
 Each workflow catalogue entry includes a `readiness` object with a `status`
@@ -40,16 +124,23 @@ Each workflow catalogue entry includes a `readiness` object with a `status`
 `issues` (`{code, message}`). The check is intentionally lightweight: it reads
 the card's default prompt, compares its node types with ComfyUI's loaded
 `NODE_CLASS_MAPPINGS`, and verifies literal file choices only for known Core
-model-loader inputs. It does not load models, download files, contact a remote
-service, or try to predict whether every optional model choice is installed.
+model-loader inputs. A shipped workflow may additionally declare bounded file
+requirements below ComfyUI's model root; related files can be grouped into one
+asset so an incomplete package produces one useful setup issue. The check does
+not load models, download files, contact a remote service, hash large assets,
+or try to predict whether every optional model choice is installed.
 
 `setup_required` means a concrete, immutable dependency is absent (the workflow
 file, a node type, or a known loader file that the form cannot replace).
 A missing default on a loader directly exposed by the form is a `warning`, so
-the user can choose an installed alternative. Scanner/import uncertainty is
-also only a warning; it is never treated as proof that a workflow cannot run.
-Runner disables Run only for `setup_required` and shows the first actionable
-reason in the workflow form; warning cards remain runnable.
+the user can choose an installed alternative. General node/import and known
+loader-category scanner uncertainty is also only a warning; it is never treated
+as proof that a workflow cannot run. A workflow's explicitly declared local
+model prerequisites are different: if Runner cannot verify those bounded paths,
+it fails closed as `setup_required` rather than allowing execution to fall
+through to a third-party auto-download path. Runner disables Run only for
+`setup_required` and shows the first actionable reason in the workflow form;
+warning cards remain runnable.
 
 ### Run control and output handoff
 
@@ -158,6 +249,7 @@ modules/workflow_runner/
 │   ├── __init__.py
 │   ├── errors.py            # Custom exception types
 │   ├── helpers.py           # Common helper functions
+│   ├── media.py             # Shared artifact media-type mapping
 │   └── serialize.py         # Job serialization utilities
 ├── scripts/                 # Utility scripts
 │   └── frontend_proxy.py    # Reverse proxy for development

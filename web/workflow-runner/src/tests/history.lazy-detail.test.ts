@@ -29,6 +29,21 @@ describe('history summary/detail boundary', () => {
     );
   });
 
+  it('does not trust a protocol-relative history artifact URL', () => {
+    expect(getFirstOutputMediaUrl({
+      save: {
+        images: [{
+          filename: 'safe.png',
+          subfolder: 'workflow-runner/history',
+          type: 'output',
+          url: '//example.invalid/steal.png',
+        }],
+      },
+    })).toBe(
+      '/view?filename=safe.png&subfolder=workflow-runner%2Fhistory&type=output',
+    );
+  });
+
   it('prefers a durable composed output over an earlier temporary cell preview', () => {
     expect(getFirstOutputMediaUrl({
       grid: {
@@ -80,8 +95,8 @@ describe('history summary/detail boundary', () => {
     } as any)).toBe('/view?filename=compare-before.png&type=temp');
   });
 
-  it('finds a raw Comfy singular audio preview URL', () => {
-    expect(getFirstOutputMediaUrl({
+  it('does not use audio artifacts as broken history image previews', () => {
+    const preview = getFirstOutputMediaUrl({
       save: {
         audio: [{
           filename: 'raw-output.m4a',
@@ -89,7 +104,42 @@ describe('history summary/detail boundary', () => {
           type: 'output',
         }],
       },
-    })).toBe('/view?filename=raw-output.m4a&subfolder=audio&type=output');
+    });
+
+    expect(preview.includes('raw-output.m4a')).toBe(false);
+  });
+
+  it('uses a browser image beside a model artifact as the history thumbnail', () => {
+    expect(getFirstOutputMediaUrl({
+      model: {
+        '3d': [{
+          filename: 'asset.glb',
+          subfolder: 'workflow-runner/3d',
+          type: 'output',
+        }],
+      },
+      preview: {
+        images: [{
+          filename: 'orbit.png',
+          subfolder: 'workflow-runner/3d',
+          type: 'output',
+        }],
+      },
+    })).toBe('/view?filename=orbit.png&subfolder=workflow-runner%2F3d&type=output');
+  });
+
+  it('does not use a model artifact as a history image preview', () => {
+    const preview = getFirstOutputMediaUrl({
+      model: {
+        '3d': [{
+          filename: 'asset.glb',
+          subfolder: 'workflow-runner/3d',
+          type: 'output',
+        }],
+      },
+    });
+
+    expect(preview.includes('asset.glb')).toBe(false);
   });
 
   it('does not use DDS file_names as a broken history image preview', () => {

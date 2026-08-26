@@ -4,9 +4,10 @@ import asyncio
 from aiohttp import web
 from typing import Optional
 
-LOG = logging.getLogger(__name__)
-
+from ..utils.media import media_type_for_filename
 from ..utils.serialize import build_output_preview, serialize_job, serialize_run_summary
+
+LOG = logging.getLogger(__name__)
 
 # region Parse body
 async def parse_json_body(request, expected_type=dict, allow_empty=False):
@@ -214,7 +215,7 @@ def extract_base64_data_from_result(result: dict) -> Optional[tuple[str, str]]:
 
     Returns:
         Tuple of (mime_type, base64_data) or None if no suitable data found
-        - mime_type: "image/png", "image/jpeg", or "image/svg+xml"
+        - mime_type: "image/png" or "image/svg+xml"
         - base64_data: The base64 encoded data string (without data URL prefix)
     """
     import base64
@@ -222,6 +223,95 @@ def extract_base64_data_from_result(result: dict) -> Optional[tuple[str, str]]:
     import os
     from PIL import Image
     import io
+    from pathlib import Path, PureWindowsPath
+
+    def image_mime_type(filename: object) -> Optional[str]:
+        if not isinstance(filename, str):
+            return None
+        media_type = media_type_for_filename(filename)
+        if not media_type or not media_type.startswith("image/"):
+            return None
+        # Raster files are normalized to PNG below. Direct SVG content keeps
+        # its own media type; every Pillow-decoded raster must advertise the
+        # PNG bytes that this compatibility endpoint actually returns.
+        if media_type == "image/svg+xml":
+            return media_type
+        return "image/png"
+
+    def has_extractable_image(output_data: object) -> bool:
+        if not isinstance(output_data, dict):
+            return False
+        for descriptor_key in ("images", "lf_images"):
+            descriptors = output_data.get(descriptor_key)
+            if isinstance(descriptors, list) and any(
+                isinstance(descriptor, dict)
+                and image_mime_type(descriptor.get("filename")) is not None
+                for descriptor in descriptors
+            ):
+                return True
+        lf_output = output_data.get("lf_output")
+        if not isinstance(lf_output, list):
+            return False
+        for item in lf_output:
+            if not isinstance(item, dict):
+                continue
+            if isinstance(item.get("svg"), str):
+                return True
+            slot_map = item.get("slot_map")
+            if isinstance(slot_map, dict) and any(
+                image_mime_type(filename) == "image/svg+xml"
+                and isinstance(content, str)
+                for filename, content in slot_map.items()
+            ):
+                return True
+            file_names = item.get("file_names")
+            if isinstance(file_names, list) and any(
+                image_mime_type(filename) is not None for filename in file_names
+            ):
+                return True
+        return False
+
+    def resolve_history_artifact(
+        storage_type: object,
+        subfolder: object,
+        filename: object,
+    ) -> Optional[Path]:
+        """Resolve one history descriptor inside its declared Comfy root."""
+
+        if (
+            not isinstance(storage_type, str)
+            or storage_type not in {"input", "output", "temp"}
+            or not isinstance(subfolder, str)
+            or not isinstance(filename, str)
+            or not filename
+        ):
+            return None
+
+        combined = f"{subfolder}/{filename}" if subfolder else filename
+        portable = combined.replace("\\", "/")
+        windows_path = PureWindowsPath(combined)
+        if (
+            len(portable) > 2048
+            or portable.startswith("/")
+            or windows_path.is_absolute()
+            or windows_path.drive
+            or any(ord(character) < 32 or ord(character) == 127 for character in portable)
+        ):
+            return None
+        parts = portable.split("/")
+        if any(part in {"", ".", ".."} or ":" in part for part in parts):
+            return None
+
+        root_value = folder_paths.get_directory_by_type(storage_type)
+        if not isinstance(root_value, (str, os.PathLike)):
+            return None
+        try:
+            root = Path(root_value).resolve(strict=True)
+            candidate = root.joinpath(*parts).resolve(strict=True)
+            candidate.relative_to(root)
+        except (OSError, RuntimeError, ValueError):
+            return None
+        return candidate if root.is_dir() and candidate.is_file() else None
 
     try:
         if not result or not isinstance(result, dict):
@@ -236,65 +326,29 @@ def extract_base64_data_from_result(result: dict) -> Optional[tuple[str, str]]:
         history = body.get("payload", {}).get("history", {})
         outputs = history.get("outputs", {})
 
-        svg_data = None  # Initialize for direct SVG content
-
-        if not outputs and not svg_data:
-            # Fallback for LF workflows: look for recently created files in output directory
-            # This handles cases where ComfyUI history doesn't contain outputs for custom nodes
-            try:
-                output_dir = folder_paths.get_directory_by_type("output")
-                if output_dir and os.path.exists(output_dir):
-                    # Look for PNG, JPG, or SVG files (most common for LF workflows)
-                    image_files = []
-                    for ext in ['.png', '.jpg', '.jpeg', '.svg']:
-                        image_files.extend([f for f in os.listdir(output_dir) if f.lower().endswith(ext)])
-                    
-                    if image_files:
-                        # Sort by modification time, take the most recent
-                        image_files.sort(key=lambda f: os.path.getmtime(os.path.join(output_dir, f)), reverse=True)
-                        image_filename = image_files[0]
-                        img_type = "output"
-                        subfolder = ""
-                        
-                        # Determine MIME type from file extension
-                        if image_filename.lower().endswith('.svg'):
-                            mime_type = "image/svg+xml"
-                        elif image_filename.lower().endswith('.jpg') or image_filename.lower().endswith('.jpeg'):
-                            mime_type = "image/jpeg"
-                        else:  # PNG and default
-                            mime_type = "image/png"
-                    else:
-                        return None
-                else:
-                    return None
-            except Exception as fallback_exc:
-                LOG.warning(f"Fallback file search failed: {fallback_exc}")
-                return None
+        if not isinstance(outputs, dict) or not outputs:
+            # No descriptor means no run-bound artifact. Never guess from the
+            # global output directory, where the newest file may belong to a
+            # different run or user.
+            return None
         else:
             preferred_output = body.get("payload", {}).get("preferred_output")
             target_output = None
 
-            if preferred_output and preferred_output in outputs:
+            if (
+                preferred_output
+                and preferred_output in outputs
+                and has_extractable_image(outputs[preferred_output])
+            ):
                 target_output = outputs[preferred_output]
             else:
-                # Find any output with images (either standard ComfyUI format or LF format)
+                # Find an image-capable output. Comfy video savers publish MP4
+                # descriptors under the historical ``images`` key, so the key
+                # name alone is not enough to select a Pillow input.
                 for output_name, output_data in outputs.items():
-                    if isinstance(output_data, dict):
-                        # Check for standard ComfyUI images
-                        if output_data.get("images") or output_data.get("lf_images"):
-                            target_output = output_data
-                            break
-                        # Check for LF custom format
-                        if output_data.get("lf_output"):
-                            lf_output = output_data.get("lf_output")
-                            if isinstance(lf_output, list) and lf_output and isinstance(lf_output[0], dict):
-                                # Check for file_names (existing), slot_map (direct SVG), or svg field
-                                first_lf = lf_output[0]
-                                if (first_lf.get("file_names") or 
-                                    first_lf.get("slot_map") or 
-                                    first_lf.get("svg")):
-                                    target_output = output_data
-                                    break
+                    if has_extractable_image(output_data):
+                        target_output = output_data
+                        break
 
             if not target_output:
                 return None
@@ -305,33 +359,34 @@ def extract_base64_data_from_result(result: dict) -> Optional[tuple[str, str]]:
             svg_data = None  # For direct SVG content
 
             # Try standard ComfyUI format first
-            images = target_output.get("images") or target_output.get("lf_images", [])
-            if images and isinstance(images, list) and images:
-                first_image = images[0]
-                if isinstance(first_image, dict):
+            for descriptor_key in ("images", "lf_images"):
+                images = target_output.get(descriptor_key)
+                if not isinstance(images, list):
+                    continue
+                for first_image in images:
+                    if not isinstance(first_image, dict):
+                        continue
                     filename = first_image.get("filename")
+                    detected_mime_type = image_mime_type(filename)
+                    if detected_mime_type is None:
+                        continue
                     subfolder = first_image.get("subfolder", "")
                     img_type = first_image.get("type", "output")
                     image_filename = filename
-                    img_type = img_type
-                    subfolder = subfolder
-                    
-                    # Determine MIME type from filename
-                    if filename and filename.lower().endswith('.svg'):
-                        mime_type = "image/svg+xml"
-                    elif filename and (filename.lower().endswith('.jpg') or filename.lower().endswith('.jpeg')):
-                        mime_type = "image/jpeg"
-                    else:
-                        mime_type = "image/png"
+                    mime_type = detected_mime_type
+                    break
+                if image_filename:
+                    break
 
             # Check for LF SVG data in lf_output (direct content, no file needed)
             if not image_filename:
                 lf_output = target_output.get("lf_output")
-                if isinstance(lf_output, list) and lf_output:
-                    first_lf = lf_output[0]
-                    if isinstance(first_lf, dict):
+                if isinstance(lf_output, list):
+                    for lf_item in lf_output:
+                        if not isinstance(lf_item, dict):
+                            continue
                         # Try slot_map first (processed SVG blocks)
-                        slot_map = first_lf.get("slot_map")
+                        slot_map = lf_item.get("slot_map")
                         if isinstance(slot_map, dict):
                             # Find first SVG in slot_map
                             for filename, content in slot_map.items():
@@ -343,30 +398,33 @@ def extract_base64_data_from_result(result: dict) -> Optional[tuple[str, str]]:
                         
                         # If no SVG in slot_map, try the plain svg field
                         if not svg_data:
-                            svg_content = first_lf.get("svg")
+                            svg_content = lf_item.get("svg")
                             if isinstance(svg_content, str):
                                 svg_data = svg_content
                                 mime_type = "image/svg+xml"
+                        if svg_data:
+                            break
 
             # Try LF custom format (file-based)
             if not image_filename and not svg_data:
                 lf_output = target_output.get("lf_output")
-                if isinstance(lf_output, list) and lf_output:
-                    first_lf = lf_output[0]
-                    if isinstance(first_lf, dict):
-                        file_names = first_lf.get("file_names")
-                        if isinstance(file_names, list) and file_names:
-                            image_filename = file_names[0]
-                            img_type = "output"
-                            subfolder = ""
-                            
-                            # Determine MIME type from filename
-                            if image_filename.lower().endswith('.svg'):
-                                mime_type = "image/svg+xml"
-                            elif image_filename.lower().endswith('.jpg') or image_filename.lower().endswith('.jpeg'):
-                                mime_type = "image/jpeg"
-                            else:
-                                mime_type = "image/png"
+                if isinstance(lf_output, list):
+                    for lf_item in lf_output:
+                        if not isinstance(lf_item, dict):
+                            continue
+                        file_names = lf_item.get("file_names")
+                        if isinstance(file_names, list):
+                            for file_name in file_names:
+                                detected_mime_type = image_mime_type(file_name)
+                                if detected_mime_type is None:
+                                    continue
+                                image_filename = file_name
+                                img_type = "output"
+                                subfolder = ""
+                                mime_type = detected_mime_type
+                                break
+                        if image_filename:
+                            break
 
             if not image_filename and not svg_data:
                 return None
@@ -375,19 +433,13 @@ def extract_base64_data_from_result(result: dict) -> Optional[tuple[str, str]]:
         if svg_data:
             pass  # Will be handled in the encoding section below
         else:
-            # Build the full path
-            output_dir = folder_paths.get_directory_by_type(img_type)
-            if not output_dir:
-                return None
-
-            if subfolder:
-                full_path = os.path.join(output_dir, subfolder, image_filename)
-            else:
-                full_path = os.path.join(output_dir, image_filename)
-
-            # Check if file exists
-            if not os.path.exists(full_path):
-                LOG.warning(f"Image file not found: {full_path}")
+            full_path = resolve_history_artifact(
+                img_type,
+                subfolder,
+                image_filename,
+            )
+            if full_path is None:
+                LOG.warning("Rejected missing or unsafe image history descriptor")
                 return None
 
         # Read and encode the file or direct SVG data

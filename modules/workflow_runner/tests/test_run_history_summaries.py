@@ -76,6 +76,57 @@ def test_output_preview_keeps_only_view_artifacts() -> None:
     assert "base64-sentinel" not in json.dumps(preview)
 
 
+def test_output_preview_projects_registered_lf_3d_file_names() -> None:
+    result = {
+        "body": {
+            "payload": {
+                "history": {
+                    "outputs": {
+                        "register": {
+                            "lf_output": [
+                                {
+                                    "file_names": [
+                                        "LF_Nodes/TRELLIS2/seed-42.glb",
+                                        "LF_Nodes/TripoSplat/seed-42.spz",
+                                        "../private.glb",
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    preview = build_output_preview(result)
+
+    assert preview == {
+        "register": {
+            "3d": [
+                {
+                    "filename": "seed-42.glb",
+                    "subfolder": "LF_Nodes/TRELLIS2",
+                    "type": "output",
+                    "url": (
+                        "/view?filename=seed-42.glb&"
+                        "subfolder=LF_Nodes%2FTRELLIS2&type=output"
+                    ),
+                },
+                {
+                    "filename": "seed-42.spz",
+                    "subfolder": "LF_Nodes/TripoSplat",
+                    "type": "output",
+                    "url": (
+                        "/view?filename=seed-42.spz&"
+                        "subfolder=LF_Nodes%2FTripoSplat&type=output"
+                    ),
+                },
+            ]
+        }
+    }
+
+
 def test_output_preview_normalizes_windows_comfy_subfolders() -> None:
     result = _large_result(9)
     descriptor = result["body"]["payload"]["history"]["outputs"]["save"]["images"][0]

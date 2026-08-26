@@ -26,6 +26,8 @@ from copy import deepcopy
 from dataclasses import dataclass, field
 from typing import Any, Dict, Mapping, Optional
 
+from ..utils.media import media_type_for_filename
+
 
 SCHEMA_VERSION = "lf.workflow-submission.v1"
 EVENT_SCHEMA_VERSION = "lf.workflow-event.v1"
@@ -380,29 +382,6 @@ async def record_running(prompt_id: str) -> Optional[Dict[str, Any]]:
         return _snapshot(record, include_events=False)
 
 
-def _media_type(filename: str) -> Optional[str]:
-    extension = filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
-    return {
-        "png": "image/png",
-        "jpg": "image/jpeg",
-        "jpeg": "image/jpeg",
-        "webp": "image/webp",
-        "gif": "image/gif",
-        "svg": "image/svg+xml",
-        "dds": "image/vnd-ms.dds",
-        "mp4": "video/mp4",
-        "webm": "video/webm",
-        "wav": "audio/wav",
-        "mp3": "audio/mpeg",
-        "m4a": "audio/mp4",
-        "flac": "audio/flac",
-        "ogg": "audio/ogg",
-        "opus": "audio/opus",
-        "json": "application/json",
-        "txt": "text/plain",
-    }.get(extension)
-
-
 class _JsonBudgetExceeded(Exception):
     pass
 
@@ -548,7 +527,7 @@ def build_output_manifest(
             "subfolder": subfolder,
             "storage_type": storage_type,
         }
-        media_type = _media_type(filename)
+        media_type = media_type_for_filename(filename)
         if media_type:
             artifact["media_type"] = media_type
         encoded_size = len(

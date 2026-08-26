@@ -6,7 +6,11 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable, Dict, Iterable, List
 
-from .readiness import WorkflowReadinessScanner, evaluate_workflow_readiness
+from .readiness import (
+    WorkflowReadinessScanner,
+    evaluate_workflow_readiness,
+    normalize_model_relative_path,
+)
 from ..utils.prompt import json_safe, workflow_to_prompt as _workflow_to_prompt
 
 _LOG = logging.getLogger(__name__)
@@ -61,6 +65,39 @@ class WorkflowSubmissionPolicy:
         return self.required
 
 
+@dataclass(frozen=True, slots=True)
+class WorkflowModelAsset:
+    """One explicitly declared local model asset used by a workflow.
+
+    ``relative_paths`` are portable paths below ComfyUI's configured model
+    root.  Grouping the files lets readiness report one useful setup issue for
+    a multi-file model package without exposing host-specific absolute paths.
+    """
+
+    label: str
+    relative_paths: tuple[str, ...]
+
+    def __post_init__(self) -> None:
+        normalized_label = " ".join(self.label.split()) if isinstance(self.label, str) else ""
+        if not normalized_label or len(normalized_label) > 120:
+            raise ValueError("model asset label must contain 1 to 120 visible characters")
+        if any(ord(char) < 32 or ord(char) == 127 for char in normalized_label):
+            raise ValueError("model asset label must not contain control characters")
+
+        if isinstance(self.relative_paths, (str, bytes)):
+            raise TypeError("model asset relative_paths must be a sequence of paths")
+        normalized_paths = tuple(
+            normalize_model_relative_path(path) for path in self.relative_paths
+        )
+        if not normalized_paths:
+            raise ValueError("model asset must declare at least one relative path")
+        if len(set(normalized_paths)) != len(normalized_paths):
+            raise ValueError("model asset relative paths must be unique")
+
+        object.__setattr__(self, "label", normalized_label)
+        object.__setattr__(self, "relative_paths", normalized_paths)
+
+
 @dataclass
 class WorkflowCell:
     id: str
@@ -102,6 +139,7 @@ class WorkflowNode:
     origin: str = "custom"
     collection: str = "Custom"
     configure_download: Callable[[Dict[str, Any], Dict[str, Any]], None] | None = None
+    required_model_assets: tuple[WorkflowModelAsset, ...] = ()
 
     def __post_init__(self) -> None:
         if self.submission_policy is not None and not isinstance(
@@ -111,6 +149,12 @@ class WorkflowNode:
             raise TypeError(
                 "submission_policy must be a WorkflowSubmissionPolicy or None"
             )
+        if isinstance(self.required_model_assets, (str, bytes)):
+            raise TypeError("required_model_assets must be a sequence")
+        assets = tuple(self.required_model_assets)
+        if not all(isinstance(asset, WorkflowModelAsset) for asset in assets):
+            raise TypeError("required_model_assets must contain WorkflowModelAsset values")
+        object.__setattr__(self, "required_model_assets", assets)
 
     def load_prompt(self) -> Dict[str, Any]:
         with self.workflow_path.open("r", encoding="utf-8") as workflow_file:

@@ -51,6 +51,29 @@ describe('deepMerge output payloads', () => {
 
     expect(deepMerge(definitions, outputs)[0].images).toEqual(outputs.save.images);
   });
+
+  it('preserves standard Comfy 3d artifacts when lf_output is absent', () => {
+    const definitions = {
+      model: {
+        id: 'model',
+        nodeId: 'save',
+        shape: 'masonry',
+      },
+    } as unknown as WorkflowCellsOutputContainer;
+    const outputs = {
+      save: {
+        '3d': [
+          {
+            filename: 'asset.glb',
+            subfolder: 'workflow-runner/3d',
+            type: 'output',
+          },
+        ],
+      },
+    } as unknown as WorkflowNodeResults;
+
+    expect(deepMerge(definitions, outputs)[0]['3d']).toEqual(outputs.save['3d']);
+  });
 });
 
 describe('recordToUI output detail', () => {

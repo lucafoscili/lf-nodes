@@ -1,6 +1,7 @@
 """Focused outage and recovery tests for the standalone frontend proxy."""
 
 import asyncio
+import gzip
 import importlib.util
 from contextlib import suppress
 from pathlib import Path
@@ -228,5 +229,49 @@ async def test_view_with_content_length_streams_before_slow_body_finishes(monkey
             response_task.cancel()
             with suppress(asyncio.CancelledError):
                 await response_task
+        await client.close()
+        await upstream.close()
+
+
+@pytest.mark.asyncio
+async def test_compressed_chunked_response_preserves_wire_encoding(monkeypatch):
+    """A gzip body stays encoded while the proxy regenerates hop framing."""
+    proxy = load_frontend_proxy_module()
+    payload = (b"workflow runner shell\n" * 4096) + b"done"
+    encoded = gzip.compress(payload, mtime=0)
+
+    async def index(request):
+        response = web.StreamResponse(
+            headers={
+                "Content-Type": "text/html; charset=utf-8",
+                "Content-Encoding": "gzip",
+            }
+        )
+        await response.prepare(request)
+        midpoint = len(encoded) // 2
+        await response.write(encoded[:midpoint])
+        await response.write(encoded[midpoint:])
+        await response.write_eof()
+        return response
+
+    upstream = TestServer(web.Application())
+    upstream.app.router.add_get("/", index)
+    await upstream.start_server()
+    monkeypatch.setattr(proxy, "DEFAULT_BACKEND", str(upstream.make_url("/")).rstrip("/"))
+    monkeypatch.setattr(proxy, "ALLOWED_PREFIXES", ["/"])
+    monkeypatch.setattr(proxy, "PROXY_STREAMING_ONLY_PROXY", False)
+
+    client = TestClient(TestServer(proxy.create_app()), auto_decompress=False)
+    await client.start_server()
+    try:
+        response = await client.get("/")
+        forwarded = await response.read()
+
+        assert response.status == 200
+        assert response.headers["Content-Encoding"] == "gzip"
+        assert response.headers.get("Content-Length") is None
+        assert forwarded == encoded
+        assert gzip.decompress(forwarded) == payload
+    finally:
         await client.close()
         await upstream.close()

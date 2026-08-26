@@ -1,0 +1,305 @@
+{
+  "load_image": {
+    "inputs": {
+      "image": "example.png"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "Load the source image"
+    }
+  },
+  "background_model": {
+    "inputs": {
+      "bg_removal_name": "birefnet.safetensors"
+    },
+    "class_type": "LoadBackgroundRemovalModel",
+    "_meta": {
+      "title": "Load the foreground extraction model"
+    }
+  },
+  "automatic_mask": {
+    "inputs": {
+      "bg_removal_model": [
+        "background_model",
+        0
+      ],
+      "image": [
+        "load_image",
+        0
+      ]
+    },
+    "class_type": "RemoveBackground",
+    "_meta": {
+      "title": "Extract the foreground"
+    }
+  },
+  "alpha_mask": {
+    "inputs": {
+      "mask": [
+        "load_image",
+        1
+      ]
+    },
+    "class_type": "InvertMask",
+    "_meta": {
+      "title": "Read foreground from source alpha"
+    }
+  },
+  "mask_source": {
+    "inputs": {
+      "switch": true,
+      "on_false": [
+        "alpha_mask",
+        0
+      ],
+      "on_true": [
+        "automatic_mask",
+        0
+      ]
+    },
+    "class_type": "ComfySwitchNode",
+    "_meta": {
+      "title": "Choose the foreground mask"
+    }
+  },
+  "preprocess": {
+    "inputs": {
+      "image": [
+        "load_image",
+        0
+      ],
+      "mask": [
+        "mask_source",
+        0
+      ],
+      "erode_radius": 1,
+      "size": 1024
+    },
+    "class_type": "TripoSplatPreprocessImage",
+    "_meta": {
+      "title": "Prepare the isolated subject"
+    }
+  },
+  "first_input": {
+    "inputs": {
+      "image": [
+        "preprocess",
+        0
+      ],
+      "batch_index": 0,
+      "length": 1
+    },
+    "class_type": "ImageFromBatch",
+    "_meta": {
+      "title": "Use the first uploaded frame"
+    }
+  },
+  "diffusion_model": {
+    "inputs": {
+      "unet_name": "triposplat_fp16.safetensors",
+      "weight_dtype": "default"
+    },
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load TripoSplat"
+    }
+  },
+  "vision_encoder": {
+    "inputs": {
+      "clip_name": "dino_v3_vit_h.safetensors"
+    },
+    "class_type": "CLIPVisionLoader",
+    "_meta": {
+      "title": "Load the DINOv3 image encoder"
+    }
+  },
+  "image_vae": {
+    "inputs": {
+      "vae_name": "flux2-vae.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load the reference-image VAE"
+    }
+  },
+  "splat_vae": {
+    "inputs": {
+      "vae_name": "triposplat_vae_decoder_fp16.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load the Gaussian decoder"
+    }
+  },
+  "conditioning": {
+    "inputs": {
+      "clip_vision": [
+        "vision_encoder",
+        0
+      ],
+      "vae": [
+        "image_vae",
+        0
+      ],
+      "image": [
+        "first_input",
+        0
+      ]
+    },
+    "class_type": "TripoSplatConditioning",
+    "_meta": {
+      "title": "Condition the 3D reconstruction"
+    }
+  },
+  "sample": {
+    "inputs": {
+      "model": [
+        "diffusion_model",
+        0
+      ],
+      "positive": [
+        "conditioning",
+        0
+      ],
+      "negative": [
+        "conditioning",
+        1
+      ],
+      "latent_image": [
+        "conditioning",
+        2
+      ],
+      "seed": 42,
+      "steps": 20,
+      "cfg": 3.0,
+      "sampler_name": "dpmpp_2m",
+      "scheduler": "simple",
+      "denoise": 1.0
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample the 3D representation"
+    }
+  },
+  "decode": {
+    "inputs": {
+      "samples": [
+        "sample",
+        0
+      ],
+      "vae": [
+        "splat_vae",
+        0
+      ],
+      "num_gaussians": 262144,
+      "seed": 42
+    },
+    "class_type": "VAEDecodeTripoSplat",
+    "_meta": {
+      "title": "Decode the Gaussian splat"
+    }
+  },
+  "splat_file": {
+    "inputs": {
+      "splat": [
+        "decode",
+        0
+      ],
+      "format": "spz"
+    },
+    "class_type": "SplatToFile3D",
+    "_meta": {
+      "title": "Serialize the Gaussian splat"
+    }
+  },
+  "save_splat": {
+    "inputs": {
+      "mesh": [
+        "splat_file",
+        0
+      ],
+      "filename_prefix": "LF_Nodes/TripoSplat/seed-42-full"
+    },
+    "class_type": "SaveGLB",
+    "_meta": {
+      "title": "Save the Gaussian splat"
+    }
+  },
+  "render_orbit": {
+    "inputs": {
+      "splat": [
+        "decode",
+        0
+      ],
+      "width": 1024,
+      "height": 1024,
+      "frames": 75,
+      "splat_scale": 1.0,
+      "sharpen": 2.0,
+      "headlight_shading": 0.0,
+      "opacity_threshold": 0.0,
+      "render_style": "color",
+      "background": "#848484"
+    },
+    "class_type": "RenderSplat",
+    "_meta": {
+      "title": "Render a full orbit"
+    }
+  },
+  "first_frame": {
+    "inputs": {
+      "image": [
+        "render_orbit",
+        0
+      ],
+      "batch_index": 0,
+      "length": 1
+    },
+    "class_type": "ImageFromBatch",
+    "_meta": {
+      "title": "Select the still preview"
+    }
+  },
+  "save_preview": {
+    "inputs": {
+      "images": [
+        "first_frame",
+        0
+      ],
+      "filename_prefix": "LF_Nodes/TripoSplat/seed-42-full-preview"
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "Save the still preview"
+    }
+  },
+  "create_video": {
+    "inputs": {
+      "images": [
+        "render_orbit",
+        0
+      ],
+      "fps": 25.0,
+      "bit_depth": 8
+    },
+    "class_type": "CreateVideo",
+    "_meta": {
+      "title": "Create the orbit video"
+    }
+  },
+  "save_video": {
+    "inputs": {
+      "video": [
+        "create_video",
+        0
+      ],
+      "filename_prefix": "LF_Nodes/TripoSplat/seed-42-full-orbit",
+      "format": "mp4",
+      "codec": "auto"
+    },
+    "class_type": "SaveVideo",
+    "_meta": {
+      "title": "Save the orbit video"
+    }
+  }
+}

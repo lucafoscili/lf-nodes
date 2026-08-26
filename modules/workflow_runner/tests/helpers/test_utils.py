@@ -45,21 +45,28 @@ def load_helpers_module() -> Any:
     # Preload package structure entries (no file-system effects)
     pkg_prefix = "lf_nodes.modules.workflow_runner"
     pkg_parts = ["lf_nodes", "lf_nodes.modules", "lf_nodes.modules.workflow_runner", "lf_nodes.modules.workflow_runner.controllers", "lf_nodes.modules.workflow_runner.utils"]
+    package_paths = {
+        "lf_nodes.modules.workflow_runner": base,
+        "lf_nodes.modules.workflow_runner.controllers": base / "controllers",
+        "lf_nodes.modules.workflow_runner.utils": base / "utils",
+    }
     for p in pkg_parts:
         if p not in sys.modules:
             sys.modules[p] = types.ModuleType(p)
+        package_path = package_paths.get(p)
+        if package_path is not None:
+            sys.modules[p].__path__ = [str(package_path)]
     link_synthetic_package(pkg_parts)
 
-    # Load utils.serialize into sys.modules under the package-qualified name
-    utils_path = base / "utils" / "serialize.py"
-    try:
-        utils_spec = importlib.util.spec_from_file_location(pkg_prefix + ".utils.serialize", str(utils_path))
+    # Load direct helper dependencies under their package-qualified names.
+    for module_name in ("media", "serialize"):
+        utils_path = base / "utils" / f"{module_name}.py"
+        qualified_name = f"{pkg_prefix}.utils.{module_name}"
+        utils_spec = importlib.util.spec_from_file_location(qualified_name, str(utils_path))
         utils_mod = importlib.util.module_from_spec(utils_spec)
+        sys.modules[qualified_name] = utils_mod
         utils_spec.loader.exec_module(utils_mod)
-        sys.modules[pkg_prefix + ".utils.serialize"] = utils_mod
-    except Exception:
-        # If utils can't be loaded, proceed — helpers may provide fallbacks.
-        pass
+        setattr(sys.modules[f"{pkg_prefix}.utils"], module_name, utils_mod)
 
     # Now load the helpers module with a package-qualified name so relative
     # imports inside it will resolve against the synthetic package entries.

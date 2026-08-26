@@ -45,6 +45,8 @@ _WORKFLOW_MODULES: Sequence[str] = (
     "svg_generation_gemini",
     "t2i_15_lcm",
     "t2i_illustrious_xl",
+    "trellis2",
+    "triposplat",
     "ace_step_remix",
     "youtube_reference_intake",
 )

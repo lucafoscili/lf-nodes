@@ -127,6 +127,7 @@ export interface ComfyFileArtifact {
   media_type?: string;
 }
 export interface StandardComfyNodeOutputs {
+  '3d'?: ComfyFileArtifact[];
   animated?: boolean[];
   images?: ComfyFileArtifact[];
   audio?: ComfyFileArtifact[];

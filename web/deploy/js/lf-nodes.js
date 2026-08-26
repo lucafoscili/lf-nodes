@@ -1315,6 +1315,7 @@ var NodeName;
   NodeName2["openAIAPI"] = "LF_OpenAIAPI";
   NodeName2["parsePromptWithLoraTags"] = "LF_ParsePromptWithLoraTags";
   NodeName2["randomBoolean"] = "LF_RandomBoolean";
+  NodeName2["registerOutputFile"] = "LF_RegisterOutputFile";
   NodeName2["regexReplace"] = "LF_RegexReplace";
   NodeName2["regionExtractor"] = "LF_RegionExtractor";
   NodeName2["regionMask"] = "LF_RegionMask";
@@ -1688,6 +1689,7 @@ const NODE_WIDGET_MAP = {
   LF_OpenAIAPI: [CustomWidgetName.code],
   LF_ParsePromptWithLoraTags: [CustomWidgetName.code],
   LF_RandomBoolean: [CustomWidgetName.progressbar],
+  LF_RegisterOutputFile: [CustomWidgetName.tree],
   LF_RegexReplace: [CustomWidgetName.code],
   LF_RegionExtractor: [CustomWidgetName.history],
   LF_RegionMask: [CustomWidgetName.compare],

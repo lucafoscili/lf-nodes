@@ -101,6 +101,8 @@ const _getIcon = (category: string) => {
     JSON: json,
     'Krea 2': ai,
     'MiniMax H3': ai,
+    'TRELLIS.2': ai,
+    TripoSplat: ai,
     LLM: robot,
     'Media Intake': folderOpen,
     SVG: codeCircle2,

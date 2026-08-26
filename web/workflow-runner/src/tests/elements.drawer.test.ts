@@ -347,6 +347,20 @@ describe('Drawer Element', () => {
             origin: 'shipped' as const,
             children: [undefined, undefined] as [undefined, undefined],
           },
+          {
+            id: 'trellis2-generate',
+            value: 'Image to Textured Mesh',
+            category: 'TRELLIS.2',
+            origin: 'shipped' as const,
+            children: [undefined, undefined] as [undefined, undefined],
+          },
+          {
+            id: 'triposplat-generate',
+            value: 'Image to Gaussian Splat',
+            category: 'TripoSplat',
+            origin: 'shipped' as const,
+            children: [undefined, undefined] as [undefined, undefined],
+          },
         ],
       };
 
@@ -370,6 +384,8 @@ describe('Drawer Element', () => {
       expect(categories).toContain('JSON');
       expect(categories).toContain('Krea 2');
       expect(categories).toContain('MiniMax H3');
+      expect(categories).toContain('TRELLIS.2');
+      expect(categories).toContain('TripoSplat');
       const kreaCategory = workflowsNode.children[0].children.find(
         (category: any) => category.value === 'Krea 2',
       );
@@ -378,6 +394,14 @@ describe('Drawer Element', () => {
         (category: any) => category.value === 'MiniMax H3',
       );
       expect(h3Category.icon).toBe('ai');
+      const trellisCategory = workflowsNode.children[0].children.find(
+        (category: any) => category.value === 'TRELLIS.2',
+      );
+      expect(trellisCategory.icon).toBe('ai');
+      const tripoCategory = workflowsNode.children[0].children.find(
+        (category: any) => category.value === 'TripoSplat',
+      );
+      expect(tripoCategory.icon).toBe('ai');
     });
 
     it('separates custom registrations by their trusted collection', () => {

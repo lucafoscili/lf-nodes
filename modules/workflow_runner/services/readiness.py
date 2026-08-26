@@ -3,8 +3,9 @@
 The catalogue check is deliberately narrow. It verifies the default prompt's
 node types against ComfyUI's already-loaded node registry and checks literal
 file selections for a small set of known Core loader inputs. It never loads a
-model, downloads anything, or treats an unavailable scanner as proof that a
-workflow cannot run.
+model or downloads anything. General scanner uncertainty remains a warning;
+an unavailable probe for a workflow's explicit local-file prerequisites fails
+closed so execution cannot fall through to a third-party auto-download path.
 """
 
 from __future__ import annotations
@@ -83,6 +84,13 @@ _CORE_LOADER_ASSETS: dict[str, tuple[_LoaderAsset, ...]] = {
     "UpscaleModelLoader": (
         _LoaderAsset("model_name", "upscale_models", "upscale model"),
     ),
+    "LoadBackgroundRemovalModel": (
+        _LoaderAsset(
+            "bg_removal_name",
+            "background_removal",
+            "background-removal model",
+        ),
+    ),
 }
 
 # These are virtual Core VAE choices rather than files in models/vae.
@@ -118,6 +126,36 @@ def _normalized_filename(value: str) -> str:
     # forward slashes.
     normalized = value.replace("\\", "/")
     return normalized.casefold() if os.name == "nt" else normalized
+
+
+def normalize_model_relative_path(value: object) -> str:
+    """Return one portable file path below ComfyUI's model root.
+
+    Workflow declarations are trusted server code, but validating them here
+    keeps the filesystem probe bounded even for compatible third-party
+    definitions.  The normalized value never contains host-specific roots.
+    """
+
+    if not isinstance(value, str):
+        raise TypeError("model-relative path must be a string")
+    if "\\" in value:
+        raise ValueError("model-relative path must use portable forward slashes")
+    normalized = value.strip()
+    if not normalized or len(normalized) > 500 or normalized.startswith("/"):
+        raise ValueError("model-relative path must name a bounded relative file")
+    if normalized.endswith("/"):
+        raise ValueError("model-relative path must name a file")
+
+    parts = normalized.split("/")
+    if any(
+        not part
+        or part in {".", ".."}
+        or ":" in part
+        or any(ord(char) < 32 or ord(char) == 127 for char in part)
+        for part in parts
+    ):
+        raise ValueError("model-relative path contains an unsafe segment")
+    return "/".join(parts)
 
 
 def _cell_exposes_asset_filename(cell: object, filename: str) -> bool:
@@ -175,6 +213,17 @@ def _load_model_filenames(folder_category: str) -> Iterable[str]:
     return filenames
 
 
+def _load_model_file_exists(relative_path: str) -> bool:
+    folder_paths = importlib.import_module("folder_paths")
+    model_root = Path(getattr(folder_paths, "models_dir")).resolve()
+    portable = normalize_model_relative_path(relative_path)
+    # The declaration is already lexically bounded. Allow an installed model
+    # file or package to be a symlink/junction to another drive, matching
+    # ComfyUI's normal model-folder behavior.
+    candidate = model_root.joinpath(*portable.split("/"))
+    return candidate.is_file()
+
+
 class WorkflowReadinessScanner:
     """One catalogue request's cached view of lightweight host readiness."""
 
@@ -183,12 +232,17 @@ class WorkflowReadinessScanner:
         *,
         node_mapping_loader: Callable[[], Mapping[str, object]] | None = None,
         model_filename_loader: Callable[[str], Iterable[str]] | None = None,
+        model_file_exists_loader: Callable[[str], bool] | None = None,
     ) -> None:
         self._node_mapping_loader = node_mapping_loader or _load_node_class_mappings
         self._model_filename_loader = model_filename_loader or _load_model_filenames
+        self._model_file_exists_loader = (
+            model_file_exists_loader or _load_model_file_exists
+        )
         self._node_types: frozenset[str] | None = None
         self._node_scan_attempted = False
         self._model_files: dict[str, frozenset[str] | None] = {}
+        self._model_file_exists: dict[str, bool | None] = {}
 
     def node_types(self) -> frozenset[str] | None:
         if self._node_scan_attempted:
@@ -219,6 +273,20 @@ class WorkflowReadinessScanner:
             normalized = None
         self._model_files[folder_category] = normalized
         return normalized
+
+    def model_file_exists(self, relative_path: str) -> bool | None:
+        portable = normalize_model_relative_path(relative_path)
+        if portable in self._model_file_exists:
+            return self._model_file_exists[portable]
+
+        try:
+            exists = self._model_file_exists_loader(portable)
+            if type(exists) is not bool:
+                raise TypeError("model file probe returned a non-boolean result")
+        except Exception:
+            exists = None
+        self._model_file_exists[portable] = exists
+        return exists
 
 
 def _bounded_public_result(issues: list[_Issue]) -> dict[str, object]:
@@ -265,6 +333,110 @@ def _missing_workflow_result(path: object) -> dict[str, object]:
                 blocking=True,
             )
         ]
+    )
+
+
+def _declared_model_asset_issues(
+    definition: Any,
+    scanner: WorkflowReadinessScanner,
+) -> list[_Issue]:
+    issues: list[_Issue] = []
+    scan_unavailable = False
+    missing_assets: set[tuple[str, str]] = set()
+    try:
+        declared_assets = tuple(getattr(definition, "required_model_assets", ()))
+    except (TypeError, ValueError):
+        declared_assets = ()
+        issues.append(
+            _Issue(
+                "model_requirement_invalid",
+                "Workflow declares an invalid local model requirement.",
+                blocking=True,
+            )
+        )
+
+    for asset in declared_assets:
+        label = getattr(asset, "label", None)
+        relative_paths = getattr(asset, "relative_paths", None)
+        if (
+            not isinstance(label, str)
+            or not label.strip()
+            or len(label) > _MAX_LABEL_LENGTH
+            or any(ord(char) < 32 or ord(char) == 127 for char in label)
+            or isinstance(relative_paths, (str, bytes))
+        ):
+            issues.append(
+                _Issue(
+                    "model_requirement_invalid",
+                    "Workflow declares an invalid local model requirement.",
+                    blocking=True,
+                )
+            )
+            continue
+        try:
+            paths = tuple(normalize_model_relative_path(path) for path in relative_paths)
+        except (TypeError, ValueError):
+            issues.append(
+                _Issue(
+                    "model_requirement_invalid",
+                    "Workflow declares an invalid local model requirement.",
+                    blocking=True,
+                )
+            )
+            continue
+        if not paths:
+            issues.append(
+                _Issue(
+                    "model_requirement_invalid",
+                    "Workflow declares an invalid local model requirement.",
+                    blocking=True,
+                )
+            )
+            continue
+
+        for relative_path in paths:
+            exists = scanner.model_file_exists(relative_path)
+            if exists is None:
+                scan_unavailable = True
+                break
+            if not exists:
+                missing_assets.add((_safe_label(label), relative_path))
+                break
+
+    if scan_unavailable:
+        issues.append(
+            _Issue(
+                "model_path_scanner_unavailable",
+                "Declared local model files could not be checked; setup is required.",
+                blocking=True,
+            )
+        )
+
+    for label, relative_path in sorted(
+        missing_assets,
+        key=lambda item: (item[0].casefold(), _normalized_filename(item[1])),
+    ):
+        issues.append(
+            _Issue(
+                "model_asset_missing",
+                f"Required local model asset is incomplete: {label} "
+                f"(missing {_safe_label(relative_path)}).",
+                blocking=True,
+            )
+        )
+    return issues
+
+
+def evaluate_declared_model_assets(
+    definition: Any,
+    *,
+    scanner: WorkflowReadinessScanner | None = None,
+) -> dict[str, object]:
+    """Fail closed on explicit model-file prerequisites without loading them."""
+
+    active_scanner = scanner or WorkflowReadinessScanner()
+    return _bounded_public_result(
+        _declared_model_asset_issues(definition, active_scanner)
     )
 
 
@@ -355,6 +527,8 @@ def evaluate_workflow_readiness(
                     )
                 )
 
+    issues.extend(_declared_model_asset_issues(definition, active_scanner))
+
     unavailable_model_categories: set[str] = set()
     missing_models: set[tuple[str, str, str]] = set()
     configurable_missing_models: set[tuple[str, str, str]] = set()
@@ -438,5 +612,7 @@ __all__ = [
     "READINESS_SETUP_REQUIRED",
     "READINESS_WARNING",
     "WorkflowReadinessScanner",
+    "evaluate_declared_model_assets",
     "evaluate_workflow_readiness",
+    "normalize_model_relative_path",
 ]

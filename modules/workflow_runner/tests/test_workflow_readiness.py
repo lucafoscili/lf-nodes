@@ -1,12 +1,16 @@
 import json
+import sys
 from pathlib import Path
 from types import SimpleNamespace
+
+import pytest
 
 from modules.workflow_runner.services.readiness import (
     MAX_READINESS_ISSUES,
     WorkflowReadinessScanner,
     evaluate_workflow_readiness,
 )
+from modules.workflow_runner.services.registry import WorkflowModelAsset
 
 
 class _Workflow:
@@ -25,11 +29,13 @@ def _write_prompt(tmp_path: Path, prompt: dict) -> _Workflow:
     return _Workflow(path)
 
 
-def _scanner(*, nodes=(), models=None) -> WorkflowReadinessScanner:
+def _scanner(*, nodes=(), models=None, model_paths=()) -> WorkflowReadinessScanner:
     model_files = models or {}
+    installed_paths = set(model_paths)
     return WorkflowReadinessScanner(
         node_mapping_loader=lambda: {name: object() for name in nodes},
         model_filename_loader=lambda category: model_files.get(category, ()),
+        model_file_exists_loader=lambda relative_path: relative_path in installed_paths,
     )
 
 
@@ -348,3 +354,176 @@ def test_unknown_custom_loader_does_not_guess_at_file_inputs(tmp_path: Path) -> 
     )
 
     assert result == {"status": "ready", "issues": []}
+
+
+def test_declared_multi_file_model_asset_must_be_complete(tmp_path: Path) -> None:
+    workflow = _write_prompt(
+        tmp_path,
+        {"1": {"class_type": "CustomLoader", "inputs": {}}},
+    )
+    workflow.required_model_assets = (
+        WorkflowModelAsset(
+            label="example model package",
+            relative_paths=(
+                "vendor/example/config.json",
+                "vendor/example/model.safetensors",
+            ),
+        ),
+    )
+
+    result = evaluate_workflow_readiness(
+        workflow,
+        scanner=_scanner(
+            nodes={"CustomLoader"},
+            model_paths={"vendor/example/config.json"},
+        ),
+    )
+
+    assert result == {
+        "status": "setup_required",
+        "issues": [
+            {
+                "code": "model_asset_missing",
+                "message": (
+                    "Required local model asset is incomplete: example model package "
+                    "(missing vendor/example/model.safetensors)."
+                ),
+            }
+        ],
+    }
+
+
+def test_declared_model_asset_is_ready_when_every_file_is_present(
+    tmp_path: Path,
+) -> None:
+    workflow = _write_prompt(
+        tmp_path,
+        {"1": {"class_type": "CustomLoader", "inputs": {}}},
+    )
+    paths = ("vendor/example/config.json", "vendor/example/model.safetensors")
+    workflow.required_model_assets = (
+        WorkflowModelAsset(label="example model package", relative_paths=paths),
+    )
+
+    assert evaluate_workflow_readiness(
+        workflow,
+        scanner=_scanner(nodes={"CustomLoader"}, model_paths=paths),
+    ) == {"status": "ready", "issues": []}
+
+
+def test_declared_model_asset_scanner_failure_blocks_execution(
+    tmp_path: Path,
+) -> None:
+    workflow = _write_prompt(
+        tmp_path,
+        {"1": {"class_type": "CustomLoader", "inputs": {}}},
+    )
+    workflow.required_model_assets = (
+        WorkflowModelAsset(
+            label="example model package",
+            relative_paths=("vendor/example/model.safetensors",),
+        ),
+    )
+    scanner = WorkflowReadinessScanner(
+        node_mapping_loader=lambda: {"CustomLoader": object()},
+        model_filename_loader=lambda _category: (),
+        model_file_exists_loader=lambda _path: (_ for _ in ()).throw(
+            RuntimeError("model root is unavailable")
+        ),
+    )
+
+    assert evaluate_workflow_readiness(workflow, scanner=scanner) == {
+        "status": "setup_required",
+        "issues": [
+            {
+                "code": "model_path_scanner_unavailable",
+                "message": (
+                    "Declared local model files could not be checked; "
+                    "setup is required."
+                ),
+            }
+        ],
+    }
+
+
+@pytest.mark.parametrize(
+    "unsafe_path",
+    (
+        "../outside.safetensors",
+        "/absolute.safetensors",
+        "C:/absolute.safetensors",
+        "nested//empty.safetensors",
+        "nested\\host-native.safetensors",
+        "nested/control\x00.safetensors",
+    ),
+)
+def test_model_asset_rejects_unsafe_relative_paths(unsafe_path: str) -> None:
+    with pytest.raises((TypeError, ValueError)):
+        WorkflowModelAsset(label="unsafe", relative_paths=(unsafe_path,))
+
+
+def test_default_model_probe_accepts_a_bounded_symlinked_model_package(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    model_root = tmp_path / "models"
+    model_root.mkdir()
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    (outside / "model.safetensors").write_bytes(b"not a model")
+    try:
+        (model_root / "linked").symlink_to(outside, target_is_directory=True)
+    except OSError as exc:
+        pytest.skip(f"directory symlinks are unavailable: {exc}")
+
+    workflow = _write_prompt(
+        tmp_path,
+        {"1": {"class_type": "CustomLoader", "inputs": {}}},
+    )
+    workflow.required_model_assets = (
+        WorkflowModelAsset(
+            label="linked model",
+            relative_paths=("linked/model.safetensors",),
+        ),
+    )
+    monkeypatch.setitem(
+        sys.modules,
+        "folder_paths",
+        SimpleNamespace(models_dir=str(model_root)),
+    )
+    scanner = WorkflowReadinessScanner(
+        node_mapping_loader=lambda: {"CustomLoader": object()},
+        model_filename_loader=lambda _category: (),
+    )
+
+    result = evaluate_workflow_readiness(workflow, scanner=scanner)
+
+    assert result == {"status": "ready", "issues": []}
+
+
+def test_model_file_probe_is_cached_per_catalogue_scan(tmp_path: Path) -> None:
+    workflow = _write_prompt(
+        tmp_path,
+        {"1": {"class_type": "CustomLoader", "inputs": {}}},
+    )
+    shared_path = "vendor/shared/model.safetensors"
+    workflow.required_model_assets = (
+        WorkflowModelAsset(label="first", relative_paths=(shared_path,)),
+        WorkflowModelAsset(label="second", relative_paths=(shared_path,)),
+    )
+    calls: list[str] = []
+
+    def missing(path: str) -> bool:
+        calls.append(path)
+        return False
+
+    scanner = WorkflowReadinessScanner(
+        node_mapping_loader=lambda: {"CustomLoader": object()},
+        model_filename_loader=lambda _category: (),
+        model_file_exists_loader=missing,
+    )
+
+    result = evaluate_workflow_readiness(workflow, scanner=scanner)
+
+    assert result["status"] == "setup_required"
+    assert calls == [shared_path]

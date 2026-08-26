@@ -408,6 +408,8 @@ const _getIcon = (category) => {
     JSON: json,
     "Krea 2": ai,
     "MiniMax H3": ai,
+    "TRELLIS.2": ai,
+    TripoSplat: ai,
     LLM: robot,
     "Media Intake": folderOpen,
     SVG: codeCircle2,
@@ -513,6 +515,14 @@ const createDrawerSection = (store) => {
     mount,
     render
   };
+};
+const artifactViewUrl = (artifact) => {
+  const params = new URLSearchParams({
+    filename: artifact.filename,
+    subfolder: (artifact.subfolder || "").replaceAll("\\", "/"),
+    type: artifact.type || "output"
+  });
+  return `/view?${params.toString()}`;
 };
 const _setProps = (comp, element, props, slotMap = {}) => {
   if (!props) {
@@ -649,23 +659,12 @@ const createInputCell = (cell) => {
     }
   }
 };
-const _artifactUrl = (artifact) => {
-  if (artifact.url && artifact.url.startsWith("/")) {
-    return artifact.url;
-  }
-  const params = new URLSearchParams({
-    filename: artifact.filename,
-    subfolder: (artifact.subfolder || "").replaceAll("\\", "/"),
-    type: artifact.type || "output"
-  });
-  return `/view?${params.toString()}`;
-};
 const _outputRelativeArtifact = (value) => {
   if (typeof value !== "string" || !value || value.includes("\\")) {
     return null;
   }
   const parts = value.split("/");
-  if (parts.some((part) => !part || part === "." || part === "..") || !parts.every((part) => /^[^\\/?#%:\x00-\x1F\x7F]+$/.test(part))) {
+  if (parts.some((part) => !part || part === "." || part === "..") || !parts.every((part) => /^[^\\/:\x00-\x1F\x7F]+$/.test(part))) {
     return null;
   }
   const filename = parts.pop();
@@ -693,7 +692,7 @@ const _mediaOutput = (artifacts) => {
     }
     const item = document.createElement("figure");
     item.className = "workflow-output-media__item";
-    const src = _artifactUrl(artifact);
+    const src = artifactViewUrl(artifact);
     const mediaType = ((_a2 = artifact.media_type) == null ? void 0 : _a2.toLowerCase()) || "";
     const isAudio = mediaType.startsWith("audio/") || /\.(?:wav|mp3|m4a|flac|ogg|opus)$/i.test(artifact.filename);
     const isVideo = mediaType.startsWith("video/") || /\.(?:mp4|webm)$/i.test(artifact.filename);
@@ -742,9 +741,15 @@ const _mediaOutput = (artifacts) => {
 };
 const createOutputComponent = (descriptor) => {
   const { syntax } = getLfFramework();
+  const modelArtifacts = descriptor["3d"];
   const { civitai_metadata, dataset, audio, file_names, audios, images, json, metadata, props, shape, slot_map, string, svg } = descriptor;
   const el = document.createElement("div");
-  const standardArtifacts = [...images || [], ...audio || [], ...audios || []];
+  const standardArtifacts = [
+    ...images || [],
+    ...audio || [],
+    ...audios || [],
+    ...modelArtifacts || []
+  ];
   const media = _mediaOutput(standardArtifacts.length > 0 ? standardArtifacts : _fileNameArtifacts(file_names));
   if (media) {
     el.appendChild(media);
@@ -2038,27 +2043,32 @@ const getFirstOutputMediaUrl = (outputs) => {
     const artifacts = [
       ...payload.images || [],
       ...payload.audio || [],
-      ...payload.audios || []
+      ...payload.audios || [],
+      ...payload["3d"] || []
     ];
     if (artifacts.length) {
       const artifact = artifacts.find((item) => {
         if (!item || !item.url && !item.filename) {
           return false;
         }
+        const previewPath = typeof item.filename === "string" && item.filename ? item.filename : item.url || "";
+        if (!_isBrowserPreviewPath(previewPath)) {
+          return false;
+        }
         const value = typeof item.url === "string" ? item.url : item.filename || "";
         return allowTemporary || !_isTemporaryMedia(value, item.type);
       });
       if (artifact) {
-        if (typeof artifact.url === "string" && artifact.url.startsWith("/")) {
-          return { image: artifact.url, fallback: null };
-        }
         if (typeof artifact.filename === "string" && artifact.filename) {
-          const params = new URLSearchParams({
-            filename: artifact.filename,
-            subfolder: (artifact.subfolder || "").replaceAll("\\", "/"),
-            type: artifact.type || "output"
-          });
-          return { image: `/view?${params.toString()}`, fallback: null };
+          return {
+            image: artifactViewUrl({
+              filename: artifact.filename,
+              subfolder: artifact.subfolder,
+              type: artifact.type,
+              url: artifact.url
+            }),
+            fallback: null
+          };
         }
       }
     }

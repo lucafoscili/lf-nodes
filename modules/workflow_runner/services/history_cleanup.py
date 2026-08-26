@@ -22,6 +22,7 @@ from .lifecycle import build_output_manifest
 _FAILED_TERMINAL_STATUSES = {"failed", "cancelled", "timeout"}
 _ACTIVE_STATUSES = {"pending", "running"}
 _STANDARD_ARTIFACT_BUCKETS = {
+    "3d",
     "audio",
     "audios",
     "files",

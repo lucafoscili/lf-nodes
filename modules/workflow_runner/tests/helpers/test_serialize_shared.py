@@ -1,12 +1,4 @@
-import importlib.util
-import pathlib
-
-spec = importlib.util.spec_from_file_location(
-    "serialize_shared",
-    str(pathlib.Path(__file__).resolve().parent.parent.parent / "utils" / "serialize.py"),
-)
-serialize_mod = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(serialize_mod)
+from modules.workflow_runner.utils import serialize as serialize_mod
 
 class MockJob:
     def __init__(self, id, workflow_id, status, result=None, error=None, owner_id=None, seq=0, created_at=1.0, updated_at=None):
