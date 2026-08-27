@@ -48,6 +48,12 @@ describe('Generic output widget contracts', () => {
     expect(NODE_WIDGET_MAP[NodeName.imageList]).toEqual([CustomWidgetName.masonry]);
   });
 
+  it('renders periodic image samples with the LF masonry widget', () => {
+    expect(NODE_WIDGET_MAP[NodeName.periodicImageBatchSampler]).toEqual([
+      CustomWidgetName.masonry,
+    ]);
+  });
+
   it('renders side-by-side composites with the LF masonry widget', () => {
     expect(NODE_WIDGET_MAP[NodeName.sideBySide]).toEqual([CustomWidgetName.masonry]);
   });

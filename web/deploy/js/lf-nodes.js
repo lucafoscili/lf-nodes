@@ -1314,6 +1314,7 @@ var NodeName;
   NodeName2["onnxSelector"] = "LF_ONNXSelector";
   NodeName2["openAIAPI"] = "LF_OpenAIAPI";
   NodeName2["parsePromptWithLoraTags"] = "LF_ParsePromptWithLoraTags";
+  NodeName2["periodicImageBatchSampler"] = "LF_PeriodicImageBatchSampler";
   NodeName2["randomBoolean"] = "LF_RandomBoolean";
   NodeName2["registerOutputFile"] = "LF_RegisterOutputFile";
   NodeName2["regexReplace"] = "LF_RegexReplace";
@@ -1688,6 +1689,7 @@ const NODE_WIDGET_MAP = {
   LF_ONNXSelector: [CustomWidgetName.history],
   LF_OpenAIAPI: [CustomWidgetName.code],
   LF_ParsePromptWithLoraTags: [CustomWidgetName.code],
+  LF_PeriodicImageBatchSampler: [CustomWidgetName.masonry],
   LF_RandomBoolean: [CustomWidgetName.progressbar],
   LF_RegisterOutputFile: [CustomWidgetName.tree],
   LF_RegexReplace: [CustomWidgetName.code],

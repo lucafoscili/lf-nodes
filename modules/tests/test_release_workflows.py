@@ -31,4 +31,4 @@ def test_recorded_node_count_matches_unique_published_mappings():
     recorded = json.loads((REPO_ROOT / "count.json").read_text(encoding="utf-8"))["nodes"]
     mappings = discover_lf_node_types()
 
-    assert recorded == len(mappings) == 136
+    assert recorded == len(mappings) == 137

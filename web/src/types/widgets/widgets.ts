@@ -131,6 +131,7 @@ export enum NodeName {
   onnxSelector = 'LF_ONNXSelector',
   openAIAPI = 'LF_OpenAIAPI',
   parsePromptWithLoraTags = 'LF_ParsePromptWithLoraTags',
+  periodicImageBatchSampler = 'LF_PeriodicImageBatchSampler',
   randomBoolean = 'LF_RandomBoolean',
   registerOutputFile = 'LF_RegisterOutputFile',
   regexReplace = 'LF_RegexReplace',

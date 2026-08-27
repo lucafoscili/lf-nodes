@@ -96,6 +96,7 @@ export const NODE_WIDGET_MAP: NodeWidgetMap = {
   LF_ONNXSelector: [CustomWidgetName.history],
   LF_OpenAIAPI: [CustomWidgetName.code],
   LF_ParsePromptWithLoraTags: [CustomWidgetName.code],
+  LF_PeriodicImageBatchSampler: [CustomWidgetName.masonry],
   LF_RandomBoolean: [CustomWidgetName.progressbar],
   LF_RegisterOutputFile: [CustomWidgetName.tree],
   LF_RegexReplace: [CustomWidgetName.code],
