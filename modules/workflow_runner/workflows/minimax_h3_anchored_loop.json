@@ -1,0 +1,317 @@
+{
+  "unet": {
+    "inputs": {
+      "unet_name": "minimax_h3_fl2va_pruned_int8_convrot.safetensors",
+      "weight_dtype": "default"
+    },
+    "class_type": "UNETLoader",
+    "_meta": { "title": "Load MiniMax H3 base model" }
+  },
+  "model_device": {
+    "inputs": {
+      "model": ["unet", 0],
+      "device": "default"
+    },
+    "class_type": "SelectModelDevice",
+    "_meta": { "title": "Place MiniMax H3 diffusion model" }
+  },
+  "attention_backend": {
+    "inputs": {
+      "model": ["model_device", 0],
+      "attention": "comfy kitchen attention"
+    },
+    "class_type": "ModelAttentionBackend",
+    "_meta": { "title": "Use Comfy Kitchen attention" }
+  },
+  "clip": {
+    "inputs": {
+      "clip_name": "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors",
+      "type": "minimax",
+      "device": "default"
+    },
+    "class_type": "CLIPLoader",
+    "_meta": { "title": "Load MiniMax H3 text encoder" }
+  },
+  "clip_device": {
+    "inputs": {
+      "clip": ["clip", 0],
+      "device": "default"
+    },
+    "class_type": "SelectCLIPDevice",
+    "_meta": { "title": "Place MiniMax H3 text encoder" }
+  },
+  "video_vae": {
+    "inputs": {
+      "vae_name": "minimax_h3_video_vae_fp16.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": { "title": "Load MiniMax H3 video VAE" }
+  },
+  "video_vae_device": {
+    "inputs": {
+      "vae": ["video_vae", 0],
+      "device": "default"
+    },
+    "class_type": "SelectVAEDevice",
+    "_meta": { "title": "Place MiniMax H3 video VAE" }
+  },
+  "audio_vae": {
+    "inputs": {
+      "vae_name": "minimax_h3_audio_vae_fp32.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": { "title": "Load MiniMax H3 audio VAE" }
+  },
+  "audio_vae_device": {
+    "inputs": {
+      "vae": ["audio_vae", 0],
+      "device": "default"
+    },
+    "class_type": "SelectVAEDevice",
+    "_meta": { "title": "Place MiniMax H3 audio VAE" }
+  },
+  "source_first": {
+    "inputs": { "image": "" },
+    "class_type": "LoadImage",
+    "_meta": { "title": "Required opening frame" }
+  },
+  "source_last": {
+    "inputs": { "image": "" },
+    "class_type": "LoadImage",
+    "_meta": { "title": "Required ending frame" }
+  },
+  "source_guide_1": {
+    "inputs": { "image": "" },
+    "class_type": "LoadImage",
+    "_meta": { "title": "Optional intermediate guide 1" }
+  },
+  "source_guide_2": {
+    "inputs": { "image": "" },
+    "class_type": "LoadImage",
+    "_meta": { "title": "Optional intermediate guide 2" }
+  },
+  "h3": {
+    "inputs": {
+      "clip": ["clip_device", 0],
+      "vae": ["video_vae_device", 0],
+      "prompt": "integrated_multimodal_description:\nA compact illustrated subject performs one coherent looping action with stable shape and palette.\n\noverall_soundscape:\nNatural ambience appropriate to the scene.\n\nnon_diegetic_music:\nN/A",
+      "width": 768,
+      "height": 768,
+      "length": 124,
+      "first_frame": ["source_first", 0],
+      "last_frame": ["source_last", 0]
+    },
+    "class_type": "MiniMaxH3ImageToVideo",
+    "_meta": { "title": "Prepare anchored MiniMax H3 video and audio conditioning" }
+  },
+  "guide_1": {
+    "inputs": {
+      "positive": ["h3", 0],
+      "vae": ["video_vae_device", 0],
+      "latent": ["h3", 1],
+      "image": ["source_guide_1", 0],
+      "frame_idx": 41
+    },
+    "class_type": "MiniMaxH3AddGuide",
+    "_meta": { "title": "Anchor optional intermediate guide 1" }
+  },
+  "guide_2": {
+    "inputs": {
+      "positive": ["guide_1", 0],
+      "vae": ["video_vae_device", 0],
+      "latent": ["h3", 1],
+      "image": ["source_guide_2", 0],
+      "frame_idx": 82
+    },
+    "class_type": "MiniMaxH3AddGuide",
+    "_meta": { "title": "Anchor optional intermediate guide 2" }
+  },
+  "noise": {
+    "inputs": { "noise_seed": 42 },
+    "class_type": "RandomNoise",
+    "_meta": { "title": "Generation seed" }
+  },
+  "guider": {
+    "inputs": {
+      "model": ["attention_backend", 0],
+      "conditioning": ["guide_2", 0]
+    },
+    "class_type": "BasicGuider",
+    "_meta": { "title": "MiniMax H3 guider" }
+  },
+  "sampler_select": {
+    "inputs": { "sampler_name": "res_multistep" },
+    "class_type": "KSamplerSelect",
+    "_meta": { "title": "Profile-owned sampler" }
+  },
+  "scheduler": {
+    "inputs": {
+      "model": ["attention_backend", 0],
+      "scheduler": "simple",
+      "steps": 20,
+      "denoise": 1.0
+    },
+    "class_type": "BasicScheduler",
+    "_meta": { "title": "Profile-owned schedule" }
+  },
+  "sample": {
+    "inputs": {
+      "noise": ["noise", 0],
+      "guider": ["guider", 0],
+      "sampler": ["sampler_select", 0],
+      "sigmas": ["scheduler", 0],
+      "latent_image": ["h3", 1]
+    },
+    "class_type": "SamplerCustomAdvanced",
+    "_meta": { "title": "Sample MiniMax H3 video and audio latent" }
+  },
+  "decode_video": {
+    "inputs": {
+      "samples": ["sample", 0],
+      "vae": ["video_vae_device", 0]
+    },
+    "class_type": "VAEDecode",
+    "_meta": { "title": "Decode MiniMax H3 video" }
+  },
+  "sprite_sampler": {
+    "inputs": {
+      "image": ["decode_video", 0],
+      "target_count": 24,
+      "loop_endpoint_policy": "exclude_final_endpoint",
+      "source_fps": 24.0,
+      "intended_fps": 12.0
+    },
+    "class_type": "LF_PeriodicImageBatchSampler",
+    "_meta": { "title": "Select 24 ordered loop frames without interpolation" }
+  },
+  "remove_background": {
+    "inputs": {
+      "image": ["sprite_sampler", 0],
+      "model": "RMBG-2.0",
+      "sensitivity": 1.0,
+      "process_res": 1024,
+      "mask_blur": 0,
+      "mask_offset": 0,
+      "invert_output": false,
+      "refine_foreground": false,
+      "background": "Alpha"
+    },
+    "class_type": "VNCCS_RMBG2",
+    "_meta": { "title": "Infer transparent sprite backgrounds with RMBG-2.0" }
+  },
+  "verify_rmbg_alpha": {
+    "inputs": {
+      "image": ["remove_background", 0],
+      "channel": "alpha"
+    },
+    "class_type": "ImageToMask",
+    "_meta": { "title": "Fail if background removal did not return RGBA" }
+  },
+  "rmbg_transparency_mask": {
+    "inputs": {
+      "mask": ["verify_rmbg_alpha", 0]
+    },
+    "class_type": "InvertMask",
+    "_meta": { "title": "Convert opacity to Comfy transparency mask" }
+  },
+  "validated_cutout": {
+    "inputs": {
+      "image": ["remove_background", 0],
+      "alpha": ["rmbg_transparency_mask", 0]
+    },
+    "class_type": "JoinImageWithAlpha",
+    "_meta": { "title": "Rejoin validated sprite alpha" }
+  },
+  "sprite_scale": {
+    "inputs": {
+      "image": ["validated_cutout", 0],
+      "upscale_method": "lanczos",
+      "width": 256,
+      "height": 256,
+      "crop": "disabled"
+    },
+    "class_type": "ImageScale",
+    "_meta": { "title": "Resize the RGBA batch to one square sprite canvas" }
+  },
+  "save_frames": {
+    "inputs": {
+      "images": ["sprite_scale", 0],
+      "filename_prefix": "LF_Nodes/MiniMaxH3/AnchoredSpriteLoop/kitchen_quality/seed-42-f124/frames-256px-12fps"
+    },
+    "class_type": "SaveImage",
+    "_meta": { "title": "Save 24 ordered RGBA sprite frames" }
+  },
+  "sprite_grid": {
+    "inputs": {
+      "image": ["sprite_scale", 0],
+      "cell_width": 256,
+      "cell_height": 256,
+      "gap_px": 0,
+      "background": "transparent",
+      "show_headers": false,
+      "title": "",
+      "dataset": {
+        "columns": [
+          { "id": "frame_01", "title": "" },
+          { "id": "frame_02", "title": "" },
+          { "id": "frame_03", "title": "" },
+          { "id": "frame_04", "title": "" },
+          { "id": "frame_05", "title": "" },
+          { "id": "frame_06", "title": "" }
+        ],
+        "nodes": [
+          { "id": "row_01", "value": "" },
+          { "id": "row_02", "value": "" },
+          { "id": "row_03", "value": "" },
+          { "id": "row_04", "value": "" }
+        ]
+      }
+    },
+    "class_type": "LF_ImageGrid",
+    "_meta": { "title": "Compose a transparent zero-gap 6x4 sprite atlas" }
+  },
+  "save_atlas": {
+    "inputs": {
+      "images": ["sprite_grid", 0],
+      "filename_prefix": "LF_Nodes/MiniMaxH3/AnchoredSpriteLoop/kitchen_quality/seed-42-f124/atlas-6x4-256px-12fps"
+    },
+    "class_type": "SaveImage",
+    "_meta": { "title": "Save transparent 6x4 sprite atlas" }
+  },
+  "display_sampling_receipt": {
+    "inputs": {
+      "json_input": ["sprite_sampler", 1],
+      "ui_widget": ""
+    },
+    "class_type": "LF_DisplayJSON",
+    "_meta": { "title": "Publish periodic frame-sampling receipt" }
+  },
+  "decode_audio": {
+    "inputs": {
+      "samples": ["sample", 0],
+      "vae": ["audio_vae_device", 0]
+    },
+    "class_type": "VAEDecodeAudio",
+    "_meta": { "title": "Decode MiniMax H3 stereo audio" }
+  },
+  "create_video": {
+    "inputs": {
+      "images": ["decode_video", 0],
+      "fps": 24.0,
+      "audio": ["decode_audio", 0],
+      "bit_depth": 8
+    },
+    "class_type": "CreateVideo",
+    "_meta": { "title": "Mux video and stereo audio at 24 fps" }
+  },
+  "save": {
+    "inputs": {
+      "video": ["create_video", 0],
+      "filename_prefix": "LF_Nodes/MiniMaxH3/AnchoredSpriteLoop/kitchen_quality/seed-42-f124",
+      "format": "mp4",
+      "codec": "auto"
+    },
+    "class_type": "SaveVideo",
+    "_meta": { "title": "Save anchored MiniMax H3 loop" }
+  }
+}

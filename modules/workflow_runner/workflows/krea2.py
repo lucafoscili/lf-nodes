@@ -700,8 +700,8 @@ def _generation_model_cell() -> WorkflowCell:
             (
                 _LUSTIFY_MODEL,
                 "Lustify v10 Krea 2 INT8 ConvRot — experimental",
-                "Community checkpoint with a photoreal bias; validate it through "
-                "controlled visual comparisons.",
+                "Community checkpoint with a photoreal bias, available for "
+                "same-seed visual comparisons.",
             ),
             (
                 _OFFICIAL_KREA2_MODEL,
@@ -732,13 +732,12 @@ def _adapter_model_cell() -> WorkflowCell:
             (
                 _DARKBEAST_MODEL,
                 "DarkBeast Krea 2 FP8 — experimental",
-                "Community derivative; use only for controlled visual A/B comparison.",
+                "Community derivative available for controlled visual A/B comparison.",
             ),
             (
                 _MOODY_MODEL,
                 "Moody Krea 2 Mix v6 — experimental",
-                "Community derivative with unqualified adapter fidelity; use only "
-                "as a visual probe.",
+                "Community derivative whose adapter fidelity has not been characterized.",
             ),
             (
                 _LUSTIFY_MODEL,
@@ -758,8 +757,8 @@ def _reid_model_cell() -> WorkflowCell:
         default=_REID_MODEL,
         description=(
             "The official INT8 ConvRot base is the validated ReID pairing. Community "
-            "checkpoints are structurally compatible experiments; compare them "
-            "at the same seed and do not treat successful loading as fidelity proof."
+            "checkpoints are structurally compatible experiments whose ReID fidelity "
+            "varies independently of loading compatibility."
         ),
         options=(
             (
@@ -770,13 +769,13 @@ def _reid_model_cell() -> WorkflowCell:
             (
                 _DARKBEAST_MODEL,
                 "DarkBeast Krea 2 FP8 — experimental",
-                "Community derivative; structurally compatible, but ReID behavior "
-                "needs visual A/B acceptance.",
+                "Community derivative; structurally compatible, with ReID behavior "
+                "best compared at the same seed.",
             ),
             (
                 _MOODY_MODEL,
                 "Moody Krea 2 Mix v6 — experimental",
-                "Community derivative with unqualified provenance; use only "
+                "Community derivative with unqualified ReID fidelity, available "
                 "as a controlled visual probe.",
             ),
             (
@@ -948,7 +947,7 @@ def _reid_inputs(
             "reference_image",
             "Character reference",
             (
-                "Upload one authorized character image. A face or head-and-shoulders "
+                "Upload one character reference image. A face or head-and-shoulders "
                 "crop gives the prompt the most freedom over clothing and pose; a "
                 "full-body image deliberately carries more costume and posture into "
                 "the result. The node inserts its internal Picture 1 tokens for you."
@@ -1261,8 +1260,8 @@ pose_change = WorkflowNode(
     value="Pose Change",
     description=(
         "Move a recognizable character into a newly prompted pose and composition "
-        "with the community ReID engine. The pose is described with text; this "
-        "card does not pretend to be exact skeleton or pose-reference control."
+        "with the community ReID engine. The pose is described with text rather "
+        "than exact skeleton or pose-reference control."
     ),
     category="Krea 2",
     inputs=_reid_inputs(

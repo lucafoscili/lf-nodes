@@ -1,13 +1,10 @@
-"""Focused MiniMax H3 Workflow Runner cards over two reusable local graphs.
+"""Focused MiniMax H3 Workflow Runner cards over reusable local graphs.
 
-The eight cards share one base graph and one reference graph while keeping the
-public controls task-oriented. Canvas geometry is selected from a curated
-native-size map, output is fixed at 24 fps, duration is selected directly on
-H3's 17k+5 frame grid, and the validated quality profile owns its sampler,
-scheduler, and step count.
-
-The access-basis field is an LF catalogue admission check.  It is validated
-before any upload is staged and is never copied into the Comfy prompt graph.
+The cards share base, anchored-guide, and reference graphs while keeping public
+controls task-oriented. Canvas geometry is selected from a curated native-size
+map, output is fixed at 24 fps, duration is selected directly on H3's 17k+5
+frame grid, and the validated quality profile owns its sampler, scheduler, and
+step count.
 """
 
 from __future__ import annotations
@@ -18,7 +15,12 @@ from pathlib import Path
 from typing import Any, Callable, Dict, NamedTuple
 
 from ..prompts import compose_base_prompt, compose_full_reference_prompt
-from ..services.registry import InputValidationError, WorkflowCell, WorkflowNode
+from ..services.registry import (
+    InputValidationError,
+    WorkflowCell,
+    WorkflowModelAsset,
+    WorkflowNode,
+)
 from .minimax_h3_profiles import (
     MiniMaxH3ExecutionProfile,
     NATIVE_MAX_EDGE,
@@ -37,34 +39,28 @@ from .utils import (
 
 _FPS = 24
 _CANVAS_MULTIPLE = 32
+_MIN_TRAINED_FRAMES = 124
 _MAX_SEED = (1 << 53) - 1
 _MAX_REFERENCE_IMAGES = 9
+_SPRITE_FRAME_COUNT = 24
+_DEFAULT_SPRITE_SIZE = 256
+_DEFAULT_INTENDED_FPS = 12
 
-_ACCESS_OPTIONS = (
-    (
-        "applicable_territory",
-        "Applicable territory",
-        "I confirm this model run and every display of its outputs will occur only in an Applicable Territory outside the EU, UK, US, and Republic of Korea.",
-    ),
-    (
-        "separate_written_authorization",
-        "Separate written authorization",
-        "I hold separate written authorization covering this run, its territory, and every display of its outputs.",
+_RMBG2_MODEL_ASSETS = (
+    WorkflowModelAsset(
+        label="VNCCS RMBG-2.0 model",
+        relative_paths=(
+            "RMBG/RMBG-2.0/config.json",
+            "RMBG/RMBG-2.0/model.safetensors",
+            "RMBG/RMBG-2.0/birefnet.py",
+            "RMBG/RMBG-2.0/BiRefNet_config.py",
+        ),
     ),
 )
-_ACCESS_IDS = tuple(option[0] for option in _ACCESS_OPTIONS)
-_ACCESS_HELP = (
-    "Required access basis. Choose only a statement that is true for this use. "
-    "Separate authorization is required in excluded territories; this workflow "
-    "does not grant a licence. The selection is validated locally and is not sent "
-    "to the Comfy graph."
-)
-_LICENCE_NOTICE = (
-    " MiniMax H3 weights and outputs remain subject to the MiniMax H3 Community "
-    "License and Acceptable Use Policy. Use only in an applicable territory or "
-    "under separate written authorization; use only authorized material and "
-    "likenesses, and clearly disclose publicly shared output as AI-generated. "
-    "This workflow grants no licence."
+
+_GUIDE_INPUTS = (
+    ("guide_image_1", "guide_frame_1", "source_guide_1", "guide_1", 41),
+    ("guide_image_2", "guide_frame_2", "source_guide_2", "guide_2", 82),
 )
 
 # Every size is explicit, aligned to 32, and no larger than the native
@@ -127,6 +123,20 @@ class _CommonSettings(NamedTuple):
     profile: MiniMaxH3ExecutionProfile
 
 
+class _ImageGuide(NamedTuple):
+    image_field: str
+    source_node: str
+    guide_node: str
+    frame_index: int
+
+
+class _AnchoredSpriteSettings(NamedTuple):
+    common: _CommonSettings
+    compiled_prompt: str
+    sprite_size: int
+    intended_fps: int
+
+
 class _BaseCardSpec(NamedTuple):
     workflow_id: str
     title: str
@@ -159,15 +169,6 @@ class _ReferenceCardSpec(NamedTuple):
     references: tuple[_ReferenceInputSpec, ...]
     prompt_fields: Callable[[int], tuple[str, str, str]]
     default_aspect_ratio: str
-
-
-def _validate_access_basis(inputs: Dict[str, Any]) -> str:
-    """Fail closed without copying the admission answer into the graph."""
-
-    value = inputs.get("access_basis")
-    if not isinstance(value, str) or value not in _ACCESS_IDS:
-        raise InputValidationError("access_basis")
-    return value
 
 
 def _optional_text(inputs: Dict[str, Any], name: str, default: str = "") -> str:
@@ -221,7 +222,7 @@ def _common_settings(
         _DURATION_IDS,
     )
     frames = int(duration_frames)
-    if frames < 5 or frames % 17 != 5:
+    if frames < _MIN_TRAINED_FRAMES or frames % 17 != 5:
         raise RuntimeError(f"Invalid MiniMax H3 frame preset: {frames}.")
 
     seed = _integer(inputs, "seed", 42, minimum=0, maximum=_MAX_SEED)
@@ -295,16 +296,156 @@ def _multimodal_description(direction: str, dialogue: str) -> str:
     return direction
 
 
+def _first_last_instruction(frames: int) -> str:
+    return (
+        "How the reference pictures align with the target video — Picture 1 "
+        "(from Shot 1) aligns with the 0.00-second mark of the target video; "
+        "Picture 2 (from Shot 1) aligns with the "
+        f"{frames / _FPS:.2f}-second mark of the target video."
+    )
+
+
+def _active_image_guides(
+    inputs: Dict[str, Any], frames: int
+) -> list[_ImageGuide]:
+    guides: list[_ImageGuide] = []
+    for image_field, frame_field, source_node, guide_node, default_frame in _GUIDE_INPUTS:
+        if not _has_image(inputs, image_field):
+            continue
+        frame_index = _integer(
+            inputs,
+            frame_field,
+            default_frame,
+            minimum=1,
+            maximum=frames - 2,
+        )
+        guides.append(
+            _ImageGuide(
+                image_field=image_field,
+                source_node=source_node,
+                guide_node=guide_node,
+                frame_index=frame_index,
+            )
+        )
+
+    if len({guide.frame_index for guide in guides}) != len(guides):
+        raise ValueError("Intermediate guide frame indices must be distinct.")
+    return guides
+
+
+def _anchored_sprite_settings(inputs: Dict[str, Any]) -> _AnchoredSpriteSettings:
+    direction = _required_text(inputs, "direction")
+    dialogue = _optional_text(inputs, "dialogue", _DEFAULT_DIALOGUE)
+    soundscape = _optional_text(inputs, "soundscape", _DEFAULT_SOUNDSCAPE)
+    music = _optional_text(inputs, "music", _DEFAULT_MUSIC)
+    common = _common_settings(
+        inputs,
+        family="fl2va",
+        default_aspect_ratio="1:1",
+    )
+    sprite_size = _integer(
+        inputs,
+        "sprite_size",
+        _DEFAULT_SPRITE_SIZE,
+        minimum=32,
+        maximum=1024,
+    )
+    intended_fps = _integer(
+        inputs,
+        "intended_fps",
+        _DEFAULT_INTENDED_FPS,
+        minimum=1,
+        maximum=60,
+    )
+    compiled_prompt = compose_base_prompt(
+        instruction=_first_last_instruction(common.frames),
+        integrated_multimodal_description=_multimodal_description(
+            direction, dialogue
+        ),
+        overall_soundscape=soundscape,
+        non_diegetic_music=music,
+    )
+    return _AnchoredSpriteSettings(
+        common=common,
+        compiled_prompt=compiled_prompt,
+        sprite_size=sprite_size,
+        intended_fps=intended_fps,
+    )
+
+
+def _remove_inactive_anchored_guides(
+    prompt: Dict[str, Any], active_guide_nodes: set[str]
+) -> None:
+    for _image_field, _frame_field, source_node, guide_node, _default in _GUIDE_INPUTS:
+        if guide_node in active_guide_nodes:
+            continue
+        prompt.pop(source_node, None)
+        prompt.pop(guide_node, None)
+
+
+def _apply_anchored_sprite_graph_settings(
+    prompt: Dict[str, Any], settings: _AnchoredSpriteSettings
+) -> None:
+    prompt["h3"]["inputs"]["prompt"] = settings.compiled_prompt
+    _apply_execution_profile(prompt, settings.common.profile)
+    _apply_common_graph_settings(
+        prompt,
+        settings.common,
+        output_folder="AnchoredSpriteLoop",
+    )
+    prompt["sprite_sampler"]["inputs"].update(
+        {
+            "target_count": _SPRITE_FRAME_COUNT,
+            "loop_endpoint_policy": "exclude_final_endpoint",
+            "source_fps": float(_FPS),
+            "intended_fps": float(settings.intended_fps),
+        }
+    )
+    prompt["remove_background"]["inputs"].update(
+        {
+            "model": "RMBG-2.0",
+            "sensitivity": 1.0,
+            "process_res": 1024,
+            "mask_blur": 0,
+            "mask_offset": 0,
+            "invert_output": False,
+            "refine_foreground": False,
+            "background": "Alpha",
+        }
+    )
+    prompt["sprite_scale"]["inputs"].update(
+        {
+            "width": settings.sprite_size,
+            "height": settings.sprite_size,
+        }
+    )
+    prompt["sprite_grid"]["inputs"].update(
+        {
+            "cell_width": settings.sprite_size,
+            "cell_height": settings.sprite_size,
+            "gap_px": 0,
+            "background": "transparent",
+            "show_headers": False,
+            "title": "",
+        }
+    )
+    output_prefix = prompt["save"]["inputs"]["filename_prefix"]
+    prompt["save_frames"]["inputs"]["filename_prefix"] = (
+        f"{output_prefix}/frames-{settings.sprite_size}px-"
+        f"{settings.intended_fps}fps"
+    )
+    prompt["save_atlas"]["inputs"]["filename_prefix"] = (
+        f"{output_prefix}/atlas-6x4-{settings.sprite_size}px-"
+        f"{settings.intended_fps}fps"
+    )
+
+
 def _configure_base_card(
     prompt: Dict[str, Any],
     inputs: Dict[str, Any],
     *,
     spec: _BaseCardSpec,
 ) -> None:
-    # This admission boundary intentionally precedes validation that can stage
-    # an upload and precedes every graph mutation.
-    _validate_access_basis(inputs)
-
     direction = _required_text(inputs, "direction")
     dialogue = _optional_text(inputs, "dialogue", _DEFAULT_DIALOGUE)
     soundscape = _optional_text(inputs, "soundscape", _DEFAULT_SOUNDSCAPE)
@@ -321,12 +462,7 @@ def _configure_base_card(
     )
     instruction = spec.instruction
     if spec.last_frame is not None:
-        instruction = (
-            "How the reference pictures align with the target video — Picture 1 "
-            "(from Shot 1) aligns with the 0.00-second mark of the target video; "
-            "Picture 2 (from Shot 1) aligns with the "
-            f"{settings.frames / _FPS:.2f}-second mark of the target video."
-        )
+        instruction = _first_last_instruction(settings.frames)
     compiled_prompt = compose_base_prompt(
         instruction=instruction,
         integrated_multimodal_description=_multimodal_description(
@@ -368,6 +504,70 @@ def _configure_base_card(
         settings,
         output_folder=spec.output_folder,
     )
+
+
+def _configure_anchored_sprite_loop(
+    prompt: Dict[str, Any], inputs: Dict[str, Any]
+) -> None:
+    # Validate the complete request before upload staging or graph mutation.
+    _require_image(inputs, "first_frame_image")
+    _require_image(inputs, "last_frame_image")
+    settings = _anchored_sprite_settings(inputs)
+    guides = _active_image_guides(inputs, settings.common.frames)
+
+    upload_fields = [
+        "first_frame_image",
+        "last_frame_image",
+        *(guide.image_field for guide in guides),
+    ]
+    resolved_images = {
+        field: resolve_load_image_reference(inputs, field) for field in upload_fields
+    }
+
+    prompt["source_first"]["inputs"]["image"] = resolved_images[
+        "first_frame_image"
+    ]
+    prompt["source_last"]["inputs"]["image"] = resolved_images[
+        "last_frame_image"
+    ]
+    prompt["h3"]["inputs"].update(
+        {
+            "first_frame": ["source_first", 0],
+            "last_frame": ["source_last", 0],
+        }
+    )
+
+    active_guide_nodes = {guide.guide_node for guide in guides}
+    _remove_inactive_anchored_guides(prompt, active_guide_nodes)
+
+    conditioning = ["h3", 0]
+    for guide in sorted(guides, key=lambda item: item.frame_index):
+        prompt[guide.source_node]["inputs"]["image"] = resolved_images[
+            guide.image_field
+        ]
+        prompt[guide.guide_node]["inputs"].update(
+            {
+                "positive": list(conditioning),
+                "vae": ["video_vae_device", 0],
+                "latent": ["h3", 1],
+                "image": [guide.source_node, 0],
+                "frame_idx": guide.frame_index,
+            }
+        )
+        conditioning = [guide.guide_node, 0]
+    prompt["guider"]["inputs"]["conditioning"] = conditioning
+    _apply_anchored_sprite_graph_settings(prompt, settings)
+
+
+def _configure_anchored_sprite_loop_download(
+    prompt: Dict[str, Any], inputs: Dict[str, Any]
+) -> None:
+    """Export the default graph with its optional guide branches absent."""
+
+    settings = _anchored_sprite_settings(inputs)
+    _remove_inactive_anchored_guides(prompt, set())
+    prompt["guider"]["inputs"]["conditioning"] = ["h3", 0]
+    _apply_anchored_sprite_graph_settings(prompt, settings)
 
 
 def _validate_reference_tags(compiled_prompt: str, reference_count: int) -> None:
@@ -420,9 +620,6 @@ def _configure_reference_card(
     *,
     spec: _ReferenceCardSpec,
 ) -> None:
-    # Fail closed before graph mutation or upload staging.
-    _validate_access_basis(inputs)
-
     reference_fields: list[str] = []
     gap_seen = False
     for reference in spec.references:
@@ -622,6 +819,7 @@ def _number_cell(
     minimum: int,
     maximum: int,
     description: str,
+    required: bool = True,
 ) -> WorkflowCell:
     return WorkflowCell(
         node_id=node_id,
@@ -642,6 +840,7 @@ def _number_cell(
             "lfHelper": {"showWhenFocused": False, "value": description},
             "lfValue": default,
         },
+        required=required,
     )
 
 
@@ -665,17 +864,6 @@ def _upload_cell(
             "lfHelper": {"showWhenFocused": False, "value": description},
         },
         required=required,
-    )
-
-
-def _access_cell() -> WorkflowCell:
-    return _select_cell(
-        node_id="access",
-        cell_id="access_basis",
-        label="Access basis (required)",
-        description=_ACCESS_HELP,
-        options=_ACCESS_OPTIONS,
-        default=None,
     )
 
 
@@ -772,6 +960,7 @@ def _video_output(description: str) -> WorkflowCell:
 
 
 _BASE_GRAPH = Path(__file__).resolve().parent / "minimax_h3_base.json"
+_ANCHORED_GRAPH = Path(__file__).resolve().parent / "minimax_h3_anchored_loop.json"
 _REFERENCE_GRAPH = Path(__file__).resolve().parent / "minimax_h3_reference.json"
 
 _BASE_CARD_SPECS = (
@@ -1028,7 +1217,7 @@ _REFERENCE_CARD_SPECS = (
             _ReferenceInputSpec(
                 "scene_sheet",
                 "Composite scene sheet",
-                "One image containing the authorized character turnarounds, costumes, props, and environment to use together as <Picture 1>.",
+                "One image containing the character turnarounds, costumes, props, and environment to use together as <Picture 1>.",
                 True,
             ),
         ),
@@ -1061,10 +1250,9 @@ def _make_base_workflow(spec: _BaseCardSpec) -> WorkflowNode:
     return WorkflowNode(
         id=spec.workflow_id,
         value=spec.title,
-        description=spec.description + _LICENCE_NOTICE,
+        description=spec.description,
         category="MiniMax H3",
         inputs=[
-            _access_cell(),
             *uploads,
             *_creative_cells(
                 direction_label=spec.direction_label,
@@ -1085,6 +1273,164 @@ def _make_base_workflow(spec: _BaseCardSpec) -> WorkflowNode:
     )
 
 
+def _make_anchored_sprite_loop_workflow() -> WorkflowNode:
+    return WorkflowNode(
+        id="minimax_h3_anchored_sprite_loop",
+        value="Anchored Sprite Loop",
+        description=(
+            "Create a prompt-guided sprite or compact illustration loop between explicit "
+            "opening and ending FL2VA frames, with up to two optional interior image "
+            "anchors at selected frame indices. Use the same endpoint image when a "
+            "visually closed cycle is required; the result remains generated motion, not "
+            "deterministic in-betweening. The card saves a 24-frame transparent PNG batch, "
+            "a zero-gap 6x4 atlas, and the original MP4 preview. RMBG-2.0 infers alpha per "
+            "frame, so edge matte, framing, scale, and depicted content can still vary; "
+            "this first slice does not add temporal stabilization or automatic cropping. "
+            "It requires the installed VNCCS_RMBG2 node and the declared local RMBG-2.0 "
+            "files; Runner does not start the wrapper's fallback download."
+        ),
+        category="MiniMax H3",
+        inputs=[
+            _upload_cell(
+                node_id="source_first",
+                cell_id="first_frame_image",
+                label="First frame",
+                description=(
+                    "Required opening endpoint at frame 0. Core stretches it to the chosen "
+                    "canvas, so select a matching aspect ratio to avoid distortion."
+                ),
+            ),
+            _upload_cell(
+                node_id="source_last",
+                cell_id="last_frame_image",
+                label="Last frame",
+                description=(
+                    "Required ending endpoint at the final frame. Reuse the opening asset "
+                    "for a closed cycle; the sprite export deliberately omits this final "
+                    "endpoint while the MP4 keeps it. Core cover-crops the image to the "
+                    "selected canvas."
+                ),
+            ),
+            _upload_cell(
+                node_id="source_guide_1",
+                cell_id="guide_image_1",
+                label="Guide 1 image (optional)",
+                description=(
+                    "Optional pose or state anchor. It is added through Core's "
+                    "MiniMaxH3AddGuide node at Guide 1 frame."
+                ),
+                required=False,
+            ),
+            _number_cell(
+                node_id="guide_1",
+                cell_id="guide_frame_1",
+                label="Guide 1 frame",
+                default="41",
+                minimum=1,
+                maximum=360,
+                description=(
+                    "Zero-based interior target frame for Guide 1. It must be after frame 0 "
+                    "and before the selected duration's final frame."
+                ),
+                required=False,
+            ),
+            _upload_cell(
+                node_id="source_guide_2",
+                cell_id="guide_image_2",
+                label="Guide 2 image (optional)",
+                description=(
+                    "Optional second pose or state anchor. It may appear before or after "
+                    "Guide 1, but the two frame indices must differ."
+                ),
+                required=False,
+            ),
+            _number_cell(
+                node_id="guide_2",
+                cell_id="guide_frame_2",
+                label="Guide 2 frame",
+                default="82",
+                minimum=1,
+                maximum=360,
+                description=(
+                    "Zero-based interior target frame for Guide 2. It must be in range and "
+                    "different from Guide 1 when both images are supplied."
+                ),
+                required=False,
+            ),
+            *_creative_cells(
+                direction_label="Loop direction",
+                direction_default=(
+                    "Create one seamless, readable action cycle between the supplied "
+                    "endpoint frames. Preserve the subject's silhouette, palette, line "
+                    "weight, proportions, and screen position; use clear anticipation, one "
+                    "primary motion, a controlled settle, restrained secondary motion, and "
+                    "a fixed camera with no cuts or added elements. Honor each supplied "
+                    "intermediate guide at its selected frame."
+                ),
+                direction_help=(
+                    "Describe the complete cycle, timing, fixed visual traits, camera and "
+                    "background behavior, and how intermediate guide poses connect."
+                ),
+            ),
+            *_common_cells(default_aspect_ratio="1:1"),
+            _number_cell(
+                node_id="sprite_scale",
+                cell_id="sprite_size",
+                label="Sprite size",
+                default=str(_DEFAULT_SPRITE_SIZE),
+                minimum=32,
+                maximum=1024,
+                description=(
+                    "Square pixel size for every transparent PNG frame and each 6x4 atlas "
+                    "cell. Core ImageScale applies one common RGBA canvas to the full batch."
+                ),
+            ),
+            _number_cell(
+                node_id="sprite_sampler",
+                cell_id="intended_fps",
+                label="Intended playback FPS",
+                default=str(_DEFAULT_INTENDED_FPS),
+                minimum=1,
+                maximum=60,
+                description=(
+                    "Playback rate recorded in the sampling receipt and output names. It "
+                    "does not change the original 24 fps MP4 preview."
+                ),
+            ),
+        ],
+        outputs=[
+            _video_output(
+                "Original anchored loop MP4 with synchronized stereo audio at 24 fps."
+            ),
+            WorkflowCell(
+                node_id="save_frames",
+                id="frames",
+                shape="masonry",
+                description="Twenty-four ordered square RGBA PNG sprite frames.",
+            ),
+            WorkflowCell(
+                node_id="save_atlas",
+                id="atlas",
+                shape="masonry",
+                description="Transparent zero-gap 6x4 PNG sprite atlas in row-major order.",
+            ),
+            WorkflowCell(
+                node_id="display_sampling_receipt",
+                id="receipt",
+                shape="code",
+                description=(
+                    "Periodic sampling indices and source/intended playback timing receipt."
+                ),
+                props={"lfLanguage": "json"},
+            ),
+        ],
+        configure_prompt=_configure_anchored_sprite_loop,
+        configure_download=_configure_anchored_sprite_loop_download,
+        workflow_path=_ANCHORED_GRAPH,
+        required_model_assets=_RMBG2_MODEL_ASSETS,
+    )
+
+
 def _make_reference_workflow(spec: _ReferenceCardSpec) -> WorkflowNode:
     return WorkflowNode(
         id=spec.workflow_id,
@@ -1093,11 +1439,9 @@ def _make_reference_workflow(spec: _ReferenceCardSpec) -> WorkflowNode:
             spec.description
             + " References use Core's Max detail for the strongest available identity "
             "fidelity; this can run several times slower than Match."
-            + _LICENCE_NOTICE
         ),
         category="MiniMax H3",
         inputs=[
-            _access_cell(),
             *[
                 _upload_cell(
                     node_id=f"source_{ordinal}",
@@ -1130,6 +1474,7 @@ def _make_reference_workflow(spec: _ReferenceCardSpec) -> WorkflowNode:
 generate_video, animate_image, first_last_frame, sprite_motion = tuple(
     _make_base_workflow(spec) for spec in _BASE_CARD_SPECS
 )
+anchored_sprite_loop = _make_anchored_sprite_loop_workflow()
 reference_restage, character_swap, outfit_transfer, scene_sheet = tuple(
     _make_reference_workflow(spec) for spec in _REFERENCE_CARD_SPECS
 )
@@ -1138,6 +1483,7 @@ WORKFLOWS = (
     generate_video,
     animate_image,
     first_last_frame,
+    anchored_sprite_loop,
     reference_restage,
     character_swap,
     outfit_transfer,
@@ -1149,6 +1495,7 @@ WORKFLOW_BY_ID = {workflow.id: workflow for workflow in WORKFLOWS}
 __all__ = [
     "WORKFLOWS",
     "WORKFLOW_BY_ID",
+    "anchored_sprite_loop",
     "animate_image",
     "character_swap",
     "first_last_frame",

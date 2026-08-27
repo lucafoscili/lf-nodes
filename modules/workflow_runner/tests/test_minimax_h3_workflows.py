@@ -32,6 +32,7 @@ EXPECTED_NAMES = {
     "minimax_h3_generate_video": "Generate Video",
     "minimax_h3_animate_image": "Animate Image",
     "minimax_h3_first_last_frame": "First & Last Frame",
+    "minimax_h3_anchored_sprite_loop": "Anchored Sprite Loop",
     "minimax_h3_reference_restage": "Reference Restage",
     "minimax_h3_character_swap": "Character Swap",
     "minimax_h3_outfit_transfer": "Outfit Transfer",
@@ -42,6 +43,7 @@ BASE_IDS = {
     "minimax_h3_generate_video",
     "minimax_h3_animate_image",
     "minimax_h3_first_last_frame",
+    "minimax_h3_anchored_sprite_loop",
     "minimax_h3_sprite_motion",
 }
 REFERENCE_IDS = set(EXPECTED_NAMES) - BASE_IDS
@@ -52,11 +54,18 @@ EXPECTED_UPLOADS = {
         "first_frame_image",
         "last_frame_image",
     ),
+    "minimax_h3_anchored_sprite_loop": (
+        "first_frame_image",
+        "last_frame_image",
+    ),
     "minimax_h3_reference_restage": ("reference_image",),
     "minimax_h3_character_swap": ("scene_image", "character_image"),
     "minimax_h3_outfit_transfer": ("character_image", "outfit_image"),
     "minimax_h3_sprite_motion": ("source_image",),
     "minimax_h3_scene_sheet": ("scene_sheet",),
+}
+OPTIONAL_UPLOADS = {
+    "minimax_h3_anchored_sprite_loop": ("guide_image_1", "guide_image_2"),
 }
 EXPECTED_CANVASES = {
     "16:9": (1344, 768),
@@ -79,6 +88,9 @@ EXPECTED_PREFIXES = {
     "minimax_h3_first_last_frame": (
         "LF_Nodes/MiniMaxH3/FirstLastFrame/kitchen_quality/seed-73-f124"
     ),
+    "minimax_h3_anchored_sprite_loop": (
+        "LF_Nodes/MiniMaxH3/AnchoredSpriteLoop/kitchen_quality/seed-73-f124"
+    ),
     "minimax_h3_reference_restage": (
         "LF_Nodes/MiniMaxH3/ReferenceRestage/kitchen_quality/seed-73-refs1-f124"
     ),
@@ -95,7 +107,13 @@ EXPECTED_PREFIXES = {
         "LF_Nodes/MiniMaxH3/SceneSheetExperimental/kitchen_quality/seed-73-refs1-f124"
     ),
 }
-FORBIDDEN_DOMAIN_WORDS = ("velora", "stellaris", "azeroth", "sentinel")
+FORBIDDEN_DOMAIN_WORDS = (
+    "velora",
+    "garage",
+    "stellaris",
+    "azeroth",
+    "sentinel",
+)
 FORBIDDEN_HOSTED_NODE_TYPES = {
     "MinimaxVideoGeneration",
     "MiniMaxVideoGeneration",
@@ -128,9 +146,8 @@ def _default_inputs(workflow: Any) -> dict[str, Any]:
         for cell in workflow.inputs
         if "lfValue" in cell.props
     }
-    inputs["access_basis"] = "applicable_territory"
     for cell in workflow.inputs:
-        if cell.shape == "upload":
+        if cell.shape == "upload" and cell.required:
             inputs[cell.id] = [Path(f"C:/uploads/{cell.id}.png")]
     return inputs
 
@@ -200,6 +217,7 @@ def test_public_cards_have_no_velora_or_other_project_domain_vocabulary() -> Non
 
     for forbidden in FORBIDDEN_DOMAIN_WORDS:
         assert forbidden not in public_text
+    assert re.search(r"\bden\b", public_text) is None
 
 
 def test_task_families_use_separate_local_checkpoints_and_profiles() -> None:
@@ -208,11 +226,30 @@ def test_task_families_use_separate_local_checkpoints_and_profiles() -> None:
     for workflow_id in BASE_IDS:
         workflow = workflows[workflow_id]
         prompt = workflow.load_prompt()
-        assert workflow.workflow_path.name == "minimax_h3_base.json"
+        expected_graph = (
+            "minimax_h3_anchored_loop.json"
+            if workflow_id == "minimax_h3_anchored_sprite_loop"
+            else "minimax_h3_base.json"
+        )
+        assert workflow.workflow_path.name == expected_graph
         assert prompt["unet"]["inputs"]["unet_name"] == (
             "minimax_h3_fl2va_pruned_int8_convrot.safetensors"
         )
         assert prompt["h3"]["class_type"] == "MiniMaxH3ImageToVideo"
+        if workflow_id == "minimax_h3_anchored_sprite_loop":
+            assert prompt["guide_1"]["class_type"] == "MiniMaxH3AddGuide"
+            assert prompt["guide_2"]["class_type"] == "MiniMaxH3AddGuide"
+            assert prompt["sprite_sampler"]["class_type"] == (
+                "LF_PeriodicImageBatchSampler"
+            )
+            assert prompt["remove_background"]["class_type"] == "VNCCS_RMBG2"
+            assert prompt["verify_rmbg_alpha"]["class_type"] == "ImageToMask"
+            assert prompt["rmbg_transparency_mask"]["class_type"] == "InvertMask"
+            assert prompt["validated_cutout"]["class_type"] == (
+                "JoinImageWithAlpha"
+            )
+            assert prompt["sprite_scale"]["class_type"] == "ImageScale"
+            assert prompt["sprite_grid"]["class_type"] == "LF_ImageGrid"
         assert "execution_profile" not in _cells(workflow)
 
     for workflow_id in REFERENCE_IDS:
@@ -274,24 +311,12 @@ def test_graphs_have_no_hosted_partner_api_nodes() -> None:
         assert "SaveVideo" in class_types
 
 
-def test_access_basis_is_required_select_with_no_default() -> None:
-    for workflow in _workflows().values():
-        access = _cells(workflow)["access_basis"]
-        assert access.shape == "select"
-        assert access.required is True
-        assert "lfValue" not in access.props
-        assert _option_values(access) == [
-            "applicable_territory",
-            "separate_written_authorization",
-        ]
-
-
-def test_public_access_copy_names_territories_and_denies_implied_authority() -> None:
-    region_patterns = (
-        r"\beuropean union\b|\beu\b",
-        r"\bunited kingdom\b|\buk\b",
-        r"\bunited states\b|\bus\b|\busa\b",
-        r"\brepublic of korea\b|\bsouth korea\b",
+def test_public_cards_do_not_require_policy_attestations() -> None:
+    forbidden = (
+        "access_basis",
+        "applicable territory",
+        "separate written authorization",
+        "grants no licence",
     )
     for workflow in _workflows().values():
         public = json.dumps(
@@ -301,57 +326,7 @@ def test_public_access_copy_names_territories_and_denies_implied_authority() -> 
             },
             ensure_ascii=False,
         ).lower()
-        assert all(re.search(pattern, public) for pattern in region_patterns)
-        assert re.search(
-            r"does not grant.{0,40}(?:licen[cs]e|authori[sz]ation)", public
-        )
-        assert "open source" not in public
-
-
-@pytest.mark.parametrize("bad_value", [None, "", "other", True])
-def test_access_basis_fails_closed_before_graph_mutation_or_upload_staging(
-    monkeypatch: pytest.MonkeyPatch,
-    bad_value: Any,
-) -> None:
-    monkeypatch.setattr(
-        workflow_module,
-        "resolve_load_image_reference",
-        lambda *_args: pytest.fail("access rejection must not stage an upload"),
-    )
-    for workflow in _workflows().values():
-        inputs = _default_inputs(workflow)
-        if bad_value is None:
-            inputs.pop("access_basis")
-        else:
-            inputs["access_basis"] = bad_value
-        prompt = workflow.load_prompt()
-        original = copy.deepcopy(prompt)
-
-        with pytest.raises(InputValidationError) as error:
-            workflow.configure_prompt(prompt, inputs)
-
-        assert error.value.input_name == "access_basis"
-        assert prompt == original
-
-
-@pytest.mark.parametrize(
-    "access_basis",
-    ["applicable_territory", "separate_written_authorization"],
-)
-def test_both_access_bases_are_accepted_but_never_written_to_the_graph(
-    monkeypatch: pytest.MonkeyPatch,
-    access_basis: str,
-) -> None:
-    for workflow in _workflows().values():
-        prompt, _calls = _configure(
-            workflow,
-            monkeypatch,
-            access_basis=access_basis,
-        )
-        serialized = json.dumps(prompt)
-        assert access_basis not in serialized
-        assert "access_basis" not in serialized
-        assert "access" not in prompt
+        assert all(phrase not in public for phrase in forbidden)
 
 
 def test_curated_aspect_ratios_map_to_safe_native_canvases(
@@ -432,10 +407,20 @@ def test_non_preset_durations_fail_before_upload_staging(
 def test_required_uploads_are_declared_in_semantic_reference_order() -> None:
     for workflow_id, expected_uploads in EXPECTED_UPLOADS.items():
         uploads = [
-            cell for cell in _workflows()[workflow_id].inputs if cell.shape == "upload"
+            cell
+            for cell in _workflows()[workflow_id].inputs
+            if cell.shape == "upload" and cell.required
         ]
         assert tuple(cell.id for cell in uploads) == expected_uploads
         assert all(cell.required for cell in uploads)
+
+    for workflow_id, expected_uploads in OPTIONAL_UPLOADS.items():
+        uploads = [
+            cell
+            for cell in _workflows()[workflow_id].inputs
+            if cell.shape == "upload" and not cell.required
+        ]
+        assert tuple(cell.id for cell in uploads) == expected_uploads
 
 
 @pytest.mark.parametrize(
@@ -529,6 +514,343 @@ def test_animate_and_first_last_cards_expose_distinct_frame_support(
     compiled = first_last["h3"]["inputs"]["prompt"]
     assert "Picture 1 (from Shot 1) aligns with the 0.00-second mark" in compiled
     assert "Picture 2 (from Shot 1) aligns with the 8.00-second mark" in compiled
+
+
+def test_anchored_sprite_loop_declares_two_optional_image_guides() -> None:
+    workflow = _workflows()["minimax_h3_anchored_sprite_loop"]
+    cells = _cells(workflow)
+
+    assert [
+        cell.id for cell in workflow.inputs if cell.shape == "upload"
+    ] == [
+        "first_frame_image",
+        "last_frame_image",
+        "guide_image_1",
+        "guide_image_2",
+    ]
+    assert cells["first_frame_image"].required is True
+    assert cells["last_frame_image"].required is True
+    for ordinal, default_frame in ((1, "41"), (2, "82")):
+        assert cells[f"guide_image_{ordinal}"].required is False
+        frame = cells[f"guide_frame_{ordinal}"]
+        assert frame.required is False
+        assert frame.props["lfValue"] == default_frame
+        assert frame.props["lfHtmlAttributes"]["min"] == 1
+        assert frame.props["lfHtmlAttributes"]["max"] == 360
+
+
+def test_anchored_sprite_loop_exposes_bounded_sprite_controls_and_outputs() -> None:
+    workflow = _workflows()["minimax_h3_anchored_sprite_loop"]
+    cells = _cells(workflow)
+
+    assert cells["sprite_size"].node_id == "sprite_scale"
+    assert cells["sprite_size"].props["lfValue"] == "256"
+    assert cells["sprite_size"].props["lfHtmlAttributes"] == {
+        "autocomplete": "off",
+        "name": "sprite_size",
+        "type": "number",
+        "min": 32,
+        "max": 1024,
+        "step": 1,
+    }
+    assert cells["intended_fps"].node_id == "sprite_sampler"
+    assert cells["intended_fps"].props["lfValue"] == "12"
+    assert cells["intended_fps"].props["lfHtmlAttributes"]["min"] == 1
+    assert cells["intended_fps"].props["lfHtmlAttributes"]["max"] == 60
+    assert [
+        (cell.id, cell.node_id, cell.shape) for cell in workflow.outputs
+    ] == [
+        ("video", "save", "masonry"),
+        ("frames", "save_frames", "masonry"),
+        ("atlas", "save_atlas", "masonry"),
+        ("receipt", "display_sampling_receipt", "code"),
+    ]
+    assert tuple(workflow.outputs)[-1].props == {"lfLanguage": "json"}
+
+
+def test_anchored_sprite_loop_builds_the_exact_sprite_output_branch(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    workflow = _workflows()["minimax_h3_anchored_sprite_loop"]
+    prompt, _calls = _configure(
+        workflow,
+        monkeypatch,
+        sprite_size="512",
+        intended_fps="24",
+    )
+
+    assert prompt["sprite_sampler"]["inputs"] == {
+        "image": ["decode_video", 0],
+        "target_count": 24,
+        "loop_endpoint_policy": "exclude_final_endpoint",
+        "source_fps": 24.0,
+        "intended_fps": 24.0,
+    }
+    assert prompt["remove_background"]["inputs"] == {
+        "image": ["sprite_sampler", 0],
+        "model": "RMBG-2.0",
+        "sensitivity": 1.0,
+        "process_res": 1024,
+        "mask_blur": 0,
+        "mask_offset": 0,
+        "invert_output": False,
+        "refine_foreground": False,
+        "background": "Alpha",
+    }
+    assert prompt["verify_rmbg_alpha"]["inputs"] == {
+        "image": ["remove_background", 0],
+        "channel": "alpha",
+    }
+    assert prompt["rmbg_transparency_mask"]["inputs"] == {
+        "mask": ["verify_rmbg_alpha", 0],
+    }
+    assert prompt["validated_cutout"]["inputs"] == {
+        "image": ["remove_background", 0],
+        "alpha": ["rmbg_transparency_mask", 0],
+    }
+    assert prompt["sprite_scale"]["inputs"] == {
+        "image": ["validated_cutout", 0],
+        "upscale_method": "lanczos",
+        "width": 512,
+        "height": 512,
+        "crop": "disabled",
+    }
+    assert prompt["save_frames"]["inputs"] == {
+        "images": ["sprite_scale", 0],
+        "filename_prefix": (
+            "LF_Nodes/MiniMaxH3/AnchoredSpriteLoop/kitchen_quality/"
+            "seed-42-f124/frames-512px-24fps"
+        ),
+    }
+    grid_inputs = prompt["sprite_grid"]["inputs"]
+    assert grid_inputs["image"] == ["sprite_scale", 0]
+    assert grid_inputs["cell_width"] == 512
+    assert grid_inputs["cell_height"] == 512
+    assert grid_inputs["gap_px"] == 0
+    assert grid_inputs["background"] == "transparent"
+    assert grid_inputs["show_headers"] is False
+    assert grid_inputs["title"] == ""
+    assert len(grid_inputs["dataset"]["columns"]) == 6
+    assert len(grid_inputs["dataset"]["nodes"]) == 4
+    assert all(
+        column["title"] == "" for column in grid_inputs["dataset"]["columns"]
+    )
+    assert all(node["value"] == "" for node in grid_inputs["dataset"]["nodes"])
+    assert prompt["save_atlas"]["inputs"] == {
+        "images": ["sprite_grid", 0],
+        "filename_prefix": (
+            "LF_Nodes/MiniMaxH3/AnchoredSpriteLoop/kitchen_quality/"
+            "seed-42-f124/atlas-6x4-512px-24fps"
+        ),
+    }
+    assert prompt["display_sampling_receipt"]["inputs"]["json_input"] == [
+        "sprite_sampler",
+        1,
+    ]
+    assert prompt["create_video"]["inputs"]["images"] == ["decode_video", 0]
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("sprite_size", 31),
+        ("sprite_size", 1025),
+        ("sprite_size", True),
+        ("sprite_size", "nan"),
+        ("intended_fps", 0),
+        ("intended_fps", 61),
+        ("intended_fps", True),
+        ("intended_fps", "nan"),
+    ],
+)
+def test_anchored_sprite_controls_fail_before_upload_staging_or_graph_mutation(
+    monkeypatch: pytest.MonkeyPatch,
+    field: str,
+    value: Any,
+) -> None:
+    workflow = _workflows()["minimax_h3_anchored_sprite_loop"]
+    inputs = {**_default_inputs(workflow), field: value}
+    monkeypatch.setattr(
+        workflow_module,
+        "resolve_load_image_reference",
+        lambda *_args: pytest.fail("invalid sprite controls must not stage uploads"),
+    )
+    prompt = workflow.load_prompt()
+    original = copy.deepcopy(prompt)
+
+    with pytest.raises((InputValidationError, ValueError)):
+        workflow.configure_prompt(prompt, inputs)
+
+    assert prompt == original
+
+
+def test_anchored_sprite_loop_declares_exact_local_rmbg2_package() -> None:
+    workflows = _workflows()
+    workflow = workflows["minimax_h3_anchored_sprite_loop"]
+
+    assert len(workflow.required_model_assets) == 1
+    asset = workflow.required_model_assets[0]
+    assert asset.label == "VNCCS RMBG-2.0 model"
+    assert asset.relative_paths == (
+        "RMBG/RMBG-2.0/config.json",
+        "RMBG/RMBG-2.0/model.safetensors",
+        "RMBG/RMBG-2.0/birefnet.py",
+        "RMBG/RMBG-2.0/BiRefNet_config.py",
+    )
+    assert all(
+        not other.required_model_assets
+        for workflow_id, other in workflows.items()
+        if workflow_id != workflow.id
+    )
+    assert "Runner does not start the wrapper's fallback download" in (
+        workflow.description
+    )
+    assert "does not add temporal stabilization or automatic cropping" in (
+        workflow.description
+    )
+
+
+def test_anchored_sprite_loop_keeps_explicit_endpoints_without_optional_guides(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    workflow = _workflows()["minimax_h3_anchored_sprite_loop"]
+    prompt, calls = _configure(workflow, monkeypatch)
+
+    assert calls == ["first_frame_image", "last_frame_image"]
+    assert prompt["h3"]["inputs"]["first_frame"] == ["source_first", 0]
+    assert prompt["h3"]["inputs"]["last_frame"] == ["source_last", 0]
+    assert prompt["guider"]["inputs"]["conditioning"] == ["h3", 0]
+    for ordinal in (1, 2):
+        assert f"source_guide_{ordinal}" not in prompt
+        assert f"guide_{ordinal}" not in prompt
+
+
+def test_anchored_sprite_loop_download_removes_optional_guide_branches() -> None:
+    workflow = _workflows()["minimax_h3_anchored_sprite_loop"]
+    defaults = {
+        cell.id: cell.props["lfValue"]
+        for cell in workflow.inputs
+        if "lfValue" in cell.props
+    }
+    prompt = workflow.load_prompt()
+
+    assert workflow.configure_download is not None
+    workflow.configure_download(prompt, defaults)
+
+    assert prompt["h3"]["inputs"]["first_frame"] == ["source_first", 0]
+    assert prompt["h3"]["inputs"]["last_frame"] == ["source_last", 0]
+    assert prompt["guider"]["inputs"]["conditioning"] == ["h3", 0]
+    assert prompt["sprite_sampler"]["inputs"]["target_count"] == 24
+    assert prompt["save"]["inputs"]["filename_prefix"].endswith(
+        "/seed-42-f124"
+    )
+    for ordinal in (1, 2):
+        assert f"source_guide_{ordinal}" not in prompt
+        assert f"guide_{ordinal}" not in prompt
+
+
+def test_anchored_sprite_loop_chains_guides_in_frame_order(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    workflow = _workflows()["minimax_h3_anchored_sprite_loop"]
+    prompt, calls = _configure(
+        workflow,
+        monkeypatch,
+        guide_image_1=[Path("C:/uploads/guide_image_1.png")],
+        guide_frame_1="90",
+        guide_image_2=[Path("C:/uploads/guide_image_2.png")],
+        guide_frame_2="30",
+    )
+
+    assert calls == [
+        "first_frame_image",
+        "last_frame_image",
+        "guide_image_1",
+        "guide_image_2",
+    ]
+    assert prompt["guide_2"] == {
+        "inputs": {
+            "positive": ["h3", 0],
+            "vae": ["video_vae_device", 0],
+            "latent": ["h3", 1],
+            "image": ["source_guide_2", 0],
+            "frame_idx": 30,
+        },
+        "class_type": "MiniMaxH3AddGuide",
+        "_meta": {"title": "Anchor optional intermediate guide 2"},
+    }
+    assert prompt["guide_1"]["inputs"]["positive"] == ["guide_2", 0]
+    assert prompt["guide_1"]["inputs"]["frame_idx"] == 90
+    assert prompt["guider"]["inputs"]["conditioning"] == ["guide_1", 0]
+
+
+def test_anchored_sprite_loop_accepts_either_optional_guide_slot(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    workflow = _workflows()["minimax_h3_anchored_sprite_loop"]
+    prompt, calls = _configure(
+        workflow,
+        monkeypatch,
+        guide_image_2=[Path("C:/uploads/guide_image_2.png")],
+        guide_frame_2="61",
+    )
+
+    assert calls == ["first_frame_image", "last_frame_image", "guide_image_2"]
+    assert "guide_1" not in prompt
+    assert "source_guide_1" not in prompt
+    assert prompt["guide_2"]["inputs"]["positive"] == ["h3", 0]
+    assert prompt["guide_2"]["inputs"]["frame_idx"] == 61
+    assert prompt["guider"]["inputs"]["conditioning"] == ["guide_2", 0]
+
+
+@pytest.mark.parametrize("bad_frame", [0, 123, -1, 124, True, "nan"])
+def test_anchored_guide_indices_must_be_interior_before_upload_staging(
+    monkeypatch: pytest.MonkeyPatch,
+    bad_frame: Any,
+) -> None:
+    workflow = _workflows()["minimax_h3_anchored_sprite_loop"]
+    inputs = {
+        **_default_inputs(workflow),
+        "guide_image_1": [Path("C:/uploads/guide_image_1.png")],
+        "guide_frame_1": bad_frame,
+    }
+    monkeypatch.setattr(
+        workflow_module,
+        "resolve_load_image_reference",
+        lambda *_args: pytest.fail("invalid guide indices must not stage uploads"),
+    )
+    prompt = workflow.load_prompt()
+    original = copy.deepcopy(prompt)
+
+    with pytest.raises((InputValidationError, ValueError)):
+        workflow.configure_prompt(prompt, inputs)
+
+    assert prompt == original
+
+
+def test_anchored_guide_indices_must_be_distinct_before_upload_staging(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    workflow = _workflows()["minimax_h3_anchored_sprite_loop"]
+    inputs = {
+        **_default_inputs(workflow),
+        "guide_image_1": [Path("C:/uploads/guide_image_1.png")],
+        "guide_frame_1": "62",
+        "guide_image_2": [Path("C:/uploads/guide_image_2.png")],
+        "guide_frame_2": "62",
+    }
+    monkeypatch.setattr(
+        workflow_module,
+        "resolve_load_image_reference",
+        lambda *_args: pytest.fail("duplicate guide indices must not stage uploads"),
+    )
+    prompt = workflow.load_prompt()
+    original = copy.deepcopy(prompt)
+
+    with pytest.raises(ValueError, match="must be distinct"):
+        workflow.configure_prompt(prompt, inputs)
+
+    assert prompt == original
 
 
 def test_reference_cards_use_max_reference_detail_by_default(
@@ -636,13 +958,23 @@ def test_outputs_and_filename_prefixes_are_exact_and_deterministic(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     for workflow_id, workflow in _workflows().items():
-        assert len(tuple(workflow.outputs)) == 1
-        output = tuple(workflow.outputs)[0]
-        assert (output.id, output.node_id, output.shape) == (
-            "video",
-            "save",
-            "masonry",
-        )
+        outputs = tuple(workflow.outputs)
+        if workflow_id == "minimax_h3_anchored_sprite_loop":
+            assert [
+                (output.id, output.node_id, output.shape) for output in outputs
+            ] == [
+                ("video", "save", "masonry"),
+                ("frames", "save_frames", "masonry"),
+                ("atlas", "save_atlas", "masonry"),
+                ("receipt", "display_sampling_receipt", "code"),
+            ]
+        else:
+            assert len(outputs) == 1
+            assert (outputs[0].id, outputs[0].node_id, outputs[0].shape) == (
+                "video",
+                "save",
+                "masonry",
+            )
 
         first, _calls = _configure(workflow, monkeypatch, seed="73")
         second, _calls = _configure(workflow, monkeypatch, seed="73")
@@ -655,6 +987,20 @@ def test_outputs_and_filename_prefixes_are_exact_and_deterministic(
         assert first["create_video"]["inputs"]["images"] == ["decode_video", 0]
         assert first["create_video"]["inputs"]["audio"] == ["decode_audio", 0]
         assert first["create_video"]["inputs"]["fps"] == 24.0
+        if workflow_id == "minimax_h3_anchored_sprite_loop":
+            assert first["save_frames"]["inputs"] == {
+                "images": ["sprite_scale", 0],
+                "filename_prefix": (
+                    EXPECTED_PREFIXES[workflow_id] + "/frames-256px-12fps"
+                ),
+            }
+            assert first["save_atlas"]["inputs"] == {
+                "images": ["sprite_grid", 0],
+                "filename_prefix": (
+                    EXPECTED_PREFIXES[workflow_id]
+                    + "/atlas-6x4-256px-12fps"
+                ),
+            }
 
 
 def test_serialized_and_native_help_contract_does_not_render_twice() -> None:

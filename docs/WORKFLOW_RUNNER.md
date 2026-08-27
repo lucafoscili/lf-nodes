@@ -6,25 +6,45 @@ The Workflow Runner is a miniapp within LF Nodes that provides a web-based inter
 
 ### MiniMax H3 workflows
 
-The shipped `MiniMax H3` category contains eight focused local-weight cards:
-Generate Video, Animate Image, First & Last Frame, Reference Restage, Character
-Swap, Outfit Transfer, Sprite Motion, and the experimental Scene Sheet workflow.
-They use current ComfyUI Core H3 nodes, fixed 24 fps output, native 20-step
-`res_multistep`/`simple` sampling, curated native canvases, and exact 5–15 second
-frame presets. FL2VA and REF2VA cards remain bound to their respective model
-families; the transfer cards are honest reference-guided prompt presets, not
-masking or pixel-replacement tools.
+The shipped `MiniMax H3` category contains nine focused local-weight cards:
+Generate Video, Animate Image, First & Last Frame, Anchored Sprite Loop,
+Reference Restage, Character Swap, Outfit Transfer, Sprite Motion, and the
+experimental Scene Sheet workflow. They use current ComfyUI Core H3 nodes,
+fixed 24 fps output, the `kitchen_quality` 20-step
+`res_multistep`/`simple` profile, curated native canvases, and exact 5–15 second
+frame presets with a trained minimum of 124 frames. FL2VA and REF2VA cards
+remain bound to their respective model families; the transfer cards use
+reference-guided prompts rather than masking or pixel replacement.
 
-The model weights are not distributed by LF Nodes. MiniMax H3 weights and
-outputs remain governed by the [MiniMax H3 Community License and Acceptable Use
-Policy](https://huggingface.co/MiniMaxAI/MiniMax-H3/blob/main/LICENSE), not this
-repository's MIT license. The Community License's Applicable Territory excludes
-the European Union, United Kingdom, United States, and Republic of Korea. Every
-H3 card therefore requires an explicit, no-default access basis before upload
-staging; this is an accidental-use guard and does not grant permission. Operators
-remain responsible for authorization covering the run and display of outputs,
-rights and consent for referenced material and likenesses, and prominent
-AI-generated disclosure for public output.
+Anchored Sprite Loop keeps required FL2VA opening and ending frames and can
+chain one or two optional images through Core's `MiniMaxH3AddGuide` node. Each
+guide uses a caller-selected, zero-based interior frame index; configured guide
+indices must be in range and distinct. All controls are validated before the
+shared content-addressed upload staging path is entered. In addition to the
+original 24 fps MP4, the card periodically selects exactly 24 ordered frames
+from the decoded batch while excluding the final endpoint. Reusing the opening
+image as the ending reference makes excluding that conditioned endpoint
+appropriate for a visually closed cycle; H3 generation does not guarantee that
+the decoded first and last frames are pixel-identical. With different endpoints,
+the ending keyframe remains in the MP4 but not the sprite export. The card then
+uses the installed `VNCCS_RMBG2` node in Alpha mode, applies one square Core
+`ImageScale` canvas (256 px by default), saves every RGBA frame, and saves a
+transparent, zero-gap, no-header 6x4 `LF_ImageGrid` atlas. The sampling receipt
+records the exact indices and source/intended playback rates. A Core alpha
+round-trip verifies that background removal produced RGBA before any frame or
+atlas is saved; an RGB fallback fails the run instead of publishing opaque
+sprites.
+
+RMBG-2.0's four-file local package is an explicit Runner model prerequisite;
+the card remains **Setup required** when it cannot be verified and never falls
+through to the wrapper's automatic download. Alpha is inferred independently
+per frame, and the first vertical slice intentionally adds no temporal matte
+stabilizer or automatic content crop. Edge matte, apparent scale, framing, and
+depicted content can therefore vary and should be checked in the saved frame
+sequence before the atlas is treated as production-ready.
+
+LF Nodes does not bundle or download MiniMax H3 weights. Catalogue readiness
+checks the declared local files and node types before a card can run.
 
 The generic `Compose Image Sheet` card arranges four uploads into a labeled 2×2
 PNG using `LF_ImageList` and `LF_ImageGrid`. The list seam preserves every
@@ -50,7 +70,7 @@ local sample. Each successful run saves three complementary artifacts: a still
 PNG preview, a 1024px three-second MP4 orbit at 25 fps, and the selected splat
 file. Runner uses the PNG for the visual result card, exposes the orbit as a
 video/download in run detail, and exposes SPZ, PLY, or KSPLAT as a direct
-download. It does not claim an interactive browser splat viewer.
+download. Interactive splat viewing remains outside this first Runner slice.
 
 LF Nodes does not distribute the required weights. The default graph expects a
 TripoSplat diffusion model and decoder, a DINOv3 vision encoder, a Flux2 image
@@ -61,17 +81,10 @@ literal files are `triposplat_fp16.safetensors`,
 ComfyUI Core node types must also be loaded. Catalogue readiness reports a
 missing known file or node as `setup_required`; it never downloads a model.
 
-Those weights retain their upstream terms; the repository's MIT license does
-not relicense them. In particular, the official DINOv3 checkpoint is gated and
-uses Meta's [DINOv3 License](https://github.com/facebookresearch/dinov3/blob/main/LICENSE.md).
-Users must obtain it from an authorized source, accept its terms, and evaluate
-the remaining model and dependency licenses for their intended use. LF Nodes
-distributes none of these weights.
-
 A Gaussian splat is a viewable radiance representation, not polygonal geometry.
-This card therefore does not promise a watertight, manifold, rig-ready, or
-game-ready mesh. Hidden surfaces are inferred, and input isolation and silhouette
-quality materially affect the reconstruction.
+The card produces no watertightness, manifold-topology, rigging, or game-ready
+optimization pass. Hidden surfaces are inferred, and input isolation and
+silhouette quality materially affect the reconstruction.
 
 ### TRELLIS.2 workflows
 
@@ -106,16 +119,12 @@ types are registered and that known Core loader files are present. It cannot
 prove that a compiled CUDA extension matches the active Python, PyTorch, and
 CUDA ABI.
 
-The preview-render path also uses NVlabs
-[`nvdiffrast`](https://github.com/NVlabs/nvdiffrast/blob/main/LICENSE.txt).
-For non-NVIDIA users, its license limits use to non-commercial research or
-evaluation and excludes direct or indirect monetary gain. LF Nodes' MIT
-license does not broaden that dependency license; review all wrapper, native
-extension, and model terms before using or redistributing the TRELLIS.2 stack.
+The preview renderer uses `nvdiffrast`, whose compiled extension must match the
+active Python, PyTorch, CUDA, and GPU environment.
 
 TRELLIS.2 output is a presentation-oriented textured mesh. Multi-view input can
-improve unseen geometry, but neither card guarantees watertightness, manifold
-topology, a production UV layout, a skeleton, or game-ready optimization.
+improve unseen geometry; the cards add no watertightness, manifold-topology,
+production-UV, skeleton, or game-ready optimization pass.
 
 ### Catalogue readiness
 
