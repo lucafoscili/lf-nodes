@@ -62,7 +62,7 @@ class LF_GeminiAPI:
     RETURN_NAMES = ("text", "clean", "raw_json", "json", "image")
     RETURN_TYPES = (Input.STRING, Input.STRING, Input.JSON, Input.JSON, Input.IMAGE)
 
-    async def on_exec(self, **kwargs: dict) -> tuple[str, str]:
+    async def on_exec(self, **kwargs: dict) -> tuple[str, str, str, str, Any]:
         prompt: str = kwargs.get("prompt", "")
         model: str = kwargs.get("model") or "gemini-2.5-flash-image"
         image = kwargs.get("image")
@@ -134,13 +134,27 @@ class LF_GeminiAPI:
                 except Exception:
                     logger.log("Failed to parse JSON response.")
                     wrapper = {"body": text_status, "lf_http_status": resp.status}
-                    return (text_status, json.dumps(wrapper, ensure_ascii=False))
+                    raw_json = json.dumps(wrapper, ensure_ascii=False)
+                    return (
+                        text_status,
+                        text_status,
+                        raw_json,
+                        "",
+                        image,
+                    )
 
         logger.log(f"Received response with status {resp.status}.")
         if resp.status != 200:
             logger.log(f"Error from Gemini API: {resp.status} {text_status}")
             wrapper = {"body": data, "lf_http_status": resp.status}
-            return (text_status, json.dumps(wrapper, ensure_ascii=False))
+            raw_json = json.dumps(wrapper, ensure_ascii=False)
+            return (
+                text_status,
+                text_status,
+                raw_json,
+                "",
+                image,
+            )
         
         if isinstance(data, dict):
             data.setdefault("lf_http_status", resp.status)

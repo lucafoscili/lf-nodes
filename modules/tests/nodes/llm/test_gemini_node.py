@@ -189,12 +189,15 @@ class TestGeminiNode(unittest.TestCase):
         with patch.dict(os.environ, {"GEMINI_PROXY_URL": "http://test-proxy.com"}):
             result = asyncio.run(self.node.on_exec(prompt="Test", node_id=self.test_node_id))
 
-        # Should return 2-tuple on JSON error: (text_status, json_wrapper)
-        self.assertEqual(len(result), 2)
+        # Every branch must honor the node's five declared outputs.
+        self.assertEqual(len(result), 5)
         self.assertEqual(result[0], "Plain text response")
-        parsed_wrapper = json.loads(result[1])
+        self.assertEqual(result[1], "Plain text response")
+        parsed_wrapper = json.loads(result[2])
         self.assertEqual(parsed_wrapper["body"], "Plain text response")
         self.assertEqual(parsed_wrapper["lf_http_status"], 200)
+        self.assertEqual(result[3], "")
+        self.assertIsNone(result[4])
 
         mock_logger_instance.log.assert_called_with("Failed to parse JSON response.")
 

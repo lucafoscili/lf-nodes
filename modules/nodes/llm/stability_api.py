@@ -10,6 +10,7 @@ from . import CATEGORY
 from ...utils.constants import API_ROUTE_PREFIX, FUNCTION, Input
 from ...utils.helpers.api import create_ui_logger, read_secret
 from ...utils.helpers.conversion.base64_to_tensor import base64_to_tensor
+from ...utils.helpers.logic import normalize_output_image
 
 # region LF_StabilityAPI
 class LF_StabilityAPI:
@@ -88,9 +89,11 @@ class LF_StabilityAPI:
     FUNCTION = FUNCTION
     OUTPUT_TOOLTIPS = (
         "Generated images from Stability AI.",
+        "Individual generated images in response order.",
     )
-    RETURN_NAMES = ("images",)
-    RETURN_TYPES = (Input.IMAGE,)
+    OUTPUT_IS_LIST = (False, True)
+    RETURN_NAMES = ("images", "image_list")
+    RETURN_TYPES = (Input.IMAGE, Input.IMAGE)
 
     async def on_exec(self, **kwargs: dict) -> tuple:
         prompt: str = kwargs.get("prompt", "")
@@ -199,7 +202,8 @@ class LF_StabilityAPI:
 
         logger.log(f"Successfully generated {len(generated_images)} image(s).")
 
-        return (result_images,)
+        _, image_list = normalize_output_image(result_images)
+        return (result_images, image_list)
 # endregion
 
 # region Mappings

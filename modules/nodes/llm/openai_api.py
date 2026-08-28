@@ -78,7 +78,7 @@ class LF_OpenAIAPI:
     RETURN_NAMES = ("text", "clean", "raw_json", "json", "image")
     RETURN_TYPES = (Input.STRING, Input.STRING, Input.JSON, Input.JSON, Input.IMAGE)
 
-    async def on_exec(self, **kwargs: dict) -> tuple[str, str]:
+    async def on_exec(self, **kwargs: dict) -> tuple[str, str, str, str, Any]:
         prompt: str = kwargs.get("prompt", "")
         model: str = kwargs.get("model") or "gpt-4"
         system_message: str = kwargs.get("system_message") or "You are a helpful assistant."
@@ -143,7 +143,14 @@ class LF_OpenAIAPI:
                 except Exception:
                     logger.log("Failed to parse JSON response.")
                     wrapper = {"body": text_status, "lf_http_status": resp.status}
-                    return (text_status, json.dumps(wrapper, ensure_ascii=False))
+                    raw_json = json.dumps(wrapper, ensure_ascii=False)
+                    return (
+                        text_status,
+                        text_status,
+                        raw_json,
+                        "",
+                        image,
+                    )
 
         if isinstance(data, dict):
             data.setdefault("lf_http_status", resp.status)
