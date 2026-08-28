@@ -7,6 +7,20 @@ from PIL import Image
 import pytest
 import torch
 
+# Some focused Workflow Runner tests install a deliberately minimal constants
+# stub at module scope. Discard that incomplete test double before importing the
+# real image package so this suite remains independent of pytest collection order.
+constants_module = sys.modules.get("modules.utils.constants")
+if constants_module is not None and not hasattr(constants_module, "CATEGORY_PREFIX"):
+    sys.modules.pop("modules.utils.constants", None)
+helpers_module = sys.modules.get("modules.utils.helpers")
+if helpers_module is not None and getattr(helpers_module, "__path__", None) == []:
+    for module_name in tuple(sys.modules):
+        if module_name == "modules.utils.helpers" or module_name.startswith(
+            "modules.utils.helpers."
+        ):
+            sys.modules.pop(module_name, None)
+
 # Keep this focused CPU tensor test independent from Comfy's optional CUDA
 # sampler stack during module import.
 if "comfy.samplers" not in sys.modules:
