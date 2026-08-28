@@ -1,6 +1,5 @@
 import aiohttp
 import os
-import torch
 
 from typing import Any
 
@@ -194,16 +193,10 @@ class LF_StabilityAPI:
             logger.log("No images were generated.")
             raise ValueError("No images were generated from Stability AI.")
 
-        # Stack images into a batch
-        if len(generated_images) == 1:
-            result_images = generated_images[0]
-        else:
-            result_images = torch.cat(generated_images, dim=0)
-
         logger.log(f"Successfully generated {len(generated_images)} image(s).")
 
-        _, image_list = normalize_output_image(result_images)
-        return (result_images, image_list)
+        batch_groups, image_list = normalize_output_image(generated_images)
+        return (batch_groups[0], image_list)
 # endregion
 
 # region Mappings

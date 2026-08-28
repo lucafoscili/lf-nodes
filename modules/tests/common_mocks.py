@@ -159,7 +159,7 @@ def setup_common_mocks(torch_enabled=False):
     def build_openai_multimodal_content(image, text):
         content = []
         if image is not None and (not isinstance(image, list) or image):
-            content.append({"type": "image_url", "image_url": {"url": "data:image/png;charset=utf-8;base64,mock"}})
+            content.append({"type": "image_url", "image_url": {"url": "data:image/png;base64,mock"}})
         if text:
             content.append({"type": "text", "text": text})
         return content

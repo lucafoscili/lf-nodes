@@ -203,6 +203,43 @@ class TestGeminiNode(unittest.TestCase):
 
     @patch('aiohttp.ClientSession')
     @patch('modules.nodes.llm.gemini_api.create_ui_logger')
+    def test_on_exec_non_success_json_honors_all_declared_outputs(
+        self,
+        mock_logger,
+        mock_session_class,
+    ):
+        mock_logger_instance = MagicMock()
+        mock_logger.return_value = mock_logger_instance
+
+        mock_session = MagicMock()
+        mock_session_class.return_value.__aenter__.return_value = mock_session
+        response_data = {"error": {"message": "rate limited"}}
+        mock_response = mock_async_response(
+            status=429,
+            text=json.dumps(response_data),
+            json_data=response_data,
+        )
+        mock_session.post.return_value.__aenter__.return_value = mock_response
+
+        with patch.dict(os.environ, {"GEMINI_PROXY_URL": "http://test-proxy.com"}):
+            result = asyncio.run(
+                self.node.on_exec(prompt="Test", node_id=self.test_node_id)
+            )
+
+        self.assertEqual(len(result), 5)
+        self.assertEqual(result[0], json.dumps(response_data))
+        self.assertEqual(result[1], json.dumps(response_data))
+        wrapper = json.loads(result[2])
+        self.assertEqual(wrapper["body"], response_data)
+        self.assertEqual(wrapper["lf_http_status"], 429)
+        self.assertEqual(result[3], "")
+        self.assertIsNone(result[4])
+        mock_logger_instance.log.assert_any_call(
+            f"Error from Gemini API: 429 {json.dumps(response_data)}"
+        )
+
+    @patch('aiohttp.ClientSession')
+    @patch('modules.nodes.llm.gemini_api.create_ui_logger')
     def test_on_exec_with_proxy_secret(self, mock_logger, mock_session_class):
         """Test request includes proxy secret when available."""
         mock_logger_instance = MagicMock()

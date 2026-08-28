@@ -134,3 +134,61 @@ def test_stability_success_returns_primary_batch_and_lossless_public_list(
     assert session.request["url"] == "https://stability.invalid/proxy"
     assert session.request["json"]["samples"] == 2
     assert logs[-1] == "Successfully generated 2 image(s)."
+
+
+def test_stability_preserves_heterogeneous_artifact_order(monkeypatch) -> None:
+    first = torch.zeros((1, 2, 3, 3), dtype=torch.float32)
+    middle = torch.full((1, 4, 5, 4), 0.5, dtype=torch.float32)
+    last = torch.ones((1, 2, 3, 3), dtype=torch.float32)
+    decoded = {
+        "first-image": first,
+        "middle-image": middle,
+        "last-image": last,
+    }
+    session = _FakeSession(
+        {
+            "artifacts": [
+                {"base64": "first-image"},
+                {"base64": "middle-image"},
+                {"base64": "last-image"},
+            ]
+        }
+    )
+    monkeypatch.setenv("STABILITY_PROXY_URL", "https://stability.invalid/proxy")
+    monkeypatch.setattr(
+        stability_module,
+        "create_ui_logger",
+        lambda *_args: SimpleNamespace(log=lambda _message: None),
+    )
+    monkeypatch.setattr(stability_module, "read_secret", lambda _name: None)
+    monkeypatch.setattr(
+        stability_module,
+        "base64_to_tensor",
+        lambda value: decoded[value],
+    )
+    monkeypatch.setattr(
+        stability_module,
+        "normalize_output_image",
+        normalize_output_image,
+    )
+
+    batch, image_list = asyncio.run(
+        LF_StabilityAPI().on_exec(
+            prompt="three ordered images",
+            samples=3,
+            _test_session=session,
+            node_id="stability-node",
+        )
+    )
+
+    assert batch.shape == (2, 2, 3, 3)
+    assert torch.equal(batch[0:1], first)
+    assert torch.equal(batch[1:2], last)
+    assert [tuple(image.shape) for image in image_list] == [
+        (1, 2, 3, 3),
+        (1, 4, 5, 4),
+        (1, 2, 3, 3),
+    ]
+    assert torch.equal(image_list[0], first)
+    assert torch.equal(image_list[1], middle)
+    assert torch.equal(image_list[2], last)
