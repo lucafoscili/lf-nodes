@@ -1,17 +1,11 @@
-import re
-
 from . import CATEGORY
 from ...utils.constants import FUNCTION, Input
 from ...utils.helpers.comfy import safe_send_sync
-from ...utils.helpers.temp_cache import TempFileCache
-from ...utils.helpers.logic.split_svgs import split_svgs
 from ...utils.helpers.logic import normalize_list_to_value
+from ...utils.helpers.logic.split_svgs import split_svgs
 
 # region LF_ViewSVGs
 class LF_ViewSVGs:
-    def __init__(self):
-        self._temp_cache = TempFileCache()
-
     @classmethod
     def INPUT_TYPES(self):
         return {
@@ -32,7 +26,7 @@ class LF_ViewSVGs:
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
-    INPUT_IS_LIST = (False, False)
+    INPUT_IS_LIST = True
     OUTPUT_IS_LIST = (False, True)
     OUTPUT_NODE = True
     OUTPUT_TOOLTIPS = (
@@ -43,19 +37,16 @@ class LF_ViewSVGs:
     RETURN_TYPES = (Input.STRING, Input.STRING)
 
     def on_exec(self, **kwargs: dict):
-        self._temp_cache.cleanup()
-
         raw = normalize_list_to_value(kwargs.get("svg"))
-
         if isinstance(raw, bytes):
             try:
-                svg_string = raw.decode('utf-8')
+                svg_string = raw.decode("utf-8")
             except Exception:
-                svg_string = raw.decode('latin-1', errors='ignore')
+                svg_string = raw.decode("latin-1", errors="ignore")
         else:
             svg_string = str(raw or "")
 
-        svg_blocks = split_svgs(svg_string)
+        svg_blocks = split_svgs(kwargs.get("svg"))
 
         nodes: list[dict] = []
         for index, _ in enumerate(svg_blocks):
@@ -76,12 +67,16 @@ class LF_ViewSVGs:
         slot_names = [f"slot-{i}" for i in range(len(svg_blocks))]
         slot_map = { name: block for name, block in zip(slot_names, svg_blocks) }
 
-        safe_send_sync("viewsvgs", {
+        payload = {
             "dataset": dataset,
             "slot_map": slot_map,
-        }, kwargs.get("node_id"))
+        }
+        safe_send_sync("viewsvgs", payload, kwargs.get("node_id"))
 
-        return (svg_string, svg_blocks)
+        return {
+            "ui": {"lf_output": [payload]},
+            "result": (svg_string, svg_blocks),
+        }
 # endregion
 
 # region Mappings

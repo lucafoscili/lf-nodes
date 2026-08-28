@@ -3,7 +3,7 @@ import torch
 from . import CATEGORY
 from ...utils.constants import FUNCTION, Input, INT_MAX, RESAMPLERS, RESIZE_MODE_COMBO
 from ...utils.helpers.comfy import safe_send_sync
-from ...utils.helpers.logic import normalize_input_image, normalize_input_list, normalize_list_item, normalize_list_to_value, normalize_output_image
+from ...utils.helpers.logic import normalize_input_image, normalize_list_to_value, normalize_output_image, normalize_parallel_list
 from ...utils.helpers.torch import resize_and_crop_image
 from ...utils.helpers.ui import create_resize_node
 
@@ -51,7 +51,7 @@ class LF_ResizeImageToDimension:
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
-    INPUT_IS_LIST = (True, True, True, False, False, False, False)
+    INPUT_IS_LIST = True
     OUTPUT_IS_LIST = (False, True, False)
     OUTPUT_TOOLTIPS = (
         "Resized image tensor.",
@@ -63,8 +63,8 @@ class LF_ResizeImageToDimension:
 
     def on_exec(self, **kwargs: dict):
         image: list[torch.Tensor] = normalize_input_image(kwargs.get("image"))
-        height: list[int] = normalize_input_list(kwargs.get("height"))
-        width: list[int] = normalize_input_list(kwargs.get("width"))
+        height = normalize_parallel_list(kwargs.get("height"), len(image), "height")
+        width = normalize_parallel_list(kwargs.get("width"), len(image), "width")
         resize_method: str = normalize_list_to_value(kwargs.get("resize_method"))
         resize_mode: str = normalize_list_to_value(kwargs.get("resize_mode"))
         pad_color: str = normalize_list_to_value(kwargs.get("pad_color"))
@@ -81,8 +81,8 @@ class LF_ResizeImageToDimension:
         resized_images: list[torch.Tensor] = []
 
         for index, img in enumerate(image):
-            h: int = normalize_list_item(height, index)
-            w: int = normalize_list_item(width, index)
+            h: int = height[index]
+            w: int = width[index]
 
             original_height, original_width = img.shape[1], img.shape[2]
             original_heights.append(original_height)
@@ -104,11 +104,13 @@ class LF_ResizeImageToDimension:
 
         image_batch, image_list = normalize_output_image(resized_images)
 
-        safe_send_sync("resizeimagetodimension", {
-            "dataset": dataset,
-        }, kwargs.get("node_id"))
+        payload = {"dataset": dataset}
+        safe_send_sync("resizeimagetodimension", payload, kwargs.get("node_id"))
 
-        return (image_batch[0], image_list, num_resized)
+        return {
+            "ui": {"lf_output": [payload]},
+            "result": (image_batch[0], image_list, num_resized),
+        }
 # endregion
 
 # region Mappings

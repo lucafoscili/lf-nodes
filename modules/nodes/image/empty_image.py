@@ -4,18 +4,13 @@ from PIL import Image
 
 from . import CATEGORY
 from ...utils.constants import FUNCTION, Input
-from ...utils.helpers.api import get_resource_url
-from ...utils.helpers.comfy import resolve_filepath, safe_send_sync
+from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.conversion import hex_to_tuple, pil_to_tensor
 from ...utils.helpers.logic import normalize_input_list, normalize_output_image
-from ...utils.helpers.temp_cache import TempFileCache
-from ...utils.helpers.ui import create_masonry_node
+from ...utils.helpers.ui import create_cached_masonry_node
 
 # region LF_EmptyImage
 class LF_EmptyImage:
-    def __init__(self):
-        self._temp_cache = TempFileCache()
-
     @classmethod
     def INPUT_TYPES(cls):
         return {
@@ -51,7 +46,7 @@ class LF_EmptyImage:
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
-    INPUT_IS_LIST = (True, True, True)
+    INPUT_IS_LIST = True
     OUTPUT_IS_LIST = (False, True)
     OUTPUT_TOOLTIPS = (
         "Generated empty image tensor.",
@@ -61,8 +56,6 @@ class LF_EmptyImage:
     RETURN_TYPES = (Input.IMAGE, Input.IMAGE)
 
     def on_exec(self, **kwargs: dict):
-        self._temp_cache.cleanup()
-
         width: list[int] = normalize_input_list(kwargs.get("width"))
         height: list[int] = normalize_input_list(kwargs.get("height"))
         color: list[int] = normalize_input_list(kwargs.get("color"))
@@ -83,25 +76,25 @@ class LF_EmptyImage:
             pil_image = Image.new("RGB", (w, h), rgb)
             empty_image_tensor = pil_to_tensor(pil_image)
 
-            output_file, subfolder, filename = resolve_filepath(
-                    filename_prefix="emptyimage",
-                    image=empty_image_tensor,
-                    temp_cache=self._temp_cache
+            nodes.append(
+                create_cached_masonry_node(
+                    empty_image_tensor,
+                    index=len(empty_images),
+                    label=f"{w}×{h} #{c.upper()}",
+                )
             )
-            pil_image.save(output_file, format="PNG")
-            url = get_resource_url(subfolder, filename, "temp")
-
-            nodes.append(create_masonry_node(filename, url, len(empty_images)))
 
             empty_images.append(empty_image_tensor)
 
         image_batch, image_list = normalize_output_image(empty_images)
 
-        safe_send_sync("emptyimage", {
-            "dataset": dataset,
-        }, kwargs.get("node_id"))
+        payload = {"dataset": dataset}
+        safe_send_sync("emptyimage", payload, kwargs.get("node_id"))
 
-        return (image_batch[0], image_list)
+        return {
+            "ui": {"lf_output": [payload]},
+            "result": (image_batch[0], image_list),
+        }
 # endregion
 
 # region Mappings

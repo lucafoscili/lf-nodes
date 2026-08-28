@@ -8,11 +8,12 @@ import torch
 
 from . import CATEGORY
 from ...utils.constants import FUNCTION, Input
-from ...utils.helpers.api import get_resource_url
-from ...utils.helpers.comfy import resolve_filepath, safe_send_sync
-from ...utils.helpers.conversion import tensor_to_pil
-from ...utils.helpers.logic import normalize_input_image, normalize_list_to_value
-from ...utils.helpers.temp_cache import TempFileCache
+from ...utils.helpers.comfy import safe_send_sync
+from ...utils.helpers.logic import (
+    normalize_input_image,
+    normalize_list_to_value,
+    normalize_output_image,
+)
 from ...utils.helpers.torch.image_composite import (
     MAX_COMPOSITE_PIXELS,
     promote_to_rgba,
@@ -21,6 +22,7 @@ from ...utils.helpers.torch.image_composite import (
     validate_composite_image,
     validate_composite_integer,
 )
+from ...utils.helpers.ui import cache_generated_preview
 
 
 GRID_RECEIPT_SCHEMA = "lf.image_grid.receipt.v1"
@@ -500,9 +502,6 @@ def _populate_image_cells(
 
 # region LF_ImageGrid
 class LF_ImageGrid:
-    def __init__(self):
-        self._temp_cache = TempFileCache()
-
     @classmethod
     def INPUT_TYPES(cls):
         return {
@@ -585,12 +584,13 @@ class LF_ImageGrid:
         "Rendered comparison matrix.",
         "LfDataDataset whose cells are the images that compose the matrix.",
         "lf.image_grid.receipt.v1 layout receipt.",
+        "Rendered comparison matrix as a one-item image list.",
     )
-    RETURN_NAMES = ("image", "dataset", "receipt")
-    RETURN_TYPES = (Input.IMAGE, Input.JSON, Input.JSON)
+    OUTPUT_IS_LIST = (False, False, False, True)
+    RETURN_NAMES = ("image", "dataset", "receipt", "image_list")
+    RETURN_TYPES = (Input.IMAGE, Input.JSON, Input.JSON, Input.IMAGE)
 
     def on_exec(self, **kwargs: dict) -> dict:
-        self._temp_cache.cleanup()
         raw_images = kwargs.get("image")
         grid, matrix, receipt = compose_image_grid(
             raw_images,
@@ -608,13 +608,8 @@ class LF_ImageGrid:
         ]
 
         def resolve_image(image: torch.Tensor, row: int, column: int):
-            output_file, subfolder, filename = resolve_filepath(
-                filename_prefix=f"image_grid_{row + 1}_{column + 1}",
-                image=image,
-                temp_cache=self._temp_cache,
-            )
-            tensor_to_pil(image).save(output_file, format="PNG")
-            return get_resource_url(subfolder, filename, "temp"), filename
+            preview = cache_generated_preview(image)
+            return preview.url, f"Image {row + 1}.{column + 1}"
 
         populated = _populate_image_cells(
             matrix,
@@ -629,9 +624,10 @@ class LF_ImageGrid:
         }
         node_id = normalize_list_to_value(kwargs.get("node_id"))
         safe_send_sync("imagegrid", payload, node_id)
+        _, image_list = normalize_output_image(grid)
         return {
             "ui": {"lf_output": [payload]},
-            "result": (grid, populated, receipt),
+            "result": (grid, populated, receipt, image_list),
         }
 
 

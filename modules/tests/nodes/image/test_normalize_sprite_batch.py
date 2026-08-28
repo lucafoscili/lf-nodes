@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import sys
 import types
+from types import SimpleNamespace
 
 from PIL import Image
 import pytest
@@ -40,19 +41,17 @@ def preview_runtime(monkeypatch: pytest.MonkeyPatch, tmp_path):
     saved_paths = []
     sent = []
 
-    def resolve_filepath(*, filename_prefix, image, temp_cache):
-        del image, temp_cache
-        path = tmp_path / f"{filename_prefix}_{len(saved_paths)}.png"
+    def cache_generated_preview(image):
+        path = tmp_path / f"preview_{len(saved_paths)}.png"
         saved_paths.append(path)
-        return path, "", path.name
+        pixels = image[0].clamp(0, 1).mul(255).round().to(torch.uint8).numpy()
+        Image.fromarray(pixels).save(path, format="PNG")
+        return SimpleNamespace(
+            url=f"/view?filename={path.name}&type=input&subfolder=preview",
+        )
 
-    monkeypatch.setattr(normalizer_module, "resolve_filepath", resolve_filepath)
     monkeypatch.setattr(
-        normalizer_module,
-        "get_resource_url",
-        lambda subfolder, filename, storage_type: (
-            f"/view?filename={filename}&type={storage_type}&subfolder={subfolder}"
-        ),
+        normalizer_module, "cache_generated_preview", cache_generated_preview
     )
     monkeypatch.setattr(
         normalizer_module,
@@ -400,9 +399,11 @@ def test_node_publishes_masonry_history_without_requiring_widget(
         node_id=["normalizer-9"],
     )
 
-    normalized, receipt = response["result"]
+    normalized, receipt, image_list = response["result"]
     payload = response["ui"]["lf_output"][0]
     assert normalized.shape == (2, 16, 16, 4)
+    assert len(image_list) == 2
+    assert torch.equal(torch.cat(image_list, dim=0), normalized)
     assert payload["receipt"] is receipt
     assert payload["preview"] == {
         "displayedFrameIndices": [0, 1],
@@ -471,6 +472,17 @@ def test_receipt_and_public_node_contract_are_deterministic_and_generic() -> Non
     assert normalizer_module.LF_NormalizeSpriteBatch.RETURN_TYPES == (
         "IMAGE",
         "JSON",
+        "IMAGE",
+    )
+    assert normalizer_module.LF_NormalizeSpriteBatch.RETURN_NAMES == (
+        "image",
+        "receipt",
+        "image_list",
+    )
+    assert normalizer_module.LF_NormalizeSpriteBatch.OUTPUT_IS_LIST == (
+        False,
+        False,
+        True,
     )
     assert normalizer_module.NODE_CLASS_MAPPINGS == {
         "LF_NormalizeSpriteBatch": normalizer_module.LF_NormalizeSpriteBatch,

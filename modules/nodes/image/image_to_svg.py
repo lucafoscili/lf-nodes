@@ -11,14 +11,12 @@ from ...utils.constants import (
     SIZE_MODE_COMBO,
     TRACE_PRESET_COMBO
 )
-from ...utils.helpers.api import get_resource_url
-from ...utils.helpers.comfy import resolve_filepath, safe_send_sync
+from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.conversion import (
     SVGTraceConfig,
     numpy_to_tensor,
     numpy_to_svg,
     tensor_to_numpy,
-    tensor_to_pil,
 )
 from ...utils.helpers.logic import (
     normalize_input_image,
@@ -26,8 +24,7 @@ from ...utils.helpers.logic import (
     normalize_masks_for_images,
     normalize_output_image,
 )
-from ...utils.helpers.temp_cache import TempFileCache
-from ...utils.helpers.ui import create_compare_node
+from ...utils.helpers.ui import create_cached_compare_node
 
 PRESET_CONFIGS: dict[str, SVGTraceConfig] = {
     "max_quality": SVGTraceConfig(
@@ -152,9 +149,6 @@ PRESET_CONFIGS: dict[str, SVGTraceConfig] = {
 
 # region LF_ImageToSVG
 class LF_ImageToSVG:
-    def __init__(self):
-        self._temp_cache = TempFileCache()
-
     @classmethod
     def INPUT_TYPES(cls):
         return {
@@ -217,6 +211,7 @@ class LF_ImageToSVG:
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
+    INPUT_IS_LIST = True
     OUTPUT_IS_LIST = (False, True, False, True, False, True)
     OUTPUT_TOOLTIPS = (
         "Generated SVG string.",
@@ -230,8 +225,6 @@ class LF_ImageToSVG:
     RETURN_TYPES = (Input.STRING, Input.STRING, Input.IMAGE, Input.IMAGE, Input.STRING, Input.STRING)
 
     def on_exec(self, **kwargs: dict):
-        self._temp_cache.cleanup()
-
         image: list[torch.Tensor] = normalize_input_image(kwargs.get("image"))
         preset: str = (normalize_list_to_value(kwargs.get("preset")) or "max_quality").lower()
         advanced_cfg = normalize_list_to_value(kwargs.get("advanced_config")) or {}
@@ -310,36 +303,26 @@ class LF_ImageToSVG:
             svg_str, proc, palette = numpy_to_svg(arr, config, mask=mask_value)
             preview = numpy_to_tensor(proc)
 
-            pil_image_original = tensor_to_pil(img)
-            output_file_s, subfolder_s, filename_s = resolve_filepath(
-                filename_prefix="svg_s",
-                image=img,
-                temp_cache=self._temp_cache
-            )
-            pil_image_original.save(output_file_s, format="PNG")
-            filename_s = get_resource_url(subfolder_s, filename_s, "temp")
-
-            pil_image_blended = tensor_to_pil(preview)
-            output_file_t, subfolder_t, filename_t = resolve_filepath(
-                filename_prefix="svg_t",
-                image=preview,
-                temp_cache=self._temp_cache
-            )
-            pil_image_blended.save(output_file_t, format="PNG")
-            filename_t = get_resource_url(subfolder_t, filename_t, "temp")
-
             previews.append(preview)
             svgs.append(svg_str)
             palettes.append(palette)
-            nodes.append(create_compare_node(filename_s, filename_t, index))
+            nodes.append(
+                create_cached_compare_node(
+                    img,
+                    preview,
+                    index=index,
+                )
+            )
 
-        safe_send_sync("imagetosvg", {
-            "dataset": dataset
-        }, kwargs.get("node_id"))
+        payload = {"dataset": dataset}
+        safe_send_sync("imagetosvg", payload, kwargs.get("node_id"))
 
         image_batch, image_list = normalize_output_image(previews)
 
-        return (svgs[0], svgs, image_batch[0], image_list, palettes[0], palettes)
+        return {
+            "ui": {"lf_output": [payload]},
+            "result": (svgs[0], svgs, image_batch[0], image_list, palettes[0], palettes),
+        }
 # endregion
 
 # region Mappings

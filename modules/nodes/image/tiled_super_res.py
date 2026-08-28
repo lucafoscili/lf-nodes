@@ -8,7 +8,7 @@ from typing import List
 from comfy import model_management
 
 from . import CATEGORY
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
+from ...utils.constants import FUNCTION, Input
 from ...utils.filters.unsharp_mask import unsharp_mask_effect
 from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.logic import (
@@ -17,17 +17,13 @@ from ...utils.helpers.logic import (
     normalize_output_image,
 )
 from ...utils.helpers.torch import TilePlan, make_blend_mask, plan_input_tiles
-from ...utils.helpers.api import get_resource_url
+from ...utils.helpers.torch.image_composite import resize_composite_image
 from ...utils.helpers.comfy import resolve_filepath
-from ...utils.helpers.conversion import tensor_to_pil
-from ...utils.helpers.temp_cache import TempFileCache
-from ...utils.helpers.ui import ComparePreviewStream
+from ...utils.helpers.conversion import pil_to_tensor, tensor_to_pil
+from ...utils.helpers.ui import ComparePreviewStream, cache_generated_preview
 
 # region LF_TiledSuperRes
 class LF_TiledSuperRes:
-    def __init__(self):
-        self._temp_cache = TempFileCache()
-
     @classmethod
     def INPUT_TYPES(cls):
         return {
@@ -71,7 +67,7 @@ class LF_TiledSuperRes:
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
-    INPUT_IS_LIST = (True, False, False, False, False)
+    INPUT_IS_LIST = True
     OUTPUT_IS_LIST = (False, True, False)
     OUTPUT_TOOLTIPS = (
         "Upscaled image tensor.",
@@ -82,8 +78,6 @@ class LF_TiledSuperRes:
     RETURN_TYPES = (Input.IMAGE, Input.IMAGE, Input.JSON)
 
     def on_exec(self, **kwargs: dict):
-        self._temp_cache.cleanup()
-
         images = normalize_input_image(kwargs.get("image"))
         upscale_model = normalize_list_to_value(kwargs.get("upscale_model"))
         target_long_edge = int(normalize_list_to_value(kwargs.get("target_long_edge")))
@@ -104,19 +98,22 @@ class LF_TiledSuperRes:
         device = model_management.get_torch_device()
 
         dtype_bytes = images[0].element_size()
-        channels = images[0].shape[-1]
+        model_channels = 3
+        output_channels = max(int(img.shape[-1]) for img in images)
         max_h = max(int(img.shape[1]) for img in images)
         max_w = max(int(img.shape[2]) for img in images)
         sample_plan = plan_input_tiles(max_w, max_h, tile_count)
         max_tile_pixels = max(spec.width * spec.height for spec in sample_plan.tiles)
-        max_input_tile_bytes = max_tile_pixels * channels * dtype_bytes
+        max_input_tile_bytes = max_tile_pixels * model_channels * dtype_bytes
         scale = float(getattr(upscale_model, "scale", 1.0))
         max_upscaled_tile_pixels = int(round(max_tile_pixels * (scale ** 2)))
-        max_upscaled_tile_bytes = max_upscaled_tile_pixels * channels * dtype_bytes
+        max_upscaled_tile_bytes = (
+            max_upscaled_tile_pixels * model_channels * dtype_bytes
+        )
 
         canvas_h = int(round(max_h * scale))
         canvas_w = int(round(max_w * scale))
-        canvas_bytes = canvas_h * canvas_w * channels * dtype_bytes
+        canvas_bytes = canvas_h * canvas_w * model_channels * dtype_bytes
 
         if target_long_edge > 0 and max(max_h, max_w) > 0:
             target_scale = target_long_edge / max(max_h, max_w)
@@ -126,7 +123,7 @@ class LF_TiledSuperRes:
 
         output_h = int(round(max_h * effective_scale))
         output_w = int(round(max_w * effective_scale))
-        output_bytes = output_h * output_w * channels * dtype_bytes
+        output_bytes = output_h * output_w * output_channels * dtype_bytes
 
         safety_margin = 64 * 1024 * 1024
         model_module = getattr(upscale_model, "model", upscale_model)
@@ -159,6 +156,8 @@ class LF_TiledSuperRes:
         for index, image in enumerate(images):
             start = time.perf_counter()
             h, w = image.shape[1], image.shape[2]
+            rgb_image = image[..., :3]
+            source_has_alpha = image.shape[-1] == 4
             plan = plan_input_tiles(w, h, tile_count)
 
             if target_long_edge > 0 and max(h, w) > 0:
@@ -174,7 +173,7 @@ class LF_TiledSuperRes:
 
             accumulator_dtype = torch.float32
             canvas = torch.zeros(
-                (1, upscaled_h, upscaled_w, channels),
+                (1, upscaled_h, upscaled_w, model_channels),
                 device=device,
                 dtype=accumulator_dtype,
             )
@@ -186,14 +185,14 @@ class LF_TiledSuperRes:
                 input_image=image,
                 dataset=dataset,
                 compare_nodes=compare_nodes,
-                event=f"{EVENT_PREFIX}tiledsuperres",
+                event="tiledsuperres",
                 input_target_size=(h, w),
                 filename_prefix="tiled_super_res",
                 resolve_filepath=resolve_filepath
             )
 
             for _, spec in enumerate(plan.tiles):
-                patch = image[:, spec.y0:spec.y1, spec.x0:spec.x1, :]
+                patch = rgb_image[:, spec.y0:spec.y1, spec.x0:spec.x1, :]
                 patch_chw = patch.permute(0, 3, 1, 2).to(device)
 
                 with torch.autocast(device.type, enabled=device.type == "cuda"):
@@ -273,6 +272,17 @@ class LF_TiledSuperRes:
                         dtype=original_dtype,
                     )
 
+            if source_has_alpha:
+                resized_source = resize_composite_image(
+                    image,
+                    target_h,
+                    target_w,
+                ).to(device=blended.device, dtype=blended.dtype)
+                blended = torch.cat(
+                    (blended[..., :3], resized_source[..., 3:4]),
+                    dim=-1,
+                )
+
             blended = blended.clamp(0.0, 1.0)
             blended_cpu = blended.to(image.dtype).cpu()
             upscaled_images.append(blended_cpu)
@@ -289,6 +299,10 @@ class LF_TiledSuperRes:
                 base_height=h,
             )
 
+            preview_stream.input_url = cache_generated_preview(
+                image,
+                target_size=(h, w),
+            ).url
             preview_stream.update_compare(clean_url, debug_url=debug_url)
             preview_stream.emit()
 
@@ -300,6 +314,7 @@ class LF_TiledSuperRes:
                 "tiles": len(plan.tiles),
                 "grid": [plan.cols, plan.rows],
                 "model_scale": scale,
+                "alpha_policy": "preserve" if source_has_alpha else "opaque",
                 "duration": elapsed,
             })
 
@@ -308,15 +323,13 @@ class LF_TiledSuperRes:
 
         batch_list, image_list = normalize_output_image(upscaled_images)
 
-        safe_send_sync(
-            "tiledsuperres",
-            {
-                "dataset": dataset,
-            },
-            node_id,
-        )
+        payload = {"dataset": dataset}
+        safe_send_sync("tiledsuperres", payload, node_id)
 
-        return batch_list[0], image_list, {"runs": stats_rows}
+        return {
+            "ui": {"lf_output": [payload]},
+            "result": (batch_list[0], image_list, {"runs": stats_rows}),
+        }
 
     @staticmethod
     def _compose_from_accumulator(canvas: torch.Tensor, weights: torch.Tensor) -> torch.Tensor:
@@ -427,21 +440,8 @@ class LF_TiledSuperRes:
             base_height=base_height,
         )
 
-        output_file_clean, subfolder_clean, filename_clean = resolve_filepath(
-            filename_prefix="tiled_super_res",
-            image=image,
-            temp_cache=self._temp_cache
-        )
-        clean_pil.save(output_file_clean, format="PNG")
-        clean_url = get_resource_url(subfolder_clean, filename_clean, "temp")
-
-        output_file_debug, subfolder_debug, filename_debug = resolve_filepath(
-            filename_prefix="tiled_super_res_debug",
-            image=image,
-            temp_cache=self._temp_cache
-        )
-        debug_image.save(output_file_debug, format="PNG")
-        debug_url = get_resource_url(subfolder_debug, filename_debug, "temp")
+        clean_url = cache_generated_preview(image).url
+        debug_url = cache_generated_preview(pil_to_tensor(debug_image)).url
 
         return clean_url, debug_url
 

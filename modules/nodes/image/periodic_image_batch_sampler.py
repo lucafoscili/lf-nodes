@@ -7,12 +7,9 @@ import torch
 
 from . import CATEGORY
 from ...utils.constants import FUNCTION, Input
-from ...utils.helpers.api import get_resource_url
-from ...utils.helpers.comfy import resolve_filepath, safe_send_sync
-from ...utils.helpers.conversion import tensor_to_pil
-from ...utils.helpers.logic import normalize_list_to_value
-from ...utils.helpers.temp_cache import TempFileCache
-from ...utils.helpers.ui import create_masonry_node
+from ...utils.helpers.comfy import safe_send_sync
+from ...utils.helpers.logic import normalize_list_to_value, normalize_output_image
+from ...utils.helpers.ui import cache_generated_preview, create_masonry_node
 
 
 PERIODIC_SAMPLER_RECEIPT_SCHEMA = "lf.periodic_image_batch_sampler.receipt.v1"
@@ -140,9 +137,6 @@ def _preview_indices(frame_count: int) -> list[int]:
 
 
 class LF_PeriodicImageBatchSampler:
-    def __init__(self):
-        self._temp_cache = TempFileCache()
-
     @classmethod
     def INPUT_TYPES(cls):
         return {
@@ -212,10 +206,12 @@ class LF_PeriodicImageBatchSampler:
     OUTPUT_TOOLTIPS = (
         "Exactly target_count source frames selected by lossless tensor indexing.",
         "Sampling indices and source/intended timing receipt.",
+        "Individual sampled frames in output order.",
     )
+    OUTPUT_IS_LIST = (False, False, True)
     OUTPUT_NODE = True
-    RETURN_NAMES = ("image", "receipt")
-    RETURN_TYPES = (Input.IMAGE, Input.JSON)
+    RETURN_NAMES = ("image", "receipt", "image_list")
+    RETURN_TYPES = (Input.IMAGE, Input.JSON, Input.IMAGE)
 
     def on_exec(
         self,
@@ -226,7 +222,6 @@ class LF_PeriodicImageBatchSampler:
         intended_fps: float,
         **kwargs: Any,
     ) -> dict[str, Any]:
-        self._temp_cache.cleanup()
         sampled, receipt = sample_periodic_image_batch(
             image,
             target_count=target_count,
@@ -240,14 +235,12 @@ class LF_PeriodicImageBatchSampler:
         dataset = {"nodes": nodes}
         for masonry_index, output_frame_index in enumerate(displayed_indices):
             frame = sampled[output_frame_index].unsqueeze(0)
-            output_file, subfolder, filename = resolve_filepath(
-                filename_prefix="periodic_image_batch_sampler",
-                image=frame,
-                temp_cache=self._temp_cache,
+            preview = cache_generated_preview(frame)
+            node = create_masonry_node(
+                f"Output frame {output_frame_index}",
+                preview.url,
+                masonry_index,
             )
-            tensor_to_pil(frame).save(output_file, format="PNG")
-            url = get_resource_url(subfolder, filename, "temp")
-            node = create_masonry_node(filename, url, masonry_index)
             node["cells"]["lfImage"]["htmlProps"]["title"] = (
                 f"Output frame {output_frame_index}"
             )
@@ -268,9 +261,10 @@ class LF_PeriodicImageBatchSampler:
             payload,
             normalize_list_to_value(kwargs.get("node_id")),
         )
+        _, image_list = normalize_output_image(sampled)
         return {
             "ui": {"lf_output": [payload]},
-            "result": (sampled, receipt),
+            "result": (sampled, receipt, image_list),
         }
 
 

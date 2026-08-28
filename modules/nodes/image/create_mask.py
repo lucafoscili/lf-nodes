@@ -3,8 +3,7 @@ import torch.nn.functional as F
 
 from . import CATEGORY
 from ...utils.constants import FUNCTION, Input, MASK_THRESHOLD_COMBO
-from ...utils.helpers.api import get_resource_url
-from ...utils.helpers.comfy import get_tokenizer_from_clip, resolve_filepath, safe_send_sync
+from ...utils.helpers.comfy import get_tokenizer_from_clip, safe_send_sync
 from ...utils.helpers.conversion import tensor_to_pil
 from ...utils.helpers.logic import (
     get_otsu_threshold,
@@ -13,15 +12,11 @@ from ...utils.helpers.logic import (
     normalize_output_image,
     normalize_output_mask,
 )
-from ...utils.helpers.temp_cache import TempFileCache
 from ...utils.helpers.torch import encode_text_for_sdclip, get_text_encoder_from_clip
-from ...utils.helpers.ui import create_compare_node
+from ...utils.helpers.ui import create_cached_compare_node
 
 # region LF_CreateMask
 class LF_CreateMask:
-    def __init__(self):
-        self._temp_cache = TempFileCache()
-
     @classmethod
     def INPUT_TYPES(cls):
         return {
@@ -87,8 +82,6 @@ class LF_CreateMask:
     RETURN_TYPES = (Input.MASK, Input.MASK, Input.IMAGE, Input.IMAGE)
 
     def on_exec(self, **kwargs):
-        self._temp_cache.cleanup()
-
         images = normalize_input_image(kwargs["image"])
         proc = normalize_list_to_value(kwargs["processor"])
         seg_model = normalize_list_to_value(kwargs["model"])
@@ -149,26 +142,24 @@ class LF_CreateMask:
             mask_images.append(mask_rgb)
             mask_tensors.append(up[:, 0])
 
-            orig_f, so, no = resolve_filepath("mask_orig",
-                                              image=img_tensor,
-                                              temp_cache=self._temp_cache)
-            tensor_to_pil(img_tensor).save(orig_f, "PNG")
-            mo, sm, nm = resolve_filepath("mask_bin",
-                                          image=mask_rgb,
-                                          temp_cache=self._temp_cache)
-            tensor_to_pil(mask_rgb).save(mo, "PNG")
-            nodes.append(create_compare_node(get_resource_url(so,no,"temp"),
-                                               get_resource_url(sm,nm,"temp"),
-                                               idx))
+            nodes.append(
+                create_cached_compare_node(
+                    img_tensor,
+                    mask_rgb,
+                    index=idx,
+                )
+            )
 
-        safe_send_sync("createmask", {
-            "dataset": dataset
-        }, kwargs.get("node_id"))
+        payload = {"dataset": dataset}
+        safe_send_sync("createmask", payload, kwargs.get("node_id"))
 
         image_batch, image_list = normalize_output_image(mask_images)
         mask_batch, mask_list = normalize_output_mask(mask_tensors)
 
-        return (mask_batch[0], mask_list, image_batch[0], image_list)
+        return {
+            "ui": {"lf_output": [payload]},
+            "result": (mask_batch[0], mask_list, image_batch[0], image_list),
+        }
 # endregion
 
 # region Mappings

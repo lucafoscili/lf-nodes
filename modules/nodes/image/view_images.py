@@ -2,18 +2,12 @@ import torch
 
 from . import CATEGORY
 from ...utils.constants import FUNCTION, Input
-from ...utils.helpers.api import get_resource_url
-from ...utils.helpers.comfy import resolve_filepath, safe_send_sync
-from ...utils.helpers.conversion import tensor_to_pil
+from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.logic import normalize_input_image, normalize_output_image
-from ...utils.helpers.temp_cache import TempFileCache
-from ...utils.helpers.ui import create_masonry_node
+from ...utils.helpers.ui import create_cached_masonry_node
 
 # region LF_ViewImages
 class LF_ViewImages:
-    def __init__(self):
-        self._temp_cache = TempFileCache()
-
     @classmethod
     def INPUT_TYPES(self):
         return {
@@ -34,7 +28,7 @@ class LF_ViewImages:
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
-    INPUT_IS_LIST = (True, False)
+    INPUT_IS_LIST = True
     OUTPUT_IS_LIST = (False, True)
     OUTPUT_NODE = True
     OUTPUT_TOOLTIPS = (
@@ -45,33 +39,29 @@ class LF_ViewImages:
     RETURN_TYPES = (Input.IMAGE, Input.IMAGE)
 
     def on_exec(self, **kwargs: dict):
-        self._temp_cache.cleanup()
-
         image: list[torch.Tensor] = normalize_input_image(kwargs.get("image"))
 
         nodes: list[dict] = []
         dataset: dict = { "nodes": nodes }
 
         for index, img in enumerate(image):
-            pil_image = tensor_to_pil(img)
-
-            output_file, subfolder, filename = resolve_filepath(
-                    filename_prefix="view",
-                    image=img,
-                    temp_cache=self._temp_cache
+            nodes.append(
+                create_cached_masonry_node(
+                    img,
+                    index=index,
+                    label=f"Image {index + 1}",
+                )
             )
-            pil_image.save(output_file, format="PNG")
-            url = get_resource_url(subfolder, filename, "temp")
-
-            nodes.append(create_masonry_node(filename, url, index))
 
         batch_list, image_list = normalize_output_image(image)
 
-        safe_send_sync("viewimages", {
-            "dataset": dataset,
-        }, kwargs.get("node_id"))
+        payload = {"dataset": dataset}
+        safe_send_sync("viewimages", payload, kwargs.get("node_id"))
 
-        return (batch_list[0], image_list)
+        return {
+            "ui": {"lf_output": [payload]},
+            "result": (batch_list[0], image_list),
+        }
 # endregion
 
 # region Mappings

@@ -4,10 +4,12 @@ import torch
 
 from . import CATEGORY
 from ...utils.constants import FUNCTION, Input
-from ...utils.helpers.api import get_resource_url
-from ...utils.helpers.comfy import resolve_filepath, safe_send_sync
-from ...utils.helpers.conversion import tensor_to_pil
-from ...utils.helpers.temp_cache import TempFileCache
+from ...utils.helpers.comfy import safe_send_sync
+from ...utils.helpers.logic import (
+    normalize_input_image,
+    normalize_list_to_value,
+    normalize_output_image,
+)
 from ...utils.helpers.torch.image_composite import (
     MAX_COMPOSITE_PIXELS,
     promote_to_rgba,
@@ -16,7 +18,7 @@ from ...utils.helpers.torch.image_composite import (
     validate_composite_image,
     validate_composite_integer,
 )
-from ...utils.helpers.ui import create_masonry_node
+from ...utils.helpers.ui import cache_generated_preview, create_masonry_node
 
 
 def _scaled_width(width: int, height: int, target_height: int) -> int:
@@ -131,9 +133,6 @@ def compose_side_by_side(
 
 # region LF_SideBySide
 class LF_SideBySide:
-    def __init__(self):
-        self._temp_cache = TempFileCache()
-
     @classmethod
     def INPUT_TYPES(cls):
         return {
@@ -196,10 +195,15 @@ class LF_SideBySide:
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
+    INPUT_IS_LIST = True
     OUTPUT_NODE = True
-    OUTPUT_TOOLTIPS = ("Horizontally stitched image batch.",)
-    RETURN_NAMES = ("image",)
-    RETURN_TYPES = (Input.IMAGE,)
+    OUTPUT_IS_LIST = (False, True)
+    OUTPUT_TOOLTIPS = (
+        "Horizontally stitched image batch.",
+        "Individual stitched images in batch order.",
+    )
+    RETURN_NAMES = ("image", "image_list")
+    RETURN_TYPES = (Input.IMAGE, Input.IMAGE)
 
     def on_exec(
         self,
@@ -212,39 +216,58 @@ class LF_SideBySide:
         label_b: str = "B",
         **kwargs: dict,
     ) -> dict:
-        self._temp_cache.cleanup()
-        composite = compose_side_by_side(
-            image_a,
-            image_b,
-            gap_px=gap_px,
-            max_height=max_height,
-            show_labels=show_labels,
-            label_a=label_a,
-            label_b=label_b,
-        )
+        images_a = normalize_input_image(image_a)
+        images_b = normalize_input_image(image_b)
+        if not images_a or not images_b:
+            raise ValueError("image_a and image_b must each contain an image.")
+        if (
+            len(images_a) != len(images_b)
+            and len(images_a) != 1
+            and len(images_b) != 1
+        ):
+            raise ValueError(
+                "image_a and image_b must contain the same number of images, "
+                "or one input must contain exactly one image for broadcasting."
+            )
+
+        gap_px = int(normalize_list_to_value(gap_px))
+        max_height = int(normalize_list_to_value(max_height))
+        show_labels = bool(normalize_list_to_value(show_labels))
+        label_a = str(normalize_list_to_value(label_a))
+        label_b = str(normalize_list_to_value(label_b))
+        pair_count = max(len(images_a), len(images_b))
+        outputs: list[torch.Tensor] = []
+        for index in range(pair_count):
+            left = images_a[0] if len(images_a) == 1 else images_a[index]
+            right = images_b[0] if len(images_b) == 1 else images_b[index]
+            outputs.append(
+                compose_side_by_side(
+                    left,
+                    right,
+                    gap_px=gap_px,
+                    max_height=max_height,
+                    show_labels=show_labels,
+                    label_a=label_a,
+                    label_b=label_b,
+                )
+            )
+
+        batch_groups, image_list = normalize_output_image(outputs)
+        primary_batch = batch_groups[0]
 
         nodes: list[dict] = []
         dataset = {"nodes": nodes}
-        for index, image in enumerate(composite):
-            single_image = image.unsqueeze(0)
-            preview = tensor_to_pil(single_image)
-            output_file, subfolder, filename = resolve_filepath(
-                filename_prefix="side_by_side",
-                image=single_image,
-                temp_cache=self._temp_cache,
+        for index, image in enumerate(image_list):
+            preview = cache_generated_preview(image)
+            nodes.append(
+                create_masonry_node(f"Composite {index + 1}", preview.url, index)
             )
-            preview.save(output_file, format="PNG")
-            url = get_resource_url(subfolder, filename, "temp")
-            nodes.append(create_masonry_node(filename, url, index))
 
-        safe_send_sync(
-            "sidebyside",
-            {"dataset": dataset},
-            kwargs.get("node_id"),
-        )
+        payload = {"dataset": dataset}
+        safe_send_sync("sidebyside", payload, kwargs.get("node_id"))
         return {
-            "ui": {"lf_output": [{"dataset": dataset}]},
-            "result": (composite,),
+            "ui": {"lf_output": [payload]},
+            "result": (primary_batch, image_list),
         }
 
 

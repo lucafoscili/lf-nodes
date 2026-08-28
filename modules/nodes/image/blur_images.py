@@ -4,18 +4,13 @@ from PIL import ImageFilter
 
 from . import CATEGORY
 from ...utils.constants import FUNCTION, Input
-from ...utils.helpers.api import get_resource_url
-from ...utils.helpers.comfy import resolve_filepath, safe_send_sync
+from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.conversion import pil_to_tensor, tensor_to_pil
 from ...utils.helpers.logic import normalize_input_image, normalize_input_list, normalize_list_to_value, normalize_output_image
-from ...utils.helpers.temp_cache import TempFileCache
-from ...utils.helpers.ui import create_masonry_node
+from ...utils.helpers.ui import create_cached_masonry_node
 
 # region LF_BlurImages
 class LF_BlurImages:
-    def __init__(self):
-        self._temp_cache = TempFileCache()
-
     @classmethod
     def INPUT_TYPES(self):
         return {
@@ -47,7 +42,7 @@ class LF_BlurImages:
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
-    INPUT_IS_LIST = (True, False, False, True)
+    INPUT_IS_LIST = True
     OUTPUT_IS_LIST = (False, True, True, False)
     OUTPUT_TOOLTIPS = (
         "Image tensor with blur effect applied.",
@@ -59,8 +54,6 @@ class LF_BlurImages:
     RETURN_TYPES = (Input.IMAGE, Input.IMAGE, Input.STRING, Input.INTEGER)
 
     def on_exec(self, **kwargs: dict):
-        self._temp_cache.cleanup()
-
         image: list[torch.Tensor] = normalize_input_image(kwargs.get("image"))
         blur_percentage: float = normalize_list_to_value(kwargs.get("blur_percentage"))
         file_name: list[str] = normalize_input_list(kwargs.get("file_name"))
@@ -70,6 +63,11 @@ class LF_BlurImages:
 
         nodes = []
         dataset = { "nodes": nodes }
+
+        if file_name and len(file_name) != len(image):
+            raise ValueError(
+                "file_name must contain exactly one name for each input image."
+            )
 
         for index, img in enumerate(image):
             if file_name:
@@ -93,26 +91,25 @@ class LF_BlurImages:
             blurred_images.append(blurred_tensor)
 
             filename_prefix = f"{base_name}_Blur"
-            output_file, subfolder, filename = resolve_filepath(
-                    filename_prefix=filename_prefix,
-                    add_counter=False,
-                    image=blurred_tensor,
-                    temp_cache=self._temp_cache
+            nodes.append(
+                create_cached_masonry_node(
+                    blurred_tensor,
+                    index=index,
+                    label=filename_prefix or f"Blurred image {index + 1}",
+                )
             )
 
-            blurred_image.save(output_file, format="PNG")
-            url = get_resource_url(subfolder, filename, "temp")
-
             blurred_file_names.append(filename_prefix)
-            nodes.append(create_masonry_node(filename, url, index))
 
         image_batch, image_list = normalize_output_image(blurred_images)
 
-        safe_send_sync("blurimages", {
-            "dataset": dataset,
-        }, kwargs.get("node_id"))
+        payload = {"dataset": dataset}
+        safe_send_sync("blurimages", payload, kwargs.get("node_id"))
 
-        return (image_batch[0], image_list, blurred_file_names, len(image_list))
+        return {
+            "ui": {"lf_output": [payload]},
+            "result": (image_batch[0], image_list, blurred_file_names, len(image_list)),
+        }
 # endregion
 
 # region Mappings

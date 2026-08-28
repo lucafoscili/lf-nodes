@@ -1,37 +1,36 @@
 from __future__ import annotations
 
-from PIL import Image
 import torch
 import pytest
 
 from modules.nodes.image import image_list as image_list_module
+from modules.utils.helpers.ui import create_masonry_node
 
 
 @pytest.fixture(autouse=True)
 def preview_runtime(monkeypatch: pytest.MonkeyPatch, tmp_path):
-    saved_paths = []
+    cached_images = []
     sent = []
 
-    def resolve_filepath(*, filename_prefix, image, temp_cache):
-        del image, temp_cache
-        path = tmp_path / f"{filename_prefix}_{len(saved_paths)}.png"
-        saved_paths.append(path)
-        return path, "", path.name
+    def create_cached_masonry(image, *, index, label):
+        cached_images.append(image.clone())
+        return create_masonry_node(
+            label,
+            f"/view?filename=image-{index}.png&type=input",
+            index,
+        )
 
-    monkeypatch.setattr(image_list_module, "resolve_filepath", resolve_filepath)
     monkeypatch.setattr(
         image_list_module,
-        "get_resource_url",
-        lambda subfolder, filename, storage_type: (
-            f"/view?filename={filename}&type={storage_type}&subfolder={subfolder}"
-        ),
+        "create_cached_masonry_node",
+        create_cached_masonry,
     )
     monkeypatch.setattr(
         image_list_module,
         "safe_send_sync",
         lambda event, payload, node_id: sent.append((event, payload, node_id)),
     )
-    return {"saved_paths": saved_paths, "sent": sent}
+    return {"cached_images": cached_images, "sent": sent}
 
 
 def test_collects_mixed_dimensions_and_channels_without_resizing() -> None:
@@ -107,14 +106,14 @@ def test_publishes_live_and_durable_preview_without_requiring_widget(
         ("imagelist", {"dataset": dataset}, "node-17")
     ]
 
-    paths = preview_runtime["saved_paths"]
-    assert len(paths) == 2
-    with Image.open(paths[0]) as preview:
-        assert preview.mode == "RGB"
-        assert preview.size == (7, 5)
-    with Image.open(paths[1]) as preview:
-        assert preview.mode == "RGBA"
-        assert preview.size == (4, 3)
+    cached_images = preview_runtime["cached_images"]
+    assert len(cached_images) == 2
+    assert [tuple(image.shape) for image in cached_images] == [
+        (1, 5, 7, 3),
+        (1, 3, 4, 4),
+    ]
+    assert torch.equal(cached_images[0], first)
+    assert torch.equal(cached_images[1], second)
 
 
 def test_schema_is_headless_and_mapping_is_generic() -> None:

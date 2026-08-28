@@ -36,13 +36,13 @@ class LF_MultipleImageResizeForWeb:
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
-    INPUT_IS_LIST = (True, True)
+    INPUT_IS_LIST = True
     OUTPUT_IS_LIST = (False, True, False, True, True, False)
     OUTPUT_TOOLTIPS = (
         "Resized image tensor.",
         "List of resized image tensors.",
-        "Original image tensor.",
-        "List of original image tensors.",
+        "First generated file name.",
+        "List of all generated file names.",
         "Names with directory.",
         "Dataset information for visualization."
     )
@@ -60,6 +60,11 @@ class LF_MultipleImageResizeForWeb:
         output_file_names_with_dir: list[str] = []
         output_images: list[torch.Tensor] = []
         resolutions: list[int] = [256, 320, 512, 640, 1024, 1280, 2048, 2560]
+
+        if not file_name or len(file_name) != len(image):
+            raise ValueError(
+                "file_name must contain exactly one name for each input image."
+            )
 
         for index, img in enumerate(image):
             f_name = file_name[index]
@@ -121,13 +126,22 @@ class LF_MultipleImageResizeForWeb:
 
             nodes.append(rootNode)
 
-        safe_send_sync("multipleimageresizeforweb", {
-            "dataset": dataset,
-        }, kwargs.get("node_id"))
+        payload = {"dataset": dataset}
+        safe_send_sync("multipleimageresizeforweb", payload, kwargs.get("node_id"))
 
         image_batch, image_list = normalize_output_image(output_images)
 
-        return (image_batch[0], image_list, output_file_names, output_file_names, output_file_names_with_dir, dataset)
+        return {
+            "ui": {"lf_output": [payload]},
+            "result": (
+                image_batch[0],
+                image_list,
+                output_file_names[0],
+                output_file_names,
+                output_file_names_with_dir,
+                dataset,
+            ),
+        }
 # endregion
 
 # region Mappings

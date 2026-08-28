@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from types import SimpleNamespace
+
 from PIL import Image
 import pytest
 import torch
@@ -171,23 +173,22 @@ def test_node_publishes_durable_masonry_history_without_requiring_widget(
     tmp_path,
 ) -> None:
     node = side_by_side_module.LF_SideBySide()
-    monkeypatch.setattr(node._temp_cache, "cleanup", lambda: None)
     saved_paths = []
 
-    def resolve_filepath(*, filename_prefix, image, temp_cache):
-        del image, temp_cache
-        path = tmp_path / f"{filename_prefix}_{len(saved_paths)}.png"
+    def cache_generated_preview(image):
+        path = tmp_path / f"preview_{len(saved_paths)}.png"
         saved_paths.append(path)
-        return path, "", path.name
+        pixels = image[0].clamp(0, 1).mul(255).round().to(torch.uint8).numpy()
+        Image.fromarray(pixels).save(path, format="PNG")
+        return SimpleNamespace(
+            url=f"/view?filename={path.name}&type=input&subfolder=preview",
+        )
 
     sent = []
-    monkeypatch.setattr(side_by_side_module, "resolve_filepath", resolve_filepath)
     monkeypatch.setattr(
         side_by_side_module,
-        "get_resource_url",
-        lambda subfolder, filename, storage_type: (
-            f"/view?filename={filename}&type={storage_type}&subfolder={subfolder}"
-        ),
+        "cache_generated_preview",
+        cache_generated_preview,
     )
     monkeypatch.setattr(
         side_by_side_module,
@@ -202,11 +203,14 @@ def test_node_publishes_durable_masonry_history_without_requiring_widget(
     )
 
     composite = response["result"][0]
+    image_list = response["result"][1]
     dataset = response["ui"]["lf_output"][0]["dataset"]
     assert composite.shape == (2, 3, 5, 4)
+    assert len(image_list) == 2
+    assert torch.equal(torch.cat(image_list, dim=0), composite)
     assert len(dataset["nodes"]) == 2
     assert all(
-        node["cells"]["lfImage"]["lfValue"].startswith("/view?")
+        "type=input" in node["cells"]["lfImage"]["lfValue"]
         for node in dataset["nodes"]
     )
     assert sent == [("sidebyside", {"dataset": dataset}, None)]
@@ -231,7 +235,13 @@ def test_public_schema_and_mapping_remain_generic() -> None:
     }
     assert schema["optional"]["ui_widget"][0] == "LF_MASONRY"
     assert schema["hidden"] == {"node_id": "UNIQUE_ID"}
-    assert side_by_side_module.LF_SideBySide.RETURN_TYPES == ("IMAGE",)
+    assert side_by_side_module.LF_SideBySide.INPUT_IS_LIST is True
+    assert side_by_side_module.LF_SideBySide.RETURN_TYPES == ("IMAGE", "IMAGE")
+    assert side_by_side_module.LF_SideBySide.RETURN_NAMES == (
+        "image",
+        "image_list",
+    )
+    assert side_by_side_module.LF_SideBySide.OUTPUT_IS_LIST == (False, True)
     assert side_by_side_module.NODE_CLASS_MAPPINGS == {
         "LF_SideBySide": side_by_side_module.LF_SideBySide,
     }

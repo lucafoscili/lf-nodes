@@ -2,18 +2,12 @@ import torch
 
 from . import CATEGORY
 from ...utils.constants import FUNCTION, Input
-from ...utils.helpers.api import get_resource_url
-from ...utils.helpers.comfy import resolve_filepath, safe_send_sync
-from ...utils.helpers.conversion import tensor_to_pil
+from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.logic import normalize_input_image, normalize_output_image
-from ...utils.helpers.temp_cache import TempFileCache
-from ...utils.helpers.ui import create_compare_node
+from ...utils.helpers.ui import create_cached_compare_node
 
 # region LF_CompareImages
 class LF_CompareImages:
-    def __init__(self):
-        self._temp_cache = TempFileCache()
-
     @classmethod
     def INPUT_TYPES(self):
         return {
@@ -37,7 +31,7 @@ class LF_CompareImages:
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
-    INPUT_IS_LIST = (True, True, False)
+    INPUT_IS_LIST = True
     OUTPUT_IS_LIST = (False, True, True, False)
     OUTPUT_NODE = True
     OUTPUT_TOOLTIPS = (
@@ -50,8 +44,6 @@ class LF_CompareImages:
     RETURN_TYPES = (Input.IMAGE, Input.IMAGE, Input.IMAGE, Input.JSON)
 
     def on_exec(self, **kwargs: dict):
-        self._temp_cache.cleanup()
-
         has_before : bool = "image_before" in kwargs and kwargs["image_before"] is not None
 
         image_list_a : list[torch.Tensor] = normalize_input_image(kwargs["image_after"])
@@ -64,30 +56,14 @@ class LF_CompareImages:
         dataset: dict = {"nodes": nodes}
 
         for idx, img_a in enumerate(image_list_a):
-
-            pil_a = tensor_to_pil(img_a)
-            file_a, sub_a, name_a = resolve_filepath(
-                filename_prefix="compare_after",
-                image=img_a,
-                temp_cache=self._temp_cache
-            )
-            pil_a.save(file_a, format="PNG")
-            url_a = get_resource_url(sub_a, name_a, "temp")
-
-            if has_before:
-                img_b = image_list_b[idx]
-                pil_b = tensor_to_pil(img_b)
-                file_b, sub_b, name_b = resolve_filepath(
-                    filename_prefix="compare_before",
-                    image=img_b,
-                    temp_cache=self._temp_cache
+            img_b = image_list_b[idx] if has_before else img_a
+            nodes.append(
+                create_cached_compare_node(
+                    img_b,
+                    img_a,
+                    index=idx,
                 )
-                pil_b.save(file_b, format="PNG")
-                url_b = get_resource_url(sub_b, name_b, "temp")
-            else:
-                url_b = url_a
-
-            nodes.append(create_compare_node(url_b, url_a, idx))
+            )
 
         image_batch, image_list = normalize_output_image(image_list_a)
         combined = image_list_a + (image_list_b if has_before else [])

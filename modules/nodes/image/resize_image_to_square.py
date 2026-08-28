@@ -3,7 +3,7 @@ import torch
 from . import CATEGORY
 from ...utils.constants import CROP_POSITION_COMBO, FUNCTION, Input, RESAMPLERS
 from ...utils.helpers.comfy import safe_send_sync
-from ...utils.helpers.logic import normalize_input_image, normalize_input_list, normalize_list_item, normalize_list_to_value, normalize_output_image
+from ...utils.helpers.logic import normalize_input_image, normalize_list_to_value, normalize_output_image, normalize_parallel_list
 from ...utils.helpers.torch import resize_to_square
 from ...utils.helpers.ui import create_resize_node
 
@@ -41,7 +41,7 @@ class LF_ResizeImageToSquare:
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
-    INPUT_IS_LIST = (True, True, False, False, False)
+    INPUT_IS_LIST = True
     OUTPUT_IS_LIST = (False, True, False)
     OUTPUT_TOOLTIPS = (
         "Resized image tensor.",
@@ -53,7 +53,9 @@ class LF_ResizeImageToSquare:
 
     def on_exec(self, **kwargs: dict):
         image: list[torch.Tensor] = normalize_input_image(kwargs.get("image"))
-        square_size: list[int] = normalize_input_list(kwargs.get("square_size"))
+        square_size = normalize_parallel_list(
+            kwargs.get("square_size"), len(image), "square_size"
+        )
         resize_method: str = normalize_list_to_value(kwargs.get("resize_method"))
         crop_position: str = normalize_list_to_value(kwargs.get("crop_position"))
 
@@ -69,7 +71,7 @@ class LF_ResizeImageToSquare:
         resized_images: list[torch.Tensor] = []
 
         for index, img in enumerate(image):
-            s: int = normalize_list_item(square_size, index)
+            s: int = square_size[index]
 
             original_height, original_width = img.shape[1], img.shape[2]
             original_heights.append(original_height)
@@ -91,11 +93,13 @@ class LF_ResizeImageToSquare:
 
         image_batch, image_list = normalize_output_image(resized_images)
 
-        safe_send_sync("resizeimagetosquare", {
-            "dataset": dataset,
-        }, kwargs.get("node_id"))
+        payload = {"dataset": dataset}
+        safe_send_sync("resizeimagetosquare", payload, kwargs.get("node_id"))
 
-        return (image_batch[0], image_list, num_resized)
+        return {
+            "ui": {"lf_output": [payload]},
+            "result": (image_batch[0], image_list, num_resized),
+        }
 # endregion
 
 # region Mappings

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from types import SimpleNamespace
+
 from PIL import Image
 import pytest
 import torch
@@ -262,23 +264,22 @@ def test_node_populates_lf_dataset_cells_and_publishes_masonry_history(
     tmp_path,
 ) -> None:
     node = image_grid_module.LF_ImageGrid()
-    monkeypatch.setattr(node._temp_cache, "cleanup", lambda: None)
     saved_paths = []
 
-    def resolve_filepath(*, filename_prefix, image, temp_cache):
-        del image, temp_cache
-        path = tmp_path / f"{filename_prefix}_{len(saved_paths)}.png"
+    def cache_generated_preview(image):
+        path = tmp_path / f"preview_{len(saved_paths)}.png"
         saved_paths.append(path)
-        return path, "", path.name
+        pixels = image[0].clamp(0, 1).mul(255).round().to(torch.uint8).numpy()
+        Image.fromarray(pixels).save(path, format="PNG")
+        return SimpleNamespace(
+            url=f"/view?filename={path.name}&type=input&subfolder=preview",
+        )
 
     sent = []
-    monkeypatch.setattr(image_grid_module, "resolve_filepath", resolve_filepath)
     monkeypatch.setattr(
         image_grid_module,
-        "get_resource_url",
-        lambda subfolder, filename, storage_type: (
-            f"/view?filename={filename}&type={storage_type}&subfolder={subfolder}"
-        ),
+        "cache_generated_preview",
+        cache_generated_preview,
     )
     monkeypatch.setattr(
         image_grid_module,
@@ -303,9 +304,11 @@ def test_node_populates_lf_dataset_cells_and_publishes_masonry_history(
         node_id=["grid-node"],
     )
 
-    grid, populated, receipt = response["result"]
+    grid, populated, receipt, image_list = response["result"]
     payload = response["ui"]["lf_output"][0]
     assert grid.shape == (1, 65, 65, 3)
+    assert len(image_list) == 1
+    assert torch.equal(image_list[0], grid)
     assert payload["columns"] == 2
     assert payload["dataset"] is populated
     assert payload["receipt"] is receipt
@@ -316,7 +319,7 @@ def test_node_populates_lf_dataset_cells_and_publishes_masonry_history(
         for column in ("low", "high")
     ]
     assert all(cell["shape"] == "image" for cell in cells)
-    assert all(cell["value"].startswith("/view?") for cell in cells)
+    assert all("type=input" in cell["value"] for cell in cells)
     assert cells[0]["htmlProps"]["title"] == "Pinned cell title"
     assert cells[1]["description"] == "Pre-existing high cell"
     assert all(list(node["cells"]) == ["low", "high"] for node in populated["nodes"])
@@ -343,7 +346,24 @@ def test_public_schema_and_mapping_use_lf_dataset_vocabulary() -> None:
     assert schema["optional"]["dataset"][0] == "JSON"
     assert schema["optional"]["ui_widget"][0] == "LF_MASONRY"
     assert image_grid_module.LF_ImageGrid.INPUT_IS_LIST is True
-    assert image_grid_module.LF_ImageGrid.RETURN_TYPES == ("IMAGE", "JSON", "JSON")
+    assert image_grid_module.LF_ImageGrid.RETURN_TYPES == (
+        "IMAGE",
+        "JSON",
+        "JSON",
+        "IMAGE",
+    )
+    assert image_grid_module.LF_ImageGrid.RETURN_NAMES == (
+        "image",
+        "dataset",
+        "receipt",
+        "image_list",
+    )
+    assert image_grid_module.LF_ImageGrid.OUTPUT_IS_LIST == (
+        False,
+        False,
+        False,
+        True,
+    )
     assert image_grid_module.NODE_CLASS_MAPPINGS == {
         "LF_ImageGrid": image_grid_module.LF_ImageGrid,
     }

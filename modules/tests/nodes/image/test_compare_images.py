@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-from PIL import Image
 import pytest
 import torch
 
 from modules.nodes.image import compare_images as compare_module
+from modules.utils.helpers.ui import create_compare_node
 
 
 def test_compare_images_publishes_history_dataset_and_preserves_rgba(
@@ -12,21 +12,21 @@ def test_compare_images_publishes_history_dataset_and_preserves_rgba(
     tmp_path,
 ) -> None:
     node = compare_module.LF_CompareImages()
-    monkeypatch.setattr(node._temp_cache, "cleanup", lambda: None)
-
-    def resolve_filepath(*, filename_prefix, image, temp_cache):
-        del image, temp_cache
-        path = tmp_path / f"{filename_prefix}.png"
-        return path, "", path.name
-
+    cached_pairs = []
     sent = []
-    monkeypatch.setattr(compare_module, "resolve_filepath", resolve_filepath)
+
+    def create_cached_compare(before, after, *, index):
+        cached_pairs.append((before.clone(), after.clone(), index))
+        return create_compare_node(
+            f"/view?filename=before-{index}.png&type=input",
+            f"/view?filename=after-{index}.png&type=input",
+            index,
+        )
+
     monkeypatch.setattr(
         compare_module,
-        "get_resource_url",
-        lambda subfolder, filename, storage_type: (
-            f"/view?filename={filename}&type={storage_type}&subfolder={subfolder}"
-        ),
+        "create_cached_compare_node",
+        create_cached_compare,
     )
     monkeypatch.setattr(
         compare_module,
@@ -50,18 +50,17 @@ def test_compare_images_publishes_history_dataset_and_preserves_rgba(
         "/view?"
     )
     assert sent == [("compareimages", {"dataset": dataset}, "compare-node")]
-
-    with Image.open(tmp_path / "compare_before.png") as saved_before:
-        assert saved_before.mode == "RGBA"
-    with Image.open(tmp_path / "compare_after.png") as saved_after:
-        assert saved_after.mode == "RGBA"
+    assert len(cached_pairs) == 1
+    cached_before, cached_after, cached_index = cached_pairs[0]
+    assert cached_index == 0
+    assert torch.equal(cached_before, before)
+    assert torch.equal(cached_after, after)
 
 
 def test_compare_images_rejects_mismatched_batches(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     node = compare_module.LF_CompareImages()
-    monkeypatch.setattr(node._temp_cache, "cleanup", lambda: None)
 
     with pytest.raises(ValueError, match="same length"):
         node.on_exec(
