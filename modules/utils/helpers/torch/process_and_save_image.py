@@ -1,19 +1,13 @@
 ﻿import torch
 
-from ..api import get_resource_url
-from ..comfy import resolve_filepath
-from ..conversion import tensor_to_pil
-from ..ui import create_compare_node
-from ..temp_cache import TempFileCache
+from ..ui import cache_generated_preview, create_compare_node
 
 # region process_and_save_image
 def process_and_save_image(
     images: list[torch.Tensor],
     filter_function: callable,
     filter_args: dict,
-    filename_prefix: str,
     nodes: list[dict],
-    temp_cache: TempFileCache,
 ):
     """
     Processes a list of images using a specified filter function, saves both the original and processed images to disk,
@@ -22,36 +16,41 @@ def process_and_save_image(
         images (list[torch.Tensor]): List of image tensors to process.
         filter_function (callable): Function to apply to each image tensor for processing.
         filter_args (dict): Dictionary of arguments to pass to the filter function.
-        filename_prefix (str): Prefix to use for saved image filenames.
         nodes (list[dict]): List to which comparison nodes will be appended.
-        temp_cache (TempFileCache): Temporary file cache to manage saved files.
     Returns:
         list[torch.Tensor]: List of processed image tensors.
     """
     processed_images = []
-    
+
     for index, img in enumerate(images):
-        pil_image = tensor_to_pil(img)
-        output_file_s, subfolder_s, filename_s = resolve_filepath(
-            filename_prefix=f"{filename_prefix}_s",
-            image=img,
-            temp_cache=temp_cache
+        source_preview = cache_generated_preview(img)
+        alpha = img[..., 3:4] if img.shape[-1] == 4 else None
+        filter_input = img[..., :3] if alpha is not None else img
+        processed = filter_function(filter_input, **filter_args)
+
+        if not isinstance(processed, torch.Tensor) or processed.ndim != 4:
+            raise ValueError("Image filters must return a 4-D BHWC tensor.")
+        if processed.shape[:3] != img.shape[:3]:
+            raise ValueError(
+                "Image filters must preserve batch and spatial dimensions; "
+                f"got {tuple(processed.shape)} for input {tuple(img.shape)}."
+            )
+        if processed.shape[-1] not in (3, 4):
+            raise ValueError("Image filters must return RGB or RGBA pixels.")
+
+        if alpha is not None:
+            processed = torch.cat(
+                (
+                    processed[..., :3],
+                    alpha.to(device=processed.device, dtype=processed.dtype),
+                ),
+                dim=-1,
+            )
+        target_preview = cache_generated_preview(processed)
+
+        nodes.append(
+            create_compare_node(source_preview.url, target_preview.url, index)
         )
-        pil_image.save(output_file_s, format="PNG")
-        filename_s = get_resource_url(subfolder_s, filename_s, "temp")
-
-        processed = filter_function(img, **filter_args)
-
-        pil_image = tensor_to_pil(processed)
-        output_file_t, subfolder_t, filename_t = resolve_filepath(
-            filename_prefix=f"{filename_prefix}_t",
-            image=processed,
-            temp_cache=temp_cache
-        )
-        pil_image.save(output_file_t, format="PNG")
-        filename_t = get_resource_url(subfolder_t, filename_t, "temp")
-
-        nodes.append(create_compare_node(filename_s, filename_t, index))
         processed_images.append(processed)
 
     return processed_images

@@ -109,12 +109,15 @@ WEIGHT_DTYPE_COMBO = ["default", "fp8_e4m3fn", "fp8_e4m3fn_fast", "fp8_e5m2"]
 
 API_ROUTE_PREFIX = "/lf-nodes"
 BASE64_PNG_PREFIX = "data:image/png;charset=utf-8;base64,"
+PNG_DATA_URL_PREFIX = "data:image/png;base64,"
 CATEGORY_PREFIX = "✨ LF Nodes"
 EVENT_PREFIX = "lf-"
 FUNCTION = "on_exec"
 
 BACKUP_FOLDER = "Backups"
-EXTERNAL_PREVIEW_SUBDIR = "_lf_external_previews"
+PREVIEW_CACHE_SUBDIR = "_lf_external_previews"
+EXTERNAL_PREVIEW_SUBDIR = PREVIEW_CACHE_SUBDIR
+GENERATED_PREVIEW_SUBDIR = f"{PREVIEW_CACHE_SUBDIR}/generated/v1"
 ONNX_ROOT = Path(folder_paths.models_dir) / "onnx"
 USER_FOLDER = "LF_Nodes"
 

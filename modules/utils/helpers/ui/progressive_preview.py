@@ -4,10 +4,9 @@ from typing import Callable, Dict, List, Optional, Tuple
 import torch
 import torch.nn.functional as F
 
-from server import PromptServer
-
 from .create_compare_node import create_compare_node
 from ..api import get_resource_url
+from ..comfy.safe_send_sync import normalize_node_id, safe_send_sync
 from ..conversion import tensor_to_pil
 
 # region prepare_preview_destination
@@ -216,10 +215,9 @@ class ComparePreviewStream:
         Type/category of resource used when saving images (defaults to "temp").
     - max_long_edge (int, optional):
         Maximum allowed long edge used when saving preview images (defaults to 512).
-    - send_fn (Optional[Callable[[str, dict], None]], optional):
-        Optional function used to emit update events. If not provided, the class
-        attempts to use PromptServer.instance.send_sync; if that is unavailable
-        (e.g. in test environments), no sending will occur and emit() is a no-op.
+    - send_fn (Optional[Callable[[str, dict, Optional[str]], None]], optional):
+        Optional safe sender accepting an unprefixed event suffix, payload, and
+        scalar node id. Defaults to `safe_send_sync`, which is headless-safe.
     Attributes (not exhaustive)
     - node_id, index, dataset, compare_nodes, event, resource_type, max_long_edge:
         Mirrors of the constructor parameters.
@@ -246,17 +244,15 @@ class ComparePreviewStream:
         image URL, the "after" image URL, an optional debug image cell, and an
         optional title. Returns the compare node dict.
     - emit() -> None
-        If a sender function is available, call it with the configured event
-        name and a payload containing {"node": node_id, "dataset": dataset}.
+        Call the configured sender with the unprefixed event suffix, dataset
+        payload, and normalized scalar node id.
     - finalize(after_url: str, debug_url: Optional[str] = None, title: Optional[str] = None, emit: bool = True) -> dict
         Convenience combining update_compare and an optional emit. Returns the
         (created or updated) compare node dict.
 
     Notes
-    - The class depends on external helpers: prepare_preview_destination and
-      save_preview_image (for file/URL handling) and optionally PromptServer for
-      a default sender. Those are not implemented here.
-    - If no sender function is available, emit() will silently do nothing.
+    - The class depends on external helpers: prepare_preview_destination,
+      save_preview_image, and LF's shared safe event sender.
     - The compare node structure conforms to the UI expected schema: cells
       containing "lfImage", "lfImage_after", and optionally "lfImage_debug".
     - Thread-safety is not guaranteed; if multiple threads/processes may update
@@ -292,10 +288,10 @@ class ComparePreviewStream:
         filename_prefix: str = "preview",
         resource_type: str = "temp",
         max_long_edge: int = 512,
-        send_fn: Optional[Callable[[str, dict], None]] = None,
+        send_fn: Optional[Callable[[str, dict, Optional[str]], None]] = None,
         resolve_filepath: Callable[..., Tuple[str, str, str]]
     ) -> None:
-        self.node_id = node_id
+        self.node_id = normalize_node_id(node_id)
         self.index = index
         self.dataset = dataset
         self.compare_nodes = compare_nodes
@@ -306,7 +302,7 @@ class ComparePreviewStream:
         self._resolve_filepath = resolve_filepath
 
         self._preview_destination = prepare_preview_destination(
-            node_id,
+            self.node_id,
             index,
             input_image,
             label="preview",
@@ -314,7 +310,7 @@ class ComparePreviewStream:
             resolve_filepath=resolve_filepath,
         )
         self._input_destination = prepare_preview_destination(
-            node_id,
+            self.node_id,
             index,
             input_image,
             label="input",
@@ -334,29 +330,9 @@ class ComparePreviewStream:
 
 # region _get_default_sender
     @staticmethod
-    def _get_default_sender() -> Optional[Callable[[str, dict], None]]:
-        """
-        Return the default sender callable from the PromptServer singleton, if available.
-
-        This helper attempts to retrieve PromptServer.instance.send_sync and return it
-        as the default synchronous sender function used by the UI. If any exception
-        occurs (for example, PromptServer is not initialized in test or headless
-        environments), the function returns None to provide a safe fallback.
-
-        Returns:
-            Optional[Callable[[str, dict], None]]: The synchronous send callable that
-            accepts a prompt string and a metadata dict, or None if unavailable.
-
-        Notes:
-            - All exceptions are intentionally suppressed to avoid breaking callers in
-              environments where the PromptServer is not present.
-            - Intended for use as a safe default supplier for UI components that may
-              run outside of the full application context.
-        """
-        try:
-            return PromptServer.instance.send_sync
-        except Exception:  # pragma: no cover - safety for test environments
-            return None
+    def _get_default_sender() -> Callable[[str, dict, Optional[str]], None]:
+        """Return LF's headless-safe, prefix-aware frontend event sender."""
+        return safe_send_sync
 # endregion
 
     @property
@@ -484,10 +460,8 @@ class ComparePreviewStream:
         if self._send_fn:
             self._send_fn(
                 self.event,
-                {
-                    "node": self.node_id,
-                    "dataset": self.dataset,
-                },
+                {"dataset": self.dataset},
+                self.node_id,
             )
 # endregion
 

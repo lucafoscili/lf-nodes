@@ -2,6 +2,7 @@ from .create_compare_node import *
 from .create_history_node import *
 from .create_masonry_node import *
 from .create_resize_node import *
+from .generated_preview import *
 from .prepare_model_dataset import *
 from .progressive_preview import *
 
