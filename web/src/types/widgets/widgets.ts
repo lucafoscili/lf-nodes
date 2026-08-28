@@ -127,6 +127,7 @@ export enum NodeName {
   lutGeneration = 'LF_LUTGeneration',
   mathOperation = 'LF_MathOperation',
   multipleImageResizeForWeb = 'LF_MultipleImageResizeForWeb',
+  normalizeSpriteBatch = 'LF_NormalizeSpriteBatch',
   notify = 'LF_Notify',
   onnxSelector = 'LF_ONNXSelector',
   openAIAPI = 'LF_OpenAIAPI',

@@ -92,6 +92,7 @@ export const NODE_WIDGET_MAP: NodeWidgetMap = {
   LF_MarkdownDocGenerator: [CustomWidgetName.code],
   LF_MathOperation: [CustomWidgetName.code],
   LF_MultipleImageResizeForWeb: [CustomWidgetName.tree],
+  LF_NormalizeSpriteBatch: [CustomWidgetName.masonry],
   LF_Notify: [],
   LF_ONNXSelector: [CustomWidgetName.history],
   LF_OpenAIAPI: [CustomWidgetName.code],

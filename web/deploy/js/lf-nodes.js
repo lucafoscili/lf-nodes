@@ -1310,6 +1310,7 @@ var NodeName;
   NodeName2["lutGeneration"] = "LF_LUTGeneration";
   NodeName2["mathOperation"] = "LF_MathOperation";
   NodeName2["multipleImageResizeForWeb"] = "LF_MultipleImageResizeForWeb";
+  NodeName2["normalizeSpriteBatch"] = "LF_NormalizeSpriteBatch";
   NodeName2["notify"] = "LF_Notify";
   NodeName2["onnxSelector"] = "LF_ONNXSelector";
   NodeName2["openAIAPI"] = "LF_OpenAIAPI";
@@ -1685,6 +1686,7 @@ const NODE_WIDGET_MAP = {
   LF_MarkdownDocGenerator: [CustomWidgetName.code],
   LF_MathOperation: [CustomWidgetName.code],
   LF_MultipleImageResizeForWeb: [CustomWidgetName.tree],
+  LF_NormalizeSpriteBatch: [CustomWidgetName.masonry],
   LF_Notify: [],
   LF_ONNXSelector: [CustomWidgetName.history],
   LF_OpenAIAPI: [CustomWidgetName.code],

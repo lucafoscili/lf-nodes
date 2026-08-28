@@ -54,6 +54,12 @@ describe('Generic output widget contracts', () => {
     ]);
   });
 
+  it('renders normalized sprite batches with the LF masonry widget', () => {
+    expect(NODE_WIDGET_MAP[NodeName.normalizeSpriteBatch]).toEqual([
+      CustomWidgetName.masonry,
+    ]);
+  });
+
   it('renders side-by-side composites with the LF masonry widget', () => {
     expect(NODE_WIDGET_MAP[NodeName.sideBySide]).toEqual([CustomWidgetName.masonry]);
   });
