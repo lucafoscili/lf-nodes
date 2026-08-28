@@ -2,19 +2,64 @@ import torch
 
 from . import CATEGORY
 from ...utils.constants import FUNCTION, Input, MASK_SHAPE_COMBO
-from ...utils.helpers.api import get_resource_url
-from ...utils.helpers.comfy import resolve_filepath, safe_send_sync
-from ...utils.helpers.conversion import tensor_to_pil
+from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.detection import build_region_mask
-from ...utils.helpers.logic import normalize_input_image, normalize_list_to_value, normalize_output_image
-from ...utils.helpers.temp_cache import TempFileCache
-from ...utils.helpers.ui import create_compare_node
+from ...utils.helpers.logic import (
+    normalize_input_image,
+    normalize_list_to_value,
+    normalize_output_mask,
+)
+from ...utils.helpers.ui import cache_generated_preview, create_compare_node
+
+
+def _is_region_metadata(value) -> bool:
+    return isinstance(value, dict) and (
+        "regions" in value or "selected_region" in value
+    )
+
+
+def _region_metadata_for_images(value, image_count: int) -> list:
+    """Pair detector metadata with images, broadcasting only singleton inputs."""
+
+    if isinstance(value, tuple):
+        value = list(value)
+    if isinstance(value, dict):
+        return [value] * image_count
+    if not isinstance(value, list) or not value:
+        raise ValueError("region_meta must contain region metadata.")
+
+    if len(value) == 1 and _is_region_metadata(value[0]):
+        return [value[0]] * image_count
+    if len(value) == image_count and all(_is_region_metadata(item) for item in value):
+        return value
+
+    raw_regions = value[0] if len(value) == 1 and isinstance(value[0], (list, tuple)) else value
+    if (
+        raw_regions
+        and all(isinstance(item, dict) for item in raw_regions)
+        and not any(_is_region_metadata(item) for item in raw_regions)
+    ):
+        metadata = {"regions": list(raw_regions), "selected_region": None}
+        return [metadata] * image_count
+
+    raise ValueError(
+        "region_meta must be one metadata item to broadcast or one item per input image."
+    )
+
+
+def _select_target_region(region_meta, region_index: int):
+    regions = region_meta.get("regions") or []
+    selected_region = region_meta.get("selected_region")
+    if region_index >= 0 and region_index < len(regions):
+        return regions[region_index]
+    if selected_region is not None:
+        return selected_region
+    if regions:
+        return regions[0]
+    raise ValueError("No region available to build a mask.")
 
 # region LF_RegionMask
 class LF_RegionMask:
-    def __init__(self):
-        self._temp_cache = TempFileCache()
-
     @classmethod
     def INPUT_TYPES(cls):
         return {
@@ -72,24 +117,28 @@ class LF_RegionMask:
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
-    INPUT_IS_LIST = (True, True, False)
-    OUTPUT_IS_LIST = (False, True, False)
+    INPUT_IS_LIST = True
+    OUTPUT_IS_LIST = (False, True, False, True)
     OUTPUT_TOOLTIPS = (
         "Region mask output.",
         "Region mask output as a list.",
-        "Metadata of the region used to build the mask."
+        "Metadata of the first region used to build the mask.",
+        "Metadata for every region used across the input batch.",
     )
-    RETURN_NAMES = ("mask", "mask_list", "region")
-    RETURN_TYPES = (Input.MASK, Input.MASK, Input.REGION_META)
+    RETURN_NAMES = ("mask", "mask_list", "region", "region_list")
+    RETURN_TYPES = (Input.MASK, Input.MASK, Input.REGION_META, Input.REGION_META)
 
     def on_exec(self, **kwargs):
-        self._temp_cache.cleanup()
-
         node_id = kwargs.get("node_id")
         images = normalize_input_image(kwargs["image"])
+        if not images:
+            raise ValueError("image must contain at least one image.")
         image_tensor = images[0]
 
-        region_meta = normalize_list_to_value(kwargs.get("region_meta"))
+        region_metadata = _region_metadata_for_images(
+            kwargs.get("region_meta"),
+            len(images),
+        )
         region_index = int(normalize_list_to_value(kwargs.get("region_index", -1)))
         shape = normalize_list_to_value(kwargs.get("shape", "rectangle")) or "rectangle"
         padding = float(normalize_list_to_value(kwargs.get("padding", 0.0)))
@@ -97,29 +146,12 @@ class LF_RegionMask:
         feather = float(normalize_list_to_value(kwargs.get("feather", 0.0)))
         invert = bool(normalize_list_to_value(kwargs.get("invert", False)))
 
-        regions = []
-        selected_region = None
-        if isinstance(region_meta, dict):
-            regions = region_meta.get("regions") or []
-            selected_region = region_meta.get("selected_region")
-        elif isinstance(region_meta, (list, tuple)):
-            regions = list(region_meta)
-
-        target_region = None
-        if region_index >= 0 and regions:
-            if region_index < len(regions):
-                target_region = regions[region_index]
-        if target_region is None and selected_region is not None:
-            target_region = selected_region
-        if target_region is None and regions:
-            target_region = regions[0]
-        if target_region is None:
-            raise ValueError("No region available to build a mask.")
-
         nodes: list[dict] = []
         dataset: dict = {"nodes": nodes}
         masks_4d: list[torch.Tensor] = []
-        for _index, img in enumerate(images):
+        target_regions: list[dict] = []
+        for index, (img, metadata) in enumerate(zip(images, region_metadata)):
+            target_region = _select_target_region(metadata, region_index)
 
             mask_4d = build_region_mask(
                 img,
@@ -132,31 +164,25 @@ class LF_RegionMask:
             )
             masks_4d.append(mask_4d)
 
-            orig_path, orig_sub, orig_name = resolve_filepath("region_source", image=image_tensor, temp_cache=self._temp_cache)
-            tensor_to_pil(image_tensor).save(orig_path, "PNG")
-
             mask_rgb = mask_4d.repeat(1, 1, 1, 3)
-            mask_path, mask_sub, mask_name = resolve_filepath("region_mask", image=mask_rgb, temp_cache=self._temp_cache)
-            tensor_to_pil(mask_rgb).save(mask_path, "PNG")
+            source_preview = cache_generated_preview(img)
+            mask_preview = cache_generated_preview(mask_rgb)
+            nodes.append(
+                create_compare_node(mask_preview.url, source_preview.url, index)
+            )
 
-            url_a = get_resource_url(orig_sub, orig_name, "temp")
-            url_b = get_resource_url(mask_sub, mask_name, "temp")
-            nodes.append(create_compare_node(url_b, url_a, _index))
+            region_summary = dict(target_region)
+            region_summary["mask_shape"] = shape
+            region_summary["padding"] = padding
+            region_summary["padding_px"] = padding_px
+            region_summary["feather"] = feather
+            region_summary["invert"] = invert
+            target_regions.append(region_summary)
 
-        # Attach mask summary for downstream nodes
-        target_region = dict(target_region)
-        target_region.setdefault("mask_shape", shape)
-        target_region.setdefault("padding", padding)
-        target_region.setdefault("padding_px", padding_px)
-        target_region.setdefault("feather", feather)
-        target_region.setdefault("invert", invert)
+        payload = {"dataset": dataset}
+        safe_send_sync("regionmask", payload, node_id)
 
-        safe_send_sync("regionmask", {"dataset": dataset}, node_id)
-
-        mask_batch_4d, mask_list_4d = normalize_output_image(masks_4d)
-
-        mask_batch = [batch.squeeze(-1).contiguous() for batch in mask_batch_4d]
-        mask_list = [mask.squeeze(-1).contiguous() for mask in mask_list_4d]
+        mask_batch, mask_list = normalize_output_mask(masks_4d)
 
         if mask_batch:
             primary_mask = mask_batch[0]
@@ -166,7 +192,10 @@ class LF_RegionMask:
             primary_mask = torch.zeros((1, height, width), device=image_tensor.device, dtype=torch.float32)
             mask_list = [primary_mask]
 
-        return (primary_mask, mask_list, target_region)
+        return {
+            "ui": {"lf_output": [payload]},
+            "result": (primary_mask, mask_list, target_regions[0], target_regions),
+        }
 # endregion
 
 # region Mappings

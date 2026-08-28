@@ -8,13 +8,9 @@ from ...utils.constants import FUNCTION, Input, SELECTION_STRATEGY_COMBO
 from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.detection import append_compare_entry, build_overlay, detect_regions, load_label_map, load_yolo_session, parse_class_filter, parse_class_labels, select_region
 from ...utils.helpers.logic import normalize_input_image, normalize_json_input, normalize_list_to_value
-from ...utils.helpers.temp_cache import TempFileCache
 
 # region LF_DetectRegions
 class LF_DetectRegions:
-    def __init__(self):
-        self._temp_cache = TempFileCache()
-
     @classmethod
     def INPUT_TYPES(cls):
         return {
@@ -85,7 +81,7 @@ class LF_DetectRegions:
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
-    INPUT_IS_LIST = (True, False, False, False, False, False, False, False, False, False, False, False)
+    INPUT_IS_LIST = True
     OUTPUT_IS_LIST = (False, True)
     OUTPUT_TOOLTIPS = (
         "Detected region metadata.",
@@ -95,8 +91,6 @@ class LF_DetectRegions:
     RETURN_TYPES = (Input.REGION_META, Input.REGION_META)
 
     def on_exec(self, **kwargs):
-        self._temp_cache.cleanup()
-
         node_id = kwargs.get("node_id")
         images = normalize_input_image(kwargs["image"])
 
@@ -137,7 +131,9 @@ class LF_DetectRegions:
 
         select_index = int(normalize_list_to_value(kwargs.get("select_index", -1)))
 
-        ui_widget = normalize_json_input(kwargs.get("ui_widget", {}))
+        ui_widget = normalize_json_input(
+            normalize_list_to_value(kwargs.get("ui_widget", {}))
+        )
         nodes: List[dict] = ui_widget.get("nodes", []) if isinstance(ui_widget, dict) else []
         dataset = {"nodes": nodes}
 
@@ -178,7 +174,7 @@ class LF_DetectRegions:
                 selected_copy["is_selected"] = True
 
             overlay = build_overlay(image, enriched)
-            append_compare_entry(image, overlay, nodes, index, temp_cache=self._temp_cache)
+            append_compare_entry(image, overlay, nodes, index)
 
             input_shape_info = runtime_info.get("input_shape") if runtime_info else None
             input_size_value = None
@@ -227,7 +223,8 @@ class LF_DetectRegions:
             }
             region_meta_list.append(meta)
 
-        safe_send_sync("detectregions", {"dataset": dataset}, node_id)
+        payload = {"dataset": dataset}
+        safe_send_sync("detectregions", payload, node_id)
 
         if region_meta_list:
             region_meta = region_meta_list[0]
@@ -276,7 +273,10 @@ class LF_DetectRegions:
                 "count": 0,
             }
 
-        return (region_meta, region_meta_list)
+        return {
+            "ui": {"lf_output": [payload]},
+            "result": (region_meta, region_meta_list),
+        }
 # endregion
 
 # region Mappings
