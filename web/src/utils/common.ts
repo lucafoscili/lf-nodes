@@ -97,6 +97,10 @@ export const getApiRoutes = () => {
 export const getComfyAPI = () => {
   return comfyAPI['api'].api;
 };
+export const getComfyClientId = (): string | undefined => {
+  const clientId = (getComfyAPI() as { clientId?: unknown }).clientId;
+  return typeof clientId === 'string' && clientId.trim() ? clientId.trim() : undefined;
+};
 export const getComfyAPP = () => {
   return comfyAPI['app'].app;
 };

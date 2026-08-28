@@ -35,6 +35,7 @@ import { TagName } from '../../types/widgets/widgets';
 import { getLfManager } from '../../utils/common';
 import { IMAGE_EDITOR_CONSTANTS } from './constants';
 import { parseLabel } from './selectors';
+import { hydrateSamplingSelectDataset } from './sampling';
 
 const layoutWarningFilters = new Set<string>();
 
@@ -359,12 +360,12 @@ export const createPrepSettings = (deps: PrepSettingsDeps): PrepSettingsFn => {
                     : await MODELS_API.getSchedulers();
 
                 if (dataset && Array.isArray(dataset.nodes) && dataset.nodes.length > 0) {
-                  select.lfDataset = dataset as LfDataDataset;
-
                   const targetValue = String(selectConfig.defaultValue ?? '');
-                  if (targetValue) {
-                    await select.setValue(targetValue);
-                  }
+                  await hydrateSamplingSelectDataset(
+                    select,
+                    dataset as LfDataDataset,
+                    targetValue,
+                  );
                 }
               } catch (error) {
                 getLfManager().log(

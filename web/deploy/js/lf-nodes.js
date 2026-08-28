@@ -483,6 +483,13 @@ const IMAGE_API = {
       body.append("url", url);
       body.append("type", type);
       body.append("settings", JSON.stringify(settings));
+      if (typeof settings.context_id === "string" && settings.context_id.trim()) {
+        body.append("context_id", settings.context_id.trim());
+      }
+      const callerClientId = getComfyClientId();
+      if (callerClientId) {
+        body.append("caller_client_id", callerClientId);
+      }
       const response = await getComfyAPI().fetchApi(APIEndpoints.ProcessImage, {
         body,
         method: "POST"
@@ -568,6 +575,19 @@ const IMAGE_API = {
   }
   //#endregion
 };
+const UPDATE_CHAINS = /* @__PURE__ */ new Map();
+const serializeJSONUpdate = async (key, operation) => {
+  const previous = UPDATE_CHAINS.get(key) ?? Promise.resolve();
+  const result = previous.catch(() => void 0).then(operation);
+  const tail = result.then(() => void 0, () => void 0);
+  UPDATE_CHAINS.set(key, tail);
+  try {
+    return await result;
+  } finally {
+    if (UPDATE_CHAINS.get(key) === tail)
+      UPDATE_CHAINS.delete(key);
+  }
+};
 const JSON_API = {
   //#region get
   get: async (filePath) => {
@@ -580,6 +600,10 @@ const JSON_API = {
     try {
       const body = new FormData();
       body.append("file_path", filePath);
+      const callerClientId = getComfyClientId();
+      if (callerClientId) {
+        body.append("caller_client_id", callerClientId);
+      }
       const response = await getComfyAPI().fetchApi(APIEndpoints.GetJson, {
         body,
         method: "POST"
@@ -609,45 +633,53 @@ const JSON_API = {
   },
   //#endregion
   //#region update
-  update: async (filePath, dataset) => {
-    const lfManager = getLfManager();
-    const payload = {
-      message: "",
-      status: LogSeverity.Info
-    };
-    const body = new FormData();
-    body.append("file_path", filePath);
-    body.append("dataset", JSON.stringify(dataset));
-    try {
-      const response = await getComfyAPI().fetchApi(APIEndpoints.UpdateJson, {
-        body,
-        method: "POST"
-      });
-      const code = response.status;
-      switch (code) {
-        case 200:
-          const p = await response.json();
-          if (p.status === "success") {
-            payload.message = p.message;
-            payload.status = LogSeverity.Success;
-          }
-          break;
-        default:
-          payload.message = "Unexpected response from the API!";
-          payload.status = LogSeverity.Error;
-          break;
+  update: (filePath, dataset) => {
+    const serializedDataset = JSON.stringify(dataset);
+    return serializeJSONUpdate(filePath, async () => {
+      const lfManager = getLfManager();
+      const payload = {
+        message: "",
+        status: LogSeverity.Info
+      };
+      const body = new FormData();
+      body.append("file_path", filePath);
+      body.append("dataset", serializedDataset);
+      const callerClientId = getComfyClientId();
+      if (callerClientId) {
+        body.append("caller_client_id", callerClientId);
       }
-    } catch (error) {
-      payload.message = error;
-      payload.status = LogSeverity.Error;
-    }
-    lfManager.log(payload.message, { payload }, payload.status);
-    return payload;
+      try {
+        const response = await getComfyAPI().fetchApi(APIEndpoints.UpdateJson, {
+          body,
+          method: "POST"
+        });
+        const code = response.status;
+        switch (code) {
+          case 200:
+            const p = await response.json();
+            if (p.status === "success") {
+              payload.message = p.message;
+              payload.status = LogSeverity.Success;
+            }
+            break;
+          default:
+            payload.message = await response.text().catch(() => "Unexpected response from the API!");
+            payload.status = LogSeverity.Error;
+            break;
+        }
+      } catch (error) {
+        payload.message = error;
+        payload.status = LogSeverity.Error;
+      }
+      lfManager.log(payload.message, { payload }, payload.status);
+      return payload;
+    });
   },
   //#endregion
   //#region recoverEditDataset
-  recoverEditDataset: async (nodeId) => {
+  recoverEditDataset: async (nodeId, contextId, callerClientId) => {
     const lfManager = getLfManager();
+    const resolvedCallerClientId = callerClientId ?? getComfyClientId();
     const payload = {
       data: {},
       message: "",
@@ -656,6 +688,12 @@ const JSON_API = {
     try {
       const body = new FormData();
       body.append("node_id", nodeId);
+      if (contextId) {
+        body.append("context_id", contextId);
+      }
+      if (resolvedCallerClientId) {
+        body.append("caller_client_id", resolvedCallerClientId);
+      }
       const response = await getComfyAPI().fetchApi(APIEndpoints.RecoverEditDataset, {
         body,
         method: "POST"
@@ -683,7 +721,7 @@ const JSON_API = {
       payload.message = error.toString();
       payload.status = LogSeverity.Error;
     }
-    lfManager.log(payload.message, { nodeId, payload }, payload.status);
+    lfManager.log(payload.message, { callerClientId: resolvedCallerClientId, contextId, nodeId, payload }, payload.status);
     return payload;
   }
   //#endregion
@@ -4481,6 +4519,20 @@ function getStatusColumn(dataset) {
 function parseLabel(data) {
   return data.isMandatory ? `${data.ariaLabel}*` : data.ariaLabel;
 }
+const hydrateSamplingSelectDataset = async (select, dataset, defaultValue) => {
+  let selectedValue = "";
+  try {
+    const selectedNode = await select.getValue();
+    selectedValue = String((selectedNode == null ? void 0 : selectedNode.id) ?? "");
+  } catch {
+  }
+  select.lfDataset = dataset;
+  const availableValues = new Set((dataset.nodes ?? []).map((node) => String((node == null ? void 0 : node.id) ?? "")));
+  const targetValue = availableValues.has(selectedValue) ? selectedValue : defaultValue;
+  if (targetValue) {
+    await select.setValue(targetValue);
+  }
+};
 const layoutWarningFilters = /* @__PURE__ */ new Set();
 function isValidImageEditorFilter(obj) {
   if (typeof obj !== "object" || obj === null || !("controlIds" in obj) || !("configs" in obj) || !("settings" in obj)) {
@@ -4705,11 +4757,8 @@ const createPrepSettings = (deps) => {
               try {
                 const dataset2 = selectConfig.id === ImageEditorSelectIds.Sampler ? await MODELS_API.getSamplers() : await MODELS_API.getSchedulers();
                 if (dataset2 && Array.isArray(dataset2.nodes) && dataset2.nodes.length > 0) {
-                  select.lfDataset = dataset2;
                   const targetValue = String(selectConfig.defaultValue ?? "");
-                  if (targetValue) {
-                    await select.setValue(targetValue);
-                  }
+                  await hydrateSamplingSelectDataset(select, dataset2, targetValue);
                 }
               } catch (error) {
                 getLfManager().log("Failed to load sampling options for select control.", { error, id: selectConfig.id }, LogSeverity.Warning);
@@ -5385,12 +5434,23 @@ const handleInterruptForState = async (state) => {
   const path = typeof (parsedPath == null ? void 0 : parsedPath.title) === "string" ? parsedPath.title : null;
   if ((statusColumn == null ? void 0 : statusColumn.title) === ImageEditorStatus.Pending) {
     statusColumn.title = ImageEditorStatus.Completed;
-    if (dataset && path) {
-      try {
-        await getApiRoutes().json.update(path, dataset);
-      } catch (error) {
-        lfManager.log("Failed to update JSON after workflow interrupt.", { error, path }, LogSeverity.Warning);
+    try {
+      if (!dataset || !path) {
+        throw new Error("The active editing session has no bound dataset path.");
       }
+      const update = await getApiRoutes().json.update(path, dataset);
+      if (update.status !== LogSeverity.Success) {
+        throw new Error(String(update.message || "The editing-session update was rejected."));
+      }
+    } catch (error) {
+      statusColumn.title = ImageEditorStatus.Pending;
+      if ((actionButtons == null ? void 0 : actionButtons.interrupt) && (actionButtons == null ? void 0 : actionButtons.resume)) {
+        setGridStatus(ImageEditorStatus.Pending, grid, actionButtons);
+      } else {
+        grid == null ? void 0 : grid.classList.remove(ImageEditorCSS.GridIsInactive);
+      }
+      lfManager.log("Failed to resume the workflow; the editing session remains pending.", { error, path }, LogSeverity.Error);
+      return;
     }
     if ((actionButtons == null ? void 0 : actionButtons.interrupt) && (actionButtons == null ? void 0 : actionButtons.resume)) {
       setGridStatus(ImageEditorStatus.Completed, grid, actionButtons);
@@ -5876,6 +5936,67 @@ const createNavigationTreeManager = (imageviewer, editorState) => {
 };
 const IMAGE_EDITOR_INSTANCES = /* @__PURE__ */ new Set();
 const STATE$h = /* @__PURE__ */ new WeakMap();
+const queueImageEditorHydration = (state, value) => {
+  state.pendingHydrationValue = value;
+};
+const consumeImageEditorHydration = (state, fallback) => {
+  const value = state.pendingHydrationValue ?? fallback;
+  delete state.pendingHydrationValue;
+  return value;
+};
+const isPendingImageEditorDataset = (dataset) => {
+  var _a;
+  return Boolean(dataset && typeof dataset === "object" && ((_a = getStatusColumn(dataset)) == null ? void 0 : _a.title) === ImageEditorStatus.Pending);
+};
+const makeImageEditorDatasetInert = (dataset) => {
+  const inert = {
+    ...dataset,
+    columns: Array.isArray(dataset.columns) ? dataset.columns.filter((column) => column.id !== ImageEditorColumnId.Path && column.id !== ImageEditorColumnId.Status) : dataset.columns,
+    selection: dataset.selection ? { ...dataset.selection } : dataset.selection
+  };
+  delete inert.context_id;
+  delete inert.recovery_client_id;
+  if (inert.selection) {
+    delete inert.selection.context_id;
+  }
+  return inert;
+};
+const resolveImageEditorHydrationDataset = (serializedDataset, recoveredDataset) => {
+  if (recoveredDataset) {
+    return { dataset: recoveredDataset, readOnly: false };
+  }
+  if (isPendingImageEditorDataset(serializedDataset)) {
+    return {
+      dataset: makeImageEditorDatasetInert(serializedDataset),
+      readOnly: true
+    };
+  }
+  return { dataset: serializedDataset, readOnly: false };
+};
+const resolveImageEditorRecoveryRequest = (nodeName, serializedDataset, callerClientId) => {
+  if (nodeName === NodeName.loadAndEditImages) {
+    if (!serializedDataset || typeof serializedDataset !== "object") {
+      return null;
+    }
+    const contextId = serializedDataset.context_id;
+    return typeof contextId === "string" && contextId.trim() ? {
+      contextId: contextId.trim(),
+      ...callerClientId ? { callerClientId } : {}
+    } : null;
+  }
+  if (nodeName === NodeName.imagesEditingBreakpoint) {
+    const contextId = isPendingImageEditorDataset(serializedDataset) ? serializedDataset.context_id : void 0;
+    const exactContextId = typeof contextId === "string" && contextId.trim() ? contextId.trim() : void 0;
+    if (!exactContextId && !callerClientId) {
+      return null;
+    }
+    return {
+      ...exactContextId ? { contextId: exactContextId } : {},
+      ...callerClientId ? { callerClientId } : {}
+    };
+  }
+  return null;
+};
 const imageEditorFactory = {
   //#region Options
   options: (wrapper) => {
@@ -5891,14 +6012,25 @@ const imageEditorFactory = {
         const { actionButtons, grid, imageviewer } = state.elements;
         const { status } = state;
         const isInitializing = status === "initializing";
+        let serializedDataset;
+        try {
+          serializedDataset = getLfManager().getManagers().lfFramework.syntax.json.unescape(value).parsedJSON;
+        } catch {
+          serializedDataset = void 0;
+        }
+        const callerClientId = getComfyClientId();
+        const recoveryRequest = resolveImageEditorRecoveryRequest(state.node.comfyClass, serializedDataset, callerClientId);
         const reconcileSession = async () => {
           if (!isInitializing) {
             return Promise.reject("Already initialized");
           }
           state.status = "reconciling";
+          if (!recoveryRequest) {
+            return null;
+          }
           try {
             const nodeId = String(state.node.id ?? "");
-            const resp = await JSON_API.recoverEditDataset(nodeId);
+            const resp = await JSON_API.recoverEditDataset(nodeId, recoveryRequest.contextId, recoveryRequest.callerClientId);
             if (resp.status !== LogSeverity.Success || !resp.data) {
               return null;
             }
@@ -5913,11 +6045,15 @@ const imageEditorFactory = {
           var _a, _b;
           const parsedValue = u.parsedJSON;
           const isPending = ((_a = getStatusColumn(parsedValue)) == null ? void 0 : _a.title) === ImageEditorStatus.Pending;
-          if (isPending) {
-            setGridStatus(ImageEditorStatus.Pending, grid, actionButtons);
+          if (state.node.comfyClass === NodeName.imagesEditingBreakpoint) {
+            setGridStatus(isPending && !state.recoveryReadOnly ? ImageEditorStatus.Pending : ImageEditorStatus.Completed, grid, actionButtons);
           }
           const dataset = parsedValue || {};
-          ensureDatasetContext(dataset, state);
+          if (state.recoveryReadOnly) {
+            state.contextId = void 0;
+          } else {
+            ensureDatasetContext(dataset, state);
+          }
           const navigationDirectory = getNavigationDirectory(dataset);
           if (navigationDirectory) {
             state.directory = { ...navigationDirectory };
@@ -5968,15 +6104,18 @@ const imageEditorFactory = {
         switch (status) {
           case "initializing":
             reconcileSession().then((reconciled) => {
-              const dataset = reconciled || value;
+              const hydration = resolveImageEditorHydrationDataset(consumeImageEditorHydration(state, serializedDataset ?? value), reconciled);
+              state.recoveryReadOnly = hydration.readOnly;
+              const dataset = hydration.dataset;
               normalizeValue(dataset, callback, CustomWidgetName.imageEditor);
               state.status = "ready";
             });
             break;
           case "reconciling":
+            queueImageEditorHydration(state, serializedDataset ?? value);
             break;
-          // no-op, wait for reconciling to finish
           case "ready":
+            state.recoveryReadOnly = false;
             normalizeValue(value, callback, CustomWidgetName.imageEditor);
             break;
         }
@@ -11021,6 +11160,10 @@ const getApiRoutes = () => {
 };
 const getComfyAPI = () => {
   return comfyAPI["api"].api;
+};
+const getComfyClientId = () => {
+  const clientId = getComfyAPI().clientId;
+  return typeof clientId === "string" && clientId.trim() ? clientId.trim() : void 0;
 };
 const getComfyAPP = () => {
   return comfyAPI["app"].app;

@@ -76,7 +76,11 @@ export interface ImageAPIs {
 }
 export interface JSONAPIs {
   get: (path: string) => Promise<GetJSONAPIPayload>;
-  recoverEditDataset: (nodeId: string) => Promise<GetJSONAPIPayload>;
+  recoverEditDataset: (
+    nodeId: string,
+    contextId?: string,
+    callerClientId?: string,
+  ) => Promise<GetJSONAPIPayload>;
   update: (path: string, dataset: LfDataDataset) => Promise<BaseAPIPayload>;
 }
 export interface APIMetadataEntry {

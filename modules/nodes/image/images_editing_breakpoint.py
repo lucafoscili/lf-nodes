@@ -2,7 +2,7 @@ import torch
 
 from . import CATEGORY
 from ...utils.constants import FUNCTION, Input
-from ...utils.helpers.comfy import safe_send_sync
+from ...utils.helpers.comfy import get_current_client_id, safe_send_sync
 from ...utils.helpers.editing import (
     EditingSession,
     apply_editor_config_to_dataset,
@@ -78,7 +78,11 @@ class LF_ImagesEditingBreakpoint:
         self._temp_cache.cleanup()
 
         node_id = kwargs.get("node_id")
-        session = EditingSession(node_id=node_id, temp_cache=self._temp_cache)
+        session = EditingSession(
+            node_id=node_id,
+            temp_cache=self._temp_cache,
+            owner_client_id=get_current_client_id(),
+        )
 
         model_value = normalize_list_to_value(kwargs.get("model"))
         clip_value = normalize_list_to_value(kwargs.get("clip"))

@@ -23,16 +23,27 @@ export const handleInterruptForState = async (state: ImageEditorState) => {
   if (statusColumn?.title === ImageEditorStatus.Pending) {
     statusColumn.title = ImageEditorStatus.Completed;
 
-    if (dataset && path) {
-      try {
-        await getApiRoutes().json.update(path, dataset);
-      } catch (error) {
-        lfManager.log(
-          'Failed to update JSON after workflow interrupt.',
-          { error, path },
-          LogSeverity.Warning,
-        );
+    try {
+      if (!dataset || !path) {
+        throw new Error('The active editing session has no bound dataset path.');
       }
+      const update = await getApiRoutes().json.update(path, dataset);
+      if (update.status !== LogSeverity.Success) {
+        throw new Error(String(update.message || 'The editing-session update was rejected.'));
+      }
+    } catch (error) {
+      statusColumn.title = ImageEditorStatus.Pending;
+      if (actionButtons?.interrupt && actionButtons?.resume) {
+        setGridStatus(ImageEditorStatus.Pending, grid, actionButtons);
+      } else {
+        grid?.classList.remove(ImageEditorCSS.GridIsInactive);
+      }
+      lfManager.log(
+        'Failed to resume the workflow; the editing session remains pending.',
+        { error, path },
+        LogSeverity.Error,
+      );
+      return;
     }
 
     if (actionButtons?.interrupt && actionButtons?.resume) {

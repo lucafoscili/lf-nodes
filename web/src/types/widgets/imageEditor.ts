@@ -79,6 +79,8 @@ export interface ImageEditorState extends BaseWidgetState {
   lastRequestedDirectory?: string;
   navigationManager?: NavigationManager;
   progressbar?: HTMLLfProgressbarElement | null;
+  pendingHydrationValue?: unknown;
+  recoveryReadOnly?: boolean;
   refreshDirectory?: (directory: string) => Promise<void>;
   status?: 'initializing' | 'reconciling' | 'ready';
   update: {
@@ -642,6 +644,7 @@ export type ImageEditorDataset = ImageEditorDeserializedValue & {
   context_id?: string;
   defaults?: ImageEditorDatasetDefaults;
   lf_node_id?: string;
+  owner_client_id?: string;
   selection?: ImageEditorDatasetSelection;
   navigation?: ImageEditorDatasetNavigation;
 };

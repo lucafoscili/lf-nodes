@@ -23,6 +23,11 @@ from ..utils.helpers.comfy import (
     resolve_input_directory_path,
 )
 from ..utils.helpers.conversion import pil_to_tensor, tensor_to_pil
+from ..utils.helpers.editing import (
+    CALLER_CLIENT_ID_FIELD,
+    caller_owns_context,
+    get_editing_context,
+)
 from ..utils.helpers.logic import sanitize_filename
 from ..utils.helpers.ui import create_masonry_node
 
@@ -165,6 +170,42 @@ async def process_image(request):
         filter_type: str = r.get("type")
         settings_raw = r.get("settings") or "{}"
         settings: dict = json.loads(settings_raw)
+        if not isinstance(settings, dict):
+            return web.Response(status=400, text="Filter settings must be an object.")
+
+        form_context_id = r.get("context_id")
+        settings_context_id = settings.get("context_id")
+        context_id = (
+            str(form_context_id).strip()
+            if form_context_id is not None
+            else (
+                str(settings_context_id).strip()
+                if settings_context_id is not None
+                else ""
+            )
+        )
+        if (
+            form_context_id is not None
+            and settings_context_id is not None
+            and str(form_context_id).strip() != str(settings_context_id).strip()
+        ):
+            return web.Response(status=400, text="Editing context mismatch.")
+
+        if not context_id and filter_type in {"inpaint", "outpaint"}:
+            return web.Response(status=400, text="Editing context is required.")
+        if context_id:
+            editing_context = get_editing_context(context_id)
+            if not isinstance(editing_context, dict):
+                return web.Response(status=404, text="Editing context is not registered.")
+            if not caller_owns_context(
+                editing_context,
+                r.get(CALLER_CLIENT_ID_FIELD),
+            ):
+                return web.Response(
+                    status=403,
+                    text="Editing context belongs to another client.",
+                )
+            settings["context_id"] = context_id
 
         filename, file_type, subfolder = resolve_url(api_url)
 
@@ -688,7 +729,9 @@ def _validate_tree_request(
 
 def _load_image_tensor(image_path: str) -> torch.Tensor:
     try:
-        pil_image = Image.open(image_path).convert("RGB")
+        with Image.open(image_path) as image:
+            mode = "RGBA" if "A" in image.getbands() else "RGB"
+            pil_image = image.convert(mode).copy()
     except Exception as e:
         raise ValueError(f"Error opening image: {e}")
 

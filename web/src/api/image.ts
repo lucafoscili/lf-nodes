@@ -9,7 +9,7 @@ import {
   UploadImageAPIPayload,
 } from '../types/api/api';
 import { LogSeverity } from '../types/manager/manager';
-import { getComfyAPI, getLfManager } from '../utils/common';
+import { getComfyAPI, getComfyClientId, getLfManager } from '../utils/common';
 
 export const IMAGE_API: ImageAPIs = {
   //#region get
@@ -142,6 +142,13 @@ export const IMAGE_API: ImageAPIs = {
       body.append('url', url);
       body.append('type', type);
       body.append('settings', JSON.stringify(settings));
+      if (typeof settings.context_id === 'string' && settings.context_id.trim()) {
+        body.append('context_id', settings.context_id.trim());
+      }
+      const callerClientId = getComfyClientId();
+      if (callerClientId) {
+        body.append('caller_client_id', callerClientId);
+      }
 
       const response = await getComfyAPI().fetchApi(APIEndpoints.ProcessImage, {
         body,

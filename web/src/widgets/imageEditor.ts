@@ -24,6 +24,7 @@ import { LfEventName } from '../types/events/events';
 import { LogSeverity } from '../types/manager/manager';
 import {
   ImageEditorActionButtons,
+  ImageEditorColumnId,
   ImageEditorCSS,
   ImageEditorDataset,
   ImageEditorDeserializedValue,
@@ -36,6 +37,7 @@ import {
 import { CustomWidgetName, NodeName, TagName } from '../types/widgets/widgets';
 import {
   createDOMWidget,
+  getComfyClientId,
   getLfManager,
   normalizeDirectoryRequest,
   normalizeValue,
@@ -43,6 +45,119 @@ import {
 
 export const IMAGE_EDITOR_INSTANCES = new Set<ImageEditorState>();
 const STATE = new WeakMap<HTMLDivElement, ImageEditorState>();
+
+export interface ImageEditorRecoveryRequest {
+  contextId?: string;
+  callerClientId?: string;
+}
+
+export const queueImageEditorHydration = (state: ImageEditorState, value: unknown): void => {
+  state.pendingHydrationValue = value;
+};
+
+export const consumeImageEditorHydration = (
+  state: ImageEditorState,
+  fallback: unknown,
+): unknown => {
+  const value = state.pendingHydrationValue ?? fallback;
+  delete state.pendingHydrationValue;
+  return value;
+};
+
+const isPendingImageEditorDataset = (dataset: unknown): dataset is ImageEditorDataset =>
+  Boolean(
+    dataset &&
+      typeof dataset === 'object' &&
+      getStatusColumn(dataset as ImageEditorDataset)?.title === ImageEditorStatus.Pending,
+  );
+
+/**
+ * Keeps the observational dataset visible while removing every capability that
+ * could resume or mutate a serialized session whose server-side ownership
+ * could not be re-established. The immutable owner is preserved verbatim; it
+ * is evidence, not a credential the frontend may rewrite.
+ */
+export const makeImageEditorDatasetInert = (dataset: ImageEditorDataset): ImageEditorDataset => {
+  const inert: ImageEditorDataset & { recovery_client_id?: string } = {
+    ...dataset,
+    columns: Array.isArray(dataset.columns)
+      ? dataset.columns.filter(
+          (column) =>
+            column.id !== ImageEditorColumnId.Path && column.id !== ImageEditorColumnId.Status,
+        )
+      : dataset.columns,
+    selection: dataset.selection ? { ...dataset.selection } : dataset.selection,
+  };
+
+  delete inert.context_id;
+  delete inert.recovery_client_id;
+  if (inert.selection) {
+    delete inert.selection.context_id;
+  }
+  return inert;
+};
+
+export const resolveImageEditorHydrationDataset = (
+  serializedDataset: unknown,
+  recoveredDataset: ImageEditorDataset | null,
+): { dataset: unknown; readOnly: boolean } => {
+  if (recoveredDataset) {
+    return { dataset: recoveredDataset, readOnly: false };
+  }
+  if (isPendingImageEditorDataset(serializedDataset)) {
+    return {
+      dataset: makeImageEditorDatasetInert(serializedDataset),
+      readOnly: true,
+    };
+  }
+  return { dataset: serializedDataset, readOnly: false };
+};
+
+/**
+ * Resolves the recovery authority carried by the widget's serialized value.
+ *
+ * Load-and-edit node ids are graph-local, so they are not sufficient to select
+ * a completed loader session. Its root context_id is the exact capability for
+ * that dataset; without it, hydration must use the serialized value instead of
+ * falling back to a node-wide scan. A breakpoint is an active transaction and
+ * intentionally retains its node-scoped pending-session recovery.
+ */
+export const resolveImageEditorRecoveryRequest = (
+  nodeName: string | undefined,
+  serializedDataset: unknown,
+  callerClientId?: string,
+): ImageEditorRecoveryRequest | null => {
+  if (nodeName === NodeName.loadAndEditImages) {
+    if (!serializedDataset || typeof serializedDataset !== 'object') {
+      return null;
+    }
+
+    const contextId = (serializedDataset as { context_id?: unknown }).context_id;
+    return typeof contextId === 'string' && contextId.trim()
+      ? {
+          contextId: contextId.trim(),
+          ...(callerClientId ? { callerClientId } : {}),
+        }
+      : null;
+  }
+
+  if (nodeName === NodeName.imagesEditingBreakpoint) {
+    const contextId = isPendingImageEditorDataset(serializedDataset)
+      ? (serializedDataset as { context_id?: unknown }).context_id
+      : undefined;
+    const exactContextId =
+      typeof contextId === 'string' && contextId.trim() ? contextId.trim() : undefined;
+    if (!exactContextId && !callerClientId) {
+      return null;
+    }
+    return {
+      ...(exactContextId ? { contextId: exactContextId } : {}),
+      ...(callerClientId ? { callerClientId } : {}),
+    };
+  }
+
+  return null;
+};
 
 export const imageEditorFactory: ImageEditorFactory = {
   //#region Options
@@ -52,7 +167,6 @@ export const imageEditorFactory: ImageEditorFactory = {
       getState: () => STATE.get(wrapper),
       getValue: () => {
         const { imageviewer } = STATE.get(wrapper).elements;
-
         return imageviewer.lfDataset || {};
       },
       setValue: (value) => {
@@ -62,6 +176,22 @@ export const imageEditorFactory: ImageEditorFactory = {
 
         const isInitializing = status === 'initializing';
 
+        let serializedDataset: unknown;
+        try {
+          serializedDataset = getLfManager()
+            .getManagers()
+            .lfFramework.syntax.json.unescape(value).parsedJSON;
+        } catch {
+          serializedDataset = undefined;
+        }
+
+        const callerClientId = getComfyClientId();
+        const recoveryRequest = resolveImageEditorRecoveryRequest(
+          state.node.comfyClass,
+          serializedDataset,
+          callerClientId,
+        );
+
         const reconcileSession = async () => {
           if (!isInitializing) {
             return Promise.reject('Already initialized');
@@ -69,9 +199,17 @@ export const imageEditorFactory: ImageEditorFactory = {
 
           state.status = 'reconciling';
 
+          if (!recoveryRequest) {
+            return null;
+          }
+
           try {
             const nodeId = String(state.node.id ?? '');
-            const resp = await JSON_API.recoverEditDataset(nodeId);
+            const resp = await JSON_API.recoverEditDataset(
+              nodeId,
+              recoveryRequest.contextId,
+              recoveryRequest.callerClientId,
+            );
             if (resp.status !== LogSeverity.Success || !resp.data) {
               return null;
             }
@@ -92,12 +230,22 @@ export const imageEditorFactory: ImageEditorFactory = {
         const callback: ImageEditorNormalizeCallback = (_, u) => {
           const parsedValue = u.parsedJSON as ImageEditorDeserializedValue;
           const isPending = getStatusColumn(parsedValue)?.title === ImageEditorStatus.Pending;
-          if (isPending) {
-            setGridStatus(ImageEditorStatus.Pending, grid, actionButtons);
+          if (state.node.comfyClass === NodeName.imagesEditingBreakpoint) {
+            setGridStatus(
+              isPending && !state.recoveryReadOnly
+                ? ImageEditorStatus.Pending
+                : ImageEditorStatus.Completed,
+              grid,
+              actionButtons,
+            );
           }
 
           const dataset = (parsedValue || {}) as ImageEditorDataset;
-          ensureDatasetContext(dataset, state);
+          if (state.recoveryReadOnly) {
+            state.contextId = undefined;
+          } else {
+            ensureDatasetContext(dataset, state);
+          }
 
           const navigationDirectory = getNavigationDirectory(dataset);
           if (navigationDirectory) {
@@ -168,14 +316,24 @@ export const imageEditorFactory: ImageEditorFactory = {
         switch (status) {
           case 'initializing':
             reconcileSession().then((reconciled) => {
-              const dataset = reconciled || (value as ImageEditorDataset);
+              const hydration = resolveImageEditorHydrationDataset(
+                consumeImageEditorHydration(state, serializedDataset ?? value),
+                reconciled,
+              );
+              state.recoveryReadOnly = hydration.readOnly;
+              const dataset = hydration.dataset;
               normalizeValue(dataset, callback, CustomWidgetName.imageEditor);
               state.status = 'ready';
             });
             break;
           case 'reconciling':
-            break; // no-op, wait for reconciling to finish
+            // A breakpoint can emit its live context while initial recovery is
+            // still in flight. Keep the newest authorized dataset so the
+            // initialization result cannot overwrite or discard that event.
+            queueImageEditorHydration(state, serializedDataset ?? value);
+            break;
           case 'ready':
+            state.recoveryReadOnly = false;
             normalizeValue(value, callback, CustomWidgetName.imageEditor);
             break;
         }

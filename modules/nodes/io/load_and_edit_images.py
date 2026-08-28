@@ -3,7 +3,7 @@ import torch
 
 from . import CATEGORY
 from ...utils.constants import FUNCTION, Input
-from ...utils.helpers.comfy import safe_send_sync
+from ...utils.helpers.comfy import get_current_client_id, safe_send_sync
 from ...utils.helpers.editing import (
     EditingSession,
     apply_editor_config_to_dataset,
@@ -103,7 +103,11 @@ class LF_LoadAndEditImages:
         node_id = kwargs.get("node_id")
         self._temp_cache.cleanup()
 
-        session = EditingSession(node_id=node_id, temp_cache=self._temp_cache)
+        session = EditingSession(
+            node_id=node_id,
+            temp_cache=self._temp_cache,
+            owner_client_id=get_current_client_id(),
+        )
 
         model_value = normalize_list_to_value(kwargs.get("model"))
         clip_value = normalize_list_to_value(kwargs.get("clip"))
@@ -122,6 +126,9 @@ class LF_LoadAndEditImages:
             config_value = None
 
         ui_dataset = normalize_json_input(kwargs.get("ui_widget", {})) or {}
+        previous_context_id = (
+            ui_dataset.get("context_id") if isinstance(ui_dataset, dict) else None
+        )
         dataset = self._prepare_dataset(session, ui_dataset)
 
         if config_value is None and isinstance(ui_dataset, dict):
@@ -129,6 +136,11 @@ class LF_LoadAndEditImages:
 
         if isinstance(config_value, dict):
             apply_editor_config_to_dataset(dataset, config_value)
+
+        # Applying a reusable config intentionally strips its old transactional
+        # context. Rebind the selection before persisting or publishing this
+        # fresh session.
+        ensure_dataset_context(dataset, dataset.get("context_id"))
 
         session.register_context(
             dataset,
@@ -141,11 +153,15 @@ class LF_LoadAndEditImages:
             wd14_tagger=wd14_tagger_value,
             node_event="loadandeditimages",
         )
+        session.retire_owned_context(
+            previous_context_id,
+            except_context_id=dataset.get("context_id"),
+        )
 
         safe_send_sync(
             "loadandeditimages",
             {
-                "dataset": dataset,
+                "value": dataset.get("context_id"),
             },
             node_id,
         )
@@ -208,6 +224,19 @@ class LF_LoadAndEditImages:
         for entry in metadata_entries:
             metadata_list.append({k: v for k, v in entry.items() if v is not None})
 
+        entry_count = len(image_list)
+        entry_cardinalities = {
+            len(names),
+            len(urls),
+            len(node_ids),
+            len(metadata_list),
+            entry_count,
+        }
+        if len(entry_cardinalities) != 1:
+            raise ValueError(
+                "Editing dataset metadata and image cardinality do not match."
+            )
+
         if image_batch:
             primary_image = image_batch[0]
         elif isinstance(selected_image_tensor, torch.Tensor):
@@ -241,36 +270,13 @@ class LF_LoadAndEditImages:
     def _prepare_dataset(self, session: EditingSession, ui_dataset: dict) -> dict:
         if isinstance(ui_dataset, dict) and ui_dataset:
             dataset = copy.deepcopy(ui_dataset)
+            default_status = "completed"
         else:
-            dataset = session.build_dataset([], filename_prefix="load_and_edit")
+            dataset = {"nodes": [], "prefix": "load_and_edit"}
+            default_status = "pending"
 
-        dataset["lf_node_id"] = str(session.node_id)
-
-        context_id = dataset.get("context_id")
-        if not context_id:
-            context_id = session._build_context_path()
-            dataset["context_id"] = context_id
-
-        columns = dataset.setdefault("columns", []) if isinstance(dataset.get("columns"), list) else []
-        if columns is not dataset.get("columns"):
-            dataset["columns"] = columns
-
-        has_path = False
-        has_status = False
-        for column in columns:
-            column_id = column.get("id") if isinstance(column, dict) else None
-            if column_id == "path":
-                has_path = True
-                column.setdefault("title", context_id)
-                if not column.get("title"):
-                    column["title"] = context_id
-            elif column_id == "status":
-                has_status = True
-
-        if not has_path:
-            columns.insert(0, {"id": "path", "title": context_id})
-        if not has_status:
-            columns.append({"id": "status", "title": "completed"})
+        dataset["prefix"] = "load_and_edit"
+        session.bind_dataset_context(dataset, default_status=default_status)
 
         nodes = dataset.get("nodes")
         if not isinstance(nodes, list):
