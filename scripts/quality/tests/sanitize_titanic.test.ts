@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -10,10 +11,32 @@ import {
 } from '../sanitize_titanic.mts';
 
 const fixturePath = resolve(dirname(fileURLToPath(import.meta.url)), '..', 'fixtures', 'E2E.json');
+const imageFixturePath = resolve(
+  dirname(fileURLToPath(import.meta.url)),
+  '..',
+  'fixtures',
+  'titanic-image',
+  'titanic-fixture.png',
+);
 
 const readFixture = () => JSON.parse(readFileSync(fixturePath, 'utf8'));
 
 describe('Titanic publication sanitizer', () => {
+  it('pins a metadata-free generic raster fixture', () => {
+    const png = readFileSync(imageFixturePath);
+    expect(createHash('sha256').update(png).digest('hex')).toBe(
+      '6e2f2c6536fe6c9161ac9947830b50697182834dd61a050978f89d544d4fbeb0',
+    );
+
+    const chunks: string[] = [];
+    for (let offset = 8; offset < png.length; ) {
+      const length = png.readUInt32BE(offset);
+      chunks.push(png.toString('ascii', offset + 4, offset + 8));
+      offset += 12 + length;
+    }
+    expect(chunks).toEqual(['IHDR', 'IDAT', 'IEND']);
+  });
+
   it('keeps the checked-in canonical fixture clean and idempotent', () => {
     const fixture = readFixture();
     const sanitized = sanitizeTitanicWorkflow(fixture).workflow;
@@ -70,8 +93,18 @@ describe('Titanic publication sanitizer', () => {
     expect(cleanById(50).widgets_values_named.lora).toBe(
       'PONY\\style\\d0f_v2.safetensors',
     );
-    expect(cleanById(93).widgets_values_named.dir).toBe('');
-    expect(cleanById(93).widgets_values_named.cache_images).toBe(true);
+    for (const id of [93, 100, 103]) {
+      expect(cleanById(id).widgets_values_named).toMatchObject({
+        dir: 'custom_nodes/lf-nodes/scripts/quality/fixtures/titanic-image',
+        load_cap: 1,
+        cache_images: true,
+        copy_into_input_dir: false,
+      });
+    }
+    expect(cleanById(481).widgets_values_named).toMatchObject({
+      dir: 'custom_nodes/lf-nodes/scripts/quality/fixtures/titanic-image',
+      filter: 'titanic-fixture.png',
+    });
     expect(cleanById(135).widgets_values_named.randomize).toBe(false);
     expect(cleanById(463).widgets_values_named.ui_widget).toEqual({});
     expect(cleanById(142).widgets_values_named.ui_widget).toEqual({
@@ -83,6 +116,16 @@ describe('Titanic publication sanitizer', () => {
     expect(cleanById(145).widgets_values_named.ui_widget.config).toEqual({
       currentCharacter: 'character_guide',
     });
+    const messengerCharacter =
+      cleanById(145).widgets_values_named.ui_widget.dataset.nodes[0];
+    expect(messengerCharacter.children.map((child: any) => child.id)).toEqual([
+      'chat',
+      'avatars',
+      'styles',
+      'locations',
+      'outfits',
+      'timeframes',
+    ]);
     expect(cleanById(357).widgets_values_named.ui_widget).not.toContain('Execution time:');
     expect(cleanById(117).widgets_values_named.mutate_source).toBe(false);
     for (const id of [51, 52, 250, 251]) {

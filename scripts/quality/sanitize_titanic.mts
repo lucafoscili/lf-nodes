@@ -17,6 +17,9 @@ const defaultInput = resolve(
   'E2E.json',
 );
 const defaultOutput = resolve(scriptDir, 'fixtures', 'E2E.json');
+const TITANIC_IMAGE_FIXTURE_DIR =
+  'custom_nodes/lf-nodes/scripts/quality/fixtures/titanic-image';
+const TITANIC_IMAGE_FIXTURE_NAME = 'titanic-fixture.png';
 
 const SEMANTIC_UI_WIDGET_CLASSES = new Set([
   'LF_KeywordToggleFromJSON',
@@ -70,6 +73,11 @@ const GENERIC_MESSENGER_DATASET = {
                 value: GENERIC_MESSENGER_CHAT,
               },
             },
+          },
+          {
+            id: 'avatars',
+            value: 0,
+            children: [],
           },
           {
             id: 'styles',
@@ -430,7 +438,9 @@ export const sanitizeTitanicWorkflow = (
 
   for (const id of [93, 100, 103]) {
     const node = requireNode(workflow, id, 'LF_LoadImages');
-    setWidget(node, 'dir', '', changes);
+    setWidget(node, 'dir', TITANIC_IMAGE_FIXTURE_DIR, changes);
+    setWidget(node, 'load_cap', 1, changes);
+    setWidget(node, 'copy_into_input_dir', false, changes);
     // `cache_images` was inserted before the observational widget after this
     // graph was first authored; old saved datasets otherwise occupy the new
     // boolean slot and carry their preview URLs into the canonical fixture.
@@ -456,12 +466,17 @@ export const sanitizeTitanicWorkflow = (
     'custom_nodes/lf-nodes/modules/nodes/seeds/sequential_seeds_generator.py',
     changes,
   );
+  const imageFixtureLoader = requireNode(workflow, 481, 'LF_LoadFileOnce');
   setWidget(
-    requireNode(workflow, 481, 'LF_LoadFileOnce'),
+    imageFixtureLoader,
     'dir',
-    'custom_nodes/lf-nodes/web/deploy/assets/svg',
+    TITANIC_IMAGE_FIXTURE_DIR,
     changes,
   );
+  // LF_BlobToImage intentionally falls back to a 1x1 image for undecodable
+  // blobs. Pin this branch to one checked-in raster so the GPU cohort tests
+  // image processing rather than whichever directory entry os.walk returns.
+  setWidget(imageFixtureLoader, 'filter', TITANIC_IMAGE_FIXTURE_NAME, changes);
 
   const afterTopology = JSON.stringify(topologyProjection(workflow));
   if (afterTopology !== beforeTopology) {
