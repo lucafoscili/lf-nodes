@@ -2,13 +2,14 @@ import torch
 
 from typing import Any, List, Optional
 
+from ...constants import PNG_DATA_URL_PREFIX
 from ..conversion.tensor_to_base64 import tensor_to_base64
 
 # region build_openai_multimodal_content
 def build_openai_multimodal_content(
     image: Optional[torch.Tensor | List[torch.Tensor]],
     text: str,
-    base64_prefix: str = "data:image/png;charset=utf-8;base64,"
+    base64_prefix: str = PNG_DATA_URL_PREFIX,
 ) -> List[dict[str, Any]]:
     """
     Build multimodal content array for OpenAI-style APIs.

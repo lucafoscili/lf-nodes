@@ -3,10 +3,9 @@ import requests
 import torch
 
 from . import CATEGORY
-from ...utils.constants import BASE64_PNG_PREFIX, FUNCTION, HEADERS, Input, INT_MAX, get_character_impersonator_system
-from ...utils.helpers.api import handle_response
+from ...utils.constants import FUNCTION, HEADERS, Input, INT_MAX, get_character_impersonator_system
+from ...utils.helpers.api import build_openai_multimodal_content, handle_response
 from ...utils.helpers.comfy import safe_send_sync
-from ...utils.helpers.conversion import tensor_to_base64
 from ...utils.helpers.logic import normalize_input_image, normalize_list_to_value
 
 # region LF_CharacterImpersonator
@@ -86,15 +85,7 @@ class LF_CharacterImpersonator:
 
         system = get_character_impersonator_system(character_bio)
 
-        content = []
-        if isinstance(image, list) and len(image) > 0:
-            image = normalize_input_image(image)
-            b64_image = tensor_to_base64(image[0])
-            image_url = f"{BASE64_PNG_PREFIX}{b64_image}"
-            content.append({"type": "image_url", "image_url": {"url":image_url}})
-
-        if prompt:
-            content.append({"type": "text", "text": prompt})
+        content = build_openai_multimodal_content(image, prompt)
 
         request = {
             "temperature": temperature,

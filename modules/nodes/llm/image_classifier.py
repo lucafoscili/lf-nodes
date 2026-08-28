@@ -5,7 +5,7 @@ import torch
 from ...utils.helpers.api.resolve_url import resolve_api_url
 
 from . import CATEGORY
-from ...utils.constants import BASE64_PNG_PREFIX, FUNCTION, HEADERS, Input, INT_MAX, get_image_classifier_system
+from ...utils.constants import FUNCTION, HEADERS, Input, INT_MAX, get_image_classifier_system
 from ...utils.helpers.api import build_openai_multimodal_content, handle_response
 from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.logic import normalize_input_image, normalize_list_to_value
