@@ -29,5 +29,11 @@ def normalize_conditioning(cond):
     if isinstance(cond, (list, tuple)) and len(cond) == 2 and isinstance(cond[1], dict):
         return [list(cond) if not isinstance(cond, list) else cond]
 
+    # INPUT_IS_LIST wraps the complete semantic CONDITIONING value once.  Peel
+    # only that unambiguous outer transport layer; never scalar-unwrap the
+    # conditioning pairs themselves.
+    if isinstance(cond, (list, tuple)) and len(cond) == 1:
+        return normalize_conditioning(cond[0])
+
     return None
 # endregion

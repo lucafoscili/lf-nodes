@@ -21,32 +21,49 @@ def normalize_output_image(image_input):
         - batch_list (list): A list of tensors, each with shape [B, H, W, C] for a unique resolution.
         - image_list (list): A list of tensors with shape [1, H, W, C], preserving the batch dimension.
     """
-    if isinstance(image_input, list):
-        image_list = []
-        for img in image_input:
-            if isinstance(img, torch.Tensor):
-                if len(img.shape) == 4:
-                    image_list.extend([i.unsqueeze(0) if len(i.shape) == 3 else i for i in img])
-                elif len(img.shape) == 3:
-                    image_list.append(img.unsqueeze(0))
-            else:
-                raise TypeError("Unsupported image format in list.")
-    elif isinstance(image_input, torch.Tensor):
-        if len(image_input.shape) == 4:
-            image_list = [img.unsqueeze(0) if len(img.shape) == 3 else img for img in image_input]
-        elif len(image_input.shape) == 3:
-            image_list = [image_input.unsqueeze(0)]
-        else:
-            raise ValueError("Unsupported tensor shape.")
+    image_list = []
+
+    def append_tensor(image, label):
+        if not isinstance(image, torch.Tensor):
+            raise TypeError(f"{label} must be a torch.Tensor.")
+        if image.ndim == 4:
+            if image.shape[0] < 1:
+                raise ValueError(f"{label} batch must contain at least one image.")
+            if image.shape[1] < 1 or image.shape[2] < 1:
+                raise ValueError(f"{label} image dimensions must be positive.")
+            if image.shape[3] not in (3, 4):
+                raise ValueError(
+                    f"{label} must use RGB or RGBA channels; got {tuple(image.shape)}."
+                )
+            for item in image:
+                image_list.append(item.unsqueeze(0).contiguous())
+            return
+        if image.ndim == 3:
+            if image.shape[0] < 1 or image.shape[1] < 1:
+                raise ValueError(f"{label} image dimensions must be positive.")
+            if image.shape[2] not in (3, 4):
+                raise ValueError(
+                    f"{label} must use RGB or RGBA channels; got {tuple(image.shape)}."
+                )
+            image_list.append(image.unsqueeze(0).contiguous())
+            return
+        raise ValueError(
+            f"{label} must have shape [H,W,C] or [B,H,W,C]; got {tuple(image.shape)}."
+        )
+
+    if isinstance(image_input, (list, tuple)):
+        if not image_input:
+            raise ValueError("Image input is empty.")
+        for index, image in enumerate(image_input):
+            append_tensor(image, f"image_input[{index}]")
     else:
-        raise TypeError("Unsupported input type for image normalization.")
+        append_tensor(image_input, "image_input")
 
     resolution_groups = {}
     for img in image_list:
-        h, w = img.shape[1:3]
-        if (h, w) not in resolution_groups:
-            resolution_groups[(h, w)] = []
-        resolution_groups[(h, w)].append(img)
+        _, h, w, channels = img.shape
+        key = (h, w, channels, img.dtype, str(img.device))
+        resolution_groups.setdefault(key, []).append(img)
 
     batch_list = []
     for _, imgs in resolution_groups.items():

@@ -1,7 +1,11 @@
 from . import CATEGORY
 from ...utils.constants import FUNCTION, Input
 from ...utils.helpers.comfy import safe_send_sync
-from ...utils.helpers.logic import normalize_input_latent, normalize_list_to_value, normalize_output_image
+from ...utils.helpers.logic import (
+    normalize_input_latent_batches,
+    normalize_list_to_value,
+    normalize_output_image,
+)
 
 # region LF_VAEDecode
 class LF_VAEDecode:
@@ -26,7 +30,7 @@ class LF_VAEDecode:
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
-    INPUT_IS_LIST = (True, False)
+    INPUT_IS_LIST = True
     OUTPUT_IS_LIST = (False, True)
     OUTPUT_TOOLTIPS = (
         "Decoded image.",
@@ -43,22 +47,39 @@ class LF_VAEDecode:
         if vae is None:
             raise RuntimeError("VAE is required for decoding.")
 
-        latent_dict = normalize_input_latent(latent_input)
-        latent_tensor = latent_dict.get("samples")
-
-        if latent_tensor is None:
-            raise RuntimeError("Invalid latent input: missing 'samples'.")
-        total = int(latent_tensor.shape[0]) if hasattr(latent_tensor, "dim") and latent_tensor.dim() >= 1 else 1
+        latent_batches = normalize_input_latent_batches(latent_input)
+        total = sum(int(latent["samples"].shape[0]) for latent in latent_batches)
 
         safe_send_sync("vaedecode", {
             "value": f"## VAE Decode\n\n- Starting decode for `{total}` sample(s)…",
         }, node_id)
 
-        images = vae.decode(latent_tensor)
-        if hasattr(images, "dim") and images.dim() == 5:
-            images = images.reshape(-1, images.shape[-3], images.shape[-2], images.shape[-1])
+        decoded_images = []
+        for latent in latent_batches:
+            images = vae.decode(latent["samples"])
+            if hasattr(images, "dim") and images.dim() == 5:
+                images = images.reshape(
+                    -1,
+                    images.shape[-3],
+                    images.shape[-2],
+                    images.shape[-1],
+                )
+            _, single_images = normalize_output_image(images)
+            decoded_images.extend(single_images)
 
-        b, h, w, c = int(images.shape[0]), int(images.shape[1]), int(images.shape[2]), int(images.shape[3])
+        batch_groups, image_list = normalize_output_image(decoded_images)
+        primary_batch = batch_groups[0]
+        b, h, w, c = (
+            int(primary_batch.shape[0]),
+            int(primary_batch.shape[1]),
+            int(primary_batch.shape[2]),
+            int(primary_batch.shape[3]),
+        )
+        output_shapes = []
+        for image in image_list:
+            shape = tuple(int(value) for value in image.shape)
+            if shape not in output_shapes:
+                output_shapes.append(shape)
         comp_spatial = getattr(vae, "spacial_compression_decode", None)
         comp_temporal = getattr(vae, "temporal_compression_decode", None)
         spatial = None
@@ -74,8 +95,9 @@ class LF_VAEDecode:
 
         log_lines = [
             "## VAE Decode\n\n",
-            f"- Input latent keys: `{list(latent_dict.keys())}`",
-            f"- Output image shape: `{b}x{h}x{w}x{c}`",
+            f"- Input latent keys: `{list(latent_batches[0].keys())}`",
+            f"- Primary compatible image batch: `{b}x{h}x{w}x{c}`",
+            f"- Per-item image shapes: `{output_shapes}`",
             f"- Completed decoding `{total}` sample(s).",
         ]
 
@@ -88,9 +110,7 @@ class LF_VAEDecode:
             "value": "\n".join(log_lines),
         }, node_id)
 
-        batch_list, image_list = normalize_output_image(images)
-
-        return (batch_list[0], image_list)
+        return (primary_batch, image_list)
 # endregion
 
 # region Mappings

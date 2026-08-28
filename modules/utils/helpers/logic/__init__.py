@@ -12,6 +12,7 @@ from .normalize_masks_for_images import *
 from .normalize_output_image import *
 from .normalize_output_latent import *
 from .normalize_output_mask import *
+from .normalize_parallel_list import *
 from .not_none import *
 from .randomize_from_history import *
 from .resolve_uploaded_filepath import *

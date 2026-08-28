@@ -11,8 +11,10 @@ def normalize_output_mask(mask_input):
         shape [B, H, W].
       - mask_list: list of tensors each with shape [1, H, W].
     """
-    if isinstance(mask_input, list):
-        candidates = mask_input
+    if isinstance(mask_input, (list, tuple)):
+        if not mask_input:
+            raise ValueError("Mask input is empty.")
+        candidates = list(mask_input)
     elif torch.is_tensor(mask_input):
         candidates = [mask_input]
     else:
@@ -26,6 +28,16 @@ def normalize_output_mask(mask_input):
         if mask.dim() == 4:
             # Interpret as batched [B, C, H, W] or [B, H, W, C].
             if mask.shape[1] == 1 or mask.shape[-1] == 1:
+                if (
+                    mask.shape[1] == 1
+                    and mask.shape[-1] == 1
+                    and mask.shape[2] != 1
+                ):
+                    raise ValueError(
+                        "A 4D mask with singleton dimensions at both channel "
+                        "positions is ambiguous; provide explicit [B,1,H,W] "
+                        "or [B,H,W,1] geometry."
+                    )
                 if mask.shape[1] == 1:
                     batches = mask[:, 0]
                 else:
@@ -33,11 +45,10 @@ def normalize_output_mask(mask_input):
                 for item in batches:
                     mask_list.append(item.unsqueeze(0).contiguous().float())
             else:
-                for item in mask:
-                    if item.dim() == 3:
-                        mask_list.append(item[:1].contiguous().float())
-                    else:
-                        raise ValueError(f"Unsupported 4D mask shape: {mask.shape}")
+                raise ValueError(
+                    "A 4D mask must use a singleton channel dimension in "
+                    f"[B,1,H,W] or [B,H,W,1] layout; got {tuple(mask.shape)}."
+                )
         elif mask.dim() == 3:
             if mask.shape[0] != 1:
                 for item in mask:
@@ -49,10 +60,14 @@ def normalize_output_mask(mask_input):
         else:
             raise ValueError(f"Unsupported mask tensor shape: {mask.shape}")
 
+    if not mask_list:
+        raise ValueError("Mask input did not contain any masks.")
+
     resolution_groups = {}
     for mask in mask_list:
         h, w = mask.shape[1:]
-        resolution_groups.setdefault((h, w), []).append(mask)
+        key = (h, w, mask.dtype, str(mask.device))
+        resolution_groups.setdefault(key, []).append(mask)
 
     batch_list = []
     for masks in resolution_groups.values():

@@ -1,4 +1,4 @@
-import torch
+from .normalize_output_mask import normalize_output_mask
 
 # region normalize_masks_for_images
 def normalize_masks_for_images(mask_input, image_count: int) -> list:
@@ -20,20 +20,10 @@ def normalize_masks_for_images(mask_input, image_count: int) -> list:
     if mask_input is None:
         raise ValueError("Mask is required for inpaint filter node.")
 
-    masks_list: list
+    if isinstance(image_count, bool) or not isinstance(image_count, int) or image_count < 1:
+        raise ValueError("image_count must be a positive integer.")
 
-    if isinstance(mask_input, (list, tuple)):
-        masks_list = list(mask_input)
-    elif torch.is_tensor(mask_input):
-        try:
-            if mask_input.dim() >= 3 and mask_input.shape[0] == image_count:
-                masks_list = [mask_input[i : i + 1].contiguous() for i in range(image_count)]
-            else:
-                masks_list = [mask_input]
-        except Exception:
-            masks_list = [mask_input]
-    else:
-        masks_list = [mask_input]
+    _, masks_list = normalize_output_mask(mask_input)
 
     if len(masks_list) not in (1, image_count):
         raise ValueError(
