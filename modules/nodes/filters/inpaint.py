@@ -3,16 +3,12 @@ import torch
 from . import CATEGORY
 from ...utils.constants import FUNCTION, Input, SAMPLERS, SCHEDULERS
 from ...utils.filters.inpaint import apply_inpaint_filter_tensor
-from ...utils.helpers.logic import normalize_input_image, normalize_list_to_value, normalize_masks_for_images, normalize_output_image
-from ...utils.helpers.temp_cache import TempFileCache
-from ...utils.helpers.torch import process_and_save_image
+from ...utils.helpers.logic import normalize_conditioning, normalize_input_image, normalize_list_to_value, normalize_masks_for_images, normalize_output_image
+from ...utils.helpers.torch.process_and_save_image import process_and_save_image
 from ...utils.helpers.comfy import safe_send_sync
 
 # region LF_Inpaint
 class LF_Inpaint:
-    def __init__(self):
-        self._temp_cache = TempFileCache()
-
     @classmethod
     def INPUT_TYPES(cls):
         return {
@@ -91,6 +87,7 @@ class LF_Inpaint:
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
+    INPUT_IS_LIST = True
     OUTPUT_IS_LIST = (False, True)
     OUTPUT_TOOLTIPS = (
         "Image tensor with inpainting effect applied.",
@@ -100,13 +97,11 @@ class LF_Inpaint:
     RETURN_TYPES = (Input.IMAGE, Input.IMAGE)
 
     def on_exec(self, **kwargs: dict):
-        self._temp_cache.cleanup()
-
         node_id = kwargs.get("node_id")
         images = normalize_input_image(kwargs.get("image"))
-        model = kwargs.get("model")
-        clip = kwargs.get("clip")
-        vae = kwargs.get("vae")
+        model = normalize_list_to_value(kwargs.get("model"))
+        clip = normalize_list_to_value(kwargs.get("clip"))
+        vae = normalize_list_to_value(kwargs.get("vae"))
 
         if model is None or clip is None or vae is None:
             raise ValueError("Model, CLIP and VAE are required.")
@@ -127,8 +122,8 @@ class LF_Inpaint:
             "scheduler": normalize_list_to_value(kwargs.get("scheduler")) if kwargs.get("scheduler") is not None else "karras",
             "positive_prompt": normalize_list_to_value(kwargs.get("positive_prompt") or ""),
             "negative_prompt": normalize_list_to_value(kwargs.get("negative_prompt") or ""),
-            "positive_conditioning": kwargs.get("positive_conditioning"),
-            "negative_conditioning": kwargs.get("negative_conditioning"),
+            "positive_conditioning": normalize_conditioning(kwargs.get("positive_conditioning")),
+            "negative_conditioning": normalize_conditioning(kwargs.get("negative_conditioning")),
             "upsample_target": int(
                 normalize_list_to_value(kwargs.get("upsample_target") if "upsample_target" in kwargs else 0)
             ),
@@ -161,22 +156,18 @@ class LF_Inpaint:
             images=images,
             filter_function=run_filter,
             filter_args={},
-            filename_prefix="inpaint",
             nodes=nodes,
-            temp_cache=self._temp_cache,
         )
 
-        safe_send_sync(
-            "inpaint",
-            {
-                "dataset": dataset,
-            },
-            node_id,
-        )
+        payload = {"dataset": dataset}
+        safe_send_sync("inpaint", payload, node_id)
 
         batch_list, image_list = normalize_output_image(processed_images)
 
-        return (batch_list[0], image_list)
+        return {
+            "ui": {"lf_output": [payload]},
+            "result": (batch_list[0], image_list),
+        }
 # endregion
 
 # region Mappings

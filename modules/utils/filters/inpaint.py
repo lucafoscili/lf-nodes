@@ -1431,6 +1431,11 @@ def apply_inpaint_filter_tensor(
 
     Raises:
         ValueError: If the mask tensor has an unsupported shape.
+
+    An empty mask is a successful no-op. This preserves the mathematical
+    compositing contract (zero editable pixels means the original image) while
+    avoiding an unnecessary VAE/sample path, including for latent-incompatible
+    tiny placeholder inputs.
     """
     device = _infer_vae_device(vae, image.device)
 
@@ -1553,6 +1558,13 @@ def apply_inpaint_filter_tensor(
             m = border
         else:
             m = torch.clamp(m + border, 0.0, 1.0)
+
+    if not bool((m > 0.5).any()):
+        _emit_progress(100.0)
+        return (
+            base_image.detach().clamp(0.0, 1.0).to(torch.float32).cpu().contiguous(),
+            {"status": "noop", "reason": "empty_mask"},
+        )
 
     wd14_tags: list[str] | None = None
     wd14_backend: str | None = None
