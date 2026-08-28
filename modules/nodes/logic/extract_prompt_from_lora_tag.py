@@ -33,11 +33,12 @@ class LF_ExtractPromptFromLoraTag:
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
+    OUTPUT_IS_LIST = (False, False, True, True)
     OUTPUT_TOOLTIPS = (
-        "Extracted keywords from the LoRA tag.",
-        "Count of keywords extracted.",
-        "List of all extracted keywords.",
-        "List of keyword counts for each entry."
+        "All extracted keywords joined in source order.",
+        "Total number of keywords extracted.",
+        "Cleaned keyword string for each LoRA tag in source order.",
+        "Keyword count for each LoRA tag in source order."
     )
     RETURN_NAMES = ("keywords", "keywords_count", "keywords_list", "keywords_count_list")
     RETURN_TYPES = (Input.STRING, Input.INTEGER, Input.STRING, Input.INTEGER)
@@ -82,7 +83,10 @@ class LF_ExtractPromptFromLoraTag:
             "value": log
         }, kwargs.get("node_id"))
 
-        return (clean_loras, keyword_counts, clean_loras, keyword_counts)
+        keywords = ", ".join(clean_loras)
+        keywords_count = sum(keyword_counts)
+
+        return (keywords, keywords_count, clean_loras, keyword_counts)
 # endregion
 
 # region Mappings
