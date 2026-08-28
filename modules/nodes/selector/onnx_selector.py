@@ -40,7 +40,7 @@ class LF_ONNXSelector:
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
-    INPUT_IS_LIST = (False, False, False)
+    INPUT_IS_LIST = False
     OUTPUT_TOOLTIPS = (
         "Selected ONNX detector model label.",
         "File path of the selected ONNX detector model.",

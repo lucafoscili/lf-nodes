@@ -74,7 +74,7 @@ class LF_Notify:
             "tag": tag
         }, kwargs.get("node_id"))
 
-        return (any, any)
+        return (any, [any])
 # endregion
 
 # region Mappings

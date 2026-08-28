@@ -6,7 +6,7 @@ import torch
 from . import CATEGORY
 from ...utils.constants import FUNCTION, Input, INT_MAX, WEIGHT_DTYPE_COMBO
 from ...utils.helpers.api import process_model_async
-from ...utils.helpers.comfy import get_comfy_list, safe_send_sync
+from ...utils.helpers.comfy import get_comfy_list, get_current_client_id, safe_send_sync
 from ...utils.helpers.logic import (
     build_is_changed_tuple,
     dataset_from_metadata,
@@ -142,6 +142,7 @@ class LF_DiffusionModelSelector:
 
         callback = None
         if node_id and diffusion_model:
+            event_client_id = get_current_client_id()
             def _metadata_callback(metadata_ready: dict) -> None:
                 model_path_ready = metadata_ready.get("model_path")
                 if not model_path_ready:
@@ -162,6 +163,7 @@ class LF_DiffusionModelSelector:
                         "paths": [model_path_ready or ""],
                     },
                     node_id,
+                    target_client_id=event_client_id,
                 )
 
             callback = _metadata_callback

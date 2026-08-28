@@ -29,3 +29,12 @@ if "server" not in sys.modules:
 
 for host_module_name in ("comfy.sample", "nodes"):
     sys.modules.setdefault(host_module_name, types.ModuleType(host_module_name))
+
+if "comfy.samplers" not in sys.modules:
+    comfy_samplers = types.ModuleType("comfy.samplers")
+    comfy_samplers.KSampler = type(
+        "KSampler",
+        (),
+        {"SAMPLERS": [], "SCHEDULERS": []},
+    )
+    sys.modules["comfy.samplers"] = comfy_samplers

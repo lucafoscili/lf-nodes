@@ -3,8 +3,14 @@ import random
 from . import CATEGORY
 from ...utils.constants import FUNCTION, Input, INT_MAX
 from ...utils.helpers.api import process_model_async
-from ...utils.helpers.comfy import get_comfy_list, safe_send_sync
-from ...utils.helpers.logic import dataset_from_metadata, filter_list, is_none, normalize_list_to_value
+from ...utils.helpers.comfy import get_comfy_list, get_current_client_id, safe_send_sync
+from ...utils.helpers.logic import (
+    dataset_from_metadata,
+    filter_list,
+    is_none,
+    normalize_list_to_value,
+    register_selector_list,
+)
 
 # region LF_EmbeddingSelector
 class LF_EmbeddingSelector:
@@ -111,6 +117,7 @@ class LF_EmbeddingSelector:
 
         callback = None
         if node_id and embedding:
+            event_client_id = get_current_client_id()
             def _metadata_callback(metadata_ready: dict) -> None:
                 model_path_ready = metadata_ready.get("model_path")
                 if not model_path_ready:
@@ -135,6 +142,7 @@ class LF_EmbeddingSelector:
                         "paths": [model_path_ready or ""],
                     },
                     node_id,
+                    target_client_id=event_client_id,
                 )
 
             callback = _metadata_callback
@@ -186,6 +194,11 @@ class LF_EmbeddingSelector:
     def VALIDATE_INPUTS(self, **kwargs):
          return True
 # endregion
+
+_EMBEDDING_SELECTOR_LIST = register_selector_list(
+    LF_EmbeddingSelector,
+    lambda: get_comfy_list("embeddings"),
+)
 
 # region Mappings
 NODE_CLASS_MAPPINGS = {

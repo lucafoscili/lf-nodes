@@ -1,9 +1,14 @@
 import random
 
 from . import CATEGORY
-from ...utils.constants import FUNCTION, HAS_V3, Input, INT_MAX
+from ...utils.constants import FUNCTION, Input, INT_MAX
 from ...utils.helpers.comfy import get_comfy_list, safe_send_sync
-from ...utils.helpers.logic import filter_list, normalize_json_input, normalize_list_to_value
+from ...utils.helpers.logic import (
+    filter_list,
+    normalize_json_input,
+    normalize_list_to_value,
+    register_selector_list,
+)
 from ...utils.helpers.ui import create_history_node
 
 # region LF_UpscaleModelSelector
@@ -52,10 +57,7 @@ class LF_UpscaleModelSelector:
         "Selected upscale model item as a string.",
     )
     RETURN_NAMES = ("combo", "string")
-    if HAS_V3:
-        RETURN_TYPES = (Input.COMBO, Input.STRING)
-    else:
-        RETURN_TYPES = (initial_list, Input.STRING)
+    RETURN_TYPES = (initial_list, Input.STRING)
 
     def on_exec(self, **kwargs: dict):
         upscale_model: str = normalize_list_to_value(kwargs.get("upscale_model"))
@@ -89,6 +91,11 @@ class LF_UpscaleModelSelector:
 
         return (upscale_model, upscale_model)
 # endregion
+
+_UPSCALE_MODEL_SELECTOR_LIST = register_selector_list(
+    LF_UpscaleModelSelector,
+    lambda: get_comfy_list("upscale_models"),
+)
 
 # region Mappings
 NODE_CLASS_MAPPINGS = {

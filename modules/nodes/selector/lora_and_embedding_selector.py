@@ -5,8 +5,14 @@ from typing import Optional, Tuple
 from . import CATEGORY
 from ...utils.constants import FUNCTION, Input, INT_MAX
 from ...utils.helpers.api import process_model_async
-from ...utils.helpers.comfy import get_comfy_list, safe_send_sync
-from ...utils.helpers.logic import dataset_from_metadata, filter_list, is_none, normalize_list_to_value
+from ...utils.helpers.comfy import get_comfy_list, get_current_client_id, safe_send_sync
+from ...utils.helpers.logic import (
+    dataset_from_metadata,
+    filter_list,
+    is_none,
+    normalize_list_to_value,
+    register_selector_list,
+)
 
 # region LF_LoraAndEmbeddingSelector
 class LF_LoraAndEmbeddingSelector:
@@ -129,6 +135,7 @@ class LF_LoraAndEmbeddingSelector:
             raise ValueError(f"Not found an embedding named {lora}")
 
         should_fetch_civitai = bool(get_civitai_info)
+        event_client_id = get_current_client_id()
 
         combined_metadata = {"lora": None, "embedding": None}
 
@@ -170,6 +177,7 @@ class LF_LoraAndEmbeddingSelector:
                     ],
                 },
                 node_id,
+                target_client_id=event_client_id,
             )
 
         def _metadata_callback(kind: str):
@@ -258,6 +266,19 @@ class LF_LoraAndEmbeddingSelector:
     def VALIDATE_INPUTS(self, **kwargs):
          return True
 # endregion
+
+_LORA_AND_EMBEDDING_LORA_LIST = register_selector_list(
+    LF_LoraAndEmbeddingSelector,
+    lambda: get_comfy_list("loras"),
+    attr_name="initial_lora_list",
+    return_index=0,
+)
+_LORA_AND_EMBEDDING_EMBEDDING_LIST = register_selector_list(
+    LF_LoraAndEmbeddingSelector,
+    lambda: get_comfy_list("embeddings"),
+    attr_name="initial_emb_list",
+    return_index=1,
+)
 
 # region Mappings
 NODE_CLASS_MAPPINGS = {

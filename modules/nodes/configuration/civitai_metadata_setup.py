@@ -1,13 +1,55 @@
-from folder_paths import get_full_path
+from folder_paths import get_full_path_or_raise
 
 from . import CATEGORY
 from ...utils.constants import FUNCTION, HAS_V3, Input, INT_MAX, SAMPLERS, SCHEDULERS, UNET_DIFFUSION_COMBO
 from ...utils.helpers.api import get_embedding_hashes, get_sha256, get_lora_hashes
 from ...utils.helpers.comfy import get_comfy_list, safe_send_sync
-from ...utils.helpers.logic import normalize_list_to_value
+from ...utils.helpers.logic import is_none, normalize_list_to_value, register_selector_list
+
+
+def _with_none(options) -> list[str]:
+    """Add the serialized no-selection sentinel to an optional combo."""
+
+    return ["None", *(option for option in options if option != "None")]
+
+
+CHECKPOINT_VALUES = get_comfy_list("checkpoints")
+UNET_VALUES = get_comfy_list("unet")
+VAE_VALUES = get_comfy_list("vae")
+UPSCALER_VALUES = get_comfy_list("upscale_models")
+
+
+def _optional_combo(options, tooltip: str):
+    values = list(options)
+    if HAS_V3:
+        return (Input.COMBO, {
+            "default": "None",
+            "options": _with_none(values),
+            "tooltip": tooltip,
+        })
+
+    # Legacy Comfy encoded combo options directly as the socket type, so the
+    # list must stay byte-for-byte compatible with connected selector outputs.
+    # It cannot safely gain a synthetic `None` item; choose a representable
+    # local default instead. `model_type` still controls whether model metadata
+    # is used.
+    legacy_config = {"tooltip": tooltip}
+    if values:
+        legacy_config["default"] = values[0]
+    return (values, legacy_config)
+
+
+def _is_selected(value) -> bool:
+    return bool(value) and not is_none(value)
+
 
 # region LF_CivitAIMetadataSetup
 class LF_CivitAIMetadataSetup:
+    checkpoint_values = CHECKPOINT_VALUES
+    unet_values = UNET_VALUES
+    vae_values = VAE_VALUES
+    upscaler_values = UPSCALER_VALUES
+
     @classmethod
     def INPUT_TYPES(self):
         return {
@@ -18,25 +60,17 @@ class LF_CivitAIMetadataSetup:
                     "default": "none",
                     "tooltip": "Type of model to use for metadata generation."
                 }),
-                "checkpoint": (get_comfy_list("checkpoints"), {
-                    "default": "None",
-                    "tooltip": "Checkpoint used to generate the image (only used when model_type is 'checkpoint')."
-                }),
-                "unet": (get_comfy_list("unet"), {
-                    "default": "None",
-                    "tooltip": "Diffusion model used to generate the image (only used when model_type is 'unet')."
-                }),
-                "vae": (get_comfy_list("vae"), {
-                    "tooltip": "VAE used to generate the image."
-                }),
-                "sampler": (SAMPLERS, {
-                    "default": "None",
-                    "tooltip": "Sampler used to generate the image."
-                }),
-                "scheduler": (SCHEDULERS, {
-                    "default": "None",
-                    "tooltip": "Scheduler used to generate the image."
-                }),
+                "checkpoint": _optional_combo(
+                    self.checkpoint_values,
+                    "Checkpoint used to generate the image (only used when model_type is 'checkpoint').",
+                ),
+                "unet": _optional_combo(
+                    self.unet_values,
+                    "Diffusion model used to generate the image (only used when model_type is 'unet').",
+                ),
+                "vae": _optional_combo(self.vae_values, "VAE used to generate the image."),
+                "sampler": _optional_combo(SAMPLERS, "Sampler used to generate the image."),
+                "scheduler": _optional_combo(SCHEDULERS, "Scheduler used to generate the image."),
                 "embeddings": (Input.STRING, {
                     "default": '',
                     "tooltip": "Embeddings used to generate the image."
@@ -95,10 +129,10 @@ class LF_CivitAIMetadataSetup:
                     "default": 1.5,
                     "tooltip": "Upscale factor for Hires-fix."
                 }),
-                "hires_upscaler": (Input.COMBO, {
-                    "options": get_comfy_list("upscale_models"),
-                    "tooltip": "Upscale model for Hires-fix."
-                }),
+                "hires_upscaler": _optional_combo(
+                    self.upscaler_values,
+                    "Upscale model for Hires-fix.",
+                ),
                 "ui_widget": (Input.LF_CODE, {
                     "default": ""
                 }),
@@ -136,15 +170,20 @@ class LF_CivitAIMetadataSetup:
         "Hires upscale factor used for the image.",
         "Analytics dataset for the image."
     )
-    RETURN_TYPES = (Input.STRING, get_comfy_list("checkpoints"), get_comfy_list("unet"), get_comfy_list("vae"),
-                    SAMPLERS, SCHEDULERS, Input.STRING, Input.STRING,
+    RETURN_TYPES = (Input.STRING,
+                    CHECKPOINT_VALUES,
+                    UNET_VALUES,
+                    VAE_VALUES,
+                    SAMPLERS,
+                    SCHEDULERS,
+                    Input.STRING, Input.STRING,
                     Input.STRING, Input.STRING, Input.INTEGER, Input.FLOAT, Input.INTEGER, Input.FLOAT, Input.INTEGER,
-                    Input.INTEGER, Input.INTEGER, Input.COMBO if HAS_V3 else get_comfy_list("upscale_models"), Input.FLOAT, Input.JSON)
+                    Input.INTEGER, Input.INTEGER, UPSCALER_VALUES, Input.FLOAT, Input.JSON)
 
     def on_exec(self, **kwargs:dict):
         def add_metadata_node(category, item):
             """Add metadata information for a specific category."""
-            if item:
+            if _is_selected(item):
                 analytics_dataset["nodes"].append({
                     "children": [{"id": item, "value": item}],
                     "id": category
@@ -175,13 +214,13 @@ class LF_CivitAIMetadataSetup:
         model_name = "Unknown"
         model_hash = "Unknown"
 
-        if model_type == "checkpoint" and checkpoint and checkpoint != "None":
+        if model_type == "checkpoint" and _is_selected(checkpoint):
             model_name = checkpoint
-            model_hash = get_sha256(get_full_path("checkpoints", checkpoint))
+            model_hash = get_sha256(get_full_path_or_raise("checkpoints", checkpoint))
             add_metadata_node("checkpoints", checkpoint)
-        elif model_type == "unet" and unet and unet != "None":
+        elif model_type == "unet" and _is_selected(unet):
             model_name = unet
-            model_hash = get_sha256(get_full_path("unet", unet))
+            model_hash = get_sha256(get_full_path_or_raise("unet", unet))
             add_metadata_node("unet", unet)
 
         add_metadata_node("samplers", sampler)
@@ -189,7 +228,7 @@ class LF_CivitAIMetadataSetup:
         add_metadata_node("upscale_models", hires_upscaler)
         add_metadata_node("vaes", vae)
 
-        vae_hash = get_sha256(get_full_path("vae", vae)) if vae else "Unknown"
+        vae_hash = get_sha256(get_full_path_or_raise("vae", vae)) if _is_selected(vae) else "Unknown"
         emb_hashes_str = ", ".join(get_embedding_hashes(embeddings, analytics_dataset)) if embeddings else ""
         lora_hashes_str = ", ".join(get_lora_hashes(lora_tags, analytics_dataset)) if lora_tags else ""
 
@@ -205,7 +244,7 @@ class LF_CivitAIMetadataSetup:
             f"Denoising strength: {denoising or ''}, Clip skip: {abs(clip_skip) or ''}, "
             f"VAE hash: {vae_hash}, "
             f"Model hash: {model_hash}, Model: {model_name}, "
-            f"Hires upscale: {hires_upscale or ''}, Hires upscaler: {hires_upscaler or 'Latent'}, "
+            f"Hires upscale: {hires_upscale or ''}, Hires upscaler: {hires_upscaler if _is_selected(hires_upscaler) else 'Latent'}, "
             f"Lora hashes: \"{lora_hashes_str}\", TI hashes: \"{emb_hashes_str}\", Version: ComfyUI.LF Nodes"
         )
 
@@ -226,10 +265,32 @@ class LF_CivitAIMetadataSetup:
             width, height, hires_upscaler, hires_upscale, analytics_dataset
         )
 
-    @classmethod
-    def VALIDATE_INPUTS(self, **kwargs):
-         return True
 # endregion
+
+_CIVITAI_CHECKPOINT_LIST = register_selector_list(
+    LF_CivitAIMetadataSetup,
+    lambda: get_comfy_list("checkpoints"),
+    attr_name="checkpoint_values",
+    return_index=1,
+)
+_CIVITAI_UNET_LIST = register_selector_list(
+    LF_CivitAIMetadataSetup,
+    lambda: get_comfy_list("unet"),
+    attr_name="unet_values",
+    return_index=2,
+)
+_CIVITAI_VAE_LIST = register_selector_list(
+    LF_CivitAIMetadataSetup,
+    lambda: get_comfy_list("vae"),
+    attr_name="vae_values",
+    return_index=3,
+)
+_CIVITAI_UPSCALER_LIST = register_selector_list(
+    LF_CivitAIMetadataSetup,
+    lambda: get_comfy_list("upscale_models"),
+    attr_name="upscaler_values",
+    return_index=17,
+)
 
 # region Mappings
 NODE_CLASS_MAPPINGS = {
