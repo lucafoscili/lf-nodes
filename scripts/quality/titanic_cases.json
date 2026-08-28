@@ -1,0 +1,146 @@
+{
+  "schema": "lf.titanic-e2e.manifest.v1",
+  "workflow": {
+    "id": "61984e36-9817-42a4-b535-93ed671940a3",
+    "expectedSha256": "2b5dacaac6f5341f378a64057edc367ba9719951a8f18a9cf9871b765167db07",
+    "expectedNodeCount": 354,
+    "expectedLinkCount": 467
+  },
+  "smokeCases": [
+    {
+      "id": "scratch.cpu-widget-previews",
+      "title": "CPU widget previews and durable history",
+      "resourceClass": "cpu",
+      "targets": [590, 592],
+      "timeoutSeconds": 120,
+      "expect": {
+        "590": {
+          "receiptSchema": "lf.periodic_image_batch_sampler.receipt.v1",
+          "minimumPreviewCount": 4,
+          "previewStorageType": "input"
+        },
+        "592": {
+          "receiptSchema": "lf.sprite_batch_normalizer.receipt.v1",
+          "minimumPreviewCount": 6,
+          "previewStorageType": "input"
+        }
+      }
+    }
+  ],
+  "coverageCases": [
+    {
+      "id": "cpu.headless",
+      "title": "Headless CPU and lightweight UI-output nodes",
+      "resourceClass": "cpu",
+      "targets": [2, 6, 7, 65, 82, 84, 97, 108, 109, 116, 117, 119, 121, 122, 123, 125, 128, 129, 132, 133, 134, 137, 172, 180, 181, 185, 187, 188, 189, 190, 198, 200, 202, 213, 219, 220, 223, 254, 255, 256, 257, 266, 269, 270, 274, 275, 334, 336, 352, 357, 378, 385, 386, 387, 393, 396, 415, 416, 420, 428, 432, 454, 515, 516, 544, 546, 552, 563, 564, 565, 566, 583, 590, 592],
+      "timeoutSeconds": 300
+    },
+    {
+      "id": "fs.read-unpinned",
+      "title": "Filesystem readers with workstation-owned inputs",
+      "resourceClass": "filesystem-unpinned",
+      "targets": [10, 329, 364, 382, 408, 413, 482, 517, 518, 519, 540, 571],
+      "timeoutSeconds": 300
+    },
+    {
+      "id": "fs.durable-write",
+      "title": "Durable saver and receipt outputs",
+      "resourceClass": "durable-write",
+      "targets": [106, 242, 246, 426, 554, 572, 573, 588],
+      "timeoutSeconds": 300
+    },
+    {
+      "id": "model.cpu",
+      "title": "Cached CPU inference models",
+      "resourceClass": "model-cpu",
+      "targets": [467, 501, 587],
+      "timeoutSeconds": 900
+    },
+    {
+      "id": "model.selector-load",
+      "title": "Checkpoint and VAE selector load paths",
+      "resourceClass": "model-gpu-write",
+      "targets": [20, 204, 207, 211, 245, 330, 421],
+      "timeoutSeconds": 1200
+    },
+    {
+      "id": "gpu.main-missing",
+      "title": "Legacy main generation branch",
+      "resourceClass": "gpu",
+      "targets": [17, 34, 35, 36, 37, 42, 302],
+      "timeoutSeconds": 1800
+    },
+    {
+      "id": "gpu.zimage",
+      "title": "Z-Image generation branch",
+      "resourceClass": "gpu",
+      "targets": [156],
+      "timeoutSeconds": 1800
+    },
+    {
+      "id": "gpu.file-fixture",
+      "title": "GPU image processing with workstation-owned input",
+      "resourceClass": "gpu-unpinned",
+      "targets": [507, 530],
+      "timeoutSeconds": 1800
+    },
+    {
+      "id": "gpu.vae-roundtrip",
+      "title": "GPU VAE round-trip",
+      "resourceClass": "gpu",
+      "targets": [570],
+      "timeoutSeconds": 900
+    },
+    {
+      "id": "llm.local",
+      "title": "Local OpenAI-compatible LLM and VLM nodes",
+      "resourceClass": "local-llm-gpu-write",
+      "targets": [347, 349, 368],
+      "timeoutSeconds": 1800,
+      "expect": {
+        "347": {
+          "forbidTopLevelJsonKeys": ["error"]
+        },
+        "349": {
+          "forbidTopLevelJsonKeys": ["error"]
+        },
+        "368": {
+          "minimumStringLength": 1,
+          "forbiddenStringPrefixes": ["Oops!", "Whoops!"]
+        }
+      }
+    },
+    {
+      "id": "browser.interactive",
+      "title": "Mid-workflow image editing transaction",
+      "resourceClass": "browser-interactive-gpu-model",
+      "targets": [418],
+      "timeoutSeconds": 900,
+      "interaction": "inpaint-image-editor",
+      "interactionNodeId": 463,
+      "execution": {
+        "requiredNodeIds": [463, 441, 442, 449, 450, 455, 418],
+        "forbiddenCachedNodeIds": [463, 441, 442, 449, 450, 455, 418],
+        "requiredAfterInteractionNodeIds": [441, 442, 449, 450, 455, 418],
+        "committedEditIngressNodeId": 441,
+        "committedEditOutputNodeId": 418
+      },
+      "expect": {
+        "418": {
+          "minimumPreviewCount": 1,
+          "previewStorageType": "input"
+        }
+      }
+    }
+  ],
+  "dormantNodeIds": [13, 278, 380, 429, 438, 439, 440, 453, 478, 492, 495, 496, 537, 538],
+  "disabledNodes": [
+    {"id": 547, "type": "LF_YouTubeReference", "reason": "external intake disabled by workflow policy"},
+    {"id": 574, "type": "LF_UploadImages", "reason": "pinned upload fixture required"},
+    {"id": 575, "type": "LF_ACEStepRemix", "reason": "external backend disabled by workflow policy"},
+    {"id": 576, "type": "LF_GeminiAPI", "reason": "external provider disabled by workflow policy"},
+    {"id": 577, "type": "LF_OpenAIAPI", "reason": "external provider disabled by workflow policy"},
+    {"id": 578, "type": "LF_StabilityAPI", "reason": "external provider disabled by workflow policy"},
+    {"id": 584, "type": "LF_SortTags", "reason": "real CLIP input intentionally disabled"}
+  ]
+}

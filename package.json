@@ -16,6 +16,9 @@
     "build:submit": "node ./web/src/scripts/build-workflow-app.js",
     "build": "yarn clean && yarn build:scss && yarn build:ts && yarn build:lfw && yarn build:vite && yarn build:submit",
     "test": "vitest run web/src web/workflow-runner/src",
+    "sanitize:titanic": "tsx scripts/quality/sanitize_titanic.mts",
+    "test:titanic": "tsx scripts/quality/titanic_e2e.mts",
+    "test:titanic:unit": "vitest run scripts/quality/tests/titanic_e2e.test.ts scripts/quality/tests/sanitize_titanic.test.ts",
     "test:watch": "vitest"
   },
   "devDependencies": {
@@ -27,6 +30,7 @@
     "@types/node": "^24.9.2",
     "fs-extra": "^11",
     "jsdom": "^27.1.0",
+    "playwright": "^1.62.1",
     "rollup-plugin-visualizer": "^5",
     "sass": "^1",
     "ts-node": "^10",

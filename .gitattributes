@@ -1,2 +1,7 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# Titanic's manifest pins the canonical workflow's exact working-tree bytes.
+# Keep both authority files stable across Windows/macOS/Linux clones.
+scripts/quality/fixtures/E2E.json text eol=lf
+scripts/quality/titanic_cases.json text eol=lf
