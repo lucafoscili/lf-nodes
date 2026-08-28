@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+import importlib.util
 import sys
 import types
-from unittest.mock import AsyncMock
+from pathlib import Path
+from types import SimpleNamespace
+from unittest.mock import AsyncMock, Mock
 
 import pytest
 
@@ -14,6 +17,63 @@ constants_module.API_ROUTE_PREFIX = "/api/lf-nodes"
 sys.modules.setdefault("modules.utils.constants", constants_module)
 
 from modules.workflow_runner.services import background, job_store, job_store_sqlite
+
+
+def test_runner_api_routes_await_background_lifecycle_startup() -> None:
+    routes_path = Path(background.__file__).parents[1] / "controllers" / "api_routes.py"
+    source = routes_path.read_text(encoding="utf-8")
+
+    assert "async def _get_api_controllers" in source
+    assert "await background.start_background_tasks(PromptServer.instance.app)" in source
+    assert "api_controllers = _get_api_controllers()" not in source
+
+
+@pytest.mark.asyncio
+async def test_runner_api_loader_starts_background_tasks_before_controller_import(
+    monkeypatch,
+) -> None:
+    routes_path = Path(background.__file__).parents[1] / "controllers" / "api_routes.py"
+    module_name = "modules.workflow_runner.controllers._api_routes_lifecycle_test"
+
+    class FakeRoutes:
+        @staticmethod
+        def get(_path):
+            return lambda handler: handler
+
+        @staticmethod
+        def post(_path):
+            return lambda handler: handler
+
+    app = {}
+    server_stub = types.ModuleType("server")
+    server_stub.PromptServer = SimpleNamespace(
+        instance=SimpleNamespace(app=app, routes=FakeRoutes())
+    )
+    config_stub = types.ModuleType("modules.workflow_runner.config")
+    config_stub.API_ROUTE_PREFIX = "/api/lf-nodes"
+    config_stub.get_settings = lambda: SimpleNamespace(WORKFLOW_RUNNER_ENABLED=True)
+    starter = AsyncMock()
+    controller_sentinel = object()
+
+    monkeypatch.setattr(background, "start_background_tasks", starter)
+    with monkeypatch.context() as context:
+        context.setitem(sys.modules, "server", server_stub)
+        context.setitem(sys.modules, "modules.workflow_runner.config", config_stub)
+        spec = importlib.util.spec_from_file_location(module_name, routes_path)
+        assert spec is not None and spec.loader is not None
+        module = importlib.util.module_from_spec(spec)
+        context.setitem(sys.modules, module_name, module)
+        spec.loader.exec_module(module)
+        import_controller = Mock(return_value=controller_sentinel)
+        context.setattr(module.importlib, "import_module", import_controller)
+
+        loaded = await module._get_api_controllers()
+
+    assert loaded is controller_sentinel
+    starter.assert_awaited_once_with(app)
+    import_controller.assert_called_once_with(
+        "lf_nodes.modules.workflow_runner.controllers.api_controllers"
+    )
 
 
 def _job(

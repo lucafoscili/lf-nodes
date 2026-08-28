@@ -1,4 +1,3 @@
-import asyncio
 import importlib
 import logging
 
@@ -34,15 +33,12 @@ LOGIN_HTML_PATH = Path(__file__).parent.parent.parent.parent / "web" / "workflow
 @PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/workflow-runner")
 async def route_workflow_runner_page(request: web.Request) -> web.Response:
     try:
-        # Lazily start background tasks (pruners) the first time the runner page
-        # is accessed so we don't run background work for users who never use it.
+        # Lazily start background tasks the first time the Runner is accessed.
+        # API-only clients use the same awaited seam in ``api_routes``.
         try:
             from ..services import background as _background
             app = PromptServer.instance.app
-            try:
-                PromptServer.instance.loop.create_task(_background.start_background_tasks(app))
-            except Exception:
-                asyncio.create_task(_background.start_background_tasks(app))
+            await _background.start_background_tasks(app)
         except Exception:
             logging.debug("Background starter not available or failed to schedule")
 

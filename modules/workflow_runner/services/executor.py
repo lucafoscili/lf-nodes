@@ -52,8 +52,13 @@ _MAX_EXECUTION_ERROR_MESSAGE_BYTES = 4096
 CANCEL_OUTCOME_PENDING = "pending_cancelled"
 CANCEL_OUTCOME_RUNNING = "running_cancel_requested"
 CANCEL_OUTCOME_TERMINAL = "terminal"
+CANCEL_OUTCOME_ORPHANED = "execution_state_lost"
 CANCEL_OUTCOME_NOOP = "noop"
 CANCEL_OUTCOME_UNSUPPORTED = "unsupported"
+
+_HISTORY_TERMINAL = "terminal"
+_HISTORY_ABSENT = "absent"
+_HISTORY_UNKNOWN = "unknown"
 
 
 def _bounded_user_message(value: Any) -> str | None:
@@ -469,16 +474,24 @@ async def _cancel_result_location(
     session: aiohttp.ClientSession,
     comfy_url: str,
     prompt_id: str,
+    *,
+    cancellation_accepted: bool = True,
 ) -> str:
-    if await _has_terminal_history(session, comfy_url, prompt_id):
+    first_history = await _prompt_history_state(session, comfy_url, prompt_id)
+    if first_history == _HISTORY_TERMINAL:
         return CANCEL_OUTCOME_TERMINAL
+    if first_history != _HISTORY_ABSENT:
+        # A malformed or future history response cannot prove absence. Core's
+        # accepted exact request may still be supervised, but a rejection must
+        # not manufacture either cancellation intent or state loss.
+        return CANCEL_OUTCOME_RUNNING if cancellation_accepted else CANCEL_OUTCOME_NOOP
 
     async with session.get(f"{comfy_url}/queue") as queue_resp:
         queue_resp.raise_for_status()
         queue = await queue_resp.json()
     location = _queue_location(queue, prompt_id) if isinstance(queue, Mapping) else "unknown"
     if location == "running":
-        return CANCEL_OUTCOME_RUNNING
+        return CANCEL_OUTCOME_RUNNING if cancellation_accepted else CANCEL_OUTCOME_NOOP
     if location == "pending":
         return CANCEL_OUTCOME_NOOP
     if location is None:
@@ -486,26 +499,53 @@ async def _cancel_result_location(
         # finish between the first history read and this queue read; Comfy adds
         # history atomically when it removes the running entry, so one final
         # exact history read closes that TOCTOU before we classify a dequeue.
-        if await _has_terminal_history(session, comfy_url, prompt_id):
+        second_history = await _prompt_history_state(session, comfy_url, prompt_id)
+        if second_history == _HISTORY_TERMINAL:
             return CANCEL_OUTCOME_TERMINAL
-        # The Core endpoint reported that it acted, both queue lists prove
-        # absence, and exact history was absent on both sides of that snapshot.
-        # This is terminal proof for a dequeued pending prompt.
-        return CANCEL_OUTCOME_PENDING
-    return CANCEL_OUTCOME_RUNNING
+        if second_history != _HISTORY_ABSENT:
+            return (
+                CANCEL_OUTCOME_RUNNING
+                if cancellation_accepted
+                else CANCEL_OUTCOME_NOOP
+            )
+        # Both queue lists prove absence, and exact history was absent on both
+        # sides of that snapshot. When Core accepted this cancellation, that
+        # proves a pending dequeue. When Core explicitly rejected it, the same
+        # observations prove the persisted Runner row has outlived Core's
+        # execution state instead of proving cancellation.
+        return (
+            CANCEL_OUTCOME_PENDING
+            if cancellation_accepted
+            else CANCEL_OUTCOME_ORPHANED
+        )
+    # Malformed or future queue data cannot prove where the prompt is. Only
+    # preserve a cancellation request when Core explicitly accepted it.
+    return CANCEL_OUTCOME_RUNNING if cancellation_accepted else CANCEL_OUTCOME_NOOP
 
 
-async def _has_terminal_history(
+async def _prompt_history_state(
     session: aiohttp.ClientSession,
     comfy_url: str,
     prompt_id: str,
-) -> bool:
-    """Return whether Comfy history proves this exact prompt is terminal."""
+) -> str:
+    """Return verified exact history state without conflating ambiguity and absence."""
 
     async with session.get(f"{comfy_url}/history/{quote(prompt_id, safe='')}") as history_resp:
         history_resp.raise_for_status()
         history = await history_resp.json()
-    return isinstance(history, Mapping) and isinstance(history.get(prompt_id), Mapping)
+    if not isinstance(history, Mapping):
+        return _HISTORY_UNKNOWN
+
+    entry = history.get(prompt_id)
+    if entry is not None:
+        return _HISTORY_TERMINAL if isinstance(entry, Mapping) else _HISTORY_UNKNOWN
+    if not history:
+        return _HISTORY_ABSENT
+    # Some Comfy-compatible backends return the exact history entry directly
+    # rather than wrapping it under the requested prompt ID.
+    if isinstance(history.get("status"), Mapping) or "outputs" in history:
+        return _HISTORY_TERMINAL
+    return _HISTORY_UNKNOWN
 
 
 async def cancel_workflow(
@@ -543,17 +583,15 @@ async def cancel_workflow(
                 if not isinstance(body, Mapping) or type(body.get("cancelled")) is not bool:
                     raise RuntimeError("ComfyUI returned an invalid job cancellation response")
                 if body["cancelled"] is False:
-                    # The exact endpoint is deliberately idempotent. A false
-                    # result can mean the worker reached history just before
-                    # this request; preserve that terminal race rather than
-                    # surfacing a misleading cancellation rejection.
-                    if await _has_terminal_history(
+                    # The exact endpoint is deliberately idempotent. Let the
+                    # shared history/queue/history probe preserve a terminal
+                    # race or prove that Core lost the execution state.
+                    return await _cancel_result_location(
                         session_to_use,
                         comfy_url,
                         prompt_id,
-                    ):
-                        return CANCEL_OUTCOME_TERMINAL
-                    return CANCEL_OUTCOME_NOOP
+                        cancellation_accepted=False,
+                    )
 
         if core_available:
             return await _cancel_result_location(
@@ -571,7 +609,16 @@ async def cancel_workflow(
             else "unknown"
         )
         if before != "pending":
-            return CANCEL_OUTCOME_UNSUPPORTED if before == "running" else CANCEL_OUTCOME_NOOP
+            if before == "running":
+                return CANCEL_OUTCOME_UNSUPPORTED
+            if before is None:
+                return await _cancel_result_location(
+                    session_to_use,
+                    comfy_url,
+                    prompt_id,
+                    cancellation_accepted=False,
+                )
+            return CANCEL_OUTCOME_NOOP
 
         async with session_to_use.post(
             f"{comfy_url}/queue",

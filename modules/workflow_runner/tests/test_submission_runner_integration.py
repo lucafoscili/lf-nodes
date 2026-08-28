@@ -34,6 +34,7 @@ def run_service_module():
 
     executor_stub.WorkflowPreparationError = WorkflowPreparationError
     executor_stub.CANCEL_OUTCOME_NOOP = "noop"
+    executor_stub.CANCEL_OUTCOME_ORPHANED = "execution_state_lost"
     executor_stub.CANCEL_OUTCOME_PENDING = "pending_cancelled"
     executor_stub.CANCEL_OUTCOME_RUNNING = "running_cancel_requested"
     executor_stub.CANCEL_OUTCOME_TERMINAL = "terminal"
@@ -433,6 +434,47 @@ async def test_targeted_cancel_marks_exactly_dequeued_pending_prompt_cancelled(r
     job = await job_store.get_job("prompt-pending-001")
     assert job is not None
     assert job.status == job_store.JobStatus.CANCELLED
+
+
+async def test_targeted_cancel_terminalizes_proven_orphan_without_claiming_cancel(
+    run_service_module,
+):
+    run_service = run_service_module
+    submission_id = "example:orphaned:001"
+    prompt_id = "prompt-orphaned-001"
+    payload = {
+        "workflowId": "remove_bg",
+        "submissionId": submission_id,
+        "inputs": {},
+    }
+    await lifecycle.reserve_submission(payload, "remove_bg")
+    await lifecycle.bind_prompt(
+        submission_id,
+        prompt_id,
+        "http://comfy:8188",
+    )
+    await lifecycle.record_running(prompt_id)
+    await job_store.create_job(prompt_id, "remove_bg")
+    await job_store.set_job_status(prompt_id, job_store.JobStatus.RUNNING)
+
+    cancel = AsyncMock(return_value=run_service.CANCEL_OUTCOME_ORPHANED)
+    with patch.object(run_service, "cancel_workflow", new=cancel):
+        snapshot = await run_service.cancel_workflow_submission(submission_id)
+        replay = await run_service.cancel_workflow_submission(submission_id)
+
+    cancel.assert_awaited_once_with(prompt_id, comfy_url="http://comfy:8188")
+    assert snapshot["status"] == "failed"
+    assert snapshot["error"] == "execution_state_lost"
+    assert snapshot["cancel_requested"] is False
+    assert replay["status"] == "failed"
+    job = await job_store.get_job(prompt_id)
+    assert job is not None
+    assert job.status == job_store.JobStatus.FAILED
+    assert job.error == "execution_state_lost"
+    assert (
+        job.result["body"]["payload"]["error"]["message"]
+        == "execution_state_lost"
+    )
 
 
 async def test_pending_dequeue_corrects_only_reconciler_state_loss(run_service_module):

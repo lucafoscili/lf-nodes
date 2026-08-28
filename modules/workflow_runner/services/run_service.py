@@ -21,6 +21,7 @@ from .job_store import (
 )
 from .executor import (
     CANCEL_OUTCOME_NOOP,
+    CANCEL_OUTCOME_ORPHANED,
     CANCEL_OUTCOME_PENDING,
     CANCEL_OUTCOME_RUNNING,
     CANCEL_OUTCOME_TERMINAL,
@@ -165,6 +166,58 @@ async def _publish_proven_pending_cancellation(prompt_id: str) -> Dict[str, Any]
     if lifecycle_error is not None:
         raise lifecycle_error
     return terminal
+
+
+async def _publish_proven_execution_state_lost(
+    prompt_id: str,
+) -> Dict[str, Any] | None:
+    """Fail one active row after exact Core queue/history absence is proven."""
+
+    from .background import _execution_state_lost_update
+
+    terminal_status, job_result, job_error = _execution_state_lost_update()
+    submission_id: str | None = None
+    for _attempt in range(2):
+        current_job = await get_job(prompt_id)
+        if current_job is None:
+            break
+        submission_id = current_job.submission_id
+        if current_job.status not in {JobStatus.PENDING, JobStatus.RUNNING}:
+            break
+        updated = await set_job_status_if_unchanged(
+            prompt_id,
+            JobStatus.FAILED,
+            owner_id=current_job.owner_id,
+            expected_status=current_job.status.value,
+            seq=current_job.seq,
+            updated_at=current_job.updated_at,
+            result=job_result,
+            error=job_error,
+        )
+        if updated is not None:
+            submission_id = updated.submission_id
+            break
+
+    final_job = await get_job(prompt_id)
+    if final_job is None:
+        raise RuntimeError("orphaned Runner job disappeared during recovery")
+    submission_id = final_job.submission_id or submission_id
+    if final_job.status in {JobStatus.PENDING, JobStatus.RUNNING}:
+        raise RuntimeError("job store could not publish execution-state loss atomically")
+
+    if final_job.status == JobStatus.FAILED and final_job.error == job_error:
+        terminal = await record_terminal(
+            prompt_id,
+            terminal_status,
+            result=job_result,
+            error=job_error,
+        )
+        if terminal is not None:
+            return terminal
+
+    if isinstance(submission_id, str) and submission_id:
+        return await get_submission(submission_id, include_events=False)
+    return None
 
 
 def _track_worker(task: Any) -> None:
@@ -631,6 +684,22 @@ async def _cancel_workflow_submission(submission_id: str) -> Dict[str, Any]:
         # the supervisor/status reconciler will publish its actual outcome.
         snapshot = await get_submission(submission_id, include_events=False)
         assert snapshot is not None
+        return snapshot
+
+    if outcome == CANCEL_OUTCOME_ORPHANED:
+        # Core rejected the exact cancellation and two exact history reads
+        # around a validated queue snapshot proved that the prompt no longer
+        # exists. This is not a cancellation; publish the bounded synthetic
+        # failure used by the background reconciler.
+        terminal = await _publish_proven_execution_state_lost(prompt_id)
+        if terminal is not None:
+            return terminal
+        snapshot = await get_submission(submission_id, include_events=False)
+        if snapshot is None:
+            raise SubmissionLifecycleError(
+                "submission_not_found",
+                "submission disappeared while publishing execution-state loss",
+            )
         return snapshot
 
     if outcome == CANCEL_OUTCOME_PENDING:

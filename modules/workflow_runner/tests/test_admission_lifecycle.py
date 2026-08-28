@@ -929,6 +929,95 @@ async def test_core_cancel_false_is_idempotent_when_exact_history_is_terminal():
     ]
 
 
+async def test_core_cancel_false_proves_orphan_after_double_history_absence():
+    from modules.workflow_runner.services import executor
+
+    prompt_id = "abababab-abab-4aba-abab-abababababab"
+    session = _CancelSession(
+        core_cancelled=False,
+        histories=[{}, {}],
+        queues=[{"queue_running": [], "queue_pending": []}],
+    )
+
+    outcome = await executor.cancel_workflow(prompt_id, session=session)
+
+    assert outcome == executor.CANCEL_OUTCOME_ORPHANED
+
+
+async def test_core_cancel_false_does_not_claim_running_cancel_intent():
+    from modules.workflow_runner.services import executor
+
+    prompt_id = "acacacac-acac-4aca-acac-acacacacacac"
+    session = _CancelSession(
+        core_cancelled=False,
+        histories=[{}],
+        queues=[{"queue_running": [[0, prompt_id]], "queue_pending": []}],
+    )
+
+    outcome = await executor.cancel_workflow(prompt_id, session=session)
+
+    assert outcome == executor.CANCEL_OUTCOME_NOOP
+
+
+async def test_core_cancel_false_preserves_ambiguous_queue_without_cancel_intent():
+    from modules.workflow_runner.services import executor
+
+    prompt_id = "adadadad-adad-4ada-adad-adadadadadad"
+    session = _CancelSession(
+        core_cancelled=False,
+        histories=[{}],
+        queues=[{"queue_running": "malformed", "queue_pending": []}],
+    )
+
+    outcome = await executor.cancel_workflow(prompt_id, session=session)
+
+    assert outcome == executor.CANCEL_OUTCOME_NOOP
+
+
+async def test_core_cancel_false_preserves_direct_terminal_history_shape():
+    from modules.workflow_runner.services import executor
+
+    prompt_id = "aeaeaeae-aeae-4aea-aeae-aeaeaeaeaeae"
+    session = _CancelSession(
+        core_cancelled=False,
+        histories=[{"status": {"status_str": "success"}, "outputs": {}}],
+    )
+
+    outcome = await executor.cancel_workflow(prompt_id, session=session)
+
+    assert outcome == executor.CANCEL_OUTCOME_TERMINAL
+
+
+async def test_core_cancel_false_does_not_treat_unrelated_history_as_absence():
+    from modules.workflow_runner.services import executor
+
+    prompt_id = "afafafaf-afaf-4afa-afaf-afafafafafaf"
+    session = _CancelSession(
+        core_cancelled=False,
+        histories=[{"another-prompt": {"status": {"status_str": "success"}}}],
+    )
+
+    outcome = await executor.cancel_workflow(prompt_id, session=session)
+
+    assert outcome == executor.CANCEL_OUTCOME_NOOP
+    assert session.queues == []
+
+
+async def test_core_cancel_false_preserves_ambiguous_second_history_read():
+    from modules.workflow_runner.services import executor
+
+    prompt_id = "bcbcbcbc-bcbc-4bcb-bcbc-bcbcbcbcbcbc"
+    session = _CancelSession(
+        core_cancelled=False,
+        histories=[{}, {"another-prompt": {}}],
+        queues=[{"queue_running": [], "queue_pending": []}],
+    )
+
+    outcome = await executor.cancel_workflow(prompt_id, session=session)
+
+    assert outcome == executor.CANCEL_OUTCOME_NOOP
+
+
 async def test_legacy_fallback_deletes_only_exact_pending_id():
     from modules.workflow_runner.services import executor
 

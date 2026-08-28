@@ -8,16 +8,20 @@ from server import PromptServer
 from ..config import API_ROUTE_PREFIX, get_settings
 
 # region Helpers
-def _get_api_controllers():
+async def _get_api_controllers():
     """
     Lazily import the API controllers module.
 
     Importing the controllers module at module-import time can pull in heavy
     dependencies (services, auth helpers) that should be deferred until a
-    request actually needs them. This helper centralises the import and logs
-    failures for easier debugging.
+    request actually needs them. Any Runner API request also starts lifecycle
+    reconciliation; headless clients must not depend on the HTML page having
+    been loaded after a Core restart.
     """
     try:
+        from ..services import background
+
+        await background.start_background_tasks(PromptServer.instance.app)
         return importlib.import_module("lf_nodes.modules.workflow_runner.controllers.api_controllers")
     except Exception:
         logging.exception("Failed to import workflow_runner.api_controllers")
@@ -37,73 +41,73 @@ else:
     @PromptServer.instance.routes.post(f"{API_ROUTE_PREFIX}/run")
     async def route_run_workflow(request: web.Request) -> web.Response:
         # Lazily import and delegate to the controller to avoid heavy imports
-        api_controllers = _get_api_controllers()
+        api_controllers = await _get_api_controllers()
         return await api_controllers.start_workflow_controller(request)
     # endregion
 
     # region Run Status
     @PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/run/{{run_id}}/status")
     async def route_run_status(request: web.Request) -> web.Response:
-        api_controllers = _get_api_controllers()
+        api_controllers = await _get_api_controllers()
         return await api_controllers.get_workflow_status_controller(request)
     # endregion
 
     # region Run Events (SSE)
     @PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/run/events")
     async def route_run_events(request: web.Request) -> web.Response:
-        api_controllers = _get_api_controllers()
+        api_controllers = await _get_api_controllers()
         return await api_controllers.stream_runs_controller(request)
     # endregion
 
     # region Stable Submission Lifecycle
     @PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/submissions/{{submission_id}}")
     async def route_submission_status(request: web.Request) -> web.Response:
-        api_controllers = _get_api_controllers()
+        api_controllers = await _get_api_controllers()
         return await api_controllers.get_submission_controller(request)
 
     @PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/submissions/{{submission_id}}/events")
     async def route_submission_events(request: web.Request) -> web.Response:
-        api_controllers = _get_api_controllers()
+        api_controllers = await _get_api_controllers()
         return await api_controllers.get_submission_events_controller(request)
 
     @PromptServer.instance.routes.post(f"{API_ROUTE_PREFIX}/submissions/{{submission_id}}/cancel")
     async def route_submission_cancel(request: web.Request) -> web.Response:
-        api_controllers = _get_api_controllers()
+        api_controllers = await _get_api_controllers()
         return await api_controllers.cancel_submission_controller(request)
     # endregion
 
     # region Icon models
     @PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/icon-models")
     async def route_list_models(request: web.Request) -> web.Response:
-        api_controllers = _get_api_controllers()
+        api_controllers = await _get_api_controllers()
         return await api_controllers.list_models_controller(request)
     # endregion
 
     # region Icon models
     @PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/image-models")
     async def route_list_models(request: web.Request) -> web.Response:
-        api_controllers = _get_api_controllers()
+        api_controllers = await _get_api_controllers()
         return await api_controllers.list_models_controller(request, is_image_models=True)
     # endregion
 
     # region Workflows
     @PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/workflows")
     async def route_list_workflows(request: web.Request) -> web.Response:
-        api_controllers = _get_api_controllers()
+        api_controllers = await _get_api_controllers()
         return await api_controllers.list_workflows_controller(request)
     # endregion
 
     # region Workflow Details
     @PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/workflows/{{workflow_id}}")
     async def route_get_workflow(request: web.Request) -> web.Response:
-        api_controllers = _get_api_controllers()
+        api_controllers = await _get_api_controllers()
         return await api_controllers.get_workflow_controller(request)
     # endregion
 
     # region Workflow Runner - List Runs
     @PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/workflow-runner/runs")
     async def route_list_runs(request: web.Request) -> web.Response:
-        api_controllers = _get_api_controllers()
+        api_controllers = await _get_api_controllers()
         return await api_controllers.list_runs_controller(request)
     # endregion
 
@@ -112,26 +116,26 @@ else:
         f"{API_ROUTE_PREFIX}/workflow-runner/runs/prune-missing-artifacts"
     )
     async def route_prune_missing_artifacts(request: web.Request) -> web.Response:
-        api_controllers = _get_api_controllers()
+        api_controllers = await _get_api_controllers()
         return await api_controllers.prune_missing_artifacts_controller(request)
     # endregion
 
     # region Workflow Runner - Events (SSE)
     @PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/workflow-runner/events")
     async def route_workflow_runner_events(request: web.Request) -> web.Response:
-        api_controllers = _get_api_controllers()
+        api_controllers = await _get_api_controllers()
         return await api_controllers.stream_runs_controller(request)
     # endregion
 
     # region Admin debug UI routes
     @PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/workflow-runner/admin")
     async def route_admin_page(request: web.Request) -> web.Response:
-        api_controllers = _get_api_controllers()
+        api_controllers = await _get_api_controllers()
         return await api_controllers.admin_runs_page(request)
 
     @PromptServer.instance.routes.get(f"{API_ROUTE_PREFIX}/workflow-runner/admin/runs")
     async def route_admin_runs(request: web.Request) -> web.Response:
-        api_controllers = _get_api_controllers()
+        api_controllers = await _get_api_controllers()
         return await api_controllers.admin_runs_api(request)
     # endregion
 
