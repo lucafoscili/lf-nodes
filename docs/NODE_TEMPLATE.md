@@ -1,131 +1,146 @@
-# LF Nodes – Python Node Template
+# LF Nodes Python node template
 
-A ready-to-copy skeleton that follows lf-nodes conventions: normalized inputs, single-image loop, async UI logging, and explicit node mappings. It also demonstrates output normalization by returning both a batch and a list, giving downstream nodes flexibility.
-
-## Template
+Start with the smallest headless transform. Add observational UI only when the
+node has final state that is genuinely useful to show or retain.
 
 ```python
 import torch
 
-from server import PromptServer
+from . import CATEGORY
+from ...utils.constants import FUNCTION, Input
+from ...utils.helpers.logic import normalize_input_image, normalize_output_image
 
-from . import CATEGORY  # adjust import path based on the folder
-from ...utils.constants import EVENT_PREFIX, FUNCTION, Input
-from ...utils.helpers.logic import (
-    normalize_input_image,
-    normalize_output_image,
-    normalize_list_to_value,
-)
 
-# region My_NodeName
-class My_NodeName:
+class LF_MyNode:
     @classmethod
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "image": (Input.IMAGE, {"tooltip": "Batch or single image."}),
-                "strength": (Input.FLOAT, {"default": 1.0, "min": 0.0, "max": 10.0, "step": 0.1}),
-            },
-            "optional": {
-                "note": (Input.STRING, {"default": ""}),
-                "ui_widget": (Input.LF_PROGRESSBAR, {"default": {}}),
-            },
-            "hidden": {
-                "node_id": "UNIQUE_ID",
+                "image": (Input.IMAGE, {"tooltip": "Input image or batch."}),
+                "strength": (
+                    Input.FLOAT,
+                    {
+                        "default": 1.0,
+                        "min": 0.0,
+                        "max": 10.0,
+                        "step": 0.1,
+                        "tooltip": "Effect strength.",
+                    },
+                ),
             },
         }
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
-
-    # Return both a batch (first) and a list (second) to maximize downstream flexibility
-    RETURN_TYPES = ("IMAGE", "IMAGE")
+    RETURN_TYPES = (Input.IMAGE, Input.IMAGE)
     RETURN_NAMES = ("image", "image_list")
     OUTPUT_IS_LIST = (False, True)
+    OUTPUT_TOOLTIPS = (
+        "First-signature stack-compatible image batch.",
+        "All processed images in source order.",
+    )
 
-    def on_exec(self, **kwargs):
-        node_id = kwargs.get("node_id")
-        strength = float(normalize_list_to_value(kwargs.get("strength", 1.0)))
-        note = str(normalize_list_to_value(kwargs.get("note", "")) or "")
-
-        # 1) Normalize inputs
-        images = normalize_input_image(kwargs.get("image"))  # list of [1,H,W,C]
-
-        # 2) Async UI logging (optional)
-        PromptServer.instance.send_sync(
-            f"{EVENT_PREFIX}mynodename",
-            {"node": node_id, "value": f"## My_NodeName\n\n- Starting with strength = {strength}"},
-        )
-
-        # 3) Per-image processing loop
+    def on_exec(self, image, strength):
+        images = normalize_input_image(image)
         outputs = []
-        for idx, img in enumerate(images):
-            # Example operation: scale pixel intensities (no-op if strength = 1.0)
-            out = img.to(dtype=torch.float32) * strength
-            out = out.clamp(0.0, 1.0).contiguous()
-            outputs.append(out)
 
-            # Optional: progress update
-            PromptServer.instance.send_sync(
-                f"{EVENT_PREFIX}mynodename",
-                {"node": node_id, "value": f"- Processed image {idx+1}/{len(images)}"},
+        for item in images:
+            channels = int(item.shape[-1])
+            if channels not in (3, 4):
+                raise ValueError("LF_MyNode expects RGB or RGBA images.")
+
+            working = item.to(dtype=torch.float32)
+            rgb = working[..., :3].mul(float(strength)).clamp(0.0, 1.0)
+            output = (
+                torch.cat((rgb, working[..., 3:4]), dim=-1)
+                if channels == 4
+                else rgb
             )
+            outputs.append(output.contiguous())
 
-        # 4) Normalize outputs back to batch/list
-        batch_list, image_list = normalize_output_image(outputs)
+        batch_groups, image_list = normalize_output_image(outputs)
+        primary_batch = batch_groups[0]
+        return (primary_batch, image_list)
 
-        # 5) Final message
-        if note:
-            PromptServer.instance.send_sync(
-                f"{EVENT_PREFIX}mynodename",
-                {"node": node_id, "value": f"- Note: {note}"},
-            )
 
-        # Return batch (first) and list (second)
-        return (batch_list[0], image_list)
-# endregion
-
-# region Mappings
-NODE_CLASS_MAPPINGS = {
-    "My_NodeName": My_NodeName,
-}
-
-NODE_DISPLAY_NAME_MAPPINGS = {
-    "My_NodeName": "My Node Name",
-}
-# endregion
+NODE_CLASS_MAPPINGS = {"LF_MyNode": LF_MyNode}
+NODE_DISPLAY_NAME_MAPPINGS = {"LF_MyNode": "My node"}
 ```
 
-## Conventions this template follows
+This unary transform deliberately uses Core's normal mapped execution. Add
+`INPUT_IS_LIST = True` only when one invocation must inspect a true list,
+validate exact pairing, or implement singleton broadcasting itself. With list
+mode disabled, Core may map inputs before `on_exec` and repeat the final item of
+a shorter input; do not rely on seeing the original cardinalities in that mode.
 
-- Always normalize inputs at the top (batch → list of [1,H,W,C]).
-- Process images one-at-a-time in a for-loop for deterministic behavior.
-- Use `send_sync` to emit UI updates while executing.
-- Normalize outputs to both a batch and a list using `normalize_output_image`, and return both: `(batch, list)`.
-- Keep `CATEGORY`, `FUNCTION`, and explicit `NODE_*_MAPPINGS` at the bottom for discovery.
+The list socket is the authoritative, complete, ordered result. The batch
+socket is a compatibility projection containing only the first encountered
+height/width/channel/dtype/device signature. For an interleaved `A, B, A`
+result, `image_list` remains `A, B, A`, while `primary_batch` contains the two
+stack-compatible `A` items. Every image node must declare one of these policies:
 
-## Variations
+- expose this first-signature projection plus the authoritative list;
+- reject heterogeneous output geometry; or
+- derive one shared output geometry so every result stacks.
 
-- If your node uses CONDITIONING, import `normalize_conditioning` and apply it to those inputs.
-- For mask-heavy nodes, consider creating/using a `normalize_mask` helper to standardize shapes/types.
-- If the node is side-effect only (pure UI), you can keep `RETURN_TYPES = ()` and return `()`.
+The example transforms RGB only and carries RGBA alpha through unchanged.
 
-## Mixed outputs variant (batch + list + names + count)
+## Optional observational UI
 
-Sometimes you’ll want to return additional metadata (e.g., file names) and a count alongside images. Here’s a minimal signature that mirrors the pattern used by `LF_BlurImages`:
+Add UI only when there is actual final observational state. Make the widget
+optional, keep execution headless, and mirror the final live payload into
+history:
 
 ```python
-class My_NodeName_Advanced:
-    CATEGORY = CATEGORY
-    FUNCTION = FUNCTION
+from ...utils.helpers.comfy import safe_send_sync
 
-    RETURN_TYPES = ("IMAGE", "IMAGE", "STRING", "INT")
-    RETURN_NAMES = ("image", "image_list", "file_name", "count")
-    OUTPUT_IS_LIST = (False, True, True, False)
+# INPUT_TYPES additions:
+"optional": {"ui_widget": (Input.LF_PROGRESSBAR, {"default": {}})},
+"hidden": {"node_id": "UNIQUE_ID"},
 
-    def on_exec(self, **kwargs):
-        # ... normalize inputs and process images into `outputs` and `names` ...
-        batch_list, image_list = normalize_output_image(outputs)
-        count = len(image_list)
-        return (batch_list[0], image_list, names, count)
+# on_exec finalization:
+final_payload = {"value": f"Processed {len(image_list)} image(s)."}
+safe_send_sync("mynode", final_payload, node_id)
+return {
+    "ui": {"lf_output": [final_payload]},
+    "result": (primary_batch, image_list),
+}
 ```
+
+No event or `ui.lf_output` is needed when the node has no useful final UI
+state. Temporary progress assets stay transactional; replace them with
+generated-preview URLs before putting the final payload into durable history.
+
+## Registration and compatibility
+
+Every public class also needs a `NodeName` enum member and exactly one
+`NODE_WIDGET_MAP` entry. Use `[]` when native Comfy UI is sufficient.
+
+Before changing a published node, snapshot and assert its existing:
+
+- input types, keys, defaults, and required/optional placement;
+- output indices, types, names, and every `OUTPUT_IS_LIST` flag;
+- consumed `ui.lf_output` and receipt keys.
+
+The standalone checker validates the current schema internally; it cannot tell
+whether a current schema drifted from a prior release. Keep an exact regression
+assertion for any published contract you touch. Append missing outputs rather
+than reordering or prepending them.
+
+## Variations and verification
+
+- Two collections must implement and test exact pairing, singleton broadcast,
+  or explicit mismatch failure.
+- Use MASK/LATENT normalizers rather than treating those structures as IMAGE.
+- Use `normalize_conditioning`; never scalar-unwrap CONDITIONING.
+- A viewer/saver that must run unconnected may opt into `OUTPUT_NODE = True`.
+- Use generated-preview helpers for final preview URLs. Temporary assets are
+  only for an active editing/progress transaction.
+- Test interleaved heterogeneous resolutions to prove authoritative list order
+  and the declared batch policy.
+
+Before handoff, run the standalone contract checker, focused behavior tests,
+`modules/tests/test_frontend_widget_registry.py`,
+`modules/tests/nodes/test_output_metadata_contract.py`, frontend build checks
+where relevant, and the repository Titanic experience gate described in
+`docs/ARCHITECTURE.md`.
