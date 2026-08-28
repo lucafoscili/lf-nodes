@@ -44,6 +44,9 @@ _MAX_SEED = (1 << 53) - 1
 _MAX_REFERENCE_IMAGES = 9
 _SPRITE_FRAME_COUNT = 24
 _DEFAULT_SPRITE_SIZE = 256
+_DEFAULT_SPRITE_ALPHA_HEIGHT = 224
+_DEFAULT_SPRITE_REFERENCE_FRAME = 0
+_DEFAULT_SPRITE_BOTTOM_PADDING = 16
 _DEFAULT_INTENDED_FPS = 12
 
 _RMBG2_MODEL_ASSETS = (
@@ -61,6 +64,7 @@ _RMBG2_MODEL_ASSETS = (
 _GUIDE_INPUTS = (
     ("guide_image_1", "guide_frame_1", "source_guide_1", "guide_1", 41),
     ("guide_image_2", "guide_frame_2", "source_guide_2", "guide_2", 82),
+    ("guide_image_3", "guide_frame_3", "source_guide_3", "guide_3", 103),
 )
 
 # Every size is explicit, aligned to 32, and no larger than the native
@@ -134,6 +138,9 @@ class _AnchoredSpriteSettings(NamedTuple):
     common: _CommonSettings
     compiled_prompt: str
     sprite_size: int
+    sprite_alpha_height: int
+    sprite_reference_frame: int
+    sprite_bottom_padding: int
     intended_fps: int
 
 
@@ -350,6 +357,32 @@ def _anchored_sprite_settings(inputs: Dict[str, Any]) -> _AnchoredSpriteSettings
         minimum=32,
         maximum=1024,
     )
+    sprite_alpha_height = _integer(
+        inputs,
+        "sprite_alpha_height",
+        _DEFAULT_SPRITE_ALPHA_HEIGHT,
+        minimum=1,
+        maximum=1024,
+    )
+    sprite_reference_frame = _integer(
+        inputs,
+        "sprite_reference_frame",
+        _DEFAULT_SPRITE_REFERENCE_FRAME,
+        minimum=0,
+        maximum=_SPRITE_FRAME_COUNT - 1,
+    )
+    sprite_bottom_padding = _integer(
+        inputs,
+        "sprite_bottom_padding",
+        _DEFAULT_SPRITE_BOTTOM_PADDING,
+        minimum=0,
+        maximum=1023,
+    )
+    if sprite_alpha_height + sprite_bottom_padding > sprite_size:
+        raise ValueError(
+            "Sprite content height plus bottom padding must be less than or "
+            "equal to the sprite canvas size."
+        )
     intended_fps = _integer(
         inputs,
         "intended_fps",
@@ -369,6 +402,9 @@ def _anchored_sprite_settings(inputs: Dict[str, Any]) -> _AnchoredSpriteSettings
         common=common,
         compiled_prompt=compiled_prompt,
         sprite_size=sprite_size,
+        sprite_alpha_height=sprite_alpha_height,
+        sprite_reference_frame=sprite_reference_frame,
+        sprite_bottom_padding=sprite_bottom_padding,
         intended_fps=intended_fps,
     )
 
@@ -413,10 +449,13 @@ def _apply_anchored_sprite_graph_settings(
             "background": "Alpha",
         }
     )
-    prompt["sprite_scale"]["inputs"].update(
+    prompt["sprite_normalize"]["inputs"].update(
         {
-            "width": settings.sprite_size,
-            "height": settings.sprite_size,
+            "canvas_width": settings.sprite_size,
+            "canvas_height": settings.sprite_size,
+            "target_reference_alpha_height": settings.sprite_alpha_height,
+            "reference_frame_index": settings.sprite_reference_frame,
+            "bottom_padding": settings.sprite_bottom_padding,
         }
     )
     prompt["sprite_grid"]["inputs"].update(
@@ -430,13 +469,18 @@ def _apply_anchored_sprite_graph_settings(
         }
     )
     output_prefix = prompt["save"]["inputs"]["filename_prefix"]
+    normalization_suffix = (
+        f"content-{settings.sprite_alpha_height}px-"
+        f"bottom-{settings.sprite_bottom_padding}px-"
+        f"ref-{settings.sprite_reference_frame}"
+    )
     prompt["save_frames"]["inputs"]["filename_prefix"] = (
         f"{output_prefix}/frames-{settings.sprite_size}px-"
-        f"{settings.intended_fps}fps"
+        f"{normalization_suffix}-{settings.intended_fps}fps"
     )
     prompt["save_atlas"]["inputs"]["filename_prefix"] = (
         f"{output_prefix}/atlas-6x4-{settings.sprite_size}px-"
-        f"{settings.intended_fps}fps"
+        f"{normalization_suffix}-{settings.intended_fps}fps"
     )
 
 
@@ -1279,13 +1323,15 @@ def _make_anchored_sprite_loop_workflow() -> WorkflowNode:
         value="Anchored Sprite Loop",
         description=(
             "Create a prompt-guided sprite or compact illustration loop between explicit "
-            "opening and ending FL2VA frames, with up to two optional interior image "
+            "opening and ending FL2VA frames, with up to three optional interior image "
             "anchors at selected frame indices. Use the same endpoint image when a "
             "visually closed cycle is required; the result remains generated motion, not "
             "deterministic in-betweening. The card saves a 24-frame transparent PNG batch, "
             "a zero-gap 6x4 atlas, and the original MP4 preview. RMBG-2.0 infers alpha per "
-            "frame, so edge matte, framing, scale, and depicted content can still vary; "
-            "this first slice does not add temporal stabilization or automatic cropping. "
+            "frame, then LF_NormalizeSpriteBatch applies one reference-derived scale and "
+            "horizontal pivot to the entire batch while aligning each alpha baseline. It "
+            "normalizes alpha-content bounds, not semantic body height: equipment, effects, "
+            "and shadows count, and it does not stabilize the inferred matte itself. "
             "It requires the installed VNCCS_RMBG2 node and the declared local RMBG-2.0 "
             "files; Runner does not start the wrapper's fallback download."
         ),
@@ -1357,6 +1403,29 @@ def _make_anchored_sprite_loop_workflow() -> WorkflowNode:
                 ),
                 required=False,
             ),
+            _upload_cell(
+                node_id="source_guide_3",
+                cell_id="guide_image_3",
+                label="Guide 3 image (optional)",
+                description=(
+                    "Optional third pose or state anchor. Its frame index must be interior "
+                    "and different from every other supplied guide."
+                ),
+                required=False,
+            ),
+            _number_cell(
+                node_id="guide_3",
+                cell_id="guide_frame_3",
+                label="Guide 3 frame",
+                default="103",
+                minimum=1,
+                maximum=360,
+                description=(
+                    "Zero-based interior target frame for Guide 3. Active guides are "
+                    "chained in ascending frame order."
+                ),
+                required=False,
+            ),
             *_creative_cells(
                 direction_label="Loop direction",
                 direction_default=(
@@ -1374,15 +1443,52 @@ def _make_anchored_sprite_loop_workflow() -> WorkflowNode:
             ),
             *_common_cells(default_aspect_ratio="1:1"),
             _number_cell(
-                node_id="sprite_scale",
+                node_id="sprite_normalize",
                 cell_id="sprite_size",
-                label="Sprite size",
+                label="Sprite canvas",
                 default=str(_DEFAULT_SPRITE_SIZE),
                 minimum=32,
                 maximum=1024,
                 description=(
-                    "Square pixel size for every transparent PNG frame and each 6x4 atlas "
-                    "cell. Core ImageScale applies one common RGBA canvas to the full batch."
+                    "Square width and height for every transparent PNG frame and each 6x4 "
+                    "atlas cell. Content that cannot fit fails instead of being cropped."
+                ),
+            ),
+            _number_cell(
+                node_id="sprite_normalize",
+                cell_id="sprite_alpha_height",
+                label="Reference content height",
+                default=str(_DEFAULT_SPRITE_ALPHA_HEIGHT),
+                minimum=1,
+                maximum=1024,
+                description=(
+                    "The reference frame's alpha bounds derive one scale for all frames. "
+                    "Think 'how tall should the visible cutout be?' Bicubic edge filtering "
+                    "can add a small measured halo."
+                ),
+            ),
+            _number_cell(
+                node_id="sprite_normalize",
+                cell_id="sprite_reference_frame",
+                label="Reference frame",
+                default=str(_DEFAULT_SPRITE_REFERENCE_FRAME),
+                minimum=0,
+                maximum=_SPRITE_FRAME_COUNT - 1,
+                description=(
+                    "Zero-based sampled frame used to choose the shared scale and horizontal "
+                    "pivot. Every other frame keeps its relative left/right motion."
+                ),
+            ),
+            _number_cell(
+                node_id="sprite_normalize",
+                cell_id="sprite_bottom_padding",
+                label="Bottom padding",
+                default=str(_DEFAULT_SPRITE_BOTTOM_PADDING),
+                minimum=0,
+                maximum=1023,
+                description=(
+                    "Transparent rows below the feet or lowest alpha pixel. Each frame's "
+                    "alpha baseline lands here; scale and horizontal placement stay shared."
                 ),
             ),
             _number_cell(
@@ -1420,6 +1526,16 @@ def _make_anchored_sprite_loop_workflow() -> WorkflowNode:
                 shape="code",
                 description=(
                     "Periodic sampling indices and source/intended playback timing receipt."
+                ),
+                props={"lfLanguage": "json"},
+            ),
+            WorkflowCell(
+                node_id="display_normalization_receipt",
+                id="normalization_receipt",
+                shape="code",
+                description=(
+                    "Shared scale/pivot, per-frame baseline translations, measured alpha "
+                    "bounds, and clipping policy. Bounds include equipment and shadows."
                 ),
                 props={"lfLanguage": "json"},
             ),

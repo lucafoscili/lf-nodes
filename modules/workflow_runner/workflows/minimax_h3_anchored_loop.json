@@ -90,6 +90,11 @@
     "class_type": "LoadImage",
     "_meta": { "title": "Optional intermediate guide 2" }
   },
+  "source_guide_3": {
+    "inputs": { "image": "" },
+    "class_type": "LoadImage",
+    "_meta": { "title": "Optional intermediate guide 3" }
+  },
   "h3": {
     "inputs": {
       "clip": ["clip_device", 0],
@@ -126,6 +131,17 @@
     "class_type": "MiniMaxH3AddGuide",
     "_meta": { "title": "Anchor optional intermediate guide 2" }
   },
+  "guide_3": {
+    "inputs": {
+      "positive": ["guide_2", 0],
+      "vae": ["video_vae_device", 0],
+      "latent": ["h3", 1],
+      "image": ["source_guide_3", 0],
+      "frame_idx": 103
+    },
+    "class_type": "MiniMaxH3AddGuide",
+    "_meta": { "title": "Anchor optional intermediate guide 3" }
+  },
   "noise": {
     "inputs": { "noise_seed": 42 },
     "class_type": "RandomNoise",
@@ -134,7 +150,7 @@
   "guider": {
     "inputs": {
       "model": ["attention_backend", 0],
-      "conditioning": ["guide_2", 0]
+      "conditioning": ["guide_3", 0]
     },
     "class_type": "BasicGuider",
     "_meta": { "title": "MiniMax H3 guider" }
@@ -222,28 +238,29 @@
     "class_type": "JoinImageWithAlpha",
     "_meta": { "title": "Rejoin validated sprite alpha" }
   },
-  "sprite_scale": {
+  "sprite_normalize": {
     "inputs": {
       "image": ["validated_cutout", 0],
-      "upscale_method": "lanczos",
-      "width": 256,
-      "height": 256,
-      "crop": "disabled"
+      "canvas_width": 256,
+      "canvas_height": 256,
+      "target_reference_alpha_height": 224,
+      "reference_frame_index": 0,
+      "bottom_padding": 16
     },
-    "class_type": "ImageScale",
-    "_meta": { "title": "Resize the RGBA batch to one square sprite canvas" }
+    "class_type": "LF_NormalizeSpriteBatch",
+    "_meta": { "title": "Normalize sprite scale, pivot, and alpha baseline as one batch" }
   },
   "save_frames": {
     "inputs": {
-      "images": ["sprite_scale", 0],
-      "filename_prefix": "LF_Nodes/MiniMaxH3/AnchoredSpriteLoop/kitchen_quality/seed-42-f124/frames-256px-12fps"
+      "images": ["sprite_normalize", 0],
+      "filename_prefix": "LF_Nodes/MiniMaxH3/AnchoredSpriteLoop/kitchen_quality/seed-42-f124/frames-256px-content-224px-bottom-16px-ref-0-12fps"
     },
     "class_type": "SaveImage",
     "_meta": { "title": "Save 24 ordered RGBA sprite frames" }
   },
   "sprite_grid": {
     "inputs": {
-      "image": ["sprite_scale", 0],
+      "image": ["sprite_normalize", 0],
       "cell_width": 256,
       "cell_height": 256,
       "gap_px": 0,
@@ -273,7 +290,7 @@
   "save_atlas": {
     "inputs": {
       "images": ["sprite_grid", 0],
-      "filename_prefix": "LF_Nodes/MiniMaxH3/AnchoredSpriteLoop/kitchen_quality/seed-42-f124/atlas-6x4-256px-12fps"
+      "filename_prefix": "LF_Nodes/MiniMaxH3/AnchoredSpriteLoop/kitchen_quality/seed-42-f124/atlas-6x4-256px-content-224px-bottom-16px-ref-0-12fps"
     },
     "class_type": "SaveImage",
     "_meta": { "title": "Save transparent 6x4 sprite atlas" }
@@ -285,6 +302,14 @@
     },
     "class_type": "LF_DisplayJSON",
     "_meta": { "title": "Publish periodic frame-sampling receipt" }
+  },
+  "display_normalization_receipt": {
+    "inputs": {
+      "json_input": ["sprite_normalize", 1],
+      "ui_widget": ""
+    },
+    "class_type": "LF_DisplayJSON",
+    "_meta": { "title": "Publish sprite-batch normalization receipt" }
   },
   "decode_audio": {
     "inputs": {

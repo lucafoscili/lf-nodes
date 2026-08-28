@@ -17,7 +17,7 @@ remain bound to their respective model families; the transfer cards use
 reference-guided prompts rather than masking or pixel replacement.
 
 Anchored Sprite Loop keeps required FL2VA opening and ending frames and can
-chain one or two optional images through Core's `MiniMaxH3AddGuide` node. Each
+chain up to three optional images through Core's `MiniMaxH3AddGuide` node. Each
 guide uses a caller-selected, zero-based interior frame index; configured guide
 indices must be in range and distinct. All controls are validated before the
 shared content-addressed upload staging path is entered. In addition to the
@@ -27,21 +27,35 @@ image as the ending reference makes excluding that conditioned endpoint
 appropriate for a visually closed cycle; H3 generation does not guarantee that
 the decoded first and last frames are pixel-identical. With different endpoints,
 the ending keyframe remains in the MP4 but not the sprite export. The card then
-uses the installed `VNCCS_RMBG2` node in Alpha mode, applies one square Core
-`ImageScale` canvas (256 px by default), saves every RGBA frame, and saves a
-transparent, zero-gap, no-header 6x4 `LF_ImageGrid` atlas. The sampling receipt
-records the exact indices and source/intended playback rates. A Core alpha
-round-trip verifies that background removal produced RGBA before any frame or
-atlas is saved; an RGB fallback fails the run instead of publishing opaque
-sprites.
+uses the installed `VNCCS_RMBG2` node in Alpha mode and passes the RGBA batch
+through `LF_NormalizeSpriteBatch`. The normalizer measures one selected
+reference frame, derives one uniform scale and one horizontal pivot, and applies
+both to the entire batch. It varies only the vertical translation needed to
+place every frame's lowest alpha pixel on the requested baseline. The default is
+a 256 px square canvas, 224 px nominal reference-content height, reference frame
+0, and 16 px bottom padding. Content that cannot fit the chosen canvas fails
+instead of being silently cropped. The card saves every normalized RGBA frame
+and a transparent, zero-gap, no-header 6x4 `LF_ImageGrid` atlas.
+
+The sampling receipt records the exact indices and source/intended playback
+rates. A separate normalization receipt records the shared transform,
+post-filter alpha bounds, per-frame vertical translations, and clipping policy.
+A Core alpha round-trip verifies that background removal produced RGBA before
+any frame or atlas is saved; an RGB fallback fails the run instead of publishing
+opaque sprites.
 
 RMBG-2.0's four-file local package is an explicit Runner model prerequisite;
 the card remains **Setup required** when it cannot be verified and never falls
 through to the wrapper's automatic download. Alpha is inferred independently
-per frame, and the first vertical slice intentionally adds no temporal matte
-stabilizer or automatic content crop. Edge matte, apparent scale, framing, and
-depicted content can therefore vary and should be checked in the saved frame
-sequence before the atlas is treated as production-ready.
+per frame, and the first vertical slice does not stabilize that matte.
+Normalization uses every alpha pixel above 1/255 as geometry: equipment,
+effects, and shadows count, so the requested height is an alpha-content height
+rather than a semantic body height. Fainter alpha is preserved but does not
+steer the transform. Bicubic antialiasing can introduce a small measured edge
+halo, which is why the requested height is nominal and the receipt reports the
+rasterized bounds. Matte quality and depicted content can still vary and should
+be checked in the saved frame sequence before the atlas is treated as
+production-ready.
 
 LF Nodes does not bundle or download MiniMax H3 weights. Catalogue readiness
 checks the declared local files and node types before a card can run.

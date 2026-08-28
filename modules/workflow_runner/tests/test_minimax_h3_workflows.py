@@ -65,7 +65,11 @@ EXPECTED_UPLOADS = {
     "minimax_h3_scene_sheet": ("scene_sheet",),
 }
 OPTIONAL_UPLOADS = {
-    "minimax_h3_anchored_sprite_loop": ("guide_image_1", "guide_image_2"),
+    "minimax_h3_anchored_sprite_loop": (
+        "guide_image_1",
+        "guide_image_2",
+        "guide_image_3",
+    ),
 }
 EXPECTED_CANVASES = {
     "16:9": (1344, 768),
@@ -239,6 +243,7 @@ def test_task_families_use_separate_local_checkpoints_and_profiles() -> None:
         if workflow_id == "minimax_h3_anchored_sprite_loop":
             assert prompt["guide_1"]["class_type"] == "MiniMaxH3AddGuide"
             assert prompt["guide_2"]["class_type"] == "MiniMaxH3AddGuide"
+            assert prompt["guide_3"]["class_type"] == "MiniMaxH3AddGuide"
             assert prompt["sprite_sampler"]["class_type"] == (
                 "LF_PeriodicImageBatchSampler"
             )
@@ -248,7 +253,12 @@ def test_task_families_use_separate_local_checkpoints_and_profiles() -> None:
             assert prompt["validated_cutout"]["class_type"] == (
                 "JoinImageWithAlpha"
             )
-            assert prompt["sprite_scale"]["class_type"] == "ImageScale"
+            assert prompt["sprite_normalize"]["class_type"] == (
+                "LF_NormalizeSpriteBatch"
+            )
+            assert not any(
+                node["class_type"] == "ImageScale" for node in prompt.values()
+            )
             assert prompt["sprite_grid"]["class_type"] == "LF_ImageGrid"
         assert "execution_profile" not in _cells(workflow)
 
@@ -516,7 +526,7 @@ def test_animate_and_first_last_cards_expose_distinct_frame_support(
     assert "Picture 2 (from Shot 1) aligns with the 8.00-second mark" in compiled
 
 
-def test_anchored_sprite_loop_declares_two_optional_image_guides() -> None:
+def test_anchored_sprite_loop_declares_three_optional_image_guides() -> None:
     workflow = _workflows()["minimax_h3_anchored_sprite_loop"]
     cells = _cells(workflow)
 
@@ -527,10 +537,11 @@ def test_anchored_sprite_loop_declares_two_optional_image_guides() -> None:
         "last_frame_image",
         "guide_image_1",
         "guide_image_2",
+        "guide_image_3",
     ]
     assert cells["first_frame_image"].required is True
     assert cells["last_frame_image"].required is True
-    for ordinal, default_frame in ((1, "41"), (2, "82")):
+    for ordinal, default_frame in ((1, "41"), (2, "82"), (3, "103")):
         assert cells[f"guide_image_{ordinal}"].required is False
         frame = cells[f"guide_frame_{ordinal}"]
         assert frame.required is False
@@ -543,7 +554,7 @@ def test_anchored_sprite_loop_exposes_bounded_sprite_controls_and_outputs() -> N
     workflow = _workflows()["minimax_h3_anchored_sprite_loop"]
     cells = _cells(workflow)
 
-    assert cells["sprite_size"].node_id == "sprite_scale"
+    assert cells["sprite_size"].node_id == "sprite_normalize"
     assert cells["sprite_size"].props["lfValue"] == "256"
     assert cells["sprite_size"].props["lfHtmlAttributes"] == {
         "autocomplete": "off",
@@ -553,6 +564,13 @@ def test_anchored_sprite_loop_exposes_bounded_sprite_controls_and_outputs() -> N
         "max": 1024,
         "step": 1,
     }
+    assert cells["sprite_alpha_height"].node_id == "sprite_normalize"
+    assert cells["sprite_alpha_height"].props["lfValue"] == "224"
+    assert cells["sprite_reference_frame"].node_id == "sprite_normalize"
+    assert cells["sprite_reference_frame"].props["lfValue"] == "0"
+    assert cells["sprite_reference_frame"].props["lfHtmlAttributes"]["max"] == 23
+    assert cells["sprite_bottom_padding"].node_id == "sprite_normalize"
+    assert cells["sprite_bottom_padding"].props["lfValue"] == "16"
     assert cells["intended_fps"].node_id == "sprite_sampler"
     assert cells["intended_fps"].props["lfValue"] == "12"
     assert cells["intended_fps"].props["lfHtmlAttributes"]["min"] == 1
@@ -564,6 +582,11 @@ def test_anchored_sprite_loop_exposes_bounded_sprite_controls_and_outputs() -> N
         ("frames", "save_frames", "masonry"),
         ("atlas", "save_atlas", "masonry"),
         ("receipt", "display_sampling_receipt", "code"),
+        (
+            "normalization_receipt",
+            "display_normalization_receipt",
+            "code",
+        ),
     ]
     assert tuple(workflow.outputs)[-1].props == {"lfLanguage": "json"}
 
@@ -576,6 +599,9 @@ def test_anchored_sprite_loop_builds_the_exact_sprite_output_branch(
         workflow,
         monkeypatch,
         sprite_size="512",
+        sprite_alpha_height="448",
+        sprite_reference_frame="7",
+        sprite_bottom_padding="32",
         intended_fps="24",
     )
 
@@ -608,22 +634,23 @@ def test_anchored_sprite_loop_builds_the_exact_sprite_output_branch(
         "image": ["remove_background", 0],
         "alpha": ["rmbg_transparency_mask", 0],
     }
-    assert prompt["sprite_scale"]["inputs"] == {
+    assert prompt["sprite_normalize"]["inputs"] == {
         "image": ["validated_cutout", 0],
-        "upscale_method": "lanczos",
-        "width": 512,
-        "height": 512,
-        "crop": "disabled",
+        "canvas_width": 512,
+        "canvas_height": 512,
+        "target_reference_alpha_height": 448,
+        "reference_frame_index": 7,
+        "bottom_padding": 32,
     }
     assert prompt["save_frames"]["inputs"] == {
-        "images": ["sprite_scale", 0],
+        "images": ["sprite_normalize", 0],
         "filename_prefix": (
             "LF_Nodes/MiniMaxH3/AnchoredSpriteLoop/kitchen_quality/"
-            "seed-42-f124/frames-512px-24fps"
+            "seed-42-f124/frames-512px-content-448px-bottom-32px-ref-7-24fps"
         ),
     }
     grid_inputs = prompt["sprite_grid"]["inputs"]
-    assert grid_inputs["image"] == ["sprite_scale", 0]
+    assert grid_inputs["image"] == ["sprite_normalize", 0]
     assert grid_inputs["cell_width"] == 512
     assert grid_inputs["cell_height"] == 512
     assert grid_inputs["gap_px"] == 0
@@ -640,11 +667,15 @@ def test_anchored_sprite_loop_builds_the_exact_sprite_output_branch(
         "images": ["sprite_grid", 0],
         "filename_prefix": (
             "LF_Nodes/MiniMaxH3/AnchoredSpriteLoop/kitchen_quality/"
-            "seed-42-f124/atlas-6x4-512px-24fps"
+            "seed-42-f124/atlas-6x4-512px-content-448px-bottom-32px-ref-7-24fps"
         ),
     }
     assert prompt["display_sampling_receipt"]["inputs"]["json_input"] == [
         "sprite_sampler",
+        1,
+    ]
+    assert prompt["display_normalization_receipt"]["inputs"]["json_input"] == [
+        "sprite_normalize",
         1,
     ]
     assert prompt["create_video"]["inputs"]["images"] == ["decode_video", 0]
@@ -657,6 +688,16 @@ def test_anchored_sprite_loop_builds_the_exact_sprite_output_branch(
         ("sprite_size", 1025),
         ("sprite_size", True),
         ("sprite_size", "nan"),
+        ("sprite_alpha_height", 0),
+        ("sprite_alpha_height", 1025),
+        ("sprite_alpha_height", True),
+        ("sprite_alpha_height", "nan"),
+        ("sprite_reference_frame", -1),
+        ("sprite_reference_frame", 24),
+        ("sprite_reference_frame", True),
+        ("sprite_bottom_padding", -1),
+        ("sprite_bottom_padding", 1024),
+        ("sprite_bottom_padding", True),
         ("intended_fps", 0),
         ("intended_fps", 61),
         ("intended_fps", True),
@@ -684,6 +725,30 @@ def test_anchored_sprite_controls_fail_before_upload_staging_or_graph_mutation(
     assert prompt == original
 
 
+def test_anchored_sprite_geometry_must_fit_before_upload_staging(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    workflow = _workflows()["minimax_h3_anchored_sprite_loop"]
+    inputs = {
+        **_default_inputs(workflow),
+        "sprite_size": 256,
+        "sprite_alpha_height": 241,
+        "sprite_bottom_padding": 16,
+    }
+    monkeypatch.setattr(
+        workflow_module,
+        "resolve_load_image_reference",
+        lambda *_args: pytest.fail("invalid sprite geometry must not stage uploads"),
+    )
+    prompt = workflow.load_prompt()
+    original = copy.deepcopy(prompt)
+
+    with pytest.raises(ValueError, match="content height plus bottom padding"):
+        workflow.configure_prompt(prompt, inputs)
+
+    assert prompt == original
+
+
 def test_anchored_sprite_loop_declares_exact_local_rmbg2_package() -> None:
     workflows = _workflows()
     workflow = workflows["minimax_h3_anchored_sprite_loop"]
@@ -705,9 +770,11 @@ def test_anchored_sprite_loop_declares_exact_local_rmbg2_package() -> None:
     assert "Runner does not start the wrapper's fallback download" in (
         workflow.description
     )
-    assert "does not add temporal stabilization or automatic cropping" in (
+    assert "one reference-derived scale and horizontal pivot" in (
         workflow.description
     )
+    assert "not semantic body height" in workflow.description
+    assert "does not stabilize the inferred matte itself" in workflow.description
 
 
 def test_anchored_sprite_loop_keeps_explicit_endpoints_without_optional_guides(
@@ -720,7 +787,7 @@ def test_anchored_sprite_loop_keeps_explicit_endpoints_without_optional_guides(
     assert prompt["h3"]["inputs"]["first_frame"] == ["source_first", 0]
     assert prompt["h3"]["inputs"]["last_frame"] == ["source_last", 0]
     assert prompt["guider"]["inputs"]["conditioning"] == ["h3", 0]
-    for ordinal in (1, 2):
+    for ordinal in (1, 2, 3):
         assert f"source_guide_{ordinal}" not in prompt
         assert f"guide_{ordinal}" not in prompt
 
@@ -744,9 +811,35 @@ def test_anchored_sprite_loop_download_removes_optional_guide_branches() -> None
     assert prompt["save"]["inputs"]["filename_prefix"].endswith(
         "/seed-42-f124"
     )
-    for ordinal in (1, 2):
+    for ordinal in (1, 2, 3):
         assert f"source_guide_{ordinal}" not in prompt
         assert f"guide_{ordinal}" not in prompt
+
+
+def test_anchored_sprite_loop_keeps_legacy_two_guide_payload(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    workflow = _workflows()["minimax_h3_anchored_sprite_loop"]
+    prompt, calls = _configure(
+        workflow,
+        monkeypatch,
+        guide_image_1=[Path("C:/uploads/guide_image_1.png")],
+        guide_frame_1="35",
+        guide_image_2=[Path("C:/uploads/guide_image_2.png")],
+        guide_frame_2="70",
+    )
+
+    assert calls == [
+        "first_frame_image",
+        "last_frame_image",
+        "guide_image_1",
+        "guide_image_2",
+    ]
+    assert "source_guide_3" not in prompt
+    assert "guide_3" not in prompt
+    assert prompt["guide_1"]["inputs"]["positive"] == ["h3", 0]
+    assert prompt["guide_2"]["inputs"]["positive"] == ["guide_1", 0]
+    assert prompt["guider"]["inputs"]["conditioning"] == ["guide_2", 0]
 
 
 def test_anchored_sprite_loop_chains_guides_in_frame_order(
@@ -760,6 +853,8 @@ def test_anchored_sprite_loop_chains_guides_in_frame_order(
         guide_frame_1="90",
         guide_image_2=[Path("C:/uploads/guide_image_2.png")],
         guide_frame_2="30",
+        guide_image_3=[Path("C:/uploads/guide_image_3.png")],
+        guide_frame_3="60",
     )
 
     assert calls == [
@@ -767,6 +862,7 @@ def test_anchored_sprite_loop_chains_guides_in_frame_order(
         "last_frame_image",
         "guide_image_1",
         "guide_image_2",
+        "guide_image_3",
     ]
     assert prompt["guide_2"] == {
         "inputs": {
@@ -779,40 +875,55 @@ def test_anchored_sprite_loop_chains_guides_in_frame_order(
         "class_type": "MiniMaxH3AddGuide",
         "_meta": {"title": "Anchor optional intermediate guide 2"},
     }
-    assert prompt["guide_1"]["inputs"]["positive"] == ["guide_2", 0]
+    assert prompt["guide_3"]["inputs"]["positive"] == ["guide_2", 0]
+    assert prompt["guide_3"]["inputs"]["frame_idx"] == 60
+    assert prompt["guide_1"]["inputs"]["positive"] == ["guide_3", 0]
     assert prompt["guide_1"]["inputs"]["frame_idx"] == 90
     assert prompt["guider"]["inputs"]["conditioning"] == ["guide_1", 0]
 
 
-def test_anchored_sprite_loop_accepts_either_optional_guide_slot(
+@pytest.mark.parametrize("ordinal", [1, 2, 3])
+def test_anchored_sprite_loop_accepts_any_optional_guide_slot(
     monkeypatch: pytest.MonkeyPatch,
+    ordinal: int,
 ) -> None:
     workflow = _workflows()["minimax_h3_anchored_sprite_loop"]
+    image_field = f"guide_image_{ordinal}"
     prompt, calls = _configure(
         workflow,
         monkeypatch,
-        guide_image_2=[Path("C:/uploads/guide_image_2.png")],
-        guide_frame_2="61",
+        **{
+            image_field: [Path(f"C:/uploads/{image_field}.png")],
+            f"guide_frame_{ordinal}": "61",
+        },
     )
 
-    assert calls == ["first_frame_image", "last_frame_image", "guide_image_2"]
-    assert "guide_1" not in prompt
-    assert "source_guide_1" not in prompt
-    assert prompt["guide_2"]["inputs"]["positive"] == ["h3", 0]
-    assert prompt["guide_2"]["inputs"]["frame_idx"] == 61
-    assert prompt["guider"]["inputs"]["conditioning"] == ["guide_2", 0]
+    assert calls == ["first_frame_image", "last_frame_image", image_field]
+    for other in {1, 2, 3} - {ordinal}:
+        assert f"guide_{other}" not in prompt
+        assert f"source_guide_{other}" not in prompt
+    assert prompt[f"guide_{ordinal}"]["inputs"]["positive"] == ["h3", 0]
+    assert prompt[f"guide_{ordinal}"]["inputs"]["frame_idx"] == 61
+    assert prompt["guider"]["inputs"]["conditioning"] == [
+        f"guide_{ordinal}",
+        0,
+    ]
 
 
+@pytest.mark.parametrize("ordinal", [1, 2, 3])
 @pytest.mark.parametrize("bad_frame", [0, 123, -1, 124, True, "nan"])
 def test_anchored_guide_indices_must_be_interior_before_upload_staging(
     monkeypatch: pytest.MonkeyPatch,
+    ordinal: int,
     bad_frame: Any,
 ) -> None:
     workflow = _workflows()["minimax_h3_anchored_sprite_loop"]
     inputs = {
         **_default_inputs(workflow),
-        "guide_image_1": [Path("C:/uploads/guide_image_1.png")],
-        "guide_frame_1": bad_frame,
+        f"guide_image_{ordinal}": [
+            Path(f"C:/uploads/guide_image_{ordinal}.png")
+        ],
+        f"guide_frame_{ordinal}": bad_frame,
     }
     monkeypatch.setattr(
         workflow_module,
@@ -828,16 +939,19 @@ def test_anchored_guide_indices_must_be_interior_before_upload_staging(
     assert prompt == original
 
 
+@pytest.mark.parametrize("first, second", [(1, 2), (1, 3), (2, 3)])
 def test_anchored_guide_indices_must_be_distinct_before_upload_staging(
     monkeypatch: pytest.MonkeyPatch,
+    first: int,
+    second: int,
 ) -> None:
     workflow = _workflows()["minimax_h3_anchored_sprite_loop"]
     inputs = {
         **_default_inputs(workflow),
-        "guide_image_1": [Path("C:/uploads/guide_image_1.png")],
-        "guide_frame_1": "62",
-        "guide_image_2": [Path("C:/uploads/guide_image_2.png")],
-        "guide_frame_2": "62",
+        f"guide_image_{first}": [Path(f"C:/uploads/guide_image_{first}.png")],
+        f"guide_frame_{first}": "62",
+        f"guide_image_{second}": [Path(f"C:/uploads/guide_image_{second}.png")],
+        f"guide_frame_{second}": "62",
     }
     monkeypatch.setattr(
         workflow_module,
@@ -967,6 +1081,11 @@ def test_outputs_and_filename_prefixes_are_exact_and_deterministic(
                 ("frames", "save_frames", "masonry"),
                 ("atlas", "save_atlas", "masonry"),
                 ("receipt", "display_sampling_receipt", "code"),
+                (
+                    "normalization_receipt",
+                    "display_normalization_receipt",
+                    "code",
+                ),
             ]
         else:
             assert len(outputs) == 1
@@ -989,16 +1108,17 @@ def test_outputs_and_filename_prefixes_are_exact_and_deterministic(
         assert first["create_video"]["inputs"]["fps"] == 24.0
         if workflow_id == "minimax_h3_anchored_sprite_loop":
             assert first["save_frames"]["inputs"] == {
-                "images": ["sprite_scale", 0],
+                "images": ["sprite_normalize", 0],
                 "filename_prefix": (
-                    EXPECTED_PREFIXES[workflow_id] + "/frames-256px-12fps"
+                    EXPECTED_PREFIXES[workflow_id]
+                    + "/frames-256px-content-224px-bottom-16px-ref-0-12fps"
                 ),
             }
             assert first["save_atlas"]["inputs"] == {
                 "images": ["sprite_grid", 0],
                 "filename_prefix": (
                     EXPECTED_PREFIXES[workflow_id]
-                    + "/atlas-6x4-256px-12fps"
+                    + "/atlas-6x4-256px-content-224px-bottom-16px-ref-0-12fps"
                 ),
             }
 
