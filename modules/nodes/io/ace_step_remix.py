@@ -348,23 +348,70 @@ class LF_ACEStepRemix:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "source_audio": (Input.STRING, {"default": ""}),
-                "mode": (list(_MODES), {"default": "cover"}),
-                "style_prompt": (Input.STRING, {"default": "", "multiline": True}),
-                "lyrics": (Input.STRING, {"default": "", "multiline": True}),
-                "instrumental": (Input.BOOLEAN, {"default": False}),
-                "audio_cover_strength": (Input.FLOAT, {"default": 1.0, "min": 0.0, "max": 1.0, "step": 0.01}),
-                "cover_noise_strength": (Input.FLOAT, {"default": 0.2, "min": 0.0, "max": 1.0, "step": 0.01}),
-                "repaint_start": (Input.FLOAT, {"default": 0.0, "min": 0.0, "max": 86400.0, "step": 0.1}),
-                "repaint_end": (Input.FLOAT, {"default": -1.0, "min": -1.0, "max": 86400.0, "step": 0.1}),
-                "seed": (Input.INTEGER, {"default": -1, "min": -1, "max": 0x7FFFFFFFFFFFFFFF}),
-                "inference_steps": (Input.INTEGER, {"default": 8, "min": 1, "max": 200}),
-                "guidance_scale": (Input.FLOAT, {"default": 7.0, "min": 0.0, "max": 100.0, "step": 0.1}),
-                "infer_method": (list(_INFER_METHODS), {"default": "ode"}),
-                "shift": (Input.FLOAT, {"default": 3.0, "min": 1.0, "max": 5.0, "step": 0.1}),
+                "source_audio": (Input.STRING, {
+                    "default": "",
+                    "tooltip": "One audio file inside ComfyUI input, temp, or output; upload/select it upstream.",
+                }),
+                "mode": (list(_MODES), {
+                    "default": "cover",
+                    "tooltip": "Cover restyles the whole source; repaint changes only the selected time range.",
+                }),
+                "style_prompt": (Input.STRING, {
+                    "default": "",
+                    "multiline": True,
+                    "tooltip": "Describe the target genre, instrumentation, voice, mood, and production style.",
+                }),
+                "lyrics": (Input.STRING, {
+                    "default": "",
+                    "multiline": True,
+                    "tooltip": "Lyrics to guide the result; ignored when instrumental is enabled.",
+                }),
+                "instrumental": (Input.BOOLEAN, {
+                    "default": False,
+                    "tooltip": "Generate music without sung lyrics.",
+                }),
+                "audio_cover_strength": (Input.FLOAT, {
+                    "default": 1.0, "min": 0.0, "max": 1.0, "step": 0.01,
+                    "tooltip": "How strongly the source performance guides the cover; higher keeps more of it.",
+                }),
+                "cover_noise_strength": (Input.FLOAT, {
+                    "default": 0.2, "min": 0.0, "max": 1.0, "step": 0.01,
+                    "tooltip": "Variation injected before generation; higher can change the source more.",
+                }),
+                "repaint_start": (Input.FLOAT, {
+                    "default": 0.0, "min": 0.0, "max": 86400.0, "step": 0.1,
+                    "tooltip": "Start of the repaint interval in seconds.",
+                }),
+                "repaint_end": (Input.FLOAT, {
+                    "default": -1.0, "min": -1.0, "max": 86400.0, "step": 0.1,
+                    "tooltip": "End of the repaint interval in seconds; -1 means the end of the source.",
+                }),
+                "seed": (Input.INTEGER, {
+                    "default": -1, "min": -1, "max": 0x7FFFFFFFFFFFFFFF,
+                    "tooltip": "Reuse a seed for comparison; -1 asks ACE-Step to choose one.",
+                }),
+                "inference_steps": (Input.INTEGER, {
+                    "default": 8, "min": 1, "max": 200,
+                    "tooltip": "Denoising passes; more may refine the result but take longer.",
+                }),
+                "guidance_scale": (Input.FLOAT, {
+                    "default": 7.0, "min": 0.0, "max": 100.0, "step": 0.1,
+                    "tooltip": "How strongly the result follows the text guidance.",
+                }),
+                "infer_method": (list(_INFER_METHODS), {
+                    "default": "ode",
+                    "tooltip": "ACE-Step integration method: ODE is the usual deterministic choice; SDE adds stochasticity.",
+                }),
+                "shift": (Input.FLOAT, {
+                    "default": 3.0, "min": 1.0, "max": 5.0, "step": 0.1,
+                    "tooltip": "ACE-Step timestep shift; keep the default unless testing a known recipe.",
+                }),
                 # FLAC is lossless and uses ACE-Step's built-in soundfile path.
                 # MP3 remains available but requires ffmpeg in the API runtime.
-                "output_format": (list(_OUTPUT_FORMATS), {"default": "flac"}),
+                "output_format": (list(_OUTPUT_FORMATS), {
+                    "default": "flac",
+                    "tooltip": "Saved audio format. FLAC is lossless; MP3 is smaller and requires ffmpeg in the API runtime.",
+                }),
             },
             "hidden": {"node_id": "UNIQUE_ID"},
         }

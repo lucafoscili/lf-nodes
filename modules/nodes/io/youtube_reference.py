@@ -354,8 +354,15 @@ class LF_YouTubeReference:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "youtube_url": (Input.STRING, {"default": "", "multiline": False}),
-                "media_kind": (["audio_m4a", "audio_flac", "video_mp4"], {"default": "audio_m4a"}),
+                "youtube_url": (Input.STRING, {
+                    "default": "",
+                    "multiline": False,
+                    "tooltip": "Canonical YouTube video URL to cache after external intake is explicitly enabled.",
+                }),
+                "media_kind": (["audio_m4a", "audio_flac", "video_mp4"], {
+                    "default": "audio_m4a",
+                    "tooltip": "Cached derivative: compact M4A audio, lossless FLAC audio, or progressive MP4 video.",
+                }),
             },
             "optional": {
                 "ui_widget": (Input.LF_CODE, {

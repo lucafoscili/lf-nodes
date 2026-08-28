@@ -10,7 +10,7 @@ from ...utils.constants import FUNCTION, IMAGE_EXTENSION_COMBO, Input
 from ...utils.helpers.api import get_resource_url
 from ...utils.helpers.comfy import get_comfy_dir, resolve_filepath, safe_send_sync
 from ...utils.helpers.conversion import tensor_to_pil
-from ...utils.helpers.logic import normalize_input_image, normalize_input_list, normalize_list_to_value
+from ...utils.helpers.logic import normalize_input_image, normalize_list_to_value, normalize_parallel_list
 from ...utils.helpers.ui import create_masonry_node
 
 # region LF_SaveImageForCivitAI
@@ -63,7 +63,7 @@ class LF_SaveImageForCivitAI:
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
-    INPUT_IS_LIST = (True, True, False, False, False, False, False, False)
+    INPUT_IS_LIST = True
     OUTPUT_IS_LIST = (True, False)
     OUTPUT_NODE = True
     OUTPUT_TOOLTIPS = (
@@ -75,7 +75,9 @@ class LF_SaveImageForCivitAI:
 
     def on_exec(self, **kwargs: dict):
         image: list[torch.Tensor] = normalize_input_image(kwargs.get("image"))
-        filename_prefix: list[str] = normalize_input_list(kwargs.get("filename_prefix"))
+        filename_prefix = normalize_parallel_list(
+            kwargs.get("filename_prefix"), len(image), "filename_prefix"
+        )
         extra_pnginfo: list[torch.Tensor] = normalize_list_to_value(kwargs.get("extra_pnginfo"))
         prompt: dict = normalize_list_to_value(kwargs.get("prompt"))
         add_timestamp: bool = normalize_list_to_value(kwargs.get("add_timestamp"))
@@ -95,11 +97,8 @@ class LF_SaveImageForCivitAI:
         for index, img in enumerate(image):
             pil_img = tensor_to_pil(img)
 
-            use_filename_list = isinstance(filename_prefix, list) and len(filename_prefix) > 1 and len(filename_prefix) == len(image)
-            if use_filename_list:
-                prefix = filename_prefix[index]
-            else:
-                prefix = filename_prefix[0]
+            use_filename_list = len(set(filename_prefix)) > 1
+            prefix = filename_prefix[index]
 
             output_file, subfolder, filename = resolve_filepath(
                 filename_prefix=prefix,
@@ -145,18 +144,21 @@ class LF_SaveImageForCivitAI:
                 "type": "output",
             })
 
-        safe_send_sync("saveimageforcivitai", {
+        final_payload = {
+            "civitai_metadata": civitai_metadata,
             "dataset": dataset,
-        }, kwargs.get("node_id"))
+            "file_names": file_names,
+        }
+        safe_send_sync(
+            "saveimageforcivitai",
+            final_payload,
+            kwargs.get("node_id"),
+        )
 
         return {
             "ui": {
                 "images": saved_images,
-                "lf_output": [{
-                    "civitai_metadata": civitai_metadata,
-                    "dataset": dataset,
-                    "file_names": file_names,
-                }],
+                "lf_output": [final_payload],
             },
             "result": (file_names, civitai_metadata)
         }

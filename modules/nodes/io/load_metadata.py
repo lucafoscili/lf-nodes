@@ -100,7 +100,10 @@ class LF_LoadMetadata:
                     "metadata": metadata_list,
                 }],
             },
-            "result": (metadata_list, metadata_list)
+            "result": (
+                metadata_list[0] if metadata_list else {},
+                metadata_list,
+            )
         }
 # endregion
 
