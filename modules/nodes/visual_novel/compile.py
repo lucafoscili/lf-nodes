@@ -10,22 +10,20 @@ from .core import (
 
 
 def _safe_send_sync(event: str, data: dict, node_id: str | None = None) -> None:
-    """Emit optional UI feedback without importing Comfy in headless runs."""
+    """Emit observational UI state only when Comfy is already the host."""
 
     try:
         import sys
 
-        server_module = sys.modules.get("server")
-        if server_module is None:
+        if sys.modules.get("server") is None:
             return
-        PromptServer = server_module.PromptServer
+        from ...utils.helpers.comfy import safe_send_sync
 
-        payload = dict(data)
-        if node_id is not None:
-            payload["node"] = node_id
-        PromptServer.instance.send_sync(f"lf-{event}", payload)
+        safe_send_sync(event, data, node_id)
     except Exception:
-        pass
+        # VN compilation is intentionally usable in CPU-only/headless tooling.
+        # UI delivery must not import Comfy or optional native/provider modules.
+        return
 
 
 class LF_VNCompile:
