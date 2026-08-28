@@ -3,7 +3,7 @@ import torch
 from . import CATEGORY
 from ...utils.constants import FUNCTION, Input
 from ...utils.helpers.comfy import safe_send_sync
-from ...utils.helpers.logic import normalize_list_to_value
+from ...utils.helpers.logic import normalize_list_to_value, normalize_output_mask
 
 # region LF_SwitchMask
 class LF_SwitchMask:
@@ -61,8 +61,9 @@ class LF_SwitchMask:
         }, kwargs.get("node_id"))
 
         value = on_true if boolean else on_false
+        mask_batches, mask_list = normalize_output_mask(value)
 
-        return (value, [value])
+        return (mask_batches[0], mask_list)
 # endregion
 
 # region Mappings

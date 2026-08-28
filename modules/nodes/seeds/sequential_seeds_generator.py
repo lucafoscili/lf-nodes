@@ -32,6 +32,7 @@ class LF_SequentialSeedsGenerator:
     
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
+    OUTPUT_TOOLTIPS = ("Sequential seed derived from the starting seed.",) * 20
     RETURN_NAMES = ("seed",) * 20
     RETURN_TYPES = (Input.INTEGER,) * 20
 
@@ -50,11 +51,19 @@ class LF_SequentialSeedsGenerator:
         if enable_history:
             create_history_node(str(seed), nodes)
 
-        safe_send_sync("sequentialseedsgenerator", {
+        final_payload = {
             "dataset": dataset,
-        }, kwargs.get("node_id"))        
+        }
+        safe_send_sync(
+            "sequentialseedsgenerator",
+            final_payload,
+            kwargs.get("node_id"),
+        )
 
-        return seeds
+        return {
+            "ui": {"lf_output": [final_payload]},
+            "result": tuple(seeds),
+        }
 # endregion
 
 # region Mappings

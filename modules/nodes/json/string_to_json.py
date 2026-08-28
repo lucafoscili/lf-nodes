@@ -1,7 +1,7 @@
 from . import CATEGORY
 from ...utils.constants import FUNCTION, Input
 from ...utils.helpers.comfy import safe_send_sync
-from ...utils.helpers.logic import normalize_json_input
+from ...utils.helpers.logic import normalize_json_input, normalize_list_to_value
 
 # region LF_StringToJSON
 class LF_StringToJSON:
@@ -27,7 +27,7 @@ class LF_StringToJSON:
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
-    INPUT_IS_LIST = (True,)
+    INPUT_IS_LIST = True
     OUTPUT_NODE = True
     OUTPUT_TOOLTIPS = (
         "Parsed JSON value.",
@@ -36,13 +36,19 @@ class LF_StringToJSON:
     RETURN_TYPES = (Input.JSON,)
 
     def on_exec(self, **kwargs: dict):
-        json_data: dict = normalize_json_input(kwargs.get("string"))
+        raw_string = kwargs.get("string")
+        json_data: dict = normalize_json_input(raw_string)
+        display_value = normalize_list_to_value(raw_string)
+        if not isinstance(display_value, str):
+            display_value = str(display_value or "")
 
-        safe_send_sync("stringtojson", {
-            "value": kwargs.get("string"),
-        }, kwargs.get("node_id"))
+        payload = {"value": display_value}
+        safe_send_sync("stringtojson", payload, kwargs.get("node_id"))
 
-        return (json_data,)
+        return {
+            "ui": {"lf_output": [payload]},
+            "result": (json_data,),
+        }
 # endregion
 
 # region Mappings

@@ -108,7 +108,7 @@ class LF_WallOfText:
             "value": wall_of_text,
         }, kwargs.get("node_id"))
 
-        return (wall_of_text, wall_of_text)
+        return (wall_of_text, [wall_of_text])
 # endregion
 
 # region Mappings

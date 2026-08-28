@@ -2,18 +2,13 @@ import numpy as np
 
 from . import CATEGORY
 from ...utils.constants import FUNCTION, Input
-from ...utils.helpers.api import get_resource_url
-from ...utils.helpers.comfy import resolve_filepath, safe_send_sync
-from ...utils.helpers.conversion import numpy_to_tensor, tensor_to_pil
+from ...utils.helpers.comfy import safe_send_sync
+from ...utils.helpers.conversion import numpy_to_tensor
 from ...utils.helpers.logic import normalize_output_image, normalize_list_to_value, normalize_json_input
-from ...utils.helpers.temp_cache import TempFileCache
-from ...utils.helpers.ui import create_masonry_node
+from ...utils.helpers.ui import create_cached_masonry_node
 
 # region LF_ImageListFromJSON
 class LF_ImageListFromJSON:
-    def __init__(self):
-        self._temp_cache = TempFileCache()
-
     @classmethod
     def INPUT_TYPES(self):
         return {
@@ -63,8 +58,6 @@ class LF_ImageListFromJSON:
     RETURN_TYPES = (Input.IMAGE, Input.IMAGE, Input.STRING, Input.INTEGER, Input.INTEGER, Input.INTEGER)
 
     def on_exec(self, **kwargs: dict):
-        self._temp_cache.cleanup()
-
         json_input = normalize_json_input(kwargs.get("json_input"))
         if (
             isinstance(json_input, list)
@@ -93,27 +86,25 @@ class LF_ImageListFromJSON:
             else:
                 img = numpy_to_tensor(np.full((height, width, 3), 255, dtype=np.uint8))
 
-            pil_img = tensor_to_pil(img)
-
-            output_file, subfolder, filename = resolve_filepath(
-                filename_prefix="jsonimage_",
-                image=img,
-                temp_cache=self._temp_cache
-            )
-            url = get_resource_url(subfolder, filename, "temp")
-            pil_img.save(output_file, format="PNG")
-
             image.append(img)
-            nodes.append(create_masonry_node(filename, url, index))
+            nodes.append(
+                create_cached_masonry_node(
+                    img,
+                    index=index,
+                    label=str(keys[index]),
+                )
+            )
 
 
-        safe_send_sync("imagelistfromjson", {
-            "dataset": dataset,
-        }, kwargs.get("node_id"))
+        payload = {"dataset": dataset}
+        safe_send_sync("imagelistfromjson", payload, kwargs.get("node_id"))
 
         image_batch, image_list = normalize_output_image(image)
 
-        return (image_batch[0], image_list, keys, num_images, width, height)
+        return {
+            "ui": {"lf_output": [payload]},
+            "result": (image_batch[0], image_list, keys, num_images, width, height),
+        }
 # endregion
 
 # region Mappings

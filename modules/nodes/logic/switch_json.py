@@ -54,10 +54,11 @@ class LF_SwitchJSON:
         on_false: dict = kwargs.get("on_false")
         on_true: dict = kwargs.get("on_true")
 
-        safe_send_sync("switchjson", {
-            "node": kwargs.get("node_id"),
-            "bool": boolean,
-        })
+        safe_send_sync(
+            "switchjson",
+            {"bool": boolean},
+            kwargs.get("node_id"),
+        )
 
         value = on_true if boolean else on_false
 

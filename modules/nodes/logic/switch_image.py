@@ -3,7 +3,11 @@ import torch
 from . import CATEGORY
 from ...utils.constants import FUNCTION, Input
 from ...utils.helpers.comfy import safe_send_sync
-from ...utils.helpers.logic import normalize_list_to_value
+from ...utils.helpers.logic import (
+    normalize_input_image,
+    normalize_list_to_value,
+    normalize_output_image,
+)
 
 # region LF_SwitchImage
 class LF_SwitchImage:
@@ -56,14 +60,18 @@ class LF_SwitchImage:
         on_false: torch.Tensor = kwargs.get("on_false")
         on_true: torch.Tensor = kwargs.get("on_true")
 
-        safe_send_sync("switchimage", {
-            "node": kwargs.get("node_id"),
-            "bool": boolean,
-        })
+        safe_send_sync(
+            "switchimage",
+            {"bool": boolean},
+            kwargs.get("node_id"),
+        )
 
         value = on_true if boolean else on_false
+        image_batches, image_list = normalize_output_image(
+            normalize_input_image(value)
+        )
 
-        return (value, [value])
+        return (image_batches[0], image_list)
 # endregion
 
 # region Mappings

@@ -37,6 +37,9 @@ class LF_UrandomSeedGenerator:
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
+    OUTPUT_TOOLTIPS = (
+        "Dataset containing the generated or retained seed values.",
+    ) + ("Generated or retained seed value.",) * 20
     RETURN_NAMES = tuple(["fixed_seeds_dataset"] + ["seed"] * 20)
     RETURN_TYPES = tuple([Input.JSON] + [Input.INTEGER] * 20)
 

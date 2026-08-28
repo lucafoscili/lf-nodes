@@ -51,10 +51,11 @@ class LF_SwitchInteger:
         on_true = normalize_list_to_value(on_true)
         on_false = normalize_list_to_value(on_false)
 
-        safe_send_sync("switchinteger", {
-            "node": kwargs.get("node_id"),
-            "bool": boolean,
-        })
+        safe_send_sync(
+            "switchinteger",
+            {"bool": boolean},
+            kwargs.get("node_id"),
+        )
 
         value = on_true if boolean else on_false
 

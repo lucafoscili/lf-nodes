@@ -56,10 +56,11 @@ class LF_SwitchFloat:
         on_false: float = kwargs.get("on_false")
         on_true: float = kwargs.get("on_true")
 
-        safe_send_sync("switchfloat", {
-            "node": kwargs.get("node_id"),
-            "bool": boolean,
-        })
+        safe_send_sync(
+            "switchfloat",
+            {"bool": boolean},
+            kwargs.get("node_id"),
+        )
 
         value = on_true if boolean else on_false
 

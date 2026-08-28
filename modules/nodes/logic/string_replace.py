@@ -49,10 +49,11 @@ class LF_StringReplace:
 
         if not input_text or not target:
             log = f"**Error**: Input text or target is empty. Replacement cannot proceed."
-            safe_send_sync("stringreplace", {
-                "node": kwargs.get("node_id"),
-                "value": log,
-            })
+            safe_send_sync(
+                "stringreplace",
+                {"value": log},
+                kwargs.get("node_id"),
+            )
             return ("", [])
 
         replacement_count = input_text.count(target)
@@ -67,10 +68,11 @@ class LF_StringReplace:
   **Replacements Made**: {replacement_count}
         """
 
-        safe_send_sync("stringreplace", {
-            "node": kwargs.get("node_id"),
-            "value": log,
-        })
+        safe_send_sync(
+            "stringreplace",
+            {"value": log},
+            kwargs.get("node_id"),
+        )
 
         return (modified_text, [modified_text])
 # endregion

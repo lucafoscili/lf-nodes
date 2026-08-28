@@ -50,7 +50,27 @@ class LF_Something2String:
             combo_name = "_".join(combo)
             combinations_list.append(combo_name)
 
-    OUTPUT_IS_LIST = tuple([False] * len(combinations_list))
+    OUTPUT_IS_LIST = (
+        False,
+        False,
+        False,
+        False,
+        False,
+        False,
+        False,
+        False,
+        False,
+        False,
+        False,
+        False,
+        False,
+        False,
+        False,
+    )
+    OUTPUT_TOOLTIPS = tuple(
+        ["String joined from the connected input combination."]
+        * len(combinations_list)
+    )
     RETURN_TYPES = tuple([Input.STRING] * len(combinations_list))
     RETURN_NAMES = tuple(combinations_list)
 
@@ -101,11 +121,15 @@ class LF_Something2String:
 {combinations_log}
         """
 
-        safe_send_sync("something2string", {
+        final_payload = {
             "value": log,
-        }, kwargs.get("node_id"))
+        }
+        safe_send_sync("something2string", final_payload, kwargs.get("node_id"))
 
-        return tuple(results)
+        return {
+            "ui": {"lf_output": [final_payload]},
+            "result": tuple(results),
+        }
 # endregion
 
 # region Mappings

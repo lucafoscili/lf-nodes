@@ -64,10 +64,11 @@ class LF_StringTemplate:
 
         if not isinstance(replacements_list, list) or not all(isinstance(d, dict) for d in replacements_list):
             log = "**Error**: Replacements must be a list of dictionaries."
-            safe_send_sync("stringtemplate", {
-                "node": kwargs.get("node_id"),
-                "value": log,
-            })
+            safe_send_sync(
+                "stringtemplate",
+                {"value": log},
+                kwargs.get("node_id"),
+            )
             return ("", [])
 
         unmatched_keys = []
@@ -84,10 +85,11 @@ class LF_StringTemplate:
 
         except Exception as e:
             log = f"**Error**: {str(e)}"
-            safe_send_sync("stringtemplate", {
-                "node": kwargs.get("node_id"),
-                "value": log,
-            })
+            safe_send_sync(
+                "stringtemplate",
+                {"value": log},
+                kwargs.get("node_id"),
+            )
             return ("", [])
 
         log = f"""## Result:
@@ -99,10 +101,11 @@ class LF_StringTemplate:
   **Result**: {filled_templates}
         """
 
-        safe_send_sync("stringtemplate", {
-            "node": kwargs.get("node_id"),
-            "value": log,
-        })
+        safe_send_sync(
+            "stringtemplate",
+            {"value": log},
+            kwargs.get("node_id"),
+        )
 
         return (filled_templates[0], filled_templates)
 
