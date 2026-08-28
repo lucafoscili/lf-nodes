@@ -16,12 +16,16 @@ def _typescript_enum(source: str, name: str) -> str:
     return source.split(marker, 1)[1].split("}", 1)[0]
 
 
-def _frontend_contract() -> tuple[set[str], dict[str, set[str]]]:
+def _frontend_contract() -> tuple[
+    list[str],
+    list[str],
+    dict[str, list[str]],
+]:
     widget_source = WIDGET_TYPES.read_text(encoding="utf-8")
     node_block = _typescript_enum(widget_source, "NodeName")
     custom_widget_block = _typescript_enum(widget_source, "CustomWidgetName")
 
-    node_names = set(re.findall(r"=\s*'(LF_[^']+)'", node_block))
+    node_names = re.findall(r"=\s*'(LF_[^']+)'", node_block)
     custom_widget_values = {
         name: value
         for name, value in re.findall(
@@ -35,20 +39,22 @@ def _frontend_contract() -> tuple[set[str], dict[str, set[str]]]:
         "export const NODE_WIDGET_MAP",
         1,
     )[1].split("};", 1)[0]
-    widget_map: dict[str, set[str]] = {}
+    map_names: list[str] = []
+    widget_map: dict[str, list[str]] = {}
     for node_name, registered in re.findall(
         r"^\s*(LF_[A-Za-z0-9_]+):\s*\[([^\]]*)\]",
         map_block,
         re.MULTILINE,
     ):
-        widget_map[node_name] = {
+        map_names.append(node_name)
+        widget_map[node_name] = [
             custom_widget_values[property_name]
             for property_name in re.findall(
                 r"CustomWidgetName\.(\w+)",
                 registered,
             )
-        }
-    return node_names, widget_map
+        ]
+    return node_names, map_names, widget_map
 
 
 def _backend_contract() -> dict[str, set[str]]:
@@ -116,13 +122,20 @@ def _backend_contract() -> dict[str, set[str]]:
 
 def test_backend_and_frontend_node_widget_registries_are_exact() -> None:
     backend = _backend_contract()
-    node_names, widget_map = _frontend_contract()
+    node_names, map_names, widget_map = _frontend_contract()
 
-    assert set(backend) == node_names
+    assert len(node_names) == len(set(node_names)), "NodeName contains duplicates"
+    assert len(map_names) == len(set(map_names)), "NODE_WIDGET_MAP contains duplicates"
+    for node_name, widgets in widget_map.items():
+        assert len(widgets) == len(set(widgets)), (
+            f"{node_name} registers the same widget more than once"
+        )
+
+    assert set(backend) == set(node_names)
     assert set(backend) == set(widget_map)
-    assert widget_map["LF_ACEStepRemix"] == set()
+    assert widget_map["LF_ACEStepRemix"] == []
     assert "LF_Brush" not in widget_map
     assert "LF_ExtractFaceEmbedding" not in widget_map
 
     for node_name, declared_widgets in backend.items():
-        assert widget_map[node_name] == declared_widgets, node_name
+        assert set(widget_map[node_name]) == declared_widgets, node_name

@@ -20,6 +20,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: scripts/quality/requirements-ci-cpu.txt
+
+      - name: Install pinned CPU contract dependencies
+        run: python -m pip install --disable-pip-version-check -r scripts/quality/requirements-ci-cpu.txt
+
+      - name: Validate published node behavior
+        run: python -I scripts/quality/run_ci_contracts.py
+
       - name: Count Published LF Nodes
         id: count
         run: |

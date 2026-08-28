@@ -179,7 +179,11 @@ def test_published_node_output_metadata_matches_return_types() -> None:
 
             for attribute in OUTPUT_METADATA:
                 cardinalities = _metadata_cardinalities(node_class, attribute)
-                if cardinalities and cardinalities != return_types:
+                if not cardinalities and return_types != {0}:
+                    failures.append(
+                        f"{public_name}: {attribute} is missing for nonzero outputs"
+                    )
+                elif cardinalities and cardinalities != return_types:
                     failures.append(
                         f"{public_name}: {attribute} has {sorted(cardinalities, key=str)!r}; "
                         f"RETURN_TYPES has {sorted(return_types, key=str)!r}"
