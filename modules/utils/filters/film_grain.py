@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import torch
 
-from ._common import validate_image
+from ._common import as_bhwc_result, validate_image
 from ...utils.helpers import hex_to_tuple, numpy_to_tensor, tensor_to_numpy
 
 # region film_grain_effect
@@ -50,5 +50,8 @@ def film_grain_effect(image: torch.Tensor, intensity: float = 0.5, size: float =
 
     grainy_image = np.clip(grainy_image, 0, 255)
 
-    return numpy_to_tensor(grainy_image.astype(np.uint8))
+    return as_bhwc_result(
+        numpy_to_tensor(grainy_image.astype(np.uint8)),
+        image,
+    )
 # endregion

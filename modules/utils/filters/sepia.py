@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 
-from ._common import validate_image
+from ._common import as_bhwc_result, validate_image
 from ...utils.helpers import numpy_to_tensor, tensor_to_numpy
 
 # region sepia_effect
@@ -29,5 +29,5 @@ def sepia_effect(image: torch.Tensor, intensity = 1.0):
     sepia_image = np_image @ sepia_filter.T
     sepia_image = np.clip(sepia_image, 0, 255)
 
-    return numpy_to_tensor(sepia_image.astype(np.uint8))
+    return as_bhwc_result(numpy_to_tensor(sepia_image.astype(np.uint8)), image)
 # endregion

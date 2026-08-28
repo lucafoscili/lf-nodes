@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import torch
 
-from ._common import validate_image
+from ._common import as_bhwc_result, validate_image
 from ...utils.helpers import numpy_to_tensor, tensor_to_numpy
 
 # region tilt_shift_effect
@@ -53,5 +53,5 @@ def tilt_shift_effect(img: torch.Tensor, focus_position: float, focus_size: floa
 
     out = np_img * mask_expanded + blurred * (1 - mask_expanded)
     
-    return numpy_to_tensor(out.astype(np.uint8))
+    return as_bhwc_result(numpy_to_tensor(out.astype(np.uint8)), img)
 # endregion

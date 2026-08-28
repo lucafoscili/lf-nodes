@@ -3,6 +3,7 @@ import torch
 
 from PIL import Image, ImageFilter
 
+from ._common import as_bhwc_result
 from ...utils.helpers import hex_to_tuple, pil_to_tensor, tensor_to_pil
 
 # region vignette_effect
@@ -40,5 +41,5 @@ def vignette_effect(image: torch.Tensor, intensity: float, radius: float, shape:
     output_image = Image.composite(overlay, pil_image, vignette_mask)
     output_image = Image.blend(pil_image, output_image, intensity)
 
-    return pil_to_tensor(output_image)
+    return as_bhwc_result(pil_to_tensor(output_image), image)
 # endregion

@@ -7,23 +7,17 @@ import torch
 from . import CATEGORY
 from ...utils.constants import FUNCTION, Input
 from ...utils.filters import apply_background_remover_filter
-from ...utils.helpers.api import get_resource_url
-from ...utils.helpers.comfy import resolve_filepath, safe_send_sync
-from ...utils.helpers.conversion import tensor_to_pil
+from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.logic import (
     normalize_input_image,
     normalize_list_to_value,
     normalize_output_image,
     normalize_output_mask,
 )
-from ...utils.helpers.temp_cache import TempFileCache
-from ...utils.helpers.ui import create_compare_node
+from ...utils.helpers.ui import create_cached_compare_node, create_compare_node
 
 # region LF_BackgroundRemover
 class LF_BackgroundRemover:
-    def __init__(self):
-        self._temp_cache = TempFileCache()
-
     @classmethod
     def INPUT_TYPES(cls):
         models = [
@@ -75,8 +69,8 @@ class LF_BackgroundRemover:
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
-    INPUT_IS_LIST = (True, False, False, False, False)
-    OUTPUT_IS_LIST = (False, True, True, False, True, False)
+    INPUT_IS_LIST = True
+    OUTPUT_IS_LIST = (False, True, True, False, True, False, False)
     OUTPUT_TOOLTIPS = (
         "Image tensor with background removed.",
         "List of image tensors with background removed.",
@@ -84,13 +78,28 @@ class LF_BackgroundRemover:
         "Mask tensor used for background removal.",
         "List of mask tensors used for background removal.",
         "JSON object with statistics about the background removal process.",
+        "Cutout image batch. Appended to preserve the indices of published outputs.",
     )
-    RETURN_NAMES = ("image", "image_list", "cutout_list", "mask", "mask_list", "stats")
-    RETURN_TYPES = (Input.IMAGE, Input.IMAGE, Input.IMAGE, Input.MASK, Input.MASK, Input.JSON)
+    RETURN_NAMES = (
+        "image",
+        "image_list",
+        "cutout_list",
+        "mask",
+        "mask_list",
+        "stats",
+        "cutout",
+    )
+    RETURN_TYPES = (
+        Input.IMAGE,
+        Input.IMAGE,
+        Input.IMAGE,
+        Input.MASK,
+        Input.MASK,
+        Input.JSON,
+        Input.IMAGE,
+    )
 
     def on_exec(self, **kwargs: dict):
-        self._temp_cache.cleanup()
-
         node_id = kwargs.get("node_id")
         images = normalize_input_image(kwargs.get("image"))
         if not images:
@@ -133,37 +142,24 @@ class LF_BackgroundRemover:
             stats["index"] = index
             stats_rows.append(stats)
 
-            source_pil = tensor_to_pil(image)
-            source_path, source_subfolder, source_filename = resolve_filepath(
-                filename_prefix="background_src",
-                image=image,
+            nodes.append(
+                create_cached_compare_node(
+                    image,
+                    composite,
+                    index=len(nodes),
+                )
             )
-            source_pil.save(source_path, format="PNG")
-            source_url = get_resource_url(source_subfolder, source_filename, "temp")
-
-            composite_pil = tensor_to_pil(composite)
-            composite_path, composite_subfolder, composite_filename = resolve_filepath(
-                filename_prefix="background_result",
-                image=composite,
-            )
-            composite_pil.save(composite_path, format="PNG")
-            composite_url = get_resource_url(composite_subfolder, composite_filename, "temp")
-
-            nodes.append(create_compare_node(source_url, composite_url, len(nodes)))
 
             cutout_url = payload.get("cutout")
             mask_url = payload.get("mask")
             if cutout_url and mask_url:
                 nodes.append(create_compare_node(cutout_url, mask_url, len(nodes)))
 
-        safe_send_sync(
-            "backgroundremover",
-            {"dataset": dataset},
-            node_id,
-        )
+        payload = {"dataset": dataset}
+        safe_send_sync("backgroundremover", payload, node_id)
 
         composite_batches, composite_list = normalize_output_image(composite_images)
-        _, cutout_list = normalize_output_image(cutout_images)
+        cutout_batches, cutout_list = normalize_output_image(cutout_images)
 
         mask_batches, mask_list = normalize_output_mask(mask_images)
         mask_output = mask_batches[0] if mask_batches else mask_list[0]
@@ -172,14 +168,18 @@ class LF_BackgroundRemover:
 
         primary_image = composite_batches[0] if composite_batches else composite_images[0]
 
-        return (
-            primary_image,
-            composite_list,
-            cutout_list,
-            mask_output,
-            mask_list,
-            stats_output,
-        )
+        return {
+            "ui": {"lf_output": [payload]},
+            "result": (
+                primary_image,
+                composite_list,
+                cutout_list,
+                mask_output,
+                mask_list,
+                stats_output,
+                cutout_batches[0],
+            ),
+        }
 # endregion
 
 # region Mappings

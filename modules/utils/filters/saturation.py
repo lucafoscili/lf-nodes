@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import torch
 
-from ._common import validate_image
+from ._common import as_bhwc_result, validate_image
 from ...utils.helpers import numpy_to_tensor, tensor_to_numpy
 
 # region saturation_effect
@@ -31,5 +31,5 @@ def saturation_effect(
     adjusted = cv2.cvtColor(hsv, cv2.COLOR_HSV2RGB)
     adjusted = np.clip(adjusted * 255, 0, 255).astype(np.uint8)
 
-    return numpy_to_tensor(adjusted)
+    return as_bhwc_result(numpy_to_tensor(adjusted), image)
 # endregion

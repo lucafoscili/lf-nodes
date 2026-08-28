@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 
-from ._common import apply_gaussian_blur, validate_image
+from ._common import apply_gaussian_blur, as_bhwc_result, validate_image
 from ...utils.helpers import numpy_to_tensor, tensor_to_numpy
 
 # region unsharp_mask_effect
@@ -51,5 +51,5 @@ def unsharp_mask_effect(
     sharpened = image_float + (amount * high_freq)
     sharpened = np.clip(sharpened, 0.0, 255.0).astype(np.uint8)
 
-    return numpy_to_tensor(sharpened)
+    return as_bhwc_result(numpy_to_tensor(sharpened), image)
 # endregion

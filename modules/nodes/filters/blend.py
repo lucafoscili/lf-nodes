@@ -5,15 +5,11 @@ from ...utils.constants import FUNCTION, Input
 from ...utils.constants import BLEND_MODE_COMBO
 from ...utils.filters import blend_effect
 from ...utils.helpers.logic import normalize_input_image, normalize_list_to_value, normalize_output_image
-from ...utils.helpers.temp_cache import TempFileCache
-from ...utils.helpers.torch import process_and_save_image
 from ...utils.helpers.comfy import safe_send_sync
+from ...utils.helpers.ui import create_cached_compare_node
 
 # region LF_Blend
 class LF_Blend:
-    def __init__(self):
-        self._temp_cache = TempFileCache()
-
     @classmethod
     def INPUT_TYPES(cls):
         return {
@@ -48,6 +44,7 @@ class LF_Blend:
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
+    INPUT_IS_LIST = True
     OUTPUT_IS_LIST = (False, True)
     OUTPUT_TOOLTIPS = (
         "Blended image tensor.",
@@ -57,35 +54,51 @@ class LF_Blend:
     RETURN_TYPES = (Input.IMAGE, Input.IMAGE)
 
     def on_exec(self, **kwargs: dict):
-        self._temp_cache.cleanup()
-
         image: list[torch.Tensor] = normalize_input_image(kwargs.get("image"))
         overlay_image: list[torch.Tensor] = normalize_input_image(kwargs.get("overlay_image"))
         opacity: float = normalize_list_to_value(kwargs.get("opacity"))
+        blend_mode = normalize_list_to_value(kwargs.get("blend_mode")) or "normal"
+
+        image_count = len(image)
+        overlay_count = len(overlay_image)
+        if image_count != overlay_count and image_count != 1 and overlay_count != 1:
+            raise ValueError(
+                "image and overlay_image must contain the same number of images, "
+                "or one input must contain exactly one image for broadcasting."
+            )
+        pair_count = max(image_count, overlay_count)
 
         nodes: list[dict] = []
         dataset: dict = {"nodes": nodes}
 
-        processed_images = process_and_save_image(
-            images=image,
-            filter_function=blend_effect,
-            filter_args={
-                'overlay_image': overlay_image[0],
-                'alpha_mask': opacity,
-                'mode': kwargs.get("blend_mode", "normal"),
-            },
-            filename_prefix="blend",
-            nodes=nodes,
-            temp_cache=self._temp_cache,
-        )
+        processed_images = []
+        for index in range(pair_count):
+            base = image[0] if image_count == 1 else image[index]
+            overlay = overlay_image[0] if overlay_count == 1 else overlay_image[index]
+            processed = blend_effect(
+                base,
+                overlay_image=overlay,
+                alpha_mask=opacity,
+                mode=blend_mode,
+            )
+            processed_images.append(processed)
+            nodes.append(
+                create_cached_compare_node(
+                    base,
+                    processed,
+                    index=index,
+                )
+            )
 
         batch_list, image_list = normalize_output_image(processed_images)
 
-        safe_send_sync("blend", {
-            "dataset": dataset,
-        }, kwargs.get("node_id"))
+        payload = {"dataset": dataset}
+        safe_send_sync("blend", payload, kwargs.get("node_id"))
 
-        return (batch_list[0], image_list)
+        return {
+            "ui": {"lf_output": [payload]},
+            "result": (batch_list[0], image_list),
+        }
 # endregion
 
 # region Mappings

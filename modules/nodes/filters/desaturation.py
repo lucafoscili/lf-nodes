@@ -4,15 +4,11 @@ from . import CATEGORY
 from ...utils.constants import FUNCTION, Input
 from ...utils.filters import desaturate_effect
 from ...utils.helpers.logic import normalize_input_image, normalize_list_to_value, normalize_output_image
-from ...utils.helpers.temp_cache import TempFileCache
-from ...utils.helpers.torch import process_and_save_image
+from ...utils.helpers.torch.process_and_save_image import process_and_save_image
 from ...utils.helpers.comfy import safe_send_sync
 
 # region LF_Desaturation
 class LF_Desaturation:
-    def __init__(self):
-        self._temp_cache = TempFileCache()
-
     @classmethod
     def INPUT_TYPES(self):
         return {
@@ -70,8 +66,6 @@ class LF_Desaturation:
     RETURN_TYPES = (Input.IMAGE, Input.IMAGE)
 
     def on_exec(self, **kwargs: dict):
-        self._temp_cache.cleanup()
-
         image: list[torch.Tensor] = normalize_input_image(kwargs.get("image"))
         global_level: float = normalize_list_to_value(kwargs.get("global_level"))
         r: float = normalize_list_to_value(kwargs.get("r_channel", 1))
@@ -88,18 +82,18 @@ class LF_Desaturation:
                 'global_level': global_level,
                 'channel_levels': [r, g, b],
             },
-            filename_prefix="desaturation",
             nodes=nodes,
-            temp_cache=self._temp_cache,
         )
 
         batch_list, image_list = normalize_output_image(processed_images)
 
-        safe_send_sync("desaturation", {
-            "dataset": dataset,
-        }, kwargs.get("node_id"))
+        payload = {"dataset": dataset}
+        safe_send_sync("desaturation", payload, kwargs.get("node_id"))
 
-        return (batch_list[0], image_list)
+        return {
+            "ui": {"lf_output": [payload]},
+            "result": (batch_list[0], image_list),
+        }
 # endregion
 
 # region Mappings

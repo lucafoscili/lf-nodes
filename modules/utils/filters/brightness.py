@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import torch
 
-from ._common import validate_image
+from ._common import as_bhwc_result, validate_image
 from ...utils.helpers import tensor_to_numpy
 
 # region brightness_effect
@@ -39,5 +39,5 @@ def brightness_effect(image: torch.Tensor, brightness_strength: float, gamma: fl
 
     final_tensor = torch.tensor(adjusted_image, dtype=image.dtype, device=image.device)
 
-    return final_tensor
+    return as_bhwc_result(final_tensor, image)
 # endregion

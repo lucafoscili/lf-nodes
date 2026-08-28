@@ -2,7 +2,13 @@ import cv2
 import numpy as np
 import torch
 
-from ._common import validate_image, split_channels, merge_channels, apply_gaussian_blur
+from ._common import (
+    apply_gaussian_blur,
+    as_bhwc_result,
+    merge_channels,
+    split_channels,
+    validate_image,
+)
 from ...utils.helpers import numpy_to_tensor, tensor_to_numpy
 
 # region clarity_effect
@@ -36,5 +42,8 @@ def clarity_effect(image: torch.Tensor, clarity_strength: float, sharpen_amount:
     gaussian_blur = apply_gaussian_blur(final_float, kernel_size=9, sigma=10.0)
     final_image = cv2.addWeighted(final_float, 1.0 + sharpen_amount, gaussian_blur, -sharpen_amount, 0)
 
-    return numpy_to_tensor(np.clip(final_image, 0, 255).astype(np.uint8))
+    return as_bhwc_result(
+        numpy_to_tensor(np.clip(final_image, 0, 255).astype(np.uint8)),
+        image,
+    )
 # endregion

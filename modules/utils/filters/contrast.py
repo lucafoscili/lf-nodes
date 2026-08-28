@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import torch
 
-from ._common import detect_edges, validate_image
+from ._common import as_bhwc_result, detect_edges, validate_image
 from ...utils.helpers import tensor_to_numpy
 
 # region contrast_effect
@@ -39,5 +39,5 @@ def contrast_effect(image: torch.Tensor, contrast_strength: float, midpoint: flo
         adjusted_image = np.clip(adjusted_image, 0, 1)
 
     final_tensor = torch.tensor(adjusted_image, dtype=image.dtype, device=image.device)
-    return final_tensor
+    return as_bhwc_result(final_tensor, image)
 # endregion

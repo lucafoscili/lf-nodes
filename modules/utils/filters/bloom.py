@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import torch
 
-from ._common import validate_image
+from ._common import as_bhwc_result, validate_image
 from ...utils.helpers import hex_to_tuple, numpy_to_tensor, tensor_to_numpy
 
 # region bloom_effect
@@ -38,5 +38,5 @@ def bloom_effect(image: torch.Tensor, threshold: float, radius: int, intensity: 
     blurred = cv2.GaussianBlur(highlights, (k, k), k * 0.4)
 
     out = np.clip(np_img + blurred * intensity, 0, 1) * 255
-    return numpy_to_tensor(out.astype(np.uint8))
+    return as_bhwc_result(numpy_to_tensor(out.astype(np.uint8)), image)
 # endregion

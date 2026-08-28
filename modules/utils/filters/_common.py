@@ -265,3 +265,18 @@ def validate_image(image: torch.Tensor, expected_shape: tuple = (3,)) -> None:
     if image.shape[0] != 1 or image.ndim != 4 or image.shape[-1] != expected_shape[0]:
         raise ValueError(f"Expected image shape (1, H, W, {expected_shape[0]}), got {image.shape}")
 # endregion
+
+
+def as_bhwc_result(result: torch.Tensor, reference: torch.Tensor) -> torch.Tensor:
+    """Restore one filter result to the strict single-image BHWC contract."""
+
+    if not isinstance(result, torch.Tensor):
+        raise TypeError("Filter result must be a torch.Tensor.")
+    if result.ndim == 3:
+        result = result.unsqueeze(0)
+    if result.ndim != 4 or result.shape != reference.shape:
+        raise ValueError(
+            "Filter result must preserve the source BHWC shape; "
+            f"got {tuple(result.shape)} for {tuple(reference.shape)}."
+        )
+    return result.to(device=reference.device, dtype=reference.dtype)

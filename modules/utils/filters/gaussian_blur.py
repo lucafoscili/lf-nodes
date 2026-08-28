@@ -1,6 +1,6 @@
 import torch
 
-from ._common import apply_gaussian_blur, validate_image
+from ._common import apply_gaussian_blur, as_bhwc_result, validate_image
 from ...utils.helpers import numpy_to_tensor, tensor_to_numpy
 
 # region gaussian_blur_effect
@@ -22,5 +22,5 @@ def gaussian_blur_effect(image: torch.Tensor, blur_kernel_size: int, blur_sigma:
 
     blurred_image = apply_gaussian_blur(image_np, kernel_size=blur_kernel_size, sigma=blur_sigma)
 
-    return numpy_to_tensor(blurred_image)
+    return as_bhwc_result(numpy_to_tensor(blurred_image), image)
 # endregion

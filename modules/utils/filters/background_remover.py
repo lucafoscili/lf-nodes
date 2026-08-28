@@ -9,8 +9,6 @@ import torch
 from PIL import Image
 from rembg import remove
 
-from ...utils.helpers.api import get_resource_url
-from ...utils.helpers.comfy import resolve_filepath
 from ...utils.helpers.conversion import (
     hex_to_tuple,
     normalize_hex_color,
@@ -18,6 +16,7 @@ from ...utils.helpers.conversion import (
     tensor_to_pil,
 )
 from ...utils.helpers.detection.rembg import get_rembg_session
+from ...utils.helpers.ui import cache_generated_preview
 
 @dataclass
 class BackgroundRemovalResult:
@@ -176,20 +175,9 @@ def background_remover_effect(
         model_name=model_name,
     )
 
-    cutout_image = tensor_to_pil(result.cutout)
-    cutout_path, cutout_subfolder, cutout_filename = resolve_filepath(
-        filename_prefix="background_cutout",
-    )
-    cutout_image.save(cutout_path, format="PNG")
-    cutout_url = get_resource_url(cutout_subfolder, cutout_filename, "temp")
-
-    mask_np = (result.mask.squeeze(0).cpu().numpy() * 255).astype(np.uint8)
-    mask_image = Image.fromarray(mask_np, mode="L")
-    mask_path, mask_subfolder, mask_filename = resolve_filepath(
-        filename_prefix="background_mask",
-    )
-    mask_image.save(mask_path, format="PNG")
-    mask_url = get_resource_url(mask_subfolder, mask_filename, "temp")
+    cutout_url = cache_generated_preview(result.cutout).url
+    mask_preview = result.mask.unsqueeze(-1).repeat(1, 1, 1, 3)
+    mask_url = cache_generated_preview(mask_preview).url
 
     payload: Dict[str, Any] = {
         "mask": mask_url,

@@ -15,24 +15,19 @@ def blend_effect(image: torch.Tensor, overlay_image: torch.Tensor, alpha_mask: f
     Returns:
         torch.Tensor: Blended image tensor.
     """
-    if image.shape != overlay_image.shape:
-        _, base_h, base_w, _ = image.shape
-
-        overlay_image: torch.Tensor = torch.nn.functional.interpolate(
-            overlay_image.permute(0, 3, 1, 2),
-            size=(base_h, base_w),
-            mode='bilinear',
-            align_corners=False
-        ).permute(0, 2, 3, 1)
-
-    alpha_tensor: torch.Tensor = torch.full_like(image[..., 0], alpha_mask).unsqueeze(-1)
-
     # Ensure inputs are floats in [0,1]
     img = image.float()
     over = overlay_image.float()
 
+    if img.ndim != 4 or over.ndim != 4:
+        raise ValueError("Blend inputs must be 4-D BHWC tensors.")
+    if img.shape[-1] not in (3, 4) or over.shape[-1] not in (3, 4):
+        raise ValueError("Blend inputs must use RGB or RGBA channels.")
+    if img.shape[0] != over.shape[0]:
+        raise ValueError("Blend inputs must have the same batch size.")
+
     # Resize overlay if needed (existing behavior)
-    if img.shape != over.shape:
+    if img.shape[1:3] != over.shape[1:3]:
         _, base_h, base_w, _ = img.shape
 
         over = torch.nn.functional.interpolate(
@@ -42,11 +37,13 @@ def blend_effect(image: torch.Tensor, overlay_image: torch.Tensor, alpha_mask: f
             align_corners=False
         ).permute(0, 2, 3, 1)
 
+    alpha_tensor = torch.full_like(img[..., :1], float(alpha_mask))
+
     def clamp01(x: torch.Tensor) -> torch.Tensor:
         return torch.clamp(x, 0.0, 1.0)
 
     # Extract alpha if overlay has an alpha channel
-    if over.shape[-1] > img.shape[-1]:
+    if over.shape[-1] == 4:
         overlay_alpha = over[..., 3:4]
         over_rgb = over[..., :3]
         combined_alpha = alpha_tensor * overlay_alpha
@@ -93,8 +90,12 @@ def blend_effect(image: torch.Tensor, overlay_image: torch.Tensor, alpha_mask: f
 
     out_rgb = clamp01(out_rgb)
 
-    # If input had extra channels, preserve them (e.g., alpha). Otherwise, reconstruct 3-channel image.
-    result = out_rgb
+    # Color blending must not silently destroy the base image's transparency.
+    result = (
+        torch.cat((out_rgb, img[..., 3:4]), dim=-1)
+        if img.shape[-1] == 4
+        else out_rgb
+    )
 
     # Ensure same batch/channel layout as input
     return result

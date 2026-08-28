@@ -4,15 +4,11 @@ from . import CATEGORY
 from ...utils.constants import FUNCTION, Input
 from ...utils.filters import sepia_effect
 from ...utils.helpers.logic import normalize_input_image, normalize_list_to_value, normalize_output_image
-from ...utils.helpers.temp_cache import TempFileCache
-from ...utils.helpers.torch import process_and_save_image
+from ...utils.helpers.torch.process_and_save_image import process_and_save_image
 from ...utils.helpers.comfy import safe_send_sync
 
 # region LF_Sepia
 class LF_Sepia:
-    def __init__(self):
-        self._temp_cache = TempFileCache()
-
     @classmethod
     def INPUT_TYPES(self):
         return {
@@ -49,8 +45,6 @@ class LF_Sepia:
     RETURN_TYPES = (Input.IMAGE, Input.IMAGE)
 
     def on_exec(self, **kwargs: dict):
-        self._temp_cache.cleanup()
-
         image: list[torch.Tensor] = normalize_input_image(kwargs.get("image"))
         intensity: float = normalize_list_to_value(kwargs.get("intensity"))
 
@@ -63,18 +57,18 @@ class LF_Sepia:
             filter_args={
                 'intensity': intensity,
             },
-            filename_prefix="sepia",
             nodes=nodes,
-            temp_cache=self._temp_cache,
         )
 
         batch_list, image_list = normalize_output_image(processed_images)
 
-        safe_send_sync("sepia", {
-            "dataset": dataset,
-        }, kwargs.get("node_id"))
+        payload = {"dataset": dataset}
+        safe_send_sync("sepia", payload, kwargs.get("node_id"))
 
-        return (batch_list[0], image_list)
+        return {
+            "ui": {"lf_output": [payload]},
+            "result": (batch_list[0], image_list),
+        }
 # endregion
 
 # region Mappings

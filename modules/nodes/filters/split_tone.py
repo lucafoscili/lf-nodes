@@ -4,15 +4,11 @@ from . import CATEGORY
 from ...utils.constants import FUNCTION, Input
 from ...utils.filters import split_tone_effect
 from ...utils.helpers.logic import normalize_input_image, normalize_list_to_value, normalize_output_image
-from ...utils.helpers.temp_cache import TempFileCache
-from ...utils.helpers.torch import process_and_save_image
+from ...utils.helpers.torch.process_and_save_image import process_and_save_image
 from ...utils.helpers.comfy import safe_send_sync
 
 # region LF_Split tone
 class LF_SplitTone:
-    def __init__(self):
-        self._temp_cache = TempFileCache()
-
     @classmethod
     def INPUT_TYPES(cls):
         return {
@@ -70,8 +66,6 @@ class LF_SplitTone:
     RETURN_TYPES = (Input.IMAGE, Input.IMAGE)
 
     def on_exec(self, **kwargs: dict):
-        self._temp_cache.cleanup()
-
         image: list[torch.Tensor] = normalize_input_image(kwargs.get("image"))
         shadows_tint: str = normalize_list_to_value(kwargs.get("shadows_tint", "0066FF"))
         highlights_tint: str = normalize_list_to_value(kwargs.get("highlights_tint", "FFAA55"))
@@ -92,18 +86,18 @@ class LF_SplitTone:
                 'softness': softness,
                 'intensity': intensity
             },
-            filename_prefix="splittone",
             nodes=nodes,
-            temp_cache=self._temp_cache,
         )
 
         batch_list, image_list = normalize_output_image(processed_images)
 
-        safe_send_sync("splittone", {
-            "dataset": dataset,
-        }, kwargs.get("node_id"))
+        payload = {"dataset": dataset}
+        safe_send_sync("splittone", payload, kwargs.get("node_id"))
 
-        return (batch_list[0], image_list)
+        return {
+            "ui": {"lf_output": [payload]},
+            "result": (batch_list[0], image_list),
+        }
 # endregion
 
 # region Mappings
