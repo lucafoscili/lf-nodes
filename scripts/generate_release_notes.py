@@ -68,10 +68,23 @@ def list_release_commits(
     return commits
 
 
+def load_version_note(
+    repo: Path,
+    release_head: str,
+    version: str,
+) -> str | None:
+    """Read this version's tracked note from the captured release commit."""
+
+    relative_path = f"docs/releases/{version}.md"
+    note = _git(repo, "show", f"{release_head}:{relative_path}", check=False)
+    return note or None
+
+
 def build_release_notes(
     version: str,
     commits: list[str],
     previous_tag: str | None,
+    version_note: str | None = None,
 ) -> str:
     if commits:
         commit_section = "\n".join(commits)
@@ -80,8 +93,11 @@ def build_release_notes(
     else:
         commit_section = "- (no commits detected in repository history)"
 
+    note_section = f"{version_note.strip()}\n\n" if version_note else ""
+
     return (
         f"Version: `{version}`\n\n"
+        f"{note_section}"
         "## Commits\n\n"
         f"{commit_section}\n\n"
         "## Install\n\n"
@@ -99,7 +115,12 @@ def generate_release_notes(
     resolved_head = _git(repo, "rev-parse", "--verify", f"{release_head}^{{commit}}")
     previous_tag = find_previous_release_tag(repo, resolved_head, current_tag)
     commits = list_release_commits(repo, resolved_head, previous_tag)
-    return build_release_notes(version, commits, previous_tag), previous_tag, commits
+    version_note = load_version_note(repo, resolved_head, version)
+    return (
+        build_release_notes(version, commits, previous_tag, version_note),
+        previous_tag,
+        commits,
+    )
 
 
 def main() -> int:

@@ -72,6 +72,10 @@ BEHAVIOR_TESTS: tuple[str, ...] = (
     "modules/tests/nodes/seeds/test_sequential_seeds_generator_contract.py",
     "modules/tests/nodes/selector/test_combo_transport_contract.py",
     "modules/tests/nodes/visual_novel/test_headless_import.py",
+    # Release metadata, note generation, and publication workflow contracts.
+    "modules/tests/test_generate_release_notes.py",
+    "modules/tests/test_release_metadata.py",
+    "modules/tests/test_release_workflows.py",
 )
 
 # These established suites install broader legacy import doubles while pytest

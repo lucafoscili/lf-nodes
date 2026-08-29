@@ -3,7 +3,7 @@
 
 <div align="center">
 
-![LF Nodes](https://img.shields.io/badge/dynamic/json?logo=python&logoColor=black&labelColor=white&color=black&label=Nodes&query=nodes&url=https://raw.githubusercontent.com/lucafoscili/lf-nodes/master/count.json)
+![LF Nodes](https://img.shields.io/badge/dynamic/json?logo=python&logoColor=black&labelColor=white&color=black&label=Nodes&query=nodes&url=https://raw.githubusercontent.com/lucafoscili/lf-nodes/main/count.json)
 
 </div>
 
@@ -185,14 +185,14 @@ To setup the environment clone this repository, then from the root open a termin
 
 This will install all the required dependencies for the Python backend.
 
-To build the frontend, you will need to have Node.js and Yarn installed, then run the command
+To build the frontend, install Node.js with Corepack available, then run the command
 
-`yarn setup`
+`corepack yarn install --immutable`
 
 This command will install all the dependencies.
 _Note that the repository includes the compiled frontend sources, so you can skip this step if you don't plan to modify the frontend._
 
-`yarn build`
+`corepack yarn build`
 
 This command will compile all the frontend sources and generate/refresh the actual web directory.
 

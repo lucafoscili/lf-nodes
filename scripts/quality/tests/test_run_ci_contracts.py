@@ -53,6 +53,9 @@ class CpuContractGateTests(unittest.TestCase):
             "test_save_json",
             "test_register_output_file",
             "test_visual_novel",
+            "test_generate_release_notes",
+            "test_release_metadata",
+            "test_release_workflows",
         ):
             self.assertIn(required_fragment, manifest)
 

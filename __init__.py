@@ -14,7 +14,7 @@ except ImportError:
     def bool_env(*args, **kwargs):
         return False
 
-VERSION = "2.9.0"
+VERSION = "3.0.0"
 
 NODE_CLASS_MAPPINGS = {}
 NODE_DISPLAY_NAME_MAPPINGS = {}

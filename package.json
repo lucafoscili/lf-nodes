@@ -5,7 +5,7 @@
     "name": "Luca Foscili",
     "url": "https://www.lucafoscili.com"
   },
-  "version": "2.9.0",
+  "version": "3.0.0",
   "type": "module",
   "scripts": {
     "clean": "node ./web/src/scripts/clean.js",
@@ -16,7 +16,10 @@
     "build:submit": "node ./web/src/scripts/build-workflow-app.js",
     "build": "yarn clean && yarn build:scss && yarn build:ts && yarn build:lfw && yarn build:vite && yarn build:submit",
     "test": "vitest run web/src web/workflow-runner/src",
+    "check:release": "yarn test && yarn test:titanic:unit && yarn test:examples:unit && yarn sanitize:examples --check && yarn build",
+    "sanitize:examples": "tsx scripts/quality/sanitize_example_workflows.mts",
     "sanitize:titanic": "tsx scripts/quality/sanitize_titanic.mts",
+    "test:examples:unit": "vitest run scripts/quality/tests/sanitize_example_workflows.test.ts",
     "test:titanic": "tsx scripts/quality/titanic_e2e.mts",
     "test:titanic:unit": "vitest run scripts/quality/tests/titanic_e2e.test.ts scripts/quality/tests/sanitize_titanic.test.ts",
     "test:watch": "vitest"

@@ -33,6 +33,20 @@ jobs:
       - name: Validate published node behavior
         run: python -I scripts/quality/run_ci_contracts.py
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install locked frontend dependencies
+        run: corepack yarn install --immutable
+
+      - name: Validate frontend, Titanic units, and production build
+        run: corepack yarn check:release
+
       - name: Count Published LF Nodes
         id: count
         run: |

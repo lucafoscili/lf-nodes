@@ -102,6 +102,35 @@ class GenerateReleaseNotesTests(unittest.TestCase):
         self.assertEqual(2, len(commits))
         self.assertFalse(any("later repository mutation" in entry for entry in commits))
 
+    def test_version_note_is_loaded_from_the_captured_release_commit(self):
+        self._commit("previous release")
+        self._git("tag", "v2.9.0")
+
+        note = self.repo / "docs" / "releases" / "3.0.0.md"
+        note.parent.mkdir(parents=True)
+        note.write_text(
+            "## Migration\n\nUse sockets 2 and 3 for per-tag values.\n",
+            encoding="utf-8",
+        )
+        self._git("add", "docs/releases/3.0.0.md")
+        self._git("commit", "-m", "add release migration")
+        release_head = self._commit("prepare release")
+
+        note.write_text("working-tree mutation", encoding="utf-8")
+        notes, previous_tag, commits = release_notes.generate_release_notes(
+            self.repo,
+            release_head,
+            "v3.0.0",
+            "3.0.0",
+        )
+
+        self.assertEqual("v2.9.0", previous_tag)
+        self.assertEqual(2, len(commits))
+        self.assertIn("## Migration", notes)
+        self.assertIn("Use sockets 2 and 3 for per-tag values.", notes)
+        self.assertNotIn("working-tree mutation", notes)
+        self.assertLess(notes.index("## Migration"), notes.index("## Commits"))
+
     def test_repository_without_tags_lists_full_history(self):
         self._commit("initial feature")
         release_head = self._commit("second feature")

@@ -1,7 +1,7 @@
 [project]
 name = "lf-nodes"
 description = "Custom nodes with a touch of extra UX ✨ Client-side LLM chat, mid-workflow image editing, history for primitives, JSON manipulation, analytics nodes, CivitAI metadata fetching and saving... and more!"
-version = "2.9.0"
+version = "3.0.0"
 requires-python = ">=3.10"
 license = {file = "LICENSE"}
 dependencies = [
