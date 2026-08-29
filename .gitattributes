@@ -5,3 +5,6 @@
 # Keep both authority files stable across Windows/macOS/Linux clones.
 scripts/quality/fixtures/E2E.json text eol=lf
 scripts/quality/titanic_cases.json text eol=lf
+
+# Shipped examples are deterministically sanitized and byte-checked in CI.
+example_workflows/*.json text eol=lf
