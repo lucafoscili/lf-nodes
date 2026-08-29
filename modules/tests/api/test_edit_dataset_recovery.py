@@ -81,6 +81,11 @@ def _write_dataset(
     return path
 
 
+def _same_path_with_dot_segment(path: str) -> str:
+    """Return a textually distinct path to the same target on Windows and POSIX."""
+    return os.path.join(os.path.dirname(path), ".", os.path.basename(path))
+
+
 def test_recovery_skips_newer_completed_breakpoint_dataset(json_api, tmp_path: Path) -> None:
     _write_dataset(
         tmp_path,
@@ -886,7 +891,7 @@ def test_update_route_authorizes_against_persisted_owner_before_payload(
         (
             lambda data: next(
                 column for column in data["columns"] if column["id"] == "path"
-            ).update(title=data["context_id"].upper()),
+            ).update(title=_same_path_with_dot_segment(data["context_id"])),
             409,
         ),
         (
