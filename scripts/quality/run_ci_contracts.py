@@ -66,6 +66,7 @@ BEHAVIOR_TESTS: tuple[str, ...] = (
     "modules/tests/nodes/json/test_string_to_json_contract.py",
     "modules/tests/nodes/llm/test_gemini_node.py",
     "modules/tests/nodes/llm/test_image_classifier_response_contract.py",
+    "modules/tests/nodes/llm/test_local_chat_completions.py",
     "modules/tests/nodes/llm/test_multimodal_payload_contract.py",
     "modules/tests/nodes/llm/test_openai_node.py",
     "modules/tests/nodes/llm/test_stability_schema.py",
@@ -87,6 +88,9 @@ BEHAVIOR_TESTS: tuple[str, ...] = (
 # collects them.  Each is still a production behavior contract, but a separate
 # inert-host process prevents one suite's doubles from leaking into another.
 ISOLATED_BEHAVIOR_TESTS: tuple[tuple[str, ...], ...] = (
+    ("modules/workflow_runner/tests/test_minimax_h3_prompt_composer.py",),
+    ("modules/workflow_runner/tests/test_minimax_h3_prompt_compiler_node.py",),
+    ("modules/workflow_runner/tests/test_minimax_h3_prompt_maker_workflow.py",),
     ("modules/tests/nodes/io/test_save_dds.py",),
     ("modules/tests/nodes/io/test_save_json.py",),
     ("modules/tests/nodes/io/test_register_output_file.py",),

@@ -110,6 +110,7 @@ export enum NodeName {
   keywordCounter = 'LF_KeywordCounter',
   keywordToggleFromJson = 'LF_KeywordToggleFromJSON',
   line = 'LF_Line',
+  localChatCompletions = 'LF_LocalChatCompletions',
   llmChat = 'LF_LLMChat',
   llmMessenger = 'LF_LLMMessenger',
   loadAndEditImages = 'LF_LoadAndEditImages',

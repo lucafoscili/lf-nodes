@@ -79,6 +79,39 @@ def test_multimodal_helper_uses_standard_png_data_url_and_first_list_image(
     ]
 
 
+def test_multimodal_helper_can_include_every_list_image_in_order(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    first = torch.zeros((1, 2, 3, 3), dtype=torch.float32)
+    second = torch.ones((1, 4, 5, 4), dtype=torch.float32)
+    encoded: list[torch.Tensor] = []
+
+    def encode(tensors: list[torch.Tensor]) -> list[str]:
+        encoded.extend(tensors)
+        return ["first-frame", "second-frame"]
+
+    monkeypatch.setattr(multimodal_module, "tensor_to_base64", encode)
+
+    content = multimodal_module.build_openai_multimodal_content(
+        [first, second],
+        "Compare them.",
+        include_all_images=True,
+    )
+
+    assert encoded == [first, second]
+    assert content == [
+        {
+            "type": "image_url",
+            "image_url": {"url": "data:image/png;base64,first-frame"},
+        },
+        {
+            "type": "image_url",
+            "image_url": {"url": "data:image/png;base64,second-frame"},
+        },
+        {"type": "text", "text": "Compare them."},
+    ]
+
+
 def test_image_classifier_payload_keeps_first_image_from_nested_batch(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

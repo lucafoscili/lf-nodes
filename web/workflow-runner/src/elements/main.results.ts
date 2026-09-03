@@ -458,7 +458,42 @@ export const createResultsSection = (store: WorkflowStore): WorkflowSectionContr
     renderedContent = nextContent;
     clearChildren(element);
 
-    const nodeIds = outputs ? Object.keys(outputs) : [];
+    const appendCodeBlock = (label: string, content: string | null) => {
+      if (!content) {
+        return;
+      }
+
+      const wrapper = document.createElement('div');
+      wrapper.className = RESULTS_CLASSES.item;
+
+      const heading = document.createElement('h4');
+      heading.className = RESULTS_CLASSES.subtitle;
+      heading.textContent = label;
+
+      const code = createComponent.code({
+        lfLanguage: syntax.json.isLikeString(content) ? 'json' : 'markdown',
+        lfStickyHeader: false,
+        lfUiState: 'danger',
+        lfValue: content,
+      });
+
+      wrapper.appendChild(heading);
+      wrapper.appendChild(code);
+
+      element.appendChild(wrapper);
+    };
+
+    const workflow = manager.workflow.current();
+    const outputsDefs = workflow ? manager.workflow.cells('output') : {};
+    const rawNodeIds = outputs ? Object.keys(outputs) : [];
+    const declaredNodeIds = new Set(
+      Object.values(outputsDefs).map((output) => output.nodeId),
+    );
+    const onlyPrivatePartialOutputs =
+      selectedRun?.status === 'failed' &&
+      rawNodeIds.length > 0 &&
+      !rawNodeIds.some((nodeId) => declaredNodeIds.has(nodeId));
+    const nodeIds = onlyPrivatePartialOutputs ? [] : rawNodeIds;
     if (nodeIds.length === 0) {
       const empty = document.createElement('p');
       empty.className = RESULTS_CLASSES.empty;
@@ -472,31 +507,6 @@ export const createResultsSection = (store: WorkflowStore): WorkflowSectionContr
       }
       element.appendChild(empty);
 
-      const appendCodeBlock = (label: string, content: string | null) => {
-        if (!content) {
-          return;
-        }
-
-        const wrapper = document.createElement('div');
-        wrapper.className = RESULTS_CLASSES.item;
-
-        const heading = document.createElement('h4');
-        heading.className = RESULTS_CLASSES.subtitle;
-        heading.textContent = label;
-
-        const code = createComponent.code({
-          lfLanguage: syntax.json.isLikeString(content) ? 'json' : 'markdown',
-          lfStickyHeader: false,
-          lfUiState: 'danger',
-          lfValue: content,
-        });
-
-        wrapper.appendChild(heading);
-        wrapper.appendChild(code);
-
-        element.appendChild(wrapper);
-      };
-
       appendCodeBlock('Error detail', stringifyDetail(selectedRun?.error ?? null));
       appendCodeBlock(
         'Run payload',
@@ -506,8 +516,7 @@ export const createResultsSection = (store: WorkflowStore): WorkflowSectionContr
       return;
     }
 
-    const workflow = manager.workflow.current();
-    const outputsDefs = workflow ? manager.workflow.cells('output') : {};
+    appendCodeBlock('Error detail', stringifyDetail(selectedRun?.error ?? null));
 
     const prepOutputs = deepMerge(outputsDefs, outputs || {});
 

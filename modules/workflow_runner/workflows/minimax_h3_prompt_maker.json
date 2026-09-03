@@ -1,0 +1,104 @@
+{
+  "picture_1": {
+    "inputs": {"image": "picture-1.png"},
+    "class_type": "LoadImage",
+    "_meta": {"title": "Load Picture 1"}
+  },
+  "picture_2": {
+    "inputs": {"image": "picture-2.png"},
+    "class_type": "LoadImage",
+    "_meta": {"title": "Load Picture 2"}
+  },
+  "picture_3": {
+    "inputs": {"image": "picture-3.png"},
+    "class_type": "LoadImage",
+    "_meta": {"title": "Load Picture 3"}
+  },
+  "picture_4": {
+    "inputs": {"image": "picture-4.png"},
+    "class_type": "LoadImage",
+    "_meta": {"title": "Load Picture 4"}
+  },
+  "picture_5": {
+    "inputs": {"image": "picture-5.png"},
+    "class_type": "LoadImage",
+    "_meta": {"title": "Load Picture 5"}
+  },
+  "picture_6": {
+    "inputs": {"image": "picture-6.png"},
+    "class_type": "LoadImage",
+    "_meta": {"title": "Load Picture 6"}
+  },
+  "picture_7": {
+    "inputs": {"image": "picture-7.png"},
+    "class_type": "LoadImage",
+    "_meta": {"title": "Load Picture 7"}
+  },
+  "picture_8": {
+    "inputs": {"image": "picture-8.png"},
+    "class_type": "LoadImage",
+    "_meta": {"title": "Load Picture 8"}
+  },
+  "picture_9": {
+    "inputs": {"image": "picture-9.png"},
+    "class_type": "LoadImage",
+    "_meta": {"title": "Load Picture 9"}
+  },
+  "image_list": {
+    "inputs": {
+      "image_1": ["picture_1", 0],
+      "image_2": ["picture_2", 0],
+      "image_3": ["picture_3", 0],
+      "image_4": ["picture_4", 0],
+      "image_5": ["picture_5", 0],
+      "image_6": ["picture_6", 0],
+      "image_7": ["picture_7", 0],
+      "image_8": ["picture_8", 0],
+      "image_9": ["picture_9", 0]
+    },
+    "class_type": "LF_ImageList",
+    "_meta": {"title": "Collect ordered H3 Picture references"}
+  },
+  "writer": {
+    "inputs": {
+      "prompt": "Create a cinematic video with clear action, coherent camera movement, and synchronized environmental sound.",
+      "url": "http://127.0.0.1:1234/api/v1/chat",
+      "system_message": "Configured by Workflow Runner for the selected MiniMax H3 mode.",
+      "image": ["image_list", 0],
+      "model": "",
+      "temperature": 0.2,
+      "reasoning": "off",
+      "max_tokens": 8192,
+      "timeout": 120,
+      "ui_widget": ""
+    },
+    "class_type": "LF_LocalChatCompletions",
+    "_meta": {"title": "Write structured H3 prompt values with a local vision model"}
+  },
+  "compiler": {
+    "inputs": {
+      "response": ["writer", 0],
+      "mode": "t2va",
+      "duration_seconds": 6.0,
+      "reference_image_count": 0
+    },
+    "class_type": "WorkflowRunnerH3PromptCompiler",
+    "_meta": {"title": "Compile and validate the MiniMax H3 prompt"}
+  },
+  "display_prompt": {
+    "inputs": {
+      "string": ["compiler", 0],
+      "ui_widget": ""
+    },
+    "class_type": "LF_DisplayString",
+    "_meta": {"title": "Copy-ready MiniMax H3 prompt"}
+  },
+  "display_report": {
+    "inputs": {
+      "json_input": ["compiler", 1],
+      "ui_widget": ""
+    },
+    "class_type": "LF_DisplayJSON",
+    "_meta": {"title": "MiniMax H3 prompt validation report"}
+  }
+}

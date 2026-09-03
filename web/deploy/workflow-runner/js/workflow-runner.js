@@ -1282,11 +1282,14 @@ const formatTimestamp = (timestamp) => {
   return date.toLocaleString();
 };
 const recordToUI = (rec, wfs = {}) => {
-  var _a2, _b2, _c2;
+  var _a2, _b2, _c2, _d, _e, _f;
   const { artifacts, cancel_requested, created_at, error, inputs, result, run_id, status, submission_id, updated_at, workflow_id } = rec;
   const hasResult = rec.result !== void 0;
   const resultOutputs = ((_c2 = (_b2 = (_a2 = result == null ? void 0 : result.body) == null ? void 0 : _a2.payload) == null ? void 0 : _b2.history) == null ? void 0 : _c2.outputs) || null;
   const outputs = resultOutputs ?? (rec.outputs !== void 0 ? rec.outputs : hasResult ? null : void 0);
+  const resultDetail = (_e = (_d = result == null ? void 0 : result.body) == null ? void 0 : _d.payload) == null ? void 0 : _e.detail;
+  const resultMessage = (_f = result == null ? void 0 : result.body) == null ? void 0 : _f.message;
+  const resultError = status === "failed" ? isString(resultDetail) && resultDetail.trim() ? resultDetail : isString(resultMessage) && resultMessage.trim() ? resultMessage : null : null;
   const createdAt = normalizeTimestamp(created_at, 0);
   const updatedAt = normalizeTimestamp(updated_at, createdAt);
   const map = {
@@ -1299,7 +1302,7 @@ const recordToUI = (rec, wfs = {}) => {
     updatedAt,
     workflowId: workflow_id ?? null,
     workflowName: workflow_id && wfs[workflow_id] || "Unknown workflow",
-    error: error ?? null,
+    error: error ?? resultError,
     httpStatus: hasResult ? (result == null ? void 0 : result.http_status) ?? null : void 0,
     resultPayload: hasResult ? result ?? null : void 0,
     outputs,
@@ -1771,7 +1774,31 @@ const createResultsSection = (store) => {
     }
     renderedContent = nextContent;
     clearChildren(element);
-    const nodeIds = outputs ? Object.keys(outputs) : [];
+    const appendCodeBlock = (label, content) => {
+      if (!content) {
+        return;
+      }
+      const wrapper = document.createElement("div");
+      wrapper.className = RESULTS_CLASSES.item;
+      const heading = document.createElement("h4");
+      heading.className = RESULTS_CLASSES.subtitle;
+      heading.textContent = label;
+      const code = createComponent.code({
+        lfLanguage: syntax.json.isLikeString(content) ? "json" : "markdown",
+        lfStickyHeader: false,
+        lfUiState: "danger",
+        lfValue: content
+      });
+      wrapper.appendChild(heading);
+      wrapper.appendChild(code);
+      element.appendChild(wrapper);
+    };
+    const workflow = manager.workflow.current();
+    const outputsDefs = workflow ? manager.workflow.cells("output") : {};
+    const rawNodeIds = outputs ? Object.keys(outputs) : [];
+    const declaredNodeIds = new Set(Object.values(outputsDefs).map((output) => output.nodeId));
+    const onlyPrivatePartialOutputs = (selectedRun == null ? void 0 : selectedRun.status) === "failed" && rawNodeIds.length > 0 && !rawNodeIds.some((nodeId) => declaredNodeIds.has(nodeId));
+    const nodeIds = onlyPrivatePartialOutputs ? [] : rawNodeIds;
     if (nodeIds.length === 0) {
       const empty = document.createElement("p");
       empty.className = RESULTS_CLASSES.empty;
@@ -1782,31 +1809,11 @@ const createResultsSection = (store) => {
         empty.textContent = "Select a run to inspect its outputs.";
       }
       element.appendChild(empty);
-      const appendCodeBlock = (label, content) => {
-        if (!content) {
-          return;
-        }
-        const wrapper = document.createElement("div");
-        wrapper.className = RESULTS_CLASSES.item;
-        const heading = document.createElement("h4");
-        heading.className = RESULTS_CLASSES.subtitle;
-        heading.textContent = label;
-        const code = createComponent.code({
-          lfLanguage: syntax.json.isLikeString(content) ? "json" : "markdown",
-          lfStickyHeader: false,
-          lfUiState: "danger",
-          lfValue: content
-        });
-        wrapper.appendChild(heading);
-        wrapper.appendChild(code);
-        element.appendChild(wrapper);
-      };
       appendCodeBlock("Error detail", stringifyDetail((selectedRun == null ? void 0 : selectedRun.error) ?? null));
       appendCodeBlock("Run payload", stringifyDetail(((_d = selectedRun == null ? void 0 : selectedRun.resultPayload) == null ? void 0 : _d.body) ?? (selectedRun == null ? void 0 : selectedRun.resultPayload) ?? null));
       return;
     }
-    const workflow = manager.workflow.current();
-    const outputsDefs = workflow ? manager.workflow.cells("output") : {};
+    appendCodeBlock("Error detail", stringifyDetail((selectedRun == null ? void 0 : selectedRun.error) ?? null));
     const prepOutputs = deepMerge(outputsDefs, outputs || {});
     for (let i = 0; i < prepOutputs.length; i++) {
       const output = prepOutputs[i];

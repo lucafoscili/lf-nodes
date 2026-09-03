@@ -448,6 +448,42 @@ describe('createResultsSection', () => {
       expect(results.children.length).toBeGreaterThan(2);
     });
 
+    it('shows failure detail instead of fake cards for private partial outputs', () => {
+      const outputs = {
+        image_list: { id: 'preview', nodeId: 'image_list', title: 'Reference preview' },
+      };
+      mockWorkflowManager.cells.mockReturnValue({
+        prompt: { id: 'prompt', nodeId: 'display_prompt', title: 'Compiled prompt' },
+        report: { id: 'report', nodeId: 'display_report', title: 'Validation report' },
+      });
+      mockRunsManager.selected.mockReturnValue({
+        runId: 'run-failed',
+        workflowName: 'MiniMax H3 / Prompt Maker',
+        status: 'failed',
+        error: 'LM Studio reported that no model is loaded.',
+        outputs,
+      } as unknown as WorkflowRunEntry);
+      mockStore.getState.mockReturnValue({
+        ...mockStore.getState(),
+        results: outputs,
+      });
+
+      createResultsSection(mockStore).render();
+
+      const results = mockElements[RESULTS_CLASSES.results] as HTMLElement;
+      const empty = results.querySelector(`.${RESULTS_CLASSES.empty}`);
+      const firstHeading = results.querySelector('h4');
+      const errorCode = results.querySelector('lf-code') as any;
+      expect(empty?.textContent).toContain(
+        'LM Studio reported that no model is loaded.',
+      );
+      expect(firstHeading?.textContent).toBe('Error detail');
+      expect(errorCode?.lfValue).toBe(
+        JSON.stringify('LM Studio reported that no model is loaded.'),
+      );
+      expect(results.querySelector('#preview')).toBeNull();
+    });
+
     it('keeps an unchanged result body mounted across background renders', () => {
       const outputs = {
         node1: { id: 'audio', nodeId: 'node1', title: 'Generated audio' },

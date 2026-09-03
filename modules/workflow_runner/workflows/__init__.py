@@ -40,6 +40,7 @@ _WORKFLOW_MODULES: Sequence[str] = (
     "krea2",
     "load_metadata",
     "minimax_h3",
+    "minimax_h3_prompt_maker",
     "remove_bg",
     "simple_chat",
     "sort_json_keys",

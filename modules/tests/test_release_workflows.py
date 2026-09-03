@@ -35,7 +35,7 @@ def test_recorded_node_count_matches_unique_published_mappings():
     recorded = json.loads((REPO_ROOT / "count.json").read_text(encoding="utf-8"))["nodes"]
     mappings = discover_lf_node_types()
 
-    assert recorded == len(mappings) == 140
+    assert recorded == len(mappings) == 141
 
 
 def test_release_workflows_enforce_the_shared_frontend_gate():

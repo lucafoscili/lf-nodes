@@ -1331,6 +1331,7 @@ var NodeName;
   NodeName2["keywordCounter"] = "LF_KeywordCounter";
   NodeName2["keywordToggleFromJson"] = "LF_KeywordToggleFromJSON";
   NodeName2["line"] = "LF_Line";
+  NodeName2["localChatCompletions"] = "LF_LocalChatCompletions";
   NodeName2["llmChat"] = "LF_LLMChat";
   NodeName2["llmMessenger"] = "LF_LLMMessenger";
   NodeName2["loadAndEditImages"] = "LF_LoadAndEditImages";
@@ -1708,6 +1709,7 @@ const NODE_WIDGET_MAP = {
   LF_KeywordCounter: [CustomWidgetName.countBarChart],
   LF_KeywordToggleFromJSON: [CustomWidgetName.chip],
   LF_Line: [CustomWidgetName.compare],
+  LF_LocalChatCompletions: [CustomWidgetName.code],
   LF_LLMChat: [CustomWidgetName.chat],
   LF_LLMMessenger: [CustomWidgetName.messenger],
   LF_LoadAndEditImages: [CustomWidgetName.imageEditor],

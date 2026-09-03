@@ -27,6 +27,12 @@ describe('External intake widget contracts', () => {
   });
 });
 
+describe('LLM widget contracts', () => {
+  it('renders local chat-completion results with the LF code widget', () => {
+    expect(NODE_WIDGET_MAP[NodeName.localChatCompletions]).toEqual([CustomWidgetName.code]);
+  });
+});
+
 describe('Generic output widget contracts', () => {
   it('uses native Comfy audio UI for ACE-Step Remix', () => {
     expect(NODE_WIDGET_MAP[NodeName.aceStepRemix]).toEqual([]);

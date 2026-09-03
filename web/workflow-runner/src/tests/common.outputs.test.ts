@@ -129,6 +129,50 @@ describe('recordToUI output detail', () => {
     expect(recordToUI(run).inputs).toBeUndefined();
   });
 
+  it('recovers a failed result detail when the top-level error is null', () => {
+    const run = {
+      run_id: 'run-failed',
+      workflow_id: 'minimax_h3_prompt_maker',
+      status: 'failed',
+      seq: 2,
+      error: null,
+      result: {
+        http_status: 500,
+        body: {
+          message: 'Workflow execution failed.',
+          status: 'failed',
+          payload: {
+            detail: 'LM Studio reported that no model is loaded.',
+            history: { outputs: { image_list: { lf_output: [] } } },
+          },
+        },
+      },
+    } as RunRecord;
+
+    expect(recordToUI(run).error).toBe(
+      'LM Studio reported that no model is loaded.',
+    );
+  });
+
+  it('preserves an explicit run error over a result-body fallback', () => {
+    const run = {
+      run_id: 'run-failed',
+      status: 'failed',
+      seq: 2,
+      error: 'Authoritative lifecycle error.',
+      result: {
+        http_status: 500,
+        body: {
+          message: 'Fallback error.',
+          status: 'failed',
+          payload: { detail: 'Fallback detail.', history: {} },
+        },
+      },
+    } as RunRecord;
+
+    expect(recordToUI(run).error).toBe('Authoritative lifecycle error.');
+  });
+
   it('normalizes legacy milliseconds and current seconds to one browser unit', () => {
     const legacy = recordToUI({
       run_id: 'legacy',

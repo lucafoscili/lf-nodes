@@ -144,6 +144,16 @@ export const recordToUI = (rec: RunRecord, wfs: Record<string, string> = {}) => 
   // only while detail is present so non-media cells (receipts, references, and
   // other lf_output values) render without making run lists heavyweight.
   const outputs = resultOutputs ?? (rec.outputs !== undefined ? rec.outputs : hasResult ? null : undefined);
+  const resultDetail = result?.body?.payload?.detail;
+  const resultMessage = result?.body?.message;
+  const resultError =
+    status === 'failed'
+      ? isString(resultDetail) && resultDetail.trim()
+        ? resultDetail
+        : isString(resultMessage) && resultMessage.trim()
+          ? resultMessage
+          : null
+      : null;
 
   // Unknown creation times belong at the end of history, not at "now". The
   // backend emits canonical seconds, while this keeps legacy millisecond/SSE
@@ -160,7 +170,7 @@ export const recordToUI = (rec: RunRecord, wfs: Record<string, string> = {}) => 
     updatedAt,
     workflowId: workflow_id ?? null,
     workflowName: (workflow_id && wfs[workflow_id]) || 'Unknown workflow',
-    error: error ?? null,
+    error: error ?? resultError,
     httpStatus: hasResult ? result?.http_status ?? null : undefined,
     resultPayload: hasResult ? result ?? null : undefined,
     outputs,
