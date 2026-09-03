@@ -5,7 +5,14 @@ from torchvision.transforms import InterpolationMode, functional
 from ..conversion import hex_to_tuple
 
 # region resize_and_crop_image
-def resize_and_crop_image(image_tensor: torch.Tensor, resize_method: str, target_height: int, target_width: int, resize_mode: str, pad_color: tuple):
+def resize_and_crop_image(
+    image_tensor: torch.Tensor,
+    resize_method: str,
+    target_height: int,
+    target_width: int,
+    resize_mode: str,
+    pad_color: str,
+):
     """
     Resize an image tensor to the target dimensions, with optional cropping or padding.
 
@@ -52,14 +59,25 @@ def resize_and_crop_image(image_tensor: torch.Tensor, resize_method: str, target
         output_image = functional.center_crop(resized_image, (target_height, target_width))
         output_image = output_image.clamp(0.0, 1.0)
     else:
-        pad_color = hex_to_tuple(pad_color)
-        channels = [functional.pad(resized_image[:, i, :, :], (
+        channel_count = int(resized_image.shape[1])
+        if channel_count not in (3, 4):
+            raise ValueError(
+                "resize_and_crop_image expects an RGB or RGBA image tensor."
+            )
+
+        rgb_fill = tuple(component / 255.0 for component in hex_to_tuple(pad_color))
+        channel_fill = (*rgb_fill, 1.0) if channel_count == 4 else rgb_fill
+        padding = (
             (target_width - new_w) // 2,
             (target_height - new_h) // 2,
             (target_width - new_w + 1) // 2,
-            (target_height - new_h + 1) // 2
-        ), fill=pad_color[i]) for i in range(3)]
+            (target_height - new_h + 1) // 2,
+        )
+        channels = [
+            functional.pad(resized_image[:, i, :, :], padding, fill=channel_fill[i])
+            for i in range(channel_count)
+        ]
         output_image = torch.stack(channels, dim=1)
 
-    return output_image.permute(0, 2, 3, 1)
+    return output_image.clamp(0.0, 1.0).permute(0, 2, 3, 1)
 # endregion

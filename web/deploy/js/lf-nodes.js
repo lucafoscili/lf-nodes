@@ -1365,6 +1365,7 @@ var NodeName;
   NodeName2["resolutionSwitcher"] = "LF_ResolutionSwitcher";
   NodeName2["samplerSelector"] = "LF_SamplerSelector";
   NodeName2["saturation"] = "LF_Saturation";
+  NodeName2["saveAudio"] = "LF_SaveAudio";
   NodeName2["saveImageForCivitai"] = "LF_SaveImageForCivitAI";
   NodeName2["saveDds"] = "LF_SaveDDS";
   NodeName2["saveJson"] = "LF_SaveJSON";
@@ -1372,6 +1373,7 @@ var NodeName;
   NodeName2["saveSvg"] = "LF_SaveSVG";
   NodeName2["saveText"] = "LF_SaveText";
   NodeName2["schedulerSelector"] = "LF_SchedulerSelector";
+  NodeName2["selectSettledImageFrame"] = "LF_SelectSettledImageFrame";
   NodeName2["sepia"] = "LF_Sepia";
   NodeName2["sideBySide"] = "LF_SideBySide";
   NodeName2["sequentialSeedsGenerator"] = "LF_SequentialSeedsGenerator";
@@ -1741,6 +1743,7 @@ const NODE_WIDGET_MAP = {
   LF_ResolutionSwitcher: [CustomWidgetName.progressbar],
   LF_SamplerSelector: [CustomWidgetName.history],
   LF_Saturation: [CustomWidgetName.compare],
+  LF_SaveAudio: [CustomWidgetName.masonry],
   LF_SaveDDS: [CustomWidgetName.tree],
   LF_SaveImageForCivitAI: [CustomWidgetName.masonry],
   LF_SaveJSON: [CustomWidgetName.tree],
@@ -1748,6 +1751,7 @@ const NODE_WIDGET_MAP = {
   LF_SaveSVG: [CustomWidgetName.masonry],
   LF_SaveText: [CustomWidgetName.tree],
   LF_SchedulerSelector: [CustomWidgetName.history],
+  LF_SelectSettledImageFrame: [CustomWidgetName.masonry],
   LF_Sepia: [CustomWidgetName.compare],
   LF_SideBySide: [CustomWidgetName.masonry],
   LF_SequentialSeedsGenerator: [CustomWidgetName.history],
@@ -9724,6 +9728,91 @@ const refFactory = {
   },
   state: REF_STATE
 };
+var MasonryCSS;
+(function(MasonryCSS2) {
+  MasonryCSS2["Content"] = "lf-masonry";
+  MasonryCSS2["Slot"] = "lf-masonry__slot";
+  MasonryCSS2["Widget"] = "lf-masonry__widget";
+})(MasonryCSS || (MasonryCSS = {}));
+const normalizeAudioFiles = (value) => value.flatMap((item) => {
+  if (!item || typeof item !== "object")
+    return [];
+  const file = item;
+  if (typeof file.filename !== "string" || !file.filename || typeof file.subfolder !== "string" || file.type !== "output") {
+    return [];
+  }
+  return [{ filename: file.filename, subfolder: file.subfolder, type: "output" }];
+});
+const releaseAudioPreview = (masonry) => {
+  masonry.querySelectorAll("audio").forEach((audio) => {
+    audio.pause();
+    audio.removeAttribute("src");
+    audio.load();
+  });
+};
+const setMasonryAudio = (state, value) => {
+  const files = normalizeAudioFiles(value);
+  if (JSON.stringify(files) === JSON.stringify(state.audio) && state.masonry.querySelectorAll("audio[src]").length === files.length) {
+    return;
+  }
+  const { masonry } = state;
+  releaseAudioPreview(masonry);
+  masonry.replaceChildren();
+  state.audio = files;
+  masonry.lfShape = "slot";
+  masonry.lfDataset = {
+    nodes: files.map((file, index) => {
+      const slotName = `lf-audio-${index}`;
+      const reference = [file.subfolder, file.filename].filter(Boolean).join("/");
+      const url = `/view?${new URLSearchParams({ ...file })}`;
+      const slot = document.createElement("div");
+      slot.slot = slotName;
+      slot.classList.add(MasonryCSS.Slot);
+      slot.style.padding = "8px";
+      slot.style.boxSizing = "border-box";
+      const label = document.createElement("a");
+      label.textContent = reference;
+      label.href = url;
+      label.download = file.filename;
+      label.title = `Download ${reference}`;
+      label.style.display = "block";
+      label.style.overflowWrap = "anywhere";
+      label.style.marginBottom = "6px";
+      label.style.color = "inherit";
+      const audio = document.createElement("audio");
+      audio.controls = true;
+      audio.preload = "metadata";
+      audio.src = url;
+      audio.setAttribute("aria-label", reference);
+      audio.style.display = "block";
+      audio.style.width = "100%";
+      audio.style.minWidth = "0";
+      slot.append(label, audio);
+      masonry.appendChild(slot);
+      return {
+        id: slotName,
+        value: reference,
+        cells: { lfSlot: { shape: "slot", value: slotName } }
+      };
+    })
+  };
+};
+const installAudioPreviewHistory = (node, apply) => {
+  const previous = node.onExecuted;
+  node.onExecuted = function(output, ...args) {
+    const result = previous == null ? void 0 : previous.apply(this, [output, ...args]);
+    if (!output || typeof output !== "object")
+      return result;
+    const payload = output;
+    const entries = Array.isArray(payload.lf_output) ? payload.lf_output.filter((entry) => entry && Array.isArray(entry.audio)) : [];
+    if (entries.length) {
+      apply(entries.flatMap((entry) => entry.audio));
+    } else if (Array.isArray(payload.audio)) {
+      apply(payload.audio);
+    }
+    return result;
+  };
+};
 const EV_HANDLERS$3 = {
   //#region Masonry handler
   masonry: (state, e) => {
@@ -9747,12 +9836,6 @@ const EV_HANDLERS$3 = {
   }
   //#endregion
 };
-var MasonryCSS;
-(function(MasonryCSS2) {
-  MasonryCSS2["Content"] = "lf-masonry";
-  MasonryCSS2["Slot"] = "lf-masonry__slot";
-  MasonryCSS2["Widget"] = "lf-masonry__widget";
-})(MasonryCSS || (MasonryCSS = {}));
 const STATE$6 = /* @__PURE__ */ new WeakMap();
 const masonryFactory = {
   //#region Options
@@ -9761,9 +9844,10 @@ const masonryFactory = {
       hideOnZoom: false,
       getState: () => STATE$6.get(wrapper),
       getValue() {
-        const { masonry, selected } = STATE$6.get(wrapper);
+        const { audio, masonry, selected } = STATE$6.get(wrapper);
         const { index, name } = selected;
         return {
+          ...audio ? { audio: audio.map((file) => ({ ...file })) } : {},
           columns: (masonry == null ? void 0 : masonry.lfColumns) || 3,
           dataset: (masonry == null ? void 0 : masonry.lfDataset) || {},
           index: isValidNumber(index) ? index : NaN,
@@ -9773,8 +9857,9 @@ const masonryFactory = {
       },
       setValue(value) {
         const callback = (_, u) => {
-          const { masonry, selected } = STATE$6.get(wrapper);
-          const { columns, dataset, index, name, view, slot_map } = u.parsedJSON;
+          const state = STATE$6.get(wrapper);
+          const { masonry, selected } = state;
+          const { audio, columns, dataset, index, name, view, slot_map } = u.parsedJSON;
           if (columns) {
             masonry.lfColumns = columns;
           }
@@ -9789,7 +9874,9 @@ const masonryFactory = {
             selected.name = name || "";
             masonry.setSelectedShape(index);
           }
-          if (slot_map && typeof slot_map === "object" && Object.keys(slot_map).length > 0) {
+          if (Array.isArray(audio)) {
+            setMasonryAudio(state, audio);
+          } else if (slot_map && typeof slot_map === "object" && Object.keys(slot_map).length > 0) {
             while (masonry.firstChild) {
               masonry.removeChild(masonry.firstChild);
             }
@@ -9821,6 +9908,10 @@ const masonryFactory = {
     masonry.lfActions = true;
     masonry.lfColumns = 3;
     switch (node.comfyClass) {
+      case NodeName.saveAudio:
+        masonry.lfActions = false;
+        masonry.lfColumns = 1;
+        break;
       case NodeName.loadImages:
         masonry.lfSelectable = true;
         break;
@@ -9830,6 +9921,14 @@ const masonryFactory = {
     wrapper.appendChild(content);
     const options = masonryFactory.options(wrapper);
     STATE$6.set(wrapper, { masonry, node, selected: { index: NaN, name: "" }, wrapper });
+    if (node.comfyClass === NodeName.saveAudio) {
+      installAudioPreviewHistory(node, (audio) => options.setValue(JSON.stringify({ audio })));
+      const onRemoved = node.onRemoved;
+      node.onRemoved = function() {
+        releaseAudioPreview(masonry);
+        return onRemoved == null ? void 0 : onRemoved.apply(this, arguments);
+      };
+    }
     return { widget: createDOMWidget(CustomWidgetName.masonry, wrapper, node, options) };
   },
   //#endregion

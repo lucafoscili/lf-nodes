@@ -1,3 +1,8 @@
+import {
+  installAudioPreviewHistory,
+  releaseAudioPreview,
+  setMasonryAudio,
+} from '../helpers/audioPreview';
 import { EV_HANDLERS } from '../helpers/masonry';
 import { LfEventName } from '../types/events/events';
 import {
@@ -19,10 +24,11 @@ export const masonryFactory: MasonryFactory = {
       hideOnZoom: false,
       getState: () => STATE.get(wrapper),
       getValue() {
-        const { masonry, selected } = STATE.get(wrapper);
+        const { audio, masonry, selected } = STATE.get(wrapper);
         const { index, name } = selected;
 
         return {
+          ...(audio ? { audio: audio.map((file) => ({ ...file })) } : {}),
           columns: masonry?.lfColumns || 3,
           dataset: masonry?.lfDataset || {},
           index: isValidNumber(index) ? index : NaN,
@@ -32,9 +38,10 @@ export const masonryFactory: MasonryFactory = {
       },
       setValue(value) {
         const callback: MasonryNormalizeCallback = (_, u) => {
-          const { masonry, selected } = STATE.get(wrapper);
+          const state = STATE.get(wrapper);
+          const { masonry, selected } = state;
 
-          const { columns, dataset, index, name, view, slot_map } =
+          const { audio, columns, dataset, index, name, view, slot_map } =
             u.parsedJSON as unknown as MasonryDeserializedValue;
 
           if (columns) {
@@ -52,7 +59,9 @@ export const masonryFactory: MasonryFactory = {
             masonry.setSelectedShape(index);
           }
 
-          if (slot_map && typeof slot_map === 'object' && Object.keys(slot_map).length > 0) {
+          if (Array.isArray(audio)) {
+            setMasonryAudio(state, audio);
+          } else if (slot_map && typeof slot_map === 'object' && Object.keys(slot_map).length > 0) {
             while (masonry.firstChild) {
               masonry.removeChild(masonry.firstChild);
             }
@@ -92,6 +101,10 @@ export const masonryFactory: MasonryFactory = {
     masonry.lfColumns = 3;
 
     switch (node.comfyClass) {
+      case NodeName.saveAudio:
+        masonry.lfActions = false;
+        masonry.lfColumns = 1;
+        break;
       case NodeName.loadImages:
         masonry.lfSelectable = true;
         break;
@@ -105,6 +118,15 @@ export const masonryFactory: MasonryFactory = {
     const options = masonryFactory.options(wrapper);
 
     STATE.set(wrapper, { masonry, node, selected: { index: NaN, name: '' }, wrapper });
+
+    if (node.comfyClass === NodeName.saveAudio) {
+      installAudioPreviewHistory(node, (audio) => options.setValue(JSON.stringify({ audio })));
+      const onRemoved = node.onRemoved;
+      node.onRemoved = function () {
+        releaseAudioPreview(masonry);
+        return onRemoved?.apply(this, arguments);
+      };
+    }
 
     return { widget: createDOMWidget(CustomWidgetName.masonry, wrapper, node, options) };
   },

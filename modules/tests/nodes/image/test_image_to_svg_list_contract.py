@@ -6,6 +6,55 @@ import torch
 from modules.nodes.image import image_to_svg
 
 
+def test_image_to_svg_published_schema_is_unchanged() -> None:
+    node = image_to_svg.LF_ImageToSVG
+    # Tooltips are observational; freeze serialized controls, bounds, placement,
+    # and order independently of the constants used by the implementation.
+    schema = {
+        section: {
+            name: declaration if isinstance(declaration, str) else (
+                declaration[0],
+                {key: value for key, value in declaration[1].items() if key != "tooltip"},
+            )
+            for name, declaration in inputs.items()
+        }
+        for section, inputs in node.INPUT_TYPES().items()
+    }
+    expected = {
+        "required": {
+            "image": ("IMAGE", {}),
+            "preset": (
+                ["max_quality", "high_quality", "balanced", "max_speed", "custom"],
+                {"default": "max_quality"},
+            ),
+        },
+        "optional": {
+            "mask": ("MASK", {}),
+            "advanced_config": ("JSON", {"default": {}}),
+            "render_mode": (["preset", "fill", "stroke", "both"], {"default": "preset"}),
+            "fill_color": ("STRING", {"default": ""}),
+            "stroke_color": ("STRING", {"default": ""}),
+            "background_color": ("STRING", {"default": ""}),
+            "stroke_width": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 10.0, "step": 0.1}),
+            "size_mode": (["preset", "responsive", "fixed"], {"default": "preset"}),
+            "viewbox": ("STRING", {"default": ""}),
+            "ui_widget": ("LF_COMPARE", {"default": {}}),
+        },
+        "hidden": {"node_id": "UNIQUE_ID"},
+    }
+    assert schema == expected
+    assert list(schema) == list(expected)
+    for section in expected:
+        assert list(schema[section]) == list(expected[section])
+    assert image_to_svg.NODE_CLASS_MAPPINGS == {"LF_ImageToSVG": node}
+    assert node.RETURN_TYPES == ("STRING", "STRING", "IMAGE", "IMAGE", "STRING", "STRING")
+    assert node.RETURN_NAMES == ("svg", "svg_list", "image", "image_list", "palette", "palette_list")
+    assert node.OUTPUT_IS_LIST == (False, True, False, True, False, True)
+    assert node.INPUT_IS_LIST is True
+    assert getattr(node, "OUTPUT_NODE", False) is False
+    assert node.FUNCTION == "on_exec"
+
+
 def test_image_to_svg_owns_image_mask_pairing_in_true_list_mode(
     monkeypatch,
 ) -> None:

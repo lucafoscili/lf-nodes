@@ -117,6 +117,98 @@ def test_sampling_is_lossless_and_preserves_image_tensor_contract() -> None:
     assert torch.equal(sampled, source[indices])
 
 
+def test_visual_motion_sampling_compensates_for_nonuniform_timing() -> None:
+    values = [0, 0, 0, 1, 2, 3, 4, 3, 2, 1, 0, 0, 0]
+    source = (
+        torch.tensor(values, dtype=torch.float32)
+        .reshape(len(values), 1, 1, 1)
+        .expand(-1, 2, 2, 3)
+        / 4.0
+    )
+
+    sampled, receipt = sampler_module.sample_periodic_image_batch(
+        source,
+        target_count=4,
+        loop_endpoint_policy="exclude_final_endpoint",
+        source_fps=24,
+        intended_fps=1,
+        sampling_basis="visual_motion",
+    )
+
+    assert receipt["indices"] == [0, 4, 6, 8]
+    assert receipt["samplingBasis"] == "visual_motion"
+    assert receipt["analysis"]["maxEdge"] == 96
+    assert (
+        receipt["analysis"]["metric"]
+        == "mean_absolute_rgb_or_premultiplied_rgba"
+    )
+    assert receipt["analysis"]["totalMotion"] == pytest.approx(2.0)
+    assert receipt["analysis"]["resizeBackend"] == "cpu"
+    assert receipt["analysis"]["scoringBackend"] == "cpu"
+    assert receipt["analysis"]["determinism"] == "fixed_resize_backend"
+    assert receipt["targetMotionFractions"] == [0.0, 0.25, 0.5, 0.75]
+    assert sampled[:, 0, 0, 0].tolist() == [0.0, 0.5, 1.0, 0.5]
+
+
+def test_visual_motion_sampling_fails_closed_for_static_or_ambiguous_motion() -> None:
+    with pytest.raises(ValueError, match="measurable change"):
+        sampler_module.sample_periodic_image_batch(
+            torch.zeros((8, 2, 2, 3)),
+            target_count=4,
+            loop_endpoint_policy="exclude_final_endpoint",
+            source_fps=24,
+            intended_fps=1,
+            sampling_basis="visual_motion",
+        )
+
+    concentrated = torch.zeros((8, 2, 2, 3))
+    concentrated[4:] = 1.0
+    with pytest.raises(ValueError, match="distinct frames"):
+        sampler_module.sample_periodic_image_batch(
+            concentrated,
+            target_count=4,
+            loop_endpoint_policy="exclude_final_endpoint",
+            source_fps=24,
+            intended_fps=1,
+            sampling_basis="visual_motion",
+        )
+
+
+def test_visual_motion_validates_cheap_controls_before_analysis(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        sampler_module,
+        "_visual_analysis_frames",
+        lambda *_args: pytest.fail("analysis must not run for invalid FPS"),
+    )
+
+    with pytest.raises(ValueError, match="source_fps"):
+        sampler_module.sample_periodic_image_batch(
+            torch.zeros((8, 2, 2, 3)),
+            target_count=4,
+            loop_endpoint_policy="exclude_final_endpoint",
+            source_fps=0,
+            intended_fps=1,
+            sampling_basis="visual_motion",
+        )
+
+
+@pytest.mark.parametrize("malformed", ["", {}, None, [None]])
+def test_supplied_malformed_sampling_basis_does_not_silently_default(
+    malformed,
+) -> None:
+    with pytest.raises(ValueError, match="sampling_basis"):
+        sampler_module.LF_PeriodicImageBatchSampler().on_exec(
+            image=torch.zeros((2, 2, 2, 3)),
+            target_count=1,
+            loop_endpoint_policy="include_final_endpoint",
+            source_fps=24,
+            intended_fps=1,
+            sampling_basis=malformed,
+        )
+
+
 def test_include_final_endpoint_policy_keeps_both_source_endpoints() -> None:
     assert sampler_module.periodic_sample_indices(
         10, 4, "include_final_endpoint"
@@ -286,7 +378,13 @@ def test_public_node_schema_and_registration_are_generic() -> None:
         "exclude_final_endpoint",
         "include_final_endpoint",
     ]
+    assert list(schema["optional"]) == ["ui_widget", "sampling_basis"]
     assert schema["optional"]["ui_widget"][0] == "LF_MASONRY"
+    assert schema["optional"]["sampling_basis"][0] == [
+        "timeline",
+        "visual_motion",
+    ]
+    assert schema["optional"]["sampling_basis"][1]["default"] == "timeline"
     assert schema["hidden"] == {"node_id": "UNIQUE_ID"}
     assert sampler_module.LF_PeriodicImageBatchSampler.OUTPUT_NODE is True
     assert sampler_module.LF_PeriodicImageBatchSampler.RETURN_TYPES == (

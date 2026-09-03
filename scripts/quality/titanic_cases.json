@@ -2,16 +2,16 @@
   "schema": "lf.titanic-e2e.manifest.v1",
   "workflow": {
     "id": "61984e36-9817-42a4-b535-93ed671940a3",
-    "expectedSha256": "31ea6dab98b0fae1aa81fba4910e9288aef152c4315018af16926380bfb8c834",
-    "expectedNodeCount": 354,
-    "expectedLinkCount": 467
+    "expectedSha256": "80bc7770621202b7dbf9e7d0be5ff7c954a54cb29fef5bdfb0828e8f931ba955",
+    "expectedNodeCount": 355,
+    "expectedLinkCount": 468
   },
   "smokeCases": [
     {
       "id": "scratch.cpu-widget-previews",
       "title": "CPU widget previews and durable history",
       "resourceClass": "cpu",
-      "targets": [590, 592],
+      "targets": [590, 592, 594],
       "timeoutSeconds": 120,
       "expect": {
         "590": {
@@ -23,6 +23,11 @@
           "receiptSchema": "lf.sprite_batch_normalizer.receipt.v1",
           "minimumPreviewCount": 6,
           "previewStorageType": "input"
+        },
+        "594": {
+          "receiptSchema": "lf.select_settled_image_frame.receipt.v1",
+          "minimumPreviewCount": 1,
+          "previewStorageType": "input"
         }
       }
     }
@@ -32,7 +37,7 @@
       "id": "cpu.headless",
       "title": "Headless CPU and lightweight UI-output nodes",
       "resourceClass": "cpu",
-      "targets": [2, 6, 7, 65, 82, 84, 97, 108, 109, 116, 117, 119, 121, 122, 123, 125, 128, 129, 132, 133, 134, 137, 172, 180, 181, 185, 187, 188, 189, 190, 198, 200, 202, 213, 219, 220, 223, 254, 255, 256, 257, 266, 269, 270, 274, 275, 334, 336, 352, 357, 378, 385, 386, 387, 393, 396, 415, 416, 420, 428, 432, 454, 515, 516, 544, 546, 552, 563, 564, 565, 566, 583, 590, 592],
+      "targets": [2, 6, 7, 65, 82, 84, 97, 108, 109, 116, 117, 119, 121, 122, 123, 125, 128, 129, 132, 133, 134, 137, 172, 180, 181, 185, 187, 188, 189, 190, 198, 200, 202, 213, 219, 220, 223, 254, 255, 256, 257, 266, 269, 270, 274, 275, 334, 336, 352, 357, 378, 385, 386, 387, 393, 396, 415, 416, 420, 428, 432, 454, 515, 516, 544, 546, 552, 563, 564, 565, 566, 583, 590, 592, 594],
       "timeoutSeconds": 300
     },
     {

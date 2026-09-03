@@ -2,11 +2,11 @@ import json
 import requests
 import torch
 
-from ...utils.helpers.api.resolve_url import resolve_api_url
+from ...utils.helpers.api.resolve_url import local_proxy_request_options, resolve_api_url
 
 from . import CATEGORY
 from ...utils.constants import FUNCTION, HEADERS, Input, INT_MAX, get_image_classifier_system
-from ...utils.helpers.api import build_openai_multimodal_content, handle_response
+from ...utils.helpers.api import build_openai_multimodal_content, handle_response, require_response_text
 from ...utils.helpers.comfy import safe_send_sync
 from ...utils.helpers.logic import normalize_input_image, normalize_list_to_value
 
@@ -33,7 +33,7 @@ class LF_ImageClassifier:
                     "min": 20,
                     "step": 10,
                     "default": 500,
-                    "tooltip": "Limits the length of the generated text. Adjusting this value can help control the verbosity of the output."
+                    "tooltip": "Response token budget, including reasoning on models that use it. Increase this if the model runs out before answering; use the prompt to request a shorter caption."
                 }),
                 "prompt": (Input.STRING, {
                     "multiline": True,
@@ -108,11 +108,19 @@ class LF_ImageClassifier:
         # Resolve relative/local proxy paths to absolute URL using helper
         resolved_url = resolve_api_url(url)
 
-        response = requests.post(resolved_url, headers=HEADERS, data=json.dumps(request))
-        response_data = response.json()
+        response = requests.post(
+            resolved_url,
+            data=json.dumps(request),
+            **local_proxy_request_options(url, HEADERS),
+        )
         status_code, method, message = handle_response(response, method="POST")
         if status_code != 200:
-            message = f"Whoops! Request failed with status code {status_code} and method {method}."
+            raise ValueError(
+                f"Image classification request failed with HTTP status {status_code} "
+                f"({method}). Check the endpoint and its access configuration."
+            )
+        response_data = response.json()
+        message = require_response_text(response_data, message)
 
         safe_send_sync("imageclassifier", {
             "value": message,

@@ -134,6 +134,7 @@ def test_backend_and_frontend_node_widget_registries_are_exact() -> None:
     assert set(backend) == set(node_names)
     assert set(backend) == set(widget_map)
     assert widget_map["LF_ACEStepRemix"] == []
+    assert widget_map["LF_SaveAudio"] == ["LF_MASONRY"]
     assert "LF_Brush" not in widget_map
     assert "LF_ExtractFaceEmbedding" not in widget_map
 

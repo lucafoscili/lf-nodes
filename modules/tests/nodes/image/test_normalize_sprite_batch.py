@@ -124,6 +124,96 @@ def test_one_reference_scale_is_applied_to_the_whole_batch() -> None:
     assert {
         frame["translation"]["x"] for frame in receipt["frames"]
     } == {receipt["horizontalPlacement"]["translation"]}
+    assert receipt["sourceCanvases"] == [
+        {"index": 0, "width": 12, "height": 12, "channels": 4},
+        {"index": 1, "width": 12, "height": 12, "channels": 4},
+    ]
+    assert all(
+        plan["changed"] is False
+        for plan in receipt["canvasNormalization"]["frames"]
+    )
+    assert receipt["frames"][0]["sourceAlphaBounds"] == receipt["frames"][0][
+        "originalSourceAlphaBounds"
+    ]
+
+
+def test_different_whole_canvases_are_contained_in_reference_canvas_without_crop() -> None:
+    front = _rgba_batch(1, 20, 10)
+    profile = _rgba_batch(1, 10, 20)
+    _paint(front, 0, left=3, top=4, right=6, bottom=15, color=(1.0, 0.0, 0.0))
+    _paint(
+        profile,
+        0,
+        left=4,
+        top=2,
+        right=15,
+        bottom=7,
+        color=(0.0, 1.0, 0.0),
+    )
+
+    output, receipt = normalizer_module.normalize_sprite_batch(
+        [front, profile],
+        canvas_width=40,
+        canvas_height=40,
+        target_reference_alpha_height=20,
+        bottom_padding=4,
+        reference_frame_index=0,
+    )
+
+    assert output.shape == (2, 40, 40, 4)
+    assert receipt["sourceCanvases"] == [
+        {"index": 0, "width": 10, "height": 20, "channels": 4},
+        {"index": 1, "width": 20, "height": 10, "channels": 4},
+    ]
+    canvas_normalization = receipt["canvasNormalization"]
+    assert canvas_normalization["policy"] == (
+        "reference_canvas_contain_fit_centered_transparent_padding"
+    )
+    assert canvas_normalization["contentPolicy"] == (
+        "whole_canvas_only_alpha_bounds_not_consulted"
+    )
+    assert canvas_normalization["cropPolicy"] == "never"
+    assert canvas_normalization["referenceCanvas"] == {
+        "width": 10,
+        "height": 20,
+    }
+    assert canvas_normalization["frames"][0] == {
+        "index": 0,
+        "source": {"width": 10, "height": 20},
+        "resized": {"width": 10, "height": 20},
+        "scale": {
+            "numerator": 10,
+            "denominator": 10,
+            "constrainedBy": "width",
+        },
+        "padding": {"left": 0, "top": 0, "right": 0, "bottom": 0},
+        "changed": False,
+    }
+    assert canvas_normalization["frames"][1] == {
+        "index": 1,
+        "source": {"width": 20, "height": 10},
+        "resized": {"width": 10, "height": 5},
+        "scale": {
+            "numerator": 10,
+            "denominator": 20,
+            "constrainedBy": "width",
+        },
+        "padding": {"left": 0, "top": 7, "right": 0, "bottom": 8},
+        "changed": True,
+    }
+    assert receipt["frames"][1]["originalSourceAlphaBounds"] == {
+        "left": 4,
+        "top": 2,
+        "right": 15,
+        "bottom": 7,
+        "width": 12,
+        "height": 6,
+    }
+    assert receipt["frames"][1]["canvasNormalizedAlphaBounds"] == receipt[
+        "frames"
+    ][1]["sourceAlphaBounds"]
+    assert output[0, ..., 0].max().item() == pytest.approx(1.0)
+    assert output[1, ..., 1].max().item() == pytest.approx(1.0)
 
 
 def test_shared_x_translation_preserves_cross_frame_horizontal_delta() -> None:
@@ -228,6 +318,67 @@ def test_any_empty_frame_fails_instead_of_publishing_a_partial_batch() -> None:
             canvas_width=16,
             canvas_height=16,
             target_reference_alpha_height=12,
+            bottom_padding=2,
+        )
+
+
+def test_heterogeneous_list_requires_one_dtype_and_device() -> None:
+    first = _rgba_batch(1, 8, 8)
+    different_dtype = _rgba_batch(1, 6, 10).to(dtype=torch.float64)
+    different_device = torch.empty((1, 6, 10, 4), device="meta")
+    _paint(first, 0, left=2, top=2, right=5, bottom=5)
+
+    with pytest.raises(TypeError, match="share one dtype"):
+        normalizer_module.normalize_sprite_batch(
+            [first, different_dtype],
+            canvas_width=16,
+            canvas_height=16,
+            target_reference_alpha_height=8,
+            bottom_padding=2,
+        )
+
+    with pytest.raises(ValueError, match="share one device"):
+        normalizer_module.normalize_sprite_batch(
+            [first, different_device],
+            canvas_width=16,
+            canvas_height=16,
+            target_reference_alpha_height=8,
+            bottom_padding=2,
+        )
+
+
+def test_nonfinite_frame_in_heterogeneous_list_fails_before_canvas_work() -> None:
+    first = _rgba_batch(1, 8, 8)
+    second = _rgba_batch(1, 6, 10)
+    _paint(first, 0, left=2, top=2, right=5, bottom=5)
+    _paint(second, 0, left=3, top=1, right=6, bottom=4)
+    second[0, 0, 0, 0] = float("nan")
+
+    with pytest.raises(ValueError, match=r"frame 1 contains NaN"):
+        normalizer_module.normalize_sprite_batch(
+            [first, second],
+            canvas_width=16,
+            canvas_height=16,
+            target_reference_alpha_height=8,
+            bottom_padding=2,
+        )
+
+
+def test_heterogeneous_source_pixel_budget_is_summed_before_canvas_work(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    first = _rgba_batch(1, 8, 8)
+    second = _rgba_batch(1, 7, 7)
+    _paint(first, 0, left=2, top=2, right=5, bottom=5)
+    _paint(second, 0, left=2, top=2, right=4, bottom=4)
+    monkeypatch.setattr(normalizer_module, "MAX_COMPOSITE_PIXELS", 100)
+
+    with pytest.raises(ValueError, match="source image frames"):
+        normalizer_module.normalize_sprite_batch(
+            [first, second],
+            canvas_width=8,
+            canvas_height=8,
+            target_reference_alpha_height=4,
             bottom_padding=2,
         )
 
@@ -425,6 +576,33 @@ def test_node_publishes_masonry_history_without_requiring_widget(
             assert preview.size == (16, 16)
 
 
+def test_node_accepts_image_list_and_list_wrapped_comfy_controls(
+    preview_runtime,
+) -> None:
+    front = _rgba_batch(1, 12, 8)
+    side = _rgba_batch(1, 8, 12)
+    _paint(front, 0, left=2, top=2, right=5, bottom=9, color=(1.0, 0.0, 0.0))
+    _paint(side, 0, left=3, top=2, right=8, bottom=5, color=(0.0, 1.0, 0.0))
+
+    response = normalizer_module.LF_NormalizeSpriteBatch().on_exec(
+        image=[[front], [side]],
+        canvas_width=[24],
+        canvas_height=[24],
+        target_reference_alpha_height=[16],
+        reference_frame_index=[0],
+        bottom_padding=[2],
+        node_id=["normalizer-list"],
+    )
+
+    normalized, receipt, image_list = response["result"]
+    assert normalized.shape == (2, 24, 24, 4)
+    assert len(image_list) == 2
+    assert torch.equal(torch.cat(image_list, dim=0), normalized)
+    assert [canvas["width"] for canvas in receipt["sourceCanvases"]] == [8, 12]
+    assert receipt["canvasNormalization"]["frames"][1]["changed"] is True
+    assert preview_runtime["sent"][0][2] == "normalizer-list"
+
+
 def test_receipt_and_public_node_contract_are_deterministic_and_generic() -> None:
     source = _rgba_batch(1, 8, 8)
     _paint(source, 0, left=2, top=1, right=5, bottom=6)
@@ -468,6 +646,7 @@ def test_receipt_and_public_node_contract_are_deterministic_and_generic() -> Non
     assert schema["required"]["reference_frame_index"][1]["default"] == 0
     assert schema["optional"]["ui_widget"][0] == "LF_MASONRY"
     assert schema["hidden"] == {"node_id": "UNIQUE_ID"}
+    assert normalizer_module.LF_NormalizeSpriteBatch.INPUT_IS_LIST is True
     assert normalizer_module.LF_NormalizeSpriteBatch.OUTPUT_NODE is True
     assert normalizer_module.LF_NormalizeSpriteBatch.RETURN_TYPES == (
         "IMAGE",

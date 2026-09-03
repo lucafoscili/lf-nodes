@@ -54,6 +54,12 @@ describe('Generic output widget contracts', () => {
     ]);
   });
 
+  it('renders settled frame selections with the LF masonry widget', () => {
+    expect(NODE_WIDGET_MAP[NodeName.selectSettledImageFrame]).toEqual([
+      CustomWidgetName.masonry,
+    ]);
+  });
+
   it('renders normalized sprite batches with the LF masonry widget', () => {
     expect(NODE_WIDGET_MAP[NodeName.normalizeSpriteBatch]).toEqual([
       CustomWidgetName.masonry,

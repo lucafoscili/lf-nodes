@@ -312,7 +312,9 @@ def _numpy_to_svg_vtracer(
 ) -> tuple[str, np.ndarray, list[str]]:
     pil_img = Image.fromarray(img_uint8)
     if num_colors > 0:
-        quantized = pil_img.convert("RGB").quantize(colors=num_colors, method=Image.MEDIANCUT)
+        # Keep distinct foreground hues when a lightly textured background
+        # dominates; median cut can spend the palette on near-identical whites.
+        quantized = pil_img.convert("RGB").quantize(colors=num_colors, method=Image.FASTOCTREE)
         preview_img = np.array(quantized.convert("RGB"))
         rgba_img = quantized.convert("RGBA")
     else:

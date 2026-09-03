@@ -22,7 +22,13 @@ export type MasonryNormalizeCallback = NormalizeValueCallback<MasonryDeserialize
 //#endregion
 
 //#region Value
+export interface MasonryAudioFile {
+  filename: string;
+  subfolder: string;
+  type: 'output';
+}
 export interface MasonryDeserializedValue {
+  audio?: MasonryAudioFile[];
   columns?: LfMasonryColumns;
   dataset: LfDataDataset;
   index?: number;
@@ -34,6 +40,7 @@ export interface MasonryDeserializedValue {
 
 //#region State
 export interface MasonryState extends BaseWidgetState {
+  audio?: MasonryAudioFile[];
   masonry: HTMLLfMasonryElement;
   selected: {
     index?: number;

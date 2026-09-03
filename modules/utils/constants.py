@@ -21,6 +21,7 @@ class AnyType(str):
 
 # region constants
 class Input:
+    AUDIO = "AUDIO"
     BOOLEAN = "BOOLEAN"
     CLIP = "CLIP"
     CLIP_MODEL = "CLIP_MODEL"

@@ -43,8 +43,8 @@ describe('Titanic publication sanitizer', () => {
 
     expect(sanitized).toEqual(fixture);
     expect(auditSanitizedTitanic(sanitized)).toEqual([]);
-    expect(sanitized.nodes).toHaveLength(354);
-    expect(sanitized.links).toHaveLength(467);
+    expect(sanitized.nodes).toHaveLength(355);
+    expect(sanitized.links).toHaveLength(468);
   });
 
   it('removes private selectors, stale sessions, preview caches, and old history', () => {

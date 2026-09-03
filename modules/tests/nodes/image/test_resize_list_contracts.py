@@ -13,6 +13,72 @@ from modules.nodes.image import (
 IMAGES = torch.zeros((3, 4, 5, 3), dtype=torch.float32)
 
 
+def test_resize_to_dimension_preserves_published_schema() -> None:
+    schema = resize_image_to_dimension.LF_ResizeImageToDimension.INPUT_TYPES()
+
+    assert tuple(schema["required"]) == (
+        "image",
+        "height",
+        "width",
+        "resize_method",
+        "resize_mode",
+        "pad_color",
+    )
+    assert tuple(schema["optional"]) == ("ui_widget",)
+    assert tuple(schema["hidden"]) == ("node_id",)
+    assert schema["required"]["height"][1]["default"] == 1216
+    assert schema["required"]["width"][1]["default"] == 832
+    assert schema["required"]["resize_method"][1]["default"] == "bicubic"
+    assert schema["required"]["resize_mode"][1]["default"] == "crop"
+    assert schema["required"]["pad_color"][1]["default"] == "000000"
+    assert resize_image_to_dimension.LF_ResizeImageToDimension.INPUT_IS_LIST is True
+    assert resize_image_to_dimension.LF_ResizeImageToDimension.RETURN_TYPES == (
+        "IMAGE",
+        "IMAGE",
+        "INT",
+    )
+    assert resize_image_to_dimension.LF_ResizeImageToDimension.RETURN_NAMES == (
+        "image",
+        "image_list",
+        "count",
+    )
+    assert resize_image_to_dimension.LF_ResizeImageToDimension.OUTPUT_IS_LIST == (
+        False,
+        True,
+        False,
+    )
+
+
+@pytest.mark.parametrize("channels", [3, 4])
+def test_resize_to_dimension_pad_color_uses_comfy_float_range_and_preserves_alpha(
+    channels: int,
+) -> None:
+    image = torch.zeros((1, 2, 4, channels), dtype=torch.float32)
+    image[..., :3] = torch.tensor((0.1, 0.2, 0.3), dtype=torch.float32)
+    if channels == 4:
+        image[..., 3] = 0.25
+
+    response = resize_image_to_dimension.LF_ResizeImageToDimension().on_exec(
+        image=[image],
+        height=[4],
+        width=[4],
+        resize_method=["nearest exact"],
+        resize_mode=["pad"],
+        pad_color=["E6E6E6"],
+    )
+    output = response["result"][0]
+
+    assert tuple(output.shape) == (1, 4, 4, channels)
+    assert float(output.min()) >= 0.0
+    assert float(output.max()) <= 1.0
+    expected_fill = torch.full((3,), 230.0 / 255.0)
+    assert torch.allclose(output[0, 0, 0, :3], expected_fill)
+    assert torch.allclose(output[0, 1:3, :, :3], image[0, :, :, :3])
+    if channels == 4:
+        assert float(output[0, 0, 0, 3]) == 1.0
+        assert torch.allclose(output[0, 1:3, :, 3], image[0, :, :, 3])
+
+
 @pytest.mark.parametrize(
     ("node", "kwargs", "control_name"),
     [

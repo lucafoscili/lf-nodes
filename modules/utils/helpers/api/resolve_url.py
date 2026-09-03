@@ -1,5 +1,7 @@
 from urllib.parse import urlparse, parse_qs
 
+from .read_secret import read_secret
+
 # region resolve_url
 def resolve_url(api_url: str):
     """
@@ -59,3 +61,36 @@ def resolve_api_url(api_url: str) -> str:
     path = api_url if api_url.startswith('/') else f'/{api_url}'
     return f"{scheme}://{host}:{port}{path}"
 # endregion
+
+
+def local_proxy_request_options(api_url: str, headers: dict) -> dict:
+    """Authenticate an internal LF proxy call, never an arbitrary endpoint.
+
+    Canonical relative proxy paths resolve against this Comfy server. Absolute
+    URLs keep their existing behavior, even if they name the same machine.
+    Never follow a redirect while carrying the server-side proxy credential.
+    These options belong to the HTTP transport, not the saved request payload.
+    """
+    from ...constants import API_ROUTE_PREFIX
+
+    options = {"headers": dict(headers)}
+    proxy_paths = (f"{API_ROUTE_PREFIX}/proxy/", f"/api{API_ROUTE_PREFIX}/proxy/")
+    if not api_url.startswith(proxy_paths):
+        return options
+    path = urlparse(api_url).path
+    # HTTP clients/routers normalize dot segments and encoded separators. LF's
+    # proxy routes need neither escapes nor traversal: don't send a credential
+    # when normalization could move this request outside the intended route.
+    if (
+        "%" in path
+        or "\\" in api_url
+        or any(ord(char) < 32 or ord(char) == 127 for char in api_url)
+        or any(part in (".", "..") for part in path.split("/"))
+    ):
+        return options
+
+    secret = read_secret("LF_PROXY_SECRET") or read_secret("GEMINI_PROXY_SECRET")
+    if secret:
+        options["headers"]["X-LF-Proxy-Secret"] = secret
+        options["allow_redirects"] = False
+    return options

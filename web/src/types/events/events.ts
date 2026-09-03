@@ -1,4 +1,5 @@
 import { LfDataDataset } from '@lf-widgets/foundations';
+import { MasonryAudioFile } from '../widgets/masonry';
 import { CustomWidgetName, NodeName } from '../widgets/widgets';
 
 // #region Common declarations
@@ -92,7 +93,9 @@ export interface CardPayload extends BaseEventPayload {
 // #endregion
 
 // #region Masonry payload
-export interface MasonryPayload extends SingleDatasetPayload {
+export interface MasonryPayload extends BaseEventPayload {
+  audio?: MasonryAudioFile[];
+  dataset?: LfDataDataset;
   index?: number;
   name?: string;
   slot_map?: { [slotName: string]: string };

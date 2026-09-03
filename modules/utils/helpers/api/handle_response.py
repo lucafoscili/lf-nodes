@@ -82,3 +82,37 @@ def handle_response(response: dict, method: str = "GET"):
 
     return status, method, "Whoops! Something went wrong."
 # endregion
+
+
+def require_response_text(response_data, text) -> str:
+    """Opt in to answer-text validation without changing legacy parsing callers.
+
+    Reasoning/tool-call payloads are not substitutes for a final answer. Keep a
+    valid answer verbatim; this guard does not shorten it or retry a provider.
+    """
+    finish_reason = None
+    if isinstance(response_data, dict) and "choices" in response_data:
+        choices = response_data["choices"]
+        first = choices[0] if isinstance(choices, list) and choices else None
+        if isinstance(first, dict):
+            finish_reason = first.get("finish_reason")
+            if isinstance(first.get("message"), dict):
+                text = first["message"].get("content")
+            elif "text" in first:
+                text = first["text"]
+            else:
+                text = None
+        else:
+            text = None
+
+    if isinstance(text, str) and text.strip():
+        return text
+    if finish_reason == "length":
+        raise ValueError(
+            "The model exhausted its response token budget before producing an answer. "
+            "Increase max_tokens; reasoning can consume this budget too."
+        )
+    raise ValueError(
+        "The model returned no answer text. Check the model response and its "
+        "generation settings before trying again."
+    )

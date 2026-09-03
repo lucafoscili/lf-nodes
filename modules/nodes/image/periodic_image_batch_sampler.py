@@ -4,6 +4,7 @@ import math
 from typing import Any
 
 import torch
+from torch.nn import functional
 
 from . import CATEGORY
 from ...utils.constants import FUNCTION, Input
@@ -14,7 +15,10 @@ from ...utils.helpers.ui import cache_generated_preview, create_masonry_node
 
 PERIODIC_SAMPLER_RECEIPT_SCHEMA = "lf.periodic_image_batch_sampler.receipt.v1"
 LOOP_ENDPOINT_POLICIES = ["exclude_final_endpoint", "include_final_endpoint"]
+SAMPLING_BASES = ["timeline", "visual_motion"]
 _MAX_PREVIEWS = 64
+_ANALYSIS_MAX_EDGE = 96
+_ANALYSIS_CHUNK_SIZE = 8
 
 
 def _positive_fps(value: Any, name: str) -> float:
@@ -79,6 +83,99 @@ def periodic_sample_indices(
     ]
 
 
+def _visual_analysis_frames(image: torch.Tensor) -> torch.Tensor:
+    """Return bounded CPU frames for deterministic visual-motion measurement."""
+
+    _, height, width, channels = image.shape
+    scale = min(1.0, _ANALYSIS_MAX_EDGE / max(int(height), int(width)))
+    analysis_height = max(1, round(int(height) * scale))
+    analysis_width = max(1, round(int(width) * scale))
+    chunks: list[torch.Tensor] = []
+
+    for start in range(0, int(image.shape[0]), _ANALYSIS_CHUNK_SIZE):
+        # Permute is a view. Resize before converting/clamping/premultiplying so the
+        # analysis never creates a full-resolution float working copy of the batch.
+        chunk = image[start : start + _ANALYSIS_CHUNK_SIZE].detach().permute(
+            0, 3, 1, 2
+        )
+        if (analysis_height, analysis_width) != (int(height), int(width)):
+            chunk = functional.interpolate(
+                chunk,
+                size=(analysis_height, analysis_width),
+                mode="bilinear",
+                align_corners=False,
+                antialias=True,
+            )
+        chunk = chunk.to(dtype=torch.float32)
+        rgb = chunk[:, :3].clamp(0.0, 1.0)
+        if channels == 4:
+            alpha = chunk[:, 3:4].clamp(0.0, 1.0)
+            chunk = torch.cat((rgb * alpha, alpha), dim=1)
+        else:
+            chunk = rgb
+        chunks.append(chunk.cpu())
+
+    return torch.cat(chunks, dim=0)
+
+
+def visual_motion_sample_indices(
+    image: torch.Tensor,
+    target_count: int,
+    loop_endpoint_policy: str,
+) -> tuple[list[int], dict[str, Any]]:
+    """Sample equal positions along the batch's measured visual-motion arc."""
+
+    source_count = int(image.shape[0])
+    periodic_sample_indices(source_count, target_count, loop_endpoint_policy)
+    analysis = _visual_analysis_frames(image)
+    motion = (
+        analysis[1:].sub(analysis[:-1]).abs().mean(dim=(1, 2, 3))
+    )
+    cumulative = torch.cat(
+        (torch.zeros(1, dtype=motion.dtype), torch.cumsum(motion, dim=0))
+    )
+    total_motion = float(cumulative[-1])
+    if not math.isfinite(total_motion) or total_motion <= 1e-8:
+        raise ValueError(
+            "visual_motion sampling requires measurable change across the source "
+            "frames."
+        )
+
+    if loop_endpoint_policy == "exclude_final_endpoint":
+        eligible_cumulative = cumulative[:-1]
+        target_fractions = [index / target_count for index in range(target_count)]
+    else:
+        eligible_cumulative = cumulative
+        target_fractions = (
+            [0.0]
+            if target_count == 1
+            else [index / (target_count - 1) for index in range(target_count)]
+        )
+
+    indices = [
+        int(torch.argmin((eligible_cumulative - total_motion * fraction).abs()))
+        for fraction in target_fractions
+    ]
+    if len(set(indices)) != len(indices):
+        raise ValueError(
+            "visual_motion sampling could not resolve the requested number of "
+            "distinct frames; reduce target_count or use timeline sampling."
+        )
+
+    return indices, {
+        "samplingBasis": "visual_motion",
+        "analysis": {
+            "maxEdge": _ANALYSIS_MAX_EDGE,
+            "metric": "mean_absolute_rgb_or_premultiplied_rgba",
+            "totalMotion": total_motion,
+            "resizeBackend": str(image.device),
+            "scoringBackend": "cpu",
+            "determinism": "fixed_resize_backend",
+        },
+        "targetMotionFractions": target_fractions,
+    }
+
+
 def sample_periodic_image_batch(
     image: Any,
     *,
@@ -86,6 +183,7 @@ def sample_periodic_image_batch(
     loop_endpoint_policy: str,
     source_fps: Any,
     intended_fps: Any,
+    sampling_basis: str = "timeline",
 ) -> tuple[torch.Tensor, dict[str, Any]]:
     if not isinstance(image, torch.Tensor):
         raise TypeError("image must be a torch.Tensor IMAGE batch.")
@@ -103,13 +201,23 @@ def sample_periodic_image_batch(
     if channels not in (3, 4):
         raise ValueError("image frames must have 3 (RGB) or 4 (RGBA) channels.")
 
-    indices = periodic_sample_indices(
-        source_count,
-        target_count,
-        loop_endpoint_policy,
-    )
     resolved_source_fps = _positive_fps(source_fps, "source_fps")
     resolved_intended_fps = _positive_fps(intended_fps, "intended_fps")
+    if sampling_basis not in SAMPLING_BASES:
+        raise ValueError("sampling_basis must be timeline or visual_motion.")
+    if sampling_basis == "timeline":
+        indices = periodic_sample_indices(
+            source_count,
+            target_count,
+            loop_endpoint_policy,
+        )
+        basis_receipt: dict[str, Any] = {}
+    else:
+        indices, basis_receipt = visual_motion_sample_indices(
+            image,
+            target_count,
+            loop_endpoint_policy,
+        )
     index_tensor = torch.tensor(indices, dtype=torch.long, device=image.device)
     sampled = image.index_select(0, index_tensor)
     receipt = {
@@ -124,6 +232,7 @@ def sample_periodic_image_batch(
         "intendedPlaybackDurationSeconds": target_count / resolved_intended_fps,
         "indices": indices,
     }
+    receipt.update(basis_receipt)
     return sampled, receipt
 
 
@@ -196,7 +305,20 @@ class LF_PeriodicImageBatchSampler:
                 ),
             },
             "optional": {
+                # Keep the original positional widget first. Older workflows may not
+                # carry widgets_values_named, so new controls must append after it.
                 "ui_widget": (Input.LF_MASONRY, {"default": {}}),
+                "sampling_basis": (
+                    SAMPLING_BASES,
+                    {
+                        "default": "timeline",
+                        "tooltip": (
+                            "Timeline uses equal frame intervals. Visual motion uses "
+                            "equal points along the measured image-change arc, which "
+                            "compensates for pauses and uneven movement."
+                        ),
+                    },
+                ),
             },
             "hidden": {"node_id": "UNIQUE_ID"},
         }
@@ -222,12 +344,18 @@ class LF_PeriodicImageBatchSampler:
         intended_fps: float,
         **kwargs: Any,
     ) -> dict[str, Any]:
+        sampling_basis = (
+            normalize_list_to_value(kwargs["sampling_basis"])
+            if "sampling_basis" in kwargs
+            else "timeline"
+        )
         sampled, receipt = sample_periodic_image_batch(
             image,
             target_count=target_count,
             loop_endpoint_policy=loop_endpoint_policy,
             source_fps=source_fps,
             intended_fps=intended_fps,
+            sampling_basis=sampling_basis,
         )
 
         displayed_indices = _preview_indices(int(sampled.shape[0]))

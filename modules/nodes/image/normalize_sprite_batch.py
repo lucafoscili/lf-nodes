@@ -7,7 +7,11 @@ import torch
 from . import CATEGORY
 from ...utils.constants import FUNCTION, Input
 from ...utils.helpers.comfy import safe_send_sync
-from ...utils.helpers.logic import normalize_list_to_value, normalize_output_image
+from ...utils.helpers.logic import (
+    normalize_input_image,
+    normalize_list_to_value,
+    normalize_output_image,
+)
 from ...utils.helpers.torch.image_composite import (
     MAX_COMPOSITE_PIXELS,
     resize_composite_image,
@@ -102,6 +106,37 @@ def _validate_pixel_budget(
         )
 
 
+def _validate_total_pixel_budget(total_pixels: int, label: str) -> None:
+    if total_pixels > MAX_COMPOSITE_PIXELS:
+        raise ValueError(
+            f"{label} exceeds the {MAX_COMPOSITE_PIXELS:,}-pixel safety limit."
+        )
+
+
+def _contain_dimensions(
+    source_width: int,
+    source_height: int,
+    target_width: int,
+    target_height: int,
+) -> tuple[int, int, str, int, int]:
+    """Return a deterministic whole-canvas contain fit without floating point."""
+
+    if target_width * source_height <= target_height * source_width:
+        resized_width = target_width
+        resized_height = max(
+            1,
+            _round_ratio(source_height * target_width, source_width),
+        )
+        return resized_width, resized_height, "width", target_width, source_width
+
+    resized_height = target_height
+    resized_width = max(
+        1,
+        _round_ratio(source_width * target_height, source_height),
+    )
+    return resized_width, resized_height, "height", target_height, source_height
+
+
 def _paste_clipped(
     source: torch.Tensor,
     destination: torch.Tensor,
@@ -136,6 +171,159 @@ def _paste_clipped(
     ] = source[source_top:source_bottom, source_left:source_right, :]
 
 
+def _validated_source_frames(
+    image: Any,
+) -> tuple[list[torch.Tensor], list[dict[str, int]]]:
+    frames = normalize_input_image(image)
+    if not frames:
+        raise ValueError("image must contain at least one frame.")
+
+    expected_dtype = frames[0].dtype
+    expected_device = frames[0].device
+    validated: list[torch.Tensor] = []
+    source_canvases: list[dict[str, int]] = []
+    total_pixels = 0
+
+    for index, frame in enumerate(frames):
+        _, height, width, channels = (int(value) for value in frame.shape)
+        if channels != 4:
+            raise ValueError(
+                f"image frame {index} must be RGBA with 4 channels; alpha is "
+                "required for sprite bounds."
+            )
+        if not torch.is_floating_point(frame):
+            raise TypeError(
+                f"image frame {index} must be a floating-point IMAGE tensor "
+                "in [0, 1]."
+            )
+        if frame.dtype != expected_dtype:
+            raise TypeError(
+                "all image frames must share one dtype; "
+                f"frame 0 uses {expected_dtype} while frame {index} uses "
+                f"{frame.dtype}."
+            )
+        if frame.device != expected_device:
+            raise ValueError(
+                "all image frames must share one device; "
+                f"frame 0 uses {expected_device} while frame {index} uses "
+                f"{frame.device}."
+            )
+        if not bool(torch.isfinite(frame).all()):
+            raise ValueError(f"image frame {index} contains NaN or infinite values.")
+
+        total_pixels += height * width
+        _validate_total_pixel_budget(total_pixels, "source image frames")
+        validated.append(frame.to(dtype=torch.float32).clamp(0.0, 1.0))
+        source_canvases.append(
+            {
+                "index": index,
+                "width": width,
+                "height": height,
+                "channels": channels,
+            }
+        )
+
+    return validated, source_canvases
+
+
+def _normalize_source_canvases(
+    frames: list[torch.Tensor],
+    *,
+    reference_frame_index: int,
+) -> tuple[torch.Tensor, dict[str, Any]]:
+    """Contain whole source canvases in the reference canvas without cropping."""
+
+    reference = frames[reference_frame_index]
+    reference_height = int(reference.shape[1])
+    reference_width = int(reference.shape[2])
+    _validate_pixel_budget(
+        len(frames),
+        reference_height,
+        reference_width,
+        "canvas-normalized source frames",
+    )
+
+    normalized: list[torch.Tensor] = []
+    frame_plans: list[dict[str, Any]] = []
+    for index, frame in enumerate(frames):
+        source_height = int(frame.shape[1])
+        source_width = int(frame.shape[2])
+        (
+            resized_width,
+            resized_height,
+            constrained_by,
+            scale_numerator,
+            scale_denominator,
+        ) = _contain_dimensions(
+            source_width,
+            source_height,
+            reference_width,
+            reference_height,
+        )
+        horizontal_gap = reference_width - resized_width
+        vertical_gap = reference_height - resized_height
+        left = horizontal_gap // 2
+        top = vertical_gap // 2
+        right = horizontal_gap - left
+        bottom = vertical_gap - top
+        changed = (
+            source_width != reference_width
+            or source_height != reference_height
+        )
+        if changed:
+            resized = resize_composite_image(frame, resized_height, resized_width)
+            canvas = torch.zeros(
+                (1, reference_height, reference_width, 4),
+                dtype=resized.dtype,
+                device=resized.device,
+            )
+            _paste_clipped(resized[0], canvas[0], x=left, y=top)
+            normalized.append(canvas)
+        else:
+            # Preserve the exact historical path for already coherent batches.
+            normalized.append(frame)
+
+        frame_plans.append(
+            {
+                "index": index,
+                "source": {
+                    "width": source_width,
+                    "height": source_height,
+                },
+                "resized": {
+                    "width": resized_width,
+                    "height": resized_height,
+                },
+                "scale": {
+                    "numerator": scale_numerator,
+                    "denominator": scale_denominator,
+                    "constrainedBy": constrained_by,
+                },
+                "padding": {
+                    "left": left,
+                    "top": top,
+                    "right": right,
+                    "bottom": bottom,
+                },
+                "changed": changed,
+            }
+        )
+
+    return torch.cat(normalized, dim=0), {
+        "policy": "reference_canvas_contain_fit_centered_transparent_padding",
+        "referenceFrameIndex": reference_frame_index,
+        "referenceCanvas": {
+            "width": reference_width,
+            "height": reference_height,
+        },
+        "contentPolicy": "whole_canvas_only_alpha_bounds_not_consulted",
+        "cropPolicy": "never",
+        "paddingPolicy": "transparent_centered_extra_pixel_right_or_bottom",
+        "filter": "bicubic_antialiased_premultiplied_alpha_when_resized",
+        "frames": frame_plans,
+    }
+
+
 def normalize_sprite_batch(
     image: Any,
     *,
@@ -145,42 +333,20 @@ def normalize_sprite_batch(
     reference_frame_index: int = 0,
     bottom_padding: int = 0,
 ) -> tuple[torch.Tensor, dict[str, Any]]:
-    """Normalize an RGBA animation batch without per-frame scale or x breathing.
+    """Normalize ordered RGBA frames without alpha-driven per-frame breathing.
 
     Alpha bounds are geometric content bounds above 1/255. Equipment, shadows, and
     every other qualifying pixel intentionally count; this function does not infer
     semantic body bounds. Fainter alpha is preserved but ignored for geometry. The
-    requested height derives the shared pre-filter scale, while the receipt records
-    measured post-filter bounds. Any meaningful alpha clipping fails the whole batch.
+    reference frame's whole canvas is the pre-registration authority: differently
+    sized canvases are contain-fitted and transparently centered without consulting
+    alpha. The requested height then derives the shared alpha-driven scale, while the
+    receipt records measured post-filter bounds. Any meaningful alpha clipping fails
+    the whole batch.
     """
 
-    if not isinstance(image, torch.Tensor):
-        raise TypeError("image must be a torch.Tensor RGBA IMAGE batch.")
-    if image.ndim != 4:
-        raise ValueError(
-            "image must have rank 4 in [batch, height, width, channels] order."
-        )
-    batch_size, source_height, source_width, channels = (
-        int(value) for value in image.shape
-    )
-    if batch_size < 1:
-        raise ValueError("image batch must contain at least one frame.")
-    if source_height < 1 or source_width < 1:
-        raise ValueError("image frames must have positive height and width.")
-    if channels != 4:
-        raise ValueError(
-            "image must be RGBA with 4 channels; alpha is required for sprite bounds."
-        )
-    if not torch.is_floating_point(image):
-        raise TypeError("image must be a floating-point IMAGE tensor in [0, 1].")
-    if not bool(torch.isfinite(image).all()):
-        raise ValueError("image contains NaN or infinite values.")
-    _validate_pixel_budget(
-        batch_size,
-        source_height,
-        source_width,
-        "image batch",
-    )
+    source_frames, source_canvases = _validated_source_frames(image)
+    batch_size = len(source_frames)
 
     canvas_width = _integer(
         canvas_width,
@@ -224,7 +390,17 @@ def normalize_sprite_batch(
         "output batch",
     )
 
-    normalized_input = image.to(dtype=torch.float32).clamp(0.0, 1.0)
+    original_source_bounds = [
+        _alpha_bounds(frame[0, ..., 3], index)
+        for index, frame in enumerate(source_frames)
+    ]
+    normalized_input, canvas_normalization = _normalize_source_canvases(
+        source_frames,
+        reference_frame_index=reference_frame_index,
+    )
+    source_height = int(normalized_input.shape[1])
+    source_width = int(normalized_input.shape[2])
+    channels = int(normalized_input.shape[3])
     source_bounds = [
         _alpha_bounds(normalized_input[index, ..., 3], index)
         for index in range(batch_size)
@@ -302,6 +478,10 @@ def normalize_sprite_batch(
         frame_receipts.append(
             {
                 "index": index,
+                "originalSourceAlphaBounds": original_source_bounds[
+                    index
+                ].to_receipt(),
+                "canvasNormalizedAlphaBounds": source_bounds[index].to_receipt(),
                 "sourceAlphaBounds": source_bounds[index].to_receipt(),
                 "scaledAlphaBounds": bounds.to_receipt(),
                 "translation": {
@@ -332,6 +512,8 @@ def normalize_sprite_batch(
             "height": source_height,
             "channels": channels,
         },
+        "sourceCanvases": source_canvases,
+        "canvasNormalization": canvas_normalization,
         "canvas": {
             "width": canvas_width,
             "height": canvas_height,
@@ -385,9 +567,12 @@ class LF_NormalizeSpriteBatch:
                     Input.IMAGE,
                     {
                         "tooltip": (
-                            "RGBA sprite animation batch. Every frame needs alpha "
-                            "content above 1/255; fainter alpha is preserved but does "
-                            "not steer the transform."
+                            "Ordered RGBA sprite frames as a batch or image list. "
+                            "Different whole canvases are contain-fitted into the "
+                            "reference frame's canvas with transparent centered "
+                            "padding and no crop. Every frame needs alpha content "
+                            "above 1/255; fainter alpha is preserved but does not "
+                            "steer the transform."
                         )
                     },
                 ),
@@ -460,6 +645,7 @@ class LF_NormalizeSpriteBatch:
 
     CATEGORY = CATEGORY
     FUNCTION = FUNCTION
+    INPUT_IS_LIST = True
     OUTPUT_NODE = True
     OUTPUT_TOOLTIPS = (
         "RGBA batch on exact canvases, with one shared scale/x pivot and per-frame alpha baseline alignment.",
@@ -472,21 +658,23 @@ class LF_NormalizeSpriteBatch:
 
     def on_exec(
         self,
-        image: torch.Tensor,
-        canvas_width: int,
-        canvas_height: int,
-        target_reference_alpha_height: int,
-        reference_frame_index: int = 0,
-        bottom_padding: int = 16,
+        image: Any,
+        canvas_width: Any,
+        canvas_height: Any,
+        target_reference_alpha_height: Any,
+        reference_frame_index: Any = 0,
+        bottom_padding: Any = 16,
         **kwargs: Any,
     ) -> dict[str, Any]:
         normalized, receipt = normalize_sprite_batch(
             image,
-            canvas_width=canvas_width,
-            canvas_height=canvas_height,
-            target_reference_alpha_height=target_reference_alpha_height,
-            reference_frame_index=reference_frame_index,
-            bottom_padding=bottom_padding,
+            canvas_width=normalize_list_to_value(canvas_width),
+            canvas_height=normalize_list_to_value(canvas_height),
+            target_reference_alpha_height=normalize_list_to_value(
+                target_reference_alpha_height
+            ),
+            reference_frame_index=normalize_list_to_value(reference_frame_index),
+            bottom_padding=normalize_list_to_value(bottom_padding),
         )
 
         displayed_indices = _preview_indices(int(normalized.shape[0]))
