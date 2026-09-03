@@ -10,6 +10,7 @@ from modules.workflow_runner.workflows.minimax_h3_profiles import (
     NATIVE_MAX_EDGE,
     NATIVE_MAX_PIXELS,
     REF2VA_PROFILE_IDS,
+    TURBO_V4_6STEP_LORA,
     h3_profile_descriptions,
     resolve_h3_execution_profile,
 )
@@ -56,6 +57,25 @@ def test_kitchen_turbo_is_exact_and_not_admitted_for_reference_video() -> None:
     )
     with pytest.raises(ValueError):
         resolve_h3_execution_profile("kitchen_turbo_8step", family="ref2va")
+
+
+def test_community_v4_turbo_profile_is_the_exact_six_step_fl2va_recipe() -> None:
+    profile = resolve_h3_execution_profile("turbo_preview", family="fl2va")
+
+    assert profile.accelerator == "turbo"
+    assert profile.steps == 6
+    assert TURBO_V4_6STEP_LORA == (
+        "MiniMax-H3\\minimax_h3_turbo_v4_step600_ema.safetensors"
+    )
+    assert "community v4 Turbo recipe" in profile.description
+    with pytest.raises(ValueError):
+        resolve_h3_execution_profile("turbo_preview", family="ref2va")
+
+
+def test_spectrum_profile_names_the_installed_version() -> None:
+    profile = resolve_h3_execution_profile("spectrum_preview", family="fl2va")
+
+    assert "Spectrum v0.2.3" in profile.description
 
 
 def test_unknown_family_and_profile_fail_closed() -> None:

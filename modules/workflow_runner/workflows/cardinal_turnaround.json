@@ -1,0 +1,272 @@
+{
+  "load_front": {
+    "inputs": {"image": "front.png"},
+    "class_type": "LoadImage",
+    "_meta": {"title": "1. Load the front frame"}
+  },
+  "remove_front": {
+    "inputs": {
+      "image": ["load_front", 0],
+      "model": "RMBG-2.0",
+      "sensitivity": 1.0,
+      "process_res": 1024,
+      "mask_blur": 0,
+      "mask_offset": 0,
+      "invert_output": false,
+      "refine_foreground": false,
+      "background": "Alpha"
+    },
+    "class_type": "VNCCS_RMBG2",
+    "_meta": {"title": "Extract the front-view foreground"}
+  },
+  "verify_front_alpha": {
+    "inputs": {"image": ["remove_front", 0], "channel": "alpha"},
+    "class_type": "ImageToMask",
+    "_meta": {"title": "Require RGBA from front background removal"}
+  },
+  "invert_front_alpha": {
+    "inputs": {"mask": ["verify_front_alpha", 0]},
+    "class_type": "InvertMask",
+    "_meta": {"title": "Convert front opacity to Comfy transparency"}
+  },
+  "validated_front": {
+    "inputs": {
+      "image": ["remove_front", 0],
+      "alpha": ["invert_front_alpha", 0]
+    },
+    "class_type": "JoinImageWithAlpha",
+    "_meta": {"title": "Rejoin validated front alpha"}
+  },
+
+  "load_right": {
+    "inputs": {"image": "subject-right.png"},
+    "class_type": "LoadImage",
+    "_meta": {"title": "2. Load the subject-right frame"}
+  },
+  "remove_right": {
+    "inputs": {
+      "image": ["load_right", 0],
+      "model": "RMBG-2.0",
+      "sensitivity": 1.0,
+      "process_res": 1024,
+      "mask_blur": 0,
+      "mask_offset": 0,
+      "invert_output": false,
+      "refine_foreground": false,
+      "background": "Alpha"
+    },
+    "class_type": "VNCCS_RMBG2",
+    "_meta": {"title": "Extract the subject-right foreground"}
+  },
+  "verify_right_alpha": {
+    "inputs": {"image": ["remove_right", 0], "channel": "alpha"},
+    "class_type": "ImageToMask",
+    "_meta": {"title": "Require RGBA from subject-right background removal"}
+  },
+  "invert_right_alpha": {
+    "inputs": {"mask": ["verify_right_alpha", 0]},
+    "class_type": "InvertMask",
+    "_meta": {"title": "Convert subject-right opacity to Comfy transparency"}
+  },
+  "validated_right": {
+    "inputs": {
+      "image": ["remove_right", 0],
+      "alpha": ["invert_right_alpha", 0]
+    },
+    "class_type": "JoinImageWithAlpha",
+    "_meta": {"title": "Rejoin validated subject-right alpha"}
+  },
+
+  "load_back": {
+    "inputs": {"image": "back.png"},
+    "class_type": "LoadImage",
+    "_meta": {"title": "3. Load the back frame"}
+  },
+  "remove_back": {
+    "inputs": {
+      "image": ["load_back", 0],
+      "model": "RMBG-2.0",
+      "sensitivity": 1.0,
+      "process_res": 1024,
+      "mask_blur": 0,
+      "mask_offset": 0,
+      "invert_output": false,
+      "refine_foreground": false,
+      "background": "Alpha"
+    },
+    "class_type": "VNCCS_RMBG2",
+    "_meta": {"title": "Extract the back-view foreground"}
+  },
+  "verify_back_alpha": {
+    "inputs": {"image": ["remove_back", 0], "channel": "alpha"},
+    "class_type": "ImageToMask",
+    "_meta": {"title": "Require RGBA from back background removal"}
+  },
+  "invert_back_alpha": {
+    "inputs": {"mask": ["verify_back_alpha", 0]},
+    "class_type": "InvertMask",
+    "_meta": {"title": "Convert back opacity to Comfy transparency"}
+  },
+  "validated_back": {
+    "inputs": {
+      "image": ["remove_back", 0],
+      "alpha": ["invert_back_alpha", 0]
+    },
+    "class_type": "JoinImageWithAlpha",
+    "_meta": {"title": "Rejoin validated back alpha"}
+  },
+
+  "load_left": {
+    "inputs": {"image": "subject-left.png"},
+    "class_type": "LoadImage",
+    "_meta": {"title": "4. Load the subject-left frame"}
+  },
+  "remove_left": {
+    "inputs": {
+      "image": ["load_left", 0],
+      "model": "RMBG-2.0",
+      "sensitivity": 1.0,
+      "process_res": 1024,
+      "mask_blur": 0,
+      "mask_offset": 0,
+      "invert_output": false,
+      "refine_foreground": false,
+      "background": "Alpha"
+    },
+    "class_type": "VNCCS_RMBG2",
+    "_meta": {"title": "Extract the subject-left foreground"}
+  },
+  "verify_left_alpha": {
+    "inputs": {"image": ["remove_left", 0], "channel": "alpha"},
+    "class_type": "ImageToMask",
+    "_meta": {"title": "Require RGBA from subject-left background removal"}
+  },
+  "invert_left_alpha": {
+    "inputs": {"mask": ["verify_left_alpha", 0]},
+    "class_type": "InvertMask",
+    "_meta": {"title": "Convert subject-left opacity to Comfy transparency"}
+  },
+  "validated_left": {
+    "inputs": {
+      "image": ["remove_left", 0],
+      "alpha": ["invert_left_alpha", 0]
+    },
+    "class_type": "JoinImageWithAlpha",
+    "_meta": {"title": "Rejoin validated subject-left alpha"}
+  },
+
+  "list_views": {
+    "inputs": {
+      "image_1": ["validated_front", 0],
+      "image_2": ["validated_right", 0],
+      "image_3": ["validated_back", 0],
+      "image_4": ["validated_left", 0],
+      "ui_widget": {}
+    },
+    "class_type": "LF_ImageList",
+    "_meta": {"title": "Keep cardinal source canvases in explicit clockwise order"}
+  },
+  "normalize_views": {
+    "inputs": {
+      "image": ["list_views", 0],
+      "canvas_width": 1024,
+      "canvas_height": 1024,
+      "target_reference_alpha_height": 900,
+      "reference_frame_index": 0,
+      "bottom_padding": 48,
+      "ui_widget": {}
+    },
+    "class_type": "LF_NormalizeSpriteBatch",
+    "_meta": {"title": "Register all four views from the front frame's transform"}
+  },
+
+  "select_front": {
+    "inputs": {"image": ["normalize_views", 0], "batch_index": 0, "length": 1},
+    "class_type": "ImageFromBatch",
+    "_meta": {"title": "Select the registered front artifact"}
+  },
+  "save_front": {
+    "inputs": {
+      "images": ["select_front", 0],
+      "filename_prefix": "LF_Nodes/CardinalTurnaround/1024px-content-900px-bottom-48px/front"
+    },
+    "class_type": "SaveImage",
+    "_meta": {"title": "Save one front PNG"}
+  },
+  "select_right": {
+    "inputs": {"image": ["normalize_views", 0], "batch_index": 1, "length": 1},
+    "class_type": "ImageFromBatch",
+    "_meta": {"title": "Select the registered subject-right artifact"}
+  },
+  "save_right": {
+    "inputs": {
+      "images": ["select_right", 0],
+      "filename_prefix": "LF_Nodes/CardinalTurnaround/1024px-content-900px-bottom-48px/right"
+    },
+    "class_type": "SaveImage",
+    "_meta": {"title": "Save one subject-right PNG"}
+  },
+  "select_back": {
+    "inputs": {"image": ["normalize_views", 0], "batch_index": 2, "length": 1},
+    "class_type": "ImageFromBatch",
+    "_meta": {"title": "Select the registered back artifact"}
+  },
+  "save_back": {
+    "inputs": {
+      "images": ["select_back", 0],
+      "filename_prefix": "LF_Nodes/CardinalTurnaround/1024px-content-900px-bottom-48px/back"
+    },
+    "class_type": "SaveImage",
+    "_meta": {"title": "Save one back PNG"}
+  },
+  "select_left": {
+    "inputs": {"image": ["normalize_views", 0], "batch_index": 3, "length": 1},
+    "class_type": "ImageFromBatch",
+    "_meta": {"title": "Select the registered subject-left artifact"}
+  },
+  "save_left": {
+    "inputs": {
+      "images": ["select_left", 0],
+      "filename_prefix": "LF_Nodes/CardinalTurnaround/1024px-content-900px-bottom-48px/left"
+    },
+    "class_type": "SaveImage",
+    "_meta": {"title": "Save one subject-left PNG"}
+  },
+
+  "contact_sheet": {
+    "inputs": {
+      "image": ["normalize_views", 0],
+      "cell_width": 1024,
+      "cell_height": 1024,
+      "gap_px": 8,
+      "background": "transparent",
+      "show_headers": true,
+      "title": "Cardinal Turnaround",
+      "dataset": {
+        "columns": [
+          {"id": "front", "title": "FRONT"},
+          {"id": "right", "title": "SUBJECT RIGHT"},
+          {"id": "back", "title": "BACK"},
+          {"id": "left", "title": "SUBJECT LEFT"}
+        ],
+        "nodes": [{"id": "views", "value": "VIEWS"}]
+      },
+      "ui_widget": {}
+    },
+    "class_type": "LF_ImageGrid",
+    "_meta": {"title": "Compose the labeled full-resolution contact sheet"}
+  },
+  "save_contact_sheet": {
+    "inputs": {
+      "images": ["contact_sheet", 0],
+      "filename_prefix": "LF_Nodes/CardinalTurnaround/1024px-content-900px-bottom-48px/contact-sheet"
+    },
+    "class_type": "SaveImage",
+    "_meta": {"title": "Save the cardinal contact sheet"}
+  },
+  "display_normalization_receipt": {
+    "inputs": {"json_input": ["normalize_views", 1], "ui_widget": ""},
+    "class_type": "LF_DisplayJSON",
+    "_meta": {"title": "Publish the shared registration receipt"}
+  }
+}

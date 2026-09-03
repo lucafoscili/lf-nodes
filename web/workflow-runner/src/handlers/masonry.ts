@@ -1,6 +1,10 @@
-import { LfCardEventPayload, LfMasonryEventPayload } from '@lf-widgets/foundations/dist';
+import {
+  LfButtonEventPayload,
+  LfCardEventPayload,
+  LfMasonryEventPayload,
+} from '@lf-widgets/foundations/dist';
 import { setView } from '../app/store-actions';
-import { HOME_CLASSES } from '../elements/main.home';
+import { HOME_CARD_OPEN_ID, HOME_MASONRY_CLASS } from '../elements/main.home';
 import { OUTPUTS_CLASSES } from '../elements/main.outputs';
 import { WorkflowStore } from '../types/state';
 
@@ -32,8 +36,19 @@ export const masonryHandler = (e: CustomEvent<LfMasonryEventPayload>, store: Wor
   }
 
   // Home
-  if (comp.rootElement.className === HOME_CLASSES.masonry) {
-    switch (ogEvent?.detail?.eventType) {
+  if (comp.rootElement.classList.contains(HOME_MASONRY_CLASS)) {
+    const nested = ogEvent?.detail?.originalEvent as CustomEvent<LfButtonEventPayload>;
+    const isOpenButton =
+      ogEvent?.detail?.eventType === 'lf-event' &&
+      nested?.detail?.eventType === 'click' &&
+      nested.detail.comp?.rootElement?.tagName.toLowerCase() === 'lf-button' &&
+      nested.detail.comp.rootElement.id === HOME_CARD_OPEN_ID;
+    if (isOpenButton) {
+      // The native button supplies keyboard activation. Its click would also
+      // bubble to the material card; consume that native path before routing.
+      nested.detail.originalEvent?.stopPropagation();
+    }
+    switch (isOpenButton ? 'click' : ogEvent?.detail?.eventType) {
       case 'click':
         const card = ogEvent.detail.comp;
         const node = card.lfDataset?.nodes?.[0];

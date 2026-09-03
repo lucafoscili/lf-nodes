@@ -14,6 +14,7 @@ import {
 } from '../types/api';
 import { isWorkflowAPIUploadPayload, isWorkflowAPIUploadResponse } from '../utils/common';
 import { ERROR_MESSAGES } from '../utils/constants';
+import { normalizeWorkflowDatasetKinds } from '../utils/workflow-kind';
 
 //#region Errors
 export class WorkflowApiError<TPayload = unknown> extends Error {
@@ -53,7 +54,7 @@ export const fetchWorkflowDefinitions = async () => {
     throw new WorkflowApiError('Invalid workflows response shape.', { payload: data });
   }
 
-  return data.workflows;
+  return normalizeWorkflowDatasetKinds(data.workflows);
 };
 
 export const fetchWorkflowJSON = async (workflowId: string) => {

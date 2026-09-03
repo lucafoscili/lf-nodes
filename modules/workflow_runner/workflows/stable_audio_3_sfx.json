@@ -1,0 +1,68 @@
+{
+  "checkpoint": {
+    "class_type": "CheckpointLoaderSimple",
+    "inputs": {"ckpt_name": "stable_audio_3_medium.safetensors"},
+    "_meta": {"title": "Stable Audio 3 Medium + SAME-L VAE"}
+  },
+  "text_encoder": {
+    "class_type": "CLIPLoader",
+    "inputs": {
+      "clip_name": "t5gemma_b_b_ul2.safetensors",
+      "type": "stable_audio",
+      "device": "default"
+    },
+    "_meta": {"title": "T5Gemma text encoder"}
+  },
+  "positive": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "clip": ["text_encoder", 0],
+      "text": "TrackType: SFX, Close recording of a steady wood fire in a hearth, soft continuous flames and irregular dry crackles. Only the fire, with no voices, music, footsteps, or other background activity."
+    },
+    "_meta": {"title": "Describe the sound"}
+  },
+  "negative": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {"clip": ["text_encoder", 0], "text": ""},
+    "_meta": {"title": "Empty conditioning (CFG 1)"}
+  },
+  "latent": {
+    "class_type": "EmptyLatentAudio",
+    "inputs": {"seconds": 10.0, "batch_size": 1},
+    "_meta": {"title": "Duration"}
+  },
+  "sample": {
+    "class_type": "KSampler",
+    "inputs": {
+      "model": ["checkpoint", 0],
+      "positive": ["positive", 0],
+      "negative": ["negative", 0],
+      "latent_image": ["latent", 0],
+      "seed": 42,
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "lcm",
+      "scheduler": "simple",
+      "denoise": 1.0
+    },
+    "_meta": {"title": "Medium post-trained 8-step recipe"}
+  },
+  "decode": {
+    "class_type": "VAEDecodeAudio",
+    "inputs": {"samples": ["sample", 0], "vae": ["checkpoint", 2]},
+    "_meta": {"title": "Decode stereo audio"}
+  },
+  "save_audio": {
+    "class_type": "LF_SaveAudio",
+    "inputs": {
+      "audio": ["decode", 0],
+      "filename_prefix": "lf-workflow-runner/stable-audio-3/sfx-seed-42"
+    },
+    "_meta": {"title": "Save original WAV"}
+  },
+  "display_receipt": {
+    "class_type": "LF_DisplayJSON",
+    "inputs": {"json_input": ["save_audio", 1], "ui_widget": ""},
+    "_meta": {"title": "Saved audio details"}
+  }
+}

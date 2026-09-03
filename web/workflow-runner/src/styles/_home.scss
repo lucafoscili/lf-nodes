@@ -1,23 +1,80 @@
 .home-section {
   & {
+    align-content: start;
     display: grid;
-    grid-template-rows: repeat(2, auto) 1fr;
     justify-items: center;
     overflow: auto;
+    padding: 0 1em 2.5em;
+  }
+
+  &__catalogue {
+    display: grid;
+    gap: 2.75em;
+    max-width: 1120px;
+    width: 100%;
   }
 
   &__description {
-    margin: 1em 0 2em 0;
+    margin: 0.25em 0 2.5em;
+    opacity: 0.72;
+    text-align: center;
   }
 
   &__masonry {
-    overflow: auto;
+    overflow: visible;
+    width: 100%;
+  }
+
+  &__rail {
+    display: grid;
+    gap: 0.9em;
+    min-width: 0;
+    width: 100%;
+
+    &[hidden] {
+      display: none;
+    }
+
+    &[data-workflow-kind='orchestra'] &-header {
+      border-inline-start-color: rgb(var(--lf-color-secondary));
+    }
+
+    &-header {
+      border-inline-start: 3px solid rgba(var(--lf-color-primary), 0.8);
+      padding-inline-start: 0.85em;
+    }
+
+    &-heading {
+      align-items: baseline;
+      display: flex;
+      gap: 0.65em;
+    }
+
+    &-title {
+      font-size: 1.15em;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    &-count {
+      border: 1px solid currentColor;
+      border-radius: 999px;
+      font-size: 0.7em;
+      line-height: 1;
+      opacity: 0.6;
+      padding: 0.25em 0.5em;
+    }
+
+    &-description {
+      font-size: 0.85em;
+      margin: 0.25em 0 0;
+      opacity: 0.62;
+    }
   }
 
   &__title-h1 {
-    margin: 0;
     font-size: 1.5em;
     font-weight: 600;
-    margin: 1em 0 0.5em 0;
+    margin: 1em 0 0.5em;
   }
 }

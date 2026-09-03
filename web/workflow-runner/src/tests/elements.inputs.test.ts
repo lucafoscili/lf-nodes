@@ -5,6 +5,7 @@ import { INPUTS_CLASSES } from '../elements/main.inputs';
 import { MAIN_CLASSES } from '../elements/layout.main';
 import { WorkflowCellInput } from '../types/api';
 import { createInputCell } from '../elements/components';
+import { buttonHandler } from '../handlers/button';
 import {
   getRetainedUploadPrefill,
   setRetainedUploadPrefill,
@@ -188,6 +189,14 @@ describe('createInputsSection', () => {
         expect.any(HTMLHeadingElement),
       );
       expect(mockUIRegistry.set).toHaveBeenCalledWith(
+        INPUTS_CLASSES.eyebrow,
+        expect.any(HTMLElement),
+      );
+      expect(mockUIRegistry.set).toHaveBeenCalledWith(
+        INPUTS_CLASSES.titleCopy,
+        expect.any(HTMLElement),
+      );
+      expect(mockUIRegistry.set).toHaveBeenCalledWith(
         INPUTS_CLASSES.openButton,
         expect.any(HTMLElement),
       );
@@ -195,6 +204,30 @@ describe('createInputsSection', () => {
         INPUTS_CLASSES.resetButton,
         expect.any(HTMLElement),
       );
+    });
+
+    it('hides and guards graph download for a legacy orchestra capsule', () => {
+      mockWorkflowManager.current.mockReturnValue({
+        id: 'identity-monument',
+        kind: 'sequence',
+        downloadable: false,
+        stages: [
+          { id: 'identity', workflowId: 'krea2_identity_edit' },
+          { id: 'restage', workflowId: 'krea2_character_restage' },
+        ],
+      });
+
+      createInputsSection(mockStore).mount();
+
+      const openButton = mockUIRegistry.set.mock.calls.find(
+        (call: unknown[]) => call[0] === INPUTS_CLASSES.openButton,
+      )?.[1] as HTMLElement;
+      expect(openButton.hidden).toBe(true);
+
+      openButton.dispatchEvent(
+        new CustomEvent('lf-button-event', { detail: { eventType: 'click' } }),
+      );
+      expect(vi.mocked(buttonHandler)).toHaveBeenCalledTimes(0);
     });
 
     it('Reset remounts declaration defaults and clears only this workflow draft', () => {
@@ -268,6 +301,51 @@ describe('createInputsSection', () => {
         const expectedId = index === 0 ? 'input1' : 'input2';
         expect(cell.id).toBe(expectedId);
       });
+      expect(mockMainElement.querySelector('details')).toBeNull();
+    });
+
+    it('groups advanced fields in one collapsed disclosure while registering every input once', () => {
+      mockWorkflowManager.cells.mockReturnValue({
+        max_tokens: {
+          id: 'max_tokens',
+          nodeId: 'classifier',
+          shape: 'textfield',
+          advanced: true,
+          required: false,
+          props: { lfValue: '2048' },
+        } as WorkflowCellInput,
+        source_path: {
+          id: 'source_path',
+          nodeId: 'loader',
+          shape: 'upload',
+        } as WorkflowCellInput,
+        seed: {
+          id: 'seed',
+          nodeId: 'classifier',
+          shape: 'textfield',
+          advanced: true,
+        } as WorkflowCellInput,
+      });
+
+      createInputsSection(mockStore).mount();
+
+      const options = mockMainElement.querySelector(`.${INPUTS_CLASSES.options}`)!;
+      const details = options.querySelector<HTMLDetailsElement>('details')!;
+      expect(options.querySelectorAll('details')).toHaveLength(1);
+      expect(details.open).toBe(false);
+      expect(details.firstElementChild?.tagName).toBe('SUMMARY');
+      expect(details.firstElementChild?.textContent).toBe('Advanced settings');
+      expect(options.lastElementChild).toBe(details);
+      expect(options.firstElementChild?.querySelector('#source_path')).toBeInstanceOf(HTMLElement);
+      expect(details.querySelector('#max_tokens')?.getAttribute('data-required')).toBe('false');
+      expect(details.querySelector('#seed')).toBeInstanceOf(HTMLElement);
+      expect(createInputCell).toHaveBeenCalledTimes(3);
+
+      const cells = mockUIRegistry.set.mock.calls.find(
+        (call) => call[0] === INPUTS_CLASSES.cells,
+      )?.[1] as HTMLElement[];
+      expect(cells.map((cell) => cell.id)).toEqual(['max_tokens', 'source_path', 'seed']);
+      expect(cells.every((cell) => options.contains(cell))).toBe(true);
     });
 
     it('shows serialized input titles as novice help below the component', () => {
@@ -489,11 +567,13 @@ describe('createInputsSection', () => {
 
     beforeEach(() => {
       mockElements = {
+        [INPUTS_CLASSES._]: document.createElement('section'),
         [INPUTS_CLASSES.cells]: [
           Object.assign(document.createElement('div'), { id: 'input1' }),
           Object.assign(document.createElement('div'), { id: 'input2' }),
         ],
         [INPUTS_CLASSES.description]: document.createElement('p'),
+        [INPUTS_CLASSES.eyebrow]: document.createElement('span'),
         [INPUTS_CLASSES.h3]: document.createElement('h3'),
         [INPUTS_CLASSES.readiness]: document.createElement('aside'),
       };
@@ -520,9 +600,31 @@ describe('createInputsSection', () => {
 
       const h3 = mockElements[INPUTS_CLASSES.h3] as HTMLElement;
       const desc = mockElements[INPUTS_CLASSES.description] as HTMLElement;
+      const eyebrow = mockElements[INPUTS_CLASSES.eyebrow] as HTMLElement;
+      const root = mockElements[INPUTS_CLASSES._] as HTMLElement;
 
       expect(h3.textContent).toBe('Test Workflow');
       expect(desc.textContent).toBe('Test Description');
+      expect(eyebrow.textContent).toBe('Block');
+      expect(root.dataset.workflowKind).toBe('block');
+    });
+
+    it('marks a canonical orchestra with its declared block count', () => {
+      mockWorkflowManager.current.mockReturnValue({
+        id: 'identity-monument',
+        kind: 'orchestra',
+        stages: [
+          { id: 'identity', workflowId: 'krea2_identity_edit' },
+          { id: 'restage', workflowId: 'krea2_character_restage' },
+        ],
+      });
+
+      createInputsSection(mockStore).render();
+
+      const eyebrow = mockElements[INPUTS_CLASSES.eyebrow] as HTMLElement;
+      const root = mockElements[INPUTS_CLASSES._] as HTMLElement;
+      expect(eyebrow.textContent).toBe('Orchestra · 2 blocks');
+      expect(root.dataset.workflowKind).toBe('orchestra');
     });
 
     it('shows the first actionable readiness issue', () => {
@@ -585,6 +687,36 @@ describe('createInputsSection', () => {
 
       expect(cells[0].parentElement!.dataset.status).toBe('valid');
       expect(cells[1].parentElement!.dataset.status).toBeUndefined();
+    });
+
+    it('opens advanced settings to reveal an invalid input without closing it on later renders', () => {
+      const details = document.createElement('details');
+      details.className = INPUTS_CLASSES.advanced;
+      const wrapper = document.createElement('div');
+      const cell = (mockElements[INPUTS_CLASSES.cells] as HTMLElement[])[0];
+      wrapper.appendChild(cell);
+      details.appendChild(wrapper);
+      mockStore.getState.mockReturnValue({
+        manager: mockStore.getState().manager,
+        inputStatuses: { input1: 'error' },
+      });
+
+      const controller = createInputsSection(mockStore);
+      controller.render();
+      expect(details.open).toBe(true);
+      expect(wrapper.dataset.status).toBe('error');
+
+      mockStore.getState.mockReturnValue({
+        manager: mockStore.getState().manager,
+        inputStatuses: {},
+      });
+      controller.render();
+      expect(details.open).toBe(true);
+      expect(wrapper.dataset.status).toBeUndefined();
+
+      details.open = false;
+      controller.render();
+      expect(details.open).toBe(false);
     });
 
     it('should log render message', () => {

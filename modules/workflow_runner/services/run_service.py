@@ -1,7 +1,7 @@
 import asyncio
 import logging
 
-from typing import Any, Coroutine, Dict
+from typing import Any, Coroutine, Dict, Mapping
 
 from server import PromptServer
 
@@ -34,11 +34,24 @@ from .executor import (
     finalize_workflow,
     post_workflow_submission,
     prepare_workflow_submission,
+    validate_sequence_stage_preflight,
 )
 from .remix_inputs import (
     UploadRemixReferenceError,
     build_durable_input_snapshot,
     materialize_upload_references,
+)
+from .registry import WorkflowNode, WorkflowSequenceNode, get_workflow
+from .sequence_runtime import (
+    SequenceExecutionError,
+    cancel_sequence_execution,
+    fail_sequence_execution,
+    is_sequence_child_submission_id,
+    is_sequence_parent_job,
+    make_sequence_parent_run_id,
+    normalize_sequence_definition,
+    sequence_stage_declared_inputs,
+    start_sequence_execution,
 )
 from .lifecycle import (
     SubmissionConflictError,
@@ -281,6 +294,152 @@ def _submission_response(snapshot: Dict[str, Any], *, replayed: bool) -> Dict[st
     }
 
 
+def _validate_sequence_stage_requirements(plan: Mapping[str, Any]) -> None:
+    """Preflight every block before any sequence stage is queued."""
+
+    for stage_index, stage in enumerate(plan["stages"]):
+        workflow_id = str(stage["workflow_id"])
+        block = get_workflow(workflow_id)
+        if not isinstance(block, WorkflowNode):
+            raise ValueError(
+                f"sequence stage references unavailable workflow '{workflow_id}'"
+            )
+        validate_sequence_stage_preflight(
+            block,
+            sequence_stage_declared_inputs(plan, stage_index),
+        )
+
+
+async def _run_sequence_workflow(
+    *,
+    definition: Any,
+    payload: Dict[str, Any],
+    effective_payload: Dict[str, Any],
+    owner_id: str | None,
+    submission_id: str,
+    caller_supplied_submission_id: bool,
+) -> Dict[str, Any]:
+    """Bind one graph-free assembly to the ordinary durable run lifecycle."""
+
+    if not isinstance(definition, WorkflowSequenceNode):
+        raise TypeError("sequence execution requires a WorkflowSequenceNode")
+
+    inputs = effective_payload.get("inputs", {})
+    try:
+        # Validate before creating a public run so malformed headless input is
+        # still an ordinary 400 preparation failure. The runtime recompiles
+        # and freezes this immutable shipped declaration when it persists the
+        # restart-safe plan.
+        plan = normalize_sequence_definition(definition, inputs)
+        _validate_sequence_stage_requirements(plan)
+    except WorkflowPreparationError as exc:
+        await record_prequeue_failure(submission_id, str(exc))
+        raise
+    except (TypeError, ValueError) as exc:
+        await record_prequeue_failure(submission_id, str(exc))
+        response = _make_run_payload(
+            detail=str(exc),
+            error_message="invalid_sequence_inputs",
+        )
+        raise WorkflowPreparationError(response, 400) from exc
+    except BaseException as exc:
+        await record_prequeue_failure(
+            submission_id,
+            str(exc) or type(exc).__name__,
+        )
+        raise
+
+    parent_run_id = make_sequence_parent_run_id()
+    synthetic_authority = "sequence://runner"
+    parent_created = False
+    try:
+        await bind_prompt(submission_id, parent_run_id, synthetic_authority)
+        submission_identity = await get_submission_persistence_fields(submission_id)
+        if submission_identity is None:
+            raise SubmissionLifecycleError(
+                "submission_identity_unavailable",
+                "submission identity could not be persisted",
+            )
+        create_job_kwargs: Dict[str, Any] = {
+            "owner_id": owner_id,
+            **submission_identity,
+        }
+        if "inputs" in effective_payload:
+            create_job_kwargs["inputs"] = build_durable_input_snapshot(
+                payload,
+                effective_payload,
+            )
+        await create_job(parent_run_id, definition.id, **create_job_kwargs)
+        parent_created = True
+        await start_sequence_execution(
+            definition,
+            inputs,
+            owner_id=owner_id,
+            parent_run_id=parent_run_id,
+        )
+    except BaseException as exc:
+        error = str(exc) or type(exc).__name__
+        result = {
+            "http_status": 500,
+            "body": _make_run_payload(
+                detail=error,
+                error_message="sequence_start_failed",
+            ),
+        }
+        if parent_created:
+            try:
+                await set_job_status(
+                    parent_run_id,
+                    JobStatus.FAILED,
+                    result=result,
+                    error=error,
+                )
+            except BaseException:
+                LOG.exception(
+                    "Failed to terminalize sequence parent %s after startup failure",
+                    parent_run_id,
+                )
+            try:
+                # ``start_sequence_execution`` persists private orchestration
+                # authority before it schedules supervision.  If anything
+                # fails after that write, freeze the private state alongside
+                # the already-failed public parent so a restart cannot resume
+                # work which this request reported as failed.
+                await fail_sequence_execution(
+                    parent_run_id,
+                    error=error,
+                    error_detail="sequence_start_failed",
+                )
+            except KeyError:
+                # The startup failure happened before private sequence state
+                # existed.  The public job remains the complete authority.
+                pass
+            except BaseException:
+                LOG.exception(
+                    "Failed to terminalize private sequence state %s after "
+                    "startup failure",
+                    parent_run_id,
+                )
+        try:
+            await record_terminal(
+                parent_run_id,
+                JobStatus.FAILED.value,
+                result=result,
+                error=error,
+            )
+        except BaseException:
+            LOG.exception(
+                "Failed to terminalize sequence submission %s after startup failure",
+                submission_id,
+            )
+        raise
+
+    lifecycle_snapshot = await get_submission(submission_id, include_events=False)
+    if lifecycle_snapshot is None or not caller_supplied_submission_id:
+        return {"run_id": parent_run_id}
+    return _submission_response(lifecycle_snapshot, replayed=False)
+
+
 async def _finalize_admitted_workflow(
     *,
     prompt_id: str,
@@ -454,6 +613,8 @@ async def run_workflow(
     payload: Dict[str, Any],
     owner_id: str | None = None,
     is_api_call: bool = False,
+    *,
+    _sequence_child: bool = False,
 ) -> Dict[str, Any]:
     """Admit, queue, register, and supervise one workflow execution.
 
@@ -465,6 +626,17 @@ async def run_workflow(
     from .job_store import _WF_DEBUG
 
     workflow_id = payload.get("workflowId")
+    requested_submission_id = payload.get("submissionId")
+    if requested_submission_id is None:
+        requested_submission_id = payload.get("submission_id")
+    if (
+        is_sequence_child_submission_id(requested_submission_id)
+        and not _sequence_child
+    ):
+        raise SubmissionConflictError(
+            "submission_id_conflict",
+            "the lfseq submission namespace is reserved for Runner orchestration",
+        )
     caller_supplied_submission_id = (
         payload.get("submissionId") is not None
         or payload.get("submission_id") is not None
@@ -485,10 +657,10 @@ async def run_workflow(
             is_api_call,
         )
 
+    # Stable-id replays are resolved before preparation. Preparation can load
+    # project-owned code and inspect mutable workflow/model state; a retry must
+    # return its stored snapshot even when that state changed.
     try:
-        # Stable-id replays are resolved before preparation.  Preparation can
-        # load project-owned code and inspect mutable workflow/model state; a
-        # retry must return its stored snapshot even when that state changed.
         try:
             effective_payload = await materialize_upload_references(payload, owner_id)
         except UploadRemixReferenceError as exc:
@@ -499,6 +671,22 @@ async def run_workflow(
             )
             raise WorkflowPreparationError(response, 400) from exc
         prepared = _prepare_workflow_execution(effective_payload)
+    except BaseException as exc:
+        await record_prequeue_failure(submission_id, str(exc) or type(exc).__name__)
+        raise
+
+    definition = prepared[0]
+    if isinstance(definition, WorkflowSequenceNode):
+        return await _run_sequence_workflow(
+            definition=definition,
+            payload=payload,
+            effective_payload=effective_payload,
+            owner_id=owner_id,
+            submission_id=submission_id,
+            caller_supplied_submission_id=caller_supplied_submission_id,
+        )
+
+    try:
         submission = await prepare_workflow_submission(
             effective_payload,
             prepared,
@@ -656,6 +844,53 @@ async def _cancel_workflow_submission(submission_id: str) -> Dict[str, Any]:
             "submission is not pending or running",
             409,
         )
+
+    if is_sequence_parent_job(job):
+        try:
+            sequence = await cancel_sequence_execution(prompt_id)
+        except KeyError as exc:
+            raise WorkflowCancellationError(
+                "sequence_state_not_found",
+                "the sequence recovery state is unavailable",
+                409,
+            ) from exc
+        except SequenceExecutionError as exc:
+            raise WorkflowCancellationError(exc.detail, str(exc), 409) from exc
+        except Exception as exc:
+            raise WorkflowCancellationError(
+                "cancel_transport_failed",
+                str(exc) or "targeted sequence cancellation failed",
+                502,
+            ) from exc
+
+        if sequence.get("status") in {
+            "succeeded",
+            "failed",
+            "cancelled",
+            "timeout",
+        }:
+            snapshot = await get_submission(submission_id, include_events=False)
+            if snapshot is None:
+                raise SubmissionLifecycleError(
+                    "submission_not_found",
+                    "submission disappeared while publishing sequence cancellation",
+                )
+            return snapshot
+        if sequence.get("cancel_requested") is not True:
+            snapshot = await get_submission(submission_id, include_events=False)
+            if snapshot is None:
+                raise SubmissionLifecycleError(
+                    "submission_not_found",
+                    "submission disappeared during sequence cancellation",
+                )
+            return snapshot
+        try:
+            return await record_cancel_requested(submission_id)
+        except SubmissionConflictError:
+            snapshot = await get_submission(submission_id, include_events=False)
+            if snapshot is None:
+                raise
+            return snapshot
 
     try:
         outcome = await cancel_workflow(prompt_id, comfy_url=comfy_url)

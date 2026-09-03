@@ -10,10 +10,18 @@ from __future__ import annotations
 
 import math
 import os
+from dataclasses import dataclass
+from functools import partial
 from pathlib import Path
 from typing import Any, Dict, NamedTuple
 
-from ..services.registry import InputValidationError, WorkflowCell, WorkflowNode
+from ..services.registry import (
+    InputValidationError,
+    WorkflowCardPresentation,
+    WorkflowCell,
+    WorkflowHeroImage,
+    WorkflowNode,
+)
 from .utils import (
     choice as _choice,
     has_input_value as _has_image,
@@ -120,6 +128,46 @@ _SCHEDULER_OPTIONS = (
         "Evenly spaces the model's noise levels; useful for controlled comparisons.",
     ),
 )
+_STYLE_REFERENCE_STEP_OPTIONS = (
+    (
+        4,
+        "Fast · 4",
+        "Four denoising passes for the quickest style-guided preview.",
+        "fast",
+    ),
+    (
+        8,
+        "Baseline · 8",
+        "Eight denoising passes: the balanced starting point for this adapter.",
+        "baseline",
+    ),
+    (
+        20,
+        "Quality · 20",
+        "Twenty denoising passes for the slower quality-oriented render.",
+        "quality",
+    ),
+)
+_IDENTITY_EDIT_STEP_OPTIONS = (
+    (
+        8,
+        "Fast · 8",
+        "Eight denoising passes for a quicker identity-edit render.",
+        "fast",
+    ),
+    (
+        10,
+        "Baseline · 10",
+        "Ten denoising passes: the balanced identity-edit starting point.",
+        "baseline",
+    ),
+    (
+        12,
+        "12-step probe",
+        "Twelve denoising passes for comparison; this is not a claimed quality tier.",
+        None,
+    ),
+)
 _REID_MODEL = _OFFICIAL_KREA2_MODEL
 _REID_MODELS = (
     _REID_MODEL,
@@ -219,6 +267,7 @@ def _local_settings(
     default_aspect_ratio: str = _SQUARE_ASPECT_RATIO,
     default_model: str = _LOCAL_DEFAULT_MODEL,
     model_choices: tuple[str, ...] = _LOCAL_MODELS,
+    default_steps: int = 8,
     min_steps: int = 4,
     max_steps: int = 20,
 ) -> _LocalSettings:
@@ -236,7 +285,13 @@ def _local_settings(
     seed = _integer(
         inputs, "seed", 42, minimum=0, maximum=_LOCAL_MAX_SEED
     )
-    steps = _integer(inputs, "steps", 8, minimum=min_steps, maximum=max_steps)
+    steps = _integer(
+        inputs,
+        "steps",
+        default_steps,
+        minimum=min_steps,
+        maximum=max_steps,
+    )
     cfg = _number(inputs, "cfg", 1.0, minimum=0.0, maximum=20.0)
     sampler_name = _choice(
         inputs,
@@ -371,6 +426,7 @@ def _apply_identity_edit_settings(
         default_aspect_ratio=_PORTRAIT_ASPECT_RATIO,
         default_model=_ADAPTER_DEFAULT_MODEL,
         model_choices=_ADAPTER_MODELS,
+        default_steps=10,
         min_steps=8,
         max_steps=12,
     )
@@ -488,66 +544,6 @@ def _configure_reid(
     prompt["reference"]["inputs"]["image"] = reference_image
 
 
-def _configure_character_restage(
-    prompt: Dict[str, Any], inputs: Dict[str, Any]
-) -> None:
-    _configure_reid(prompt, inputs, output_folder="CharacterRestage")
-
-
-def _configure_character_restage_download(
-    prompt: Dict[str, Any], inputs: Dict[str, Any]
-) -> None:
-    _apply_reid_settings(prompt, inputs, output_folder="CharacterRestage")
-
-
-def _configure_outfit_change(
-    prompt: Dict[str, Any], inputs: Dict[str, Any]
-) -> None:
-    _configure_reid(prompt, inputs, output_folder="OutfitChange")
-
-
-def _configure_outfit_change_download(
-    prompt: Dict[str, Any], inputs: Dict[str, Any]
-) -> None:
-    _apply_reid_settings(prompt, inputs, output_folder="OutfitChange")
-
-
-def _configure_pose_change(
-    prompt: Dict[str, Any], inputs: Dict[str, Any]
-) -> None:
-    _configure_reid(prompt, inputs, output_folder="PoseChange")
-
-
-def _configure_pose_change_download(
-    prompt: Dict[str, Any], inputs: Dict[str, Any]
-) -> None:
-    _apply_reid_settings(prompt, inputs, output_folder="PoseChange")
-
-
-def _configure_feature_edit(
-    prompt: Dict[str, Any], inputs: Dict[str, Any]
-) -> None:
-    _configure_reid(prompt, inputs, output_folder="FeatureEdit")
-
-
-def _configure_feature_edit_download(
-    prompt: Dict[str, Any], inputs: Dict[str, Any]
-) -> None:
-    _apply_reid_settings(prompt, inputs, output_folder="FeatureEdit")
-
-
-def _configure_character_restyle(
-    prompt: Dict[str, Any], inputs: Dict[str, Any]
-) -> None:
-    _configure_reid(prompt, inputs, output_folder="CharacterRestyle")
-
-
-def _configure_character_restyle_download(
-    prompt: Dict[str, Any], inputs: Dict[str, Any]
-) -> None:
-    _apply_reid_settings(prompt, inputs, output_folder="CharacterRestyle")
-
-
 def _select_cell(
     *,
     node_id: str,
@@ -616,6 +612,46 @@ def _number_cell(
             "lfLabel": label,
             "lfHelper": {"showWhenFocused": False, "value": description},
             "lfValue": default,
+        },
+    )
+
+
+def _steps_profile_cell(
+    *,
+    default: int,
+    options: tuple[tuple[int, str, str, str | None], ...],
+) -> WorkflowCell:
+    description = (
+        "How many denoising passes clean up the image. More passes take longer; "
+        "choose the labelled tiers for a quick speed-versus-detail comparison."
+    )
+    nodes = []
+    for steps, option_label, option_description, profile_tier in options:
+        node = {
+            "description": option_description,
+            "id": str(steps),
+            "value": option_label,
+            "workflowValue": steps,
+        }
+        if profile_tier is not None:
+            node["profileTier"] = profile_tier
+        nodes.append(node)
+
+    return WorkflowCell(
+        node_id="sampler",
+        id="steps",
+        shape="select",
+        value="Steps",
+        description=description,
+        props={
+            "lfDataset": {"nodes": nodes},
+            "lfTextfieldProps": {
+                "lfHelper": {"showWhenFocused": False, "value": description},
+                "lfLabel": "Steps",
+            },
+            # Numeric lfValue is an lf-select option index, so the default uses
+            # the option id while workflowValue remains the submitted integer.
+            "lfValue": str(default),
         },
     )
 
@@ -865,10 +901,12 @@ def _sampling_cells(
     min_steps: int = 4,
     max_steps: int = 20,
     include_cfg: bool = True,
+    steps_cell: WorkflowCell | None = None,
 ) -> list[WorkflowCell]:
     cells = [
         _seed_cell(),
-        _number_cell(
+        steps_cell
+        or _number_cell(
             node_id="sampler",
             cell_id="steps",
             label="Steps",
@@ -912,6 +950,7 @@ def _local_common_inputs(
     max_steps: int = 20,
     adapter_profile: bool = False,
     include_cfg: bool = True,
+    steps_cell: WorkflowCell | None = None,
 ) -> list[WorkflowCell]:
     return [
         _adapter_model_cell() if adapter_profile else _generation_model_cell(),
@@ -921,6 +960,7 @@ def _local_common_inputs(
             min_steps=min_steps,
             max_steps=max_steps,
             include_cfg=include_cfg,
+            steps_cell=steps_cell,
         ),
     ]
 
@@ -973,6 +1013,13 @@ generate = WorkflowNode(
     value="Generate Image",
     description="Generate an image from text with an installed Krea 2-compatible checkpoint.",
     category="Krea 2",
+    card=WorkflowCardPresentation(
+        summary="Turn a prompt into an image.",
+        hero=WorkflowHeroImage(
+            asset="krea2/generate.webp",
+            alt="Generated adult traveler seated beside a rain-covered train window.",
+        ),
+    ),
     inputs=[_prompt_cell(), *_local_common_inputs()],
     outputs=[_image_output("The generated PNG image.")],
     configure_prompt=_configure_generate,
@@ -991,6 +1038,13 @@ style_reference = WorkflowNode(
         "uploaded image's subject identity."
     ),
     category="Krea 2",
+    card=WorkflowCardPresentation(
+        summary="Give a new subject a reference image's visual style.",
+        hero=WorkflowHeroImage(
+            asset="krea2/style-reference.webp",
+            alt="Style reference: a painted explorer figurine. Result: a fox figurine with a teal scarf.",
+        ),
+    ),
     inputs=[
         _upload_cell(
             "style",
@@ -1030,7 +1084,14 @@ style_reference = WorkflowNode(
                 "if the reference overwhelms the prompt."
             ),
         ),
-        *_local_common_inputs(adapter_profile=True, include_cfg=False),
+        *_local_common_inputs(
+            adapter_profile=True,
+            include_cfg=False,
+            steps_cell=_steps_profile_cell(
+                default=8,
+                options=_STYLE_REFERENCE_STEP_OPTIONS,
+            ),
+        ),
     ],
     outputs=[_image_output("The generated style-guided PNG image.")],
     configure_prompt=_configure_style_reference,
@@ -1048,6 +1109,13 @@ style_blend = WorkflowNode(
         "order can affect the result and this adapter does not expose separate weights."
     ),
     category="Krea 2",
+    card=WorkflowCardPresentation(
+        summary="Guide a new image with two style references.",
+        hero=WorkflowHeroImage(
+            asset="krea2/style-blend.webp",
+            alt="Two explorer references, a figurine and watercolor, beside the resulting watercolor fox.",
+        ),
+    ),
     inputs=[
         _upload_cell(
             "style_a",
@@ -1111,6 +1179,16 @@ identity_edit = WorkflowNode(
         "identity-preserving tool; ordinary style reference is not."
     ),
     category="Krea 2",
+    card=WorkflowCardPresentation(
+        summary="Edit a portrait while keeping its identity.",
+        hero=WorkflowHeroImage(
+            asset="krea2/identity-edit.webp",
+            alt=(
+                "Before: a generated traveler by a train window. "
+                "After: the portrait reframed by Identity Edit."
+            ),
+        ),
+    ),
     inputs=[
         _upload_cell(
             "identity",
@@ -1149,6 +1227,10 @@ identity_edit = WorkflowNode(
             min_steps=8,
             max_steps=12,
             adapter_profile=True,
+            steps_cell=_steps_profile_cell(
+                default=10,
+                options=_IDENTITY_EDIT_STEP_OPTIONS,
+            ),
         ),
         _number_cell(
             node_id="patch",
@@ -1184,16 +1266,57 @@ identity_edit = WorkflowNode(
 )
 
 
-character_restage = WorkflowNode(
-    id="krea2_character_restage",
-    value="Character Restage",
-    description=(
-        "Keep a character recognizable while changing pose, clothing, framing, and "
-        "environment with the community Krea 2 ReID adapter. The validated 8-step "
-        "INT8 engine keeps its published technical settings fixed."
-    ),
-    category="Krea 2",
-    inputs=_reid_inputs(
+@dataclass(frozen=True, slots=True)
+class _ReIDRecipeSpec:
+    """Copy and labels that distinguish one card over the shared ReID block."""
+
+    id: str
+    value: str
+    description: str
+    prompt_label: str
+    prompt_default: str
+    prompt_description: str
+    output_description: str
+    output_folder: str
+    card: WorkflowCardPresentation | None = None
+
+
+def _reid_workflow(spec: _ReIDRecipeSpec) -> WorkflowNode:
+    """Materialize one focused card from the single executable ReID contract."""
+
+    return WorkflowNode(
+        id=spec.id,
+        value=spec.value,
+        description=spec.description,
+        category="Krea 2",
+        card=spec.card,
+        inputs=_reid_inputs(
+            prompt_label=spec.prompt_label,
+            prompt_default=spec.prompt_default,
+            prompt_description=spec.prompt_description,
+        ),
+        outputs=[_image_output(spec.output_description)],
+        configure_prompt=partial(
+            _configure_reid,
+            output_folder=spec.output_folder,
+        ),
+        configure_download=partial(
+            _apply_reid_settings,
+            output_folder=spec.output_folder,
+        ),
+        workflow_path=_WORKFLOW_DIR / "krea2_character_restage.json",
+    )
+
+
+_REID_RECIPE_SPECS = (
+    _ReIDRecipeSpec(
+        id="krea2_character_restage",
+        value="Character Restage",
+        description=(
+            "Keep a character recognizable while changing pose, clothing, framing, and "
+            "environment with the community Krea 2 ReID adapter. The validated 8-step "
+            "INT8 engine keeps its published technical settings fixed."
+        ),
         prompt_label="New scene and pose",
         prompt_default=(
             "A polished narrative illustration of the same character seated naturally "
@@ -1210,25 +1333,27 @@ character_restage = WorkflowNode(
             "identity matters. Do not type Picture or image tags; the reference node "
             "injects them automatically."
         ),
-        default_aspect_ratio=_PORTRAIT_ASPECT_RATIO,
+        output_description="The generated, identity-guided PNG image.",
+        output_folder="CharacterRestage",
+        card=WorkflowCardPresentation(
+            summary="Move a character into a new pose, outfit, and scene.",
+            hero=WorkflowHeroImage(
+                asset="krea2/character-restage.webp",
+                alt=(
+                    "Before: a traveler in a gray jacket on a train. "
+                    "After: the supplied character in a teal jacket in a greenhouse."
+                ),
+            ),
+        ),
     ),
-    outputs=[_image_output("The generated, identity-guided PNG image.")],
-    configure_prompt=_configure_character_restage,
-    configure_download=_configure_character_restage_download,
-    workflow_path=_WORKFLOW_DIR / "krea2_character_restage.json",
-)
-
-
-outfit_change = WorkflowNode(
-    id="krea2_outfit_change",
-    value="Outfit Change",
-    description=(
-        "Put a recognizable character in newly prompted clothing with the "
-        "community ReID engine. This is a text-guided outfit change, not a pixel copy "
-        "from a second garment image."
-    ),
-    category="Krea 2",
-    inputs=_reid_inputs(
+    _ReIDRecipeSpec(
+        id="krea2_outfit_change",
+        value="Outfit Change",
+        description=(
+            "Put a recognizable character in newly prompted clothing with the "
+            "community ReID engine. This is a text-guided outfit change, not a pixel copy "
+            "from a second garment image."
+        ),
         prompt_label="Outfit direction",
         prompt_default=(
             "A polished full-body image of the same character wearing a tailored "
@@ -1246,25 +1371,24 @@ outfit_change = WorkflowNode(
             "reference crop gives the prompt more freedom than a costume-heavy "
             "full-body reference. Do not type Picture or image tags."
         ),
-        default_aspect_ratio=_PORTRAIT_ASPECT_RATIO,
+        output_description="The generated outfit-change PNG image.",
+        output_folder="OutfitChange",
+        card=WorkflowCardPresentation(
+            summary="Try a new outfit on a character.",
+            hero=WorkflowHeroImage(
+                asset="krea2/outfit-change.webp",
+                alt="Before: explorer in a mustard jacket. After: burgundy winter jacket and cream hiking boots.",
+            ),
+        ),
     ),
-    outputs=[_image_output("The generated outfit-change PNG image.")],
-    configure_prompt=_configure_outfit_change,
-    configure_download=_configure_outfit_change_download,
-    workflow_path=_WORKFLOW_DIR / "krea2_character_restage.json",
-)
-
-
-pose_change = WorkflowNode(
-    id="krea2_pose_change",
-    value="Pose Change",
-    description=(
-        "Move a recognizable character into a newly prompted pose and composition "
-        "with the community ReID engine. The pose is described with text rather "
-        "than exact skeleton or pose-reference control."
-    ),
-    category="Krea 2",
-    inputs=_reid_inputs(
+    _ReIDRecipeSpec(
+        id="krea2_pose_change",
+        value="Pose Change",
+        description=(
+            "Move a recognizable character into a newly prompted pose and composition "
+            "with the community ReID engine. The pose is described with text rather "
+            "than exact skeleton or pose-reference control."
+        ),
         prompt_label="Pose and composition",
         prompt_default=(
             "A polished three-quarter image of the same character sitting naturally in "
@@ -1280,25 +1404,24 @@ pose_change = WorkflowNode(
             "Use concrete anatomy and spatial language. This is prompt-guided pose "
             "generation, not exact OpenPose control. Do not type Picture or image tags."
         ),
-        default_aspect_ratio=_PORTRAIT_ASPECT_RATIO,
+        output_description="The generated pose-change PNG image.",
+        output_folder="PoseChange",
+        card=WorkflowCardPresentation(
+            summary="Guide a character into a new pose.",
+            hero=WorkflowHeroImage(
+                asset="krea2/pose-change.webp",
+                alt="Before: explorer standing with arms lowered. After: the generated character raises her right hand in a wave.",
+            ),
+        ),
     ),
-    outputs=[_image_output("The generated pose-change PNG image.")],
-    configure_prompt=_configure_pose_change,
-    configure_download=_configure_pose_change_download,
-    workflow_path=_WORKFLOW_DIR / "krea2_character_restage.json",
-)
-
-
-feature_edit = WorkflowNode(
-    id="krea2_feature_edit",
-    value="Feature Edit",
-    description=(
-        "Change a prompted visible feature while retaining the broader character "
-        "identity with the community ReID engine. Large changes can still drift, "
-        "so the default asks for one bounded edit at a time."
-    ),
-    category="Krea 2",
-    inputs=_reid_inputs(
+    _ReIDRecipeSpec(
+        id="krea2_feature_edit",
+        value="Feature Edit",
+        description=(
+            "Change a prompted visible feature while retaining the broader character "
+            "identity with the community ReID engine. Large changes can still drift, "
+            "so the default asks for one bounded edit at a time."
+        ),
         prompt_label="Feature edit",
         prompt_default=(
             "A polished close portrait of the same character with a shorter layered "
@@ -1313,25 +1436,17 @@ feature_edit = WorkflowNode(
             "features that must stay unchanged. Small, isolated edits are more reliable "
             "than changing the face wholesale. Do not type Picture or image tags."
         ),
-        default_aspect_ratio=_PORTRAIT_ASPECT_RATIO,
+        output_description="The generated feature-edit PNG image.",
+        output_folder="FeatureEdit",
     ),
-    outputs=[_image_output("The generated feature-edit PNG image.")],
-    configure_prompt=_configure_feature_edit,
-    configure_download=_configure_feature_edit_download,
-    workflow_path=_WORKFLOW_DIR / "krea2_character_restage.json",
-)
-
-
-character_restyle = WorkflowNode(
-    id="krea2_character_restyle",
-    value="Character Restyle",
-    description=(
-        "Translate a recognizable character into a style described in text with the "
-        "community ReID engine. Use Style Reference when an uploaded artwork, "
-        "rather than a written art direction, should drive the visual language."
-    ),
-    category="Krea 2",
-    inputs=_reid_inputs(
+    _ReIDRecipeSpec(
+        id="krea2_character_restyle",
+        value="Character Restyle",
+        description=(
+            "Translate a recognizable character into a style described in text with the "
+            "community ReID engine. Use Style Reference when an uploaded artwork, "
+            "rather than a written art direction, should drive the visual language."
+        ),
         prompt_label="Art direction",
         prompt_default=(
             "A hand-drawn 1990s television-anime cel illustration of the same character, "
@@ -1345,13 +1460,26 @@ character_restyle = WorkflowNode(
             "and finish in plain English. This is prompt-guided restyling; it does not "
             "copy the style of a second image. Do not type Picture or image tags."
         ),
-        default_aspect_ratio=_PORTRAIT_ASPECT_RATIO,
+        output_description="The generated character-restyle PNG image.",
+        output_folder="CharacterRestyle",
+        card=WorkflowCardPresentation(
+            summary="Translate a character into a different art style.",
+            hero=WorkflowHeroImage(
+                asset="krea2/character-restyle.webp",
+                alt="Before: a painted explorer figurine. After: an ink-and-watercolor interpretation in ochre and teal.",
+            ),
+        ),
     ),
-    outputs=[_image_output("The generated character-restyle PNG image.")],
-    configure_prompt=_configure_character_restyle,
-    configure_download=_configure_character_restyle_download,
-    workflow_path=_WORKFLOW_DIR / "krea2_character_restage.json",
 )
+
+
+(
+    character_restage,
+    outfit_change,
+    pose_change,
+    feature_edit,
+    character_restyle,
+) = tuple(_reid_workflow(spec) for spec in _REID_RECIPE_SPECS)
 
 
 WORKFLOWS = (

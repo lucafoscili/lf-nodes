@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Any, Dict
 
 from ...dds_formats import MIP_POLICIES, PIXEL_FORMATS
-from ..services.registry import InputValidationError, WorkflowCell, WorkflowNode
+from ..services.registry import InputValidationError, WorkflowCardPresentation, WorkflowCell, WorkflowHeroImage, WorkflowNode
 from .utils import required_text as _required_text, resolve_load_image_reference
 
 
@@ -198,6 +198,13 @@ node = WorkflowNode(
         "crops or resizes your source image. No DDS lore required."
     ),
     category="Image Processing",
+    card=WorkflowCardPresentation(
+        summary="Export an image as a DDS texture, with optional mipmaps.",
+        hero=WorkflowHeroImage(
+            asset="image/dds.webp",
+            alt="Decoded saved BC3 DDS texture: a traveler cutout with transparency and eleven mip levels.",
+        ),
+    ),
     inputs=[
         input_upload,
         input_filename_prefix,

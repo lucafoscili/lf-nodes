@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Any, Dict
 
-from ..services.registry import WorkflowCell, WorkflowNode
+from ..services.registry import WorkflowCardPresentation, WorkflowCell, WorkflowHeroImage, WorkflowNode
 from .utils import resolve_upload_paths
 
 # region Workflow Config
@@ -93,6 +93,13 @@ node = WorkflowNode(
     id=id,
     value=value,
     description=description,
+    card=WorkflowCardPresentation(
+        summary="Cut a subject out onto a transparent or solid background.",
+        hero=WorkflowHeroImage(
+            asset="image/remove-background.webp",
+            alt="Before: an explorer figurine on gray. After: the saved cutout on a transparency checkerboard.",
+        ),
+    ),
     inputs=[
         input_upload,
         input_bg_color,

@@ -31,6 +31,7 @@ vi.mock('../utils/debug', () => ({
 
 const createStore = (selected: {
   id: string;
+  profileTier?: 'fast' | 'baseline' | 'quality';
   value?: string | number;
   workflowValue?: string | number;
 }) => {
@@ -67,6 +68,7 @@ describe('workflowDispatcher select inputs', () => {
 
   it.each([
     ['uses an explicit workflow value behind a friendly label', { id: 'cover', value: 'Cover', workflowValue: 'cover' }, 'cover'],
+    ['keeps profile metadata visual while submitting its workflow value', { id: 'quality', profileTier: 'quality' as const, value: 'Quality', workflowValue: 'full' }, 'full'],
     ['uses the selected semantic value', { id: 'sampler-euler', value: 'euler' }, 'euler'],
     ['preserves a numeric zero value', { id: 'first-option', value: 0 }, 0],
     ['falls back to the selected node id', { id: 'sampler-euler' }, 'sampler-euler'],

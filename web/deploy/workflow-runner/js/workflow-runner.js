@@ -313,10 +313,11 @@ const treeHandler = (e, store) => {
           const isHome = node.id === "home";
           if (isHome) {
             state.mutate.view("home");
+            drawer.close();
           } else if (isLeaf) {
             state.mutate.workflow(node.id);
+            drawer.close();
           }
-          drawer.close();
           break;
         default:
           return;
@@ -326,6 +327,15 @@ const treeHandler = (e, store) => {
       return;
   }
 };
+const normalizeWorkflowKind = (kind) => kind === "orchestra" || kind === "sequence" ? "orchestra" : "block";
+const isWorkflowOrchestra = (workflow) => normalizeWorkflowKind(workflow == null ? void 0 : workflow.kind) === "orchestra";
+const normalizeWorkflowDatasetKinds = (dataset) => ({
+  ...dataset,
+  nodes: dataset.nodes.map((node) => ({
+    ...node,
+    kind: normalizeWorkflowKind(node.kind)
+  }))
+});
 const { theme: theme$8 } = getLfFramework();
 const ROOT_CLASS$8 = "drawer-section";
 const DRAWER_CLASSES = {
@@ -337,27 +347,61 @@ const DRAWER_CLASSES = {
   footer: theme$8.bemClass(ROOT_CLASS$8, "footer"),
   tree: theme$8.bemClass(ROOT_CLASS$8, "tree")
 };
+const _catalogueRoot = (id, value, icon, shippedIcon, customIcon) => {
+  const shippedGroups = [];
+  const customGroups = [];
+  return {
+    custom: {
+      children: customGroups,
+      icon: customIcon,
+      id: `${id}:custom`,
+      value: "Custom"
+    },
+    customGroups,
+    root: { children: [], icon, id, value },
+    shipped: {
+      children: shippedGroups,
+      icon: shippedIcon,
+      id: `${id}:shipped`,
+      value: "LF Nodes"
+    },
+    shippedGroups
+  };
+};
+const _addToCatalogue = (catalogue, node) => {
+  const isCustom = node.origin !== "shipped";
+  const name = isCustom ? node.collection || "Custom" : node.category || "Uncategorized";
+  const groups = isCustom ? catalogue.customGroups : catalogue.shippedGroups;
+  let group = groups.find((item) => item.value === name);
+  if (!group) {
+    const owner = isCustom ? "custom" : "shipped";
+    group = {
+      icon: isCustom ? _getIcon("Custom") : _getIcon(name),
+      id: `${catalogue.root.id}:${owner}:${name}`,
+      value: name,
+      children: []
+    };
+    groups.push(group);
+  }
+  group.children.push(node);
+};
+const _finalizeCatalogue = (catalogue) => {
+  catalogue.shippedGroups.sort((a, b) => String(a.value).localeCompare(String(b.value)));
+  catalogue.customGroups.sort((a, b) => String(a.value).localeCompare(String(b.value)));
+  if (catalogue.shippedGroups.length) {
+    catalogue.root.children.push(catalogue.shipped);
+  }
+  if (catalogue.customGroups.length) {
+    catalogue.root.children.push(catalogue.custom);
+  }
+};
 const _createDataset$2 = (workflows) => {
   var _a2;
-  const { article, folderOpen, lfSignature, listTree } = getLfFramework().theme.get.icons();
+  const { article, folderOpen, lfSignature, listTree, route2 } = getLfFramework().theme.get.icons();
   const fallback = folderOpen || article || listTree || lfSignature;
-  const shippedCategories = [];
-  const customCollections = [];
   const home = { icon: article || fallback, id: "home", value: "Home" };
-  const shipped = {
-    icon: lfSignature || fallback,
-    id: "workflows:shipped",
-    value: "LF Nodes",
-    children: shippedCategories
-  };
-  const custom = {
-    icon: folderOpen || fallback,
-    id: "workflows:custom",
-    value: "Custom",
-    children: customCollections
-  };
-  const roots = [];
-  const wfs = { icon: listTree || fallback, id: "workflows", value: "Workflows", children: roots };
+  const blockCatalogue = _catalogueRoot("blocks", "Blocks", listTree || fallback, lfSignature || fallback, folderOpen || fallback);
+  const orchestraCatalogue = _catalogueRoot("orchestras", "Orchestras", route2 || listTree || fallback, lfSignature || fallback, folderOpen || fallback);
   const clone = JSON.parse(JSON.stringify(workflows));
   (_a2 = clone.nodes) == null ? void 0 : _a2.forEach((node) => {
     var _a3, _b2, _c2, _d, _e;
@@ -370,31 +414,17 @@ const _createDataset$2 = (workflows) => {
       node.icon = getLfFramework().theme.get.icon("hexagonInfo");
       node.description = `Check setup${issue ? `: ${issue}` : "."}`;
     }
-    const isCustom = node.origin !== "shipped";
-    const name = isCustom ? node.collection || "Custom" : node.category || "Uncategorized";
-    const groups = isCustom ? customCollections : shippedCategories;
-    let group = groups.find((item) => item.value === name);
-    if (!group) {
-      group = {
-        icon: isCustom ? _getIcon("Custom") : _getIcon(name),
-        id: `${isCustom ? "custom" : "shipped"}:${name}`,
-        value: name,
-        children: []
-      };
-      groups.push(group);
-    }
-    group.children.push(node);
+    const catalogue = isWorkflowOrchestra(node) ? orchestraCatalogue : blockCatalogue;
+    _addToCatalogue(catalogue, node);
   });
-  shippedCategories.sort((a, b) => String(a.value).localeCompare(String(b.value)));
-  customCollections.sort((a, b) => String(a.value).localeCompare(String(b.value)));
-  if (shippedCategories.length) {
-    roots.push(shipped);
-  }
-  if (customCollections.length) {
-    roots.push(custom);
-  }
+  _finalizeCatalogue(blockCatalogue);
+  _finalizeCatalogue(orchestraCatalogue);
   const dataset = {
-    nodes: [home, wfs]
+    nodes: [
+      home,
+      ...blockCatalogue.root.children.length ? [blockCatalogue.root] : [],
+      ...orchestraCatalogue.root.children.length ? [orchestraCatalogue.root] : []
+    ]
   };
   return dataset;
 };
@@ -580,6 +610,73 @@ const _setSlots = (_comp, element, slotMap) => {
     }
   }
 };
+const PROFILE_TIER_PRESENTATION = {
+  fast: { icon: "stopwatch", state: "info" },
+  baseline: { icon: "contrast-2", state: "primary" },
+  quality: { icon: "wand", state: "secondary" }
+};
+const _profileTier = (node) => {
+  const tier = node == null ? void 0 : node.profileTier;
+  return tier && Object.prototype.hasOwnProperty.call(PROFILE_TIER_PRESENTATION, tier) ? tier : null;
+};
+const _profileSelectProps = (props) => {
+  var _a2;
+  const nodes = (_a2 = props.lfDataset) == null ? void 0 : _a2.nodes;
+  if (!(nodes == null ? void 0 : nodes.some((node) => _profileTier(node)))) {
+    return props;
+  }
+  return {
+    ...props,
+    lfDataset: {
+      ...props.lfDataset,
+      nodes: nodes.map((node) => {
+        const tier = _profileTier(node);
+        return tier ? { ...node, icon: PROFILE_TIER_PRESENTATION[tier].icon } : node;
+      })
+    }
+  };
+};
+const _bindProfileSelect = (comp, props) => {
+  var _a2;
+  const nodes = (_a2 = props.lfDataset) == null ? void 0 : _a2.nodes;
+  if (!(nodes == null ? void 0 : nodes.some((node) => _profileTier(node)))) {
+    return;
+  }
+  const baseTextfieldProps = { ...props.lfTextfieldProps || {} };
+  const mayDecorateState = props.lfUiState === void 0;
+  const baseState = props.lfUiState ?? "primary";
+  let appliedTierState = mayDecorateState ? baseState : void 0;
+  const apply = (node) => {
+    const tier = _profileTier(node);
+    const currentState = comp.lfUiState;
+    const ownsState = mayDecorateState && (currentState === appliedTierState || currentState === void 0);
+    if (!tier) {
+      if (ownsState) {
+        comp.lfUiState = baseState;
+        appliedTierState = baseState;
+      }
+      comp.lfTextfieldProps = baseTextfieldProps;
+      return;
+    }
+    const presentation = PROFILE_TIER_PRESENTATION[tier];
+    if (ownsState) {
+      comp.lfUiState = presentation.state;
+      appliedTierState = presentation.state;
+    }
+    comp.lfTextfieldProps = {
+      ...baseTextfieldProps,
+      lfIcon: presentation.icon
+    };
+  };
+  const initialNode = typeof props.lfValue === "number" ? nodes[props.lfValue] : nodes.find((node) => node.id === String(props.lfValue ?? ""));
+  apply(initialNode);
+  comp.addEventListener("lf-select-event", (event) => {
+    const detail = event.detail;
+    if ((detail == null ? void 0 : detail.eventType) === "change") {
+      apply(detail.node);
+    }
+  });
+};
 const createComponent = {
   button: (props) => {
     const comp = document.createElement("lf-button");
@@ -612,7 +709,9 @@ const createComponent = {
   },
   select: (props) => {
     const comp = document.createElement("lf-select");
-    _setProps("LfSelect", comp, props);
+    const profileProps = _profileSelectProps(props);
+    _setProps("LfSelect", comp, profileProps);
+    _bindProfileSelect(comp, profileProps);
     return comp;
   },
   textfield: (props) => {
@@ -964,6 +1063,47 @@ const createHeaderSection = (store) => {
     mount,
     render
   };
+};
+const visibleLine = (value, limit) => {
+  if (typeof value !== "string" || value.length > limit || /[\u0000-\u001f\u007f-\u009f\u2028\u2029]/u.test(value)) {
+    return void 0;
+  }
+  return value.trim().replace(/\s+/gu, " ") || void 0;
+};
+const resolveWorkflowHeroUrl = (asset) => {
+  if (typeof asset !== "string" || !asset || asset.length > 240 || asset.includes("..") || !/\.(?:avif|jpe?g|png|webp)$/i.test(asset) || !asset.split("/").every((part) => /^[a-z0-9][a-z0-9._-]*$/i.test(part) && !part.endsWith("."))) {
+    return void 0;
+  }
+  try {
+    const base = new URL(`${buildAssetsUrl().replace(/\/+$/, "")}/workflow-runner/heroes/`);
+    const url = new URL(asset, base);
+    if (url.origin !== window.location.origin || !url.pathname.startsWith(base.pathname)) {
+      return void 0;
+    }
+    return url.href;
+  } catch {
+    return void 0;
+  }
+};
+const workflowCardPresentation = (value) => {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return void 0;
+  }
+  const card = value;
+  const summary = visibleLine(card.summary, 180);
+  if (!summary) {
+    return void 0;
+  }
+  const presentation = { summary };
+  if (card.hero && typeof card.hero === "object" && !Array.isArray(card.hero)) {
+    const hero = card.hero;
+    const url = resolveWorkflowHeroUrl(hero.asset);
+    const alt = visibleLine(hero.alt, 500);
+    if (url && alt) {
+      presentation.hero = { url, alt };
+    }
+  }
+  return presentation;
 };
 const DEFAULT_VIEW = "workflow";
 const SECTION_PRESETS = {
@@ -1781,21 +1921,77 @@ const createMainSection = (store) => {
 };
 const { theme: theme$4 } = getLfFramework();
 const ROOT_CLASS$4 = "home-section";
+const HOME_MASONRY_CLASS = theme$4.bemClass(ROOT_CLASS$4, "masonry");
+const HOME_CARD_OPEN_ID = "workflow-card-open";
 const HOME_CLASSES = {
   _: theme$4.bemClass(ROOT_CLASS$4),
+  blockMasonry: theme$4.bemClass(ROOT_CLASS$4, "block-masonry"),
+  blockRail: theme$4.bemClass(ROOT_CLASS$4, "block-rail"),
+  catalogue: theme$4.bemClass(ROOT_CLASS$4, "catalogue"),
   description: theme$4.bemClass(ROOT_CLASS$4, "description"),
   h1: theme$4.bemClass(ROOT_CLASS$4, "title-h1"),
-  masonry: theme$4.bemClass(ROOT_CLASS$4, "masonry"),
+  orchestraMasonry: theme$4.bemClass(ROOT_CLASS$4, "orchestra-masonry"),
+  orchestraRail: theme$4.bemClass(ROOT_CLASS$4, "orchestra-rail"),
   title: theme$4.bemClass(ROOT_CLASS$4, "title")
 };
-const _createDataset$1 = (store) => {
+const ORCHESTRA_CARD_ACCENT = [
+  ".material-layout {",
+  "  border-inline-start: 4px double rgb(var(--lf-card-color-primary, var(--lf-color-secondary)));",
+  "}"
+].join("\n");
+const ORCHESTRA_CARD_STYLE = `${ORCHESTRA_CARD_ACCENT}
+.material-layout__text-section { height: 100%; }`;
+const HERO_CARD_STYLE = [
+  // LF's adopted base stylesheet follows lfStyle; :host makes these overrides
+  // win without relying on insertion order or changing the shared widget.
+  ":host .material-layout { height: auto; overflow: hidden; }",
+  ":host .material-layout__cover-section {",
+  "  aspect-ratio: 16 / 9; flex: none; height: auto; overflow: hidden;",
+  "  --lf-image-object-fit: contain;",
+  "}",
+  ":host .material-layout__text-section { height: auto; min-width: 0; overflow: hidden; }",
+  ":host .material-layout .text-content__description { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }",
+  ":host .material-layout--has-actions { padding-bottom: 0; }",
+  ":host .material-layout__actions-section { position: static; height: auto; padding: 0 .5em .35em; }"
+].join("\n");
+const _kind = (node) => normalizeWorkflowKind(node.kind);
+const _fallbackStageLabel = (value) => value.replace(/[_-]+/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+const _stageTrail = (node, labels) => {
   var _a2;
-  const { workflows } = store.getState();
-  const clone = JSON.parse(JSON.stringify(workflows));
-  const root = { cells: {}, id: "root", value: "Workflows" };
-  (_a2 = clone.nodes) == null ? void 0 : _a2.forEach((node) => {
+  if (!isWorkflowOrchestra(node) || !((_a2 = node.stages) == null ? void 0 : _a2.length)) {
+    return "";
+  }
+  const workflowCounts = node.stages.reduce((counts, stage) => {
+    counts.set(stage.workflowId, (counts.get(stage.workflowId) || 0) + 1);
+    return counts;
+  }, /* @__PURE__ */ new Map());
+  return node.stages.map((stage) => {
+    const blockLabel = labels.get(stage.workflowId);
+    if (!blockLabel) {
+      return _fallbackStageLabel(stage.id);
+    }
+    return (workflowCounts.get(stage.workflowId) || 0) > 1 ? `${_fallbackStageLabel(stage.id)} · ${blockLabel}` : blockLabel;
+  }).join(" → ");
+};
+const _createDataset$1 = (nodes, labels, kind, failedHeroes) => {
+  const root = {
+    cells: {},
+    id: "root",
+    value: kind === "orchestra" ? "Orchestras" : "Blocks"
+  };
+  nodes.filter((node) => _kind(node) === kind).forEach((node) => {
+    var _a2;
     const id = node.id;
+    const blockCount = ((_a2 = node.stages) == null ? void 0 : _a2.length) || 0;
+    const subtitle = kind === "orchestra" ? blockCount ? `ORCHESTRA · ${blockCount} ${blockCount === 1 ? "BLOCK" : "BLOCKS"}` : "ORCHESTRA" : node.category;
+    const trail = _stageTrail(node, labels);
+    const presentation = workflowCardPresentation(node.card);
+    const hero = presentation == null ? void 0 : presentation.hero;
+    const description = (presentation == null ? void 0 : presentation.summary) || [trail, node.description].filter(Boolean).join("\n");
     root.cells[id] = {
+      htmlProps: {
+        dataset: { workflowKind: kind }
+      },
       lfDataset: {
         nodes: [
           {
@@ -1804,38 +2000,125 @@ const _createDataset$1 = (store) => {
                 value: String(node.value)
               },
               "2": {
-                value: node.category
+                value: subtitle
               },
               "3": {
-                value: node.description
+                value: description
+              },
+              ...hero && !failedHeroes.has(hero.url) ? {
+                hero: {
+                  shape: "image",
+                  value: hero.url,
+                  lfHtmlAttributes: { alt: hero.alt }
+                }
+              } : {},
+              open: {
+                shape: "button",
+                value: "",
+                htmlProps: { id: HOME_CARD_OPEN_ID },
+                lfLabel: "Open",
+                lfAriaLabel: `Open ${String(node.value)}`,
+                lfStyling: "flat",
+                lfUiSize: "small",
+                lfUiState: kind === "orchestra" ? "secondary" : "primary"
               }
             },
             id
           }
         ]
       },
+      ...presentation ? {
+        lfSizeY: "auto",
+        lfStyle: [
+          HERO_CARD_STYLE,
+          kind === "orchestra" ? ORCHESTRA_CARD_ACCENT : ""
+        ].join("\n"),
+        ...kind === "orchestra" ? { lfUiState: "secondary" } : {}
+      } : kind === "orchestra" ? {
+        lfStyle: ORCHESTRA_CARD_STYLE,
+        lfUiState: "secondary"
+      } : {},
       shape: "card",
       value: ""
     };
   });
-  const dataset = {
-    nodes: [root]
+  return {
+    count: Object.keys(root.cells).length,
+    dataset: { nodes: [root] }
   };
-  return dataset;
 };
-const _masonry$1 = (store) => {
+const _recoverHero = (e, failedHeroes) => {
+  var _a2, _b2, _c2, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p;
+  const masonry = e.detail.comp;
+  const cardEvent = e.detail.originalEvent;
+  const imageEvent = (_a2 = cardEvent == null ? void 0 : cardEvent.detail) == null ? void 0 : _a2.originalEvent;
+  const card = (_b2 = cardEvent == null ? void 0 : cardEvent.detail) == null ? void 0 : _b2.comp;
+  const image = (_c2 = imageEvent == null ? void 0 : imageEvent.detail) == null ? void 0 : _c2.comp;
+  if (((_d = cardEvent == null ? void 0 : cardEvent.detail) == null ? void 0 : _d.eventType) !== "lf-event" || ((_e = card == null ? void 0 : card.rootElement) == null ? void 0 : _e.tagName.toLowerCase()) !== "lf-card" || ((_f = imageEvent == null ? void 0 : imageEvent.detail) == null ? void 0 : _f.eventType) !== "error" || ((_g = image == null ? void 0 : image.rootElement) == null ? void 0 : _g.tagName.toLowerCase()) !== "lf-image") {
+    return;
+  }
+  const id = (_j = (_i = (_h = card.lfDataset) == null ? void 0 : _h.nodes) == null ? void 0 : _i[0]) == null ? void 0 : _j.id;
+  const root = (_l = (_k = masonry.lfDataset) == null ? void 0 : _k.nodes) == null ? void 0 : _l[0];
+  const cell = (_m = root == null ? void 0 : root.cells) == null ? void 0 : _m[id];
+  if ((cell == null ? void 0 : cell.shape) !== "card") {
+    return;
+  }
+  const node = (_o = (_n = cell == null ? void 0 : cell.lfDataset) == null ? void 0 : _n.nodes) == null ? void 0 : _o[0];
+  const hero = (_p = node == null ? void 0 : node.cells) == null ? void 0 : _p.hero;
+  if ((hero == null ? void 0 : hero.shape) !== "image" || hero.value !== image.lfValue) {
+    return;
+  }
+  failedHeroes.add(String(hero.value));
+  const cells = { ...node.cells };
+  delete cells.hero;
+  const dataset = { ...cell.lfDataset, nodes: [{ ...node, cells }] };
+  card.lfDataset = dataset;
+  masonry.lfDataset = {
+    ...masonry.lfDataset,
+    nodes: [{ ...root, cells: { ...root.cells, [id]: { ...cell, lfDataset: dataset } } }]
+  };
+};
+const _masonry$1 = (store, className, failedHeroes) => {
   const masonry = document.createElement("lf-masonry");
-  masonry.className = HOME_CLASSES.masonry;
+  masonry.className = `${HOME_MASONRY_CLASS} ${className}`;
   masonry.lfShape = "card";
   masonry.lfStyle = UI_CONSTANTS.MASONRY_STYLE;
-  masonry.addEventListener("lf-masonry-event", (e) => masonryHandler(e, store));
+  masonry.addEventListener("lf-masonry-event", (e) => {
+    _recoverHero(e, failedHeroes);
+    masonryHandler(e, store);
+  });
   return masonry;
 };
 const _description$1 = () => {
   const p = document.createElement("p");
   p.className = HOME_CLASSES.description;
-  p.textContent = "Below a list of the available workflows.";
+  p.textContent = "Choose a focused block or a ready-made orchestra.";
   return p;
+};
+const _rail = (store, kind, titleText, descriptionText, railClass, masonryClass, failedHeroes) => {
+  const rail = document.createElement("section");
+  const header = document.createElement("header");
+  const headingRow = document.createElement("div");
+  const heading = document.createElement("h2");
+  const count = document.createElement("span");
+  const description = document.createElement("p");
+  const masonry = _masonry$1(store, masonryClass, failedHeroes);
+  rail.className = `${theme$4.bemClass(ROOT_CLASS$4, "rail")} ${railClass}`;
+  rail.dataset.workflowKind = kind;
+  header.className = theme$4.bemClass(ROOT_CLASS$4, "rail-header");
+  headingRow.className = theme$4.bemClass(ROOT_CLASS$4, "rail-heading");
+  heading.className = theme$4.bemClass(ROOT_CLASS$4, "rail-title");
+  count.className = theme$4.bemClass(ROOT_CLASS$4, "rail-count");
+  description.className = theme$4.bemClass(ROOT_CLASS$4, "rail-description");
+  heading.textContent = titleText;
+  count.textContent = "0";
+  count.setAttribute("aria-label", `0 ${titleText.toLowerCase()}`);
+  count.dataset.railCount = kind;
+  description.textContent = descriptionText;
+  headingRow.append(heading, count);
+  header.append(headingRow, description);
+  rail.append(header, masonry);
+  return { masonry, rail };
 };
 const _title$2 = () => {
   const title = document.createElement("div");
@@ -1848,6 +2131,7 @@ const _title$2 = () => {
 };
 const createHomeSection = (store) => {
   const { HOME_DESTROYED, HOME_MOUNTED, HOME_UPDATED } = DEBUG_MESSAGES;
+  const failedHeroes = /* @__PURE__ */ new Set();
   const destroy = () => {
     const { manager } = store.getState();
     const { uiRegistry } = manager;
@@ -1855,6 +2139,7 @@ const createHomeSection = (store) => {
       const element = HOME_CLASSES[cls];
       uiRegistry.remove(element);
     }
+    failedHeroes.clear();
     debugLog(HOME_DESTROYED);
   };
   const mount = () => {
@@ -1865,18 +2150,24 @@ const createHomeSection = (store) => {
       return;
     }
     const _root = document.createElement("section");
+    const catalogue = document.createElement("div");
     _root.className = HOME_CLASSES._;
+    catalogue.className = HOME_CLASSES.catalogue;
     const description = _description$1();
-    const masonry = _masonry$1(store);
+    const orchestra = _rail(store, "orchestra", "Orchestras", "Multi-block pipelines.", HOME_CLASSES.orchestraRail, HOME_CLASSES.orchestraMasonry, failedHeroes);
+    const block = _rail(store, "block", "Blocks", "Single-purpose tools.", HOME_CLASSES.blockRail, HOME_CLASSES.blockMasonry, failedHeroes);
     const { h1, title } = _title$2();
-    _root.appendChild(title);
-    _root.appendChild(description);
-    _root.appendChild(masonry);
+    catalogue.append(orchestra.rail, block.rail);
+    _root.append(title, description, catalogue);
     elements[MAIN_CLASSES._].prepend(_root);
     uiRegistry.set(HOME_CLASSES._, _root);
+    uiRegistry.set(HOME_CLASSES.blockMasonry, block.masonry);
+    uiRegistry.set(HOME_CLASSES.blockRail, block.rail);
+    uiRegistry.set(HOME_CLASSES.catalogue, catalogue);
     uiRegistry.set(HOME_CLASSES.description, description);
     uiRegistry.set(HOME_CLASSES.h1, h1);
-    uiRegistry.set(HOME_CLASSES.masonry, masonry);
+    uiRegistry.set(HOME_CLASSES.orchestraMasonry, orchestra.masonry);
+    uiRegistry.set(HOME_CLASSES.orchestraRail, orchestra.rail);
     uiRegistry.set(HOME_CLASSES.title, title);
     debugLog(HOME_MOUNTED);
   };
@@ -1888,8 +2179,32 @@ const createHomeSection = (store) => {
     if (!elements) {
       return;
     }
-    const masonry = elements[HOME_CLASSES.masonry];
-    masonry.lfDataset = _createDataset$1(store);
+    const orchestraMasonry = elements[HOME_CLASSES.orchestraMasonry];
+    const orchestraRail = elements[HOME_CLASSES.orchestraRail];
+    const blockMasonry = elements[HOME_CLASSES.blockMasonry];
+    const blockRail = elements[HOME_CLASSES.blockRail];
+    if (!orchestraMasonry || !orchestraRail || !blockMasonry || !blockRail) {
+      return;
+    }
+    const clone = JSON.parse(JSON.stringify(state.workflows));
+    const nodes = clone.nodes || [];
+    const labels = new Map(nodes.map((node) => [node.id, String(node.value || node.id)]));
+    const orchestras = _createDataset$1(nodes, labels, "orchestra", failedHeroes);
+    const blocks = _createDataset$1(nodes, labels, "block", failedHeroes);
+    orchestraMasonry.lfDataset = orchestras.dataset;
+    blockMasonry.lfDataset = blocks.dataset;
+    orchestraRail.hidden = orchestras.count === 0;
+    blockRail.hidden = blocks.count === 0;
+    const orchestraCount = orchestraRail.querySelector('[data-rail-count="orchestra"]');
+    const blockCount = blockRail.querySelector('[data-rail-count="block"]');
+    if (orchestraCount) {
+      orchestraCount.textContent = String(orchestras.count);
+      orchestraCount.setAttribute("aria-label", `${orchestras.count} ${orchestras.count === 1 ? "orchestra" : "orchestras"}`);
+    }
+    if (blockCount) {
+      blockCount.textContent = String(blocks.count);
+      blockCount.setAttribute("aria-label", `${blocks.count} ${blocks.count === 1 ? "block" : "blocks"}`);
+    }
     debugLog(HOME_UPDATED);
   };
   return {
@@ -1899,7 +2214,7 @@ const createHomeSection = (store) => {
   };
 };
 const masonryHandler = (e, store) => {
-  var _a2, _b2, _c2, _d, _e, _f, _g;
+  var _a2, _b2, _c2, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m;
   const { comp, originalEvent } = e.detail;
   const ogEvent = originalEvent;
   const { manager, mutate } = store.getState();
@@ -1920,11 +2235,16 @@ const masonryHandler = (e, store) => {
         return;
     }
   }
-  if (comp.rootElement.className === HOME_CLASSES.masonry) {
-    switch ((_e = ogEvent == null ? void 0 : ogEvent.detail) == null ? void 0 : _e.eventType) {
+  if (comp.rootElement.classList.contains(HOME_MASONRY_CLASS)) {
+    const nested = (_e = ogEvent == null ? void 0 : ogEvent.detail) == null ? void 0 : _e.originalEvent;
+    const isOpenButton = ((_f = ogEvent == null ? void 0 : ogEvent.detail) == null ? void 0 : _f.eventType) === "lf-event" && ((_g = nested == null ? void 0 : nested.detail) == null ? void 0 : _g.eventType) === "click" && ((_i = (_h = nested.detail.comp) == null ? void 0 : _h.rootElement) == null ? void 0 : _i.tagName.toLowerCase()) === "lf-button" && nested.detail.comp.rootElement.id === HOME_CARD_OPEN_ID;
+    if (isOpenButton) {
+      (_j = nested.detail.originalEvent) == null ? void 0 : _j.stopPropagation();
+    }
+    switch (isOpenButton ? "click" : (_k = ogEvent == null ? void 0 : ogEvent.detail) == null ? void 0 : _k.eventType) {
       case "click":
         const card = ogEvent.detail.comp;
-        const node = (_g = (_f = card.lfDataset) == null ? void 0 : _f.nodes) == null ? void 0 : _g[0];
+        const node = (_m = (_l = card.lfDataset) == null ? void 0 : _l.nodes) == null ? void 0 : _m[0];
         const isValidCard = (node == null ? void 0 : node.id) && card.rootElement.tagName.toLowerCase() === "lf-card";
         if (isValidCard) {
           const { id } = node;
@@ -2752,9 +3072,12 @@ const { theme: theme$2 } = getLfFramework();
 const ROOT_CLASS$2 = "inputs-section";
 const INPUTS_CLASSES = {
   _: theme$2.bemClass(ROOT_CLASS$2),
+  advanced: theme$2.bemClass(ROOT_CLASS$2, "advanced"),
+  advancedFields: theme$2.bemClass(ROOT_CLASS$2, "advanced-fields"),
   cell: theme$2.bemClass(ROOT_CLASS$2, "cell"),
   cells: theme$2.bemClass(ROOT_CLASS$2, "cells"),
   description: theme$2.bemClass(ROOT_CLASS$2, "description"),
+  eyebrow: theme$2.bemClass(ROOT_CLASS$2, "eyebrow"),
   help: theme$2.bemClass(ROOT_CLASS$2, "help"),
   h3: theme$2.bemClass(ROOT_CLASS$2, "title-h3"),
   openButton: theme$2.bemClass(ROOT_CLASS$2, "title-open-button"),
@@ -2764,7 +3087,8 @@ const INPUTS_CLASSES = {
   retainedUpload: theme$2.bemClass(ROOT_CLASS$2, "retained-upload"),
   retainedUploadClear: theme$2.bemClass(ROOT_CLASS$2, "retained-upload-clear"),
   retainedUploadText: theme$2.bemClass(ROOT_CLASS$2, "retained-upload-text"),
-  title: theme$2.bemClass(ROOT_CLASS$2, "title")
+  title: theme$2.bemClass(ROOT_CLASS$2, "title"),
+  titleCopy: theme$2.bemClass(ROOT_CLASS$2, "title-copy")
 };
 const _cells = () => {
   const cellWrapper = document.createElement("div");
@@ -2781,14 +3105,28 @@ const _options = () => {
   optionsWrapper.className = INPUTS_CLASSES.options;
   return optionsWrapper;
 };
+const _advanced = () => {
+  const details = document.createElement("details");
+  const summary = document.createElement("summary");
+  const fields = document.createElement("div");
+  details.className = INPUTS_CLASSES.advanced;
+  fields.className = INPUTS_CLASSES.advancedFields;
+  summary.textContent = "Advanced settings";
+  details.append(summary, fields);
+  return { details, fields };
+};
 const _title = (store, onReset) => {
   const download = theme$2.get.icon("download");
   const refresh = theme$2.get.icon("refresh");
   const title = document.createElement("div");
+  const titleCopy = document.createElement("div");
+  const eyebrow = document.createElement("span");
   const h3 = document.createElement("h3");
   const resetButton = document.createElement("lf-button");
   const openButton = document.createElement("lf-button");
   title.className = INPUTS_CLASSES.title;
+  titleCopy.className = INPUTS_CLASSES.titleCopy;
+  eyebrow.className = INPUTS_CLASSES.eyebrow;
   h3.className = INPUTS_CLASSES.h3;
   resetButton.className = INPUTS_CLASSES.resetButton;
   resetButton.lfAriaLabel = "Reset this workflow form to its defaults";
@@ -2809,11 +3147,18 @@ const _title = (store, onReset) => {
   openButton.lfStyling = "icon";
   openButton.lfUiSize = "xsmall";
   openButton.title = label;
-  openButton.addEventListener("lf-button-event", (e) => buttonHandler(e, store));
-  title.appendChild(h3);
+  openButton.addEventListener("lf-button-event", (e) => {
+    var _a2;
+    if (((_a2 = store.getState().manager.workflow.current()) == null ? void 0 : _a2.downloadable) === false) {
+      return;
+    }
+    buttonHandler(e, store);
+  });
+  titleCopy.append(eyebrow, h3);
+  title.appendChild(titleCopy);
   title.appendChild(resetButton);
   title.appendChild(openButton);
-  return { h3, openButton, resetButton, title };
+  return { eyebrow, h3, openButton, resetButton, title, titleCopy };
 };
 const _help = (value) => {
   if (!value) {
@@ -2942,8 +3287,10 @@ const createInputsSection = (store) => {
       mount();
       render();
     };
-    const { h3, openButton, resetButton, title } = _title(store, reset);
+    const { eyebrow, h3, openButton, resetButton, title, titleCopy } = _title(store, reset);
+    openButton.hidden = (workflow == null ? void 0 : workflow.downloadable) === false;
     const cellElements = [];
+    let advanced = null;
     if (workflow) {
       const inputCells = manager.workflow.cells("input");
       for (const id in inputCells) {
@@ -2967,8 +3314,16 @@ const createInputsSection = (store) => {
         if (cell.shape === "upload") {
           wrapper.appendChild(_retainedUpload(component));
         }
-        options.appendChild(wrapper);
+        if (cell.advanced) {
+          advanced ?? (advanced = _advanced());
+          advanced.fields.appendChild(wrapper);
+        } else {
+          options.appendChild(wrapper);
+        }
       }
+    }
+    if (advanced) {
+      options.appendChild(advanced.details);
     }
     uiRegistry.set(INPUTS_CLASSES.cells, cellElements);
     _root.appendChild(title);
@@ -2978,12 +3333,14 @@ const createInputsSection = (store) => {
     elements[MAIN_CLASSES._].prepend(_root);
     uiRegistry.set(INPUTS_CLASSES._, _root);
     uiRegistry.set(INPUTS_CLASSES.description, description);
+    uiRegistry.set(INPUTS_CLASSES.eyebrow, eyebrow);
     uiRegistry.set(INPUTS_CLASSES.h3, h3);
     uiRegistry.set(INPUTS_CLASSES.openButton, openButton);
     uiRegistry.set(INPUTS_CLASSES.resetButton, resetButton);
     uiRegistry.set(INPUTS_CLASSES.options, options);
     uiRegistry.set(INPUTS_CLASSES.readiness, readiness);
     uiRegistry.set(INPUTS_CLASSES.title, title);
+    uiRegistry.set(INPUTS_CLASSES.titleCopy, titleCopy);
     mountedCells = cellElements;
     mountedWorkflowId = workflowId;
     if (workflowId) {
@@ -3017,7 +3374,7 @@ const createInputsSection = (store) => {
     debugLog(WORKFLOW_INPUTS_MOUNTED);
   };
   const render = () => {
-    var _a2, _b2, _c2;
+    var _a2, _b2, _c2, _d;
     const state = store.getState();
     const { manager } = state;
     const { uiRegistry } = manager;
@@ -3027,19 +3384,33 @@ const createInputsSection = (store) => {
     }
     const cells = elements[INPUTS_CLASSES.cells];
     const descr = elements[INPUTS_CLASSES.description];
+    const eyebrow = elements[INPUTS_CLASSES.eyebrow];
     const h3 = elements[INPUTS_CLASSES.h3];
+    const root = elements[INPUTS_CLASSES._];
+    const openButton = elements[INPUTS_CLASSES.openButton];
     const readiness = elements[INPUTS_CLASSES.readiness];
     const workflow = manager.workflow.current();
     descr.textContent = manager.workflow.description();
     h3.textContent = manager.workflow.title();
+    if (eyebrow) {
+      const isOrchestra = isWorkflowOrchestra(workflow);
+      const blockCount = ((_a2 = workflow == null ? void 0 : workflow.stages) == null ? void 0 : _a2.length) || 0;
+      eyebrow.textContent = isOrchestra ? blockCount ? `Orchestra · ${blockCount} ${blockCount === 1 ? "block" : "blocks"}` : "Orchestra" : "Block";
+    }
+    if (root) {
+      root.dataset.workflowKind = isWorkflowOrchestra(workflow) ? "orchestra" : "block";
+    }
+    if (openButton) {
+      openButton.hidden = (workflow == null ? void 0 : workflow.downloadable) === false;
+    }
     if (readiness) {
-      const status = (_a2 = workflow == null ? void 0 : workflow.readiness) == null ? void 0 : _a2.status;
-      const issues = ((_b2 = workflow == null ? void 0 : workflow.readiness) == null ? void 0 : _b2.issues) || [];
+      const status = (_b2 = workflow == null ? void 0 : workflow.readiness) == null ? void 0 : _b2.status;
+      const issues = ((_c2 = workflow == null ? void 0 : workflow.readiness) == null ? void 0 : _c2.issues) || [];
       readiness.hidden = !status || status === "ready";
       if (status && status !== "ready") {
         readiness.dataset.status = status;
         const prefix = status === "setup_required" ? "Setup required" : "Setup check";
-        readiness.textContent = `${prefix}: ${((_c2 = issues[0]) == null ? void 0 : _c2.message) || "Review this workflow before running."}`;
+        readiness.textContent = `${prefix}: ${((_d = issues[0]) == null ? void 0 : _d.message) || "Review this workflow before running."}`;
       } else {
         readiness.textContent = "";
         delete readiness.dataset.status;
@@ -3053,6 +3424,12 @@ const createInputsSection = (store) => {
       if (cell && parent) {
         if (status) {
           parent.dataset.status = status;
+          if (status === "error") {
+            const advanced = cell.closest(`details.${INPUTS_CLASSES.advanced}`);
+            if (advanced) {
+              advanced.open = true;
+            }
+          }
         } else {
           delete parent.dataset.status;
         }
@@ -3092,7 +3469,7 @@ const fetchWorkflowDefinitions = async () => {
   if (!(data == null ? void 0 : data.workflows) || !Array.isArray(data.workflows.nodes)) {
     throw new WorkflowApiError("Invalid workflows response shape.", { payload: data });
   }
-  return data.workflows;
+  return normalizeWorkflowDatasetKinds(data.workflows);
 };
 const fetchWorkflowJSON = async (workflowId) => {
   const { syntax } = getLfFramework();
@@ -5557,6 +5934,7 @@ _LfWorkflowRunnerManager_FRAMEWORK = /* @__PURE__ */ new WeakMap(), _LfWorkflowR
       lastRunId = state.currentRunId;
     }
     if (current.id !== lastId) {
+      needs.actionButton = true;
       needs.main = true;
       lastId = current.id;
     }

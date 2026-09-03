@@ -25,7 +25,12 @@ from ..services.executor import (
 from ..services.job_service import get_job_status
 from ..services import job_store
 from ..services.run_service import run_workflow
-from ..services.workflow_service import list_workflows as svc_list_workflows, get_workflow_content
+from ..services.sequence_runtime import is_sequence_child_job
+from ..services.workflow_service import (
+    WorkflowHasNoDownloadableGraphError,
+    get_workflow_content,
+    list_workflows as svc_list_workflows,
+)
 from ..config import get_settings
 from ._helpers import (
     build_output_preview,
@@ -173,6 +178,8 @@ async def _send_initial_snapshot(
 
             events = []
             for job in jobs.values():
+                if is_sequence_child_job(job):
+                    continue
                 owner = getattr(job, "owner_id", None)
                 if subscriber_owner and owner and owner != subscriber_owner:
                     continue
@@ -395,6 +402,9 @@ async def stream_runs_controller(request: web.Request) -> web.Response:
                 # sentinel to close
                 break
 
+            if is_sequence_child_job(event):
+                continue
+
             if subscriber_owner is not None and event.get("owner_id") != subscriber_owner:
                 continue
 
@@ -508,6 +518,8 @@ async def list_runs_controller(request: web.Request) -> web.Response:
     runs_out = []
 
     def append_run(job) -> None:
+        if is_sequence_child_job(job):
+            return
         if summary_only:
             runs_out.append(_normalize_run_history_record(serialize_run_summary(job)))
             return
@@ -1011,7 +1023,8 @@ async def get_workflow_controller(request: web.Request) -> web.Response:
     Returns:
         web.Response: A JSON response containing the workflow content if found,
             or an error response (400 for missing ID, 401/403 for auth failure,
-            404 if workflow not found).
+            404 if the workflow is unknown, or 409 if the registered workflow is
+            a graph-free orchestra).
 
     Raises:
         None explicitly, but may propagate exceptions from underlying functions
@@ -1025,7 +1038,10 @@ async def get_workflow_controller(request: web.Request) -> web.Response:
         if isinstance(auth_resp, web.Response):
             return auth_resp
 
-    content = get_workflow_content(workflow_id)
+    try:
+        content = get_workflow_content(workflow_id)
+    except WorkflowHasNoDownloadableGraphError as exc:
+        return web.json_response({"detail": exc.code}, status=409)
     if content is None:
         return web.Response(status=404, text='Workflow not found')
     return web.json_response(content)

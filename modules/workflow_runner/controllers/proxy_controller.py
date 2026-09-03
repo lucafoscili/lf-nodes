@@ -29,10 +29,8 @@ LOG = logging.getLogger(__name__)
 @PromptServer.instance.routes.post(f"{API_ROUTE_PREFIX}/proxy/{{service}}")
 async def proxy_service(request: web.Request) -> web.Response:
     try:
-        if proxy_svc.PROXY_SECRET:
-            provided = request.headers.get(proxy_svc.PROXY_SECRET_HEADER, "")
-            if not provided or provided != proxy_svc.PROXY_SECRET:
-                return web.json_response({"detail": "unauthorized"}, status=401)
+        if not proxy_svc._is_authorized(request):
+            return web.json_response({"detail": "unauthorized"}, status=401)
 
         service = request.match_info.get("service", "")
         cfg = proxy_svc.SERVICES.get(service)
@@ -320,6 +318,17 @@ async def proxy_service(request: web.Request) -> web.Response:
 async def proxy_service_status(request: web.Request) -> web.Response:
     try:
         service = request.match_info.get("service", "")
+        if not proxy_svc._is_authorized(request):
+            return web.json_response(
+                {
+                    "service": service,
+                    "ready": False,
+                    "detail": "unauthorized",
+                    "reason": "proxy_authentication_required",
+                },
+                status=401,
+            )
+
         cfg = proxy_svc.SERVICES.get(service)
         if cfg is None:
             return web.json_response({"detail": f"unknown_service: {service}"}, status=404)
@@ -363,10 +372,8 @@ async def proxy_service_with_path(request: web.Request) -> web.Response:
         except Exception:
             LOG.exception("Failed to log incoming proxy request")
 
-        if proxy_svc.PROXY_SECRET:
-            provided = request.headers.get(proxy_svc.PROXY_SECRET_HEADER, "")
-            if not provided or provided != proxy_svc.PROXY_SECRET:
-                return web.json_response({"detail": "unauthorized"}, status=401)
+        if not proxy_svc._is_authorized(request):
+            return web.json_response({"detail": "unauthorized"}, status=401)
 
         service = request.match_info.get("service", "")
         proxypath = request.match_info.get("proxypath", "")

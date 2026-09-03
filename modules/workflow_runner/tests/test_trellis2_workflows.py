@@ -1,4 +1,4 @@
-"""Offline contracts for the generic TRELLIS.2 Runner workflows."""
+"""Offline contracts for the native TRELLIS.2 Runner workflow."""
 
 from __future__ import annotations
 
@@ -17,7 +17,9 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 constants_module = sys.modules.setdefault(
     "modules.utils.constants", types.ModuleType("modules.utils.constants")
 )
-constants_module.API_ROUTE_PREFIX = "/api/lf-nodes"
+constants_module.API_ROUTE_PREFIX = getattr(
+    constants_module, "API_ROUTE_PREFIX", "/api/lf-nodes"
+)
 constants_module.FUNCTION = "on_exec"
 constants_module.Input = getattr(
     constants_module,
@@ -41,47 +43,13 @@ from modules.workflow_runner.workflows import _WORKFLOW_MODULES
 from modules.workflow_runner.workflows import trellis2 as workflow_module
 
 
-SINGLE, MULTIVIEW = workflow_module.WORKFLOWS
+SINGLE = workflow_module.WORKFLOWS[0]
 MAX_SEED = 0x7FFFFFFF
-DECLARED_MODEL_PATHS = {
-    path
-    for asset in SINGLE.required_model_assets
-    for path in asset.relative_paths
-}
-EXPECTED_MODEL_PATHS = {
-    "microsoft/TRELLIS.2-4B/pipeline.json",
-    "facebook/dinov3-vitl16-pretrain-lvd1689m/config.json",
-    "facebook/dinov3-vitl16-pretrain-lvd1689m/model.safetensors",
-    "microsoft/TRELLIS-image-large/ckpts/ss_dec_conv3d_16l8_fp16.json",
-    "microsoft/TRELLIS-image-large/ckpts/ss_dec_conv3d_16l8_fp16.safetensors",
-    *{
-        f"microsoft/TRELLIS.2-4B/ckpts/{stem}.{extension}"
-        for stem in (
-            "ss_flow_img_dit_1_3B_64_bf16",
-            "shape_dec_next_dc_f16c32_fp16",
-            "slat_flow_img2shape_dit_1_3B_512_bf16",
-            "slat_flow_img2shape_dit_1_3B_1024_bf16",
-            "tex_dec_next_dc_f16c32_fp16",
-            "slat_flow_imgshape2tex_dit_1_3B_512_bf16",
-            "slat_flow_imgshape2tex_dit_1_3B_1024_bf16",
-        )
-        for extension in ("json", "safetensors")
-    },
-}
 
 
 def _single_inputs(**overrides: Any) -> dict[str, Any]:
     return {
         "image": [Path("C:/uploads/object.png")],
-        "quality": "balanced",
-        "seed": "42",
-        **overrides,
-    }
-
-
-def _multiview_inputs(**overrides: Any) -> dict[str, Any]:
-    return {
-        "front_image": [Path("C:/uploads/front.png")],
         "quality": "balanced",
         "seed": "42",
         **overrides,
@@ -119,59 +87,36 @@ def _assert_links_resolve(prompt: dict[str, Any]) -> None:
             assert source_id in prompt
 
 
-def test_declarations_are_two_small_generic_mesh_cards() -> None:
+def test_declaration_is_one_small_native_mesh_card() -> None:
     assert [workflow.id for workflow in workflow_module.WORKFLOWS] == [
-        "trellis2_image_to_textured_mesh",
-        "trellis2_multiview_to_textured_mesh",
+        "trellis2_image_to_textured_mesh"
     ]
-    assert [workflow.value for workflow in workflow_module.WORKFLOWS] == [
-        "Image to Textured Mesh",
-        "Multi-view to Textured Mesh",
-    ]
-    assert {workflow.category for workflow in workflow_module.WORKFLOWS} == {
-        "TRELLIS.2"
-    }
+    assert SINGLE.value == "Image to Textured Mesh"
+    assert SINGLE.category == "TRELLIS.2"
     assert [cell.id for cell in SINGLE.inputs] == ["image", "quality", "seed"]
-    assert [cell.id for cell in MULTIVIEW.inputs] == [
-        "front_image",
-        "back_image",
-        "left_image",
-        "right_image",
-        "quality",
-        "seed",
+    assert [(cell.node_id, cell.id, cell.shape) for cell in SINGLE.outputs] == [
+        ("save_preview", "preview", "masonry"),
+        ("register_output", "mesh", "code"),
     ]
-    assert [cell.required for cell in MULTIVIEW.inputs[:4]] == [
-        True,
-        False,
-        False,
-        False,
-    ]
-    assert all(cell.shape == "upload" for cell in MULTIVIEW.inputs[:4])
-    assert all(
-        [(cell.node_id, cell.id, cell.shape) for cell in workflow.outputs]
-        == [
-            ("save_preview", "preview", "masonry"),
-            ("register_output", "mesh", "code"),
-        ]
-        for workflow in workflow_module.WORKFLOWS
-    )
-    assert all(
-        cell.description
-        for workflow in workflow_module.WORKFLOWS
-        for cell in (*workflow.inputs, *workflow.outputs)
-    )
-    assert all("watertight" in workflow.description for workflow in workflow_module.WORKFLOWS)
+    assert all(cell.description for cell in (*SINGLE.inputs, *SINGLE.outputs))
+    assert "watertight" in SINGLE.description
     assert "trellis2" in _WORKFLOW_MODULES
 
 
 def test_quality_select_exposes_only_bounded_24_gb_profiles() -> None:
-    for workflow in workflow_module.WORKFLOWS:
-        cell = next(cell for cell in workflow.inputs if cell.id == "quality")
-        assert cell.props["lfValue"] == "balanced"
-        assert [
-            option["workflowValue"] for option in cell.props["lfDataset"]["nodes"]
-        ] == ["balanced", "draft"]
-
+    cell = next(cell for cell in SINGLE.inputs if cell.id == "quality")
+    assert cell.props["lfValue"] == "balanced"
+    assert [
+        option["workflowValue"] for option in cell.props["lfDataset"]["nodes"]
+    ] == ["draft", "balanced"]
+    assert [option["profileTier"] for option in cell.props["lfDataset"]["nodes"]] == [
+        "fast",
+        "baseline",
+    ]
+    assert [option["value"] for option in cell.props["lfDataset"]["nodes"]] == [
+        "Fast · 512",
+        "Baseline · 1024",
+    ]
     assert workflow_module._QUALITY_SETTINGS == {
         "balanced": {
             "pipeline_type": "1024_cascade",
@@ -190,142 +135,92 @@ def test_quality_select_exposes_only_bounded_24_gb_profiles() -> None:
     }
 
 
-@pytest.mark.parametrize("workflow", workflow_module.WORKFLOWS)
-def test_graph_uses_explicit_core_cutout_and_never_calls_wrapper_rembg(
-    workflow: Any,
-) -> None:
-    prompt = workflow.load_prompt()
-
+def test_graph_uses_the_core_mask_crop() -> None:
+    prompt = SINGLE.load_prompt()
     assert prompt["background_model"] == {
         "class_type": "LoadBackgroundRemovalModel",
         "inputs": {"bg_removal_name": "birefnet.safetensors"},
         "_meta": {"title": "Load the foreground extraction model"},
     }
-    preprocess_nodes = [
-        node
-        for node in prompt.values()
-        if node["class_type"] == "Trellis2PreProcessImage"
-    ]
-    assert preprocess_nodes
-    assert all(
-        node["inputs"]["remove_background"] is False for node in preprocess_nodes
-    )
-    assert all(node["inputs"]["padding"] == 0 for node in preprocess_nodes)
-    assert all(node["inputs"]["max_size"] == 2048 for node in preprocess_nodes)
-
-    invert_nodes = {
-        node_id
-        for node_id, node in prompt.items()
-        if node["class_type"] == "InvertMask"
-    }
-    for node in prompt.values():
-        if node["class_type"] == "JoinImageWithAlpha":
-            assert node["inputs"]["alpha"][0] in invert_nodes
-
-
-@pytest.mark.parametrize("workflow", workflow_module.WORKFLOWS)
-def test_graph_fixes_the_safe_loader_and_postprocess_contract(workflow: Any) -> None:
-    prompt = workflow.load_prompt()
-
-    assert prompt["load_model"]["inputs"] == {
-        "modelname": "microsoft/TRELLIS.2-4B",
-        "backend": "sdpa",
-        "device": "cuda",
-        "low_vram": True,
-        "keep_models_loaded": False,
-        "conv_backend": "flex_gemm",
-        "sparse_backend": "xformers",
-        "use_reconviagen": False,
-    }
-    assert prompt["generate"]["inputs"]["max_num_tokens"] == 49152
-    assert prompt["generate"]["inputs"]["sparse_structure_resolution"] == 32
-    assert prompt["generate"]["inputs"]["use_tiled_decoder"] is True
-    assert prompt["generate"]["inputs"]["sampler"] == "euler"
-    assert prompt["postprocess"]["inputs"]["simplify_method"] == "Cumesh"
-    assert prompt["postprocess"]["inputs"]["texture_alpha_mode"] == "OPAQUE"
-    assert prompt["postprocess"]["inputs"]["target_face_num"] == 200000
-    assert prompt["postprocess"]["inputs"]["texture_size"] == 4096
-
-
-@pytest.mark.parametrize("workflow", workflow_module.WORKFLOWS)
-def test_export_is_glb_and_registered_from_the_relative_path(workflow: Any) -> None:
-    prompt = workflow.load_prompt()
-
-    assert prompt["export"]["class_type"] == "Trellis2ExportMesh"
-    assert prompt["export"]["inputs"]["file_format"] == "glb"
-    assert prompt["register_output"] == {
-        "class_type": "LF_RegisterOutputFile",
+    assert prompt["preprocess"] == {
+        "class_type": "ImageCropToMask",
         "inputs": {
-            "relative_path": ["export", 1],
-            "ui_widget": {},
+            "images": ["load_image", 0],
+            "masks": ["remove_background", 0],
+            "width": 1024,
+            "height": 1024,
+            "pad_factor": 1.0,
+            "grow_mask": 0,
+            "background": "#000000",
         },
-        "_meta": {"title": "Register the GLB in durable history"},
+        "_meta": {"title": "Crop the isolated subject for native TRELLIS.2"},
+    }
+    assert not {
+        "InvertMask",
+        "JoinImageWithAlpha",
+        "Trellis2PreProcessImage",
+    }.intersection(node["class_type"] for node in prompt.values())
+
+
+def test_graph_uses_the_official_core_stage_contract() -> None:
+    prompt = SINGLE.load_prompt()
+    class_types = {node["class_type"] for node in prompt.values()}
+    assert prompt["load_model"]["inputs"] == {
+        "unet_name": "trellis_2_int8_convrot.safetensors",
+        "weight_dtype": "default",
+    }
+    assert prompt["clip_vision"]["inputs"] == {
+        "clip_name": "dino_v3_vit_l.safetensors"
+    }
+    assert prompt["shape_vae"]["inputs"] == {
+        "vae_name": "trellis_2_shape_vae_bf16.safetensors"
+    }
+    assert prompt["texture_vae"]["inputs"] == {
+        "vae_name": "trellis_2_texture_vae_bf16.safetensors"
+    }
+    assert prompt["decode_structure"]["inputs"]["resolution"] == "32"
+    assert prompt["upsample_shape"]["inputs"]["target_resolution"] == 1024
+    assert prompt["sample_structure"]["inputs"]["cfg"] == 7.5
+    assert prompt["sample_shape"]["inputs"]["scheduler"] == "simple"
+    assert prompt["sample_texture"]["inputs"]["cfg"] == 1.0
+    assert prompt["remesh"]["inputs"]["sign_mode"] == {
+        "sign_mode": "udf",
+        "qef": False,
+        "drop_inverted_components": False,
+        "drop_enclosed_components": False,
+    }
+    assert prompt["decimate"]["inputs"]["target_face_count"] == 200000
+    assert prompt["unwrap"]["inputs"]["resolution"] == 4096
+    assert prompt["bake_texture"]["inputs"]["texture_size"] == 4096
+    assert "Pixal3DConditioning" not in class_types
+    assert not any(class_type.startswith("MoGe") for class_type in class_types)
+
+
+def test_export_uses_standard_comfy_3d_history() -> None:
+    prompt = SINGLE.load_prompt()
+    assert prompt["register_output"] == {
+        "class_type": "SaveGLB",
+        "inputs": {
+            "mesh": ["final_mesh", 0],
+            "filename_prefix": "LF_Nodes/TRELLIS2/ImageToTexturedMesh/seed-42-balanced",
+        },
+        "_meta": {"title": "Save the GLB in durable history"},
     }
     assert prompt["render_preview"] == {
-        "class_type": "Trellis2RenderMultiViewNvdiffrast",
+        "class_type": "RenderMesh",
         "inputs": {
-            "trimesh": ["postprocess", 0],
-            "render_size": 512,
-            "ortho_scale": 1.2,
-            "azimuths": "0",
-            "elevations": "0",
-            "add_shading": True,
+            "mesh": ["final_mesh", 0],
+            "mode": "auto",
+            "width": 512,
+            "height": 512,
+            "background": "#000000",
         },
         "_meta": {"title": "Render a deterministic front preview"},
     }
-    assert prompt["save_preview"]["class_type"] == "SaveImage"
     assert prompt["save_preview"]["inputs"]["images"] == ["render_preview", 0]
 
 
-def test_multiview_graph_uses_the_proven_guidance_profile() -> None:
-    generator = MULTIVIEW.load_prompt()["generate"]
-
-    assert generator["class_type"] == "Trellis2MeshWithVoxelMultiViewGenerator"
-    assert generator["inputs"] == {
-        "pipeline": ["load_model", 0],
-        "front_image": ["preprocess_front", 0],
-        "back_image": ["preprocess_back", 0],
-        "left_image": ["preprocess_left", 0],
-        "right_image": ["preprocess_right", 0],
-        "seed": 42,
-        "pipeline_type": "1024_cascade",
-        "sparse_structure_steps": 12,
-        "sparse_structure_guidance_strength": 6.5,
-        "sparse_structure_guidance_rescale": 0.05,
-        "sparse_structure_rescale_t": 4.0,
-        "shape_steps": 12,
-        "shape_guidance_strength": 6.5,
-        "shape_guidance_rescale": 0.05,
-        "shape_rescale_t": 4.0,
-        "texture_steps": 12,
-        "texture_guidance_strength": 3.0,
-        "texture_guidance_rescale": 0.2,
-        "texture_rescale_t": 3.0,
-        "max_num_tokens": 49152,
-        "sparse_structure_resolution": 32,
-        "generate_texture_slat": True,
-        "sparse_structure_guidance_interval_start": 0.1,
-        "sparse_structure_guidance_interval_end": 1.0,
-        "shape_guidance_interval_start": 0.1,
-        "shape_guidance_interval_end": 1.0,
-        "texture_guidance_interval_start": 0.0,
-        "texture_guidance_interval_end": 0.9,
-        "use_tiled_decoder": True,
-        "front_axis": "z",
-        "blend_temperature": 1.0,
-        "sampler": "euler",
-        "fill_holes": True,
-        "hole_iterations": 1,
-        "verbose": False,
-        "dino_lock": 0.0,
-        "dino_substeps": 4,
-        "hole_fill_algorithm": "flood_fill",
-        "dino_foundation_cap": 1.0,
-        "keep_only_shell": True,
-    }
-
-
-def test_single_configuration_maps_upload_seed_and_draft_profile(
+def test_configuration_maps_upload_seed_and_draft_profile(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     resolved = "lf-workflow-runner/sha256-object.png [input]"
@@ -337,113 +232,61 @@ def test_single_configuration_maps_upload_seed_and_draft_profile(
         else pytest.fail("unexpected upload resolution request"),
     )
     prompt = SINGLE.load_prompt()
-
-    SINGLE.configure_prompt(
-        prompt,
-        _single_inputs(quality="draft", seed="240826"),
-    )
+    SINGLE.configure_prompt(prompt, _single_inputs(quality="draft", seed="240826"))
 
     assert prompt["load_image"]["inputs"]["image"] == resolved
-    assert prompt["generate"]["inputs"]["seed"] == 240826
-    assert prompt["generate"]["inputs"]["pipeline_type"] == "512"
-    assert prompt["generate"]["inputs"]["sparse_structure_steps"] == 12
-    assert prompt["postprocess"]["inputs"]["target_face_num"] == 100000
-    assert prompt["postprocess"]["inputs"]["texture_size"] == 2048
-    assert prompt["postprocess"]["inputs"]["dual_contouring_resolution"] == "512"
-    assert prompt["export"]["inputs"]["filename_prefix"] == (
+    for node_id in ("sample_structure", "sample_shape_512", "sample_texture"):
+        assert prompt[node_id]["inputs"]["seed"] == 240826
+        assert prompt[node_id]["inputs"]["steps"] == 12
+    assert "upsample_shape" not in prompt
+    assert "sample_shape" not in prompt
+    assert prompt["texture_stage"]["inputs"] == {
+        "positive": ["shape_stage", 0],
+        "negative": ["shape_stage", 1],
+        "shape_latent": ["sample_shape_512", 0],
+    }
+    assert prompt["decode_shape"]["inputs"]["samples"] == ["sample_shape_512", 0]
+    assert prompt["remesh"]["inputs"]["resolution"] == 512
+    assert prompt["decimate"]["inputs"]["target_face_count"] == 100000
+    assert prompt["unwrap"]["inputs"]["resolution"] == 2048
+    assert prompt["bake_texture"]["inputs"]["texture_size"] == 2048
+    assert prompt["register_output"]["inputs"]["filename_prefix"] == (
         "LF_Nodes/TRELLIS2/ImageToTexturedMesh/seed-240826-draft"
     )
     assert prompt["save_preview"]["inputs"]["filename_prefix"] == (
         "LF_Nodes/TRELLIS2/ImageToTexturedMesh/seed-240826-draft-preview"
     )
-
-
-def test_multiview_configuration_keeps_only_uploaded_orientation_branches(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    calls: list[str] = []
-
-    def resolve(inputs: dict[str, Any], name: str) -> str:
-        calls.append(name)
-        assert inputs[name]
-        return f"lf-workflow-runner/{name}.png [input]"
-
-    monkeypatch.setattr(workflow_module, "resolve_load_image_reference", resolve)
-    prompt = MULTIVIEW.load_prompt()
-
-    MULTIVIEW.configure_prompt(
-        prompt,
-        _multiview_inputs(
-            left_image=[Path("C:/uploads/left.png")],
-            quality="draft",
-            seed="7",
-        ),
-    )
-
-    assert calls == ["front_image", "left_image"]
-    assert prompt["load_front"]["inputs"]["image"].endswith("front_image.png [input]")
-    assert prompt["load_left"]["inputs"]["image"].endswith("left_image.png [input]")
-    for node_id in (
-        "load_back",
-        "remove_back",
-        "invert_back",
-        "alpha_back",
-        "preprocess_back",
-        "load_right",
-        "remove_right",
-        "invert_right",
-        "alpha_right",
-        "preprocess_right",
-    ):
-        assert node_id not in prompt
-    assert set(prompt["generate"]["inputs"]) >= {"front_image", "left_image"}
-    assert "back_image" not in prompt["generate"]["inputs"]
-    assert "right_image" not in prompt["generate"]["inputs"]
-    assert prompt["generate"]["inputs"]["pipeline_type"] == "512"
-    assert prompt["generate"]["inputs"]["seed"] == 7
     _assert_links_resolve(prompt)
 
 
-@pytest.mark.parametrize(
-    ("workflow", "inputs", "missing_field"),
-    [
-        (SINGLE, {"quality": "balanced", "seed": "42"}, "image"),
-        (MULTIVIEW, {"quality": "balanced", "seed": "42"}, "front_image"),
-    ],
-)
 def test_required_source_fails_before_upload_staging(
     monkeypatch: pytest.MonkeyPatch,
-    workflow: Any,
-    inputs: dict[str, Any],
-    missing_field: str,
 ) -> None:
     monkeypatch.setattr(
         workflow_module,
         "resolve_load_image_reference",
         lambda *_args, **_kwargs: pytest.fail("missing input must not stage uploads"),
     )
-    prompt = workflow.load_prompt()
+    prompt = SINGLE.load_prompt()
     original = copy.deepcopy(prompt)
 
     with pytest.raises(InputValidationError) as error:
-        workflow.configure_prompt(prompt, inputs)
+        SINGLE.configure_prompt(prompt, {"quality": "balanced", "seed": "42"})
 
-    assert error.value.input_name == missing_field
+    assert error.value.input_name == "image"
     assert prompt == original
 
 
 @pytest.mark.parametrize(
-    ("workflow", "inputs", "field"),
+    ("inputs", "field"),
     [
-        (SINGLE, _single_inputs(quality="1536"), "quality"),
-        (SINGLE, _single_inputs(seed=-1), "seed"),
-        (MULTIVIEW, _multiview_inputs(quality="hq"), "quality"),
-        (MULTIVIEW, _multiview_inputs(seed=MAX_SEED + 1), "seed"),
+        (_single_inputs(quality="1536"), "quality"),
+        (_single_inputs(seed=-1), "seed"),
+        (_single_inputs(seed=MAX_SEED + 1), "seed"),
     ],
 )
 def test_invalid_controls_fail_before_upload_staging_or_graph_mutation(
     monkeypatch: pytest.MonkeyPatch,
-    workflow: Any,
     inputs: dict[str, Any],
     field: str,
 ) -> None:
@@ -452,11 +295,11 @@ def test_invalid_controls_fail_before_upload_staging_or_graph_mutation(
         "resolve_load_image_reference",
         lambda *_args, **_kwargs: pytest.fail("invalid input must not stage uploads"),
     )
-    prompt = workflow.load_prompt()
+    prompt = SINGLE.load_prompt()
     original = copy.deepcopy(prompt)
 
     with pytest.raises((InputValidationError, ValueError)) as error:
-        workflow.configure_prompt(prompt, inputs)
+        SINGLE.configure_prompt(prompt, inputs)
 
     if isinstance(error.value, InputValidationError):
         assert error.value.input_name == field
@@ -465,141 +308,82 @@ def test_invalid_controls_fail_before_upload_staging_or_graph_mutation(
     assert prompt == original
 
 
-def test_download_graphs_use_visible_defaults_without_local_upload_paths() -> None:
-    single_prompt = SINGLE.load_prompt()
+def test_download_graph_uses_visible_defaults_without_local_upload_paths() -> None:
+    prompt = SINGLE.load_prompt()
     assert SINGLE.configure_download is not None
-    SINGLE.configure_download(single_prompt, _default_values(SINGLE))
-    assert single_prompt["load_image"]["inputs"]["image"] == "example.png"
-    assert single_prompt["generate"]["inputs"]["pipeline_type"] == "1024_cascade"
-
-    multiview_prompt = MULTIVIEW.load_prompt()
-    assert MULTIVIEW.configure_download is not None
-    MULTIVIEW.configure_download(multiview_prompt, _default_values(MULTIVIEW))
-    assert multiview_prompt["load_front"]["inputs"]["image"] == "example-front.png"
-    assert "load_back" not in multiview_prompt
-    assert "load_left" not in multiview_prompt
-    assert "load_right" not in multiview_prompt
-    assert set(
-        key
-        for key in multiview_prompt["generate"]["inputs"]
-        if key.endswith("_image")
-    ) == {"front_image"}
-    _assert_links_resolve(multiview_prompt)
+    SINGLE.configure_download(prompt, _default_values(SINGLE))
+    assert prompt["load_image"]["inputs"]["image"] == "example.png"
+    assert prompt["upsample_shape"]["inputs"]["target_resolution"] == 1024
+    assert prompt["decimate"]["inputs"]["target_face_count"] == 200000
+    assert prompt["bake_texture"]["inputs"]["texture_size"] == 4096
+    _assert_links_resolve(prompt)
 
 
-def test_declares_every_local_model_file_used_by_both_profiles() -> None:
-    assert DECLARED_MODEL_PATHS == EXPECTED_MODEL_PATHS
-    assert SINGLE.required_model_assets == MULTIVIEW.required_model_assets
+def _installed_model_names(category: str) -> set[str]:
+    return {
+        "background_removal": {"birefnet.safetensors"},
+        "clip_vision": {"dino_v3_vit_l.safetensors"},
+        "diffusion_models": {"trellis_2_int8_convrot.safetensors"},
+        "vae": {
+            "trellis_2_shape_vae_bf16.safetensors",
+            "trellis_2_texture_vae_bf16.safetensors",
+        },
+    }.get(category, set())
 
 
-def test_readiness_reports_wrapper_and_birefnet_setup_failures() -> None:
-    core_and_lf_nodes = {
-        "InvertMask",
-        "JoinImageWithAlpha",
-        "LF_RegisterOutputFile",
-        "LoadBackgroundRemovalModel",
-        "LoadImage",
-        "RemoveBackground",
-        "SaveImage",
-    }
-    scanner = WorkflowReadinessScanner(
-        node_mapping_loader=lambda: {name: object() for name in core_and_lf_nodes},
-        model_filename_loader=lambda _category: (),
-        model_file_exists_loader=lambda path: path in DECLARED_MODEL_PATHS,
-    )
-
-    result = evaluate_workflow_readiness(SINGLE, scanner=scanner)
-
-    assert result["status"] == "setup_required"
-    assert any(
-        issue == {
-            "code": "model_missing",
-            "message": (
-                "Required background-removal model file is not installed: "
-                "birefnet.safetensors."
-            ),
-        }
-        for issue in result["issues"]
-    )
-    missing_types = {
-        issue["message"].removeprefix("Required node type is not installed: ").removesuffix(".")
-        for issue in result["issues"]
-        if issue["code"] == "node_missing"
-    }
-    assert missing_types == {
-        "Trellis2ExportMesh",
-        "Trellis2LoadModel",
-        "Trellis2MeshWithVoxelGenerator",
-        "Trellis2PostProcessAndUnWrapAndRasterizer",
-        "Trellis2PreProcessImage",
-        "Trellis2RenderMultiViewNvdiffrast",
-    }
-
-
-@pytest.mark.parametrize("workflow", workflow_module.WORKFLOWS)
-def test_readiness_is_ready_when_declared_nodes_and_birefnet_are_present(
-    workflow: Any,
-) -> None:
-    prompt = workflow.load_prompt()
+def test_readiness_is_ready_when_native_nodes_and_models_are_present() -> None:
+    prompt = SINGLE.load_prompt()
     node_types = {node["class_type"] for node in prompt.values()}
     scanner = WorkflowReadinessScanner(
         node_mapping_loader=lambda: {name: object() for name in node_types},
-        model_filename_loader=lambda category: (
-            {"birefnet.safetensors"} if category == "background_removal" else ()
-        ),
-        model_file_exists_loader=lambda path: path in DECLARED_MODEL_PATHS,
+        model_filename_loader=_installed_model_names,
     )
-
-    assert evaluate_workflow_readiness(workflow, scanner=scanner) == {
+    assert evaluate_workflow_readiness(SINGLE, scanner=scanner) == {
         "status": "ready",
         "issues": [],
     }
 
 
-@pytest.mark.parametrize("workflow", workflow_module.WORKFLOWS)
-def test_readiness_blocks_an_incomplete_declared_model_asset(workflow: Any) -> None:
-    prompt = workflow.load_prompt()
+def test_readiness_requires_the_official_trellis_dino_encoder() -> None:
+    prompt = SINGLE.load_prompt()
     node_types = {node["class_type"] for node in prompt.values()}
-    missing_path = "facebook/dinov3-vitl16-pretrain-lvd1689m/model.safetensors"
+
+    def installed_with_only_the_pixal_encoder(category: str) -> set[str]:
+        if category == "clip_vision":
+            return {"dino_v3_L_naf_fp32.safetensors"}
+        return _installed_model_names(category)
+
     scanner = WorkflowReadinessScanner(
         node_mapping_loader=lambda: {name: object() for name in node_types},
-        model_filename_loader=lambda category: (
-            {"birefnet.safetensors"} if category == "background_removal" else ()
-        ),
-        model_file_exists_loader=lambda path: (
-            path in DECLARED_MODEL_PATHS and path != missing_path
-        ),
+        model_filename_loader=installed_with_only_the_pixal_encoder,
     )
-
-    assert evaluate_workflow_readiness(workflow, scanner=scanner) == {
+    assert evaluate_workflow_readiness(SINGLE, scanner=scanner) == {
         "status": "setup_required",
         "issues": [
             {
-                "code": "model_asset_missing",
+                "code": "model_missing",
                 "message": (
-                    "Required local model asset is incomplete: DINOv3 image encoder "
-                    f"(missing {missing_path})."
+                    "Required CLIP Vision model file is not installed: "
+                    "dino_v3_vit_l.safetensors."
                 ),
             }
         ],
     }
 
 
-def test_public_copy_and_graphs_are_domain_neutral() -> None:
-    public = ""
-    for workflow in workflow_module.WORKFLOWS:
-        public += json.dumps(
-            {
-                "id": workflow.id,
-                "value": workflow.value,
-                "description": workflow.description,
-                "category": workflow.category,
-                "inputs": [cell.to_dict() for cell in workflow.inputs],
-                "outputs": [cell.to_dict() for cell in workflow.outputs],
-            },
-            ensure_ascii=False,
-        ).casefold()
-        public += workflow.workflow_path.read_text(encoding="utf-8").casefold()
+def test_public_copy_and_graph_are_domain_neutral() -> None:
+    public = json.dumps(
+        {
+            "id": SINGLE.id,
+            "value": SINGLE.value,
+            "description": SINGLE.description,
+            "category": SINGLE.category,
+            "inputs": [cell.to_dict() for cell in SINGLE.inputs],
+            "outputs": [cell.to_dict() for cell in SINGLE.outputs],
+        },
+        ensure_ascii=False,
+    ).casefold()
+    public += SINGLE.workflow_path.read_text(encoding="utf-8").casefold()
 
     for forbidden in (
         "velora",

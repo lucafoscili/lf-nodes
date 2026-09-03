@@ -160,3 +160,34 @@ async def test_history_and_sse_preserve_terminal_results_by_default_and_bound_on
 
     assert first_event(legacy_sse)["result"] == job.result
     assert "result" not in first_event(summary_sse)
+
+
+async def test_sequence_child_runs_stay_out_of_history_and_sse_cards():
+    parent = job_store.Job(
+        id="lf-sequence:0123456789abcdef0123456789abcdef",
+        workflow_id="identity_cleanup_restage",
+        status=job_store.JobStatus.RUNNING,
+        submission_id="lf-web:sequence-parent",
+    )
+    child = job_store.Job(
+        id="comfy-prompt-child",
+        workflow_id="krea2_identity_edit",
+        status=job_store.JobStatus.RUNNING,
+        submission_id="lfseq:0123456789abcdef0123456789abcdef:00",
+    )
+
+    async def fake_list_jobs(owner_id=None, status=None):
+        return {parent.id: parent, child.id: child}
+
+    with patch.object(job_store, "list_jobs", side_effect=fake_list_jobs):
+        history = await api_controllers.list_runs_controller(
+            SimpleNamespace(query={"summary": "1"})
+        )
+        snapshot = FakeResponse()
+        await api_controllers._send_initial_snapshot(snapshot, summary_only=True)
+
+    history_ids = [run["run_id"] for run in json.loads(history.text)["runs"]]
+    snapshot_text = b"".join(snapshot.written).decode("utf-8")
+    assert history_ids == [parent.id]
+    assert parent.id in snapshot_text
+    assert child.id not in snapshot_text

@@ -17,6 +17,7 @@ import {
   extractDatasetCellPreviewUrl,
   extractHistoryExecutionTargets,
   extractHistoryPrompt,
+  findComfyArgv,
   normalizeExecutionTargetIds,
   parseQueueSnapshot,
   queueIds,
@@ -281,26 +282,6 @@ const validatePreviewAssets = async (
     }
   }
   return errors;
-};
-
-const findArgv = (value: unknown): string[] | null => {
-  if (Array.isArray(value)) {
-    if (value.every((item) => typeof item === 'string') && value.includes('main.py')) {
-      return value as string[];
-    }
-    for (const item of value) {
-      const found = findArgv(item);
-      if (found) return found;
-    }
-    return null;
-  }
-  if (value && typeof value === 'object') {
-    for (const item of Object.values(value)) {
-      const found = findArgv(item);
-      if (found) return found;
-    }
-  }
-  return null;
 };
 
 const launchBrowser = async (options: CliOptions): Promise<Browser> => {
@@ -2900,7 +2881,7 @@ const main = async () => {
       });
       throw error;
     }
-    const argv = findArgv(systemStats);
+    const argv = findComfyArgv(systemStats);
     summary.environment.comfyArgv = argv;
     summary.environment.coldCache = Boolean(argv?.includes('--cache-none'));
 

@@ -25,10 +25,17 @@ from .job_store import JobStatus, set_job_status
 from .registry import (
     InputValidationError,
     WorkflowNode,
+    WorkflowSequenceNode,
     get_workflow,
     get_workflow_submission_policy,
 )
-from .readiness import evaluate_declared_model_assets
+from .readiness import (
+    READINESS_SETUP_REQUIRED,
+    evaluate_declared_model_assets,
+    evaluate_input_option_requirement,
+    evaluate_workflow_readiness,
+    selected_input_option_requirements,
+)
 from ..config import CONFIG as RUNNER_CONFIG, get_settings
 from ...utils.json_safe import json_safe
 
@@ -155,7 +162,126 @@ def _make_run_payload(
 
     return {"message": detail or "", "payload": payload, "status": "error" if error_message else "ready"}
 
-def _prepare_workflow_execution(payload: Dict[str, Any]) -> Tuple[WorkflowNode, Dict[str, Any]]:
+
+def validate_workflow_requirements(
+    definition: WorkflowNode,
+    inputs: Mapping[str, Any],
+) -> None:
+    """Fail closed on one block's declared host prerequisites."""
+
+    model_assets = evaluate_declared_model_assets(definition)
+    if model_assets.get("status") == "setup_required":
+        raw_issues = model_assets.get("issues")
+        issues = raw_issues if isinstance(raw_issues, list) else []
+        first_issue = issues[0] if issues and isinstance(issues[0], Mapping) else {}
+        detail = str(
+            first_issue.get("message")
+            or "Required local model assets are not ready."
+        )
+        response = _make_run_payload(
+            detail=detail,
+            error_message="workflow_setup_required",
+        )
+        raise WorkflowPreparationError(response, 409)
+
+    for requirement in selected_input_option_requirements(definition, inputs):
+        option_readiness = evaluate_input_option_requirement(requirement)
+        if option_readiness.get("status") != "setup_required":
+            continue
+        raw_issues = option_readiness.get("issues")
+        issues = raw_issues if isinstance(raw_issues, list) else []
+        first_issue = issues[0] if issues and isinstance(issues[0], Mapping) else {}
+        detail = str(
+            first_issue.get("message")
+            or "The selected workflow option is not ready on this host."
+        )
+        input_id = getattr(requirement, "input_id", None)
+        response = _make_run_payload(
+            detail=detail,
+            error_message="workflow_setup_required",
+            error_input=input_id if isinstance(input_id, str) else None,
+        )
+        raise WorkflowPreparationError(response, 409)
+
+
+def validate_sequence_stage_preflight(
+    definition: WorkflowNode,
+    inputs: Mapping[str, Any],
+) -> None:
+    """Validate one sequence block before any earlier block is queued.
+
+    Sequence artifact inputs do not exist yet, so the portable download
+    configurator is the only safe way to exercise cross-field validation and
+    graph branching. Registry validation requires this callback for every
+    orchestra stage; the explicit check here also protects direct callers.
+    """
+
+    validate_workflow_requirements(definition, inputs)
+
+    configure_download = getattr(definition, "configure_download", None)
+    if not callable(configure_download):
+        response = _make_run_payload(
+            detail=(
+                f"Workflow '{definition.id}' cannot be used as a sequence stage "
+                "because it has no portable preflight configurator."
+            ),
+            error_message="sequence_stage_preflight_unavailable",
+        )
+        raise WorkflowPreparationError(response, 500)
+    try:
+        prompt = definition.load_prompt()
+        configure_download(prompt, dict(inputs))
+    except FileNotFoundError as exc:
+        response = _make_run_payload(
+            detail=str(exc),
+            error_message="missing_source",
+        )
+        raise WorkflowPreparationError(response, 400) from exc
+    except InputValidationError as exc:
+        response = _make_run_payload(
+            detail=str(exc),
+            error_message="invalid_input",
+            error_input=getattr(exc, "input_name", None),
+        )
+        raise WorkflowPreparationError(response, 400) from exc
+    except ValueError as exc:
+        response = _make_run_payload(
+            detail=str(exc),
+            error_message="invalid_input",
+        )
+        raise WorkflowPreparationError(response, 400) from exc
+    except Exception as exc:
+        logging.exception(
+            "Failed to preflight sequence stage workflow '%s': %s",
+            definition.id,
+            exc,
+        )
+        response = _make_run_payload(
+            detail=str(exc),
+            error_message="configuration_failed",
+        )
+        raise WorkflowPreparationError(response, 500) from exc
+
+    readiness = evaluate_workflow_readiness(definition, inputs=inputs)
+    if readiness.get("status") != READINESS_SETUP_REQUIRED:
+        return
+    raw_issues = readiness.get("issues")
+    issues = raw_issues if isinstance(raw_issues, list) else []
+    first_issue = issues[0] if issues and isinstance(issues[0], Mapping) else {}
+    detail = str(
+        first_issue.get("message")
+        or "A workflow sequence stage is not ready on this host."
+    )
+    response = _make_run_payload(
+        detail=detail,
+        error_message="workflow_setup_required",
+    )
+    raise WorkflowPreparationError(response, 409)
+
+
+def _prepare_workflow_execution(
+    payload: Dict[str, Any],
+) -> Tuple[WorkflowNode | WorkflowSequenceNode, Dict[str, Any]]:
     inputs = payload.get("inputs", {})
     if not isinstance(inputs, dict):
         response = _make_run_payload(detail="inputs must be an object", error_message="invalid_inputs")
@@ -184,20 +310,13 @@ def _prepare_workflow_execution(payload: Dict[str, Any]) -> Tuple[WorkflowNode, 
         response = _make_run_payload(detail=f"No workflow found for id '{workflow_id}'.", error_message="unknown_workflow")
         raise WorkflowPreparationError(response, 404)
 
-    model_assets = evaluate_declared_model_assets(definition)
-    if model_assets.get("status") == "setup_required":
-        raw_issues = model_assets.get("issues")
-        issues = raw_issues if isinstance(raw_issues, list) else []
-        first_issue = issues[0] if issues and isinstance(issues[0], Mapping) else {}
-        detail = str(
-            first_issue.get("message")
-            or "Required local model assets are not ready."
-        )
-        response = _make_run_payload(
-            detail=detail,
-            error_message="workflow_setup_required",
-        )
-        raise WorkflowPreparationError(response, 409)
+    # Assemblies deliberately own no Comfy graph. Their durable runtime will
+    # validate and freeze the public inputs, then prepare each ordinary block
+    # through this same function when that stage is submitted.
+    if isinstance(definition, WorkflowSequenceNode):
+        return definition, {}
+
+    validate_workflow_requirements(definition, inputs)
 
     try:
         prompt = definition.load_prompt()
@@ -636,9 +755,51 @@ async def cancel_workflow(
             await session_to_use.close()
 
 
+def _validated_prompt_dependencies(
+    prompt: Mapping[str, Any],
+    validated_outputs: Any,
+) -> set[str]:
+    """Return nodes reached upstream from Core-validated output roots."""
+
+    nodes = {str(node_id): node for node_id, node in prompt.items()}
+    try:
+        pending = [str(node_id) for node_id in validated_outputs]
+    except TypeError:
+        return set()
+    reached: set[str] = set()
+
+    def linked_nodes(value: Any):
+        if isinstance(value, (list, tuple)):
+            if (
+                len(value) == 2
+                and str(value[0]) in nodes
+                and type(value[1]) is int
+            ):
+                yield str(value[0])
+                return
+            for item in value:
+                yield from linked_nodes(item)
+        elif isinstance(value, Mapping):
+            for item in value.values():
+                yield from linked_nodes(item)
+
+    while pending:
+        node_id = pending.pop()
+        if node_id in reached:
+            continue
+        reached.add(node_id)
+        node = nodes.get(node_id)
+        if not isinstance(node, Mapping):
+            continue
+        inputs = node.get("inputs")
+        if isinstance(inputs, Mapping):
+            pending.extend(linked_nodes(inputs))
+    return reached
+
+
 async def prepare_workflow_submission(
     payload: Dict[str, Any],
-    prepared: Tuple[WorkflowNode, Dict[str, Any]] | None = None,
+    prepared: Tuple[WorkflowNode | WorkflowSequenceNode, Dict[str, Any]] | None = None,
     *,
     owner_id: str | None = None,
 ) -> WorkflowSubmissionRequest:
@@ -648,20 +809,48 @@ async def prepare_workflow_submission(
     comfy_url = settings.COMFY_BACKEND_URL
 
     definition, prompt = prepared or _prepare_workflow_execution(payload)
+    if isinstance(definition, WorkflowSequenceNode):
+        response = _make_run_payload(
+            detail="Workflow sequences require the supervised Runner lifecycle.",
+            error_message="sequence_requires_supervised_runner",
+        )
+        raise WorkflowPreparationError(response, 400)
     raw_workflow_id = payload.get("workflowId")
     workflow_id = raw_workflow_id if isinstance(raw_workflow_id, str) else None
     # Queue identity is server authority.  A caller-supplied clientId could
     # collide with another lifecycle and therefore is intentionally ignored.
     client_id = uuid.uuid4().hex
 
-    # Local validation (non-fatal if it crashes)
+    # Legacy definitions without required outputs may defer validation to Core.
     try:
         validation = await execution.validate_prompt(uuid.uuid4().hex, prompt, None)
     except Exception as exc:
-        logging.warning("Local validate_prompt failed: %s (continuing)", exc)
+        logging.warning("Local validate_prompt failed: %s", exc)
         validation = (True, "", [], [])
     if not validation[0]:
         response = _make_run_payload(detail=validation[1], error_message="validation_failed", history={"outputs": {}, "node_errors": json_safe(validation[3])})
+        raise WorkflowPreparationError(response, 400)
+
+    # Core accepts a prompt when any output validates, even if a disconnected
+    # receipt is the only survivor. Runner must also retain every promised
+    # required output; optional cells and unrelated invalid branches are fine.
+    required_output_ids = {
+        str(cell.node_id)
+        for cell in getattr(definition, "outputs", ())
+        if getattr(cell, "required", True)
+    }
+    covered_output_ids = _validated_prompt_dependencies(prompt, validation[2])
+    missing_output_ids = required_output_ids.difference(covered_output_ids)
+    if missing_output_ids:
+        response = _make_run_payload(
+            detail=(
+                "Required workflow outputs failed validation: "
+                + ", ".join(sorted(missing_output_ids))
+                + "."
+            ),
+            error_message="validation_failed",
+            history={"outputs": {}, "node_errors": json_safe(validation[3])},
+        )
         raise WorkflowPreparationError(response, 400)
 
     # A prepared definition has already crossed the trusted registry boundary.
@@ -927,7 +1116,8 @@ async def finalize_workflow(
     return JobStatus.FAILED, response, http_status
 
 async def execute_workflow(
-    payload: Dict[str, Any], prepared: Tuple[WorkflowNode, Dict[str, Any]] | None = None
+    payload: Dict[str, Any],
+    prepared: Tuple[WorkflowNode | WorkflowSequenceNode, Dict[str, Any]] | None = None,
 ) -> Tuple[str, JobStatus, Dict[str, Any], int]:
     """Blocking admitted execution wrapper preserving the legacy return tuple."""
 
@@ -995,6 +1185,8 @@ __all__ = [
     "finalize_workflow",
     "_make_run_payload",
     "_prepare_workflow_execution",
+    "validate_sequence_stage_preflight",
+    "validate_workflow_requirements",
     "_sanitize_history",
     "_extract_execution_error_message",
     "_wait_for_completion",

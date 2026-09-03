@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Any, Dict
 
-from ..services.registry import InputValidationError, WorkflowCell, WorkflowNode
+from ..services.registry import InputValidationError, WorkflowCardPresentation, WorkflowCell, WorkflowHeroImage, WorkflowNode
 from ...utils.helpers.conversion import convert_to_json
 
 # region Workflow Config
@@ -94,6 +94,13 @@ node = WorkflowNode(
     id=id,
     value=value,
     description=description,
+    card=WorkflowCardPresentation(
+        summary="Put an object's JSON keys in order.",
+        hero=WorkflowHeroImage(
+            asset="data/sort-json.webp",
+            alt="Exact before-and-after JSON: title, seed, camera, author reordered alphabetically without changing their values.",
+        ),
+    ),
     inputs=[
         input_json,
         input_ascending,

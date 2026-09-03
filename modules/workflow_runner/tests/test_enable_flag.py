@@ -33,3 +33,19 @@ def test_workflow_runner_imported_when_enabled(monkeypatch):
     init_path = Path(__file__).resolve().parents[3] / "__init__.py"
     mods = _import_lf_nodes_and_list_workflow_modules(init_path)
     assert len(mods) > 0, "Expected workflow_runner modules to be imported when enabled"
+
+
+def test_enabled_loader_registers_dataclass_workflow_under_its_canonical_name(monkeypatch):
+    monkeypatch.setenv("WORKFLOW_RUNNER_ENABLED", "true")
+
+    init_path = Path(__file__).resolve().parents[3] / "__init__.py"
+    workflow_dir = init_path.parent / "modules" / "workflow_runner" / "workflows"
+    monkeypatch.setattr(
+        "os.walk",
+        lambda _root: [(str(workflow_dir), (), ("krea2.py",))],
+    )
+
+    mods = _import_lf_nodes_and_list_workflow_modules(init_path)
+    module_name = "lf_nodes.modules.workflow_runner.workflows.krea2"
+    assert module_name in mods
+    assert sys.modules[module_name]._ReIDRecipeSpec.__module__ == module_name

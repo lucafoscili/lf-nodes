@@ -1,0 +1,1505 @@
+{
+  "description": "Actual Workflow Runner outputs using original generated generic subjects; source runs recorded below. Covers are examples, not universal quality guarantees.",
+  "display": "960x540 metadata-free WebP covers. Individual entries describe contain-fit, labels, matched detail crops, decoded formats, or exact typeset output excerpts. No retouching.",
+  "orchestra": {
+    "workflowId": "identity_cleanup_restage",
+    "runId": "lf-sequence:7cedbb8a0bd54f709582877eac931e0f",
+    "submissionId": "lf-catalogue:hero:identity-cleanup-restage:20260830:a1",
+    "stages": [
+      "identity",
+      "restage"
+    ],
+    "status": "succeeded"
+  },
+  "sources": {
+    "generate": {
+      "workflowId": "krea2_generate",
+      "runId": "2fd5ce09-d029-4481-a925-2e482033d69d",
+      "artifact": "LF_Nodes/Krea2/Generate/seed-43_00001_.png",
+      "dimensions": [
+        2048,
+        880
+      ],
+      "sha256": "ebf58397d3f1f4a761a9f0003f7d285ebdaa54440e0559e1d73a30fbf3194a13"
+    },
+    "reference": {
+      "workflowId": "krea2_generate",
+      "runId": "fdd3b1b8-f909-46dc-ba12-c9bb9df0515f",
+      "artifact": "LF_Nodes/Krea2/Generate/seed-42_00002_.png",
+      "dimensions": [
+        1408,
+        1408
+      ],
+      "sha256": "87aed4a29760144ea890220ec66c8fbe73034035179af020e9b7a4b5e307977c"
+    },
+    "identity": {
+      "workflowId": "krea2_identity_edit",
+      "runId": "6b016c93-59a5-4bfd-b9e2-4475347357ba",
+      "artifact": "LF_Nodes/Krea2/IdentityEdit/seed-42_00029_.png",
+      "dimensions": [
+        1152,
+        1728
+      ],
+      "sha256": "e64ff4cf787400fa82a76236f9416c85b6682a349d6188720ebb34208af87fea"
+    },
+    "restage": {
+      "workflowId": "krea2_character_restage",
+      "runId": "94f9e8ae-177c-4530-acd7-9fb503f1eab3",
+      "artifact": "LF_Nodes/Krea2/CharacterRestage/seed-42_00012_.png",
+      "dimensions": [
+        1152,
+        1728
+      ],
+      "sha256": "b88bf18e332537a56cf951d3b58848297bf3f5437dc7919fb9a76394d8dbf141"
+    },
+    "explorer": {
+      "workflowId": "krea2_generate",
+      "runId": "a8187067-59fb-4101-9b12-eaf6c8a7f1ad",
+      "artifact": "output/LF_Nodes/Krea2/Generate/seed-450_00001_.png",
+      "sha256": "938401a219871d982dee16965f1e352a8874508ce2e8a712d7b55f29219c91a3",
+      "dimensions": [
+        1152,
+        1728
+      ]
+    },
+    "outfit": {
+      "workflowId": "krea2_outfit_change",
+      "runId": "b2572083-3843-4c9d-b9ae-3ada1ee34742",
+      "artifact": "output/LF_Nodes/Krea2/OutfitChange/seed-42_00001_.png",
+      "sha256": "58cfa4379507188f71d7759bc9cacd7aed71b891e50c06a9e93dc754ee95b712",
+      "dimensions": [
+        1152,
+        1728
+      ]
+    },
+    "pose": {
+      "workflowId": "krea2_pose_change",
+      "runId": "b130977e-1425-4604-8e54-a558b0dbbcb6",
+      "artifact": "output/LF_Nodes/Krea2/PoseChange/seed-42_00001_.png",
+      "sha256": "a170ac0fd94c47589c0f2745b1dd65be94af6348c57f84998f73f356ce9736c2",
+      "dimensions": [
+        1152,
+        1728
+      ]
+    },
+    "restyle": {
+      "workflowId": "krea2_character_restyle",
+      "runId": "99a22d58-5b0c-4a82-a465-efa16888934c",
+      "artifact": "output/LF_Nodes/Krea2/CharacterRestyle/seed-42_00001_.png",
+      "sha256": "d4a68527626f7e0536c8ef7f7bc23476f732fc223b9ccb8e0e5dcc089dd9c153",
+      "dimensions": [
+        1152,
+        1728
+      ]
+    },
+    "style-reference": {
+      "workflowId": "krea2_style_reference",
+      "runId": "80d10109-2a30-4134-b5a6-b7837ba29ce9",
+      "artifact": "output/LF_Nodes/Krea2/StyleReference/seed-42_00016_.png",
+      "sha256": "9f57bc2cec5b950c31928f06f04e9a49d01b5359b66cd476ea71a5809435bed3",
+      "dimensions": [
+        1408,
+        1408
+      ]
+    },
+    "style-blend": {
+      "workflowId": "krea2_style_blend",
+      "runId": "5c1b1c58-03ab-4455-a69b-11661596dd89",
+      "artifact": "output/LF_Nodes/Krea2/StyleBlend/seed-42_00001_.png",
+      "sha256": "4bc80a83f006834b25bc9c9f7a2a641ef91b51c700257c82e26476cf65068d76",
+      "dimensions": [
+        1408,
+        1408
+      ]
+    },
+    "sheet": {
+      "workflowId": "image_sheet",
+      "runId": "2bc3e198-e6aa-4cc9-9f61-3ccaa29247da",
+      "artifact": "output/LF_Nodes/ImageSheet/2x2_00016_.png",
+      "sha256": "2ebe3319415cb115fa6a27eebb7df8933378c7b9c8278a73b08e8f8ce099bf3d",
+      "dimensions": [
+        1181,
+        1168
+      ]
+    },
+    "cutout": {
+      "workflowId": "remove_bg",
+      "runId": "e31ed927-2b46-4d7a-b20e-4cf8f1ddd52f",
+      "artifact": "output/_2026-08-30_23-14-12_1.png",
+      "sha256": "df83027baed136b3b064793fc2867799e495d442d4959f87828edd3f4aaf78f3",
+      "dimensions": [
+        1152,
+        1728
+      ]
+    },
+    "dds": {
+      "workflowId": "image_to_dds",
+      "runId": "7a975a09-23a8-461f-9385-2e6c22951b5d",
+      "artifact": "output/LF_Nodes/Catalogue/DDS/traveler_1.dds",
+      "sha256": "c3938015891ffe325d9e9f2fe1ca4e94d10957426779f7842af7a23da892f3c7",
+      "dimensions": [
+        1152,
+        1728
+      ]
+    },
+    "detail": {
+      "workflowId": "image_detail_4k",
+      "runId": "9a48059a-dcf7-4b10-9e0b-dcb4e9167129",
+      "artifact": "output/LF_Nodes/4KDetail/UHD-3840/seed-42_00001_.png",
+      "sha256": "75f92b3a79037521a1a7e346fb45b99353e374e9fafdd8d66b9a12e86143210b",
+      "dimensions": [
+        3840,
+        3840
+      ]
+    },
+    "comparison-before": {
+      "workflowId": "compare_images",
+      "runId": "fe02099b-c59a-4e0b-b333-7fda33bddfe1",
+      "artifact": "input/_lf_external_previews/generated/v1/2e/2e3bf2d516e3043abcf63733b99a32c8dcf2c1b069bca24bb239776a2a55ab4f.png",
+      "sha256": "2e3bf2d516e3043abcf63733b99a32c8dcf2c1b069bca24bb239776a2a55ab4f"
+    },
+    "comparison-after": {
+      "workflowId": "compare_images",
+      "runId": "fe02099b-c59a-4e0b-b333-7fda33bddfe1",
+      "artifact": "input/_lf_external_previews/generated/v1/22/22592342e0a6bbc584301e1f489e48116577072e707b468d3d8ddf626a0a74fb.png",
+      "sha256": "22592342e0a6bbc584301e1f489e48116577072e707b468d3d8ddf626a0a74fb"
+    },
+    "sorted-json": {
+      "workflowId": "sort_json_keys",
+      "runId": "0b918eaf-81b1-409f-a59b-c67322789855",
+      "artifact": "output node 2, lf_output[0].json",
+      "value": {
+        "alpha": 1,
+        "beta": 2,
+        "zeta": 3
+      }
+    },
+    "loaded-metadata": {
+      "workflowId": "load_metadata",
+      "runId": "3a243fe0-0d3d-4033-bb4e-8de6ee9108a9",
+      "artifact": "output node 10, metadata[0].metadata.prompt.sampler.inputs",
+      "selection": {
+        "seed": 450,
+        "steps": 8,
+        "sampler_name": "euler"
+      }
+    },
+    "turnaround-explorer": {
+      "workflowId": "krea2_generate",
+      "runId": "a8187067-59fb-4101-9b12-eaf6c8a7f1ad",
+      "artifact": "output/LF_Nodes/Krea2/Generate/seed-450_00001_.png",
+      "sha256": "938401a219871d982dee16965f1e352a8874508ce2e8a712d7b55f29219c91a3",
+      "dimensions": [
+        1152,
+        1728
+      ]
+    },
+    "turnaround-cleanup": {
+      "workflowId": "krea2_identity_edit",
+      "runId": "f15b773c-995d-4854-b8dd-63444989fc7e",
+      "artifact": "output/LF_Nodes/Krea2/IdentityEdit/seed-42_00030_.png",
+      "sha256": "98d3417157945c9dc2f1ad6afa9fc7557dbfa8f3f4e29e4a48fb9af5316eb07d",
+      "dimensions": [
+        1056,
+        1888
+      ],
+      "parentRunId": "lf-sequence:564d2a37f6954960b9ac7683fdf78681",
+      "stageId": "cleanup"
+    },
+    "turnaround-subject-right": {
+      "workflowId": "minimax_h3_directed_view",
+      "runId": "cfab9984-f9a9-4de0-8da2-2872573a15b9",
+      "artifact": "output/LF_Nodes/MiniMaxH3/DirectedView/subject_right/kitchen_quality/seed-42-f124/selected-subject_right_00001_.png",
+      "sha256": "2ee021a6d260287f572bc9dcc69b4374161ab062a4d2e4b367c6f2ba9f26062b",
+      "dimensions": [
+        768,
+        1344
+      ],
+      "parentRunId": "lf-sequence:564d2a37f6954960b9ac7683fdf78681",
+      "stageId": "subject_right",
+      "selectedFrameIndex": 116,
+      "selectionMeaning": "Least-motion tail frame; viewpoint accepted by separate sampled visual review, not by the receipt alone."
+    },
+    "turnaround-sheet": {
+      "workflowId": "assemble_cardinal_turnaround",
+      "runId": "990245cb-1d16-49e3-a0b5-af70f50b5d29",
+      "artifact": "output/LF_Nodes/CardinalTurnaround/1024px-content-900px-bottom-48px/contact-sheet_00001_.png",
+      "sha256": "3ac261f07e2eaa8dc71fa19a1ee88e718035d77136ce079163f504b648481b01",
+      "dimensions": [
+        4256,
+        1160
+      ],
+      "parentRunId": "lf-sequence:564d2a37f6954960b9ac7683fdf78681",
+      "stageId": "assemble"
+    },
+    "turnaround-final-front": {
+      "workflowId": "assemble_cardinal_turnaround",
+      "runId": "990245cb-1d16-49e3-a0b5-af70f50b5d29",
+      "artifact": "output/LF_Nodes/CardinalTurnaround/1024px-content-900px-bottom-48px/front_00001_.png",
+      "sha256": "0084c6b6251c9ed0949983eefd21d466df47f3827c5252cb6c919dfc7988845c",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "parentRunId": "lf-sequence:564d2a37f6954960b9ac7683fdf78681",
+      "stageId": "assemble"
+    },
+    "turnaround-final-right": {
+      "workflowId": "assemble_cardinal_turnaround",
+      "runId": "990245cb-1d16-49e3-a0b5-af70f50b5d29",
+      "artifact": "output/LF_Nodes/CardinalTurnaround/1024px-content-900px-bottom-48px/right_00001_.png",
+      "sha256": "d0eb5cc8abed30680d7bed7b7b8ad5256619996dd4f3f787967916cfeff41d3d",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "parentRunId": "lf-sequence:564d2a37f6954960b9ac7683fdf78681",
+      "stageId": "assemble"
+    },
+    "turnaround-final-back": {
+      "workflowId": "assemble_cardinal_turnaround",
+      "runId": "990245cb-1d16-49e3-a0b5-af70f50b5d29",
+      "artifact": "output/LF_Nodes/CardinalTurnaround/1024px-content-900px-bottom-48px/back_00001_.png",
+      "sha256": "5f84593b6edf7521ece97afa3eea72b0b8d3d4c2b76812c33c0be2c41d0543f1",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "parentRunId": "lf-sequence:564d2a37f6954960b9ac7683fdf78681",
+      "stageId": "assemble"
+    },
+    "turnaround-final-left": {
+      "workflowId": "assemble_cardinal_turnaround",
+      "runId": "990245cb-1d16-49e3-a0b5-af70f50b5d29",
+      "artifact": "output/LF_Nodes/CardinalTurnaround/1024px-content-900px-bottom-48px/left_00001_.png",
+      "sha256": "8e101edb6d49f414d5d7f5e242ec8f7c598abdf07a52c4de02501e8991c3984c",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "parentRunId": "lf-sequence:564d2a37f6954960b9ac7683fdf78681",
+      "stageId": "assemble"
+    },
+    "trellis-single-glb": {
+      "workflowId": "trellis2_image_to_textured_mesh",
+      "runId": "cd96aaba-e794-496c-b12f-fcb2c4d23066",
+      "artifact": "output/LF_Nodes/TRELLIS2/ImageToTexturedMesh/seed-42-balanced_00002_.glb",
+      "sha256": "8f38ac53335a2553528235c7b34964c5ce7f2b048dd795aa960cc938f6a1c7a3",
+      "bytes": 34791432,
+      "displayRenders": [
+        {
+          "angle": "front three-quarter",
+          "artifact": "output/playwright/trellis-geometry/single-front-three-quarter.png",
+          "sha256": "ecd38ae53d8af26544c4e7ac6afb0b4e81384ac35c71929f2213d0361d16d792",
+          "dimensions": [
+            640,
+            721
+          ]
+        },
+        {
+          "angle": "rear three-quarter",
+          "artifact": "output/playwright/trellis-geometry/single-rear-three-quarter.png",
+          "sha256": "677174af83a65fa454fbfa34237ebcf9ea64e39eec35dd77a2a73be7d00486cf",
+          "dimensions": [
+            640,
+            721
+          ]
+        }
+      ],
+      "renderRecipe": {
+        "renderer": "Local Three.js 0.184.0 GLTFLoader and WebGLRenderer; original embedded GLB materials, single-sided as saved.",
+        "viewport": [
+          640,
+          720
+        ],
+        "pixelRatio": 1,
+        "antialias": true,
+        "colorSpace": "sRGB",
+        "toneMapping": "NoToneMapping",
+        "background": "#303640",
+        "lights": [
+          {
+            "type": "AmbientLight",
+            "color": "#ffffff",
+            "intensity": 1.3
+          },
+          {
+            "type": "DirectionalLight",
+            "color": "#ffffff",
+            "intensity": 1.1,
+            "position": [
+              2,
+              4,
+              3
+            ]
+          },
+          {
+            "type": "DirectionalLight",
+            "color": "#ffffff",
+            "intensity": 0.45,
+            "position": [
+              -3,
+              1,
+              -2
+            ]
+          }
+        ],
+        "camera": "Orthographic, looking at model bounding-box center; radius=max(height,width/(8/9),depth/(8/9))*0.6; position at radius*5 horizontally and center.y+height*0.04. Front=+Z; front quarter=45 degrees; rear quarter=225 degrees.",
+        "capture": "Playwright image-element PNG screenshot at native 640x720 display size, yielding 640x721 because fractional CSS clip bounds round outward by one background row; no browser filters or postprocessing.",
+        "recipeFile": "output/playwright/trellis-geometry/index.html",
+        "recipeSha256": "a3a15e467a2251ea6d5faaad8002f20ae9d8d1bb0198a8429d9cb9171dd5bc20"
+      }
+    },
+    "h3-animate-input": {
+      "workflowId": "krea2_generate",
+      "runId": "a8187067-59fb-4101-9b12-eaf6c8a7f1ad",
+      "artifact": "input/LF_Catalogue/hero-20260830/explorer_front_9x16.png",
+      "sha256": "cbacbf7a8dce8a52f274bd6f0e45a707ac9cf616954ba535b2d88782c05ab364",
+      "dimensions": [
+        768,
+        1344
+      ],
+      "role": "Actual prepared opening image consumed by the Animate Image run",
+      "original": {
+        "artifact": "output/LF_Nodes/Krea2/Generate/seed-450_00001_.png",
+        "sha256": "938401a219871d982dee16965f1e352a8874508ce2e8a712d7b55f29219c91a3"
+      },
+      "preparation": "whole-canvas contain fit, centered corner-color padding; no retouching"
+    },
+    "h3-animate-wave": {
+      "workflowId": "minimax_h3_animate_image",
+      "runId": "3e67ae62-ba10-4a10-bce9-69aefea0be9d",
+      "artifact": "output/LF_Nodes/MiniMaxH3/AnimateImage/kitchen_quality/seed-42-f124_00002_.mp4",
+      "sha256": "0dcc9e912780e710369dc6911593073f3fbff2ef148a47ce03ed6f0631050d39",
+      "dimensions": [
+        768,
+        1344
+      ],
+      "mediaType": "video/mp4",
+      "role": "Selected actual decoded video frame",
+      "decodedFrame": {
+        "index": 38,
+        "timeSeconds": 1.5833333333333333,
+        "pngSha256": "ee8bfc89ab8bbc9372d6396846b8690ce7434c5654ec098ec425ee8a9d42c3ee",
+        "origin": "RGB pixels decoded on CPU from compressed MP4/video; PNG encoding is lossless, source compression is not reversed."
+      }
+    },
+    "h3-animate-return": {
+      "workflowId": "minimax_h3_animate_image",
+      "runId": "3e67ae62-ba10-4a10-bce9-69aefea0be9d",
+      "artifact": "output/LF_Nodes/MiniMaxH3/AnimateImage/kitchen_quality/seed-42-f124_00002_.mp4",
+      "sha256": "0dcc9e912780e710369dc6911593073f3fbff2ef148a47ce03ed6f0631050d39",
+      "dimensions": [
+        768,
+        1344
+      ],
+      "mediaType": "video/mp4",
+      "role": "Selected actual decoded video frame",
+      "decodedFrame": {
+        "index": 123,
+        "timeSeconds": 5.125,
+        "pngSha256": "53810883c3189289051585c6a33be03b91865107aa3529e667d97f75ed9cc1be",
+        "origin": "RGB pixels decoded on CPU from compressed MP4/video; PNG encoding is lossless, source compression is not reversed."
+      }
+    },
+    "h3-generate-scene": {
+      "workflowId": "minimax_h3_generate_video",
+      "runId": "8e91b6d3-c7e8-4d05-8c87-6767ed40b0e5",
+      "artifact": "output/LF_Nodes/MiniMaxH3/GenerateVideo/kitchen_quality/seed-42-f124_00001_.mp4",
+      "sha256": "cee6b56095a2f9921e229c07ac4812dc49cdbf2f9ec7717cadf014f0e4f3b300",
+      "dimensions": [
+        1344,
+        768
+      ],
+      "mediaType": "video/mp4",
+      "role": "Selected actual decoded video frame",
+      "decodedFrame": {
+        "index": 0,
+        "timeSeconds": 0.0,
+        "pngSha256": "bc5ac7b57997767ab8cb3dff3e52310d2cccde57ad9339a7189efd9741610ead",
+        "origin": "RGB pixels decoded on CPU from compressed MP4/video; PNG encoding is lossless, source compression is not reversed."
+      }
+    },
+    "h3-restage-reference": {
+      "workflowId": "krea2_generate",
+      "runId": "a8187067-59fb-4101-9b12-eaf6c8a7f1ad",
+      "artifact": "output/LF_Nodes/Krea2/Generate/seed-450_00001_.png",
+      "sha256": "938401a219871d982dee16965f1e352a8874508ce2e8a712d7b55f29219c91a3",
+      "dimensions": [
+        1152,
+        1728
+      ],
+      "role": "Actual original reference image consumed by this Reference Restage run"
+    },
+    "h3-restage-market": {
+      "workflowId": "minimax_h3_reference_restage",
+      "runId": "08fa617f-26d0-4e1a-9bf0-2fba4300309f",
+      "artifact": "output/LF_Nodes/MiniMaxH3/ReferenceRestage/kitchen_quality/seed-42-refs1-f124_00001_.mp4",
+      "sha256": "8228d3cdf7a78e2f301581844e9cecb3c92151cca729e727a3e6af87f720df4f",
+      "dimensions": [
+        1344,
+        768
+      ],
+      "mediaType": "video/mp4",
+      "role": "Selected actual decoded video frame",
+      "decodedFrame": {
+        "index": 31,
+        "timeSeconds": 1.2916666666666667,
+        "pngSha256": "b6de104361999ea5260ca99a518696dcbe6bd667b3faf45189dbaef02bd58c59",
+        "origin": "RGB pixels decoded on CPU from compressed MP4/video; PNG encoding is lossless, source compression is not reversed."
+      }
+    },
+    "h3-turntable-front": {
+      "workflowId": "minimax_h3_character_turnaround",
+      "runId": "24bfe9b6-3e2e-4bb0-b1cc-b6452b9c1fc0",
+      "artifact": "output/LF_Nodes/MiniMaxH3/CharacterTurnaround/kitchen_quality/seed-42-f124/candidate-views-intended-cardinal-order-1024px_00009_.png",
+      "sha256": "983f7179e6bf30220690a6504336cb93c7060ca6546e1d63704daf529dc417bf",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "mediaType": "image/png",
+      "role": "Actual separately saved transparent candidate from this single-turntable run, not an Orchestra view",
+      "sourceFrameIndex": 0,
+      "intendedView": "front",
+      "samplingBasis": "visual_motion",
+      "origin": "The workflow's own sampled, background-removed and normalized RGBA PNG output; not a PNG decoded from the saved MP4."
+    },
+    "h3-turntable-right": {
+      "workflowId": "minimax_h3_character_turnaround",
+      "runId": "24bfe9b6-3e2e-4bb0-b1cc-b6452b9c1fc0",
+      "artifact": "output/LF_Nodes/MiniMaxH3/CharacterTurnaround/kitchen_quality/seed-42-f124/candidate-views-intended-cardinal-order-1024px_00010_.png",
+      "sha256": "e51124ae5b8fa68c1cee441fd7e424ce2cb881f5deba3c1c8b52da8a41b037dc",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "mediaType": "image/png",
+      "role": "Actual separately saved transparent candidate from this single-turntable run, not an Orchestra view",
+      "sourceFrameIndex": 34,
+      "intendedView": "right",
+      "samplingBasis": "visual_motion",
+      "origin": "The workflow's own sampled, background-removed and normalized RGBA PNG output; not a PNG decoded from the saved MP4."
+    },
+    "h3-turntable-back": {
+      "workflowId": "minimax_h3_character_turnaround",
+      "runId": "24bfe9b6-3e2e-4bb0-b1cc-b6452b9c1fc0",
+      "artifact": "output/LF_Nodes/MiniMaxH3/CharacterTurnaround/kitchen_quality/seed-42-f124/candidate-views-intended-cardinal-order-1024px_00011_.png",
+      "sha256": "acf5a3c6a1aec51e4563e4ab12f2bd4452f94ae9b49807d4e3e5b014afe501c5",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "mediaType": "image/png",
+      "role": "Actual separately saved transparent candidate from this single-turntable run, not an Orchestra view",
+      "sourceFrameIndex": 58,
+      "intendedView": "back",
+      "samplingBasis": "visual_motion",
+      "origin": "The workflow's own sampled, background-removed and normalized RGBA PNG output; not a PNG decoded from the saved MP4."
+    },
+    "h3-turntable-left": {
+      "workflowId": "minimax_h3_character_turnaround",
+      "runId": "24bfe9b6-3e2e-4bb0-b1cc-b6452b9c1fc0",
+      "artifact": "output/LF_Nodes/MiniMaxH3/CharacterTurnaround/kitchen_quality/seed-42-f124/candidate-views-intended-cardinal-order-1024px_00012_.png",
+      "sha256": "41a1b0982f5ac556a601e8d36c8290a08b9e7c0b3d66b5111c1236c3e5b0772b",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "mediaType": "image/png",
+      "role": "Actual separately saved transparent candidate from this single-turntable run, not an Orchestra view",
+      "sourceFrameIndex": 82,
+      "intendedView": "left",
+      "samplingBasis": "visual_motion",
+      "origin": "The workflow's own sampled, background-removed and normalized RGBA PNG output; not a PNG decoded from the saved MP4."
+    },
+    "h3-firstlast-first": {
+      "workflowId": "minimax_h3_animate_image",
+      "runId": "3e67ae62-ba10-4a10-bce9-69aefea0be9d",
+      "artifact": "input/LF_Catalogue/hero-20260830/video-front-native.png",
+      "sha256": "d21bff220f7451b9e6187779c64ea7a6ad415e0738f4b370c5b2186ded92a5eb",
+      "dimensions": [
+        768,
+        1344
+      ],
+      "role": "Actual prepared first_frame_image consumed by this run",
+      "originVideo": {
+        "artifact": "output/LF_Nodes/MiniMaxH3/AnimateImage/kitchen_quality/seed-42-f124_00002_.mp4",
+        "sha256": "0dcc9e912780e710369dc6911593073f3fbff2ef148a47ce03ed6f0631050d39"
+      },
+      "originFrame": {
+        "index": 0,
+        "timeSeconds": 0.0,
+        "pngSha256": "d21bff220f7451b9e6187779c64ea7a6ad415e0738f4b370c5b2186ded92a5eb",
+        "origin": "RGB pixels decoded on CPU from compressed MP4/video; PNG encoding is lossless, source compression is not reversed."
+      },
+      "preparation": "Native decoded frame saved as the input PNG without pixel transformation."
+    },
+    "h3-firstlast-last": {
+      "workflowId": "minimax_h3_animate_image",
+      "runId": "3e67ae62-ba10-4a10-bce9-69aefea0be9d",
+      "artifact": "input/LF_Catalogue/hero-20260830/video-wave-native.png",
+      "sha256": "ee8bfc89ab8bbc9372d6396846b8690ce7434c5654ec098ec425ee8a9d42c3ee",
+      "dimensions": [
+        768,
+        1344
+      ],
+      "role": "Actual prepared last_frame_image consumed by this run",
+      "originVideo": {
+        "artifact": "output/LF_Nodes/MiniMaxH3/AnimateImage/kitchen_quality/seed-42-f124_00002_.mp4",
+        "sha256": "0dcc9e912780e710369dc6911593073f3fbff2ef148a47ce03ed6f0631050d39"
+      },
+      "originFrame": {
+        "index": 38,
+        "timeSeconds": 1.5833333333333333,
+        "pngSha256": "ee8bfc89ab8bbc9372d6396846b8690ce7434c5654ec098ec425ee8a9d42c3ee",
+        "origin": "RGB pixels decoded on CPU from compressed MP4/video; PNG encoding is lossless, source compression is not reversed."
+      },
+      "preparation": "Native decoded frame saved as the input PNG without pixel transformation."
+    },
+    "h3-firstlast-transition": {
+      "workflowId": "minimax_h3_first_last_frame",
+      "runId": "d67e9708-1dc4-461c-a9ca-ed5fc0523230",
+      "artifact": "output/LF_Nodes/MiniMaxH3/FirstLastFrame/kitchen_quality/seed-42-f124_00001_.mp4",
+      "sha256": "9bca2fdf410a0aa588feea3fff6f77ae5400efa066dc39513bdff50e98004e9a",
+      "dimensions": [
+        768,
+        1344
+      ],
+      "mediaType": "video/mp4",
+      "role": "Selected actual decoded video frame",
+      "decodedFrame": {
+        "index": 23,
+        "timeSeconds": 0.9583333333333334,
+        "pngSha256": "92d322d7089e6f77799de780ce123e2d21a2abea2e9205c34d592f279fe14368",
+        "origin": "RGB pixels decoded on CPU from compressed MP4/video; PNG encoding is lossless, source compression is not reversed."
+      }
+    },
+    "h3-firstlast-final": {
+      "workflowId": "minimax_h3_first_last_frame",
+      "runId": "d67e9708-1dc4-461c-a9ca-ed5fc0523230",
+      "artifact": "output/LF_Nodes/MiniMaxH3/FirstLastFrame/kitchen_quality/seed-42-f124_00001_.mp4",
+      "sha256": "9bca2fdf410a0aa588feea3fff6f77ae5400efa066dc39513bdff50e98004e9a",
+      "dimensions": [
+        768,
+        1344
+      ],
+      "mediaType": "video/mp4",
+      "role": "Selected actual decoded video frame",
+      "decodedFrame": {
+        "index": 123,
+        "timeSeconds": 5.125,
+        "pngSha256": "fcc6a8b6fb7cfc41270aca3229c23de1ebf1d8f35eac86743ff6d2eb1963d51e",
+        "origin": "RGB pixels decoded on CPU from compressed MP4/video; PNG encoding is lossless, source compression is not reversed."
+      }
+    },
+    "h3-anchored-sprite-00": {
+      "workflowId": "minimax_h3_anchored_sprite_loop",
+      "runId": "4b0179e8-cc9b-4da1-bf35-05605fdf2dce",
+      "artifact": "output/LF_Nodes/MiniMaxH3/AnchoredSpriteLoop/kitchen_quality/seed-42-f124/frames-256px-content-224px-bottom-16px-ref-0-12fps_00001_.png",
+      "sha256": "2e265968fbdf4aeb533f106e5ce9d1c7f61f046602fdba113e60d706a04090ad",
+      "dimensions": [
+        256,
+        256
+      ],
+      "mediaType": "image/png",
+      "role": "Actual saved normalized RGBA sprite, not an MP4 screenshot",
+      "spriteFrameIndex": 0,
+      "sourceFrameIndex": 0,
+      "spritePlaybackTimeSeconds": 0.0,
+      "sourceVideoTimeSeconds": 0.0,
+      "origin": "Workflow-sampled, background-removed and normalized PNG from this anchored run's original image batch."
+    },
+    "h3-anchored-sprite-08": {
+      "workflowId": "minimax_h3_anchored_sprite_loop",
+      "runId": "4b0179e8-cc9b-4da1-bf35-05605fdf2dce",
+      "artifact": "output/LF_Nodes/MiniMaxH3/AnchoredSpriteLoop/kitchen_quality/seed-42-f124/frames-256px-content-224px-bottom-16px-ref-0-12fps_00009_.png",
+      "sha256": "996aa16f06a67909bbf722b0eb59f904e3a4da988f284b792897d78eb09e6709",
+      "dimensions": [
+        256,
+        256
+      ],
+      "mediaType": "image/png",
+      "role": "Actual saved normalized RGBA sprite, not an MP4 screenshot",
+      "spriteFrameIndex": 8,
+      "sourceFrameIndex": 41,
+      "spritePlaybackTimeSeconds": 0.6666666666666666,
+      "sourceVideoTimeSeconds": 1.7083333333333333,
+      "origin": "Workflow-sampled, background-removed and normalized PNG from this anchored run's original image batch."
+    },
+    "h3-anchored-sprite-16": {
+      "workflowId": "minimax_h3_anchored_sprite_loop",
+      "runId": "4b0179e8-cc9b-4da1-bf35-05605fdf2dce",
+      "artifact": "output/LF_Nodes/MiniMaxH3/AnchoredSpriteLoop/kitchen_quality/seed-42-f124/frames-256px-content-224px-bottom-16px-ref-0-12fps_00017_.png",
+      "sha256": "fc4d8b3c2bfab229e1136f6dcc034f5299a53f9c7b9b0adf5ec6d1b838c41cc1",
+      "dimensions": [
+        256,
+        256
+      ],
+      "mediaType": "image/png",
+      "role": "Actual saved normalized RGBA sprite, not an MP4 screenshot",
+      "spriteFrameIndex": 16,
+      "sourceFrameIndex": 82,
+      "spritePlaybackTimeSeconds": 1.3333333333333333,
+      "sourceVideoTimeSeconds": 3.4166666666666665,
+      "origin": "Workflow-sampled, background-removed and normalized PNG from this anchored run's original image batch."
+    },
+    "h3-anchored-sprite-23": {
+      "workflowId": "minimax_h3_anchored_sprite_loop",
+      "runId": "4b0179e8-cc9b-4da1-bf35-05605fdf2dce",
+      "artifact": "output/LF_Nodes/MiniMaxH3/AnchoredSpriteLoop/kitchen_quality/seed-42-f124/frames-256px-content-224px-bottom-16px-ref-0-12fps_00024_.png",
+      "sha256": "1c373be759e1267c2defc0a91887cbd6a497c96fbe5a00352ab3d352b5ebc497",
+      "dimensions": [
+        256,
+        256
+      ],
+      "mediaType": "image/png",
+      "role": "Actual saved normalized RGBA sprite, not an MP4 screenshot",
+      "spriteFrameIndex": 23,
+      "sourceFrameIndex": 118,
+      "spritePlaybackTimeSeconds": 1.9166666666666667,
+      "sourceVideoTimeSeconds": 4.916666666666667,
+      "origin": "Workflow-sampled, background-removed and normalized PNG from this anchored run's original image batch."
+    },
+    "h3-anchored-endpoint": {
+      "workflowId": "minimax_h3_animate_image",
+      "runId": "3e67ae62-ba10-4a10-bce9-69aefea0be9d",
+      "artifact": "input/LF_Catalogue/hero-20260830/video-front-square.png",
+      "sha256": "05633d0b0d1fd2d37929c455f0e3dfc2b66b3a3e87b3de3b4150f1778efa6d4c",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "role": "Actual prepared first_frame_image consumed by this run",
+      "originVideo": {
+        "artifact": "output/LF_Nodes/MiniMaxH3/AnimateImage/kitchen_quality/seed-42-f124_00002_.mp4",
+        "sha256": "0dcc9e912780e710369dc6911593073f3fbff2ef148a47ce03ed6f0631050d39"
+      },
+      "originFrame": {
+        "index": 0,
+        "timeSeconds": 0.0,
+        "pngSha256": "d21bff220f7451b9e6187779c64ea7a6ad415e0738f4b370c5b2186ded92a5eb",
+        "origin": "RGB pixels decoded on CPU from compressed MP4/video; PNG encoding is lossless, source compression is not reversed."
+      },
+      "preparation": "Same whole-canvas contain-fit into a 1024px square with corner-color padding; no silhouette crop."
+    },
+    "h3-anchored-guide": {
+      "workflowId": "minimax_h3_animate_image",
+      "runId": "3e67ae62-ba10-4a10-bce9-69aefea0be9d",
+      "artifact": "input/LF_Catalogue/hero-20260830/video-wave-square.png",
+      "sha256": "77d895c05848cb10226ba3fd0d7fc6e521d3250cf7d89ec4dcfdb4bde18e234c",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "role": "Actual prepared guide_image_1 consumed by this run",
+      "originVideo": {
+        "artifact": "output/LF_Nodes/MiniMaxH3/AnimateImage/kitchen_quality/seed-42-f124_00002_.mp4",
+        "sha256": "0dcc9e912780e710369dc6911593073f3fbff2ef148a47ce03ed6f0631050d39"
+      },
+      "originFrame": {
+        "index": 38,
+        "timeSeconds": 1.5833333333333333,
+        "pngSha256": "ee8bfc89ab8bbc9372d6396846b8690ce7434c5654ec098ec425ee8a9d42c3ee",
+        "origin": "RGB pixels decoded on CPU from compressed MP4/video; PNG encoding is lossless, source compression is not reversed."
+      },
+      "preparation": "Same whole-canvas contain-fit into a 1024px square with corner-color padding; no silhouette crop."
+    },
+    "h3-sprite-source": {
+      "workflowId": "minimax_h3_animate_image",
+      "runId": "3e67ae62-ba10-4a10-bce9-69aefea0be9d",
+      "artifact": "input/LF_Catalogue/hero-20260830/video-front-square.png",
+      "sha256": "05633d0b0d1fd2d37929c455f0e3dfc2b66b3a3e87b3de3b4150f1778efa6d4c",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "role": "Actual prepared source_image consumed by this run",
+      "originVideo": {
+        "artifact": "output/LF_Nodes/MiniMaxH3/AnimateImage/kitchen_quality/seed-42-f124_00002_.mp4",
+        "sha256": "0dcc9e912780e710369dc6911593073f3fbff2ef148a47ce03ed6f0631050d39"
+      },
+      "originFrame": {
+        "index": 0,
+        "timeSeconds": 0.0,
+        "pngSha256": "d21bff220f7451b9e6187779c64ea7a6ad415e0738f4b370c5b2186ded92a5eb",
+        "origin": "RGB pixels decoded on CPU from compressed MP4/video; PNG encoding is lossless, source compression is not reversed."
+      },
+      "preparation": "Same whole-canvas contain-fit into a 1024px square with corner-color padding; no silhouette crop."
+    },
+    "h3-sprite-wave": {
+      "workflowId": "minimax_h3_sprite_motion",
+      "runId": "8110c5c3-0609-499e-92ca-e61e47faa05f",
+      "artifact": "output/LF_Nodes/MiniMaxH3/SpriteMotion/kitchen_quality/seed-42-f124_00001_.mp4",
+      "sha256": "5d4d3c20a9e5e46ec9e59e4dd4e2c5093d6f7586cf7ea12304c90364efd7d623",
+      "dimensions": [
+        768,
+        768
+      ],
+      "mediaType": "video/mp4",
+      "role": "Selected actual decoded video frame",
+      "decodedFrame": {
+        "index": 38,
+        "timeSeconds": 1.5833333333333333,
+        "pngSha256": "66fc1b39662ab8ea225f96c9175f669c707da8da604556c5e9726dd21c86ccbf",
+        "origin": "RGB pixels decoded on CPU from compressed MP4/video; PNG encoding is lossless, source compression is not reversed."
+      }
+    },
+    "h3-sprite-return": {
+      "workflowId": "minimax_h3_sprite_motion",
+      "runId": "8110c5c3-0609-499e-92ca-e61e47faa05f",
+      "artifact": "output/LF_Nodes/MiniMaxH3/SpriteMotion/kitchen_quality/seed-42-f124_00001_.mp4",
+      "sha256": "5d4d3c20a9e5e46ec9e59e4dd4e2c5093d6f7586cf7ea12304c90364efd7d623",
+      "dimensions": [
+        768,
+        768
+      ],
+      "mediaType": "video/mp4",
+      "role": "Selected actual decoded video frame",
+      "decodedFrame": {
+        "index": 123,
+        "timeSeconds": 5.125,
+        "pngSha256": "c043d5b010a8f0b33756ad2f8383e148d43c814ac949ccf185e4cc3f2349812f",
+        "origin": "RGB pixels decoded on CPU from compressed MP4/video; PNG encoding is lossless, source compression is not reversed."
+      }
+    },
+    "utility-svg-input": {
+      "workflowId": "image_to_svg",
+      "runId": "682705e2-348f-46e8-9d7a-0086b7a58428",
+      "receipt": "output/hero-cards/svg-a5.json",
+      "receiptSha256": "c80c84b68a5290c190c4850fd504735e0401eb599e919b89b2495d76a7db296d",
+      "artifact": "output/LF_Nodes/Krea2/Generate/seed-451_00001_.png",
+      "sha256": "5b93419bfac6eace6c95db7ead21146c56b7c64792781451e47c83c58d3db71f",
+      "role": "Actual input consumed by this run"
+    },
+    "utility-svg-output": {
+      "workflowId": "image_to_svg",
+      "runId": "682705e2-348f-46e8-9d7a-0086b7a58428",
+      "receipt": "output/hero-cards/svg-a5.json",
+      "receiptSha256": "c80c84b68a5290c190c4850fd504735e0401eb599e919b89b2495d76a7db296d",
+      "artifact": "output/LF_Nodes/Catalogue/SVG/campfire_8.svg",
+      "sha256": "eb6ec9dc4a0013412d56ab53988cd970aa118be97caa34881e160217763989ee",
+      "role": "Actual saved SVG, rasterized on CPU",
+      "outputPointer": "history.outputs.20.lf_output[0].slot_map",
+      "mediaType": "image/svg+xml",
+      "renderRecipe": {
+        "renderer": "sharp/libvips/librsvg",
+        "sharp": "0.35.4",
+        "vips": "8.18.6",
+        "rsvg": "2.62.91",
+        "density": 144,
+        "maximumRaster": [
+          960,
+          960
+        ],
+        "rasterDimensions": [
+          960,
+          960
+        ],
+        "pngSha256": "a690601ccb8919eaca132470a0007bcb2972bff81c4b5a57babcbdbdb899d530"
+      }
+    }
+  },
+  "heroes": [
+    {
+      "workflowId": "krea2_generate",
+      "asset": "krea2/generate.webp",
+      "sources": [
+        "generate"
+      ],
+      "sha256": "b29454667dddf12e6ff4e76d2b1329859d7a4f7420cab3f7831d20e184c5b28c",
+      "bytes": 54544
+    },
+    {
+      "workflowId": "krea2_identity_edit",
+      "asset": "krea2/identity-edit.webp",
+      "sources": [
+        "reference",
+        "identity"
+      ],
+      "sha256": "c5ba90cb18a5c492d8c02c85cb0c271adc8c21a0badf6e54563a7c40915987f9",
+      "bytes": 87168
+    },
+    {
+      "workflowId": "krea2_character_restage",
+      "asset": "krea2/character-restage.webp",
+      "sources": [
+        "identity",
+        "restage"
+      ],
+      "sha256": "6490e5108fb9ef471f415437eafe1742eae215509e1aa75735836ed5eaefb8cb",
+      "bytes": 73726
+    },
+    {
+      "workflowId": "identity_cleanup_restage",
+      "asset": "krea2/identity-cleanup-restage.webp",
+      "sources": [
+        "reference",
+        "restage"
+      ],
+      "sha256": "4a0934b1f78ea831af9ab5a70c47c78ac831529776e9ac20f64a7c70b2106b67",
+      "bytes": 89306
+    },
+    {
+      "workflowId": "krea2_style_reference",
+      "asset": "krea2/style-reference.webp",
+      "sources": [
+        "explorer",
+        "style-reference"
+      ],
+      "display": "Actual output, contain-fit only; labels and checkerboard where transparent.",
+      "sha256": "e02f872119ef4724941598792cdeb9de129bbeac9a393610cbf4a6b69e8f0904",
+      "bytes": 22130
+    },
+    {
+      "workflowId": "krea2_style_blend",
+      "asset": "krea2/style-blend.webp",
+      "sources": [
+        "explorer",
+        "restyle",
+        "style-blend"
+      ],
+      "display": "Actual output, contain-fit only; labels and checkerboard where transparent.",
+      "sha256": "ffdeee4eef6bb839b97b336c16a4d487bbdfc22b5dcaea435d1cea23f2fe23bb",
+      "bytes": 43466
+    },
+    {
+      "workflowId": "krea2_outfit_change",
+      "asset": "krea2/outfit-change.webp",
+      "sources": [
+        "explorer",
+        "outfit"
+      ],
+      "display": "Actual output, contain-fit only; labels and checkerboard where transparent.",
+      "sha256": "9fc49ada5fbcbdb95dce5082d6046a01fb567aeca94afe4f2f2c4de0af22f8e0",
+      "bytes": 24498
+    },
+    {
+      "workflowId": "krea2_pose_change",
+      "asset": "krea2/pose-change.webp",
+      "sources": [
+        "explorer",
+        "pose"
+      ],
+      "display": "Actual output, contain-fit only; labels and checkerboard where transparent.",
+      "sha256": "ca8e22957d1bdd893a88f265c2eec0b2e7309ace72f3fc87a66a770cab3164c0",
+      "bytes": 26076
+    },
+    {
+      "workflowId": "krea2_character_restyle",
+      "asset": "krea2/character-restyle.webp",
+      "sources": [
+        "explorer",
+        "restyle"
+      ],
+      "display": "Actual output, contain-fit only; labels and checkerboard where transparent.",
+      "sha256": "bb89fbea6d01699052a7e2e8df35f5bdf51ef365cb020dd8e43733b10a812c5d",
+      "bytes": 36768
+    },
+    {
+      "workflowId": "image_sheet",
+      "asset": "image/sheet.webp",
+      "sources": [
+        "sheet"
+      ],
+      "display": "Actual output, contain-fit only; labels and checkerboard where transparent.",
+      "sha256": "4f4f28d066431e04afd4bdef1cc9ac46b309c75745c5928189f7c68bfd988fe1",
+      "bytes": 52314
+    },
+    {
+      "workflowId": "remove_bg",
+      "asset": "image/remove-background.webp",
+      "sources": [
+        "explorer",
+        "cutout"
+      ],
+      "display": "Actual output, contain-fit only; labels and checkerboard where transparent.",
+      "sha256": "fd5aaad24a0d1ef999a6c80ac7ed8d74ef1b8acc217200537cf771fc8497bd80",
+      "bytes": 28030
+    },
+    {
+      "workflowId": "image_to_dds",
+      "asset": "image/dds.webp",
+      "sources": [
+        "dds"
+      ],
+      "display": "Actual output, contain-fit only; labels and checkerboard where transparent. DDS is decoded from the saved DDS file.",
+      "sha256": "8cd3cf554a9914852ad9ad6fa8f5df88959cd22bc001dd7067826bfbae7db5e1",
+      "bytes": 21032
+    },
+    {
+      "workflowId": "image_detail_4k",
+      "asset": "image/detail-4k.webp",
+      "sources": [
+        "reference",
+        "detail"
+      ],
+      "display": "Matched normalized crops [0.58,0.10,0.86,0.42] from input and actual 4K output, equally displayed; no retouching.",
+      "sha256": "376bf057e1c322c61c04ea1442808dae4a819c15a42fad3c8f0bb579aa819905",
+      "bytes": 60226
+    },
+    {
+      "workflowId": "compare_images",
+      "asset": "image/compare.webp",
+      "sources": [
+        "comparison-before",
+        "comparison-after"
+      ],
+      "display": "Side-by-side composition of the two durable preview images emitted by the comparison workflow.",
+      "sha256": "f0a8c81490a3712012e81f2eca22c4ecab09508c759a496a03f25ee3bf0ac9be",
+      "bytes": 85310
+    },
+    {
+      "workflowId": "sort_json_keys",
+      "asset": "data/sort-json.webp",
+      "sources": [
+        "sorted-json"
+      ],
+      "display": "Exact submitted object and actual output object, typeset without changing values or key order.",
+      "sha256": "64ee4f7c7d00fb51666006ceda82fb37856df6eab85baad6d7b8b4ba8ae45e22",
+      "bytes": 10142
+    },
+    {
+      "workflowId": "load_metadata",
+      "asset": "data/metadata.webp",
+      "sources": [
+        "explorer",
+        "loaded-metadata"
+      ],
+      "display": "Actual image beside selected sampler fields parsed from the workflow's metadata output; other fields intentionally omitted.",
+      "sha256": "03b14348dbd4e6af57aaae4331bf59d80965d3514c7f7c0f4bb744291384454d",
+      "bytes": 21094
+    },
+    {
+      "workflowId": "minimax_h3_directed_view",
+      "asset": "minimax-h3/directed-view.webp",
+      "sources": [
+        "turnaround-cleanup",
+        "turnaround-subject-right"
+      ],
+      "display": "Actual cleaned front input beside the workflow's lossless selected anatomical-right output. Aspect-preserving contain-fit and labels only; no cropping or retouching.",
+      "sha256": "adf12367d3dc845bc8879d533f7aed3a811ccd951177232cff17bdb69faa394c",
+      "bytes": 20146,
+      "qualityScope": "Visually inspected generated views; minor matte halos and small detail/scale differences remain. Not calibrated geometry or a 3D reconstruction guarantee."
+    },
+    {
+      "workflowId": "assemble_cardinal_turnaround",
+      "asset": "image/cardinal-turnaround.webp",
+      "sources": [
+        "turnaround-final-front",
+        "turnaround-final-right",
+        "turnaround-final-back",
+        "turnaround-final-left"
+      ],
+      "display": "Four actual separately saved RGBA outputs arranged as tall labeled panels. One shared union-alpha crop removes only transparent outer margins with 8px padding, then all views use the same contain-fit scale. RIGHT/LEFT mean anatomical subject sides. Matte halos retained; no retouching.",
+      "sha256": "39a86e6cb2cddc3a4e7ae0314146dffabaf553263107510b348764907b7214dc",
+      "bytes": 33204,
+      "qualityScope": "Visually inspected generated views; minor matte halos and small detail/scale differences remain. Not calibrated geometry or a 3D reconstruction guarantee.",
+      "displayCrop": {
+        "coordinateSpace": "Original saved 1024x1024 RGBA output canvases",
+        "sharedCropRectangle": [
+          258,
+          47,
+          766,
+          984
+        ],
+        "rectangleConvention": "left, top, right-exclusive, bottom-exclusive",
+        "alphaBounds": "Union of all pixels with alpha greater than zero across all four final views",
+        "paddingPixels": 8,
+        "preserves": "One identical crop and display scale for all final views; every nontransparent pixel retained. No independent body rescaling, silhouette crop, matte cleanup, or geometry change.",
+        "originalReference": "Original opaque source is separately contain-fitted without cropping or retouching."
+      }
+    },
+    {
+      "workflowId": "character_turnaround_orchestra",
+      "asset": "orchestra/character-turnaround.webp",
+      "sources": [
+        "turnaround-explorer",
+        "turnaround-final-front",
+        "turnaround-final-right",
+        "turnaround-final-back",
+        "turnaround-final-left"
+      ],
+      "display": "One row of five tall panels: original reference contain-fitted without cropping, then the same orchestra's four actual separately saved RGBA final views. Final views share one union-alpha display crop and one contain-fit scale; only transparent outer margins removed. Labels added, no synthesized views or retouching.",
+      "sha256": "fa8f06f46218586a21c8b3d9a3263c776aaa315a28b7b48c9ded6fc7069d0911",
+      "bytes": 30138,
+      "qualityScope": "Visually inspected generated views; minor matte halos and small detail/scale differences remain. Not calibrated geometry or a 3D reconstruction guarantee.",
+      "displayCrop": {
+        "coordinateSpace": "Original saved 1024x1024 RGBA output canvases",
+        "sharedCropRectangle": [
+          258,
+          47,
+          766,
+          984
+        ],
+        "rectangleConvention": "left, top, right-exclusive, bottom-exclusive",
+        "alphaBounds": "Union of all pixels with alpha greater than zero across all four final views",
+        "paddingPixels": 8,
+        "preserves": "One identical crop and display scale for all final views; every nontransparent pixel retained. No independent body rescaling, silhouette crop, matte cleanup, or geometry change.",
+        "originalReference": "Original opaque source is separately contain-fitted without cropping or retouching."
+      },
+      "orchestra": {
+        "runId": "lf-sequence:564d2a37f6954960b9ac7683fdf78681",
+        "status": "succeeded",
+        "stages": [
+          {
+            "id": "cleanup",
+            "workflowId": "krea2_identity_edit",
+            "runId": "f15b773c-995d-4854-b8dd-63444989fc7e"
+          },
+          {
+            "id": "subject_right",
+            "workflowId": "minimax_h3_directed_view",
+            "runId": "cfab9984-f9a9-4de0-8da2-2872573a15b9"
+          },
+          {
+            "id": "back",
+            "workflowId": "minimax_h3_directed_view",
+            "runId": "ae96c413-d363-47e7-89ac-22de089fb056"
+          },
+          {
+            "id": "subject_left",
+            "workflowId": "minimax_h3_directed_view",
+            "runId": "5c05c8cd-8c38-4c0f-bc92-0b6da5c88404"
+          },
+          {
+            "id": "assemble",
+            "workflowId": "assemble_cardinal_turnaround",
+            "runId": "990245cb-1d16-49e3-a0b5-af70f50b5d29"
+          }
+        ]
+      }
+    },
+    {
+      "workflowId": "trellis2_image_to_textured_mesh",
+      "asset": "trellis2/image-to-mesh.webp",
+      "sources": [
+        "turnaround-final-front",
+        "trellis-single-glb"
+      ],
+      "sha256": "ce1f1c3e571b2cb0cbd71a472da41e17fca8385f6aa8fd1c35bb842582ca5ec1",
+      "bytes": 29384,
+      "display": "Actual supplied PNG input(s) beside front and rear three-quarter mechanical renders of the exact saved GLB, with original materials and neutral fixed lighting. Shared empty-background/transparent-margin crops and aspect-preserving contain-fit only; no geometry edits, recoloring, or retouching.",
+      "displayCrop": {
+        "inputSharedRgbaCrop": [
+          258,
+          47,
+          766,
+          984
+        ],
+        "renderSharedRgbCrop": [
+          183,
+          53,
+          457,
+          670
+        ],
+        "paddingPixels": 8,
+        "preserves": "Every nontransparent input pixel and every non-background render pixel. One identical crop across all four inputs and one across all four model renders. All generated mesh views share one display scale."
+      },
+      "qualityScope": "Six-angle textured and gray-geometry review. Simplified fingers, softened face and uneven surface detail remain. Single-view rear strap discontinuity retained. Presentation mesh example, not a watertight, rig-ready, or game-ready guarantee."
+    },
+    {
+      "workflowId": "minimax_h3_animate_image",
+      "asset": "minimax-h3/animate-image.webp",
+      "sources": [
+        "h3-animate-input",
+        "h3-animate-wave",
+        "h3-animate-return"
+      ],
+      "display": "Prepared input, actual wave frame 38 and return frame 123 from one completed Animate Image clip. Complete source canvases, including existing contain-padding, are identically contain-fitted into three labeled panels. No cropping, retouching or synthesized poses.",
+      "qualityScope": "Root-reviewed temporal samples and source retain broadly recognizable identity, outfit, framing and wave/return action, with mild facial, material and garment-detail changes. No continuous-playback or audio-quality claim; not a pixel-identical loop.",
+      "videoEvidence": {
+        "runId": "3e67ae62-ba10-4a10-bce9-69aefea0be9d",
+        "decodedFrameCount": 124,
+        "visuallyInspectedSampleIndices": [
+          0,
+          8,
+          15,
+          23,
+          31,
+          38,
+          46,
+          54,
+          62,
+          69,
+          77,
+          85,
+          92,
+          100,
+          108,
+          115,
+          123
+        ],
+        "audioListened": false
+      },
+      "sha256": "52c9cab62a88dacee2168556cbe402d0a00d37904fe7ebbcb5e27c61bcaae130",
+      "bytes": 34166
+    },
+    {
+      "workflowId": "minimax_h3_generate_video",
+      "asset": "minimax-h3/generate-video.webp",
+      "sources": [
+        "h3-generate-scene"
+      ],
+      "display": "One actual wide scene from frame 0 of this text-only generated video, whole-frame contain-fit with narrow side padding. No input picture, crop, retouching or synthesized temporal strip.",
+      "qualityScope": "Root-reviewed samples show a coherent stylized explorer walking through a market and stopping. Exact step count, brief between-frame gait/finger defects, distant background people and audio quality are unverified. This text-only run does not transfer the Krea explorer's identity.",
+      "videoEvidence": {
+        "runId": "8e91b6d3-c7e8-4d05-8c87-6767ed40b0e5",
+        "decodedFrameCount": 124,
+        "visuallyInspectedSampleIndices": [
+          0,
+          8,
+          15,
+          23,
+          31,
+          38,
+          46,
+          54,
+          62,
+          69,
+          77,
+          85,
+          92,
+          100,
+          108,
+          115,
+          123
+        ],
+        "audioListened": false,
+        "review": "Root accepted the complete temporal contact sheet with the stated limits; not continuous video playback."
+      },
+      "sha256": "caed622555f37c13e34336b876a8957f2d4b026e2a3d4799cc1d2ee712e0d990",
+      "bytes": 35900
+    },
+    {
+      "workflowId": "minimax_h3_reference_restage",
+      "asset": "minimax-h3/reference-restage.webp",
+      "sources": [
+        "h3-restage-reference",
+        "h3-restage-market"
+      ],
+      "display": "Actual portrait reference beside actual wide market output frame 31. Both complete canvases are separately contain-fitted without cropping or retouching. The wider output panel preserves the generated camera composition and realistic style change.",
+      "qualityScope": "Root accepted broad outfit/color continuity and a coherent market shot with limits: the resin-style reference becomes more realistic, facial likeness is not proven by the mostly side/back views, and exact step timing, perfect identity/material retention and audio quality are not claimed.",
+      "videoEvidence": {
+        "runId": "08fa617f-26d0-4e1a-9bf0-2fba4300309f",
+        "decodedFrameCount": 124,
+        "visuallyInspectedSampleIndices": [
+          0,
+          8,
+          15,
+          23,
+          31,
+          38,
+          46,
+          54,
+          62,
+          69,
+          77,
+          85,
+          92,
+          100,
+          108,
+          115,
+          123
+        ],
+        "audioListened": false,
+        "review": "Root accepted the complete temporal contact sheet with the stated limits; not continuous video playback."
+      },
+      "sha256": "f5d7fd541c2e02e78f7db6aba4644941e0734bad6dc14c4e9df634ee878f1ff0",
+      "bytes": 49894
+    },
+    {
+      "workflowId": "minimax_h3_character_turnaround",
+      "asset": "minimax-h3/character-turnaround.webp",
+      "sources": [
+        "h3-turntable-front",
+        "h3-turntable-right",
+        "h3-turntable-back",
+        "h3-turntable-left"
+      ],
+      "display": "Four actual separately saved transparent candidates from this workflow's own turntable, sampled at source frames 0/34/58/82. One common union-alpha display crop removes only fully transparent outer margins, then one shared contain-fit scale is used on a neutral gray matte. RIGHT/LEFT are intended anatomical sides; no retouching or Orchestra substitutions.",
+      "displayCrop": {
+        "coordinateSpace": "Saved 1024x1024 RGBA candidates",
+        "sharedCropRectangle": [
+          254,
+          30,
+          767,
+          984
+        ],
+        "rectangleConvention": "left, top, right-exclusive, bottom-exclusive",
+        "alphaBounds": "Union of all pixels with alpha greater than zero",
+        "paddingPixels": 8,
+        "matte": "#DEE0E2",
+        "preserves": "All nontransparent pixels including halos, with identical crop and scale across all four candidates"
+      },
+      "qualityScope": "Root accepted these candidate views with minor matte halos, detail/scale differences and generated-view limitations. Not calibrated geometry, perfect identity preservation or proven reconstruction readiness. No audio-quality claim.",
+      "videoEvidence": {
+        "runId": "24bfe9b6-3e2e-4bb0-b1cc-b6452b9c1fc0",
+        "decodedFrameCount": 124,
+        "visuallyInspectedSampleIndices": [
+          0,
+          8,
+          15,
+          23,
+          31,
+          34,
+          38,
+          46,
+          54,
+          58,
+          62,
+          69,
+          77,
+          82,
+          85,
+          92,
+          100,
+          108,
+          115,
+          123
+        ],
+        "audioListened": false,
+        "review": "Root accepted the complete temporal contact sheet with the stated limits; not continuous video playback."
+      },
+      "sha256": "90a8939de4ac5d9592c90c4f4fb45d0f31ad463a8336b2cb9a47976ad415a136",
+      "bytes": 34954
+    },
+    {
+      "workflowId": "minimax_h3_first_last_frame",
+      "asset": "minimax-h3/first-last-frame.webp",
+      "sources": [
+        "h3-firstlast-first",
+        "h3-firstlast-transition",
+        "h3-firstlast-final"
+      ],
+      "conditioningSources": {
+        "first": "h3-firstlast-first",
+        "last": "h3-firstlast-last"
+      },
+      "display": "Actual prepared neutral first input, this run's generated transition frame 23 and its generated final frame 123. The final panel is output, not the supplied last-input picture. Complete canvases are contain-fitted without crop or retouching.",
+      "qualityScope": "Root accepted the sampled neutral-to-wave transition with mild detail/motion limits. This is model-generated interpolation, not exact morphing or pixel-perfect endpoint reproduction. No continuous playback or audio-quality claim.",
+      "videoEvidence": {
+        "runId": "d67e9708-1dc4-461c-a9ca-ed5fc0523230",
+        "decodedFrameCount": 124,
+        "visuallyInspectedSampleIndices": [
+          0,
+          8,
+          15,
+          23,
+          31,
+          38,
+          46,
+          54,
+          62,
+          69,
+          77,
+          85,
+          92,
+          100,
+          108,
+          115,
+          123
+        ],
+        "audioListened": false,
+        "review": "Root accepted the complete temporal contact sheet with the stated limits; not continuous video playback."
+      },
+      "sha256": "07b2140d8fd328f4bf32cb7ee193e472c2a9c5e113f7f8f477a0dd25a5341968",
+      "bytes": 39180
+    },
+    {
+      "workflowId": "minimax_h3_anchored_sprite_loop",
+      "asset": "minimax-h3/anchored-sprite-loop.webp",
+      "sources": [
+        "h3-anchored-sprite-00",
+        "h3-anchored-sprite-08",
+        "h3-anchored-sprite-16",
+        "h3-anchored-sprite-23"
+      ],
+      "conditioningSources": {
+        "first": "h3-anchored-endpoint",
+        "last": "h3-anchored-endpoint",
+        "guideAtFrame41": "h3-anchored-guide"
+      },
+      "display": "Four actual saved RGBA sprites (ordinals 0/8/16/23, source-video frames 0/41/82/118) over a display checkerboard. One shared crop from the union of all 24 alpha bounds removes only transparent margins, retaining halos; identical contain-fit scale, no retouching.",
+      "displayCrop": {
+        "coordinateSpace": "Actual saved 256x256 RGBA sprites",
+        "sharedCropRectangle": [
+          47,
+          11,
+          194,
+          244
+        ],
+        "rectangleConvention": "left, top, right-exclusive, bottom-exclusive",
+        "alphaBounds": "Union of all alpha greater than zero across all 24 saved frames",
+        "paddingPixels": 4
+      },
+      "spriteExport": {
+        "frameCount": 24,
+        "frameSize": [
+          256,
+          256
+        ],
+        "intendedFps": 12,
+        "playbackDurationSeconds": 2,
+        "sampledSourceIndices": [
+          0,
+          5,
+          10,
+          15,
+          21,
+          26,
+          31,
+          36,
+          41,
+          46,
+          51,
+          56,
+          62,
+          67,
+          72,
+          77,
+          82,
+          87,
+          92,
+          97,
+          103,
+          108,
+          113,
+          118
+        ],
+        "loopEndpointPolicy": "exclude_final_endpoint",
+        "atlas": {
+          "artifact": "output/LF_Nodes/MiniMaxH3/AnchoredSpriteLoop/kitchen_quality/seed-42-f124/atlas-6x4-256px-content-224px-bottom-16px-ref-0-12fps_00001_.png",
+          "sha256": "1c7121d26e3c039cd7462b2af634e79f3210d0d8e4bd4cced89f2c107baa9f92",
+          "layout": "6x4"
+        }
+      },
+      "originalVideoTiming": {
+        "frameCount": 124,
+        "fps": 24,
+        "playbackDurationSeconds": 5.166666666666667
+      },
+      "qualityScope": "Root accepted the actual normalized loop-seam evidence; independent reviewer inspected all 24 sprites and confirmed first/last plus frame-41 guide wiring in the executed graph. White matte fringe remains; no pixel-perfect seam or identical MP4/sprite timing claim. Audio unreviewed.",
+      "videoEvidence": {
+        "runId": "4b0179e8-cc9b-4da1-bf35-05605fdf2dce",
+        "decodedFrameCount": 124,
+        "visuallyInspectedSampleIndices": [
+          0,
+          8,
+          15,
+          23,
+          31,
+          38,
+          46,
+          54,
+          62,
+          69,
+          77,
+          85,
+          92,
+          100,
+          108,
+          115,
+          123
+        ],
+        "audioListened": false,
+        "review": "Root accepted the complete temporal contact sheet with the stated limits; not continuous video playback."
+      },
+      "sha256": "58d33a951432a36ae976ea2a866502120a48ea31e2fc019edb7637d7ae9fee27",
+      "bytes": 44020
+    },
+    {
+      "workflowId": "minimax_h3_sprite_motion",
+      "asset": "minimax-h3/sprite-motion.webp",
+      "sources": [
+        "h3-sprite-source",
+        "h3-sprite-wave",
+        "h3-sprite-return"
+      ],
+      "display": "Actual prepared source beside this Sprite Motion run's own wave frame 38 and return frame 123. Only the matching lateral square-preparation padding is display-cropped from all three panels, then contain-fitted; complete people and vertical canvases retained. The clip remains opaque; no matte extraction, atlas or transparent export is implied.",
+      "displayCrop": {
+        "method": "Same centered native-portrait aspect rectangle in each square canvas, removing lateral preparation padding only",
+        "rectangles": [
+          {
+            "originalSize": [
+              1024,
+              1024
+            ],
+            "cropRectangle": [
+              219,
+              0,
+              804,
+              1024
+            ]
+          },
+          {
+            "originalSize": [
+              768,
+              768
+            ],
+            "cropRectangle": [
+              164,
+              0,
+              603,
+              768
+            ]
+          },
+          {
+            "originalSize": [
+              768,
+              768
+            ],
+            "cropRectangle": [
+              164,
+              0,
+              603,
+              768
+            ]
+          }
+        ],
+        "rectangleConvention": "left, top, right-exclusive, bottom-exclusive",
+        "preserves": "Complete silhouette and top/bottom canvas, without pose retouching, alpha extraction or body rescaling"
+      },
+      "qualityScope": "Root accepted sampled idle-wave-settle motion. Independent Core-history review verified this first-frame-only graph executed separately from Anchored Sprite Loop. Mild facial/material/temporal limits remain; not a finished sprite atlas, seamless loop or audio-quality claim.",
+      "videoEvidence": {
+        "runId": "8110c5c3-0609-499e-92ca-e61e47faa05f",
+        "decodedFrameCount": 124,
+        "visuallyInspectedSampleIndices": [
+          0,
+          8,
+          15,
+          23,
+          31,
+          38,
+          46,
+          54,
+          62,
+          69,
+          77,
+          85,
+          92,
+          100,
+          108,
+          115,
+          123
+        ],
+        "audioListened": false,
+        "review": "Root accepted the complete temporal contact sheet with the stated limits; not continuous video playback."
+      },
+      "sha256": "090d4f039b6c66feb828ced92773c8bc20b3d45da2989f827d2661cf58663374",
+      "bytes": 32346
+    },
+    {
+      "workflowId": "image_to_svg",
+      "asset": "image/svg.webp",
+      "sources": [
+        "utility-svg-input",
+        "utility-svg-output"
+      ],
+      "display": "Actual source beside a CPU rendering of this run's saved SVG. Complete canvases contain-fitted; no retouching. The quantized node preview is not substituted for the SVG.",
+      "qualityScope": "Root visually accepted the post-fix three-color rendering: orange flame, dark crossed logs, and the icon silhouette are retained. Earlier color-loss samples are not used.",
+      "sha256": "32f5a8d4432948ad8a2de450bf8d465b1ebfc1e88527d1391cc8087c0ace2043",
+      "bytes": 18832
+    }
+  ]
+}

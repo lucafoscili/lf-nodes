@@ -95,6 +95,13 @@ except ImportError:
 # endregion
 
 # region Helpers
+def _is_authorized(request: web.Request) -> bool:
+    """Use the same configured shared-secret requirement for status and POSTs."""
+    if not PROXY_SECRET:
+        return True
+    return request.headers.get(PROXY_SECRET_HEADER, "") == PROXY_SECRET
+
+
 def _build_body_for_legacy(body: Dict[str, Any]) -> Dict[str, Any]:
     """
     Build a legacy 'generate' style body from an OpenAI chat `messages` list.
@@ -301,6 +308,7 @@ __all__ = [
     "_read_secret",
     "PROXY_SECRET",
     "PROXY_SECRET_HEADER",
+    "_is_authorized",
     "_get_client_id",
     "_check_rate_limit",
     "_build_upstream_and_headers",

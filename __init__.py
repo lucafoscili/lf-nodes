@@ -1,4 +1,4 @@
-import importlib.util
+import importlib
 import logging
 import os
 import sys
@@ -45,13 +45,9 @@ for dirpath, _, filenames in os.walk(MODULES_DIR):
         full_module_name = f"lf_nodes.modules.{module_name}"
 
         try:
-            spec = importlib.util.spec_from_file_location(full_module_name, os.path.join(dirpath, filename))
-            if spec and spec.loader:
-                module = importlib.util.module_from_spec(spec)
-                spec.loader.exec_module(module)
-
-                NODE_CLASS_MAPPINGS.update(getattr(module, "NODE_CLASS_MAPPINGS", {}))
-                NODE_DISPLAY_NAME_MAPPINGS.update(getattr(module, "NODE_DISPLAY_NAME_MAPPINGS", {}))
+            module = importlib.import_module(full_module_name)
+            NODE_CLASS_MAPPINGS.update(getattr(module, "NODE_CLASS_MAPPINGS", {}))
+            NODE_DISPLAY_NAME_MAPPINGS.update(getattr(module, "NODE_DISPLAY_NAME_MAPPINGS", {}))
         except Exception as e:
             LOG.error(f"Failed to import {full_module_name}: {e}")
 
@@ -62,6 +58,7 @@ __all__ = ["NODE_CLASS_MAPPINGS", "NODE_DISPLAY_NAME_MAPPINGS", "WEB_DIRECTORY"]
 LOG.info("\033[34m*-----------------------------------------------------------*\033[0m")
 LOG.info(f"\033[34m*               LF Nodes initialized - v{VERSION}                *\033[0m")
 if _WF_ENABLED:
+    wr_url = None
     try:
         import comfy.cli_args as _cli
 
@@ -80,7 +77,7 @@ if _WF_ENABLED:
         if port:
             wr_url = f"http://{host}:{port}"
     except Exception:
-        wr_url = None
+        pass
 
     if wr_url:
         full = wr_url.rstrip("/") + "/api/lf-nodes/workflow-runner"

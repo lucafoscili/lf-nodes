@@ -34,7 +34,7 @@ corepack yarn test:titanic
 
 This checks workflow identity, the seven disabled-policy branches, real
 frontend hydration, LF custom-widget DOM mounting, authoritative prompt
-serialization, and exhaustive classification of all 119 active output nodes.
+serialization, and exhaustive classification of all 120 active output nodes.
 The canonical `E2E.json` bytes are checked again before exit.
 
 ## Bounded CPU experience check
@@ -43,10 +43,11 @@ The canonical `E2E.json` bytes are checked again before exit.
 corepack yarn test:titanic -- --execute-smoke
 ```
 
-This additionally queues the two uniquely titled CPU widget specimens:
-`LF_PeriodicImageBatchSampler` and `LF_NormalizeSpriteBatch`. It requires exact
-terminal history, their versioned receipts, generated preview URLs, live
-widget updates, durable `ui.lf_output`, and an unchanged workflow file.
+This additionally queues the three uniquely titled CPU widget specimens:
+`LF_PeriodicImageBatchSampler`, `LF_NormalizeSpriteBatch`, and
+`LF_SelectSettledImageFrame`. It requires exact terminal history, their
+versioned receipts, generated preview URLs, live widget updates, durable
+`ui.lf_output`, and an unchanged workflow file.
 
 ## Full active-workflow gate
 

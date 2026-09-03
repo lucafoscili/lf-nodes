@@ -8,9 +8,17 @@ import pytest
 from modules.workflow_runner.services.readiness import (
     MAX_READINESS_ISSUES,
     WorkflowReadinessScanner,
+    evaluate_input_option_requirement,
     evaluate_workflow_readiness,
+    filter_unavailable_input_options,
+    selected_input_option_requirements,
 )
-from modules.workflow_runner.services.registry import WorkflowModelAsset
+from modules.workflow_runner.services.registry import (
+    WorkflowCell,
+    WorkflowInputOptionRequirement,
+    WorkflowModelAsset,
+    WorkflowNode,
+)
 
 
 class _Workflow:
@@ -75,6 +83,97 @@ def test_missing_node_is_setup_required(tmp_path: Path) -> None:
             {
                 "code": "node_missing",
                 "message": "Required node type is not installed: CommunityMagic.",
+            }
+        ],
+    }
+
+
+def test_readiness_scans_the_configured_default_download_graph(tmp_path: Path) -> None:
+    workflow = _write_prompt(
+        tmp_path,
+        {
+            "keep": {"class_type": "InstalledNode", "inputs": {"mode": "raw"}},
+            "discard": {"class_type": "TemplateOnlyNode", "inputs": {}},
+        },
+    )
+    workflow.inputs = (
+        WorkflowCell(
+            id="mode",
+            node_id="keep",
+            props={"lfValue": "configured"},
+        ),
+    )
+
+    def configure_download(prompt, inputs):
+        prompt.pop("discard")
+        prompt["keep"]["inputs"]["mode"] = inputs["mode"]
+
+    workflow.configure_download = configure_download
+
+    assert evaluate_workflow_readiness(
+        workflow,
+        scanner=_scanner(nodes={"InstalledNode"}),
+    ) == {"status": "ready", "issues": []}
+
+
+def test_readiness_scans_the_graph_configured_for_supplied_inputs(
+    tmp_path: Path,
+) -> None:
+    workflow = _write_prompt(
+        tmp_path,
+        {"node": {"class_type": "InstalledNode", "inputs": {}}},
+    )
+    workflow.inputs = (
+        WorkflowCell(
+            id="mode",
+            node_id="node",
+            props={"lfValue": "safe"},
+        ),
+    )
+
+    def configure_download(prompt, inputs):
+        if inputs["mode"] == "selected":
+            prompt["selected"] = {"class_type": "SelectedNode", "inputs": {}}
+
+    workflow.configure_download = configure_download
+
+    assert evaluate_workflow_readiness(
+        workflow,
+        inputs={"mode": "selected"},
+        scanner=_scanner(nodes={"InstalledNode"}),
+    ) == {
+        "status": "setup_required",
+        "issues": [
+            {
+                "code": "node_missing",
+                "message": "Required node type is not installed: SelectedNode.",
+            }
+        ],
+    }
+
+
+def test_readiness_fails_closed_when_default_configuration_is_invalid(
+    tmp_path: Path,
+) -> None:
+    workflow = _write_prompt(
+        tmp_path,
+        {"node": {"class_type": "InstalledNode", "inputs": {}}},
+    )
+
+    def configure_download(_prompt, _inputs):
+        raise ValueError("private implementation detail")
+
+    workflow.configure_download = configure_download
+
+    assert evaluate_workflow_readiness(
+        workflow,
+        scanner=_scanner(nodes={"InstalledNode"}),
+    ) == {
+        "status": "setup_required",
+        "issues": [
+            {
+                "code": "workflow_configuration_invalid",
+                "message": "Workflow defaults could not be configured for readiness.",
             }
         ],
     }
@@ -151,6 +250,76 @@ def test_missing_selectable_default_model_warns_without_blocking(tmp_path: Path)
                 "message": (
                     "Default diffusion model file is not installed: wanted.safetensors. "
                     "Choose an installed option before running."
+                ),
+            }
+        ],
+    }
+
+
+def test_missing_explicitly_configured_model_is_setup_required(tmp_path: Path) -> None:
+    workflow = _write_prompt(
+        tmp_path,
+        {
+            "1": {
+                "class_type": "UNETLoader",
+                "inputs": {"unet_name": "template.safetensors"},
+            }
+        },
+    )
+    workflow.inputs = (
+        SimpleNamespace(
+            id="model",
+            node_id="1",
+            shape="select",
+            props={
+                "lfDataset": {
+                    "nodes": [
+                        {
+                            "id": "missing",
+                            "value": "Missing model",
+                            "workflowValue": "missing.safetensors",
+                        }
+                    ]
+                },
+                "lfValue": "missing",
+            },
+        ),
+    )
+
+    def configure_download(prompt, configured_inputs):
+        prompt["1"]["inputs"]["unet_name"] = configured_inputs["model"]
+
+    workflow.configure_download = configure_download
+
+    assert evaluate_workflow_readiness(
+        workflow,
+        inputs={"model": "missing.safetensors"},
+        scanner=_scanner(nodes={"UNETLoader"}, models={"diffusion_models": set()}),
+    ) == {
+        "status": "setup_required",
+        "issues": [
+            {
+                "code": "model_missing",
+                "message": (
+                    "Required diffusion model file is not installed: "
+                    "missing.safetensors."
+                ),
+            }
+        ],
+    }
+    assert evaluate_workflow_readiness(
+        workflow,
+        inputs={"model": "missing.safetensors"},
+        replaceable_input_ids={"model"},
+        scanner=_scanner(nodes={"UNETLoader"}, models={"diffusion_models": set()}),
+    ) == {
+        "status": "warning",
+        "issues": [
+            {
+                "code": "default_model_missing",
+                "message": (
+                    "Default diffusion model file is not installed: "
+                    "missing.safetensors. Choose an installed option before running."
                 ),
             }
         ],
@@ -527,3 +696,239 @@ def test_model_file_probe_is_cached_per_catalogue_scan(tmp_path: Path) -> None:
 
     assert result["status"] == "setup_required"
     assert calls == [shared_path]
+
+
+def test_unavailable_optional_recipe_is_filtered_without_blocking_its_default() -> None:
+    model_path = "loras/vendor/turbo.safetensors"
+    requirement = WorkflowInputOptionRequirement(
+        input_id="execution_profile",
+        option_value="turbo",
+        required_node_types=("VendorTurboLoRA", "VendorTurboSampler"),
+        required_model_assets=(
+            WorkflowModelAsset(
+                label="Vendor Turbo LoRA",
+                relative_paths=(model_path,),
+            ),
+        ),
+    )
+    definition = SimpleNamespace(
+        input_option_requirements=(requirement,),
+        inputs=(
+            WorkflowCell(
+                node_id="sample",
+                id="execution_profile",
+                props={"lfValue": "baseline"},
+            ),
+        ),
+    )
+    cells = {
+        "execution_profile": {
+            "props": {
+                "lfValue": "baseline",
+                "lfDataset": {
+                    "nodes": [
+                        {
+                            "id": "turbo",
+                            "value": "Fast",
+                            "workflowValue": "turbo",
+                        },
+                        {
+                            "id": "baseline",
+                            "value": "Baseline",
+                            "workflowValue": "baseline",
+                        },
+                    ]
+                },
+            }
+        }
+    }
+
+    filtered = filter_unavailable_input_options(
+        definition,
+        cells,
+        scanner=_scanner(nodes={"VendorTurboLoRA"}, model_paths={model_path}),
+    )
+
+    assert filtered["execution_profile"]["props"]["lfDataset"]["nodes"] == [
+        {
+            "id": "baseline",
+            "value": "Baseline",
+            "workflowValue": "baseline",
+        }
+    ]
+    assert selected_input_option_requirements(definition, {}) == ()
+    assert selected_input_option_requirements(
+        definition,
+        {"execution_profile": "turbo"},
+    ) == (requirement,)
+
+
+@pytest.mark.parametrize(
+    ("default", "nodes", "option_value"),
+    [
+        (
+            "10",
+            [{"id": "10", "value": "Ten", "workflowValue": 10}],
+            10,
+        ),
+        (
+            1,
+            [
+                {"id": "baseline", "workflowValue": "baseline"},
+                {"id": "quality", "workflowValue": "quality"},
+            ],
+            "quality",
+        ),
+        (
+            "friendly",
+            [{"id": "friendly", "value": "Friendly"}],
+            "Friendly",
+        ),
+        (
+            "identity",
+            [{"id": "identity"}],
+            "identity",
+        ),
+    ],
+    ids=("numeric-workflow-value", "numeric-index", "value-fallback", "id-fallback"),
+)
+def test_selected_requirement_resolves_omitted_select_default_semantically(
+    default: str | int,
+    nodes: list[dict[str, object]],
+    option_value: str | int,
+) -> None:
+    requirement = WorkflowInputOptionRequirement(
+        input_id="profile",
+        option_value=option_value,
+        required_node_types=("OptionalSampler",),
+    )
+    definition = SimpleNamespace(
+        input_option_requirements=(requirement,),
+        inputs=(
+            WorkflowCell(
+                node_id="sample",
+                id="profile",
+                shape="select",
+                props={
+                    "lfValue": default,
+                    "lfDataset": {"nodes": nodes},
+                },
+            ),
+        ),
+    )
+
+    assert selected_input_option_requirements(definition, {}) == (requirement,)
+    assert selected_input_option_requirements(
+        definition,
+        {"profile": "explicit-override"},
+    ) == ()
+
+
+def test_optional_recipe_is_kept_only_when_every_declared_dependency_is_ready() -> None:
+    model_path = "loras/vendor/turbo.safetensors"
+    requirement = WorkflowInputOptionRequirement(
+        input_id="execution_profile",
+        option_value="turbo",
+        required_node_types=("VendorTurboLoRA", "VendorTurboSampler"),
+        required_model_assets=(
+            WorkflowModelAsset(
+                label="Vendor Turbo LoRA",
+                relative_paths=(model_path,),
+            ),
+        ),
+    )
+    missing_model = evaluate_input_option_requirement(
+        requirement,
+        scanner=_scanner(
+            nodes={"VendorTurboLoRA", "VendorTurboSampler"},
+            model_paths=set(),
+        ),
+    )
+    assert missing_model["status"] == "setup_required"
+    assert missing_model["issues"][0]["code"] == "model_asset_missing"
+
+    scanner = _scanner(
+        nodes={"VendorTurboLoRA", "VendorTurboSampler"},
+        model_paths={model_path},
+    )
+
+    assert evaluate_input_option_requirement(requirement, scanner=scanner) == {
+        "status": "ready",
+        "issues": [],
+    }
+
+
+def test_optional_recipe_requirement_cannot_target_the_workflow_default(
+    tmp_path: Path,
+) -> None:
+    requirement = WorkflowInputOptionRequirement(
+        input_id="execution_profile",
+        option_value="turbo",
+        required_node_types=("VendorTurboSampler",),
+    )
+
+    with pytest.raises(
+        ValueError,
+        match="must not target a workflow default",
+    ):
+        WorkflowNode(
+            id="example",
+            value="Example",
+            description="Example workflow.",
+            category="Test",
+            inputs=(
+                WorkflowCell(
+                    node_id="sample",
+                    id="execution_profile",
+                    props={"lfValue": "turbo"},
+                ),
+            ),
+            outputs=(),
+            configure_prompt=lambda _prompt, _inputs: None,
+            workflow_path=tmp_path / "workflow.json",
+            input_option_requirements=(requirement,),
+        )
+
+
+def test_optional_recipe_requirement_cannot_target_semantic_select_default(
+    tmp_path: Path,
+) -> None:
+    requirement = WorkflowInputOptionRequirement(
+        input_id="execution_profile",
+        option_value=10,
+        required_node_types=("VendorTurboSampler",),
+    )
+
+    with pytest.raises(
+        ValueError,
+        match="must not target a workflow default",
+    ):
+        WorkflowNode(
+            id="example",
+            value="Example",
+            description="Example workflow.",
+            category="Test",
+            inputs=(
+                WorkflowCell(
+                    node_id="sample",
+                    id="execution_profile",
+                    shape="select",
+                    props={
+                        "lfValue": "10",
+                        "lfDataset": {
+                            "nodes": [
+                                {
+                                    "id": "10",
+                                    "value": "Ten steps",
+                                    "workflowValue": 10,
+                                }
+                            ]
+                        },
+                    },
+                ),
+            ),
+            outputs=(),
+            configure_prompt=lambda _prompt, _inputs: None,
+            workflow_path=tmp_path / "workflow.json",
+            input_option_requirements=(requirement,),
+        )

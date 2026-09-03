@@ -5,6 +5,7 @@ import { WorkflowSectionController, WorkflowUICells } from '../types/section';
 import { WorkflowStore } from '../types/state';
 import { DEBUG_MESSAGES } from '../utils/constants';
 import { debugLog } from '../utils/debug';
+import { isWorkflowOrchestra } from '../utils/workflow-kind';
 import { consumeArtifactHandoff } from '../utils/artifact-handoff';
 import { createInputCell } from './components';
 import { MAIN_CLASSES } from './layout.main';
@@ -26,9 +27,12 @@ const { theme } = getLfFramework();
 const ROOT_CLASS = 'inputs-section';
 export const INPUTS_CLASSES = {
   _: theme.bemClass(ROOT_CLASS),
+  advanced: theme.bemClass(ROOT_CLASS, 'advanced'),
+  advancedFields: theme.bemClass(ROOT_CLASS, 'advanced-fields'),
   cell: theme.bemClass(ROOT_CLASS, 'cell'),
   cells: theme.bemClass(ROOT_CLASS, 'cells'),
   description: theme.bemClass(ROOT_CLASS, 'description'),
+  eyebrow: theme.bemClass(ROOT_CLASS, 'eyebrow'),
   help: theme.bemClass(ROOT_CLASS, 'help'),
   h3: theme.bemClass(ROOT_CLASS, 'title-h3'),
   openButton: theme.bemClass(ROOT_CLASS, 'title-open-button'),
@@ -39,6 +43,7 @@ export const INPUTS_CLASSES = {
   retainedUploadClear: theme.bemClass(ROOT_CLASS, 'retained-upload-clear'),
   retainedUploadText: theme.bemClass(ROOT_CLASS, 'retained-upload-text'),
   title: theme.bemClass(ROOT_CLASS, 'title'),
+  titleCopy: theme.bemClass(ROOT_CLASS, 'title-copy'),
 } as const;
 //#endregion
 
@@ -61,16 +66,30 @@ const _options = () => {
 
   return optionsWrapper;
 };
+const _advanced = () => {
+  const details = document.createElement('details');
+  const summary = document.createElement('summary');
+  const fields = document.createElement('div');
+  details.className = INPUTS_CLASSES.advanced;
+  fields.className = INPUTS_CLASSES.advancedFields;
+  summary.textContent = 'Advanced settings';
+  details.append(summary, fields);
+  return { details, fields };
+};
 const _title = (store: WorkflowStore, onReset: () => void) => {
   const download = theme.get.icon('download');
   const refresh = theme.get.icon('refresh');
 
   const title = document.createElement('div');
+  const titleCopy = document.createElement('div');
+  const eyebrow = document.createElement('span');
   const h3 = document.createElement('h3');
   const resetButton = document.createElement('lf-button');
   const openButton = document.createElement('lf-button');
 
   title.className = INPUTS_CLASSES.title;
+  titleCopy.className = INPUTS_CLASSES.titleCopy;
+  eyebrow.className = INPUTS_CLASSES.eyebrow;
 
   h3.className = INPUTS_CLASSES.h3;
 
@@ -93,13 +112,19 @@ const _title = (store: WorkflowStore, onReset: () => void) => {
   openButton.lfStyling = 'icon';
   openButton.lfUiSize = 'xsmall';
   openButton.title = label;
-  openButton.addEventListener('lf-button-event', (e) => buttonHandler(e, store));
+  openButton.addEventListener('lf-button-event', (e) => {
+    if (store.getState().manager.workflow.current()?.downloadable === false) {
+      return;
+    }
+    buttonHandler(e, store);
+  });
 
-  title.appendChild(h3);
+  titleCopy.append(eyebrow, h3);
+  title.appendChild(titleCopy);
   title.appendChild(resetButton);
   title.appendChild(openButton);
 
-  return { h3, openButton, resetButton, title };
+  return { eyebrow, h3, openButton, resetButton, title, titleCopy };
 };
 const _help = (value?: string) => {
   if (!value) {
@@ -260,9 +285,11 @@ export const createInputsSection = (store: WorkflowStore): WorkflowSectionContro
       mount();
       render();
     };
-    const { h3, openButton, resetButton, title } = _title(store, reset);
+    const { eyebrow, h3, openButton, resetButton, title, titleCopy } = _title(store, reset);
+    openButton.hidden = workflow?.downloadable === false;
 
     const cellElements: WorkflowUICells = [];
+    let advanced: ReturnType<typeof _advanced> | null = null;
     if (workflow) {
       const inputCells = manager.workflow.cells('input');
       for (const id in inputCells) {
@@ -290,8 +317,16 @@ export const createInputsSection = (store: WorkflowStore): WorkflowSectionContro
         if (cell.shape === 'upload') {
           wrapper.appendChild(_retainedUpload(component));
         }
-        options.appendChild(wrapper);
+        if (cell.advanced) {
+          advanced ??= _advanced();
+          advanced.fields.appendChild(wrapper);
+        } else {
+          options.appendChild(wrapper);
+        }
       }
+    }
+    if (advanced) {
+      options.appendChild(advanced.details);
     }
 
     uiRegistry.set(INPUTS_CLASSES.cells, cellElements);
@@ -305,12 +340,14 @@ export const createInputsSection = (store: WorkflowStore): WorkflowSectionContro
 
     uiRegistry.set(INPUTS_CLASSES._, _root);
     uiRegistry.set(INPUTS_CLASSES.description, description);
+    uiRegistry.set(INPUTS_CLASSES.eyebrow, eyebrow);
     uiRegistry.set(INPUTS_CLASSES.h3, h3);
     uiRegistry.set(INPUTS_CLASSES.openButton, openButton);
     uiRegistry.set(INPUTS_CLASSES.resetButton, resetButton);
     uiRegistry.set(INPUTS_CLASSES.options, options);
     uiRegistry.set(INPUTS_CLASSES.readiness, readiness);
     uiRegistry.set(INPUTS_CLASSES.title, title);
+    uiRegistry.set(INPUTS_CLASSES.titleCopy, titleCopy);
 
     mountedCells = cellElements;
     mountedWorkflowId = workflowId;
@@ -370,11 +407,29 @@ export const createInputsSection = (store: WorkflowStore): WorkflowSectionContro
 
     const cells = elements[INPUTS_CLASSES.cells] as WorkflowUICells;
     const descr = elements[INPUTS_CLASSES.description] as HTMLElement;
+    const eyebrow = elements[INPUTS_CLASSES.eyebrow] as HTMLElement | undefined;
     const h3 = elements[INPUTS_CLASSES.h3] as HTMLElement;
+    const root = elements[INPUTS_CLASSES._] as HTMLElement | undefined;
+    const openButton = elements[INPUTS_CLASSES.openButton] as HTMLElement | undefined;
     const readiness = elements[INPUTS_CLASSES.readiness] as HTMLElement | undefined;
     const workflow = manager.workflow.current();
     descr.textContent = manager.workflow.description();
     h3.textContent = manager.workflow.title();
+    if (eyebrow) {
+      const isOrchestra = isWorkflowOrchestra(workflow);
+      const blockCount = workflow?.stages?.length || 0;
+      eyebrow.textContent = isOrchestra
+        ? blockCount
+          ? `Orchestra · ${blockCount} ${blockCount === 1 ? 'block' : 'blocks'}`
+          : 'Orchestra'
+        : 'Block';
+    }
+    if (root) {
+      root.dataset.workflowKind = isWorkflowOrchestra(workflow) ? 'orchestra' : 'block';
+    }
+    if (openButton) {
+      openButton.hidden = workflow?.downloadable === false;
+    }
     if (readiness) {
       const status = workflow?.readiness?.status;
       const issues = workflow?.readiness?.issues || [];
@@ -398,6 +453,14 @@ export const createInputsSection = (store: WorkflowStore): WorkflowSectionContro
       if (cell && parent) {
         if (status) {
           parent.dataset.status = status;
+          if (status === 'error') {
+            const advanced = cell.closest<HTMLDetailsElement>(
+              `details.${INPUTS_CLASSES.advanced}`,
+            );
+            if (advanced) {
+              advanced.open = true;
+            }
+          }
         } else {
           delete parent.dataset.status;
         }

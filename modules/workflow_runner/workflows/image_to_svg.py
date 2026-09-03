@@ -1,8 +1,8 @@
 from pathlib import Path
 from typing import Any, Dict
 
-from ..services.registry import WorkflowCell, WorkflowNode
-from .utils import resolve_upload_paths
+from ..services.registry import WorkflowCardPresentation, WorkflowCell, WorkflowHeroImage, WorkflowNode
+from .utils import resolve_load_image_reference
 
 # region Workflow Config
 def _configure(prompt: Dict[str, Any], inputs: Dict[str, Any]) -> None:
@@ -13,8 +13,10 @@ def _configure(prompt: Dict[str, Any], inputs: Dict[str, Any]) -> None:
         inputs_map = node.setdefault("inputs", {})
 
         if node_id == "16":  # Image loader
-            resolved_paths = resolve_upload_paths(inputs, "source_path", allow_multiple=False)
-            inputs_map["image"] = resolved_paths[0]
+            inputs_map["image"] = resolve_load_image_reference(inputs, "source_path")
+
+        if node_id == "20":  # Preserve previous conversions with the existing saver counter.
+            inputs_map["add_counter"] = True
 
         if node_id == "40":  # Color number (optional)
             name = "number_of_colors"
@@ -33,14 +35,14 @@ def _configure(prompt: Dict[str, Any], inputs: Dict[str, Any]) -> None:
             desaturate = inputs.get(name)
             inputs_map["boolean"] = bool(desaturate)
 
-        if node_id == "71":  # Keep transparency checkbox (optional)
+        if node_id == "72":  # Keep transparency checkbox (optional)
             name = "keep_transparency"
-            keep_transparency = inputs.get(name)
+            keep_transparency = inputs.get(name, True)
             inputs_map["boolean"] = bool(keep_transparency)
 
         if node_id == "80":  # Strip attributes checkbox (optional)
             name = "strip_attributes"
-            strip_attributes = inputs.get(name)
+            strip_attributes = inputs.get(name, True)
             inputs_map["boolean"] = bool(strip_attributes)
 # endregion
 
@@ -109,7 +111,7 @@ input_desaturate = WorkflowCell(
     },
 )
 input_transparency = WorkflowCell(
-    node_id="71",
+    node_id="72",
     id="keep_transparency",
     shape="toggle",
     value="Keep Transparency",
@@ -183,7 +185,14 @@ node = WorkflowNode(
     ],
     configure_prompt=_configure,
     workflow_path=Path(__file__).resolve().parent / f"{id}.json",
-    category=category
+    category=category,
+    card=WorkflowCardPresentation(
+        summary="Trace an image into editable SVG artwork with a chosen color palette.",
+        hero=WorkflowHeroImage(
+            asset="image/svg.webp",
+            alt="Actual campfire source beside its three-color SVG rendering, retaining the orange flame and dark crossed logs.",
+        ),
+    ),
 )
 # endregion
 

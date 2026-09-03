@@ -12,28 +12,28 @@ from .utils import choice, integer, resolve_load_image_reference
 _MAX_SEED = (1 << 53) - 1
 _DENSITY_OPTIONS = (
     (
-        "full",
-        "Full · 262k (Recommended)",
-        "Native octree density and the best default for a final Gaussian splat.",
-        262144,
-    ),
-    (
-        "balanced",
-        "Balanced · 131k",
-        "Half-density export for faster iteration and smaller files.",
-        131072,
+        "draft",
+        "Fast · 32k",
+        "Keeps the minimum supported density for the quickest structural check.",
+        32768,
     ),
     (
         "light",
-        "Light · 64k",
-        "A lighter result for quick review or constrained downstream viewers.",
+        "Fast · 64k",
+        "Keeps one quarter of the Gaussians for quick review and lighter viewers.",
         65536,
     ),
     (
-        "draft",
-        "Draft · 32k",
-        "The minimum supported density for a fast structural check.",
-        32768,
+        "balanced",
+        "Baseline · 131k",
+        "Keeps half the generated Gaussians for faster viewing and a smaller file.",
+        131072,
+    ),
+    (
+        "full",
+        "Quality · 262k",
+        "Keeps all generated Gaussians. Largest file; it does not invent extra model detail.",
+        262144,
     ),
 )
 _DENSITY_BY_ID = {option_id: count for option_id, _label, _help, count in _DENSITY_OPTIONS}
@@ -142,7 +142,20 @@ def _select_cell(
     default: str,
     description: str,
     options: tuple[tuple[str, str, str], ...],
+    profile_tiers: dict[str, str] | None = None,
 ) -> WorkflowCell:
+    nodes = []
+    for option_id, option_label, option_help in options:
+        node = {
+            "description": option_help,
+            "id": option_id,
+            "value": option_label,
+            "workflowValue": option_id,
+        }
+        if profile_tiers and option_id in profile_tiers:
+            node["profileTier"] = profile_tiers[option_id]
+        nodes.append(node)
+
     return WorkflowCell(
         node_id=node_id,
         id=input_id,
@@ -150,17 +163,7 @@ def _select_cell(
         shape="select",
         description=description,
         props={
-            "lfDataset": {
-                "nodes": [
-                    {
-                        "description": option_help,
-                        "id": option_id,
-                        "value": option_label,
-                        "workflowValue": option_id,
-                    }
-                    for option_id, option_label, option_help in options
-                ]
-            },
+            "lfDataset": {"nodes": nodes},
             "lfTextfieldProps": {
                 "lfHelper": {"showWhenFocused": False, "value": description},
                 "lfLabel": label,
@@ -253,6 +256,12 @@ inputs = [
         "full",
         "Choose the number of exported Gaussians. Higher density costs more memory, time, and disk space; counts above 262k do not add new model detail.",
         _density_cell_options,
+        profile_tiers={
+            "full": "quality",
+            "balanced": "baseline",
+            "light": "fast",
+            "draft": "fast",
+        },
     ),
     _select_cell(
         "edge_cleanup",

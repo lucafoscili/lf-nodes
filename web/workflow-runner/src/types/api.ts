@@ -23,6 +23,20 @@ export interface WorkflowAPIResponse {
 
 //#region Dataset
 export type WorkflowLFNode = Omit<LfDataNode, 'children' | 'cells'>;
+export type WorkflowProfileTier = 'fast' | 'baseline' | 'quality';
+export interface WorkflowSelectNode extends WorkflowLFNode {
+  profileTier?: WorkflowProfileTier;
+  workflowValue?: string | number;
+}
+export interface WorkflowSelectDataset extends Omit<LfDataDataset, 'nodes'> {
+  nodes?: WorkflowSelectNode[];
+}
+export type WorkflowSelectProps = Omit<
+  Partial<LfComponentPropsFor<'LfSelect'>>,
+  'lfDataset'
+> & {
+  lfDataset?: WorkflowSelectDataset;
+};
 export type WorkflowReadinessStatus = 'ready' | 'warning' | 'setup_required';
 export interface WorkflowReadinessIssue {
   code: string;
@@ -32,12 +46,31 @@ export interface WorkflowReadiness {
   status: WorkflowReadinessStatus;
   issues: WorkflowReadinessIssue[];
 }
+export type WorkflowAPIKind = 'block' | 'orchestra';
+export type WorkflowAPILegacyKind = 'workflow' | 'sequence';
+export type WorkflowAPIWireKind = WorkflowAPIKind | WorkflowAPILegacyKind;
+export interface WorkflowAPIStage {
+  id: string;
+  workflowId: string;
+}
+export interface WorkflowAPICardHero {
+  asset: string;
+  alt: string;
+}
+export interface WorkflowAPICard {
+  summary: string;
+  hero?: WorkflowAPICardHero;
+}
 export interface WorkflowAPIItem extends WorkflowLFNode {
   children: [WorkflowAPIInputs?, WorkflowAPIOutputs?];
+  card?: WorkflowAPICard;
   category: string;
   collection?: string;
+  downloadable?: boolean;
+  kind?: WorkflowAPIWireKind;
   origin?: 'shipped' | 'custom';
   readiness?: WorkflowReadiness;
+  stages?: WorkflowAPIStage[];
 }
 export interface WorkflowAPIInputs extends WorkflowLFNode {
   cells: WorkflowCellsInputContainer;
@@ -68,18 +101,20 @@ export type WorkflowCellType = WorkflowCellInputId | WorkflowCellOutputId;
 
 // Inputs
 export interface WorkflowCellInput extends WorkflowCellBase {
-  props?: Partial<
-    LfComponentPropsFor<
-      | 'LfButton'
-      | 'LfChat'
-      | 'LfCode'
-      | 'LfMasonry'
-      | 'LfSelect'
-      | 'LfTextfield'
-      | 'LfToggle'
-      | 'LfUpload'
-    >
-  >;
+  advanced?: boolean;
+  props?:
+    | WorkflowSelectProps
+    | Partial<
+        LfComponentPropsFor<
+          | 'LfButton'
+          | 'LfChat'
+          | 'LfCode'
+          | 'LfMasonry'
+          | 'LfTextfield'
+          | 'LfToggle'
+          | 'LfUpload'
+        >
+      >;
   shape?: 'chat' | 'choice' | 'select' | 'textfield' | 'toggle' | 'upload';
 }
 export interface WorkflowCellsInputContainer {

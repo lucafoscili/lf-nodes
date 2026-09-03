@@ -3,6 +3,7 @@ import { createDrawerSection } from '../elements/layout.drawer';
 import { initState } from '../app/state';
 import { createWorkflowRunnerStore } from '../app/store';
 import { getLfFramework } from '@lf-widgets/framework';
+import { treeHandler } from '../handlers/tree';
 
 // Mock the LF framework
 vi.mock('@lf-widgets/framework', () => ({
@@ -34,6 +35,7 @@ vi.mock('@lf-widgets/framework', () => ({
           photo: 'photo',
           json: 'json',
           robot: 'robot',
+          route2: 'route-2',
           wand: 'wand',
           imageInPicture: 'image-in-picture',
           bug: 'bug',
@@ -269,8 +271,10 @@ describe('Drawer Element', () => {
       expect(debugButton.title).toBe('Hide developer console');
     });
 
-    it('updates tree dataset with workflow data', () => {
+    it('omits an empty Orchestras root so it cannot be clicked as a fake workflow', () => {
       const section = createDrawerSection(store);
+      const closeDrawer = vi.fn();
+      const selectWorkflow = vi.fn();
 
       const mockWorkflows = {
         nodes: [
@@ -293,6 +297,10 @@ describe('Drawer Element', () => {
       vi.spyOn(store, 'getState').mockReturnValue({
         ...initState(),
         manager: mockManager,
+        mutate: {
+          ...initState().mutate,
+          workflow: selectWorkflow,
+        },
         workflows: mockWorkflows,
       });
 
@@ -300,14 +308,180 @@ describe('Drawer Element', () => {
 
       const elements = mockManager.uiRegistry.get();
       const tree = elements['drawer-section-tree'];
+      (elements['drawer-section'] as any).close = closeDrawer;
 
       expect(tree.lfDataset).toBeDefined();
-      expect(tree.lfDataset.nodes).toHaveLength(2); // Home and Workflows
+      expect(tree.lfDataset.nodes).toHaveLength(2); // Home and non-empty Blocks
       expect(tree.lfDataset.nodes[0].id).toBe('home');
-      expect(tree.lfDataset.nodes[1].id).toBe('workflows');
+      expect(tree.lfDataset.nodes[1].id).toBe('blocks');
+      expect(tree.lfDataset.nodes[1].value).toBe('Blocks');
+      const emptyOrchestraRoot = tree.lfDataset.nodes.find(
+        (node: any) => node.id === 'orchestras',
+      );
+      expect(emptyOrchestraRoot).toBeUndefined();
+
+      // Exercise the exact legacy failure path if a future projection ever
+      // reintroduces an empty structural root: treeHandler would otherwise
+      // interpret it as a selectable workflow leaf and close the drawer.
+      if (emptyOrchestraRoot) {
+        treeHandler(
+          {
+            detail: {
+              comp: { rootElement: tree },
+              eventType: 'click',
+              node: emptyOrchestraRoot,
+            },
+          } as any,
+          store,
+        );
+      }
+      expect(selectWorkflow.mock.calls).toHaveLength(0);
+      expect(closeDrawer.mock.calls).toHaveLength(0);
     });
 
-    it('categorizes workflows correctly', () => {
+    it('preserves Home when both catalogue roots are empty', () => {
+      vi.spyOn(store, 'getState').mockReturnValue({
+        ...initState(),
+        manager: mockManager,
+        workflows: { nodes: [] },
+      });
+
+      createDrawerSection(store).render();
+
+      const tree = mockManager.uiRegistry.get()['drawer-section-tree'];
+      expect(tree.lfDataset.nodes.map((node: any) => node.id)).toEqual(['home']);
+    });
+
+    it('keeps the drawer open for structural branches and closes it for destinations', () => {
+      const drawer = mockManager.uiRegistry.get()['drawer-section'] as any;
+      const tree = mockManager.uiRegistry.get()['drawer-section-tree'];
+      const closeDrawer = vi.fn();
+      const selectWorkflow = vi.fn();
+      const selectView = vi.fn();
+      drawer.close = closeDrawer;
+      tree.className = 'drawer-section-tree';
+      vi.spyOn(store, 'getState').mockReturnValue({
+        ...initState(),
+        manager: mockManager,
+        mutate: {
+          ...initState().mutate,
+          view: selectView,
+          workflow: selectWorkflow,
+        },
+      });
+      const click = (node: any) => treeHandler(
+        {
+          detail: {
+            comp: { rootElement: tree },
+            eventType: 'click',
+            node,
+          },
+        } as any,
+        store,
+      );
+
+      click({ id: 'blocks', value: 'Blocks', children: [{ id: 'images' }] });
+      expect(closeDrawer).toHaveBeenCalledTimes(0);
+      expect(selectWorkflow).toHaveBeenCalledTimes(0);
+      expect(selectView).toHaveBeenCalledTimes(0);
+
+      click({ id: 'resize', value: 'Resize', children: [] });
+      expect(selectWorkflow).toHaveBeenCalledExactlyOnceWith('resize');
+      expect(closeDrawer).toHaveBeenCalledTimes(1);
+
+      click({ id: 'home', value: 'Home' });
+      expect(selectView).toHaveBeenCalledExactlyOnceWith('home');
+      expect(closeDrawer).toHaveBeenCalledTimes(2);
+    });
+
+    it('routes canonical and legacy orchestras away from canonical and fallback blocks', () => {
+      const section = createDrawerSection(store);
+      vi.spyOn(store, 'getState').mockReturnValue({
+        ...initState(),
+        manager: mockManager,
+        workflows: {
+          nodes: [
+            {
+              id: 'ordinary-shipped',
+              value: 'Block',
+              category: 'Krea 2',
+              kind: 'block',
+              origin: 'shipped',
+              children: [undefined, undefined],
+            },
+            {
+              id: 'legacy-custom',
+              value: 'Legacy block',
+              category: 'Image Processing',
+              collection: 'Garage',
+              kind: 'workflow',
+              children: [undefined, undefined],
+            },
+            {
+              id: 'shipped-orchestra',
+              value: 'Identity cleanup and restage',
+              category: 'Orchestration',
+              kind: 'orchestra',
+              origin: 'shipped',
+              stages: [
+                { id: 'identity', workflowId: 'krea2_identity_edit' },
+                { id: 'restage', workflowId: 'krea2_character_restage' },
+              ],
+              readiness: {
+                status: 'warning',
+                issues: [{ code: 'setup_unknown', message: 'Could not check one block.' }],
+              },
+              children: [undefined, undefined],
+            },
+            {
+              id: 'custom-orchestra',
+              value: 'Custom composition',
+              category: 'Orchestration',
+              collection: 'Velora',
+              kind: 'sequence',
+              origin: 'custom',
+              stages: [
+                { id: 'first', workflowId: 'first' },
+                { id: 'second', workflowId: 'second' },
+              ],
+              children: [undefined, undefined],
+            },
+          ],
+        } as any,
+      });
+
+      section.render();
+
+      const tree = mockManager.uiRegistry.get()['drawer-section-tree'];
+      const blockRoot = tree.lfDataset.nodes.find((node: any) => node.id === 'blocks');
+      const orchestraRoot = tree.lfDataset.nodes.find((node: any) => node.id === 'orchestras');
+      const blockLeaves = blockRoot.children.flatMap((owner: any) =>
+        owner.children.flatMap((group: any) => group.children),
+      );
+      const orchestraLeaves = orchestraRoot.children.flatMap((owner: any) =>
+        owner.children.flatMap((group: any) => group.children),
+      );
+
+      expect(blockLeaves.map((node: any) => node.id)).toEqual([
+        'ordinary-shipped',
+        'legacy-custom',
+      ]);
+      expect(orchestraLeaves.map((node: any) => node.id)).toEqual([
+        'shipped-orchestra',
+        'custom-orchestra',
+      ]);
+      expect(orchestraRoot.icon).toBe('route-2');
+      expect(orchestraRoot.children.map((node: any) => node.value)).toEqual([
+        'LF Nodes',
+        'Custom',
+      ]);
+      expect(orchestraRoot.children[1].children[0].value).toBe('Velora');
+      const warned = orchestraLeaves.find((node: any) => node.id === 'shipped-orchestra');
+      expect(warned.icon).toBe('hexagon-info');
+      expect(warned.description).toBe('Check setup: Could not check one block.');
+    });
+
+    it('categorizes blocks correctly', () => {
       const section = createDrawerSection(store);
 
       const mockWorkflows = {
@@ -374,11 +548,13 @@ describe('Drawer Element', () => {
 
       const elements = mockManager.uiRegistry.get();
       const tree = elements['drawer-section-tree'];
-      const workflowsNode = tree.lfDataset.nodes[1]; // Workflows node
+      const blocksNode = tree.lfDataset.nodes[1]; // Blocks node
 
-      expect(workflowsNode.children).toHaveLength(1); // LF Nodes collection
-      expect(workflowsNode.children[0].value).toBe('LF Nodes');
-      const categories = workflowsNode.children[0].children.map((cat: any) => cat.value);
+      expect(blocksNode.id).toBe('blocks');
+      expect(blocksNode.value).toBe('Blocks');
+      expect(blocksNode.children).toHaveLength(1); // LF Nodes collection
+      expect(blocksNode.children[0].value).toBe('LF Nodes');
+      const categories = blocksNode.children[0].children.map((cat: any) => cat.value);
       expect(categories).toContain('Image Processing');
       expect(categories).toContain('LLM');
       expect(categories).toContain('JSON');
@@ -386,19 +562,19 @@ describe('Drawer Element', () => {
       expect(categories).toContain('MiniMax H3');
       expect(categories).toContain('TRELLIS.2');
       expect(categories).toContain('TripoSplat');
-      const kreaCategory = workflowsNode.children[0].children.find(
+      const kreaCategory = blocksNode.children[0].children.find(
         (category: any) => category.value === 'Krea 2',
       );
       expect(kreaCategory.icon).toBe('ai');
-      const h3Category = workflowsNode.children[0].children.find(
+      const h3Category = blocksNode.children[0].children.find(
         (category: any) => category.value === 'MiniMax H3',
       );
       expect(h3Category.icon).toBe('ai');
-      const trellisCategory = workflowsNode.children[0].children.find(
+      const trellisCategory = blocksNode.children[0].children.find(
         (category: any) => category.value === 'TRELLIS.2',
       );
       expect(trellisCategory.icon).toBe('ai');
-      const tripoCategory = workflowsNode.children[0].children.find(
+      const tripoCategory = blocksNode.children[0].children.find(
         (category: any) => category.value === 'TripoSplat',
       );
       expect(tripoCategory.icon).toBe('ai');
@@ -454,7 +630,7 @@ describe('Drawer Element', () => {
       );
     });
 
-    it('keeps unmarked workflows out of the shipped LF Nodes collection', () => {
+    it('keeps unmarked blocks out of the shipped LF Nodes collection', () => {
       const section = createDrawerSection(store);
       vi.spyOn(store, 'getState').mockReturnValue({
         ...initState(),

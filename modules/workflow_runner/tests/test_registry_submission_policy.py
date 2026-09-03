@@ -117,12 +117,14 @@ def test_registry_keeps_submission_policy_server_side() -> None:
         "value",
         "description",
         "category",
+        "kind",
         "origin",
         "collection",
         "readiness",
         "children",
     }
     assert listed["origin"] == "shipped"
+    assert listed["kind"] == "block"
     assert listed["collection"] == "LF Nodes"
     assert listed["readiness"]["status"] == "setup_required"
     assert listed["readiness"]["issues"][0]["code"] == "workflow_file_missing"

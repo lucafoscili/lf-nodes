@@ -23,7 +23,7 @@ def _configure(prompt: Dict[str, Any], inputs: Dict[str, Any]) -> None:
             name = "icon_size"
             icon_size = inputs.get(name)
             if icon_size:
-                inputs_map["integer"] = int(icon_size)
+                inputs_map["replacement"] = str(int(icon_size))
 
         if node_id == "29":  # Strip attributes checkbox (optional)
             name = "strip_attributes"
@@ -31,10 +31,12 @@ def _configure(prompt: Dict[str, Any], inputs: Dict[str, Any]) -> None:
             inputs_map["boolean"] = bool(strip_attributes)
 
         if node_id == "33":  # Gemini model (optional)
-            name = "gemini_model"
-            gemini_model = inputs.get(name)
+            gemini_model = inputs.get("model") or inputs.get("gemini_model")
             if gemini_model:
                 inputs_map["model"] = str(gemini_model)
+
+        if node_id == "15":  # Preserve prior SVG outputs using the saver counter.
+            inputs_map["add_counter"] = True
 # endregion
 
 # region Inputs

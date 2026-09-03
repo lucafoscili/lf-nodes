@@ -2,11 +2,12 @@ import { LfDataDataset, LfIconType } from '@lf-widgets/foundations/dist';
 import { getLfFramework } from '@lf-widgets/framework';
 import { buttonHandler } from '../handlers/button';
 import { treeHandler } from '../handlers/tree';
-import { WorkflowAPIDataset, WorkflowLFNode } from '../types/api';
+import { WorkflowAPIDataset, WorkflowAPIItem, WorkflowLFNode } from '../types/api';
 import { WorkflowSectionController } from '../types/section';
 import { WorkflowStore } from '../types/state';
 import { DEBUG_MESSAGES } from '../utils/constants';
 import { debugLog } from '../utils/debug';
+import { isWorkflowOrchestra } from '../utils/workflow-kind';
 
 //#region CSS Classes
 const { theme } = getLfFramework();
@@ -23,27 +24,95 @@ export const DRAWER_CLASSES = {
 //#endregion
 
 //#region Helpers
+type DrawerBranch = WorkflowLFNode & { children: WorkflowLFNode[] };
+type DrawerCatalogueRoot = {
+  custom: DrawerBranch;
+  customGroups: DrawerBranch[];
+  root: DrawerBranch;
+  shipped: DrawerBranch;
+  shippedGroups: DrawerBranch[];
+};
+
+const _catalogueRoot = (
+  id: 'blocks' | 'orchestras',
+  value: 'Blocks' | 'Orchestras',
+  icon: LfIconType,
+  shippedIcon: LfIconType,
+  customIcon: LfIconType,
+): DrawerCatalogueRoot => {
+  const shippedGroups: DrawerBranch[] = [];
+  const customGroups: DrawerBranch[] = [];
+
+  return {
+    custom: {
+      children: customGroups,
+      icon: customIcon,
+      id: `${id}:custom`,
+      value: 'Custom',
+    },
+    customGroups,
+    root: { children: [], icon, id, value },
+    shipped: {
+      children: shippedGroups,
+      icon: shippedIcon,
+      id: `${id}:shipped`,
+      value: 'LF Nodes',
+    },
+    shippedGroups,
+  };
+};
+
+const _addToCatalogue = (catalogue: DrawerCatalogueRoot, node: WorkflowAPIItem) => {
+  // Only explicitly packaged records enter LF Nodes. Missing or malformed
+  // provenance fails closed into Custom instead of borrowing LF's identity.
+  const isCustom = node.origin !== 'shipped';
+  const name = isCustom ? node.collection || 'Custom' : node.category || 'Uncategorized';
+  const groups = isCustom ? catalogue.customGroups : catalogue.shippedGroups;
+  let group = groups.find((item) => item.value === name);
+  if (!group) {
+    const owner = isCustom ? 'custom' : 'shipped';
+    group = {
+      icon: isCustom ? _getIcon('Custom') : _getIcon(name),
+      id: `${catalogue.root.id}:${owner}:${name}`,
+      value: name,
+      children: [],
+    };
+    groups.push(group);
+  }
+  group.children.push(node);
+};
+
+const _finalizeCatalogue = (catalogue: DrawerCatalogueRoot) => {
+  catalogue.shippedGroups.sort((a, b) => String(a.value).localeCompare(String(b.value)));
+  catalogue.customGroups.sort((a, b) => String(a.value).localeCompare(String(b.value)));
+  if (catalogue.shippedGroups.length) {
+    catalogue.root.children.push(catalogue.shipped);
+  }
+  if (catalogue.customGroups.length) {
+    catalogue.root.children.push(catalogue.custom);
+  }
+};
+
 const _createDataset = (workflows: WorkflowAPIDataset) => {
-  const { article, folderOpen, lfSignature, listTree } = getLfFramework().theme.get.icons();
+  const { article, folderOpen, lfSignature, listTree, route2 } =
+    getLfFramework().theme.get.icons();
   const fallback = folderOpen || article || listTree || lfSignature;
 
-  const shippedCategories: Array<WorkflowLFNode & { children: WorkflowLFNode[] }> = [];
-  const customCollections: Array<WorkflowLFNode & { children: WorkflowLFNode[] }> = [];
   const home = { icon: article || fallback, id: 'home', value: 'Home' };
-  const shipped = {
-    icon: lfSignature || fallback,
-    id: 'workflows:shipped',
-    value: 'LF Nodes',
-    children: shippedCategories,
-  };
-  const custom = {
-    icon: folderOpen || fallback,
-    id: 'workflows:custom',
-    value: 'Custom',
-    children: customCollections,
-  };
-  const roots: Array<WorkflowLFNode & { children: WorkflowLFNode[] }> = [];
-  const wfs = { icon: listTree || fallback, id: 'workflows', value: 'Workflows', children: roots };
+  const blockCatalogue = _catalogueRoot(
+    'blocks',
+    'Blocks',
+    listTree || fallback,
+    lfSignature || fallback,
+    folderOpen || fallback,
+  );
+  const orchestraCatalogue = _catalogueRoot(
+    'orchestras',
+    'Orchestras',
+    route2 || listTree || fallback,
+    lfSignature || fallback,
+    folderOpen || fallback,
+  );
 
   const clone: WorkflowAPIDataset = JSON.parse(JSON.stringify(workflows));
 
@@ -57,35 +126,19 @@ const _createDataset = (workflows: WorkflowAPIDataset) => {
       node.icon = getLfFramework().theme.get.icon('hexagonInfo');
       node.description = `Check setup${issue ? `: ${issue}` : '.'}`;
     }
-    // Only explicitly packaged records enter LF Nodes. Missing or malformed
-    // provenance fails closed into Custom instead of borrowing LF's identity.
-    const isCustom = node.origin !== 'shipped';
-    const name = isCustom ? node.collection || 'Custom' : node.category || 'Uncategorized';
-    const groups = isCustom ? customCollections : shippedCategories;
-    let group = groups.find((item) => item.value === name);
-    if (!group) {
-      group = {
-        icon: isCustom ? _getIcon('Custom') : _getIcon(name),
-        id: `${isCustom ? 'custom' : 'shipped'}:${name}`,
-        value: name,
-        children: [],
-      };
-      groups.push(group);
-    }
-    group.children.push(node);
+    const catalogue = isWorkflowOrchestra(node) ? orchestraCatalogue : blockCatalogue;
+    _addToCatalogue(catalogue, node);
   });
 
-  shippedCategories.sort((a, b) => String(a.value).localeCompare(String(b.value)));
-  customCollections.sort((a, b) => String(a.value).localeCompare(String(b.value)));
-  if (shippedCategories.length) {
-    roots.push(shipped);
-  }
-  if (customCollections.length) {
-    roots.push(custom);
-  }
+  _finalizeCatalogue(blockCatalogue);
+  _finalizeCatalogue(orchestraCatalogue);
 
   const dataset: LfDataDataset = {
-    nodes: [home, wfs],
+    nodes: [
+      home,
+      ...(blockCatalogue.root.children.length ? [blockCatalogue.root] : []),
+      ...(orchestraCatalogue.root.children.length ? [orchestraCatalogue.root] : []),
+    ],
   };
 
   return dataset;

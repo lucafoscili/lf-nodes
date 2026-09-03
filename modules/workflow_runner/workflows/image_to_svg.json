@@ -11,7 +11,7 @@
   "20": {
     "inputs": {
       "svg": [
-        "44",
+        "80",
         0
       ],
       "filename_prefix": [
@@ -19,7 +19,7 @@
         0
       ],
       "add_timestamp": false,
-      "add_counter": false,
+      "add_counter": true,
       "ui_widget": {
         "columns": 3,
         "dataset": {
@@ -94,7 +94,7 @@
       "background_color": "",
       "stroke_width": 2,
       "size_mode": "preset",
-      "viewbox": "0 0 24 24",
+      "viewbox": "",
       "ui_widget": {
         "nodes": [
           {
@@ -517,6 +517,23 @@
     "class_type": "InvertMask",
     "_meta": {
       "title": "I N V E R T   M A S K"
+    }
+  },
+  "80": {
+    "inputs": {
+      "boolean": true,
+      "on_true": [
+        "44",
+        0
+      ],
+      "on_false": [
+        "42",
+        0
+      ]
+    },
+    "class_type": "LF_SwitchString",
+    "_meta": {
+      "title": "S T R I P   A T T R I B U T E S"
     }
   }
 }

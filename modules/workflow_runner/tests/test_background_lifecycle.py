@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import importlib.util
 import sys
 import types
@@ -17,6 +18,7 @@ constants_module.API_ROUTE_PREFIX = "/api/lf-nodes"
 sys.modules.setdefault("modules.utils.constants", constants_module)
 
 from modules.workflow_runner.services import background, job_store, job_store_sqlite
+from modules.workflow_runner.services import sequence_runtime
 
 
 def test_runner_api_routes_await_background_lifecycle_startup() -> None:
@@ -26,6 +28,112 @@ def test_runner_api_routes_await_background_lifecycle_startup() -> None:
     assert "async def _get_api_controllers" in source
     assert "await background.start_background_tasks(PromptServer.instance.app)" in source
     assert "api_controllers = _get_api_controllers()" not in source
+
+
+@pytest.mark.asyncio
+async def test_background_lifecycle_resumes_and_stops_sequence_supervisors(
+    monkeypatch,
+) -> None:
+    resume = AsyncMock(return_value=[])
+    stop = AsyncMock()
+    monkeypatch.setattr(sequence_runtime, "resume_sequence_executions", resume)
+    monkeypatch.setattr(sequence_runtime, "stop_sequence_supervisors", stop)
+    monkeypatch.setattr(background, "_JOB_TTL_SECONDS", 0)
+    app = {}
+
+    await background.start_background_tasks(app)
+    await background.stop_background_tasks(app)
+
+    resume.assert_awaited_once_with()
+    stop.assert_awaited_once_with()
+    assert "_workflow_runner_bg_started" not in app
+
+
+@pytest.mark.asyncio
+async def test_background_lifecycle_retries_failed_sequence_resume_without_restarting_loops(
+    monkeypatch,
+) -> None:
+    resume = AsyncMock(side_effect=[RuntimeError("resume failed"), []])
+    stop = AsyncMock()
+    active_reconciler_started = asyncio.Event()
+    queue_publisher_started = asyncio.Event()
+
+    async def active_reconciler(_job_store) -> None:
+        active_reconciler_started.set()
+        await asyncio.Event().wait()
+
+    async def queue_publisher(_job_store) -> None:
+        queue_publisher_started.set()
+        await asyncio.Event().wait()
+
+    monkeypatch.setattr(sequence_runtime, "resume_sequence_executions", resume)
+    monkeypatch.setattr(sequence_runtime, "stop_sequence_supervisors", stop)
+    monkeypatch.setattr(background, "_active_job_reconciler_loop", active_reconciler)
+    monkeypatch.setattr(background, "_queue_status_publisher_loop", queue_publisher)
+    monkeypatch.setattr(background, "_JOB_TTL_SECONDS", 0)
+    app = {}
+
+    await background.start_background_tasks(app)
+    await active_reconciler_started.wait()
+    await queue_publisher_started.wait()
+    first_reconciler = app["_active_job_reconciler_task"]
+    first_publisher = app["_queue_status_publisher_task"]
+
+    await background.start_background_tasks(app)
+    await background.start_background_tasks(app)
+
+    assert resume.await_count == 2
+    assert app["_active_job_reconciler_task"] is first_reconciler
+    assert app["_queue_status_publisher_task"] is first_publisher
+
+    await background.stop_background_tasks(app)
+
+
+@pytest.mark.asyncio
+async def test_concurrent_background_starts_share_one_startup(
+    monkeypatch,
+) -> None:
+    resume_entered = asyncio.Event()
+    release_resume = asyncio.Event()
+    resume_calls = 0
+    loop_starts = {"active": 0, "queue": 0}
+
+    async def resume() -> list[str]:
+        nonlocal resume_calls
+        resume_calls += 1
+        resume_entered.set()
+        await release_resume.wait()
+        return []
+
+    async def active_reconciler(_job_store) -> None:
+        loop_starts["active"] += 1
+        await asyncio.Event().wait()
+
+    async def queue_publisher(_job_store) -> None:
+        loop_starts["queue"] += 1
+        await asyncio.Event().wait()
+
+    monkeypatch.setattr(sequence_runtime, "resume_sequence_executions", resume)
+    monkeypatch.setattr(sequence_runtime, "stop_sequence_supervisors", AsyncMock())
+    monkeypatch.setattr(background, "_active_job_reconciler_loop", active_reconciler)
+    monkeypatch.setattr(background, "_queue_status_publisher_loop", queue_publisher)
+    monkeypatch.setattr(background, "_JOB_TTL_SECONDS", 0)
+    app = {}
+
+    first_start = asyncio.create_task(background.start_background_tasks(app))
+    await resume_entered.wait()
+    second_start = asyncio.create_task(background.start_background_tasks(app))
+    await asyncio.sleep(0)
+
+    assert resume_calls == 1
+    release_resume.set()
+    await asyncio.gather(first_start, second_start)
+    await asyncio.sleep(0)
+
+    assert resume_calls == 1
+    assert loop_starts == {"active": 1, "queue": 1}
+
+    await background.stop_background_tasks(app)
 
 
 @pytest.mark.asyncio
@@ -83,6 +191,7 @@ def _job(
     created_at: float,
     updated_at: float | None,
     comfy_url: str | None = "http://comfy:8188",
+    submission_id: str | None = None,
 ) -> job_store.Job:
     return job_store.Job(
         id=run_id,
@@ -93,6 +202,7 @@ def _job(
         seq=2,
         owner_id="owner-a",
         comfy_url=comfy_url,
+        submission_id=submission_id,
     )
 
 
@@ -555,6 +665,32 @@ async def test_retention_starts_at_terminal_updated_at(monkeypatch) -> None:
 
     assert removed == ["expired-terminal"]
     assert set(job_store._jobs) == {"recent-terminal", "unknown-terminal-time"}
+
+
+@pytest.mark.asyncio
+async def test_retention_never_prunes_sequence_owned_child_independently(
+    monkeypatch,
+) -> None:
+    child_id = "expired-private-child"
+    job_store._jobs[child_id] = _job(
+        child_id,
+        job_store.JobStatus.SUCCEEDED,
+        created_at=0.0,
+        updated_at=100.0,
+        submission_id="lfseq:0123456789abcdef0123456789abcdef:00",
+    )
+    queue_snapshot = AsyncMock(return_value=set())
+    monkeypatch.setattr(background, "fetch_active_prompt_ids", queue_snapshot)
+
+    removed = await background._prune_jobs_once(
+        job_store,
+        now=1_000.0,
+        ttl_seconds=300.0,
+    )
+
+    assert removed == []
+    assert child_id in job_store._jobs
+    queue_snapshot.assert_not_awaited()
 
 
 @pytest.mark.asyncio

@@ -9,6 +9,7 @@ step count.
 
 from __future__ import annotations
 
+import math
 import re
 from functools import partial
 from pathlib import Path
@@ -17,7 +18,10 @@ from typing import Any, Callable, Dict, NamedTuple
 from ..prompts import compose_base_prompt, compose_full_reference_prompt
 from ..services.registry import (
     InputValidationError,
+    WorkflowCardPresentation,
     WorkflowCell,
+    WorkflowHeroImage,
+    WorkflowInputOptionRequirement,
     WorkflowModelAsset,
     WorkflowNode,
 )
@@ -25,6 +29,7 @@ from .minimax_h3_profiles import (
     MiniMaxH3ExecutionProfile,
     NATIVE_MAX_EDGE,
     NATIVE_MAX_PIXELS,
+    TURBO_V4_6STEP_LORA,
     resolve_h3_execution_profile,
 )
 from .utils import (
@@ -48,6 +53,13 @@ _DEFAULT_SPRITE_ALPHA_HEIGHT = 224
 _DEFAULT_SPRITE_REFERENCE_FRAME = 0
 _DEFAULT_SPRITE_BOTTOM_PADDING = 16
 _DEFAULT_INTENDED_FPS = 12
+_TURNAROUND_VIEW_COUNT = 4
+_TURNAROUND_CANVAS_SIZE = 1024
+_TURNAROUND_ALPHA_HEIGHT = 900
+_TURNAROUND_BOTTOM_PADDING = 48
+_TURNAROUND_PAD_COLOR = "E6E6E6"
+_DIRECTED_VIEW_TAIL_FRACTION = 0.25
+_DIRECTED_VIEW_ANALYSIS_RESOLUTION = 96
 
 _RMBG2_MODEL_ASSETS = (
     WorkflowModelAsset(
@@ -57,6 +69,18 @@ _RMBG2_MODEL_ASSETS = (
             "RMBG/RMBG-2.0/model.safetensors",
             "RMBG/RMBG-2.0/birefnet.py",
             "RMBG/RMBG-2.0/BiRefNet_config.py",
+        ),
+    ),
+)
+_TURBO_V4_MODEL_PATH = "loras/" + TURBO_V4_6STEP_LORA.replace("\\", "/")
+_TURBO_V4_OPTION_REQUIREMENT = WorkflowInputOptionRequirement(
+    input_id="execution_profile",
+    option_value="turbo_preview",
+    required_node_types=("MiniMaxH3TurboLoRA", "MiniMaxH3TurboSampler"),
+    required_model_assets=(
+        WorkflowModelAsset(
+            label="MiniMax H3 Turbo v4 LoRA",
+            relative_paths=(_TURBO_V4_MODEL_PATH,),
         ),
     ),
 )
@@ -97,6 +121,25 @@ _DURATION_OPTIONS = (
     ("362", "15.08 seconds - 362 frames", "362 frames at 24 fps."),
 )
 _DURATION_IDS = tuple(option[0] for option in _DURATION_OPTIONS)
+_ANIMATE_EXECUTION_PROFILE_OPTIONS = (
+    (
+        "turbo_preview",
+        "Fast · Turbo 6",
+        "Six sampling passes with the community v4 Turbo recipe. It is much "
+        "faster, but fine detail and motion consistency may be weaker.",
+        "fast",
+    ),
+    (
+        "kitchen_quality",
+        "Baseline · Kitchen 20",
+        "Twenty sampling passes with Kitchen attention and the base H3 model. "
+        "Use this as the full-speed reference when judging the Fast result.",
+        "baseline",
+    ),
+)
+_ANIMATE_EXECUTION_PROFILE_IDS = tuple(
+    option[0] for option in _ANIMATE_EXECUTION_PROFILE_OPTIONS
+)
 
 _REFERENCE_TAG = re.compile(
     r"<\s*(picture|video|audio)\s+(\d+)\s*>", re.IGNORECASE
@@ -116,6 +159,47 @@ _PROMPT_SECTION_NODES = (
 _DEFAULT_DIALOGUE = "No spoken dialogue."
 _DEFAULT_SOUNDSCAPE = "Natural ambience and restrained foley appropriate to the scene."
 _DEFAULT_MUSIC = "N/A"
+_TURNAROUND_DIRECTION_DEFAULT = (
+    "One continuous technical character turntable. Keep the subject completely "
+    "stationary in a neutral full-body stance with unchanged expression, anatomy, "
+    "clothing, equipment, materials, and proportions. The camera performs one smooth "
+    "clockwise 360-degree orbit at constant speed and eye-level height. Follow this "
+    "camera-position convention exactly: front at the opening frame, camera on the "
+    "subject's right side showing the subject's right profile at one quarter, back at "
+    "one half, camera on the subject's left side showing the subject's left profile at "
+    "three quarters, and front again at the final frame. "
+    "Use a locked focal length, camera distance, subject scale, vertical alignment, "
+    "plain neutral light-gray studio background, and even diffuse lighting. No cuts, "
+    "camera roll, zoom, body motion, added elements, disappearing details, or dialogue."
+)
+
+_DIRECTED_VIEW_OPTIONS = (
+    (
+        "subject_right",
+        "Subject right",
+        "Move the camera to the subject's anatomical right side. In an ordinary "
+        "front view, this is the side shown on the left of the image.",
+    ),
+    (
+        "back",
+        "Back",
+        "Move the camera behind the subject for a strict rear view; front-facing "
+        "features should no longer be visible.",
+    ),
+    (
+        "subject_left",
+        "Subject left",
+        "Move the camera to the subject's anatomical left side. In an ordinary "
+        "front view, this is the side shown on the right of the image.",
+    ),
+)
+_DIRECTED_VIEW_IDS = tuple(option[0] for option in _DIRECTED_VIEW_OPTIONS)
+_DIRECTED_VIEW_RETENTION_DEFAULT = (
+    "Preserve the subject's recognizable identity, facial structure, body proportions, "
+    "hairstyle, clothing, materials, colors, accessories, equipment, and every visible "
+    "left-right asymmetry. Keep the same neutral full-body stance and leave generous "
+    "clear margin around the complete silhouette."
+)
 
 
 class _CommonSettings(NamedTuple):
@@ -156,6 +240,7 @@ class _BaseCardSpec(NamedTuple):
     first_frame: tuple[str, str, str] | None
     last_frame: tuple[str, str, str] | None
     default_aspect_ratio: str
+    card: WorkflowCardPresentation | None = None
 
 
 class _ReferenceInputSpec(NamedTuple):
@@ -176,6 +261,7 @@ class _ReferenceCardSpec(NamedTuple):
     references: tuple[_ReferenceInputSpec, ...]
     prompt_fields: Callable[[int], tuple[str, str, str]]
     default_aspect_ratio: str
+    card: WorkflowCardPresentation | None = None
 
 
 def _optional_text(inputs: Dict[str, Any], name: str, default: str = "") -> str:
@@ -185,6 +271,28 @@ def _optional_text(inputs: Dict[str, Any], name: str, default: str = "") -> str:
     if not isinstance(value, str):
         raise InputValidationError(name)
     return value.strip()
+
+
+def _bounded_float(
+    inputs: Dict[str, Any],
+    name: str,
+    default: float,
+    *,
+    minimum: float,
+    maximum: float,
+) -> float:
+    value = inputs.get(name, default)
+    if value in (None, ""):
+        value = default
+    if isinstance(value, bool):
+        raise InputValidationError(name)
+    try:
+        parsed = float(value)
+    except (TypeError, ValueError) as error:
+        raise InputValidationError(name) from error
+    if not math.isfinite(parsed) or parsed < minimum or parsed > maximum:
+        raise ValueError(f"{name} must be between {minimum} and {maximum}.")
+    return parsed
 
 
 def _validate_hard_bound_input(
@@ -201,8 +309,14 @@ def _common_settings(
     *,
     family: str,
     default_aspect_ratio: str,
+    execution_profile_ids: tuple[str, ...] = ("kitchen_quality",),
 ) -> _CommonSettings:
-    _validate_hard_bound_input(inputs, "execution_profile", "kitchen_quality")
+    profile_id = _choice(
+        inputs,
+        "execution_profile",
+        "kitchen_quality",
+        execution_profile_ids,
+    )
     aspect_ratio = _choice(
         inputs,
         "aspect_ratio",
@@ -233,7 +347,7 @@ def _common_settings(
         raise RuntimeError(f"Invalid MiniMax H3 frame preset: {frames}.")
 
     seed = _integer(inputs, "seed", 42, minimum=0, maximum=_MAX_SEED)
-    profile = resolve_h3_execution_profile("kitchen_quality", family=family)
+    profile = resolve_h3_execution_profile(profile_id, family=family)
     if profile.steps is None:
         raise RuntimeError(
             f"Focused MiniMax H3 cards require a profile-owned step count: {profile.id}."
@@ -253,18 +367,44 @@ def _apply_execution_profile(
 ) -> None:
     """Apply the shared sampler, scheduler, and accelerator recipe."""
 
-    if profile.id != "kitchen_quality" or profile.accelerator != "kitchen":
-        raise RuntimeError("Focused MiniMax H3 cards expose kitchen_quality only.")
     prompt["sampler_select"]["inputs"]["sampler_name"] = "res_multistep"
     prompt["scheduler"]["inputs"]["scheduler"] = "simple"
-    prompt["sample"]["inputs"]["sampler"] = ["sampler_select", 0]
     prompt["attention_backend"]["inputs"]["attention"] = (
         "comfy kitchen attention"
     )
     model_output = ["attention_backend", 0]
+
+    if profile.id == "kitchen_quality" and profile.accelerator == "kitchen":
+        prompt.pop("turbo_lora", None)
+        prompt.pop("turbo_sampler", None)
+        sampler_output = ["sampler_select", 0]
+    elif profile.id == "turbo_preview" and profile.accelerator == "turbo":
+        prompt["turbo_lora"] = {
+            "inputs": {
+                "model": ["attention_backend", 0],
+                "lora_name": TURBO_V4_6STEP_LORA,
+                "strength": 1.0,
+                "low_vram": False,
+            },
+            "class_type": "MiniMaxH3TurboLoRA",
+            "_meta": {"title": "Apply the six-step H3 Turbo v4 LoRA"},
+        }
+        prompt["turbo_sampler"] = {
+            "inputs": {},
+            "class_type": "MiniMaxH3TurboSampler",
+            "_meta": {"title": "Use the matching H3 Turbo sampler"},
+        }
+        model_output = ["turbo_lora", 0]
+        sampler_output = ["turbo_sampler", 0]
+    else:
+        raise RuntimeError(
+            f"Unsupported focused MiniMax H3 execution profile: {profile.id}."
+        )
+
     prompt["guider"]["inputs"]["model"] = list(model_output)
     prompt["scheduler"]["inputs"]["model"] = list(model_output)
     prompt["scheduler"]["inputs"]["steps"] = profile.steps
+    prompt["sample"]["inputs"]["sampler"] = list(sampler_output)
 
 
 def _apply_common_graph_settings(
@@ -310,6 +450,110 @@ def _first_last_instruction(frames: int) -> str:
         "Picture 2 (from Shot 1) aligns with the "
         f"{frames / _FPS:.2f}-second mark of the target video."
     )
+
+
+def _directed_view_description(target_view: str, retention: str) -> str:
+    """Build one strict, generic front-to-cardinal camera instruction."""
+
+    target_instructions = {
+        "subject_right": (
+            "Move on one horizontal 90-degree arc toward the subject's anatomical "
+            "right side, which normally appears on the left of the opening image. "
+            "At the target, show a strict right profile: the nose points toward the "
+            "right edge and the right cheek, shoulder, hip, and leg are the near side."
+        ),
+        "back": (
+            "Move on one horizontal 180-degree arc via the subject's anatomical right "
+            "side. At the target, show a strict symmetrical rear view: the face, eyes, "
+            "nose, mouth, chest, and other front-facing details are not visible."
+        ),
+        "subject_left": (
+            "Move on one horizontal 90-degree arc toward the subject's anatomical left "
+            "side, which normally appears on the right of the opening image. At the "
+            "target, show a strict left profile: the nose points toward the left edge "
+            "and the left cheek, shoulder, hip, and leg are the near side."
+        ),
+    }
+    target = target_instructions[target_view]
+    return (
+        "Create one continuous technical character-view capture from the supplied "
+        "frontal opening image. Use that image as the identity and appearance authority. "
+        f"{retention}\n\n"
+        "The subject remains completely stationary; only the camera moves. "
+        f"{target} The motion is monotonic: never reverse, overshoot, mirror, switch "
+        "sides, zoom, roll, tilt, or change focal length, camera height, distance, "
+        "subject scale, or vertical alignment. Reach the exact target view during the "
+        "final fifth of the clip, then hold both camera and subject perfectly still "
+        "through the final frame so a stable still can be selected.\n\n"
+        "Keep the complete subject and all equipment inside frame against one plain "
+        "neutral light-gray studio background with even diffuse lighting. No cuts, "
+        "body motion, secondary motion, reframing, added elements, disappearing "
+        "details, dialogue, or music."
+    )
+
+
+def _add_neutral_h3_source(
+    prompt: Dict[str, Any],
+    *,
+    source_reference: str,
+    settings: _CommonSettings,
+) -> None:
+    """Fit an RGBA upload without stretching and flatten it onto neutral gray."""
+
+    prompt["source_first"]["inputs"]["image"] = source_reference
+    prompt.pop("source_last", None)
+    prompt["turnaround_source_rgba"] = {
+        "inputs": {
+            "image": ["source_first", 0],
+            "alpha": ["source_first", 1],
+        },
+        "class_type": "JoinImageWithAlpha",
+        "_meta": {"title": "Preserve uploaded source transparency"},
+    }
+    prompt["turnaround_fit"] = {
+        "inputs": {
+            "image": ["turnaround_source_rgba", 0],
+            "height": settings.height,
+            "width": settings.width,
+            "resize_method": "bicubic",
+            "resize_mode": "pad",
+            "pad_color": _TURNAROUND_PAD_COLOR,
+        },
+        "class_type": "LF_ResizeImageToDimension",
+        "_meta": {"title": "Fit the identity anchor without stretching"},
+    }
+    prompt["turnaround_split"] = {
+        "inputs": {"image": ["turnaround_fit", 0]},
+        "class_type": "SplitImageWithAlpha",
+        "_meta": {"title": "Separate fitted RGB and transparency"},
+    }
+    prompt["turnaround_opacity"] = {
+        "inputs": {"mask": ["turnaround_split", 1]},
+        "class_type": "InvertMask",
+        "_meta": {"title": "Convert transparency to source opacity"},
+    }
+    prompt["turnaround_background"] = {
+        "inputs": {
+            "width": settings.width,
+            "height": settings.height,
+            "batch_size": 1,
+            "color": int(_TURNAROUND_PAD_COLOR, 16),
+        },
+        "class_type": "EmptyImage",
+        "_meta": {"title": "Create the neutral H3 source background"},
+    }
+    prompt["turnaround_composite"] = {
+        "inputs": {
+            "destination": ["turnaround_background", 0],
+            "source": ["turnaround_split", 0],
+            "x": 0,
+            "y": 0,
+            "resize_source": False,
+            "mask": ["turnaround_opacity", 0],
+        },
+        "class_type": "ImageCompositeMasked",
+        "_meta": {"title": "Flatten source alpha onto neutral gray"},
+    }
 
 
 def _active_image_guides(
@@ -503,6 +747,11 @@ def _configure_base_card(
         inputs,
         family="fl2va",
         default_aspect_ratio=spec.default_aspect_ratio,
+        execution_profile_ids=(
+            _ANIMATE_EXECUTION_PROFILE_IDS
+            if spec.workflow_id == "minimax_h3_animate_image"
+            else ("kitchen_quality",)
+        ),
     )
     instruction = spec.instruction
     if spec.last_frame is not None:
@@ -548,6 +797,283 @@ def _configure_base_card(
         settings,
         output_folder=spec.output_folder,
     )
+
+
+def _configure_directed_view(
+    prompt: Dict[str, Any], inputs: Dict[str, Any], *, resolve_upload: bool
+) -> None:
+    """Render one front-to-cardinal camera move and save one lossless still."""
+
+    target_view = _choice(
+        inputs,
+        "target_view",
+        "subject_right",
+        _DIRECTED_VIEW_IDS,
+    )
+    retention = _required_text(inputs, "retention_details")
+    tail_fraction = _bounded_float(
+        inputs,
+        "tail_fraction",
+        _DIRECTED_VIEW_TAIL_FRACTION,
+        minimum=0.01,
+        maximum=1.0,
+    )
+    analysis_max_edge = _integer(
+        inputs,
+        "analysis_max_edge",
+        _DIRECTED_VIEW_ANALYSIS_RESOLUTION,
+        minimum=8,
+        maximum=1024,
+    )
+    settings = _common_settings(
+        inputs,
+        family="fl2va",
+        default_aspect_ratio="9:16",
+        execution_profile_ids=_ANIMATE_EXECUTION_PROFILE_IDS,
+    )
+    if resolve_upload:
+        _require_image(inputs, "source_image")
+        source_reference = resolve_load_image_reference(inputs, "source_image")
+    else:
+        source_reference = prompt["source_first"]["inputs"]["image"]
+
+    compiled_prompt = compose_base_prompt(
+        instruction=(
+            "For the target video, at 0.00 seconds into the target video, "
+            "<Picture 1> (from [Shot 1]) is fully referenced."
+        ),
+        integrated_multimodal_description=_directed_view_description(
+            target_view,
+            retention,
+        ),
+        overall_soundscape="N/A",
+        non_diegetic_music="N/A",
+    )
+
+    _add_neutral_h3_source(
+        prompt,
+        source_reference=source_reference,
+        settings=settings,
+    )
+    prompt["h3"]["inputs"].update(
+        {
+            "prompt": compiled_prompt,
+            "first_frame": ["turnaround_composite", 0],
+        }
+    )
+    prompt["h3"]["inputs"].pop("last_frame", None)
+    _remove_inactive_anchored_guides(prompt, set())
+    prompt["guider"]["inputs"]["conditioning"] = ["h3", 0]
+    _apply_execution_profile(prompt, settings.profile)
+    _apply_common_graph_settings(
+        prompt,
+        settings,
+        output_folder=f"DirectedView/{target_view}",
+    )
+
+    for node_id in (
+        "sprite_sampler",
+        "remove_background",
+        "verify_rmbg_alpha",
+        "rmbg_transparency_mask",
+        "validated_cutout",
+        "sprite_normalize",
+        "sprite_grid",
+        "save_frames",
+        "save_atlas",
+        "display_sampling_receipt",
+        "display_normalization_receipt",
+    ):
+        prompt.pop(node_id, None)
+
+    prompt["settled_selector"] = {
+        "inputs": {
+            "image": ["decode_video", 0],
+            "tail_fraction": tail_fraction,
+            "analysis_max_edge": analysis_max_edge,
+        },
+        "class_type": "LF_SelectSettledImageFrame",
+        "_meta": {
+            "title": "Select the least-moving frame from the settled tail"
+        },
+    }
+    output_prefix = prompt["save"]["inputs"]["filename_prefix"]
+    prompt["save_view"] = {
+        "inputs": {
+            "images": ["settled_selector", 0],
+            "filename_prefix": f"{output_prefix}/selected-{target_view}",
+        },
+        "class_type": "SaveImage",
+        "_meta": {"title": "Save one lossless selected cardinal view"},
+    }
+    prompt["display_selection_receipt"] = {
+        "inputs": {
+            "json_input": ["settled_selector", 3],
+            "ui_widget": "",
+        },
+        "class_type": "LF_DisplayJSON",
+        "_meta": {"title": "Publish settled-frame selection receipt"},
+    }
+
+
+def _configure_directed_view_run(
+    prompt: Dict[str, Any], inputs: Dict[str, Any]
+) -> None:
+    _configure_directed_view(prompt, inputs, resolve_upload=True)
+
+
+def _configure_directed_view_download(
+    prompt: Dict[str, Any], inputs: Dict[str, Any]
+) -> None:
+    _configure_directed_view(prompt, inputs, resolve_upload=False)
+
+
+def _configure_character_turnaround(
+    prompt: Dict[str, Any], inputs: Dict[str, Any], *, resolve_upload: bool
+) -> None:
+    """Build one closed Kitchen-quality orbit and publish four ordered view images."""
+
+    direction = _required_text(inputs, "direction")
+    content_height = _integer(
+        inputs,
+        "content_height",
+        _TURNAROUND_ALPHA_HEIGHT,
+        minimum=512,
+        maximum=_TURNAROUND_ALPHA_HEIGHT,
+    )
+    settings = _common_settings(
+        inputs,
+        family="fl2va",
+        default_aspect_ratio="9:16",
+    )
+    if resolve_upload:
+        _require_image(inputs, "source_image")
+        source_reference = resolve_load_image_reference(inputs, "source_image")
+    else:
+        source_reference = prompt["source_first"]["inputs"]["image"]
+
+    compiled_prompt = compose_base_prompt(
+        instruction=_first_last_instruction(settings.frames),
+        integrated_multimodal_description=_multimodal_description(
+            direction, _DEFAULT_DIALOGUE
+        ),
+        overall_soundscape="N/A",
+        non_diegetic_music="N/A",
+    )
+
+    _add_neutral_h3_source(
+        prompt,
+        source_reference=source_reference,
+        settings=settings,
+    )
+    prompt["h3"]["inputs"].update(
+        {
+            "prompt": compiled_prompt,
+            "first_frame": ["turnaround_composite", 0],
+            "last_frame": ["turnaround_composite", 0],
+        }
+    )
+
+    _remove_inactive_anchored_guides(prompt, set())
+    prompt["guider"]["inputs"]["conditioning"] = ["h3", 0]
+    _apply_execution_profile(prompt, settings.profile)
+    _apply_common_graph_settings(
+        prompt,
+        settings,
+        output_folder="CharacterTurnaround",
+    )
+
+    prompt["sprite_sampler"]["inputs"].update(
+        {
+            "target_count": _TURNAROUND_VIEW_COUNT,
+            "loop_endpoint_policy": "exclude_final_endpoint",
+            "source_fps": float(_FPS),
+            "intended_fps": 1.0,
+            "sampling_basis": "visual_motion",
+        }
+    )
+    prompt["sprite_sampler"]["_meta"]["title"] = (
+        "Select four visual-motion angle candidates"
+    )
+    prompt["remove_background"]["inputs"].update(
+        {
+            "model": "RMBG-2.0",
+            "sensitivity": 1.0,
+            "process_res": 1024,
+            "mask_blur": 0,
+            "mask_offset": 0,
+            "invert_output": False,
+            "refine_foreground": False,
+            "background": "Alpha",
+        }
+    )
+    prompt["sprite_normalize"]["inputs"].update(
+        {
+            "canvas_width": _TURNAROUND_CANVAS_SIZE,
+            "canvas_height": _TURNAROUND_CANVAS_SIZE,
+            "target_reference_alpha_height": content_height,
+            "reference_frame_index": 0,
+            "bottom_padding": _TURNAROUND_BOTTOM_PADDING,
+        }
+    )
+    prompt["sprite_normalize"]["_meta"]["title"] = (
+        "Normalize all four views from the front-view scale and pivot"
+    )
+    prompt["sprite_grid"]["inputs"].update(
+        {
+            "cell_width": 512,
+            "cell_height": 512,
+            "gap_px": 8,
+            "background": "transparent",
+            "show_headers": True,
+            "title": "Character turnaround candidates",
+            "dataset": {
+                "columns": [
+                    {"id": "front", "title": "FRONT CANDIDATE"},
+                    {
+                        "id": "subject_right",
+                        "title": "SUBJECT-RIGHT CANDIDATE",
+                    },
+                    {"id": "back", "title": "BACK CANDIDATE"},
+                    {
+                        "id": "subject_left",
+                        "title": "SUBJECT-LEFT CANDIDATE",
+                    },
+                ],
+                "nodes": [{"id": "views", "value": ""}],
+            },
+        }
+    )
+    prompt["sprite_grid"]["_meta"]["title"] = (
+        "Compose the intended cardinal-view candidate sheet"
+    )
+
+    output_prefix = prompt["save"]["inputs"]["filename_prefix"]
+    prompt["save_frames"]["inputs"]["filename_prefix"] = (
+        f"{output_prefix}/candidate-views-intended-cardinal-order-"
+        f"{_TURNAROUND_CANVAS_SIZE}px"
+    )
+    prompt["save_frames"]["_meta"]["title"] = (
+        "Save four ordered transparent reconstruction candidates"
+    )
+    prompt["save_atlas"]["inputs"]["filename_prefix"] = (
+        f"{output_prefix}/candidate-contact-sheet-intended-cardinal-order"
+    )
+    prompt["save_atlas"]["_meta"]["title"] = (
+        "Save the labeled turnaround contact sheet"
+    )
+
+
+def _configure_character_turnaround_run(
+    prompt: Dict[str, Any], inputs: Dict[str, Any]
+) -> None:
+    _configure_character_turnaround(prompt, inputs, resolve_upload=True)
+
+
+def _configure_character_turnaround_download(
+    prompt: Dict[str, Any], inputs: Dict[str, Any]
+) -> None:
+    _configure_character_turnaround(prompt, inputs, resolve_upload=False)
 
 
 def _configure_anchored_sprite_loop(
@@ -826,6 +1352,48 @@ def _select_cell(
     )
 
 
+def _animate_execution_profile_cell() -> WorkflowCell:
+    description = (
+        "Choose the complete sampling recipe. Fast trades some fine detail and "
+        "motion consistency for a much shorter render; Baseline spends twenty "
+        "passes and is the default comparison reference."
+    )
+    return WorkflowCell(
+        node_id="sample",
+        id="execution_profile",
+        value="Render profile",
+        shape="select",
+        description=description,
+        props={
+            "lfDataset": {
+                "nodes": [
+                    {
+                        "description": option_description,
+                        "id": profile_id,
+                        "profileTier": profile_tier,
+                        "value": option_label,
+                        "workflowValue": profile_id,
+                    }
+                    for (
+                        profile_id,
+                        option_label,
+                        option_description,
+                        profile_tier,
+                    ) in _ANIMATE_EXECUTION_PROFILE_OPTIONS
+                ]
+            },
+            "lfTextfieldProps": {
+                "lfLabel": "Render profile",
+                "lfHelper": {
+                    "showWhenFocused": False,
+                    "value": description,
+                },
+            },
+            "lfValue": "kitchen_quality",
+        },
+    )
+
+
 def _textarea_cell(
     *,
     node_id: str,
@@ -849,6 +1417,39 @@ def _textarea_cell(
             "lfLabel": label,
             "lfHelper": {"showWhenFocused": False, "value": description},
             "lfStyling": "textarea",
+            "lfValue": default,
+        },
+    )
+
+
+def _float_cell(
+    *,
+    node_id: str,
+    cell_id: str,
+    label: str,
+    default: str,
+    minimum: float,
+    maximum: float,
+    step: float,
+    description: str,
+) -> WorkflowCell:
+    return WorkflowCell(
+        node_id=node_id,
+        id=cell_id,
+        value=label,
+        shape="textfield",
+        description=description,
+        props={
+            "lfHtmlAttributes": {
+                "autocomplete": "off",
+                "name": cell_id,
+                "type": "number",
+                "min": minimum,
+                "max": maximum,
+                "step": step,
+            },
+            "lfLabel": label,
+            "lfHelper": {"showWhenFocused": False, "value": description},
             "lfValue": default,
         },
     )
@@ -1030,6 +1631,13 @@ _BASE_CARD_SPECS = (
         first_frame=None,
         last_frame=None,
         default_aspect_ratio="16:9",
+        card=WorkflowCardPresentation(
+            summary="Create a new video from written scene and motion direction.",
+            hero=WorkflowHeroImage(
+                asset="minimax-h3/generate-video.webp",
+                alt="Actual generated video frame of a stylized adult explorer walking through a market.",
+            ),
+        ),
     ),
     _BaseCardSpec(
         workflow_id="minimax_h3_animate_image",
@@ -1062,6 +1670,16 @@ _BASE_CARD_SPECS = (
         ),
         last_frame=None,
         default_aspect_ratio="9:16",
+        card=WorkflowCardPresentation(
+            summary="Bring one opening image to life with directed motion.",
+            hero=WorkflowHeroImage(
+                asset="minimax-h3/animate-image.webp",
+                alt=(
+                    "Prepared adult explorer input beside actual video frames "
+                    "showing a right-hand wave and return to the neutral pose."
+                ),
+            ),
+        ),
     ),
     _BaseCardSpec(
         workflow_id="minimax_h3_first_last_frame",
@@ -1095,6 +1713,13 @@ _BASE_CARD_SPECS = (
             "Required ending frame; it is aspect-preserving cover-cropped by the H3 node.",
         ),
         default_aspect_ratio="16:9",
+        card=WorkflowCardPresentation(
+            summary="Generate motion between supplied opening and ending frames.",
+            hero=WorkflowHeroImage(
+                asset="minimax-h3/first-last-frame.webp",
+                alt="Actual neutral first input beside generated transition and final waving frames of the explorer.",
+            ),
+        ),
     ),
     _BaseCardSpec(
         workflow_id="minimax_h3_sprite_motion",
@@ -1127,6 +1752,13 @@ _BASE_CARD_SPECS = (
         ),
         last_frame=None,
         default_aspect_ratio="1:1",
+        card=WorkflowCardPresentation(
+            summary="Animate a compact subject into an opaque motion clip.",
+            hero=WorkflowHeroImage(
+                asset="minimax-h3/sprite-motion.webp",
+                alt="Actual source beside wave and return frames from the opaque Sprite Motion video, not a sprite atlas.",
+            ),
+        ),
     ),
 )
 
@@ -1160,6 +1792,16 @@ _REFERENCE_CARD_SPECS = (
         ),
         prompt_fields=_restage_prompt_fields,
         default_aspect_ratio="16:9",
+        card=WorkflowCardPresentation(
+            summary="Restage a referenced subject in a newly directed video.",
+            hero=WorkflowHeroImage(
+                asset="minimax-h3/reference-restage.webp",
+                alt=(
+                    "Original explorer figurine reference beside an actual video "
+                    "frame restaging her in profile in a more realistic market scene."
+                ),
+            ),
+        ),
     ),
     _ReferenceCardSpec(
         workflow_id="minimax_h3_character_swap",
@@ -1291,11 +1933,17 @@ def _make_base_workflow(spec: _BaseCardSpec) -> WorkflowNode:
                 description=spec.last_frame[2],
             )
         )
+    execution_profile_cells = (
+        [_animate_execution_profile_cell()]
+        if spec.workflow_id == "minimax_h3_animate_image"
+        else []
+    )
     return WorkflowNode(
         id=spec.workflow_id,
         value=spec.title,
         description=spec.description,
         category="MiniMax H3",
+        card=spec.card,
         inputs=[
             *uploads,
             *_creative_cells(
@@ -1303,6 +1951,7 @@ def _make_base_workflow(spec: _BaseCardSpec) -> WorkflowNode:
                 direction_default=spec.direction_default,
                 direction_help=spec.direction_help,
             ),
+            *execution_profile_cells,
             *_common_cells(
                 default_aspect_ratio=spec.default_aspect_ratio,
             ),
@@ -1314,6 +1963,11 @@ def _make_base_workflow(spec: _BaseCardSpec) -> WorkflowNode:
         ],
         configure_prompt=partial(_configure_base_card, spec=spec),
         workflow_path=_BASE_GRAPH,
+        input_option_requirements=(
+            (_TURBO_V4_OPTION_REQUIREMENT,)
+            if spec.workflow_id == "minimax_h3_animate_image"
+            else ()
+        ),
     )
 
 
@@ -1336,6 +1990,16 @@ def _make_anchored_sprite_loop_workflow() -> WorkflowNode:
             "files; Runner does not start the wrapper's fallback download."
         ),
         category="MiniMax H3",
+        card=WorkflowCardPresentation(
+            summary="Guide a motion cycle and export transparent sprite frames.",
+            hero=WorkflowHeroImage(
+                asset="minimax-h3/anchored-sprite-loop.webp",
+                alt=(
+                    "Four actual transparent sprites showing start, wave, lowering "
+                    "and return from a 24-frame export played at 12 fps."
+                ),
+            ),
+        ),
         inputs=[
             _upload_cell(
                 node_id="source_first",
@@ -1557,6 +2221,7 @@ def _make_reference_workflow(spec: _ReferenceCardSpec) -> WorkflowNode:
             "fidelity; this can run several times slower than Match."
         ),
         category="MiniMax H3",
+        card=spec.card,
         inputs=[
             *[
                 _upload_cell(
@@ -1587,10 +2252,241 @@ def _make_reference_workflow(spec: _ReferenceCardSpec) -> WorkflowNode:
     )
 
 
+def _make_directed_view_workflow() -> WorkflowNode:
+    return WorkflowNode(
+        id="minimax_h3_directed_view",
+        value="Directed View",
+        description=(
+            "Turn one frontal character reference toward one exact cardinal camera "
+            "view, then save the least-moving full-resolution frame from the clip's "
+            "settled tail. This block measures motion only; it cannot prove viewpoint, "
+            "identity, anatomy, or geometric consistency."
+        ),
+        category="MiniMax H3",
+        card=WorkflowCardPresentation(
+            summary="Generate a requested view, then select a settled frame.",
+            hero=WorkflowHeroImage(
+                asset="minimax-h3/directed-view.webp",
+                alt=(
+                    "Front input beside the actual generated subject-right profile "
+                    "of an original adult explorer figurine."
+                ),
+            ),
+        ),
+        inputs=[
+            _upload_cell(
+                node_id="source_first",
+                cell_id="source_image",
+                label="Frontal character",
+                description=(
+                    "Use one centered, full-body front view with visible extremities, "
+                    "clear margin, a neutral stance, and as little occlusion as practical."
+                ),
+            ),
+            _select_cell(
+                node_id="h3",
+                cell_id="target_view",
+                label="Target view",
+                description=(
+                    "Choose where the camera should finish relative to the subject. "
+                    "Subject right and left are anatomical, not the viewer's sides."
+                ),
+                options=_DIRECTED_VIEW_OPTIONS,
+                default="subject_right",
+            ),
+            _textarea_cell(
+                node_id="h3",
+                cell_id="retention_details",
+                label="Details to retain",
+                default=_DIRECTED_VIEW_RETENTION_DEFAULT,
+                description=(
+                    "Name identity, silhouette, outfit, equipment, colors, materials, "
+                    "and asymmetries that must survive the turn. The camera path and "
+                    "stationary-pose rules are added automatically."
+                ),
+            ),
+            _animate_execution_profile_cell(),
+            _float_cell(
+                node_id="settled_selector",
+                cell_id="tail_fraction",
+                label="Settled tail",
+                default=str(_DIRECTED_VIEW_TAIL_FRACTION),
+                minimum=0.01,
+                maximum=1.0,
+                step=0.01,
+                description=(
+                    "Final fraction of the clip searched for the least movement. 0.25 "
+                    "means the last quarter; this does not judge whether the chosen "
+                    "frame is the requested angle."
+                ),
+            ),
+            _number_cell(
+                node_id="settled_selector",
+                cell_id="analysis_max_edge",
+                label="Motion analysis size",
+                default=str(_DIRECTED_VIEW_ANALYSIS_RESOLUTION),
+                minimum=8,
+                maximum=1024,
+                description=(
+                    "Temporary longest-edge size used only to compare frame motion. "
+                    "Smaller is faster and less sensitive to tiny texture shimmer; the "
+                    "saved image always stays at full decoded resolution."
+                ),
+            ),
+            *_common_cells(default_aspect_ratio="9:16"),
+        ],
+        outputs=[
+            WorkflowCell(
+                node_id="save_view",
+                id="view",
+                shape="masonry",
+                description=(
+                    "One lossless PNG selected from the full-resolution decoded tensor "
+                    "before MP4 compression. Visually verify the requested view and "
+                    "identity before downstream reconstruction."
+                ),
+            ),
+            _video_output(
+                "The complete camera-turn clip used to select the still frame."
+            ),
+            WorkflowCell(
+                node_id="display_selection_receipt",
+                id="selection_receipt",
+                shape="code",
+                description=(
+                    "Selected source index and tail-motion measurements. It reports "
+                    "temporal stability, not semantic correctness."
+                ),
+                props={"lfLanguage": "json"},
+            ),
+        ],
+        configure_prompt=_configure_directed_view_run,
+        configure_download=_configure_directed_view_download,
+        workflow_path=_ANCHORED_GRAPH,
+        input_option_requirements=(_TURBO_V4_OPTION_REQUIREMENT,),
+    )
+
+
+def _make_character_turnaround_workflow() -> WorkflowNode:
+    return WorkflowNode(
+        id="minimax_h3_character_turnaround",
+        value="Character Turnaround · Experimental",
+        description=(
+            "Generate one closed, identity-coupled H3 turntable and extract four "
+            "ordered transparent angle candidates for reconstruction. The intended "
+            "order is front, subject-right, back, and subject-left. The workflow keeps "
+            "the native one-megapixel canvas and 20-step quality schedule while using "
+            "Comfy Kitchen attention; neither it nor the motion-aware sampler can prove "
+            "camera orientation. Review the contact sheet before treating the views "
+            "as geometric evidence."
+        ),
+        category="MiniMax H3",
+        card=WorkflowCardPresentation(
+            summary="Sample four candidate views from one generated turntable.",
+            hero=WorkflowHeroImage(
+                asset="minimax-h3/character-turnaround.webp",
+                alt=(
+                    "Four actual transparent explorer view candidates sampled "
+                    "from one generated turntable, shown on a neutral gray matte."
+                ),
+            ),
+        ),
+        inputs=[
+            _upload_cell(
+                node_id="source_first",
+                cell_id="source_image",
+                label="Character source",
+                description=(
+                    "Use a full-body character with visible extremities, generous margin, "
+                    "a neutral stance, and as little occlusion as practical. The workflow "
+                    "fits it to the selected H3 canvas without stretching."
+                ),
+            ),
+            _textarea_cell(
+                node_id="h3",
+                cell_id="direction",
+                label="Turntable direction",
+                default=_TURNAROUND_DIRECTION_DEFAULT,
+                description=(
+                    "Keep the declared front → right → back → left → front order. Add "
+                    "character-specific retention details here without introducing body "
+                    "motion, cuts, zoom, or changing camera distance."
+                ),
+            ),
+            _number_cell(
+                node_id="sprite_normalize",
+                cell_id="content_height",
+                label="View content height",
+                default=str(_TURNAROUND_ALPHA_HEIGHT),
+                minimum=512,
+                maximum=_TURNAROUND_ALPHA_HEIGHT,
+                description=(
+                    "How tall the front view should be on each 1024px output canvas. "
+                    "Keep 900 for maximum detail; lower it when wings, weapons, or "
+                    "stray matte pixels would otherwise clip at the sides."
+                ),
+            ),
+            *_common_cells(default_aspect_ratio="9:16"),
+        ],
+        outputs=[
+            _video_output(
+                "The complete closed H3 turntable used as the four-view evidence source."
+            ),
+            WorkflowCell(
+                node_id="save_frames",
+                id="views",
+                shape="masonry",
+                description=(
+                    "Four ordered 1024px transparent angle candidates: front, "
+                    "subject-right, back, subject-left. Visual-motion sampling "
+                    "compensates for pauses, but the contact sheet remains the "
+                    "semantic acceptance gate."
+                ),
+            ),
+            WorkflowCell(
+                node_id="save_atlas",
+                id="contact_sheet",
+                shape="masonry",
+                description=(
+                    "Labeled intended-cardinal-view candidate sheet. Reject the set "
+                    "if an angle is transitional, duplicated, reversed, or "
+                    "identity-drifted."
+                ),
+            ),
+            WorkflowCell(
+                node_id="display_sampling_receipt",
+                id="sampling_receipt",
+                shape="code",
+                description=(
+                    "Exact source frame count, measured visual-motion arc, and the "
+                    "deterministic candidate indices selected from it."
+                ),
+                props={"lfLanguage": "json"},
+            ),
+            WorkflowCell(
+                node_id="display_normalization_receipt",
+                id="normalization_receipt",
+                shape="code",
+                description=(
+                    "Shared scale/pivot and per-view alpha-baseline translations. Alpha "
+                    "bounds include equipment, hair, and shadows."
+                ),
+                props={"lfLanguage": "json"},
+            ),
+        ],
+        configure_prompt=_configure_character_turnaround_run,
+        configure_download=_configure_character_turnaround_download,
+        workflow_path=_ANCHORED_GRAPH,
+        required_model_assets=_RMBG2_MODEL_ASSETS,
+    )
+
+
 generate_video, animate_image, first_last_frame, sprite_motion = tuple(
     _make_base_workflow(spec) for spec in _BASE_CARD_SPECS
 )
 anchored_sprite_loop = _make_anchored_sprite_loop_workflow()
+directed_view = _make_directed_view_workflow()
+character_turnaround = _make_character_turnaround_workflow()
 reference_restage, character_swap, outfit_transfer, scene_sheet = tuple(
     _make_reference_workflow(spec) for spec in _REFERENCE_CARD_SPECS
 )
@@ -1600,6 +2496,8 @@ WORKFLOWS = (
     animate_image,
     first_last_frame,
     anchored_sprite_loop,
+    directed_view,
+    character_turnaround,
     reference_restage,
     character_swap,
     outfit_transfer,
@@ -1614,6 +2512,8 @@ __all__ = [
     "anchored_sprite_loop",
     "animate_image",
     "character_swap",
+    "character_turnaround",
+    "directed_view",
     "first_last_frame",
     "generate_video",
     "outfit_transfer",

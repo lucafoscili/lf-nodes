@@ -489,6 +489,12 @@ async def _prune_jobs_once(
     if ttl_seconds <= 0:
         return []
 
+    from .sequence_runtime import (
+        hard_delete_sequence_parent_if_unchanged,
+        is_sequence_child_job,
+        is_sequence_parent_run_id,
+    )
+
     try:
         jobs = await job_manager_module.list_jobs()
     except Exception:
@@ -498,6 +504,10 @@ async def _prune_jobs_once(
     current_time = time.time() if now is None else now
     candidates: list[tuple[str, str, int, str | None, float]] = []
     for job_id, job in jobs.items():
+        # A sequence parent exclusively owns its hidden child rows. Deleting a
+        # child independently can destroy durable fan-in recovery authority.
+        if is_sequence_child_job(job):
+            continue
         status = _status_value(job)
         if status not in _TERMINAL_STATUSES:
             # Pending and running jobs are never made terminal by age alone.
@@ -548,13 +558,22 @@ async def _prune_jobs_once(
         if job_id in active_prompt_ids:
             continue
         try:
-            removed = await delete_if_unchanged(
-                job_id,
-                owner_id=owner_id,
-                status=status,
-                seq=seq,
-                updated_at=updated_at,
-            )
+            if is_sequence_parent_run_id(job_id):
+                removed = await hard_delete_sequence_parent_if_unchanged(
+                    job_id,
+                    owner_id=owner_id,
+                    status=status,
+                    seq=seq,
+                    updated_at=updated_at,
+                )
+            else:
+                removed = await delete_if_unchanged(
+                    job_id,
+                    owner_id=owner_id,
+                    status=status,
+                    seq=seq,
+                    updated_at=updated_at,
+                )
         except Exception:
             logging.exception("Failed to remove job %s during pruning", job_id)
             continue
@@ -671,7 +690,29 @@ async def fetch_queue_status() -> dict | None:
 # endregion
 
 # region Background task management
+_BACKGROUND_LIFECYCLE_LOCK_KEY = "_workflow_runner_bg_lifecycle_lock"
+_SEQUENCE_RESUME_COMPLETE_KEY = "_workflow_runner_sequence_resume_complete"
+
+
+def _background_lifecycle_lock(app: Any) -> asyncio.Lock:
+    """Return the per-application lock that serializes lifecycle transitions."""
+
+    lock = app.get(_BACKGROUND_LIFECYCLE_LOCK_KEY)
+    if isinstance(lock, asyncio.Lock):
+        return lock
+    lock = asyncio.Lock()
+    app[_BACKGROUND_LIFECYCLE_LOCK_KEY] = lock
+    return lock
+
+
 async def start_background_tasks(app: Any) -> None:
+    """Start Runner background services once, serializing concurrent callers."""
+
+    async with _background_lifecycle_lock(app):
+        await _start_background_tasks_locked(app)
+
+
+async def _start_background_tasks_locked(app: Any) -> None:
     """
     Asynchronously start background tasks for the workflow runner, including session pruning and job pruning.
     This function is idempotent, meaning it can be called multiple times without adverse effects.
@@ -695,9 +736,6 @@ async def start_background_tasks(app: Any) -> None:
         - Logs the start of each task with relevant configuration details.
         - Sets a flag '_workflow_runner_bg_started' on the app to prevent re-initialization.
     """
-    if app.get("_workflow_runner_bg_started"):
-        return
-
     try:
         from .. import routes as routes_mod
     except Exception:
@@ -707,6 +745,23 @@ async def start_background_tasks(app: Any) -> None:
         from ..services import job_store as job_manager_mod
     except Exception:
         job_manager_mod = None
+
+    if not app.get(_SEQUENCE_RESUME_COMPLETE_KEY):
+        try:
+            from .sequence_runtime import resume_sequence_executions
+
+            await resume_sequence_executions()
+        except Exception:
+            # Ordinary Runner startup must remain available even when a damaged
+            # private sequence row needs explicit diagnosis. Its public parent is
+            # preserved as-is rather than being guessed terminal here. Do not mark
+            # this independent phase complete: a later request may safely retry it.
+            logging.exception("Failed to resume workflow sequence supervisors")
+        else:
+            app[_SEQUENCE_RESUME_COMPLETE_KEY] = True
+
+    if app.get("_workflow_runner_bg_started"):
+        return
 
     if routes_mod and hasattr(routes_mod, "_cleanup_expired_sessions"):
         task = asyncio.create_task(_session_pruner_loop(routes_mod._cleanup_expired_sessions))
@@ -738,6 +793,13 @@ async def start_background_tasks(app: Any) -> None:
     app["_workflow_runner_bg_started"] = True
 
 async def stop_background_tasks(app: Any) -> None:
+    """Stop Runner background services, serializing against startup."""
+
+    async with _background_lifecycle_lock(app):
+        await _stop_background_tasks_locked(app)
+
+
+async def _stop_background_tasks_locked(app: Any) -> None:
     """
     Asynchronously stop background tasks that were started by start_background_tasks.
     This function cancels and awaits the completion of the session pruner task and job pruner task
@@ -756,7 +818,7 @@ async def stop_background_tasks(app: Any) -> None:
         task.cancel()
         try:
             await task
-        except Exception:
+        except (asyncio.CancelledError, Exception):
             pass
         logging.info("Stopped session pruner task")
 
@@ -765,7 +827,7 @@ async def stop_background_tasks(app: Any) -> None:
         task.cancel()
         try:
             await task
-        except Exception:
+        except (asyncio.CancelledError, Exception):
             pass
         logging.info("Stopped job pruner task")
 
@@ -774,7 +836,7 @@ async def stop_background_tasks(app: Any) -> None:
         task.cancel()
         try:
             await task
-        except Exception:
+        except (asyncio.CancelledError, Exception):
             pass
         logging.info("Stopped active job reconciler")
 
@@ -783,10 +845,18 @@ async def stop_background_tasks(app: Any) -> None:
         task.cancel()
         try:
             await task
-        except Exception:
+        except (asyncio.CancelledError, Exception):
             pass
         logging.info("Stopped queue status publisher task")
 
+    try:
+        from .sequence_runtime import stop_sequence_supervisors
+
+        await stop_sequence_supervisors()
+    except Exception:
+        logging.exception("Failed to stop workflow sequence supervisors")
+
+    app.pop(_SEQUENCE_RESUME_COMPLETE_KEY, None)
     app.pop("_workflow_runner_bg_started", None)
     logging.info("Workflow-runner background tasks stopped")
 # endregion

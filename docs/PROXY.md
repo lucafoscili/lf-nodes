@@ -11,6 +11,10 @@ Endpoints
   - Auth: if LF_PROXY_SECRET is set, the request must include header X-LF-Proxy-Secret: `<secret>`
   - Body: JSON payload in the shape expected by the upstream provider. The proxy injects keys and forwards it.
   - Response: Upstream JSON with an additional lf_http_status field or a normalized error payload.
+- GET /api/lf-nodes/proxy/{service}
+  - Checks the same configured shared-secret requirement as POST before reporting readiness.
+  - Missing or incorrect authentication returns 401 with `ready: false` and `reason: "proxy_authentication_required"`; configured upstreams are not advertised as ready to an unauthorized caller.
+  - An authorized check returns 200 when the upstream configuration is present, or 503 with a missing-configuration reason. It does not contact the provider or prove that a model is loaded.
 
 Services
 --------
@@ -184,7 +188,8 @@ Security
 Notes
 -----
 
-- If LF_PROXY_SECRET is set, browser components that cannot set custom headers may not be able to call the proxy directly. For local/dev, leave LF_PROXY_SECRET unset, or place the proxy behind an authenticated origin that injects the header server‑side.
+- If `LF_PROXY_SECRET` (or its file-backed equivalent) is configured, the Runner chat component cannot supply its custom header. An authenticated origin can inject the header server-side after authenticating the caller, keeping the secret out of browser config. The bundled frontend proxy forwards headers and cookies but does not perform this authentication or injection. Runner's `LF_SESSION` cookie does not replace the separate proxy-secret requirement.
+- Backend `LF_ImageClassifier` calls attach the configured shared secret only for relative LF proxy paths (`/lf-nodes/proxy/...` or Comfy's `/api/lf-nodes/proxy/...` alias). Redirects are disabled for those authenticated requests. Absolute/custom endpoint URLs do not receive the server credential, and transport headers are not included in the node's request/response outputs.
 
 Notes about streaming and safety
 

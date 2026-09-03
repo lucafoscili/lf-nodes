@@ -24,11 +24,11 @@ export const treeHandler = (e: CustomEvent<LfTreeEventPayload>, store: WorkflowS
 
           if (isHome) {
             state.mutate.view('home');
+            drawer.close();
           } else if (isLeaf) {
             state.mutate.workflow(node.id);
+            drawer.close();
           }
-
-          drawer.close();
           break;
         default:
           return;

@@ -16,7 +16,10 @@ import os
 from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any
+
+from .definition_inputs import default_input_values, select_option_value
 
 
 READINESS_READY = "ready"
@@ -186,11 +189,7 @@ def _cell_exposes_asset_filename(cell: object, filename: str) -> bool:
         # Mirror the browser select dispatcher: workflowValue wins, followed
         # by value and then id. A display label that happens to look like a
         # filename is not proof that the submitted value selects that file.
-        value = option.get("workflowValue")
-        if value is None:
-            value = option.get("value")
-        if value is None:
-            value = option.get("id")
+        value = select_option_value(option)
         if isinstance(value, str) and _normalized_filename(value.strip()) == expected:
             return True
     return False
@@ -440,12 +439,164 @@ def evaluate_declared_model_assets(
     )
 
 
-def evaluate_workflow_readiness(
-    definition: Any,
+def evaluate_input_option_requirement(
+    requirement: Any,
     *,
     scanner: WorkflowReadinessScanner | None = None,
 ) -> dict[str, object]:
-    """Evaluate the runnable default graph without executing or loading it."""
+    """Fail closed on one trusted, option-scoped host prerequisite."""
+
+    active_scanner = scanner or WorkflowReadinessScanner()
+    issues: list[_Issue] = []
+    try:
+        required_node_types = tuple(
+            node_type
+            for node_type in getattr(requirement, "required_node_types", ())
+            if isinstance(node_type, str) and node_type
+        )
+    except TypeError:
+        required_node_types = ()
+        issues.append(
+            _Issue(
+                "option_requirement_invalid",
+                "Workflow option declares an invalid node requirement.",
+                blocking=True,
+            )
+        )
+
+    if required_node_types:
+        available_node_types = active_scanner.node_types()
+        if available_node_types is None:
+            issues.append(
+                _Issue(
+                    "option_node_scanner_unavailable",
+                    "Required node types for this workflow option could not be checked.",
+                    blocking=True,
+                )
+            )
+        else:
+            for node_type in sorted(set(required_node_types)):
+                if node_type not in available_node_types:
+                    issues.append(
+                        _Issue(
+                            "option_node_missing",
+                            "Required node type for this workflow option is not "
+                            f"installed: {_safe_label(node_type)}.",
+                            blocking=True,
+                        )
+                    )
+
+    required_model_assets = getattr(requirement, "required_model_assets", ())
+    issues.extend(
+        _declared_model_asset_issues(
+            SimpleNamespace(required_model_assets=required_model_assets),
+            active_scanner,
+        )
+    )
+    return _bounded_public_result(issues)
+
+
+def selected_input_option_requirements(
+    definition: Any,
+    inputs: Mapping[str, Any],
+) -> tuple[Any, ...]:
+    """Return trusted requirements selected explicitly or by a cell default."""
+
+    try:
+        requirements = tuple(
+            getattr(definition, "input_option_requirements", ())
+        )
+    except TypeError:
+        return ()
+    if not requirements:
+        return ()
+
+    try:
+        defaults = default_input_values(definition)
+    except TypeError:
+        defaults = {}
+
+    selected: list[Any] = []
+    for requirement in requirements:
+        input_id = getattr(requirement, "input_id", None)
+        if not isinstance(input_id, str) or not input_id:
+            continue
+        value = inputs[input_id] if input_id in inputs else defaults.get(input_id)
+        if value == getattr(requirement, "option_value", object()):
+            selected.append(requirement)
+    return tuple(selected)
+
+
+def filter_unavailable_input_options(
+    definition: Any,
+    input_cells: dict[str, Any],
+    *,
+    scanner: WorkflowReadinessScanner | None = None,
+) -> dict[str, Any]:
+    """Remove only unavailable optional choices from serialized select cells."""
+
+    active_scanner = scanner or WorkflowReadinessScanner()
+    try:
+        requirements = tuple(
+            getattr(definition, "input_option_requirements", ())
+        )
+    except TypeError:
+        return input_cells
+
+    requirements_by_option = {
+        (
+            getattr(requirement, "input_id", None),
+            getattr(requirement, "option_value", None),
+        ): requirement
+        for requirement in requirements
+    }
+    if not requirements_by_option:
+        return input_cells
+
+    for input_id, cell in input_cells.items():
+        if not isinstance(cell, dict):
+            continue
+        props = cell.get("props")
+        dataset = props.get("lfDataset") if isinstance(props, dict) else None
+        nodes = dataset.get("nodes") if isinstance(dataset, dict) else None
+        if not isinstance(nodes, list):
+            continue
+
+        available_nodes: list[Any] = []
+        for option in nodes:
+            if not isinstance(option, dict):
+                available_nodes.append(option)
+                continue
+            option_value = select_option_value(option)
+            requirement = requirements_by_option.get((input_id, option_value))
+            if requirement is None:
+                available_nodes.append(option)
+                continue
+            readiness = evaluate_input_option_requirement(
+                requirement,
+                scanner=active_scanner,
+            )
+            if readiness.get("status") != READINESS_SETUP_REQUIRED:
+                available_nodes.append(option)
+        dataset["nodes"] = available_nodes
+    return input_cells
+
+
+def evaluate_workflow_readiness(
+    definition: Any,
+    *,
+    inputs: Mapping[str, Any] | None = None,
+    replaceable_input_ids: Iterable[str] | None = None,
+    scanner: WorkflowReadinessScanner | None = None,
+) -> dict[str, object]:
+    """Evaluate a configured graph without executing or loading its models."""
+
+    allow_all_configurable_models = inputs is None and replaceable_input_ids is None
+    replaceable_ids = {
+        value
+        for value in (replaceable_input_ids or ())
+        if isinstance(value, str) and value
+    }
 
     workflow_path = getattr(definition, "workflow_path", None)
     if workflow_path is None:
@@ -470,6 +621,26 @@ def evaluate_workflow_readiness(
                 )
             ]
         )
+
+    configure_download = getattr(definition, "configure_download", None)
+    if callable(configure_download):
+        try:
+            configured_inputs = (
+                default_input_values(definition)
+                if inputs is None
+                else dict(inputs)
+            )
+            configure_download(prompt, configured_inputs)
+        except Exception:
+            return _bounded_public_result(
+                [
+                    _Issue(
+                        "workflow_configuration_invalid",
+                        "Workflow defaults could not be configured for readiness.",
+                        blocking=True,
+                    )
+                ]
+            )
 
     if not isinstance(prompt, Mapping) or not prompt:
         return _bounded_public_result(
@@ -535,6 +706,9 @@ def evaluate_workflow_readiness(
     try:
         configurable_cells_by_node: dict[str, list[object]] = {}
         for cell in getattr(definition, "inputs", ()):
+            cell_id = getattr(cell, "id", None)
+            if not allow_all_configurable_models and cell_id not in replaceable_ids:
+                continue
             cell_node_id = getattr(cell, "node_id", None)
             if cell_node_id is not None:
                 configurable_cells_by_node.setdefault(str(cell_node_id), []).append(cell)
@@ -543,12 +717,12 @@ def evaluate_workflow_readiness(
 
     for node_id, class_type, raw_node in prompt_nodes:
         loader_assets = _CORE_LOADER_ASSETS.get(class_type, ())
-        inputs = raw_node.get("inputs")
-        if not loader_assets or not isinstance(inputs, Mapping):
+        node_inputs = raw_node.get("inputs")
+        if not loader_assets or not isinstance(node_inputs, Mapping):
             continue
 
         for asset in loader_assets:
-            filename = inputs.get(asset.input_name)
+            filename = node_inputs.get(asset.input_name)
             # A link or computed value is not a provable missing local file.
             if not isinstance(filename, str) or not filename.strip():
                 continue
@@ -613,6 +787,9 @@ __all__ = [
     "READINESS_WARNING",
     "WorkflowReadinessScanner",
     "evaluate_declared_model_assets",
+    "evaluate_input_option_requirement",
     "evaluate_workflow_readiness",
+    "filter_unavailable_input_options",
     "normalize_model_relative_path",
+    "selected_input_option_requirements",
 ]

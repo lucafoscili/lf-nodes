@@ -14,6 +14,7 @@ import {
   extractDatasetCellPreviewUrl,
   extractHistoryExecutionTargets,
   extractHistoryPrompt,
+  findComfyArgv,
   normalizeExecutionTargetIds,
   parseQueueSnapshot,
   requiredFlagsForResourceClass,
@@ -29,6 +30,23 @@ import {
 } from '../titanic_e2e_core.ts';
 
 describe('Titanic E2E pure contracts', () => {
+  it('finds only a named Comfy argv with relative, Windows, or POSIX main.py paths', () => {
+    expect(findComfyArgv({ system: { argv: ['main.py', '--cache-none'] } })).toEqual([
+      'main.py',
+      '--cache-none',
+    ]);
+    expect(
+      findComfyArgv({ system: { argv: ['F:\\GitHub\\ComfyUI\\main.py', '--cache-none'] } }),
+    ).toEqual(['F:\\GitHub\\ComfyUI\\main.py', '--cache-none']);
+    expect(
+      findComfyArgv({ system: { argv: ['/opt/comfyui/main.py', '--cache-none'] } }),
+    ).toEqual(['/opt/comfyui/main.py', '--cache-none']);
+
+    expect(findComfyArgv({ values: ['main.py', '--cache-none'] })).toBeNull();
+    expect(findComfyArgv({ argv: ['not-main.py', '--cache-none'] })).toBeNull();
+    expect(findComfyArgv({ argv: ['main.py', 42] })).toBeNull();
+  });
+
   it('parses current Comfy queue tuples and fails closed on malformed entries', () => {
     const parsed = parseQueueSnapshot({
       queue_running: [[0, 'running-id', {}, {}]],

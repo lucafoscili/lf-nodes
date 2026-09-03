@@ -103,6 +103,37 @@ const asRecord = (value: unknown): Record<string, unknown> | null =>
     ? (value as Record<string, unknown>)
     : null;
 
+const isComfyMainPath = (value: string): boolean =>
+  /(?:^|[\\/])main\.py$/i.test(value);
+
+export const findComfyArgv = (value: unknown): string[] | null => {
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      const found = findComfyArgv(item);
+      if (found) return found;
+    }
+    return null;
+  }
+
+  const record = asRecord(value);
+  if (!record) return null;
+
+  const argv = record.argv;
+  if (
+    Array.isArray(argv) &&
+    argv.every((item) => typeof item === 'string') &&
+    argv.some(isComfyMainPath)
+  ) {
+    return argv as string[];
+  }
+
+  for (const item of Object.values(record)) {
+    const found = findComfyArgv(item);
+    if (found) return found;
+  }
+  return null;
+};
+
 export const comfyArtifactKey = (value: unknown): string => {
   const raw = String(value ?? '');
   try {

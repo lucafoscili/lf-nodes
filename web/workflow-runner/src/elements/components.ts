@@ -7,14 +7,23 @@ import {
   LfComponentPropsFor,
   LfComponentRootElement,
   LfMasonryInterface,
-  LfSelectInterface,
+  LfIconType,
+  LfSelectEventPayload,
   LfTextfieldInterface,
+  LfThemeUIState,
   LfToggleInterface,
   LfUploadInterface,
 } from '@lf-widgets/foundations/dist';
 import { getLfFramework } from '@lf-widgets/framework';
 import { CHAT_ENDPOINT } from '../config';
-import { ComfyFileArtifact, WorkflowCellInput, WorkflowCellOutput } from '../types/api';
+import {
+  ComfyFileArtifact,
+  WorkflowCellInput,
+  WorkflowCellOutput,
+  WorkflowProfileTier,
+  WorkflowSelectNode,
+  WorkflowSelectProps,
+} from '../types/api';
 import { artifactViewUrl } from '../utils/artifacts';
 
 //#region Helpers
@@ -87,6 +96,95 @@ const _setSlots = <T extends LfComponentName>(
     }
   }
 };
+
+const PROFILE_TIER_PRESENTATION: Record<
+  WorkflowProfileTier,
+  { icon: LfIconType; state: LfThemeUIState }
+> = {
+  fast: { icon: 'stopwatch', state: 'info' },
+  baseline: { icon: 'contrast-2', state: 'primary' },
+  quality: { icon: 'wand', state: 'secondary' },
+};
+
+const _profileTier = (node: WorkflowSelectNode | undefined): WorkflowProfileTier | null => {
+  const tier = node?.profileTier;
+  return tier && Object.prototype.hasOwnProperty.call(PROFILE_TIER_PRESENTATION, tier)
+    ? tier
+    : null;
+};
+
+const _profileSelectProps = (props: WorkflowSelectProps): WorkflowSelectProps => {
+  const nodes = props.lfDataset?.nodes;
+  if (!nodes?.some((node) => _profileTier(node))) {
+    return props;
+  }
+
+  return {
+    ...props,
+    lfDataset: {
+      ...props.lfDataset,
+      nodes: nodes.map((node) => {
+        const tier = _profileTier(node);
+        return tier
+          ? { ...node, icon: PROFILE_TIER_PRESENTATION[tier].icon }
+          : node;
+      }),
+    },
+  } satisfies WorkflowSelectProps;
+};
+
+const _bindProfileSelect = (
+  comp: HTMLLfSelectElement,
+  props: WorkflowSelectProps,
+) => {
+  const nodes = props.lfDataset?.nodes;
+  if (!nodes?.some((node) => _profileTier(node))) {
+    return;
+  }
+
+  const baseTextfieldProps = { ...(props.lfTextfieldProps || {}) };
+  const mayDecorateState = props.lfUiState === undefined;
+  const baseState: LfThemeUIState = props.lfUiState ?? 'primary';
+  let appliedTierState: LfThemeUIState | undefined = mayDecorateState
+    ? baseState
+    : undefined;
+  const apply = (node: WorkflowSelectNode | undefined) => {
+    const tier = _profileTier(node);
+    const currentState = comp.lfUiState;
+    const ownsState =
+      mayDecorateState &&
+      (currentState === appliedTierState || currentState === undefined);
+    if (!tier) {
+      if (ownsState) {
+        comp.lfUiState = baseState;
+        appliedTierState = baseState;
+      }
+      comp.lfTextfieldProps = baseTextfieldProps;
+      return;
+    }
+    const presentation = PROFILE_TIER_PRESENTATION[tier];
+    if (ownsState) {
+      comp.lfUiState = presentation.state;
+      appliedTierState = presentation.state;
+    }
+    comp.lfTextfieldProps = {
+      ...baseTextfieldProps,
+      lfIcon: presentation.icon,
+    };
+  };
+
+  const initialNode =
+    typeof props.lfValue === 'number'
+      ? nodes[props.lfValue]
+      : nodes.find((node) => node.id === String(props.lfValue ?? ''));
+  apply(initialNode);
+  comp.addEventListener('lf-select-event', (event) => {
+    const detail = (event as CustomEvent<LfSelectEventPayload>).detail;
+    if (detail?.eventType === 'change') {
+      apply(detail.node);
+    }
+  });
+};
 //#endregion
 
 //#region Components
@@ -125,10 +223,12 @@ export const createComponent = {
     _setProps('LfCompare', comp, props);
     return comp;
   },
-  select: (props: Partial<LfSelectInterface>) => {
+  select: (props: WorkflowSelectProps) => {
     const comp = document.createElement('lf-select');
+    const profileProps = _profileSelectProps(props);
 
-    _setProps('LfSelect', comp, props);
+    _setProps('LfSelect', comp, profileProps);
+    _bindProfileSelect(comp, profileProps);
     return comp;
   },
   textfield: (props: Partial<LfTextfieldInterface>) => {
@@ -164,8 +264,8 @@ export const createInputCell = (cell: WorkflowCellInput) => {
     }
     case 'choice':
     case 'select': {
-      const p = (props || {}) as Partial<LfSelectInterface>;
-      return createComponent.select(sanitizeProps(p, 'LfSelect'));
+      const p = (props || {}) as WorkflowSelectProps;
+      return createComponent.select(sanitizeProps(p, 'LfSelect') as WorkflowSelectProps);
     }
     case 'toggle': {
       const p = (props || {}) as Partial<LfToggleInterface>;

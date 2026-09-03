@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Any, Dict
 
-from ..services.registry import WorkflowCell, WorkflowNode
+from ..services.registry import WorkflowCardPresentation, WorkflowCell, WorkflowHeroImage, WorkflowNode
 from .utils import resolve_upload_paths
 
 # region Workflow Config
@@ -55,6 +55,13 @@ node = WorkflowNode(
     id=id,
     value=value,
     description=description,
+    card=WorkflowCardPresentation(
+        summary="Read the metadata stored inside an image.",
+        hero=WorkflowHeroImage(
+            asset="data/metadata.webp",
+            alt="Explorer image beside actual extracted sampler settings: seed 450, eight steps, Euler, Beta, CFG one.",
+        ),
+    ),
     inputs=[
         input_upload,
     ],

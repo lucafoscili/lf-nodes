@@ -49,7 +49,12 @@ if "modules.utils.helpers.comfy" not in sys.modules:
     sys.modules["modules.utils.helpers.comfy"] = comfy_helpers_module
 
 import modules.workflow_runner.controllers.api_controllers as api_controllers
-from modules.workflow_runner.services import history_cleanup, job_store, job_store_sqlite
+from modules.workflow_runner.services import (
+    history_cleanup,
+    job_store,
+    job_store_sqlite,
+    sequence_runtime,
+)
 
 
 @pytest.fixture(autouse=True)
@@ -103,6 +108,7 @@ def _job(
     owner_id: str | None = None,
     result=None,
     seq: int = 3,
+    submission_id: str | None = None,
 ) -> job_store.Job:
     return job_store.Job(
         id=run_id,
@@ -111,6 +117,7 @@ def _job(
         owner_id=owner_id,
         result=result,
         seq=seq,
+        submission_id=submission_id,
         updated_at=1234.5,
     )
 
@@ -269,6 +276,46 @@ async def test_dry_run_scans_all_owner_rows_without_mutating(tmp_path: Path, mon
 
 
 @pytest.mark.asyncio
+async def test_cleanup_hides_private_sequence_children(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    monkeypatch.setattr(history_cleanup, "_artifact_roots", lambda: _roots(tmp_path))
+    job_store._jobs.update(
+        {
+            "private-child": _job(
+                "private-child",
+                job_store.JobStatus.FAILED,
+                owner_id="owner-a",
+                submission_id=(
+                    "lfseq:0123456789abcdef0123456789abcdef:00"
+                ),
+            ),
+            "public-parent": _job(
+                "public-parent",
+                job_store.JobStatus.FAILED,
+                owner_id="owner-a",
+            ),
+        }
+    )
+
+    preview = await history_cleanup.prune_missing_artifacts(
+        owner_id="owner-a",
+        dry_run=True,
+        candidate_run_ids=None,
+    )
+    result = await history_cleanup.prune_missing_artifacts(
+        owner_id="owner-a",
+        dry_run=False,
+        candidate_run_ids=["private-child", "public-parent"],
+    )
+
+    assert preview["candidate_run_ids"] == ["public-parent"]
+    assert result["removed_run_ids"] == ["public-parent"]
+    assert "private-child" in job_store._jobs
+
+
+@pytest.mark.asyncio
 async def test_cleanup_scan_is_not_limited_to_history_card_page_size(
     tmp_path: Path, monkeypatch
 ) -> None:
@@ -328,6 +375,70 @@ async def test_execute_hard_deletes_candidates_and_preserves_unknown_active_and_
     assert response["removed_run_ids"] == ["failed", "missing"]
     assert response["skipped_unknown"] == 1
     assert set(job_store._jobs) == {"unknown", "pending", "other-owner"}
+
+
+@pytest.mark.asyncio
+async def test_execute_delegates_sequence_parent_to_pre_delete_cascade(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    parent_id = "lf-sequence:0123456789abcdef0123456789abcdef"
+    monkeypatch.setattr(history_cleanup, "_artifact_roots", lambda: _roots(tmp_path))
+    job_store._jobs[parent_id] = _job(
+        parent_id,
+        job_store.JobStatus.FAILED,
+        owner_id="owner-a",
+    )
+    cascade_delete = AsyncMock(return_value=True)
+    monkeypatch.setattr(
+        sequence_runtime,
+        "hard_delete_sequence_parent_if_unchanged",
+        cascade_delete,
+    )
+
+    response = await history_cleanup.prune_missing_artifacts(
+        owner_id="owner-a",
+        dry_run=False,
+        candidate_run_ids=[parent_id],
+    )
+
+    assert response["removed_run_ids"] == [parent_id]
+    cascade_delete.assert_awaited_once_with(
+        parent_id,
+        owner_id="owner-a",
+        status="failed",
+        seq=3,
+        updated_at=1234.5,
+    )
+
+
+@pytest.mark.asyncio
+async def test_execute_preserves_sequence_parent_when_private_cleanup_fails(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    parent_id = "lf-sequence:cleanup-failed"
+    monkeypatch.setattr(history_cleanup, "_artifact_roots", lambda: _roots(tmp_path))
+    job_store._jobs[parent_id] = _job(
+        parent_id,
+        job_store.JobStatus.FAILED,
+        owner_id="owner-a",
+    )
+    monkeypatch.setattr(
+        sequence_runtime,
+        "hard_delete_sequence_parent_if_unchanged",
+        AsyncMock(side_effect=RuntimeError("private cleanup failed")),
+    )
+
+    response = await history_cleanup.prune_missing_artifacts(
+        owner_id="owner-a",
+        dry_run=False,
+        candidate_run_ids=[parent_id],
+    )
+
+    assert response["removed_run_ids"] == []
+    assert response["skipped_changed"] == 1
+    assert parent_id in job_store._jobs
 
 
 @pytest.mark.asyncio

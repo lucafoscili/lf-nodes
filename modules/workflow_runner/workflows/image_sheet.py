@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, Dict
 
-from ..services.registry import InputValidationError, WorkflowCell, WorkflowNode
+from ..services.registry import InputValidationError, WorkflowCardPresentation, WorkflowCell, WorkflowHeroImage, WorkflowNode
 from .utils import (
     choice as _choice,
     integer as _integer,
@@ -411,6 +411,13 @@ WORKFLOW = WorkflowNode(
         "or stretching and letterboxes any unused cell area."
     ),
     category="Image Processing",
+    card=WorkflowCardPresentation(
+        summary="Arrange four images into one labeled sheet.",
+        hero=WorkflowHeroImage(
+            asset="image/sheet.webp",
+            alt="Actual labeled 2-by-2 image sheet containing four traveler studies at different aspect ratios.",
+        ),
+    ),
     inputs=inputs,
     outputs=outputs,
     configure_prompt=_configure,

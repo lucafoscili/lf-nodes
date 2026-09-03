@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Any, Dict
 
-from ..services.registry import WorkflowCell, WorkflowNode
+from ..services.registry import WorkflowCardPresentation, WorkflowCell, WorkflowHeroImage, WorkflowNode
 from .utils import resolve_load_image_reference
 
 
@@ -71,6 +71,13 @@ node = WorkflowNode(
         "before-and-after view. Both files keep their original dimensions and transparency."
     ),
     category="Image Processing",
+    card=WorkflowCardPresentation(
+        summary="Inspect two images side by side or with a reveal slider.",
+        hero=WorkflowHeroImage(
+            asset="image/compare.webp",
+            alt="Actual comparison outputs: the original train portrait and its greenhouse restage.",
+        ),
+    ),
     inputs=[input_before, input_after],
     outputs=[output_comparison],
     configure_prompt=_configure,

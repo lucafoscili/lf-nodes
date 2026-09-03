@@ -30,6 +30,7 @@ class _WorkflowDefinitionWithProvenance:
         return getattr(self._definition, name)
 
 _WORKFLOW_MODULES: Sequence[str] = (
+    "cardinal_turnaround",
     "caption_image_vision",
     "compare_images",
     "image_detail_4k",
@@ -42,6 +43,7 @@ _WORKFLOW_MODULES: Sequence[str] = (
     "remove_bg",
     "simple_chat",
     "sort_json_keys",
+    "stable_audio_3_sfx",
     "svg_generation_gemini",
     "t2i_15_lcm",
     "t2i_illustrious_xl",
@@ -49,6 +51,9 @@ _WORKFLOW_MODULES: Sequence[str] = (
     "triposplat",
     "ace_step_remix",
     "youtube_reference_intake",
+    # Import order is not dependency order: the packaged registry performs a
+    # block-first/orchestra-second registration pass after discovery.
+    "orchestration",
 )
 
 # region Workflow Imports
@@ -274,8 +279,13 @@ def iter_workflow_definitions(
     Yield each workflow definition exported by the configured workflow modules.
 
     Modules can expose either:
-      * WORKFLOWS: an iterable of WorkflowNode instances, or
-      * WORKFLOW: a single WorkflowNode instance.
+      * WORKFLOWS: an iterable of WorkflowBlockNode or WorkflowOrchestraNode
+        instances, or
+      * WORKFLOW: a single workflow definition.
+
+    Definition order is only discovery order. The packaged registry resolves
+    dependencies in two passes, so custom orchestras may live before or after
+    the block modules they compose.
     """
     for module in iter_workflow_modules(extra_workflow_roots, extra_workflow_groups):
         origin = getattr(module, _ORIGIN_ATTR, _SHIPPED_ORIGIN)

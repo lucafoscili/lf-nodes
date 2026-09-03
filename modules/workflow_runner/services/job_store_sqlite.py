@@ -4,9 +4,10 @@ import json
 import logging
 import time
 
+from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, AsyncIterator, Dict, Optional
 
 from .input_snapshot import sanitize_input_snapshot
 from .job_contracts import validate_submission_identity as _validate_submission_identity
@@ -27,6 +28,7 @@ def configure(db_path: Optional[str]) -> None:
 
 _conn: Optional[aiosqlite.Connection] = None
 _conn_lock = asyncio.Lock()
+_connection_operation_lock = asyncio.Lock()
 
 # in-memory pubsub (subscribers receive event dicts)
 _subscribers: list[asyncio.Queue] = []
@@ -166,19 +168,65 @@ async def _ensure_conn():
         _conn = conn
         return conn
 
+
+@asynccontextmanager
+async def _connection_operation() -> AsyncIterator[aiosqlite.Connection]:
+    """Own the shared SQLite connection for one complete store operation.
+
+    The private sequence store deliberately shares this adapter connection.
+    Serializing complete operations prevents another coroutine from committing,
+    rolling back, or reading the first operation's uncommitted transaction.
+    """
+
+    while True:
+        operation_lock = _connection_operation_lock
+        async with operation_lock:
+            # close() rotates the lock so it can be reused from a later event
+            # loop. A coroutine already queued on the retired lock must join
+            # the replacement before touching the newly opened connection.
+            if operation_lock is not _connection_operation_lock:
+                continue
+            yield await _ensure_conn()
+            return
+
+
+@asynccontextmanager
+async def _transaction() -> AsyncIterator[aiosqlite.Connection]:
+    """Run one isolated write transaction on the shared connection."""
+
+    async with _connection_operation() as conn:
+        try:
+            yield conn
+            await conn.commit()
+        except BaseException:
+            await conn.rollback()
+            raise
+
 async def close() -> None:
     """Close the adapter connection if open. Safe to call on shutdown.
 
     This helps tests and interactive sessions avoid leaving a locked DB file.
     """
-    global _conn
-    if _conn is not None:
-        try:
-            await _conn.close()
-        except Exception:
-            LOG.exception("Error closing sqlite connection")
-        finally:
-            _conn = None
+    global _conn, _connection_operation_lock
+    while True:
+        operation_lock = _connection_operation_lock
+        async with operation_lock:
+            # Another close may have rotated the lock while this coroutine was
+            # queued. Rejoin the current generation before touching a newly
+            # opened connection.
+            if operation_lock is not _connection_operation_lock:
+                continue
+            if _conn is not None:
+                try:
+                    await _conn.close()
+                except Exception:
+                    LOG.exception("Error closing sqlite connection")
+                finally:
+                    _conn = None
+            # Rotate before releasing the retired lock. Waiters that captured
+            # it detect the generation change and retry.
+            _connection_operation_lock = asyncio.Lock()
+            return
 # endregion
 
 # region Create
@@ -193,9 +241,8 @@ async def create_job(
     comfy_url: Optional[str] = None,
 ) -> JobRecord:
     _validate_submission_identity(submission_id, request_fingerprint, comfy_url)
-    conn = await _ensure_conn()
     now = time.time()
-    try:
+    async with _transaction() as conn:
         values = (
             run_id,
             workflow_id,
@@ -244,10 +291,6 @@ async def create_job(
                 """,
                 values,
             )
-        await conn.commit()
-    except BaseException:
-        await conn.rollback()
-        raise
 
     # Read back the row (may have pre-existed)
     rec = await get_job(run_id)
@@ -284,30 +327,29 @@ async def create_job(
 
 # region Read
 async def get_job(run_id: str) -> Optional[JobRecord]:
-    conn = await _ensure_conn()
-    cur = await conn.execute(
-        f"SELECT {_SELECT_COLUMNS} FROM runs WHERE run_id = ?",
-        (run_id,),
-    )
-    row = await cur.fetchone()
+    async with _connection_operation() as conn:
+        cur = await conn.execute(
+            f"SELECT {_SELECT_COLUMNS} FROM runs WHERE run_id = ?",
+            (run_id,),
+        )
+        row = await cur.fetchone()
     if not row:
         return None
     return _record_from_row(row)
 
 
 async def get_job_by_submission_id(submission_id: str) -> Optional[JobRecord]:
-    conn = await _ensure_conn()
-    cur = await conn.execute(
-        f"SELECT {_SELECT_COLUMNS} FROM runs WHERE submission_id = ?",
-        (submission_id,),
-    )
-    row = await cur.fetchone()
+    async with _connection_operation() as conn:
+        cur = await conn.execute(
+            f"SELECT {_SELECT_COLUMNS} FROM runs WHERE submission_id = ?",
+            (submission_id,),
+        )
+        row = await cur.fetchone()
     return _record_from_row(row) if row else None
 # endregion
 
 # region Update
 async def set_job_status(run_id: str, status: str, *, result: Optional[Any] = None, error: Optional[str] = None) -> Optional[JobRecord]:
-    conn = await _ensure_conn()
     now = time.time()
 
     if result is not None:
@@ -318,23 +360,22 @@ async def set_job_status(run_id: str, status: str, *, result: Optional[Any] = No
     else:
         result_json = None
 
-    # Single atomic statement; no explicit BEGIN
-    await conn.execute(
-        """
-        INSERT INTO runs (run_id, workflow_id, status, created_at, updated_at, result, error, seq, owner_id, inputs)
-        VALUES (?, NULL, ?, ?, ?, ?, ?, 1, NULL, NULL)
-        ON CONFLICT(run_id) DO UPDATE SET
-          status      = excluded.status,
-          updated_at  = excluded.updated_at,
-          result      = excluded.result,
-          error       = excluded.error,
-          seq         = COALESCE(runs.seq, 0) + 1,
-          owner_id    = COALESCE(runs.owner_id, excluded.owner_id),
-          workflow_id = COALESCE(runs.workflow_id, excluded.workflow_id)
-        """,
-        (run_id, status, now, now, result_json, error),
-    )
-    await conn.commit()
+    async with _transaction() as conn:
+        await conn.execute(
+            """
+            INSERT INTO runs (run_id, workflow_id, status, created_at, updated_at, result, error, seq, owner_id, inputs)
+            VALUES (?, NULL, ?, ?, ?, ?, ?, 1, NULL, NULL)
+            ON CONFLICT(run_id) DO UPDATE SET
+              status      = excluded.status,
+              updated_at  = excluded.updated_at,
+              result      = excluded.result,
+              error       = excluded.error,
+              seq         = COALESCE(runs.seq, 0) + 1,
+              owner_id    = COALESCE(runs.owner_id, excluded.owner_id),
+              workflow_id = COALESCE(runs.workflow_id, excluded.workflow_id)
+            """,
+            (run_id, status, now, now, result_json, error),
+        )
 
     rec = await get_job(run_id)
     if not rec:
@@ -362,7 +403,6 @@ async def set_job_status_if_unchanged(
 ) -> Optional[JobRecord]:
     """Atomically update and return one exact previously-scanned row."""
 
-    conn = await _ensure_conn()
     now = time.time()
     result_supplied = result is not None
     if result_supplied:
@@ -373,44 +413,44 @@ async def set_job_status_if_unchanged(
     else:
         result_json = None
 
-    cur = await conn.execute(
-        """
-        UPDATE runs
-        SET status = ?,
-            updated_at = ?,
-            result = CASE WHEN ? THEN ? ELSE result END,
-            error = CASE
-                      WHEN ? THEN NULL
-                      WHEN ? THEN ?
-                      ELSE error
-                    END,
-            seq = COALESCE(seq, 0) + 1
-        WHERE run_id = ?
-          AND status = ?
-          AND COALESCE(seq, 0) = ?
-          AND owner_id IS ?
-          AND updated_at IS ?
-        RETURNING run_id, workflow_id, status, created_at, updated_at,
-                  result, error, seq, owner_id, inputs, submission_id,
-                  request_fingerprint, comfy_url
-        """,
-        (
-            new_status,
-            now,
-            int(result_supplied),
-            result_json,
-            int(clear_error),
-            int(error is not None),
-            error,
-            run_id,
-            expected_status,
-            int(seq),
-            owner_id,
-            updated_at,
-        ),
-    )
-    row = await cur.fetchone()
-    await conn.commit()
+    async with _transaction() as conn:
+        cur = await conn.execute(
+            """
+            UPDATE runs
+            SET status = ?,
+                updated_at = ?,
+                result = CASE WHEN ? THEN ? ELSE result END,
+                error = CASE
+                          WHEN ? THEN NULL
+                          WHEN ? THEN ?
+                          ELSE error
+                        END,
+                seq = COALESCE(seq, 0) + 1
+            WHERE run_id = ?
+              AND status = ?
+              AND COALESCE(seq, 0) = ?
+              AND owner_id IS ?
+              AND updated_at IS ?
+            RETURNING run_id, workflow_id, status, created_at, updated_at,
+                      result, error, seq, owner_id, inputs, submission_id,
+                      request_fingerprint, comfy_url
+            """,
+            (
+                new_status,
+                now,
+                int(result_supplied),
+                result_json,
+                int(clear_error),
+                int(error is not None),
+                error,
+                run_id,
+                expected_status,
+                int(seq),
+                owner_id,
+                updated_at,
+            ),
+        )
+        row = await cur.fetchone()
     if row is None:
         return None
 
@@ -430,7 +470,6 @@ async def list_jobs(owner_id: Optional[str] = None, status: Optional[str] = None
 
     Returns a dict keyed by run_id mapping to JobRecord instances.
     """
-    conn = await _ensure_conn()
     out: Dict[str, JobRecord] = {}
     q = f"SELECT {_SELECT_COLUMNS} FROM runs"
     params: list = []
@@ -443,8 +482,9 @@ async def list_jobs(owner_id: Optional[str] = None, status: Optional[str] = None
         params.append(status)
     if clauses:
         q += " WHERE " + " AND ".join(clauses)
-    cur = await conn.execute(q, params)
-    rows = await cur.fetchall()
+    async with _connection_operation() as conn:
+        cur = await conn.execute(q, params)
+        rows = await cur.fetchall()
     for row in rows:
         out[row[0]] = _record_from_row(row)
     return out
@@ -467,19 +507,18 @@ async def hard_delete_job_if_unchanged(
 ) -> bool:
     """Hard-delete one row only when its scanned snapshot is still current."""
 
-    conn = await _ensure_conn()
-    cur = await conn.execute(
-        """
-        DELETE FROM runs
-        WHERE run_id = ?
-          AND status = ?
-          AND COALESCE(seq, 0) = ?
-          AND ((owner_id IS NULL AND ? IS NULL) OR owner_id = ?)
-          AND ((updated_at IS NULL AND ? IS NULL) OR updated_at = ?)
-        """,
-        (run_id, status, int(seq), owner_id, owner_id, updated_at, updated_at),
-    )
-    await conn.commit()
+    async with _transaction() as conn:
+        cur = await conn.execute(
+            """
+            DELETE FROM runs
+            WHERE run_id = ?
+              AND status = ?
+              AND COALESCE(seq, 0) = ?
+              AND ((owner_id IS NULL AND ? IS NULL) OR owner_id = ?)
+              AND ((updated_at IS NULL AND ? IS NULL) OR updated_at = ?)
+            """,
+            (run_id, status, int(seq), owner_id, owner_id, updated_at, updated_at),
+        )
     return cur.rowcount == 1
 # endregion
 

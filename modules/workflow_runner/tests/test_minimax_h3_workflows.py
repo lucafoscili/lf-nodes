@@ -33,6 +33,8 @@ EXPECTED_NAMES = {
     "minimax_h3_animate_image": "Animate Image",
     "minimax_h3_first_last_frame": "First & Last Frame",
     "minimax_h3_anchored_sprite_loop": "Anchored Sprite Loop",
+    "minimax_h3_directed_view": "Directed View",
+    "minimax_h3_character_turnaround": "Character Turnaround · Experimental",
     "minimax_h3_reference_restage": "Reference Restage",
     "minimax_h3_character_swap": "Character Swap",
     "minimax_h3_outfit_transfer": "Outfit Transfer",
@@ -44,6 +46,8 @@ BASE_IDS = {
     "minimax_h3_animate_image",
     "minimax_h3_first_last_frame",
     "minimax_h3_anchored_sprite_loop",
+    "minimax_h3_directed_view",
+    "minimax_h3_character_turnaround",
     "minimax_h3_sprite_motion",
 }
 REFERENCE_IDS = set(EXPECTED_NAMES) - BASE_IDS
@@ -58,6 +62,8 @@ EXPECTED_UPLOADS = {
         "first_frame_image",
         "last_frame_image",
     ),
+    "minimax_h3_directed_view": ("source_image",),
+    "minimax_h3_character_turnaround": ("source_image",),
     "minimax_h3_reference_restage": ("reference_image",),
     "minimax_h3_character_swap": ("scene_image", "character_image"),
     "minimax_h3_outfit_transfer": ("character_image", "outfit_image"),
@@ -94,6 +100,13 @@ EXPECTED_PREFIXES = {
     ),
     "minimax_h3_anchored_sprite_loop": (
         "LF_Nodes/MiniMaxH3/AnchoredSpriteLoop/kitchen_quality/seed-73-f124"
+    ),
+    "minimax_h3_directed_view": (
+        "LF_Nodes/MiniMaxH3/DirectedView/subject_right/kitchen_quality/"
+        "seed-73-f124"
+    ),
+    "minimax_h3_character_turnaround": (
+        "LF_Nodes/MiniMaxH3/CharacterTurnaround/kitchen_quality/seed-73-f124"
     ),
     "minimax_h3_reference_restage": (
         "LF_Nodes/MiniMaxH3/ReferenceRestage/kitchen_quality/seed-73-refs1-f124"
@@ -232,7 +245,12 @@ def test_task_families_use_separate_local_checkpoints_and_profiles() -> None:
         prompt = workflow.load_prompt()
         expected_graph = (
             "minimax_h3_anchored_loop.json"
-            if workflow_id == "minimax_h3_anchored_sprite_loop"
+            if workflow_id
+            in {
+                "minimax_h3_anchored_sprite_loop",
+                "minimax_h3_directed_view",
+                "minimax_h3_character_turnaround",
+            }
             else "minimax_h3_base.json"
         )
         assert workflow.workflow_path.name == expected_graph
@@ -260,7 +278,13 @@ def test_task_families_use_separate_local_checkpoints_and_profiles() -> None:
                 node["class_type"] == "ImageScale" for node in prompt.values()
             )
             assert prompt["sprite_grid"]["class_type"] == "LF_ImageGrid"
-        assert "execution_profile" not in _cells(workflow)
+        if workflow_id in {
+            "minimax_h3_animate_image",
+            "minimax_h3_directed_view",
+        }:
+            assert "execution_profile" in _cells(workflow)
+        else:
+            assert "execution_profile" not in _cells(workflow)
 
     for workflow_id in REFERENCE_IDS:
         workflow = workflows[workflow_id]
@@ -286,14 +310,17 @@ def test_all_cards_use_the_validated_kitchen_attention_path(
             "class_type": "ModelAttentionBackend",
             "_meta": {"title": "Use Comfy Kitchen attention"},
         }
-        assert prompt["guider"]["inputs"]["model"] == [
-            "attention_backend",
+        expected_model = ["attention_backend", 0]
+        assert prompt["guider"]["inputs"]["model"] == expected_model
+        assert prompt["scheduler"]["inputs"]["model"] == expected_model
+        assert prompt["scheduler"]["inputs"]["scheduler"] == "simple"
+        assert prompt["scheduler"]["inputs"]["steps"] == 20
+        assert prompt["sample"]["inputs"]["sampler"] == [
+            "sampler_select",
             0,
         ]
-        assert prompt["scheduler"]["inputs"]["model"] == [
-            "attention_backend",
-            0,
-        ]
+        assert "turbo_lora" not in prompt
+        assert "turbo_sampler" not in prompt
         for node_id in (
             "model_device",
             "clip_device",
@@ -301,6 +328,114 @@ def test_all_cards_use_the_validated_kitchen_attention_path(
             "audio_vae_device",
         ):
             assert prompt[node_id]["inputs"]["device"] == "default"
+
+
+def test_only_animate_and_directed_view_expose_fast_and_baseline_profiles() -> None:
+    workflows = _workflows()
+    profile_cells = {
+        workflow_id: _cells(workflow)["execution_profile"]
+        for workflow_id, workflow in workflows.items()
+        if "execution_profile" in _cells(workflow)
+    }
+
+    assert set(profile_cells) == {
+        "minimax_h3_animate_image",
+        "minimax_h3_directed_view",
+    }
+    profile = profile_cells["minimax_h3_animate_image"]
+    assert profile.props["lfValue"] == "kitchen_quality"
+    assert [
+        (
+            option["value"],
+            option["workflowValue"],
+            option["profileTier"],
+        )
+        for option in profile.props["lfDataset"]["nodes"]
+    ] == [
+        ("Fast · Turbo 6", "turbo_preview", "fast"),
+        ("Baseline · Kitchen 20", "kitchen_quality", "baseline"),
+    ]
+    assert "Quality" not in json.dumps(profile.props)
+
+    assert profile_cells["minimax_h3_directed_view"].props == profile.props
+
+    for workflow_id in (
+        "minimax_h3_animate_image",
+        "minimax_h3_directed_view",
+    ):
+        requirements = workflows[workflow_id].input_option_requirements
+        assert len(requirements) == 1
+        requirement = requirements[0]
+        assert requirement.input_id == "execution_profile"
+        assert requirement.option_value == "turbo_preview"
+        assert requirement.required_node_types == (
+            "MiniMaxH3TurboLoRA",
+            "MiniMaxH3TurboSampler",
+        )
+    assert requirement.required_model_assets[0].relative_paths == (
+        "loras/MiniMax-H3/minimax_h3_turbo_v4_step600_ema.safetensors",
+    )
+    assert all(
+        not workflow.input_option_requirements
+        for workflow_id, workflow in workflows.items()
+        if workflow_id
+        not in {"minimax_h3_animate_image", "minimax_h3_directed_view"}
+    )
+
+
+def test_animate_fast_profile_inserts_only_the_exact_turbo_recipe(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    workflow = _workflows()["minimax_h3_animate_image"]
+    baseline, baseline_calls = _configure(workflow, monkeypatch)
+    turbo, turbo_calls = _configure(
+        workflow,
+        monkeypatch,
+        execution_profile="turbo_preview",
+    )
+
+    assert baseline_calls == turbo_calls == ["source_image"]
+    assert turbo["turbo_lora"] == {
+        "inputs": {
+            "model": ["attention_backend", 0],
+            "lora_name": (
+                "MiniMax-H3\\minimax_h3_turbo_v4_step600_ema.safetensors"
+            ),
+            "strength": 1.0,
+            "low_vram": False,
+        },
+        "class_type": "MiniMaxH3TurboLoRA",
+        "_meta": {"title": "Apply the six-step H3 Turbo v4 LoRA"},
+    }
+    assert turbo["turbo_sampler"] == {
+        "inputs": {},
+        "class_type": "MiniMaxH3TurboSampler",
+        "_meta": {"title": "Use the matching H3 Turbo sampler"},
+    }
+    assert turbo["guider"]["inputs"]["model"] == ["turbo_lora", 0]
+    assert turbo["scheduler"]["inputs"] == {
+        "model": ["turbo_lora", 0],
+        "scheduler": "simple",
+        "steps": 6,
+        "denoise": 1.0,
+    }
+    assert turbo["sample"]["inputs"]["sampler"] == ["turbo_sampler", 0]
+    assert turbo["save"]["inputs"]["filename_prefix"].endswith(
+        "/AnimateImage/turbo_preview/seed-42-f124"
+    )
+
+    normalized = copy.deepcopy(turbo)
+    normalized.pop("turbo_lora")
+    normalized.pop("turbo_sampler")
+    normalized["guider"]["inputs"]["model"] = ["attention_backend", 0]
+    normalized["scheduler"]["inputs"].update(
+        {"model": ["attention_backend", 0], "steps": 20}
+    )
+    normalized["sample"]["inputs"]["sampler"] = ["sampler_select", 0]
+    normalized["save"]["inputs"]["filename_prefix"] = baseline["save"][
+        "inputs"
+    ]["filename_prefix"]
+    assert normalized == baseline
 
 
 def test_graphs_have_no_hosted_partner_api_nodes() -> None:
@@ -468,6 +603,33 @@ def test_uploads_resolve_in_order_and_wire_to_their_exact_graph_roles(
     for workflow_id, expected_uploads in EXPECTED_UPLOADS.items():
         prompt, calls = _configure(workflows[workflow_id], monkeypatch)
         assert calls == list(expected_uploads)
+
+        if workflow_id == "minimax_h3_character_turnaround":
+            assert prompt["source_first"]["inputs"]["image"].endswith(
+                "source_image.png [input]"
+            )
+            assert prompt["h3"]["inputs"]["first_frame"] == [
+                "turnaround_composite",
+                0,
+            ]
+            assert prompt["h3"]["inputs"]["last_frame"] == [
+                "turnaround_composite",
+                0,
+            ]
+            assert "source_last" not in prompt
+            continue
+
+        if workflow_id == "minimax_h3_directed_view":
+            assert prompt["source_first"]["inputs"]["image"].endswith(
+                "source_image.png [input]"
+            )
+            assert prompt["h3"]["inputs"]["first_frame"] == [
+                "turnaround_composite",
+                0,
+            ]
+            assert "last_frame" not in prompt["h3"]["inputs"]
+            assert "source_last" not in prompt
+            continue
 
         if workflow_id in BASE_IDS:
             expected_first = expected_uploads[:1]
@@ -752,6 +914,7 @@ def test_anchored_sprite_geometry_must_fit_before_upload_staging(
 def test_anchored_sprite_loop_declares_exact_local_rmbg2_package() -> None:
     workflows = _workflows()
     workflow = workflows["minimax_h3_anchored_sprite_loop"]
+    turnaround = workflows["minimax_h3_character_turnaround"]
 
     assert len(workflow.required_model_assets) == 1
     asset = workflow.required_model_assets[0]
@@ -762,10 +925,11 @@ def test_anchored_sprite_loop_declares_exact_local_rmbg2_package() -> None:
         "RMBG/RMBG-2.0/birefnet.py",
         "RMBG/RMBG-2.0/BiRefNet_config.py",
     )
+    assert turnaround.required_model_assets == workflow.required_model_assets
     assert all(
         not other.required_model_assets
         for workflow_id, other in workflows.items()
-        if workflow_id != workflow.id
+        if workflow_id not in {workflow.id, turnaround.id}
     )
     assert "Runner does not start the wrapper's fallback download" in (
         workflow.description
@@ -775,6 +939,274 @@ def test_anchored_sprite_loop_declares_exact_local_rmbg2_package() -> None:
     )
     assert "not semantic body height" in workflow.description
     assert "does not stabilize the inferred matte itself" in workflow.description
+
+
+def test_character_turnaround_builds_one_closed_kitchen_orbit_and_four_views(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    workflow = _workflows()["minimax_h3_character_turnaround"]
+    prompt, calls = _configure(workflow, monkeypatch, seed="73")
+
+    assert calls == ["source_image"]
+    assert "source_last" not in prompt
+    assert prompt["turnaround_fit"] == {
+        "inputs": {
+            "image": ["turnaround_source_rgba", 0],
+            "height": 1344,
+            "width": 768,
+            "resize_method": "bicubic",
+            "resize_mode": "pad",
+            "pad_color": "E6E6E6",
+        },
+        "class_type": "LF_ResizeImageToDimension",
+        "_meta": {"title": "Fit the identity anchor without stretching"},
+    }
+    assert prompt["turnaround_source_rgba"]["inputs"] == {
+        "image": ["source_first", 0],
+        "alpha": ["source_first", 1],
+    }
+    assert prompt["turnaround_split"]["inputs"] == {
+        "image": ["turnaround_fit", 0]
+    }
+    assert prompt["turnaround_background"]["inputs"] == {
+        "width": 768,
+        "height": 1344,
+        "batch_size": 1,
+        "color": 0xE6E6E6,
+    }
+    assert prompt["turnaround_composite"]["inputs"] == {
+        "destination": ["turnaround_background", 0],
+        "source": ["turnaround_split", 0],
+        "x": 0,
+        "y": 0,
+        "resize_source": False,
+        "mask": ["turnaround_opacity", 0],
+    }
+    assert prompt["h3"]["inputs"]["first_frame"] == ["turnaround_composite", 0]
+    assert prompt["h3"]["inputs"]["last_frame"] == ["turnaround_composite", 0]
+    assert "clockwise 360-degree orbit" in prompt["h3"]["inputs"]["prompt"]
+    assert prompt["attention_backend"]["inputs"] == {
+        "model": ["model_device", 0],
+        "attention": "comfy kitchen attention",
+    }
+    assert prompt["guider"]["inputs"]["model"] == ["attention_backend", 0]
+    assert prompt["scheduler"]["inputs"] == {
+        "model": ["attention_backend", 0],
+        "scheduler": "simple",
+        "steps": 20,
+        "denoise": 1.0,
+    }
+    assert prompt["sprite_sampler"]["inputs"] == {
+        "image": ["decode_video", 0],
+        "target_count": 4,
+        "loop_endpoint_policy": "exclude_final_endpoint",
+        "source_fps": 24.0,
+        "intended_fps": 1.0,
+        "sampling_basis": "visual_motion",
+    }
+    assert prompt["sprite_normalize"]["inputs"] == {
+        "image": ["validated_cutout", 0],
+        "canvas_width": 1024,
+        "canvas_height": 1024,
+        "target_reference_alpha_height": 900,
+        "reference_frame_index": 0,
+        "bottom_padding": 48,
+    }
+    assert prompt["sprite_grid"]["inputs"]["dataset"] == {
+        "columns": [
+            {"id": "front", "title": "FRONT CANDIDATE"},
+            {
+                "id": "subject_right",
+                "title": "SUBJECT-RIGHT CANDIDATE",
+            },
+            {"id": "back", "title": "BACK CANDIDATE"},
+            {
+                "id": "subject_left",
+                "title": "SUBJECT-LEFT CANDIDATE",
+            },
+        ],
+        "nodes": [{"id": "views", "value": ""}],
+    }
+
+
+@pytest.mark.parametrize(
+    ("target_view", "prompt_fragment", "orientation_fragment"),
+    [
+        (
+            "subject_right",
+            "strict right profile",
+            "nose points toward the right edge",
+        ),
+        (
+            "back",
+            "strict symmetrical rear view",
+            "front-facing details are not visible",
+        ),
+        (
+            "subject_left",
+            "strict left profile",
+            "nose points toward the left edge",
+        ),
+    ],
+)
+def test_directed_view_builds_one_lossless_settled_endpoint_branch(
+    monkeypatch: pytest.MonkeyPatch,
+    target_view: str,
+    prompt_fragment: str,
+    orientation_fragment: str,
+) -> None:
+    workflow = _workflows()["minimax_h3_directed_view"]
+    prompt, calls = _configure(
+        workflow,
+        monkeypatch,
+        target_view=target_view,
+        tail_fraction="0.4",
+        analysis_max_edge="128",
+        seed="73",
+    )
+
+    assert calls == ["source_image"]
+    assert prompt["h3"]["inputs"]["first_frame"] == [
+        "turnaround_composite",
+        0,
+    ]
+    assert "last_frame" not in prompt["h3"]["inputs"]
+    assert prompt_fragment in prompt["h3"]["inputs"]["prompt"]
+    assert orientation_fragment in prompt["h3"]["inputs"]["prompt"]
+    assert "hold both camera and subject perfectly still" in (
+        prompt["h3"]["inputs"]["prompt"]
+    )
+    assert prompt["settled_selector"] == {
+        "inputs": {
+            "image": ["decode_video", 0],
+            "tail_fraction": 0.4,
+            "analysis_max_edge": 128,
+        },
+        "class_type": "LF_SelectSettledImageFrame",
+        "_meta": {
+            "title": "Select the least-moving frame from the settled tail"
+        },
+    }
+    assert prompt["save_view"]["inputs"] == {
+        "images": ["settled_selector", 0],
+        "filename_prefix": (
+            "LF_Nodes/MiniMaxH3/DirectedView/"
+            f"{target_view}/kitchen_quality/seed-73-f124/"
+            f"selected-{target_view}"
+        ),
+    }
+    assert prompt["display_selection_receipt"]["inputs"] == {
+        "json_input": ["settled_selector", 3],
+        "ui_widget": "",
+    }
+
+
+def test_directed_view_download_prunes_template_only_sprite_dependencies() -> None:
+    workflow = _workflows()["minimax_h3_directed_view"]
+    defaults = _default_inputs(workflow)
+    prompt = workflow.load_prompt()
+
+    assert workflow.configure_download is not None
+    workflow.configure_download(prompt, defaults)
+
+    configured_types = {node["class_type"] for node in prompt.values()}
+    assert {
+        "ImageToMask",
+        "LF_ImageGrid",
+        "LF_NormalizeSpriteBatch",
+        "LF_PeriodicImageBatchSampler",
+        "MiniMaxH3AddGuide",
+        "VNCCS_RMBG2",
+    }.isdisjoint(configured_types)
+    assert "LF_SelectSettledImageFrame" in configured_types
+    for removed in (
+        "sprite_sampler",
+        "remove_background",
+        "sprite_normalize",
+        "save_frames",
+        "save_atlas",
+    ):
+        assert removed not in prompt
+
+
+def test_directed_view_exposes_only_proven_fast_and_baseline_profiles(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    workflow = _workflows()["minimax_h3_directed_view"]
+    cells = _cells(workflow)
+
+    assert _option_values(cells["execution_profile"]) == [
+        "turbo_preview",
+        "kitchen_quality",
+    ]
+    assert workflow.input_option_requirements == (
+        workflow_module._TURBO_V4_OPTION_REQUIREMENT,
+    )
+
+    prompt, _calls = _configure(
+        workflow,
+        monkeypatch,
+        execution_profile="turbo_preview",
+    )
+    assert prompt["turbo_lora"]["class_type"] == "MiniMaxH3TurboLoRA"
+    assert prompt["turbo_sampler"]["class_type"] == "MiniMaxH3TurboSampler"
+    assert prompt["scheduler"]["inputs"]["steps"] == 6
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("target_view", "front"),
+        ("tail_fraction", 0),
+        ("tail_fraction", 1.01),
+        ("analysis_max_edge", 7),
+        ("analysis_max_edge", 1025),
+    ],
+)
+def test_directed_view_controls_fail_before_upload_staging(
+    monkeypatch: pytest.MonkeyPatch,
+    field: str,
+    value: Any,
+) -> None:
+    workflow = _workflows()["minimax_h3_directed_view"]
+    monkeypatch.setattr(
+        workflow_module,
+        "resolve_load_image_reference",
+        lambda *_args: pytest.fail("invalid controls must not stage uploads"),
+    )
+
+    with pytest.raises((InputValidationError, ValueError)):
+        workflow.configure_prompt(
+            workflow.load_prompt(),
+            {**_default_inputs(workflow), field: value},
+        )
+
+
+@pytest.mark.parametrize(
+    "workflow_id",
+    sorted(
+        set(EXPECTED_NAMES)
+        - {"minimax_h3_animate_image", "minimax_h3_directed_view"}
+    ),
+)
+def test_every_other_card_rejects_turbo_profile_before_staging(
+    monkeypatch: pytest.MonkeyPatch,
+    workflow_id: str,
+) -> None:
+    workflow = _workflows()[workflow_id]
+    monkeypatch.setattr(
+        workflow_module,
+        "resolve_load_image_reference",
+        lambda *_args: pytest.fail("invalid profile must not stage uploads"),
+    )
+
+    with pytest.raises(InputValidationError) as error:
+        workflow.configure_prompt(
+            workflow.load_prompt(),
+            {**_default_inputs(workflow), "execution_profile": "turbo_preview"},
+        )
+
+    assert error.value.input_name == "execution_profile"
 
 
 def test_anchored_sprite_loop_keeps_explicit_endpoints_without_optional_guides(
@@ -1087,6 +1519,32 @@ def test_outputs_and_filename_prefixes_are_exact_and_deterministic(
                     "code",
                 ),
             ]
+        elif workflow_id == "minimax_h3_character_turnaround":
+            assert [
+                (output.id, output.node_id, output.shape) for output in outputs
+            ] == [
+                ("video", "save", "masonry"),
+                ("views", "save_frames", "masonry"),
+                ("contact_sheet", "save_atlas", "masonry"),
+                ("sampling_receipt", "display_sampling_receipt", "code"),
+                (
+                    "normalization_receipt",
+                    "display_normalization_receipt",
+                    "code",
+                ),
+            ]
+        elif workflow_id == "minimax_h3_directed_view":
+            assert [
+                (output.id, output.node_id, output.shape) for output in outputs
+            ] == [
+                ("view", "save_view", "masonry"),
+                ("video", "save", "masonry"),
+                (
+                    "selection_receipt",
+                    "display_selection_receipt",
+                    "code",
+                ),
+            ]
         else:
             assert len(outputs) == 1
             assert (outputs[0].id, outputs[0].node_id, outputs[0].shape) == (
@@ -1119,6 +1577,28 @@ def test_outputs_and_filename_prefixes_are_exact_and_deterministic(
                 "filename_prefix": (
                     EXPECTED_PREFIXES[workflow_id]
                     + "/atlas-6x4-256px-content-224px-bottom-16px-ref-0-12fps"
+                ),
+            }
+        elif workflow_id == "minimax_h3_character_turnaround":
+            assert first["save_frames"]["inputs"] == {
+                "images": ["sprite_normalize", 0],
+                "filename_prefix": (
+                    EXPECTED_PREFIXES[workflow_id]
+                    + "/candidate-views-intended-cardinal-order-1024px"
+                ),
+            }
+            assert first["save_atlas"]["inputs"] == {
+                "images": ["sprite_grid", 0],
+                "filename_prefix": (
+                    EXPECTED_PREFIXES[workflow_id]
+                    + "/candidate-contact-sheet-intended-cardinal-order"
+                ),
+            }
+        elif workflow_id == "minimax_h3_directed_view":
+            assert first["save_view"]["inputs"] == {
+                "images": ["settled_selector", 0],
+                "filename_prefix": (
+                    EXPECTED_PREFIXES[workflow_id] + "/selected-subject_right"
                 ),
             }
 

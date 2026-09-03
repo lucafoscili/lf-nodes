@@ -17,7 +17,9 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 constants_module = sys.modules.setdefault(
     "modules.utils.constants", types.ModuleType("modules.utils.constants")
 )
-constants_module.API_ROUTE_PREFIX = "/api/lf-nodes"
+constants_module.API_ROUTE_PREFIX = getattr(
+    constants_module, "API_ROUTE_PREFIX", "/api/lf-nodes"
+)
 constants_module.FUNCTION = "on_exec"
 constants_module.Input = getattr(
     constants_module,
@@ -88,7 +90,14 @@ def test_choices_surface_only_native_density_and_export_options() -> None:
     assert [
         node["workflowValue"]
         for node in cells["density"].props["lfDataset"]["nodes"]
-    ] == ["full", "balanced", "light", "draft"]
+    ] == ["draft", "light", "balanced", "full"]
+    assert [
+        node["profileTier"]
+        for node in cells["density"].props["lfDataset"]["nodes"]
+    ] == ["fast", "fast", "baseline", "quality"]
+    assert [
+        node["value"] for node in cells["density"].props["lfDataset"]["nodes"]
+    ] == ["Fast · 32k", "Fast · 64k", "Baseline · 131k", "Quality · 262k"]
     assert cells["density"].props["lfValue"] == "full"
     assert max(workflow_module._DENSITY_BY_ID.values()) == 262144
     assert min(workflow_module._DENSITY_BY_ID.values()) == 32768

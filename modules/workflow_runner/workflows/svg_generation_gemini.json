@@ -29,7 +29,7 @@
       "svg": ["30", 0],
       "filename_prefix": "",
       "add_timestamp": false,
-      "add_counter": false,
+      "add_counter": true,
       "ui_widget": {
         "columns": 3,
         "dataset": {

@@ -24,6 +24,9 @@ EXPERIMENTAL_MAX_PIXELS = 1920 * 1088
 KITCHEN_TURBO_8STEP_LORA = (
     "MiniMax-H3\\minimax_h3_fl2v_turbo_8step_v1.0_comfyui_bf16.safetensors"
 )
+TURBO_V4_6STEP_LORA = (
+    "MiniMax-H3\\minimax_h3_turbo_v4_step600_ema.safetensors"
+)
 
 
 class MiniMaxH3ExecutionProfile(NamedTuple):
@@ -82,7 +85,7 @@ _PROFILES = {
         max_edge=NATIVE_MAX_EDGE,
         max_pixels=NATIVE_MAX_PIXELS,
         description=(
-            "Spectrum v0.2.1 offline replay over the native 20-step schedule. "
+            "Spectrum v0.2.3 offline replay over the native 20-step schedule. "
             "Approximate and intended for same-seed preview A/B tests."
         ),
     ),
@@ -93,8 +96,10 @@ _PROFILES = {
         max_edge=NATIVE_MAX_EDGE,
         max_pixels=NATIVE_MAX_PIXELS,
         description=(
-            "Six-step Larryvrh v4 Turbo LoRA preview for FL2VA T2V/I2V. "
-            "Not admitted for REF2VA identity runs."
+            "Six-step community v4 Turbo recipe for FL2VA T2V/I2V: Kitchen "
+            "attention, the exact step-600 EMA LoRA in bypass mode, the matching "
+            "Turbo sampler, and the simple schedule. Not admitted for REF2VA "
+            "identity runs."
         ),
     ),
     "experimental_2mp": MiniMaxH3ExecutionProfile(
@@ -179,6 +184,7 @@ __all__ = [
     "NATIVE_MAX_EDGE",
     "NATIVE_MAX_PIXELS",
     "KITCHEN_TURBO_8STEP_LORA",
+    "TURBO_V4_6STEP_LORA",
     "REF2VA_PROFILE_IDS",
     "h3_profile_descriptions",
     "resolve_h3_execution_profile",

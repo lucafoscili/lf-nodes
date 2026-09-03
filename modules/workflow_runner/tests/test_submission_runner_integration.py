@@ -30,7 +30,10 @@ def run_service_module():
 
     executor_stub = ModuleType("modules.workflow_runner.services.executor")
     class WorkflowPreparationError(RuntimeError):
-        pass
+        def __init__(self, response_body, status):
+            super().__init__(response_body.get("payload", {}).get("detail"))
+            self.response_body = response_body
+            self.status = status
 
     executor_stub.WorkflowPreparationError = WorkflowPreparationError
     executor_stub.CANCEL_OUTCOME_NOOP = "noop"
@@ -47,6 +50,7 @@ def run_service_module():
     executor_stub.interrupt_workflow = AsyncMock()
     executor_stub.post_workflow_submission = AsyncMock()
     executor_stub.prepare_workflow_submission = AsyncMock()
+    executor_stub.validate_sequence_stage_preflight = Mock()
 
     helpers_package = ModuleType("modules.utils.helpers")
     helpers_package.__path__ = []
@@ -85,6 +89,79 @@ def _submission() -> WorkflowSubmissionRequest:
         queue_body={"prompt": prompt, "client_id": "client-1"},
         queue_body_json="{}",
     )
+
+
+def _sequence_admission_plan():
+    from modules.workflow_runner.workflows.krea2 import (
+        character_restage,
+        identity_edit,
+    )
+
+    return {
+        "inputs": {"profile": "turbo"},
+        "stages": [
+            {
+                "workflow_id": identity_edit.id,
+                "defaults": {"sampler": "baseline", "steps": 20},
+                "bindings": [
+                    {
+                        "kind": "public_input",
+                        "target_input_id": "sampler",
+                        "public_input_id": "profile",
+                    },
+                    {
+                        "kind": "literal",
+                        "target_input_id": "cfg",
+                        "value": 2.5,
+                    },
+                ],
+            },
+            {
+                "workflow_id": character_restage.id,
+                "defaults": {"sampler": "quality", "strength": 0.8},
+                "bindings": [
+                    {
+                        "kind": "artifact",
+                        "target_input_id": "reference_image",
+                        "output_id": "image",
+                    },
+                    {
+                        "kind": "literal",
+                        "target_input_id": "strength",
+                        "value": 0.6,
+                    },
+                ],
+            },
+        ],
+    }
+
+
+def _sequence_blocks_by_id():
+    from modules.workflow_runner.workflows.krea2 import (
+        character_restage,
+        identity_edit,
+    )
+
+    return {
+        identity_edit.id: identity_edit,
+        character_restage.id: character_restage,
+    }
+
+
+async def test_external_call_cannot_claim_private_sequence_child_namespace(
+    run_service_module,
+):
+    with pytest.raises(
+        lifecycle.SubmissionConflictError,
+        match="reserved for Runner orchestration",
+    ):
+        await run_service_module.run_workflow(
+            {
+                "workflowId": "remove_bg",
+                "submissionId": "lfseq:0123456789abcdef0123456789abcdef:00",
+                "inputs": {},
+            }
+        )
 
 
 async def test_run_replay_with_stable_id_does_not_submit_twice(run_service_module):
@@ -200,6 +277,234 @@ async def test_run_replay_does_not_depend_on_mutable_workflow_preparation(
     assert replay["idempotent_replay"] is True
     prepare.assert_called_once_with(payload)
     admission.submit.assert_awaited_once()
+
+
+async def test_sequence_parent_uses_stable_replay_and_exact_cancel_seam(
+    run_service_module,
+):
+    run_service = run_service_module
+    from modules.workflow_runner.workflows.orchestration import (
+        identity_cleanup_restage,
+    )
+
+    payload = {
+        "workflowId": identity_cleanup_restage.id,
+        "submissionId": "example:identity-cleanup-restage:001",
+        "inputs": {"identity_image": "portrait.png"},
+    }
+    started = AsyncMock(
+        return_value={
+            "parent_run_id": "ignored-by-service-response",
+            "status": "running",
+        }
+    )
+    validate_preflight = Mock()
+    with patch.object(
+        run_service,
+        "_prepare_workflow_execution",
+        return_value=(identity_cleanup_restage, {}),
+    ), patch.object(
+        run_service,
+        "normalize_sequence_definition",
+        return_value=_sequence_admission_plan(),
+    ), patch.object(
+        run_service,
+        "validate_sequence_stage_preflight",
+        new=validate_preflight,
+    ), patch.object(
+        run_service,
+        "get_workflow",
+        side_effect=_sequence_blocks_by_id().get,
+    ), patch.object(
+        run_service,
+        "start_sequence_execution",
+        new=started,
+    ):
+        first = await run_service.run_workflow(payload)
+        replay = await run_service.run_workflow(payload)
+
+    assert first["run_id"].startswith("lf-sequence:")
+    assert first["submission_id"] == payload["submissionId"]
+    assert first["idempotent_replay"] is False
+    assert replay["run_id"] == first["run_id"]
+    assert replay["idempotent_replay"] is True
+    started.assert_awaited_once()
+    assert started.await_args.kwargs["parent_run_id"] == first["run_id"]
+    parent = await job_store.get_job(first["run_id"])
+    assert parent is not None
+    assert parent.workflow_id == identity_cleanup_restage.id
+    assert parent.submission_id == payload["submissionId"]
+    assert parent.comfy_url == "sequence://runner"
+    assert validate_preflight.call_count == 2
+    assert validate_preflight.call_args_list[0].args[1] == {
+        "sampler": "turbo",
+        "steps": 20,
+        "cfg": 2.5,
+    }
+    assert validate_preflight.call_args_list[1].args[1] == {
+        "sampler": "quality",
+        "strength": 0.6,
+    }
+
+    sequence_cancel = AsyncMock(
+        return_value={"status": "running", "cancel_requested": True}
+    )
+    run_service.cancel_workflow.reset_mock()
+    with patch.object(
+        run_service,
+        "cancel_sequence_execution",
+        new=sequence_cancel,
+    ):
+        cancelled = await run_service.cancel_workflow_submission(
+            payload["submissionId"]
+        )
+
+    assert cancelled["cancel_requested"] is True
+    sequence_cancel.assert_awaited_once_with(first["run_id"])
+    run_service.cancel_workflow.assert_not_awaited()
+
+
+async def test_sequence_start_failure_terminalizes_public_and_private_authority(
+    run_service_module,
+):
+    run_service = run_service_module
+    from modules.workflow_runner.workflows.orchestration import (
+        identity_cleanup_restage,
+    )
+
+    payload = {
+        "workflowId": identity_cleanup_restage.id,
+        "submissionId": "example:identity-cleanup-restage:start-failure",
+        "inputs": {"identity_image": "portrait.png"},
+    }
+    private_failure = AsyncMock(return_value={"status": "failed"})
+    with patch.object(
+        run_service,
+        "_prepare_workflow_execution",
+        return_value=(identity_cleanup_restage, {}),
+    ), patch.object(
+        run_service,
+        "normalize_sequence_definition",
+        return_value=_sequence_admission_plan(),
+    ), patch.object(
+        run_service,
+        "get_workflow",
+        side_effect=_sequence_blocks_by_id().get,
+    ), patch.object(
+        run_service,
+        "start_sequence_execution",
+        new=AsyncMock(side_effect=RuntimeError("scheduler unavailable")),
+    ), patch.object(
+        run_service,
+        "fail_sequence_execution",
+        new=private_failure,
+    ):
+        with pytest.raises(RuntimeError, match="scheduler unavailable"):
+            await run_service.run_workflow(payload)
+
+    parent_run_id = private_failure.await_args.args[0]
+    private_failure.assert_awaited_once_with(
+        parent_run_id,
+        error="scheduler unavailable",
+        error_detail="sequence_start_failed",
+    )
+    parent = await job_store.get_job(parent_run_id)
+    assert parent is not None
+    assert parent.status is job_store.JobStatus.FAILED
+    replay = await lifecycle.get_submission(payload["submissionId"])
+    assert replay is not None
+    assert replay["status"] == "failed"
+
+
+@pytest.mark.parametrize(
+    ("blocked_stage", "error_input"),
+    [(0, None), (1, "sampler")],
+    ids=("declared-model-asset", "selected-option"),
+)
+async def test_sequence_setup_requirement_fails_before_parent_creation(
+    run_service_module,
+    blocked_stage,
+    error_input,
+):
+    run_service = run_service_module
+    from modules.workflow_runner.workflows.orchestration import (
+        identity_cleanup_restage,
+    )
+
+    payload = {
+        "workflowId": identity_cleanup_restage.id,
+        "submissionId": f"example:sequence-blocked:{blocked_stage}",
+        "inputs": {"identity_image": "portrait.png"},
+    }
+    calls = 0
+
+    def reject_blocked_stage(_definition, _inputs):
+        nonlocal calls
+        current = calls
+        calls += 1
+        if current != blocked_stage:
+            return
+        error = {"message": "workflow_setup_required"}
+        if error_input is not None:
+            error["input"] = error_input
+        raise run_service.WorkflowPreparationError(
+            {
+                "payload": {
+                    "detail": "Required stage setup is unavailable.",
+                    "error": error,
+                }
+            },
+            409,
+        )
+
+    make_parent_id = Mock(return_value="lf-sequence:must-not-exist")
+    bind_parent = AsyncMock()
+    create_parent = AsyncMock()
+    start_sequence = AsyncMock()
+    with patch.object(
+        run_service,
+        "_prepare_workflow_execution",
+        return_value=(identity_cleanup_restage, {}),
+    ), patch.object(
+        run_service,
+        "normalize_sequence_definition",
+        return_value=_sequence_admission_plan(),
+    ), patch.object(
+        run_service,
+        "validate_sequence_stage_preflight",
+        side_effect=reject_blocked_stage,
+    ), patch.object(
+        run_service,
+        "get_workflow",
+        side_effect=_sequence_blocks_by_id().get,
+    ), patch.object(
+        run_service,
+        "make_sequence_parent_run_id",
+        new=make_parent_id,
+    ), patch.object(
+        run_service,
+        "bind_prompt",
+        new=bind_parent,
+    ), patch.object(
+        run_service,
+        "create_job",
+        new=create_parent,
+    ), patch.object(
+        run_service,
+        "start_sequence_execution",
+        new=start_sequence,
+    ):
+        with pytest.raises(run_service.WorkflowPreparationError) as error:
+            await run_service.run_workflow(payload)
+
+    assert error.value.status == 409
+    assert error.value.response_body["payload"]["error"]["message"] == (
+        "workflow_setup_required"
+    )
+    make_parent_id.assert_not_called()
+    bind_parent.assert_not_awaited()
+    create_parent.assert_not_awaited()
+    start_sequence.assert_not_awaited()
 
 
 async def test_stable_replay_does_not_revalidate_an_expired_upload_reference(

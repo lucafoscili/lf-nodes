@@ -1,4 +1,20 @@
 .inputs-section {
+  &__advanced {
+    border-top: 1px solid rgba(var(--lf-color-on-surface), 0.15);
+    padding-top: 1em;
+
+    > summary {
+      cursor: pointer;
+      font-weight: 600;
+    }
+  }
+
+  &__advanced-fields {
+    display: grid;
+    gap: 1.5em;
+    padding-top: 1.5em;
+  }
+
   &__cell {
     & {
       --lf-chat-padding: 0;
@@ -17,6 +33,19 @@
 
   &__description {
     margin: 0.5em 0px 2em 0;
+  }
+
+  &__eyebrow {
+    color: rgba(var(--lf-color-primary), 0.9);
+    font-size: 0.68em;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    line-height: 1.2;
+    text-transform: uppercase;
+  }
+
+  &[data-workflow-kind='orchestra'] &__eyebrow {
+    color: rgb(var(--lf-color-secondary));
   }
 
   &__help {
@@ -85,9 +114,19 @@
     }
 
     &-h3 {
-      flex: 1;
       margin: 0;
       min-width: 0;
+    }
+
+    &-copy {
+      display: grid;
+      flex: 1;
+      gap: 0.2em;
+      min-width: 0;
+    }
+
+    &-open-button[hidden] {
+      display: none;
     }
   }
 }

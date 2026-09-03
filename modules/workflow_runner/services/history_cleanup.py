@@ -7,6 +7,7 @@ safe local-artifact description remain untouched.
 
 from __future__ import annotations
 
+import logging
 import os
 import stat
 from collections.abc import Mapping, Sequence
@@ -17,6 +18,9 @@ from . import job_store
 from .background import fetch_active_prompt_ids
 from .job_contracts import job_status_value as _status_value
 from .lifecycle import build_output_manifest
+
+
+LOG = logging.getLogger(__name__)
 
 
 _FAILED_TERMINAL_STATUSES = {"failed", "cancelled", "timeout"}
@@ -295,6 +299,12 @@ async def prune_missing_artifacts(
     never swept into the confirmed operation.
     """
 
+    from .sequence_runtime import (
+        hard_delete_sequence_parent_if_unchanged,
+        is_sequence_child_job,
+        is_sequence_parent_run_id,
+    )
+
     jobs = await job_store.list_jobs(owner_id=owner_id, status=None)
     requested_run_ids = None if dry_run else set(candidate_run_ids or ())
     candidates: list[_CleanupCandidate] = []
@@ -305,6 +315,11 @@ async def prune_missing_artifacts(
         roots = {"input": None, "output": None, "temp": None}
 
     for run_id, job in jobs.items():
+        # Child rows are private sequence plumbing. Their public parent owns
+        # history visibility and cleanup, so never expose them in the user's
+        # preview count or accept them through a confirmed candidate list.
+        if is_sequence_child_job(job):
+            continue
         run_id = str(run_id)
         is_selected = requested_run_ids is None or run_id in requested_run_ids
         status = _status_value(job)
@@ -375,13 +390,30 @@ async def prune_missing_artifacts(
             ) != "missing":
                 skipped_changed += 1
                 continue
-            removed = await job_store.hard_delete_job_if_unchanged(
-                candidate.run_id,
-                owner_id=candidate.owner_id,
-                status=candidate.status,
-                seq=candidate.seq,
-                updated_at=candidate.updated_at,
-            )
+            try:
+                if is_sequence_parent_run_id(candidate.run_id):
+                    removed = await hard_delete_sequence_parent_if_unchanged(
+                        candidate.run_id,
+                        owner_id=candidate.owner_id,
+                        status=candidate.status,
+                        seq=candidate.seq,
+                        updated_at=candidate.updated_at,
+                    )
+                else:
+                    removed = await job_store.hard_delete_job_if_unchanged(
+                        candidate.run_id,
+                        owner_id=candidate.owner_id,
+                        status=candidate.status,
+                        seq=candidate.seq,
+                        updated_at=candidate.updated_at,
+                    )
+            except Exception:
+                LOG.exception(
+                    "Failed to remove history row %s",
+                    candidate.run_id,
+                )
+                skipped_changed += 1
+                continue
             if removed:
                 removed_run_ids.append(candidate.run_id)
             else:

@@ -1,20 +1,18 @@
-"""Generic local TRELLIS.2 image-to-textured-mesh workflows.
-
-The cards deliberately expose a small, bounded profile instead of every
-wrapper knob.  Both profiles keep the official 4B model on its documented
-pipeline and release the wrapper-managed model after each run so another
-Comfy pipeline can reclaim the GPU cleanly.
-"""
+"""Generic local TRELLIS.2 image-to-textured-mesh workflow."""
 
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Dict, Iterable
+from typing import Any, Dict
 
-from ..services.registry import WorkflowCell, WorkflowModelAsset, WorkflowNode
+from ..services.registry import (
+    WorkflowCardPresentation,
+    WorkflowCell,
+    WorkflowHeroImage,
+    WorkflowNode,
+)
 from .utils import (
     choice,
-    has_input_value,
     integer,
     require_input_value,
     resolve_load_image_reference,
@@ -23,20 +21,19 @@ from .utils import (
 
 _MAX_SEED = 0x7FFFFFFF
 _SINGLE_GRAPH = Path(__file__).resolve().parent / "trellis2_image_to_textured_mesh.json"
-_MULTIVIEW_GRAPH = (
-    Path(__file__).resolve().parent / "trellis2_multiview_to_textured_mesh.json"
-)
 
 _QUALITY_OPTIONS = (
     (
-        "balanced",
-        "Balanced 1024 cascade (Recommended)",
-        "The established 24 GB profile: 1024 cascade reconstruction, a 200k-face mesh, and 4K textures.",
+        "draft",
+        "Fast · 512",
+        "Reconstructs at 512 with 100k faces and 2K textures. Faster, but loses fine geometry.",
+        "fast",
     ),
     (
-        "draft",
-        "Draft 512",
-        "A lighter 512 reconstruction with a 100k-face mesh and 2K textures for quicker iteration.",
+        "balanced",
+        "Baseline · 1024",
+        "Reconstructs at 1024 with 200k faces and 4K textures. Slower, but keeps more geometry.",
+        "baseline",
     ),
 )
 _QUALITY_IDS = tuple(option[0] for option in _QUALITY_OPTIONS)
@@ -57,83 +54,50 @@ _QUALITY_SETTINGS: dict[str, dict[str, Any]] = {
     },
 }
 
-_VIEW_BRANCHES = {
-    "front_image": ("load_front", "remove_front", "invert_front", "alpha_front", "preprocess_front"),
-    "back_image": ("load_back", "remove_back", "invert_back", "alpha_back", "preprocess_back"),
-    "left_image": ("load_left", "remove_left", "invert_left", "alpha_left", "preprocess_left"),
-    "right_image": ("load_right", "remove_right", "invert_right", "alpha_right", "preprocess_right"),
-}
-
-_MODEL_ASSETS = (
-    WorkflowModelAsset(
-        label="official TRELLIS.2 4B model package",
-        relative_paths=(
-            "microsoft/TRELLIS.2-4B/pipeline.json",
-            "microsoft/TRELLIS.2-4B/ckpts/ss_flow_img_dit_1_3B_64_bf16.json",
-            "microsoft/TRELLIS.2-4B/ckpts/ss_flow_img_dit_1_3B_64_bf16.safetensors",
-            "microsoft/TRELLIS.2-4B/ckpts/shape_dec_next_dc_f16c32_fp16.json",
-            "microsoft/TRELLIS.2-4B/ckpts/shape_dec_next_dc_f16c32_fp16.safetensors",
-            "microsoft/TRELLIS.2-4B/ckpts/slat_flow_img2shape_dit_1_3B_512_bf16.json",
-            "microsoft/TRELLIS.2-4B/ckpts/slat_flow_img2shape_dit_1_3B_512_bf16.safetensors",
-            "microsoft/TRELLIS.2-4B/ckpts/slat_flow_img2shape_dit_1_3B_1024_bf16.json",
-            "microsoft/TRELLIS.2-4B/ckpts/slat_flow_img2shape_dit_1_3B_1024_bf16.safetensors",
-            "microsoft/TRELLIS.2-4B/ckpts/tex_dec_next_dc_f16c32_fp16.json",
-            "microsoft/TRELLIS.2-4B/ckpts/tex_dec_next_dc_f16c32_fp16.safetensors",
-            "microsoft/TRELLIS.2-4B/ckpts/slat_flow_imgshape2tex_dit_1_3B_512_bf16.json",
-            "microsoft/TRELLIS.2-4B/ckpts/slat_flow_imgshape2tex_dit_1_3B_512_bf16.safetensors",
-            "microsoft/TRELLIS.2-4B/ckpts/slat_flow_imgshape2tex_dit_1_3B_1024_bf16.json",
-            "microsoft/TRELLIS.2-4B/ckpts/slat_flow_imgshape2tex_dit_1_3B_1024_bf16.safetensors",
-        ),
-    ),
-    WorkflowModelAsset(
-        label="DINOv3 image encoder",
-        relative_paths=(
-            "facebook/dinov3-vitl16-pretrain-lvd1689m/config.json",
-            "facebook/dinov3-vitl16-pretrain-lvd1689m/model.safetensors",
-        ),
-    ),
-    WorkflowModelAsset(
-        label="TRELLIS sparse-structure decoder package",
-        relative_paths=(
-            "microsoft/TRELLIS-image-large/ckpts/ss_dec_conv3d_16l8_fp16.json",
-            "microsoft/TRELLIS-image-large/ckpts/ss_dec_conv3d_16l8_fp16.safetensors",
-        ),
-    ),
-)
-
-
 def _validate_settings(inputs: Dict[str, Any]) -> tuple[str, int]:
     quality = choice(inputs, "quality", "balanced", _QUALITY_IDS)
     seed = integer(inputs, "seed", 42, minimum=0, maximum=_MAX_SEED)
     return quality, seed
 
 
-def _apply_profile(prompt: Dict[str, Any], quality: str, seed: int) -> None:
+def _apply_native_profile(prompt: Dict[str, Any], quality: str, seed: int) -> None:
     profile = _QUALITY_SETTINGS[quality]
-    generator = prompt["generate"]["inputs"]
-    generator.update(
+    for node_id in (
+        "sample_structure",
+        "sample_shape_512",
+        "sample_shape",
+        "sample_texture",
+    ):
+        prompt[node_id]["inputs"].update({"seed": seed, "steps": profile["steps"]})
+
+    prompt["remesh"]["inputs"]["resolution"] = int(
+        profile["dual_contouring_resolution"]
+    )
+    prompt["decimate"]["inputs"]["target_face_count"] = profile["target_face_num"]
+    prompt["unwrap"]["inputs"]["resolution"] = profile["texture_size"]
+    prompt["bake_texture"]["inputs"]["texture_size"] = profile["texture_size"]
+
+    if profile["pipeline_type"] == "1024_cascade":
+        prompt["upsample_shape"]["inputs"]["target_resolution"] = 1024
+        return
+
+    prompt.pop("upsample_shape")
+    prompt.pop("sample_shape")
+    prompt["texture_stage"]["inputs"].update(
         {
-            "seed": seed,
-            "pipeline_type": profile["pipeline_type"],
-            "sparse_structure_steps": profile["steps"],
-            "shape_steps": profile["steps"],
-            "texture_steps": profile["steps"],
+            "positive": ["shape_stage", 0],
+            "negative": ["shape_stage", 1],
+            "shape_latent": ["sample_shape_512", 0],
         }
     )
-    prompt["postprocess"]["inputs"].update(
-        {
-            "target_face_num": profile["target_face_num"],
-            "texture_size": profile["texture_size"],
-            "dual_contouring_resolution": profile["dual_contouring_resolution"],
-        }
-    )
+    prompt["decode_shape"]["inputs"]["samples"] = ["sample_shape_512", 0]
 
 
-def _apply_output_prefix(
+def _apply_native_output_prefix(
     prompt: Dict[str, Any], *, workflow_name: str, quality: str, seed: int
 ) -> None:
     prefix = f"LF_Nodes/TRELLIS2/{workflow_name}/seed-{seed}-{quality}"
-    prompt["export"]["inputs"]["filename_prefix"] = prefix
+    prompt["register_output"]["inputs"]["filename_prefix"] = prefix
     prompt["save_preview"]["inputs"]["filename_prefix"] = f"{prefix}-preview"
 
 
@@ -148,8 +112,8 @@ def _configure_single(
         image_reference = "example.png"
 
     prompt["load_image"]["inputs"]["image"] = image_reference
-    _apply_profile(prompt, quality, seed)
-    _apply_output_prefix(
+    _apply_native_profile(prompt, quality, seed)
+    _apply_native_output_prefix(
         prompt,
         workflow_name="ImageToTexturedMesh",
         quality=quality,
@@ -163,57 +127,6 @@ def _configure_single_run(prompt: Dict[str, Any], inputs: Dict[str, Any]) -> Non
 
 def _configure_single_download(prompt: Dict[str, Any], inputs: Dict[str, Any]) -> None:
     _configure_single(prompt, inputs, resolve_upload=False)
-
-
-def _remove_view_branch(
-    prompt: Dict[str, Any], field_id: str, branch: Iterable[str]
-) -> None:
-    for node_id in branch:
-        prompt.pop(node_id, None)
-    prompt["generate"]["inputs"].pop(field_id, None)
-
-
-def _configure_multiview(
-    prompt: Dict[str, Any], inputs: Dict[str, Any], *, resolve_upload: bool
-) -> None:
-    quality, seed = _validate_settings(inputs)
-    if resolve_upload:
-        require_input_value(inputs, "front_image")
-        present_fields = [
-            field_id for field_id in _VIEW_BRANCHES if has_input_value(inputs, field_id)
-        ]
-        resolved = {
-            field_id: resolve_load_image_reference(inputs, field_id)
-            for field_id in present_fields
-        }
-    else:
-        present_fields = ["front_image"]
-        resolved = {"front_image": "example-front.png"}
-
-    for field_id, branch in _VIEW_BRANCHES.items():
-        if field_id not in resolved:
-            _remove_view_branch(prompt, field_id, branch)
-            continue
-        load_id = branch[0]
-        prompt[load_id]["inputs"]["image"] = resolved[field_id]
-
-    _apply_profile(prompt, quality, seed)
-    _apply_output_prefix(
-        prompt,
-        workflow_name="MultiViewToTexturedMesh",
-        quality=quality,
-        seed=seed,
-    )
-
-
-def _configure_multiview_run(prompt: Dict[str, Any], inputs: Dict[str, Any]) -> None:
-    _configure_multiview(prompt, inputs, resolve_upload=True)
-
-
-def _configure_multiview_download(
-    prompt: Dict[str, Any], inputs: Dict[str, Any]
-) -> None:
-    _configure_multiview(prompt, inputs, resolve_upload=False)
 
 
 def _upload_cell(
@@ -234,10 +147,7 @@ def _upload_cell(
 
 
 def _quality_cell() -> WorkflowCell:
-    description = (
-        "Choose a bounded local reconstruction profile. Balanced is the established "
-        "24 GB starting point; Draft reduces spatial detail, polygon count, and texture size."
-    )
+    description = "Controls reconstruction size, retained faces, and texture resolution."
     return WorkflowCell(
         node_id="generate",
         id="quality",
@@ -250,10 +160,11 @@ def _quality_cell() -> WorkflowCell:
                     {
                         "description": option_help,
                         "id": option_id,
+                        "profileTier": profile_tier,
                         "value": option_label,
                         "workflowValue": option_id,
                     }
-                    for option_id, option_label, option_help in _QUALITY_OPTIONS
+                    for option_id, option_label, option_help, profile_tier in _QUALITY_OPTIONS
                 ]
             },
             "lfTextfieldProps": {
@@ -330,47 +241,11 @@ _SINGLE_INPUTS = [
     _seed_cell(),
 ]
 
-_MULTIVIEW_INPUTS = [
-    _upload_cell(
-        field_id="front_image",
-        node_id="load_front",
-        label="Front view",
-        description=(
-            "Required front-facing view. Keep scale, lighting, subject state, and framing "
-            "consistent with every additional view."
-        ),
-    ),
-    _upload_cell(
-        field_id="back_image",
-        node_id="load_back",
-        label="Back view",
-        description="Optional rear view of the same subject in the same state and framing.",
-        required=False,
-    ),
-    _upload_cell(
-        field_id="left_image",
-        node_id="load_left",
-        label="Left view",
-        description="Optional left-side view of the same subject in the same state and framing.",
-        required=False,
-    ),
-    _upload_cell(
-        field_id="right_image",
-        node_id="load_right",
-        label="Right view",
-        description="Optional right-side view of the same subject in the same state and framing.",
-        required=False,
-    ),
-    _quality_cell(),
-    _seed_cell(),
-]
-
-_REQUIREMENTS_COPY = (
-    "Requires the local TRELLIS.2 wrapper, its matching native CUDA extensions, the "
-    "official 4B model, DINOv3 weights, and the Core BiRefNet background-removal model. "
-    "The third-party wrapper can download several gigabytes when its assets are missing; "
-    "LF Nodes never starts those downloads and keeps this card at Setup required until "
-    "its declared local files are present."
+_NATIVE_REQUIREMENTS_COPY = (
+    "Requires ComfyUI's native TRELLIS.2 diffusion model, shape and texture VAEs, "
+    "DINOv3 image encoder, and the Core BiRefNet background-removal model. LF Nodes "
+    "never starts model downloads and keeps this card at Setup required until its "
+    "declared local files are present."
 )
 
 WORKFLOWS = (
@@ -381,32 +256,24 @@ WORKFLOWS = (
             "Reconstruct one isolated subject as a locally generated PBR-textured GLB. "
             "Hidden surfaces are inferred, so the result is a presentation mesh rather "
             "than a guaranteed watertight, manifold, rig-ready, or game-ready asset. "
-            f"{_REQUIREMENTS_COPY}"
+            f"{_NATIVE_REQUIREMENTS_COPY}"
         ),
         category="TRELLIS.2",
+        card=WorkflowCardPresentation(
+            summary="Reconstruct a textured mesh from one image.",
+            hero=WorkflowHeroImage(
+                asset="trellis2/image-to-mesh.webp",
+                alt=(
+                    "Actual explorer input beside front and rear three-quarter renders "
+                    "of its saved generated GLB. The imperfect rear strap remains visible."
+                ),
+            ),
+        ),
         inputs=_SINGLE_INPUTS,
         outputs=[_preview_output(), _mesh_output()],
         configure_prompt=_configure_single_run,
         configure_download=_configure_single_download,
         workflow_path=_SINGLE_GRAPH,
-        required_model_assets=_MODEL_ASSETS,
-    ),
-    WorkflowNode(
-        id="trellis2_multiview_to_textured_mesh",
-        value="Multi-view to Textured Mesh",
-        description=(
-            "Reconstruct one subject from an explicit front view plus optional rear and "
-            "side views, then export a PBR-textured GLB. Additional views constrain hidden "
-            "surfaces but do not guarantee a watertight, manifold, rig-ready, or game-ready "
-            f"asset. {_REQUIREMENTS_COPY}"
-        ),
-        category="TRELLIS.2",
-        inputs=_MULTIVIEW_INPUTS,
-        outputs=[_preview_output(), _mesh_output()],
-        configure_prompt=_configure_multiview_run,
-        configure_download=_configure_multiview_download,
-        workflow_path=_MULTIVIEW_GRAPH,
-        required_model_assets=_MODEL_ASSETS,
     ),
 )
 

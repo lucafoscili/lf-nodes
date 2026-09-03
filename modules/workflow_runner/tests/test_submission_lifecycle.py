@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 
 import pytest
+import pytest_asyncio
 
 from modules.workflow_runner.services import lifecycle
 
@@ -10,7 +11,7 @@ from modules.workflow_runner.services import lifecycle
 pytestmark = pytest.mark.anyio
 
 
-@pytest.fixture(autouse=True)
+@pytest_asyncio.fixture(autouse=True)
 async def reset_lifecycle():
     await lifecycle.reset_for_tests()
     yield

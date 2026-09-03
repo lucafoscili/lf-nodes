@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, Dict
 
-from ..services.registry import WorkflowCell, WorkflowNode
+from ..services.registry import WorkflowCardPresentation, WorkflowCell, WorkflowHeroImage, WorkflowNode
 from .utils import choice, integer as _integer, require_input_value as _required_image, resolve_load_image_reference
 
 
@@ -150,6 +150,13 @@ node = WorkflowNode(
         "3.4 GB model, and a CUDA GPU; missing models may download on first use."
     ),
     category="Image Processing",
+    card=WorkflowCardPresentation(
+        summary="Reconstruct a finished image at a 4K long edge.",
+        hero=WorkflowHeroImage(
+            asset="image/detail-4k.webp",
+            alt="Matched face-detail crops from the input portrait and the actual SeedVR2 4K reconstruction.",
+        ),
+    ),
     inputs=[input_upload, _select_cell(), input_seed],
     outputs=[output_image],
     configure_prompt=_configure,

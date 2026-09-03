@@ -5,6 +5,8 @@ from __future__ import annotations
 import json
 import math
 import os
+from dataclasses import FrozenInstanceError
+from functools import partial
 from pathlib import Path
 import sys
 import types
@@ -141,6 +143,46 @@ def test_public_family_uses_concise_context_aware_names() -> None:
             assert cell.id
             assert cell.node_id
             assert cell.description, f"{workflow.id}:{cell.id} needs a description"
+
+
+def test_reid_recipe_family_has_one_immutable_block_contract() -> None:
+    workflows = _workflows()
+    family = tuple(workflows[spec.id] for spec in workflow_module._REID_RECIPE_SPECS)
+    expected_folders = {
+        "krea2_character_restage": "CharacterRestage",
+        "krea2_outfit_change": "OutfitChange",
+        "krea2_pose_change": "PoseChange",
+        "krea2_feature_edit": "FeatureEdit",
+        "krea2_character_restyle": "CharacterRestyle",
+    }
+
+    def port_schema(cells: Any) -> tuple[tuple[str, str, str, bool], ...]:
+        return tuple(
+            (cell.node_id, cell.id, cell.shape, cell.required) for cell in cells
+        )
+
+    assert tuple(workflow.id for workflow in family) == tuple(expected_folders)
+    assert len({workflow.workflow_path for workflow in family}) == 1
+    assert {workflow.workflow_path.name for workflow in family} == {
+        "krea2_character_restage.json"
+    }
+    assert len({port_schema(workflow.inputs) for workflow in family}) == 1
+    assert len({port_schema(workflow.outputs) for workflow in family}) == 1
+
+    for workflow in family:
+        assert isinstance(workflow.configure_prompt, partial)
+        assert workflow.configure_prompt.func is workflow_module._configure_reid
+        assert workflow.configure_prompt.keywords == {
+            "output_folder": expected_folders[workflow.id]
+        }
+        assert isinstance(workflow.configure_download, partial)
+        assert workflow.configure_download.func is workflow_module._apply_reid_settings
+        assert workflow.configure_download.keywords == {
+            "output_folder": expected_folders[workflow.id]
+        }
+
+    with pytest.raises(FrozenInstanceError):
+        workflow_module._REID_RECIPE_SPECS[0].value = "Drifted"
 
 
 def test_public_graphs_use_no_hosted_partner_api_nodes() -> None:
@@ -438,6 +480,80 @@ def test_safe_krea_cards_expose_curated_sampling_controls() -> None:
         cell_ids = {cell.id for cell in workflows[workflow_id].inputs}
         assert "sampler_name" not in cell_ids
         assert "scheduler" not in cell_ids
+
+
+def test_proven_krea_cards_expose_evidence_backed_step_profiles() -> None:
+    expected = {
+        "krea2_style_reference": {
+            "default": "8",
+            "values": [4, 8, 20],
+            "labels": ["Fast · 4", "Baseline · 8", "Quality · 20"],
+            "tiers": ["fast", "baseline", "quality"],
+        },
+        "krea2_identity_edit": {
+            "default": "10",
+            "values": [8, 10, 12],
+            "labels": ["Fast · 8", "Baseline · 10", "12-step probe"],
+            "tiers": ["fast", "baseline", None],
+        },
+    }
+
+    for workflow_id, contract in expected.items():
+        steps = next(
+            cell for cell in _workflows()[workflow_id].inputs if cell.id == "steps"
+        )
+        options = steps.props["lfDataset"]["nodes"]
+
+        assert steps.shape == "select"
+        assert steps.props["lfValue"] == contract["default"]
+        assert [option["workflowValue"] for option in options] == contract["values"]
+        assert [option["value"] for option in options] == contract["labels"]
+        assert [option.get("profileTier") for option in options] == contract["tiers"]
+        assert "denoising passes" in steps.description.lower()
+
+    for workflow_id in EXPECTED_IDS - {
+        "krea2_style_reference",
+        "krea2_identity_edit",
+    }:
+        steps = next(
+            (cell for cell in _workflows()[workflow_id].inputs if cell.id == "steps"),
+            None,
+        )
+        if steps is not None:
+            assert steps.shape == "textfield"
+
+
+@pytest.mark.parametrize(
+    ("workflow_id", "step_values", "default_steps"),
+    [
+        ("krea2_style_reference", [4, 8, 20], 8),
+        ("krea2_identity_edit", [8, 10, 12], 10),
+    ],
+)
+def test_step_profiles_submit_numeric_values_and_apply_to_the_prompt(
+    workflow_id: str,
+    step_values: list[int],
+    default_steps: int,
+) -> None:
+    workflow = _workflows()[workflow_id]
+    defaults = _default_inputs(workflow)
+
+    default_prompt = workflow.load_prompt()
+    assert workflow.configure_download is not None
+    workflow.configure_download(default_prompt, defaults)
+    assert default_prompt["sampler"]["inputs"]["steps"] == default_steps
+
+    headless_prompt = workflow.load_prompt()
+    workflow.configure_download(
+        headless_prompt,
+        {key: value for key, value in defaults.items() if key != "steps"},
+    )
+    assert headless_prompt["sampler"]["inputs"]["steps"] == default_steps
+
+    for value in step_values:
+        prompt = workflow.load_prompt()
+        workflow.configure_download(prompt, {**defaults, "steps": value})
+        assert prompt["sampler"]["inputs"]["steps"] == value
 
 
 def test_krea_cards_surface_curated_aspect_ratios_instead_of_raw_canvas_dimensions() -> None:

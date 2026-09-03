@@ -4,12 +4,90 @@
 
 The Workflow Runner is a miniapp within LF Nodes that provides a web-based interface for executing ComfyUI workflows. It allows users to select, configure, and run workflows through a modern web UI, with real-time progress tracking and result visualization.
 
+### Blocks and orchestras
+
+Runner exposes two composition roles:
+
+- A **block** is one independently runnable, narrow capability with a stable
+  input/output contract. It owns its Comfy graph, configuration and download
+  callbacks, knobs and helper text, model/readiness requirements, and submission
+  policy.
+- An **orchestra** is a graph-free ordered assembly of two to eight registered
+  blocks. It owns only its public presentation, projected inputs, fixed literals,
+  artifact wiring, and exposed final outputs. Model policy and graph mutation stay
+  with the blocks.
+
+Graph size does not decide the role. Loading models, sampling latents, decoding,
+previewing, validating, and saving may all remain inside one block when they serve
+one capability and do not create a useful durable boundary. Repeated MODEL, CLIP,
+VAE, conditioning, latent, or tensor plumbing is an internal graph-fragment DRY
+opportunity, not a public block: orchestras compose durable media artifacts rather
+than live Comfy objects.
+
+A differently worded recipe is not automatically a third runtime role. Shipped
+families may use shared declaration factories to give closely related, narrow
+tasks their own defaults and helper text while retaining one implementation
+authority. The catalogue wire contract emits `kind: block` or
+`kind: orchestra`; legacy custom declarations using `workflow`, `sequence`, or no
+kind are normalized at the frontend boundary.
+
+Current orchestras are deliberately ordered: an artifact binding consumes one
+declared output from either the immediately previous stage or an explicitly named
+earlier stage. Named sources permit honest fan-out and fan-in without exposing
+live Comfy objects; forward, self, unknown-stage, and unknown-output references
+fail declaration validation. Every referenced block must also provide a portable
+`configure_download` callback so the complete assembly can be preflighted before
+its first stage is queued. Only outputs declared by the final stage are public.
+Compound cards such as H3 Anchored Sprite Loop, H3 Character Turnaround, and
+YouTube ACE-Step Remix remain transitional blocks until their intermediate values
+or ordered media batches can cross that boundary without quality loss or fictional
+artifact semantics.
+
+The graph-content endpoint returns a block's configured Comfy graph as before.
+Requesting that representation for a registered orchestra returns HTTP 409 with
+`{"detail":"workflow_has_no_downloadable_graph"}`; an unknown ID remains HTTP
+404. Consumers can therefore distinguish a valid graph-free composition from a
+misspelled or stale catalogue ID.
+
+### Catalogue covers
+
+Blocks and orchestras can declare optional catalogue-only presentation:
+
+```python
+card=WorkflowCardPresentation(
+    summary="Move a character into a new scene.",
+    hero=WorkflowHeroImage(
+        asset="krea2/character-restage.webp",
+        alt="Before: the reference portrait. After: the restaged character.",
+    ),
+)
+```
+
+The material card shows this one-line summary; the workflow page retains its full
+description and knob help. `hero` is optional, and definitions without `card`
+retain their existing presentation. A missing or failed image falls back to text.
+
+Covers are curated **actual workflow outputs**, with a labelled before/after
+composition when an input transformation matters. An orchestra cover must come
+from its complete execution, not an unrelated run of its final block. Coverage
+expands only as suitable outputs are reviewed; cards without accepted examples
+remain text-only. See the [showcase coverage and review limits](WORKFLOW_RUNNER_SHOWCASE.md)
+for all shipped workflows, including pending runs and rejected samples.
+
+`asset` is a relative PNG, JPEG, WebP, or AVIF path below
+`web/deploy/assets/workflow-runner/heroes/`. Keep covers small, strip embedded
+metadata, use public-safe subjects, and record their source outputs and display
+transforms in that directory's `samples.json`. These are distributable static
+assets, never private run URLs or temporary previews. Rendering uses the existing
+static-asset route and does not inspect history. A shipped orchestra's cover is
+omitted when a custom declaration replaces one of its blocks.
+
 ### MiniMax H3 workflows
 
-The shipped `MiniMax H3` category contains nine focused local-weight cards:
-Generate Video, Animate Image, First & Last Frame, Anchored Sprite Loop,
-Reference Restage, Character Swap, Outfit Transfer, Sprite Motion, and the
-experimental Scene Sheet workflow. They use current ComfyUI Core H3 nodes,
+The shipped `MiniMax H3` category contains eleven local blocks: Generate Video,
+Animate Image, First & Last Frame, Anchored Sprite Loop, Character Turnaround,
+Directed View, Reference Restage, Character Swap, Outfit Transfer, Sprite Motion,
+and the experimental Scene Sheet block. They use current ComfyUI Core H3 nodes,
 fixed 24 fps output, the `kitchen_quality` 20-step
 `res_multistep`/`simple` profile, curated native canvases, and exact 5–15 second
 frame presets with a trained minimum of 124 frames. FL2VA and REF2VA cards
@@ -60,6 +138,20 @@ production-ready.
 LF Nodes does not bundle or download MiniMax H3 weights. Catalogue readiness
 checks the declared local files and node types before a card can run.
 
+`Directed View` is the focused camera-turn block used by the first shipped
+multi-source orchestra. It keeps the source subject stationary, targets one strict
+subject-right, back, or subject-left view, and searches a caller-selected final
+fraction of the decoded frame sequence for the locally least-changing frame. The
+selection metric is deliberately pixel-only: it preserves the exact chosen PNG and
+records its score and index, but does not certify angle, anatomy, or identity.
+
+`3D-Ready Character Turnaround` composes Identity Edit, three Directed View runs,
+and Assemble Cardinal Turnaround. The cleaned 9:16 front artifact fans out to all
+three turns, then the four named views fan into one alpha-aware registration pass.
+The final block publishes four separate transparent PNGs, a labeled review sheet,
+and the normalization receipt. It stops before reconstruction so the view set can
+be accepted or rejected without spending a TRELLIS or TripoSplat run.
+
 The generic `Compose Image Sheet` card arranges four uploads into a labeled 2×2
 PNG using `LF_ImageList` and `LF_ImageGrid`. The list seam preserves every
 source tensor at its original dimensions so the grid alone owns aspect-preserving
@@ -102,12 +194,9 @@ silhouette quality materially affect the reconstruction.
 
 ### TRELLIS.2 workflows
 
-The shipped `TRELLIS.2` category contains two local textured-mesh cards.
-`Image to Textured Mesh` accepts one source image. `Multi-view to Textured Mesh`
-requires a front view and optionally accepts matching rear, left, and right
-views. Extra views constrain hidden surfaces only when they show the same subject
-state, scale, lighting, and framing. Both cards expose a seed and two bounded
-quality profiles:
+The shipped `TRELLIS.2` category contains one native `Image to Textured Mesh`
+card. It accepts one source image and exposes a seed plus two bounded quality
+profiles:
 
 - **Balanced 1024 cascade** (default): 12 structure, shape, and texture steps,
   a 200k-face target, and embedded 4K textures. This is the established 24 GB
@@ -115,30 +204,23 @@ quality profiles:
 - **Draft 512**: the same 12-step schedule with a 100k-face target and embedded
   2K textures for lighter iteration.
 
-Each run exports a PBR-textured GLB, saves a deterministic 512px front render,
-and registers the GLB's relative output path with `LF_RegisterOutputFile`.
-Runner therefore gets a durable visual history card plus a direct mesh download
-without exposing an absolute host path. Textures are embedded in the GLB;
-transparency may still need to be enabled in the destination material. The
-current Runner intentionally does not embed a WebGL mesh viewer.
+Each run uses ComfyUI's native 3D nodes to save a PBR-textured GLB and a
+deterministic 512px front render. Runner therefore gets a durable visual history
+card plus a direct mesh download without exposing an absolute host path.
+Textures are embedded in the GLB; transparency may still need to be enabled in
+the destination material. The current Runner intentionally does not embed a
+WebGL mesh viewer.
 
-These cards require the local TRELLIS.2 wrapper, its matching native CUDA
-extensions, the official `microsoft/TRELLIS.2-4B` model, DINOv3 weights, the
-Core BiRefNet model, and the LF output-registration node. The third-party
-wrapper can otherwise fetch several gigabytes of model data during execution.
-LF Nodes does not initiate those downloads: these shipped cards explicitly
-declare their local multi-file model assets and remain **Setup required** until
-every declared file is present. Readiness also checks that the workflow's node
-types are registered and that known Core loader files are present. It cannot
-prove that a compiled CUDA extension matches the active Python, PyTorch, and
-CUDA ABI.
+The card requires `trellis_2_int8_convrot.safetensors`,
+`trellis_2_shape_vae_bf16.safetensors`,
+`trellis_2_texture_vae_bf16.safetensors`, `dino_v3_vit_l.safetensors`, and the
+Core `birefnet.safetensors` background-removal model. LF Nodes never downloads
+them. Catalogue readiness checks the literal Core loader choices and native node
+types and keeps the card at **Setup required** until they are available.
 
-The preview renderer uses `nvdiffrast`, whose compiled extension must match the
-active Python, PyTorch, CUDA, and GPU environment.
-
-TRELLIS.2 output is a presentation-oriented textured mesh. Multi-view input can
-improve unseen geometry; the cards add no watertightness, manifold-topology,
-production-UV, skeleton, or game-ready optimization pass.
+TRELLIS.2 output is a presentation-oriented textured mesh. The card adds no
+watertightness, manifold-topology, production-UV, skeleton, or game-ready
+optimization pass; surfaces hidden from the source camera are inferred.
 
 ### Catalogue readiness
 
@@ -205,6 +287,31 @@ are not presets, do not use local storage, and disappear on page reload. **Reset
 clears only the current workflow's draft and remounts its declaration defaults.
 An explicit **Remix** replaces the ordinary draft with the selected run's inputs;
 neither draft navigation nor Reset starts, cancels, or mutates a submission.
+
+### Advanced inputs and caption budget
+
+A declaration can mark an input with `WorkflowCell(advanced=True)` to place it
+under the collapsed **Advanced settings** disclosure. It is still an ordinary
+input for defaults, drafts, Remix, validation, and submission. Validation errors
+open the disclosure; workflows without advanced inputs show no extra section.
+
+Caption image (Vision) defaults to a **2048-token response budget**, adjustable
+under Advanced from 20 to 8000. The budget includes reasoning on models that use
+it, not just the visible caption. Caption length belongs in the prompt. An
+omitted override preserves the graph's configured value; the downloaded template
+uses 2048 too. The public `LF_ImageClassifier` node retains its published 500-token
+default and socket contract so existing graphs are not silently retuned.
+
+The classifier now fails on HTTP errors and empty answer text, with a specific
+budget explanation when `finish_reason=length`. It does not retry automatically
+or substitute reasoning/tool calls for the caption. Nonempty answers are kept
+verbatim, including a nonempty length-limited response; this is not a general
+caption-quality or completeness check.
+
+The default relative caption endpoint uses the server's configured proxy secret
+without exposing it in graph inputs or outputs. Only relative LF proxy paths
+receive this header, and authenticated requests do not follow redirects.
+Absolute/custom endpoints retain their existing credential behavior.
 
 ## Architecture Principles
 
@@ -520,7 +627,7 @@ tests/
 - The runner is shipped inside the `lf-nodes` package but is opt-in by default. If `WORKFLOW_RUNNER_ENABLED` is not set or is false, route registration is skipped and the runner will not expose its APIs or UI.
 - Configuration is read from the repository-level `.env` (project root).
 - Extra workflow roots are trusted Python source directories. Their modules are discovered at first registry access, so configure them before startup and restart ComfyUI after changing the setting or files.
-- External modules share the `modules.workflow_runner.workflows.custom` import namespace. Use unique filenames: the bundled custom directory and then the configured roots are searched in order, and the first module with a given filename wins with a warning for later duplicates. Duplicate workflow IDs retain the existing last-registration-wins behavior and emit a warning.
+- External modules share the `modules.workflow_runner.workflows.custom` import namespace. Use unique filenames: the bundled custom directory and then the configured roots are searched in order, and the first module with a given filename wins with a warning for later duplicates. Discovery order is not composition order: Runner registers every block before every orchestra, while preserving discovery order within each role. Duplicate workflow IDs retain the supported last-registration-wins behavior and emit a warning, including when a custom definition replaces a shipped one. Because all block replacements settle before orchestra validation, a custom orchestra sees the final block authority.
 - If you enable the runner, please also configure authentication/allowed-users to avoid exposing the endpoints unintentionally.
 - For persistence, set `WORKFLOW_RUNNER_USE_PERSISTENCE=true` to enable SQLite storage for job history.
 
@@ -531,6 +638,36 @@ Centralized configuration in `config.py`:
 - Environment variable parsing
 - Type conversion and validation
 - Default value handling
+
+## Stable Audio 3 sound effects
+
+`stable_audio_3_sfx` is a block, shown under **Stable Audio 3 → Sound Effects**.
+Describe the source/action/recording perspective, choose duration and seed, then
+run. The output card plays and downloads the decoded stereo WAV; a second card
+shows its saved-file receipt. Changing the seed creates a different take.
+
+Install the two components from the
+[official Comfy package](https://huggingface.co/Comfy-Org/stable-audio-3):
+
+- `models/checkpoints/stable_audio_3_medium.safetensors` (includes SAME-L VAE).
+- `models/text_encoders/t5gemma_b_b_ul2.safetensors`.
+
+The graph uses the native post-trained Medium recipe: CLIPLoader `stable_audio`,
+EmptyLatentAudio, KSampler **8 steps / CFG 1 / LCM / simple**, VAEDecodeAudio, and
+LF_SaveAudio. No LLM prompt-rewriter, API, separate VAE, or standalone Stable Audio
+runtime is needed. More than eight steps and a negative-prompt knob are not
+advertised as quality controls for this post-trained checkpoint. See the
+[native template](https://github.com/Comfy-Org/workflow_templates/blob/main/templates/audio_stable_audio_3_medium.json)
+and [inference guide](https://github.com/Stability-AI/stable-audio-3/blob/main/docs/workflows/inference.md).
+
+Duration is bounded to Medium's **1–380 seconds**. Native latent rounding means
+44.1-kHz output length may differ by about 46 ms. The SFX task tag is inserted
+automatically; prompts still need audition for unwanted voices, music or activity.
+For example, try a 10-second close recording of a steady wood fire, or a 3-second
+single axe strike on dry wood followed by silence. These are test prompts, not
+accepted sound assets. A requested loop is not automatically seamless: keep the
+original WAV, prepare a separate loop derivative if needed, then listen across
+its join. Export checks and waveforms alone are not listening acceptance.
 
 ## Error Handling
 

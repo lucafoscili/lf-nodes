@@ -237,6 +237,9 @@ export function createMinimalDocumentMock(): Document {
         addEventListener() {
           /* noop */
         },
+        append() {
+          /* noop */
+        },
         dispatchEvent() {
           return true;
         },
@@ -249,10 +252,16 @@ export function createMinimalDocumentMock(): Document {
         replaceChildren() {
           /* noop */
         },
+        querySelector() {
+          return null;
+        },
         prepend() {
           /* noop */
         },
         insertBefore() {
+          /* noop */
+        },
+        setAttribute() {
           /* noop */
         },
         classList: { add() {}, remove() {} },

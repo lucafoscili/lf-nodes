@@ -10,6 +10,7 @@ Verifies that:
 
 import asyncio
 import pytest
+import pytest_asyncio
 import sys
 
 from pathlib import Path
@@ -30,7 +31,7 @@ def anyio_backend():
     return "asyncio"
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def temp_db(tmp_path):
     """Provide a temporary SQLite database for each test."""
     db_path = str(tmp_path / "test_concurrent.db")
@@ -58,6 +59,63 @@ async def test_concurrent_status_updates_no_transaction_errors(temp_db):
     assert rec.status == "running"
     # seq should be at least 25 (initial pending + 25 running updates)
     assert rec.seq >= 25
+
+
+async def test_waiter_on_retired_operation_lock_rejoins_current_lock(temp_db):
+    """A close-time lock rotation cannot create parallel DB operations."""
+
+    retired_lock = mod._connection_operation_lock
+    await retired_lock.acquire()
+    entered = asyncio.Event()
+    release_operation = asyncio.Event()
+
+    async def queued_operation():
+        async with mod._connection_operation():
+            entered.set()
+            await release_operation.wait()
+
+    waiter = asyncio.create_task(queued_operation())
+    await asyncio.sleep(0)
+
+    current_lock = asyncio.Lock()
+    await current_lock.acquire()
+    mod._connection_operation_lock = current_lock
+    retired_lock.release()
+    await asyncio.sleep(0)
+    assert not entered.is_set()
+
+    current_lock.release()
+    await asyncio.wait_for(entered.wait(), timeout=1)
+    release_operation.set()
+    await waiter
+
+
+async def test_close_waiter_on_retired_lock_cannot_close_current_connection(
+    temp_db,
+):
+    """Concurrent close generations serialize with the current operation gate."""
+
+    await mod.create_job("close-generation", workflow_id="test_workflow")
+    retired_lock = mod._connection_operation_lock
+    await retired_lock.acquire()
+
+    close_task = asyncio.create_task(mod.close())
+    await asyncio.sleep(0)
+
+    current_lock = asyncio.Lock()
+    await current_lock.acquire()
+    mod._connection_operation_lock = current_lock
+    connection = mod._conn
+    assert connection is not None
+
+    retired_lock.release()
+    await asyncio.sleep(0)
+    assert mod._conn is connection
+    assert not close_task.done()
+
+    current_lock.release()
+    await close_task
+    assert mod._conn is None
 
 
 async def test_seq_increments_correctly_under_concurrent_load(temp_db):

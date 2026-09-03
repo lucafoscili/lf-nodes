@@ -158,6 +158,38 @@ describe('LfWorkflowRunnerManager - Client Integration', () => {
     consoleWarnSpy.mockRestore();
   });
 
+  it('rerenders the action button when the current workflow changes', async () => {
+    const manager = new LfWorkflowRunnerManager();
+
+    try {
+      await vi.waitFor(() => {
+        expect(manager.getStore().getState().workflows.nodes).toHaveLength(2);
+      });
+
+      const actionButton = manager.uiRegistry.get()?.['action-button-section'] as
+        | HTMLLfButtonElement
+        | undefined;
+      await vi.waitFor(() => {
+        expect(actionButton?.lfUiState).toBe('disabled');
+      });
+
+      manager.getStore().setState((state) => ({
+        ...state,
+        current: {
+          ...state.current,
+          id: 'wf-1',
+        },
+      }));
+
+      await vi.waitFor(() => {
+        expect(manager.getStore().getState().current.id).toBe('wf-1');
+        expect(actionButton?.lfUiState).toBe('primary');
+      });
+    } finally {
+      manager.uiRegistry.delete();
+    }
+  });
+
   it('should hydrate store with cold-loaded runs', async () => {
     const manager = new LfWorkflowRunnerManager();
 

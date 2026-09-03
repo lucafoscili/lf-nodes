@@ -80,9 +80,25 @@ def load_api_controllers_module():
     run_service_mock.run_workflow = MagicMock()
     sys.modules["lf_nodes.modules.workflow_runner.services.run_service"] = run_service_mock
 
+    sequence_runtime_mock = MagicMock()
+    sequence_runtime_mock.is_sequence_child_job = MagicMock(return_value=False)
+    sys.modules[
+        "lf_nodes.modules.workflow_runner.services.sequence_runtime"
+    ] = sequence_runtime_mock
+
+    class WorkflowHasNoDownloadableGraphError(LookupError):
+        code = "workflow_has_no_downloadable_graph"
+
+        def __init__(self, workflow_id):
+            self.workflow_id = workflow_id
+            super().__init__(self.code)
+
     workflow_service_mock = MagicMock()
     workflow_service_mock.list_workflows = MagicMock()
     workflow_service_mock.get_workflow_content = MagicMock()
+    workflow_service_mock.WorkflowHasNoDownloadableGraphError = (
+        WorkflowHasNoDownloadableGraphError
+    )
     sys.modules["lf_nodes.modules.workflow_runner.services.workflow_service"] = workflow_service_mock
 
     # Set up _helpers mock
@@ -147,6 +163,9 @@ def load_api_controllers_module():
             elif mod_key == "services.workflow_service":
                 mock_mod.list_workflows = MagicMock()
                 mock_mod.get_workflow_content = MagicMock()
+                mock_mod.WorkflowHasNoDownloadableGraphError = (
+                    WorkflowHasNoDownloadableGraphError
+                )
             elif mod_key == "controllers._helpers":
                 mock_mod.extract_base64_data_from_result = MagicMock(return_value=("image/png", "mock_base64_data"))
                 mock_mod.serialize_job = MagicMock()
@@ -177,6 +196,66 @@ class TestApiControllers:
     @pytest.fixture
     def api_controllers(self):
         return load_api_controllers_module()
+
+    @pytest.mark.asyncio
+    async def test_get_workflow_controller_returns_block_graph(
+        self,
+        api_controllers,
+    ):
+        request = MagicMock()
+        request.match_info = {"workflow_id": "example_block"}
+        graph = {"1": {"class_type": "PreviewImage"}}
+
+        with patch.object(
+            api_controllers,
+            "get_workflow_content",
+            return_value=graph,
+        ):
+            response = await api_controllers.get_workflow_controller(request)
+
+        assert response.status == 200
+        assert json.loads(response.text) == graph
+
+    @pytest.mark.asyncio
+    async def test_get_workflow_controller_preserves_404_for_unknown_id(
+        self,
+        api_controllers,
+    ):
+        request = MagicMock()
+        request.match_info = {"workflow_id": "unknown"}
+
+        with patch.object(
+            api_controllers,
+            "get_workflow_content",
+            return_value=None,
+        ):
+            response = await api_controllers.get_workflow_controller(request)
+
+        assert response.status == 404
+        assert response.text == "Workflow not found"
+
+    @pytest.mark.asyncio
+    async def test_get_workflow_controller_identifies_graph_free_orchestra(
+        self,
+        api_controllers,
+    ):
+        request = MagicMock()
+        request.match_info = {"workflow_id": "example_orchestra"}
+        error = api_controllers.WorkflowHasNoDownloadableGraphError(
+            "example_orchestra"
+        )
+
+        with patch.object(
+            api_controllers,
+            "get_workflow_content",
+            side_effect=error,
+        ):
+            response = await api_controllers.get_workflow_controller(request)
+
+        assert response.status == 409
+        assert json.loads(response.text) == {
+            "detail": "workflow_has_no_downloadable_graph"
+        }
 
     @pytest.mark.asyncio
     async def test_idle_sse_writes_heartbeat_then_keeps_waiting(

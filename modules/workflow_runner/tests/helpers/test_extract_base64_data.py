@@ -21,7 +21,7 @@ spec.loader.exec_module(test_utils)
 load_helpers_module = test_utils.load_helpers_module
 
 
-def load_helpers_module_with_mocks():
+def load_helpers_module_with_mocks(monkeypatch):
     """Load helpers module with mocked external dependencies."""
     import sys
     import types
@@ -45,9 +45,9 @@ def load_helpers_module_with_mocks():
     mock_pil = MagicMock()
     mock_pil_image = MagicMock()
     mock_pil.Image = mock_pil_image
-    sys.modules['folder_paths'] = mock_folder_paths
-    sys.modules['PIL'] = mock_pil
-    sys.modules['PIL.Image'] = mock_pil_image
+    monkeypatch.setitem(sys.modules, 'folder_paths', mock_folder_paths)
+    monkeypatch.setitem(sys.modules, 'PIL', mock_pil)
+    monkeypatch.setitem(sys.modules, 'PIL.Image', mock_pil_image)
 
     # Load utils.serialize into sys.modules under the package-qualified name
     media_path = base / "utils" / "media.py"
@@ -81,7 +81,9 @@ def load_helpers_module_with_mocks():
 @pytest.fixture(scope="module")
 def helpers():
     """Load helpers module with mocked dependencies."""
-    return load_helpers_module_with_mocks()
+    # Later real-image tests must receive the original Pillow/host modules.
+    with pytest.MonkeyPatch.context() as monkeypatch:
+        yield load_helpers_module_with_mocks(monkeypatch)
 
 class TestExtractBase64DataFromResult:
     """Test cases for extract_base64_data_from_result function."""

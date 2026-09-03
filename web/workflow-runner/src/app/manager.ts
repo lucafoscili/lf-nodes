@@ -226,6 +226,7 @@ export class LfWorkflowRunnerManager implements WorkflowManager {
       }
 
       if (current.id !== lastId) {
+        needs.actionButton = true;
         needs.main = true;
         lastId = current.id;
       }
